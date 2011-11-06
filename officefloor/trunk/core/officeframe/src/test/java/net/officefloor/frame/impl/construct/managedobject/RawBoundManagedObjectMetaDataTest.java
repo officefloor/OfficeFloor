@@ -108,7 +108,7 @@ public class RawBoundManagedObjectMetaDataTest extends OfficeFrameTestCase {
 	/**
 	 * {@link RawGovernanceMetaData}.
 	 */
-	private final Map<String, RawGovernanceMetaData> rawGovernanceMetaDatas = new HashMap<String, RawGovernanceMetaData>();
+	private final Map<String, RawGovernanceMetaData<?, ?>> rawGovernanceMetaDatas = new HashMap<String, RawGovernanceMetaData<?, ?>>();
 
 	/**
 	 * Ensure issue if no bound name.
@@ -1454,7 +1454,7 @@ public class RawBoundManagedObjectMetaDataTest extends OfficeFrameTestCase {
 			Class<?>... extensionInterfaceTypes) {
 
 		// Governance meta-data
-		final RawGovernanceMetaData rawGovernanceMetaData = this
+		final RawGovernanceMetaData<?, ?> rawGovernanceMetaData = this
 				.createMock(RawGovernanceMetaData.class);
 		final String GOVERNANCE_NAME = "GOVERNANCE";
 		this.rawGovernanceMetaDatas.put(GOVERNANCE_NAME, rawGovernanceMetaData);

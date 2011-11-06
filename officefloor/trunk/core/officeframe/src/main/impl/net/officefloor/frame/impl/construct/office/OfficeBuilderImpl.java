@@ -25,6 +25,7 @@ import net.officefloor.frame.api.build.AdministratorBuilder;
 import net.officefloor.frame.api.build.DependencyMappingBuilder;
 import net.officefloor.frame.api.build.FlowNodeBuilder;
 import net.officefloor.frame.api.build.GovernanceBuilder;
+import net.officefloor.frame.api.build.GovernanceFactory;
 import net.officefloor.frame.api.build.OfficeBuilder;
 import net.officefloor.frame.api.build.OfficeEnhancer;
 import net.officefloor.frame.api.build.WorkBuilder;
@@ -54,7 +55,6 @@ import net.officefloor.frame.internal.structure.ProcessState;
 import net.officefloor.frame.internal.structure.ThreadState;
 import net.officefloor.frame.spi.administration.Administrator;
 import net.officefloor.frame.spi.administration.source.AdministratorSource;
-import net.officefloor.frame.spi.governance.source.GovernanceSource;
 
 /**
  * Implements the {@link OfficeBuilder}.
@@ -111,7 +111,7 @@ public class OfficeBuilderImpl implements OfficeBuilder, OfficeConfiguration {
 	/**
 	 * Listing of {@link GovernanceConfiguration}.
 	 */
-	private final List<GovernanceConfiguration<?, ?, ?>> governances = new LinkedList<GovernanceConfiguration<?, ?, ?>>();
+	private final List<GovernanceConfiguration<?, ?>> governances = new LinkedList<GovernanceConfiguration<?, ?>>();
 
 	/**
 	 * Listing of {@link ThreadState} bound {@link ManagedObjectConfiguration}.
@@ -217,10 +217,12 @@ public class OfficeBuilderImpl implements OfficeBuilder, OfficeConfiguration {
 	}
 
 	@Override
-	public <I, F extends Enum<F>, GS extends GovernanceSource<I, F>> GovernanceBuilder addGovernance(
-			String governanceName, Class<GS> governanceSource) {
-		GovernanceBuilderImpl<I, F, GS> builder = new GovernanceBuilderImpl<I, F, GS>(
-				governanceName, null, governanceSource);
+	public <I, F extends Enum<F>> GovernanceBuilder addGovernance(
+			String governanceName,
+			GovernanceFactory<? super I, F> governanceFactory,
+			Class<I> extensionInterface) {
+		GovernanceBuilderImpl<I, F> builder = new GovernanceBuilderImpl<I, F>(
+				governanceName, governanceFactory, extensionInterface);
 		this.governances.add(builder);
 		return builder;
 	}
@@ -320,7 +322,7 @@ public class OfficeBuilderImpl implements OfficeBuilder, OfficeConfiguration {
 	}
 
 	@Override
-	public GovernanceConfiguration<?, ?, ?>[] getGovernanceConfiguration() {
+	public GovernanceConfiguration<?, ?>[] getGovernanceConfiguration() {
 		return this.governances
 				.toArray(new GovernanceConfiguration[this.governances.size()]);
 	}

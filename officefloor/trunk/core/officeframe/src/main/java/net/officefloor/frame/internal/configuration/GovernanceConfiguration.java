@@ -17,10 +17,10 @@
  */
 package net.officefloor.frame.internal.configuration;
 
+import net.officefloor.frame.api.build.GovernanceFactory;
 import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.spi.governance.Governance;
-import net.officefloor.frame.spi.governance.source.GovernanceSource;
-import net.officefloor.frame.spi.source.SourceProperties;
+import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.frame.spi.team.Team;
 
 /**
@@ -28,7 +28,7 @@ import net.officefloor.frame.spi.team.Team;
  * 
  * @author Daniel Sagenschneider
  */
-public interface GovernanceConfiguration<I, F extends Enum<F>, GS extends GovernanceSource<I, F>> {
+public interface GovernanceConfiguration<I, F extends Enum<F>> {
 
 	/**
 	 * Obtains the name of the {@link Governance}.
@@ -38,32 +38,20 @@ public interface GovernanceConfiguration<I, F extends Enum<F>, GS extends Govern
 	String getGovernanceName();
 
 	/**
-	 * <p>
-	 * Obtains the {@link GovernanceSource} instance.
-	 * <p>
-	 * This will override the {@link Class} in being used to configure the
-	 * {@link Governance}.
+	 * Obtains the {@link GovernanceFactory}.
 	 * 
-	 * @return {@link GovernanceSource} instance. May be <code>null</code> to
-	 *         use {@link Class}.
+	 * @return {@link GovernanceFactory}.
 	 */
-	GS getGovernanceSource();
+	GovernanceFactory<? super I, F> getGovernanceFactory();
 
 	/**
-	 * Obtains the {@link GovernanceSource} {@link Class}.
+	 * Obtains the extension interface type for {@link ManagedObject} to provide
+	 * to enable {@link Governance}.
 	 * 
-	 * @return {@link GovernanceSource} {@link Class}.
+	 * @return Extension interface type for {@link ManagedObject} to provide to
+	 *         enable {@link Governance}.
 	 */
-	Class<GS> getGovernanceSourceClass();
-
-	/**
-	 * Obtains the {@link SourceProperties} to configure the
-	 * {@link GovernanceSource}.
-	 * 
-	 * @return {@link SourceProperties} to configure the
-	 *         {@link GovernanceSource}.
-	 */
-	SourceProperties getProperties();
+	Class<I> getExtensionInterface();
 
 	/**
 	 * Obtains the name of the {@link Team} to execute the {@link Task}

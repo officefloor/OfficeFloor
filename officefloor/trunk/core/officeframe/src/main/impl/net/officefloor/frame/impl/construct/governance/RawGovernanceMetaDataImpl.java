@@ -17,6 +17,7 @@
  */
 package net.officefloor.frame.impl.construct.governance;
 
+import net.officefloor.frame.api.build.GovernanceFactory;
 import net.officefloor.frame.api.build.OfficeBuilder;
 import net.officefloor.frame.api.build.OfficeFloorIssues;
 import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
@@ -46,14 +47,8 @@ import net.officefloor.frame.internal.structure.GovernanceMetaData;
 import net.officefloor.frame.internal.structure.ProcessState;
 import net.officefloor.frame.internal.structure.TaskMetaData;
 import net.officefloor.frame.spi.governance.Governance;
-import net.officefloor.frame.spi.governance.source.GovernanceSource;
-import net.officefloor.frame.spi.governance.source.GovernanceSourceMetaData;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.frame.spi.source.SourceContext;
-import net.officefloor.frame.spi.source.SourceProperties;
-import net.officefloor.frame.spi.source.UnknownClassError;
-import net.officefloor.frame.spi.source.UnknownPropertyError;
-import net.officefloor.frame.spi.source.UnknownResourceError;
 import net.officefloor.frame.spi.team.Team;
 
 /**
@@ -62,7 +57,7 @@ import net.officefloor.frame.spi.team.Team;
  * @author Daniel Sagenschneider
  */
 public class RawGovernanceMetaDataImpl<I, F extends Enum<F>> implements
-		RawGovernanceMetaDataFactory, RawGovernanceMetaData {
+		RawGovernanceMetaDataFactory, RawGovernanceMetaData<I, F> {
 
 	/**
 	 * Name of the {@link Task} to activate {@link Governance}.
@@ -151,11 +146,10 @@ public class RawGovernanceMetaDataImpl<I, F extends Enum<F>> implements
 	 */
 
 	@Override
-	public <i, f extends Enum<f>, GS extends GovernanceSource<i, f>> RawGovernanceMetaData createRawGovernanceMetaData(
-			GovernanceConfiguration<i, f, GS> configuration,
-			int governanceIndex, SourceContext sourceContext,
-			String officeName, OfficeBuilder officeBuilder,
-			OfficeFloorIssues issues) {
+	public <i, f extends Enum<f>> RawGovernanceMetaData<i, f> createRawGovernanceMetaData(
+			GovernanceConfiguration<i, f> configuration, int governanceIndex,
+			SourceContext sourceContext, String officeName,
+			OfficeBuilder officeBuilder, OfficeFloorIssues issues) {
 
 		// Obtain the governance name
 		String governanceName = configuration.getGovernanceName();
@@ -165,78 +159,18 @@ public class RawGovernanceMetaDataImpl<I, F extends Enum<F>> implements
 			return null; // can not carry on
 		}
 
-		// Attempt to obtain the governance source
-		GS governanceSource = configuration.getGovernanceSource();
-		if (governanceSource == null) {
-			// No instance, so by governance source class
-			Class<GS> governanceSourceClass = configuration
-					.getGovernanceSourceClass();
-			if (governanceSourceClass == null) {
-				issues.addIssue(AssetType.GOVERNANCE, governanceName,
-						"No GovernanceSource class provided");
-				return null; // can not carry on
-			}
-
-			// Instantiate the managed object source
-			governanceSource = ConstructUtil.newInstance(governanceSourceClass,
-					GovernanceSource.class, "Governance Source '"
-							+ governanceName + "'", AssetType.GOVERNANCE,
-					governanceName, issues);
-			if (governanceSource == null) {
-				return null; // can not carry on
-			}
-		}
-
-		// Obtain the properties to initialise the managed object source
-		SourceProperties properties = configuration.getProperties();
-
-		// Create the context for the governance source
-		GovernanceSourceContextImpl context = new GovernanceSourceContextImpl(
-				properties, sourceContext);
-
-		try {
-			// Initialise the governance source
-			governanceSource.init(context);
-
-		} catch (UnknownPropertyError ex) {
-			issues.addIssue(AssetType.GOVERNANCE, governanceName, "Property '"
-					+ ex.getUnknownPropertyName() + "' must be specified");
-			return null; // can not carry on
-
-		} catch (UnknownClassError ex) {
-			issues.addIssue(AssetType.GOVERNANCE, governanceName,
-					"Can not load class '" + ex.getUnknownClassName() + "'");
-			return null; // can not carry on
-
-		} catch (UnknownResourceError ex) {
-			issues.addIssue(
-					AssetType.GOVERNANCE,
-					governanceName,
-					"Can not obtain resource at location '"
-							+ ex.getUnknownResourceLocation() + "'");
-			return null; // can not carry on
-
-		} catch (Throwable ex) {
-			issues.addIssue(AssetType.GOVERNANCE, governanceName,
-					"Failed to initialise "
-							+ governanceSource.getClass().getName(), ex);
-			return null; // can not carry on
-		}
-
-		// Flag initialising over
-		context.flagInitOver();
-
-		// Obtain the meta-data
-		GovernanceSourceMetaData<i, f> metaData = governanceSource
-				.getMetaData();
-		if (metaData == null) {
-			issues.addIssue(AssetType.GOVERNANCE, governanceName,
-					"Must provide meta-data");
+		// Obtain the governance factory
+		GovernanceFactory<? super i, f> governanceFactory = configuration
+				.getGovernanceFactory();
+		if (governanceFactory == null) {
+			issues.addIssue(AssetType.GOVERNANCE, governanceName, "No "
+					+ GovernanceFactory.class.getSimpleName() + " provided");
 			return null; // can not carry on
 		}
 
 		// Obtain the extension interface type
-		Class<i> extensionInterfaceType = metaData.getExtensionInterface();
+		Class<i> extensionInterfaceType = configuration
+				.getExtensionInterface();
 		if (extensionInterfaceType == null) {
 			issues.addIssue(AssetType.GOVERNANCE, governanceName,
 					"No extension interface type provided");
@@ -272,10 +206,10 @@ public class RawGovernanceMetaDataImpl<I, F extends Enum<F>> implements
 
 		// Create the Governance Meta-Data
 		GovernanceMetaDataImpl<i, f> governanceMetaData = new GovernanceMetaDataImpl<i, f>(
-				governanceName, governanceSource);
+				governanceName, governanceFactory);
 
 		// Create the raw Governance meta-data
-		RawGovernanceMetaData rawGovernanceMetaData = new RawGovernanceMetaDataImpl<i, f>(
+		RawGovernanceMetaData<i, f> rawGovernanceMetaData = new RawGovernanceMetaDataImpl<i, f>(
 				governanceName, governanceIndex, extensionInterfaceType,
 				governanceWorkName, governanceMetaData);
 
@@ -312,7 +246,7 @@ public class RawGovernanceMetaDataImpl<I, F extends Enum<F>> implements
 	}
 
 	/*
-	 * =================== RawGovernanceMetaDataMetaData ==================
+	 * =================== RawGovernanceMetaData ==================
 	 */
 
 	@Override
@@ -321,7 +255,7 @@ public class RawGovernanceMetaDataImpl<I, F extends Enum<F>> implements
 	}
 
 	@Override
-	public Class<?> getExtensionInterfaceType() {
+	public Class<I> getExtensionInterfaceType() {
 		return this.extensionInterfaceType;
 	}
 

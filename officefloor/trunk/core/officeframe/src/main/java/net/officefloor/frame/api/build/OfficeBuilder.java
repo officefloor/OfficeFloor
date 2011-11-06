@@ -31,7 +31,6 @@ import net.officefloor.frame.internal.structure.ThreadState;
 import net.officefloor.frame.spi.administration.Administrator;
 import net.officefloor.frame.spi.administration.source.AdministratorSource;
 import net.officefloor.frame.spi.governance.Governance;
-import net.officefloor.frame.spi.governance.source.GovernanceSource;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.spi.team.Team;
@@ -140,12 +139,16 @@ public interface OfficeBuilder {
 	 * @param governanceName
 	 *            Name of the {@link Governance} to be referenced locally by
 	 *            this {@link Office}.
-	 * @param governanceSource
-	 *            {@link GovernanceSource} class.
+	 * @param governanceFactory
+	 *            {@link GovernanceFactory} class.
+	 * @param extensionInterface
+	 *            Extension interface.
 	 * @return {@link GovernanceBuilder}.
 	 */
-	<I, F extends Enum<F>, GS extends GovernanceSource<I, F>> GovernanceBuilder addGovernance(
-			String governanceName, Class<GS> governanceSource);
+	<I, F extends Enum<F>> GovernanceBuilder addGovernance(
+			String governanceName,
+			GovernanceFactory<? super I, F> governanceFactory,
+			Class<I> extensionInterface);
 
 	/**
 	 * <p>

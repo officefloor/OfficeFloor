@@ -17,24 +17,22 @@
  */
 package net.officefloor.frame.api.build;
 
-import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.spi.governance.Governance;
-import net.officefloor.frame.spi.team.Team;
 
 /**
- * Builds the {@link Governance}.
+ * Factory for the creation of the {@link Governance}.
  * 
  * @author Daniel Sagenschneider
  */
-public interface GovernanceBuilder {
+public interface GovernanceFactory<I, F extends Enum<F>> {
 
 	/**
-	 * Specifies the name of the {@link Team} responsible for executing the
-	 * {@link Governance} {@link Task} instances.
+	 * Creates the {@link Governance}.
 	 * 
-	 * @param teamName
-	 *            {@link Team} name.
+	 * @return {@link Governance}.
+	 * @throws Throwable
+	 *             If fails to create the {@link Governance}.
 	 */
-	void setTeamName(String teamName);
+	Governance<I, F> createGovernance() throws Throwable;
 
 }

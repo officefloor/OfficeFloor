@@ -145,7 +145,7 @@ public class RawOfficeMetaDataImpl implements RawOfficeMetaDataFactory,
 	 * {@link RawGovernanceMetaData} of the {@link Office} by its {@link Office}
 	 * registered name.
 	 */
-	private final Map<String, RawGovernanceMetaData> governanceMetaData;
+	private final Map<String, RawGovernanceMetaData<?, ?>> governanceMetaData;
 
 	/**
 	 * {@link ProcessState} {@link RawBoundAdministratorMetaData}.
@@ -212,7 +212,7 @@ public class RawOfficeMetaDataImpl implements RawOfficeMetaDataFactory,
 			RawBoundManagedObjectMetaData[] processBoundManagedObjects,
 			RawBoundManagedObjectMetaData[] threadBoundManagedObjects,
 			Map<String, RawBoundManagedObjectMetaData> scopeMo,
-			Map<String, RawGovernanceMetaData> governanceMetaData,
+			Map<String, RawGovernanceMetaData<?, ?>> governanceMetaData,
 			RawBoundAdministratorMetaData<?, ?>[] processBoundAdministrators,
 			RawBoundAdministratorMetaData<?, ?>[] threadBoundAdministrators,
 			Map<String, RawBoundAdministratorMetaData<?, ?>> scopeAdmins) {
@@ -310,16 +310,16 @@ public class RawOfficeMetaDataImpl implements RawOfficeMetaDataFactory,
 
 		// Register the governances to office
 		OfficeBuilder officeBuilder = configuration.getBuilder();
-		GovernanceConfiguration<?, ?, ?>[] governanceConfigurations = configuration
+		GovernanceConfiguration<?, ?>[] governanceConfigurations = configuration
 				.getGovernanceConfiguration();
 		GovernanceMetaData<?, ?>[] governanceMetaDatas = new GovernanceMetaData[governanceConfigurations.length];
-		List<RawGovernanceMetaData> rawGovernanceMetaDataList = new LinkedList<RawGovernanceMetaData>();
-		Map<String, RawGovernanceMetaData> rawGovernanceMetaData = new HashMap<String, RawGovernanceMetaData>();
+		List<RawGovernanceMetaData<?, ?>> rawGovernanceMetaDataList = new LinkedList<RawGovernanceMetaData<?, ?>>();
+		Map<String, RawGovernanceMetaData<?, ?>> rawGovernanceMetaData = new HashMap<String, RawGovernanceMetaData<?, ?>>();
 		NEXT_GOVERNANCE: for (int i = 0; i < governanceConfigurations.length; i++) {
-			GovernanceConfiguration<?, ?, ?> governanceConfiguration = governanceConfigurations[i];
+			GovernanceConfiguration<?, ?> governanceConfiguration = governanceConfigurations[i];
 
 			// Create the raw governance
-			RawGovernanceMetaData rawGovernance = rawGovernanceMetaDataFactory
+			RawGovernanceMetaData<?, ?> rawGovernance = rawGovernanceMetaDataFactory
 					.createRawGovernanceMetaData(governanceConfiguration, i,
 							sourceContext, officeName, officeBuilder, issues);
 			if (rawGovernance == null) {
@@ -651,7 +651,7 @@ public class RawOfficeMetaDataImpl implements RawOfficeMetaDataFactory,
 				processBoundAdministrators, issues);
 
 		// Link tasks for Governance
-		for (RawGovernanceMetaData rawGovernance : rawGovernanceMetaDataList) {
+		for (RawGovernanceMetaData<?, ?> rawGovernance : rawGovernanceMetaDataList) {
 			rawGovernance.linkOfficeMetaData(metaDataLocator,
 					officeAssetManagerFactory, issues);
 		}
@@ -773,7 +773,7 @@ public class RawOfficeMetaDataImpl implements RawOfficeMetaDataFactory,
 	}
 
 	@Override
-	public Map<String, RawGovernanceMetaData> getGovernanceMetaData() {
+	public Map<String, RawGovernanceMetaData<?, ?>> getGovernanceMetaData() {
 		return this.governanceMetaData;
 	}
 

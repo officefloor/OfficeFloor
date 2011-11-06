@@ -211,7 +211,7 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 	/**
 	 * {@link RawGovernanceMetaData} instances by their registered names.
 	 */
-	private final Map<String, RawGovernanceMetaData> rawGovernanceMetaDatas = new HashMap<String, RawGovernanceMetaData>();
+	private final Map<String, RawGovernanceMetaData<?, ?>> rawGovernanceMetaDatas = new HashMap<String, RawGovernanceMetaData<?, ?>>();
 
 	/**
 	 * Ensure issue if no {@link Office} name.
@@ -883,7 +883,7 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 	 */
 	public void testFailConstructGovernance() {
 
-		final GovernanceConfiguration<?, ?, ?> governanceConfiguration = this
+		final GovernanceConfiguration<?, ?> governanceConfiguration = this
 				.createMock(GovernanceConfiguration.class);
 
 		// Record creating a thread bound managed object
@@ -927,7 +927,7 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 		this.verifyMockObjects();
 
 		// Ensure the correct governance meta-data
-		Map<String, RawGovernanceMetaData> rawGovernanceMetaDatas = rawOfficeMetaData
+		Map<String, RawGovernanceMetaData<?, ?>> rawGovernanceMetaDatas = rawOfficeMetaData
 				.getGovernanceMetaData();
 		assertEquals("Should be no governance", 0,
 				rawGovernanceMetaDatas.size());
@@ -975,7 +975,7 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 		this.verifyMockObjects();
 
 		// Ensure the correct governance meta-data
-		Map<String, RawGovernanceMetaData> rawGovernanceMetaDatas = rawOfficeMetaData
+		Map<String, RawGovernanceMetaData<?, ?>> rawGovernanceMetaDatas = rawOfficeMetaData
 				.getGovernanceMetaData();
 		assertNotNull("Ensure have first governance",
 				rawGovernanceMetaDatas.get("GOVERNANCE_ONE"));
@@ -1608,7 +1608,7 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 			String... governanceNames) {
 
 		// Create the listing of governance configuration
-		GovernanceConfiguration<?, ?, ?>[] governanceConfigurations = new GovernanceConfiguration[governanceNames.length];
+		GovernanceConfiguration<?, ?>[] governanceConfigurations = new GovernanceConfiguration[governanceNames.length];
 		for (int i = 0; i < governanceConfigurations.length; i++) {
 			governanceConfigurations[i] = this
 					.createMock(GovernanceConfiguration.class);
@@ -1622,10 +1622,10 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 				governanceConfigurations);
 		GovernanceMetaData<?, ?>[] governanceMetaDatas = new GovernanceMetaData<?, ?>[governanceConfigurations.length];
 		for (int i = 0; i < governanceConfigurations.length; i++) {
-			GovernanceConfiguration<?, ?, ?> governanceConfiguration = governanceConfigurations[i];
+			GovernanceConfiguration<?, ?> governanceConfiguration = governanceConfigurations[i];
 			String governanceName = governanceNames[i];
 
-			final RawGovernanceMetaData rawGovernanceMetaData = this
+			final RawGovernanceMetaData<?, ?> rawGovernanceMetaData = this
 					.createMock(RawGovernanceMetaData.class);
 			final GovernanceMetaData<?, ?> governanceMetaData = this
 					.createMock(GovernanceMetaData.class);
@@ -1662,7 +1662,7 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 			String governanceName = governanceNames[i];
 
 			// Ensure have raw governance meta-data
-			RawGovernanceMetaData rawGovernanceMetaData = this.rawGovernanceMetaDatas
+			RawGovernanceMetaData<?, ?> rawGovernanceMetaData = this.rawGovernanceMetaDatas
 					.get(governanceName);
 			assertNotNull("Missing raw Governance meta-data",
 					rawGovernanceMetaData);

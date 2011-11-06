@@ -17,9 +17,7 @@
  */
 package net.officefloor.frame.impl.construct.governance;
 
-import java.net.URL;
-import java.net.URLClassLoader;
-
+import net.officefloor.frame.api.build.GovernanceFactory;
 import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.build.OfficeBuilder;
 import net.officefloor.frame.api.build.OfficeFloorIssues;
@@ -29,7 +27,6 @@ import net.officefloor.frame.api.build.TaskFactory;
 import net.officefloor.frame.api.build.WorkBuilder;
 import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.manage.Office;
-import net.officefloor.frame.impl.construct.source.SourcePropertiesImpl;
 import net.officefloor.frame.impl.execute.governance.ActivateGovernanceTask;
 import net.officefloor.frame.impl.execute.governance.DisregardGovernanceTask;
 import net.officefloor.frame.impl.execute.governance.EnforceGovernanceTask;
@@ -49,18 +46,8 @@ import net.officefloor.frame.internal.structure.GovernanceControl;
 import net.officefloor.frame.internal.structure.GovernanceMetaData;
 import net.officefloor.frame.internal.structure.ProcessState;
 import net.officefloor.frame.internal.structure.TaskMetaData;
-import net.officefloor.frame.spi.TestSource;
 import net.officefloor.frame.spi.governance.Governance;
-import net.officefloor.frame.spi.governance.source.GovernanceSource;
-import net.officefloor.frame.spi.governance.source.GovernanceSourceContext;
-import net.officefloor.frame.spi.governance.source.GovernanceSourceMetaData;
-import net.officefloor.frame.spi.governance.source.GovernanceSourceSpecification;
-import net.officefloor.frame.spi.managedobject.ManagedObject;
-import net.officefloor.frame.spi.managedobject.source.ManagedObjectFlowMetaData;
-import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.spi.source.SourceContext;
-import net.officefloor.frame.spi.source.UnknownClassError;
-import net.officefloor.frame.spi.source.UnknownResourceError;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 
 import org.easymock.AbstractMatcher;
@@ -75,7 +62,7 @@ public class RawGovernanceMetaDataTest extends OfficeFrameTestCase {
 	/**
 	 * {@link GovernanceConfiguration}.
 	 */
-	private final GovernanceConfiguration<?, ?, ?> configuration = this
+	private final GovernanceConfiguration<?, ?> configuration = this
 			.createMock(GovernanceConfiguration.class);
 
 	/**
@@ -87,6 +74,12 @@ public class RawGovernanceMetaDataTest extends OfficeFrameTestCase {
 	 * {@link Governance} name.
 	 */
 	private final String GOVERNANCE_NAME = "GOVERNANCE";
+
+	/**
+	 * {@link GovernanceFactory}.
+	 */
+	private final GovernanceFactory<?, ?> governanceFactory = this
+			.createMock(GovernanceFactory.class);
 
 	/**
 	 * {@link Office} name.
@@ -106,18 +99,6 @@ public class RawGovernanceMetaDataTest extends OfficeFrameTestCase {
 			.createMock(SourceContext.class);
 
 	/**
-	 * {@link GovernanceSourceMetaData}.
-	 */
-	private final GovernanceSourceMetaData<?, ?> metaData = this
-			.createMock(GovernanceSourceMetaData.class);
-
-	/**
-	 * {@link GovernanceSource} instances to use in testing overriding the
-	 * {@link MockGovernanceSource} {@link Class}.
-	 */
-	private GovernanceSource<?, ?> governanceSourceInstance = null;
-
-	/**
 	 * {@link OfficeMetaDataLocator}.
 	 */
 	private final OfficeMetaDataLocator officeMetaDataLocator = this
@@ -134,12 +115,6 @@ public class RawGovernanceMetaDataTest extends OfficeFrameTestCase {
 	 */
 	private final OfficeFloorIssues issues = this
 			.createMock(OfficeFloorIssues.class);
-
-	@Override
-	protected void setUp() throws Exception {
-		// Reset the mock governance source state
-		MockGovernanceSource.reset(this.metaData);
-	}
 
 	/**
 	 * Ensures issue if no {@link GovernanceSource} name.
@@ -159,18 +134,16 @@ public class RawGovernanceMetaDataTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensures issue if no {@link GovernanceSource} class.
+	 * Ensures issue if no {@link GovernanceFactory}.
 	 */
-	public void testNoGovernanceSourceClass() {
+	public void testNoGovernanceFactory() {
 
 		// Record no class
 		this.recordReturn(this.configuration,
 				this.configuration.getGovernanceName(), GOVERNANCE_NAME);
 		this.recordReturn(this.configuration,
-				this.configuration.getGovernanceSource(), null);
-		this.recordReturn(this.configuration,
-				this.configuration.getGovernanceSourceClass(), null);
-		this.record_issue("No GovernanceSource class provided");
+				this.configuration.getGovernanceFactory(), null);
+		this.record_issue("No GovernanceFactory provided");
 
 		// Attempt to construct governance
 		this.replayMockObjects();
@@ -179,139 +152,18 @@ public class RawGovernanceMetaDataTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensures issue if fail to instantiate {@link GovernanceSource}.
+	 * Ensures issue if no extension interface.
 	 */
-	public void testFailInstantiateGovernanceSource() {
+	public void testNoExtensionInterface() {
 
-		final Exception failure = new Exception("instantiate failure");
-
-		// Record fail instantiate
+		// Record no class
 		this.recordReturn(this.configuration,
 				this.configuration.getGovernanceName(), GOVERNANCE_NAME);
 		this.recordReturn(this.configuration,
-				this.configuration.getGovernanceSource(), null);
+				this.configuration.getGovernanceFactory(),
+				this.governanceFactory);
 		this.recordReturn(this.configuration,
-				this.configuration.getGovernanceSourceClass(),
-				MockGovernanceSource.class);
-		this.record_issue(
-				"Failed to instantiate " + MockGovernanceSource.class.getName(),
-				failure);
-
-		// Attempt to construct governance
-		this.replayMockObjects();
-		MockGovernanceSource.instantiateFailure = failure;
-		this.constructRawGovernanceMetaData(false);
-		this.verifyMockObjects();
-	}
-
-	/**
-	 * Ensures issue if missing required property.
-	 */
-	public void testMissingProperty() {
-
-		// Record fail instantiate due to missing property
-		this.record_initGovernance();
-		this.record_issue("Property 'required.property' must be specified");
-
-		// Attempt to construct governance
-		this.replayMockObjects();
-		MockGovernanceSource.requiredPropertyName = "required.property";
-		this.constructRawGovernanceMetaData(false);
-		this.verifyMockObjects();
-	}
-
-	/**
-	 * Ensure issue if missing {@link Class}.
-	 */
-	public void testClassLoaderAndMissingClass() {
-
-		final ClassLoader classLoader = new URLClassLoader(new URL[0]);
-		final String CLASS_NAME = "UNKNOWN CLASS";
-
-		// Record fail instantiate due to missing class
-		this.record_initGovernance();
-		this.recordReturn(this.sourceContext,
-				this.sourceContext.getClassLoader(), classLoader);
-		this.sourceContext.loadClass(CLASS_NAME);
-		this.control(this.sourceContext).setThrowable(
-				new UnknownClassError("TEST ERROR", CLASS_NAME));
-		this.record_issue("Can not load class '" + CLASS_NAME + "'");
-
-		// Attempt to construct governance
-		this.replayMockObjects();
-		MockGovernanceSource.classLoader = classLoader;
-		MockGovernanceSource.requiredClassName = CLASS_NAME;
-		this.constructRawGovernanceMetaData(false);
-		this.verifyMockObjects();
-	}
-
-	/**
-	 * Ensure issue if missing a resource.
-	 */
-	public void testMissingResource() {
-
-		final String RESOURCE_LOCATION = "RESOURCE LOCATION";
-
-		// Record fail instantiate due to missing resource
-		this.record_initGovernance();
-		this.sourceContext.getResource(RESOURCE_LOCATION);
-		this.control(this.sourceContext).setThrowable(
-				new UnknownResourceError("TEST ERROR", RESOURCE_LOCATION));
-		this.record_issue("Can not obtain resource at location '"
-				+ RESOURCE_LOCATION + "'");
-
-		// Attempt to construct governance
-		this.replayMockObjects();
-		MockGovernanceSource.requiredResourceLocation = RESOURCE_LOCATION;
-		this.constructRawGovernanceMetaData(false);
-		this.verifyMockObjects();
-	}
-
-	/**
-	 * Ensures issue if failure in initialising {@link GovernanceSource}.
-	 */
-	public void testFailInitManagedObjectSource() {
-
-		final Exception failure = new Exception("init failure");
-
-		// Record fail instantiate
-		this.record_initGovernance();
-		this.record_issue(
-				"Failed to initialise " + MockGovernanceSource.class.getName(),
-				failure);
-
-		// Attempt to construct governance
-		this.replayMockObjects();
-		MockGovernanceSource.initFailure = failure;
-		this.constructRawGovernanceMetaData(false);
-		this.verifyMockObjects();
-	}
-
-	/**
-	 * Ensures issue if null {@link GovernanceSourceMetaData}.
-	 */
-	public void testNullMetaData() {
-
-		// Record null meta-data
-		this.record_initGovernance();
-		this.record_issue("Must provide meta-data");
-
-		// Attempt to construct governance
-		this.replayMockObjects();
-		MockGovernanceSource.metaData = null;
-		this.constructRawGovernanceMetaData(false);
-		this.verifyMockObjects();
-	}
-
-	/**
-	 * Ensures issue if no extension interface type.
-	 */
-	public void testNoExtensionInterfaceType() {
-
-		// Record no object type
-		this.record_initGovernance();
-		this.recordReturn(this.metaData, this.metaData.getExtensionInterface(),
-				null);
+				this.configuration.getExtensionInterface(), null);
 		this.record_issue("No extension interface type provided");
 
 		// Attempt to construct governance
@@ -327,7 +179,6 @@ public class RawGovernanceMetaDataTest extends OfficeFrameTestCase {
 
 		// Record simple governance
 		this.record_initGovernance();
-		this.record_createRawMetaData(String.class);
 		this.record_setupGovernanceTasks();
 		TaskMetaData<?, ?, ?> activateTaskMetaData = this
 				.record_linkGovernanceTask("ACTIVATE", true);
@@ -340,7 +191,7 @@ public class RawGovernanceMetaDataTest extends OfficeFrameTestCase {
 
 		// Attempt to construct governance
 		this.replayMockObjects();
-		RawGovernanceMetaData rawMetaData = this
+		RawGovernanceMetaData<?, ?> rawMetaData = this
 				.constructRawGovernanceMetaData(true);
 		GovernanceMetaData<?, ?> governanceMetaData = rawMetaData
 				.getGovernanceMetaData();
@@ -384,17 +235,10 @@ public class RawGovernanceMetaDataTest extends OfficeFrameTestCase {
 		this.recordReturn(this.configuration,
 				this.configuration.getGovernanceName(), GOVERNANCE_NAME);
 		this.recordReturn(this.configuration,
-				this.configuration.getGovernanceSource(),
-				this.governanceSourceInstance);
-		if (this.governanceSourceInstance == null) {
-			this.recordReturn(this.configuration,
-					this.configuration.getGovernanceSourceClass(),
-					MockGovernanceSource.class);
-		}
-
-		// Record obtaining details from configuration to init
+				this.configuration.getGovernanceFactory(),
+				this.governanceFactory);
 		this.recordReturn(this.configuration,
-				this.configuration.getProperties(), new SourcePropertiesImpl());
+				this.configuration.getExtensionInterface(), String.class);
 	}
 
 	/**
@@ -515,23 +359,6 @@ public class RawGovernanceMetaDataTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Records creating the {@link RawGovernanceMetaData} after initialising.
-	 * 
-	 * @param managedObjectClass
-	 *            {@link ManagedObject} class.
-	 * @param timeout
-	 *            Timeout for the {@link ManagedObjectSource}.
-	 * @param processBoundName
-	 *            Process bound name for {@link ManagedObject}.
-	 * @param {@link ManagedObjectFlowMetaData} for the
-	 *        {@link ManagedObjectSource}.
-	 */
-	private <I> void record_createRawMetaData(Class<I> extensionInterfaceType) {
-		this.recordReturn(this.metaData, this.metaData.getExtensionInterface(),
-				extensionInterfaceType);
-	}
-
-	/**
 	 * Records an issue for the {@link Governance}.
 	 * 
 	 * @param issueDescription
@@ -540,19 +367,6 @@ public class RawGovernanceMetaDataTest extends OfficeFrameTestCase {
 	private void record_issue(String issueDescription) {
 		this.issues.addIssue(AssetType.GOVERNANCE, GOVERNANCE_NAME,
 				issueDescription);
-	}
-
-	/**
-	 * Records an issue for the {@link Governance}.
-	 * 
-	 * @param issueDescription
-	 *            Issue description.
-	 * @param cause
-	 *            Cause.
-	 */
-	private void record_issue(String issueDescription, Throwable cause) {
-		this.issues.addIssue(AssetType.GOVERNANCE, GOVERNANCE_NAME,
-				issueDescription, cause);
 	}
 
 	/**
@@ -588,132 +402,6 @@ public class RawGovernanceMetaDataTest extends OfficeFrameTestCase {
 
 		// Return the raw governance meta-data
 		return rawGovernanceMetaData;
-	}
-
-	/**
-	 * Mock {@link GovernanceSource}.
-	 */
-	@TestSource
-	@SuppressWarnings("rawtypes")
-	public static class MockGovernanceSource implements GovernanceSource {
-
-		/**
-		 * Instantiate exception.
-		 */
-		public static Exception instantiateFailure = null;
-
-		/**
-		 * Name of required property.
-		 */
-		public static String requiredPropertyName = null;
-
-		/**
-		 * Name of required {@link Class}.
-		 */
-		public static String requiredClassName = null;
-
-		/**
-		 * Location of required resource.
-		 */
-		public static String requiredResourceLocation = null;
-
-		/**
-		 * {@link ClassLoader}.
-		 */
-		public static ClassLoader classLoader = null;
-
-		/**
-		 * Init exception.
-		 */
-		public static Exception initFailure = null;
-
-		/**
-		 * {@link GovernanceMetaData}.
-		 */
-		public static GovernanceSourceMetaData<?, ?> metaData = null;
-
-		/**
-		 * Resets state of {@link MockGovernanceSource} for testing.
-		 * 
-		 * @param metaData
-		 *            {@link GovernanceSourceMetaData}.
-		 */
-		public static void reset(GovernanceSourceMetaData<?, ?> metaData) {
-			instantiateFailure = null;
-			requiredPropertyName = null;
-			requiredClassName = null;
-			requiredResourceLocation = null;
-			classLoader = null;
-			initFailure = null;
-			MockGovernanceSource.metaData = metaData;
-		}
-
-		/**
-		 * Instantiate.
-		 * 
-		 * @throws Exception
-		 *             Possible instantiate failure.
-		 */
-		public MockGovernanceSource() throws Exception {
-			if (instantiateFailure != null) {
-				throw instantiateFailure;
-			}
-		}
-
-		/*
-		 * ==================== GovernanceSource ====================
-		 */
-
-		@Override
-		public GovernanceSourceSpecification getSpecification() {
-			fail("Should not call getSpecification");
-			return null;
-		}
-
-		@Override
-		public void init(GovernanceSourceContext context) throws Exception {
-
-			// Obtain the required property
-			if (requiredPropertyName != null) {
-				context.getProperty(requiredPropertyName);
-			}
-
-			// Obtain class loader
-			if (classLoader != null) {
-				assertSame("Incorrect class loader", classLoader,
-						context.getClassLoader());
-			}
-
-			// Load the required class
-			if (requiredClassName != null) {
-				context.loadClass(requiredClassName);
-			}
-
-			// Obtain the required resource
-			if (requiredResourceLocation != null) {
-				context.getResource(requiredResourceLocation);
-			}
-
-			// Ensure can obtain defaulted property
-			assertEquals("Must default property", "DEFAULT",
-					context.getProperty("property to default", "DEFAULT"));
-
-			// Determine if failure in initialising
-			if (initFailure != null) {
-				throw initFailure;
-			}
-		}
-
-		@Override
-		public GovernanceSourceMetaData<?, ?> getMetaData() {
-			return metaData;
-		}
-
-		@Override
-		public Governance createGovernance() throws Throwable {
-			fail("Should not be required to create Governance");
-			return null;
-		}
 	}
 
 }
