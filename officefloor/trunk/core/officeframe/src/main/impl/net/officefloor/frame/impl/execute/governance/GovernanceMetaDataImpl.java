@@ -22,8 +22,10 @@ import net.officefloor.frame.api.execute.TaskContext;
 import net.officefloor.frame.internal.structure.ActiveGovernanceManager;
 import net.officefloor.frame.internal.structure.FlowMetaData;
 import net.officefloor.frame.internal.structure.GovernanceContainer;
+import net.officefloor.frame.internal.structure.GovernanceControl;
 import net.officefloor.frame.internal.structure.GovernanceMetaData;
 import net.officefloor.frame.internal.structure.ManagedObjectContainer;
+import net.officefloor.frame.internal.structure.ProcessState;
 import net.officefloor.frame.spi.governance.Governance;
 import net.officefloor.frame.spi.governance.GovernanceContext;
 import net.officefloor.frame.spi.governance.source.GovernanceSource;
@@ -114,8 +116,10 @@ public class GovernanceMetaDataImpl<I, F extends Enum<F>> implements
 	}
 
 	@Override
-	public GovernanceContainer<I> createGovernanceContainer(Object processLock) {
-		return new GovernanceContainerImpl<I, F>(this, processLock);
+	public GovernanceContainer<I> createGovernanceContainer(
+			ProcessState processState, int processRegisteredIndex) {
+		return new GovernanceContainerImpl<I, F>(this, processState,
+				processRegisteredIndex);
 	}
 
 	@Override
@@ -126,10 +130,12 @@ public class GovernanceMetaDataImpl<I, F extends Enum<F>> implements
 	@Override
 	public ActiveGovernanceManager createActiveGovernance(
 			GovernanceContainer<I> governanceContainer,
-			Governance<I, F> governance, I extensionInterface,
-			ManagedObjectContainer managedobjectContainer) {
+			GovernanceControl<I, F> governanceControl, I extensionInterface,
+			ManagedObjectContainer managedobjectContainer,
+			int managedObjectContainerRegisteredIndex) {
 		return new ActiveGovernanceImpl<I, F>(governanceContainer, this,
-				governance, extensionInterface, managedobjectContainer);
+				governanceControl, extensionInterface, managedobjectContainer,
+				managedObjectContainerRegisteredIndex);
 	}
 
 	@Override

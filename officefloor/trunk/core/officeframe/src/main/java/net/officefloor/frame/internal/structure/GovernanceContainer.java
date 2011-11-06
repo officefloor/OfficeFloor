@@ -28,6 +28,15 @@ import net.officefloor.frame.spi.managedobject.ManagedObject;
 public interface GovernanceContainer<I> {
 
 	/**
+	 * Obtains the index of this {@link Governance} registered within the
+	 * {@link ProcessState}.
+	 * 
+	 * @return Index of this {@link Governance} registered within the
+	 *         {@link ProcessState}.
+	 */
+	int getProcessRegisteredIndex();
+
+	/**
 	 * Indicates if this {@link Governance} is active.
 	 * 
 	 * @return <code>true</code> if this {@link Governance} is active.
@@ -51,12 +60,18 @@ public interface GovernanceContainer<I> {
 	 *            to allow {@link Governance} over it.
 	 * @param managedobjectContainer
 	 *            {@link ManagedObjectContainer} of the {@link ManagedObject}.
+	 * @param managedObjectContainerRegisteredIndex
+	 *            Registered index of the {@link ActiveGovernance} within the
+	 *            {@link ManagedObjectContainer}. This is to enable easier
+	 *            identification of the {@link ActiveGovernance} within the
+	 *            {@link ManagedObjectContainer} for unregistering.
 	 * @return {@link ActiveGovernance}.
 	 * @throws Exception
 	 *             If fails to govern the {@link ManagedObject}.
 	 */
 	ActiveGovernance createActiveGovernance(I extensionInterface,
-			ManagedObjectContainer managedobjectContainer);
+			ManagedObjectContainer managedobjectContainer,
+			int managedObjectContainerRegisteredIndex);
 
 	/**
 	 * Enforces the {@link Governance}.

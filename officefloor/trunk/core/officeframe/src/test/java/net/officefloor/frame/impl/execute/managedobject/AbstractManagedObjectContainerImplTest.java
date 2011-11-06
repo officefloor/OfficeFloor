@@ -18,6 +18,8 @@
 
 package net.officefloor.frame.impl.execute.managedobject;
 
+import java.util.Arrays;
+
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
 import net.officefloor.frame.api.build.Indexed;
@@ -623,7 +625,7 @@ public abstract class AbstractManagedObjectContainerImplTest extends
 	 * Records governing the {@link ManagedObject}.
 	 */
 	@SuppressWarnings({ "rawtypes", "unchecked" })
-	protected void record_MoContainer_governManagedObject(
+	protected ActiveGovernance[] record_MoContainer_governManagedObject(
 			boolean... isActivateGovernances) {
 
 		if (!this.isGoverned) {
@@ -692,6 +694,8 @@ public abstract class AbstractManagedObjectContainerImplTest extends
 				final FlowMetaData<?> flowMetaData = this
 						.createMock(FlowMetaData.class);
 
+				final int registeredIndex = i;
+
 				// Record governing the managed object
 				this.recordReturn(moGovMetaData,
 						moGovMetaData.getExtensionInterfaceExtractor(),
@@ -700,8 +704,9 @@ public abstract class AbstractManagedObjectContainerImplTest extends
 						.extractExtensionInterface(this.managedObject,
 								this.managedObjectMetaData), extension);
 				this.recordReturn(governanceContainer, governanceContainer
-						.createActiveGovernance(extension, null),
-						activeGovernance, new AbstractMatcher() {
+						.createActiveGovernance(extension, null,
+								registeredIndex), activeGovernance,
+						new AbstractMatcher() {
 							@Override
 							public boolean matches(Object[] expected,
 									Object[] actual) {
@@ -710,6 +715,8 @@ public abstract class AbstractManagedObjectContainerImplTest extends
 								assertTrue(
 										"Must have managed object container",
 										actual[1] instanceof ManagedObjectContainer);
+								assertEquals("Incorrect registered index",
+										registeredIndex, actual[2]);
 								return true;
 							}
 						});
@@ -719,6 +726,10 @@ public abstract class AbstractManagedObjectContainerImplTest extends
 						activeGovernance);
 			}
 		}
+
+		// Return a copy of the active governances
+		return Arrays.copyOf(this.activeGovernances,
+				this.activeGovernances.length);
 	}
 
 	/**
@@ -928,6 +939,29 @@ public abstract class AbstractManagedObjectContainerImplTest extends
 			this.recordReturn(this.sourcingAssetMonitor,
 					this.sourcingAssetMonitor.waitOnAsset(this.jobNode,
 							this.jobActivateSet), true);
+		}
+	}
+
+	/**
+	 * Records unregistering the {@link ManagedObject} from {@link Governance}.
+	 */
+	protected void record_MoContainer_unregisterManagedObjectFromGovernance(
+			boolean... isUnregisters) {
+
+		// Record unregistering the governance
+		for (int i = 0; i < isUnregisters.length; i++) {
+			boolean isUnregister = isUnregisters[i];
+
+			if (!isUnregister) {
+				continue; // not unregister
+			}
+
+			// Obtain the active governance to unregister
+			ActiveGovernance activeGovernance = this.activeGovernances[i];
+
+			// Record unregistering the active governance
+			this.recordReturn(activeGovernance,
+					activeGovernance.getManagedObjectRegisteredIndex(), i);
 		}
 	}
 
@@ -1181,6 +1215,28 @@ public abstract class AbstractManagedObjectContainerImplTest extends
 					actualManagedObject);
 		}
 		return object;
+	}
+
+	/**
+	 * Unregisters the {@link ManagedObject} from {@link Governance}.
+	 */
+	protected void unregisterManagedObjectFromGovernance(
+			ManagedObjectContainer mo, boolean... isUnregisters) {
+
+		// Record unregistering the governance
+		for (int i = 0; i < isUnregisters.length; i++) {
+			boolean isUnregister = isUnregisters[i];
+
+			if (!isUnregister) {
+				continue; // not unregister
+			}
+
+			// Obtain the active governance to unregister
+			ActiveGovernance activeGovernance = this.activeGovernances[i];
+
+			// Unregistering the active governance
+			mo.unregisterManagedObjectFromGovernance(activeGovernance);
+		}
 	}
 
 	/**

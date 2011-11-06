@@ -369,7 +369,7 @@ public class RawGovernanceMetaDataTest extends OfficeFrameTestCase {
 
 		// Validate correct govern meta-data
 		ActiveGovernanceManager manager = governanceMetaData
-				.createActiveGovernance(null, null, null, null);
+				.createActiveGovernance(null, null, null, null, 0);
 		ActiveGovernance activeGovernance = manager.getActiveGovernance();
 		assertEquals("Incorrect govern flow meta-data", governTaskMetaData,
 				activeGovernance.getFlowMetaData().getInitialTaskMetaData());

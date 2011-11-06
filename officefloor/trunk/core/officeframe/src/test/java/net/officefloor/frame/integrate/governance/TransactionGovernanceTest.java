@@ -21,6 +21,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 import net.officefloor.frame.api.build.AdministratorBuilder;
+import net.officefloor.frame.api.build.DependencyMappingBuilder;
 import net.officefloor.frame.api.build.GovernanceBuilder;
 import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.build.None;
@@ -57,11 +58,7 @@ public class TransactionGovernanceTest extends AbstractOfficeConstructTestCase {
 	 * Ensure able to commit transaction.
 	 */
 	public void testTransaction() throws Exception {
-		
-		// TODO run test
-		System.err.println("TODO run test");
-		if (true) return;
-		
+
 		// Mocks
 		final TransactionalObject object = this
 				.createMock(TransactionalObject.class);
@@ -88,12 +85,15 @@ public class TransactionGovernanceTest extends AbstractOfficeConstructTestCase {
 		ReflectiveTaskBuilder task = builder.buildTask("doTask", "TEAM");
 		task.getBuilder().linkPreTaskAdministration("ADMIN", "BEGIN");
 		task.getBuilder().linkPostTaskAdministration("ADMIN", "COMMIT");
-		task.buildObject("MO", ManagedObjectScope.PROCESS);
+		DependencyMappingBuilder dependencies = task.buildObject("MO",
+				ManagedObjectScope.PROCESS);
 
 		// Configure the Governance
 		GovernanceBuilder governance = this.getOfficeBuilder().addGovernance(
 				"GOVERNANCE", MockTransactionalGovernanceSource.class);
 		governance.addProperty("TEST", "AVAILABLE");
+		governance.setTeamName("TEAM");
+		dependencies.mapGovernance("GOVERNANCE");
 
 		// Configure the Administration
 		AdministratorBuilder<Indexed> admin = this.constructAdministrator(

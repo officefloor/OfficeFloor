@@ -51,13 +51,18 @@ public class GovernanceManagedObjectContainerTest extends
 		this.record_MoContainer_sourceManagedObject(true, null);
 		this.record_MoUser_setManagedObject(true);
 
-		// Record governance
+		// Record Governance
 		this.record_MoContainer_governManagedObject(true, false, true);
 
 		// Record remaining managed object functionality
 		this.record_MoContainer_coordinateManagedObject(true, true, null,
 				object);
 		this.record_MoContainer_isManagedObjectReady(ReadyState.READY);
+
+		// Record unregistering Governance
+		this.record_MoContainer_unregisterManagedObjectFromGovernance(true,
+				false, true);
+
 		this.record_MoContainer_unloadManagedObject(true);
 
 		// Replay mock objects
@@ -70,6 +75,10 @@ public class GovernanceManagedObjectContainerTest extends
 		this.coordinateManagedObject(mo, true);
 		this.isManagedObjectReady(mo, true);
 		this.assert_getObject(mo, object);
+
+		// Unregister the Governance
+		this.unregisterManagedObjectFromGovernance(mo, true, false, true);
+
 		this.unloadManagedObject(mo);
 
 		// Verify mock objects
