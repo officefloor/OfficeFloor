@@ -60,7 +60,7 @@ public interface RawOfficeMetaData {
 	 * @return {@link RawGovernanceMetaData} by their {@link Office} registered
 	 *         names.
 	 */
-	Map<String, RawGovernanceMetaData> getGovernanceMetaData();
+	Map<String, RawGovernanceMetaData<?, ?>> getGovernanceMetaData();
 
 	/**
 	 * Obtains the {@link RawManagedObjectMetaData} by their {@link Office}

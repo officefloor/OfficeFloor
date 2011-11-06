@@ -294,7 +294,7 @@ public class RawBoundManagedObjectInstanceMetaDataImpl<D extends Enum<D>>
 	 */
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public void loadGovernance(
-			Map<String, RawGovernanceMetaData> rawGovernanceMetaDatas,
+			Map<String, RawGovernanceMetaData<?, ?>> rawGovernanceMetaDatas,
 			OfficeFloorIssues issues) {
 
 		// Determine if governance

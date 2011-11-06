@@ -24,7 +24,6 @@ import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.internal.configuration.GovernanceConfiguration;
 import net.officefloor.frame.internal.structure.ProcessState;
 import net.officefloor.frame.spi.governance.Governance;
-import net.officefloor.frame.spi.governance.source.GovernanceSource;
 import net.officefloor.frame.spi.source.SourceContext;
 
 /**
@@ -53,10 +52,9 @@ public interface RawGovernanceMetaDataFactory {
 	 *            {@link OfficeFloorIssues}.
 	 * @return {@link RawGovernanceMetaData}.
 	 */
-	<I, F extends Enum<F>, GS extends GovernanceSource<I, F>> RawGovernanceMetaData createRawGovernanceMetaData(
-			GovernanceConfiguration<I, F, GS> configuration,
-			int governanceIndex, SourceContext sourceContext,
-			String officeName, OfficeBuilder officeBuilder,
-			OfficeFloorIssues issues);
+	<I, F extends Enum<F>> RawGovernanceMetaData<I, F> createRawGovernanceMetaData(
+			GovernanceConfiguration<I, F> configuration, int governanceIndex,
+			SourceContext sourceContext, String officeName,
+			OfficeBuilder officeBuilder, OfficeFloorIssues issues);
 
 }

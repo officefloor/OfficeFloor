@@ -640,7 +640,7 @@ public class RawWorkMetaDataTest<W extends Work> extends OfficeFrameTestCase {
 			this.recordReturn(this.rawOfficeMetaData,
 					this.rawOfficeMetaData.getManagedObjectMetaData(),
 					officeRegisteredManagedObjects);
-			Map<String, RawGovernanceMetaData> rawGovernanceMetaData = new HashMap<String, RawGovernanceMetaData>();
+			Map<String, RawGovernanceMetaData<?, ?>> rawGovernanceMetaData = new HashMap<String, RawGovernanceMetaData<?, ?>>();
 			this.recordReturn(this.rawOfficeMetaData,
 					this.rawOfficeMetaData.getGovernanceMetaData(),
 					rawGovernanceMetaData);

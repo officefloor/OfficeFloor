@@ -17,6 +17,7 @@
  */
 package net.officefloor.frame.impl.execute.governance;
 
+import net.officefloor.frame.api.build.GovernanceFactory;
 import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.execute.TaskContext;
 import net.officefloor.frame.internal.structure.ActiveGovernance;
@@ -419,10 +420,16 @@ public class GovernanceContainerTest extends OfficeFrameTestCase {
 	 * Record activating the {@link Governance}.
 	 */
 	private void record_activateGovernance() {
+
+		final GovernanceFactory<?, ?> governanceFactory = this
+				.createMock(GovernanceFactory.class);
+
 		try {
 			this.record_processLock();
-			this.recordReturn(this.metaData, this.metaData.createGovernance(),
-					this.governance);
+			this.recordReturn(this.metaData,
+					this.metaData.getGovernanceFactory(), governanceFactory);
+			this.recordReturn(governanceFactory,
+					governanceFactory.createGovernance(), this.governance);
 		} catch (Throwable ex) {
 			throw fail(ex);
 		}

@@ -20,6 +20,7 @@ package net.officefloor.frame.impl.execute.governance;
 import java.util.LinkedList;
 import java.util.List;
 
+import net.officefloor.frame.api.build.GovernanceFactory;
 import net.officefloor.frame.api.execute.TaskContext;
 import net.officefloor.frame.internal.structure.ActiveGovernance;
 import net.officefloor.frame.internal.structure.ActiveGovernanceManager;
@@ -65,7 +66,7 @@ public class GovernanceContainerImpl<I, F extends Enum<F>> implements
 	/**
 	 * {@link Governance}.
 	 */
-	private Governance<I, F> governance = null;
+	private Governance<? super I, F> governance = null;
 
 	/**
 	 * Initiate.
@@ -188,7 +189,9 @@ public class GovernanceContainerImpl<I, F extends Enum<F>> implements
 			}
 
 			// Create the governance
-			this.governance = this.metaData.createGovernance();
+			GovernanceFactory<? super I, F> factory = this.metaData
+					.getGovernanceFactory();
+			this.governance = factory.createGovernance();
 		}
 	}
 

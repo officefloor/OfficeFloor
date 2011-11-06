@@ -86,6 +86,6 @@ public interface RawBoundManagedObjectMetaDataFactory {
 			Map<String, RawBoundManagedObjectMetaData> scopeManagedObjects,
 			RawManagingOfficeMetaData<?>[] inputManagedObjects,
 			Map<String, String> boundInputManagedObjects,
-			Map<String, RawGovernanceMetaData> rawGovernanceMetaData);
+			Map<String, RawGovernanceMetaData<?, ?>> rawGovernanceMetaData);
 
 }

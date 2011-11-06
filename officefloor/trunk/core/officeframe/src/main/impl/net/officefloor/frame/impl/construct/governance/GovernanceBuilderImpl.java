@@ -18,12 +18,10 @@
 package net.officefloor.frame.impl.construct.governance;
 
 import net.officefloor.frame.api.build.GovernanceBuilder;
+import net.officefloor.frame.api.build.GovernanceFactory;
 import net.officefloor.frame.api.execute.Task;
-import net.officefloor.frame.impl.construct.source.SourcePropertiesImpl;
 import net.officefloor.frame.internal.configuration.GovernanceConfiguration;
 import net.officefloor.frame.spi.governance.Governance;
-import net.officefloor.frame.spi.governance.source.GovernanceSource;
-import net.officefloor.frame.spi.source.SourceProperties;
 import net.officefloor.frame.spi.team.Team;
 
 /**
@@ -31,8 +29,8 @@ import net.officefloor.frame.spi.team.Team;
  * 
  * @author Daniel Sagenschneider
  */
-public class GovernanceBuilderImpl<I, F extends Enum<F>, GS extends GovernanceSource<I, F>>
-		implements GovernanceBuilder, GovernanceConfiguration<I, F, GS> {
+public class GovernanceBuilderImpl<I, F extends Enum<F>> implements
+		GovernanceBuilder, GovernanceConfiguration<I, F> {
 
 	/**
 	 * Name of the {@link Governance}.
@@ -40,19 +38,14 @@ public class GovernanceBuilderImpl<I, F extends Enum<F>, GS extends GovernanceSo
 	private final String governanceName;
 
 	/**
-	 * {@link GovernanceSource} instance.
+	 * {@link GovernanceFactory}.
 	 */
-	private final GS governanceSourceInstance;
+	private final GovernanceFactory<? super I, F> governanceFactory;
 
 	/**
-	 * {@link GovernanceSource} {@link Class}.
+	 * Extension interface.
 	 */
-	private final Class<GS> governanceSourceClass;
-
-	/**
-	 * {@link SourceProperties} for the {@link GovernanceSource}.
-	 */
-	private final SourcePropertiesImpl properties = new SourcePropertiesImpl();
+	private final Class<I> extensionInterface;
 
 	/**
 	 * {@link Team} name responsible to undertake the {@link Governance}
@@ -65,24 +58,22 @@ public class GovernanceBuilderImpl<I, F extends Enum<F>, GS extends GovernanceSo
 	 * 
 	 * @param governanceName
 	 *            Name of the {@link Governance}.
-	 * @param governanceSourceInstance
-	 *            {@link GovernanceSource} instance.
+	 * @param governanceFactory
+	 *            {@link GovernanceFactory}.
+	 * @param extensionInterface
+	 *            Extension interface.
 	 */
 	public GovernanceBuilderImpl(String governanceName,
-			GS governanceSourceInstance, Class<GS> governanceSourceClass) {
+			GovernanceFactory<? super I, F> governanceFactory,
+			Class<I> extensionInterface) {
 		this.governanceName = governanceName;
-		this.governanceSourceInstance = governanceSourceInstance;
-		this.governanceSourceClass = governanceSourceClass;
+		this.governanceFactory = governanceFactory;
+		this.extensionInterface = extensionInterface;
 	}
 
 	/*
 	 * ================= GovernanceBuilder =======================
 	 */
-
-	@Override
-	public void addProperty(String name, String value) {
-		this.properties.addProperty(name, value);
-	}
 
 	@Override
 	public void setTeamName(String teamName) {
@@ -99,18 +90,13 @@ public class GovernanceBuilderImpl<I, F extends Enum<F>, GS extends GovernanceSo
 	}
 
 	@Override
-	public GS getGovernanceSource() {
-		return this.governanceSourceInstance;
+	public GovernanceFactory<? super I, F> getGovernanceFactory() {
+		return this.governanceFactory;
 	}
 
 	@Override
-	public Class<GS> getGovernanceSourceClass() {
-		return this.governanceSourceClass;
-	}
-
-	@Override
-	public SourceProperties getProperties() {
-		return this.properties;
+	public Class<I> getExtensionInterface() {
+		return this.extensionInterface;
 	}
 
 	@Override

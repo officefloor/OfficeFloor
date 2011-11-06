@@ -23,6 +23,7 @@ import java.util.List;
 import net.officefloor.frame.api.build.AdministratorBuilder;
 import net.officefloor.frame.api.build.DependencyMappingBuilder;
 import net.officefloor.frame.api.build.GovernanceBuilder;
+import net.officefloor.frame.api.build.GovernanceFactory;
 import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.api.execute.Task;
@@ -37,9 +38,6 @@ import net.officefloor.frame.spi.administration.source.AdministratorSource;
 import net.officefloor.frame.spi.administration.source.impl.AbstractAdministratorSource;
 import net.officefloor.frame.spi.governance.Governance;
 import net.officefloor.frame.spi.governance.GovernanceContext;
-import net.officefloor.frame.spi.governance.source.GovernanceSource;
-import net.officefloor.frame.spi.governance.source.GovernanceSourceContext;
-import net.officefloor.frame.spi.governance.source.impl.AbstractGovernanceSource;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.frame.test.AbstractOfficeConstructTestCase;
 import net.officefloor.frame.test.ReflectiveWorkBuilder;
@@ -90,8 +88,8 @@ public class TransactionGovernanceTest extends AbstractOfficeConstructTestCase {
 
 		// Configure the Governance
 		GovernanceBuilder governance = this.getOfficeBuilder().addGovernance(
-				"GOVERNANCE", MockTransactionalGovernanceSource.class);
-		governance.addProperty("TEST", "AVAILABLE");
+				"GOVERNANCE", new MockTransactionalGovernanceFactory(),
+				MockTransaction.class);
 		governance.setTeamName("TEAM");
 		dependencies.mapGovernance("GOVERNANCE");
 
@@ -232,28 +230,12 @@ public class TransactionGovernanceTest extends AbstractOfficeConstructTestCase {
 	/**
 	 * Mock transactional {@link GovernanceSource}.
 	 */
-	public static class MockTransactionalGovernanceSource extends
-			AbstractGovernanceSource<MockTransaction, Indexed> {
+	public static class MockTransactionalGovernanceFactory implements
+			GovernanceFactory<MockTransaction, Indexed> {
 
 		/*
-		 * ===================== GovernanceSource =======================
+		 * ===================== GovernanceFactory =======================
 		 */
-
-		@Override
-		protected void loadSpecification(SpecificationContext context) {
-			context.addProperty("TEST");
-		}
-
-		@Override
-		protected void loadMetaData(
-				MetaDataContext<MockTransaction, Indexed> context)
-				throws Exception {
-			GovernanceSourceContext govContext = context
-					.getGovernanceSourceContext();
-			assertEquals("Ensure property available", "AVAILABLE",
-					govContext.getProperty("TEST"));
-			context.setExtensionInterface(MockTransaction.class);
-		}
 
 		@Override
 		public Governance<MockTransaction, Indexed> createGovernance()

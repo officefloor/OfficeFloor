@@ -17,6 +17,7 @@
  */
 package net.officefloor.frame.impl.execute.governance;
 
+import net.officefloor.frame.api.build.GovernanceFactory;
 import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.execute.TaskContext;
 import net.officefloor.frame.internal.structure.ActiveGovernanceManager;
@@ -28,7 +29,6 @@ import net.officefloor.frame.internal.structure.ManagedObjectContainer;
 import net.officefloor.frame.internal.structure.ProcessState;
 import net.officefloor.frame.spi.governance.Governance;
 import net.officefloor.frame.spi.governance.GovernanceContext;
-import net.officefloor.frame.spi.governance.source.GovernanceSource;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
 
 /**
@@ -45,9 +45,9 @@ public class GovernanceMetaDataImpl<I, F extends Enum<F>> implements
 	private final String governanceName;
 
 	/**
-	 * {@link GovernanceSource}.
+	 * {@link GovernanceFactory}.
 	 */
-	private final GovernanceSource<I, F> governanceSource;
+	private final GovernanceFactory<? super I, F> governanceFactory;
 
 	/**
 	 * {@link FlowMetaData} to activate {@link Governance}.
@@ -74,13 +74,13 @@ public class GovernanceMetaDataImpl<I, F extends Enum<F>> implements
 	 * 
 	 * @param governanceName
 	 *            Name of the {@link Governance}.
-	 * @param governanceSource
-	 *            {@link GovernanceSource}.
+	 * @param governanceFactory
+	 *            {@link GovernanceFactory}.
 	 */
 	public GovernanceMetaDataImpl(String governanceName,
-			GovernanceSource<I, F> governanceSource) {
+			GovernanceFactory<? super I, F> governanceFactory) {
 		this.governanceName = governanceName;
-		this.governanceSource = governanceSource;
+		this.governanceFactory = governanceFactory;
 	}
 
 	/**
@@ -116,15 +116,15 @@ public class GovernanceMetaDataImpl<I, F extends Enum<F>> implements
 	}
 
 	@Override
+	public GovernanceFactory<? super I, F> getGovernanceFactory() {
+		return this.governanceFactory;
+	}
+
+	@Override
 	public GovernanceContainer<I> createGovernanceContainer(
 			ProcessState processState, int processRegisteredIndex) {
 		return new GovernanceContainerImpl<I, F>(this, processState,
 				processRegisteredIndex);
-	}
-
-	@Override
-	public Governance<I, F> createGovernance() throws Throwable {
-		return this.governanceSource.createGovernance();
 	}
 
 	@Override

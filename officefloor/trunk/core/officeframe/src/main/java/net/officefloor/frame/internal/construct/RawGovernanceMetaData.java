@@ -29,7 +29,7 @@ import net.officefloor.frame.spi.governance.Governance;
  * 
  * @author Daniel Sagenschneider
  */
-public interface RawGovernanceMetaData {
+public interface RawGovernanceMetaData<I, F extends Enum<F>> {
 
 	/**
 	 * Obtains the name of the {@link Governance}.
@@ -43,7 +43,7 @@ public interface RawGovernanceMetaData {
 	 * 
 	 * @return Extension interface type used by the {@link Governance}.
 	 */
-	Class<?> getExtensionInterfaceType();
+	Class<I> getExtensionInterfaceType();
 
 	/**
 	 * Obtains the index to obtain the {@link Governance} from the
@@ -73,6 +73,6 @@ public interface RawGovernanceMetaData {
 	 * 
 	 * @return {@link GovernanceMetaData}.
 	 */
-	GovernanceMetaData<?, ?> getGovernanceMetaData();
+	GovernanceMetaData<I, F> getGovernanceMetaData();
 
 }

@@ -17,6 +17,7 @@
  */
 package net.officefloor.frame.internal.structure;
 
+import net.officefloor.frame.api.build.GovernanceFactory;
 import net.officefloor.frame.api.execute.TaskContext;
 import net.officefloor.frame.spi.governance.Governance;
 import net.officefloor.frame.spi.governance.GovernanceContext;
@@ -37,6 +38,13 @@ public interface GovernanceMetaData<I, F extends Enum<F>> {
 	String getGovernanceName();
 
 	/**
+	 * Obtains the {@link GovernanceFactory}.
+	 * 
+	 * @return {@link GovernanceFactory}.
+	 */
+	GovernanceFactory<? super I, F> getGovernanceFactory();
+
+	/**
 	 * Creates the {@link GovernanceContainer}.
 	 * 
 	 * @param processState
@@ -48,17 +56,6 @@ public interface GovernanceMetaData<I, F extends Enum<F>> {
 	 */
 	GovernanceContainer<I> createGovernanceContainer(ProcessState processState,
 			int processRegisteredIndex);
-
-	/**
-	 * Create the {@link Governance}.
-	 * 
-	 * @return {@link Governance}.
-	 * @throws Throwable
-	 *             If fails to create the {@link Governance}.
-	 * 
-	 * @deprecated Use GovernanceFactory and provide to GovernanceContainer.
-	 */
-	Governance<I, F> createGovernance() throws Throwable;
 
 	/**
 	 * Creates the {@link ActiveGovernance}.

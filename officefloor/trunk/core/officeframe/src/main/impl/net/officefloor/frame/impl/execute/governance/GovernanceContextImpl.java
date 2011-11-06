@@ -49,9 +49,7 @@ public class GovernanceContextImpl<F extends Enum<F>> implements
 
 	@Override
 	public void doFlow(F key, Object parameter) {
-		// TODO implement GovernanceContext<F>.doFlow
-		throw new UnsupportedOperationException(
-				"TODO implement GovernanceContext<F>.doFlow");
+		this.taskContext.doFlow(key, parameter);
 	}
 
 	@Override
