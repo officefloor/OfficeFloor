@@ -39,11 +39,15 @@ public interface GovernanceMetaData<I, F extends Enum<F>> {
 	/**
 	 * Creates the {@link GovernanceContainer}.
 	 * 
-	 * @param processLock
-	 *            {@link ProcessState} lock.
+	 * @param processState
+	 *            {@link ProcessState}.
+	 * @param processRegisteredIndex
+	 *            Index of the {@link Governance} within the
+	 *            {@link ProcessState}.
 	 * @return {@link GovernanceContainer}.
 	 */
-	GovernanceContainer<I> createGovernanceContainer(Object processLock);
+	GovernanceContainer<I> createGovernanceContainer(ProcessState processState,
+			int processRegisteredIndex);
 
 	/**
 	 * Create the {@link Governance}.
@@ -51,6 +55,8 @@ public interface GovernanceMetaData<I, F extends Enum<F>> {
 	 * @return {@link Governance}.
 	 * @throws Throwable
 	 *             If fails to create the {@link Governance}.
+	 * 
+	 * @deprecated Use GovernanceFactory and provide to GovernanceContainer.
 	 */
 	Governance<I, F> createGovernance() throws Throwable;
 
@@ -59,19 +65,25 @@ public interface GovernanceMetaData<I, F extends Enum<F>> {
 	 * 
 	 * @param governanceContainer
 	 *            {@link GovernanceContainer}.
-	 * @param governance
-	 *            {@link Governances}.
+	 * @param governanceControl
+	 *            {@link GovernanceControl}.
 	 * @param extensionInterface
 	 *            Extension interface to {@link ManagedObject} to enable
 	 *            {@link Governance} over the {@link ManagedObject}.
 	 * @param managedobjectContainer
 	 *            {@link ManagedObjectContainer}.
+	 * @param managedObjectContainerRegisteredIndex
+	 *            Registered index of the {@link ActiveGovernance} within the
+	 *            {@link ManagedObjectContainer}. This is to enable easier
+	 *            identification of the {@link ActiveGovernance} within the
+	 *            {@link ManagedObjectContainer} for unregistering.
 	 * @return {@link ActiveGovernanceManager}.
 	 */
 	ActiveGovernanceManager createActiveGovernance(
 			GovernanceContainer<I> governanceContainer,
-			Governance<I, F> governance, I extensionInterface,
-			ManagedObjectContainer managedobjectContainer);
+			GovernanceControl<I, F> governanceControl, I extensionInterface,
+			ManagedObjectContainer managedobjectContainer,
+			int managedObjectContainerRegisteredIndex);
 
 	/**
 	 * Obtains the {@link FlowMetaData} for activating the {@link Governance}.

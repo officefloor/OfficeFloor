@@ -29,6 +29,19 @@ import net.officefloor.frame.spi.managedobject.ManagedObject;
 public interface ActiveGovernance {
 
 	/**
+	 * <p>
+	 * Obtains the index by which the {@link ManagedObject} has registered this
+	 * {@link ActiveGovernance}.
+	 * <p>
+	 * This allows the {@link ManagedObject} to quickly find the
+	 * {@link ActiveGovernance} for unregistering it.
+	 * 
+	 * @return Index by which the {@link ManagedObject} has registered this
+	 *         {@link ActiveGovernance}.
+	 */
+	int getManagedObjectRegisteredIndex();
+
+	/**
 	 * Indicates if the {@link Governance} is still active.
 	 * 
 	 * @return <code>true</code> if the {@link Governance} is still active.

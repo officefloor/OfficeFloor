@@ -39,7 +39,7 @@ import net.officefloor.frame.spi.governance.GovernanceContext;
  * @author Daniel Sagenschneider
  */
 public class GovernanceContainerImpl<I, F extends Enum<F>> implements
-		GovernanceContainer<I>, GovernanceControl<F> {
+		GovernanceContainer<I>, GovernanceControl<I, F> {
 
 	/**
 	 * {@link GovernanceMetaData}.
@@ -47,9 +47,15 @@ public class GovernanceContainerImpl<I, F extends Enum<F>> implements
 	private final GovernanceMetaData<I, F> metaData;
 
 	/**
-	 * {@link ProcessState} lock.
+	 * {@link ProcessState}.
 	 */
-	private final Object processLock;
+	private final ProcessState processState;
+
+	/**
+	 * Index of this {@link Governance} registered within the
+	 * {@link ProcessState}.
+	 */
+	private final int registeredIndex;
 
 	/**
 	 * {@link ActiveGovernanceManager} instances.
@@ -66,13 +72,17 @@ public class GovernanceContainerImpl<I, F extends Enum<F>> implements
 	 * 
 	 * @param metaData
 	 *            {@link GovernanceMetaData}.
-	 * @param processLock
-	 *            {@link ProcessState} lock.
+	 * @param processState
+	 *            {@link ProcessState}.
+	 * @param registeredIndex
+	 *            Index of this {@link Governance} registered within the
+	 *            {@link ProcessState}.
 	 */
 	public GovernanceContainerImpl(GovernanceMetaData<I, F> metaData,
-			Object processLock) {
+			ProcessState processState, int registeredIndex) {
 		this.metaData = metaData;
-		this.processLock = processLock;
+		this.processState = processState;
+		this.registeredIndex = registeredIndex;
 	}
 
 	/**
@@ -85,13 +95,24 @@ public class GovernanceContainerImpl<I, F extends Enum<F>> implements
 			activeGovernance.unregisterManagedObject();
 		}
 
+		// Unregister the Governance from Process
+		this.processState.governanceComplete(this);
+
 		// Disregard the governance
 		this.governance = null;
 	}
 
 	/*
 	 * ==================== GovernanceContainer =========================
+	 * 
+	 * All methods are invoked from WorkContainer with a ProcessState lock so no
+	 * need to synchronise access on these methods as already thread safe.
 	 */
+
+	@Override
+	public int getProcessRegisteredIndex() {
+		return this.registeredIndex;
+	}
 
 	@Override
 	public boolean isActive() {
@@ -104,7 +125,8 @@ public class GovernanceContainerImpl<I, F extends Enum<F>> implements
 
 	@Override
 	public ActiveGovernance createActiveGovernance(I extensionInterface,
-			ManagedObjectContainer managedobjectContainer) {
+			ManagedObjectContainer managedobjectContainer,
+			int managedObjectContainerRegisteredIndex) {
 
 		// Access Point: Work
 		// Locks: ThreadState, ProcessState
@@ -118,8 +140,9 @@ public class GovernanceContainerImpl<I, F extends Enum<F>> implements
 
 		// Create the active governance
 		ActiveGovernanceManager activeGovernance = this.metaData
-				.createActiveGovernance(this, this.governance,
-						extensionInterface, managedobjectContainer);
+				.createActiveGovernance(this, this, extensionInterface,
+						managedobjectContainer,
+						managedObjectContainerRegisteredIndex);
 
 		// Register the active governance
 		this.activeGovernances.add(activeGovernance);
@@ -157,7 +180,7 @@ public class GovernanceContainerImpl<I, F extends Enum<F>> implements
 		// Access Point: Job
 		// Locks: ThreadState
 
-		synchronized (this.processLock) {
+		synchronized (this.processState.getProcessLock()) {
 
 			// Determine if already active governance
 			if (this.governance != null) {
@@ -170,17 +193,35 @@ public class GovernanceContainerImpl<I, F extends Enum<F>> implements
 	}
 
 	@Override
+	public void governManagedObject(I extension,
+			TaskContext<?, ?, F> taskContext) throws Throwable {
+
+		// Access Point: Job
+		// Locks: ThreadState
+
+		// Create the governance context
+		GovernanceContext<F> governanceContext = this.metaData
+				.createGovernanceContext(taskContext);
+
+		synchronized (this.processState.getProcessLock()) {
+
+			// Govern the managed object
+			this.governance.governManagedObject(extension, governanceContext);
+		}
+	}
+
+	@Override
 	public void enforceGovernance(TaskContext<?, ?, F> taskContext)
 			throws Throwable {
 
 		// Access Point: Job
 		// Locks: ThreadState
 
-		synchronized (this.processLock) {
+		// Create governance context from task context
+		GovernanceContext<F> governanceContext = this.metaData
+				.createGovernanceContext(taskContext);
 
-			// Create governance context from task context
-			GovernanceContext<F> governanceContext = this.metaData
-					.createGovernanceContext(taskContext);
+		synchronized (this.processState.getProcessLock()) {
 
 			// Enforce the governance
 			this.governance.enforceGovernance(governanceContext);
@@ -197,11 +238,11 @@ public class GovernanceContainerImpl<I, F extends Enum<F>> implements
 		// Access Point: Job
 		// Locks: ThreadState
 
-		synchronized (this.processLock) {
+		// Create governance context from task context
+		GovernanceContext<F> governanceContext = this.metaData
+				.createGovernanceContext(taskContext);
 
-			// Create governance context from task context
-			GovernanceContext<F> governanceContext = this.metaData
-					.createGovernanceContext(taskContext);
+		synchronized (this.processState.getProcessLock()) {
 
 			// Disregard the governance
 			this.governance.disregardGovernance(governanceContext);

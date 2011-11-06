@@ -19,13 +19,14 @@ package net.officefloor.frame.internal.structure;
 
 import net.officefloor.frame.api.execute.TaskContext;
 import net.officefloor.frame.spi.governance.Governance;
+import net.officefloor.frame.spi.managedobject.ManagedObject;
 
 /**
  * Provides control over the {@link Governance}.
  * 
  * @author Daniel Sagenschneider
  */
-public interface GovernanceControl<F extends Enum<F>> {
+public interface GovernanceControl<I, F extends Enum<F>> {
 
 	/**
 	 * Activates the {@link Governance}.
@@ -36,6 +37,21 @@ public interface GovernanceControl<F extends Enum<F>> {
 	 *             If fails to activate the {@link Governance}.
 	 */
 	void activateGovernance(TaskContext<?, ?, F> taskContext) throws Throwable;
+
+	/**
+	 * Initiates {@link Governance} over the {@link ManagedObject}.
+	 * 
+	 * @param extension
+	 *            Extension of the {@link ManagedObject} to provide
+	 *            {@link Governance} over it.
+	 * @param taskContext
+	 *            {@link TaskContext}.
+	 * @throws Throwable
+	 *             If fails to initiate {@link Governance} over the
+	 *             {@link ManagedObject}.
+	 */
+	void governManagedObject(I extension, TaskContext<?, ?, F> taskContext)
+			throws Throwable;
 
 	/**
 	 * Enforce the {@link Governance}.

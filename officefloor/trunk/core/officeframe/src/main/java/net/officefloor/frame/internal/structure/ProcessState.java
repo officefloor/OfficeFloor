@@ -26,6 +26,7 @@ import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.api.manage.ProcessFuture;
 import net.officefloor.frame.api.manage.UnknownTaskException;
 import net.officefloor.frame.api.manage.UnknownWorkException;
+import net.officefloor.frame.spi.governance.Governance;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 
@@ -136,6 +137,15 @@ public interface ProcessState {
 	 *         active will return <code>null</code>.
 	 */
 	GovernanceContainer<?> getGovernanceContainer(int index);
+
+	/**
+	 * Flags the {@link Governance} has completed.
+	 * 
+	 * @param container
+	 *            {@link GovernanceContainer} of the completed
+	 *            {@link Governance}.
+	 */
+	void governanceComplete(GovernanceContainer<?> governanceContainer);
 
 	/**
 	 * Obtains the {@link AdministratorContainer} for the input index.

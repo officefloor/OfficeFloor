@@ -23,10 +23,9 @@ import net.officefloor.frame.internal.structure.ActiveGovernanceControl;
 import net.officefloor.frame.internal.structure.ActiveGovernanceManager;
 import net.officefloor.frame.internal.structure.FlowMetaData;
 import net.officefloor.frame.internal.structure.GovernanceContainer;
+import net.officefloor.frame.internal.structure.GovernanceControl;
 import net.officefloor.frame.internal.structure.GovernanceMetaData;
 import net.officefloor.frame.internal.structure.ManagedObjectContainer;
-import net.officefloor.frame.spi.governance.Governance;
-import net.officefloor.frame.spi.governance.GovernanceContext;
 
 /**
  * {@link ActiveGovernance} implementation.
@@ -47,9 +46,9 @@ public class ActiveGovernanceImpl<I, F extends Enum<F>> implements
 	private final GovernanceMetaData<I, F> metaData;
 
 	/**
-	 * {@link Governance}.
+	 * {@link GovernanceControl}.
 	 */
-	private final Governance<I, F> governance;
+	private final GovernanceControl<I, F> governanceControl;
 
 	/**
 	 * Extension interface.
@@ -62,27 +61,36 @@ public class ActiveGovernanceImpl<I, F extends Enum<F>> implements
 	private final ManagedObjectContainer managedObject;
 
 	/**
+	 * Registered index within the {@link ManagedObjectContainer}.
+	 */
+	private final int registeredIndex;
+
+	/**
 	 * Initiate.
 	 * 
 	 * @param governanceContainer
 	 *            {@link GovernanceContainer}.
 	 * @param metaData
 	 *            {@link GovernanceMetaData}.
-	 * @param governance
-	 *            {@link Governance}.
+	 * @param governanceControl
+	 *            {@link GovernanceControl}.
 	 * @param extensionInterface
 	 *            Extension interface.
 	 * @param managedObject
 	 *            {@link ManagedObjectContainer}.
+	 * @param registeredIndex
+	 *            Registered index within the {@link ManagedObjectContainer}.
 	 */
 	public ActiveGovernanceImpl(GovernanceContainer<I> governanceContainer,
-			GovernanceMetaData<I, F> metaData, Governance<I, F> governance,
-			I extensionInterface, ManagedObjectContainer managedObject) {
+			GovernanceMetaData<I, F> metaData,
+			GovernanceControl<I, F> governanceControl, I extensionInterface,
+			ManagedObjectContainer managedObject, int registeredIndex) {
 		this.governanceContainer = governanceContainer;
 		this.metaData = metaData;
-		this.governance = governance;
+		this.governanceControl = governanceControl;
 		this.extensionInterface = extensionInterface;
 		this.managedObject = managedObject;
+		this.registeredIndex = registeredIndex;
 	}
 
 	/*
@@ -104,6 +112,11 @@ public class ActiveGovernanceImpl<I, F extends Enum<F>> implements
 	 */
 
 	@Override
+	public int getManagedObjectRegisteredIndex() {
+		return this.registeredIndex;
+	}
+
+	@Override
 	public boolean isActive() {
 		return this.governanceContainer.isActive();
 	}
@@ -120,14 +133,8 @@ public class ActiveGovernanceImpl<I, F extends Enum<F>> implements
 	@Override
 	public void governManagedObject(TaskContext<?, ?, F> taskContext)
 			throws Throwable {
-
-		// Create the governance context
-		GovernanceContext<F> governanceContext = this.metaData
-				.createGovernanceContext(taskContext);
-
-		// Govern the managed object
-		this.governance.governManagedObject(this.extensionInterface,
-				governanceContext);
+		this.governanceControl.governManagedObject(this.extensionInterface,
+				taskContext);
 	}
 
 }

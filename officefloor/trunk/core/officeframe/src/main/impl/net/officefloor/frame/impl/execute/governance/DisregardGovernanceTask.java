@@ -53,7 +53,7 @@ public class DisregardGovernanceTask<F extends Enum<F>> implements
 			throws Throwable {
 
 		// Obtain the governance control
-		GovernanceControl<F> governanceControl = (GovernanceControl<F>) context
+		GovernanceControl<?, F> governanceControl = (GovernanceControl<?, F>) context
 				.getObject(GovernanceTaskDependency.GOVERNANCE_CONTROL);
 
 		// Disregard the governance

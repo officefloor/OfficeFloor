@@ -419,7 +419,7 @@ public class ManagedObjectContainerImpl implements ManagedObjectContainer,
 
 				// Create and register the governance for the managed object
 				activeGovernance = governance.createActiveGovernance(
-						extensionInterface, this);
+						extensionInterface, this, i);
 				this.activeGovernances[i] = activeGovernance;
 
 				// Add the governance for activation
@@ -763,10 +763,13 @@ public class ManagedObjectContainerImpl implements ManagedObjectContainer,
 	@Override
 	public void unregisterManagedObjectFromGovernance(
 			ActiveGovernance governance) {
-		// TODO implement
-		// ManagedObjectContainer.unregisterManagedObjectFromGovernance
-		throw new UnsupportedOperationException(
-				"TODO implement ManagedObjectContainer.unregisterManagedObjectFromGovernance");
+
+		// Access Point: GovernanceContainer
+		// Locks: ThreadState -> ProcessState
+
+		// Unregister the active governance
+		int index = governance.getManagedObjectRegisteredIndex();
+		this.activeGovernances[index] = null;
 	}
 
 	@Override
