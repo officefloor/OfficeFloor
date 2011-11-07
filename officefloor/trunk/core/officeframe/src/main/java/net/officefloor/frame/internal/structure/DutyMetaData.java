@@ -45,16 +45,6 @@ public interface DutyMetaData {
 	 *            {@link Duty} {@link Governance} index.
 	 * @return {@link ProcessState} {@link Governance} index.
 	 */
-	int translateGovernanceIndexToProcess(int governanceIndex);
-
-	/**
-	 * Translates the {@link Duty} index to a {@link ProcessState} index to
-	 * obtain the {@link Governance}.
-	 * 
-	 * @param dutyGovernanceIndex
-	 *            {@link Duty} index to reference the {@link Governance}.
-	 * @return Translated {@link Governance} index for the {@link Duty} index.
-	 */
-	int translateGovernanceDutyIndexToProcessIndex(int dutyGovernanceIndex);
+	int translateGovernanceIndexToProcessIndex(int governanceIndex);
 
 }

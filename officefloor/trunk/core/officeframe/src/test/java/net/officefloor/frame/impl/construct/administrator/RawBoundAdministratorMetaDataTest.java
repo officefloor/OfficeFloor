@@ -1144,7 +1144,7 @@ public class RawBoundAdministratorMetaDataTest extends OfficeFrameTestCase {
 
 		// Verify the governance not mapped
 		int processIndex = duty
-				.translateGovernanceDutyIndexToProcessIndex(DUTY_GOVERNANCE_INDEX);
+				.translateGovernanceIndexToProcessIndex(DUTY_GOVERNANCE_INDEX);
 		assertEquals("Process index should not be translated", -1, processIndex);
 	}
 
@@ -1229,7 +1229,7 @@ public class RawBoundAdministratorMetaDataTest extends OfficeFrameTestCase {
 
 		// Verify the governance
 		int processIndex = duty
-				.translateGovernanceDutyIndexToProcessIndex(DUTY_GOVERNANCE_INDEX);
+				.translateGovernanceIndexToProcessIndex(DUTY_GOVERNANCE_INDEX);
 		assertEquals("Incorrect process index", 1, processIndex);
 	}
 

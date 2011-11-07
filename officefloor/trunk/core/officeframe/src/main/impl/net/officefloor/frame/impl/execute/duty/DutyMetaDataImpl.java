@@ -66,14 +66,8 @@ public class DutyMetaDataImpl implements DutyMetaData {
 	}
 
 	@Override
-	public int translateGovernanceIndexToProcess(int governanceIndex) {
+	public int translateGovernanceIndexToProcessIndex(int governanceIndex) {
 		return this.governanceMapping[governanceIndex];
-	}
-
-	@Override
-	public int translateGovernanceDutyIndexToProcessIndex(
-			int dutyGovernanceIndex) {
-		return this.governanceMapping[dutyGovernanceIndex];
 	}
 
 }
