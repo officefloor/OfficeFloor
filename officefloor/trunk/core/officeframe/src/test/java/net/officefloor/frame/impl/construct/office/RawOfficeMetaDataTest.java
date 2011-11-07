@@ -29,7 +29,6 @@ import net.officefloor.frame.api.build.OfficeEnhancer;
 import net.officefloor.frame.api.build.OfficeEnhancerContext;
 import net.officefloor.frame.api.build.OfficeFloorIssues;
 import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
-import net.officefloor.frame.api.build.TaskFactory;
 import net.officefloor.frame.api.escalate.EscalationHandler;
 import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.execute.Work;
@@ -71,17 +70,14 @@ import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
 import net.officefloor.frame.internal.structure.FlowMetaData;
 import net.officefloor.frame.internal.structure.GovernanceMetaData;
 import net.officefloor.frame.internal.structure.JobNode;
-import net.officefloor.frame.internal.structure.ManagedObjectIndex;
 import net.officefloor.frame.internal.structure.ManagedObjectMetaData;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.frame.internal.structure.OfficeMetaData;
 import net.officefloor.frame.internal.structure.OfficeStartupTask;
 import net.officefloor.frame.internal.structure.ProcessMetaData;
 import net.officefloor.frame.internal.structure.ProcessState;
-import net.officefloor.frame.internal.structure.TaskDutyAssociation;
 import net.officefloor.frame.internal.structure.TaskMetaData;
 import net.officefloor.frame.internal.structure.ThreadState;
-import net.officefloor.frame.internal.structure.WorkContainer;
 import net.officefloor.frame.internal.structure.WorkMetaData;
 import net.officefloor.frame.spi.administration.Administrator;
 import net.officefloor.frame.spi.governance.Governance;
@@ -92,6 +88,7 @@ import net.officefloor.frame.spi.team.Team;
 import net.officefloor.frame.spi.team.source.ProcessContextListener;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.frame.test.match.TypeMatcher;
+import net.officefloor.frame.util.TestInstanceFactory;
 
 import org.easymock.AbstractMatcher;
 import org.easymock.ArgumentsMatcher;
@@ -1390,16 +1387,13 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 				.createMock(FlowMetaData.class);
 		final AssetManager flowAssetManager = this
 				.createMock(AssetManager.class);
-		final TaskMetaData<?, ?, ?> taskMetaData = this
-				.createMock(TaskMetaData.class);
-		final WorkMetaData<?> workMetaData = this
-				.createMock(WorkMetaData.class);
-		final WorkContainer<?> workContainer = this
-				.createMock(WorkContainer.class);
-		final TaskFactory<Work, ?, ?> taskFactory = this
-				.createMock(TaskFactory.class);
 		final Work work = this.createMock(Work.class);
 		final Task<Work, ?, ?> task = this.createMock(Task.class);
+
+		final WorkMetaData<?> workMetaData = TestInstanceFactory
+				.createWorkMetaData(work);
+		final TaskMetaData<?, ?, ?> taskMetaData = TestInstanceFactory
+				.createTaskMetaData(task, workMetaData);
 
 		// Record creating a process
 		this.record_enhanceOffice();
@@ -1413,24 +1407,6 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 				flowAssetManager);
 		this.recordReturn(flowMetaData, flowMetaData.getInitialTaskMetaData(),
 				taskMetaData);
-		this.recordReturn(taskMetaData, taskMetaData.getWorkMetaData(),
-				workMetaData);
-		this.recordReturn(workMetaData, workMetaData.createWorkContainer(null),
-				workContainer, new TypeMatcher(ProcessState.class));
-		this.recordReturn(taskMetaData,
-				taskMetaData.getPreAdministrationMetaData(),
-				new TaskDutyAssociation[0]);
-		this.recordReturn(taskMetaData,
-				taskMetaData.getPostAdministrationMetaData(),
-				new TaskDutyAssociation[0]);
-		this.recordReturn(taskMetaData,
-				taskMetaData.getRequiredManagedObjects(),
-				new ManagedObjectIndex[0]);
-		this.recordReturn(taskMetaData, taskMetaData.getTaskFactory(),
-				taskFactory);
-		this.recordReturn(workContainer, workContainer.getWork(null), work,
-				new TypeMatcher(ThreadState.class));
-		this.recordReturn(taskFactory, taskFactory.createTask(work), task);
 		this.record_processContextListeners();
 
 		// Construct the office
@@ -1450,7 +1426,6 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 	/**
 	 * Enable able to include {@link ProcessContextListener} instances.
 	 */
-	@SuppressWarnings("unchecked")
 	public void testRegisteredProcessContextListener() {
 
 		final ProcessContextListener listener = this
@@ -1458,16 +1433,13 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 		final FlowMetaData<?> flowMetaData = this
 				.createMock(FlowMetaData.class);
 		final AssetManager flowManager = this.createMock(AssetManager.class);
-		final TaskMetaData<?, ?, ?> taskMetaData = this
-				.createMock(TaskMetaData.class);
-		final WorkMetaData<?> workMetaData = this
-				.createMock(WorkMetaData.class);
-		final WorkContainer<?> workContainer = this
-				.createMock(WorkContainer.class);
-		final TaskFactory<Work, ?, ?> taskFactory = this
-				.createMock(TaskFactory.class);
 		final Work work = this.createMock(Work.class);
 		final Task<?, ?, ?> task = this.createMock(Task.class);
+
+		final WorkMetaData<?> workMetaData = TestInstanceFactory
+				.createWorkMetaData(work);
+		final TaskMetaData<?, ?, ?> taskMetaData = TestInstanceFactory
+				.createTaskMetaData(task, workMetaData);
 
 		// Record registering Process Context Listener
 		this.record_enhanceOffice();
@@ -1484,34 +1456,6 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 				flowManager);
 		this.recordReturn(flowMetaData, flowMetaData.getInitialTaskMetaData(),
 				taskMetaData);
-		this.recordReturn(taskMetaData, taskMetaData.getWorkMetaData(),
-				workMetaData);
-
-		// Obtain ProcessState (for Process Identifier)
-		final ProcessState[] processState = new ProcessState[1];
-		this.recordReturn(workMetaData, workMetaData.createWorkContainer(null),
-				workContainer, new AbstractMatcher() {
-					@Override
-					public boolean matches(Object[] expected, Object[] actual) {
-						processState[0] = (ProcessState) actual[0];
-						return true;
-					}
-				});
-
-		this.recordReturn(taskMetaData,
-				taskMetaData.getPreAdministrationMetaData(),
-				new TaskDutyAssociation[0]);
-		this.recordReturn(taskMetaData,
-				taskMetaData.getPostAdministrationMetaData(),
-				new TaskDutyAssociation[0]);
-		this.recordReturn(taskMetaData,
-				taskMetaData.getRequiredManagedObjects(),
-				new ManagedObjectIndex[0]);
-		this.recordReturn(taskMetaData, taskMetaData.getTaskFactory(),
-				taskFactory);
-		this.recordReturn(workContainer, workContainer.getWork(null), work,
-				new TypeMatcher(ThreadState.class));
-		this.recordReturn(taskFactory, taskFactory.createTask(work), task);
 
 		// Obtain Process Identifier
 		final Object[] processIdentifier = new Object[1];
@@ -1529,15 +1473,20 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 		RawOfficeMetaData metaData = this.constructRawOfficeMetaData(true);
 
 		// Verify registered Process Context Listener by creating Process
-		metaData.getOfficeMetaData().createProcess(flowMetaData, null);
+		JobNode node = metaData.getOfficeMetaData().createProcess(flowMetaData,
+				null);
 
 		// Verify functionality
 		this.verifyMockObjects();
 
+		// Obtain the process state
+		ProcessState processState = node.getFlow().getThreadState()
+				.getProcessState();
+
 		// Verify process identifiers
 		assertNotNull("Must have Process Identifier", processIdentifier[0]);
 		assertEquals("Incorrect Process Identifier",
-				processState[0].getProcessIdentifier(), processIdentifier[0]);
+				processState.getProcessIdentifier(), processIdentifier[0]);
 	}
 
 	/**

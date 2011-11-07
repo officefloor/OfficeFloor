@@ -20,16 +20,14 @@ package net.officefloor.frame.impl.execute.flow;
 
 import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.impl.execute.duty.DutyJob;
-import net.officefloor.frame.impl.execute.job.AbstractJobContainer;
 import net.officefloor.frame.impl.execute.linkedlistset.AbstractLinkedListSetEntry;
 import net.officefloor.frame.impl.execute.linkedlistset.StrictLinkedListSet;
-import net.officefloor.frame.impl.execute.task.TaskJob;
 import net.officefloor.frame.impl.execute.work.WorkContainerProxy;
 import net.officefloor.frame.internal.structure.AdministratorIndex;
 import net.officefloor.frame.internal.structure.AdministratorMetaData;
 import net.officefloor.frame.internal.structure.Flow;
-import net.officefloor.frame.internal.structure.JobNodeActivateSet;
 import net.officefloor.frame.internal.structure.JobNode;
+import net.officefloor.frame.internal.structure.JobNodeActivateSet;
 import net.officefloor.frame.internal.structure.LinkedListSet;
 import net.officefloor.frame.internal.structure.TaskDutyAssociation;
 import net.officefloor.frame.internal.structure.TaskMetaData;
@@ -127,7 +125,7 @@ public class FlowImpl extends AbstractLinkedListSetEntry<Flow, ThreadState>
 		}
 
 		// First and last job
-		AbstractJobContainer<?, ?>[] firstLastJobs = new AbstractJobContainer<?, ?>[2];
+		JobNode[] firstLastJobs = new JobNode[2];
 
 		// Load the pre-task administrator duty jobs.
 		// Never use actual work container for pre duties.
@@ -139,8 +137,8 @@ public class FlowImpl extends AbstractLinkedListSetEntry<Flow, ThreadState>
 				: proxyWorkContainer);
 
 		// Create and register the active task job
-		AbstractJobContainer<?, ?> taskJob = new TaskJob(this,
-				taskWorkContainer, taskMetaData, parallelNodeOwner, parameter);
+		JobNode taskJob = taskMetaData.createTask(this, taskWorkContainer,
+				parallelNodeOwner, parameter);
 		this.activeJobNodes.addEntry(taskJob);
 
 		// Load the task job
@@ -175,7 +173,7 @@ public class FlowImpl extends AbstractLinkedListSetEntry<Flow, ThreadState>
 	 *            {@link TaskMetaData} of the {@link Task} being administered.
 	 */
 	@SuppressWarnings({ "unchecked", "rawtypes" })
-	private void loadDutyJobs(AbstractJobContainer<?, ?>[] firstLastJobs,
+	private void loadDutyJobs(JobNode[] firstLastJobs,
 			TaskDutyAssociation<?>[] taskDutyAssociations,
 			WorkMetaData<?> workMetaData, WorkContainer<?> actualWorkContainer,
 			WorkContainerProxy<?> proxyWorkContainer,
@@ -220,9 +218,9 @@ public class FlowImpl extends AbstractLinkedListSetEntry<Flow, ThreadState>
 			}
 
 			// Create and register the active duty job
-			AbstractJobContainer<?, ?> dutyJob = new DutyJob(this,
-					workContainer, adminMetaData, taskDutyAssociation,
-					parallelNodeOwner, administeringTaskMetaData);
+			JobNode dutyJob = new DutyJob(this, workContainer, adminMetaData,
+					taskDutyAssociation, parallelNodeOwner,
+					administeringTaskMetaData);
 			this.activeJobNodes.addEntry(dutyJob);
 
 			// Load the duty job
@@ -239,8 +237,7 @@ public class FlowImpl extends AbstractLinkedListSetEntry<Flow, ThreadState>
 	 * @param newJob
 	 *            New {@link JobNode}.
 	 */
-	private void loadJob(AbstractJobContainer<?, ?>[] firstLastJobs,
-			AbstractJobContainer<?, ?> newJob) {
+	private void loadJob(JobNode[] firstLastJobs, JobNode newJob) {
 		if (firstLastJobs[0] == null) {
 			// First job
 			firstLastJobs[0] = newJob;

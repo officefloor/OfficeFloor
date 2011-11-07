@@ -25,10 +25,12 @@ import net.officefloor.frame.impl.execute.job.JobNodeActivatableSetImpl;
 import net.officefloor.frame.internal.structure.EscalationProcedure;
 import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.internal.structure.FlowMetaData;
+import net.officefloor.frame.internal.structure.JobNode;
 import net.officefloor.frame.internal.structure.JobNodeActivatableSet;
 import net.officefloor.frame.internal.structure.ManagedObjectIndex;
 import net.officefloor.frame.internal.structure.TaskDutyAssociation;
 import net.officefloor.frame.internal.structure.TaskMetaData;
+import net.officefloor.frame.internal.structure.WorkContainer;
 import net.officefloor.frame.internal.structure.WorkMetaData;
 import net.officefloor.frame.spi.administration.Duty;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
@@ -265,6 +267,13 @@ public class TaskMetaDataImpl<W extends Work, D extends Enum<D>, F extends Enum<
 	@Override
 	public TaskDutyAssociation<?>[] getPostAdministrationMetaData() {
 		return this.postTaskDuties;
+	}
+
+	@Override
+	public JobNode createTask(Flow flow, WorkContainer<W> workContainer,
+			JobNode parallelJobNodeOwner, Object parameter) {
+		return new TaskJob<W, D, F>(flow, workContainer, this,
+				parallelJobNodeOwner, parameter);
 	}
 
 }

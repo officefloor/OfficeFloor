@@ -32,16 +32,19 @@ import net.officefloor.frame.impl.execute.asset.AssetManagerImpl;
 import net.officefloor.frame.impl.execute.escalation.EscalationProcedureImpl;
 import net.officefloor.frame.impl.execute.job.JobNodeActivatableSetImpl;
 import net.officefloor.frame.impl.execute.managedobject.ManagedObjectIndexImpl;
+import net.officefloor.frame.impl.execute.task.TaskJob;
 import net.officefloor.frame.internal.structure.AssetManager;
 import net.officefloor.frame.internal.structure.EscalationProcedure;
 import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
 import net.officefloor.frame.internal.structure.FlowMetaData;
+import net.officefloor.frame.internal.structure.JobNode;
 import net.officefloor.frame.internal.structure.JobNodeActivatableSet;
 import net.officefloor.frame.internal.structure.ManagedObjectIndex;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.frame.internal.structure.TaskDutyAssociation;
 import net.officefloor.frame.internal.structure.TaskMetaData;
+import net.officefloor.frame.internal.structure.WorkContainer;
 import net.officefloor.frame.internal.structure.WorkMetaData;
 import net.officefloor.frame.spi.managedobject.AsynchronousManagedObject;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
@@ -328,6 +331,13 @@ public class ExecutionNode<W extends Work> implements
 	@Override
 	public TaskDutyAssociation<?>[] getPostAdministrationMetaData() {
 		return new TaskDutyAssociation[0];
+	}
+
+	@Override
+	public JobNode createTask(Flow flow, WorkContainer<W> workContainer,
+			JobNode parallelJobNodeOwner, Object parameter) {
+		return new TaskJob<W, Indexed, Indexed>(flow, workContainer, this,
+				parallelJobNodeOwner, parameter);
 	}
 
 	/*

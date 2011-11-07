@@ -69,7 +69,7 @@ public class TypeMatcher extends AbstractMatcher {
 		for (Class<?> matchType : this.matchTypes) {
 			// Ensure null if expected
 			if (matchType == null) {
-				if (actual != null) {
+				if (actual[index] != null) {
 					return false;
 				}
 			} else {
