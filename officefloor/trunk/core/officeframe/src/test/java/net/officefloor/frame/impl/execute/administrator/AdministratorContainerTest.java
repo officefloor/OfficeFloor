@@ -257,7 +257,7 @@ public class AdministratorContainerTest<I, A extends Enum<A>, F extends Enum<F>,
 
 		// Record governance setup
 		this.recordReturn(this.dutyMetaData, this.dutyMetaData
-				.translateGovernanceIndexToProcess(Governances.GOVERNANCE
+				.translateGovernanceIndexToProcessIndex(Governances.GOVERNANCE
 						.ordinal()), PROCESS_INDEX);
 		this.recordReturn(this.context, this.context.getThreadState(),
 				threadState);

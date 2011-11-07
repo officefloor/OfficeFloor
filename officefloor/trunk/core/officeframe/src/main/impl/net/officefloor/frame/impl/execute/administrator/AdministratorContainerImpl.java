@@ -189,7 +189,7 @@ public class AdministratorContainerImpl<I extends Object, A extends Enum<A>, F e
 
 			// Obtain the process index for the governance
 			int processIndex = this.dutyMetaData
-					.translateGovernanceIndexToProcess(governanceIndex);
+					.translateGovernanceIndexToProcessIndex(governanceIndex);
 
 			// Obtain the governance container
 			GovernanceContainer<?> container = this.adminContext
