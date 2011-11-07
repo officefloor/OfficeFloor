@@ -21,7 +21,6 @@ package net.officefloor.frame.impl.execute.thread;
 import java.util.LinkedList;
 import java.util.List;
 
-import net.officefloor.frame.api.build.TaskFactory;
 import net.officefloor.frame.api.escalate.FlowJoinTimedOutEscalation;
 import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.execute.Work;
@@ -37,22 +36,20 @@ import net.officefloor.frame.internal.structure.FlowMetaData;
 import net.officefloor.frame.internal.structure.JobNode;
 import net.officefloor.frame.internal.structure.JobNodeActivateSet;
 import net.officefloor.frame.internal.structure.ManagedObjectContainer;
-import net.officefloor.frame.internal.structure.ManagedObjectIndex;
 import net.officefloor.frame.internal.structure.ManagedObjectMetaData;
 import net.officefloor.frame.internal.structure.ProcessState;
-import net.officefloor.frame.internal.structure.TaskDutyAssociation;
 import net.officefloor.frame.internal.structure.TaskMetaData;
 import net.officefloor.frame.internal.structure.ThreadMetaData;
 import net.officefloor.frame.internal.structure.ThreadState;
-import net.officefloor.frame.internal.structure.WorkContainer;
 import net.officefloor.frame.internal.structure.WorkMetaData;
 import net.officefloor.frame.test.OfficeFrameTestCase;
+import net.officefloor.frame.util.TestInstanceFactory;
 
 import org.easymock.AbstractMatcher;
 
 /**
  * Tests the {@link ThreadState}.
- *
+ * 
  * @author Daniel Sagenschneider
  */
 public class ThreadStateTest extends OfficeFrameTestCase {
@@ -72,36 +69,37 @@ public class ThreadStateTest extends OfficeFrameTestCase {
 				.createMock(AdministratorContainer.class);
 
 		// Record creating the ThreadState
-		this.recordReturn(this.threadMetaData, this.threadMetaData
-				.getManagedObjectMetaData(),
+		this.recordReturn(this.threadMetaData,
+				this.threadMetaData.getManagedObjectMetaData(),
 				new ManagedObjectMetaData[] { moMetaData });
-		this.recordReturn(this.threadMetaData, this.threadMetaData
-				.getAdministratorMetaData(),
+		this.recordReturn(this.threadMetaData,
+				this.threadMetaData.getAdministratorMetaData(),
 				new AdministratorMetaData[] { adminMetaData });
 		this.recordReturn(this.flowMetaData,
 				this.flowMetaData.getFlowManager(), this.threadManager);
 
 		// Record obtaining the Managed Object Container
-		this.recordReturn(this.threadMetaData, this.threadMetaData
-				.getManagedObjectMetaData(),
+		this.recordReturn(this.threadMetaData,
+				this.threadMetaData.getManagedObjectMetaData(),
 				new ManagedObjectMetaData[] { moMetaData });
-		this.recordReturn(moMetaData, moMetaData
-				.createManagedObjectContainer(this.processState), moContainer);
+		this.recordReturn(moMetaData,
+				moMetaData.createManagedObjectContainer(this.processState),
+				moContainer);
 
 		// Record obtaining the Administrator Container
-		this.recordReturn(this.threadMetaData, this.threadMetaData
-				.getAdministratorMetaData(),
+		this.recordReturn(this.threadMetaData,
+				this.threadMetaData.getAdministratorMetaData(),
 				new AdministratorMetaData[] { adminMetaData });
-		this.recordReturn(adminMetaData, adminMetaData
-				.createAdministratorContainer(), adminContainer);
+		this.recordReturn(adminMetaData,
+				adminMetaData.createAdministratorContainer(), adminContainer);
 
 		// Test
 		this.replayMockObjects();
 		ThreadState thread = this.createThreadState();
 
 		// Lazy load managed object container
-		assertEquals("Incorrect managed object container", moContainer, thread
-				.getManagedObjectContainer(0));
+		assertEquals("Incorrect managed object container", moContainer,
+				thread.getManagedObjectContainer(0));
 
 		// Lazy load administrator container
 		assertEquals("Incorrect administrator container", adminContainer,
@@ -112,10 +110,10 @@ public class ThreadStateTest extends OfficeFrameTestCase {
 
 		// Verify state of thread
 		assertEquals("Incorrect lock", thread, thread.getThreadLock());
-		assertEquals("Incorrect meta-data", this.threadMetaData, thread
-				.getThreadMetaData());
-		assertEquals("Incorrect process state", this.processState, thread
-				.getProcessState());
+		assertEquals("Incorrect meta-data", this.threadMetaData,
+				thread.getThreadMetaData());
+		assertEquals("Incorrect process state", this.processState,
+				thread.getProcessState());
 
 		// Verify failure
 		assertNull("No failure initially", thread.getFailure());
@@ -134,8 +132,8 @@ public class ThreadStateTest extends OfficeFrameTestCase {
 				EscalationLevel.OFFICE, thread.getEscalationLevel());
 
 		// Ensure can get same managed object container
-		assertEquals("Incorrect managed object container", moContainer, thread
-				.getManagedObjectContainer(0));
+		assertEquals("Incorrect managed object container", moContainer,
+				thread.getManagedObjectContainer(0));
 
 		// Ensure can get same administrator container
 		assertEquals("Incorrect administrator container", adminContainer,
@@ -224,49 +222,21 @@ public class ThreadStateTest extends OfficeFrameTestCase {
 	/**
 	 * Ensures a {@link JobNode} does not wait on its {@link ThreadState}.
 	 */
-	@SuppressWarnings("unchecked")
 	public void testJobNodeNotWaitOnItsOwnThread() {
 
 		final FlowMetaData<?> flowMetaData = this
 				.createMock(FlowMetaData.class);
-		final TaskMetaData<?, ?, ?> taskMetaData = this
-				.createMock(TaskMetaData.class);
-		final WorkMetaData<?> workMetaData = this
-				.createMock(WorkMetaData.class);
-		final WorkContainer<?> workContainer = this
-				.createMock(WorkContainer.class);
-		final TaskFactory<Work, ?, ?> taskFactory = this
-				.createMock(TaskFactory.class);
 		final Work work = this.createMock(Work.class);
 		final Task<?, ?, ?> task = this.createMock(Task.class);
 		final JobNode[] jobNode = new JobNode[1];
 
+		final WorkMetaData<Work> workMetaData = TestInstanceFactory
+				.createWorkMetaData(work);
+		final TaskMetaData<?, ?, ?> taskMetaData = TestInstanceFactory
+				.createTaskMetaData(task, workMetaData);
+
 		// Record initialising ThreadState and create a JobNode from it
 		this.record_ThreadState_init();
-		this.recordReturn(taskMetaData, taskMetaData.getWorkMetaData(),
-				workMetaData);
-		this.recordReturn(workMetaData, workMetaData
-				.createWorkContainer(this.processState), workContainer);
-		this.recordReturn(taskMetaData, taskMetaData
-				.getPreAdministrationMetaData(), new TaskDutyAssociation[0]);
-		this.recordReturn(taskMetaData, taskMetaData
-				.getPostAdministrationMetaData(), new TaskDutyAssociation[0]);
-		this.recordReturn(taskMetaData, taskMetaData
-				.getRequiredManagedObjects(), new ManagedObjectIndex[0]);
-		this.recordReturn(taskMetaData, taskMetaData.getTaskFactory(),
-				taskFactory);
-		this.recordReturn(workContainer, workContainer.getWork(null), work,
-				new AbstractMatcher() {
-					@Override
-					public boolean matches(Object[] expected, Object[] actual) {
-						ThreadState threadState = (ThreadState) actual[0];
-						assertEquals("Incorrect thread state",
-								ThreadStateTest.this.threadMetaData,
-								threadState.getThreadMetaData());
-						return true;
-					}
-				});
-		this.recordReturn(taskFactory, taskFactory.createTask(work), task);
 
 		// Record not waiting on own thread state
 		this.activateSet.addJobNode(null);
@@ -324,8 +294,8 @@ public class ThreadStateTest extends OfficeFrameTestCase {
 		// Record only creation as check will do nothing
 		this.record_ThreadState_init();
 		this.record_FlowAsset_waitOnFlow(jobNode);
-		this.recordReturn(context, context.getTime(), System
-				.currentTimeMillis());
+		this.recordReturn(context, context.getTime(),
+				System.currentTimeMillis());
 
 		// Test
 		this.replayMockObjects();
@@ -354,8 +324,8 @@ public class ThreadStateTest extends OfficeFrameTestCase {
 			@Override
 			public boolean matches(Object[] expected, Object[] actual) {
 				FlowJoinTimedOutEscalation escalation = (FlowJoinTimedOutEscalation) actual[0];
-				assertEquals("Incorrect escalation", token, escalation
-						.getToken());
+				assertEquals("Incorrect escalation", token,
+						escalation.getToken());
 				assertEquals("Should be permanent failure", true, actual[1]);
 				return true;
 			}
@@ -393,8 +363,8 @@ public class ThreadStateTest extends OfficeFrameTestCase {
 			@Override
 			public boolean matches(Object[] expected, Object[] actual) {
 				FlowJoinTimedOutEscalation escalation = (FlowJoinTimedOutEscalation) actual[0];
-				assertEquals("Incorrect escalation", timedOutToken, escalation
-						.getToken());
+				assertEquals("Incorrect escalation", timedOutToken,
+						escalation.getToken());
 				assertEquals("Should be permanent failure", true, actual[1]);
 				return true;
 			}
@@ -458,10 +428,12 @@ public class ThreadStateTest extends OfficeFrameTestCase {
 	 * Records instantiating the {@link ThreadState}.
 	 */
 	private void record_ThreadState_init() {
-		this.recordReturn(this.threadMetaData, this.threadMetaData
-				.getManagedObjectMetaData(), new ManagedObjectMetaData[0]);
-		this.recordReturn(this.threadMetaData, this.threadMetaData
-				.getAdministratorMetaData(), new AdministratorMetaData[0]);
+		this.recordReturn(this.threadMetaData,
+				this.threadMetaData.getManagedObjectMetaData(),
+				new ManagedObjectMetaData[0]);
+		this.recordReturn(this.threadMetaData,
+				this.threadMetaData.getAdministratorMetaData(),
+				new AdministratorMetaData[0]);
 		this.recordReturn(this.flowMetaData,
 				this.flowMetaData.getFlowManager(), this.threadManager);
 	}
@@ -478,7 +450,7 @@ public class ThreadStateTest extends OfficeFrameTestCase {
 
 	/**
 	 * Records the {@link JobNode} joining on the {@link ThreadState}.
-	 *
+	 * 
 	 * @param jobNode
 	 *            {@link JobNode}.
 	 * @return {@link AssetMonitor} monitoring the join.
@@ -493,8 +465,8 @@ public class ThreadStateTest extends OfficeFrameTestCase {
 		// Record job node joining on ThreadState
 		this.recordReturn(jobNode, jobNode.getFlow(), flow);
 		this.recordReturn(flow, flow.getThreadState(), anotherThreadState);
-		this.recordReturn(this.threadManager, this.threadManager
-				.createAssetMonitor(null), assetMonitor);
+		this.recordReturn(this.threadManager,
+				this.threadManager.createAssetMonitor(null), assetMonitor);
 		if (!this.isMatcherSet_createAssetMonitor) {
 			this.control(this.threadManager).setMatcher(new AbstractMatcher() {
 				@Override
@@ -506,8 +478,8 @@ public class ThreadStateTest extends OfficeFrameTestCase {
 			});
 			this.isMatcherSet_createAssetMonitor = true;
 		}
-		this.recordReturn(assetMonitor, assetMonitor.waitOnAsset(jobNode,
-				this.activateSet), true);
+		this.recordReturn(assetMonitor,
+				assetMonitor.waitOnAsset(jobNode, this.activateSet), true);
 
 		// Return the asset monitor for the join
 		return assetMonitor;
@@ -524,8 +496,8 @@ public class ThreadStateTest extends OfficeFrameTestCase {
 			public boolean matches(Object[] expected, Object[] actual) {
 				ThreadState threadState = (ThreadState) actual[0];
 				assertEquals("Incorrect ThreadState",
-						ThreadStateTest.this.processState, threadState
-								.getLinkedListSetOwner());
+						ThreadStateTest.this.processState,
+						threadState.getLinkedListSetOwner());
 				assertEquals("Incorrect activate set",
 						ThreadStateTest.this.activateSet, actual[1]);
 				return true;
@@ -535,7 +507,7 @@ public class ThreadStateTest extends OfficeFrameTestCase {
 
 	/**
 	 * Creates the {@link ThreadStateImpl}.
-	 *
+	 * 
 	 * @return {@link ThreadStateImpl}.
 	 */
 	private ThreadStateImpl createThreadState() {

@@ -117,4 +117,21 @@ public interface TaskMetaData<W extends Work, D extends Enum<D>, F extends Enum<
 	 */
 	TaskDutyAssociation<?>[] getPostAdministrationMetaData();
 
+	/**
+	 * Creates the {@link JobNode} for the {@link Task}.
+	 * 
+	 * @param flow
+	 *            {@link Flow} containing the {@link Task}.
+	 * @param workContainer
+	 *            {@link WorkContainer} for the {@link Work} for the
+	 *            {@link Task}.
+	 * @param parallelJobNodeOwner
+	 *            Parallel {@link JobNode} owner.
+	 * @param parameter
+	 *            Parameter.
+	 * @return {@link JobNode}.
+	 */
+	JobNode createTask(Flow flow, WorkContainer<W> workContainer,
+			JobNode parallelJobNodeOwner, Object parameter);
+
 }
