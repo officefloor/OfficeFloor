@@ -88,7 +88,7 @@ import net.officefloor.frame.spi.team.Team;
 import net.officefloor.frame.spi.team.source.ProcessContextListener;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.frame.test.match.TypeMatcher;
-import net.officefloor.frame.util.TestInstanceFactory;
+import net.officefloor.frame.util.MetaDataTestInstanceFactory;
 
 import org.easymock.AbstractMatcher;
 import org.easymock.ArgumentsMatcher;
@@ -1390,9 +1390,9 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 		final Work work = this.createMock(Work.class);
 		final Task<Work, ?, ?> task = this.createMock(Task.class);
 
-		final WorkMetaData<?> workMetaData = TestInstanceFactory
+		final WorkMetaData<?> workMetaData = MetaDataTestInstanceFactory
 				.createWorkMetaData(work);
-		final TaskMetaData<?, ?, ?> taskMetaData = TestInstanceFactory
+		final TaskMetaData<?, ?, ?> taskMetaData = MetaDataTestInstanceFactory
 				.createTaskMetaData(task, workMetaData);
 
 		// Record creating a process
@@ -1437,9 +1437,9 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 		final Work work = this.createMock(Work.class);
 		final Task<?, ?, ?> task = this.createMock(Task.class);
 
-		final WorkMetaData<?> workMetaData = TestInstanceFactory
+		final WorkMetaData<?> workMetaData = MetaDataTestInstanceFactory
 				.createWorkMetaData(work);
-		final TaskMetaData<?, ?, ?> taskMetaData = TestInstanceFactory
+		final TaskMetaData<?, ?, ?> taskMetaData = MetaDataTestInstanceFactory
 				.createTaskMetaData(task, workMetaData);
 
 		// Record registering Process Context Listener
