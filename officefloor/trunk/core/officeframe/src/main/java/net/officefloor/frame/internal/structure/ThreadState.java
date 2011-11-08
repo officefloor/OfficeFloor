@@ -65,23 +65,22 @@ public interface ThreadState extends FlowAsset, FlowFuture,
 	/**
 	 * Creates a {@link JobSequence} contained in this {@link ThreadState}.
 	 * 
-	 * @param flowMetaData
-	 *            {@link FlowMetaData} for the new {@link JobSequence}.
 	 * @return New {@link JobSequence}.
 	 */
-	JobSequence createFlow(FlowMetaData<?> flowMetaData);
+	JobSequence createJobSequence();
 
 	/**
 	 * Flags that the input {@link JobSequence} has completed.
 	 * 
-	 * @param flow
+	 * @param jobSequence
 	 *            {@link JobSequence} that has completed.
 	 * @param activateSet
 	 *            {@link JobNodeActivateSet} to add {@link JobNode} instances
 	 *            waiting on this {@link ThreadState} if all {@link JobSequence}
 	 *            instances of this {@link ThreadState} are complete.
 	 */
-	void flowComplete(JobSequence flow, JobNodeActivateSet activateSet);
+	void jobSequenceComplete(JobSequence jobSequence,
+			JobNodeActivateSet activateSet);
 
 	/**
 	 * Obtains the {@link ProcessState} of the process containing this
@@ -115,8 +114,8 @@ public interface ThreadState extends FlowAsset, FlowFuture,
 	 * Flags that escalation is about to happen on this {@link ThreadState}.
 	 * <p>
 	 * This allows the {@link ThreadState} to know not to clean up should all
-	 * its {@link JobSequence} instances be closed and a new one will be created for
-	 * the {@link EscalationFlow}.
+	 * its {@link JobSequence} instances be closed and a new one will be created
+	 * for the {@link EscalationFlow}.
 	 * 
 	 * @param currentJobNode
 	 *            Current {@link JobNode} being executed.

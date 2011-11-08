@@ -1419,8 +1419,9 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 
 		// Verify the office floor escalation
 		assertEquals("Incorrect office floor escalation",
-				this.officeFloorEscalation, node.getFlow().getThreadState()
-						.getProcessState().getOfficeFloorEscalation());
+				this.officeFloorEscalation, node.getJobSequence()
+						.getThreadState().getProcessState()
+						.getOfficeFloorEscalation());
 	}
 
 	/**
@@ -1480,7 +1481,7 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 		this.verifyMockObjects();
 
 		// Obtain the process state
-		ProcessState processState = node.getFlow().getThreadState()
+		ProcessState processState = node.getJobSequence().getThreadState()
 				.getProcessState();
 
 		// Verify process identifiers

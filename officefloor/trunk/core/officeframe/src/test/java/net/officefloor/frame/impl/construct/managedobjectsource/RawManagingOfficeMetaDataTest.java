@@ -462,8 +462,8 @@ public class RawManagingOfficeMetaDataTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensures issues if {@link JobSequence} instances configured but no {@link JobSequence}
-	 * instances required.
+	 * Ensures issues if {@link JobSequence} instances configured but no
+	 * {@link JobSequence} instances required.
 	 */
 	public void testNoFlowsButFlowsConfigured() {
 
@@ -650,7 +650,8 @@ public class RawManagingOfficeMetaDataTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensures able to construct {@link JobSequence} for a {@link ManagedObject}.
+	 * Ensures able to construct {@link JobSequence} for a {@link ManagedObject}
+	 * .
 	 */
 	public void testConstructFlow() {
 
@@ -667,7 +668,7 @@ public class RawManagingOfficeMetaDataTest extends OfficeFrameTestCase {
 		final ManagedObject managedObject = this
 				.createMock(ManagedObject.class);
 		final JobNode jobNode = this.createMock(JobNode.class);
-		final JobSequence flow = this.createMock(JobSequence.class);
+		final JobSequence jobSequence = this.createMock(JobSequence.class);
 		final ThreadState thread = this.createMock(ThreadState.class);
 		final ProcessState process = this.createMock(ProcessState.class);
 		final ProcessFuture future = this.createMock(ProcessFuture.class);
@@ -731,8 +732,8 @@ public class RawManagingOfficeMetaDataTest extends OfficeFrameTestCase {
 		});
 
 		// Record obtaining the process state
-		this.recordReturn(jobNode, jobNode.getFlow(), flow);
-		this.recordReturn(flow, flow.getThreadState(), thread);
+		this.recordReturn(jobNode, jobNode.getJobSequence(), jobSequence);
+		this.recordReturn(jobSequence, jobSequence.getThreadState(), thread);
 		this.recordReturn(thread, thread.getProcessState(), process);
 
 		// Record activating job (without notifying process ticker)
@@ -756,8 +757,8 @@ public class RawManagingOfficeMetaDataTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensures able to construct {@link JobSequence} for a {@link ManagedObject} that
-	 * is not the first bound or first instance.
+	 * Ensures able to construct {@link JobSequence} for a {@link ManagedObject}
+	 * that is not the first bound or first instance.
 	 */
 	public void testConstructFlowOfNotFirstBoundOrInstance() {
 
@@ -779,7 +780,7 @@ public class RawManagingOfficeMetaDataTest extends OfficeFrameTestCase {
 		final JobNode jobNode = this.createMock(JobNode.class);
 		final ProcessTicker processTicker = this
 				.createMock(ProcessTicker.class);
-		final JobSequence flow = this.createMock(JobSequence.class);
+		final JobSequence jobSequence = this.createMock(JobSequence.class);
 		final ThreadState thread = this.createMock(ThreadState.class);
 		final ProcessState process = this.createMock(ProcessState.class);
 		final ProcessFuture future = this.createMock(ProcessFuture.class);
@@ -845,8 +846,8 @@ public class RawManagingOfficeMetaDataTest extends OfficeFrameTestCase {
 		});
 
 		// Record obtaining the process state
-		this.recordReturn(jobNode, jobNode.getFlow(), flow);
-		this.recordReturn(flow, flow.getThreadState(), thread);
+		this.recordReturn(jobNode, jobNode.getJobSequence(), jobSequence);
+		this.recordReturn(jobSequence, jobSequence.getThreadState(), thread);
 		this.recordReturn(thread, thread.getProcessState(), process);
 
 		// Record activating job (and subsequently process)
@@ -909,7 +910,7 @@ public class RawManagingOfficeMetaDataTest extends OfficeFrameTestCase {
 			final ManagedObject managedObject) {
 
 		final JobNode recycleJob = this.createMock(JobNode.class);
-		final JobSequence flow = this.createMock(JobSequence.class);
+		final JobSequence jobSequence = this.createMock(JobSequence.class);
 		final ThreadState threadState = this.createMock(ThreadState.class);
 		final ProcessState processState = this.createMock(ProcessState.class);
 
@@ -929,8 +930,9 @@ public class RawManagingOfficeMetaDataTest extends OfficeFrameTestCase {
 				});
 
 		// Record adding process listener
-		this.recordReturn(recycleJob, recycleJob.getFlow(), flow);
-		this.recordReturn(flow, flow.getThreadState(), threadState);
+		this.recordReturn(recycleJob, recycleJob.getJobSequence(), jobSequence);
+		this.recordReturn(jobSequence, jobSequence.getThreadState(),
+				threadState);
 		this.recordReturn(threadState, threadState.getProcessState(),
 				processState);
 		processState.registerProcessCompletionListener(null);

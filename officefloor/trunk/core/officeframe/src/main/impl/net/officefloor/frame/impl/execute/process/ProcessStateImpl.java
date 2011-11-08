@@ -292,7 +292,8 @@ public class ProcessStateImpl implements ProcessState {
 	}
 
 	@Override
-	public <W extends Work> JobSequence createThread(FlowMetaData<W> flowMetaData) {
+	public <W extends Work> JobSequence createThread(
+			FlowMetaData<W> flowMetaData) {
 
 		// Create the thread
 		ThreadState threadState = new ThreadStateImpl(
@@ -303,8 +304,8 @@ public class ProcessStateImpl implements ProcessState {
 			this.activeThreads.addEntry(threadState);
 		}
 
-		// Return the flow for the new thread
-		return threadState.createFlow(flowMetaData);
+		// Return the Job Sequence for the new thread
+		return threadState.createJobSequence();
 	}
 
 	@Override

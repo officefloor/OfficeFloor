@@ -308,7 +308,7 @@ public abstract class AbstractManagedObjectContainerImplTest extends
 	/**
 	 * {@link JobSequence}.
 	 */
-	private final JobSequence flow = this.createMock(JobSequence.class);
+	private final JobSequence jobSequence = this.createMock(JobSequence.class);
 
 	/**
 	 * {@link ThreadState}.
@@ -644,8 +644,9 @@ public abstract class AbstractManagedObjectContainerImplTest extends
 				this.moGovernanceMetaData);
 
 		// Obtain the process state
-		this.recordReturn(this.jobNode, this.jobNode.getFlow(), this.flow);
-		this.recordReturn(this.flow, this.flow.getThreadState(),
+		this.recordReturn(this.jobNode, this.jobNode.getJobSequence(),
+				this.jobSequence);
+		this.recordReturn(this.jobSequence, this.jobSequence.getThreadState(),
 				this.threadState);
 		this.recordReturn(this.threadState, this.threadState.getProcessState(),
 				this.processState);
@@ -789,9 +790,10 @@ public abstract class AbstractManagedObjectContainerImplTest extends
 			}
 
 			// Ready so coordinate Managed Object
-			this.recordReturn(this.jobNode, this.jobNode.getFlow(), this.flow);
-			this.recordReturn(this.flow, this.flow.getThreadState(),
-					this.threadState);
+			this.recordReturn(this.jobNode, this.jobNode.getJobSequence(),
+					this.jobSequence);
+			this.recordReturn(this.jobSequence,
+					this.jobSequence.getThreadState(), this.threadState);
 			this.recordReturn(this.managedObjectMetaData,
 					this.managedObjectMetaData.createObjectRegistry(
 							this.workContainer, this.threadState),

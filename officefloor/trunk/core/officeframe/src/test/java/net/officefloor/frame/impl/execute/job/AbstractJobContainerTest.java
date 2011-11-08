@@ -166,7 +166,8 @@ public abstract class AbstractJobContainerTest extends OfficeFrameTestCase {
 	/**
 	 * Asynchronous {@link JobSequence}.
 	 */
-	private final JobSequence asynchronousFlow = this.createMock(JobSequence.class);
+	private final JobSequence asynchronousFlow = this
+			.createMock(JobSequence.class);
 
 	/**
 	 * Asynchronous {@link JobNode}.
@@ -194,7 +195,8 @@ public abstract class AbstractJobContainerTest extends OfficeFrameTestCase {
 	/**
 	 * {@link EscalationFlow} {@link JobSequence}.
 	 */
-	private final JobSequence escalationFlow = this.createMock(JobSequence.class);
+	private final JobSequence escalationFlow = this
+			.createMock(JobSequence.class);
 
 	/**
 	 * {@link EscalationFlow} {@link Job}.
@@ -362,7 +364,8 @@ public abstract class AbstractJobContainerTest extends OfficeFrameTestCase {
 	 *            Sequential {@link JobSequence} parameter.
 	 * @param isActivateFlow
 	 *            Flag indicating if required to activate the first
-	 *            {@link JobNode} of the instigated sequential {@link JobSequence}.
+	 *            {@link JobNode} of the instigated sequential
+	 *            {@link JobSequence}.
 	 */
 	protected void record_doSequentialFlow(Job currentJob,
 			Object sequentialFlowParameter, boolean isActivateFlow) {
@@ -401,8 +404,7 @@ public abstract class AbstractJobContainerTest extends OfficeFrameTestCase {
 		this.recordReturn(this.flow, this.flow.getThreadState(),
 				this.threadState);
 		this.recordReturn(this.threadState,
-				this.threadState.createFlow(this.parallelFlowMetaData),
-				this.parallelFlow);
+				this.threadState.createJobSequence(), this.parallelFlow);
 		this.recordReturn(this.parallelFlow, this.parallelFlow.createTaskNode(
 				this.parallelTaskMetaData, functionalityJob,
 				parallelFlowParameter), this.parallelJob);
@@ -632,8 +634,7 @@ public abstract class AbstractJobContainerTest extends OfficeFrameTestCase {
 		this.recordReturn(this.flow, this.flow.getThreadState(),
 				this.threadState);
 		this.recordReturn(this.threadState,
-				this.threadState.createFlow(this.escalationFlowMetaData),
-				this.escalationFlow);
+				this.threadState.createJobSequence(), this.escalationFlow);
 		this.recordReturn(this.escalationFlow, this.escalationFlow
 				.createTaskNode(this.escalationTaskMetaData, parallelOwner,
 						failure), this.escalationJob);
@@ -645,8 +646,8 @@ public abstract class AbstractJobContainerTest extends OfficeFrameTestCase {
 	 * @param currentJob
 	 *            Current {@link Job}.
 	 * @param instigationStrategy
-	 *            {@link FlowInstigationStrategyEnum} of the {@link JobSequence} being
-	 *            joined on.
+	 *            {@link FlowInstigationStrategyEnum} of the {@link JobSequence}
+	 *            being joined on.
 	 * @param timeout
 	 *            Timeout in milliseconds for the {@link JobSequence} join.
 	 * @param token
@@ -990,8 +991,8 @@ public abstract class AbstractJobContainerTest extends OfficeFrameTestCase {
 		 *            The maximum time to wait in milliseconds for the
 		 *            {@link JobSequence} to complete.
 		 * @param token
-		 *            A token identifying which {@link JobSequence} join timed out. May
-		 *            be <code>null</code>.
+		 *            A token identifying which {@link JobSequence} join timed
+		 *            out. May be <code>null</code>.
 		 */
 		void join(FlowFuture flowFuture, long timeout, Object token);
 

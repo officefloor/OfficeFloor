@@ -72,8 +72,8 @@ public class AssetMonitorTest extends OfficeFrameTestCase {
 	 * Ensure correct {@link Asset} is returned.
 	 */
 	public void testGetAsset() {
-		assertEquals("Incorrect assset", this.asset, this.assetMonitor
-				.getAsset());
+		assertEquals("Incorrect assset", this.asset,
+				this.assetMonitor.getAsset());
 	}
 
 	/**
@@ -298,14 +298,14 @@ public class AssetMonitorTest extends OfficeFrameTestCase {
 	public void testActivateByOfficeManager() {
 
 		final JobNode job = this.createMock(JobNode.class);
-		final JobSequence flow = this.createMock(JobSequence.class);
+		final JobSequence jobSequence = this.createMock(JobSequence.class);
 		final ThreadState threadState = this.createMock(ThreadState.class);
 
 		// Record
 		this.assetManager.registerAssetMonitor(this.assetMonitor);
 		this.assetManager.unregisterAssetMonitor(this.assetMonitor);
-		this.recordReturn(this.assetManager, this.assetManager
-				.getOfficeManager(), this.officeManager);
+		this.recordReturn(this.assetManager,
+				this.assetManager.getOfficeManager(), this.officeManager);
 		this.officeManager.activateJobNodes(null);
 		this.control(this.officeManager).setMatcher(new AbstractMatcher() {
 			@Override
@@ -315,8 +315,9 @@ public class AssetMonitorTest extends OfficeFrameTestCase {
 				return true;
 			}
 		});
-		this.recordReturn(job, job.getFlow(), flow);
-		this.recordReturn(flow, flow.getThreadState(), threadState);
+		this.recordReturn(job, job.getJobSequence(), jobSequence);
+		this.recordReturn(jobSequence, jobSequence.getThreadState(),
+				threadState);
 		this.recordReturn(threadState, threadState.getThreadLock(),
 				"THREAD LOCK");
 		job.activateJob(); // triggered to indicate in set

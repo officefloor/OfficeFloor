@@ -93,7 +93,7 @@ public class OfficeMetaDataImpl implements OfficeMetaData {
 		JobNode jobNode = officeMetaData.createProcess(flowMetaData, parameter);
 
 		// Obtain the ProcessState
-		ProcessState processState = jobNode.getFlow().getThreadState()
+		ProcessState processState = jobNode.getJobSequence().getThreadState()
 				.getProcessState();
 
 		// Indicate process started and register to be notified of completion.

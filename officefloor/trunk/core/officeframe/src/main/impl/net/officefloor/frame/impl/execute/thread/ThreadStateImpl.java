@@ -45,7 +45,7 @@ import net.officefloor.frame.internal.structure.ThreadState;
 
 /**
  * Implementation of the {@link ThreadState}.
- *
+ * 
  * @author Daniel Sagenschneider
  */
 public class ThreadStateImpl extends
@@ -55,7 +55,7 @@ public class ThreadStateImpl extends
 	/**
 	 * Active {@link JobSequence} instances for this {@link ThreadState}.
 	 */
-	protected final LinkedListSet<JobSequence, ThreadState> activeFlows = new StrictLinkedListSet<JobSequence, ThreadState>() {
+	protected final LinkedListSet<JobSequence, ThreadState> activeJobSequences = new StrictLinkedListSet<JobSequence, ThreadState>() {
 		@Override
 		protected ThreadState getOwner() {
 			return ThreadStateImpl.this;
@@ -128,7 +128,7 @@ public class ThreadStateImpl extends
 
 	/**
 	 * Initiate.
-	 *
+	 * 
 	 * @param threadMetaData
 	 *            {@link ThreadMetaData} for this {@link ThreadState}.
 	 * @param processState
@@ -166,7 +166,7 @@ public class ThreadStateImpl extends
 
 	/*
 	 * ===================== ThreadState ==================================
-	 *
+	 * 
 	 * Methods do not requiring synchronising as will all be called within the
 	 * ThreadState lock taken by the JobContainer.
 	 */
@@ -192,27 +192,28 @@ public class ThreadStateImpl extends
 	}
 
 	@Override
-	public JobSequence createFlow(FlowMetaData<?> flowMetaData) {
+	public JobSequence createJobSequence() {
 
-		// Create and register the activate flow
-		JobSequence flow = new JobSequenceImpl(this);
-		this.activeFlows.addEntry(flow);
+		// Create and register the activate Job Sequence
+		JobSequence jobSequence = new JobSequenceImpl(this);
+		this.activeJobSequences.addEntry(jobSequence);
 
-		// Return the flow
-		return flow;
+		// Return the Job Sequence
+		return jobSequence;
 	}
 
 	@Override
-	public void flowComplete(JobSequence flow, JobNodeActivateSet activateSet) {
-		// Remove flow from active flow listing
-		if (this.activeFlows.removeEntry(flow)) {
+	public void jobSequenceComplete(JobSequence jobSequence,
+			JobNodeActivateSet activateSet) {
+		// Remove Job Sequence from active Job Sequence listing
+		if (this.activeJobSequences.removeEntry(jobSequence)) {
 
 			// Do nothing if searching for escalation
 			if (this.isEscalating) {
 				return;
 			}
 
-			// No more active flows so thread is complete
+			// No more active job sequences so thread is complete
 			this.isFlowComplete = true;
 
 			// Unload managed objects (some may not have been used)
@@ -317,7 +318,7 @@ public class ThreadStateImpl extends
 			}
 
 			// Determine if the same thread
-			if (this == jobNode.getFlow().getThreadState()) {
+			if (this == jobNode.getJobSequence().getThreadState()) {
 				// Do not wait on this thread (activate job immediately)
 				activateSet.addJobNode(jobNode);
 				return false; // not waiting
@@ -368,7 +369,7 @@ public class ThreadStateImpl extends
 
 		/**
 		 * Initiate.
-		 *
+		 * 
 		 * @param jobNode
 		 *            {@link JobNode} waiting for this {@link ThreadState} to
 		 *            complete.
