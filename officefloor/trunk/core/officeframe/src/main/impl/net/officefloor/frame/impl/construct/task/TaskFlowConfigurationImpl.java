@@ -21,7 +21,7 @@ package net.officefloor.frame.impl.construct.task;
 import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.internal.configuration.TaskFlowConfiguration;
 import net.officefloor.frame.internal.configuration.TaskNodeReference;
-import net.officefloor.frame.internal.structure.Flow;
+import net.officefloor.frame.internal.structure.JobSequence;
 import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
 
 /**
@@ -33,7 +33,7 @@ public class TaskFlowConfigurationImpl<F extends Enum<F>> implements
 		TaskFlowConfiguration<F> {
 
 	/**
-	 * Name of the {@link Flow}.
+	 * Name of the {@link JobSequence}.
 	 */
 	private final String flowName;
 
@@ -43,17 +43,17 @@ public class TaskFlowConfigurationImpl<F extends Enum<F>> implements
 	private final FlowInstigationStrategyEnum strategy;
 
 	/**
-	 * Reference to the initial {@link Task} of this {@link Flow}.
+	 * Reference to the initial {@link Task} of this {@link JobSequence}.
 	 */
 	private final TaskNodeReference taskNodeRef;
 
 	/**
-	 * Index of the {@link Flow}.
+	 * Index of the {@link JobSequence}.
 	 */
 	private final int index;
 
 	/**
-	 * Key of the {@link Flow}.
+	 * Key of the {@link JobSequence}.
 	 */
 	private final F key;
 
@@ -61,15 +61,15 @@ public class TaskFlowConfigurationImpl<F extends Enum<F>> implements
 	 * Initiate.
 	 * 
 	 * @param flowName
-	 *            Name of this {@link Flow}.
+	 *            Name of this {@link JobSequence}.
 	 * @param strategy
 	 *            {@link FlowInstigationStrategyEnum}.
 	 * @param taskNodeRef
-	 *            Reference to the initial {@link Task} of this {@link Flow}.
+	 *            Reference to the initial {@link Task} of this {@link JobSequence}.
 	 * @param index
-	 *            Index of this {@link Flow}.
+	 *            Index of this {@link JobSequence}.
 	 * @param key
-	 *            Key of the {@link Flow}.
+	 *            Key of the {@link JobSequence}.
 	 */
 	public TaskFlowConfigurationImpl(String flowName,
 			FlowInstigationStrategyEnum strategy,

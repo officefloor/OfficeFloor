@@ -22,7 +22,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 import net.officefloor.frame.api.build.Indexed;
-import net.officefloor.frame.internal.structure.Flow;
+import net.officefloor.frame.internal.structure.JobSequence;
 import net.officefloor.frame.spi.administration.Duty;
 import net.officefloor.frame.spi.administration.source.AdministratorDutyFlowMetaData;
 import net.officefloor.frame.spi.administration.source.AdministratorDutyMetaData;
@@ -203,7 +203,7 @@ public abstract class AbstractAdministratorSource<I, A extends Enum<A>>
 	}
 
 	/**
-	 * Provides the ability to label the {@link Duty} or {@link Flow}.
+	 * Provides the ability to label the {@link Duty} or {@link JobSequence}.
 	 */
 	public static interface Labeller {
 
@@ -217,9 +217,9 @@ public abstract class AbstractAdministratorSource<I, A extends Enum<A>>
 		Labeller setLabel(String label);
 
 		/**
-		 * Obtains the index of the {@link Duty} or {@link Flow}.
+		 * Obtains the index of the {@link Duty} or {@link JobSequence}.
 		 * 
-		 * @return Index of the {@link Duty} or {@link Flow}.
+		 * @return Index of the {@link Duty} or {@link JobSequence}.
 		 */
 		int getIndex();
 	}
@@ -230,23 +230,23 @@ public abstract class AbstractAdministratorSource<I, A extends Enum<A>>
 	public static interface DutyMetaDataContext {
 
 		/**
-		 * Adds a required {@link Flow} identified by the key.
+		 * Adds a required {@link JobSequence} identified by the key.
 		 * 
 		 * @param key
-		 *            {@link Enum} to identify the {@link Flow}.
+		 *            {@link Enum} to identify the {@link JobSequence}.
 		 * @param argumentType
-		 *            Type of argument passed to the {@link Flow}.
-		 * @return {@link Labeller} to possibly label the {@link Flow}.
+		 *            Type of argument passed to the {@link JobSequence}.
+		 * @return {@link Labeller} to possibly label the {@link JobSequence}.
 		 */
 		<F extends Enum<F>> Labeller addFlow(F key, Class<?> argumentType);
 
 		/**
-		 * Adds a required {@link Flow} identified by an index into the order
-		 * the {@link Flow} was added.
+		 * Adds a required {@link JobSequence} identified by an index into the order
+		 * the {@link JobSequence} was added.
 		 * 
 		 * @param argumentType
-		 *            Type of argument passed to the {@link Flow}.
-		 * @return {@link Labeller} to possibly label the {@link Flow}.
+		 *            Type of argument passed to the {@link JobSequence}.
+		 * @return {@link Labeller} to possibly label the {@link JobSequence}.
 		 */
 		Labeller addFlow(Class<?> argumentType);
 	}
@@ -417,22 +417,22 @@ public abstract class AbstractAdministratorSource<I, A extends Enum<A>>
 			Labeller, AdministratorDutyFlowMetaData<F> {
 
 		/**
-		 * Key identifying this {@link Flow}.
+		 * Key identifying this {@link JobSequence}.
 		 */
 		private final F key;
 
 		/**
-		 * Argument type to the {@link Flow}.
+		 * Argument type to the {@link JobSequence}.
 		 */
 		private final Class<?> argumentType;
 
 		/**
-		 * Index of this {@link Flow}.
+		 * Index of this {@link JobSequence}.
 		 */
 		private final int index;
 
 		/**
-		 * Label for this {@link Flow}.
+		 * Label for this {@link JobSequence}.
 		 */
 		private String label;
 
@@ -440,11 +440,11 @@ public abstract class AbstractAdministratorSource<I, A extends Enum<A>>
 		 * Initiate.
 		 * 
 		 * @param key
-		 *            Key identifying this {@link Flow}.
+		 *            Key identifying this {@link JobSequence}.
 		 * @param argumentType
-		 *            Argument type to the {@link Flow}.
+		 *            Argument type to the {@link JobSequence}.
 		 * @param index
-		 *            Index of this {@link Flow}.
+		 *            Index of this {@link JobSequence}.
 		 */
 		public DutyFlowMetaData(F key, Class<?> argumentType, int index) {
 			this.key = key;

@@ -19,7 +19,7 @@
 package net.officefloor.frame.impl.execute.job;
 
 import net.officefloor.frame.api.execute.FlowFuture;
-import net.officefloor.frame.internal.structure.Flow;
+import net.officefloor.frame.internal.structure.JobSequence;
 import net.officefloor.frame.internal.structure.FlowMetaData;
 import net.officefloor.frame.spi.team.Job;
 
@@ -39,25 +39,25 @@ public interface JobExecuteContext {
 	void setJobComplete(boolean isComplete);
 
 	/**
-	 * Joins on the {@link Flow} for the {@link FlowFuture}.
+	 * Joins on the {@link JobSequence} for the {@link FlowFuture}.
 	 * 
 	 * @param flowFuture
-	 *            {@link FlowFuture} of the {@link Flow} to join.
+	 *            {@link FlowFuture} of the {@link JobSequence} to join.
 	 * @param timeout
-	 *            Timeout in milliseconds for the {@link Flow} join.
+	 *            Timeout in milliseconds for the {@link JobSequence} join.
 	 * @param token
-	 *            {@link Flow} join token.
+	 *            {@link JobSequence} join token.
 	 */
 	void joinFlow(FlowFuture flowFuture, long timeout, Object token);
 
 	/**
-	 * Invokes the {@link Flow} for the input {@link FlowMetaData}.
+	 * Invokes the {@link JobSequence} for the input {@link FlowMetaData}.
 	 * 
 	 * @param flowMetaData
 	 *            {@link FlowMetaData}.
 	 * @param parameter
-	 *            Parameter for the {@link Flow}.
-	 * @return {@link FlowFuture} of the {@link Flow}.
+	 *            Parameter for the {@link JobSequence}.
+	 * @return {@link FlowFuture} of the {@link JobSequence}.
 	 */
 	FlowFuture doFlow(FlowMetaData<?> flowMetaData, Object parameter);
 

@@ -18,12 +18,12 @@
 
 package net.officefloor.frame.impl.execute.job;
 
-import net.officefloor.frame.internal.structure.Flow;
+import net.officefloor.frame.internal.structure.JobSequence;
 import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
 import net.officefloor.frame.spi.team.Job;
 
 /**
- * Tests the {@link AbstractJobContainer} invoking parallel {@link Flow}
+ * Tests the {@link AbstractJobContainer} invoking parallel {@link JobSequence}
  * instances.
  * 
  * @author Daniel Sagenschneider
@@ -59,7 +59,7 @@ public class ParallelJobContainerTest extends AbstractJobContainerTest {
 	}
 
 	/**
-	 * Ensures execution of a {@link Job} with a parallel {@link Flow} invoked.
+	 * Ensures execution of a {@link Job} with a parallel {@link JobSequence} invoked.
 	 */
 	public void testExecuteJobWithParallelFlow() {
 
@@ -108,7 +108,7 @@ public class ParallelJobContainerTest extends AbstractJobContainerTest {
 	}
 
 	/**
-	 * Ensures execution of a {@link Job} with a passive parallel {@link Flow}
+	 * Ensures execution of a {@link Job} with a passive parallel {@link JobSequence}
 	 * invoked.
 	 */
 	public void testExecuteJobWithPassiveParallelFlow() {

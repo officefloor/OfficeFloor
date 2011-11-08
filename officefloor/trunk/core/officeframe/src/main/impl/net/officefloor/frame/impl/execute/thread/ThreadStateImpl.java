@@ -20,7 +20,7 @@ package net.officefloor.frame.impl.execute.thread;
 
 import net.officefloor.frame.api.escalate.FlowJoinTimedOutEscalation;
 import net.officefloor.frame.api.execute.FlowFuture;
-import net.officefloor.frame.impl.execute.flow.FlowImpl;
+import net.officefloor.frame.impl.execute.job.JobSequenceImpl;
 import net.officefloor.frame.impl.execute.linkedlistset.AbstractLinkedListSetEntry;
 import net.officefloor.frame.impl.execute.linkedlistset.ComparatorLinkedListSet;
 import net.officefloor.frame.impl.execute.linkedlistset.StrictLinkedListSet;
@@ -32,7 +32,7 @@ import net.officefloor.frame.internal.structure.AssetMonitor;
 import net.officefloor.frame.internal.structure.CheckAssetContext;
 import net.officefloor.frame.internal.structure.EscalationFlow;
 import net.officefloor.frame.internal.structure.EscalationLevel;
-import net.officefloor.frame.internal.structure.Flow;
+import net.officefloor.frame.internal.structure.JobSequence;
 import net.officefloor.frame.internal.structure.FlowMetaData;
 import net.officefloor.frame.internal.structure.JobNode;
 import net.officefloor.frame.internal.structure.JobNodeActivateSet;
@@ -53,9 +53,9 @@ public class ThreadStateImpl extends
 		ThreadState {
 
 	/**
-	 * Active {@link Flow} instances for this {@link ThreadState}.
+	 * Active {@link JobSequence} instances for this {@link ThreadState}.
 	 */
-	protected final LinkedListSet<Flow, ThreadState> activeFlows = new StrictLinkedListSet<Flow, ThreadState>() {
+	protected final LinkedListSet<JobSequence, ThreadState> activeFlows = new StrictLinkedListSet<JobSequence, ThreadState>() {
 		@Override
 		protected ThreadState getOwner() {
 			return ThreadStateImpl.this;
@@ -192,10 +192,10 @@ public class ThreadStateImpl extends
 	}
 
 	@Override
-	public Flow createFlow(FlowMetaData<?> flowMetaData) {
+	public JobSequence createFlow(FlowMetaData<?> flowMetaData) {
 
 		// Create and register the activate flow
-		Flow flow = new FlowImpl(this);
+		JobSequence flow = new JobSequenceImpl(this);
 		this.activeFlows.addEntry(flow);
 
 		// Return the flow
@@ -203,7 +203,7 @@ public class ThreadStateImpl extends
 	}
 
 	@Override
-	public void flowComplete(Flow flow, JobNodeActivateSet activateSet) {
+	public void flowComplete(JobSequence flow, JobNodeActivateSet activateSet) {
 		// Remove flow from active flow listing
 		if (this.activeFlows.removeEntry(flow)) {
 
@@ -376,7 +376,7 @@ public class ThreadStateImpl extends
 		 *            {@link AssetMonitor} to monitor this join.
 		 * @param timeoutTime
 		 *            The maximum time to wait in milliseconds for the
-		 *            {@link Flow} to complete.
+		 *            {@link JobSequence} to complete.
 		 * @param token
 		 *            Token identifying the join.
 		 */

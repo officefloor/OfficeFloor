@@ -45,12 +45,12 @@ public interface JobMetaData {
 
 	/**
 	 * Obtains the {@link TaskMetaData} of the next {@link Task} within
-	 * {@link Flow} that this {@link Task} is involved within.
+	 * {@link JobSequence} that this {@link Task} is involved within.
 	 * 
 	 * @param key
-	 *            Key of the {@link Flow}.
+	 *            Key of the {@link JobSequence}.
 	 * @return {@link TaskMetaData} of the first {@link Task} within the
-	 *         specified {@link Flow}.
+	 *         specified {@link JobSequence}.
 	 */
 	TaskMetaData<?, ?, ?> getNextTaskInFlow();
 

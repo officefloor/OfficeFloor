@@ -20,7 +20,7 @@ package net.officefloor.frame.internal.structure;
 
 /**
  * Instigation strategies of a
- * {@link net.officefloor.frame.internal.structure.Flow}.
+ * {@link net.officefloor.frame.internal.structure.JobSequence}.
  * 
  * @author Daniel Sagenschneider
  */

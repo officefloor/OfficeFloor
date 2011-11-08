@@ -21,7 +21,7 @@ package net.officefloor.frame.impl.execute.asset;
 import net.officefloor.frame.internal.structure.Asset;
 import net.officefloor.frame.internal.structure.AssetManager;
 import net.officefloor.frame.internal.structure.AssetMonitor;
-import net.officefloor.frame.internal.structure.Flow;
+import net.officefloor.frame.internal.structure.JobSequence;
 import net.officefloor.frame.internal.structure.JobNode;
 import net.officefloor.frame.internal.structure.JobNodeActivatableSet;
 import net.officefloor.frame.internal.structure.JobNodeActivateSet;
@@ -298,7 +298,7 @@ public class AssetMonitorTest extends OfficeFrameTestCase {
 	public void testActivateByOfficeManager() {
 
 		final JobNode job = this.createMock(JobNode.class);
-		final Flow flow = this.createMock(Flow.class);
+		final JobSequence flow = this.createMock(JobSequence.class);
 		final ThreadState threadState = this.createMock(ThreadState.class);
 
 		// Record

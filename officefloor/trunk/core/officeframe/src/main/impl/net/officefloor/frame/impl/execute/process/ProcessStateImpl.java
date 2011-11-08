@@ -38,7 +38,7 @@ import net.officefloor.frame.internal.structure.AdministratorMetaData;
 import net.officefloor.frame.internal.structure.ContainerContext;
 import net.officefloor.frame.internal.structure.EscalationFlow;
 import net.officefloor.frame.internal.structure.EscalationProcedure;
-import net.officefloor.frame.internal.structure.Flow;
+import net.officefloor.frame.internal.structure.JobSequence;
 import net.officefloor.frame.internal.structure.FlowMetaData;
 import net.officefloor.frame.internal.structure.GovernanceContainer;
 import net.officefloor.frame.internal.structure.GovernanceMetaData;
@@ -292,7 +292,7 @@ public class ProcessStateImpl implements ProcessState {
 	}
 
 	@Override
-	public <W extends Work> Flow createThread(FlowMetaData<W> flowMetaData) {
+	public <W extends Work> JobSequence createThread(FlowMetaData<W> flowMetaData) {
 
 		// Create the thread
 		ThreadState threadState = new ThreadStateImpl(
@@ -318,11 +318,6 @@ public class ProcessStateImpl implements ProcessState {
 			// Remove thread from active thread listing
 			if (this.activeThreads.removeEntry(thread)) {
 
-				// Notify process complete
-				for (ProcessCompletionListener listener : this.completionListeners) {
-					listener.processComplete();
-				}
-
 				/*
 				 * TODO ProcessState to implement ContainerContext to allow new
 				 * ThreadState for clean up
@@ -335,6 +330,16 @@ public class ProcessStateImpl implements ProcessState {
 					if (container != null) {
 						container.disregardGovernance(containerContext);
 					}
+				}
+
+				// Determine if ThreadState created for Governance cleanup
+				if (this.activeThreads.getHead() != null) {
+					return; // wait for cleanup of Governance
+				}
+
+				// Notify process complete
+				for (ProcessCompletionListener listener : this.completionListeners) {
+					listener.processComplete();
 				}
 
 				// Unload managed objects (some may not have been used)

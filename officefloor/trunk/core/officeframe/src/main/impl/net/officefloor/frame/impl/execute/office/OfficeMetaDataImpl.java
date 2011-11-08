@@ -28,7 +28,7 @@ import net.officefloor.frame.api.manage.ProcessFuture;
 import net.officefloor.frame.impl.execute.process.ProcessStateImpl;
 import net.officefloor.frame.internal.structure.EscalationFlow;
 import net.officefloor.frame.internal.structure.EscalationProcedure;
-import net.officefloor.frame.internal.structure.Flow;
+import net.officefloor.frame.internal.structure.JobSequence;
 import net.officefloor.frame.internal.structure.FlowMetaData;
 import net.officefloor.frame.internal.structure.JobNode;
 import net.officefloor.frame.internal.structure.ManagedObjectMetaData;
@@ -257,14 +257,14 @@ public class OfficeMetaDataImpl implements OfficeMetaData {
 		}
 
 		// Create the Flow
-		Flow flow = processState.createThread(flowMetaData);
+		JobSequence flow = processState.createThread(flowMetaData);
 
 		// Obtain the task meta-data
 		TaskMetaData<W, ?, ?> taskMetaData = flowMetaData
 				.getInitialTaskMetaData();
 
 		// Create the Job Node for the initial job
-		JobNode jobNode = flow.createJobNode(taskMetaData, null, parameter);
+		JobNode jobNode = flow.createTaskNode(taskMetaData, null, parameter);
 
 		// Notify of created process context
 		Object processIdentifier = processState.getProcessIdentifier();

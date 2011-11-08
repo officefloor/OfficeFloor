@@ -25,7 +25,7 @@ import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.execute.TaskContext;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.impl.spi.team.PassiveTeam;
-import net.officefloor.frame.internal.structure.Flow;
+import net.officefloor.frame.internal.structure.JobSequence;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.frame.internal.structure.ThreadState;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
@@ -41,7 +41,7 @@ import net.officefloor.frame.test.ReflectiveWorkBuilder.ReflectiveTaskBuilder;
 public class DynamicFlowInvocationTest extends AbstractOfficeConstructTestCase {
 
 	/**
-	 * Ensure able to dynamically invoke a {@link Flow}.
+	 * Ensure able to dynamically invoke a {@link JobSequence}.
 	 */
 	public void testDynamicFlowInvocation() throws Exception {
 
@@ -82,7 +82,7 @@ public class DynamicFlowInvocationTest extends AbstractOfficeConstructTestCase {
 		public String parameter;
 
 		/**
-		 * Invokes the {@link Flow} dynamically.
+		 * Invokes the {@link JobSequence} dynamically.
 		 * 
 		 * @param context
 		 *            {@link TaskContext}.
@@ -104,7 +104,7 @@ public class DynamicFlowInvocationTest extends AbstractOfficeConstructTestCase {
 	}
 
 	/**
-	 * Ensures that dynamic {@link Flow} is invoked in the same
+	 * Ensures that dynamic {@link JobSequence} is invoked in the same
 	 * {@link ThreadState}.
 	 */
 	public void testMaintainState() throws Exception {
@@ -174,7 +174,7 @@ public class DynamicFlowInvocationTest extends AbstractOfficeConstructTestCase {
 		}
 
 		/**
-		 * Invokes the {@link Flow} dynamically.
+		 * Invokes the {@link JobSequence} dynamically.
 		 * 
 		 * @param context
 		 *            {@link TaskContext}.

@@ -24,7 +24,7 @@ import java.util.List;
 import java.util.Map;
 
 import net.officefloor.frame.impl.construct.util.ConstructUtil;
-import net.officefloor.frame.internal.structure.Flow;
+import net.officefloor.frame.internal.structure.JobSequence;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.frame.spi.managedobject.extension.ExtensionInterfaceFactory;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectDependencyMetaData;
@@ -221,23 +221,23 @@ public abstract class AbstractAsyncManagedObjectSource<D extends Enum<D>, F exte
 		Labeller addDependency(Class<?> dependencyType);
 
 		/**
-		 * Adds a required {@link Flow} identified by the key.
+		 * Adds a required {@link JobSequence} identified by the key.
 		 * 
 		 * @param key
-		 *            {@link Enum} to identify the {@link Flow}.
+		 *            {@link Enum} to identify the {@link JobSequence}.
 		 * @param argumentType
-		 *            Type of argument passed to the {@link Flow}.
-		 * @return {@link Labeller} to possibly label the {@link Flow}.
+		 *            Type of argument passed to the {@link JobSequence}.
+		 * @return {@link Labeller} to possibly label the {@link JobSequence}.
 		 */
 		Labeller addFlow(F key, Class<?> argumentType);
 
 		/**
-		 * Adds a required {@link Flow} identified by an index into the order
-		 * the {@link Flow} was added.
+		 * Adds a required {@link JobSequence} identified by an index into the order
+		 * the {@link JobSequence} was added.
 		 * 
 		 * @param argumentType
-		 *            Type of argument passed to the {@link Flow}.
-		 * @return {@link Labeller} to possibly label the {@link Flow}.
+		 *            Type of argument passed to the {@link JobSequence}.
+		 * @return {@link Labeller} to possibly label the {@link JobSequence}.
 		 */
 		Labeller addFlow(Class<?> argumentType);
 
@@ -255,7 +255,7 @@ public abstract class AbstractAsyncManagedObjectSource<D extends Enum<D>, F exte
 	}
 
 	/**
-	 * Provides the ability to label the required dependency or {@link Flow}.
+	 * Provides the ability to label the required dependency or {@link JobSequence}.
 	 */
 	public static interface Labeller {
 
@@ -269,9 +269,9 @@ public abstract class AbstractAsyncManagedObjectSource<D extends Enum<D>, F exte
 		Labeller setLabel(String label);
 
 		/**
-		 * Obtains the index of the dependency of {@link Flow}.
+		 * Obtains the index of the dependency of {@link JobSequence}.
 		 * 
-		 * @return Index of the dependency of {@link Flow}.
+		 * @return Index of the dependency of {@link JobSequence}.
 		 */
 		int getIndex();
 	}
@@ -405,15 +405,15 @@ public abstract class AbstractAsyncManagedObjectSource<D extends Enum<D>, F exte
 		}
 
 		/**
-		 * Adds a {@link Flow}.
+		 * Adds a {@link JobSequence}.
 		 * 
 		 * @param index
-		 *            Index to add the {@link Flow} under.
+		 *            Index to add the {@link JobSequence} under.
 		 * @param key
-		 *            Key for the {@link Flow}. May be <code>null</code>.
+		 *            Key for the {@link JobSequence}. May be <code>null</code>.
 		 * @param argumentType
-		 *            Type of the argument passed to the {@link Flow}.
-		 * @return {@link Labeller} for the {@link Flow}.
+		 *            Type of the argument passed to the {@link JobSequence}.
+		 * @return {@link Labeller} for the {@link JobSequence}.
 		 */
 		private Labeller addFlow(final int index, F key, Class<?> argumentType) {
 

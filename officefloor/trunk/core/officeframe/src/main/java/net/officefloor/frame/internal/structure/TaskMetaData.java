@@ -84,11 +84,11 @@ public interface TaskMetaData<W extends Work, D extends Enum<D>, F extends Enum<
 	ManagedObjectIndex translateManagedObjectIndexForWork(int taskMoIndex);
 
 	/**
-	 * Obtains the {@link FlowMetaData} of the specified {@link Flow}.
+	 * Obtains the {@link FlowMetaData} of the specified {@link JobSequence}.
 	 * 
 	 * @param flowIndex
-	 *            Index of the {@link Flow}.
-	 * @return {@link FlowMetaData} of the specified {@link Flow}.
+	 *            Index of the {@link JobSequence}.
+	 * @return {@link FlowMetaData} of the specified {@link JobSequence}.
 	 */
 	FlowMetaData<?> getFlow(int flowIndex);
 
@@ -121,7 +121,7 @@ public interface TaskMetaData<W extends Work, D extends Enum<D>, F extends Enum<
 	 * Creates the {@link JobNode} for the {@link Task}.
 	 * 
 	 * @param flow
-	 *            {@link Flow} containing the {@link Task}.
+	 *            {@link JobSequence} containing the {@link Task}.
 	 * @param workContainer
 	 *            {@link WorkContainer} for the {@link Work} for the
 	 *            {@link Task}.
@@ -131,7 +131,7 @@ public interface TaskMetaData<W extends Work, D extends Enum<D>, F extends Enum<
 	 *            Parameter.
 	 * @return {@link JobNode}.
 	 */
-	JobNode createTaskNode(Flow flow, WorkContainer<W> workContainer,
+	JobNode createTaskNode(JobSequence flow, WorkContainer<W> workContainer,
 			JobNode parallelJobNodeOwner, Object parameter);
 
 }

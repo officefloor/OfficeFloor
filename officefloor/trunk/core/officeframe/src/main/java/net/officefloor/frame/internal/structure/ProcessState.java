@@ -93,15 +93,15 @@ public interface ProcessState {
 
 	/**
 	 * <p>
-	 * Creates a {@link Flow} for the new {@link ThreadState} contained in this
+	 * Creates a {@link JobSequence} for the new {@link ThreadState} contained in this
 	 * {@link ProcessState}.
 	 * <p>
-	 * The new {@link ThreadState} is available from the returned {@link Flow}.
+	 * The new {@link ThreadState} is available from the returned {@link JobSequence}.
 	 * 
-	 * @return {@link Flow} for the new {@link ThreadState} contained in this
+	 * @return {@link JobSequence} for the new {@link ThreadState} contained in this
 	 *         {@link ProcessState}.
 	 */
-	<W extends Work> Flow createThread(FlowMetaData<W> flowMetaData);
+	<W extends Work> JobSequence createThread(FlowMetaData<W> flowMetaData);
 
 	/**
 	 * Flags that the input {@link ThreadState} has complete.

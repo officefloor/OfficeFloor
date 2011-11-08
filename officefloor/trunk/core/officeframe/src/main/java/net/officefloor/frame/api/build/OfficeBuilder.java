@@ -23,7 +23,7 @@ import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.internal.structure.EscalationFlow;
-import net.officefloor.frame.internal.structure.Flow;
+import net.officefloor.frame.internal.structure.JobSequence;
 import net.officefloor.frame.internal.structure.JobNode;
 import net.officefloor.frame.internal.structure.OfficeManager;
 import net.officefloor.frame.internal.structure.ProcessState;
@@ -214,14 +214,14 @@ public interface OfficeBuilder {
 	void addOfficeEnhancer(OfficeEnhancer officeEnhancer);
 
 	/**
-	 * Adds an {@link EscalationFlow} for issues not handled by the {@link Flow}
+	 * Adds an {@link EscalationFlow} for issues not handled by the {@link JobSequence}
 	 * of the {@link Office}.
 	 * 
 	 * @param typeOfCause
 	 *            Type of cause handled by this {@link EscalationFlow}.
 	 * @param workName
 	 *            Name of the {@link Work} that the first {@link Task} of the
-	 *            {@link Flow} resides on.
+	 *            {@link JobSequence} resides on.
 	 * @param taskName
 	 *            Name of {@link Task} on the {@link Work} to handle the
 	 *            {@link EscalationFlow}.

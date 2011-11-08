@@ -32,7 +32,7 @@ import net.officefloor.frame.internal.structure.ContainerContext;
 import net.officefloor.frame.internal.structure.EscalationFlow;
 import net.officefloor.frame.internal.structure.EscalationLevel;
 import net.officefloor.frame.internal.structure.EscalationProcedure;
-import net.officefloor.frame.internal.structure.Flow;
+import net.officefloor.frame.internal.structure.JobSequence;
 import net.officefloor.frame.internal.structure.FlowAsset;
 import net.officefloor.frame.internal.structure.FlowMetaData;
 import net.officefloor.frame.internal.structure.JobMetaData;
@@ -59,7 +59,7 @@ import net.officefloor.frame.spi.team.Team;
  * @author Daniel Sagenschneider
  */
 public abstract class AbstractJobContainer<W extends Work, N extends JobMetaData>
-		extends AbstractLinkedListSetEntry<JobNode, Flow> implements Job,
+		extends AbstractLinkedListSetEntry<JobNode, JobSequence> implements Job,
 		JobNode, JobExecuteContext, ContainerContext {
 
 	/**
@@ -69,9 +69,9 @@ public abstract class AbstractJobContainer<W extends Work, N extends JobMetaData
 			.getName());
 
 	/**
-	 * {@link Flow}.
+	 * {@link JobSequence}.
 	 */
-	protected final Flow flow;
+	protected final JobSequence flow;
 
 	/**
 	 * {@link WorkContainer}.
@@ -99,7 +99,7 @@ public abstract class AbstractJobContainer<W extends Work, N extends JobMetaData
 	 * Initiate.
 	 * 
 	 * @param flow
-	 *            {@link Flow} containing this {@link Job}.
+	 *            {@link JobSequence} containing this {@link Job}.
 	 * @param workContainer
 	 *            {@link WorkContainer} of the {@link Work} for this
 	 *            {@link Task}.
@@ -114,7 +114,7 @@ public abstract class AbstractJobContainer<W extends Work, N extends JobMetaData
 	 *            {@link ManagedObject} instances that must be loaded before the
 	 *            {@link Task} may be executed.
 	 */
-	public AbstractJobContainer(Flow flow, WorkContainer<W> workContainer,
+	public AbstractJobContainer(JobSequence flow, WorkContainer<W> workContainer,
 			N nodeMetaData, JobNode parallelOwner,
 			ManagedObjectIndex[] requiredManagedObjects) {
 		this.flow = flow;
@@ -139,7 +139,7 @@ public abstract class AbstractJobContainer<W extends Work, N extends JobMetaData
 	 */
 
 	@Override
-	public Flow getLinkedListSetOwner() {
+	public JobSequence getLinkedListSetOwner() {
 		return this.flow;
 	}
 
@@ -173,10 +173,10 @@ public abstract class AbstractJobContainer<W extends Work, N extends JobMetaData
 
 		// Create a new flow for execution
 		ThreadState threadState = this.flow.getThreadState();
-		Flow parallelFlow = threadState.createFlow(flowMetaData);
+		JobSequence parallelFlow = threadState.createFlow(flowMetaData);
 
 		// Create the job node
-		JobNode parallelJobNode = parallelFlow.createJobNode(initTaskMetaData,
+		JobNode parallelJobNode = parallelFlow.createTaskNode(initTaskMetaData,
 				this, parameter);
 
 		// Load the parallel node
@@ -370,12 +370,12 @@ public abstract class AbstractJobContainer<W extends Work, N extends JobMetaData
 
 						switch (this.jobState) {
 						case EXECUTE_JOB:
-							
+
 							// Determine if setup job
 							if (this.isSetupJob) {
 								return true; // setup before execute
 							}
-							
+
 							// Flag complete by default and not waiting
 							this.isComplete = true;
 
@@ -437,7 +437,7 @@ public abstract class AbstractJobContainer<W extends Work, N extends JobMetaData
 										.getNextTaskInFlow();
 								if (nextTaskMetaData != null) {
 									// Create next task
-									JobNode job = this.flow.createJobNode(
+									JobNode job = this.flow.createTaskNode(
 											nextTaskMetaData,
 											this.parallelOwner,
 											this.nextJobParameter);
@@ -907,10 +907,10 @@ public abstract class AbstractJobContainer<W extends Work, N extends JobMetaData
 
 		// Create a new flow for execution
 		ThreadState threadState = this.flow.getThreadState();
-		Flow parallelFlow = threadState.createFlow(flowMetaData);
+		JobSequence parallelFlow = threadState.createFlow(flowMetaData);
 
 		// Create the job node
-		JobNode escalationJobNode = parallelFlow.createJobNode(
+		JobNode escalationJobNode = parallelFlow.createTaskNode(
 				initTaskMetaData, parallelOwner, parameter);
 
 		// Return the escalation job node
@@ -918,7 +918,7 @@ public abstract class AbstractJobContainer<W extends Work, N extends JobMetaData
 	}
 
 	/**
-	 * Creates an asynchronous {@link Flow} from the input {@link FlowMetaData}.
+	 * Creates an asynchronous {@link JobSequence} from the input {@link FlowMetaData}.
 	 * 
 	 * @param flowMetaData
 	 *            {@link FlowMetaData}.
@@ -936,10 +936,10 @@ public abstract class AbstractJobContainer<W extends Work, N extends JobMetaData
 		// Create thread to execute asynchronously
 		ProcessState processState = this.flow.getThreadState()
 				.getProcessState();
-		Flow asyncFlow = processState.createThread(flowMetaData);
+		JobSequence asyncFlow = processState.createThread(flowMetaData);
 
 		// Create job node for execution
-		JobNode asyncJobNode = asyncFlow.createJobNode(initTaskMetaData, null,
+		JobNode asyncJobNode = asyncFlow.createTaskNode(initTaskMetaData, null,
 				parameter);
 
 		// Asynchronously instigate the job node
@@ -950,13 +950,13 @@ public abstract class AbstractJobContainer<W extends Work, N extends JobMetaData
 	}
 
 	/**
-	 * Creates a parallel {@link Flow} from the input {@link FlowMetaData}.
+	 * Creates a parallel {@link JobSequence} from the input {@link FlowMetaData}.
 	 * 
 	 * @param flowMetaData
 	 *            {@link FlowMetaData}.
 	 * @param parameter
 	 *            Parameter.
-	 * @return Parallel {@link Flow}.
+	 * @return Parallel {@link JobSequence}.
 	 */
 	private FlowFuture createParallelFlow(FlowMetaData<?> flowMetaData,
 			Object parameter) {
@@ -967,10 +967,10 @@ public abstract class AbstractJobContainer<W extends Work, N extends JobMetaData
 
 		// Create a new flow for execution
 		ThreadState threadState = this.flow.getThreadState();
-		Flow parallelFlow = threadState.createFlow(flowMetaData);
+		JobSequence parallelFlow = threadState.createFlow(flowMetaData);
 
 		// Create the job node
-		JobNode parallelJobNode = parallelFlow.createJobNode(initTaskMetaData,
+		JobNode parallelJobNode = parallelFlow.createTaskNode(initTaskMetaData,
 				this, parameter);
 
 		// Load the parallel node
@@ -981,13 +981,13 @@ public abstract class AbstractJobContainer<W extends Work, N extends JobMetaData
 	}
 
 	/**
-	 * Creates a sequential {@link Flow} from the input {@link FlowMetaData}.
+	 * Creates a sequential {@link JobSequence} from the input {@link FlowMetaData}.
 	 * 
 	 * @param flowMetaData
 	 *            {@link FlowMetaData}.
 	 * @param parameter
 	 *            Parameter.
-	 * @return Sequential {@link Flow}.
+	 * @return Sequential {@link JobSequence}.
 	 */
 	private FlowFuture createSequentialFlow(FlowMetaData<?> flowMetaData,
 			Object parameter) {
@@ -997,7 +997,7 @@ public abstract class AbstractJobContainer<W extends Work, N extends JobMetaData
 				.getInitialTaskMetaData();
 
 		// Create the job node on the same flow as this job node
-		JobNode sequentialJobNode = this.flow.createJobNode(initTaskMetaData,
+		JobNode sequentialJobNode = this.flow.createTaskNode(initTaskMetaData,
 				this.parallelOwner, parameter);
 
 		// Load the sequential node
@@ -1059,7 +1059,7 @@ public abstract class AbstractJobContainer<W extends Work, N extends JobMetaData
 	 * <p>
 	 * Owner if this {@link JobNode} is a parallel {@link JobNode}.
 	 * <p>
-	 * This is the {@link JobNode} that is executed once the {@link Flow} that
+	 * This is the {@link JobNode} that is executed once the {@link JobSequence} that
 	 * this {@link JobNode} is involved within is complete.
 	 */
 	private JobNode parallelOwner;
@@ -1071,7 +1071,7 @@ public abstract class AbstractJobContainer<W extends Work, N extends JobMetaData
 	private JobNode parallelNode;
 
 	/**
-	 * Next {@link JobNode} in the sequential listing of {@link Flow}.
+	 * Next {@link JobNode} in the sequential listing of {@link JobSequence}.
 	 */
 	private JobNode nextTaskNode;
 
@@ -1126,7 +1126,7 @@ public abstract class AbstractJobContainer<W extends Work, N extends JobMetaData
 	}
 
 	@Override
-	public Flow getFlow() {
+	public JobSequence getFlow() {
 		return this.flow;
 	}
 
@@ -1248,12 +1248,12 @@ public abstract class AbstractJobContainer<W extends Work, N extends JobMetaData
 		public final FlowAsset flowAsset;
 
 		/**
-		 * Timeout in milliseconds for the {@link Flow} join.
+		 * Timeout in milliseconds for the {@link JobSequence} join.
 		 */
 		public final long timeout;
 
 		/**
-		 * {@link Flow} join token.
+		 * {@link JobSequence} join token.
 		 */
 		public final Object token;
 
@@ -1263,9 +1263,9 @@ public abstract class AbstractJobContainer<W extends Work, N extends JobMetaData
 		 * @param flowAsset
 		 *            {@link FlowAsset} that this {@link JobNode} is to join on.
 		 * @param timeout
-		 *            Timeout in milliseconds for the {@link Flow} join.
+		 *            Timeout in milliseconds for the {@link JobSequence} join.
 		 * @param token
-		 *            {@link Flow} join token.
+		 *            {@link JobSequence} join token.
 		 */
 		public JoinFlowAsset(FlowAsset flowAsset, long timeout, Object token) {
 			this.flowAsset = flowAsset;

@@ -19,6 +19,7 @@
 package net.officefloor.frame.internal.structure;
 
 import net.officefloor.frame.api.execute.FlowFuture;
+import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.spi.team.Job;
 
 /**
@@ -26,16 +27,17 @@ import net.officefloor.frame.spi.team.Job;
  * Represents a sequence of {@link Job} instances that are completed one after
  * another.
  * <p>
- * May be used as a {@link LinkedListSetEntry} in a list of {@link Flow}
+ * May be used as a {@link LinkedListSetEntry} in a list of {@link JobSequence}
  * instances for a {@link ThreadState}.
  * 
  * @author Daniel Sagenschneider
  */
-public interface Flow extends FlowAsset, FlowFuture,
-		LinkedListSetEntry<Flow, ThreadState> {
+public interface JobSequence extends FlowAsset, FlowFuture,
+		LinkedListSetEntry<JobSequence, ThreadState> {
 
 	/**
-	 * Creates a new {@link JobNode} contained in this {@link Flow}.
+	 * Creates a new {@link JobNode} contained in this {@link JobSequence} for the
+	 * {@link Task}.
 	 * 
 	 * @param taskMetaData
 	 *            {@link TaskMetaData} for the new {@link JobNode}.
@@ -46,7 +48,7 @@ public interface Flow extends FlowAsset, FlowFuture,
 	 *            Parameter for the {@link JobNode}.
 	 * @return New {@link JobNode}.
 	 */
-	JobNode createJobNode(TaskMetaData<?, ?, ?> taskMetaData,
+	JobNode createTaskNode(TaskMetaData<?, ?, ?> taskMetaData,
 			JobNode parallelNodeOwner, Object parameter);
 
 	/**
@@ -56,15 +58,15 @@ public interface Flow extends FlowAsset, FlowFuture,
 	 *            {@link JobNode} that has completed.
 	 * @param activateSet
 	 *            {@link JobNodeActivateSet} to add {@link JobNode} instances
-	 *            waiting on this {@link Flow} if all {@link JobNode} instances
-	 *            of this {@link Flow} are complete.
+	 *            waiting on this {@link JobSequence} if all {@link JobNode} instances
+	 *            of this {@link JobSequence} are complete.
 	 */
 	void jobNodeComplete(JobNode jobNode, JobNodeActivateSet activateSet);
 
 	/**
-	 * Obtains the {@link ThreadState} containing this {@link Flow}.
+	 * Obtains the {@link ThreadState} containing this {@link JobSequence}.
 	 * 
-	 * @return {@link ThreadState} containing this {@link Flow}.
+	 * @return {@link ThreadState} containing this {@link JobSequence}.
 	 */
 	ThreadState getThreadState();
 

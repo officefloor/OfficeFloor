@@ -23,7 +23,7 @@ import net.officefloor.frame.api.build.WorkFactory;
 import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.api.manage.Office;
-import net.officefloor.frame.internal.structure.Flow;
+import net.officefloor.frame.internal.structure.JobSequence;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.frame.spi.managedobject.pool.ManagedObjectPool;
 import net.officefloor.frame.spi.source.SourceContext;
@@ -37,13 +37,13 @@ public interface ManagedObjectSourceContext<F extends Enum<F>> extends SourceCon
 
 	/**
 	 * <p>
-	 * Links in a {@link Flow} by specifying the first {@link Task} of the
-	 * {@link Flow}.
+	 * Links in a {@link JobSequence} by specifying the first {@link Task} of the
+	 * {@link JobSequence}.
 	 * <p>
 	 * The {@link Task} must be registered by this {@link ManagedObjectSource}.
 	 * 
 	 * @param key
-	 *            Key identifying {@link Flow} being invoked by the
+	 *            Key identifying {@link JobSequence} being invoked by the
 	 *            {@link ManagedObjectSource}.
 	 * @param workName
 	 *            Name of the {@link Work} that the {@link Task} resides on.
@@ -54,13 +54,13 @@ public interface ManagedObjectSourceContext<F extends Enum<F>> extends SourceCon
 
 	/**
 	 * <p>
-	 * Links in a {@link Flow} by specifying the first {@link Task} of the
-	 * {@link Flow}.
+	 * Links in a {@link JobSequence} by specifying the first {@link Task} of the
+	 * {@link JobSequence}.
 	 * <p>
 	 * The {@link Task} must be registered by this {@link ManagedObjectSource}.
 	 * 
 	 * @param flowIndex
-	 *            Index identifying the {@link Flow}.
+	 *            Index identifying the {@link JobSequence}.
 	 * @param workName
 	 *            Name of the {@link Work} that the {@link Task} resides on.
 	 * @param taskName

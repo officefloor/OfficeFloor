@@ -41,7 +41,7 @@ import net.officefloor.frame.internal.construct.RawBoundManagedObjectInstanceMet
 import net.officefloor.frame.internal.construct.RawBoundManagedObjectMetaData;
 import net.officefloor.frame.internal.construct.RawManagedObjectMetaData;
 import net.officefloor.frame.internal.construct.RawManagingOfficeMetaData;
-import net.officefloor.frame.internal.structure.Flow;
+import net.officefloor.frame.internal.structure.JobSequence;
 import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
 import net.officefloor.frame.internal.structure.FlowMetaData;
 import net.officefloor.frame.internal.structure.ManagedObjectExecuteContextFactory;
@@ -65,14 +65,14 @@ public class RawManagingOfficeMetaDataImpl<F extends Enum<F>> implements
 		RawManagingOfficeMetaData<F> {
 
 	/**
-	 * Determines if the {@link ManagedObjectSource} instigates {@link Flow}
+	 * Determines if the {@link ManagedObjectSource} instigates {@link JobSequence}
 	 * instances.
 	 * 
 	 * @param flowMetaData
 	 *            {@link ManagedObjectFlowMetaData} instances of the
 	 *            {@link ManagedObjectSource}.
 	 * @return <code>true</code> if {@link ManagedObjectSource} instigates
-	 *         {@link Flow} instances.
+	 *         {@link JobSequence} instances.
 	 */
 	public static boolean isRequireFlows(
 			ManagedObjectFlowMetaData<?>[] flowMetaData) {
@@ -123,7 +123,7 @@ public class RawManagingOfficeMetaDataImpl<F extends Enum<F>> implements
 	private OfficeMetaData managingOffice = null;
 
 	/**
-	 * {@link FlowMetaData} of the recycle {@link Flow}.
+	 * {@link FlowMetaData} of the recycle {@link JobSequence}.
 	 */
 	private FlowMetaData<?> recycleFlowMetaData = null;
 

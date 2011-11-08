@@ -19,10 +19,10 @@
 package net.officefloor.frame.api.escalate;
 
 import net.officefloor.frame.api.execute.Task;
-import net.officefloor.frame.internal.structure.Flow;
+import net.officefloor.frame.internal.structure.JobSequence;
 
 /**
- * {@link Escalation} of a {@link Flow} not completing in the timeout of a
+ * {@link Escalation} of a {@link JobSequence} not completing in the timeout of a
  * {@link Task} joining to it.
  * 
  * @author Daniel Sagenschneider
@@ -30,7 +30,7 @@ import net.officefloor.frame.internal.structure.Flow;
 public class FlowJoinTimedOutEscalation extends Escalation {
 
 	/**
-	 * Token provided to the join on the {@link Flow}.
+	 * Token provided to the join on the {@link JobSequence}.
 	 */
 	private final Object token;
 
@@ -38,16 +38,16 @@ public class FlowJoinTimedOutEscalation extends Escalation {
 	 * Initiate.
 	 * 
 	 * @param token
-	 *            Token provided to the join on the {@link Flow}.
+	 *            Token provided to the join on the {@link JobSequence}.
 	 */
 	public FlowJoinTimedOutEscalation(Object token) {
 		this.token = token;
 	}
 
 	/**
-	 * Obtains the token provided to the join on the {@link Flow}.
+	 * Obtains the token provided to the join on the {@link JobSequence}.
 	 * 
-	 * @return Token provided to the join on the {@link Flow}.
+	 * @return Token provided to the join on the {@link JobSequence}.
 	 */
 	public Object getToken() {
 		return this.token;

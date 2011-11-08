@@ -18,12 +18,12 @@
 
 package net.officefloor.frame.impl.execute.job;
 
-import net.officefloor.frame.internal.structure.Flow;
+import net.officefloor.frame.internal.structure.JobSequence;
 import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
 import net.officefloor.frame.spi.team.Job;
 
 /**
- * Tests the {@link AbstractJobContainer} invoking asynchronous {@link Flow}
+ * Tests the {@link AbstractJobContainer} invoking asynchronous {@link JobSequence}
  * instances.
  * 
  * @author Daniel Sagenschneider
@@ -31,7 +31,7 @@ import net.officefloor.frame.spi.team.Job;
 public class AsynchronousJobContainerTest extends AbstractJobContainerTest {
 
 	/**
-	 * Ensures execution of a {@link Job} with an asynchronous {@link Flow}
+	 * Ensures execution of a {@link Job} with an asynchronous {@link JobSequence}
 	 * invoked.
 	 */
 	public void testExecuteJobWithAsynchronousFlow() {

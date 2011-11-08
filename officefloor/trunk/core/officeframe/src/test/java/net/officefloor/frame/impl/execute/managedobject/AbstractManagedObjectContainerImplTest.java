@@ -35,7 +35,7 @@ import net.officefloor.frame.internal.structure.AssetManager;
 import net.officefloor.frame.internal.structure.AssetMonitor;
 import net.officefloor.frame.internal.structure.ContainerContext;
 import net.officefloor.frame.internal.structure.ExtensionInterfaceExtractor;
-import net.officefloor.frame.internal.structure.Flow;
+import net.officefloor.frame.internal.structure.JobSequence;
 import net.officefloor.frame.internal.structure.FlowMetaData;
 import net.officefloor.frame.internal.structure.GovernanceContainer;
 import net.officefloor.frame.internal.structure.JobNode;
@@ -306,9 +306,9 @@ public abstract class AbstractManagedObjectContainerImplTest extends
 			.createMock(WorkContainer.class);
 
 	/**
-	 * {@link Flow}.
+	 * {@link JobSequence}.
 	 */
-	private final Flow flow = this.createMock(Flow.class);
+	private final JobSequence flow = this.createMock(JobSequence.class);
 
 	/**
 	 * {@link ThreadState}.

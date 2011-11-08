@@ -22,7 +22,7 @@ import net.officefloor.frame.api.build.WorkFactory;
 import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.internal.structure.AdministratorMetaData;
-import net.officefloor.frame.internal.structure.Flow;
+import net.officefloor.frame.internal.structure.JobSequence;
 import net.officefloor.frame.internal.structure.FlowMetaData;
 import net.officefloor.frame.internal.structure.ManagedObjectMetaData;
 import net.officefloor.frame.internal.structure.ProcessState;
@@ -62,7 +62,7 @@ public class WorkMetaDataImpl<W extends Work> implements WorkMetaData<W> {
 	private final AdministratorMetaData<?, ?>[] administratorMetaData;
 
 	/**
-	 * {@link FlowMetaData} for the initial {@link Flow} of the {@link Work} .
+	 * {@link FlowMetaData} for the initial {@link JobSequence} of the {@link Work} .
 	 */
 	private final FlowMetaData<W> initialFlowMetaData;
 
@@ -83,7 +83,7 @@ public class WorkMetaDataImpl<W extends Work> implements WorkMetaData<W> {
 	 *            {@link AdministratorMetaData} of the {@link Administrator}
 	 *            instances bound to this {@link Work}.
 	 * @param initialFlowMetaData
-	 *            {@link FlowMetaData} for the initial {@link Flow} of the
+	 *            {@link FlowMetaData} for the initial {@link JobSequence} of the
 	 *            {@link Work}.
 	 * @param taskMetaData
 	 *            {@link TaskMetaData} of the {@link Task} instances of this

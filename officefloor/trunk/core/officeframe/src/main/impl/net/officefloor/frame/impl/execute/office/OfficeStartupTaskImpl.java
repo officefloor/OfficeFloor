@@ -18,7 +18,7 @@
 
 package net.officefloor.frame.impl.execute.office;
 
-import net.officefloor.frame.internal.structure.Flow;
+import net.officefloor.frame.internal.structure.JobSequence;
 import net.officefloor.frame.internal.structure.FlowMetaData;
 import net.officefloor.frame.internal.structure.OfficeStartupTask;
 
@@ -35,7 +35,7 @@ public class OfficeStartupTaskImpl implements OfficeStartupTask {
 	private final FlowMetaData<?> flowMetaData;
 
 	/**
-	 * Parameter for the startup {@link Flow}.
+	 * Parameter for the startup {@link JobSequence}.
 	 */
 	private final Object parameter;
 
@@ -45,7 +45,7 @@ public class OfficeStartupTaskImpl implements OfficeStartupTask {
 	 * @param flowMetaData
 	 *            {@link FlowMetaData} for the {@link OfficeStartupTask}.
 	 * @param parameter
-	 *            Parameter for the startup {@link Flow}.
+	 *            Parameter for the startup {@link JobSequence}.
 	 */
 	public OfficeStartupTaskImpl(FlowMetaData<?> flowMetaData, Object parameter) {
 		this.flowMetaData = flowMetaData;

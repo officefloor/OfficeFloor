@@ -28,7 +28,7 @@ import net.officefloor.frame.internal.structure.ActiveGovernance;
 import net.officefloor.frame.internal.structure.EscalationFlow;
 import net.officefloor.frame.internal.structure.EscalationLevel;
 import net.officefloor.frame.internal.structure.EscalationProcedure;
-import net.officefloor.frame.internal.structure.Flow;
+import net.officefloor.frame.internal.structure.JobSequence;
 import net.officefloor.frame.internal.structure.FlowAsset;
 import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
 import net.officefloor.frame.internal.structure.FlowMetaData;
@@ -80,9 +80,9 @@ public abstract class AbstractJobContainerTest extends OfficeFrameTestCase {
 			.createMock(WorkContainer.class);
 
 	/**
-	 * {@link Flow}.
+	 * {@link JobSequence}.
 	 */
-	private final Flow flow = this.createMock(Flow.class);
+	private final JobSequence flow = this.createMock(JobSequence.class);
 
 	/**
 	 * {@link JobMetaData}.
@@ -142,9 +142,9 @@ public abstract class AbstractJobContainerTest extends OfficeFrameTestCase {
 			.createMock(TaskMetaData.class);
 
 	/**
-	 * Parallel {@link Flow}.
+	 * Parallel {@link JobSequence}.
 	 */
-	private final Flow parallelFlow = this.createMock(Flow.class);
+	private final JobSequence parallelFlow = this.createMock(JobSequence.class);
 
 	/**
 	 * Parallel {@link Job}.
@@ -164,9 +164,9 @@ public abstract class AbstractJobContainerTest extends OfficeFrameTestCase {
 			.createMock(TaskMetaData.class);
 
 	/**
-	 * Asynchronous {@link Flow}.
+	 * Asynchronous {@link JobSequence}.
 	 */
-	private final Flow asynchronousFlow = this.createMock(Flow.class);
+	private final JobSequence asynchronousFlow = this.createMock(JobSequence.class);
 
 	/**
 	 * Asynchronous {@link JobNode}.
@@ -192,9 +192,9 @@ public abstract class AbstractJobContainerTest extends OfficeFrameTestCase {
 			.createMock(TaskMetaData.class);
 
 	/**
-	 * {@link EscalationFlow} {@link Flow}.
+	 * {@link EscalationFlow} {@link JobSequence}.
 	 */
-	private final Flow escalationFlow = this.createMock(Flow.class);
+	private final JobSequence escalationFlow = this.createMock(JobSequence.class);
 
 	/**
 	 * {@link EscalationFlow} {@link Job}.
@@ -354,15 +354,15 @@ public abstract class AbstractJobContainerTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Records doing a sequential {@link Flow}.
+	 * Records doing a sequential {@link JobSequence}.
 	 * 
 	 * @param currentJob
 	 *            Current {@link Job}.
 	 * @param sequentialFlowParameter
-	 *            Sequential {@link Flow} parameter.
+	 *            Sequential {@link JobSequence} parameter.
 	 * @param isActivateFlow
 	 *            Flag indicating if required to activate the first
-	 *            {@link JobNode} of the instigated sequential {@link Flow}.
+	 *            {@link JobNode} of the instigated sequential {@link JobSequence}.
 	 */
 	protected void record_doSequentialFlow(Job currentJob,
 			Object sequentialFlowParameter, boolean isActivateFlow) {
@@ -373,7 +373,7 @@ public abstract class AbstractJobContainerTest extends OfficeFrameTestCase {
 		this.recordReturn(this.sequentialFlowMetaData,
 				this.sequentialFlowMetaData.getInitialTaskMetaData(),
 				this.sequentialTaskMetaData);
-		this.recordReturn(this.flow, this.flow.createJobNode(
+		this.recordReturn(this.flow, this.flow.createTaskNode(
 				this.sequentialTaskMetaData, functionalityJob.parallelOwnerJob,
 				sequentialFlowParameter), this.sequentialJob);
 		if (isActivateFlow) {
@@ -382,7 +382,7 @@ public abstract class AbstractJobContainerTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Records doing a parallel {@link Flow}.
+	 * Records doing a parallel {@link JobSequence}.
 	 * 
 	 * @param currentJob
 	 *            Current {@link Job}.
@@ -403,7 +403,7 @@ public abstract class AbstractJobContainerTest extends OfficeFrameTestCase {
 		this.recordReturn(this.threadState,
 				this.threadState.createFlow(this.parallelFlowMetaData),
 				this.parallelFlow);
-		this.recordReturn(this.parallelFlow, this.parallelFlow.createJobNode(
+		this.recordReturn(this.parallelFlow, this.parallelFlow.createTaskNode(
 				this.parallelTaskMetaData, functionalityJob,
 				parallelFlowParameter), this.parallelJob);
 		this.parallelJob.setParallelOwner(functionalityJob);
@@ -471,7 +471,7 @@ public abstract class AbstractJobContainerTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Records doing an asynchronous {@link Flow}.
+	 * Records doing an asynchronous {@link JobSequence}.
 	 * 
 	 * @param currentJob
 	 *            Current {@link Job}.
@@ -494,7 +494,7 @@ public abstract class AbstractJobContainerTest extends OfficeFrameTestCase {
 				this.processState.createThread(this.asynchronousFlowMetaData),
 				this.asynchronousFlow);
 		this.recordReturn(this.asynchronousFlow, this.asynchronousFlow
-				.createJobNode(this.asynchronousTaskMetaData, null,
+				.createTaskNode(this.asynchronousTaskMetaData, null,
 						asynchronousFlowParameter), this.asynchronousJob);
 		this.asynchronousJob.activateJob();
 		this.recordReturn(this.asynchronousFlow,
@@ -635,22 +635,22 @@ public abstract class AbstractJobContainerTest extends OfficeFrameTestCase {
 				this.threadState.createFlow(this.escalationFlowMetaData),
 				this.escalationFlow);
 		this.recordReturn(this.escalationFlow, this.escalationFlow
-				.createJobNode(this.escalationTaskMetaData, parallelOwner,
+				.createTaskNode(this.escalationTaskMetaData, parallelOwner,
 						failure), this.escalationJob);
 	}
 
 	/**
-	 * Records waiting on a joined {@link Flow}.
+	 * Records waiting on a joined {@link JobSequence}.
 	 * 
 	 * @param currentJob
 	 *            Current {@link Job}.
 	 * @param instigationStrategy
-	 *            {@link FlowInstigationStrategyEnum} of the {@link Flow} being
+	 *            {@link FlowInstigationStrategyEnum} of the {@link JobSequence} being
 	 *            joined on.
 	 * @param timeout
-	 *            Timeout in milliseconds for the {@link Flow} join.
+	 *            Timeout in milliseconds for the {@link JobSequence} join.
 	 * @param token
-	 *            {@link Flow} join token.
+	 *            {@link JobSequence} join token.
 	 */
 	protected void record_JobContainer_waitOnFlow(Job currentJob,
 			FlowInstigationStrategyEnum instigationStrategy, long timeout,
@@ -694,7 +694,7 @@ public abstract class AbstractJobContainerTest extends OfficeFrameTestCase {
 	 */
 	protected void record_Flow_createJob(Job currentJob, Object nextJobParameter) {
 		FunctionalityJob functionalityJob = (FunctionalityJob) currentJob;
-		this.recordReturn(this.flow, this.flow.createJobNode(
+		this.recordReturn(this.flow, this.flow.createTaskNode(
 				this.nextTaskMetaData, functionalityJob.parallelOwnerJob,
 				nextJobParameter), this.nextJob);
 	}
@@ -966,16 +966,16 @@ public abstract class AbstractJobContainerTest extends OfficeFrameTestCase {
 		Object getObject(ManagedObjectIndex managedObjectIndex);
 
 		/**
-		 * Invokes a {@link Flow}.
+		 * Invokes a {@link JobSequence}.
 		 * 
 		 * @param flowIndex
-		 *            Index of the {@link Flow} to invoke.
+		 *            Index of the {@link JobSequence} to invoke.
 		 * @param instigationStrategy
 		 *            {@link FlowInstigationStrategyEnum}.
 		 * @param parameter
 		 *            Parameter for the first {@link Job} of the invoked
-		 *            {@link Flow}.
-		 * @return {@link FlowFuture} for the invoked {@link Flow}.
+		 *            {@link JobSequence}.
+		 * @return {@link FlowFuture} for the invoked {@link JobSequence}.
 		 */
 		FlowFuture doFlow(int flowIndex,
 				FlowInstigationStrategyEnum instigationStrategy,
@@ -988,9 +988,9 @@ public abstract class AbstractJobContainerTest extends OfficeFrameTestCase {
 		 *            {@link FlowFuture}.
 		 * @param timeout
 		 *            The maximum time to wait in milliseconds for the
-		 *            {@link Flow} to complete.
+		 *            {@link JobSequence} to complete.
 		 * @param token
-		 *            A token identifying which {@link Flow} join timed out. May
+		 *            A token identifying which {@link JobSequence} join timed out. May
 		 *            be <code>null</code>.
 		 */
 		void join(FlowFuture flowFuture, long timeout, Object token);

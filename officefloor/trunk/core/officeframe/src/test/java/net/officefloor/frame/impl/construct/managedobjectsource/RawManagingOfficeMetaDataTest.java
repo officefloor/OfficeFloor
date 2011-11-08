@@ -37,7 +37,7 @@ import net.officefloor.frame.internal.construct.RawBoundManagedObjectMetaData;
 import net.officefloor.frame.internal.construct.RawManagedObjectMetaData;
 import net.officefloor.frame.internal.construct.RawManagingOfficeMetaData;
 import net.officefloor.frame.internal.structure.AssetManager;
-import net.officefloor.frame.internal.structure.Flow;
+import net.officefloor.frame.internal.structure.JobSequence;
 import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
 import net.officefloor.frame.internal.structure.FlowMetaData;
 import net.officefloor.frame.internal.structure.JobNode;
@@ -462,7 +462,7 @@ public class RawManagingOfficeMetaDataTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensures issues if {@link Flow} instances configured but no {@link Flow}
+	 * Ensures issues if {@link JobSequence} instances configured but no {@link JobSequence}
 	 * instances required.
 	 */
 	public void testNoFlowsButFlowsConfigured() {
@@ -485,7 +485,7 @@ public class RawManagingOfficeMetaDataTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensures issue if no {@link Flow} is configured.
+	 * Ensures issue if no {@link JobSequence} is configured.
 	 */
 	public void testNoFlowConfigured() {
 
@@ -514,7 +514,7 @@ public class RawManagingOfficeMetaDataTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensures issue if no {@link TaskMetaData} for the {@link Flow}.
+	 * Ensures issue if no {@link TaskMetaData} for the {@link JobSequence}.
 	 */
 	public void testNoFlowTask() {
 
@@ -599,7 +599,7 @@ public class RawManagingOfficeMetaDataTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensures issue if extra {@link Flow} configured.
+	 * Ensures issue if extra {@link JobSequence} configured.
 	 */
 	public void testExtraFlowConfigured() {
 
@@ -650,7 +650,7 @@ public class RawManagingOfficeMetaDataTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensures able to construct {@link Flow} for a {@link ManagedObject}.
+	 * Ensures able to construct {@link JobSequence} for a {@link ManagedObject}.
 	 */
 	public void testConstructFlow() {
 
@@ -667,7 +667,7 @@ public class RawManagingOfficeMetaDataTest extends OfficeFrameTestCase {
 		final ManagedObject managedObject = this
 				.createMock(ManagedObject.class);
 		final JobNode jobNode = this.createMock(JobNode.class);
-		final Flow flow = this.createMock(Flow.class);
+		final JobSequence flow = this.createMock(JobSequence.class);
 		final ThreadState thread = this.createMock(ThreadState.class);
 		final ProcessState process = this.createMock(ProcessState.class);
 		final ProcessFuture future = this.createMock(ProcessFuture.class);
@@ -756,7 +756,7 @@ public class RawManagingOfficeMetaDataTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensures able to construct {@link Flow} for a {@link ManagedObject} that
+	 * Ensures able to construct {@link JobSequence} for a {@link ManagedObject} that
 	 * is not the first bound or first instance.
 	 */
 	public void testConstructFlowOfNotFirstBoundOrInstance() {
@@ -779,7 +779,7 @@ public class RawManagingOfficeMetaDataTest extends OfficeFrameTestCase {
 		final JobNode jobNode = this.createMock(JobNode.class);
 		final ProcessTicker processTicker = this
 				.createMock(ProcessTicker.class);
-		final Flow flow = this.createMock(Flow.class);
+		final JobSequence flow = this.createMock(JobSequence.class);
 		final ThreadState thread = this.createMock(ThreadState.class);
 		final ProcessState process = this.createMock(ProcessState.class);
 		final ProcessFuture future = this.createMock(ProcessFuture.class);
@@ -872,7 +872,7 @@ public class RawManagingOfficeMetaDataTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * {@link Flow} key.
+	 * {@link JobSequence} key.
 	 */
 	private enum Flows {
 		KEY, WRONG_KEY
@@ -909,7 +909,7 @@ public class RawManagingOfficeMetaDataTest extends OfficeFrameTestCase {
 			final ManagedObject managedObject) {
 
 		final JobNode recycleJob = this.createMock(JobNode.class);
-		final Flow flow = this.createMock(Flow.class);
+		final JobSequence flow = this.createMock(JobSequence.class);
 		final ThreadState threadState = this.createMock(ThreadState.class);
 		final ProcessState processState = this.createMock(ProcessState.class);
 

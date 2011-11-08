@@ -19,11 +19,11 @@
 package net.officefloor.frame.impl.execute.job;
 
 import net.officefloor.frame.api.execute.FlowFuture;
-import net.officefloor.frame.internal.structure.Flow;
+import net.officefloor.frame.internal.structure.JobSequence;
 import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
 
 /**
- * Tests the {@link AbstractJobContainer} invoking asynchronous {@link Flow}
+ * Tests the {@link AbstractJobContainer} invoking asynchronous {@link JobSequence}
  * instances.
  * 
  * @author Daniel Sagenschneider
@@ -31,31 +31,31 @@ import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
 public class JoinJobContainerTest extends AbstractJobContainerTest {
 
 	/**
-	 * Ensures join on sequential {@link Flow}.
+	 * Ensures join on sequential {@link JobSequence}.
 	 */
 	public void testJoinSequentialFlow() {
 		this.doJoinFlowTest(FlowInstigationStrategyEnum.SEQUENTIAL);
 	}
 
 	/**
-	 * Ensures join on parallel {@link Flow}.
+	 * Ensures join on parallel {@link JobSequence}.
 	 */
 	public void testJoinParallelFlow() {
 		this.doJoinFlowTest(FlowInstigationStrategyEnum.PARALLEL);
 	}
 
 	/**
-	 * Ensures join on asynchronous {@link Flow}.
+	 * Ensures join on asynchronous {@link JobSequence}.
 	 */
 	public void testJoinAsynchronousFlow() {
 		this.doJoinFlowTest(FlowInstigationStrategyEnum.ASYNCHRONOUS);
 	}
 
 	/**
-	 * Does a single join on {@link Flow} test.
+	 * Does a single join on {@link JobSequence} test.
 	 * 
 	 * @param instigationStrategy
-	 *            {@link FlowInstigationStrategyEnum} of the {@link Flow} being
+	 *            {@link FlowInstigationStrategyEnum} of the {@link JobSequence} being
 	 *            joined on.
 	 */
 	private void doJoinFlowTest(
@@ -110,7 +110,7 @@ public class JoinJobContainerTest extends AbstractJobContainerTest {
 	}
 
 	/**
-	 * Tests joining multiple {@link Flow} instances.
+	 * Tests joining multiple {@link JobSequence} instances.
 	 */
 	public void testJoinMultipleFlows() {
 
@@ -156,8 +156,8 @@ public class JoinJobContainerTest extends AbstractJobContainerTest {
 	}
 
 	/**
-	 * Tests joining the same {@link Flow} multiple times which should result on
-	 * waiting on the {@link Flow} only once.
+	 * Tests joining the same {@link JobSequence} multiple times which should result on
+	 * waiting on the {@link JobSequence} only once.
 	 */
 	public void testJoinSameFlowMultipleTimes() {
 

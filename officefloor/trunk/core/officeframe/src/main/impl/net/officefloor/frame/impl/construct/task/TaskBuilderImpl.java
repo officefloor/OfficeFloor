@@ -36,7 +36,7 @@ import net.officefloor.frame.internal.configuration.TaskDutyConfiguration;
 import net.officefloor.frame.internal.configuration.TaskNodeReference;
 import net.officefloor.frame.internal.configuration.TaskObjectConfiguration;
 import net.officefloor.frame.internal.structure.EscalationProcedure;
-import net.officefloor.frame.internal.structure.Flow;
+import net.officefloor.frame.internal.structure.JobSequence;
 import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
 import net.officefloor.frame.internal.structure.JobNode;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
@@ -67,7 +67,7 @@ public class TaskBuilderImpl<W extends Work, D extends Enum<D>, F extends Enum<F
 	private final Map<Integer, TaskObjectConfigurationImpl<D>> objects = new HashMap<Integer, TaskObjectConfigurationImpl<D>>();
 
 	/**
-	 * {@link Flow} instances to be linked to this {@link Task}.
+	 * {@link JobSequence} instances to be linked to this {@link Task}.
 	 */
 	private final Map<Integer, TaskFlowConfigurationImpl<F>> flows = new HashMap<Integer, TaskFlowConfigurationImpl<F>>();
 
@@ -82,7 +82,7 @@ public class TaskBuilderImpl<W extends Work, D extends Enum<D>, F extends Enum<F
 	private String teamName;
 
 	/**
-	 * Next {@link JobNode} within the {@link Flow}.
+	 * Next {@link JobNode} within the {@link JobSequence}.
 	 */
 	private TaskNodeReference nextTaskInFlow;
 
@@ -248,12 +248,12 @@ public class TaskBuilderImpl<W extends Work, D extends Enum<D>, F extends Enum<F
 	}
 
 	/**
-	 * Links in a {@link Flow}.
+	 * Links in a {@link JobSequence}.
 	 * 
 	 * @param flowIndex
-	 *            Index of the {@link Flow}.
+	 *            Index of the {@link JobSequence}.
 	 * @param flowKey
-	 *            Key of the {@link Flow}. Should be <code>null</code> if
+	 *            Key of the {@link JobSequence}. Should be <code>null</code> if
 	 *            indexed.
 	 * @param workName
 	 *            Name of the {@link Work}. May be <code>null</code> if same
@@ -263,7 +263,7 @@ public class TaskBuilderImpl<W extends Work, D extends Enum<D>, F extends Enum<F
 	 * @param strategy
 	 *            {@link FlowInstigationStrategyEnum}.
 	 * @param argumentType
-	 *            Type of argument passed to the instigated {@link Flow}.
+	 *            Type of argument passed to the instigated {@link JobSequence}.
 	 */
 	private void linkFlow(int flowIndex, F flowKey, String workName,
 			String taskName, FlowInstigationStrategyEnum strategy,

@@ -22,7 +22,7 @@ import net.officefloor.frame.api.build.WorkFactory;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.internal.structure.AdministratorMetaData;
 import net.officefloor.frame.internal.structure.ContainerContext;
-import net.officefloor.frame.internal.structure.Flow;
+import net.officefloor.frame.internal.structure.JobSequence;
 import net.officefloor.frame.internal.structure.FlowMetaData;
 import net.officefloor.frame.internal.structure.JobNode;
 import net.officefloor.frame.internal.structure.JobNodeActivateSet;
@@ -93,9 +93,9 @@ public class WorkContainerTest extends OfficeFrameTestCase {
 			.createMock(ContainerContext.class);
 
 	/**
-	 * Mock {@link Flow}.
+	 * Mock {@link JobSequence}.
 	 */
-	private final Flow flow = this.createMock(Flow.class);
+	private final JobSequence flow = this.createMock(JobSequence.class);
 
 	/**
 	 * Mock {@link ThreadState}.

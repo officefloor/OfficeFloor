@@ -76,7 +76,7 @@ public interface AdministratorMetaData<I extends Object, A extends Enum<A>>
 	 * @param administeringWorkContainer
 	 *            {@link WorkContainer} of the administered {@link Task}.
 	 * @param flow
-	 *            {@link Flow}.
+	 *            {@link JobSequence}.
 	 * @param taskDutyAssociation
 	 *            {@link TaskDutyAssociation}.
 	 * @param parallelJobNodeOwner
@@ -84,7 +84,7 @@ public interface AdministratorMetaData<I extends Object, A extends Enum<A>>
 	 * @return {@link JobNode} for the {@link Duty}.
 	 */
 	JobNode createDutyNode(TaskMetaData<?, ?, ?> administeringTaskMetaData,
-			WorkContainer<?> administeringWorkContainer, Flow flow,
+			WorkContainer<?> administeringWorkContainer, JobSequence flow,
 			TaskDutyAssociation<?> taskDutyAssociation,
 			JobNode parallelJobNodeOwner);
 

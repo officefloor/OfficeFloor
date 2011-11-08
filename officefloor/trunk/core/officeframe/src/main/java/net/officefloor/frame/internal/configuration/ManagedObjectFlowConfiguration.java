@@ -19,35 +19,35 @@
 package net.officefloor.frame.internal.configuration;
 
 import net.officefloor.frame.api.build.Indexed;
-import net.officefloor.frame.internal.structure.Flow;
+import net.officefloor.frame.internal.structure.JobSequence;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 
 /**
- * Configuration of a {@link Flow} instigated by a {@link ManagedObjectSource}.
+ * Configuration of a {@link JobSequence} instigated by a {@link ManagedObjectSource}.
  * 
  * @author Daniel Sagenschneider
  */
 public interface ManagedObjectFlowConfiguration<F extends Enum<F>> {
 
 	/**
-	 * Obtains the name to identify this {@link Flow}.
+	 * Obtains the name to identify this {@link JobSequence}.
 	 * 
-	 * @return Name identifying this {@link Flow}.
+	 * @return Name identifying this {@link JobSequence}.
 	 */
 	String getFlowName();
 
 	/**
-	 * Obtains the key for this {@link Flow}.
+	 * Obtains the key for this {@link JobSequence}.
 	 * 
-	 * @return Key for this flow. May be <code>null</code> if {@link Flow}
+	 * @return Key for this flow. May be <code>null</code> if {@link JobSequence}
 	 *         instances are {@link Indexed}.
 	 */
 	F getFlowKey();
 
 	/**
-	 * Obtains the {@link TaskNodeReference} for this {@link Flow}.
+	 * Obtains the {@link TaskNodeReference} for this {@link JobSequence}.
 	 * 
-	 * @return {@link TaskNodeReference} to the {@link Flow}.
+	 * @return {@link TaskNodeReference} to the {@link JobSequence}.
 	 */
 	TaskNodeReference getTaskNodeReference();
 

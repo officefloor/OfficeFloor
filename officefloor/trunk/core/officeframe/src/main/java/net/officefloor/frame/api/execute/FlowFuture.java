@@ -18,19 +18,19 @@
 
 package net.officefloor.frame.api.execute;
 
-import net.officefloor.frame.internal.structure.Flow;
+import net.officefloor.frame.internal.structure.JobSequence;
 
 /**
- * Future token to indicate a {@link Flow} has completed.
+ * Future token to indicate a {@link JobSequence} has completed.
  * 
  * @author Daniel Sagenschneider
  */
 public interface FlowFuture {
 
 	/**
-	 * Indicates whether the {@link Flow} has completed.
+	 * Indicates whether the {@link JobSequence} has completed.
 	 * 
-	 * @return <code>true</code> if the {@link Flow} has completed.
+	 * @return <code>true</code> if the {@link JobSequence} has completed.
 	 */
 	boolean isComplete();
 
