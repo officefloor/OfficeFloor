@@ -20,7 +20,7 @@ package net.officefloor.compile.test.administrator;
 
 import net.officefloor.compile.administrator.DutyFlowType;
 import net.officefloor.compile.administrator.DutyType;
-import net.officefloor.frame.internal.structure.Flow;
+import net.officefloor.frame.internal.structure.JobSequence;
 
 /**
  * Builder of the {@link DutyType}.
@@ -33,13 +33,13 @@ public interface DutyTypeBuilder<F extends Enum<F>> {
 	 * Adds a {@link DutyFlowType}.
 	 * 
 	 * @param flowName
-	 *            Name of the {@link Flow}.
+	 *            Name of the {@link JobSequence}.
 	 * @param argumentType
 	 *            Argument type.
 	 * @param index
-	 *            Index of the {@link Flow}.
+	 *            Index of the {@link JobSequence}.
 	 * @param flowKey
-	 *            Key of the {@link Flow}.
+	 *            Key of the {@link JobSequence}.
 	 */
 	void addFlow(String flowName, Class<?> argumentType, int index, F flowKey);
 

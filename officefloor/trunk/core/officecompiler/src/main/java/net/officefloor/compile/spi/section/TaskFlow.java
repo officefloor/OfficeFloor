@@ -18,10 +18,10 @@
 
 package net.officefloor.compile.spi.section;
 
-import net.officefloor.frame.internal.structure.Flow;
+import net.officefloor.frame.internal.structure.JobSequence;
 
 /**
- * {@link Flow} from the {@link SectionTask}.
+ * {@link JobSequence} from the {@link SectionTask}.
  * 
  * @author Daniel Sagenschneider
  */

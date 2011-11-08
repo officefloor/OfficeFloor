@@ -21,11 +21,11 @@ package net.officefloor.compile.spi.work.source;
 import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.api.execute.Task;
-import net.officefloor.frame.internal.structure.Flow;
+import net.officefloor.frame.internal.structure.JobSequence;
 
 /**
  * Provides means for the {@link WorkSource} to provide a
- * <code>type definition</code> of a possible {@link Flow} instigated by the
+ * <code>type definition</code> of a possible {@link JobSequence} instigated by the
  * {@link Task}.
  * 
  * @author Daniel Sagenschneider
@@ -45,21 +45,21 @@ public interface TaskFlowTypeBuilder<F extends Enum<F>> {
 	/**
 	 * <p>
 	 * Specifies the type of the argument passed by the {@link Task} to the
-	 * {@link Flow}.
+	 * {@link JobSequence}.
 	 * <p>
 	 * Should there be no argument, do not call this method.
 	 * 
 	 * @param parameterType
-	 *            Type of argument passed to {@link Flow}.
+	 *            Type of argument passed to {@link JobSequence}.
 	 */
 	void setArgumentType(Class<?> argumentType);
 
 	/**
 	 * <p>
-	 * Provides means to specify a display label for the {@link Flow}.
+	 * Provides means to specify a display label for the {@link JobSequence}.
 	 * <p>
 	 * This need not be set as is only an aid to better identify the
-	 * {@link Flow}. If not set the {@link TaskTypeBuilder} will use the
+	 * {@link JobSequence}. If not set the {@link TaskTypeBuilder} will use the
 	 * following order to get a display label:
 	 * <ol>
 	 * <li>{@link Enum} key name</li>
@@ -67,7 +67,7 @@ public interface TaskFlowTypeBuilder<F extends Enum<F>> {
 	 * </ol>
 	 * 
 	 * @param label
-	 *            Display label for the {@link Flow}.
+	 *            Display label for the {@link JobSequence}.
 	 */
 	void setLabel(String label);
 

@@ -25,10 +25,10 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 import net.officefloor.frame.api.execute.Task;
-import net.officefloor.frame.internal.structure.Flow;
+import net.officefloor.frame.internal.structure.JobSequence;
 
 /**
- * Annotates an interface to have each of its methods be a {@link Flow} that may
+ * Annotates an interface to have each of its methods be a {@link JobSequence} that may
  * be invoked by the {@link Task} class method.
  * 
  * @author Daniel Sagenschneider

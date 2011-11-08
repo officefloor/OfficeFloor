@@ -18,7 +18,7 @@
 
 package net.officefloor.compile.managedobject;
 
-import net.officefloor.frame.internal.structure.Flow;
+import net.officefloor.frame.internal.structure.JobSequence;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.spi.team.Team;
@@ -49,10 +49,10 @@ public interface ManagedObjectType<D extends Enum<D>> {
 	ManagedObjectDependencyType<D>[] getDependencyTypes();
 
 	/**
-	 * Obtains the {@link ManagedObjectFlowType} definitions of the {@link Flow}
+	 * Obtains the {@link ManagedObjectFlowType} definitions of the {@link JobSequence}
 	 * instances required to be linked for the {@link ManagedObjectSource}.
 	 * 
-	 * @return {@link ManagedObjectFlowType} definitions of the {@link Flow}
+	 * @return {@link ManagedObjectFlowType} definitions of the {@link JobSequence}
 	 *         instances required to be linked for the
 	 *         {@link ManagedObjectSource}.
 	 */

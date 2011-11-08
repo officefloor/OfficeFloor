@@ -18,7 +18,7 @@
 
 package net.officefloor.plugin.autowire;
 
-import net.officefloor.frame.internal.structure.Flow;
+import net.officefloor.frame.internal.structure.JobSequence;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.spi.team.Team;
 
@@ -27,7 +27,7 @@ import net.officefloor.frame.spi.team.Team;
  * Provides wiring of a {@link ManagedObjectSource}.
  * <p>
  * This is to assist auto-wiring for {@link ManagedObjectSource} instances that
- * have {@link Flow}, {@link Team} or {@link Object} dependencies.
+ * have {@link JobSequence}, {@link Team} or {@link Object} dependencies.
  * 
  * @author Daniel Sagenschneider
  */
