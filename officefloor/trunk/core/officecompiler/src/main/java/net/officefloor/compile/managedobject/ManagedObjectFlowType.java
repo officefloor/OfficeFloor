@@ -20,11 +20,11 @@ package net.officefloor.compile.managedobject;
 
 import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.execute.Work;
-import net.officefloor.frame.internal.structure.Flow;
+import net.officefloor.frame.internal.structure.JobSequence;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 
 /**
- * <code>Type definition</code> of a {@link Flow} instigated by the
+ * <code>Type definition</code> of a {@link JobSequence} instigated by the
  * {@link ManagedObjectSource} or one of its {@link Task} instances.
  * 
  * @author Daniel Sagenschneider
@@ -32,15 +32,15 @@ import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 public interface ManagedObjectFlowType<F extends Enum<F>> {
 
 	/**
-	 * Obtains the name of the {@link Flow}.
+	 * Obtains the name of the {@link JobSequence}.
 	 * 
-	 * @return Name of the {@link Flow}.
+	 * @return Name of the {@link JobSequence}.
 	 */
 	String getFlowName();
 
 	/**
-	 * Obtains the name of the {@link Work} instigating the {@link Flow}. Should
-	 * the {@link Flow} be instigated by the {@link ManagedObjectSource}
+	 * Obtains the name of the {@link Work} instigating the {@link JobSequence}. Should
+	 * the {@link JobSequence} be instigated by the {@link ManagedObjectSource}
 	 * directly (rather than a {@link Task} it added) this will return
 	 * <code>null</code>.
 	 * 
@@ -49,8 +49,8 @@ public interface ManagedObjectFlowType<F extends Enum<F>> {
 	String getWorkName();
 
 	/**
-	 * Obtains the name of the {@link Task} instigating the {@link Flow}. Should
-	 * the {@link Flow} be instigated by the {@link ManagedObjectSource}
+	 * Obtains the name of the {@link Task} instigating the {@link JobSequence}. Should
+	 * the {@link JobSequence} be instigated by the {@link ManagedObjectSource}
 	 * directly (rather than a {@link Task} it added) this will return
 	 * <code>null</code>.
 	 * 
@@ -59,23 +59,23 @@ public interface ManagedObjectFlowType<F extends Enum<F>> {
 	String getTaskName();
 
 	/**
-	 * Obtains the key identifying the {@link Flow}.
+	 * Obtains the key identifying the {@link JobSequence}.
 	 * 
-	 * @return Key identifying the {@link Flow}.
+	 * @return Key identifying the {@link JobSequence}.
 	 */
 	F getKey();
 
 	/**
-	 * Obtains the index identifying the {@link Flow}.
+	 * Obtains the index identifying the {@link JobSequence}.
 	 * 
-	 * @return Index identifying the {@link Flow}.
+	 * @return Index identifying the {@link JobSequence}.
 	 */
 	int getIndex();
 
 	/**
-	 * Obtains the type of the argument passed to the {@link Flow}.
+	 * Obtains the type of the argument passed to the {@link JobSequence}.
 	 * 
-	 * @return Type of argument passed to the {@link Flow}. May be
+	 * @return Type of argument passed to the {@link JobSequence}. May be
 	 *         <code>null</code> to indicate no argument.
 	 */
 	Class<?> getArgumentType();

@@ -35,7 +35,7 @@ import net.officefloor.compile.test.issues.FailTestCompilerIssues;
 import net.officefloor.compile.test.managedobject.ManagedObjectTypeBuilder;
 import net.officefloor.compile.test.properties.PropertyListUtil;
 import net.officefloor.frame.api.build.Indexed;
-import net.officefloor.frame.internal.structure.Flow;
+import net.officefloor.frame.internal.structure.JobSequence;
 import net.officefloor.frame.spi.administration.Duty;
 import net.officefloor.frame.spi.administration.source.AdministratorSource;
 import net.officefloor.frame.spi.administration.source.AdministratorSourceSpecification;
@@ -270,7 +270,7 @@ public class AdministratorLoaderUtil {
 		private final A dutyKey;
 
 		/**
-		 * {@link Flow} {@link Enum}.
+		 * {@link JobSequence} {@link Enum}.
 		 */
 		private final Class<F> flowKeyClass;
 
@@ -287,7 +287,7 @@ public class AdministratorLoaderUtil {
 		 * @param dutyKey
 		 *            Key identifying the {@link Duty}.
 		 * @param flowKeyClass
-		 *            {@link Flow} {@link Enum}.
+		 *            {@link JobSequence} {@link Enum}.
 		 */
 		public DutyTypeBuilderImpl(String dutyName, A dutyKey,
 				Class<F> flowKeyClass) {
@@ -339,22 +339,22 @@ public class AdministratorLoaderUtil {
 			DutyFlowType<F> {
 
 		/**
-		 * Name of the {@link Flow}.
+		 * Name of the {@link JobSequence}.
 		 */
 		private final String flowName;
 
 		/**
-		 * Argument type to the {@link Flow}.
+		 * Argument type to the {@link JobSequence}.
 		 */
 		private final Class<?> argumentType;
 
 		/**
-		 * Index identifying the {@link Flow}.
+		 * Index identifying the {@link JobSequence}.
 		 */
 		private final int index;
 
 		/**
-		 * Key identifying the {@link Flow}.
+		 * Key identifying the {@link JobSequence}.
 		 */
 		private final F key;
 
@@ -362,13 +362,13 @@ public class AdministratorLoaderUtil {
 		 * Initiate.
 		 * 
 		 * @param flowName
-		 *            Name of the {@link Flow}.
+		 *            Name of the {@link JobSequence}.
 		 * @param argumentType
-		 *            Argument type to the {@link Flow}.
+		 *            Argument type to the {@link JobSequence}.
 		 * @param index
-		 *            Index identifying the {@link Flow}.
+		 *            Index identifying the {@link JobSequence}.
 		 * @param key
-		 *            Key identifying the {@link Flow}.
+		 *            Key identifying the {@link JobSequence}.
 		 */
 		public DutyFlowTypeImpl(String flowName, Class<?> argumentType,
 				int index, F key) {

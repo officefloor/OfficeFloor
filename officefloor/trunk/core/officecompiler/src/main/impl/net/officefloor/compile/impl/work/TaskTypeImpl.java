@@ -35,7 +35,7 @@ import net.officefloor.compile.work.TaskType;
 import net.officefloor.frame.api.build.TaskFactory;
 import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.execute.Work;
-import net.officefloor.frame.internal.structure.Flow;
+import net.officefloor.frame.internal.structure.JobSequence;
 
 /**
  * {@link TaskType} implementation.
@@ -66,7 +66,7 @@ public class TaskTypeImpl<W extends Work, M extends Enum<M>, F extends Enum<F>>
 	private final List<TaskObjectType<M>> objects = new LinkedList<TaskObjectType<M>>();
 
 	/**
-	 * {@link Enum} providing keys for instigated {@link Flow} instances.
+	 * {@link Enum} providing keys for instigated {@link JobSequence} instances.
 	 */
 	private final Class<F> flowKeyClass;
 
@@ -101,7 +101,7 @@ public class TaskTypeImpl<W extends Work, M extends Enum<M>, F extends Enum<F>>
 	 *            {@link Enum} providing keys for dependent {@link Object}
 	 *            instances.
 	 * @param flowKeyClass
-	 *            {@link Enum} providing keys for instigated {@link Flow}
+	 *            {@link Enum} providing keys for instigated {@link JobSequence}
 	 *            instances.
 	 */
 	public TaskTypeImpl(String taskName, TaskFactory<W, M, F> taskFactory,

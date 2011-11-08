@@ -23,7 +23,7 @@ import net.officefloor.frame.api.build.TaskFactory;
 import net.officefloor.frame.api.build.WorkFactory;
 import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.execute.Work;
-import net.officefloor.frame.internal.structure.Flow;
+import net.officefloor.frame.internal.structure.JobSequence;
 
 /**
  * Provides means for the {@link WorkSource} to provide a
@@ -56,9 +56,9 @@ public interface WorkTypeBuilder<W extends Work> {
 	 *            {@link TaskTypeBuilder} requires no dependent {@link Object}
 	 *            instances or they are {@link Indexed}.
 	 * @param flowKeysClass
-	 *            {@link Enum} providing the keys of the {@link Flow} instigated
+	 *            {@link Enum} providing the keys of the {@link JobSequence} instigated
 	 *            by the {@link TaskTypeBuilder}. This may be <code>null</code>
-	 *            if the {@link TaskTypeBuilder} does not instigate {@link Flow}
+	 *            if the {@link TaskTypeBuilder} does not instigate {@link JobSequence}
 	 *            instances or they are {@link Indexed}.
 	 * @return {@link TaskTypeBuilder} to provide <code>type definition</code>
 	 *         of the added {@link Task}.

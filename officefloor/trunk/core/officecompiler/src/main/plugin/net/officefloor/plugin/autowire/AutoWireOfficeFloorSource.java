@@ -54,7 +54,7 @@ import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.impl.spi.team.ProcessContextTeamSource;
-import net.officefloor.frame.internal.structure.Flow;
+import net.officefloor.frame.internal.structure.JobSequence;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
@@ -820,7 +820,7 @@ public class AutoWireOfficeFloorSource extends AbstractOfficeFloorSource
 	}
 
 	/**
-	 * Auto-wire {@link Flow}.
+	 * Auto-wire {@link JobSequence}.
 	 */
 	private class AutoWireFlow {
 

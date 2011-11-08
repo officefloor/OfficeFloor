@@ -26,10 +26,10 @@ import java.util.Map;
 
 import net.officefloor.frame.api.execute.FlowFuture;
 import net.officefloor.frame.api.execute.TaskContext;
-import net.officefloor.frame.internal.structure.Flow;
+import net.officefloor.frame.internal.structure.JobSequence;
 
 /**
- * {@link ParameterFactory} to obtain the {@link Flow}.
+ * {@link ParameterFactory} to obtain the {@link JobSequence}.
  * 
  * @author Daniel Sagenschneider
  */
@@ -90,7 +90,7 @@ public class FlowParameterFactory implements ParameterFactory {
 	}
 
 	/**
-	 * {@link Flow} {@link InvocationHandler}.
+	 * {@link JobSequence} {@link InvocationHandler}.
 	 */
 	private class FlowInvocationHandler implements InvocationHandler {
 
