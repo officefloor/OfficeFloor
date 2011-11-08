@@ -131,7 +131,7 @@ public interface TaskMetaData<W extends Work, D extends Enum<D>, F extends Enum<
 	 *            Parameter.
 	 * @return {@link JobNode}.
 	 */
-	JobNode createTask(Flow flow, WorkContainer<W> workContainer,
+	JobNode createTaskNode(Flow flow, WorkContainer<W> workContainer,
 			JobNode parallelJobNodeOwner, Object parameter);
 
 }

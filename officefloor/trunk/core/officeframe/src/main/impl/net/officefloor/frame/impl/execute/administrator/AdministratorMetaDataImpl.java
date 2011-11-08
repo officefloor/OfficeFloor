@@ -20,14 +20,19 @@ package net.officefloor.frame.impl.execute.administrator;
 
 import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.api.execute.Work;
+import net.officefloor.frame.impl.execute.duty.DutyJob;
 import net.officefloor.frame.impl.execute.job.JobNodeActivatableSetImpl;
 import net.officefloor.frame.internal.structure.AdministratorContainer;
 import net.officefloor.frame.internal.structure.AdministratorMetaData;
 import net.officefloor.frame.internal.structure.DutyMetaData;
 import net.officefloor.frame.internal.structure.EscalationProcedure;
 import net.officefloor.frame.internal.structure.ExtensionInterfaceMetaData;
+import net.officefloor.frame.internal.structure.Flow;
+import net.officefloor.frame.internal.structure.JobNode;
 import net.officefloor.frame.internal.structure.JobNodeActivatableSet;
+import net.officefloor.frame.internal.structure.TaskDutyAssociation;
 import net.officefloor.frame.internal.structure.TaskMetaData;
+import net.officefloor.frame.internal.structure.WorkContainer;
 import net.officefloor.frame.spi.administration.Administrator;
 import net.officefloor.frame.spi.administration.DutyKey;
 import net.officefloor.frame.spi.administration.source.AdministratorSource;
@@ -146,6 +151,18 @@ public class AdministratorMetaDataImpl<I extends Object, A extends Enum<A>>
 	public TaskMetaData<?, ?, ?> getNextTaskInFlow() {
 		// Never a next task for an administrator duty
 		return null;
+	}
+
+	@Override
+	@SuppressWarnings({ "unchecked", "rawtypes" })
+	public JobNode createDutyNode(
+			TaskMetaData<?, ?, ?> administeringTaskMetaData,
+			WorkContainer<?> administeringWorkContainer, Flow flow,
+			TaskDutyAssociation<?> taskDutyAssociation,
+			JobNode parallelJobNodeOwner) {
+		return new DutyJob(flow, administeringWorkContainer, this,
+				taskDutyAssociation, parallelJobNodeOwner,
+				administeringTaskMetaData);
 	}
 
 }

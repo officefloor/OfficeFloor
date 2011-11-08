@@ -18,6 +18,7 @@
 
 package net.officefloor.frame.internal.structure;
 
+import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.spi.administration.Administrator;
 import net.officefloor.frame.spi.administration.Duty;
 import net.officefloor.frame.spi.administration.DutyKey;
@@ -66,5 +67,25 @@ public interface AdministratorMetaData<I extends Object, A extends Enum<A>>
 	 *         {@link DutyKey}.
 	 */
 	DutyMetaData getDutyMetaData(DutyKey<A> dutyKey);
+
+	/**
+	 * Creates the {@link JobNode} for the {@link Duty}.
+	 * 
+	 * @param administeringTaskMetaData
+	 *            {@link TaskMetaData} of the administered {@link Task}.
+	 * @param administeringWorkContainer
+	 *            {@link WorkContainer} of the administered {@link Task}.
+	 * @param flow
+	 *            {@link Flow}.
+	 * @param taskDutyAssociation
+	 *            {@link TaskDutyAssociation}.
+	 * @param parallelJobNodeOwner
+	 *            Paralllel {@link JobNode} owner.
+	 * @return {@link JobNode} for the {@link Duty}.
+	 */
+	JobNode createDutyNode(TaskMetaData<?, ?, ?> administeringTaskMetaData,
+			WorkContainer<?> administeringWorkContainer, Flow flow,
+			TaskDutyAssociation<?> taskDutyAssociation,
+			JobNode parallelJobNodeOwner);
 
 }

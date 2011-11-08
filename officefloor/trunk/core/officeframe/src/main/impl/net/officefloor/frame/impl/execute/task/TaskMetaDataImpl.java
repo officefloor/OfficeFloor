@@ -270,7 +270,7 @@ public class TaskMetaDataImpl<W extends Work, D extends Enum<D>, F extends Enum<
 	}
 
 	@Override
-	public JobNode createTask(Flow flow, WorkContainer<W> workContainer,
+	public JobNode createTaskNode(Flow flow, WorkContainer<W> workContainer,
 			JobNode parallelJobNodeOwner, Object parameter) {
 		return new TaskJob<W, D, F>(flow, workContainer, this,
 				parallelJobNodeOwner, parameter);
