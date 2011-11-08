@@ -43,7 +43,7 @@ import net.officefloor.frame.internal.structure.ThreadMetaData;
 import net.officefloor.frame.internal.structure.ThreadState;
 import net.officefloor.frame.internal.structure.WorkMetaData;
 import net.officefloor.frame.test.OfficeFrameTestCase;
-import net.officefloor.frame.util.TestInstanceFactory;
+import net.officefloor.frame.util.MetaDataTestInstanceFactory;
 
 import org.easymock.AbstractMatcher;
 
@@ -220,9 +220,9 @@ public class ThreadStateTest extends OfficeFrameTestCase {
 		final Task<?, ?, ?> task = this.createMock(Task.class);
 		final JobNode[] jobNode = new JobNode[1];
 
-		final WorkMetaData<Work> workMetaData = TestInstanceFactory
+		final WorkMetaData<Work> workMetaData = MetaDataTestInstanceFactory
 				.createWorkMetaData(work);
-		final TaskMetaData<?, ?, ?> taskMetaData = TestInstanceFactory
+		final TaskMetaData<?, ?, ?> taskMetaData = MetaDataTestInstanceFactory
 				.createTaskMetaData(task, workMetaData);
 
 		// Record initialising ThreadState and create a JobNode from it

@@ -38,7 +38,7 @@ import net.officefloor.frame.internal.structure.WorkMetaData;
  * 
  * @author Daniel Sagenschneider
  */
-public class TestInstanceFactory {
+public class MetaDataTestInstanceFactory {
 
 	/**
 	 * Creates the {@link WorkMetaData}.
@@ -105,6 +105,6 @@ public class TestInstanceFactory {
 	/**
 	 * All access via static methods.
 	 */
-	private TestInstanceFactory() {
+	private MetaDataTestInstanceFactory() {
 	}
 }
