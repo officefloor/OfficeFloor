@@ -334,7 +334,7 @@ public class ExecutionNode<W extends Work> implements
 	}
 
 	@Override
-	public JobNode createTask(Flow flow, WorkContainer<W> workContainer,
+	public JobNode createTaskNode(Flow flow, WorkContainer<W> workContainer,
 			JobNode parallelJobNodeOwner, Object parameter) {
 		return new TaskJob<W, Indexed, Indexed>(flow, workContainer, this,
 				parallelJobNodeOwner, parameter);
