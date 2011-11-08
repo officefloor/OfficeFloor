@@ -23,7 +23,7 @@ import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.execute.TaskContext;
 import net.officefloor.frame.impl.spi.team.LeaderFollowerTeam;
 import net.officefloor.frame.impl.spi.team.OnePersonTeam;
-import net.officefloor.frame.internal.structure.Flow;
+import net.officefloor.frame.internal.structure.JobSequence;
 import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
 import net.officefloor.frame.spi.team.Team;
 import net.officefloor.frame.test.AbstractOfficeConstructTestCase;
@@ -32,8 +32,8 @@ import net.officefloor.frame.test.ReflectiveWorkBuilder;
 import net.officefloor.frame.test.ReflectiveWorkBuilder.ReflectiveTaskBuilder;
 
 /**
- * Tests invoking asynchronous {@link Flow} instances and joining on the
- * resulting {@link Flow}.
+ * Tests invoking asynchronous {@link JobSequence} instances and joining on the
+ * resulting {@link JobSequence}.
  * 
  * @author Daniel Sagenschneider
  */
@@ -107,7 +107,7 @@ public class AsynchronousJoinStressTest extends AbstractOfficeConstructTestCase 
 	public class Tasks {
 
 		/**
-		 * Number of asynchronous {@link Flow} instances to invoke and join on
+		 * Number of asynchronous {@link JobSequence} instances to invoke and join on
 		 * per iteration.
 		 */
 		private final int maxAsynchronousFlows;
@@ -146,7 +146,7 @@ public class AsynchronousJoinStressTest extends AbstractOfficeConstructTestCase 
 		 * Initiate.
 		 * 
 		 * @param maxAsynchronousFlows
-		 *            Number of asynchronous {@link Flow} instances to invoke
+		 *            Number of asynchronous {@link JobSequence} instances to invoke
 		 *            and join on per iteration.
 		 * @param joinTimeout
 		 *            Timeout of the joins.
@@ -164,12 +164,12 @@ public class AsynchronousJoinStressTest extends AbstractOfficeConstructTestCase 
 		}
 
 		/**
-		 * Invokes and joins the asynchronous {@link Flow} instances.
+		 * Invokes and joins the asynchronous {@link JobSequence} instances.
 		 * 
 		 * @param taskContext
 		 *            {@link TaskContext}.
 		 * @param flow
-		 *            asynchronousTask {@link Flow}.
+		 *            asynchronousTask {@link JobSequence}.
 		 */
 		public void invokeAndJoin(TaskContext<?, ?, ?> taskContext,
 				ReflectiveFlow flow) {

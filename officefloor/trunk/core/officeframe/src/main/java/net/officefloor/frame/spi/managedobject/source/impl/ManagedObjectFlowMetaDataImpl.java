@@ -18,7 +18,7 @@
 
 package net.officefloor.frame.spi.managedobject.source.impl;
 
-import net.officefloor.frame.internal.structure.Flow;
+import net.officefloor.frame.internal.structure.JobSequence;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectFlowMetaData;
 
 /**
@@ -30,17 +30,17 @@ public class ManagedObjectFlowMetaDataImpl<F extends Enum<F>> implements
 		ManagedObjectFlowMetaData<F> {
 
 	/**
-	 * Key identifying the {@link Flow}.
+	 * Key identifying the {@link JobSequence}.
 	 */
 	private final F key;
 
 	/**
-	 * Type of argument passed to the {@link Flow}.
+	 * Type of argument passed to the {@link JobSequence}.
 	 */
 	private final Class<?> argumentType;
 
 	/**
-	 * Optional label to describe the {@link Flow}.
+	 * Optional label to describe the {@link JobSequence}.
 	 */
 	private String label = null;
 
@@ -48,9 +48,9 @@ public class ManagedObjectFlowMetaDataImpl<F extends Enum<F>> implements
 	 * Initiate.
 	 * 
 	 * @param key
-	 *            Key identifying the {@link Flow}.
+	 *            Key identifying the {@link JobSequence}.
 	 * @param argumentType
-	 *            Type of argument passed to the {@link Flow}.
+	 *            Type of argument passed to the {@link JobSequence}.
 	 */
 	public ManagedObjectFlowMetaDataImpl(F key, Class<?> argumentType) {
 		this.key = key;
@@ -58,10 +58,10 @@ public class ManagedObjectFlowMetaDataImpl<F extends Enum<F>> implements
 	}
 
 	/**
-	 * Specifies a label to describe the {@link Flow}.
+	 * Specifies a label to describe the {@link JobSequence}.
 	 * 
 	 * @param label
-	 *            Label to describe the {@link Flow}.
+	 *            Label to describe the {@link JobSequence}.
 	 */
 	public void setLabel(String label) {
 		this.label = label;

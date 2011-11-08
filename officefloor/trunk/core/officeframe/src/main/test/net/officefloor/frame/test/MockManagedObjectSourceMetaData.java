@@ -23,7 +23,7 @@ import java.util.List;
 import java.util.Map;
 
 import junit.framework.TestCase;
-import net.officefloor.frame.internal.structure.Flow;
+import net.officefloor.frame.internal.structure.JobSequence;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.frame.spi.managedobject.extension.ExtensionInterfaceFactory;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectDependencyMetaData;
@@ -57,7 +57,7 @@ public class MockManagedObjectSourceMetaData<D extends Enum<D>, H extends Enum<H
 	private final ManagedObjectDependencyMetaData<D>[] dependencyMetaData;
 
 	/**
-	 * {@link Flow} meta-data.
+	 * {@link JobSequence} meta-data.
 	 */
 	private final ManagedObjectFlowMetaData<H>[] flowMetaData;
 

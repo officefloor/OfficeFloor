@@ -21,7 +21,7 @@ package net.officefloor.frame.integrate.stress;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.impl.spi.team.LeaderFollowerTeam;
 import net.officefloor.frame.impl.spi.team.OnePersonTeam;
-import net.officefloor.frame.internal.structure.Flow;
+import net.officefloor.frame.internal.structure.JobSequence;
 import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
 import net.officefloor.frame.spi.team.Team;
 import net.officefloor.frame.test.AbstractOfficeConstructTestCase;
@@ -117,7 +117,7 @@ public class SequentialTaskStressTest extends AbstractOfficeConstructTestCase {
 		 *            Number of sequential calls so far.
 		 * @param flow
 		 *            {@link ReflectiveFlow} to invoke the sequential
-		 *            {@link Flow}.
+		 *            {@link JobSequence}.
 		 */
 		public synchronized void sequential(Integer callCount,
 				ReflectiveFlow flow) {

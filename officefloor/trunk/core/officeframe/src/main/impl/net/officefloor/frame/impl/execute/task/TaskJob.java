@@ -29,7 +29,7 @@ import net.officefloor.frame.impl.execute.job.AbstractJobContainer;
 import net.officefloor.frame.impl.execute.job.JobExecuteContext;
 import net.officefloor.frame.impl.execute.managedobject.ManagedObjectIndexImpl;
 import net.officefloor.frame.internal.structure.AssetManager;
-import net.officefloor.frame.internal.structure.Flow;
+import net.officefloor.frame.internal.structure.JobSequence;
 import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
 import net.officefloor.frame.internal.structure.FlowMetaData;
 import net.officefloor.frame.internal.structure.JobNode;
@@ -84,7 +84,7 @@ public class TaskJob<W extends Work, D extends Enum<D>, F extends Enum<F>>
 	 * Initiate.
 	 * 
 	 * @param flow
-	 *            {@link Flow}.
+	 *            {@link JobSequence}.
 	 * @param workContainer
 	 *            {@link WorkContainer}.
 	 * @param taskMetaData
@@ -94,7 +94,7 @@ public class TaskJob<W extends Work, D extends Enum<D>, F extends Enum<F>>
 	 * @param parameter
 	 *            Parameter for the {@link Task}.
 	 */
-	public TaskJob(Flow flow, WorkContainer<W> workContainer,
+	public TaskJob(JobSequence flow, WorkContainer<W> workContainer,
 			TaskMetaData<W, D, F> taskMetaData, JobNode parallelOwner,
 			Object parameter) {
 		super(flow, workContainer, taskMetaData, parallelOwner, taskMetaData

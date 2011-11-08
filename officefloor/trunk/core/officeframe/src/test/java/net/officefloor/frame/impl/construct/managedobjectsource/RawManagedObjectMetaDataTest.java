@@ -45,7 +45,7 @@ import net.officefloor.frame.internal.construct.RawBoundManagedObjectInstanceMet
 import net.officefloor.frame.internal.construct.RawBoundManagedObjectMetaData;
 import net.officefloor.frame.internal.construct.RawManagedObjectMetaData;
 import net.officefloor.frame.internal.structure.AssetManager;
-import net.officefloor.frame.internal.structure.Flow;
+import net.officefloor.frame.internal.structure.JobSequence;
 import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
 import net.officefloor.frame.internal.structure.ManagedObjectGovernanceMetaData;
 import net.officefloor.frame.internal.structure.ManagedObjectIndex;
@@ -1090,7 +1090,7 @@ public class RawManagedObjectMetaDataTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * {@link Flow} keys.
+	 * {@link JobSequence} keys.
 	 */
 	private static enum FlowKey {
 		KEY
@@ -1149,12 +1149,12 @@ public class RawManagedObjectMetaDataTest extends OfficeFrameTestCase {
 		public static Class<?> addTaskLinkedParameter = null;
 
 		/**
-		 * Name of {@link Flow} to link to the added {@link Task}.
+		 * Name of {@link JobSequence} to link to the added {@link Task}.
 		 */
 		public static String addTaskLinkWorkName = null;
 
 		/**
-		 * Name of {@link Flow} to link to the added {@link Task}.
+		 * Name of {@link JobSequence} to link to the added {@link Task}.
 		 */
 		public static String addTaskLinkTaskName = null;
 

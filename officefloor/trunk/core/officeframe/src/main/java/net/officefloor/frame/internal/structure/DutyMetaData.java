@@ -29,11 +29,11 @@ import net.officefloor.frame.spi.governance.Governance;
 public interface DutyMetaData {
 
 	/**
-	 * Obtains the {@link FlowMetaData} of the specified {@link Flow}.
+	 * Obtains the {@link FlowMetaData} of the specified {@link JobSequence}.
 	 * 
 	 * @param flowIndex
-	 *            Index of the {@link Flow}.
-	 * @return {@link FlowMetaData} of the specified {@link Flow}.
+	 *            Index of the {@link JobSequence}.
+	 * @return {@link FlowMetaData} of the specified {@link JobSequence}.
 	 */
 	FlowMetaData<?> getFlow(int flowIndex);
 

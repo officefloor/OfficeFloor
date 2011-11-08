@@ -24,7 +24,7 @@ import net.officefloor.frame.internal.structure.AdministratorContext;
 import net.officefloor.frame.internal.structure.AdministratorMetaData;
 import net.officefloor.frame.internal.structure.ContainerContext;
 import net.officefloor.frame.internal.structure.DutyMetaData;
-import net.officefloor.frame.internal.structure.Flow;
+import net.officefloor.frame.internal.structure.JobSequence;
 import net.officefloor.frame.internal.structure.FlowMetaData;
 import net.officefloor.frame.internal.structure.GovernanceContainer;
 import net.officefloor.frame.internal.structure.ProcessState;
@@ -131,7 +131,7 @@ public class AdministratorContainerTest<I, A extends Enum<A>, F extends Enum<F>,
 	}
 
 	/**
-	 * Ensure able to invoke {@link Flow}.
+	 * Ensure able to invoke {@link JobSequence}.
 	 */
 	public void testFlow() throws Throwable {
 
@@ -157,7 +157,7 @@ public class AdministratorContainerTest<I, A extends Enum<A>, F extends Enum<F>,
 	}
 
 	/**
-	 * {@link Flow} keys for testing.
+	 * {@link JobSequence} keys for testing.
 	 */
 	private static enum Flows {
 		FLOW

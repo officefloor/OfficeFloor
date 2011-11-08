@@ -21,7 +21,7 @@ package net.officefloor.frame.spi.administration;
 import java.util.List;
 
 import net.officefloor.frame.api.execute.Task;
-import net.officefloor.frame.internal.structure.Flow;
+import net.officefloor.frame.internal.structure.JobSequence;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
 
 /**
@@ -40,13 +40,13 @@ public interface DutyContext<I extends Object, F extends Enum<F>, G extends Enum
 	List<I> getExtensionInterfaces();
 
 	/**
-	 * Instigates a {@link Flow} to be run in parallel to the {@link Task} being
+	 * Instigates a {@link JobSequence} to be run in parallel to the {@link Task} being
 	 * administered.
 	 * 
 	 * @param key
-	 *            Key identifying the {@link Flow} to instigate.
+	 *            Key identifying the {@link JobSequence} to instigate.
 	 * @param parameter
-	 *            Parameter for the first {@link Task} of the {@link Flow}.
+	 *            Parameter for the first {@link Task} of the {@link JobSequence}.
 	 */
 	void doFlow(F key, Object parameter);
 
@@ -59,9 +59,9 @@ public interface DutyContext<I extends Object, F extends Enum<F>, G extends Enum
 	 * flows available.
 	 * 
 	 * @param flowIndex
-	 *            Index identifying the {@link Flow} to instigate.
+	 *            Index identifying the {@link JobSequence} to instigate.
 	 * @param parameter
-	 *            Parameter for the first {@link Task} of the {@link Flow}.
+	 *            Parameter for the first {@link Task} of the {@link JobSequence}.
 	 */
 	void doFlow(int flowIndex, Object parameter);
 

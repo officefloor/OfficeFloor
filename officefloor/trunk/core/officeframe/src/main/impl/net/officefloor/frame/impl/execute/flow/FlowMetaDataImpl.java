@@ -21,7 +21,7 @@ package net.officefloor.frame.impl.execute.flow;
 import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.internal.structure.AssetManager;
-import net.officefloor.frame.internal.structure.Flow;
+import net.officefloor.frame.internal.structure.JobSequence;
 import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
 import net.officefloor.frame.internal.structure.FlowMetaData;
 import net.officefloor.frame.internal.structure.TaskMetaData;
@@ -39,12 +39,12 @@ public class FlowMetaDataImpl<W extends Work> implements FlowMetaData<W> {
 	private final FlowInstigationStrategyEnum strategy;
 
 	/**
-	 * {@link TaskMetaData} of the initial {@link Task} of the {@link Flow}.
+	 * {@link TaskMetaData} of the initial {@link Task} of the {@link JobSequence}.
 	 */
 	private final TaskMetaData<W, ?, ?> initialTaskMetaData;
 
 	/**
-	 * {@link AssetManager} to managed this {@link Flow}.
+	 * {@link AssetManager} to managed this {@link JobSequence}.
 	 */
 	private final AssetManager flowManager;
 
@@ -55,9 +55,9 @@ public class FlowMetaDataImpl<W extends Work> implements FlowMetaData<W> {
 	 *            {@link FlowInstigationStrategyEnum}.
 	 * @param initialTaskMetaData
 	 *            {@link TaskMetaData} of the initial {@link Task} of the
-	 *            {@link Flow}.
+	 *            {@link JobSequence}.
 	 * @param flowManager
-	 *            {@link AssetManager} to managed this {@link Flow}.
+	 *            {@link AssetManager} to managed this {@link JobSequence}.
 	 */
 	public FlowMetaDataImpl(FlowInstigationStrategyEnum strategy,
 			TaskMetaData<W, ?, ?> initialTaskMetaData, AssetManager flowManager) {

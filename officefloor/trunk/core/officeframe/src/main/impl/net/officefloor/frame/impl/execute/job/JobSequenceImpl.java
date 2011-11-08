@@ -16,7 +16,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package net.officefloor.frame.impl.execute.flow;
+package net.officefloor.frame.impl.execute.job;
 
 import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.impl.execute.duty.DutyJob;
@@ -25,7 +25,7 @@ import net.officefloor.frame.impl.execute.linkedlistset.StrictLinkedListSet;
 import net.officefloor.frame.impl.execute.work.WorkContainerProxy;
 import net.officefloor.frame.internal.structure.AdministratorIndex;
 import net.officefloor.frame.internal.structure.AdministratorMetaData;
-import net.officefloor.frame.internal.structure.Flow;
+import net.officefloor.frame.internal.structure.JobSequence;
 import net.officefloor.frame.internal.structure.JobNode;
 import net.officefloor.frame.internal.structure.JobNodeActivateSet;
 import net.officefloor.frame.internal.structure.LinkedListSet;
@@ -37,30 +37,30 @@ import net.officefloor.frame.internal.structure.WorkMetaData;
 import net.officefloor.frame.spi.team.Job;
 
 /**
- * Implementation of the {@link Flow}.
+ * Implementation of the {@link JobSequence}.
  * 
  * @author Daniel Sagenschneider
  */
-public class FlowImpl extends AbstractLinkedListSetEntry<Flow, ThreadState>
-		implements Flow {
+public class JobSequenceImpl extends AbstractLinkedListSetEntry<JobSequence, ThreadState>
+		implements JobSequence {
 
 	/**
-	 * Activate {@link JobNode} instances for this {@link Flow}.
+	 * Activate {@link JobNode} instances for this {@link JobSequence}.
 	 */
-	private final LinkedListSet<JobNode, Flow> activeJobNodes = new StrictLinkedListSet<JobNode, Flow>() {
+	private final LinkedListSet<JobNode, JobSequence> activeJobNodes = new StrictLinkedListSet<JobNode, JobSequence>() {
 		@Override
-		protected Flow getOwner() {
-			return FlowImpl.this;
+		protected JobSequence getOwner() {
+			return JobSequenceImpl.this;
 		}
 	};
 
 	/**
-	 * {@link ThreadState} that this {@link Flow} is bound.
+	 * {@link ThreadState} that this {@link JobSequence} is bound.
 	 */
 	private final ThreadState threadState;
 
 	/**
-	 * Completion flag indicating if this {@link Flow} is complete.
+	 * Completion flag indicating if this {@link JobSequence} is complete.
 	 */
 	private volatile boolean isFlowComplete = false;
 
@@ -68,9 +68,9 @@ public class FlowImpl extends AbstractLinkedListSetEntry<Flow, ThreadState>
 	 * Initiate.
 	 * 
 	 * @param threadState
-	 *            {@link ThreadState} containing this {@link Flow}.
+	 *            {@link ThreadState} containing this {@link JobSequence}.
 	 */
-	public FlowImpl(ThreadState threadState) {
+	public JobSequenceImpl(ThreadState threadState) {
 		this.threadState = threadState;
 	}
 
@@ -89,7 +89,7 @@ public class FlowImpl extends AbstractLinkedListSetEntry<Flow, ThreadState>
 
 	@Override
 	@SuppressWarnings({ "unchecked", "rawtypes" })
-	public JobNode createJobNode(TaskMetaData<?, ?, ?> taskMetaData,
+	public JobNode createTaskNode(TaskMetaData<?, ?, ?> taskMetaData,
 			JobNode parallelNodeOwner, Object parameter) {
 
 		// Obtain the work meta-data

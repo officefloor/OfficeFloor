@@ -18,7 +18,7 @@
 package net.officefloor.frame.spi.governance;
 
 import net.officefloor.frame.api.execute.Task;
-import net.officefloor.frame.internal.structure.Flow;
+import net.officefloor.frame.internal.structure.JobSequence;
 
 /**
  * Context for {@link Governance}.
@@ -28,12 +28,12 @@ import net.officefloor.frame.internal.structure.Flow;
 public interface GovernanceContext<F> {
 
 	/**
-	 * Instigates a {@link Flow} to be run in parallel to {@link Governance}.
+	 * Instigates a {@link JobSequence} to be run in parallel to {@link Governance}.
 	 * 
 	 * @param key
-	 *            Key identifying the {@link Flow} to instigate.
+	 *            Key identifying the {@link JobSequence} to instigate.
 	 * @param parameter
-	 *            Parameter for the first {@link Task} of the {@link Flow}.
+	 *            Parameter for the first {@link Task} of the {@link JobSequence}.
 	 */
 	void doFlow(F key, Object parameter);
 
@@ -46,9 +46,9 @@ public interface GovernanceContext<F> {
 	 * flows available.
 	 * 
 	 * @param flowIndex
-	 *            Index identifying the {@link Flow} to instigate.
+	 *            Index identifying the {@link JobSequence} to instigate.
 	 * @param parameter
-	 *            Parameter for the first {@link Task} of the {@link Flow}.
+	 *            Parameter for the first {@link Task} of the {@link JobSequence}.
 	 */
 	void doFlow(int flowIndex, Object parameter);
 

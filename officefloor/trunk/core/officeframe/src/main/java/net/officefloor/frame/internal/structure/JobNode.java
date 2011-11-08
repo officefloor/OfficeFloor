@@ -25,11 +25,11 @@ import net.officefloor.frame.spi.team.Job;
  * Node within the graph of {@link JobNode} instances to execute.
  * <p>
  * May be used as a {@link LinkedListSetEntry} in a list of {@link JobNode}
- * instances for a {@link Flow}.
+ * instances for a {@link JobSequence}.
  * 
  * @author Daniel Sagenschneider
  */
-public interface JobNode extends LinkedListSetEntry<JobNode, Flow> {
+public interface JobNode extends LinkedListSetEntry<JobNode, JobSequence> {
 
 	/**
 	 * Activates the {@link Job} for this {@link JobNode}.
@@ -44,13 +44,13 @@ public interface JobNode extends LinkedListSetEntry<JobNode, Flow> {
 	boolean isJobNodeComplete();
 
 	/**
-	 * Obtains the {@link Flow} containing this {@link JobNode}. The returned
-	 * {@link Flow} provides access to the {@link ThreadState} and subsequent
+	 * Obtains the {@link JobSequence} containing this {@link JobNode}. The returned
+	 * {@link JobSequence} provides access to the {@link ThreadState} and subsequent
 	 * {@link ProcessState} that this {@link JobNode} is involved in.
 	 * 
-	 * @return {@link Flow} containing this {@link JobNode}.
+	 * @return {@link JobSequence} containing this {@link JobNode}.
 	 */
-	Flow getFlow();
+	JobSequence getFlow();
 
 	/**
 	 * Obtains the {@link EscalationProcedure} for this {@link JobNode}.
@@ -63,7 +63,7 @@ public interface JobNode extends LinkedListSetEntry<JobNode, Flow> {
 	 * <p>
 	 * Specifies the parallel owner of this {@link JobNode}.
 	 * <p>
-	 * The input {@link JobNode} is executed once the current {@link Flow} that
+	 * The input {@link JobNode} is executed once the current {@link JobSequence} that
 	 * this {@link JobNode} is involved with is complete.
 	 * 
 	 * @param jobNode
@@ -96,7 +96,7 @@ public interface JobNode extends LinkedListSetEntry<JobNode, Flow> {
 	JobNode getParallelNode();
 
 	/**
-	 * Specifies the next {@link JobNode} in the {@link Flow} to execute after
+	 * Specifies the next {@link JobNode} in the {@link JobSequence} to execute after
 	 * the current {@link JobNode} is completed.
 	 * 
 	 * @param jobNode
@@ -105,7 +105,7 @@ public interface JobNode extends LinkedListSetEntry<JobNode, Flow> {
 	void setNextNode(JobNode jobNode);
 
 	/**
-	 * Obtains the next {@link JobNode} in the {@link Flow} to execute after the
+	 * Obtains the next {@link JobNode} in the {@link JobSequence} to execute after the
 	 * current {@link JobNode} has completed.
 	 * 
 	 * @return Next {@link JobNode}.

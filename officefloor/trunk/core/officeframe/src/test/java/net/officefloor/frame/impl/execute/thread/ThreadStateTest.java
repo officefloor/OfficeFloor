@@ -31,7 +31,7 @@ import net.officefloor.frame.internal.structure.AssetManager;
 import net.officefloor.frame.internal.structure.AssetMonitor;
 import net.officefloor.frame.internal.structure.CheckAssetContext;
 import net.officefloor.frame.internal.structure.EscalationLevel;
-import net.officefloor.frame.internal.structure.Flow;
+import net.officefloor.frame.internal.structure.JobSequence;
 import net.officefloor.frame.internal.structure.FlowMetaData;
 import net.officefloor.frame.internal.structure.JobNode;
 import net.officefloor.frame.internal.structure.JobNodeActivateSet;
@@ -154,7 +154,7 @@ public class ThreadStateTest extends OfficeFrameTestCase {
 		// Test
 		this.replayMockObjects();
 		ThreadState thread = this.createThreadState();
-		Flow flow = thread.createFlow(newFlow); // a flow always created
+		JobSequence flow = thread.createFlow(newFlow); // a flow always created
 		thread.flowComplete(flow, this.activateSet);
 		this.verifyMockObjects();
 
@@ -182,14 +182,14 @@ public class ThreadStateTest extends OfficeFrameTestCase {
 		ThreadState thread = this.createThreadState();
 
 		// Not completes while escalating
-		Flow flowOne = thread.createFlow(flowMetaDataOne);
+		JobSequence flowOne = thread.createFlow(flowMetaDataOne);
 		thread.escalationStart(jobNode, this.activateSet);
 		thread.flowComplete(flowOne, this.activateSet);
 		assertFalse("Should not complete while escalating", thread.isComplete());
 
 		// Completes after escalating
 		thread.escalationComplete(jobNode, this.activateSet);
-		Flow flowTwo = thread.createFlow(flowMetaDataTwo);
+		JobSequence flowTwo = thread.createFlow(flowMetaDataTwo);
 		thread.flowComplete(flowTwo, this.activateSet);
 		assertTrue("Thread should be complete", thread.isComplete());
 
@@ -251,8 +251,8 @@ public class ThreadStateTest extends OfficeFrameTestCase {
 		// Test
 		this.replayMockObjects();
 		ThreadStateImpl thread = this.createThreadState();
-		Flow flow = thread.createFlow(flowMetaData);
-		jobNode[0] = flow.createJobNode(taskMetaData, null, null);
+		JobSequence flow = thread.createFlow(flowMetaData);
+		jobNode[0] = flow.createTaskNode(taskMetaData, null, null);
 		thread.waitOnFlow(jobNode[0], 1000, "TOKEN", this.activateSet);
 		this.verifyMockObjects();
 	}
@@ -457,7 +457,7 @@ public class ThreadStateTest extends OfficeFrameTestCase {
 	 */
 	private AssetMonitor record_FlowAsset_waitOnFlow(JobNode jobNode) {
 
-		final Flow flow = this.createMock(Flow.class);
+		final JobSequence flow = this.createMock(JobSequence.class);
 		final ThreadState anotherThreadState = this
 				.createMock(ThreadState.class);
 		final AssetMonitor assetMonitor = this.createMock(AssetMonitor.class);

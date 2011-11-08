@@ -45,7 +45,7 @@ import net.officefloor.frame.internal.structure.AdministratorScope;
 import net.officefloor.frame.internal.structure.Asset;
 import net.officefloor.frame.internal.structure.DutyMetaData;
 import net.officefloor.frame.internal.structure.ExtensionInterfaceMetaData;
-import net.officefloor.frame.internal.structure.Flow;
+import net.officefloor.frame.internal.structure.JobSequence;
 import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
 import net.officefloor.frame.internal.structure.FlowMetaData;
 import net.officefloor.frame.internal.structure.GovernanceMetaData;
@@ -910,7 +910,7 @@ public class RawBoundAdministratorMetaDataTest extends OfficeFrameTestCase {
 
 	/**
 	 * Ensure issue if no {@link Task} is found for the {@link Duty}
-	 * {@link Flow}.
+	 * {@link JobSequence}.
 	 */
 	public void testNoTaskForDutyFlow() {
 

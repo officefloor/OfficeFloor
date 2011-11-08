@@ -35,7 +35,7 @@ import net.officefloor.frame.impl.execute.managedobject.ManagedObjectIndexImpl;
 import net.officefloor.frame.impl.execute.task.TaskJob;
 import net.officefloor.frame.internal.structure.AssetManager;
 import net.officefloor.frame.internal.structure.EscalationProcedure;
-import net.officefloor.frame.internal.structure.Flow;
+import net.officefloor.frame.internal.structure.JobSequence;
 import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
 import net.officefloor.frame.internal.structure.FlowMetaData;
 import net.officefloor.frame.internal.structure.JobNode;
@@ -220,7 +220,7 @@ public class ExecutionNode<W extends Work> implements
 	}
 
 	/**
-	 * Add a {@link Flow} to be executed.
+	 * Add a {@link JobSequence} to be executed.
 	 * 
 	 * @param instigationStrategy
 	 *            {@link FlowInstigationStrategyEnum}.
@@ -334,7 +334,7 @@ public class ExecutionNode<W extends Work> implements
 	}
 
 	@Override
-	public JobNode createTaskNode(Flow flow, WorkContainer<W> workContainer,
+	public JobNode createTaskNode(JobSequence flow, WorkContainer<W> workContainer,
 			JobNode parallelJobNodeOwner, Object parameter) {
 		return new TaskJob<W, Indexed, Indexed>(flow, workContainer, this,
 				parallelJobNodeOwner, parameter);
@@ -469,7 +469,7 @@ public class ExecutionNode<W extends Work> implements
 	}
 
 	/**
-	 * {@link TaskProcessItem} to instigate a {@link Flow}.
+	 * {@link TaskProcessItem} to instigate a {@link JobSequence}.
 	 */
 	private class FlowTaskProcessItem implements TaskProcessItem<W>,
 			FlowMetaData<W> {
@@ -490,7 +490,7 @@ public class ExecutionNode<W extends Work> implements
 		protected final AbstractTaskNodeTestCase<W> testCase;
 
 		/**
-		 * {@link AssetManager} to managed the {@link Flow}.
+		 * {@link AssetManager} to managed the {@link JobSequence}.
 		 */
 		protected final AssetManager flowManager;
 

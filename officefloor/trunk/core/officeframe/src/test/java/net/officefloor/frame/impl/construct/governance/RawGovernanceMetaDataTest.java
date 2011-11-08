@@ -41,7 +41,7 @@ import net.officefloor.frame.internal.construct.RawGovernanceMetaDataFactory;
 import net.officefloor.frame.internal.structure.ActiveGovernance;
 import net.officefloor.frame.internal.structure.ActiveGovernanceControl;
 import net.officefloor.frame.internal.structure.ActiveGovernanceManager;
-import net.officefloor.frame.internal.structure.Flow;
+import net.officefloor.frame.internal.structure.JobSequence;
 import net.officefloor.frame.internal.structure.GovernanceControl;
 import net.officefloor.frame.internal.structure.GovernanceMetaData;
 import net.officefloor.frame.internal.structure.ProcessState;
@@ -173,7 +173,7 @@ public class RawGovernanceMetaDataTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensures able to handle simple {@link Governance} without {@link Flow}.
+	 * Ensures able to handle simple {@link Governance} without {@link JobSequence}.
 	 */
 	public void testSimpleGovernance() {
 

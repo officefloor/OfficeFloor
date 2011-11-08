@@ -21,7 +21,7 @@ package net.officefloor.frame.internal.structure;
 import net.officefloor.frame.api.escalate.Escalation;
 
 /**
- * {@link Flow} to handle an {@link Escalation} from a {@link JobNode}.
+ * {@link JobSequence} to handle an {@link Escalation} from a {@link JobNode}.
  * 
  * @author Daniel Sagenschneider
  */

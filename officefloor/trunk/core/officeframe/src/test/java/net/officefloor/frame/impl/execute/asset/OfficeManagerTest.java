@@ -21,7 +21,7 @@ package net.officefloor.frame.impl.execute.asset;
 import net.officefloor.frame.impl.execute.job.JobNodeActivatableSetImpl;
 import net.officefloor.frame.internal.structure.Asset;
 import net.officefloor.frame.internal.structure.AssetManager;
-import net.officefloor.frame.internal.structure.Flow;
+import net.officefloor.frame.internal.structure.JobSequence;
 import net.officefloor.frame.internal.structure.JobNode;
 import net.officefloor.frame.internal.structure.JobNodeActivatableSet;
 import net.officefloor.frame.internal.structure.JobNodeActivateSet;
@@ -125,7 +125,7 @@ public class OfficeManagerTest extends OfficeFrameTestCase {
 	 */
 	public void testActivateJobNodes() throws Exception {
 
-		final Flow flow = this.createSynchronizedMock(Flow.class);
+		final JobSequence flow = this.createSynchronizedMock(JobSequence.class);
 		final ThreadState threadState = this
 				.createSynchronizedMock(ThreadState.class);
 
@@ -188,9 +188,9 @@ public class OfficeManagerTest extends OfficeFrameTestCase {
 		 * Initiate.
 		 * 
 		 * @param flow
-		 *            {@link Flow}.
+		 *            {@link JobSequence}.
 		 */
-		public MockJobNode(Flow flow) {
+		public MockJobNode(JobSequence flow) {
 			super(flow);
 		}
 

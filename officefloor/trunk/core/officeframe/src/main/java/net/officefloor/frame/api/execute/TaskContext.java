@@ -24,7 +24,7 @@ import net.officefloor.frame.api.manage.InvalidParameterTypeException;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.manage.UnknownTaskException;
 import net.officefloor.frame.api.manage.UnknownWorkException;
-import net.officefloor.frame.internal.structure.Flow;
+import net.officefloor.frame.internal.structure.JobSequence;
 import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
 import net.officefloor.frame.internal.structure.ProcessState;
 import net.officefloor.frame.internal.structure.ThreadState;
@@ -43,7 +43,7 @@ import net.officefloor.frame.spi.managedobject.ManagedObject;
  *            <li>Parameter for the {@link Task}</li>
  *            </ol>
  * @param F
- *            Type providing the keys to the possible {@link Flow} instances
+ *            Type providing the keys to the possible {@link JobSequence} instances
  *            instigated by this {@link Task}.
  * 
  * @author Daniel Sagenschneider
@@ -94,18 +94,18 @@ public interface TaskContext<W extends Work, D extends Enum<D>, F extends Enum<F
 
 	/**
 	 * <p>
-	 * Instigates a {@link Flow} to be run.
+	 * Instigates a {@link JobSequence} to be run.
 	 * <p>
 	 * The returned {@link FlowFuture} may not complete while the current
 	 * {@link Task} is executing. However it is available to register for later
 	 * checking by other {@link Task} instances.
 	 * 
 	 * @param key
-	 *            Key identifying the {@link Flow} to instigate.
+	 *            Key identifying the {@link JobSequence} to instigate.
 	 * @param parameter
-	 *            Parameter for the first {@link Task} of the {@link Flow}
+	 *            Parameter for the first {@link Task} of the {@link JobSequence}
 	 *            instigated.
-	 * @return {@link FlowFuture} to indicate when the instigated {@link Flow}
+	 * @return {@link FlowFuture} to indicate when the instigated {@link JobSequence}
 	 *         has completed.
 	 */
 	FlowFuture doFlow(F key, Object parameter);
@@ -116,22 +116,22 @@ public interface TaskContext<W extends Work, D extends Enum<D>, F extends Enum<F
 	 * instigation of flows.
 	 * <p>
 	 * In other words, an {@link Enum} is not required to define the possible
-	 * {@link Flow} instances available.
+	 * {@link JobSequence} instances available.
 	 * 
 	 * @param flowIndex
-	 *            Index identifying the {@link Flow} to instigate.
+	 *            Index identifying the {@link JobSequence} to instigate.
 	 * @param parameter
 	 *            Parameter that will be available for the first {@link Task} of
-	 *            the {@link Flow} to be run.
-	 * @return {@link FlowFuture} to indicate when the instigated {@link Flow}
+	 *            the {@link JobSequence} to be run.
+	 * @return {@link FlowFuture} to indicate when the instigated {@link JobSequence}
 	 *         has completed.
 	 */
 	FlowFuture doFlow(int flowIndex, Object parameter);
 
 	/**
 	 * <p>
-	 * Invokes a {@link Flow} by dynamically naming the initial {@link Task} of
-	 * the {@link Flow}.
+	 * Invokes a {@link JobSequence} by dynamically naming the initial {@link Task} of
+	 * the {@link JobSequence}.
 	 * <p>
 	 * This method should not be preferred, as the other
 	 * <code>doFlow(...)</code> methods are compile safe. This method however
@@ -168,24 +168,24 @@ public interface TaskContext<W extends Work, D extends Enum<D>, F extends Enum<F
 	/**
 	 * <p>
 	 * Stops this {@link Task} from proceeding to the next {@link Task} in its
-	 * {@link Flow} until the {@link Flow} of the input {@link FlowFuture} is
+	 * {@link JobSequence} until the {@link JobSequence} of the input {@link FlowFuture} is
 	 * complete.
 	 * <p>
-	 * Should the same {@link Flow} be joined on twice, only the first join is
-	 * registered - second join of same {@link Flow} will be ignored.
+	 * Should the same {@link JobSequence} be joined on twice, only the first join is
+	 * registered - second join of same {@link JobSequence} will be ignored.
 	 * 
 	 * @param flowFuture
-	 *            {@link FlowFuture} of the {@link Flow} that must complete.
+	 *            {@link FlowFuture} of the {@link JobSequence} that must complete.
 	 * @param timeout
-	 *            The maximum time to wait in milliseconds for the {@link Flow}
-	 *            to complete. Should the {@link Flow} not complete in this
+	 *            The maximum time to wait in milliseconds for the {@link JobSequence}
+	 *            to complete. Should the {@link JobSequence} not complete in this
 	 *            timeout, a {@link FlowJoinTimedOutEscalation} is escalated
 	 *            from this {@link Task}.
 	 * @param token
 	 *            Should a {@link FlowJoinTimedOutEscalation} be escalated the
 	 *            token will be added to the escalated
 	 *            {@link FlowJoinTimedOutEscalation} to aid in identifying which
-	 *            {@link Flow} join timed out. May be <code>null</code>.
+	 *            {@link JobSequence} join timed out. May be <code>null</code>.
 	 * @throws IllegalStateException
 	 *             If a {@link ProcessState} or unknown {@link FlowFuture}. Only
 	 *             {@link FlowFuture} instances returned from the

@@ -24,7 +24,7 @@ import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.impl.spi.team.LeaderFollowerTeam;
 import net.officefloor.frame.impl.spi.team.OnePersonTeam;
-import net.officefloor.frame.internal.structure.Flow;
+import net.officefloor.frame.internal.structure.JobSequence;
 import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.frame.spi.TestSource;
@@ -141,7 +141,7 @@ public class NameAwareTaskStressTest extends AbstractOfficeConstructTestCase {
 		 *            Number of sequential calls so far.
 		 * @param flow
 		 *            {@link ReflectiveFlow} to invoke the sequential
-		 *            {@link Flow}.
+		 *            {@link JobSequence}.
 		 * @param nameAware
 		 *            {@link StressNameAwareManagedObject}.
 		 */

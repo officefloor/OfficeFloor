@@ -29,7 +29,7 @@ import net.officefloor.frame.api.manage.NoInitialTaskException;
 import net.officefloor.frame.api.manage.ProcessFuture;
 import net.officefloor.frame.api.manage.TaskManager;
 import net.officefloor.frame.api.manage.WorkManager;
-import net.officefloor.frame.internal.structure.Flow;
+import net.officefloor.frame.internal.structure.JobSequence;
 import net.officefloor.frame.internal.structure.ProcessState;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectExecuteContext;
@@ -182,7 +182,7 @@ public class ProcessContextTeam implements Team, ProcessContextListener {
 	 * @param executeContext
 	 *            {@link ManagedObjectExecuteContext}.
 	 * @param flowKey
-	 *            {@link Flow} key.
+	 *            {@link JobSequence} key.
 	 * @param parameter
 	 *            Parameter for the initial {@link Task}.
 	 * @param managedObject
@@ -212,7 +212,7 @@ public class ProcessContextTeam implements Team, ProcessContextListener {
 	 * @param executeContext
 	 *            {@link ManagedObjectExecuteContext}.
 	 * @param flowIndex
-	 *            {@link Flow} index.
+	 *            {@link JobSequence} index.
 	 * @param parameter
 	 *            Parameter for the initial {@link Task}.
 	 * @param managedObject

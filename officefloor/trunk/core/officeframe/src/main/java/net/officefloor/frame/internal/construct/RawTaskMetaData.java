@@ -22,7 +22,7 @@ import net.officefloor.frame.api.build.OfficeFloorIssues;
 import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.internal.structure.AssetManager;
-import net.officefloor.frame.internal.structure.Flow;
+import net.officefloor.frame.internal.structure.JobSequence;
 import net.officefloor.frame.internal.structure.TaskMetaData;
 import net.officefloor.frame.internal.structure.WorkMetaData;
 
@@ -56,7 +56,7 @@ public interface RawTaskMetaData<W extends Work, D extends Enum<D>, F extends En
 	TaskMetaData<W, D, F> getTaskMetaData();
 
 	/**
-	 * Links the {@link TaskMetaData} instances to create {@link Flow} of
+	 * Links the {@link TaskMetaData} instances to create {@link JobSequence} of
 	 * execution.
 	 * 
 	 * @param taskMetaDataLocator
@@ -65,7 +65,7 @@ public interface RawTaskMetaData<W extends Work, D extends Enum<D>, F extends En
 	 *            {@link WorkMetaData} containing this {@link TaskMetaData}.
 	 * @param assetManagerFactory
 	 *            {@link AssetManagerFactory} to create the {@link AssetManager}
-	 *            instances that manage {@link Flow} instances.
+	 *            instances that manage {@link JobSequence} instances.
 	 * @param issues
 	 *            {@link OfficeFloorIssues}.
 	 */

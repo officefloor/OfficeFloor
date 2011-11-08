@@ -26,7 +26,7 @@ import net.officefloor.frame.api.execute.TaskContext;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.impl.spi.team.PassiveTeam;
-import net.officefloor.frame.internal.structure.Flow;
+import net.officefloor.frame.internal.structure.JobSequence;
 import net.officefloor.frame.internal.structure.ProcessState;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
@@ -34,7 +34,7 @@ import net.officefloor.frame.test.AbstractOfficeConstructTestCase;
 import net.officefloor.frame.util.AbstractSingleTask;
 
 /**
- * Tests {@link ManagedObjectSource} invoking a {@link Flow}.
+ * Tests {@link ManagedObjectSource} invoking a {@link JobSequence}.
  * 
  * @author Daniel Sagenschneider
  */

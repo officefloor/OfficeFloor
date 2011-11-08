@@ -23,7 +23,7 @@ import net.officefloor.frame.api.execute.TaskContext;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.impl.spi.team.LeaderFollowerTeam;
 import net.officefloor.frame.impl.spi.team.OnePersonTeam;
-import net.officefloor.frame.internal.structure.Flow;
+import net.officefloor.frame.internal.structure.JobSequence;
 import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
 import net.officefloor.frame.spi.team.Team;
 import net.officefloor.frame.test.AbstractOfficeConstructTestCase;
@@ -120,7 +120,7 @@ public class DynamicFlowStressTest extends AbstractOfficeConstructTestCase {
 		}
 
 		/**
-		 * Invokes the {@link Flow} dynamically.
+		 * Invokes the {@link JobSequence} dynamically.
 		 * 
 		 * @param context
 		 *            {@link TaskContext}.

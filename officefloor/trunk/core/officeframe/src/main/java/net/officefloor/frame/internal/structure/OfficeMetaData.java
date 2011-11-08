@@ -62,7 +62,7 @@ public interface OfficeMetaData {
 
 	/**
 	 * Obtains the {@link EscalationProcedure} for this {@link Office}. This is
-	 * used when the {@link EscalationProcedure} instances on the {@link Flow}
+	 * used when the {@link EscalationProcedure} instances on the {@link JobSequence}
 	 * does not handle the escalation.
 	 *
 	 * @return {@link EscalationProcedure} for this {@link Office}.

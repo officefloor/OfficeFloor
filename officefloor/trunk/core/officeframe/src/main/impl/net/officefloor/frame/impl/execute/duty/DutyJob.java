@@ -24,7 +24,7 @@ import net.officefloor.frame.impl.execute.job.AbstractJobContainer;
 import net.officefloor.frame.impl.execute.job.JobExecuteContext;
 import net.officefloor.frame.internal.structure.AdministratorContext;
 import net.officefloor.frame.internal.structure.AdministratorMetaData;
-import net.officefloor.frame.internal.structure.Flow;
+import net.officefloor.frame.internal.structure.JobSequence;
 import net.officefloor.frame.internal.structure.FlowMetaData;
 import net.officefloor.frame.internal.structure.JobNode;
 import net.officefloor.frame.internal.structure.TaskDutyAssociation;
@@ -56,7 +56,7 @@ public class DutyJob<W extends Work, I, A extends Enum<A>> extends
 	 * Initiate.
 	 * 
 	 * @param flow
-	 *            {@link Flow}.
+	 *            {@link JobSequence}.
 	 * @param workContainer
 	 *            {@link WorkContainer}.
 	 * @param adminMetaData
@@ -68,7 +68,7 @@ public class DutyJob<W extends Work, I, A extends Enum<A>> extends
 	 * @param administeringTaskMetaData
 	 *            {@link TaskMetaData} of the {@link Task} being administered.
 	 */
-	public DutyJob(Flow flow, WorkContainer<W> workContainer,
+	public DutyJob(JobSequence flow, WorkContainer<W> workContainer,
 			AdministratorMetaData<I, A> adminMetaData,
 			TaskDutyAssociation<A> taskDutyAssociation, JobNode parallelOwner,
 			TaskMetaData<?, ?, ?> administeringTaskMetaData) {

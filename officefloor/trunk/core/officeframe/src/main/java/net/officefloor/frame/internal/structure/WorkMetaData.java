@@ -55,11 +55,11 @@ public interface WorkMetaData<W extends Work> {
 	WorkFactory<W> getWorkFactory();
 
 	/**
-	 * Obtain the {@link FlowMetaData} for the initial {@link Flow} of the
+	 * Obtain the {@link FlowMetaData} for the initial {@link JobSequence} of the
 	 * {@link Work}.
 	 * 
-	 * @return {@link FlowMetaData} for the initial {@link Flow} of the
-	 *         {@link Work} or <code>null</code> if no initial {@link Flow} for
+	 * @return {@link FlowMetaData} for the initial {@link JobSequence} of the
+	 *         {@link Work} or <code>null</code> if no initial {@link JobSequence} for
 	 *         the {@link Work}.
 	 */
 	FlowMetaData<W> getInitialFlowMetaData();

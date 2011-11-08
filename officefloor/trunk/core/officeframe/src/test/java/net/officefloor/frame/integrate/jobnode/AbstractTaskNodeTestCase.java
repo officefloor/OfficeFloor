@@ -35,7 +35,7 @@ import net.officefloor.frame.impl.execute.process.ProcessStateImpl;
 import net.officefloor.frame.impl.execute.thread.ThreadMetaDataImpl;
 import net.officefloor.frame.impl.execute.work.WorkMetaDataImpl;
 import net.officefloor.frame.internal.structure.AdministratorMetaData;
-import net.officefloor.frame.internal.structure.Flow;
+import net.officefloor.frame.internal.structure.JobSequence;
 import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
 import net.officefloor.frame.internal.structure.FlowMetaData;
 import net.officefloor.frame.internal.structure.GovernanceMetaData;
@@ -237,7 +237,7 @@ public abstract class AbstractTaskNodeTestCase<W extends Work> extends
 	}
 
 	/**
-	 * Binds an {@link ExecutionNode} to instigated as a {@link Flow}.
+	 * Binds an {@link ExecutionNode} to instigated as a {@link JobSequence}.
 	 * 
 	 * @param instigationStrategy
 	 *            {@link FlowInstigationStrategyEnum}.
@@ -310,10 +310,10 @@ public abstract class AbstractTaskNodeTestCase<W extends Work> extends
 				new ProcessContextListener[0], null, null);
 		WorkMetaData<W> workMetaData = this.getInitialNode().getWorkMetaData();
 		FlowMetaData<?> flowMetaData = workMetaData.getInitialFlowMetaData();
-		Flow flow = processState.createThread(flowMetaData);
+		JobSequence flow = processState.createThread(flowMetaData);
 
 		// Create the initial job node to execute
-		JobNode initialJobNode = flow.createJobNode(this.getInitialNode(),
+		JobNode initialJobNode = flow.createTaskNode(this.getInitialNode(),
 				null, null);
 		Job initialJob = (Job) initialJobNode;
 
