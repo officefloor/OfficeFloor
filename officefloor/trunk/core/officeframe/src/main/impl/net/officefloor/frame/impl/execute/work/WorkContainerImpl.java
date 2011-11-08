@@ -117,7 +117,7 @@ public class WorkContainerImpl<W extends Work> implements WorkContainer<W> {
 		// Locks: ThreadState -> ProcessState
 
 		// Obtain the states
-		ThreadState threadState = jobNode.getFlow().getThreadState();
+		ThreadState threadState = jobNode.getJobSequence().getThreadState();
 		ProcessState processState = threadState.getProcessState();
 
 		// Load the managed objects
@@ -169,7 +169,7 @@ public class WorkContainerImpl<W extends Work> implements WorkContainer<W> {
 		// Locks: ThreadState -> ProcessState
 
 		// Obtain the states
-		ThreadState threadState = jobNode.getFlow().getThreadState();
+		ThreadState threadState = jobNode.getJobSequence().getThreadState();
 		ProcessState processState = threadState.getProcessState();
 
 		// Govern the managed objects
@@ -217,7 +217,7 @@ public class WorkContainerImpl<W extends Work> implements WorkContainer<W> {
 		// Locks: ThreadState -> ProcessState
 
 		// Obtain the states
-		ThreadState threadState = jobNode.getFlow().getThreadState();
+		ThreadState threadState = jobNode.getJobSequence().getThreadState();
 		ProcessState processState = threadState.getProcessState();
 
 		// Coordinate the managed objects
@@ -265,7 +265,7 @@ public class WorkContainerImpl<W extends Work> implements WorkContainer<W> {
 		// Locks: ThreadState -> ProcessState
 
 		// Obtain the states
-		ThreadState threadState = jobNode.getFlow().getThreadState();
+		ThreadState threadState = jobNode.getJobSequence().getThreadState();
 		ProcessState processState = threadState.getProcessState();
 
 		// Coordinate the managed objects

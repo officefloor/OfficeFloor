@@ -44,13 +44,14 @@ public interface JobNode extends LinkedListSetEntry<JobNode, JobSequence> {
 	boolean isJobNodeComplete();
 
 	/**
-	 * Obtains the {@link JobSequence} containing this {@link JobNode}. The returned
-	 * {@link JobSequence} provides access to the {@link ThreadState} and subsequent
-	 * {@link ProcessState} that this {@link JobNode} is involved in.
+	 * Obtains the {@link JobSequence} containing this {@link JobNode}. The
+	 * returned {@link JobSequence} provides access to the {@link ThreadState}
+	 * and subsequent {@link ProcessState} that this {@link JobNode} is involved
+	 * in.
 	 * 
 	 * @return {@link JobSequence} containing this {@link JobNode}.
 	 */
-	JobSequence getFlow();
+	JobSequence getJobSequence();
 
 	/**
 	 * Obtains the {@link EscalationProcedure} for this {@link JobNode}.
@@ -63,8 +64,9 @@ public interface JobNode extends LinkedListSetEntry<JobNode, JobSequence> {
 	 * <p>
 	 * Specifies the parallel owner of this {@link JobNode}.
 	 * <p>
-	 * The input {@link JobNode} is executed once the current {@link JobSequence} that
-	 * this {@link JobNode} is involved with is complete.
+	 * The input {@link JobNode} is executed once the current
+	 * {@link JobSequence} that this {@link JobNode} is involved with is
+	 * complete.
 	 * 
 	 * @param jobNode
 	 *            Parallel owner of this {@link JobNode}.
@@ -96,8 +98,8 @@ public interface JobNode extends LinkedListSetEntry<JobNode, JobSequence> {
 	JobNode getParallelNode();
 
 	/**
-	 * Specifies the next {@link JobNode} in the {@link JobSequence} to execute after
-	 * the current {@link JobNode} is completed.
+	 * Specifies the next {@link JobNode} in the {@link JobSequence} to execute
+	 * after the current {@link JobNode} is completed.
 	 * 
 	 * @param jobNode
 	 *            Next {@link JobNode}.
@@ -105,8 +107,8 @@ public interface JobNode extends LinkedListSetEntry<JobNode, JobSequence> {
 	void setNextNode(JobNode jobNode);
 
 	/**
-	 * Obtains the next {@link JobNode} in the {@link JobSequence} to execute after the
-	 * current {@link JobNode} has completed.
+	 * Obtains the next {@link JobNode} in the {@link JobSequence} to execute
+	 * after the current {@link JobNode} has completed.
 	 * 
 	 * @return Next {@link JobNode}.
 	 */

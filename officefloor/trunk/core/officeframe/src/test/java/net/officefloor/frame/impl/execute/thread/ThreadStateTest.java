@@ -145,8 +145,6 @@ public class ThreadStateTest extends OfficeFrameTestCase {
 	 */
 	public void testCreateAndCompleteThread() {
 
-		final FlowMetaData<?> newFlow = this.createMock(FlowMetaData.class);
-
 		// Record creating and completing the ThreadState
 		this.record_ThreadState_init();
 		this.record_ProcessState_threadComplete();
@@ -154,8 +152,8 @@ public class ThreadStateTest extends OfficeFrameTestCase {
 		// Test
 		this.replayMockObjects();
 		ThreadState thread = this.createThreadState();
-		JobSequence flow = thread.createFlow(newFlow); // a flow always created
-		thread.flowComplete(flow, this.activateSet);
+		JobSequence jobSequence = thread.createJobSequence();
+		thread.jobSequenceComplete(jobSequence, this.activateSet);
 		this.verifyMockObjects();
 
 		// Thread should be complete
@@ -168,10 +166,6 @@ public class ThreadStateTest extends OfficeFrameTestCase {
 	public void testEscalating() {
 
 		final JobNode jobNode = this.createMock(JobNode.class);
-		final FlowMetaData<?> flowMetaDataOne = this
-				.createMock(FlowMetaData.class);
-		final FlowMetaData<?> flowMetaDataTwo = this
-				.createMock(FlowMetaData.class);
 
 		// Record creating and completing the ThreadState
 		this.record_ThreadState_init();
@@ -182,15 +176,15 @@ public class ThreadStateTest extends OfficeFrameTestCase {
 		ThreadState thread = this.createThreadState();
 
 		// Not completes while escalating
-		JobSequence flowOne = thread.createFlow(flowMetaDataOne);
+		JobSequence flowOne = thread.createJobSequence();
 		thread.escalationStart(jobNode, this.activateSet);
-		thread.flowComplete(flowOne, this.activateSet);
+		thread.jobSequenceComplete(flowOne, this.activateSet);
 		assertFalse("Should not complete while escalating", thread.isComplete());
 
 		// Completes after escalating
 		thread.escalationComplete(jobNode, this.activateSet);
-		JobSequence flowTwo = thread.createFlow(flowMetaDataTwo);
-		thread.flowComplete(flowTwo, this.activateSet);
+		JobSequence flowTwo = thread.createJobSequence();
+		thread.jobSequenceComplete(flowTwo, this.activateSet);
 		assertTrue("Thread should be complete", thread.isComplete());
 
 		this.verifyMockObjects();
@@ -202,8 +196,6 @@ public class ThreadStateTest extends OfficeFrameTestCase {
 	 */
 	public void testNotWaitOnThreadWhenComplete() {
 
-		final FlowMetaData<?> flowMetaData = this
-				.createMock(FlowMetaData.class);
 		final JobNode jobNode = this.createMock(JobNode.class);
 
 		// Record not waiting on a completed thread
@@ -214,7 +206,7 @@ public class ThreadStateTest extends OfficeFrameTestCase {
 		// Test
 		this.replayMockObjects();
 		ThreadStateImpl thread = this.createThreadState();
-		thread.flowComplete(thread.createFlow(flowMetaData), this.activateSet);
+		thread.jobSequenceComplete(thread.createJobSequence(), this.activateSet);
 		thread.waitOnFlow(jobNode, 1000, "TOKEN", this.activateSet);
 		this.verifyMockObjects();
 	}
@@ -224,8 +216,6 @@ public class ThreadStateTest extends OfficeFrameTestCase {
 	 */
 	public void testJobNodeNotWaitOnItsOwnThread() {
 
-		final FlowMetaData<?> flowMetaData = this
-				.createMock(FlowMetaData.class);
 		final Work work = this.createMock(Work.class);
 		final Task<?, ?, ?> task = this.createMock(Task.class);
 		final JobNode[] jobNode = new JobNode[1];
@@ -251,8 +241,8 @@ public class ThreadStateTest extends OfficeFrameTestCase {
 		// Test
 		this.replayMockObjects();
 		ThreadStateImpl thread = this.createThreadState();
-		JobSequence flow = thread.createFlow(flowMetaData);
-		jobNode[0] = flow.createTaskNode(taskMetaData, null, null);
+		JobSequence jobSequence = thread.createJobSequence();
+		jobNode[0] = jobSequence.createTaskNode(taskMetaData, null, null);
 		thread.waitOnFlow(jobNode[0], 1000, "TOKEN", this.activateSet);
 		this.verifyMockObjects();
 	}
@@ -263,8 +253,6 @@ public class ThreadStateTest extends OfficeFrameTestCase {
 	 */
 	public void testActivateJoinedJobNodesOnThreadCompletion() {
 
-		final FlowMetaData<?> flowMetaData = this
-				.createMock(FlowMetaData.class);
 		final JobNode jobNode = this.createMock(JobNode.class);
 
 		// Record not waiting on a completed thread
@@ -277,7 +265,7 @@ public class ThreadStateTest extends OfficeFrameTestCase {
 		this.replayMockObjects();
 		ThreadStateImpl thread = this.createThreadState();
 		thread.waitOnFlow(jobNode, 1000, "TOKEN", this.activateSet);
-		thread.flowComplete(thread.createFlow(flowMetaData), this.activateSet);
+		thread.jobSequenceComplete(thread.createJobSequence(), this.activateSet);
 		this.verifyMockObjects();
 	}
 
@@ -379,7 +367,7 @@ public class ThreadStateTest extends OfficeFrameTestCase {
 		thread.waitOnFlow(activatedJobNode, NOT_TIME_OUT, activatedToken,
 				this.activateSet);
 		this.joinedAssets.get(0).checkOnAsset(context);
-		thread.flowComplete(thread.createFlow(flowMetaData), this.activateSet);
+		thread.jobSequenceComplete(thread.createJobSequence(), this.activateSet);
 		this.verifyMockObjects();
 	}
 
@@ -463,7 +451,7 @@ public class ThreadStateTest extends OfficeFrameTestCase {
 		final AssetMonitor assetMonitor = this.createMock(AssetMonitor.class);
 
 		// Record job node joining on ThreadState
-		this.recordReturn(jobNode, jobNode.getFlow(), flow);
+		this.recordReturn(jobNode, jobNode.getJobSequence(), flow);
 		this.recordReturn(flow, flow.getThreadState(), anotherThreadState);
 		this.recordReturn(this.threadManager,
 				this.threadManager.createAssetMonitor(null), assetMonitor);

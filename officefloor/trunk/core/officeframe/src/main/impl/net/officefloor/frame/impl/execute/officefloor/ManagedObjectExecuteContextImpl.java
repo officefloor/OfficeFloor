@@ -149,7 +149,7 @@ public class ManagedObjectExecuteContextImpl<F extends Enum<F>> implements
 				this.processMoIndex, escalationHandler);
 
 		// Obtain the process state
-		ProcessState processState = jobNode.getFlow().getThreadState()
+		ProcessState processState = jobNode.getJobSequence().getThreadState()
 				.getProcessState();
 
 		// Indicate process started and register to be notified of completion

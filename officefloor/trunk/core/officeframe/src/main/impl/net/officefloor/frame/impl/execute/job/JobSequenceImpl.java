@@ -41,8 +41,9 @@ import net.officefloor.frame.spi.team.Job;
  * 
  * @author Daniel Sagenschneider
  */
-public class JobSequenceImpl extends AbstractLinkedListSetEntry<JobSequence, ThreadState>
-		implements JobSequence {
+public class JobSequenceImpl extends
+		AbstractLinkedListSetEntry<JobSequence, ThreadState> implements
+		JobSequence {
 
 	/**
 	 * Activate {@link JobNode} instances for this {@link JobSequence}.
@@ -254,7 +255,7 @@ public class JobSequenceImpl extends AbstractLinkedListSetEntry<JobSequence, Thr
 		if (this.activeJobNodes.removeEntry(jobNode)) {
 			// Last active JobNode so flow is now complete
 			this.isFlowComplete = true;
-			this.threadState.flowComplete(this, activateSet);
+			this.threadState.jobSequenceComplete(this, activateSet);
 		}
 	}
 

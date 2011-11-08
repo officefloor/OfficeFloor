@@ -78,7 +78,7 @@ public class JobNodeAdapter extends AbstractLinkedListSetEntry<JobNode, JobSeque
 	}
 
 	@Override
-	public JobSequence getFlow() {
+	public JobSequence getJobSequence() {
 		return this.flow;
 	}
 

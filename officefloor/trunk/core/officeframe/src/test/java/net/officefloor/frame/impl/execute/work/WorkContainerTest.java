@@ -95,7 +95,7 @@ public class WorkContainerTest extends OfficeFrameTestCase {
 	/**
 	 * Mock {@link JobSequence}.
 	 */
-	private final JobSequence flow = this.createMock(JobSequence.class);
+	private final JobSequence jobSequence = this.createMock(JobSequence.class);
 
 	/**
 	 * Mock {@link ThreadState}.
@@ -194,8 +194,9 @@ public class WorkContainerTest extends OfficeFrameTestCase {
 	 * Records obtaining the {@link ThreadState} and {@link ProcessState}.
 	 */
 	private void record_WorkContainer_toProcessState() {
-		this.recordReturn(this.jobNode, this.jobNode.getFlow(), this.flow);
-		this.recordReturn(this.flow, this.flow.getThreadState(),
+		this.recordReturn(this.jobNode, this.jobNode.getJobSequence(),
+				this.jobSequence);
+		this.recordReturn(this.jobSequence, this.jobSequence.getThreadState(),
 				this.threadState);
 		this.recordReturn(this.threadState, this.threadState.getProcessState(),
 				this.processState);

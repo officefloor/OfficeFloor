@@ -59,8 +59,8 @@ import net.officefloor.frame.spi.team.Team;
  * @author Daniel Sagenschneider
  */
 public abstract class AbstractJobContainer<W extends Work, N extends JobMetaData>
-		extends AbstractLinkedListSetEntry<JobNode, JobSequence> implements Job,
-		JobNode, JobExecuteContext, ContainerContext {
+		extends AbstractLinkedListSetEntry<JobNode, JobSequence> implements
+		Job, JobNode, JobExecuteContext, ContainerContext {
 
 	/**
 	 * {@link Logger}.
@@ -114,9 +114,9 @@ public abstract class AbstractJobContainer<W extends Work, N extends JobMetaData
 	 *            {@link ManagedObject} instances that must be loaded before the
 	 *            {@link Task} may be executed.
 	 */
-	public AbstractJobContainer(JobSequence flow, WorkContainer<W> workContainer,
-			N nodeMetaData, JobNode parallelOwner,
-			ManagedObjectIndex[] requiredManagedObjects) {
+	public AbstractJobContainer(JobSequence flow,
+			WorkContainer<W> workContainer, N nodeMetaData,
+			JobNode parallelOwner, ManagedObjectIndex[] requiredManagedObjects) {
 		this.flow = flow;
 		this.workContainer = workContainer;
 		this.nodeMetaData = nodeMetaData;
@@ -173,7 +173,7 @@ public abstract class AbstractJobContainer<W extends Work, N extends JobMetaData
 
 		// Create a new flow for execution
 		ThreadState threadState = this.flow.getThreadState();
-		JobSequence parallelFlow = threadState.createFlow(flowMetaData);
+		JobSequence parallelFlow = threadState.createJobSequence();
 
 		// Create the job node
 		JobNode parallelJobNode = parallelFlow.createTaskNode(initTaskMetaData,
@@ -907,7 +907,7 @@ public abstract class AbstractJobContainer<W extends Work, N extends JobMetaData
 
 		// Create a new flow for execution
 		ThreadState threadState = this.flow.getThreadState();
-		JobSequence parallelFlow = threadState.createFlow(flowMetaData);
+		JobSequence parallelFlow = threadState.createJobSequence();
 
 		// Create the job node
 		JobNode escalationJobNode = parallelFlow.createTaskNode(
@@ -918,7 +918,8 @@ public abstract class AbstractJobContainer<W extends Work, N extends JobMetaData
 	}
 
 	/**
-	 * Creates an asynchronous {@link JobSequence} from the input {@link FlowMetaData}.
+	 * Creates an asynchronous {@link JobSequence} from the input
+	 * {@link FlowMetaData}.
 	 * 
 	 * @param flowMetaData
 	 *            {@link FlowMetaData}.
@@ -950,7 +951,8 @@ public abstract class AbstractJobContainer<W extends Work, N extends JobMetaData
 	}
 
 	/**
-	 * Creates a parallel {@link JobSequence} from the input {@link FlowMetaData}.
+	 * Creates a parallel {@link JobSequence} from the input
+	 * {@link FlowMetaData}.
 	 * 
 	 * @param flowMetaData
 	 *            {@link FlowMetaData}.
@@ -967,7 +969,7 @@ public abstract class AbstractJobContainer<W extends Work, N extends JobMetaData
 
 		// Create a new flow for execution
 		ThreadState threadState = this.flow.getThreadState();
-		JobSequence parallelFlow = threadState.createFlow(flowMetaData);
+		JobSequence parallelFlow = threadState.createJobSequence();
 
 		// Create the job node
 		JobNode parallelJobNode = parallelFlow.createTaskNode(initTaskMetaData,
@@ -981,7 +983,8 @@ public abstract class AbstractJobContainer<W extends Work, N extends JobMetaData
 	}
 
 	/**
-	 * Creates a sequential {@link JobSequence} from the input {@link FlowMetaData}.
+	 * Creates a sequential {@link JobSequence} from the input
+	 * {@link FlowMetaData}.
 	 * 
 	 * @param flowMetaData
 	 *            {@link FlowMetaData}.
@@ -1059,8 +1062,8 @@ public abstract class AbstractJobContainer<W extends Work, N extends JobMetaData
 	 * <p>
 	 * Owner if this {@link JobNode} is a parallel {@link JobNode}.
 	 * <p>
-	 * This is the {@link JobNode} that is executed once the {@link JobSequence} that
-	 * this {@link JobNode} is involved within is complete.
+	 * This is the {@link JobNode} that is executed once the {@link JobSequence}
+	 * that this {@link JobNode} is involved within is complete.
 	 */
 	private JobNode parallelOwner;
 
@@ -1126,7 +1129,7 @@ public abstract class AbstractJobContainer<W extends Work, N extends JobMetaData
 	}
 
 	@Override
-	public JobSequence getFlow() {
+	public JobSequence getJobSequence() {
 		return this.flow;
 	}
 

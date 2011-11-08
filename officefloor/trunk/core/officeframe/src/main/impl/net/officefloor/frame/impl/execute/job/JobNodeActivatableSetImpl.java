@@ -35,7 +35,7 @@ import net.officefloor.frame.internal.structure.ThreadState;
 public class JobNodeActivatableSetImpl implements JobNodeActivatableSet {
 
 	/**
-	 * {@link JobNode} instances to be activated. 
+	 * {@link JobNode} instances to be activated.
 	 */
 	private final LinkedListSet<ActivatedJobNode, JobNodeActivatableSet> jobNodes = new StrictLinkedListSet<ActivatedJobNode, JobNodeActivatableSet>() {
 		@Override
@@ -66,7 +66,7 @@ public class JobNodeActivatableSetImpl implements JobNodeActivatableSet {
 		while (notifiedJobNode != null) {
 
 			// Synchronise on thread of job to ensure safe activation
-			ThreadState threadState = notifiedJobNode.jobNode.getFlow()
+			ThreadState threadState = notifiedJobNode.jobNode.getJobSequence()
 					.getThreadState();
 			synchronized (threadState.getThreadLock()) {
 
