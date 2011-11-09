@@ -20,7 +20,6 @@ package net.officefloor.plugin.socket.server.http.protocol;
 
 import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.build.None;
-import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceContext;
 import net.officefloor.frame.spi.managedobject.source.impl.AbstractAsyncManagedObjectSource.MetaDataContext;
 import net.officefloor.frame.spi.managedobject.source.impl.AbstractAsyncManagedObjectSource.SpecificationContext;
@@ -133,7 +132,7 @@ public class HttpCommunicationProtocol implements
 	private BufferSquirtFactory bufferSquirtFactory;
 
 	/**
-	 * {@link Flow} index to handle processing {@link HttpRequest}.
+	 * Flow index to handle processing {@link HttpRequest}.
 	 */
 	private int requestHandlingFlowIndex;
 

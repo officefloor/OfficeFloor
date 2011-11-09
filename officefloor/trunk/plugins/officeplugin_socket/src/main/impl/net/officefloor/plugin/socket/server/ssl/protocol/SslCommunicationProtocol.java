@@ -26,7 +26,6 @@ import javax.net.ssl.SSLEngine;
 
 import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.build.None;
-import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectExecuteContext;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceContext;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectTaskBuilder;
@@ -107,7 +106,7 @@ public class SslCommunicationProtocol<CH extends ConnectionHandler> implements
 	private ManagedObjectExecuteContext<Indexed> executeContext;
 
 	/**
-	 * {@link Flow} index to run the SSL tasks.
+	 * Flow index to run the SSL tasks.
 	 */
 	private int sslTaskFlowIndex;
 

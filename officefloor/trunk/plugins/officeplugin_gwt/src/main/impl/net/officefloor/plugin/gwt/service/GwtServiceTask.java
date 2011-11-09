@@ -24,7 +24,6 @@ import java.util.Map;
 import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.execute.TaskContext;
-import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.util.AbstractSingleTask;
 
 import com.google.gwt.user.client.rpc.IncompatibleRemoteServiceException;
@@ -47,7 +46,7 @@ public class GwtServiceTask
 	}
 
 	/**
-	 * Mapping of {@link Method} name to {@link Flow} index.
+	 * Mapping of {@link Method} name to flow index.
 	 */
 	private final Map<String, Integer> methodToFlow;
 

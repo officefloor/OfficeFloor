@@ -21,7 +21,6 @@ package net.officefloor.plugin.socket.server.tcp.protocol;
 import java.io.IOException;
 
 import net.officefloor.frame.api.build.Indexed;
-import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectExecuteContext;
 import net.officefloor.plugin.socket.server.Server;
 
@@ -33,7 +32,7 @@ import net.officefloor.plugin.socket.server.Server;
 public class TcpServer implements Server<TcpConnectionHandler> {
 
 	/**
-	 * {@link Flow} index to handle a new connection.
+	 * Flow index to handle a new connection.
 	 */
 	private final int newConnectionFlowIndex;
 
@@ -46,7 +45,7 @@ public class TcpServer implements Server<TcpConnectionHandler> {
 	 * Initiate.
 	 *
 	 * @param newConnectionFlowIndex
-	 *            {@link Flow} index to handle a new connection.
+	 *            Flow index to handle a new connection.
 	 */
 	public TcpServer(int newConnectionFlowIndex) {
 		this.newConnectionFlowIndex = newConnectionFlowIndex;

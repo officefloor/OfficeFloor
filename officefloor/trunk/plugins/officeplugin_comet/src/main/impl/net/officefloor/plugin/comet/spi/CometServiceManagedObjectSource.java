@@ -26,7 +26,6 @@ import java.util.Set;
 import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.execute.TaskContext;
-import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.spi.managedobject.AsynchronousListener;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectExecuteContext;
@@ -54,7 +53,7 @@ public class CometServiceManagedObjectSource
 		AbstractManagedObjectSource<Dependencies, CometServiceManagedObjectSource.Flows> {
 
 	/**
-	 * {@link Flow} keys.
+	 * Flow keys.
 	 */
 	public static enum Flows {
 		EXPIRE

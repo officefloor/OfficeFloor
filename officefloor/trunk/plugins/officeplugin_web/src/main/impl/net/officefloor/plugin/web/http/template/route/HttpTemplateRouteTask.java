@@ -33,7 +33,6 @@ import net.officefloor.frame.api.manage.TaskManager;
 import net.officefloor.frame.api.manage.UnknownTaskException;
 import net.officefloor.frame.api.manage.UnknownWorkException;
 import net.officefloor.frame.api.manage.WorkManager;
-import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.util.AbstractSingleTask;
 import net.officefloor.plugin.socket.server.http.HttpRequest;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
@@ -63,7 +62,7 @@ public class HttpTemplateRouteTask
 	}
 
 	/**
-	 * Keys of {@link Flow} for the {@link HttpTemplateRouteTask}.
+	 * Keys of Flow for the {@link HttpTemplateRouteTask}.
 	 */
 	public static enum HttpTemplateRouteTaskFlows {
 		NON_MATCHED_REQUEST
