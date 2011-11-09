@@ -17,7 +17,9 @@
  */
 package net.officefloor.frame.internal.structure;
 
-import net.officefloor.frame.spi.team.Job;
+import net.officefloor.frame.api.execute.Task;
+import net.officefloor.frame.spi.administration.Duty;
+import net.officefloor.frame.spi.managedobject.ManagedObject;
 
 /**
  * Context for the {@link WorkContainer} and {@link ManagedObjectContainer}.
@@ -27,19 +29,25 @@ import net.officefloor.frame.spi.team.Job;
 public interface ContainerContext {
 
 	/**
-	 * Flags for the {@link Job} to wait and be activated at a later time once a
-	 * dependency is ready.
+	 * Flags for the {@link JobNode} to wait and be activated at a later time
+	 * once a dependency is ready.
 	 */
 	void flagJobToWait();
 
 	/**
-	 * Adds a setup {@link Job} to be executed before the current {@link Job}.
+	 * <p>
+	 * Adds a setup {@link Task} to be executed before the current
+	 * {@link JobNode}.
+	 * <p>
+	 * This is available to {@link ManagedObject} and {@link Duty} setup. Note
+	 * that if it is added during {@link Task} execution it will be executed
+	 * after the {@link Task}.
 	 * 
-	 * @param flowMetaData
-	 *            {@link FlowMetaData} for the setup {@link Job}.
+	 * @param taskMetaData
+	 *            {@link TaskMetaData} for the setup {@link Task}.
 	 * @param parameter
-	 *            Parameter for the {@link Job}.
+	 *            Parameter for the {@link Task}.
 	 */
-	void addSetupJob(FlowMetaData<?> flowMetaData, Object parameter);
+	void addSetupTask(TaskMetaData<?, ?, ?> taskMetaData, Object parameter);
 
 }

@@ -173,7 +173,8 @@ public class RawGovernanceMetaDataTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensures able to handle simple {@link Governance} without {@link JobSequence}.
+	 * Ensures able to handle simple {@link Governance} without
+	 * {@link JobSequence}.
 	 */
 	public void testSimpleGovernance() {
 
@@ -209,21 +210,19 @@ public class RawGovernanceMetaDataTest extends OfficeFrameTestCase {
 		assertEquals("Incorrect governance name", GOVERNANCE_NAME,
 				governanceMetaData.getGovernanceName());
 		assertEquals("Incorrect activate flow meta-data", activateTaskMetaData,
-				governanceMetaData.getActivateFlowMetaData()
-						.getInitialTaskMetaData());
+				governanceMetaData.getActivateTaskMetaData());
 		assertEquals("Incorrect enforce flow meta-data", enforceTaskMetaData,
-				governanceMetaData.getEnforceFlowMetaData()
-						.getInitialTaskMetaData());
+				governanceMetaData.getEnforceTaskMetaData());
 		assertEquals("Incorrect disregard flow meta-data",
-				disregardTaskMetaData, governanceMetaData
-						.getDisregardFlowMetaData().getInitialTaskMetaData());
+				disregardTaskMetaData,
+				governanceMetaData.getDisregardTaskMetaData());
 
 		// Validate correct govern meta-data
 		ActiveGovernanceManager manager = governanceMetaData
 				.createActiveGovernance(null, null, null, null, 0);
 		ActiveGovernance activeGovernance = manager.getActiveGovernance();
 		assertEquals("Incorrect govern flow meta-data", governTaskMetaData,
-				activeGovernance.getFlowMetaData().getInitialTaskMetaData());
+				activeGovernance.getTaskMetaData());
 	}
 
 	/**

@@ -165,18 +165,15 @@ public abstract class AbstractJobContainer<W extends Work, N extends JobMetaData
 	}
 
 	@Override
-	public void addSetupJob(FlowMetaData<?> flowMetaData, Object parameter) {
-
-		// Obtain the task meta-data for instigating the flow
-		TaskMetaData<?, ?, ?> initTaskMetaData = flowMetaData
-				.getInitialTaskMetaData();
+	public void addSetupTask(TaskMetaData<?, ?, ?> taskMetaData,
+			Object parameter) {
 
 		// Create a new flow for execution
 		ThreadState threadState = this.flow.getThreadState();
 		JobSequence parallelFlow = threadState.createJobSequence();
 
 		// Create the job node
-		JobNode parallelJobNode = parallelFlow.createTaskNode(initTaskMetaData,
+		JobNode parallelJobNode = parallelFlow.createTaskNode(taskMetaData,
 				this, parameter);
 
 		// Load the parallel node
@@ -254,8 +251,8 @@ public abstract class AbstractJobContainer<W extends Work, N extends JobMetaData
 		// Access Point: Team
 		// Locks: None
 
-		// Flag to determine if activate setup job
-		boolean isActivateSetupJob = false;
+		// Setup job to be activated
+		JobNode setupJob = null;
 
 		// Ensure activate and wait on flow
 		JobNodeActivatableSet activateSet = this.nodeMetaData
@@ -314,8 +311,7 @@ public abstract class AbstractJobContainer<W extends Work, N extends JobMetaData
 											executionContext, this,
 											activateSet, this);
 
-									// Flag Managed Objects are now to be
-									// governed
+									// Flag Managed Objects now to be governed
 									this.jobState = JobState.GOVERN_MANAGED_OBJECTS;
 
 								case GOVERN_MANAGED_OBJECTS:
@@ -492,6 +488,12 @@ public abstract class AbstractJobContainer<W extends Work, N extends JobMetaData
 						}
 
 					} catch (Throwable ex) {
+
+						// TODO remove
+						if (ex instanceof Error) {
+							throw (Error) ex;
+						}
+
 						// Flag for escalation
 						escalationCause = ex;
 					}
@@ -648,8 +650,11 @@ public abstract class AbstractJobContainer<W extends Work, N extends JobMetaData
 					// Job no longer active
 					this.isActive = false;
 
-					// Indicate whether to activate setup job
-					isActivateSetupJob = this.isSetupJob;
+					// Set setup job to be activated
+					if (this.isSetupJob) {
+						// Obtain the setup job to be activated
+						setupJob = this.getParallelJobNodeToExecute();
+					}
 				}
 			}
 
@@ -667,12 +672,9 @@ public abstract class AbstractJobContainer<W extends Work, N extends JobMetaData
 			// Ensure activate the necessary jobs
 			activateSet.activateJobNodes();
 
-			// Activate parallel jobs (for setup)
-			if (isActivateSetupJob) {
-				JobNode setupJob = this.getParallelJobNodeToExecute();
-				if (setupJob != null) {
-					setupJob.activateJob();
-				}
+			// Activate setup job
+			if (setupJob != null) {
+				setupJob.activateJob();
 			}
 		}
 	}

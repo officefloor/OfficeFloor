@@ -423,7 +423,7 @@ public class ManagedObjectContainerImpl implements ManagedObjectContainer,
 				this.activeGovernances[i] = activeGovernance;
 
 				// Add the governance for activation
-				context.addSetupJob(activeGovernance.getFlowMetaData(),
+				context.addSetupTask(activeGovernance.getTaskMetaData(),
 						activeGovernance);
 			}
 

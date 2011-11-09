@@ -24,17 +24,17 @@ import java.util.List;
 import net.officefloor.frame.api.execute.FlowFuture;
 import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.execute.Work;
-import net.officefloor.frame.internal.structure.ActiveGovernance;
+import net.officefloor.frame.internal.structure.ContainerContext;
 import net.officefloor.frame.internal.structure.EscalationFlow;
 import net.officefloor.frame.internal.structure.EscalationLevel;
 import net.officefloor.frame.internal.structure.EscalationProcedure;
-import net.officefloor.frame.internal.structure.JobSequence;
 import net.officefloor.frame.internal.structure.FlowAsset;
 import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
 import net.officefloor.frame.internal.structure.FlowMetaData;
 import net.officefloor.frame.internal.structure.JobMetaData;
 import net.officefloor.frame.internal.structure.JobNode;
 import net.officefloor.frame.internal.structure.JobNodeActivatableSet;
+import net.officefloor.frame.internal.structure.JobSequence;
 import net.officefloor.frame.internal.structure.ManagedObjectIndex;
 import net.officefloor.frame.internal.structure.ProcessState;
 import net.officefloor.frame.internal.structure.TaskMetaData;
@@ -287,15 +287,45 @@ public abstract class AbstractJobContainerTest extends OfficeFrameTestCase {
 	 * 
 	 * @param job
 	 *            {@link Job}.
-	 * @param activeGovernances
-	 *            {@link ActiveGovernance} instances.
 	 */
 	protected void record_WorkContainer_governManagedObjects(Job job,
-			ActiveGovernance... activeGovernances) {
+			boolean isActivateTask) {
 		final FunctionalityJob functionalityJob = (FunctionalityJob) job;
+
+		// Record governing managed objects
 		this.workContainer.governManagedObjects(
 				functionalityJob.requiredManagedObjectIndexes, this.jobContext,
 				functionalityJob, this.jobActivatableSet, functionalityJob);
+
+		if (isActivateTask) {
+
+			final TaskMetaData<?, ?, ?> setuptaskMetaData = this
+					.createMock(TaskMetaData.class);
+			final Object parameter = new Object();
+
+			// Trigger setup task from govern managed objects
+			this.control(this.workContainer).setMatcher(new AbstractMatcher() {
+				@Override
+				public boolean matches(Object[] expected, Object[] actual) {
+
+					// Ensure correct parameters
+					for (int i = 0; i < expected.length; i++) {
+						assertEquals("Incorrect parameter " + i, expected[i],
+								actual[i]);
+					}
+
+					// Trigger setup task
+					ContainerContext context = (ContainerContext) actual[4];
+					context.addSetupTask(setuptaskMetaData, parameter);
+
+					return true;
+				}
+			});
+
+			// Record activating the task
+			this.record_ContainerContext_addSetupTask(job, setuptaskMetaData,
+					parameter);
+		}
 	}
 
 	/**
@@ -452,7 +482,7 @@ public abstract class AbstractJobContainerTest extends OfficeFrameTestCase {
 	 *            Parallel {@link Job} of the parallel {@link Job}.
 	 */
 	protected void record_parallelJob_activateJob(Job currentJob,
-			final boolean isComplete, Job nextJob, Job parallelJob) {
+			final boolean isComplete) {
 		final FunctionalityJob functionalityJob = (FunctionalityJob) currentJob;
 		this.parallelJob.activateJob();
 		this.control(this.parallelJob).setMatcher(new AlwaysMatcher() {
@@ -716,6 +746,31 @@ public abstract class AbstractJobContainerTest extends OfficeFrameTestCase {
 	}
 
 	/**
+	 * Records {@link ContainerContext} adding a setup {@link Task}.
+	 * 
+	 * @param job
+	 *            {@link Job}.
+	 * @param taskMetaData
+	 *            {@link TaskMetaData}.
+	 * @param parameter
+	 *            Parameter.
+	 */
+	protected void record_ContainerContext_addSetupTask(Job job,
+			TaskMetaData<?, ?, ?> taskMetaData, Object parameter) {
+		FunctionalityJob functionalityJob = (FunctionalityJob) job;
+
+		final JobSequence setupJobSequence = this.createMock(JobSequence.class);
+
+		this.recordReturn(this.flow, this.flow.getThreadState(),
+				this.threadState);
+		this.recordReturn(this.threadState,
+				this.threadState.createJobSequence(), setupJobSequence);
+		this.recordReturn(setupJobSequence, setupJobSequence.createTaskNode(
+				taskMetaData, functionalityJob, parameter), this.parallelJob);
+		this.parallelJob.setParallelOwner(functionalityJob);
+	}
+
+	/**
 	 * Records completing the {@link Job}.
 	 * 
 	 * @param job
@@ -956,6 +1011,16 @@ public abstract class AbstractJobContainerTest extends OfficeFrameTestCase {
 	 * Context for the {@link JobFunctionality}.
 	 */
 	protected static interface JobFunctionalityContext {
+
+		/**
+		 * Adds a setup {@link Task}.
+		 * 
+		 * @param taskMetaData
+		 *            {@link TaskMetaData}.
+		 * @param parameter
+		 *            Parameter.
+		 */
+		void addSetupTask(TaskMetaData<?, ?, ?> taskMetaData, Object parameter);
 
 		/**
 		 * Obtains the {@link ManagedObject} instance's object.

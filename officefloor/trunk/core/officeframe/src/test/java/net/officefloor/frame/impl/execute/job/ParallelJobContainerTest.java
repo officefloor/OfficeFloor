@@ -59,7 +59,8 @@ public class ParallelJobContainerTest extends AbstractJobContainerTest {
 	}
 
 	/**
-	 * Ensures execution of a {@link Job} with a parallel {@link JobSequence} invoked.
+	 * Ensures execution of a {@link Job} with a parallel {@link JobSequence}
+	 * invoked.
 	 */
 	public void testExecuteJobWithParallelFlow() {
 
@@ -80,7 +81,7 @@ public class ParallelJobContainerTest extends AbstractJobContainerTest {
 		this.record_doParallelFlow(job, parallelFlowParameter);
 		this.record_JobMetaData_getNextTaskInFlow(false);
 		this.record_parallelJob_getParallelNode(null);
-		this.record_parallelJob_activateJob(job, false, null, null);
+		this.record_parallelJob_activateJob(job, false);
 		this.record_JobActivatableSet_activateJobs();
 
 		// Record parallel job complete and now completing job
@@ -108,8 +109,8 @@ public class ParallelJobContainerTest extends AbstractJobContainerTest {
 	}
 
 	/**
-	 * Ensures execution of a {@link Job} with a passive parallel {@link JobSequence}
-	 * invoked.
+	 * Ensures execution of a {@link Job} with a passive parallel
+	 * {@link JobSequence} invoked.
 	 */
 	public void testExecuteJobWithPassiveParallelFlow() {
 
@@ -131,7 +132,7 @@ public class ParallelJobContainerTest extends AbstractJobContainerTest {
 		this.record_doParallelFlow(job, parallelFlowParameter);
 		this.record_JobMetaData_getNextTaskInFlow(false);
 		this.record_parallelJob_getParallelNode(null);
-		this.record_parallelJob_activateJob(job, true, null, null);
+		this.record_parallelJob_activateJob(job, true);
 		this.record_completeJob(job);
 		this.record_JobActivatableSet_activateJobs();
 

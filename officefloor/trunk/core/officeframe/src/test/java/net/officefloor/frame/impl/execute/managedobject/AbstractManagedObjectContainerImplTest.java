@@ -35,16 +35,16 @@ import net.officefloor.frame.internal.structure.AssetManager;
 import net.officefloor.frame.internal.structure.AssetMonitor;
 import net.officefloor.frame.internal.structure.ContainerContext;
 import net.officefloor.frame.internal.structure.ExtensionInterfaceExtractor;
-import net.officefloor.frame.internal.structure.JobSequence;
-import net.officefloor.frame.internal.structure.FlowMetaData;
 import net.officefloor.frame.internal.structure.GovernanceContainer;
 import net.officefloor.frame.internal.structure.JobNode;
 import net.officefloor.frame.internal.structure.JobNodeActivatableSet;
 import net.officefloor.frame.internal.structure.JobNodeActivateSet;
+import net.officefloor.frame.internal.structure.JobSequence;
 import net.officefloor.frame.internal.structure.ManagedObjectContainer;
 import net.officefloor.frame.internal.structure.ManagedObjectGovernanceMetaData;
 import net.officefloor.frame.internal.structure.ManagedObjectMetaData;
 import net.officefloor.frame.internal.structure.ProcessState;
+import net.officefloor.frame.internal.structure.TaskMetaData;
 import net.officefloor.frame.internal.structure.ThreadState;
 import net.officefloor.frame.internal.structure.WorkContainer;
 import net.officefloor.frame.spi.governance.Governance;
@@ -692,8 +692,8 @@ public abstract class AbstractManagedObjectContainerImplTest extends
 				final ExtensionInterfaceExtractor<?> eiExtractor = this
 						.createMock(ExtensionInterfaceExtractor.class);
 				final Object extension = new Object();
-				final FlowMetaData<?> flowMetaData = this
-						.createMock(FlowMetaData.class);
+				final TaskMetaData<?, ?, ?> taskMetaData = this
+						.createMock(TaskMetaData.class);
 
 				final int registeredIndex = i;
 
@@ -722,8 +722,8 @@ public abstract class AbstractManagedObjectContainerImplTest extends
 							}
 						});
 				this.recordReturn(activeGovernance,
-						activeGovernance.getFlowMetaData(), flowMetaData);
-				this.containerContext.addSetupJob(flowMetaData,
+						activeGovernance.getTaskMetaData(), taskMetaData);
+				this.containerContext.addSetupTask(taskMetaData,
 						activeGovernance);
 			}
 		}
