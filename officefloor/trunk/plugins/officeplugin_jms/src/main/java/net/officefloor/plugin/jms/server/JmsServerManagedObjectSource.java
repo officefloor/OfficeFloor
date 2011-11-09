@@ -32,7 +32,6 @@ import javax.jms.Session;
 
 import net.officefloor.admin.transaction.Transaction;
 import net.officefloor.frame.api.build.None;
-import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.frame.spi.managedobject.extension.ExtensionInterfaceFactory;
@@ -281,7 +280,7 @@ public class JmsServerManagedObjectSource
 	}
 
 	/**
-	 * Provides the {@link Flow} instances.
+	 * Provides the flow instances.
 	 */
 	public static enum JmsServerFlows {
 

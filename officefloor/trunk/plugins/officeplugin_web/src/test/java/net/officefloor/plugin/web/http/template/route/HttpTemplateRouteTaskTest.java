@@ -24,7 +24,6 @@ import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.manage.TaskManager;
 import net.officefloor.frame.api.manage.WorkManager;
-import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.socket.server.http.HttpRequest;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
@@ -245,7 +244,7 @@ public class HttpTemplateRouteTaskTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Record doing the non matched {@link Flow}.
+	 * Record doing the non matched Flow.
 	 */
 	private void record_doNonMatchedRequestFlow() {
 		this.recordReturn(this.taskContext, this.taskContext.doFlow(

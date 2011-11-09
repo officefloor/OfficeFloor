@@ -22,7 +22,6 @@ import javax.jms.Message;
 
 import net.officefloor.frame.api.execute.TaskContext;
 import net.officefloor.frame.api.execute.Work;
-import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.util.AbstractSingleTask;
 
 /**
@@ -42,7 +41,7 @@ public class OnMessageTask
 	}
 
 	/**
-	 * Keys for {@link Flow} instigated by the {@link OnMessageTask} with the
+	 * Keys for flow instigated by the {@link OnMessageTask} with the
 	 * {@link Message} as argument.
 	 */
 	public enum OnMessageFlows {

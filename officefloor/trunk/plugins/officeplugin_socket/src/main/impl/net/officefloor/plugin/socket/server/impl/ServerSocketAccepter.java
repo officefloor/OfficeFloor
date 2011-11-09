@@ -31,7 +31,6 @@ import java.util.Iterator;
 
 import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.api.execute.TaskContext;
-import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.util.AbstractSingleTask;
 import net.officefloor.plugin.socket.server.ConnectionHandler;
 import net.officefloor.plugin.socket.server.ServerSocketHandler;
@@ -47,7 +46,7 @@ public class ServerSocketAccepter<CH extends ConnectionHandler>
 		AbstractSingleTask<ServerSocketAccepter<CH>, None, ServerSocketAccepter.ServerSocketAccepterFlows> {
 
 	/**
-	 * {@link Flow} instances for the {@link ServerSocketAccepter}.
+	 * Flow instances for the {@link ServerSocketAccepter}.
 	 */
 	public static enum ServerSocketAccepterFlows {
 		LISTEN

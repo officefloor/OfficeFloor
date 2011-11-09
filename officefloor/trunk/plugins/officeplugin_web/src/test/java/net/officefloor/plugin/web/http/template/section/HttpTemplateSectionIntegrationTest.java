@@ -24,7 +24,6 @@ import java.io.Writer;
 import java.sql.Connection;
 
 import net.officefloor.frame.api.execute.Task;
-import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.spi.source.UnknownPropertyError;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.autowire.AutoWireOfficeFloor;
@@ -142,7 +141,7 @@ public class HttpTemplateSectionIntegrationTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensure with {@link NextTask} annotation that invoking a {@link Flow}
+	 * Ensure with {@link NextTask} annotation that invoking a Flow
 	 * takes precedence.
 	 */
 	public void testSubmitInvokingFlow() throws Exception {
@@ -204,7 +203,7 @@ public class HttpTemplateSectionIntegrationTest extends OfficeFrameTestCase {
 
 	/**
 	 * Ensure on submit link that has next {@link Task} instances that if last
-	 * {@link Task} in {@link Flow} does not indicate {@link NextTask} that the
+	 * {@link Task} in Flow does not indicate {@link NextTask} that the
 	 * template is rendered.
 	 */
 	public void testRenderByDefault() throws Exception {

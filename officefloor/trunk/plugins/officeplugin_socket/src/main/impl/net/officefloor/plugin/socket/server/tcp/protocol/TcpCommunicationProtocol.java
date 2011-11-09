@@ -20,7 +20,6 @@ package net.officefloor.plugin.socket.server.tcp.protocol;
 
 import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.build.None;
-import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceContext;
 import net.officefloor.frame.spi.managedobject.source.impl.AbstractAsyncManagedObjectSource.MetaDataContext;
 import net.officefloor.frame.spi.managedobject.source.impl.AbstractAsyncManagedObjectSource.SpecificationContext;
@@ -52,7 +51,7 @@ public class TcpCommunicationProtocol implements
 	private long maxIdleTime;
 
 	/**
-	 * {@link Flow} index to handle a new connection.
+	 * Flow index to handle a new connection.
 	 */
 	private int newConnectionFlowIndex;
 

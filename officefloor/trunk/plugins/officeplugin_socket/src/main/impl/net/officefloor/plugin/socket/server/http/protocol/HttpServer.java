@@ -21,7 +21,6 @@ package net.officefloor.plugin.socket.server.http.protocol;
 import java.io.IOException;
 
 import net.officefloor.frame.api.build.Indexed;
-import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectExecuteContext;
 import net.officefloor.plugin.socket.server.Server;
 import net.officefloor.plugin.socket.server.http.HttpRequest;
@@ -35,7 +34,7 @@ import net.officefloor.plugin.socket.server.http.conversation.HttpManagedObject;
 public class HttpServer implements Server<HttpConnectionHandler> {
 
 	/**
-	 * {@link Flow} index to handle processing {@link HttpRequest}.
+	 * Flow index to handle processing {@link HttpRequest}.
 	 */
 	private final int requestHandlingFlowIndex;
 
@@ -48,7 +47,7 @@ public class HttpServer implements Server<HttpConnectionHandler> {
 	 * Initiate.
 	 * 
 	 * @param requestHandlingFlowIndex
-	 *            {@link Flow} index to handle processing {@link HttpRequest}.
+	 *            Flow index to handle processing {@link HttpRequest}.
 	 */
 	public HttpServer(int requestHandlingFlowIndex) {
 		this.requestHandlingFlowIndex = requestHandlingFlowIndex;

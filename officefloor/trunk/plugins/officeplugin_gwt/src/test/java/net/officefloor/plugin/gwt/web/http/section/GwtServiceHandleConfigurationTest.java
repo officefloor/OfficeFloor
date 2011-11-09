@@ -21,9 +21,6 @@ import java.util.List;
 
 import javax.sql.DataSource;
 
-import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
-
 import net.officefloor.compile.OfficeFloorCompiler;
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.spi.section.SectionDesigner;
@@ -37,12 +34,14 @@ import net.officefloor.compile.spi.section.source.SectionSourceContext;
 import net.officefloor.compile.test.work.WorkLoaderUtil;
 import net.officefloor.compile.work.WorkType;
 import net.officefloor.frame.api.execute.Task;
-import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.gwt.service.GwtServiceWorkSource;
 import net.officefloor.plugin.gwt.service.ServerGwtRpcConnection;
 import net.officefloor.plugin.web.http.template.section.HttpTemplateSectionExtensionContext;
+
+import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
 
 /**
  * Tests configuring the handling of a GWT service.
@@ -160,7 +159,7 @@ public class GwtServiceHandleConfigurationTest extends OfficeFrameTestCase {
 	 * Record configuring the GWT Service.
 	 * 
 	 * @param flowToTaskPairs
-	 *            {@link Flow} to {@link Task} names.
+	 *            Flow to {@link Task} names.
 	 */
 	private void recordGwtService(String... flowToTaskPairs) {
 

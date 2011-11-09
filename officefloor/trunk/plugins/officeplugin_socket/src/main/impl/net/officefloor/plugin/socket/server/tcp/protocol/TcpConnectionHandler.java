@@ -21,7 +21,6 @@ package net.officefloor.plugin.socket.server.tcp.protocol;
 import java.io.IOException;
 
 import net.officefloor.frame.api.build.Indexed;
-import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.spi.managedobject.AsynchronousListener;
 import net.officefloor.frame.spi.managedobject.AsynchronousManagedObject;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectExecuteContext;
@@ -95,7 +94,7 @@ public class TcpConnectionHandler implements ConnectionHandler,
 	 * Called within the lock on the {@link Connection}.
 	 * 
 	 * @param newConnectionFlowIndex
-	 *            {@link Flow} index to handle a new connection.
+	 *            Flow index to handle a new connection.
 	 * @param executeContext
 	 *            {@link ManagedObjectExecuteContext}.
 	 */
