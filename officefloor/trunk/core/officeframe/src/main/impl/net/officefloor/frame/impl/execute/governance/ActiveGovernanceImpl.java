@@ -21,11 +21,11 @@ import net.officefloor.frame.api.execute.TaskContext;
 import net.officefloor.frame.internal.structure.ActiveGovernance;
 import net.officefloor.frame.internal.structure.ActiveGovernanceControl;
 import net.officefloor.frame.internal.structure.ActiveGovernanceManager;
-import net.officefloor.frame.internal.structure.FlowMetaData;
 import net.officefloor.frame.internal.structure.GovernanceContainer;
 import net.officefloor.frame.internal.structure.GovernanceControl;
 import net.officefloor.frame.internal.structure.GovernanceMetaData;
 import net.officefloor.frame.internal.structure.ManagedObjectContainer;
+import net.officefloor.frame.internal.structure.TaskMetaData;
 
 /**
  * {@link ActiveGovernance} implementation.
@@ -122,8 +122,8 @@ public class ActiveGovernanceImpl<I, F extends Enum<F>> implements
 	}
 
 	@Override
-	public FlowMetaData<?> getFlowMetaData() {
-		return this.metaData.getGovernFlowMetaData();
+	public TaskMetaData<?, ?, ?> getTaskMetaData() {
+		return this.metaData.getGovernTaskMetaData();
 	}
 
 	/*

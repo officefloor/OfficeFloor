@@ -25,12 +25,12 @@ import net.officefloor.frame.api.execute.TaskContext;
 import net.officefloor.frame.internal.structure.ActiveGovernance;
 import net.officefloor.frame.internal.structure.ActiveGovernanceManager;
 import net.officefloor.frame.internal.structure.ContainerContext;
-import net.officefloor.frame.internal.structure.FlowMetaData;
 import net.officefloor.frame.internal.structure.GovernanceContainer;
 import net.officefloor.frame.internal.structure.GovernanceControl;
 import net.officefloor.frame.internal.structure.GovernanceMetaData;
 import net.officefloor.frame.internal.structure.ManagedObjectContainer;
 import net.officefloor.frame.internal.structure.ProcessState;
+import net.officefloor.frame.internal.structure.TaskMetaData;
 import net.officefloor.frame.spi.governance.Governance;
 import net.officefloor.frame.spi.governance.GovernanceContext;
 
@@ -154,20 +154,20 @@ public class GovernanceContainerImpl<I, F extends Enum<F>> implements
 
 	@Override
 	public void activateGovernance(ContainerContext context) {
-		FlowMetaData<?> flow = this.metaData.getActivateFlowMetaData();
-		context.addSetupJob(flow, this);
+		TaskMetaData<?, ?, ?> flow = this.metaData.getActivateTaskMetaData();
+		context.addSetupTask(flow, this);
 	}
 
 	@Override
 	public void enforceGovernance(ContainerContext context) {
-		FlowMetaData<?> flow = this.metaData.getEnforceFlowMetaData();
-		context.addSetupJob(flow, this);
+		TaskMetaData<?, ?, ?> flow = this.metaData.getEnforceTaskMetaData();
+		context.addSetupTask(flow, this);
 	}
 
 	@Override
 	public void disregardGovernance(ContainerContext context) {
-		FlowMetaData<?> flow = this.metaData.getDisregardFlowMetaData();
-		context.addSetupJob(flow, this);
+		TaskMetaData<?, ?, ?> flow = this.metaData.getDisregardTaskMetaData();
+		context.addSetupTask(flow, this);
 	}
 
 	/*

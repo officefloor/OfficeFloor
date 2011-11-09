@@ -23,11 +23,11 @@ import net.officefloor.frame.api.execute.TaskContext;
 import net.officefloor.frame.internal.structure.ActiveGovernance;
 import net.officefloor.frame.internal.structure.ActiveGovernanceManager;
 import net.officefloor.frame.internal.structure.ContainerContext;
-import net.officefloor.frame.internal.structure.FlowMetaData;
 import net.officefloor.frame.internal.structure.GovernanceContainer;
 import net.officefloor.frame.internal.structure.GovernanceMetaData;
 import net.officefloor.frame.internal.structure.ManagedObjectContainer;
 import net.officefloor.frame.internal.structure.ProcessState;
+import net.officefloor.frame.internal.structure.TaskMetaData;
 import net.officefloor.frame.spi.governance.Governance;
 import net.officefloor.frame.spi.governance.GovernanceContext;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
@@ -105,13 +105,14 @@ public class GovernanceContainerTest extends OfficeFrameTestCase {
 	 */
 	public void testActivateGovernance() throws Throwable {
 
-		final FlowMetaData<?> activateFlowMetaData = this
-				.createMock(FlowMetaData.class);
+		final TaskMetaData<?, ?, ?> activateTaskMetaData = this
+				.createMock(TaskMetaData.class);
 
 		// Record triggering activating governance
 		this.recordReturn(this.metaData,
-				this.metaData.getActivateFlowMetaData(), activateFlowMetaData);
-		this.containerContext.addSetupJob(activateFlowMetaData, this.container);
+				this.metaData.getActivateTaskMetaData(), activateTaskMetaData);
+		this.containerContext
+				.addSetupTask(activateTaskMetaData, this.container);
 
 		// Record activating governance
 		this.record_activateGovernance();
@@ -136,16 +137,16 @@ public class GovernanceContainerTest extends OfficeFrameTestCase {
 	 */
 	public void testEnforceGovernance() throws Throwable {
 
-		final FlowMetaData<?> enforceFlowMetaData = this
-				.createMock(FlowMetaData.class);
+		final TaskMetaData<?, ?, ?> enforceTaskMetaData = this
+				.createMock(TaskMetaData.class);
 
 		// Record activating governance
 		this.record_activateGovernance();
 
 		// Record triggering enforcing governance
 		this.recordReturn(this.metaData,
-				this.metaData.getEnforceFlowMetaData(), enforceFlowMetaData);
-		this.containerContext.addSetupJob(enforceFlowMetaData, this.container);
+				this.metaData.getEnforceTaskMetaData(), enforceTaskMetaData);
+		this.containerContext.addSetupTask(enforceTaskMetaData, this.container);
 
 		// Record enforce governance
 		this.recordReturn(this.metaData,
@@ -230,17 +231,17 @@ public class GovernanceContainerTest extends OfficeFrameTestCase {
 	 */
 	public void testDisregardGovernance() throws Throwable {
 
-		final FlowMetaData<?> disregardFlowMetaData = this
-				.createMock(FlowMetaData.class);
+		final TaskMetaData<?, ?, ?> disregardTaskMetaData = this
+				.createMock(TaskMetaData.class);
 
 		// Record activating governance
 		this.record_activateGovernance();
 
 		// Record triggering disregarding governance
 		this.recordReturn(this.metaData,
-				this.metaData.getDisregardFlowMetaData(), disregardFlowMetaData);
-		this.containerContext
-				.addSetupJob(disregardFlowMetaData, this.container);
+				this.metaData.getDisregardTaskMetaData(), disregardTaskMetaData);
+		this.containerContext.addSetupTask(disregardTaskMetaData,
+				this.container);
 
 		// Record disregard governance
 		this.recordReturn(this.metaData,

@@ -83,34 +83,34 @@ public interface GovernanceMetaData<I, F extends Enum<F>> {
 			int managedObjectContainerRegisteredIndex);
 
 	/**
-	 * Obtains the {@link FlowMetaData} for activating the {@link Governance}.
+	 * Obtains the {@link TaskMetaData} for activating the {@link Governance}.
 	 * 
-	 * @return {@link FlowMetaData} for activating the {@link Governance}.
+	 * @return {@link TaskMetaData} for activating the {@link Governance}.
 	 */
-	FlowMetaData<?> getActivateFlowMetaData();
+	TaskMetaData<?, ?, ?> getActivateTaskMetaData();
 
 	/**
-	 * Obtains the {@link FlowMetaData} for {@link Governance} over a
+	 * Obtains the {@link TaskMetaData} for {@link Governance} over a
 	 * {@link ManagedObject}.
 	 * 
-	 * @return {@link FlowMetaData} for {@link Governance} over a
+	 * @return {@link TaskMetaData} for {@link Governance} over a
 	 *         {@link ManagedObject}.
 	 */
-	FlowMetaData<?> getGovernFlowMetaData();
+	TaskMetaData<?, ?, ?> getGovernTaskMetaData();
 
 	/**
-	 * Obtains the {@link FlowMetaData} for enforcing the {@link Governance}.
+	 * Obtains the {@link TaskMetaData} for enforcing the {@link Governance}.
 	 * 
-	 * @return {@link FlowMetaData} for enforcing the {@link Governance}.
+	 * @return {@link TaskMetaData} for enforcing the {@link Governance}.
 	 */
-	FlowMetaData<?> getEnforceFlowMetaData();
+	TaskMetaData<?, ?, ?> getEnforceTaskMetaData();
 
 	/**
-	 * Obtains the {@link FlowMetaData} for disregarding the {@link Governance}.
+	 * Obtains the {@link TaskMetaData} for disregarding the {@link Governance}.
 	 * 
-	 * @return {@link FlowMetaData} for disregarding the {@link Governance}.
+	 * @return {@link TaskMetaData} for disregarding the {@link Governance}.
 	 */
-	FlowMetaData<?> getDisregardFlowMetaData();
+	TaskMetaData<?, ?, ?> getDisregardTaskMetaData();
 
 	/**
 	 * Creates the {@link GovernanceContext}.

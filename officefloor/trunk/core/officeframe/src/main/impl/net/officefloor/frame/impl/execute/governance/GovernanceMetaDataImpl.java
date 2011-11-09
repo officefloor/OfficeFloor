@@ -21,12 +21,12 @@ import net.officefloor.frame.api.build.GovernanceFactory;
 import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.execute.TaskContext;
 import net.officefloor.frame.internal.structure.ActiveGovernanceManager;
-import net.officefloor.frame.internal.structure.FlowMetaData;
 import net.officefloor.frame.internal.structure.GovernanceContainer;
 import net.officefloor.frame.internal.structure.GovernanceControl;
 import net.officefloor.frame.internal.structure.GovernanceMetaData;
 import net.officefloor.frame.internal.structure.ManagedObjectContainer;
 import net.officefloor.frame.internal.structure.ProcessState;
+import net.officefloor.frame.internal.structure.TaskMetaData;
 import net.officefloor.frame.spi.governance.Governance;
 import net.officefloor.frame.spi.governance.GovernanceContext;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
@@ -50,24 +50,24 @@ public class GovernanceMetaDataImpl<I, F extends Enum<F>> implements
 	private final GovernanceFactory<? super I, F> governanceFactory;
 
 	/**
-	 * {@link FlowMetaData} to activate {@link Governance}.
+	 * {@link TaskMetaData} to activate {@link Governance}.
 	 */
-	private FlowMetaData<?> activateFlow;
+	private TaskMetaData<?, ?, ?> activateFlow;
 
 	/**
-	 * {@link FlowMetaData} for {@link Governance} of a {@link ManagedObject}.
+	 * {@link TaskMetaData} for {@link Governance} of a {@link ManagedObject}.
 	 */
-	private FlowMetaData<?> governFlow;
+	private TaskMetaData<?, ?, ?> governFlow;
 
 	/**
-	 * {@link FlowMetaData} to enforce {@link Governance}.
+	 * {@link TaskMetaData} to enforce {@link Governance}.
 	 */
-	private FlowMetaData<?> enforceFlow;
+	private TaskMetaData<?, ?, ?> enforceFlow;
 
 	/**
-	 * {@link FlowMetaData} to disregard {@link Governance}.
+	 * {@link TaskMetaData} to disregard {@link Governance}.
 	 */
-	private FlowMetaData<?> disregardFlow;
+	private TaskMetaData<?, ?, ?> disregardFlow;
 
 	/**
 	 * Initiate.
@@ -84,22 +84,22 @@ public class GovernanceMetaDataImpl<I, F extends Enum<F>> implements
 	}
 
 	/**
-	 * Loads the {@link FlowMetaData} for the {@link Governance} {@link Task}
+	 * Loads the {@link TaskMetaData} for the {@link Governance} {@link Task}
 	 * instances.
 	 * 
 	 * @param activateFlow
-	 *            {@link FlowMetaData} to activate {@link Governance}.
+	 *            {@link TaskMetaData} to activate {@link Governance}.
 	 * @param governFlow
-	 *            {@link FlowMetaData} for {@link Governance} of a
+	 *            {@link TaskMetaData} for {@link Governance} of a
 	 *            {@link ManagedObject}.
 	 * @param enforceFlow
-	 *            {@link FlowMetaData} to enforce {@link Governance}.
+	 *            {@link TaskMetaData} to enforce {@link Governance}.
 	 * @param disregardFlow
-	 *            {@link FlowMetaData} to disregard {@link Governance}.
+	 *            {@link TaskMetaData} to disregard {@link Governance}.
 	 */
-	public void loadFlows(FlowMetaData<?> activateFlow,
-			FlowMetaData<?> governFlow, FlowMetaData<?> enforceFlow,
-			FlowMetaData<?> disregardFlow) {
+	public void loadFlows(TaskMetaData<?, ?, ?> activateFlow,
+			TaskMetaData<?, ?, ?> governFlow, TaskMetaData<?, ?, ?> enforceFlow,
+			TaskMetaData<?, ?, ?> disregardFlow) {
 		this.activateFlow = activateFlow;
 		this.governFlow = governFlow;
 		this.enforceFlow = enforceFlow;
@@ -139,22 +139,22 @@ public class GovernanceMetaDataImpl<I, F extends Enum<F>> implements
 	}
 
 	@Override
-	public FlowMetaData<?> getActivateFlowMetaData() {
+	public TaskMetaData<?, ?, ?> getActivateTaskMetaData() {
 		return this.activateFlow;
 	}
 
 	@Override
-	public FlowMetaData<?> getGovernFlowMetaData() {
+	public TaskMetaData<?, ?, ?> getGovernTaskMetaData() {
 		return this.governFlow;
 	}
 
 	@Override
-	public FlowMetaData<?> getEnforceFlowMetaData() {
+	public TaskMetaData<?, ?, ?> getEnforceTaskMetaData() {
 		return this.enforceFlow;
 	}
 
 	@Override
-	public FlowMetaData<?> getDisregardFlowMetaData() {
+	public TaskMetaData<?, ?, ?> getDisregardTaskMetaData() {
 		return this.disregardFlow;
 	}
 

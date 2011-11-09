@@ -49,12 +49,12 @@ public interface ActiveGovernance {
 	boolean isActive();
 
 	/**
-	 * Obtains the {@link FlowMetaData} for the {@link Task} to setup the
+	 * Obtains the {@link TaskMetaData} for the {@link Task} to setup the
 	 * {@link ActiveGovernance}.
 	 * 
-	 * @return {@link FlowMetaData} for the {@link Task} to setup the
+	 * @return {@link TaskMetaData} for the {@link Task} to setup the
 	 *         {@link ActiveGovernance}.
 	 */
-	FlowMetaData<?> getFlowMetaData();
+	TaskMetaData<?, ?, ?> getTaskMetaData();
 
 }

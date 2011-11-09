@@ -40,8 +40,6 @@ import net.officefloor.frame.internal.construct.OfficeMetaDataLocator;
 import net.officefloor.frame.internal.construct.RawGovernanceMetaData;
 import net.officefloor.frame.internal.construct.RawGovernanceMetaDataFactory;
 import net.officefloor.frame.internal.structure.ActiveGovernanceControl;
-import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
-import net.officefloor.frame.internal.structure.FlowMetaData;
 import net.officefloor.frame.internal.structure.GovernanceControl;
 import net.officefloor.frame.internal.structure.GovernanceMetaData;
 import net.officefloor.frame.internal.structure.ProcessState;
@@ -169,8 +167,7 @@ public class RawGovernanceMetaDataImpl<I, F extends Enum<F>> implements
 		}
 
 		// Obtain the extension interface type
-		Class<i> extensionInterfaceType = configuration
-				.getExtensionInterface();
+		Class<i> extensionInterfaceType = configuration.getExtensionInterface();
 		if (extensionInterfaceType == null) {
 			issues.addIssue(AssetType.GOVERNANCE, governanceName,
 					"No extension interface type provided");
@@ -274,14 +271,14 @@ public class RawGovernanceMetaDataImpl<I, F extends Enum<F>> implements
 			AssetManagerFactory assetManagerFactory, OfficeFloorIssues issues) {
 
 		// Locate the tasks
-		FlowMetaData<?> activateFlow = this.getFlowMetaData(TASK_ACTIVATE,
-				taskLocator, assetManagerFactory, issues);
-		FlowMetaData<?> governFlow = this.getFlowMetaData(TASK_GOVERN,
-				taskLocator, assetManagerFactory, issues);
-		FlowMetaData<?> enforceFlow = this.getFlowMetaData(TASK_ENFORCE,
-				taskLocator, assetManagerFactory, issues);
-		FlowMetaData<?> disregardFlow = this.getFlowMetaData(TASK_DISREGARD,
-				taskLocator, assetManagerFactory, issues);
+		TaskMetaData<?, ?, ?> activateFlow = this.getTaskMetaData(
+				TASK_ACTIVATE, taskLocator, issues);
+		TaskMetaData<?, ?, ?> governFlow = this.getTaskMetaData(TASK_GOVERN,
+				taskLocator, issues);
+		TaskMetaData<?, ?, ?> enforceFlow = this.getTaskMetaData(TASK_ENFORCE,
+				taskLocator, issues);
+		TaskMetaData<?, ?, ?> disregardFlow = this.getTaskMetaData(
+				TASK_DISREGARD, taskLocator, issues);
 
 		// Load flows into governance meta-data
 		this.governanceMetaData.loadFlows(activateFlow, governFlow,
@@ -289,21 +286,18 @@ public class RawGovernanceMetaDataImpl<I, F extends Enum<F>> implements
 	}
 
 	/**
-	 * Obtains the {@link FlowMetaData}.
+	 * Obtains the {@link TaskMetaData}.
 	 * 
 	 * @param taskName
 	 *            Name of {@link Governance} {@link Task}.
 	 * @param taskLocator
 	 *            {@link OfficeMetaDataLocator}.
-	 * @param assetManagerFactory
-	 *            {@link AssetManagerFactory}.
 	 * @param issues
 	 *            {@link OfficeFloorIssues}.
-	 * @return {@link FlowMetaData} for the {@link Governance} {@link Task}.
+	 * @return {@link TaskMetaData} for the {@link Governance} {@link Task}.
 	 */
-	private FlowMetaData<?> getFlowMetaData(String taskName,
-			OfficeMetaDataLocator taskLocator,
-			AssetManagerFactory assetManagerFactory, OfficeFloorIssues issues) {
+	private TaskMetaData<?, ?, ?> getTaskMetaData(String taskName,
+			OfficeMetaDataLocator taskLocator, OfficeFloorIssues issues) {
 
 		// Obtain the task meta-data
 		TaskMetaData<?, ?, ?> taskMetaData = taskLocator.getTaskMetaData(
@@ -315,14 +309,8 @@ public class RawGovernanceMetaDataImpl<I, F extends Enum<F>> implements
 			return null; // no flow meta-data for task
 		}
 
-		// Create the flow meta-data
-		FlowMetaData<?> flowMetaData = ConstructUtil.newFlowMetaData(
-				FlowInstigationStrategyEnum.PARALLEL, taskMetaData,
-				assetManagerFactory, AssetType.GOVERNANCE, this.governanceName,
-				this.workName + "-" + taskName, issues);
-
-		// Return the flow meta-data
-		return flowMetaData;
+		// Return the task meta-data
+		return taskMetaData;
 	}
 
 }
