@@ -31,10 +31,9 @@ import net.officefloor.frame.internal.structure.AssetManager;
 import net.officefloor.frame.internal.structure.AssetMonitor;
 import net.officefloor.frame.internal.structure.CheckAssetContext;
 import net.officefloor.frame.internal.structure.EscalationLevel;
-import net.officefloor.frame.internal.structure.JobSequence;
-import net.officefloor.frame.internal.structure.FlowMetaData;
 import net.officefloor.frame.internal.structure.JobNode;
 import net.officefloor.frame.internal.structure.JobNodeActivateSet;
+import net.officefloor.frame.internal.structure.JobSequence;
 import net.officefloor.frame.internal.structure.ManagedObjectContainer;
 import net.officefloor.frame.internal.structure.ManagedObjectMetaData;
 import net.officefloor.frame.internal.structure.ProcessState;
@@ -75,8 +74,6 @@ public class ThreadStateTest extends OfficeFrameTestCase {
 		this.recordReturn(this.threadMetaData,
 				this.threadMetaData.getAdministratorMetaData(),
 				new AdministratorMetaData[] { adminMetaData });
-		this.recordReturn(this.flowMetaData,
-				this.flowMetaData.getFlowManager(), this.threadManager);
 
 		// Record obtaining the Managed Object Container
 		this.recordReturn(this.threadMetaData,
@@ -395,12 +392,6 @@ public class ThreadStateTest extends OfficeFrameTestCase {
 			.createMock(ProcessState.class);
 
 	/**
-	 * {@link FlowMetaData}.
-	 */
-	private final FlowMetaData<?> flowMetaData = this
-			.createMock(FlowMetaData.class);
-
-	/**
 	 * {@link AssetManager} for the {@link ThreadState}.
 	 */
 	private final AssetManager threadManager = this
@@ -422,8 +413,6 @@ public class ThreadStateTest extends OfficeFrameTestCase {
 		this.recordReturn(this.threadMetaData,
 				this.threadMetaData.getAdministratorMetaData(),
 				new AdministratorMetaData[0]);
-		this.recordReturn(this.flowMetaData,
-				this.flowMetaData.getFlowManager(), this.threadManager);
 	}
 
 	/**
@@ -500,6 +489,7 @@ public class ThreadStateTest extends OfficeFrameTestCase {
 	 */
 	private ThreadStateImpl createThreadState() {
 		return new ThreadStateImpl(this.threadMetaData, this.processState,
-				this.flowMetaData);
+				this.threadManager);
 	}
+
 }

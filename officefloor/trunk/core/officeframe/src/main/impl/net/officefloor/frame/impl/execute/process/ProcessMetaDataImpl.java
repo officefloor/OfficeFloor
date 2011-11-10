@@ -19,9 +19,11 @@
 package net.officefloor.frame.impl.execute.process;
 
 import net.officefloor.frame.internal.structure.AdministratorMetaData;
+import net.officefloor.frame.internal.structure.AssetManager;
 import net.officefloor.frame.internal.structure.GovernanceMetaData;
 import net.officefloor.frame.internal.structure.ManagedObjectMetaData;
 import net.officefloor.frame.internal.structure.ProcessMetaData;
+import net.officefloor.frame.internal.structure.ProcessState;
 import net.officefloor.frame.internal.structure.ThreadMetaData;
 
 /**
@@ -52,6 +54,11 @@ public class ProcessMetaDataImpl implements ProcessMetaData {
 	private final ThreadMetaData threadMetaData;
 
 	/**
+	 * {@link ProcessState} completion {@link AssetManager}.
+	 */
+	private final AssetManager processCompletionAssetManager;
+
+	/**
 	 * Initiate.
 	 * 
 	 * @param managedObjectMetaData
@@ -62,16 +69,20 @@ public class ProcessMetaDataImpl implements ProcessMetaData {
 	 *            {@link AdministratorMetaData} instances.
 	 * @param threadMetaData
 	 *            {@link ThreadMetaData}.
+	 * @param processCompletionAssetManager
+	 *            {@link ProcessState} completion {@link AssetManager}.
 	 */
 	public ProcessMetaDataImpl(
 			ManagedObjectMetaData<?>[] managedObjectMetaData,
 			GovernanceMetaData<?, ?>[] governanceMetaData,
 			AdministratorMetaData<?, ?>[] administratorMetaData,
-			ThreadMetaData threadMetaData) {
+			ThreadMetaData threadMetaData,
+			AssetManager processCompletionAssetManager) {
 		this.managedObjectMetaData = managedObjectMetaData;
 		this.governanceMetaData = governanceMetaData;
 		this.administratorMetaData = administratorMetaData;
 		this.threadMetaData = threadMetaData;
+		this.processCompletionAssetManager = processCompletionAssetManager;
 	}
 
 	/*
@@ -96,6 +107,11 @@ public class ProcessMetaDataImpl implements ProcessMetaData {
 	@Override
 	public ThreadMetaData getThreadMetaData() {
 		return this.threadMetaData;
+	}
+
+	@Override
+	public AssetManager getProcessCompletionAssetManager() {
+		return this.processCompletionAssetManager;
 	}
 
 }

@@ -64,4 +64,13 @@ public interface ProcessMetaData {
 	 */
 	ThreadMetaData getThreadMetaData();
 
+	/**
+	 * Obtains the {@link AssetManager} for any {@link ThreadState} instances
+	 * that must be created to enable completion (clean up) of the
+	 * {@link ProcessState}.
+	 * 
+	 * @return {@link AssetManager}.
+	 */
+	AssetManager getProcessCompletionAssetManager();
+
 }

@@ -32,10 +32,9 @@ import net.officefloor.frame.internal.structure.AssetMonitor;
 import net.officefloor.frame.internal.structure.CheckAssetContext;
 import net.officefloor.frame.internal.structure.EscalationFlow;
 import net.officefloor.frame.internal.structure.EscalationLevel;
-import net.officefloor.frame.internal.structure.JobSequence;
-import net.officefloor.frame.internal.structure.FlowMetaData;
 import net.officefloor.frame.internal.structure.JobNode;
 import net.officefloor.frame.internal.structure.JobNodeActivateSet;
+import net.officefloor.frame.internal.structure.JobSequence;
 import net.officefloor.frame.internal.structure.LinkedListSet;
 import net.officefloor.frame.internal.structure.ManagedObjectContainer;
 import net.officefloor.frame.internal.structure.ManagedObjectMetaData;
@@ -133,13 +132,14 @@ public class ThreadStateImpl extends
 	 *            {@link ThreadMetaData} for this {@link ThreadState}.
 	 * @param processState
 	 *            {@link ProcessState} for this {@link ThreadState}.
-	 * @param flowMetaData
-	 *            {@link FlowMetaData} for this {@link ThreadState}.
+	 * @param assetManager
+	 *            {@link AssetManager} for the {@link ThreadState}.
 	 */
 	public ThreadStateImpl(ThreadMetaData threadMetaData,
-			ProcessState processState, FlowMetaData<?> flowMetaData) {
+			ProcessState processState, AssetManager assetManager) {
 		this.threadMetaData = threadMetaData;
 		this.processState = processState;
+		this.threadManager = assetManager;
 
 		// Create array to reference the managed objects
 		ManagedObjectMetaData<?>[] moMetaData = this.threadMetaData
@@ -150,9 +150,6 @@ public class ThreadStateImpl extends
 		AdministratorMetaData<?, ?>[] adminMetaData = this.threadMetaData
 				.getAdministratorMetaData();
 		this.administratorContainers = new AdministratorContainer[adminMetaData.length];
-
-		// Obtain the thread manager
-		this.threadManager = flowMetaData.getFlowManager();
 	}
 
 	/*

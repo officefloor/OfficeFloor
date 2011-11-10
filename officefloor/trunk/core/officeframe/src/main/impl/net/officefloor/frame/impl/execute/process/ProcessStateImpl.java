@@ -24,7 +24,6 @@ import net.officefloor.frame.api.escalate.EscalationHandler;
 import net.officefloor.frame.api.execute.FlowFuture;
 import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.execute.TaskContext;
-import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.api.manage.ProcessFuture;
 import net.officefloor.frame.api.manage.UnknownTaskException;
@@ -35,14 +34,15 @@ import net.officefloor.frame.impl.execute.thread.ThreadStateImpl;
 import net.officefloor.frame.impl.spi.team.PassiveTeam;
 import net.officefloor.frame.internal.structure.AdministratorContainer;
 import net.officefloor.frame.internal.structure.AdministratorMetaData;
+import net.officefloor.frame.internal.structure.AssetManager;
 import net.officefloor.frame.internal.structure.ContainerContext;
 import net.officefloor.frame.internal.structure.EscalationFlow;
 import net.officefloor.frame.internal.structure.EscalationProcedure;
-import net.officefloor.frame.internal.structure.JobSequence;
-import net.officefloor.frame.internal.structure.FlowMetaData;
 import net.officefloor.frame.internal.structure.GovernanceContainer;
 import net.officefloor.frame.internal.structure.GovernanceMetaData;
+import net.officefloor.frame.internal.structure.JobNode;
 import net.officefloor.frame.internal.structure.JobNodeActivateSet;
+import net.officefloor.frame.internal.structure.JobSequence;
 import net.officefloor.frame.internal.structure.LinkedListSet;
 import net.officefloor.frame.internal.structure.ManagedObjectContainer;
 import net.officefloor.frame.internal.structure.ManagedObjectMetaData;
@@ -97,6 +97,35 @@ public class ProcessStateImpl implements ProcessState {
 		@Override
 		protected ProcessState getOwner() {
 			return ProcessStateImpl.this;
+		}
+	};
+
+	/**
+	 * {@link ContainerContext}.
+	 */
+	private final ContainerContext containerContext = new ContainerContext() {
+
+		@Override
+		public void flagJobToWait() {
+			// Ignore, as not waiting for tidy up
+		}
+
+		@Override
+		public void addSetupTask(TaskMetaData<?, ?, ?> taskMetaData,
+				Object parameter) {
+
+			// Obtain the Asset Manager
+			AssetManager assetManager = ProcessStateImpl.this.processMetaData
+					.getProcessCompletionAssetManager();
+
+			// Create the thread to run setup task
+			JobSequence jobSequence = ProcessStateImpl.this
+					.createThread(assetManager);
+
+			// Create and activate the task
+			JobNode task = jobSequence.createTaskNode(taskMetaData, null,
+					parameter);
+			task.activateJob();
 		}
 	};
 
@@ -292,12 +321,11 @@ public class ProcessStateImpl implements ProcessState {
 	}
 
 	@Override
-	public <W extends Work> JobSequence createThread(
-			FlowMetaData<W> flowMetaData) {
+	public JobSequence createThread(AssetManager assetManager) {
 
 		// Create the thread
 		ThreadState threadState = new ThreadStateImpl(
-				this.processMetaData.getThreadMetaData(), this, flowMetaData);
+				this.processMetaData.getThreadMetaData(), this, assetManager);
 
 		// Register as active thread
 		synchronized (this.getProcessLock()) {
@@ -319,17 +347,11 @@ public class ProcessStateImpl implements ProcessState {
 			// Remove thread from active thread listing
 			if (this.activeThreads.removeEntry(thread)) {
 
-				/*
-				 * TODO ProcessState to implement ContainerContext to allow new
-				 * ThreadState for clean up
-				 */
-				ContainerContext containerContext = null;
-
 				// Disregard governance as not enforced and process complete
 				for (int i = 0; i < this.governanceContainers.length; i++) {
 					GovernanceContainer<?> container = this.governanceContainers[i];
 					if (container != null) {
-						container.disregardGovernance(containerContext);
+						container.disregardGovernance(this.containerContext);
 					}
 				}
 
