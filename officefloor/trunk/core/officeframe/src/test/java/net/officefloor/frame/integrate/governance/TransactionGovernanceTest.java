@@ -28,6 +28,7 @@ import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.execute.Work;
+import net.officefloor.frame.impl.spi.team.LeaderFollowerTeam;
 import net.officefloor.frame.impl.spi.team.PassiveTeam;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.frame.spi.administration.Administrator;
@@ -39,6 +40,7 @@ import net.officefloor.frame.spi.administration.source.impl.AbstractAdministrato
 import net.officefloor.frame.spi.governance.Governance;
 import net.officefloor.frame.spi.governance.GovernanceContext;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
+import net.officefloor.frame.spi.team.Team;
 import net.officefloor.frame.test.AbstractOfficeConstructTestCase;
 import net.officefloor.frame.test.ReflectiveWorkBuilder;
 import net.officefloor.frame.test.ReflectiveWorkBuilder.ReflectiveTaskBuilder;
@@ -53,36 +55,159 @@ import net.officefloor.frame.test.ReflectiveWorkBuilder.ReflectiveTaskBuilder;
 public class TransactionGovernanceTest extends AbstractOfficeConstructTestCase {
 
 	/**
-	 * Ensure able to commit transaction.
+	 * {@link TransactionalObject}.
 	 */
-	public void testTransaction() throws Exception {
+	private final TransactionalObject object = this
+			.createSynchronizedMock(TransactionalObject.class);
 
-		// Mocks
-		final TransactionalObject object = this
-				.createMock(TransactionalObject.class);
+	/**
+	 * Flag indicating whether to provide commit after {@link Task}.
+	 */
+	private boolean isCommit = false;
+
+	/**
+	 * Flag indicating whether to rollback after {@link Task}.
+	 */
+	private boolean isRollback = false;
+
+	/**
+	 * Ensure able to commit transaction with {@link PassiveTeam}.
+	 */
+	public void test_Passive_CommitTransaction() {
+
+		// Commit
+		this.isCommit = true;
+
+		// Record committing the transaction
+		this.object.begin();
+		this.object.doFunctionality();
+		this.object.commit();
+
+		// Test
+		this.doTest(false);
+	}
+
+	/**
+	 * Ensure able to commit transaction with {@link LeaderFollowerTeam}.
+	 */
+	public void test_LeaderFollower_CommitTransaction() {
+
+		// Commit
+		this.isCommit = true;
+
+		// Record committing the transaction
+		this.object.begin();
+		this.object.doFunctionality();
+		this.object.commit();
+
+		// Test
+		this.doTest(true);
+	}
+
+	/**
+	 * Ensure able to rollback transaction with {@link PassiveTeam}.
+	 */
+	public void test_Passive_RollbackTransaction() {
+
+		// Rollback
+		this.isRollback = true;
+
+		// Record rolling back the transaction
+		this.object.begin();
+		this.object.doFunctionality();
+		this.object.rollback();
+
+		// Test
+		this.doTest(false);
+	}
+
+	/**
+	 * Ensure able to rollback transaction with {@link LeaderFollowerTeam}.
+	 */
+	public void test_LeaderFollower_RollbackTransaction() {
+
+		// Rollback
+		this.isRollback = true;
+
+		// Record rolling back the transaction
+		this.object.begin();
+		this.object.doFunctionality();
+		this.object.rollback();
+
+		// Test
+		this.doTest(true);
+	}
+
+	/**
+	 * Ensure able to tidy up transaction.
+	 */
+	public void test_Passive_TidyUpTransaction() {
 
 		// Ensure transaction governing functionality
-		object.begin();
-		object.doFunctionality();
-		object.commit();
+		this.object.begin();
+		this.object.doFunctionality();
+		this.object.rollback();
+
+		// Test
+		this.doTest(false);
+	}
+
+	/**
+	 * Ensure able to tidy up transaction.
+	 */
+	public void test_LeaderFollower_TidyUpTransaction() {
+
+		// Ensure transaction governing functionality
+		this.object.begin();
+		this.object.doFunctionality();
+		this.object.rollback();
+
+		// Test
+		this.doTest(true);
+	}
+
+	/**
+	 * Undertake the test.
+	 * 
+	 * @param isMultithreaded
+	 *            Flag indicating if to be a multi-threaded test.
+	 */
+	private void doTest(boolean isMultithreaded) {
+
+		// Create the teams
+		Team taskTeam;
+		Team governanceTeam;
+		if (isMultithreaded) {
+			taskTeam = new PassiveTeam();
+			governanceTeam = taskTeam;
+		} else {
+			taskTeam = new LeaderFollowerTeam("TASK", 5, 100);
+			governanceTeam = new LeaderFollowerTeam("GOVERNANCE", 2, 100);
+		}
 
 		// Test
 		this.replayMockObjects();
 
 		// Configure
 		String officeName = this.getOfficeName();
-		this.constructTeam("TEAM", new PassiveTeam());
+		this.constructTeam("TASK_TEAM", taskTeam);
+		this.constructTeam("GOVERNANCE_TEAM", governanceTeam);
 
 		// Configure the Managed Object
-		this.constructManagedObject(object, "MO", officeName);
+		this.constructManagedObject(this.object, "MO", officeName);
 
 		// Configure the Work
 		TransactionalWork work = new TransactionalWork();
 		ReflectiveWorkBuilder builder = this.constructWork(work, "WORK",
 				"doTask");
-		ReflectiveTaskBuilder task = builder.buildTask("doTask", "TEAM");
+		ReflectiveTaskBuilder task = builder.buildTask("doTask", "TASK_TEAM");
 		task.getBuilder().linkPreTaskAdministration("ADMIN", "BEGIN");
-		task.getBuilder().linkPostTaskAdministration("ADMIN", "COMMIT");
+		if (this.isCommit) {
+			task.getBuilder().linkPostTaskAdministration("ADMIN", "COMMIT");
+		}
+		if (this.isRollback) {
+			task.getBuilder().linkPostTaskAdministration("ADMIN", "ROLLBACK");
+		}
 		DependencyMappingBuilder dependencies = task.buildObject("MO",
 				ManagedObjectScope.PROCESS);
 
@@ -90,18 +215,24 @@ public class TransactionGovernanceTest extends AbstractOfficeConstructTestCase {
 		GovernanceBuilder governance = this.getOfficeBuilder().addGovernance(
 				"GOVERNANCE", new MockTransactionalGovernanceFactory(),
 				MockTransaction.class);
-		governance.setTeamName("TEAM");
+		governance.setTeamName("GOVERNANCE_TEAM");
 		dependencies.mapGovernance("GOVERNANCE");
 
 		// Configure the Administration
 		AdministratorBuilder<Indexed> admin = this.constructAdministrator(
-				"ADMIN", MockTransactionalAdministratorSource.class, "TEAM");
+				"ADMIN", MockTransactionalAdministratorSource.class,
+				"GOVERNANCE_TEAM");
 		admin.administerManagedObject("MO");
 		admin.addDuty("BEGIN").linkGovernance(0, "GOVERNANCE");
 		admin.addDuty("COMMIT").linkGovernance(0, "GOVERNANCE");
+		admin.addDuty("ROLLBACK").linkGovernance(0, "GOVERNANCE");
 
 		// Execute the work
-		this.invokeWork("WORK", null);
+		try {
+			this.invokeWork("WORK", null);
+		} catch (Exception ex) {
+			throw fail(ex);
+		}
 
 		// Verify
 		this.verifyMockObjects();
@@ -167,6 +298,7 @@ public class TransactionGovernanceTest extends AbstractOfficeConstructTestCase {
 			context.setExtensionInterface(MockTransaction.class);
 			context.addDuty("BEGIN");
 			context.addDuty("COMMIT");
+			context.addDuty("ROLLBACK");
 		}
 
 		@Override
@@ -222,6 +354,11 @@ public class TransactionGovernanceTest extends AbstractOfficeConstructTestCase {
 			case 1:
 				// Commit transaction
 				context.getGovernance(0).enforceGovernance();
+				break;
+
+			case 2:
+				// Rollback transaction
+				context.getGovernance(0).disregardGovernance();
 				break;
 			}
 		}

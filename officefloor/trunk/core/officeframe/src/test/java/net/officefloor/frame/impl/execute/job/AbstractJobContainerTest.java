@@ -24,6 +24,7 @@ import java.util.List;
 import net.officefloor.frame.api.execute.FlowFuture;
 import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.execute.Work;
+import net.officefloor.frame.internal.structure.AssetManager;
 import net.officefloor.frame.internal.structure.ContainerContext;
 import net.officefloor.frame.internal.structure.EscalationFlow;
 import net.officefloor.frame.internal.structure.EscalationLevel;
@@ -156,6 +157,12 @@ public abstract class AbstractJobContainerTest extends OfficeFrameTestCase {
 	 */
 	private final FlowMetaData<?> asynchronousFlowMetaData = this
 			.createMock(FlowMetaData.class);
+
+	/**
+	 * Asynchronous {@link AssetManager}.
+	 */
+	private final AssetManager asynchronousFlowAssetManager = this
+			.createMock(AssetManager.class);
 
 	/**
 	 * Asynchronous {@link TaskMetaData}.
@@ -522,8 +529,11 @@ public abstract class AbstractJobContainerTest extends OfficeFrameTestCase {
 				this.threadState);
 		this.recordReturn(this.threadState, this.threadState.getProcessState(),
 				this.processState);
-		this.recordReturn(this.processState,
-				this.processState.createThread(this.asynchronousFlowMetaData),
+		this.recordReturn(this.asynchronousFlowMetaData,
+				this.asynchronousFlowMetaData.getFlowManager(),
+				this.asynchronousFlowAssetManager);
+		this.recordReturn(this.processState, this.processState
+				.createThread(this.asynchronousFlowAssetManager),
 				this.asynchronousFlow);
 		this.recordReturn(this.asynchronousFlow, this.asynchronousFlow
 				.createTaskNode(this.asynchronousTaskMetaData, null,

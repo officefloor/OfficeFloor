@@ -28,6 +28,7 @@ import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.impl.execute.escalation.PropagateEscalationError;
 import net.officefloor.frame.impl.execute.linkedlistset.AbstractLinkedListSetEntry;
 import net.officefloor.frame.impl.execute.linkedlistset.ComparatorLinkedListSet;
+import net.officefloor.frame.internal.structure.AssetManager;
 import net.officefloor.frame.internal.structure.ContainerContext;
 import net.officefloor.frame.internal.structure.EscalationFlow;
 import net.officefloor.frame.internal.structure.EscalationLevel;
@@ -488,12 +489,6 @@ public abstract class AbstractJobContainer<W extends Work, N extends JobMetaData
 						}
 
 					} catch (Throwable ex) {
-
-						// TODO remove
-						if (ex instanceof Error) {
-							throw (Error) ex;
-						}
-
 						// Flag for escalation
 						escalationCause = ex;
 					}
@@ -939,7 +934,8 @@ public abstract class AbstractJobContainer<W extends Work, N extends JobMetaData
 		// Create thread to execute asynchronously
 		ProcessState processState = this.flow.getThreadState()
 				.getProcessState();
-		JobSequence asyncFlow = processState.createThread(flowMetaData);
+		AssetManager flowAssetManager = flowMetaData.getFlowManager();
+		JobSequence asyncFlow = processState.createThread(flowAssetManager);
 
 		// Create job node for execution
 		JobNode asyncJobNode = asyncFlow.createTaskNode(initTaskMetaData, null,

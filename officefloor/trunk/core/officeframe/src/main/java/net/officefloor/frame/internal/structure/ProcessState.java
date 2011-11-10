@@ -93,15 +93,18 @@ public interface ProcessState {
 
 	/**
 	 * <p>
-	 * Creates a {@link JobSequence} for the new {@link ThreadState} contained in this
-	 * {@link ProcessState}.
+	 * Creates a {@link JobSequence} for the new {@link ThreadState} contained
+	 * in this {@link ProcessState}.
 	 * <p>
-	 * The new {@link ThreadState} is available from the returned {@link JobSequence}.
+	 * The new {@link ThreadState} is available from the returned
+	 * {@link JobSequence}.
 	 * 
-	 * @return {@link JobSequence} for the new {@link ThreadState} contained in this
-	 *         {@link ProcessState}.
+	 * @param assetManager
+	 *            {@link AssetManager} for the {@link ThreadState}.
+	 * @return {@link JobSequence} for the new {@link ThreadState} contained in
+	 *         this {@link ProcessState}.
 	 */
-	<W extends Work> JobSequence createThread(FlowMetaData<W> flowMetaData);
+	JobSequence createThread(AssetManager assetManager);
 
 	/**
 	 * Flags that the input {@link ThreadState} has complete.
