@@ -24,6 +24,7 @@ import net.officefloor.frame.impl.execute.job.AbstractJobContainer;
 import net.officefloor.frame.impl.execute.job.JobExecuteContext;
 import net.officefloor.frame.internal.structure.AdministratorContext;
 import net.officefloor.frame.internal.structure.AdministratorMetaData;
+import net.officefloor.frame.internal.structure.JobNodeActivateSet;
 import net.officefloor.frame.internal.structure.JobSequence;
 import net.officefloor.frame.internal.structure.FlowMetaData;
 import net.officefloor.frame.internal.structure.JobNode;
@@ -33,6 +34,7 @@ import net.officefloor.frame.internal.structure.ThreadState;
 import net.officefloor.frame.internal.structure.WorkContainer;
 import net.officefloor.frame.spi.administration.Duty;
 import net.officefloor.frame.spi.team.Job;
+import net.officefloor.frame.spi.team.JobContext;
 
 /**
  * {@link Duty} implementation for a {@link Job}.
@@ -82,7 +84,9 @@ public class DutyJob<W extends Work, I, A extends Enum<A>> extends
 	 */
 
 	@Override
-	protected Object executeJob(JobExecuteContext context) throws Throwable {
+	protected Object executeJob(JobExecuteContext context,
+			JobContext jobContext, JobNodeActivateSet activateSet)
+			throws Throwable {
 
 		// Administer the duty
 		this.workContainer.administerManagedObjects(this.taskDutyAssociation,

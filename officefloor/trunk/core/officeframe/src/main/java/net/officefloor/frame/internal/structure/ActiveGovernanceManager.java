@@ -19,24 +19,44 @@ package net.officefloor.frame.internal.structure;
 
 import net.officefloor.frame.spi.governance.Governance;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
+import net.officefloor.frame.spi.team.JobContext;
 
 /**
  * Provides management functions to the {@link ActiveGovernance}.
  * 
  * @author Daniel Sagenschneider
  */
-public interface ActiveGovernanceManager {
+public interface ActiveGovernanceManager<I, F extends Enum<F>> {
 
 	/**
 	 * Obtains the {@link ActiveGovernance} being managed.
 	 * 
 	 * @return {@link ActiveGovernance} being managed.
 	 */
-	ActiveGovernance getActiveGovernance();
+	ActiveGovernance<I, F> getActiveGovernance();
+
+	/**
+	 * Indicates if the {@link ManagedObject} is ready.
+	 * 
+	 * @param jobContext
+	 *            {@link JobContext}.
+	 * @param jobNode
+	 *            {@link JobNode}.
+	 * @param activateSet
+	 *            {@link JobNodeActivateSet}.
+	 * @param context
+	 *            {@link ContainerContext}.
+	 * @return <code>true</code> if the {@link ManagedObject} is ready.
+	 */
+	boolean isManagedObjectReady(JobContext jobContext, JobNode jobNode,
+			JobNodeActivateSet activateSet, ContainerContext context);
 
 	/**
 	 * Unregisters the {@link ManagedObject} from {@link Governance}.
+	 * 
+	 * @param activateSet
+	 *            {@link JobNodeActivateSet}.
 	 */
-	void unregisterManagedObject();
+	void unregisterManagedObject(JobNodeActivateSet activateSet);
 
 }

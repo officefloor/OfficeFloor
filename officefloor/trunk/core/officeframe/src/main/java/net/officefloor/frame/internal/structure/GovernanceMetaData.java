@@ -18,7 +18,6 @@
 package net.officefloor.frame.internal.structure;
 
 import net.officefloor.frame.api.build.GovernanceFactory;
-import net.officefloor.frame.api.execute.TaskContext;
 import net.officefloor.frame.spi.governance.Governance;
 import net.officefloor.frame.spi.governance.GovernanceContext;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
@@ -28,7 +27,7 @@ import net.officefloor.frame.spi.managedobject.ManagedObject;
  * 
  * @author Daniel Sagenschneider
  */
-public interface GovernanceMetaData<I, F extends Enum<F>> {
+public interface GovernanceMetaData<I, F extends Enum<F>> extends JobMetaData {
 
 	/**
 	 * Obtains the name of the {@link Governance}.
@@ -54,8 +53,8 @@ public interface GovernanceMetaData<I, F extends Enum<F>> {
 	 *            {@link ProcessState}.
 	 * @return {@link GovernanceContainer}.
 	 */
-	GovernanceContainer<I> createGovernanceContainer(ProcessState processState,
-			int processRegisteredIndex);
+	GovernanceContainer<I, F> createGovernanceContainer(
+			ProcessState processState, int processRegisteredIndex);
 
 	/**
 	 * Creates the {@link ActiveGovernance}.
@@ -69,6 +68,8 @@ public interface GovernanceMetaData<I, F extends Enum<F>> {
 	 *            {@link Governance} over the {@link ManagedObject}.
 	 * @param managedobjectContainer
 	 *            {@link ManagedObjectContainer}.
+	 * @param workContainer
+	 *            {@link WorkContainer}.
 	 * @param managedObjectContainerRegisteredIndex
 	 *            Registered index of the {@link ActiveGovernance} within the
 	 *            {@link ManagedObjectContainer}. This is to enable easier
@@ -76,50 +77,70 @@ public interface GovernanceMetaData<I, F extends Enum<F>> {
 	 *            {@link ManagedObjectContainer} for unregistering.
 	 * @return {@link ActiveGovernanceManager}.
 	 */
-	ActiveGovernanceManager createActiveGovernance(
-			GovernanceContainer<I> governanceContainer,
+	ActiveGovernanceManager<I, F> createActiveGovernance(
+			GovernanceContainer<I, F> governanceContainer,
 			GovernanceControl<I, F> governanceControl, I extensionInterface,
 			ManagedObjectContainer managedobjectContainer,
+			WorkContainer<?> workContainer,
 			int managedObjectContainerRegisteredIndex);
 
 	/**
-	 * Obtains the {@link TaskMetaData} for activating the {@link Governance}.
+	 * Creates a {@link GovernanceActivity} to activate the {@link Governance}.
 	 * 
-	 * @return {@link TaskMetaData} for activating the {@link Governance}.
+	 * @param governanceControl
+	 *            {@link GovernanceControl}.
+	 * @return {@link GovernanceActivity} to activate the {@link Governance}.
 	 */
-	TaskMetaData<?, ?, ?> getActivateTaskMetaData();
+	GovernanceActivity<I, F> createActivateActivity(
+			GovernanceControl<I, F> governanceControl);
 
 	/**
-	 * Obtains the {@link TaskMetaData} for {@link Governance} over a
+	 * Creates a {@link GovernanceActivity} to provide {@link Governance} to the
 	 * {@link ManagedObject}.
 	 * 
-	 * @return {@link TaskMetaData} for {@link Governance} over a
+	 * @param activeGovernanceControl
+	 *            {@link ActiveGovernanceControl}.
+	 * @return {@link GovernanceActivity} to provide {@link Governance} to the
 	 *         {@link ManagedObject}.
 	 */
-	TaskMetaData<?, ?, ?> getGovernTaskMetaData();
+	GovernanceActivity<I, F> createGovernActivity(
+			ActiveGovernanceControl<F> activeGovernanceControl);
 
 	/**
-	 * Obtains the {@link TaskMetaData} for enforcing the {@link Governance}.
+	 * Creates the {@link GovernanceActivity} to enforce the {@link Governance}.
 	 * 
-	 * @return {@link TaskMetaData} for enforcing the {@link Governance}.
+	 * @param governanceControl
+	 *            {@link GovernanceControl}.
+	 * @return {@link GovernanceActivity} to enforce the {@link Governance}.
 	 */
-	TaskMetaData<?, ?, ?> getEnforceTaskMetaData();
+	GovernanceActivity<I, F> createEnforceActivity(
+			GovernanceControl<I, F> governanceControl);
 
 	/**
-	 * Obtains the {@link TaskMetaData} for disregarding the {@link Governance}.
+	 * Creates the {@link GovernanceActivity} to disregard the
+	 * {@link Governance}.
 	 * 
-	 * @return {@link TaskMetaData} for disregarding the {@link Governance}.
+	 * @param governanceControl
+	 *            {@link GovernanceContext}.
+	 * @return {@link GovernanceActivity} to disregard the {@link Governance}.
 	 */
-	TaskMetaData<?, ?, ?> getDisregardTaskMetaData();
+	GovernanceActivity<I, F> createDisregardActivity(
+			GovernanceControl<I, F> governanceControl);
 
 	/**
-	 * Creates the {@link GovernanceContext}.
+	 * Creates the {@link JobNode} for the {@link GovernanceActivity}.
 	 * 
-	 * @param taskContext
-	 *            {@link TaskContext}.
-	 * @return {@link GovernanceContext}.
+	 * @param flow
+	 *            {@link JobSequence} for containing this
+	 *            {@link GovernanceActivity}.
+	 * @param governanceActivity
+	 *            {@link GovernanceActivity}.
+	 * @param parallelJobNodeOwner
+	 *            Parallel {@link JobNode} owner.
+	 * @return {@link JobNode} for the {@link GovernanceActivity}.
 	 */
-	GovernanceContext<F> createGovernanceContext(
-			TaskContext<?, ?, F> taskContext);
+	JobNode createGovernanceJob(JobSequence flow,
+			GovernanceActivity<I, F> governanceActivity,
+			JobNode parallelJobNodeOwner);
 
 }

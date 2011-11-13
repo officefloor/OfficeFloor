@@ -19,18 +19,21 @@ package net.officefloor.frame.impl.execute.governance;
 
 import net.officefloor.frame.api.build.GovernanceFactory;
 import net.officefloor.frame.api.build.Indexed;
-import net.officefloor.frame.api.execute.TaskContext;
 import net.officefloor.frame.internal.structure.ActiveGovernance;
 import net.officefloor.frame.internal.structure.ActiveGovernanceManager;
 import net.officefloor.frame.internal.structure.ContainerContext;
+import net.officefloor.frame.internal.structure.GovernanceActivity;
 import net.officefloor.frame.internal.structure.GovernanceContainer;
 import net.officefloor.frame.internal.structure.GovernanceMetaData;
+import net.officefloor.frame.internal.structure.JobNode;
+import net.officefloor.frame.internal.structure.JobNodeActivateSet;
 import net.officefloor.frame.internal.structure.ManagedObjectContainer;
 import net.officefloor.frame.internal.structure.ProcessState;
-import net.officefloor.frame.internal.structure.TaskMetaData;
+import net.officefloor.frame.internal.structure.WorkContainer;
 import net.officefloor.frame.spi.governance.Governance;
 import net.officefloor.frame.spi.governance.GovernanceContext;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
+import net.officefloor.frame.spi.team.JobContext;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 
 /**
@@ -85,11 +88,27 @@ public class GovernanceContainerTest extends OfficeFrameTestCase {
 			.createMock(GovernanceContext.class);
 
 	/**
-	 * {@link TaskContext}.
+	 * {@link JobContext}.
+	 */
+	private final JobContext jobContext = this.createMock(JobContext.class);
+
+	/**
+	 * {@link JobNode}.
+	 */
+	private final JobNode jobNode = this.createMock(JobNode.class);
+
+	/**
+	 * {@link JobNodeActivateSet}.
+	 */
+	private final JobNodeActivateSet activateSet = this
+			.createMock(JobNodeActivateSet.class);
+
+	/**
+	 * {@link GovernanceActivity}.
 	 */
 	@SuppressWarnings("unchecked")
-	private final TaskContext<?, ?, Indexed> taskContext = this
-			.createMock(TaskContext.class);
+	private final GovernanceActivity<MockExtensionInterface, Indexed> governanceActivity = this
+			.createMock(GovernanceActivity.class);
 
 	/**
 	 * Ensure the correct {@link ProcessState} registered index.
@@ -105,14 +124,11 @@ public class GovernanceContainerTest extends OfficeFrameTestCase {
 	 */
 	public void testActivateGovernance() throws Throwable {
 
-		final TaskMetaData<?, ?, ?> activateTaskMetaData = this
-				.createMock(TaskMetaData.class);
-
 		// Record triggering activating governance
 		this.recordReturn(this.metaData,
-				this.metaData.getActivateTaskMetaData(), activateTaskMetaData);
-		this.containerContext
-				.addSetupTask(activateTaskMetaData, this.container);
+				this.metaData.createActivateActivity(this.container),
+				this.governanceActivity);
+		this.containerContext.addGovernanceActivity(this.governanceActivity);
 
 		// Record activating governance
 		this.record_activateGovernance();
@@ -126,7 +142,9 @@ public class GovernanceContainerTest extends OfficeFrameTestCase {
 				this.container.isActive());
 
 		// Undertake the activation
-		this.container.activateGovernance(this.taskContext);
+		this.container.activateGovernance(this.governanceContext,
+				this.jobContext, this.jobNode, this.activateSet,
+				this.containerContext);
 		assertTrue("Ensure now active", this.container.isActive());
 
 		this.verifyMockObjects();
@@ -137,21 +155,16 @@ public class GovernanceContainerTest extends OfficeFrameTestCase {
 	 */
 	public void testEnforceGovernance() throws Throwable {
 
-		final TaskMetaData<?, ?, ?> enforceTaskMetaData = this
-				.createMock(TaskMetaData.class);
-
 		// Record activating governance
 		this.record_activateGovernance();
 
 		// Record triggering enforcing governance
 		this.recordReturn(this.metaData,
-				this.metaData.getEnforceTaskMetaData(), enforceTaskMetaData);
-		this.containerContext.addSetupTask(enforceTaskMetaData, this.container);
+				this.metaData.createEnforceActivity(this.container),
+				this.governanceActivity);
+		this.containerContext.addGovernanceActivity(this.governanceActivity);
 
 		// Record enforce governance
-		this.recordReturn(this.metaData,
-				this.metaData.createGovernanceContext(this.taskContext),
-				this.governanceContext);
 		this.record_processLock();
 		this.governance.enforceGovernance(this.governanceContext);
 		this.processState.governanceComplete(this.container);
@@ -160,15 +173,74 @@ public class GovernanceContainerTest extends OfficeFrameTestCase {
 		this.replayMockObjects();
 
 		// Ensure governance is active
-		this.container.activateGovernance(this.taskContext);
+		this.container.activateGovernance(this.governanceContext,
+				this.jobContext, this.jobNode, this.activateSet,
+				this.containerContext);
 		assertTrue("Governance should be active", this.container.isActive());
 
 		// Trigger enforcing the governance
 		this.container.enforceGovernance(this.containerContext);
 
 		// Undertake the enforcing
-		this.container.enforceGovernance(this.taskContext);
+		this.container.enforceGovernance(this.governanceContext,
+				this.jobContext, this.jobNode, this.activateSet,
+				this.containerContext);
 		assertFalse("Ensure no longer active", this.container.isActive());
+
+		this.verifyMockObjects();
+	}
+
+	/**
+	 * Ensure not enforce {@link Governance} as {@link ManagedObject} not ready.
+	 */
+	public void testEnforceGovernanceNotReady() throws Throwable {
+
+		final int MO_INDEX = 3;
+		final MockExtensionInterface extension = this
+				.createMock(MockExtensionInterface.class);
+		final ManagedObjectContainer managedObject = this
+				.createMock(ManagedObjectContainer.class);
+		final WorkContainer<?> workContainer = this
+				.createMock(WorkContainer.class);
+
+		// Record activating governance
+		this.record_activateGovernance();
+
+		// Record governing the managed object
+		ActiveGovernanceManager<MockExtensionInterface, Indexed> manager = this
+				.record_createActiveGovernance(extension, managedObject,
+						workContainer, MO_INDEX);
+
+		// Record enforce governance
+		this.record_processLock();
+		this.recordReturn(manager, manager.isManagedObjectReady(
+				this.jobContext, this.jobNode, this.activateSet,
+				this.containerContext), false);
+
+		// Test
+		this.replayMockObjects();
+
+		// Ensure governance is active
+		this.container.activateGovernance(this.governanceContext,
+				this.jobContext, this.jobNode, this.activateSet,
+				this.containerContext);
+		assertTrue("Governance should be active", this.container.isActive());
+
+		// Create the active governance
+		ActiveGovernance<MockExtensionInterface, Indexed> activeGovernance = this.container
+				.createActiveGovernance(extension, managedObject, MO_INDEX,
+						workContainer);
+		assertTrue("Should be active", activeGovernance.isActive());
+		assertEquals("Incorrect registerd index", MO_INDEX,
+				activeGovernance.getManagedObjectRegisteredIndex());
+
+		// Undertake the enforcing
+		this.container.enforceGovernance(this.governanceContext,
+				this.jobContext, this.jobNode, this.activateSet,
+				this.containerContext);
+		assertTrue("Ensure governance still active", this.container.isActive());
+		assertTrue("Ensure active governance still active",
+				activeGovernance.isActive());
 
 		this.verifyMockObjects();
 	}
@@ -183,41 +255,49 @@ public class GovernanceContainerTest extends OfficeFrameTestCase {
 				.createMock(MockExtensionInterface.class);
 		final ManagedObjectContainer managedObject = this
 				.createMock(ManagedObjectContainer.class);
+		final WorkContainer<?> workContainer = this
+				.createMock(WorkContainer.class);
 
 		// Record activating governance
 		this.record_activateGovernance();
 
 		// Record governing the managed object
-		ActiveGovernanceManager manager = this.record_createActiveGovernance(
-				extension, managedObject, MO_INDEX);
+		ActiveGovernanceManager<MockExtensionInterface, Indexed> manager = this
+				.record_createActiveGovernance(extension, managedObject,
+						workContainer, MO_INDEX);
 
 		// Record enforce governance
-		this.recordReturn(this.metaData,
-				this.metaData.createGovernanceContext(this.taskContext),
-				this.governanceContext);
 		this.record_processLock();
+		this.recordReturn(manager, manager.isManagedObjectReady(
+				this.jobContext, this.jobNode, this.activateSet,
+				this.containerContext), true);
 		this.governance.enforceGovernance(this.governanceContext);
 
 		// Record unregistering managed object
-		manager.unregisterManagedObject();
+		manager.unregisterManagedObject(this.activateSet);
 		this.processState.governanceComplete(this.container);
 
 		// Test
 		this.replayMockObjects();
 
 		// Ensure governance is active
-		this.container.activateGovernance(this.taskContext);
+		this.container.activateGovernance(this.governanceContext,
+				this.jobContext, this.jobNode, this.activateSet,
+				this.containerContext);
 		assertTrue("Governance should be active", this.container.isActive());
 
 		// Create the active governance
-		ActiveGovernance activeGovernance = this.container
-				.createActiveGovernance(extension, managedObject, MO_INDEX);
+		ActiveGovernance<MockExtensionInterface, Indexed> activeGovernance = this.container
+				.createActiveGovernance(extension, managedObject, MO_INDEX,
+						workContainer);
 		assertTrue("Should be active", activeGovernance.isActive());
 		assertEquals("Incorrect registerd index", MO_INDEX,
 				activeGovernance.getManagedObjectRegisteredIndex());
 
 		// Undertake the enforcing
-		this.container.enforceGovernance(this.taskContext);
+		this.container.enforceGovernance(this.governanceContext,
+				this.jobContext, this.jobNode, this.activateSet,
+				this.containerContext);
 		assertFalse("Ensure governance no longer active",
 				this.container.isActive());
 		assertFalse("Ensure active governance no longer active",
@@ -231,22 +311,16 @@ public class GovernanceContainerTest extends OfficeFrameTestCase {
 	 */
 	public void testDisregardGovernance() throws Throwable {
 
-		final TaskMetaData<?, ?, ?> disregardTaskMetaData = this
-				.createMock(TaskMetaData.class);
-
 		// Record activating governance
 		this.record_activateGovernance();
 
 		// Record triggering disregarding governance
 		this.recordReturn(this.metaData,
-				this.metaData.getDisregardTaskMetaData(), disregardTaskMetaData);
-		this.containerContext.addSetupTask(disregardTaskMetaData,
-				this.container);
+				this.metaData.createDisregardActivity(this.container),
+				this.governanceActivity);
+		this.containerContext.addGovernanceActivity(this.governanceActivity);
 
 		// Record disregard governance
-		this.recordReturn(this.metaData,
-				this.metaData.createGovernanceContext(this.taskContext),
-				this.governanceContext);
 		this.record_processLock();
 		this.governance.disregardGovernance(this.governanceContext);
 		this.processState.governanceComplete(this.container);
@@ -255,15 +329,75 @@ public class GovernanceContainerTest extends OfficeFrameTestCase {
 		this.replayMockObjects();
 
 		// Ensure governance is active
-		this.container.activateGovernance(this.taskContext);
+		this.container.activateGovernance(this.governanceContext,
+				this.jobContext, this.jobNode, this.activateSet,
+				this.containerContext);
 		assertTrue("Governance should be active", this.container.isActive());
 
 		// Trigger disregarding the governance
 		this.container.disregardGovernance(this.containerContext);
 
 		// Undertake the disregard
-		this.container.disregardGovernance(this.taskContext);
+		this.container.disregardGovernance(this.governanceContext,
+				this.jobContext, this.jobNode, this.activateSet,
+				this.containerContext);
 		assertFalse("Ensure no longer active", this.container.isActive());
+
+		this.verifyMockObjects();
+	}
+
+	/**
+	 * Ensure not disregard {@link Governance} as {@link ManagedObject} not
+	 * ready.
+	 */
+	public void testDisregardGovernanceNotReady() throws Throwable {
+
+		final int MO_INDEX = 2;
+		final MockExtensionInterface extension = this
+				.createMock(MockExtensionInterface.class);
+		final ManagedObjectContainer managedObject = this
+				.createMock(ManagedObjectContainer.class);
+		final WorkContainer<?> workContainer = this
+				.createMock(WorkContainer.class);
+
+		// Record activating governance
+		this.record_activateGovernance();
+
+		// Record governing the managed object
+		ActiveGovernanceManager<MockExtensionInterface, Indexed> manager = this
+				.record_createActiveGovernance(extension, managedObject,
+						workContainer, MO_INDEX);
+
+		// Record disregard governance
+		this.record_processLock();
+		this.recordReturn(manager, manager.isManagedObjectReady(
+				this.jobContext, this.jobNode, this.activateSet,
+				this.containerContext), false);
+
+		// Test
+		this.replayMockObjects();
+
+		// Ensure governance is active
+		this.container.activateGovernance(this.governanceContext,
+				this.jobContext, this.jobNode, this.activateSet,
+				this.containerContext);
+		assertTrue("Governance should be active", this.container.isActive());
+
+		// Create the active governance
+		ActiveGovernance<MockExtensionInterface, Indexed> activeGovernance = this.container
+				.createActiveGovernance(extension, managedObject, MO_INDEX,
+						workContainer);
+		assertTrue("Should be active", activeGovernance.isActive());
+		assertEquals("Incorrect registerd index", MO_INDEX,
+				activeGovernance.getManagedObjectRegisteredIndex());
+
+		// Undertake the disregarding
+		this.container.disregardGovernance(this.governanceContext,
+				this.jobContext, this.jobNode, this.activateSet,
+				this.containerContext);
+		assertTrue("Ensure governance still active", this.container.isActive());
+		assertTrue("Ensure active governance still active",
+				activeGovernance.isActive());
 
 		this.verifyMockObjects();
 	}
@@ -278,41 +412,49 @@ public class GovernanceContainerTest extends OfficeFrameTestCase {
 				.createMock(MockExtensionInterface.class);
 		final ManagedObjectContainer managedObject = this
 				.createMock(ManagedObjectContainer.class);
+		final WorkContainer<?> workContainer = this
+				.createMock(WorkContainer.class);
 
 		// Record activating governance
 		this.record_activateGovernance();
 
 		// Record governing the managed object
-		ActiveGovernanceManager manager = this.record_createActiveGovernance(
-				extension, managedObject, MO_INDEX);
+		ActiveGovernanceManager<MockExtensionInterface, Indexed> manager = this
+				.record_createActiveGovernance(extension, managedObject,
+						workContainer, MO_INDEX);
 
 		// Record disregard governance
-		this.recordReturn(this.metaData,
-				this.metaData.createGovernanceContext(this.taskContext),
-				this.governanceContext);
 		this.record_processLock();
+		this.recordReturn(manager, manager.isManagedObjectReady(
+				this.jobContext, this.jobNode, this.activateSet,
+				this.containerContext), true);
 		this.governance.disregardGovernance(this.governanceContext);
 
 		// Record unregistering managed object
-		manager.unregisterManagedObject();
+		manager.unregisterManagedObject(this.activateSet);
 		this.processState.governanceComplete(this.container);
 
 		// Test
 		this.replayMockObjects();
 
 		// Ensure governance is active
-		this.container.activateGovernance(this.taskContext);
+		this.container.activateGovernance(this.governanceContext,
+				this.jobContext, this.jobNode, this.activateSet,
+				this.containerContext);
 		assertTrue("Governance should be active", this.container.isActive());
 
 		// Create the active governance
-		ActiveGovernance activeGovernance = this.container
-				.createActiveGovernance(extension, managedObject, MO_INDEX);
+		ActiveGovernance<MockExtensionInterface, Indexed> activeGovernance = this.container
+				.createActiveGovernance(extension, managedObject, MO_INDEX,
+						workContainer);
 		assertTrue("Should be active", activeGovernance.isActive());
 		assertEquals("Incorrect registerd index", MO_INDEX,
 				activeGovernance.getManagedObjectRegisteredIndex());
 
 		// Undertake the disregarding
-		this.container.disregardGovernance(this.taskContext);
+		this.container.disregardGovernance(this.governanceContext,
+				this.jobContext, this.jobNode, this.activateSet,
+				this.containerContext);
 		assertFalse("Ensure governance no longer active",
 				this.container.isActive());
 		assertFalse("Ensure active governance no longer active",
@@ -330,6 +472,8 @@ public class GovernanceContainerTest extends OfficeFrameTestCase {
 				.createMock(MockExtensionInterface.class);
 		final ManagedObjectContainer managedObject = this
 				.createMock(ManagedObjectContainer.class);
+		final WorkContainer<?> workContainer = this
+				.createMock(WorkContainer.class);
 
 		// Test
 		this.replayMockObjects();
@@ -340,7 +484,8 @@ public class GovernanceContainerTest extends OfficeFrameTestCase {
 
 		// Ensure not able to create active governance unless active
 		try {
-			this.container.createActiveGovernance(extension, managedObject, 0);
+			this.container.createActiveGovernance(extension, managedObject, 0,
+					workContainer);
 			fail("Should not be successful");
 		} catch (IllegalStateException ex) {
 			assertEquals("Incorrect cause",
@@ -355,6 +500,7 @@ public class GovernanceContainerTest extends OfficeFrameTestCase {
 	 * Ensure apply {@link Governance} across multiple {@link ManagedObject}
 	 * instances.
 	 */
+	@SuppressWarnings("unchecked")
 	public void testGovernMultipleManagedObjects() throws Throwable {
 
 		// Record activating governance
@@ -364,24 +510,28 @@ public class GovernanceContainerTest extends OfficeFrameTestCase {
 		final int MANAGED_OBJECT_COUNT = 5;
 		MockExtensionInterface[] extensions = new MockExtensionInterface[MANAGED_OBJECT_COUNT];
 		ManagedObjectContainer[] managedObjects = new ManagedObjectContainer[MANAGED_OBJECT_COUNT];
-		ActiveGovernanceManager[] managers = new ActiveGovernanceManager[MANAGED_OBJECT_COUNT];
+		WorkContainer<?>[] workContainers = new WorkContainer<?>[MANAGED_OBJECT_COUNT];
+		ActiveGovernanceManager<MockExtensionInterface, Indexed>[] managers = new ActiveGovernanceManager[MANAGED_OBJECT_COUNT];
 		for (int i = 0; i < managers.length; i++) {
 			extensions[i] = this.createMock(MockExtensionInterface.class);
 			managedObjects[i] = this.createMock(ManagedObjectContainer.class);
+			workContainers[i] = this.createMock(WorkContainer.class);
 			managers[i] = this.record_createActiveGovernance(extensions[i],
-					managedObjects[i], i);
+					managedObjects[i], workContainers[i], i);
 		}
 
 		// Record enforce governance
-		this.recordReturn(this.metaData,
-				this.metaData.createGovernanceContext(this.taskContext),
-				this.governanceContext);
 		this.record_processLock();
+		for (int i = 0; i < managers.length; i++) {
+			this.recordReturn(managers[i], managers[i].isManagedObjectReady(
+					this.jobContext, this.jobNode, this.activateSet,
+					this.containerContext), true);
+		}
 		this.governance.enforceGovernance(this.governanceContext);
 
 		// Record unregistering managed object
 		for (int i = 0; i < managers.length; i++) {
-			managers[i].unregisterManagedObject();
+			managers[i].unregisterManagedObject(this.activateSet);
 		}
 		this.processState.governanceComplete(this.container);
 
@@ -389,21 +539,25 @@ public class GovernanceContainerTest extends OfficeFrameTestCase {
 		this.replayMockObjects();
 
 		// Ensure governance is active
-		this.container.activateGovernance(this.taskContext);
+		this.container.activateGovernance(this.governanceContext,
+				this.jobContext, this.jobNode, this.activateSet,
+				this.containerContext);
 		assertTrue("Governance should be active", this.container.isActive());
 
 		// Create the active governances
-		final ActiveGovernance[] activeGovernances = new ActiveGovernance[MANAGED_OBJECT_COUNT];
+		final ActiveGovernance<MockExtensionInterface, Indexed>[] activeGovernances = new ActiveGovernance[MANAGED_OBJECT_COUNT];
 		for (int i = 0; i < managers.length; i++) {
 			activeGovernances[i] = this.container.createActiveGovernance(
-					extensions[i], managedObjects[i], i);
+					extensions[i], managedObjects[i], i, workContainers[i]);
 			assertTrue("Should be active", activeGovernances[i].isActive());
 			assertEquals("Incorrect registered index", i,
 					activeGovernances[i].getManagedObjectRegisteredIndex());
 		}
 
 		// Undertake the enforcing
-		this.container.enforceGovernance(this.taskContext);
+		this.container.enforceGovernance(this.governanceContext,
+				this.jobContext, this.jobNode, this.activateSet,
+				this.containerContext);
 		assertFalse("Ensure no longer active", this.container.isActive());
 
 		this.verifyMockObjects();
@@ -439,22 +593,24 @@ public class GovernanceContainerTest extends OfficeFrameTestCase {
 	/**
 	 * Records the creating the {@link ActiveGovernance}.
 	 */
-	private ActiveGovernanceManager record_createActiveGovernance(
+	@SuppressWarnings("unchecked")
+	private ActiveGovernanceManager<MockExtensionInterface, Indexed> record_createActiveGovernance(
 			MockExtensionInterface extension,
-			ManagedObjectContainer managedObject, int registeredIndex) {
+			ManagedObjectContainer managedObject,
+			WorkContainer<?> workContainer, int registeredIndex) {
 
-		final ActiveGovernanceManager activeGovernanceManager = this
+		final ActiveGovernanceManager<MockExtensionInterface, Indexed> activeGovernanceManager = this
 				.createMock(ActiveGovernanceManager.class);
 
 		// Create active governance
-		final ActiveGovernance activeGovernance = new ActiveGovernanceImpl<MockExtensionInterface, Indexed>(
+		final ActiveGovernance<MockExtensionInterface, Indexed> activeGovernance = new ActiveGovernanceImpl<MockExtensionInterface, Indexed>(
 				this.container, this.metaData, this.container, extension,
-				managedObject, registeredIndex);
+				managedObject, workContainer, registeredIndex);
 
 		// Record creating the active governance
 		this.recordReturn(this.metaData, this.metaData.createActiveGovernance(
 				this.container, this.container, extension, managedObject,
-				registeredIndex), activeGovernanceManager);
+				workContainer, registeredIndex), activeGovernanceManager);
 		this.recordReturn(activeGovernanceManager,
 				activeGovernanceManager.getActiveGovernance(), activeGovernance);
 

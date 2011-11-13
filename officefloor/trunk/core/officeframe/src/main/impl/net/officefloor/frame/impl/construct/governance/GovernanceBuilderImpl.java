@@ -17,10 +17,15 @@
  */
 package net.officefloor.frame.impl.construct.governance;
 
+import java.util.LinkedList;
+import java.util.List;
+
 import net.officefloor.frame.api.build.GovernanceBuilder;
 import net.officefloor.frame.api.build.GovernanceFactory;
 import net.officefloor.frame.api.execute.Task;
+import net.officefloor.frame.impl.construct.task.TaskNodeReferenceImpl;
 import net.officefloor.frame.internal.configuration.GovernanceConfiguration;
+import net.officefloor.frame.internal.configuration.GovernanceEscalationConfiguration;
 import net.officefloor.frame.spi.governance.Governance;
 import net.officefloor.frame.spi.team.Team;
 
@@ -54,6 +59,11 @@ public class GovernanceBuilderImpl<I, F extends Enum<F>> implements
 	private String teamName;
 
 	/**
+	 * {@link GovernanceEscalationConfiguration} instances.
+	 */
+	private final List<GovernanceEscalationConfiguration> escalations = new LinkedList<GovernanceEscalationConfiguration>();
+
+	/**
 	 * Initiate.
 	 * 
 	 * @param governanceName
@@ -80,6 +90,14 @@ public class GovernanceBuilderImpl<I, F extends Enum<F>> implements
 		this.teamName = teamName;
 	}
 
+	@Override
+	public void addEscalation(Class<? extends Throwable> typeOfCause,
+			String workName, String taskName) {
+		this.escalations.add(new GovernanceEscalationConfigurationImpl(
+				typeOfCause, new TaskNodeReferenceImpl(workName, taskName,
+						typeOfCause)));
+	}
+
 	/*
 	 * =============== GovernanceConfiguration ====================
 	 */
@@ -102,6 +120,13 @@ public class GovernanceBuilderImpl<I, F extends Enum<F>> implements
 	@Override
 	public String getTeamName() {
 		return this.teamName;
+	}
+
+	@Override
+	public GovernanceEscalationConfiguration[] getEscalations() {
+		return this.escalations
+				.toArray(new GovernanceEscalationConfiguration[this.escalations
+						.size()]);
 	}
 
 }

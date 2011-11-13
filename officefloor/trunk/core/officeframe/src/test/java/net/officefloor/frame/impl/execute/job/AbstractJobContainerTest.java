@@ -32,9 +32,11 @@ import net.officefloor.frame.internal.structure.EscalationProcedure;
 import net.officefloor.frame.internal.structure.FlowAsset;
 import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
 import net.officefloor.frame.internal.structure.FlowMetaData;
+import net.officefloor.frame.internal.structure.GovernanceActivity;
 import net.officefloor.frame.internal.structure.JobMetaData;
 import net.officefloor.frame.internal.structure.JobNode;
 import net.officefloor.frame.internal.structure.JobNodeActivatableSet;
+import net.officefloor.frame.internal.structure.JobNodeActivateSet;
 import net.officefloor.frame.internal.structure.JobSequence;
 import net.officefloor.frame.internal.structure.ManagedObjectIndex;
 import net.officefloor.frame.internal.structure.ProcessState;
@@ -294,9 +296,13 @@ public abstract class AbstractJobContainerTest extends OfficeFrameTestCase {
 	 * 
 	 * @param job
 	 *            {@link Job}.
+	 * @param isSetupTask
+	 *            Indicates to add a setup {@link Task}.
+	 * @param isGovernanceActivity
+	 *            Indicates to add a {@link GovernanceActivity}.
 	 */
 	protected void record_WorkContainer_governManagedObjects(Job job,
-			boolean isActivateTask) {
+			boolean isSetupTask, boolean isGovernanceActivity) {
 		final FunctionalityJob functionalityJob = (FunctionalityJob) job;
 
 		// Record governing managed objects
@@ -304,7 +310,7 @@ public abstract class AbstractJobContainerTest extends OfficeFrameTestCase {
 				functionalityJob.requiredManagedObjectIndexes, this.jobContext,
 				functionalityJob, this.jobActivatableSet, functionalityJob);
 
-		if (isActivateTask) {
+		if (isSetupTask) {
 
 			final TaskMetaData<?, ?, ?> setuptaskMetaData = this
 					.createMock(TaskMetaData.class);
@@ -329,9 +335,37 @@ public abstract class AbstractJobContainerTest extends OfficeFrameTestCase {
 				}
 			});
 
-			// Record activating the task
+			// Record adding the setup task
 			this.record_ContainerContext_addSetupTask(job, setuptaskMetaData,
 					parameter);
+
+		} else if (isGovernanceActivity) {
+
+			final GovernanceActivity<?, ?> governanceActivity = this
+					.createMock(GovernanceActivity.class);
+
+			// Trigger governance activity from govern managed objects
+			this.control(this.workContainer).setMatcher(new AbstractMatcher() {
+				@Override
+				public boolean matches(Object[] expected, Object[] actual) {
+
+					// Ensure correct parameters
+					for (int i = 0; i < expected.length; i++) {
+						assertEquals("Incorrect parameter " + i, expected[i],
+								actual[i]);
+					}
+
+					// Trigger governance activity
+					ContainerContext context = (ContainerContext) actual[4];
+					context.addGovernanceActivity(governanceActivity);
+
+					return true;
+				}
+			});
+
+			// Record adding the governance activity
+			this.record_ContainerContext_addGovernanceActivity(job,
+					governanceActivity);
 		}
 	}
 
@@ -781,6 +815,30 @@ public abstract class AbstractJobContainerTest extends OfficeFrameTestCase {
 	}
 
 	/**
+	 * Records {@link ContainerContext} adding a {@link GovernanceActivity}.
+	 * 
+	 * @param job
+	 *            {@link Job}.
+	 * @param activity
+	 *            {@link GovernanceActivity}.
+	 */
+	protected void record_ContainerContext_addGovernanceActivity(Job job,
+			GovernanceActivity<?, ?> activity) {
+		FunctionalityJob functionalityJob = (FunctionalityJob) job;
+
+		final JobSequence setupJobSequence = this.createMock(JobSequence.class);
+
+		this.recordReturn(this.flow, this.flow.getThreadState(),
+				this.threadState);
+		this.recordReturn(this.threadState,
+				this.threadState.createJobSequence(), setupJobSequence);
+		this.recordReturn(setupJobSequence, setupJobSequence
+				.createGovernanceNode(activity, functionalityJob),
+				this.parallelJob);
+		this.parallelJob.setParallelOwner(functionalityJob);
+	}
+
+	/**
 	 * Records completing the {@link Job}.
 	 * 
 	 * @param job
@@ -937,7 +995,9 @@ public abstract class AbstractJobContainerTest extends OfficeFrameTestCase {
 		 */
 
 		@Override
-		protected Object executeJob(JobExecuteContext context) throws Throwable {
+		protected Object executeJob(JobExecuteContext context,
+				JobContext jobContext, JobNodeActivateSet activateSet)
+				throws Throwable {
 			// Indicate the job is executed
 			this.isJobExecuted = true;
 
@@ -1031,6 +1091,14 @@ public abstract class AbstractJobContainerTest extends OfficeFrameTestCase {
 		 *            Parameter.
 		 */
 		void addSetupTask(TaskMetaData<?, ?, ?> taskMetaData, Object parameter);
+
+		/**
+		 * Adds a {@link GovernanceActivity}.
+		 * 
+		 * @param activity
+		 *            {@link GovernanceActivity}.
+		 */
+		void addGovernanceActivity(GovernanceActivity<?, ?> activity);
 
 		/**
 		 * Obtains the {@link ManagedObject} instance's object.

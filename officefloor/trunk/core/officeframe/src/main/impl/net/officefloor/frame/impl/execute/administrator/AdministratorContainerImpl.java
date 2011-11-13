@@ -192,7 +192,7 @@ public class AdministratorContainerImpl<I extends Object, A extends Enum<A>, F e
 					.translateGovernanceIndexToProcessIndex(governanceIndex);
 
 			// Obtain the governance container
-			GovernanceContainer<?> container = this.adminContext
+			GovernanceContainer<?, ?> container = this.adminContext
 					.getThreadState().getProcessState()
 					.getGovernanceContainer(processIndex);
 

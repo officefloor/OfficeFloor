@@ -17,15 +17,20 @@
  */
 package net.officefloor.frame.impl.execute.governance;
 
-import net.officefloor.frame.api.execute.TaskContext;
 import net.officefloor.frame.internal.structure.ActiveGovernance;
 import net.officefloor.frame.internal.structure.ActiveGovernanceControl;
 import net.officefloor.frame.internal.structure.ActiveGovernanceManager;
+import net.officefloor.frame.internal.structure.ContainerContext;
+import net.officefloor.frame.internal.structure.GovernanceActivity;
 import net.officefloor.frame.internal.structure.GovernanceContainer;
 import net.officefloor.frame.internal.structure.GovernanceControl;
 import net.officefloor.frame.internal.structure.GovernanceMetaData;
+import net.officefloor.frame.internal.structure.JobNode;
+import net.officefloor.frame.internal.structure.JobNodeActivateSet;
 import net.officefloor.frame.internal.structure.ManagedObjectContainer;
-import net.officefloor.frame.internal.structure.TaskMetaData;
+import net.officefloor.frame.internal.structure.WorkContainer;
+import net.officefloor.frame.spi.governance.GovernanceContext;
+import net.officefloor.frame.spi.team.JobContext;
 
 /**
  * {@link ActiveGovernance} implementation.
@@ -33,12 +38,13 @@ import net.officefloor.frame.internal.structure.TaskMetaData;
  * @author Daniel Sagenschneider
  */
 public class ActiveGovernanceImpl<I, F extends Enum<F>> implements
-		ActiveGovernanceManager, ActiveGovernance, ActiveGovernanceControl<F> {
+		ActiveGovernanceManager<I, F>, ActiveGovernance<I, F>,
+		ActiveGovernanceControl<F> {
 
 	/**
 	 * {@link GovernanceContainer}.
 	 */
-	private final GovernanceContainer<I> governanceContainer;
+	private final GovernanceContainer<I, F> governanceContainer;
 
 	/**
 	 * {@link GovernanceMetaData}.
@@ -61,6 +67,11 @@ public class ActiveGovernanceImpl<I, F extends Enum<F>> implements
 	private final ManagedObjectContainer managedObject;
 
 	/**
+	 * {@link WorkContainer}.
+	 */
+	private final WorkContainer<?> workContainer;
+
+	/**
 	 * Registered index within the {@link ManagedObjectContainer}.
 	 */
 	private final int registeredIndex;
@@ -78,18 +89,22 @@ public class ActiveGovernanceImpl<I, F extends Enum<F>> implements
 	 *            Extension interface.
 	 * @param managedObject
 	 *            {@link ManagedObjectContainer}.
+	 * @param workContainer
+	 *            {@link WorkContainer}.
 	 * @param registeredIndex
 	 *            Registered index within the {@link ManagedObjectContainer}.
 	 */
-	public ActiveGovernanceImpl(GovernanceContainer<I> governanceContainer,
+	public ActiveGovernanceImpl(GovernanceContainer<I, F> governanceContainer,
 			GovernanceMetaData<I, F> metaData,
 			GovernanceControl<I, F> governanceControl, I extensionInterface,
-			ManagedObjectContainer managedObject, int registeredIndex) {
+			ManagedObjectContainer managedObject,
+			WorkContainer<?> workContainer, int registeredIndex) {
 		this.governanceContainer = governanceContainer;
 		this.metaData = metaData;
 		this.governanceControl = governanceControl;
 		this.extensionInterface = extensionInterface;
 		this.managedObject = managedObject;
+		this.workContainer = workContainer;
 		this.registeredIndex = registeredIndex;
 	}
 
@@ -98,13 +113,20 @@ public class ActiveGovernanceImpl<I, F extends Enum<F>> implements
 	 */
 
 	@Override
-	public ActiveGovernance getActiveGovernance() {
+	public ActiveGovernance<I, F> getActiveGovernance() {
 		return this;
 	}
 
+	public boolean isManagedObjectReady(JobContext jobContext, JobNode jobNode,
+			JobNodeActivateSet activateSet, ContainerContext context) {
+		return this.managedObject.isManagedObjectReady(this.workContainer,
+				jobContext, jobNode, activateSet, context);
+	}
+
 	@Override
-	public void unregisterManagedObject() {
-		this.managedObject.unregisterManagedObjectFromGovernance(this);
+	public void unregisterManagedObject(JobNodeActivateSet activateSet) {
+		this.managedObject.unregisterManagedObjectFromGovernance(this,
+				activateSet);
 	}
 
 	/*
@@ -122,8 +144,8 @@ public class ActiveGovernanceImpl<I, F extends Enum<F>> implements
 	}
 
 	@Override
-	public TaskMetaData<?, ?, ?> getTaskMetaData() {
-		return this.metaData.getGovernTaskMetaData();
+	public GovernanceActivity<I, F> createGovernActivity() {
+		return this.metaData.createGovernActivity(this);
 	}
 
 	/*
@@ -131,10 +153,13 @@ public class ActiveGovernanceImpl<I, F extends Enum<F>> implements
 	 */
 
 	@Override
-	public void governManagedObject(TaskContext<?, ?, F> taskContext)
+	public boolean governManagedObject(GovernanceContext<F> governanceContext,
+			JobContext jobContext, JobNode jobNode,
+			JobNodeActivateSet activateSet, ContainerContext context)
 			throws Throwable {
-		this.governanceControl.governManagedObject(this.extensionInterface,
-				taskContext);
+		return this.governanceControl.governManagedObject(
+				this.extensionInterface, this, governanceContext, jobContext,
+				jobNode, activateSet, context);
 	}
 
 }

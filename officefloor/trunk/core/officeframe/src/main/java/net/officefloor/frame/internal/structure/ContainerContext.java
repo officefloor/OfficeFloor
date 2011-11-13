@@ -50,4 +50,18 @@ public interface ContainerContext {
 	 */
 	void addSetupTask(TaskMetaData<?, ?, ?> taskMetaData, Object parameter);
 
+	/**
+	 * <p>
+	 * Adds a {@link GovernanceActivity} to be executed before the current
+	 * {@link JobNode}.
+	 * <p>
+	 * This is available to {@link ManagedObject} and {@link Duty} setup. Note
+	 * that if it is added during {@link Task} execution it will be executed
+	 * after the {@link Task}.
+	 * 
+	 * @param activity
+	 *            {@link GovernanceActivity}.
+	 */
+	void addGovernanceActivity(GovernanceActivity<?, ?> activity);
+
 }

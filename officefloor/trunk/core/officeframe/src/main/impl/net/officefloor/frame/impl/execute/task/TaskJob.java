@@ -29,6 +29,7 @@ import net.officefloor.frame.impl.execute.job.AbstractJobContainer;
 import net.officefloor.frame.impl.execute.job.JobExecuteContext;
 import net.officefloor.frame.impl.execute.managedobject.ManagedObjectIndexImpl;
 import net.officefloor.frame.internal.structure.AssetManager;
+import net.officefloor.frame.internal.structure.JobNodeActivateSet;
 import net.officefloor.frame.internal.structure.JobSequence;
 import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
 import net.officefloor.frame.internal.structure.FlowMetaData;
@@ -40,6 +41,7 @@ import net.officefloor.frame.internal.structure.TaskMetaData;
 import net.officefloor.frame.internal.structure.WorkContainer;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.frame.spi.team.Job;
+import net.officefloor.frame.spi.team.JobContext;
 
 /**
  * {@link Task} implementation of a {@link Job}.
@@ -111,7 +113,9 @@ public class TaskJob<W extends Work, D extends Enum<D>, F extends Enum<F>>
 	 */
 
 	@Override
-	protected Object executeJob(JobExecuteContext context) throws Throwable {
+	protected Object executeJob(JobExecuteContext context,
+			JobContext jobContext, JobNodeActivateSet activateSet)
+			throws Throwable {
 		// Execute the task
 		return this.task.doTask(this.taskContextToken);
 	}

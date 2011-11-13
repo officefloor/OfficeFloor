@@ -38,6 +38,7 @@ import net.officefloor.frame.internal.structure.AssetManager;
 import net.officefloor.frame.internal.structure.ContainerContext;
 import net.officefloor.frame.internal.structure.EscalationFlow;
 import net.officefloor.frame.internal.structure.EscalationProcedure;
+import net.officefloor.frame.internal.structure.GovernanceActivity;
 import net.officefloor.frame.internal.structure.GovernanceContainer;
 import net.officefloor.frame.internal.structure.GovernanceMetaData;
 import net.officefloor.frame.internal.structure.JobNode;
@@ -123,9 +124,26 @@ public class ProcessStateImpl implements ProcessState {
 					.createThread(assetManager);
 
 			// Create and activate the task
-			JobNode task = jobSequence.createTaskNode(taskMetaData, null,
+			JobNode taskNode = jobSequence.createTaskNode(taskMetaData, null,
 					parameter);
-			task.activateJob();
+			taskNode.activateJob();
+		}
+
+		@Override
+		public void addGovernanceActivity(GovernanceActivity<?, ?> activity) {
+
+			// Obtain the Asset Manager
+			AssetManager assetManager = ProcessStateImpl.this.processMetaData
+					.getProcessCompletionAssetManager();
+
+			// Create the thread to run setup task
+			JobSequence jobSequence = ProcessStateImpl.this
+					.createThread(assetManager);
+
+			// Create and activate the activity
+			JobNode activityNode = jobSequence.createGovernanceNode(activity,
+					null);
+			activityNode.activateJob();
 		}
 	};
 
@@ -152,7 +170,7 @@ public class ProcessStateImpl implements ProcessState {
 	/**
 	 * {@link GovernanceContainer} instances for the {@link ProcessState}.
 	 */
-	private final GovernanceContainer<?>[] governanceContainers;
+	private final GovernanceContainer<?, ?>[] governanceContainers;
 
 	/**
 	 * {@link AdministratorContainer} instances for the {@link ProcessState}.
@@ -349,7 +367,7 @@ public class ProcessStateImpl implements ProcessState {
 
 				// Disregard governance as not enforced and process complete
 				for (int i = 0; i < this.governanceContainers.length; i++) {
-					GovernanceContainer<?> container = this.governanceContainers[i];
+					GovernanceContainer<?, ?> container = this.governanceContainers[i];
 					if (container != null) {
 						container.disregardGovernance(this.containerContext);
 					}
@@ -407,11 +425,11 @@ public class ProcessStateImpl implements ProcessState {
 	}
 
 	@Override
-	public GovernanceContainer<?> getGovernanceContainer(int index) {
+	public GovernanceContainer<?, ?> getGovernanceContainer(int index) {
 		// Lazy load the Governance Container
 		// (This should be thread safe as should always be called within the
 		// Process lock of the Thread before the Job uses it).
-		GovernanceContainer<?> container = this.governanceContainers[index];
+		GovernanceContainer<?, ?> container = this.governanceContainers[index];
 		if (container == null) {
 			container = this.processMetaData.getGovernanceMetaData()[index]
 					.createGovernanceContainer(this, index);
@@ -421,7 +439,7 @@ public class ProcessStateImpl implements ProcessState {
 	}
 
 	@Override
-	public void governanceComplete(GovernanceContainer<?> governanceContainer) {
+	public void governanceComplete(GovernanceContainer<?, ?> governanceContainer) {
 		// Unregister the governance
 		int index = governanceContainer.getProcessRegisteredIndex();
 		this.governanceContainers[index] = null;

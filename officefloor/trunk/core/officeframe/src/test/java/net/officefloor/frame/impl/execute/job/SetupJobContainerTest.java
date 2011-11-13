@@ -19,6 +19,7 @@ package net.officefloor.frame.impl.execute.job;
 
 import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.impl.execute.managedobject.ManagedObjectIndexImpl;
+import net.officefloor.frame.internal.structure.GovernanceActivity;
 import net.officefloor.frame.internal.structure.JobNode;
 import net.officefloor.frame.internal.structure.ManagedObjectIndex;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
@@ -56,7 +57,7 @@ public class SetupJobContainerTest extends AbstractJobContainerTest {
 
 		// Record setup job from managed object
 		this.record_WorkContainer_loadManagedObjects(job);
-		this.record_WorkContainer_governManagedObjects(job, true);
+		this.record_WorkContainer_governManagedObjects(job, true, false);
 		this.record_WorkContainer_coordinateManagedObjects(job, true);
 		this.record_WorkContainer_isManagedObjectsReady(job, true);
 
@@ -105,6 +106,101 @@ public class SetupJobContainerTest extends AbstractJobContainerTest {
 
 		// Record setup task
 		this.record_ContainerContext_addSetupTask(job, taskMetaData, parameter);
+
+		// Record activating the setup task (completes passively)
+		this.record_JobMetaData_getNextTaskInFlow(false);
+		this.record_parallelJob_getParallelNode(null);
+		this.record_parallelJob_activateJob(job, true);
+
+		// Record activating jobs
+		this.record_completeJob(job);
+		this.record_JobActivatableSet_activateJobs();
+
+		// Replay mocks
+		this.replayMockObjects();
+
+		// Execute the job
+		this.doJob(job, true);
+
+		// Verify mocks
+		this.verifyMockObjects();
+
+		// Ensure job run
+		assertJobExecuted(job);
+	}
+
+	/**
+	 * Ensures execution of setup {@link JobNode} requested before {@link Task}
+	 * execution.
+	 */
+	public void testPreExecuteGovernanceActivity() {
+
+		// Create a job that should not be executed
+		Job job = this.createJob(false,
+				new ManagedObjectIndex[] { new ManagedObjectIndexImpl(
+						ManagedObjectScope.PROCESS, 0) },
+				new JobFunctionality() {
+					@Override
+					public Object executeFunctionality(
+							JobFunctionalityContext context) throws Throwable {
+						fail("Job should not be executed");
+						return null;
+					}
+				});
+
+		// Record actions
+		this.record_JobContainer_initialSteps(job, null);
+
+		// Record setup job from managed object
+		this.record_WorkContainer_loadManagedObjects(job);
+		this.record_WorkContainer_governManagedObjects(job, false, true);
+		this.record_WorkContainer_coordinateManagedObjects(job, true);
+		this.record_WorkContainer_isManagedObjectsReady(job, true);
+
+		// Record activating jobs
+		this.record_JobActivatableSet_activateJobs();
+
+		// Record activating the setup task (passively completes)
+		this.record_parallelJob_getParallelNode(null);
+		this.record_parallelJob_activateJob(job, true);
+
+		// Replay mocks
+		this.replayMockObjects();
+
+		// Execute the job
+		this.doJob(job, true);
+
+		// Verify mocks
+		this.verifyMockObjects();
+
+		// Ensure job run
+		assertJobNotExecuted(job);
+	}
+
+	/**
+	 * Ensures execution of setup {@link JobNode} requested during {@link Task}
+	 * execution.
+	 */
+	public void testPostExecuteGovernanceActivity() {
+
+		final GovernanceActivity<?, ?> activity = this
+				.createMock(GovernanceActivity.class);
+
+		// Create a job with setup task
+		Job job = this.createJob(false, new JobFunctionality() {
+			@Override
+			public Object executeFunctionality(JobFunctionalityContext context)
+					throws Throwable {
+				context.addGovernanceActivity(activity);
+				return null;
+			}
+		});
+
+		// Record actions
+		this.record_JobContainer_initialSteps(job, null);
+
+		// Record setup task
+		this.record_ContainerContext_addGovernanceActivity(job, activity);
 
 		// Record activating the setup task (completes passively)
 		this.record_JobMetaData_getNextTaskInFlow(false);

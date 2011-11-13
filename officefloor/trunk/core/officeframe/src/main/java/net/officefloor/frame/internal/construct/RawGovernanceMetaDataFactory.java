@@ -17,6 +17,8 @@
  */
 package net.officefloor.frame.internal.construct;
 
+import java.util.Map;
+
 import net.officefloor.frame.api.build.OfficeBuilder;
 import net.officefloor.frame.api.build.OfficeFloorIssues;
 import net.officefloor.frame.api.execute.Task;
@@ -25,6 +27,7 @@ import net.officefloor.frame.internal.configuration.GovernanceConfiguration;
 import net.officefloor.frame.internal.structure.ProcessState;
 import net.officefloor.frame.spi.governance.Governance;
 import net.officefloor.frame.spi.source.SourceContext;
+import net.officefloor.frame.spi.team.Team;
 
 /**
  * Factory for the creation of the {@link RawGovernanceMetaData}.
@@ -43,6 +46,8 @@ public interface RawGovernanceMetaDataFactory {
 	 *            {@link ProcessState}.
 	 * @param sourceContext
 	 *            {@link SourceContext}.
+	 * @param officeTeams
+	 *            {@link Team} instances by their {@link Office} name.
 	 * @param officeName
 	 *            Name of the {@link Office} having {@link Governance} added.
 	 * @param officeBuilder
@@ -54,7 +59,8 @@ public interface RawGovernanceMetaDataFactory {
 	 */
 	<I, F extends Enum<F>> RawGovernanceMetaData<I, F> createRawGovernanceMetaData(
 			GovernanceConfiguration<I, F> configuration, int governanceIndex,
-			SourceContext sourceContext, String officeName,
-			OfficeBuilder officeBuilder, OfficeFloorIssues issues);
+			SourceContext sourceContext, Map<String, Team> officeTeams,
+			String officeName, OfficeBuilder officeBuilder,
+			OfficeFloorIssues issues);
 
 }

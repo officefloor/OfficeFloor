@@ -21,6 +21,7 @@ package net.officefloor.frame.impl.execute.managedobject;
 import net.officefloor.frame.api.escalate.FailedToSourceManagedObjectEscalation;
 import net.officefloor.frame.api.escalate.ManagedObjectOperationTimedOutEscalation;
 import net.officefloor.frame.api.escalate.SourceManagedObjectTimedOutEscalation;
+import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.impl.execute.escalation.PropagateEscalationError;
 import net.officefloor.frame.internal.structure.ActiveGovernance;
@@ -29,6 +30,7 @@ import net.officefloor.frame.internal.structure.AssetMonitor;
 import net.officefloor.frame.internal.structure.CheckAssetContext;
 import net.officefloor.frame.internal.structure.ContainerContext;
 import net.officefloor.frame.internal.structure.ExtensionInterfaceExtractor;
+import net.officefloor.frame.internal.structure.GovernanceActivity;
 import net.officefloor.frame.internal.structure.GovernanceContainer;
 import net.officefloor.frame.internal.structure.JobNode;
 import net.officefloor.frame.internal.structure.JobNodeActivateSet;
@@ -91,7 +93,7 @@ public class ManagedObjectContainerImpl implements ManagedObjectContainer,
 	/**
 	 * Listing of potential {@link ActiveGovernance}.
 	 */
-	private final ActiveGovernance[] activeGovernances;
+	private final ActiveGovernance<?, ?>[] activeGovernances;
 
 	/**
 	 * State of this {@link ManagedObjectContainer}.
@@ -315,6 +317,7 @@ public class ManagedObjectContainerImpl implements ManagedObjectContainer,
 			// Managed Object loaded
 			return;
 
+		case UNLOAD_WAITING_GOVERNANCE:
 		case UNLOADING:
 			// Should never be called in this state
 			// (only unloaded when no interest in this managed object)
@@ -419,17 +422,19 @@ public class ManagedObjectContainerImpl implements ManagedObjectContainer,
 
 				// Create and register the governance for the managed object
 				activeGovernance = governance.createActiveGovernance(
-						extensionInterface, this, i);
+						extensionInterface, this, i, workContainer);
 				this.activeGovernances[i] = activeGovernance;
 
 				// Add the governance for activation
-				context.addSetupTask(activeGovernance.getTaskMetaData(),
-						activeGovernance);
+				GovernanceActivity<?, ?> activity = activeGovernance
+						.createGovernActivity();
+				context.addGovernanceActivity(activity);
 			}
 
 			// Successfully now governed, or governance ready
 			return true;
 
+		case UNLOAD_WAITING_GOVERNANCE:
 		case UNLOADING:
 			// Should never be called in this state
 			// (only unloaded when no interest in this managed object)
@@ -540,6 +545,7 @@ public class ManagedObjectContainerImpl implements ManagedObjectContainer,
 			// Object available and coordinated
 			return true;
 
+		case UNLOAD_WAITING_GOVERNANCE:
 		case UNLOADING:
 			// Should never be called in this state
 			// (only unloaded when no interest in this managed object)
@@ -609,6 +615,7 @@ public class ManagedObjectContainerImpl implements ManagedObjectContainer,
 		case GOVERNED:
 		case COORDINATING:
 		case OBJECT_AVAILABLE:
+		case UNLOAD_WAITING_GOVERNANCE:
 
 			// Determine if not sourced or asynchronous
 			if ((this.managedObject == null)
@@ -694,6 +701,10 @@ public class ManagedObjectContainerImpl implements ManagedObjectContainer,
 				case OBJECT_AVAILABLE:
 					// Object available and ready
 					return true;
+
+				case UNLOAD_WAITING_GOVERNANCE:
+					// Ready for enforce/disregard governance
+					return true;
 				}
 
 				// Fail as not expected state
@@ -763,7 +774,7 @@ public class ManagedObjectContainerImpl implements ManagedObjectContainer,
 
 	@Override
 	public void unregisterManagedObjectFromGovernance(
-			ActiveGovernance governance) {
+			ActiveGovernance<?, ?> governance, JobNodeActivateSet activateSet) {
 
 		// Access Point: GovernanceContainer
 		// Locks: ThreadState -> ProcessState
@@ -771,13 +782,33 @@ public class ManagedObjectContainerImpl implements ManagedObjectContainer,
 		// Unregister the active governance
 		int index = governance.getManagedObjectRegisteredIndex();
 		this.activeGovernances[index] = null;
+
+		// Determine if managed object waiting on governance to unload
+		if (this.containerState == ManagedObjectContainerState.UNLOAD_WAITING_GOVERNANCE) {
+			// Attempt to unload the managed object
+			this.unloadManagedObject(activateSet);
+		}
 	}
 
 	@Override
 	public void unloadManagedObject(JobNodeActivateSet activateSet) {
 
-		// Access Point: JobContainer via WorkContainer
+		// Access Point: JobContainer, GovernanceContainer (unregister)
 		// Locks: ThreadState -> ProcessState
+
+		// Flag that possibly waiting on governance to unload
+		this.containerState = ManagedObjectContainerState.UNLOAD_WAITING_GOVERNANCE;
+
+		// Ensure no active governance
+		boolean isActiveGovernance = false;
+		for (int i = 0; i < this.activeGovernances.length; i++) {
+			if (this.activeGovernances[i] != null) {
+				isActiveGovernance = true;
+			}
+		}
+		if (isActiveGovernance) {
+			return; // Do not unload if active governance
+		}
 
 		// Flag that unloading
 		this.containerState = ManagedObjectContainerState.UNLOADING;
@@ -952,6 +983,7 @@ public class ManagedObjectContainerImpl implements ManagedObjectContainer,
 						this.metaData.createRecycleJobNode(managedObject));
 				break;
 
+			case UNLOAD_WAITING_GOVERNANCE:
 			case UNLOADING:
 				// Discard as managed object already flagged for unloading
 				// (if unloading nothing should be waiting on it)
@@ -1101,6 +1133,13 @@ public class ManagedObjectContainerImpl implements ManagedObjectContainer,
 		 * available.
 		 */
 		OBJECT_AVAILABLE,
+
+		/**
+		 * Indicates that the {@link ManagedObject} is waiting on a
+		 * {@link Governance} to be unloaded. At this point, it should no longer
+		 * be used for {@link Task} functionality.
+		 */
+		UNLOAD_WAITING_GOVERNANCE,
 
 		/**
 		 * Indicates the {@link ManagedObject} is being unloaded.

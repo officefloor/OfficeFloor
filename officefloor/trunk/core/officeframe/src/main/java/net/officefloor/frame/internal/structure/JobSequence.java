@@ -36,8 +36,8 @@ public interface JobSequence extends FlowAsset, FlowFuture,
 		LinkedListSetEntry<JobSequence, ThreadState> {
 
 	/**
-	 * Creates a new {@link JobNode} contained in this {@link JobSequence} for the
-	 * {@link Task}.
+	 * Creates a new {@link JobNode} contained in this {@link JobSequence} for
+	 * the {@link Task}.
 	 * 
 	 * @param taskMetaData
 	 *            {@link TaskMetaData} for the new {@link JobNode}.
@@ -52,14 +52,28 @@ public interface JobSequence extends FlowAsset, FlowFuture,
 			JobNode parallelNodeOwner, Object parameter);
 
 	/**
+	 * Creates a new {@link JobNode} contained in this {@link JobSequence} for
+	 * the {@link GovernanceActivity}.
+	 * 
+	 * @param governanceActivity
+	 *            {@link GovernanceActivity}.
+	 * @param parallelNodeOwner
+	 *            {@link JobNode} that is the parallel owner of the new
+	 *            {@link JobNode}.
+	 * @return New {@link JobNode}.
+	 */
+	JobNode createGovernanceNode(GovernanceActivity<?, ?> governanceActivity,
+			JobNode parallelNodeOwner);
+
+	/**
 	 * Flags that the input {@link JobNode} has completed.
 	 * 
 	 * @param jobNode
 	 *            {@link JobNode} that has completed.
 	 * @param activateSet
 	 *            {@link JobNodeActivateSet} to add {@link JobNode} instances
-	 *            waiting on this {@link JobSequence} if all {@link JobNode} instances
-	 *            of this {@link JobSequence} are complete.
+	 *            waiting on this {@link JobSequence} if all {@link JobNode}
+	 *            instances of this {@link JobSequence} are complete.
 	 */
 	void jobNodeComplete(JobNode jobNode, JobNodeActivateSet activateSet);
 

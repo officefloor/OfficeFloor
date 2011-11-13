@@ -17,9 +17,10 @@
  */
 package net.officefloor.frame.internal.structure;
 
-import net.officefloor.frame.api.execute.TaskContext;
 import net.officefloor.frame.spi.governance.Governance;
+import net.officefloor.frame.spi.governance.GovernanceContext;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
+import net.officefloor.frame.spi.team.JobContext;
 
 /**
  * Provides control over the {@link Governance}.
@@ -31,12 +32,24 @@ public interface GovernanceControl<I, F extends Enum<F>> {
 	/**
 	 * Activates the {@link Governance}.
 	 * 
-	 * @param taskContext
-	 *            {@link TaskContext}.
+	 * @param governanceContext
+	 *            {@link GovernanceContext}.
+	 * @param jobContext
+	 *            {@link JobContext}.
+	 * @param jobNode
+	 *            {@link JobNode}.
+	 * @param activateSet
+	 *            {@link JobNodeActivateSet}.
+	 * @param context
+	 *            ContainerContext.
+	 * @return <code>true</code> if the {@link Governance} was activated.
 	 * @throws Throwable
 	 *             If fails to activate the {@link Governance}.
 	 */
-	void activateGovernance(TaskContext<?, ?, F> taskContext) throws Throwable;
+	boolean activateGovernance(GovernanceContext<F> governanceContext,
+			JobContext jobContext, JobNode jobNode,
+			JobNodeActivateSet activateSet, ContainerContext context)
+			throws Throwable;
 
 	/**
 	 * Initiates {@link Governance} over the {@link ManagedObject}.
@@ -44,33 +57,72 @@ public interface GovernanceControl<I, F extends Enum<F>> {
 	 * @param extension
 	 *            Extension of the {@link ManagedObject} to provide
 	 *            {@link Governance} over it.
-	 * @param taskContext
-	 *            {@link TaskContext}.
+	 * @param governanceManager
+	 *            {@link ActiveGovernanceManager}.
+	 * @param governanceContext
+	 *            {@link GovernanceContext}.
+	 * @param jobContext
+	 *            {@link JobContext}.
+	 * @param jobNode
+	 *            {@link JobNode}.
+	 * @param activateSet
+	 *            {@link JobNodeActivateSet}.
+	 * @param context
+	 *            ContainerContext.
+	 * @return <code>true</code> if {@link ManagedObject} is under
+	 *         {@link Governance}.
 	 * @throws Throwable
 	 *             If fails to initiate {@link Governance} over the
 	 *             {@link ManagedObject}.
 	 */
-	void governManagedObject(I extension, TaskContext<?, ?, F> taskContext)
-			throws Throwable;
+	boolean governManagedObject(I extension,
+			ActiveGovernanceManager<I, F> governanceManager,
+			GovernanceContext<F> governanceContext, JobContext jobContext,
+			JobNode jobNode, JobNodeActivateSet activateSet,
+			ContainerContext context) throws Throwable;
 
 	/**
 	 * Enforce the {@link Governance}.
 	 * 
-	 * @param taskContext
-	 *            {@link TaskContext}.
+	 * @param governanceContext
+	 *            {@link GovernanceContext}.
+	 * @param jobContext
+	 *            {@link JobContext}.
+	 * @param jobNode
+	 *            {@link JobNode}.
+	 * @param activateSet
+	 *            {@link JobNodeActivateSet}.
+	 * @param context
+	 *            ContainerContext.
+	 * @return <code>true</code> if the {@link Governance} was enforced.
 	 * @throws Throwable
 	 *             If fails to enforce the {@link Governance}.
 	 */
-	void enforceGovernance(TaskContext<?, ?, F> taskContext) throws Throwable;
+	boolean enforceGovernance(GovernanceContext<F> governanceContext,
+			JobContext jobContext, JobNode jobNode,
+			JobNodeActivateSet activateSet, ContainerContext context)
+			throws Throwable;
 
 	/**
 	 * Disregards the {@link Governance}.
 	 * 
-	 * @param taskContext
-	 *            {@link TaskContext}.
+	 * @param governanceContext
+	 *            {@link GovernanceContext}.
+	 * @param jobContext
+	 *            {@link JobContext}.
+	 * @param jobNode
+	 *            {@link JobNode}.
+	 * @param activateSet
+	 *            {@link JobNodeActivateSet}.
+	 * @param context
+	 *            ContainerContext.
+	 * @return <code>true</code> if the {@link Governance} was disregarded.
 	 * @throws Throwable
 	 *             If fails to disregard the {@link Governance}.
 	 */
-	void disregardGovernance(TaskContext<?, ?, F> taskContext) throws Throwable;
+	boolean disregardGovernance(GovernanceContext<F> governanceContext,
+			JobContext jobContext, JobNode jobNode,
+			JobNodeActivateSet activateSet, ContainerContext context)
+			throws Throwable;
 
 }
