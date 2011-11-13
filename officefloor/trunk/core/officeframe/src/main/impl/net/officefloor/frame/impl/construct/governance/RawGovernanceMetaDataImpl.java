@@ -36,8 +36,6 @@ import net.officefloor.frame.internal.construct.RawGovernanceMetaData;
 import net.officefloor.frame.internal.construct.RawGovernanceMetaDataFactory;
 import net.officefloor.frame.internal.structure.EscalationFlow;
 import net.officefloor.frame.internal.structure.EscalationProcedure;
-import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
-import net.officefloor.frame.internal.structure.FlowMetaData;
 import net.officefloor.frame.internal.structure.GovernanceMetaData;
 import net.officefloor.frame.internal.structure.ProcessState;
 import net.officefloor.frame.internal.structure.TaskMetaData;
@@ -245,16 +243,9 @@ public class RawGovernanceMetaDataImpl<I, F extends Enum<F>> implements
 				continue; // no escalation handler
 			}
 
-			// Create the escalation flow meta-data
-			FlowMetaData<?> escalationFlowMetaData = ConstructUtil
-					.newFlowMetaData(FlowInstigationStrategyEnum.PARALLEL,
-							escalationTaskMetaData, assetManagerFactory,
-							AssetType.GOVERNANCE, this.getGovernanceName(),
-							"Escalation" + i, issues);
-
 			// Create and add the escalation
 			escalations[i] = new EscalationFlowImpl(typeOfCause,
-					escalationFlowMetaData);
+					escalationTaskMetaData);
 		}
 		EscalationProcedure escalationProcedure = new EscalationProcedureImpl(
 				escalations);

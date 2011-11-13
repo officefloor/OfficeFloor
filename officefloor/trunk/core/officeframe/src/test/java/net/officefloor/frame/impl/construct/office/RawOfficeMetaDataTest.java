@@ -66,7 +66,6 @@ import net.officefloor.frame.internal.structure.AdministratorScope;
 import net.officefloor.frame.internal.structure.AssetManager;
 import net.officefloor.frame.internal.structure.EscalationFlow;
 import net.officefloor.frame.internal.structure.EscalationProcedure;
-import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
 import net.officefloor.frame.internal.structure.FlowMetaData;
 import net.officefloor.frame.internal.structure.GovernanceMetaData;
 import net.officefloor.frame.internal.structure.JobNode;
@@ -1371,14 +1370,8 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 		EscalationProcedure escalationProcedure = officeMetaData
 				.getEscalationProcedure();
 		EscalationFlow escalation = escalationProcedure.getEscalation(failure);
-		FlowMetaData<?> escalationFlowMetaData = escalation.getFlowMetaData();
 		assertEquals("Incorrect escalation task meta-data", taskMetaData,
-				escalationFlowMetaData.getInitialTaskMetaData());
-		assertEquals("Incorrect escalation instigation strategy",
-				FlowInstigationStrategyEnum.PARALLEL,
-				escalationFlowMetaData.getInstigationStrategy());
-		assertNull("Not required to have asset manager",
-				escalationFlowMetaData.getFlowManager());
+				escalation.getTaskMetaData());
 	}
 
 	/**

@@ -570,7 +570,7 @@ public abstract class AbstractJobContainer<W extends Work, N extends JobMetaData
 									// Create the node for the escalation
 									escalationNode = this
 											.createEscalationJobNode(escalation
-													.getFlowMetaData(),
+													.getTaskMetaData(),
 													escalationCause,
 													escalationOwnerNode);
 								}
@@ -648,7 +648,7 @@ public abstract class AbstractJobContainer<W extends Work, N extends JobMetaData
 
 							// Create the global escalation
 							escalationNode = this.createEscalationJobNode(
-									globalEscalation.getFlowMetaData(),
+									globalEscalation.getTaskMetaData(),
 									escalationCause, null);
 						}
 
@@ -914,32 +914,26 @@ public abstract class AbstractJobContainer<W extends Work, N extends JobMetaData
 
 	/**
 	 * Creates an {@link EscalationFlow} {@link JobNode} from the input
-	 * {@link FlowMetaData}.
+	 * {@link TaskMetaData}.
 	 * 
-	 * @param flowMetaData
-	 *            {@link FlowMetaData}.
+	 * @param taskMetaData
+	 *            {@link TaskMetaData}.
 	 * @param parameter
 	 *            Parameter.
 	 * @param parallelOwner
 	 *            Parallel owner for the {@link EscalationFlow} {@link JobNode}.
 	 * @return {@link JobNode}.
-	 * 
-	 * @deprecated TODO Escalation to provide TaskMetaData
 	 */
-	private JobNode createEscalationJobNode(FlowMetaData<?> flowMetaData,
+	private JobNode createEscalationJobNode(TaskMetaData<?, ?, ?> taskMetaData,
 			Object parameter, JobNode parallelOwner) {
-
-		// Obtain the task meta-data for instigating the flow
-		TaskMetaData<?, ?, ?> initTaskMetaData = flowMetaData
-				.getInitialTaskMetaData();
 
 		// Create a new flow for execution
 		ThreadState threadState = this.flow.getThreadState();
 		JobSequence parallelFlow = threadState.createJobSequence();
 
 		// Create the job node
-		JobNode escalationJobNode = parallelFlow.createTaskNode(
-				initTaskMetaData, parallelOwner, parameter);
+		JobNode escalationJobNode = parallelFlow.createTaskNode(taskMetaData,
+				parallelOwner, parameter);
 
 		// Return the escalation job node
 		return escalationJobNode;

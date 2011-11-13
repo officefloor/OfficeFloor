@@ -738,15 +738,9 @@ public class RawTaskMetaDataImpl<W extends Work, D extends Enum<D>, F extends En
 				continue; // no escalation handler
 			}
 
-			// Create the escalation flow meta-data
-			FlowMetaData<?> escalationFlowMetaData = ConstructUtil
-					.newFlowMetaData(FlowInstigationStrategyEnum.PARALLEL,
-							escalationTaskMetaData, assetManagerFactory,
-							AssetType.TASK, assetName, "Escalation" + i, issues);
-
 			// Create and add the escalation
 			escalations[i] = new EscalationFlowImpl(typeOfCause,
-					escalationFlowMetaData);
+					escalationTaskMetaData);
 		}
 		EscalationProcedure escalationProcedure = new EscalationProcedureImpl(
 				escalations);

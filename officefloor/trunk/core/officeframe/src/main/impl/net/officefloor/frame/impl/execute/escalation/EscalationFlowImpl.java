@@ -19,7 +19,7 @@
 package net.officefloor.frame.impl.execute.escalation;
 
 import net.officefloor.frame.internal.structure.EscalationFlow;
-import net.officefloor.frame.internal.structure.FlowMetaData;
+import net.officefloor.frame.internal.structure.TaskMetaData;
 
 /**
  * Implementation of {@link EscalationFlow}.
@@ -34,37 +34,38 @@ public class EscalationFlowImpl implements EscalationFlow {
 	private final Class<? extends Throwable> typeOfCause;
 
 	/**
-	 * {@link FlowMetaData} determine the actions for this {@link EscalationFlow}.
+	 * {@link TaskMetaData} determine the actions for this
+	 * {@link EscalationFlow}.
 	 */
-	private final FlowMetaData<?> flowMetaData;
+	private final TaskMetaData<?, ?, ?> taskMetaData;
 
 	/**
 	 * Initiate.
 	 * 
 	 * @param typeOfCause
 	 *            Type of cause handled by this {@link EscalationFlow}.
-	 * @param flowMetaData
-	 *            {@link FlowMetaData} determine the actions for this
+	 * @param taskMetaData
+	 *            {@link TaskMetaData} determine the actions for this
 	 *            {@link EscalationFlow}.
 	 */
 	public EscalationFlowImpl(Class<? extends Throwable> typeOfCause,
-			FlowMetaData<?> flowMetaData) {
+			TaskMetaData<?, ?, ?> taskMetaData) {
 		this.typeOfCause = typeOfCause;
-		this.flowMetaData = flowMetaData;
+		this.taskMetaData = taskMetaData;
 	}
 
 	/*
 	 * ======================== Escalation ====================================
 	 */
-	
+
 	@Override
 	public Class<? extends Throwable> getTypeOfCause() {
 		return this.typeOfCause;
 	}
 
 	@Override
-	public FlowMetaData<?> getFlowMetaData() {
-		return this.flowMetaData;
+	public TaskMetaData<?, ?, ?> getTaskMetaData() {
+		return this.taskMetaData;
 	}
 
 }

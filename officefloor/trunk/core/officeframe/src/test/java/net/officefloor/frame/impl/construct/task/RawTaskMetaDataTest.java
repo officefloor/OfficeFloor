@@ -155,8 +155,8 @@ public class RawTaskMetaDataTest<W extends Work, D extends Enum<D>, F extends En
 		// Record no task name
 		this.recordReturn(this.configuration, this.configuration.getTaskName(),
 				null);
-		this.recordReturn(this.rawWorkMetaData, this.rawWorkMetaData
-				.getWorkName(), "WORK");
+		this.recordReturn(this.rawWorkMetaData,
+				this.rawWorkMetaData.getWorkName(), "WORK");
 		this.issues.addIssue(AssetType.WORK, "WORK", "Task added without name");
 
 		// Attempt to construct task meta-data
@@ -173,8 +173,8 @@ public class RawTaskMetaDataTest<W extends Work, D extends Enum<D>, F extends En
 		// Record no task factory
 		this.recordReturn(this.configuration, this.configuration.getTaskName(),
 				TASK_NAME);
-		this.recordReturn(this.configuration, this.configuration
-				.getTaskFactory(), null);
+		this.recordReturn(this.configuration,
+				this.configuration.getTaskFactory(), null);
 		this.record_taskIssue("No TaskFactory provided");
 
 		// Attempt to construct task meta-data
@@ -193,18 +193,19 @@ public class RawTaskMetaDataTest<W extends Work, D extends Enum<D>, F extends En
 		// Record with differentiator
 		this.recordReturn(this.configuration, this.configuration.getTaskName(),
 				TASK_NAME);
-		this.recordReturn(this.configuration, this.configuration
-				.getTaskFactory(), this.taskFactory);
-		this.recordReturn(this.configuration, this.configuration
-				.getDifferentiator(), DIFFERENTIATOR);
-		this.recordReturn(this.configuration, this.configuration
-				.getOfficeTeamName(), "TEAM");
-		this.recordReturn(this.rawWorkMetaData, this.rawWorkMetaData
-				.getRawOfficeMetaData(), this.rawOfficeMetaData);
+		this.recordReturn(this.configuration,
+				this.configuration.getTaskFactory(), this.taskFactory);
+		this.recordReturn(this.configuration,
+				this.configuration.getDifferentiator(), DIFFERENTIATOR);
+		this.recordReturn(this.configuration,
+				this.configuration.getOfficeTeamName(), "TEAM");
+		this.recordReturn(this.rawWorkMetaData,
+				this.rawWorkMetaData.getRawOfficeMetaData(),
+				this.rawOfficeMetaData);
 		Map<String, Team> teams = new HashMap<String, Team>();
 		teams.put("TEAM", this.team);
-		this.recordReturn(this.rawOfficeMetaData, this.rawOfficeMetaData
-				.getTeams(), teams);
+		this.recordReturn(this.rawOfficeMetaData,
+				this.rawOfficeMetaData.getTeams(), teams);
 		this.record_NoManagedObjects();
 		this.record_NoAdministration();
 
@@ -246,12 +247,12 @@ public class RawTaskMetaDataTest<W extends Work, D extends Enum<D>, F extends En
 		// Record no team name
 		this.recordReturn(this.configuration, this.configuration.getTaskName(),
 				TASK_NAME);
-		this.recordReturn(this.configuration, this.configuration
-				.getTaskFactory(), this.taskFactory);
-		this.recordReturn(this.configuration, this.configuration
-				.getDifferentiator(), null);
-		this.recordReturn(this.configuration, this.configuration
-				.getOfficeTeamName(), null);
+		this.recordReturn(this.configuration,
+				this.configuration.getTaskFactory(), this.taskFactory);
+		this.recordReturn(this.configuration,
+				this.configuration.getDifferentiator(), null);
+		this.recordReturn(this.configuration,
+				this.configuration.getOfficeTeamName(), null);
 		this.record_taskIssue("No team name provided for task");
 
 		// Attempt to construct task meta-data
@@ -268,16 +269,17 @@ public class RawTaskMetaDataTest<W extends Work, D extends Enum<D>, F extends En
 		// Record unknown team
 		this.recordReturn(this.configuration, this.configuration.getTaskName(),
 				TASK_NAME);
-		this.recordReturn(this.configuration, this.configuration
-				.getTaskFactory(), this.taskFactory);
-		this.recordReturn(this.configuration, this.configuration
-				.getDifferentiator(), null);
-		this.recordReturn(this.configuration, this.configuration
-				.getOfficeTeamName(), "TEAM");
-		this.recordReturn(this.rawWorkMetaData, this.rawWorkMetaData
-				.getRawOfficeMetaData(), this.rawOfficeMetaData);
-		this.recordReturn(this.rawOfficeMetaData, this.rawOfficeMetaData
-				.getTeams(), new HashMap<String, Team>());
+		this.recordReturn(this.configuration,
+				this.configuration.getTaskFactory(), this.taskFactory);
+		this.recordReturn(this.configuration,
+				this.configuration.getDifferentiator(), null);
+		this.recordReturn(this.configuration,
+				this.configuration.getOfficeTeamName(), "TEAM");
+		this.recordReturn(this.rawWorkMetaData,
+				this.rawWorkMetaData.getRawOfficeMetaData(),
+				this.rawOfficeMetaData);
+		this.recordReturn(this.rawOfficeMetaData,
+				this.rawOfficeMetaData.getTeams(), new HashMap<String, Team>());
 		this.record_taskIssue("Unknown team 'TEAM' responsible for task");
 
 		// Attempt to construct task meta-data
@@ -324,8 +326,8 @@ public class RawTaskMetaDataTest<W extends Work, D extends Enum<D>, F extends En
 
 		// Record no managed object name
 		this.record_taskNameFactoryTeam();
-		this.recordReturn(this.configuration, this.configuration
-				.getObjectConfiguration(),
+		this.recordReturn(this.configuration,
+				this.configuration.getObjectConfiguration(),
 				new TaskObjectConfiguration[] { moConfiguration });
 		this.recordReturn(moConfiguration, moConfiguration.getObjectType(),
 				null);
@@ -349,8 +351,8 @@ public class RawTaskMetaDataTest<W extends Work, D extends Enum<D>, F extends En
 
 		// Record parameter
 		this.record_taskNameFactoryTeam();
-		this.recordReturn(this.configuration, this.configuration
-				.getObjectConfiguration(),
+		this.recordReturn(this.configuration,
+				this.configuration.getObjectConfiguration(),
 				new TaskObjectConfiguration[] { moConfiguration });
 		this.recordReturn(moConfiguration, moConfiguration.getObjectType(),
 				parameterType);
@@ -365,19 +367,19 @@ public class RawTaskMetaDataTest<W extends Work, D extends Enum<D>, F extends En
 		this.verifyMockObjects();
 
 		// Ensure have parameter
-		assertEquals("Should have no required objects", 0, metaData
-				.getRequiredManagedObjects().length);
-		assertEquals("Incorrect parameter type", parameterType, metaData
-				.getParameterType());
+		assertEquals("Should have no required objects", 0,
+				metaData.getRequiredManagedObjects().length);
+		assertEquals("Incorrect parameter type", parameterType,
+				metaData.getParameterType());
 
 		// Ensure can translate to parameter
 		ManagedObjectIndex parameterIndex = metaData
 				.translateManagedObjectIndexForWork(0);
 		assertEquals("Incorrect translation to parameter",
-				TaskJob.PARAMETER_INDEX, parameterIndex
-						.getIndexOfManagedObjectWithinScope());
-		assertNull("Should not have scope for parameter index", parameterIndex
-				.getManagedObjectScope());
+				TaskJob.PARAMETER_INDEX,
+				parameterIndex.getIndexOfManagedObjectWithinScope());
+		assertNull("Should not have scope for parameter index",
+				parameterIndex.getManagedObjectScope());
 	}
 
 	/**
@@ -397,9 +399,10 @@ public class RawTaskMetaDataTest<W extends Work, D extends Enum<D>, F extends En
 
 		// Record parameter used twice
 		this.record_taskNameFactoryTeam();
-		this.recordReturn(this.configuration, this.configuration
-				.getObjectConfiguration(), new TaskObjectConfiguration[] {
-				paramConfigOne, paramConfigTwo });
+		this.recordReturn(
+				this.configuration,
+				this.configuration.getObjectConfiguration(),
+				new TaskObjectConfiguration[] { paramConfigOne, paramConfigTwo });
 		this.recordReturn(paramConfigOne, paramConfigOne.getObjectType(),
 				paramTypeOne);
 		this.recordReturn(paramConfigOne, paramConfigOne.isParameter(), true);
@@ -416,8 +419,8 @@ public class RawTaskMetaDataTest<W extends Work, D extends Enum<D>, F extends En
 		this.verifyMockObjects();
 
 		// Ensure have parameter
-		assertEquals("Should have no required objects", 0, metaData
-				.getRequiredManagedObjects().length);
+		assertEquals("Should have no required objects", 0,
+				metaData.getRequiredManagedObjects().length);
 		assertEquals("Parameter type should be most specific", parameterType,
 				metaData.getParameterType());
 
@@ -447,9 +450,10 @@ public class RawTaskMetaDataTest<W extends Work, D extends Enum<D>, F extends En
 
 		// Record parameters incompatible
 		this.record_taskNameFactoryTeam();
-		this.recordReturn(this.configuration, this.configuration
-				.getObjectConfiguration(), new TaskObjectConfiguration[] {
-				paramConfigOne, paramConfigTwo });
+		this.recordReturn(
+				this.configuration,
+				this.configuration.getObjectConfiguration(),
+				new TaskObjectConfiguration[] { paramConfigOne, paramConfigTwo });
 		this.recordReturn(paramConfigOne, paramConfigOne.getObjectType(),
 				paramTypeOne);
 		this.recordReturn(paramConfigOne, paramConfigOne.isParameter(), true);
@@ -473,8 +477,8 @@ public class RawTaskMetaDataTest<W extends Work, D extends Enum<D>, F extends En
 
 		// Record null managed object configuration
 		this.record_taskNameFactoryTeam();
-		this.recordReturn(this.configuration, this.configuration
-				.getObjectConfiguration(),
+		this.recordReturn(this.configuration,
+				this.configuration.getObjectConfiguration(),
 				new TaskObjectConfiguration[] { null });
 		this.record_taskIssue("No object configuration at index 0");
 		this.record_NoAdministration();
@@ -495,16 +499,14 @@ public class RawTaskMetaDataTest<W extends Work, D extends Enum<D>, F extends En
 
 		// Record no managed object name
 		this.record_taskNameFactoryTeam();
-		this.recordReturn(this.configuration, this.configuration
-				.getObjectConfiguration(),
+		this.recordReturn(this.configuration,
+				this.configuration.getObjectConfiguration(),
 				new TaskObjectConfiguration[] { moConfiguration });
 		this.recordReturn(moConfiguration, moConfiguration.getObjectType(),
 				Object.class);
-		this
-				.recordReturn(moConfiguration, moConfiguration.isParameter(),
-						false);
-		this.recordReturn(moConfiguration, moConfiguration
-				.getScopeManagedObjectName(), null);
+		this.recordReturn(moConfiguration, moConfiguration.isParameter(), false);
+		this.recordReturn(moConfiguration,
+				moConfiguration.getScopeManagedObjectName(), null);
 		this.record_taskIssue("No name for managed object at index 0");
 		this.record_NoAdministration();
 
@@ -524,18 +526,16 @@ public class RawTaskMetaDataTest<W extends Work, D extends Enum<D>, F extends En
 
 		// Record unknown managed object
 		this.record_taskNameFactoryTeam();
-		this.recordReturn(this.configuration, this.configuration
-				.getObjectConfiguration(),
+		this.recordReturn(this.configuration,
+				this.configuration.getObjectConfiguration(),
 				new TaskObjectConfiguration[] { moConfiguration });
 		this.recordReturn(moConfiguration, moConfiguration.getObjectType(),
 				Object.class);
-		this
-				.recordReturn(moConfiguration, moConfiguration.isParameter(),
-						false);
-		this.recordReturn(moConfiguration, moConfiguration
-				.getScopeManagedObjectName(), "MO");
-		this.recordReturn(this.rawWorkMetaData, this.rawWorkMetaData
-				.getScopeManagedObjectMetaData("MO"), null);
+		this.recordReturn(moConfiguration, moConfiguration.isParameter(), false);
+		this.recordReturn(moConfiguration,
+				moConfiguration.getScopeManagedObjectName(), "MO");
+		this.recordReturn(this.rawWorkMetaData,
+				this.rawWorkMetaData.getScopeManagedObjectMetaData("MO"), null);
 		this.record_taskIssue("Can not find scope managed object 'MO'");
 		this.record_NoAdministration();
 
@@ -566,23 +566,22 @@ public class RawTaskMetaDataTest<W extends Work, D extends Enum<D>, F extends En
 
 		// Record incompatible managed object type
 		this.record_taskNameFactoryTeam();
-		this.recordReturn(this.configuration, this.configuration
-				.getObjectConfiguration(),
+		this.recordReturn(this.configuration,
+				this.configuration.getObjectConfiguration(),
 				new TaskObjectConfiguration[] { moConfiguration });
 		this.recordReturn(moConfiguration, moConfiguration.getObjectType(),
 				Connection.class); // require Connection but Integer
-		this
-				.recordReturn(moConfiguration, moConfiguration.isParameter(),
-						false);
-		this.recordReturn(moConfiguration, moConfiguration
-				.getScopeManagedObjectName(), "MO");
-		this.recordReturn(this.rawWorkMetaData, this.rawWorkMetaData
-				.getScopeManagedObjectMetaData("MO"), rawWorkMo);
+		this.recordReturn(moConfiguration, moConfiguration.isParameter(), false);
+		this.recordReturn(moConfiguration,
+				moConfiguration.getScopeManagedObjectName(), "MO");
+		this.recordReturn(this.rawWorkMetaData,
+				this.rawWorkMetaData.getScopeManagedObjectMetaData("MO"),
+				rawWorkMo);
 		this.record_singleInstance_getRawManagedObjectMetaData(rawWorkMo,
 				rawWorkMoInstance, rawMo);
 		this.recordReturn(rawMo, rawMo.getObjectType(), Integer.class);
-		this.recordReturn(rawWorkMoInstance, rawWorkMoInstance
-				.getRawManagedObjectMetaData(), rawMo);
+		this.recordReturn(rawWorkMoInstance,
+				rawWorkMoInstance.getRawManagedObjectMetaData(), rawMo);
 		this.recordReturn(rawMo, rawMo.getManagedObjectName(),
 				"MANAGED_OBJECT_SOURCE");
 		this.record_taskIssue("Managed object MO is incompatible (require="
@@ -622,18 +621,16 @@ public class RawTaskMetaDataTest<W extends Work, D extends Enum<D>, F extends En
 
 		// Record
 		this.record_taskNameFactoryTeam();
-		this.recordReturn(this.configuration, this.configuration
-				.getObjectConfiguration(),
+		this.recordReturn(this.configuration,
+				this.configuration.getObjectConfiguration(),
 				new TaskObjectConfiguration[] { moConfiguration });
 		this.recordReturn(moConfiguration, moConfiguration.getObjectType(),
 				Object.class);
-		this
-				.recordReturn(moConfiguration, moConfiguration.isParameter(),
-						false);
-		this.recordReturn(moConfiguration, moConfiguration
-				.getScopeManagedObjectName(), "MO");
-		this.recordReturn(this.rawWorkMetaData, this.rawWorkMetaData
-				.getScopeManagedObjectMetaData("MO"), rawMo);
+		this.recordReturn(moConfiguration, moConfiguration.isParameter(), false);
+		this.recordReturn(moConfiguration,
+				moConfiguration.getScopeManagedObjectName(), "MO");
+		this.recordReturn(this.rawWorkMetaData,
+				this.rawWorkMetaData.getScopeManagedObjectMetaData("MO"), rawMo);
 		this.record_singleInstance_getRawManagedObjectMetaData(rawMo,
 				rawMoInstance, mo);
 		this.recordReturn(mo, mo.getObjectType(), Connection.class);
@@ -699,18 +696,17 @@ public class RawTaskMetaDataTest<W extends Work, D extends Enum<D>, F extends En
 
 		// Record
 		this.record_taskNameFactoryTeam();
-		this.recordReturn(this.configuration, this.configuration
-				.getObjectConfiguration(),
+		this.recordReturn(this.configuration,
+				this.configuration.getObjectConfiguration(),
 				new TaskObjectConfiguration[] { moConfiguration });
 		this.recordReturn(moConfiguration, moConfiguration.getObjectType(),
 				Object.class);
-		this
-				.recordReturn(moConfiguration, moConfiguration.isParameter(),
-						false);
-		this.recordReturn(moConfiguration, moConfiguration
-				.getScopeManagedObjectName(), "MO");
-		this.recordReturn(this.rawWorkMetaData, this.rawWorkMetaData
-				.getScopeManagedObjectMetaData("MO"), rawWorkMo);
+		this.recordReturn(moConfiguration, moConfiguration.isParameter(), false);
+		this.recordReturn(moConfiguration,
+				moConfiguration.getScopeManagedObjectName(), "MO");
+		this.recordReturn(this.rawWorkMetaData,
+				this.rawWorkMetaData.getScopeManagedObjectMetaData("MO"),
+				rawWorkMo);
 		this.record_singleInstance_getRawManagedObjectMetaData(rawWorkMo,
 				rawWorkMoInstance, workMo);
 		this.recordReturn(workMo, workMo.getObjectType(), Connection.class);
@@ -776,18 +772,17 @@ public class RawTaskMetaDataTest<W extends Work, D extends Enum<D>, F extends En
 
 		// Record
 		this.record_taskNameFactoryTeam();
-		this.recordReturn(this.configuration, this.configuration
-				.getObjectConfiguration(),
+		this.recordReturn(this.configuration,
+				this.configuration.getObjectConfiguration(),
 				new TaskObjectConfiguration[] { moConfiguration });
 		this.recordReturn(moConfiguration, moConfiguration.getObjectType(),
 				Object.class);
-		this
-				.recordReturn(moConfiguration, moConfiguration.isParameter(),
-						false);
-		this.recordReturn(moConfiguration, moConfiguration
-				.getScopeManagedObjectName(), "MO");
-		this.recordReturn(this.rawWorkMetaData, this.rawWorkMetaData
-				.getScopeManagedObjectMetaData("MO"), rawMoA);
+		this.recordReturn(moConfiguration, moConfiguration.isParameter(), false);
+		this.recordReturn(moConfiguration,
+				moConfiguration.getScopeManagedObjectName(), "MO");
+		this.recordReturn(this.rawWorkMetaData,
+				this.rawWorkMetaData.getScopeManagedObjectMetaData("MO"),
+				rawMoA);
 		this.record_singleInstance_getRawManagedObjectMetaData(rawMoA,
 				rawMoAInstance, moA);
 		this.recordReturn(moA, moA.getObjectType(), Connection.class);
@@ -823,14 +818,14 @@ public class RawTaskMetaDataTest<W extends Work, D extends Enum<D>, F extends En
 		// Record no administrator name
 		this.record_taskNameFactoryTeam();
 		this.record_NoManagedObjects();
-		this.recordReturn(this.configuration, this.configuration
-				.getPreTaskAdministratorDutyConfiguration(),
+		this.recordReturn(this.configuration,
+				this.configuration.getPreTaskAdministratorDutyConfiguration(),
 				new TaskDutyConfiguration[] { dutyConfiguration });
-		this.recordReturn(dutyConfiguration, dutyConfiguration
-				.getScopeAdministratorName(), null);
+		this.recordReturn(dutyConfiguration,
+				dutyConfiguration.getScopeAdministratorName(), null);
 		this.record_taskIssue("No administrator name for pre-task at index 0");
-		this.recordReturn(this.configuration, this.configuration
-				.getPostTaskAdministratorDutyConfiguration(),
+		this.recordReturn(this.configuration,
+				this.configuration.getPostTaskAdministratorDutyConfiguration(),
 				new TaskDutyConfiguration[0]);
 
 		// Attempt to construct task meta-data
@@ -854,16 +849,17 @@ public class RawTaskMetaDataTest<W extends Work, D extends Enum<D>, F extends En
 		// Record unknown administrator
 		this.record_taskNameFactoryTeam();
 		this.record_NoManagedObjects();
-		this.recordReturn(this.configuration, this.configuration
-				.getPreTaskAdministratorDutyConfiguration(),
+		this.recordReturn(this.configuration,
+				this.configuration.getPreTaskAdministratorDutyConfiguration(),
 				new TaskDutyConfiguration[] { dutyConfiguration });
-		this.recordReturn(dutyConfiguration, dutyConfiguration
-				.getScopeAdministratorName(), "ADMIN");
-		this.recordReturn(this.rawWorkMetaData, this.rawWorkMetaData
-				.getScopeAdministratorMetaData("ADMIN"), null);
+		this.recordReturn(dutyConfiguration,
+				dutyConfiguration.getScopeAdministratorName(), "ADMIN");
+		this.recordReturn(this.rawWorkMetaData,
+				this.rawWorkMetaData.getScopeAdministratorMetaData("ADMIN"),
+				null);
 		this.record_taskIssue("Can not find scope administrator 'ADMIN'");
-		this.recordReturn(this.configuration, this.configuration
-				.getPostTaskAdministratorDutyConfiguration(),
+		this.recordReturn(this.configuration,
+				this.configuration.getPostTaskAdministratorDutyConfiguration(),
 				new TaskDutyConfiguration[0]);
 
 		// Attempt to construct task meta-data
@@ -891,13 +887,14 @@ public class RawTaskMetaDataTest<W extends Work, D extends Enum<D>, F extends En
 		// Record no duty key
 		this.record_taskNameFactoryTeam();
 		this.record_NoManagedObjects();
-		this.recordReturn(this.configuration, this.configuration
-				.getPreTaskAdministratorDutyConfiguration(),
+		this.recordReturn(this.configuration,
+				this.configuration.getPreTaskAdministratorDutyConfiguration(),
 				new TaskDutyConfiguration[] { dutyConfiguration });
-		this.recordReturn(dutyConfiguration, dutyConfiguration
-				.getScopeAdministratorName(), "ADMIN");
-		this.recordReturn(this.rawWorkMetaData, this.rawWorkMetaData
-				.getScopeAdministratorMetaData("ADMIN"), rawAdmin);
+		this.recordReturn(dutyConfiguration,
+				dutyConfiguration.getScopeAdministratorName(), "ADMIN");
+		this.recordReturn(this.rawWorkMetaData,
+				this.rawWorkMetaData.getScopeAdministratorMetaData("ADMIN"),
+				rawAdmin);
 		this.recordReturn(rawAdmin, rawAdmin.getAdministratorIndex(),
 				adminIndex);
 		this.recordReturn(dutyConfiguration, dutyConfiguration.getDutyKey(),
@@ -905,8 +902,8 @@ public class RawTaskMetaDataTest<W extends Work, D extends Enum<D>, F extends En
 		this.recordReturn(dutyConfiguration, dutyConfiguration.getDutyName(),
 				null);
 		this.record_taskIssue("No duty name/key for pre-task at index 0");
-		this.recordReturn(this.configuration, this.configuration
-				.getPostTaskAdministratorDutyConfiguration(),
+		this.recordReturn(this.configuration,
+				this.configuration.getPostTaskAdministratorDutyConfiguration(),
 				new TaskDutyConfiguration[0]);
 
 		// Attempt to construct task meta-data
@@ -942,26 +939,27 @@ public class RawTaskMetaDataTest<W extends Work, D extends Enum<D>, F extends En
 		// Record construct task duty association
 		this.record_taskNameFactoryTeam();
 		this.record_NoManagedObjects();
-		this.recordReturn(this.configuration, this.configuration
-				.getPreTaskAdministratorDutyConfiguration(),
+		this.recordReturn(this.configuration,
+				this.configuration.getPreTaskAdministratorDutyConfiguration(),
 				new TaskDutyConfiguration[] { dutyConfiguration });
-		this.recordReturn(dutyConfiguration, dutyConfiguration
-				.getScopeAdministratorName(), "ADMIN");
-		this.recordReturn(this.rawWorkMetaData, this.rawWorkMetaData
-				.getScopeAdministratorMetaData("ADMIN"), rawAdmin);
+		this.recordReturn(dutyConfiguration,
+				dutyConfiguration.getScopeAdministratorName(), "ADMIN");
+		this.recordReturn(this.rawWorkMetaData,
+				this.rawWorkMetaData.getScopeAdministratorMetaData("ADMIN"),
+				rawAdmin);
 		this.recordReturn(rawAdmin, rawAdmin.getAdministratorIndex(),
 				adminIndex);
 		this.recordReturn(dutyConfiguration, dutyConfiguration.getDutyKey(),
 				DutyKey.KEY);
 		this.recordReturn(rawAdmin, rawAdmin.getDutyKey(DutyKey.KEY), dutyKey);
-		this.recordReturn(rawAdmin, rawAdmin
-				.getAdministeredRawBoundManagedObjects(),
+		this.recordReturn(rawAdmin,
+				rawAdmin.getAdministeredRawBoundManagedObjects(),
 				new RawBoundManagedObjectMetaData[] { rawMo });
 		LoadDependencies moLinked = new LoadDependencies(rawMo, moIndex,
 				rawMoInstance); // no dependencies
 		this.record_loadDependencies(moLinked);
-		this.recordReturn(this.configuration, this.configuration
-				.getPostTaskAdministratorDutyConfiguration(),
+		this.recordReturn(this.configuration,
+				this.configuration.getPostTaskAdministratorDutyConfiguration(),
 				new TaskDutyConfiguration[0]);
 		this.record_dependencySortingForCoordination(moLinked);
 
@@ -973,12 +971,12 @@ public class RawTaskMetaDataTest<W extends Work, D extends Enum<D>, F extends En
 		this.verifyMockObjects();
 
 		// Ensure have duty
-		assertEquals("Should have duty", 1, taskMetaData
-				.getPreAdministrationMetaData().length);
+		assertEquals("Should have duty", 1,
+				taskMetaData.getPreAdministrationMetaData().length);
 		TaskDutyAssociation<?> taskDuty = taskMetaData
 				.getPreAdministrationMetaData()[0];
-		assertEquals("Incorrect administrator index", adminIndex, taskDuty
-				.getAdministratorIndex());
+		assertEquals("Incorrect administrator index", adminIndex,
+				taskDuty.getAdministratorIndex());
 		assertEquals("Incorrect duty key", DutyKey.KEY, taskDuty.getDutyKey()
 				.getKey());
 
@@ -1019,16 +1017,17 @@ public class RawTaskMetaDataTest<W extends Work, D extends Enum<D>, F extends En
 		// Record construct task duty association
 		this.record_taskNameFactoryTeam();
 		this.record_NoManagedObjects();
-		this.recordReturn(this.configuration, this.configuration
-				.getPreTaskAdministratorDutyConfiguration(),
+		this.recordReturn(this.configuration,
+				this.configuration.getPreTaskAdministratorDutyConfiguration(),
 				new TaskDutyConfiguration[0]);
-		this.recordReturn(this.configuration, this.configuration
-				.getPostTaskAdministratorDutyConfiguration(),
+		this.recordReturn(this.configuration,
+				this.configuration.getPostTaskAdministratorDutyConfiguration(),
 				new TaskDutyConfiguration[] { dutyConfiguration });
-		this.recordReturn(dutyConfiguration, dutyConfiguration
-				.getScopeAdministratorName(), "ADMIN");
-		this.recordReturn(this.rawWorkMetaData, this.rawWorkMetaData
-				.getScopeAdministratorMetaData("ADMIN"), rawAdmin);
+		this.recordReturn(dutyConfiguration,
+				dutyConfiguration.getScopeAdministratorName(), "ADMIN");
+		this.recordReturn(this.rawWorkMetaData,
+				this.rawWorkMetaData.getScopeAdministratorMetaData("ADMIN"),
+				rawAdmin);
 		this.recordReturn(rawAdmin, rawAdmin.getAdministratorIndex(),
 				adminIndex);
 		this.recordReturn(dutyConfiguration, dutyConfiguration.getDutyKey(),
@@ -1037,17 +1036,15 @@ public class RawTaskMetaDataTest<W extends Work, D extends Enum<D>, F extends En
 				DutyKey.KEY.name());
 		this.recordReturn(rawAdmin, rawAdmin.getDutyKey(DutyKey.KEY.name()),
 				dutyKey);
-		this.recordReturn(rawAdmin, rawAdmin
-				.getAdministeredRawBoundManagedObjects(),
+		this.recordReturn(rawAdmin,
+				rawAdmin.getAdministeredRawBoundManagedObjects(),
 				new RawBoundManagedObjectMetaData[] { rawMo });
 		LoadDependencies dependencyLinked = new LoadDependencies(rawDependency,
 				dependencyIndex, rawDependencyInstance);
 		LoadDependencies moLinked = new LoadDependencies(rawMo, moIndex,
 				rawMoInstance, dependencyLinked);
 		this.record_loadDependencies(moLinked);
-		this
-				.record_dependencySortingForCoordination(moLinked,
-						dependencyLinked);
+		this.record_dependencySortingForCoordination(moLinked, dependencyLinked);
 
 		// Attempt to construct task meta-data
 		this.replayMockObjects();
@@ -1057,12 +1054,12 @@ public class RawTaskMetaDataTest<W extends Work, D extends Enum<D>, F extends En
 		this.verifyMockObjects();
 
 		// Ensure have duty
-		assertEquals("Should have post task duty", 1, taskMetaData
-				.getPostAdministrationMetaData().length);
+		assertEquals("Should have post task duty", 1,
+				taskMetaData.getPostAdministrationMetaData().length);
 		TaskDutyAssociation<?> taskDuty = taskMetaData
 				.getPostAdministrationMetaData()[0];
-		assertEquals("Incorrect administrator index", adminIndex, taskDuty
-				.getAdministratorIndex());
+		assertEquals("Incorrect administrator index", adminIndex,
+				taskDuty.getAdministratorIndex());
 		assertEquals("Incorrect duty key", DutyKey.KEY, taskDuty.getDutyKey()
 				.getKey());
 
@@ -1091,8 +1088,8 @@ public class RawTaskMetaDataTest<W extends Work, D extends Enum<D>, F extends En
 		this.record_NoManagedObjects();
 		this.record_NoAdministration();
 		this.record_createWorkSpecificTaskMetaDataLocator();
-		this.recordReturn(this.configuration, this.configuration
-				.getFlowConfiguration(),
+		this.recordReturn(this.configuration,
+				this.configuration.getFlowConfiguration(),
 				new TaskFlowConfiguration[] { flowConfiguration });
 		this.recordReturn(flowConfiguration,
 				flowConfiguration.getInitialTask(), null);
@@ -1121,8 +1118,8 @@ public class RawTaskMetaDataTest<W extends Work, D extends Enum<D>, F extends En
 		this.record_NoManagedObjects();
 		this.record_NoAdministration();
 		this.record_createWorkSpecificTaskMetaDataLocator();
-		this.recordReturn(this.configuration, this.configuration
-				.getFlowConfiguration(),
+		this.recordReturn(this.configuration,
+				this.configuration.getFlowConfiguration(),
 				new TaskFlowConfiguration[] { flowConfiguration });
 		this.recordReturn(flowConfiguration,
 				flowConfiguration.getInitialTask(), taskNodeReference);
@@ -1156,8 +1153,8 @@ public class RawTaskMetaDataTest<W extends Work, D extends Enum<D>, F extends En
 		this.record_NoManagedObjects();
 		this.record_NoAdministration();
 		this.record_createWorkSpecificTaskMetaDataLocator();
-		this.recordReturn(this.configuration, this.configuration
-				.getFlowConfiguration(),
+		this.recordReturn(this.configuration,
+				this.configuration.getFlowConfiguration(),
 				new TaskFlowConfiguration[] { flowConfiguration });
 		this.recordReturn(flowConfiguration,
 				flowConfiguration.getInitialTask(), taskNodeReference);
@@ -1167,8 +1164,7 @@ public class RawTaskMetaDataTest<W extends Work, D extends Enum<D>, F extends En
 				"IGNORED TASK NAME");
 		this.recordReturn(this.taskLocator, this.taskLocator.getTaskMetaData(
 				"UNKNOWN WORK", "IGNORED TASK NAME"), null);
-		this
-				.record_taskIssue("Can not find task meta-data (work=UNKNOWN WORK, task=IGNORED TASK NAME) for flow index 0");
+		this.record_taskIssue("Can not find task meta-data (work=UNKNOWN WORK, task=IGNORED TASK NAME) for flow index 0");
 		this.record_NoNextTask();
 		this.record_NoEscalations();
 
@@ -1193,8 +1189,8 @@ public class RawTaskMetaDataTest<W extends Work, D extends Enum<D>, F extends En
 		this.record_NoManagedObjects();
 		this.record_NoAdministration();
 		this.record_createWorkSpecificTaskMetaDataLocator();
-		this.recordReturn(this.configuration, this.configuration
-				.getFlowConfiguration(),
+		this.recordReturn(this.configuration,
+				this.configuration.getFlowConfiguration(),
 				new TaskFlowConfiguration[] { flowConfiguration });
 		this.recordReturn(flowConfiguration,
 				flowConfiguration.getInitialTask(), taskNodeReference);
@@ -1202,14 +1198,13 @@ public class RawTaskMetaDataTest<W extends Work, D extends Enum<D>, F extends En
 				null); // same work
 		this.recordReturn(taskNodeReference, taskNodeReference.getTaskName(),
 				"TASK");
-		this.recordReturn(this.taskLocator, this.taskLocator
-				.getTaskMetaData("TASK"), null);
-		this.recordReturn(this.taskLocator, this.taskLocator
-				.getDefaultWorkMetaData(), this.workMetaData);
+		this.recordReturn(this.taskLocator,
+				this.taskLocator.getTaskMetaData("TASK"), null);
+		this.recordReturn(this.taskLocator,
+				this.taskLocator.getDefaultWorkMetaData(), this.workMetaData);
 		this.recordReturn(this.workMetaData, this.workMetaData.getWorkName(),
 				"WORK");
-		this
-				.record_taskIssue("Can not find task meta-data (work=WORK, task=TASK) for flow index 0");
+		this.record_taskIssue("Can not find task meta-data (work=WORK, task=TASK) for flow index 0");
 		this.record_NoNextTask();
 		this.record_NoEscalations();
 
@@ -1236,8 +1231,8 @@ public class RawTaskMetaDataTest<W extends Work, D extends Enum<D>, F extends En
 		this.record_NoManagedObjects();
 		this.record_NoAdministration();
 		this.record_createWorkSpecificTaskMetaDataLocator();
-		this.recordReturn(this.configuration, this.configuration
-				.getFlowConfiguration(),
+		this.recordReturn(this.configuration,
+				this.configuration.getFlowConfiguration(),
 				new TaskFlowConfiguration[] { flowConfiguration });
 		this.recordReturn(flowConfiguration,
 				flowConfiguration.getInitialTask(), taskNodeReference);
@@ -1245,18 +1240,18 @@ public class RawTaskMetaDataTest<W extends Work, D extends Enum<D>, F extends En
 				"WORK");
 		this.recordReturn(taskNodeReference, taskNodeReference.getTaskName(),
 				"TASK");
-		this.recordReturn(this.taskLocator, this.taskLocator.getTaskMetaData(
-				"WORK", "TASK"), flowTaskMetaData);
-		this.recordReturn(taskNodeReference, taskNodeReference
-				.getArgumentType(), Connection.class);
+		this.recordReturn(this.taskLocator,
+				this.taskLocator.getTaskMetaData("WORK", "TASK"),
+				flowTaskMetaData);
+		this.recordReturn(taskNodeReference,
+				taskNodeReference.getArgumentType(), Connection.class);
 		this.recordReturn(flowTaskMetaData,
 				flowTaskMetaData.getParameterType(), Integer.class);
-		this
-				.record_taskIssue("Argument is not compatible with task parameter (argument="
-						+ Connection.class.getName()
-						+ ", parameter="
-						+ Integer.class.getName()
-						+ ", work=WORK, task=TASK) for flow index 0");
+		this.record_taskIssue("Argument is not compatible with task parameter (argument="
+				+ Connection.class.getName()
+				+ ", parameter="
+				+ Integer.class.getName()
+				+ ", work=WORK, task=TASK) for flow index 0");
 		this.record_NoNextTask();
 		this.record_NoEscalations();
 
@@ -1283,8 +1278,8 @@ public class RawTaskMetaDataTest<W extends Work, D extends Enum<D>, F extends En
 		this.record_NoManagedObjects();
 		this.record_NoAdministration();
 		this.record_createWorkSpecificTaskMetaDataLocator();
-		this.recordReturn(this.configuration, this.configuration
-				.getFlowConfiguration(),
+		this.recordReturn(this.configuration,
+				this.configuration.getFlowConfiguration(),
 				new TaskFlowConfiguration[] { flowConfiguration });
 		this.recordReturn(flowConfiguration,
 				flowConfiguration.getInitialTask(), taskNodeReference);
@@ -1292,16 +1287,15 @@ public class RawTaskMetaDataTest<W extends Work, D extends Enum<D>, F extends En
 				null); // same work
 		this.recordReturn(taskNodeReference, taskNodeReference.getTaskName(),
 				"TASK");
-		this.recordReturn(this.taskLocator, this.taskLocator
-				.getTaskMetaData("TASK"), flowTaskMetaData);
-		this.recordReturn(taskNodeReference, taskNodeReference
-				.getArgumentType(), Connection.class);
+		this.recordReturn(this.taskLocator,
+				this.taskLocator.getTaskMetaData("TASK"), flowTaskMetaData);
+		this.recordReturn(taskNodeReference,
+				taskNodeReference.getArgumentType(), Connection.class);
 		this.recordReturn(flowTaskMetaData,
 				flowTaskMetaData.getParameterType(), null);
-		this.recordReturn(flowConfiguration, flowConfiguration
-				.getInstigationStrategy(), null);
-		this
-				.record_taskIssue("No instigation strategy provided for flow index 0");
+		this.recordReturn(flowConfiguration,
+				flowConfiguration.getInstigationStrategy(), null);
+		this.record_taskIssue("No instigation strategy provided for flow index 0");
 		this.record_NoNextTask();
 		this.record_NoEscalations();
 
@@ -1351,8 +1345,8 @@ public class RawTaskMetaDataTest<W extends Work, D extends Enum<D>, F extends En
 		this.record_NoManagedObjects();
 		this.record_NoAdministration();
 		this.record_createWorkSpecificTaskMetaDataLocator();
-		this.recordReturn(this.configuration, this.configuration
-				.getFlowConfiguration(),
+		this.recordReturn(this.configuration,
+				this.configuration.getFlowConfiguration(),
 				new TaskFlowConfiguration[] { flowConfiguration });
 		this.recordReturn(flowConfiguration,
 				flowConfiguration.getInitialTask(), taskNodeReference);
@@ -1360,14 +1354,14 @@ public class RawTaskMetaDataTest<W extends Work, D extends Enum<D>, F extends En
 				null); // same work
 		this.recordReturn(taskNodeReference, taskNodeReference.getTaskName(),
 				"TASK");
-		this.recordReturn(this.taskLocator, this.taskLocator
-				.getTaskMetaData("TASK"), flowTaskMetaData);
-		this.recordReturn(taskNodeReference, taskNodeReference
-				.getArgumentType(), Connection.class);
+		this.recordReturn(this.taskLocator,
+				this.taskLocator.getTaskMetaData("TASK"), flowTaskMetaData);
+		this.recordReturn(taskNodeReference,
+				taskNodeReference.getArgumentType(), Connection.class);
 		this.recordReturn(flowTaskMetaData,
 				flowTaskMetaData.getParameterType(), Connection.class);
-		this.recordReturn(flowConfiguration, flowConfiguration
-				.getInstigationStrategy(), instigationStrategy);
+		this.recordReturn(flowConfiguration,
+				flowConfiguration.getInstigationStrategy(), instigationStrategy);
 		if (instigationStrategy == FlowInstigationStrategyEnum.ASYNCHRONOUS) {
 			this.recordReturn(this.assetManagerFactory,
 					this.assetManagerFactory.createAssetManager(AssetType.TASK,
@@ -1393,12 +1387,12 @@ public class RawTaskMetaDataTest<W extends Work, D extends Enum<D>, F extends En
 		// Ensure correct flow manager
 		if (instigationStrategy == FlowInstigationStrategyEnum.ASYNCHRONOUS) {
 			// Asynchronous so should have flow manager
-			assertEquals("Incorrect flow manager", assetManager, flowMetaData
-					.getFlowManager());
+			assertEquals("Incorrect flow manager", assetManager,
+					flowMetaData.getFlowManager());
 		} else {
 			// Not asynchronous so not require flow manager
-			assertNull("Should not require flow manager", flowMetaData
-					.getFlowManager());
+			assertNull("Should not require flow manager",
+					flowMetaData.getFlowManager());
 		}
 	}
 
@@ -1416,8 +1410,8 @@ public class RawTaskMetaDataTest<W extends Work, D extends Enum<D>, F extends En
 		this.record_NoAdministration();
 		this.record_createWorkSpecificTaskMetaDataLocator();
 		this.record_NoFlows();
-		this.recordReturn(this.configuration, this.configuration
-				.getNextTaskInFlow(), taskNodeReference);
+		this.recordReturn(this.configuration,
+				this.configuration.getNextTaskInFlow(), taskNodeReference);
 		this.recordReturn(taskNodeReference, taskNodeReference.getWorkName(),
 				null);
 		this.recordReturn(taskNodeReference, taskNodeReference.getTaskName(),
@@ -1447,24 +1441,24 @@ public class RawTaskMetaDataTest<W extends Work, D extends Enum<D>, F extends En
 		this.record_NoAdministration();
 		this.record_createWorkSpecificTaskMetaDataLocator();
 		this.record_NoFlows();
-		this.recordReturn(this.configuration, this.configuration
-				.getNextTaskInFlow(), taskNodeReference);
+		this.recordReturn(this.configuration,
+				this.configuration.getNextTaskInFlow(), taskNodeReference);
 		this.recordReturn(taskNodeReference, taskNodeReference.getWorkName(),
 				"ANOTHER_WORK");
 		this.recordReturn(taskNodeReference, taskNodeReference.getTaskName(),
 				"NEXT_TASK");
-		this.recordReturn(this.taskLocator, this.taskLocator.getTaskMetaData(
-				"ANOTHER_WORK", "NEXT_TASK"), nextTaskMetaData);
-		this.recordReturn(taskNodeReference, taskNodeReference
-				.getArgumentType(), Integer.class);
+		this.recordReturn(this.taskLocator,
+				this.taskLocator.getTaskMetaData("ANOTHER_WORK", "NEXT_TASK"),
+				nextTaskMetaData);
+		this.recordReturn(taskNodeReference,
+				taskNodeReference.getArgumentType(), Integer.class);
 		this.recordReturn(nextTaskMetaData,
 				nextTaskMetaData.getParameterType(), Connection.class);
-		this
-				.record_taskIssue("Argument is not compatible with task parameter (argument="
-						+ Integer.class.getName()
-						+ ", parameter="
-						+ Connection.class.getName()
-						+ ", work=ANOTHER_WORK, task=NEXT_TASK) for next task");
+		this.record_taskIssue("Argument is not compatible with task parameter (argument="
+				+ Integer.class.getName()
+				+ ", parameter="
+				+ Connection.class.getName()
+				+ ", work=ANOTHER_WORK, task=NEXT_TASK) for next task");
 		this.record_NoEscalations();
 
 		// Fully construct task meta-data
@@ -1489,16 +1483,17 @@ public class RawTaskMetaDataTest<W extends Work, D extends Enum<D>, F extends En
 		this.record_NoAdministration();
 		this.record_createWorkSpecificTaskMetaDataLocator();
 		this.record_NoFlows();
-		this.recordReturn(this.configuration, this.configuration
-				.getNextTaskInFlow(), taskNodeReference);
+		this.recordReturn(this.configuration,
+				this.configuration.getNextTaskInFlow(), taskNodeReference);
 		this.recordReturn(taskNodeReference, taskNodeReference.getWorkName(),
 				"ANOTHER_WORK");
 		this.recordReturn(taskNodeReference, taskNodeReference.getTaskName(),
 				"NEXT_TASK");
-		this.recordReturn(this.taskLocator, this.taskLocator.getTaskMetaData(
-				"ANOTHER_WORK", "NEXT_TASK"), nextTaskMetaData);
-		this.recordReturn(taskNodeReference, taskNodeReference
-				.getArgumentType(), null);
+		this.recordReturn(this.taskLocator,
+				this.taskLocator.getTaskMetaData("ANOTHER_WORK", "NEXT_TASK"),
+				nextTaskMetaData);
+		this.recordReturn(taskNodeReference,
+				taskNodeReference.getArgumentType(), null);
 		this.recordReturn(nextTaskMetaData,
 				nextTaskMetaData.getParameterType(), null);
 		this.record_NoEscalations();
@@ -1531,11 +1526,11 @@ public class RawTaskMetaDataTest<W extends Work, D extends Enum<D>, F extends En
 		this.record_createWorkSpecificTaskMetaDataLocator();
 		this.record_NoFlows();
 		this.record_NoNextTask();
-		this.recordReturn(this.configuration, this.configuration
-				.getEscalations(),
+		this.recordReturn(this.configuration,
+				this.configuration.getEscalations(),
 				new TaskEscalationConfiguration[] { escalationConfiguration });
-		this.recordReturn(escalationConfiguration, escalationConfiguration
-				.getTypeOfCause(), null);
+		this.recordReturn(escalationConfiguration,
+				escalationConfiguration.getTypeOfCause(), null);
 		this.record_taskIssue("No escalation type for escalation index 0");
 
 		// Fully construct task meta-data
@@ -1559,13 +1554,13 @@ public class RawTaskMetaDataTest<W extends Work, D extends Enum<D>, F extends En
 		this.record_createWorkSpecificTaskMetaDataLocator();
 		this.record_NoFlows();
 		this.record_NoNextTask();
-		this.recordReturn(this.configuration, this.configuration
-				.getEscalations(),
+		this.recordReturn(this.configuration,
+				this.configuration.getEscalations(),
 				new TaskEscalationConfiguration[] { escalationConfiguration });
-		this.recordReturn(escalationConfiguration, escalationConfiguration
-				.getTypeOfCause(), IOException.class);
-		this.recordReturn(escalationConfiguration, escalationConfiguration
-				.getTaskNodeReference(), null);
+		this.recordReturn(escalationConfiguration,
+				escalationConfiguration.getTypeOfCause(), IOException.class);
+		this.recordReturn(escalationConfiguration,
+				escalationConfiguration.getTaskNodeReference(), null);
 		this.record_taskIssue("No task referenced for escalation index 0");
 
 		// Fully construct task meta-data
@@ -1591,13 +1586,14 @@ public class RawTaskMetaDataTest<W extends Work, D extends Enum<D>, F extends En
 		this.record_createWorkSpecificTaskMetaDataLocator();
 		this.record_NoFlows();
 		this.record_NoNextTask();
-		this.recordReturn(this.configuration, this.configuration
-				.getEscalations(),
+		this.recordReturn(this.configuration,
+				this.configuration.getEscalations(),
 				new TaskEscalationConfiguration[] { escalationConfiguration });
-		this.recordReturn(escalationConfiguration, escalationConfiguration
-				.getTypeOfCause(), IOException.class);
-		this.recordReturn(escalationConfiguration, escalationConfiguration
-				.getTaskNodeReference(), taskNodeReference);
+		this.recordReturn(escalationConfiguration,
+				escalationConfiguration.getTypeOfCause(), IOException.class);
+		this.recordReturn(escalationConfiguration,
+				escalationConfiguration.getTaskNodeReference(),
+				taskNodeReference);
 		this.recordReturn(taskNodeReference, taskNodeReference.getWorkName(),
 				null); // same work
 		this.recordReturn(taskNodeReference, taskNodeReference.getTaskName(),
@@ -1629,29 +1625,30 @@ public class RawTaskMetaDataTest<W extends Work, D extends Enum<D>, F extends En
 		this.record_createWorkSpecificTaskMetaDataLocator();
 		this.record_NoFlows();
 		this.record_NoNextTask();
-		this.recordReturn(this.configuration, this.configuration
-				.getEscalations(),
+		this.recordReturn(this.configuration,
+				this.configuration.getEscalations(),
 				new TaskEscalationConfiguration[] { escalationConfiguration });
-		this.recordReturn(escalationConfiguration, escalationConfiguration
-				.getTypeOfCause(), IOException.class);
-		this.recordReturn(escalationConfiguration, escalationConfiguration
-				.getTaskNodeReference(), taskNodeReference);
+		this.recordReturn(escalationConfiguration,
+				escalationConfiguration.getTypeOfCause(), IOException.class);
+		this.recordReturn(escalationConfiguration,
+				escalationConfiguration.getTaskNodeReference(),
+				taskNodeReference);
 		this.recordReturn(taskNodeReference, taskNodeReference.getWorkName(),
 				"WORK");
 		this.recordReturn(taskNodeReference, taskNodeReference.getTaskName(),
 				"ESCALATION_HANDLER");
-		this.recordReturn(this.taskLocator, this.taskLocator.getTaskMetaData(
-				"WORK", "ESCALATION_HANDLER"), escalationTaskMetaData);
-		this.recordReturn(taskNodeReference, taskNodeReference
-				.getArgumentType(), NullPointerException.class);
-		this.recordReturn(escalationTaskMetaData, escalationTaskMetaData
-				.getParameterType(), Integer.class);
-		this
-				.record_taskIssue("Argument is not compatible with task parameter (argument="
-						+ NullPointerException.class.getName()
-						+ ", parameter="
-						+ Integer.class.getName()
-						+ ", work=WORK, task=ESCALATION_HANDLER) for escalation index 0");
+		this.recordReturn(this.taskLocator,
+				this.taskLocator.getTaskMetaData("WORK", "ESCALATION_HANDLER"),
+				escalationTaskMetaData);
+		this.recordReturn(taskNodeReference,
+				taskNodeReference.getArgumentType(), NullPointerException.class);
+		this.recordReturn(escalationTaskMetaData,
+				escalationTaskMetaData.getParameterType(), Integer.class);
+		this.record_taskIssue("Argument is not compatible with task parameter (argument="
+				+ NullPointerException.class.getName()
+				+ ", parameter="
+				+ Integer.class.getName()
+				+ ", work=WORK, task=ESCALATION_HANDLER) for escalation index 0");
 
 		// Fully construct task meta-data
 		this.replayMockObjects();
@@ -1678,23 +1675,26 @@ public class RawTaskMetaDataTest<W extends Work, D extends Enum<D>, F extends En
 		this.record_createWorkSpecificTaskMetaDataLocator();
 		this.record_NoFlows();
 		this.record_NoNextTask();
-		this.recordReturn(this.configuration, this.configuration
-				.getEscalations(),
+		this.recordReturn(this.configuration,
+				this.configuration.getEscalations(),
 				new TaskEscalationConfiguration[] { escalationConfiguration });
-		this.recordReturn(escalationConfiguration, escalationConfiguration
-				.getTypeOfCause(), IOException.class);
-		this.recordReturn(escalationConfiguration, escalationConfiguration
-				.getTaskNodeReference(), taskNodeReference);
+		this.recordReturn(escalationConfiguration,
+				escalationConfiguration.getTypeOfCause(), IOException.class);
+		this.recordReturn(escalationConfiguration,
+				escalationConfiguration.getTaskNodeReference(),
+				taskNodeReference);
 		this.recordReturn(taskNodeReference, taskNodeReference.getWorkName(),
 				null); // same work
 		this.recordReturn(taskNodeReference, taskNodeReference.getTaskName(),
 				"ESCALATION_HANDLER");
-		this.recordReturn(this.taskLocator, this.taskLocator
-				.getTaskMetaData("ESCALATION_HANDLER"), escalationTaskMetaData);
-		this.recordReturn(taskNodeReference, taskNodeReference
-				.getArgumentType(), NullPointerException.class);
-		this.recordReturn(escalationTaskMetaData, escalationTaskMetaData
-				.getParameterType(), RuntimeException.class);
+		this.recordReturn(this.taskLocator,
+				this.taskLocator.getTaskMetaData("ESCALATION_HANDLER"),
+				escalationTaskMetaData);
+		this.recordReturn(taskNodeReference,
+				taskNodeReference.getArgumentType(), NullPointerException.class);
+		this.recordReturn(escalationTaskMetaData,
+				escalationTaskMetaData.getParameterType(),
+				RuntimeException.class);
 
 		// Fully construct task meta-data
 		this.replayMockObjects();
@@ -1707,16 +1707,10 @@ public class RawTaskMetaDataTest<W extends Work, D extends Enum<D>, F extends En
 				.getEscalationProcedure();
 		EscalationFlow escalation = escalationProcedure
 				.getEscalation(new IOException("test"));
-		assertEquals("Incorrect type of cause", IOException.class, escalation
-				.getTypeOfCause());
-		FlowMetaData<?> flowMetaData = escalation.getFlowMetaData();
+		assertEquals("Incorrect type of cause", IOException.class,
+				escalation.getTypeOfCause());
 		assertEquals("Incorrect escalation task meta-data",
-				escalationTaskMetaData, flowMetaData.getInitialTaskMetaData());
-		assertEquals("Incorrect instigation strategy",
-				FlowInstigationStrategyEnum.PARALLEL, flowMetaData
-						.getInstigationStrategy());
-		assertNull("Should not have flow manager as always parallel",
-				flowMetaData.getFlowManager());
+				escalationTaskMetaData, escalation.getTaskMetaData());
 	}
 
 	/**
@@ -1726,37 +1720,39 @@ public class RawTaskMetaDataTest<W extends Work, D extends Enum<D>, F extends En
 	private void record_taskNameFactoryTeam() {
 		this.recordReturn(this.configuration, this.configuration.getTaskName(),
 				TASK_NAME);
-		this.recordReturn(this.configuration, this.configuration
-				.getTaskFactory(), this.taskFactory);
-		this.recordReturn(this.configuration, this.configuration
-				.getDifferentiator(), null);
-		this.recordReturn(this.configuration, this.configuration
-				.getOfficeTeamName(), "TEAM");
-		this.recordReturn(this.rawWorkMetaData, this.rawWorkMetaData
-				.getRawOfficeMetaData(), this.rawOfficeMetaData);
+		this.recordReturn(this.configuration,
+				this.configuration.getTaskFactory(), this.taskFactory);
+		this.recordReturn(this.configuration,
+				this.configuration.getDifferentiator(), null);
+		this.recordReturn(this.configuration,
+				this.configuration.getOfficeTeamName(), "TEAM");
+		this.recordReturn(this.rawWorkMetaData,
+				this.rawWorkMetaData.getRawOfficeMetaData(),
+				this.rawOfficeMetaData);
 		Map<String, Team> teams = new HashMap<String, Team>();
 		teams.put("TEAM", this.team);
-		this.recordReturn(this.rawOfficeMetaData, this.rawOfficeMetaData
-				.getTeams(), teams);
+		this.recordReturn(this.rawOfficeMetaData,
+				this.rawOfficeMetaData.getTeams(), teams);
 	}
 
 	/**
 	 * Records no {@link ManagedObject} instances.
 	 */
 	private void record_NoManagedObjects() {
-		this.recordReturn(this.configuration, this.configuration
-				.getObjectConfiguration(), new TaskObjectConfiguration[0]);
+		this.recordReturn(this.configuration,
+				this.configuration.getObjectConfiguration(),
+				new TaskObjectConfiguration[0]);
 	}
 
 	/**
 	 * Records no {@link Administrator} {@link Duty} instances for {@link Task}.
 	 */
 	private void record_NoAdministration() {
-		this.recordReturn(this.configuration, this.configuration
-				.getPreTaskAdministratorDutyConfiguration(),
+		this.recordReturn(this.configuration,
+				this.configuration.getPreTaskAdministratorDutyConfiguration(),
 				new TaskDutyConfiguration[0]);
-		this.recordReturn(this.configuration, this.configuration
-				.getPostTaskAdministratorDutyConfiguration(),
+		this.recordReturn(this.configuration,
+				this.configuration.getPostTaskAdministratorDutyConfiguration(),
 				new TaskDutyConfiguration[0]);
 	}
 
@@ -1771,12 +1767,11 @@ public class RawTaskMetaDataTest<W extends Work, D extends Enum<D>, F extends En
 	 * Records obtaining the {@link OfficeMetaDataLocator}.
 	 */
 	private void record_createWorkSpecificTaskMetaDataLocator() {
-		this
-				.recordReturn(
-						this.inputTaskMetaDataLocator,
-						this.inputTaskMetaDataLocator
-								.createWorkSpecificOfficeMetaDataLocator(this.workMetaData),
-						this.taskLocator);
+		this.recordReturn(
+				this.inputTaskMetaDataLocator,
+				this.inputTaskMetaDataLocator
+						.createWorkSpecificOfficeMetaDataLocator(this.workMetaData),
+				this.taskLocator);
 		this.recordReturn(this.workMetaData, this.workMetaData.getWorkName(),
 				DEFAULT_WORK_NAME);
 	}
@@ -1797,13 +1792,12 @@ public class RawTaskMetaDataTest<W extends Work, D extends Enum<D>, F extends En
 			RawBoundManagedObjectMetaData rawBoundMo,
 			RawBoundManagedObjectInstanceMetaData<?> rawBoundMoInstance,
 			RawManagedObjectMetaData<?, ?> rawMo) {
-		this
-				.recordReturn(
-						rawBoundMo,
-						rawBoundMo.getRawBoundManagedObjectInstanceMetaData(),
-						new RawBoundManagedObjectInstanceMetaData[] { rawBoundMoInstance });
-		this.recordReturn(rawBoundMoInstance, rawBoundMoInstance
-				.getRawManagedObjectMetaData(), rawMo);
+		this.recordReturn(
+				rawBoundMo,
+				rawBoundMo.getRawBoundManagedObjectInstanceMetaData(),
+				new RawBoundManagedObjectInstanceMetaData[] { rawBoundMoInstance });
+		this.recordReturn(rawBoundMoInstance,
+				rawBoundMoInstance.getRawManagedObjectMetaData(), rawMo);
 	}
 
 	/**
@@ -1856,13 +1850,12 @@ public class RawTaskMetaDataTest<W extends Work, D extends Enum<D>, F extends En
 		}
 
 		// Record loading the direct dependencies
-		this
-				.recordReturn(
-						mo.boundMo,
-						mo.boundMo.getRawBoundManagedObjectInstanceMetaData(),
-						new RawBoundManagedObjectInstanceMetaData[] { mo.boundMoInstance });
-		this.recordReturn(mo.boundMoInstance, mo.boundMoInstance
-				.getDependencies(), dependencies);
+		this.recordReturn(
+				mo.boundMo,
+				mo.boundMo.getRawBoundManagedObjectInstanceMetaData(),
+				new RawBoundManagedObjectInstanceMetaData[] { mo.boundMoInstance });
+		this.recordReturn(mo.boundMoInstance,
+				mo.boundMoInstance.getDependencies(), dependencies);
 
 		// Flag the dependency as loaded
 		loadedDependencies.add(mo.index);
@@ -1901,24 +1894,26 @@ public class RawTaskMetaDataTest<W extends Work, D extends Enum<D>, F extends En
 	 * Records no {@link JobSequence}.
 	 */
 	private void record_NoFlows() {
-		this.recordReturn(this.configuration, this.configuration
-				.getFlowConfiguration(), new TaskFlowConfiguration[0]);
+		this.recordReturn(this.configuration,
+				this.configuration.getFlowConfiguration(),
+				new TaskFlowConfiguration[0]);
 	}
 
 	/**
 	 * Records no next {@link Task}.
 	 */
 	private void record_NoNextTask() {
-		this.recordReturn(this.configuration, this.configuration
-				.getNextTaskInFlow(), null);
+		this.recordReturn(this.configuration,
+				this.configuration.getNextTaskInFlow(), null);
 	}
 
 	/**
 	 * Records no {@link EscalationFlow}.
 	 */
 	private void record_NoEscalations() {
-		this.recordReturn(this.configuration, this.configuration
-				.getEscalations(), new TaskEscalationConfiguration[0]);
+		this.recordReturn(this.configuration,
+				this.configuration.getEscalations(),
+				new TaskEscalationConfiguration[0]);
 	}
 
 	/**

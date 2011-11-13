@@ -44,7 +44,6 @@ import net.officefloor.frame.internal.structure.ActiveGovernance;
 import net.officefloor.frame.internal.structure.ActiveGovernanceManager;
 import net.officefloor.frame.internal.structure.EscalationFlow;
 import net.officefloor.frame.internal.structure.EscalationProcedure;
-import net.officefloor.frame.internal.structure.FlowMetaData;
 import net.officefloor.frame.internal.structure.GovernanceControl;
 import net.officefloor.frame.internal.structure.GovernanceMetaData;
 import net.officefloor.frame.internal.structure.JobSequence;
@@ -498,9 +497,8 @@ public class RawGovernanceMetaDataTest extends OfficeFrameTestCase {
 		EscalationFlow flow = escalationProcedure.getEscalation(exception);
 		assertEquals("Incorrect type of cause", SQLException.class,
 				flow.getTypeOfCause());
-		FlowMetaData<?> flowMetaData = flow.getFlowMetaData();
 		assertEquals("Incorrect task meta-data", taskMetaData,
-				flowMetaData.getInitialTaskMetaData());
+				flow.getTaskMetaData());
 
 		// Ensure not handle unknown escalation
 		assertNull("Should not handle unknown escalation",
