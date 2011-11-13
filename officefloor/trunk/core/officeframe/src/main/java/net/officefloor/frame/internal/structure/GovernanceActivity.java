@@ -17,31 +17,44 @@
  */
 package net.officefloor.frame.internal.structure;
 
-import net.officefloor.frame.api.execute.TaskContext;
 import net.officefloor.frame.spi.governance.Governance;
 import net.officefloor.frame.spi.governance.GovernanceContext;
-import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.frame.spi.team.JobContext;
 
 /**
- * Provides control over the {@link ActiveGovernance}.
+ * Activity regarding the {@link Governance}.
  * 
  * @author Daniel Sagenschneider
  */
-public interface ActiveGovernanceControl<F extends Enum<F>> {
+public interface GovernanceActivity<I, F extends Enum<F>> {
 
 	/**
-	 * Provides the {@link Governance} over the {@link ManagedObject}.
+	 * Obtains the {@link GovernanceMetaData} for this
+	 * {@link GovernanceActivity}.
 	 * 
-	 * @param taskContext
-	 *            {@link TaskContext}.
-	 * @throws Throwable
-	 *             If fails to provide {@link Governance} over the
-	 *             {@link ManagedObject}.
+	 * @return {@link GovernanceMetaData} for this {@link GovernanceActivity}.
 	 */
-	boolean governManagedObject(GovernanceContext<F> governanceContext,
+	GovernanceMetaData<I, F> getGovernanceMetaData();
+
+	/**
+	 * Undertakes an activity regarding the {@link Governance}.
+	 * 
+	 * @param governanceContext
+	 *            {@link GovernanceContext}
+	 * @param jobContext
+	 *            {@link JobContext}.
+	 * @param jobNode
+	 *            {@link JobNode}.
+	 * @param activateSet
+	 *            {@link JobNodeActivateSet}.
+	 * @param containerContext
+	 *            {@link ContainerContext}.
+	 * @throws Throwable
+	 *             If activity fails.
+	 */
+	void doActivity(GovernanceContext<F> governanceContext,
 			JobContext jobContext, JobNode jobNode,
-			JobNodeActivateSet activateSet, ContainerContext context)
+			JobNodeActivateSet activateSet, ContainerContext containerContext)
 			throws Throwable;
 
 }

@@ -17,35 +17,31 @@
  */
 package net.officefloor.frame.impl.construct.governance;
 
+import java.util.Map;
+
 import net.officefloor.frame.api.build.GovernanceFactory;
 import net.officefloor.frame.api.build.OfficeBuilder;
 import net.officefloor.frame.api.build.OfficeFloorIssues;
 import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
-import net.officefloor.frame.api.build.TaskBuilder;
-import net.officefloor.frame.api.build.TaskFactory;
-import net.officefloor.frame.api.build.WorkBuilder;
-import net.officefloor.frame.api.execute.Task;
-import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.impl.construct.util.ConstructUtil;
-import net.officefloor.frame.impl.execute.governance.ActivateGovernanceTask;
-import net.officefloor.frame.impl.execute.governance.DisregardGovernanceTask;
-import net.officefloor.frame.impl.execute.governance.EnforceGovernanceTask;
-import net.officefloor.frame.impl.execute.governance.GovernGovernanceTask;
+import net.officefloor.frame.impl.execute.escalation.EscalationFlowImpl;
+import net.officefloor.frame.impl.execute.escalation.EscalationProcedureImpl;
 import net.officefloor.frame.impl.execute.governance.GovernanceMetaDataImpl;
-import net.officefloor.frame.impl.execute.governance.GovernanceTaskDependency;
-import net.officefloor.frame.impl.execute.governance.GovernanceWork;
 import net.officefloor.frame.internal.configuration.GovernanceConfiguration;
+import net.officefloor.frame.internal.configuration.GovernanceEscalationConfiguration;
+import net.officefloor.frame.internal.configuration.TaskNodeReference;
 import net.officefloor.frame.internal.construct.AssetManagerFactory;
 import net.officefloor.frame.internal.construct.OfficeMetaDataLocator;
 import net.officefloor.frame.internal.construct.RawGovernanceMetaData;
 import net.officefloor.frame.internal.construct.RawGovernanceMetaDataFactory;
-import net.officefloor.frame.internal.structure.ActiveGovernanceControl;
-import net.officefloor.frame.internal.structure.GovernanceControl;
+import net.officefloor.frame.internal.structure.EscalationFlow;
+import net.officefloor.frame.internal.structure.EscalationProcedure;
+import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
+import net.officefloor.frame.internal.structure.FlowMetaData;
 import net.officefloor.frame.internal.structure.GovernanceMetaData;
 import net.officefloor.frame.internal.structure.ProcessState;
 import net.officefloor.frame.internal.structure.TaskMetaData;
 import net.officefloor.frame.spi.governance.Governance;
-import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.frame.spi.source.SourceContext;
 import net.officefloor.frame.spi.team.Team;
 
@@ -56,27 +52,6 @@ import net.officefloor.frame.spi.team.Team;
  */
 public class RawGovernanceMetaDataImpl<I, F extends Enum<F>> implements
 		RawGovernanceMetaDataFactory, RawGovernanceMetaData<I, F> {
-
-	/**
-	 * Name of the {@link Task} to activate {@link Governance}.
-	 */
-	private static final String TASK_ACTIVATE = "ACTIVATE";
-
-	/**
-	 * Name of the {@link Task} to provide {@link Governance} over a
-	 * {@link ManagedObject}.
-	 */
-	private static final String TASK_GOVERN = "GOVERN";
-
-	/**
-	 * Name of the {@link Task} to activate {@link Governance}.
-	 */
-	private static final String TASK_ENFORCE = "ENFORCE";
-
-	/**
-	 * Name of the {@link Task} to activate {@link Governance}.
-	 */
-	private static final String TASK_DISREGARD = "DISREGARD";
 
 	/**
 	 * Obtains the {@link RawGovernanceMetaDataFactory}.
@@ -105,9 +80,9 @@ public class RawGovernanceMetaDataImpl<I, F extends Enum<F>> implements
 	private final Class<I> extensionInterfaceType;
 
 	/**
-	 * Name of {@link Work} for the {@link Governance}.
+	 * {@link GovernanceConfiguration}.
 	 */
-	private final String workName;
+	private final GovernanceConfiguration<I, F> governanceConfiguration;
 
 	/**
 	 * {@link GovernanceMetaData}.
@@ -124,18 +99,19 @@ public class RawGovernanceMetaDataImpl<I, F extends Enum<F>> implements
 	 *            {@link ProcessState}.
 	 * @param extensionInterfaceType
 	 *            Extension interface type.
-	 * @param workName
-	 *            Name of {@link Work} for the {@link Governance}.
+	 * @param governanceConfiguration
+	 *            {@link GovernanceConfiguration}.
 	 * @param governanceMetaData
 	 *            {@link GovernanceMetaDataImpl}.
 	 */
 	public RawGovernanceMetaDataImpl(String governanceName,
 			int governanceIndex, Class<I> extensionInterfaceType,
-			String workName, GovernanceMetaDataImpl<I, F> governanceMetaData) {
+			GovernanceConfiguration<I, F> governanceConfiguration,
+			GovernanceMetaDataImpl<I, F> governanceMetaData) {
 		this.governanceName = governanceName;
 		this.governanceIndex = governanceIndex;
 		this.extensionInterfaceType = extensionInterfaceType;
-		this.workName = workName;
+		this.governanceConfiguration = governanceConfiguration;
 		this.governanceMetaData = governanceMetaData;
 	}
 
@@ -146,8 +122,9 @@ public class RawGovernanceMetaDataImpl<I, F extends Enum<F>> implements
 	@Override
 	public <i, f extends Enum<f>> RawGovernanceMetaData<i, f> createRawGovernanceMetaData(
 			GovernanceConfiguration<i, f> configuration, int governanceIndex,
-			SourceContext sourceContext, String officeName,
-			OfficeBuilder officeBuilder, OfficeFloorIssues issues) {
+			SourceContext sourceContext, Map<String, Team> officeTeams,
+			String officeName, OfficeBuilder officeBuilder,
+			OfficeFloorIssues issues) {
 
 		// Obtain the governance name
 		String governanceName = configuration.getGovernanceName();
@@ -177,69 +154,35 @@ public class RawGovernanceMetaDataImpl<I, F extends Enum<F>> implements
 		// Obtain the team name for the governance
 		String teamName = configuration.getTeamName();
 		if (ConstructUtil.isBlank(teamName)) {
-			issues.addIssue(AssetType.GOVERNANCE, governanceName,
-					"Must specify Team responsible for executing Governance");
+			issues.addIssue(
+					AssetType.GOVERNANCE,
+					governanceName,
+					"Must specify " + Team.class.getSimpleName()
+							+ " responsible for "
+							+ Governance.class.getSimpleName() + " activities");
 			return null; // can not carry on
 		}
 
-		// Create the work for the governance tasks
-		final String governanceWorkName = "GOVERNANCE_" + governanceName;
-		WorkBuilder<GovernanceWork> workBuilder = officeBuilder.addWork(
-				governanceWorkName, new GovernanceWork());
-
-		// Register the governance tasks
-		this.registerGovernanceTask(workBuilder, TASK_ACTIVATE,
-				new ActivateGovernanceTask<f>(), teamName,
-				GovernanceControl.class);
-		this.registerGovernanceTask(workBuilder, TASK_GOVERN,
-				new GovernGovernanceTask<f>(), teamName,
-				ActiveGovernanceControl.class);
-		this.registerGovernanceTask(workBuilder, TASK_ENFORCE,
-				new EnforceGovernanceTask<f>(), teamName,
-				GovernanceControl.class);
-		this.registerGovernanceTask(workBuilder, TASK_DISREGARD,
-				new DisregardGovernanceTask<f>(), teamName,
-				GovernanceControl.class);
+		// Obtain the team
+		Team team = officeTeams.get(teamName);
+		if (team == null) {
+			issues.addIssue(AssetType.GOVERNANCE, governanceName,
+					"Can not find " + Team.class.getSimpleName() + " by name '"
+							+ teamName + "'");
+			return null; // can not carry on
+		}
 
 		// Create the Governance Meta-Data
 		GovernanceMetaDataImpl<i, f> governanceMetaData = new GovernanceMetaDataImpl<i, f>(
-				governanceName, governanceFactory);
+				governanceName, governanceFactory, team);
 
 		// Create the raw Governance meta-data
 		RawGovernanceMetaData<i, f> rawGovernanceMetaData = new RawGovernanceMetaDataImpl<i, f>(
 				governanceName, governanceIndex, extensionInterfaceType,
-				governanceWorkName, governanceMetaData);
+				configuration, governanceMetaData);
 
 		// Return the raw governance meta-data
 		return rawGovernanceMetaData;
-	}
-
-	/**
-	 * Registers the {@link Governance} {@link Task}.
-	 * 
-	 * @param workBuilder
-	 *            {@link WorkBuilder} of the {@link Governance} {@link Work}.
-	 * @param taskName
-	 *            Name of the {@link Task}.
-	 * @param taskFactory
-	 *            {@link TaskFactory}.
-	 * @param teamName
-	 *            Name of the {@link Team} to execute the {@link Governance}
-	 *            {@link Task}.
-	 * @param controlType
-	 *            {@link GovernanceControl} or {@link ActiveGovernanceControl}
-	 *            type.
-	 */
-	private <f extends Enum<f>> void registerGovernanceTask(
-			WorkBuilder<GovernanceWork> workBuilder,
-			String taskName,
-			TaskFactory<GovernanceWork, GovernanceTaskDependency, f> taskFactory,
-			String teamName, Class<?> controlType) {
-		TaskBuilder<GovernanceWork, GovernanceTaskDependency, f> taskBuilder = workBuilder
-				.addTask(taskName, taskFactory);
-		taskBuilder.setTeam(teamName);
-		taskBuilder.linkParameter(GovernanceTaskDependency.GOVERNANCE_CONTROL,
-				controlType);
 	}
 
 	/*
@@ -270,47 +213,54 @@ public class RawGovernanceMetaDataImpl<I, F extends Enum<F>> implements
 	public void linkOfficeMetaData(OfficeMetaDataLocator taskLocator,
 			AssetManagerFactory assetManagerFactory, OfficeFloorIssues issues) {
 
-		// Locate the tasks
-		TaskMetaData<?, ?, ?> activateFlow = this.getTaskMetaData(
-				TASK_ACTIVATE, taskLocator, issues);
-		TaskMetaData<?, ?, ?> governFlow = this.getTaskMetaData(TASK_GOVERN,
-				taskLocator, issues);
-		TaskMetaData<?, ?, ?> enforceFlow = this.getTaskMetaData(TASK_ENFORCE,
-				taskLocator, issues);
-		TaskMetaData<?, ?, ?> disregardFlow = this.getTaskMetaData(
-				TASK_DISREGARD, taskLocator, issues);
+		// Create the escalation procedure
+		GovernanceEscalationConfiguration[] escalationConfigurations = this.governanceConfiguration
+				.getEscalations();
+		EscalationFlow[] escalations = new EscalationFlow[escalationConfigurations.length];
+		for (int i = 0; i < escalations.length; i++) {
+			GovernanceEscalationConfiguration escalationConfiguration = escalationConfigurations[i];
 
-		// Load flows into governance meta-data
-		this.governanceMetaData.loadFlows(activateFlow, governFlow,
-				enforceFlow, disregardFlow);
-	}
+			// Obtain the type of cause
+			Class<? extends Throwable> typeOfCause = escalationConfiguration
+					.getTypeOfCause();
+			if (typeOfCause == null) {
+				issues.addIssue(AssetType.GOVERNANCE, this.getGovernanceName(),
+						"No escalation type for escalation index " + i);
+				continue; // no escalation type
+			}
 
-	/**
-	 * Obtains the {@link TaskMetaData}.
-	 * 
-	 * @param taskName
-	 *            Name of {@link Governance} {@link Task}.
-	 * @param taskLocator
-	 *            {@link OfficeMetaDataLocator}.
-	 * @param issues
-	 *            {@link OfficeFloorIssues}.
-	 * @return {@link TaskMetaData} for the {@link Governance} {@link Task}.
-	 */
-	private TaskMetaData<?, ?, ?> getTaskMetaData(String taskName,
-			OfficeMetaDataLocator taskLocator, OfficeFloorIssues issues) {
+			// Obtain the escalation handler
+			TaskNodeReference escalationReference = escalationConfiguration
+					.getTaskNodeReference();
+			if (escalationReference == null) {
+				issues.addIssue(AssetType.GOVERNANCE, this.getGovernanceName(),
+						"No task referenced for escalation index " + i);
+				continue; // no escalation handler referenced
+			}
+			TaskMetaData<?, ?, ?> escalationTaskMetaData = ConstructUtil
+					.getTaskMetaData(escalationReference, taskLocator, issues,
+							AssetType.GOVERNANCE, this.getGovernanceName(),
+							"escalation index " + i, true);
+			if (escalationTaskMetaData == null) {
+				continue; // no escalation handler
+			}
 
-		// Obtain the task meta-data
-		TaskMetaData<?, ?, ?> taskMetaData = taskLocator.getTaskMetaData(
-				this.workName, taskName);
-		if (taskMetaData == null) {
-			issues.addIssue(AssetType.GOVERNANCE, this.governanceName,
-					"Can not obtain " + Governance.class.getSimpleName() + " "
-							+ Task.class.getSimpleName() + " " + taskName);
-			return null; // no flow meta-data for task
+			// Create the escalation flow meta-data
+			FlowMetaData<?> escalationFlowMetaData = ConstructUtil
+					.newFlowMetaData(FlowInstigationStrategyEnum.PARALLEL,
+							escalationTaskMetaData, assetManagerFactory,
+							AssetType.GOVERNANCE, this.getGovernanceName(),
+							"Escalation" + i, issues);
+
+			// Create and add the escalation
+			escalations[i] = new EscalationFlowImpl(typeOfCause,
+					escalationFlowMetaData);
 		}
+		EscalationProcedure escalationProcedure = new EscalationProcedureImpl(
+				escalations);
 
-		// Return the task meta-data
-		return taskMetaData;
+		// Load the remaining state
+		this.governanceMetaData.loadRemainingState(escalationProcedure);
 	}
 
 }

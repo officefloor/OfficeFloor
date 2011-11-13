@@ -718,7 +718,7 @@ public class RawTaskMetaDataImpl<W extends Work, D extends Enum<D>, F extends En
 					.getTypeOfCause();
 			if (typeOfCause == null) {
 				issues.addIssue(AssetType.TASK, this.getTaskName(),
-						"No escalation type for escalation index 0");
+						"No escalation type for escalation index " + i);
 				continue; // no escalation type
 			}
 
@@ -727,7 +727,7 @@ public class RawTaskMetaDataImpl<W extends Work, D extends Enum<D>, F extends En
 					.getTaskNodeReference();
 			if (escalationReference == null) {
 				issues.addIssue(AssetType.TASK, this.getTaskName(),
-						"No task referenced for escalation index 0");
+						"No task referenced for escalation index " + i);
 				continue; // no escalation handler referenced
 			}
 			TaskMetaData<?, ?, ?> escalationTaskMetaData = ConstructUtil

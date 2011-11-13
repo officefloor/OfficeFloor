@@ -37,11 +37,11 @@ public interface Governance<I, F extends Enum<F>> {
 	 *            Extension interface of the {@link ManagedObject}.
 	 * @param context
 	 *            {@link GovernanceContext}.
-	 * @throws Exception
+	 * @throws Throwable
 	 *             If fails to govern the {@link ManagedObject}.
 	 */
 	void governManagedObject(I extensionInterface, GovernanceContext<F> context)
-			throws Exception;
+			throws Throwable;
 
 	/**
 	 * Enforces the {@link Governance} of the {@link ManagedObject} instances
@@ -49,15 +49,19 @@ public interface Governance<I, F extends Enum<F>> {
 	 * 
 	 * @param context
 	 *            {@link GovernanceContext}.
+	 * @throws Throwable
+	 *             If fails to enforce {@link Governance}.
 	 */
-	void enforceGovernance(GovernanceContext<F> context);
+	void enforceGovernance(GovernanceContext<F> context) throws Throwable;
 
 	/**
 	 * Disregard {@link Governance} of the {@link ManagedObject} instances.
 	 * 
 	 * @param context
 	 *            {@link GovernanceContext}.
+	 * @throws Throwable
+	 *             If fails to disregard {@link Governance}.
 	 */
-	void disregardGovernance(GovernanceContext<F> context);
+	void disregardGovernance(GovernanceContext<F> context) throws Throwable;
 
 }

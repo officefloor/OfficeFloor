@@ -31,7 +31,7 @@ public class GovernanceManagerImpl implements GovernanceManager {
 	/**
 	 * {@link GovernanceContainer}.
 	 */
-	private final GovernanceContainer<?> container;
+	private final GovernanceContainer<?, ?> container;
 
 	/**
 	 * {@link ContainerContext}.
@@ -46,7 +46,7 @@ public class GovernanceManagerImpl implements GovernanceManager {
 	 * @param containerContext
 	 *            {@link ContainerContext}.
 	 */
-	public GovernanceManagerImpl(GovernanceContainer<?> container,
+	public GovernanceManagerImpl(GovernanceContainer<?, ?> container,
 			ContainerContext containerContext) {
 		this.container = container;
 		this.containerContext = containerContext;

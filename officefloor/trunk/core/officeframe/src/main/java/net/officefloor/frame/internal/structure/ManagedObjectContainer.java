@@ -46,8 +46,7 @@ public interface ManagedObjectContainer {
 	 *            {@link ContainerContext}.
 	 */
 	void loadManagedObject(JobContext jobContext, JobNode jobNode,
-			JobNodeActivateSet activateSet,
-			ContainerContext context);
+			JobNodeActivateSet activateSet, ContainerContext context);
 
 	/**
 	 * Provides any active {@link Governance} over the {@link ManagedObject}.
@@ -157,8 +156,11 @@ public interface ManagedObjectContainer {
 	 * 
 	 * @param governance
 	 *            {@link ActiveGovernance}.
+	 * @param activateSet
+	 *            {@link JobNodeActivateSet}.
 	 */
-	void unregisterManagedObjectFromGovernance(ActiveGovernance governance);
+	void unregisterManagedObjectFromGovernance(
+			ActiveGovernance<?, ?> governance, JobNodeActivateSet activateSet);
 
 	/**
 	 * Unloads the {@link ManagedObject}.

@@ -19,6 +19,10 @@ package net.officefloor.frame.impl.execute.governance;
 
 import net.officefloor.frame.api.build.WorkFactory;
 import net.officefloor.frame.api.execute.Work;
+import net.officefloor.frame.impl.execute.work.WorkMetaDataImpl;
+import net.officefloor.frame.internal.structure.AdministratorMetaData;
+import net.officefloor.frame.internal.structure.ManagedObjectMetaData;
+import net.officefloor.frame.internal.structure.TaskMetaData;
 import net.officefloor.frame.spi.governance.Governance;
 
 /**
@@ -26,15 +30,32 @@ import net.officefloor.frame.spi.governance.Governance;
  * 
  * @author Daniel Sagenschneider
  */
-public class GovernanceWork implements WorkFactory<GovernanceWork>, Work {
+public class GovernanceWork extends WorkMetaDataImpl<Work> {
 
-	/*
-	 * ====================== WorkFactory ===========================
+	/**
+	 * Initiate.
 	 */
+	@SuppressWarnings("unchecked")
+	public GovernanceWork() {
+		super("GOVERNANCE", new GovernanceWorkFactory(),
+				new ManagedObjectMetaData<?>[0],
+				new AdministratorMetaData<?, ?>[0], null, new TaskMetaData[0]);
+	}
 
-	@Override
-	public GovernanceWork createWork() {
-		return this;
+	/**
+	 * {@link WorkFactory} for the {@link GovernanceWork}.
+	 */
+	private static class GovernanceWorkFactory implements WorkFactory<Work>,
+			Work {
+
+		/*
+		 * ====================== WorkFactory ===========================
+		 */
+
+		@Override
+		public Work createWork() {
+			return this;
+		}
 	}
 
 }

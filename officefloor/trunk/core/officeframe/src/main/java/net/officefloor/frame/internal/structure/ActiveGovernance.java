@@ -17,7 +17,6 @@
  */
 package net.officefloor.frame.internal.structure;
 
-import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.spi.governance.Governance;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
 
@@ -26,7 +25,7 @@ import net.officefloor.frame.spi.managedobject.ManagedObject;
  * 
  * @author Daniel Sagenschneider
  */
-public interface ActiveGovernance {
+public interface ActiveGovernance<I, F extends Enum<F>> {
 
 	/**
 	 * <p>
@@ -49,12 +48,12 @@ public interface ActiveGovernance {
 	boolean isActive();
 
 	/**
-	 * Obtains the {@link TaskMetaData} for the {@link Task} to setup the
-	 * {@link ActiveGovernance}.
+	 * Creates the {@link GovernanceActivity} to provide {@link Governance} on
+	 * the {@link ManagedObject}.
 	 * 
-	 * @return {@link TaskMetaData} for the {@link Task} to setup the
-	 *         {@link ActiveGovernance}.
+	 * @return {@link GovernanceActivity} to provide {@link Governance} on the
+	 *         {@link ManagedObject}.
 	 */
-	TaskMetaData<?, ?, ?> getTaskMetaData();
+	GovernanceActivity<I, F> createGovernActivity();
 
 }

@@ -25,6 +25,8 @@ import net.officefloor.frame.impl.execute.linkedlistset.StrictLinkedListSet;
 import net.officefloor.frame.impl.execute.work.WorkContainerProxy;
 import net.officefloor.frame.internal.structure.AdministratorIndex;
 import net.officefloor.frame.internal.structure.AdministratorMetaData;
+import net.officefloor.frame.internal.structure.GovernanceActivity;
+import net.officefloor.frame.internal.structure.GovernanceMetaData;
 import net.officefloor.frame.internal.structure.JobSequence;
 import net.officefloor.frame.internal.structure.JobNode;
 import net.officefloor.frame.internal.structure.JobNodeActivateSet;
@@ -152,6 +154,23 @@ public class JobSequenceImpl extends
 
 		// Return the starting job
 		return firstLastJobs[0];
+	}
+
+	@Override
+	@SuppressWarnings({ "rawtypes", "unchecked" })
+	public JobNode createGovernanceNode(
+			GovernanceActivity<?, ?> governanceActivity,
+			JobNode parallelNodeOwner) {
+
+		// Create and register the governance job
+		GovernanceMetaData governanceMetaData = governanceActivity
+				.getGovernanceMetaData();
+		JobNode governanceJob = governanceMetaData.createGovernanceJob(this,
+				governanceActivity, parallelNodeOwner);
+		this.activeJobNodes.addEntry(governanceJob);
+
+		// Return the governance job
+		return governanceJob;
 	}
 
 	/**

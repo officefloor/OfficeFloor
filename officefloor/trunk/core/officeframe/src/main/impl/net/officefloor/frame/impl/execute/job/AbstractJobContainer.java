@@ -33,13 +33,14 @@ import net.officefloor.frame.internal.structure.ContainerContext;
 import net.officefloor.frame.internal.structure.EscalationFlow;
 import net.officefloor.frame.internal.structure.EscalationLevel;
 import net.officefloor.frame.internal.structure.EscalationProcedure;
-import net.officefloor.frame.internal.structure.JobSequence;
 import net.officefloor.frame.internal.structure.FlowAsset;
 import net.officefloor.frame.internal.structure.FlowMetaData;
+import net.officefloor.frame.internal.structure.GovernanceActivity;
 import net.officefloor.frame.internal.structure.JobMetaData;
 import net.officefloor.frame.internal.structure.JobNode;
 import net.officefloor.frame.internal.structure.JobNodeActivatableSet;
 import net.officefloor.frame.internal.structure.JobNodeActivateSet;
+import net.officefloor.frame.internal.structure.JobSequence;
 import net.officefloor.frame.internal.structure.LinkedListSet;
 import net.officefloor.frame.internal.structure.LinkedListSetEntry;
 import net.officefloor.frame.internal.structure.ManagedObjectIndex;
@@ -128,11 +129,18 @@ public abstract class AbstractJobContainer<W extends Work, N extends JobMetaData
 	/**
 	 * Overridden by specific container to execute the {@link Job}.
 	 * 
+	 * @param context
+	 *            {@link JobExecuteContext}.
+	 * @param jobContext
+	 *            {@link JobContext}.
+	 * @param activateSet
+	 *            {@link JobNodeActivateSet}.
 	 * @return Parameter for the next {@link Job}.
 	 * @throws Throwable
 	 *             If failure in executing the {@link Job}.
 	 */
-	protected abstract Object executeJob(JobExecuteContext context)
+	protected abstract Object executeJob(JobExecuteContext context,
+			JobContext jobContext, JobNodeActivateSet activateSet)
 			throws Throwable;
 
 	/*
@@ -176,6 +184,24 @@ public abstract class AbstractJobContainer<W extends Work, N extends JobMetaData
 		// Create the job node
 		JobNode parallelJobNode = parallelFlow.createTaskNode(taskMetaData,
 				this, parameter);
+
+		// Load the parallel node
+		this.loadParallelJobNode(parallelJobNode);
+
+		// Flag setup job
+		this.isSetupJob = true;
+	}
+
+	@Override
+	public void addGovernanceActivity(GovernanceActivity<?, ?> activity) {
+
+		// Create a new flow for execution
+		ThreadState threadState = this.flow.getThreadState();
+		JobSequence parallelFlow = threadState.createJobSequence();
+
+		// Create the job node
+		JobNode parallelJobNode = parallelFlow.createGovernanceNode(activity,
+				this);
 
 		// Load the parallel node
 		this.loadParallelJobNode(parallelJobNode);
@@ -247,7 +273,7 @@ public abstract class AbstractJobContainer<W extends Work, N extends JobMetaData
 	private boolean isSequentialJobInvoked = false;
 
 	@Override
-	public final boolean doJob(JobContext executionContext) {
+	public final boolean doJob(JobContext jobContext) {
 
 		// Access Point: Team
 		// Locks: None
@@ -307,10 +333,11 @@ public abstract class AbstractJobContainer<W extends Work, N extends JobMetaData
 								switch (this.jobState) {
 								case LOAD_MANAGED_OBJECTS:
 									// Load the managed objects
-									this.workContainer.loadManagedObjects(
-											this.requiredManagedObjects,
-											executionContext, this,
-											activateSet, this);
+									this.workContainer
+											.loadManagedObjects(
+													this.requiredManagedObjects,
+													jobContext, this,
+													activateSet, this);
 
 									// Flag Managed Objects now to be governed
 									this.jobState = JobState.GOVERN_MANAGED_OBJECTS;
@@ -318,10 +345,11 @@ public abstract class AbstractJobContainer<W extends Work, N extends JobMetaData
 								case GOVERN_MANAGED_OBJECTS:
 									// Govern the managed objects.
 									// (Handles managed objects not ready)
-									this.workContainer.governManagedObjects(
-											this.requiredManagedObjects,
-											executionContext, this,
-											activateSet, this);
+									this.workContainer
+											.governManagedObjects(
+													this.requiredManagedObjects,
+													jobContext, this,
+													activateSet, this);
 
 									// Determine if Job to wait
 									if (this.isJobToWait) {
@@ -338,7 +366,7 @@ public abstract class AbstractJobContainer<W extends Work, N extends JobMetaData
 									this.workContainer
 											.coordinateManagedObjects(
 													this.requiredManagedObjects,
-													executionContext, this,
+													jobContext, this,
 													activateSet, this);
 
 									// Determine if Job to wait
@@ -356,7 +384,7 @@ public abstract class AbstractJobContainer<W extends Work, N extends JobMetaData
 									if (!this.workContainer
 											.isManagedObjectsReady(
 													this.requiredManagedObjects,
-													executionContext, this,
+													jobContext, this,
 													activateSet, this)) {
 										// Woken up when ready
 										return true;
@@ -378,7 +406,8 @@ public abstract class AbstractJobContainer<W extends Work, N extends JobMetaData
 
 							try {
 								// Execute the job
-								this.nextJobParameter = this.executeJob(this);
+								this.nextJobParameter = this.executeJob(this,
+										jobContext, activateSet);
 							} finally {
 								// Ensure always purge join flow assets
 								headJoinOnFlowAsset = this.joinFlowAssets
@@ -894,6 +923,8 @@ public abstract class AbstractJobContainer<W extends Work, N extends JobMetaData
 	 * @param parallelOwner
 	 *            Parallel owner for the {@link EscalationFlow} {@link JobNode}.
 	 * @return {@link JobNode}.
+	 * 
+	 * @deprecated TODO Escalation to provide TaskMetaData
 	 */
 	private JobNode createEscalationJobNode(FlowMetaData<?> flowMetaData,
 			Object parameter, JobNode parallelOwner) {

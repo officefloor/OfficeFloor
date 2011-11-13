@@ -322,7 +322,8 @@ public class RawOfficeMetaDataImpl implements RawOfficeMetaDataFactory,
 			// Create the raw governance
 			RawGovernanceMetaData<?, ?> rawGovernance = rawGovernanceMetaDataFactory
 					.createRawGovernanceMetaData(governanceConfiguration, i,
-							sourceContext, officeName, officeBuilder, issues);
+							sourceContext, officeTeams, officeName,
+							officeBuilder, issues);
 			if (rawGovernance == null) {
 				// Not able to create governance
 				issues.addIssue(AssetType.OFFICE, officeName,

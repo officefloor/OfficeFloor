@@ -55,14 +55,15 @@ public class GovernanceEstablishedManagedObjectContainerTest extends
 		// Record establishing governance
 		this.record_MoContainer_governManagedObject(true, false, true);
 
-		// Record further governance (and clearing unactive)
+		// Record further governance (and clearing inactive)
 		this.record_MoContainer_governManagedObject(true, true, false);
 
 		// Record remaining managed object functionality
 		this.record_MoContainer_coordinateManagedObject(true, true, null,
 				object);
 		this.record_MoContainer_isManagedObjectReady(ReadyState.READY);
-		this.record_MoContainer_unloadManagedObject(true);
+
+		// Not unload managed object as governance active
 
 		// Replay mock objects
 		this.replayMockObjects();

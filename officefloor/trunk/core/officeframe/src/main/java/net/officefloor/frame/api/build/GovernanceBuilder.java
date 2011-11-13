@@ -18,6 +18,10 @@
 package net.officefloor.frame.api.build;
 
 import net.officefloor.frame.api.execute.Task;
+import net.officefloor.frame.api.execute.Work;
+import net.officefloor.frame.internal.structure.EscalationFlow;
+import net.officefloor.frame.internal.structure.EscalationProcedure;
+import net.officefloor.frame.internal.structure.JobSequence;
 import net.officefloor.frame.spi.governance.Governance;
 import net.officefloor.frame.spi.team.Team;
 
@@ -36,5 +40,20 @@ public interface GovernanceBuilder {
 	 *            {@link Team} name.
 	 */
 	void setTeamName(String teamName);
+
+	/**
+	 * Adds an {@link EscalationFlow} to the {@link EscalationProcedure} for the
+	 * {@link Governance}.
+	 * 
+	 * @param typeOfCause
+	 *            Type of cause handled by this {@link EscalationFlow}.
+	 * @param workName
+	 *            Name of the {@link Work} that the first {@link Task} of the
+	 *            {@link JobSequence} resides on.
+	 * @param taskName
+	 *            Name of {@link Task} on the {@link Work}.
+	 */
+	void addEscalation(Class<? extends Throwable> typeOfCause, String workName,
+			String taskName);
 
 }

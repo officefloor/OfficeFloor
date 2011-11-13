@@ -15,17 +15,30 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.frame.impl.execute.governance;
+package net.officefloor.frame.integrate.governance;
 
-import net.officefloor.frame.api.execute.Task;
-import net.officefloor.frame.spi.governance.Governance;
+import java.sql.SQLException;
 
 /**
- * Dependencies for the {@link Governance} {@link Task}.
+ * Mock transaction interface for testing.
  * 
  * @author Daniel Sagenschneider
  */
-public enum GovernanceTaskDependency {
+public interface MockTransaction {
 
-	GOVERNANCE_CONTROL
+	/**
+	 * Mock begin transaction.
+	 */
+	void begin() throws SQLException;
+
+	/**
+	 * Mock commit transaction.
+	 */
+	void commit() throws SQLException;
+
+	/**
+	 * Mock rollback transaction.
+	 */
+	void rollback() throws SQLException;
+
 }

@@ -211,6 +211,11 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 	private final Map<String, RawGovernanceMetaData<?, ?>> rawGovernanceMetaDatas = new HashMap<String, RawGovernanceMetaData<?, ?>>();
 
 	/**
+	 * {@link Team} instances by their {@link Office} names.
+	 */
+	private Map<String, Team> officeTeams;
+
+	/**
 	 * Ensure issue if no {@link Office} name.
 	 */
 	public void testNoOfficeName() {
@@ -895,8 +900,8 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 				new GovernanceConfiguration[] { governanceConfiguration });
 		this.recordReturn(this.rawGovernanceFactory, this.rawGovernanceFactory
 				.createRawGovernanceMetaData(governanceConfiguration, 0,
-						this.sourceContext, OFFICE_NAME, this.officeBuilder,
-						this.issues), null);
+						this.sourceContext, teams, OFFICE_NAME,
+						this.officeBuilder, this.issues), null);
 		this.recordReturn(governanceConfiguration,
 				governanceConfiguration.getGovernanceName(), "GOVERNANCE");
 		this.record_issue("Unable to configure governance 'GOVERNANCE'");
@@ -1522,7 +1527,7 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 		}
 
 		// Record registering the teams
-		Map<String, Team> teams = new HashMap<String, Team>();
+		this.officeTeams = new HashMap<String, Team>();
 		this.recordReturn(this.configuration,
 				this.configuration.getRegisteredTeams(), teamConfigurations);
 		for (int i = 0; i < teamNames.length; i++) {
@@ -1544,11 +1549,11 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 			this.recordReturn(rawTeam, rawTeam.getTeam(), team);
 
 			// Register the team for return
-			teams.put(teamName, team);
+			this.officeTeams.put(teamName, team);
 		}
 
 		// Return the registry of the teams
-		return teams;
+		return this.officeTeams;
 	}
 
 	/**
@@ -1589,8 +1594,8 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 			this.recordReturn(this.rawGovernanceFactory,
 					this.rawGovernanceFactory.createRawGovernanceMetaData(
 							governanceConfiguration, i, this.sourceContext,
-							OFFICE_NAME, this.officeBuilder, this.issues),
-					rawGovernanceMetaData);
+							this.officeTeams, OFFICE_NAME, this.officeBuilder,
+							this.issues), rawGovernanceMetaData);
 			this.recordReturn(rawGovernanceMetaData,
 					rawGovernanceMetaData.getGovernanceName(), governanceName);
 			this.recordReturn(rawGovernanceMetaData,

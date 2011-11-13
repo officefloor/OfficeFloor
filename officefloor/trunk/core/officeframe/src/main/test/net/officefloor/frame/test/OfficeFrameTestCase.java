@@ -1167,11 +1167,19 @@ public abstract class OfficeFrameTestCase extends TestCase {
 					public Object invoke(Object proxy, Method method,
 							Object[] args) throws Throwable {
 						// Invoke method with lock on control
-						synchronized (control) {
-							return method.invoke(mockObject, args);
+						try {
+							synchronized (control) {
+								return method.invoke(mockObject, args);
+							}
+						} catch (InvocationTargetException ex) {
+							// Propagate cause of invocation failure
+							throw ex.getCause();
 						}
 					}
 				});
+
+		// Register the synchronized mock object
+		this.registerMockObject(proxy, control);
 
 		// Return the synchronised proxy
 		return proxy;

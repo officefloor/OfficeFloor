@@ -169,7 +169,7 @@ public class AdministratorContainerTest<I, A extends Enum<A>, F extends Enum<F>,
 	public void testGovernance_Activate() throws Throwable {
 
 		// Record activating the governance
-		GovernanceContainer<?> governanceContainer = this
+		GovernanceContainer<?, ?> governanceContainer = this
 				.recordGovernance(new Duty<I, F, Governances>() {
 					@Override
 					public void doDuty(DutyContext<I, F, Governances> context)
@@ -191,7 +191,7 @@ public class AdministratorContainerTest<I, A extends Enum<A>, F extends Enum<F>,
 	public void testGovernance_Enforce() throws Throwable {
 
 		// Record enforcing the governance
-		GovernanceContainer<?> governanceContainer = this
+		GovernanceContainer<?, ?> governanceContainer = this
 				.recordGovernance(new Duty<I, F, Governances>() {
 					@Override
 					public void doDuty(DutyContext<I, F, Governances> context)
@@ -213,7 +213,7 @@ public class AdministratorContainerTest<I, A extends Enum<A>, F extends Enum<F>,
 	public void testGovernance_Disregard() throws Throwable {
 
 		// Record disregarding the governance
-		GovernanceContainer<?> governanceContainer = this
+		GovernanceContainer<?, ?> governanceContainer = this
 				.recordGovernance(new Duty<I, F, Governances>() {
 					@Override
 					public void doDuty(DutyContext<I, F, Governances> context)
@@ -243,13 +243,13 @@ public class AdministratorContainerTest<I, A extends Enum<A>, F extends Enum<F>,
 	 *            {@link Duty}.
 	 * @return {@link GovernanceContainer}.
 	 */
-	private GovernanceContainer<?> recordGovernance(Duty<?, ?, Governances> duty)
-			throws Throwable {
+	private GovernanceContainer<?, ?> recordGovernance(
+			Duty<?, ?, Governances> duty) throws Throwable {
 
 		final int PROCESS_INDEX = 3;
 		final ThreadState threadState = this.createMock(ThreadState.class);
 		final ProcessState processState = this.createMock(ProcessState.class);
-		final GovernanceContainer<?> governanceContainer = this
+		final GovernanceContainer<?, ?> governanceContainer = this
 				.createMock(GovernanceContainer.class);
 
 		// Duty to validate context

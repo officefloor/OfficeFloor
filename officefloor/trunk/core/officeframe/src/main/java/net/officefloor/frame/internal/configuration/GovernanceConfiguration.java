@@ -18,7 +18,7 @@
 package net.officefloor.frame.internal.configuration;
 
 import net.officefloor.frame.api.build.GovernanceFactory;
-import net.officefloor.frame.api.execute.Task;
+import net.officefloor.frame.internal.structure.GovernanceActivity;
 import net.officefloor.frame.spi.governance.Governance;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.frame.spi.team.Team;
@@ -54,11 +54,19 @@ public interface GovernanceConfiguration<I, F extends Enum<F>> {
 	Class<I> getExtensionInterface();
 
 	/**
-	 * Obtains the name of the {@link Team} to execute the {@link Task}
-	 * instances for {@link Governance}.
+	 * Obtains the name of the {@link Team} to execute the
+	 * {@link GovernanceActivity} instances for {@link Governance}.
 	 * 
 	 * @return Name of {@link Team}.
 	 */
 	String getTeamName();
+
+	/**
+	 * Obtains the {@link GovernanceEscalationConfiguration} instances in
+	 * escalation order. Index 0 being first, index 1 second and so forth.
+	 * 
+	 * @return {@link GovernanceEscalationConfiguration} instances.
+	 */
+	GovernanceEscalationConfiguration[] getEscalations();
 
 }
