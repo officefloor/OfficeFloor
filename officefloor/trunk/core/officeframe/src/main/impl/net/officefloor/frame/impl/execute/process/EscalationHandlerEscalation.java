@@ -23,13 +23,11 @@ import net.officefloor.frame.api.escalate.EscalationHandler;
 import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.execute.TaskContext;
 import net.officefloor.frame.impl.execute.escalation.EscalationProcedureImpl;
-import net.officefloor.frame.impl.execute.flow.FlowMetaDataImpl;
 import net.officefloor.frame.impl.execute.task.TaskJob;
 import net.officefloor.frame.impl.execute.task.TaskMetaDataImpl;
 import net.officefloor.frame.impl.execute.work.WorkMetaDataImpl;
 import net.officefloor.frame.internal.structure.AdministratorMetaData;
 import net.officefloor.frame.internal.structure.EscalationFlow;
-import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
 import net.officefloor.frame.internal.structure.FlowMetaData;
 import net.officefloor.frame.internal.structure.ManagedObjectIndex;
 import net.officefloor.frame.internal.structure.ManagedObjectMetaData;
@@ -52,9 +50,9 @@ public class EscalationHandlerEscalation implements EscalationFlow {
 	private final EscalationHandler escalationHandler;
 
 	/**
-	 * {@link FlowMetaData} for the {@link EscalationHandler} {@link Task}.
+	 * {@link TaskMetaData} for the {@link EscalationHandler} {@link Task}.
 	 */
-	private final FlowMetaData<EscalationHandlerTask> flowMetaData;
+	private final TaskMetaData<EscalationHandlerTask, EscalationKey, None> taskMetaData;
 
 	/**
 	 * Initiate.
@@ -91,9 +89,8 @@ public class EscalationHandlerEscalation implements EscalationFlow {
 		taskMetaData.loadRemainingState(workMetaData, new FlowMetaData[0],
 				null, new EscalationProcedureImpl());
 
-		// Create the escalation flow meta-data
-		this.flowMetaData = new FlowMetaDataImpl<EscalationHandlerTask>(
-				FlowInstigationStrategyEnum.PARALLEL, taskMetaData, null);
+		// Specify the escalation task meta-data
+		this.taskMetaData = taskMetaData;
 	}
 
 	/**
@@ -115,8 +112,8 @@ public class EscalationHandlerEscalation implements EscalationFlow {
 	}
 
 	@Override
-	public FlowMetaData<?> getFlowMetaData() {
-		return this.flowMetaData;
+	public TaskMetaData<?, ?, ?> getTaskMetaData() {
+		return this.taskMetaData;
 	}
 
 	/**

@@ -190,12 +190,6 @@ public abstract class AbstractJobContainerTest extends OfficeFrameTestCase {
 			.createMock(ThreadState.class);
 
 	/**
-	 * {@link EscalationFlow} {@link FlowMetaData}.
-	 */
-	private final FlowMetaData<?> escalationFlowMetaData = this
-			.createMock(FlowMetaData.class);
-
-	/**
 	 * {@link EscalationFlow} {@link TaskMetaData}.
 	 */
 	private final TaskMetaData<?, ?, ?> escalationTaskMetaData = this
@@ -700,10 +694,7 @@ public abstract class AbstractJobContainerTest extends OfficeFrameTestCase {
 	 */
 	private void record_JobContainer_createEscalationJob(Throwable failure,
 			JobNode parallelOwner) {
-		this.recordReturn(this.escalation, this.escalation.getFlowMetaData(),
-				this.escalationFlowMetaData);
-		this.recordReturn(this.escalationFlowMetaData,
-				this.escalationFlowMetaData.getInitialTaskMetaData(),
+		this.recordReturn(this.escalation, this.escalation.getTaskMetaData(),
 				this.escalationTaskMetaData);
 		this.recordReturn(this.flow, this.flow.getThreadState(),
 				this.threadState);

@@ -635,16 +635,9 @@ public class RawOfficeMetaDataImpl implements RawOfficeMetaDataFactory,
 				continue; // escalation task not found
 			}
 
-			// Create flow meta-data (always use thread's flow asset manager)
-			FlowMetaData<?> escalationFlow = ConstructUtil.newFlowMetaData(
-					FlowInstigationStrategyEnum.PARALLEL,
-					escalationTaskMetaData, officeAssetManagerFactory,
-					AssetType.OFFICE, officeName, "Office Escalation " + i,
-					issues);
-
 			// Create and load the escalation
 			officeEscalations[i] = new EscalationFlowImpl(typeOfCause,
-					escalationFlow);
+					escalationTaskMetaData);
 		}
 
 		// Link tasks within the meta-data of the office
