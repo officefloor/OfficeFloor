@@ -128,6 +128,15 @@ public interface GovernanceMetaData<I, F extends Enum<F>> extends JobMetaData {
 			GovernanceControl<I, F> governanceControl);
 
 	/**
+	 * Obtains the {@link FlowMetaData} for the specified index.
+	 * 
+	 * @param flowIndex
+	 *            Index of the {@link FlowMetaData}.
+	 * @return {@link FlowMetaData} for the specified index.
+	 */
+	FlowMetaData<?> getFlow(int flowIndex);
+
+	/**
 	 * Creates the {@link JobNode} for the {@link GovernanceActivity}.
 	 * 
 	 * @param flow

@@ -29,6 +29,7 @@ import net.officefloor.frame.impl.execute.escalation.EscalationProcedureImpl;
 import net.officefloor.frame.impl.execute.governance.GovernanceMetaDataImpl;
 import net.officefloor.frame.internal.configuration.GovernanceConfiguration;
 import net.officefloor.frame.internal.configuration.GovernanceEscalationConfiguration;
+import net.officefloor.frame.internal.configuration.GovernanceFlowConfiguration;
 import net.officefloor.frame.internal.configuration.TaskNodeReference;
 import net.officefloor.frame.internal.construct.AssetManagerFactory;
 import net.officefloor.frame.internal.construct.OfficeMetaDataLocator;
@@ -36,6 +37,8 @@ import net.officefloor.frame.internal.construct.RawGovernanceMetaData;
 import net.officefloor.frame.internal.construct.RawGovernanceMetaDataFactory;
 import net.officefloor.frame.internal.structure.EscalationFlow;
 import net.officefloor.frame.internal.structure.EscalationProcedure;
+import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
+import net.officefloor.frame.internal.structure.FlowMetaData;
 import net.officefloor.frame.internal.structure.GovernanceMetaData;
 import net.officefloor.frame.internal.structure.ProcessState;
 import net.officefloor.frame.internal.structure.TaskMetaData;
@@ -211,6 +214,52 @@ public class RawGovernanceMetaDataImpl<I, F extends Enum<F>> implements
 	public void linkOfficeMetaData(OfficeMetaDataLocator taskLocator,
 			AssetManagerFactory assetManagerFactory, OfficeFloorIssues issues) {
 
+		// Obtain the listing of flow meta-data
+		GovernanceFlowConfiguration<F>[] flowConfigurations = this.governanceConfiguration
+				.getFlowConfiguration();
+		FlowMetaData<?>[] flowMetaDatas = new FlowMetaData[flowConfigurations.length];
+		for (int i = 0; i < flowMetaDatas.length; i++) {
+			GovernanceFlowConfiguration<F> flowConfiguration = flowConfigurations[i];
+
+			// Ensure have flow configuration
+			if (flowConfiguration == null) {
+				continue;
+			}
+
+			// Obtain the task reference
+			TaskNodeReference taskNodeReference = flowConfiguration
+					.getInitialTask();
+			if (taskNodeReference == null) {
+				issues.addIssue(AssetType.GOVERNANCE, this.governanceName,
+						"No task referenced for flow index " + i);
+				continue; // no reference task for flow
+			}
+
+			// Obtain the task meta-data
+			TaskMetaData<?, ?, ?> taskMetaData = ConstructUtil.getTaskMetaData(
+					taskNodeReference, taskLocator, issues,
+					AssetType.GOVERNANCE, this.governanceName, "flow index "
+							+ i, true);
+			if (taskMetaData == null) {
+				continue; // no initial task for flow
+			}
+
+			// Obtain the flow instigation strategy
+			FlowInstigationStrategyEnum instigationStrategy = flowConfiguration
+					.getInstigationStrategy();
+			if (instigationStrategy == null) {
+				issues.addIssue(AssetType.GOVERNANCE, this.governanceName,
+						"No instigation strategy provided for flow index " + i);
+				continue; // no instigation strategy
+			}
+
+			// Create and add the flow meta-data
+			flowMetaDatas[i] = ConstructUtil.newFlowMetaData(
+					instigationStrategy, taskMetaData, assetManagerFactory,
+					AssetType.GOVERNANCE, this.governanceName, "Flow" + i,
+					issues);
+		}
+
 		// Create the escalation procedure
 		GovernanceEscalationConfiguration[] escalationConfigurations = this.governanceConfiguration
 				.getEscalations();
@@ -251,7 +300,8 @@ public class RawGovernanceMetaDataImpl<I, F extends Enum<F>> implements
 				escalations);
 
 		// Load the remaining state
-		this.governanceMetaData.loadRemainingState(escalationProcedure);
+		this.governanceMetaData.loadRemainingState(flowMetaDatas,
+				escalationProcedure);
 	}
 
 }

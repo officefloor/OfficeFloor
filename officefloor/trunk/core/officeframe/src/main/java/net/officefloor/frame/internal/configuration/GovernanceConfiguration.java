@@ -19,6 +19,7 @@ package net.officefloor.frame.internal.configuration;
 
 import net.officefloor.frame.api.build.GovernanceFactory;
 import net.officefloor.frame.internal.structure.GovernanceActivity;
+import net.officefloor.frame.internal.structure.JobSequence;
 import net.officefloor.frame.spi.governance.Governance;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.frame.spi.team.Team;
@@ -60,6 +61,15 @@ public interface GovernanceConfiguration<I, F extends Enum<F>> {
 	 * @return Name of {@link Team}.
 	 */
 	String getTeamName();
+
+	/**
+	 * Obtains the configuration of the {@link JobSequence} instances for this
+	 * {@link Governance}.
+	 * 
+	 * @return Configuration of {@link JobSequence} instances for this
+	 *         {@link Governance}.
+	 */
+	GovernanceFlowConfiguration<F>[] getFlowConfiguration();
 
 	/**
 	 * Obtains the {@link GovernanceEscalationConfiguration} instances in

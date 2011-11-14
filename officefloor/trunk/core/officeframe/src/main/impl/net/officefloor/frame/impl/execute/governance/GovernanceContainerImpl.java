@@ -197,7 +197,7 @@ public class GovernanceContainerImpl<I, F extends Enum<F>> implements
 		synchronized (this.processState.getProcessLock()) {
 
 			// Determine if already active governance
-			if (this.governance != null) {
+			if (this.isActive()) {
 				return true; // already active governance
 			}
 
@@ -248,15 +248,23 @@ public class GovernanceContainerImpl<I, F extends Enum<F>> implements
 
 		synchronized (this.processState.getProcessLock()) {
 
+			// Determine if active.
+			// As Managed Object triggers creation, may not always be active.
+			boolean isActive = this.isActive();
+
 			// Ensure managed objects are ready
-			if (!this.isManagedObjectsReady(jobContext, jobNode, activateSet,
-					context)) {
-				return false; // not ready to enforce
+			if (isActive) {
+				if (!this.isManagedObjectsReady(jobContext, jobNode,
+						activateSet, context)) {
+					return false; // not ready to enforce
+				}
 			}
 
 			try {
-				// Enforce the governance
-				this.governance.enforceGovernance(governanceContext);
+				// Enforce the governance (if activated)
+				if (isActive) {
+					this.governance.enforceGovernance(governanceContext);
+				}
 
 			} finally {
 				// Governance enforced (as best), so now unregister
@@ -279,15 +287,23 @@ public class GovernanceContainerImpl<I, F extends Enum<F>> implements
 
 		synchronized (this.processState.getProcessLock()) {
 
+			// Determine if active.
+			// As Managed Object triggers creation, may not always be active.
+			boolean isActive = this.isActive();
+
 			// Ensure managed objects are ready
-			if (!this.isManagedObjectsReady(jobContext, jobNode, activateSet,
-					context)) {
-				return false; // not ready to disregard
+			if (isActive) {
+				if (!this.isManagedObjectsReady(jobContext, jobNode,
+						activateSet, context)) {
+					return false; // not ready to disregard
+				}
 			}
 
 			try {
-				// Disregard the governance
-				this.governance.disregardGovernance(governanceContext);
+				// Disregard the governance (if activated)
+				if (isActive) {
+					this.governance.disregardGovernance(governanceContext);
+				}
 
 			} finally {
 				// Governance disregarded (as best), so now unregister

@@ -23,6 +23,7 @@ import net.officefloor.frame.impl.execute.job.JobNodeActivatableSetImpl;
 import net.officefloor.frame.internal.structure.ActiveGovernanceControl;
 import net.officefloor.frame.internal.structure.ActiveGovernanceManager;
 import net.officefloor.frame.internal.structure.EscalationProcedure;
+import net.officefloor.frame.internal.structure.FlowMetaData;
 import net.officefloor.frame.internal.structure.GovernanceActivity;
 import net.officefloor.frame.internal.structure.GovernanceContainer;
 import net.officefloor.frame.internal.structure.GovernanceControl;
@@ -67,6 +68,11 @@ public class GovernanceMetaDataImpl<I, F extends Enum<F>> implements
 	private final Team team;
 
 	/**
+	 * {@link FlowMetaData} instances.
+	 */
+	private FlowMetaData<?>[] flowMetaData;
+
+	/**
 	 * {@link EscalationProcedure} for the {@link GovernanceActivity} failures.
 	 */
 	private EscalationProcedure escalationProcedure;
@@ -92,10 +98,14 @@ public class GovernanceMetaDataImpl<I, F extends Enum<F>> implements
 	/**
 	 * Loads the remaining state.
 	 * 
+	 * @param flowMetaData
+	 *            {@link FlowMetaData} instances.
 	 * @param escalationProcedure
 	 *            {@link EscalationProcedure}.
 	 */
-	public void loadRemainingState(EscalationProcedure escalationProcedure) {
+	public void loadRemainingState(FlowMetaData<?>[] flowMetaData,
+			EscalationProcedure escalationProcedure) {
+		this.flowMetaData = flowMetaData;
 		this.escalationProcedure = escalationProcedure;
 	}
 
@@ -179,6 +189,11 @@ public class GovernanceMetaDataImpl<I, F extends Enum<F>> implements
 	public GovernanceActivity<I, F> createDisregardActivity(
 			GovernanceControl<I, F> governanceControl) {
 		return new DisregardGovernanceActivity<I, F>(this, governanceControl);
+	}
+
+	@Override
+	public FlowMetaData<?> getFlow(int flowIndex) {
+		return this.flowMetaData[flowIndex];
 	}
 
 	@Override

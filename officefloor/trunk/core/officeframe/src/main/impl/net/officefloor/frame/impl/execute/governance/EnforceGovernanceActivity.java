@@ -53,14 +53,14 @@ public class EnforceGovernanceActivity<I, F extends Enum<F>> extends
 	 */
 
 	@Override
-	public void doActivity(GovernanceContext<F> governanceContext,
+	public boolean doActivity(GovernanceContext<F> governanceContext,
 			JobContext jobContext, JobNode jobNode,
 			JobNodeActivateSet activateSet, ContainerContext containerContext)
 			throws Throwable {
 
 		// Enforce the governance
-		this.governanceControl.enforceGovernance(governanceContext, jobContext,
-				jobNode, activateSet, containerContext);
+		return this.governanceControl.enforceGovernance(governanceContext,
+				jobContext, jobNode, activateSet, containerContext);
 	}
 
 }

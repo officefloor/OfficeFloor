@@ -20,6 +20,7 @@ package net.officefloor.frame.impl.execute.governance;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.impl.execute.job.AbstractJobContainer;
 import net.officefloor.frame.impl.execute.job.JobExecuteContext;
+import net.officefloor.frame.internal.structure.FlowMetaData;
 import net.officefloor.frame.internal.structure.GovernanceActivity;
 import net.officefloor.frame.internal.structure.GovernanceMetaData;
 import net.officefloor.frame.internal.structure.JobNode;
@@ -39,13 +40,17 @@ import net.officefloor.frame.spi.team.JobContext;
  * @author Daniel Sagenschneider
  */
 public class GovernanceJob<I, F extends Enum<F>, W extends Work> extends
-		AbstractJobContainer<W, GovernanceMetaData<I, F>> implements
-		GovernanceContext<F> {
+		AbstractJobContainer<W, GovernanceMetaData<I, F>> {
 
 	/**
 	 * No {@link ManagedObject} instances required for {@link Governance}.
 	 */
 	private static final ManagedObjectIndex[] REQUIRED_MANAGED_OBJECTS = new ManagedObjectIndex[0];
+
+	/**
+	 * {@link GovernanceContext} to disallow downcast to {@link GovernanceJob}.
+	 */
+	private final GovernanceContext<F> governanceContext = new GovernanceContextToken();
 
 	/**
 	 * {@link GovernanceActivity}.
@@ -80,29 +85,41 @@ public class GovernanceJob<I, F extends Enum<F>, W extends Work> extends
 			throws Throwable {
 
 		// Execute the governance activity
-		this.governanceActivity.doActivity(this, jobContext, this, activateSet,
-				this);
+		boolean isComplete = this.governanceActivity.doActivity(
+				this.governanceContext, jobContext, this, activateSet, this);
+
+		// Flag whether activity is complete
+		this.setJobComplete(isComplete);
 
 		// No further tasks expected after activity
 		return null;
 	}
 
-	/*
-	 * ======================== GovernanceContext ======================
+	/**
+	 * Provide token as {@link GovernanceContext} so can not downcast to obtain
+	 * additional functionality of {@link GovernanceJob}.
 	 */
+	private class GovernanceContextToken implements GovernanceContext<F> {
 
-	@Override
-	public void doFlow(F key, Object parameter) {
-		// TODO implement GovernanceContext<F>.doFlow
-		throw new UnsupportedOperationException(
-				"TODO implement GovernanceContext<F>.doFlow");
-	}
+		/*
+		 * ======================== GovernanceContext ======================
+		 */
 
-	@Override
-	public void doFlow(int flowIndex, Object parameter) {
-		// TODO implement GovernanceContext<F>.doFlow
-		throw new UnsupportedOperationException(
-				"TODO implement GovernanceContext<F>.doFlow");
+		@Override
+		public void doFlow(F key, Object parameter) {
+			this.doFlow(key.ordinal(), parameter);
+		}
+
+		@Override
+		public void doFlow(int flowIndex, Object parameter) {
+
+			// Obtain the flow meta-data
+			FlowMetaData<?> flowMetaData = GovernanceJob.this.nodeMetaData
+					.getFlow(flowIndex);
+
+			// Do the flow
+			GovernanceJob.this.doFlow(flowMetaData, parameter);
+		}
 	}
 
 }
