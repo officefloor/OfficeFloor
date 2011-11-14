@@ -211,13 +211,13 @@ public class ManagedObjectUnloadGovernanceTest extends
 		Team taskTeamTwo;
 		Team governanceTeam;
 		if (this.isMultiThreaded) {
-			taskTeamOne = new PassiveTeam();
-			taskTeamTwo = taskTeamOne;
-			governanceTeam = taskTeamOne;
-		} else {
 			taskTeamOne = new LeaderFollowerTeam("TASK", 5, 100);
 			taskTeamTwo = new LeaderFollowerTeam("TASK", 5, 100);
 			governanceTeam = new LeaderFollowerTeam("GOVERNANCE", 2, 100);
+		} else {
+			taskTeamOne = new PassiveTeam();
+			taskTeamTwo = taskTeamOne;
+			governanceTeam = taskTeamOne;
 		}
 
 		// Test
@@ -267,9 +267,10 @@ public class ManagedObjectUnloadGovernanceTest extends
 		}
 
 		// Configure the Governance
-		GovernanceBuilder governance = this.getOfficeBuilder().addGovernance(
-				"GOVERNANCE", new MockTransactionalGovernanceFactory(),
-				MockTransaction.class);
+		GovernanceBuilder<None> governance = this.getOfficeBuilder()
+				.addGovernance("GOVERNANCE",
+						new MockTransactionalGovernanceFactory(),
+						MockTransaction.class);
 		governance.setTeamName("GOVERNANCE_TEAM");
 		dependenciesOne.mapGovernance("GOVERNANCE");
 		dependenciesTwo.mapGovernance("GOVERNANCE");

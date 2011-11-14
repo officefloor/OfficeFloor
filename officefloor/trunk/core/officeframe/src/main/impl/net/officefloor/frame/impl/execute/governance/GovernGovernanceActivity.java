@@ -55,13 +55,13 @@ public class GovernGovernanceActivity<I, F extends Enum<F>> extends
 	 */
 
 	@Override
-	public void doActivity(GovernanceContext<F> governanceContext,
+	public boolean doActivity(GovernanceContext<F> governanceContext,
 			JobContext jobContext, JobNode jobNode,
 			JobNodeActivateSet activateSet, ContainerContext containerContext)
 			throws Throwable {
 
 		// Govern the managed object
-		this.governanceControl.governManagedObject(governanceContext,
+		return this.governanceControl.governManagedObject(governanceContext,
 				jobContext, jobNode, activateSet, containerContext);
 	}
 

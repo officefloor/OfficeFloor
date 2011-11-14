@@ -53,13 +53,13 @@ public class DisregardGovernanceActivity<I, F extends Enum<F>> extends
 	 */
 
 	@Override
-	public void doActivity(GovernanceContext<F> governanceContext,
+	public boolean doActivity(GovernanceContext<F> governanceContext,
 			JobContext jobContext, JobNode jobNode,
 			JobNodeActivateSet activateSet, ContainerContext containerContext)
 			throws Throwable {
 
 		// Disregard the governance
-		this.governanceControl.disregardGovernance(governanceContext,
+		return this.governanceControl.disregardGovernance(governanceContext,
 				jobContext, jobNode, activateSet, containerContext);
 	}
 

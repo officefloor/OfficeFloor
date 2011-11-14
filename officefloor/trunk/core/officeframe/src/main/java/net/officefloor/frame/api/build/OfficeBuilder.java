@@ -145,7 +145,7 @@ public interface OfficeBuilder {
 	 *            Extension interface.
 	 * @return {@link GovernanceBuilder}.
 	 */
-	<I, F extends Enum<F>> GovernanceBuilder addGovernance(
+	<I, F extends Enum<F>> GovernanceBuilder<F> addGovernance(
 			String governanceName,
 			GovernanceFactory<? super I, F> governanceFactory,
 			Class<I> extensionInterface);
@@ -214,8 +214,8 @@ public interface OfficeBuilder {
 	void addOfficeEnhancer(OfficeEnhancer officeEnhancer);
 
 	/**
-	 * Adds an {@link EscalationFlow} for issues not handled by the {@link JobSequence}
-	 * of the {@link Office}.
+	 * Adds an {@link EscalationFlow} for issues not handled by the
+	 * {@link JobSequence} of the {@link Office}.
 	 * 
 	 * @param typeOfCause
 	 *            Type of cause handled by this {@link EscalationFlow}.

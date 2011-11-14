@@ -17,15 +17,22 @@
  */
 package net.officefloor.frame.impl.construct.governance;
 
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
 import net.officefloor.frame.api.build.GovernanceBuilder;
 import net.officefloor.frame.api.build.GovernanceFactory;
 import net.officefloor.frame.api.execute.Task;
+import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.impl.construct.task.TaskNodeReferenceImpl;
+import net.officefloor.frame.impl.construct.util.ConstructUtil;
 import net.officefloor.frame.internal.configuration.GovernanceConfiguration;
 import net.officefloor.frame.internal.configuration.GovernanceEscalationConfiguration;
+import net.officefloor.frame.internal.configuration.GovernanceFlowConfiguration;
+import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
+import net.officefloor.frame.internal.structure.JobSequence;
 import net.officefloor.frame.spi.governance.Governance;
 import net.officefloor.frame.spi.team.Team;
 
@@ -35,7 +42,7 @@ import net.officefloor.frame.spi.team.Team;
  * @author Daniel Sagenschneider
  */
 public class GovernanceBuilderImpl<I, F extends Enum<F>> implements
-		GovernanceBuilder, GovernanceConfiguration<I, F> {
+		GovernanceBuilder<F>, GovernanceConfiguration<I, F> {
 
 	/**
 	 * Name of the {@link Governance}.
@@ -57,6 +64,11 @@ public class GovernanceBuilderImpl<I, F extends Enum<F>> implements
 	 * {@link Task} instances.
 	 */
 	private String teamName;
+
+	/**
+	 * {@link JobSequence} instances to be linked to this {@link Governance}.
+	 */
+	private final Map<Integer, GovernanceFlowConfigurationImpl<F>> flows = new HashMap<Integer, GovernanceFlowConfigurationImpl<F>>();
 
 	/**
 	 * {@link GovernanceEscalationConfiguration} instances.
@@ -91,6 +103,57 @@ public class GovernanceBuilderImpl<I, F extends Enum<F>> implements
 	}
 
 	@Override
+	public void linkFlow(F key, String workName, String taskName,
+			FlowInstigationStrategyEnum strategy, Class<?> argumentType) {
+		this.linkFlow(key.ordinal(), key, workName, taskName, strategy,
+				argumentType);
+	}
+
+	@Override
+	public void linkFlow(int flowIndex, String workName, String taskName,
+			FlowInstigationStrategyEnum strategy, Class<?> argumentType) {
+		this.linkFlow(flowIndex, null, workName, taskName, strategy,
+				argumentType);
+	}
+
+	/**
+	 * Links in a {@link JobSequence}.
+	 * 
+	 * @param flowIndex
+	 *            Index of the {@link JobSequence}.
+	 * @param flowKey
+	 *            Key of the {@link JobSequence}. Should be <code>null</code> if
+	 *            indexed.
+	 * @param workName
+	 *            Name of the {@link Work}.
+	 * @param taskName
+	 *            Name of the {@link Task}.
+	 * @param strategy
+	 *            {@link FlowInstigationStrategyEnum}.
+	 * @param argumentType
+	 *            Type of argument passed to the instigated {@link JobSequence}.
+	 */
+	private void linkFlow(int flowIndex, F flowKey, String workName,
+			String taskName, FlowInstigationStrategyEnum strategy,
+			Class<?> argumentType) {
+
+		// Determine the flow name
+		String flowName = (flowKey != null ? flowKey.name() : String
+				.valueOf(flowIndex));
+
+		// Create the task node reference
+		TaskNodeReferenceImpl taskNode = new TaskNodeReferenceImpl(workName,
+				taskName, argumentType);
+
+		// Create the flow configuration
+		GovernanceFlowConfigurationImpl<F> flow = new GovernanceFlowConfigurationImpl<F>(
+				flowName, strategy, taskNode, flowIndex, flowKey);
+
+		// Register the flow
+		this.flows.put(new Integer(flowIndex), flow);
+	}
+
+	@Override
 	public void addEscalation(Class<? extends Throwable> typeOfCause,
 			String workName, String taskName) {
 		this.escalations.add(new GovernanceEscalationConfigurationImpl(
@@ -120,6 +183,12 @@ public class GovernanceBuilderImpl<I, F extends Enum<F>> implements
 	@Override
 	public String getTeamName() {
 		return this.teamName;
+	}
+
+	@Override
+	public GovernanceFlowConfiguration<F>[] getFlowConfiguration() {
+		return ConstructUtil.toArray(this.flows,
+				new GovernanceFlowConfiguration[0]);
 	}
 
 	@Override

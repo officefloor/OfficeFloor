@@ -35,6 +35,7 @@ import net.officefloor.frame.impl.execute.governance.EnforceGovernanceActivity;
 import net.officefloor.frame.impl.execute.governance.GovernGovernanceActivity;
 import net.officefloor.frame.internal.configuration.GovernanceConfiguration;
 import net.officefloor.frame.internal.configuration.GovernanceEscalationConfiguration;
+import net.officefloor.frame.internal.configuration.GovernanceFlowConfiguration;
 import net.officefloor.frame.internal.configuration.TaskNodeReference;
 import net.officefloor.frame.internal.construct.AssetManagerFactory;
 import net.officefloor.frame.internal.construct.OfficeMetaDataLocator;
@@ -42,8 +43,11 @@ import net.officefloor.frame.internal.construct.RawGovernanceMetaData;
 import net.officefloor.frame.internal.construct.RawGovernanceMetaDataFactory;
 import net.officefloor.frame.internal.structure.ActiveGovernance;
 import net.officefloor.frame.internal.structure.ActiveGovernanceManager;
+import net.officefloor.frame.internal.structure.AssetManager;
 import net.officefloor.frame.internal.structure.EscalationFlow;
 import net.officefloor.frame.internal.structure.EscalationProcedure;
+import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
+import net.officefloor.frame.internal.structure.FlowMetaData;
 import net.officefloor.frame.internal.structure.GovernanceControl;
 import net.officefloor.frame.internal.structure.GovernanceMetaData;
 import net.officefloor.frame.internal.structure.JobSequence;
@@ -245,6 +249,7 @@ public class RawGovernanceMetaDataTest extends OfficeFrameTestCase {
 
 		// Record simple governance
 		this.record_initGovernance();
+		this.record_flows();
 		this.record_escalations();
 
 		// Attempt to construct governance
@@ -286,6 +291,260 @@ public class RawGovernanceMetaDataTest extends OfficeFrameTestCase {
 	}
 
 	/**
+	 * Ensure issue if no {@link Work} name for flow.
+	 */
+	public void testNoFlowWorkName() {
+
+		final GovernanceFlowConfiguration<?> flowConfiguration = this
+				.createMock(GovernanceFlowConfiguration.class);
+		final TaskNodeReference taskNode = this
+				.createMock(TaskNodeReference.class);
+
+		// Record initiate
+		this.record_initGovernance();
+
+		// Record flow
+		this.recordReturn(this.configuration,
+				this.configuration.getFlowConfiguration(),
+				new GovernanceFlowConfiguration<?>[] { flowConfiguration });
+		this.recordReturn(flowConfiguration,
+				flowConfiguration.getInitialTask(), taskNode);
+		this.recordReturn(taskNode, taskNode.getWorkName(), null);
+		this.record_issue("No work name provided for flow index 0");
+
+		// Record no escalations
+		this.record_escalations();
+
+		// Attempt to construct governance
+		this.replayMockObjects();
+		RawGovernanceMetaData<?, ?> rawMetaData = this
+				.constructRawGovernanceMetaData(true);
+		rawMetaData.linkOfficeMetaData(this.officeMetaDataLocator,
+				this.assetManagerFactory, this.issues);
+		this.verifyMockObjects();
+	}
+
+	/**
+	 * Ensure issue if no {@link Task} name for flow.
+	 */
+	public void testNoFlowTaskName() {
+
+		final GovernanceFlowConfiguration<?> flowConfiguration = this
+				.createMock(GovernanceFlowConfiguration.class);
+		final TaskNodeReference taskNode = this
+				.createMock(TaskNodeReference.class);
+
+		// Record initiate
+		this.record_initGovernance();
+
+		// Record flow
+		this.recordReturn(this.configuration,
+				this.configuration.getFlowConfiguration(),
+				new GovernanceFlowConfiguration<?>[] { flowConfiguration });
+		this.recordReturn(flowConfiguration,
+				flowConfiguration.getInitialTask(), taskNode);
+		this.recordReturn(taskNode, taskNode.getWorkName(), "WORK");
+		this.recordReturn(taskNode, taskNode.getTaskName(), null);
+		this.record_issue("No task name provided for flow index 0");
+
+		// Record no escalations
+		this.record_escalations();
+
+		// Attempt to construct governance
+		this.replayMockObjects();
+		RawGovernanceMetaData<?, ?> rawMetaData = this
+				.constructRawGovernanceMetaData(true);
+		rawMetaData.linkOfficeMetaData(this.officeMetaDataLocator,
+				this.assetManagerFactory, this.issues);
+		this.verifyMockObjects();
+	}
+
+	/**
+	 * Ensure issue if no {@link Task} for flow.
+	 */
+	public void testNoFlowTask() {
+
+		final GovernanceFlowConfiguration<?> flowConfiguration = this
+				.createMock(GovernanceFlowConfiguration.class);
+		final TaskNodeReference taskNode = this
+				.createMock(TaskNodeReference.class);
+
+		// Record initiate
+		this.record_initGovernance();
+
+		// Record flow
+		this.recordReturn(this.configuration,
+				this.configuration.getFlowConfiguration(),
+				new GovernanceFlowConfiguration<?>[] { flowConfiguration });
+		this.recordReturn(flowConfiguration,
+				flowConfiguration.getInitialTask(), taskNode);
+		this.recordReturn(taskNode, taskNode.getWorkName(), "WORK");
+		this.recordReturn(taskNode, taskNode.getTaskName(), "TASK");
+		this.recordReturn(this.officeMetaDataLocator,
+				this.officeMetaDataLocator.getTaskMetaData("WORK", "TASK"),
+				null);
+		this.record_issue("Can not find task meta-data (work=WORK, task=TASK) for flow index 0");
+
+		// Record no escalations
+		this.record_escalations();
+
+		// Attempt to construct governance
+		this.replayMockObjects();
+		RawGovernanceMetaData<?, ?> rawMetaData = this
+				.constructRawGovernanceMetaData(true);
+		rawMetaData.linkOfficeMetaData(this.officeMetaDataLocator,
+				this.assetManagerFactory, this.issues);
+		this.verifyMockObjects();
+	}
+
+	/**
+	 * Ensure issue if incorrect parameter for flow.
+	 */
+	public void testFlowIncorrectParameter() {
+
+		final GovernanceFlowConfiguration<?> flowConfiguration = this
+				.createMock(GovernanceFlowConfiguration.class);
+		final TaskNodeReference taskNode = this
+				.createMock(TaskNodeReference.class);
+		final TaskMetaData<?, ?, ?> taskMetaData = this
+				.createMock(TaskMetaData.class);
+
+		// Record initiate
+		this.record_initGovernance();
+
+		// Record incorrect parameter for flow
+		this.recordReturn(this.configuration,
+				this.configuration.getFlowConfiguration(),
+				new GovernanceFlowConfiguration<?>[] { flowConfiguration });
+		this.recordReturn(flowConfiguration,
+				flowConfiguration.getInitialTask(), taskNode);
+		this.recordReturn(taskNode, taskNode.getWorkName(), "WORK");
+		this.recordReturn(taskNode, taskNode.getTaskName(), "TASK");
+		this.recordReturn(this.officeMetaDataLocator,
+				this.officeMetaDataLocator.getTaskMetaData("WORK", "TASK"),
+				taskMetaData);
+		this.recordReturn(taskNode, taskNode.getArgumentType(), String.class);
+		this.recordReturn(taskMetaData, taskMetaData.getParameterType(),
+				Integer.class);
+		this.record_issue("Argument is not compatible with task parameter (argument="
+				+ String.class.getName()
+				+ ", parameter="
+				+ Integer.class.getName()
+				+ ", work=WORK, task=TASK) for flow index 0");
+
+		// Record no escalations
+		this.record_escalations();
+
+		// Attempt to construct governance
+		this.replayMockObjects();
+		RawGovernanceMetaData<?, ?> rawMetaData = this
+				.constructRawGovernanceMetaData(true);
+		rawMetaData.linkOfficeMetaData(this.officeMetaDataLocator,
+				this.assetManagerFactory, this.issues);
+		this.verifyMockObjects();
+	}
+
+	/**
+	 * Ensure issue if no {@link FlowInstigationStrategyEnum}.
+	 */
+	public void testNoFlowInstigationStrategy() {
+
+		final GovernanceFlowConfiguration<?> flowConfiguration = this
+				.createMock(GovernanceFlowConfiguration.class);
+		final TaskNodeReference taskNode = this
+				.createMock(TaskNodeReference.class);
+		final TaskMetaData<?, ?, ?> taskMetaData = this
+				.createMock(TaskMetaData.class);
+
+		// Record initiate
+		this.record_initGovernance();
+
+		// Record incorrect parameter for flow
+		this.recordReturn(this.configuration,
+				this.configuration.getFlowConfiguration(),
+				new GovernanceFlowConfiguration<?>[] { flowConfiguration });
+		this.recordReturn(flowConfiguration,
+				flowConfiguration.getInitialTask(), taskNode);
+		this.recordReturn(taskNode, taskNode.getWorkName(), "WORK");
+		this.recordReturn(taskNode, taskNode.getTaskName(), "TASK");
+		this.recordReturn(this.officeMetaDataLocator,
+				this.officeMetaDataLocator.getTaskMetaData("WORK", "TASK"),
+				taskMetaData);
+		this.recordReturn(taskNode, taskNode.getArgumentType(), String.class);
+		this.recordReturn(taskMetaData, taskMetaData.getParameterType(),
+				String.class);
+		this.recordReturn(flowConfiguration,
+				flowConfiguration.getInstigationStrategy(), null);
+		this.record_issue("No instigation strategy provided for flow index 0");
+
+		// Record no escalations
+		this.record_escalations();
+
+		// Attempt to construct governance
+		this.replayMockObjects();
+		RawGovernanceMetaData<?, ?> rawMetaData = this
+				.constructRawGovernanceMetaData(true);
+		rawMetaData.linkOfficeMetaData(this.officeMetaDataLocator,
+				this.assetManagerFactory, this.issues);
+		this.verifyMockObjects();
+	}
+
+	/**
+	 * Ensure able to configure a flow.
+	 */
+	public void testGovernanceFlow() {
+
+		// Record flows for governance
+		this.record_initGovernance();
+		TaskMetaData<?, ?, ?>[] taskMetaDatas = this.record_flows(
+				FlowInstigationStrategyEnum.SEQUENTIAL,
+				FlowInstigationStrategyEnum.ASYNCHRONOUS);
+		this.record_escalations();
+
+		// Attempt to construct governance
+		this.replayMockObjects();
+		RawGovernanceMetaData<?, ?> rawMetaData = this
+				.constructRawGovernanceMetaData(true);
+		rawMetaData.linkOfficeMetaData(this.officeMetaDataLocator,
+				this.assetManagerFactory, this.issues);
+		this.verifyMockObjects();
+
+		// Verify the flows
+		GovernanceMetaData<?, ?> governanceMetaData = rawMetaData
+				.getGovernanceMetaData();
+
+		// Verify the first flow
+		FlowMetaData<?> flowOne = governanceMetaData.getFlow(0);
+		assertNotNull("Should have first flow", flowOne);
+		assertEquals("Incorrect task meta-data for first flow",
+				taskMetaDatas[0], flowOne.getInitialTaskMetaData());
+		assertEquals("Incorrect instigation strategy for first flow",
+				FlowInstigationStrategyEnum.SEQUENTIAL,
+				flowOne.getInstigationStrategy());
+		assertNull("Should not have asset manager for first flow",
+				flowOne.getFlowManager());
+
+		// Verify the second flow
+		FlowMetaData<?> flowTwo = governanceMetaData.getFlow(1);
+		assertNotNull("Should have second flow", flowTwo);
+		assertEquals("Incorrect task meta-data for second flow",
+				taskMetaDatas[1], flowTwo.getInitialTaskMetaData());
+		assertEquals("Incorrect instigation strategy for second flow",
+				FlowInstigationStrategyEnum.ASYNCHRONOUS,
+				flowTwo.getInstigationStrategy());
+		assertNotNull("Should have asset manager for second flow",
+				flowTwo.getFlowManager());
+
+		// Should not be a third flow
+		try {
+			governanceMetaData.getFlow(2);
+			fail("Should not be successful");
+		} catch (ArrayIndexOutOfBoundsException ex) {
+			// Correctly have no third flow
+		}
+	}
+
+	/**
 	 * Ensure issue if no cause type for {@link Escalation}.
 	 */
 	public void testNoEscalationTypeOfCause() {
@@ -295,11 +554,45 @@ public class RawGovernanceMetaDataTest extends OfficeFrameTestCase {
 
 		// Record simple governance
 		this.record_initGovernance();
+		this.record_flows();
 		this.recordReturn(this.configuration,
 				this.configuration.getEscalations(),
 				new GovernanceEscalationConfiguration[] { escalation });
 		this.recordReturn(escalation, escalation.getTypeOfCause(), null);
 		this.record_issue("No escalation type for escalation index 0");
+
+		// Attempt to construct governance
+		this.replayMockObjects();
+		RawGovernanceMetaData<?, ?> rawMetaData = this
+				.constructRawGovernanceMetaData(true);
+		rawMetaData.linkOfficeMetaData(this.officeMetaDataLocator,
+				this.assetManagerFactory, this.issues);
+		this.verifyMockObjects();
+	}
+
+	/**
+	 * Ensure issue if no {@link Work} name for {@link Escalation}.
+	 */
+	public void testNoEscalationWorkName() {
+
+		final GovernanceEscalationConfiguration escalation = this
+				.createMock(GovernanceEscalationConfiguration.class);
+		final TaskNodeReference taskNodeReference = this
+				.createMock(TaskNodeReference.class);
+
+		// Record simple governance
+		this.record_initGovernance();
+		this.record_flows();
+		this.recordReturn(this.configuration,
+				this.configuration.getEscalations(),
+				new GovernanceEscalationConfiguration[] { escalation });
+		this.recordReturn(escalation, escalation.getTypeOfCause(),
+				SQLException.class);
+		this.recordReturn(escalation, escalation.getTaskNodeReference(),
+				taskNodeReference);
+		this.recordReturn(taskNodeReference, taskNodeReference.getWorkName(),
+				null);
+		this.record_issue("No work name provided for escalation index 0");
 
 		// Attempt to construct governance
 		this.replayMockObjects();
@@ -323,6 +616,7 @@ public class RawGovernanceMetaDataTest extends OfficeFrameTestCase {
 
 		// Record simple governance
 		this.record_initGovernance();
+		this.record_flows();
 		this.recordReturn(this.configuration,
 				this.configuration.getEscalations(),
 				new GovernanceEscalationConfiguration[] { escalation });
@@ -335,38 +629,6 @@ public class RawGovernanceMetaDataTest extends OfficeFrameTestCase {
 		this.recordReturn(taskNodeReference, taskNodeReference.getTaskName(),
 				null);
 		this.record_issue("No task name provided for escalation index 0");
-
-		// Attempt to construct governance
-		this.replayMockObjects();
-		RawGovernanceMetaData<?, ?> rawMetaData = this
-				.constructRawGovernanceMetaData(true);
-		rawMetaData.linkOfficeMetaData(this.officeMetaDataLocator,
-				this.assetManagerFactory, this.issues);
-		this.verifyMockObjects();
-	}
-
-	/**
-	 * Ensure issue if no {@link Work} name for {@link Escalation}.
-	 */
-	public void testNoEscalationWorkName() {
-
-		final GovernanceEscalationConfiguration escalation = this
-				.createMock(GovernanceEscalationConfiguration.class);
-		final TaskNodeReference taskNodeReference = this
-				.createMock(TaskNodeReference.class);
-
-		// Record simple governance
-		this.record_initGovernance();
-		this.recordReturn(this.configuration,
-				this.configuration.getEscalations(),
-				new GovernanceEscalationConfiguration[] { escalation });
-		this.recordReturn(escalation, escalation.getTypeOfCause(),
-				SQLException.class);
-		this.recordReturn(escalation, escalation.getTaskNodeReference(),
-				taskNodeReference);
-		this.recordReturn(taskNodeReference, taskNodeReference.getWorkName(),
-				null);
-		this.record_issue("No work name provided for escalation index 0");
 
 		// Attempt to construct governance
 		this.replayMockObjects();
@@ -391,6 +653,7 @@ public class RawGovernanceMetaDataTest extends OfficeFrameTestCase {
 
 		// Record simple governance
 		this.record_initGovernance();
+		this.record_flows();
 		this.recordReturn(this.configuration,
 				this.configuration.getEscalations(),
 				new GovernanceEscalationConfiguration[] { escalation });
@@ -434,6 +697,7 @@ public class RawGovernanceMetaDataTest extends OfficeFrameTestCase {
 
 		// Record simple governance
 		this.record_initGovernance();
+		this.record_flows();
 		this.recordReturn(this.configuration,
 				this.configuration.getEscalations(),
 				new GovernanceEscalationConfiguration[] { escalation });
@@ -479,6 +743,7 @@ public class RawGovernanceMetaDataTest extends OfficeFrameTestCase {
 
 		// Record simple governance
 		this.record_initGovernance();
+		this.record_flows();
 		TaskMetaData<?, ?, ?> taskMetaData = this.record_escalations(exception)[0];
 
 		// Attempt to construct governance
@@ -521,6 +786,73 @@ public class RawGovernanceMetaDataTest extends OfficeFrameTestCase {
 				this.configuration.getExtensionInterface(), String.class);
 		this.recordReturn(this.configuration, this.configuration.getTeamName(),
 				TEAM_NAME);
+	}
+
+	/**
+	 * Records the flows.
+	 * 
+	 * @param instigationStrategies
+	 *            {@link FlowInstigationStrategyEnum} strategies for the
+	 *            respective flows.
+	 * @return {@link TaskMetaData} for the flow instances.
+	 */
+	private TaskMetaData<?, ?, ?>[] record_flows(
+			FlowInstigationStrategyEnum... instigationStrategies) {
+
+		// Create the listing of mocks
+		final GovernanceFlowConfiguration<?>[] flowConfigurations = new GovernanceFlowConfiguration<?>[instigationStrategies.length];
+		final TaskNodeReference[] taskNodes = new TaskNodeReference[instigationStrategies.length];
+		final TaskMetaData<?, ?, ?>[] taskMetaDatas = new TaskMetaData<?, ?, ?>[instigationStrategies.length];
+		for (int i = 0; i < instigationStrategies.length; i++) {
+			flowConfigurations[i] = this
+					.createMock(GovernanceFlowConfiguration.class);
+			taskNodes[i] = this.createMock(TaskNodeReference.class);
+			taskMetaDatas[i] = this.createMock(TaskMetaData.class);
+		}
+
+		// Record configuration for flows
+		this.recordReturn(this.configuration,
+				this.configuration.getFlowConfiguration(), flowConfigurations);
+
+		// Record configuring each flow
+		for (int i = 0; i < instigationStrategies.length; i++) {
+			GovernanceFlowConfiguration<?> flowConfiguration = flowConfigurations[i];
+			TaskNodeReference taskNode = taskNodes[i];
+			TaskMetaData<?, ?, ?> taskMetaData = taskMetaDatas[i];
+			FlowInstigationStrategyEnum instigationStrategy = instigationStrategies[i];
+
+			String workName = "WORK" + i;
+			String taskName = "TASK" + i;
+
+			// Record configuring the flow
+			this.recordReturn(flowConfiguration,
+					flowConfiguration.getInitialTask(), taskNode);
+			this.recordReturn(taskNode, taskNode.getWorkName(), workName);
+			this.recordReturn(taskNode, taskNode.getTaskName(), taskName);
+			this.recordReturn(this.officeMetaDataLocator,
+					this.officeMetaDataLocator.getTaskMetaData(workName,
+							taskName), taskMetaData);
+			this.recordReturn(taskNode, taskNode.getArgumentType(),
+					String.class);
+			this.recordReturn(taskMetaData, taskMetaData.getParameterType(),
+					String.class);
+			this.recordReturn(flowConfiguration,
+					flowConfiguration.getInstigationStrategy(),
+					instigationStrategy);
+
+			// Asset Manager required for asynchronous flow
+			if (instigationStrategy == FlowInstigationStrategyEnum.ASYNCHRONOUS) {
+				final AssetManager assetManager = this
+						.createMock(AssetManager.class);
+				this.recordReturn(this.assetManagerFactory,
+						this.assetManagerFactory.createAssetManager(
+								AssetType.GOVERNANCE, GOVERNANCE_NAME, "Flow"
+										+ i, this.issues), assetManager);
+			}
+		}
+
+		// Return the task meta-data
+		return taskMetaDatas;
 	}
 
 	/**

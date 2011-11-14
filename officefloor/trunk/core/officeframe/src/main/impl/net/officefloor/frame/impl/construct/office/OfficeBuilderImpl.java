@@ -217,7 +217,7 @@ public class OfficeBuilderImpl implements OfficeBuilder, OfficeConfiguration {
 	}
 
 	@Override
-	public <I, F extends Enum<F>> GovernanceBuilder addGovernance(
+	public <I, F extends Enum<F>> GovernanceBuilder<F> addGovernance(
 			String governanceName,
 			GovernanceFactory<? super I, F> governanceFactory,
 			Class<I> extensionInterface) {
