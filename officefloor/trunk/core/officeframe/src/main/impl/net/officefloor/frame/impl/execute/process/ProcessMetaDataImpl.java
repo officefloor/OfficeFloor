@@ -19,11 +19,8 @@
 package net.officefloor.frame.impl.execute.process;
 
 import net.officefloor.frame.internal.structure.AdministratorMetaData;
-import net.officefloor.frame.internal.structure.AssetManager;
-import net.officefloor.frame.internal.structure.GovernanceMetaData;
 import net.officefloor.frame.internal.structure.ManagedObjectMetaData;
 import net.officefloor.frame.internal.structure.ProcessMetaData;
-import net.officefloor.frame.internal.structure.ProcessState;
 import net.officefloor.frame.internal.structure.ThreadMetaData;
 
 /**
@@ -39,11 +36,6 @@ public class ProcessMetaDataImpl implements ProcessMetaData {
 	private final ManagedObjectMetaData<?>[] managedObjectMetaData;
 
 	/**
-	 * {@link GovernanceMetaData} instances.
-	 */
-	private final GovernanceMetaData<?, ?>[] governanceMetaData;
-
-	/**
 	 * {@link AdministratorMetaData} instances.
 	 */
 	private final AdministratorMetaData<?, ?>[] administratorMetaData;
@@ -54,35 +46,22 @@ public class ProcessMetaDataImpl implements ProcessMetaData {
 	private final ThreadMetaData threadMetaData;
 
 	/**
-	 * {@link ProcessState} completion {@link AssetManager}.
-	 */
-	private final AssetManager processCompletionAssetManager;
-
-	/**
 	 * Initiate.
 	 * 
 	 * @param managedObjectMetaData
 	 *            {@link ManagedObjectMetaData} instances.
-	 * @param governanceMetaData
-	 *            {@link GovernanceMetaData} instances.
 	 * @param administratorMetaData
 	 *            {@link AdministratorMetaData} instances.
 	 * @param threadMetaData
 	 *            {@link ThreadMetaData}.
-	 * @param processCompletionAssetManager
-	 *            {@link ProcessState} completion {@link AssetManager}.
 	 */
 	public ProcessMetaDataImpl(
 			ManagedObjectMetaData<?>[] managedObjectMetaData,
-			GovernanceMetaData<?, ?>[] governanceMetaData,
 			AdministratorMetaData<?, ?>[] administratorMetaData,
-			ThreadMetaData threadMetaData,
-			AssetManager processCompletionAssetManager) {
+			ThreadMetaData threadMetaData) {
 		this.managedObjectMetaData = managedObjectMetaData;
-		this.governanceMetaData = governanceMetaData;
 		this.administratorMetaData = administratorMetaData;
 		this.threadMetaData = threadMetaData;
-		this.processCompletionAssetManager = processCompletionAssetManager;
 	}
 
 	/*
@@ -95,11 +74,6 @@ public class ProcessMetaDataImpl implements ProcessMetaData {
 	}
 
 	@Override
-	public GovernanceMetaData<?, ?>[] getGovernanceMetaData() {
-		return this.governanceMetaData;
-	}
-
-	@Override
 	public AdministratorMetaData<?, ?>[] getAdministratorMetaData() {
 		return this.administratorMetaData;
 	}
@@ -107,11 +81,6 @@ public class ProcessMetaDataImpl implements ProcessMetaData {
 	@Override
 	public ThreadMetaData getThreadMetaData() {
 		return this.threadMetaData;
-	}
-
-	@Override
-	public AssetManager getProcessCompletionAssetManager() {
-		return this.processCompletionAssetManager;
 	}
 
 }

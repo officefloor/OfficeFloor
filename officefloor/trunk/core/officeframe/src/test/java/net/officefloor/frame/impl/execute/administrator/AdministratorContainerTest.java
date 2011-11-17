@@ -24,10 +24,9 @@ import net.officefloor.frame.internal.structure.AdministratorContext;
 import net.officefloor.frame.internal.structure.AdministratorMetaData;
 import net.officefloor.frame.internal.structure.ContainerContext;
 import net.officefloor.frame.internal.structure.DutyMetaData;
-import net.officefloor.frame.internal.structure.JobSequence;
 import net.officefloor.frame.internal.structure.FlowMetaData;
 import net.officefloor.frame.internal.structure.GovernanceContainer;
-import net.officefloor.frame.internal.structure.ProcessState;
+import net.officefloor.frame.internal.structure.JobSequence;
 import net.officefloor.frame.internal.structure.TaskDutyAssociation;
 import net.officefloor.frame.internal.structure.ThreadState;
 import net.officefloor.frame.spi.administration.Administrator;
@@ -248,7 +247,6 @@ public class AdministratorContainerTest<I, A extends Enum<A>, F extends Enum<F>,
 
 		final int PROCESS_INDEX = 3;
 		final ThreadState threadState = this.createMock(ThreadState.class);
-		final ProcessState processState = this.createMock(ProcessState.class);
 		final GovernanceContainer<?, ?> governanceContainer = this
 				.createMock(GovernanceContainer.class);
 
@@ -261,10 +259,8 @@ public class AdministratorContainerTest<I, A extends Enum<A>, F extends Enum<F>,
 						.ordinal()), PROCESS_INDEX);
 		this.recordReturn(this.context, this.context.getThreadState(),
 				threadState);
-		this.recordReturn(threadState, threadState.getProcessState(),
-				processState);
-		this.recordReturn(processState,
-				processState.getGovernanceContainer(PROCESS_INDEX),
+		this.recordReturn(threadState,
+				threadState.getGovernanceContainer(PROCESS_INDEX),
 				governanceContainer);
 
 		// Return the governance container

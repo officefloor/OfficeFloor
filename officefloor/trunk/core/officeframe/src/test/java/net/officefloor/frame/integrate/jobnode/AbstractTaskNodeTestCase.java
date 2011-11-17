@@ -292,7 +292,7 @@ public abstract class AbstractTaskNodeTestCase<W extends Work> extends
 				false, null, 1000, new ManagedObjectGovernanceMetaData[0]);
 		ThreadMetaData threadMetaData = new ThreadMetaDataImpl(
 				new ManagedObjectMetaData[] { threadMoMetaData },
-				new AdministratorMetaData[0]);
+				new GovernanceMetaData[0], new AdministratorMetaData[0]);
 
 		// Create the process meta-data (single instance)
 		ManagedObjectMetaDataImpl<?> processMoMetaData = new ManagedObjectMetaDataImpl(
@@ -303,8 +303,7 @@ public abstract class AbstractTaskNodeTestCase<W extends Work> extends
 		processMoMetaData.loadRemainingState(null, null);
 		ProcessMetaData processMetaData = new ProcessMetaDataImpl(
 				new ManagedObjectMetaData[] { processMoMetaData },
-				new GovernanceMetaData[0], new AdministratorMetaData[0],
-				threadMetaData, new AssetManagerImpl(null));
+				new AdministratorMetaData[0], threadMetaData);
 
 		// Create Flow for executing
 		ProcessState processState = new ProcessStateImpl(processMetaData,

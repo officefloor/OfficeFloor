@@ -656,8 +656,6 @@ public abstract class AbstractManagedObjectContainerImplTest extends
 				this.jobSequence);
 		this.recordReturn(this.jobSequence, this.jobSequence.getThreadState(),
 				this.threadState);
-		this.recordReturn(this.threadState, this.threadState.getProcessState(),
-				this.processState);
 
 		// Provide governance
 		NEXT_GOVERNANCE: for (int i = 0; i < this.moGovernanceMetaData.length; i++) {
@@ -684,8 +682,8 @@ public abstract class AbstractManagedObjectContainerImplTest extends
 			// Record determining if activate governance
 			this.recordReturn(moGovMetaData,
 					moGovMetaData.getGovernanceIndex(), i);
-			this.recordReturn(this.processState,
-					this.processState.getGovernanceContainer(i),
+			this.recordReturn(this.threadState,
+					this.threadState.getGovernanceContainer(i),
 					governanceContainer);
 			this.recordReturn(governanceContainer,
 					governanceContainer.isActive(), isActivateGovernance);

@@ -67,7 +67,6 @@ import net.officefloor.frame.internal.construct.RawWorkMetaData;
 import net.officefloor.frame.internal.construct.RawWorkMetaDataFactory;
 import net.officefloor.frame.internal.structure.AdministratorMetaData;
 import net.officefloor.frame.internal.structure.AdministratorScope;
-import net.officefloor.frame.internal.structure.AssetManager;
 import net.officefloor.frame.internal.structure.EscalationFlow;
 import net.officefloor.frame.internal.structure.EscalationProcedure;
 import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
@@ -558,19 +557,14 @@ public class RawOfficeMetaDataImpl implements RawOfficeMetaDataFactory,
 		// Create the thread meta-data
 		ThreadMetaData threadMetaData = new ThreadMetaDataImpl(
 				this.constructDefaultManagedObjectMetaData(threadBoundManagedObjects),
+				governanceMetaDatas,
 				this.constructAdministratorMetaData(threadBoundAdministrators));
-
-		// Create the process completion asset manager
-		AssetManager processCompletionAssetManager = officeAssetManagerFactory
-				.createAssetManager(AssetType.PROCESS,
-						ProcessState.class.getSimpleName(), "CleanUp", issues);
 
 		// Create the process meta-data
 		ProcessMetaData processMetaData = new ProcessMetaDataImpl(
 				this.constructDefaultManagedObjectMetaData(processBoundManagedObjects),
-				governanceMetaDatas,
 				this.constructAdministratorMetaData(processBoundAdministrators),
-				threadMetaData, processCompletionAssetManager);
+				threadMetaData);
 
 		// Obtain the Process Context Listeners
 		ProcessContextListener[] processContextListeners = rawOfficeFloorMetaData

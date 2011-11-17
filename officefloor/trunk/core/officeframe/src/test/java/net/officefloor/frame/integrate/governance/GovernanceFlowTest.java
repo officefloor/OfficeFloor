@@ -24,6 +24,7 @@ import net.officefloor.frame.api.build.AdministratorBuilder;
 import net.officefloor.frame.api.build.DependencyMappingBuilder;
 import net.officefloor.frame.api.build.GovernanceBuilder;
 import net.officefloor.frame.api.build.GovernanceFactory;
+import net.officefloor.frame.api.build.OfficeBuilder;
 import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.impl.spi.team.LeaderFollowerTeam;
@@ -71,7 +72,7 @@ public class GovernanceFlowTest extends AbstractOfficeConstructTestCase {
 	/**
 	 * Ensure able to commit transaction with {@link PassiveTeam}.
 	 */
-	public void test_Passive_CommitTransaction() throws Exception {
+	public void test_Passive_CommitTransaction() throws Throwable {
 
 		// Commit
 		this.isCommit = true;
@@ -90,7 +91,7 @@ public class GovernanceFlowTest extends AbstractOfficeConstructTestCase {
 	/**
 	 * Ensure able to commit transaction with {@link LeaderFollowerTeam}.
 	 */
-	public void test_LeaderFollower_CommitTransaction() throws Exception {
+	public void test_LeaderFollower_CommitTransaction() throws Throwable {
 
 		// Multi-threaded Commit
 		this.isMultiThreaded = true;
@@ -110,7 +111,7 @@ public class GovernanceFlowTest extends AbstractOfficeConstructTestCase {
 	/**
 	 * Ensure able to rollback transaction with {@link PassiveTeam}.
 	 */
-	public void test_Passive_RollbackTransaction() throws Exception {
+	public void test_Passive_RollbackTransaction() throws Throwable {
 
 		// Rollback
 		this.isRollback = true;
@@ -129,7 +130,7 @@ public class GovernanceFlowTest extends AbstractOfficeConstructTestCase {
 	/**
 	 * Ensure able to rollback transaction with {@link LeaderFollowerTeam}.
 	 */
-	public void test_LeaderFollower_RollbackTransaction() throws Exception {
+	public void test_LeaderFollower_RollbackTransaction() throws Throwable {
 
 		// Multi-threaded Rollback
 		this.isMultiThreaded = true;
@@ -149,7 +150,7 @@ public class GovernanceFlowTest extends AbstractOfficeConstructTestCase {
 	/**
 	 * Ensure able to tidy up transaction.
 	 */
-	public void test_Passive_TidyUpTransaction() throws Exception {
+	public void test_Passive_TidyUpTransaction() throws Throwable {
 
 		// Ensure transaction governing functionality
 		this.object.begin();
@@ -165,7 +166,7 @@ public class GovernanceFlowTest extends AbstractOfficeConstructTestCase {
 	/**
 	 * Ensure able to tidy up transaction.
 	 */
-	public void test_LeaderFollower_TidyUpTransaction() throws Exception {
+	public void test_LeaderFollower_TidyUpTransaction() throws Throwable {
 
 		// Multi-threaded
 		this.isMultiThreaded = true;
@@ -182,9 +183,14 @@ public class GovernanceFlowTest extends AbstractOfficeConstructTestCase {
 	}
 
 	/**
+	 * Failure in testing.
+	 */
+	private volatile Throwable failure = null;
+
+	/**
 	 * Undertake the test.
 	 */
-	private void doTest() throws Exception {
+	private void doTest() throws Throwable {
 
 		// Create the teams
 		Team taskTeam;
@@ -202,6 +208,7 @@ public class GovernanceFlowTest extends AbstractOfficeConstructTestCase {
 
 		// Configure
 		String officeName = this.getOfficeName();
+		OfficeBuilder officeBuilder = this.getOfficeBuilder();
 		this.constructTeam("TASK_TEAM", taskTeam);
 		this.constructTeam("GOVERNANCE_TEAM", governanceTeam);
 
@@ -239,6 +246,12 @@ public class GovernanceFlowTest extends AbstractOfficeConstructTestCase {
 		rollbackTask.buildObject("MO");
 		rollbackTask.buildParameter();
 
+		// Configure handling test failures
+		ReflectiveTaskBuilder handleException = builder.buildTask(
+				"handleException", "TASK_TEAM");
+		handleException.buildParameter();
+		officeBuilder.addEscalation(Throwable.class, "WORK", "handleException");
+
 		// Configure the Governance
 		GovernanceBuilder<GovernanceFlowKeys> governance = this
 				.getOfficeBuilder().addGovernance("GOVERNANCE",
@@ -267,10 +280,11 @@ public class GovernanceFlowTest extends AbstractOfficeConstructTestCase {
 				TransactionGovernanceKey.TRANSACTION, "GOVERNANCE");
 
 		// Execute the work
-		try {
-			this.invokeWork("WORK", null);
-		} catch (Exception ex) {
-			throw fail(ex);
+		this.invokeWork("WORK", null);
+
+		// Propagate any failure
+		if (this.failure != null) {
+			throw this.failure;
 		}
 
 		// Verify
@@ -283,7 +297,7 @@ public class GovernanceFlowTest extends AbstractOfficeConstructTestCase {
 	/**
 	 * Transactional {@link Work}.
 	 */
-	public static class TransactionalWork {
+	public class TransactionalWork {
 
 		/**
 		 * Indicates if the {@link Task} was invoked.
@@ -324,6 +338,13 @@ public class GovernanceFlowTest extends AbstractOfficeConstructTestCase {
 		public void flowRollback(TransactionalObject object, String parameter) {
 			assertEquals("Incorrect rollback parameter", "ROLLBACK", parameter);
 			object.flowRollback();
+		}
+
+		/**
+		 * Handles failure in testing.
+		 */
+		public void handleException(Throwable cause) {
+			GovernanceFlowTest.this.failure = cause;
 		}
 	}
 

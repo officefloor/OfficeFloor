@@ -193,8 +193,7 @@ public class AdministratorContainerImpl<I extends Object, A extends Enum<A>, F e
 
 			// Obtain the governance container
 			GovernanceContainer<?, ?> container = this.adminContext
-					.getThreadState().getProcessState()
-					.getGovernanceContainer(processIndex);
+					.getThreadState().getGovernanceContainer(processIndex);
 
 			// Create Governance Manager to wrap Governance Container
 			GovernanceManager manager = new GovernanceManagerImpl(container,

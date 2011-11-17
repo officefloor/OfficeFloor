@@ -20,6 +20,7 @@ package net.officefloor.frame.impl.execute.thread;
 
 import net.officefloor.frame.api.escalate.FlowJoinTimedOutEscalation;
 import net.officefloor.frame.api.execute.FlowFuture;
+import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.impl.execute.job.JobSequenceImpl;
 import net.officefloor.frame.impl.execute.linkedlistset.AbstractLinkedListSetEntry;
 import net.officefloor.frame.impl.execute.linkedlistset.ComparatorLinkedListSet;
@@ -30,8 +31,12 @@ import net.officefloor.frame.internal.structure.Asset;
 import net.officefloor.frame.internal.structure.AssetManager;
 import net.officefloor.frame.internal.structure.AssetMonitor;
 import net.officefloor.frame.internal.structure.CheckAssetContext;
+import net.officefloor.frame.internal.structure.ContainerContext;
 import net.officefloor.frame.internal.structure.EscalationFlow;
 import net.officefloor.frame.internal.structure.EscalationLevel;
+import net.officefloor.frame.internal.structure.GovernanceActivity;
+import net.officefloor.frame.internal.structure.GovernanceContainer;
+import net.officefloor.frame.internal.structure.GovernanceMetaData;
 import net.officefloor.frame.internal.structure.JobNode;
 import net.officefloor.frame.internal.structure.JobNodeActivateSet;
 import net.officefloor.frame.internal.structure.JobSequence;
@@ -39,6 +44,7 @@ import net.officefloor.frame.internal.structure.LinkedListSet;
 import net.officefloor.frame.internal.structure.ManagedObjectContainer;
 import net.officefloor.frame.internal.structure.ManagedObjectMetaData;
 import net.officefloor.frame.internal.structure.ProcessState;
+import net.officefloor.frame.internal.structure.TaskMetaData;
 import net.officefloor.frame.internal.structure.ThreadMetaData;
 import net.officefloor.frame.internal.structure.ThreadState;
 
@@ -78,6 +84,48 @@ public class ThreadStateImpl extends
 	};
 
 	/**
+	 * {@link ContainerContext}.
+	 */
+	private final ContainerContext containerContext = new ContainerContext() {
+
+		@Override
+		public void flagJobToWait() {
+			// Ignore, as not waiting for tidy up
+		}
+
+		@Override
+		public void addSetupTask(TaskMetaData<?, ?, ?> taskMetaData,
+				Object parameter) {
+
+			// Create the flow to run setup task
+			JobSequence jobSequence = ThreadStateImpl.this.createJobSequence();
+
+			// Create and activate the task
+			JobNode taskNode = jobSequence.createTaskNode(taskMetaData, null,
+					parameter);
+			taskNode.activateJob();
+
+			// Flag triggered setup task
+			ThreadStateImpl.this.isTriggerTaskOrActivity = true;
+		}
+
+		@Override
+		public void addGovernanceActivity(GovernanceActivity<?, ?> activity) {
+
+			// Create the flow to run the activity
+			JobSequence jobSequence = ThreadStateImpl.this.createJobSequence();
+
+			// Create and activate the activity
+			JobNode activityNode = jobSequence.createGovernanceNode(activity,
+					null);
+			activityNode.activateJob();
+
+			// Flag triggered governance activity
+			ThreadStateImpl.this.isTriggerTaskOrActivity = true;
+		}
+	};
+
+	/**
 	 * {@link ThreadMetaData} for this {@link ThreadState}.
 	 */
 	private final ThreadMetaData threadMetaData;
@@ -86,6 +134,11 @@ public class ThreadStateImpl extends
 	 * {@link ManagedObjectContainer} instances for this {@link ThreadState}.
 	 */
 	private final ManagedObjectContainer[] managedObjectContainers;
+
+	/**
+	 * {@link GovernanceContainer} instances for the {@link ProcessState}.
+	 */
+	private final GovernanceContainer<?, ?>[] governanceContainers;
 
 	/**
 	 * {@link AdministratorContainer} instances for this {@link ThreadState}.
@@ -106,6 +159,12 @@ public class ThreadStateImpl extends
 	 * Flag indicating that looking for {@link EscalationFlow}.
 	 */
 	private boolean isEscalating = false;
+
+	/**
+	 * Flag indicating that a setup {@link Task} or {@link GovernanceActivity}
+	 * was triggered.
+	 */
+	private boolean isTriggerTaskOrActivity = false;
 
 	/**
 	 * Failure of the {@link ThreadState}.
@@ -145,6 +204,11 @@ public class ThreadStateImpl extends
 		ManagedObjectMetaData<?>[] moMetaData = this.threadMetaData
 				.getManagedObjectMetaData();
 		this.managedObjectContainers = new ManagedObjectContainer[moMetaData.length];
+
+		// Create the array to reference the governances
+		GovernanceMetaData<?, ?>[] governanceMetaData = this.threadMetaData
+				.getGovernanceMetaData();
+		this.governanceContainers = new GovernanceContainer[governanceMetaData.length];
 
 		// Create array to reference the administrators
 		AdministratorMetaData<?, ?>[] adminMetaData = this.threadMetaData
@@ -210,6 +274,23 @@ public class ThreadStateImpl extends
 				return;
 			}
 
+			// Reset trigger for disregard governance
+			this.isTriggerTaskOrActivity = false;
+
+			// Disregard governance as not enforced and thread complete
+			for (int i = 0; i < this.governanceContainers.length; i++) {
+				GovernanceContainer<?, ?> container = this.governanceContainers[i];
+				if (container != null) {
+					container.disregardGovernance(this.containerContext);
+				}
+			}
+
+			// Determine if setup task or activity for cleanup.
+			// Note not check list as passive team may already remove.
+			if (this.isTriggerTaskOrActivity) {
+				return; // wait for cleanup of Governance
+			}
+
 			// No more active job sequences so thread is complete
 			this.isFlowComplete = true;
 
@@ -250,6 +331,27 @@ public class ThreadStateImpl extends
 			this.managedObjectContainers[index] = container;
 		}
 		return container;
+	}
+
+	@Override
+	public GovernanceContainer<?, ?> getGovernanceContainer(int index) {
+		// Lazy load the Governance Container
+		// (This should be thread safe as should always be called within the
+		// Thread lock of the Thread before the Job uses it).
+		GovernanceContainer<?, ?> container = this.governanceContainers[index];
+		if (container == null) {
+			container = this.threadMetaData.getGovernanceMetaData()[index]
+					.createGovernanceContainer(this, index);
+			this.governanceContainers[index] = container;
+		}
+		return container;
+	}
+
+	@Override
+	public void governanceComplete(GovernanceContainer<?, ?> governanceContainer) {
+		// Unregister the governance
+		int index = governanceContainer.getProcessRegisteredIndex();
+		this.governanceContainers[index] = null;
 	}
 
 	@Override
