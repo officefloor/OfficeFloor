@@ -46,11 +46,10 @@ public class TypeMatcher extends AbstractMatcher {
 	}
 
 	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.easymock.ArgumentsMatcher#matches(java.lang.Object[],
-	 * java.lang.Object[])
+	 * ====================== AbstractMatcher =========================
 	 */
+
+	@Override
 	public boolean matches(Object[] expected, Object[] actual) {
 
 		// Ensure get actual matches

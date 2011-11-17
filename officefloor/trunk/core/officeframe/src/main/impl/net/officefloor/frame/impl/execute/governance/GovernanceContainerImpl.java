@@ -32,6 +32,7 @@ import net.officefloor.frame.internal.structure.JobNode;
 import net.officefloor.frame.internal.structure.JobNodeActivateSet;
 import net.officefloor.frame.internal.structure.ManagedObjectContainer;
 import net.officefloor.frame.internal.structure.ProcessState;
+import net.officefloor.frame.internal.structure.ThreadState;
 import net.officefloor.frame.internal.structure.WorkContainer;
 import net.officefloor.frame.spi.governance.Governance;
 import net.officefloor.frame.spi.governance.GovernanceContext;
@@ -52,9 +53,9 @@ public class GovernanceContainerImpl<I, F extends Enum<F>> implements
 	private final GovernanceMetaData<I, F> metaData;
 
 	/**
-	 * {@link ProcessState}.
+	 * {@link ThreadState}.
 	 */
-	private final ProcessState processState;
+	private final ThreadState threadState;
 
 	/**
 	 * Index of this {@link Governance} registered within the
@@ -77,16 +78,16 @@ public class GovernanceContainerImpl<I, F extends Enum<F>> implements
 	 * 
 	 * @param metaData
 	 *            {@link GovernanceMetaData}.
-	 * @param processState
-	 *            {@link ProcessState}.
+	 * @param threadState
+	 *            {@link ThreadState}.
 	 * @param registeredIndex
 	 *            Index of this {@link Governance} registered within the
 	 *            {@link ProcessState}.
 	 */
 	public GovernanceContainerImpl(GovernanceMetaData<I, F> metaData,
-			ProcessState processState, int registeredIndex) {
+			ThreadState threadState, int registeredIndex) {
 		this.metaData = metaData;
-		this.processState = processState;
+		this.threadState = threadState;
 		this.registeredIndex = registeredIndex;
 	}
 
@@ -104,7 +105,7 @@ public class GovernanceContainerImpl<I, F extends Enum<F>> implements
 		}
 
 		// Unregister the Governance from Process
-		this.processState.governanceComplete(this);
+		this.threadState.governanceComplete(this);
 
 		// Disregard the governance
 		this.governance = null;
@@ -194,18 +195,15 @@ public class GovernanceContainerImpl<I, F extends Enum<F>> implements
 		// Access Point: Job
 		// Locks: ThreadState
 
-		synchronized (this.processState.getProcessLock()) {
-
-			// Determine if already active governance
-			if (this.isActive()) {
-				return true; // already active governance
-			}
-
-			// Create the governance
-			GovernanceFactory<? super I, F> factory = this.metaData
-					.getGovernanceFactory();
-			this.governance = factory.createGovernance();
+		// Determine if already active governance
+		if (this.isActive()) {
+			return true; // already active governance
 		}
+
+		// Create the governance
+		GovernanceFactory<? super I, F> factory = this.metaData
+				.getGovernanceFactory();
+		this.governance = factory.createGovernance();
 
 		// Successfully activated the governance
 		return true;
@@ -221,7 +219,9 @@ public class GovernanceContainerImpl<I, F extends Enum<F>> implements
 		// Access Point: Job
 		// Locks: ThreadState
 
-		synchronized (this.processState.getProcessLock()) {
+		// Must lock to check if managed object ready
+		ProcessState processState = this.threadState.getProcessState();
+		synchronized (processState.getProcessLock()) {
 
 			// Ensure managed object is ready
 			if (!governanceManager.isManagedObjectReady(jobContext, jobNode,
@@ -246,7 +246,9 @@ public class GovernanceContainerImpl<I, F extends Enum<F>> implements
 		// Access Point: Job
 		// Locks: ThreadState
 
-		synchronized (this.processState.getProcessLock()) {
+		// Must lock to check if managed objects ready
+		ProcessState processState = this.threadState.getProcessState();
+		synchronized (processState.getProcessLock()) {
 
 			// Determine if active.
 			// As Managed Object triggers creation, may not always be active.
@@ -285,7 +287,9 @@ public class GovernanceContainerImpl<I, F extends Enum<F>> implements
 		// Access Point: Job
 		// Locks: ThreadState
 
-		synchronized (this.processState.getProcessLock()) {
+		// Must lock to check if managed objects ready
+		ProcessState processState = this.threadState.getProcessState();
+		synchronized (processState.getProcessLock()) {
 
 			// Determine if active.
 			// As Managed Object triggers creation, may not always be active.

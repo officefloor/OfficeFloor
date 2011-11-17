@@ -35,13 +35,8 @@ import net.officefloor.frame.impl.spi.team.PassiveTeam;
 import net.officefloor.frame.internal.structure.AdministratorContainer;
 import net.officefloor.frame.internal.structure.AdministratorMetaData;
 import net.officefloor.frame.internal.structure.AssetManager;
-import net.officefloor.frame.internal.structure.ContainerContext;
 import net.officefloor.frame.internal.structure.EscalationFlow;
 import net.officefloor.frame.internal.structure.EscalationProcedure;
-import net.officefloor.frame.internal.structure.GovernanceActivity;
-import net.officefloor.frame.internal.structure.GovernanceContainer;
-import net.officefloor.frame.internal.structure.GovernanceMetaData;
-import net.officefloor.frame.internal.structure.JobNode;
 import net.officefloor.frame.internal.structure.JobNodeActivateSet;
 import net.officefloor.frame.internal.structure.JobSequence;
 import net.officefloor.frame.internal.structure.LinkedListSet;
@@ -102,52 +97,6 @@ public class ProcessStateImpl implements ProcessState {
 	};
 
 	/**
-	 * {@link ContainerContext}.
-	 */
-	private final ContainerContext containerContext = new ContainerContext() {
-
-		@Override
-		public void flagJobToWait() {
-			// Ignore, as not waiting for tidy up
-		}
-
-		@Override
-		public void addSetupTask(TaskMetaData<?, ?, ?> taskMetaData,
-				Object parameter) {
-
-			// Obtain the Asset Manager
-			AssetManager assetManager = ProcessStateImpl.this.processMetaData
-					.getProcessCompletionAssetManager();
-
-			// Create the thread to run setup task
-			JobSequence jobSequence = ProcessStateImpl.this
-					.createThread(assetManager);
-
-			// Create and activate the task
-			JobNode taskNode = jobSequence.createTaskNode(taskMetaData, null,
-					parameter);
-			taskNode.activateJob();
-		}
-
-		@Override
-		public void addGovernanceActivity(GovernanceActivity<?, ?> activity) {
-
-			// Obtain the Asset Manager
-			AssetManager assetManager = ProcessStateImpl.this.processMetaData
-					.getProcessCompletionAssetManager();
-
-			// Create the thread to run setup task
-			JobSequence jobSequence = ProcessStateImpl.this
-					.createThread(assetManager);
-
-			// Create and activate the activity
-			JobNode activityNode = jobSequence.createGovernanceNode(activity,
-					null);
-			activityNode.activateJob();
-		}
-	};
-
-	/**
 	 * {@link ProcessMetaData}.
 	 */
 	private final ProcessMetaData processMetaData;
@@ -166,11 +115,6 @@ public class ProcessStateImpl implements ProcessState {
 	 * {@link ManagedObjectContainer} instances for the {@link ProcessState}.
 	 */
 	private final ManagedObjectContainer[] managedObjectContainers;
-
-	/**
-	 * {@link GovernanceContainer} instances for the {@link ProcessState}.
-	 */
-	private final GovernanceContainer<?, ?>[] governanceContainers;
 
 	/**
 	 * {@link AdministratorContainer} instances for the {@link ProcessState}.
@@ -270,11 +214,6 @@ public class ProcessStateImpl implements ProcessState {
 					inputManagedObject, inputManagedObjectMetaData, this);
 		}
 
-		// Create the array to reference the governances
-		GovernanceMetaData<?, ?>[] governanceMetaData = this.processMetaData
-				.getGovernanceMetaData();
-		this.governanceContainers = new GovernanceContainer[governanceMetaData.length];
-
 		// Create array to reference the administrators
 		AdministratorMetaData<?, ?>[] administratorMetaData = this.processMetaData
 				.getAdministratorMetaData();
@@ -365,19 +304,6 @@ public class ProcessStateImpl implements ProcessState {
 			// Remove thread from active thread listing
 			if (this.activeThreads.removeEntry(thread)) {
 
-				// Disregard governance as not enforced and process complete
-				for (int i = 0; i < this.governanceContainers.length; i++) {
-					GovernanceContainer<?, ?> container = this.governanceContainers[i];
-					if (container != null) {
-						container.disregardGovernance(this.containerContext);
-					}
-				}
-
-				// Determine if ThreadState created for Governance cleanup
-				if (this.activeThreads.getHead() != null) {
-					return; // wait for cleanup of Governance
-				}
-
 				// Notify process complete
 				for (ProcessCompletionListener listener : this.completionListeners) {
 					listener.processComplete();
@@ -422,27 +348,6 @@ public class ProcessStateImpl implements ProcessState {
 			this.managedObjectContainers[index] = container;
 		}
 		return container;
-	}
-
-	@Override
-	public GovernanceContainer<?, ?> getGovernanceContainer(int index) {
-		// Lazy load the Governance Container
-		// (This should be thread safe as should always be called within the
-		// Process lock of the Thread before the Job uses it).
-		GovernanceContainer<?, ?> container = this.governanceContainers[index];
-		if (container == null) {
-			container = this.processMetaData.getGovernanceMetaData()[index]
-					.createGovernanceContainer(this, index);
-			this.governanceContainers[index] = container;
-		}
-		return container;
-	}
-
-	@Override
-	public void governanceComplete(GovernanceContainer<?, ?> governanceContainer) {
-		// Unregister the governance
-		int index = governanceContainer.getProcessRegisteredIndex();
-		this.governanceContainers[index] = null;
 	}
 
 	@Override

@@ -19,6 +19,7 @@
 package net.officefloor.frame.internal.structure;
 
 import net.officefloor.frame.spi.administration.Administrator;
+import net.officefloor.frame.spi.governance.Governance;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
 
 /**
@@ -36,6 +37,14 @@ public interface ThreadMetaData {
 	 *         instances bound to the {@link ThreadState}.
 	 */
 	ManagedObjectMetaData<?>[] getManagedObjectMetaData();
+
+	/**
+	 * Obtains the {@link GovernanceMetaData} of the possible {@link Governance}
+	 * within this {@link ThreadState}.
+	 * 
+	 * @return {@link GovernanceMetaData} instances.
+	 */
+	GovernanceMetaData<?, ?>[] getGovernanceMetaData();
 
 	/**
 	 * Obtains the {@link AdministratorMetaData} of the {@link Administrator}

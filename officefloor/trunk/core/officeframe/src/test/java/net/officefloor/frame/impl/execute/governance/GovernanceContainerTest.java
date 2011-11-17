@@ -29,6 +29,7 @@ import net.officefloor.frame.internal.structure.JobNode;
 import net.officefloor.frame.internal.structure.JobNodeActivateSet;
 import net.officefloor.frame.internal.structure.ManagedObjectContainer;
 import net.officefloor.frame.internal.structure.ProcessState;
+import net.officefloor.frame.internal.structure.ThreadState;
 import net.officefloor.frame.internal.structure.WorkContainer;
 import net.officefloor.frame.spi.governance.Governance;
 import net.officefloor.frame.spi.governance.GovernanceContext;
@@ -64,6 +65,11 @@ public class GovernanceContainerTest extends OfficeFrameTestCase {
 			.createMock(ProcessState.class);
 
 	/**
+	 * {@link ThreadState}.
+	 */
+	private final ThreadState threadState = this.createMock(ThreadState.class);
+
+	/**
 	 * Index of the {@link Governance} within the {@link ProcessState}.
 	 */
 	private final int PROCESS_REGISTERED_INDEX = 3;
@@ -72,7 +78,7 @@ public class GovernanceContainerTest extends OfficeFrameTestCase {
 	 * {@link GovernanceContainer} to test.
 	 */
 	private final GovernanceContainerImpl<MockExtensionInterface, Indexed> container = new GovernanceContainerImpl<MockExtensionInterface, Indexed>(
-			this.metaData, this.processState, PROCESS_REGISTERED_INDEX);
+			this.metaData, this.threadState, PROCESS_REGISTERED_INDEX);
 
 	/**
 	 * {@link ContainerContext}.
@@ -167,7 +173,7 @@ public class GovernanceContainerTest extends OfficeFrameTestCase {
 		// Record enforce governance
 		this.record_processLock();
 		this.governance.enforceGovernance(this.governanceContext);
-		this.processState.governanceComplete(this.container);
+		this.threadState.governanceComplete(this.container);
 
 		// Test
 		this.replayMockObjects();
@@ -275,7 +281,7 @@ public class GovernanceContainerTest extends OfficeFrameTestCase {
 
 		// Record unregistering managed object
 		manager.unregisterManagedObject(this.activateSet);
-		this.processState.governanceComplete(this.container);
+		this.threadState.governanceComplete(this.container);
 
 		// Test
 		this.replayMockObjects();
@@ -323,7 +329,7 @@ public class GovernanceContainerTest extends OfficeFrameTestCase {
 		// Record disregard governance
 		this.record_processLock();
 		this.governance.disregardGovernance(this.governanceContext);
-		this.processState.governanceComplete(this.container);
+		this.threadState.governanceComplete(this.container);
 
 		// Test
 		this.replayMockObjects();
@@ -432,7 +438,7 @@ public class GovernanceContainerTest extends OfficeFrameTestCase {
 
 		// Record unregistering managed object
 		manager.unregisterManagedObject(this.activateSet);
-		this.processState.governanceComplete(this.container);
+		this.threadState.governanceComplete(this.container);
 
 		// Test
 		this.replayMockObjects();
@@ -533,7 +539,7 @@ public class GovernanceContainerTest extends OfficeFrameTestCase {
 		for (int i = 0; i < managers.length; i++) {
 			managers[i].unregisterManagedObject(this.activateSet);
 		}
-		this.processState.governanceComplete(this.container);
+		this.threadState.governanceComplete(this.container);
 
 		// Test
 		this.replayMockObjects();
@@ -567,6 +573,8 @@ public class GovernanceContainerTest extends OfficeFrameTestCase {
 	 * Records obtaining the {@link ProcessState} lock.
 	 */
 	private void record_processLock() {
+		this.recordReturn(this.threadState, this.threadState.getProcessState(),
+				this.processState);
 		this.recordReturn(this.processState,
 				this.processState.getProcessLock(), "PROCESS_LOCK");
 	}
@@ -580,7 +588,6 @@ public class GovernanceContainerTest extends OfficeFrameTestCase {
 				.createMock(GovernanceFactory.class);
 
 		try {
-			this.record_processLock();
 			this.recordReturn(this.metaData,
 					this.metaData.getGovernanceFactory(), governanceFactory);
 			this.recordReturn(governanceFactory,

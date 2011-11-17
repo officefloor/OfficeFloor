@@ -31,6 +31,8 @@ import net.officefloor.frame.internal.structure.AssetManager;
 import net.officefloor.frame.internal.structure.AssetMonitor;
 import net.officefloor.frame.internal.structure.CheckAssetContext;
 import net.officefloor.frame.internal.structure.EscalationLevel;
+import net.officefloor.frame.internal.structure.GovernanceContainer;
+import net.officefloor.frame.internal.structure.GovernanceMetaData;
 import net.officefloor.frame.internal.structure.JobNode;
 import net.officefloor.frame.internal.structure.JobNodeActivateSet;
 import net.officefloor.frame.internal.structure.JobSequence;
@@ -42,6 +44,7 @@ import net.officefloor.frame.internal.structure.ThreadMetaData;
 import net.officefloor.frame.internal.structure.ThreadState;
 import net.officefloor.frame.internal.structure.WorkMetaData;
 import net.officefloor.frame.test.OfficeFrameTestCase;
+import net.officefloor.frame.test.match.TypeMatcher;
 import net.officefloor.frame.util.MetaDataTestInstanceFactory;
 
 import org.easymock.AbstractMatcher;
@@ -62,6 +65,10 @@ public class ThreadStateTest extends OfficeFrameTestCase {
 				.createMock(ManagedObjectMetaData.class);
 		final ManagedObjectContainer moContainer = this
 				.createMock(ManagedObjectContainer.class);
+		final GovernanceMetaData<?, ?> governanceMetaData = this
+				.createMock(GovernanceMetaData.class);
+		final GovernanceContainer<?, ?> governanceContainer = this
+				.createMock(GovernanceContainer.class);
 		final AdministratorMetaData<?, ?> adminMetaData = this
 				.createMock(AdministratorMetaData.class);
 		final AdministratorContainer<?, ?> adminContainer = this
@@ -71,6 +78,9 @@ public class ThreadStateTest extends OfficeFrameTestCase {
 		this.recordReturn(this.threadMetaData,
 				this.threadMetaData.getManagedObjectMetaData(),
 				new ManagedObjectMetaData[] { moMetaData });
+		this.recordReturn(this.threadMetaData,
+				this.threadMetaData.getGovernanceMetaData(),
+				new GovernanceMetaData[] { governanceMetaData });
 		this.recordReturn(this.threadMetaData,
 				this.threadMetaData.getAdministratorMetaData(),
 				new AdministratorMetaData[] { adminMetaData });
@@ -82,6 +92,14 @@ public class ThreadStateTest extends OfficeFrameTestCase {
 		this.recordReturn(moMetaData,
 				moMetaData.createManagedObjectContainer(this.processState),
 				moContainer);
+
+		// Record obtaining the Governance Container
+		this.recordReturn(this.threadMetaData,
+				this.threadMetaData.getGovernanceMetaData(),
+				new GovernanceMetaData[] { governanceMetaData });
+		this.recordReturn(governanceMetaData, governanceMetaData
+				.createGovernanceContainer(null, 0), governanceContainer,
+				new TypeMatcher(ThreadState.class, Integer.class));
 
 		// Record obtaining the Administrator Container
 		this.recordReturn(this.threadMetaData,
@@ -97,6 +115,10 @@ public class ThreadStateTest extends OfficeFrameTestCase {
 		// Lazy load managed object container
 		assertEquals("Incorrect managed object container", moContainer,
 				thread.getManagedObjectContainer(0));
+
+		// Lazy load governance container
+		assertEquals("Incorrect governance container", governanceContainer,
+				thread.getGovernanceContainer(0));
 
 		// Lazy load administrator container
 		assertEquals("Incorrect administrator container", adminContainer,
@@ -410,6 +432,9 @@ public class ThreadStateTest extends OfficeFrameTestCase {
 		this.recordReturn(this.threadMetaData,
 				this.threadMetaData.getManagedObjectMetaData(),
 				new ManagedObjectMetaData[0]);
+		this.recordReturn(this.threadMetaData,
+				this.threadMetaData.getGovernanceMetaData(),
+				new GovernanceMetaData[0]);
 		this.recordReturn(this.threadMetaData,
 				this.threadMetaData.getAdministratorMetaData(),
 				new AdministratorMetaData[0]);

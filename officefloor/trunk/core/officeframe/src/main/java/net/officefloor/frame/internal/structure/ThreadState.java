@@ -19,6 +19,7 @@
 package net.officefloor.frame.internal.structure;
 
 import net.officefloor.frame.api.execute.FlowFuture;
+import net.officefloor.frame.spi.governance.Governance;
 
 /**
  * <p>
@@ -99,6 +100,25 @@ public interface ThreadState extends FlowAsset, FlowFuture,
 	 * @return {@link ManagedObjectContainer} for the index.
 	 */
 	ManagedObjectContainer getManagedObjectContainer(int index);
+
+	/**
+	 * Obtains the {@link GovernanceContainer} for the input index.
+	 * 
+	 * @param index
+	 *            Index of the {@link GovernanceContainer} to be returned.
+	 * @return {@link GovernanceContainer} for the index only if active. If not
+	 *         active will return <code>null</code>.
+	 */
+	GovernanceContainer<?, ?> getGovernanceContainer(int index);
+
+	/**
+	 * Flags the {@link Governance} has completed.
+	 * 
+	 * @param container
+	 *            {@link GovernanceContainer} of the completed
+	 *            {@link Governance}.
+	 */
+	void governanceComplete(GovernanceContainer<?, ?> governanceContainer);
 
 	/**
 	 * Obtains the {@link AdministratorContainer} for the input index.

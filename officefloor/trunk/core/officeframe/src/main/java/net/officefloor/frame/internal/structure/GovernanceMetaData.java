@@ -46,15 +46,14 @@ public interface GovernanceMetaData<I, F extends Enum<F>> extends JobMetaData {
 	/**
 	 * Creates the {@link GovernanceContainer}.
 	 * 
-	 * @param processState
-	 *            {@link ProcessState}.
-	 * @param processRegisteredIndex
-	 *            Index of the {@link Governance} within the
-	 *            {@link ProcessState}.
+	 * @param threadState
+	 *            {@link ThreadState}.
+	 * @param threadRegisteredIndex
+	 *            Index of {@link Governance} within the {@link ThreadState}.
 	 * @return {@link GovernanceContainer}.
 	 */
 	GovernanceContainer<I, F> createGovernanceContainer(
-			ProcessState processState, int processRegisteredIndex);
+			ThreadState threadState, int threadRegisteredIndex);
 
 	/**
 	 * Creates the {@link ActiveGovernance}.

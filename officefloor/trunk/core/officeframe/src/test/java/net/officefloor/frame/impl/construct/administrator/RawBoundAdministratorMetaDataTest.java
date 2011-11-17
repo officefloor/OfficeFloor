@@ -54,6 +54,7 @@ import net.officefloor.frame.internal.structure.ManagedObjectMetaData;
 import net.officefloor.frame.internal.structure.OfficeMetaData;
 import net.officefloor.frame.internal.structure.ProcessMetaData;
 import net.officefloor.frame.internal.structure.TaskMetaData;
+import net.officefloor.frame.internal.structure.ThreadMetaData;
 import net.officefloor.frame.spi.TestSource;
 import net.officefloor.frame.spi.administration.Administrator;
 import net.officefloor.frame.spi.administration.Duty;
@@ -972,6 +973,8 @@ public class RawBoundAdministratorMetaDataTest extends OfficeFrameTestCase {
 				.createMock(OfficeMetaData.class);
 		final ProcessMetaData processMetaData = this
 				.createMock(ProcessMetaData.class);
+		final ThreadMetaData threadMetaData = this
+				.createMock(ThreadMetaData.class);
 
 		// Record construction of bound administrator meta-data
 		this.record_init();
@@ -1023,8 +1026,10 @@ public class RawBoundAdministratorMetaDataTest extends OfficeFrameTestCase {
 				this.taskMetaDataLocator.getOfficeMetaData(), officeMetaData);
 		this.recordReturn(officeMetaData, officeMetaData.getProcessMetaData(),
 				processMetaData);
-		this.recordReturn(processMetaData,
-				processMetaData.getGovernanceMetaData(),
+		this.recordReturn(processMetaData, processMetaData.getThreadMetaData(),
+				threadMetaData);
+		this.recordReturn(threadMetaData,
+				threadMetaData.getGovernanceMetaData(),
 				new GovernanceMetaData[0]);
 
 		// Record governance for second duty
@@ -1035,8 +1040,10 @@ public class RawBoundAdministratorMetaDataTest extends OfficeFrameTestCase {
 				this.taskMetaDataLocator.getOfficeMetaData(), officeMetaData);
 		this.recordReturn(officeMetaData, officeMetaData.getProcessMetaData(),
 				processMetaData);
-		this.recordReturn(processMetaData,
-				processMetaData.getGovernanceMetaData(),
+		this.recordReturn(processMetaData, processMetaData.getThreadMetaData(),
+				threadMetaData);
+		this.recordReturn(threadMetaData,
+				threadMetaData.getGovernanceMetaData(),
 				new GovernanceMetaData[0]);
 
 		// Construct the administrator and link tasks
@@ -1086,6 +1093,8 @@ public class RawBoundAdministratorMetaDataTest extends OfficeFrameTestCase {
 				.createMock(OfficeMetaData.class);
 		final ProcessMetaData processMetaData = this
 				.createMock(ProcessMetaData.class);
+		final ThreadMetaData threadMetaData = this
+				.createMock(ThreadMetaData.class);
 
 		// Record construction of bound administrator meta-data
 		this.record_init();
@@ -1122,8 +1131,10 @@ public class RawBoundAdministratorMetaDataTest extends OfficeFrameTestCase {
 				this.taskMetaDataLocator.getOfficeMetaData(), officeMetaData);
 		this.recordReturn(officeMetaData, officeMetaData.getProcessMetaData(),
 				processMetaData);
-		this.recordReturn(processMetaData,
-				processMetaData.getGovernanceMetaData(),
+		this.recordReturn(processMetaData, processMetaData.getThreadMetaData(),
+				threadMetaData);
+		this.recordReturn(threadMetaData,
+				threadMetaData.getGovernanceMetaData(),
 				new GovernanceMetaData<?, ?>[] { governanceMetaData });
 		this.recordReturn(governanceMetaData,
 				governanceMetaData.getGovernanceName(), "NOT MATCH");
@@ -1169,6 +1180,8 @@ public class RawBoundAdministratorMetaDataTest extends OfficeFrameTestCase {
 				.createMock(OfficeMetaData.class);
 		final ProcessMetaData processMetaData = this
 				.createMock(ProcessMetaData.class);
+		final ThreadMetaData threadMetaData = this
+				.createMock(ThreadMetaData.class);
 
 		// Record construction of bound administrator meta-data
 		this.record_init();
@@ -1205,8 +1218,10 @@ public class RawBoundAdministratorMetaDataTest extends OfficeFrameTestCase {
 				this.taskMetaDataLocator.getOfficeMetaData(), officeMetaData);
 		this.recordReturn(officeMetaData, officeMetaData.getProcessMetaData(),
 				processMetaData);
-		this.recordReturn(processMetaData,
-				processMetaData.getGovernanceMetaData(),
+		this.recordReturn(processMetaData, processMetaData.getThreadMetaData(),
+				threadMetaData);
+		this.recordReturn(threadMetaData,
+				threadMetaData.getGovernanceMetaData(),
 				new GovernanceMetaData<?, ?>[] { governanceMetaDataOne,
 						governanceMetaDataTwo });
 		this.recordReturn(governanceMetaDataOne,

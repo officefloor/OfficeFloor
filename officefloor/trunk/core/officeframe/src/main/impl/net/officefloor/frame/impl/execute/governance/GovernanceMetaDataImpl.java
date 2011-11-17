@@ -34,6 +34,7 @@ import net.officefloor.frame.internal.structure.JobSequence;
 import net.officefloor.frame.internal.structure.ManagedObjectContainer;
 import net.officefloor.frame.internal.structure.ProcessState;
 import net.officefloor.frame.internal.structure.TaskMetaData;
+import net.officefloor.frame.internal.structure.ThreadState;
 import net.officefloor.frame.internal.structure.WorkContainer;
 import net.officefloor.frame.internal.structure.WorkMetaData;
 import net.officefloor.frame.spi.governance.Governance;
@@ -150,8 +151,8 @@ public class GovernanceMetaDataImpl<I, F extends Enum<F>> implements
 
 	@Override
 	public GovernanceContainer<I, F> createGovernanceContainer(
-			ProcessState processState, int processRegisteredIndex) {
-		return new GovernanceContainerImpl<I, F>(this, processState,
+			ThreadState threadState, int processRegisteredIndex) {
+		return new GovernanceContainerImpl<I, F>(this, threadState,
 				processRegisteredIndex);
 	}
 

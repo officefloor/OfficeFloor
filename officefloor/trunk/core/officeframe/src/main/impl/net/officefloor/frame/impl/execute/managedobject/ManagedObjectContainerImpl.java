@@ -388,8 +388,7 @@ public class ManagedObjectContainerImpl implements ManagedObjectContainer,
 					.getGovernanceMetaData();
 
 			// Iterate over governance and govern by active governance
-			ProcessState process = jobNode.getJobSequence().getThreadState()
-					.getProcessState();
+			ThreadState thread = jobNode.getJobSequence().getThreadState();
 			NEXT_GOVERNANCE: for (int i = 0; i < governanceMetaDatas.length; i++) {
 				ManagedObjectGovernanceMetaData<?> governanceMetaData = governanceMetaDatas[i];
 
@@ -408,7 +407,7 @@ public class ManagedObjectContainerImpl implements ManagedObjectContainer,
 
 				// Obtain the governance
 				int governanceIndex = governanceMetaData.getGovernanceIndex();
-				GovernanceContainer governance = process
+				GovernanceContainer governance = thread
 						.getGovernanceContainer(governanceIndex);
 				if (!governance.isActive()) {
 					continue NEXT_GOVERNANCE; // not active, so not govern

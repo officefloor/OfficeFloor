@@ -620,7 +620,7 @@ public class RawBoundAdministratorMetaDataImpl<I, A extends Enum<A>> implements
 			int[] governanceMapping = new int[dutyGovernanceConfigurations.length];
 			GovernanceMetaData<?, ?>[] governanceMetaDatas = taskLocator
 					.getOfficeMetaData().getProcessMetaData()
-					.getGovernanceMetaData();
+					.getThreadMetaData().getGovernanceMetaData();
 			for (DutyGovernanceConfiguration<?> dutyGovernanceConfiguration : dutyGovernanceConfigurations) {
 
 				// Index of governance for the duty

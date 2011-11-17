@@ -19,7 +19,6 @@
 package net.officefloor.frame.internal.structure;
 
 import net.officefloor.frame.spi.administration.Administrator;
-import net.officefloor.frame.spi.governance.Governance;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
 
 /**
@@ -39,14 +38,6 @@ public interface ProcessMetaData {
 	ManagedObjectMetaData<?>[] getManagedObjectMetaData();
 
 	/**
-	 * Obtains the {@link GovernanceMetaData} of the possible {@link Governance}
-	 * within this {@link ProcessState}.
-	 * 
-	 * @return {@link GovernanceMetaData} instances.
-	 */
-	GovernanceMetaData<?, ?>[] getGovernanceMetaData();
-
-	/**
 	 * Obtains the {@link AdministratorMetaData} of the {@link Administrator}
 	 * instances bound to the {@link ProcessState}.
 	 * 
@@ -63,14 +54,5 @@ public interface ProcessMetaData {
 	 *         from the {@link ProcessState} of this {@link ProcessMetaData}.
 	 */
 	ThreadMetaData getThreadMetaData();
-
-	/**
-	 * Obtains the {@link AssetManager} for any {@link ThreadState} instances
-	 * that must be created to enable completion (clean up) of the
-	 * {@link ProcessState}.
-	 * 
-	 * @return {@link AssetManager}.
-	 */
-	AssetManager getProcessCompletionAssetManager();
 
 }

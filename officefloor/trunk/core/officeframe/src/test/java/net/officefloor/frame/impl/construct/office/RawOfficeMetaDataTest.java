@@ -937,7 +937,7 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 		ProcessMetaData processMetaData = rawOfficeMetaData.getOfficeMetaData()
 				.getProcessMetaData();
 		GovernanceMetaData<?, ?>[] governanceMetaDatas = processMetaData
-				.getGovernanceMetaData();
+				.getThreadMetaData().getGovernanceMetaData();
 		assertEquals("Incorrect number of governances", 1,
 				governanceMetaDatas.length);
 		assertNull("Should be no governance", governanceMetaDatas[0]);
@@ -987,7 +987,7 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 		ProcessMetaData processMetaData = rawOfficeMetaData.getOfficeMetaData()
 				.getProcessMetaData();
 		GovernanceMetaData<?, ?>[] governanceMetaDatas = processMetaData
-				.getGovernanceMetaData();
+				.getThreadMetaData().getGovernanceMetaData();
 		assertEquals("Incorrect number of governances",
 				expectedGovernances.length, governanceMetaDatas.length);
 		for (int i = 0; i < expectedGovernances.length; i++) {
