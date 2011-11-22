@@ -18,14 +18,18 @@
 
 package net.officefloor.frame.api.build;
 
+import net.officefloor.frame.api.escalate.Escalation;
 import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.execute.Work;
+import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.api.manage.TaskManager;
 import net.officefloor.frame.internal.structure.AdministratorScope;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
+import net.officefloor.frame.internal.structure.ThreadState;
 import net.officefloor.frame.spi.administration.Administrator;
 import net.officefloor.frame.spi.administration.Duty;
 import net.officefloor.frame.spi.administration.source.AdministratorDutyMetaData;
+import net.officefloor.frame.spi.governance.Governance;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
 
 /**
@@ -151,5 +155,29 @@ public interface TaskBuilder<W extends Work, D extends Enum<D>, F extends Enum<F
 	 */
 	void linkPostTaskAdministration(String scopeAdministratorName,
 			String dutyName);
+
+	/**
+	 * <p>
+	 * Adds {@link OfficeFloor} managed {@link Governance} to this {@link Task}.
+	 * <p>
+	 * In other words, to execute this {@link Task} the {@link Governance} will
+	 * be automatically activated before the {@link Task} is executed (or stay
+	 * active from previous {@link Task}).
+	 * <p>
+	 * The {@link Governance} will be:
+	 * <ol>
+	 * <li>enforced when either a {@link Task} in the flow does not require the
+	 * {@link Governance} or the {@link ThreadState} completes.
+	 * <li>
+	 * <li>disregarded when an escalation occurs to a {@link Task} not requiring
+	 * the {@link Governance}. Note that this does allow {@link Governance} to
+	 * stay active should the {@link Escalation} {@link Task} require the
+	 * {@link Governance}.</li>
+	 * </ol>
+	 * 
+	 * @param governanceName
+	 *            Name of the {@link Governance}.
+	 */
+	void addGovernance(String governanceName);
 
 }

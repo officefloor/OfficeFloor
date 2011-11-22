@@ -19,6 +19,8 @@ package net.officefloor.frame.integrate.governance;
 
 import java.sql.SQLException;
 
+import junit.framework.Test;
+import junit.framework.TestSuite;
 import net.officefloor.frame.api.build.AdministratorBuilder;
 import net.officefloor.frame.api.build.DependencyMappingBuilder;
 import net.officefloor.frame.api.build.GovernanceBuilder;
@@ -26,16 +28,12 @@ import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.api.escalate.Escalation;
 import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.execute.Work;
-import net.officefloor.frame.impl.spi.team.LeaderFollowerTeam;
-import net.officefloor.frame.impl.spi.team.PassiveTeam;
 import net.officefloor.frame.integrate.governance.MockTransactionalAdministratorSource.TransactionDutyKey;
 import net.officefloor.frame.integrate.governance.MockTransactionalAdministratorSource.TransactionGovernanceKey;
 import net.officefloor.frame.internal.structure.EscalationFlow;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.frame.spi.governance.Governance;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
-import net.officefloor.frame.spi.team.Team;
-import net.officefloor.frame.test.AbstractOfficeConstructTestCase;
 import net.officefloor.frame.test.ReflectiveWorkBuilder;
 import net.officefloor.frame.test.ReflectiveWorkBuilder.ReflectiveTaskBuilder;
 
@@ -46,7 +44,17 @@ import net.officefloor.frame.test.ReflectiveWorkBuilder.ReflectiveTaskBuilder;
  * 
  * @author Daniel Sagenschneider
  */
-public class TransactionGovernanceTest extends AbstractOfficeConstructTestCase {
+public class TransactionGovernanceTest extends AbstractGovernanceTestCase {
+
+	/**
+	 * Creates all combinations of meta-data for testing.
+	 * 
+	 * @return {@link TestSuite} containing tests for all combinations of
+	 *         meta-data.
+	 */
+	public static Test suite() {
+		return createMetaDataCombinationTestSuite(TransactionGovernanceTest.class);
+	}
 
 	/**
 	 * {@link TransactionalObject}.
@@ -65,14 +73,9 @@ public class TransactionGovernanceTest extends AbstractOfficeConstructTestCase {
 	private boolean isRollback = false;
 
 	/**
-	 * Flag indicating whether to use multi-threaded {@link Team} instances.
+	 * Ensure able to commit transaction.
 	 */
-	private boolean isMultiThreaded = false;
-
-	/**
-	 * Ensure able to commit transaction with {@link PassiveTeam}.
-	 */
-	public void test_Passive_CommitTransaction() throws Exception {
+	public void testCommitTransaction() throws Exception {
 
 		// Commit
 		this.isCommit = true;
@@ -87,27 +90,9 @@ public class TransactionGovernanceTest extends AbstractOfficeConstructTestCase {
 	}
 
 	/**
-	 * Ensure able to commit transaction with {@link LeaderFollowerTeam}.
+	 * Ensure able to rollback transaction.
 	 */
-	public void test_LeaderFollower_CommitTransaction() throws Exception {
-
-		// Multi-threaded Commit
-		this.isMultiThreaded = true;
-		this.isCommit = true;
-
-		// Record committing the transaction
-		this.object.begin();
-		this.object.doFunctionality();
-		this.object.commit();
-
-		// Test
-		this.doTest();
-	}
-
-	/**
-	 * Ensure able to rollback transaction with {@link PassiveTeam}.
-	 */
-	public void test_Passive_RollbackTransaction() throws Exception {
+	public void testRollbackTransaction() throws Exception {
 
 		// Rollback
 		this.isRollback = true;
@@ -122,44 +107,9 @@ public class TransactionGovernanceTest extends AbstractOfficeConstructTestCase {
 	}
 
 	/**
-	 * Ensure able to rollback transaction with {@link LeaderFollowerTeam}.
-	 */
-	public void test_LeaderFollower_RollbackTransaction() throws Exception {
-
-		// Multi-threaded Rollback
-		this.isMultiThreaded = true;
-		this.isRollback = true;
-
-		// Record rolling back the transaction
-		this.object.begin();
-		this.object.doFunctionality();
-		this.object.rollback();
-
-		// Test
-		this.doTest();
-	}
-
-	/**
 	 * Ensure able to tidy up transaction.
 	 */
-	public void test_Passive_TidyUpTransaction() throws Exception {
-
-		// Ensure transaction governing functionality
-		this.object.begin();
-		this.object.doFunctionality();
-		this.object.rollback();
-
-		// Test
-		this.doTest();
-	}
-
-	/**
-	 * Ensure able to tidy up transaction.
-	 */
-	public void test_LeaderFollower_TidyUpTransaction() throws Exception {
-
-		// Multi-threaded
-		this.isMultiThreaded = true;
+	public void testTidyUpTransaction() throws Exception {
 
 		// Ensure transaction governing functionality
 		this.object.begin();
@@ -173,7 +123,7 @@ public class TransactionGovernanceTest extends AbstractOfficeConstructTestCase {
 	/**
 	 * Ensure handle {@link Escalation} from transaction failure.
 	 */
-	public void test_Passive_TransactionEscalation() throws Exception {
+	public void testTransactionEscalation() throws Exception {
 
 		final SQLException exception = new SQLException("TEST");
 
@@ -196,54 +146,19 @@ public class TransactionGovernanceTest extends AbstractOfficeConstructTestCase {
 	}
 
 	/**
-	 * Ensure handle {@link Escalation} from transaction failure.
-	 */
-	public void test_LeaderFollower_TransactionEscalation() throws Exception {
-
-		final SQLException exception = new SQLException("TEST");
-
-		// Multi-threaded commit attempt
-		this.isCommit = true;
-		this.isMultiThreaded = true;
-
-		// Record transaction failed
-		this.object.begin();
-		this.object.doFunctionality();
-		this.object.commit();
-		this.control(this.object).setThrowable(exception);
-
-		// Test
-		try {
-			this.doTest();
-			fail("Should not be successful");
-		} catch (SQLException ex) {
-			assertSame("Incorrect exception", exception, ex);
-		}
-	}
-
-	/**
 	 * Undertake the test.
 	 */
 	private void doTest() throws Exception {
-
-		// Create the teams
-		Team taskTeam;
-		Team governanceTeam;
-		if (this.isMultiThreaded) {
-			taskTeam = new LeaderFollowerTeam("TASK", 5, 100);
-			governanceTeam = new LeaderFollowerTeam("GOVERNANCE", 2, 100);
-		} else {
-			taskTeam = new PassiveTeam();
-			governanceTeam = taskTeam;
-		}
 
 		// Test
 		this.replayMockObjects();
 
 		// Configure
 		String officeName = this.getOfficeName();
-		this.constructTeam("TASK_TEAM", taskTeam);
-		this.constructTeam("GOVERNANCE_TEAM", governanceTeam);
+		this.constructTeams();
+
+		// Flag for manual governance management
+		this.getOfficeBuilder().setManuallyManageGovernance(true);
 
 		// Configure the Managed Object
 		this.constructManagedObject(this.object, "MO", officeName);
@@ -254,7 +169,7 @@ public class TransactionGovernanceTest extends AbstractOfficeConstructTestCase {
 				"doTask");
 
 		// Configure the Task
-		ReflectiveTaskBuilder task = builder.buildTask("doTask", "TASK_TEAM");
+		ReflectiveTaskBuilder task = builder.buildTask("doTask", TEAM_TASK);
 		task.getBuilder().linkPreTaskAdministration("ADMIN", "BEGIN");
 		if (this.isCommit) {
 			task.getBuilder().linkPostTaskAdministration("ADMIN", "COMMIT");
@@ -267,7 +182,7 @@ public class TransactionGovernanceTest extends AbstractOfficeConstructTestCase {
 
 		// Configure the Escalation
 		ReflectiveTaskBuilder escalation = builder.buildTask(
-				"handleEscalation", "TASK_TEAM");
+				"handleEscalation", TEAM_TASK);
 		escalation.buildParameter();
 
 		// Configure the Governance
@@ -275,7 +190,7 @@ public class TransactionGovernanceTest extends AbstractOfficeConstructTestCase {
 				.addGovernance("GOVERNANCE",
 						new MockTransactionalGovernanceFactory(),
 						MockTransaction.class);
-		governance.setTeamName("GOVERNANCE_TEAM");
+		governance.setTeamName(TEAM_GOVERNANCE);
 		governance
 				.addEscalation(SQLException.class, "WORK", "handleEscalation");
 		dependencies.mapGovernance("GOVERNANCE");
@@ -284,7 +199,7 @@ public class TransactionGovernanceTest extends AbstractOfficeConstructTestCase {
 		AdministratorBuilder<TransactionDutyKey> admin = this
 				.constructAdministrator("ADMIN",
 						MockTransactionalAdministratorSource.class,
-						"GOVERNANCE_TEAM");
+						TEAM_ADMINISTRATION);
 		admin.administerManagedObject("MO");
 		admin.addDuty("BEGIN").linkGovernance(
 				TransactionGovernanceKey.TRANSACTION, "GOVERNANCE");

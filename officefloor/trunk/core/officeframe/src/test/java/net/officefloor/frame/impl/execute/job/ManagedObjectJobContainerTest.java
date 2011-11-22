@@ -42,7 +42,7 @@ public class ManagedObjectJobContainerTest extends AbstractJobContainerTest {
 		// Create a job to use the managed object
 		final Object moObject = "ManagedObject Object";
 		Job job = this.createJob(false, new ManagedObjectIndex[] { moIndex },
-				new JobFunctionality() {
+				null, null, new JobFunctionality() {
 					@Override
 					public Object executeFunctionality(
 							JobFunctionalityContext context) throws Throwable {
@@ -89,7 +89,7 @@ public class ManagedObjectJobContainerTest extends AbstractJobContainerTest {
 		// Create a job to use the asynchronous managed object
 		final Object moObject = "AsynchronousManagedObject Object";
 		Job job = this.createJob(false, new ManagedObjectIndex[] { moIndex },
-				new JobFunctionality() {
+				null, null, new JobFunctionality() {
 					@Override
 					public Object executeFunctionality(
 							JobFunctionalityContext context) throws Throwable {
@@ -111,6 +111,7 @@ public class ManagedObjectJobContainerTest extends AbstractJobContainerTest {
 		// Record actions on managed object now loaded
 		this.record_JobContainer_initialSteps(job, null);
 		this.record_WorkContainer_coordinateManagedObjects(job, true);
+		this.record_WorkContainer_governManagedObjects(job, false, false);
 		this.record_WorkContainer_isManagedObjectsReady(job, true);
 		this.record_WorkContainer_getObject(moIndex, moObject);
 		this.record_JobMetaData_getNextTaskInFlow(false);
@@ -145,7 +146,7 @@ public class ManagedObjectJobContainerTest extends AbstractJobContainerTest {
 		// Create a job to use the coordinating managed object
 		final Object moObject = "CoordinatingManagedObject Object";
 		Job job = this.createJob(false, new ManagedObjectIndex[] { moIndex },
-				new JobFunctionality() {
+				null, null, new JobFunctionality() {
 					@Override
 					public Object executeFunctionality(
 							JobFunctionalityContext context) throws Throwable {
@@ -167,6 +168,7 @@ public class ManagedObjectJobContainerTest extends AbstractJobContainerTest {
 		// Record actions on completing coordination
 		this.record_JobContainer_initialSteps(job, null);
 		this.record_WorkContainer_coordinateManagedObjects(job, true);
+		this.record_WorkContainer_governManagedObjects(job, false, false);
 		this.record_WorkContainer_isManagedObjectsReady(job, true);
 		this.record_WorkContainer_getObject(moIndex, moObject);
 		this.record_JobMetaData_getNextTaskInFlow(false);
@@ -204,7 +206,7 @@ public class ManagedObjectJobContainerTest extends AbstractJobContainerTest {
 		// Create a job to use the asynchronous managed object
 		final Object moObject = "CoordinatingManagedObject Object";
 		Job job = this.createJob(false,
-				new ManagedObjectIndex[] { moOne, moTwo },
+				new ManagedObjectIndex[] { moOne, moTwo }, null, null,
 				new JobFunctionality() {
 					@Override
 					public Object executeFunctionality(
@@ -227,6 +229,7 @@ public class ManagedObjectJobContainerTest extends AbstractJobContainerTest {
 
 		// Record actions on managed object now ready
 		this.record_JobContainer_initialSteps(job, null);
+		this.record_WorkContainer_governManagedObjects(job, false, false);
 		this.record_WorkContainer_isManagedObjectsReady(job, true);
 		this.record_WorkContainer_getObject(moTwo, moObject);
 		this.record_JobMetaData_getNextTaskInFlow(false);

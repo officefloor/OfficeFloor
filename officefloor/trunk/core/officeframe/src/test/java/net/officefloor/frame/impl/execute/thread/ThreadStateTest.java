@@ -24,14 +24,19 @@ import java.util.List;
 import net.officefloor.frame.api.escalate.FlowJoinTimedOutEscalation;
 import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.execute.Work;
+import net.officefloor.frame.impl.execute.governance.GovernanceJob;
+import net.officefloor.frame.impl.execute.governance.GovernanceMetaDataImpl;
 import net.officefloor.frame.internal.structure.AdministratorContainer;
 import net.officefloor.frame.internal.structure.AdministratorMetaData;
 import net.officefloor.frame.internal.structure.Asset;
 import net.officefloor.frame.internal.structure.AssetManager;
 import net.officefloor.frame.internal.structure.AssetMonitor;
 import net.officefloor.frame.internal.structure.CheckAssetContext;
+import net.officefloor.frame.internal.structure.ContainerContext;
 import net.officefloor.frame.internal.structure.EscalationLevel;
+import net.officefloor.frame.internal.structure.GovernanceActivity;
 import net.officefloor.frame.internal.structure.GovernanceContainer;
+import net.officefloor.frame.internal.structure.GovernanceDeactivationStrategy;
 import net.officefloor.frame.internal.structure.GovernanceMetaData;
 import net.officefloor.frame.internal.structure.JobNode;
 import net.officefloor.frame.internal.structure.JobNodeActivateSet;
@@ -43,6 +48,8 @@ import net.officefloor.frame.internal.structure.TaskMetaData;
 import net.officefloor.frame.internal.structure.ThreadMetaData;
 import net.officefloor.frame.internal.structure.ThreadState;
 import net.officefloor.frame.internal.structure.WorkMetaData;
+import net.officefloor.frame.spi.governance.Governance;
+import net.officefloor.frame.spi.team.Team;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.frame.test.match.TypeMatcher;
 import net.officefloor.frame.util.MetaDataTestInstanceFactory;
@@ -180,6 +187,90 @@ public class ThreadStateTest extends OfficeFrameTestCase {
 	}
 
 	/**
+	 * Ensure not complete {@link ThreadState} while active {@link Governance}.
+	 */
+	public void testDisregardGovernanceOnCompleteThread() {
+		this.doDeactivateGovernanceOnThreadCompletionTest(GovernanceDeactivationStrategy.DISREGARD);
+	}
+
+	/**
+	 * Ensure not complete {@link ThreadState} while active {@link Governance}.
+	 */
+	public void testEnforceGovernanceOnCompleteThread() {
+		this.doDeactivateGovernanceOnThreadCompletionTest(GovernanceDeactivationStrategy.ENFORCE);
+	}
+
+	/**
+	 * Undertakes deactivation of {@link Governance} on {@link ThreadState}
+	 * completion.
+	 * 
+	 * @param deactivationStrategy
+	 *            {@link GovernanceDeactivationStrategy}.
+	 */
+	@SuppressWarnings({ "unchecked", "rawtypes" })
+	private void doDeactivateGovernanceOnThreadCompletionTest(
+			GovernanceDeactivationStrategy deactivationStrategy) {
+
+		final int GOVERNANCE_INDEX = 3;
+		final int GOVERNANCE_SIZE = GOVERNANCE_INDEX + 1;
+
+		final GovernanceActivity<?, ?> activity = this
+				.createMock(GovernanceActivity.class);
+		final Team governanceTeam = this.createMock(Team.class);
+		final GovernanceMetaData<?, ?> governanceMetaData = new GovernanceMetaDataImpl(
+				"GOVERNANCE", null, governanceTeam);
+
+		// Record not complete thread due to governance
+		this.record_ThreadState_init(0, GOVERNANCE_SIZE, 0);
+		GovernanceContainer<?, ?> governance = this
+				.record_ThreadState_getGovernance(GOVERNANCE_INDEX);
+		this.recordReturn(this.threadMetaData,
+				this.threadMetaData.getGovernanceDeactivationStrategy(),
+				deactivationStrategy);
+		switch (deactivationStrategy) {
+		case ENFORCE:
+			governance.enforceGovernance(null);
+			break;
+		case DISREGARD:
+			governance.disregardGovernance(null);
+			break;
+		default:
+			fail("Unknown governance deactivation strategy "
+					+ deactivationStrategy);
+		}
+		this.control(governance).setMatcher(new AbstractMatcher() {
+			@Override
+			public boolean matches(Object[] expected, Object[] actual) {
+				// Trigger disregarding governance
+				ContainerContext context = (ContainerContext) actual[0];
+				context.addGovernanceActivity(activity);
+				return true;
+			}
+		});
+		this.recordReturn(activity, activity.getGovernanceMetaData(),
+				governanceMetaData);
+		governanceTeam.assignJob(null);
+		this.control(governanceTeam).setMatcher(
+				new TypeMatcher(GovernanceJob.class));
+
+		// Test
+		this.replayMockObjects();
+		ThreadState thread = this.createThreadState();
+		GovernanceContainer<?, ?> actualGovernance = thread
+				.getGovernanceContainer(GOVERNANCE_INDEX);
+		JobSequence jobSequence = thread.createJobSequence();
+		thread.jobSequenceComplete(jobSequence, this.activateSet);
+		this.verifyMockObjects();
+
+		// Ensure correct governance container
+		assertEquals("Incorrect governance container", governance,
+				actualGovernance);
+
+		// Thread should not be complete
+		assertFalse("Thread should not be complete", thread.isComplete());
+	}
+
+	/**
 	 * Ensure {@link ThreadState} does not complete while escalating.
 	 */
 	public void testEscalating() {
@@ -261,7 +352,8 @@ public class ThreadStateTest extends OfficeFrameTestCase {
 		this.replayMockObjects();
 		ThreadStateImpl thread = this.createThreadState();
 		JobSequence jobSequence = thread.createJobSequence();
-		jobNode[0] = jobSequence.createTaskNode(taskMetaData, null, null);
+		jobNode[0] = jobSequence.createTaskNode(taskMetaData, null, null,
+				GovernanceDeactivationStrategy.ENFORCE);
 		thread.waitOnFlow(jobNode[0], 1000, "TOKEN", this.activateSet);
 		this.verifyMockObjects();
 	}
@@ -429,15 +521,59 @@ public class ThreadStateTest extends OfficeFrameTestCase {
 	 * Records instantiating the {@link ThreadState}.
 	 */
 	private void record_ThreadState_init() {
+		this.record_ThreadState_init(0, 0, 0);
+	}
+
+	/**
+	 * Records instantiating the {@link ThreadState}.
+	 */
+	private void record_ThreadState_init(int managedObjectCount,
+			int governanceCount, int administratorCount) {
+		// Init only looks at array length (not content)
 		this.recordReturn(this.threadMetaData,
 				this.threadMetaData.getManagedObjectMetaData(),
-				new ManagedObjectMetaData[0]);
+				new ManagedObjectMetaData[managedObjectCount]);
 		this.recordReturn(this.threadMetaData,
 				this.threadMetaData.getGovernanceMetaData(),
-				new GovernanceMetaData[0]);
+				new GovernanceMetaData[governanceCount]);
 		this.recordReturn(this.threadMetaData,
 				this.threadMetaData.getAdministratorMetaData(),
-				new AdministratorMetaData[0]);
+				new AdministratorMetaData[administratorCount]);
+	}
+
+	/**
+	 * Records obtaining a {@link GovernanceContainer}.
+	 */
+	private GovernanceContainer<?, ?> record_ThreadState_getGovernance(
+			int governanceIndex) {
+
+		// Record providing array for governance meta-data
+		GovernanceMetaData<?, ?> governanceMetaData = this
+				.createMock(GovernanceMetaData.class);
+		GovernanceMetaData<?, ?>[] governanceMetaDatas = new GovernanceMetaData<?, ?>[governanceIndex + 1];
+		governanceMetaDatas[governanceIndex] = governanceMetaData;
+		this.recordReturn(this.threadMetaData,
+				this.threadMetaData.getGovernanceMetaData(),
+				governanceMetaDatas);
+
+		// Record creating the container
+		final GovernanceContainer<?, ?> governanceContainer = this
+				.createMock(GovernanceContainer.class);
+		this.recordReturn(governanceMetaData, governanceMetaData
+				.createGovernanceContainer(null, governanceIndex),
+				governanceContainer, new AbstractMatcher() {
+					@Override
+					public boolean matches(Object[] expected, Object[] actual) {
+						assertTrue("Expect ThreadState",
+								actual[0] instanceof ThreadState);
+						assertEquals("Incorrect governance index", expected[1],
+								actual[1]);
+						return true;
+					}
+				});
+
+		// Return the governance container
+		return governanceContainer;
 	}
 
 	/**
@@ -492,6 +628,9 @@ public class ThreadStateTest extends OfficeFrameTestCase {
 	 * is complete.
 	 */
 	private void record_ProcessState_threadComplete() {
+		this.recordReturn(this.threadMetaData,
+				this.threadMetaData.getGovernanceDeactivationStrategy(),
+				GovernanceDeactivationStrategy.DISREGARD);
 		this.processState.threadComplete(null, this.activateSet);
 		this.control(this.processState).setMatcher(new AbstractMatcher() {
 			@Override

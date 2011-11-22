@@ -32,6 +32,7 @@ import net.officefloor.frame.api.build.TaskFactory;
 import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
 import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.execute.Work;
+import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.impl.construct.util.ConstructUtil;
 import net.officefloor.frame.impl.execute.duty.TaskDutyAssociationImpl;
 import net.officefloor.frame.impl.execute.escalation.EscalationFlowImpl;
@@ -43,6 +44,7 @@ import net.officefloor.frame.internal.configuration.TaskConfiguration;
 import net.officefloor.frame.internal.configuration.TaskDutyConfiguration;
 import net.officefloor.frame.internal.configuration.TaskEscalationConfiguration;
 import net.officefloor.frame.internal.configuration.TaskFlowConfiguration;
+import net.officefloor.frame.internal.configuration.TaskGovernanceConfiguration;
 import net.officefloor.frame.internal.configuration.TaskNodeReference;
 import net.officefloor.frame.internal.configuration.TaskObjectConfiguration;
 import net.officefloor.frame.internal.construct.AssetManagerFactory;
@@ -50,6 +52,7 @@ import net.officefloor.frame.internal.construct.OfficeMetaDataLocator;
 import net.officefloor.frame.internal.construct.RawBoundAdministratorMetaData;
 import net.officefloor.frame.internal.construct.RawBoundManagedObjectInstanceMetaData;
 import net.officefloor.frame.internal.construct.RawBoundManagedObjectMetaData;
+import net.officefloor.frame.internal.construct.RawGovernanceMetaData;
 import net.officefloor.frame.internal.construct.RawOfficeMetaData;
 import net.officefloor.frame.internal.construct.RawTaskMetaData;
 import net.officefloor.frame.internal.construct.RawTaskMetaDataFactory;
@@ -64,6 +67,7 @@ import net.officefloor.frame.internal.structure.TaskDutyAssociation;
 import net.officefloor.frame.internal.structure.TaskMetaData;
 import net.officefloor.frame.internal.structure.WorkMetaData;
 import net.officefloor.frame.spi.administration.DutyKey;
+import net.officefloor.frame.spi.governance.Governance;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.frame.spi.team.Team;
 
@@ -297,10 +301,10 @@ public class RawTaskMetaDataImpl<W extends Work, D extends Enum<D>, F extends En
 		// Create the required managed object indexes
 		ManagedObjectIndex[] requiredManagedObjectIndexes = new ManagedObjectIndex[requiredManagedObjects
 				.size()];
-		int i = 0;
+		int requiredIndex = 0;
 		for (ManagedObjectIndex requiredManagedObjectIndex : requiredManagedObjects
 				.keySet()) {
-			requiredManagedObjectIndexes[i++] = requiredManagedObjectIndex;
+			requiredManagedObjectIndexes[requiredIndex++] = requiredManagedObjectIndex;
 		}
 
 		// Sort the required managed objects
@@ -310,11 +314,66 @@ public class RawTaskMetaDataImpl<W extends Work, D extends Enum<D>, F extends En
 			return null;
 		}
 
+		// Obtain the required governance
+		boolean[] requiredGovernance;
+		TaskGovernanceConfiguration[] governanceConfigurations = configuration
+				.getGovernanceConfiguration();
+		boolean isManuallyManageGovernance = rawOfficeMetaData
+				.isManuallyManageGovernance();
+		if (isManuallyManageGovernance) {
+			// Ensure no governance is configured
+			if (governanceConfigurations.length > 0) {
+				issues.addIssue(AssetType.TASK, taskName, "Manually manage "
+						+ Governance.class.getSimpleName() + " but "
+						+ Governance.class.getSimpleName() + " configured for "
+						+ OfficeFloor.class.getSimpleName() + " management");
+			}
+
+			// No OfficeFloor managed governance for task
+			requiredGovernance = null;
+
+		} else {
+			// OfficeFloor to manage Governance, create base flags
+			Map<String, RawGovernanceMetaData<?, ?>> rawGovernances = rawOfficeMetaData
+					.getGovernanceMetaData();
+			requiredGovernance = new boolean[rawGovernances.size()];
+			for (int i = 0; i < requiredGovernance.length; i++) {
+				requiredGovernance[i] = false;
+			}
+
+			// Configure activation of appropriate governance
+			for (int i = 0; i < governanceConfigurations.length; i++) {
+				TaskGovernanceConfiguration governanceConfiguration = governanceConfigurations[i];
+
+				// Obtain the name of the governance
+				String governanceName = governanceConfiguration
+						.getGovernanceName();
+				if (ConstructUtil.isBlank(governanceName)) {
+					issues.addIssue(AssetType.TASK, taskName,
+							"No Governance name provided for Governance " + i);
+					continue; // move on to next governance
+				}
+
+				// Obtain the raw governance meta-data
+				RawGovernanceMetaData<?, ?> rawGovernance = rawGovernances
+						.get(governanceName);
+				if (rawGovernance == null) {
+					issues.addIssue(AssetType.TASK, taskName,
+							"Unknown Governance '" + governanceName + "'");
+					continue; // move on to next governance
+				}
+
+				// Flag activate the particular governance
+				int governanceIndex = rawGovernance.getGovernanceIndex();
+				requiredGovernance[governanceIndex] = true;
+			}
+		}
+
 		// Create the task meta-data
 		TaskMetaDataImpl<w, d, f> taskMetaData = new TaskMetaDataImpl<w, d, f>(
 				taskName, taskFactory, differentiator, parameterType, team,
 				requiredManagedObjectIndexes, taskToWorkMoTranslations,
-				preTaskDuties, postTaskDuties);
+				requiredGovernance, preTaskDuties, postTaskDuties);
 
 		// Return the raw task meta-data
 		return new RawTaskMetaDataImpl<w, d, f>(taskName, configuration,

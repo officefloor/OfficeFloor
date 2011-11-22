@@ -17,6 +17,8 @@
  */
 package net.officefloor.frame.integrate.governance;
 
+import junit.framework.Test;
+import junit.framework.TestSuite;
 import net.officefloor.frame.api.build.AdministratorBuilder;
 import net.officefloor.frame.api.build.DependencyMappingBuilder;
 import net.officefloor.frame.api.build.GovernanceBuilder;
@@ -26,7 +28,6 @@ import net.officefloor.frame.api.build.WorkFactory;
 import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.execute.TaskContext;
 import net.officefloor.frame.api.execute.Work;
-import net.officefloor.frame.impl.spi.team.LeaderFollowerTeam;
 import net.officefloor.frame.impl.spi.team.PassiveTeam;
 import net.officefloor.frame.integrate.governance.MockTransactionalAdministratorSource.TransactionDutyKey;
 import net.officefloor.frame.integrate.governance.MockTransactionalAdministratorSource.TransactionGovernanceKey;
@@ -36,8 +37,6 @@ import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.frame.spi.managedobject.extension.ExtensionInterfaceFactory;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.spi.managedobject.source.impl.AbstractManagedObjectSource;
-import net.officefloor.frame.spi.team.Team;
-import net.officefloor.frame.test.AbstractOfficeConstructTestCase;
 import net.officefloor.frame.test.ReflectiveWorkBuilder;
 import net.officefloor.frame.test.ReflectiveWorkBuilder.ReflectiveTaskBuilder;
 
@@ -47,7 +46,17 @@ import net.officefloor.frame.test.ReflectiveWorkBuilder.ReflectiveTaskBuilder;
  * @author Daniel Sagenschneider
  */
 public class ManagedObjectUnloadGovernanceTest extends
-		AbstractOfficeConstructTestCase {
+		AbstractGovernanceTestCase {
+
+	/**
+	 * Creates all combinations of meta-data for testing.
+	 * 
+	 * @return {@link TestSuite} containing tests for all combinations of
+	 *         meta-data.
+	 */
+	public static Test suite() {
+		return createMetaDataCombinationTestSuite(ManagedObjectUnloadGovernanceTest.class);
+	}
 
 	/**
 	 * {@link TransactionalObject}.
@@ -66,14 +75,9 @@ public class ManagedObjectUnloadGovernanceTest extends
 	private boolean isRollback = false;
 
 	/**
-	 * Flag indicating whether to use multi-threaded {@link Team} instances.
+	 * Ensure able to commit transaction.
 	 */
-	private boolean isMultiThreaded = false;
-
-	/**
-	 * Ensure able to commit transaction with {@link PassiveTeam}.
-	 */
-	public void test_Passive_CommitTransaction() throws Exception {
+	public void testCommitTransaction() throws Exception {
 
 		// Commit
 		this.isCommit = true;
@@ -93,32 +97,9 @@ public class ManagedObjectUnloadGovernanceTest extends
 	}
 
 	/**
-	 * Ensure able to commit transaction with {@link LeaderFollowerTeam}.
+	 * Ensure able to rollback transaction.
 	 */
-	public void test_LeaderFollower_CommitTransaction() throws Exception {
-
-		// Multi-threaded Commit
-		this.isMultiThreaded = true;
-		this.isCommit = true;
-
-		// Record commit
-		this.object.begin();
-		this.object.doFunctionalityOne();
-		this.object.begin();
-		this.object.doFunctionalityTwo();
-		this.object.commit();
-		this.object.commit();
-		this.object.recycled();
-		this.object.recycled();
-
-		// Test
-		this.doTest();
-	}
-
-	/**
-	 * Ensure able to rollback transaction with {@link PassiveTeam}.
-	 */
-	public void test_Passive_RollbackTransaction() throws Exception {
+	public void testRollbackTransaction() throws Exception {
 
 		// Rollback
 		this.isRollback = true;
@@ -138,54 +119,9 @@ public class ManagedObjectUnloadGovernanceTest extends
 	}
 
 	/**
-	 * Ensure able to rollback transaction with {@link LeaderFollowerTeam}.
-	 */
-	public void test_LeaderFollower_RollbackTransaction() throws Exception {
-
-		// Multi-threaded Rollback
-		this.isMultiThreaded = true;
-		this.isRollback = true;
-
-		// Record rolling back the transaction
-		this.object.begin();
-		this.object.doFunctionalityOne();
-		this.object.begin();
-		this.object.doFunctionalityTwo();
-		this.object.rollback();
-		this.object.rollback();
-		this.object.recycled();
-		this.object.recycled();
-
-		// Test
-		this.doTest();
-	}
-
-	/**
 	 * Ensure able to tidy up transaction.
 	 */
-	public void test_Passive_TidyUpTransaction() throws Exception {
-
-		// Ensure transaction governing functionality
-		this.object.begin();
-		this.object.doFunctionalityOne();
-		this.object.begin();
-		this.object.doFunctionalityTwo();
-		this.object.rollback();
-		this.object.rollback();
-		this.object.recycled();
-		this.object.recycled();
-
-		// Test
-		this.doTest();
-	}
-
-	/**
-	 * Ensure able to tidy up transaction.
-	 */
-	public void test_LeaderFollower_TidyUpTransaction() throws Exception {
-
-		// Multi-threaded
-		this.isMultiThreaded = true;
+	public void testTidyUpTransaction() throws Exception {
 
 		// Ensure transaction governing functionality
 		this.object.begin();
@@ -206,28 +142,15 @@ public class ManagedObjectUnloadGovernanceTest extends
 	 */
 	private void doTest() {
 
-		// Create the teams
-		Team taskTeamOne;
-		Team taskTeamTwo;
-		Team governanceTeam;
-		if (this.isMultiThreaded) {
-			taskTeamOne = new LeaderFollowerTeam("TASK", 5, 100);
-			taskTeamTwo = new LeaderFollowerTeam("TASK", 5, 100);
-			governanceTeam = new LeaderFollowerTeam("GOVERNANCE", 2, 100);
-		} else {
-			taskTeamOne = new PassiveTeam();
-			taskTeamTwo = taskTeamOne;
-			governanceTeam = taskTeamOne;
-		}
-
 		// Test
 		this.replayMockObjects();
 
 		// Configure
 		String officeName = this.getOfficeName();
-		this.constructTeam("TASK_TEAM_ONE", taskTeamOne);
-		this.constructTeam("TASK_TEAM_TWO", taskTeamTwo);
-		this.constructTeam("GOVERNANCE_TEAM", governanceTeam);
+		this.constructTeams();
+
+		// Flag for manual governance management
+		this.getOfficeBuilder().setManuallyManageGovernance(true);
 
 		// Passive recycling to ensure happens at time of unload
 		this.constructTeam("of-MO_ONE.RECYCLE", new PassiveTeam());
@@ -247,7 +170,7 @@ public class ManagedObjectUnloadGovernanceTest extends
 
 		// Configure the first task
 		ReflectiveTaskBuilder taskOne = builder.buildTask("doTaskOne",
-				"TASK_TEAM_ONE");
+				TEAM_TASK);
 		DependencyMappingBuilder dependenciesOne = taskOne.buildObject(
 				"MO_ONE", ManagedObjectScope.WORK);
 		taskOne.getBuilder().linkPreTaskAdministration("ADMIN", "BEGIN");
@@ -255,7 +178,7 @@ public class ManagedObjectUnloadGovernanceTest extends
 
 		// Configure the second task
 		ReflectiveTaskBuilder taskTwo = builder.buildTask("doTaskTwo",
-				"TASK_TEAM_TWO");
+				TEAM_TASK);
 		DependencyMappingBuilder dependenciesTwo = taskTwo.buildObject(
 				"MO_TWO", ManagedObjectScope.WORK);
 		if (this.isCommit) {
@@ -271,7 +194,7 @@ public class ManagedObjectUnloadGovernanceTest extends
 				.addGovernance("GOVERNANCE",
 						new MockTransactionalGovernanceFactory(),
 						MockTransaction.class);
-		governance.setTeamName("GOVERNANCE_TEAM");
+		governance.setTeamName(TEAM_GOVERNANCE);
 		dependenciesOne.mapGovernance("GOVERNANCE");
 		dependenciesTwo.mapGovernance("GOVERNANCE");
 
@@ -279,7 +202,7 @@ public class ManagedObjectUnloadGovernanceTest extends
 		AdministratorBuilder<TransactionDutyKey> admin = this
 				.constructAdministrator("ADMIN",
 						MockTransactionalAdministratorSource.class,
-						"GOVERNANCE_TEAM");
+						TEAM_ADMINISTRATION);
 		admin.addDuty("BEGIN").linkGovernance(
 				TransactionGovernanceKey.TRANSACTION, "GOVERNANCE");
 		admin.addDuty("COMMIT").linkGovernance(

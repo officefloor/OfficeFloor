@@ -19,9 +19,11 @@
 package net.officefloor.frame.impl.execute.thread;
 
 import net.officefloor.frame.internal.structure.AdministratorMetaData;
+import net.officefloor.frame.internal.structure.GovernanceDeactivationStrategy;
 import net.officefloor.frame.internal.structure.GovernanceMetaData;
 import net.officefloor.frame.internal.structure.ManagedObjectMetaData;
 import net.officefloor.frame.internal.structure.ThreadMetaData;
+import net.officefloor.frame.internal.structure.ThreadState;
 
 /**
  * {@link ThreadMetaData} implementation.
@@ -46,6 +48,11 @@ public class ThreadMetaDataImpl implements ThreadMetaData {
 	private final AdministratorMetaData<?, ?>[] administratorMetaData;
 
 	/**
+	 * {@link GovernanceDeactivationStrategy} on {@link ThreadState} completion.
+	 */
+	private final GovernanceDeactivationStrategy governanceDeactivationStrategy;
+
+	/**
 	 * Initiate.
 	 * 
 	 * @param managedObjectMetaData
@@ -54,13 +61,18 @@ public class ThreadMetaDataImpl implements ThreadMetaData {
 	 *            {@link GovernanceMetaData} instances.
 	 * @param administratorMetaData
 	 *            {@link AdministratorMetaData} instances.
+	 * @param governanceDeactivationStrategy
+	 *            {@link GovernanceDeactivationStrategy} on {@link ThreadState}
+	 *            completion.
 	 */
 	public ThreadMetaDataImpl(ManagedObjectMetaData<?>[] managedObjectMetaData,
 			GovernanceMetaData<?, ?>[] governanceMetaData,
-			AdministratorMetaData<?, ?>[] administratorMetaData) {
+			AdministratorMetaData<?, ?>[] administratorMetaData,
+			GovernanceDeactivationStrategy governanceDeactivationStrategy) {
 		this.managedObjectMetaData = managedObjectMetaData;
 		this.governanceMetaData = governanceMetaData;
 		this.administratorMetaData = administratorMetaData;
+		this.governanceDeactivationStrategy = governanceDeactivationStrategy;
 	}
 
 	/*
@@ -80,6 +92,11 @@ public class ThreadMetaDataImpl implements ThreadMetaData {
 	@Override
 	public AdministratorMetaData<?, ?>[] getAdministratorMetaData() {
 		return this.administratorMetaData;
+	}
+
+	@Override
+	public GovernanceDeactivationStrategy getGovernanceDeactivationStrategy() {
+		return this.governanceDeactivationStrategy;
 	}
 
 }

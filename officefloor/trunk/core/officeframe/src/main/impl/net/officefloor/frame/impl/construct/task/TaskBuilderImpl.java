@@ -33,12 +33,14 @@ import net.officefloor.frame.internal.configuration.TaskEscalationConfiguration;
 import net.officefloor.frame.internal.configuration.TaskFlowConfiguration;
 import net.officefloor.frame.internal.configuration.TaskConfiguration;
 import net.officefloor.frame.internal.configuration.TaskDutyConfiguration;
+import net.officefloor.frame.internal.configuration.TaskGovernanceConfiguration;
 import net.officefloor.frame.internal.configuration.TaskNodeReference;
 import net.officefloor.frame.internal.configuration.TaskObjectConfiguration;
 import net.officefloor.frame.internal.structure.EscalationProcedure;
 import net.officefloor.frame.internal.structure.JobSequence;
 import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
 import net.officefloor.frame.internal.structure.JobNode;
+import net.officefloor.frame.spi.governance.Governance;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.spi.team.Team;
@@ -70,6 +72,11 @@ public class TaskBuilderImpl<W extends Work, D extends Enum<D>, F extends Enum<F
 	 * {@link JobSequence} instances to be linked to this {@link Task}.
 	 */
 	private final Map<Integer, TaskFlowConfigurationImpl<F>> flows = new HashMap<Integer, TaskFlowConfigurationImpl<F>>();
+
+	/**
+	 * {@link Governance} instances to be active for this {@link Task}.
+	 */
+	private final List<TaskGovernanceConfiguration> governances = new LinkedList<TaskGovernanceConfiguration>();
 
 	/**
 	 * Differentiator.
@@ -299,6 +306,12 @@ public class TaskBuilderImpl<W extends Work, D extends Enum<D>, F extends Enum<F
 				new TaskNodeReferenceImpl(workName, taskName, typeOfCause)));
 	}
 
+	@Override
+	public void addGovernance(String governanceName) {
+		this.governances
+				.add(new TaskGovernanceConfigurationImpl(governanceName));
+	}
+
 	/*
 	 * ============ TaskConfiguration =====================================
 	 */
@@ -327,6 +340,13 @@ public class TaskBuilderImpl<W extends Work, D extends Enum<D>, F extends Enum<F
 	public TaskObjectConfiguration<D>[] getObjectConfiguration() {
 		return ConstructUtil.toArray(this.objects,
 				new TaskObjectConfiguration[0]);
+	}
+
+	@Override
+	public TaskGovernanceConfiguration[] getGovernanceConfiguration() {
+		return this.governances
+				.toArray(new TaskGovernanceConfiguration[this.governances
+						.size()]);
 	}
 
 	@Override

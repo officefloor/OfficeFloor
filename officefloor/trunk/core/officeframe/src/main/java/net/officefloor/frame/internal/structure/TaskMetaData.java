@@ -23,6 +23,7 @@ import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.spi.administration.Administrator;
 import net.officefloor.frame.spi.administration.Duty;
+import net.officefloor.frame.spi.governance.Governance;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
 
 /**
@@ -71,6 +72,15 @@ public interface TaskMetaData<W extends Work, D extends Enum<D>, F extends Enum<
 	 * @return Listing of {@link ManagedObjectIndex} instances.
 	 */
 	ManagedObjectIndex[] getRequiredManagedObjects();
+
+	/**
+	 * Obtains the activation flags for the {@link Governance}. The index into
+	 * the array identifies the {@link Governance} for the respective activation
+	 * flag.
+	 * 
+	 * @return Activation flags for the {@link Governance}.
+	 */
+	boolean[] getRequiredGovernance();
 
 	/**
 	 * Translates the {@link ManagedObject} index of the {@link Task} to that of
@@ -129,9 +139,12 @@ public interface TaskMetaData<W extends Work, D extends Enum<D>, F extends Enum<
 	 *            Parallel {@link JobNode} owner.
 	 * @param parameter
 	 *            Parameter.
+	 * @param governanceDeactivationStrategy
+	 *            {@link GovernanceDeactivationStrategy}.
 	 * @return {@link JobNode}.
 	 */
 	JobNode createTaskNode(JobSequence flow, WorkContainer<W> workContainer,
-			JobNode parallelJobNodeOwner, Object parameter);
+			JobNode parallelJobNodeOwner, Object parameter,
+			GovernanceDeactivationStrategy governanceDeactivationStrategy);
 
 }

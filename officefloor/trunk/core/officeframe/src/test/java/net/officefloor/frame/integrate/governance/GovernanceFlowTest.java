@@ -20,6 +20,8 @@ package net.officefloor.frame.integrate.governance;
 import java.util.LinkedList;
 import java.util.List;
 
+import junit.framework.Test;
+import junit.framework.TestSuite;
 import net.officefloor.frame.api.build.AdministratorBuilder;
 import net.officefloor.frame.api.build.DependencyMappingBuilder;
 import net.officefloor.frame.api.build.GovernanceBuilder;
@@ -27,8 +29,6 @@ import net.officefloor.frame.api.build.GovernanceFactory;
 import net.officefloor.frame.api.build.OfficeBuilder;
 import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.execute.Work;
-import net.officefloor.frame.impl.spi.team.LeaderFollowerTeam;
-import net.officefloor.frame.impl.spi.team.PassiveTeam;
 import net.officefloor.frame.integrate.governance.MockTransactionalAdministratorSource.TransactionDutyKey;
 import net.officefloor.frame.integrate.governance.MockTransactionalAdministratorSource.TransactionGovernanceKey;
 import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
@@ -36,8 +36,6 @@ import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.frame.spi.governance.Governance;
 import net.officefloor.frame.spi.governance.GovernanceContext;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
-import net.officefloor.frame.spi.team.Team;
-import net.officefloor.frame.test.AbstractOfficeConstructTestCase;
 import net.officefloor.frame.test.ReflectiveWorkBuilder;
 import net.officefloor.frame.test.ReflectiveWorkBuilder.ReflectiveTaskBuilder;
 
@@ -46,7 +44,17 @@ import net.officefloor.frame.test.ReflectiveWorkBuilder.ReflectiveTaskBuilder;
  * 
  * @author Daniel Sagenschneider
  */
-public class GovernanceFlowTest extends AbstractOfficeConstructTestCase {
+public class GovernanceFlowTest extends AbstractGovernanceTestCase {
+
+	/**
+	 * Creates all combinations of meta-data for testing.
+	 * 
+	 * @return {@link TestSuite} containing tests for all combinations of
+	 *         meta-data.
+	 */
+	public static Test suite() {
+		return createMetaDataCombinationTestSuite(GovernanceFlowTest.class);
+	}
 
 	/**
 	 * {@link TransactionalObject}.
@@ -65,14 +73,9 @@ public class GovernanceFlowTest extends AbstractOfficeConstructTestCase {
 	private boolean isRollback = false;
 
 	/**
-	 * Flag indicating whether to use multi-threaded {@link Team} instances.
+	 * Ensure able to commit transaction.
 	 */
-	private boolean isMultiThreaded = false;
-
-	/**
-	 * Ensure able to commit transaction with {@link PassiveTeam}.
-	 */
-	public void test_Passive_CommitTransaction() throws Throwable {
+	public void testCommitTransaction() throws Throwable {
 
 		// Commit
 		this.isCommit = true;
@@ -89,29 +92,9 @@ public class GovernanceFlowTest extends AbstractOfficeConstructTestCase {
 	}
 
 	/**
-	 * Ensure able to commit transaction with {@link LeaderFollowerTeam}.
+	 * Ensure able to rollback transaction.
 	 */
-	public void test_LeaderFollower_CommitTransaction() throws Throwable {
-
-		// Multi-threaded Commit
-		this.isMultiThreaded = true;
-		this.isCommit = true;
-
-		// Record committing the transaction
-		this.object.begin();
-		this.object.flowBegin();
-		this.object.doFunctionality();
-		this.object.commit();
-		this.object.flowCommit();
-
-		// Test
-		this.doTest();
-	}
-
-	/**
-	 * Ensure able to rollback transaction with {@link PassiveTeam}.
-	 */
-	public void test_Passive_RollbackTransaction() throws Throwable {
+	public void testRollbackTransaction() throws Throwable {
 
 		// Rollback
 		this.isRollback = true;
@@ -128,48 +111,9 @@ public class GovernanceFlowTest extends AbstractOfficeConstructTestCase {
 	}
 
 	/**
-	 * Ensure able to rollback transaction with {@link LeaderFollowerTeam}.
-	 */
-	public void test_LeaderFollower_RollbackTransaction() throws Throwable {
-
-		// Multi-threaded Rollback
-		this.isMultiThreaded = true;
-		this.isRollback = true;
-
-		// Record rolling back the transaction
-		this.object.begin();
-		this.object.flowBegin();
-		this.object.doFunctionality();
-		this.object.rollback();
-		this.object.flowRollback();
-
-		// Test
-		this.doTest();
-	}
-
-	/**
 	 * Ensure able to tidy up transaction.
 	 */
-	public void test_Passive_TidyUpTransaction() throws Throwable {
-
-		// Ensure transaction governing functionality
-		this.object.begin();
-		this.object.flowBegin();
-		this.object.doFunctionality();
-		this.object.rollback();
-		this.object.flowRollback();
-
-		// Test
-		this.doTest();
-	}
-
-	/**
-	 * Ensure able to tidy up transaction.
-	 */
-	public void test_LeaderFollower_TidyUpTransaction() throws Throwable {
-
-		// Multi-threaded
-		this.isMultiThreaded = true;
+	public void testTidyUpTransaction() throws Throwable {
 
 		// Ensure transaction governing functionality
 		this.object.begin();
@@ -192,25 +136,16 @@ public class GovernanceFlowTest extends AbstractOfficeConstructTestCase {
 	 */
 	private void doTest() throws Throwable {
 
-		// Create the teams
-		Team taskTeam;
-		Team governanceTeam;
-		if (this.isMultiThreaded) {
-			taskTeam = new LeaderFollowerTeam("TASK", 5, 100);
-			governanceTeam = new LeaderFollowerTeam("GOVERNANCE", 2, 100);
-		} else {
-			taskTeam = new PassiveTeam();
-			governanceTeam = taskTeam;
-		}
-
 		// Test
 		this.replayMockObjects();
 
 		// Configure
 		String officeName = this.getOfficeName();
 		OfficeBuilder officeBuilder = this.getOfficeBuilder();
-		this.constructTeam("TASK_TEAM", taskTeam);
-		this.constructTeam("GOVERNANCE_TEAM", governanceTeam);
+		this.constructTeams();
+
+		// Flag for manual governance management
+		officeBuilder.setManuallyManageGovernance(true);
 
 		// Configure the Managed Object
 		this.constructManagedObject(this.object, "MO", officeName);
@@ -221,7 +156,7 @@ public class GovernanceFlowTest extends AbstractOfficeConstructTestCase {
 				"doTask");
 
 		// Configure the Task
-		ReflectiveTaskBuilder task = builder.buildTask("doTask", "TASK_TEAM");
+		ReflectiveTaskBuilder task = builder.buildTask("doTask", TEAM_TASK);
 		task.getBuilder().linkPreTaskAdministration("ADMIN", "BEGIN");
 		if (this.isCommit) {
 			task.getBuilder().linkPostTaskAdministration("ADMIN", "COMMIT");
@@ -234,21 +169,21 @@ public class GovernanceFlowTest extends AbstractOfficeConstructTestCase {
 
 		// Configure the governance flow tasks
 		ReflectiveTaskBuilder beginTask = builder.buildTask("flowBegin",
-				"TASK_TEAM");
+				TEAM_TASK);
 		beginTask.buildObject("MO");
 		beginTask.buildParameter();
 		ReflectiveTaskBuilder commitTask = builder.buildTask("flowCommit",
-				"TASK_TEAM");
+				TEAM_TASK);
 		commitTask.buildObject("MO");
 		commitTask.buildParameter();
 		ReflectiveTaskBuilder rollbackTask = builder.buildTask("flowRollback",
-				"TASK_TEAM");
+				TEAM_TASK);
 		rollbackTask.buildObject("MO");
 		rollbackTask.buildParameter();
 
 		// Configure handling test failures
 		ReflectiveTaskBuilder handleException = builder.buildTask(
-				"handleException", "TASK_TEAM");
+				"handleException", TEAM_TASK);
 		handleException.buildParameter();
 		officeBuilder.addEscalation(Throwable.class, "WORK", "handleException");
 
@@ -256,7 +191,7 @@ public class GovernanceFlowTest extends AbstractOfficeConstructTestCase {
 		GovernanceBuilder<GovernanceFlowKeys> governance = this
 				.getOfficeBuilder().addGovernance("GOVERNANCE",
 						new FlowGovernanceFactory(), MockTransaction.class);
-		governance.setTeamName("GOVERNANCE_TEAM");
+		governance.setTeamName(TEAM_GOVERNANCE);
 		governance.linkFlow(GovernanceFlowKeys.BEGIN, "WORK", "flowBegin",
 				FlowInstigationStrategyEnum.SEQUENTIAL, String.class);
 		governance.linkFlow(GovernanceFlowKeys.COMMIT, "WORK", "flowCommit",
@@ -270,7 +205,7 @@ public class GovernanceFlowTest extends AbstractOfficeConstructTestCase {
 		AdministratorBuilder<TransactionDutyKey> admin = this
 				.constructAdministrator("ADMIN",
 						MockTransactionalAdministratorSource.class,
-						"GOVERNANCE_TEAM");
+						TEAM_ADMINISTRATION);
 		admin.administerManagedObject("MO");
 		admin.addDuty("BEGIN").linkGovernance(
 				TransactionGovernanceKey.TRANSACTION, "GOVERNANCE");

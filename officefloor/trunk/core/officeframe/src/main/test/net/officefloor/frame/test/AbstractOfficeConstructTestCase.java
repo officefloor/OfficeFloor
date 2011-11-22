@@ -123,11 +123,6 @@ public abstract class AbstractOfficeConstructTestCase extends
 	 */
 	private OfficeFloor officeFloor = null;
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see junit.framework.TestCase#setUp()
-	 */
 	@Override
 	protected void setUp() throws Exception {
 		// Initiate for constructing office
@@ -179,11 +174,6 @@ public abstract class AbstractOfficeConstructTestCase extends
 		}
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see junit.framework.TestCase#tearDown()
-	 */
 	@Override
 	protected void tearDown() throws Exception {
 		try {

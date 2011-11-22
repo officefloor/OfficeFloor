@@ -29,6 +29,8 @@ import net.officefloor.frame.impl.execute.process.ProcessStateImpl;
 import net.officefloor.frame.internal.structure.AssetManager;
 import net.officefloor.frame.internal.structure.EscalationFlow;
 import net.officefloor.frame.internal.structure.EscalationProcedure;
+import net.officefloor.frame.internal.structure.GovernanceDeactivationStrategy;
+import net.officefloor.frame.internal.structure.GovernanceMetaData;
 import net.officefloor.frame.internal.structure.JobSequence;
 import net.officefloor.frame.internal.structure.FlowMetaData;
 import net.officefloor.frame.internal.structure.JobNode;
@@ -41,6 +43,7 @@ import net.officefloor.frame.internal.structure.ProcessState;
 import net.officefloor.frame.internal.structure.ProcessTicker;
 import net.officefloor.frame.internal.structure.TaskMetaData;
 import net.officefloor.frame.internal.structure.WorkMetaData;
+import net.officefloor.frame.spi.governance.Governance;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.frame.spi.team.source.ProcessContextListener;
 
@@ -154,6 +157,12 @@ public class OfficeMetaDataImpl implements OfficeMetaData {
 	private final EscalationFlow officeFloorEscalation;
 
 	/**
+	 * Required {@link Governance} for the input {@link ManagedObject}
+	 * {@link EscalationHandler}.
+	 */
+	private final boolean[] inputManagedObjectEscalationRequiredGovernance;
+
+	/**
 	 * Initiate.
 	 * 
 	 * @param officeName
@@ -189,6 +198,14 @@ public class OfficeMetaDataImpl implements OfficeMetaData {
 		this.startupTasks = startupTasks;
 		this.escalationProcedure = escalationProcedure;
 		this.officeFloorEscalation = officeFloorEscalation;
+
+		// Always no governance for input managed object escalation handling
+		GovernanceMetaData<?, ?>[] governanceMetaData = this.processMetaData
+				.getThreadMetaData().getGovernanceMetaData();
+		this.inputManagedObjectEscalationRequiredGovernance = new boolean[governanceMetaData.length];
+		for (int i = 0; i < this.inputManagedObjectEscalationRequiredGovernance.length; i++) {
+			this.inputManagedObjectEscalationRequiredGovernance[i] = false;
+		}
 	}
 
 	/*
@@ -254,7 +271,8 @@ public class OfficeMetaDataImpl implements OfficeMetaData {
 					this.officeFloorEscalation, inputManagedObject,
 					inputManagedObjectMetaData,
 					processBoundIndexForInputManagedObject,
-					inputManagedObjectEscalationHandler);
+					inputManagedObjectEscalationHandler,
+					this.inputManagedObjectEscalationRequiredGovernance);
 		}
 
 		// Create the Flow
@@ -266,7 +284,8 @@ public class OfficeMetaDataImpl implements OfficeMetaData {
 				.getInitialTaskMetaData();
 
 		// Create the Job Node for the initial job
-		JobNode jobNode = flow.createTaskNode(taskMetaData, null, parameter);
+		JobNode jobNode = flow.createTaskNode(taskMetaData, null, parameter,
+				GovernanceDeactivationStrategy.ENFORCE);
 
 		// Notify of created process context
 		Object processIdentifier = processState.getProcessIdentifier();

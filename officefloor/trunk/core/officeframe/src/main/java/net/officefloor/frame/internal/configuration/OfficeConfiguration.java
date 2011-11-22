@@ -31,6 +31,7 @@ import net.officefloor.frame.internal.structure.OfficeManager;
 import net.officefloor.frame.internal.structure.ProcessState;
 import net.officefloor.frame.internal.structure.ThreadState;
 import net.officefloor.frame.spi.administration.source.AdministratorSource;
+import net.officefloor.frame.spi.governance.Governance;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.spi.team.Team;
@@ -112,6 +113,13 @@ public interface OfficeConfiguration {
 	 *         instances bound to the {@link ThreadState}.
 	 */
 	ManagedObjectConfiguration<?>[] getThreadManagedObjectConfiguration();
+
+	/**
+	 * Flags whether the {@link Governance} is to be manually managed.
+	 * 
+	 * @return <code>true</code> to manually manage the {@link Governance}.
+	 */
+	boolean isManuallyManageGovernance();
 
 	/**
 	 * Obtains the {@link GovernanceConfiguration}.

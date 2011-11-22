@@ -36,6 +36,7 @@ import net.officefloor.frame.impl.execute.thread.ThreadMetaDataImpl;
 import net.officefloor.frame.impl.execute.work.WorkMetaDataImpl;
 import net.officefloor.frame.internal.structure.AdministratorMetaData;
 import net.officefloor.frame.internal.structure.AssetManager;
+import net.officefloor.frame.internal.structure.GovernanceDeactivationStrategy;
 import net.officefloor.frame.internal.structure.JobSequence;
 import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
 import net.officefloor.frame.internal.structure.FlowMetaData;
@@ -292,7 +293,8 @@ public abstract class AbstractTaskNodeTestCase<W extends Work> extends
 				false, null, 1000, new ManagedObjectGovernanceMetaData[0]);
 		ThreadMetaData threadMetaData = new ThreadMetaDataImpl(
 				new ManagedObjectMetaData[] { threadMoMetaData },
-				new GovernanceMetaData[0], new AdministratorMetaData[0]);
+				new GovernanceMetaData[0], new AdministratorMetaData[0],
+				GovernanceDeactivationStrategy.DISREGARD);
 
 		// Create the process meta-data (single instance)
 		ManagedObjectMetaDataImpl<?> processMoMetaData = new ManagedObjectMetaDataImpl(
@@ -315,7 +317,7 @@ public abstract class AbstractTaskNodeTestCase<W extends Work> extends
 
 		// Create the initial job node to execute
 		JobNode initialJobNode = flow.createTaskNode(this.getInitialNode(),
-				null, null);
+				null, null, GovernanceDeactivationStrategy.ENFORCE);
 		Job initialJob = (Job) initialJobNode;
 
 		// Execute the task tree (until complete)

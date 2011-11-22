@@ -42,7 +42,7 @@ public class SetupJobContainerTest extends AbstractJobContainerTest {
 		// Create a job that should not be executed
 		Job job = this.createJob(false,
 				new ManagedObjectIndex[] { new ManagedObjectIndexImpl(
-						ManagedObjectScope.PROCESS, 0) },
+						ManagedObjectScope.PROCESS, 0) }, null, null,
 				new JobFunctionality() {
 					@Override
 					public Object executeFunctionality(
@@ -138,7 +138,7 @@ public class SetupJobContainerTest extends AbstractJobContainerTest {
 		// Create a job that should not be executed
 		Job job = this.createJob(false,
 				new ManagedObjectIndex[] { new ManagedObjectIndexImpl(
-						ManagedObjectScope.PROCESS, 0) },
+						ManagedObjectScope.PROCESS, 0) }, null, null,
 				new JobFunctionality() {
 					@Override
 					public Object executeFunctionality(
