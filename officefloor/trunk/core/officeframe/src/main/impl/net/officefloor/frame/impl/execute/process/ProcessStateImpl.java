@@ -49,6 +49,7 @@ import net.officefloor.frame.internal.structure.ProcessState;
 import net.officefloor.frame.internal.structure.TaskMetaData;
 import net.officefloor.frame.internal.structure.ThreadState;
 import net.officefloor.frame.internal.structure.WorkMetaData;
+import net.officefloor.frame.spi.governance.Governance;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.spi.team.Team;
@@ -162,7 +163,7 @@ public class ProcessStateImpl implements ProcessState {
 			ProcessContextListener[] processContextListeners,
 			OfficeMetaData officeMetaData, EscalationFlow officeFloorEscalation) {
 		this(processMetaData, processContextListeners, officeMetaData,
-				officeFloorEscalation, null, null, -1, null);
+				officeFloorEscalation, null, null, -1, null, null);
 	}
 
 	/**
@@ -189,6 +190,8 @@ public class ProcessStateImpl implements ProcessState {
 	 * @param inputManagedObjectEscalationHandler
 	 *            {@link EscalationHandler} provided by the
 	 *            {@link ManagedObject} that invoked this {@link ProcessState}.
+	 * @param escalationRequiredGovernance
+	 *            {@link EscalationHandler} required {@link Governance}.
 	 */
 	public ProcessStateImpl(ProcessMetaData processMetaData,
 			ProcessContextListener[] processContextListeners,
@@ -197,7 +200,8 @@ public class ProcessStateImpl implements ProcessState {
 			ManagedObject inputManagedObject,
 			ManagedObjectMetaData<?> inputManagedObjectMetaData,
 			int inputManagedObjectIndex,
-			EscalationHandler inputManagedObjectEscalationHandler) {
+			EscalationHandler inputManagedObjectEscalationHandler,
+			boolean[] escalationHandlerRequiredGovernance) {
 		this.processMetaData = processMetaData;
 		this.processContextListeners = processContextListeners;
 		this.officeMetaData = officeMetaData;
@@ -225,7 +229,8 @@ public class ProcessStateImpl implements ProcessState {
 		// Escalation handled by managed object source
 		this.managedObjectSourceEscalation = (inputManagedObjectEscalationHandler == null ? null
 				: new EscalationHandlerEscalation(
-						inputManagedObjectEscalationHandler, team));
+						inputManagedObjectEscalationHandler, team,
+						escalationHandlerRequiredGovernance));
 	}
 
 	/*

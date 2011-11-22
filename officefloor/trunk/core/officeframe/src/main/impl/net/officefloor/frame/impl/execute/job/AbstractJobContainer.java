@@ -28,6 +28,7 @@ import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.impl.execute.escalation.PropagateEscalationError;
 import net.officefloor.frame.impl.execute.linkedlistset.AbstractLinkedListSetEntry;
 import net.officefloor.frame.impl.execute.linkedlistset.ComparatorLinkedListSet;
+import net.officefloor.frame.internal.structure.ActiveGovernance;
 import net.officefloor.frame.internal.structure.AssetManager;
 import net.officefloor.frame.internal.structure.ContainerContext;
 import net.officefloor.frame.internal.structure.EscalationFlow;
@@ -36,6 +37,8 @@ import net.officefloor.frame.internal.structure.EscalationProcedure;
 import net.officefloor.frame.internal.structure.FlowAsset;
 import net.officefloor.frame.internal.structure.FlowMetaData;
 import net.officefloor.frame.internal.structure.GovernanceActivity;
+import net.officefloor.frame.internal.structure.GovernanceContainer;
+import net.officefloor.frame.internal.structure.GovernanceDeactivationStrategy;
 import net.officefloor.frame.internal.structure.JobMetaData;
 import net.officefloor.frame.internal.structure.JobNode;
 import net.officefloor.frame.internal.structure.JobNodeActivatableSet;
@@ -98,6 +101,29 @@ public abstract class AbstractJobContainer<W extends Work, N extends JobMetaData
 	private final ManagedObjectIndex[] requiredManagedObjects;
 
 	/**
+	 * <p>
+	 * Array identifying which {@link Governance} instances are required to be
+	 * active for this {@link Job}. The {@link Governance} is identified by the
+	 * index into the array.For each {@link Governance}:
+	 * <ol>
+	 * <li><code>true</code> indicates the {@link Governance} is to be activated
+	 * (if not already activated)</li>
+	 * <li><code>false</code> indicates to deactivate the {@link Governance}
+	 * should it be active. The strategy for deactivation is defined by the
+	 * {@link GovernanceDeactivationStrategy}.</li>
+	 * </ol>
+	 * <p>
+	 * Should this array be <code>null</code> no change is undertaken with the
+	 * {@link Governance} for the {@link Job}.
+	 */
+	private final boolean[] requiredGovernance;
+
+	/**
+	 * {@link GovernanceDeactivationStrategy}.
+	 */
+	private final GovernanceDeactivationStrategy governanceDeactivationStrategy;
+
+	/**
 	 * Initiate.
 	 * 
 	 * @param flow
@@ -115,15 +141,25 @@ public abstract class AbstractJobContainer<W extends Work, N extends JobMetaData
 	 *            {@link work} {@link ManagedObjectIndex} instances to the
 	 *            {@link ManagedObject} instances that must be loaded before the
 	 *            {@link Task} may be executed.
+	 * @param requiredGovernance
+	 *            Identifies the required activation state of the
+	 *            {@link Governance} for this {@link Job}.
+	 * @param governanceDeactivationStrategy
+	 *            {@link GovernanceDeactivationStrategy} for
+	 *            {@link ActiveGovernance}.
 	 */
 	public AbstractJobContainer(JobSequence flow,
 			WorkContainer<W> workContainer, N nodeMetaData,
-			JobNode parallelOwner, ManagedObjectIndex[] requiredManagedObjects) {
+			JobNode parallelOwner, ManagedObjectIndex[] requiredManagedObjects,
+			boolean[] requiredGovernance,
+			GovernanceDeactivationStrategy governanceDeactivationStrategy) {
 		this.flow = flow;
 		this.workContainer = workContainer;
 		this.nodeMetaData = nodeMetaData;
 		this.parallelOwner = parallelOwner;
 		this.requiredManagedObjects = requiredManagedObjects;
+		this.requiredGovernance = requiredGovernance;
+		this.governanceDeactivationStrategy = governanceDeactivationStrategy;
 	}
 
 	/**
@@ -183,7 +219,7 @@ public abstract class AbstractJobContainer<W extends Work, N extends JobMetaData
 
 		// Create the job node
 		JobNode parallelJobNode = parallelFlow.createTaskNode(taskMetaData,
-				this, parameter);
+				this, parameter, GovernanceDeactivationStrategy.ENFORCE);
 
 		// Load the parallel node
 		this.loadParallelJobNode(parallelJobNode);
@@ -318,6 +354,60 @@ public abstract class AbstractJobContainer<W extends Work, N extends JobMetaData
 						this.isJobToWait = false;
 						this.isSetupJob = false;
 
+						// Determine if alter governance
+						if (this.requiredGovernance != null) {
+							// Alter governance for the job
+							boolean isGovernanceAltered = false;
+							for (int i = 0; i < this.requiredGovernance.length; i++) {
+								boolean isGovernanceRequired = this.requiredGovernance[i];
+
+								// Determine if governance in correct state
+								if (isGovernanceRequired != threadState
+										.isGovernanceActive(i)) {
+
+									// Obtain the governance
+									GovernanceContainer<?, ?> governance = threadState
+											.getGovernanceContainer(i);
+
+									// Incorrect state, so correct
+									if (isGovernanceRequired) {
+										// Activate the governance
+										governance.activateGovernance(this);
+
+									} else {
+										// De-activate the governance
+										switch (this.governanceDeactivationStrategy) {
+										case ENFORCE:
+											governance.enforceGovernance(this);
+											break;
+
+										case DISREGARD:
+											governance
+													.disregardGovernance(this);
+											break;
+
+										default:
+											// Unknown de-activation strategy
+											throw new IllegalStateException(
+													"Unknown "
+															+ GovernanceDeactivationStrategy.class
+																	.getSimpleName()
+															+ " "
+															+ this.governanceDeactivationStrategy);
+										}
+									}
+
+									// Flag that governance altered
+									isGovernanceAltered = true;
+								}
+							}
+
+							// If governance changed, wait the change
+							if (isGovernanceAltered) {
+								return true;
+							}
+						}
+
 						// Only take lock if have required managed objects
 						if (this.requiredManagedObjects.length == 0) {
 							// Only jump forward if initial state
@@ -329,6 +419,9 @@ public abstract class AbstractJobContainer<W extends Work, N extends JobMetaData
 						} else {
 							// Within process lock, ensure managed objects ready
 							synchronized (processState.getProcessLock()) {
+
+								// Only govern once on pass through
+								boolean isGovernManagedObjects = false;
 
 								switch (this.jobState) {
 								case LOAD_MANAGED_OBJECTS:
@@ -350,6 +443,9 @@ public abstract class AbstractJobContainer<W extends Work, N extends JobMetaData
 													this.requiredManagedObjects,
 													jobContext, this,
 													activateSet, this);
+
+									// Attempted to govern managed objects
+									isGovernManagedObjects = true;
 
 									// Determine if Job to wait
 									if (this.isJobToWait) {
@@ -379,6 +475,24 @@ public abstract class AbstractJobContainer<W extends Work, N extends JobMetaData
 									this.jobState = JobState.EXECUTE_JOB;
 
 								default:
+									// Ensure appropriate governance to execute.
+									// May change due to parallel re-execution.
+									if ((!isGovernManagedObjects)
+											&& (this.jobState == JobState.EXECUTE_JOB)) {
+										// Govern managed objects
+										this.workContainer
+												.governManagedObjects(
+														this.requiredManagedObjects,
+														jobContext, this,
+														activateSet, this);
+
+										// Determine if Job to wait
+										if (this.isJobToWait) {
+											// Woken when ready to govern again
+											return true;
+										}
+									}
+
 									// Ensure managed objects are ready.
 									// Coordinating cause asynchronous operation
 									if (!this.workContainer
@@ -463,10 +577,12 @@ public abstract class AbstractJobContainer<W extends Work, N extends JobMetaData
 										.getNextTaskInFlow();
 								if (nextTaskMetaData != null) {
 									// Create next task
-									JobNode job = this.flow.createTaskNode(
-											nextTaskMetaData,
-											this.parallelOwner,
-											this.nextJobParameter);
+									JobNode job = this.flow
+											.createTaskNode(
+													nextTaskMetaData,
+													this.parallelOwner,
+													this.nextJobParameter,
+													GovernanceDeactivationStrategy.ENFORCE);
 
 									// Load for sequential execution
 									this.loadSequentialJobNode(job);
@@ -933,7 +1049,8 @@ public abstract class AbstractJobContainer<W extends Work, N extends JobMetaData
 
 		// Create the job node
 		JobNode escalationJobNode = parallelFlow.createTaskNode(taskMetaData,
-				parallelOwner, parameter);
+				parallelOwner, parameter,
+				GovernanceDeactivationStrategy.DISREGARD);
 
 		// Return the escalation job node
 		return escalationJobNode;
@@ -964,7 +1081,7 @@ public abstract class AbstractJobContainer<W extends Work, N extends JobMetaData
 
 		// Create job node for execution
 		JobNode asyncJobNode = asyncFlow.createTaskNode(initTaskMetaData, null,
-				parameter);
+				parameter, GovernanceDeactivationStrategy.ENFORCE);
 
 		// Asynchronously instigate the job node
 		asyncJobNode.activateJob();
@@ -996,7 +1113,7 @@ public abstract class AbstractJobContainer<W extends Work, N extends JobMetaData
 
 		// Create the job node
 		JobNode parallelJobNode = parallelFlow.createTaskNode(initTaskMetaData,
-				this, parameter);
+				this, parameter, GovernanceDeactivationStrategy.ENFORCE);
 
 		// Load the parallel node
 		this.loadParallelJobNode(parallelJobNode);
@@ -1024,7 +1141,8 @@ public abstract class AbstractJobContainer<W extends Work, N extends JobMetaData
 
 		// Create the job node on the same flow as this job node
 		JobNode sequentialJobNode = this.flow.createTaskNode(initTaskMetaData,
-				this.parallelOwner, parameter);
+				this.parallelOwner, parameter,
+				GovernanceDeactivationStrategy.ENFORCE);
 
 		// Load the sequential node
 		this.loadSequentialJobNode(sequentialJobNode);

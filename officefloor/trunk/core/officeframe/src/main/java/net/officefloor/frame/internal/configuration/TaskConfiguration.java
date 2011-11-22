@@ -23,6 +23,7 @@ import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.internal.structure.JobSequence;
+import net.officefloor.frame.spi.governance.Governance;
 import net.officefloor.frame.spi.team.Team;
 
 /**
@@ -63,9 +64,11 @@ public interface TaskConfiguration<W extends Work, D extends Enum<D>, F extends 
 	String getOfficeTeamName();
 
 	/**
-	 * Obtains the reference to the next {@link Task} within the {@link JobSequence}.
+	 * Obtains the reference to the next {@link Task} within the
+	 * {@link JobSequence}.
 	 * 
-	 * @return Reference to the next {@link Task} within the {@link JobSequence}.
+	 * @return Reference to the next {@link Task} within the {@link JobSequence}
+	 *         .
 	 */
 	TaskNodeReference getNextTaskInFlow();
 
@@ -73,7 +76,8 @@ public interface TaskConfiguration<W extends Work, D extends Enum<D>, F extends 
 	 * Obtains the configuration of the {@link JobSequence} instances for this
 	 * {@link Task}.
 	 * 
-	 * @return Configuration of {@link JobSequence} instances for this {@link Task}.
+	 * @return Configuration of {@link JobSequence} instances for this
+	 *         {@link Task}.
 	 */
 	TaskFlowConfiguration<F>[] getFlowConfiguration();
 
@@ -85,6 +89,14 @@ public interface TaskConfiguration<W extends Work, D extends Enum<D>, F extends 
 	 *         {@link Task}.
 	 */
 	TaskObjectConfiguration<D>[] getObjectConfiguration();
+
+	/**
+	 * Obtains the configuration of the {@link Governance} instances for this
+	 * {@link Task}.
+	 * 
+	 * @return Configuration of the {@link Governance} for this {@link Task}.
+	 */
+	TaskGovernanceConfiguration[] getGovernanceConfiguration();
 
 	/**
 	 * Obtains the listing of the {@link TaskDutyConfiguration} for the

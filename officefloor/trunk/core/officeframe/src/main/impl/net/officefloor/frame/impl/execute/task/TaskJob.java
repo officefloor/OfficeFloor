@@ -29,6 +29,7 @@ import net.officefloor.frame.impl.execute.job.AbstractJobContainer;
 import net.officefloor.frame.impl.execute.job.JobExecuteContext;
 import net.officefloor.frame.impl.execute.managedobject.ManagedObjectIndexImpl;
 import net.officefloor.frame.internal.structure.AssetManager;
+import net.officefloor.frame.internal.structure.GovernanceDeactivationStrategy;
 import net.officefloor.frame.internal.structure.JobNodeActivateSet;
 import net.officefloor.frame.internal.structure.JobSequence;
 import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
@@ -91,16 +92,20 @@ public class TaskJob<W extends Work, D extends Enum<D>, F extends Enum<F>>
 	 *            {@link WorkContainer}.
 	 * @param taskMetaData
 	 *            {@link TaskMetaData}.
+	 * @param governanceDeactivationStrategy
+	 *            {@link GovernanceDeactivationStrategy}.
 	 * @param parallelOwner
 	 *            Parallel owning {@link JobNode}.
 	 * @param parameter
 	 *            Parameter for the {@link Task}.
 	 */
 	public TaskJob(JobSequence flow, WorkContainer<W> workContainer,
-			TaskMetaData<W, D, F> taskMetaData, JobNode parallelOwner,
-			Object parameter) {
+			TaskMetaData<W, D, F> taskMetaData,
+			GovernanceDeactivationStrategy governanceDeactivationStrategy,
+			JobNode parallelOwner, Object parameter) {
 		super(flow, workContainer, taskMetaData, parallelOwner, taskMetaData
-				.getRequiredManagedObjects());
+				.getRequiredManagedObjects(), taskMetaData
+				.getRequiredGovernance(), governanceDeactivationStrategy);
 		this.parameter = parameter;
 
 		// Create the task

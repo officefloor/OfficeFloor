@@ -22,7 +22,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 import net.officefloor.frame.api.build.GovernanceFactory;
-import net.officefloor.frame.api.build.OfficeBuilder;
 import net.officefloor.frame.api.build.OfficeFloorIssues;
 import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
 import net.officefloor.frame.api.escalate.Escalation;
@@ -91,12 +90,6 @@ public class RawGovernanceMetaDataTest extends OfficeFrameTestCase {
 	 * {@link Office} name.
 	 */
 	private final String OFFICE_NAME = "OFFICE";
-
-	/**
-	 * {@link OfficeBuilder}.
-	 */
-	private final OfficeBuilder officeBuilder = this
-			.createMock(OfficeBuilder.class);
 
 	/**
 	 * {@link SourceContext}.
@@ -944,7 +937,7 @@ public class RawGovernanceMetaDataTest extends OfficeFrameTestCase {
 				.getFactory().createRawGovernanceMetaData(
 						(GovernanceConfiguration) this.configuration,
 						GOVERNANCE_INDEX, this.sourceContext, officeTeams,
-						OFFICE_NAME, this.officeBuilder, this.issues);
+						OFFICE_NAME, this.issues);
 		if (!isCreated) {
 			// Ensure not created
 			assertNull("Should not create the Raw Governance Meta-Data",

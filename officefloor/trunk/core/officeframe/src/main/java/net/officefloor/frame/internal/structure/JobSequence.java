@@ -46,10 +46,13 @@ public interface JobSequence extends FlowAsset, FlowFuture,
 	 *            {@link JobNode}.
 	 * @param parameter
 	 *            Parameter for the {@link JobNode}.
+	 * @param governanceDeactivationStrategy
+	 *            {@link GovernanceDeactivationStrategy}.
 	 * @return New {@link JobNode}.
 	 */
 	JobNode createTaskNode(TaskMetaData<?, ?, ?> taskMetaData,
-			JobNode parallelNodeOwner, Object parameter);
+			JobNode parallelNodeOwner, Object parameter,
+			GovernanceDeactivationStrategy governanceDeactivationStrategy);
 
 	/**
 	 * Creates a new {@link JobNode} contained in this {@link JobSequence} for

@@ -26,6 +26,7 @@ import net.officefloor.frame.impl.execute.work.WorkContainerProxy;
 import net.officefloor.frame.internal.structure.AdministratorIndex;
 import net.officefloor.frame.internal.structure.AdministratorMetaData;
 import net.officefloor.frame.internal.structure.GovernanceActivity;
+import net.officefloor.frame.internal.structure.GovernanceDeactivationStrategy;
 import net.officefloor.frame.internal.structure.GovernanceMetaData;
 import net.officefloor.frame.internal.structure.JobSequence;
 import net.officefloor.frame.internal.structure.JobNode;
@@ -87,13 +88,14 @@ public class JobSequenceImpl extends
 	}
 
 	/*
-	 * ======================= Flow ===========================================
+	 * ======================= JobSequence ===================================
 	 */
 
 	@Override
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public JobNode createTaskNode(TaskMetaData<?, ?, ?> taskMetaData,
-			JobNode parallelNodeOwner, Object parameter) {
+			JobNode parallelNodeOwner, Object parameter,
+			GovernanceDeactivationStrategy governanceDeactivationStrategy) {
 
 		// Obtain the work meta-data
 		WorkMetaData workMetaData = taskMetaData.getWorkMetaData();
@@ -141,7 +143,7 @@ public class JobSequenceImpl extends
 
 		// Create and register the active task job
 		JobNode taskJob = taskMetaData.createTaskNode(this, taskWorkContainer,
-				parallelNodeOwner, parameter);
+				parallelNodeOwner, parameter, governanceDeactivationStrategy);
 		this.activeJobNodes.addEntry(taskJob);
 
 		// Load the task job

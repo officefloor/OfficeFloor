@@ -36,6 +36,7 @@ import net.officefloor.frame.internal.structure.EscalationFlow;
 import net.officefloor.frame.internal.structure.EscalationLevel;
 import net.officefloor.frame.internal.structure.GovernanceActivity;
 import net.officefloor.frame.internal.structure.GovernanceContainer;
+import net.officefloor.frame.internal.structure.GovernanceDeactivationStrategy;
 import net.officefloor.frame.internal.structure.GovernanceMetaData;
 import net.officefloor.frame.internal.structure.JobNode;
 import net.officefloor.frame.internal.structure.JobNodeActivateSet;
@@ -102,7 +103,7 @@ public class ThreadStateImpl extends
 
 			// Create and activate the task
 			JobNode taskNode = jobSequence.createTaskNode(taskMetaData, null,
-					parameter);
+					parameter, GovernanceDeactivationStrategy.ENFORCE);
 			taskNode.activateJob();
 
 			// Flag triggered setup task
@@ -277,12 +278,34 @@ public class ThreadStateImpl extends
 			// Reset trigger for disregard governance
 			this.isTriggerTaskOrActivity = false;
 
-			// Disregard governance as not enforced and thread complete
-			for (int i = 0; i < this.governanceContainers.length; i++) {
-				GovernanceContainer<?, ?> container = this.governanceContainers[i];
-				if (container != null) {
-					container.disregardGovernance(this.containerContext);
+			// Deactivate governance
+			GovernanceDeactivationStrategy deactivationStrategy = this.threadMetaData
+					.getGovernanceDeactivationStrategy();
+			switch (deactivationStrategy) {
+			case ENFORCE:
+				// Enforce any active governance
+				for (int i = 0; i < this.governanceContainers.length; i++) {
+					GovernanceContainer<?, ?> container = this.governanceContainers[i];
+					if (container != null) {
+						container.enforceGovernance(this.containerContext);
+					}
 				}
+				break;
+
+			case DISREGARD:
+				// Disregard any active governance
+				for (int i = 0; i < this.governanceContainers.length; i++) {
+					GovernanceContainer<?, ?> container = this.governanceContainers[i];
+					if (container != null) {
+						container.disregardGovernance(this.containerContext);
+					}
+				}
+				break;
+
+			default:
+				throw new IllegalStateException("Unknown "
+						+ GovernanceDeactivationStrategy.class.getSimpleName()
+						+ " " + deactivationStrategy);
 			}
 
 			// Determine if setup task or activity for cleanup.
@@ -331,6 +354,15 @@ public class ThreadStateImpl extends
 			this.managedObjectContainers[index] = container;
 		}
 		return container;
+	}
+
+	@Override
+	public boolean isGovernanceActive(int index) {
+		// Determine if container is active (not created is not active).
+		// (This should be thread safe as should always be called within the
+		// Thread lock of the Thread before the Job uses it).
+		GovernanceContainer<?, ?> container = this.governanceContainers[index];
+		return (container != null) && (container.isActive());
 	}
 
 	@Override

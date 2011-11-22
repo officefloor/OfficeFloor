@@ -19,21 +19,32 @@
 package net.officefloor.frame.impl.execute.process;
 
 import net.officefloor.frame.api.build.None;
+import net.officefloor.frame.api.build.TaskFactory;
+import net.officefloor.frame.api.escalate.Escalation;
 import net.officefloor.frame.api.escalate.EscalationHandler;
 import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.execute.TaskContext;
+import net.officefloor.frame.api.execute.Work;
+import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.impl.execute.escalation.EscalationProcedureImpl;
 import net.officefloor.frame.impl.execute.task.TaskJob;
 import net.officefloor.frame.impl.execute.task.TaskMetaDataImpl;
 import net.officefloor.frame.impl.execute.work.WorkMetaDataImpl;
 import net.officefloor.frame.internal.structure.AdministratorMetaData;
 import net.officefloor.frame.internal.structure.EscalationFlow;
+import net.officefloor.frame.internal.structure.EscalationProcedure;
 import net.officefloor.frame.internal.structure.FlowMetaData;
+import net.officefloor.frame.internal.structure.GovernanceDeactivationStrategy;
+import net.officefloor.frame.internal.structure.JobNode;
+import net.officefloor.frame.internal.structure.JobSequence;
 import net.officefloor.frame.internal.structure.ManagedObjectIndex;
 import net.officefloor.frame.internal.structure.ManagedObjectMetaData;
 import net.officefloor.frame.internal.structure.TaskDutyAssociation;
 import net.officefloor.frame.internal.structure.TaskMetaData;
+import net.officefloor.frame.internal.structure.WorkContainer;
 import net.officefloor.frame.internal.structure.WorkMetaData;
+import net.officefloor.frame.spi.governance.Governance;
+import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.frame.spi.team.Team;
 import net.officefloor.frame.util.AbstractSingleTask;
 
@@ -45,9 +56,63 @@ import net.officefloor.frame.util.AbstractSingleTask;
 public class EscalationHandlerEscalation implements EscalationFlow {
 
 	/**
+	 * No required {@link ManagedObject} instances for
+	 * {@link EscalationHandlerTask}.
+	 */
+	private static final ManagedObjectIndex[] REQUIRED_MANAGED_OBJECTS = new ManagedObjectIndex[0];
+
+	/**
+	 * NO {@link TaskDutyAssociation} instances for
+	 * {@link EscalationHandlerTask}.
+	 */
+	private static final TaskDutyAssociation<?>[] TASK_DUTY_ASSOCIATIONS = new TaskDutyAssociation[0];
+
+	/**
+	 * No {@link FlowMetaData} instnaces for {@link EscalationHandlerTask}.
+	 */
+	private static final FlowMetaData<?>[] FLOW_META_DATA = new FlowMetaData<?>[0];
+
+	/**
+	 * No {@link Escalation} handling from {@link EscalationHandlerTask}.
+	 */
+	private static final EscalationProcedure FURTHER_ESCALATION_PROCEDURE = new EscalationProcedureImpl();
+
+	/**
+	 * {@link ManagedObjectIndex} instances for dependencies.
+	 */
+	private static final ManagedObjectIndex[] MANGED_OBJECT_DEPENDENCIES = new ManagedObjectIndex[1];
+
+	/**
+	 * <p>
+	 * {@link WorkMetaData} for the {@link EscalationHandlerTask}.
+	 * <p>
+	 * The {@link EscalationHandlerTask} does not use state from the
+	 * {@link Work} so single instance across all {@link EscalationHandlerTask}
+	 * instances to reduce overheads.
+	 */
+	@SuppressWarnings("unchecked")
+	private static final WorkMetaData<EscalationHandlerTask> WORK_META_DATA = new WorkMetaDataImpl<EscalationHandlerTask>(
+			"Escalation Handler Work", new EscalationHandlerTask(null),
+			new ManagedObjectMetaData[0], new AdministratorMetaData[0], null,
+			new TaskMetaData[0]);
+
+	/**
+	 * Initiate static state.
+	 */
+	static {
+		// Specify dependency on parameter for escalation to handle
+		MANGED_OBJECT_DEPENDENCIES[EscalationKey.EXCEPTION.ordinal()] = TaskJob.PARAMETER_MANAGED_OBJECT_INDEX;
+	}
+
+	/**
 	 * {@link EscalationHandler}.
 	 */
 	private final EscalationHandler escalationHandler;
+
+	/**
+	 * {@link Team}.
+	 */
+	private final Team team;
 
 	/**
 	 * {@link TaskMetaData} for the {@link EscalationHandler} {@link Task}.
@@ -62,35 +127,16 @@ public class EscalationHandlerEscalation implements EscalationFlow {
 	 * @param team
 	 *            {@link Team} responsible to undertake the
 	 *            {@link EscalationFlow}.
+	 * @param requiredGovernance
+	 *            Required {@link Governance}.
 	 */
-	@SuppressWarnings("unchecked")
 	public EscalationHandlerEscalation(EscalationHandler escalationHandler,
-			Team team) {
+			Team team, boolean[] requiredGovernance) {
 		this.escalationHandler = escalationHandler;
+		this.team = team;
 
-		// Create the escalation task
-		EscalationHandlerTask task = new EscalationHandlerTask();
-
-		// Create the dependencies to obtain exception as parameter
-		ManagedObjectIndex[] dependencies = new ManagedObjectIndex[1];
-		dependencies[EscalationKey.EXCEPTION.ordinal()] = TaskJob.PARAMETER_MANAGED_OBJECT_INDEX;
-
-		// Create the escalation task meta-data
-		TaskMetaDataImpl<EscalationHandlerTask, EscalationKey, None> taskMetaData = new TaskMetaDataImpl<EscalationHandlerTask, EscalationKey, None>(
-				"Escalation Handler Task", task, null, Throwable.class, team,
-				new ManagedObjectIndex[0], dependencies,
-				new TaskDutyAssociation[0], new TaskDutyAssociation[0]);
-
-		// Create the escalation work meta-data (and load to task meta-data)
-		WorkMetaData<EscalationHandlerTask> workMetaData = new WorkMetaDataImpl<EscalationHandlerTask>(
-				"Escalation Handler Work", task, new ManagedObjectMetaData[0],
-				new AdministratorMetaData[0], null,
-				new TaskMetaData[] { taskMetaData });
-		taskMetaData.loadRemainingState(workMetaData, new FlowMetaData[0],
-				null, new EscalationProcedureImpl());
-
-		// Specify the escalation task meta-data
-		this.taskMetaData = taskMetaData;
+		// Specify the basic escalation task meta-data
+		this.taskMetaData = this.createTaskMetaData(null);
 	}
 
 	/**
@@ -100,6 +146,31 @@ public class EscalationHandlerEscalation implements EscalationFlow {
 	 */
 	public EscalationHandler getEscalationHandler() {
 		return this.escalationHandler;
+	}
+
+	/**
+	 * Creates the {@link TaskMetaData} for the {@link EscalationHandlerTask}.
+	 * 
+	 * @param requiredGovernance
+	 *            Required {@link Governance} to execute the
+	 *            {@link EscalationHandlerTask}. This enables deactivating all
+	 *            {@link Governance} for the particular {@link Office} before
+	 *            executing the {@link Task}.
+	 * @return {@link TaskMetaData} for the {@link EscalationHandlerTask}.
+	 */
+	private TaskMetaData<EscalationHandlerTask, EscalationKey, None> createTaskMetaData(
+			boolean[] requiredGovernance) {
+
+		// Create the escalation task
+		EscalationHandlerTask task = new EscalationHandlerTask(
+				this.escalationHandler);
+
+		// Create the escalation task meta-data
+		EscalationTaskMetaData taskMetaData = new EscalationTaskMetaData(task,
+				this.team, requiredGovernance);
+
+		// Return the task meta-data
+		return taskMetaData;
 	}
 
 	/*
@@ -126,8 +197,23 @@ public class EscalationHandlerEscalation implements EscalationFlow {
 	/**
 	 * {@link Task} to execute the {@link EscalationHandler}.
 	 */
-	private class EscalationHandlerTask extends
+	private static class EscalationHandlerTask extends
 			AbstractSingleTask<EscalationHandlerTask, EscalationKey, None> {
+
+		/**
+		 * {@link EscalationHandler}.
+		 */
+		private final EscalationHandler escalationHandler;
+
+		/**
+		 * Initiate.
+		 * 
+		 * @param escalationHandler
+		 *            {@link EscalationHandler}.
+		 */
+		public EscalationHandlerTask(EscalationHandler escalationHandler) {
+			this.escalationHandler = escalationHandler;
+		}
 
 		/*
 		 * ================== Task ============================================
@@ -143,11 +229,73 @@ public class EscalationHandlerEscalation implements EscalationFlow {
 					.getObject(EscalationKey.EXCEPTION);
 
 			// Handle the exception
-			EscalationHandlerEscalation.this.escalationHandler
-					.handleEscalation(exception);
+			this.escalationHandler.handleEscalation(exception);
 
 			// Nothing to return
 			return null;
+		}
+	}
+
+	/**
+	 * <p>
+	 * {@link TaskMetaData} for the {@link EscalationHandlerTask} to ensure
+	 * deactivate any active {@link Governance} before execution.
+	 * <p>
+	 * The {@link TaskMetaData} used by the actual executing
+	 * {@link EscalationHandlerTask} is dynamic to the {@link Governance} for
+	 * the particular {@link Office}.
+	 */
+	private static class EscalationTaskMetaData extends
+			TaskMetaDataImpl<EscalationHandlerTask, EscalationKey, None> {
+
+		/**
+		 * Initiate.
+		 * 
+		 * @param taskFactory
+		 *            {@link TaskFactory}.
+		 * @param team
+		 *            {@link Team}.
+		 * @param requiredGovernance
+		 *            Required {@link Governance}.
+		 */
+		public EscalationTaskMetaData(
+				TaskFactory<EscalationHandlerTask, EscalationKey, None> taskFactory,
+				Team team, boolean[] requiredGovernance) {
+			super("Escalation Handler Task", taskFactory, null,
+					Throwable.class, team, REQUIRED_MANAGED_OBJECTS,
+					MANGED_OBJECT_DEPENDENCIES, requiredGovernance,
+					TASK_DUTY_ASSOCIATIONS, TASK_DUTY_ASSOCIATIONS);
+			this.loadRemainingState(WORK_META_DATA, FLOW_META_DATA, null,
+					FURTHER_ESCALATION_PROCEDURE);
+		}
+
+		/*
+		 * ======================= TaskMetaData ==========================
+		 */
+
+		@Override
+		public JobNode createTaskNode(JobSequence flow,
+				WorkContainer<EscalationHandlerTask> workContainer,
+				JobNode parallelJobNodeOwner, Object parameter,
+				GovernanceDeactivationStrategy governanceDeactivationStrategy) {
+
+			// Create required Governance to deactivate all governance
+			int requiredGovernanceCount = flow.getThreadState()
+					.getThreadMetaData().getGovernanceMetaData().length;
+			boolean[] requiredGovernance = new boolean[requiredGovernanceCount];
+			for (int i = 0; i < requiredGovernance.length; i++) {
+				requiredGovernance[i] = false;
+			}
+
+			// Create task meta-data for escalation
+			EscalationTaskMetaData taskMetaData = new EscalationTaskMetaData(
+					this.getTaskFactory(), this.getTeam(), requiredGovernance);
+
+			// Create and return the job node
+			return new TaskJob<EscalationHandlerTask, EscalationKey, None>(
+					flow, workContainer, taskMetaData,
+					governanceDeactivationStrategy, parallelJobNodeOwner,
+					parameter);
 		}
 	}
 

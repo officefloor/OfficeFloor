@@ -271,7 +271,7 @@ public class RawOfficeFloorMetaDataImpl implements RawOfficeFloorMetaData,
 			officeFloorEscalationHandler = new DefaultOfficeFloorEscalationHandler();
 		}
 		EscalationFlow officeFloorEscalation = new EscalationHandlerEscalation(
-				officeFloorEscalationHandler, new PassiveTeam());
+				officeFloorEscalationHandler, new PassiveTeam(), null);
 
 		// Create the raw office floor meta-data
 		RawOfficeFloorMetaDataImpl rawMetaData = new RawOfficeFloorMetaDataImpl(

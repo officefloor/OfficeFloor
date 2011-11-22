@@ -55,6 +55,7 @@ import net.officefloor.frame.internal.structure.ProcessState;
 import net.officefloor.frame.internal.structure.ThreadState;
 import net.officefloor.frame.spi.administration.Administrator;
 import net.officefloor.frame.spi.administration.source.AdministratorSource;
+import net.officefloor.frame.spi.governance.Governance;
 
 /**
  * Implements the {@link OfficeBuilder}.
@@ -107,6 +108,11 @@ public class OfficeBuilderImpl implements OfficeBuilder, OfficeConfiguration {
 	 * Listing of {@link ProcessState} bound {@link ManagedObjectConfiguration}.
 	 */
 	private final List<ManagedObjectConfiguration<?>> processManagedObjects = new LinkedList<ManagedObjectConfiguration<?>>();
+
+	/**
+	 * By default do not manually manage {@link Governance}.
+	 */
+	private boolean isManuallyManageGovernance = false;
 
 	/**
 	 * Listing of {@link GovernanceConfiguration}.
@@ -217,6 +223,11 @@ public class OfficeBuilderImpl implements OfficeBuilder, OfficeConfiguration {
 	}
 
 	@Override
+	public void setManuallyManageGovernance(boolean isManuallyManage) {
+		this.isManuallyManageGovernance = isManuallyManage;
+	}
+
+	@Override
 	public <I, F extends Enum<F>> GovernanceBuilder<F> addGovernance(
 			String governanceName,
 			GovernanceFactory<? super I, F> governanceFactory,
@@ -319,6 +330,11 @@ public class OfficeBuilderImpl implements OfficeBuilder, OfficeConfiguration {
 	public ManagedObjectConfiguration<?>[] getThreadManagedObjectConfiguration() {
 		return this.threadManagedObjects
 				.toArray(new ManagedObjectConfiguration[0]);
+	}
+
+	@Override
+	public boolean isManuallyManageGovernance() {
+		return this.isManuallyManageGovernance;
 	}
 
 	@Override

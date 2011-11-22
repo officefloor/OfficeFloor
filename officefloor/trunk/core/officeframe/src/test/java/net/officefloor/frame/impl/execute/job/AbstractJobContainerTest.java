@@ -33,6 +33,8 @@ import net.officefloor.frame.internal.structure.FlowAsset;
 import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
 import net.officefloor.frame.internal.structure.FlowMetaData;
 import net.officefloor.frame.internal.structure.GovernanceActivity;
+import net.officefloor.frame.internal.structure.GovernanceContainer;
+import net.officefloor.frame.internal.structure.GovernanceDeactivationStrategy;
 import net.officefloor.frame.internal.structure.JobMetaData;
 import net.officefloor.frame.internal.structure.JobNode;
 import net.officefloor.frame.internal.structure.JobNodeActivatableSet;
@@ -43,6 +45,7 @@ import net.officefloor.frame.internal.structure.ProcessState;
 import net.officefloor.frame.internal.structure.TaskMetaData;
 import net.officefloor.frame.internal.structure.ThreadState;
 import net.officefloor.frame.internal.structure.WorkContainer;
+import net.officefloor.frame.spi.governance.Governance;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.frame.spi.team.Job;
 import net.officefloor.frame.spi.team.JobContext;
@@ -255,6 +258,63 @@ public abstract class AbstractJobContainerTest extends OfficeFrameTestCase {
 	}
 
 	/**
+	 * Records activating the {@link Governance}.
+	 * 
+	 * @param job
+	 *            {@link Job}.
+	 * @param currentGovernanceState
+	 *            Current state of {@link Governance} identifying which is
+	 *            active.
+	 */
+	protected void record_JobContainer_activateGovernance(Job job,
+			boolean... currentGovernanceState) {
+		final FunctionalityJob functionalityJob = (FunctionalityJob) job;
+
+		// Run through governance
+		for (int i = 0; i < functionalityJob.requiredGovernance.length; i++) {
+			boolean isRequireGovernance = functionalityJob.requiredGovernance[i];
+
+			// Determine current activation state (defaulty not active)
+			boolean isCurrentlyActive = (i < currentGovernanceState.length ? currentGovernanceState[i]
+					: false);
+
+			// Record whether active
+			this.recordReturn(this.threadState,
+					this.threadState.isGovernanceActive(i), isCurrentlyActive);
+
+			// Handle changing activation of Governance
+			if (isRequireGovernance != isCurrentlyActive) {
+
+				// Obtain the Governance Container
+				final GovernanceContainer<?, ?> container = this
+						.createMock(GovernanceContainer.class);
+				this.recordReturn(this.threadState,
+						this.threadState.getGovernanceContainer(i), container);
+
+				// Change activation state of Governance
+				if (isRequireGovernance) {
+					// Activate Governance
+					container.activateGovernance(functionalityJob);
+
+				} else {
+					// Deactivate Governance
+					switch (functionalityJob.deactivationStrategy) {
+					case ENFORCE:
+						container.enforceGovernance(functionalityJob);
+						break;
+					case DISREGARD:
+						container.disregardGovernance(functionalityJob);
+						break;
+					default:
+						fail("Unknown governance deactivation strategy "
+								+ functionalityJob.deactivationStrategy);
+					}
+				}
+			}
+		}
+	}
+
+	/**
 	 * Records loading the {@link ManagedObject} instances.
 	 * 
 	 * @param job
@@ -441,9 +501,12 @@ public abstract class AbstractJobContainerTest extends OfficeFrameTestCase {
 		this.recordReturn(this.sequentialFlowMetaData,
 				this.sequentialFlowMetaData.getInitialTaskMetaData(),
 				this.sequentialTaskMetaData);
-		this.recordReturn(this.flow, this.flow.createTaskNode(
-				this.sequentialTaskMetaData, functionalityJob.parallelOwnerJob,
-				sequentialFlowParameter), this.sequentialJob);
+		this.recordReturn(this.flow, this.flow
+				.createTaskNode(this.sequentialTaskMetaData,
+						functionalityJob.parallelOwnerJob,
+						sequentialFlowParameter,
+						GovernanceDeactivationStrategy.ENFORCE),
+				this.sequentialJob);
 		if (isActivateFlow) {
 			this.sequentialJob.activateJob();
 		}
@@ -472,7 +535,8 @@ public abstract class AbstractJobContainerTest extends OfficeFrameTestCase {
 				this.threadState.createJobSequence(), this.parallelFlow);
 		this.recordReturn(this.parallelFlow, this.parallelFlow.createTaskNode(
 				this.parallelTaskMetaData, functionalityJob,
-				parallelFlowParameter), this.parallelJob);
+				parallelFlowParameter, GovernanceDeactivationStrategy.ENFORCE),
+				this.parallelJob);
 		this.parallelJob.setParallelOwner(functionalityJob);
 	}
 
@@ -565,7 +629,9 @@ public abstract class AbstractJobContainerTest extends OfficeFrameTestCase {
 				this.asynchronousFlow);
 		this.recordReturn(this.asynchronousFlow, this.asynchronousFlow
 				.createTaskNode(this.asynchronousTaskMetaData, null,
-						asynchronousFlowParameter), this.asynchronousJob);
+						asynchronousFlowParameter,
+						GovernanceDeactivationStrategy.ENFORCE),
+				this.asynchronousJob);
 		this.asynchronousJob.activateJob();
 		this.recordReturn(this.asynchronousFlow,
 				this.asynchronousFlow.getThreadState(),
@@ -702,7 +768,8 @@ public abstract class AbstractJobContainerTest extends OfficeFrameTestCase {
 				this.threadState.createJobSequence(), this.escalationFlow);
 		this.recordReturn(this.escalationFlow, this.escalationFlow
 				.createTaskNode(this.escalationTaskMetaData, parallelOwner,
-						failure), this.escalationJob);
+						failure, GovernanceDeactivationStrategy.DISREGARD),
+				this.escalationJob);
 	}
 
 	/**
@@ -762,7 +829,8 @@ public abstract class AbstractJobContainerTest extends OfficeFrameTestCase {
 		FunctionalityJob functionalityJob = (FunctionalityJob) currentJob;
 		this.recordReturn(this.flow, this.flow.createTaskNode(
 				this.nextTaskMetaData, functionalityJob.parallelOwnerJob,
-				nextJobParameter), this.nextJob);
+				nextJobParameter, GovernanceDeactivationStrategy.ENFORCE),
+				this.nextJob);
 	}
 
 	/**
@@ -801,7 +869,8 @@ public abstract class AbstractJobContainerTest extends OfficeFrameTestCase {
 		this.recordReturn(this.threadState,
 				this.threadState.createJobSequence(), setupJobSequence);
 		this.recordReturn(setupJobSequence, setupJobSequence.createTaskNode(
-				taskMetaData, functionalityJob, parameter), this.parallelJob);
+				taskMetaData, functionalityJob, parameter,
+				GovernanceDeactivationStrategy.ENFORCE), this.parallelJob);
 		this.parallelJob.setParallelOwner(functionalityJob);
 	}
 
@@ -861,7 +930,7 @@ public abstract class AbstractJobContainerTest extends OfficeFrameTestCase {
 	protected FunctionalityJob createJob(boolean hasParallelOwnerJob,
 			JobFunctionality... jobFunctionality) {
 		return this.createJob(hasParallelOwnerJob, new ManagedObjectIndex[0],
-				jobFunctionality);
+				null, null, jobFunctionality);
 	}
 
 	/**
@@ -871,12 +940,18 @@ public abstract class AbstractJobContainerTest extends OfficeFrameTestCase {
 	 *            Flag indicating if to have a parallel owner {@link JobNode}.
 	 * @param requiredManagedObjects
 	 *            Required {@link ManagedObjectIndex} instances.
+	 * @param requiredGovernance
+	 *            {@link Governance} activation.
+	 * @param deactivationStrategy
+	 *            {@link GovernanceDeactivationStrategy}.
 	 * @param jobFunctionality
 	 *            {@link JobFunctionality} instances.
 	 * @return {@link Job}.
 	 */
 	protected FunctionalityJob createJob(boolean hasParallelOwnerJob,
 			ManagedObjectIndex[] requiredManagedObjects,
+			boolean[] requiredGovernance,
+			GovernanceDeactivationStrategy deactivationStrategy,
 			JobFunctionality... jobFunctionality) {
 
 		// Obtain the parallel owner job
@@ -890,7 +965,7 @@ public abstract class AbstractJobContainerTest extends OfficeFrameTestCase {
 
 		// Return the created functionality job
 		return new FunctionalityJob(owner, requiredManagedObjects,
-				jobFunctionality);
+				requiredGovernance, deactivationStrategy, jobFunctionality);
 	}
 
 	/**
@@ -955,6 +1030,16 @@ public abstract class AbstractJobContainerTest extends OfficeFrameTestCase {
 		public final ManagedObjectIndex[] requiredManagedObjectIndexes;
 
 		/**
+		 * Required {@link Governance}.
+		 */
+		public final boolean[] requiredGovernance;
+
+		/**
+		 * {@link GovernanceDeactivationStrategy}.
+		 */
+		public final GovernanceDeactivationStrategy deactivationStrategy;
+
+		/**
 		 * Flag indicating if the {@link Job} is executed.
 		 */
 		public boolean isJobExecuted = false;
@@ -966,19 +1051,28 @@ public abstract class AbstractJobContainerTest extends OfficeFrameTestCase {
 		 *            Parallel Owner {@link JobNode}.
 		 * @param requiredManagedObjectIndexes
 		 *            Required {@link ManagedObjectIndex} instances.
+		 * @param requiredGovernance
+		 *            {@link Governance} activation.
+		 * @param deactivationStrategy
+		 *            {@link GovernanceDeactivationStrategy}.
 		 * @param jobFunctionality
 		 *            {@link JobFunctionality}.
 		 */
 		public FunctionalityJob(JobNode parallelOwnerJob,
 				ManagedObjectIndex[] requiredManagedObjectIndexes,
+				boolean[] requiredGovernance,
+				GovernanceDeactivationStrategy deactivationStrategy,
 				JobFunctionality[] jobFunctionality) {
 			super(AbstractJobContainerTest.this.flow,
 					AbstractJobContainerTest.this.workContainer,
 					AbstractJobContainerTest.this.jobMetaData,
-					parallelOwnerJob, requiredManagedObjectIndexes);
+					parallelOwnerJob, requiredManagedObjectIndexes,
+					requiredGovernance, deactivationStrategy);
 			this.jobFunctionality = jobFunctionality;
 			this.parallelOwnerJob = parallelOwnerJob;
 			this.requiredManagedObjectIndexes = requiredManagedObjectIndexes;
+			this.requiredGovernance = requiredGovernance;
+			this.deactivationStrategy = deactivationStrategy;
 		}
 
 		/*

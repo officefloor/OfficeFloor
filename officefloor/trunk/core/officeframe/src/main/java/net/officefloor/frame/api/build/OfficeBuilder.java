@@ -134,6 +134,21 @@ public interface OfficeBuilder {
 			String threadManagedObjectName, String officeManagedObjectName);
 
 	/**
+	 * <p>
+	 * Flags to manually manage the {@link Governance}.
+	 * <p>
+	 * WARNING: given the nuances of {@link Task} completion be wary of
+	 * attempting to manually manage the {@link Governance}.
+	 * <p>
+	 * Manually managing however is useful for multi-threaded execution and
+	 * managing {@link Governance}.
+	 * 
+	 * @param isManuallyManage
+	 *            <code>true</code> to manually manage.
+	 */
+	void setManuallyManageGovernance(boolean isManuallyManage);
+
+	/**
 	 * Adds {@link Governance} within the {@link Office}.
 	 * 
 	 * @param governanceName

@@ -23,7 +23,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-import net.officefloor.frame.api.build.OfficeBuilder;
 import net.officefloor.frame.api.build.OfficeFloorIssues;
 import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
 import net.officefloor.frame.api.manage.Office;
@@ -71,6 +70,7 @@ import net.officefloor.frame.internal.structure.EscalationFlow;
 import net.officefloor.frame.internal.structure.EscalationProcedure;
 import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
 import net.officefloor.frame.internal.structure.FlowMetaData;
+import net.officefloor.frame.internal.structure.GovernanceDeactivationStrategy;
 import net.officefloor.frame.internal.structure.GovernanceMetaData;
 import net.officefloor.frame.internal.structure.ManagedObjectMetaData;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
@@ -82,6 +82,7 @@ import net.officefloor.frame.internal.structure.TaskMetaData;
 import net.officefloor.frame.internal.structure.ThreadMetaData;
 import net.officefloor.frame.internal.structure.ThreadState;
 import net.officefloor.frame.internal.structure.WorkMetaData;
+import net.officefloor.frame.spi.governance.Governance;
 import net.officefloor.frame.spi.source.SourceContext;
 import net.officefloor.frame.spi.team.Team;
 import net.officefloor.frame.spi.team.source.ProcessContextListener;
@@ -101,7 +102,7 @@ public class RawOfficeMetaDataImpl implements RawOfficeMetaDataFactory,
 	 */
 	public static RawOfficeMetaDataFactory getFactory() {
 		return new RawOfficeMetaDataImpl(null, null, null, null, null, null,
-				null, null, null, null, null);
+				null, false, null, null, null, null);
 	}
 
 	/**
@@ -140,6 +141,11 @@ public class RawOfficeMetaDataImpl implements RawOfficeMetaDataFactory,
 	 * {@link ProcessState} and {@link ThreadState} bound names.
 	 */
 	private final Map<String, RawBoundManagedObjectMetaData> scopeMo;
+
+	/**
+	 * Indicates whether to manually manage {@link Governance}.
+	 */
+	private final boolean isManuallyManageGovernance;
 
 	/**
 	 * {@link RawGovernanceMetaData} of the {@link Office} by its {@link Office}
@@ -191,6 +197,8 @@ public class RawOfficeMetaDataImpl implements RawOfficeMetaDataFactory,
 	 *            Scope {@link RawBoundManagedObjectMetaData} of the
 	 *            {@link Office} by the {@link ProcessState} and
 	 *            {@link ThreadState} bound names.
+	 * @param isManuallyManageGovernance
+	 *            Indicates whether to manually manage {@link Governance}.
 	 * @param governanceMetaData
 	 *            {@link RawGovernanceMetaData} of the {@link Office} by its
 	 *            {@link Office} registered name.
@@ -212,6 +220,7 @@ public class RawOfficeMetaDataImpl implements RawOfficeMetaDataFactory,
 			RawBoundManagedObjectMetaData[] processBoundManagedObjects,
 			RawBoundManagedObjectMetaData[] threadBoundManagedObjects,
 			Map<String, RawBoundManagedObjectMetaData> scopeMo,
+			boolean isManuallyManageGovernance,
 			Map<String, RawGovernanceMetaData<?, ?>> governanceMetaData,
 			RawBoundAdministratorMetaData<?, ?>[] processBoundAdministrators,
 			RawBoundAdministratorMetaData<?, ?>[] threadBoundAdministrators,
@@ -223,6 +232,7 @@ public class RawOfficeMetaDataImpl implements RawOfficeMetaDataFactory,
 		this.processBoundManagedObjects = processBoundManagedObjects;
 		this.threadBoundManagedObjects = threadBoundManagedObjects;
 		this.scopeMo = scopeMo;
+		this.isManuallyManageGovernance = isManuallyManageGovernance;
 		this.governanceMetaData = governanceMetaData;
 		this.processBoundAdministrators = processBoundAdministrators;
 		this.threadBoundAdministrators = threadBoundAdministrators;
@@ -308,8 +318,13 @@ public class RawOfficeMetaDataImpl implements RawOfficeMetaDataFactory,
 			officeTeams.put(officeTeamName, rawTeamMetaData.getTeam());
 		}
 
+		// Determine if manually manage governance (and deactivation strategy)
+		boolean isManuallyManageGovernance = configuration
+				.isManuallyManageGovernance();
+		GovernanceDeactivationStrategy governanceDeactivationStrategy = (isManuallyManageGovernance ? GovernanceDeactivationStrategy.DISREGARD
+				: GovernanceDeactivationStrategy.ENFORCE);
+
 		// Register the governances to office
-		OfficeBuilder officeBuilder = configuration.getBuilder();
 		GovernanceConfiguration<?, ?>[] governanceConfigurations = configuration
 				.getGovernanceConfiguration();
 		GovernanceMetaData<?, ?>[] governanceMetaDatas = new GovernanceMetaData[governanceConfigurations.length];
@@ -321,8 +336,7 @@ public class RawOfficeMetaDataImpl implements RawOfficeMetaDataFactory,
 			// Create the raw governance
 			RawGovernanceMetaData<?, ?> rawGovernance = rawGovernanceMetaDataFactory
 					.createRawGovernanceMetaData(governanceConfiguration, i,
-							sourceContext, officeTeams, officeName,
-							officeBuilder, issues);
+							sourceContext, officeTeams, officeName, issues);
 			if (rawGovernance == null) {
 				// Not able to create governance
 				issues.addIssue(AssetType.OFFICE, officeName,
@@ -508,8 +522,9 @@ public class RawOfficeMetaDataImpl implements RawOfficeMetaDataFactory,
 		RawOfficeMetaDataImpl rawOfficeMetaData = new RawOfficeMetaDataImpl(
 				officeName, rawOfficeFloorMetaData, officeTeams, registeredMo,
 				processBoundManagedObjects, threadBoundManagedObjects, scopeMo,
-				rawGovernanceMetaData, processBoundAdministrators,
-				threadBoundAdministrators, scopeAdmins);
+				isManuallyManageGovernance, rawGovernanceMetaData,
+				processBoundAdministrators, threadBoundAdministrators,
+				scopeAdmins);
 
 		// Construct the meta-data of the work carried out within the office
 		List<RawWorkMetaData<?>> rawWorkMetaDatas = new LinkedList<RawWorkMetaData<?>>();
@@ -558,7 +573,8 @@ public class RawOfficeMetaDataImpl implements RawOfficeMetaDataFactory,
 		ThreadMetaData threadMetaData = new ThreadMetaDataImpl(
 				this.constructDefaultManagedObjectMetaData(threadBoundManagedObjects),
 				governanceMetaDatas,
-				this.constructAdministratorMetaData(threadBoundAdministrators));
+				this.constructAdministratorMetaData(threadBoundAdministrators),
+				governanceDeactivationStrategy);
 
 		// Create the process meta-data
 		ProcessMetaData processMetaData = new ProcessMetaDataImpl(
@@ -764,6 +780,11 @@ public class RawOfficeMetaDataImpl implements RawOfficeMetaDataFactory,
 	@Override
 	public RawBoundManagedObjectMetaData[] getThreadBoundManagedObjects() {
 		return this.threadBoundManagedObjects;
+	}
+
+	@Override
+	public boolean isManuallyManageGovernance() {
+		return this.isManuallyManageGovernance;
 	}
 
 	@Override

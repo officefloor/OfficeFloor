@@ -93,8 +93,8 @@ public class MetaDataTestInstanceFactory {
 		TaskMetaDataImpl<W, D, F> metaData = new TaskMetaDataImpl<W, D, F>(
 				"TEST_TASK", taskFactory, "TEST_DIFFERENTIATOR", Object.class,
 				new PassiveTeam(), new ManagedObjectIndex[0],
-				new ManagedObjectIndex[0], new TaskDutyAssociation<?>[0],
-				new TaskDutyAssociation<?>[0]);
+				new ManagedObjectIndex[0], new boolean[0],
+				new TaskDutyAssociation<?>[0], new TaskDutyAssociation<?>[0]);
 		metaData.loadRemainingState((WorkMetaData<W>) workMetaData,
 				new FlowMetaData<?>[0], null, new EscalationProcedureImpl());
 

@@ -102,6 +102,20 @@ public interface ThreadState extends FlowAsset, FlowFuture,
 	ManagedObjectContainer getManagedObjectContainer(int index);
 
 	/**
+	 * <p>
+	 * Checks whether the particular {@link Governance} is active.
+	 * <p>
+	 * This enables light weight checking by not having to create the
+	 * {@link GovernanceContainer}.
+	 * 
+	 * @param index
+	 *            Index of the {@link GovernanceContainer} to determine if the
+	 *            {@link Governance} is active.
+	 * @return <code>true</code> if the {@link Governance} is activate.
+	 */
+	boolean isGovernanceActive(int index);
+
+	/**
 	 * Obtains the {@link GovernanceContainer} for the input index.
 	 * 
 	 * @param index

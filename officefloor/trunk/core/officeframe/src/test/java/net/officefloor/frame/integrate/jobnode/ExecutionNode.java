@@ -35,11 +35,12 @@ import net.officefloor.frame.impl.execute.managedobject.ManagedObjectIndexImpl;
 import net.officefloor.frame.impl.execute.task.TaskJob;
 import net.officefloor.frame.internal.structure.AssetManager;
 import net.officefloor.frame.internal.structure.EscalationProcedure;
-import net.officefloor.frame.internal.structure.JobSequence;
 import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
 import net.officefloor.frame.internal.structure.FlowMetaData;
+import net.officefloor.frame.internal.structure.GovernanceDeactivationStrategy;
 import net.officefloor.frame.internal.structure.JobNode;
 import net.officefloor.frame.internal.structure.JobNodeActivatableSet;
+import net.officefloor.frame.internal.structure.JobSequence;
 import net.officefloor.frame.internal.structure.ManagedObjectIndex;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.frame.internal.structure.TaskDutyAssociation;
@@ -297,6 +298,11 @@ public class ExecutionNode<W extends Work> implements
 	}
 
 	@Override
+	public boolean[] getRequiredGovernance() {
+		return null; // no governance
+	}
+
+	@Override
 	@SuppressWarnings("unchecked")
 	public ManagedObjectIndex translateManagedObjectIndexForWork(int taskMoIndex) {
 		return ((ManagedObjectTaskProcessItem<?>) this.taskProcessing
@@ -334,10 +340,12 @@ public class ExecutionNode<W extends Work> implements
 	}
 
 	@Override
-	public JobNode createTaskNode(JobSequence flow, WorkContainer<W> workContainer,
-			JobNode parallelJobNodeOwner, Object parameter) {
+	public JobNode createTaskNode(JobSequence flow,
+			WorkContainer<W> workContainer, JobNode parallelJobNodeOwner,
+			Object parameter,
+			GovernanceDeactivationStrategy governanceDeactivationStrategy) {
 		return new TaskJob<W, Indexed, Indexed>(flow, workContainer, this,
-				parallelJobNodeOwner, parameter);
+				governanceDeactivationStrategy, parallelJobNodeOwner, parameter);
 	}
 
 	/*

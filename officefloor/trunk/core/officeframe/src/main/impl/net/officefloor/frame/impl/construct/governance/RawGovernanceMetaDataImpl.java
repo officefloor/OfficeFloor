@@ -20,7 +20,6 @@ package net.officefloor.frame.impl.construct.governance;
 import java.util.Map;
 
 import net.officefloor.frame.api.build.GovernanceFactory;
-import net.officefloor.frame.api.build.OfficeBuilder;
 import net.officefloor.frame.api.build.OfficeFloorIssues;
 import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
 import net.officefloor.frame.impl.construct.util.ConstructUtil;
@@ -124,8 +123,7 @@ public class RawGovernanceMetaDataImpl<I, F extends Enum<F>> implements
 	public <i, f extends Enum<f>> RawGovernanceMetaData<i, f> createRawGovernanceMetaData(
 			GovernanceConfiguration<i, f> configuration, int governanceIndex,
 			SourceContext sourceContext, Map<String, Team> officeTeams,
-			String officeName, OfficeBuilder officeBuilder,
-			OfficeFloorIssues issues) {
+			String officeName, OfficeFloorIssues issues) {
 
 		// Obtain the governance name
 		String governanceName = configuration.getGovernanceName();

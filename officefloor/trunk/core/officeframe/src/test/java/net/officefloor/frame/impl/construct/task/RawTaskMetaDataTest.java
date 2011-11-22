@@ -26,8 +26,8 @@ import java.util.Map;
 import java.util.Set;
 
 import net.officefloor.frame.api.build.OfficeFloorIssues;
-import net.officefloor.frame.api.build.TaskFactory;
 import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
+import net.officefloor.frame.api.build.TaskFactory;
 import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.impl.execute.duty.DutyKeyImpl;
@@ -37,6 +37,7 @@ import net.officefloor.frame.internal.configuration.TaskConfiguration;
 import net.officefloor.frame.internal.configuration.TaskDutyConfiguration;
 import net.officefloor.frame.internal.configuration.TaskEscalationConfiguration;
 import net.officefloor.frame.internal.configuration.TaskFlowConfiguration;
+import net.officefloor.frame.internal.configuration.TaskGovernanceConfiguration;
 import net.officefloor.frame.internal.configuration.TaskNodeReference;
 import net.officefloor.frame.internal.configuration.TaskObjectConfiguration;
 import net.officefloor.frame.internal.construct.AssetManagerFactory;
@@ -44,6 +45,7 @@ import net.officefloor.frame.internal.construct.OfficeMetaDataLocator;
 import net.officefloor.frame.internal.construct.RawBoundAdministratorMetaData;
 import net.officefloor.frame.internal.construct.RawBoundManagedObjectInstanceMetaData;
 import net.officefloor.frame.internal.construct.RawBoundManagedObjectMetaData;
+import net.officefloor.frame.internal.construct.RawGovernanceMetaData;
 import net.officefloor.frame.internal.construct.RawManagedObjectMetaData;
 import net.officefloor.frame.internal.construct.RawOfficeMetaData;
 import net.officefloor.frame.internal.construct.RawTaskMetaData;
@@ -52,9 +54,9 @@ import net.officefloor.frame.internal.structure.AdministratorIndex;
 import net.officefloor.frame.internal.structure.AssetManager;
 import net.officefloor.frame.internal.structure.EscalationFlow;
 import net.officefloor.frame.internal.structure.EscalationProcedure;
-import net.officefloor.frame.internal.structure.JobSequence;
 import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
 import net.officefloor.frame.internal.structure.FlowMetaData;
+import net.officefloor.frame.internal.structure.JobSequence;
 import net.officefloor.frame.internal.structure.ManagedObjectIndex;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.frame.internal.structure.TaskDutyAssociation;
@@ -62,6 +64,7 @@ import net.officefloor.frame.internal.structure.TaskMetaData;
 import net.officefloor.frame.internal.structure.WorkMetaData;
 import net.officefloor.frame.spi.administration.Administrator;
 import net.officefloor.frame.spi.administration.Duty;
+import net.officefloor.frame.spi.governance.Governance;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.frame.spi.team.Team;
 import net.officefloor.frame.test.OfficeFrameTestCase;
@@ -208,6 +211,7 @@ public class RawTaskMetaDataTest<W extends Work, D extends Enum<D>, F extends En
 				this.rawOfficeMetaData.getTeams(), teams);
 		this.record_NoManagedObjects();
 		this.record_NoAdministration();
+		this.record_NoGovernance();
 
 		// Attempt to construct task meta-data
 		this.replayMockObjects();
@@ -228,6 +232,7 @@ public class RawTaskMetaDataTest<W extends Work, D extends Enum<D>, F extends En
 		this.record_taskNameFactoryTeam(); // no differentiator loaded
 		this.record_NoManagedObjects();
 		this.record_NoAdministration();
+		this.record_NoGovernance();
 
 		// Attempt to construct task meta-data
 		this.replayMockObjects();
@@ -298,6 +303,7 @@ public class RawTaskMetaDataTest<W extends Work, D extends Enum<D>, F extends En
 		this.record_taskNameFactoryTeam();
 		this.record_NoManagedObjects();
 		this.record_NoAdministration();
+		this.record_NoGovernance();
 
 		// Attempt to construct task meta-data
 		this.replayMockObjects();
@@ -333,6 +339,7 @@ public class RawTaskMetaDataTest<W extends Work, D extends Enum<D>, F extends En
 				null);
 		this.record_taskIssue("No type for object at index 0");
 		this.record_NoAdministration();
+		this.record_NoGovernance();
 
 		// Attempt to construct task meta-data
 		this.replayMockObjects();
@@ -358,6 +365,7 @@ public class RawTaskMetaDataTest<W extends Work, D extends Enum<D>, F extends En
 				parameterType);
 		this.recordReturn(moConfiguration, moConfiguration.isParameter(), true);
 		this.record_NoAdministration();
+		this.record_NoGovernance();
 
 		// Attempt to construct task meta-data
 		this.replayMockObjects();
@@ -410,6 +418,7 @@ public class RawTaskMetaDataTest<W extends Work, D extends Enum<D>, F extends En
 				paramTypeTwo);
 		this.recordReturn(paramConfigTwo, paramConfigTwo.isParameter(), true);
 		this.record_NoAdministration();
+		this.record_NoGovernance();
 
 		// Attempt to construct task meta-data
 		this.replayMockObjects();
@@ -463,6 +472,7 @@ public class RawTaskMetaDataTest<W extends Work, D extends Enum<D>, F extends En
 		this.record_taskIssue("Incompatible parameter types ("
 				+ paramTypeOne.getName() + ", " + paramTypeTwo.getName() + ")");
 		this.record_NoAdministration();
+		this.record_NoGovernance();
 
 		// Attempt to construct task meta-data
 		this.replayMockObjects();
@@ -482,6 +492,7 @@ public class RawTaskMetaDataTest<W extends Work, D extends Enum<D>, F extends En
 				new TaskObjectConfiguration[] { null });
 		this.record_taskIssue("No object configuration at index 0");
 		this.record_NoAdministration();
+		this.record_NoGovernance();
 
 		// Attempt to construct task meta-data
 		this.replayMockObjects();
@@ -509,6 +520,7 @@ public class RawTaskMetaDataTest<W extends Work, D extends Enum<D>, F extends En
 				moConfiguration.getScopeManagedObjectName(), null);
 		this.record_taskIssue("No name for managed object at index 0");
 		this.record_NoAdministration();
+		this.record_NoGovernance();
 
 		// Attempt to construct task meta-data
 		this.replayMockObjects();
@@ -538,6 +550,7 @@ public class RawTaskMetaDataTest<W extends Work, D extends Enum<D>, F extends En
 				this.rawWorkMetaData.getScopeManagedObjectMetaData("MO"), null);
 		this.record_taskIssue("Can not find scope managed object 'MO'");
 		this.record_NoAdministration();
+		this.record_NoGovernance();
 
 		// Attempt to construct task meta-data
 		this.replayMockObjects();
@@ -589,6 +602,7 @@ public class RawTaskMetaDataTest<W extends Work, D extends Enum<D>, F extends En
 				+ ", object of managed object type=" + Integer.class.getName()
 				+ ", ManagedObjectSource=MANAGED_OBJECT_SOURCE)");
 		this.record_NoAdministration();
+		this.record_NoGovernance();
 
 		// Attempt to construct task meta-data
 		this.replayMockObjects();
@@ -640,6 +654,7 @@ public class RawTaskMetaDataTest<W extends Work, D extends Enum<D>, F extends En
 		this.record_NoAdministration();
 		// Record dependency sorting
 		this.record_dependencySortingForCoordination(moLinked);
+		this.record_NoGovernance();
 
 		// Attempt to construct task meta-data
 		this.replayMockObjects();
@@ -724,6 +739,7 @@ public class RawTaskMetaDataTest<W extends Work, D extends Enum<D>, F extends En
 		// Record dependency sorting
 		this.record_dependencySortingForCoordination(workLinked,
 				dependencyLinked, dependencyDependencyLinked);
+		this.record_NoGovernance();
 
 		// Attempt to construct task meta-data
 		this.replayMockObjects();
@@ -827,6 +843,7 @@ public class RawTaskMetaDataTest<W extends Work, D extends Enum<D>, F extends En
 		this.recordReturn(this.configuration,
 				this.configuration.getPostTaskAdministratorDutyConfiguration(),
 				new TaskDutyConfiguration[0]);
+		this.record_NoGovernance();
 
 		// Attempt to construct task meta-data
 		this.replayMockObjects();
@@ -861,6 +878,7 @@ public class RawTaskMetaDataTest<W extends Work, D extends Enum<D>, F extends En
 		this.recordReturn(this.configuration,
 				this.configuration.getPostTaskAdministratorDutyConfiguration(),
 				new TaskDutyConfiguration[0]);
+		this.record_NoGovernance();
 
 		// Attempt to construct task meta-data
 		this.replayMockObjects();
@@ -905,6 +923,7 @@ public class RawTaskMetaDataTest<W extends Work, D extends Enum<D>, F extends En
 		this.recordReturn(this.configuration,
 				this.configuration.getPostTaskAdministratorDutyConfiguration(),
 				new TaskDutyConfiguration[0]);
+		this.record_NoGovernance();
 
 		// Attempt to construct task meta-data
 		this.replayMockObjects();
@@ -962,6 +981,7 @@ public class RawTaskMetaDataTest<W extends Work, D extends Enum<D>, F extends En
 				this.configuration.getPostTaskAdministratorDutyConfiguration(),
 				new TaskDutyConfiguration[0]);
 		this.record_dependencySortingForCoordination(moLinked);
+		this.record_NoGovernance();
 
 		// Attempt to construct task meta-data
 		this.replayMockObjects();
@@ -1045,6 +1065,7 @@ public class RawTaskMetaDataTest<W extends Work, D extends Enum<D>, F extends En
 				rawMoInstance, dependencyLinked);
 		this.record_loadDependencies(moLinked);
 		this.record_dependencySortingForCoordination(moLinked, dependencyLinked);
+		this.record_NoGovernance();
 
 		// Attempt to construct task meta-data
 		this.replayMockObjects();
@@ -1087,6 +1108,7 @@ public class RawTaskMetaDataTest<W extends Work, D extends Enum<D>, F extends En
 		this.record_taskNameFactoryTeam();
 		this.record_NoManagedObjects();
 		this.record_NoAdministration();
+		this.record_NoGovernance();
 		this.record_createWorkSpecificTaskMetaDataLocator();
 		this.recordReturn(this.configuration,
 				this.configuration.getFlowConfiguration(),
@@ -1117,6 +1139,7 @@ public class RawTaskMetaDataTest<W extends Work, D extends Enum<D>, F extends En
 		this.record_taskNameFactoryTeam();
 		this.record_NoManagedObjects();
 		this.record_NoAdministration();
+		this.record_NoGovernance();
 		this.record_createWorkSpecificTaskMetaDataLocator();
 		this.recordReturn(this.configuration,
 				this.configuration.getFlowConfiguration(),
@@ -1152,6 +1175,7 @@ public class RawTaskMetaDataTest<W extends Work, D extends Enum<D>, F extends En
 		this.record_taskNameFactoryTeam();
 		this.record_NoManagedObjects();
 		this.record_NoAdministration();
+		this.record_NoGovernance();
 		this.record_createWorkSpecificTaskMetaDataLocator();
 		this.recordReturn(this.configuration,
 				this.configuration.getFlowConfiguration(),
@@ -1188,6 +1212,7 @@ public class RawTaskMetaDataTest<W extends Work, D extends Enum<D>, F extends En
 		this.record_taskNameFactoryTeam();
 		this.record_NoManagedObjects();
 		this.record_NoAdministration();
+		this.record_NoGovernance();
 		this.record_createWorkSpecificTaskMetaDataLocator();
 		this.recordReturn(this.configuration,
 				this.configuration.getFlowConfiguration(),
@@ -1230,6 +1255,7 @@ public class RawTaskMetaDataTest<W extends Work, D extends Enum<D>, F extends En
 		this.record_taskNameFactoryTeam();
 		this.record_NoManagedObjects();
 		this.record_NoAdministration();
+		this.record_NoGovernance();
 		this.record_createWorkSpecificTaskMetaDataLocator();
 		this.recordReturn(this.configuration,
 				this.configuration.getFlowConfiguration(),
@@ -1277,6 +1303,7 @@ public class RawTaskMetaDataTest<W extends Work, D extends Enum<D>, F extends En
 		this.record_taskNameFactoryTeam();
 		this.record_NoManagedObjects();
 		this.record_NoAdministration();
+		this.record_NoGovernance();
 		this.record_createWorkSpecificTaskMetaDataLocator();
 		this.recordReturn(this.configuration,
 				this.configuration.getFlowConfiguration(),
@@ -1344,6 +1371,7 @@ public class RawTaskMetaDataTest<W extends Work, D extends Enum<D>, F extends En
 		this.record_taskNameFactoryTeam();
 		this.record_NoManagedObjects();
 		this.record_NoAdministration();
+		this.record_NoGovernance();
 		this.record_createWorkSpecificTaskMetaDataLocator();
 		this.recordReturn(this.configuration,
 				this.configuration.getFlowConfiguration(),
@@ -1408,6 +1436,7 @@ public class RawTaskMetaDataTest<W extends Work, D extends Enum<D>, F extends En
 		this.record_taskNameFactoryTeam();
 		this.record_NoManagedObjects();
 		this.record_NoAdministration();
+		this.record_NoGovernance();
 		this.record_createWorkSpecificTaskMetaDataLocator();
 		this.record_NoFlows();
 		this.recordReturn(this.configuration,
@@ -1439,6 +1468,7 @@ public class RawTaskMetaDataTest<W extends Work, D extends Enum<D>, F extends En
 		this.record_taskNameFactoryTeam();
 		this.record_NoManagedObjects();
 		this.record_NoAdministration();
+		this.record_NoGovernance();
 		this.record_createWorkSpecificTaskMetaDataLocator();
 		this.record_NoFlows();
 		this.recordReturn(this.configuration,
@@ -1481,6 +1511,7 @@ public class RawTaskMetaDataTest<W extends Work, D extends Enum<D>, F extends En
 		this.record_taskNameFactoryTeam();
 		this.record_NoManagedObjects();
 		this.record_NoAdministration();
+		this.record_NoGovernance();
 		this.record_createWorkSpecificTaskMetaDataLocator();
 		this.record_NoFlows();
 		this.recordReturn(this.configuration,
@@ -1523,6 +1554,7 @@ public class RawTaskMetaDataTest<W extends Work, D extends Enum<D>, F extends En
 		this.record_taskNameFactoryTeam();
 		this.record_NoManagedObjects();
 		this.record_NoAdministration();
+		this.record_NoGovernance();
 		this.record_createWorkSpecificTaskMetaDataLocator();
 		this.record_NoFlows();
 		this.record_NoNextTask();
@@ -1551,6 +1583,7 @@ public class RawTaskMetaDataTest<W extends Work, D extends Enum<D>, F extends En
 		this.record_taskNameFactoryTeam();
 		this.record_NoManagedObjects();
 		this.record_NoAdministration();
+		this.record_NoGovernance();
 		this.record_createWorkSpecificTaskMetaDataLocator();
 		this.record_NoFlows();
 		this.record_NoNextTask();
@@ -1583,6 +1616,7 @@ public class RawTaskMetaDataTest<W extends Work, D extends Enum<D>, F extends En
 		this.record_taskNameFactoryTeam();
 		this.record_NoManagedObjects();
 		this.record_NoAdministration();
+		this.record_NoGovernance();
 		this.record_createWorkSpecificTaskMetaDataLocator();
 		this.record_NoFlows();
 		this.record_NoNextTask();
@@ -1622,6 +1656,7 @@ public class RawTaskMetaDataTest<W extends Work, D extends Enum<D>, F extends En
 		this.record_taskNameFactoryTeam();
 		this.record_NoManagedObjects();
 		this.record_NoAdministration();
+		this.record_NoGovernance();
 		this.record_createWorkSpecificTaskMetaDataLocator();
 		this.record_NoFlows();
 		this.record_NoNextTask();
@@ -1672,6 +1707,7 @@ public class RawTaskMetaDataTest<W extends Work, D extends Enum<D>, F extends En
 		this.record_taskNameFactoryTeam();
 		this.record_NoManagedObjects();
 		this.record_NoAdministration();
+		this.record_NoGovernance();
 		this.record_createWorkSpecificTaskMetaDataLocator();
 		this.record_NoFlows();
 		this.record_NoNextTask();
@@ -1711,6 +1747,208 @@ public class RawTaskMetaDataTest<W extends Work, D extends Enum<D>, F extends En
 				escalation.getTypeOfCause());
 		assertEquals("Incorrect escalation task meta-data",
 				escalationTaskMetaData, escalation.getTaskMetaData());
+	}
+
+	/**
+	 * Ensure issue if no {@link Governance} name.
+	 */
+	public void testNoGovernanceName() {
+
+		final TaskGovernanceConfiguration gov = this
+				.createMock(TaskGovernanceConfiguration.class);
+		final Map<String, RawGovernanceMetaData<?, ?>> governances = new HashMap<String, RawGovernanceMetaData<?, ?>>();
+
+		// Record construct governance
+		this.record_taskNameFactoryTeam();
+		this.record_NoManagedObjects();
+		this.record_NoAdministration();
+
+		// Record configuring governance
+		this.recordReturn(this.configuration,
+				this.configuration.getGovernanceConfiguration(),
+				new TaskGovernanceConfiguration[] { gov });
+		this.recordReturn(this.rawOfficeMetaData,
+				this.rawOfficeMetaData.isManuallyManageGovernance(), false);
+		this.recordReturn(this.rawOfficeMetaData,
+				this.rawOfficeMetaData.getGovernanceMetaData(), governances);
+		this.recordReturn(gov, gov.getGovernanceName(), null);
+		this.record_taskIssue("No Governance name provided for Governance 0");
+
+		this.record_createWorkSpecificTaskMetaDataLocator();
+		this.record_NoFlows();
+		this.record_NoNextTask();
+		this.record_NoEscalations();
+
+		// Fully construct task meta-data
+		this.replayMockObjects();
+		this.fullyConstructRawTaskMetaData();
+		this.verifyMockObjects();
+	}
+
+	/**
+	 * Ensure issue if unknown {@link Governance}.
+	 */
+	public void testUnknownGovernance() {
+
+		final TaskGovernanceConfiguration gov = this
+				.createMock(TaskGovernanceConfiguration.class);
+		final Map<String, RawGovernanceMetaData<?, ?>> governances = new HashMap<String, RawGovernanceMetaData<?, ?>>();
+
+		// Record construct governance
+		this.record_taskNameFactoryTeam();
+		this.record_NoManagedObjects();
+		this.record_NoAdministration();
+
+		// Record configuring governance
+		this.recordReturn(this.configuration,
+				this.configuration.getGovernanceConfiguration(),
+				new TaskGovernanceConfiguration[] { gov });
+		this.recordReturn(this.rawOfficeMetaData,
+				this.rawOfficeMetaData.isManuallyManageGovernance(), false);
+		this.recordReturn(this.rawOfficeMetaData,
+				this.rawOfficeMetaData.getGovernanceMetaData(), governances);
+		this.recordReturn(gov, gov.getGovernanceName(), "UNKNOWN");
+		this.record_taskIssue("Unknown Governance 'UNKNOWN'");
+
+		this.record_createWorkSpecificTaskMetaDataLocator();
+		this.record_NoFlows();
+		this.record_NoNextTask();
+		this.record_NoEscalations();
+
+		// Fully construct task meta-data
+		this.replayMockObjects();
+		this.fullyConstructRawTaskMetaData();
+		this.verifyMockObjects();
+	}
+
+	/**
+	 * Ensure correct required {@link Governance}.
+	 */
+	public void testGovernance() {
+
+		final TaskGovernanceConfiguration govOne = this
+				.createMock(TaskGovernanceConfiguration.class);
+		final RawGovernanceMetaData<?, ?> rawGovOne = this
+				.createMock(RawGovernanceMetaData.class);
+		final TaskGovernanceConfiguration govTwo = this
+				.createMock(TaskGovernanceConfiguration.class);
+		final RawGovernanceMetaData<?, ?> rawGovTwo = this
+				.createMock(RawGovernanceMetaData.class);
+		final Map<String, RawGovernanceMetaData<?, ?>> governances = new HashMap<String, RawGovernanceMetaData<?, ?>>();
+		governances.put("GOV_ZERO",
+				this.createMock(RawGovernanceMetaData.class));
+		governances.put("GOV_ONE", rawGovOne);
+		governances
+				.put("GOV_TWO", this.createMock(RawGovernanceMetaData.class));
+		governances.put("GOV_THREE", rawGovTwo);
+
+		// Record construct governance
+		this.record_taskNameFactoryTeam();
+		this.record_NoManagedObjects();
+		this.record_NoAdministration();
+
+		// Record configuring governance
+		this.recordReturn(this.configuration,
+				this.configuration.getGovernanceConfiguration(),
+				new TaskGovernanceConfiguration[] { govOne, govTwo });
+		this.recordReturn(this.rawOfficeMetaData,
+				this.rawOfficeMetaData.isManuallyManageGovernance(), false);
+		this.recordReturn(this.rawOfficeMetaData,
+				this.rawOfficeMetaData.getGovernanceMetaData(), governances);
+		this.recordReturn(govOne, govOne.getGovernanceName(), "GOV_ONE");
+		this.recordReturn(rawGovOne, rawGovOne.getGovernanceIndex(), 1);
+		this.recordReturn(govTwo, govTwo.getGovernanceName(), "GOV_THREE");
+		this.recordReturn(rawGovTwo, rawGovTwo.getGovernanceIndex(), 3);
+
+		this.record_createWorkSpecificTaskMetaDataLocator();
+		this.record_NoFlows();
+		this.record_NoNextTask();
+		this.record_NoEscalations();
+
+		// Fully construct task meta-data
+		this.replayMockObjects();
+		RawTaskMetaData<W, D, F> metaData = this
+				.fullyConstructRawTaskMetaData();
+		this.verifyMockObjects();
+
+		// Ensure correct required governance
+		boolean[] requiredGovernance = metaData.getTaskMetaData()
+				.getRequiredGovernance();
+		assertFalse("First governance should not be active",
+				requiredGovernance[0]);
+		assertTrue("Second governance should be active", requiredGovernance[1]);
+		assertFalse("Third governance should not be active",
+				requiredGovernance[2]);
+		assertTrue("Fourth governance should be active", requiredGovernance[3]);
+	}
+
+	/**
+	 * Flagged to be manual {@link Governance} however {@link Governance}
+	 * configured for the {@link Task}.
+	 */
+	public void testGovernanceButFlaggedManual() {
+
+		final TaskGovernanceConfiguration gov = this
+				.createMock(TaskGovernanceConfiguration.class);
+
+		// Record construct governance
+		this.record_taskNameFactoryTeam();
+		this.record_NoManagedObjects();
+		this.record_NoAdministration();
+
+		// Record configuring governance
+		this.recordReturn(this.configuration,
+				this.configuration.getGovernanceConfiguration(),
+				new TaskGovernanceConfiguration[] { gov });
+		this.recordReturn(this.rawOfficeMetaData,
+				this.rawOfficeMetaData.isManuallyManageGovernance(), true);
+		this.record_taskIssue("Manually manage Governance but Governance configured for OfficeFloor management");
+
+		this.record_createWorkSpecificTaskMetaDataLocator();
+		this.record_NoFlows();
+		this.record_NoNextTask();
+		this.record_NoEscalations();
+
+		// Fully construct task meta-data
+		this.replayMockObjects();
+		this.fullyConstructRawTaskMetaData();
+		this.verifyMockObjects();
+	}
+
+	/**
+	 * Ensure no required {@link Governance} if flagged for manual
+	 * {@link Governance} control.
+	 */
+	public void testManualGovernance() {
+
+		// Record construct governance
+		this.record_taskNameFactoryTeam();
+		this.record_NoManagedObjects();
+		this.record_NoAdministration();
+
+		// Record configuring governance
+		this.recordReturn(this.configuration,
+				this.configuration.getGovernanceConfiguration(),
+				new TaskGovernanceConfiguration[0]);
+		this.recordReturn(this.rawOfficeMetaData,
+				this.rawOfficeMetaData.isManuallyManageGovernance(), true);
+
+		this.record_createWorkSpecificTaskMetaDataLocator();
+		this.record_NoFlows();
+		this.record_NoNextTask();
+		this.record_NoEscalations();
+
+		// Fully construct task meta-data
+		this.replayMockObjects();
+		RawTaskMetaData<W, D, F> metaData = this
+				.fullyConstructRawTaskMetaData();
+		this.verifyMockObjects();
+
+		// Ensure manual governance
+		boolean[] requiredGovernance = metaData.getTaskMetaData()
+				.getRequiredGovernance();
+		assertNull("Should not have governance array when manual",
+				requiredGovernance);
 	}
 
 	/**
@@ -1761,6 +1999,21 @@ public class RawTaskMetaDataTest<W extends Work, D extends Enum<D>, F extends En
 	 */
 	private static enum DutyKey {
 		KEY
+	}
+
+	/**
+	 * Records no {@link Governance} instances for the {@link Task}.
+	 */
+	private void record_NoGovernance() {
+		final Map<?, ?> governances = this.createMock(Map.class);
+		this.recordReturn(this.configuration,
+				this.configuration.getGovernanceConfiguration(),
+				new TaskGovernanceConfiguration[0]);
+		this.recordReturn(this.rawOfficeMetaData,
+				this.rawOfficeMetaData.isManuallyManageGovernance(), false);
+		this.recordReturn(this.rawOfficeMetaData,
+				this.rawOfficeMetaData.getGovernanceMetaData(), governances);
+		this.recordReturn(governances, governances.size(), 0);
 	}
 
 	/**

@@ -65,13 +65,17 @@ public class GovernanceJob<I, F extends Enum<F>, W extends Work> extends
 	 * @param workContainer
 	 *            {@link WorkContainer}.
 	 * @param nodeMetaData
+	 *            {@link GovernanceMetaData}.
 	 * @param parallelOwner
+	 *            Parallel owner {@link JobNode}.
+	 * @param governanceActivity
+	 *            {@link GovernanceActivity}.
 	 */
 	public GovernanceJob(JobSequence flow, WorkContainer<W> workContainer,
 			GovernanceMetaData<I, F> nodeMetaData, JobNode parallelOwner,
 			GovernanceActivity<I, F> governanceActivity) {
 		super(flow, workContainer, nodeMetaData, parallelOwner,
-				REQUIRED_MANAGED_OBJECTS);
+				REQUIRED_MANAGED_OBJECTS, null, null);
 		this.governanceActivity = governanceActivity;
 	}
 
