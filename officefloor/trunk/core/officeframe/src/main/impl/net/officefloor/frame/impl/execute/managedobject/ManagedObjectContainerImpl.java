@@ -405,13 +405,15 @@ public class ManagedObjectContainerImpl implements ManagedObjectContainer,
 					this.activeGovernances[i] = null;
 				}
 
-				// Obtain the governance
+				// Determine if the governance is active
 				int governanceIndex = governanceMetaData.getGovernanceIndex();
-				GovernanceContainer governance = thread
-						.getGovernanceContainer(governanceIndex);
-				if (!governance.isActive()) {
+				if (!thread.isGovernanceActive(governanceIndex)) {
 					continue NEXT_GOVERNANCE; // not active, so not govern
 				}
+
+				// Obtain the governance
+				GovernanceContainer governance = thread
+						.getGovernanceContainer(governanceIndex);
 
 				// Obtain the extension interface
 				ExtensionInterfaceExtractor<?> extractor = governanceMetaData
