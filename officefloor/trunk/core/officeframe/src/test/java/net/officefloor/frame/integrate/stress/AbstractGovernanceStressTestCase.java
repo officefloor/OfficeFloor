@@ -21,7 +21,6 @@ import java.sql.SQLException;
 import java.util.LinkedList;
 import java.util.List;
 
-import net.officefloor.frame.api.build.AdministratorBuilder;
 import net.officefloor.frame.api.build.DependencyMappingBuilder;
 import net.officefloor.frame.api.build.GovernanceBuilder;
 import net.officefloor.frame.api.build.ManagedObjectBuilder;
@@ -30,12 +29,7 @@ import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.api.build.OfficeBuilder;
 import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.execute.Work;
-import net.officefloor.frame.impl.spi.team.LeaderFollowerTeam;
-import net.officefloor.frame.impl.spi.team.OnePersonTeam;
 import net.officefloor.frame.integrate.governance.MockTransaction;
-import net.officefloor.frame.integrate.governance.MockTransactionalAdministratorSource;
-import net.officefloor.frame.integrate.governance.MockTransactionalAdministratorSource.TransactionDutyKey;
-import net.officefloor.frame.integrate.governance.MockTransactionalAdministratorSource.TransactionGovernanceKey;
 import net.officefloor.frame.integrate.governance.MockTransactionalGovernanceFactory;
 import net.officefloor.frame.internal.structure.ProcessState;
 import net.officefloor.frame.spi.TestSource;
@@ -54,20 +48,27 @@ import net.officefloor.frame.test.ReflectiveWorkBuilder;
 import net.officefloor.frame.test.ReflectiveWorkBuilder.ReflectiveTaskBuilder;
 
 /**
- * <p>
- * Ensure stress test the {@link Governance} functionality.
- * <p>
- * This includes both invoking {@link Governance} but also not in prematurely
- * unloading the {@link ManagedObject}.
+ * Abstract {@link Governance} stress test.
  * 
  * @author Daniel Sagenschneider
  */
-public class GovernanceStressTest extends AbstractOfficeConstructTestCase {
+public abstract class AbstractGovernanceStressTestCase extends
+		AbstractOfficeConstructTestCase {
 
 	/**
-	 * {@link GovernanceStressTest}.
+	 * Name of the {@link Governance}.
 	 */
-	private static GovernanceStressTest instance;
+	protected static final String GOVERNANCE_NAME = "GOVERNANCE";
+
+	/**
+	 * Name of the {@link Team}.
+	 */
+	protected static final String TEAM_NAME = "TEAM";
+
+	/**
+	 * {@link AbstractGovernanceStressTestCase}.
+	 */
+	private static AbstractGovernanceStressTestCase instance;
 
 	@Override
 	protected void setUp() throws Exception {
@@ -76,22 +77,18 @@ public class GovernanceStressTest extends AbstractOfficeConstructTestCase {
 	}
 
 	/**
-	 * Ensures no issues arising in stress {@link Governance} with a
-	 * {@link OnePersonTeam}.
+	 * Configures particulars of the test.
+	 * 
+	 * @param commitTask
+	 *            Commit {@link Task}.
+	 * @param rollbackTask
+	 *            Rollback {@link Task}.
+	 * @param tidyUpTask
+	 *            Tidy up {@link Task}.
+	 * @return <code>true</code> if managed {@link Governance}.
 	 */
-	@StressTest
-	public void test_StressGovernance_OnePersonTeam() throws Throwable {
-		this.doTest(new OnePersonTeam("TEST", 100));
-	}
-
-	/**
-	 * Ensures no issues arising in stress {@link Governance} with a
-	 * {@link LeaderFollowerTeam}.
-	 */
-	@StressTest
-	public void test_StressGovernance_LeaderFollowerTeam() throws Throwable {
-		this.doTest(new LeaderFollowerTeam("TEST", 3, 100));
-	}
+	protected abstract boolean configure(ReflectiveTaskBuilder commitTask,
+			ReflectiveTaskBuilder rollbackTask, ReflectiveTaskBuilder tidyUpTask);
 
 	/**
 	 * Failure of testing.
@@ -104,7 +101,7 @@ public class GovernanceStressTest extends AbstractOfficeConstructTestCase {
 	 * @param team
 	 *            {@link Team} to use to run the {@link Task} instances.
 	 */
-	private void doTest(Team team) throws Throwable {
+	protected void doTest(Team team) throws Throwable {
 
 		int OPERATION_COUNT = 1000000;
 		int MAX_RUN_TIME = 100;
@@ -118,11 +115,62 @@ public class GovernanceStressTest extends AbstractOfficeConstructTestCase {
 		OfficeBuilder officeBuilder = this.getOfficeBuilder();
 
 		// Construct the team
-		this.constructTeam("TEAM", team);
+		this.constructTeam(TEAM_NAME, team);
+
+		// Create and register the work and tasks
+		MockWork workObject = new MockWork();
+		ReflectiveWorkBuilder work = this.constructWork(workObject, "WORK",
+				"setupTask");
+
+		// Build tasks
+		ReflectiveTaskBuilder setupTask = work
+				.buildTask("setupTask", TEAM_NAME);
+		setupTask.buildObject("MO");
+		setupTask.setNextTaskInFlow("completeTask");
+		ReflectiveTaskBuilder completeTask = work.buildTask("completeTask",
+				TEAM_NAME);
+		completeTask.buildObject("MO");
+
+		// Build the commit task
+		ReflectiveTaskBuilder commitTask = work.buildTask("doCommitTask",
+				TEAM_NAME);
+		commitTask.buildObject("MO");
+
+		// Build the rollback task
+		ReflectiveTaskBuilder rollbackTask = work.buildTask("doRollbackTask",
+				TEAM_NAME);
+		rollbackTask.buildObject("MO");
+
+		// Build the tidy up task
+		ReflectiveTaskBuilder tidyUpTask = work.buildTask("doTidyUpTask",
+				TEAM_NAME);
+		tidyUpTask.buildObject("MO");
+
+		// Configure specifics of test
+		boolean isManagedGovernance = this.configure(commitTask, rollbackTask,
+				tidyUpTask);
+
+		// Build rollback handling
+		if (isManagedGovernance) {
+			ReflectiveTaskBuilder handleRollback = work.buildTask(
+					"handleRollback", TEAM_NAME);
+			handleRollback.buildParameter();
+			officeBuilder.addEscalation(SQLException.class, "WORK",
+					"handleRollback");
+		}
+
+		// Build escalation handling
+		ReflectiveTaskBuilder escalationTask = work.buildTask(
+				"handleException", TEAM_NAME);
+		escalationTask.buildParameter();
+		escalationTask.buildObject("MO");
+		officeBuilder.addEscalation(Throwable.class, "WORK", "handleException");
 
 		// Create and register the managed object
 		ManagedObjectBuilder<GovernanceScenario> mo = this
 				.constructManagedObject("MO", MockManagedObjectSource.class);
+		mo.addProperty(MockManagedObjectSource.PROPERTY_MANAGED_GOVERNANCE,
+				String.valueOf(isManagedGovernance));
 		mo.addProperty(MockManagedObjectSource.PROPERTY_MAX_INVOCATIONS,
 				String.valueOf(OPERATION_COUNT));
 		mo.setTimeout(MAX_RUN_TIME * 1000 * 2);
@@ -137,69 +185,16 @@ public class GovernanceStressTest extends AbstractOfficeConstructTestCase {
 		managingOffice.linkProcess(GovernanceScenario.TIDY_UP, "WORK",
 				"doTidyUpTask");
 
-		// Create and register the work and tasks
-		ReflectiveWorkBuilder work = this.constructWork(new MockWork(), "WORK",
-				"setupTask");
-
-		// Build tasks
-		ReflectiveTaskBuilder setupTask = work.buildTask("setupTask", "TEAM");
-		setupTask.buildObject("MO");
-		setupTask.setNextTaskInFlow("completeTask");
-		ReflectiveTaskBuilder completeTask = work.buildTask("completeTask",
-				"TEAM");
-		completeTask.buildObject("MO");
-
-		// Build escalation handling
-		ReflectiveTaskBuilder escalationTask = work.buildTask(
-				"handleException", "TEAM");
-		escalationTask.buildParameter();
-		escalationTask.buildObject("MO");
-		officeBuilder.addEscalation(Throwable.class, "WORK", "handleException");
-
-		// Build the commit task
-		ReflectiveTaskBuilder commitTask = work.buildTask("doCommitTask",
-				"TEAM");
-		commitTask.buildObject("MO");
-		commitTask.getBuilder().linkPreTaskAdministration("ADMIN",
-				TransactionDutyKey.BEGIN);
-		commitTask.getBuilder().linkPostTaskAdministration("ADMIN",
-				TransactionDutyKey.COMMIT);
-
-		// Build the rollback task
-		ReflectiveTaskBuilder rollbackTask = work.buildTask("doRollbackTask",
-				"TEAM");
-		rollbackTask.buildObject("MO");
-		rollbackTask.getBuilder().linkPreTaskAdministration("ADMIN",
-				TransactionDutyKey.BEGIN);
-		rollbackTask.getBuilder().linkPostTaskAdministration("ADMIN",
-				TransactionDutyKey.ROLLBACK);
-
-		// Build the tidy up task
-		ReflectiveTaskBuilder tidyUpTask = work.buildTask("doTidyUpTask",
-				"TEAM");
-		tidyUpTask.buildObject("MO");
-		tidyUpTask.getBuilder().linkPreTaskAdministration("ADMIN",
-				TransactionDutyKey.BEGIN);
-
 		// Configure the Governance
 		GovernanceBuilder<None> governance = this.getOfficeBuilder()
-				.addGovernance("GOVERNANCE",
+				.addGovernance(GOVERNANCE_NAME,
 						new MockTransactionalGovernanceFactory(),
 						MockTransaction.class);
-		governance.setTeamName("TEAM");
-		dependencies.mapGovernance("GOVERNANCE");
+		governance.setTeamName(TEAM_NAME);
 
-		// Configure the Administration
-		AdministratorBuilder<TransactionDutyKey> admin = this
-				.constructAdministrator("ADMIN",
-						MockTransactionalAdministratorSource.class, "TEAM");
-		admin.administerManagedObject("MO");
-		admin.addDuty("BEGIN").linkGovernance(
-				TransactionGovernanceKey.TRANSACTION, "GOVERNANCE");
-		admin.addDuty("COMMIT").linkGovernance(
-				TransactionGovernanceKey.TRANSACTION, "GOVERNANCE");
-		admin.addDuty("ROLLBACK").linkGovernance(
-				TransactionGovernanceKey.TRANSACTION, "GOVERNANCE");
+		// Configure governance
+		workObject.isManagedGovernance = isManagedGovernance;
+		dependencies.mapGovernance(GOVERNANCE_NAME);
 
 		// Trigger invoking functionality
 		this.invokeWork("WORK", null, MAX_RUN_TIME);
@@ -246,6 +241,11 @@ public class GovernanceStressTest extends AbstractOfficeConstructTestCase {
 	public static class MockManagedObjectSource extends
 			AbstractManagedObjectSource<None, GovernanceScenario> implements
 			ExtensionInterfaceFactory<MockTransaction> {
+
+		/**
+		 * Property name to indicate if managed {@link Governance}.
+		 */
+		public static final String PROPERTY_MANAGED_GOVERNANCE = "MANAGED_GOVERNANCE";
 
 		/**
 		 * Property name of the maximum number of invocations.
@@ -308,6 +308,11 @@ public class GovernanceStressTest extends AbstractOfficeConstructTestCase {
 		private AsynchronousListener listener;
 
 		/**
+		 * Indicates if managed {@link Governance}.
+		 */
+		private boolean isManagedGovernance;
+
+		/**
 		 * Number of invocations of functionality.
 		 */
 		private int invocationCount = 0;
@@ -360,7 +365,7 @@ public class GovernanceStressTest extends AbstractOfficeConstructTestCase {
 
 					// Determine if provide progress
 					if ((this.invocationCount % (this.maxInvocations / 10)) == 0) {
-						GovernanceStressTest.instance
+						AbstractGovernanceStressTestCase.instance
 								.printMessage("Invocations "
 										+ this.invocationCount);
 					}
@@ -433,6 +438,7 @@ public class GovernanceStressTest extends AbstractOfficeConstructTestCase {
 
 		@Override
 		protected void loadSpecification(SpecificationContext context) {
+			context.addProperty(PROPERTY_MANAGED_GOVERNANCE);
 			context.addProperty(PROPERTY_MAX_INVOCATIONS);
 		}
 
@@ -443,7 +449,9 @@ public class GovernanceStressTest extends AbstractOfficeConstructTestCase {
 			ManagedObjectSourceContext<GovernanceScenario> mosContext = context
 					.getManagedObjectSourceContext();
 
-			// Obtain maximum number of invocations
+			// Obtain property values
+			this.isManagedGovernance = Boolean.parseBoolean(mosContext
+					.getProperty(PROPERTY_MANAGED_GOVERNANCE));
 			this.maxInvocations = Integer.parseInt(mosContext
 					.getProperty(PROPERTY_MAX_INVOCATIONS));
 
@@ -485,7 +493,7 @@ public class GovernanceStressTest extends AbstractOfficeConstructTestCase {
 
 			// Create the Managed Object
 			MockManagedObject managedObject = new MockManagedObject(this,
-					scenario);
+					scenario, this.isManagedGovernance);
 
 			// Register new managed object
 			synchronized (this) {
@@ -538,6 +546,11 @@ public class GovernanceStressTest extends AbstractOfficeConstructTestCase {
 		private final GovernanceScenario scenario;
 
 		/**
+		 * Indicates if managed {@link Governance}.
+		 */
+		private final boolean isManagedGovernance;
+
+		/**
 		 * {@link AsynchronousListener}.
 		 */
 		private AsynchronousListener listener;
@@ -554,11 +567,14 @@ public class GovernanceStressTest extends AbstractOfficeConstructTestCase {
 		 *            {@link MockManagedObjectSource}.
 		 * @param scenario
 		 *            {@link GovernanceScenario}.
+		 * @param isManagedGovernance
+		 *            Indicates if managed {@link Governance}.
 		 */
 		public MockManagedObject(MockManagedObjectSource mos,
-				GovernanceScenario scenario) {
+				GovernanceScenario scenario, boolean isManagedGovernance) {
 			this.mos = mos;
 			this.scenario = scenario;
+			this.isManagedGovernance = isManagedGovernance;
 		}
 
 		/*
@@ -608,8 +624,21 @@ public class GovernanceStressTest extends AbstractOfficeConstructTestCase {
 		public void commit() throws SQLException {
 			assertEquals("Incorrect step", InvokeSteps.DO_FUNCTIONALITY,
 					this.step);
-			assertEquals("Incorrect scenario", GovernanceScenario.COMMIT,
-					this.scenario);
+			switch (this.scenario) {
+			case COMMIT:
+				/*
+				 * Correctly commit due to either administrated commit or
+				 * managed governance thread completion.
+				 */
+				break;
+			case TIDY_UP:
+				if (!this.isManagedGovernance) {
+					fail("Should not commit on thread completion for administered governance");
+				}
+				break;
+			default:
+				fail("Should not commit for scenario " + this.scenario);
+			}
 			this.mos.managedObjectComplete(this);
 		}
 
@@ -619,7 +648,15 @@ public class GovernanceStressTest extends AbstractOfficeConstructTestCase {
 					this.step);
 			switch (this.scenario) {
 			case ROLLBACK:
+				/*
+				 * Correctly rollback due to either administrated thread
+				 * completion or managed governance escalation deactivation.
+				 */
+				break;
 			case TIDY_UP:
+				if (this.isManagedGovernance) {
+					fail("Should not rollback on thread completion for managed governance");
+				}
 				break; // correct handling of scenario
 			default:
 				fail("Should not rollback for scenario " + this.scenario);
@@ -637,6 +674,11 @@ public class GovernanceStressTest extends AbstractOfficeConstructTestCase {
 	 * Mock {@link Work}.
 	 */
 	public class MockWork {
+
+		/**
+		 * Indicates if managed {@link Governance}.
+		 */
+		public volatile boolean isManagedGovernance = false;
 
 		/**
 		 * Setup {@link Task} to trigger testing.
@@ -674,8 +716,13 @@ public class GovernanceStressTest extends AbstractOfficeConstructTestCase {
 		 * @param object
 		 *            {@link MockObject}.
 		 */
-		public void doRollbackTask(MockObject object) {
+		public void doRollbackTask(MockObject object) throws SQLException {
 			object.doFunctionality();
+
+			// If managed governance, through exception to trigger rollback
+			if (this.isManagedGovernance) {
+				throw new SQLException("TEST");
+			}
 		}
 
 		/**
@@ -689,6 +736,16 @@ public class GovernanceStressTest extends AbstractOfficeConstructTestCase {
 		}
 
 		/**
+		 * Gracefully handles rollback exception.
+		 * 
+		 * @param ex
+		 *            {@link SQLException}.
+		 */
+		public void handleRollback(SQLException ex) {
+			assertEquals("Incorrect exception", "TEST", ex.getMessage());
+		}
+
+		/**
 		 * Handles exception.
 		 * 
 		 * @param ex
@@ -699,7 +756,7 @@ public class GovernanceStressTest extends AbstractOfficeConstructTestCase {
 		public void handleException(Throwable ex, MockObject object) {
 
 			// Flag failure
-			GovernanceStressTest.this.failure = ex;
+			AbstractGovernanceStressTestCase.this.failure = ex;
 
 			// Force complete
 			object.forceComplete();

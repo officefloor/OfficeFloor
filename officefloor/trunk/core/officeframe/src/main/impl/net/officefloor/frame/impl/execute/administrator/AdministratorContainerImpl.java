@@ -27,7 +27,6 @@ import net.officefloor.frame.internal.structure.ContainerContext;
 import net.officefloor.frame.internal.structure.DutyMetaData;
 import net.officefloor.frame.internal.structure.ExtensionInterfaceMetaData;
 import net.officefloor.frame.internal.structure.FlowMetaData;
-import net.officefloor.frame.internal.structure.GovernanceContainer;
 import net.officefloor.frame.internal.structure.TaskDutyAssociation;
 import net.officefloor.frame.spi.administration.Administrator;
 import net.officefloor.frame.spi.administration.Duty;
@@ -189,15 +188,11 @@ public class AdministratorContainerImpl<I extends Object, A extends Enum<A>, F e
 
 			// Obtain the process index for the governance
 			int processIndex = this.dutyMetaData
-					.translateGovernanceIndexToProcessIndex(governanceIndex);
-
-			// Obtain the governance container
-			GovernanceContainer<?, ?> container = this.adminContext
-					.getThreadState().getGovernanceContainer(processIndex);
+					.translateGovernanceIndexToThreadIndex(governanceIndex);
 
 			// Create Governance Manager to wrap Governance Container
-			GovernanceManager manager = new GovernanceManagerImpl(container,
-					this.containerContext);
+			GovernanceManager manager = new GovernanceManagerImpl(
+					this.adminContext, processIndex, this.containerContext);
 
 			// Return the governance manager
 			return manager;

@@ -683,13 +683,16 @@ public abstract class AbstractManagedObjectContainerImplTest extends
 			this.recordReturn(moGovMetaData,
 					moGovMetaData.getGovernanceIndex(), i);
 			this.recordReturn(this.threadState,
-					this.threadState.getGovernanceContainer(i),
-					governanceContainer);
-			this.recordReturn(governanceContainer,
-					governanceContainer.isActive(), isActivateGovernance);
+					this.threadState.isGovernanceActive(i),
+					isActivateGovernance);
 
 			// Determine if to activate
 			if (isActivateGovernance) {
+
+				// Obtain the container
+				this.recordReturn(this.threadState,
+						this.threadState.getGovernanceContainer(i),
+						governanceContainer);
 
 				// Create active governance for managed object
 				activeGovernance = this.createMock(ActiveGovernance.class);

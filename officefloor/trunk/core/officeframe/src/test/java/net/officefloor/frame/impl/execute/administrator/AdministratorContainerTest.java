@@ -245,7 +245,7 @@ public class AdministratorContainerTest<I, A extends Enum<A>, F extends Enum<F>,
 	private GovernanceContainer<?, ?> recordGovernance(
 			Duty<?, ?, Governances> duty) throws Throwable {
 
-		final int PROCESS_INDEX = 3;
+		final int THREAD_INDEX = 3;
 		final ThreadState threadState = this.createMock(ThreadState.class);
 		final GovernanceContainer<?, ?> governanceContainer = this
 				.createMock(GovernanceContainer.class);
@@ -255,12 +255,12 @@ public class AdministratorContainerTest<I, A extends Enum<A>, F extends Enum<F>,
 
 		// Record governance setup
 		this.recordReturn(this.dutyMetaData, this.dutyMetaData
-				.translateGovernanceIndexToProcessIndex(Governances.GOVERNANCE
-						.ordinal()), PROCESS_INDEX);
+				.translateGovernanceIndexToThreadIndex(Governances.GOVERNANCE
+						.ordinal()), THREAD_INDEX);
 		this.recordReturn(this.context, this.context.getThreadState(),
 				threadState);
 		this.recordReturn(threadState,
-				threadState.getGovernanceContainer(PROCESS_INDEX),
+				threadState.getGovernanceContainer(THREAD_INDEX),
 				governanceContainer);
 
 		// Return the governance container

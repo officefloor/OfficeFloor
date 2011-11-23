@@ -1154,9 +1154,9 @@ public class RawBoundAdministratorMetaDataTest extends OfficeFrameTestCase {
 		assertNotNull("Must have duty", duty);
 
 		// Verify the governance not mapped
-		int processIndex = duty
-				.translateGovernanceIndexToProcessIndex(DUTY_GOVERNANCE_INDEX);
-		assertEquals("Process index should not be translated", -1, processIndex);
+		int threadIndex = duty
+				.translateGovernanceIndexToThreadIndex(DUTY_GOVERNANCE_INDEX);
+		assertEquals("Thread index should not be translated", -1, threadIndex);
 	}
 
 	/**
@@ -1243,9 +1243,9 @@ public class RawBoundAdministratorMetaDataTest extends OfficeFrameTestCase {
 		assertNotNull("Must have duty", duty);
 
 		// Verify the governance
-		int processIndex = duty
-				.translateGovernanceIndexToProcessIndex(DUTY_GOVERNANCE_INDEX);
-		assertEquals("Incorrect process index", 1, processIndex);
+		int threadIndex = duty
+				.translateGovernanceIndexToThreadIndex(DUTY_GOVERNANCE_INDEX);
+		assertEquals("Incorrect thread index", 1, threadIndex);
 	}
 
 	/**
