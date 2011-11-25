@@ -57,9 +57,19 @@ public interface DutyType<A extends Enum<A>, F extends Enum<F>> {
 	 * Obtains the {@link DutyFlowType} definitions for the possible
 	 * {@link JobSequence} instances instigated by the {@link Duty}.
 	 * 
-	 * @return {@link DutyFlowType} definitions for the possible {@link JobSequence}
-	 *         instances instigated by the {@link Duty}.
+	 * @return {@link DutyFlowType} definitions for the possible
+	 *         {@link JobSequence} instances instigated by the {@link Duty}.
 	 */
 	DutyFlowType<F>[] getFlowTypes();
+
+	/**
+	 * Obtains the {@link DutyEscalationType} definitions for the possible
+	 * {@link EscalationFlow} instances by the {@link Duty}.
+	 * 
+	 * @return {@link DutyEscalationType} definitions for the possible
+	 *         {@link EscalationFlow} instances by the {@link Duty}.
+	 */
+	// TODO provide getEscalationTypes() from DutyType
+	// DutyEscalationType[] getEscalationTypes();
 
 }

@@ -25,7 +25,6 @@ import javax.transaction.xa.XAResource;
 
 import net.officefloor.compile.OfficeFloorCompiler;
 import net.officefloor.compile.impl.properties.PropertyListImpl;
-import net.officefloor.compile.impl.work.LoadWorkTypeTest;
 import net.officefloor.compile.issues.CompilerIssues;
 import net.officefloor.compile.managedobject.ManagedObjectDependencyType;
 import net.officefloor.compile.managedobject.ManagedObjectFlowType;
@@ -37,9 +36,9 @@ import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.work.WorkType;
 import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.build.None;
+import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
 import net.officefloor.frame.api.build.TaskFactory;
 import net.officefloor.frame.api.build.WorkFactory;
-import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
 import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
@@ -219,7 +218,7 @@ public class LoadManagedObjectTypeTest extends OfficeFrameTestCase {
 					InitUtil util) {
 				assertEquals(
 						"Incorrect resource locator",
-						LoadWorkTypeTest.class.getClassLoader().getResource(
+						LoadManagedObjectTypeTest.class.getClassLoader().getResource(
 								objectPath), context.getClassLoader()
 								.getResource(objectPath));
 			}

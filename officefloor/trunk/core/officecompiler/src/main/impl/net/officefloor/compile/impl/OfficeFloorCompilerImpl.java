@@ -25,7 +25,9 @@ import java.util.Map;
 
 import net.officefloor.compile.OfficeFloorCompiler;
 import net.officefloor.compile.administrator.AdministratorLoader;
+import net.officefloor.compile.governance.GovernanceLoader;
 import net.officefloor.compile.impl.administrator.AdministratorLoaderImpl;
+import net.officefloor.compile.impl.governance.GovernanceLoaderImpl;
 import net.officefloor.compile.impl.issues.StderrCompilerIssues;
 import net.officefloor.compile.impl.managedobject.ManagedObjectLoaderImpl;
 import net.officefloor.compile.impl.office.OfficeLoaderImpl;
@@ -300,6 +302,11 @@ public class OfficeFloorCompilerImpl extends OfficeFloorCompiler implements
 	@Override
 	public ManagedObjectLoader getManagedObjectLoader() {
 		return new ManagedObjectLoaderImpl(this);
+	}
+
+	@Override
+	public GovernanceLoader getGovernanceLoader() {
+		return new GovernanceLoaderImpl(this);
 	}
 
 	@Override

@@ -21,6 +21,7 @@ import java.lang.reflect.Method;
 
 import net.officefloor.compile.OfficeFloorCompiler;
 import net.officefloor.compile.administrator.AdministratorLoader;
+import net.officefloor.compile.governance.GovernanceLoader;
 import net.officefloor.compile.issues.CompilerIssues;
 import net.officefloor.compile.managedobject.ManagedObjectLoader;
 import net.officefloor.compile.office.OfficeLoader;
@@ -292,6 +293,12 @@ public class OfficeFloorCompilerAdapter extends OfficeFloorCompiler {
 	public ManagedObjectLoader getManagedObjectLoader() {
 		return (ManagedObjectLoader) this.invokeMethod(
 				"getManagedObjectLoader", null);
+	}
+
+	@Override
+	public GovernanceLoader getGovernanceLoader() {
+		return (GovernanceLoader) this.invokeMethod(
+				"getGovernanceLoader", null);
 	}
 
 	@Override
