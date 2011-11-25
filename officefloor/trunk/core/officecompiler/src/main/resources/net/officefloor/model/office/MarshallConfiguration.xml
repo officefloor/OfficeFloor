@@ -23,6 +23,15 @@
 					</attributes>
 				</item>
 			</collection>
+			<collection method="getOfficeGovernances">
+				<item
+					type="net.officefloor.model.office.ExternalManagedObjectToOfficeGovernanceModel"
+					element="govern">
+					<attributes>
+						<attribute method="getOfficeGovernanceName" attribute="governance" />
+					</attributes>
+				</item>
+			</collection>
 		</item>
 	</collection>
 
@@ -134,6 +143,15 @@
 					</attributes>
 				</item>
 			</collection>
+			<collection method="getOfficeGovernances">
+				<item
+					type="net.officefloor.model.office.OfficeManagedObjectToOfficeGovernanceModel"
+					element="govern">
+					<attributes>
+						<attribute method="getOfficeGovernanceName" attribute="governance" />
+					</attributes>
+				</item>
+			</collection>
 			<collection method="getOfficeManagedObjectDependencies">
 				<item
 					type="net.officefloor.model.office.OfficeManagedObjectDependencyModel"
@@ -220,6 +238,45 @@
 				<item type="net.officefloor.model.office.DutyModel" element="duty">
 					<attributes>
 						<attribute method="getDutyName" attribute="name" />
+					</attributes>
+				</item>
+			</collection>
+		</item>
+	</collection>
+
+	<!-- OFFICE GOVERNANCES -->
+	<collection method="getOfficeGovernances" element="governances">
+		<item type="net.officefloor.model.office.OfficeGovernanceModel"
+			element="governance">
+			<attributes>
+				<attribute method="getOfficeGovernanceName" attribute="name" />
+				<attribute method="getGovernanceSourceClassName"
+					attribute="source" />
+				<attribute method="getX" attribute="x" />
+				<attribute method="getY" attribute="y" />
+			</attributes>
+			<collection method="getProperties" element="properties">
+				<item type="net.officefloor.model.office.PropertyModel"
+					element="property">
+					<attributes>
+						<attribute method="getName" attribute="name" />
+						<attribute method="getValue" attribute="value" />
+					</attributes>
+				</item>
+			</collection>
+			<object method="getOfficeTeam" element="team">
+				<attributes>
+					<attribute method="getOfficeTeamName" attribute="name" />
+				</attributes>
+			</object>
+			<collection method="getOfficeGovernanceAreas">
+				<item type="net.officefloor.model.office.OfficeGovernanceAreaModel"
+					element="governance-area">
+					<attributes>
+						<attribute method="getX" attribute="x" />
+						<attribute method="getY" attribute="y" />
+						<attribute method="getHeight" attribute="height" />
+						<attribute method="getWidth" attribute="width" />
 					</attributes>
 				</item>
 			</collection>

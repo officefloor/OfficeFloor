@@ -7,4 +7,5 @@
 	<list type="OfficeManagedObjectModel" name="office managed object" />
 	<list type="OfficeEscalationModel" name="office escalation" />
 	<list type="AdministratorModel" name="office administrator" />
+	<list type="OfficeGovernanceModel" name="office governance" />
 </model>

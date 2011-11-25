@@ -13,6 +13,10 @@
 			<value method="setAdministratorName" node="administer@administrator" />
 			<value method="setOrder" node="administer@order" />
 		</object>
+		<object method="addOfficeGovernance" node="govern"
+			class="net.officefloor.model.office.ExternalManagedObjectToOfficeGovernanceModel">
+			<value method="setOfficeGovernanceName" node="govern@governance" />
+		</object>
 	</object>
 
 	<!-- MANAGED OBJECT SOURCES -->
@@ -78,6 +82,10 @@
 			<value method="setAdministratorName" node="administer@administrator" />
 			<value method="setOrder" node="administer@order" />
 		</object>
+		<object method="addOfficeGovernance" node="govern"
+			class="net.officefloor.model.office.OfficeManagedObjectToOfficeGovernanceModel">
+			<value method="setOfficeGovernanceName" node="govern@governance" />
+		</object>
 		<object method="addOfficeManagedObjectDependency" node="dependency"
 			class="net.officefloor.model.office.OfficeManagedObjectDependencyModel">
 			<value method="setOfficeManagedObjectDependencyName" node="dependency@name" />
@@ -134,6 +142,31 @@
 		<object method="addDuty" node="duty"
 			class="net.officefloor.model.office.DutyModel">
 			<value method="setDutyName" node="duty@name" />
+		</object>
+	</object>
+
+	<!-- OFFICE GOVERNANCES -->
+	<object method="addOfficeGovernance" node="governance"
+		class="net.officefloor.model.office.OfficeGovernanceModel">
+		<value method="setOfficeGovernanceName" node="governance@name" />
+		<value method="setGovernanceSourceClassName" node="governance@source" />
+		<value method="setX" node="governance@x" />
+		<value method="setY" node="governance@y" />
+		<object method="addProperty" node="property"
+			class="net.officefloor.model.office.PropertyModel">
+			<value method="setName" node="property@name" />
+			<value method="setValue" node="property@value" />
+		</object>
+		<object method="setOfficeTeam" node="team"
+			class="net.officefloor.model.office.OfficeGovernanceToOfficeTeamModel">
+			<value method="setOfficeTeamName" node="team@name" />
+		</object>
+		<object method="addOfficeGovernanceArea" node="governance-area"
+			class="net.officefloor.model.office.OfficeGovernanceAreaModel">
+			<value method="setX" node="governance-area@x" />
+			<value method="setY" node="governance-area@y" />
+			<value method="setHeight" node="governance-area@height" />
+			<value method="setWidth" node="governance-area@width" />
 		</object>
 	</object>
 
