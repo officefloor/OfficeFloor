@@ -29,8 +29,11 @@ import net.officefloor.model.office.AdministratorToOfficeTeamModel;
 import net.officefloor.model.office.DutyModel;
 import net.officefloor.model.office.ExternalManagedObjectModel;
 import net.officefloor.model.office.ExternalManagedObjectToAdministratorModel;
+import net.officefloor.model.office.ExternalManagedObjectToOfficeGovernanceModel;
 import net.officefloor.model.office.OfficeEscalationModel;
 import net.officefloor.model.office.OfficeEscalationToOfficeSectionInputModel;
+import net.officefloor.model.office.OfficeGovernanceModel;
+import net.officefloor.model.office.OfficeGovernanceToOfficeTeamModel;
 import net.officefloor.model.office.OfficeInputManagedObjectDependencyModel;
 import net.officefloor.model.office.OfficeInputManagedObjectDependencyToExternalManagedObjectModel;
 import net.officefloor.model.office.OfficeInputManagedObjectDependencyToOfficeManagedObjectModel;
@@ -44,6 +47,7 @@ import net.officefloor.model.office.OfficeManagedObjectSourceModel;
 import net.officefloor.model.office.OfficeManagedObjectSourceTeamModel;
 import net.officefloor.model.office.OfficeManagedObjectSourceTeamToOfficeTeamModel;
 import net.officefloor.model.office.OfficeManagedObjectToAdministratorModel;
+import net.officefloor.model.office.OfficeManagedObjectToOfficeGovernanceModel;
 import net.officefloor.model.office.OfficeManagedObjectToOfficeManagedObjectSourceModel;
 import net.officefloor.model.office.OfficeModel;
 import net.officefloor.model.office.OfficeRepository;
@@ -152,13 +156,26 @@ public class OfficeRepositoryImpl implements OfficeRepository {
 			}
 		}
 
+		// Connect the governances to the teams
+		for (OfficeGovernanceModel gov : office.getOfficeGovernances()) {
+			OfficeGovernanceToOfficeTeamModel conn = gov.getOfficeTeam();
+			if (conn != null) {
+				OfficeTeamModel team = teams.get(conn.getOfficeTeamName());
+				if (team != null) {
+					conn.setOfficeGovernance(gov);
+					conn.setOfficeTeam(team);
+					conn.connect();
+				}
+			}
+		}
+
 		// Create the set of office section inputs
 		DoubleKeyMap<String, String, OfficeSectionInputModel> inputs = new DoubleKeyMap<String, String, OfficeSectionInputModel>();
 		for (OfficeSectionModel section : office.getOfficeSections()) {
 			for (OfficeSectionInputModel input : section
 					.getOfficeSectionInputs()) {
-				inputs.put(section.getOfficeSectionName(), input
-						.getOfficeSectionInputName(), input);
+				inputs.put(section.getOfficeSectionName(),
+						input.getOfficeSectionInputName(), input);
 			}
 		}
 
@@ -169,9 +186,9 @@ public class OfficeRepositoryImpl implements OfficeRepository {
 				OfficeSectionOutputToOfficeSectionInputModel conn = output
 						.getOfficeSectionInput();
 				if (conn != null) {
-					OfficeSectionInputModel input = inputs.get(conn
-							.getOfficeSectionName(), conn
-							.getOfficeSectionInputName());
+					OfficeSectionInputModel input = inputs.get(
+							conn.getOfficeSectionName(),
+							conn.getOfficeSectionInputName());
 					if (input != null) {
 						conn.setOfficeSectionOutput(output);
 						conn.setOfficeSectionInput(input);
@@ -189,9 +206,9 @@ public class OfficeRepositoryImpl implements OfficeRepository {
 				OfficeManagedObjectSourceFlowToOfficeSectionInputModel conn = flow
 						.getOfficeSectionInput();
 				if (conn != null) {
-					OfficeSectionInputModel input = inputs.get(conn
-							.getOfficeSectionName(), conn
-							.getOfficeSectionInputName());
+					OfficeSectionInputModel input = inputs.get(
+							conn.getOfficeSectionName(),
+							conn.getOfficeSectionInputName());
 					if (input != null) {
 						conn.setOfficeManagedObjectSourceFlow(flow);
 						conn.setOfficeSectionInput(input);
@@ -206,9 +223,9 @@ public class OfficeRepositoryImpl implements OfficeRepository {
 			OfficeEscalationToOfficeSectionInputModel conn = escalation
 					.getOfficeSectionInput();
 			if (conn != null) {
-				OfficeSectionInputModel sectionInput = inputs.get(conn
-						.getOfficeSectionName(), conn
-						.getOfficeSectionInputName());
+				OfficeSectionInputModel sectionInput = inputs.get(
+						conn.getOfficeSectionName(),
+						conn.getOfficeSectionInputName());
 				if (sectionInput != null) {
 					conn.setOfficeEscalation(escalation);
 					conn.setOfficeSectionInput(sectionInput);
@@ -346,8 +363,9 @@ public class OfficeRepositoryImpl implements OfficeRepository {
 		Map<String, OfficeManagedObjectSourceModel> managedObjectSources = new HashMap<String, OfficeManagedObjectSourceModel>();
 		for (OfficeManagedObjectSourceModel managedObjectSource : office
 				.getOfficeManagedObjectSources()) {
-			managedObjectSources.put(managedObjectSource
-					.getOfficeManagedObjectSourceName(), managedObjectSource);
+			managedObjectSources.put(
+					managedObjectSource.getOfficeManagedObjectSourceName(),
+					managedObjectSource);
 		}
 
 		// Connect the managed objects to their corresponding sources
@@ -411,6 +429,42 @@ public class OfficeRepositoryImpl implements OfficeRepository {
 			}
 		}
 
+		// Create the map of governances
+		Map<String, OfficeGovernanceModel> governances = new HashMap<String, OfficeGovernanceModel>();
+		for (OfficeGovernanceModel gov : office.getOfficeGovernances()) {
+			String governanceName = gov.getOfficeGovernanceName();
+			governances.put(governanceName, gov);
+		}
+
+		// Connect the external managed objects to governances
+		for (ExternalManagedObjectModel extMo : office
+				.getExternalManagedObjects()) {
+			for (ExternalManagedObjectToOfficeGovernanceModel conn : extMo
+					.getOfficeGovernances()) {
+				OfficeGovernanceModel gov = governances.get(conn
+						.getOfficeGovernanceName());
+				if (gov != null) {
+					conn.setExternalManagedObject(extMo);
+					conn.setOfficeGovernance(gov);
+					conn.connect();
+				}
+			}
+		}
+
+		// Connect the managed objects to governances
+		for (OfficeManagedObjectModel mo : office.getOfficeManagedObjects()) {
+			for (OfficeManagedObjectToOfficeGovernanceModel conn : mo
+					.getOfficeGovernances()) {
+				OfficeGovernanceModel gov = governances.get(conn
+						.getOfficeGovernanceName());
+				if (gov != null) {
+					conn.setOfficeManagedObject(mo);
+					conn.setOfficeGovernance(gov);
+					conn.connect();
+				}
+			}
+		}
+
 		// Return the office
 		return office;
 	}
@@ -435,8 +489,8 @@ public class OfficeRepositoryImpl implements OfficeRepository {
 		// Connect the sub section tasks to pre duties
 		for (OfficeTaskModel task : subSection.getOfficeTasks()) {
 			for (OfficeTaskToPreDutyModel conn : task.getPreDuties()) {
-				DutyModel duty = duties.get(conn.getAdministratorName(), conn
-						.getDutyName());
+				DutyModel duty = duties.get(conn.getAdministratorName(),
+						conn.getDutyName());
 				if (duty != null) {
 					conn.setOfficeTask(task);
 					conn.setDuty(duty);
@@ -448,8 +502,8 @@ public class OfficeRepositoryImpl implements OfficeRepository {
 		// Connect the sub section tasks to post duties
 		for (OfficeTaskModel task : subSection.getOfficeTasks()) {
 			for (OfficeTaskToPostDutyModel conn : task.getPostDuties()) {
-				DutyModel duty = duties.get(conn.getAdministratorName(), conn
-						.getDutyName());
+				DutyModel duty = duties.get(conn.getAdministratorName(),
+						conn.getDutyName());
 				if (duty != null) {
 					conn.setOfficeTask(task);
 					conn.setDuty(duty);
@@ -488,6 +542,14 @@ public class OfficeRepositoryImpl implements OfficeRepository {
 		// Specify administrators to team
 		for (OfficeTeamModel team : office.getOfficeTeams()) {
 			for (AdministratorToOfficeTeamModel conn : team.getAdministrators()) {
+				conn.setOfficeTeamName(team.getOfficeTeamName());
+			}
+		}
+
+		// Specify governances to team
+		for (OfficeTeamModel team : office.getOfficeTeams()) {
+			for (OfficeGovernanceToOfficeTeamModel conn : team
+					.getOfficeGovernances()) {
 				conn.setOfficeTeamName(team.getOfficeTeamName());
 			}
 		}
@@ -545,9 +607,7 @@ public class OfficeRepositoryImpl implements OfficeRepository {
 		for (OfficeManagedObjectModel mo : office.getOfficeManagedObjects()) {
 			for (OfficeSectionObjectToOfficeManagedObjectModel conn : mo
 					.getOfficeSectionObjects()) {
-				conn
-						.setOfficeManagedObjectName(mo
-								.getOfficeManagedObjectName());
+				conn.setOfficeManagedObjectName(mo.getOfficeManagedObjectName());
 			}
 		}
 
@@ -575,9 +635,7 @@ public class OfficeRepositoryImpl implements OfficeRepository {
 		for (OfficeManagedObjectModel mo : office.getOfficeManagedObjects()) {
 			for (OfficeManagedObjectDependencyToOfficeManagedObjectModel conn : mo
 					.getDependentOfficeManagedObjects()) {
-				conn
-						.setOfficeManagedObjectName(mo
-								.getOfficeManagedObjectName());
+				conn.setOfficeManagedObjectName(mo.getOfficeManagedObjectName());
 			}
 		}
 
@@ -595,9 +653,7 @@ public class OfficeRepositoryImpl implements OfficeRepository {
 		for (OfficeManagedObjectModel mo : office.getOfficeManagedObjects()) {
 			for (OfficeInputManagedObjectDependencyToOfficeManagedObjectModel conn : mo
 					.getDependentOfficeInputManagedObjects()) {
-				conn
-						.setOfficeManagedObjectName(mo
-								.getOfficeManagedObjectName());
+				conn.setOfficeManagedObjectName(mo.getOfficeManagedObjectName());
 			}
 		}
 
@@ -634,6 +690,22 @@ public class OfficeRepositoryImpl implements OfficeRepository {
 			for (OfficeManagedObjectToAdministratorModel conn : admin
 					.getOfficeManagedObjects()) {
 				conn.setAdministratorName(admin.getAdministratorName());
+			}
+		}
+
+		// Specify external managed objects to governances
+		for (OfficeGovernanceModel gov : office.getOfficeGovernances()) {
+			for (ExternalManagedObjectToOfficeGovernanceModel conn : gov
+					.getExternalManagedObjects()) {
+				conn.setOfficeGovernanceName(gov.getOfficeGovernanceName());
+			}
+		}
+
+		// Specify managed objects to governances
+		for (OfficeGovernanceModel gov : office.getOfficeGovernances()) {
+			for (OfficeManagedObjectToOfficeGovernanceModel conn : gov
+					.getOfficeManagedObjects()) {
+				conn.setOfficeGovernanceName(gov.getOfficeGovernanceName());
 			}
 		}
 

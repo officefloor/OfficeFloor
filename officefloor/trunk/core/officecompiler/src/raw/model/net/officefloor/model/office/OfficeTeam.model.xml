@@ -5,4 +5,5 @@
 		plural="office section responsibilities" />
 	<list type="OfficeManagedObjectSourceTeamToOfficeTeamModel" name="office managed object source team" />
 	<list type="AdministratorToOfficeTeamModel" name="administrator" />
+	<list type="OfficeGovernanceToOfficeTeamModel" name="office governance" />
 </model>
