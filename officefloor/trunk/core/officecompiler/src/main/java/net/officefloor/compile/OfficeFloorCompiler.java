@@ -24,6 +24,7 @@ import java.util.Properties;
 import java.util.ServiceLoader;
 
 import net.officefloor.compile.administrator.AdministratorLoader;
+import net.officefloor.compile.governance.GovernanceLoader;
 import net.officefloor.compile.impl.OfficeFloorCompilerAdapter;
 import net.officefloor.compile.impl.OfficeFloorCompilerImpl;
 import net.officefloor.compile.impl.util.CompileUtil;
@@ -601,6 +602,13 @@ public abstract class OfficeFloorCompiler {
 	 * @return {@link ManagedObjectLoader}.
 	 */
 	public abstract ManagedObjectLoader getManagedObjectLoader();
+
+	/**
+	 * Obtains the {@link GovernanceLoader}.
+	 * 
+	 * @return {@link GovernanceLoader}.
+	 */
+	public abstract GovernanceLoader getGovernanceLoader();
 
 	/**
 	 * Obtains the {@link ManagedObjectPoolLoader}.

@@ -25,6 +25,7 @@ import java.net.URLClassLoader;
 
 import net.officefloor.compile.OfficeFloorCompiler;
 import net.officefloor.compile.administrator.AdministratorLoader;
+import net.officefloor.compile.governance.GovernanceLoader;
 import net.officefloor.compile.managedobject.ManagedObjectLoader;
 import net.officefloor.compile.office.OfficeLoader;
 import net.officefloor.compile.officefloor.OfficeFloorLoader;
@@ -45,6 +46,7 @@ import net.officefloor.plugin.administrator.clazz.ClassAdministratorSource;
 import net.officefloor.plugin.autowire.AutoWireAdministration;
 import net.officefloor.plugin.autowire.AutoWireOfficeFloor;
 import net.officefloor.plugin.autowire.AutoWireOfficeFloorSource;
+import net.officefloor.plugin.governance.clazz.ClassGovernanceSource;
 import net.officefloor.plugin.managedobject.clazz.ClassManagedObjectSource;
 import net.officefloor.plugin.section.clazz.ClassSectionSource;
 import net.officefloor.plugin.section.clazz.Parameter;
@@ -315,6 +317,17 @@ public class OfficeFloorCompilerAdapterTest extends OfficeFrameTestCase {
 		ManagedObjectLoader loader = this.compiler.getManagedObjectLoader();
 		PropertyList specification = loader
 				.loadSpecification(ClassManagedObjectSource.class);
+		assertEquals("Should have a property", 1,
+				specification.getPropertyNames().length);
+	}
+
+	/**
+	 * Tests the {@link GovernanceLoader}.
+	 */
+	public void testGovernanceLoader() {
+		GovernanceLoader loader = this.compiler.getGovernanceLoader();
+		PropertyList specification = loader
+				.loadSpecification(ClassGovernanceSource.class);
 		assertEquals("Should have a property", 1,
 				specification.getPropertyNames().length);
 	}
