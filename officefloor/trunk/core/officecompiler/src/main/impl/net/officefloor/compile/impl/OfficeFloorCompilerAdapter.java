@@ -29,6 +29,7 @@ import net.officefloor.compile.officefloor.OfficeFloorLoader;
 import net.officefloor.compile.pool.ManagedObjectPoolLoader;
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.section.SectionLoader;
+import net.officefloor.compile.spi.governance.source.GovernanceSource;
 import net.officefloor.compile.spi.office.source.OfficeSource;
 import net.officefloor.compile.spi.officefloor.source.OfficeFloorSource;
 import net.officefloor.compile.spi.section.source.SectionSource;
@@ -257,6 +258,13 @@ public class OfficeFloorCompilerAdapter extends OfficeFloorCompiler {
 	}
 
 	@Override
+	public <I, F extends Enum<F>, S extends GovernanceSource<I, F>> void addGovernanceSourceAlias(
+			String alias, Class<S> governanceSourceClass) {
+		this.invokeMethod("addGovernanceSourceAlias", new Object[] { alias,
+				governanceSourceClass }, String.class, Class.class);
+	}
+
+	@Override
 	public <S extends TeamSource> void addTeamSourceAlias(String alias,
 			Class<S> teamSourceClass) {
 		this.invokeMethod("addTeamSourceAlias", new Object[] { alias,
@@ -297,8 +305,8 @@ public class OfficeFloorCompilerAdapter extends OfficeFloorCompiler {
 
 	@Override
 	public GovernanceLoader getGovernanceLoader() {
-		return (GovernanceLoader) this.invokeMethod(
-				"getGovernanceLoader", null);
+		return (GovernanceLoader) this
+				.invokeMethod("getGovernanceLoader", null);
 	}
 
 	@Override

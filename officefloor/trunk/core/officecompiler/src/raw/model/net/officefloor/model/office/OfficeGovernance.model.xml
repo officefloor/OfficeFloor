@@ -7,4 +7,8 @@
 	<list type="OfficeGovernanceAreaModel" name="office governance area" />
 	<list type="ExternalManagedObjectToOfficeGovernanceModel" name="external managed object" />
 	<list type="OfficeManagedObjectToOfficeGovernanceModel" name="office managed object" />
+	<list type="OfficeSectionManagedObjectToOfficeGovernanceModel"
+		name="office section managed object" />
+	<list type="OfficeSubSectionToOfficeGovernanceModel" name="office sub section" />
+	<list type="OfficeTaskToOfficeGovernanceModel" name="office task" />
 </model>

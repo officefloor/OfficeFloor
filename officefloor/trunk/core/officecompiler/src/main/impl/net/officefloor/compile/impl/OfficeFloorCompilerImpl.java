@@ -47,6 +47,7 @@ import net.officefloor.compile.officefloor.OfficeFloorLoader;
 import net.officefloor.compile.pool.ManagedObjectPoolLoader;
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.section.SectionLoader;
+import net.officefloor.compile.spi.governance.source.GovernanceSource;
 import net.officefloor.compile.spi.office.source.OfficeSource;
 import net.officefloor.compile.spi.officefloor.source.OfficeFloorSource;
 import net.officefloor.compile.spi.section.source.SectionSource;
@@ -137,6 +138,11 @@ public class OfficeFloorCompilerImpl extends OfficeFloorCompiler implements
 	 * {@link AdministratorSource} {@link Class} instances by their alias name.
 	 */
 	private final Map<String, Class<?>> administratorSourceAliases = new HashMap<String, Class<?>>();
+
+	/**
+	 * {@link GovernanceSource} {@link Class} instances by their alias name.
+	 */
+	private final Map<String, Class<?>> governanceSourceAliases = new HashMap<String, Class<?>>();
 
 	/**
 	 * {@link TeamSource} {@link Class} instances by their alias name.
@@ -265,6 +271,13 @@ public class OfficeFloorCompilerImpl extends OfficeFloorCompiler implements
 			String alias, Class<S> administratorSourceClass) {
 		this.registerAlias(alias, administratorSourceClass,
 				this.administratorSourceAliases, "administrator");
+	}
+
+	@Override
+	public <I, F extends Enum<F>, S extends GovernanceSource<I, F>> void addGovernanceSourceAlias(
+			String alias, Class<S> governanceSourceClass) {
+		this.registerAlias(alias, governanceSourceClass,
+				this.governanceSourceAliases, "governance");
 	}
 
 	@Override
@@ -473,6 +486,23 @@ public class OfficeFloorCompilerImpl extends OfficeFloorCompiler implements
 			String administratorName) {
 		return new AdministratorLoaderImpl(officeLocation, administratorName,
 				this);
+	}
+
+	@Override
+	@SuppressWarnings("unchecked")
+	public <S extends GovernanceSource<?, ?>> Class<S> getGovernanceSourceClass(
+			String governanceSourceName, String officeLocation,
+			String governanceName) {
+		return (Class<S>) CompileUtil.obtainClass(governanceSourceName,
+				GovernanceSource.class, this.governanceSourceAliases,
+				this.getSourceContext(), LocationType.OFFICE, officeLocation,
+				AssetType.GOVERNANCE, governanceName, this.getCompilerIssues());
+	}
+
+	@Override
+	public GovernanceLoader getGovernanceLoader(String officeLocation,
+			String governanceName) {
+		return new GovernanceLoaderImpl(officeLocation, governanceName, this);
 	}
 
 	@Override

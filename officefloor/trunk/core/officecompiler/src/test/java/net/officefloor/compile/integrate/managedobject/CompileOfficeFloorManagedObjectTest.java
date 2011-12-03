@@ -172,12 +172,12 @@ public class CompileOfficeFloorManagedObjectTest extends
 		// Register the office linked managed objects with the office
 		OfficeBuilder office = this
 				.record_officeFloorBuilder_addOffice("OFFICE");
-		office.registerManagedObjectSource("SIMPLE", "SIMPLE_SOURCE");
-		this.record_officeBuilder_addProcessManagedObject("SIMPLE", "SIMPLE");
 		office.registerManagedObjectSource("DEPENDENT", "DEPENDENT_SOURCE");
 		DependencyMappingBuilder mapper = this
 				.record_officeBuilder_addProcessManagedObject("DEPENDENT",
 						"DEPENDENT");
+		office.registerManagedObjectSource("SIMPLE", "SIMPLE_SOURCE");
+		this.record_officeBuilder_addProcessManagedObject("SIMPLE", "SIMPLE");
 		mapper.mapDependency(0, "SIMPLE");
 
 		// Add managed objects to office floor
@@ -409,9 +409,7 @@ public class CompileOfficeFloorManagedObjectTest extends
 				.record_managedObjectBuilder_setManagingOffice("OFFICE");
 		this.record_managingOfficeBuilder_setInputManagedObjectName("INPUT_MO");
 		mosA.linkProcess(0, "SECTION.WORK", "INPUT");
-		office
-				.setBoundInputManagedObject("INPUT_MO",
-						"MANAGED_OBJECT_SOURCE_A");
+		office.setBoundInputManagedObject("INPUT_MO", "MANAGED_OBJECT_SOURCE_A");
 		this.record_officeFloorBuilder_addManagedObject(
 				"MANAGED_OBJECT_SOURCE_B", ClassManagedObjectSource.class, 0,
 				"class.name", ProcessManagedObject.class.getName());
@@ -553,8 +551,8 @@ public class CompileOfficeFloorManagedObjectTest extends
 			// Require a team
 			ManagedObjectSourceContext<?> mosContext = context
 					.getManagedObjectSourceContext();
-			mosContext.addWork("WORK", this).addTask("TASK", this).setTeam(
-					"MANAGED_OBJECT_SOURCE_TEAM");
+			mosContext.addWork("WORK", this).addTask("TASK", this)
+					.setTeam("MANAGED_OBJECT_SOURCE_TEAM");
 		}
 
 		@Override

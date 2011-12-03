@@ -36,6 +36,7 @@ import net.officefloor.compile.pool.ManagedObjectPoolLoader;
 import net.officefloor.compile.properties.Property;
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.section.SectionLoader;
+import net.officefloor.compile.spi.governance.source.GovernanceSource;
 import net.officefloor.compile.spi.office.source.OfficeSource;
 import net.officefloor.compile.spi.officefloor.source.OfficeFloorSource;
 import net.officefloor.compile.spi.section.source.SectionSource;
@@ -333,6 +334,13 @@ public abstract class OfficeFloorCompiler {
 					service.getAdministratorSourceClass());
 		}
 
+		// Add the governance source alias from the class path
+		for (GovernanceSourceService<?, ?, ?> service : ServiceLoader.load(
+				GovernanceSourceService.class, this.getClassLoader())) {
+			this.addGovernanceSourceAlias(service.getGovernanceSourceAlias(),
+					service.getGovernanceSourceClass());
+		}
+
 		// Add the team source aliases from the class path
 		for (TeamSourceService<?> service : ServiceLoader.load(
 				TeamSourceService.class, this.getClassLoader())) {
@@ -538,6 +546,28 @@ public abstract class OfficeFloorCompiler {
 	 */
 	public abstract <I, A extends Enum<A>, S extends AdministratorSource<I, A>> void addAdministratorSourceAlias(
 			String alias, Class<S> administratorSourceClass);
+
+	/**
+	 * <p>
+	 * Allows providing an alias name for a {@link GovernanceSource}.
+	 * <p>
+	 * This stops the configuration files from being littered with fully
+	 * qualified class names of the {@link GovernanceSource} classes. This is
+	 * anticipated to allow flexibility as the functionality evolves so that
+	 * relocating/renaming classes does not require significant configuration
+	 * changes.
+	 * <p>
+	 * Typically this should not be used directly as the
+	 * {@link GovernanceSourceService} is the preferred means to provide
+	 * {@link GovernanceSource} aliases.
+	 * 
+	 * @param alias
+	 *            Alias name for the {@link GovernanceSource}.
+	 * @param governanceSourceClass
+	 *            {@link GovernanceSource} {@link Class} for the alias.
+	 */
+	public abstract <I, F extends Enum<F>, S extends GovernanceSource<I, F>> void addGovernanceSourceAlias(
+			String alias, Class<S> governanceSourceClass);
 
 	/**
 	 * <p>

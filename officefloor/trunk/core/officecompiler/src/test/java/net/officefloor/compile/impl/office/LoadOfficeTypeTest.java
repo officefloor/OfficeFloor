@@ -42,6 +42,7 @@ import net.officefloor.compile.properties.Property;
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.spi.office.OfficeAdministrator;
 import net.officefloor.compile.spi.office.OfficeArchitect;
+import net.officefloor.compile.spi.office.OfficeGovernance;
 import net.officefloor.compile.spi.office.OfficeObject;
 import net.officefloor.compile.spi.office.source.OfficeSource;
 import net.officefloor.compile.spi.office.source.OfficeSourceContext;
@@ -353,6 +354,47 @@ public class LoadOfficeTypeTest extends AbstractStructureTestCase {
 						.addAdministrator(office, "ADMIN", XAResource.class,
 								SimpleDutyKey.DUTY);
 				admin.administerManagedObject(mo);
+			}
+		});
+
+		// Validate type
+		assertEquals("Incorrect number of managed object types", 1,
+				officeType.getOfficeManagedObjectTypes().length);
+		OfficeManagedObjectType moType = officeType
+				.getOfficeManagedObjectTypes()[0];
+		assertEquals("Incorrect name", "MO",
+				moType.getOfficeManagedObjectName());
+		assertEquals("Incorrect type", Connection.class.getName(),
+				moType.getObjectType());
+		assertEquals("Incorrect number of extension interfaces", 1,
+				moType.getExtensionInterfaces().length);
+		String extensionInterface = moType.getExtensionInterfaces()[0];
+		assertEquals("Incorrect extension interface",
+				XAResource.class.getName(), extensionInterface);
+	}
+
+	/**
+	 * Ensure get {@link OfficeManagedObjectType} being governed (has extension
+	 * interfaces).
+	 */
+	public void testGovernedManagedObjectType() {
+		// Load office type with governed office floor managed object
+		OfficeType officeType = this.loadOfficeType(true, new Loader() {
+			@Override
+			public void sourceOffice(OfficeArchitect office,
+					OfficeSourceContext context) throws Exception {
+				OfficeObject mo = office.addOfficeObject("MO",
+						Connection.class.getName());
+				OfficeGovernance governance = LoadOfficeTypeTest.this
+						.addGovernance(office, "GOVERNANCE",
+								new GovernanceMaker() {
+									@Override
+									public void make(
+											GovernanceMakerContext context) {
+										context.setExtensionInterface(XAResource.class);
+									}
+								});
+				governance.governManagedObject(mo);
 			}
 		});
 

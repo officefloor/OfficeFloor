@@ -19,11 +19,12 @@
 package net.officefloor.compile.internal.structure;
 
 import net.officefloor.compile.spi.officefloor.OfficeFloorInputManagedObject;
+import net.officefloor.frame.spi.governance.Governance;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
 
 /**
  * Node representing an instance use of an Input {@link ManagedObject}.
- *
+ * 
  * @author Daniel Sagenschneider
  */
 public interface InputManagedObjectNode extends BoundManagedObjectNode,
@@ -32,10 +33,23 @@ public interface InputManagedObjectNode extends BoundManagedObjectNode,
 	/**
 	 * Obtains the bound {@link ManagedObjectSourceNode} for this
 	 * {@link InputManagedObjectNode}.
-	 *
+	 * 
 	 * @return Bound {@link ManagedObjectSourceNode} for this
 	 *         {@link InputManagedObjectNode}.
 	 */
 	ManagedObjectSourceNode getBoundManagedObjectSourceNode();
+
+	/**
+	 * Obtains the {@link GovernanceNode} instances providing {@link Governance}
+	 * over this {@link InputManagedObjectNode}.
+	 * 
+	 * @param managingOffice
+	 *            {@link OfficeNode} managing the {@link InputManagedObjectNode}
+	 *            , which ensures that {@link Governance} does not extend beyond
+	 *            the particular {@link OfficeNode}.
+	 * @return {@link GovernanceNode} instances providing {@link Governance}
+	 *         over this {@link InputManagedObjectNode}.
+	 */
+	GovernanceNode[] getGovernances(OfficeNode managingOffice);
 
 }

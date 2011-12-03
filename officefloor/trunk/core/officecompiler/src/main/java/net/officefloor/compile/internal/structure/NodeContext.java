@@ -20,6 +20,7 @@ package net.officefloor.compile.internal.structure;
 
 import net.officefloor.compile.OfficeFloorCompiler;
 import net.officefloor.compile.administrator.AdministratorLoader;
+import net.officefloor.compile.governance.GovernanceLoader;
 import net.officefloor.compile.issues.CompilerIssues;
 import net.officefloor.compile.issues.CompilerIssues.LocationType;
 import net.officefloor.compile.managedobject.ManagedObjectLoader;
@@ -27,6 +28,7 @@ import net.officefloor.compile.office.OfficeLoader;
 import net.officefloor.compile.pool.ManagedObjectPoolLoader;
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.section.SectionLoader;
+import net.officefloor.compile.spi.governance.source.GovernanceSource;
 import net.officefloor.compile.spi.office.OfficeSection;
 import net.officefloor.compile.spi.office.source.OfficeSource;
 import net.officefloor.compile.spi.section.source.SectionSource;
@@ -39,6 +41,7 @@ import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.spi.administration.Administrator;
 import net.officefloor.frame.spi.administration.source.AdministratorSource;
+import net.officefloor.frame.spi.governance.Governance;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.frame.spi.managedobject.pool.ManagedObjectPool;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
@@ -248,6 +251,37 @@ public interface NodeContext {
 	 */
 	AdministratorLoader getAdministratorLoader(String officeLocation,
 			String administratorName);
+
+	/**
+	 * Obtains the {@link GovernanceSource} class.
+	 * 
+	 * @param governanceSourceName
+	 *            {@link GovernanceSource} class name or an alias to an
+	 *            {@link GovernanceSource} class.
+	 * @param officeLocation
+	 *            Location of the {@link Office} requiring
+	 *            {@link GovernanceSource} for reporting issues.
+	 * @param governanceName
+	 *            Name of {@link Governance} for reporting issues.
+	 * @return {@link GovernanceSource} class, or <code>null</code> with issues
+	 *         reported to the {@link CompilerIssues} of this
+	 *         {@link NodeContext}.
+	 */
+	<S extends GovernanceSource<?, ?>> Class<S> getGovernanceSourceClass(
+			String governanceSourceName, String officeLocation,
+			String governanceName);
+
+	/**
+	 * Obtains the {@link GovernanceLoader}.
+	 * 
+	 * @param officeLocation
+	 *            {@link Office} location.
+	 * @param governanceName
+	 *            Name of the {@link Governance}.
+	 * @return {@link GovernanceLoader}.
+	 */
+	GovernanceLoader getGovernanceLoader(String officeLocation,
+			String governanceName);
 
 	/**
 	 * Obtains the {@link TeamSource} class.

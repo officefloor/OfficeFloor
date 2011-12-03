@@ -27,6 +27,7 @@ import net.officefloor.compile.governance.GovernanceLoader;
 import net.officefloor.compile.governance.GovernanceType;
 import net.officefloor.compile.impl.properties.PropertyListImpl;
 import net.officefloor.compile.issues.CompilerIssues;
+import net.officefloor.compile.issues.CompilerIssues.LocationType;
 import net.officefloor.compile.properties.Property;
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.spi.governance.source.GovernanceFlowMetaData;
@@ -40,7 +41,6 @@ import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
 import net.officefloor.frame.internal.structure.FlowMetaData;
 import net.officefloor.frame.internal.structure.GovernanceMetaData;
 import net.officefloor.frame.spi.TestSource;
-import net.officefloor.frame.spi.governance.Governance;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 
 /**
@@ -620,8 +620,8 @@ public class LoadGovernanceTypeTest extends OfficeFrameTestCase {
 	 *            Description of the issue.
 	 */
 	private void record_issue(String issueDescription) {
-		this.issues.addIssue(null, null, AssetType.GOVERNANCE, null,
-				issueDescription);
+		this.issues.addIssue(LocationType.OFFICE, null, AssetType.GOVERNANCE,
+				null, issueDescription);
 	}
 
 	/**
@@ -633,8 +633,8 @@ public class LoadGovernanceTypeTest extends OfficeFrameTestCase {
 	 *            Cause of the issue.
 	 */
 	private void record_issue(String issueDescription, Throwable cause) {
-		this.issues.addIssue(null, null, AssetType.GOVERNANCE, null,
-				issueDescription, cause);
+		this.issues.addIssue(LocationType.OFFICE, null, AssetType.GOVERNANCE,
+				null, issueDescription, cause);
 	}
 
 	/**
@@ -732,12 +732,6 @@ public class LoadGovernanceTypeTest extends OfficeFrameTestCase {
 
 			// Return the meta-data
 			return metaData;
-		}
-
-		@Override
-		public Governance<Object, None> createGovernance() throws Throwable {
-			fail("Should not be required to create Governance");
-			return null;
 		}
 	}
 

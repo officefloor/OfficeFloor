@@ -180,7 +180,7 @@ public class ClassWorkSource extends AbstractWorkSource<ClassWork> implements
 
 		// Obtain the class
 		String className = context.getProperty(CLASS_NAME_PROPERTY_NAME);
-		Class<?> clazz = classLoader.loadClass(className);
+		Class<?> clazz = context.loadClass(className);
 
 		// Define the work factory
 		WorkFactory<ClassWork> workFactory = this.createWorkFactory(clazz);

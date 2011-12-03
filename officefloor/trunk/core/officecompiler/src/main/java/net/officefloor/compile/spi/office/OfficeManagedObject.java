@@ -29,7 +29,7 @@ import net.officefloor.frame.spi.managedobject.ManagedObject;
  * @author Daniel Sagenschneider
  */
 public interface OfficeManagedObject extends DependentManagedObject,
-		AdministerableManagedObject {
+		AdministerableManagedObject, GovernerableManagedObject {
 
 	/**
 	 * Obtains the name of the {@link ManagedObject}.

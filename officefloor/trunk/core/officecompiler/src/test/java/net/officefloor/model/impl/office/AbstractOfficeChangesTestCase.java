@@ -21,6 +21,7 @@ package net.officefloor.model.impl.office;
 import java.util.LinkedList;
 import java.util.List;
 
+import net.officefloor.compile.spi.office.OfficeGovernance;
 import net.officefloor.compile.spi.office.OfficeSection;
 import net.officefloor.compile.spi.office.OfficeSectionInput;
 import net.officefloor.compile.spi.office.OfficeSectionManagedObjectSource;
@@ -36,7 +37,7 @@ import net.officefloor.model.test.changes.AbstractChangesTestCase;
 
 /**
  * Abstract functionality for testing the {@link OfficeChanges}.
- *
+ * 
  * @author Daniel Sagenschneider
  */
 public abstract class AbstractOfficeChangesTestCase extends
@@ -50,7 +51,7 @@ public abstract class AbstractOfficeChangesTestCase extends
 
 	/**
 	 * Initiate.
-	 *
+	 * 
 	 * @param isSpecificSetupFilePerTest
 	 *            Flag if specific setup file to be used.
 	 */
@@ -81,7 +82,7 @@ public abstract class AbstractOfficeChangesTestCase extends
 
 	/**
 	 * Constructs an {@link OfficeSection} for testing.
-	 *
+	 * 
 	 * @param constructor
 	 *            {@link OfficeSectionConstructor}.
 	 * @return {@link OfficeSection}.
@@ -102,7 +103,7 @@ public abstract class AbstractOfficeChangesTestCase extends
 
 		/**
 		 * Constructs the {@link OfficeSection}.
-		 *
+		 * 
 		 * @param context
 		 *            {@link OfficeSection}.
 		 */
@@ -116,7 +117,7 @@ public abstract class AbstractOfficeChangesTestCase extends
 
 		/**
 		 * Adds an {@link OfficeSectionInput}.
-		 *
+		 * 
 		 * @param name
 		 *            Name.
 		 * @param parameterType
@@ -126,7 +127,7 @@ public abstract class AbstractOfficeChangesTestCase extends
 
 		/**
 		 * Adds an {@link OfficeSectionOutput}.
-		 *
+		 * 
 		 * @param name
 		 *            Name.
 		 * @param argumentType
@@ -139,7 +140,7 @@ public abstract class AbstractOfficeChangesTestCase extends
 
 		/**
 		 * Adds an {@link OfficeSectionObject}.
-		 *
+		 * 
 		 * @param name
 		 *            Name.
 		 * @param objectType
@@ -227,6 +228,11 @@ public abstract class AbstractOfficeChangesTestCase extends
 		}
 
 		@Override
+		public void addGovernance(OfficeGovernance governance) {
+			fail("Currently not testing sub sections");
+		}
+
+		@Override
 		public OfficeSubSection[] getOfficeSubSections() {
 			fail("Currently not testing sub sections");
 			return null;
@@ -237,7 +243,6 @@ public abstract class AbstractOfficeChangesTestCase extends
 			fail("Currently not testing sub sections");
 			return null;
 		}
-
 	}
 
 	/**
@@ -263,7 +268,7 @@ public abstract class AbstractOfficeChangesTestCase extends
 
 		/**
 		 * Initialise.
-		 *
+		 * 
 		 * @param name
 		 *            Name.
 		 * @param type
@@ -279,7 +284,7 @@ public abstract class AbstractOfficeChangesTestCase extends
 
 		/**
 		 * Initialise.
-		 *
+		 * 
 		 * @param name
 		 *            Name.
 		 * @param type

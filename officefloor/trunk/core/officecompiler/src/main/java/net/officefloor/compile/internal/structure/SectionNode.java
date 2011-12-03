@@ -29,6 +29,7 @@ import net.officefloor.compile.spi.section.source.SectionSource;
 import net.officefloor.frame.api.build.OfficeBuilder;
 import net.officefloor.frame.api.build.OfficeFloorBuilder;
 import net.officefloor.frame.api.manage.Office;
+import net.officefloor.frame.spi.governance.Governance;
 
 /**
  * Node within the hierarchy of {@link OfficeSection} instances.
@@ -87,6 +88,23 @@ public interface SectionNode extends SectionDesigner, SectionType, SubSection,
 	 * @return {@link DeployedOfficeInput}.
 	 */
 	DeployedOfficeInput getDeployedOfficeInput(String inputName);
+
+	/**
+	 * <p>
+	 * Obtains the {@link GovernanceNode} instances providing {@link Governance}
+	 * over this {@link SectionNode}.
+	 * <p>
+	 * This is list comprised of the:
+	 * <ol>
+	 * <li>{@link GovernanceNode} assigned to this particular
+	 * {@link SectionNode}</li>
+	 * <li>{@link GovernanceNode} assigned to any parent {@link SectionNode}</li>
+	 * </ol>
+	 * 
+	 * @return {@link GovernanceNode} instances providing {@link Governance}
+	 *         over this {@link SectionNode}.
+	 */
+	GovernanceNode[] getGoverningGovernances();
 
 	/**
 	 * Loads the {@link OfficeSection} of this {@link SectionNode} and all its

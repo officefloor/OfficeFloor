@@ -91,8 +91,7 @@ public class CompileTaskTest extends AbstractCompileTestCase {
 				"TEAM");
 		this.record_officeBuilder_addWork("SECTION.WORK");
 		this.record_workBuilder_addTask("TASK", "OFFICE_TEAM");
-		this
-				.record_taskBuilder_setDifferentiator(DifferentiatorWorkSource.DIFFERENTIATOR);
+		this.record_taskBuilder_setDifferentiator(DifferentiatorWorkSource.DIFFERENTIATOR);
 
 		// Compile the office floor
 		this.compile(true);
@@ -205,8 +204,8 @@ public class CompileTaskTest extends AbstractCompileTestCase {
 	}
 
 	/**
-	 * Tests compiling a {@link Task} linking a {@link JobSequence} to a {@link Task}
-	 * in a different {@link SubSection}.
+	 * Tests compiling a {@link Task} linking a {@link JobSequence} to a
+	 * {@link Task} in a different {@link SubSection}.
 	 */
 	public void testLinkFlowToTaskInDifferentSubSection() {
 
@@ -228,8 +227,8 @@ public class CompileTaskTest extends AbstractCompileTestCase {
 	}
 
 	/**
-	 * Tests compiling a {@link Task} linking a {@link JobSequence} to a {@link Task}
-	 * in a different {@link OfficeSection}.
+	 * Tests compiling a {@link Task} linking a {@link JobSequence} to a
+	 * {@link Task} in a different {@link OfficeSection}.
 	 */
 	public void testLinkFlowToTaskInDifferentOfficeSection() {
 
@@ -389,10 +388,6 @@ public class CompileTaskTest extends AbstractCompileTestCase {
 				OnePersonTeamSource.class);
 		OfficeBuilder office = this.record_officeFloorBuilder_addOffice(
 				"OFFICE", "OFFICE_TEAM", "TEAM");
-		office.registerManagedObjectSource("MANAGED_OBJECT",
-				"MANAGED_OBJECT_SOURCE");
-		this.record_officeBuilder_addThreadManagedObject("MANAGED_OBJECT",
-				"MANAGED_OBJECT");
 		this.record_officeBuilder_addWork("SECTION.WORK");
 		TaskBuilder<?, ?, ?> task = this.record_workBuilder_addTask("TASK",
 				"OFFICE_TEAM");
@@ -401,6 +396,10 @@ public class CompileTaskTest extends AbstractCompileTestCase {
 				"MANAGED_OBJECT_SOURCE", ClassManagedObjectSource.class, 0,
 				"class.name", CompileManagedObject.class.getName());
 		this.record_managedObjectBuilder_setManagingOffice("OFFICE");
+		office.registerManagedObjectSource("MANAGED_OBJECT",
+				"MANAGED_OBJECT_SOURCE");
+		this.record_officeBuilder_addThreadManagedObject("MANAGED_OBJECT",
+				"MANAGED_OBJECT");
 
 		// Compile the office floor
 		this.compile(true);
@@ -427,8 +426,7 @@ public class CompileTaskTest extends AbstractCompileTestCase {
 				"class.name", InputManagedObject.class.getName());
 		ManagingOfficeBuilder<?> managingOffice = this
 				.record_managedObjectBuilder_setManagingOffice("OFFICE");
-		this
-				.record_managingOfficeBuilder_setInputManagedObjectName("INPUT_MANAGED_OBJECT");
+		this.record_managingOfficeBuilder_setInputManagedObjectName("INPUT_MANAGED_OBJECT");
 		managingOffice.linkProcess(0, "SECTION.WORK", "TASK");
 
 		// Compile the office floor
@@ -538,10 +536,6 @@ public class CompileTaskTest extends AbstractCompileTestCase {
 				OnePersonTeamSource.class);
 		OfficeBuilder office = this.record_officeFloorBuilder_addOffice(
 				"OFFICE", "OFFICE_TEAM", "TEAM");
-		office.registerManagedObjectSource("MANAGED_OBJECT",
-				"MANAGED_OBJECT_SOURCE");
-		this.record_officeBuilder_addThreadManagedObject("MANAGED_OBJECT",
-				"MANAGED_OBJECT");
 		this.record_officeBuilder_addWork("SECTION.DESK.WORK");
 		TaskBuilder<?, ?, ?> task = this.record_workBuilder_addTask("TASK",
 				"OFFICE_TEAM");
@@ -550,6 +544,10 @@ public class CompileTaskTest extends AbstractCompileTestCase {
 				"MANAGED_OBJECT_SOURCE", ClassManagedObjectSource.class, 0,
 				"class.name", CompileManagedObject.class.getName());
 		this.record_managedObjectBuilder_setManagingOffice("OFFICE");
+		office.registerManagedObjectSource("MANAGED_OBJECT",
+				"MANAGED_OBJECT_SOURCE");
+		this.record_officeBuilder_addThreadManagedObject("MANAGED_OBJECT",
+				"MANAGED_OBJECT");
 
 		// Compile the office floor
 		this.compile(true);

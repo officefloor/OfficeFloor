@@ -25,11 +25,14 @@ import junit.framework.TestCase;
 import net.officefloor.compile.OfficeFloorCompiler;
 import net.officefloor.compile.issues.CompilerIssues;
 import net.officefloor.compile.properties.Property;
+import net.officefloor.compile.spi.governance.source.GovernanceSource;
 import net.officefloor.compile.spi.officefloor.ManagingOffice;
 import net.officefloor.compile.test.issues.StderrCompilerIssuesWrapper;
 import net.officefloor.frame.api.OfficeFrame;
 import net.officefloor.frame.api.build.AdministratorBuilder;
 import net.officefloor.frame.api.build.DependencyMappingBuilder;
+import net.officefloor.frame.api.build.GovernanceBuilder;
+import net.officefloor.frame.api.build.GovernanceFactory;
 import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.build.ManagedObjectBuilder;
 import net.officefloor.frame.api.build.ManagingOfficeBuilder;
@@ -51,6 +54,7 @@ import net.officefloor.frame.internal.structure.ProcessState;
 import net.officefloor.frame.internal.structure.ThreadState;
 import net.officefloor.frame.spi.administration.Administrator;
 import net.officefloor.frame.spi.administration.source.AdministratorSource;
+import net.officefloor.frame.spi.governance.Governance;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.spi.source.ResourceSource;
@@ -301,6 +305,71 @@ public abstract class AbstractCompileTestCase extends OfficeFrameTestCase {
 				.addThreadManagedObject(threadManagedObjectName,
 						officeManagedObjectName), builder);
 		return builder;
+	}
+
+	/**
+	 * Flags if the matcher has been specified to add a {@link Governance}.
+	 */
+	private boolean isMatcherSet_officeBuilder_addGovernance = false;
+
+	/**
+	 * Records adding a {@link GovernanceSource} to the {@link OfficeBuilder}.
+	 * 
+	 * @param governanceSourceName
+	 *            Name of the {@link GovernanceSource}.
+	 * @param governanceSourceClass
+	 *            {@link GovernanceSource} class.
+	 * @param extensionInterface
+	 *            Extension interface.
+	 * @return {@link GovernanceBuilder} for the added {@link GovernanceSource}.
+	 */
+	@SuppressWarnings("unchecked")
+	protected <I, F extends Enum<F>, S extends GovernanceSource<I, F>> GovernanceBuilder<F> record_officeBuilder_addGovernance(
+			String governanceName, Class<S> governanceSourceClass,
+			Class<?> extensionInterface) {
+		GovernanceBuilder<F> governanceBuilder = this
+				.createMock(GovernanceBuilder.class);
+		this.recordReturn(this.officeBuilder, this.officeBuilder.addGovernance(
+				governanceName, (GovernanceFactory<I, F>) null,
+				(Class<I>) extensionInterface), governanceBuilder);
+		if (!this.isMatcherSet_officeBuilder_addGovernance) {
+			this.control(this.officeBuilder).setMatcher(new AbstractMatcher() {
+				@Override
+				public boolean matches(Object[] expected, Object[] actual) {
+					// Ensure have governance factory
+					assertNotNull("Must have governance factory", actual[1]);
+
+					// Match if name and extension interface same
+					return this.argumentMatches(expected[0], actual[0])
+							&& this.argumentMatches(expected[2], actual[2]);
+				}
+			});
+			this.isMatcherSet_officeBuilder_addGovernance = true;
+		}
+		return governanceBuilder;
+	}
+
+	/**
+	 * Records adding a {@link GovernanceSource} to the {@link OfficeBuilder}.
+	 * 
+	 * @param governanceSourceName
+	 *            Name of the {@link GovernanceSource}.
+	 * @param teamName
+	 *            Name of {@link Team} responsible for {@link Governance}.
+	 * @param governanceSourceClass
+	 *            {@link GovernanceSource} class.
+	 * @param extensionInterface
+	 *            Extension interface.
+	 * @return {@link GovernanceBuilder} for the added {@link GovernanceSource}.
+	 */
+	protected <I, F extends Enum<F>, S extends GovernanceSource<I, F>> GovernanceBuilder<F> record_officeBuilder_addGovernance(
+			String governanceName, String teamName,
+			Class<S> governanceSourceClass, Class<?> extensionInterface) {
+		GovernanceBuilder<F> governanceBuilder = this
+				.record_officeBuilder_addGovernance(governanceName,
+						governanceSourceClass, extensionInterface);
+		governanceBuilder.setTeam(teamName);
+		return governanceBuilder;
 	}
 
 	/**

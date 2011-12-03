@@ -20,6 +20,7 @@ package net.officefloor.compile.spi.office;
 
 import net.officefloor.compile.spi.office.source.OfficeSource;
 import net.officefloor.frame.api.manage.Office;
+import net.officefloor.frame.spi.governance.Governance;
 import net.officefloor.frame.spi.team.Team;
 
 /**
@@ -87,5 +88,17 @@ public interface OfficeTask {
 	 *            {@link OfficeTask}.
 	 */
 	void addPostTaskDuty(OfficeDuty duty);
+
+	/**
+	 * <p>
+	 * Adds {@link Governance} for this {@link OfficeTask}.
+	 * <p>
+	 * This enables specifying specifically which {@link OfficeTask} instances
+	 * require {@link Governance}.
+	 * 
+	 * @param governance
+	 *            {@link OfficeGovernance}.
+	 */
+	void addGovernance(OfficeGovernance governance);
 
 }

@@ -19,6 +19,7 @@
 package net.officefloor.compile.spi.office;
 
 import net.officefloor.compile.spi.section.SubSection;
+import net.officefloor.frame.spi.governance.Governance;
 
 /**
  * {@link SubSection} of an {@link OfficeSection}.
@@ -67,5 +68,18 @@ public interface OfficeSubSection {
 	 *         particular {@link OfficeSubSection}.
 	 */
 	OfficeSectionManagedObjectSource[] getOfficeSectionManagedObjectSources();
+
+	/**
+	 * <p>
+	 * Adds {@link Governance} for this {@link OfficeSubSection}.
+	 * <p>
+	 * This enables providing {@link Governance} over all {@link OfficeTask}
+	 * instances within the {@link OfficeSubSection} and all its subsequent
+	 * {@link OfficeSubSection} instances.
+	 * 
+	 * @param governance
+	 *            {@link OfficeGovernance}.
+	 */
+	void addGovernance(OfficeGovernance governance);
 
 }

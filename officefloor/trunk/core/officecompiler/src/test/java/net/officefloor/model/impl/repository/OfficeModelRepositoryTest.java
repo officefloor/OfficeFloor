@@ -54,6 +54,7 @@ import net.officefloor.model.office.OfficeModel;
 import net.officefloor.model.office.OfficeSectionInputModel;
 import net.officefloor.model.office.OfficeSectionManagedObjectModel;
 import net.officefloor.model.office.OfficeSectionManagedObjectTeamModel;
+import net.officefloor.model.office.OfficeSectionManagedObjectToOfficeGovernanceModel;
 import net.officefloor.model.office.OfficeSectionModel;
 import net.officefloor.model.office.OfficeSectionObjectModel;
 import net.officefloor.model.office.OfficeSectionObjectToExternalManagedObjectModel;
@@ -64,7 +65,9 @@ import net.officefloor.model.office.OfficeSectionResponsibilityModel;
 import net.officefloor.model.office.OfficeSectionResponsibilityObjectModel;
 import net.officefloor.model.office.OfficeSectionResponsibilityToOfficeTeamModel;
 import net.officefloor.model.office.OfficeSubSectionModel;
+import net.officefloor.model.office.OfficeSubSectionToOfficeGovernanceModel;
 import net.officefloor.model.office.OfficeTaskModel;
+import net.officefloor.model.office.OfficeTaskToOfficeGovernanceModel;
 import net.officefloor.model.office.OfficeTaskToPostDutyModel;
 import net.officefloor.model.office.OfficeTaskToPreDutyModel;
 import net.officefloor.model.office.OfficeTeamModel;
@@ -264,7 +267,8 @@ public class OfficeModelRepositoryTest extends OfficeFrameTestCase {
 				"getGovernanceSourceClassName", "getX", "getY" },
 				office.getOfficeGovernances(), new OfficeGovernanceModel(
 						"GOVERNANCE", "net.example.ExampleGovernanceSource",
-						null, null, null, null, null, 700, 701));
+						null, null, null, null, null, null, null, null, 700,
+						701));
 		OfficeGovernanceModel gov = office.getOfficeGovernances().get(0);
 		assertList(new String[] { "getName", "getValue" }, gov.getProperties(),
 				new PropertyModel("GOV_ONE", "VALUE_ONE"), new PropertyModel(
@@ -343,24 +347,37 @@ public class OfficeModelRepositoryTest extends OfficeFrameTestCase {
 				new OfficeSectionResponsibilityObjectModel(
 						"RESPONSIBILITY_OBJECT"));
 
-		// Sub sections
+		// Sub section details for the top level office section
 		assertNotNull("Must have sub section of office section",
 				section.getOfficeSubSection());
 		OfficeSubSectionModel officeSection = section.getOfficeSubSection();
+		assertList(new String[] { "getOfficeGovernanceName" },
+				officeSection.getOfficeGovernances(),
+				new OfficeSubSectionToOfficeGovernanceModel("GOVERNANCE"));
 		assertList(new String[] { "getOfficeSectionManagedObjectName" },
 				officeSection.getOfficeSectionManagedObjects(),
 				new OfficeSectionManagedObjectModel("SECTION_MANAGED_OBJECT"));
-		OfficeSectionManagedObjectModel sectionMo = officeSection
+		OfficeSectionManagedObjectModel officeSectionMo = officeSection
 				.getOfficeSectionManagedObjects().get(0);
+		assertList(new String[] { "getOfficeGovernanceName" },
+				officeSectionMo.getOfficeGovernances(),
+				new OfficeSectionManagedObjectToOfficeGovernanceModel(
+						"GOVERNANCE"));
 		assertList(new String[] { "getOfficeSectionManagedObjectTeamName" },
-				sectionMo.getOfficeSectionManagedObjectTeams(),
+				officeSectionMo.getOfficeSectionManagedObjectTeams(),
 				new OfficeSectionManagedObjectTeamModel("MO_TEAM"));
 		assertList(new String[] { "getOfficeTaskName" },
 				officeSection.getOfficeTasks(), new OfficeTaskModel("TASK"));
-		OfficeTaskModel sectionTask = officeSection.getOfficeTasks().get(0);
+		OfficeTaskModel officeSectionTask = officeSection.getOfficeTasks().get(
+				0);
 		assertList(new String[] { "getAdministratorName", "getDutyName" },
-				sectionTask.getPreDuties(), new OfficeTaskToPreDutyModel(
+				officeSectionTask.getPreDuties(), new OfficeTaskToPreDutyModel(
 						"ADMINISTRATOR", "DUTY_ONE"));
+		assertList(new String[] { "getOfficeGovernanceName" },
+				officeSectionTask.getOfficeGovernances(),
+				new OfficeTaskToOfficeGovernanceModel("GOVERNANCE"));
+
+		// Sub section
 		assertList(new String[] { "getOfficeSubSectionName" },
 				officeSection.getOfficeSubSections(),
 				new OfficeSubSectionModel("SUB_SECTION"));
@@ -377,6 +394,9 @@ public class OfficeModelRepositoryTest extends OfficeFrameTestCase {
 		assertList(new String[] { "getAdministratorName", "getDutyName" },
 				subSectionTask.getPostDuties(), new OfficeTaskToPostDutyModel(
 						"ADMINISTRATOR", "DUTY_TWO"));
+		assertList(new String[] { "getOfficeGovernanceName" },
+				subSectionTask.getOfficeGovernances(),
+				new OfficeTaskToOfficeGovernanceModel("GOVERNANCE"));
 		assertList(new String[] { "getOfficeSubSectionName" },
 				subSection.getOfficeSubSections(), new OfficeSubSectionModel(
 						"SUB_SUB_SECTION"));

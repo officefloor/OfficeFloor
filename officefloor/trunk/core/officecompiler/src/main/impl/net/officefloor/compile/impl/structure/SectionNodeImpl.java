@@ -21,12 +21,15 @@ package net.officefloor.compile.impl.structure;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 
 import net.officefloor.compile.impl.properties.PropertyListImpl;
 import net.officefloor.compile.impl.section.SectionSourceContextImpl;
 import net.officefloor.compile.impl.util.CompileUtil;
 import net.officefloor.compile.impl.util.StringExtractor;
+import net.officefloor.compile.internal.structure.GovernanceNode;
 import net.officefloor.compile.internal.structure.ManagedObjectNode;
 import net.officefloor.compile.internal.structure.ManagedObjectSourceNode;
 import net.officefloor.compile.internal.structure.NodeContext;
@@ -46,6 +49,7 @@ import net.officefloor.compile.section.SectionInputType;
 import net.officefloor.compile.section.SectionObjectType;
 import net.officefloor.compile.section.SectionOutputType;
 import net.officefloor.compile.section.SectionType;
+import net.officefloor.compile.spi.office.OfficeGovernance;
 import net.officefloor.compile.spi.office.OfficeSection;
 import net.officefloor.compile.spi.office.OfficeSectionInput;
 import net.officefloor.compile.spi.office.OfficeSectionManagedObjectSource;
@@ -79,6 +83,7 @@ import net.officefloor.frame.api.build.OfficeFloorBuilder;
 import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
+import net.officefloor.frame.spi.governance.Governance;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 
 /**
@@ -139,6 +144,12 @@ public class SectionNodeImpl extends AbstractNode implements SectionNode {
 	 * name.
 	 */
 	private final Map<String, ManagedObjectNode> managedObjects = new HashMap<String, ManagedObjectNode>();
+
+	/**
+	 * Listing of {@link OfficeGovernance} instances providing
+	 * {@link Governance} over this {@link SectionNode}.
+	 */
+	private final List<GovernanceNode> governances = new LinkedList<GovernanceNode>();
 
 	/**
 	 * {@link WorkNode} instances by their {@link SectionWork} names.
@@ -373,6 +384,27 @@ public class SectionNodeImpl extends AbstractNode implements SectionNode {
 
 		// Flag that initialised
 		this.isInitialised = true;
+	}
+
+	@Override
+	public GovernanceNode[] getGoverningGovernances() {
+
+		// Create the listing of governances
+		List<GovernanceNode> governingGovernances = new LinkedList<GovernanceNode>();
+
+		// Add the parent governances (if have parent)
+		SectionNode parent = this.getParentSectionNode();
+		if (parent != null) {
+			governingGovernances.addAll(Arrays.asList(parent
+					.getGoverningGovernances()));
+		}
+
+		// Add governance for this particular section
+		governingGovernances.addAll(this.governances);
+
+		// Return the governing governances
+		return governingGovernances
+				.toArray(new GovernanceNode[governingGovernances.size()]);
 	}
 
 	@Override
@@ -1086,6 +1118,24 @@ public class SectionNodeImpl extends AbstractNode implements SectionNode {
 					}
 				});
 		return sectionMos;
+	}
+
+	@Override
+	public void addGovernance(OfficeGovernance governance) {
+
+		// Ensure governance node
+		if (!(governance instanceof GovernanceNode)) {
+			this.addIssue("Invalid governance: "
+					+ governance
+					+ " ["
+					+ (governance == null ? null : governance.getClass()
+							.getName()) + "]");
+			return; // can not add governance
+		}
+		GovernanceNode governanceNode = (GovernanceNode) governance;
+
+		// Add the governance
+		this.governances.add(governanceNode);
 	}
 
 	@Override

@@ -28,6 +28,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+import net.officefloor.compile.SectionSourceService;
 import net.officefloor.compile.managedobject.ManagedObjectDependencyType;
 import net.officefloor.compile.managedobject.ManagedObjectType;
 import net.officefloor.compile.properties.PropertyList;
@@ -74,7 +75,8 @@ import net.officefloor.plugin.work.clazz.ParameterFactory;
  * 
  * @author Daniel Sagenschneider
  */
-public class ClassSectionSource extends AbstractSectionSource {
+public class ClassSectionSource extends AbstractSectionSource implements
+		SectionSourceService<ClassSectionSource> {
 
 	/**
 	 * Name of the {@link SectionManagedObject} for the section class.
@@ -648,6 +650,20 @@ public class ClassSectionSource extends AbstractSectionSource {
 					.getOrCreateObject(objectTypeName);
 			this.getDesigner().link(taskObject, sectionObject);
 		}
+	}
+
+	/*
+	 * ================ SectionSourceService ========================
+	 */
+
+	@Override
+	public String getSectionSourceAlias() {
+		return "CLASS";
+	}
+
+	@Override
+	public Class<ClassSectionSource> getSectionSourceClass() {
+		return ClassSectionSource.class;
 	}
 
 	/*

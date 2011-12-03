@@ -21,6 +21,8 @@ package net.officefloor.compile.impl.structure;
 import java.util.HashMap;
 import java.util.Map;
 
+import junit.framework.TestCase;
+
 import net.officefloor.compile.OfficeFloorCompiler;
 import net.officefloor.compile.impl.properties.PropertyListImpl;
 import net.officefloor.compile.internal.structure.InputManagedObjectNode;
@@ -34,8 +36,11 @@ import net.officefloor.compile.issues.CompilerIssues;
 import net.officefloor.compile.properties.Property;
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.section.SectionLoader;
+import net.officefloor.compile.spi.governance.source.GovernanceSource;
+import net.officefloor.compile.spi.governance.source.impl.AbstractGovernanceSource;
 import net.officefloor.compile.spi.office.OfficeAdministrator;
 import net.officefloor.compile.spi.office.OfficeArchitect;
+import net.officefloor.compile.spi.office.OfficeGovernance;
 import net.officefloor.compile.spi.office.OfficeManagedObjectSource;
 import net.officefloor.compile.spi.office.OfficeSection;
 import net.officefloor.compile.spi.office.source.OfficeSource;
@@ -72,6 +77,7 @@ import net.officefloor.compile.work.TaskEscalationType;
 import net.officefloor.compile.work.TaskFlowType;
 import net.officefloor.compile.work.TaskObjectType;
 import net.officefloor.compile.work.TaskType;
+import net.officefloor.frame.api.build.GovernanceFactory;
 import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.build.TaskFactory;
 import net.officefloor.frame.api.build.WorkFactory;
@@ -83,6 +89,7 @@ import net.officefloor.frame.spi.administration.Administrator;
 import net.officefloor.frame.spi.administration.Duty;
 import net.officefloor.frame.spi.administration.source.AdministratorSource;
 import net.officefloor.frame.spi.administration.source.impl.AbstractAdministratorSource;
+import net.officefloor.frame.spi.governance.Governance;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.frame.spi.managedobject.extension.ExtensionInterfaceFactory;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
@@ -145,6 +152,7 @@ public abstract class AbstractStructureTestCase extends OfficeFrameTestCase {
 		MakerSectionSource.reset();
 		MakerManagedObjectSource.reset();
 		MakerWorkSource.reset();
+		MakerGovernanceSource.reset();
 		MakerAdministratorSource.reset();
 		MakerTeamSource.reset();
 		MakerOfficeSource.reset(this);
@@ -377,6 +385,32 @@ public abstract class AbstractStructureTestCase extends OfficeFrameTestCase {
 			moSource.addProperty(property.getName(), property.getValue());
 		}
 		return moSource;
+	}
+
+	/**
+	 * Adds an {@link OfficeGovernance} to the {@link OfficeArchitect}.
+	 * 
+	 * @param officeArchitect
+	 *            {@link OfficeArchitect}.
+	 * @param governanceName
+	 *            Name of the {@link OfficeGovernance}.
+	 * @param maker
+	 *            {@link GovernanceMaker}.
+	 * @return {@link OfficeGovernance}.
+	 */
+	protected OfficeGovernance addGovernance(OfficeArchitect officeArchitect,
+			String governanceName, GovernanceMaker maker) {
+
+		// Register the governance maker
+		PropertyList propertyList = MakerGovernanceSource.register(maker);
+
+		// Add and return the governance
+		OfficeGovernance gov = officeArchitect.addOfficeGovernance(
+				governanceName, MakerGovernanceSource.class.getName());
+		for (Property property : propertyList) {
+			gov.addProperty(property.getName(), property.getValue());
+		}
+		return gov;
 	}
 
 	/**
@@ -1404,6 +1438,142 @@ public abstract class AbstractStructureTestCase extends OfficeFrameTestCase {
 				escalationBuilder.setLabel(escalationName);
 				return escalationBuilder;
 			}
+		}
+	}
+
+	/**
+	 * Maker of {@link Governance}.
+	 */
+	protected static interface GovernanceMaker {
+
+		/**
+		 * Makes the {@link Governance}.
+		 * 
+		 * @param context
+		 *            {@link GovernanceMakerContext}.
+		 */
+		void make(GovernanceMakerContext context);
+	}
+
+	/**
+	 * Context for the {@link GovernanceMaker}.
+	 */
+	protected static interface GovernanceMakerContext {
+
+		/**
+		 * Specifies the extension interface.
+		 * 
+		 * @param extensionInterface
+		 *            Extension interface.
+		 */
+		void setExtensionInterface(Class<?> extensionInterface);
+	}
+
+	/**
+	 * Maker {@link GovernanceSource}.
+	 */
+	@TestSource
+	public static class MakerGovernanceSource extends
+			AbstractGovernanceSource<Object, Indexed> implements
+			GovernanceMakerContext, GovernanceFactory<Object, Indexed> {
+
+		/**
+		 * Property name to obtain the {@link GovernanceMaker} identifier.
+		 */
+		private static final String MAKER_IDENTIFIER_PROPERTY_NAME = "governance.maker";
+
+		/**
+		 * {@link GovernanceMaker} instances by their identifiers.
+		 */
+		private static Map<String, GovernanceMaker> governanceMakers;
+
+		/**
+		 * Resets for the next test.
+		 */
+		public static void reset() {
+			governanceMakers = new HashMap<String, GovernanceMaker>();
+		}
+
+		/**
+		 * Registers a {@link GovernanceMaker}.
+		 * 
+		 * @param maker
+		 *            {@link GovernanceMaker}.
+		 * @return {@link PropertyList}.
+		 */
+		public static PropertyList register(GovernanceMaker maker) {
+
+			// Ensure have a maker
+			if (maker == null) {
+				maker = new GovernanceMaker() {
+					@Override
+					public void make(GovernanceMakerContext context) {
+						// Empty governance
+					}
+				};
+			}
+
+			// Register the governance maker
+			String identifier = String.valueOf(governanceMakers.size());
+			governanceMakers.put(identifier, maker);
+
+			// Return the property list
+			return new PropertyListImpl(MAKER_IDENTIFIER_PROPERTY_NAME,
+					identifier);
+		}
+
+		/**
+		 * {@link MetaDataContext}.
+		 */
+		@SuppressWarnings("rawtypes")
+		private MetaDataContext metaDataContext;
+
+		/*
+		 * ================ AbstractAdministratorSource ========================
+		 */
+
+		@Override
+		protected void loadSpecification(SpecificationContext context) {
+			fail("Should not require specification");
+		}
+
+		@Override
+		protected void loadMetaData(MetaDataContext<Object, Indexed> context)
+				throws Exception {
+
+			// Store details to load
+			this.metaDataContext = context;
+
+			// Provide the governance factory
+			context.setGovernanceFactory(this);
+
+			// Obtain the governance maker
+			String identifier = context.getGovernanceSourceContext()
+					.getProperty(MAKER_IDENTIFIER_PROPERTY_NAME);
+			GovernanceMaker governanceMaker = governanceMakers.get(identifier);
+
+			// Make the governance
+			governanceMaker.make(this);
+		}
+
+		/*
+		 * ================= GovernanceMakerContext =========================
+		 */
+
+		@Override
+		@SuppressWarnings("unchecked")
+		public void setExtensionInterface(Class<?> extensionInterface) {
+			this.metaDataContext.setExtensionInterface(extensionInterface);
+		}
+
+		/*
+		 * ===================== GovernanceFactory ===========================
+		 */
+
+		@Override
+		public Governance<Object, Indexed> createGovernance() throws Throwable {
+			TestCase.fail("Should not require to create Governance for compiling");
+			return null;
 		}
 	}
 

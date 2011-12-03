@@ -227,12 +227,20 @@
 		<object method="setOfficeSubSection" node="sub-section"
 			class="net.officefloor.model.office.OfficeSubSectionModel" id="SUB_SECTION">
 			<value method="setOfficeSubSectionName" node="sub-section@name" />
+			<object method="addOfficeGovernance" node="govern"
+				class="net.officefloor.model.office.OfficeSubSectionToOfficeGovernanceModel">
+				<value method="setOfficeGovernanceName" node="govern@governance" />
+			</object>
 			<object method="addOfficeSectionManagedObject" node="section-managed-object"
 				class="net.officefloor.model.office.OfficeSectionManagedObjectModel">
 				<value method="setOfficeSectionManagedObjectName" node="section-managed-object@name" />
 				<object method="addOfficeSectionManagedObjectTeam" node="team"
 					class="net.officefloor.model.office.OfficeSectionManagedObjectTeamModel">
 					<value method="setOfficeSectionManagedObjectTeamName" node="team@name" />
+				</object>
+				<object method="addOfficeGovernance" node="govern"
+					class="net.officefloor.model.office.OfficeSectionManagedObjectToOfficeGovernanceModel">
+					<value method="setOfficeGovernanceName" node="govern@governance" />
 				</object>
 			</object>
 			<object method="addOfficeTask" node="task"
@@ -247,6 +255,10 @@
 					class="net.officefloor.model.office.OfficeTaskToPostDutyModel">
 					<value method="setAdministratorName" node="post-administer@administrator" />
 					<value method="setDutyName" node="post-administer@duty" />
+				</object>
+				<object method="addOfficeGovernance" node="govern"
+					class="net.officefloor.model.office.OfficeTaskToOfficeGovernanceModel">
+					<value method="setOfficeGovernanceName" node="govern@governance" />
 				</object>
 			</object>
 			<reference id="SUB_SECTION" method="addOfficeSubSection" />
