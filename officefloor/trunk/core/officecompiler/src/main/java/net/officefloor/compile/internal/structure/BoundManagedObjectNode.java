@@ -20,11 +20,12 @@ package net.officefloor.compile.internal.structure;
 
 import net.officefloor.frame.api.build.OfficeBuilder;
 import net.officefloor.frame.api.manage.Office;
+import net.officefloor.frame.spi.governance.Governance;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
 
 /**
  * {@link ManagedObject} bound into the {@link Office}.
- *
+ * 
  * @author Daniel Sagenschneider
  */
 public interface BoundManagedObjectNode {
@@ -32,11 +33,24 @@ public interface BoundManagedObjectNode {
 	/**
 	 * Obtains the name under which this {@link ManagedObject} is made available
 	 * to the {@link Office}.
-	 *
+	 * 
 	 * @return Name under which this {@link ManagedObject} is made available to
 	 *         the {@link Office}.
 	 */
 	String getBoundManagedObjectName();
+
+	/**
+	 * Adds the {@link GovernanceNode} to provide {@link Governance} over this
+	 * {@link ManagedObjectNode} when used within the {@link Office} of the
+	 * {@link OfficeNode}.
+	 * 
+	 * @param governance
+	 *            {@link GovernanceNode}.
+	 * @param office
+	 *            {@link OfficeNode} for which the {@link Governance} is
+	 *            applicable.
+	 */
+	void addGovernance(GovernanceNode governance, OfficeNode office);
 
 	/**
 	 * <p>
@@ -46,7 +60,7 @@ public interface BoundManagedObjectNode {
 	 * management. Only the first invocation should build this
 	 * {@link ManagedObject} into the {@link Office} and all further invocations
 	 * are to be ignored.
-	 *
+	 * 
 	 * @param office
 	 *            {@link OfficeNode} of the {@link Office} that this
 	 *            {@link ManagedObject} is to build itself into.

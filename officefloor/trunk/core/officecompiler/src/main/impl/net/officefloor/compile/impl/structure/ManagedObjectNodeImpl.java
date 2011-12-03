@@ -22,11 +22,14 @@ import java.util.Arrays;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 import net.officefloor.compile.impl.util.LinkUtil;
 import net.officefloor.compile.internal.structure.BoundManagedObjectNode;
+import net.officefloor.compile.internal.structure.GovernanceNode;
 import net.officefloor.compile.internal.structure.LinkObjectNode;
 import net.officefloor.compile.internal.structure.ManagedObjectDependencyNode;
 import net.officefloor.compile.internal.structure.ManagedObjectNode;
@@ -45,6 +48,7 @@ import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
+import net.officefloor.frame.spi.governance.Governance;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 
@@ -104,6 +108,12 @@ public class ManagedObjectNodeImpl implements ManagedObjectNode {
 	 * {@link NodeContext}.
 	 */
 	private final NodeContext context;
+
+	/**
+	 * {@link GovernanceNode} instances to provide {@link Governance} over this
+	 * {@link ManagedObjectNode} within the specified {@link OfficeNode}.
+	 */
+	private final Map<OfficeNode, List<GovernanceNode>> governancesPerOffice = new HashMap<OfficeNode, List<GovernanceNode>>();
 
 	/**
 	 * Initiate.
@@ -172,6 +182,22 @@ public class ManagedObjectNodeImpl implements ManagedObjectNode {
 		default:
 			throw new IllegalStateException("Unknown location type");
 		}
+	}
+
+	@Override
+	public void addGovernance(GovernanceNode governance, OfficeNode office) {
+
+		// Obtain the listing of governances for the office
+		List<GovernanceNode> governances = this.governancesPerOffice
+				.get(office);
+		if (governances == null) {
+			// Create and register listing to add the governance
+			governances = new LinkedList<GovernanceNode>();
+			this.governancesPerOffice.put(office, governances);
+		}
+
+		// Add the governance for the specified office
+		governances.add(governance);
 	}
 
 	/**
@@ -256,6 +282,16 @@ public class ManagedObjectNodeImpl implements ManagedObjectNode {
 			} else {
 				mapper.mapDependency(dependencyIndex,
 						dependentManagedObjectName);
+			}
+		}
+
+		// Obtain the governances for the office
+		List<GovernanceNode> governances = this.governancesPerOffice
+				.get(office);
+		if (governances != null) {
+			// Load the governance for the managed object
+			for (GovernanceNode governance : governances) {
+				mapper.mapGovernance(governance.getOfficeGovernanceName());
 			}
 		}
 	}
@@ -365,6 +401,18 @@ public class ManagedObjectNodeImpl implements ManagedObjectNode {
 	@Override
 	public String getAdministerableManagedObjectName() {
 		return this.managedObjectName;
+	}
+
+	/*
+	 * =================== GovernerableManagedObject =========================
+	 */
+
+	@Override
+	public String getGovernerableManagedObjectName() {
+		// TODO implement
+		// GovernerableManagedObject.getGovernerableManagedObjectName
+		throw new UnsupportedOperationException(
+				"TODO implement GovernerableManagedObject.getGovernerableManagedObjectName");
 	}
 
 	/*

@@ -18,9 +18,14 @@
 
 package net.officefloor.compile.impl.structure;
 
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
+import net.officefloor.compile.internal.structure.GovernanceNode;
 import net.officefloor.compile.internal.structure.InputManagedObjectNode;
 import net.officefloor.compile.internal.structure.LinkObjectNode;
 import net.officefloor.compile.internal.structure.ManagedObjectSourceNode;
@@ -33,7 +38,7 @@ import net.officefloor.frame.api.manage.OfficeFloor;
 
 /**
  * {@link InputManagedObjectNode} implementation.
- *
+ * 
  * @author Daniel Sagenschneider
  */
 public class InputManagedObjectNodeImpl implements InputManagedObjectNode {
@@ -59,6 +64,12 @@ public class InputManagedObjectNodeImpl implements InputManagedObjectNode {
 	private ManagedObjectSourceNode boundManagedObjectSource = null;
 
 	/**
+	 * Listing of {@link GovernanceNode} instances for the particular
+	 * {@link OfficeNode}.
+	 */
+	private final Map<OfficeNode, List<GovernanceNode>> governancesPerOffice = new HashMap<OfficeNode, List<GovernanceNode>>();
+
+	/**
 	 * {@link OfficeNode} instances that this {@link InputManagedObjectNode} has
 	 * been built into.
 	 */
@@ -66,7 +77,7 @@ public class InputManagedObjectNodeImpl implements InputManagedObjectNode {
 
 	/**
 	 * Initiate.
-	 *
+	 * 
 	 * @param inputManagedObjectName
 	 *            Name of this {@link InputManagedObjectNode}.
 	 * @param officeFloorLocation
@@ -100,6 +111,21 @@ public class InputManagedObjectNodeImpl implements InputManagedObjectNode {
 	}
 
 	@Override
+	public void addGovernance(GovernanceNode governance, OfficeNode office) {
+
+		// Obtain the listing of governances for the office
+		List<GovernanceNode> governances = this.governancesPerOffice
+				.get(office);
+		if (governances == null) {
+			governances = new LinkedList<GovernanceNode>();
+			this.governancesPerOffice.put(office, governances);
+		}
+
+		// Add the governance
+		governances.add(governance);
+	}
+
+	@Override
 	public void buildOfficeManagedObject(OfficeNode office,
 			OfficeBuilder officeBuilder) {
 
@@ -110,9 +136,9 @@ public class InputManagedObjectNodeImpl implements InputManagedObjectNode {
 
 		// Provide binding to managed object source if specified
 		if (this.boundManagedObjectSource != null) {
-			officeBuilder.setBoundInputManagedObject(this
-					.getBoundManagedObjectName(), this.boundManagedObjectSource
-					.getManagedObjectSourceName());
+			officeBuilder.setBoundInputManagedObject(
+					this.getBoundManagedObjectName(),
+					this.boundManagedObjectSource.getManagedObjectSourceName());
 		}
 
 		// Flag that built into the office
@@ -184,6 +210,18 @@ public class InputManagedObjectNodeImpl implements InputManagedObjectNode {
 	@Override
 	public LinkObjectNode getLinkedObjectNode() {
 		return this.linkedObjectName;
+	}
+
+	@Override
+	public GovernanceNode[] getGovernances(OfficeNode managingOffice) {
+
+		// Obtain the governances
+		List<GovernanceNode> governances = this.governancesPerOffice
+				.get(managingOffice);
+
+		// Return the governances
+		return (governances == null ? new GovernanceNode[0] : governances
+				.toArray(new GovernanceNode[governances.size()]));
 	}
 
 }

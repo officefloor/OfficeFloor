@@ -28,18 +28,15 @@ import net.officefloor.compile.administrator.DutyFlowType;
 import net.officefloor.compile.administrator.DutyType;
 import net.officefloor.compile.impl.properties.PropertyListImpl;
 import net.officefloor.compile.impl.util.CompileUtil;
-import net.officefloor.compile.managedobject.ManagedObjectType;
 import net.officefloor.compile.properties.Property;
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.test.issues.FailTestCompilerIssues;
-import net.officefloor.compile.test.managedobject.ManagedObjectTypeBuilder;
 import net.officefloor.compile.test.properties.PropertyListUtil;
 import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.internal.structure.JobSequence;
 import net.officefloor.frame.spi.administration.Duty;
 import net.officefloor.frame.spi.administration.source.AdministratorSource;
 import net.officefloor.frame.spi.administration.source.AdministratorSourceSpecification;
-import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 
 /**
  * Utility class for testing the {@link AdministratorSource}.
@@ -87,12 +84,12 @@ public class AdministratorLoaderUtil {
 	}
 
 	/**
-	 * Validates the {@link ManagedObjectType} contained in the
-	 * {@link ManagedObjectTypeBuilder} against the {@link ManagedObjectType}
-	 * loaded from the {@link ManagedObjectSource}.
+	 * Validates the {@link AdministratorType} contained in the
+	 * {@link AdministratorTypeBuilder} against the {@link AdministratorType}
+	 * loaded from the {@link AdministratorSource}.
 	 * 
-	 * @return {@link ManagedObjectType} loaded from the
-	 *         {@link ManagedObjectSource}.
+	 * @return {@link AdministratorType} loaded from the
+	 *         {@link AdministratorSource}.
 	 */
 	@SuppressWarnings("unchecked")
 	public static <I, A extends Enum<A>, S extends AdministratorSource<I, A>> AdministratorType<I, A> validateAdministratorType(

@@ -22,6 +22,7 @@ import net.officefloor.compile.office.OfficeManagedObjectType;
 import net.officefloor.compile.spi.office.OfficeObject;
 import net.officefloor.compile.spi.officefloor.OfficeFloorManagedObject;
 import net.officefloor.frame.api.manage.OfficeFloor;
+import net.officefloor.frame.spi.governance.Governance;
 
 /**
  * {@link OfficeObject} node.
@@ -59,6 +60,29 @@ public interface OfficeObjectNode extends OfficeManagedObjectType,
 	 *            {@link AdministratorNode}.
 	 */
 	void addAdministrator(AdministratorNode administrator);
+
+	/**
+	 * <p>
+	 * Adds a {@link GovernanceNode} providing {@link Governance} for this
+	 * {@link OfficeObject}.
+	 * <p>
+	 * This also allows the {@link OfficeManagedObjectType} to report the
+	 * extension interfaces required to be supported by the
+	 * {@link OfficeFloorManagedObject} for the {@link OfficeObject}.
+	 * 
+	 * @param governance
+	 *            {@link GovernanceNode}.
+	 */
+	void addGovernance(GovernanceNode governance);
+
+	/**
+	 * Obtains the {@link GovernanceNode} instances to provide
+	 * {@link Governance} over {@link BoundManagedObjectNode} linked to this
+	 * {@link OfficeObjectNode}.
+	 * 
+	 * @return {@link GovernanceNode} instances.
+	 */
+	GovernanceNode[] getGovernances();
 
 	/**
 	 * Adds the context of the {@link OfficeFloor} containing this

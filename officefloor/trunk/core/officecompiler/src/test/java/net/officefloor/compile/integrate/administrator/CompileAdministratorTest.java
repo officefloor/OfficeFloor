@@ -34,7 +34,7 @@ import net.officefloor.plugin.managedobject.clazz.ClassManagedObjectSource;
 
 /**
  * Tests compiling the {@link Administrator}.
- *
+ * 
  * @author Daniel Sagenschneider
  */
 public class CompileAdministratorTest extends AbstractCompileTestCase {
@@ -118,20 +118,20 @@ public class CompileAdministratorTest extends AbstractCompileTestCase {
 				OnePersonTeamSource.class);
 		OfficeBuilder office = this.record_officeFloorBuilder_addOffice(
 				"OFFICE", "OFFICE_TEAM", "TEAM");
-		office.registerManagedObjectSource("MANAGED_OBJECT",
-				"MANAGED_OBJECT_SOURCE");
 		this.record_officeFloorBuilder_addManagedObject(
 				"MANAGED_OBJECT_SOURCE", ClassManagedObjectSource.class, 0,
 				"class.name", SimpleManagedObject.class.getName());
 		this.record_managedObjectBuilder_setManagingOffice("OFFICE");
-		this.record_officeBuilder_addThreadManagedObject("MANAGED_OBJECT",
-				"MANAGED_OBJECT");
 		AdministratorBuilder<?> admin = this
 				.record_officeBuilder_addThreadAdministrator("ADMIN",
 						"OFFICE_TEAM", ClassAdministratorSource.class,
 						ClassAdministratorSource.CLASS_NAME_PROPERTY_NAME,
 						SimpleAdmin.class.getName());
 		admin.administerManagedObject("MANAGED_OBJECT");
+		office.registerManagedObjectSource("MANAGED_OBJECT",
+				"MANAGED_OBJECT_SOURCE");
+		this.record_officeBuilder_addThreadManagedObject("MANAGED_OBJECT",
+				"MANAGED_OBJECT");
 
 		// Compile
 		this.compile(true);

@@ -430,8 +430,4 @@ public abstract class AbstractGovernanceSource<I, F extends Enum<F>> implements
 		return this.metaData;
 	}
 
-	/**
-	 * {@link GovernanceSource#createGovernance()} to be overridden.
-	 */
-
 }

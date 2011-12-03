@@ -116,15 +116,19 @@
 			<sub-section>
 				<section-managed-object name="SECTION_MANAGED_OBJECT">
 					<team name="MO_TEAM" />
+					<govern governance="GOVERNANCE" />
 				</section-managed-object>
 				<task name="TASK">
 					<pre-administer administrator="ADMINISTRATOR" duty="DUTY_ONE" />
+					<govern governance="GOVERNANCE" />
 				</task>
+				<govern governance="GOVERNANCE" />
 				<sub-section name="SUB_SECTION">
 					<section-managed-object name="SUB_SECTION_MANAGED_OBJECT" />
 					<task name="SUB_SECTION_TASK">
 						<post-administer administrator="ADMINISTRATOR"
 							duty="DUTY_TWO" />
+						<govern governance="GOVERNANCE" />
 					</task>
 					<sub-section name="SUB_SUB_SECTION" />
 				</sub-section>

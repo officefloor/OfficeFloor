@@ -65,13 +65,4 @@ public interface GovernanceSource<I, F extends Enum<F>> {
 	 */
 	GovernanceSourceMetaData<I, F> getMetaData();
 
-	/**
-	 * Creates a new {@link Governance}.
-	 * 
-	 * @return New {@link Governance}.
-	 * @throws Throwable
-	 *             If fails to create the {@link Governance}.
-	 */
-	Governance<I, F> createGovernance() throws Throwable;
-
 }

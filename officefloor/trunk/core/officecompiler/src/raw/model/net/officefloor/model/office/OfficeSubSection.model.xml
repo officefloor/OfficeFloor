@@ -4,4 +4,5 @@
 	<list type="OfficeTaskModel" name="office task" />
 	<list type="OfficeSectionManagedObjectModel" name="office section managed object" />
 	<list type="OfficeSubSectionModel" name="office sub section" />
+	<list type="OfficeSubSectionToOfficeGovernanceModel" name="office governance" />
 </model>

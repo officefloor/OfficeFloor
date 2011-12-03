@@ -37,6 +37,7 @@ import net.officefloor.compile.impl.util.StringExtractor;
 import net.officefloor.compile.internal.structure.AdministratorNode;
 import net.officefloor.compile.internal.structure.BoundManagedObjectNode;
 import net.officefloor.compile.internal.structure.EscalationNode;
+import net.officefloor.compile.internal.structure.GovernanceNode;
 import net.officefloor.compile.internal.structure.LinkOfficeNode;
 import net.officefloor.compile.internal.structure.ManagedObjectNode;
 import net.officefloor.compile.internal.structure.ManagedObjectSourceNode;
@@ -53,10 +54,12 @@ import net.officefloor.compile.office.OfficeManagedObjectType;
 import net.officefloor.compile.office.OfficeTeamType;
 import net.officefloor.compile.office.OfficeType;
 import net.officefloor.compile.properties.PropertyList;
+import net.officefloor.compile.spi.governance.source.GovernanceSource;
 import net.officefloor.compile.spi.office.ManagedObjectTeam;
 import net.officefloor.compile.spi.office.OfficeAdministrator;
 import net.officefloor.compile.spi.office.OfficeArchitect;
 import net.officefloor.compile.spi.office.OfficeEscalation;
+import net.officefloor.compile.spi.office.OfficeGovernance;
 import net.officefloor.compile.spi.office.OfficeManagedObject;
 import net.officefloor.compile.spi.office.OfficeManagedObjectSource;
 import net.officefloor.compile.spi.office.OfficeObject;
@@ -157,6 +160,11 @@ public class OfficeNodeImpl extends AbstractNode implements OfficeNode {
 	 * name.
 	 */
 	private final Map<String, AdministratorNode> administrators = new HashMap<String, AdministratorNode>();
+
+	/**
+	 * {@link GovernanceNode} instances by their {@link OfficeGovernance} name.
+	 */
+	private final Map<String, GovernanceNode> governances = new HashMap<String, GovernanceNode>();
 
 	/**
 	 * {@link EscalationNode} instances by their {@link OfficeEscalation} type.
@@ -461,10 +469,33 @@ public class OfficeNodeImpl extends AbstractNode implements OfficeNode {
 			officeBuilder.registerTeam(officeTeamName, officeFloorTeamName);
 		}
 
-		// Build the office floor managed objects for the office.
-		// Ensure the managed objects are only built into the office once.
-		Set<BoundManagedObjectNode> builtManagedObjects = new HashSet<BoundManagedObjectNode>();
-		for (OfficeObjectStruct struct : this.objects.values()) {
+		// Build the governance for the office (in deterministic order)
+		GovernanceNode[] governanceNodes = CompileUtil.toSortedArray(
+				this.governances.values(), new GovernanceNode[0],
+				new StringExtractor<GovernanceNode>() {
+					@Override
+					public String toString(GovernanceNode object) {
+						return object.getOfficeGovernanceName();
+					}
+				});
+		for (GovernanceNode governance : governanceNodes) {
+			governance.buildGovernance(officeBuilder);
+		}
+
+		// Load the office objects (in deterministic order)
+		OfficeObjectStruct[] officeObjects = CompileUtil.toSortedArray(
+				this.objects.values(), new OfficeObjectStruct[0],
+				new StringExtractor<OfficeObjectStruct>() {
+					@Override
+					public String toString(OfficeObjectStruct object) {
+						return object.officeObject.getOfficeManagedObjectName();
+					}
+				});
+
+		// Configure governance for the linked office floor managed objects.
+		// Must be before managed objects as building them builds dependencies.
+		Map<OfficeObjectStruct, BoundManagedObjectNode> officeObjectToBoundMo = new HashMap<OfficeNodeImpl.OfficeObjectStruct, BoundManagedObjectNode>();
+		for (OfficeObjectStruct struct : officeObjects) {
 
 			// Obtain the office object name
 			OfficeObjectNode objectNode = struct.officeObject;
@@ -478,6 +509,25 @@ public class OfficeNodeImpl extends AbstractNode implements OfficeNode {
 					officeObjectName, this.context.getCompilerIssues());
 			if (managedObjectNode == null) {
 				continue; // office floor managed object not linked
+			}
+
+			// Load governances for linked office floor managed object
+			GovernanceNode[] governances = objectNode.getGovernances();
+			for (GovernanceNode governance : governances) {
+				managedObjectNode.addGovernance(governance, this);
+			}
+		}
+
+		// Build the office floor managed objects for the office.
+		// Ensure the managed objects are only built into the office once.
+		Set<BoundManagedObjectNode> builtManagedObjects = new HashSet<BoundManagedObjectNode>();
+		for (OfficeObjectStruct struct : officeObjects) {
+
+			// Obtain the office floor managed object node
+			BoundManagedObjectNode managedObjectNode = officeObjectToBoundMo
+					.get(struct);
+			if (managedObjectNode == null) {
+				continue; // not linked and reported in adding governance
 			}
 
 			// Determine if already built the managed object
@@ -780,6 +830,41 @@ public class OfficeNodeImpl extends AbstractNode implements OfficeNode {
 	}
 
 	@Override
+	public OfficeGovernance addOfficeGovernance(String governanceName,
+			String governanceSourceClassName) {
+		// Obtain and return the governance for the name
+		GovernanceNode governance = this.governances.get(governanceName);
+		if (governance == null) {
+			// Add the governance
+			governance = new GovernanceNodeImpl(governanceName,
+					governanceSourceClassName, this.officeLocation, this,
+					this.context);
+			this.governances.put(governanceName, governance);
+		} else {
+			// Governance already added and initialised
+			this.addIssue("Governance " + governanceName + " already added");
+		}
+		return governance;
+	}
+
+	@Override
+	public OfficeGovernance addOfficeGovernance(String governanceName,
+			GovernanceSource<?, ?> governanceSource) {
+		// Obtain and return the governance for the name
+		GovernanceNode governance = this.governances.get(governanceName);
+		if (governance == null) {
+			// Add the governance
+			governance = new GovernanceNodeImpl(governanceName,
+					governanceSource, this.officeLocation, this, this.context);
+			this.governances.put(governanceName, governance);
+		} else {
+			// Governance already added and initialised
+			this.addIssue("Governance " + governanceName + " already added");
+		}
+		return governance;
+	}
+
+	@Override
 	public OfficeAdministrator addOfficeAdministrator(String administratorName,
 			String administratorSourceClassName) {
 		// Obtain and return the administrator for the name
@@ -881,6 +966,11 @@ public class OfficeNodeImpl extends AbstractNode implements OfficeNode {
 	@Override
 	public void link(ManagedObjectTeam team, OfficeTeam officeTeam) {
 		this.linkTeam(team, officeTeam);
+	}
+
+	@Override
+	public void link(OfficeGovernance governance, OfficeTeam officeTeam) {
+		this.linkTeam(governance, officeTeam);
 	}
 
 	@Override

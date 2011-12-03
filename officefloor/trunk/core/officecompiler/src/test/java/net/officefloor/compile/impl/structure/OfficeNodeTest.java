@@ -31,6 +31,7 @@ import net.officefloor.compile.spi.office.OfficeAdministrator;
 import net.officefloor.compile.spi.office.OfficeArchitect;
 import net.officefloor.compile.spi.office.OfficeDuty;
 import net.officefloor.compile.spi.office.OfficeEscalation;
+import net.officefloor.compile.spi.office.OfficeGovernance;
 import net.officefloor.compile.spi.office.OfficeManagedObject;
 import net.officefloor.compile.spi.office.OfficeManagedObjectSource;
 import net.officefloor.compile.spi.office.OfficeObject;
@@ -40,6 +41,7 @@ import net.officefloor.compile.spi.office.OfficeSectionManagedObject;
 import net.officefloor.compile.spi.office.OfficeSectionManagedObjectSource;
 import net.officefloor.compile.spi.office.OfficeSectionObject;
 import net.officefloor.compile.spi.office.OfficeSectionOutput;
+import net.officefloor.compile.spi.office.OfficeSubSection;
 import net.officefloor.compile.spi.office.OfficeTask;
 import net.officefloor.compile.spi.office.OfficeTeam;
 import net.officefloor.compile.spi.office.TaskTeam;
@@ -62,6 +64,7 @@ import net.officefloor.frame.spi.managedobject.source.ManagedObjectTaskBuilder;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectWorkBuilder;
 import net.officefloor.model.impl.section.SectionModelSectionSource;
 import net.officefloor.plugin.administrator.clazz.ClassAdministratorSource;
+import net.officefloor.plugin.governance.clazz.ClassGovernanceSource;
 import net.officefloor.plugin.managedobject.clazz.ClassManagedObjectSource;
 
 /**
@@ -477,6 +480,81 @@ public class OfficeNodeTest extends AbstractStructureTestCase {
 	}
 
 	/**
+	 * Tests adding an {@link OfficeGovernance}.
+	 */
+	public void testAddOfficeGovernance() {
+		// Add two different governances verifying details
+		this.replayMockObjects();
+		OfficeGovernance gov = this
+				.addGovernance(this.node, "GOVERNANCE", null);
+		assertNotNull("Must have governance", gov);
+		assertEquals("Incorrect governance name", "GOVERNANCE",
+				gov.getOfficeGovernanceName());
+		assertNotSame("Should obtain another governance", gov,
+				this.addAdministrator(this.node, "ANOTHER", null));
+		this.verifyMockObjects();
+	}
+
+	/**
+	 * Ensure issue if add the {@link OfficeGovernance} twice.
+	 */
+	public void testAddOfficeGovernanceTwice() {
+
+		// Record issue in adding the governance twice
+		this.record_issue("Governance GOVERNANCE already added");
+
+		// Add the governance twice
+		this.replayMockObjects();
+		OfficeGovernance govFirst = this.addGovernance(this.node, "GOVERNANCE",
+				null);
+		OfficeGovernance govSecond = this.addGovernance(this.node,
+				"GOVERNANCE", null);
+		this.verifyMockObjects();
+
+		// Should be the same governance
+		assertEquals("Should be same governance on adding twice", govFirst,
+				govSecond);
+	}
+
+	/**
+	 * Tests adding an {@link OfficeGovernance} instance.
+	 */
+	public void testAddOfficeGovernanceInstance() {
+		// Add two different governances verifying details
+		this.replayMockObjects();
+		OfficeGovernance gov = this.node.addOfficeGovernance("GOVERNANCE",
+				new ClassGovernanceSource());
+		assertNotNull("Must have governance", gov);
+		assertEquals("Incorrect governance name", "GOVERNANCE",
+				gov.getOfficeGovernanceName());
+		assertNotSame("Should obtain another governance", gov,
+				this.node.addOfficeGovernance("ANOTHER",
+						new ClassGovernanceSource()));
+		this.verifyMockObjects();
+	}
+
+	/**
+	 * Ensure issue if add the {@link OfficeGovernance} instance twice.
+	 */
+	public void testAddOfficeGovernanceInstanceTwice() {
+
+		// Record issue in adding the governance twice
+		this.record_issue("Governance GOVERNANCE already added");
+
+		// Add the governance twice
+		this.replayMockObjects();
+		OfficeGovernance govFirst = this.node.addOfficeGovernance("GOVERNANCE",
+				new ClassGovernanceSource());
+		OfficeGovernance govSecond = this.node.addOfficeGovernance(
+				"GOVERNANCE", new ClassGovernanceSource());
+		this.verifyMockObjects();
+
+		// Should be the same governance
+		assertEquals("Should be same governance on adding twice", govFirst,
+				govSecond);
+	}
+
+	/**
 	 * Tests adding an {@link OfficeAdministrator}.
 	 */
 	public void testAddOfficeAdministrator() {
@@ -493,7 +571,7 @@ public class OfficeNodeTest extends AbstractStructureTestCase {
 	}
 
 	/**
-	 * Ensure issue if add the {@link OfficeManagedObject} twice.
+	 * Ensure issue if add the {@link OfficeAdministrator} twice.
 	 */
 	public void testAddOfficeAdministratorTwice() {
 
@@ -531,7 +609,7 @@ public class OfficeNodeTest extends AbstractStructureTestCase {
 	}
 
 	/**
-	 * Ensure issue if add the {@link OfficeManagedObject} instance twice.
+	 * Ensure issue if add the {@link OfficeAdministrator} instance twice.
 	 */
 	public void testAddOfficeAdministratorInstanceTwice() {
 
@@ -593,6 +671,31 @@ public class OfficeNodeTest extends AbstractStructureTestCase {
 	}
 
 	/**
+	 * Ensures can link {@link OfficeGovernance} to the {@link OfficeTeam}.
+	 */
+	public void testLinkOfficeGovernanceToOfficeTeam() {
+
+		// Record already being linked
+		this.issues.addIssue(LocationType.OFFICE, OFFICE_LOCATION,
+				AssetType.GOVERNANCE, "GOVERNANCE", "Team already assigned");
+
+		this.replayMockObjects();
+
+		// Link
+		OfficeGovernance gov = this
+				.addGovernance(this.node, "GOVERNANCE", null);
+		OfficeTeam officeTeam = this.node.addOfficeTeam("OFFICE_TEAM");
+		this.node.link(gov, officeTeam);
+		assertTeamLink("governance -> office team", gov, officeTeam);
+
+		// Ensure only can link once
+		this.node.link(gov, this.node.addOfficeTeam("ANOTHER"));
+		assertTeamLink("Can only link once", gov, officeTeam);
+
+		this.verifyMockObjects();
+	}
+
+	/**
 	 * Ensures can link {@link OfficeAdministrator} to the {@link OfficeTeam}.
 	 */
 	public void testLinkOfficeAdministratorToOfficeTeam() {
@@ -613,6 +716,99 @@ public class OfficeNodeTest extends AbstractStructureTestCase {
 		// Ensure only can link once
 		this.node.link(admin, this.node.addOfficeTeam("ANOTHER"));
 		assertTeamLink("Can only link once", admin, officeTeam);
+
+		this.verifyMockObjects();
+	}
+
+	/**
+	 * Ensure can specify {@link OfficeGovernance} for a {@link OfficeSection}.
+	 */
+	public void testLinkOfficeGovernanceForOfficeSection() {
+
+		this.replayMockObjects();
+
+		// Add section
+		OfficeSection section = this.addSection(this.node, "SECTION", null);
+
+		// Link
+		OfficeGovernance governance = this.addGovernance(this.node,
+				"GOVERNANCE", null);
+		section.addGovernance(governance);
+		// TODO test that governance specified
+
+		// May have many governances
+		OfficeGovernance another = this.addGovernance(this.node, "ANOTHER",
+				null);
+		section.addGovernance(another);
+
+		this.verifyMockObjects();
+	}
+
+	/**
+	 * Ensure can specify {@link OfficeGovernance} for a
+	 * {@link OfficeSubSection}.
+	 */
+	public void testLinkOfficeGovernanceForOfficeSubSection() {
+
+		this.replayMockObjects();
+
+		// Add section with sub-section
+		OfficeSection section = this.addSection(this.node, "SECTION",
+				new SectionMaker() {
+					@Override
+					public void make(SectionMakerContext context) {
+						context.addSubSection("SUB_SECTION", null);
+					}
+				});
+		OfficeSubSection subSection = section.getOfficeSubSections()[0];
+
+		// Link
+		OfficeGovernance governance = this.addGovernance(this.node,
+				"GOVERNANCE", null);
+		subSection.addGovernance(governance);
+		// TODO test that governance specified
+
+		// May have many governances
+		OfficeGovernance another = this.addGovernance(this.node, "ANOTHER",
+				null);
+		subSection.addGovernance(another);
+
+		this.verifyMockObjects();
+	}
+
+	/**
+	 * Ensure can specify {@link OfficeGovernance} for a specific
+	 * {@link OfficeTask}.
+	 */
+	public void testLinkOfficeGovernanceForOfficeTask() {
+
+		final WorkFactory<Work> workFactory = this.createMockWorkFactory();
+		final TaskFactory<Work, ?, ?> taskFactory = this
+				.createMockTaskFactory();
+
+		this.replayMockObjects();
+
+		// Add section with task
+		OfficeSection section = this.addSection(this.node, "SECTION",
+				new SectionMaker() {
+					@Override
+					public void make(SectionMakerContext context) {
+						context.addTask("WORK", workFactory, "TASK",
+								taskFactory, null);
+					}
+				});
+		OfficeTask task = section.getOfficeTasks()[0];
+
+		// Link
+		OfficeGovernance governance = this.addGovernance(this.node,
+				"GOVERNANCE", null);
+		task.addGovernance(governance);
+		// TODO test that governance specified
+
+		// May have many governances
+		OfficeGovernance another = this.addGovernance(this.node, "ANOTHER",
+				null);
+		task.addGovernance(another);
 
 		this.verifyMockObjects();
 	}
@@ -686,6 +882,81 @@ public class OfficeNodeTest extends AbstractStructureTestCase {
 
 		// May have many post duties
 		task.addPostTaskDuty(administrator.getDuty("ANOTHER"));
+
+		this.verifyMockObjects();
+	}
+
+	/**
+	 * Ensure can govern {@link OfficeSectionManagedObject}.
+	 */
+	public void testGovernOfficeSectionManagedObject() {
+		this.replayMockObjects();
+
+		// Add section with governance
+		OfficeSection section = this.addSection(this.node, "SECTION",
+				new SectionMaker() {
+					@Override
+					public void make(SectionMakerContext context) {
+						SectionManagedObjectSource moSource = context
+								.addManagedObjectSource("MO_SOURCE", null);
+						moSource.addSectionManagedObject("MO",
+								ManagedObjectScope.WORK);
+					}
+				});
+		OfficeSectionManagedObject mo = section
+				.getOfficeSectionManagedObjectSources()[0]
+				.getOfficeSectionManagedObjects()[0];
+
+		// Link
+		OfficeGovernance governance = this.addGovernance(this.node,
+				"GOVERNANCE", null);
+		governance.governManagedObject(mo);
+		// TODO test that governing the section managed object
+
+		// Should be able to govern the managed object twice
+		governance.governManagedObject(mo);
+
+		this.verifyMockObjects();
+	}
+
+	/**
+	 * Ensure can govern {@link OfficeManagedObject}.
+	 */
+	public void testGovernOfficeManagedObject() {
+		this.replayMockObjects();
+
+		// Link
+		OfficeGovernance governance = this.addGovernance(this.node,
+				"GOVERNANCE", null);
+		OfficeManagedObjectSource moSource = this.addManagedObjectSource(
+				this.node, "MO_SOURCE", null);
+		OfficeManagedObject mo = moSource.addOfficeManagedObject("MO",
+				ManagedObjectScope.THREAD);
+		governance.governManagedObject(mo);
+		// TODO test that governering the section managed object
+
+		// Should be able to govern the managed object twice
+		governance.governManagedObject(mo);
+
+		this.verifyMockObjects();
+	}
+
+	/**
+	 * Ensure can govern {@link OfficeObject}.
+	 */
+	public void testGovernOfficeObject() {
+		this.replayMockObjects();
+
+		// Link
+		OfficeGovernance governance = this.addGovernance(this.node,
+				"GOVERNANCE", null);
+		OfficeObject mo = this.node.addOfficeObject("MO",
+				Connection.class.getName());
+		governance.governManagedObject(mo);
+		// TODO test that governering the office object
+
+		// Should be able to govern the office object twice
+		governance.governManagedObject(mo);
 
 		this.verifyMockObjects();
 	}

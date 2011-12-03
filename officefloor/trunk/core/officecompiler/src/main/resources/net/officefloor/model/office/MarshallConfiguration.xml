@@ -378,6 +378,15 @@
 				</item>
 			</collection>
 			<object method="getOfficeSubSection" element="sub-section">
+				<collection method="getOfficeGovernances">
+					<item
+						type="net.officefloor.model.office.OfficeSubSectionToOfficeGovernanceModel"
+						element="govern">
+						<attributes>
+							<attribute method="getOfficeGovernanceName" attribute="governance" />
+						</attributes>
+					</item>
+				</collection>
 				<collection method="getOfficeSectionManagedObjects" id="SECTION_MANAGED_OBJECT">
 					<item
 						type="net.officefloor.model.office.OfficeSectionManagedObjectModel"
@@ -393,6 +402,16 @@
 								<attributes>
 									<attribute method="getOfficeSectionManagedObjectTeamName"
 										attribute="name" />
+								</attributes>
+							</item>
+						</collection>
+						<collection method="getOfficeGovernances">
+							<item
+								type="net.officefloor.model.office.OfficeSectionManagedObjectToOfficeGovernanceModel"
+								element="govern">
+								<attributes>
+									<attribute method="getOfficeGovernanceName"
+										attribute="governance" />
 								</attributes>
 							</item>
 						</collection>
@@ -419,6 +438,16 @@
 								<attributes>
 									<attribute method="getAdministratorName" attribute="administrator" />
 									<attribute method="getDutyName" attribute="duty" />
+								</attributes>
+							</item>
+						</collection>
+						<collection method="getOfficeGovernances">
+							<item
+								type="net.officefloor.model.office.OfficeTaskToOfficeGovernanceModel"
+								element="govern">
+								<attributes>
+									<attribute method="getOfficeGovernanceName"
+										attribute="governance" />
 								</attributes>
 							</item>
 						</collection>

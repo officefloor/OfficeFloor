@@ -19,6 +19,7 @@
 package net.officefloor.compile.spi.office;
 
 import net.officefloor.compile.properties.PropertyList;
+import net.officefloor.compile.spi.governance.source.GovernanceSource;
 import net.officefloor.compile.spi.office.source.OfficeSource;
 import net.officefloor.compile.spi.section.ManagedObjectDependency;
 import net.officefloor.compile.spi.section.ManagedObjectFlow;
@@ -115,6 +116,30 @@ public interface OfficeArchitect {
 	OfficeManagedObjectSource addOfficeManagedObjectSource(
 			String managedObjectSourceName,
 			ManagedObjectSource<?, ?> managedObjectSource);
+
+	/**
+	 * Adds a {@link OfficeGovernance}.
+	 * 
+	 * @param governanceName
+	 *            Name of the {@link OfficeGovernance}.
+	 * @param governanceSourceClassName
+	 *            Fully qualified class name of the {@link GovernanceSource}.
+	 * @return Added {@link OfficeGovernance}.
+	 */
+	OfficeGovernance addOfficeGovernance(String governanceName,
+			String governanceSourceClassName);
+
+	/**
+	 * Adds an {@link OfficeGovernance}.
+	 * 
+	 * @param governanceName
+	 *            Name of the {@link OfficeGovernance}.
+	 * @param governanceSource
+	 *            {@link GovernanceSource} instance to use.
+	 * @return Added {@link OfficeGovernance}.
+	 */
+	OfficeGovernance addOfficeGovernance(String governanceName,
+			GovernanceSource<?, ?> governanceSource);
 
 	/**
 	 * Adds an {@link OfficeAdministrator}.
@@ -245,6 +270,17 @@ public interface OfficeArchitect {
 	 *            {@link OfficeTeam}.
 	 */
 	void link(ManagedObjectTeam team, OfficeTeam officeTeam);
+
+	/**
+	 * Links the {@link OfficeTeam} to be responsible for the
+	 * {@link OfficeGovernance}.
+	 * 
+	 * @param governance
+	 *            {@link OfficeGovernance}.
+	 * @param officeTeam
+	 *            {@link OfficeTeam}.
+	 */
+	void link(OfficeGovernance governance, OfficeTeam officeTeam);
 
 	/**
 	 * Links the {@link OfficeTeam} to be responsible for the

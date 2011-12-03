@@ -168,13 +168,13 @@ public class CompileOfficeManagedObjectTest extends AbstractCompileTestCase {
 		// Register the office linked managed objects with the office
 		OfficeBuilder office = this
 				.record_officeFloorBuilder_addOffice("OFFICE");
-		office.registerManagedObjectSource("SIMPLE", "SIMPLE_SOURCE");
-		this.record_officeBuilder_addProcessManagedObject("SIMPLE", "SIMPLE");
 		office.registerManagedObjectSource("OFFICE.DEPENDENT",
 				"OFFICE.DEPENDENT_SOURCE");
 		DependencyMappingBuilder mapper = this
 				.record_officeBuilder_addProcessManagedObject(
 						"OFFICE.DEPENDENT", "OFFICE.DEPENDENT");
+		office.registerManagedObjectSource("SIMPLE", "SIMPLE_SOURCE");
+		this.record_officeBuilder_addProcessManagedObject("SIMPLE", "SIMPLE");
 		mapper.mapDependency(0, "SIMPLE");
 
 		// Add managed objects to office

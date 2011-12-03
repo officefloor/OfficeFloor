@@ -50,6 +50,8 @@ import net.officefloor.model.office.OfficeManagedObjectToOfficeManagedObjectSour
 import net.officefloor.model.office.OfficeModel;
 import net.officefloor.model.office.OfficeRepository;
 import net.officefloor.model.office.OfficeSectionInputModel;
+import net.officefloor.model.office.OfficeSectionManagedObjectModel;
+import net.officefloor.model.office.OfficeSectionManagedObjectToOfficeGovernanceModel;
 import net.officefloor.model.office.OfficeSectionModel;
 import net.officefloor.model.office.OfficeSectionObjectModel;
 import net.officefloor.model.office.OfficeSectionObjectToExternalManagedObjectModel;
@@ -59,7 +61,9 @@ import net.officefloor.model.office.OfficeSectionOutputToOfficeSectionInputModel
 import net.officefloor.model.office.OfficeSectionResponsibilityModel;
 import net.officefloor.model.office.OfficeSectionResponsibilityToOfficeTeamModel;
 import net.officefloor.model.office.OfficeSubSectionModel;
+import net.officefloor.model.office.OfficeSubSectionToOfficeGovernanceModel;
 import net.officefloor.model.office.OfficeTaskModel;
+import net.officefloor.model.office.OfficeTaskToOfficeGovernanceModel;
 import net.officefloor.model.office.OfficeTaskToPostDutyModel;
 import net.officefloor.model.office.OfficeTaskToPreDutyModel;
 import net.officefloor.model.office.OfficeTeamModel;
@@ -147,7 +151,7 @@ public class OfficeRepositoryTest extends OfficeFrameTestCase {
 				"GOVERNANCE", "net.example.ExampleGovernanceSource");
 		office.addOfficeGovernance(governance);
 		OfficeSectionModel targetSection = new OfficeSectionModel(
-				"SECTION_TARGET", "net.example.ExcampleSectionSource",
+				"SECTION_TARGET", "net.example.ExampleSectionSource",
 				"SECTION_LOCATION");
 		office.addOfficeSection(targetSection);
 		OfficeSectionInputModel targetInput = new OfficeSectionInputModel(
@@ -205,6 +209,26 @@ public class OfficeRepositoryTest extends OfficeFrameTestCase {
 		OfficeTaskToPostDutyModel taskToPostDuty = new OfficeTaskToPostDutyModel(
 				"ADMINISTRATOR", "DUTY");
 		officeTask.addPostDuty(taskToPostDuty);
+
+		// office task -> governance
+		OfficeTaskToOfficeGovernanceModel taskToGov = new OfficeTaskToOfficeGovernanceModel(
+				"GOVERNANCE");
+		officeTask.addOfficeGovernance(taskToGov);
+
+		// sub section -> governance
+		OfficeSubSectionToOfficeGovernanceModel subSectionToGov = new OfficeSubSectionToOfficeGovernanceModel(
+				"GOVERNANCE");
+		subSection.addOfficeGovernance(subSectionToGov);
+
+		// section managed object (setup)
+		OfficeSectionManagedObjectModel sectionMo = new OfficeSectionManagedObjectModel(
+				"SECTION_MO");
+		subSection.addOfficeSectionManagedObject(sectionMo);
+
+		// section managed object -> governance
+		OfficeSectionManagedObjectToOfficeGovernanceModel sectionMoToGov = new OfficeSectionManagedObjectToOfficeGovernanceModel(
+				"GOVERNANCE");
+		sectionMo.addOfficeGovernance(sectionMoToGov);
 
 		// external managed object -> administrator
 		ExternalManagedObjectToAdministratorModel extMoToAdmin = new ExternalManagedObjectToAdministratorModel(
@@ -348,6 +372,24 @@ public class OfficeRepositoryTest extends OfficeFrameTestCase {
 		assertEquals("task <- post duty", officeTask,
 				taskToPostDuty.getOfficeTask());
 		assertEquals("task -> post duty", duty, taskToPostDuty.getDuty());
+
+		// Ensure the office task governance connected
+		assertEquals("task <- governance", officeTask,
+				taskToGov.getOfficeTask());
+		assertEquals("task -> governance", governance,
+				taskToGov.getOfficeGovernance());
+
+		// Ensure the sub section governance connected
+		assertEquals("sub section <- governance", subSection,
+				subSectionToGov.getOfficeSubSection());
+		assertEquals("sub section -> governance", governance,
+				subSectionToGov.getOfficeGovernance());
+
+		// Ensure section managed object governed
+		assertEquals("section managed object <- governance", sectionMo,
+				sectionMoToGov.getOfficeSectionManagedObject());
+		assertEquals("section managed object -> governance", governance,
+				sectionMoToGov.getOfficeGovernance());
 
 		// Ensure external managed object administration connected
 		assertEquals("external managed object <- administrator", extMo,
@@ -569,6 +611,28 @@ public class OfficeRepositoryTest extends OfficeFrameTestCase {
 		taskToPostDuty.setDuty(duty);
 		taskToPostDuty.connect();
 
+		// office task -> governance
+		OfficeTaskToOfficeGovernanceModel taskToGov = new OfficeTaskToOfficeGovernanceModel();
+		taskToGov.setOfficeTask(officeTask);
+		taskToGov.setOfficeGovernance(governance);
+		taskToGov.connect();
+
+		// sub section -> governance
+		OfficeSubSectionToOfficeGovernanceModel subSectionToGov = new OfficeSubSectionToOfficeGovernanceModel();
+		subSectionToGov.setOfficeSubSection(subSection);
+		subSectionToGov.setOfficeGovernance(governance);
+		subSectionToGov.connect();
+
+		// section managed object (setup)
+		OfficeSectionManagedObjectModel sectionMo = new OfficeSectionManagedObjectModel();
+		subSection.addOfficeSectionManagedObject(sectionMo);
+
+		// section managed object -> governance
+		OfficeSectionManagedObjectToOfficeGovernanceModel sectionMoToGov = new OfficeSectionManagedObjectToOfficeGovernanceModel();
+		sectionMoToGov.setOfficeSectionManagedObject(sectionMo);
+		sectionMoToGov.setOfficeGovernance(governance);
+		sectionMoToGov.connect();
+
 		// external managed object -> administrator
 		ExternalManagedObjectToAdministratorModel extMoToAdmin = new ExternalManagedObjectToAdministratorModel();
 		extMoToAdmin.setExternalManagedObject(extMo);
@@ -649,6 +713,12 @@ public class OfficeRepositoryTest extends OfficeFrameTestCase {
 				taskToPostDuty.getAdministratorName());
 		assertEquals("task - post duty (duty name)", "DUTY",
 				taskToPostDuty.getDutyName());
+		assertEquals("task - governance", "GOVERNANCE",
+				taskToGov.getOfficeGovernanceName());
+		assertEquals("sub section - governance", "GOVERNANCE",
+				subSectionToGov.getOfficeGovernanceName());
+		assertEquals("section managed object - governance", "GOVERNANCE",
+				sectionMoToGov.getOfficeGovernanceName());
 		assertEquals("external managed object - administrator",
 				"ADMINISTRATOR", extMoToAdmin.getAdministratorName());
 		assertEquals("external managed object - governance", "GOVERNANCE",

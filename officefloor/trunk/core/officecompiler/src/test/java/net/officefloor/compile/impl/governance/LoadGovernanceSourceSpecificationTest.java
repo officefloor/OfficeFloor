@@ -21,6 +21,7 @@ package net.officefloor.compile.impl.governance;
 import net.officefloor.compile.OfficeFloorCompiler;
 import net.officefloor.compile.governance.GovernanceLoader;
 import net.officefloor.compile.issues.CompilerIssues;
+import net.officefloor.compile.issues.CompilerIssues.LocationType;
 import net.officefloor.compile.properties.Property;
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.spi.governance.source.GovernanceSource;
@@ -32,7 +33,6 @@ import net.officefloor.compile.test.properties.PropertyListUtil;
 import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
 import net.officefloor.frame.spi.TestSource;
-import net.officefloor.frame.spi.governance.Governance;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 
 /**
@@ -53,11 +53,6 @@ public class LoadGovernanceSourceSpecificationTest extends OfficeFrameTestCase {
 	private final GovernanceSourceSpecification specification = this
 			.createMock(GovernanceSourceSpecification.class);
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see junit.framework.TestCase#setUp()
-	 */
 	@Override
 	protected void setUp() throws Exception {
 		MockGovernanceSource.reset(this.specification);
@@ -286,7 +281,7 @@ public class LoadGovernanceSourceSpecificationTest extends OfficeFrameTestCase {
 	 *            Description of the issue.
 	 */
 	private void record_issue(String issueDescription) {
-		this.issues.addIssue(null, null, AssetType.GOVERNANCE, null,
+		this.issues.addIssue(LocationType.OFFICE, null, AssetType.GOVERNANCE, null,
 				issueDescription);
 	}
 
@@ -299,8 +294,8 @@ public class LoadGovernanceSourceSpecificationTest extends OfficeFrameTestCase {
 	 *            Cause of the issue.
 	 */
 	private void record_issue(String issueDescription, Throwable cause) {
-		this.issues.addIssue(null, null, AssetType.GOVERNANCE, null,
-				issueDescription, cause);
+		this.issues.addIssue(LocationType.OFFICE, null, AssetType.GOVERNANCE,
+				null, issueDescription, cause);
 	}
 
 	/**
@@ -402,12 +397,6 @@ public class LoadGovernanceSourceSpecificationTest extends OfficeFrameTestCase {
 
 		@Override
 		public GovernanceSourceMetaData<Object, None> getMetaData() {
-			fail("Should not be invoked for obtaining specification");
-			return null;
-		}
-
-		@Override
-		public Governance<Object, None> createGovernance() throws Throwable {
 			fail("Should not be invoked for obtaining specification");
 			return null;
 		}

@@ -28,6 +28,7 @@ import java.util.Map;
 import net.officefloor.compile.impl.util.LinkUtil;
 import net.officefloor.compile.internal.structure.BoundManagedObjectNode;
 import net.officefloor.compile.internal.structure.DutyNode;
+import net.officefloor.compile.internal.structure.GovernanceNode;
 import net.officefloor.compile.internal.structure.LinkFlowNode;
 import net.officefloor.compile.internal.structure.NodeContext;
 import net.officefloor.compile.internal.structure.OfficeTeamNode;
@@ -40,6 +41,7 @@ import net.officefloor.compile.internal.structure.WorkNode;
 import net.officefloor.compile.issues.CompilerIssues.LocationType;
 import net.officefloor.compile.spi.office.ObjectDependency;
 import net.officefloor.compile.spi.office.OfficeDuty;
+import net.officefloor.compile.spi.office.OfficeGovernance;
 import net.officefloor.compile.spi.office.OfficeSection;
 import net.officefloor.compile.spi.office.OfficeTask;
 import net.officefloor.compile.spi.office.OfficeTeam;
@@ -57,8 +59,10 @@ import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
 import net.officefloor.frame.api.build.TaskBuilder;
 import net.officefloor.frame.api.build.TaskFactory;
 import net.officefloor.frame.api.build.WorkBuilder;
+import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
+import net.officefloor.frame.spi.governance.Governance;
 
 /**
  * {@link TaskNode} implementation.
@@ -118,6 +122,12 @@ public class TaskNodeImpl implements TaskNode {
 	 * {@link OfficeDuty}.
 	 */
 	private final List<DutyNode> postTaskDuties = new LinkedList<DutyNode>();
+
+	/**
+	 * Listing of {@link OfficeGovernance} instances providing
+	 * {@link Governance} over this {@link Task}.
+	 */
+	private final List<GovernanceNode> governances = new LinkedList<GovernanceNode>();
 
 	/**
 	 * Flag indicating if the context of the {@link Office} for this
@@ -447,6 +457,16 @@ public class TaskNodeImpl implements TaskNode {
 		for (DutyNode postDuty : this.postTaskDuties) {
 			postDuty.buildPostTaskAdministration(workBuilder, taskBuilder);
 		}
+
+		// Build the governance (first inherited then specific for task)
+		SectionNode section = this.workNode.getSectionNode();
+		GovernanceNode[] sectionGovernances = section.getGoverningGovernances();
+		for (GovernanceNode governance : sectionGovernances) {
+			taskBuilder.addGovernance(governance.getOfficeGovernanceName());
+		}
+		for (GovernanceNode governance : this.governances) {
+			taskBuilder.addGovernance(governance.getOfficeGovernanceName());
+		}
 	}
 
 	/*
@@ -596,6 +616,24 @@ public class TaskNodeImpl implements TaskNode {
 
 		// Add the post task duty
 		this.postTaskDuties.add(dutyNode);
+	}
+
+	@Override
+	public void addGovernance(OfficeGovernance governance) {
+
+		// Ensure governance node
+		if (!(governance instanceof GovernanceNode)) {
+			this.addIssue("Invalid governance: "
+					+ governance
+					+ " ["
+					+ (governance == null ? null : governance.getClass()
+							.getName()) + "]");
+			return; // can not add governance
+		}
+		GovernanceNode governanceNode = (GovernanceNode) governance;
+
+		// Add the governance
+		this.governances.add(governanceNode);
 	}
 
 }

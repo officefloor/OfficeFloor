@@ -24,6 +24,7 @@ import java.util.Map;
 import net.officefloor.compile.impl.util.DoubleKeyMap;
 import net.officefloor.frame.spi.administration.Administrator;
 import net.officefloor.frame.spi.administration.Duty;
+import net.officefloor.frame.spi.governance.Governance;
 import net.officefloor.model.office.AdministratorModel;
 import net.officefloor.model.office.AdministratorToOfficeTeamModel;
 import net.officefloor.model.office.DutyModel;
@@ -52,6 +53,8 @@ import net.officefloor.model.office.OfficeManagedObjectToOfficeManagedObjectSour
 import net.officefloor.model.office.OfficeModel;
 import net.officefloor.model.office.OfficeRepository;
 import net.officefloor.model.office.OfficeSectionInputModel;
+import net.officefloor.model.office.OfficeSectionManagedObjectModel;
+import net.officefloor.model.office.OfficeSectionManagedObjectToOfficeGovernanceModel;
 import net.officefloor.model.office.OfficeSectionModel;
 import net.officefloor.model.office.OfficeSectionObjectModel;
 import net.officefloor.model.office.OfficeSectionObjectToExternalManagedObjectModel;
@@ -61,7 +64,9 @@ import net.officefloor.model.office.OfficeSectionOutputToOfficeSectionInputModel
 import net.officefloor.model.office.OfficeSectionResponsibilityModel;
 import net.officefloor.model.office.OfficeSectionResponsibilityToOfficeTeamModel;
 import net.officefloor.model.office.OfficeSubSectionModel;
+import net.officefloor.model.office.OfficeSubSectionToOfficeGovernanceModel;
 import net.officefloor.model.office.OfficeTaskModel;
+import net.officefloor.model.office.OfficeTaskToOfficeGovernanceModel;
 import net.officefloor.model.office.OfficeTaskToPostDutyModel;
 import net.officefloor.model.office.OfficeTaskToPreDutyModel;
 import net.officefloor.model.office.OfficeTeamModel;
@@ -395,11 +400,6 @@ public class OfficeRepositoryImpl implements OfficeRepository {
 			}
 		}
 
-		// Connect tasks to duties
-		for (OfficeSectionModel section : office.getOfficeSections()) {
-			this.connectTasksToDuties(section.getOfficeSubSection(), duties);
-		}
-
 		// Connect the external managed objects to administrators
 		for (ExternalManagedObjectModel extMo : office
 				.getExternalManagedObjects()) {
@@ -465,25 +465,47 @@ public class OfficeRepositoryImpl implements OfficeRepository {
 			}
 		}
 
+		// Connect the sub sections
+		for (OfficeSectionModel section : office.getOfficeSections()) {
+			this.connectSubSections(section.getOfficeSubSection(), duties,
+					governances);
+		}
+
 		// Return the office
 		return office;
 	}
 
 	/**
-	 * Connects the {@link OfficeTaskModel} to {@link DutyModel} instances.
+	 * Connects the {@link OfficeSubSectionModel} instances.
 	 * 
 	 * @param subSection
 	 *            {@link OfficeSubSectionModel}.
 	 * @param duties
 	 *            Map of {@link DutyModel} instances by {@link Administrator}
 	 *            then {@link Duty} name.
+	 * @param governances
+	 *            Map of {@link OfficeGovernanceModel} instances by
+	 *            {@link Governance} name.
 	 */
-	private void connectTasksToDuties(OfficeSubSectionModel subSection,
-			DoubleKeyMap<String, String, DutyModel> duties) {
+	private void connectSubSections(OfficeSubSectionModel subSection,
+			DoubleKeyMap<String, String, DutyModel> duties,
+			Map<String, OfficeGovernanceModel> governances) {
 
 		// Ensure have the sub section
 		if (subSection == null) {
 			return;
+		}
+
+		// Connect sub section to governances
+		for (OfficeSubSectionToOfficeGovernanceModel conn : subSection
+				.getOfficeGovernances()) {
+			OfficeGovernanceModel governance = governances.get(conn
+					.getOfficeGovernanceName());
+			if (governance != null) {
+				conn.setOfficeSubSection(subSection);
+				conn.setOfficeGovernance(governance);
+				conn.connect();
+			}
 		}
 
 		// Connect the sub section tasks to pre duties
@@ -512,10 +534,39 @@ public class OfficeRepositoryImpl implements OfficeRepository {
 			}
 		}
 
+		// Connect the sub section tasks to governance
+		for (OfficeTaskModel task : subSection.getOfficeTasks()) {
+			for (OfficeTaskToOfficeGovernanceModel conn : task
+					.getOfficeGovernances()) {
+				OfficeGovernanceModel governance = governances.get(conn
+						.getOfficeGovernanceName());
+				if (governance != null) {
+					conn.setOfficeTask(task);
+					conn.setOfficeGovernance(governance);
+					conn.connect();
+				}
+			}
+		}
+
+		// Connect the section managed objects to governance
+		for (OfficeSectionManagedObjectModel mo : subSection
+				.getOfficeSectionManagedObjects()) {
+			for (OfficeSectionManagedObjectToOfficeGovernanceModel conn : mo
+					.getOfficeGovernances()) {
+				OfficeGovernanceModel governance = governances.get(conn
+						.getOfficeGovernanceName());
+				if (governance != null) {
+					conn.setOfficeSectionManagedObject(mo);
+					conn.setOfficeGovernance(governance);
+					conn.connect();
+				}
+			}
+		}
+
 		// Connect task to duties for further sub sections
 		for (OfficeSubSectionModel subSubSection : subSection
 				.getOfficeSubSections()) {
-			this.connectTasksToDuties(subSubSection, duties);
+			this.connectSubSections(subSubSection, duties, governances);
 		}
 	}
 
@@ -657,6 +708,15 @@ public class OfficeRepositoryImpl implements OfficeRepository {
 			}
 		}
 
+		// Specify governances to sub sections
+		for (OfficeGovernanceModel governance : office.getOfficeGovernances()) {
+			for (OfficeSubSectionToOfficeGovernanceModel conn : governance
+					.getOfficeSubSections()) {
+				conn.setOfficeGovernanceName(governance
+						.getOfficeGovernanceName());
+			}
+		}
+
 		// Specify pre duties to office tasks
 		for (AdministratorModel admin : office.getOfficeAdministrators()) {
 			for (DutyModel duty : admin.getDuties()) {
@@ -674,6 +734,24 @@ public class OfficeRepositoryImpl implements OfficeRepository {
 					conn.setAdministratorName(admin.getAdministratorName());
 					conn.setDutyName(duty.getDutyName());
 				}
+			}
+		}
+
+		// Specify governances to office tasks
+		for (OfficeGovernanceModel governance : office.getOfficeGovernances()) {
+			for (OfficeTaskToOfficeGovernanceModel conn : governance
+					.getOfficeTasks()) {
+				conn.setOfficeGovernanceName(governance
+						.getOfficeGovernanceName());
+			}
+		}
+
+		// Specify governance to section managed objects
+		for (OfficeGovernanceModel governance : office.getOfficeGovernances()) {
+			for (OfficeSectionManagedObjectToOfficeGovernanceModel conn : governance
+					.getOfficeSectionManagedObjects()) {
+				conn.setOfficeGovernanceName(governance
+						.getOfficeGovernanceName());
 			}
 		}
 

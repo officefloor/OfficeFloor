@@ -25,7 +25,9 @@ import java.util.List;
 import java.util.Set;
 
 import net.officefloor.compile.administrator.AdministratorType;
+import net.officefloor.compile.governance.GovernanceType;
 import net.officefloor.compile.internal.structure.AdministratorNode;
+import net.officefloor.compile.internal.structure.GovernanceNode;
 import net.officefloor.compile.internal.structure.LinkObjectNode;
 import net.officefloor.compile.internal.structure.NodeContext;
 import net.officefloor.compile.internal.structure.OfficeObjectNode;
@@ -35,11 +37,13 @@ import net.officefloor.compile.section.SectionObjectType;
 import net.officefloor.compile.spi.office.ObjectDependency;
 import net.officefloor.compile.spi.office.OfficeAdministrator;
 import net.officefloor.compile.spi.office.OfficeArchitect;
+import net.officefloor.compile.spi.office.OfficeGovernance;
 import net.officefloor.compile.spi.office.OfficeObject;
 import net.officefloor.compile.spi.office.OfficeSectionObject;
 import net.officefloor.compile.spi.officefloor.DeployedOffice;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.manage.OfficeFloor;
+import net.officefloor.frame.spi.governance.Governance;
 
 /**
  * {@link OfficeObjectNode} implementation.
@@ -59,6 +63,13 @@ public class OfficeObjectNodeImpl implements OfficeObjectNode {
 	 * {@link OfficeManagedObjectType}.
 	 */
 	private final List<AdministratorNode> administrators = new LinkedList<AdministratorNode>();
+
+	/**
+	 * Listing of the {@link GovernanceNode} instances of the
+	 * {@link OfficeGovernance} instances providing {@link Governance} over this
+	 * {@link OfficeObjectNode}.
+	 */
+	private final List<GovernanceNode> governances = new LinkedList<GovernanceNode>();
 
 	/**
 	 * Location of the {@link Office} containing this
@@ -149,6 +160,17 @@ public class OfficeObjectNodeImpl implements OfficeObjectNode {
 	}
 
 	@Override
+	public void addGovernance(GovernanceNode governance) {
+		this.governances.add(governance);
+	}
+
+	@Override
+	public GovernanceNode[] getGovernances() {
+		return this.governances.toArray(new GovernanceNode[this.governances
+				.size()]);
+	}
+
+	@Override
 	public void addOfficeFloorContext(String officeFloorLocation) {
 		this.officeFloorLocation = officeFloorLocation;
 		this.isInOfficeFloorContext = true;
@@ -173,6 +195,8 @@ public class OfficeObjectNodeImpl implements OfficeObjectNode {
 
 		// Obtain the set of extension interfaces to be supported
 		Set<String> extensionInterfaces = new HashSet<String>();
+
+		// Load the extension interfaces for administration
 		for (AdministratorNode admin : this.administrators) {
 
 			// Attempt to obtain the administrator type
@@ -183,6 +207,20 @@ public class OfficeObjectNodeImpl implements OfficeObjectNode {
 
 			// Add the extension interface
 			Class<?> extensionInterface = adminType.getExtensionInterface();
+			extensionInterfaces.add(extensionInterface.getName());
+		}
+
+		// Load the extension interfaces for governance
+		for (GovernanceNode governance : this.governances) {
+
+			// Attempt to obtain the governance type
+			GovernanceType<?, ?> govType = governance.getGovernanceType();
+			if (govType == null) {
+				continue; // problem loading governance type
+			}
+
+			// Add the extension interface
+			Class<?> extensionInterface = govType.getExtensionInterface();
 			extensionInterfaces.add(extensionInterface.getName());
 		}
 
@@ -225,6 +263,15 @@ public class OfficeObjectNodeImpl implements OfficeObjectNode {
 
 	@Override
 	public String getAdministerableManagedObjectName() {
+		return this.objectName;
+	}
+
+	/*
+	 * ==================== GovernerableManagedObject ==========================
+	 */
+
+	@Override
+	public String getGovernerableManagedObjectName() {
 		return this.objectName;
 	}
 

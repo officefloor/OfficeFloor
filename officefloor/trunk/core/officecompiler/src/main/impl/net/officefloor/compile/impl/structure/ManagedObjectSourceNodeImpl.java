@@ -26,6 +26,7 @@ import net.officefloor.compile.impl.util.CompileUtil;
 import net.officefloor.compile.impl.util.LinkUtil;
 import net.officefloor.compile.impl.util.StringExtractor;
 import net.officefloor.compile.internal.structure.BoundManagedObjectNode;
+import net.officefloor.compile.internal.structure.GovernanceNode;
 import net.officefloor.compile.internal.structure.InputManagedObjectNode;
 import net.officefloor.compile.internal.structure.ManagedObjectDependencyNode;
 import net.officefloor.compile.internal.structure.ManagedObjectFlowNode;
@@ -592,6 +593,20 @@ public class ManagedObjectSourceNodeImpl implements ManagedObjectSourceNode {
 				// Bind the managed object to process state of managing office
 				DependencyMappingBuilder inputDependencyMappings = managingOfficeBuilder
 						.setInputManagedObjectName(inputBoundManagedObjectName);
+
+				// Provide governance for office floor input managed object.
+				// For others, should be configured through Office (for flows).
+				if (this.inputManagedObjectNode != null) {
+					// Get governances for input managed object of office
+					GovernanceNode[] governances = this.inputManagedObjectNode
+							.getGovernances(managingOffice);
+
+					// Map in the governances
+					for (GovernanceNode governance : governances) {
+						inputDependencyMappings.mapGovernance(governance
+								.getOfficeGovernanceName());
+					}
+				}
 
 				// Determine if dependencies
 				ManagedObjectDependencyType<?>[] dependencyTypes = managedObjectType
