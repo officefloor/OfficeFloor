@@ -191,7 +191,7 @@ public class GovernanceFlowTest extends AbstractGovernanceTestCase {
 		GovernanceBuilder<GovernanceFlowKeys> governance = this
 				.getOfficeBuilder().addGovernance("GOVERNANCE",
 						new FlowGovernanceFactory(), MockTransaction.class);
-		governance.setTeamName(TEAM_GOVERNANCE);
+		governance.setTeam(TEAM_GOVERNANCE);
 		governance.linkFlow(GovernanceFlowKeys.BEGIN, "WORK", "flowBegin",
 				FlowInstigationStrategyEnum.SEQUENTIAL, String.class);
 		governance.linkFlow(GovernanceFlowKeys.COMMIT, "WORK", "flowCommit",

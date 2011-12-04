@@ -40,7 +40,7 @@ public interface GovernanceBuilder<F extends Enum<F>> {
 	 * @param teamName
 	 *            {@link Team} name.
 	 */
-	void setTeamName(String teamName);
+	void setTeam(String teamName);
 
 	/**
 	 * Links in a {@link JobSequence} by specifying the first {@link Task} of

@@ -190,7 +190,7 @@ public abstract class AbstractGovernanceStressTestCase extends
 				.addGovernance(GOVERNANCE_NAME,
 						new MockTransactionalGovernanceFactory(),
 						MockTransaction.class);
-		governance.setTeamName(TEAM_NAME);
+		governance.setTeam(TEAM_NAME);
 
 		// Configure governance
 		workObject.isManagedGovernance = isManagedGovernance;
