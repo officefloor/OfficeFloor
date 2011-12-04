@@ -25,15 +25,22 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+import javax.transaction.xa.XAResource;
+
+import net.officefloor.compile.governance.GovernanceType;
 import net.officefloor.compile.impl.structure.OfficeObjectNodeImpl;
 import net.officefloor.compile.internal.structure.OfficeObjectNode;
 import net.officefloor.compile.internal.structure.SectionObjectNode;
 import net.officefloor.compile.properties.PropertyList;
+import net.officefloor.compile.spi.governance.source.GovernanceSource;
 import net.officefloor.compile.spi.office.OfficeArchitect;
 import net.officefloor.compile.spi.office.OfficeEscalation;
+import net.officefloor.compile.spi.office.OfficeGovernance;
 import net.officefloor.compile.spi.office.OfficeObject;
 import net.officefloor.compile.spi.office.OfficeSection;
 import net.officefloor.compile.spi.office.OfficeSectionInput;
+import net.officefloor.compile.spi.office.OfficeSectionManagedObject;
+import net.officefloor.compile.spi.office.OfficeSectionManagedObjectSource;
 import net.officefloor.compile.spi.office.OfficeSectionObject;
 import net.officefloor.compile.spi.office.OfficeSectionOutput;
 import net.officefloor.compile.spi.office.OfficeSubSection;
@@ -46,6 +53,7 @@ import net.officefloor.compile.test.section.SectionLoaderUtil;
 import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
 import net.officefloor.frame.api.escalate.Escalation;
 import net.officefloor.frame.api.execute.Task;
+import net.officefloor.frame.spi.governance.Governance;
 import net.officefloor.frame.spi.team.Team;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.managedobject.clazz.ClassManagedObjectSource;
@@ -90,7 +98,7 @@ public class AutoWireOfficeSourceTest extends OfficeFrameTestCase {
 		this.recordSectionObjects(SECTION);
 		this.recordSectionInputs(SECTION);
 		this.recordSectionOutputs(SECTION);
-		this.recordAssignTeams(SECTION);
+		this.recordSubSections(SECTION);
 
 		// Test
 		this.replayMockObjects();
@@ -176,7 +184,7 @@ public class AutoWireOfficeSourceTest extends OfficeFrameTestCase {
 		this.recordSectionObjects(SECTION);
 		this.recordSectionInputs(SECTION);
 		this.recordSectionOutputs(SECTION);
-		this.recordAssignTeams(SECTION, "SubSection");
+		this.recordSubSections(SECTION, "SubSection");
 		this.recordSubSections("SubSection", "SubSubSectionOne",
 				"SubSubSectionTwo");
 		this.recordSubSections("SubSubSectionOne");
@@ -210,12 +218,12 @@ public class AutoWireOfficeSourceTest extends OfficeFrameTestCase {
 		this.recordSectionObjects(ONE);
 		this.recordSectionInputs(ONE);
 		this.recordSectionOutputs(ONE, ONE_OUTPUT);
-		this.recordAssignTeams(ONE);
+		this.recordSubSections(ONE);
 		this.recordOfficeSection(TWO);
 		this.recordSectionObjects(TWO);
 		this.recordSectionInputs(TWO, TWO_INPUT);
 		this.recordSectionOutputs(TWO);
-		this.recordAssignTeams(TWO);
+		this.recordSubSections(TWO);
 		OfficeSectionOutput output = this.outputs.get(ONE).get(ONE_OUTPUT);
 		OfficeSectionInput input = this.inputs.get(TWO).get(TWO_INPUT);
 		this.architect.link(output, input);
@@ -294,12 +302,12 @@ public class AutoWireOfficeSourceTest extends OfficeFrameTestCase {
 		this.recordSectionObjects(ONE);
 		this.recordSectionInputs(ONE);
 		this.recordSectionOutputs(ONE);
-		this.recordAssignTeams(ONE);
+		this.recordSubSections(ONE);
 		this.recordOfficeSection(TWO);
 		this.recordSectionObjects(TWO);
 		this.recordSectionInputs(TWO, TWO_INPUT);
 		this.recordSectionOutputs(TWO);
-		this.recordAssignTeams(TWO);
+		this.recordSubSections(TWO);
 		this.architect
 				.addIssue(
 						"Unknown section output 'One:output' to link to section input 'Two:input'",
@@ -333,12 +341,12 @@ public class AutoWireOfficeSourceTest extends OfficeFrameTestCase {
 		this.recordSectionObjects(ONE);
 		this.recordSectionInputs(ONE);
 		this.recordSectionOutputs(ONE, ONE_OUTPUT);
-		this.recordAssignTeams(ONE);
+		this.recordSubSections(ONE);
 		this.recordOfficeSection(TWO);
 		this.recordSectionObjects(TWO);
 		this.recordSectionInputs(TWO);
 		this.recordSectionOutputs(TWO);
-		this.recordAssignTeams(TWO);
+		this.recordSubSections(TWO);
 		this.architect
 				.addIssue(
 						"Unknown section input 'Two:input' for linking section output 'One:output'",
@@ -366,7 +374,7 @@ public class AutoWireOfficeSourceTest extends OfficeFrameTestCase {
 		this.recordSectionObjects("SECTION");
 		this.recordSectionInputs("SECTION", "INPUT");
 		this.recordSectionOutputs("SECTION");
-		this.recordAssignTeams("SECTION");
+		this.recordSubSections("SECTION");
 		this.recordEscalation(Exception.class, "SECTION", "INPUT");
 
 		// Test
@@ -392,7 +400,196 @@ public class AutoWireOfficeSourceTest extends OfficeFrameTestCase {
 		this.recordSectionObjects(SECTION, Connection.class);
 		this.recordSectionInputs(SECTION);
 		this.recordSectionOutputs(SECTION);
-		this.recordAssignTeams(SECTION);
+		this.recordSubSections(SECTION);
+
+		// Test
+		this.replayMockObjects();
+		source.sourceOffice(this.architect, this.context);
+		this.verifyMockObjects();
+	}
+
+	/**
+	 * Ensure can provide {@link Governance} over {@link OfficeObject}.
+	 */
+	public void testOfficeObjectGovernance() throws Exception {
+
+		final String SECTION = "Section";
+		final String GOVERNANCE = "GOVERNANCE";
+
+		// Create and configure the source
+		AutoWireOfficeSource source = new AutoWireOfficeSource();
+		this.addSection(source, SECTION);
+		this.addGovernance(source, GOVERNANCE, "PROPERTY_NAME",
+				"PROPERTY_VALUE");
+		source.addOfficeObjectExtension(Connection.class, XAResource.class);
+
+		// Record governance over office object
+		OfficeTeam team = this.recordTeam();
+		this.recordOfficeSection(SECTION);
+		this.recordSectionObjects(SECTION, Connection.class);
+		this.recordSectionInputs(SECTION);
+		this.recordSectionOutputs(SECTION);
+		this.recordSubSections(SECTION);
+		this.recordGovernance(GOVERNANCE, XAResource.class, team);
+		this.recordGovernOfficeObject(GOVERNANCE, Connection.class);
+		this.recordGovernManagedObject(GOVERNANCE, SECTION, null, false);
+
+		// Test
+		this.replayMockObjects();
+		source.sourceOffice(this.architect, this.context);
+		this.verifyMockObjects();
+	}
+
+	/**
+	 * Ensure can provide {@link Governance} over {@link ManagedObject}.
+	 */
+	public void testManagedObjectGovernance() throws Exception {
+
+		final String SECTION = "SECTION";
+		final String SUB_SECTION = "SUB_SECTION";
+		final String SUB_SUB_SECTION = "SUB_SUB_SECTION";
+		final String GOVERNANCE = "GOVERNANCE";
+
+		// Create and configure the source
+		AutoWireOfficeSource source = new AutoWireOfficeSource();
+		this.addSection(source, SECTION);
+		this.addGovernance(source, GOVERNANCE, "PROPERTY_NAME",
+				"PROPERTY_VALUE");
+
+		// Record governance over office object
+		OfficeTeam team = this.recordTeam();
+		this.recordOfficeSection(SECTION);
+		this.recordSectionObjects(SECTION);
+		this.recordSectionInputs(SECTION);
+		this.recordSectionOutputs(SECTION);
+		this.recordSubSections(SECTION, SUB_SECTION);
+		this.recordSubSections(SUB_SECTION, SUB_SUB_SECTION);
+		this.recordSubSections(SUB_SUB_SECTION);
+		this.recordGovernance(GOVERNANCE, XAResource.class, team);
+		this.recordGovernManagedObject(GOVERNANCE, SECTION, XAResource.class,
+				true, SUB_SECTION);
+		this.recordGovernManagedObject(GOVERNANCE, SUB_SECTION, Map.class,
+				false, SUB_SUB_SECTION);
+		this.recordGovernManagedObject(GOVERNANCE, SUB_SUB_SECTION,
+				XAResource.class, true);
+
+		// Test
+		this.replayMockObjects();
+		source.sourceOffice(this.architect, this.context);
+		this.verifyMockObjects();
+	}
+
+	/**
+	 * Ensure issue if unkonwn {@link AutoWireSection} for {@link Governance}.
+	 */
+	public void testUnknownSectionGovernance() throws Exception {
+
+		final String SECTION = "SECTION";
+		final String UNKNOWN_SECTION = "UNKNOWN";
+		final String GOVERNANCE = "GOVERNANCE";
+
+		final AutoWireSection unknownSection = this
+				.createMock(AutoWireSection.class);
+
+		// Create and configure the source
+		AutoWireOfficeSource source = new AutoWireOfficeSource();
+		this.addSection(source, SECTION);
+		AutoWireGovernance governance = this.addGovernance(source, GOVERNANCE);
+		governance.governSection(unknownSection);
+
+		// Record governance over office object
+		OfficeTeam team = this.recordTeam();
+		this.recordOfficeSection(SECTION);
+		this.recordSectionObjects(SECTION);
+		this.recordSectionInputs(SECTION);
+		this.recordSectionOutputs(SECTION);
+		this.recordSubSections(SECTION);
+		this.recordGovernance(GOVERNANCE, XAResource.class, team);
+		this.recordReturn(unknownSection, unknownSection.getSectionName(),
+				UNKNOWN_SECTION);
+		this.architect.addIssue("Unknown section '" + UNKNOWN_SECTION
+				+ "' to be governed", AssetType.GOVERNANCE, GOVERNANCE);
+		this.recordGovernManagedObject(GOVERNANCE, SECTION, null, false);
+
+		// Test
+		this.replayMockObjects();
+		source.sourceOffice(this.architect, this.context);
+		this.verifyMockObjects();
+	}
+
+	/**
+	 * Ensure can provide {@link Governance} over {@link AutoWireSection}.
+	 */
+	public void testSectionGovernance() throws Exception {
+
+		final String SECTION = "Section";
+		final String GOVERNANCE = "GOVERNANCE";
+
+		// Create and configure the source
+		AutoWireOfficeSource source = new AutoWireOfficeSource();
+		AutoWireSection section = this.addSection(source, SECTION);
+		AutoWireGovernance governance = this.addGovernance(source, GOVERNANCE,
+				"PROPERTY_NAME", "PROPERTY_VALUE");
+		governance.governSection(section);
+
+		// Record governance over office object
+		OfficeTeam team = this.recordTeam();
+		this.recordOfficeSection(SECTION);
+		this.recordSectionObjects(SECTION);
+		this.recordSectionInputs(SECTION);
+		this.recordSectionOutputs(SECTION);
+		this.recordSubSections(SECTION);
+		this.recordGovernance(GOVERNANCE, XAResource.class, team);
+		this.recordGovernSections(GOVERNANCE, SECTION);
+		this.recordGovernManagedObject(GOVERNANCE, SECTION, null, false);
+
+		// Test
+		this.replayMockObjects();
+		source.sourceOffice(this.architect, this.context);
+		this.verifyMockObjects();
+	}
+
+	/**
+	 * Ensure can assign specific {@link Team} for {@link Governance} by
+	 * extension interface.
+	 */
+	public void testGovernanceTeamByExtensionInterface() throws Exception {
+
+		final String GOVERNANCE = "GOVERNANCE";
+
+		// Create and configure the source
+		AutoWireOfficeSource source = new AutoWireOfficeSource();
+		source.addResponsibility(XAResource.class);
+		this.addGovernance(source, GOVERNANCE, "PROPERTY_NAME",
+				"PROPERTY_VALUE");
+
+		// Record governance over office object
+		this.recordTeam();
+		OfficeTeam team = this.recordTeam(XAResource.class);
+		this.recordGovernance(GOVERNANCE, XAResource.class, team);
+		this.recordGovernSections(GOVERNANCE);
+
+		// Test
+		this.replayMockObjects();
+		source.sourceOffice(this.architect, this.context);
+		this.verifyMockObjects();
+	}
+
+	/**
+	 * Ensure can assign default {@link Team} for {@link Governance}.
+	 */
+	public void testGovernanceTeamByDefaultTeam() throws Exception {
+
+		final String GOVERNANCE = "GOVERNANCE";
+
+		// Create and configure the source
+		AutoWireOfficeSource source = new AutoWireOfficeSource();
+		this.addGovernance(source, GOVERNANCE);
+
+		// Record governance over office object
+		OfficeTeam team = this.recordTeam();
+		this.recordGovernance(GOVERNANCE, XAResource.class, team);
+		this.recordGovernSections(GOVERNANCE);
 
 		// Test
 		this.replayMockObjects();
@@ -422,7 +619,7 @@ public class AutoWireOfficeSourceTest extends OfficeFrameTestCase {
 	/**
 	 * Ensure can assign a {@link Team} responsibility based on {@link Task}
 	 * having dependency on a {@link ManagedObject} that depends on the object
-	 * type..
+	 * type.
 	 */
 	public void testAssignTeamBasedOnManagedObjectDependency() throws Exception {
 		this.doAssignTeamTest(MockTeamDependencySection.class);
@@ -542,6 +739,16 @@ public class AutoWireOfficeSourceTest extends OfficeFrameTestCase {
 	 * {@link OfficeSubSection} instances by name.
 	 */
 	private final Map<String, OfficeSubSection> subSections = new HashMap<String, OfficeSubSection>();
+
+	/**
+	 * {@link OfficeGovernance} instances by name.
+	 */
+	private final Map<String, OfficeGovernance> governances = new HashMap<String, OfficeGovernance>();
+
+	/**
+	 * {@link PropertyList} instances by {@link Governance} name.
+	 */
+	private final Map<String, PropertyList> governanceProperties = new HashMap<String, PropertyList>();
 
 	/**
 	 * Records the {@link OfficeTeam}.
@@ -752,13 +959,236 @@ public class AutoWireOfficeSourceTest extends OfficeFrameTestCase {
 	 * Obtains the {@link OfficeSection}.
 	 * 
 	 * @param sectionName
-	 *            Name.
+	 *            Name of the {@link OfficeSection}.
 	 * @return {@link OfficeSection}.
 	 */
 	private OfficeSection getOfficeSection(String sectionName) {
 		OfficeSection section = this.sections.get(sectionName);
 		assertNotNull("Unknown section " + sectionName, section);
 		return section;
+	}
+
+	/**
+	 * Obtains the {@link OfficeSubSection}.
+	 * 
+	 * @param sectionName
+	 *            Name of the {@link OfficeSubSection}.
+	 * @return {@link OfficeSubSection}.
+	 */
+	private OfficeSubSection getOfficeSubSection(String sectionName) {
+
+		// Obtain the office sub section
+		OfficeSubSection section = this.sections.get(sectionName);
+		if (section == null) {
+
+			// Obtain as sub section
+			section = this.subSections.get(sectionName);
+			if (section == null) {
+
+				// Unknown section
+				fail("Unknown section " + sectionName);
+			}
+		}
+
+		// Return the office sub section
+		return section;
+	}
+
+	/**
+	 * Adds an {@link AutoWireGovernance}.
+	 * 
+	 * @param source
+	 *            {@link AutoWireOfficeSource}.
+	 * @param governanceName
+	 *            Name of the {@link Governance}.
+	 * @param propertyNameValues
+	 *            Property name value pairs.
+	 * @return {@link AutoWireGovernances}.
+	 */
+	private AutoWireGovernance addGovernance(AutoWireOfficeSource source,
+			String governanceName, String... propertyNameValues) {
+
+		// Add the governance
+		AutoWireGovernance governance = source.addGovernance(governanceName,
+				GovernanceSource.class);
+
+		// Load the properties
+		for (int i = 0; i < propertyNameValues.length; i += 2) {
+			String name = propertyNameValues[i];
+			String value = propertyNameValues[i + 1];
+			governance.addProperty(name, value);
+		}
+
+		// Register properties for later recording
+		this.governanceProperties.put(governanceName,
+				governance.getProperties());
+
+		// Return the governance
+		return governance;
+	}
+
+	/**
+	 * Records adding the {@link Governance}.
+	 * 
+	 * @param governanceName
+	 *            Name of the {@link Governance}.
+	 * @param extensionInterface
+	 *            Extension interface.
+	 * @param team
+	 *            {@link OfficeTeam} for the {@link Governance}.
+	 */
+	private void recordGovernance(String governanceName,
+			Class<?> extensionInterface, OfficeTeam team) {
+		assertNull("Already Governance by name " + governanceName,
+				this.governances.get(governanceName));
+
+		// Record creating the Governance
+		OfficeGovernance governance = this.createMock(OfficeGovernance.class);
+		this.recordReturn(this.architect, this.architect.addOfficeGovernance(
+				governanceName, GovernanceSource.class.getName()), governance);
+
+		// Load the properties
+		PropertyList properties = this.governanceProperties.get(governanceName);
+		if (properties != null) {
+			for (net.officefloor.compile.properties.Property property : properties) {
+				governance.addProperty(property.getName(), property.getValue());
+			}
+		}
+
+		// Register the governance
+		this.governances.put(governanceName, governance);
+
+		// Load the governance type
+		GovernanceType<?, ?> governanceType = this
+				.createMock(GovernanceType.class);
+		this.recordReturn(
+				this.context,
+				this.context.loadGovernanceType(
+						GovernanceSource.class.getName(), properties),
+				governanceType);
+		this.recordReturn(governanceType,
+				governanceType.getExtensionInterface(), extensionInterface);
+
+		// Record specifying the team
+		this.architect.link(governance, team);
+	}
+
+	/**
+	 * Records {@link Governance} over the sections.
+	 * 
+	 * @param governanceName
+	 *            Name of {@link Governance}.
+	 * @param sectionNames
+	 *            Names of the {@link AutoWireSection} instances to provide
+	 *            {@link Governance}.
+	 */
+	private void recordGovernSections(String governanceName,
+			String... sectionNames) {
+
+		// Obtain the governance
+		OfficeGovernance officeGovernance = this.governances
+				.get(governanceName);
+		assertNotNull("Unknown governance " + governanceName);
+
+		// Record governing the sections
+		for (String sectionName : sectionNames) {
+
+			// Obtain the section
+			OfficeSubSection section = this.getOfficeSubSection(sectionName);
+
+			// Govern the section
+			section.addGovernance(officeGovernance);
+		}
+	}
+
+	/**
+	 * Records {@link Governance} for the {@link ManagedObject}.
+	 * 
+	 * @param governanceName
+	 *            Name of the {@link Governance}.
+	 * @param sectionName
+	 *            {@link OfficeSubSection} name to contain a
+	 *            {@link ManagedObject} for {@link Governance}.
+	 * @param extensionInterface
+	 *            Extension interface of the {@link ManagedObject} for the
+	 *            section. <code>null</code> indicates no {@link ManagedObject}
+	 *            for section.
+	 * @param isGovern
+	 *            Identifies if the {@link OfficeSectionManagedObject} should be
+	 *            under {@link Governance}.
+	 * @param subSectionNames
+	 *            Names of the {@link OfficeSubSection} instances under the
+	 *            section.
+	 */
+	private void recordGovernManagedObject(String governanceName,
+			String sectionName, Class<?> extensionInterface, boolean isGovern,
+			String... subSectionNames) {
+
+		// Obtain the sub sections
+		List<OfficeSubSection> list = new LinkedList<OfficeSubSection>();
+		for (String subSectionName : subSectionNames) {
+			OfficeSubSection subSection = this.subSections.get(subSectionName);
+			assertNotNull("Unknown sub section " + subSectionName, subSection);
+			list.add(subSection);
+		}
+		OfficeSubSection[] subSections = list.toArray(new OfficeSubSection[list
+				.size()]);
+
+		// Obtain the section
+		OfficeSubSection section = this.getOfficeSubSection(sectionName);
+
+		// Record section managed object
+		OfficeSectionManagedObject mo;
+		if (extensionInterface == null) {
+			// No managed object for section
+			this.recordReturn(section,
+					section.getOfficeSectionManagedObjectSources(),
+					new OfficeSectionManagedObjectSource[0]);
+			mo = null; // no section managed object
+
+		} else {
+			// Managed object for section
+			final OfficeSectionManagedObjectSource moSource = this
+					.createMock(OfficeSectionManagedObjectSource.class);
+			mo = this.createMock(OfficeSectionManagedObject.class);
+			this.recordReturn(section,
+					section.getOfficeSectionManagedObjectSources(),
+					new OfficeSectionManagedObjectSource[] { moSource });
+			this.recordReturn(moSource,
+					moSource.getOfficeSectionManagedObjects(),
+					new OfficeSectionManagedObject[] { mo });
+			this.recordReturn(mo, mo.getSupportedExtensionInterfaces(),
+					new Class<?>[] { extensionInterface });
+		}
+
+		// Provide governance if expected to be under governance
+		OfficeGovernance governance = this.governances.get(governanceName);
+		assertNotNull("Unknown governance " + governanceName);
+		if (isGovern) {
+			governance.governManagedObject(mo);
+		}
+
+		// Record obtain the sub sections
+		this.recordReturn(section, section.getOfficeSubSections(), subSections);
+	}
+
+	/**
+	 * Records {@link Governance} for the {@link OfficeObject}.
+	 * 
+	 * @param governanceName
+	 *            Name of the {@link Governance}.
+	 * @param objectTypes
+	 *            {@link OfficeObject} types to be provided {@link Governance}.
+	 */
+	private void recordGovernOfficeObject(String governanceName,
+			Class<?>... objectTypes) {
+		OfficeGovernance governance = this.governances.get(governanceName);
+		for (Class<?> objectType : objectTypes) {
+			OfficeObject officeObject = this.dependencies.get(objectType);
+
+			// Record governing the Office Object
+			governance.governManagedObject(officeObject);
+		}
 	}
 
 	/**
@@ -849,32 +1279,6 @@ public class AutoWireOfficeSourceTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Records the assigning the {@link Team} instances.
-	 * 
-	 * @param sectionName
-	 *            Section name.
-	 * @param subSectionNames
-	 *            Name of the {@link OfficeSubSection} instances.
-	 */
-	private void recordAssignTeams(String sectionName,
-			String... subSectionNames) {
-
-		// Obtain the section
-		OfficeSection section = this.getOfficeSection(sectionName);
-
-		// Record task on section
-		OfficeTask task = this.createMock(OfficeTask.class);
-		this.recordReturn(section, section.getOfficeTasks(),
-				new OfficeTask[] { task });
-		TaskTeam taskTeam = this.createMock(TaskTeam.class);
-		this.recordReturn(task, task.getTeamResponsible(), taskTeam);
-		this.architect.link(taskTeam, this.team);
-
-		// Record the sub sections
-		this.recordSubSections(sectionName, subSectionNames);
-	}
-
-	/**
 	 * Records the {@link OfficeSubSection} instances.
 	 * 
 	 * @param sectionName
@@ -898,34 +1302,19 @@ public class AutoWireOfficeSourceTest extends OfficeFrameTestCase {
 		OfficeSubSection[] subSections = list.toArray(new OfficeSubSection[list
 				.size()]);
 
-		// Record from office section
-		OfficeSection section = this.sections.get(sectionName);
-		if (section != null) {
-			this.recordReturn(section, section.getOfficeSubSections(),
-					subSections);
+		// Obtain the section
+		OfficeSubSection section = this.getOfficeSubSection(sectionName);
 
-		} else {
-			// Record from office sub section
-			OfficeSubSection subSection = this.subSections.get(sectionName);
-			if (subSection != null) {
-				this.recordReturn(subSection,
-						subSection.getOfficeSubSections(), subSections);
+		// Link section tasks to team
+		OfficeTask task = this.createMock(OfficeTask.class);
+		this.recordReturn(section, section.getOfficeTasks(),
+				new OfficeTask[] { task });
+		TaskTeam taskTeam = this.createMock(TaskTeam.class);
+		this.recordReturn(task, task.getTeamResponsible(), taskTeam);
+		this.architect.link(taskTeam, this.team);
 
-			} else {
-				// Unknown section
-				fail("Unknown section " + sectionName);
-			}
-		}
-
-		// Link sub section tasks to team
-		for (OfficeSubSection subSection : subSections) {
-			OfficeTask task = this.createMock(OfficeTask.class);
-			this.recordReturn(subSection, subSection.getOfficeTasks(),
-					new OfficeTask[] { task });
-			TaskTeam taskTeam = this.createMock(TaskTeam.class);
-			this.recordReturn(task, task.getTeamResponsible(), taskTeam);
-			this.architect.link(taskTeam, this.team);
-		}
+		// Record obtaining the sub sections
+		this.recordReturn(section, section.getOfficeSubSections(), subSections);
 	}
 
 	/**

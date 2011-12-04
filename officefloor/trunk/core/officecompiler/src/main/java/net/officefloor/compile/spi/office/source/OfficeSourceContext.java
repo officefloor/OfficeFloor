@@ -19,11 +19,14 @@
 package net.officefloor.compile.spi.office.source;
 
 import net.officefloor.compile.administrator.AdministratorType;
+import net.officefloor.compile.governance.GovernanceType;
 import net.officefloor.compile.managedobject.ManagedObjectType;
 import net.officefloor.compile.properties.PropertyList;
+import net.officefloor.compile.spi.governance.source.GovernanceSource;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.spi.administration.Administrator;
 import net.officefloor.frame.spi.administration.source.AdministratorSource;
+import net.officefloor.frame.spi.governance.Governance;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.spi.source.SourceContext;
@@ -91,5 +94,25 @@ public interface OfficeSourceContext extends SourceContext {
 	 */
 	AdministratorType<?, ?> loadAdministratorType(
 			String administratorSourceClassName, PropertyList properties);
+
+	/**
+	 * <p>
+	 * Loads the {@link GovernanceType}.
+	 * <p>
+	 * This is to enable obtaining the type information for the
+	 * {@link Governance} to allow reflective configuration by the
+	 * {@link OfficeSource}.
+	 * 
+	 * @param governanceSourceClassName
+	 *            Name of the implementing {@link GovernanceSource} class. May
+	 *            also be an alias.
+	 * @param properties
+	 *            {@link PropertyList} for configuring the
+	 *            {@link GovernanceSource}.
+	 * @return {@link GovernanceType} or <code>null</code> if fails to load the
+	 *         {@link GovernanceType}.
+	 */
+	GovernanceType<?, ?> loadGovernanceType(String governanceSourceClassName,
+			PropertyList properties);
 
 }

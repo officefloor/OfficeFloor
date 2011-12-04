@@ -27,7 +27,9 @@ import javax.transaction.xa.XAResource;
 
 import net.officefloor.compile.OfficeFloorCompiler;
 import net.officefloor.compile.administrator.AdministratorType;
+import net.officefloor.compile.governance.GovernanceType;
 import net.officefloor.compile.impl.administrator.MockLoadAdministrator;
+import net.officefloor.compile.impl.governance.MockLoadGovernance;
 import net.officefloor.compile.impl.managedobject.MockLoadManagedObject;
 import net.officefloor.compile.impl.properties.PropertyListImpl;
 import net.officefloor.compile.impl.structure.AbstractStructureTestCase;
@@ -51,6 +53,7 @@ import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.spi.TestSource;
 import net.officefloor.plugin.administrator.clazz.ClassAdministratorSource;
+import net.officefloor.plugin.governance.clazz.ClassGovernanceSource;
 import net.officefloor.plugin.managedobject.clazz.ClassManagedObjectSource;
 
 /**
@@ -543,6 +546,60 @@ public class LoadOfficeTypeTest extends AbstractStructureTestCase {
 	}
 
 	/**
+	 * Ensure can obtain the {@link GovernanceType}.
+	 */
+	public void testLoadGovernanceType() {
+		this.loadOfficeType(true, new Loader() {
+			@Override
+			public void sourceOffice(OfficeArchitect architect,
+					OfficeSourceContext context) throws Exception {
+
+				// Load the governance type
+				PropertyList properties = context.createPropertyList();
+				properties.addProperty(
+						ClassGovernanceSource.CLASS_NAME_PROPERTY_NAME)
+						.setValue(MockLoadGovernance.class.getName());
+				GovernanceType<?, ?> governanceType = context
+						.loadGovernanceType(
+								ClassGovernanceSource.class.getName(),
+								properties);
+
+				// Ensure correct governance type
+				MockLoadGovernance.assertGovernanceType(governanceType);
+			}
+		});
+	}
+
+	/**
+	 * Ensure issue if fails to load the {@link GovernanceType}.
+	 */
+	public void testFailLoadingGovernanceType() {
+
+		// Ensure issue in not loading governance type
+		this.issues.addIssue(LocationType.OFFICE, OFFICE_LOCATION,
+				AssetType.GOVERNANCE, "loadGovernanceType",
+				"Property 'class.name' must be specified");
+		this.record_issue("Failure loading GovernanceType from source "
+				+ ClassGovernanceSource.class.getName());
+
+		// Fail to load the governance type
+		this.loadOfficeType(false, new Loader() {
+			@Override
+			public void sourceOffice(OfficeArchitect architect,
+					OfficeSourceContext context) throws Exception {
+
+				// Do not specify class causing failure to load type
+				PropertyList properties = context.createPropertyList();
+				context.loadGovernanceType(
+						ClassGovernanceSource.class.getName(), properties);
+
+				// Should not reach this point
+				fail("Should not successfully load governance type");
+			}
+		});
+	}
+
+	/**
 	 * Ensure can obtain the {@link AdministratorType}.
 	 */
 	public void testLoadAdministratorType() {
@@ -551,7 +608,7 @@ public class LoadOfficeTypeTest extends AbstractStructureTestCase {
 			public void sourceOffice(OfficeArchitect architect,
 					OfficeSourceContext context) throws Exception {
 
-				// Load the managed object type
+				// Load the administrator type
 				PropertyList properties = context.createPropertyList();
 				properties.addProperty(
 						ClassAdministratorSource.CLASS_NAME_PROPERTY_NAME)
@@ -573,7 +630,7 @@ public class LoadOfficeTypeTest extends AbstractStructureTestCase {
 	 */
 	public void testFailLoadingAdministratorType() {
 
-		// Ensure issue in not loading managed object type
+		// Ensure issue in not loading administrator type
 		this.issues.addIssue(LocationType.OFFICE, OFFICE_LOCATION,
 				AssetType.ADMINISTRATOR, "loadAdministratorType",
 				"Missing property 'class.name'");

@@ -20,6 +20,8 @@ package net.officefloor.compile.impl.office;
 
 import net.officefloor.compile.administrator.AdministratorLoader;
 import net.officefloor.compile.administrator.AdministratorType;
+import net.officefloor.compile.governance.GovernanceLoader;
+import net.officefloor.compile.governance.GovernanceType;
 import net.officefloor.compile.impl.properties.PropertyListSourceProperties;
 import net.officefloor.compile.impl.util.LoadTypeError;
 import net.officefloor.compile.internal.structure.NodeContext;
@@ -116,6 +118,38 @@ public class OfficeSourceContextImpl extends SourceContextImpl implements
 	}
 
 	@Override
+	@SuppressWarnings({ "rawtypes", "unchecked" })
+	public GovernanceType<?, ?> loadGovernanceType(
+			String governanceSourceClassName, PropertyList properties) {
+
+		// Obtain the governance source class
+		Class governanceSourceClass = this.context.getGovernanceSourceClass(
+				governanceSourceClassName, this.officeLocation,
+				"loadAdministratorType");
+
+		// Ensure have the governance source class
+		if (governanceSourceClass == null) {
+			throw new LoadTypeError(GovernanceType.class,
+					governanceSourceClassName);
+		}
+
+		// Load the governance type
+		GovernanceLoader governanceLoader = this.context.getGovernanceLoader(
+				this.officeLocation, "loadGovernanceType");
+		GovernanceType<?, ?> governanceType = governanceLoader
+				.loadGovernanceType(governanceSourceClass, properties);
+
+		// Ensure have the governance type
+		if (governanceType == null) {
+			throw new LoadTypeError(GovernanceType.class,
+					governanceSourceClassName);
+		}
+
+		// Return the governance type
+		return governanceType;
+	}
+
+	@Override
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public AdministratorType<?, ?> loadAdministratorType(
 			String administratorSourceClassName, PropertyList properties) {
@@ -147,4 +181,5 @@ public class OfficeSourceContextImpl extends SourceContextImpl implements
 		// Return the administrator type
 		return administratorType;
 	}
+
 }
