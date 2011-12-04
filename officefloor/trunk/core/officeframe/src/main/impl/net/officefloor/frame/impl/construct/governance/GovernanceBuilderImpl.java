@@ -98,7 +98,7 @@ public class GovernanceBuilderImpl<I, F extends Enum<F>> implements
 	 */
 
 	@Override
-	public void setTeamName(String teamName) {
+	public void setTeam(String teamName) {
 		this.teamName = teamName;
 	}
 

@@ -194,7 +194,7 @@ public class ManagedObjectUnloadGovernanceTest extends
 				.addGovernance("GOVERNANCE",
 						new MockTransactionalGovernanceFactory(),
 						MockTransaction.class);
-		governance.setTeamName(TEAM_GOVERNANCE);
+		governance.setTeam(TEAM_GOVERNANCE);
 		dependenciesOne.mapGovernance("GOVERNANCE");
 		dependenciesTwo.mapGovernance("GOVERNANCE");
 

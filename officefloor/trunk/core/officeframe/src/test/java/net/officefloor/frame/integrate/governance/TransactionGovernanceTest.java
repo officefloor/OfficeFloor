@@ -190,7 +190,7 @@ public class TransactionGovernanceTest extends AbstractGovernanceTestCase {
 				.addGovernance("GOVERNANCE",
 						new MockTransactionalGovernanceFactory(),
 						MockTransaction.class);
-		governance.setTeamName(TEAM_GOVERNANCE);
+		governance.setTeam(TEAM_GOVERNANCE);
 		governance
 				.addEscalation(SQLException.class, "WORK", "handleEscalation");
 		dependencies.mapGovernance("GOVERNANCE");

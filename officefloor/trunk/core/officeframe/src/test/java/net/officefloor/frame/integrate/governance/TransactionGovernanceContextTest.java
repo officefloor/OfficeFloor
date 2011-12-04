@@ -361,7 +361,7 @@ public class TransactionGovernanceContextTest extends
 				.addGovernance(GOVERNANCE_NAME,
 						new MockTransactionalGovernanceFactory(),
 						MockTransaction.class);
-		governance.setTeamName(TEAM_GOVERNANCE);
+		governance.setTeam(TEAM_GOVERNANCE);
 		dependencies.mapGovernance(GOVERNANCE_NAME);
 
 		// Execute the work
