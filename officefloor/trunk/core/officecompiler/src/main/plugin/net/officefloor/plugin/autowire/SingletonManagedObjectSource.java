@@ -18,8 +18,12 @@
 
 package net.officefloor.plugin.autowire;
 
+import java.util.LinkedList;
+import java.util.List;
+
 import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
+import net.officefloor.frame.spi.managedobject.extension.ExtensionInterfaceFactory;
 import net.officefloor.frame.spi.managedobject.source.impl.AbstractManagedObjectSource;
 
 /**
@@ -28,7 +32,8 @@ import net.officefloor.frame.spi.managedobject.source.impl.AbstractManagedObject
  * @author Daniel Sagenschneider
  */
 public class SingletonManagedObjectSource extends
-		AbstractManagedObjectSource<None, None> implements ManagedObject {
+		AbstractManagedObjectSource<None, None> implements ManagedObject,
+		ExtensionInterfaceFactory<Object> {
 
 	/**
 	 * Singleton.
@@ -55,9 +60,22 @@ public class SingletonManagedObjectSource extends
 	}
 
 	@Override
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	protected void loadMetaData(MetaDataContext<None, None> context)
 			throws Exception {
-		context.setObjectClass(this.object.getClass());
+
+		// Obtain the object type
+		Class<?> objectType = this.object.getClass();
+
+		// Specify the object type
+		context.setObjectClass(objectType);
+
+		// Load the extension interfaces
+		List<Class<?>> extensionInterfaces = new LinkedList<Class<?>>();
+		this.loadAllExtensionInterfaces(objectType, extensionInterfaces);
+		for (Class extensionInterface : extensionInterfaces) {
+			context.addManagedObjectExtensionInterface(extensionInterface, this);
+		}
 	}
 
 	@Override
@@ -72,6 +90,46 @@ public class SingletonManagedObjectSource extends
 	@Override
 	public Object getObject() {
 		return this.object;
+	}
+
+	/*
+	 * =================== ExtensionInterfaceFactory ======================
+	 */
+
+	@Override
+	public Object createExtensionInterface(ManagedObject managedObject) {
+		return ((SingletonManagedObjectSource) managedObject).object;
+	}
+
+	/**
+	 * Loads all extension interfaces from type.
+	 * 
+	 * @param type
+	 *            Type.
+	 * @param interfaces
+	 *            Listing of interfaces to be loaded.
+	 */
+	private void loadAllExtensionInterfaces(Class<?> type,
+			List<Class<?>> interfaces) {
+
+		// Determine if already loaded type
+		if (interfaces.contains(type)) {
+			return; // already loaded information for type
+		}
+
+		// Add type to prevent it further being loaded
+		interfaces.add(type);
+
+		// Load the interfaces from type
+		for (Class<?> interfaceType : type.getInterfaces()) {
+			this.loadAllExtensionInterfaces(interfaceType, interfaces);
+		}
+
+		// Load parent class types
+		Class<?> parentType = type.getSuperclass();
+		if (parentType != null) {
+			this.loadAllExtensionInterfaces(parentType, interfaces);
+		}
 	}
 
 }

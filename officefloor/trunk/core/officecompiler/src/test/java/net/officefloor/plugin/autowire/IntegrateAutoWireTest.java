@@ -47,7 +47,7 @@ public class IntegrateAutoWireTest extends OfficeFrameTestCase {
 	/**
 	 * {@link Thread} instances that executed the {@link Task} instances.
 	 */
-	private static List<Thread> threadForTask = new ArrayList<Thread>(2);
+	private static final List<Thread> threadForTask = new ArrayList<Thread>(2);
 
 	/**
 	 * Registers the {@link Thread} for the {@link Task}.
