@@ -30,6 +30,7 @@ import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.spi.officefloor.source.OfficeFloorSourceContext;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.impl.construct.source.SourceContextImpl;
+import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 
 /**
  * {@link OfficeFloorSourceContext} implementation.
@@ -79,6 +80,28 @@ public class OfficeFloorSourceContextImpl extends SourceContextImpl implements
 	@Override
 	public PropertyList createPropertyList() {
 		return this.context.createPropertyList();
+	}
+
+	@Override
+	public ManagedObjectType<?> loadManagedObjectType(
+			ManagedObjectSource<?, ?> managedObjectSource,
+			PropertyList properties) {
+
+		// Load the managed object type
+		ManagedObjectLoader managedObjectLoader = this.context
+				.getManagedObjectLoader(LocationType.OFFICE_FLOOR,
+						this.officeFloorLocation, "loadManagedObjectType");
+		ManagedObjectType<?> managedObjectType = managedObjectLoader
+				.loadManagedObjectType(managedObjectSource, properties);
+
+		// Ensure have the managed object type
+		if (managedObjectType == null) {
+			throw new LoadTypeError(ManagedObjectType.class,
+					managedObjectSource.getClass().getName());
+		}
+
+		// Return the managed object type
+		return managedObjectType;
 	}
 
 	@Override

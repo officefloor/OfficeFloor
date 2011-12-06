@@ -30,6 +30,7 @@ import net.officefloor.compile.managedobject.ManagedObjectDependencyType;
 import net.officefloor.compile.managedobject.ManagedObjectType;
 import net.officefloor.compile.properties.Property;
 import net.officefloor.compile.properties.PropertyList;
+import net.officefloor.compile.spi.governance.source.GovernanceSource;
 import net.officefloor.compile.spi.office.ManagedObjectTeam;
 import net.officefloor.compile.spi.office.OfficeObject;
 import net.officefloor.compile.spi.office.OfficeSection;
@@ -199,9 +200,12 @@ public class AutoWireOfficeFloorSource extends AbstractOfficeFloorSource
 			objectTypes = new Class<?>[] { object.getClass() };
 		}
 
+		// Create the properties
+		PropertyList properties = this.compiler.createPropertyList();
+
 		// Add the raw object
 		this.objectContexts.add(new AutoWireContext(new AutoWireObjectImpl(
-				this.compiler, null, null, null, objectTypes), object));
+				this.compiler, null, properties, null, objectTypes), object));
 	}
 
 	@Override
@@ -244,6 +248,13 @@ public class AutoWireOfficeFloorSource extends AbstractOfficeFloorSource
 
 		// As here, object type not available
 		return false;
+	}
+
+	@Override
+	public <I, F extends Enum<F>, S extends GovernanceSource<I, F>> AutoWireGovernance addGovernance(
+			String governanceName, Class<S> governanceSource) {
+		return this.officeSource
+				.addGovernance(governanceName, governanceSource);
 	}
 
 	@Override
@@ -350,6 +361,28 @@ public class AutoWireOfficeFloorSource extends AbstractOfficeFloorSource
 					ProcessContextTeamSource.class.getName());
 		}
 
+		// Load extension interfaces for object types
+		for (AutoWireContext objectContext : this.objectContexts) {
+
+			// Obtain the managed object type for the object
+			ManagedObjectType<?> managedObjectType = objectContext
+					.getManagedObjectType(context);
+			if (managedObjectType == null) {
+				continue; // failed to obtain type so can not load
+			}
+
+			// Obtain the extension interfaces for object type
+			Class<?>[] extensionInterfaces = managedObjectType
+					.getExtensionInterfaces();
+
+			// Load the extension interfaces for object type
+			for (Class<?> objectType : objectContext.autoWireObject
+					.getObjectTypes()) {
+				this.officeSource.addOfficeObjectExtension(objectType,
+						extensionInterfaces);
+			}
+		}
+
 		// Add the auto-wiring office
 		DeployedOffice office = deployer.addDeployedOffice(OFFICE_NAME,
 				this.officeSource, "auto-wire");
@@ -435,6 +468,11 @@ public class AutoWireOfficeFloorSource extends AbstractOfficeFloorSource
 		public final List<AutoWireTeam> teams = new LinkedList<AutoWireTeam>();
 
 		/**
+		 * {@link ManagedObjectType}.
+		 */
+		private ManagedObjectType<?> managedObjectType = null;
+
+		/**
 		 * {@link OfficeFloorManagedObjectSource}.
 		 */
 		private OfficeFloorManagedObjectSource managedObjectSource = null;
@@ -455,6 +493,40 @@ public class AutoWireOfficeFloorSource extends AbstractOfficeFloorSource
 		public AutoWireContext(AutoWireObject autoWireObject, Object rawObject) {
 			this.autoWireObject = autoWireObject;
 			this.rawObject = rawObject;
+		}
+
+		/**
+		 * Obtains the {@link ManagedObjectType}.
+		 * 
+		 * @param context
+		 *            {@link OfficeFloorSourceContext}.
+		 * @return {@link ManagedObjectType} of <code>null</code> if issue
+		 *         obtaining.
+		 */
+		public ManagedObjectType<?> getManagedObjectType(
+				OfficeFloorSourceContext context) {
+
+			// Lazy load the managed object type
+			if (this.managedObjectType == null) {
+
+				// Determine if raw object
+				if (this.rawObject != null) {
+					// Obtain type from raw object
+					this.managedObjectType = context.loadManagedObjectType(
+							new SingletonManagedObjectSource(this.rawObject),
+							this.autoWireObject.getProperties());
+
+				} else {
+					// Obtain type from managed object
+					this.managedObjectType = context.loadManagedObjectType(
+							this.autoWireObject.getManagedObjectSourceClass()
+									.getName(), this.autoWireObject
+									.getProperties());
+				}
+			}
+
+			// Return the managed object type
+			return managedObjectType;
 		}
 
 		/**
@@ -612,10 +684,8 @@ public class AutoWireOfficeFloorSource extends AbstractOfficeFloorSource
 			Map<String, Class<?>> typeDependencies = new HashMap<String, Class<?>>();
 			if (this.rawObject == null) {
 				// Load the managed object type
-				ManagedObjectType<?> moType = context
-						.loadManagedObjectType(this.autoWireObject
-								.getManagedObjectSourceClass().getName(),
-								this.autoWireObject.getProperties());
+				ManagedObjectType<?> moType = this
+						.getManagedObjectType(context);
 				if (moType != null) {
 					// Have type so register its dependencies
 					for (ManagedObjectDependencyType<?> typeDependency : moType

@@ -34,6 +34,7 @@ import net.officefloor.compile.spi.officefloor.source.OfficeFloorSourceContext;
 import net.officefloor.compile.spi.officefloor.source.RequiredProperties;
 import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
 import net.officefloor.frame.api.manage.OfficeFloor;
+import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 import net.officefloor.plugin.managedobject.clazz.ClassManagedObjectSource;
 
 /**
@@ -298,6 +299,67 @@ public class LoadOfficeFloorSourceContextTest extends
 				PropertyList properties = ofsContext.createPropertyList();
 				ofsContext.loadManagedObjectType(
 						ClassManagedObjectSource.class.getName(), properties);
+
+				// Should not reach this point
+				fail("Should not successfully load managed object type");
+			}
+		});
+	}
+
+	/**
+	 * Ensure can obtain the {@link ManagedObjectType} by an
+	 * {@link ManagedObjectSource} instance.
+	 */
+	public void testLoadManagedObjectTypeByInstance() {
+
+		// Record
+		this.record_initiateOfficeFloorBuilder();
+
+		// Test
+		this.loadOfficeFloor(true, new OfficeFloorMaker() {
+			@Override
+			public void make(OfficeFloorMakerContext context) {
+				OfficeFloorSourceContext ofsContext = context.getContext();
+
+				// Load the managed object type
+				PropertyList properties = ofsContext.createPropertyList();
+				properties.addProperty(
+						ClassManagedObjectSource.CLASS_NAME_PROPERTY_NAME)
+						.setValue(MockLoadManagedObject.class.getName());
+				ManagedObjectType<?> managedObjectType = ofsContext
+						.loadManagedObjectType(new ClassManagedObjectSource(),
+								properties);
+
+				// Ensure correct managed object type
+				MockLoadManagedObject
+						.assertManagedObjectType(managedObjectType);
+			}
+		});
+	}
+
+	/**
+	 * Ensure issue if fails to load the {@link ManagedObjectType} by
+	 * {@link ManagedObjectSource} instance.
+	 */
+	public void testFailLoadingManagedObjectTypeByInstance() {
+
+		// Ensure issue in not loading managed object type
+		this.issues.addIssue(LocationType.OFFICE_FLOOR, OFFICE_FLOOR_LOCATION,
+				AssetType.MANAGED_OBJECT, "loadManagedObjectType",
+				"Missing property 'class.name'");
+		this.record_officefloor_issue("Failure loading ManagedObjectType from source "
+				+ ClassManagedObjectSource.class.getName());
+
+		// Fail to load the managed object type
+		this.loadOfficeFloor(false, new OfficeFloorMaker() {
+			@Override
+			public void make(OfficeFloorMakerContext context) {
+				OfficeFloorSourceContext ofsContext = context.getContext();
+
+				// Do not specify class causing failure to load type
+				PropertyList properties = ofsContext.createPropertyList();
+				ofsContext.loadManagedObjectType(
+						new ClassManagedObjectSource(), properties);
 
 				// Should not reach this point
 				fail("Should not successfully load managed object type");

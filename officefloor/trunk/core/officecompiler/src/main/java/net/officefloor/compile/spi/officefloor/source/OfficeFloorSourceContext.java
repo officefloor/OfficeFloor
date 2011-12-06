@@ -75,6 +75,26 @@ public interface OfficeFloorSourceContext extends SourceContext {
 
 	/**
 	 * <p>
+	 * Loads the {@link ManagedObjectType}.
+	 * <p>
+	 * This is to enable obtaining the type information for the
+	 * {@link ManagedObject} to allow reflective configuration by the
+	 * {@link OfficeFloorSource}.
+	 * 
+	 * @param managedObjectSource
+	 *            {@link ManagedObjectSource} instance.
+	 * @param properties
+	 *            {@link PropertyList} to configure the
+	 *            {@link ManagedObjectSource}.
+	 * @return {@link ManagedObjectType} or <code>null</code> if fails to load
+	 *         the {@link ManagedObjectType}.
+	 */
+	ManagedObjectType<?> loadManagedObjectType(
+			ManagedObjectSource<?, ?> managedObjectSource,
+			PropertyList properties);
+
+	/**
+	 * <p>
 	 * Loads the {@link OfficeType}.
 	 * <p>
 	 * This is to enable obtaining the type information for the {@link Office}

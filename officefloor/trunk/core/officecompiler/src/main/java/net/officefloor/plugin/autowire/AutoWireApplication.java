@@ -18,6 +18,7 @@
 package net.officefloor.plugin.autowire;
 
 import net.officefloor.compile.OfficeFloorCompiler;
+import net.officefloor.compile.spi.governance.source.GovernanceSource;
 import net.officefloor.compile.spi.office.OfficeSection;
 import net.officefloor.compile.spi.office.OfficeSectionInput;
 import net.officefloor.compile.spi.section.SectionInput;
@@ -26,9 +27,11 @@ import net.officefloor.compile.spi.section.source.SectionSource;
 import net.officefloor.frame.api.escalate.Escalation;
 import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.manage.OfficeFloor;
+import net.officefloor.frame.spi.governance.Governance;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.spi.team.Team;
 import net.officefloor.frame.spi.team.source.TeamSource;
+import net.officefloor.plugin.section.clazz.ManagedObject;
 
 /**
  * Application which has auto-wired configuration.
@@ -183,14 +186,31 @@ public interface AutoWireApplication {
 	boolean isObjectAvailable(Class<?> objectType);
 
 	/**
-	 * Assigns a {@link Team} responsible for {@link Task} dependent on the
-	 * specified object types.
+	 * Adds {@link Governance} over the {@link ManagedObject} and object
+	 * instances.
+	 * 
+	 * @param governanceName
+	 *            Name of the {@link Governance}.
+	 * @param governanceSource
+	 *            {@link GovernanceSource} class.
+	 * @return {@link AutoWireGovernance}.
+	 */
+	<I, F extends Enum<F>, S extends GovernanceSource<I, F>> AutoWireGovernance addGovernance(
+			String governanceName, Class<S> governanceSource);
+
+	/**
+	 * Assigns a {@link Team} responsible for:
+	 * <ol>
+	 * <li>{@link Task} dependent on the specified object types</li>
+	 * <li>{@link Governance} with the extension interfance object type</li>
+	 * </ol>
 	 * 
 	 * @param teamSourceClass
 	 *            {@link TeamSource} class.
 	 * @param objectTypes
-	 *            Dependent {@link Task} object types the {@link Team} is
-	 *            responsible for. Must have at least one object type provided.
+	 *            Dependent {@link Task} object types and {@link Governance}
+	 *            extension interfaces the {@link Team} is responsible for. Must
+	 *            have at least one object type provided.
 	 * @return {@link AutoWireTeam}.
 	 */
 	<T extends TeamSource> AutoWireTeam assignTeam(Class<T> teamSourceClass,
