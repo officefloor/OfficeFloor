@@ -96,8 +96,9 @@ public class WoofOfficeFloorSourceTest extends OfficeFrameTestCase {
 
 		@Override
 		protected void configure(HttpServerAutoWireOfficeFloorSource application) {
-			AutoWireSection section = application.addSection("ANOTHER",
-					ClassSectionSource.class, Section.class.getName());
+			AutoWireSection section = application
+					.addSection("ANOTHER", ClassSectionSource.class.getName(),
+							Section.class.getName());
 			application.linkUri("another", section, "service");
 		}
 	}

@@ -65,17 +65,17 @@ public class CometServiceIntegrationTest extends OfficeFrameTestCase {
 		HttpServerAutoWireOfficeFloorSource server = new HttpServerAutoWireOfficeFloorSource(
 				this.port);
 		server.addManagedObject(
-				ServerGwtRpcConnectionManagedObjectSource.class, null,
-				ServerGwtRpcConnection.class);
+				ServerGwtRpcConnectionManagedObjectSource.class.getName(),
+				null, ServerGwtRpcConnection.class);
 		AutoWireObject comet = server.addManagedObject(
-				CometServiceManagedObjectSource.class,
+				CometServiceManagedObjectSource.class.getName(),
 				new ManagedObjectSourceWirer() {
 					@Override
 					public void wire(ManagedObjectSourceWirerContext context) {
 						context.setInput(true);
 						context.mapTeam(
 								CometServiceManagedObjectSource.EXPIRE_TEAM_NAME,
-								OnePersonTeamSource.class);
+								OnePersonTeamSource.class.getName());
 					}
 				}, CometService.class);
 		comet.addProperty(
@@ -89,7 +89,7 @@ public class CometServiceIntegrationTest extends OfficeFrameTestCase {
 				String.valueOf((long) (eventTimeout / 10)));
 		comet.setTimeout(eventTimeout * 4);
 		AutoWireSection service = server.addSection("SERVICE",
-				ClassSectionSource.class, Service.class.getName());
+				ClassSectionSource.class.getName(), Service.class.getName());
 		server.linkUri("/service", service, "service");
 		server.linkUri("/publishEvent", service, "publishEvent");
 		this.autoWireOfficefloor = server.openOfficeFloor();

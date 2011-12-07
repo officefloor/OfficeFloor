@@ -31,9 +31,9 @@ public class AutoWireObjectImpl extends AutoWirePropertiesImpl implements
 		AutoWireObject {
 
 	/**
-	 * {@link ManagedObjectSource} class.
+	 * {@link ManagedObjectSource} class name.
 	 */
-	private final Class<?> managedObjectSourceClass;
+	private final String managedObjectSourceClassName;
 
 	/**
 	 * {@link ManagedObjectSourceWirer}.
@@ -56,8 +56,8 @@ public class AutoWireObjectImpl extends AutoWirePropertiesImpl implements
 	 * 
 	 * @param compiler
 	 *            {@link OfficeFloorCompiler}.
-	 * @param managedObjectSourceClass
-	 *            {@link ManagedObjectSource} class.
+	 * @param managedObjectSourceClassName
+	 *            {@link ManagedObjectSource} class name. May be an alias.
 	 * @param properties
 	 *            {@link PropertyList} for the {@link ManagedObjectSource}.
 	 * @param wirer
@@ -67,10 +67,10 @@ public class AutoWireObjectImpl extends AutoWirePropertiesImpl implements
 	 *            provide auto-wiring.
 	 */
 	public AutoWireObjectImpl(OfficeFloorCompiler compiler,
-			Class<?> managedObjectSourceClass, PropertyList properties,
+			String managedObjectSourceClassName, PropertyList properties,
 			ManagedObjectSourceWirer wirer, Class<?>... objectTypes) {
 		super(compiler, properties);
-		this.managedObjectSourceClass = managedObjectSourceClass;
+		this.managedObjectSourceClassName = managedObjectSourceClassName;
 		this.wirer = wirer;
 		this.objectTypes = objectTypes;
 	}
@@ -80,8 +80,8 @@ public class AutoWireObjectImpl extends AutoWirePropertiesImpl implements
 	 */
 
 	@Override
-	public Class<?> getManagedObjectSourceClass() {
-		return this.managedObjectSourceClass;
+	public String getManagedObjectSourceClassName() {
+		return this.managedObjectSourceClassName;
 	}
 
 	@Override

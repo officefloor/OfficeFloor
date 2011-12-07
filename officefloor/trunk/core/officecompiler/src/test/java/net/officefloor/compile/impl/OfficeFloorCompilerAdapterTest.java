@@ -106,8 +106,8 @@ public class OfficeFloorCompilerAdapterTest extends OfficeFrameTestCase {
 		// Build OfficeFloor
 		AutoWireOfficeFloorSource source = new AutoWireOfficeFloorSource(
 				this.compiler);
-		source.assignDefaultTeam(PassiveTeamSource.class);
-		source.addSection("TEST", ClassSectionSource.class,
+		source.assignDefaultTeam(PassiveTeamSource.class.getName());
+		source.addSection("TEST", ClassSectionSource.class.getName(),
 				AdaptWork.class.getName());
 		AutoWireOfficeFloor officeFloor = source.openOfficeFloor();
 
@@ -154,10 +154,10 @@ public class OfficeFloorCompilerAdapterTest extends OfficeFrameTestCase {
 		// Build OfficeFloor
 		AutoWireOfficeFloorSource source = new AutoWireOfficeFloorSource(
 				this.compiler);
-		source.assignDefaultTeam(PassiveTeamSource.class);
-		source.addSection("TEST", ClassSectionSource.class,
+		source.assignDefaultTeam(PassiveTeamSource.class.getName());
+		source.addSection("TEST", ClassSectionSource.class.getName(),
 				AdaptManagedObjectWork.class.getName());
-		source.addManagedObject(ClassManagedObjectSource.class, null,
+		source.addManagedObject(ClassManagedObjectSource.class.getName(), null,
 				AdaptManagedObject.class).addProperty(
 				ClassManagedObjectSource.CLASS_NAME_PROPERTY_NAME,
 				AdaptManagedObjectImpl.class.getName());
@@ -185,8 +185,8 @@ public class OfficeFloorCompilerAdapterTest extends OfficeFrameTestCase {
 		// Build OfficeFloor
 		AutoWireOfficeFloorSource source = new AutoWireOfficeFloorSource(
 				this.compiler);
-		source.assignDefaultTeam(PassiveTeamSource.class);
-		source.addSection("TEST", ClassSectionSource.class,
+		source.assignDefaultTeam(PassiveTeamSource.class.getName());
+		source.addSection("TEST", ClassSectionSource.class.getName(),
 				AdaptManagedObjectWork.class.getName());
 		source.addObject(object, AdaptManagedObject.class);
 		AutoWireOfficeFloor officeFloor = source.openOfficeFloor();

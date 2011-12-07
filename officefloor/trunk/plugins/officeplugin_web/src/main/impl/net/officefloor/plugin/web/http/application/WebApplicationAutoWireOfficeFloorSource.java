@@ -135,7 +135,7 @@ public class WebApplicationAutoWireOfficeFloorSource extends
 
 		// Add the HTTP template section
 		HttpTemplateAutoWireSection template = this.addSection(sectionName,
-				HttpTemplateSectionSource.class, templatePath,
+				HttpTemplateSectionSource.class.getName(), templatePath,
 				new AutoWireSectionFactory<HttpTemplateAutoWireSection>() {
 					@Override
 					public HttpTemplateAutoWireSection createAutoWireSection(
@@ -213,7 +213,7 @@ public class WebApplicationAutoWireOfficeFloorSource extends
 
 		// Not registered, so register
 		object = this.addManagedObject(
-				HttpApplicationClassManagedObjectSource.class, null,
+				HttpApplicationClassManagedObjectSource.class.getName(), null,
 				objectClass);
 		object.addProperty(
 				HttpApplicationClassManagedObjectSource.PROPERTY_CLASS_NAME,
@@ -246,7 +246,8 @@ public class WebApplicationAutoWireOfficeFloorSource extends
 
 		// Not registered, so register
 		object = this.addManagedObject(
-				HttpSessionClassManagedObjectSource.class, null, objectClass);
+				HttpSessionClassManagedObjectSource.class.getName(), null,
+				objectClass);
 		object.addProperty(
 				HttpSessionClassManagedObjectSource.PROPERTY_CLASS_NAME,
 				objectClass.getName());
@@ -278,7 +279,8 @@ public class WebApplicationAutoWireOfficeFloorSource extends
 
 		// Not registered, so register
 		object = this.addManagedObject(
-				HttpRequestClassManagedObjectSource.class, null, objectClass);
+				HttpRequestClassManagedObjectSource.class.getName(), null,
+				objectClass);
 		object.addProperty(
 				HttpRequestClassManagedObjectSource.PROPERTY_CLASS_NAME,
 				objectClass.getName());
@@ -309,7 +311,7 @@ public class WebApplicationAutoWireOfficeFloorSource extends
 
 		// Not registered, so register
 		object = this.addManagedObject(
-				HttpParametersObjectManagedObjectSource.class, null,
+				HttpParametersObjectManagedObjectSource.class.getName(), null,
 				objectClass);
 		object.addProperty(
 				HttpParametersObjectManagedObjectSource.PROPERTY_CLASS_NAME,
@@ -395,7 +397,7 @@ public class WebApplicationAutoWireOfficeFloorSource extends
 
 		// Add the HTTP section
 		AutoWireSection httpSection = this.addSection(HANDLER_SECTION_NAME,
-				WebApplicationSectionSource.class, null);
+				WebApplicationSectionSource.class.getName(), null);
 		httpSection
 				.addProperty(
 						WebApplicationSectionSource.PROPERTY_LINK_SERVICE_TASK_NAME_PREFIX,
@@ -412,8 +414,8 @@ public class WebApplicationAutoWireOfficeFloorSource extends
 		} else {
 			// Use default non-handled servicer (file sending)
 			AutoWireSection nonHandledServicer = this.addSection(
-					"NON_HANDLED_SERVICER", HttpFileSenderSectionSource.class,
-					null);
+					"NON_HANDLED_SERVICER",
+					HttpFileSenderSectionSource.class.getName(), null);
 			this.addProperty(
 					nonHandledServicer,
 					context,
@@ -461,7 +463,7 @@ public class WebApplicationAutoWireOfficeFloorSource extends
 
 			// Create section to send resources
 			AutoWireSection section = this.addSection("RESOURCES",
-					HttpFileSectionSource.class, CLASS_PATH_PREFIX);
+					HttpFileSectionSource.class.getName(), CLASS_PATH_PREFIX);
 
 			// Link section outputs to the resources
 			for (ResourceLink resourceLink : this.resourceLinks) {

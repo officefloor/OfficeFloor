@@ -102,7 +102,8 @@ public class AutoWireOfficeFloorSourceTest extends OfficeFrameTestCase {
 		ManagedObjectSourceWirer wirer = this
 				.createMock(ManagedObjectSourceWirer.class);
 		try {
-			this.source.addManagedObject(ClassManagedObjectSource.class, wirer);
+			this.source.addManagedObject(
+					ClassManagedObjectSource.class.getName(), wirer);
 			fail("Should not be successful");
 		} catch (IllegalArgumentException ex) {
 			assertEquals("Incorrect cause",
@@ -161,7 +162,8 @@ public class AutoWireOfficeFloorSourceTest extends OfficeFrameTestCase {
 
 		// Add the managed object source
 		AutoWireObject object = this.source.addManagedObject(
-				ClassManagedObjectSource.class, null, MockRawType.class);
+				ClassManagedObjectSource.class.getName(), null,
+				MockRawType.class);
 		object.addProperty(ClassManagedObjectSource.CLASS_NAME_PROPERTY_NAME,
 				MockRawObject.class.getName());
 
@@ -191,7 +193,8 @@ public class AutoWireOfficeFloorSourceTest extends OfficeFrameTestCase {
 
 		// Add the managed object source
 		AutoWireObject object = this.source.addManagedObject(
-				ClassManagedObjectSource.class, null, MockRawType.class);
+				ClassManagedObjectSource.class.getName(), null,
+				MockRawType.class);
 		object.setTimeout(TIMEOUT);
 
 		// Record
@@ -219,7 +222,8 @@ public class AutoWireOfficeFloorSourceTest extends OfficeFrameTestCase {
 
 		// Add the managed object loading properties from class path
 		AutoWireObject object = this.source.addManagedObject(
-				ClassManagedObjectSource.class, null, MockRawType.class);
+				ClassManagedObjectSource.class.getName(), null,
+				MockRawType.class);
 		object.loadProperties(this.getClass().getPackage().getName()
 				.replace('.', '/')
 				+ "/object.properties");
@@ -255,7 +259,8 @@ public class AutoWireOfficeFloorSourceTest extends OfficeFrameTestCase {
 
 		// Add the managed object loading properties from class path
 		AutoWireObject object = this.source.addManagedObject(
-				ClassManagedObjectSource.class, null, MockRawType.class);
+				ClassManagedObjectSource.class.getName(), null,
+				MockRawType.class);
 		object.loadProperties("object.properties");
 
 		// Record
@@ -314,8 +319,8 @@ public class AutoWireOfficeFloorSourceTest extends OfficeFrameTestCase {
 				context.mapFlow("flow", "section", "sectionInput");
 
 				// Map team
-				context.mapTeam("team", OnePersonTeamSource.class).addProperty(
-						"name", "value");
+				context.mapTeam("team", OnePersonTeamSource.class.getName())
+						.addProperty("name", "value");
 			}
 		};
 
@@ -325,7 +330,8 @@ public class AutoWireOfficeFloorSourceTest extends OfficeFrameTestCase {
 
 		// Add the wiring of the managed object source
 		AutoWireObject object = this.source.addManagedObject(
-				ClassManagedObjectSource.class, wirer, MockRawType.class);
+				ClassManagedObjectSource.class.getName(), wirer,
+				MockRawType.class);
 		object.addProperty(ClassManagedObjectSource.CLASS_NAME_PROPERTY_NAME,
 				MockRawObject.class.getName());
 
@@ -375,7 +381,8 @@ public class AutoWireOfficeFloorSourceTest extends OfficeFrameTestCase {
 
 		// Add the wiring of the managed object source
 		AutoWireObject object = this.source.addManagedObject(
-				ClassManagedObjectSource.class, wirer, MockRawType.class);
+				ClassManagedObjectSource.class.getName(), wirer,
+				MockRawType.class);
 		object.addProperty(ClassManagedObjectSource.CLASS_NAME_PROPERTY_NAME,
 				MockRawObject.class.getName());
 
@@ -423,8 +430,8 @@ public class AutoWireOfficeFloorSourceTest extends OfficeFrameTestCase {
 				context.mapFlow("flow", "section", "sectionInput");
 
 				// Map team
-				context.mapTeam("team", OnePersonTeamSource.class).addProperty(
-						"name", "value");
+				context.mapTeam("team", OnePersonTeamSource.class.getName())
+						.addProperty("name", "value");
 			}
 		};
 
@@ -434,7 +441,8 @@ public class AutoWireOfficeFloorSourceTest extends OfficeFrameTestCase {
 
 		// Add the wiring of the managed object source
 		AutoWireObject object = this.source.addManagedObject(
-				ClassManagedObjectSource.class, wirer, MockRawType.class);
+				ClassManagedObjectSource.class.getName(), wirer,
+				MockRawType.class);
 		object.addProperty(ClassManagedObjectSource.CLASS_NAME_PROPERTY_NAME,
 				MockRawObject.class.getName());
 
@@ -477,14 +485,16 @@ public class AutoWireOfficeFloorSourceTest extends OfficeFrameTestCase {
 
 		// Add the wiring of first input managed object
 		AutoWireObject firstObject = this.source.addManagedObject(
-				ClassManagedObjectSource.class, wirer, MockRawType.class);
+				ClassManagedObjectSource.class.getName(), wirer,
+				MockRawType.class);
 		firstObject.addProperty(
 				ClassManagedObjectSource.CLASS_NAME_PROPERTY_NAME,
 				MockRawObject.class.getName());
 
 		// Add the wiring of second input managed object
 		AutoWireObject secondObject = this.source.addManagedObject(
-				ClassManagedObjectSource.class, wirer, MockRawType.class);
+				ClassManagedObjectSource.class.getName(), wirer,
+				MockRawType.class);
 		secondObject.addProperty(
 				ClassManagedObjectSource.CLASS_NAME_PROPERTY_NAME,
 				MockRawObject.class.getName());
@@ -529,7 +539,8 @@ public class AutoWireOfficeFloorSourceTest extends OfficeFrameTestCase {
 
 		// Add the wiring of the managed object source
 		AutoWireObject object = this.source.addManagedObject(
-				ClassManagedObjectSource.class, null, MockRawType.class);
+				ClassManagedObjectSource.class.getName(), null,
+				MockRawType.class);
 		object.addProperty(ClassManagedObjectSource.CLASS_NAME_PROPERTY_NAME,
 				MockRawObject.class.getName());
 
@@ -577,8 +588,8 @@ public class AutoWireOfficeFloorSourceTest extends OfficeFrameTestCase {
 	public void testManagedObjectAvailable() throws Exception {
 
 		// Add the Managed Object
-		this.source.addManagedObject(ClassManagedObjectSource.class, null,
-				String.class);
+		this.source.addManagedObject(ClassManagedObjectSource.class.getName(),
+				null, String.class);
 
 		// Test
 		this.replayMockObjects();
@@ -595,8 +606,8 @@ public class AutoWireOfficeFloorSourceTest extends OfficeFrameTestCase {
 	public void testAssignTeam() throws Exception {
 
 		// Assign the team
-		AutoWireTeam team = this.source.assignTeam(OnePersonTeamSource.class,
-				Connection.class);
+		AutoWireTeam team = this.source.assignTeam(
+				OnePersonTeamSource.class.getName(), Connection.class);
 		team.addProperty("name", "value");
 
 		// Record
@@ -616,8 +627,8 @@ public class AutoWireOfficeFloorSourceTest extends OfficeFrameTestCase {
 	public void testAssignTeamMultipleResponsibilities() throws Exception {
 
 		// Assign the team with multiple responsibilities
-		this.source.assignTeam(OnePersonTeamSource.class, Connection.class,
-				DataSource.class);
+		this.source.assignTeam(OnePersonTeamSource.class.getName(),
+				Connection.class, DataSource.class);
 
 		// Record
 		this.recordTeam();
@@ -637,7 +648,7 @@ public class AutoWireOfficeFloorSourceTest extends OfficeFrameTestCase {
 
 		// Assign the default team
 		AutoWireTeam defaultTeam = this.source
-				.assignDefaultTeam(PassiveTeamSource.class);
+				.assignDefaultTeam(PassiveTeamSource.class.getName());
 		defaultTeam.addProperty("name", "value");
 
 		// Record
@@ -929,9 +940,11 @@ public class AutoWireOfficeFloorSourceTest extends OfficeFrameTestCase {
 		// Record the managed object type
 		ManagedObjectType<?> managedObjectType = this
 				.createMock(ManagedObjectType.class);
-		this.recordReturn(this.context, this.context.loadManagedObjectType(
-				object.getManagedObjectSourceClass().getName(),
-				object.getProperties()), managedObjectType);
+		this.recordReturn(
+				this.context,
+				this.context.loadManagedObjectType(
+						object.getManagedObjectSourceClassName(),
+						object.getProperties()), managedObjectType);
 
 		// Record obtaining extension interfaces
 		this.recordReturn(managedObjectType,

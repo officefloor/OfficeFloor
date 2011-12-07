@@ -181,24 +181,27 @@ public abstract class OfficeFloorServletFilter extends
 
 		// Configure Server HTTP connection
 		this.addManagedObject(
-				ServletServerHttpConnectionManagedObjectSource.class, null,
-				ServerHttpConnection.class);
+				ServletServerHttpConnectionManagedObjectSource.class.getName(),
+				null, ServerHttpConnection.class);
 
 		// Configure the HTTP session
-		this.addManagedObject(ServletHttpSessionManagedObjectSource.class,
-				null, HttpSession.class);
+		this.addManagedObject(
+				ServletHttpSessionManagedObjectSource.class.getName(), null,
+				HttpSession.class);
 
 		// Configure the HTTP Application and Request State
 		this.addManagedObject(
-				ServletHttpApplicationStateManagedObjectSource.class, null,
-				HttpApplicationState.class);
-		this.addManagedObject(ServletHttpRequestStateManagedObjectSource.class,
+				ServletHttpApplicationStateManagedObjectSource.class.getName(),
+				null, HttpApplicationState.class);
+		this.addManagedObject(
+				ServletHttpRequestStateManagedObjectSource.class.getName(),
 				null, HttpRequestState.class);
 
 		// Configure the Servlet container resource section
 		AutoWireSection servletContainerResource = this.addSection(
 				"SERVLET_CONTAINER_RESOURCE",
-				ServletContainerResourceSectionSource.class, "NOT_HANDLED");
+				ServletContainerResourceSectionSource.class.getName(),
+				"NOT_HANDLED");
 		this.setNonHandledServicer(servletContainerResource, "NOT_HANDLED");
 
 		// Provide dependencies of Servlet
@@ -206,7 +209,7 @@ public abstract class OfficeFloorServletFilter extends
 		for (Class<?> dependencyType : dependencyTypes) {
 			// Add Servlet dependency for dependency injection
 			AutoWireObject dependency = this.addManagedObject(
-					ServletDependencyManagedObjectSource.class, null,
+					ServletDependencyManagedObjectSource.class.getName(), null,
 					dependencyType);
 			dependency.addProperty(
 					ServletDependencyManagedObjectSource.PROPERTY_TYPE_NAME,
@@ -216,7 +219,8 @@ public abstract class OfficeFloorServletFilter extends
 		// Process Context Team to ensure appropriate Thread for dependencies
 		// (EJB's typically rely on ThreadLocal functionality)
 		if (dependencyTypes.length > 0) {
-			this.assignTeam(ProcessContextTeamSource.class, dependencyTypes);
+			this.assignTeam(ProcessContextTeamSource.class.getName(),
+					dependencyTypes);
 		}
 
 		// Configure the web application

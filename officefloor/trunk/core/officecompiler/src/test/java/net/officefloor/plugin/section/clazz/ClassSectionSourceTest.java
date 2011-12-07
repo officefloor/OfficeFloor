@@ -349,7 +349,7 @@ public class ClassSectionSourceTest extends OfficeFrameTestCase {
 		// Managed object internal, so must run to test
 		AutoWireOfficeFloorSource source = new AutoWireOfficeFloorSource();
 		AutoWireSection section = source.addSection("test",
-				MockChangeTaskNameClassSectionSource.class,
+				MockChangeTaskNameClassSectionSource.class.getName(),
 				MockChangeTaskNameWithLinksSection.class.getName());
 		source.addObject(returnValue, ReturnValue.class);
 		source.addObject(connection, Connection.class);
@@ -424,7 +424,7 @@ public class ClassSectionSourceTest extends OfficeFrameTestCase {
 
 		// Managed object internal, so must run to test
 		AutoWireOfficeFloorSource source = new AutoWireOfficeFloorSource();
-		source.addSection("test", ClassSectionSource.class,
+		source.addSection("test", ClassSectionSource.class.getName(),
 				MockManagedObjectSection.class.getName());
 
 		// Open the OfficeFloor
@@ -479,7 +479,7 @@ public class ClassSectionSourceTest extends OfficeFrameTestCase {
 
 		// Managed object internal, so must run to test
 		AutoWireOfficeFloorSource source = new AutoWireOfficeFloorSource();
-		source.addSection("test", ClassSectionSource.class,
+		source.addSection("test", ClassSectionSource.class.getName(),
 				MockManagedObjectWithDependencySection.class.getName());
 
 		// Open OfficeFloor
@@ -534,7 +534,7 @@ public class ClassSectionSourceTest extends OfficeFrameTestCase {
 
 		// Triggering flows, so must run to test
 		AutoWireOfficeFloorSource source = new AutoWireOfficeFloorSource();
-		source.addSection("test", ClassSectionSource.class,
+		source.addSection("test", ClassSectionSource.class.getName(),
 				MockInternalFlowSection.class.getName());
 
 		// Open OfficeFloor
@@ -592,7 +592,7 @@ public class ClassSectionSourceTest extends OfficeFrameTestCase {
 		AutoWireOfficeFloorSource source = new AutoWireOfficeFloorSource();
 		ReturnValue returnValue = new ReturnValue();
 		source.addObject(returnValue, ReturnValue.class);
-		source.addSection("test", ClassSectionSource.class,
+		source.addSection("test", ClassSectionSource.class.getName(),
 				MockEscalationHandlingSection.class.getName());
 
 		// Open OfficeFloor
@@ -632,7 +632,7 @@ public class ClassSectionSourceTest extends OfficeFrameTestCase {
 
 		// Triggering sub section, so must run to test
 		AutoWireOfficeFloorSource source = new AutoWireOfficeFloorSource();
-		source.addSection("test", ClassSectionSource.class,
+		source.addSection("test", ClassSectionSource.class.getName(),
 				MockInvokeSubSection.class.getName());
 		ReturnValue returnValue = new ReturnValue();
 		source.addObject(returnValue, ReturnValue.class);

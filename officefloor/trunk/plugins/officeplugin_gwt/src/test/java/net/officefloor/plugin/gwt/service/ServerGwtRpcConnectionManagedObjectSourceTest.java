@@ -274,10 +274,10 @@ public class ServerGwtRpcConnectionManagedObjectSourceTest extends
 		HttpServerAutoWireOfficeFloorSource source = new HttpServerAutoWireOfficeFloorSource(
 				PORT);
 		source.addManagedObject(
-				ServerGwtRpcConnectionManagedObjectSource.class, null,
-				ServerGwtRpcConnection.class, AsyncCallback.class);
+				ServerGwtRpcConnectionManagedObjectSource.class.getName(),
+				null, ServerGwtRpcConnection.class, AsyncCallback.class);
 		AutoWireSection section = source.addSection("HANDLE",
-				ClassSectionSource.class, Service.class.getName());
+				ClassSectionSource.class.getName(), Service.class.getName());
 
 		// Link in URIs to servicing methods
 		for (Method method : Service.class.getDeclaredMethods()) {

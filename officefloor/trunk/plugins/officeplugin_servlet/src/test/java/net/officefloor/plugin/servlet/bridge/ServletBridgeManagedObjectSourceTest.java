@@ -128,7 +128,7 @@ public class ServletBridgeManagedObjectSourceTest extends OfficeFrameTestCase {
 		// Configure the OfficeFloor
 		AutoWireOfficeFloorSource autoWire = new AutoWireOfficeFloorSource();
 		AutoWireObject servletBridgeMo = autoWire.addManagedObject(
-				ServletBridgeManagedObjectSource.class,
+				ServletBridgeManagedObjectSource.class.getName(),
 				new ManagedObjectSourceWirer() {
 					@Override
 					public void wire(ManagedObjectSourceWirerContext context) {
@@ -140,7 +140,7 @@ public class ServletBridgeManagedObjectSourceTest extends OfficeFrameTestCase {
 		servletBridgeMo.addProperty(
 				ServletBridgeManagedObjectSource.PROPERTY_INSTANCE_IDENTIFIER,
 				servicer.getInstanceIdentifier());
-		autoWire.addSection("SECTION", ClassSectionSource.class,
+		autoWire.addSection("SECTION", ClassSectionSource.class.getName(),
 				SectionClass.class.getName());
 
 		// Open the OfficeFloor

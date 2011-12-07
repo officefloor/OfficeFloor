@@ -36,9 +36,9 @@ public class AutoWireSectionImpl extends AutoWirePropertiesImpl implements
 	private final String name;
 
 	/**
-	 * {@link SectionSource} class.
+	 * {@link SectionSource} class name.
 	 */
-	private final Class<?> sourceClass;
+	private final String sourceClassName;
 
 	/**
 	 * Location of section.
@@ -52,18 +52,18 @@ public class AutoWireSectionImpl extends AutoWirePropertiesImpl implements
 	 *            {@link OfficeFloorCompiler}.
 	 * @param name
 	 *            Name of section.
-	 * @param sourceClass
-	 *            {@link SectionSource} class.
+	 * @param sourceClassName
+	 *            {@link SectionSource} class name.
 	 * @param location
 	 *            Location of section.
 	 * @param properties
 	 *            Properties for the section.
 	 */
 	public AutoWireSectionImpl(OfficeFloorCompiler compiler, String name,
-			Class<?> sourceClass, String location, PropertyList properties) {
+			String sourceClassName, String location, PropertyList properties) {
 		super(compiler, properties);
 		this.name = name;
-		this.sourceClass = sourceClass;
+		this.sourceClassName = sourceClassName;
 		this.location = location;
 	}
 
@@ -79,8 +79,8 @@ public class AutoWireSectionImpl extends AutoWirePropertiesImpl implements
 	protected AutoWireSectionImpl(OfficeFloorCompiler compiler,
 			AutoWireSection section) {
 		this(compiler, section.getSectionName(), section
-				.getSectionSourceClass(), section.getSectionLocation(), section
-				.getProperties());
+				.getSectionSourceClassName(), section.getSectionLocation(),
+				section.getProperties());
 	}
 
 	/*
@@ -93,8 +93,8 @@ public class AutoWireSectionImpl extends AutoWirePropertiesImpl implements
 	}
 
 	@Override
-	public Class<?> getSectionSourceClass() {
-		return this.sourceClass;
+	public String getSectionSourceClassName() {
+		return this.sourceClassName;
 	}
 
 	@Override

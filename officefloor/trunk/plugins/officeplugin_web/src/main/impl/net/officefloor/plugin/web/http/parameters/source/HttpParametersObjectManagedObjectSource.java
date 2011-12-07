@@ -58,7 +58,7 @@ public class HttpParametersObjectManagedObjectSource
 	public static AutoWireObject autoWire(AutoWireOfficeFloorSource source,
 			Class<?> objectClass) {
 		AutoWireObject object = source.addManagedObject(
-				HttpParametersObjectManagedObjectSource.class, null,
+				HttpParametersObjectManagedObjectSource.class.getName(), null,
 				objectClass);
 		object.addProperty(
 				HttpParametersObjectManagedObjectSource.PROPERTY_CLASS_NAME,

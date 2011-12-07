@@ -157,8 +157,8 @@ public class GwtServiceRouteConfigurationTest extends OfficeFrameTestCase {
 		this.recordReturn(this.application, this.application
 				.isObjectAvailable(ServerGwtRpcConnection.class), false);
 		this.recordReturn(this.application, this.application.addManagedObject(
-				ServerGwtRpcConnectionManagedObjectSource.class, null,
-				ServerGwtRpcConnection.class, AsyncCallback.class),
+				ServerGwtRpcConnectionManagedObjectSource.class.getName(),
+				null, ServerGwtRpcConnection.class, AsyncCallback.class),
 				serverGwtRpcConnection, new AbstractMatcher() {
 					@Override
 					public boolean matches(Object[] expected, Object[] actual) {

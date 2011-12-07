@@ -137,24 +137,41 @@ public class WoofModelRepositoryTest extends OfficeFrameTestCase {
 				section3.getWoofResource(), "getResourceName");
 
 		// ----------------------------------------
+		// Validate the governances
+		// ----------------------------------------
+		assertList(new String[] { "getWoofGovernanceName",
+				"getGovernanceSourceClassName", "getX", "getY" },
+				woof.getWoofGovernances(), new WoofGovernanceModel(
+						"GOVERNANCE", "net.example.ExampleGovernanceSource",
+						null, null, 500, 501));
+		WoofGovernanceModel governance = woof.getWoofGovernances().get(0);
+		assertList(new String[] { "getName", "getValue" },
+				governance.getProperties(), new PropertyModel("name.a",
+						"value.a"), new PropertyModel("name.b", "value.b"));
+		assertList(new String[] { "getX", "getY", "getWidth", "getHeight" },
+				governance.getGovernanceAreas(), new WoofGovernanceAreaModel(
+						520, 521, 510, 511), new WoofGovernanceAreaModel(540,
+						541, 530, 531));
+
+		// ----------------------------------------
 		// Validate the resources
 		// ----------------------------------------
 		assertList(new String[] { "getWoofResourceName", "getResourcePath",
 				"getX", "getY" }, woof.getWoofResources(),
 				new WoofResourceModel("RESOURCE", "Example.html", null, null,
-						null, 500, 501));
+						null, 600, 601));
 
 		// ----------------------------------------
 		// Validate the exceptions
 		// ----------------------------------------
 		assertList(new String[] { "getClassName", "getX", "getY" },
 				woof.getWoofExceptions(), new WoofExceptionModel(
-						"java.lang.Exception", null, null, null, 600, 601),
+						"java.lang.Exception", null, null, null, 700, 701),
 				new WoofExceptionModel("java.lang.RuntimeException", null,
-						null, null, 602, 603), new WoofExceptionModel(
-						"java.sql.SQLException", null, null, null, 604, 605),
+						null, null, 702, 703), new WoofExceptionModel(
+						"java.sql.SQLException", null, null, null, 704, 705),
 				new WoofExceptionModel("java.io.IOException", null, null, null,
-						606, 607));
+						706, 707));
 		WoofExceptionModel exception1 = woof.getWoofExceptions().get(0);
 		assertProperties(new WoofExceptionToWoofSectionInputModel("SECTION_A",
 				"INPUT_A"), exception1.getWoofSectionInput(), "getSectionName",

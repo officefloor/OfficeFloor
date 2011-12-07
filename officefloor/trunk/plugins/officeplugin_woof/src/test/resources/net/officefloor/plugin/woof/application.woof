@@ -46,6 +46,13 @@
         <resource name="RESOURCE" path="Example.html"/>
     </resources>
     
+    <governances>
+    	<governance name="GOVERNANCE_A" source="net.officefloor.plugin.governance.clazz.ClassGovernanceSource">
+    	</governance>
+    	<governance name="GOVERNANCE_B" source="net.officefloor.plugin.governance.clazz.ClassGovernanceSource">
+    	</governance>
+    </governances>
+    
     <exceptions>
         <exception class="java.lang.Exception">
             <input section="SECTION_A" input="INPUT_A"/>

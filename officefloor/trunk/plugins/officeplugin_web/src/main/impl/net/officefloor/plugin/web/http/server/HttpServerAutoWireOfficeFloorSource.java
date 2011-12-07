@@ -52,7 +52,7 @@ import net.officefloor.plugin.web.http.session.source.HttpSessionManagedObjectSo
 public class HttpServerAutoWireOfficeFloorSource extends
 		WebApplicationAutoWireOfficeFloorSource implements
 		HttpServerAutoWireApplication {
-	
+
 	/**
 	 * Default HTTP port to listen for connections.
 	 */
@@ -91,17 +91,20 @@ public class HttpServerAutoWireOfficeFloorSource extends
 		this.defaultPort = defaultPort;
 
 		// Use active team by default - done early so allow further overriding
-		this.assignDefaultTeam(OnePersonTeamSource.class);
+		this.assignDefaultTeam(OnePersonTeamSource.class.getName());
 
 		// Configure HTTP Session (allowing 10 seconds to retrieve session)
 		this.httpSession = this.addManagedObject(
-				HttpSessionManagedObjectSource.class, null, HttpSession.class);
+				HttpSessionManagedObjectSource.class.getName(), null,
+				HttpSession.class);
 		this.httpSession.setTimeout(10 * 1000);
 
 		// Configure the HTTP Application and Request States
-		this.addManagedObject(HttpApplicationStateManagedObjectSource.class,
-				null, HttpApplicationState.class);
-		this.addManagedObject(HttpRequestStateManagedObjectSource.class, null,
+		this.addManagedObject(
+				HttpApplicationStateManagedObjectSource.class.getName(), null,
+				HttpApplicationState.class);
+		this.addManagedObject(
+				HttpRequestStateManagedObjectSource.class.getName(), null,
 				HttpRequestState.class);
 	}
 
@@ -136,7 +139,6 @@ public class HttpServerAutoWireOfficeFloorSource extends
 	 * @param application
 	 *            {@link WebAutoWireApplication} to configure.
 	 */
-	@SuppressWarnings("unchecked")
 	private void configureWebApplication(WebAutoWireApplication application) {
 
 		// Add the HTTP Socket
@@ -148,7 +150,7 @@ public class HttpServerAutoWireOfficeFloorSource extends
 			// Override the HTTP Socket
 			for (HttpSocket socket : this.httpSockets) {
 				AutoWireObject object = application.addManagedObject(
-						socket.managedObjectSource, socket.wirer,
+						socket.managedObjectSourceClassName, socket.wirer,
 						ServerHttpConnection.class);
 				for (Property property : socket.properties) {
 					object.addProperty(property.getName(), property.getValue());
@@ -162,16 +164,16 @@ public class HttpServerAutoWireOfficeFloorSource extends
 	 */
 
 	@Override
-	public <D extends Enum<D>, F extends Enum<F>, M extends ManagedObjectSource<D, F>> PropertyList addHttpSocket(
-			Class<M> managedObjectSource, ManagedObjectSourceWirer wirer) {
+	public PropertyList addHttpSocket(String managedObjectSourceClassName,
+			ManagedObjectSourceWirer wirer) {
 
 		// Create the properties
 		PropertyList properties = this.getOfficeFloorCompiler()
 				.createPropertyList();
 
 		// Create and register the HTTP socket
-		HttpSocket httpSocket = new HttpSocket(managedObjectSource, wirer,
-				properties);
+		HttpSocket httpSocket = new HttpSocket(managedObjectSourceClassName,
+				wirer, properties);
 		this.httpSockets.add(httpSocket);
 
 		// Return the properties
@@ -204,10 +206,9 @@ public class HttpServerAutoWireOfficeFloorSource extends
 	private static class HttpSocket {
 
 		/**
-		 * {@link ManagedObjectSource} class.
+		 * {@link ManagedObjectSource} class name.
 		 */
-		@SuppressWarnings("rawtypes")
-		public final Class managedObjectSource;
+		public final String managedObjectSourceClassName;
 
 		/**
 		 * {@link ManagedObjectSourceWirer}.
@@ -222,16 +223,16 @@ public class HttpServerAutoWireOfficeFloorSource extends
 		/**
 		 * Initiate.
 		 * 
-		 * @param managedObjectSource
-		 *            {@link ManagedObjectSource} class.
+		 * @param managedObjectSourceClassName
+		 *            {@link ManagedObjectSource} class name.
 		 * @param wirer
 		 *            {@link ManagedObjectSourceWirer}.
 		 * @param properties
 		 *            {@link PropertyList}.
 		 */
-		public HttpSocket(Class<?> managedObjectSource,
+		public HttpSocket(String managedObjectSourceClassName,
 				ManagedObjectSourceWirer wirer, PropertyList properties) {
-			this.managedObjectSource = managedObjectSource;
+			this.managedObjectSourceClassName = managedObjectSourceClassName;
 			this.wirer = wirer;
 			this.properties = properties;
 		}

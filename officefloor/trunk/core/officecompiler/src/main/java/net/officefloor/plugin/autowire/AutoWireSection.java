@@ -35,11 +35,14 @@ public interface AutoWireSection extends AutoWireProperties {
 	String getSectionName();
 
 	/**
-	 * Obtains the {@link SectionSource} class.
+	 * <p>
+	 * Obtains the class name of the {@link SectionSource}.
+	 * <p>
+	 * This may be an alias.
 	 * 
-	 * @return {@link SectionSource} class.
+	 * @return Class name of the {@link SectionSource}.
 	 */
-	Class<?> getSectionSourceClass();
+	String getSectionSourceClassName();
 
 	/**
 	 * Obtains the section location.

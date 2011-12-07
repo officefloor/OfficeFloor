@@ -123,14 +123,15 @@ public class CometHttpTemplateSectionExtension implements
 		// Determine if already configured Comet Service
 		if (!application.isObjectAvailable(CometService.class)) {
 			// Configure the Comet Service
-			application.addManagedObject(CometServiceManagedObjectSource.class,
+			application.addManagedObject(
+					CometServiceManagedObjectSource.class.getName(),
 					new ManagedObjectSourceWirer() {
 						@Override
 						public void wire(ManagedObjectSourceWirerContext context) {
 							context.setInput(true);
 							context.mapTeam(
 									CometServiceManagedObjectSource.EXPIRE_TEAM_NAME,
-									OnePersonTeamSource.class);
+									OnePersonTeamSource.class.getName());
 						}
 					}, CometService.class).setTimeout(600 * 1000);
 		}
@@ -139,7 +140,7 @@ public class CometHttpTemplateSectionExtension implements
 		if (!application.isObjectAvailable(CometPublisher.class)) {
 			// Configure the Comet Publisher
 			application.addManagedObject(
-					CometPublisherManagedObjectSource.class, null,
+					CometPublisherManagedObjectSource.class.getName(), null,
 					CometPublisher.class);
 		}
 
@@ -147,8 +148,8 @@ public class CometHttpTemplateSectionExtension implements
 		AutoWireSection section = application.getSection("COMET");
 		if (section == null) {
 			// Add the section
-			section = application.addSection("COMET", CometSectionSource.class,
-					"COMET");
+			section = application.addSection("COMET",
+					CometSectionSource.class.getName(), "COMET");
 		}
 
 		// Obtain the template URI
@@ -194,8 +195,8 @@ public class CometHttpTemplateSectionExtension implements
 					if (!application.isObjectAvailable(parameterType)) {
 						application
 								.addManagedObject(
-										CometProxyPublisherManagedObjectSource.class,
-										null, parameterType)
+										CometProxyPublisherManagedObjectSource.class
+												.getName(), null, parameterType)
 								.addProperty(
 										CometProxyPublisherManagedObjectSource.PROPERTY_PROXY_INTERFACE,
 										parameterType.getName());

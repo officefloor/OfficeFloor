@@ -18,7 +18,6 @@
 package net.officefloor.plugin.woof.servlet;
 
 import java.io.FileNotFoundException;
-import java.io.InputStream;
 import java.util.logging.Filter;
 
 import javax.servlet.Servlet;
@@ -26,6 +25,7 @@ import javax.servlet.Servlet;
 import net.officefloor.model.impl.repository.ModelRepositoryImpl;
 import net.officefloor.model.impl.repository.classloader.ClassLoaderConfigurationContext;
 import net.officefloor.model.repository.ConfigurationContext;
+import net.officefloor.model.repository.ConfigurationItem;
 import net.officefloor.model.woof.WoofRepository;
 import net.officefloor.model.woof.WoofRepositoryImpl;
 import net.officefloor.plugin.servlet.OfficeFloorServletFilter;
@@ -57,10 +57,6 @@ public class WoofServletFilter extends OfficeFloorServletFilter {
 	@Override
 	protected void configure() throws Exception {
 
-		// Obtain the class loader
-		ClassLoader classLoader = Thread.currentThread()
-				.getContextClassLoader();
-
 		// Obtain the location of the configuration
 		String location = this.getFilterConfig().getInitParameter(
 				PROPERTY_WOOF_CONFIGURATION_LOCATION);
@@ -68,24 +64,25 @@ public class WoofServletFilter extends OfficeFloorServletFilter {
 			location = DEFAULT_WOOF_CONFIGUARTION_LOCATION;
 		}
 
-		// Ensure configuration available
-		InputStream available = classLoader.getResourceAsStream(location);
-		if (available == null) {
+		// Obtain the woof configuration (ensuring exists)
+		ClassLoader classLoader = this.getOfficeFloorCompiler()
+				.getClassLoader();
+		ConfigurationContext configurationContext = new ClassLoaderConfigurationContext(
+				classLoader);
+		ConfigurationItem configuration = configurationContext
+				.getConfigurationItem(location);
+		if (configuration == null) {
 			throw new FileNotFoundException(
 					"Can not find WoOF configuration at " + location);
 		}
-		available.close(); // only need to see if available
 
 		// Create the WoOF loader
-		ConfigurationContext context = new ClassLoaderConfigurationContext(
-				classLoader);
 		WoofRepository repository = new WoofRepositoryImpl(
 				new ModelRepositoryImpl());
-		WoofLoader woofLoader = new WoofLoaderImpl(classLoader, context,
-				repository);
+		WoofLoader woofLoader = new WoofLoaderImpl(repository);
 
 		// Configure this filter
-		woofLoader.loadWoofConfiguration(location, this);
+		woofLoader.loadWoofConfiguration(configuration, this);
 	}
 
 }

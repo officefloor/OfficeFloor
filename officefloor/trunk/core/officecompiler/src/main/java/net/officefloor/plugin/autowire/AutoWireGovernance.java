@@ -35,11 +35,14 @@ public interface AutoWireGovernance extends AutoWireProperties {
 	String getGovernanceName();
 
 	/**
-	 * Obtains the {@link GovernanceSource} class.
+	 * <p>
+	 * Obtains the {@link GovernanceSource} class name.
+	 * <p>
+	 * May be an alias.
 	 * 
-	 * @return {@link GovernanceSource} class.
+	 * @return {@link GovernanceSource} class name.
 	 */
-	Class<?> getGovernanceSourceClass();
+	String getGovernanceSourceClassName();
 
 	/**
 	 * Provides {@link Governance} over the {@link AutoWireSection}.

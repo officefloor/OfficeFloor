@@ -56,14 +56,14 @@ public interface AutoWireApplication {
 	 * 
 	 * @param sectionName
 	 *            Name of the {@link OfficeSection}.
-	 * @param sectionSourceClass
-	 *            {@link SectionSource} class.
+	 * @param sectionSourceClassName
+	 *            Class name of the {@link SectionSource}. May be an alias.
 	 * @param sectionLocation
 	 *            {@link OfficeSection} location.
 	 * @return {@link AutoWireSection} to configure properties and link flows.
 	 */
-	<S extends SectionSource> AutoWireSection addSection(String sectionName,
-			Class<S> sectionSourceClass, String sectionLocation);
+	AutoWireSection addSection(String sectionName,
+			String sectionSourceClassName, String sectionLocation);
 
 	/**
 	 * Adds an {@link AutoWireSection} with the ability to override the
@@ -71,8 +71,8 @@ public interface AutoWireApplication {
 	 * 
 	 * @param sectionName
 	 *            Name of the {@link OfficeSection}.
-	 * @param sectionSourceClass
-	 *            {@link SectionSource} class.
+	 * @param sectionSourceClassName
+	 *            Class name of the {@link SectionSource}. May be an alias.
 	 * @param sectionLocation
 	 *            {@link OfficeSection} location.
 	 * @param sectionFactory
@@ -81,9 +81,9 @@ public interface AutoWireApplication {
 	 * @return Overridden {@link AutoWireSection} to configure properties and
 	 *         link flows.
 	 */
-	<S extends SectionSource, A extends AutoWireSection> AutoWireSection addSection(
-			String sectionName, Class<S> sectionSourceClass,
-			String sectionLocation, AutoWireSectionFactory<A> sectionFactory);
+	<A extends AutoWireSection> AutoWireSection addSection(String sectionName,
+			String sectionSourceClassName, String sectionLocation,
+			AutoWireSectionFactory<A> sectionFactory);
 
 	/**
 	 * <p>
@@ -159,8 +159,9 @@ public interface AutoWireApplication {
 	/**
 	 * Adds a {@link ManagedObjectSource} for dependency injection.
 	 * 
-	 * @param managedObjectSourceClass
-	 *            {@link ManagedObjectSource} class.
+	 * @param managedObjectSourceClassName
+	 *            Class name of the {@link ManagedObjectSource}. May be an
+	 *            alias.
 	 * @param wirer
 	 *            {@link ManagedObjectSourceWirer} to assist in configuring the
 	 *            {@link ManagedObjectSource}. May be <code>null</code> if no
@@ -170,9 +171,8 @@ public interface AutoWireApplication {
 	 *            dependency injection via auto-wiring.
 	 * @return {@link AutoWireObject} for the {@link ManagedObjectSource}.
 	 */
-	<D extends Enum<D>, F extends Enum<F>, S extends ManagedObjectSource<D, F>> AutoWireObject addManagedObject(
-			Class<S> managedObjectSourceClass, ManagedObjectSourceWirer wirer,
-			Class<?>... objectTypes);
+	AutoWireObject addManagedObject(String managedObjectSourceClassName,
+			ManagedObjectSourceWirer wirer, Class<?>... objectTypes);
 
 	/**
 	 * Indicates if the {@link AutoWireObject} is already configured for the
@@ -191,12 +191,12 @@ public interface AutoWireApplication {
 	 * 
 	 * @param governanceName
 	 *            Name of the {@link Governance}.
-	 * @param governanceSource
-	 *            {@link GovernanceSource} class.
+	 * @param governanceSourceClassName
+	 *            Class name of the {@link GovernanceSource}. May be an alias.
 	 * @return {@link AutoWireGovernance}.
 	 */
-	<I, F extends Enum<F>, S extends GovernanceSource<I, F>> AutoWireGovernance addGovernance(
-			String governanceName, Class<S> governanceSource);
+	AutoWireGovernance addGovernance(String governanceName,
+			String governanceSourceClassName);
 
 	/**
 	 * Assigns a {@link Team} responsible for:
@@ -205,26 +205,24 @@ public interface AutoWireApplication {
 	 * <li>{@link Governance} with the extension interfance object type</li>
 	 * </ol>
 	 * 
-	 * @param teamSourceClass
-	 *            {@link TeamSource} class.
+	 * @param teamSourceClassName
+	 *            Class name of the {@link TeamSource}. May be an alias.
 	 * @param objectTypes
 	 *            Dependent {@link Task} object types and {@link Governance}
 	 *            extension interfaces the {@link Team} is responsible for. Must
 	 *            have at least one object type provided.
 	 * @return {@link AutoWireTeam}.
 	 */
-	<T extends TeamSource> AutoWireTeam assignTeam(Class<T> teamSourceClass,
-			Class<?>... objectTypes);
+	AutoWireTeam assignTeam(String teamSourceClassName, Class<?>... objectTypes);
 
 	/**
 	 * Assigns a {@link Team} responsible for unassigned {@link Task} instances.
 	 * 
-	 * @param teamSourceClass
-	 *            {@link TeamSource} class.
+	 * @param teamSourceClassName
+	 *            Class name of the {@link TeamSource}. May be an alias.
 	 * @return {@link AutoWireTeam}.
 	 */
-	<T extends TeamSource> AutoWireTeam assignDefaultTeam(
-			Class<T> teamSourceClass);
+	AutoWireTeam assignDefaultTeam(String teamSourceClassName);
 
 	/**
 	 * Opens the {@link AutoWireOfficeFloor}.

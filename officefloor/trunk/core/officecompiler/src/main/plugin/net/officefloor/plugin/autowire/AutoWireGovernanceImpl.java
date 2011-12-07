@@ -39,9 +39,9 @@ public class AutoWireGovernanceImpl extends AutoWirePropertiesImpl implements
 	private final String governanceName;
 
 	/**
-	 * {@link Class} of the {@link GovernanceSource}.
+	 * {@link Class} name of the {@link GovernanceSource}.
 	 */
-	private final Class<?> governanceSourceClass;
+	private final String governanceSourceClassName;
 
 	/**
 	 * {@link AutoWireSection} instances under this {@link Governance}.
@@ -53,19 +53,19 @@ public class AutoWireGovernanceImpl extends AutoWirePropertiesImpl implements
 	 * 
 	 * @param governanceName
 	 *            Name of the {@link Governance}.
-	 * @param governanceSourceClass
-	 *            {@link Class} of the {@link GovernanceSource}.
+	 * @param governanceSourceClassName
+	 *            {@link Class} name of the {@link GovernanceSource}.
 	 * @param compiler
 	 *            {@link OfficeFloorCompiler}.
 	 * @param properties
 	 *            {@link PropertyList}.
 	 */
 	public AutoWireGovernanceImpl(String governanceName,
-			Class<?> governanceSourceClass, OfficeFloorCompiler compiler,
+			String governanceSourceClassName, OfficeFloorCompiler compiler,
 			PropertyList properties) {
 		super(compiler, properties);
 		this.governanceName = governanceName;
-		this.governanceSourceClass = governanceSourceClass;
+		this.governanceSourceClassName = governanceSourceClassName;
 	}
 
 	/*
@@ -78,8 +78,8 @@ public class AutoWireGovernanceImpl extends AutoWirePropertiesImpl implements
 	}
 
 	@Override
-	public Class<?> getGovernanceSourceClass() {
-		return this.governanceSourceClass;
+	public String getGovernanceSourceClassName() {
+		return this.governanceSourceClassName;
 	}
 
 	@Override

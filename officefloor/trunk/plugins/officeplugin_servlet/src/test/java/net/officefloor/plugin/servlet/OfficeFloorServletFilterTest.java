@@ -380,7 +380,8 @@ public class OfficeFloorServletFilterTest extends OfficeFrameTestCase {
 
 			// Link to section
 			AutoWireSection section = this.addSection("SECTION",
-					ClassSectionSource.class, MockSection.class.getName());
+					ClassSectionSource.class.getName(),
+					MockSection.class.getName());
 			this.linkUri("section", section, "doSection");
 
 			// Link to Servlet resource
@@ -389,12 +390,13 @@ public class OfficeFloorServletFilterTest extends OfficeFrameTestCase {
 
 			// Enable access to EJB of filter
 			AutoWireSection ejb = this.addSection("EJB",
-					ClassSectionSource.class, MockEjbSection.class.getName());
+					ClassSectionSource.class.getName(),
+					MockEjbSection.class.getName());
 			this.linkUri("ejb", ejb, "doEjb");
 
 			// Enable escalation handling to resource
 			AutoWireSection failSection = this.addSection("FAILURE",
-					ClassSectionSource.class,
+					ClassSectionSource.class.getName(),
 					MockFailureSection.class.getName());
 			this.linkUri("fail", failSection, "task");
 			this.linkEscalation(IOException.class, "Template.jsp");
