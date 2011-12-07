@@ -35,6 +35,7 @@ import net.officefloor.model.woof.WoofExceptionModel;
 import net.officefloor.model.woof.WoofExceptionToWoofResourceModel;
 import net.officefloor.model.woof.WoofExceptionToWoofSectionInputModel;
 import net.officefloor.model.woof.WoofExceptionToWoofTemplateModel;
+import net.officefloor.model.woof.WoofGovernanceAreaModel;
 import net.officefloor.model.woof.WoofGovernanceModel;
 import net.officefloor.model.woof.WoofModel;
 import net.officefloor.model.woof.WoofRepository;
@@ -51,6 +52,7 @@ import net.officefloor.model.woof.WoofTemplateOutputModel;
 import net.officefloor.model.woof.WoofTemplateOutputToWoofResourceModel;
 import net.officefloor.model.woof.WoofTemplateOutputToWoofSectionInputModel;
 import net.officefloor.model.woof.WoofTemplateOutputToWoofTemplateModel;
+import net.officefloor.plugin.autowire.AutoWireGovernance;
 import net.officefloor.plugin.autowire.AutoWireSection;
 import net.officefloor.plugin.web.http.application.HttpTemplateAutoWireSection;
 import net.officefloor.plugin.web.http.application.HttpTemplateAutoWireSectionExtension;
@@ -421,10 +423,85 @@ public class WoofLoaderImpl implements WoofLoader {
 
 		// Load the governance
 		for (WoofGovernanceModel govModel : woof.getWoofGovernances()) {
-			// TODO implement
-			throw new UnsupportedOperationException(
-					"TODO implement configuring WoOF governance");
+
+			// Obtain the governance details
+			String governanceName = govModel.getWoofGovernanceName();
+			String governanceSourceClassName = govModel
+					.getGovernanceSourceClassName();
+
+			// Configure the governance
+			AutoWireGovernance governance = application.addGovernance(
+					governanceName, governanceSourceClassName);
+			for (PropertyModel property : govModel.getProperties()) {
+				governance.addProperty(property.getName(), property.getValue());
+			}
+
+			// Configure the governance of the sections
+			for (WoofGovernanceAreaModel area : govModel.getGovernanceAreas()) {
+
+				// Govern the templates within the governance area
+				for (WoofTemplateModel templateModel : woof.getWoofTemplates()) {
+					if (this.isWithinGovernanceArea(templateModel.getX(),
+							templateModel.getY(), area)) {
+						// Template within governance area so govern
+						HttpTemplateAutoWireSection template = templates
+								.get(templateModel.getWoofTemplateName());
+						governance.governSection(template);
+					}
+				}
+
+				// Govern the sections within the governance area
+				for (WoofSectionModel sectionModel : woof.getWoofSections()) {
+					if (this.isWithinGovernanceArea(sectionModel.getX(),
+							sectionModel.getY(), area)) {
+						// Section within governance area so govern
+						AutoWireSection section = sections.get(sectionModel
+								.getWoofSectionName());
+						governance.governSection(section);
+					}
+				}
+			}
 		}
+	}
+
+	/**
+	 * Indicates if the position is within the area.
+	 * 
+	 * @param posX
+	 *            Position X location.
+	 * @param posY
+	 *            Position Y location.
+	 * @param area
+	 *            {@link WoofGovernanceAreaModel}.
+	 * @return <code>true</code> if position within the
+	 *         {@link WoofGovernanceAreaModel}.
+	 */
+	private boolean isWithinGovernanceArea(int posX, int posY,
+			WoofGovernanceAreaModel area) {
+
+		// Obtain left and right X locations
+		int left = area.getX();
+		int right = area.getX() + area.getWidth();
+		if (left > right) {
+			// Swap around to have correct left right orientation
+			int temp = left;
+			left = right;
+			right = temp;
+		}
+
+		// Obtain top and bottom Y locations
+		int top = area.getY();
+		int bottom = area.getY() + area.getHeight();
+		if (top > bottom) {
+			// Swap around to have correct top bottom orientation
+			int temp = top;
+			top = bottom;
+			bottom = temp;
+		}
+
+		// Return whether position within area
+		return ((left <= posX) && (posX <= right))
+				&& ((top <= posY) && (posY <= bottom));
 	}
 
 	/**
