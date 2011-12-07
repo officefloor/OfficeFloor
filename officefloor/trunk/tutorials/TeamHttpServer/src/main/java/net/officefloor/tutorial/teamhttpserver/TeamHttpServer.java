@@ -52,12 +52,12 @@ public class TeamHttpServer {
 		source.addHttpTemplate("Template.ofp", Template.class, "example");
 		HttpParametersObjectManagedObjectSource.autoWire(source,
 				EncryptLetter.class);
-		source.addManagedObject(DataSourceManagedObjectSource.class, null,
-				DataSource.class).loadProperties("datasource.properties");
+		source.addManagedObject(DataSourceManagedObjectSource.class.getName(),
+				null, DataSource.class).loadProperties("datasource.properties");
 
 		// Configure team for all database tasks
-		AutoWireTeam team = source.assignTeam(LeaderFollowerTeamSource.class,
-				DataSource.class);
+		AutoWireTeam team = source.assignTeam(
+				LeaderFollowerTeamSource.class.getName(), DataSource.class);
 		team.addProperty("size", "10");
 
 		// Start the HTTP server

@@ -49,7 +49,8 @@ public class DatabaseHttpServer {
 
 		// Provide DataSource to database for dependency injection
 		AutoWireObject object = source.addManagedObject(
-				DataSourceManagedObjectSource.class, null, DataSource.class);
+				DataSourceManagedObjectSource.class.getName(), null,
+				DataSource.class);
 		object.loadProperties("datasource.properties");
 
 		// Start the HTTP server
