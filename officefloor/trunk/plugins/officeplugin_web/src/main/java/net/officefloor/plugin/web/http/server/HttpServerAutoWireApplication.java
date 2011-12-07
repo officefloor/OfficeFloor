@@ -40,9 +40,9 @@ public interface HttpServerAutoWireApplication extends WebAutoWireApplication {
 	 * <p>
 	 * This may be called multiple times to add listeners on more than one port.
 	 * 
-	 * @param managedObjectSource
+	 * @param managedObjectSourceClassName
 	 *            {@link ManagedObjectSource} providing the
-	 *            {@link ServerHttpConnection}.
+	 *            {@link ServerHttpConnection}. May be an alias.
 	 * @param wirer
 	 *            {@link ManagedObjectSourceWirer}. May be <code>null</code>.
 	 * @return {@link PropertyList} for configuring the
@@ -51,8 +51,8 @@ public interface HttpServerAutoWireApplication extends WebAutoWireApplication {
 	 * @see #HANDLER_SECTION_NAME
 	 * @see #HANDLER_INPUT_NAME
 	 */
-	<D extends Enum<D>, F extends Enum<F>, M extends ManagedObjectSource<D, F>> PropertyList addHttpSocket(
-			Class<M> managedObjectSource, ManagedObjectSourceWirer wirer);
+	PropertyList addHttpSocket(String managedObjectSourceClassName,
+			ManagedObjectSourceWirer wirer);
 
 	/**
 	 * <p>

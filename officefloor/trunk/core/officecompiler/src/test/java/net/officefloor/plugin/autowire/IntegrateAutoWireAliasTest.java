@@ -29,7 +29,7 @@ import javax.transaction.xa.XAResource;
 import javax.transaction.xa.Xid;
 
 import net.officefloor.frame.api.build.None;
-import net.officefloor.frame.impl.spi.team.OnePersonTeamSource;
+import net.officefloor.frame.spi.TestSource;
 import net.officefloor.frame.spi.governance.Governance;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.frame.spi.managedobject.extension.ExtensionInterfaceFactory;
@@ -43,11 +43,11 @@ import net.officefloor.plugin.governance.clazz.Govern;
 import net.officefloor.plugin.section.clazz.ClassSectionSource;
 
 /**
- * Tests the integration of the {@link AutoWireGovernance}.
+ * Tests the integration of the use of aliases.
  * 
  * @author Daniel Sagenschneider
  */
-public class IntegrateAutoWireGovernanceTest extends OfficeFrameTestCase {
+public class IntegrateAutoWireAliasTest extends OfficeFrameTestCase {
 
 	/**
 	 * {@link Thread} instances that executed the {@link Job} instances.
@@ -119,25 +119,23 @@ public class IntegrateAutoWireGovernanceTest extends OfficeFrameTestCase {
 
 		// Configure the application
 		AutoWireApplication application = new AutoWireOfficeFloorSource();
-		AutoWireSection section = application
-				.addSection("SECTION", ClassSectionSource.class.getName(),
-						MockSection.class.getName());
+		AutoWireSection section = application.addSection("SECTION", "CLASS",
+				MockSection.class.getName());
 		AutoWireGovernance governance = application.addGovernance("GOVERNANCE",
-				ClassGovernanceSource.class.getName());
+				"CLASS");
 		governance.addProperty(ClassGovernanceSource.CLASS_NAME_PROPERTY_NAME,
 				MockGovernance.class.getName());
 		governance.governSection(section);
-		application.assignTeam(OnePersonTeamSource.class.getName(),
-				XAResource.class);
-		application.assignDefaultTeam(OnePersonTeamSource.class.getName());
+		application.assignTeam("ONE_PERSON", XAResource.class);
+		application.assignDefaultTeam("ONE_PERSON");
 
 		// Configure the object / managed object
 		if (isManagedObject) {
 			// Configure the managed object
 			MockManagedObjectSource.object = object;
-			application.addManagedObject(
-					MockManagedObjectSource.class.getName(), null,
-					Connection.class);
+			application.getOfficeFloorCompiler().addManagedObjectSourceAlias(
+					"MOCK", MockManagedObjectSource.class);
+			application.addManagedObject("MOCK", null, Connection.class);
 
 		} else {
 			// Configure the object
@@ -216,6 +214,7 @@ public class IntegrateAutoWireGovernanceTest extends OfficeFrameTestCase {
 	/**
 	 * Mock {@link ManagedObjectSource}.
 	 */
+	@TestSource
 	public static class MockManagedObjectSource extends
 			AbstractManagedObjectSource<None, None> implements ManagedObject,
 			ExtensionInterfaceFactory<XAResource> {

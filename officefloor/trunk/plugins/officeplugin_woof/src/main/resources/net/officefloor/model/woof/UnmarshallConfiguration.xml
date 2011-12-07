@@ -78,6 +78,27 @@
 		</object>
 	</object>
 
+	<!-- GOVERNANCES -->
+	<object method="addWoofGovernance" node="governance"
+		class="net.officefloor.model.woof.WoofGovernanceModel">
+		<value method="setWoofGovernanceName" node="governance@name" />
+		<value method="setGovernanceSourceClassName" node="governance@source" />
+		<value method="setX" node="governance@x" />
+		<value method="setY" node="governance@y" />
+		<object method="addProperty" node="property"
+			class="net.officefloor.model.woof.PropertyModel">
+			<value method="setName" node="property@name" />
+			<value method="setValue" node="property@value" />
+		</object>
+		<object method="addGovernanceArea" node="governance-area"
+			class="net.officefloor.model.woof.WoofGovernanceAreaModel">
+			<value method="setX" node="governance-area@x" />
+			<value method="setY" node="governance-area@y" />
+			<value method="setWidth" node="governance-area@width" />
+			<value method="setHeight" node="governance-area@height" />
+		</object>
+	</object>
+
 	<!-- RESOURCES -->
 	<object method="addWoofResource" node="resource"
 		class="net.officefloor.model.woof.WoofResourceModel">

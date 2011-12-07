@@ -46,12 +46,12 @@ public interface ManagedObjectSourceWirerContext {
 	 * 
 	 * @param managedObjectSourceTeamName
 	 *            Name of the {@link ManagedObjectTeam}.
-	 * @param teamSourceClass
-	 *            {@link TeamSource} class.
+	 * @param teamSourceClassName
+	 *            {@link TeamSource} class name. May be an alias.
 	 * @return {@link AutoWireTeam}.
 	 */
 	<S extends TeamSource> AutoWireTeam mapTeam(
-			String managedObjectSourceTeamName, Class<S> teamSourceClass);
+			String managedObjectSourceTeamName, String teamSourceClassName);
 
 	/**
 	 * Maps the {@link ManagedObjectFlow}.

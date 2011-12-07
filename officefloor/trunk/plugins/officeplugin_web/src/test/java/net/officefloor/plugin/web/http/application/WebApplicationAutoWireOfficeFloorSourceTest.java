@@ -112,8 +112,8 @@ public class WebApplicationAutoWireOfficeFloorSourceTest extends
 		assertEquals("Incorrect section name", "uri.ofp",
 				section.getSectionName());
 		assertEquals("Incorrect section source",
-				HttpTemplateSectionSource.class,
-				section.getSectionSourceClass());
+				HttpTemplateSectionSource.class.getName(),
+				section.getSectionSourceClassName());
 		assertEquals("Incorrect section location",
 				this.getClassPath("template.ofp"), templatePath);
 		assertEquals("Incorrect template path", templatePath,
@@ -190,8 +190,8 @@ public class WebApplicationAutoWireOfficeFloorSourceTest extends
 		assertEquals("Incorrect section name", "resource0",
 				section.getSectionName());
 		assertEquals("Incorrect section source",
-				HttpTemplateSectionSource.class,
-				section.getSectionSourceClass());
+				HttpTemplateSectionSource.class.getName(),
+				section.getSectionSourceClassName());
 		assertEquals("Incorrect section location", templatePath,
 				section.getSectionLocation());
 		assertEquals("Incorrect template path", templatePath,
@@ -289,7 +289,8 @@ public class WebApplicationAutoWireOfficeFloorSourceTest extends
 
 		// Add section for handling request
 		AutoWireSection section = this.source.addSection("SECTION",
-				ClassSectionSource.class, MockTemplateLogic.class.getName());
+				ClassSectionSource.class.getName(),
+				MockTemplateLogic.class.getName());
 		this.source.linkUri("test", section, "submit");
 		this.source.openOfficeFloor();
 
@@ -304,7 +305,8 @@ public class WebApplicationAutoWireOfficeFloorSourceTest extends
 
 		// Add linking to HTTP template
 		AutoWireSection section = this.source.addSection("SECTION",
-				ClassSectionSource.class, MockLinkHttpTemplate.class.getName());
+				ClassSectionSource.class.getName(),
+				MockLinkHttpTemplate.class.getName());
 		this.source.linkUri("test", section, "service");
 		HttpTemplateAutoWireSection template = this.source.addHttpTemplate(
 				this.getClassPath("template.ofp"), MockTemplateLogic.class);
@@ -334,7 +336,8 @@ public class WebApplicationAutoWireOfficeFloorSourceTest extends
 
 		// Add linking to resource
 		AutoWireSection section = this.source.addSection("SECTION",
-				ClassSectionSource.class, MockLinkResource.class.getName());
+				ClassSectionSource.class.getName(),
+				MockLinkResource.class.getName());
 		this.source.linkUri("test", section, "service");
 		this.source.linkToResource(section, "resource", "resource.html");
 		this.source.openOfficeFloor();
@@ -362,7 +365,8 @@ public class WebApplicationAutoWireOfficeFloorSourceTest extends
 
 		// Add escalation to template
 		AutoWireSection failingSection = this.source.addSection("FAILING",
-				ClassSectionSource.class, FailingSection.class.getName());
+				ClassSectionSource.class.getName(),
+				FailingSection.class.getName());
 		this.source.linkUri("test", failingSection, "task");
 		HttpTemplateAutoWireSection template = this.source.addHttpTemplate(
 				this.getClassPath("template.ofp"), MockTemplateLogic.class,
@@ -393,7 +397,8 @@ public class WebApplicationAutoWireOfficeFloorSourceTest extends
 
 		// Add escalation to resource
 		AutoWireSection failingSection = this.source.addSection("FAILING",
-				ClassSectionSource.class, FailingSection.class.getName());
+				ClassSectionSource.class.getName(),
+				FailingSection.class.getName());
 		this.source.linkUri("test", failingSection, "task");
 		this.source.linkEscalation(SQLException.class, "resource.html");
 		this.source.openOfficeFloor();
@@ -494,8 +499,9 @@ public class WebApplicationAutoWireOfficeFloorSourceTest extends
 	public void testHttpSessionObject() throws Exception {
 
 		// Provide HTTP Session
-		this.source.addManagedObject(HttpSessionManagedObjectSource.class,
-				null, HttpSession.class).setTimeout(10 * 1000);
+		this.source.addManagedObject(
+				HttpSessionManagedObjectSource.class.getName(), null,
+				HttpSession.class).setTimeout(10 * 1000);
 
 		// Add two templates to ensure object available to both
 		this.source.addHttpTemplate(this.getClassPath("StatefulObject.ofp"),
@@ -547,8 +553,9 @@ public class WebApplicationAutoWireOfficeFloorSourceTest extends
 	public void testHttpSessionStatefulAnnotation() throws Exception {
 
 		// Provide HTTP Session
-		this.source.addManagedObject(HttpSessionManagedObjectSource.class,
-				null, HttpSession.class).setTimeout(10 * 1000);
+		this.source.addManagedObject(
+				HttpSessionManagedObjectSource.class.getName(), null,
+				HttpSession.class).setTimeout(10 * 1000);
 
 		// Add two templates with annotations for HttpSessionStateful
 		this.source.addHttpTemplate(this.getClassPath("StatefulObject.ofp"),
@@ -604,8 +611,9 @@ public class WebApplicationAutoWireOfficeFloorSourceTest extends
 			throws Exception {
 
 		// Provide HTTP Session
-		this.source.addManagedObject(HttpSessionManagedObjectSource.class,
-				null, HttpSession.class).setTimeout(10 * 1000);
+		this.source.addManagedObject(
+				HttpSessionManagedObjectSource.class.getName(), null,
+				HttpSession.class).setTimeout(10 * 1000);
 
 		// Add the template
 		this.source
@@ -659,8 +667,9 @@ public class WebApplicationAutoWireOfficeFloorSourceTest extends
 		final String URI = "/template.links-submit.task";
 
 		// Provide HTTP Request State
-		this.source.addManagedObject(HttpRequestStateManagedObjectSource.class,
-				null, HttpRequestState.class);
+		this.source.addManagedObject(
+				HttpRequestStateManagedObjectSource.class.getName(), null,
+				HttpRequestState.class);
 
 		// Add the template
 		this.source.addHttpTemplate(this.getClassPath("HttpStateObject.ofp"),
@@ -720,7 +729,7 @@ public class WebApplicationAutoWireOfficeFloorSourceTest extends
 
 		// Provide HTTP Application State
 		this.source.addManagedObject(
-				HttpApplicationStateManagedObjectSource.class, null,
+				HttpApplicationStateManagedObjectSource.class.getName(), null,
 				HttpApplicationState.class);
 
 		// Add the template
@@ -779,9 +788,9 @@ public class WebApplicationAutoWireOfficeFloorSourceTest extends
 	public void testOverrideNonHandledServicing() throws Exception {
 
 		// Add section to override servicing
-		AutoWireSection section = this.source
-				.addSection("SECTION", ClassSectionSource.class,
-						MockNonRoutedServicer.class.getName());
+		AutoWireSection section = this.source.addSection("SECTION",
+				ClassSectionSource.class.getName(),
+				MockNonRoutedServicer.class.getName());
 		this.source.setNonHandledServicer(section, "service");
 		this.source.linkToSendResponse(section, "send");
 

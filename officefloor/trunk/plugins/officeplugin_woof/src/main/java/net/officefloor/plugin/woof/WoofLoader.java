@@ -17,6 +17,7 @@
  */
 package net.officefloor.plugin.woof;
 
+import net.officefloor.model.repository.ConfigurationItem;
 import net.officefloor.plugin.web.http.application.WebAutoWireApplication;
 
 /**
@@ -29,14 +30,14 @@ public interface WoofLoader {
 	/**
 	 * Loads the WoOF configuration to the {@link WebAutoWireApplication}.
 	 * 
-	 * @param woofLocation
-	 *            Location of the WoOF configuration.
+	 * @param woofConfiguration
+	 *            {@link ConfigurationItem} containing the WoOF configuration.
 	 * @param application
 	 *            {@link WebAutoWireApplication}.
 	 * @throws Exception
 	 *             If fails to load the configuration.
 	 */
-	void loadWoofConfiguration(String woofLocation,
+	void loadWoofConfiguration(ConfigurationItem woofConfiguration,
 			WebAutoWireApplication application) throws Exception;
 
 }

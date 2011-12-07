@@ -30,7 +30,6 @@ import net.officefloor.compile.managedobject.ManagedObjectDependencyType;
 import net.officefloor.compile.managedobject.ManagedObjectType;
 import net.officefloor.compile.properties.Property;
 import net.officefloor.compile.properties.PropertyList;
-import net.officefloor.compile.spi.governance.source.GovernanceSource;
 import net.officefloor.compile.spi.office.ManagedObjectTeam;
 import net.officefloor.compile.spi.office.OfficeObject;
 import net.officefloor.compile.spi.office.OfficeSection;
@@ -50,7 +49,6 @@ import net.officefloor.compile.spi.officefloor.source.RequiredProperties;
 import net.officefloor.compile.spi.officefloor.source.impl.AbstractOfficeFloorSource;
 import net.officefloor.compile.spi.section.ManagedObjectDependency;
 import net.officefloor.compile.spi.section.ManagedObjectFlow;
-import net.officefloor.compile.spi.section.source.SectionSource;
 import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.manage.OfficeFloor;
@@ -154,19 +152,18 @@ public class AutoWireOfficeFloorSource extends AbstractOfficeFloorSource
 	}
 
 	@Override
-	public <S extends SectionSource> AutoWireSection addSection(
-			String sectionName, Class<S> sectionSourceClass,
-			String sectionLocation) {
-		return this.officeSource.addSection(sectionName, sectionSourceClass,
-				sectionLocation);
+	public AutoWireSection addSection(String sectionName,
+			String sectionSourceClassName, String sectionLocation) {
+		return this.officeSource.addSection(sectionName,
+				sectionSourceClassName, sectionLocation);
 	}
 
 	@Override
-	public <S extends SectionSource, A extends AutoWireSection> A addSection(
-			String sectionName, Class<S> sectionSourceClass,
-			String sectionLocation, AutoWireSectionFactory<A> sectionFactory) {
-		return this.officeSource.addSection(sectionName, sectionSourceClass,
-				sectionLocation, sectionFactory);
+	public <A extends AutoWireSection> A addSection(String sectionName,
+			String sectionSourceClassName, String sectionLocation,
+			AutoWireSectionFactory<A> sectionFactory) {
+		return this.officeSource.addSection(sectionName,
+				sectionSourceClassName, sectionLocation, sectionFactory);
 	}
 
 	@Override
@@ -209,9 +206,8 @@ public class AutoWireOfficeFloorSource extends AbstractOfficeFloorSource
 	}
 
 	@Override
-	public <D extends Enum<D>, F extends Enum<F>, S extends ManagedObjectSource<D, F>> AutoWireObject addManagedObject(
-			Class<S> managedObjectSourceClass, ManagedObjectSourceWirer wirer,
-			Class<?>... objectTypes) {
+	public AutoWireObject addManagedObject(String managedObjectSourceClassName,
+			ManagedObjectSourceWirer wirer, Class<?>... objectTypes) {
 
 		// Ensure have object types
 		if ((objectTypes == null) || (objectTypes.length == 0)) {
@@ -224,7 +220,7 @@ public class AutoWireOfficeFloorSource extends AbstractOfficeFloorSource
 
 		// Create the auto wire object
 		AutoWireObject object = new AutoWireObjectImpl(this.compiler,
-				managedObjectSourceClass, properties, wirer, objectTypes);
+				managedObjectSourceClassName, properties, wirer, objectTypes);
 
 		// Add the object context
 		this.objectContexts.add(new AutoWireContext(object, null));
@@ -251,15 +247,15 @@ public class AutoWireOfficeFloorSource extends AbstractOfficeFloorSource
 	}
 
 	@Override
-	public <I, F extends Enum<F>, S extends GovernanceSource<I, F>> AutoWireGovernance addGovernance(
-			String governanceName, Class<S> governanceSource) {
-		return this.officeSource
-				.addGovernance(governanceName, governanceSource);
+	public AutoWireGovernance addGovernance(String governanceName,
+			String governanceSourceClassName) {
+		return this.officeSource.addGovernance(governanceName,
+				governanceSourceClassName);
 	}
 
 	@Override
-	public <T extends TeamSource> AutoWireTeam assignTeam(
-			Class<T> teamSourceClass, Class<?>... objectTypes) {
+	public AutoWireTeam assignTeam(String teamSourceClassName,
+			Class<?>... objectTypes) {
 
 		// Must have object types
 		if ((objectTypes == null) || (objectTypes.length == 0)) {
@@ -282,7 +278,7 @@ public class AutoWireOfficeFloorSource extends AbstractOfficeFloorSource
 
 		// Create and add the team
 		AutoWireTeam team = new AutoWireTeamImpl(this.compiler, teamName,
-				teamSourceClass, properties, responsibilities);
+				teamSourceClassName, properties, responsibilities);
 		this.teams.add(team);
 
 		// Return the team
@@ -290,15 +286,14 @@ public class AutoWireOfficeFloorSource extends AbstractOfficeFloorSource
 	}
 
 	@Override
-	public <T extends TeamSource> AutoWireTeam assignDefaultTeam(
-			Class<T> teamSourceClass) {
+	public AutoWireTeam assignDefaultTeam(String teamSourceClassName) {
 
 		// Create the properties
 		PropertyList properties = this.compiler.createPropertyList();
 
 		// Create the default team
 		this.defaultTeam = new AutoWireTeamImpl(this.compiler, "team",
-				teamSourceClass, properties);
+				teamSourceClassName, properties);
 
 		// Return the default team
 		return this.defaultTeam;
@@ -344,8 +339,8 @@ public class AutoWireOfficeFloorSource extends AbstractOfficeFloorSource
 		OfficeFloorTeam team;
 		if (this.defaultTeam != null) {
 			// Configure the default team
-			team = deployer.addTeam("team", this.defaultTeam
-					.getTeamSourceClass().getName());
+			team = deployer.addTeam("team",
+					this.defaultTeam.getTeamSourceClassName());
 			for (Property property : this.defaultTeam.getProperties()) {
 				team.addProperty(property.getName(), property.getValue());
 			}
@@ -395,9 +390,9 @@ public class AutoWireOfficeFloorSource extends AbstractOfficeFloorSource
 		for (AutoWireTeam autoWireTeam : this.teams) {
 
 			// Add the responsible team
-			OfficeFloorTeam responsibleTeam = deployer
-					.addTeam(autoWireTeam.getTeamName(), autoWireTeam
-							.getTeamSourceClass().getName());
+			OfficeFloorTeam responsibleTeam = deployer.addTeam(
+					autoWireTeam.getTeamName(),
+					autoWireTeam.getTeamSourceClassName());
 			for (Property property : autoWireTeam.getProperties()) {
 				responsibleTeam.addProperty(property.getName(),
 						property.getValue());
@@ -519,9 +514,9 @@ public class AutoWireOfficeFloorSource extends AbstractOfficeFloorSource
 				} else {
 					// Obtain type from managed object
 					this.managedObjectType = context.loadManagedObjectType(
-							this.autoWireObject.getManagedObjectSourceClass()
-									.getName(), this.autoWireObject
-									.getProperties());
+							this.autoWireObject
+									.getManagedObjectSourceClassName(),
+							this.autoWireObject.getProperties());
 				}
 			}
 
@@ -555,8 +550,8 @@ public class AutoWireOfficeFloorSource extends AbstractOfficeFloorSource
 				Map<Class<?>, Integer> typeIndex) throws ClassNotFoundException {
 
 			// Determine the details
-			Class<?> managedObjectSourceClass = this.autoWireObject
-					.getManagedObjectSourceClass();
+			String managedObjectSourceClassName = this.autoWireObject
+					.getManagedObjectSourceClassName();
 			long timeout = this.autoWireObject.getTimeout();
 			PropertyList properties = this.autoWireObject.getProperties();
 			ManagedObjectSourceWirer wirer = this.autoWireObject
@@ -594,8 +589,7 @@ public class AutoWireOfficeFloorSource extends AbstractOfficeFloorSource
 			} else {
 				// Bind the managed object source
 				this.managedObjectSource = deployer.addManagedObjectSource(
-						this.managedObjectName,
-						managedObjectSourceClass.getName());
+						this.managedObjectName, managedObjectSourceClassName);
 
 				// Specify time out to source the managed object
 				this.managedObjectSource.setTimeout(timeout);
@@ -768,8 +762,8 @@ public class AutoWireOfficeFloorSource extends AbstractOfficeFloorSource
 						this.managedObjectSource
 								.getOfficeFloorManagedObjectSourceName()
 								+ "-"
-								+ team.getTeamName(), team.getTeamSourceClass()
-								.getName());
+								+ team.getTeamName(), team
+								.getTeamSourceClassName());
 				for (Property property : team.getProperties()) {
 					officeFloorTeam.addProperty(property.getName(),
 							property.getValue());
@@ -843,7 +837,7 @@ public class AutoWireOfficeFloorSource extends AbstractOfficeFloorSource
 
 		@Override
 		public <S extends TeamSource> AutoWireTeam mapTeam(
-				String managedObjectSourceTeamName, Class<S> teamSourceClass) {
+				String managedObjectSourceTeamName, String teamSourceClassName) {
 
 			// Create the properties for the team
 			PropertyList properties = AutoWireOfficeFloorSource.this.compiler
@@ -852,7 +846,8 @@ public class AutoWireOfficeFloorSource extends AbstractOfficeFloorSource
 			// Register the team mapping
 			AutoWireTeam team = new AutoWireTeamImpl(
 					AutoWireOfficeFloorSource.this.compiler,
-					managedObjectSourceTeamName, teamSourceClass, properties);
+					managedObjectSourceTeamName, teamSourceClassName,
+					properties);
 			this.teams.add(team);
 
 			// Return the team

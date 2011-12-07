@@ -74,13 +74,13 @@ public class ResourceIntegrationTest extends OfficeFrameTestCase {
 		// Configure OfficeFloor
 		AutoWireOfficeFloorSource source = new AutoWireOfficeFloorSource(
 				OfficeFloorCompiler.newOfficeFloorCompiler(null));
-		source.addManagedObject(ClassLoaderManagedObjectSource.class, null,
-				ClassLoader.class);
-		source.addManagedObject(ResourceManagedObjectSource.class, null,
-				InputStream.class);
-		source.addSection("SECTION", ClassSectionSource.class,
+		source.addManagedObject(ClassLoaderManagedObjectSource.class.getName(),
+				null, ClassLoader.class);
+		source.addManagedObject(ResourceManagedObjectSource.class.getName(),
+				null, InputStream.class);
+		source.addSection("SECTION", ClassSectionSource.class.getName(),
 				ResourceWork.class.getName());
-		source.assignDefaultTeam(PassiveTeamSource.class);
+		source.assignDefaultTeam(PassiveTeamSource.class.getName());
 
 		// Configure for the OfficeFrame
 		source.getOfficeFloorCompiler().addResources(resourceSource);

@@ -157,8 +157,9 @@ public class HttpServerAutoWireOfficeFloorSourceTest extends
 	public void testHttpSession() throws Exception {
 
 		// Add section that uses the HTTP Session
-		AutoWireSection section = this.source.addSection("SECTION",
-				ClassSectionSource.class, MockSection.class.getName());
+		AutoWireSection section = this.source
+				.addSection("SECTION", ClassSectionSource.class.getName(),
+						MockSection.class.getName());
 		this.source.linkUri("increment", section, "incrementCounter");
 
 		// Ensure have the auto-wire object for HTTP Session
@@ -349,7 +350,7 @@ public class HttpServerAutoWireOfficeFloorSourceTest extends
 	private void addHttpSocket(int port) {
 		this.source
 				.addHttpSocket(
-						HttpServerSocketManagedObjectSource.class,
+						HttpServerSocketManagedObjectSource.class.getName(),
 						HttpServerSocketManagedObjectSource
 								.createManagedObjectSourceWirer(
 										HttpServerAutoWireOfficeFloorSource.HANDLER_SECTION_NAME,

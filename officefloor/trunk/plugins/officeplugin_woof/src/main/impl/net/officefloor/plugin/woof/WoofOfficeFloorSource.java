@@ -19,9 +19,11 @@ package net.officefloor.plugin.woof;
 
 import net.officefloor.compile.spi.officefloor.OfficeFloorDeployer;
 import net.officefloor.compile.spi.officefloor.source.OfficeFloorSourceContext;
+import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
 import net.officefloor.model.impl.repository.ModelRepositoryImpl;
 import net.officefloor.model.impl.repository.classloader.ClassLoaderConfigurationContext;
 import net.officefloor.model.repository.ConfigurationContext;
+import net.officefloor.model.repository.ConfigurationItem;
 import net.officefloor.model.woof.WoofModel;
 import net.officefloor.model.woof.WoofRepository;
 import net.officefloor.model.woof.WoofRepositoryImpl;
@@ -94,17 +96,24 @@ public class WoofOfficeFloorSource extends HttpServerAutoWireOfficeFloorSource {
 				PROPERTY_WOOF_CONFIGURATION_LOCATION,
 				DEFAULT_WOOF_CONFIGUARTION_LOCATION);
 
-		// Obtain objects to load configuration
-		ClassLoader classLoader = Thread.currentThread()
-				.getContextClassLoader();
+		// Obtain the woof configuration (ensuring exists)
+		ClassLoader classLoader = this.getOfficeFloorCompiler()
+				.getClassLoader();
 		ConfigurationContext configurationContext = new ClassLoaderConfigurationContext(
 				classLoader);
-		WoofRepository repository = new WoofRepositoryImpl(
-				new ModelRepositoryImpl());
+		ConfigurationItem configuration = configurationContext
+				.getConfigurationItem(woofLocation);
+		if (configuration == null) {
+			deployer.addIssue("Can not find WoOF configuration file '"
+					+ woofLocation + "'", AssetType.OFFICE_FLOOR, "WoOF");
+			return; // must have WoOF configuration
+		}
 
 		// Load the WoOF configuration to the application
-		new WoofLoaderImpl(classLoader, configurationContext, repository)
-				.loadWoofConfiguration(woofLocation, this);
+		WoofRepository repository = new WoofRepositoryImpl(
+				new ModelRepositoryImpl());
+		new WoofLoaderImpl(repository).loadWoofConfiguration(configuration,
+				this);
 
 		// Providing additional configuration
 		this.configure(this);

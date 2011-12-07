@@ -110,8 +110,8 @@ public class GwtHttpTemplateSectionExtension implements
 		// Configure the Server GWT RPC Connection (only once)
 		if (!(application.isObjectAvailable(ServerGwtRpcConnection.class))) {
 			application.addManagedObject(
-					ServerGwtRpcConnectionManagedObjectSource.class, null,
-					ServerGwtRpcConnection.class, AsyncCallback.class);
+					ServerGwtRpcConnectionManagedObjectSource.class.getName(),
+					null, ServerGwtRpcConnection.class, AsyncCallback.class);
 		}
 
 		// Configure this extension

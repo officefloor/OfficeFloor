@@ -52,7 +52,7 @@ public class AutoWireHttpSocketTest extends OfficeFrameTestCase {
 		final AutoWireOfficeFloorSource autoWire = new AutoWireOfficeFloorSource();
 
 		// Add the section to handle the HTTP request
-		autoWire.addSection("TEST", ClassSectionSource.class,
+		autoWire.addSection("TEST", ClassSectionSource.class.getName(),
 				MockSection.class.getName());
 
 		// Register the managed object source

@@ -35,11 +35,14 @@ public interface AutoWireTeam extends AutoWireProperties {
 	String getTeamName();
 
 	/**
-	 * Obtains the {@link TeamSource} class.
+	 * <p>
+	 * Obtains the {@link TeamSource} class name.
+	 * <p>
+	 * May be an alias.
 	 * 
-	 * @return {@link TeamSource} class.
+	 * @return {@link TeamSource} class name.
 	 */
-	Class<? extends TeamSource> getTeamSourceClass();
+	String getTeamSourceClassName();
 
 	/**
 	 * Obtains the {@link AutoWireResponsibility} instances for this

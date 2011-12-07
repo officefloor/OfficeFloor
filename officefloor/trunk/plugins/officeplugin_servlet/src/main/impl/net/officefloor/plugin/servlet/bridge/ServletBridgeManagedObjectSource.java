@@ -115,7 +115,7 @@ public class ServletBridgeManagedObjectSource
 
 		// Configure the Servlet Bridger
 		AutoWireObject bridge = source.addManagedObject(
-				ServletBridgeManagedObjectSource.class,
+				ServletBridgeManagedObjectSource.class.getName(),
 				new ManagedObjectSourceWirer() {
 					@Override
 					public void wire(ManagedObjectSourceWirerContext context) {

@@ -309,11 +309,11 @@ public class GwtServiceWorkSourceTest extends OfficeFrameTestCase {
 
 		// Configure GWT service
 		AutoWireSection section = source.addSection("SECTION",
-				MockGwtServiceSection.class, "LOCATION");
+				MockGwtServiceSection.class.getName(), "LOCATION");
 		source.linkUri("template/GwtServicePath", section, "service");
 		source.addManagedObject(
-				ServerGwtRpcConnectionManagedObjectSource.class, null,
-				ServerGwtRpcConnection.class, AsyncCallback.class);
+				ServerGwtRpcConnectionManagedObjectSource.class.getName(),
+				null, ServerGwtRpcConnection.class, AsyncCallback.class);
 
 		// Start the server
 		source.openOfficeFloor();

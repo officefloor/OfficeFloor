@@ -17,7 +17,6 @@
  */
 package net.officefloor.plugin.woof;
 
-import java.io.FileNotFoundException;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -30,13 +29,13 @@ import net.officefloor.compile.OfficeFloorCompiler;
 import net.officefloor.compile.impl.properties.PropertyListSourceProperties;
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.frame.impl.construct.source.SourcePropertiesImpl;
-import net.officefloor.model.repository.ConfigurationContext;
 import net.officefloor.model.repository.ConfigurationItem;
 import net.officefloor.model.woof.PropertyModel;
 import net.officefloor.model.woof.WoofExceptionModel;
 import net.officefloor.model.woof.WoofExceptionToWoofResourceModel;
 import net.officefloor.model.woof.WoofExceptionToWoofSectionInputModel;
 import net.officefloor.model.woof.WoofExceptionToWoofTemplateModel;
+import net.officefloor.model.woof.WoofGovernanceModel;
 import net.officefloor.model.woof.WoofModel;
 import net.officefloor.model.woof.WoofRepository;
 import net.officefloor.model.woof.WoofResourceModel;
@@ -72,16 +71,6 @@ public class WoofLoaderImpl implements WoofLoader {
 			.getName());
 
 	/**
-	 * {@link ClassLoader}.
-	 */
-	private final ClassLoader classLoader;
-
-	/**
-	 * {@link ConfigurationContext}.
-	 */
-	private final ConfigurationContext context;
-
-	/**
 	 * {@link WoofRepository}.
 	 */
 	private final WoofRepository repository;
@@ -89,17 +78,10 @@ public class WoofLoaderImpl implements WoofLoader {
 	/**
 	 * Initiate.
 	 * 
-	 * @param classLoader
-	 *            {@link ClassLoader}.
-	 * @param context
-	 *            {@link ConfigurationContext}.
 	 * @param repository
 	 *            {@link WoofRepository}.
 	 */
-	public WoofLoaderImpl(ClassLoader classLoader,
-			ConfigurationContext context, WoofRepository repository) {
-		this.classLoader = classLoader;
-		this.context = context;
+	public WoofLoaderImpl(WoofRepository repository) {
 		this.repository = repository;
 	}
 
@@ -108,25 +90,21 @@ public class WoofLoaderImpl implements WoofLoader {
 	 */
 
 	@Override
-	@SuppressWarnings({ "rawtypes", "unchecked" })
-	public void loadWoofConfiguration(String woofLocation,
+	@SuppressWarnings("unchecked")
+	public void loadWoofConfiguration(ConfigurationItem woofConfiguration,
 			WebAutoWireApplication application) throws Exception {
 
-		// Obtain the woof configuration (ensuring exists)
-		ConfigurationItem configuration = this.context
-				.getConfigurationItem(woofLocation);
-		if (configuration == null) {
-			throw new FileNotFoundException("Can not find configuration file '"
-					+ woofLocation + "'");
-		}
-
 		// Load the WoOF model
-		WoofModel woof = this.repository.retrieveWoOF(configuration);
+		WoofModel woof = this.repository.retrieveWoOF(woofConfiguration);
+
+		// Obtain the class loader
+		ClassLoader classLoader = application.getOfficeFloorCompiler()
+				.getClassLoader();
 
 		// Load the extension services
 		Map<String, WoofTemplateExtensionService> extensionServices = new HashMap<String, WoofTemplateExtensionService>();
 		ServiceLoader<WoofTemplateExtensionService> extensionServiceLoader = ServiceLoader
-				.load(WoofTemplateExtensionService.class, this.classLoader);
+				.load(WoofTemplateExtensionService.class, classLoader);
 		Iterator<WoofTemplateExtensionService> extensionIterator = extensionServiceLoader
 				.iterator();
 		while (extensionIterator.hasNext()) {
@@ -158,7 +136,7 @@ public class WoofLoaderImpl implements WoofLoader {
 			String uri = templateModel.getUri();
 
 			// Obtain the template logic class
-			Class<?> templateLogicClass = this.classLoader
+			Class<?> templateLogicClass = classLoader
 					.loadClass(templateClassName);
 
 			// Configure the template
@@ -190,11 +168,11 @@ public class WoofLoaderImpl implements WoofLoader {
 						extensionService
 								.extendTemplate(new WoofTemplateExtensionServiceContextImpl(
 										template, application, properties,
-										this.classLoader));
+										classLoader));
 
 					} else {
 						// Load via extension class name
-						Class<? extends HttpTemplateSectionExtension> extensionClass = (Class<? extends HttpTemplateSectionExtension>) this.classLoader
+						Class<? extends HttpTemplateSectionExtension> extensionClass = (Class<? extends HttpTemplateSectionExtension>) classLoader
 								.loadClass(extensionClassName);
 						HttpTemplateAutoWireSectionExtension extension = template
 								.addTemplateExtension(extensionClass);
@@ -225,13 +203,9 @@ public class WoofLoaderImpl implements WoofLoader {
 					.getSectionSourceClassName();
 			String sectionLocation = sectionModel.getSectionLocation();
 
-			// Obtain the section source class
-			Class sectionSourceClass = this.classLoader
-					.loadClass(sectionSourceClassName);
-
 			// Configure the section
 			AutoWireSection section = application.addSection(sectionName,
-					sectionSourceClass, sectionLocation);
+					sectionSourceClassName, sectionLocation);
 			for (PropertyModel property : sectionModel.getProperties()) {
 				section.addProperty(property.getName(), property.getValue());
 			}
@@ -392,7 +366,7 @@ public class WoofLoaderImpl implements WoofLoader {
 
 			// Obtain the exception type
 			String exceptionClassName = exceptionModel.getClassName();
-			Class<? extends Throwable> exceptionType = (Class<? extends Throwable>) this.classLoader
+			Class<? extends Throwable> exceptionType = (Class<? extends Throwable>) classLoader
 					.loadClass(exceptionClassName);
 
 			// Link potential section input
@@ -445,6 +419,12 @@ public class WoofLoaderImpl implements WoofLoader {
 			}
 		}
 
+		// Load the governance
+		for (WoofGovernanceModel govModel : woof.getWoofGovernances()) {
+			// TODO implement
+			throw new UnsupportedOperationException(
+					"TODO implement configuring WoOF governance");
+		}
 	}
 
 	/**

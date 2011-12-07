@@ -36,9 +36,9 @@ public class AutoWireTeamImpl extends AutoWirePropertiesImpl implements
 	private final String teamName;
 
 	/**
-	 * {@link TeamSource} class.
+	 * {@link TeamSource} class name.
 	 */
-	private final Class<? extends TeamSource> teamSourceClass;
+	private final String teamSourceClassName;
 
 	/**
 	 * {@link AutoWireResponsibility} instances.
@@ -52,19 +52,19 @@ public class AutoWireTeamImpl extends AutoWirePropertiesImpl implements
 	 *            {@link OfficeFloorCompiler}.
 	 * @param teamName
 	 *            Name of the {@link OfficeFloorTeam}.
-	 * @param teamSourceClass
-	 *            {@link TeamSource} class.
+	 * @param teamSourceClassName
+	 *            {@link TeamSource} class name. May be an alias.
 	 * @param properties
 	 *            {@link PropertyList} for the {@link TeamSource}.
 	 * @param responsibilities
 	 *            {@link AutoWireResponsibility} instances.
 	 */
 	public AutoWireTeamImpl(OfficeFloorCompiler compiler, String teamName,
-			Class<? extends TeamSource> teamSourceClass,
-			PropertyList properties, AutoWireResponsibility... responsibilities) {
+			String teamSourceClassName, PropertyList properties,
+			AutoWireResponsibility... responsibilities) {
 		super(compiler, properties);
 		this.teamName = teamName;
-		this.teamSourceClass = teamSourceClass;
+		this.teamSourceClassName = teamSourceClassName;
 		this.responsibilities = responsibilities;
 	}
 
@@ -78,8 +78,8 @@ public class AutoWireTeamImpl extends AutoWirePropertiesImpl implements
 	}
 
 	@Override
-	public Class<? extends TeamSource> getTeamSourceClass() {
-		return this.teamSourceClass;
+	public String getTeamSourceClassName() {
+		return this.teamSourceClassName;
 	}
 
 	@Override

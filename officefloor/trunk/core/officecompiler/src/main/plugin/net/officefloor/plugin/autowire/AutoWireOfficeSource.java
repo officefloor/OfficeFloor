@@ -126,7 +126,7 @@ public class AutoWireOfficeSource extends AbstractOfficeSource {
 	 * @param sectionName
 	 *            Name of the {@link OfficeSection}.
 	 * @param sectionSourceClass
-	 *            {@link SectionSource} class.
+	 *            {@link SectionSource} class name.
 	 * @param sectionLocation
 	 *            {@link OfficeSection} location.
 	 * @param sectionFactory
@@ -135,7 +135,7 @@ public class AutoWireOfficeSource extends AbstractOfficeSource {
 	 */
 	@SuppressWarnings("unchecked")
 	public <S extends SectionSource, A extends AutoWireSection> A addSection(
-			String sectionName, Class<S> sectionSourceClass,
+			String sectionName, String sectionSourceClassName,
 			String sectionLocation, AutoWireSectionFactory<A> sectionFactory) {
 
 		// Create the properties
@@ -143,7 +143,8 @@ public class AutoWireOfficeSource extends AbstractOfficeSource {
 
 		// Create and add the section
 		AutoWireSection section = new AutoWireSectionImpl(this.compiler,
-				sectionName, sectionSourceClass, sectionLocation, properties);
+				sectionName, sectionSourceClassName, sectionLocation,
+				properties);
 
 		// Determine if override the section
 		if (sectionFactory != null) {
@@ -167,16 +168,16 @@ public class AutoWireOfficeSource extends AbstractOfficeSource {
 	 * 
 	 * @param sectionName
 	 *            Name of the {@link OfficeSection}.
-	 * @param sectionSourceClass
-	 *            {@link SectionSource} class.
+	 * @param sectionSourceClassName
+	 *            {@link SectionSource} class name.
 	 * @param sectionLocation
 	 *            {@link OfficeSection} location.
 	 * @return {@link AutoWireSection} to configure properties and link flows.
 	 */
 	public <S extends SectionSource> AutoWireSection addSection(
-			String sectionName, Class<S> sectionSourceClass,
+			String sectionName, String sectionSourceClassName,
 			String sectionLocation) {
-		return this.addSection(sectionName, sectionSourceClass,
+		return this.addSection(sectionName, sectionSourceClassName,
 				sectionLocation, null);
 	}
 
@@ -275,22 +276,23 @@ public class AutoWireOfficeSource extends AbstractOfficeSource {
 	 * 
 	 * @param governanceName
 	 *            Name of the {@link Governance}.
-	 * @param governanceSource
-	 *            {@link GovernanceSource} {@link Class}.
+	 * @param governanceSourceClassName
+	 *            {@link Class} name of the {@link GovernanceSource}. May be an
+	 *            alias.
 	 * @return {@link AutoWireGovernance}.
 	 * 
 	 * @see #addObjectExtension(Class, Class...)
 	 */
-	@SuppressWarnings("rawtypes")
-	public <S extends GovernanceSource> AutoWireGovernance addGovernance(
-			String governanceName, Class<S> governanceSource) {
+	public AutoWireGovernance addGovernance(String governanceName,
+			String governanceSourceClassName) {
 
 		// Create the properties
 		PropertyList properties = this.compiler.createPropertyList();
 
 		// Create the auto-wire governance
 		AutoWireGovernance governance = new AutoWireGovernanceImpl(
-				governanceName, governanceSource, this.compiler, properties);
+				governanceName, governanceSourceClassName, this.compiler,
+				properties);
 
 		// Register the auto-wire governance
 		this.governances.add(governance);
@@ -391,7 +393,7 @@ public class AutoWireOfficeSource extends AbstractOfficeSource {
 
 			// Add the section
 			OfficeSection officeSection = architect.addOfficeSection(
-					sectionName, section.getSectionSourceClass().getName(),
+					sectionName, section.getSectionSourceClassName(),
 					section.getSectionLocation(), section.getProperties());
 
 			// Register the section
@@ -522,7 +524,7 @@ public class AutoWireOfficeSource extends AbstractOfficeSource {
 			// Obtain the governance details
 			String governanceName = governance.getGovernanceName();
 			String governanceSourceClassName = governance
-					.getGovernanceSourceClass().getName();
+					.getGovernanceSourceClassName();
 			PropertyList properties = governance.getProperties();
 
 			// Add the Governance

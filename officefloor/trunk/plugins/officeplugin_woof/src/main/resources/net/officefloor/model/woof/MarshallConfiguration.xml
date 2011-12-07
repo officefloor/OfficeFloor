@@ -114,6 +114,39 @@
 		</item>
 	</collection>
 
+	<!-- GOVERNANCES -->
+	<collection method="getWoofGovernances" element="governances">
+		<item type="net.officefloor.model.woof.WoofGovernanceModel"
+			element="governance">
+			<attributes>
+				<attribute method="getWoofGovernanceName" attribute="name" />
+				<attribute method="getGovernanceSourceClassName"
+					attribute="source" />
+				<attribute method="getX" attribute="x" />
+				<attribute method="getY" attribute="y" />
+			</attributes>
+			<collection method="getProperties">
+				<item type="net.officefloor.model.woof.PropertyModel" element="property">
+					<attributes>
+						<attribute method="getName" attribute="name" />
+						<attribute method="getValue" attribute="value" />
+					</attributes>
+				</item>
+			</collection>
+			<collection method="getGovernanceAreas">
+				<item type="net.officefloor.model.woof.WoofGovernanceAreaModel"
+					element="governance-area">
+					<attributes>
+						<attribute method="getX" attribute="x" />
+						<attribute method="getY" attribute="y" />
+						<attribute method="getWidth" attribute="width" />
+						<attribute method="getHeight" attribute="height" />
+					</attributes>
+				</item>
+			</collection>
+		</item>
+	</collection>
+
 	<!-- RESOURCES -->
 	<collection method="getWoofResources" element="resources">
 		<item type="net.officefloor.model.woof.WoofResourceModel"

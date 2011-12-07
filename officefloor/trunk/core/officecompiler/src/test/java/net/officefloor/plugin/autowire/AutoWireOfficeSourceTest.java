@@ -132,8 +132,8 @@ public class AutoWireOfficeSourceTest extends OfficeFrameTestCase {
 		// Record creating the overridden section
 		this.recordReturn(overridden, overridden.getProperties(), properties);
 		this.recordReturn(overridden, overridden.getSectionName(), SECTION);
-		this.recordReturn(overridden, overridden.getSectionSourceClass(),
-				SectionSource.class);
+		this.recordReturn(overridden, overridden.getSectionSourceClassName(),
+				SectionSource.class.getName());
 		this.recordTeam();
 		this.recordReturn(overridden, overridden.getSectionLocation(),
 				SECTION_LOCATION);
@@ -273,7 +273,7 @@ public class AutoWireOfficeSourceTest extends OfficeFrameTestCase {
 
 		// Add the section
 		AutoWireSection section = source.addSection("SECTION",
-				ClassSectionSource.class, Object.class.getName());
+				ClassSectionSource.class.getName(), Object.class.getName());
 
 		// Ensure able to obtain section
 		assertSame("Should be able to obtain section by name", section,
@@ -790,7 +790,7 @@ public class AutoWireOfficeSourceTest extends OfficeFrameTestCase {
 
 		// Add the section
 		AutoWireSection section = source.addSection(SECTION_NAME,
-				ClassSectionSource.class, sectionClass.getName());
+				ClassSectionSource.class.getName(), sectionClass.getName());
 
 		// Register the properties
 		PropertyList properties = section.getProperties();
@@ -894,11 +894,11 @@ public class AutoWireOfficeSourceTest extends OfficeFrameTestCase {
 		AutoWireSection section;
 		final String sectionLocation = sectionName + "Location";
 		if (factory == null) {
-			section = source.addSection(sectionName, SectionSource.class,
-					sectionLocation);
+			section = source.addSection(sectionName,
+					SectionSource.class.getName(), sectionLocation);
 		} else {
-			section = source.addSection(sectionName, SectionSource.class,
-					sectionLocation, factory);
+			section = source.addSection(sectionName,
+					SectionSource.class.getName(), sectionLocation, factory);
 		}
 
 		// Load the properties
@@ -1010,7 +1010,7 @@ public class AutoWireOfficeSourceTest extends OfficeFrameTestCase {
 
 		// Add the governance
 		AutoWireGovernance governance = source.addGovernance(governanceName,
-				GovernanceSource.class);
+				GovernanceSource.class.getName());
 
 		// Load the properties
 		for (int i = 0; i < propertyNameValues.length; i += 2) {

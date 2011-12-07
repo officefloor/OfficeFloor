@@ -28,11 +28,14 @@ import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 public interface AutoWireObject extends AutoWireProperties {
 
 	/**
+	 * <p>
 	 * Obtains the {@link ManagedObjectSource} class.
+	 * <p>
+	 * May be an alias.
 	 * 
 	 * @return {@link ManagedObjectSource} class.
 	 */
-	Class<?> getManagedObjectSourceClass();
+	String getManagedObjectSourceClassName();
 
 	/**
 	 * Obtains the {@link ManagedObjectSourceWirer}.

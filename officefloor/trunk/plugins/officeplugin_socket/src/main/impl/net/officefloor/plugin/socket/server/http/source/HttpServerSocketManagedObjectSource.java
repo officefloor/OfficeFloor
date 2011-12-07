@@ -68,9 +68,10 @@ public class HttpServerSocketManagedObjectSource extends
 				context.setInput(true);
 
 				// Provide teams
-				context.mapTeam("accepter", OnePersonTeamSource.class);
-				context.mapTeam("listener", WorkerPerTaskTeamSource.class);
-				context.mapTeam("cleanup", OnePersonTeamSource.class);
+				context.mapTeam("accepter", OnePersonTeamSource.class.getName());
+				context.mapTeam("listener",
+						WorkerPerTaskTeamSource.class.getName());
+				context.mapTeam("cleanup", OnePersonTeamSource.class.getName());
 
 				// Map request handler
 				context.mapFlow("HANDLE_HTTP_REQUEST", sectionName,
@@ -98,7 +99,7 @@ public class HttpServerSocketManagedObjectSource extends
 
 		// Add this managed object source
 		AutoWireObject object = source.addManagedObject(
-				HttpServerSocketManagedObjectSource.class, wirer,
+				HttpServerSocketManagedObjectSource.class.getName(), wirer,
 				ServerHttpConnection.class);
 		object.addProperty(PROPERTY_PORT, String.valueOf(port));
 	}

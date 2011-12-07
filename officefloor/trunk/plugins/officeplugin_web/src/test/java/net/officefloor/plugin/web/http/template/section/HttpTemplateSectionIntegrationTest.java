@@ -141,8 +141,8 @@ public class HttpTemplateSectionIntegrationTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensure with {@link NextTask} annotation that invoking a Flow
-	 * takes precedence.
+	 * Ensure with {@link NextTask} annotation that invoking a Flow takes
+	 * precedence.
 	 */
 	public void testSubmitInvokingFlow() throws Exception {
 
@@ -203,8 +203,8 @@ public class HttpTemplateSectionIntegrationTest extends OfficeFrameTestCase {
 
 	/**
 	 * Ensure on submit link that has next {@link Task} instances that if last
-	 * {@link Task} in Flow does not indicate {@link NextTask} that the
-	 * template is rendered.
+	 * {@link Task} in Flow does not indicate {@link NextTask} that the template
+	 * is rendered.
 	 */
 	public void testRenderByDefault() throws Exception {
 
@@ -433,15 +433,15 @@ public class HttpTemplateSectionIntegrationTest extends OfficeFrameTestCase {
 
 		// Add dependencies
 		source.addObject(this.connection, Connection.class);
-		source.addManagedObject(HttpSessionManagedObjectSource.class, null,
-				HttpSession.class).setTimeout(10 * 1000);
+		source.addManagedObject(HttpSessionManagedObjectSource.class.getName(),
+				null, HttpSession.class).setTimeout(10 * 1000);
 
 		// Link service Task name prefix
 		final String LINK_SERVICE_TASK_NAME_PREFIX = "LINK_";
 
 		// Provide HTTP template router for testing
 		AutoWireSection routeSection = source.addSection("ROUTE",
-				WorkSectionSource.class,
+				WorkSectionSource.class.getName(),
 				HttpTemplateRouteWorkSource.class.getName());
 		routeSection.addProperty(
 				HttpTemplateRouteWorkSource.PROPERTY_TASK_NAME_PREFIX,
@@ -452,7 +452,7 @@ public class HttpTemplateSectionIntegrationTest extends OfficeFrameTestCase {
 				.replace('.', '/')
 				+ "/" + templateName;
 		AutoWireSection templateSection = source.addSection("SECTION",
-				HttpTemplateSectionSource.class, templateLocation);
+				HttpTemplateSectionSource.class.getName(), templateLocation);
 		templateSection.addProperty(
 				HttpTemplateSectionSource.PROPERTY_CLASS_NAME,
 				logicClass.getName());
@@ -466,8 +466,9 @@ public class HttpTemplateSectionIntegrationTest extends OfficeFrameTestCase {
 		}
 
 		// Load mock section for handling outputs
-		AutoWireSection handleOutputSection = source.addSection("OUTPUT",
-				ClassSectionSource.class, MockSection.class.getName());
+		AutoWireSection handleOutputSection = source
+				.addSection("OUTPUT", ClassSectionSource.class.getName(),
+						MockSection.class.getName());
 
 		// Link flow outputs
 		source.link(routeSection, "NON_MATCHED_REQUEST", templateSection,

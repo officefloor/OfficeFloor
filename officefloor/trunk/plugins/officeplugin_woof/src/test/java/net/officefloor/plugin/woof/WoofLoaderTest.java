@@ -24,17 +24,20 @@ import java.util.logging.Handler;
 import java.util.logging.LogRecord;
 import java.util.logging.Logger;
 
+import net.officefloor.compile.OfficeFloorCompiler;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.model.impl.repository.ModelRepositoryImpl;
 import net.officefloor.model.impl.repository.classloader.ClassLoaderConfigurationContext;
 import net.officefloor.model.repository.ConfigurationContext;
-import net.officefloor.model.woof.WoofRepository;
+import net.officefloor.model.repository.ConfigurationItem;
 import net.officefloor.model.woof.WoofRepositoryImpl;
+import net.officefloor.plugin.autowire.AutoWireGovernance;
 import net.officefloor.plugin.autowire.AutoWireSection;
 import net.officefloor.plugin.comet.CometPublisher;
 import net.officefloor.plugin.comet.section.CometSectionSource;
 import net.officefloor.plugin.comet.spi.CometService;
 import net.officefloor.plugin.comet.web.http.section.CometHttpTemplateSectionExtension;
+import net.officefloor.plugin.governance.clazz.ClassGovernanceSource;
 import net.officefloor.plugin.gwt.service.ServerGwtRpcConnection;
 import net.officefloor.plugin.gwt.web.http.section.GwtHttpTemplateSectionExtension;
 import net.officefloor.plugin.section.clazz.ClassSectionSource;
@@ -57,28 +60,16 @@ public class WoofLoaderTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * {@link ClassLoader}.
+	 * {@link OfficeFloorCompiler}.
 	 */
-	private final ClassLoader classLoader = Thread.currentThread()
-			.getContextClassLoader();
-
-	/**
-	 * {@link ConfigurationContext}.
-	 */
-	private final ConfigurationContext context = new ClassLoaderConfigurationContext(
-			this.classLoader);
-
-	/**
-	 * {@link WoofRepository}.
-	 */
-	private final WoofRepository repository = new WoofRepositoryImpl(
-			new ModelRepositoryImpl());
+	private final OfficeFloorCompiler compiler = OfficeFloorCompiler
+			.newOfficeFloorCompiler(null);
 
 	/**
 	 * {@link WoofLoader} to test.
 	 */
-	private final WoofLoader loader = new WoofLoaderImpl(this.classLoader,
-			this.context, this.repository);
+	private final WoofLoader loader = new WoofLoaderImpl(
+			new WoofRepositoryImpl(new ModelRepositoryImpl()));
 
 	/**
 	 * Mock {@link WebAutoWireApplication}.
@@ -171,6 +162,14 @@ public class WoofLoaderTest extends OfficeFrameTestCase {
 				.createMock(HttpTemplateAutoWireSection.class);
 		final AutoWireSection sectionA = this.createMock(AutoWireSection.class);
 		final AutoWireSection sectionB = this.createMock(AutoWireSection.class);
+		final AutoWireGovernance governanceA = this
+				.createMock(AutoWireGovernance.class);
+		final AutoWireGovernance governanceB = this
+				.createMock(AutoWireGovernance.class);
+
+		// Record obtaining compiler
+		this.recordReturn(this.app, this.app.getOfficeFloorCompiler(),
+				this.compiler);
 
 		// Record loading templates
 		this.recordReturn(this.app, this.app.addHttpTemplate(
@@ -179,13 +178,19 @@ public class WoofLoaderTest extends OfficeFrameTestCase {
 				"WOOF/TemplateB.ofp", Template.class, null), templateB);
 
 		// Record loading sections
-		this.recordReturn(this.app, this.app.addSection("SECTION_A",
-				ClassSectionSource.class, Section.class.getName()), sectionA);
+		this.recordReturn(
+				this.app,
+				this.app.addSection("SECTION_A",
+						ClassSectionSource.class.getName(),
+						Section.class.getName()), sectionA);
 		sectionA.addProperty("name.one", "value.one");
 		sectionA.addProperty("name.two", "value.two");
 		this.app.linkUri("example", sectionA, "INPUT_B");
-		this.recordReturn(this.app, this.app.addSection("SECTION_B",
-				ClassSectionSource.class, Section.class.getName()), sectionB);
+		this.recordReturn(
+				this.app,
+				this.app.addSection("SECTION_B",
+						ClassSectionSource.class.getName(),
+						Section.class.getName()), sectionB);
 
 		// Record linking template outputs
 		this.app.link(templateA, "OUTPUT_1", sectionA, "INPUT_A");
@@ -202,11 +207,22 @@ public class WoofLoaderTest extends OfficeFrameTestCase {
 		this.app.linkEscalation(RuntimeException.class, templateA);
 		this.app.linkEscalation(SQLException.class, "Example.html");
 
+		// Record loading governances
+		this.recordReturn(this.app, this.app.addGovernance("GOVERNANCE_A",
+				ClassGovernanceSource.class.getName()), governanceA);
+		governanceA.addProperty("name.a", "value.a");
+		governanceA.addProperty("name.b", "value.b");
+		governanceA.governSection(sectionA);
+		governanceB.governSection(templateA);
+		this.recordReturn(this.app, this.app.addGovernance("GOVERNANCE_B",
+				ClassGovernanceSource.class.getName()), governanceB);
+		governanceB.addProperty("name.1", "value.1");
+		governanceB.addProperty("name.2", "value.2");
+
 		// Test
 		this.replayMockObjects();
 		this.loader.loadWoofConfiguration(
-				this.getFileLocation(this.getClass(), "application.woof"),
-				this.app);
+				this.getConfiguration("application.woof"), this.app);
 		this.verifyMockObjects();
 	}
 
@@ -219,6 +235,10 @@ public class WoofLoaderTest extends OfficeFrameTestCase {
 				.createMock(HttpTemplateAutoWireSection.class);
 		final HttpTemplateAutoWireSectionExtension extension = this
 				.createMock(HttpTemplateAutoWireSectionExtension.class);
+
+		// Record obtaining compiler
+		this.recordReturn(this.app, this.app.getOfficeFloorCompiler(),
+				this.compiler);
 
 		// Record loading template
 		this.recordReturn(this.app, this.app.addHttpTemplate(
@@ -237,8 +257,8 @@ public class WoofLoaderTest extends OfficeFrameTestCase {
 
 		// Test
 		this.replayMockObjects();
-		this.loader.loadWoofConfiguration(
-				this.getFileLocation(this.getClass(), "gwt.woof"), this.app);
+		this.loader.loadWoofConfiguration(this.getConfiguration("gwt.woof"),
+				this.app);
 		this.verifyMockObjects();
 	}
 
@@ -253,6 +273,10 @@ public class WoofLoaderTest extends OfficeFrameTestCase {
 				.createMock(HttpTemplateAutoWireSection.class);
 		final HttpTemplateAutoWireSectionExtension extension = this
 				.createMock(HttpTemplateAutoWireSectionExtension.class);
+
+		// Record obtaining compiler
+		this.recordReturn(this.app, this.app.getOfficeFloorCompiler(),
+				this.compiler);
 
 		// Record loading template
 		this.recordReturn(this.app, this.app.addHttpTemplate(
@@ -277,8 +301,8 @@ public class WoofLoaderTest extends OfficeFrameTestCase {
 
 		// Test
 		this.replayMockObjects();
-		this.loader.loadWoofConfiguration(
-				this.getFileLocation(this.getClass(), "comet.woof"), this.app);
+		this.loader.loadWoofConfiguration(this.getConfiguration("comet.woof"),
+				this.app);
 		this.verifyMockObjects();
 	}
 
@@ -290,6 +314,10 @@ public class WoofLoaderTest extends OfficeFrameTestCase {
 		final HttpTemplateAutoWireSection template = this
 				.createMock(HttpTemplateAutoWireSection.class);
 
+		// Record obtaining compiler
+		this.recordReturn(this.app, this.app.getOfficeFloorCompiler(),
+				this.compiler);
+
 		// Record loading template
 		this.recordReturn(this.app, this.app.addHttpTemplate(
 				"WOOF/Template.html", Template.class, "example"), template);
@@ -299,8 +327,8 @@ public class WoofLoaderTest extends OfficeFrameTestCase {
 		// Test
 		this.replayMockObjects();
 		try {
-			this.loader.loadWoofConfiguration(this.getFileLocation(
-					this.getClass(), "unknown-template-extension.woof"),
+			this.loader.loadWoofConfiguration(
+					this.getConfiguration("unknown-template-extension.woof"),
 					this.app);
 			fail("Should not load successfully");
 		} catch (WoofTemplateExtensionException ex) {
@@ -313,6 +341,25 @@ public class WoofLoaderTest extends OfficeFrameTestCase {
 					ex.getCause() instanceof ClassNotFoundException);
 		}
 		this.verifyMockObjects();
+	}
+
+	/**
+	 * Obtains the {@link ConfigurationItem}.
+	 * 
+	 * @param fileName
+	 *            File name for {@link ConfigurationItem}.
+	 * @return {@link ConfigurationItem}.
+	 */
+	private ConfigurationItem getConfiguration(String fileName)
+			throws Exception {
+		String location = this.getFileLocation(this.getClass(), fileName);
+		ConfigurationContext context = new ClassLoaderConfigurationContext(
+				this.compiler.getClassLoader());
+		ConfigurationItem configuration = context
+				.getConfigurationItem(location);
+		assertNotNull("Can not find configuration '" + fileName + "'",
+				configuration);
+		return configuration;
 	}
 
 	/**

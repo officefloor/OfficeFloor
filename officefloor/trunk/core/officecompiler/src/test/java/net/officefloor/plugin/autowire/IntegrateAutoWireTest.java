@@ -188,9 +188,11 @@ public class IntegrateAutoWireTest extends OfficeFrameTestCase {
 
 		// Add sections
 		AutoWireSection one = source.addSection("one",
-				ClassSectionSource.class, MockSectionOne.class.getName());
+				ClassSectionSource.class.getName(),
+				MockSectionOne.class.getName());
 		AutoWireSection two = source.addSection("two",
-				ClassSectionSource.class, MockSectionTwo.class.getName());
+				ClassSectionSource.class.getName(),
+				MockSectionTwo.class.getName());
 		source.link(one, "output", two, "doInput");
 
 		// Add the Value
@@ -200,8 +202,8 @@ public class IntegrateAutoWireTest extends OfficeFrameTestCase {
 		source.addObject(connection, Connection.class);
 
 		// Provide teams for separate tasks
-		source.assignDefaultTeam(OnePersonTeamSource.class);
-		source.assignTeam(OnePersonTeamSource.class, Connection.class);
+		source.assignDefaultTeam(OnePersonTeamSource.class.getName());
+		source.assignTeam(OnePersonTeamSource.class.getName(), Connection.class);
 
 		// Return the office floor source
 		return source;
