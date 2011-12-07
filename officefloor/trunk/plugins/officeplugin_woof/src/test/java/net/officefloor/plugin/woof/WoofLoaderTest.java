@@ -188,8 +188,7 @@ public class WoofLoaderTest extends OfficeFrameTestCase {
 		this.app.linkUri("example", sectionA, "INPUT_B");
 		this.recordReturn(
 				this.app,
-				this.app.addSection("SECTION_B",
-						ClassSectionSource.class.getName(),
+				this.app.addSection("SECTION_B", "CLASS",
 						Section.class.getName()), sectionB);
 
 		// Record linking template outputs
@@ -212,12 +211,10 @@ public class WoofLoaderTest extends OfficeFrameTestCase {
 				ClassGovernanceSource.class.getName()), governanceA);
 		governanceA.addProperty("name.a", "value.a");
 		governanceA.addProperty("name.b", "value.b");
+		governanceA.governSection(templateA);
 		governanceA.governSection(sectionA);
-		governanceB.governSection(templateA);
-		this.recordReturn(this.app, this.app.addGovernance("GOVERNANCE_B",
-				ClassGovernanceSource.class.getName()), governanceB);
-		governanceB.addProperty("name.1", "value.1");
-		governanceB.addProperty("name.2", "value.2");
+		this.recordReturn(this.app,
+				this.app.addGovernance("GOVERNANCE_B", "CLASS"), governanceB);
 
 		// Test
 		this.replayMockObjects();
