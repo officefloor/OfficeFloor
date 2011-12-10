@@ -24,6 +24,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+import net.officefloor.compile.governance.GovernanceType;
 import net.officefloor.compile.impl.util.CompileUtil;
 import net.officefloor.compile.properties.Property;
 import net.officefloor.compile.properties.PropertyList;
@@ -72,6 +73,26 @@ public class WoofChangesImpl implements WoofChanges {
 		@Override
 		public String extractName(WoofSectionModel model) {
 			return model.getWoofSectionName();
+		}
+	};
+
+	/**
+	 * {@link WoofGovernanceModel} {@link NameExtractor}.
+	 */
+	private static final NameExtractor<WoofGovernanceModel> GOVERNANCE_NAME_EXTRACTOR = new NameExtractor<WoofGovernanceModel>() {
+		@Override
+		public String extractName(WoofGovernanceModel model) {
+			return model.getWoofGovernanceName();
+		}
+	};
+
+	/**
+	 * {@link WoofGovernanceAreaModel} {@link NameExtractor}.
+	 */
+	private static final NameExtractor<WoofGovernanceAreaModel> GOVERNANCE_AREA_IDENTIFIER_EXTRACTOR = new NameExtractor<WoofGovernanceAreaModel>() {
+		@Override
+		public String extractName(WoofGovernanceAreaModel model) {
+			return model.getWidth() + "-" + model.getHeight();
 		}
 	};
 
@@ -317,6 +338,26 @@ public class WoofChangesImpl implements WoofChanges {
 	}
 
 	/**
+	 * Sorts the {@link WoofGovernanceModel} instances.
+	 */
+	private void sortGovernances() {
+		sortByName(this.model.getWoofGovernances(), GOVERNANCE_NAME_EXTRACTOR);
+	}
+
+	/**
+	 * Sorts the {@link WoofGovernanceAreaModel} for the
+	 * {@link WoofGovernanceModel}.
+	 * 
+	 * @param governance
+	 *            {@link WoofGovernanceModel} to have its
+	 *            {@link WoofGovernanceAreaModel} instances sorted.
+	 */
+	private void sortGovernanceAreas(WoofGovernanceModel governance) {
+		sortByName(governance.getGovernanceAreas(),
+				GOVERNANCE_AREA_IDENTIFIER_EXTRACTOR);
+	}
+
+	/**
 	 * Sorts the {@link WoofResourceModel} instances.
 	 */
 	private void sortResources() {
@@ -355,6 +396,34 @@ public class WoofChangesImpl implements WoofChanges {
 
 		// Return the containing section
 		return containingSection;
+	}
+
+	/**
+	 * Obtains the {@link WoofGovernanceModel} for the
+	 * {@link WoofGovernanceAreaModel}.
+	 * 
+	 * @param area
+	 *            {@link WoofGovernanceAreaModel}.
+	 * @return {@link WoofGovernanceModel} for the
+	 *         {@link WoofGovernanceAreaModel} or <code>null</code> if not
+	 *         within the {@link WoofModel}.
+	 */
+	private WoofGovernanceModel getGovernance(WoofGovernanceAreaModel area) {
+
+		// Find the containing governance
+		WoofGovernanceModel containingGovernance = null;
+		for (WoofGovernanceModel governance : this.model.getWoofGovernances()) {
+			for (WoofGovernanceAreaModel check : governance
+					.getGovernanceAreas()) {
+				if (check == area) {
+					// Found containing governance
+					containingGovernance = governance;
+				}
+			}
+		}
+
+		// Return the containing governance
+		return containingGovernance;
 	}
 
 	/*
@@ -763,6 +832,138 @@ public class WoofChangesImpl implements WoofChanges {
 				WoofChangesImpl.this.model.addWoofSection(section);
 				reconnectConnections(this.connections);
 				WoofChangesImpl.this.sortSections();
+			}
+		};
+	}
+
+	@Override
+	public Change<WoofGovernanceModel> addGovernance(String governanceName,
+			String governanceSourceClassName, PropertyList properties,
+			GovernanceType<?, ?> governanceType) {
+
+		// Obtain the unique governance name
+		governanceName = getUniqueName(governanceName, null,
+				this.model.getWoofGovernances(), GOVERNANCE_NAME_EXTRACTOR);
+
+		// Create the governance
+		final WoofGovernanceModel woofGovernance = new WoofGovernanceModel(
+				governanceName, governanceSourceClassName);
+
+		// Add the properties (if available)
+		if (properties != null) {
+			for (Property property : properties) {
+				woofGovernance.addProperty(new PropertyModel(
+						property.getName(), property.getValue()));
+			}
+		}
+
+		// Return the change to add governance
+		return new AbstractChange<WoofGovernanceModel>(woofGovernance,
+				"Add Governance") {
+			@Override
+			public void apply() {
+				WoofChangesImpl.this.model.addWoofGovernance(woofGovernance);
+				WoofChangesImpl.this.sortGovernances();
+			}
+
+			@Override
+			public void revert() {
+				WoofChangesImpl.this.model.removeWoofGovernance(woofGovernance);
+			}
+		};
+	}
+
+	@Override
+	public Change<WoofGovernanceModel> removeGovernance(
+			final WoofGovernanceModel governance) {
+
+		// Ensure governance available to remove
+		boolean isInModel = false;
+		for (WoofGovernanceModel model : this.model.getWoofGovernances()) {
+			if (model == governance) {
+				isInModel = true;
+			}
+		}
+		if (!isInModel) {
+			// Governance model not in model
+			return new NoChange<WoofGovernanceModel>(governance,
+					"Remove governance " + governance.getWoofGovernanceName(),
+					"Governance " + governance.getWoofGovernanceName()
+							+ " is not in WoOF model");
+		}
+
+		// Return change to remove governance
+		return new AbstractChange<WoofGovernanceModel>(governance,
+				"Remove governance " + governance.getWoofGovernanceName()) {
+
+			@Override
+			public void apply() {
+				// Remove the governance
+				WoofChangesImpl.this.model.removeWoofGovernance(governance);
+			}
+
+			@Override
+			public void revert() {
+				// Add back the governance
+				WoofChangesImpl.this.model.addWoofGovernance(governance);
+				WoofChangesImpl.this.sortGovernances();
+			}
+		};
+	}
+
+	@Override
+	public Change<WoofGovernanceAreaModel> addGovernanceArea(
+			final WoofGovernanceModel governance, int width, int height) {
+
+		// Create the governance area
+		final WoofGovernanceAreaModel area = new WoofGovernanceAreaModel(width,
+				height);
+
+		// Return the change to add governance area
+		return new AbstractChange<WoofGovernanceAreaModel>(area,
+				"Add governance area") {
+			@Override
+			public void apply() {
+				governance.addGovernanceArea(area);
+				WoofChangesImpl.this.sortGovernanceAreas(governance);
+			}
+
+			@Override
+			public void revert() {
+				governance.removeGovernanceArea(area);
+			}
+		};
+	}
+
+	@Override
+	public Change<WoofGovernanceAreaModel> removeGovernanceArea(
+			final WoofGovernanceAreaModel governanceArea) {
+
+		// Ensure governance area in WoOF to remove
+		final WoofGovernanceModel governance = this
+				.getGovernance(governanceArea);
+		if (governance == null) {
+			// Governance area not in model
+			return new NoChange<WoofGovernanceAreaModel>(governanceArea,
+					"Remove governance area ",
+					"Governance area is not in WoOF model");
+		}
+
+		// Return change to remove governance area
+		return new AbstractChange<WoofGovernanceAreaModel>(governanceArea,
+				"Remove governance area") {
+
+			@Override
+			public void apply() {
+				// Remove the governance area
+				governance.removeGovernanceArea(governanceArea);
+			}
+
+			@Override
+			public void revert() {
+				// Add back the governance area
+				governance.addGovernanceArea(governanceArea);
+				WoofChangesImpl.this.sortGovernanceAreas(governance);
 			}
 		};
 	}

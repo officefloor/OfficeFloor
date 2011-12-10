@@ -25,6 +25,7 @@ import java.util.Map;
 import javax.sql.DataSource;
 
 import net.officefloor.compile.OfficeFloorCompiler;
+import net.officefloor.compile.governance.GovernanceType;
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.section.SectionType;
 import net.officefloor.model.change.Change;
@@ -249,6 +250,66 @@ public class AddTest extends AbstractWoofChangesTestCase {
 				section, null).apply();
 
 		// Ensure appropriately added sections
+		this.validateModel();
+	}
+
+	/**
+	 * Ensure able to add {@link WoofGovernanceModel}.
+	 */
+	public void testAddGovernance() {
+
+		// Create the governance type
+		final GovernanceType<?, ?> governanceType = this
+				.createMock(GovernanceType.class);
+		this.replayMockObjects();
+
+		// Create the properties
+		PropertyList properties = OfficeFloorCompiler.newPropertyList();
+		properties.addProperty("name.one").setValue("value.one");
+		properties.addProperty("name.two").setValue("value.two");
+
+		// Validate add governance
+		Change<WoofGovernanceModel> change = this.operations.addGovernance(
+				"GOVERNANCE", "net.example.ExampleGovernanceSource",
+				properties, governanceType);
+		change.getTarget().setX(100);
+		change.getTarget().setY(101);
+
+		// Validate change
+		this.assertChange(change, null, "Add Governance", true);
+
+		// Ensure appropriately added governance
+		change.apply();
+		WoofGovernanceModel governance = this.model.getWoofGovernances().get(0);
+		assertSame("Incorrect resource", governance, change.getTarget());
+
+		// Verify
+		this.verifyMockObjects();
+	}
+
+	/**
+	 * Ensure able to add multiple {@link WoofGovernanceModel} instances with
+	 * clashing names.
+	 */
+	public void testAddMultipleGovernances() {
+
+		// Create the governance type
+		final GovernanceType<?, ?> governanceType = this
+				.createMock(GovernanceType.class);
+		this.replayMockObjects();
+
+		// Create the properties
+		PropertyList properties = OfficeFloorCompiler.newPropertyList();
+
+		// Add the governances
+		this.operations.addGovernance("GOVERNANCE",
+				"net.example.ExampleGovernanceSource", properties,
+				governanceType).apply();
+		this.operations.addGovernance("GOVERNANCE",
+				"net.example.ExampleGovernanceSource", properties,
+				governanceType).apply();
+
+		// Validate appropriately added governances
 		this.validateModel();
 	}
 

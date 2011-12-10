@@ -55,6 +55,21 @@ public class RemoveUnconnectedTest extends AbstractWoofChangesTestCase {
 	}
 
 	/**
+	 * Ensure able to remove the {@link WoofGovernanceModel}.
+	 */
+	public void testRemoveGovernance() {
+
+		// Obtain the governance to remove
+		WoofGovernanceModel governance = this.model.getWoofGovernances().get(0);
+
+		// Remove the governance
+		Change<WoofGovernanceModel> change = this.operations
+				.removeGovernance(governance);
+		this.assertChange(change, governance, "Remove governance GOVERNANCE",
+				true);
+	}
+
+	/**
 	 * Ensure able to remove the {@link WoofResourceModel}.
 	 */
 	public void testRemoveResource() {
