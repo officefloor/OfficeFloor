@@ -26,6 +26,8 @@ import java.net.URLClassLoader;
 import net.officefloor.compile.OfficeFloorCompiler;
 import net.officefloor.compile.administrator.AdministratorLoader;
 import net.officefloor.compile.governance.GovernanceLoader;
+import net.officefloor.compile.governance.GovernanceType;
+import net.officefloor.compile.issues.CompilerIssues;
 import net.officefloor.compile.managedobject.ManagedObjectLoader;
 import net.officefloor.compile.office.OfficeLoader;
 import net.officefloor.compile.officefloor.OfficeFloorLoader;
@@ -33,6 +35,7 @@ import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.section.SectionLoader;
 import net.officefloor.compile.team.TeamLoader;
 import net.officefloor.compile.work.WorkLoader;
+import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
 import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.impl.spi.team.PassiveTeamSource;
@@ -47,6 +50,7 @@ import net.officefloor.plugin.autowire.AutoWireAdministration;
 import net.officefloor.plugin.autowire.AutoWireOfficeFloor;
 import net.officefloor.plugin.autowire.AutoWireOfficeFloorSource;
 import net.officefloor.plugin.governance.clazz.ClassGovernanceSource;
+import net.officefloor.plugin.governance.clazz.Govern;
 import net.officefloor.plugin.managedobject.clazz.ClassManagedObjectSource;
 import net.officefloor.plugin.section.clazz.ClassSectionSource;
 import net.officefloor.plugin.section.clazz.Parameter;
@@ -352,6 +356,64 @@ public class OfficeFloorCompilerAdapterTest extends OfficeFrameTestCase {
 				.loadSpecification(PassiveTeamSource.class);
 		assertEquals("Should be no properties", 0,
 				specification.getPropertyNames().length);
+	}
+
+	/**
+	 * Ensure able to be provided details of the cause of the
+	 * {@link CompilerIssues} issue.
+	 */
+	public void testCompilerIssueCause() {
+
+		// Specify to capture the cause
+		final Throwable[] adaptedCause = new Throwable[1];
+		final CompilerIssues issues = new CompilerIssues() {
+			@Override
+			public void addIssue(LocationType locationType, String location,
+					AssetType assetType, String assetName,
+					String issueDescription, Throwable cause) {
+				// Register the adapted cause
+				adaptedCause[0] = cause;
+			}
+
+			@Override
+			public void addIssue(LocationType locationType, String location,
+					AssetType assetType, String assetName,
+					String issueDescription) {
+				fail("Should not be invoked - " + issueDescription);
+			}
+		};
+		this.compiler.setCompilerIssues(issues);
+
+		// Load governance class without @govern to trigger issue cause
+		PropertyList properties = this.compiler.createPropertyList();
+		properties.addProperty(ClassGovernanceSource.CLASS_NAME_PROPERTY_NAME)
+				.setValue(MockInvalidGovernance.class.getName());
+
+		// Load type to trigger issue with cause
+		GovernanceLoader loader = this.compiler.getGovernanceLoader();
+		GovernanceType<?, ?> type = loader.loadGovernanceType(
+				ClassGovernanceSource.class, properties);
+		assertNull("Should not load governance type", type);
+
+		// Validate adapted the cause
+		assertNotNull("Should have adapted cause", adaptedCause[0]);
+		assertTrue("Should be adapted cause of this class loader",
+				adaptedCause[0] instanceof AdaptedException);
+		assertEquals("Ensure provides details of original cause",
+				"A method must be annotated with @Govern",
+				adaptedCause[0].getMessage());
+	}
+
+	/**
+	 * Mock invalid class for {@link ClassGovernanceSource}.
+	 */
+	public static class MockInvalidGovernance {
+
+		/**
+		 * No {@link Govern} annotation which will trigger failure.
+		 */
+		public void invalid() {
+		}
 	}
 
 }

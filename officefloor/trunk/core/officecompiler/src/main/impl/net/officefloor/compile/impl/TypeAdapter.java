@@ -18,6 +18,7 @@
 package net.officefloor.compile.impl;
 
 import java.lang.reflect.Array;
+import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -164,6 +165,17 @@ public class TypeAdapter implements InvocationHandler {
 						overridingArgument = Enum.valueOf(
 								(Class) methodParamType, argumentEnum.name());
 
+					} else if (isThrowable(argument.getClass())) {
+						// Only provide exception for CompilerIssue.
+						// Therefore can adapt the exception.
+						Throwable cause = (Throwable) argument;
+						Class<?> adaptedExceptionClass = translateClass(
+								AdaptedException.class, implClassLoader);
+						Constructor<?> constructor = adaptedExceptionClass
+								.getConstructor(String.class);
+						overridingArgument = constructor.newInstance(cause
+								.getMessage());
+
 					} else if ((String.class.getName().equals(methodParamType
 							.getName()))
 							|| (String.class.getName().equals(argument
@@ -278,6 +290,25 @@ public class TypeAdapter implements InvocationHandler {
 
 		// Translate class
 		return classLoader.loadClass(clazz.getName());
+	}
+
+	/**
+	 * Determines if the {@link Class} is a {@link Throwable} (i.e. an
+	 * {@link Exception}).
+	 * 
+	 * @param clazz
+	 *            {@link Class} to check.
+	 * @return <code>true</code> if is a {@link Throwable}.
+	 */
+	private static boolean isThrowable(Class<?> clazz) {
+		if (clazz == null) {
+			return false; // not throwable (as no super throwable)
+		} else if (clazz.getName().equals(Throwable.class.getName())) {
+			return true; // throwable
+		} else {
+			// Check super class to determine if throwable
+			return isThrowable(clazz.getSuperclass());
+		}
 	}
 
 	/**
