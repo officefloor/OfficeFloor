@@ -26,20 +26,24 @@ import java.net.URLClassLoader;
 import net.officefloor.compile.OfficeFloorCompiler;
 import net.officefloor.compile.administrator.AdministratorLoader;
 import net.officefloor.compile.governance.GovernanceLoader;
-import net.officefloor.compile.governance.GovernanceType;
 import net.officefloor.compile.issues.CompilerIssues;
 import net.officefloor.compile.managedobject.ManagedObjectLoader;
+import net.officefloor.compile.managedobject.ManagedObjectType;
 import net.officefloor.compile.office.OfficeLoader;
 import net.officefloor.compile.officefloor.OfficeFloorLoader;
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.section.SectionLoader;
 import net.officefloor.compile.team.TeamLoader;
 import net.officefloor.compile.work.WorkLoader;
+import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
 import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.impl.spi.team.PassiveTeamSource;
+import net.officefloor.frame.spi.TestSource;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
+import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
+import net.officefloor.frame.spi.managedobject.source.impl.AbstractManagedObjectSource;
 import net.officefloor.frame.spi.team.Team;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.model.impl.office.OfficeModelOfficeSource;
@@ -50,7 +54,6 @@ import net.officefloor.plugin.autowire.AutoWireAdministration;
 import net.officefloor.plugin.autowire.AutoWireOfficeFloor;
 import net.officefloor.plugin.autowire.AutoWireOfficeFloorSource;
 import net.officefloor.plugin.governance.clazz.ClassGovernanceSource;
-import net.officefloor.plugin.governance.clazz.Govern;
 import net.officefloor.plugin.managedobject.clazz.ClassManagedObjectSource;
 import net.officefloor.plugin.section.clazz.ClassSectionSource;
 import net.officefloor.plugin.section.clazz.Parameter;
@@ -360,9 +363,27 @@ public class OfficeFloorCompilerAdapterTest extends OfficeFrameTestCase {
 
 	/**
 	 * Ensure able to be provided details of the cause of the
-	 * {@link CompilerIssues} issue.
+	 * {@link CompilerIssues} issue maintaining type.
 	 */
-	public void testCompilerIssueCause() {
+	public void testCompilerIssueSameTypeCause() {
+		this.doCompilerIssueCauseTest(new NullPointerException("TEST"),
+				NullPointerException.class);
+	}
+
+	/**
+	 * Ensure able to be provided details of the cause of the
+	 * {@link CompilerIssues} issue, with need to adapt the cause.
+	 */
+	public void testCompilerIssueAdaptCause() {
+		this.doCompilerIssueCauseTest(new NonAdaptableException("TEST", null),
+				AdaptedException.class);
+	}
+
+	/**
+	 * Undertakes the {@link CompilerIssues} cause test.
+	 */
+	private void doCompilerIssueCauseTest(Exception cause,
+			Class<?> expectedCauseType) {
 
 		// Specify to capture the cause
 		final Throwable[] adaptedCause = new Throwable[1];
@@ -384,35 +405,81 @@ public class OfficeFloorCompilerAdapterTest extends OfficeFrameTestCase {
 		};
 		this.compiler.setCompilerIssues(issues);
 
-		// Load governance class without @govern to trigger issue cause
-		PropertyList properties = this.compiler.createPropertyList();
-		properties.addProperty(ClassGovernanceSource.CLASS_NAME_PROPERTY_NAME)
-				.setValue(MockInvalidGovernance.class.getName());
-
 		// Load type to trigger issue with cause
-		GovernanceLoader loader = this.compiler.getGovernanceLoader();
-		GovernanceType<?, ?> type = loader.loadGovernanceType(
-				ClassGovernanceSource.class, properties);
-		assertNull("Should not load governance type", type);
+		ManagedObjectLoader loader = this.compiler.getManagedObjectLoader();
+		ManagedObjectType<None> type = loader.loadManagedObjectType(
+				new MockFailManagedObjectSource(cause),
+				this.compiler.createPropertyList());
+		assertNull("Should not load type", type);
 
 		// Validate adapted the cause
-		assertNotNull("Should have adapted cause", adaptedCause[0]);
-		assertTrue("Should be adapted cause of this class loader",
-				adaptedCause[0] instanceof AdaptedException);
+		Throwable actualCause = adaptedCause[0];
+		assertNotNull("Should have adapted cause", actualCause);
+		assertEquals("Incorrect adapted cause type", expectedCauseType,
+				actualCause.getClass());
 		assertEquals("Ensure provides details of original cause",
-				"A method must be annotated with @Govern",
-				adaptedCause[0].getMessage());
+				cause.getMessage(), adaptedCause[0].getMessage());
 	}
 
 	/**
-	 * Mock invalid class for {@link ClassGovernanceSource}.
+	 * Non-adaptable {@link Exception}.
 	 */
-	public static class MockInvalidGovernance {
+	public static class NonAdaptableException extends Exception {
 
 		/**
-		 * No {@link Govern} annotation which will trigger failure.
+		 * Initiate.
+		 * 
+		 * @param message
+		 *            Message.
+		 * @param nonAdaptSignature
+		 *            Constructor is non-adaptable.
 		 */
-		public void invalid() {
+		public NonAdaptableException(String message, Object nonAdaptSignature) {
+			super(message);
+		}
+	}
+
+	/**
+	 * Mock {@link ManagedObjectSource} to propagate a failure.
+	 */
+	@TestSource
+	public static class MockFailManagedObjectSource extends
+			AbstractManagedObjectSource<None, None> {
+
+		/**
+		 * Failure.
+		 */
+		private final Exception failure;
+
+		/**
+		 * Initiate.
+		 * 
+		 * @param failure
+		 *            Failure.
+		 */
+		public MockFailManagedObjectSource(Exception failure) {
+			this.failure = failure;
+		}
+
+		/*
+		 * =================== ManagedObjectSource =====================
+		 */
+
+		@Override
+		protected void loadSpecification(SpecificationContext context) {
+			fail("Should not be invoked");
+		}
+
+		@Override
+		protected void loadMetaData(MetaDataContext<None, None> context)
+				throws Exception {
+			throw this.failure;
+		}
+
+		@Override
+		protected ManagedObject getManagedObject() throws Throwable {
+			fail("Should not be invoked");
+			return null;
 		}
 	}
 
