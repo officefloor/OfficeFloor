@@ -166,15 +166,28 @@ public class TypeAdapter implements InvocationHandler {
 								(Class) methodParamType, argumentEnum.name());
 
 					} else if (isThrowable(argument.getClass())) {
-						// Only provide exception for CompilerIssue.
-						// Therefore can adapt the exception.
+						// Adapt the throwable
 						Throwable cause = (Throwable) argument;
-						Class<?> adaptedExceptionClass = translateClass(
-								AdaptedException.class, implClassLoader);
-						Constructor<?> constructor = adaptedExceptionClass
-								.getConstructor(String.class);
-						overridingArgument = constructor.newInstance(cause
-								.getMessage());
+						Constructor<?> constructor;
+						try {
+							// Attempt to adapt the actual throwable type
+							Class<?> adaptedCauseClass = translateClass(
+									argument.getClass(), implClassLoader);
+							constructor = adaptedCauseClass
+									.getConstructor(String.class);
+							overridingArgument = constructor.newInstance(cause
+									.getMessage());
+
+						} catch (Throwable ex) {
+							// Only provide exception for CompilerIssue.
+							// Therefore can adapt the exception with another.
+							Class<?> adaptedExceptionClass = translateClass(
+									AdaptedException.class, implClassLoader);
+							constructor = adaptedExceptionClass
+									.getConstructor(String.class);
+							overridingArgument = constructor.newInstance(cause
+									.getMessage());
+						}
 
 					} else if ((String.class.getName().equals(methodParamType
 							.getName()))
