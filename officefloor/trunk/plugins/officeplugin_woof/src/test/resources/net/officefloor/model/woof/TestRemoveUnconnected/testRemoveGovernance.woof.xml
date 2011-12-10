@@ -9,9 +9,7 @@
 			location="SECTION_LOCATION" />
 	</sections>
 
-	<governances>
-		<governance name="GOVERNANCE" source="net.example.ExampleGovernanceSource" />
-	</governances>
+	<governances />
 
 	<resources>
 		<resource name="RESOURCE" path="Example.html" />

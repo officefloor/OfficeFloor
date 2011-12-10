@@ -19,8 +19,10 @@ package net.officefloor.model.woof;
 
 import java.util.Map;
 
+import net.officefloor.compile.governance.GovernanceType;
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.section.SectionType;
+import net.officefloor.compile.spi.governance.source.GovernanceSource;
 import net.officefloor.compile.spi.section.source.SectionSource;
 import net.officefloor.model.change.Change;
 import net.officefloor.plugin.comet.internal.CometEvent;
@@ -126,6 +128,56 @@ public interface WoofChanges {
 	 * @return {@link Change} to remove the {@link WoofSectionModel}.
 	 */
 	Change<WoofSectionModel> removeSection(WoofSectionModel section);
+
+	/**
+	 * Adds a {@link WoofGovernanceModel}.
+	 * 
+	 * @param governanceName
+	 *            Name of the {@link WoofGovernanceModel}.
+	 * @param governanceSourceClassName
+	 *            {@link GovernanceSource} class name.
+	 * @param properties
+	 *            {@link PropertyList}.
+	 * @param governanceType
+	 *            {@link GovernanceType}.
+	 * @return {@link Change} to add the {@link WoofGovernanceModel}.
+	 */
+	Change<WoofGovernanceModel> addGovernance(String governanceName,
+			String governanceSourceClassName, PropertyList properties,
+			GovernanceType<?, ?> governanceType);
+
+	/**
+	 * Removes the {@link WoofGovernanceModel}.
+	 * 
+	 * @param governance
+	 *            {@link WoofGovernanceModel} to remove.
+	 * @return {@link Change} to remove the {@link WoofGovernanceModel}.
+	 */
+	Change<WoofGovernanceModel> removeGovernance(WoofGovernanceModel governance);
+
+	/**
+	 * Adds a {@link WoofGovernanceAreaModel} for a {@link WoofGovernanceModel}.
+	 * 
+	 * @param governance
+	 *            {@link WoofGovernanceModel}.
+	 * @param width
+	 *            Width of {@link WoofGovernanceAreaModel}.
+	 * @param height
+	 *            Height of {@link WoofGovernanceAreaModel}.
+	 * @return {@link Change} to add {@link WoofGovernanceAreaModel}.
+	 */
+	Change<WoofGovernanceAreaModel> addGovernanceArea(
+			WoofGovernanceModel governance, int width, int height);
+
+	/**
+	 * Removes the {@link WoofGovernanceAreaModel}.
+	 * 
+	 * @param governanceArea
+	 *            {@link WoofGovernanceAreaModel}.
+	 * @return {@link Change} to remove the {@link WoofGovernanceAreaModel}.
+	 */
+	Change<WoofGovernanceAreaModel> removeGovernanceArea(
+			WoofGovernanceAreaModel governanceArea);
 
 	/**
 	 * Adds a {@link WoofResourceModel}.
