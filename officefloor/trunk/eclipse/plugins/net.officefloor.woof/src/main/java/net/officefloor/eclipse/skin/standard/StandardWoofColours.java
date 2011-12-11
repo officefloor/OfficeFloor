@@ -63,6 +63,15 @@ public class StandardWoofColours {
 	}
 
 	/**
+	 * Governance
+	 * 
+	 * @return Governance.
+	 */
+	public static Color GOVERNANCE() {
+		return new Color(null, 245, 245, 96);
+	}
+
+	/**
 	 * Resource (#e5e5e5).
 	 * 
 	 * @return Resource.

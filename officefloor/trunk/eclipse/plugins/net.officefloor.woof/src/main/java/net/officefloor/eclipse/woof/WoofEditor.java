@@ -32,6 +32,7 @@ import net.officefloor.eclipse.woof.editparts.WoofExceptionEditPart;
 import net.officefloor.eclipse.woof.editparts.WoofExceptionToWoofResourceEditPart;
 import net.officefloor.eclipse.woof.editparts.WoofExceptionToWoofSectionInputEditPart;
 import net.officefloor.eclipse.woof.editparts.WoofExceptionToWoofTemplateEditPart;
+import net.officefloor.eclipse.woof.editparts.WoofGovernanceEditPart;
 import net.officefloor.eclipse.woof.editparts.WoofResourceEditPart;
 import net.officefloor.eclipse.woof.editparts.WoofSectionEditPart;
 import net.officefloor.eclipse.woof.editparts.WoofSectionInputEditPart;
@@ -59,6 +60,7 @@ import net.officefloor.model.woof.WoofExceptionModel;
 import net.officefloor.model.woof.WoofExceptionToWoofResourceModel;
 import net.officefloor.model.woof.WoofExceptionToWoofSectionInputModel;
 import net.officefloor.model.woof.WoofExceptionToWoofTemplateModel;
+import net.officefloor.model.woof.WoofGovernanceModel;
 import net.officefloor.model.woof.WoofModel;
 import net.officefloor.model.woof.WoofRepositoryImpl;
 import net.officefloor.model.woof.WoofResourceModel;
@@ -152,6 +154,7 @@ public class WoofEditor extends
 		map.put(WoofSectionModel.class, WoofSectionEditPart.class);
 		map.put(WoofSectionInputModel.class, WoofSectionInputEditPart.class);
 		map.put(WoofSectionOutputModel.class, WoofSectionOutputEditPart.class);
+		map.put(WoofGovernanceModel.class, WoofGovernanceEditPart.class);
 		map.put(WoofResourceModel.class, WoofResourceEditPart.class);
 		map.put(WoofExceptionModel.class, WoofExceptionEditPart.class);
 

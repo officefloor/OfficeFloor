@@ -41,7 +41,7 @@ public class StandardResourceFigure extends AbstractOfficeFloorFigure implements
 	private final ResourceFigureContext context;
 
 	/**
-	 * Name.s
+	 * Name.
 	 */
 	private final Label name;
 
