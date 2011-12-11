@@ -24,6 +24,8 @@ import net.officefloor.eclipse.common.dialog.input.InputHandler;
 import net.officefloor.eclipse.common.dialog.input.InputListener;
 import net.officefloor.eclipse.common.dialog.input.impl.ClasspathClassInput;
 import net.officefloor.eclipse.common.dialog.input.impl.ClasspathFileInput;
+import net.officefloor.eclipse.extension.governancesource.GovernanceSourceExtension;
+import net.officefloor.eclipse.extension.governancesource.GovernanceSourceExtensionContext;
 import net.officefloor.eclipse.extension.managedobjectsource.ManagedObjectSourceExtension;
 import net.officefloor.eclipse.extension.managedobjectsource.ManagedObjectSourceExtensionContext;
 import net.officefloor.eclipse.extension.worksource.WorkSourceExtension;
@@ -126,6 +128,28 @@ public class SourceExtensionUtil {
 	 * @param container
 	 *            {@link Composite} to add display {@link Control} instances.
 	 * @param context
+	 *            {@link GovernanceSourceExtensionContext}.
+	 * @param listener
+	 *            {@link PropertyValueChangeListener}. May be <code>null</code>.
+	 * @return {@link Property} for the {@link Text}.
+	 */
+	public static Property createPropertyClass(String label, String name,
+			Composite container, GovernanceSourceExtensionContext context,
+			PropertyValueChangeListener listener) {
+		return createPropertyClass(label, name, container,
+				new GovernanceGeneric(context), listener);
+	}
+
+	/**
+	 * Creates the display for the input {@link Property}.
+	 * 
+	 * @param label
+	 *            Label for the {@link Property}.
+	 * @param name
+	 *            Name of the {@link Property}.
+	 * @param container
+	 *            {@link Composite} to add display {@link Control} instances.
+	 * @param context
 	 *            {@link GenericSourceExtensionContext}.
 	 * @param listener
 	 *            {@link PropertyValueChangeListener}. May be <code>null</code>.
@@ -140,8 +164,8 @@ public class SourceExtensionUtil {
 				name);
 
 		// Create the input to obtain the class
-		ClasspathClassInput input = new ClasspathClassInput(context
-				.getProject(), property.getValue(), container.getShell());
+		ClasspathClassInput input = new ClasspathClassInput(
+				context.getProject(), property.getValue(), container.getShell());
 
 		// Provide the label
 		new Label(container, SWT.NONE).setText(label + ": ");
@@ -154,9 +178,8 @@ public class SourceExtensionUtil {
 						String propertyValue = (String) value;
 						property.setValue(propertyValue);
 						if (listener != null) {
-							listener
-									.propertyValueChanged(new PropertyValueChangeEventImpl(
-											property));
+							listener.propertyValueChanged(new PropertyValueChangeEventImpl(
+									property));
 						}
 						context.notifyPropertiesChanged();
 					}
@@ -256,9 +279,8 @@ public class SourceExtensionUtil {
 						String propertyValue = (String) value;
 						property.setValue(propertyValue);
 						if (listener != null) {
-							listener
-									.propertyValueChanged(new PropertyValueChangeEventImpl(
-											property));
+							listener.propertyValueChanged(new PropertyValueChangeEventImpl(
+									property));
 						}
 						context.notifyPropertiesChanged();
 					}
@@ -370,9 +392,8 @@ public class SourceExtensionUtil {
 			public void modifyText(ModifyEvent e) {
 				property.setValue(text.getText());
 				if (listener != null) {
-					listener
-							.propertyValueChanged(new PropertyValueChangeEventImpl(
-									property));
+					listener.propertyValueChanged(new PropertyValueChangeEventImpl(
+							property));
 				}
 				context.notifyPropertiesChanged();
 			}
@@ -496,9 +517,8 @@ public class SourceExtensionUtil {
 				property.setValue(checkbox.getSelection() ? trueValue
 						: falseValue);
 				if (listener != null) {
-					listener
-							.propertyValueChanged(new PropertyValueChangeEventImpl(
-									property));
+					listener.propertyValueChanged(new PropertyValueChangeEventImpl(
+							property));
 				}
 				context.notifyPropertiesChanged();
 			}
@@ -629,6 +649,47 @@ public class SourceExtensionUtil {
 		 *            {@link ManagedObjectSourceExtensionContext}.
 		 */
 		public ManagedObjectGeneric(ManagedObjectSourceExtensionContext context) {
+			this.context = context;
+		}
+
+		/*
+		 * =============== GenericSourceExtensionContext ====================
+		 */
+
+		@Override
+		public IProject getProject() {
+			return this.context.getProject();
+		}
+
+		@Override
+		public PropertyList getPropertyList() {
+			return this.context.getPropertyList();
+		}
+
+		@Override
+		public void notifyPropertiesChanged() {
+			this.context.notifyPropertiesChanged();
+		}
+	}
+
+	/**
+	 * {@link GovernanceSourceExtension} {@link GenericSourceExtensionContext}.
+	 */
+	private static class GovernanceGeneric implements
+			GenericSourceExtensionContext {
+
+		/**
+		 * {@link GovernanceSourceExtensionContext}.
+		 */
+		private final GovernanceSourceExtensionContext context;
+
+		/**
+		 * Initiate.
+		 * 
+		 * @param context
+		 *            {@link GovernanceSourceExtensionContext}.
+		 */
+		public GovernanceGeneric(GovernanceSourceExtensionContext context) {
 			this.context = context;
 		}
 

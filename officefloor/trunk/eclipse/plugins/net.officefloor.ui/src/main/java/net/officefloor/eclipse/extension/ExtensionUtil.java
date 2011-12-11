@@ -35,6 +35,7 @@ import net.officefloor.eclipse.classpath.ClasspathUtil;
 import net.officefloor.eclipse.common.editor.AbstractOfficeFloorEditor;
 import net.officefloor.eclipse.extension.administratorsource.AdministratorSourceExtension;
 import net.officefloor.eclipse.extension.classpath.ExtensionClasspathProvider;
+import net.officefloor.eclipse.extension.governancesource.GovernanceSourceExtension;
 import net.officefloor.eclipse.extension.managedobjectsource.ManagedObjectSourceExtension;
 import net.officefloor.eclipse.extension.officesource.OfficeSourceExtension;
 import net.officefloor.eclipse.extension.open.ExtensionOpener;
@@ -141,6 +142,41 @@ public class ExtensionUtil {
 	@SuppressWarnings("rawtypes")
 	public static List<ManagedObjectSourceExtension> createManagedObjectSourceExtensionList() {
 		return createSourceExtensionList(createManagedObjectSourceExtensionMap());
+	}
+
+	/**
+	 * {@link SourceClassExtractor} for {@link GovernanceSourceExtension}.
+	 */
+	@SuppressWarnings("rawtypes")
+	private static final SourceClassExtractor<GovernanceSourceExtension> GOVERNANCE_SOURCE_CLASS_EXTRACTOR = new SourceClassExtractor<GovernanceSourceExtension>() {
+		@Override
+		public Class<?> getSourceClass(GovernanceSourceExtension sourceExtension) {
+			return sourceExtension.getGovernanceSourceClass();
+		}
+	};
+
+	/**
+	 * Creates the map of {@link GovernanceSourceExtension} instances by their
+	 * respective {@link GovernanceSource} class name.
+	 * 
+	 * @return Map of {@link GovernanceSourceExtension} instances by their
+	 *         respective {@link GovernanceSource} class name.
+	 */
+	@SuppressWarnings("rawtypes")
+	public static Map<String, GovernanceSourceExtension> createGovernanceSourceExtensionMap() {
+		return createSourceExtensionMap(GovernanceSourceExtension.EXTENSION_ID,
+				GovernanceSourceExtension.class,
+				GOVERNANCE_SOURCE_CLASS_EXTRACTOR);
+	}
+
+	/**
+	 * Creates the listing of {@link GovernanceSourceExtension} instances.
+	 * 
+	 * @return Listing of {@link GovernanceSourceExtension} instances.
+	 */
+	@SuppressWarnings("rawtypes")
+	public static List<GovernanceSourceExtension> createGovernanceSourceExtensionList() {
+		return createSourceExtensionList(createGovernanceSourceExtensionMap());
 	}
 
 	/**
@@ -368,6 +404,24 @@ public class ExtensionUtil {
 	}
 
 	/**
+	 * Opens the {@link GovernanceSource}.
+	 * 
+	 * @param governanceSourceClassName
+	 *            {@link GovernanceSource} class name.
+	 * @param properties
+	 *            {@link PropertyList} for the {@link GovernanceSource}.
+	 * @param editor
+	 *            {@link AbstractOfficeFloorEditor}.
+	 */
+	public static void openGovernanceSource(String governanceSourceClassName,
+			PropertyList properties, AbstractOfficeFloorEditor<?, ?> editor) {
+		openSource(GovernanceSourceExtension.EXTENSION_ID,
+				GovernanceSourceExtension.class,
+				GOVERNANCE_SOURCE_CLASS_EXTRACTOR, governanceSourceClassName,
+				null, properties, editor);
+	}
+
+	/**
 	 * Opens the {@link AdministratorSource}.
 	 * 
 	 * @param administratorSourceClassName
@@ -523,6 +577,10 @@ public class ExtensionUtil {
 		loadExtensionClasspathProviders(
 				createManagedObjectSourceExtensionMap(),
 				MANAGED_OBJECT_SOURCE_CLASS_EXTRACTOR, providers);
+
+		// Load the governance source extensions
+		loadExtensionClasspathProviders(createGovernanceSourceExtensionMap(),
+				GOVERNANCE_SOURCE_CLASS_EXTRACTOR, providers);
 
 		// Load the administrator source extensions
 		loadExtensionClasspathProviders(
