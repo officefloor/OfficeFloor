@@ -45,6 +45,7 @@ import net.officefloor.eclipse.woof.editparts.WoofTemplateOutputToWoofResourceEd
 import net.officefloor.eclipse.woof.editparts.WoofTemplateOutputToWoofSectionInputEditPart;
 import net.officefloor.eclipse.woof.editparts.WoofTemplateOutputToWoofTemplateEditPart;
 import net.officefloor.eclipse.woof.operations.AddExceptionOperation;
+import net.officefloor.eclipse.woof.operations.AddGovernanceOperation;
 import net.officefloor.eclipse.woof.operations.AddResourceOperation;
 import net.officefloor.eclipse.woof.operations.AddSectionOperation;
 import net.officefloor.eclipse.woof.operations.AddTemplateOperation;
@@ -184,6 +185,7 @@ public class WoofEditor extends
 		// Add actions
 		list.add(new AddTemplateOperation(woofChanges));
 		list.add(new AddSectionOperation(woofChanges));
+		list.add(new AddGovernanceOperation(woofChanges));
 		list.add(new AddResourceOperation(woofChanges));
 		list.add(new AddExceptionOperation(woofChanges));
 	}
