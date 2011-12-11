@@ -108,8 +108,8 @@ public class OfficeBuildingTestUtil {
 				// Found the artifact, so extract version
 				String version = name.substring(ARTIFACT_ID.length()
 						+ "-".length());
-				version = version.substring(0, version.length()
-						- ".jar".length());
+				version = version.substring(0,
+						version.length() - ".jar".length());
 
 				// Return the version
 				return version;
@@ -268,8 +268,8 @@ public class OfficeBuildingTestUtil {
 	public static void waitUntilProcessComplete(ProcessManager manager)
 			throws Exception {
 
-		// Obtain the maximum run time
-		final int MAX_RUN_TIME = 10000;
+		// Maximum run time (double OfficeFloorImpl wait to close time)
+		final int MAX_RUN_TIME = 20000;
 
 		// Wait until process completes (or times out)
 		long maxFinishTime = System.currentTimeMillis() + MAX_RUN_TIME;
