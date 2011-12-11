@@ -15,30 +15,15 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.eclipse.woof.editparts;
+package net.officefloor.eclipse.skin.woof;
 
-import java.util.List;
-
-import net.officefloor.eclipse.common.editparts.AbstractOfficeFloorDiagramEditPart;
-import net.officefloor.model.woof.WoofModel;
-
-import org.eclipse.gef.EditPart;
+import net.officefloor.eclipse.skin.OfficeFloorFigure;
+import net.officefloor.model.woof.WoofGovernanceModel;
 
 /**
- * {@link EditPart} for the {@link WoofModel}.
+ * {@link OfficeFloorFigure} for the {@link WoofGovernanceModel}.
  * 
  * @author Daniel Sagenschneider
  */
-public class WoofEditPart extends AbstractOfficeFloorDiagramEditPart<WoofModel> {
-
-	@Override
-	protected void populateChildren(List<Object> childModels) {
-		WoofModel woof = this.getCastedModel();
-		childModels.addAll(woof.getWoofTemplates());
-		childModels.addAll(woof.getWoofSections());
-		childModels.addAll(woof.getWoofGovernances());
-		childModels.addAll(woof.getWoofResources());
-		childModels.addAll(woof.getWoofExceptions());
-	}
-
+public interface GovernanceFigure extends OfficeFloorFigure {
 }

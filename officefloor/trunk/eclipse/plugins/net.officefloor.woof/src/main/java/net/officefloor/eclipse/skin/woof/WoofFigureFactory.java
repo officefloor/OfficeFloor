@@ -88,6 +88,15 @@ public interface WoofFigureFactory {
 			SectionOutputFigureContext context);
 
 	/**
+	 * Creates the {@link GovernanceFigure}.
+	 * 
+	 * @param context
+	 *            {@link GovernanceFigureContext}.
+	 * @return {@link GovernanceFigure}.
+	 */
+	GovernanceFigure createGovernanceFigure(GovernanceFigureContext context);
+
+	/**
 	 * Creates the {@link ResourceFigure}.
 	 * 
 	 * @param context
