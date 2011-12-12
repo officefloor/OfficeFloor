@@ -20,13 +20,17 @@ package net.officefloor.eclipse.skin.standard.woof;
 import org.eclipse.draw2d.PolylineConnection;
 import org.eclipse.draw2d.PolylineDecoration;
 
+import net.officefloor.eclipse.skin.standard.StandardWoofColours;
 import net.officefloor.eclipse.skin.woof.ExceptionFigure;
 import net.officefloor.eclipse.skin.woof.ExceptionFigureContext;
 import net.officefloor.eclipse.skin.woof.ExceptionToResourceFigureContext;
 import net.officefloor.eclipse.skin.woof.ExceptionToSectionInputFigureContext;
 import net.officefloor.eclipse.skin.woof.ExceptionToTemplateFigureContext;
+import net.officefloor.eclipse.skin.woof.GovernanceAreaFigure;
+import net.officefloor.eclipse.skin.woof.GovernanceAreaFigureContext;
 import net.officefloor.eclipse.skin.woof.GovernanceFigure;
 import net.officefloor.eclipse.skin.woof.GovernanceFigureContext;
+import net.officefloor.eclipse.skin.woof.GovernanceToGovernanceAreaFigureContext;
 import net.officefloor.eclipse.skin.woof.ResourceFigure;
 import net.officefloor.eclipse.skin.woof.ResourceFigureContext;
 import net.officefloor.eclipse.skin.woof.SectionFigure;
@@ -93,6 +97,12 @@ public class StandardWoofFigureFactory implements WoofFigureFactory {
 	}
 
 	@Override
+	public GovernanceAreaFigure createGovernanceAreaFigure(
+			GovernanceAreaFigureContext context) {
+		return new StandardGovernanceAreaFigure(context);
+	}
+
+	@Override
 	public ResourceFigure createResourceFigure(ResourceFigureContext context) {
 		return new StandardResourceFigure(context);
 	}
@@ -142,6 +152,13 @@ public class StandardWoofFigureFactory implements WoofFigureFactory {
 			PolylineConnection figure,
 			SectionOutputToResourceFigureContext context) {
 		figure.setTargetDecoration(new PolylineDecoration());
+	}
+
+	@Override
+	public void decorateGovernanceToGovernanceAreaFigure(
+			PolylineConnection figure,
+			GovernanceToGovernanceAreaFigureContext context) {
+		figure.setForegroundColor(StandardWoofColours.GOVERNANCE());
 	}
 
 	@Override

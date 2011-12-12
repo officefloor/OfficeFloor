@@ -143,15 +143,15 @@ public class WoofModelRepositoryTest extends OfficeFrameTestCase {
 				"getGovernanceSourceClassName", "getX", "getY" },
 				woof.getWoofGovernances(), new WoofGovernanceModel(
 						"GOVERNANCE", "net.example.ExampleGovernanceSource",
-						null, null, 500, 501));
+						null, null, null, 500, 501));
 		WoofGovernanceModel governance = woof.getWoofGovernances().get(0);
 		assertList(new String[] { "getName", "getValue" },
 				governance.getProperties(), new PropertyModel("name.a",
 						"value.a"), new PropertyModel("name.b", "value.b"));
 		assertList(new String[] { "getX", "getY", "getWidth", "getHeight" },
 				governance.getGovernanceAreas(), new WoofGovernanceAreaModel(
-						520, 521, 510, 511), new WoofGovernanceAreaModel(540,
-						541, 530, 531));
+						520, 521, null, 510, 511), new WoofGovernanceAreaModel(
+						540, 541, null, 530, 531));
 
 		// ----------------------------------------
 		// Validate the resources

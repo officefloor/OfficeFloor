@@ -32,7 +32,9 @@ import net.officefloor.eclipse.woof.editparts.WoofExceptionEditPart;
 import net.officefloor.eclipse.woof.editparts.WoofExceptionToWoofResourceEditPart;
 import net.officefloor.eclipse.woof.editparts.WoofExceptionToWoofSectionInputEditPart;
 import net.officefloor.eclipse.woof.editparts.WoofExceptionToWoofTemplateEditPart;
+import net.officefloor.eclipse.woof.editparts.WoofGovernanceAreaEditPart;
 import net.officefloor.eclipse.woof.editparts.WoofGovernanceEditPart;
+import net.officefloor.eclipse.woof.editparts.WoofGovernanceToWoofGovernanceAreaEditPart;
 import net.officefloor.eclipse.woof.editparts.WoofResourceEditPart;
 import net.officefloor.eclipse.woof.editparts.WoofSectionEditPart;
 import net.officefloor.eclipse.woof.editparts.WoofSectionInputEditPart;
@@ -46,6 +48,7 @@ import net.officefloor.eclipse.woof.editparts.WoofTemplateOutputToWoofResourceEd
 import net.officefloor.eclipse.woof.editparts.WoofTemplateOutputToWoofSectionInputEditPart;
 import net.officefloor.eclipse.woof.editparts.WoofTemplateOutputToWoofTemplateEditPart;
 import net.officefloor.eclipse.woof.operations.AddExceptionOperation;
+import net.officefloor.eclipse.woof.operations.AddGovernanceAreaOperation;
 import net.officefloor.eclipse.woof.operations.AddGovernanceOperation;
 import net.officefloor.eclipse.woof.operations.AddResourceOperation;
 import net.officefloor.eclipse.woof.operations.AddSectionOperation;
@@ -60,7 +63,9 @@ import net.officefloor.model.woof.WoofExceptionModel;
 import net.officefloor.model.woof.WoofExceptionToWoofResourceModel;
 import net.officefloor.model.woof.WoofExceptionToWoofSectionInputModel;
 import net.officefloor.model.woof.WoofExceptionToWoofTemplateModel;
+import net.officefloor.model.woof.WoofGovernanceAreaModel;
 import net.officefloor.model.woof.WoofGovernanceModel;
+import net.officefloor.model.woof.WoofGovernanceToWoofGovernanceAreaModel;
 import net.officefloor.model.woof.WoofModel;
 import net.officefloor.model.woof.WoofRepositoryImpl;
 import net.officefloor.model.woof.WoofResourceModel;
@@ -81,6 +86,7 @@ import net.officefloor.plugin.gwt.module.GwtFailureListener;
 import net.officefloor.plugin.gwt.module.GwtModuleRepositoryImpl;
 
 import org.eclipse.gef.EditPart;
+import org.eclipse.gef.editpolicies.LayoutEditPolicy;
 import org.eclipse.gef.requests.CreateConnectionRequest;
 import org.eclipse.ui.IEditorPart;
 
@@ -155,6 +161,7 @@ public class WoofEditor extends
 		map.put(WoofSectionInputModel.class, WoofSectionInputEditPart.class);
 		map.put(WoofSectionOutputModel.class, WoofSectionOutputEditPart.class);
 		map.put(WoofGovernanceModel.class, WoofGovernanceEditPart.class);
+		map.put(WoofGovernanceAreaModel.class, WoofGovernanceAreaEditPart.class);
 		map.put(WoofResourceModel.class, WoofResourceEditPart.class);
 		map.put(WoofExceptionModel.class, WoofExceptionEditPart.class);
 
@@ -171,6 +178,8 @@ public class WoofEditor extends
 				WoofSectionOutputToWoofSectionInputEditPart.class);
 		map.put(WoofSectionOutputToWoofResourceModel.class,
 				WoofSectionOutputToWoofResourceEditPart.class);
+		map.put(WoofGovernanceToWoofGovernanceAreaModel.class,
+				WoofGovernanceToWoofGovernanceAreaEditPart.class);
 		map.put(WoofExceptionToWoofTemplateModel.class,
 				WoofExceptionToWoofTemplateEditPart.class);
 		map.put(WoofExceptionToWoofSectionInputModel.class,
@@ -189,8 +198,17 @@ public class WoofEditor extends
 		list.add(new AddTemplateOperation(woofChanges));
 		list.add(new AddSectionOperation(woofChanges));
 		list.add(new AddGovernanceOperation(woofChanges));
+		list.add(new AddGovernanceAreaOperation(woofChanges));
 		list.add(new AddResourceOperation(woofChanges));
 		list.add(new AddExceptionOperation(woofChanges));
+	}
+
+	@Override
+	public LayoutEditPolicy createLayoutEditPolicy() {
+		// Override layout policy to allow resizing governance areas
+		OfficeFloorLayoutEditPolicy policy = new WoofLayoutEdityPolicy();
+		this.populateLayoutEditPolicy(policy);
+		return policy;
 	}
 
 	@Override
@@ -215,6 +233,28 @@ public class WoofEditor extends
 							WoofSectionModel target) {
 						return WoofEditor.this.getModelChanges().removeSection(
 								target);
+					}
+				});
+
+		// Allow deleting governance
+		policy.addDelete(WoofGovernanceModel.class,
+				new DeleteChangeFactory<WoofGovernanceModel>() {
+					@Override
+					public Change<WoofGovernanceModel> createChange(
+							WoofGovernanceModel target) {
+						return WoofEditor.this.getModelChanges()
+								.removeGovernance(target);
+					}
+				});
+
+		// Allow deleting governance area
+		policy.addDelete(WoofGovernanceAreaModel.class,
+				new DeleteChangeFactory<WoofGovernanceAreaModel>() {
+					@Override
+					public Change<WoofGovernanceAreaModel> createChange(
+							WoofGovernanceAreaModel target) {
+						return WoofEditor.this.getModelChanges()
+								.removeGovernanceArea(target);
 					}
 				});
 
