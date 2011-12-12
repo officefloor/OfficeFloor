@@ -18,13 +18,16 @@
 package net.officefloor.eclipse.woof.editparts;
 
 import java.beans.PropertyChangeEvent;
+import java.util.List;
 
 import net.officefloor.eclipse.WoofPlugin;
 import net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart;
 import net.officefloor.eclipse.skin.woof.GovernanceFigure;
 import net.officefloor.eclipse.skin.woof.GovernanceFigureContext;
+import net.officefloor.model.woof.WoofGovernanceAreaModel;
 import net.officefloor.model.woof.WoofGovernanceModel;
 import net.officefloor.model.woof.WoofGovernanceModel.WoofGovernanceEvent;
+import net.officefloor.model.woof.WoofGovernanceToWoofGovernanceAreaModel;
 
 import org.eclipse.gef.EditPart;
 
@@ -37,6 +40,29 @@ public class WoofGovernanceEditPart
 		extends
 		AbstractOfficeFloorEditPart<WoofGovernanceModel, WoofGovernanceEvent, GovernanceFigure>
 		implements GovernanceFigureContext {
+
+	/**
+	 * Obtains the {@link WoofGovernanceToWoofGovernanceAreaModel} from the
+	 * {@link WoofGovernanceAreaModel}.
+	 * 
+	 * @param area
+	 *            {@link WoofGovernanceAreaModel}.
+	 * @return {@link WoofGovernanceToWoofGovernanceAreaModel}.
+	 */
+	public static WoofGovernanceToWoofGovernanceAreaModel getWoofGovernanceToWoofGovernanceArea(
+			WoofGovernanceAreaModel area) {
+		WoofGovernanceToWoofGovernanceAreaModel conn = area
+				.getGovernanceConnection();
+		if (conn == null) {
+			conn = new WoofGovernanceToWoofGovernanceAreaModel();
+			area.setGovernanceConnection(conn);
+		}
+		return conn;
+	}
+
+	/*
+	 * ====================== AbstractOfficeFloorEditPart =================
+	 */
 
 	@Override
 	protected GovernanceFigure createOfficeFloorFigure() {
@@ -56,6 +82,25 @@ public class WoofGovernanceEditPart
 		case CHANGE_WOOF_GOVERNANCE_NAME:
 			// TODO handle
 			break;
+		case ADD_GOVERNANCE_AREA:
+		case REMOVE_GOVERNANCE_AREA:
+			// Refresh woof as area added graphically to top level
+			WoofEditPart woofEditPart = (WoofEditPart) this.getParent();
+			woofEditPart.refresh();
+			
+			// Refresh connections to areas
+			this.refreshSourceConnections();
+			break;
+		}
+	}
+
+	@Override
+	protected void populateConnectionSourceModels(List<Object> models) {
+		// Load the listing of governance to area connections
+		for (WoofGovernanceAreaModel area : this.getCastedModel()
+				.getGovernanceAreas()) {
+			WoofGovernanceToWoofGovernanceAreaModel conn = getWoofGovernanceToWoofGovernanceArea(area);
+			models.add(conn);
 		}
 	}
 

@@ -2,4 +2,5 @@
 <model>
 	<field type="int" name="width" />
 	<field type="int" name="height" />
+	<field type="WoofGovernanceToWoofGovernanceAreaModel" name="governance connection" />
 </model>

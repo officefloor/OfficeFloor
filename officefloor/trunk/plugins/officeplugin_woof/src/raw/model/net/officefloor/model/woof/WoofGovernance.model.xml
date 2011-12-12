@@ -4,4 +4,5 @@
 	<field type="String" name="governance source class name" />
 	<list type="PropertyModel" name="property" plural="properties" />
 	<list type="WoofGovernanceAreaModel" name="governance area" />
+	<list type="WoofGovernanceToWoofGovernanceAreaModel" name="governance area connection" />
 </model>

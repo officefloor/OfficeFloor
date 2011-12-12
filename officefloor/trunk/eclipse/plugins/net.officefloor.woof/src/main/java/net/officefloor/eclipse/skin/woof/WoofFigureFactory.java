@@ -20,6 +20,7 @@ package net.officefloor.eclipse.skin.woof;
 import net.officefloor.model.woof.WoofExceptionToWoofResourceModel;
 import net.officefloor.model.woof.WoofExceptionToWoofSectionInputModel;
 import net.officefloor.model.woof.WoofExceptionToWoofTemplateModel;
+import net.officefloor.model.woof.WoofGovernanceToWoofGovernanceAreaModel;
 import net.officefloor.model.woof.WoofModel;
 import net.officefloor.model.woof.WoofSectionOutputToWoofResourceModel;
 import net.officefloor.model.woof.WoofSectionOutputToWoofSectionInputModel;
@@ -97,6 +98,16 @@ public interface WoofFigureFactory {
 	GovernanceFigure createGovernanceFigure(GovernanceFigureContext context);
 
 	/**
+	 * Creates the {@link GovernanceAreaFigure}.
+	 * 
+	 * @param context
+	 *            {@link GovernanceAreaFigureContext}.
+	 * @return {@link GovernanceAreaFigure}.
+	 */
+	GovernanceAreaFigure createGovernanceAreaFigure(
+			GovernanceAreaFigureContext context);
+
+	/**
 	 * Creates the {@link ResourceFigure}.
 	 * 
 	 * @param context
@@ -164,7 +175,7 @@ public interface WoofFigureFactory {
 	 * @param figure
 	 *            {@link IFigure} to decorate.
 	 * @param context
-	 *            {@link SectionOutputToSectionInputFigureContext}
+	 *            {@link SectionOutputToSectionInputFigureContext}.
 	 */
 	void decorateSectionOutputToSectionInputFigure(PolylineConnection figure,
 			SectionOutputToSectionInputFigureContext context);
@@ -175,10 +186,21 @@ public interface WoofFigureFactory {
 	 * @param figure
 	 *            {@link IFigure} to decorate.
 	 * @param context
-	 *            {@link SectionOutputToResourceFigureContext}
+	 *            {@link SectionOutputToResourceFigureContext}.
 	 */
 	void decorateSectionOutputToResourceFigure(PolylineConnection figure,
 			SectionOutputToResourceFigureContext context);
+
+	/**
+	 * Decorates the {@link WoofGovernanceToWoofGovernanceAreaModel} figure.
+	 * 
+	 * @param figure
+	 *            {@link IFigure} to decorate.
+	 * @param context
+	 *            {@link GovernanceToGovernanceAreaFigureContext}.
+	 */
+	void decorateGovernanceToGovernanceAreaFigure(PolylineConnection figure,
+			GovernanceToGovernanceAreaFigureContext context);
 
 	/**
 	 * Decorates the {@link WoofExceptionToWoofTemplateModel} figure.
@@ -186,7 +208,7 @@ public interface WoofFigureFactory {
 	 * @param figure
 	 *            {@link IFigure} to decorate.
 	 * @param context
-	 *            {@link ExceptionToTemplateFigureContext}
+	 *            {@link ExceptionToTemplateFigureContext}.
 	 */
 	void decorateExceptionToTemplateFigure(PolylineConnection figure,
 			ExceptionToTemplateFigureContext context);

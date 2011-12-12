@@ -258,14 +258,27 @@ public abstract class AbstractOfficeFloorEditPart<M extends Model, E extends Enu
 
 	@Override
 	protected void createEditPolicies() {
-		// Disallow resizing
-		this.installEditPolicy(EditPolicy.SELECTION_FEEDBACK_ROLE,
-				new NonResizableEditPolicy());
+		this.createEditPolicies(true);
+	}
+
+	/**
+	 * Creates and installs the {@link EditPolicy} instances.
+	 * 
+	 * @param isDisableResize
+	 *            <code>true</code> to disable re-sizing the {@link Figure}.
+	 */
+	protected void createEditPolicies(boolean isDisableResize) {
+
+		// Determine if disable re-sizing the figure
+		if (isDisableResize) {
+			// Disallow resizing
+			this.installEditPolicy(EditPolicy.SELECTION_FEEDBACK_ROLE,
+					new NonResizableEditPolicy());
+		}
 
 		// Allow direct editing (if configured)
 		this.officeFloorDirectEditPolicy = new OfficeFloorDirectEditPolicy<M>();
-		this
-				.populateOfficeFloorDirectEditPolicy(this.officeFloorDirectEditPolicy);
+		this.populateOfficeFloorDirectEditPolicy(this.officeFloorDirectEditPolicy);
 		this.installEditPolicy(EditPolicy.DIRECT_EDIT_ROLE,
 				this.officeFloorDirectEditPolicy);
 
@@ -482,7 +495,7 @@ public abstract class AbstractOfficeFloorEditPart<M extends Model, E extends Enu
 	 * 
 	 * @return Model casted to its specific type.
 	 */
-	@SuppressWarnings( { "unchecked" })
+	@SuppressWarnings({ "unchecked" })
 	public M getCastedModel() {
 		return (M) this.getModel();
 	}
