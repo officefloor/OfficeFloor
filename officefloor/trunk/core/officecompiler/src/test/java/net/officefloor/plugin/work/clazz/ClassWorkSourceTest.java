@@ -19,19 +19,28 @@
 package net.officefloor.plugin.work.clazz;
 
 import java.io.IOException;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.lang.reflect.Method;
 import java.sql.SQLException;
 
+import net.officefloor.compile.OfficeFloorCompiler;
+import net.officefloor.compile.issues.CompilerIssues;
+import net.officefloor.compile.issues.CompilerIssues.LocationType;
 import net.officefloor.compile.spi.work.source.TaskFlowTypeBuilder;
+import net.officefloor.compile.spi.work.source.TaskObjectTypeBuilder;
 import net.officefloor.compile.spi.work.source.TaskTypeBuilder;
 import net.officefloor.compile.spi.work.source.WorkTypeBuilder;
 import net.officefloor.compile.test.work.WorkLoaderUtil;
 import net.officefloor.compile.work.TaskType;
 import net.officefloor.compile.work.WorkType;
+import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
 import net.officefloor.frame.api.execute.FlowFuture;
 import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.execute.TaskContext;
 import net.officefloor.frame.test.OfficeFrameTestCase;
+
+import org.easymock.AbstractMatcher;
 
 /**
  * Test the {@link ClassWorkSource}.
@@ -46,11 +55,6 @@ public class ClassWorkSourceTest extends OfficeFrameTestCase {
 	@SuppressWarnings("rawtypes")
 	private final TaskContext taskContext = this.createMock(TaskContext.class);
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see junit.framework.TestCase#setUp()
-	 */
 	@Override
 	protected void setUp() throws Exception {
 		MockClass.reset(this.taskContext);
@@ -62,6 +66,136 @@ public class ClassWorkSourceTest extends OfficeFrameTestCase {
 	public void testSpecification() {
 		WorkLoaderUtil.validateSpecification(ClassWorkSource.class,
 				ClassWorkSource.CLASS_NAME_PROPERTY_NAME, "Class");
+	}
+
+	/**
+	 * Ensure able to provider {@link Qualifier} to dependency name.
+	 */
+	public void testQualifiedDependency() throws Exception {
+
+		// Create the work type builder
+		WorkTypeBuilder<ClassWork> work = WorkLoaderUtil
+				.createWorkTypeBuilder(new ClassWorkFactory(
+						MockQualifiedClass.class));
+
+		// task
+		TaskTypeBuilder<?, ?> task = work.addTaskType("task",
+				new ClassTaskFactory(null, false, null), null, null);
+		TaskObjectTypeBuilder<?> objectOne = task.addObject(String.class);
+		objectOne.setTypeQualifier(MockQualification.class.getName());
+		objectOne.setLabel(MockQualification.class.getName() + "-"
+				+ String.class.getName());
+		TaskObjectTypeBuilder<?> objectTwo = task.addObject(String.class);
+		objectTwo.setLabel(String.class.getName());
+
+		// Validate the work type
+		WorkLoaderUtil.validateWorkType(work, ClassWorkSource.class,
+				ClassWorkSource.CLASS_NAME_PROPERTY_NAME,
+				MockQualifiedClass.class.getName());
+	}
+
+	/**
+	 * Mock {@link Qualifier}.
+	 */
+	@Retention(RetentionPolicy.RUNTIME)
+	@Qualifier
+	public static @interface MockQualification {
+	}
+
+	/**
+	 * Mock qualified {@link Class} to load as {@link ClassWork}.
+	 */
+	public static class MockQualifiedClass {
+		public void task(@MockQualification String objectOne, String objectTwo) {
+		}
+	}
+
+	/**
+	 * Ensure issue if provide multiple {@link Qualifier} to dependency name.
+	 */
+	public void testMultipleQualifiedDependency() throws Exception {
+
+		final CompilerIssues issues = this.createMock(CompilerIssues.class);
+
+		// Use compiler to record issue
+		OfficeFloorCompiler compiler = OfficeFloorCompiler
+				.newOfficeFloorCompiler(null);
+		compiler.setCompilerIssues(issues);
+
+		// Record issue
+		issues.addIssue(LocationType.SECTION, null, AssetType.WORK, null,
+				"Failed to source WorkType definition from WorkSource "
+						+ ClassWorkSource.class.getName(),
+				new IllegalArgumentException(
+						"Method task parameter 0 has more than one Qualifier"));
+		this.control(issues).setMatcher(new AbstractMatcher() {
+			@Override
+			public boolean matches(Object[] expected, Object[] actual) {
+
+				// Match initial parameters
+				for (int i = 0; i < 5; i++) {
+					Object e = expected[i];
+					Object a = actual[i];
+					if ((e == null) && (a == null)) {
+						continue; // match on null
+					} else if ((e != null) && (e.equals(actual[i]))) {
+						continue; // match not null
+					} else {
+						return false; // not match
+					}
+				}
+
+				// Match exception
+				IllegalArgumentException eEx = (IllegalArgumentException) expected[5];
+				IllegalArgumentException aEx = (IllegalArgumentException) actual[5];
+				if (!eEx.getMessage().equals(aEx.getMessage())) {
+					return false; // not match
+				}
+
+				// As here, matches
+				return true;
+			}
+		});
+
+		// Create the work type builder
+		WorkTypeBuilder<ClassWork> work = WorkLoaderUtil
+				.createWorkTypeBuilder(new ClassWorkFactory(
+						MockMultipleQualifiedClass.class));
+
+		// task
+		TaskTypeBuilder<?, ?> task = work.addTaskType("task",
+				new ClassTaskFactory(null, false, null), null, null);
+		task.addObject(String.class)
+				.setLabel(MockQualification.class.getName());
+
+		// Test
+		this.replayMockObjects();
+
+		// Validate the work type
+		WorkType<?> type = WorkLoaderUtil.loadWorkType(ClassWorkSource.class,
+				compiler, ClassWorkSource.CLASS_NAME_PROPERTY_NAME,
+				MockMultipleQualifiedClass.class.getName());
+		assertNull("Should not load work with multiple qualifers", type);
+
+		// Verify
+		this.verifyMockObjects();
+	}
+
+	/**
+	 * Another mock {@link Qualifier}.
+	 */
+	@Retention(RetentionPolicy.RUNTIME)
+	@Qualifier
+	public @interface MockAnotherQualification {
+	}
+
+	/**
+	 * Mock multiple qualified {@link Class} to load as {@link ClassWork}.
+	 */
+	public static class MockMultipleQualifiedClass {
+		public void task(
+				@MockQualification @MockAnotherQualification String dependency) {
+		}
 	}
 
 	/**
@@ -78,8 +212,7 @@ public class ClassWorkSourceTest extends OfficeFrameTestCase {
 				"taskInstanceMethod", new ClassTaskFactory(null, false, null),
 				null, null);
 		instanceMethod.setReturnType(String.class);
-		instanceMethod.addObject(String.class).setLabel(
-				String.class.getSimpleName());
+		instanceMethod.addObject(String.class).setLabel(String.class.getName());
 		TaskFlowTypeBuilder<?> asynchronous = instanceMethod.addFlow();
 		asynchronous.setLabel("asynchronous");
 		asynchronous.setArgumentType(String.class);

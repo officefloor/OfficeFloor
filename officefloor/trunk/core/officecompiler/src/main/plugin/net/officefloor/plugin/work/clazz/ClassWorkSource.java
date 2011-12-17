@@ -228,11 +228,16 @@ public class ClassWorkSource extends AbstractWorkSource<ClassWork> implements
 				taskTypeBuilder.setReturnType(returnType);
 			}
 
+			// Obtain the parameter annotations (for qualifying)
+			Annotation[][] methodParamAnnotations = method
+					.getParameterAnnotations();
+
 			// Define the listing of task objects and flows
 			for (int i = 0; i < paramTypes.length; i++) {
 
-				// Obtain the parameter type
+				// Obtain the parameter type and its annotations
 				Class<?> paramType = paramTypes[i];
+				Annotation[] paramAnnotations = methodParamAnnotations[i];
 
 				// Obtain the parameter factory
 				ParameterFactory parameterFactory = null;
@@ -248,12 +253,40 @@ public class ClassWorkSource extends AbstractWorkSource<ClassWork> implements
 
 				// Default to object if no parameter factory
 				if (parameterFactory == null) {
-					// Otherwise must be an object
+					// Otherwise must be an dependency object
 					parameterFactory = new ObjectParameterFactory(
 							objectSequence.nextIndex());
 					TaskObjectTypeBuilder<Indexed> objectTypeBuilder = taskTypeBuilder
 							.addObject(paramType);
-					objectTypeBuilder.setLabel(paramType.getSimpleName());
+
+					// Determine type qualifier
+					String typeQualifier = null;
+					for (Annotation annotation : paramAnnotations) {
+
+						// Obtain the annotation type
+						Class<?> annotationType = annotation.annotationType();
+
+						// Determine if qualifier annotation
+						if (annotationType.isAnnotationPresent(Qualifier.class)) {
+
+							// Allow only one qualifier
+							if (typeQualifier != null) {
+								throw new IllegalArgumentException("Method "
+										+ methodName + " parameter " + i
+										+ " has more than one "
+										+ Qualifier.class.getSimpleName());
+							}
+
+							// Provide type qualifier
+							typeQualifier = annotationType.getName();
+							objectTypeBuilder.setTypeQualifier(typeQualifier);
+						}
+					}
+
+					// Specify the label
+					String label = (typeQualifier != null ? typeQualifier + "-"
+							: "") + paramType.getName();
+					objectTypeBuilder.setLabel(label);
 				}
 
 				// Load the parameter factory

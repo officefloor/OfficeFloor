@@ -19,22 +19,27 @@
 package net.officefloor.plugin.section.work;
 
 import java.io.IOException;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.LinkedList;
 import java.util.List;
 
 import net.officefloor.compile.spi.section.SectionDesigner;
+import net.officefloor.compile.spi.section.SectionObject;
 import net.officefloor.compile.spi.section.SectionTask;
 import net.officefloor.compile.spi.section.SectionWork;
 import net.officefloor.compile.test.section.SectionLoaderUtil;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.test.OfficeFrameTestCase;
+import net.officefloor.plugin.autowire.AutoWire;
 import net.officefloor.plugin.autowire.AutoWireOfficeFloor;
 import net.officefloor.plugin.autowire.AutoWireOfficeFloorSource;
 import net.officefloor.plugin.autowire.AutoWireSection;
 import net.officefloor.plugin.work.clazz.ClassWorkSource;
 import net.officefloor.plugin.work.clazz.FlowInterface;
+import net.officefloor.plugin.work.clazz.Qualifier;
 
 /**
  * Tests the {@link WorkSectionSource}.
@@ -68,26 +73,34 @@ public class WorkSectionSourceTest extends OfficeFrameTestCase {
 		expected.addSectionOutput("doFlow", Character.class.getName(), false);
 		expected.addSectionOutput("taskTwo", Byte.class.getName(), false);
 		expected.addSectionOutput("taskThree", null, false);
-		expected.addSectionOutput("IOException", IOException.class.getName(),
-				true);
-		expected.addSectionOutput("SQLException", SQLException.class.getName(),
-				true);
+		expected.addSectionOutput(IOException.class.getName(),
+				IOException.class.getName(), true);
+		expected.addSectionOutput(SQLException.class.getName(),
+				SQLException.class.getName(), true);
 
 		// Objects
-		expected.addSectionObject("Integer", Integer.class.getName());
-		expected.addSectionObject("Connection", Connection.class.getName());
-		expected.addSectionObject("List", List.class.getName());
+		expected.addSectionObject(Integer.class.getName(),
+				Integer.class.getName());
+		SectionObject object = expected.addSectionObject(
+				MockQualification.class.getName() + "-"
+						+ Connection.class.getName(),
+				Connection.class.getName());
+		object.setTypeQualifier(MockQualification.class.getName());
+		expected.addSectionObject(Connection.class.getName(),
+				Connection.class.getName());
+		expected.addSectionObject(List.class.getName(), List.class.getName());
 
 		// Tasks
 		SectionWork work = expected.addSectionWork("WORK",
 				ClassWorkSource.class.getName());
 		SectionTask taskOne = work.addSectionTask("taskOne", "taskOne");
-		taskOne.getTaskObject("Integer");
-		taskOne.getTaskObject("Connection");
+		taskOne.getTaskObject(Integer.class.getName());
+		taskOne.getTaskObject(MockQualification.class.getName() + "-"
+				+ Connection.class.getName());
 		SectionTask taskTwo = work.addSectionTask("taskTwo", "taskTwo");
-		taskTwo.getTaskObject("Connection");
-		taskTwo.getTaskObject("String");
-		taskTwo.getTaskObject("List");
+		taskTwo.getTaskObject(Connection.class.getName());
+		taskTwo.getTaskObject(String.class.getName());
+		taskTwo.getTaskObject(List.class.getName());
 		work.addSectionTask("taskThree", "taskThree");
 
 		// Validate the type
@@ -109,9 +122,9 @@ public class WorkSectionSourceTest extends OfficeFrameTestCase {
 		final List<String> list = new LinkedList<String>();
 
 		AutoWireOfficeFloorSource autoWire = new AutoWireOfficeFloorSource();
-		autoWire.addObject(connection, Connection.class);
-		autoWire.addObject(list, List.class);
-		autoWire.addObject(new Integer(1), Integer.class);
+		autoWire.addObject(connection, new AutoWire(Connection.class));
+		autoWire.addObject(list, new AutoWire(List.class));
+		autoWire.addObject(new Integer(1), new AutoWire(Integer.class));
 
 		// Create Work section
 		AutoWireSection section = autoWire.addSection("SECTION",
@@ -165,6 +178,14 @@ public class WorkSectionSourceTest extends OfficeFrameTestCase {
 	}
 
 	/**
+	 * Mock {@link Qualifier}.
+	 */
+	@Qualifier
+	@Retention(RetentionPolicy.RUNTIME)
+	public @interface MockQualification {
+	}
+
+	/**
 	 * Mock {@link Work} for testing.
 	 */
 	public static class MockWork {
@@ -174,7 +195,8 @@ public class WorkSectionSourceTest extends OfficeFrameTestCase {
 			void doFlow(Character parameter);
 		}
 
-		public Long taskOne(Integer value, Connection connection, Flows flows)
+		public Long taskOne(Integer value,
+				@MockQualification Connection connection, Flows flows)
 				throws IOException, SQLException {
 			return new Long(1);
 		}

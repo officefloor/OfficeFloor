@@ -145,8 +145,11 @@ public abstract class AbstractOfficeChangesTestCase extends
 		 *            Name.
 		 * @param objectType
 		 *            Object type.
+		 * @param qualifier
+		 *            Type qualifier.
 		 */
-		void addOfficeSectionObject(String name, Class<?> objectType);
+		void addOfficeSectionObject(String name, Class<?> objectType,
+				String qualifier);
 	}
 
 	/**
@@ -193,8 +196,10 @@ public abstract class AbstractOfficeChangesTestCase extends
 		}
 
 		@Override
-		public void addOfficeSectionObject(String name, Class<?> objectType) {
-			this.objects.add(new OfficeSectionItem(name, objectType.getName()));
+		public void addOfficeSectionObject(String name, Class<?> objectType,
+				String qualifier) {
+			this.objects.add(new OfficeSectionItem(name, objectType.getName(),
+					qualifier));
 		}
 
 		/*
@@ -262,12 +267,29 @@ public abstract class AbstractOfficeChangesTestCase extends
 		private final String type;
 
 		/**
+		 * Type qualifier.
+		 */
+		private final String typeQualifier;
+
+		/**
 		 * Flag indicating if escalation only.
 		 */
 		private final boolean isEscalation;
 
 		/**
-		 * Initialise.
+		 * Initialise {@link OfficeSectionInput}.
+		 * 
+		 * @param name
+		 *            Name.
+		 * @param type
+		 *            Type.
+		 */
+		public OfficeSectionItem(String name, String type) {
+			this(name, type, false);
+		}
+
+		/**
+		 * Initialise {@link OfficeSectionOutput}.
 		 * 
 		 * @param name
 		 *            Name.
@@ -279,19 +301,25 @@ public abstract class AbstractOfficeChangesTestCase extends
 		public OfficeSectionItem(String name, String type, boolean isEscalation) {
 			this.name = name;
 			this.type = type;
+			this.typeQualifier = null;
 			this.isEscalation = isEscalation;
 		}
 
 		/**
-		 * Initialise.
+		 * Initialise {@link OfficeSectionObject}.
 		 * 
 		 * @param name
 		 *            Name.
 		 * @param type
 		 *            Type.
+		 * @param qualifier
+		 *            Type qualifier.
 		 */
-		public OfficeSectionItem(String name, String type) {
-			this(name, type, false);
+		public OfficeSectionItem(String name, String type, String qualifier) {
+			this.name = name;
+			this.type = type;
+			this.typeQualifier = qualifier;
+			this.isEscalation = false;
 		}
 
 		/*
@@ -339,6 +367,11 @@ public abstract class AbstractOfficeChangesTestCase extends
 		@Override
 		public String getObjectType() {
 			return this.type;
+		}
+
+		@Override
+		public String getTypeQualifier() {
+			return this.typeQualifier;
 		}
 	}
 

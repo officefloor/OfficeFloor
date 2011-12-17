@@ -58,7 +58,7 @@
 						<property name="class.name" value="${testcase}$ProcessWork" />
 					</properties>
 					<work-task name="process">
-						<task-object name="Integer" parameter="true" />
+						<task-object name="java.lang.Integer" parameter="true" />
 					</work-task>
 				</work>
 			</works>

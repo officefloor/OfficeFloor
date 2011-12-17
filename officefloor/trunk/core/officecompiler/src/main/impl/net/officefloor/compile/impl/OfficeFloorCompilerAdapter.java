@@ -18,6 +18,8 @@
 package net.officefloor.compile.impl;
 
 import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.List;
 
 import net.officefloor.compile.OfficeFloorCompiler;
 import net.officefloor.compile.administrator.AdministratorLoader;
@@ -44,6 +46,7 @@ import net.officefloor.frame.spi.administration.source.AdministratorSource;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.spi.source.ResourceSource;
 import net.officefloor.frame.spi.team.source.TeamSource;
+import net.officefloor.plugin.autowire.AutoWire;
 import net.officefloor.plugin.autowire.SingletonManagedObjectSource;
 
 /**
@@ -70,8 +73,8 @@ public class OfficeFloorCompilerAdapter extends OfficeFloorCompiler {
 	 *            {@link OfficeFloorCompiler}.
 	 * @param singleton
 	 *            Singleton.
-	 * @param interfaceTypes
-	 *            Interface types for the singleton.
+	 * @param autoWiring
+	 *            {@link AutoWire} instances for the singleton.
 	 * @return {@link ManagedObjectSource} to provide the singleton.
 	 * @throws ClassNotFoundException
 	 *             If fails to obtain the adapted {@link Class}.
@@ -79,7 +82,7 @@ public class OfficeFloorCompilerAdapter extends OfficeFloorCompiler {
 	@SuppressWarnings("unchecked")
 	public static ManagedObjectSource<None, None> createSingletonManagedObjectSource(
 			OfficeFloorCompiler compiler, Object singleton,
-			Class<?>[] interfaceTypes) throws ClassNotFoundException {
+			AutoWire[] autoWiring) throws ClassNotFoundException {
 
 		// Determine if must adapt for use
 		boolean isAdapt = (compiler instanceof OfficeFloorCompilerAdapter);
@@ -90,20 +93,33 @@ public class OfficeFloorCompilerAdapter extends OfficeFloorCompiler {
 			// Adapting so obtain the adapter
 			adapter = (OfficeFloorCompilerAdapter) compiler;
 
-			// Ensure all types are interfaces
-			for (Class<?> interfaceType : interfaceTypes) {
-				if (!interfaceType.isInterface()) {
+			// Obtain the interface types (ensuring all are interfaces)
+			List<Class<?>> interfaceTypes = new ArrayList<Class<?>>(
+					autoWiring.length);
+			for (AutoWire autoWire : autoWiring) {
+
+				// Load the type class
+				Class<?> type = adapter.clientClassLoader.loadClass(autoWire
+						.getType());
+
+				// Ensure the interface type
+				if (!type.isInterface()) {
 					throw new IllegalStateException("Adapting "
 							+ OfficeFloorCompiler.class.getSimpleName()
 							+ " so all object types must be an interface ["
-							+ interfaceType.getName() + "]");
+							+ type.getName() + "]");
 				}
+
+				// Register the interface type
+				interfaceTypes.add(type);
 			}
 
 			// Adapt the object
-			singleton = TypeAdapter.createProxy(singleton,
-					adapter.implClassLoader, adapter.clientClassLoader,
-					interfaceTypes);
+			singleton = TypeAdapter
+					.createProxy(singleton, adapter.implClassLoader,
+							adapter.clientClassLoader,
+							interfaceTypes.toArray(new Class<?>[interfaceTypes
+									.size()]));
 		}
 
 		// Create the managed object source for the singleton

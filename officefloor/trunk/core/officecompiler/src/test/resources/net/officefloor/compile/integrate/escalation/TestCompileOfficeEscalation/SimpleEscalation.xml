@@ -36,7 +36,7 @@
 					<property name="class.name" value="${testcase}$EscalationWork" />
 				</properties>
 				<work-task name="handle">
-					<task-object name="Throwable" parameter="true" />
+					<task-object name="java.lang.Throwable" parameter="true" />
 				</work-task>
 			</work>
 		</works>

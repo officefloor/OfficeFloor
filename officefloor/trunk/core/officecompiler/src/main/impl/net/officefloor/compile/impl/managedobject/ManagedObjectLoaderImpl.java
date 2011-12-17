@@ -808,12 +808,15 @@ public class ManagedObjectLoaderImpl implements ManagedObjectLoader {
 					return null; // must have type
 				}
 
+				// Obtain the type qualifier
+				String typeQualifier = dependencyMetaData.getTypeQualifier();
+
 				// Determine the index for the dependency
 				int index = (key != null ? key.ordinal() : i);
 
 				// Create and add the dependency type
 				dependencyTypes[i] = new ManagedObjectDependencyTypeImpl<D>(
-						index, type, key, label);
+						index, type, typeQualifier, key, label);
 			}
 		}
 

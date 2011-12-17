@@ -206,9 +206,10 @@ public abstract class AbstractAsyncManagedObjectSource<D extends Enum<D>, F exte
 		 *            {@link Enum} to identify the dependency.
 		 * @param dependencyType
 		 *            Type the dependency is required to extend/implement.
-		 * @return {@link Labeller} to possibly label the required dependency.
+		 * @return {@link DependencyLabeller} to possibly label the required
+		 *         dependency.
 		 */
-		Labeller addDependency(D key, Class<?> dependencyType);
+		DependencyLabeller addDependency(D key, Class<?> dependencyType);
 
 		/**
 		 * Adds a required dependency identified by an index into the order the
@@ -216,9 +217,10 @@ public abstract class AbstractAsyncManagedObjectSource<D extends Enum<D>, F exte
 		 * 
 		 * @param dependencyType
 		 *            Type the dependency is required to extend/implement.
-		 * @return {@link Labeller} to possibly label the required dependency.
+		 * @return {@link DependencyLabeller} to possibly label the required
+		 *         dependency.
 		 */
-		Labeller addDependency(Class<?> dependencyType);
+		DependencyLabeller addDependency(Class<?> dependencyType);
 
 		/**
 		 * Adds a required {@link JobSequence} identified by the key.
@@ -232,8 +234,8 @@ public abstract class AbstractAsyncManagedObjectSource<D extends Enum<D>, F exte
 		Labeller addFlow(F key, Class<?> argumentType);
 
 		/**
-		 * Adds a required {@link JobSequence} identified by an index into the order
-		 * the {@link JobSequence} was added.
+		 * Adds a required {@link JobSequence} identified by an index into the
+		 * order the {@link JobSequence} was added.
 		 * 
 		 * @param argumentType
 		 *            Type of argument passed to the {@link JobSequence}.
@@ -255,7 +257,25 @@ public abstract class AbstractAsyncManagedObjectSource<D extends Enum<D>, F exte
 	}
 
 	/**
-	 * Provides the ability to label the required dependency or {@link JobSequence}.
+	 * Provide {@link Labeller} functionality along with qualifying type of
+	 * dependency.
+	 */
+	public static interface DependencyLabeller extends Labeller {
+
+		/**
+		 * Specifies qualifier for the type.
+		 * 
+		 * @param qualifier
+		 *            Type qualifier.
+		 * @return <code>this</code> {@link Labeller} (allows simpler coding).
+		 */
+		Labeller setTypeQualifier(String qualifier);
+
+	}
+
+	/**
+	 * Provides the ability to label the required dependency or
+	 * {@link JobSequence}.
 	 */
 	public static interface Labeller {
 
@@ -344,13 +364,13 @@ public abstract class AbstractAsyncManagedObjectSource<D extends Enum<D>, F exte
 		}
 
 		@Override
-		public Labeller addDependency(D key, Class<?> dependencyType) {
+		public DependencyLabeller addDependency(D key, Class<?> dependencyType) {
 			// Use ordinal of key to index the dependency
 			return this.addDependency(key.ordinal(), key, dependencyType);
 		}
 
 		@Override
-		public Labeller addDependency(Class<?> dependencyType) {
+		public DependencyLabeller addDependency(Class<?> dependencyType) {
 			// Indexed, so use next index (size will increase with indexing)
 			return this.addDependency(this.dependencies.size(), null,
 					dependencyType);
@@ -367,7 +387,7 @@ public abstract class AbstractAsyncManagedObjectSource<D extends Enum<D>, F exte
 		 *            Type of dependency.
 		 * @return {@link Labeller} for the dependency.
 		 */
-		private Labeller addDependency(final int index, D key,
+		private DependencyLabeller addDependency(final int index, D key,
 				Class<?> dependencyType) {
 
 			// Create the dependency meta-data
@@ -378,10 +398,16 @@ public abstract class AbstractAsyncManagedObjectSource<D extends Enum<D>, F exte
 			this.dependencies.put(new Integer(index), dependency);
 
 			// Return the labeller for the dependency
-			return new Labeller() {
+			return new DependencyLabeller() {
 				@Override
 				public Labeller setLabel(String label) {
 					dependency.setLabel(label);
+					return this;
+				}
+
+				@Override
+				public Labeller setTypeQualifier(String qualifier) {
+					dependency.setTypeQualifier(qualifier);
 					return this;
 				}
 

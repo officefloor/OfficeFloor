@@ -34,7 +34,7 @@ import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 /**
  * Builder for the {@link ManagedObjectType} to validate the loaded
  * {@link ManagedObjectType} from the {@link ManagedObjectSource}.
- *
+ * 
  * @author Daniel Sagenschneider
  */
 public interface ManagedObjectTypeBuilder {
@@ -42,7 +42,7 @@ public interface ManagedObjectTypeBuilder {
 	/**
 	 * Specifies the {@link Object} class returned from the
 	 * {@link ManagedObject}.
-	 *
+	 * 
 	 * @param objectClass
 	 *            Class of the {@link Object} returned from the
 	 *            {@link ManagedObject}.
@@ -51,17 +51,20 @@ public interface ManagedObjectTypeBuilder {
 
 	/**
 	 * Adds a {@link ManagedObjectDependencyType}.
-	 *
+	 * 
 	 * @param name
 	 *            Name of the {@link ManagedObjectDependency}.
 	 * @param type
 	 *            Type of the {@link ManagedObjectDependency}.
+	 * @param typeQualifier
+	 *            Qualifier for the type of {@link ManagedObjectDependency}.
 	 * @param index
 	 *            Index of the {@link ManagedObjectDependency}.
 	 * @param key
 	 *            Key identifying the {@link ManagedObjectDependency}.
 	 */
-	void addDependency(String name, Class<?> type, int index, Enum<?> key);
+	void addDependency(String name, Class<?> type, String typeQualifier,
+			int index, Enum<?> key);
 
 	/**
 	 * <p>
@@ -70,17 +73,19 @@ public interface ManagedObjectTypeBuilder {
 	 * <p>
 	 * Both the <code>name</code> and <code>index</code> are extracted from the
 	 * key.
-	 *
+	 * 
 	 * @param key
 	 *            Key identifying the {@link ManagedObjectDependency}.
 	 * @param type
 	 *            Type of the {@link ManagedObjectDependency}.
+	 * @param typeQualifier
+	 *            Qualifier for the type of {@link ManagedObjectDependency}.
 	 */
-	void addDependency(Enum<?> key, Class<?> type);
+	void addDependency(Enum<?> key, Class<?> type, String typeQualifier);
 
 	/**
 	 * Adds a {@link ManagedObjectFlowType}.
-	 *
+	 * 
 	 * @param name
 	 *            Name of the {@link ManagedObjectFlow}.
 	 * @param argumentType
@@ -108,7 +113,7 @@ public interface ManagedObjectTypeBuilder {
 	 * <p>
 	 * Both the <code>name</code> and <code>index</code> are extracted from the
 	 * key.
-	 *
+	 * 
 	 * @param key
 	 *            Key identifying the {@link ManagedObjectFlow}.
 	 * @param argumentType
@@ -127,7 +132,7 @@ public interface ManagedObjectTypeBuilder {
 
 	/**
 	 * Adds a {@link ManagedObjectTeamType}.
-	 *
+	 * 
 	 * @param teamName
 	 *            Name of the {@link ManagedObjectTeam}.
 	 */
@@ -135,7 +140,7 @@ public interface ManagedObjectTypeBuilder {
 
 	/**
 	 * Adds an extension interface.
-	 *
+	 * 
 	 * @param extensionInterface
 	 *            Extension interface.
 	 */

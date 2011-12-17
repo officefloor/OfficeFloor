@@ -61,7 +61,7 @@
 					<property name="class.name" value="${testcase}$CompileTaskWork" />
 				</properties>
 				<work-task name="inputObjectTask">
-					<task-object name="InputManagedObject" parameter="false">
+					<task-object name="${testcase}$InputManagedObject" parameter="false">
 						<external-managed-object name="OBJECT" />
 					</task-object>
 				</work-task>

@@ -256,8 +256,10 @@ public class SectionLoaderUtil {
 			TestCase.assertEquals("Incorrect name for object " + i,
 					eObject.getSectionObjectName(),
 					aObject.getSectionObjectName());
-			TestCase.assertEquals("Incorrect object type for input " + i,
+			TestCase.assertEquals("Incorrect object type for object " + i,
 					eObject.getObjectType(), aObject.getObjectType());
+			TestCase.assertEquals("Incorrect type qualifier for object " + i,
+					eObject.getTypeQualifier(), aObject.getTypeQualifier());
 		}
 	}
 
@@ -340,6 +342,9 @@ public class SectionLoaderUtil {
 					aObject.getOfficeSectionObjectName());
 			TestCase.assertEquals("Incorrect object type for section object "
 					+ i, eObject.getObjectType(), aObject.getObjectType());
+			TestCase.assertEquals(
+					"Incorrect type qualifier for section object " + i,
+					eObject.getTypeQualifier(), aObject.getTypeQualifier());
 		}
 
 		// Validate remaining of the office section

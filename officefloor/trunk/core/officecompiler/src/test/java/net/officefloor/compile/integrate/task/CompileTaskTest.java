@@ -349,9 +349,9 @@ public class CompileTaskTest extends AbstractCompileTestCase {
 				"TEAM");
 		this.record_officeBuilder_addWork("SECTION.WORK");
 		this.record_workBuilder_addTask("TASK", "OFFICE_TEAM");
-		this.issues
-				.addIssue(LocationType.SECTION, "desk", AssetType.TASK, "TASK",
-						"Object CompileManagedObject is not linked to a BoundManagedObjectNode");
+		this.issues.addIssue(LocationType.SECTION, "desk", AssetType.TASK,
+				"TASK", "Object " + CompileManagedObject.class.getName()
+						+ " is not linked to a BoundManagedObjectNode");
 
 		// Compile the office floor
 		this.compile(true);

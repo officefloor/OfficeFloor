@@ -51,6 +51,17 @@ public interface ManagedObjectDependencyType<D extends Enum<D>> {
 	Class<?> getDependencyType();
 
 	/**
+	 * <p>
+	 * Obtains the qualifier on the type.
+	 * <p>
+	 * This is to enable qualifying the type of dependency required.
+	 * 
+	 * @return Qualifier on the type. May be <code>null</code> if not qualifying
+	 *         the type.
+	 */
+	String getTypeQualifier();
+
+	/**
 	 * Obtains the key identifying the dependency.
 	 * 
 	 * @return Key identifying the dependency.

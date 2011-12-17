@@ -216,11 +216,10 @@ public class LoadManagedObjectTypeTest extends OfficeFrameTestCase {
 			@Override
 			public void init(ManagedObjectSourceContext<None> context,
 					InitUtil util) {
-				assertEquals(
-						"Incorrect resource locator",
-						LoadManagedObjectTypeTest.class.getClassLoader().getResource(
-								objectPath), context.getClassLoader()
-								.getResource(objectPath));
+				assertEquals("Incorrect resource locator",
+						LoadManagedObjectTypeTest.class.getClassLoader()
+								.getResource(objectPath), context
+								.getClassLoader().getResource(objectPath));
 			}
 		});
 	}
@@ -388,6 +387,7 @@ public class LoadManagedObjectTypeTest extends OfficeFrameTestCase {
 		this.recordReturn(dependencyOne, dependencyOne.getKey(), TwoKey.ONE);
 		this.recordReturn(dependencyOne, dependencyOne.getType(),
 				Connection.class);
+		this.recordReturn(dependencyOne, dependencyOne.getTypeQualifier(), null);
 		this.recordReturn(dependencyTwo, dependencyTwo.getLabel(), null);
 		this.recordReturn(dependencyTwo, dependencyTwo.getKey(),
 				InvalidKey.INVALID);
@@ -418,6 +418,7 @@ public class LoadManagedObjectTypeTest extends OfficeFrameTestCase {
 		this.recordReturn(dependencyOne, dependencyOne.getKey(), TwoKey.ONE);
 		this.recordReturn(dependencyOne, dependencyOne.getType(),
 				Connection.class);
+		this.recordReturn(dependencyOne, dependencyOne.getTypeQualifier(), null);
 		this.recordReturn(dependencyTwo, dependencyTwo.getLabel(), null);
 		this.recordReturn(dependencyTwo, dependencyTwo.getKey(), null);
 		this.record_issue("Dependencies mixing keys and indexes");
@@ -445,9 +446,11 @@ public class LoadManagedObjectTypeTest extends OfficeFrameTestCase {
 		this.recordReturn(dependencyOne, dependencyOne.getKey(), TwoKey.ONE);
 		this.recordReturn(dependencyOne, dependencyOne.getType(),
 				Connection.class);
+		this.recordReturn(dependencyOne, dependencyOne.getTypeQualifier(), null);
 		this.recordReturn(dependencyTwo, dependencyTwo.getLabel(), null);
 		this.recordReturn(dependencyTwo, dependencyTwo.getKey(), TwoKey.ONE);
 		this.recordReturn(dependencyTwo, dependencyTwo.getType(), String.class);
+		this.recordReturn(dependencyTwo, dependencyTwo.getTypeQualifier(), null);
 		this.record_issue("Must have exactly one dependency per key (key="
 				+ TwoKey.ONE + ")");
 
@@ -470,6 +473,7 @@ public class LoadManagedObjectTypeTest extends OfficeFrameTestCase {
 		this.recordReturn(dependency, dependency.getLabel(), null);
 		this.recordReturn(dependency, dependency.getKey(), TwoKey.ONE);
 		this.recordReturn(dependency, dependency.getType(), Connection.class);
+		this.recordReturn(dependency, dependency.getTypeQualifier(), null);
 		this.record_issue("Missing dependency meta-data (keys=" + TwoKey.TWO
 				+ ")");
 
@@ -671,10 +675,13 @@ public class LoadManagedObjectTypeTest extends OfficeFrameTestCase {
 		this.recordReturn(dependencyOne, dependencyOne.getLabel(), null);
 		this.recordReturn(dependencyOne, dependencyOne.getKey(), TwoKey.TWO); // order
 		this.recordReturn(dependencyOne, dependencyOne.getType(), Integer.class);
+		this.recordReturn(dependencyOne, dependencyOne.getTypeQualifier(),
+				"QUALIFIED");
 		this.recordReturn(dependencyTwo, dependencyTwo.getLabel(), null);
 		this.recordReturn(dependencyTwo, dependencyTwo.getKey(), TwoKey.ONE); // order
 		this.recordReturn(dependencyTwo, dependencyTwo.getType(),
 				Connection.class);
+		this.recordReturn(dependencyTwo, dependencyTwo.getTypeQualifier(), null);
 		this.recordReturn(this.metaData, this.metaData.getFlowMetaData(),
 				new ManagedObjectFlowMetaData[] { flowOne, flowTwo });
 		this.recordReturn(flowOne, flowOne.getLabel(), null);
@@ -704,6 +711,8 @@ public class LoadManagedObjectTypeTest extends OfficeFrameTestCase {
 				dependencyTypeOne.getDependencyName());
 		assertEquals("Incorrect first dependency type", Connection.class,
 				dependencyTypeOne.getDependencyType());
+		assertNull("First dependency type should not be qualified",
+				dependencyTypeOne.getTypeQualifier());
 		ManagedObjectDependencyType<?> dependencyTypeTwo = dependencyTypes[1];
 		assertEquals("Keys should be ordered", TwoKey.TWO,
 				dependencyTypeTwo.getKey());
@@ -713,6 +722,8 @@ public class LoadManagedObjectTypeTest extends OfficeFrameTestCase {
 				dependencyTypeTwo.getDependencyName());
 		assertEquals("Incorrect second dependency type", Integer.class,
 				dependencyTypeTwo.getDependencyType());
+		assertEquals("Incorrect second dependency type qualification",
+				"QUALIFIED", dependencyTypeTwo.getTypeQualifier());
 
 		// Validate flows ordered and correct values
 		ManagedObjectFlowType<?>[] flowTypes = moType.getFlowTypes();
@@ -758,10 +769,13 @@ public class LoadManagedObjectTypeTest extends OfficeFrameTestCase {
 		this.recordReturn(dependencyOne, dependencyOne.getLabel(), null);
 		this.recordReturn(dependencyOne, dependencyOne.getKey(), null);
 		this.recordReturn(dependencyOne, dependencyOne.getType(), Integer.class);
+		this.recordReturn(dependencyOne, dependencyOne.getTypeQualifier(),
+				"QUALIFIED");
 		this.recordReturn(dependencyTwo, dependencyTwo.getLabel(), null);
 		this.recordReturn(dependencyTwo, dependencyTwo.getKey(), null);
 		this.recordReturn(dependencyTwo, dependencyTwo.getType(),
 				Connection.class);
+		this.recordReturn(dependencyTwo, dependencyTwo.getTypeQualifier(), null);
 		this.recordReturn(this.metaData, this.metaData.getFlowMetaData(),
 				new ManagedObjectFlowMetaData[] { flowOne, flowTwo });
 		this.recordReturn(flowOne, flowOne.getLabel(), null);
@@ -791,6 +805,8 @@ public class LoadManagedObjectTypeTest extends OfficeFrameTestCase {
 				dependencyTypeOne.getDependencyName());
 		assertEquals("Incorrect first dependency type", Integer.class,
 				dependencyTypeOne.getDependencyType());
+		assertEquals("Incorrect first dependency type qualification",
+				"QUALIFIED", dependencyTypeOne.getTypeQualifier());
 		ManagedObjectDependencyType<?> dependencyTypeTwo = dependencyTypes[1];
 		assertEquals("Incorrect second dependency index", 1,
 				dependencyTypeTwo.getIndex());
@@ -800,6 +816,8 @@ public class LoadManagedObjectTypeTest extends OfficeFrameTestCase {
 				dependencyTypeTwo.getDependencyName());
 		assertEquals("Incorrect second dependency type", Connection.class,
 				dependencyTypeTwo.getDependencyType());
+		assertNull("Second dependency should not be qualified",
+				dependencyTypeTwo.getTypeQualifier());
 
 		// Validate flows
 		ManagedObjectFlowType<?>[] flowTypes = moType.getFlowTypes();

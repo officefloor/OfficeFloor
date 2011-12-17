@@ -126,6 +126,9 @@ public class ManagedObjectLoaderUtil {
 			TestCase.assertEquals("Incorrect type for dependency " + i,
 					eDependency.getDependencyType(),
 					aDependency.getDependencyType());
+			TestCase.assertEquals("Incorrect type qualifier for dependency "
+					+ i, eDependency.getTypeQualifier(),
+					aDependency.getTypeQualifier());
 			TestCase.assertEquals("Incorrect index for dependency " + i,
 					eDependency.getIndex(), aDependency.getIndex());
 			TestCase.assertEquals("Incorrect key for dependency " + i,
@@ -341,15 +344,17 @@ public class ManagedObjectLoaderUtil {
 
 		@Override
 		@SuppressWarnings({ "unchecked", "rawtypes" })
-		public void addDependency(String name, Class<?> type, int index,
-				Enum<?> key) {
+		public void addDependency(String name, Class<?> type,
+				String typeQualifier, int index, Enum<?> key) {
 			this.dependencies.add(new ManagedObjectDependencyTypeImpl(index,
-					type, key, name));
+					type, typeQualifier, key, name));
 		}
 
 		@Override
-		public void addDependency(Enum<?> key, Class<?> type) {
-			this.addDependency(key.name(), type, key.ordinal(), key);
+		public void addDependency(Enum<?> key, Class<?> type,
+				String typeQualifier) {
+			this.addDependency(key.name(), type, typeQualifier, key.ordinal(),
+					key);
 		}
 
 		@Override

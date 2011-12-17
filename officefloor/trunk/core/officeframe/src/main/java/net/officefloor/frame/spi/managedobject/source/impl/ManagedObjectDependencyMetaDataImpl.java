@@ -39,6 +39,11 @@ public class ManagedObjectDependencyMetaDataImpl<D extends Enum<D>> implements
 	private final Class<?> type;
 
 	/**
+	 * Optional qualifier for the type.
+	 */
+	private String qualifier = null;
+
+	/**
 	 * Optional label to describe the dependency.
 	 */
 	private String label = null;
@@ -66,6 +71,16 @@ public class ManagedObjectDependencyMetaDataImpl<D extends Enum<D>> implements
 		this.label = label;
 	}
 
+	/**
+	 * Specifies the type qualifier.
+	 * 
+	 * @param qualifier
+	 *            Type qualifier.
+	 */
+	public void setTypeQualifier(String qualifier) {
+		this.qualifier = qualifier;
+	}
+
 	/*
 	 * ================= ManagedObjectDependencyMetaData =================
 	 */
@@ -78,6 +93,11 @@ public class ManagedObjectDependencyMetaDataImpl<D extends Enum<D>> implements
 	@Override
 	public Class<?> getType() {
 		return this.type;
+	}
+
+	@Override
+	public String getTypeQualifier() {
+		return this.qualifier;
 	}
 
 	@Override

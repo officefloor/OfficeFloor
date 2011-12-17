@@ -32,4 +32,12 @@ public interface SectionObject {
 	 */
 	String getSectionObjectName();
 
+	/**
+	 * Specifies the type qualifier.
+	 * 
+	 * @param qualifier
+	 *            Type qualifier.
+	 */
+	void setTypeQualifier(String qualifier);
+
 }

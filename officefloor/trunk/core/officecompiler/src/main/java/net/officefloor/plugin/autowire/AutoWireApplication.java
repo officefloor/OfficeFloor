@@ -149,12 +149,13 @@ public interface AutoWireApplication {
 	 * 
 	 * @param object
 	 *            Object implementing the type to be dependency injected.
-	 * @param objectTypes
-	 *            Types that the object is to provide dependency injection via
-	 *            auto-wiring. Should no types be provided the type is defaulted
-	 *            from the object.
+	 * @param autoWiring
+	 *            {@link AutoWire} matches that the object is to provide
+	 *            dependency injection. Should no {@link AutoWire} instances be
+	 *            provided the type is defaulted from the object without a
+	 *            qualifier.
 	 */
-	void addObject(Object object, Class<?>... objectTypes);
+	void addObject(Object object, AutoWire... autoWiring);
 
 	/**
 	 * Adds a {@link ManagedObjectSource} for dependency injection.
@@ -166,24 +167,25 @@ public interface AutoWireApplication {
 	 *            {@link ManagedObjectSourceWirer} to assist in configuring the
 	 *            {@link ManagedObjectSource}. May be <code>null</code> if no
 	 *            assistance is required.
-	 * @param objectTypes
-	 *            Types that the {@link ManagedObjectSource} is to provide
-	 *            dependency injection via auto-wiring.
+	 * @param autoWiring
+	 *            {@link AutoWire} matches that the {@link ManagedObjectSource}
+	 *            is to provide dependency injection. At least one
+	 *            {@link AutoWire} must be provided.
 	 * @return {@link AutoWireObject} for the {@link ManagedObjectSource}.
 	 */
 	AutoWireObject addManagedObject(String managedObjectSourceClassName,
-			ManagedObjectSourceWirer wirer, Class<?>... objectTypes);
+			ManagedObjectSourceWirer wirer, AutoWire... autoWiring);
 
 	/**
 	 * Indicates if the {@link AutoWireObject} is already configured for the
 	 * type.
 	 * 
-	 * @param objectType
-	 *            Type of object to determine if available (configured).
+	 * @param autoWiring
+	 *            {@link AutoWire} to determine if available (configured).
 	 * @return <code>true</code> if an {@link AutoWireObject} has been
-	 *         configured for the type.
+	 *         configured for the {@link AutoWire}.
 	 */
-	boolean isObjectAvailable(Class<?> objectType);
+	boolean isObjectAvailable(AutoWire autoWiring);
 
 	/**
 	 * Adds {@link Governance} over the {@link ManagedObject} and object
@@ -202,18 +204,19 @@ public interface AutoWireApplication {
 	 * Assigns a {@link Team} responsible for:
 	 * <ol>
 	 * <li>{@link Task} dependent on the specified object types</li>
-	 * <li>{@link Governance} with the extension interfance object type</li>
+	 * <li>{@link Governance} with the extension interface object type</li>
 	 * </ol>
 	 * 
 	 * @param teamSourceClassName
 	 *            Class name of the {@link TeamSource}. May be an alias.
-	 * @param objectTypes
-	 *            Dependent {@link Task} object types and {@link Governance}
-	 *            extension interfaces the {@link Team} is responsible for. Must
-	 *            have at least one object type provided.
+	 * @param autoWiring
+	 *            {@link AutoWire} instances to identify dependent {@link Task}
+	 *            object types and {@link Governance} extension interfaces the
+	 *            {@link Team} is responsible for. Must have at least one
+	 *            {@link AutoWire} provided.
 	 * @return {@link AutoWireTeam}.
 	 */
-	AutoWireTeam assignTeam(String teamSourceClassName, Class<?>... objectTypes);
+	AutoWireTeam assignTeam(String teamSourceClassName, AutoWire... autoWiring);
 
 	/**
 	 * Assigns a {@link Team} responsible for unassigned {@link Task} instances.

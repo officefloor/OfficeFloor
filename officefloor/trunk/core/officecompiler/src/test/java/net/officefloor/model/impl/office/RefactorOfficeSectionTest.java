@@ -25,7 +25,7 @@ import net.officefloor.model.office.OfficeSectionModel;
 
 /**
  * Tests refactoring the {@link OfficeSectionModel}.
- *
+ * 
  * @author Daniel Sagenschneider
  */
 public class RefactorOfficeSectionTest extends
@@ -43,8 +43,7 @@ public class RefactorOfficeSectionTest extends
 	 * Ensure can change {@link SectionSource} class name.
 	 */
 	public void testChangeSectionSource() {
-		this
-				.refactor_sectionSourceClassName("net.another.AnotherSectionSource");
+		this.refactor_sectionSourceClassName("net.another.AnotherSectionSource");
 		this.doRefactor();
 	}
 
@@ -90,9 +89,7 @@ public class RefactorOfficeSectionTest extends
 			public void construct(OfficeSectionContext context) {
 				context.addOfficeSectionOutput("CHANGE_DETAILS", Integer.class,
 						false);
-				context
-						.addOfficeSectionOutput("RENAME_NEW", Object.class,
-								true);
+				context.addOfficeSectionOutput("RENAME_NEW", Object.class, true);
 			}
 		});
 	}
@@ -106,8 +103,9 @@ public class RefactorOfficeSectionTest extends
 		this.doRefactor(new OfficeSectionConstructor() {
 			@Override
 			public void construct(OfficeSectionContext context) {
-				context.addOfficeSectionObject("CHANGE_DETAILS", Integer.class);
-				context.addOfficeSectionObject("RENAME_NEW", Object.class);
+				context.addOfficeSectionObject("CHANGE_DETAILS", Integer.class,
+						null);
+				context.addOfficeSectionObject("RENAME_NEW", Object.class, null);
 			}
 		});
 	}

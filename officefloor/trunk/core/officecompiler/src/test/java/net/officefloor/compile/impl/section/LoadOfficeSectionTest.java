@@ -304,6 +304,41 @@ public class LoadOfficeSectionTest extends AbstractStructureTestCase {
 				object.getOfficeSectionObjectName());
 		assertEquals("Incorrect office section object, object type",
 				Connection.class.getName(), object.getObjectType());
+		assertNull("Office section object should not be qualified",
+				object.getTypeQualifier());
+	}
+
+	/**
+	 * Ensure can add a qualified {@link OfficeSectionObject}.
+	 */
+	public void testLoadQualifiedOfficeSectionObject() {
+
+		// Load the office section with an office section object
+		OfficeSection section = this.loadOfficeSection("SECTION",
+				new SectionMaker() {
+					@Override
+					public void make(SectionMakerContext context) {
+						SectionObject object = context.getBuilder()
+								.addSectionObject("OBJECT",
+										Connection.class.getName());
+						object.setTypeQualifier("QUALIFIED");
+					}
+				});
+
+		// Validate results
+		assertEquals("Should be no office section inputs", 0,
+				section.getOfficeSectionInputs().length);
+		assertEquals("Should be no office section outputs", 0,
+				section.getOfficeSectionOutputs().length);
+		assertEquals("Should have office section object", 1,
+				section.getOfficeSectionObjects().length);
+		OfficeSectionObject object = section.getOfficeSectionObjects()[0];
+		assertEquals("Incorrect office section object", "OBJECT",
+				object.getOfficeSectionObjectName());
+		assertEquals("Incorrect office section object, object type",
+				Connection.class.getName(), object.getObjectType());
+		assertEquals("Incorrect office section object, type qualifier",
+				"QUALIFIED", object.getTypeQualifier());
 	}
 
 	/**

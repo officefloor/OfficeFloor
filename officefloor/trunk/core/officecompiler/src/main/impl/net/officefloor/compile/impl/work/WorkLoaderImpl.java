@@ -20,11 +20,14 @@ package net.officefloor.compile.impl.work;
 
 import java.util.Arrays;
 import java.util.Comparator;
+import java.util.HashSet;
+import java.util.Set;
 
 import net.officefloor.compile.OfficeFloorCompiler;
 import net.officefloor.compile.impl.properties.PropertyListImpl;
 import net.officefloor.compile.impl.util.CompileUtil;
 import net.officefloor.compile.internal.structure.NodeContext;
+import net.officefloor.compile.issues.CompilerIssues;
 import net.officefloor.compile.issues.CompilerIssues.LocationType;
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.spi.office.OfficeSection;
@@ -278,6 +281,23 @@ public class WorkLoaderImpl implements WorkLoader {
 			return null; // must have complete type
 		}
 
+		// Determine if duplicate task names
+		if (this.isDuplicateNaming(
+				taskTypes,
+				new NameExtractor<TaskType<W, ?, ?>>() {
+					@Override
+					public String extractName(TaskType<W, ?, ?> item) {
+						return item.getTaskName();
+					}
+				},
+				"Two or more "
+						+ TaskType.class.getSimpleName()
+						+ " definitions with the same name (${NAME}) provided by "
+						+ WorkSource.class.getSimpleName() + " "
+						+ workSourceClass.getName())) {
+			return null; // must have valid type
+		}
+
 		// Ensure the task definitions are valid
 		for (int i = 0; i < taskTypes.length; i++) {
 			if (!this.isValidTaskType(taskTypes[i], i, workSourceClass)) {
@@ -336,7 +356,8 @@ public class WorkLoaderImpl implements WorkLoader {
 		}
 
 		// Validate common details for objects
-		for (TaskObjectType<M> objectType : taskType.getObjectTypes()) {
+		TaskObjectType<M>[] objectTypes = taskType.getObjectTypes();
+		for (TaskObjectType<M> objectType : objectTypes) {
 
 			// Must have names for objects
 			String objectName = objectType.getObjectName();
@@ -353,6 +374,20 @@ public class WorkLoaderImpl implements WorkLoader {
 						workSourceClass);
 				return false; // not valid
 			}
+		}
+
+		// Validate no duplicate object names
+		if (this.isDuplicateNaming(objectTypes,
+				new NameExtractor<TaskObjectType<M>>() {
+					@Override
+					public String extractName(TaskObjectType<M> item) {
+						return item.getObjectName();
+					}
+				}, this.getTaskIssueDescription("Two or more "
+						+ TaskObjectType.class.getSimpleName()
+						+ " definitions with the same name (${NAME}) for",
+						taskIndex, taskName, workSourceClass))) {
+			return false; // must have valid type
 		}
 
 		// Obtain the flow keys class (taking into account Indexed)
@@ -372,7 +407,8 @@ public class WorkLoaderImpl implements WorkLoader {
 		}
 
 		// Validate common details for flows
-		for (TaskFlowType<F> flowType : taskType.getFlowTypes()) {
+		TaskFlowType<F>[] flowTypes = taskType.getFlowTypes();
+		for (TaskFlowType<F> flowType : flowTypes) {
 
 			// Must have names for flows
 			if (CompileUtil.isBlank(flowType.getFlowName())) {
@@ -382,8 +418,23 @@ public class WorkLoaderImpl implements WorkLoader {
 			}
 		}
 
+		// Validate no duplicate flow names
+		if (this.isDuplicateNaming(flowTypes,
+				new NameExtractor<TaskFlowType<F>>() {
+					@Override
+					public String extractName(TaskFlowType<F> item) {
+						return item.getFlowName();
+					}
+				}, this.getTaskIssueDescription("Two or more "
+						+ TaskFlowType.class.getSimpleName()
+						+ " definitions with the same name (${NAME}) for",
+						taskIndex, taskName, workSourceClass))) {
+			return false; // must have valid type
+		}
+
 		// Validate the escalations
-		for (TaskEscalationType escalationType : taskType.getEscalationTypes()) {
+		TaskEscalationType[] escalationTypes = taskType.getEscalationTypes();
+		for (TaskEscalationType escalationType : escalationTypes) {
 
 			// Must have escalation type
 			if (escalationType.getEscalationType() == null) {
@@ -398,6 +449,20 @@ public class WorkLoaderImpl implements WorkLoader {
 						workSourceClass);
 				return false; // not valid
 			}
+		}
+
+		// Validate no duplicate escalation names
+		if (this.isDuplicateNaming(escalationTypes,
+				new NameExtractor<TaskEscalationType>() {
+					@Override
+					public String extractName(TaskEscalationType item) {
+						return item.getEscalationName();
+					}
+				}, this.getTaskIssueDescription("Two or more "
+						+ TaskEscalationType.class.getSimpleName()
+						+ " definitions with the same name (${NAME}) for",
+						taskIndex, taskName, workSourceClass))) {
+			return false; // must have valid type
 		}
 
 		// If here then valid
@@ -668,6 +733,102 @@ public class WorkLoaderImpl implements WorkLoader {
 	}
 
 	/**
+	 * <p>
+	 * Determines if there are duplicate item names.
+	 * <p>
+	 * Duplicate names are reported as issues.
+	 * 
+	 * @param items
+	 *            Items to be checked for unique naming.
+	 * @param extractor
+	 *            {@link NameExtractor}.
+	 * @param issueDescription
+	 *            {@link CompilerIssues} description if duplicate name
+	 * @return <code>true</code> if there are duplicate item names.
+	 */
+	private <N> boolean isDuplicateNaming(N[] items,
+			NameExtractor<N> extractor, String issueDescription) {
+
+		// Determine if duplicate name
+		boolean isDuplicateName = false;
+		Set<String> checkedNames = new HashSet<String>();
+		for (N item : items) {
+			String name = extractor.extractName(item);
+			if (name != null) {
+
+				// Ignore if name already checked (stops repetitive issues)
+				if (checkedNames.contains(name)) {
+					continue; // already checked
+				}
+
+				// Determine if name occurs more than once
+				int nameCount = 0;
+				for (N check : items) {
+					String checkName = extractor.extractName(check);
+					if (name.equals(checkName)) {
+						nameCount++;
+					}
+				}
+				if (nameCount > 1) {
+
+					// More than one item with name so duplicate name
+					isDuplicateName = true;
+
+					// Duplicate name so prepare message
+					String reportMessage = issueDescription.replace("${NAME}",
+							name);
+
+					// Report the issue
+					this.addIssue(reportMessage);
+				}
+
+				// Name checked
+				checkedNames.add(name);
+			}
+		}
+
+		// Return whether duplicate names
+		return isDuplicateName;
+	}
+
+	/**
+	 * Extracts the name from the object.
+	 */
+	private static interface NameExtractor<N> {
+
+		/**
+		 * Extracts the particular name from the item.
+		 * 
+		 * @param item
+		 *            Item to have name extracted.
+		 * @return
+		 */
+		String extractName(N item);
+	}
+
+	/**
+	 * Obtains the {@link Task} issue description.
+	 * 
+	 * @param issueDescription
+	 *            Description of the issue.
+	 * @param taskIndex
+	 *            Index of the {@link Task}.
+	 * @param taskName
+	 *            Name of the {@link Task}.
+	 * @param workSourceClass
+	 *            {@link WorkSource} class.
+	 * @return {@link Task} issue description.
+	 */
+	private String getTaskIssueDescription(String issueDescription,
+			int taskIndex, String taskName, Class<?> workSourceClass) {
+		return issueDescription + " " + TaskType.class.getSimpleName()
+				+ " definition " + taskIndex
+				+ (taskName == null ? "" : " (" + taskName + ")") + " by "
+				+ WorkSource.class.getSimpleName() + " "
+				+ workSourceClass.getName();
+	}
+
+	/**
 	 * Adds an issue.
 	 * 
 	 * @param issueDescription
@@ -686,11 +847,8 @@ public class WorkLoaderImpl implements WorkLoader {
 				this.sectionLocation,
 				AssetType.WORK,
 				this.workName,
-				issueDescription + " " + TaskType.class.getSimpleName()
-						+ " definition " + taskIndex
-						+ (taskName == null ? "" : " (" + taskName + ")")
-						+ " by " + WorkSource.class.getSimpleName() + " "
-						+ workSourceClass.getName());
+				this.getTaskIssueDescription(issueDescription, taskIndex,
+						taskName, workSourceClass));
 	}
 
 	/**

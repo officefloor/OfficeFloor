@@ -18,9 +18,11 @@
 
 package net.officefloor.plugin.managedobject.clazz;
 
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 
 import net.officefloor.frame.spi.managedobject.ObjectRegistry;
+import net.officefloor.plugin.work.clazz.Qualifier;
 
 /**
  * Meta-data for a {@link Dependency}.
@@ -58,6 +60,41 @@ public class DependencyMetaData {
 		this.name = name;
 		this.index = index;
 		this.field = field;
+	}
+
+	/**
+	 * Obtains the type qualifier for the dependency.
+	 * 
+	 * @return Type qualifier. May be <code>null</code> if no type qualifier.
+	 * @throws IllegalArgumentException
+	 *             If fails to obtain the type qualifier.
+	 */
+	public String getTypeQualifier() throws IllegalArgumentException {
+
+		// Determine type qualifier
+		String typeQualifier = null;
+		for (Annotation annotation : this.field.getAnnotations()) {
+
+			// Obtain the annotation type
+			Class<?> annotationType = annotation.annotationType();
+
+			// Determine if qualifier annotation
+			if (annotationType.isAnnotationPresent(Qualifier.class)) {
+
+				// Allow only one qualifier
+				if (typeQualifier != null) {
+					throw new IllegalArgumentException("Dependency "
+							+ this.name + " has more than one "
+							+ Qualifier.class.getSimpleName());
+				}
+
+				// Provide type qualifier
+				typeQualifier = annotationType.getName();
+			}
+		}
+
+		// Return the type qualifier
+		return typeQualifier;
 	}
 
 	/**

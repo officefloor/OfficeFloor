@@ -296,6 +296,27 @@ public class LoadWorkTypeTest extends OfficeFrameTestCase {
 	}
 
 	/**
+	 * Ensure issue if duplicate {@link TaskType} name.
+	 */
+	public void testDuplicateTaskNames() {
+
+		// Record duplicate task names
+		this.record_issue("Two or more TaskType definitions with the same name (SAME) provided by WorkSource "
+				+ MockWorkSource.class.getName());
+
+		// Attempt to load work type
+		this.loadWorkType(false, new Loader() {
+			@Override
+			public void sourceWork(WorkTypeBuilder<Work> work,
+					WorkSourceContext context) throws Exception {
+				work.setWorkFactory(workFactory);
+				work.addTaskType("SAME", taskFactory, null, null);
+				work.addTaskType("SAME", taskFactory, null, null);
+			}
+		});
+	}
+
+	/**
 	 * Ensure issue if no {@link TaskFactoryManufacturer}.
 	 */
 	public void testNoTaskFactory() {
@@ -536,6 +557,31 @@ public class LoadWorkTypeTest extends OfficeFrameTestCase {
 	}
 
 	/**
+	 * Ensure issue if duplicate object name.
+	 */
+	public void testDuplicateObjectNames() {
+
+		// Record no object type
+		this.record_issue("Two or more TaskObjectType definitions with the same name (SAME) for TaskType definition 0 (TASK) by WorkSource "
+				+ MockWorkSource.class.getName());
+
+		// Attempt to load work type
+		this.loadWorkType(false, new Loader() {
+			@Override
+			public void sourceWork(WorkTypeBuilder<Work> work,
+					WorkSourceContext context) throws Exception {
+				work.setWorkFactory(workFactory);
+				TaskTypeBuilder<?, ?> task = work.addTaskType("TASK",
+						taskFactory, null, null);
+
+				// Add objects with same name
+				task.addObject(Connection.class).setLabel("SAME");
+				task.addObject(Connection.class).setLabel("SAME");
+			}
+		});
+	}
+
+	/**
 	 * Ensure issue if {@link TaskObjectType} are not ordered to {@link Enum}
 	 * key order.
 	 */
@@ -591,6 +637,46 @@ public class LoadWorkTypeTest extends OfficeFrameTestCase {
 	 */
 	private enum ObjectKey {
 		ONE, TWO
+	}
+
+	/**
+	 * Ensure able to provide type qualifier for object type.
+	 */
+	@SuppressWarnings("unchecked")
+	public void testObjectTypeQualification() {
+
+		final TaskFactory<Work, Indexed, Indexed> taskFactory = this
+				.createMock(TaskFactory.class);
+
+		// Attempt to load work type
+		WorkType<Work> workType = this.loadWorkType(true, new Loader() {
+			@Override
+			public void sourceWork(WorkTypeBuilder<Work> work,
+					WorkSourceContext context) throws Exception {
+				work.setWorkFactory(workFactory);
+				TaskTypeBuilder<?, ?> task = work.addTaskType("TASK",
+						taskFactory, null, null);
+
+				// Add objects with type qualified for on
+				task.addObject(Connection.class).setTypeQualifier("QUALIFIED");
+				task.addObject(Connection.class); // unqualified
+			}
+		});
+
+		// Validate the type qualification
+		TaskType<Work, ?, ?> task = workType.getTaskTypes()[0];
+		TaskObjectType<?>[] objects = task.getObjectTypes();
+		assertEquals("Incorrect number of objects", 2, objects.length);
+
+		// Validate qualified object
+		TaskObjectType<?> one = objects[0];
+		assertEquals("Incorrect type", Connection.class, one.getObjectType());
+		assertEquals("Incorrect qualifier", "QUALIFIED", one.getTypeQualifier());
+
+		// Validate unqualified object
+		TaskObjectType<?> two = objects[1];
+		assertEquals("Incorrect type", Connection.class, two.getObjectType());
+		assertNull("Should be unqualified", two.getTypeQualifier());
 	}
 
 	/**
@@ -737,6 +823,31 @@ public class LoadWorkTypeTest extends OfficeFrameTestCase {
 	}
 
 	/**
+	 * Ensure issue if duplicate {@link TaskFlowType} names.
+	 */
+	public void testDuplicateFlowNames() {
+
+		// Record no object type
+		this.record_issue("Two or more TaskFlowType definitions with the same name (SAME) for TaskType definition 0 (TASK) by WorkSource "
+				+ MockWorkSource.class.getName());
+
+		// Attempt to load work type
+		this.loadWorkType(false, new Loader() {
+			@Override
+			public void sourceWork(WorkTypeBuilder<Work> work,
+					WorkSourceContext context) throws Exception {
+				work.setWorkFactory(workFactory);
+				TaskTypeBuilder<?, ?> task = work.addTaskType("TASK",
+						taskFactory, null, null);
+
+				// Add flows with same name
+				task.addFlow().setLabel("SAME");
+				task.addFlow().setLabel("SAME");
+			}
+		});
+	}
+
+	/**
 	 * Ensure issue if {@link TaskFlowType} are not ordered to {@link Enum} key
 	 * order.
 	 */
@@ -816,6 +927,31 @@ public class LoadWorkTypeTest extends OfficeFrameTestCase {
 
 				// Add no escalation type
 				task.addEscalation(null);
+			}
+		});
+	}
+
+	/**
+	 * Ensure issue if duplicate escalation names.
+	 */
+	public void testDuplicateEscalationNames() {
+
+		// Record no object type
+		this.record_issue("Two or more TaskEscalationType definitions with the same name (SAME) for TaskType definition 0 (TASK) by WorkSource "
+				+ MockWorkSource.class.getName());
+
+		// Attempt to load work type
+		this.loadWorkType(false, new Loader() {
+			@Override
+			public void sourceWork(WorkTypeBuilder<Work> work,
+					WorkSourceContext context) throws Exception {
+				work.setWorkFactory(workFactory);
+				TaskTypeBuilder<?, ?> task = work.addTaskType("TASK",
+						taskFactory, null, null);
+
+				// Add duplicate escalation names
+				task.addEscalation(Exception.class).setLabel("SAME");
+				task.addEscalation(Exception.class).setLabel("SAME");
 			}
 		});
 	}
