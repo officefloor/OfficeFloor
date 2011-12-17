@@ -34,8 +34,7 @@ public interface OfficeManagedObjectType {
 	 * Obtains the name of the {@link OfficeObject} required by the
 	 * {@link Office}.
 	 * 
-	 * @return Name of the {@link OfficeObject} required by the
-	 *         {@link Office}.
+	 * @return Name of the {@link OfficeObject} required by the {@link Office}.
 	 */
 	String getOfficeManagedObjectName();
 
@@ -47,6 +46,17 @@ public interface OfficeManagedObjectType {
 	 *         returned from the {@link ManagedObject}.
 	 */
 	String getObjectType();
+
+	/**
+	 * <p>
+	 * Obtains the qualifier on the type.
+	 * <p>
+	 * This is to enable qualifying the type of dependency required.
+	 * 
+	 * @return Qualifier on the type. May be <code>null</code> if not qualifying
+	 *         the type.
+	 */
+	String getTypeQualifier();
 
 	/**
 	 * Obtains the fully qualified class names of the extension interfaces that

@@ -93,6 +93,11 @@ public class OfficeObjectNodeImpl implements OfficeObjectNode {
 	private String objectType;
 
 	/**
+	 * Type qualifier.
+	 */
+	private String typeQualifier = null;
+
+	/**
 	 * Flags whether within the {@link OfficeFloor} context
 	 */
 	private boolean isInOfficeFloorContext = false;
@@ -191,6 +196,11 @@ public class OfficeObjectNodeImpl implements OfficeObjectNode {
 	}
 
 	@Override
+	public String getTypeQualifier() {
+		return this.typeQualifier;
+	}
+
+	@Override
 	public String[] getExtensionInterfaces() {
 
 		// Obtain the set of extension interfaces to be supported
@@ -237,6 +247,11 @@ public class OfficeObjectNodeImpl implements OfficeObjectNode {
 	@Override
 	public String getOfficeObjectName() {
 		return this.objectName;
+	}
+
+	@Override
+	public void setTypeQualifier(String qualifier) {
+		this.typeQualifier = qualifier;
 	}
 
 	/*

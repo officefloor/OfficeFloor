@@ -29,7 +29,7 @@ import net.officefloor.model.officefloor.DeployedOfficeTeamModel;
 
 /**
  * Tests refactoring the {@link DeployedOfficeModel}.
- *
+ * 
  * @author Daniel Sagenschneider
  */
 public class RefactorDeployedOfficeTest extends
@@ -92,8 +92,8 @@ public class RefactorDeployedOfficeTest extends
 			@Override
 			public void construct(OfficeTypeContext context) {
 				context.addOfficeManagedObject("CHANGE_DETAILS", Integer.class,
-						XAResource.class);
-				context.addOfficeManagedObject("RENAME_NEW", Object.class);
+						null, XAResource.class);
+				context.addOfficeManagedObject("RENAME_NEW", Object.class, null);
 			}
 		});
 	}

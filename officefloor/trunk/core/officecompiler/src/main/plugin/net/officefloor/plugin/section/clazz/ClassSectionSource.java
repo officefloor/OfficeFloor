@@ -29,6 +29,7 @@ import java.util.List;
 import java.util.Map;
 
 import net.officefloor.compile.SectionSourceService;
+import net.officefloor.compile.impl.util.CompileUtil;
 import net.officefloor.compile.managedobject.ManagedObjectDependencyType;
 import net.officefloor.compile.managedobject.ManagedObjectType;
 import net.officefloor.compile.properties.PropertyList;
@@ -65,6 +66,7 @@ import net.officefloor.plugin.work.clazz.FlowInterface;
 import net.officefloor.plugin.work.clazz.FlowMethodMetaData;
 import net.officefloor.plugin.work.clazz.FlowParameterFactory;
 import net.officefloor.plugin.work.clazz.ParameterFactory;
+import net.officefloor.plugin.work.clazz.Qualifier;
 
 /**
  * <p>
@@ -179,17 +181,31 @@ public class ClassSectionSource extends AbstractSectionSource implements
 	 * <p>
 	 * Should the {@link SectionObject} not yet be added, it is added.
 	 * 
+	 * @param qualifier
+	 *            {@link Qualifier} for the {@link SectionObject}. If not
+	 *            {@link Qualifier} should be the same as the type name.
 	 * @param typeName
 	 *            Fully qualified type name of the {@link SectionObject}.
 	 * @return {@link SectionObject}.
 	 */
-	public SectionObject getOrCreateObject(String typeName) {
-		SectionObject sectionObject = this._objectsByTypeName.get(typeName);
+	public SectionObject getOrCreateObject(String qualifier, String typeName) {
+
+		// Determine the object name
+		boolean isQualifier = !CompileUtil.isBlank(qualifier);
+		String objectName = (isQualifier ? qualifier + "-" : "") + typeName;
+
+		// Obtain or create the Section Object
+		SectionObject sectionObject = this._objectsByTypeName.get(objectName);
 		if (sectionObject == null) {
 			// No yet added, so add section object
-			sectionObject = this.getDesigner().addSectionObject(typeName,
+			sectionObject = this.getDesigner().addSectionObject(objectName,
 					typeName);
-			this._objectsByTypeName.put(typeName, sectionObject);
+			this._objectsByTypeName.put(objectName, sectionObject);
+
+			// Provide type qualifier (if specified)
+			if (isQualifier) {
+				sectionObject.setTypeQualifier(qualifier);
+			}
 		}
 		return sectionObject;
 	}
@@ -317,7 +333,7 @@ public class ClassSectionSource extends AbstractSectionSource implements
 		for (SectionObjectType subSectionObjectType : subSectionType
 				.getSectionObjectTypes()) {
 
-			// Obtain the sub section output
+			// Obtain the sub section object
 			String objectName = subSectionObjectType.getSectionObjectName();
 			SubSectionObject subSectionObject = subSection
 					.getSubSectionObject(objectName);
@@ -332,8 +348,8 @@ public class ClassSectionSource extends AbstractSectionSource implements
 
 			} else {
 				// Link to external object
-				SectionObject sectionObject = this
-						.getOrCreateObject(objectTypeName);
+				SectionObject sectionObject = this.getOrCreateObject(null,
+						objectTypeName);
 				this.getDesigner().link(subSectionObject, sectionObject);
 			}
 		}
@@ -634,6 +650,7 @@ public class ClassSectionSource extends AbstractSectionSource implements
 		// Obtain the object name and its type
 		String objectName = objectType.getObjectName();
 		String objectTypeName = objectType.getObjectType().getName();
+		String typeQualifier = objectType.getTypeQualifier();
 
 		// Obtain the task object
 		TaskObject taskObject = task.getTaskObject(objectName);
@@ -646,8 +663,8 @@ public class ClassSectionSource extends AbstractSectionSource implements
 
 		} else {
 			// Link to external object (by type)
-			SectionObject sectionObject = this
-					.getOrCreateObject(objectTypeName);
+			SectionObject sectionObject = this.getOrCreateObject(typeQualifier,
+					objectTypeName);
 			this.getDesigner().link(taskObject, sectionObject);
 		}
 	}
@@ -719,6 +736,15 @@ public class ClassSectionSource extends AbstractSectionSource implements
 			String dependencyName = dependency.name;
 			String dependencyTypeName = dependency.field.getType().getName();
 
+			// Obtain the type qualifier
+			String dependencyTypeQualifier;
+			try {
+				dependencyTypeQualifier = dependency.getTypeQualifier();
+			} catch (IllegalArgumentException ex) {
+				designer.addIssue(ex.getMessage(), null, null);
+				return; // invalid section
+			}
+
 			// Obtain the managed object dependency
 			ManagedObjectDependency moDependency = managedObject
 					.getManagedObjectDependency(dependencyName);
@@ -747,8 +773,8 @@ public class ClassSectionSource extends AbstractSectionSource implements
 
 			} else {
 				// Link to external object (by type)
-				SectionObject sectionObject = this
-						.getOrCreateObject(dependencyTypeName);
+				SectionObject sectionObject = this.getOrCreateObject(
+						dependencyTypeQualifier, dependencyTypeName);
 				designer.link(moDependency, sectionObject);
 			}
 		}
@@ -801,8 +827,8 @@ public class ClassSectionSource extends AbstractSectionSource implements
 
 				} else {
 					// Link to external object (by type)
-					SectionObject sectionObject = this
-							.getOrCreateObject(dependencyTypeName);
+					SectionObject sectionObject = this.getOrCreateObject(
+							dependencyTypeName, dependencyTypeName);
 					designer.link(moDependency, sectionObject);
 				}
 			}

@@ -111,7 +111,7 @@ public class WorkSectionSource extends AbstractSectionSource {
 		}
 
 		// Add the tasks
-		Map<Class<?>, SectionObject> sectionObjects = new HashMap<Class<?>, SectionObject>();
+		Map<String, SectionObject> sectionObjects = new HashMap<String, SectionObject>();
 		Map<String, SectionOutput> sectionOutputs = new HashMap<String, SectionOutput>();
 		for (TaskType<?, ?, ?> taskType : workType.getTaskTypes()) {
 
@@ -133,6 +133,11 @@ public class WorkSectionSource extends AbstractSectionSource {
 				// Obtain object details
 				String objectName = objectType.getObjectName();
 				Class<?> objectClass = objectType.getObjectType();
+				String typeQualifier = objectType.getTypeQualifier();
+
+				// Determine the section object name
+				String sectionObjectName = (typeQualifier == null ? ""
+						: typeQualifier + "-") + objectClass.getName();
 
 				// Obtain the object
 				TaskObject object = task.getTaskObject(objectName);
@@ -146,12 +151,14 @@ public class WorkSectionSource extends AbstractSectionSource {
 				} else {
 					// Obtain the section object
 					SectionObject sectionObject = sectionObjects
-							.get(objectClass);
+							.get(sectionObjectName);
 					if (sectionObject == null) {
 						sectionObject = designer.addSectionObject(
-								objectClass.getSimpleName(),
-								objectClass.getName());
-						sectionObjects.put(objectClass, sectionObject);
+								sectionObjectName, objectClass.getName());
+						if (typeQualifier != null) {
+							sectionObject.setTypeQualifier(typeQualifier);
+						}
+						sectionObjects.put(sectionObjectName, sectionObject);
 					}
 
 					// Specify as section object dependency
@@ -218,7 +225,7 @@ public class WorkSectionSource extends AbstractSectionSource {
 				TaskFlow flow = task.getTaskEscalation(escalation.getName());
 
 				// Obtain the section output
-				String outputName = escalation.getSimpleName();
+				String outputName = escalation.getName();
 				SectionOutput sectionOutput = sectionOutputs.get(outputName);
 				if (sectionOutput == null) {
 					sectionOutput = designer.addSectionOutput(outputName,

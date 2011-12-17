@@ -302,6 +302,7 @@ public class LoadOfficeTypeTest extends AbstractStructureTestCase {
 	 * extension interfaces).
 	 */
 	public void testManagedObjectType() {
+
 		// Load office type with office floor managed object
 		OfficeType officeType = this.loadOfficeType(true, new Loader() {
 			@Override
@@ -337,8 +338,41 @@ public class LoadOfficeTypeTest extends AbstractStructureTestCase {
 				moType.getOfficeManagedObjectName());
 		assertEquals("Incorrect type", Connection.class.getName(),
 				moType.getObjectType());
+		assertNull("Should not be qualified", moType.getTypeQualifier());
 		assertEquals("Should be no required extension interfaces", 0,
 				moType.getExtensionInterfaces().length);
+	}
+
+	/**
+	 * Ensure get qualified {@link OfficeManagedObjectType} not being
+	 * administered (no extension interfaces).
+	 */
+	public void testQualifiedManagedObjectType() {
+
+		// Load office type with office floor managed object
+		OfficeType officeType = this.loadOfficeType(true, new Loader() {
+			@Override
+			public void sourceOffice(OfficeArchitect office,
+					OfficeSourceContext context) throws Exception {
+
+				// Add the office object
+				OfficeObject officeObject = office.addOfficeObject("MO",
+						Connection.class.getName());
+				officeObject.setTypeQualifier("QUALIFIED");
+			}
+		});
+
+		// Validate type
+		assertEquals("Incorrect number of managed object types", 1,
+				officeType.getOfficeManagedObjectTypes().length);
+		OfficeManagedObjectType moType = officeType
+				.getOfficeManagedObjectTypes()[0];
+		assertEquals("Incorrect name", "MO",
+				moType.getOfficeManagedObjectName());
+		assertEquals("Incorrect type", Connection.class.getName(),
+				moType.getObjectType());
+		assertEquals("Incorrect type qualifier", "QUALIFIED",
+				moType.getTypeQualifier());
 	}
 
 	/**

@@ -18,13 +18,19 @@
 
 package net.officefloor.plugin.managedobject.clazz;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.sql.Connection;
 
 import junit.framework.TestCase;
+import net.officefloor.compile.OfficeFloorCompiler;
+import net.officefloor.compile.issues.CompilerIssues;
 import net.officefloor.compile.managedobject.ManagedObjectType;
+import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.test.managedobject.ManagedObjectLoaderUtil;
 import net.officefloor.compile.test.managedobject.ManagedObjectTypeBuilder;
 import net.officefloor.frame.api.build.Indexed;
+import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
 import net.officefloor.frame.api.manage.ProcessFuture;
 import net.officefloor.frame.internal.structure.ProcessState;
 import net.officefloor.frame.spi.managedobject.CoordinatingManagedObject;
@@ -35,6 +41,7 @@ import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.frame.util.ManagedObjectSourceStandAlone;
 import net.officefloor.frame.util.ManagedObjectUserStandAlone;
 import net.officefloor.plugin.work.clazz.FlowInterface;
+import net.officefloor.plugin.work.clazz.Qualifier;
 
 import org.easymock.AbstractMatcher;
 
@@ -68,8 +75,11 @@ public class ClassManagedObjectSourceTest extends OfficeFrameTestCase {
 		expected.setObjectClass(MockClass.class);
 
 		// Dependencies
-		expected.addDependency("connection", Connection.class, 0, null);
-		expected.addDependency("sqlQuery", String.class, 1, null);
+		expected.addDependency("connection", Connection.class, null, 0, null);
+		expected.addDependency("qualifiedDependency", String.class,
+				MockQualifier.class.getName(), 1, null);
+		expected.addDependency("unqualifiedDependency", String.class, null, 2,
+				null);
 
 		// Processes
 		expected.addFlow("doProcess", null, 0, null, null, null);
@@ -102,9 +112,9 @@ public class ClassManagedObjectSourceTest extends OfficeFrameTestCase {
 
 		// Dependencies
 		expected.addDependency("OverrideMockClass.connection", Integer.class,
-				0, null);
+				null, 0, null);
 		expected.addDependency("ParentMockClass.connection", Connection.class,
-				1, null);
+				null, 1, null);
 
 		// Processes
 		expected.addFlow(OverrideMockClass.class.getName()
@@ -129,12 +139,96 @@ public class ClassManagedObjectSourceTest extends OfficeFrameTestCase {
 	}
 
 	/**
+	 * Ensure issue if dependency with multiple qualifiers.
+	 */
+	public void testMultipleQualifiersOnDependency() {
+
+		final CompilerIssues issues = this.createMock(CompilerIssues.class);
+
+		// Enable using compiler issues
+		OfficeFloorCompiler compiler = OfficeFloorCompiler
+				.newOfficeFloorCompiler(null);
+		compiler.setCompilerIssues(issues);
+
+		// Record issue
+		issues.addIssue(null, null, AssetType.MANAGED_OBJECT, null,
+				"Failed to init", new IllegalArgumentException(
+						"Dependency connection has more than one Qualifier"));
+		this.control(issues).setMatcher(new AbstractMatcher() {
+			@Override
+			public boolean matches(Object[] expected, Object[] actual) {
+
+				// Match initial parameters
+				for (int i = 0; i < 5; i++) {
+					Object e = expected[i];
+					Object a = actual[i];
+					if ((e == null) && (a == null)) {
+						continue; // match on null
+					} else if ((e != null) && (e.equals(actual[i]))) {
+						continue; // match not null
+					} else {
+						return false; // not match
+					}
+				}
+
+				// Match exception
+				IllegalArgumentException eEx = (IllegalArgumentException) expected[5];
+				IllegalArgumentException aEx = (IllegalArgumentException) actual[5];
+				if (!eEx.getMessage().equals(aEx.getMessage())) {
+					return false; // not match
+				}
+
+				// As here, matches
+				return true;
+			}
+		});
+
+		// Test
+		this.replayMockObjects();
+
+		// Properties
+		PropertyList properties = compiler.createPropertyList();
+		properties.addProperty(
+				ClassManagedObjectSource.CLASS_NAME_PROPERTY_NAME).setValue(
+				MockMultipleQualifiedClass.class.getName());
+
+		// Validate the managed object type
+		ManagedObjectType<?> type = compiler.getManagedObjectLoader()
+				.loadManagedObjectType(ClassManagedObjectSource.class,
+						properties);
+		assertNull("Should not load type", type);
+
+		// Verify
+		this.verifyMockObjects();
+	}
+
+	/**
+	 * Another {@link Qualifier}.
+	 */
+	@Qualifier
+	@Retention(RetentionPolicy.RUNTIME)
+	public @interface MockAnotherQualifier {
+	}
+
+	/**
+	 * Mock multiple {@link Qualifier} instances on dependency.
+	 */
+	public static class MockMultipleQualifiedClass {
+
+		@MockQualifier
+		@MockAnotherQualifier
+		@Dependency
+		Connection connection;
+	}
+
+	/**
 	 * Ensures can inject {@link Dependency} instances into the object.
 	 */
 	@SuppressWarnings("unchecked")
 	public void testInjectDependencies() throws Throwable {
 
-		final String SQL_QUERY = "SELECT * FROM TABLE";
+		final String UNQUALIFIED_DEPENDENCY = "SELECT * FROM UNQUALIFIED";
+		final String QUALIFIED_DEPENDENCY = "SELECT NAME FROM QUALIFIED";
 		final Connection connection = this.createMock(Connection.class);
 		final ObjectRegistry<Indexed> objectRegistry = this
 				.createMock(ObjectRegistry.class);
@@ -143,7 +237,9 @@ public class ClassManagedObjectSourceTest extends OfficeFrameTestCase {
 		this.recordReturn(objectRegistry, objectRegistry.getObject(0),
 				connection);
 		this.recordReturn(objectRegistry, objectRegistry.getObject(1),
-				SQL_QUERY);
+				QUALIFIED_DEPENDENCY);
+		this.recordReturn(objectRegistry, objectRegistry.getObject(2),
+				UNQUALIFIED_DEPENDENCY);
 
 		// Replay mocks
 		this.replayMockObjects();
@@ -169,20 +265,21 @@ public class ClassManagedObjectSourceTest extends OfficeFrameTestCase {
 		MockClass mockClass = (MockClass) object;
 
 		// Verify the dependencies injected
-		mockClass.verifyDependencyInjection(SQL_QUERY, connection);
+		mockClass.verifyDependencyInjection(UNQUALIFIED_DEPENDENCY,
+				QUALIFIED_DEPENDENCY, connection);
 
 		// Verify functionality
 		this.verifyMockObjects();
 	}
 
 	/**
-	 * Ensures can inject the {@link FlowInterface} instances into the
-	 * object.
+	 * Ensures can inject the {@link FlowInterface} instances into the object.
 	 */
 	@SuppressWarnings("unchecked")
 	public void testInjectProcessInterfaces() throws Throwable {
 
-		final String SQL_QUERY = "SELECT * FROM TABLE";
+		final String QUALIFIED_DEPENDENCY = "SELECT NAME FROM QUALIFIED";
+		final String UNQUALIFIED_DEPENDENCY = "SELECT * FROM UNQUALIFIED";
 		final ProcessFuture future = this.createMock(ProcessFuture.class);
 		final Connection connection = this.createMock(Connection.class);
 		final ObjectRegistry<Indexed> objectRegistry = this
@@ -195,7 +292,9 @@ public class ClassManagedObjectSourceTest extends OfficeFrameTestCase {
 		this.recordReturn(objectRegistry, objectRegistry.getObject(0),
 				connection);
 		this.recordReturn(objectRegistry, objectRegistry.getObject(1),
-				SQL_QUERY);
+				QUALIFIED_DEPENDENCY);
+		this.recordReturn(objectRegistry, objectRegistry.getObject(2),
+				UNQUALIFIED_DEPENDENCY);
 
 		// Record invoking the processes
 		this.recordReturn(executeContext,
@@ -252,7 +351,8 @@ public class ClassManagedObjectSourceTest extends OfficeFrameTestCase {
 		MockClass mockClass = (MockClass) object;
 
 		// Verify the dependencies injected
-		mockClass.verifyDependencyInjection(SQL_QUERY, connection);
+		mockClass.verifyDependencyInjection(UNQUALIFIED_DEPENDENCY,
+				QUALIFIED_DEPENDENCY, connection);
 
 		// Verify the processes injected
 		mockClass.verifyProcessInjection(PROCESS_PARAMETER);
@@ -267,7 +367,8 @@ public class ClassManagedObjectSourceTest extends OfficeFrameTestCase {
 	public void testNewInstance() throws Exception {
 
 		final Connection connection = this.createMock(Connection.class);
-		final String SQL_QUERY = "SELECT * FROM TABLE";
+		final String QUALIFIED_DEPENDENCY = "SELECT NAME FROM QUALIFIED";
+		final String UNQUALIFIED_DEPENDENCY = "SELECT * FROM UNQUALIFIED";
 		final MockProcessInterface processInterface = this
 				.createMock(MockProcessInterface.class);
 		final Integer PROCESS_PARAMETER = new Integer(200);
@@ -281,11 +382,14 @@ public class ClassManagedObjectSourceTest extends OfficeFrameTestCase {
 
 		// Create the instance
 		MockClass mockClass = ClassManagedObjectSource.newInstance(
-				MockClass.class, "sqlQuery", SQL_QUERY, "connection",
-				connection, "processes", processInterface);
+				MockClass.class, "unqualifiedDependency",
+				UNQUALIFIED_DEPENDENCY, "qualifiedDependency",
+				QUALIFIED_DEPENDENCY, "connection", connection, "processes",
+				processInterface);
 
 		// Verify the dependencies injected
-		mockClass.verifyDependencyInjection(SQL_QUERY, connection);
+		mockClass.verifyDependencyInjection(UNQUALIFIED_DEPENDENCY,
+				QUALIFIED_DEPENDENCY, connection);
 
 		// Verify the process interfaces injected
 		mockClass.verifyProcessInjection(PROCESS_PARAMETER);
@@ -315,6 +419,14 @@ public class ClassManagedObjectSourceTest extends OfficeFrameTestCase {
 	}
 
 	/**
+	 * {@link Qualifier} for the {@link Dependency}.
+	 */
+	@Qualifier
+	@Retention(RetentionPolicy.RUNTIME)
+	private @interface MockQualifier {
+	}
+
+	/**
 	 * Mock class for testing.
 	 */
 	public static class MockClass extends ParentMockClass {
@@ -323,22 +435,37 @@ public class ClassManagedObjectSourceTest extends OfficeFrameTestCase {
 		 * Ensure can inject dependencies.
 		 */
 		@Dependency
-		private String sqlQuery;
+		private String unqualifiedDependency;
+
+		/**
+		 * Qualified injected dependency.
+		 */
+		@MockQualifier
+		@Dependency
+		private String qualifiedDependency;
 
 		/**
 		 * Verifies the dependencies.
 		 * 
-		 * @param sqlQuery
-		 *            Expected SQL query.
+		 * @param unqualifiedDependency
+		 *            Unqualified dependency.
+		 * @param qualifiedDependency
+		 *            Qualified dependency.
 		 * @param connection
 		 *            Expected {@link Connection}.
 		 */
-		public void verifyDependencyInjection(String sqlQuery,
-				Connection connection) {
+		public void verifyDependencyInjection(String unqualifiedDependency,
+				String qualifiedDependency, Connection connection) {
 
 			// Verify dependency injection
-			TestCase.assertEquals("Incorrect sql query", sqlQuery,
-					this.sqlQuery);
+			TestCase.assertNotNull("Expecting unqualified dependency",
+					unqualifiedDependency);
+			TestCase.assertEquals("Incorrect unqualified dependency",
+					unqualifiedDependency, this.unqualifiedDependency);
+			TestCase.assertNotNull("Expecting qualified dependency",
+					qualifiedDependency);
+			TestCase.assertEquals("Incorrect qualified dependency",
+					qualifiedDependency, this.qualifiedDependency);
 
 			// Verify parent dependencies
 			super.verifyDependencyInjection(connection);

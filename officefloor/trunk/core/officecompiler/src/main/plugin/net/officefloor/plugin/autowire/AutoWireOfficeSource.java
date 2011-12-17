@@ -99,9 +99,9 @@ public class AutoWireOfficeSource extends AbstractOfficeSource {
 	private final List<AutoWireGovernance> governances = new LinkedList<AutoWireGovernance>();
 
 	/**
-	 * Extension interface to their {@link OfficeObject} types.
+	 * Extension interface to their {@link AutoWire} instances.
 	 */
-	private final Map<Class<?>, List<Class<?>>> extensionInterfaceToOfficeObjectTypes = new HashMap<Class<?>, List<Class<?>>>();
+	private final Map<Class<?>, List<AutoWire>> extensionInterfaceToAutoWiring = new HashMap<Class<?>, List<AutoWire>>();
 
 	/**
 	 * Initiate.
@@ -308,26 +308,26 @@ public class AutoWireOfficeSource extends AbstractOfficeSource {
 	 * <p>
 	 * This aids auto-wiring the {@link Governance} for the {@link OfficeObject}.
 	 * 
-	 * @param objectType
-	 *            {@link OfficeObject} object type.
+	 * @param autoWire
+	 *            {@link OfficeObject} {@link AutoWire}.
 	 * @param extensionInterfaces
 	 *            Extension interfaces available for the {@link OfficeObject}.
 	 */
-	public void addOfficeObjectExtension(Class<?> objectType,
+	public void addOfficeObjectExtension(AutoWire autoWire,
 			Class<?>... extensionInterfaces) {
 		for (Class<?> extensionInterface : extensionInterfaces) {
 
-			// Obtain the object types for the extension type
-			List<Class<?>> objectTypes = this.extensionInterfaceToOfficeObjectTypes
+			// Obtain the auto wiring for the extension type
+			List<AutoWire> autoWiring = this.extensionInterfaceToAutoWiring
 					.get(extensionInterface);
-			if (objectTypes == null) {
-				objectTypes = new LinkedList<Class<?>>();
-				this.extensionInterfaceToOfficeObjectTypes.put(
-						extensionInterface, objectTypes);
+			if (autoWiring == null) {
+				autoWiring = new LinkedList<AutoWire>();
+				this.extensionInterfaceToAutoWiring.put(extensionInterface,
+						autoWiring);
 			}
 
-			// Add the object type
-			objectTypes.add(objectType);
+			// Add the auto wire
+			autoWiring.add(autoWire);
 		}
 	}
 
@@ -335,13 +335,13 @@ public class AutoWireOfficeSource extends AbstractOfficeSource {
 	 * Adds an {@link OfficeTeam} responsible for executing {@link Task}
 	 * instances that has an object dependency of the input type.
 	 * 
-	 * @param dependencyType
-	 *            Object dependency type for the {@link Task}.
+	 * @param autoWire
+	 *            Object dependency {@link AutoWire} for the {@link Task}.
 	 * @return {@link AutoWireResponsibility} for the {@link OfficeTeam}.
 	 */
-	public AutoWireResponsibility addResponsibility(Class<?> dependencyType) {
+	public AutoWireResponsibility addResponsibility(AutoWire autoWire) {
 		AutoWireResponsibility responsibility = new AutoWireResponsibilityImpl(
-				dependencyType, "team-" + dependencyType.getName());
+				autoWire, "team-" + autoWire.getQualifiedType());
 		this.responsibilities.add(responsibility);
 		return responsibility;
 	}
@@ -372,9 +372,10 @@ public class AutoWireOfficeSource extends AbstractOfficeSource {
 					.getOfficeTeamName());
 
 			// Register the responsible team
-			Class<?> dependencyType = responsibility.getDependencyType();
+			AutoWire dependencyAutoWire = responsibility
+					.getDependencyAutoWire();
 			ResponsibleTeam responsibleTeam = new ResponsibleTeam(
-					dependencyType, officeTeam);
+					dependencyAutoWire, officeTeam);
 
 			// Add the responsible team
 			responsibleTeams.add(responsibleTeam);
@@ -385,7 +386,7 @@ public class AutoWireOfficeSource extends AbstractOfficeSource {
 		Map<String, OfficeSection> officeSectionsByName = new HashMap<String, OfficeSection>();
 		Map<String, Map<String, OfficeSectionInput>> inputs = new HashMap<String, Map<String, OfficeSectionInput>>();
 		Map<String, Map<String, OfficeSectionOutput>> outputs = new HashMap<String, Map<String, OfficeSectionOutput>>();
-		Map<String, OfficeObject> objects = new HashMap<String, OfficeObject>();
+		Map<AutoWire, OfficeObject> objects = new HashMap<AutoWire, OfficeObject>();
 		for (AutoWireSection section : this.sections) {
 
 			// Obtain the section name
@@ -404,11 +405,16 @@ public class AutoWireOfficeSource extends AbstractOfficeSource {
 			for (OfficeSectionObject object : officeSection
 					.getOfficeSectionObjects()) {
 				String objectType = object.getObjectType();
-				OfficeObject officeObject = objects.get(objectType);
+
+				// TODO Match to appropriate auto-wire
+				AutoWire autoWire = new AutoWire(objectType);
+
+				// Link to appropriate Office Object
+				OfficeObject officeObject = objects.get(autoWire);
 				if (officeObject == null) {
-					officeObject = architect.addOfficeObject(objectType,
-							objectType);
-					objects.put(objectType, officeObject);
+					officeObject = architect.addOfficeObject(
+							autoWire.getQualifiedType(), autoWire.getType());
+					objects.put(autoWire, officeObject);
 				}
 				architect.link(object, officeObject);
 			}
@@ -566,17 +572,16 @@ public class AutoWireOfficeSource extends AbstractOfficeSource {
 				officeSection.addGovernance(officeGovernance);
 			}
 
-			// Obtain the object types for the extension interface
-			List<Class<?>> objectTypes = this.extensionInterfaceToOfficeObjectTypes
+			// Obtain the auto wiring for the extension interface
+			List<AutoWire> autoWiring = this.extensionInterfaceToAutoWiring
 					.get(extensionInterface);
-			if (objectTypes != null) {
+			if (autoWiring != null) {
 
 				// Govern the office objects
-				for (Class<?> objectType : objectTypes) {
+				for (AutoWire autoWire : autoWiring) {
 
 					// Obtain the office object
-					String objectTypeName = objectType.getName();
-					OfficeObject officeObject = objects.get(objectTypeName);
+					OfficeObject officeObject = objects.get(autoWire);
 					if (officeObject == null) {
 						continue; // no office object for type
 					}
@@ -817,9 +822,9 @@ public class AutoWireOfficeSource extends AbstractOfficeSource {
 	private static class ResponsibleTeam {
 
 		/**
-		 * Dependency type.
+		 * Dependency {@link AutoWire}.
 		 */
-		private final Class<?> dependencyType;
+		private final AutoWire dependencyAutoWire;
 
 		/**
 		 * {@link OfficeTeam}.
@@ -829,13 +834,14 @@ public class AutoWireOfficeSource extends AbstractOfficeSource {
 		/**
 		 * Initiate.
 		 * 
-		 * @param dependencyType
-		 *            Dependency type.
+		 * @param dependencyAutoWire
+		 *            Dependency {@link AutoWire}.
 		 * @param officeTeam
 		 *            {@link OfficeTeam}.
 		 */
-		public ResponsibleTeam(Class<?> dependencyType, OfficeTeam officeTeam) {
-			this.dependencyType = dependencyType;
+		public ResponsibleTeam(AutoWire dependencyAutoWire,
+				OfficeTeam officeTeam) {
+			this.dependencyAutoWire = dependencyAutoWire;
 			this.officeTeam = officeTeam;
 		}
 
@@ -863,7 +869,8 @@ public class AutoWireOfficeSource extends AbstractOfficeSource {
 		 *         responsible for the {@link OfficeGovernance}.
 		 */
 		public boolean isResponsible(Class<?> extensionInterface) {
-			return (this.dependencyType.equals(extensionInterface));
+			return (this.dependencyAutoWire.getType().equals(extensionInterface
+					.getName()));
 		}
 
 		/**

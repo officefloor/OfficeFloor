@@ -36,6 +36,11 @@ public class TaskObjectTypeImpl<M extends Enum<M>> implements
 	private final Class<?> objectType;
 
 	/**
+	 * Type qualifier.
+	 */
+	private String typeQualifier;
+
+	/**
 	 * Label describing this {@link TaskObjectType}.
 	 */
 	private String label = null;
@@ -74,6 +79,11 @@ public class TaskObjectTypeImpl<M extends Enum<M>> implements
 	}
 
 	@Override
+	public void setTypeQualifier(String qualifier) {
+		this.typeQualifier = qualifier;
+	}
+
+	@Override
 	public void setLabel(String label) {
 		this.label = label;
 	}
@@ -102,6 +112,11 @@ public class TaskObjectTypeImpl<M extends Enum<M>> implements
 	@Override
 	public Class<?> getObjectType() {
 		return this.objectType;
+	}
+
+	@Override
+	public String getTypeQualifier() {
+		return this.typeQualifier;
 	}
 
 	@Override

@@ -35,7 +35,7 @@ import net.officefloor.model.test.changes.AbstractChangesTestCase;
 
 /**
  * Abstract functionality for testing the {@link OfficeFloorChanges}.
- *
+ * 
  * @author Daniel Sagenschneider
  */
 public abstract class AbstractOfficeFloorChangesTestCase extends
@@ -49,7 +49,7 @@ public abstract class AbstractOfficeFloorChangesTestCase extends
 
 	/**
 	 * Initiate.
-	 *
+	 * 
 	 * @param isSpecificSetupFilePerTest
 	 *            Flag if specific setup file to be used.
 	 */
@@ -80,7 +80,7 @@ public abstract class AbstractOfficeFloorChangesTestCase extends
 
 	/**
 	 * Constructs the {@link OfficeType}.
-	 *
+	 * 
 	 * @param constructor
 	 *            {@link OfficeTypeConstructor}.
 	 * @return {@link OfficeType}.
@@ -98,7 +98,7 @@ public abstract class AbstractOfficeFloorChangesTestCase extends
 
 		/**
 		 * Constructs the {@link OfficeType}.
-		 *
+		 * 
 		 * @param context
 		 *            {@link OfficeTypeContext}.
 		 */
@@ -112,7 +112,7 @@ public abstract class AbstractOfficeFloorChangesTestCase extends
 
 		/**
 		 * Add {@link OfficeInputType}.
-		 *
+		 * 
 		 * @param name
 		 *            Name of {@link OfficeSection}.
 		 * @param inputName
@@ -125,20 +125,22 @@ public abstract class AbstractOfficeFloorChangesTestCase extends
 
 		/**
 		 * Add {@link OfficeManagedObjectType}.
-		 *
+		 * 
 		 * @param name
 		 *            Name of {@link OfficeManagedObjectType}.
 		 * @param objectType
 		 *            Object type.
+		 * @param typeQualifier
+		 *            Type qualifier.
 		 * @param extensionInterfaces
 		 *            Extension interfaces.
 		 */
 		void addOfficeManagedObject(String name, Class<?> objectType,
-				Class<?>... extensionInterfaces);
+				String typeQualifier, Class<?>... extensionInterfaces);
 
 		/**
 		 * Add {@link OfficeTeamType}.
-		 *
+		 * 
 		 * @param name
 		 *            Name of {@link OfficeTeamType}.
 		 */
@@ -179,9 +181,9 @@ public abstract class AbstractOfficeFloorChangesTestCase extends
 
 		@Override
 		public void addOfficeManagedObject(String name, Class<?> objectType,
-				Class<?>... extensionInterfaces) {
+				String typeQualifier, Class<?>... extensionInterfaces) {
 			this.objects.add(new OfficeTypeItem(name, objectType.getName(),
-					extensionInterfaces));
+					typeQualifier, extensionInterfaces));
 		}
 
 		@Override
@@ -226,6 +228,11 @@ public abstract class AbstractOfficeFloorChangesTestCase extends
 		private final String type;
 
 		/**
+		 * Type qualifier.
+		 */
+		private final String typeQualifier;
+
+		/**
 		 * Input name.
 		 */
 		private final String inputName;
@@ -237,7 +244,7 @@ public abstract class AbstractOfficeFloorChangesTestCase extends
 
 		/**
 		 * Initialise for {@link OfficeInputType}.
-		 *
+		 * 
 		 * @param name
 		 *            Name.
 		 * @param inputName
@@ -250,24 +257,28 @@ public abstract class AbstractOfficeFloorChangesTestCase extends
 			this.name = name;
 			this.inputName = inputName;
 			this.type = parameterType;
+			this.typeQualifier = null;
 			this.extensionInterfaces = null;
 		}
 
 		/**
 		 * Initialise for {@link OfficeManagedObjectType}.
-		 *
+		 * 
 		 * @param name
 		 *            Name.
 		 * @param objectType
 		 *            Object type.
+		 * @param typeQualifier
+		 *            Type qualifier.
 		 * @param extensionInterfaces
 		 *            Extension interfaces.
 		 */
 		public OfficeTypeItem(String name, String objectType,
-				Class<?>[] extensionInterfaces) {
+				String typeQualifier, Class<?>[] extensionInterfaces) {
 			this.name = name;
 			this.inputName = null;
 			this.type = objectType;
+			this.typeQualifier = typeQualifier;
 			this.extensionInterfaces = new String[extensionInterfaces.length];
 			for (int i = 0; i < this.extensionInterfaces.length; i++) {
 				this.extensionInterfaces[i] = extensionInterfaces[i].getName();
@@ -276,7 +287,7 @@ public abstract class AbstractOfficeFloorChangesTestCase extends
 
 		/**
 		 * Initialise for {@link OfficeTeamType}.
-		 *
+		 * 
 		 * @param name
 		 *            Name.
 		 */
@@ -284,6 +295,7 @@ public abstract class AbstractOfficeFloorChangesTestCase extends
 			this.name = name;
 			this.inputName = null;
 			this.type = null;
+			this.typeQualifier = null;
 			this.extensionInterfaces = null;
 		}
 
@@ -318,6 +330,11 @@ public abstract class AbstractOfficeFloorChangesTestCase extends
 		@Override
 		public String getObjectType() {
 			return this.type;
+		}
+
+		@Override
+		public String getTypeQualifier() {
+			return this.typeQualifier;
 		}
 
 		@Override

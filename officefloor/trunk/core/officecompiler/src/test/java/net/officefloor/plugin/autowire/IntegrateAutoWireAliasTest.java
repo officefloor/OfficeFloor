@@ -126,7 +126,7 @@ public class IntegrateAutoWireAliasTest extends OfficeFrameTestCase {
 		governance.addProperty(ClassGovernanceSource.CLASS_NAME_PROPERTY_NAME,
 				MockGovernance.class.getName());
 		governance.governSection(section);
-		application.assignTeam("ONE_PERSON", XAResource.class);
+		application.assignTeam("ONE_PERSON", new AutoWire(XAResource.class));
 		application.assignDefaultTeam("ONE_PERSON");
 
 		// Configure the object / managed object
@@ -135,11 +135,12 @@ public class IntegrateAutoWireAliasTest extends OfficeFrameTestCase {
 			MockManagedObjectSource.object = object;
 			application.getOfficeFloorCompiler().addManagedObjectSourceAlias(
 					"MOCK", MockManagedObjectSource.class);
-			application.addManagedObject("MOCK", null, Connection.class);
+			application.addManagedObject("MOCK", null, new AutoWire(
+					Connection.class));
 
 		} else {
 			// Configure the object
-			application.addObject(object, Connection.class);
+			application.addObject(object, new AutoWire(Connection.class));
 		}
 
 		// Execute the task

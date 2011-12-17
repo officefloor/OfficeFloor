@@ -54,6 +54,17 @@ public interface TaskObjectType<M extends Enum<M>> {
 	Class<?> getObjectType();
 
 	/**
+	 * <p>
+	 * Obtains the qualifier on the type.
+	 * <p>
+	 * This is to enable qualifying the type of dependency required.
+	 * 
+	 * @return Qualifier on the type. May be <code>null</code> if not qualifying
+	 *         the type.
+	 */
+	String getTypeQualifier();
+
+	/**
 	 * Obtains the {@link Enum} key for the {@link TaskObjectType}.
 	 * 
 	 * @return {@link Enum} key for the {@link TaskObjectType}. May be

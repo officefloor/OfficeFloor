@@ -409,6 +409,35 @@ public class AutoWireOfficeSourceTest extends OfficeFrameTestCase {
 	}
 
 	/**
+	 * Ensure dependency with qualified type.
+	 */
+	public void testDependencyWithQualifiedType() throws Exception {
+
+		final String SECTION = "Section";
+
+		// Create and configure the source
+		AutoWireOfficeSource source = new AutoWireOfficeSource();
+		this.addSection(source, SECTION);
+
+		// Record creating the section
+		this.recordTeam();
+		this.recordOfficeSection(SECTION);
+
+		// TODO provide qualification
+		fail("Enable qualified section object");
+
+		this.recordSectionObjects(SECTION, Connection.class);
+		this.recordSectionInputs(SECTION);
+		this.recordSectionOutputs(SECTION);
+		this.recordSubSections(SECTION);
+
+		// Test
+		this.replayMockObjects();
+		source.sourceOffice(this.architect, this.context);
+		this.verifyMockObjects();
+	}
+
+	/**
 	 * Ensure can provide {@link Governance} over {@link OfficeObject}.
 	 */
 	public void testOfficeObjectGovernance() throws Exception {
@@ -421,7 +450,8 @@ public class AutoWireOfficeSourceTest extends OfficeFrameTestCase {
 		this.addSection(source, SECTION);
 		this.addGovernance(source, GOVERNANCE, "PROPERTY_NAME",
 				"PROPERTY_VALUE");
-		source.addOfficeObjectExtension(Connection.class, XAResource.class);
+		source.addOfficeObjectExtension(new AutoWire(Connection.class),
+				XAResource.class);
 
 		// Record governance over office object
 		OfficeTeam team = this.recordTeam();
@@ -559,7 +589,36 @@ public class AutoWireOfficeSourceTest extends OfficeFrameTestCase {
 
 		// Create and configure the source
 		AutoWireOfficeSource source = new AutoWireOfficeSource();
-		source.addResponsibility(XAResource.class);
+		source.addResponsibility(new AutoWire(XAResource.class));
+		this.addGovernance(source, GOVERNANCE, "PROPERTY_NAME",
+				"PROPERTY_VALUE");
+
+		// Record governance over office object
+		this.recordTeam();
+		OfficeTeam team = this.recordTeam(XAResource.class);
+		this.recordGovernance(GOVERNANCE, XAResource.class, team);
+		this.recordGovernSections(GOVERNANCE);
+
+		// Test
+		this.replayMockObjects();
+		source.sourceOffice(this.architect, this.context);
+		this.verifyMockObjects();
+	}
+
+	/**
+	 * Ensure can assign specific {@link Team} for {@link Governance} by
+	 * extension interface ignoring the qualification.
+	 */
+	public void testGovernanceTeamByExtensionInterfaceIgnoringQualification()
+			throws Exception {
+
+		final String GOVERNANCE = "GOVERNANCE";
+
+		// Create and configure the source
+		AutoWireOfficeSource source = new AutoWireOfficeSource();
+		source.addResponsibility(new AutoWire("QUALIFIED", XAResource.class
+				.getName()));
+		source.addResponsibility(new AutoWire(XAResource.class));
 		this.addGovernance(source, GOVERNANCE, "PROPERTY_NAME",
 				"PROPERTY_VALUE");
 
@@ -652,6 +711,14 @@ public class AutoWireOfficeSourceTest extends OfficeFrameTestCase {
 	}
 
 	/**
+	 * Ensure can assign a {@link Team} responsibility based on qualified
+	 * {@link Task} dependency.
+	 */
+	public void testAssignTeamBasedOnQualifiedDependency() throws Exception {
+		fail("TODO implement");
+	}
+
+	/**
 	 * Does the assign {@link Team} test.
 	 * 
 	 * @param sectionClass
@@ -663,7 +730,7 @@ public class AutoWireOfficeSourceTest extends OfficeFrameTestCase {
 		AutoWireOfficeSource source = new AutoWireOfficeSource();
 		this.addSection(source, sectionClass);
 		AutoWireResponsibility responsibility = source
-				.addResponsibility(Connection.class);
+				.addResponsibility(new AutoWire(Connection.class));
 		assertEquals("Incorrect team name",
 				"team-" + Connection.class.getName(),
 				responsibility.getOfficeTeamName());

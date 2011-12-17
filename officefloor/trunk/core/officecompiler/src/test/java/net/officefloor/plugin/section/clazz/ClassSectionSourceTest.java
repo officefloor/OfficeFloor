@@ -19,11 +19,19 @@
 package net.officefloor.plugin.section.clazz;
 
 import java.io.IOException;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
 
+import net.officefloor.compile.OfficeFloorCompiler;
+import net.officefloor.compile.issues.CompilerIssues;
+import net.officefloor.compile.issues.CompilerIssues.LocationType;
+import net.officefloor.compile.section.SectionType;
 import net.officefloor.compile.spi.section.SectionDesigner;
 import net.officefloor.compile.spi.section.SectionInput;
 import net.officefloor.compile.spi.section.SectionManagedObjectSource;
@@ -34,9 +42,11 @@ import net.officefloor.compile.spi.section.SectionWork;
 import net.officefloor.compile.spi.section.SubSection;
 import net.officefloor.compile.test.section.SectionLoaderUtil;
 import net.officefloor.compile.work.TaskType;
+import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
 import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.test.OfficeFrameTestCase;
+import net.officefloor.plugin.autowire.AutoWire;
 import net.officefloor.plugin.autowire.AutoWireOfficeFloor;
 import net.officefloor.plugin.autowire.AutoWireOfficeFloorSource;
 import net.officefloor.plugin.autowire.AutoWireSection;
@@ -44,6 +54,9 @@ import net.officefloor.plugin.managedobject.clazz.ClassManagedObjectSource;
 import net.officefloor.plugin.managedobject.clazz.Dependency;
 import net.officefloor.plugin.work.clazz.ClassWorkSource;
 import net.officefloor.plugin.work.clazz.FlowInterface;
+import net.officefloor.plugin.work.clazz.Qualifier;
+
+import org.easymock.AbstractMatcher;
 
 /**
  * Tests the {@link ClassSectionSource}.
@@ -182,7 +195,7 @@ public class ClassSectionSourceTest extends OfficeFrameTestCase {
 		// Create the expected section
 		SectionDesigner expected = this.createSectionDesigner(
 				MockParameterArgumentSection.class, "doInput");
-		this.expectedTasks.get("doInput").getTaskObject("String");
+		this.expectedTasks.get("doInput").getTaskObject(String.class.getName());
 		expected.addSectionInput("doInput", String.class.getName());
 		expected.addSectionOutput("doOutput", Integer.class.getName(), false);
 
@@ -205,10 +218,12 @@ public class ClassSectionSourceTest extends OfficeFrameTestCase {
 	 * Ensure can provide {@link SectionObject}.
 	 */
 	public void testObject() {
+
 		// Create the expected section
 		SectionDesigner expected = this.createSectionDesigner(
 				MockObjectSection.class, "doInput");
-		this.expectedTasks.get("doInput").getTaskObject("Connection");
+		this.expectedTasks.get("doInput").getTaskObject(
+				Connection.class.getName());
 		expected.addSectionInput("doInput", null);
 		expected.addSectionObject(Connection.class.getName(),
 				Connection.class.getName());
@@ -223,6 +238,184 @@ public class ClassSectionSourceTest extends OfficeFrameTestCase {
 	 */
 	public static class MockObjectSection {
 		public void doInput(Connection connection) {
+		}
+	}
+
+	/**
+	 * Ensure can provide qualified {@link SectionObject}.
+	 */
+	public void testQualifiedObject() {
+
+		final String QUALIFIED_NAME = MockQualification.class.getName() + "-"
+				+ Connection.class.getName();
+		final String UNQUALIFIED_NAME = Connection.class.getName();
+
+		// Create the expected section
+		SectionDesigner expected = this.createSectionDesigner(
+				MockObjectSection.class, "doInput");
+		SectionTask task = this.expectedTasks.get("doInput");
+		task.getTaskObject(QUALIFIED_NAME);
+		task.getTaskObject(UNQUALIFIED_NAME);
+		expected.addSectionInput("doInput", null);
+		expected.addSectionObject(QUALIFIED_NAME, Connection.class.getName())
+				.setTypeQualifier(MockQualification.class.getName());
+		expected.addSectionObject(UNQUALIFIED_NAME, Connection.class.getName());
+
+		// Validate section
+		SectionLoaderUtil.validateSection(expected, ClassSectionSource.class,
+				MockQualifiedObjectSection.class.getName());
+	}
+
+	/**
+	 * Mock qualification.
+	 */
+	@Target({ ElementType.TYPE, ElementType.FIELD, ElementType.PARAMETER })
+	@Retention(RetentionPolicy.RUNTIME)
+	@Qualifier
+	public @interface MockQualification {
+	}
+
+	/**
+	 * Section with qualified object.
+	 */
+	public static class MockQualifiedObjectSection {
+		public void doInput(@MockQualification Connection qualified,
+				Connection unqualified) {
+		}
+	}
+
+	/**
+	 * Ensure can provide same {@link Qualifier} on {@link SectionObject}
+	 * instances of different types.
+	 */
+	public void testSameQualifierOnDifferentObjectTypes() {
+
+		// Create the expected section
+		SectionDesigner expected = this.createSectionDesigner(
+				MockObjectSection.class, "doInput");
+		SectionTask task = this.expectedTasks.get("doInput");
+		task.getTaskObject(MockQualification.class.getName() + "-"
+				+ Connection.class.getName());
+		task.getTaskObject(MockQualification.class.getName() + "-"
+				+ String.class.getName());
+		expected.addSectionInput("doInput", null);
+		expected.addSectionObject(
+				MockQualification.class.getName() + "-"
+						+ Connection.class.getName(),
+				Connection.class.getName()).setTypeQualifier(
+				MockQualification.class.getName());
+		expected.addSectionObject(
+				MockQualification.class.getName() + "-"
+						+ String.class.getName(), String.class.getName())
+				.setTypeQualifier(MockQualification.class.getName());
+
+		// Validate section
+		SectionLoaderUtil.validateSection(expected, ClassSectionSource.class,
+				MockSameQualifierObjectSection.class.getName());
+	}
+
+	/**
+	 * Section with same {@link Qualifier} on objects of different types.
+	 */
+	public static class MockSameQualifierObjectSection {
+		public void doInput(@MockQualification Connection connection,
+				@MockQualification String string) {
+		}
+	}
+
+	/**
+	 * Ensure issue if qualified {@link SectionObject} with more than one
+	 * {@link Qualifier}.
+	 */
+	public void testMultipleQualifiedObject() {
+
+		final CompilerIssues issues = this.createMock(CompilerIssues.class);
+
+		// Enable recording issue
+		OfficeFloorCompiler compiler = OfficeFloorCompiler
+				.newOfficeFloorCompiler(null);
+		compiler.setCompilerIssues(issues);
+
+		// Record issue
+		issues.addIssue(
+				LocationType.SECTION,
+				MockMultipleQualifiedObjectSection.class.getName(),
+				AssetType.WORK,
+				"loadWorkType",
+				"Failed to source WorkType definition from WorkSource "
+						+ SectionClassWorkSource.class.getName(),
+				new IllegalArgumentException(
+						"Method doInput parameter 0 has more than one Qualifier"));
+		this.control(issues).setMatcher(new AbstractMatcher() {
+			@Override
+			public boolean matches(Object[] expected, Object[] actual) {
+
+				// Match initial parameters
+				for (int i = 0; i < 5; i++) {
+					Object e = expected[i];
+					Object a = actual[i];
+					if ((e == null) && (a == null)) {
+						continue; // match on null
+					} else if ((e != null) && (e.equals(actual[i]))) {
+						continue; // match not null
+					} else {
+						return false; // not match
+					}
+				}
+
+				// Match exception
+				IllegalArgumentException eEx = (IllegalArgumentException) expected[5];
+				IllegalArgumentException aEx = (IllegalArgumentException) actual[5];
+				if (!eEx.getMessage().equals(aEx.getMessage())) {
+					return false; // not match
+				}
+
+				// As here, matches
+				return true;
+			}
+		});
+		issues.addIssue(LocationType.SECTION,
+				MockMultipleQualifiedObjectSection.class.getName(), null, null,
+				"Failure loading WorkType from source "
+						+ SectionClassWorkSource.class.getName());
+
+		// Create the expected section
+		SectionDesigner expected = this.createSectionDesigner(
+				MockObjectSection.class, "doInput");
+		this.expectedTasks.get("doInput").getTaskObject("Connection");
+		expected.addSectionInput("doInput", null);
+		expected.addSectionObject(MockQualification.class.getName(),
+				Connection.class.getName());
+
+		// Test
+		this.replayMockObjects();
+
+		// Validate section
+		SectionType type = compiler.getSectionLoader().loadSectionType(
+				ClassSectionSource.class,
+				MockMultipleQualifiedObjectSection.class.getName(),
+				compiler.createPropertyList());
+		assertNull("Should not load type as multiple qualifiers", type);
+
+		// Verify
+		this.verifyMockObjects();
+	}
+
+	/**
+	 * Mock another qualification.
+	 */
+	@Target({ ElementType.TYPE, ElementType.FIELD, ElementType.PARAMETER })
+	@Retention(RetentionPolicy.RUNTIME)
+	@Qualifier
+	public @interface MockAnotherQualification {
+	}
+
+	/**
+	 * Section with qualified object.
+	 */
+	public static class MockMultipleQualifiedObjectSection {
+		public void doInput(
+				@MockAnotherQualification @MockQualification Connection connection) {
 		}
 	}
 
@@ -246,6 +439,81 @@ public class ClassSectionSourceTest extends OfficeFrameTestCase {
 	 * Section with {@link Dependency}.
 	 */
 	public static class MockDependencySection {
+		@Dependency
+		Connection connection;
+
+		public void doInput() {
+		}
+	}
+
+	/**
+	 * Ensure provide {@link SectionObject} via qualified {@link Dependency}.
+	 */
+	public void testQualifiedDependency() {
+
+		// Create the expected section
+		SectionDesigner expected = this.createSectionDesigner(
+				MockDependencySection.class, "doInput");
+		expected.addSectionInput("doInput", null);
+		SectionObject object = expected.addSectionObject(
+				MockQualification.class.getName() + "-"
+						+ Connection.class.getName(),
+				Connection.class.getName());
+		object.setTypeQualifier(MockQualification.class.getName());
+
+		// Validate section
+		SectionLoaderUtil.validateSection(expected, ClassSectionSource.class,
+				MockQualifiedDependencySection.class.getName());
+	}
+
+	/**
+	 * Section with qualified {@link Dependency}.
+	 */
+	public static class MockQualifiedDependencySection {
+		@MockQualification
+		@Dependency
+		Connection connection;
+
+		public void doInput() {
+		}
+	}
+
+	/**
+	 * Ensure issue if provide {@link SectionObject} via multiple qualifiers for
+	 * {@link Dependency}.
+	 */
+	public void testMulipleQualifiedDependency() {
+
+		final CompilerIssues issues = this.createMock(CompilerIssues.class);
+
+		// Enable loading with compiler issues
+		OfficeFloorCompiler compiler = OfficeFloorCompiler
+				.newOfficeFloorCompiler(null);
+		compiler.setCompilerIssues(issues);
+
+		// Record issue
+		issues.addIssue(LocationType.SECTION,
+				MockMultipleQualifiedDependencySection.class.getName(), null,
+				null, "Dependency connection has more than one Qualifier");
+
+		// Test
+		this.replayMockObjects();
+
+		// Validate section
+		compiler.getSectionLoader().loadSectionType(ClassSectionSource.class,
+				MockMultipleQualifiedDependencySection.class.getName(),
+				compiler.createPropertyList());
+
+		// Verify
+		this.verifyMockObjects();
+	}
+
+	/**
+	 * Section with multiple qualifiers for {@link Dependency}.
+	 */
+	public static class MockMultipleQualifiedDependencySection {
+		@MockQualification
+		@MockAnotherQualification
 		@Dependency
 		Connection connection;
 
@@ -305,14 +573,14 @@ public class ClassSectionSourceTest extends OfficeFrameTestCase {
 		SectionDesigner expected = this.createSectionDesigner(
 				MockInputSection.class, "doInput", "newName", "finished");
 		SectionTask doInput = this.expectedTasks.get("doInput");
-		doInput.getTaskObject("ReturnValue");
-		doInput.getTaskObject("Boolean");
+		doInput.getTaskObject(ReturnValue.class.getName());
+		doInput.getTaskObject(Boolean.class.getName());
 		SectionTask newName = this.expectedTasks.get("newName");
-		newName.getTaskObject("ReturnValue");
-		newName.getTaskObject("String");
-		newName.getTaskObject("Connection");
+		newName.getTaskObject(ReturnValue.class.getName());
+		newName.getTaskObject(String.class.getName());
+		newName.getTaskObject(Connection.class.getName());
 		SectionTask finished = this.expectedTasks.get("finished");
-		finished.getTaskObject("ReturnValue");
+		finished.getTaskObject(ReturnValue.class.getName());
 
 		// Inputs
 		expected.addSectionInput("doInput", Boolean.class.getName());
@@ -351,8 +619,8 @@ public class ClassSectionSourceTest extends OfficeFrameTestCase {
 		AutoWireSection section = source.addSection("test",
 				MockChangeTaskNameClassSectionSource.class.getName(),
 				MockChangeTaskNameWithLinksSection.class.getName());
-		source.addObject(returnValue, ReturnValue.class);
-		source.addObject(connection, Connection.class);
+		source.addObject(returnValue, new AutoWire(ReturnValue.class));
+		source.addObject(connection, new AutoWire(Connection.class));
 		source.link(section, "externalFlow", section, "finished");
 
 		// Open OfficeFloor
@@ -591,7 +859,7 @@ public class ClassSectionSourceTest extends OfficeFrameTestCase {
 		// Triggering flows, so must run to test
 		AutoWireOfficeFloorSource source = new AutoWireOfficeFloorSource();
 		ReturnValue returnValue = new ReturnValue();
-		source.addObject(returnValue, ReturnValue.class);
+		source.addObject(returnValue, new AutoWire(ReturnValue.class));
 		source.addSection("test", ClassSectionSource.class.getName(),
 				MockEscalationHandlingSection.class.getName());
 
@@ -635,7 +903,7 @@ public class ClassSectionSourceTest extends OfficeFrameTestCase {
 		source.addSection("test", ClassSectionSource.class.getName(),
 				MockInvokeSubSection.class.getName());
 		ReturnValue returnValue = new ReturnValue();
-		source.addObject(returnValue, ReturnValue.class);
+		source.addObject(returnValue, new AutoWire(ReturnValue.class));
 
 		// Open OfficeFloor
 		AutoWireOfficeFloor officeFloor = source.openOfficeFloor();

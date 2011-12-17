@@ -27,9 +27,9 @@ import net.officefloor.compile.spi.office.OfficeTeam;
 public class AutoWireResponsibilityImpl implements AutoWireResponsibility {
 
 	/**
-	 * Dependency type.
+	 * Dependency {@link AutoWire}.
 	 */
-	private final Class<?> dependencyType;
+	private final AutoWire dependencyAutoWire;
 
 	/**
 	 * {@link OfficeTeam} name.
@@ -39,14 +39,14 @@ public class AutoWireResponsibilityImpl implements AutoWireResponsibility {
 	/**
 	 * Initiate.
 	 * 
-	 * @param dependencyType
-	 *            Dependency type.
+	 * @param dependencyAutoWire
+	 *            Dependency {@link AutoWire}.
 	 * @param officeTeamName
 	 *            {@link OfficeTeam} name.
 	 */
-	public AutoWireResponsibilityImpl(Class<?> dependencyType,
+	public AutoWireResponsibilityImpl(AutoWire dependencyAutoWire,
 			String officeTeamName) {
-		this.dependencyType = dependencyType;
+		this.dependencyAutoWire = dependencyAutoWire;
 		this.officeTeamName = officeTeamName;
 	}
 
@@ -55,8 +55,8 @@ public class AutoWireResponsibilityImpl implements AutoWireResponsibility {
 	 */
 
 	@Override
-	public Class<?> getDependencyType() {
-		return this.dependencyType;
+	public AutoWire getDependencyAutoWire() {
+		return this.dependencyAutoWire;
 	}
 
 	@Override

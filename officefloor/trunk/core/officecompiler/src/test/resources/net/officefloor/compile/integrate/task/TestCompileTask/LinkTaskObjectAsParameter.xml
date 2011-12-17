@@ -31,7 +31,7 @@
                         value="${testcase}$CompileTaskWork" />
                 </properties>
                 <work-task name="objectTask">
-                    <task-object name="CompileManagedObject"
+                    <task-object name="${testcase}$CompileManagedObject"
                         parameter="true">
                     </task-object>
                 </work-task>

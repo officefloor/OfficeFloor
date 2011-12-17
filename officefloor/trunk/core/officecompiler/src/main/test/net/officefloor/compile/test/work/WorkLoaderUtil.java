@@ -208,6 +208,10 @@ public class WorkLoaderUtil {
 						+ expectedTask.getTaskName() + ", dependency=" + d
 						+ ")", expectedDependency.getObjectType(),
 						actualDependency.getObjectType());
+				TestCase.assertEquals("Incorrect dependency qualifier (task="
+						+ expectedTask.getTaskName() + ", dependency=" + d
+						+ ")", expectedDependency.getTypeQualifier(),
+						actualDependency.getTypeQualifier());
 				TestCase.assertEquals("Incorrect dependency index (task="
 						+ expectedTask.getTaskName() + ", dependency=" + d
 						+ ")", expectedDependency.getIndex(),

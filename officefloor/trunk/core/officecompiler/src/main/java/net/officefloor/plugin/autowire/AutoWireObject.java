@@ -45,13 +45,13 @@ public interface AutoWireObject extends AutoWireProperties {
 	ManagedObjectSourceWirer getManagedObjectSourceWirer();
 
 	/**
-	 * Obtains the Object types that the {@link ManagedObjectSource} is to
-	 * provide auto-wiring.
+	 * Obtains the {@link AutoWire} instances that the
+	 * {@link ManagedObjectSource} is to provide auto-wiring.
 	 * 
-	 * @return Object types that the {@link ManagedObjectSource} is to provide
-	 *         auto-wiring.
+	 * @return {@link AutoWire} instances that the {@link ManagedObjectSource}
+	 *         is to provide auto-wiring.
 	 */
-	Class<?>[] getObjectTypes();
+	AutoWire[] getAutoWiring();
 
 	/**
 	 * Obtains the time-out for sourcing the {@link ManagedObject} from the

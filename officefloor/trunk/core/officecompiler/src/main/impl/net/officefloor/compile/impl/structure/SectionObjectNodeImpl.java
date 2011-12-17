@@ -69,6 +69,11 @@ public class SectionObjectNodeImpl implements SectionObjectNode {
 	private String objectType;
 
 	/**
+	 * Type qualifier.
+	 */
+	private String typeQualifier = null;
+
+	/**
 	 * Flags whether within the {@link Office} context.
 	 */
 	private boolean isInOfficeContext = false;
@@ -125,6 +130,15 @@ public class SectionObjectNodeImpl implements SectionObjectNode {
 	}
 
 	/*
+	 * ==================== SectionObject =========================
+	 */
+
+	@Override
+	public void setTypeQualifier(String qualifier) {
+		this.typeQualifier = qualifier;
+	}
+
+	/*
 	 * ================== SectionObjectNode ========================
 	 */
 
@@ -162,6 +176,11 @@ public class SectionObjectNodeImpl implements SectionObjectNode {
 	@Override
 	public String getObjectType() {
 		return this.objectType;
+	}
+
+	@Override
+	public String getTypeQualifier() {
+		return this.typeQualifier;
 	}
 
 	/*

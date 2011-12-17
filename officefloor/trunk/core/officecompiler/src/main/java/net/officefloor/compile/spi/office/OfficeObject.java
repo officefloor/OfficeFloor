@@ -39,4 +39,12 @@ public interface OfficeObject extends DependentManagedObject,
 	 */
 	String getOfficeObjectName();
 
+	/**
+	 * Specifies the type qualifier.
+	 * 
+	 * @param qualifier
+	 *            Type qualifier.
+	 */
+	void setTypeQualifier(String qualifier);
+
 }

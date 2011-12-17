@@ -32,8 +32,8 @@ import net.officefloor.frame.api.execute.Task;
 public interface TaskObjectTypeBuilder<M extends Enum<M>> {
 
 	/**
-	 * Specifies the {@link Enum} for this {@link TaskObjectTypeBuilder}. This is
-	 * required to be set if <code>M</code> is not {@link None} or
+	 * Specifies the {@link Enum} for this {@link TaskObjectTypeBuilder}. This
+	 * is required to be set if <code>M</code> is not {@link None} or
 	 * {@link Indexed}.
 	 * 
 	 * @param key
@@ -42,12 +42,20 @@ public interface TaskObjectTypeBuilder<M extends Enum<M>> {
 	void setKey(M key);
 
 	/**
+	 * Specifies the type qualifier.
+	 * 
+	 * @param qualifier
+	 *            Type qualifier.
+	 */
+	void setTypeQualifier(String qualifier);
+
+	/**
 	 * <p>
 	 * Provides means to specify a display label for the {@link Object}.
 	 * <p>
 	 * This need not be set as is only an aid to better identify the
-	 * {@link Object}. If not set the {@link TaskTypeBuilder} will use the following
-	 * order to get a display label:
+	 * {@link Object}. If not set the {@link TaskTypeBuilder} will use the
+	 * following order to get a display label:
 	 * <ol>
 	 * <li>{@link Enum} key name</li>
 	 * <li>index value</li>

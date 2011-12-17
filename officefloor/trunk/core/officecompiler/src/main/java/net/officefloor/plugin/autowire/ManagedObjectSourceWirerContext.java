@@ -68,13 +68,14 @@ public interface ManagedObjectSourceWirerContext {
 
 	/**
 	 * Overrides the type for the dependency to allow more specific auto-wiring
-	 * by type.
+	 * by {@link AutoWire}.
 	 * 
 	 * @param dependencyName
 	 *            Name of the {@link ManagedObjectDependency}.
-	 * @param type
-	 *            Specific type the dependency must implement/extend.
+	 * @param autoWire
+	 *            Specific {@link AutoWire} the dependency must
+	 *            implement/extend.
 	 */
-	void mapDependency(String dependencyName, Class<?> type);
+	void mapDependency(String dependencyName, AutoWire autoWire);
 
 }

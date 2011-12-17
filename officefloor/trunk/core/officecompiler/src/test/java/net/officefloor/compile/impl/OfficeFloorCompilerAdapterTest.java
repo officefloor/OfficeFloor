@@ -50,6 +50,7 @@ import net.officefloor.model.impl.office.OfficeModelOfficeSource;
 import net.officefloor.model.impl.officefloor.OfficeFloorModelOfficeFloorSource;
 import net.officefloor.model.impl.section.SectionModelSectionSource;
 import net.officefloor.plugin.administrator.clazz.ClassAdministratorSource;
+import net.officefloor.plugin.autowire.AutoWire;
 import net.officefloor.plugin.autowire.AutoWireAdministration;
 import net.officefloor.plugin.autowire.AutoWireOfficeFloor;
 import net.officefloor.plugin.autowire.AutoWireOfficeFloorSource;
@@ -165,7 +166,7 @@ public class OfficeFloorCompilerAdapterTest extends OfficeFrameTestCase {
 		source.addSection("TEST", ClassSectionSource.class.getName(),
 				AdaptManagedObjectWork.class.getName());
 		source.addManagedObject(ClassManagedObjectSource.class.getName(), null,
-				AdaptManagedObject.class).addProperty(
+				new AutoWire(AdaptManagedObject.class)).addProperty(
 				ClassManagedObjectSource.CLASS_NAME_PROPERTY_NAME,
 				AdaptManagedObjectImpl.class.getName());
 		AutoWireOfficeFloor officeFloor = source.openOfficeFloor();
@@ -195,7 +196,7 @@ public class OfficeFloorCompilerAdapterTest extends OfficeFrameTestCase {
 		source.assignDefaultTeam(PassiveTeamSource.class.getName());
 		source.addSection("TEST", ClassSectionSource.class.getName(),
 				AdaptManagedObjectWork.class.getName());
-		source.addObject(object, AdaptManagedObject.class);
+		source.addObject(object, new AutoWire(AdaptManagedObject.class));
 		AutoWireOfficeFloor officeFloor = source.openOfficeFloor();
 
 		// Invoke the task

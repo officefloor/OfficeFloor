@@ -128,7 +128,7 @@ public class IntegrateAutoWireGovernanceTest extends OfficeFrameTestCase {
 				MockGovernance.class.getName());
 		governance.governSection(section);
 		application.assignTeam(OnePersonTeamSource.class.getName(),
-				XAResource.class);
+				new AutoWire(XAResource.class));
 		application.assignDefaultTeam(OnePersonTeamSource.class.getName());
 
 		// Configure the object / managed object
@@ -137,11 +137,11 @@ public class IntegrateAutoWireGovernanceTest extends OfficeFrameTestCase {
 			MockManagedObjectSource.object = object;
 			application.addManagedObject(
 					MockManagedObjectSource.class.getName(), null,
-					Connection.class);
+					new AutoWire(Connection.class));
 
 		} else {
 			// Configure the object
-			application.addObject(object, Connection.class);
+			application.addObject(object, new AutoWire(Connection.class));
 		}
 
 		// Execute the task

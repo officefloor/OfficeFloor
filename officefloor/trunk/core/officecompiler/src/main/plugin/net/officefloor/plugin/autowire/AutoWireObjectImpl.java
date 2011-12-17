@@ -41,9 +41,9 @@ public class AutoWireObjectImpl extends AutoWirePropertiesImpl implements
 	private final ManagedObjectSourceWirer wirer;
 
 	/**
-	 * Object types for linking this a dependency.
+	 * {@link AutoWire} instances for linking this dependency.
 	 */
-	private final Class<?>[] objectTypes;
+	private final AutoWire[] autoWiring;
 
 	/**
 	 * Time-out for sourcing the {@link ManagedObject} from the
@@ -62,17 +62,17 @@ public class AutoWireObjectImpl extends AutoWirePropertiesImpl implements
 	 *            {@link PropertyList} for the {@link ManagedObjectSource}.
 	 * @param wirer
 	 *            {@link ManagedObjectSourceWirer}.
-	 * @param objectTypes
-	 *            Object types that the {@link ManagedObjectSource} is to
-	 *            provide auto-wiring.
+	 * @param autoWiring
+	 *            {@link AutoWire} instances that the
+	 *            {@link ManagedObjectSource} is to provide auto-wiring.
 	 */
 	public AutoWireObjectImpl(OfficeFloorCompiler compiler,
 			String managedObjectSourceClassName, PropertyList properties,
-			ManagedObjectSourceWirer wirer, Class<?>... objectTypes) {
+			ManagedObjectSourceWirer wirer, AutoWire... autoWiring) {
 		super(compiler, properties);
 		this.managedObjectSourceClassName = managedObjectSourceClassName;
 		this.wirer = wirer;
-		this.objectTypes = objectTypes;
+		this.autoWiring = autoWiring;
 	}
 
 	/*
@@ -90,8 +90,8 @@ public class AutoWireObjectImpl extends AutoWirePropertiesImpl implements
 	}
 
 	@Override
-	public Class<?>[] getObjectTypes() {
-		return this.objectTypes;
+	public AutoWire[] getAutoWiring() {
+		return this.autoWiring;
 	}
 
 	@Override

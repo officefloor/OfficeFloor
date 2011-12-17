@@ -39,4 +39,11 @@ public interface OfficeSectionObject {
 	 */
 	String getObjectType();
 
+	/**
+	 * Obtains the type qualifier.
+	 * 
+	 * @return Type qualifier.
+	 */
+	String getTypeQualifier();
+
 }

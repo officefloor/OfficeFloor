@@ -32,6 +32,7 @@ import java.util.Map;
 import java.util.Set;
 
 import net.officefloor.compile.ManagedObjectSourceService;
+import net.officefloor.compile.impl.util.CompileUtil;
 import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectExecuteContext;
@@ -272,8 +273,18 @@ public class ClassManagedObjectSource extends
 				.extractDependencyMetaData(this.objectClass);
 		for (DependencyMetaData dependency : this.dependencyMetaData) {
 			// Register the dependency
-			context.addDependency(dependency.field.getType()).setLabel(
-					dependency.name);
+			DependencyLabeller labeller = context
+					.addDependency(dependency.field.getType());
+
+			// Use field name as name of dependency
+			labeller.setLabel(dependency.name);
+
+			// Determine type qualifier
+			String typeQualifier = dependency.getTypeQualifier();
+			if (!CompileUtil.isBlank(typeQualifier)) {
+				// Specify the type qualifier
+				labeller.setTypeQualifier(typeQualifier);
+			}
 		}
 
 		// Obtain the process details
@@ -323,9 +334,7 @@ public class ClassManagedObjectSource extends
 			Map<String, Integer> indexes = new HashMap<String, Integer>(
 					struct.invokeMethods.length);
 			for (Method invokeMethod : struct.invokeMethods) {
-				indexes
-						.put(invokeMethod.getName(),
-								new Integer(processIndex++));
+				indexes.put(invokeMethod.getName(), new Integer(processIndex++));
 			}
 
 			// Create and add the process meta-data
@@ -381,14 +390,12 @@ public class ClassManagedObjectSource extends
 		} else {
 			// Field name not unique, so add class name for making unique
 			String classInjectName = injectField.getDeclaringClass()
-					.getSimpleName()
-					+ "." + injectField.getName();
+					.getSimpleName() + "." + injectField.getName();
 			boolean isAnotherByClassName = false;
 			for (Field field : allInjectFields) {
 				if (field != injectField) {
 					String fieldClassName = field.getDeclaringClass()
-							.getSimpleName()
-							+ "." + field.getName();
+							.getSimpleName() + "." + field.getName();
 					if (fieldClassName.equals(classInjectName)) {
 						// Another field by same class name
 						isAnotherByClassName = true;
@@ -496,8 +503,7 @@ public class ClassManagedObjectSource extends
 						.getName()
 						+ "."
 						+ processInterfaceField.getName()
-						+ "."
-						+ processMethod.getName();
+						+ "." + processMethod.getName();
 			}
 		}
 
@@ -691,8 +697,8 @@ public class ClassManagedObjectSource extends
 				}
 
 				// Field and simple class name same so compare by package
-				return aClass.getPackage().getName().compareTo(
-						bClass.getPackage().getName());
+				return aClass.getPackage().getName()
+						.compareTo(bClass.getPackage().getName());
 			}
 		});
 	}

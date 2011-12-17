@@ -15,30 +15,26 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.plugin.autowire;
+package net.officefloor.plugin.work.clazz;
 
-import net.officefloor.compile.spi.office.OfficeTeam;
+import java.lang.annotation.Documented;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
 /**
- * Responsibilities for auto-wiring.
+ * <p>
+ * Enables qualifying dependencies.
+ * <p>
+ * TODO consider following JSR299 specification to use the
+ * javax.inject.Qualifier annotation. Until available and not tied to the heavy
+ * JEE specification using this annotation.
  * 
  * @author Daniel Sagenschneider
  */
-public interface AutoWireResponsibility {
-
-	/**
-	 * Obtains the dependency {@link AutoWire}.
-	 * 
-	 * @return Dependency {@link AutoWire}.
-	 */
-	AutoWire getDependencyAutoWire();
-
-	/**
-	 * Obtains the corresponding {@link OfficeTeam} name for this
-	 * responsibility.
-	 * 
-	 * @return {@link OfficeTeam} name for this responsibility.
-	 */
-	String getOfficeTeamName();
-
+@Documented
+@Retention(RetentionPolicy.RUNTIME)
+@Target(ElementType.ANNOTATION_TYPE)
+public @interface Qualifier {
 }

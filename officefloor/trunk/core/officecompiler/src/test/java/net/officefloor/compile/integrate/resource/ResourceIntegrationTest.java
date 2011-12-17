@@ -32,6 +32,7 @@ import net.officefloor.frame.spi.managedobject.source.impl.AbstractManagedObject
 import net.officefloor.frame.spi.source.ResourceSource;
 import net.officefloor.frame.spi.source.SourceContext;
 import net.officefloor.frame.test.OfficeFrameTestCase;
+import net.officefloor.plugin.autowire.AutoWire;
 import net.officefloor.plugin.autowire.AutoWireOfficeFloor;
 import net.officefloor.plugin.autowire.AutoWireOfficeFloorSource;
 import net.officefloor.plugin.section.clazz.ClassSectionSource;
@@ -75,9 +76,9 @@ public class ResourceIntegrationTest extends OfficeFrameTestCase {
 		AutoWireOfficeFloorSource source = new AutoWireOfficeFloorSource(
 				OfficeFloorCompiler.newOfficeFloorCompiler(null));
 		source.addManagedObject(ClassLoaderManagedObjectSource.class.getName(),
-				null, ClassLoader.class);
+				null, new AutoWire(ClassLoader.class));
 		source.addManagedObject(ResourceManagedObjectSource.class.getName(),
-				null, InputStream.class);
+				null, new AutoWire(InputStream.class));
 		source.addSection("SECTION", ClassSectionSource.class.getName(),
 				ResourceWork.class.getName());
 		source.assignDefaultTeam(PassiveTeamSource.class.getName());

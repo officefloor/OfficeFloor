@@ -37,10 +37,12 @@ import net.officefloor.compile.properties.Property;
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.section.SectionInputType;
 import net.officefloor.compile.section.SectionLoader;
+import net.officefloor.compile.section.SectionObjectType;
 import net.officefloor.compile.section.SectionOutputType;
 import net.officefloor.compile.section.SectionType;
 import net.officefloor.compile.spi.office.OfficeSection;
 import net.officefloor.compile.spi.section.SectionDesigner;
+import net.officefloor.compile.spi.section.SectionObject;
 import net.officefloor.compile.spi.section.source.SectionSource;
 import net.officefloor.compile.spi.section.source.SectionSourceContext;
 import net.officefloor.compile.spi.section.source.SectionSourceSpecification;
@@ -449,10 +451,39 @@ public class LoadSectionTypeTest extends OfficeFrameTestCase {
 		// Ensure correct object
 		assertEquals("Incorrect number of objects", 1,
 				type.getSectionObjectTypes().length);
+		SectionObjectType objectType = type.getSectionObjectTypes()[0];
 		assertEquals("Incorrect object name", "OBJECT",
-				type.getSectionObjectTypes()[0].getSectionObjectName());
+				objectType.getSectionObjectName());
 		assertEquals("Incorrect object type", Double.class.getName(),
-				type.getSectionObjectTypes()[0].getObjectType());
+				objectType.getObjectType());
+		assertNull("Should not be qualified", objectType.getTypeQualifier());
+	}
+
+	/**
+	 * Ensure can create object with an qualified object type.
+	 */
+	public void testObjectWithQualifiedObjectType() {
+		// Load section type
+		SectionType type = this.loadSectionType(true, new Loader() {
+			@Override
+			public void sourceSection(SectionDesigner section,
+					SectionSourceContext context) throws Exception {
+				SectionObject object = section.addSectionObject("OBJECT",
+						Double.class.getName());
+				object.setTypeQualifier("QUALIFIED");
+			}
+		});
+
+		// Ensure correct object
+		assertEquals("Incorrect number of objects", 1,
+				type.getSectionObjectTypes().length);
+		SectionObjectType objectType = type.getSectionObjectTypes()[0];
+		assertEquals("Incorrect object name", "OBJECT",
+				objectType.getSectionObjectName());
+		assertEquals("Incorrect object type", Double.class.getName(),
+				objectType.getObjectType());
+		assertEquals("Incorrect type qualifier", "QUALIFIED",
+				objectType.getTypeQualifier());
 	}
 
 	/**
