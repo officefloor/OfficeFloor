@@ -23,6 +23,7 @@ import java.lang.reflect.Proxy;
 import net.officefloor.frame.impl.spi.team.OnePersonTeamSource;
 import net.officefloor.frame.spi.source.SourceProperties;
 import net.officefloor.model.gwt.module.GwtModuleModel;
+import net.officefloor.plugin.autowire.AutoWire;
 import net.officefloor.plugin.autowire.AutoWireSection;
 import net.officefloor.plugin.autowire.ManagedObjectSourceWirer;
 import net.officefloor.plugin.autowire.ManagedObjectSourceWirerContext;
@@ -121,7 +122,7 @@ public class CometHttpTemplateSectionExtension implements
 			throws Exception {
 
 		// Determine if already configured Comet Service
-		if (!application.isObjectAvailable(CometService.class)) {
+		if (!application.isObjectAvailable(new AutoWire(CometService.class))) {
 			// Configure the Comet Service
 			application.addManagedObject(
 					CometServiceManagedObjectSource.class.getName(),
@@ -133,15 +134,15 @@ public class CometHttpTemplateSectionExtension implements
 									CometServiceManagedObjectSource.EXPIRE_TEAM_NAME,
 									OnePersonTeamSource.class.getName());
 						}
-					}, CometService.class).setTimeout(600 * 1000);
+					}, new AutoWire(CometService.class)).setTimeout(600 * 1000);
 		}
 
 		// Determine if already configured CometPublisher
-		if (!application.isObjectAvailable(CometPublisher.class)) {
+		if (!application.isObjectAvailable(new AutoWire(CometPublisher.class))) {
 			// Configure the Comet Publisher
 			application.addManagedObject(
 					CometPublisherManagedObjectSource.class.getName(), null,
-					CometPublisher.class);
+					new AutoWire(CometPublisher.class));
 		}
 
 		// Obtain the section to service Comet requests
@@ -192,11 +193,13 @@ public class CometHttpTemplateSectionExtension implements
 				if (parameterType
 						.isAnnotationPresent(CometPublisherInterface.class)) {
 					// CometPublisherInterface, so register once
-					if (!application.isObjectAvailable(parameterType)) {
+					if (!application.isObjectAvailable(new AutoWire(
+							parameterType))) {
 						application
 								.addManagedObject(
 										CometProxyPublisherManagedObjectSource.class
-												.getName(), null, parameterType)
+												.getName(), null,
+										new AutoWire(parameterType))
 								.addProperty(
 										CometProxyPublisherManagedObjectSource.PROPERTY_PROXY_INTERFACE,
 										parameterType.getName());

@@ -26,6 +26,7 @@ import java.sql.Connection;
 import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.spi.source.UnknownPropertyError;
 import net.officefloor.frame.test.OfficeFrameTestCase;
+import net.officefloor.plugin.autowire.AutoWire;
 import net.officefloor.plugin.autowire.AutoWireOfficeFloor;
 import net.officefloor.plugin.autowire.AutoWireOfficeFloorSource;
 import net.officefloor.plugin.autowire.AutoWireSection;
@@ -432,9 +433,9 @@ public class HttpTemplateSectionIntegrationTest extends OfficeFrameTestCase {
 				"ROUTE", "route");
 
 		// Add dependencies
-		source.addObject(this.connection, Connection.class);
+		source.addObject(this.connection, new AutoWire(Connection.class));
 		source.addManagedObject(HttpSessionManagedObjectSource.class.getName(),
-				null, HttpSession.class).setTimeout(10 * 1000);
+				null, new AutoWire(HttpSession.class)).setTimeout(10 * 1000);
 
 		// Link service Task name prefix
 		final String LINK_SERVICE_TASK_NAME_PREFIX = "LINK_";

@@ -212,8 +212,11 @@ public abstract class AbstractWoofChangesTestCase extends
 		 *            Name.
 		 * @param objectType
 		 *            Object type.
+		 * @param typeQualifier
+		 *            Type qualifier.
 		 */
-		void addSectionObject(String name, Class<?> objectType);
+		void addSectionObject(String name, Class<?> objectType,
+				String typeQualifier);
 	}
 
 	/**
@@ -256,8 +259,10 @@ public abstract class AbstractWoofChangesTestCase extends
 		}
 
 		@Override
-		public void addSectionObject(String name, Class<?> objectType) {
-			this.objects.add(new SectionTypeItem(name, objectType.getName()));
+		public void addSectionObject(String name, Class<?> objectType,
+				String typeQualifier) {
+			this.objects.add(new SectionTypeItem(name, objectType.getName(),
+					typeQualifier));
 		}
 
 		/*
@@ -297,12 +302,29 @@ public abstract class AbstractWoofChangesTestCase extends
 		private final String type;
 
 		/**
+		 * Type qualifier.
+		 */
+		private final String typeQualifier;
+
+		/**
 		 * Flag indicating if escalation only.
 		 */
 		private final boolean isEscalation;
 
 		/**
-		 * Initialise.
+		 * Initialise for {@link SectionInputType}.
+		 * 
+		 * @param name
+		 *            Name.
+		 * @param type
+		 *            Type.
+		 */
+		public SectionTypeItem(String name, String type) {
+			this(name, type, false);
+		}
+
+		/**
+		 * Initialise for {@link SectionOutputType}.
 		 * 
 		 * @param name
 		 *            Name.
@@ -314,19 +336,25 @@ public abstract class AbstractWoofChangesTestCase extends
 		public SectionTypeItem(String name, String type, boolean isEscalation) {
 			this.name = name;
 			this.type = type;
+			this.typeQualifier = null;
 			this.isEscalation = isEscalation;
 		}
 
 		/**
-		 * Initialise.
+		 * Initialise for {@link SectionObjectType}.
 		 * 
 		 * @param name
 		 *            Name.
 		 * @param type
 		 *            Type.
+		 * @param typeQualifier
+		 *            Type qualifier.
 		 */
-		public SectionTypeItem(String name, String type) {
-			this(name, type, false);
+		public SectionTypeItem(String name, String type, String typeQualifier) {
+			this.name = name;
+			this.type = type;
+			this.typeQualifier = typeQualifier;
+			this.isEscalation = false;
 		}
 
 		/*
@@ -374,6 +402,11 @@ public abstract class AbstractWoofChangesTestCase extends
 		@Override
 		public String getObjectType() {
 			return this.type;
+		}
+
+		@Override
+		public String getTypeQualifier() {
+			return this.typeQualifier;
 		}
 	}
 

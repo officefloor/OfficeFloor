@@ -95,14 +95,16 @@ public class CometSectionSource extends AbstractSectionSource {
 		// Configure pre-subscription
 		SectionTask preSubscription = subscribeWork.addSectionTask(
 				"PRE_SUBSCRIBE", "preSubscribe");
-		designer.link(preSubscription.getTaskObject(CometService.class
-				.getSimpleName()), cometService);
+		designer.link(
+				preSubscription.getTaskObject(CometService.class.getName()),
+				cometService);
 
 		// Configure post-subscription (after pre-subscription)
 		SectionTask postSubscription = subscribeWork.addSectionTask(
 				"POST_SUBSCRIBE", "postSubscribe");
-		designer.link(postSubscription.getTaskObject(CometService.class
-				.getSimpleName()), cometService);
+		designer.link(
+				postSubscription.getTaskObject(CometService.class.getName()),
+				cometService);
 		designer.link(preSubscription, postSubscription);
 
 		// Register input to service subscription

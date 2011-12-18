@@ -19,6 +19,7 @@ package net.officefloor.plugin.comet.spi;
 
 import net.officefloor.frame.impl.spi.team.OnePersonTeamSource;
 import net.officefloor.frame.test.OfficeFrameTestCase;
+import net.officefloor.plugin.autowire.AutoWire;
 import net.officefloor.plugin.autowire.AutoWireObject;
 import net.officefloor.plugin.autowire.AutoWireOfficeFloor;
 import net.officefloor.plugin.autowire.AutoWireSection;
@@ -66,7 +67,7 @@ public class CometServiceIntegrationTest extends OfficeFrameTestCase {
 				this.port);
 		server.addManagedObject(
 				ServerGwtRpcConnectionManagedObjectSource.class.getName(),
-				null, ServerGwtRpcConnection.class);
+				null, new AutoWire(ServerGwtRpcConnection.class));
 		AutoWireObject comet = server.addManagedObject(
 				CometServiceManagedObjectSource.class.getName(),
 				new ManagedObjectSourceWirer() {
@@ -77,7 +78,7 @@ public class CometServiceIntegrationTest extends OfficeFrameTestCase {
 								CometServiceManagedObjectSource.EXPIRE_TEAM_NAME,
 								OnePersonTeamSource.class.getName());
 					}
-				}, CometService.class);
+				}, new AutoWire(CometService.class));
 		comet.addProperty(
 				CometServiceManagedObjectSource.PROPERTY_EVENT_TIMEOUT,
 				String.valueOf(eventTimeout));

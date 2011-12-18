@@ -61,7 +61,7 @@ public class HttpSecurityManagedObjectSourceTest extends OfficeFrameTestCase {
 		type.setObjectClass(HttpSecurity.class);
 		type.addTeam("AUTHENTICATOR");
 		type.addDependency(DependencyKeys.HTTP_SECURITY_SERVICE,
-				HttpSecurityService.class);
+				HttpSecurityService.class, null);
 
 		// Validate the type
 		ManagedObjectLoaderUtil.validateManagedObjectType(type,
@@ -96,12 +96,11 @@ public class HttpSecurityManagedObjectSourceTest extends OfficeFrameTestCase {
 		};
 
 		// Record
-		this
-				.recordReturn(
-						taskContext,
-						taskContext
-								.getObject(AuthenticateTaskDependencyKeys.HTTP_SECURITY_MANAGED_OBJECT),
-						mockManagedObject);
+		this.recordReturn(
+				taskContext,
+				taskContext
+						.getObject(AuthenticateTaskDependencyKeys.HTTP_SECURITY_MANAGED_OBJECT),
+				mockManagedObject);
 		listener.notifyStarted();
 		this.recordReturn(service, service.authenticate(), expectedSecurity);
 		listener.notifyComplete();

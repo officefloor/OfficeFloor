@@ -60,7 +60,7 @@ public class HttpSessionObjectRetrieverManagedObjectSourceTest extends
 		type.setObjectClass(MockType.class);
 		type.addDependency(
 				HttpSessionObjectRetrieverDependencies.HTTP_SESSION_OBJECT
-						.name(), HttpSessionObject.class,
+						.name(), HttpSessionObject.class, null,
 				HttpSessionObjectRetrieverDependencies.HTTP_SESSION_OBJECT
 						.ordinal(),
 				HttpSessionObjectRetrieverDependencies.HTTP_SESSION_OBJECT);
@@ -89,12 +89,11 @@ public class HttpSessionObjectRetrieverManagedObjectSourceTest extends
 				.createMock(HttpSessionObject.class);
 
 		// Record
-		this
-				.recordReturn(
-						objectRegistry,
-						objectRegistry
-								.getObject(HttpSessionObjectRetrieverDependencies.HTTP_SESSION_OBJECT),
-						sessionObject);
+		this.recordReturn(
+				objectRegistry,
+				objectRegistry
+						.getObject(HttpSessionObjectRetrieverDependencies.HTTP_SESSION_OBJECT),
+				sessionObject);
 		this.recordReturn(sessionObject, sessionObject.getSessionObject(),
 				SESSION_OBJECT);
 
@@ -102,10 +101,9 @@ public class HttpSessionObjectRetrieverManagedObjectSourceTest extends
 
 		// Load the managed object source
 		ManagedObjectSourceStandAlone loader = new ManagedObjectSourceStandAlone();
-		loader
-				.addProperty(
-						HttpSessionObjectRetrieverManagedObjectSource.PROPERTY_TYPE_NAME,
-						MockType.class.getName());
+		loader.addProperty(
+				HttpSessionObjectRetrieverManagedObjectSource.PROPERTY_TYPE_NAME,
+				MockType.class.getName());
 		HttpSessionObjectRetrieverManagedObjectSource mos = loader
 				.loadManagedObjectSource(HttpSessionObjectRetrieverManagedObjectSource.class);
 

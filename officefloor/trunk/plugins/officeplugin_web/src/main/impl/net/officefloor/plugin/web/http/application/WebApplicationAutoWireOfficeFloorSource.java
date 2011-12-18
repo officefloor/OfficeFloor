@@ -31,6 +31,7 @@ import net.officefloor.compile.spi.section.SectionInput;
 import net.officefloor.compile.spi.section.SectionOutput;
 import net.officefloor.frame.api.escalate.Escalation;
 import net.officefloor.frame.api.execute.Task;
+import net.officefloor.plugin.autowire.AutoWire;
 import net.officefloor.plugin.autowire.AutoWireObject;
 import net.officefloor.plugin.autowire.AutoWireOfficeFloorSource;
 import net.officefloor.plugin.autowire.AutoWireSection;
@@ -214,7 +215,7 @@ public class WebApplicationAutoWireOfficeFloorSource extends
 		// Not registered, so register
 		object = this.addManagedObject(
 				HttpApplicationClassManagedObjectSource.class.getName(), null,
-				objectClass);
+				new AutoWire(objectClass));
 		object.addProperty(
 				HttpApplicationClassManagedObjectSource.PROPERTY_CLASS_NAME,
 				objectClass.getName());
@@ -247,7 +248,7 @@ public class WebApplicationAutoWireOfficeFloorSource extends
 		// Not registered, so register
 		object = this.addManagedObject(
 				HttpSessionClassManagedObjectSource.class.getName(), null,
-				objectClass);
+				new AutoWire(objectClass));
 		object.addProperty(
 				HttpSessionClassManagedObjectSource.PROPERTY_CLASS_NAME,
 				objectClass.getName());
@@ -280,7 +281,7 @@ public class WebApplicationAutoWireOfficeFloorSource extends
 		// Not registered, so register
 		object = this.addManagedObject(
 				HttpRequestClassManagedObjectSource.class.getName(), null,
-				objectClass);
+				new AutoWire(objectClass));
 		object.addProperty(
 				HttpRequestClassManagedObjectSource.PROPERTY_CLASS_NAME,
 				objectClass.getName());
@@ -312,7 +313,7 @@ public class WebApplicationAutoWireOfficeFloorSource extends
 		// Not registered, so register
 		object = this.addManagedObject(
 				HttpParametersObjectManagedObjectSource.class.getName(), null,
-				objectClass);
+				new AutoWire(objectClass));
 		object.addProperty(
 				HttpParametersObjectManagedObjectSource.PROPERTY_CLASS_NAME,
 				objectClass.getName());

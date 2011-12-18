@@ -63,7 +63,7 @@ public class JndiLdapManagedObjectSourceTest extends OfficeFrameTestCase {
 		ManagedObjectTypeBuilder type = ManagedObjectLoaderUtil
 				.createManagedObjectTypeBuilder();
 		type.setObjectClass(CredentialStore.class);
-		type.addDependency(DependencyKeys.DIR_CONTEXT, DirContext.class);
+		type.addDependency(DependencyKeys.DIR_CONTEXT, DirContext.class, null);
 
 		// Validate type
 		ManagedObjectLoaderUtil.validateManagedObjectType(type,

@@ -108,7 +108,7 @@ public class HttpTemplateSectionSourceTest extends OfficeFrameTestCase {
 		// List
 		SectionTask getList = classWork.addSectionTask("getList", "getList");
 		getList.getTaskObject("OBJECT");
-		getList.getTaskObject("HttpSession");
+		getList.getTaskObject(HttpSession.class.getName());
 		SectionTask listArrayIterator = classWork.addSectionTask(
 				"ListArrayIterator", "ListArrayIterator");
 		listArrayIterator.getTaskObject("ARRAY");
@@ -132,7 +132,7 @@ public class HttpTemplateSectionSourceTest extends OfficeFrameTestCase {
 		SectionTask nextTaskMethod = classWork.addSectionTask("nextTask",
 				"nextTask");
 		nextTaskMethod.getTaskObject("OBJECT");
-		nextTaskMethod.getTaskObject("ServerHttpConnection");
+		nextTaskMethod.getTaskObject(ServerHttpConnection.class.getName());
 
 		// Route submit link
 		templateWork.addSectionTask("LINK_submit", "submit");
@@ -140,15 +140,15 @@ public class HttpTemplateSectionSourceTest extends OfficeFrameTestCase {
 		// Handle submit task
 		SectionTask submitMethod = classWork.addSectionTask("submit", "submit");
 		submitMethod.getTaskObject("OBJECT");
-		submitMethod.getTaskObject("ServerHttpConnection");
+		submitMethod.getTaskObject(ServerHttpConnection.class.getName());
 
 		// Extra task
 		SectionTask doInternalFlow = classWork.addSectionTask("doInternalFlow",
 				"doInternalFlow");
 		doInternalFlow.getTaskObject("OBJECT");
-		doInternalFlow.getTaskObject("Integer");
-		doInternalFlow.getTaskObject("Connection");
-		doInternalFlow.getTaskObject("ServerHttpConnection");
+		doInternalFlow.getTaskObject(Integer.class.getName());
+		doInternalFlow.getTaskObject(Connection.class.getName());
+		doInternalFlow.getTaskObject(ServerHttpConnection.class.getName());
 
 		// Managed Object Sources
 		expected.addSectionManagedObjectSource("OBJECT",

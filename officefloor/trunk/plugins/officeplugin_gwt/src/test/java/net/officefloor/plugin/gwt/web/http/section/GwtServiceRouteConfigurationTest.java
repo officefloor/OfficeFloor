@@ -21,6 +21,7 @@ import org.easymock.AbstractMatcher;
 
 import net.officefloor.frame.spi.source.SourceProperties;
 import net.officefloor.frame.test.OfficeFrameTestCase;
+import net.officefloor.plugin.autowire.AutoWire;
 import net.officefloor.plugin.autowire.AutoWireObject;
 import net.officefloor.plugin.gwt.service.ServerGwtRpcConnection;
 import net.officefloor.plugin.gwt.service.ServerGwtRpcConnectionManagedObjectSource;
@@ -155,23 +156,26 @@ public class GwtServiceRouteConfigurationTest extends OfficeFrameTestCase {
 
 		// Record adding Server GWT RPC Connection
 		this.recordReturn(this.application, this.application
-				.isObjectAvailable(ServerGwtRpcConnection.class), false);
+				.isObjectAvailable(new AutoWire(ServerGwtRpcConnection.class)),
+				false);
 		this.recordReturn(this.application, this.application.addManagedObject(
 				ServerGwtRpcConnectionManagedObjectSource.class.getName(),
-				null, ServerGwtRpcConnection.class, AsyncCallback.class),
-				serverGwtRpcConnection, new AbstractMatcher() {
+				null, new AutoWire(ServerGwtRpcConnection.class), new AutoWire(
+						AsyncCallback.class)), serverGwtRpcConnection,
+				new AbstractMatcher() {
 					@Override
 					public boolean matches(Object[] expected, Object[] actual) {
 						assertEquals("Incorrect managed object source",
 								expected[0], actual[0]);
 						assertNull("Should not be a wirer", actual[1]);
-						Class<?>[] expectedTypes = (Class<?>[]) expected[2];
-						Class<?>[] actualTypes = (Class<?>[]) actual[2];
-						assertEquals("Incorrect number of types",
-								expectedTypes.length, actualTypes.length);
-						for (int i = 0; i < expectedTypes.length; i++) {
-							assertEquals("Incorrect type " + i,
-									expectedTypes[i], actualTypes[i]);
+						AutoWire[] expectedAutoWiring = (AutoWire[]) expected[2];
+						AutoWire[] actualAutoWiring = (AutoWire[]) actual[2];
+						assertEquals("Incorrect number of auto-wiring",
+								expectedAutoWiring.length,
+								actualAutoWiring.length);
+						for (int i = 0; i < expectedAutoWiring.length; i++) {
+							assertEquals("Incorrect auto-wire " + i,
+									expectedAutoWiring[i], actualAutoWiring[i]);
 						}
 						return true;
 					}

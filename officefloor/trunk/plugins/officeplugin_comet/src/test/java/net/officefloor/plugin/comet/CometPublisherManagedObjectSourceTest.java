@@ -51,7 +51,7 @@ public class CometPublisherManagedObjectSourceTest extends OfficeFrameTestCase {
 		ManagedObjectTypeBuilder type = ManagedObjectLoaderUtil
 				.createManagedObjectTypeBuilder();
 		type.setObjectClass(CometPublisher.class);
-		type.addDependency(Dependencies.COMET_SERVICE, CometService.class);
+		type.addDependency(Dependencies.COMET_SERVICE, CometService.class, null);
 
 		// Validate type
 		ManagedObjectLoaderUtil.validateManagedObjectType(type,

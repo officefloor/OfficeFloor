@@ -57,7 +57,8 @@ public class ServletHttpRequestStateManagedObjectSourceTest extends
 		ManagedObjectTypeBuilder type = ManagedObjectLoaderUtil
 				.createManagedObjectTypeBuilder();
 		type.setObjectClass(HttpRequestState.class);
-		type.addDependency(Dependencies.SERVLET_BRIDGE, ServletBridge.class);
+		type.addDependency(Dependencies.SERVLET_BRIDGE, ServletBridge.class,
+				null);
 
 		// Validate type
 		ManagedObjectLoaderUtil.validateManagedObjectType(type,

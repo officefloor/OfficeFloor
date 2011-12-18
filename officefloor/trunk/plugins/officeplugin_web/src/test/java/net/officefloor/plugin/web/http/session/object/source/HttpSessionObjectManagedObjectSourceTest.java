@@ -56,8 +56,9 @@ public class HttpSessionObjectManagedObjectSourceTest extends
 				.createManagedObjectTypeBuilder();
 		type.setObjectClass(HttpSessionObject.class);
 		type.addDependency(HttpSessionObjectDependencies.HTTP_SESSION.name(),
-				HttpSession.class, HttpSessionObjectDependencies.HTTP_SESSION
-						.ordinal(), HttpSessionObjectDependencies.HTTP_SESSION);
+				HttpSession.class, null,
+				HttpSessionObjectDependencies.HTTP_SESSION.ordinal(),
+				HttpSessionObjectDependencies.HTTP_SESSION);
 
 		// Validate the managed object type
 		ManagedObjectLoaderUtil.validateManagedObjectType(type,

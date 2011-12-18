@@ -57,7 +57,7 @@ public class HttpParametersObjectManagedObjectSourceTest extends
 				.createManagedObjectTypeBuilder();
 		mo.setObjectClass(MockClass.class);
 		mo.addDependency(Dependencies.SERVER_HTTP_CONNECTION,
-				ServerHttpConnection.class);
+				ServerHttpConnection.class, null);
 		ManagedObjectLoaderUtil.validateManagedObjectType(mo,
 				HttpParametersObjectManagedObjectSource.class,
 				HttpParametersObjectManagedObjectSource.PROPERTY_CLASS_NAME,

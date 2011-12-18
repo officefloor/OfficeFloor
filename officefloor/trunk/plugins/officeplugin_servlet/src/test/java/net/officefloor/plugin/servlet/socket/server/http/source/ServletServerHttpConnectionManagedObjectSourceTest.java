@@ -55,7 +55,8 @@ public class ServletServerHttpConnectionManagedObjectSourceTest extends
 		ManagedObjectTypeBuilder type = ManagedObjectLoaderUtil
 				.createManagedObjectTypeBuilder();
 		type.setObjectClass(ServerHttpConnection.class);
-		type.addDependency(DependencyKeys.SERVLET_BRIDGE, ServletBridge.class);
+		type.addDependency(DependencyKeys.SERVLET_BRIDGE, ServletBridge.class,
+				null);
 
 		// Validate type
 		ManagedObjectLoaderUtil.validateManagedObjectType(type,

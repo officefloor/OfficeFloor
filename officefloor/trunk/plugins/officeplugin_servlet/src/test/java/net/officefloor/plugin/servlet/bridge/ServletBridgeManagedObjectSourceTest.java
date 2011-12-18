@@ -31,6 +31,7 @@ import javax.servlet.http.HttpServletResponse;
 import net.officefloor.compile.test.managedobject.ManagedObjectLoaderUtil;
 import net.officefloor.compile.test.managedobject.ManagedObjectTypeBuilder;
 import net.officefloor.frame.test.OfficeFrameTestCase;
+import net.officefloor.plugin.autowire.AutoWire;
 import net.officefloor.plugin.autowire.AutoWireObject;
 import net.officefloor.plugin.autowire.AutoWireOfficeFloor;
 import net.officefloor.plugin.autowire.AutoWireOfficeFloorSource;
@@ -136,7 +137,7 @@ public class ServletBridgeManagedObjectSourceTest extends OfficeFrameTestCase {
 						context.mapFlow(FlowKeys.SERVICE.name(), "SECTION",
 								"service");
 					}
-				}, ServletBridge.class);
+				}, new AutoWire(ServletBridge.class));
 		servletBridgeMo.addProperty(
 				ServletBridgeManagedObjectSource.PROPERTY_INSTANCE_IDENTIFIER,
 				servicer.getInstanceIdentifier());

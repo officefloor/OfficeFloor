@@ -261,8 +261,8 @@ public class HttpTemplateSectionSource extends ClassSectionSource {
 					.isHttpTemplateSectionRequireBean(templateSection);
 
 			// Link the Server HTTP Connection dependency
-			SectionObject connectionObject = this
-					.getOrCreateObject(ServerHttpConnection.class.getName());
+			SectionObject connectionObject = this.getOrCreateObject(null,
+					ServerHttpConnection.class.getName());
 			designer.link(templateTask.getTaskObject("SERVER_HTTP_CONNECTION"),
 					connectionObject);
 
@@ -729,7 +729,8 @@ public class HttpTemplateSectionSource extends ClassSectionSource {
 
 		@Override
 		public SectionObject getOrCreateSectionObject(String typeName) {
-			return HttpTemplateSectionSource.this.getOrCreateObject(typeName);
+			return HttpTemplateSectionSource.this.getOrCreateObject(null,
+					typeName);
 		}
 
 		@Override
