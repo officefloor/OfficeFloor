@@ -86,7 +86,7 @@ public class HttpSecurityServiceManagedObjectSourceTest extends
 		ManagedObjectTypeBuilder type = this.createCoreType();
 		type.addDependency(
 				"Dependency-" + Dependencies.CREDENTIAL_STORE.name(),
-				CredentialStore.class, 2, null);
+				CredentialStore.class, null, 2, null);
 
 		// Validate type
 		ManagedObjectLoaderUtil
@@ -108,7 +108,7 @@ public class HttpSecurityServiceManagedObjectSourceTest extends
 		type.addDependency(
 				"Dependency-"
 						+ net.officefloor.plugin.web.http.security.scheme.DigestHttpSecuritySource.Dependencies.CREDENTIAL_STORE
-								.name(), CredentialStore.class, 2, null);
+								.name(), CredentialStore.class, null, 2, null);
 
 		// Validate type
 		ManagedObjectLoaderUtil
@@ -159,8 +159,8 @@ public class HttpSecurityServiceManagedObjectSourceTest extends
 
 		// Create the expected type
 		ManagedObjectTypeBuilder type = this.createCoreType();
-		type.addDependency("Dependency-KEY_ONE", Integer.class, 2, null);
-		type.addDependency("Dependency-KEY_TWO", Object.class, 3, null);
+		type.addDependency("Dependency-KEY_ONE", Integer.class, null, 2, null);
+		type.addDependency("Dependency-KEY_TWO", Object.class, null, 3, null);
 
 		// Validate type
 		ManagedObjectLoaderUtil
@@ -491,9 +491,9 @@ public class HttpSecurityServiceManagedObjectSourceTest extends
 		ManagedObjectTypeBuilder type = ManagedObjectLoaderUtil
 				.createManagedObjectTypeBuilder();
 		type.setObjectClass(HttpSecurityService.class);
-		type.addDependency("HTTP_CONNECTION", ServerHttpConnection.class, 0,
-				null);
-		type.addDependency("HTTP_SESSION", HttpSession.class, 1, null);
+		type.addDependency("HTTP_CONNECTION", ServerHttpConnection.class, null,
+				0, null);
+		type.addDependency("HTTP_SESSION", HttpSession.class, null, 1, null);
 		return type;
 	}
 

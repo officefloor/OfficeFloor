@@ -32,6 +32,7 @@ import net.officefloor.compile.work.TaskType;
 import net.officefloor.compile.work.WorkType;
 import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
 import net.officefloor.frame.spi.source.SourceProperties;
+import net.officefloor.plugin.autowire.AutoWire;
 import net.officefloor.plugin.gwt.service.GwtServiceTask.Dependencies;
 import net.officefloor.plugin.gwt.service.GwtServiceWorkSource;
 import net.officefloor.plugin.gwt.service.ServerGwtRpcConnection;
@@ -108,10 +109,12 @@ public class GwtHttpTemplateSectionExtension implements
 		}
 
 		// Configure the Server GWT RPC Connection (only once)
-		if (!(application.isObjectAvailable(ServerGwtRpcConnection.class))) {
+		if (!(application.isObjectAvailable(new AutoWire(
+				ServerGwtRpcConnection.class)))) {
 			application.addManagedObject(
 					ServerGwtRpcConnectionManagedObjectSource.class.getName(),
-					null, ServerGwtRpcConnection.class, AsyncCallback.class);
+					null, new AutoWire(ServerGwtRpcConnection.class),
+					new AutoWire(AsyncCallback.class));
 		}
 
 		// Configure this extension

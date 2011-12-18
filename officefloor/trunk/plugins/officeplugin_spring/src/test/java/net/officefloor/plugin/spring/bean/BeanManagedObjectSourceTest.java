@@ -34,7 +34,7 @@ import org.springframework.beans.factory.BeanFactory;
 
 /**
  * Tests the {@link BeanManagedObjectSource}.
- *
+ * 
  * @author Daniel Sagenschneider
  */
 public class BeanManagedObjectSourceTest extends OfficeFrameTestCase {
@@ -59,15 +59,15 @@ public class BeanManagedObjectSourceTest extends OfficeFrameTestCase {
 		ManagedObjectTypeBuilder type = ManagedObjectLoaderUtil
 				.createManagedObjectTypeBuilder();
 		type.setObjectClass(MockBean.class);
-		type.addDependency("BeanFactory", BeanFactory.class, 0,
+		type.addDependency("BeanFactory", BeanFactory.class, null, 0,
 				BeanDependency.BEAN_FACTORY);
 
 		// Validate the managed object type
 		ManagedObjectLoaderUtil.validateManagedObjectType(type,
 				BeanManagedObjectSource.class,
 				BeanManagedObjectSource.BEAN_NAME_PROPERTY_NAME, "test",
-				BeanManagedObjectSource.BEAN_FACTORY_PATH_PROPERTY_NAME, this
-						.getBeanFactoryConfigurationPath());
+				BeanManagedObjectSource.BEAN_FACTORY_PATH_PROPERTY_NAME,
+				this.getBeanFactoryConfigurationPath());
 	}
 
 	/**
@@ -83,10 +83,11 @@ public class BeanManagedObjectSourceTest extends OfficeFrameTestCase {
 		final Object BEAN = "Bean";
 
 		// Record obtaining the bean
-		this.recordReturn(objectRegistry, objectRegistry
-				.getObject(BeanDependency.BEAN_FACTORY), beanFactory);
-		this.recordReturn(beanFactory, beanFactory.getBean(BEAN_NAME,
-				MockBean.class), BEAN);
+		this.recordReturn(objectRegistry,
+				objectRegistry.getObject(BeanDependency.BEAN_FACTORY),
+				beanFactory);
+		this.recordReturn(beanFactory,
+				beanFactory.getBean(BEAN_NAME, MockBean.class), BEAN);
 
 		// Ensure able to obtain the bean factory
 		this.replayMockObjects();
@@ -94,8 +95,8 @@ public class BeanManagedObjectSourceTest extends OfficeFrameTestCase {
 		standAlone.addProperty(BeanManagedObjectSource.BEAN_NAME_PROPERTY_NAME,
 				BEAN_NAME);
 		standAlone.addProperty(
-				BeanManagedObjectSource.BEAN_FACTORY_PATH_PROPERTY_NAME, this
-						.getBeanFactoryConfigurationPath());
+				BeanManagedObjectSource.BEAN_FACTORY_PATH_PROPERTY_NAME,
+				this.getBeanFactoryConfigurationPath());
 		BeanManagedObjectSource managedObjectSource = standAlone
 				.loadManagedObjectSource(BeanManagedObjectSource.class);
 		ManagedObjectUserStandAlone user = new ManagedObjectUserStandAlone();
@@ -109,7 +110,7 @@ public class BeanManagedObjectSourceTest extends OfficeFrameTestCase {
 
 	/**
 	 * Obtains the path to the configuration for the {@link BeanFactory}.
-	 *
+	 * 
 	 * @return Path to the configuration for the {@link BeanFactory}.
 	 */
 	private String getBeanFactoryConfigurationPath() {

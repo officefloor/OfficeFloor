@@ -32,7 +32,7 @@ import net.officefloor.plugin.web.http.parameters.source.HttpParametersLoaderMan
 
 /**
  * Tests the {@link HttpParametersLoaderManagedObjectSource}.
- *
+ * 
  * @author Daniel Sagenschneider
  */
 public class HttpParametersLoaderManagedObjectSourceTest extends
@@ -57,9 +57,9 @@ public class HttpParametersLoaderManagedObjectSourceTest extends
 		mo.setObjectClass(MockType.class);
 		mo.addDependency(
 				HttpParametersLoaderDependencies.SERVER_HTTP_CONNECTION,
-				ServerHttpConnection.class);
+				ServerHttpConnection.class, null);
 		mo.addDependency(HttpParametersLoaderDependencies.OBJECT,
-				MockType.class);
+				MockType.class, null);
 		ManagedObjectLoaderUtil.validateManagedObjectType(mo,
 				HttpParametersLoaderManagedObjectSource.class,
 				HttpParametersLoaderManagedObjectSource.PROPERTY_TYPE_NAME,

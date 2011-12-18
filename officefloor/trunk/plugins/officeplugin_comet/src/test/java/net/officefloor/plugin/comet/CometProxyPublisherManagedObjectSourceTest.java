@@ -54,7 +54,8 @@ public class CometProxyPublisherManagedObjectSourceTest extends
 		ManagedObjectTypeBuilder type = ManagedObjectLoaderUtil
 				.createManagedObjectTypeBuilder();
 		type.setObjectClass(MockCometSubscriber.class);
-		type.addDependency(Dependencies.COMET_PUBLISHER, CometPublisher.class);
+		type.addDependency(Dependencies.COMET_PUBLISHER, CometPublisher.class,
+				null);
 
 		// Validate the expected type
 		ManagedObjectLoaderUtil

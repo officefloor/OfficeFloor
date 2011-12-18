@@ -54,7 +54,7 @@ public class CometServiceManagedObjectSourceTest extends OfficeFrameTestCase {
 				.createManagedObjectTypeBuilder();
 		type.setObjectClass(CometService.class);
 		type.addDependency(Dependencies.SERVER_GWT_RPC_CONNECTION,
-				ServerGwtRpcConnection.class);
+				ServerGwtRpcConnection.class, null);
 		type.addTeam("EXPIRE_TEAM");
 
 		// Validate type

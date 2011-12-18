@@ -31,6 +31,7 @@ import net.officefloor.model.impl.repository.classloader.ClassLoaderConfiguratio
 import net.officefloor.model.repository.ConfigurationContext;
 import net.officefloor.model.repository.ConfigurationItem;
 import net.officefloor.model.woof.WoofRepositoryImpl;
+import net.officefloor.plugin.autowire.AutoWire;
 import net.officefloor.plugin.autowire.AutoWireGovernance;
 import net.officefloor.plugin.autowire.AutoWireSection;
 import net.officefloor.plugin.comet.CometPublisher;
@@ -242,8 +243,8 @@ public class WoofLoaderTest extends OfficeFrameTestCase {
 				"WOOF/Template.html", Template.class, "example"), template);
 
 		// Record extending with GWT
-		this.recordReturn(this.app,
-				this.app.isObjectAvailable(ServerGwtRpcConnection.class), true);
+		this.recordReturn(this.app, this.app.isObjectAvailable(new AutoWire(
+				ServerGwtRpcConnection.class)), true);
 		this.recordReturn(template, template.getTemplateUri(), "example");
 		this.recordReturn(template, template
 				.addTemplateExtension(GwtHttpTemplateSectionExtension.class),
@@ -281,9 +282,11 @@ public class WoofLoaderTest extends OfficeFrameTestCase {
 
 		// Record extending with GWT
 		this.recordReturn(this.app,
-				this.app.isObjectAvailable(CometService.class), true);
+				this.app.isObjectAvailable(new AutoWire(CometService.class)),
+				true);
 		this.recordReturn(this.app,
-				this.app.isObjectAvailable(CometPublisher.class), true);
+				this.app.isObjectAvailable(new AutoWire(CometPublisher.class)),
+				true);
 		this.recordReturn(this.app, this.app.getSection("COMET"), cometSection);
 		this.recordReturn(template, template.getTemplateUri(), "example");
 		this.app.linkUri("example/comet-subscribe", cometSection,

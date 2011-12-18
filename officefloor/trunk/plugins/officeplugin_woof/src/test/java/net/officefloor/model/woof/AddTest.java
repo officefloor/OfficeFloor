@@ -54,7 +54,7 @@ public class AddTest extends AbstractWoofChangesTestCase {
 						context.addSectionOutput("NOT_INCLUDE_ESCALTION",
 								IOException.class, true);
 						context.addSectionObject("IGNORE_OBJECT",
-								DataSource.class);
+								DataSource.class, null);
 					}
 				});
 
@@ -200,7 +200,7 @@ public class AddTest extends AbstractWoofChangesTestCase {
 						context.addSectionOutput("NOT_INCLUDE_ESCALTION",
 								IOException.class, true);
 						context.addSectionObject("IGNORE_OBJECT",
-								DataSource.class);
+								DataSource.class, null);
 					}
 				});
 

@@ -25,6 +25,7 @@ import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.frame.util.ManagedObjectSourceStandAlone;
 import net.officefloor.frame.util.ManagedObjectUserStandAlone;
+import net.officefloor.plugin.autowire.AutoWire;
 import net.officefloor.plugin.autowire.AutoWireAdministration;
 import net.officefloor.plugin.autowire.AutoWireSection;
 import net.officefloor.plugin.gwt.service.ServerGwtRpcConnectionManagedObjectSource.Dependencies;
@@ -93,7 +94,7 @@ public class ServerGwtRpcConnectionManagedObjectSourceTest extends
 				.createManagedObjectTypeBuilder();
 		type.setObjectClass(ServerGwtRpcConnection.class);
 		type.addDependency(Dependencies.SERVER_HTTP_CONNECTION,
-				ServerHttpConnection.class);
+				ServerHttpConnection.class, null);
 
 		// Validate type
 		ManagedObjectLoaderUtil.validateManagedObjectType(type,
@@ -273,9 +274,9 @@ public class ServerGwtRpcConnectionManagedObjectSourceTest extends
 		final int PORT = MockHttpServer.getAvailablePort();
 		HttpServerAutoWireOfficeFloorSource source = new HttpServerAutoWireOfficeFloorSource(
 				PORT);
-		source.addManagedObject(
-				ServerGwtRpcConnectionManagedObjectSource.class.getName(),
-				null, ServerGwtRpcConnection.class, AsyncCallback.class);
+		source.addManagedObject(ServerGwtRpcConnectionManagedObjectSource.class
+				.getName(), null, new AutoWire(ServerGwtRpcConnection.class),
+				new AutoWire(AsyncCallback.class));
 		AutoWireSection section = source.addSection("HANDLE",
 				ClassSectionSource.class.getName(), Service.class.getName());
 

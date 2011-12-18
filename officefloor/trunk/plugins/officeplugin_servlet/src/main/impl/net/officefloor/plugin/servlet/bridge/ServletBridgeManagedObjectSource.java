@@ -40,6 +40,7 @@ import net.officefloor.frame.spi.managedobject.source.ManagedObjectExecuteContex
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceContext;
 import net.officefloor.frame.spi.managedobject.source.impl.AbstractManagedObjectSource;
+import net.officefloor.plugin.autowire.AutoWire;
 import net.officefloor.plugin.autowire.AutoWireObject;
 import net.officefloor.plugin.autowire.AutoWireOfficeFloorSource;
 import net.officefloor.plugin.autowire.ManagedObjectSourceWirer;
@@ -123,7 +124,7 @@ public class ServletBridgeManagedObjectSource
 						context.mapFlow(FlowKeys.SERVICE.name(),
 								handlerSectionName, handlerInputName);
 					}
-				}, ServletBridge.class);
+				}, new AutoWire(ServletBridge.class));
 		bridge.addProperty(
 				ServletBridgeManagedObjectSource.PROPERTY_INSTANCE_IDENTIFIER,
 				bridger.getInstanceIdentifier());

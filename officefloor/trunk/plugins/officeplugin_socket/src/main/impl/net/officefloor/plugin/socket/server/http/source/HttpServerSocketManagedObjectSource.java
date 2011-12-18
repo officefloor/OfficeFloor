@@ -25,6 +25,7 @@ import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.impl.spi.team.OnePersonTeamSource;
 import net.officefloor.frame.impl.spi.team.WorkerPerTaskTeamSource;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
+import net.officefloor.plugin.autowire.AutoWire;
 import net.officefloor.plugin.autowire.AutoWireApplication;
 import net.officefloor.plugin.autowire.AutoWireObject;
 import net.officefloor.plugin.autowire.ManagedObjectSourceWirer;
@@ -100,7 +101,7 @@ public class HttpServerSocketManagedObjectSource extends
 		// Add this managed object source
 		AutoWireObject object = source.addManagedObject(
 				HttpServerSocketManagedObjectSource.class.getName(), wirer,
-				ServerHttpConnection.class);
+				new AutoWire(ServerHttpConnection.class));
 		object.addProperty(PROPERTY_PORT, String.valueOf(port));
 	}
 

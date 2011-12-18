@@ -28,6 +28,7 @@ import net.officefloor.compile.spi.officefloor.source.OfficeFloorSource;
 import net.officefloor.compile.spi.officefloor.source.OfficeFloorSourceContext;
 import net.officefloor.frame.impl.spi.team.OnePersonTeamSource;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
+import net.officefloor.plugin.autowire.AutoWire;
 import net.officefloor.plugin.autowire.AutoWireObject;
 import net.officefloor.plugin.autowire.AutoWireOfficeFloor;
 import net.officefloor.plugin.autowire.ManagedObjectSourceWirer;
@@ -96,16 +97,16 @@ public class HttpServerAutoWireOfficeFloorSource extends
 		// Configure HTTP Session (allowing 10 seconds to retrieve session)
 		this.httpSession = this.addManagedObject(
 				HttpSessionManagedObjectSource.class.getName(), null,
-				HttpSession.class);
+				new AutoWire(HttpSession.class));
 		this.httpSession.setTimeout(10 * 1000);
 
 		// Configure the HTTP Application and Request States
 		this.addManagedObject(
 				HttpApplicationStateManagedObjectSource.class.getName(), null,
-				HttpApplicationState.class);
+				new AutoWire(HttpApplicationState.class));
 		this.addManagedObject(
 				HttpRequestStateManagedObjectSource.class.getName(), null,
-				HttpRequestState.class);
+				new AutoWire(HttpRequestState.class));
 	}
 
 	/**
@@ -151,7 +152,7 @@ public class HttpServerAutoWireOfficeFloorSource extends
 			for (HttpSocket socket : this.httpSockets) {
 				AutoWireObject object = application.addManagedObject(
 						socket.managedObjectSourceClassName, socket.wirer,
-						ServerHttpConnection.class);
+						new AutoWire(ServerHttpConnection.class));
 				for (Property property : socket.properties) {
 					object.addProperty(property.getName(), property.getValue());
 				}

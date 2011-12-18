@@ -56,7 +56,7 @@ public class HttpApplicationClassManagedObjectSourceTest extends
 				.createManagedObjectTypeBuilder();
 		type.setObjectClass(MockObject.class);
 		type.addDependency(Dependencies.HTTP_APPLICATION_STATE.name(),
-				HttpApplicationState.class,
+				HttpApplicationState.class, null,
 				Dependencies.HTTP_APPLICATION_STATE.ordinal(),
 				Dependencies.HTTP_APPLICATION_STATE);
 

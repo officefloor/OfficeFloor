@@ -36,7 +36,7 @@ import org.springframework.beans.factory.BeanFactory;
 
 /**
  * Tests the {@link BeanFactoryManagedObjectSource}.
- *
+ * 
  * @author Daniel Sagenschneider
  */
 public class BeanFactoryManagedObjectSourceTest extends OfficeFrameTestCase {
@@ -60,7 +60,7 @@ public class BeanFactoryManagedObjectSourceTest extends OfficeFrameTestCase {
 		ManagedObjectTypeBuilder type = ManagedObjectLoaderUtil
 				.createManagedObjectTypeBuilder();
 		type.setObjectClass(BeanFactory.class);
-		type.addDependency("testFactory", Connection.class, 0, null);
+		type.addDependency("testFactory", Connection.class, null, 0, null);
 
 		// Validate the managed object type
 		ManagedObjectLoaderUtil.validateManagedObjectType(type,
@@ -134,15 +134,15 @@ public class BeanFactoryManagedObjectSourceTest extends OfficeFrameTestCase {
 		Connection dependency = (Connection) beanFactory.getBean("testFactory");
 
 		// Ensure delegate to actual dependency
-		assertEquals("Incorrect after delegation", "A", dependency
-				.getClientInfo("ONE"));
+		assertEquals("Incorrect after delegation", "A",
+				dependency.getClientInfo("ONE"));
 
 		this.verifyMockObjects();
 	}
 
 	/**
 	 * Obtains the path to the configuration for the {@link BeanFactory}.
-	 *
+	 * 
 	 * @return Path to the configuration for the {@link BeanFactory}.
 	 */
 	private String getBeanFactoryConfigurationPath() {

@@ -42,6 +42,7 @@ import net.officefloor.compile.spi.office.OfficeSectionOutput;
 import net.officefloor.frame.api.escalate.Escalation;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.impl.spi.team.ProcessContextTeamSource;
+import net.officefloor.plugin.autowire.AutoWire;
 import net.officefloor.plugin.autowire.AutoWireObject;
 import net.officefloor.plugin.autowire.AutoWireOfficeFloor;
 import net.officefloor.plugin.autowire.AutoWireSection;
@@ -182,20 +183,20 @@ public abstract class OfficeFloorServletFilter extends
 		// Configure Server HTTP connection
 		this.addManagedObject(
 				ServletServerHttpConnectionManagedObjectSource.class.getName(),
-				null, ServerHttpConnection.class);
+				null, new AutoWire(ServerHttpConnection.class));
 
 		// Configure the HTTP session
 		this.addManagedObject(
 				ServletHttpSessionManagedObjectSource.class.getName(), null,
-				HttpSession.class);
+				new AutoWire(HttpSession.class));
 
 		// Configure the HTTP Application and Request State
 		this.addManagedObject(
 				ServletHttpApplicationStateManagedObjectSource.class.getName(),
-				null, HttpApplicationState.class);
+				null, new AutoWire(HttpApplicationState.class));
 		this.addManagedObject(
 				ServletHttpRequestStateManagedObjectSource.class.getName(),
-				null, HttpRequestState.class);
+				null, new AutoWire(HttpRequestState.class));
 
 		// Configure the Servlet container resource section
 		AutoWireSection servletContainerResource = this.addSection(
@@ -210,7 +211,7 @@ public abstract class OfficeFloorServletFilter extends
 			// Add Servlet dependency for dependency injection
 			AutoWireObject dependency = this.addManagedObject(
 					ServletDependencyManagedObjectSource.class.getName(), null,
-					dependencyType);
+					new AutoWire(dependencyType));
 			dependency.addProperty(
 					ServletDependencyManagedObjectSource.PROPERTY_TYPE_NAME,
 					dependencyType.getName());
@@ -219,8 +220,16 @@ public abstract class OfficeFloorServletFilter extends
 		// Process Context Team to ensure appropriate Thread for dependencies
 		// (EJB's typically rely on ThreadLocal functionality)
 		if (dependencyTypes.length > 0) {
+
+			// Create the auto-wiring for dependency types
+			AutoWire[] autoWiring = new AutoWire[dependencyTypes.length];
+			for (int i = 0; i < autoWiring.length; i++) {
+				autoWiring[i] = new AutoWire(dependencyTypes[i]);
+			}
+
+			// Assign the team
 			this.assignTeam(ProcessContextTeamSource.class.getName(),
-					dependencyTypes);
+					autoWiring);
 		}
 
 		// Configure the web application

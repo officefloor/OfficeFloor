@@ -56,7 +56,7 @@ public class HttpRequestClassManagedObjectSourceTest extends
 				.createManagedObjectTypeBuilder();
 		type.setObjectClass(MockObject.class);
 		type.addDependency(Dependencies.HTTP_REQUEST_STATE.name(),
-				HttpRequestState.class,
+				HttpRequestState.class, null,
 				Dependencies.HTTP_REQUEST_STATE.ordinal(),
 				Dependencies.HTTP_REQUEST_STATE);
 

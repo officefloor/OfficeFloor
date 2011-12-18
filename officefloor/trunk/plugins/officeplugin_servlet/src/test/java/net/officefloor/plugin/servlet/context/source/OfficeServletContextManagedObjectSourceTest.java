@@ -59,7 +59,8 @@ public class OfficeServletContextManagedObjectSourceTest extends
 		ManagedObjectTypeBuilder type = ManagedObjectLoaderUtil
 				.createManagedObjectTypeBuilder();
 		type.setObjectClass(OfficeServletContext.class);
-		type.addDependency(DependencyKeys.SERVLET_SERVER, ServletServer.class);
+		type.addDependency(DependencyKeys.SERVLET_SERVER, ServletServer.class,
+				null);
 
 		// Validate type
 		ManagedObjectLoaderUtil
@@ -90,18 +91,15 @@ public class OfficeServletContextManagedObjectSourceTest extends
 
 		// Load the managed object source
 		ManagedObjectSourceStandAlone loader = new ManagedObjectSourceStandAlone();
-		loader
-				.addProperty(
-						OfficeServletContextManagedObjectSource.PROPERTY_SERVLET_CONTEXT_NAME,
-						"Servlet Context Name");
-		loader
-				.addProperty(
-						OfficeServletContextManagedObjectSource.PROPERTY_PREFIX_INIT_PARAMETER
-								+ "test", "Init Parameter");
-		loader
-				.addProperty(
-						OfficeServletContextManagedObjectSource.PROPERTY_PREFIX_FILE_EXTENSION_TO_MIME_TYPE
-								+ "custom", "text/custom");
+		loader.addProperty(
+				OfficeServletContextManagedObjectSource.PROPERTY_SERVLET_CONTEXT_NAME,
+				"Servlet Context Name");
+		loader.addProperty(
+				OfficeServletContextManagedObjectSource.PROPERTY_PREFIX_INIT_PARAMETER
+						+ "test", "Init Parameter");
+		loader.addProperty(
+				OfficeServletContextManagedObjectSource.PROPERTY_PREFIX_FILE_EXTENSION_TO_MIME_TYPE
+						+ "custom", "text/custom");
 		OfficeServletContextManagedObjectSource mos = loader
 				.loadManagedObjectSource(OfficeServletContextManagedObjectSource.class);
 
@@ -112,50 +110,50 @@ public class OfficeServletContextManagedObjectSourceTest extends
 
 		// Obtain the Office Servlet Context and validate configured
 		OfficeServletContext context = (OfficeServletContext) mo.getObject();
-		assertEquals("getServletContextName", "Servlet Context Name", context
-				.getServletContextName(office));
-		assertEquals("getContextPath", "/context", context
-				.getContextPath(office));
-		assertEquals("getInitParameter(test)", "Init Parameter", context
-				.getInitParameter(office, "test"));
+		assertEquals("getServletContextName", "Servlet Context Name",
+				context.getServletContextName(office));
+		assertEquals("getContextPath", "/context",
+				context.getContextPath(office));
+		assertEquals("getInitParameter(test)", "Init Parameter",
+				context.getInitParameter(office, "test"));
 
 		// Validate default MIME mappings
-		assertEquals("getMimeType(test.css)", "text/css", context.getMimeType(
-				office, "text.css"));
-		assertEquals("getMimeType(test.gif)", "image/gif", context.getMimeType(
-				office, "text.gif"));
-		assertEquals("getMimeType(test.htm)", "text/html", context.getMimeType(
-				office, "text.htm"));
-		assertEquals("getMimeType(test.html)", "text/html", context
-				.getMimeType(office, "text.html"));
-		assertEquals("getMimeType(test.ico)", "image/x-icon", context
-				.getMimeType(office, "text.ico"));
-		assertEquals("getMimeType(test.jpeg)", "image/jpeg", context
-				.getMimeType(office, "text.jpeg"));
-		assertEquals("getMimeType(test.jpg)", "image/jpeg", context
-				.getMimeType(office, "text.jpg"));
+		assertEquals("getMimeType(test.css)", "text/css",
+				context.getMimeType(office, "text.css"));
+		assertEquals("getMimeType(test.gif)", "image/gif",
+				context.getMimeType(office, "text.gif"));
+		assertEquals("getMimeType(test.htm)", "text/html",
+				context.getMimeType(office, "text.htm"));
+		assertEquals("getMimeType(test.html)", "text/html",
+				context.getMimeType(office, "text.html"));
+		assertEquals("getMimeType(test.ico)", "image/x-icon",
+				context.getMimeType(office, "text.ico"));
+		assertEquals("getMimeType(test.jpeg)", "image/jpeg",
+				context.getMimeType(office, "text.jpeg"));
+		assertEquals("getMimeType(test.jpg)", "image/jpeg",
+				context.getMimeType(office, "text.jpg"));
 		assertEquals("getMimeType(test.js)", "application/x-javascript",
 				context.getMimeType(office, "text.js"));
-		assertEquals("getMimeType(test.log)", "text/plain", context
-				.getMimeType(office, "text.log"));
-		assertEquals("getMimeType(test.pdf)", "application/pdf", context
-				.getMimeType(office, "text.pdf"));
-		assertEquals("getMimeType(test.png)", "image/png", context.getMimeType(
-				office, "text.png"));
-		assertEquals("getMimeType(test.txt)", "text/plain", context
-				.getMimeType(office, "text.txt"));
-		assertEquals("getMimeType(test.xml)", "text/xml", context.getMimeType(
-				office, "text.xml"));
+		assertEquals("getMimeType(test.log)", "text/plain",
+				context.getMimeType(office, "text.log"));
+		assertEquals("getMimeType(test.pdf)", "application/pdf",
+				context.getMimeType(office, "text.pdf"));
+		assertEquals("getMimeType(test.png)", "image/png",
+				context.getMimeType(office, "text.png"));
+		assertEquals("getMimeType(test.txt)", "text/plain",
+				context.getMimeType(office, "text.txt"));
+		assertEquals("getMimeType(test.xml)", "text/xml",
+				context.getMimeType(office, "text.xml"));
 
 		// Validate custom MIME mapping
-		assertEquals("getMimeType(test.custom)", "text/custom", context
-				.getMimeType(office, "text.custom"));
+		assertEquals("getMimeType(test.custom)", "text/custom",
+				context.getMimeType(office, "text.custom"));
 
 		// Test attributes (for re-obtaining context)
 		final Object attribute = new Object();
 		context.setAttribute(office, "test", attribute);
-		assertEquals("Incorrect attribute", attribute, context.getAttribute(
-				office, "test"));
+		assertEquals("Incorrect attribute", attribute,
+				context.getAttribute(office, "test"));
 
 		// Ensure same servlet config each time
 		ManagedObject otherMo = user.sourceManagedObject(mos);

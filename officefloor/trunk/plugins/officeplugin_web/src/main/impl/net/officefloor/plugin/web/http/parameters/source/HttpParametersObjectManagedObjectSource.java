@@ -28,6 +28,7 @@ import net.officefloor.frame.spi.managedobject.ObjectRegistry;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceContext;
 import net.officefloor.frame.spi.managedobject.source.impl.AbstractManagedObjectSource;
+import net.officefloor.plugin.autowire.AutoWire;
 import net.officefloor.plugin.autowire.AutoWireObject;
 import net.officefloor.plugin.autowire.AutoWireOfficeFloorSource;
 import net.officefloor.plugin.socket.server.http.HttpRequest;
@@ -59,7 +60,7 @@ public class HttpParametersObjectManagedObjectSource
 			Class<?> objectClass) {
 		AutoWireObject object = source.addManagedObject(
 				HttpParametersObjectManagedObjectSource.class.getName(), null,
-				objectClass);
+				new AutoWire(objectClass));
 		object.addProperty(
 				HttpParametersObjectManagedObjectSource.PROPERTY_CLASS_NAME,
 				objectClass.getName());

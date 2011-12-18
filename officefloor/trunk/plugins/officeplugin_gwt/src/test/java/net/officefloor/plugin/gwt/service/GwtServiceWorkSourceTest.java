@@ -45,6 +45,7 @@ import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
 import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
 import net.officefloor.frame.test.OfficeFrameTestCase;
+import net.officefloor.plugin.autowire.AutoWire;
 import net.officefloor.plugin.autowire.AutoWireAdministration;
 import net.officefloor.plugin.autowire.AutoWireSection;
 import net.officefloor.plugin.gwt.service.GwtServiceTask.Dependencies;
@@ -311,9 +312,9 @@ public class GwtServiceWorkSourceTest extends OfficeFrameTestCase {
 		AutoWireSection section = source.addSection("SECTION",
 				MockGwtServiceSection.class.getName(), "LOCATION");
 		source.linkUri("template/GwtServicePath", section, "service");
-		source.addManagedObject(
-				ServerGwtRpcConnectionManagedObjectSource.class.getName(),
-				null, ServerGwtRpcConnection.class, AsyncCallback.class);
+		source.addManagedObject(ServerGwtRpcConnectionManagedObjectSource.class
+				.getName(), null, new AutoWire(ServerGwtRpcConnection.class),
+				new AutoWire(AsyncCallback.class));
 
 		// Start the server
 		source.openOfficeFloor();
@@ -371,7 +372,8 @@ public class GwtServiceWorkSourceTest extends OfficeFrameTestCase {
 					Service.class.getName());
 			SectionTask classTask = classWork
 					.addSectionTask("handle", "handle");
-			TaskObject classObject = classTask.getTaskObject("AsyncCallback");
+			TaskObject classObject = classTask
+					.getTaskObject(AsyncCallback.class.getName());
 			designer.link(classObject, sectionConnection);
 
 			// Link servicing

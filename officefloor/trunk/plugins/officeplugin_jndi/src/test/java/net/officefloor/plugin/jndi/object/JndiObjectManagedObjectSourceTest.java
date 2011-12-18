@@ -57,7 +57,7 @@ public class JndiObjectManagedObjectSourceTest extends
 		ManagedObjectTypeBuilder type = ManagedObjectLoaderUtil
 				.createManagedObjectTypeBuilder();
 		type.setObjectClass(DataSource.class);
-		type.addDependency(JndiObjectDependency.CONTEXT, Context.class);
+		type.addDependency(JndiObjectDependency.CONTEXT, Context.class, null);
 
 		// Validate type
 		ManagedObjectLoaderUtil.validateManagedObjectType(type,

@@ -54,7 +54,8 @@ public class ServletDependencyManagedObjectSourceTest extends
 		ManagedObjectTypeBuilder type = ManagedObjectLoaderUtil
 				.createManagedObjectTypeBuilder();
 		type.setObjectClass(MockEjbLocal.class);
-		type.addDependency(DependencyKeys.SERVLET_BRIDGE, ServletBridge.class);
+		type.addDependency(DependencyKeys.SERVLET_BRIDGE, ServletBridge.class,
+				null);
 
 		// Validate type
 		ManagedObjectLoaderUtil.validateManagedObjectType(type,

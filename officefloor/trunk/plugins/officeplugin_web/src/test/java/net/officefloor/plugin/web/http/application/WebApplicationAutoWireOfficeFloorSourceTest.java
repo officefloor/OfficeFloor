@@ -27,6 +27,7 @@ import net.officefloor.compile.spi.office.OfficeSectionInput;
 import net.officefloor.compile.spi.office.OfficeSectionOutput;
 import net.officefloor.frame.api.escalate.Escalation;
 import net.officefloor.frame.test.OfficeFrameTestCase;
+import net.officefloor.plugin.autowire.AutoWire;
 import net.officefloor.plugin.autowire.AutoWireAdministration;
 import net.officefloor.plugin.autowire.AutoWireSection;
 import net.officefloor.plugin.section.clazz.ClassSectionSource;
@@ -501,7 +502,7 @@ public class WebApplicationAutoWireOfficeFloorSourceTest extends
 		// Provide HTTP Session
 		this.source.addManagedObject(
 				HttpSessionManagedObjectSource.class.getName(), null,
-				HttpSession.class).setTimeout(10 * 1000);
+				new AutoWire(HttpSession.class)).setTimeout(10 * 1000);
 
 		// Add two templates to ensure object available to both
 		this.source.addHttpTemplate(this.getClassPath("StatefulObject.ofp"),
@@ -555,7 +556,7 @@ public class WebApplicationAutoWireOfficeFloorSourceTest extends
 		// Provide HTTP Session
 		this.source.addManagedObject(
 				HttpSessionManagedObjectSource.class.getName(), null,
-				HttpSession.class).setTimeout(10 * 1000);
+				new AutoWire(HttpSession.class)).setTimeout(10 * 1000);
 
 		// Add two templates with annotations for HttpSessionStateful
 		this.source.addHttpTemplate(this.getClassPath("StatefulObject.ofp"),
@@ -613,7 +614,7 @@ public class WebApplicationAutoWireOfficeFloorSourceTest extends
 		// Provide HTTP Session
 		this.source.addManagedObject(
 				HttpSessionManagedObjectSource.class.getName(), null,
-				HttpSession.class).setTimeout(10 * 1000);
+				new AutoWire(HttpSession.class)).setTimeout(10 * 1000);
 
 		// Add the template
 		this.source
@@ -669,7 +670,7 @@ public class WebApplicationAutoWireOfficeFloorSourceTest extends
 		// Provide HTTP Request State
 		this.source.addManagedObject(
 				HttpRequestStateManagedObjectSource.class.getName(), null,
-				HttpRequestState.class);
+				new AutoWire(HttpRequestState.class));
 
 		// Add the template
 		this.source.addHttpTemplate(this.getClassPath("HttpStateObject.ofp"),
@@ -730,7 +731,7 @@ public class WebApplicationAutoWireOfficeFloorSourceTest extends
 		// Provide HTTP Application State
 		this.source.addManagedObject(
 				HttpApplicationStateManagedObjectSource.class.getName(), null,
-				HttpApplicationState.class);
+				new AutoWire(HttpApplicationState.class));
 
 		// Add the template
 		this.source.addHttpTemplate(this.getClassPath("HttpStateObject.ofp"),
