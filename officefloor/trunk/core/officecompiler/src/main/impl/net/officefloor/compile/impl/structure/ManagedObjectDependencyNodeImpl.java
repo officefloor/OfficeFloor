@@ -115,12 +115,49 @@ public class ManagedObjectDependencyNodeImpl implements
 	@Override
 	public Class<?> getObjectDependencyType() {
 
+		// Obtain the managed object dependency type
+		ManagedObjectDependencyType<?> dependencyType = this
+				.getManagedObjectDependencyType();
+		if (dependencyType == null) {
+			// Failed to obtain dependency type, so type unknown
+			return UnknownType.class;
+		}
+
+		// Return the dependency type
+		return dependencyType.getDependencyType();
+	}
+
+	@Override
+	public String getObjectDependencyTypeQualifier() {
+
+		// Obtain the managed object dependency type
+		ManagedObjectDependencyType<?> dependencyType = this
+				.getManagedObjectDependencyType();
+		if (dependencyType == null) {
+			// Failed to obtain dependency type, so no type qualifier
+			return null;
+		}
+
+		// Return the dependency type qualifier
+		return dependencyType.getTypeQualifier();
+	}
+
+	/**
+	 * Obtains the {@link ManagedObjectDependencyType} for this
+	 * {@link ManagedObjectDependencyNode}.
+	 * 
+	 * @return {@link ManagedObjectDependencyType} for this
+	 *         {@link ManagedObjectDependencyNode}. May be <code>null</code> if
+	 *         not able to obtain {@link ManagedObjectDependencyType}.
+	 */
+	private ManagedObjectDependencyType<?> getManagedObjectDependencyType() {
+
 		// Obtain the managed object type
 		ManagedObjectType<?> managedObjectType = this.managedObjectSourceNode
 				.getManagedObjectType();
 		if (managedObjectType == null) {
-			// Failed to obtain managed object type, so type unknown
-			return UnknownType.class;
+			// Failed to obtain managed object type, so no dependency type
+			return null;
 		}
 
 		// Find the corresponding dependency type
@@ -128,12 +165,12 @@ public class ManagedObjectDependencyNodeImpl implements
 				.getDependencyTypes()) {
 			if (this.dependencyName.equals(dependencyType.getDependencyName())) {
 				// Return the dependency type
-				return dependencyType.getDependencyType();
+				return dependencyType;
 			}
 		}
 
-		// As here, no dependency type so is unknown
-		return UnknownType.class;
+		// As here, not dependency type
+		return null;
 	}
 
 	@Override

@@ -122,7 +122,8 @@ public class WorkSectionSourceTest extends OfficeFrameTestCase {
 		final List<String> list = new LinkedList<String>();
 
 		AutoWireOfficeFloorSource autoWire = new AutoWireOfficeFloorSource();
-		autoWire.addObject(connection, new AutoWire(Connection.class));
+		autoWire.addObject(connection, new AutoWire(Connection.class),
+				new AutoWire(MockQualification.class, Connection.class));
 		autoWire.addObject(list, new AutoWire(List.class));
 		autoWire.addObject(new Integer(1), new AutoWire(Integer.class));
 

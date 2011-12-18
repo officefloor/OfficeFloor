@@ -141,6 +141,37 @@ public class TaskObjectNodeImpl implements TaskObjectNode {
 	@Override
 	public Class<?> getObjectDependencyType() {
 
+		// Obtain the task object type
+		TaskObjectType<?> objectType = this.getTaskObjectType();
+		if (objectType == null) {
+			return UnknownType.class; // unable to obtain object type
+		}
+
+		// Return the type
+		return objectType.getObjectType();
+	}
+
+	@Override
+	public String getObjectDependencyTypeQualifier() {
+
+		// Obtain the task object type
+		TaskObjectType<?> objectType = this.getTaskObjectType();
+		if (objectType == null) {
+			return null; // unable to obtain object type
+		}
+
+		// Return the type qualifier
+		return objectType.getTypeQualifier();
+	}
+
+	/**
+	 * Obtains the {@link TaskObjectType} for this {@link TaskObjectNode}.
+	 * 
+	 * @return {@link TaskObjectType} for this {@link TaskObjectNode}. May be
+	 *         <code>null</code> if can not obtain.
+	 */
+	private TaskObjectType<?> getTaskObjectType() {
+
 		// Ensure in office context
 		if (!this.isInOfficeContext) {
 			throw new IllegalStateException("Must be in office context");
@@ -149,19 +180,19 @@ public class TaskObjectNodeImpl implements TaskObjectNode {
 		// Obtain the task type for this task node
 		TaskType<?, ?, ?> taskType = this.taskNode.getTaskType();
 		if (taskType == null) {
-			return UnknownType.class; // must have task type
+			return null; // must have task type containing object type
 		}
 
 		// Find the corresponding object type for this task object
 		for (TaskObjectType<?> objectType : taskType.getObjectTypes()) {
 			if (this.objectName.equals(objectType.getObjectName())) {
 				// Found the object type, so return the type
-				return objectType.getObjectType();
+				return objectType;
 			}
 		}
 
 		// As here, did not find the object type
-		return UnknownType.class;
+		return null;
 	}
 
 	@Override

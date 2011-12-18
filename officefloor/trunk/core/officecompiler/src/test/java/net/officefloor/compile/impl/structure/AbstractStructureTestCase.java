@@ -697,12 +697,14 @@ public abstract class AbstractStructureTestCase extends OfficeFrameTestCase {
 		 *            Name of the {@link TaskObjectType}.
 		 * @param objectType
 		 *            Object type.
+		 * @param typeQualifier
+		 *            Type qualifier.
 		 * @return {@link TaskObject}.
 		 */
 		<W extends Work> TaskObject addTaskObject(String workName,
 				WorkFactory<W> workFactory, String taskName,
 				TaskFactory<W, ?, ?> taskFactory, String objectName,
-				Class<?> objectType);
+				Class<?> objectType, String typeQualifier);
 
 		/**
 		 * Adds a {@link TaskFlow} for a {@link TaskEscalationType}.
@@ -931,13 +933,13 @@ public abstract class AbstractStructureTestCase extends OfficeFrameTestCase {
 		public <W extends Work> TaskObject addTaskObject(String workName,
 				WorkFactory<W> workFactory, String taskName,
 				TaskFactory<W, ?, ?> taskFactory, final String objectName,
-				final Class<?> objectType) {
+				final Class<?> objectType, final String typeQualifier) {
 			// Create the section task containing of a single object
 			TaskMaker taskMaker = new TaskMaker() {
 				@Override
 				public void make(TaskTypeMaker maker) {
 					// Create the object
-					maker.addObject(objectName, objectType);
+					maker.addObject(objectName, objectType, typeQualifier);
 				}
 			};
 			SectionTask task = this.addTask(workName, workFactory, taskName,
@@ -1212,10 +1214,12 @@ public abstract class AbstractStructureTestCase extends OfficeFrameTestCase {
 		 *            Name of the {@link TaskObjectType}.
 		 * @param objectType
 		 *            Object type.
+		 * @param typeQualifier
+		 *            Type qualifier.
 		 * @return {@link TaskObjectTypeBuilder}.
 		 */
 		TaskObjectTypeBuilder<?> addObject(String objectName,
-				Class<?> objectType);
+				Class<?> objectType, String typeQualifier);
 
 		/**
 		 * Adds a {@link TaskEscalationTypeBuilder}.
@@ -1421,11 +1425,14 @@ public abstract class AbstractStructureTestCase extends OfficeFrameTestCase {
 
 			@Override
 			public TaskObjectTypeBuilder<?> addObject(String objectName,
-					Class<?> objectType) {
+					Class<?> objectType, String typeQualifier) {
 				// Create and return the task object type builder
 				TaskObjectTypeBuilder<?> objectBuilder = this.taskTypeBuilder
 						.addObject(objectType);
 				objectBuilder.setLabel(objectName);
+				if (typeQualifier != null) {
+					objectBuilder.setTypeQualifier(typeQualifier);
+				}
 				return objectBuilder;
 			}
 

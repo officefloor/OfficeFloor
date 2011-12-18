@@ -52,6 +52,14 @@ public interface ObjectDependency {
 	Class<?> getObjectDependencyType();
 
 	/**
+	 * Obtains the type qualifier required of this {@link ObjectDependency}.
+	 * 
+	 * @return Type qualifier required of this {@link ObjectDependency}. May be
+	 *         <code>null</code> if no qualifier.
+	 */
+	String getObjectDependencyTypeQualifier();
+
+	/**
 	 * <p>
 	 * Obtains the {@link ManagedObject} that full fills the dependency.
 	 * <p>
