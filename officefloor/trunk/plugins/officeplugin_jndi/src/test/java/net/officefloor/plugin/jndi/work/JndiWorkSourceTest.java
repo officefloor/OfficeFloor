@@ -67,23 +67,24 @@ public class JndiWorkSourceTest extends AbstractOfficeConstructTestCase {
 		TaskTypeBuilder<Indexed, None> complexTask = work.addTaskType(
 				"complexTask", new JndiObjectTaskFactory(null, false, null),
 				Indexed.class, None.class);
-		complexTask.addObject(Context.class).setLabel("Context");
-		complexTask.addObject(String.class).setLabel("String");
-		complexTask.addObject(XmlUnmarshaller.class)
-				.setLabel("XmlUnmarshaller");
+		complexTask.addObject(Context.class).setLabel(Context.class.getName());
+		complexTask.addObject(String.class).setLabel(String.class.getName());
+		complexTask.addObject(XmlUnmarshaller.class).setLabel(
+				XmlUnmarshaller.class.getName());
 		complexTask.setReturnType(long.class);
 		complexTask.addEscalation(XmlMarshallException.class);
 
 		// Create the simple task
 		work.addTaskType("simpleTask",
 				new JndiObjectTaskFactory(null, false, null), Indexed.class,
-				None.class).addObject(Context.class).setLabel("Context");
+				None.class).addObject(Context.class)
+				.setLabel(Context.class.getName());
 
 		// Validate the type
 		WorkLoaderUtil.validateWorkType(work, JndiWorkSource.class,
 				JndiWorkSource.PROPERTY_JNDI_NAME, "mock/JndiObject",
-				JndiWorkSource.PROPERTY_WORK_TYPE, MockJndiObject.class
-						.getName());
+				JndiWorkSource.PROPERTY_WORK_TYPE,
+				MockJndiObject.class.getName());
 	}
 
 	/**
@@ -99,32 +100,36 @@ public class JndiWorkSourceTest extends AbstractOfficeConstructTestCase {
 		TaskTypeBuilder<Indexed, None> complexTask = work.addTaskType(
 				"complexFacade", new JndiFacadeTaskFactory(null, false, null),
 				Indexed.class, None.class);
-		complexTask.addObject(Context.class).setLabel("Context");
-		complexTask.addObject(String.class).setLabel("String");
-		complexTask.addObject(String.class).setLabel("String");
+		complexTask.addObject(Context.class).setLabel(Context.class.getName());
+		complexTask.addObject(String.class).setLabel(String.class.getName());
+		complexTask.addObject(Integer.class).setLabel(Integer.class.getName());
 		complexTask.setReturnType(Date.class);
 		complexTask.addEscalation(Exception.class);
 
 		// Ensure override by name
 		work.addTaskType("complexTask",
 				new JndiFacadeTaskFactory(null, false, null), Indexed.class,
-				None.class).addObject(Context.class).setLabel("Context");
+				None.class).addObject(Context.class)
+				.setLabel(Context.class.getName());
 
 		// Create the simple facade
 		work.addTaskType("simpleFacade",
 				new JndiFacadeTaskFactory(null, false, null), Indexed.class,
-				None.class).addObject(Context.class).setLabel("Context");
+				None.class).addObject(Context.class)
+				.setLabel(Context.class.getName());
 
 		// Create the simple task
 		work.addTaskType("simpleTask",
 				new JndiObjectTaskFactory(null, false, null), Indexed.class,
-				None.class).addObject(Context.class).setLabel("Context");
+				None.class).addObject(Context.class)
+				.setLabel(Context.class.getName());
 
 		// Validate the type
 		WorkLoaderUtil.validateWorkType(work, JndiWorkSource.class,
 				JndiWorkSource.PROPERTY_JNDI_NAME, "mock/JndiObject",
-				JndiWorkSource.PROPERTY_WORK_TYPE, MockJndiObject.class
-						.getName(), JndiWorkSource.PROPERTY_FACADE_CLASS,
+				JndiWorkSource.PROPERTY_WORK_TYPE,
+				MockJndiObject.class.getName(),
+				JndiWorkSource.PROPERTY_FACADE_CLASS,
 				MockFacade.class.getName());
 	}
 
@@ -177,8 +182,8 @@ public class JndiWorkSourceTest extends AbstractOfficeConstructTestCase {
 				"UNMARSHALLER_MOS");
 
 		// Register the work and task (complexTask)
-		WorkBuilder<JndiWork> workBuilder = this.constructWork("WORK", work
-				.getWorkFactory());
+		WorkBuilder<JndiWork> workBuilder = this.constructWork("WORK",
+				work.getWorkFactory());
 		workBuilder.setInitialTask("TASK");
 		TaskFactory<JndiWork, ?, ?> taskFactory = work.getTaskTypes()[0]
 				.getTaskFactory();
@@ -203,7 +208,7 @@ public class JndiWorkSourceTest extends AbstractOfficeConstructTestCase {
 		final String JNDI_NAME = "mock/JndiObject";
 		final Context context = this.createMock(Context.class);
 		final String XML = "<test/>";
-		final String IDENTIFIER = "TEST";
+		final Integer IDENTIFIER = Integer.valueOf(1);
 		final XmlUnmarshaller unmarshaller = this
 				.createMock(XmlUnmarshaller.class);
 		final MockJndiObject jndiObject = this.createMock(MockJndiObject.class);
@@ -226,8 +231,8 @@ public class JndiWorkSourceTest extends AbstractOfficeConstructTestCase {
 				JndiWorkSource.class, JndiWorkSource.PROPERTY_JNDI_NAME,
 				JNDI_NAME, JndiWorkSource.PROPERTY_WORK_TYPE,
 				MockJndiObject.class.getName(),
-				JndiWorkSource.PROPERTY_FACADE_CLASS, MockFacade.class
-						.getName());
+				JndiWorkSource.PROPERTY_FACADE_CLASS,
+				MockFacade.class.getName());
 
 		// String Office
 		String officeName = this.getOfficeName();
@@ -250,8 +255,8 @@ public class JndiWorkSourceTest extends AbstractOfficeConstructTestCase {
 				.addProcessManagedObject("IDENTIFIER_MO", "IDENTIFIER_MOS");
 
 		// Register the work and task (complexTask)
-		WorkBuilder<JndiWork> workBuilder = this.constructWork("WORK", work
-				.getWorkFactory());
+		WorkBuilder<JndiWork> workBuilder = this.constructWork("WORK",
+				work.getWorkFactory());
 		workBuilder.setInitialTask("TASK");
 		TaskFactory<JndiWork, ?, ?> taskFactory = work.getTaskTypes()[0]
 				.getTaskFactory();
@@ -259,7 +264,7 @@ public class JndiWorkSourceTest extends AbstractOfficeConstructTestCase {
 				taskFactory, "TEAM");
 		task.linkManagedObject(0, "CONTEXT_MO", Context.class);
 		task.linkManagedObject(1, "XML_MO", String.class);
-		task.linkManagedObject(2, "IDENTIFIER_MO", String.class);
+		task.linkManagedObject(2, "IDENTIFIER_MO", Integer.class);
 
 		// Invoke the Task
 		this.invokeWork("WORK", null);

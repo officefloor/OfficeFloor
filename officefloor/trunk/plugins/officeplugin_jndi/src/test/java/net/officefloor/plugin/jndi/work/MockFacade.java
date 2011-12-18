@@ -43,7 +43,7 @@ public class MockFacade {
 	/**
 	 * {@link XmlUnmarshaller} registry.
 	 */
-	private static final Map<String, XmlUnmarshaller> unmarshallerRegistry = new HashMap<String, XmlUnmarshaller>();
+	private static final Map<Integer, XmlUnmarshaller> unmarshallerRegistry = new HashMap<Integer, XmlUnmarshaller>();
 
 	/**
 	 * Registers an {@link XmlUnmarshaller}.
@@ -53,7 +53,7 @@ public class MockFacade {
 	 * @param unmarshaller
 	 *            {@link XmlUnmarshaller}.
 	 */
-	public static void registerXmlUnmarshaller(String identifier,
+	public static void registerXmlUnmarshaller(Integer identifier,
 			XmlUnmarshaller unmarshaller) {
 		unmarshallerRegistry.put(identifier, unmarshaller);
 	}
@@ -100,7 +100,7 @@ public class MockFacade {
 	 * @throws Exception
 	 *             Test exception.
 	 */
-	public Date complexFacade(String xml, String identifer,
+	public Date complexFacade(String xml, Integer identifer,
 			MockJndiObject object) throws Exception {
 
 		// Look up the XML unmarshaller
