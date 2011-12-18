@@ -42,12 +42,14 @@ public class IntegrateAutoWireQualificationTest extends OfficeFrameTestCase {
 		// Mocks
 		final Connection a = this.createSynchronizedMock(Connection.class);
 		final Connection b = this.createSynchronizedMock(Connection.class);
-		final Connection c = this.createSynchronizedMock(Connection.class);
+		// c is unqualified (i.e. d)
+		final Connection d = this.createSynchronizedMock(Connection.class);
 
 		// Record connections
 		this.recordReturn(a, a.nativeSQL("a"), "A");
 		this.recordReturn(b, b.nativeSQL("b"), "B");
-		this.recordReturn(c, c.nativeSQL("c"), "C");
+		this.recordReturn(d, d.nativeSQL("c"), "C");
+		this.recordReturn(d, d.nativeSQL("d"), "D");
 
 		// Test
 		this.replayMockObjects();
@@ -56,14 +58,14 @@ public class IntegrateAutoWireQualificationTest extends OfficeFrameTestCase {
 		AutoWireApplication app = new AutoWireOfficeFloorSource();
 		app.addObject(a, new AutoWire(MockA.class, Connection.class));
 		app.addObject(b, new AutoWire(MockB.class, Connection.class));
-		app.addObject(c, new AutoWire(Connection.class));
+		app.addObject(d, new AutoWire(Connection.class));
 		app.addSection("TEST", ClassSectionSource.class.getName(),
 				MockSection.class.getName());
 		app.assignDefaultTeam(PassiveTeamSource.class.getName());
 
 		// Ensure invoke task with appropriate dependencies
 		AutoWireOfficeFloor officeFloor = app.openOfficeFloor();
-		officeFloor.invokeTask("TEST.MockSection", "task", null);
+		officeFloor.invokeTask("TEST.WORK", "task", null);
 		officeFloor.closeOfficeFloor();
 
 		// Verify
@@ -87,15 +89,25 @@ public class IntegrateAutoWireQualificationTest extends OfficeFrameTestCase {
 	}
 
 	/**
+	 * Mock C qualifier.
+	 */
+	@Retention(RetentionPolicy.RUNTIME)
+	@Qualifier
+	public @interface MockC {
+	}
+
+	/**
 	 * Mock section.
 	 */
-	public class MockSection {
+	public static class MockSection {
 
-		public void task(@MockA Connection a, @MockB Connection b, Connection c)
-				throws SQLException {
+		public void task(@MockA Connection a, @MockB Connection b,
+				@MockC Connection c, Connection d) throws SQLException {
 			assertEquals("Qualified A", "A", a.nativeSQL("a"));
 			assertEquals("Qualified B", "B", b.nativeSQL("b"));
-			assertEquals("Unqualified C", "C", c.nativeSQL("c"));
+			assertEquals("Default unqualified C", "C", c.nativeSQL("c"));
+			assertEquals("Unqualified D", "D", d.nativeSQL("d"));
+			assertEquals("Default qualified to be unqualified", c, d);
 		}
 	}
 

@@ -48,6 +48,7 @@ import net.officefloor.frame.api.build.WorkFactory;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
+import net.officefloor.frame.spi.managedobject.source.impl.AbstractAsyncManagedObjectSource.DependencyLabeller;
 
 /**
  * Tests loading the {@link OfficeSection}.
@@ -183,10 +184,14 @@ public class LoadOfficeSectionTest extends AbstractStructureTestCase {
 				.createMockTaskFactory();
 
 		// Record not linked on first attempt to retrieve dependent
-		this.issues.addIssue(LocationType.OFFICE, SECTION_LOCATION, null, null,
-				"TaskObject OBJECT is not linked to a DependentManagedObject");
+		this.issues
+				.addIssue(LocationType.OFFICE, SECTION_LOCATION, null, null,
+						"TaskObject QUALIFIED-OBJECT is not linked to a DependentManagedObject");
+		this.issues
+				.addIssue(LocationType.OFFICE, SECTION_LOCATION, null, null,
+						"TaskObject UNQUALIFIED-OBJECT is not linked to a DependentManagedObject");
 
-		// Replay mocks
+		// Replay
 		this.replayMockObjects();
 
 		// Load the task object dependency not linked
@@ -194,24 +199,53 @@ public class LoadOfficeSectionTest extends AbstractStructureTestCase {
 				new SectionMaker() {
 					@Override
 					public void make(SectionMakerContext context) {
-						context.addTaskObject("WORK", workFactory, "TASK",
-								taskFactory, "OBJECT", Connection.class);
+						SectionTask task = context.addTask("WORK", workFactory,
+								"TASK", taskFactory, new TaskMaker() {
+									@Override
+									public void make(TaskTypeMaker maker) {
+										maker.addObject("UNQUALIFIED-OBJECT",
+												Connection.class, null);
+										maker.addObject("QUALIFIED-OBJECT",
+												String.class, "QUALIFIED");
+									}
+								});
+						task.getTaskObject("UNQUALIFIED-OBJECT");
+						task.getTaskObject("QUALIFIED-OBJECT");
 					}
 				});
 
 		// Ensure task object is correct
 		OfficeTask task = section.getOfficeTasks()[0];
-		assertEquals("Incorrect number of dependencies", 1,
+		assertEquals("Incorrect number of dependencies", 2,
 				task.getObjectDependencies().length);
-		ObjectDependency dependency = task.getObjectDependencies()[0];
-		assertEquals("Incorrect object dependency name", "OBJECT",
-				dependency.getObjectDependencyName());
-		assertEquals("Incorrect object dependency type", Connection.class,
-				dependency.getObjectDependencyType());
+
+		// Validate the qualified object (sorting puts first)
+		ObjectDependency qualified = task.getObjectDependencies()[0];
+		assertEquals("Incorrect qualified dependency name", "QUALIFIED-OBJECT",
+				qualified.getObjectDependencyName());
+		assertEquals("Incorrect qualified dependency type", String.class,
+				qualified.getObjectDependencyType());
+		assertEquals("Incorrect qualified dependency type qualifier",
+				"QUALIFIED", qualified.getObjectDependencyTypeQualifier());
 
 		// Validate not linked to dependent managed object
-		assertNull("Should not be linked to dependent managed object",
-				dependency.getDependentManagedObject());
+		assertNull(
+				"Qualified dependency should not be linked to dependent managed object",
+				qualified.getDependentManagedObject());
+
+		// Validate the unqualified object
+		ObjectDependency unqualified = task.getObjectDependencies()[1];
+		assertEquals("Incorrect unqualified dependency name",
+				"UNQUALIFIED-OBJECT", unqualified.getObjectDependencyName());
+		assertEquals("Incorrect unqualified dependency type", Connection.class,
+				unqualified.getObjectDependencyType());
+		assertNull("Unqualified dependency should not have type qualifier",
+				unqualified.getObjectDependencyTypeQualifier());
+
+		// Validate not linked to dependent managed object
+		assertNull(
+				"Unqualified dependency should not be linked to dependent managed object",
+				unqualified.getDependentManagedObject());
 
 		// Verify the mocks
 		this.verifyMockObjects();
@@ -386,8 +420,19 @@ public class LoadOfficeSectionTest extends AbstractStructureTestCase {
 
 		// Record not linked on first attempt to retrieve dependent
 		this.issues
-				.addIssue(LocationType.SECTION, SECTION_LOCATION, null, null,
-						"ManagedObjectDependency DEPENDENCY is not linked to a DependentManagedObject");
+				.addIssue(
+						LocationType.SECTION,
+						SECTION_LOCATION,
+						null,
+						null,
+						"ManagedObjectDependency QUALIFIED-DEPENDENCY is not linked to a DependentManagedObject");
+		this.issues
+				.addIssue(
+						LocationType.SECTION,
+						SECTION_LOCATION,
+						null,
+						null,
+						"ManagedObjectDependency UNQUALIFIED-DEPENDENCY is not linked to a DependentManagedObject");
 
 		// Load the section managed object with a dependency
 		this.replayMockObjects();
@@ -401,16 +446,30 @@ public class LoadOfficeSectionTest extends AbstractStructureTestCase {
 											@Override
 											public void make(
 													ManagedObjectMakerContext context) {
+
+												// Qualified dependency
+												DependencyLabeller qualified = context
+														.getContext()
+														.addDependency(
+																Connection.class);
+												qualified
+														.setLabel("QUALIFIED-DEPENDENCY");
+												qualified
+														.setTypeQualifier("QUALIFIED");
+
+												// Unqualified dependency
 												context.getContext()
 														.addDependency(
-																Connection.class)
-														.setLabel("DEPENDENCY");
+																String.class)
+														.setLabel(
+																"UNQUALIFIED-DEPENDENCY");
 											}
 										});
 						SectionManagedObject mo = source
 								.addSectionManagedObject("MO",
 										ManagedObjectScope.PROCESS);
-						mo.getManagedObjectDependency("DEPENDENCY");
+						mo.getManagedObjectDependency("QUALIFIED-DEPENDENCY");
+						mo.getManagedObjectDependency("UNQUALIFIED-DEPENDENCY");
 					}
 				});
 
@@ -427,17 +486,30 @@ public class LoadOfficeSectionTest extends AbstractStructureTestCase {
 				.getOfficeSectionManagedObjects()[0];
 		assertEquals("Incorrect managed object name", "MO",
 				mo.getOfficeSectionManagedObjectName());
-		assertEquals("Should have a dependency", 1,
+		assertEquals("Should have a dependencies", 2,
 				mo.getObjectDependencies().length);
-		ObjectDependency dependency = mo.getObjectDependencies()[0];
-		assertEquals("Incorrect dependency name", "DEPENDENCY",
-				dependency.getObjectDependencyName());
-		assertEquals("Incorrect dependency type", Connection.class,
-				dependency.getObjectDependencyType());
 
-		// Dependency should not be linked and report the issue
-		assertNull("Dependency should not be linked",
-				dependency.getDependentManagedObject());
+		// Validate qualified dependency
+		ObjectDependency qualified = mo.getObjectDependencies()[0];
+		assertEquals("Incorrect qualified dependency name",
+				"QUALIFIED-DEPENDENCY", qualified.getObjectDependencyName());
+		assertEquals("Incorrect qualified dependency type", Connection.class,
+				qualified.getObjectDependencyType());
+		assertEquals("Incorrect qualified dependency type qualifier",
+				"QUALIFIED", qualified.getObjectDependencyTypeQualifier());
+		assertNull("Qualified dependency should not be linked",
+				qualified.getDependentManagedObject());
+
+		// Validate unqualified dependency
+		ObjectDependency unqualified = mo.getObjectDependencies()[1];
+		assertEquals("Incorrect unqualified dependency name",
+				"UNQUALIFIED-DEPENDENCY", unqualified.getObjectDependencyName());
+		assertEquals("Incorrect unqualified dependency type", String.class,
+				unqualified.getObjectDependencyType());
+		assertNull("Unqualified dependency should not have type qualifier",
+				unqualified.getObjectDependencyTypeQualifier());
+		assertNull("Unqualified dependency should not be linked",
+				unqualified.getDependentManagedObject());
 
 		// Verify
 		this.verifyMockObjects();
@@ -505,7 +577,7 @@ public class LoadOfficeSectionTest extends AbstractStructureTestCase {
 						// Add the task object and managed object
 						TaskObject object = context.addTaskObject("WORK",
 								workFactory, "TASK", taskFactory, "OBJECT",
-								Connection.class);
+								Connection.class, null);
 						SectionManagedObjectSource moSource = context
 								.addManagedObjectSource("MO_SOURCE", null);
 						SectionManagedObject managedObject = moSource
@@ -557,7 +629,7 @@ public class LoadOfficeSectionTest extends AbstractStructureTestCase {
 												.addTaskObject("WORK",
 														workFactory, "TASK",
 														taskFactory, "OBJECT",
-														Connection.class);
+														Connection.class, null);
 
 										// Link task object to section output
 										SectionObject sectionObject = context
@@ -715,7 +787,7 @@ public class LoadOfficeSectionTest extends AbstractStructureTestCase {
 						// Add the task object
 						TaskObject taskObject = context.addTaskObject("WORK",
 								workFactory, "TASK", taskFactory, "OBJECT",
-								Connection.class);
+								Connection.class, null);
 
 						// Add the first managed object with a dependency
 						SectionManagedObjectSource moSourceOne = context
@@ -796,7 +868,7 @@ public class LoadOfficeSectionTest extends AbstractStructureTestCase {
 						// Add the task object as parameter
 						TaskObject taskObject = context.addTaskObject("WORK",
 								workFactory, "TASK", taskFactory, "OBJECT",
-								Connection.class);
+								Connection.class, null);
 						taskObject.flagAsParameter();
 					}
 				});

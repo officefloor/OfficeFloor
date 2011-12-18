@@ -332,6 +332,16 @@ public class AutoWireOfficeSource extends AbstractOfficeSource {
 	}
 
 	/**
+	 * Adds an available {@link AutoWire}.
+	 * 
+	 * @param autoWire
+	 *            {@link AutoWire}.
+	 */
+	public void addAvailableAutoWire(AutoWire autoWire) {
+
+	}
+
+	/**
 	 * Adds an {@link OfficeTeam} responsible for executing {@link Task}
 	 * instances that has an object dependency of the input type.
 	 * 
@@ -341,7 +351,7 @@ public class AutoWireOfficeSource extends AbstractOfficeSource {
 	 */
 	public AutoWireResponsibility addResponsibility(AutoWire autoWire) {
 		AutoWireResponsibility responsibility = new AutoWireResponsibilityImpl(
-				autoWire, "team-" + autoWire.getQualifiedType());
+				autoWire);
 		this.responsibilities.add(responsibility);
 		return responsibility;
 	}
@@ -404,10 +414,13 @@ public class AutoWireOfficeSource extends AbstractOfficeSource {
 			// Link the objects
 			for (OfficeSectionObject object : officeSection
 					.getOfficeSectionObjects()) {
+
+				// Obtain object details
 				String objectType = object.getObjectType();
+				String typeQualifier = object.getTypeQualifier();
 
 				// TODO Match to appropriate auto-wire
-				AutoWire autoWire = new AutoWire(objectType);
+				AutoWire autoWire = new AutoWire(typeQualifier, objectType);
 
 				// Link to appropriate Office Object
 				OfficeObject officeObject = objects.get(autoWire);
@@ -869,6 +882,13 @@ public class AutoWireOfficeSource extends AbstractOfficeSource {
 		 *         responsible for the {@link OfficeGovernance}.
 		 */
 		public boolean isResponsible(Class<?> extensionInterface) {
+
+			// Extension interface matching can not be qualified
+			if (this.dependencyAutoWire.getQualifier() != null) {
+				return false; // not match responsibility if qualified
+			}
+
+			// Return based on type matching
 			return (this.dependencyAutoWire.getType().equals(extensionInterface
 					.getName()));
 		}
@@ -889,7 +909,8 @@ public class AutoWireOfficeSource extends AbstractOfficeSource {
 
 			// Determine if any objects are of dependency type
 			for (ObjectDependency dependency : dependencies) {
-				if (this.isResponsible(dependency.getObjectDependencyType())) {
+				if (this.dependencyAutoWire.getType().equals(
+						dependency.getObjectDependencyType().getName())) {
 					// Matching dependency type, so is responsible
 					return true;
 				}

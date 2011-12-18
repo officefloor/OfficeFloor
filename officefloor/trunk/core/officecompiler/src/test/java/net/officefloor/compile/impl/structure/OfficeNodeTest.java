@@ -1138,7 +1138,7 @@ public class OfficeNodeTest extends AbstractStructureTestCase {
 						// Add managed object and link to section output
 						TaskObject object = context.addTaskObject("WORK",
 								workFactory, "TASK", taskFactory, "OBJECT",
-								Connection.class);
+								Connection.class, null);
 						SectionObject sectionObject = context.getBuilder()
 								.addSectionObject("SECTION_OBJECT",
 										Connection.class.getName());
@@ -1193,7 +1193,7 @@ public class OfficeNodeTest extends AbstractStructureTestCase {
 						// Add managed object and link to section output
 						TaskObject object = context.addTaskObject("WORK",
 								workFactory, "TASK", taskFactory, "OBJECT",
-								Connection.class);
+								Connection.class, null);
 						SectionObject sectionObject = context.getBuilder()
 								.addSectionObject("SECTION_OBJECT",
 										Connection.class.getName());

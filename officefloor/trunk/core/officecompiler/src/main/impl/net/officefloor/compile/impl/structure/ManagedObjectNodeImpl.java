@@ -409,10 +409,7 @@ public class ManagedObjectNodeImpl implements ManagedObjectNode {
 
 	@Override
 	public String getGovernerableManagedObjectName() {
-		// TODO implement
-		// GovernerableManagedObject.getGovernerableManagedObjectName
-		throw new UnsupportedOperationException(
-				"TODO implement GovernerableManagedObject.getGovernerableManagedObjectName");
+		return this.managedObjectName;
 	}
 
 	/*

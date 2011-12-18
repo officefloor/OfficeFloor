@@ -397,7 +397,8 @@ public class AutoWireOfficeSourceTest extends OfficeFrameTestCase {
 		// Record creating the section
 		this.recordTeam();
 		this.recordOfficeSection(SECTION);
-		this.recordSectionObjects(SECTION, Connection.class);
+		this.recordSectionObjects(SECTION, new ExpectedAutoWire(
+				Connection.class));
 		this.recordSectionInputs(SECTION);
 		this.recordSectionOutputs(SECTION);
 		this.recordSubSections(SECTION);
@@ -415,18 +416,97 @@ public class AutoWireOfficeSourceTest extends OfficeFrameTestCase {
 
 		final String SECTION = "Section";
 
+		final ExpectedAutoWire qualifiedConnection = new ExpectedAutoWire(
+				"QUALIFIED", Connection.class, "QUALIFIED-"
+						+ Connection.class.getName());
+		final ExpectedAutoWire unqualifiedConnection = new ExpectedAutoWire(
+				Connection.class);
+		final ExpectedAutoWire qualifiedString = new ExpectedAutoWire(
+				"QUALIFIED", String.class, "QUALIFIED-"
+						+ String.class.getName());
+
 		// Create and configure the source
 		AutoWireOfficeSource source = new AutoWireOfficeSource();
 		this.addSection(source, SECTION);
+
+		// Add the available auto-wiring
+		source.addAvailableAutoWire(qualifiedConnection.autoWire);
+		source.addAvailableAutoWire(unqualifiedConnection.autoWire);
+		source.addAvailableAutoWire(qualifiedString.autoWire);
 
 		// Record creating the section
 		this.recordTeam();
 		this.recordOfficeSection(SECTION);
 
-		// TODO provide qualification
-		fail("Enable qualified section object");
+		// Record combinations of same qualifiers and types
+		this.recordSectionObjects(SECTION, qualifiedConnection,
+				unqualifiedConnection, qualifiedString);
 
-		this.recordSectionObjects(SECTION, Connection.class);
+		this.recordSectionInputs(SECTION);
+		this.recordSectionOutputs(SECTION);
+		this.recordSubSections(SECTION);
+
+		// Test
+		this.replayMockObjects();
+		source.sourceOffice(this.architect, this.context);
+		this.verifyMockObjects();
+	}
+
+	/**
+	 * Ensure able to have qualified dependency fall back to using unqualified
+	 * dependency (should no matching qualified dependency be available).
+	 */
+	public void testFallBackToUnqualifiedDependency() throws Exception {
+
+		final String SECTION = "Section";
+
+		// Create and configure the source
+		AutoWireOfficeSource source = new AutoWireOfficeSource();
+		this.addSection(source, SECTION);
+
+		// Add the unqualified available auto-wiring
+		source.addAvailableAutoWire(new AutoWire(Connection.class));
+
+		// Record creating the section
+		this.recordTeam();
+		this.recordOfficeSection(SECTION);
+
+		// Record fall back to unqualified type
+		this.recordSectionObjects(SECTION, new ExpectedAutoWire("QUALIFIED",
+				Connection.class, Connection.class.getName()));
+
+		this.recordSectionInputs(SECTION);
+		this.recordSectionOutputs(SECTION);
+		this.recordSubSections(SECTION);
+
+		// Test
+		this.replayMockObjects();
+		source.sourceOffice(this.architect, this.context);
+		this.verifyMockObjects();
+	}
+
+	/**
+	 * Ensure issue if no matching dependency available.
+	 */
+	public void testNoAvailableAutoWireDependency() throws Exception {
+
+		final String SECTION = "Section";
+
+		// Create and configure the source
+		AutoWireOfficeSource source = new AutoWireOfficeSource();
+		this.addSection(source, SECTION);
+
+		// No auto-wiring
+
+		// Record creating the section
+		this.recordTeam();
+		this.recordOfficeSection(SECTION);
+
+		// Record objects
+		this.recordSectionObjects(SECTION, new ExpectedAutoWire("QUALIFIED",
+				Connection.class, "QUALIFIED-" + Connection.class.getName()),
+				new ExpectedAutoWire(Connection.class));
+
 		this.recordSectionInputs(SECTION);
 		this.recordSectionOutputs(SECTION);
 		this.recordSubSections(SECTION);
@@ -456,12 +536,14 @@ public class AutoWireOfficeSourceTest extends OfficeFrameTestCase {
 		// Record governance over office object
 		OfficeTeam team = this.recordTeam();
 		this.recordOfficeSection(SECTION);
-		this.recordSectionObjects(SECTION, Connection.class);
+		this.recordSectionObjects(SECTION, new ExpectedAutoWire(
+				Connection.class));
 		this.recordSectionInputs(SECTION);
 		this.recordSectionOutputs(SECTION);
 		this.recordSubSections(SECTION);
 		this.recordGovernance(GOVERNANCE, XAResource.class, team);
-		this.recordGovernOfficeObject(GOVERNANCE, Connection.class);
+		this.recordGovernOfficeObject(GOVERNANCE,
+				new AutoWire(Connection.class));
 		this.recordGovernManagedObject(GOVERNANCE, SECTION, null, false);
 
 		// Test
@@ -595,7 +677,7 @@ public class AutoWireOfficeSourceTest extends OfficeFrameTestCase {
 
 		// Record governance over office object
 		this.recordTeam();
-		OfficeTeam team = this.recordTeam(XAResource.class);
+		OfficeTeam team = this.recordTeam(new AutoWire(XAResource.class));
 		this.recordGovernance(GOVERNANCE, XAResource.class, team);
 		this.recordGovernSections(GOVERNANCE);
 
@@ -624,7 +706,8 @@ public class AutoWireOfficeSourceTest extends OfficeFrameTestCase {
 
 		// Record governance over office object
 		this.recordTeam();
-		OfficeTeam team = this.recordTeam(XAResource.class);
+		this.recordTeam(new AutoWire("QUALIFIED", XAResource.class.getName()));
+		OfficeTeam team = this.recordTeam(new AutoWire(XAResource.class));
 		this.recordGovernance(GOVERNANCE, XAResource.class, team);
 		this.recordGovernSections(GOVERNANCE);
 
@@ -737,7 +820,8 @@ public class AutoWireOfficeSourceTest extends OfficeFrameTestCase {
 
 		// Record creating the teams (responsibilities)
 		final OfficeTeam defaultTeam = this.recordTeam();
-		final OfficeTeam connectionTeam = this.recordTeam(Connection.class);
+		final OfficeTeam connectionTeam = this.recordTeam(new AutoWire(
+				Connection.class));
 
 		// Record creating the section
 		this.recordOfficeSection(sectionClass, new TeamAssigner() {
@@ -800,7 +884,7 @@ public class AutoWireOfficeSourceTest extends OfficeFrameTestCase {
 	/**
 	 * {@link OfficeObject} instances by type.
 	 */
-	private final Map<Class<?>, OfficeObject> dependencies = new HashMap<Class<?>, OfficeObject>();
+	private final Map<String, OfficeObject> dependencies = new HashMap<String, OfficeObject>();
 
 	/**
 	 * {@link OfficeSubSection} instances by name.
@@ -831,13 +915,16 @@ public class AutoWireOfficeSourceTest extends OfficeFrameTestCase {
 	/**
 	 * Records the {@link OfficeTeam} for a object.
 	 * 
+	 * @param autoWire
+	 *            {@link AutoWire}.
 	 * @return {@link OfficeTeam}.
 	 */
-	private OfficeTeam recordTeam(Class<?> objectType) {
+	private OfficeTeam recordTeam(AutoWire autoWire) {
 		OfficeTeam officeTeam = this.createMock(OfficeTeam.class);
-		this.recordReturn(this.architect,
-				this.architect.addOfficeTeam("team-" + objectType.getName()),
-				officeTeam);
+		this.recordReturn(
+				this.architect,
+				this.architect.addOfficeTeam("team-"
+						+ autoWire.getQualifiedType()), officeTeam);
 		return officeTeam;
 	}
 
@@ -1244,14 +1331,16 @@ public class AutoWireOfficeSourceTest extends OfficeFrameTestCase {
 	 * 
 	 * @param governanceName
 	 *            Name of the {@link Governance}.
-	 * @param objectTypes
-	 *            {@link OfficeObject} types to be provided {@link Governance}.
+	 * @param autoWire
+	 *            {@link OfficeObject} {@link AutoWire} to be provided
+	 *            {@link Governance}.
 	 */
 	private void recordGovernOfficeObject(String governanceName,
-			Class<?>... objectTypes) {
+			AutoWire... autoWiring) {
 		OfficeGovernance governance = this.governances.get(governanceName);
-		for (Class<?> objectType : objectTypes) {
-			OfficeObject officeObject = this.dependencies.get(objectType);
+		for (AutoWire autoWire : autoWiring) {
+			OfficeObject officeObject = this.dependencies.get(autoWire
+					.getQualifiedType());
 
 			// Record governing the Office Object
 			governance.governManagedObject(officeObject);
@@ -1303,16 +1392,16 @@ public class AutoWireOfficeSourceTest extends OfficeFrameTestCase {
 	 * 
 	 * @param sectionName
 	 *            Name of {@link OfficeSection}.
-	 * @param objectTypes
-	 *            Types of the objects.
+	 * @param autoWiring
+	 *            {@link ExpectedAutoWire} instances.
 	 */
 	private void recordSectionObjects(String sectionName,
-			Class<?>... objectTypes) {
+			ExpectedAutoWire... autoWiring) {
 
 		// Create names of the objects
-		String[] objectNames = new String[objectTypes.length];
-		for (int i = 0; i < objectTypes.length; i++) {
-			objectNames[i] = objectTypes[i].getName();
+		String[] objectNames = new String[autoWiring.length];
+		for (int i = 0; i < autoWiring.length; i++) {
+			objectNames[i] = autoWiring[i].autoWire.getQualifiedType();
 		}
 
 		// Record obtaining the objects
@@ -1322,22 +1411,28 @@ public class AutoWireOfficeSourceTest extends OfficeFrameTestCase {
 		this.recordReturn(section, section.getOfficeSectionObjects(), objects);
 
 		// Link objects as dependencies
-		for (int i = 0; i < objectTypes.length; i++) {
-			Class<?> objectType = objectTypes[i];
+		for (int i = 0; i < autoWiring.length; i++) {
+			ExpectedAutoWire autoWire = autoWiring[i];
 			OfficeSectionObject object = objects[i];
 
+			// Obtain dependency details
+			String dependencyType = autoWire.autoWire.getType();
+			String dependencyQualifier = autoWire.autoWire.getQualifier();
+
 			// Obtain object type
-			this.recordReturn(object, object.getObjectType(),
-					objectType.getName());
+			this.recordReturn(object, object.getObjectType(), dependencyType);
+			this.recordReturn(object, object.getTypeQualifier(),
+					dependencyQualifier);
 
 			// Lazy add the dependency
-			OfficeObject dependency = this.dependencies.get(objectType);
+			OfficeObject dependency = this.dependencies
+					.get(autoWire.objectName);
 			if (dependency == null) {
 				dependency = this.createMock(OfficeObject.class);
-				this.dependencies.put(objectType, dependency);
+				this.dependencies.put(autoWire.objectName, dependency);
 				this.recordReturn(this.architect, this.architect
-						.addOfficeObject(objectType.getName(),
-								objectType.getName()), dependency);
+						.addOfficeObject(autoWire.objectName, dependencyType),
+						dependency);
 			}
 
 			// Link the object to dependency
@@ -1435,6 +1530,49 @@ public class AutoWireOfficeSourceTest extends OfficeFrameTestCase {
 
 		// Return the listing of items
 		return list.toArray((T[]) Array.newInstance(itemType, list.size()));
+	}
+
+	/**
+	 * Expected {@link AutoWire}.
+	 */
+	private static class ExpectedAutoWire {
+
+		/**
+		 * {@link AutoWire}.
+		 */
+		public final AutoWire autoWire;
+
+		/**
+		 * Name of object.
+		 */
+		public final String objectName;
+
+		/**
+		 * Initiate.
+		 * 
+		 * @param qualifier
+		 *            Qualifier.
+		 * @param type
+		 *            Type.
+		 * @param objectName
+		 *            Matched object name.
+		 */
+		public ExpectedAutoWire(String qualifier, Class<?> type,
+				String objectName) {
+			this.autoWire = new AutoWire(qualifier, type.getName());
+			this.objectName = objectName;
+		}
+
+		/**
+		 * Initiate.
+		 * 
+		 * @param type
+		 *            Type.
+		 */
+		public ExpectedAutoWire(Class<?> type) {
+			this.autoWire = new AutoWire(type);
+			this.objectName = type.getName();
+		}
 	}
 
 }
