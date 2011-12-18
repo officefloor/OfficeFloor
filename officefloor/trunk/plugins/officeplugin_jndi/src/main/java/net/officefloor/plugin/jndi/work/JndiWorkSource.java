@@ -271,7 +271,7 @@ public class JndiWorkSource extends AbstractWorkSource<JndiWork> {
 
 		// Add the Context dependency
 		taskTypeBuilder.addObject(Context.class).setLabel(
-				Context.class.getSimpleName());
+				Context.class.getName());
 
 		// Define the listing of task objects
 		int objectIndex = 1; // Index after Context dependency
@@ -299,8 +299,7 @@ public class JndiWorkSource extends AbstractWorkSource<JndiWork> {
 
 			// Otherwise must be an object.
 			parameters[i] = new ObjectParameterFactory(objectIndex++);
-			taskTypeBuilder.addObject(paramType).setLabel(
-					paramType.getSimpleName());
+			taskTypeBuilder.addObject(paramType).setLabel(paramType.getName());
 		}
 
 		// Define the escalation listing
