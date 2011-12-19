@@ -22,6 +22,7 @@ import java.sql.DriverManager;
 
 import javax.sql.DataSource;
 
+import net.officefloor.plugin.autowire.AutoWire;
 import net.officefloor.plugin.autowire.AutoWireObject;
 import net.officefloor.plugin.jdbc.datasource.DataSourceManagedObjectSource;
 import net.officefloor.plugin.web.http.parameters.source.HttpParametersObjectManagedObjectSource;
@@ -50,7 +51,7 @@ public class DatabaseHttpServer {
 		// Provide DataSource to database for dependency injection
 		AutoWireObject object = source.addManagedObject(
 				DataSourceManagedObjectSource.class.getName(), null,
-				DataSource.class);
+				new AutoWire(DataSource.class));
 		object.loadProperties("datasource.properties");
 
 		// Start the HTTP server
