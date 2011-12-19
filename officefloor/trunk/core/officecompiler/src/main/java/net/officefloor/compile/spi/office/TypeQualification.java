@@ -17,23 +17,27 @@
  */
 package net.officefloor.compile.spi.office;
 
+import net.officefloor.frame.spi.managedobject.ManagedObject;
+
 /**
- * <p>
- * Special class returned by {@link ObjectDependency} to indicate the type is
- * unknown.
- * <p>
- * The class is <code>final</code> and with a <code>private</code> constructor
- * to ensure it stays only as a type indicator (not to actually be used and
- * therefore never a real dependency).
+ * Provides type qualification for a {@link ManagedObject}.
  * 
  * @author Daniel Sagenschneider
  */
-public final class UnknownType {
+public interface TypeQualification {
 
 	/**
-	 * Ensure can not initiate this class as is only an type indicator.
+	 * Obtains the qualifier.
+	 * 
+	 * @return Qualifier. May be <code>null</code>.
 	 */
-	private UnknownType() {
-	}
+	String getQualifier();
+
+	/**
+	 * Obtains the type.
+	 * 
+	 * @return Type.
+	 */
+	String getType();
 
 }

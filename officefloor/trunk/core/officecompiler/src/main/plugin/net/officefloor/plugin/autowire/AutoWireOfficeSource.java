@@ -19,6 +19,8 @@
 package net.officefloor.plugin.autowire;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -102,6 +104,11 @@ public class AutoWireOfficeSource extends AbstractOfficeSource {
 	 * Extension interface to their {@link AutoWire} instances.
 	 */
 	private final Map<Class<?>, List<AutoWire>> extensionInterfaceToAutoWiring = new HashMap<Class<?>, List<AutoWire>>();
+
+	/**
+	 * Available {@link AutoWire} instances.
+	 */
+	private final List<AutoWire> availableAutoWiring = new LinkedList<AutoWire>();
 
 	/**
 	 * Initiate.
@@ -338,7 +345,7 @@ public class AutoWireOfficeSource extends AbstractOfficeSource {
 	 *            {@link AutoWire}.
 	 */
 	public void addAvailableAutoWire(AutoWire autoWire) {
-
+		this.availableAutoWiring.add(autoWire);
 	}
 
 	/**
@@ -368,6 +375,35 @@ public class AutoWireOfficeSource extends AbstractOfficeSource {
 	@Override
 	public void sourceOffice(OfficeArchitect architect,
 			OfficeSourceContext context) throws Exception {
+
+		// Sort the available auto-wiring (so qualifiers first)
+		Collections.sort(this.availableAutoWiring, new Comparator<AutoWire>() {
+			@Override
+			public int compare(AutoWire a, AutoWire b) {
+				// Sort by type first
+				int match = String.CASE_INSENSITIVE_ORDER.compare(a.getType(),
+						b.getType());
+				if (match != 0) {
+					// Not matching type, so return compare ordering
+					return match;
+				}
+
+				// Matching types, so sort by qualifier (with default last)
+				String aQualifier = a.getQualifier();
+				String bQualifier = b.getQualifier();
+				if ((aQualifier == null) && (bQualifier == null)) {
+					// Duplicate default types, so match
+					return 0;
+				} else if ((aQualifier != null) && (bQualifier != null)) {
+					// Same type, so compare on qualifiers
+					return String.CASE_INSENSITIVE_ORDER.compare(aQualifier,
+							bQualifier);
+				} else {
+					// Sort so default (null) qualifier is last
+					return (aQualifier == null ? 1 : -1);
+				}
+			}
+		});
 
 		// Add the default team
 		OfficeTeam defaultTeam = architect.addOfficeTeam("team");
@@ -419,8 +455,19 @@ public class AutoWireOfficeSource extends AbstractOfficeSource {
 				String objectType = object.getObjectType();
 				String typeQualifier = object.getTypeQualifier();
 
-				// TODO Match to appropriate auto-wire
-				AutoWire autoWire = new AutoWire(typeQualifier, objectType);
+				// Obtain appropriate auto-wire
+				AutoWire autoWire = this.getAvailableAutoWire(typeQualifier,
+						objectType);
+				if (autoWire == null) {
+					String objectName = object.getOfficeSectionObjectName();
+					architect.addIssue("No available auto-wiring for "
+							+ OfficeSectionObject.class.getSimpleName() + " "
+							+ objectName + " (qualifier=" + typeQualifier
+							+ ", type=" + objectType + ") from "
+							+ OfficeSection.class.getSimpleName() + " "
+							+ sectionName, null, null);
+					continue; // no available auto-wiring for section object
+				}
 
 				// Link to appropriate Office Object
 				OfficeObject officeObject = objects.get(autoWire);
@@ -610,6 +657,45 @@ public class AutoWireOfficeSource extends AbstractOfficeSource {
 						officeGovernance);
 			}
 		}
+	}
+
+	/**
+	 * Obtains the appropriate available {@link AutoWire}.
+	 * 
+	 * @param qualifier
+	 *            Qualifier. May be <code>null</code>.
+	 * @param type
+	 *            Type.
+	 * @return Appropriate available {@link AutoWire} or <code>null</code> if no
+	 *         matching {@link AutoWire}.
+	 */
+	private AutoWire getAvailableAutoWire(String qualifier, String type) {
+
+		// Available auto-wiring should be sorted at this point.
+		// Therefore iterate over to find first matching.
+		for (AutoWire autoWire : this.availableAutoWiring) {
+
+			// Ensure matches on type
+			if (!(type.equals(autoWire.getType()))) {
+				continue; // ignore as must match on type
+			}
+
+			// Determine if unqualified auto-wire
+			String autoWireQualifier = autoWire.getQualifier();
+			if (autoWireQualifier == null) {
+				// Use unqualified auto-wire (as no qualified)
+				return autoWire;
+			}
+
+			// May use if qualifiers match
+			if (autoWireQualifier.equals(qualifier)) {
+				// Use the matching qualified auto-wire
+				return autoWire;
+			}
+		}
+
+		// As here, no matching auto-wire
+		return null;
 	}
 
 	/**
