@@ -34,6 +34,7 @@ import net.officefloor.compile.issues.CompilerIssues.LocationType;
 import net.officefloor.compile.section.SectionType;
 import net.officefloor.compile.spi.section.SectionDesigner;
 import net.officefloor.compile.spi.section.SectionInput;
+import net.officefloor.compile.spi.section.SectionManagedObject;
 import net.officefloor.compile.spi.section.SectionManagedObjectSource;
 import net.officefloor.compile.spi.section.SectionObject;
 import net.officefloor.compile.spi.section.SectionOutput;
@@ -45,6 +46,7 @@ import net.officefloor.compile.work.TaskType;
 import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
 import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.manage.OfficeFloor;
+import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.autowire.AutoWire;
 import net.officefloor.plugin.autowire.AutoWireOfficeFloor;
@@ -792,6 +794,56 @@ public class ClassSectionSourceTest extends OfficeFrameTestCase {
 
 		public void doInput(@Parameter ReturnValue returnValue) {
 			returnValue.value = this.managedObjectWithDependency.getMessage();
+		}
+	}
+
+	/**
+	 * Ensure can qualify the {@link ManagedObject}.
+	 */
+	public void testQualifiedManagedObject() {
+
+		// Create the expected section type
+		SectionDesigner type = this.createSectionDesigner(
+				MockQualifiedManagedObjectSection.class, "task");
+		type.addSectionInput("task", null);
+		SectionManagedObjectSource mos = type.addSectionManagedObjectSource(
+				"managedObject", ClassManagedObjectSource.class.getName());
+		mos.addProperty(ClassManagedObjectSource.CLASS_NAME_PROPERTY_NAME,
+				MockQualifiedManagedObject.class.getName());
+		SectionManagedObject mo = mos.addSectionManagedObject("managedObject",
+				ManagedObjectScope.PROCESS);
+		mo.addTypeQualification(MockQualifier.class.getName(),
+				String.class.getName());
+		mo.addTypeQualification(null, Integer.class.getName());
+
+		// Validate the section type
+		SectionLoaderUtil.validateSection(type, ClassSectionSource.class,
+				MockQualifiedManagedObjectSection.class.getName());
+	}
+
+	/**
+	 * Mock qualifier.
+	 */
+	public @interface MockQualifier {
+	}
+
+	/**
+	 * Mock qualified {@link ManagedObject}.
+	 */
+	public static class MockQualifiedManagedObject {
+	}
+
+	/**
+	 * Section with qualified {@link ManagedObject}.
+	 */
+	public static class MockQualifiedManagedObjectSection {
+
+		@ManagedObject(source = ClassManagedObjectSource.class, qualifiers = {
+				@TypeQualifier(qualifier = MockQualifier.class, type = String.class),
+				@TypeQualifier(type = Integer.class) }, properties = { @Property(name = ClassManagedObjectSource.CLASS_NAME_PROPERTY_NAME, valueClass = MockQualifiedManagedObject.class) })
+		MockQualifiedManagedObject managedObject;
+
+		public void task() {
 		}
 	}
 

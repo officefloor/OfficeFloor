@@ -18,6 +18,8 @@
 
 package net.officefloor.plugin.autowire;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.lang.reflect.Array;
 import java.sql.Connection;
 import java.util.HashMap;
@@ -61,6 +63,8 @@ import net.officefloor.plugin.managedobject.clazz.Dependency;
 import net.officefloor.plugin.section.clazz.ClassSectionSource;
 import net.officefloor.plugin.section.clazz.ManagedObject;
 import net.officefloor.plugin.section.clazz.Property;
+import net.officefloor.plugin.section.clazz.TypeQualifier;
+import net.officefloor.plugin.work.clazz.Qualifier;
 
 /**
  * Tests the {@link AutoWireOfficeSource}.
@@ -759,7 +763,9 @@ public class AutoWireOfficeSourceTest extends OfficeFrameTestCase {
 	 * Ensure can assign a {@link Team} responsibility.
 	 */
 	public void testAssignTeam() throws Exception {
-		this.doAssignTeamTest(MockTeamSection.class);
+		this.doAssignTeamTest(new AutoWire(Connection.class),
+				MockTeamSection.class, new AutoWire(Connection.class),
+				new AutoWire(String.class));
 	}
 
 	/**
@@ -780,7 +786,8 @@ public class AutoWireOfficeSourceTest extends OfficeFrameTestCase {
 	 * type.
 	 */
 	public void testAssignTeamBasedOnManagedObjectDependency() throws Exception {
-		this.doAssignTeamTest(MockTeamDependencySection.class);
+		this.doAssignTeamTest(new AutoWire(Connection.class),
+				MockTeamDependencySection.class, new AutoWire(Connection.class));
 	}
 
 	/**
@@ -811,35 +818,98 @@ public class AutoWireOfficeSourceTest extends OfficeFrameTestCase {
 
 	/**
 	 * Ensure can assign a {@link Team} responsibility based on qualified
+	 * {@link ManagedObject}.
+	 */
+	public void testAssignTeamBasedOnQualifiedManagedObject() throws Exception {
+		this.doAssignTeamTest(new AutoWire(MockQualifier.class, Integer.class),
+				MockTeamQualifiedManagedObjectSection.class, new AutoWire(
+						Integer.class));
+	}
+
+	/**
+	 * Mock qualifier.
+	 */
+	@Qualifier
+	@Retention(RetentionPolicy.RUNTIME)
+	public static @interface MockQualifier {
+	}
+
+	/**
+	 * Mock qualified dependency for {@link MockTeamQualifiedDependencySection}.
+	 */
+	public static class MockQualifiedManagedObject {
+	}
+
+	/**
+	 * Mock {@link Team} section class with qualified {@link ManagedObject}.
+	 */
+	public static class MockTeamQualifiedManagedObjectSection {
+
+		@ManagedObject(source = ClassManagedObjectSource.class, qualifiers = { @TypeQualifier(qualifier = MockQualifier.class, type = Integer.class) }, properties = { @Property(name = ClassManagedObjectSource.CLASS_NAME_PROPERTY_NAME, valueClass = MockQualifiedManagedObject.class) })
+		MockQualifiedManagedObject managedObject;
+
+		/**
+		 * {@link Task} depends on {@link #managedObject}.
+		 */
+		public void taskAssign() {
+		}
+	}
+
+	/**
+	 * Ensure can assign a {@link Team} responsibility based on qualified
 	 * {@link Task} dependency.
 	 */
 	public void testAssignTeamBasedOnQualifiedDependency() throws Exception {
-		fail("TODO implement");
+		this.doAssignTeamTest(new AutoWire(MockQualifier.class, Integer.class),
+				MockTeamQualifiedDependencySection.class, new AutoWire(
+						Integer.class), new AutoWire(MockQualifier.class,
+						Integer.class));
+	}
+
+	/**
+	 * Mock {@link Team} section class with qualified {@link Dependency}.
+	 */
+	public static class MockTeamQualifiedDependencySection {
+
+		public void taskAssign(@MockQualifier Integer object) {
+		}
+
+		public void taskNotAssign(Integer object) {
+		}
 	}
 
 	/**
 	 * Does the assign {@link Team} test.
 	 * 
+	 * @param teamAutoWire
+	 *            {@link Team} {@link AutoWire}.
 	 * @param sectionClass
 	 *            Section class.
+	 * @param objectAutoWiring
+	 *            Object {@link AutoWire} instances.
 	 */
-	private void doAssignTeamTest(Class<?> sectionClass) throws Exception {
+	private void doAssignTeamTest(AutoWire teamAutoWire, Class<?> sectionClass,
+			AutoWire... objectAutoWiring) throws Exception {
 
 		// Create and configure the source
 		AutoWireOfficeSource source = new AutoWireOfficeSource();
 		this.addSection(source, sectionClass);
+
+		// Add responsibility, ensuring appropriate details
 		AutoWireResponsibility responsibility = source
-				.addResponsibility(new AutoWire(Connection.class));
-		source.addAvailableAutoWire(new AutoWire(String.class));
-		source.addAvailableAutoWire(new AutoWire(Connection.class));
+				.addResponsibility(teamAutoWire);
 		assertEquals("Incorrect team name",
-				"team-" + Connection.class.getName(),
+				"team-" + teamAutoWire.getQualifiedType(),
 				responsibility.getOfficeTeamName());
+
+		// Add the available auto-wire objects
+		for (AutoWire autoWire : objectAutoWiring) {
+			source.addAvailableAutoWire(autoWire);
+		}
 
 		// Record creating the teams (responsibilities)
 		final OfficeTeam defaultTeam = this.recordTeam();
-		final OfficeTeam connectionTeam = this.recordTeam(new AutoWire(
-				Connection.class));
+		final OfficeTeam autoWireTeam = this.recordTeam(teamAutoWire);
 
 		// Record creating the section
 		this.recordOfficeSection(sectionClass, new TeamAssigner() {
@@ -849,7 +919,7 @@ public class AutoWireOfficeSourceTest extends OfficeFrameTestCase {
 				// Determine team responsible
 				OfficeTeam assignedTeam;
 				if ("taskAssign".equals(task.getOfficeTaskName())) {
-					assignedTeam = connectionTeam;
+					assignedTeam = autoWireTeam;
 				} else {
 					assignedTeam = defaultTeam;
 				}
@@ -862,7 +932,7 @@ public class AutoWireOfficeSourceTest extends OfficeFrameTestCase {
 
 		// Test
 		this.replayMockObjects();
-		source.sourceOffice(this.architect, context);
+		source.sourceOffice(this.architect, this.context);
 		this.verifyMockObjects();
 	}
 
@@ -1006,11 +1076,15 @@ public class AutoWireOfficeSourceTest extends OfficeFrameTestCase {
 		for (OfficeSectionObject sectionObject : officeSection
 				.getOfficeSectionObjects()) {
 			String objectType = sectionObject.getObjectType();
+			String typeQualifier = sectionObject.getTypeQualifier();
 			OfficeObjectNode officeObject = new OfficeObjectNodeImpl("TEST",
-					"TEST", null);
-			this.recordReturn(this.architect,
-					this.architect.addOfficeObject(objectType, objectType),
-					officeObject);
+					objectType, "TEST", null);
+			if (typeQualifier != null) {
+				officeObject.setTypeQualifier(typeQualifier);
+			}
+			this.recordReturn(this.architect, this.architect.addOfficeObject(
+					new AutoWire(typeQualifier, objectType).getQualifiedType(),
+					objectType), officeObject);
 
 			// Record the link
 			this.architect.link(sectionObject, officeObject);

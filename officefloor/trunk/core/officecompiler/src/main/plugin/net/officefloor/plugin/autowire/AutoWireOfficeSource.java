@@ -48,6 +48,7 @@ import net.officefloor.compile.spi.office.OfficeSectionOutput;
 import net.officefloor.compile.spi.office.OfficeSubSection;
 import net.officefloor.compile.spi.office.OfficeTask;
 import net.officefloor.compile.spi.office.OfficeTeam;
+import net.officefloor.compile.spi.office.TypeQualification;
 import net.officefloor.compile.spi.office.source.OfficeSource;
 import net.officefloor.compile.spi.office.source.OfficeSourceContext;
 import net.officefloor.compile.spi.office.source.impl.AbstractOfficeSource;
@@ -683,7 +684,7 @@ public class AutoWireOfficeSource extends AbstractOfficeSource {
 			// Determine if unqualified auto-wire
 			String autoWireQualifier = autoWire.getQualifier();
 			if (autoWireQualifier == null) {
-				// Use unqualified auto-wire (as no qualified)
+				// Use unqualified auto-wire (as not qualified)
 				return autoWire;
 			}
 
@@ -993,14 +994,9 @@ public class AutoWireOfficeSource extends AbstractOfficeSource {
 		private boolean isResponsible(ObjectDependency[] dependencies,
 				Set<DependentManagedObject> objects) {
 
-			// Determine if any objects are of dependency type
-			for (ObjectDependency dependency : dependencies) {
-				if (this.dependencyAutoWire.getType().equals(
-						dependency.getObjectDependencyType().getName())) {
-					// Matching dependency type, so is responsible
-					return true;
-				}
-			}
+			// Obtain details of auto-wire
+			String autoWireQualifier = this.dependencyAutoWire.getQualifier();
+			String autoWireType = this.dependencyAutoWire.getType();
 
 			// Determine if responsible for dependent objects
 			for (ObjectDependency dependency : dependencies) {
@@ -1017,6 +1013,27 @@ public class AutoWireOfficeSource extends AbstractOfficeSource {
 					continue; // ignore as already processed object
 				}
 				objects.add(object);
+
+				// Determine if responsible
+				for (TypeQualification qualification : object
+						.getTypeQualifications()) {
+
+					// Must match on type
+					if (!(autoWireType.equals(qualification.getType()))) {
+						continue; // ignore as not match on type
+					}
+
+					// Determine match via qualifier
+					if (autoWireQualifier == null) {
+						// No qualifier, so matches just on type
+						return true;
+
+					} else if (autoWireQualifier.equals(qualification
+							.getQualifier())) {
+						// Qualifier and type matches, so matches
+						return true;
+					}
+				}
 
 				// Recursively determine if responsible
 				if (this.isResponsible(object.getObjectDependencies(), objects)) {
