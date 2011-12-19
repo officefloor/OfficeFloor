@@ -20,7 +20,9 @@ package net.officefloor.compile.spi.section;
 
 import net.officefloor.compile.managedobject.ManagedObjectDependencyType;
 import net.officefloor.compile.spi.office.OfficeSection;
+import net.officefloor.compile.spi.office.TypeQualification;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
+import net.officefloor.frame.spi.team.Team;
 
 /**
  * {@link ManagedObject} within the {@link OfficeSection}.
@@ -35,6 +37,20 @@ public interface SectionManagedObject {
 	 * @return Name of this {@link SectionManagedObject}.
 	 */
 	String getSectionManagedObjectName();
+
+	/**
+	 * <p>
+	 * Adds an {@link TypeQualification} for this {@link SectionManagedObject}.
+	 * <p>
+	 * This enables distinguishing {@link SectionManagedObject} instances to
+	 * enable, for example, dynamic {@link Team} assignment.
+	 * 
+	 * @param qualifier
+	 *            Qualifier. May be <code>null</code> if no qualification.
+	 * @param type
+	 *            Type (typically the fully qualified type).
+	 */
+	void addTypeQualification(String qualifier, String type);
 
 	/**
 	 * Obtains the {@link ManagedObjectDependency} for the

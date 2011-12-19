@@ -41,6 +41,8 @@ import net.officefloor.compile.issues.CompilerIssues.LocationType;
 import net.officefloor.compile.managedobject.ManagedObjectDependencyType;
 import net.officefloor.compile.managedobject.ManagedObjectType;
 import net.officefloor.compile.spi.office.ObjectDependency;
+import net.officefloor.compile.spi.office.TypeQualification;
+import net.officefloor.compile.spi.office.UnknownType;
 import net.officefloor.compile.spi.section.ManagedObjectDependency;
 import net.officefloor.frame.api.build.DependencyMappingBuilder;
 import net.officefloor.frame.api.build.OfficeBuilder;
@@ -108,6 +110,11 @@ public class ManagedObjectNodeImpl implements ManagedObjectNode {
 	 * {@link NodeContext}.
 	 */
 	private final NodeContext context;
+
+	/**
+	 * {@link TypeQualification} instances for this {@link ManagedObjectNode}.
+	 */
+	private final List<TypeQualification> typeQualifications = new LinkedList<TypeQualification>();
 
 	/**
 	 * {@link GovernanceNode} instances to provide {@link Governance} over this
@@ -301,6 +308,11 @@ public class ManagedObjectNodeImpl implements ManagedObjectNode {
 	 */
 
 	@Override
+	public void addTypeQualification(String qualifier, String type) {
+		this.typeQualifications.add(new TypeQualificationImpl(qualifier, type));
+	}
+
+	@Override
 	public ManagedObjectDependency getManagedObjectDependency(
 			String managedObjectDependencyName) {
 		// Obtain and return the dependency for the name
@@ -378,6 +390,35 @@ public class ManagedObjectNodeImpl implements ManagedObjectNode {
 	@Override
 	public String getDependentManagedObjectName() {
 		return this.managedObjectName;
+	}
+
+	@Override
+	public TypeQualification[] getTypeQualifications() {
+
+		// Determine if have type qualifications
+		if (this.typeQualifications.size() > 0) {
+			// Type qualifications provided so return
+			return this.typeQualifications
+					.toArray(new TypeQualification[this.typeQualifications
+							.size()]);
+		}
+
+		// Default type qualification from managed object type
+		this.managedObjectSourceNode.loadManagedObjectType(); // ensure loaded
+		ManagedObjectType<?> managedObjectType = this.managedObjectSourceNode
+				.getManagedObjectType();
+		Class<?> type;
+		if (managedObjectType == null) {
+			// Failed loading managed object type, so unknown type
+			type = UnknownType.class;
+		} else {
+			// Default type qualification from managed object type
+			type = managedObjectType.getObjectClass();
+		}
+
+		// Return defaulted type qualification
+		return new TypeQualification[] { new TypeQualificationImpl(null,
+				type.getName()) };
 	}
 
 	@Override

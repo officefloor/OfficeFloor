@@ -35,6 +35,7 @@ import net.officefloor.compile.spi.office.OfficeSectionObject;
 import net.officefloor.compile.spi.office.OfficeSectionOutput;
 import net.officefloor.compile.spi.office.OfficeSubSection;
 import net.officefloor.compile.spi.office.OfficeTask;
+import net.officefloor.compile.spi.office.TypeQualification;
 import net.officefloor.compile.spi.section.ManagedObjectDependency;
 import net.officefloor.compile.spi.section.SectionManagedObject;
 import net.officefloor.compile.spi.section.SectionManagedObjectSource;
@@ -601,6 +602,78 @@ public class LoadOfficeSectionTest extends AbstractStructureTestCase {
 				mo.getDependentManagedObjectName());
 		assertTrue("Incorrect managed object type",
 				mo instanceof OfficeSectionManagedObject);
+
+		// Validate the default type qualification (from managed object type)
+		assertEquals("Incorrect number of type qualifications", 1,
+				mo.getTypeQualifications().length);
+		TypeQualification qualification = mo.getTypeQualifications()[0];
+		assertEquals("Incorrect dependent type", Object.class.getName(),
+				qualification.getType());
+		assertNull("Dependent should not be qualified for default auto-wire",
+				qualification.getQualifier());
+	}
+
+	/**
+	 * Ensure can get {@link DependentManagedObject} provides qualification.
+	 */
+	public void testTaskDependentOnQualifiedSectionManagedObject() {
+
+		final WorkFactory<Work> workFactory = this.createMockWorkFactory();
+		final TaskFactory<Work, ?, ?> taskFactory = this
+				.createMockTaskFactory();
+
+		// Load the task object dependent on managed object of same section
+		OfficeSection section = this.loadOfficeSection("SECTION",
+				new SectionMaker() {
+					@Override
+					public void make(SectionMakerContext context) {
+
+						// Add the task object and managed object
+						TaskObject object = context.addTaskObject("WORK",
+								workFactory, "TASK", taskFactory, "OBJECT",
+								Connection.class, null);
+						SectionManagedObjectSource moSource = context
+								.addManagedObjectSource("MO_SOURCE", null);
+						SectionManagedObject managedObject = moSource
+								.addSectionManagedObject("MO",
+										ManagedObjectScope.THREAD);
+
+						// Add type qualification (allows distinguishing)
+						managedObject.addTypeQualification("QUALIFIED",
+								Integer.class.getName());
+						managedObject.addTypeQualification(null,
+								String.class.getName());
+
+						// Link task object to managed object
+						context.getBuilder().link(object, managedObject);
+					}
+				});
+
+		// Validate link to dependent managed object
+		OfficeTask task = section.getOfficeTasks()[0];
+		assertEquals("Incorrect number of dependencies", 1,
+				task.getObjectDependencies().length);
+		ObjectDependency dependency = task.getObjectDependencies()[0];
+		assertEquals("Incorrect object dependency", "OBJECT",
+				dependency.getObjectDependencyName());
+		DependentManagedObject mo = dependency.getDependentManagedObject();
+		assertEquals("Incorrect dependent managed object", "MO",
+				mo.getDependentManagedObjectName());
+		assertTrue("Incorrect managed object type",
+				mo instanceof OfficeSectionManagedObject);
+
+		// Validate the specifying auto-wiring
+		assertEquals("Incorrect number of type qualifiers", 2,
+				mo.getTypeQualifications().length);
+		TypeQualification one = mo.getTypeQualifications()[0];
+		assertEquals("Incorrect first qualified type", Integer.class.getName(),
+				one.getType());
+		assertEquals("Incorrect first type qualifier", "QUALIFIED",
+				one.getQualifier());
+		TypeQualification two = mo.getTypeQualifications()[1];
+		assertEquals("Incorrect second qualified type", String.class.getName(),
+				two.getType());
+		assertNull("Second type should not be qualified", two.getQualifier());
 	}
 
 	/**

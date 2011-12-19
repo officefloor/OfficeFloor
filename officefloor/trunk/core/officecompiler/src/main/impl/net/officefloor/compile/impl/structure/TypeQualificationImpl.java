@@ -15,25 +15,52 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.compile.spi.office;
+package net.officefloor.compile.impl.structure;
+
+import net.officefloor.compile.spi.office.TypeQualification;
 
 /**
- * <p>
- * Special class returned by {@link ObjectDependency} to indicate the type is
- * unknown.
- * <p>
- * The class is <code>final</code> and with a <code>private</code> constructor
- * to ensure it stays only as a type indicator (not to actually be used and
- * therefore never a real dependency).
+ * {@link TypeQualification} implementation.
  * 
  * @author Daniel Sagenschneider
  */
-public final class UnknownType {
+public class TypeQualificationImpl implements TypeQualification {
 
 	/**
-	 * Ensure can not initiate this class as is only an type indicator.
+	 * Qualifier.
 	 */
-	private UnknownType() {
+	private final String qualifier;
+
+	/**
+	 * Type.
+	 */
+	private final String type;
+
+	/**
+	 * Initiate.
+	 * 
+	 * @param qualifier
+	 *            Qualifier. May be <code>null</code>.
+	 * @param type
+	 *            Type.
+	 */
+	public TypeQualificationImpl(String qualifier, String type) {
+		this.qualifier = qualifier;
+		this.type = type;
+	}
+
+	/*
+	 * ==================== TypeQualification =======================
+	 */
+
+	@Override
+	public String getQualifier() {
+		return this.qualifier;
+	}
+
+	@Override
+	public String getType() {
+		return this.type;
 	}
 
 }
