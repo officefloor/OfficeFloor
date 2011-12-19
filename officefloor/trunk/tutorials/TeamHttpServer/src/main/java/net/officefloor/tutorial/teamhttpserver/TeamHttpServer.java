@@ -26,6 +26,7 @@ import javax.sql.DataSource;
 import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.impl.spi.team.LeaderFollowerTeamSource;
 import net.officefloor.frame.spi.team.Team;
+import net.officefloor.plugin.autowire.AutoWire;
 import net.officefloor.plugin.autowire.AutoWireTeam;
 import net.officefloor.plugin.jdbc.datasource.DataSourceManagedObjectSource;
 import net.officefloor.plugin.web.http.parameters.source.HttpParametersObjectManagedObjectSource;
@@ -53,11 +54,12 @@ public class TeamHttpServer {
 		HttpParametersObjectManagedObjectSource.autoWire(source,
 				EncryptLetter.class);
 		source.addManagedObject(DataSourceManagedObjectSource.class.getName(),
-				null, DataSource.class).loadProperties("datasource.properties");
+				null, new AutoWire(DataSource.class)).loadProperties(
+				"datasource.properties");
 
 		// Configure team for all database tasks
-		AutoWireTeam team = source.assignTeam(
-				LeaderFollowerTeamSource.class.getName(), DataSource.class);
+		AutoWireTeam team = source.assignTeam(LeaderFollowerTeamSource.class
+				.getName(), new AutoWire(DataSource.class));
 		team.addProperty("size", "10");
 
 		// Start the HTTP server
