@@ -54,6 +54,13 @@ public @interface ManagedObject {
 	Property[] properties() default {};
 
 	/**
+	 * Obtains the {@link TypeQualifier} instances.
+	 * 
+	 * @return {@link TypeQualifier} instances.
+	 */
+	TypeQualifier[] qualifiers() default {};
+
+	/**
 	 * Obtains the {@link FlowLink} instances.
 	 * 
 	 * @return {@link FlowLink} instances.

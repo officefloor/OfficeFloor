@@ -30,7 +30,7 @@
 					<team name="OFFICE_TEAM" />
 				</responsibility>
 				<sub-section>
-					<section-managed-object name="${testcase}$SimpleManagedObject">
+					<section-managed-object name="managedObject">
 						<govern governance="GOVERNANCE" />
 					</section-managed-object>
 				</sub-section>

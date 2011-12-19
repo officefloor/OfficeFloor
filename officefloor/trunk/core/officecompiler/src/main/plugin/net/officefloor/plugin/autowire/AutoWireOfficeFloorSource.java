@@ -360,6 +360,13 @@ public class AutoWireOfficeFloorSource extends AbstractOfficeFloorSource
 		// Load extension interfaces for object types
 		for (AutoWireContext objectContext : this.objectContexts) {
 
+			// Load the available auto-wiring
+			AutoWire[] autoWiring = objectContext.autoWireObject
+					.getAutoWiring();
+			for (AutoWire autoWire : autoWiring) {
+				this.officeSource.addAvailableAutoWire(autoWire);
+			}
+
 			// Obtain the managed object type for the object
 			ManagedObjectType<?> managedObjectType = objectContext
 					.getManagedObjectType(context);
@@ -372,8 +379,7 @@ public class AutoWireOfficeFloorSource extends AbstractOfficeFloorSource
 					.getExtensionInterfaces();
 
 			// Load the extension interfaces for object type
-			for (AutoWire autoWire : objectContext.autoWireObject
-					.getAutoWiring()) {
+			for (AutoWire autoWire : autoWiring) {
 				this.officeSource.addOfficeObjectExtension(autoWire,
 						extensionInterfaces);
 			}

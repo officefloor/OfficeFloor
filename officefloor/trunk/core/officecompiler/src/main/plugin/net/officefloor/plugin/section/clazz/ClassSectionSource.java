@@ -736,15 +736,6 @@ public class ClassSectionSource extends AbstractSectionSource implements
 			String dependencyName = dependency.name;
 			String dependencyTypeName = dependency.field.getType().getName();
 
-			// Obtain the type qualifier
-			String dependencyTypeQualifier;
-			try {
-				dependencyTypeQualifier = dependency.getTypeQualifier();
-			} catch (IllegalArgumentException ex) {
-				designer.addIssue(ex.getMessage(), null, null);
-				return; // invalid section
-			}
-
 			// Obtain the managed object dependency
 			ManagedObjectDependency moDependency = managedObject
 					.getManagedObjectDependency(dependencyName);
@@ -753,17 +744,33 @@ public class ClassSectionSource extends AbstractSectionSource implements
 			ManagedObject moAnnotation = dependency.field
 					.getAnnotation(ManagedObject.class);
 			if (moAnnotation != null) {
+				// Use name of field to add the managed object
+				String moName = dependency.field.getName();
+
 				// Add the managed object
 				SectionManagedObjectSource mos = designer
-						.addSectionManagedObjectSource(dependencyTypeName,
-								moAnnotation.source().getName());
+						.addSectionManagedObjectSource(moName, moAnnotation
+								.source().getName());
 				for (Property property : moAnnotation.properties()) {
 					String value = ("".equals(property.value()) ? property
 							.valueClass().getName() : property.value());
 					mos.addProperty(property.name(), value);
 				}
-				SectionManagedObject mo = mos.addSectionManagedObject(
-						dependencyTypeName, ManagedObjectScope.PROCESS);
+				SectionManagedObject mo = mos.addSectionManagedObject(moName,
+						ManagedObjectScope.PROCESS);
+
+				// Add the type qualifiers for managed object
+				for (TypeQualifier typeQualifier : moAnnotation.qualifiers()) {
+					Class<?> qualifierClass = typeQualifier.qualifier();
+					if (TypeQualifier.class.equals(qualifierClass)) {
+						// No qualifier (as default value)
+						qualifierClass = null;
+					}
+					String qualifier = (qualifierClass == null ? null
+							: qualifierClass.getName());
+					String type = typeQualifier.type().getName();
+					mo.addTypeQualification(qualifier, type);
+				}
 
 				// Register the managed object
 				this._managedObjectsByTypeName.put(dependencyTypeName, mo);
@@ -772,7 +779,16 @@ public class ClassSectionSource extends AbstractSectionSource implements
 				designer.link(moDependency, mo);
 
 			} else {
-				// Link to external object (by type)
+				// Obtain the type qualifier for external object
+				String dependencyTypeQualifier;
+				try {
+					dependencyTypeQualifier = dependency.getTypeQualifier();
+				} catch (IllegalArgumentException ex) {
+					designer.addIssue(ex.getMessage(), null, null);
+					return; // invalid section
+				}
+
+				// Link to external object (by qualified type)
 				SectionObject sectionObject = this.getOrCreateObject(
 						dependencyTypeQualifier, dependencyTypeName);
 				designer.link(moDependency, sectionObject);
@@ -809,9 +825,11 @@ public class ClassSectionSource extends AbstractSectionSource implements
 			for (ManagedObjectDependencyType<?> dependencyType : moType
 					.getDependencyTypes()) {
 
-				// Obtain the dependency type
+				// Obtain the dependency type information
 				String dependencyTypeName = dependencyType.getDependencyType()
 						.getName();
+				String dependencyTypeQualifier = dependencyType
+						.getTypeQualifier();
 
 				// Obtain the managed object dependency
 				ManagedObjectDependency moDependency = mo
@@ -828,7 +846,7 @@ public class ClassSectionSource extends AbstractSectionSource implements
 				} else {
 					// Link to external object (by type)
 					SectionObject sectionObject = this.getOrCreateObject(
-							dependencyTypeName, dependencyTypeName);
+							dependencyTypeQualifier, dependencyTypeName);
 					designer.link(moDependency, sectionObject);
 				}
 			}

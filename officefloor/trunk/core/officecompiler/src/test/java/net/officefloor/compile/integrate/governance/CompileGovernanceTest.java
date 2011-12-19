@@ -181,21 +181,18 @@ public class CompileGovernanceTest extends AbstractCompileTestCase {
 		DependencyMappingBuilder sectionDependencies = this
 				.record_officeBuilder_addThreadManagedObject(
 						"OFFICE.SECTION.OBJECT", "OFFICE.SECTION.OBJECT");
-		sectionDependencies.mapDependency(0, "OFFICE.SECTION."
-				+ SimpleManagedObject.class.getName());
+		sectionDependencies.mapDependency(0, "OFFICE.SECTION.managedObject");
 
-		this.record_officeFloorBuilder_addManagedObject("OFFICE.SECTION."
-				+ SimpleManagedObject.class.getName(),
-				ClassManagedObjectSource.class, 0, "class.name",
-				SimpleManagedObject.class.getName());
+		this.record_officeFloorBuilder_addManagedObject(
+				"OFFICE.SECTION.managedObject", ClassManagedObjectSource.class,
+				0, "class.name", SimpleManagedObject.class.getName());
 		this.record_managedObjectBuilder_setManagingOffice("OFFICE");
-		office.registerManagedObjectSource("OFFICE.SECTION."
-				+ SimpleManagedObject.class.getName(), "OFFICE.SECTION."
-				+ SimpleManagedObject.class.getName());
+		office.registerManagedObjectSource("OFFICE.SECTION.managedObject",
+				"OFFICE.SECTION.managedObject");
 		DependencyMappingBuilder managedObjectDependencies = this
-				.record_officeBuilder_addProcessManagedObject("OFFICE.SECTION."
-						+ SimpleManagedObject.class.getName(),
-						"OFFICE.SECTION." + SimpleManagedObject.class.getName());
+				.record_officeBuilder_addProcessManagedObject(
+						"OFFICE.SECTION.managedObject",
+						"OFFICE.SECTION.managedObject");
 		managedObjectDependencies.mapGovernance("GOVERNANCE");
 
 		// Compile the office floor

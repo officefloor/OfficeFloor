@@ -43,6 +43,7 @@ import net.officefloor.compile.spi.office.OfficeSectionObject;
 import net.officefloor.compile.spi.office.OfficeSectionOutput;
 import net.officefloor.compile.spi.office.OfficeSubSection;
 import net.officefloor.compile.spi.office.OfficeTask;
+import net.officefloor.compile.spi.office.TypeQualification;
 import net.officefloor.compile.spi.section.SectionDesigner;
 import net.officefloor.compile.spi.section.source.SectionSource;
 import net.officefloor.compile.spi.section.source.SectionSourceSpecification;
@@ -456,7 +457,7 @@ public class SectionLoaderUtil {
 			// Validate the managed objects
 			OfficeSectionManagedObject[] eMos = eMoSource
 					.getOfficeSectionManagedObjects();
-			OfficeSectionManagedObject[] aMos = eMoSource
+			OfficeSectionManagedObject[] aMos = aMoSource
 					.getOfficeSectionManagedObjects();
 			TestCase.assertEquals(
 					"Incorrect number of managed objects (managed object source="
@@ -487,6 +488,32 @@ public class SectionLoaderUtil {
 						aMo.getAdministerableManagedObjectName());
 				String managedObjectName = eMo
 						.getOfficeSectionManagedObjectName();
+
+				// Validate the managed object type qualifiers
+				TypeQualification[] eTqs = eMo.getTypeQualifications();
+				TypeQualification[] aTqs = aMo.getTypeQualifications();
+				TestCase.assertEquals(
+						"Incorrect number of type qualifiers for managed object "
+								+ j + " (managed object source="
+								+ managedObjectSourceName + ", sub section="
+								+ subSectionName + ")", eTqs.length,
+						aTqs.length);
+				for (int q = 0; q < eTqs.length; q++) {
+					TypeQualification eTq = eTqs[q];
+					TypeQualification aTq = aTqs[q];
+					TestCase.assertEquals("Incorrect qualifying qualifier " + q
+							+ " (managed object=" + managedObjectName
+							+ ", managed object source="
+							+ managedObjectSourceName + ", sub section="
+							+ subSectionName + ")", eTq.getQualifier(),
+							aTq.getQualifier());
+					TestCase.assertEquals("Incorrect qualifying type " + q
+							+ " (managed object=" + managedObjectName
+							+ ", managed object source="
+							+ managedObjectSourceName + ", sub section="
+							+ subSectionName + ")", eTq.getType(),
+							aTq.getType());
+				}
 
 				// Validate the managed object supported extension interfaces
 				Class<?>[] eEis = eMo.getSupportedExtensionInterfaces();
