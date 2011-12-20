@@ -18,7 +18,9 @@
 
 package net.officefloor.console;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.PrintStream;
 
 import net.officefloor.building.command.OfficeFloorCommand;
 import net.officefloor.building.console.AbstractConsoleTestCase;
@@ -63,6 +65,9 @@ public abstract class AbstractConsoleMainTestCase extends
 	@Override
 	protected void setUp() throws Exception {
 
+		// Flag verbose
+		this.setVerbose(true);
+
 		// Testing
 		OfficeFloorConsoleMain.isExit = false;
 
@@ -75,12 +80,21 @@ public abstract class AbstractConsoleMainTestCase extends
 
 		// Ensure OfficeBuilding not running (before output to pipes)
 		if (this.isEnsureOfficeBuildingNotRunningForTest) {
+			this.printMessage("Setting up test (ensuring OfficeBuilding not running)");
+			PrintStream stdErr = System.err;
+			PrintStream devNull = new PrintStream(new ByteArrayOutputStream());
 			try {
+				// Ignore errors in stopping OfficeFloor (as may not be running)
+				System.setErr(devNull);
+
 				this.doMain("stop");
 			} catch (Throwable ex) {
 				// Ignore failure to stop office
 				System.err
 						.println("NOTE: Ignore previous error as ensuring OfficeBuilding not running.");
+			} finally {
+				// Reinstate stdErr
+				System.setErr(stdErr);
 			}
 		}
 
