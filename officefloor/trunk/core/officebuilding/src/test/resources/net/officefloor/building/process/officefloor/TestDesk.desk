@@ -7,7 +7,7 @@
             </properties>
             <initial-task name="writeMessage"/>
             <work-task name="writeMessage">
-                <task-object name="String" object-type="java.lang.String" parameter="true"/>
+                <task-object name="java.lang.String" object-type="java.lang.String" parameter="true"/>
             </work-task>
         </work>
     </works>

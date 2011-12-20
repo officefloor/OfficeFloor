@@ -277,16 +277,7 @@ public class OfficeBuildingTest extends AbstractConsoleMainTestCase {
 							null,
 							OfficeBuildingPortOfficeFloorCommandParameter.DEFAULT_OFFICE_BUILDING_PORT,
 							PROCESS_NAME);
-			long startTime = System.currentTimeMillis();
-			do {
-				// Allow some time for task to run
-				Thread.sleep(100);
-				if ((System.currentTimeMillis() - startTime) > 5000) {
-					assertOut("Timed out waiting for task to run");
-					fail("Ensure failure as timed out");
-				}
-
-			} while (!manager.isProcessComplete());
+			OfficeBuildingTestUtil.waitUntilProcessComplete(manager);
 		} catch (UndeclaredThrowableException ex) {
 			// May have already finished and unregistered before check
 			assertTrue(

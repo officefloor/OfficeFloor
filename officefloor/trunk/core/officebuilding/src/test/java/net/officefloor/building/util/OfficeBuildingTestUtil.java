@@ -24,7 +24,7 @@ import java.io.IOException;
 
 import junit.framework.TestCase;
 import net.officefloor.building.classpath.ClassPathFactoryImpl;
-import net.officefloor.building.process.ProcessManager;
+import net.officefloor.building.process.ProcessManagerMBean;
 import net.officefloor.console.OfficeBuilding;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.test.OfficeFrameTestCase;
@@ -264,8 +264,12 @@ public class OfficeBuildingTestUtil {
 
 	/**
 	 * Waits until the {@link Process} is complete (or times out).
+	 * 
+	 * @param manager
+	 *            {@link ProcessManagerMBean} of {@link Process} to wait until
+	 *            complete.
 	 */
-	public static void waitUntilProcessComplete(ProcessManager manager)
+	public static void waitUntilProcessComplete(ProcessManagerMBean manager)
 			throws Exception {
 
 		// Maximum run time (double OfficeFloorImpl wait to close time)

@@ -77,9 +77,9 @@ public class HttpTemplateSectionSourceTest extends OfficeFrameTestCase {
 		expected.addSectionOutput("doExternalFlow", String.class.getName(),
 				false);
 		expected.addSectionOutput("output", null, false);
-		expected.addSectionOutput("java.sql.SQLException",
+		expected.addSectionOutput(SQLException.class.getName(),
 				SQLException.class.getName(), true);
-		expected.addSectionOutput("java.io.IOException",
+		expected.addSectionOutput(IOException.class.getName(),
 				IOException.class.getName(), true);
 
 		// Objects
@@ -155,7 +155,7 @@ public class HttpTemplateSectionSourceTest extends OfficeFrameTestCase {
 				SectionClassManagedObjectSource.class.getName()).addProperty(
 				SectionClassManagedObjectSource.CLASS_NAME_PROPERTY_NAME,
 				TemplateLogic.class.getName());
-		expected.addSectionManagedObjectSource(RowBean.class.getName(),
+		expected.addSectionManagedObjectSource("managedObject",
 				ClassManagedObjectSource.class.getName()).addProperty(
 				ClassManagedObjectSource.CLASS_NAME_PROPERTY_NAME,
 				RowBean.class.getName());
