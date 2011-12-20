@@ -18,6 +18,9 @@
 
 package net.officefloor.plugin.autowire;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -75,6 +78,79 @@ import net.officefloor.model.impl.officefloor.OfficeFloorModelOfficeFloorSource;
  */
 public class AutoWireOfficeFloorSource extends AbstractOfficeFloorSource
 		implements AutoWireApplication {
+
+	/**
+	 * Obtains the appropriate available {@link AutoWire}.
+	 * 
+	 * @param qualifier
+	 *            Qualifier. May be <code>null</code>.
+	 * @param type
+	 *            Type.
+	 * @param availableAutoWiring
+	 *            Available {@link AutoWire} instances to select from.
+	 * @return Appropriate available {@link AutoWire} or <code>null</code> if no
+	 *         appropriate matching {@link AutoWire}.
+	 */
+	public static AutoWire getAppropriateAutoWire(String qualifier,
+			String type, List<AutoWire> availableAutoWiring) {
+
+		// Create a copy of the auto-wiring (allow sorting without side effect)
+		availableAutoWiring = new ArrayList<AutoWire>(availableAutoWiring);
+
+		// Sort the available auto-wiring (so qualifiers first)
+		Collections.sort(availableAutoWiring, new Comparator<AutoWire>() {
+			@Override
+			public int compare(AutoWire a, AutoWire b) {
+				// Sort by type first
+				int match = String.CASE_INSENSITIVE_ORDER.compare(a.getType(),
+						b.getType());
+				if (match != 0) {
+					// Not matching type, so return compare ordering
+					return match;
+				}
+
+				// Matching types, so sort by qualifier (with default last)
+				String aQualifier = a.getQualifier();
+				String bQualifier = b.getQualifier();
+				if ((aQualifier == null) && (bQualifier == null)) {
+					// Duplicate default types, so match
+					return 0;
+				} else if ((aQualifier != null) && (bQualifier != null)) {
+					// Same type, so compare on qualifiers
+					return String.CASE_INSENSITIVE_ORDER.compare(aQualifier,
+							bQualifier);
+				} else {
+					// Sort so default (null) qualifier is last
+					return (aQualifier == null ? 1 : -1);
+				}
+			}
+		});
+
+		// Iterate over to find first matching (as sorted)
+		for (AutoWire autoWire : availableAutoWiring) {
+
+			// Ensure matches on type
+			if (!(type.equals(autoWire.getType()))) {
+				continue; // ignore as must match on type
+			}
+
+			// Determine if unqualified auto-wire
+			String autoWireQualifier = autoWire.getQualifier();
+			if (autoWireQualifier == null) {
+				// Use unqualified auto-wire (as not qualified)
+				return autoWire;
+			}
+
+			// May use if qualifiers match
+			if (autoWireQualifier.equals(qualifier)) {
+				// Use the matching qualified auto-wire
+				return autoWire;
+			}
+		}
+
+		// As here, no matching auto-wire
+		return null;
+	}
 
 	/**
 	 * Name of the single {@link Office}.
@@ -683,8 +759,8 @@ public class AutoWireOfficeFloorSource extends AbstractOfficeFloorSource
 				Map<AutoWire, OfficeFloorManagedObject> managedObjects,
 				Map<AutoWire, OfficeFloorInputManagedObject> inputManagedObjects) {
 
-			// Obtain the managed object dependencies from type
-			Map<String, Class<?>> typeDependencies = new HashMap<String, Class<?>>();
+			// Obtain the managed object dependencies from appropriate auto-wire
+			Map<String, AutoWire> typeDependencies = new HashMap<String, AutoWire>();
 			if (this.rawObject == null) {
 				// Load the managed object type
 				ManagedObjectType<?> moType = this
@@ -693,9 +769,21 @@ public class AutoWireOfficeFloorSource extends AbstractOfficeFloorSource
 					// Have type so register its dependencies
 					for (ManagedObjectDependencyType<?> typeDependency : moType
 							.getDependencyTypes()) {
-						typeDependencies.put(
-								typeDependency.getDependencyName(),
-								typeDependency.getDependencyType());
+
+						// Obtain the dependency name
+						String dependencyName = typeDependency
+								.getDependencyName();
+
+						// Create the dependency auto-wire
+						String type = typeDependency.getDependencyType()
+								.getName();
+						String qualifier = typeDependency.getTypeQualifier();
+						AutoWire dependencyAutoWire = new AutoWire(qualifier,
+								type);
+
+						// Register the appropriate auto-wire for the dependency
+						typeDependencies
+								.put(dependencyName, dependencyAutoWire);
 					}
 				}
 			}
@@ -725,8 +813,9 @@ public class AutoWireOfficeFloorSource extends AbstractOfficeFloorSource
 			// Link the dependencies (from type)
 			for (String dependencyName : typeDependencies.keySet()) {
 
-				// Obtain the type of dependency
-				Class<?> dependencyType = typeDependencies.get(dependencyName);
+				// Obtain the auto-wire of dependency
+				AutoWire dependencyAutoWire = typeDependencies
+						.get(dependencyName);
 
 				// Obtain the dependency
 				ManagedObjectDependency dependency;
@@ -739,8 +828,7 @@ public class AutoWireOfficeFloorSource extends AbstractOfficeFloorSource
 				}
 
 				// Link the dependency
-				this.linkDependency(dependency,
-						new AutoWire(dependencyType.getName()), deployer,
+				this.linkDependency(dependency, dependencyAutoWire, deployer,
 						managedObjects, inputManagedObjects);
 			}
 
@@ -805,26 +893,45 @@ public class AutoWireOfficeFloorSource extends AbstractOfficeFloorSource
 				Map<AutoWire, OfficeFloorManagedObject> managedObjects,
 				Map<AutoWire, OfficeFloorInputManagedObject> inputManagedObjects) {
 
-			// Try first for the managed object
-			OfficeFloorManagedObject mo = managedObjects
-					.get(dependencyAutoWire);
-			if (mo != null) {
-				deployer.link(dependency, mo);
-				return;
+			// Create the listing of available auto-wiring
+			List<AutoWire> availableAutoWiring = new ArrayList<AutoWire>(
+					managedObjects.size() + inputManagedObjects.size());
+			availableAutoWiring.addAll(managedObjects.keySet());
+			availableAutoWiring.addAll(inputManagedObjects.keySet());
+
+			// Obtain the appropriate auto-wire
+			AutoWire appropriateAutoWire = getAppropriateAutoWire(
+					dependencyAutoWire.getQualifier(),
+					dependencyAutoWire.getType(), availableAutoWiring);
+
+			// Only attempt to link if have appropriate auto-wire
+			if (appropriateAutoWire != null) {
+
+				// Try first for the managed object
+				OfficeFloorManagedObject mo = managedObjects
+						.get(appropriateAutoWire);
+				if (mo != null) {
+					deployer.link(dependency, mo);
+					return;
+				}
+
+				// Try next for input managed object
+				OfficeFloorInputManagedObject inputMo = inputManagedObjects
+						.get(appropriateAutoWire);
+				if (inputMo != null) {
+					deployer.link(dependency, inputMo);
+					return;
+				}
 			}
 
-			// Try next for input managed object
-			OfficeFloorInputManagedObject inputMo = inputManagedObjects
-					.get(dependencyAutoWire);
-			if (inputMo != null) {
-				deployer.link(dependency, inputMo);
-				return;
-			}
-
-			// No managed object for dependency
-			deployer.addIssue("No dependency managed object for type "
-					+ dependencyAutoWire.getType(), AssetType.MANAGED_OBJECT,
-					this.managedObjectName);
+			// As here, no managed object for dependency
+			deployer.addIssue(
+					"No dependent managed object for auto-wiring dependency "
+							+ dependency.getManagedObjectDependencyName()
+							+ " (qualifier="
+							+ dependencyAutoWire.getQualifier() + ", type="
+							+ dependencyAutoWire.getType() + ")",
+					AssetType.MANAGED_OBJECT, this.managedObjectName);
 		}
 
 		/*

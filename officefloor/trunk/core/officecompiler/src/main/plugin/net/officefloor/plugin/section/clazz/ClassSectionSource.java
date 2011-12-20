@@ -745,7 +745,7 @@ public class ClassSectionSource extends AbstractSectionSource implements
 					.getAnnotation(ManagedObject.class);
 			if (moAnnotation != null) {
 				// Use name of field to add the managed object
-				String moName = dependency.field.getName();
+				String moName = dependency.name;
 
 				// Add the managed object
 				SectionManagedObjectSource mos = designer
@@ -798,9 +798,6 @@ public class ClassSectionSource extends AbstractSectionSource implements
 		// Link the managed object dependencies
 		for (DependencyMetaData dependency : dependencyMetaData) {
 
-			// Obtain managed object name
-			String moName = dependency.field.getType().getName();
-
 			// Obtain the managed object annotation
 			ManagedObject annotation = dependency.field
 					.getAnnotation(ManagedObject.class);
@@ -809,7 +806,8 @@ public class ClassSectionSource extends AbstractSectionSource implements
 			}
 
 			// Obtain the managed object
-			SectionManagedObject mo = this.getManagedObject(moName);
+			SectionManagedObject mo = this.getManagedObject(dependency.field
+					.getType().getName());
 
 			// Load the managed object type
 			PropertyList moProperties = context.createPropertyList();
