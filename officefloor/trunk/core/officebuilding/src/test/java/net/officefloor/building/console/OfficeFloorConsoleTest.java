@@ -181,10 +181,10 @@ public class OfficeFloorConsoleTest extends AbstractConsoleTestCase {
 
 		// Ensure notified of runs
 		synchronized (this) {
-			assertEquals("Should be notified of start", 1, this.processManagers
-					.size());
-			assertEquals("Should notified of completion", 1, this.completed
-					.size());
+			assertEquals("Should be notified of start", 1,
+					this.processManagers.size());
+			assertEquals("Should notified of completion", 1,
+					this.completed.size());
 			assertEquals("Incorrect process manager", "command",
 					this.processManagers.get(0).getProcessName());
 			assertEquals("Ensure same process", this.processManagers.get(0),
@@ -235,34 +235,30 @@ public class OfficeFloorConsoleTest extends AbstractConsoleTestCase {
 		// Recording initialising parser
 		this.recordReturn(localRepository, localRepository.getName(),
 				"local-repository");
-		this
-				.recordReturn(localRepository, localRepository.getShortName(),
-						null);
+		this.recordReturn(localRepository, localRepository.getShortName(), null);
 		this.recordReturn(localRepository, localRepository.isRequireValue(),
 				true);
 		this.recordReturn(remoteRepositoryUrls, remoteRepositoryUrls.getName(),
 				"remote-repository-urls");
-		this.recordReturn(remoteRepositoryUrls, remoteRepositoryUrls
-				.getShortName(), null);
-		this.recordReturn(remoteRepositoryUrls, remoteRepositoryUrls
-				.isRequireValue(), true);
+		this.recordReturn(remoteRepositoryUrls,
+				remoteRepositoryUrls.getShortName(), null);
+		this.recordReturn(remoteRepositoryUrls,
+				remoteRepositoryUrls.isRequireValue(), true);
 
 		// Record parsing
 		this.recordReturn(localRepository, localRepository.getName(),
 				"local-repository");
-		this
-				.recordReturn(localRepository, localRepository.getShortName(),
-						null);
+		this.recordReturn(localRepository, localRepository.getShortName(), null);
 		this.recordReturn(remoteRepositoryUrls, remoteRepositoryUrls.getName(),
 				"remote-repository-urls");
-		this.recordReturn(remoteRepositoryUrls, remoteRepositoryUrls
-				.getShortName(), null);
+		this.recordReturn(remoteRepositoryUrls,
+				remoteRepositoryUrls.getShortName(), null);
 
 		// Record obtaining both local and remote repositories
 		this.recordReturn(localRepository,
 				localRepository.getLocalRepository(), new File("."));
-		this.recordReturn(remoteRepositoryUrls, remoteRepositoryUrls
-				.getRemoteRepositoryUrls(), new String[0]);
+		this.recordReturn(remoteRepositoryUrls,
+				remoteRepositoryUrls.getRemoteRepositoryUrls(), new String[0]);
 
 		// Record environment loading onto parameters
 		this.recordReturn(localRepository, localRepository.getName(),
@@ -292,16 +288,27 @@ public class OfficeFloorConsoleTest extends AbstractConsoleTestCase {
 		// Start
 		this.doStartCommand();
 
-		// Ensure only notified of start of process
 		synchronized (this) {
+			// Ensure only notified of start of process
 			assertEquals("Should have process manager registered", 1,
 					this.processManagers.size());
 			ProcessManagerMBean processManager = this.processManagers.get(0);
-			assertEquals("Incorrect process manager", "command", processManager
-					.getProcessName());
-			assertEquals("Should not yet be completed", 0, this.completed
-					.size());
+			assertEquals("Incorrect process manager", "command",
+					processManager.getProcessName());
+
+			// Ensure notified of completion of process.
+			// Need to wait on process completion to check this.
+			long endTime = System.currentTimeMillis() + 10000;
+			while (this.completed.size() == 0) {
+				// Wait some time for completion
+				this.wait(100);
+
+				// Determine if timed out waiting for complete
+				assertTrue("Timed out waiting for completion",
+						(System.currentTimeMillis() < endTime));
+			}
 		}
+
 	}
 
 	/**
@@ -319,9 +326,9 @@ public class OfficeFloorConsoleTest extends AbstractConsoleTestCase {
 
 		// Ensure test valid by no process manager registered
 		synchronized (this) {
-			assertEquals("Should not have process manager registered", 0,
+			assertEquals("Should not have started process notification", 0,
 					this.processManagers.size());
-			assertEquals("Should not have process manager registered", 0,
+			assertEquals("Should not have completed process notification", 0,
 					this.completed.size());
 		}
 	}
@@ -360,8 +367,8 @@ public class OfficeFloorConsoleTest extends AbstractConsoleTestCase {
 		while (!isRun(command)) {
 			// Allow some time for waiting
 			Thread.sleep(10);
-			TestCase.assertTrue("Timed out waiting", ((System
-					.currentTimeMillis() - startTime) < 5000));
+			TestCase.assertTrue("Timed out waiting",
+					((System.currentTimeMillis() - startTime) < 5000));
 		}
 
 		// Ensure JVM option made available

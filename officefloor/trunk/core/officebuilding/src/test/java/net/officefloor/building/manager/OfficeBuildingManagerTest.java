@@ -352,14 +352,7 @@ public class OfficeBuildingManagerTest extends TestCase {
 				stopDetails);
 
 		// Ensure the OfficeFloor process is also stopped
-		try {
-			remoteProcessShell.triggerStopProcess();
-			fail("Process should already be stopped");
-		} catch (Exception ex) {
-			// Ensure issue connecting
-			assertTrue("Should have issue connecting as process stopped",
-					(ex.getCause() instanceof ConnectException));
-		}
+		validateProcessStopped(remoteProcessShell);
 	}
 
 	/**
@@ -413,14 +406,7 @@ public class OfficeBuildingManagerTest extends TestCase {
 		assertEquals("Should be closed", "Closed", closeText);
 
 		// Ensure the OfficeFloor process is closed
-		try {
-			remoteProcessShell.triggerStopProcess();
-			fail("OfficeFloor should already be closed and process stopped");
-		} catch (Exception ex) {
-			// Ensure issue connecting
-			assertTrue("Should have issue finding as OfficeFloor closed",
-					(ex.getCause() instanceof ConnectException));
-		}
+		validateProcessStopped(remoteProcessShell);
 	}
 
 	/**
@@ -466,4 +452,34 @@ public class OfficeBuildingManagerTest extends TestCase {
 				+ "/TestOfficeFloor.officefloor";
 	}
 
+	/**
+	 * Validate {@link ProcessShellMBean} is stopped.
+	 * 
+	 * @param shell
+	 *            {@link ProcessShellMBean} to determine if stopped.
+	 */
+	private static void validateProcessStopped(ProcessShellMBean shell) {
+
+		long endTime = System.currentTimeMillis() + 10000;
+		for (;;) {
+
+			// Attempt to determine the OfficeFloor process is stopped
+			Throwable cause = null;
+			try {
+				shell.triggerStopProcess();
+				fail("Process should already be stopped (or be stopping)");
+			} catch (Exception ex) {
+				// Ensure issue connecting (as stopped)
+				cause = ex.getCause();
+				if (cause instanceof ConnectException) {
+					return; // identified as correctly closed
+				}
+			}
+
+			// Determine if timed out waiting for close
+			assertTrue("Timed out waiting for process to stop (last was "
+					+ cause.getClass().getName() + ": " + cause.getMessage()
+					+ ")", (System.currentTimeMillis() < endTime));
+		}
+	}
 }

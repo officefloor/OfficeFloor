@@ -268,11 +268,14 @@ public class OfficeBuildingTestUtil {
 	 * @param manager
 	 *            {@link ProcessManagerMBean} of {@link Process} to wait until
 	 *            complete.
+	 * @param details
+	 *            Provides further details should {@link Process} time out. May
+	 *            be <code>null</code>.
 	 */
-	public static void waitUntilProcessComplete(ProcessManagerMBean manager)
-			throws Exception {
+	public static void waitUntilProcessComplete(ProcessManagerMBean manager,
+			FurtherDetails details) throws Exception {
 
-		// Maximum run time (double OfficeFloorImpl wait to close time)
+		// Maximum run time (allow reasonable time to close)
 		final int MAX_RUN_TIME = 20000;
 
 		// Wait until process completes (or times out)
@@ -281,7 +284,8 @@ public class OfficeBuildingTestUtil {
 			// Determine if taken too long
 			if (System.currentTimeMillis() > maxFinishTime) {
 				manager.destroyProcess();
-				TestCase.fail("Processing took too long");
+				TestCase.fail("Processing took too long"
+						+ (details == null ? "" : ": " + details.getMessage()));
 			}
 
 			// Wait some time for further processing

@@ -91,7 +91,7 @@ public class OfficeFloorManagerTest extends OfficeFrameTestCase {
 		// Run process ensuring it completes
 		ProcessManager manager = ProcessManager.startProcess(managedProcess,
 				null);
-		OfficeBuildingTestUtil.waitUntilProcessComplete(manager);
+		OfficeBuildingTestUtil.waitUntilProcessComplete(manager, null);
 
 		// Validate content in file
 		OfficeBuildingTestUtil.validateFileContent("Expecting content written",
@@ -159,7 +159,7 @@ public class OfficeFloorManagerTest extends OfficeFrameTestCase {
 
 		// Stop the managed process
 		manager.triggerStopProcess();
-		OfficeBuildingTestUtil.waitUntilProcessComplete(manager);
+		OfficeBuildingTestUtil.waitUntilProcessComplete(manager, null);
 
 		// Validate content in file
 		OfficeBuildingTestUtil.validateFileContent("Expecting content written",
