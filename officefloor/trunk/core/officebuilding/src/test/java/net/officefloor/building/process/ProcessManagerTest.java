@@ -64,11 +64,12 @@ public class ProcessManagerTest extends OfficeFrameTestCase {
 		File file = OfficeBuildingTestUtil.createTempFile(this);
 
 		// Start the process
-		this.manager = ProcessManager.startProcess(new WriteToFileProcess(file
-				.getAbsolutePath(), TEST_CONTENT), null);
+		this.manager = ProcessManager.startProcess(
+				new WriteToFileProcess(file.getAbsolutePath(), TEST_CONTENT),
+				null);
 
 		// Wait until process writes content to file
-		OfficeBuildingTestUtil.waitUntilProcessComplete(this.manager);
+		OfficeBuildingTestUtil.waitUntilProcessComplete(this.manager, null);
 
 		// Ensure content in file
 		OfficeBuildingTestUtil.validateFileContent("Content should be in file",
@@ -97,8 +98,8 @@ public class ProcessManagerTest extends OfficeFrameTestCase {
 				TEST_CONTENT, file);
 
 		// Ensure class path not changed
-		assertEquals("Class path should not be changed", classPath, System
-				.getProperty("java.class.path"));
+		assertEquals("Class path should not be changed", classPath,
+				System.getProperty("java.class.path"));
 	}
 
 	/**
@@ -240,7 +241,7 @@ public class ProcessManagerTest extends OfficeFrameTestCase {
 				CLASS_PATH_FILE_PATH, file.getAbsolutePath()), null);
 
 		// Wait until process writes content to file
-		OfficeBuildingTestUtil.waitUntilProcessComplete(this.manager);
+		OfficeBuildingTestUtil.waitUntilProcessComplete(this.manager, null);
 
 		// Ensure content in file
 		OfficeBuildingTestUtil.validateFileContent("Content should be in file",
@@ -385,7 +386,7 @@ public class ProcessManagerTest extends OfficeFrameTestCase {
 		this.manager.triggerStopProcess();
 
 		// Wait until process completes
-		OfficeBuildingTestUtil.waitUntilProcessComplete(this.manager);
+		OfficeBuildingTestUtil.waitUntilProcessComplete(this.manager, null);
 
 		// Ensure listeners notified
 		synchronized (isStarted) {
@@ -414,13 +415,13 @@ public class ProcessManagerTest extends OfficeFrameTestCase {
 			// Ensure correct message
 			assertEquals("Incorrect failure message",
 					"Failed to start ProcessShell for " + managedProcess + " ["
-							+ FailInitProcess.class.getName() + "]", ex
-							.getMessage());
+							+ FailInitProcess.class.getName() + "]",
+					ex.getMessage());
 
 			// Ensure correct cause
 			Throwable cause = ex.getCause();
-			assertEquals("Incorrect exception", FAILURE_MESSAGE, cause
-					.getMessage());
+			assertEquals("Incorrect exception", FAILURE_MESSAGE,
+					cause.getMessage());
 		}
 	}
 
@@ -442,13 +443,13 @@ public class ProcessManagerTest extends OfficeFrameTestCase {
 			// Ensure correct message
 			assertEquals("Incorrect failure message",
 					"Failed to run ProcessShell for " + managedProcess + " ["
-							+ FailInitProcess.class.getName() + "]", ex
-							.getMessage());
+							+ FailInitProcess.class.getName() + "]",
+					ex.getMessage());
 
 			// Ensure correct cause
 			Throwable cause = ex.getCause();
-			assertEquals("Incorrect exception", FAILURE_MESSAGE, cause
-					.getMessage());
+			assertEquals("Incorrect exception", FAILURE_MESSAGE,
+					cause.getMessage());
 		}
 	}
 
@@ -506,11 +507,11 @@ public class ProcessManagerTest extends OfficeFrameTestCase {
 		System.clearProperty("test.property2");
 
 		// Start the process
-		this.manager = ProcessManager.startProcess(new JvmOptionsProcess(file
-				.getAbsolutePath()), configuration);
+		this.manager = ProcessManager.startProcess(
+				new JvmOptionsProcess(file.getAbsolutePath()), configuration);
 
 		// Wait until process writes content to file
-		OfficeBuildingTestUtil.waitUntilProcessComplete(this.manager);
+		OfficeBuildingTestUtil.waitUntilProcessComplete(this.manager, null);
 
 		// Ensure content in file
 		OfficeBuildingTestUtil.validateFileContent("Content should be in file",
@@ -580,7 +581,7 @@ public class ProcessManagerTest extends OfficeFrameTestCase {
 		this.manager.destroyProcess();
 
 		// Wait until process completes
-		OfficeBuildingTestUtil.waitUntilProcessComplete(this.manager);
+		OfficeBuildingTestUtil.waitUntilProcessComplete(this.manager, null);
 	}
 
 	/**
@@ -650,9 +651,8 @@ public class ProcessManagerTest extends OfficeFrameTestCase {
 		// Ensure Process Manager MBean registered
 		assertTrue(
 				"Process Manager MBean should be registered",
-				server
-						.isRegistered(this.manager
-								.getLocalObjectName(ProcessManager.PROCESS_MANAGER_OBJECT_NAME)));
+				server.isRegistered(this.manager
+						.getLocalObjectName(ProcessManager.PROCESS_MANAGER_OBJECT_NAME)));
 	}
 
 	/**
@@ -682,24 +682,24 @@ public class ProcessManagerTest extends OfficeFrameTestCase {
 				.getLocalObjectName(ProcessManager.PROCESS_MANAGER_OBJECT_NAME);
 
 		// Ensure the MBeans are registered
-		assertTrue("Mock MBean not registered", server
-				.isRegistered(mockLocalMBeanName));
-		assertTrue("Process Shell MBean not registered", server
-				.isRegistered(processShellLocalMBeanName));
-		assertTrue("Process Manager MBean not registered", server
-				.isRegistered(processManagerLocalMBeanName));
+		assertTrue("Mock MBean not registered",
+				server.isRegistered(mockLocalMBeanName));
+		assertTrue("Process Shell MBean not registered",
+				server.isRegistered(processShellLocalMBeanName));
+		assertTrue("Process Manager MBean not registered",
+				server.isRegistered(processManagerLocalMBeanName));
 
 		// Stop the process
 		this.manager.triggerStopProcess();
-		OfficeBuildingTestUtil.waitUntilProcessComplete(this.manager);
+		OfficeBuildingTestUtil.waitUntilProcessComplete(this.manager, null);
 
 		// Ensure the MBeans are unregistered
-		assertFalse("Mock MBean should be unregistered", server
-				.isRegistered(mockLocalMBeanName));
-		assertFalse("Process Shell MBean should be unregistered", server
-				.isRegistered(processShellLocalMBeanName));
-		assertFalse("Process Manager MBean should be unregistered", server
-				.isRegistered(processManagerLocalMBeanName));
+		assertFalse("Mock MBean should be unregistered",
+				server.isRegistered(mockLocalMBeanName));
+		assertFalse("Process Shell MBean should be unregistered",
+				server.isRegistered(processShellLocalMBeanName));
+		assertFalse("Process Manager MBean should be unregistered",
+				server.isRegistered(processManagerLocalMBeanName));
 	}
 
 	/**
@@ -828,8 +828,8 @@ public class ProcessManagerTest extends OfficeFrameTestCase {
 			}
 
 			// Ensure mock MBean unregistered after process complete
-			assertFalse("MBean should not be registered", server
-					.isRegistered(localMBeanName));
+			assertFalse("MBean should not be registered",
+					server.isRegistered(localMBeanName));
 
 			// Ensure process did not fail
 			synchronized (failure) {

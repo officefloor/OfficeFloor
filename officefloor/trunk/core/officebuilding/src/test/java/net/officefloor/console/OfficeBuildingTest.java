@@ -277,7 +277,7 @@ public class OfficeBuildingTest extends AbstractConsoleMainTestCase {
 							null,
 							OfficeBuildingPortOfficeFloorCommandParameter.DEFAULT_OFFICE_BUILDING_PORT,
 							PROCESS_NAME);
-			OfficeBuildingTestUtil.waitUntilProcessComplete(manager);
+			OfficeBuildingTestUtil.waitUntilProcessComplete(manager, this);
 		} catch (UndeclaredThrowableException ex) {
 			// May have already finished and unregistered before check
 			assertTrue(

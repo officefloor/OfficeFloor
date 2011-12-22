@@ -373,27 +373,29 @@ public class ProcessManager implements ProcessManagerMBean {
 		Process process = null;
 		try {
 
-			// Invoke the process
-			ProcessBuilder builder = new ProcessBuilder(command);
-			process = builder.start();
-
-			// Gobble the process's stdout and stderr
-			new StreamGobbler(process.getInputStream()).start();
-			new StreamGobbler(process.getErrorStream()).start();
-
 			// Obtain the process completion listener
 			ProcessCompletionListener completionListener = configuration
 					.getProcessCompletionListener();
+
+			// Start the process (first as Process required by Manager)
+			ProcessBuilder builder = new ProcessBuilder(command);
+			process = builder.start();
 
 			// Create the process manager for the process
 			processManager = new ProcessManager(processName, mbeanNamespace,
 					process, completionListener, mbeanServer);
 
 			// Handle process responses
-			ProcessNotificationHandler handler = new ProcessNotificationHandler(
+			ProcessNotificationHandler notificationHandler = new ProcessNotificationHandler(
 					processManager);
-			int fromProcessPort = handler.getFromProcessPort();
-			handler.start();
+			int fromProcessPort = notificationHandler.getFromProcessPort();
+			notificationHandler.start();
+			Thread.yield(); // give chance to start
+
+			// Gobble the stdout and stderr
+			new StreamGobbler(process.getInputStream()).start();
+			new StreamGobbler(process.getErrorStream()).start();
+			Thread.yield(); // give change to start
 
 			// Send managed process and response port to process
 			ObjectOutputStream toProcessPipe = new ObjectOutputStream(
@@ -410,7 +412,7 @@ public class ProcessManager implements ProcessManagerMBean {
 				startListener.processStarted(processManager);
 			}
 
-		} catch (IOException ex) {
+		} catch (Exception ex) {
 			// Propagate failure
 			throw newProcessException(process, ex.getMessage(), ex);
 		}
@@ -444,7 +446,8 @@ public class ProcessManager implements ProcessManagerMBean {
 				}
 			}
 		} catch (InterruptedException ex) {
-			// Continue on as interrupted
+			// Interrupted in beginning the process
+			throw newProcessException(process, "Process start interruption", ex);
 		}
 
 		// Return the manager for the process
@@ -905,10 +908,12 @@ public class ProcessManager implements ProcessManagerMBean {
 		public void run() {
 			try {
 				// Accept only the first connection (from process)
-				Socket socket;
+				ServerSocket serverSocket;
 				synchronized (this) {
-					socket = this.fromProcessServerSocket.accept();
+					serverSocket = this.fromProcessServerSocket;
 				}
+				serverSocket.setSoTimeout(10000); // allow 10 seconds to connect
+				Socket socket = serverSocket.accept();
 
 				// Register the Process Manager MBean
 				this.processManager.registerMBean(this.processManager,
@@ -918,7 +923,7 @@ public class ProcessManager implements ProcessManagerMBean {
 				ObjectInputStream fromProcessPipe = new ObjectInputStream(
 						socket.getInputStream());
 
-				// Loop until pipe closes
+				// Loop until pipe closes (or indicated to close)
 				for (;;) {
 
 					// Read in next Object
@@ -1002,7 +1007,10 @@ public class ProcessManager implements ProcessManagerMBean {
 						this.fromProcessServerSocket.close();
 					}
 				} catch (Throwable ex) {
-					ex.printStackTrace();
+					// Indicate error
+					LOGGER.log(Level.WARNING,
+							ProcessNotificationHandler.class.getSimpleName()
+									+ " error", ex);
 				}
 			}
 		}
@@ -1049,7 +1057,8 @@ public class ProcessManager implements ProcessManagerMBean {
 				}
 			} catch (Throwable ex) {
 				// Provide stack trace and exit
-				ex.printStackTrace();
+				LOGGER.log(Level.WARNING, StreamGobbler.class.getSimpleName()
+						+ " error", ex);
 			}
 		}
 	}

@@ -39,6 +39,7 @@ import net.officefloor.building.command.OfficeFloorCommandParameter;
 import net.officefloor.building.execute.MockCommand;
 import net.officefloor.building.process.ManagedProcess;
 import net.officefloor.building.process.ManagedProcessContext;
+import net.officefloor.building.util.FurtherDetails;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 
 /**
@@ -46,7 +47,8 @@ import net.officefloor.frame.test.OfficeFrameTestCase;
  * 
  * @author Daniel Sagenschneider
  */
-public class AbstractConsoleTestCase extends OfficeFrameTestCase {
+public class AbstractConsoleTestCase extends OfficeFrameTestCase implements
+		FurtherDetails {
 
 	/**
 	 * Data written to file to confirm the {@link ManagedProcess} is run.
@@ -305,8 +307,8 @@ public class AbstractConsoleTestCase extends OfficeFrameTestCase {
 			if (this.waitFilePath != null) {
 
 				// Ensure the wait file exists
-				assertTrue("Wait file exists", new File(this.waitFilePath)
-						.exists());
+				assertTrue("Wait file exists",
+						new File(this.waitFilePath).exists());
 
 				// Wait for content in the wait file
 				long startTime = System.currentTimeMillis();
@@ -315,8 +317,8 @@ public class AbstractConsoleTestCase extends OfficeFrameTestCase {
 
 					// Allow some time for waiting
 					Thread.sleep(10);
-					TestCase.assertTrue("Timed out waiting", ((System
-							.currentTimeMillis() - startTime) < 5000));
+					TestCase.assertTrue("Timed out waiting",
+							((System.currentTimeMillis() - startTime) < 5000));
 
 					// Check if content to indicate finished waiting
 					if (new OfficeFrameTestCase() {
@@ -389,8 +391,8 @@ public class AbstractConsoleTestCase extends OfficeFrameTestCase {
 			// Remove right format spacing for test readability
 			final String TRAILING_SPACE = " ";
 			while (line.endsWith(TRAILING_SPACE)) {
-				line = line.substring(0, (line.length() - TRAILING_SPACE
-						.length()));
+				line = line.substring(0,
+						(line.length() - TRAILING_SPACE.length()));
 			}
 
 			// Add expected line
@@ -399,14 +401,57 @@ public class AbstractConsoleTestCase extends OfficeFrameTestCase {
 		}
 
 		// Obtain the actual output
-		console.close();
-		StringWriter actual = new StringWriter();
-		for (int value = pipe.read(); value != -1; value = pipe.read()) {
-			actual.write(value);
-		}
+		String actual = this.getPipeContent(console, pipe);
 
 		// Validate output
-		assertEquals("Incorrect output", expected.toString(), actual.toString());
+		assertEquals("Incorrect output", expected.toString(), actual);
+	}
+
+	/**
+	 * Obtains the Pipe content.
+	 * 
+	 * @param console
+	 *            {@link PrintStream}.
+	 * @param pipe
+	 *            Corresponding pipe for {@link PrintStream}.
+	 * @return Pipe content.
+	 */
+	private String getPipeContent(PrintStream console, BufferedReader pipe)
+			throws IOException {
+
+		// Close console to enable end of stream
+		console.close();
+
+		// Obtain the content
+		StringWriter content = new StringWriter();
+		for (int value = pipe.read(); value != -1; value = pipe.read()) {
+			content.write(value);
+		}
+
+		// Return the content
+		return content.toString();
+	}
+
+	/*
+	 * ======================= FurtherDetails ==============================
+	 */
+
+	@Override
+	public String getMessage() {
+		try {
+			// Obtain the message
+			StringBuilder msg = new StringBuilder();
+			msg.append("\nSTDOUT:\n");
+			msg.append(this.getPipeContent(this.consoleOut, this.out));
+			msg.append("\nSTDERR:\n");
+			msg.append(this.getPipeContent(this.consoleErr, this.err));
+
+			// Return the message
+			return msg.toString();
+
+		} catch (IOException ex) {
+			throw fail(ex);
+		}
 	}
 
 }

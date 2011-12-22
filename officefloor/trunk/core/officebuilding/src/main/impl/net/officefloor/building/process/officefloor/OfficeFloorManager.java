@@ -21,9 +21,12 @@ package net.officefloor.building.process.officefloor;
 import java.io.PrintWriter;
 import java.io.Serializable;
 import java.io.StringWriter;
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Properties;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
@@ -49,6 +52,12 @@ import net.officefloor.frame.api.manage.WorkManager;
  */
 public class OfficeFloorManager implements ManagedProcess,
 		OfficeFloorManagerMBean {
+
+	/**
+	 * {@link Logger}.
+	 */
+	private static final Logger LOGGER = Logger
+			.getLogger(OfficeFloorManager.class.getName());
 
 	/**
 	 * {@link ObjectName} for the {@link OfficeFloorManager}.
@@ -138,18 +147,23 @@ public class OfficeFloorManager implements ManagedProcess,
 	}
 
 	@Override
-	public synchronized String listTasks() {
+	public String listTasks() {
 
-		// Ensure open
-		if (!this.isOpen) {
-			return "OfficeFloor not open";
+		OfficeFloor officeFloor;
+		synchronized (this) {
+			officeFloor = this.officeFloor;
+
+			// Ensure open
+			if (!this.isOpen) {
+				return "OfficeFloor not open";
+			}
 		}
 
 		// Create the listing of tasks
 		StringBuilder tasks = new StringBuilder();
 		try {
 			boolean isFirst = true;
-			for (String officeName : this.officeFloor.getOfficeNames()) {
+			for (String officeName : officeFloor.getOfficeNames()) {
 
 				// Separator
 				if (!isFirst) {
@@ -161,7 +175,7 @@ public class OfficeFloorManager implements ManagedProcess,
 				tasks.append(officeName);
 
 				// List work of the office
-				Office office = this.officeFloor.getOffice(officeName);
+				Office office = officeFloor.getOffice(officeName);
 				for (String workName : office.getWorkNames()) {
 					tasks.append("\n\t" + workName);
 
@@ -189,19 +203,29 @@ public class OfficeFloorManager implements ManagedProcess,
 	}
 
 	@Override
-	public synchronized void invokeTask(String officeName, String workName,
-			String taskName, String parameter) throws Exception {
+	public void invokeTask(String officeName, String workName, String taskName,
+			String parameter) throws Exception {
 
-		// Determine if already opened the OfficeFloor
-		if (this.isOpen) {
-			// OfficeFloor running so invoke immediately
-			new WorkState(officeName, workName, taskName, parameter)
-					.invoke(this.officeFloor);
+		WorkState work = null;
+		OfficeFloor officeFloor;
+		synchronized (this) {
+			officeFloor = this.officeFloor;
 
-		} else {
-			// Register the work to be invoked inside the main
-			this.workStates.add(new WorkState(officeName, workName, taskName,
-					parameter));
+			// Determine if already opened the OfficeFloor
+			if (this.isOpen) {
+				// OfficeFloor running so invoke immediately
+				work = new WorkState(officeName, workName, taskName, parameter);
+
+			} else {
+				// Register the work to be invoked inside the main
+				this.workStates.add(new WorkState(officeName, workName,
+						taskName, parameter));
+			}
+		}
+
+		// Invoke work if have (outside locks)
+		if (work != null) {
+			work.invoke(officeFloor);
 		}
 	}
 
@@ -211,125 +235,149 @@ public class OfficeFloorManager implements ManagedProcess,
 
 	@Override
 	@SuppressWarnings("unchecked")
-	public synchronized void init(ManagedProcessContext context)
-			throws Throwable {
-		this.context = context;
+	public void init(ManagedProcessContext context) throws Throwable {
 
-		// Create the OfficeFloor compiler
-		OfficeFloorCompiler compiler = OfficeFloorCompiler
-				.newOfficeFloorCompiler(null);
+		synchronized (this) {
+			this.context = context;
 
-		// Add properties for the compiler
-		for (String name : this.officeFloorProperties.stringPropertyNames()) {
-			String value = this.officeFloorProperties.getProperty(name);
-			compiler.addProperty(name, value);
-		}
-		compiler.addSystemProperties();
-		compiler.addEnvProperties();
+			// Create the OfficeFloor compiler
+			OfficeFloorCompiler compiler = OfficeFloorCompiler
+					.newOfficeFloorCompiler(null);
 
-		// Ensure fail if not compiles
-		compiler.setCompilerIssues(new CompilerIssues() {
-			@Override
-			public void addIssue(LocationType locationType, String location,
-					AssetType assetType, String assetName,
-					String issueDescription) {
-				this.addIssue(locationType, location, assetType, assetName,
-						issueDescription, null);
+			// Add properties for the compiler
+			for (String name : this.officeFloorProperties.stringPropertyNames()) {
+				String value = this.officeFloorProperties.getProperty(name);
+				compiler.addProperty(name, value);
+			}
+			compiler.addSystemProperties();
+			compiler.addEnvProperties();
+
+			// Ensure fail if not compiles
+			compiler.setCompilerIssues(new CompilerIssues() {
+				@Override
+				public void addIssue(LocationType locationType,
+						String location, AssetType assetType, String assetName,
+						String issueDescription) {
+					this.addIssue(locationType, location, assetType, assetName,
+							issueDescription, null);
+				}
+
+				@Override
+				public void addIssue(LocationType locationType,
+						String location, AssetType assetType, String assetName,
+						String issueDescription, Throwable cause) {
+					throw new OfficeFloorCompileException(issueDescription
+							+ " [" + locationType + ":" + location + ", "
+							+ assetType + ":" + assetName + "] - "
+							+ (cause == null ? "" : cause.getMessage()), cause);
+				}
+			});
+
+			// Determine if override the default OfficeFloorSource
+			if ((this.officeFloorSourceClassName != null)
+					&& (this.officeFloorSourceClassName.trim().length() > 0)) {
+
+				// Load the OfficeFloorSource class
+				Class<? extends OfficeFloorSource> officeFloorSourceClass = (Class<? extends OfficeFloorSource>) compiler
+						.getClassLoader().loadClass(
+								this.officeFloorSourceClassName);
+
+				// Override the default OfficeFloorSource
+				compiler.setOfficeFloorSourceClass(officeFloorSourceClass);
 			}
 
-			@Override
-			public void addIssue(LocationType locationType, String location,
-					AssetType assetType, String assetName,
-					String issueDescription, Throwable cause) {
-				throw new OfficeFloorCompileException(issueDescription + " ["
-						+ locationType + ":" + location + ", " + assetType
-						+ ":" + assetName + "] - "
-						+ (cause == null ? "" : cause.getMessage()), cause);
-			}
-		});
-
-		// Determine if override the default OfficeFloorSource
-		if ((this.officeFloorSourceClassName != null)
-				&& (this.officeFloorSourceClassName.trim().length() > 0)) {
-
-			// Load the OfficeFloorSource class
-			Class<? extends OfficeFloorSource> officeFloorSourceClass = (Class<? extends OfficeFloorSource>) compiler
-					.getClassLoader()
-					.loadClass(this.officeFloorSourceClassName);
-
-			// Override the default OfficeFloorSource
-			compiler.setOfficeFloorSourceClass(officeFloorSourceClass);
+			// Compile the OfficeFloor
+			this.officeFloor = compiler.compile(this.officeFloorLocation);
 		}
 
-		// Compile the OfficeFloor
-		this.officeFloor = compiler.compile(this.officeFloorLocation);
-
-		// Register this MBean
-		this.context.registerMBean(this, OFFICE_FLOOR_MANAGER_OBJECT_NAME);
+		// Register this MBean (outside lock)
+		context.registerMBean(this, OFFICE_FLOOR_MANAGER_OBJECT_NAME);
 	}
 
 	@Override
-	public synchronized void main() throws Throwable {
+	public void main() throws Throwable {
 
-		// Open the OfficeFloor
-		this.officeFloor.openOfficeFloor();
-
-		// OfficeFloor now open
-		this.isOpen = true;
-
-		// Ensure close OfficeFloor
+		ManagedProcessContext context;
+		OfficeFloor officeFloor = null;
 		try {
+			List<WorkState> workStates;
+			synchronized (this) {
+				context = this.context;
+				officeFloor = this.officeFloor;
 
-			// Determine if initial work to run
-			if (this.workStates.size() == 0) {
-				// No work, so wait until triggered to stop
-				for (;;) {
+				// Open the OfficeFloor
+				this.officeFloor.openOfficeFloor();
 
-					// Determine if flagged to stop
-					if (!this.context.continueProcessing()) {
-						return; // triggered to stop
-					}
+				// OfficeFloor now open
+				this.isOpen = true;
 
-					// Wait some time for trigger to stop
-					this.wait(1000);
-				}
+				// Obtain thread safe list
+				workStates = new ArrayList<WorkState>(this.workStates);
+			}
 
-			} else {
-				// Invoke the work and stop once the work is complete
-				for (WorkState workState : this.workStates) {
-					workState.invoke(this.officeFloor);
-				}
+			// Ensure close OfficeFloor
+			try {
 
-				// Wait for all work to complete
-				for (;;) {
+				// Determine if initial work to run
+				if (workStates.size() == 0) {
+					// No work, so wait until triggered to stop
+					for (;;) {
 
-					// Check if all work complete
-					boolean isAllWorkComplete = true;
-					for (WorkState workState : this.workStates) {
-						if (!workState.isComplete()) {
-							isAllWorkComplete = false;
+						// Determine if flagged to stop
+						if (!context.continueProcessing()) {
+							return; // triggered to stop
+						}
+
+						// Wait some time for trigger to stop
+						synchronized (this) {
+							this.wait(1000);
 						}
 					}
 
-					// Exit processing if work complete or flagged to stop
-					if (isAllWorkComplete
-							|| (!this.context.continueProcessing())) {
-						return; // All work complete
+				} else {
+					// Invoke the work and stop once the work is complete
+					for (WorkState workState : workStates) {
+						workState.invoke(officeFloor);
 					}
 
-					// Wait some time for work to complete
-					this.wait(1000);
+					// Wait for all work to complete
+					for (;;) {
+
+						// Check if all work complete
+						boolean isAllWorkComplete = true;
+						for (WorkState workState : workStates) {
+							if (!workState.isComplete()) {
+								isAllWorkComplete = false;
+							}
+						}
+
+						// Exit processing if work complete or flagged stop
+						if (isAllWorkComplete
+								|| (!context.continueProcessing())) {
+							return; // All work complete
+						}
+
+						// Wait some time for work to complete
+						synchronized (this) {
+							this.wait(1000);
+						}
+					}
+				}
+
+			} catch (Throwable ex) {
+				// Indicate failure
+				LOGGER.log(Level.WARNING, "Process had failure", ex);
+
+			} finally {
+				synchronized (this) {
+					// Closed
+					this.isOpen = false;
 				}
 			}
 
-		} catch (Throwable ex) {
-			// Indicate failure
-			ex.printStackTrace();
-
 		} finally {
-			// Close the OfficeFloor
-			this.officeFloor.closeOfficeFloor();
-			this.isOpen = false;
+			// Ensure trigger closing office
+			officeFloor.closeOfficeFloor();
 		}
 	}
 
@@ -363,7 +411,7 @@ public class OfficeFloorManager implements ManagedProcess,
 		/**
 		 * {@link ProcessFuture} for invoking the {@link Work}.
 		 */
-		private ProcessFuture invokedProcessFuture = null;
+		private transient ProcessFuture invokedProcessFuture = null;
 
 		/**
 		 * Initiate.
@@ -399,14 +447,20 @@ public class OfficeFloorManager implements ManagedProcess,
 			// Obtain the work manager
 			WorkManager workManager = officeFloor.getOffice(this.officeName)
 					.getWorkManager(this.workName);
+			ProcessFuture invokedProcessFuture;
 			if (this.taskName == null) {
 				// Invoke initial task of work
-				this.invokedProcessFuture = workManager
-						.invokeWork(this.parameter);
+				invokedProcessFuture = workManager.invokeWork(this.parameter);
 			} else {
 				// Invoke the specific task
-				this.invokedProcessFuture = workManager.getTaskManager(
-						this.taskName).invokeTask(this.parameter);
+				invokedProcessFuture = workManager
+						.getTaskManager(this.taskName).invokeTask(
+								this.parameter);
+			}
+
+			// Set state
+			synchronized (this) {
+				this.invokedProcessFuture = invokedProcessFuture;
 			}
 		}
 
@@ -415,7 +469,7 @@ public class OfficeFloorManager implements ManagedProcess,
 		 * 
 		 * @return <code>true</code> if complete.
 		 */
-		public boolean isComplete() {
+		public synchronized boolean isComplete() {
 			return this.invokedProcessFuture.isComplete();
 		}
 	}
