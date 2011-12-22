@@ -24,6 +24,7 @@ import net.officefloor.compile.spi.office.OfficeSectionInput;
 import net.officefloor.compile.spi.officefloor.OfficeFloorInputManagedObject;
 import net.officefloor.compile.spi.section.ManagedObjectDependency;
 import net.officefloor.compile.spi.section.ManagedObjectFlow;
+import net.officefloor.frame.spi.team.Team;
 import net.officefloor.frame.spi.team.source.TeamSource;
 
 /**
@@ -52,6 +53,16 @@ public interface ManagedObjectSourceWirerContext {
 	 */
 	<S extends TeamSource> AutoWireTeam mapTeam(
 			String managedObjectSourceTeamName, String teamSourceClassName);
+
+	/**
+	 * Maps {@link Team} by {@link AutoWire}.
+	 * 
+	 * @param managedObjectSourceTeamName
+	 *            Name of the {@link ManagedObjectTeam}.
+	 * @param autoWire
+	 *            {@link AutoWire} to identify the {@link AutoWireTeam}.
+	 */
+	void mapTeam(String managedObjectSourceTeamName, AutoWire autoWire);
 
 	/**
 	 * Maps the {@link ManagedObjectFlow}.
