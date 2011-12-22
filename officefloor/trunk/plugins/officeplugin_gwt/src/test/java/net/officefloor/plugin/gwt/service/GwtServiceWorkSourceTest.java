@@ -22,6 +22,9 @@ import java.util.Map;
 
 import org.easymock.AbstractMatcher;
 
+import net.officefloor.autowire.AutoWire;
+import net.officefloor.autowire.AutoWireSection;
+import net.officefloor.autowire.impl.AutoWireAdministration;
 import net.officefloor.compile.OfficeFloorCompiler;
 import net.officefloor.compile.issues.CompilerIssues;
 import net.officefloor.compile.issues.CompilerIssues.LocationType;
@@ -45,9 +48,6 @@ import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
 import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
 import net.officefloor.frame.test.OfficeFrameTestCase;
-import net.officefloor.plugin.autowire.AutoWire;
-import net.officefloor.plugin.autowire.AutoWireAdministration;
-import net.officefloor.plugin.autowire.AutoWireSection;
 import net.officefloor.plugin.gwt.service.GwtServiceTask.Dependencies;
 import net.officefloor.plugin.socket.server.http.server.MockHttpServer;
 import net.officefloor.plugin.web.http.server.HttpServerAutoWireOfficeFloorSource;

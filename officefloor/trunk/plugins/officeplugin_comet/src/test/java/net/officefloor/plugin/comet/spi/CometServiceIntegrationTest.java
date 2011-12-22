@@ -17,14 +17,14 @@
  */
 package net.officefloor.plugin.comet.spi;
 
+import net.officefloor.autowire.AutoWire;
+import net.officefloor.autowire.AutoWireObject;
+import net.officefloor.autowire.AutoWireOfficeFloor;
+import net.officefloor.autowire.AutoWireSection;
+import net.officefloor.autowire.ManagedObjectSourceWirer;
+import net.officefloor.autowire.ManagedObjectSourceWirerContext;
 import net.officefloor.frame.impl.spi.team.OnePersonTeamSource;
 import net.officefloor.frame.test.OfficeFrameTestCase;
-import net.officefloor.plugin.autowire.AutoWire;
-import net.officefloor.plugin.autowire.AutoWireObject;
-import net.officefloor.plugin.autowire.AutoWireOfficeFloor;
-import net.officefloor.plugin.autowire.AutoWireSection;
-import net.officefloor.plugin.autowire.ManagedObjectSourceWirer;
-import net.officefloor.plugin.autowire.ManagedObjectSourceWirerContext;
 import net.officefloor.plugin.comet.CometServiceInvoker;
 import net.officefloor.plugin.comet.api.CometSubscriber;
 import net.officefloor.plugin.comet.client.MockCometListener;

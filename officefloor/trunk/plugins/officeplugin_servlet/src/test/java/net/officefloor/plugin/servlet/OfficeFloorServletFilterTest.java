@@ -36,9 +36,9 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import net.officefloor.autowire.AutoWireSection;
 import net.officefloor.frame.api.escalate.Escalation;
 import net.officefloor.frame.test.OfficeFrameTestCase;
-import net.officefloor.plugin.autowire.AutoWireSection;
 import net.officefloor.plugin.section.clazz.ClassSectionSource;
 import net.officefloor.plugin.section.clazz.NextTask;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;

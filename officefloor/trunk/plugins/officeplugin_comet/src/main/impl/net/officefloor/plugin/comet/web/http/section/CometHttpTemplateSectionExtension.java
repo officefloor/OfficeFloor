@@ -20,13 +20,13 @@ package net.officefloor.plugin.comet.web.http.section;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 
+import net.officefloor.autowire.AutoWire;
+import net.officefloor.autowire.AutoWireSection;
+import net.officefloor.autowire.ManagedObjectSourceWirer;
+import net.officefloor.autowire.ManagedObjectSourceWirerContext;
 import net.officefloor.frame.impl.spi.team.OnePersonTeamSource;
 import net.officefloor.frame.spi.source.SourceProperties;
 import net.officefloor.model.gwt.module.GwtModuleModel;
-import net.officefloor.plugin.autowire.AutoWire;
-import net.officefloor.plugin.autowire.AutoWireSection;
-import net.officefloor.plugin.autowire.ManagedObjectSourceWirer;
-import net.officefloor.plugin.autowire.ManagedObjectSourceWirerContext;
 import net.officefloor.plugin.comet.CometProxyPublisherManagedObjectSource;
 import net.officefloor.plugin.comet.CometPublisher;
 import net.officefloor.plugin.comet.CometPublisherInterface;

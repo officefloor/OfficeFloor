@@ -25,6 +25,8 @@ import java.util.ServiceLoader;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import net.officefloor.autowire.AutoWireGovernance;
+import net.officefloor.autowire.AutoWireSection;
 import net.officefloor.compile.OfficeFloorCompiler;
 import net.officefloor.compile.impl.properties.PropertyListSourceProperties;
 import net.officefloor.compile.properties.PropertyList;
@@ -52,8 +54,6 @@ import net.officefloor.model.woof.WoofTemplateOutputModel;
 import net.officefloor.model.woof.WoofTemplateOutputToWoofResourceModel;
 import net.officefloor.model.woof.WoofTemplateOutputToWoofSectionInputModel;
 import net.officefloor.model.woof.WoofTemplateOutputToWoofTemplateModel;
-import net.officefloor.plugin.autowire.AutoWireGovernance;
-import net.officefloor.plugin.autowire.AutoWireSection;
 import net.officefloor.plugin.web.http.application.HttpTemplateAutoWireSection;
 import net.officefloor.plugin.web.http.application.HttpTemplateAutoWireSectionExtension;
 import net.officefloor.plugin.web.http.application.WebAutoWireApplication;

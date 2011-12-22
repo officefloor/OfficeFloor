@@ -19,9 +19,9 @@ package net.officefloor.plugin.gwt.web.http.section;
 
 import java.io.ByteArrayOutputStream;
 
+import net.officefloor.autowire.impl.AutoWireAdministration;
 import net.officefloor.frame.impl.construct.source.SourcePropertiesImpl;
 import net.officefloor.frame.test.OfficeFrameTestCase;
-import net.officefloor.plugin.autowire.AutoWireAdministration;
 import net.officefloor.plugin.gwt.service.MockGwtServiceInterface;
 import net.officefloor.plugin.gwt.service.MockGwtServiceInterfaceAsync;
 import net.officefloor.plugin.section.clazz.Parameter;

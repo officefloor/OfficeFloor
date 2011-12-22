@@ -23,11 +23,11 @@ import java.sql.PreparedStatement;
 
 import javax.sql.DataSource;
 
+import net.officefloor.autowire.AutoWire;
+import net.officefloor.autowire.AutoWireTeam;
 import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.impl.spi.team.LeaderFollowerTeamSource;
 import net.officefloor.frame.spi.team.Team;
-import net.officefloor.plugin.autowire.AutoWire;
-import net.officefloor.plugin.autowire.AutoWireTeam;
 import net.officefloor.plugin.jdbc.datasource.DataSourceManagedObjectSource;
 import net.officefloor.plugin.web.http.parameters.source.HttpParametersObjectManagedObjectSource;
 import net.officefloor.plugin.web.http.server.HttpServerAutoWireOfficeFloorSource;

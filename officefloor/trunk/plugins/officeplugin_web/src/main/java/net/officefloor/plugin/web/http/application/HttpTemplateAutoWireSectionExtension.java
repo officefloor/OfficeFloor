@@ -17,7 +17,7 @@
  */
 package net.officefloor.plugin.web.http.application;
 
-import net.officefloor.plugin.autowire.AutoWireProperties;
+import net.officefloor.autowire.AutoWireProperties;
 import net.officefloor.plugin.web.http.template.section.HttpTemplateSectionExtension;
 
 /**

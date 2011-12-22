@@ -30,6 +30,11 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import net.officefloor.autowire.AutoWire;
+import net.officefloor.autowire.AutoWireObject;
+import net.officefloor.autowire.ManagedObjectSourceWirer;
+import net.officefloor.autowire.ManagedObjectSourceWirerContext;
+import net.officefloor.autowire.impl.AutoWireOfficeFloorSource;
 import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.api.escalate.EscalationHandler;
 import net.officefloor.frame.api.manage.OfficeFloor;
@@ -40,11 +45,6 @@ import net.officefloor.frame.spi.managedobject.source.ManagedObjectExecuteContex
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceContext;
 import net.officefloor.frame.spi.managedobject.source.impl.AbstractManagedObjectSource;
-import net.officefloor.plugin.autowire.AutoWire;
-import net.officefloor.plugin.autowire.AutoWireObject;
-import net.officefloor.plugin.autowire.AutoWireOfficeFloorSource;
-import net.officefloor.plugin.autowire.ManagedObjectSourceWirer;
-import net.officefloor.plugin.autowire.ManagedObjectSourceWirerContext;
 import net.officefloor.plugin.servlet.bridge.spi.ServletServiceBridger;
 
 /**

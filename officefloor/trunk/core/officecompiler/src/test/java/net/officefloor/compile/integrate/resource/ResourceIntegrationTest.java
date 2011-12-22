@@ -20,6 +20,9 @@ package net.officefloor.compile.integrate.resource;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 
+import net.officefloor.autowire.AutoWire;
+import net.officefloor.autowire.AutoWireOfficeFloor;
+import net.officefloor.autowire.impl.AutoWireOfficeFloorSource;
 import net.officefloor.compile.OfficeFloorCompiler;
 import net.officefloor.frame.api.OfficeFrame;
 import net.officefloor.frame.api.build.None;
@@ -32,9 +35,6 @@ import net.officefloor.frame.spi.managedobject.source.impl.AbstractManagedObject
 import net.officefloor.frame.spi.source.ResourceSource;
 import net.officefloor.frame.spi.source.SourceContext;
 import net.officefloor.frame.test.OfficeFrameTestCase;
-import net.officefloor.plugin.autowire.AutoWire;
-import net.officefloor.plugin.autowire.AutoWireOfficeFloor;
-import net.officefloor.plugin.autowire.AutoWireOfficeFloorSource;
 import net.officefloor.plugin.section.clazz.ClassSectionSource;
 
 /**

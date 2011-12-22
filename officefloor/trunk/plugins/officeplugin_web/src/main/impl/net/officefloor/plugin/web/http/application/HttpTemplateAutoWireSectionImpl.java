@@ -18,10 +18,10 @@
 
 package net.officefloor.plugin.web.http.application;
 
+import net.officefloor.autowire.AutoWireSection;
+import net.officefloor.autowire.impl.AutoWirePropertiesImpl;
+import net.officefloor.autowire.impl.AutoWireSectionImpl;
 import net.officefloor.compile.OfficeFloorCompiler;
-import net.officefloor.plugin.autowire.AutoWirePropertiesImpl;
-import net.officefloor.plugin.autowire.AutoWireSection;
-import net.officefloor.plugin.autowire.AutoWireSectionImpl;
 import net.officefloor.plugin.web.http.template.parse.HttpTemplate;
 import net.officefloor.plugin.web.http.template.section.HttpTemplateSectionExtension;
 

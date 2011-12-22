@@ -17,10 +17,10 @@
  */
 package net.officefloor.plugin.web.http.server;
 
+import net.officefloor.autowire.AutoWireObject;
+import net.officefloor.autowire.ManagedObjectSourceWirer;
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
-import net.officefloor.plugin.autowire.AutoWireObject;
-import net.officefloor.plugin.autowire.ManagedObjectSourceWirer;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
 import net.officefloor.plugin.web.http.application.WebAutoWireApplication;
 import net.officefloor.plugin.web.http.session.HttpSession;

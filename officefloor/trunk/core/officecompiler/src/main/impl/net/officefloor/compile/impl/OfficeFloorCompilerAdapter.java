@@ -21,6 +21,8 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 
+import net.officefloor.autowire.AutoWire;
+import net.officefloor.autowire.impl.SingletonManagedObjectSource;
 import net.officefloor.compile.OfficeFloorCompiler;
 import net.officefloor.compile.administrator.AdministratorLoader;
 import net.officefloor.compile.governance.GovernanceLoader;
@@ -46,8 +48,6 @@ import net.officefloor.frame.spi.administration.source.AdministratorSource;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.spi.source.ResourceSource;
 import net.officefloor.frame.spi.team.source.TeamSource;
-import net.officefloor.plugin.autowire.AutoWire;
-import net.officefloor.plugin.autowire.SingletonManagedObjectSource;
 
 /**
  * <p>
