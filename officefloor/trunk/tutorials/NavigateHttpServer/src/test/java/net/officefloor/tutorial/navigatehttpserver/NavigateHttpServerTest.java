@@ -18,7 +18,7 @@
 package net.officefloor.tutorial.navigatehttpserver;
 
 import junit.framework.TestCase;
-import net.officefloor.autowire.impl.AutoWireAdministration;
+import net.officefloor.autowire.AutoWireAdministration;
 import net.officefloor.plugin.woof.WoofOfficeFloorSource;
 
 import org.apache.http.HttpResponse;

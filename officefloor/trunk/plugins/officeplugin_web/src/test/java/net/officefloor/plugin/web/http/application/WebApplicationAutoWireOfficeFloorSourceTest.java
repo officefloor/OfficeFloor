@@ -24,8 +24,8 @@ import java.io.Writer;
 import java.sql.SQLException;
 
 import net.officefloor.autowire.AutoWire;
+import net.officefloor.autowire.AutoWireAdministration;
 import net.officefloor.autowire.AutoWireSection;
-import net.officefloor.autowire.impl.AutoWireAdministration;
 import net.officefloor.compile.spi.office.OfficeSectionInput;
 import net.officefloor.compile.spi.office.OfficeSectionOutput;
 import net.officefloor.frame.api.escalate.Escalation;

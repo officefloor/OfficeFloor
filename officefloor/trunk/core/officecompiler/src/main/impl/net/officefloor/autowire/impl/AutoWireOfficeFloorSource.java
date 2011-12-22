@@ -29,6 +29,7 @@ import java.util.Map;
 import java.util.Set;
 
 import net.officefloor.autowire.AutoWire;
+import net.officefloor.autowire.AutoWireAdministration;
 import net.officefloor.autowire.AutoWireApplication;
 import net.officefloor.autowire.AutoWireGovernance;
 import net.officefloor.autowire.AutoWireObject;

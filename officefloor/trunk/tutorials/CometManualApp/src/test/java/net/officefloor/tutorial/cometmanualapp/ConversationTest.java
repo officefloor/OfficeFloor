@@ -20,7 +20,7 @@ package net.officefloor.tutorial.cometmanualapp;
 import com.gdevelop.gwt.syncrpc.SyncProxy;
 
 import junit.framework.TestCase;
-import net.officefloor.autowire.impl.AutoWireAdministration;
+import net.officefloor.autowire.AutoWireAdministration;
 import net.officefloor.plugin.comet.internal.CometEvent;
 import net.officefloor.plugin.comet.internal.CometPublicationService;
 import net.officefloor.plugin.woof.WoofOfficeFloorSource;

@@ -26,7 +26,7 @@ import net.officefloor.frame.api.manage.OfficeFloor;
  * 
  * @author Daniel Sagenschneider
  */
-public interface AutoWireAdministrationMBean {
+public interface AutoWireManagementMBean {
 
 	/**
 	 * Invokes the {@link Task} on the {@link OfficeFloor}.

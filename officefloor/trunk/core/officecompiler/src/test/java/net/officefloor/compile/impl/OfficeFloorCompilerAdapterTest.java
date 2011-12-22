@@ -24,8 +24,8 @@ import java.net.URL;
 import java.net.URLClassLoader;
 
 import net.officefloor.autowire.AutoWire;
+import net.officefloor.autowire.AutoWireAdministration;
 import net.officefloor.autowire.AutoWireOfficeFloor;
-import net.officefloor.autowire.impl.AutoWireAdministration;
 import net.officefloor.autowire.impl.AutoWireOfficeFloorSource;
 import net.officefloor.compile.OfficeFloorCompiler;
 import net.officefloor.compile.administrator.AdministratorLoader;

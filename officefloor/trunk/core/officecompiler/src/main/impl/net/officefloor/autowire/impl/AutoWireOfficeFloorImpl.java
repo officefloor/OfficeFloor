@@ -19,7 +19,8 @@ package net.officefloor.autowire.impl;
 
 import javax.management.ObjectName;
 
-import net.officefloor.autowire.AutoWireAdministrationMBean;
+import net.officefloor.autowire.AutoWireAdministration;
+import net.officefloor.autowire.AutoWireManagementMBean;
 import net.officefloor.autowire.AutoWireOfficeFloor;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.manage.OfficeFloor;
@@ -28,7 +29,7 @@ import net.officefloor.frame.api.manage.WorkManager;
 import net.officefloor.frame.impl.spi.team.ProcessContextTeam;
 
 /**
- * {@link AutoWireAdministrationMBean} implementation.
+ * {@link AutoWireManagementMBean} implementation.
  * 
  * @author Daniel Sagenschneider
  */
