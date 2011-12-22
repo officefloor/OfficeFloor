@@ -24,7 +24,7 @@ import java.io.Writer;
 import java.sql.SQLException;
 
 import net.officefloor.autowire.AutoWire;
-import net.officefloor.autowire.AutoWireAdministration;
+import net.officefloor.autowire.AutoWireManagement;
 import net.officefloor.autowire.AutoWireSection;
 import net.officefloor.compile.spi.office.OfficeSectionInput;
 import net.officefloor.compile.spi.office.OfficeSectionOutput;
@@ -89,7 +89,7 @@ public class WebApplicationAutoWireOfficeFloorSourceTest extends
 	@Override
 	protected void tearDown() throws Exception {
 		// Ensure close
-		AutoWireAdministration.closeAllOfficeFloors();
+		AutoWireManagement.closeAllOfficeFloors();
 
 		// Stop the client
 		this.client.getConnectionManager().shutdown();

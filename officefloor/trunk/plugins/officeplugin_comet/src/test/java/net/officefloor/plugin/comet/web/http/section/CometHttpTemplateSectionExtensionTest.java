@@ -20,7 +20,7 @@ package net.officefloor.plugin.comet.web.http.section;
 import java.io.IOException;
 import java.lang.reflect.Proxy;
 
-import net.officefloor.autowire.AutoWireAdministration;
+import net.officefloor.autowire.AutoWireManagement;
 import net.officefloor.frame.impl.construct.source.SourcePropertiesImpl;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.comet.CometPublisher;
@@ -82,7 +82,7 @@ public class CometHttpTemplateSectionExtensionTest extends OfficeFrameTestCase {
 
 	@Override
 	protected void tearDown() throws Exception {
-		AutoWireAdministration.closeAllOfficeFloors();
+		AutoWireManagement.closeAllOfficeFloors();
 	}
 
 	/**

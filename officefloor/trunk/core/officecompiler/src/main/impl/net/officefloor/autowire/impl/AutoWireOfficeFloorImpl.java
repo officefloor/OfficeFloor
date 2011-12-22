@@ -19,7 +19,7 @@ package net.officefloor.autowire.impl;
 
 import javax.management.ObjectName;
 
-import net.officefloor.autowire.AutoWireAdministration;
+import net.officefloor.autowire.AutoWireManagement;
 import net.officefloor.autowire.AutoWireManagementMBean;
 import net.officefloor.autowire.AutoWireOfficeFloor;
 import net.officefloor.frame.api.manage.Office;
@@ -51,9 +51,9 @@ public class AutoWireOfficeFloorImpl implements AutoWireOfficeFloor {
 	private final ObjectName objectName;
 
 	/**
-	 * {@link AutoWireAdministration}.
+	 * {@link AutoWireManagement}.
 	 */
-	private final AutoWireAdministration administration;
+	private final AutoWireManagement administration;
 
 	/**
 	 * Initiate.
@@ -65,10 +65,10 @@ public class AutoWireOfficeFloorImpl implements AutoWireOfficeFloor {
 	 * @param objectName
 	 *            {@link ObjectName} for this {@link AutoWireOfficeFloorImpl}.
 	 * @param administration
-	 *            {@link AutoWireAdministration}.
+	 *            {@link AutoWireManagement}.
 	 */
 	public AutoWireOfficeFloorImpl(OfficeFloor officeFloor, String officeName,
-			ObjectName objectName, AutoWireAdministration administration) {
+			ObjectName objectName, AutoWireManagement administration) {
 		this.officeFloor = officeFloor;
 		this.officeName = officeName;
 		this.objectName = objectName;

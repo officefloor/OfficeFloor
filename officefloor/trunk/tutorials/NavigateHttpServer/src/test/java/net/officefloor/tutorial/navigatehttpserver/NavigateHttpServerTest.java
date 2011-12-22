@@ -18,7 +18,7 @@
 package net.officefloor.tutorial.navigatehttpserver;
 
 import junit.framework.TestCase;
-import net.officefloor.autowire.AutoWireAdministration;
+import net.officefloor.autowire.AutoWireManagement;
 import net.officefloor.plugin.woof.WoofOfficeFloorSource;
 
 import org.apache.http.HttpResponse;
@@ -62,7 +62,7 @@ public class NavigateHttpServerTest extends TestCase {
 	@Override
 	protected void tearDown() throws Exception {
 		this.client.getConnectionManager().shutdown();
-		AutoWireAdministration.closeAllOfficeFloors();
+		AutoWireManagement.closeAllOfficeFloors();
 	}
 
 }
