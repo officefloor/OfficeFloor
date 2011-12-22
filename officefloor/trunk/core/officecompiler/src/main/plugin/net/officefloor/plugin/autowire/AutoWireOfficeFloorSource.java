@@ -19,12 +19,14 @@
 package net.officefloor.plugin.autowire;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import net.officefloor.compile.OfficeFloorCompiler;
 import net.officefloor.compile.impl.OfficeFloorCompilerAdapter;
@@ -56,10 +58,10 @@ import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.impl.spi.team.ProcessContextTeamSource;
-import net.officefloor.frame.internal.structure.JobSequence;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
+import net.officefloor.frame.spi.team.Team;
 import net.officefloor.frame.spi.team.source.TeamSource;
 import net.officefloor.model.impl.officefloor.OfficeFloorModelOfficeFloorSource;
 
@@ -92,13 +94,14 @@ public class AutoWireOfficeFloorSource extends AbstractOfficeFloorSource
 	 *         appropriate matching {@link AutoWire}.
 	 */
 	public static AutoWire getAppropriateAutoWire(String qualifier,
-			String type, List<AutoWire> availableAutoWiring) {
+			String type, Collection<AutoWire> availableAutoWiring) {
 
 		// Create a copy of the auto-wiring (allow sorting without side effect)
-		availableAutoWiring = new ArrayList<AutoWire>(availableAutoWiring);
+		List<AutoWire> orderedAutoWiring = new ArrayList<AutoWire>(
+				availableAutoWiring);
 
 		// Sort the available auto-wiring (so qualifiers first)
-		Collections.sort(availableAutoWiring, new Comparator<AutoWire>() {
+		Collections.sort(orderedAutoWiring, new Comparator<AutoWire>() {
 			@Override
 			public int compare(AutoWire a, AutoWire b) {
 				// Sort by type first
@@ -127,7 +130,7 @@ public class AutoWireOfficeFloorSource extends AbstractOfficeFloorSource
 		});
 
 		// Iterate over to find first matching (as sorted)
-		for (AutoWire autoWire : availableAutoWiring) {
+		for (AutoWire autoWire : orderedAutoWiring) {
 
 			// Ensure matches on type
 			if (!(type.equals(autoWire.getType()))) {
@@ -470,6 +473,7 @@ public class AutoWireOfficeFloorSource extends AbstractOfficeFloorSource
 		deployer.link(officeTeam, team);
 
 		// Link team via object dependency responsibility
+		Map<AutoWire, OfficeFloorTeam> teamAutoWiring = new HashMap<AutoWire, OfficeFloorTeam>();
 		for (AutoWireTeam autoWireTeam : this.teams) {
 
 			// Add the responsible team
@@ -484,10 +488,17 @@ public class AutoWireOfficeFloorSource extends AbstractOfficeFloorSource
 			// Link responsible team to its responsibilities
 			for (AutoWireResponsibility autoWireResponsibility : autoWireTeam
 					.getResponsibilities()) {
+
+				// Link responsibility to team
 				OfficeTeam responsibility = office
 						.getDeployedOfficeTeam(autoWireResponsibility
 								.getOfficeTeamName());
 				deployer.link(responsibility, responsibleTeam);
+
+				// Register the team for auto-wiring
+				teamAutoWiring.put(
+						autoWireResponsibility.getDependencyAutoWire(),
+						responsibleTeam);
 			}
 		}
 
@@ -501,7 +512,7 @@ public class AutoWireOfficeFloorSource extends AbstractOfficeFloorSource
 		}
 		for (AutoWireContext objectContext : this.objectContexts) {
 			objectContext.linkManagedObject(office, deployer, context,
-					managedObjects, inputManagedObjects);
+					managedObjects, inputManagedObjects, teamAutoWiring);
 		}
 	}
 
@@ -531,14 +542,19 @@ public class AutoWireOfficeFloorSource extends AbstractOfficeFloorSource
 		public boolean isInput = false;
 
 		/**
-		 * {@link AutoWireDependency} instances.
+		 * {@link AutoWireManagedObjectDependency} instances.
 		 */
-		public final List<AutoWireDependency> dependencies = new LinkedList<AutoWireDependency>();
+		public final List<AutoWireManagedObjectDependency> moDependencies = new LinkedList<AutoWireManagedObjectDependency>();
 
 		/**
-		 * {@link AutoWireFlow} instances.
+		 * {@link AutoWireManagedObjectFlow} instances.
 		 */
-		public final List<AutoWireFlow> flows = new LinkedList<AutoWireFlow>();
+		public final List<AutoWireManagedObjectFlow> moFlows = new LinkedList<AutoWireManagedObjectFlow>();
+
+		/**
+		 * {@link AutoWireManagedObjectTeam} instances.
+		 */
+		private final List<AutoWireManagedObjectTeam> moTeams = new LinkedList<AutoWireManagedObjectTeam>();
 
 		/**
 		 * {@link AutoWireTeam} instances.
@@ -753,11 +769,17 @@ public class AutoWireOfficeFloorSource extends AbstractOfficeFloorSource
 		 * @param inputManagedObjects
 		 *            {@link OfficeFloorInputManagedObject} instances by their
 		 *            {@link AutoWire}.
+		 * @param teams
+		 *            {@link OfficeFloorTeam} instances by their
+		 *            {@link AutoWire}.
 		 */
-		public void linkManagedObject(DeployedOffice office,
-				OfficeFloorDeployer deployer, OfficeFloorSourceContext context,
+		public void linkManagedObject(
+				DeployedOffice office,
+				OfficeFloorDeployer deployer,
+				OfficeFloorSourceContext context,
 				Map<AutoWire, OfficeFloorManagedObject> managedObjects,
-				Map<AutoWire, OfficeFloorInputManagedObject> inputManagedObjects) {
+				Map<AutoWire, OfficeFloorInputManagedObject> inputManagedObjects,
+				Map<AutoWire, OfficeFloorTeam> teams) {
 
 			// Obtain the managed object dependencies from appropriate auto-wire
 			Map<String, AutoWire> typeDependencies = new HashMap<String, AutoWire>();
@@ -789,7 +811,7 @@ public class AutoWireOfficeFloorSource extends AbstractOfficeFloorSource
 			}
 
 			// Link the dependencies (from mapping)
-			for (AutoWireDependency autoWireDependency : this.dependencies) {
+			for (AutoWireManagedObjectDependency autoWireDependency : this.moDependencies) {
 
 				// Obtain the dependency
 				ManagedObjectDependency dependency;
@@ -833,7 +855,7 @@ public class AutoWireOfficeFloorSource extends AbstractOfficeFloorSource
 			}
 
 			// Link flows
-			for (AutoWireFlow flow : this.flows) {
+			for (AutoWireManagedObjectFlow flow : this.moFlows) {
 
 				// Obtain the managed object flow
 				ManagedObjectFlow moFlow = this.managedObjectSource
@@ -849,6 +871,41 @@ public class AutoWireOfficeFloorSource extends AbstractOfficeFloorSource
 			}
 
 			// Link teams
+			Set<AutoWire> teamAutoWiring = teams.keySet();
+			for (AutoWireManagedObjectTeam team : this.moTeams) {
+
+				// Obtain the managed object team
+				String teamName = team.teamName;
+				ManagedObjectTeam moTeam = this.managedObjectSource
+						.getManagedObjectTeam(teamName);
+
+				// Obtain the appropriate auto-wire for the team
+				String teamType = team.teamAutoWire.getType();
+				String teamQualifier = team.teamAutoWire.getQualifier();
+				AutoWire appropriateAutoWire = getAppropriateAutoWire(
+						teamQualifier, teamType, teamAutoWiring);
+				if (appropriateAutoWire == null) {
+					// No appropriate team for auto-wiring
+					deployer.addIssue(
+							"No " + Team.class.getSimpleName()
+									+ " for auto-wiring "
+									+ ManagedObjectTeam.class.getSimpleName()
+									+ " " + teamName + " (qualifier="
+									+ teamQualifier + ", type=" + teamType
+									+ ")", AssetType.MANAGED_OBJECT,
+							this.managedObjectName);
+					continue; // can not link team
+				}
+
+				// Obtain the team
+				OfficeFloorTeam officeFloorTeam = teams
+						.get(appropriateAutoWire);
+
+				// Link managed object team to office floor team
+				deployer.link(moTeam, officeFloorTeam);
+			}
+
+			// Build teams
 			for (AutoWireTeam team : this.teams) {
 
 				// Obtain the managed object team
@@ -945,15 +1002,17 @@ public class AutoWireOfficeFloorSource extends AbstractOfficeFloorSource
 
 		@Override
 		public void mapDependency(String dependencyName, AutoWire autoWire) {
-			this.dependencies.add(new AutoWireDependency(dependencyName,
-					autoWire));
+			this.moDependencies.add(new AutoWireManagedObjectDependency(
+					dependencyName, autoWire));
 		}
 
 		@Override
 		public void mapFlow(String managedObjectSourceFlowName,
 				String sectionName, String sectionInputName) {
-			this.flows.add(new AutoWireFlow(managedObjectSourceFlowName,
-					sectionName, sectionInputName));
+			this.moFlows
+					.add(new AutoWireManagedObjectFlow(
+							managedObjectSourceFlowName, sectionName,
+							sectionInputName));
 		}
 
 		@Override
@@ -974,12 +1033,19 @@ public class AutoWireOfficeFloorSource extends AbstractOfficeFloorSource
 			// Return the team
 			return team;
 		}
+
+		@Override
+		public void mapTeam(String managedObjectSourceTeamName,
+				AutoWire autoWire) {
+			this.moTeams.add(new AutoWireManagedObjectTeam(
+					managedObjectSourceTeamName, autoWire));
+		}
 	}
 
 	/**
-	 * Auto-wire dependency.
+	 * Auto-wire {@link ManagedObject} dependency.
 	 */
-	private class AutoWireDependency {
+	private class AutoWireManagedObjectDependency {
 
 		/**
 		 * Name of the dependency.
@@ -999,7 +1065,7 @@ public class AutoWireOfficeFloorSource extends AbstractOfficeFloorSource
 		 * @param dependencyAutoWire
 		 *            {@link AutoWire} of the dependency.
 		 */
-		public AutoWireDependency(String dependencyName,
+		public AutoWireManagedObjectDependency(String dependencyName,
 				AutoWire dependencyAutoWire) {
 			this.dependencyName = dependencyName;
 			this.dependencyAutoWire = dependencyAutoWire;
@@ -1007,9 +1073,9 @@ public class AutoWireOfficeFloorSource extends AbstractOfficeFloorSource
 	}
 
 	/**
-	 * Auto-wire {@link JobSequence}.
+	 * Auto-wire {@link ManagedObject} flow.
 	 */
-	private class AutoWireFlow {
+	private class AutoWireManagedObjectFlow {
 
 		/**
 		 * Name of the {@link ManagedObjectFlow}.
@@ -1036,11 +1102,40 @@ public class AutoWireOfficeFloorSource extends AbstractOfficeFloorSource
 		 * @param sectionInputName
 		 *            Name of the {@link OfficeSectionInput}.
 		 */
-		public AutoWireFlow(String managedObjectSourceFlowName,
+		public AutoWireManagedObjectFlow(String managedObjectSourceFlowName,
 				String sectionName, String sectionInputName) {
 			this.managedObjectSourceFlowName = managedObjectSourceFlowName;
 			this.sectionName = sectionName;
 			this.sectionInputName = sectionInputName;
+		}
+	}
+
+	/**
+	 * Auto-wire {@link ManagedObject} {@link Team}.
+	 */
+	private class AutoWireManagedObjectTeam {
+
+		/**
+		 * Name of the {@link ManagedObjectTeam}.
+		 */
+		public final String teamName;
+
+		/**
+		 * {@link AutoWire} of the {@link ManagedObjectTeam}.
+		 */
+		public final AutoWire teamAutoWire;
+
+		/**
+		 * Initiate.
+		 * 
+		 * @param teamName
+		 *            Name of the {@link ManagedObjectTeam}.
+		 * @param teamAutoWire
+		 *            {@link AutoWire} of the {@link ManagedObjectTeam}.
+		 */
+		public AutoWireManagedObjectTeam(String teamName, AutoWire teamAutoWire) {
+			this.teamName = teamName;
+			this.teamAutoWire = teamAutoWire;
 		}
 	}
 
