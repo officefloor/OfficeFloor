@@ -18,6 +18,11 @@
 
 package net.officefloor.plugin.socket.server.http.source;
 
+import net.officefloor.autowire.AutoWire;
+import net.officefloor.autowire.AutoWireApplication;
+import net.officefloor.autowire.AutoWireObject;
+import net.officefloor.autowire.ManagedObjectSourceWirer;
+import net.officefloor.autowire.ManagedObjectSourceWirerContext;
 import net.officefloor.compile.ManagedObjectSourceService;
 import net.officefloor.compile.spi.section.SectionInput;
 import net.officefloor.frame.api.build.Indexed;
@@ -25,11 +30,6 @@ import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.impl.spi.team.OnePersonTeamSource;
 import net.officefloor.frame.impl.spi.team.WorkerPerTaskTeamSource;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
-import net.officefloor.plugin.autowire.AutoWire;
-import net.officefloor.plugin.autowire.AutoWireApplication;
-import net.officefloor.plugin.autowire.AutoWireObject;
-import net.officefloor.plugin.autowire.ManagedObjectSourceWirer;
-import net.officefloor.plugin.autowire.ManagedObjectSourceWirerContext;
 import net.officefloor.plugin.socket.server.CommunicationProtocol;
 import net.officefloor.plugin.socket.server.http.HttpRequest;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;

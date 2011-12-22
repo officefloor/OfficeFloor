@@ -38,14 +38,14 @@ import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import net.officefloor.autowire.AutoWire;
+import net.officefloor.autowire.AutoWireObject;
+import net.officefloor.autowire.AutoWireOfficeFloor;
+import net.officefloor.autowire.AutoWireSection;
 import net.officefloor.compile.spi.office.OfficeSectionOutput;
 import net.officefloor.frame.api.escalate.Escalation;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.impl.spi.team.ProcessContextTeamSource;
-import net.officefloor.plugin.autowire.AutoWire;
-import net.officefloor.plugin.autowire.AutoWireObject;
-import net.officefloor.plugin.autowire.AutoWireOfficeFloor;
-import net.officefloor.plugin.autowire.AutoWireSection;
 import net.officefloor.plugin.servlet.bridge.ServletBridgeManagedObjectSource;
 import net.officefloor.plugin.servlet.bridge.spi.ServletServiceBridger;
 import net.officefloor.plugin.servlet.socket.server.http.ServletServerHttpConnection;

@@ -21,7 +21,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
 
 import junit.framework.TestCase;
-import net.officefloor.plugin.autowire.AutoWireAdministration;
+import net.officefloor.autowire.impl.AutoWireAdministration;
 import net.officefloor.plugin.woof.WoofOfficeFloorSource;
 
 import org.apache.http.client.HttpClient;

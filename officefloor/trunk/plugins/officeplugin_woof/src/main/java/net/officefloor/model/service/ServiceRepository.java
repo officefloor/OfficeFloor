@@ -17,8 +17,8 @@
  */
 package net.officefloor.model.service;
 
+import net.officefloor.autowire.impl.AutoWireOfficeFloorSource;
 import net.officefloor.model.repository.ConfigurationItem;
-import net.officefloor.plugin.autowire.AutoWireOfficeFloorSource;
 
 /**
  * Repository for obtaining the services model for auto-wiring into an

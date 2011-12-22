@@ -20,9 +20,9 @@ package net.officefloor.plugin.comet.web.http.section;
 import java.io.IOException;
 import java.lang.reflect.Proxy;
 
+import net.officefloor.autowire.impl.AutoWireAdministration;
 import net.officefloor.frame.impl.construct.source.SourcePropertiesImpl;
 import net.officefloor.frame.test.OfficeFrameTestCase;
-import net.officefloor.plugin.autowire.AutoWireAdministration;
 import net.officefloor.plugin.comet.CometPublisher;
 import net.officefloor.plugin.comet.CometPublisherInterface;
 import net.officefloor.plugin.comet.CometServiceInvoker;

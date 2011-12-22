@@ -19,15 +19,15 @@ package net.officefloor.plugin.gwt.service;
 
 import java.lang.reflect.Method;
 
+import net.officefloor.autowire.AutoWire;
+import net.officefloor.autowire.AutoWireSection;
+import net.officefloor.autowire.impl.AutoWireAdministration;
 import net.officefloor.compile.test.managedobject.ManagedObjectLoaderUtil;
 import net.officefloor.compile.test.managedobject.ManagedObjectTypeBuilder;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.frame.util.ManagedObjectSourceStandAlone;
 import net.officefloor.frame.util.ManagedObjectUserStandAlone;
-import net.officefloor.plugin.autowire.AutoWire;
-import net.officefloor.plugin.autowire.AutoWireAdministration;
-import net.officefloor.plugin.autowire.AutoWireSection;
 import net.officefloor.plugin.gwt.service.ServerGwtRpcConnectionManagedObjectSource.Dependencies;
 import net.officefloor.plugin.section.clazz.ClassSectionSource;
 import net.officefloor.plugin.section.clazz.Parameter;

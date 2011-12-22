@@ -17,6 +17,7 @@
  */
 package net.officefloor.plugin.gwt.web.http.section;
 
+import net.officefloor.autowire.AutoWire;
 import net.officefloor.compile.properties.Property;
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.spi.section.SectionDesigner;
@@ -32,7 +33,6 @@ import net.officefloor.compile.work.TaskType;
 import net.officefloor.compile.work.WorkType;
 import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
 import net.officefloor.frame.spi.source.SourceProperties;
-import net.officefloor.plugin.autowire.AutoWire;
 import net.officefloor.plugin.gwt.service.GwtServiceTask.Dependencies;
 import net.officefloor.plugin.gwt.service.GwtServiceWorkSource;
 import net.officefloor.plugin.gwt.service.ServerGwtRpcConnection;

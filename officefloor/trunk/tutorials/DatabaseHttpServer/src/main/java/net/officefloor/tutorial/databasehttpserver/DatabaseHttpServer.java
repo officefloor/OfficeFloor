@@ -22,8 +22,8 @@ import java.sql.DriverManager;
 
 import javax.sql.DataSource;
 
-import net.officefloor.plugin.autowire.AutoWire;
-import net.officefloor.plugin.autowire.AutoWireObject;
+import net.officefloor.autowire.AutoWire;
+import net.officefloor.autowire.AutoWireObject;
 import net.officefloor.plugin.jdbc.datasource.DataSourceManagedObjectSource;
 import net.officefloor.plugin.web.http.parameters.source.HttpParametersObjectManagedObjectSource;
 import net.officefloor.plugin.web.http.server.HttpServerAutoWireOfficeFloorSource;

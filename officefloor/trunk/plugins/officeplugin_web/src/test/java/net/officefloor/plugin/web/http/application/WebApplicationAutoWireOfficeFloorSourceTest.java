@@ -23,13 +23,13 @@ import java.io.Serializable;
 import java.io.Writer;
 import java.sql.SQLException;
 
+import net.officefloor.autowire.AutoWire;
+import net.officefloor.autowire.AutoWireSection;
+import net.officefloor.autowire.impl.AutoWireAdministration;
 import net.officefloor.compile.spi.office.OfficeSectionInput;
 import net.officefloor.compile.spi.office.OfficeSectionOutput;
 import net.officefloor.frame.api.escalate.Escalation;
 import net.officefloor.frame.test.OfficeFrameTestCase;
-import net.officefloor.plugin.autowire.AutoWire;
-import net.officefloor.plugin.autowire.AutoWireAdministration;
-import net.officefloor.plugin.autowire.AutoWireSection;
 import net.officefloor.plugin.section.clazz.ClassSectionSource;
 import net.officefloor.plugin.section.clazz.NextTask;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;

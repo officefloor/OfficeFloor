@@ -17,13 +17,13 @@
  */
 package net.officefloor.plugin.web.http.application;
 
+import net.officefloor.autowire.AutoWireApplication;
+import net.officefloor.autowire.AutoWireObject;
+import net.officefloor.autowire.AutoWireSection;
 import net.officefloor.compile.spi.office.OfficeSection;
 import net.officefloor.compile.spi.office.OfficeSectionInput;
 import net.officefloor.compile.spi.office.OfficeSectionOutput;
 import net.officefloor.frame.api.escalate.Escalation;
-import net.officefloor.plugin.autowire.AutoWireApplication;
-import net.officefloor.plugin.autowire.AutoWireObject;
-import net.officefloor.plugin.autowire.AutoWireSection;
 import net.officefloor.plugin.socket.server.http.HttpRequest;
 import net.officefloor.plugin.socket.server.http.HttpResponse;
 import net.officefloor.plugin.web.http.session.HttpSession;

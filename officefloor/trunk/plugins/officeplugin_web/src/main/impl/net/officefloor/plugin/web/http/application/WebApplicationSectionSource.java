@@ -22,6 +22,7 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
+import net.officefloor.autowire.AutoWireSection;
 import net.officefloor.compile.properties.Property;
 import net.officefloor.compile.spi.section.SectionDesigner;
 import net.officefloor.compile.spi.section.SectionInput;
@@ -38,7 +39,6 @@ import net.officefloor.frame.api.manage.InvalidParameterTypeException;
 import net.officefloor.frame.api.manage.UnknownTaskException;
 import net.officefloor.frame.api.manage.UnknownWorkException;
 import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
-import net.officefloor.plugin.autowire.AutoWireSection;
 import net.officefloor.plugin.socket.server.http.HttpRequest;
 import net.officefloor.plugin.socket.server.http.HttpResponse;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;

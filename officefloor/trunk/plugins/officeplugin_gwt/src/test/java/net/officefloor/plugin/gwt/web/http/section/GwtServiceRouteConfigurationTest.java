@@ -19,10 +19,10 @@ package net.officefloor.plugin.gwt.web.http.section;
 
 import org.easymock.AbstractMatcher;
 
+import net.officefloor.autowire.AutoWire;
+import net.officefloor.autowire.AutoWireObject;
 import net.officefloor.frame.spi.source.SourceProperties;
 import net.officefloor.frame.test.OfficeFrameTestCase;
-import net.officefloor.plugin.autowire.AutoWire;
-import net.officefloor.plugin.autowire.AutoWireObject;
 import net.officefloor.plugin.gwt.service.ServerGwtRpcConnection;
 import net.officefloor.plugin.gwt.service.ServerGwtRpcConnectionManagedObjectSource;
 import net.officefloor.plugin.web.http.application.HttpTemplateAutoWireSection;

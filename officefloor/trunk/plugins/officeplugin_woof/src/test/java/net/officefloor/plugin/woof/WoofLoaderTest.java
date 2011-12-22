@@ -24,6 +24,9 @@ import java.util.logging.Handler;
 import java.util.logging.LogRecord;
 import java.util.logging.Logger;
 
+import net.officefloor.autowire.AutoWire;
+import net.officefloor.autowire.AutoWireGovernance;
+import net.officefloor.autowire.AutoWireSection;
 import net.officefloor.compile.OfficeFloorCompiler;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.model.impl.repository.ModelRepositoryImpl;
@@ -31,9 +34,6 @@ import net.officefloor.model.impl.repository.classloader.ClassLoaderConfiguratio
 import net.officefloor.model.repository.ConfigurationContext;
 import net.officefloor.model.repository.ConfigurationItem;
 import net.officefloor.model.woof.WoofRepositoryImpl;
-import net.officefloor.plugin.autowire.AutoWire;
-import net.officefloor.plugin.autowire.AutoWireGovernance;
-import net.officefloor.plugin.autowire.AutoWireSection;
 import net.officefloor.plugin.comet.CometPublisher;
 import net.officefloor.plugin.comet.section.CometSectionSource;
 import net.officefloor.plugin.comet.spi.CometService;

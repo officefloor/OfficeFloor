@@ -22,9 +22,9 @@ import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
 
+import net.officefloor.autowire.AutoWireOfficeFloor;
+import net.officefloor.autowire.impl.AutoWireOfficeFloorSource;
 import net.officefloor.frame.test.OfficeFrameTestCase;
-import net.officefloor.plugin.autowire.AutoWireOfficeFloor;
-import net.officefloor.plugin.autowire.AutoWireOfficeFloorSource;
 import net.officefloor.plugin.section.clazz.ClassSectionSource;
 import net.officefloor.plugin.socket.server.http.HttpResponse;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;

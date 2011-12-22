@@ -18,6 +18,7 @@
 
 package net.officefloor.compile.impl.structure;
 
+import net.officefloor.autowire.impl.SingletonManagedObjectSource;
 import net.officefloor.compile.internal.structure.InputManagedObjectNode;
 import net.officefloor.compile.internal.structure.OfficeFloorNode;
 import net.officefloor.compile.issues.CompilerIssues.LocationType;
@@ -39,7 +40,6 @@ import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.model.impl.office.OfficeModelOfficeSource;
-import net.officefloor.plugin.autowire.SingletonManagedObjectSource;
 
 /**
  * Tests the {@link OfficeFloorNode}.
