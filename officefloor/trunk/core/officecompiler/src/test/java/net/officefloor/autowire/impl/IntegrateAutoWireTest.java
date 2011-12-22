@@ -23,7 +23,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import net.officefloor.autowire.AutoWire;
-import net.officefloor.autowire.AutoWireAdministration;
+import net.officefloor.autowire.AutoWireManagement;
 import net.officefloor.autowire.AutoWireManagementMBean;
 import net.officefloor.autowire.AutoWireOfficeFloor;
 import net.officefloor.autowire.AutoWireSection;
@@ -148,7 +148,7 @@ public class IntegrateAutoWireTest extends OfficeFrameTestCase {
 	public void testMBean() throws Exception {
 
 		// Ensure all auto-wire OfficeFloors are closed
-		AutoWireAdministration.closeAllOfficeFloors();
+		AutoWireManagement.closeAllOfficeFloors();
 
 		// Create the OfficeFloor
 		final Connection connection = this.createMock(Connection.class);
@@ -159,16 +159,16 @@ public class IntegrateAutoWireTest extends OfficeFrameTestCase {
 		AutoWireOfficeFloor officeFloor = source.openOfficeFloor();
 
 		// Obtain the MBean
-		AutoWireManagementMBean[] mbeans = AutoWireAdministration
-				.getAutoWireAdministrators();
+		AutoWireManagementMBean[] mbeans = AutoWireManagement
+				.getAutoWireManagers();
 		assertEquals("Incorrect number of OfficeFloor MBeans", 1, mbeans.length);
 
 		// Close the OfficeFloor
 		officeFloor.closeOfficeFloor();
 
 		// Ensure MBean unregistered
-		AutoWireManagementMBean[] remainingMBeans = AutoWireAdministration
-				.getAutoWireAdministrators();
+		AutoWireManagementMBean[] remainingMBeans = AutoWireManagement
+				.getAutoWireManagers();
 		assertEquals("Should unregister OfficeFloor MBean", 0,
 				remainingMBeans.length);
 	}

@@ -19,7 +19,7 @@ package net.officefloor.plugin.gwt.web.http.section;
 
 import java.io.ByteArrayOutputStream;
 
-import net.officefloor.autowire.AutoWireAdministration;
+import net.officefloor.autowire.AutoWireManagement;
 import net.officefloor.frame.impl.construct.source.SourcePropertiesImpl;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.gwt.service.MockGwtServiceInterface;
@@ -151,7 +151,7 @@ public class GwtIntegrationTest extends OfficeFrameTestCase {
 	protected void tearDown() throws Exception {
 		// Shutdown
 		this.client.getConnectionManager().shutdown();
-		AutoWireAdministration.closeAllOfficeFloors();
+		AutoWireManagement.closeAllOfficeFloors();
 	}
 
 	/**

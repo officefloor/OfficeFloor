@@ -18,7 +18,7 @@
 package net.officefloor.tutorial.dynamichttpserver;
 
 import junit.framework.TestCase;
-import net.officefloor.autowire.AutoWireAdministration;
+import net.officefloor.autowire.AutoWireManagement;
 import net.officefloor.plugin.woof.WoofOfficeFloorSource;
 
 import org.apache.http.HttpResponse;
@@ -63,7 +63,7 @@ public class DynamicHttpServerTest extends TestCase {
 	@Override
 	protected void tearDown() throws Exception {
 		// Stop server
-		AutoWireAdministration.closeAllOfficeFloors();
+		AutoWireManagement.closeAllOfficeFloors();
 	}
 
 }

@@ -20,7 +20,7 @@ package net.officefloor.tutorial.gwtapp;
 import java.io.ByteArrayOutputStream;
 
 import junit.framework.TestCase;
-import net.officefloor.autowire.AutoWireAdministration;
+import net.officefloor.autowire.AutoWireManagement;
 import net.officefloor.plugin.woof.WoofOfficeFloorSource;
 
 import org.apache.http.HttpResponse;
@@ -65,7 +65,7 @@ public class GwtAppTest extends TestCase {
 		} finally {
 			// Stop the client and server
 			client.getConnectionManager().shutdown();
-			AutoWireAdministration.closeAllOfficeFloors();
+			AutoWireManagement.closeAllOfficeFloors();
 		}
 	}
 

@@ -23,7 +23,7 @@ import java.util.Map;
 import org.easymock.AbstractMatcher;
 
 import net.officefloor.autowire.AutoWire;
-import net.officefloor.autowire.AutoWireAdministration;
+import net.officefloor.autowire.AutoWireManagement;
 import net.officefloor.autowire.AutoWireSection;
 import net.officefloor.compile.OfficeFloorCompiler;
 import net.officefloor.compile.issues.CompilerIssues;
@@ -72,7 +72,7 @@ public class GwtServiceWorkSourceTest extends OfficeFrameTestCase {
 	@Override
 	protected void tearDown() throws Exception {
 		// Ensure stop server
-		AutoWireAdministration.closeAllOfficeFloors();
+		AutoWireManagement.closeAllOfficeFloors();
 	}
 
 	/**

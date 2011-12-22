@@ -24,7 +24,7 @@ import java.sql.ResultSet;
 import javax.sql.DataSource;
 
 import junit.framework.TestCase;
-import net.officefloor.autowire.AutoWireAdministration;
+import net.officefloor.autowire.AutoWireManagement;
 import net.officefloor.tutorial.teamhttpserver.TeamHttpServer;
 
 import org.apache.http.HttpResponse;
@@ -68,7 +68,7 @@ public class TeamHttpServerTest extends TestCase {
 		this.client.getConnectionManager().shutdown();
 
 		// Stop HTTP Server
-		AutoWireAdministration.closeAllOfficeFloors();
+		AutoWireManagement.closeAllOfficeFloors();
 
 		// Stop database for new instance each test
 		DriverManager.getConnection(DATABASE_URL, DATABASE_USER, "")

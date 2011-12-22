@@ -23,7 +23,7 @@ import java.io.OutputStreamWriter;
 import java.io.Serializable;
 import java.io.Writer;
 
-import net.officefloor.autowire.AutoWireAdministration;
+import net.officefloor.autowire.AutoWireManagement;
 import net.officefloor.autowire.AutoWireSection;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.section.clazz.ClassSectionSource;
@@ -75,7 +75,7 @@ public class HttpServerAutoWireOfficeFloorSourceTest extends
 	@Override
 	protected void tearDown() throws Exception {
 		// Ensure close
-		AutoWireAdministration.closeAllOfficeFloors();
+		AutoWireManagement.closeAllOfficeFloors();
 
 		// Stop the client
 		this.client.getConnectionManager().shutdown();

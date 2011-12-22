@@ -33,16 +33,16 @@ import net.officefloor.autowire.impl.AutoWireOfficeFloorImpl;
 import net.officefloor.frame.api.manage.OfficeFloor;
 
 /**
- * Administration of an {@link AutoWireOfficeFloor}.
+ * Management of an {@link AutoWireOfficeFloor}.
  * 
  * @author Daniel Sagenschneider
  */
-public class AutoWireAdministration implements AutoWireManagementMBean {
+public class AutoWireManagement implements AutoWireManagementMBean {
 
 	/**
 	 * Name value for the {@link AutoWireManagementMBean}.
 	 */
-	public static final String MBEAN_NAME = "AutoWireAdministration";
+	public static final String MBEAN_NAME = "AutoWireManagement";
 
 	/**
 	 * Obtains the index for the next {@link ObjectName} to ensure uniqueness.
@@ -58,7 +58,7 @@ public class AutoWireAdministration implements AutoWireManagementMBean {
 	static {
 		try {
 			SEARCH_QUERY = new ObjectName("officefloor:type="
-					+ AutoWireAdministration.class.getName() + ",name="
+					+ AutoWireManagement.class.getName() + ",name="
 					+ MBEAN_NAME + "*");
 		} catch (Exception ex) {
 			// This should never be the case
@@ -74,18 +74,18 @@ public class AutoWireAdministration implements AutoWireManagementMBean {
 	 */
 	public static AutoWireOfficeFloor createAutoWireOfficeFloor(
 			OfficeFloor officeFloor, String officeName) throws Exception {
-		synchronized (AutoWireAdministration.class) {
+		synchronized (AutoWireManagement.class) {
 
 			// Obtain the unique index for the OfficeFloor
 			int index = nextNameIndex++; // increment for next
 
 			// Create the Object Name
 			ObjectName objectName = new ObjectName("officefloor:type="
-					+ AutoWireAdministration.class.getName() + ",name="
+					+ AutoWireManagement.class.getName() + ",name="
 					+ MBEAN_NAME + "_" + index);
 
 			// Create the auto-wire OfficeFloor (and its administration)
-			AutoWireAdministration administration = new AutoWireAdministration();
+			AutoWireManagement administration = new AutoWireManagement();
 			AutoWireOfficeFloorImpl autoWire = new AutoWireOfficeFloorImpl(
 					officeFloor, officeName, objectName, administration);
 			administration.autoWireOfficeFloor = autoWire;
@@ -104,7 +104,7 @@ public class AutoWireAdministration implements AutoWireManagementMBean {
 	 * 
 	 * @return {@link AutoWireManagementMBean} instances.
 	 */
-	public static AutoWireManagementMBean[] getAutoWireAdministrators() {
+	public static AutoWireManagementMBean[] getAutoWireManagers() {
 
 		// Obtain the MBean Server
 		MBeanServer mbeanServer = ManagementFactory.getPlatformMBeanServer();
@@ -130,7 +130,7 @@ public class AutoWireAdministration implements AutoWireManagementMBean {
 	 * are closed.
 	 */
 	public static void closeAllOfficeFloors() {
-		for (AutoWireManagementMBean mbean : getAutoWireAdministrators()) {
+		for (AutoWireManagementMBean mbean : getAutoWireManagers()) {
 			mbean.closeOfficeFloor();
 		}
 	}
@@ -143,23 +143,23 @@ public class AutoWireAdministration implements AutoWireManagementMBean {
 	/**
 	 * Disallow instantiated except from static methods of this class.
 	 */
-	private AutoWireAdministration() {
+	private AutoWireManagement() {
 	}
 
 	/*
-	 * ==================== AutoWireAdministrationMBean =====================
+	 * ==================== AutoWireManagementMBean =====================
 	 */
 
 	@Override
 	public void invokeTask(String workName, String taskName) throws Exception {
-		synchronized (AutoWireAdministration.class) {
+		synchronized (AutoWireManagement.class) {
 			this.autoWireOfficeFloor.invokeTask(workName, taskName, null);
 		}
 	}
 
 	@Override
 	public void closeOfficeFloor() {
-		synchronized (AutoWireAdministration.class) {
+		synchronized (AutoWireManagement.class) {
 
 			// Close the OfficeFloor
 			this.autoWireOfficeFloor.getOfficeFloor().closeOfficeFloor();
@@ -174,7 +174,8 @@ public class AutoWireAdministration implements AutoWireManagementMBean {
 				}
 			} catch (Exception ex) {
 				throw new IllegalStateException(
-						"Should not fail to unregister AutoWireAdministration MBean",
+						"Should not fail to unregister "
+								+ AutoWireManagementMBean.class.getSimpleName(),
 						ex);
 			}
 		}

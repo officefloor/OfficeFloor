@@ -29,7 +29,7 @@ import java.util.Map;
 import java.util.Set;
 
 import net.officefloor.autowire.AutoWire;
-import net.officefloor.autowire.AutoWireAdministration;
+import net.officefloor.autowire.AutoWireManagement;
 import net.officefloor.autowire.AutoWireApplication;
 import net.officefloor.autowire.AutoWireGovernance;
 import net.officefloor.autowire.AutoWireObject;
@@ -400,7 +400,7 @@ public class AutoWireOfficeFloorSource extends AbstractOfficeFloorSource
 		officeFloor.openOfficeFloor();
 
 		// Create and return the auto-wire OfficeFloor
-		return AutoWireAdministration.createAutoWireOfficeFloor(officeFloor,
+		return AutoWireManagement.createAutoWireOfficeFloor(officeFloor,
 				OFFICE_NAME);
 	}
 

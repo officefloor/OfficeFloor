@@ -20,7 +20,7 @@ package net.officefloor.plugin.gwt.service;
 import java.lang.reflect.Method;
 
 import net.officefloor.autowire.AutoWire;
-import net.officefloor.autowire.AutoWireAdministration;
+import net.officefloor.autowire.AutoWireManagement;
 import net.officefloor.autowire.AutoWireSection;
 import net.officefloor.compile.test.managedobject.ManagedObjectLoaderUtil;
 import net.officefloor.compile.test.managedobject.ManagedObjectTypeBuilder;
@@ -66,7 +66,7 @@ public class ServerGwtRpcConnectionManagedObjectSourceTest extends
 	@Override
 	protected void tearDown() throws Exception {
 		// Close the Servers
-		AutoWireAdministration.closeAllOfficeFloors();
+		AutoWireManagement.closeAllOfficeFloors();
 
 		// Ensure propagate server failure
 		if (serverFailure != null) {

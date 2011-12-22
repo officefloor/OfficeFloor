@@ -20,7 +20,7 @@ package net.officefloor.tutorial.cometmanualapp;
 import com.gdevelop.gwt.syncrpc.SyncProxy;
 
 import junit.framework.TestCase;
-import net.officefloor.autowire.AutoWireAdministration;
+import net.officefloor.autowire.AutoWireManagement;
 import net.officefloor.plugin.comet.internal.CometEvent;
 import net.officefloor.plugin.comet.internal.CometPublicationService;
 import net.officefloor.plugin.woof.WoofOfficeFloorSource;
@@ -56,7 +56,7 @@ public class ConversationTest extends TestCase {
 		assertTrue("Invalid sequence number", sequenceNumber.longValue() > 0);
 
 		// Stop the application
-		AutoWireAdministration.closeAllOfficeFloors();
+		AutoWireManagement.closeAllOfficeFloors();
 	}
 
 }

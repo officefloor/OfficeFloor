@@ -20,7 +20,7 @@ package net.officefloor.plugin.woof;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 
-import net.officefloor.autowire.AutoWireAdministration;
+import net.officefloor.autowire.AutoWireManagement;
 import net.officefloor.autowire.AutoWireSection;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.model.woof.WoofModel;
@@ -47,7 +47,7 @@ public class WoofOfficeFloorSourceTest extends OfficeFrameTestCase {
 
 	@Override
 	protected void tearDown() throws Exception {
-		AutoWireAdministration.closeAllOfficeFloors();
+		AutoWireManagement.closeAllOfficeFloors();
 	}
 
 	/**

@@ -19,7 +19,7 @@ package net.officefloor.tutorial.gwtservice;
 
 import com.gdevelop.gwt.syncrpc.SyncProxy;
 
-import net.officefloor.autowire.AutoWireAdministration;
+import net.officefloor.autowire.AutoWireManagement;
 import net.officefloor.plugin.woof.WoofOfficeFloorSource;
 import net.officefloor.tutorial.gwtservice.client.HighLowGame;
 import net.officefloor.tutorial.gwtservice.client.Result;
@@ -34,7 +34,7 @@ public class GameTest extends TestCase {
 
 	@Override
 	protected void tearDown() throws Exception {
-		AutoWireAdministration.closeAllOfficeFloors();
+		AutoWireManagement.closeAllOfficeFloors();
 	}
 
 	/**

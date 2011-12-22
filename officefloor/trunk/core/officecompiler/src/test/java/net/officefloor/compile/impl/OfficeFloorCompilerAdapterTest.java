@@ -24,7 +24,7 @@ import java.net.URL;
 import java.net.URLClassLoader;
 
 import net.officefloor.autowire.AutoWire;
-import net.officefloor.autowire.AutoWireAdministration;
+import net.officefloor.autowire.AutoWireManagement;
 import net.officefloor.autowire.AutoWireOfficeFloor;
 import net.officefloor.autowire.impl.AutoWireOfficeFloorSource;
 import net.officefloor.compile.OfficeFloorCompiler;
@@ -103,7 +103,7 @@ public class OfficeFloorCompilerAdapterTest extends OfficeFrameTestCase {
 
 	@Override
 	protected void tearDown() throws Exception {
-		AutoWireAdministration.closeAllOfficeFloors();
+		AutoWireManagement.closeAllOfficeFloors();
 	}
 
 	/**
