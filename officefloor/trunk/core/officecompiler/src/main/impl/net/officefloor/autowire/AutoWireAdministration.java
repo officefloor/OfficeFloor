@@ -15,7 +15,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.autowire.impl;
+package net.officefloor.autowire;
 
 import java.lang.management.ManagementFactory;
 import java.util.ArrayList;
@@ -27,8 +27,9 @@ import javax.management.MBeanServer;
 import javax.management.ObjectName;
 import javax.management.QueryExp;
 
-import net.officefloor.autowire.AutoWireAdministrationMBean;
+import net.officefloor.autowire.AutoWireManagementMBean;
 import net.officefloor.autowire.AutoWireOfficeFloor;
+import net.officefloor.autowire.impl.AutoWireOfficeFloorImpl;
 import net.officefloor.frame.api.manage.OfficeFloor;
 
 /**
@@ -36,10 +37,10 @@ import net.officefloor.frame.api.manage.OfficeFloor;
  * 
  * @author Daniel Sagenschneider
  */
-public class AutoWireAdministration implements AutoWireAdministrationMBean {
+public class AutoWireAdministration implements AutoWireManagementMBean {
 
 	/**
-	 * Name value for the {@link AutoWireAdministrationMBean}.
+	 * Name value for the {@link AutoWireManagementMBean}.
 	 */
 	public static final String MBEAN_NAME = "AutoWireAdministration";
 
@@ -99,11 +100,11 @@ public class AutoWireAdministration implements AutoWireAdministrationMBean {
 	}
 
 	/**
-	 * Obtains the {@link AutoWireAdministrationMBean} instances.
+	 * Obtains the {@link AutoWireManagementMBean} instances.
 	 * 
-	 * @return {@link AutoWireAdministrationMBean} instances.
+	 * @return {@link AutoWireManagementMBean} instances.
 	 */
-	public static AutoWireAdministrationMBean[] getAutoWireAdministrators() {
+	public static AutoWireManagementMBean[] getAutoWireAdministrators() {
 
 		// Obtain the MBean Server
 		MBeanServer mbeanServer = ManagementFactory.getPlatformMBeanServer();
@@ -112,16 +113,16 @@ public class AutoWireAdministration implements AutoWireAdministrationMBean {
 		Set<ObjectName> names = mbeanServer.queryNames(null, SEARCH_QUERY);
 
 		// Create the listing of the AutoWireOfficeFloor MBeans
-		List<AutoWireAdministrationMBean> mbeans = new ArrayList<AutoWireAdministrationMBean>(
+		List<AutoWireManagementMBean> mbeans = new ArrayList<AutoWireManagementMBean>(
 				names.size());
 		for (ObjectName name : names) {
-			AutoWireAdministrationMBean mbean = JMX.newMBeanProxy(mbeanServer,
-					name, AutoWireAdministrationMBean.class);
+			AutoWireManagementMBean mbean = JMX.newMBeanProxy(mbeanServer,
+					name, AutoWireManagementMBean.class);
 			mbeans.add(mbean);
 		}
 
 		// Return the MBeans
-		return mbeans.toArray(new AutoWireAdministrationMBean[mbeans.size()]);
+		return mbeans.toArray(new AutoWireManagementMBean[mbeans.size()]);
 	}
 
 	/**
@@ -129,7 +130,7 @@ public class AutoWireAdministration implements AutoWireAdministrationMBean {
 	 * are closed.
 	 */
 	public static void closeAllOfficeFloors() {
-		for (AutoWireAdministrationMBean mbean : getAutoWireAdministrators()) {
+		for (AutoWireManagementMBean mbean : getAutoWireAdministrators()) {
 			mbean.closeOfficeFloor();
 		}
 	}

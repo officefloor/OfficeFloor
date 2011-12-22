@@ -24,7 +24,7 @@ import java.sql.ResultSet;
 import javax.sql.DataSource;
 
 import junit.framework.TestCase;
-import net.officefloor.autowire.impl.AutoWireAdministration;
+import net.officefloor.autowire.AutoWireAdministration;
 import net.officefloor.tutorial.databasehttpserver.DatabaseHttpServer;
 
 import org.apache.http.HttpResponse;

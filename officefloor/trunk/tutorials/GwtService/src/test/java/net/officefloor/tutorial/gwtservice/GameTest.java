@@ -19,7 +19,7 @@ package net.officefloor.tutorial.gwtservice;
 
 import com.gdevelop.gwt.syncrpc.SyncProxy;
 
-import net.officefloor.autowire.impl.AutoWireAdministration;
+import net.officefloor.autowire.AutoWireAdministration;
 import net.officefloor.plugin.woof.WoofOfficeFloorSource;
 import net.officefloor.tutorial.gwtservice.client.HighLowGame;
 import net.officefloor.tutorial.gwtservice.client.Result;

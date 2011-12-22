@@ -24,7 +24,7 @@ import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.api.manage.OfficeFloor;
 
 /**
- * {@link AutoWireAdministrationMBean} implementation.
+ * {@link AutoWireManagementMBean} implementation.
  * 
  * @author Daniel Sagenschneider
  */

@@ -23,8 +23,8 @@ import java.util.Map;
 import org.easymock.AbstractMatcher;
 
 import net.officefloor.autowire.AutoWire;
+import net.officefloor.autowire.AutoWireAdministration;
 import net.officefloor.autowire.AutoWireSection;
-import net.officefloor.autowire.impl.AutoWireAdministration;
 import net.officefloor.compile.OfficeFloorCompiler;
 import net.officefloor.compile.issues.CompilerIssues;
 import net.officefloor.compile.issues.CompilerIssues.LocationType;
