@@ -36,12 +36,12 @@ public interface SuppliedManagedObjectDependencyType {
 	String getDependencyName();
 
 	/**
-	 * Obtains the {@link Class} that the dependent object must
+	 * Obtains the {@link Class} name that the dependent object must
 	 * extend/implement.
 	 * 
 	 * @return Type of the dependency.
 	 */
-	Class<?> getDependencyType();
+	String getDependencyType();
 
 	/**
 	 * <p>

@@ -20,7 +20,10 @@ package net.officefloor.autowire.impl;
 
 import java.io.File;
 import java.sql.Connection;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 
 import javax.sql.DataSource;
@@ -29,16 +32,24 @@ import net.officefloor.autowire.AutoWire;
 import net.officefloor.autowire.AutoWireApplication;
 import net.officefloor.autowire.AutoWireObject;
 import net.officefloor.autowire.AutoWireProperties;
+import net.officefloor.autowire.AutoWireSupplier;
 import net.officefloor.autowire.AutoWireTeam;
 import net.officefloor.autowire.ManagedObjectSourceWirer;
 import net.officefloor.autowire.ManagedObjectSourceWirerContext;
-import net.officefloor.autowire.impl.AutoWireOfficeFloorSource;
-import net.officefloor.autowire.impl.SingletonManagedObjectSource;
+import net.officefloor.autowire.impl.supplier.MockTypeManagedObjectSource;
+import net.officefloor.autowire.spi.supplier.source.SupplierSource;
+import net.officefloor.autowire.spi.supplier.source.SupplierSourceContext;
+import net.officefloor.autowire.spi.supplier.source.impl.AbstractSupplierSource;
+import net.officefloor.autowire.supplier.SuppliedManagedObjectDependencyType;
+import net.officefloor.autowire.supplier.SuppliedManagedObjectFlowType;
+import net.officefloor.autowire.supplier.SuppliedManagedObjectTeamType;
+import net.officefloor.autowire.supplier.SuppliedManagedObjectType;
 import net.officefloor.compile.integrate.managedobject.CompileOfficeFloorManagedObjectTest.InputManagedObject;
 import net.officefloor.compile.managedobject.ManagedObjectDependencyType;
 import net.officefloor.compile.managedobject.ManagedObjectType;
 import net.officefloor.compile.spi.office.ManagedObjectTeam;
 import net.officefloor.compile.spi.office.OfficeObject;
+import net.officefloor.compile.spi.office.OfficeSectionInput;
 import net.officefloor.compile.spi.office.OfficeTeam;
 import net.officefloor.compile.spi.office.source.OfficeSource;
 import net.officefloor.compile.spi.officefloor.DeployedOffice;
@@ -53,6 +64,11 @@ import net.officefloor.compile.spi.officefloor.source.OfficeFloorSource;
 import net.officefloor.compile.spi.officefloor.source.OfficeFloorSourceContext;
 import net.officefloor.compile.spi.section.ManagedObjectDependency;
 import net.officefloor.compile.spi.section.ManagedObjectFlow;
+import net.officefloor.compile.spi.section.SectionDesigner;
+import net.officefloor.compile.spi.section.SectionObject;
+import net.officefloor.compile.spi.section.source.SectionSource;
+import net.officefloor.compile.spi.section.source.SectionSourceContext;
+import net.officefloor.compile.spi.section.source.impl.AbstractSectionSource;
 import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.manage.OfficeFloor;
@@ -60,6 +76,7 @@ import net.officefloor.frame.impl.spi.team.OnePersonTeamSource;
 import net.officefloor.frame.impl.spi.team.PassiveTeamSource;
 import net.officefloor.frame.impl.spi.team.ProcessContextTeamSource;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
+import net.officefloor.frame.spi.TestSource;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.spi.team.Team;
@@ -68,12 +85,14 @@ import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.managedobject.clazz.ClassManagedObjectSource;
 
 import org.easymock.AbstractMatcher;
+import org.junit.Ignore;
 
 /**
  * Tests the {@link AutoWireOfficeFloorSource}.
  * 
  * @author Daniel Sagenschneider
  */
+@Ignore("Need to configure in SupplierSource functionality")
 public class AutoWireOfficeFloorSourceTest extends OfficeFrameTestCase {
 
 	/**
@@ -92,6 +111,11 @@ public class AutoWireOfficeFloorSourceTest extends OfficeFrameTestCase {
 	 */
 	private final OfficeFloorSourceContext context = this
 			.createMock(OfficeFloorSourceContext.class);
+
+	@Override
+	protected void setUp() throws Exception {
+		DynamicSectionSource.reset();
+	}
 
 	/**
 	 * Ensure can load simple case of just the {@link Office}.
@@ -136,35 +160,63 @@ public class AutoWireOfficeFloorSourceTest extends OfficeFrameTestCase {
 		this.recordTeam();
 		this.recordRawObjectType(dependency);
 		this.recordOffice();
-		this.recordRawObjectDependency(dependency, autoWire);
+		this.recordRawObject(dependency, autoWire);
 
 		// Test
 		this.replayMockObjects();
 
 		// Add the raw object dependency
 		this.source.addObject(dependency, autoWire);
+		this.addUsedAutoWiring(autoWire);
 		this.doSourceOfficeFloor();
 		this.verifyMockObjects();
 	}
 
 	/**
-	 * Ensure can load with a raw dependency that defaults the type..
+	 * Ensure not load unused raw object.
+	 */
+	public void testUnusedRawObject() throws Throwable {
+
+		final MockRawObject dependency = new MockRawObject();
+		final AutoWire autoWire = new AutoWire(MockRawType.class);
+
+		// Record (not load raw object)
+		this.recordTeam();
+		this.recordOffice();
+
+		// Test
+		this.replayMockObjects();
+
+		// Add the unused raw object
+		this.source.addObject(dependency, autoWire);
+		this.addUsedAutoWiring(); // none
+
+		// Source OfficeFloor (will not load unused raw object)
+		this.doSourceOfficeFloor();
+
+		// Verify
+		this.verifyMockObjects();
+	}
+
+	/**
+	 * Ensure can load with a raw dependency that defaults the type.
 	 */
 	public void testRawObjectDefaultType() throws Throwable {
 
-		final Object object = "default type to String";
+		final String object = "default type to String";
 
 		// Record
 		this.recordTeam();
 		this.recordRawObjectType(object);
 		this.recordOffice();
-		this.recordRawObjectDependency(object, new AutoWire(String.class));
+		this.recordRawObject(object, new AutoWire(String.class));
 
 		// Test
 		this.replayMockObjects();
 
 		// Add the raw object dependency to default type
 		this.source.addObject(object);
+		this.addUsedAutoWiring(new AutoWire(Object.class));
 		this.doSourceOfficeFloor();
 		this.verifyMockObjects();
 	}
@@ -182,13 +234,39 @@ public class AutoWireOfficeFloorSourceTest extends OfficeFrameTestCase {
 		this.recordTeam();
 		this.recordRawObjectType(dependency);
 		this.recordOffice();
-		this.recordRawObjectDependency(dependency, autoWire);
+		this.recordRawObject(dependency, autoWire);
 
 		// Test
 		this.replayMockObjects();
 
 		// Add the raw object dependency
 		this.source.addObject(dependency, autoWire);
+		this.addUsedAutoWiring(autoWire);
+		this.doSourceOfficeFloor();
+		this.verifyMockObjects();
+	}
+
+	/**
+	 * Ensure can wire raw object against multiple types.
+	 */
+	public void testRawObjectForMultipleTypes() throws Exception {
+
+		final MockRawObject object = new MockRawObject();
+		final AutoWire typeAutoWire = new AutoWire(MockRawType.class);
+		final AutoWire objectAutoWire = new AutoWire(MockRawObject.class);
+
+		// Record
+		this.recordTeam();
+		this.recordRawObjectType(object);
+		this.recordOffice();
+		this.recordRawObject(object, typeAutoWire, objectAutoWire);
+
+		// Test
+		this.replayMockObjects();
+
+		// Add raw object with multiple types
+		this.source.addObject(object, typeAutoWire, objectAutoWire);
+		this.addUsedAutoWiring(objectAutoWire); // only one needed
 		this.doSourceOfficeFloor();
 		this.verifyMockObjects();
 	}
@@ -206,6 +284,9 @@ public class AutoWireOfficeFloorSourceTest extends OfficeFrameTestCase {
 		object.addProperty(ClassManagedObjectSource.CLASS_NAME_PROPERTY_NAME,
 				MockRawObject.class.getName());
 
+		// Flag using managed object
+		this.addUsedAutoWiring(autoWire);
+
 		// Record
 		this.recordTeam();
 		this.recordManagedObjectType(object);
@@ -216,6 +297,32 @@ public class AutoWireOfficeFloorSourceTest extends OfficeFrameTestCase {
 				MockRawObject.class.getName());
 		this.recordManagedObject(source, autoWire);
 		this.recordManagedObjectDependencies(object);
+
+		// Test
+		this.replayMockObjects();
+		this.doSourceOfficeFloor();
+		this.verifyMockObjects();
+	}
+
+	/**
+	 * Ensure not load unused {@link ManagedObject}.
+	 */
+	public void testUnusedManagedObject() throws Exception {
+
+		final AutoWire autoWire = new AutoWire(MockRawType.class);
+
+		// Add the managed object source
+		AutoWireObject object = this.source.addManagedObject(
+				ClassManagedObjectSource.class.getName(), null, autoWire);
+		object.addProperty(ClassManagedObjectSource.CLASS_NAME_PROPERTY_NAME,
+				MockRawObject.class.getName());
+
+		// Not using managed object
+		this.addUsedAutoWiring();
+
+		// Record (not load managed object)
+		this.recordTeam();
+		this.recordOffice();
 
 		// Test
 		this.replayMockObjects();
@@ -236,6 +343,9 @@ public class AutoWireOfficeFloorSourceTest extends OfficeFrameTestCase {
 				ClassManagedObjectSource.class.getName(), null, autoWire);
 		object.addProperty(ClassManagedObjectSource.CLASS_NAME_PROPERTY_NAME,
 				MockRawObject.class.getName());
+
+		// Flag using managed object
+		this.addUsedAutoWiring(autoWire);
 
 		// Record
 		this.recordTeam();
@@ -266,6 +376,9 @@ public class AutoWireOfficeFloorSourceTest extends OfficeFrameTestCase {
 		AutoWireObject object = this.source.addManagedObject(
 				ClassManagedObjectSource.class.getName(), null, autoWire);
 		object.setTimeout(TIMEOUT);
+
+		// Flag using managed object
+		this.addUsedAutoWiring(autoWire);
 
 		// Record
 		this.recordTeam();
@@ -298,6 +411,9 @@ public class AutoWireOfficeFloorSourceTest extends OfficeFrameTestCase {
 		object.loadProperties(this.getClass().getPackage().getName()
 				.replace('.', '/')
 				+ "/object.properties");
+
+		// Flag using managed object
+		this.addUsedAutoWiring(autoWire);
 
 		// Record
 		this.recordTeam();
@@ -335,6 +451,9 @@ public class AutoWireOfficeFloorSourceTest extends OfficeFrameTestCase {
 				ClassManagedObjectSource.class.getName(), null, autoWire);
 		object.loadProperties("object.properties");
 
+		// Flag using managed object
+		this.addUsedAutoWiring(autoWire);
+
 		// Record
 		this.recordTeam();
 		this.recordManagedObjectType(object);
@@ -347,30 +466,6 @@ public class AutoWireOfficeFloorSourceTest extends OfficeFrameTestCase {
 
 		// Test
 		this.replayMockObjects();
-		this.doSourceOfficeFloor();
-		this.verifyMockObjects();
-	}
-
-	/**
-	 * Ensure can wire {@link ManagedObject} against multiple types.
-	 */
-	public void testObjectForMultipleTypes() throws Exception {
-
-		final MockRawObject object = new MockRawObject();
-		final AutoWire typeAutoWire = new AutoWire(MockRawType.class);
-		final AutoWire objectAutoWire = new AutoWire(MockRawObject.class);
-
-		// Record
-		this.recordTeam();
-		this.recordRawObjectType(object);
-		this.recordOffice();
-		this.recordRawObjectDependency(object, typeAutoWire, objectAutoWire);
-
-		// Test
-		this.replayMockObjects();
-
-		// Add raw object with multiple types
-		this.source.addObject(object, typeAutoWire, objectAutoWire);
 		this.doSourceOfficeFloor();
 		this.verifyMockObjects();
 	}
@@ -412,12 +507,15 @@ public class AutoWireOfficeFloorSourceTest extends OfficeFrameTestCase {
 		object.addProperty(ClassManagedObjectSource.CLASS_NAME_PROPERTY_NAME,
 				MockRawObject.class.getName());
 
+		// Flag the object used (dependency should also be loaded)
+		this.addUsedAutoWiring(rawTypeAutoWire);
+
 		// Record Managed Object Source (with non-specific dependency types)
 		this.recordTeam();
 		this.recordRawObjectType(connection);
 		this.recordManagedObjectType(object);
 		this.recordOffice();
-		this.recordRawObjectDependency(connection, connectionAutoWire);
+		this.recordRawObject(connection, connectionAutoWire);
 		OfficeFloorManagedObjectSource source = this.recordManagedObjectSource(
 				rawTypeAutoWire, ClassManagedObjectSource.class, 0, 0,
 				ClassManagedObjectSource.CLASS_NAME_PROPERTY_NAME,
@@ -425,7 +523,7 @@ public class AutoWireOfficeFloorSourceTest extends OfficeFrameTestCase {
 		this.recordManagedObject(source, rawTypeAutoWire);
 		this.recordManagedObjectDependencies(object, "dependency",
 				new AutoWire(Object.class));
-		this.recordManagedObjectDependency(rawTypeAutoWire, "dependency",
+		this.recordLinkManagedObjectDependency(rawTypeAutoWire, "dependency",
 				connectionAutoWire);
 		this.recordManagedObjectFlow(source, "flow", "section", "sectionInput");
 		this.recordManagedObjectTeam(source, "team", OnePersonTeamSource.class,
@@ -471,14 +569,17 @@ public class AutoWireOfficeFloorSourceTest extends OfficeFrameTestCase {
 		object.addProperty(ClassManagedObjectSource.CLASS_NAME_PROPERTY_NAME,
 				MockRawObject.class.getName());
 
+		// Flag the object used (dependency should also be loaded)
+		this.addUsedAutoWiring(rawTypeAutoWire);
+
 		// Record Managed Object Source (with non-specific dependency types)
 		this.recordTeam();
 		this.recordRawObjectType(connection);
 		this.recordRawObjectType(dataSource);
 		this.recordManagedObjectType(object);
 		this.recordOffice();
-		this.recordRawObjectDependency(connection, connectionAutoWire);
-		this.recordRawObjectDependency(dataSource, dataSourceAutoWire);
+		this.recordRawObject(connection, connectionAutoWire);
+		this.recordRawObject(dataSource, dataSourceAutoWire);
 		OfficeFloorManagedObjectSource source = this.recordManagedObjectSource(
 				rawTypeAutoWire, ClassManagedObjectSource.class, 0, 0,
 				ClassManagedObjectSource.CLASS_NAME_PROPERTY_NAME,
@@ -487,9 +588,9 @@ public class AutoWireOfficeFloorSourceTest extends OfficeFrameTestCase {
 		this.recordManagedObjectDependencies(object, "connection",
 				new AutoWire(Object.class), "dataSource", new AutoWire(
 						Object.class));
-		this.recordManagedObjectDependency(rawTypeAutoWire, "connection",
+		this.recordLinkManagedObjectDependency(rawTypeAutoWire, "connection",
 				connectionAutoWire);
-		this.recordManagedObjectDependency(rawTypeAutoWire, "dataSource",
+		this.recordLinkManagedObjectDependency(rawTypeAutoWire, "dataSource",
 				dataSourceAutoWire);
 
 		// Test
@@ -534,12 +635,15 @@ public class AutoWireOfficeFloorSourceTest extends OfficeFrameTestCase {
 		object.addProperty(ClassManagedObjectSource.CLASS_NAME_PROPERTY_NAME,
 				MockRawObject.class.getName());
 
+		// Input Managed Object and its dependencies always loaded
+		this.addUsedAutoWiring();
+
 		// Record Managed Object Source
 		this.recordTeam();
 		this.recordRawObjectType(connection);
 		this.recordManagedObjectType(object);
 		this.recordOffice();
-		this.recordRawObjectDependency(connection, connectionAutoWire);
+		this.recordRawObject(connection, connectionAutoWire);
 		OfficeFloorManagedObjectSource source = this.recordManagedObjectSource(
 				rawTypeAutoWire, ClassManagedObjectSource.class, 0, 0,
 				ClassManagedObjectSource.CLASS_NAME_PROPERTY_NAME,
@@ -583,6 +687,9 @@ public class AutoWireOfficeFloorSourceTest extends OfficeFrameTestCase {
 				ClassManagedObjectSource.class.getName(), wirer, moAutoWire);
 		object.addProperty(ClassManagedObjectSource.CLASS_NAME_PROPERTY_NAME,
 				MockRawObject.class.getName());
+
+		// Use Managed Object
+		this.addUsedAutoWiring(moAutoWire);
 
 		// Add the team (one qualified, the other not to ensure pick qualified)
 		this.source.assignTeam(OnePersonTeamSource.class.getName(),
@@ -636,6 +743,9 @@ public class AutoWireOfficeFloorSourceTest extends OfficeFrameTestCase {
 		object.addProperty(ClassManagedObjectSource.CLASS_NAME_PROPERTY_NAME,
 				MockRawObject.class.getName());
 
+		// Use Managed Object
+		this.addUsedAutoWiring(moAutoWire);
+
 		// Add the team for default auto-wire type
 		this.source.assignTeam(OnePersonTeamSource.class.getName(),
 				unqualifiedTeamAutoWire);
@@ -686,6 +796,9 @@ public class AutoWireOfficeFloorSourceTest extends OfficeFrameTestCase {
 		object.addProperty(ClassManagedObjectSource.CLASS_NAME_PROPERTY_NAME,
 				MockRawObject.class.getName());
 
+		// Use Managed Object
+		this.addUsedAutoWiring(moAutoWire);
+
 		// No auto-wire team available
 
 		// Record Managed Object Source
@@ -731,6 +844,9 @@ public class AutoWireOfficeFloorSourceTest extends OfficeFrameTestCase {
 				ClassManagedObjectSource.class.getName(), wirer, autoWire);
 		object.addProperty(ClassManagedObjectSource.CLASS_NAME_PROPERTY_NAME,
 				MockRawObject.class.getName());
+
+		// Input managed object always loaded
+		this.addUsedAutoWiring();
 
 		// Record team and office
 		this.recordTeam();
@@ -780,6 +896,9 @@ public class AutoWireOfficeFloorSourceTest extends OfficeFrameTestCase {
 				ClassManagedObjectSource.CLASS_NAME_PROPERTY_NAME,
 				MockRawObject.class.getName());
 
+		// Input managed objects always loaded
+		this.addUsedAutoWiring();
+
 		// Record team and office
 		this.recordTeam();
 		this.recordManagedObjectType(firstObject);
@@ -827,12 +946,15 @@ public class AutoWireOfficeFloorSourceTest extends OfficeFrameTestCase {
 		object.addProperty(ClassManagedObjectSource.CLASS_NAME_PROPERTY_NAME,
 				MockRawObject.class.getName());
 
+		// Use Managed Object (dependency will also be loaded)
+		this.addUsedAutoWiring(rawTypeAutoWire);
+
 		// Record Managed Object Source
 		this.recordTeam();
 		this.recordRawObjectType(connection);
 		this.recordManagedObjectType(object);
 		this.recordOffice();
-		this.recordRawObjectDependency(connection, connectionAutoWire);
+		this.recordRawObject(connection, connectionAutoWire);
 		OfficeFloorManagedObjectSource source = this.recordManagedObjectSource(
 				rawTypeAutoWire, ClassManagedObjectSource.class, 0, 0,
 				ClassManagedObjectSource.CLASS_NAME_PROPERTY_NAME,
@@ -840,7 +962,7 @@ public class AutoWireOfficeFloorSourceTest extends OfficeFrameTestCase {
 		this.recordManagedObject(source, rawTypeAutoWire);
 		this.recordManagedObjectDependencies(object, "dependency",
 				connectionAutoWire);
-		this.recordManagedObjectDependency(rawTypeAutoWire, "dependency",
+		this.recordLinkManagedObjectDependency(rawTypeAutoWire, "dependency",
 				connectionAutoWire);
 
 		// Test
@@ -871,12 +993,15 @@ public class AutoWireOfficeFloorSourceTest extends OfficeFrameTestCase {
 		object.addProperty(ClassManagedObjectSource.CLASS_NAME_PROPERTY_NAME,
 				MockRawObject.class.getName());
 
+		// Use Managed Object (dependency will also be loaded)
+		this.addUsedAutoWiring(rawTypeAutoWire);
+
 		// Record Managed Object Source
 		this.recordTeam();
 		this.recordRawObjectType(connection);
 		this.recordManagedObjectType(object);
 		this.recordOffice();
-		this.recordRawObjectDependency(connection, unqualifiedAutoWire);
+		this.recordRawObject(connection, unqualifiedAutoWire);
 		OfficeFloorManagedObjectSource source = this.recordManagedObjectSource(
 				rawTypeAutoWire, ClassManagedObjectSource.class, 0, 0,
 				ClassManagedObjectSource.CLASS_NAME_PROPERTY_NAME,
@@ -884,7 +1009,7 @@ public class AutoWireOfficeFloorSourceTest extends OfficeFrameTestCase {
 		this.recordManagedObject(source, rawTypeAutoWire);
 		this.recordManagedObjectDependencies(object, "dependency",
 				qualifiedAutoWire);
-		this.recordManagedObjectDependency(rawTypeAutoWire, "dependency",
+		this.recordLinkManagedObjectDependency(rawTypeAutoWire, "dependency",
 				unqualifiedAutoWire);
 
 		// Test
@@ -919,21 +1044,22 @@ public class AutoWireOfficeFloorSourceTest extends OfficeFrameTestCase {
 		object.addProperty(ClassManagedObjectSource.CLASS_NAME_PROPERTY_NAME,
 				MockRawObject.class.getName());
 
-		// Record Managed Object Source
+		// Use Managed Object (appropriate dependency will also be loaded)
+		this.addUsedAutoWiring(rawTypeAutoWire);
+
+		// Record Managed Object Source (only used will be loaded)
 		this.recordTeam();
-		this.recordRawObjectType(connectionOne);
 		this.recordRawObjectType(connectionTwo);
 		this.recordManagedObjectType(object);
 		this.recordOffice();
-		this.recordRawObjectDependency(connectionOne, oneAutoWire);
-		this.recordRawObjectDependency(connectionTwo, twoAutoWire);
+		this.recordRawObject(connectionTwo, twoAutoWire);
 		OfficeFloorManagedObjectSource source = this.recordManagedObjectSource(
 				rawTypeAutoWire, ClassManagedObjectSource.class, 0, 0,
 				ClassManagedObjectSource.CLASS_NAME_PROPERTY_NAME,
 				MockRawObject.class.getName());
 		this.recordManagedObject(source, rawTypeAutoWire);
 		this.recordManagedObjectDependencies(object, "dependency", twoAutoWire);
-		this.recordManagedObjectDependency(rawTypeAutoWire, "dependency",
+		this.recordLinkManagedObjectDependency(rawTypeAutoWire, "dependency",
 				twoAutoWire);
 
 		// Test
@@ -969,12 +1095,14 @@ public class AutoWireOfficeFloorSourceTest extends OfficeFrameTestCase {
 		object.addProperty(ClassManagedObjectSource.CLASS_NAME_PROPERTY_NAME,
 				MockRawObject.class.getName());
 
+		// Use Managed Object (dependency will also be loaded)
+		this.addUsedAutoWiring(rawTypeAutoWire);
+
 		// Record Managed Object Source
 		this.recordTeam();
-		this.recordRawObjectType(connection);
 		this.recordManagedObjectType(object);
 		this.recordOffice();
-		this.recordRawObjectDependency(connection, notMatchAutoWire);
+		this.recordRawObject(connection, notMatchAutoWire);
 		OfficeFloorManagedObjectSource source = this.recordManagedObjectSource(
 				rawTypeAutoWire, ClassManagedObjectSource.class, 0, 0,
 				ClassManagedObjectSource.CLASS_NAME_PROPERTY_NAME,
@@ -993,6 +1121,88 @@ public class AutoWireOfficeFloorSourceTest extends OfficeFrameTestCase {
 								+ Connection.class.getName() + ")",
 						AssetType.MANAGED_OBJECT,
 						rawTypeAutoWire.getQualifiedType());
+
+		// Test
+		this.replayMockObjects();
+		this.doSourceOfficeFloor();
+		this.verifyMockObjects();
+	}
+
+	/**
+	 * Ensure issue if cyclic dependency.
+	 */
+	public void testCyclicManagedObjectDependency() throws Exception {
+
+		final AutoWire cyclicAutoWire = new AutoWire(MockRawType.class);
+
+		// Add the wiring of the managed object source
+		AutoWireObject object = this.source.addManagedObject(
+				ClassManagedObjectSource.class.getName(), null, cyclicAutoWire);
+		object.addProperty(ClassManagedObjectSource.CLASS_NAME_PROPERTY_NAME,
+				MockRawObject.class.getName());
+
+		// Use Managed Object
+		this.addUsedAutoWiring(cyclicAutoWire);
+
+		// Record Managed Object Source
+		this.recordTeam();
+		this.recordManagedObjectType(object);
+		this.recordOffice();
+		OfficeFloorManagedObjectSource source = this.recordManagedObjectSource(
+				cyclicAutoWire, ClassManagedObjectSource.class, 0, 0,
+				ClassManagedObjectSource.CLASS_NAME_PROPERTY_NAME,
+				MockRawObject.class.getName());
+		this.recordManagedObject(source, cyclicAutoWire);
+		this.recordManagedObjectDependencies(object, "dependency",
+				cyclicAutoWire);
+		this.deployer.addIssue(
+				"Cyclic managed object dependency graph for auto-wiring (qualifier=null, type="
+						+ MockRawType.class.getName() + ")",
+				AssetType.MANAGED_OBJECT, cyclicAutoWire.getQualifiedType());
+
+		// Test
+		this.replayMockObjects();
+		this.doSourceOfficeFloor();
+		this.verifyMockObjects();
+	}
+
+	/**
+	 * Ensure issue if cyclic graph dependency.
+	 */
+	public void testCyclicGraphManagedObjectDependency() throws Exception {
+
+		final AutoWire oneAutoWire = new AutoWire(MockRawType.class);
+		final AutoWire twoAutoWire = new AutoWire(MockRawObject.class);
+
+		// Add the first managed object
+		AutoWireObject object = this.source.addManagedObject(
+				ClassManagedObjectSource.class.getName(), null, oneAutoWire);
+		object.addProperty(ClassManagedObjectSource.CLASS_NAME_PROPERTY_NAME,
+				MockRawObject.class.getName());
+
+		// Add the second managed object
+		final MockRawObject rawObject = new MockRawObject();
+		this.source.addObject(rawObject, twoAutoWire);
+
+		// Use Managed Object (dependency will be loaded)
+		this.addUsedAutoWiring(oneAutoWire);
+
+		// Record Managed Object Source
+		this.recordTeam();
+		this.recordManagedObjectType(object);
+		this.recordRawObjectType(rawObject);
+		this.recordOffice();
+		OfficeFloorManagedObjectSource source = this.recordManagedObjectSource(
+				oneAutoWire, ClassManagedObjectSource.class, 0, 0,
+				ClassManagedObjectSource.CLASS_NAME_PROPERTY_NAME,
+				MockRawObject.class.getName());
+		this.recordManagedObject(source, oneAutoWire);
+		this.recordManagedObjectDependencies(object, "dependency", twoAutoWire);
+		this.recordRawObject(rawObject, oneAutoWire);
+		this.deployer.addIssue(
+				"Cyclic managed object dependency graph for auto-wiring (qualifier=null, type="
+						+ oneAutoWire.getType() + ")",
+				AssetType.MANAGED_OBJECT, oneAutoWire.getQualifiedType());
 
 		// Test
 		this.replayMockObjects();
@@ -1130,6 +1340,454 @@ public class AutoWireOfficeFloorSourceTest extends OfficeFrameTestCase {
 	}
 
 	/**
+	 * Ensure can use {@link SuppliedManagedObjectType}.
+	 */
+	public void testSuppliedManagedObject() throws Exception {
+
+		final AutoWire autoWire = new AutoWire(Connection.class);
+		final ClassManagedObjectSource mos = new ClassManagedObjectSource();
+
+		// Add the supplier
+		this.addSupplier(new SupplierInit() {
+			@Override
+			public void supply(SupplierSourceContext context) throws Exception {
+				AutoWireObject object = context.addManagedObject(mos, null,
+						autoWire);
+				object.addProperty(
+						ClassManagedObjectSource.CLASS_NAME_PROPERTY_NAME,
+						MockRawObject.class.getName());
+			}
+		});
+
+		// Use the supplied managed object
+		this.addUsedAutoWiring(autoWire);
+
+		// Record
+		this.recordTeam();
+		this.recordOffice();
+		OfficeFloorManagedObjectSource source = this.recordManagedObjectSource(
+				autoWire, mos, 0, 0,
+				ClassManagedObjectSource.CLASS_NAME_PROPERTY_NAME,
+				MockRawObject.class.getName());
+		this.recordManagedObject(source, autoWire);
+
+		// Test
+		this.replayMockObjects();
+		this.doSourceOfficeFloor();
+		this.verifyMockObjects();
+	}
+
+	/**
+	 * Ensure can selectively use a {@link SuppliedManagedObjectType}.
+	 */
+	public void testSelectivelyUseSuppliedManagedObjects() throws Exception {
+
+		final MockTypeManagedObjectSource one = new MockTypeManagedObjectSource(
+				String.class);
+		final MockTypeManagedObjectSource two = new MockTypeManagedObjectSource(
+				Connection.class);
+		final MockTypeManagedObjectSource three = new MockTypeManagedObjectSource(
+				Integer.class);
+
+		// Add the supplier
+		this.addSupplier(new SupplierInit() {
+			@Override
+			public void supply(SupplierSourceContext context) throws Exception {
+				one.addAsManagedObject(context, null);
+				two.addAsManagedObject(context, null);
+				three.addAsManagedObject(context, null);
+			}
+		});
+
+		// Selectively only use two
+		this.addUsedAutoWiring(two.getAutoWire());
+
+		// Record (only two is loaded)
+		this.recordTeam();
+		this.recordOffice();
+		OfficeFloorManagedObjectSource source = this.recordManagedObjectSource(
+				two.getAutoWire(), two, 0, 0);
+		this.recordManagedObject(source, two.getAutoWire());
+
+		// Test
+		this.replayMockObjects();
+		this.doSourceOfficeFloor();
+		this.verifyMockObjects();
+	}
+
+	/**
+	 * Ensure can wire {@link ManagedObjectDependency} to
+	 * {@link SuppliedManagedObjectType}.
+	 */
+	public void testWire_ManagedObjectDependency_To_SuppliedManagedObject()
+			throws Exception {
+		this.doWireDependencyTest(SourceObjectType.MANAGED_OBJECT, null,
+				SourceObjectType.SUPPLIED, null);
+	}
+
+	/**
+	 * Ensure can wire qualified {@link ManagedObjectDependency} to qualified
+	 * {@link SuppliedManagedObjectType}.
+	 */
+	public void testWire_QualifiedManagedObjectDependency_To_QualifiedSuppliedManagedObject()
+			throws Exception {
+		this.doWireDependencyTest(SourceObjectType.MANAGED_OBJECT, "QUALIFIED",
+				SourceObjectType.SUPPLIED, "QUALIFIED");
+	}
+
+	/**
+	 * Ensure can wire qualified {@link ManagedObjectDependency} to default
+	 * {@link SuppliedManagedObjectType}.
+	 */
+	public void testWire_QualifiedManagedObjectDependency_To_SuppliedManagedObject()
+			throws Exception {
+		this.doWireDependencyTest(SourceObjectType.MANAGED_OBJECT, "QUALIFIED",
+				SourceObjectType.SUPPLIED, null);
+	}
+
+	/**
+	 * Ensure can wire {@link ManagedObjectDependency} to {@link ManagedObject}.
+	 */
+	public void testWire_ManagedObjectDependency_To_ManagedObject()
+			throws Exception {
+		this.doWireDependencyTest(SourceObjectType.MANAGED_OBJECT, null,
+				SourceObjectType.MANAGED_OBJECT, null);
+	}
+
+	/**
+	 * Ensure can wire qualified {@link ManagedObjectDependency} to qualified
+	 * {@link ManagedObject}.
+	 */
+	public void testWire_QualifiedManagedObjectDependency_To_QualifiedManagedObject()
+			throws Exception {
+		this.doWireDependencyTest(SourceObjectType.MANAGED_OBJECT, "QUALIFIED",
+				SourceObjectType.MANAGED_OBJECT, "QUALIFIED");
+	}
+
+	/**
+	 * Ensure can wire qualified {@link ManagedObjectDependency} to default
+	 * {@link ManagedObject}.
+	 */
+	public void testWire_QualifiedManagedObjectDependency_To_ManagedObject()
+			throws Exception {
+		this.doWireDependencyTest(SourceObjectType.MANAGED_OBJECT, "QUALIFIED",
+				SourceObjectType.MANAGED_OBJECT, null);
+	}
+
+	/**
+	 * Ensure can wire {@link ManagedObjectDependency} to raw object.
+	 */
+	public void testWire_ManagedObjectDependency_To_RawObject()
+			throws Exception {
+		this.doWireDependencyTest(SourceObjectType.MANAGED_OBJECT, null,
+				SourceObjectType.RAW, null);
+	}
+
+	/**
+	 * Ensure can wire qualified {@link ManagedObjectDependency} to qualified
+	 * raw object.
+	 */
+	public void testWire_QualifiedManagedObjectDependency_To_QualifiedRawObject()
+			throws Exception {
+		this.doWireDependencyTest(SourceObjectType.MANAGED_OBJECT, "QUALIFIED",
+				SourceObjectType.RAW, "QUALIFIED");
+	}
+
+	/**
+	 * Ensure can wire qualified {@link ManagedObjectDependency} to default raw
+	 * object.
+	 */
+	public void testWire_QualifiedManagedObjectDependency_To_RawObject()
+			throws Exception {
+		this.doWireDependencyTest(SourceObjectType.MANAGED_OBJECT, "QUALIFIED",
+				SourceObjectType.RAW, null);
+	}
+
+	/**
+	 * Ensure can wire {@link SuppliedManagedObjectDependencyType} to
+	 * {@link SuppliedManagedObjectType}.
+	 */
+	public void testWire_SuppliedManagedObjectDependency_To_SuppliedManagedObject()
+			throws Exception {
+		this.doWireDependencyTest(SourceObjectType.SUPPLIED, null,
+				SourceObjectType.SUPPLIED, null);
+	}
+
+	/**
+	 * Ensure can wire qualified {@link SuppliedManagedObjectDependencyType} to
+	 * qualified {@link SuppliedManagedObjectType}.
+	 */
+	public void testWire_QualifiedSuppliedManagedObjectDependency_To_QualifiedSuppliedManagedObject()
+			throws Exception {
+		this.doWireDependencyTest(SourceObjectType.SUPPLIED, "QUALIFIED",
+				SourceObjectType.SUPPLIED, "QUALIFIED");
+	}
+
+	/**
+	 * Ensure can wire qualified {@link SuppliedManagedObjectDependencyType} to
+	 * {@link SuppliedManagedObjectType}.
+	 */
+	public void testWire_QualifiedSuppliedManagedObjectDependency_To_SuppliedManagedObject()
+			throws Exception {
+		this.doWireDependencyTest(SourceObjectType.SUPPLIED, "QUALIFIED",
+				SourceObjectType.SUPPLIED, null);
+	}
+
+	/**
+	 * Ensure can wire {@link SuppliedManagedObjectDependencyType} to
+	 * {@link ManagedObject}.
+	 */
+	public void testWire_SuppliedManagedObjectDependency_To_ManagedObject()
+			throws Exception {
+		this.doWireDependencyTest(SourceObjectType.SUPPLIED, null,
+				SourceObjectType.MANAGED_OBJECT, null);
+	}
+
+	/**
+	 * Ensure can wire qualified {@link SuppliedManagedObjectDependencyType} to
+	 * qualified {@link ManagedObject}.
+	 */
+	public void testWire_QualifiedSuppliedManagedObjectDependency_To_QualifiedManagedObject()
+			throws Exception {
+		this.doWireDependencyTest(SourceObjectType.SUPPLIED, "QUALIFIED",
+				SourceObjectType.MANAGED_OBJECT, "QUALIFIED");
+	}
+
+	/**
+	 * Ensure can wire qualified {@link SuppliedManagedObjectDependencyType} to
+	 * {@link ManagedObject}.
+	 */
+	public void testWire_QualifiedSuppliedManagedObjectDependency_To_ManagedObject()
+			throws Exception {
+		this.doWireDependencyTest(SourceObjectType.SUPPLIED, "QUALIFIED",
+				SourceObjectType.MANAGED_OBJECT, null);
+	}
+
+	/**
+	 * Ensure can wire {@link SuppliedManagedObjectDependencyType} to raw
+	 * object.
+	 */
+	public void testWire_SuppliedManagedObjectDependency_To_RawObject()
+			throws Exception {
+		this.doWireDependencyTest(SourceObjectType.SUPPLIED, null,
+				SourceObjectType.RAW, null);
+	}
+
+	/**
+	 * Ensure can wire qualified {@link SuppliedManagedObjectDependencyType} to
+	 * qualified raw object.
+	 */
+	public void testWire_QualifiedSuppliedManagedObjectDependency_To_QualifiedRawObject()
+			throws Exception {
+		this.doWireDependencyTest(SourceObjectType.SUPPLIED, "QUALIFIED",
+				SourceObjectType.RAW, "QUALIFIED");
+	}
+
+	/**
+	 * Ensure can wire qualified {@link SuppliedManagedObjectDependencyType} to
+	 * raw object.
+	 */
+	public void testWire_QualifiedSuppliedManagedObjectDependency_To_RawObject()
+			throws Exception {
+		this.doWireDependencyTest(SourceObjectType.SUPPLIED, "QUALIFIED",
+				SourceObjectType.RAW, null);
+	}
+
+	/**
+	 * Ensure can link {@link SuppliedManagedObjectFlowType}.
+	 */
+	public void testLinkSuppliedManagedObjectFlow() throws Exception {
+
+		final MockTypeManagedObjectSource source = new MockTypeManagedObjectSource(
+				String.class);
+		source.addFlow("flow", Integer.class);
+
+		final ManagedObjectSourceWirer wirer = new ManagedObjectSourceWirer() {
+			@Override
+			public void wire(ManagedObjectSourceWirerContext context) {
+				context.mapFlow("flow", "SECTION", "INPUT");
+			}
+		};
+
+		// Add the supplier
+		this.addSupplier(new SupplierInit() {
+			@Override
+			public void supply(SupplierSourceContext context) throws Exception {
+				source.addAsManagedObject(context, wirer);
+			}
+		});
+
+		// Use the supplied managed object
+		this.addUsedAutoWiring(source.getAutoWire());
+
+		// Make the section input available
+		this.addSectionInput("INPUT");
+
+		// Record
+		this.recordTeam();
+		DeployedOffice office = this.recordOffice();
+		OfficeFloorManagedObjectSource mos = this.recordManagedObjectSource(
+				source.getAutoWire(), source, 0, 0);
+		this.recordManagedObject(mos, source.getAutoWire());
+
+		// Record linking flow to input
+		final ManagedObjectFlow flow = this.createMock(ManagedObjectFlow.class);
+		final DeployedOfficeInput officeInput = this
+				.createMock(DeployedOfficeInput.class);
+		this.recordReturn(mos, mos.getManagedObjectFlow("flow"), flow);
+		this.recordReturn(office,
+				office.getDeployedOfficeInput("SECTION", "INPUT"), officeInput);
+		this.deployer.link(flow, officeInput);
+
+		// Test
+		this.replayMockObjects();
+		this.doSourceOfficeFloor();
+		this.verifyMockObjects();
+	}
+
+	/**
+	 * Ensure can link {@link SuppliedManagedObjectTeamType} to
+	 * {@link OfficeFloorTeam}.
+	 */
+	public void testLink_SuppliedManagedObjectTeam_To_OfficeFloorTeam()
+			throws Exception {
+		this.doLinkSuppliedManagedObjectTeamTest(null, null);
+	}
+
+	/**
+	 * Ensure can link qualified {@link SuppliedManagedObjectTeamType} to
+	 * qualified {@link OfficeFloorTeam}.
+	 */
+	public void testLink_QualifiedSuppliedManagedObjectTeam_To_QualifiedOfficeFloorTeam()
+			throws Exception {
+		this.doLinkSuppliedManagedObjectTeamTest("QUALIFIED", "QUALIFIED");
+	}
+
+	/**
+	 * Ensure can link qualified {@link SuppliedManagedObjectTeamType} to
+	 * {@link OfficeFloorTeam}.
+	 */
+	public void testLink_QualifiedSuppliedManagedObjectTeam_To_OfficeFloorTeam()
+			throws Exception {
+		this.doLinkSuppliedManagedObjectTeamTest("QUALIFIED", null);
+	}
+
+	/**
+	 * Undertakes testing to link {@link ManagedObjectTeam} to
+	 * {@link OfficeFloorTeam}.
+	 * 
+	 * @param managedObjectTeamQualifier
+	 *            Qualifier for the {@link ManagedObjectTeam}.
+	 * @param teamQualifier
+	 *            Qualifier for the {@link OfficeFloorTeam}.
+	 */
+	private void doLinkSuppliedManagedObjectTeamTest(
+			final String managedObjectTeamQualifier, String teamQualifier)
+			throws Exception {
+
+		final AutoWire managedObjectTeamAutoWire = new AutoWire(
+				managedObjectTeamQualifier, Connection.class.getName());
+		final AutoWire officeFloorTeamAutoWire = new AutoWire(teamQualifier,
+				Connection.class.getName());
+
+		final MockTypeManagedObjectSource source = new MockTypeManagedObjectSource(
+				String.class);
+		source.addTeam("team");
+
+		final ManagedObjectSourceWirer wirer = new ManagedObjectSourceWirer() {
+			@Override
+			public void wire(ManagedObjectSourceWirerContext context) {
+				context.mapTeam("team", managedObjectTeamAutoWire);
+			}
+		};
+
+		// Add the supplier
+		this.addSupplier(new SupplierInit() {
+			@Override
+			public void supply(SupplierSourceContext context) throws Exception {
+				source.addAsManagedObject(context, wirer);
+			}
+		});
+
+		// Use the supplied managed object
+		this.addUsedAutoWiring(source.getAutoWire());
+
+		// Provide team
+		this.source.assignTeam("TEAM", officeFloorTeamAutoWire);
+
+		// Record
+		this.recordTeam();
+		OfficeFloorTeam team = this.recordTeam(new String[] {},
+				officeFloorTeamAutoWire);
+		this.recordOffice();
+		OfficeFloorManagedObjectSource mos = this.recordManagedObjectSource(
+				source.getAutoWire(), source, 0, 0);
+		this.recordManagedObject(mos, source.getAutoWire());
+
+		// Record linking managed object team to team
+		final ManagedObjectTeam moTeam = this
+				.createMock(ManagedObjectTeam.class);
+		this.recordReturn(mos, mos.getManagedObjectTeam("team"), moTeam);
+		this.deployer.link(moTeam, team);
+
+		// Test
+		this.replayMockObjects();
+		this.doSourceOfficeFloor();
+		this.verifyMockObjects();
+	}
+
+	/**
+	 * Ensure issue if no {@link OfficeFloorTeam} for
+	 * {@link SuppliedManagedObjectTeamType}.
+	 */
+	public void testNoTeamForSuppliedManagedObjectTeam() throws Exception {
+
+		final MockTypeManagedObjectSource source = new MockTypeManagedObjectSource(
+				String.class);
+		source.addTeam("team");
+
+		final ManagedObjectSourceWirer wirer = new ManagedObjectSourceWirer() {
+			@Override
+			public void wire(ManagedObjectSourceWirerContext context) {
+				context.mapTeam("team", new AutoWire(Connection.class));
+			}
+		};
+
+		// Add the supplier
+		this.addSupplier(new SupplierInit() {
+			@Override
+			public void supply(SupplierSourceContext context) throws Exception {
+				source.addAsManagedObject(context, wirer);
+			}
+		});
+
+		// Use the supplied managed object
+		this.addUsedAutoWiring(source.getAutoWire());
+
+		// No OfficeFloor Team
+
+		// Record
+		this.recordTeam();
+		this.recordOffice();
+		OfficeFloorManagedObjectSource mos = this.recordManagedObjectSource(
+				source.getAutoWire(), source, 0, 0);
+		this.recordManagedObject(mos, source.getAutoWire());
+
+		// Record issue as no corresponding OfficeFloor Team
+		this.deployer
+				.addIssue(
+						"No OfficeFloorTeam available for ManagedObjectTeam 'team' (qualifier=null, type="
+								+ Connection.class.getName() + ")",
+						AssetType.MANAGED_OBJECT, source.getAutoWire()
+								.getQualifiedType());
+
+		// Test
+		this.replayMockObjects();
+		this.doSourceOfficeFloor();
+		this.verifyMockObjects();
+	}
+
+	/**
 	 * {@link OfficeFloorTeam}.
 	 */
 	private final OfficeFloorTeam team = this.createMock(OfficeFloorTeam.class);
@@ -1165,9 +1823,384 @@ public class AutoWireOfficeFloorSourceTest extends OfficeFrameTestCase {
 	private final Map<AutoWireObject, ManagedObjectType<?>> managedObjectTypes = new HashMap<AutoWireObject, ManagedObjectType<?>>();
 
 	/**
+	 * Adds used {@link AutoWire} instances for {@link AutoWireOfficeSource}.
+	 * 
+	 * @param usedAutoWiring
+	 *            Used {@link AutoWire} instances.
+	 */
+	private void addUsedAutoWiring(AutoWire... usedAutoWiring) {
+		DynamicSectionSource.usedAutoWiring.addAll(Arrays
+				.asList(usedAutoWiring));
+	}
+
+	/**
+	 * Adds a {@link OfficeSectionInput}.
+	 * 
+	 * @param inputName
+	 *            Name of {@link OfficeSectionInput}.
+	 */
+	private void addSectionInput(String inputName) {
+		DynamicSectionSource.sectionInputs.add(inputName);
+	}
+
+	/**
+	 * Dynamic {@link SectionSource} for providing the used {@link AutoWire}
+	 * instances.
+	 */
+	@TestSource
+	public static class DynamicSectionSource extends AbstractSectionSource {
+
+		/**
+		 * Used {@link AutoWire} instances.
+		 */
+		private static final List<AutoWire> usedAutoWiring = new LinkedList<AutoWire>();
+
+		/**
+		 * {@link OfficeSectionInput} names.
+		 */
+		private static final List<String> sectionInputs = new LinkedList<String>();
+
+		/**
+		 * Resets for the next test.
+		 */
+		public static void reset() {
+			usedAutoWiring.clear();
+			sectionInputs.clear();
+		}
+
+		/**
+		 * Adds this to the {@link AutoWireApplication}.
+		 * 
+		 * @param application
+		 *            {@link AutoWireApplication}
+		 */
+		public static void setup(AutoWireApplication application) {
+			application.addSection("SECTION",
+					DynamicSectionSource.class.getName(), "TEST");
+		}
+
+		/*
+		 * ==================== SectionSource =======================
+		 */
+
+		@Override
+		protected void loadSpecification(SpecificationContext context) {
+			// No properties required
+		}
+
+		@Override
+		public void sourceSection(SectionDesigner designer,
+				SectionSourceContext context) throws Exception {
+
+			// Add the used section objects (to be office objects)
+			for (AutoWire autoWire : usedAutoWiring) {
+				SectionObject object = designer.addSectionObject(
+						autoWire.getQualifiedType(), autoWire.getType());
+				object.setTypeQualifier(autoWire.getQualifier());
+			}
+
+			// Add the section inputs (to be office section inputs)
+			for (String sectionInputName : sectionInputs) {
+				designer.addSectionInput(sectionInputName, null);
+			}
+		}
+	}
+
+	/**
+	 * Adds {@link SupplierSource}.
+	 * 
+	 * @param init
+	 *            {@link SupplierInit}.
+	 */
+	private void addSupplier(SupplierInit init) {
+		DynamicSupplierSource.addSupplier(this.source, init);
+	}
+
+	/**
+	 * Provides the supply for the {@link DynamicSupplierSource}.
+	 */
+	private static interface SupplierInit {
+
+		/**
+		 * Provides the supply.
+		 * 
+		 * @param context
+		 *            {@link SupplierSourceContext}.
+		 * @throws Exception
+		 *             If fails to supply.
+		 */
+		void supply(SupplierSourceContext context) throws Exception;
+	}
+
+	/**
+	 * Dynamic {@link SupplierSource}.
+	 */
+	@TestSource
+	public static class DynamicSupplierSource extends AbstractSupplierSource {
+
+		/**
+		 * Identifier to obtain the appropriate {@link SupplierInit}.
+		 */
+		public static final String PROPERTY_SUPPLIER_IDENTIFIER = "SUPPLIER_ID";
+
+		/**
+		 * {@link SupplierInit} instances by their identifiers.
+		 */
+		private static final Map<Integer, SupplierInit> supplierInits = new HashMap<Integer, SupplierInit>();
+
+		/**
+		 * Setup for the next test.
+		 */
+		public static void reset() {
+			supplierInits.clear();
+		}
+
+		/**
+		 * Adds this to the {@link AutoWireApplication} with the
+		 * {@link SupplierInit}.
+		 * 
+		 * @param application
+		 *            {@link AutoWireApplication}.
+		 * @param init
+		 *            {@link SupplierInit}.
+		 */
+		public static void addSupplier(AutoWireApplication application,
+				SupplierInit init) {
+
+			// Obtain the next identifier (and register init)
+			int identifier = supplierInits.size();
+			supplierInits.put(Integer.valueOf(identifier), init);
+
+			// Add the supplier
+			AutoWireSupplier supplier = application
+					.addSupplier(DynamicSupplierSource.class.getName());
+			supplier.addProperty(PROPERTY_SUPPLIER_IDENTIFIER,
+					String.valueOf(identifier));
+		}
+
+		/*
+		 * ==================== SupplierSource =====================
+		 */
+
+		@Override
+		protected void loadSpecification(SpecificationContext context) {
+			context.addProperty(PROPERTY_SUPPLIER_IDENTIFIER);
+		}
+
+		@Override
+		public void supply(SupplierSourceContext context) throws Exception {
+
+			// Obtain the supplier init
+			Integer identifier = Integer.valueOf(context
+					.getProperty(PROPERTY_SUPPLIER_IDENTIFIER));
+			SupplierInit init = supplierInits.get(identifier);
+			assertNotNull("No init configured for identifier " + identifier,
+					init);
+
+			// Initialise the supplier
+			init.supply(context);
+		}
+	}
+
+	/**
+	 * Type of sourcing for the object.
+	 */
+	private static enum SourceObjectType {
+		RAW, MANAGED_OBJECT, SUPPLIED
+	}
+
+	/**
+	 * Undertakes the wiring dependency testing.
+	 */
+	private void doWireDependencyTest(SourceObjectType usedType,
+			String dependencyQualifier, SourceObjectType dependencyType,
+			String typeQualifier) throws Exception {
+
+		final Class<?> usedClass = MockRawType.class;
+		final Class<?> dependencyClass = Connection.class;
+
+		// Add the objects
+		Object usedObject = this.addSourceObject(usedClass, usedType, null);
+		Object dependencyObject = this.addSourceObject(dependencyClass,
+				dependencyType, typeQualifier);
+
+		// Only used (dependency should also be loaded)
+		this.addUsedAutoWiring(new AutoWire(usedClass));
+
+		// Record
+		this.recordTeam();
+		this.recordSourceObjectType(usedObject, usedType);
+		this.recordSourceObjectType(dependencyObject, dependencyType);
+		this.recordOffice();
+		this.recordSourceObject(usedObject, usedClass, dependencyQualifier,
+				usedType, "dependency", dependencyClass, typeQualifier);
+		this.recordSourceObject(dependencyObject, dependencyClass, null,
+				dependencyType, null, null, null);
+		this.recordLinkManagedObjectDependency(new AutoWire(usedClass),
+				"dependency",
+				new AutoWire(typeQualifier, dependencyClass.getName()));
+
+		// Test
+		this.replayMockObjects();
+		this.doSourceOfficeFloor();
+		this.verifyMockObjects();
+	}
+
+	/**
+	 * Adds the source object.
+	 * 
+	 * @param clazz
+	 *            {@link Class} of the object.
+	 * @param sourceType
+	 *            {@link SourceObjectType}.
+	 * @param qualifier
+	 *            Type qualifier for the object.
+	 * @return Raw Object, {@link AutoWireObject} or {@link ManagedObjectSource}
+	 *         based on {@link SourceObjectType}.
+	 */
+	private Object addSourceObject(Class<?> clazz, SourceObjectType sourceType,
+			String qualifier) {
+
+		final AutoWire autoWire = new AutoWire(qualifier, clazz.getName());
+
+		// Load based on source type
+		switch (sourceType) {
+		case RAW:
+			// Add and return the raw object
+			Object rawObject = this.createMock(clazz);
+			this.source.addObject(rawObject, autoWire);
+			return rawObject;
+
+		case MANAGED_OBJECT:
+			// Add and return the managed object
+			AutoWireObject object = this.source.addManagedObject(
+					ClassManagedObjectSource.class.getName(), null, autoWire);
+			object.addProperty(
+					ClassManagedObjectSource.CLASS_NAME_PROPERTY_NAME,
+					clazz.getName());
+			return object;
+
+		case SUPPLIED:
+			// Add and return the supplied managed object
+			final MockTypeManagedObjectSource supplied = new MockTypeManagedObjectSource(
+					clazz);
+			this.addSupplier(new SupplierInit() {
+				@Override
+				public void supply(SupplierSourceContext context)
+						throws Exception {
+					context.addManagedObject(supplied, null, autoWire);
+				}
+			});
+			return supplied;
+
+		default:
+			fail("Unknown source type");
+			return null;
+		}
+	}
+
+	/**
+	 * Records the type for the object.
+	 * 
+	 * @param object
+	 *            Raw Object, {@link AutoWireObject} or <code>null</code>.
+	 * @param sourceType
+	 *            {@link SourceObjectType}.
+	 */
+	private void recordSourceObjectType(Object object,
+			SourceObjectType sourceType) {
+		switch (sourceType) {
+		case RAW:
+			// Record raw object type
+			this.recordRawObjectType(object);
+			break;
+
+		case MANAGED_OBJECT:
+			// Record managed object type
+			AutoWireObject autoWireObject = (AutoWireObject) object;
+			this.recordManagedObjectType(autoWireObject);
+			break;
+
+		case SUPPLIED:
+			// Type loaded without mocks
+			break;
+
+		default:
+			fail("Unknown source type");
+		}
+	}
+
+	/**
+	 * Records the source object.
+	 */
+	private void recordSourceObject(Object object, Class<?> objectType,
+			String typeQualifier, SourceObjectType sourceType,
+			String dependencyName, Class<?> dependencyType,
+			String dependencyQualifier) {
+
+		// Create the listing for the dependency
+		Object[] dependencyNameAutoWirePairing;
+		if (dependencyName == null) {
+			// No dependencies
+			dependencyNameAutoWirePairing = new Object[0];
+		} else {
+			// Provide dependency
+			dependencyNameAutoWirePairing = new Object[] { dependencyName,
+					new AutoWire(dependencyQualifier, dependencyType.getName()) };
+		}
+
+		final AutoWire autoWire = new AutoWire(typeQualifier,
+				objectType.getName());
+		OfficeFloorManagedObjectSource mos;
+
+		// Record source object
+		switch (sourceType) {
+		case RAW:
+			// Record adding raw object
+			this.recordRawObject(object, autoWire);
+			assertNull("Raw object can not have dependencies", dependencyName);
+			break;
+
+		case MANAGED_OBJECT:
+			// Record adding managed object
+			mos = this.recordManagedObjectSource(autoWire,
+					ClassManagedObjectSource.class, 0, 0,
+					ClassManagedObjectSource.CLASS_NAME_PROPERTY_NAME,
+					objectType.getName());
+			this.recordManagedObject(mos, autoWire);
+			AutoWireObject autoWireObject = (AutoWireObject) object;
+			this.recordManagedObjectDependencies(autoWireObject,
+					dependencyNameAutoWirePairing);
+			break;
+
+		case SUPPLIED:
+			// Record adding supplied managed object
+			MockTypeManagedObjectSource mosSource = (MockTypeManagedObjectSource) object;
+			mos = this.recordManagedObjectSource(autoWire, mosSource, 0, 0);
+			this.recordManagedObject(mos, autoWire);
+
+			// Add dependency (if required)
+			if (dependencyName != null) {
+				// Type should only be loaded in sourcing OfficeFloor.
+				// Therefore type should not be loaded, and ok to define here.
+				mosSource.addDependency(dependencyName, dependencyType, null);
+			}
+			break;
+
+		default:
+			fail("Unknown source type");
+		}
+	}
+
+	/**
 	 * Sources the {@link OfficeFloor} for the {@link AutoWireApplication}.
 	 */
 	private void doSourceOfficeFloor() throws Exception {
+
+		// Setup section for used auto-wiring
+		DynamicSectionSource.setup(this.source);
+
+		// Source the OfficeFloor
 		((OfficeFloorSource) this.source).sourceOfficeFloor(this.deployer,
 				this.context);
 	}
@@ -1184,9 +2217,11 @@ public class AutoWireOfficeFloorSourceTest extends OfficeFrameTestCase {
 
 	/**
 	 * Records the {@link Office}.
+	 * 
+	 * @return {@link DeployedOffice}.
 	 */
-	private void recordOffice() {
-		this.recordOffice(this.team);
+	private DeployedOffice recordOffice() {
+		return this.recordOffice(this.team);
 	}
 
 	/**
@@ -1194,8 +2229,9 @@ public class AutoWireOfficeFloorSourceTest extends OfficeFrameTestCase {
 	 * 
 	 * @param defaultTeam
 	 *            Default {@link Team}.
+	 * @return {@link DeployedOffice}.
 	 */
-	private void recordOffice(OfficeFloorTeam defaultTeam) {
+	private DeployedOffice recordOffice(OfficeFloorTeam defaultTeam) {
 
 		// Record the office
 		this.recordReturn(this.deployer, this.deployer.addDeployedOffice(
@@ -1218,6 +2254,9 @@ public class AutoWireOfficeFloorSourceTest extends OfficeFrameTestCase {
 		this.recordReturn(this.office,
 				this.office.getDeployedOfficeTeam("team"), officeTeam);
 		this.deployer.link(officeTeam, defaultTeam);
+
+		// Return the office
+		return this.office;
 	}
 
 	/**
@@ -1269,10 +2308,9 @@ public class AutoWireOfficeFloorSourceTest extends OfficeFrameTestCase {
 	private boolean isRawObjectMatcherSpecified = false;
 
 	/**
-	 * Records raw object dependency.
+	 * Records raw object.
 	 */
-	private void recordRawObjectDependency(Object dependency,
-			AutoWire... autoWiring) {
+	private void recordRawObject(Object dependency, AutoWire... autoWiring) {
 
 		final OfficeFloorManagedObjectSource source = this
 				.createMock(OfficeFloorManagedObjectSource.class);
@@ -1310,6 +2348,28 @@ public class AutoWireOfficeFloorSourceTest extends OfficeFrameTestCase {
 	 */
 	private OfficeFloorManagedObjectSource recordManagedObjectSource(
 			AutoWire mosName, Class<?> managedObjectSourceClass, int typeIndex,
+			long timeout, String... propertyNameValues) {
+		return this.recordManagedObjectSource(mosName,
+				managedObjectSourceClass, null, typeIndex, timeout,
+				propertyNameValues);
+	}
+
+	/**
+	 * Records a {@link ManagedObjectSource}.
+	 */
+	private OfficeFloorManagedObjectSource recordManagedObjectSource(
+			AutoWire mosName, ManagedObjectSource<?, ?> managedObjectSource,
+			int typeIndex, long timeout, String... propertyNameValues) {
+		return this.recordManagedObjectSource(mosName, null,
+				managedObjectSource, typeIndex, timeout, propertyNameValues);
+	}
+
+	/**
+	 * Records a {@link ManagedObjectSource}.
+	 */
+	private OfficeFloorManagedObjectSource recordManagedObjectSource(
+			AutoWire mosName, Class<?> managedObjectSourceClass,
+			ManagedObjectSource<?, ?> managedObjectSource, int typeIndex,
 			long timeout, String... propertyNameValues) {
 
 		final OfficeFloorManagedObjectSource source = this
@@ -1491,9 +2551,9 @@ public class AutoWireOfficeFloorSourceTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Records a {@link ManagedObject} dependency.
+	 * Records linking a {@link ManagedObject} dependency.
 	 */
-	private void recordManagedObjectDependency(AutoWire autoWire,
+	private void recordLinkManagedObjectDependency(AutoWire autoWire,
 			String managedObjectDependencyName, AutoWire dependencyAutoWire) {
 
 		// Obtain the managed object
@@ -1636,8 +2696,9 @@ public class AutoWireOfficeFloorSourceTest extends OfficeFrameTestCase {
 	 *            properties.
 	 * @param autoWiring
 	 *            {@link AutoWire} instances.
+	 * @return {@link OfficeFloorTeam}.
 	 */
-	private void recordTeam(String[] propertyNameValuePairs,
+	private OfficeFloorTeam recordTeam(String[] propertyNameValuePairs,
 			AutoWire... autoWiring) {
 
 		// Base name of first auto-wire
@@ -1669,6 +2730,9 @@ public class AutoWireOfficeFloorSourceTest extends OfficeFrameTestCase {
 			// Register the team
 			this.teams.put(autoWire, officeFloorTeam);
 		}
+
+		// Return the team
+		return officeFloorTeam;
 	}
 
 	/**

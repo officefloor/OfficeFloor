@@ -27,14 +27,16 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+import javax.sql.DataSource;
 import javax.transaction.xa.XAResource;
+
+import org.junit.Ignore;
 
 import net.officefloor.autowire.AutoWire;
 import net.officefloor.autowire.AutoWireGovernance;
 import net.officefloor.autowire.AutoWireResponsibility;
 import net.officefloor.autowire.AutoWireSection;
 import net.officefloor.autowire.AutoWireSectionFactory;
-import net.officefloor.autowire.impl.AutoWireOfficeSource;
 import net.officefloor.compile.governance.GovernanceType;
 import net.officefloor.compile.impl.structure.OfficeObjectNodeImpl;
 import net.officefloor.compile.internal.structure.OfficeObjectNode;
@@ -77,6 +79,7 @@ import net.officefloor.plugin.work.clazz.Qualifier;
  * 
  * @author Daniel Sagenschneider
  */
+@Ignore("TODO provide Used AutoWire instances")
 public class AutoWireOfficeSourceTest extends OfficeFrameTestCase {
 
 	/**
@@ -396,7 +399,7 @@ public class AutoWireOfficeSourceTest extends OfficeFrameTestCase {
 	/**
 	 * Ensure dependency.
 	 */
-	public void testDependency() throws Exception {
+	public void testOfficeObject() throws Exception {
 
 		final String SECTION = "Section";
 
@@ -418,12 +421,19 @@ public class AutoWireOfficeSourceTest extends OfficeFrameTestCase {
 		this.replayMockObjects();
 		source.sourceOffice(this.architect, this.context);
 		this.verifyMockObjects();
+
+		// Validate using auto-wire
+		AutoWire[] usedAutoWiring = source.getUsedAutoWiring();
+		assertEquals("Should only be one used auto-wiring", 1,
+				usedAutoWiring.length);
+		assertEquals("Incorrect used auto-wire",
+				new AutoWire(Connection.class), usedAutoWiring[0]);
 	}
 
 	/**
 	 * Ensure dependency with qualified type.
 	 */
-	public void testDependencyWithQualifiedType() throws Exception {
+	public void testOfficeObjectWithQualifiedType() throws Exception {
 
 		final String SECTION = "Section";
 
@@ -461,13 +471,23 @@ public class AutoWireOfficeSourceTest extends OfficeFrameTestCase {
 		this.replayMockObjects();
 		source.sourceOffice(this.architect, this.context);
 		this.verifyMockObjects();
+
+		// Validate using auto-wire
+		AutoWire[] usedAutoWiring = source.getUsedAutoWiring();
+		assertEquals("All auto-wiring should be used", 3, usedAutoWiring.length);
+		assertEquals("Incorrect first used auto-wire", qualifiedConnection,
+				usedAutoWiring[0]);
+		assertEquals("Incorrect second used auto-wire", unqualifiedConnection,
+				usedAutoWiring[1]);
+		assertEquals("Incorrect third used auto-wire", qualifiedString,
+				usedAutoWiring[2]);
 	}
 
 	/**
 	 * Ensure able to have qualified dependency fall back to using unqualified
 	 * dependency (should no matching qualified dependency be available).
 	 */
-	public void testFallBackToUnqualifiedDependency() throws Exception {
+	public void testFallBackToUnqualifiedOfficeObject() throws Exception {
 
 		final String SECTION = "Section";
 
@@ -494,12 +514,19 @@ public class AutoWireOfficeSourceTest extends OfficeFrameTestCase {
 		this.replayMockObjects();
 		source.sourceOffice(this.architect, this.context);
 		this.verifyMockObjects();
+
+		// Validate using auto-wire
+		AutoWire[] usedAutoWiring = source.getUsedAutoWiring();
+		assertEquals("Should have used auto-wiring", 1, usedAutoWiring.length);
+		assertEquals("Incorrect used auto-wire",
+				new AutoWire(Connection.class), usedAutoWiring[0]);
+
 	}
 
 	/**
 	 * Ensure issue if no matching dependency available.
 	 */
-	public void testNoAvailableAutoWireDependency() throws Exception {
+	public void testNoAvailableAutoWireOfficeObject() throws Exception {
 
 		final String SECTION = "SECTION";
 		final OfficeSectionObject object = this
@@ -540,6 +567,47 @@ public class AutoWireOfficeSourceTest extends OfficeFrameTestCase {
 		this.replayMockObjects();
 		source.sourceOffice(this.architect, this.context);
 		this.verifyMockObjects();
+
+		// Validate no used auto-wire
+		AutoWire[] usedAutoWiring = source.getUsedAutoWiring();
+		assertEquals("Should be no used auto-wiring", 0, usedAutoWiring.length);
+	}
+
+	/**
+	 * Ensure no used {@link OfficeObject} instances.
+	 */
+	public void testNoUsedOfficeObjects() throws Exception {
+
+		final String SECTION = "Section";
+
+		// Create and configure the source
+		AutoWireOfficeSource source = new AutoWireOfficeSource();
+		this.addSection(source, SECTION);
+
+		// Add various available auto-wiring that will not be used
+		source.addAvailableAutoWire(new AutoWire(Connection.class));
+		source.addAvailableAutoWire(new AutoWire("QUALIFIED", Connection.class
+				.getName()));
+		source.addAvailableAutoWire(new AutoWire(String.class));
+		source.addAvailableAutoWire(new AutoWire(Integer.class));
+		source.addAvailableAutoWire(new AutoWire(DataSource.class));
+
+		// Record creating the section
+		this.recordTeam();
+		this.recordOfficeSection(SECTION);
+		this.recordSectionObjects(SECTION);
+		this.recordSectionInputs(SECTION);
+		this.recordSectionOutputs(SECTION);
+		this.recordSubSections(SECTION);
+
+		// Test
+		this.replayMockObjects();
+		source.sourceOffice(this.architect, this.context);
+		this.verifyMockObjects();
+
+		// Validate no used auto-wire
+		assertEquals("Should be no used auto-wiring", 0,
+				source.getUsedAutoWiring().length);
 	}
 
 	/**
