@@ -19,8 +19,8 @@ package net.officefloor.autowire.supplier;
 
 import net.officefloor.autowire.AutoWire;
 import net.officefloor.autowire.AutoWireApplication;
-import net.officefloor.compile.integrate.managedobject.CompileOfficeFloorManagedObjectTest.InputManagedObject;
 import net.officefloor.compile.managedobject.ManagedObjectFlowType;
+import net.officefloor.compile.spi.officefloor.OfficeFloorInputManagedObject;
 import net.officefloor.frame.internal.structure.ProcessState;
 import net.officefloor.frame.spi.team.Team;
 import net.officefloor.plugin.section.clazz.ManagedObject;
@@ -43,14 +43,15 @@ public interface SuppliedManagedObjectType {
 
 	/**
 	 * <p>
-	 * Indicates if this is an {@link InputManagedObject}.
+	 * Indicates if this is to be an {@link OfficeFloorInputManagedObject}.
 	 * <p>
-	 * {@link InputManagedObject} instances are always loaded as they may
-	 * potentially not be depended on by {@link AutoWire} but may trigger
+	 * {@link OfficeFloorInputManagedObject} instances are always loaded as they
+	 * may potentially not be depended on by {@link AutoWire} but may trigger
 	 * {@link ProcessState}, so must be loaded to ensure all inputs are
 	 * triggered for the {@link AutoWireApplication}.
 	 * 
-	 * @return <code>true</code> if this is an {@link InputManagedObject}.
+	 * @return <code>true</code> if this is an
+	 *         {@link OfficeFloorInputManagedObject}.
 	 */
 	boolean isInputManagedObject();
 
