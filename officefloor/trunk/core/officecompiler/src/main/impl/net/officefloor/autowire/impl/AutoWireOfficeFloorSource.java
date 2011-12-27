@@ -37,9 +37,11 @@ import net.officefloor.autowire.AutoWireOfficeFloor;
 import net.officefloor.autowire.AutoWireResponsibility;
 import net.officefloor.autowire.AutoWireSection;
 import net.officefloor.autowire.AutoWireSectionFactory;
+import net.officefloor.autowire.AutoWireSupplier;
 import net.officefloor.autowire.AutoWireTeam;
 import net.officefloor.autowire.ManagedObjectSourceWirer;
 import net.officefloor.autowire.ManagedObjectSourceWirerContext;
+import net.officefloor.autowire.supplier.SupplierLoader;
 import net.officefloor.compile.OfficeFloorCompiler;
 import net.officefloor.compile.impl.OfficeFloorCompilerAdapter;
 import net.officefloor.compile.impl.issues.FailCompilerIssues;
@@ -321,6 +323,20 @@ public class AutoWireOfficeFloorSource extends AbstractOfficeFloorSource
 	}
 
 	@Override
+	public SupplierLoader getSupplierLoader() {
+		// TODO implement AutoWireApplication.getSupplierLoader
+		throw new UnsupportedOperationException(
+				"TODO implement AutoWireApplication.getSupplierLoader");
+	}
+
+	@Override
+	public AutoWireSupplier addSupplier(String supplierSourceClassName) {
+		// TODO implement AutoWireApplication.addSupplier
+		throw new UnsupportedOperationException(
+				"TODO implement AutoWireApplication.addSupplier");
+	}
+
+	@Override
 	public boolean isObjectAvailable(AutoWire autoWire) {
 
 		// Determine if the auto wire is available
@@ -447,6 +463,10 @@ public class AutoWireOfficeFloorSource extends AbstractOfficeFloorSource
 			team = deployer.addTeam("team",
 					ProcessContextTeamSource.class.getName());
 		}
+
+		// TODO obtain the listing of all used AutoWireObjects
+
+		// TODO filter to just the used AutoWireObjects
 
 		// Load extension interfaces for object types
 		for (AutoWireContext objectContext : this.objectContexts) {

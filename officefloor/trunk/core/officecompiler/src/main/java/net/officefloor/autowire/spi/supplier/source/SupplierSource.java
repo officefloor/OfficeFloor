@@ -53,7 +53,10 @@ public interface SupplierSource {
 	 * 
 	 * @param context
 	 *            {@link SupplierSourceContext}.
+	 * @throws Exception
+	 *             If fails to provide supply of {@link ManagedObject}
+	 *             instances.
 	 */
-	void supply(SupplierSourceContext context);
+	void supply(SupplierSourceContext context) throws Exception;
 
 }

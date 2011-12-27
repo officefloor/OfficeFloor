@@ -27,6 +27,7 @@ import java.util.Map;
 import java.util.Set;
 
 import net.officefloor.autowire.AutoWire;
+import net.officefloor.autowire.AutoWireApplication;
 import net.officefloor.autowire.AutoWireGovernance;
 import net.officefloor.autowire.AutoWireResponsibility;
 import net.officefloor.autowire.AutoWireSection;
@@ -353,6 +354,22 @@ public class AutoWireOfficeSource extends AbstractOfficeSource {
 	}
 
 	/**
+	 * <p>
+	 * Obtains the used {@link AutoWire}.
+	 * <p>
+	 * This allows identifying only the {@link AutoWire} instances required so
+	 * that a potential wrapping {@link AutoWireApplication} need only load the
+	 * appropriate {@link ManagedObject} instances.
+	 * 
+	 * @return Used {@link AutoWire} instances.
+	 */
+	public AutoWire[] getUsedAutoWiring() {
+		// TODO implement
+		throw new UnsupportedOperationException(
+				"TODO implement getUsedAutoWire");
+	}
+
+	/**
 	 * Adds an {@link OfficeTeam} responsible for executing {@link Task}
 	 * instances that has an object dependency of the input type.
 	 * 
@@ -608,7 +625,7 @@ public class AutoWireOfficeSource extends AbstractOfficeSource {
 				officeSection.addGovernance(officeGovernance);
 			}
 
-			// Obtain the auto wiring for the extension interface
+			// Govern the Office Objects (via auto-wiring extensions)
 			List<AutoWire> autoWiring = this.extensionInterfaceToAutoWiring
 					.get(extensionInterface);
 			if (autoWiring != null) {
