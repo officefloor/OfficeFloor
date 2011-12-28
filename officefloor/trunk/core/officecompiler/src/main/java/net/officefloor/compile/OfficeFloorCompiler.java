@@ -23,6 +23,7 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.ServiceLoader;
 
+import net.officefloor.autowire.supplier.SupplierLoader;
 import net.officefloor.compile.administrator.AdministratorLoader;
 import net.officefloor.compile.governance.GovernanceLoader;
 import net.officefloor.compile.impl.OfficeFloorCompilerAdapter;
@@ -632,6 +633,13 @@ public abstract class OfficeFloorCompiler {
 	 * @return {@link ManagedObjectLoader}.
 	 */
 	public abstract ManagedObjectLoader getManagedObjectLoader();
+
+	/**
+	 * Obtains the {@link SupplierLoader}.
+	 * 
+	 * @return {@link SupplierLoader}.
+	 */
+	public abstract SupplierLoader getSupplierLoader();
 
 	/**
 	 * Obtains the {@link GovernanceLoader}.

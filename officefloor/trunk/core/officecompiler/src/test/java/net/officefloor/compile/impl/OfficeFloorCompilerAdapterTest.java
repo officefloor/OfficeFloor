@@ -23,10 +23,16 @@ import java.io.IOException;
 import java.net.URL;
 import java.net.URLClassLoader;
 
+import org.junit.Ignore;
+
 import net.officefloor.autowire.AutoWire;
 import net.officefloor.autowire.AutoWireManagement;
 import net.officefloor.autowire.AutoWireOfficeFloor;
 import net.officefloor.autowire.impl.AutoWireOfficeFloorSource;
+import net.officefloor.autowire.spi.supplier.source.SupplierSource;
+import net.officefloor.autowire.spi.supplier.source.SupplierSourceContext;
+import net.officefloor.autowire.spi.supplier.source.impl.AbstractSupplierSource;
+import net.officefloor.autowire.supplier.SupplierLoader;
 import net.officefloor.compile.OfficeFloorCompiler;
 import net.officefloor.compile.administrator.AdministratorLoader;
 import net.officefloor.compile.governance.GovernanceLoader;
@@ -65,6 +71,7 @@ import net.officefloor.plugin.work.clazz.ClassWorkSource;
  * 
  * @author Daniel Sagenschneider
  */
+@Ignore("TODO implement OfficeFloorCompilerImpl.getSupplierLoader()")
 public class OfficeFloorCompilerAdapterTest extends OfficeFrameTestCase {
 
 	/**
@@ -327,6 +334,37 @@ public class OfficeFloorCompilerAdapterTest extends OfficeFrameTestCase {
 				.loadSpecification(ClassManagedObjectSource.class);
 		assertEquals("Should have a property", 1,
 				specification.getPropertyNames().length);
+	}
+
+	/**
+	 * Tests the {@link SupplierLoader}.
+	 */
+	public void testSupplierLoader() {
+		SupplierLoader loader = this.compiler.getSupplierLoader();
+		PropertyList specification = loader
+				.loadSpecification(MockSupplierSource.class);
+		assertEquals("Should have a property", 1,
+				specification.getPropertyNames().length);
+	}
+
+	/**
+	 * Mock {@link SupplierSource}.
+	 */
+	public static class MockSupplierSource extends AbstractSupplierSource {
+
+		/*
+		 * ===================== SupplierSource ====================
+		 */
+
+		@Override
+		protected void loadSpecification(SpecificationContext context) {
+			context.addProperty("TEST");
+		}
+
+		@Override
+		public void supply(SupplierSourceContext context) throws Exception {
+			fail("Should not be invoked in checking specification");
+		}
 	}
 
 	/**

@@ -22,7 +22,9 @@ import java.util.HashMap;
 import java.util.Map;
 
 import junit.framework.TestCase;
-
+import net.officefloor.autowire.spi.supplier.source.SupplierSource;
+import net.officefloor.autowire.spi.supplier.source.SupplierSourceContext;
+import net.officefloor.autowire.spi.supplier.source.impl.AbstractSupplierSource;
 import net.officefloor.compile.OfficeFloorCompiler;
 import net.officefloor.compile.impl.properties.PropertyListImpl;
 import net.officefloor.compile.internal.structure.InputManagedObjectNode;
@@ -49,6 +51,7 @@ import net.officefloor.compile.spi.office.source.OfficeSourceSpecification;
 import net.officefloor.compile.spi.officefloor.DeployedOffice;
 import net.officefloor.compile.spi.officefloor.OfficeFloorDeployer;
 import net.officefloor.compile.spi.officefloor.OfficeFloorManagedObjectSource;
+import net.officefloor.compile.spi.officefloor.OfficeFloorSupplier;
 import net.officefloor.compile.spi.officefloor.OfficeFloorTeam;
 import net.officefloor.compile.spi.officefloor.source.OfficeFloorSource;
 import net.officefloor.compile.spi.officefloor.source.OfficeFloorSourceContext;
@@ -151,6 +154,7 @@ public abstract class AbstractStructureTestCase extends OfficeFrameTestCase {
 	protected void setUp() throws Exception {
 		MakerSectionSource.reset();
 		MakerManagedObjectSource.reset();
+		MakerSupplierSource.reset();
 		MakerWorkSource.reset();
 		MakerGovernanceSource.reset();
 		MakerAdministratorSource.reset();
@@ -537,6 +541,33 @@ public abstract class AbstractStructureTestCase extends OfficeFrameTestCase {
 			moSource.addProperty(property.getName(), property.getValue());
 		}
 		return moSource;
+	}
+
+	/**
+	 * Adds an {@link OfficeFloorSupplier} to the {@link OfficeFloorDeployer}.
+	 * 
+	 * @param officeFloorDeployer
+	 *            {@link OfficeFloorDeployer}.
+	 * @param supplierName
+	 *            Name of the {@link OfficeFloorSupplier}.
+	 * @param maker
+	 *            {@link SupplierMaker}.
+	 * @return {@link OfficeFloorSupplier}.
+	 */
+	protected OfficeFloorSupplier addSupplier(
+			OfficeFloorDeployer officeFloorDeployer, String supplierName,
+			SupplierMaker maker) {
+
+		// Register the supplier maker
+		PropertyList propertyList = MakerSupplierSource.register(maker);
+
+		// Add and return the supplier
+		OfficeFloorSupplier supplier = officeFloorDeployer.addSupplier(
+				supplierName, MakerSupplierSource.class.getName());
+		for (Property property : propertyList) {
+			supplier.addProperty(property.getName(), property.getValue());
+		}
+		return supplier;
 	}
 
 	/**
@@ -1121,6 +1152,99 @@ public abstract class AbstractStructureTestCase extends OfficeFrameTestCase {
 							return null;
 						}
 					});
+		}
+	}
+
+	/**
+	 * Makes the {@link OfficeFloorSupplier}.
+	 */
+	protected static interface SupplierMaker {
+
+		/**
+		 * As per {@link SupplierSource}.
+		 * 
+		 * @param context
+		 *            {@link SupplierSourceContext}.
+		 * @throws Exception
+		 *             If fails to supply the {@link ManagedObjectSource}
+		 *             instances.
+		 */
+		void supply(SupplierSourceContext context) throws Exception;
+	}
+
+	/**
+	 * Maker {@link SupplierSource}.
+	 */
+	@TestSource
+	public static class MakerSupplierSource extends AbstractSupplierSource {
+
+		/**
+		 * Name of property holding the identifier for the {@link SupplierMaker}
+		 * .
+		 */
+		private static final String MAKER_IDENTIFIER_PROPERTY_NAME = "supplier.maker";
+
+		/**
+		 * {@link SupplierMaker} instances by their identifiers.
+		 */
+		private static Map<String, SupplierMaker> supplierMakers;
+
+		/**
+		 * Clears the {@link SupplierMaker} instances for the next test.
+		 */
+		public static void reset() {
+			supplierMakers = new HashMap<String, SupplierMaker>();
+		}
+
+		/**
+		 * Registers a {@link SupplierMaker}.
+		 * 
+		 * @param maker
+		 *            {@link SupplierMaker}.
+		 * @return {@link PropertyList}.
+		 */
+		public static PropertyList register(SupplierMaker maker) {
+
+			// Ensure have a maker
+			if (maker == null) {
+				maker = new SupplierMaker() {
+					@Override
+					public void supply(SupplierSourceContext context)
+							throws Exception {
+						// No managed objects
+					}
+				};
+			}
+
+			// Register the managed object maker
+			String identifier = String.valueOf(supplierMakers.size());
+			supplierMakers.put(identifier, maker);
+
+			// Return the property list
+			return new PropertyListImpl(MAKER_IDENTIFIER_PROPERTY_NAME,
+					identifier);
+		}
+
+		/*
+		 * ================== SupplierSource =========================
+		 */
+
+		@Override
+		protected void loadSpecification(SpecificationContext context) {
+			fail("Should not require specification");
+		}
+
+		@Override
+		public void supply(SupplierSourceContext context) throws Exception {
+
+			// Obtain the supplier maker
+			String identifier = context
+					.getProperty(MAKER_IDENTIFIER_PROPERTY_NAME);
+			SupplierMaker maker = supplierMakers.get(identifier);
+			assertNotNull("Unknown supplier maker " + identifier, maker);
+
+			// Make the supplier
+			maker.supply(context);
 		}
 	}
 

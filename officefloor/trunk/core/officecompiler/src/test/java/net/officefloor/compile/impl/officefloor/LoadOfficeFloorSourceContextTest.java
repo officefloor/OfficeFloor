@@ -22,6 +22,10 @@ import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.util.Properties;
 
+import org.junit.Ignore;
+
+import net.officefloor.autowire.impl.supplier.MockLoadSupplierSource;
+import net.officefloor.autowire.supplier.SupplierType;
 import net.officefloor.compile.impl.managedobject.MockLoadManagedObject;
 import net.officefloor.compile.impl.office.MockLoadOfficeSource;
 import net.officefloor.compile.issues.CompilerIssues.LocationType;
@@ -43,6 +47,7 @@ import net.officefloor.plugin.managedobject.clazz.ClassManagedObjectSource;
  * 
  * @author Daniel Sagenschneider
  */
+@Ignore("TODO implement SupplierLoaderImpl")
 public class LoadOfficeFloorSourceContextTest extends
 		AbstractOfficeFloorTestCase {
 
@@ -363,6 +368,62 @@ public class LoadOfficeFloorSourceContextTest extends
 
 				// Should not reach this point
 				fail("Should not successfully load managed object type");
+			}
+		});
+	}
+
+	/**
+	 * Ensure can obtain the {@link SupplierType}.
+	 */
+	public void testLoadSupplierType() {
+
+		// Record
+		this.record_initiateOfficeFloorBuilder();
+
+		// Test
+		this.loadOfficeFloor(true, new OfficeFloorMaker() {
+			@Override
+			public void make(OfficeFloorMakerContext context) {
+				OfficeFloorSourceContext ofsContext = context.getContext();
+
+				// Load the supplier type
+				PropertyList properties = ofsContext.createPropertyList();
+				properties.addProperty(MockLoadSupplierSource.PROPERTY_TEST)
+						.setValue(MockLoadSupplierSource.PROPERTY_TEST);
+				SupplierType supplierType = ofsContext.loadSupplierType(
+						MockLoadSupplierSource.class.getName(), properties);
+
+				// Ensure correct supplier type
+				MockLoadSupplierSource.assertSupplierType(supplierType);
+			}
+		});
+	}
+
+	/**
+	 * Ensure issue if fails to load the {@link SupplierType}.
+	 */
+	public void testFailLoadingSupplierType() {
+
+		// Ensure issue in not loading supplier type
+		this.issues.addIssue(LocationType.OFFICE_FLOOR, OFFICE_FLOOR_LOCATION,
+				AssetType.MANAGED_OBJECT, "loadSupplierType",
+				"Missing property 'TEST'");
+		this.record_officefloor_issue("Failure loading SupplierType from source "
+				+ MockLoadSupplierSource.class.getName());
+
+		// Fail to load the supplier type
+		this.loadOfficeFloor(false, new OfficeFloorMaker() {
+			@Override
+			public void make(OfficeFloorMakerContext context) {
+				OfficeFloorSourceContext ofsContext = context.getContext();
+
+				// Do not specify property causing failure to load type
+				PropertyList properties = ofsContext.createPropertyList();
+				ofsContext.loadSupplierType(
+						MockLoadSupplierSource.class.getName(), properties);
+
+				// Should not reach this point
+				fail("Should not successfully load supplier type");
 			}
 		});
 	}

@@ -29,9 +29,9 @@ import java.util.Map;
 import java.util.Set;
 
 import net.officefloor.autowire.AutoWire;
-import net.officefloor.autowire.AutoWireManagement;
 import net.officefloor.autowire.AutoWireApplication;
 import net.officefloor.autowire.AutoWireGovernance;
+import net.officefloor.autowire.AutoWireManagement;
 import net.officefloor.autowire.AutoWireObject;
 import net.officefloor.autowire.AutoWireOfficeFloor;
 import net.officefloor.autowire.AutoWireResponsibility;
@@ -41,7 +41,6 @@ import net.officefloor.autowire.AutoWireSupplier;
 import net.officefloor.autowire.AutoWireTeam;
 import net.officefloor.autowire.ManagedObjectSourceWirer;
 import net.officefloor.autowire.ManagedObjectSourceWirerContext;
-import net.officefloor.autowire.supplier.SupplierLoader;
 import net.officefloor.compile.OfficeFloorCompiler;
 import net.officefloor.compile.impl.OfficeFloorCompilerAdapter;
 import net.officefloor.compile.impl.issues.FailCompilerIssues;
@@ -320,13 +319,6 @@ public class AutoWireOfficeFloorSource extends AbstractOfficeFloorSource
 
 		// Return the auto wire object
 		return object;
-	}
-
-	@Override
-	public SupplierLoader getSupplierLoader() {
-		// TODO implement AutoWireApplication.getSupplierLoader
-		throw new UnsupportedOperationException(
-				"TODO implement AutoWireApplication.getSupplierLoader");
 	}
 
 	@Override

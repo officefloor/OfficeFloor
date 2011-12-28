@@ -19,26 +19,20 @@
 package net.officefloor.autowire.impl.supplier;
 
 import java.sql.Connection;
-import java.util.Map;
 import java.util.Properties;
 
-import org.junit.Ignore;
-
 import net.officefloor.autowire.AutoWire;
-import net.officefloor.autowire.AutoWireApplication;
 import net.officefloor.autowire.AutoWireObject;
 import net.officefloor.autowire.ManagedObjectSourceWirer;
 import net.officefloor.autowire.ManagedObjectSourceWirerContext;
-import net.officefloor.autowire.impl.AutoWireOfficeFloorSource;
 import net.officefloor.autowire.spi.supplier.source.SupplierSource;
 import net.officefloor.autowire.spi.supplier.source.SupplierSourceContext;
 import net.officefloor.autowire.spi.supplier.source.SupplierSourceSpecification;
 import net.officefloor.autowire.supplier.SuppliedManagedObjectDependencyType;
-import net.officefloor.autowire.supplier.SuppliedManagedObjectFlowType;
-import net.officefloor.autowire.supplier.SuppliedManagedObjectTeamType;
 import net.officefloor.autowire.supplier.SuppliedManagedObjectType;
 import net.officefloor.autowire.supplier.SupplierLoader;
 import net.officefloor.autowire.supplier.SupplierType;
+import net.officefloor.compile.OfficeFloorCompiler;
 import net.officefloor.compile.impl.properties.PropertyListImpl;
 import net.officefloor.compile.issues.CompilerIssues;
 import net.officefloor.compile.properties.Property;
@@ -52,6 +46,8 @@ import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.spi.team.Team;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.managedobject.clazz.ClassManagedObjectSource;
+
+import org.junit.Ignore;
 
 /**
  * Tests loading the {@link SupplierType}.
@@ -320,72 +316,17 @@ public class LoadSupplierTypeTest extends OfficeFrameTestCase {
 	 */
 	public void testComplexManagedObject() {
 
-		// Wirer for minimal configuration
-		final ManagedObjectSourceWirer wirer = new ManagedObjectSourceWirer() {
-			@Override
-			public void wire(ManagedObjectSourceWirerContext context) {
-				context.setInput(true);
-				context.mapFlow("flow", "SECTION", "INPUT");
-				context.mapTeam("team", new AutoWire("SPECIFIC",
-						Connection.class.getName()));
-			}
-		};
-
 		// Load
-		SuppliedManagedObjectType type = this
-				.loadSuppliedManagedObjectType(new Init() {
-					@Override
-					public void supply(SupplierSourceContext context) {
-						MockTypeManagedObjectSource source = new MockTypeManagedObjectSource(
-								Map.class);
-						source.addDependency("dependency", Connection.class,
-								"QUALIFIER");
-						source.addFlow("flow", Integer.class);
-						source.addTeam("team");
-						source.addAsManagedObject(context, wirer);
-					}
-				});
+		SupplierType type = this.loadSupplierType(true, new Init() {
+			@Override
+			public void supply(SupplierSourceContext context) throws Exception {
+				new MockLoadSupplierSource().supply(context);
+			}
+		}, MockLoadSupplierSource.PROPERTY_TEST,
+				MockLoadSupplierSource.PROPERTY_TEST);
 
-		// Validate the managed object type
-		AutoWire[] autoWiring = type.getAutoWiring();
-		assertEquals("Should have auto-wiring", 1, autoWiring.length);
-		assertEquals("Incorrect auto-wire", new AutoWire(Map.class),
-				autoWiring[0]);
-
-		// Validate input managed object
-		assertTrue("Should be input managed object",
-				type.isInputManagedObject());
-
-		// Validate dependencies
-		SuppliedManagedObjectDependencyType[] dependencies = type
-				.getDependencyTypes();
-		assertEquals("Incorrect number of dependencies", 1, dependencies.length);
-		SuppliedManagedObjectDependencyType dependency = dependencies[0];
-		assertEquals("Incorrect dependency name", "dependency",
-				dependency.getDependencyName());
-		assertEquals("Incorrect dependency type", Connection.class.getName(),
-				dependency.getDependencyType());
-		assertEquals("Incorrect dependency qualifier", "QUALIFIER",
-				dependency.getTypeQualifier());
-
-		// Validate flows
-		SuppliedManagedObjectFlowType[] flows = type.getFlowTypes();
-		assertEquals("Incorrect number of flows", 1, flows.length);
-		SuppliedManagedObjectFlowType flow = flows[0];
-		assertEquals("Incorrect flow name", "flow", flow.getFlowName());
-		assertEquals("Incorrect flow section", "SECTION", flow.getSectionName());
-		assertEquals("Incorrect flow section input", "INPUT",
-				flow.getSectionInputName());
-		assertEquals("Incorrect flow argument", Integer.class,
-				flow.getArgumentType());
-
-		// Validate teams
-		SuppliedManagedObjectTeamType[] teams = type.getTeamTypes();
-		assertEquals("Incorrect number of teams", 1, teams.length);
-		SuppliedManagedObjectTeamType team = teams[0];
-		assertEquals("Incorrect team name", "team", team.getTeamName());
-		assertEquals("Incorrect team auto-wire", new AutoWire("SPECIFIC",
-				Connection.class.getName()), team.getTeamAutoWire());
+		// Validate the supplier type
+		MockLoadSupplierSource.assertSupplierType(type);
 	}
 
 	/**
@@ -697,9 +638,10 @@ public class LoadSupplierTypeTest extends OfficeFrameTestCase {
 		}
 
 		// Create the managed object loader and load the managed object type
-		AutoWireApplication application = new AutoWireOfficeFloorSource();
-		application.getOfficeFloorCompiler().setCompilerIssues(this.issues);
-		SupplierLoader supplierLoader = application.getSupplierLoader();
+		OfficeFloorCompiler compiler = OfficeFloorCompiler
+				.newOfficeFloorCompiler(null);
+		compiler.setCompilerIssues(this.issues);
+		SupplierLoader supplierLoader = compiler.getSupplierLoader();
 		MockSupplierSource.init = init;
 		SupplierType supplierType = supplierLoader.loadSupplierType(
 				MockSupplierSource.class, propertyList);
@@ -729,7 +671,7 @@ public class LoadSupplierTypeTest extends OfficeFrameTestCase {
 		 * @param context
 		 *            {@link SupplierSourceContext}.
 		 */
-		void supply(SupplierSourceContext context);
+		void supply(SupplierSourceContext context) throws Exception;
 	}
 
 	/**
