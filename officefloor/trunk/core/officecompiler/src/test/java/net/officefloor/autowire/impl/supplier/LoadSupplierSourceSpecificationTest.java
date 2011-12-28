@@ -20,13 +20,12 @@ package net.officefloor.autowire.impl.supplier;
 
 import org.junit.Ignore;
 
-import net.officefloor.autowire.AutoWireApplication;
-import net.officefloor.autowire.impl.AutoWireOfficeFloorSource;
 import net.officefloor.autowire.spi.supplier.source.SupplierSource;
 import net.officefloor.autowire.spi.supplier.source.SupplierSourceContext;
 import net.officefloor.autowire.spi.supplier.source.SupplierSourceProperty;
 import net.officefloor.autowire.spi.supplier.source.SupplierSourceSpecification;
 import net.officefloor.autowire.supplier.SupplierLoader;
+import net.officefloor.compile.OfficeFloorCompiler;
 import net.officefloor.compile.issues.CompilerIssues;
 import net.officefloor.compile.properties.Property;
 import net.officefloor.compile.properties.PropertyList;
@@ -40,7 +39,7 @@ import net.officefloor.frame.test.OfficeFrameTestCase;
  * 
  * @author Daniel Sagenschneider
  */
-@Ignore("TODO Implement SupplierLoaderImpl")
+@Ignore("TODO implement SupplierLoaderImpl")
 public class LoadSupplierSourceSpecificationTest extends OfficeFrameTestCase {
 
 	/**
@@ -310,9 +309,10 @@ public class LoadSupplierSourceSpecificationTest extends OfficeFrameTestCase {
 			String... propertyNameLabelPairs) {
 
 		// Load the supplier specification specification
-		AutoWireApplication application = new AutoWireOfficeFloorSource();
-		application.getOfficeFloorCompiler().setCompilerIssues(this.issues);
-		SupplierLoader supplierLoader = application.getSupplierLoader();
+		OfficeFloorCompiler compiler = OfficeFloorCompiler
+				.newOfficeFloorCompiler(null);
+		compiler.setCompilerIssues(this.issues);
+		SupplierLoader supplierLoader = compiler.getSupplierLoader();
 		PropertyList propertyList = supplierLoader
 				.loadSpecification(MockSupplierSource.class);
 

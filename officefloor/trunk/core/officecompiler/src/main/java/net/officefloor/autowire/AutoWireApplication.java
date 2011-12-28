@@ -18,7 +18,6 @@
 package net.officefloor.autowire;
 
 import net.officefloor.autowire.spi.supplier.source.SupplierSource;
-import net.officefloor.autowire.supplier.SupplierLoader;
 import net.officefloor.compile.OfficeFloorCompiler;
 import net.officefloor.compile.spi.governance.source.GovernanceSource;
 import net.officefloor.compile.spi.office.OfficeSection;
@@ -177,13 +176,6 @@ public interface AutoWireApplication {
 	 */
 	AutoWireObject addManagedObject(String managedObjectSourceClassName,
 			ManagedObjectSourceWirer wirer, AutoWire... autoWiring);
-
-	/**
-	 * Obtains the {@link SupplierLoader}.
-	 * 
-	 * @return {@link SupplierLoader}.
-	 */
-	SupplierLoader getSupplierLoader();
 
 	/**
 	 * Adds a {@link SupplierSource} to provide {@link ManagedObject} instances

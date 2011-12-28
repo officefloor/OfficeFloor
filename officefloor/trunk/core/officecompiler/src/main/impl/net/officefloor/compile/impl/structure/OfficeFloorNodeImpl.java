@@ -41,6 +41,7 @@ import net.officefloor.compile.spi.officefloor.ManagingOffice;
 import net.officefloor.compile.spi.officefloor.OfficeFloorInputManagedObject;
 import net.officefloor.compile.spi.officefloor.OfficeFloorManagedObject;
 import net.officefloor.compile.spi.officefloor.OfficeFloorManagedObjectSource;
+import net.officefloor.compile.spi.officefloor.OfficeFloorSupplier;
 import net.officefloor.compile.spi.officefloor.OfficeFloorTeam;
 import net.officefloor.compile.spi.section.ManagedObjectDependency;
 import net.officefloor.compile.spi.section.ManagedObjectFlow;
@@ -193,6 +194,14 @@ public class OfficeFloorNodeImpl extends AbstractNode implements
 					+ inputManagedObjectName + " already added");
 		}
 		return inputMo;
+	}
+
+	@Override
+	public OfficeFloorSupplier addSupplier(String supplierName,
+			String supplierSourceClassName) {
+		// TODO implement OfficeFloorDeployer.addSupplier
+		throw new UnsupportedOperationException(
+				"TODO implement OfficeFloorDeployer.addSupplier");
 	}
 
 	@Override

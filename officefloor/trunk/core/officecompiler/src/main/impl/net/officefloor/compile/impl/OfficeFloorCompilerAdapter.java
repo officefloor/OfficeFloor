@@ -23,6 +23,7 @@ import java.util.List;
 
 import net.officefloor.autowire.AutoWire;
 import net.officefloor.autowire.impl.SingletonManagedObjectSource;
+import net.officefloor.autowire.supplier.SupplierLoader;
 import net.officefloor.compile.OfficeFloorCompiler;
 import net.officefloor.compile.administrator.AdministratorLoader;
 import net.officefloor.compile.governance.GovernanceLoader;
@@ -317,6 +318,11 @@ public class OfficeFloorCompilerAdapter extends OfficeFloorCompiler {
 	public ManagedObjectLoader getManagedObjectLoader() {
 		return (ManagedObjectLoader) this.invokeMethod(
 				"getManagedObjectLoader", null);
+	}
+
+	@Override
+	public SupplierLoader getSupplierLoader() {
+		return (SupplierLoader) this.invokeMethod("getSupplierLoader", null);
 	}
 
 	@Override

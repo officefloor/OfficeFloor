@@ -18,6 +18,9 @@
 
 package net.officefloor.compile.spi.officefloor;
 
+import net.officefloor.autowire.AutoWire;
+import net.officefloor.autowire.AutoWireApplication;
+import net.officefloor.autowire.spi.supplier.source.SupplierSource;
 import net.officefloor.compile.spi.office.ManagedObjectTeam;
 import net.officefloor.compile.spi.office.OfficeObject;
 import net.officefloor.compile.spi.office.OfficeTeam;
@@ -85,6 +88,25 @@ public interface OfficeFloorDeployer {
 	 */
 	OfficeFloorInputManagedObject addInputManagedObject(
 			String inputManagedObjectName);
+
+	/**
+	 * <p>
+	 * Adds an {@link OfficeFloorSupplier}.
+	 * <p>
+	 * Please note there is no {@link AutoWire} functionality and this is only
+	 * provided to allow {@link OfficeFloorSource} implementations to take
+	 * advantage of a {@link SupplierSource}.
+	 * 
+	 * @param supplierName
+	 *            Name of the {@link OfficeFloorSupplier}.
+	 * @param supplierSourceClassName
+	 *            Fully qualified class name of the {@link SupplierSource}.
+	 * @return {@link OfficeFloorSupplier}.
+	 * 
+	 * @see AutoWireApplication
+	 */
+	OfficeFloorSupplier addSupplier(String supplierName,
+			String supplierSourceClassName);
 
 	/**
 	 * Adds a {@link DeployedOffice} to the {@link OfficeFloor}.

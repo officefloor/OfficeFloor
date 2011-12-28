@@ -18,6 +18,8 @@
 
 package net.officefloor.compile.spi.officefloor.source;
 
+import net.officefloor.autowire.spi.supplier.source.SupplierSource;
+import net.officefloor.autowire.supplier.SupplierType;
 import net.officefloor.compile.managedobject.ManagedObjectType;
 import net.officefloor.compile.office.OfficeType;
 import net.officefloor.compile.properties.PropertyList;
@@ -91,6 +93,25 @@ public interface OfficeFloorSourceContext extends SourceContext {
 	 */
 	ManagedObjectType<?> loadManagedObjectType(
 			ManagedObjectSource<?, ?> managedObjectSource,
+			PropertyList properties);
+
+	/**
+	 * <p>
+	 * Loads the {@link SupplierType}.
+	 * <p>
+	 * This is to enable obtaining the type information for the
+	 * {@link SupplierSource} to allow reflective configuration by the
+	 * {@link OfficeFloorSource}.
+	 * 
+	 * @param supplierSourceClassName
+	 *            Name of the implementing {@link SupplierSource} class. May
+	 *            also be an alias.
+	 * @param properties
+	 *            {@link PropertyList} to configure the {@link SupplierSource}.
+	 * @return {@link SupplierType} or <code>null</code> if fails to load the
+	 *         {@link SupplierType}.
+	 */
+	SupplierType loadSupplierType(String supplierSourceClassName,
 			PropertyList properties);
 
 	/**

@@ -18,6 +18,7 @@
 
 package net.officefloor.compile.impl.officefloor;
 
+import net.officefloor.autowire.supplier.SupplierType;
 import net.officefloor.compile.impl.properties.PropertyListSourceProperties;
 import net.officefloor.compile.impl.util.LoadTypeError;
 import net.officefloor.compile.internal.structure.NodeContext;
@@ -136,6 +137,14 @@ public class OfficeFloorSourceContextImpl extends SourceContextImpl implements
 
 		// Return the managed object type
 		return managedObjectType;
+	}
+
+	@Override
+	public SupplierType loadSupplierType(String supplierSourceClassName,
+			PropertyList properties) {
+		// TODO implement OfficeFloorSourceContext.loadSupplierType
+		throw new UnsupportedOperationException(
+				"TODO implement OfficeFloorSourceContext.loadSupplierType");
 	}
 
 	@Override

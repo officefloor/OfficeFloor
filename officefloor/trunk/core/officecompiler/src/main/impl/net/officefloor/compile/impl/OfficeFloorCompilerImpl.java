@@ -23,6 +23,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+import net.officefloor.autowire.supplier.SupplierLoader;
 import net.officefloor.compile.OfficeFloorCompiler;
 import net.officefloor.compile.administrator.AdministratorLoader;
 import net.officefloor.compile.governance.GovernanceLoader;
@@ -315,6 +316,13 @@ public class OfficeFloorCompilerImpl extends OfficeFloorCompiler implements
 	@Override
 	public ManagedObjectLoader getManagedObjectLoader() {
 		return new ManagedObjectLoaderImpl(this);
+	}
+
+	@Override
+	public SupplierLoader getSupplierLoader() {
+		// TODO implement OfficeFloorCompiler.getSupplierLoader
+		throw new UnsupportedOperationException(
+				"TODO implement OfficeFloorCompiler.getSupplierLoader");
 	}
 
 	@Override
