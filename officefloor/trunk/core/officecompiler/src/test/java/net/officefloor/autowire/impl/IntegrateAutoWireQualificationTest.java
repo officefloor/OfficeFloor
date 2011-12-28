@@ -29,6 +29,7 @@ import net.officefloor.autowire.impl.AutoWireOfficeFloorSource;
 import net.officefloor.frame.impl.spi.team.PassiveTeamSource;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.section.clazz.ClassSectionSource;
+import net.officefloor.plugin.section.clazz.Parameter;
 import net.officefloor.plugin.work.clazz.Qualifier;
 
 /**
@@ -39,9 +40,17 @@ import net.officefloor.plugin.work.clazz.Qualifier;
 public class IntegrateAutoWireQualificationTest extends OfficeFrameTestCase {
 
 	/**
+	 * Potential failure.
+	 */
+	private static Throwable failure = null;
+
+	/**
 	 * Ensure able to integrate qualified {@link AutoWire}.
 	 */
-	public void testIntegrateQualifiedAutoWire() throws Exception {
+	public void testIntegrateQualifiedAutoWire() throws Throwable {
+
+		// Clear failure to reset to run test
+		failure = null;
 
 		// Mocks
 		final Connection a = this.createSynchronizedMock(Connection.class);
@@ -74,6 +83,11 @@ public class IntegrateAutoWireQualificationTest extends OfficeFrameTestCase {
 
 		// Verify
 		this.verifyMockObjects();
+
+		// Propagate if failure
+		if (failure != null) {
+			throw failure;
+		}
 	}
 
 	/**
@@ -111,7 +125,11 @@ public class IntegrateAutoWireQualificationTest extends OfficeFrameTestCase {
 			assertEquals("Qualified B", "B", b.nativeSQL("b"));
 			assertEquals("Default unqualified C", "C", c.nativeSQL("c"));
 			assertEquals("Unqualified D", "D", d.nativeSQL("d"));
-			assertEquals("Default qualified to be unqualified", c, d);
+			assertSame("Default qualified to be unqualified", c, d);
+		}
+
+		public void handleFailure(@Parameter Throwable ex) {
+			IntegrateAutoWireQualificationTest.failure = ex;
 		}
 	}
 
