@@ -52,8 +52,7 @@ public interface OfficeFloorSupplier {
 	 * Adds an {@link OfficeFloorManagedObjectSource}.
 	 * 
 	 * @param managedObjectSourceName
-	 *            Name of the {@link OfficeFloorManagedObjectSource} (which will
-	 *            be prefixed with the {@link OfficeFloorSupplier} name).
+	 *            Name of the {@link OfficeFloorManagedObjectSource}.
 	 * @param autoWire
 	 *            {@link AutoWire} to identify the
 	 *            {@link SuppliedManagedObjectType}. The {@link AutoWire} must
