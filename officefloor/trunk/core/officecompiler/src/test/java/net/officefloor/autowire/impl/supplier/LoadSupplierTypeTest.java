@@ -35,6 +35,7 @@ import net.officefloor.autowire.supplier.SupplierType;
 import net.officefloor.compile.OfficeFloorCompiler;
 import net.officefloor.compile.impl.properties.PropertyListImpl;
 import net.officefloor.compile.issues.CompilerIssues;
+import net.officefloor.compile.issues.CompilerIssues.LocationType;
 import net.officefloor.compile.properties.Property;
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.frame.api.build.None;
@@ -47,14 +48,11 @@ import net.officefloor.frame.spi.team.Team;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.managedobject.clazz.ClassManagedObjectSource;
 
-import org.junit.Ignore;
-
 /**
  * Tests loading the {@link SupplierType}.
  * 
  * @author Daniel Sagenschneider
  */
-@Ignore("TODO Implement SupplierLoaderImpl")
 public class LoadSupplierTypeTest extends OfficeFrameTestCase {
 
 	/**
@@ -91,7 +89,8 @@ public class LoadSupplierTypeTest extends OfficeFrameTestCase {
 	public void testMissingProperty() {
 
 		// Record missing property
-		this.record_issue("Missing property 'missing'");
+		this.record_issue("Missing property 'missing' for SupplierSource "
+				+ MockSupplierSource.class.getName());
 
 		// Attempt to load
 		this.loadSupplierType(false, new Init() {
@@ -134,7 +133,8 @@ public class LoadSupplierTypeTest extends OfficeFrameTestCase {
 	public void testMissingClass() {
 
 		// Record missing class
-		this.record_issue("Can not load class 'missing'");
+		this.record_issue("Can not load class 'missing' for SupplierSource "
+				+ MockSupplierSource.class.getName());
 
 		// Attempt to load
 		this.loadSupplierType(false, new Init() {
@@ -151,7 +151,8 @@ public class LoadSupplierTypeTest extends OfficeFrameTestCase {
 	public void testMissingResource() {
 
 		// Record missing resource
-		this.record_issue("Can not obtain resource at location 'missing'");
+		this.record_issue("Can not obtain resource at location 'missing' for SupplierSource "
+				+ MockSupplierSource.class.getName());
 
 		// Attempt to load
 		this.loadSupplierType(false, new Init() {
@@ -192,7 +193,9 @@ public class LoadSupplierTypeTest extends OfficeFrameTestCase {
 				"Fail init SupplierSource");
 
 		// Record failure to init the Supplier Source
-		this.record_issue("Failed to init", failure);
+		this.record_issue(
+				"Failed to source SupplierType definition from SupplierSource "
+						+ MockSupplierSource.class.getName(), failure);
 
 		// Attempt to load
 		this.loadSupplierType(false, new Init() {
@@ -204,37 +207,21 @@ public class LoadSupplierTypeTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensure issue if no supplied {@link ManagedObject} instances.
+	 * <p>
+	 * Ensure able to load with no {@link ManagedObject} instances.
+	 * <p>
+	 * No {@link ManagedObject} instances is allowed as may have
+	 * {@link SupplierSource} turn off supplying {@link ManagedObject}
+	 * instances. Allowing none, will prevent this case having to load an
+	 * arbitrary {@link ManagedObject}.
 	 */
 	public void testNoSuppliedManagedObjects() {
 
-		// Record no supplied managed objects
-		this.record_issue("Must provide at least one ManagedObject");
-
 		// Attempt to load
-		this.loadSupplierType(false, new Init() {
+		this.loadEmptySupplierType(new Init() {
 			@Override
 			public void supply(SupplierSourceContext context) {
 				// No supplied managed objects
-			}
-		});
-	}
-
-	/**
-	 * Ensure issue if null {@link ManagedObjectSource}.
-	 */
-	public void testNullManagedObjectSource() {
-
-		// Record no null managed object source
-		this.record_issue("Must provide a ManagedObjectSource");
-
-		// Attempt to load
-		this.loadSupplierType(false, new Init() {
-			@Override
-			public void supply(SupplierSourceContext context) {
-				context.addManagedObject(
-						(ManagedObjectSource<None, None>) null, null,
-						new AutoWire(Connection.class));
 			}
 		});
 	}
@@ -244,14 +231,35 @@ public class LoadSupplierTypeTest extends OfficeFrameTestCase {
 	 */
 	public void testNoAutoWiring() {
 
-		// Record no null managed object source
-		this.record_issue("Must provide a ManagedObjectSource");
+		// Record no auto-wiring
+		this.record_issue("Must provide auto-wiring for ManagedObject 1");
 
 		// Attempt to load
-		this.loadSupplierType(false, new Init() {
+		this.loadEmptySupplierType(new Init() {
 			@Override
 			public void supply(SupplierSourceContext context) {
 				context.addManagedObject(new ClassManagedObjectSource(), null);
+			}
+		});
+	}
+
+	/**
+	 * Ensure issue if null {@link ManagedObjectSource}.
+	 */
+	public void testNullManagedObjectSource() {
+
+		final AutoWire autoWire = new AutoWire(Connection.class);
+
+		// Record no null managed object source
+		this.record_issue("Must provide a ManagedObjectSource for ManagedObject "
+				+ autoWire.getQualifiedType());
+
+		// Attempt to load
+		this.loadEmptySupplierType(new Init() {
+			@Override
+			public void supply(SupplierSourceContext context) {
+				context.addManagedObject(
+						(ManagedObjectSource<None, None>) null, null, autoWire);
 			}
 		});
 	}
@@ -262,16 +270,22 @@ public class LoadSupplierTypeTest extends OfficeFrameTestCase {
 	 */
 	public void testInvalidManagedObjectType() {
 
-		// Record invalide managed object type
-		this.record_issue("Invalid ManagedObject ... TODO provide details");
+		final AutoWire autoWire = new AutoWire(Connection.class);
+
+		// Record invalid managed object type
+		this.issues.addIssue(LocationType.OFFICE_FLOOR, null,
+				AssetType.MANAGED_OBJECT, autoWire.getQualifiedType(),
+				"Missing property 'class.name'");
+		this.record_issue("Could not load ManagedObjectType for ManagedObject "
+				+ autoWire.getQualifiedType());
 
 		// Attempt to load
-		this.loadSupplierType(false, new Init() {
+		this.loadEmptySupplierType(new Init() {
 			@Override
 			public void supply(SupplierSourceContext context) {
 				// Load invalid managed object (missing property)
 				context.addManagedObject(new ClassManagedObjectSource(), null,
-						new AutoWire(Connection.class));
+						autoWire);
 			}
 		});
 	}
@@ -347,7 +361,7 @@ public class LoadSupplierTypeTest extends OfficeFrameTestCase {
 		};
 
 		// Load
-		this.loadSupplierType(false, new Init() {
+		this.loadSuppliedManagedObjectType(new Init() {
 			@Override
 			public void supply(SupplierSourceContext context) {
 				MockTypeManagedObjectSource source = new MockTypeManagedObjectSource(
@@ -407,15 +421,19 @@ public class LoadSupplierTypeTest extends OfficeFrameTestCase {
 				+ new AutoWire(Object.class).getQualifiedType());
 
 		// Load
-		this.loadSupplierType(false, new Init() {
-			@Override
-			public void supply(SupplierSourceContext context) {
-				MockTypeManagedObjectSource source = new MockTypeManagedObjectSource(
-						Object.class);
-				source.addFlow("flow", Integer.class);
-				source.addAsManagedObject(context, null);
-			}
-		});
+		SuppliedManagedObjectType type = this
+				.loadSuppliedManagedObjectType(new Init() {
+					@Override
+					public void supply(SupplierSourceContext context) {
+						MockTypeManagedObjectSource source = new MockTypeManagedObjectSource(
+								Object.class);
+						source.addFlow("flow", Integer.class);
+						source.addAsManagedObject(context, null);
+					}
+				});
+
+		// Should not have flow
+		assertEquals("Should not load the flow", 0, type.getFlowTypes().length);
 	}
 
 	/**
@@ -435,7 +453,7 @@ public class LoadSupplierTypeTest extends OfficeFrameTestCase {
 		};
 
 		// Load
-		this.loadSupplierType(false, new Init() {
+		this.loadSuppliedManagedObjectType(new Init() {
 			@Override
 			public void supply(SupplierSourceContext context) {
 				MockTypeManagedObjectSource source = new MockTypeManagedObjectSource(
@@ -455,15 +473,19 @@ public class LoadSupplierTypeTest extends OfficeFrameTestCase {
 				+ new AutoWire(Object.class).getQualifiedType());
 
 		// Load
-		this.loadSupplierType(false, new Init() {
-			@Override
-			public void supply(SupplierSourceContext context) {
-				MockTypeManagedObjectSource source = new MockTypeManagedObjectSource(
-						Object.class);
-				source.addTeam("team");
-				source.addAsManagedObject(context, null);
-			}
-		});
+		SuppliedManagedObjectType type = this
+				.loadSuppliedManagedObjectType(new Init() {
+					@Override
+					public void supply(SupplierSourceContext context) {
+						MockTypeManagedObjectSource source = new MockTypeManagedObjectSource(
+								Object.class);
+						source.addTeam("team");
+						source.addAsManagedObject(context, null);
+					}
+				});
+
+		// Should not have team
+		assertEquals("Should not load the team", 0, type.getTeamTypes().length);
 	}
 
 	/**
@@ -472,7 +494,7 @@ public class LoadSupplierTypeTest extends OfficeFrameTestCase {
 	public void testUnknownManagedObjectTeamAutoWire() {
 
 		// Record issue as unknown team
-		this.record_issue("Wired Team 'team' not specified on ManagedObjectType for ManagedObject "
+		this.record_issue("Wired team 'team' not specified on ManagedObjectType for ManagedObject "
 				+ new AutoWire(Object.class).getQualifiedType());
 
 		final ManagedObjectSourceWirer wirer = new ManagedObjectSourceWirer() {
@@ -483,7 +505,7 @@ public class LoadSupplierTypeTest extends OfficeFrameTestCase {
 		};
 
 		// Load
-		this.loadSupplierType(false, new Init() {
+		this.loadSuppliedManagedObjectType(new Init() {
 			@Override
 			public void supply(SupplierSourceContext context) {
 				MockTypeManagedObjectSource source = new MockTypeManagedObjectSource(
@@ -519,7 +541,7 @@ public class LoadSupplierTypeTest extends OfficeFrameTestCase {
 				});
 
 		// Validate team not appears
-		assertEquals("Should have no teams", type.getTeamTypes().length);
+		assertEquals("Should have no teams", 0, type.getTeamTypes().length);
 	}
 
 	/**
@@ -568,7 +590,7 @@ public class LoadSupplierTypeTest extends OfficeFrameTestCase {
 	 *            Description of the issue.
 	 */
 	private void record_issue(String issueDescription) {
-		this.issues.addIssue(null, null, AssetType.MANAGED_OBJECT, null,
+		this.issues.addIssue(LocationType.OFFICE_FLOOR, null, null, null,
 				issueDescription);
 	}
 
@@ -581,7 +603,7 @@ public class LoadSupplierTypeTest extends OfficeFrameTestCase {
 	 *            Cause of the issue.
 	 */
 	private void record_issue(String issueDescription, Throwable cause) {
-		this.issues.addIssue(null, null, AssetType.MANAGED_OBJECT, null,
+		this.issues.addIssue(LocationType.OFFICE_FLOOR, null, null, null,
 				issueDescription, cause);
 	}
 
@@ -610,6 +632,27 @@ public class LoadSupplierTypeTest extends OfficeFrameTestCase {
 
 		// Return the single supplied managed object type
 		return moTypes[0];
+	}
+
+	/**
+	 * Ensure loads an empty {@link SupplierType}. In other words, a
+	 * {@link SupplierType} with no {@link SuppliedManagedObjectType} instances.
+	 * 
+	 * @param init
+	 *            {@link Init}.
+	 * @param propertyNameValuePairs
+	 *            {@link Property} name value pairs.
+	 */
+	private void loadEmptySupplierType(Init init,
+			String... propertyNameValuePairs) {
+
+		// Load the supplier type
+		SupplierType type = this.loadSupplierType(true, init,
+				propertyNameValuePairs);
+
+		// Ensure no supplied managed object types
+		assertEquals("Supplier should not have managed objects", 0,
+				type.getSuppliedManagedObjectTypes().length);
 	}
 
 	/**

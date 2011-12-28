@@ -23,8 +23,6 @@ import java.io.IOException;
 import java.net.URL;
 import java.net.URLClassLoader;
 
-import org.junit.Ignore;
-
 import net.officefloor.autowire.AutoWire;
 import net.officefloor.autowire.AutoWireManagement;
 import net.officefloor.autowire.AutoWireOfficeFloor;
@@ -71,7 +69,6 @@ import net.officefloor.plugin.work.clazz.ClassWorkSource;
  * 
  * @author Daniel Sagenschneider
  */
-@Ignore("TODO implement OfficeFloorCompilerImpl.getSupplierLoader()")
 public class OfficeFloorCompilerAdapterTest extends OfficeFrameTestCase {
 
 	/**

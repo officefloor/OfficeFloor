@@ -47,6 +47,11 @@ public abstract class AutoWirePropertiesImpl implements AutoWireProperties {
 	private final OfficeFloorCompiler compiler;
 
 	/**
+	 * Optional {@link ClassLoader}.
+	 */
+	private final ClassLoader classLoader;
+
+	/**
 	 * {@link PropertyList}.
 	 */
 	private final PropertyList properties;
@@ -62,7 +67,33 @@ public abstract class AutoWirePropertiesImpl implements AutoWireProperties {
 	public AutoWirePropertiesImpl(OfficeFloorCompiler compiler,
 			PropertyList properties) {
 		this.compiler = compiler;
+		this.classLoader = null;
 		this.properties = properties;
+	}
+
+	/**
+	 * Initiate to use {@link ClassLoader}.
+	 * 
+	 * @param classLoader
+	 *            {@link ClassLoader}.
+	 * @param properties
+	 *            {@link PropertyList}.
+	 */
+	public AutoWirePropertiesImpl(ClassLoader classLoader,
+			PropertyList properties) {
+		this.compiler = null;
+		this.classLoader = classLoader;
+		this.properties = properties;
+	}
+
+	/**
+	 * Obtains the {@link ClassLoader}.
+	 * 
+	 * @return {@link ClassLoader}.
+	 */
+	private ClassLoader getClassLoader() {
+		return (this.classLoader != null ? this.classLoader : this.compiler
+				.getClassLoader());
 	}
 
 	/*
@@ -91,7 +122,7 @@ public abstract class AutoWirePropertiesImpl implements AutoWireProperties {
 		if ((environmentDirectory == null)
 				|| (environmentDirectory.trim().length() == 0)) {
 			// Environment directory not specified so load from class path
-			inputStream = this.compiler.getClassLoader().getResourceAsStream(
+			inputStream = this.getClassLoader().getResourceAsStream(
 					propertiesFilePath);
 		} else {
 			// Load properties from environment directory

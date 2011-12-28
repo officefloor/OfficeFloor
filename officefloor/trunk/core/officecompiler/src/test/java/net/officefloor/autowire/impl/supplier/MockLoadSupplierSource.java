@@ -127,7 +127,7 @@ public class MockLoadSupplierSource extends AbstractSupplierSource {
 				MockTypeManagedObjectSource.class.getName()),
 				simpleAutoWiring[0]);
 		TestCase.assertFalse("Should not be an input managed object",
-				complexMo.isInputManagedObject());
+				simpleMo.isInputManagedObject());
 		TestCase.assertEquals("Should be no dependencies", 0,
 				simpleMo.getDependencyTypes().length);
 		TestCase.assertEquals("Should be no flows", 0,
@@ -164,6 +164,7 @@ public class MockLoadSupplierSource extends AbstractSupplierSource {
 		context.addManagedObject(complex, new ManagedObjectSourceWirer() {
 			@Override
 			public void wire(ManagedObjectSourceWirerContext context) {
+				context.setInput(true);
 				context.mapDependency("overridden", new AutoWire("OVERRIDDEN",
 						String.class.getName()));
 				context.mapFlow("flow", "SECTION", "INPUT");
