@@ -20,9 +20,10 @@ package net.officefloor.compile.integrate.managedobject;
 
 import java.sql.Connection;
 
-import org.junit.Ignore;
-
 import net.officefloor.autowire.AutoWire;
+import net.officefloor.autowire.AutoWireTeam;
+import net.officefloor.autowire.ManagedObjectSourceWirer;
+import net.officefloor.autowire.ManagedObjectSourceWirerContext;
 import net.officefloor.autowire.impl.supplier.MockTypeManagedObjectSource;
 import net.officefloor.autowire.spi.supplier.source.SupplierSource;
 import net.officefloor.autowire.spi.supplier.source.SupplierSourceContext;
@@ -37,10 +38,10 @@ import net.officefloor.frame.api.build.DependencyMappingBuilder;
 import net.officefloor.frame.api.build.ManagingOfficeBuilder;
 import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.api.build.OfficeBuilder;
+import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
 import net.officefloor.frame.api.build.TaskBuilder;
 import net.officefloor.frame.api.build.TaskFactory;
 import net.officefloor.frame.api.build.WorkFactory;
-import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
 import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.api.manage.Office;
@@ -59,6 +60,8 @@ import net.officefloor.plugin.managedobject.clazz.ClassManagedObjectSource;
 import net.officefloor.plugin.managedobject.clazz.Dependency;
 import net.officefloor.plugin.work.clazz.ClassWorkSource;
 import net.officefloor.plugin.work.clazz.FlowInterface;
+
+import org.junit.Ignore;
 
 /**
  * Tests compiling a {@link OfficeFloor} {@link ManagedObject}.
@@ -113,6 +116,7 @@ public class CompileOfficeFloorManagedObjectTest extends
 	public void testSuppliedManagedObject() {
 
 		// Setup to provide managed object source instance
+		MockSupplierSource.reset();
 		final MockTypeManagedObjectSource mos = new MockTypeManagedObjectSource(
 				Object.class);
 		MockSupplierSource.managedObjectSource = mos;
@@ -136,14 +140,70 @@ public class CompileOfficeFloorManagedObjectTest extends
 	}
 
 	/**
+	 * Tests compiling a supplied {@link ManagedObject} that provides its
+	 * {@link Team}.
+	 */
+	public void testSuppliedManagedObjectWithProvidedTeam() {
+
+		// Setup to provide managed object source instance (with team)
+		MockSupplierSource.reset();
+		final MockTypeManagedObjectSource mos = new MockTypeManagedObjectSource(
+				Object.class);
+		mos.addTeam("team");
+		MockSupplierSource.managedObjectSource = mos;
+		MockSupplierSource.wirer = new ManagedObjectSourceWirer() {
+			@Override
+			public void wire(ManagedObjectSourceWirerContext context) {
+				AutoWireTeam team = context.mapTeam("team",
+						OnePersonTeamSource.class.getName());
+				team.addProperty(
+						OnePersonTeamSource.MAX_WAIT_TIME_PROPERTY_NAME, "200");
+			}
+		};
+
+		// Record building the office floor
+		this.record_officeFloorBuilder_addTeam("MANAGED_OBJECT_SOURCE-team",
+				OnePersonTeamSource.class,
+				OnePersonTeamSource.MAX_WAIT_TIME_PROPERTY_NAME, "200");
+		OfficeBuilder office = this
+				.record_officeFloorBuilder_addOffice("OFFICE");
+		office.registerManagedObjectSource("MANAGED_OBJECT",
+				"MANAGED_OBJECT_SOURCE");
+		this.recordReturn(office, office.addProcessManagedObject(
+				"MANAGED_OBJECT", "MANAGED_OBJECT"), null);
+
+		// Record instance (as supplied)
+		this.record_officeFloorBuilder_addManagedObject(
+				"MANAGED_OBJECT_SOURCE", mos, 0, "PROP_NAME", "PROP_VALUE");
+
+		this.record_managedObjectBuilder_setManagingOffice("OFFICE");
+
+		// Compile the office floor
+		this.compile(true);
+	}
+
+	/**
 	 * Mock {@link SupplierSource}.
 	 */
 	public static class MockSupplierSource extends AbstractSupplierSource {
 
 		/**
+		 * Resets for the next test.
+		 */
+		public static void reset() {
+			managedObjectSource = null;
+			wirer = null;
+		}
+
+		/**
 		 * {@link ManagedObjectSource}.
 		 */
 		public static ManagedObjectSource<?, ?> managedObjectSource = null;
+
+		/**
+		 * {@link ManagedObjectSourceWirer}.
+		 */
+		public static ManagedObjectSourceWirer wirer = null;
 
 		/*
 		 * ===================== SupplierSource ========================+
@@ -162,7 +222,7 @@ public class CompileOfficeFloorManagedObjectTest extends
 			assertEquals("Incorrect property value", "PROP_VALUE", value);
 
 			// Supply the managed object source
-			context.addManagedObject(managedObjectSource, null, new AutoWire(
+			context.addManagedObject(managedObjectSource, wirer, new AutoWire(
 					"QUALIFIER", Connection.class.getName()));
 		}
 	}
