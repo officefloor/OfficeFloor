@@ -18,6 +18,15 @@
 
 package net.officefloor.compile.integrate.managedobject;
 
+import java.sql.Connection;
+
+import org.junit.Ignore;
+
+import net.officefloor.autowire.AutoWire;
+import net.officefloor.autowire.impl.supplier.MockTypeManagedObjectSource;
+import net.officefloor.autowire.spi.supplier.source.SupplierSource;
+import net.officefloor.autowire.spi.supplier.source.SupplierSourceContext;
+import net.officefloor.autowire.spi.supplier.source.impl.AbstractSupplierSource;
 import net.officefloor.compile.integrate.AbstractCompileTestCase;
 import net.officefloor.compile.issues.CompilerIssues.LocationType;
 import net.officefloor.compile.spi.office.ManagedObjectTeam;
@@ -56,6 +65,7 @@ import net.officefloor.plugin.work.clazz.FlowInterface;
  * 
  * @author Daniel Sagenschneider
  */
+@Ignore("TODO implement supplying managed object sources")
 public class CompileOfficeFloorManagedObjectTest extends
 		AbstractCompileTestCase {
 
@@ -94,6 +104,67 @@ public class CompileOfficeFloorManagedObjectTest extends
 
 		// Compile the office floor
 		this.compile(true);
+	}
+
+	/**
+	 * Tests compiling a supplied {@link ManagedObject} bound to
+	 * {@link ProcessState}.
+	 */
+	public void testSuppliedManagedObject() {
+
+		// Setup to provide managed object source instance
+		final MockTypeManagedObjectSource mos = new MockTypeManagedObjectSource(
+				Object.class);
+		MockSupplierSource.managedObjectSource = mos;
+
+		// Record building the office floor
+		OfficeBuilder office = this
+				.record_officeFloorBuilder_addOffice("OFFICE");
+		office.registerManagedObjectSource("MANAGED_OBJECT",
+				"MANAGED_OBJECT_SOURCE");
+		this.recordReturn(office, office.addProcessManagedObject(
+				"MANAGED_OBJECT", "MANAGED_OBJECT"), null);
+
+		// Record instance (as supplied)
+		this.record_officeFloorBuilder_addManagedObject(
+				"MANAGED_OBJECT_SOURCE", mos, 0, "PROP_NAME", "PROP_VALUE");
+
+		this.record_managedObjectBuilder_setManagingOffice("OFFICE");
+
+		// Compile the office floor
+		this.compile(true);
+	}
+
+	/**
+	 * Mock {@link SupplierSource}.
+	 */
+	public static class MockSupplierSource extends AbstractSupplierSource {
+
+		/**
+		 * {@link ManagedObjectSource}.
+		 */
+		public static ManagedObjectSource<?, ?> managedObjectSource = null;
+
+		/*
+		 * ===================== SupplierSource ========================+
+		 */
+
+		@Override
+		protected void loadSpecification(SpecificationContext context) {
+			fail("Specification should not be required");
+		}
+
+		@Override
+		public void supply(SupplierSourceContext context) throws Exception {
+
+			// Ensure the property is available
+			String value = context.getProperty("PROP_NAME");
+			assertEquals("Incorrect property value", "PROP_VALUE", value);
+
+			// Supply the managed object source
+			context.addManagedObject(managedObjectSource, null, new AutoWire(
+					"QUALIFIER", Connection.class.getName()));
+		}
 	}
 
 	/**
