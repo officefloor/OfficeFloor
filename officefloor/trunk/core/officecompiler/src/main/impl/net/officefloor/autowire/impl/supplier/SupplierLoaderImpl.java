@@ -22,11 +22,16 @@ import net.officefloor.autowire.spi.supplier.source.SupplierSourceProperty;
 import net.officefloor.autowire.spi.supplier.source.SupplierSourceSpecification;
 import net.officefloor.autowire.supplier.SupplierLoader;
 import net.officefloor.autowire.supplier.SupplierType;
+import net.officefloor.compile.OfficeFloorCompiler;
 import net.officefloor.compile.impl.properties.PropertyListImpl;
 import net.officefloor.compile.impl.util.CompileUtil;
 import net.officefloor.compile.internal.structure.NodeContext;
 import net.officefloor.compile.issues.CompilerIssues.LocationType;
 import net.officefloor.compile.properties.PropertyList;
+import net.officefloor.frame.api.manage.OfficeFloor;
+import net.officefloor.frame.spi.source.UnknownClassError;
+import net.officefloor.frame.spi.source.UnknownPropertyError;
+import net.officefloor.frame.spi.source.UnknownResourceError;
 
 /**
  * {@link SupplierLoader} implementation.
@@ -36,18 +41,37 @@ import net.officefloor.compile.properties.PropertyList;
 public class SupplierLoaderImpl implements SupplierLoader {
 
 	/**
+	 * {@link OfficeFloor} Location.
+	 */
+	private final String officeFloorLocation;
+
+	/**
 	 * {@link NodeContext}.
 	 */
 	private final NodeContext nodeContext;
 
 	/**
-	 * Initiate.
+	 * Initiate for building.
+	 * 
+	 * @param officeFloorLocation
+	 *            {@link OfficeFloor} location.
+	 * @param nodeContext
+	 *            {@link NodeContext}.
+	 */
+	public SupplierLoaderImpl(String officeFloorLocation,
+			NodeContext nodeContext) {
+		this.officeFloorLocation = officeFloorLocation;
+		this.nodeContext = nodeContext;
+	}
+
+	/**
+	 * Initiate from {@link OfficeFloorCompiler}.
 	 * 
 	 * @param nodeContext
 	 *            {@link NodeContext}.
 	 */
 	public SupplierLoaderImpl(NodeContext nodeContext) {
-		this.nodeContext = nodeContext;
+		this(null, nodeContext);
 	}
 
 	/*
@@ -61,8 +85,8 @@ public class SupplierLoaderImpl implements SupplierLoader {
 		// Instantiate the supplier source
 		SupplierSource supplierSource = CompileUtil.newInstance(
 				supplierSourceClass, SupplierSource.class,
-				LocationType.OFFICE_FLOOR, "auto-wire", null, null,
-				this.nodeContext.getCompilerIssues());
+				LocationType.OFFICE_FLOOR, this.officeFloorLocation, null,
+				null, this.nodeContext.getCompilerIssues());
 		if (supplierSource == null) {
 			return null; // failed to instantiate
 		}
@@ -160,9 +184,57 @@ public class SupplierLoaderImpl implements SupplierLoader {
 	@Override
 	public <S extends SupplierSource> SupplierType loadSupplierType(
 			Class<S> supplierSourceClass, PropertyList propertyList) {
-		// TODO implement SupplierLoader.loadSupplierType
-		throw new UnsupportedOperationException(
-				"TODO implement SupplierLoader.loadSupplierType");
+
+		// Instantiate the supplier source
+		S supplierSource = CompileUtil.newInstance(supplierSourceClass,
+				SupplierSource.class, LocationType.OFFICE_FLOOR,
+				this.officeFloorLocation, null, null,
+				this.nodeContext.getCompilerIssues());
+		if (supplierSource == null) {
+			return null; // failed to instantiate
+		}
+
+		// Create the supplier source context
+		SupplierSourceContextImpl supplierSourceContext = new SupplierSourceContextImpl(
+				this.officeFloorLocation, propertyList, this.nodeContext);
+
+		try {
+			// Source the supplier type
+			supplierSource.supply(supplierSourceContext);
+
+		} catch (UnknownPropertyError ex) {
+			this.addIssue("Missing property '" + ex.getUnknownPropertyName()
+					+ "' for " + SupplierSource.class.getSimpleName() + " "
+					+ supplierSourceClass.getName());
+			return null; // must have property
+
+		} catch (UnknownClassError ex) {
+			this.addIssue("Can not load class '" + ex.getUnknownClassName()
+					+ "' for " + SupplierSource.class.getSimpleName() + " "
+					+ supplierSourceClass.getName());
+			return null; // must have class
+
+		} catch (UnknownResourceError ex) {
+			this.addIssue("Can not obtain resource at location '"
+					+ ex.getUnknownResourceLocation() + "' for "
+					+ SupplierSource.class.getSimpleName() + " "
+					+ supplierSourceClass.getName());
+			return null; // must have resource
+
+		} catch (Throwable ex) {
+			this.addIssue(
+					"Failed to source " + SupplierType.class.getSimpleName()
+							+ " definition from "
+							+ SupplierSource.class.getSimpleName() + " "
+							+ supplierSourceClass.getName(), ex);
+			return null; // must be successful
+		}
+
+		// Obtain the supplier type
+		SupplierType supplierType = supplierSourceContext.loadSupplierType();
+
+		// Return the supplier type
+		return supplierType;
 	}
 
 	/**
@@ -173,7 +245,8 @@ public class SupplierLoaderImpl implements SupplierLoader {
 	 */
 	private void addIssue(String issueDescription) {
 		this.nodeContext.getCompilerIssues().addIssue(
-				LocationType.OFFICE_FLOOR, null, null, null, issueDescription);
+				LocationType.OFFICE_FLOOR, this.officeFloorLocation, null,
+				null, issueDescription);
 	}
 
 	/**
@@ -184,8 +257,8 @@ public class SupplierLoaderImpl implements SupplierLoader {
 	 */
 	private void addIssue(String issueDescription, Throwable cause) {
 		this.nodeContext.getCompilerIssues().addIssue(
-				LocationType.OFFICE_FLOOR, null, null, null, issueDescription,
-				cause);
+				LocationType.OFFICE_FLOOR, this.officeFloorLocation, null,
+				null, issueDescription, cause);
 	}
 
 }

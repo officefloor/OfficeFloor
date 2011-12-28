@@ -18,8 +18,6 @@
 
 package net.officefloor.autowire.impl.supplier;
 
-import org.junit.Ignore;
-
 import net.officefloor.autowire.spi.supplier.source.SupplierSource;
 import net.officefloor.autowire.spi.supplier.source.SupplierSourceContext;
 import net.officefloor.autowire.spi.supplier.source.SupplierSourceProperty;
@@ -27,10 +25,10 @@ import net.officefloor.autowire.spi.supplier.source.SupplierSourceSpecification;
 import net.officefloor.autowire.supplier.SupplierLoader;
 import net.officefloor.compile.OfficeFloorCompiler;
 import net.officefloor.compile.issues.CompilerIssues;
+import net.officefloor.compile.issues.CompilerIssues.LocationType;
 import net.officefloor.compile.properties.Property;
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.test.properties.PropertyListUtil;
-import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
 import net.officefloor.frame.spi.TestSource;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 
@@ -39,7 +37,6 @@ import net.officefloor.frame.test.OfficeFrameTestCase;
  * 
  * @author Daniel Sagenschneider
  */
-@Ignore("TODO implement SupplierLoaderImpl")
 public class LoadSupplierSourceSpecificationTest extends OfficeFrameTestCase {
 
 	/**
@@ -279,7 +276,7 @@ public class LoadSupplierSourceSpecificationTest extends OfficeFrameTestCase {
 	 *            Description of the issue.
 	 */
 	private void record_issue(String issueDescription) {
-		this.issues.addIssue(null, null, AssetType.MANAGED_OBJECT, null,
+		this.issues.addIssue(LocationType.OFFICE_FLOOR, null, null, null,
 				issueDescription);
 	}
 
@@ -292,7 +289,7 @@ public class LoadSupplierSourceSpecificationTest extends OfficeFrameTestCase {
 	 *            Cause of the issue.
 	 */
 	private void record_issue(String issueDescription, Throwable cause) {
-		this.issues.addIssue(null, null, AssetType.MANAGED_OBJECT, null,
+		this.issues.addIssue(LocationType.OFFICE_FLOOR, null, null, null,
 				issueDescription, cause);
 	}
 
