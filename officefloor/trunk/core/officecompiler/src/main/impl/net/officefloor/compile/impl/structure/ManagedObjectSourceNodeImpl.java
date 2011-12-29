@@ -19,9 +19,12 @@
 package net.officefloor.compile.impl.structure;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 import net.officefloor.autowire.supplier.SuppliedManagedObject;
+import net.officefloor.autowire.supplier.SuppliedManagedObjectTeam;
 import net.officefloor.compile.impl.properties.PropertyListImpl;
 import net.officefloor.compile.impl.util.CompileUtil;
 import net.officefloor.compile.impl.util.LinkUtil;
@@ -66,6 +69,7 @@ import net.officefloor.frame.api.build.OfficeBuilder;
 import net.officefloor.frame.api.build.OfficeEnhancer;
 import net.officefloor.frame.api.build.OfficeEnhancerContext;
 import net.officefloor.frame.api.build.OfficeFloorBuilder;
+import net.officefloor.frame.api.build.TeamBuilder;
 import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.manage.OfficeFloor;
@@ -593,7 +597,69 @@ public class ManagedObjectSourceNodeImpl implements ManagedObjectSourceNode {
 
 		// Obtain the Managed Object Builder
 		ManagedObjectBuilder<?> moBuilder;
-		if (this.managedObjectSource != null) {
+		Set<String> suppliedTeamNames = new HashSet<String>();
+		if (this.suppliedManagedObjectNode != null) {
+			// Obtain the supplied managed object for managed object builder
+			SuppliedManagedObject<?, ?> suppliedManagedObject = this.suppliedManagedObjectNode
+					.getSuppliedManagedObject();
+			if (suppliedManagedObject == null) {
+				// Must have supplied managed object
+				this.context.getCompilerIssues().addIssue(
+						this.locationType,
+						this.location,
+						AssetType.MANAGED_OBJECT,
+						managedObjectSourceName,
+						"No " + SuppliedManagedObject.class.getSimpleName()
+								+ " available");
+				return; // must have supplied managed object
+			}
+
+			// Build the managed object source from supplied managed object
+			moBuilder = builder.addManagedObject(managedObjectSourceName,
+					suppliedManagedObject.getManagedObjectSource());
+
+			// Provide properties from supplied managed object
+			for (Property property : suppliedManagedObject.getProperties()) {
+				moBuilder.addProperty(property.getName(), property.getValue());
+			}
+
+			// Provide timeout from supplied managed object
+			moBuilder.setTimeout(suppliedManagedObject.getTimeout());
+
+			// Add the necessary supplied teams
+			for (SuppliedManagedObjectTeam suppliedTeam : suppliedManagedObject
+					.getSuppliedTeams()) {
+
+				// Obtain the team name and flag that being supplied
+				String teamName = suppliedTeam.getTeamName();
+				suppliedTeamNames.add(teamName);
+
+				// Obtain the qualified team name
+				String qualifiedTeamName = managedObjectSourceName + "-"
+						+ teamName;
+
+				// Obtain the team source class
+				Class teamSourceClass = this.context.getTeamSourceClass(
+						suppliedTeam.getTeamSourceClassName(), this.location,
+						qualifiedTeamName);
+				if (teamSourceClass == null) {
+					continue; // must have team source class
+				}
+
+				// Build the supplied team
+				TeamBuilder<?> teamBuilder = builder.addTeam(qualifiedTeamName,
+						teamSourceClass);
+				for (Property property : suppliedTeam.getProperties()) {
+					teamBuilder.addProperty(property.getName(),
+							property.getValue());
+				}
+
+				// Register the supplied team to the office
+				officeBuilder
+						.registerTeam(qualifiedTeamName, qualifiedTeamName);
+			}
+
+		} else if (this.managedObjectSource != null) {
 			// Build the managed object source from instance
 			moBuilder = builder.addManagedObject(managedObjectSourceName,
 					this.managedObjectSource);
@@ -619,8 +685,10 @@ public class ManagedObjectSourceNodeImpl implements ManagedObjectSourceNode {
 			moBuilder.addProperty(property.getName(), property.getValue());
 		}
 
-		// Provide timeout
-		moBuilder.setTimeout(this.timeout);
+		// Provide timeout (only if override potential supplied timeout)
+		if (this.timeout > 0) {
+			moBuilder.setTimeout(this.timeout);
+		}
 
 		// Specify the managing office
 		ManagingOfficeBuilder managingOfficeBuilder = moBuilder
@@ -661,7 +729,7 @@ public class ManagedObjectSourceNodeImpl implements ManagedObjectSourceNode {
 								this.officeFloorLocation,
 								AssetType.MANAGED_OBJECT,
 								this.managedObjectSourceName,
-								"Must provide input managed object as managed object source has flows");
+								"Must provide input managed object as managed object source has flows/teams");
 			} else {
 				// Bind the managed object to process state of managing office
 				DependencyMappingBuilder inputDependencyMappings = managingOfficeBuilder
@@ -825,6 +893,11 @@ public class ManagedObjectSourceNodeImpl implements ManagedObjectSourceNode {
 
 			// Obtain the team type details
 			String teamName = teamType.getTeamName();
+
+			// Ignore if already supplied
+			if (suppliedTeamNames.contains(teamName)) {
+				continue; // team supplied
+			}
 
 			// Obtain the team
 			OfficeTeamNode managedObjectTeam = this.teams.get(teamName);

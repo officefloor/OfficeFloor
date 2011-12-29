@@ -19,8 +19,6 @@ package net.officefloor.compile.impl.structure;
 
 import net.officefloor.autowire.AutoWire;
 import net.officefloor.autowire.supplier.SuppliedManagedObject;
-import net.officefloor.autowire.supplier.SupplierType;
-import net.officefloor.compile.internal.structure.NodeContext;
 import net.officefloor.compile.internal.structure.SuppliedManagedObjectNode;
 import net.officefloor.compile.internal.structure.SupplierNode;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
@@ -43,9 +41,9 @@ public class SuppliedManagedObjectNodeImpl implements SuppliedManagedObjectNode 
 	private final SupplierNode supplierNode;
 
 	/**
-	 * {@link NodeContext}.
+	 * {@link SuppliedManagedObject}.
 	 */
-	private final NodeContext context;
+	private SuppliedManagedObject<?, ?> suppliedManagedObject = null;
 
 	/**
 	 * Initiate.
@@ -55,14 +53,11 @@ public class SuppliedManagedObjectNodeImpl implements SuppliedManagedObjectNode 
 	 *            {@link ManagedObjectSource}.
 	 * @param supplierNode
 	 *            {@link SupplierNode}.
-	 * @param context
-	 *            {@link NodeContext}.
 	 */
 	public SuppliedManagedObjectNodeImpl(AutoWire autoWire,
-			SupplierNode supplierNode, NodeContext context) {
+			SupplierNode supplierNode) {
 		this.autoWire = autoWire;
 		this.supplierNode = supplierNode;
-		this.context = context;
 	}
 
 	/*
@@ -71,23 +66,28 @@ public class SuppliedManagedObjectNodeImpl implements SuppliedManagedObjectNode 
 
 	@Override
 	public void loadSuppliedManagedObject() {
-
-		// Load the supplier type
-		SupplierType supplierType = this.supplierNode.loadSupplierType();
-		if (supplierType == null) {
-			return; // no supplier type, so no supply of managed objects
-		}
-
-		// TODO implement SuppliedManagedObjectNode.loadSuppliedManagedObject
-		throw new UnsupportedOperationException(
-				"TODO implement SuppliedManagedObjectNode.loadSuppliedManagedObject");
+		// Load the supplier (to fill this supply order)
+		this.supplierNode.fillSupplyOrders();
 	}
 
 	@Override
 	public SuppliedManagedObject<?, ?> getSuppliedManagedObject() {
-		// TODO implement SuppliedManagedObjectNode.getSuppliedManagedObject
-		throw new UnsupportedOperationException(
-				"TODO implement SuppliedManagedObjectNode.getSuppliedManagedObject");
+		return this.suppliedManagedObject;
+	}
+
+	/*
+	 * =========================== SupplyOrder =========================
+	 */
+
+	@Override
+	public AutoWire getAutoWire() {
+		return this.autoWire;
+	}
+
+	@Override
+	public <D extends Enum<D>, F extends Enum<F>> void fillOrder(
+			SuppliedManagedObject<D, F> suppliedManagedObject) {
+		this.suppliedManagedObject = suppliedManagedObject;
 	}
 
 }
