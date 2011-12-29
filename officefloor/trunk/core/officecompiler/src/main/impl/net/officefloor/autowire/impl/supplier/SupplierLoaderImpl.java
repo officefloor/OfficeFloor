@@ -22,6 +22,7 @@ import net.officefloor.autowire.spi.supplier.source.SupplierSourceProperty;
 import net.officefloor.autowire.spi.supplier.source.SupplierSourceSpecification;
 import net.officefloor.autowire.supplier.SupplierLoader;
 import net.officefloor.autowire.supplier.SupplierType;
+import net.officefloor.autowire.supplier.SupplyOrder;
 import net.officefloor.compile.OfficeFloorCompiler;
 import net.officefloor.compile.impl.properties.PropertyListImpl;
 import net.officefloor.compile.impl.util.CompileUtil;
@@ -244,6 +245,15 @@ public class SupplierLoaderImpl implements SupplierLoader {
 
 		// Return the supplier type
 		return supplierType;
+	}
+
+	@Override
+	public <S extends SupplierSource> void fillSupplyOrders(
+			Class<S> supplierSourceClass, PropertyList propertyList,
+			SupplyOrder... supplyOrders) {
+		// TODO implement SupplierLoader.fillSupplyOrders
+		throw new UnsupportedOperationException(
+				"TODO implement SupplierLoader.fillSupplyOrders");
 	}
 
 	/**

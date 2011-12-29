@@ -30,6 +30,7 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 
+import net.officefloor.autowire.AutoWire;
 import net.officefloor.compile.impl.util.CompileUtil;
 import net.officefloor.compile.impl.util.TripleKeyMap;
 import net.officefloor.compile.spi.office.ManagedObjectTeam;
@@ -41,6 +42,7 @@ import net.officefloor.compile.spi.officefloor.OfficeFloorDeployer;
 import net.officefloor.compile.spi.officefloor.OfficeFloorInputManagedObject;
 import net.officefloor.compile.spi.officefloor.OfficeFloorManagedObject;
 import net.officefloor.compile.spi.officefloor.OfficeFloorManagedObjectSource;
+import net.officefloor.compile.spi.officefloor.OfficeFloorSupplier;
 import net.officefloor.compile.spi.officefloor.OfficeFloorTeam;
 import net.officefloor.compile.spi.officefloor.source.OfficeFloorSource;
 import net.officefloor.compile.spi.officefloor.source.OfficeFloorSourceContext;
@@ -75,8 +77,10 @@ import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceTeamModel
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceTeamToOfficeFloorTeamModel;
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceToDeployedOfficeModel;
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceToOfficeFloorInputManagedObjectModel;
+import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceToOfficeFloorSupplierModel;
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectToOfficeFloorManagedObjectSourceModel;
 import net.officefloor.model.officefloor.OfficeFloorModel;
+import net.officefloor.model.officefloor.OfficeFloorSupplierModel;
 import net.officefloor.model.officefloor.OfficeFloorTeamModel;
 import net.officefloor.model.officefloor.PropertyModel;
 import net.officefloor.model.repository.ConfigurationContext;
@@ -178,6 +182,23 @@ public class OfficeFloorModelOfficeFloorSource extends
 				new ModelRepositoryImpl())
 				.retrieveOfficeFloor(configurationItem);
 
+		// Add the office floor suppliers, keeping registry of them
+		Map<String, OfficeFloorSupplier> officeFloorSuppliers = new HashMap<String, OfficeFloorSupplier>();
+		for (OfficeFloorSupplierModel supplierModel : officeFloor
+				.getOfficeFloorSuppliers()) {
+
+			// Add the office floor supplier
+			String supplierName = supplierModel.getOfficeFloorSupplierName();
+			OfficeFloorSupplier supplier = deployer.addSupplier(supplierName,
+					supplierModel.getSupplierSourceClassName());
+			for (PropertyModel property : supplierModel.getProperties()) {
+				supplier.addProperty(property.getName(), property.getValue());
+			}
+
+			// Register the supplier
+			officeFloorSuppliers.put(supplierName, supplier);
+		}
+
 		// Add the office floor managed object sources, keeping registry of them
 		Map<String, OfficeFloorManagedObjectSource> officeFloorManagedObjectSources = new HashMap<String, OfficeFloorManagedObjectSource>();
 		for (OfficeFloorManagedObjectSourceModel managedObjectSourceModel : officeFloor
@@ -186,10 +207,41 @@ public class OfficeFloorModelOfficeFloorSource extends
 			// Add the office floor managed object source
 			String managedObjectSourceName = managedObjectSourceModel
 					.getOfficeFloorManagedObjectSourceName();
-			OfficeFloorManagedObjectSource managedObjectSource = deployer
-					.addManagedObjectSource(managedObjectSourceName,
-							managedObjectSourceModel
-									.getManagedObjectSourceClassName());
+
+			// Determine if supplied managed object source
+			OfficeFloorManagedObjectSource managedObjectSource;
+			OfficeFloorManagedObjectSourceToOfficeFloorSupplierModel mosToSupplier = managedObjectSourceModel
+					.getOfficeFloorSupplier();
+			if (mosToSupplier != null) {
+				// Supplied managed object source, so obtain its supplier
+				String supplierName = mosToSupplier
+						.getOfficeFloorSupplierName();
+				OfficeFloorSupplier supplier = officeFloorSuppliers
+						.get(supplierName);
+				if (supplier == null) {
+					// Must have supplier
+					deployer.addIssue("No supplier '" + supplierName
+							+ "' for managed object source "
+							+ managedObjectSourceName,
+							AssetType.MANAGED_OBJECT, managedObjectSourceName);
+					continue; // must have supplier to add managed object source
+				}
+
+				// Supply the managed object source
+				String qualifier = mosToSupplier.getAutoWireQualifier();
+				qualifier = (CompileUtil.isBlank(qualifier) ? null : qualifier);
+				String type = mosToSupplier.getAutoWireType();
+				managedObjectSource = supplier.addManagedObjectSource(
+						managedObjectSourceName, new AutoWire(qualifier, type));
+
+			} else {
+				// Source the managed object source
+				managedObjectSource = deployer.addManagedObjectSource(
+						managedObjectSourceName, managedObjectSourceModel
+								.getManagedObjectSourceClassName());
+			}
+
+			// Add properties for the managed object source
 			for (PropertyModel property : managedObjectSourceModel
 					.getProperties()) {
 				managedObjectSource.addProperty(property.getName(),

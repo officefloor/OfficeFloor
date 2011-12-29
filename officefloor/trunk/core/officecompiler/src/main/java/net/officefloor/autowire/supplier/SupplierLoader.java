@@ -59,4 +59,21 @@ public interface SupplierLoader {
 	<S extends SupplierSource> SupplierType loadSupplierType(
 			Class<S> supplierSourceClass, PropertyList propertyList);
 
+	/**
+	 * Fills the {@link SupplyOrder} instances with a
+	 * {@link SuppliedManagedObject}.
+	 * 
+	 * @param supplierSourceClass
+	 *            Class of the {@link SupplierSource}.
+	 * @param propertyList
+	 *            {@link PropertyList} containing the properties to configure
+	 *            the {@link SupplierSource} to fill the {@link SupplyOrder}
+	 *            instances.
+	 * @param supplyOrders
+	 *            {@link SupplyOrder} instances to be filled.
+	 */
+	<S extends SupplierSource> void fillSupplyOrders(
+			Class<S> supplierSourceClass, PropertyList propertyList,
+			SupplyOrder... supplyOrders);
+
 }
