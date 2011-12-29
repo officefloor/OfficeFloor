@@ -20,8 +20,6 @@ package net.officefloor.autowire.impl.supplier;
 import java.sql.Connection;
 import java.util.Properties;
 
-import org.junit.Ignore;
-
 import net.officefloor.autowire.AutoWire;
 import net.officefloor.autowire.AutoWireObject;
 import net.officefloor.autowire.AutoWireTeam;
@@ -53,7 +51,6 @@ import net.officefloor.frame.test.OfficeFrameTestCase;
  * 
  * @author Daniel Sagenschneider
  */
-@Ignore("TODO implement SupplierLoader.fillSupplyOrders(...)")
 public class FillSupplyOrderTest extends OfficeFrameTestCase {
 
 	/**
@@ -108,10 +105,12 @@ public class FillSupplyOrderTest extends OfficeFrameTestCase {
 	public void testFillMultipleSupplyOrders() {
 		MockSupplyOrder one = new MockSupplyOrder(new AutoWire(String.class));
 		MockSupplyOrder two = new MockSupplyOrder(new AutoWire(Property.class));
-		this.fillSupplyOrders(one, two);
+		MockSupplyOrder three = new MockSupplyOrder(new AutoWire(Long.class));
+		this.fillSupplyOrders(one, two, three);
 		validateSuppliedManagedObject(one, String.class, 0, 0);
-		validateSuppliedManagedObject(two, Property.class, 1000, 0, "MO_NAME",
+		validateSuppliedManagedObject(two, Property.class, 0, 0, "MO_NAME",
 				"MO_VALUE");
+		validateSuppliedManagedObject(three, Long.class, 1000, 0);
 	}
 
 	/**
@@ -121,7 +120,7 @@ public class FillSupplyOrderTest extends OfficeFrameTestCase {
 		MockSupplyOrder defaultOrder = new MockSupplyOrder(new AutoWire(
 				String.class));
 		MockSupplyOrder qualifiedOrder = new MockSupplyOrder(new AutoWire(
-				"QUALFIED", String.class.getName()));
+				"QUALIFIED", String.class.getName()));
 		this.fillSupplyOrders(defaultOrder, qualifiedOrder);
 		validateSuppliedManagedObject(defaultOrder, String.class, 0, 0);
 		validateSuppliedManagedObject(qualifiedOrder, String.class, 0, 0);
@@ -285,12 +284,17 @@ public class FillSupplyOrderTest extends OfficeFrameTestCase {
 					String.class), null,
 					new AutoWire("QUALIFIED", String.class.getName()));
 
-			// Managed object with properties and timeout
+			// Managed object with properties
 			AutoWireObject property = context.addManagedObject(
-					new MockTypeManagedObjectSource(String.class), null,
+					new MockTypeManagedObjectSource(Property.class), null,
 					new AutoWire(Property.class));
 			property.addProperty("MO_NAME", "MO_VALUE");
-			property.setTimeout(1000);
+
+			// Managed object with timeout
+			AutoWireObject timeout = context.addManagedObject(
+					new MockTypeManagedObjectSource(Long.class), null,
+					new AutoWire(Long.class));
+			timeout.setTimeout(1000);
 
 			// Managed object with team
 			MockTypeManagedObjectSource teamMo = new MockTypeManagedObjectSource(

@@ -32,13 +32,18 @@ import net.officefloor.autowire.AutoWireTeam;
 import net.officefloor.autowire.ManagedObjectSourceWirer;
 import net.officefloor.autowire.ManagedObjectSourceWirerContext;
 import net.officefloor.autowire.impl.AutoWirePropertiesImpl;
+import net.officefloor.autowire.spi.supplier.source.SupplierSource;
 import net.officefloor.autowire.spi.supplier.source.SupplierSourceContext;
+import net.officefloor.autowire.supplier.SuppliedManagedObject;
 import net.officefloor.autowire.supplier.SuppliedManagedObjectDependencyType;
 import net.officefloor.autowire.supplier.SuppliedManagedObjectFlowType;
+import net.officefloor.autowire.supplier.SuppliedManagedObjectTeam;
 import net.officefloor.autowire.supplier.SuppliedManagedObjectTeamType;
 import net.officefloor.autowire.supplier.SuppliedManagedObjectType;
 import net.officefloor.autowire.supplier.SupplierType;
+import net.officefloor.autowire.supplier.SupplyOrder;
 import net.officefloor.compile.impl.properties.PropertyListSourceProperties;
+import net.officefloor.compile.impl.util.CompileUtil;
 import net.officefloor.compile.internal.structure.NodeContext;
 import net.officefloor.compile.issues.CompilerIssues.LocationType;
 import net.officefloor.compile.managedobject.ManagedObjectDependencyType;
@@ -50,10 +55,14 @@ import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.spi.office.OfficeSection;
 import net.officefloor.compile.spi.office.OfficeSectionInput;
 import net.officefloor.compile.spi.officefloor.OfficeFloorInputManagedObject;
+import net.officefloor.compile.spi.officefloor.OfficeFloorSupplier;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.impl.construct.source.SourceContextImpl;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
+import net.officefloor.frame.spi.source.UnknownClassError;
+import net.officefloor.frame.spi.source.UnknownPropertyError;
+import net.officefloor.frame.spi.source.UnknownResourceError;
 import net.officefloor.frame.spi.team.Team;
 import net.officefloor.frame.spi.team.source.TeamSource;
 
@@ -64,6 +73,11 @@ import net.officefloor.frame.spi.team.source.TeamSource;
  */
 public class SupplierSourceContextImpl extends SourceContextImpl implements
 		SupplierSourceContext {
+
+	/**
+	 * {@link OfficeFloorSupplier} name.
+	 */
+	private final String supplierName;
 
 	/**
 	 * {@link OfficeFloor} location.
@@ -83,6 +97,8 @@ public class SupplierSourceContextImpl extends SourceContextImpl implements
 	/**
 	 * Initiate.
 	 * 
+	 * @param supplierName
+	 *            {@link OfficeFloorSupplier} name.
 	 * @param officeFloorLocation
 	 *            {@link OfficeFloor} location.
 	 * @param propertyList
@@ -90,21 +106,92 @@ public class SupplierSourceContextImpl extends SourceContextImpl implements
 	 * @param context
 	 *            {@link NodeContext}.
 	 */
-	public SupplierSourceContextImpl(String officeFloorLocation,
-			PropertyList propertyList, NodeContext context) {
+	public SupplierSourceContextImpl(String supplierName,
+			String officeFloorLocation, PropertyList propertyList,
+			NodeContext context) {
 		super(context.getSourceContext(), new PropertyListSourceProperties(
 				propertyList));
+		this.supplierName = supplierName;
 		this.officeFloorLocation = officeFloorLocation;
 		this.context = context;
 	}
 
 	/**
 	 * Loads the {@link SupplierType} from the added {@link ManagedObject}
-	 * instances.
+	 * instances, along with filling {@link SupplyOrder} instances.
 	 * 
+	 * @param supplierSourceClass
+	 *            {@link SupplierSource} class.
+	 * @param propertyList
+	 *            {@link PropertyList}.
+	 * @param supplyOrders
+	 *            {@link SupplyOrder} instances.
 	 * @return {@link SupplierType}.
 	 */
-	public SupplierType loadSupplierType() {
+	@SuppressWarnings({ "rawtypes", "unchecked" })
+	public <S extends SupplierSource> SupplierType loadSupplier(
+			Class<S> supplierSourceClass, PropertyList propertyList,
+			SupplyOrder... supplyOrders) {
+
+		// Ensure all supply orders have auto-wire specified
+		List<SupplyOrder> filteredSupplyOrders = new ArrayList<SupplyOrder>(
+				supplyOrders.length);
+		for (int i = 0; i < supplyOrders.length; i++) {
+			SupplyOrder supplyOrder = supplyOrders[i];
+
+			// Ensure has auto-wire
+			if (supplyOrder.getAutoWire() == null) {
+				this.addIssue(SupplyOrder.class.getSimpleName() + " " + i
+						+ " must have an " + AutoWire.class.getSimpleName());
+				continue; // do not include
+			}
+
+			// As here valid, so include
+			filteredSupplyOrders.add(supplyOrder);
+		}
+		supplyOrders = filteredSupplyOrders
+				.toArray(new SupplyOrder[filteredSupplyOrders.size()]);
+
+		// Instantiate the supplier source
+		S supplierSource = CompileUtil.newInstance(supplierSourceClass,
+				SupplierSource.class, LocationType.OFFICE_FLOOR,
+				this.officeFloorLocation, null, null,
+				this.context.getCompilerIssues());
+		if (supplierSource == null) {
+			return null; // failed to instantiate
+		}
+
+		try {
+			// Source the supplier
+			supplierSource.supply(this);
+
+		} catch (UnknownPropertyError ex) {
+			this.addIssue("Missing property '" + ex.getUnknownPropertyName()
+					+ "' for " + SupplierSource.class.getSimpleName() + " "
+					+ supplierSourceClass.getName());
+			return null; // must have property
+
+		} catch (UnknownClassError ex) {
+			this.addIssue("Can not load class '" + ex.getUnknownClassName()
+					+ "' for " + SupplierSource.class.getSimpleName() + " "
+					+ supplierSourceClass.getName());
+			return null; // must have class
+
+		} catch (UnknownResourceError ex) {
+			this.addIssue("Can not obtain resource at location '"
+					+ ex.getUnknownResourceLocation() + "' for "
+					+ SupplierSource.class.getSimpleName() + " "
+					+ supplierSourceClass.getName());
+			return null; // must have resource
+
+		} catch (Throwable ex) {
+			this.addIssue(
+					"Failed to source " + SupplierType.class.getSimpleName()
+							+ " definition from "
+							+ SupplierSource.class.getSimpleName() + " "
+							+ supplierSourceClass.getName(), ex);
+			return null; // must be successful
+		}
 
 		// Load the supplied managed object types
 		int index = 0;
@@ -216,8 +303,9 @@ public class SupplierSourceContextImpl extends SourceContextImpl implements
 						+ ManagedObjectType.class.getSimpleName() + issueSuffix);
 			}
 
-			// Obtain the team types
-			List<SuppliedManagedObjectTeamType> teams = new LinkedList<SuppliedManagedObjectTeamType>();
+			// Obtain the supplied teams and required team types
+			List<SuppliedManagedObjectTeam> suppliedTeams = new LinkedList<SuppliedManagedObjectTeam>();
+			List<SuppliedManagedObjectTeamType> requiredTeams = new LinkedList<SuppliedManagedObjectTeamType>();
 			for (ManagedObjectTeamType teamType : moType.getTeamTypes()) {
 
 				// Obtain the team name
@@ -237,13 +325,18 @@ public class SupplierSourceContextImpl extends SourceContextImpl implements
 						continue; // must have wiring to include
 					}
 
+					// Add the supplied team
+					suppliedTeams.add(new SuppliedManagedObjectTeamImpl(
+							teamName, suppliedTeam.getTeamSourceClassName(),
+							suppliedTeam.getProperties()));
+
 					// Not include as already supplied
 					continue;
 				}
 
-				// Add the supplied maaged object team
-				teams.add(new SuppliedManagedObjectTeamTypeImpl(teamName,
-						teamAutoWire));
+				// Add the required team type
+				requiredTeams.add(new SuppliedManagedObjectTeamTypeImpl(
+						teamName, teamAutoWire));
 			}
 			Set<String> unknownTeamNames = new HashSet<String>();
 			unknownTeamNames.addAll(object.teams.keySet());
@@ -260,11 +353,34 @@ public class SupplierSourceContextImpl extends SourceContextImpl implements
 							.size()]);
 			SuppliedManagedObjectFlowType[] flowTypes = flows
 					.toArray(new SuppliedManagedObjectFlowType[flows.size()]);
-			SuppliedManagedObjectTeamType[] teamTypes = teams
-					.toArray(new SuppliedManagedObjectTeamType[teams.size()]);
+			SuppliedManagedObjectTeamType[] teamTypes = requiredTeams
+					.toArray(new SuppliedManagedObjectTeamType[requiredTeams
+							.size()]);
 			managedObjects.add(new SuppliedManagedObjectTypeImpl(
 					object.autoWiring, object.isInput, dependencyTypes,
 					flowTypes, teamTypes));
+
+			// Create the supplied managed object
+			SuppliedManagedObjectTeam[] teams = suppliedTeams
+					.toArray(new SuppliedManagedObjectTeam[suppliedTeams.size()]);
+			SuppliedManagedObject<?, ?> suppliedManagedObject = new SuppliedManagedObjectImpl(
+					moType, object.managedObjectSource, object.properties,
+					object.timeout, teams);
+
+			// Fill supply orders
+			NEXT_SUPPLY_ORDER: for (SupplyOrder supplyOrder : supplyOrders) {
+				AutoWire supplyAutoWire = supplyOrder.getAutoWire();
+				for (AutoWire objectAutoWire : object.getAutoWiring()) {
+					if (supplyAutoWire.equals(objectAutoWire)) {
+
+						// Matching auto-wire, so fill supply order
+						supplyOrder.fillOrder(suppliedManagedObject);
+
+						// Supply order filled, so move on to next supply order
+						continue NEXT_SUPPLY_ORDER;
+					}
+				}
+			}
 		}
 
 		// Return the supplier type
@@ -282,7 +398,22 @@ public class SupplierSourceContextImpl extends SourceContextImpl implements
 	 */
 	private void addIssue(String issueDescription) {
 		this.context.getCompilerIssues().addIssue(LocationType.OFFICE_FLOOR,
-				this.officeFloorLocation, null, null, issueDescription);
+				this.officeFloorLocation, null, this.supplierName,
+				issueDescription);
+	}
+
+	/**
+	 * Adds an issue.
+	 * 
+	 * @param issueDescription
+	 *            Description of the issue.
+	 * @param cause
+	 *            Cause of issue.
+	 */
+	private void addIssue(String issueDescription, Throwable cause) {
+		this.context.getCompilerIssues().addIssue(LocationType.OFFICE_FLOOR,
+				this.officeFloorLocation, null, this.supplierName,
+				issueDescription, cause);
 	}
 
 	/*
@@ -332,6 +463,11 @@ public class SupplierSourceContextImpl extends SourceContextImpl implements
 		 * {@link AutoWire} instances.
 		 */
 		private final AutoWire[] autoWiring;
+
+		/**
+		 * Timeout.
+		 */
+		private long timeout = 0;
 
 		/**
 		 * Indicates if this is an {@link OfficeFloorInputManagedObject}.
@@ -395,37 +531,28 @@ public class SupplierSourceContextImpl extends SourceContextImpl implements
 
 		@Override
 		public String getManagedObjectSourceClassName() {
-			// TODO implement AutoWireObject.getManagedObjectSourceClassName
-			throw new UnsupportedOperationException(
-					"TODO implement AutoWireObject.getManagedObjectSourceClassName");
+			return (this.managedObjectSource == null ? null
+					: this.managedObjectSource.getClass().getName());
 		}
 
 		@Override
 		public ManagedObjectSourceWirer getManagedObjectSourceWirer() {
-			// TODO implement AutoWireObject.getManagedObjectSourceWirer
-			throw new UnsupportedOperationException(
-					"TODO implement AutoWireObject.getManagedObjectSourceWirer");
+			return this.wirer;
 		}
 
 		@Override
 		public AutoWire[] getAutoWiring() {
-			// TODO implement AutoWireObject.getAutoWiring
-			throw new UnsupportedOperationException(
-					"TODO implement AutoWireObject.getAutoWiring");
+			return this.autoWiring;
 		}
 
 		@Override
 		public long getTimeout() {
-			// TODO implement AutoWireObject.getTimeout
-			throw new UnsupportedOperationException(
-					"TODO implement AutoWireObject.getTimeout");
+			return this.timeout;
 		}
 
 		@Override
 		public void setTimeout(long timeout) {
-			// TODO implement AutoWireObject.setTimeout
-			throw new UnsupportedOperationException(
-					"TODO implement AutoWireObject.setTimeout");
+			this.timeout = timeout;
 		}
 
 		/*
@@ -456,6 +583,7 @@ public class SupplierSourceContextImpl extends SourceContextImpl implements
 			// Create the supplied auto-wire team
 			PropertyList properties = this.context.createPropertyList();
 			SuppliedAutoWireTeam suppliedTeam = new SuppliedAutoWireTeam(
+					managedObjectSourceTeamName, teamSourceClassName,
 					properties, this.context);
 
 			// Register and return the supplied auto-wire team
@@ -477,15 +605,33 @@ public class SupplierSourceContextImpl extends SourceContextImpl implements
 			implements AutoWireTeam {
 
 		/**
+		 * {@link Team} name.
+		 */
+		private final String teamName;
+
+		/**
+		 * Name of the {@link TeamSource} {@link Class}.
+		 */
+		private final String teamSourceClassName;
+
+		/**
 		 * Initiate.
 		 * 
+		 * @param teamName
+		 *            {@link Team} name.
+		 * @param teamSourceClassName
+		 *            Name of the {@link TeamSource} {@link Class}.
 		 * @param properties
 		 *            {@link PropertyList}.
 		 * @param context
 		 *            {@link NodeContext}.
 		 */
-		public SuppliedAutoWireTeam(PropertyList properties, NodeContext context) {
+		public SuppliedAutoWireTeam(String teamName,
+				String teamSourceClassName, PropertyList properties,
+				NodeContext context) {
 			super(context.getSourceContext().getClassLoader(), properties);
+			this.teamName = teamName;
+			this.teamSourceClassName = teamSourceClassName;
 		}
 
 		/*
@@ -494,23 +640,18 @@ public class SupplierSourceContextImpl extends SourceContextImpl implements
 
 		@Override
 		public String getTeamName() {
-			// TODO implement AutoWireTeam.getTeamName
-			throw new UnsupportedOperationException(
-					"TODO implement AutoWireTeam.getTeamName");
+			return this.teamName;
 		}
 
 		@Override
 		public String getTeamSourceClassName() {
-			// TODO implement AutoWireTeam.getTeamSourceClassName
-			throw new UnsupportedOperationException(
-					"TODO implement AutoWireTeam.getTeamSourceClassName");
+			return this.teamSourceClassName;
 		}
 
 		@Override
 		public AutoWireResponsibility[] getResponsibilities() {
-			// TODO implement AutoWireTeam.getResponsibilities
-			throw new UnsupportedOperationException(
-					"TODO implement AutoWireTeam.getResponsibilities");
+			// Only responsible for managed object
+			return new AutoWireResponsibility[0];
 		}
 	}
 

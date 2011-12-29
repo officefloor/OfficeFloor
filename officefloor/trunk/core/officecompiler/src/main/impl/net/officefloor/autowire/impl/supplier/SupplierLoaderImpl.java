@@ -31,9 +31,6 @@ import net.officefloor.compile.issues.CompilerIssues.LocationType;
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.spi.officefloor.OfficeFloorSupplier;
 import net.officefloor.frame.api.manage.OfficeFloor;
-import net.officefloor.frame.spi.source.UnknownClassError;
-import net.officefloor.frame.spi.source.UnknownPropertyError;
-import net.officefloor.frame.spi.source.UnknownResourceError;
 
 /**
  * {@link SupplierLoader} implementation.
@@ -195,77 +192,41 @@ public class SupplierLoaderImpl implements SupplierLoader {
 	public <S extends SupplierSource> SupplierType loadSupplierType(
 			Class<S> supplierSourceClass, PropertyList propertyList) {
 
-		// Instantiate the supplier source
-		S supplierSource = CompileUtil.newInstance(supplierSourceClass,
-				SupplierSource.class, LocationType.OFFICE_FLOOR,
-				this.officeFloorLocation, null, null,
-				this.nodeContext.getCompilerIssues());
-		if (supplierSource == null) {
-			return null; // failed to instantiate
-		}
-
 		// Create the supplier source context
 		SupplierSourceContextImpl supplierSourceContext = new SupplierSourceContextImpl(
-				this.officeFloorLocation, propertyList, this.nodeContext);
+				this.supplierName, this.officeFloorLocation, propertyList,
+				this.nodeContext);
 
-		try {
-			// Source the supplier type
-			supplierSource.supply(supplierSourceContext);
-
-		} catch (UnknownPropertyError ex) {
-			this.addIssue("Missing property '" + ex.getUnknownPropertyName()
-					+ "' for " + SupplierSource.class.getSimpleName() + " "
-					+ supplierSourceClass.getName());
-			return null; // must have property
-
-		} catch (UnknownClassError ex) {
-			this.addIssue("Can not load class '" + ex.getUnknownClassName()
-					+ "' for " + SupplierSource.class.getSimpleName() + " "
-					+ supplierSourceClass.getName());
-			return null; // must have class
-
-		} catch (UnknownResourceError ex) {
-			this.addIssue("Can not obtain resource at location '"
-					+ ex.getUnknownResourceLocation() + "' for "
-					+ SupplierSource.class.getSimpleName() + " "
-					+ supplierSourceClass.getName());
-			return null; // must have resource
-
-		} catch (Throwable ex) {
-			this.addIssue(
-					"Failed to source " + SupplierType.class.getSimpleName()
-							+ " definition from "
-							+ SupplierSource.class.getSimpleName() + " "
-							+ supplierSourceClass.getName(), ex);
-			return null; // must be successful
-		}
-
-		// Obtain the supplier type
-		SupplierType supplierType = supplierSourceContext.loadSupplierType();
-
-		// Return the supplier type
-		return supplierType;
+		// Load and return the supplier type
+		return supplierSourceContext.loadSupplier(supplierSourceClass,
+				propertyList);
 	}
 
 	@Override
 	public <S extends SupplierSource> void fillSupplyOrders(
 			Class<S> supplierSourceClass, PropertyList propertyList,
 			SupplyOrder... supplyOrders) {
-		// TODO implement SupplierLoader.fillSupplyOrders
-		throw new UnsupportedOperationException(
-				"TODO implement SupplierLoader.fillSupplyOrders");
+
+		// Create the supplier source context
+		SupplierSourceContextImpl supplierSourceContext = new SupplierSourceContextImpl(
+				this.supplierName, this.officeFloorLocation, propertyList,
+				this.nodeContext);
+
+		// Fill the supply orders
+		supplierSourceContext.loadSupplier(supplierSourceClass, propertyList,
+				supplyOrders);
 	}
 
 	/**
 	 * Adds an issue.
 	 * 
 	 * @param issueDescription
-	 *            Description of the issue.
+	 *            Issue description.
 	 */
 	private void addIssue(String issueDescription) {
 		this.nodeContext.getCompilerIssues().addIssue(
 				LocationType.OFFICE_FLOOR, this.officeFloorLocation, null,
-				this.supplierName, issueDescription);
+				null, issueDescription);
 	}
 
 	/**
@@ -273,11 +234,13 @@ public class SupplierLoaderImpl implements SupplierLoader {
 	 * 
 	 * @param issueDescription
 	 *            Description of the issue.
+	 * @param cause
+	 *            Cause of issue.
 	 */
 	private void addIssue(String issueDescription, Throwable cause) {
 		this.nodeContext.getCompilerIssues().addIssue(
 				LocationType.OFFICE_FLOOR, this.officeFloorLocation, null,
-				this.supplierName, issueDescription, cause);
+				null, issueDescription, cause);
 	}
 
 }
