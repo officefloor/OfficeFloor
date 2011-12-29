@@ -18,6 +18,8 @@
 
 package net.officefloor.compile.internal.structure;
 
+import net.officefloor.autowire.spi.supplier.source.SupplierSource;
+import net.officefloor.autowire.supplier.SupplierLoader;
 import net.officefloor.compile.OfficeFloorCompiler;
 import net.officefloor.compile.administrator.AdministratorLoader;
 import net.officefloor.compile.governance.GovernanceLoader;
@@ -31,6 +33,7 @@ import net.officefloor.compile.section.SectionLoader;
 import net.officefloor.compile.spi.governance.source.GovernanceSource;
 import net.officefloor.compile.spi.office.OfficeSection;
 import net.officefloor.compile.spi.office.source.OfficeSource;
+import net.officefloor.compile.spi.officefloor.OfficeFloorSupplier;
 import net.officefloor.compile.spi.section.source.SectionSource;
 import net.officefloor.compile.spi.work.source.WorkSource;
 import net.officefloor.compile.work.WorkLoader;
@@ -220,6 +223,38 @@ public interface NodeContext {
 	ManagedObjectPoolLoader getManagedObjectPoolLoader(
 			LocationType locationType, String location,
 			String managedObjectPoolName);
+
+	/**
+	 * Obtains the {@link SupplierSource} class.
+	 * 
+	 * @param supplierSourceClassName
+	 *            {@link SupplierSource} class name or an alias to a
+	 *            {@link SupplierSource} class.
+	 * @param officeFloorLocation
+	 *            Location of the {@link OfficeFloor} requiring the
+	 *            {@link OfficeFloorSupplier} for reporting issues.
+	 * @param supplierName
+	 *            Name of the {@link OfficeFloorSupplier} for reporting issues.
+	 * @return {@link SupplierSource} class, or <code>null</code> with issues
+	 *         reported to the {@link CompilerIssues} of this
+	 *         {@link NodeContext}.
+	 */
+	<S extends SupplierSource> Class<S> getSupplierSourceClass(
+			String supplierSourceClassName, String officeFloorLocation,
+			String supplierName);
+
+	/**
+	 * Obtains the {@link SupplierLoader}.
+	 * 
+	 * @param officeFloorLocation
+	 *            Location of the {@link OfficeFloor} requiring the
+	 *            {@link OfficeFloorSupplier} for reporting issues.
+	 * @param supplierName
+	 *            Name of the {@link OfficeFloorSupplier} for reporting issues.
+	 * @return {@link SupplierLoader}.
+	 */
+	SupplierLoader getSupplierLoader(String officeFloorLocation,
+			String supplierName);
 
 	/**
 	 * Obtains the {@link AdministratorSource} class.

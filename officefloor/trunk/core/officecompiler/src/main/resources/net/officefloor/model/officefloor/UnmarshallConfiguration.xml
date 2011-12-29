@@ -2,6 +2,20 @@
 <unmarshall node="office-floor"
 	class="net.officefloor.model.officefloor.OfficeFloorModel">
 
+	<!-- SUPPLIERS -->
+	<object method="addOfficeFloorSupplier" node="supplier"
+		class="net.officefloor.model.officefloor.OfficeFloorSupplierModel">
+		<value method="setOfficeFloorSupplierName" node="supplier@name" />
+		<value method="setSupplierSourceClassName" node="supplier@source" />
+		<value method="setX" node="supplier@x" />
+		<value method="setY" node="supplier@y" />
+		<object method="addProperty" node="property"
+			class="net.officefloor.model.officefloor.PropertyModel">
+			<value method="setName" node="property@name" />
+			<value method="setValue" node="property@value" />
+		</object>
+	</object>
+
 	<!-- MANAGED OBJECT SOURCES -->
 	<object method="addOfficeFloorManagedObjectSource" node="managed-object-source"
 		class="net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceModel">
@@ -15,6 +29,12 @@
 			class="net.officefloor.model.officefloor.PropertyModel">
 			<value method="setName" node="property@name" />
 			<value method="setValue" node="property@value" />
+		</object>
+		<object method="setOfficeFloorSupplier" node="supplier"
+			class="net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceToOfficeFloorSupplierModel">
+			<value method="setOfficeFloorSupplierName" node="supplier@name" />
+			<value method="setAutoWireType" node="supplier@type" />
+			<value method="setAutoWireQualifier" node="supplier@qualifier" />
 		</object>
 		<object method="setManagingOffice" node="managing-office"
 			class="net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceToDeployedOfficeModel">

@@ -54,14 +54,12 @@ import net.officefloor.model.repository.ConfigurationItem;
 import net.officefloor.model.repository.ModelRepository;
 
 import org.easymock.AbstractMatcher;
-import org.junit.Ignore;
 
 /**
  * Tests the {@link OfficeFloorRepository}.
  * 
  * @author Daniel Sagenschneider
  */
-@Ignore("TODO enable loading OfficeFloorSupplierModel")
 public class OfficeFloorRepositoryTest extends OfficeFrameTestCase {
 
 	/**
@@ -508,7 +506,7 @@ public class OfficeFloorRepositoryTest extends OfficeFrameTestCase {
 		// Ensure the connections have links to enable retrieving
 		assertEquals(
 				"office floor managed object source - office floor supplier",
-				"SUPPLIER", mosToSupplier.getOfficeFloorSupplier());
+				"SUPPLIER", mosToSupplier.getOfficeFloorSupplierName());
 		assertEquals(
 				"office floor managed object - office floor managed object source",
 				"MANAGED_OBJECT_SOURCE",

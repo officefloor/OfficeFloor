@@ -24,6 +24,7 @@ import java.util.List;
 import java.util.Map;
 
 import net.officefloor.autowire.impl.supplier.SupplierLoaderImpl;
+import net.officefloor.autowire.spi.supplier.source.SupplierSource;
 import net.officefloor.autowire.supplier.SupplierLoader;
 import net.officefloor.compile.OfficeFloorCompiler;
 import net.officefloor.compile.administrator.AdministratorLoader;
@@ -135,6 +136,11 @@ public class OfficeFloorCompilerImpl extends OfficeFloorCompiler implements
 	 * {@link ManagedObjectSource} {@link Class} instances by their alias name.
 	 */
 	private final Map<String, Class<?>> managedObjectSourceAliases = new HashMap<String, Class<?>>();
+
+	/**
+	 * {@link SupplierSource} {@link Class} instances by their alias name.
+	 */
+	private final Map<String, Class<?>> supplierSourceAliases = new HashMap<String, Class<?>>();
 
 	/**
 	 * {@link AdministratorSource} {@link Class} instances by their alias name.
@@ -266,6 +272,13 @@ public class OfficeFloorCompilerImpl extends OfficeFloorCompiler implements
 			String alias, Class<S> managedObjectSourceClass) {
 		this.registerAlias(alias, managedObjectSourceClass,
 				this.managedObjectSourceAliases, "managed object");
+	}
+
+	@Override
+	public <S extends SupplierSource> void addSupplierSourceAlias(String alias,
+			Class<S> supplierSourceClass) {
+		this.registerAlias(alias, supplierSourceClass,
+				this.supplierSourceAliases, "supplier");
 	}
 
 	@Override
@@ -474,6 +487,24 @@ public class OfficeFloorCompilerImpl extends OfficeFloorCompiler implements
 			String managedObjectPoolName) {
 		return new ManagedObjectPoolLoaderImpl(locationType, location,
 				managedObjectPoolName, this);
+	}
+
+	@Override
+	@SuppressWarnings("unchecked")
+	public <S extends SupplierSource> Class<S> getSupplierSourceClass(
+			String supplierSourceClassName, String officeFloorLocation,
+			String supplierName) {
+		return (Class<S>) CompileUtil.obtainClass(supplierSourceClassName,
+				SupplierSource.class, this.supplierSourceAliases,
+				this.getSourceContext(), LocationType.OFFICE_FLOOR,
+				officeFloorLocation, null, supplierName,
+				this.getCompilerIssues());
+	}
+
+	@Override
+	public SupplierLoader getSupplierLoader(String officeFloorLocation,
+			String supplierName) {
+		return new SupplierLoaderImpl(officeFloorLocation, supplierName, this);
 	}
 
 	@Override

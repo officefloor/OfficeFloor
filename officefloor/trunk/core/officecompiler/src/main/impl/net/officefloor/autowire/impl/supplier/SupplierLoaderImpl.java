@@ -28,6 +28,7 @@ import net.officefloor.compile.impl.util.CompileUtil;
 import net.officefloor.compile.internal.structure.NodeContext;
 import net.officefloor.compile.issues.CompilerIssues.LocationType;
 import net.officefloor.compile.properties.PropertyList;
+import net.officefloor.compile.spi.officefloor.OfficeFloorSupplier;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.spi.source.UnknownClassError;
 import net.officefloor.frame.spi.source.UnknownPropertyError;
@@ -46,6 +47,11 @@ public class SupplierLoaderImpl implements SupplierLoader {
 	private final String officeFloorLocation;
 
 	/**
+	 * {@link OfficeFloorSupplier} name.
+	 */
+	private final String supplierName;
+
+	/**
 	 * {@link NodeContext}.
 	 */
 	private final NodeContext nodeContext;
@@ -55,12 +61,15 @@ public class SupplierLoaderImpl implements SupplierLoader {
 	 * 
 	 * @param officeFloorLocation
 	 *            {@link OfficeFloor} location.
+	 * @param supplierName
+	 *            {@link OfficeFloorSupplier} name.
 	 * @param nodeContext
 	 *            {@link NodeContext}.
 	 */
-	public SupplierLoaderImpl(String officeFloorLocation,
+	public SupplierLoaderImpl(String officeFloorLocation, String supplierName,
 			NodeContext nodeContext) {
 		this.officeFloorLocation = officeFloorLocation;
+		this.supplierName = supplierName;
 		this.nodeContext = nodeContext;
 	}
 
@@ -71,7 +80,7 @@ public class SupplierLoaderImpl implements SupplierLoader {
 	 *            {@link NodeContext}.
 	 */
 	public SupplierLoaderImpl(NodeContext nodeContext) {
-		this(null, nodeContext);
+		this(null, null, nodeContext);
 	}
 
 	/*
@@ -86,7 +95,7 @@ public class SupplierLoaderImpl implements SupplierLoader {
 		SupplierSource supplierSource = CompileUtil.newInstance(
 				supplierSourceClass, SupplierSource.class,
 				LocationType.OFFICE_FLOOR, this.officeFloorLocation, null,
-				null, this.nodeContext.getCompilerIssues());
+				this.supplierName, this.nodeContext.getCompilerIssues());
 		if (supplierSource == null) {
 			return null; // failed to instantiate
 		}
@@ -246,7 +255,7 @@ public class SupplierLoaderImpl implements SupplierLoader {
 	private void addIssue(String issueDescription) {
 		this.nodeContext.getCompilerIssues().addIssue(
 				LocationType.OFFICE_FLOOR, this.officeFloorLocation, null,
-				null, issueDescription);
+				this.supplierName, issueDescription);
 	}
 
 	/**
@@ -258,7 +267,7 @@ public class SupplierLoaderImpl implements SupplierLoader {
 	private void addIssue(String issueDescription, Throwable cause) {
 		this.nodeContext.getCompilerIssues().addIssue(
 				LocationType.OFFICE_FLOOR, this.officeFloorLocation, null,
-				null, issueDescription, cause);
+				this.supplierName, issueDescription, cause);
 	}
 
 }

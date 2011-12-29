@@ -18,6 +18,7 @@
 
 package net.officefloor.compile.impl.officefloor;
 
+import net.officefloor.autowire.supplier.SupplierLoader;
 import net.officefloor.autowire.supplier.SupplierType;
 import net.officefloor.compile.impl.properties.PropertyListSourceProperties;
 import net.officefloor.compile.impl.util.LoadTypeError;
@@ -140,11 +141,33 @@ public class OfficeFloorSourceContextImpl extends SourceContextImpl implements
 	}
 
 	@Override
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public SupplierType loadSupplierType(String supplierSourceClassName,
 			PropertyList properties) {
-		// TODO implement OfficeFloorSourceContext.loadSupplierType
-		throw new UnsupportedOperationException(
-				"TODO implement OfficeFloorSourceContext.loadSupplierType");
+
+		// Obtain the supplier source class
+		Class supplierSourceClass = this.context.getSupplierSourceClass(
+				supplierSourceClassName, this.officeFloorLocation,
+				"loadSupplierType");
+
+		// Ensure have the supplier source class
+		if (supplierSourceClass == null) {
+			throw new LoadTypeError(SupplierType.class, supplierSourceClassName);
+		}
+
+		// Load the supplier type
+		SupplierLoader supplierLoader = this.context.getSupplierLoader(
+				this.officeFloorLocation, "loadSupplierType");
+		SupplierType supplierType = supplierLoader.loadSupplierType(
+				supplierSourceClass, properties);
+
+		// Ensure have the supplier type
+		if (supplierType == null) {
+			throw new LoadTypeError(SupplierType.class, supplierSourceClassName);
+		}
+
+		// Return the supplier type
+		return supplierType;
 	}
 
 	@Override
