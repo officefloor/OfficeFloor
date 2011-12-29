@@ -75,17 +75,19 @@ public class OfficeLoaderImpl implements OfficeLoader {
 		try {
 			specification = officeSource.getSpecification();
 		} catch (Throwable ex) {
-			this.addIssue("Failed to obtain "
-					+ OfficeSourceSpecification.class.getSimpleName()
-					+ " from " + officeSourceClass.getName(), ex, null);
+			this.addIssue(
+					"Failed to obtain "
+							+ OfficeSourceSpecification.class.getSimpleName()
+							+ " from " + officeSourceClass.getName(), ex, null);
 			return null; // failed to obtain
 		}
 
 		// Ensure have specification
 		if (specification == null) {
-			this.addIssue("No "
-					+ OfficeSourceSpecification.class.getSimpleName()
-					+ " returned from " + officeSourceClass.getName(), null);
+			this.addIssue(
+					"No " + OfficeSourceSpecification.class.getSimpleName()
+							+ " returned from " + officeSourceClass.getName(),
+					null);
 			return null; // no specification obtained
 		}
 
@@ -94,11 +96,12 @@ public class OfficeLoaderImpl implements OfficeLoader {
 		try {
 			officeProperties = specification.getProperties();
 		} catch (Throwable ex) {
-			this.addIssue("Failed to obtain "
-					+ OfficeSourceProperty.class.getSimpleName()
-					+ " instances from "
-					+ OfficeSourceSpecification.class.getSimpleName() + " for "
-					+ officeSourceClass.getName(), ex, null);
+			this.addIssue(
+					"Failed to obtain "
+							+ OfficeSourceProperty.class.getSimpleName()
+							+ " instances from "
+							+ OfficeSourceSpecification.class.getSimpleName()
+							+ " for " + officeSourceClass.getName(), ex, null);
 			return null; // failed to obtain properties
 		}
 
@@ -122,11 +125,16 @@ public class OfficeLoaderImpl implements OfficeLoader {
 				try {
 					name = officeProperty.getName();
 				} catch (Throwable ex) {
-					this.addIssue("Failed to get name for "
-							+ OfficeSourceProperty.class.getSimpleName() + " "
-							+ i + " from "
-							+ OfficeSourceSpecification.class.getSimpleName()
-							+ " for " + officeSourceClass.getName(), ex, null);
+					this.addIssue(
+							"Failed to get name for "
+									+ OfficeSourceProperty.class
+											.getSimpleName()
+									+ " "
+									+ i
+									+ " from "
+									+ OfficeSourceSpecification.class
+											.getSimpleName() + " for "
+									+ officeSourceClass.getName(), ex, null);
 					return null; // must have complete property details
 				}
 				if (CompileUtil.isBlank(name)) {
@@ -171,6 +179,14 @@ public class OfficeLoaderImpl implements OfficeLoader {
 		if (officeSource == null) {
 			return null; // failed to instantiate
 		}
+
+		// Return loaded office type
+		return this.loadOfficeType(officeSource, officeLocation, propertyList);
+	}
+
+	@Override
+	public OfficeType loadOfficeType(OfficeSource officeSource,
+			String officeLocation, PropertyList propertyList) {
 
 		// Create the office type
 		OfficeNode officeType = new OfficeNodeImpl(officeLocation,

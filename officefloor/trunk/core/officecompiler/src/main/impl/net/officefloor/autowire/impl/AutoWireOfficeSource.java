@@ -27,7 +27,6 @@ import java.util.Map;
 import java.util.Set;
 
 import net.officefloor.autowire.AutoWire;
-import net.officefloor.autowire.AutoWireApplication;
 import net.officefloor.autowire.AutoWireGovernance;
 import net.officefloor.autowire.AutoWireResponsibility;
 import net.officefloor.autowire.AutoWireSection;
@@ -324,6 +323,9 @@ public class AutoWireOfficeSource extends AbstractOfficeSource {
 	 *            {@link OfficeObject} {@link AutoWire}.
 	 * @param extensionInterfaces
 	 *            Extension interfaces available for the {@link OfficeObject}.
+	 *
+	 * @deprecated
+	 * TODO rename to addAvailableOfficeObject
 	 */
 	public void addOfficeObjectExtension(AutoWire autoWire,
 			Class<?>... extensionInterfaces) {
@@ -348,25 +350,12 @@ public class AutoWireOfficeSource extends AbstractOfficeSource {
 	 * 
 	 * @param autoWire
 	 *            {@link AutoWire}.
+	 * 
+	 * @deprecated
+	 * TODO remove and just use addOfficeObjectExtension
 	 */
 	public void addAvailableAutoWire(AutoWire autoWire) {
 		this.availableAutoWiring.add(autoWire);
-	}
-
-	/**
-	 * <p>
-	 * Obtains the used {@link AutoWire}.
-	 * <p>
-	 * This allows identifying only the {@link AutoWire} instances required so
-	 * that a potential wrapping {@link AutoWireApplication} need only load the
-	 * appropriate {@link ManagedObject} instances.
-	 * 
-	 * @return Used {@link AutoWire} instances.
-	 */
-	public AutoWire[] getUsedAutoWiring() {
-		// TODO implement
-		throw new UnsupportedOperationException(
-				"TODO implement getUsedAutoWire");
 	}
 
 	/**

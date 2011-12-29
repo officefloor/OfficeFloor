@@ -30,8 +30,6 @@ import java.util.Map;
 import javax.sql.DataSource;
 import javax.transaction.xa.XAResource;
 
-import org.junit.Ignore;
-
 import net.officefloor.autowire.AutoWire;
 import net.officefloor.autowire.AutoWireGovernance;
 import net.officefloor.autowire.AutoWireResponsibility;
@@ -79,7 +77,6 @@ import net.officefloor.plugin.work.clazz.Qualifier;
  * 
  * @author Daniel Sagenschneider
  */
-@Ignore("TODO provide Used AutoWire instances")
 public class AutoWireOfficeSourceTest extends OfficeFrameTestCase {
 
 	/**
@@ -421,13 +418,6 @@ public class AutoWireOfficeSourceTest extends OfficeFrameTestCase {
 		this.replayMockObjects();
 		source.sourceOffice(this.architect, this.context);
 		this.verifyMockObjects();
-
-		// Validate using auto-wire
-		AutoWire[] usedAutoWiring = source.getUsedAutoWiring();
-		assertEquals("Should only be one used auto-wiring", 1,
-				usedAutoWiring.length);
-		assertEquals("Incorrect used auto-wire",
-				new AutoWire(Connection.class), usedAutoWiring[0]);
 	}
 
 	/**
@@ -471,16 +461,6 @@ public class AutoWireOfficeSourceTest extends OfficeFrameTestCase {
 		this.replayMockObjects();
 		source.sourceOffice(this.architect, this.context);
 		this.verifyMockObjects();
-
-		// Validate using auto-wire
-		AutoWire[] usedAutoWiring = source.getUsedAutoWiring();
-		assertEquals("All auto-wiring should be used", 3, usedAutoWiring.length);
-		assertEquals("Incorrect first used auto-wire", qualifiedConnection,
-				usedAutoWiring[0]);
-		assertEquals("Incorrect second used auto-wire", unqualifiedConnection,
-				usedAutoWiring[1]);
-		assertEquals("Incorrect third used auto-wire", qualifiedString,
-				usedAutoWiring[2]);
 	}
 
 	/**
@@ -514,13 +494,6 @@ public class AutoWireOfficeSourceTest extends OfficeFrameTestCase {
 		this.replayMockObjects();
 		source.sourceOffice(this.architect, this.context);
 		this.verifyMockObjects();
-
-		// Validate using auto-wire
-		AutoWire[] usedAutoWiring = source.getUsedAutoWiring();
-		assertEquals("Should have used auto-wiring", 1, usedAutoWiring.length);
-		assertEquals("Incorrect used auto-wire",
-				new AutoWire(Connection.class), usedAutoWiring[0]);
-
 	}
 
 	/**
@@ -567,10 +540,6 @@ public class AutoWireOfficeSourceTest extends OfficeFrameTestCase {
 		this.replayMockObjects();
 		source.sourceOffice(this.architect, this.context);
 		this.verifyMockObjects();
-
-		// Validate no used auto-wire
-		AutoWire[] usedAutoWiring = source.getUsedAutoWiring();
-		assertEquals("Should be no used auto-wiring", 0, usedAutoWiring.length);
 	}
 
 	/**
@@ -604,10 +573,6 @@ public class AutoWireOfficeSourceTest extends OfficeFrameTestCase {
 		this.replayMockObjects();
 		source.sourceOffice(this.architect, this.context);
 		this.verifyMockObjects();
-
-		// Validate no used auto-wire
-		assertEquals("Should be no used auto-wiring", 0,
-				source.getUsedAutoWiring().length);
 	}
 
 	/**

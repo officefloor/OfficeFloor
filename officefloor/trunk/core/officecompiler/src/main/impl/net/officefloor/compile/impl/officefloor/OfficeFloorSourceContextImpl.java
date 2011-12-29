@@ -29,6 +29,7 @@ import net.officefloor.compile.managedobject.ManagedObjectType;
 import net.officefloor.compile.office.OfficeLoader;
 import net.officefloor.compile.office.OfficeType;
 import net.officefloor.compile.properties.PropertyList;
+import net.officefloor.compile.spi.office.source.OfficeSource;
 import net.officefloor.compile.spi.officefloor.source.OfficeFloorSourceContext;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.impl.construct.source.SourceContextImpl;
@@ -193,6 +194,25 @@ public class OfficeFloorSourceContextImpl extends SourceContextImpl implements
 		// Ensure have the office type
 		if (officeType == null) {
 			throw new LoadTypeError(OfficeType.class, officeSourceClassName);
+		}
+
+		// Return the office type
+		return officeType;
+	}
+
+	@Override
+	public OfficeType loadOfficeType(OfficeSource officeSource,
+			String location, PropertyList properties) {
+
+		// Load the office type
+		OfficeLoader officeLoader = this.context.getOfficeLoader();
+		OfficeType officeType = officeLoader.loadOfficeType(officeSource,
+				location, properties);
+
+		// Ensure have the office type
+		if (officeType == null) {
+			throw new LoadTypeError(OfficeType.class, officeSource.getClass()
+					.getName());
 		}
 
 		// Return the office type

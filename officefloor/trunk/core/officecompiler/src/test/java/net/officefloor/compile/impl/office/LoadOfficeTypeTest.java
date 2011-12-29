@@ -57,6 +57,7 @@ import net.officefloor.compile.spi.office.TypeQualification;
 import net.officefloor.compile.spi.office.source.OfficeSource;
 import net.officefloor.compile.spi.office.source.OfficeSourceContext;
 import net.officefloor.compile.spi.office.source.OfficeSourceSpecification;
+import net.officefloor.compile.test.issues.FailTestCompilerIssues;
 import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
@@ -82,6 +83,50 @@ public class LoadOfficeTypeTest extends AbstractStructureTestCase {
 	protected void setUp() throws Exception {
 		super.setUp();
 		MockOfficeSource.reset();
+	}
+
+	/**
+	 * Ensure able to load by {@link OfficeSource} {@link Class}.
+	 */
+	public void testLoadByClass() {
+
+		// Configure test
+		OfficeFloorCompiler compiler = OfficeFloorCompiler
+				.newOfficeFloorCompiler(null);
+		compiler.setCompilerIssues(new FailTestCompilerIssues());
+
+		// Configure to load simple class
+		PropertyList properties = compiler.createPropertyList();
+		properties.addProperty(MockLoadOfficeSource.PROPERTY_REQUIRED)
+				.setValue("available");
+
+		// Load the office type
+		OfficeLoader officeLoader = compiler.getOfficeLoader();
+		OfficeType officeType = officeLoader.loadOfficeType(
+				MockLoadOfficeSource.class, "LOCATION", properties);
+		MockLoadOfficeSource.assertOfficeType(officeType);
+	}
+
+	/**
+	 * Ensure able to load by {@link OfficeSource} instances.
+	 */
+	public void testLoadByInstance() {
+
+		// Configure test
+		OfficeFloorCompiler compiler = OfficeFloorCompiler
+				.newOfficeFloorCompiler(null);
+		compiler.setCompilerIssues(new FailTestCompilerIssues());
+
+		// Configure to load simple class
+		PropertyList properties = compiler.createPropertyList();
+		properties.addProperty(MockLoadOfficeSource.PROPERTY_REQUIRED)
+				.setValue("available");
+
+		// Load the office type
+		OfficeLoader officeLoader = compiler.getOfficeLoader();
+		OfficeType officeType = officeLoader.loadOfficeType(
+				new MockLoadOfficeSource(), "LOCATION", properties);
+		MockLoadOfficeSource.assertOfficeType(officeType);
 	}
 
 	/**

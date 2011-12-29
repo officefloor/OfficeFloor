@@ -134,4 +134,23 @@ public interface OfficeFloorSourceContext extends SourceContext {
 	OfficeType loadOfficeType(String officeSourceClassName, String location,
 			PropertyList properties);
 
+	/**
+	 * <p>
+	 * Loads the {@link OfficeType}.
+	 * <p>
+	 * This is to enable obtaining the type information for the {@link Office}
+	 * to allow reflective configuration by the {@link OfficeFloorSource}.
+	 * 
+	 * @param officeSource
+	 *            {@link OfficeSource} instance.
+	 * @param location
+	 *            Location of the {@link Office}.
+	 * @param properties
+	 *            {@link PropertyList} to configure the {@link OfficeSource}.
+	 * @return {@link OfficeType} or <code>null</code> if fails to load the
+	 *         {@link OfficeType}.
+	 */
+	OfficeType loadOfficeType(OfficeSource officeSource, String location,
+			PropertyList properties);
+
 }
