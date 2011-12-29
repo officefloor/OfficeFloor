@@ -17,13 +17,17 @@
  */
 package net.officefloor.compile.impl.structure;
 
+import java.util.LinkedList;
+import java.util.List;
+
 import net.officefloor.autowire.AutoWire;
 import net.officefloor.autowire.spi.supplier.source.SupplierSource;
 import net.officefloor.autowire.supplier.SupplierLoader;
-import net.officefloor.autowire.supplier.SupplierType;
+import net.officefloor.autowire.supplier.SupplyOrder;
 import net.officefloor.compile.impl.properties.PropertyListImpl;
 import net.officefloor.compile.internal.structure.NodeContext;
 import net.officefloor.compile.internal.structure.OfficeFloorNode;
+import net.officefloor.compile.internal.structure.SuppliedManagedObjectNode;
 import net.officefloor.compile.internal.structure.SupplierNode;
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.spi.officefloor.OfficeFloorManagedObjectSource;
@@ -63,19 +67,19 @@ public class SupplierNodeImpl implements SupplierNode {
 	private final PropertyList propertyList = new PropertyListImpl();
 
 	/**
+	 * {@link SupplyOrder} instances.
+	 */
+	private final List<SupplyOrder> supplyOrders = new LinkedList<SupplyOrder>();
+
+	/**
 	 * {@link NodeContext}.
 	 */
 	private final NodeContext context;
 
 	/**
-	 * {@link SupplierType}.
+	 * Indicates if the {@link SupplyOrder} instances have been filled.
 	 */
-	private SupplierType supplierType;
-
-	/**
-	 * Indicates if the {@link SupplierType} has been attempted to be loaded.
-	 */
-	private boolean isSupplierTypeLoaded = false;
+	private boolean isSupplyOrdersFilled = false;
 
 	/**
 	 * Initiate.
@@ -118,9 +122,25 @@ public class SupplierNodeImpl implements SupplierNode {
 	@Override
 	public OfficeFloorManagedObjectSource addManagedObjectSource(
 			String managedObjectSourceName, AutoWire autoWire) {
+
+		// Ensure supply orders not yet filled
+		if (this.isSupplyOrdersFilled) {
+			throw new IllegalStateException("Can not add "
+					+ OfficeFloorManagedObjectSource.class.getSimpleName()
+					+ " once " + SupplyOrder.class.getSimpleName()
+					+ " instances are filled");
+		}
+
+		// Create the supplied managed object node
+		SuppliedManagedObjectNode suppliedManagedObjectNode = new SuppliedManagedObjectNodeImpl(
+				autoWire, this);
+
+		// Register the supply order
+		this.supplyOrders.add(suppliedManagedObjectNode);
+
+		// Add and return the managed object source
 		return this.officeFloorNode.addManagedObjectSource(
-				managedObjectSourceName, new SuppliedManagedObjectNodeImpl(
-						autoWire, this, this.context));
+				managedObjectSourceName, suppliedManagedObjectNode);
 	}
 
 	/*
@@ -129,30 +149,28 @@ public class SupplierNodeImpl implements SupplierNode {
 
 	@Override
 	@SuppressWarnings({ "rawtypes", "unchecked" })
-	public SupplierType loadSupplierType() {
+	public void fillSupplyOrders() {
 
-		// Only load the supplier type once (whether successful or not)
-		if (this.isSupplierTypeLoaded) {
-			return this.supplierType;
+		// Only fill supply orders once (whether successful or not)
+		if (this.isSupplyOrdersFilled) {
+			return;
 		}
-		this.isSupplierTypeLoaded = true;
+		this.isSupplyOrdersFilled = true;
 
 		// Load the supplier source class
 		Class supplierSourceClass = this.context.getSupplierSourceClass(
 				this.supplierSourceClassName, this.officeFloorLocation,
 				this.supplierName);
 		if (supplierSourceClass == null) {
-			return null; // must have supplier source class
+			return; // must have supplier source class
 		}
 
-		// Load the supplier type
+		// Fill the supply orders
 		SupplierLoader supplierLoader = this.context.getSupplierLoader(
 				this.officeFloorLocation, this.supplierName);
-		this.supplierType = supplierLoader.loadSupplierType(
-				supplierSourceClass, this.propertyList);
-
-		// Return the supplier type
-		return this.supplierType;
+		supplierLoader.fillSupplyOrders(supplierSourceClass, this.propertyList,
+				this.supplyOrders.toArray(new SupplyOrder[this.supplyOrders
+						.size()]));
 	}
 
 }

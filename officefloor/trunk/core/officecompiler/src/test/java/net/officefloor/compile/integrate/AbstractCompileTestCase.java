@@ -201,7 +201,9 @@ public abstract class AbstractCompileTestCase extends OfficeFrameTestCase {
 			String value = propertyNameValues[i + 1];
 			this.managedObjectBuilder.addProperty(name, value);
 		}
-		this.managedObjectBuilder.setTimeout(timeout);
+		if (timeout > 0) {
+			this.managedObjectBuilder.setTimeout(timeout);
+		}
 		return this.managedObjectBuilder;
 	}
 

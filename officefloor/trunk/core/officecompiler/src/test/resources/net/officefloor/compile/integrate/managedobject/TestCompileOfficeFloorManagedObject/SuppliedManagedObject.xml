@@ -3,7 +3,7 @@
 		<suppliers>
 			<supplier name="SUPPLIER" source="${testcase}$MockSupplierSource">
 				<properties>
-					<property name="PROP_NAME" value="PROP_VALUE" />
+					<property name="SUPPLY_NAME" value="SUPPLY_VALUE" />
 				</properties>
 			</supplier>
 		</suppliers>

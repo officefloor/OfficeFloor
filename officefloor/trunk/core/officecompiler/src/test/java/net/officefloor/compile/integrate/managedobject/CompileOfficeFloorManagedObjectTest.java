@@ -20,9 +20,8 @@ package net.officefloor.compile.integrate.managedobject;
 
 import java.sql.Connection;
 
-import org.junit.Ignore;
-
 import net.officefloor.autowire.AutoWire;
+import net.officefloor.autowire.AutoWireObject;
 import net.officefloor.autowire.AutoWireTeam;
 import net.officefloor.autowire.ManagedObjectSourceWirer;
 import net.officefloor.autowire.ManagedObjectSourceWirerContext;
@@ -68,7 +67,6 @@ import net.officefloor.plugin.work.clazz.FlowInterface;
  * 
  * @author Daniel Sagenschneider
  */
-@Ignore("TODO when able to fill SupplyOrder, implement SuppliedManagedObject loading")
 public class CompileOfficeFloorManagedObjectTest extends
 		AbstractCompileTestCase {
 
@@ -131,7 +129,7 @@ public class CompileOfficeFloorManagedObjectTest extends
 
 		// Record instance (as supplied)
 		this.record_officeFloorBuilder_addManagedObject(
-				"MANAGED_OBJECT_SOURCE", mos, 0, "PROP_NAME", "PROP_VALUE");
+				"MANAGED_OBJECT_SOURCE", mos, 10, "MO_NAME", "MO_VALUE");
 
 		this.record_managedObjectBuilder_setManagingOffice("OFFICE");
 
@@ -162,21 +160,30 @@ public class CompileOfficeFloorManagedObjectTest extends
 		};
 
 		// Record building the office floor
+		OfficeBuilder office = this
+				.record_officeFloorBuilder_addOffice("OFFICE");
+
+		// Record supplied managed object
+		this.record_officeFloorBuilder_addManagedObject(
+				"MANAGED_OBJECT_SOURCE", mos, 10, "MO_NAME", "MO_VALUE");
+
+		// Record the supplied team
 		this.record_officeFloorBuilder_addTeam("MANAGED_OBJECT_SOURCE-team",
 				OnePersonTeamSource.class,
 				OnePersonTeamSource.MAX_WAIT_TIME_PROPERTY_NAME, "200");
-		OfficeBuilder office = this
-				.record_officeFloorBuilder_addOffice("OFFICE");
+		this.record_officeBuilder_registerTeam("MANAGED_OBJECT_SOURCE-team",
+				"MANAGED_OBJECT_SOURCE-team");
+
+		// Record binding supplied managed object for use
 		office.registerManagedObjectSource("MANAGED_OBJECT",
 				"MANAGED_OBJECT_SOURCE");
 		this.recordReturn(office, office.addProcessManagedObject(
 				"MANAGED_OBJECT", "MANAGED_OBJECT"), null);
 
-		// Record instance (as supplied)
-		this.record_officeFloorBuilder_addManagedObject(
-				"MANAGED_OBJECT_SOURCE", mos, 0, "PROP_NAME", "PROP_VALUE");
-
+		// Record as input managed object
 		this.record_managedObjectBuilder_setManagingOffice("OFFICE");
+		this.record_managingOfficeBuilder_setInputManagedObjectName("INPUT_MO");
+		office.setBoundInputManagedObject("INPUT_MO", "MANAGED_OBJECT_SOURCE");
 
 		// Compile the office floor
 		this.compile(true);
@@ -218,12 +225,15 @@ public class CompileOfficeFloorManagedObjectTest extends
 		public void supply(SupplierSourceContext context) throws Exception {
 
 			// Ensure the property is available
-			String value = context.getProperty("PROP_NAME");
-			assertEquals("Incorrect property value", "PROP_VALUE", value);
+			String value = context.getProperty("SUPPLY_NAME");
+			assertEquals("Incorrect property value", "SUPPLY_VALUE", value);
 
 			// Supply the managed object source
-			context.addManagedObject(managedObjectSource, wirer, new AutoWire(
-					"QUALIFIER", Connection.class.getName()));
+			AutoWireObject object = context.addManagedObject(
+					managedObjectSource, wirer, new AutoWire("QUALIFIER",
+							Connection.class.getName()));
+			object.addProperty("MO_NAME", "MO_VALUE");
+			object.setTimeout(10);
 		}
 	}
 
@@ -407,7 +417,7 @@ public class CompileOfficeFloorManagedObjectTest extends
 		this.issues
 				.addIssue(LocationType.OFFICE_FLOOR, "office-floor",
 						AssetType.MANAGED_OBJECT, "MANAGED_OBJECT_SOURCE",
-						"Must provide input managed object as managed object source has flows");
+						"Must provide input managed object as managed object source has flows/teams");
 		managingOffice.linkProcess(0, "SECTION.WORK", "INPUT");
 
 		// Compile the office floor

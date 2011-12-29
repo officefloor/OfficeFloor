@@ -18,6 +18,7 @@
 package net.officefloor.compile.internal.structure;
 
 import net.officefloor.autowire.supplier.SuppliedManagedObject;
+import net.officefloor.autowire.supplier.SupplyOrder;
 import net.officefloor.compile.issues.CompilerIssues;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
 
@@ -26,7 +27,7 @@ import net.officefloor.frame.spi.managedobject.ManagedObject;
  * 
  * @author Daniel Sagenschneider
  */
-public interface SuppliedManagedObjectNode {
+public interface SuppliedManagedObjectNode extends SupplyOrder {
 
 	/**
 	 * <p>

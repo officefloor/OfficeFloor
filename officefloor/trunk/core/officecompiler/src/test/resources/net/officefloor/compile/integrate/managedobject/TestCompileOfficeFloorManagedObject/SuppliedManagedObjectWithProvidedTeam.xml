@@ -3,7 +3,7 @@
 		<suppliers>
 			<supplier name="SUPPLIER" source="${testcase}$MockSupplierSource">
 				<properties>
-					<property name="PROP_NAME" value="PROP_VALUE" />
+					<property name="SUPPLY_NAME" value="SUPPLY_VALUE" />
 				</properties>
 			</supplier>
 		</suppliers>
@@ -11,6 +11,7 @@
 			<managed-object-source name="MANAGED_OBJECT_SOURCE">
 				<supplier name="SUPPLIER" qualifier="QUALIFIER" type="java.sql.Connection" />
 				<managing-office name="OFFICE" />
+				<input-managed-object name="INPUT_MO" />
 			</managed-object-source>
 		</managed-object-sources>
 		<managed-objects>
@@ -18,6 +19,11 @@
 				<managed-object-source name="MANAGED_OBJECT_SOURCE" />
 			</managed-object>
 		</managed-objects>
+		<input-managed-objects>
+			<input-managed-object name="INPUT_MO">
+				<bound-managed-object-source name="MANAGED_OBJECT_SOURCE" />
+			</input-managed-object>
+		</input-managed-objects>
 		<offices>
 			<office name="OFFICE" source="OFFICE" location="office">
 				<object name="OBJECT">
