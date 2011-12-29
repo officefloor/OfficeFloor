@@ -23,6 +23,7 @@ import java.util.Properties;
 
 import net.officefloor.autowire.AutoWire;
 import net.officefloor.autowire.AutoWireObject;
+import net.officefloor.autowire.AutoWireTeam;
 import net.officefloor.autowire.ManagedObjectSourceWirer;
 import net.officefloor.autowire.ManagedObjectSourceWirerContext;
 import net.officefloor.autowire.spi.supplier.source.SupplierSource;
@@ -323,6 +324,68 @@ public class LoadSupplierTypeTest extends OfficeFrameTestCase {
 	 * Mock class for test by similar name.
 	 */
 	public static class SimpleManagedObject {
+	}
+
+	/**
+	 * Ensure configuration items provide correct details.
+	 */
+	public void testAutoWireConfigurationItems() {
+
+		final ManagedObjectSourceWirer wirer = new ManagedObjectSourceWirer() {
+			@Override
+			public void wire(ManagedObjectSourceWirerContext context) {
+
+				// Add the supplied team
+				AutoWireTeam team = context.mapTeam("team", "PASSIVE");
+				team.addProperty("NAME", "VALUE");
+
+				// Validate auto-wire team
+				assertEquals("Incorrect team name", "team", team.getTeamName());
+				assertEquals("Incorrect team source class name", "PASSIVE",
+						team.getTeamSourceClassName());
+				Properties properties = team.getProperties().getProperties();
+				assertEquals("Incorrect number of properties", 1,
+						properties.size());
+				assertEquals("Incorrect team property", "VALUE",
+						properties.getProperty("NAME"));
+				assertEquals(
+						"Should have no responsibilities other than to the managed object",
+						0, team.getResponsibilities().length);
+			}
+		};
+
+		this.loadSuppliedManagedObjectType(new Init() {
+			@Override
+			public void supply(SupplierSourceContext context) throws Exception {
+
+				// Add the managed object
+				MockTypeManagedObjectSource source = new MockTypeManagedObjectSource(
+						Object.class);
+				source.addTeam("team");
+				AutoWireObject object = context.addManagedObject(source, wirer,
+						new AutoWire(Object.class));
+				object.addProperty("NAME", "VALUE");
+				object.setTimeout(1000);
+
+				// Validate auto-wire object
+				assertEquals("Incorrect managed object source class name",
+						MockTypeManagedObjectSource.class.getName(),
+						object.getManagedObjectSourceClassName());
+				assertEquals("Incorrect wirer", wirer,
+						object.getManagedObjectSourceWirer());
+				assertEquals("Incorrect timeout", 1000, object.getTimeout());
+				AutoWire[] autoWiring = object.getAutoWiring();
+				assertEquals("Incorrect number of auto-wiring", 1,
+						autoWiring.length);
+				assertEquals("Incorrect auto-wiring",
+						new AutoWire(Object.class), autoWiring[0]);
+				Properties properties = object.getProperties().getProperties();
+				assertEquals("Incorrect number of properties", 1,
+						properties.size());
+				assertEquals("Incorrect property", "VALUE",
+						properties.getProperty("NAME"));
+			}
+		});
 	}
 
 	/**
