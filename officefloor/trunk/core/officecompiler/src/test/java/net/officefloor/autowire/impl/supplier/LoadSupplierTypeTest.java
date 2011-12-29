@@ -617,7 +617,7 @@ public class LoadSupplierTypeTest extends OfficeFrameTestCase {
 	 *            {@link Property} name value pairs.
 	 * @return Single {@link SuppliedManagedObjectType}.
 	 */
-	public SuppliedManagedObjectType loadSuppliedManagedObjectType(Init init,
+	private SuppliedManagedObjectType loadSuppliedManagedObjectType(Init init,
 			String... propertyNameValuePairs) {
 
 		// Load the supplier type
@@ -666,7 +666,7 @@ public class LoadSupplierTypeTest extends OfficeFrameTestCase {
 	 *            {@link Property} name value pairs.
 	 * @return Loaded {@link SupplierType}.
 	 */
-	public SupplierType loadSupplierType(boolean isExpectedToLoad, Init init,
+	private SupplierType loadSupplierType(boolean isExpectedToLoad, Init init,
 			String... propertyNameValuePairs) {
 
 		// Replay mock objects

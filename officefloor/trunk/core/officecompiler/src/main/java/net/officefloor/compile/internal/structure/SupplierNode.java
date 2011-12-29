@@ -17,6 +17,7 @@
  */
 package net.officefloor.compile.internal.structure;
 
+import net.officefloor.autowire.supplier.SupplierType;
 import net.officefloor.compile.spi.officefloor.OfficeFloorSupplier;
 
 /**
@@ -25,4 +26,12 @@ import net.officefloor.compile.spi.officefloor.OfficeFloorSupplier;
  * @author Daniel Sagenschneider
  */
 public interface SupplierNode extends OfficeFloorSupplier {
+
+	/**
+	 * Loads the {@link SupplierType}.
+	 * 
+	 * @return {@link SupplierType}.
+	 */
+	SupplierType loadSupplierType();
+
 }

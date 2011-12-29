@@ -210,7 +210,9 @@ public class OfficeFloorNodeImpl extends AbstractNode implements
 		SupplierNode supplier = this.suppliers.get(supplierName);
 		if (supplier == null) {
 			// Add the supplier
-			supplier = new SupplierNodeImpl(supplierName, this);
+			supplier = new SupplierNodeImpl(supplierName,
+					supplierSourceClassName, this, this.officeFloorLocation,
+					this.context);
 			this.suppliers.put(supplierName, supplier);
 		} else {
 			// Supplier already added

@@ -20,6 +20,8 @@ package net.officefloor.compile.integrate.managedobject;
 
 import java.sql.Connection;
 
+import org.junit.Ignore;
+
 import net.officefloor.autowire.AutoWire;
 import net.officefloor.autowire.AutoWireTeam;
 import net.officefloor.autowire.ManagedObjectSourceWirer;
@@ -61,14 +63,12 @@ import net.officefloor.plugin.managedobject.clazz.Dependency;
 import net.officefloor.plugin.work.clazz.ClassWorkSource;
 import net.officefloor.plugin.work.clazz.FlowInterface;
 
-import org.junit.Ignore;
-
 /**
  * Tests compiling a {@link OfficeFloor} {@link ManagedObject}.
  * 
  * @author Daniel Sagenschneider
  */
-@Ignore("TODO implement supplying managed object sources")
+@Ignore("TODO when able to fill SupplyOrder, implement SuppliedManagedObject loading")
 public class CompileOfficeFloorManagedObjectTest extends
 		AbstractCompileTestCase {
 

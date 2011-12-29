@@ -21,6 +21,7 @@ package net.officefloor.compile.impl.structure;
 import java.util.HashMap;
 import java.util.Map;
 
+import net.officefloor.autowire.supplier.SuppliedManagedObject;
 import net.officefloor.compile.impl.properties.PropertyListImpl;
 import net.officefloor.compile.impl.util.CompileUtil;
 import net.officefloor.compile.impl.util.LinkUtil;
@@ -420,38 +421,53 @@ public class ManagedObjectSourceNodeImpl implements ManagedObjectSourceNode {
 		}
 		this.isManagedObjectTypeLoaded = true;
 
-		// Create the loader to obtain the managed object type
-		ManagedObjectLoader loader = this.context.getManagedObjectLoader(
-				this.locationType, this.location, this.managedObjectSourceName);
+		// Determine if supplied
+		if (this.suppliedManagedObjectNode != null) {
+			// Ensure supplied managed object is loaded
+			this.suppliedManagedObjectNode.loadSuppliedManagedObject();
 
-		// Load the managed object type
-		if (this.managedObjectSource != null) {
-			// Load the managed object type from instance
-			this.managedObjectType = loader.loadManagedObjectType(
-					this.managedObjectSource, this.propertyList);
+			// Obtain the supplied managed object type
+			SuppliedManagedObject<?, ?> suppliedManagedObject = this.suppliedManagedObjectNode
+					.getSuppliedManagedObject();
+			this.managedObjectType = suppliedManagedObject
+					.getManagedObjectType();
 
 		} else {
-			// Obtain the managed object source class
-			Class managedObjectSourceClass = this.context
-					.getManagedObjectSourceClass(
-							this.managedObjectSourceClassName,
-							this.locationType, this.location,
-							this.managedObjectSourceName);
-			if (managedObjectSourceClass == null) {
-				return; // must have managed object source class
+
+			// Create the loader to obtain the managed object type
+			ManagedObjectLoader loader = this.context.getManagedObjectLoader(
+					this.locationType, this.location,
+					this.managedObjectSourceName);
+
+			// Load the managed object type
+			if (this.managedObjectSource != null) {
+				// Load the managed object type from instance
+				this.managedObjectType = loader.loadManagedObjectType(
+						this.managedObjectSource, this.propertyList);
+
+			} else {
+				// Obtain the managed object source class
+				Class managedObjectSourceClass = this.context
+						.getManagedObjectSourceClass(
+								this.managedObjectSourceClassName,
+								this.locationType, this.location,
+								this.managedObjectSourceName);
+				if (managedObjectSourceClass == null) {
+					return; // must have managed object source class
+				}
+
+				// Load the managed object type from class
+				this.managedObjectType = loader.loadManagedObjectType(
+						managedObjectSourceClass, this.propertyList);
 			}
 
-			// Load the managed object type from class
-			this.managedObjectType = loader.loadManagedObjectType(
-					managedObjectSourceClass, this.propertyList);
-		}
-
-		// Ensure all the teams are made available
-		if (this.managedObjectType != null) {
-			for (ManagedObjectTeamType teamType : this.managedObjectType
-					.getTeamTypes()) {
-				// Obtain team (ensures any missing teams are added)
-				this.getManagedObjectTeam(teamType.getTeamName());
+			// Ensure all the teams are made available
+			if (this.managedObjectType != null) {
+				for (ManagedObjectTeamType teamType : this.managedObjectType
+						.getTeamTypes()) {
+					// Obtain team (ensures any missing teams are added)
+					this.getManagedObjectTeam(teamType.getTeamName());
+				}
 			}
 		}
 	}

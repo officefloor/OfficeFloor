@@ -17,7 +17,13 @@
  */
 package net.officefloor.compile.impl.structure;
 
+import net.officefloor.autowire.AutoWire;
+import net.officefloor.autowire.supplier.SuppliedManagedObject;
+import net.officefloor.autowire.supplier.SupplierType;
+import net.officefloor.compile.internal.structure.NodeContext;
 import net.officefloor.compile.internal.structure.SuppliedManagedObjectNode;
+import net.officefloor.compile.internal.structure.SupplierNode;
+import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 
 /**
  * {@link SuppliedManagedObjectNodeImpl}.
@@ -25,4 +31,63 @@ import net.officefloor.compile.internal.structure.SuppliedManagedObjectNode;
  * @author Daniel Sagenschneider
  */
 public class SuppliedManagedObjectNodeImpl implements SuppliedManagedObjectNode {
+
+	/**
+	 * {@link AutoWire} to identify the supplied {@link ManagedObjectSource}.
+	 */
+	private final AutoWire autoWire;
+
+	/**
+	 * {@link SupplierNode}.
+	 */
+	private final SupplierNode supplierNode;
+
+	/**
+	 * {@link NodeContext}.
+	 */
+	private final NodeContext context;
+
+	/**
+	 * Initiate.
+	 * 
+	 * @param autoWire
+	 *            {@link AutoWire} to identify the supplied
+	 *            {@link ManagedObjectSource}.
+	 * @param supplierNode
+	 *            {@link SupplierNode}.
+	 * @param context
+	 *            {@link NodeContext}.
+	 */
+	public SuppliedManagedObjectNodeImpl(AutoWire autoWire,
+			SupplierNode supplierNode, NodeContext context) {
+		this.autoWire = autoWire;
+		this.supplierNode = supplierNode;
+		this.context = context;
+	}
+
+	/*
+	 * ===================== SuppliedManagedObjectNode =================
+	 */
+
+	@Override
+	public void loadSuppliedManagedObject() {
+
+		// Load the supplier type
+		SupplierType supplierType = this.supplierNode.loadSupplierType();
+		if (supplierType == null) {
+			return; // no supplier type, so no supply of managed objects
+		}
+
+		// TODO implement SuppliedManagedObjectNode.loadSuppliedManagedObject
+		throw new UnsupportedOperationException(
+				"TODO implement SuppliedManagedObjectNode.loadSuppliedManagedObject");
+	}
+
+	@Override
+	public SuppliedManagedObject<?, ?> getSuppliedManagedObject() {
+		// TODO implement SuppliedManagedObjectNode.getSuppliedManagedObject
+		throw new UnsupportedOperationException(
+				"TODO implement SuppliedManagedObjectNode.getSuppliedManagedObject");
+	}
+
 }
