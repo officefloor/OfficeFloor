@@ -2,6 +2,28 @@
 <marshall type="net.officefloor.model.officefloor.OfficeFloorModel"
 	element="office-floor">
 
+	<!-- SUPPLIERS -->
+	<collection method="getOfficeFloorSuppliers" element="suppliers">
+		<item type="net.officefloor.model.officefloor.OfficeFloorSupplierModel"
+			element="supplier">
+			<attributes>
+				<attribute method="getOfficeFloorSupplierName" attribute="name" />
+				<attribute method="getSupplierSourceClassName" attribute="source" />
+				<attribute method="getX" attribute="x" />
+				<attribute method="getY" attribute="y" />
+			</attributes>
+			<collection method="getProperties" element="properties">
+				<item type="net.officefloor.model.officefloor.PropertyModel"
+					element="property">
+					<attributes>
+						<attribute method="getName" attribute="name" />
+						<attribute method="getValue" attribute="value" />
+					</attributes>
+				</item>
+			</collection>
+		</item>
+	</collection>
+
 	<!-- MANAGED OBJECT SOURCES -->
 	<collection method="getOfficeFloorManagedObjectSources"
 		element="managed-object-sources">
@@ -27,6 +49,13 @@
 					</attributes>
 				</item>
 			</collection>
+			<object method="getOfficeFloorSupplier" element="supplier">
+				<attributes>
+					<attribute method="getOfficeFloorSupplierName" attribute="name" />
+					<attribute method="getAutoWireType" attribute="type" />
+					<attribute method="getAutoWireQualifier" attribute="qualifier" />
+				</attributes>
+			</object>
 			<object method="getManagingOffice" element="managing-office">
 				<attributes>
 					<attribute method="getManagingOfficeName" attribute="name" />

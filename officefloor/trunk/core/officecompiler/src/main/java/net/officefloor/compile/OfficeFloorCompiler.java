@@ -23,6 +23,7 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.ServiceLoader;
 
+import net.officefloor.autowire.spi.supplier.source.SupplierSource;
 import net.officefloor.autowire.supplier.SupplierLoader;
 import net.officefloor.compile.administrator.AdministratorLoader;
 import net.officefloor.compile.governance.GovernanceLoader;
@@ -327,6 +328,13 @@ public abstract class OfficeFloorCompiler {
 					service.getManagedObjectSourceClass());
 		}
 
+		// Add the supplier source aliases from the class path
+		for (SupplierSourceService<?> service : ServiceLoader.load(
+				SupplierSourceService.class, this.getClassLoader())) {
+			this.addSupplierSourceAlias(service.getSupplierSourceAlias(),
+					service.getSupplierSourceClass());
+		}
+
 		// Add the administrator source aliases from the class path
 		for (AdministratorSourceService<?, ?, ?> service : ServiceLoader.load(
 				AdministratorSourceService.class, this.getClassLoader())) {
@@ -498,7 +506,7 @@ public abstract class OfficeFloorCompiler {
 	 * 
 	 * @param alias
 	 *            Alias name for the {@link WorkSource}.
-	 * @param sectionSourceClass
+	 * @param workSourceClass
 	 *            {@link WorkSource} {@link Class} for the alias.
 	 */
 	public abstract <W extends Work, S extends WorkSource<W>> void addWorkSourceAlias(
@@ -520,11 +528,33 @@ public abstract class OfficeFloorCompiler {
 	 * 
 	 * @param alias
 	 *            Alias name for the {@link ManagedObjectSource}.
-	 * @param sectionSourceClass
+	 * @param managedObjectSourceClass
 	 *            {@link ManagedObjectSource} {@link Class} for the alias.
 	 */
 	public abstract <D extends Enum<D>, F extends Enum<F>, S extends ManagedObjectSource<D, F>> void addManagedObjectSourceAlias(
 			String alias, Class<S> managedObjectSourceClass);
+
+	/**
+	 * <p>
+	 * Allows providing an alias name for a {@link SupplierSource}.
+	 * <p>
+	 * This stops the configuration files from being littered with fully
+	 * qualified class names of the {@link SupplierSource} classes. This is
+	 * anticipated to allow flexibility as the functionality evolves so that
+	 * relocating/renaming classes does not require significant configuration
+	 * changes.
+	 * <p>
+	 * Typically this should not be used directly as the
+	 * {@link SupplierSourceService} is the preferred means to provide
+	 * {@link SupplierSource} aliases.
+	 * 
+	 * @param alias
+	 *            Alias name for the {@link SupplierSource}.
+	 * @param supplierSourceClass
+	 *            {@link SupplierSource} {@link Class} for the alias.
+	 */
+	public abstract <S extends SupplierSource> void addSupplierSourceAlias(
+			String alias, Class<S> supplierSourceClass);
 
 	/**
 	 * <p>
@@ -542,7 +572,7 @@ public abstract class OfficeFloorCompiler {
 	 * 
 	 * @param alias
 	 *            Alias name for the {@link AdministratorSource}.
-	 * @param sectionSourceClass
+	 * @param administratorSourceClass
 	 *            {@link AdministratorSource} {@link Class} for the alias.
 	 */
 	public abstract <I, A extends Enum<A>, S extends AdministratorSource<I, A>> void addAdministratorSourceAlias(
@@ -586,7 +616,7 @@ public abstract class OfficeFloorCompiler {
 	 * 
 	 * @param alias
 	 *            Alias name for the {@link TeamSource}.
-	 * @param sectionSourceClass
+	 * @param teamSourceClass
 	 *            {@link TeamSource} {@link Class} for the alias.
 	 */
 	public abstract <S extends TeamSource> void addTeamSourceAlias(

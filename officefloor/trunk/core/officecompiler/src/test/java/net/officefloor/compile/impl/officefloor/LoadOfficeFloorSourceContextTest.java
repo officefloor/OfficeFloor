@@ -22,8 +22,6 @@ import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.util.Properties;
 
-import org.junit.Ignore;
-
 import net.officefloor.autowire.impl.supplier.MockLoadSupplierSource;
 import net.officefloor.autowire.supplier.SupplierType;
 import net.officefloor.compile.impl.managedobject.MockLoadManagedObject;
@@ -47,7 +45,6 @@ import net.officefloor.plugin.managedobject.clazz.ClassManagedObjectSource;
  * 
  * @author Daniel Sagenschneider
  */
-@Ignore("TODO implement SupplierLoaderImpl")
 public class LoadOfficeFloorSourceContextTest extends
 		AbstractOfficeFloorTestCase {
 
@@ -406,8 +403,9 @@ public class LoadOfficeFloorSourceContextTest extends
 
 		// Ensure issue in not loading supplier type
 		this.issues.addIssue(LocationType.OFFICE_FLOOR, OFFICE_FLOOR_LOCATION,
-				AssetType.MANAGED_OBJECT, "loadSupplierType",
-				"Missing property 'TEST'");
+				null, "loadSupplierType",
+				"Missing property 'TEST' for SupplierSource "
+						+ MockLoadSupplierSource.class.getName());
 		this.record_officefloor_issue("Failure loading SupplierType from source "
 				+ MockLoadSupplierSource.class.getName());
 

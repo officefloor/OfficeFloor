@@ -23,6 +23,7 @@ import java.util.List;
 
 import net.officefloor.autowire.AutoWire;
 import net.officefloor.autowire.impl.SingletonManagedObjectSource;
+import net.officefloor.autowire.spi.supplier.source.SupplierSource;
 import net.officefloor.autowire.supplier.SupplierLoader;
 import net.officefloor.compile.OfficeFloorCompiler;
 import net.officefloor.compile.administrator.AdministratorLoader;
@@ -265,6 +266,13 @@ public class OfficeFloorCompilerAdapter extends OfficeFloorCompiler {
 			String alias, Class<S> managedObjectSourceClass) {
 		this.invokeMethod("addManagedObjectSourceAlias", new Object[] { alias,
 				managedObjectSourceClass }, String.class, Class.class);
+	}
+
+	@Override
+	public <S extends SupplierSource> void addSupplierSourceAlias(String alias,
+			Class<S> supplierSourceClass) {
+		this.invokeMethod("addSupplierSourceAlias", new Object[] { alias,
+				supplierSourceClass }, String.class, Class.class);
 	}
 
 	@Override

@@ -37,6 +37,7 @@ import net.officefloor.compile.internal.structure.NodeContext;
 import net.officefloor.compile.internal.structure.OfficeNode;
 import net.officefloor.compile.internal.structure.OfficeTeamNode;
 import net.officefloor.compile.internal.structure.SectionNode;
+import net.officefloor.compile.internal.structure.SuppliedManagedObjectNode;
 import net.officefloor.compile.internal.structure.TaskNode;
 import net.officefloor.compile.internal.structure.TeamNode;
 import net.officefloor.compile.internal.structure.WorkNode;
@@ -86,15 +87,22 @@ public class ManagedObjectSourceNodeImpl implements ManagedObjectSourceNode {
 	private final String managedObjectSourceName;
 
 	/**
-	 * Class name of the {@link ManagedObjectSource}.
+	 * {@link SuppliedManagedObjectNode} should this be a supplied
+	 * {@link ManagedObjectSource}. Will be <code>null</code> if not supplied.
 	 */
-	private final String managedObjectSourceClassName;
+	private final SuppliedManagedObjectNode suppliedManagedObjectNode;
 
 	/**
 	 * {@link ManagedObjectSource} instance to use. If this is specified its use
-	 * overrides the {@link Class}.
+	 * overrides the {@link Class}. Will be <code>null</code> if not to
+	 * override.
 	 */
 	private final ManagedObjectSource<?, ?> managedObjectSource;
+
+	/**
+	 * Class name of the {@link ManagedObjectSource}.
+	 */
+	private final String managedObjectSourceClassName;
 
 	/**
 	 * {@link PropertyList} to load the {@link ManagedObjectSource}.
@@ -242,8 +250,9 @@ public class ManagedObjectSourceNodeImpl implements ManagedObjectSourceNode {
 			Map<String, ManagedObjectNode> locationManagedObjects,
 			NodeContext context) {
 		this.managedObjectSourceName = managedObjectSourceName;
-		this.managedObjectSourceClassName = managedObjectSourceClassName;
+		this.suppliedManagedObjectNode = null;
 		this.managedObjectSource = null;
+		this.managedObjectSourceClassName = managedObjectSourceClassName;
 		this.locationType = locationType;
 		this.location = location;
 		this.containingSectionNode = containingSectionNode;
@@ -287,8 +296,56 @@ public class ManagedObjectSourceNodeImpl implements ManagedObjectSourceNode {
 			Map<String, ManagedObjectNode> locationManagedObjects,
 			NodeContext context) {
 		this.managedObjectSourceName = managedObjectSourceName;
-		this.managedObjectSourceClassName = null;
+		this.suppliedManagedObjectNode = null;
 		this.managedObjectSource = managedObjectSource;
+		this.managedObjectSourceClassName = null;
+		this.locationType = locationType;
+		this.location = location;
+		this.containingSectionNode = containingSectionNode;
+		this.containingOfficeNode = containingOfficeNode;
+		this.locationManagedObjects = locationManagedObjects;
+		this.context = context;
+	}
+
+	/**
+	 * Initiate.
+	 * 
+	 * @param managedObjectSourceName
+	 *            Name of this {@link ManagedObjectSource}.
+	 * @param suppliedManagedobjectNode
+	 *            {@link SuppliedManagedObjectNode} to use to supply this
+	 *            {@link ManagedObjectSource}.
+	 * @param locationType
+	 *            {@link LocationType} of the location containing this
+	 *            {@link ManagedObjectSource}.
+	 * @param location
+	 *            Location containing this {@link ManagedObjectSource}.
+	 * @param containingOfficeNode
+	 *            {@link OfficeNode} containing this
+	 *            {@link ManagedObjectSourceNode}. <code>null</code> if
+	 *            contained in the {@link OfficeFloor}.
+	 * @param containingSectionNode
+	 *            {@link SectionNode} containing this
+	 *            {@link ManagedObjectSourceNode}. <code>null</code> if
+	 *            contained in the {@link Office} or {@link OfficeFloor}.
+	 * @param locationManagedObjects
+	 *            Registry of all {@link ManagedObjectNode} instances within a
+	 *            location. This allows to check that no other
+	 *            {@link ManagedObjectNode} instances are added by other
+	 *            {@link ManagedObjectSourceNode} with the same name.
+	 * @param context
+	 *            {@link NodeContext}.
+	 */
+	public ManagedObjectSourceNodeImpl(String managedObjectSourceName,
+			SuppliedManagedObjectNode suppliedManagedobjectNode,
+			LocationType locationType, String location,
+			SectionNode containingSectionNode, OfficeNode containingOfficeNode,
+			Map<String, ManagedObjectNode> locationManagedObjects,
+			NodeContext context) {
+		this.managedObjectSourceName = managedObjectSourceName;
+		this.suppliedManagedObjectNode = suppliedManagedobjectNode;
+		this.managedObjectSource = null;
+		this.managedObjectSourceClassName = null;
 		this.locationType = locationType;
 		this.location = location;
 		this.containingSectionNode = containingSectionNode;

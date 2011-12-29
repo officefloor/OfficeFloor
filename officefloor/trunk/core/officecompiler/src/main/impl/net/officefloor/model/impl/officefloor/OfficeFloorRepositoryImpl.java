@@ -44,9 +44,11 @@ import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceTeamModel
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceTeamToOfficeFloorTeamModel;
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceToDeployedOfficeModel;
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceToOfficeFloorInputManagedObjectModel;
+import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceToOfficeFloorSupplierModel;
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectToOfficeFloorManagedObjectSourceModel;
 import net.officefloor.model.officefloor.OfficeFloorModel;
 import net.officefloor.model.officefloor.OfficeFloorRepository;
+import net.officefloor.model.officefloor.OfficeFloorSupplierModel;
 import net.officefloor.model.officefloor.OfficeFloorTeamModel;
 import net.officefloor.model.repository.ConfigurationItem;
 import net.officefloor.model.repository.ModelRepository;
@@ -85,13 +87,37 @@ public class OfficeFloorRepositoryImpl implements OfficeFloorRepository {
 		OfficeFloorModel officeFloor = this.modelRepository.retrieve(
 				new OfficeFloorModel(), configuration);
 
+		// Create the set of office floor suppliers
+		Map<String, OfficeFloorSupplierModel> suppliers = new HashMap<String, OfficeFloorSupplierModel>();
+		for (OfficeFloorSupplierModel supplier : officeFloor
+				.getOfficeFloorSuppliers()) {
+			suppliers.put(supplier.getOfficeFloorSupplierName(), supplier);
+		}
+
+		// Connect the managed object sources to their suppliers
+		for (OfficeFloorManagedObjectSourceModel managedObjectSource : officeFloor
+				.getOfficeFloorManagedObjectSources()) {
+			OfficeFloorManagedObjectSourceToOfficeFloorSupplierModel conn = managedObjectSource
+					.getOfficeFloorSupplier();
+			if (conn != null) {
+				OfficeFloorSupplierModel supplier = suppliers.get(conn
+						.getOfficeFloorSupplierName());
+				if (supplier != null) {
+					conn.setOfficeFloorManagedObjectSource(managedObjectSource);
+					conn.setOfficeFloorSupplier(supplier);
+					conn.connect();
+				}
+			}
+		}
+
 		// Create the set of office floor managed object sources
 		Map<String, OfficeFloorManagedObjectSourceModel> managedObjectSources = new HashMap<String, OfficeFloorManagedObjectSourceModel>();
 		for (OfficeFloorManagedObjectSourceModel managedObjectSource : officeFloor
 				.getOfficeFloorManagedObjectSources()) {
-			managedObjectSources.put(managedObjectSource
-					.getOfficeFloorManagedObjectSourceName(),
-					managedObjectSource);
+			managedObjectSources
+					.put(managedObjectSource
+							.getOfficeFloorManagedObjectSourceName(),
+							managedObjectSource);
 		}
 
 		// Connect the managed objects to their managed object sources
@@ -136,10 +162,9 @@ public class OfficeFloorRepositoryImpl implements OfficeFloorRepository {
 		Map<String, OfficeFloorInputManagedObjectModel> inputManagedObjects = new HashMap<String, OfficeFloorInputManagedObjectModel>();
 		for (OfficeFloorInputManagedObjectModel inputManagedObject : officeFloor
 				.getOfficeFloorInputManagedObjects()) {
-			inputManagedObjects
-					.put(inputManagedObject
-							.getOfficeFloorInputManagedObjectName(),
-							inputManagedObject);
+			inputManagedObjects.put(
+					inputManagedObject.getOfficeFloorInputManagedObjectName(),
+					inputManagedObject);
 		}
 
 		// Connect the managed object source to its input managed object
@@ -179,9 +204,9 @@ public class OfficeFloorRepositoryImpl implements OfficeFloorRepository {
 		for (DeployedOfficeModel office : officeFloor.getDeployedOffices()) {
 			for (DeployedOfficeInputModel officeInput : office
 					.getDeployedOfficeInputs()) {
-				officeInputs.put(office.getDeployedOfficeName(), officeInput
-						.getSectionName(), officeInput.getSectionInputName(),
-						officeInput);
+				officeInputs.put(office.getDeployedOfficeName(),
+						officeInput.getSectionName(),
+						officeInput.getSectionInputName(), officeInput);
 			}
 		}
 
@@ -224,8 +249,7 @@ public class OfficeFloorRepositoryImpl implements OfficeFloorRepository {
 					OfficeFloorManagedObjectModel managedObject = managedObjects
 							.get(conn.getOfficeFloorManagedObjectName());
 					if (managedObject != null) {
-						conn
-								.setOfficeFloorManagedObjectDependency(inputDependency);
+						conn.setOfficeFloorManagedObjectDependency(inputDependency);
 						conn.setOfficeFloorManagedObject(managedObject);
 						conn.connect();
 					}
@@ -281,8 +305,7 @@ public class OfficeFloorRepositoryImpl implements OfficeFloorRepository {
 							.get(conn.getOfficeFloorManagedObjectName());
 					if (dependentManagedObject != null) {
 						conn.setOfficeFloorManagedObjectDependency(dependency);
-						conn
-								.setOfficeFloorManagedObject(dependentManagedObject);
+						conn.setOfficeFloorManagedObject(dependentManagedObject);
 						conn.connect();
 					}
 				}
@@ -301,8 +324,7 @@ public class OfficeFloorRepositoryImpl implements OfficeFloorRepository {
 							.get(conn.getOfficeFloorInputManagedObjectName());
 					if (dependentManagedObject != null) {
 						conn.setOfficeFloorManagedObjectDependency(dependency);
-						conn
-								.setOfficeFloorInputManagedObject(dependentManagedObject);
+						conn.setOfficeFloorInputManagedObject(dependentManagedObject);
 						conn.connect();
 					}
 				}
@@ -359,6 +381,16 @@ public class OfficeFloorRepositoryImpl implements OfficeFloorRepository {
 	@Override
 	public void storeOfficeFloor(OfficeFloorModel officeFloor,
 			ConfigurationItem configuration) throws Exception {
+
+		// Specify the suppliers for the managed object sources
+		for (OfficeFloorSupplierModel supplier : officeFloor
+				.getOfficeFloorSuppliers()) {
+			for (OfficeFloorManagedObjectSourceToOfficeFloorSupplierModel conn : supplier
+					.getOfficeFloorManagedObjectSources()) {
+				conn.setOfficeFloorSupplierName(supplier
+						.getOfficeFloorSupplierName());
+			}
+		}
 
 		// Specify managed object sources for the managed objects
 		for (OfficeFloorManagedObjectSourceModel moSource : officeFloor

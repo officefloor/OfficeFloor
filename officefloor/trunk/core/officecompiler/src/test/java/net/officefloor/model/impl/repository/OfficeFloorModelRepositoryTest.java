@@ -21,8 +21,6 @@ package net.officefloor.model.impl.repository;
 import java.sql.Connection;
 import java.util.List;
 
-import org.junit.Ignore;
-
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.model.RemoveConnectionsAction;
 import net.officefloor.model.desk.DeskModel;
@@ -65,7 +63,6 @@ import net.officefloor.model.repository.ModelRepository;
  * 
  * @author Daniel Sagenschneider
  */
-@Ignore("TODO add unmarshalling/marshalling of OfficeFloorSupplierModel")
 public class OfficeFloorModelRepositoryTest extends OfficeFrameTestCase {
 
 	/**
@@ -120,8 +117,8 @@ public class OfficeFloorModelRepositoryTest extends OfficeFrameTestCase {
 						null, null, null, null, 100, 101),
 				new OfficeFloorManagedObjectSourceModel(
 						"SUPPLIED_MANAGED_OBJECT_SOURCE", null,
-						"java.sql.Connection", "0", null, null, null, null,
-						null, null, null, null, null, 100, 101));
+						"net.orm.Session", null, null, null, null, null, null,
+						null, null, null, null, 110, 111));
 		List<OfficeFloorManagedObjectSourceModel> moSources = officeFloor
 				.getOfficeFloorManagedObjectSources();
 

@@ -29,6 +29,8 @@ import net.officefloor.compile.internal.structure.ManagedObjectSourceNode;
 import net.officefloor.compile.internal.structure.NodeContext;
 import net.officefloor.compile.internal.structure.OfficeFloorNode;
 import net.officefloor.compile.internal.structure.OfficeNode;
+import net.officefloor.compile.internal.structure.SuppliedManagedObjectNode;
+import net.officefloor.compile.internal.structure.SupplierNode;
 import net.officefloor.compile.internal.structure.TeamNode;
 import net.officefloor.compile.issues.CompilerIssues.LocationType;
 import net.officefloor.compile.spi.office.ManagedObjectTeam;
@@ -88,6 +90,11 @@ public class OfficeFloorNodeImpl extends AbstractNode implements
 	 * {@link OfficeFloorManagedObject} name.
 	 */
 	private final Map<String, ManagedObjectNode> managedObjects = new HashMap<String, ManagedObjectNode>();
+
+	/**
+	 * {@link SupplierNode} instances by their {@link OfficeFloorSupplier} name.
+	 */
+	private final Map<String, SupplierNode> suppliers = new HashMap<String, SupplierNode>();
 
 	/**
 	 * {@link TeamNode} instances by their {@link OfficeFloorTeam} name.
@@ -199,9 +206,18 @@ public class OfficeFloorNodeImpl extends AbstractNode implements
 	@Override
 	public OfficeFloorSupplier addSupplier(String supplierName,
 			String supplierSourceClassName) {
-		// TODO implement OfficeFloorDeployer.addSupplier
-		throw new UnsupportedOperationException(
-				"TODO implement OfficeFloorDeployer.addSupplier");
+		// Obtain and return the supplier for the name
+		SupplierNode supplier = this.suppliers.get(supplierName);
+		if (supplier == null) {
+			// Add the supplier
+			supplier = new SupplierNodeImpl(supplierName, this);
+			this.suppliers.put(supplierName, supplier);
+		} else {
+			// Supplier already added
+			this.addIssue("Office floor supplier " + supplierName
+					+ " already added");
+		}
+		return supplier;
 	}
 
 	@Override
@@ -330,6 +346,31 @@ public class OfficeFloorNodeImpl extends AbstractNode implements
 	/*
 	 * ===================== OfficeFloorNode ==================================
 	 */
+
+	@Override
+	public OfficeFloorManagedObjectSource addManagedObjectSource(
+			String managedObjectSourceName,
+			SuppliedManagedObjectNode suppliedManagedObject) {
+		// Obtain and return the managed object source for the name
+		ManagedObjectSourceNode mo = this.managedObjectSources
+				.get(managedObjectSourceName);
+		if (mo == null) {
+			// Create the managed object source and have in office floor context
+			mo = new ManagedObjectSourceNodeImpl(managedObjectSourceName,
+					suppliedManagedObject, LocationType.OFFICE_FLOOR,
+					this.officeFloorLocation, null, null, this.managedObjects,
+					this.context);
+			mo.addOfficeFloorContext(this.officeFloorLocation);
+
+			// Add the managed object source
+			this.managedObjectSources.put(managedObjectSourceName, mo);
+		} else {
+			// Managed object source already added
+			this.addIssue("Office floor managed object source "
+					+ managedObjectSourceName + " already added");
+		}
+		return mo;
+	}
 
 	@Override
 	public OfficeFloor deployOfficeFloor(OfficeFrame officeFrame) {

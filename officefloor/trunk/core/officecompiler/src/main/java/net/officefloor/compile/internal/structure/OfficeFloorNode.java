@@ -19,6 +19,8 @@
 package net.officefloor.compile.internal.structure;
 
 import net.officefloor.compile.spi.officefloor.OfficeFloorDeployer;
+import net.officefloor.compile.spi.officefloor.OfficeFloorManagedObjectSource;
+import net.officefloor.compile.spi.officefloor.OfficeFloorSupplier;
 import net.officefloor.frame.api.OfficeFrame;
 import net.officefloor.frame.api.manage.OfficeFloor;
 
@@ -28,6 +30,21 @@ import net.officefloor.frame.api.manage.OfficeFloor;
  * @author Daniel Sagenschneider
  */
 public interface OfficeFloorNode extends OfficeFloorDeployer {
+
+	/**
+	 * Adds a {@link OfficeFloorManagedObjectSource} supplied from an
+	 * {@link OfficeFloorSupplier}.
+	 * 
+	 * @param managedObjectSourceName
+	 *            Name of the {@link OfficeFloorManagedObjectSource}.
+	 * @param suppliedManagedObject
+	 *            {@link SuppliedManagedObjectNode} to supply the
+	 *            {@link OfficeFloorManagedObjectSource}.
+	 * @return {@link OfficeFloorManagedObjectSource}.
+	 */
+	OfficeFloorManagedObjectSource addManagedObjectSource(
+			String managedObjectSourceName,
+			SuppliedManagedObjectNode suppliedManagedObject);
 
 	/**
 	 * Deploys the {@link OfficeFloor}.

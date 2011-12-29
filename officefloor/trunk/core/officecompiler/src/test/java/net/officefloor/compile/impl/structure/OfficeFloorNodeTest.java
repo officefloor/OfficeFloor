@@ -20,8 +20,6 @@ package net.officefloor.compile.impl.structure;
 
 import java.sql.Connection;
 
-import org.junit.Ignore;
-
 import net.officefloor.autowire.AutoWire;
 import net.officefloor.autowire.impl.SingletonManagedObjectSource;
 import net.officefloor.compile.internal.structure.InputManagedObjectNode;
@@ -52,7 +50,6 @@ import net.officefloor.model.impl.office.OfficeModelOfficeSource;
  * 
  * @author Daniel Sagenschneider
  */
-@Ignore("TODO implement OfficeFloorDeployer.addSupplier")
 public class OfficeFloorNodeTest extends AbstractStructureTestCase {
 
 	/**
@@ -375,7 +372,7 @@ public class OfficeFloorNodeTest extends AbstractStructureTestCase {
 		OfficeFloorManagedObjectSource mos = supplier.addManagedObjectSource(
 				"MO_SOURCE", new AutoWire(Connection.class));
 		assertNotNull("Must have managed object source", mos);
-		assertEquals("Incorrect managed object name", "SUPPLIER-MO_SOURCE",
+		assertEquals("Incorrect managed object name", "MO_SOURCE",
 				mos.getOfficeFloorManagedObjectSourceName());
 		assertNotSame("Should obtain another managed object source", mos,
 				supplier.addManagedObjectSource("ANOTHER", new AutoWire(
@@ -391,8 +388,8 @@ public class OfficeFloorNodeTest extends AbstractStructureTestCase {
 
 		// Record issue in adding the supplied managed object souce twice
 		this.issues.addIssue(LocationType.OFFICE_FLOOR, OFFICE_FLOOR_LOCATION,
-				AssetType.MANAGED_OBJECT, "SUPPLIER-MO_SOURCE",
-				"Office floor managed object SUPPLIER-MO_SOURCE already added");
+				null, null,
+				"Office floor managed object source MO_SOURCE already added");
 
 		OfficeFloorSupplier supplier = this.addSupplier(this.node, "SUPPLIER",
 				null);
@@ -410,6 +407,36 @@ public class OfficeFloorNodeTest extends AbstractStructureTestCase {
 		// Should be the same managed object source
 		assertEquals("Should be same managed object source on adding twice",
 				mosFirst, mosSecond);
+	}
+
+	/**
+	 * Ensure issue if adding the {@link OfficeFloorManagedObjectSource} twice
+	 * by different {@link OfficeFloorSupplier} instances.
+	 */
+	public void testAddOfficeFloorManagedObjectSourceTwiceByDifferentSuppliers() {
+
+		// Record issue in adding the managed object source twice
+		this.issues.addIssue(LocationType.OFFICE_FLOOR, OFFICE_FLOOR_LOCATION,
+				null, null,
+				"Office floor managed object source MO_SOURCE already added");
+
+		OfficeFloorSupplier supplierOne = this.addSupplier(this.node,
+				"SUPPLIER_ONE", null);
+		OfficeFloorSupplier supplierTwo = this.addSupplier(this.node,
+				"SUPPLIER_TWO", null);
+
+		// Add the managed object twice by different sources
+		this.replayMockObjects();
+		OfficeFloorManagedObjectSource moSourceFirst = supplierOne
+				.addManagedObjectSource("MO_SOURCE", new AutoWire(
+						Connection.class));
+		OfficeFloorManagedObjectSource moSourceSecond = supplierTwo
+				.addManagedObjectSource("MO_SOURCE", new AutoWire(String.class));
+		this.verifyMockObjects();
+
+		// Should be the same managed object
+		assertEquals("Should be same managed object source on adding twice",
+				moSourceFirst, moSourceSecond);
 	}
 
 	/**
