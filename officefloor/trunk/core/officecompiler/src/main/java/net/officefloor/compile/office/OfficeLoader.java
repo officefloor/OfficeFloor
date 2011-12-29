@@ -63,4 +63,20 @@ public interface OfficeLoader {
 			Class<O> officeSourceClass, String officeLocation,
 			PropertyList propertyList);
 
+	/**
+	 * Loads and returns the {@link OfficeType} from the {@link OfficeSource}.
+	 * 
+	 * @param officeSource
+	 *            {@link OfficeSource} instance.
+	 * @param officeLocation
+	 *            Location of the {@link Office}.
+	 * @param propertyList
+	 *            {@link PropertyList} containing the properties to source the
+	 *            {@link OfficeType}.
+	 * @return {@link OfficeType} or <code>null</code> if issues, which are
+	 *         reported to the {@link CompilerIssues}.
+	 */
+	OfficeType loadOfficeType(OfficeSource officeSource, String officeLocation,
+			PropertyList propertyList);
+
 }

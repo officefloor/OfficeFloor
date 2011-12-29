@@ -31,6 +31,7 @@ import net.officefloor.compile.managedobject.ManagedObjectType;
 import net.officefloor.compile.office.OfficeType;
 import net.officefloor.compile.properties.Property;
 import net.officefloor.compile.properties.PropertyList;
+import net.officefloor.compile.spi.office.source.OfficeSource;
 import net.officefloor.compile.spi.officefloor.source.OfficeFloorSource;
 import net.officefloor.compile.spi.officefloor.source.OfficeFloorSourceContext;
 import net.officefloor.compile.spi.officefloor.source.RequiredProperties;
@@ -476,6 +477,64 @@ public class LoadOfficeFloorSourceContextTest extends
 				PropertyList properties = ofsContext.createPropertyList();
 				ofsContext.loadOfficeType(MockLoadOfficeSource.class.getName(),
 						"mock", properties);
+
+				// Should not reach this point
+				fail("Should not successfully load office type");
+			}
+		});
+	}
+
+	/**
+	 * Ensure can obtain the {@link OfficeType} by {@link OfficeSource}
+	 * instance.
+	 */
+	public void testLoadOfficeTypeByInstance() {
+
+		// Record
+		this.record_initiateOfficeFloorBuilder();
+
+		// Test
+		this.loadOfficeFloor(true, new OfficeFloorMaker() {
+			@Override
+			public void make(OfficeFloorMakerContext context) {
+				OfficeFloorSourceContext ofsContext = context.getContext();
+
+				// Load the office type
+				PropertyList properties = ofsContext.createPropertyList();
+				properties.addProperty(MockLoadOfficeSource.PROPERTY_REQUIRED)
+						.setValue("provided");
+				OfficeType officeType = ofsContext.loadOfficeType(
+						new MockLoadOfficeSource(), "mock", properties);
+
+				// Ensure correct office type
+				MockLoadOfficeSource.assertOfficeType(officeType);
+			}
+		});
+	}
+
+	/**
+	 * Ensure issue if fails to load the {@link OfficeType} by
+	 * {@link OfficeSource} instance.
+	 */
+	public void testFailLoadingOfficeTypeByInstance() {
+
+		// Ensure issue in not loading office type
+		this.issues.addIssue(LocationType.OFFICE, "mock", null, null,
+				"Missing property 'required.property' for OfficeSource "
+						+ MockLoadOfficeSource.class.getName());
+		this.record_officefloor_issue("Failure loading OfficeType from source "
+				+ MockLoadOfficeSource.class.getName());
+
+		// Fail to load the office type
+		this.loadOfficeFloor(false, new OfficeFloorMaker() {
+			@Override
+			public void make(OfficeFloorMakerContext context) {
+				OfficeFloorSourceContext ofsContext = context.getContext();
+
+				// Do not specify class causing failure to load type
+				PropertyList properties = ofsContext.createPropertyList();
+				ofsContext.loadOfficeType(new MockLoadOfficeSource(), "mock",
+						properties);
 
 				// Should not reach this point
 				fail("Should not successfully load office type");

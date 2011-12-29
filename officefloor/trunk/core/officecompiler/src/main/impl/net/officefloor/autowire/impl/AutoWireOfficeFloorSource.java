@@ -46,6 +46,8 @@ import net.officefloor.compile.impl.OfficeFloorCompilerAdapter;
 import net.officefloor.compile.impl.issues.FailCompilerIssues;
 import net.officefloor.compile.managedobject.ManagedObjectDependencyType;
 import net.officefloor.compile.managedobject.ManagedObjectType;
+import net.officefloor.compile.office.OfficeManagedObjectType;
+import net.officefloor.compile.office.OfficeType;
 import net.officefloor.compile.properties.Property;
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.spi.office.ManagedObjectTeam;
@@ -448,19 +450,16 @@ public class AutoWireOfficeFloorSource extends AbstractOfficeFloorSource
 		} else {
 			/*
 			 * Create the default Team by default to always use invoking thread.
-			 * This is to allow use within an application server as typically
-			 * would use OfficeFloor configuration (not auto-wire) for
-			 * OfficeFloor hosted application.
+			 * This is to allow use within an application server, as use within
+			 * other contexts should specify an appropriate default Team if
+			 * requiring different default behaviour.
 			 */
 			team = deployer.addTeam("team",
 					ProcessContextTeamSource.class.getName());
 		}
 
-		// TODO obtain the listing of all used AutoWireObjects
-
-		// TODO filter to just the used AutoWireObjects
-
-		// Load extension interfaces for object types
+		// Load available office objects
+		// TODO change to: this.officeSource.addAvailalbleOfficeObject(...)
 		for (AutoWireContext objectContext : this.objectContexts) {
 
 			// Load the available auto-wiring
@@ -487,6 +486,26 @@ public class AutoWireOfficeFloorSource extends AbstractOfficeFloorSource
 						extensionInterfaces);
 			}
 		}
+
+		// Obtain the listing of all used auto-wiring
+		List<AutoWire> usedAutoWiring = new LinkedList<AutoWire>();
+		OfficeType officeType = context.loadOfficeType(this.officeSource,
+				"auto-wire", context.createPropertyList());
+		for (OfficeManagedObjectType officeObject : officeType
+				.getOfficeManagedObjectTypes()) {
+
+			// Obtain the auto-wire for the office object
+			String type = officeObject.getObjectType();
+			String qualifier = officeObject.getTypeQualifier();
+			AutoWire usedAutoWire = new AutoWire(qualifier, type);
+
+			// Add the used auto-wire (uniquely)
+			if (!(usedAutoWiring.contains(usedAutoWire))) {
+				usedAutoWiring.add(usedAutoWire);
+			}
+		}
+
+		// TODO filter to just the used AutoWireObjects
 
 		// Add the auto-wiring office
 		DeployedOffice office = deployer.addDeployedOffice(OFFICE_NAME,

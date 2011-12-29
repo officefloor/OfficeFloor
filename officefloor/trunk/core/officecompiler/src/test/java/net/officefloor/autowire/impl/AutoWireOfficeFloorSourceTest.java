@@ -92,7 +92,7 @@ import org.junit.Ignore;
  * 
  * @author Daniel Sagenschneider
  */
-@Ignore("Need to configure in SupplierSource functionality")
+@Ignore("TODO used auto-wiring to be obtained by loading OfficeType")
 public class AutoWireOfficeFloorSourceTest extends OfficeFrameTestCase {
 
 	/**

@@ -33,6 +33,7 @@ import net.officefloor.compile.managedobject.ManagedObjectTeamType;
 import net.officefloor.compile.managedobject.ManagedObjectType;
 import net.officefloor.compile.properties.Property;
 import net.officefloor.compile.properties.PropertyList;
+import net.officefloor.compile.test.issues.FailTestCompilerIssues;
 import net.officefloor.compile.work.WorkType;
 import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.build.None;
@@ -59,6 +60,7 @@ import net.officefloor.frame.spi.managedobject.source.ManagedObjectUser;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectWorkBuilder;
 import net.officefloor.frame.spi.team.Team;
 import net.officefloor.frame.test.OfficeFrameTestCase;
+import net.officefloor.plugin.managedobject.clazz.ClassManagedObjectSource;
 
 /**
  * Tests loading the {@link ManagedObjectType}.
@@ -95,6 +97,54 @@ public class LoadManagedObjectTypeTest extends OfficeFrameTestCase {
 	@Override
 	protected void setUp() throws Exception {
 		MockManagedObjectSource.reset(this.metaData, new InitUtil());
+	}
+
+	/**
+	 * Ensure can load {@link SimpleManagedObject} via
+	 * {@link ClassManagedObjectSource} {@link Class}.
+	 */
+	public void testLoadByClass() {
+
+		// Configure test
+		OfficeFloorCompiler compiler = OfficeFloorCompiler
+				.newOfficeFloorCompiler(null);
+		compiler.setCompilerIssues(new FailTestCompilerIssues());
+
+		// Configure to load simple class
+		PropertyList properties = compiler.createPropertyList();
+		properties.addProperty(
+				ClassManagedObjectSource.CLASS_NAME_PROPERTY_NAME).setValue(
+				MockLoadManagedObject.class.getName());
+
+		// Load the managed object type
+		ManagedObjectLoader moLoader = compiler.getManagedObjectLoader();
+		ManagedObjectType<?> moType = moLoader.loadManagedObjectType(
+				ClassManagedObjectSource.class, properties);
+		MockLoadManagedObject.assertManagedObjectType(moType);
+	}
+
+	/**
+	 * Ensure can load {@link SimpleManagedObject} via
+	 * {@link ClassManagedObjectSource} instance.
+	 */
+	public void testLoadByInstance() {
+
+		// Configure test
+		OfficeFloorCompiler compiler = OfficeFloorCompiler
+				.newOfficeFloorCompiler(null);
+		compiler.setCompilerIssues(new FailTestCompilerIssues());
+
+		// Configure to load simple class
+		PropertyList properties = compiler.createPropertyList();
+		properties.addProperty(
+				ClassManagedObjectSource.CLASS_NAME_PROPERTY_NAME).setValue(
+				MockLoadManagedObject.class.getName());
+
+		// Load the managed object type
+		ManagedObjectLoader moLoader = compiler.getManagedObjectLoader();
+		ManagedObjectType<?> moType = moLoader.loadManagedObjectType(
+				new ClassManagedObjectSource(), properties);
+		MockLoadManagedObject.assertManagedObjectType(moType);
 	}
 
 	/**
