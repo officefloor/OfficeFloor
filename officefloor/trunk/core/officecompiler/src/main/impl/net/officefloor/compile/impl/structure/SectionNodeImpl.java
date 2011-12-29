@@ -442,7 +442,7 @@ public class SectionNodeImpl extends AbstractNode implements SectionNode {
 		} catch (Throwable ex) {
 			// Indicate failure to source section
 			this.addIssue(
-					"Faild to source " + OfficeSection.class.getSimpleName(),
+					"Failed to source " + OfficeSection.class.getSimpleName(),
 					ex);
 			return; // can not load sub section as section load failure
 		}

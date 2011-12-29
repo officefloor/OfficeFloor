@@ -245,16 +245,16 @@ public class HttpTemplateSectionIntegrationTest extends OfficeFrameTestCase {
 	 */
 	public void testTemplateSectionExtension() throws Exception {
 
-		// Reset the mock extension for testing
-		MockHttpTemplateSectionExtension.reset();
-
 		// Start the server (with extension)
 		this.startHttpServer("ExtensionTemplate.ofp",
 				MockExtensionTemplateLogic.class, "extension.1",
 				MockHttpTemplateSectionExtension.class.getName(),
-				"extension.1.name", "value", "extension.2",
+				"extension.1.name", "value",
+				"extension.1.mock.extension.index", "1", "extension.2",
 				MockHttpTemplateSectionExtension.class.getName(),
-				"extension.2.name", "value", "section.name", "section.value");
+				"extension.2.name", "value",
+				"extension.2.mock.extension.index", "2", "section.name",
+				"section.value");
 
 		// Ensure change with extension
 		this.assertHttpRequest("", "Overridden template with overridden class");
@@ -266,18 +266,6 @@ public class HttpTemplateSectionIntegrationTest extends OfficeFrameTestCase {
 	public static class MockHttpTemplateSectionExtension implements
 			HttpTemplateSectionExtension {
 
-		/**
-		 * Indicates if first.
-		 */
-		private static int extensionIndex = 1;
-
-		/**
-		 * Resets for testing.
-		 */
-		public static void reset() {
-			extensionIndex = 1;
-		}
-
 		/*
 		 * ================== HttpTemplateSectionExtension ====================
 		 */
@@ -287,6 +275,10 @@ public class HttpTemplateSectionIntegrationTest extends OfficeFrameTestCase {
 				throws Exception {
 
 			final String TEMPLATE_CONTENT = "Overridden template with ${property}";
+
+			// Obtain the particular extension index
+			int extensionIndex = Integer.parseInt(context
+					.getProperty("mock.extension.index"));
 
 			// Validate overriding details
 			switch (extensionIndex) {
@@ -306,10 +298,12 @@ public class HttpTemplateSectionIntegrationTest extends OfficeFrameTestCase {
 
 			// Validate extension configuration
 			String[] names = context.getPropertyNames();
-			assertEquals("Incorrect number of properties", 1, names.length);
+			assertEquals("Incorrect number of properties", 2, names.length);
 			assertEquals("Incorrect property name", "name", names[0]);
 			assertEquals("Incorrect property value", "value",
 					context.getProperty("name"));
+			assertEquals("Incorrect property mock.extension.index",
+					"mock.extension.index", names[1]);
 			assertEquals("Not defaulting property", "default",
 					context.getProperty("unknown", "default"));
 			try {
@@ -334,9 +328,6 @@ public class HttpTemplateSectionIntegrationTest extends OfficeFrameTestCase {
 
 			// Extend the template (via overriding)
 			context.setTemplateContent(TEMPLATE_CONTENT);
-
-			// Increment for next extension use
-			extensionIndex++;
 		}
 	}
 
