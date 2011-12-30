@@ -589,10 +589,9 @@ public class AutoWireOfficeFloorSource extends AbstractOfficeFloorSource
 					autoWireObjectInstances, typeIndex, inputManagedObjects,
 					autoWireTeamInstances);
 
-			// Load the used managed object
-			inputObjectInstance.loadManagedObject(
-					inputObjectInstance.autoWireObject.getAutoWiring()[0],
-					state);
+			// Load the input managed object
+			inputObjectInstance.buildManagedObject(state,
+					inputObjectInstance.autoWireObject.getAutoWiring()[0]);
 		}
 
 		// Load the required auto-wire objects
@@ -614,8 +613,8 @@ public class AutoWireOfficeFloorSource extends AbstractOfficeFloorSource
 					autoWireObjectInstances, typeIndex, inputManagedObjects,
 					autoWireTeamInstances);
 
-			// Load the used managed object
-			autoWireObjectInstance.loadManagedObject(usedAutoWire, state);
+			// Build the used managed object
+			autoWireObjectInstance.buildManagedObject(state, usedAutoWire);
 		}
 	}
 
@@ -731,15 +730,12 @@ public class AutoWireOfficeFloorSource extends AbstractOfficeFloorSource
 		 * 
 		 * @param autoWire
 		 *            {@link AutoWire}.
-		 * @param officeObject
-		 *            {@link OfficeObject} requiring the
-		 *            {@link OfficeFloorInputManagedObject}.
 		 * @param managedObjectSource
 		 *            {@link OfficeFloorManagedObjectSource}.
 		 * @return {@link OfficeFloorInputManagedObject}.
 		 */
 		public OfficeFloorInputManagedObject createInputManagedObject(
-				AutoWire autoWire, OfficeObject officeObject,
+				AutoWire autoWire,
 				OfficeFloorManagedObjectSource managedObjectSource) {
 
 			// Obtain the single input managed object for the auto-wire
@@ -753,9 +749,6 @@ public class AutoWireOfficeFloorSource extends AbstractOfficeFloorSource
 
 				// Only first is specified as bound
 				inputMo.setBoundOfficeFloorManagedObjectSource(managedObjectSource);
-
-				// Link office object to input managed object
-				this.deployer.link(officeObject, inputMo);
 			}
 
 			// Return the input managed object
@@ -893,6 +886,11 @@ public class AutoWireOfficeFloorSource extends AbstractOfficeFloorSource
 		private OfficeFloorInputManagedObject inputManagedObject = null;
 
 		/**
+		 * Indicates if built.
+		 */
+		private boolean isBuilt = false;
+
+		/**
 		 * Initiate.
 		 * 
 		 * @param autoWireObject
@@ -957,111 +955,137 @@ public class AutoWireOfficeFloorSource extends AbstractOfficeFloorSource
 		}
 
 		/**
-		 * Loads the {@link ManagedObject}.
+		 * Builds the {@link ManagedObject}.
 		 * 
-		 * @param loadAutoWire
+		 * @param state
+		 *            {@link AutoWireState}.
+		 * @param officeObjectAutoWire
 		 *            {@link AutoWire} to load this
 		 *            {@link AutoWireObjectInstance} as an {@link OfficeObject}.
 		 *            May be <code>null</code> to not load the
 		 *            {@link OfficeObject}.
-		 * @param state
-		 *            {@link AutoWireState}.
 		 */
-		public void loadManagedObject(AutoWire loadAutoWire, AutoWireState state) {
+		public void buildManagedObject(AutoWireState state,
+				AutoWire officeObjectAutoWire) {
 
-			// Determine the details
-			String managedObjectSourceClassName = this.autoWireObject
-					.getManagedObjectSourceClassName();
-			long timeout = this.autoWireObject.getTimeout();
-			PropertyList properties = this.autoWireObject.getProperties();
-			AutoWire[] autoWiring = this.autoWireObject.getAutoWiring();
+			// Only build once
+			if (!this.isBuilt) {
 
-			// Use first auto wiring for naming
-			AutoWire firstAutoWire = autoWiring[0];
-			this.managedObjectName = state
-					.getUniqueManagedObjectName(firstAutoWire);
+				// Only attempt to build once
+				this.isBuilt = true;
 
-			// Determine if raw object
-			if (this.rawObject != null) {
-				// Bind the raw object
-				ManagedObjectSource<?, ?> singleton;
-				try {
-					singleton = OfficeFloorCompilerAdapter
-							.createSingletonManagedObjectSource(this.compiler,
-									this.rawObject, autoWiring);
-				} catch (ClassNotFoundException ex) {
-					// Not able to create singleton
-					state.deployer.addIssue("Unable manage raw object "
-							+ this.managedObjectName, ex,
-							AssetType.MANAGED_OBJECT, this.managedObjectName);
-					return; // must be able to create singleton
+				// Determine the details
+				String managedObjectSourceClassName = this.autoWireObject
+						.getManagedObjectSourceClassName();
+				long timeout = this.autoWireObject.getTimeout();
+				PropertyList properties = this.autoWireObject.getProperties();
+				AutoWire[] autoWiring = this.autoWireObject.getAutoWiring();
+
+				// Use first auto wiring for naming
+				AutoWire firstAutoWire = autoWiring[0];
+				this.managedObjectName = state
+						.getUniqueManagedObjectName(firstAutoWire);
+
+				// Determine if raw object
+				if (this.rawObject != null) {
+					// Bind the raw object
+					ManagedObjectSource<?, ?> singleton;
+					try {
+						singleton = OfficeFloorCompilerAdapter
+								.createSingletonManagedObjectSource(
+										this.compiler, this.rawObject,
+										autoWiring);
+					} catch (ClassNotFoundException ex) {
+						// Not able to create singleton
+						state.deployer.addIssue("Unable manage raw object "
+								+ this.managedObjectName, ex,
+								AssetType.MANAGED_OBJECT,
+								this.managedObjectName);
+						return; // must be able to create singleton
+					}
+					this.managedObjectSource = state.deployer
+							.addManagedObjectSource(this.managedObjectName,
+									singleton);
+
+				} else {
+					// Bind the managed object source
+					this.managedObjectSource = state.deployer
+							.addManagedObjectSource(this.managedObjectName,
+									managedObjectSourceClassName);
+
+					// Specify time out to source the managed object
+					this.managedObjectSource.setTimeout(timeout);
+
+					// Configure properties for managed object source
+					for (Property property : properties) {
+						this.managedObjectSource.addProperty(
+								property.getName(), property.getValue());
+					}
 				}
-				this.managedObjectSource = state.deployer
-						.addManagedObjectSource(this.managedObjectName,
-								singleton);
 
-			} else {
-				// Bind the managed object source
-				this.managedObjectSource = state.deployer
-						.addManagedObjectSource(this.managedObjectName,
-								managedObjectSourceClassName);
+				// Bind to managing office
+				state.deployer.link(
+						this.managedObjectSource.getManagingOffice(),
+						state.office);
 
-				// Specify time out to source the managed object
-				this.managedObjectSource.setTimeout(timeout);
+				// Handle managed object
+				if (this.isInput) {
 
-				// Configure properties for managed object source
-				for (Property property : properties) {
-					this.managedObjectSource.addProperty(property.getName(),
-							property.getValue());
+					// Ensure linking to Office (to handle input)
+					if (officeObjectAutoWire == null) {
+						state.deployer.addIssue(
+								"May only use "
+										+ OfficeFloorInputManagedObject.class
+												.getSimpleName() + " if "
+										+ DeployedOffice.class.getSimpleName()
+										+ " providing handling of its input",
+								AssetType.MANAGED_OBJECT,
+								this.managedObjectName);
+						return;
+					}
+
+					// Create the Input Managed Object
+					this.inputManagedObject = state.createInputManagedObject(
+							officeObjectAutoWire, this.managedObjectSource);
+
+					// Link source to input
+					state.deployer.link(this.managedObjectSource,
+							this.inputManagedObject);
+
+				} else {
+					// Create the managed object
+					this.managedObject = this.managedObjectSource
+							.addOfficeFloorManagedObject(
+									this.managedObjectName,
+									ManagedObjectScope.PROCESS);
 				}
+
+				// Link managed object
+				this.linkManagedObject(state);
 			}
 
-			// Bind to managing office
-			state.deployer.link(this.managedObjectSource.getManagingOffice(),
-					state.office);
+			// Link managed object to office object (if loading to office)
+			if (officeObjectAutoWire != null) {
 
-			// Obtain the office object (if loading to Office)
-			OfficeObject officeObject = null;
-			if (loadAutoWire != null) {
-				officeObject = state.office
-						.getDeployedOfficeObject(loadAutoWire
+				// Create the Office Object
+				OfficeObject officeObject = state.office
+						.getDeployedOfficeObject(officeObjectAutoWire
 								.getQualifiedType());
-			}
 
-			// Handle managed object
-			if (this.isInput) {
-
-				// May only input as single auto-wire
-				if (this.autoWireObject.getAutoWiring().length > 1) {
-					state.deployer.addIssue("Input Managed Object "
-							+ this.managedObjectName
-							+ " may only have a single auto-wire",
-							AssetType.MANAGED_OBJECT, this.managedObjectName);
-					return; // only allow the single auto-wire
-				}
-
-				// Create the Input Managed Object
-				this.inputManagedObject = state.createInputManagedObject(
-						loadAutoWire, officeObject, this.managedObjectSource);
-
-				// Link source to input
-				state.deployer.link(this.managedObjectSource,
-						this.inputManagedObject);
-
-			} else {
-				// Create the one managed object
-				this.managedObject = this.managedObjectSource
-						.addOfficeFloorManagedObject(this.managedObjectName,
-								ManagedObjectScope.PROCESS);
-
-				// Link managed object to office object (if loading to office)
-				if (loadAutoWire != null) {
-					state.deployer.link(officeObject, this.managedObject);
+				// Link to Office Object
+				if (this.isInput) {
+					// Input, so link to input managed object
+					if (this.inputManagedObject != null) {
+						state.deployer.link(officeObject,
+								this.inputManagedObject);
+					}
+				} else {
+					// Link to managed object
+					if (this.managedObject != null) {
+						state.deployer.link(officeObject, this.managedObject);
+					}
 				}
 			}
-
-			// Link managed object
-			this.linkManagedObject(state);
 		}
 
 		/**
@@ -1235,8 +1259,8 @@ public class AutoWireOfficeFloorSource extends AbstractOfficeFloorSource
 			// Only attempt to link if have object instance
 			if (objectInstance != null) {
 
-				// Ensure the object instance is loaded
-				objectInstance.loadManagedObject(null, state);
+				// Ensure the object instance is built
+				objectInstance.buildManagedObject(state, null);
 
 				// First try to link as Managed Object
 				OfficeFloorManagedObject mo = objectInstance.managedObject;

@@ -428,22 +428,20 @@ public class AutoWireOfficeSourceTest extends OfficeFrameTestCase {
 		final String SECTION = "Section";
 
 		final ExpectedAutoWire qualifiedConnection = new ExpectedAutoWire(
-				"QUALIFIED", Connection.class, "QUALIFIED-"
-						+ Connection.class.getName());
+				"QUALIFIED", "QUALIFIED", Connection.class);
 		final ExpectedAutoWire unqualifiedConnection = new ExpectedAutoWire(
 				Connection.class);
 		final ExpectedAutoWire qualifiedString = new ExpectedAutoWire(
-				"QUALIFIED", String.class, "QUALIFIED-"
-						+ String.class.getName());
+				"QUALIFIED", "QUALIFIED", String.class);
 
 		// Create and configure the source
 		AutoWireOfficeSource source = new AutoWireOfficeSource();
 		this.addSection(source, SECTION);
 
 		// Add the available auto-wiring
-		source.addAvailableOfficeObject(qualifiedConnection.autoWire);
-		source.addAvailableOfficeObject(unqualifiedConnection.autoWire);
-		source.addAvailableOfficeObject(qualifiedString.autoWire);
+		source.addAvailableOfficeObject(qualifiedConnection.requestedAutoWire);
+		source.addAvailableOfficeObject(unqualifiedConnection.requestedAutoWire);
+		source.addAvailableOfficeObject(qualifiedString.requestedAutoWire);
 
 		// Record creating the section
 		this.recordTeam();
@@ -484,7 +482,7 @@ public class AutoWireOfficeSourceTest extends OfficeFrameTestCase {
 
 		// Record fall back to unqualified type
 		this.recordSectionObjects(SECTION, new ExpectedAutoWire("QUALIFIED",
-				Connection.class, Connection.class.getName()));
+				null, Connection.class));
 
 		this.recordSectionInputs(SECTION);
 		this.recordSectionOutputs(SECTION);
@@ -1531,7 +1529,7 @@ public class AutoWireOfficeSourceTest extends OfficeFrameTestCase {
 		// Create names of the objects
 		String[] objectNames = new String[autoWiring.length];
 		for (int i = 0; i < autoWiring.length; i++) {
-			objectNames[i] = autoWiring[i].autoWire.getQualifiedType();
+			objectNames[i] = autoWiring[i].requestedAutoWire.getQualifiedType();
 		}
 
 		// Record obtaining the objects
@@ -1545,24 +1543,26 @@ public class AutoWireOfficeSourceTest extends OfficeFrameTestCase {
 			ExpectedAutoWire autoWire = autoWiring[i];
 			OfficeSectionObject object = objects[i];
 
-			// Obtain dependency details
-			String dependencyType = autoWire.autoWire.getType();
-			String dependencyQualifier = autoWire.autoWire.getQualifier();
-
 			// Obtain object type
-			this.recordReturn(object, object.getObjectType(), dependencyType);
+			this.recordReturn(object, object.getObjectType(),
+					autoWire.requestedAutoWire.getType());
 			this.recordReturn(object, object.getTypeQualifier(),
-					dependencyQualifier);
+					autoWire.requestedAutoWire.getQualifier());
 
 			// Lazy add the dependency
-			OfficeObject dependency = this.dependencies
-					.get(autoWire.objectName);
+			String usedName = autoWire.usedAutoWire.getQualifiedType();
+			String usedQualifier = autoWire.usedAutoWire.getQualifier();
+			String usedType = autoWire.usedAutoWire.getType();
+			OfficeObject dependency = this.dependencies.get(usedName);
 			if (dependency == null) {
 				dependency = this.createMock(OfficeObject.class);
-				this.dependencies.put(autoWire.objectName, dependency);
-				this.recordReturn(this.architect, this.architect
-						.addOfficeObject(autoWire.objectName, dependencyType),
+				this.dependencies.put(usedName, dependency);
+				this.recordReturn(this.architect,
+						this.architect.addOfficeObject(usedName, usedType),
 						dependency);
+				if (usedQualifier != null) {
+					dependency.setTypeQualifier(usedQualifier);
+				}
 			}
 
 			// Link the object to dependency
@@ -1668,29 +1668,30 @@ public class AutoWireOfficeSourceTest extends OfficeFrameTestCase {
 	private static class ExpectedAutoWire {
 
 		/**
-		 * {@link AutoWire}.
+		 * Requested {@link AutoWire}.
 		 */
-		public final AutoWire autoWire;
+		public final AutoWire requestedAutoWire;
 
 		/**
-		 * Name of object.
+		 * Used {@link AutoWire}.
 		 */
-		public final String objectName;
+		public final AutoWire usedAutoWire;
 
 		/**
 		 * Initiate.
 		 * 
-		 * @param qualifier
-		 *            Qualifier.
+		 * @param requestedQualifier
+		 *            Requested Qualifier.
+		 * @param usedQualifier
+		 *            Used Qualifier.
 		 * @param type
 		 *            Type.
-		 * @param objectName
-		 *            Matched object name.
 		 */
-		public ExpectedAutoWire(String qualifier, Class<?> type,
-				String objectName) {
-			this.autoWire = new AutoWire(qualifier, type.getName());
-			this.objectName = objectName;
+		public ExpectedAutoWire(String requestedQualifier,
+				String usedQualifier, Class<?> type) {
+			this.requestedAutoWire = new AutoWire(requestedQualifier,
+					type.getName());
+			this.usedAutoWire = new AutoWire(usedQualifier, type.getName());
 		}
 
 		/**
@@ -1700,8 +1701,7 @@ public class AutoWireOfficeSourceTest extends OfficeFrameTestCase {
 		 *            Type.
 		 */
 		public ExpectedAutoWire(Class<?> type) {
-			this.autoWire = new AutoWire(type);
-			this.objectName = type.getName();
+			this(null, null, type);
 		}
 	}
 
