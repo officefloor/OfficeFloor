@@ -22,6 +22,8 @@ import java.lang.annotation.RetentionPolicy;
 import java.sql.Connection;
 import java.sql.SQLException;
 
+import org.junit.Ignore;
+
 import net.officefloor.autowire.AutoWire;
 import net.officefloor.autowire.AutoWireApplication;
 import net.officefloor.autowire.AutoWireOfficeFloor;
@@ -37,6 +39,7 @@ import net.officefloor.plugin.work.clazz.Qualifier;
  * 
  * @author Daniel Sagenschneider
  */
+@Ignore("Fix auto-wiring of objects (only load once)")
 public class IntegrateAutoWireQualificationTest extends OfficeFrameTestCase {
 
 	/**
