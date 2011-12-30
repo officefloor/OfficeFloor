@@ -403,7 +403,7 @@ public class AutoWireOfficeSourceTest extends OfficeFrameTestCase {
 		// Create and configure the source
 		AutoWireOfficeSource source = new AutoWireOfficeSource();
 		this.addSection(source, SECTION);
-		source.addAvailableAutoWire(new AutoWire(Connection.class));
+		source.addAvailableOfficeObject(new AutoWire(Connection.class));
 
 		// Record creating the section
 		this.recordTeam();
@@ -441,9 +441,9 @@ public class AutoWireOfficeSourceTest extends OfficeFrameTestCase {
 		this.addSection(source, SECTION);
 
 		// Add the available auto-wiring
-		source.addAvailableAutoWire(qualifiedConnection.autoWire);
-		source.addAvailableAutoWire(unqualifiedConnection.autoWire);
-		source.addAvailableAutoWire(qualifiedString.autoWire);
+		source.addAvailableOfficeObject(qualifiedConnection.autoWire);
+		source.addAvailableOfficeObject(unqualifiedConnection.autoWire);
+		source.addAvailableOfficeObject(qualifiedString.autoWire);
 
 		// Record creating the section
 		this.recordTeam();
@@ -476,7 +476,7 @@ public class AutoWireOfficeSourceTest extends OfficeFrameTestCase {
 		this.addSection(source, SECTION);
 
 		// Add the unqualified available auto-wiring
-		source.addAvailableAutoWire(new AutoWire(Connection.class));
+		source.addAvailableOfficeObject(new AutoWire(Connection.class));
 
 		// Record creating the section
 		this.recordTeam();
@@ -510,9 +510,9 @@ public class AutoWireOfficeSourceTest extends OfficeFrameTestCase {
 		this.addSection(source, SECTION);
 
 		// Provide auto-wiring that will not match
-		source.addAvailableAutoWire(new AutoWire(String.class));
-		source.addAvailableAutoWire(new AutoWire("QUALIFIED", Connection.class
-				.getName()));
+		source.addAvailableOfficeObject(new AutoWire(String.class));
+		source.addAvailableOfficeObject(new AutoWire("QUALIFIED",
+				Connection.class.getName()));
 
 		// Record creating the section
 		this.recordTeam();
@@ -554,12 +554,12 @@ public class AutoWireOfficeSourceTest extends OfficeFrameTestCase {
 		this.addSection(source, SECTION);
 
 		// Add various available auto-wiring that will not be used
-		source.addAvailableAutoWire(new AutoWire(Connection.class));
-		source.addAvailableAutoWire(new AutoWire("QUALIFIED", Connection.class
-				.getName()));
-		source.addAvailableAutoWire(new AutoWire(String.class));
-		source.addAvailableAutoWire(new AutoWire(Integer.class));
-		source.addAvailableAutoWire(new AutoWire(DataSource.class));
+		source.addAvailableOfficeObject(new AutoWire(Connection.class));
+		source.addAvailableOfficeObject(new AutoWire("QUALIFIED",
+				Connection.class.getName()));
+		source.addAvailableOfficeObject(new AutoWire(String.class));
+		source.addAvailableOfficeObject(new AutoWire(Integer.class));
+		source.addAvailableOfficeObject(new AutoWire(DataSource.class));
 
 		// Record creating the section
 		this.recordTeam();
@@ -588,9 +588,8 @@ public class AutoWireOfficeSourceTest extends OfficeFrameTestCase {
 		this.addSection(source, SECTION);
 		this.addGovernance(source, GOVERNANCE, "PROPERTY_NAME",
 				"PROPERTY_VALUE");
-		source.addOfficeObjectExtension(new AutoWire(Connection.class),
+		source.addAvailableOfficeObject(new AutoWire(Connection.class),
 				XAResource.class);
-		source.addAvailableAutoWire(new AutoWire(Connection.class));
 
 		// Record governance over office object
 		OfficeTeam team = this.recordTeam();
@@ -943,7 +942,7 @@ public class AutoWireOfficeSourceTest extends OfficeFrameTestCase {
 
 		// Add the available auto-wire objects
 		for (AutoWire autoWire : objectAutoWiring) {
-			source.addAvailableAutoWire(autoWire);
+			source.addAvailableOfficeObject(autoWire);
 		}
 
 		// Record creating the teams (responsibilities)

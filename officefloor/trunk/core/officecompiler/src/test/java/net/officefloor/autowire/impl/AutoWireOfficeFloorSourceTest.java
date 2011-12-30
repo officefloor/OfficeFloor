@@ -92,7 +92,7 @@ import org.junit.Ignore;
  * 
  * @author Daniel Sagenschneider
  */
-@Ignore("TODO used auto-wiring to be obtained by loading OfficeType")
+@Ignore("TODO provide AutoWireSupplier functionality")
 public class AutoWireOfficeFloorSourceTest extends OfficeFrameTestCase {
 
 	/**
