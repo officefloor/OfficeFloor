@@ -86,7 +86,7 @@ import org.junit.Ignore;
  * 
  * @author Daniel Sagenschneider
  */
-@Ignore("Fixing auto-wire objects, also to add auto-wire team, and AutoWireSupplier")
+@Ignore("TODO addSupplier(...) functionality")
 public class AutoWireOfficeFloorSourceTest extends OfficeFrameTestCase {
 
 	/**
@@ -145,17 +145,19 @@ public class AutoWireOfficeFloorSourceTest extends OfficeFrameTestCase {
 		final MockRawObject dependency = new MockRawObject();
 		final AutoWire autoWire = new AutoWire(MockRawType.class);
 
+		// Add the raw object dependency
+		this.source.addObject(dependency, autoWire);
+
 		// Record
 		this.recordTeam();
 		this.recordRawObjectType(dependency);
 		this.recordOffice(autoWire);
-		this.recordRawObject(dependency, true, autoWire);
+		OfficeFloorManagedObject mo = this
+				.recordRawObject(dependency, autoWire);
+		this.recordOfficeObject(mo, autoWire);
 
 		// Test
 		this.replayMockObjects();
-
-		// Add the raw object dependency
-		this.source.addObject(dependency, autoWire);
 		this.doSourceOfficeFloor();
 		this.verifyMockObjects();
 	}
@@ -168,6 +170,9 @@ public class AutoWireOfficeFloorSourceTest extends OfficeFrameTestCase {
 		final MockRawObject dependency = new MockRawObject();
 		final AutoWire autoWire = new AutoWire(MockRawType.class);
 
+		// Add the unused raw object
+		this.source.addObject(dependency, autoWire);
+
 		// Record (not load raw object)
 		this.recordTeam();
 		this.recordRawObjectType(dependency);
@@ -175,14 +180,7 @@ public class AutoWireOfficeFloorSourceTest extends OfficeFrameTestCase {
 
 		// Test
 		this.replayMockObjects();
-
-		// Add the unused raw object
-		this.source.addObject(dependency, autoWire);
-
-		// Source OfficeFloor (will not load unused raw object)
 		this.doSourceOfficeFloor();
-
-		// Verify
 		this.verifyMockObjects();
 	}
 
@@ -192,18 +190,20 @@ public class AutoWireOfficeFloorSourceTest extends OfficeFrameTestCase {
 	public void testRawObjectDefaultAutoWireFromRawObject() throws Throwable {
 
 		final String object = "default type to String";
+		final AutoWire autoWire = new AutoWire(String.class);
+
+		// Add the raw object dependency to default type
+		this.source.addObject(object);
 
 		// Record
 		this.recordTeam();
 		this.recordRawObjectType(object);
 		this.recordOffice(new AutoWire(String.class));
-		this.recordRawObject(object, true, new AutoWire(String.class));
+		OfficeFloorManagedObject mo = this.recordRawObject(object, autoWire);
+		this.recordOfficeObject(mo, autoWire);
 
 		// Test
 		this.replayMockObjects();
-
-		// Add the raw object dependency to default type
-		this.source.addObject(object);
 		this.doSourceOfficeFloor();
 		this.verifyMockObjects();
 	}
@@ -217,17 +217,19 @@ public class AutoWireOfficeFloorSourceTest extends OfficeFrameTestCase {
 		final AutoWire autoWire = new AutoWire("QUALIFICATION",
 				MockRawType.class.getName());
 
+		// Add the raw object dependency
+		this.source.addObject(dependency, autoWire);
+
 		// Record
 		this.recordTeam();
 		this.recordRawObjectType(dependency);
 		this.recordOffice(autoWire);
-		this.recordRawObject(dependency, true, autoWire);
+		OfficeFloorManagedObject mo = this
+				.recordRawObject(dependency, autoWire);
+		this.recordOfficeObject(mo, autoWire);
 
 		// Test
 		this.replayMockObjects();
-
-		// Add the raw object dependency
-		this.source.addObject(dependency, autoWire);
 		this.doSourceOfficeFloor();
 		this.verifyMockObjects();
 	}
@@ -241,17 +243,19 @@ public class AutoWireOfficeFloorSourceTest extends OfficeFrameTestCase {
 		final AutoWire typeAutoWire = new AutoWire(MockRawType.class);
 		final AutoWire objectAutoWire = new AutoWire(MockRawObject.class);
 
+		// Add raw object with multiple types
+		this.source.addObject(object, typeAutoWire, objectAutoWire);
+
 		// Record
 		this.recordTeam();
 		this.recordRawObjectType(object);
-		this.recordOffice(typeAutoWire); // only one used
-		this.recordRawObject(object, true, typeAutoWire);
+		this.recordOffice(typeAutoWire); // only use one
+		OfficeFloorManagedObject mo = this
+				.recordRawObject(object, typeAutoWire);
+		this.recordOfficeObject(mo, typeAutoWire);
 
 		// Test
 		this.replayMockObjects();
-
-		// Add raw object with multiple types
-		this.source.addObject(object, typeAutoWire, objectAutoWire);
 		this.doSourceOfficeFloor();
 		this.verifyMockObjects();
 	}
@@ -265,19 +269,20 @@ public class AutoWireOfficeFloorSourceTest extends OfficeFrameTestCase {
 		final AutoWire typeAutoWire = new AutoWire(MockRawType.class);
 		final AutoWire objectAutoWire = new AutoWire(MockRawObject.class);
 
+		// Add raw object with multiple types
+		this.source.addObject(object, typeAutoWire, objectAutoWire);
+
 		// Record
 		this.recordTeam();
 		this.recordRawObjectType(object);
 		this.recordOffice(typeAutoWire, objectAutoWire); // both types used
 		OfficeFloorManagedObject managedObject = this.recordRawObject(object,
-				true, typeAutoWire);
+				typeAutoWire);
+		this.recordOfficeObject(managedObject, typeAutoWire);
 		this.recordOfficeObject(managedObject, objectAutoWire);
 
 		// Test
 		this.replayMockObjects();
-
-		// Add raw object with multiple types
-		this.source.addObject(object, typeAutoWire, objectAutoWire);
 		this.doSourceOfficeFloor();
 		this.verifyMockObjects();
 	}
@@ -303,8 +308,10 @@ public class AutoWireOfficeFloorSourceTest extends OfficeFrameTestCase {
 				autoWire, ClassManagedObjectSource.class, 0, 0,
 				ClassManagedObjectSource.CLASS_NAME_PROPERTY_NAME,
 				MockRawObject.class.getName());
-		this.recordManagedObject(source, true, autoWire);
+		OfficeFloorManagedObject mo = this
+				.recordManagedObject(source, autoWire);
 		this.recordManagedObjectDependencies(object);
+		this.recordOfficeObject(mo, autoWire);
 
 		// Test
 		this.replayMockObjects();
@@ -359,8 +366,10 @@ public class AutoWireOfficeFloorSourceTest extends OfficeFrameTestCase {
 				typeAutoWire, ClassManagedObjectSource.class, 0, 0,
 				ClassManagedObjectSource.CLASS_NAME_PROPERTY_NAME,
 				MockRawObject.class.getName());
-		this.recordManagedObject(source, true, typeAutoWire);
+		OfficeFloorManagedObject mo = this.recordManagedObject(source,
+				typeAutoWire);
 		this.recordManagedObjectDependencies(object);
+		this.recordOfficeObject(mo, typeAutoWire);
 
 		// Test
 		this.replayMockObjects();
@@ -391,10 +400,11 @@ public class AutoWireOfficeFloorSourceTest extends OfficeFrameTestCase {
 				typeAutoWire, ClassManagedObjectSource.class, 0, 0,
 				ClassManagedObjectSource.CLASS_NAME_PROPERTY_NAME,
 				MockRawObject.class.getName());
-		OfficeFloorManagedObject managedObject = this.recordManagedObject(
-				source, true, typeAutoWire);
+		OfficeFloorManagedObject mo = this.recordManagedObject(source,
+				typeAutoWire);
 		this.recordManagedObjectDependencies(object);
-		this.recordOfficeObject(managedObject, objectAutoWire);
+		this.recordOfficeObject(mo, typeAutoWire);
+		this.recordOfficeObject(mo, objectAutoWire);
 
 		// Test
 		this.replayMockObjects();
@@ -424,8 +434,10 @@ public class AutoWireOfficeFloorSourceTest extends OfficeFrameTestCase {
 				autoWire, ClassManagedObjectSource.class, 0, 0,
 				ClassManagedObjectSource.CLASS_NAME_PROPERTY_NAME,
 				MockRawObject.class.getName());
-		this.recordManagedObject(source, true, autoWire);
+		OfficeFloorManagedObject mo = this
+				.recordManagedObject(source, autoWire);
 		this.recordManagedObjectDependencies(object);
+		this.recordOfficeObject(mo, autoWire);
 
 		// Test
 		this.replayMockObjects();
@@ -452,8 +464,10 @@ public class AutoWireOfficeFloorSourceTest extends OfficeFrameTestCase {
 		this.recordOffice(autoWire);
 		OfficeFloorManagedObjectSource source = this.recordManagedObjectSource(
 				autoWire, ClassManagedObjectSource.class, 0, TIMEOUT);
-		this.recordManagedObject(source, true, autoWire);
+		OfficeFloorManagedObject mo = this
+				.recordManagedObject(source, autoWire);
 		this.recordManagedObjectDependencies(object);
+		this.recordOfficeObject(mo, autoWire);
 
 		// Test
 		this.replayMockObjects();
@@ -485,8 +499,10 @@ public class AutoWireOfficeFloorSourceTest extends OfficeFrameTestCase {
 		OfficeFloorManagedObjectSource source = this.recordManagedObjectSource(
 				autoWire, ClassManagedObjectSource.class, 0, 0,
 				"class.path.property", "available");
-		this.recordManagedObject(source, true, autoWire);
+		OfficeFloorManagedObject mo = this
+				.recordManagedObject(source, autoWire);
 		this.recordManagedObjectDependencies(object);
+		this.recordOfficeObject(mo, autoWire);
 
 		// Test
 		this.replayMockObjects();
@@ -521,8 +537,10 @@ public class AutoWireOfficeFloorSourceTest extends OfficeFrameTestCase {
 		OfficeFloorManagedObjectSource source = this.recordManagedObjectSource(
 				autoWire, ClassManagedObjectSource.class, 0, 0,
 				"class.path.property", "available");
-		this.recordManagedObject(source, true, autoWire);
+		OfficeFloorManagedObject mo = this
+				.recordManagedObject(source, autoWire);
 		this.recordManagedObjectDependencies(object);
+		this.recordOfficeObject(mo, autoWire);
 
 		// Test
 		this.replayMockObjects();
@@ -576,15 +594,17 @@ public class AutoWireOfficeFloorSourceTest extends OfficeFrameTestCase {
 				rawTypeAutoWire, ClassManagedObjectSource.class, 0, 0,
 				ClassManagedObjectSource.CLASS_NAME_PROPERTY_NAME,
 				MockRawObject.class.getName());
-		this.recordManagedObject(source, true, rawTypeAutoWire);
+		OfficeFloorManagedObject managedObject = this.recordManagedObject(
+				source, rawTypeAutoWire);
 		this.recordManagedObjectDependencies(object, "dependency",
 				new AutoWire(Object.class));
-		this.recordRawObject(connection, false, connectionAutoWire);
+		this.recordRawObject(connection, connectionAutoWire);
 		this.recordLinkManagedObjectDependency(rawTypeAutoWire, "dependency",
 				connectionAutoWire);
 		this.recordManagedObjectFlow(source, "flow", "section", "sectionInput");
 		this.recordManagedObjectTeam(source, "team", OnePersonTeamSource.class,
 				"name", "value");
+		this.recordOfficeObject(managedObject, rawTypeAutoWire);
 
 		// Test
 		this.replayMockObjects();
@@ -621,14 +641,16 @@ public class AutoWireOfficeFloorSourceTest extends OfficeFrameTestCase {
 				rawTypeAutoWire, ClassManagedObjectSource.class, 0, 0,
 				ClassManagedObjectSource.CLASS_NAME_PROPERTY_NAME,
 				MockRawObject.class.getName());
-		this.recordManagedObject(source, true, rawTypeAutoWire);
+		OfficeFloorManagedObject managedObject = this.recordManagedObject(
+				source, rawTypeAutoWire);
 		this.recordManagedObjectDependencies(object, "connection",
 				new AutoWire(Connection.class));
-		OfficeFloorManagedObject rawManagedObject = this.recordRawObject(
-				connection, false, connectionAutoWire);
+		OfficeFloorManagedObject rawObject = this.recordRawObject(connection,
+				connectionAutoWire);
 		this.recordLinkManagedObjectDependency(rawTypeAutoWire, "connection",
 				connectionAutoWire);
-		this.recordOfficeObject(rawManagedObject, connectionAutoWire);
+		this.recordOfficeObject(managedObject, rawTypeAutoWire);
+		this.recordOfficeObject(rawObject, connectionAutoWire);
 
 		// Test
 		this.replayMockObjects();
@@ -680,16 +702,18 @@ public class AutoWireOfficeFloorSourceTest extends OfficeFrameTestCase {
 				rawTypeAutoWire, ClassManagedObjectSource.class, 0, 0,
 				ClassManagedObjectSource.CLASS_NAME_PROPERTY_NAME,
 				MockRawObject.class.getName());
-		this.recordManagedObject(source, true, rawTypeAutoWire);
+		OfficeFloorManagedObject mo = this.recordManagedObject(source,
+				rawTypeAutoWire);
 		this.recordManagedObjectDependencies(object, "connection",
 				new AutoWire(Object.class), "dataSource", new AutoWire(
 						Object.class));
-		this.recordRawObject(connection, false, connectionAutoWire);
+		this.recordRawObject(connection, connectionAutoWire);
 		this.recordLinkManagedObjectDependency(rawTypeAutoWire, "connection",
 				connectionAutoWire);
-		this.recordRawObject(dataSource, false, dataSourceAutoWire);
+		this.recordRawObject(dataSource, dataSourceAutoWire);
 		this.recordLinkManagedObjectDependency(rawTypeAutoWire, "dataSource",
 				dataSourceAutoWire);
+		this.recordOfficeObject(mo, rawTypeAutoWire);
 
 		// Test
 		this.replayMockObjects();
@@ -742,8 +766,9 @@ public class AutoWireOfficeFloorSourceTest extends OfficeFrameTestCase {
 				rawTypeAutoWire, ClassManagedObjectSource.class, 0, 0,
 				ClassManagedObjectSource.CLASS_NAME_PROPERTY_NAME,
 				MockRawObject.class.getName());
-		this.recordInputManagedObject(source, rawTypeAutoWire);
-		this.recordRawObject(connection, false, connectionAutoWire);
+		OfficeFloorInputManagedObject mo = this.recordInputManagedObject(
+				source, rawTypeAutoWire);
+		this.recordRawObject(connection, connectionAutoWire);
 		this.recordManagedObjectDependencies(object, "dependency",
 				connectionAutoWire);
 		this.recordInputManagedObjectDependency(source, "dependency",
@@ -751,6 +776,7 @@ public class AutoWireOfficeFloorSourceTest extends OfficeFrameTestCase {
 		this.recordManagedObjectFlow(source, "flow", "section", "sectionInput");
 		this.recordManagedObjectTeam(source, "team", OnePersonTeamSource.class,
 				"name", "value");
+		this.recordOfficeObject(mo, rawTypeAutoWire);
 
 		// Test
 		this.replayMockObjects();
@@ -799,9 +825,11 @@ public class AutoWireOfficeFloorSourceTest extends OfficeFrameTestCase {
 				moAutoWire, ClassManagedObjectSource.class, 0, 0,
 				ClassManagedObjectSource.CLASS_NAME_PROPERTY_NAME,
 				MockRawObject.class.getName());
-		this.recordManagedObject(source, true, moAutoWire);
+		OfficeFloorManagedObject mo = this.recordManagedObject(source,
+				moAutoWire);
 		this.recordManagedObjectDependencies(object);
 		this.recordManagedObjectTeam(source, "team", qualifiedTeamAutoWire);
+		this.recordOfficeObject(mo, moAutoWire);
 
 		// Test
 		this.replayMockObjects();
@@ -848,9 +876,11 @@ public class AutoWireOfficeFloorSourceTest extends OfficeFrameTestCase {
 				moAutoWire, ClassManagedObjectSource.class, 0, 0,
 				ClassManagedObjectSource.CLASS_NAME_PROPERTY_NAME,
 				MockRawObject.class.getName());
-		this.recordManagedObject(source, true, moAutoWire);
+		OfficeFloorManagedObject mo = this.recordManagedObject(source,
+				moAutoWire);
 		this.recordManagedObjectDependencies(object);
 		this.recordManagedObjectTeam(source, "team", unqualifiedTeamAutoWire);
+		this.recordOfficeObject(mo, moAutoWire);
 
 		// Test
 		this.replayMockObjects();
@@ -895,13 +925,15 @@ public class AutoWireOfficeFloorSourceTest extends OfficeFrameTestCase {
 				moAutoWire, ClassManagedObjectSource.class, 0, 0,
 				ClassManagedObjectSource.CLASS_NAME_PROPERTY_NAME,
 				MockRawObject.class.getName());
-		this.recordManagedObject(source, true, moAutoWire);
+		OfficeFloorManagedObject mo = this.recordManagedObject(source,
+				moAutoWire);
 		this.recordManagedObjectDependencies(object);
 		this.recordReturn(source, source.getManagedObjectTeam("TEAM"), moTeam);
 		this.deployer.addIssue(
 				"No Team for auto-wiring ManagedObjectTeam TEAM (qualifier=QUALIFIED, type="
 						+ Connection.class.getName() + ")",
 				AssetType.MANAGED_OBJECT, moAutoWire.getQualifiedType());
+		this.recordOfficeObject(mo, moAutoWire);
 
 		// Test
 		this.replayMockObjects();
@@ -941,8 +973,10 @@ public class AutoWireOfficeFloorSourceTest extends OfficeFrameTestCase {
 				autoWire, ClassManagedObjectSource.class, 0, 0,
 				ClassManagedObjectSource.CLASS_NAME_PROPERTY_NAME,
 				MockRawObject.class.getName());
-		this.recordInputManagedObject(mosOne, autoWire);
+		OfficeFloorInputManagedObject mo = this.recordInputManagedObject(
+				mosOne, autoWire);
 		this.recordManagedObjectDependencies(object);
+		this.recordOfficeObject(mo, autoWire);
 
 		// Test
 		this.replayMockObjects();
@@ -990,16 +1024,20 @@ public class AutoWireOfficeFloorSourceTest extends OfficeFrameTestCase {
 				autoWire, ClassManagedObjectSource.class, 0, 0,
 				ClassManagedObjectSource.CLASS_NAME_PROPERTY_NAME,
 				MockRawObject.class.getName());
-		this.recordInputManagedObject(mosOne, autoWire);
+		OfficeFloorInputManagedObject moOne = this.recordInputManagedObject(
+				mosOne, autoWire);
 		this.recordManagedObjectDependencies(firstObject);
+		this.recordOfficeObject(moOne, autoWire);
 
 		// Record the second input managed object
 		OfficeFloorManagedObjectSource mosTwo = this.recordManagedObjectSource(
 				autoWire, ClassManagedObjectSource.class, 1, 0,
 				ClassManagedObjectSource.CLASS_NAME_PROPERTY_NAME,
 				MockRawObject.class.getName());
-		this.recordInputManagedObject(mosTwo, autoWire);
+		OfficeFloorInputManagedObject moTwo = this.recordInputManagedObject(
+				mosTwo, autoWire);
 		this.recordManagedObjectDependencies(secondObject);
+		this.recordOfficeObject(moTwo, autoWire);
 
 		// Test
 		this.replayMockObjects();
@@ -1035,12 +1073,14 @@ public class AutoWireOfficeFloorSourceTest extends OfficeFrameTestCase {
 				rawTypeAutoWire, ClassManagedObjectSource.class, 0, 0,
 				ClassManagedObjectSource.CLASS_NAME_PROPERTY_NAME,
 				MockRawObject.class.getName());
-		this.recordManagedObject(source, true, rawTypeAutoWire);
+		OfficeFloorManagedObject mo = this.recordManagedObject(source,
+				rawTypeAutoWire);
 		this.recordManagedObjectDependencies(object, "dependency",
 				connectionAutoWire);
-		this.recordRawObject(connection, false, connectionAutoWire);
+		this.recordRawObject(connection, connectionAutoWire);
 		this.recordLinkManagedObjectDependency(rawTypeAutoWire, "dependency",
 				connectionAutoWire);
+		this.recordOfficeObject(mo, rawTypeAutoWire);
 
 		// Test
 		this.replayMockObjects();
@@ -1079,12 +1119,14 @@ public class AutoWireOfficeFloorSourceTest extends OfficeFrameTestCase {
 				rawTypeAutoWire, ClassManagedObjectSource.class, 0, 0,
 				ClassManagedObjectSource.CLASS_NAME_PROPERTY_NAME,
 				MockRawObject.class.getName());
-		this.recordManagedObject(source, true, rawTypeAutoWire);
+		OfficeFloorManagedObject mo = this.recordManagedObject(source,
+				rawTypeAutoWire);
 		this.recordManagedObjectDependencies(object, "dependency",
 				qualifiedAutoWire);
-		this.recordRawObject(connection, false, unqualifiedAutoWire);
+		this.recordRawObject(connection, unqualifiedAutoWire);
 		this.recordLinkManagedObjectDependency(rawTypeAutoWire, "dependency",
 				unqualifiedAutoWire);
+		this.recordOfficeObject(mo, rawTypeAutoWire);
 
 		// Test
 		this.replayMockObjects();
@@ -1128,11 +1170,13 @@ public class AutoWireOfficeFloorSourceTest extends OfficeFrameTestCase {
 				rawTypeAutoWire, ClassManagedObjectSource.class, 0, 0,
 				ClassManagedObjectSource.CLASS_NAME_PROPERTY_NAME,
 				MockRawObject.class.getName());
-		this.recordManagedObject(source, true, rawTypeAutoWire);
+		OfficeFloorManagedObject mo = this.recordManagedObject(source,
+				rawTypeAutoWire);
 		this.recordManagedObjectDependencies(object, "dependency", twoAutoWire);
-		this.recordRawObject(connectionTwo, false, twoAutoWire);
+		this.recordRawObject(connectionTwo, twoAutoWire);
 		this.recordLinkManagedObjectDependency(rawTypeAutoWire, "dependency",
 				twoAutoWire);
+		this.recordOfficeObject(mo, rawTypeAutoWire);
 
 		// Test
 		this.replayMockObjects();
@@ -1176,7 +1220,7 @@ public class AutoWireOfficeFloorSourceTest extends OfficeFrameTestCase {
 				rawTypeAutoWire, ClassManagedObjectSource.class, 0, 0,
 				ClassManagedObjectSource.CLASS_NAME_PROPERTY_NAME,
 				MockRawObject.class.getName());
-		OfficeFloorManagedObject mo = this.recordManagedObject(source, true,
+		OfficeFloorManagedObject mo = this.recordManagedObject(source,
 				rawTypeAutoWire);
 		this.recordManagedObjectDependencies(object, "dependency",
 				dependencyAutoWire);
@@ -1190,6 +1234,7 @@ public class AutoWireOfficeFloorSourceTest extends OfficeFrameTestCase {
 								+ Connection.class.getName() + ")",
 						AssetType.MANAGED_OBJECT,
 						rawTypeAutoWire.getQualifiedType());
+		this.recordOfficeObject(mo, rawTypeAutoWire);
 
 		// Test
 		this.replayMockObjects();
@@ -1218,13 +1263,15 @@ public class AutoWireOfficeFloorSourceTest extends OfficeFrameTestCase {
 				cyclicAutoWire, ClassManagedObjectSource.class, 0, 0,
 				ClassManagedObjectSource.CLASS_NAME_PROPERTY_NAME,
 				MockRawObject.class.getName());
-		this.recordManagedObject(source, true, cyclicAutoWire);
+		OfficeFloorManagedObject mo = this.recordManagedObject(source,
+				cyclicAutoWire);
 		this.recordManagedObjectDependencies(object, "dependency",
 				cyclicAutoWire);
 		this.deployer.addIssue(
 				"Cyclic managed object dependency graph for auto-wiring (qualifier=null, type="
 						+ MockRawType.class.getName() + ")",
 				AssetType.MANAGED_OBJECT, cyclicAutoWire.getQualifiedType());
+		this.recordOfficeObject(mo, cyclicAutoWire);
 
 		// Test
 		this.replayMockObjects();
@@ -1241,31 +1288,46 @@ public class AutoWireOfficeFloorSourceTest extends OfficeFrameTestCase {
 		final AutoWire twoAutoWire = new AutoWire(MockRawObject.class);
 
 		// Add the first managed object
-		AutoWireObject object = this.source.addManagedObject(
+		AutoWireObject oneObject = this.source.addManagedObject(
 				ClassManagedObjectSource.class.getName(), null, oneAutoWire);
-		object.addProperty(ClassManagedObjectSource.CLASS_NAME_PROPERTY_NAME,
+		oneObject.addProperty(
+				ClassManagedObjectSource.CLASS_NAME_PROPERTY_NAME,
 				MockRawObject.class.getName());
 
 		// Add the second managed object
-		final MockRawObject rawObject = new MockRawObject();
-		this.source.addObject(rawObject, twoAutoWire);
+		AutoWireObject twoObject = this.source.addManagedObject(
+				ClassManagedObjectSource.class.getName(), null, twoAutoWire);
+		twoObject.addProperty(
+				ClassManagedObjectSource.CLASS_NAME_PROPERTY_NAME,
+				MockRawObject.class.getName());
 
 		// Record Managed Object Source
 		this.recordTeam();
-		this.recordManagedObjectType(object);
-		this.recordRawObjectType(rawObject);
+		this.recordManagedObjectType(oneObject);
+		this.recordManagedObjectType(twoObject);
 		this.recordOffice(oneAutoWire);
-		OfficeFloorManagedObjectSource source = this.recordManagedObjectSource(
-				oneAutoWire, ClassManagedObjectSource.class, 0, 0,
-				ClassManagedObjectSource.CLASS_NAME_PROPERTY_NAME,
-				MockRawObject.class.getName());
-		this.recordManagedObject(source, true, oneAutoWire);
-		this.recordManagedObjectDependencies(object, "dependency", twoAutoWire);
-		this.recordRawObject(rawObject, false, oneAutoWire);
+		OfficeFloorManagedObjectSource oneSource = this
+				.recordManagedObjectSource(oneAutoWire,
+						ClassManagedObjectSource.class, 0, 0,
+						ClassManagedObjectSource.CLASS_NAME_PROPERTY_NAME,
+						MockRawObject.class.getName());
+		OfficeFloorManagedObject mo = this.recordManagedObject(oneSource,
+				oneAutoWire);
+		this.recordManagedObjectDependencies(oneObject, "dependency",
+				twoAutoWire);
+		OfficeFloorManagedObjectSource twoSource = this
+				.recordManagedObjectSource(twoAutoWire,
+						ClassManagedObjectSource.class, 0, 0,
+						ClassManagedObjectSource.CLASS_NAME_PROPERTY_NAME,
+						MockRawObject.class.getName());
+		this.recordManagedObject(twoSource, twoAutoWire);
+		this.recordManagedObjectDependencies(twoObject, "dependency",
+				oneAutoWire);
 		this.deployer.addIssue(
 				"Cyclic managed object dependency graph for auto-wiring (qualifier=null, type="
 						+ oneAutoWire.getType() + ")",
 				AssetType.MANAGED_OBJECT, oneAutoWire.getQualifiedType());
+		this.recordOfficeObject(mo, oneAutoWire);
 
 		// Test
 		this.replayMockObjects();
@@ -1429,7 +1491,9 @@ public class AutoWireOfficeFloorSourceTest extends OfficeFrameTestCase {
 				autoWire, mos, 0, 0,
 				ClassManagedObjectSource.CLASS_NAME_PROPERTY_NAME,
 				MockRawObject.class.getName());
-		this.recordManagedObject(source, true, autoWire);
+		OfficeFloorManagedObject mo = this
+				.recordManagedObject(source, autoWire);
+		this.recordOfficeObject(mo, autoWire);
 
 		// Test
 		this.replayMockObjects();
@@ -1464,7 +1528,9 @@ public class AutoWireOfficeFloorSourceTest extends OfficeFrameTestCase {
 		this.recordOffice(two.getAutoWire()); // selectively only use two
 		OfficeFloorManagedObjectSource source = this.recordManagedObjectSource(
 				two.getAutoWire(), two, 0, 0);
-		this.recordManagedObject(source, true, two.getAutoWire());
+		OfficeFloorManagedObject mo = this.recordManagedObject(source,
+				two.getAutoWire());
+		this.recordOfficeObject(mo, two.getAutoWire());
 
 		// Test
 		this.replayMockObjects();
@@ -1679,7 +1745,8 @@ public class AutoWireOfficeFloorSourceTest extends OfficeFrameTestCase {
 		DeployedOffice office = this.recordOffice(source.getAutoWire());
 		OfficeFloorManagedObjectSource mos = this.recordManagedObjectSource(
 				source.getAutoWire(), source, 0, 0);
-		this.recordManagedObject(mos, true, source.getAutoWire());
+		OfficeFloorManagedObject mo = this.recordManagedObject(mos,
+				source.getAutoWire());
 
 		// Record linking flow to input
 		final ManagedObjectFlow flow = this.createMock(ManagedObjectFlow.class);
@@ -1689,6 +1756,9 @@ public class AutoWireOfficeFloorSourceTest extends OfficeFrameTestCase {
 		this.recordReturn(office,
 				office.getDeployedOfficeInput("SECTION", "INPUT"), officeInput);
 		this.deployer.link(flow, officeInput);
+
+		// Record linking into office
+		this.recordOfficeObject(mo, source.getAutoWire());
 
 		// Test
 		this.replayMockObjects();
@@ -1770,13 +1840,17 @@ public class AutoWireOfficeFloorSourceTest extends OfficeFrameTestCase {
 		this.recordOffice(source.getAutoWire());
 		OfficeFloorManagedObjectSource mos = this.recordManagedObjectSource(
 				source.getAutoWire(), source, 0, 0);
-		this.recordManagedObject(mos, true, source.getAutoWire());
+		OfficeFloorManagedObject mo = this.recordManagedObject(mos,
+				source.getAutoWire());
 
 		// Record linking managed object team to team
 		final ManagedObjectTeam moTeam = this
 				.createMock(ManagedObjectTeam.class);
 		this.recordReturn(mos, mos.getManagedObjectTeam("team"), moTeam);
 		this.deployer.link(moTeam, team);
+
+		// Record linking into office
+		this.recordOfficeObject(mo, source.getAutoWire());
 
 		// Test
 		this.replayMockObjects();
@@ -1816,7 +1890,8 @@ public class AutoWireOfficeFloorSourceTest extends OfficeFrameTestCase {
 		this.recordOffice(source.getAutoWire());
 		OfficeFloorManagedObjectSource mos = this.recordManagedObjectSource(
 				source.getAutoWire(), source, 0, 0);
-		this.recordManagedObject(mos, true, source.getAutoWire());
+		OfficeFloorManagedObject mo = this.recordManagedObject(mos,
+				source.getAutoWire());
 
 		// Record issue as no corresponding OfficeFloor Team
 		this.deployer
@@ -1825,6 +1900,9 @@ public class AutoWireOfficeFloorSourceTest extends OfficeFrameTestCase {
 								+ Connection.class.getName() + ")",
 						AssetType.MANAGED_OBJECT, source.getAutoWire()
 								.getQualifiedType());
+
+		// Record linking into office
+		this.recordOfficeObject(mo, source.getAutoWire());
 
 		// Test
 		this.replayMockObjects();
@@ -1990,13 +2068,15 @@ public class AutoWireOfficeFloorSourceTest extends OfficeFrameTestCase {
 		this.recordSourceObjectType(usedObject, usedType);
 		this.recordSourceObjectType(dependencyObject, dependencyType);
 		this.recordOffice(new AutoWire(usedClass)); // dependency should load
-		this.recordSourceObject(usedObject, usedClass, null, usedType, true,
-				"dependency", dependencyClass, dependencyQualifier);
+		OfficeFloorManagedObject mo = this.recordSourceObject(usedObject,
+				usedClass, null, usedType, "dependency", dependencyClass,
+				dependencyQualifier);
 		this.recordSourceObject(dependencyObject, dependencyClass,
-				typeQualifier, dependencyType, false, null, null, null);
+				typeQualifier, dependencyType, null, null, null);
 		this.recordLinkManagedObjectDependency(new AutoWire(usedClass),
 				"dependency",
 				new AutoWire(typeQualifier, dependencyClass.getName()));
+		this.recordOfficeObject(mo, new AutoWire(usedClass));
 
 		// Test
 		this.replayMockObjects();
@@ -2091,9 +2171,9 @@ public class AutoWireOfficeFloorSourceTest extends OfficeFrameTestCase {
 	/**
 	 * Records the source object.
 	 */
-	private void recordSourceObject(Object object, Class<?> objectType,
-			String typeQualifier, SourceObjectType sourceType,
-			boolean isLinkToOffice, String dependencyName,
+	private OfficeFloorManagedObject recordSourceObject(Object object,
+			Class<?> objectType, String typeQualifier,
+			SourceObjectType sourceType, String dependencyName,
 			Class<?> dependencyType, String dependencyQualifier) {
 
 		// Create the listing for the dependency
@@ -2112,10 +2192,11 @@ public class AutoWireOfficeFloorSourceTest extends OfficeFrameTestCase {
 		OfficeFloorManagedObjectSource mos;
 
 		// Record source object
+		OfficeFloorManagedObject mo = null;
 		switch (sourceType) {
 		case RAW:
 			// Record adding raw object
-			this.recordRawObject(object, isLinkToOffice, autoWire);
+			mo = this.recordRawObject(object, autoWire);
 			assertNull("Raw object can not have dependencies", dependencyName);
 			break;
 
@@ -2125,7 +2206,7 @@ public class AutoWireOfficeFloorSourceTest extends OfficeFrameTestCase {
 					ClassManagedObjectSource.class, 0, 0,
 					ClassManagedObjectSource.CLASS_NAME_PROPERTY_NAME,
 					objectType.getName());
-			this.recordManagedObject(mos, isLinkToOffice, autoWire);
+			mo = this.recordManagedObject(mos, autoWire);
 			AutoWireObject autoWireObject = (AutoWireObject) object;
 			this.recordManagedObjectDependencies(autoWireObject,
 					dependencyNameAutoWirePairing);
@@ -2135,7 +2216,7 @@ public class AutoWireOfficeFloorSourceTest extends OfficeFrameTestCase {
 			// Record adding supplied managed object
 			MockTypeManagedObjectSource mosSource = (MockTypeManagedObjectSource) object;
 			mos = this.recordManagedObjectSource(autoWire, mosSource, 0, 0);
-			this.recordManagedObject(mos, isLinkToOffice, autoWire);
+			mo = this.recordManagedObject(mos, autoWire);
 
 			// Add dependency (if required)
 			if (dependencyName != null) {
@@ -2148,6 +2229,9 @@ public class AutoWireOfficeFloorSourceTest extends OfficeFrameTestCase {
 		default:
 			fail("Unknown source type");
 		}
+
+		// Return the managed object
+		return mo;
 	}
 
 	/**
@@ -2301,6 +2385,34 @@ public class AutoWireOfficeFloorSourceTest extends OfficeFrameTestCase {
 	}
 
 	/**
+	 * Records obtaining the {@link ManagedObjectType}.
+	 * 
+	 * @param object
+	 *            {@link AutoWireObject}.
+	 * @param extensionInterfaces
+	 *            Extension interfaces.
+	 */
+	private void recordManagedObjectType(AutoWireObject object,
+			Class<?>... extensionInterfaces) {
+
+		// Record the managed object type
+		ManagedObjectType<?> managedObjectType = this
+				.createMock(ManagedObjectType.class);
+		this.recordReturn(
+				this.context,
+				this.context.loadManagedObjectType(
+						object.getManagedObjectSourceClassName(),
+						object.getProperties()), managedObjectType);
+
+		// Record obtaining extension interfaces
+		this.recordReturn(managedObjectType,
+				managedObjectType.getExtensionInterfaces(), extensionInterfaces);
+
+		// Register the managed object type
+		this.managedObjectTypes.put(object, managedObjectType);
+	}
+
+	/**
 	 * Indicates if the {@link AbstractMatcher} is specified for the raw object.
 	 */
 	private boolean isRawObjectMatcherSpecified = false;
@@ -2309,15 +2421,15 @@ public class AutoWireOfficeFloorSourceTest extends OfficeFrameTestCase {
 	 * Records raw object.
 	 */
 	private OfficeFloorManagedObject recordRawObject(Object dependency,
-			boolean isLinkToOffice, AutoWire... autoWiring) {
+			AutoWire autoWire) {
 
 		final OfficeFloorManagedObjectSource source = this
 				.createMock(OfficeFloorManagedObjectSource.class);
 
 		// Record the managed object source
 		this.recordReturn(this.deployer, this.deployer.addManagedObjectSource(
-				autoWiring[0].getQualifiedType(),
-				new SingletonManagedObjectSource(dependency)), source);
+				autoWire.getQualifiedType(), new SingletonManagedObjectSource(
+						dependency)), source);
 		if (!this.isRawObjectMatcherSpecified) {
 			this.control(this.deployer).setMatcher(new AbstractMatcher() {
 				@Override
@@ -2339,7 +2451,7 @@ public class AutoWireOfficeFloorSourceTest extends OfficeFrameTestCase {
 		this.deployer.link(managingOffice, this.office);
 
 		// Record and return the managed object
-		return this.recordManagedObject(source, isLinkToOffice, autoWiring);
+		return this.recordManagedObject(source, autoWire);
 	}
 
 	/**
@@ -2407,48 +2519,17 @@ public class AutoWireOfficeFloorSourceTest extends OfficeFrameTestCase {
 	 * @return {@link OfficeFloorManagedObject}.
 	 */
 	private OfficeFloorManagedObject recordManagedObject(
-			OfficeFloorManagedObjectSource source, boolean isLinkToOffice,
-			AutoWire... autoWiring) {
-
-		// Obtain the first auto-wire for naming and identification
-		AutoWire firstAutoWire = autoWiring[0];
+			OfficeFloorManagedObjectSource source, AutoWire autoWire) {
 
 		// Record the managed object
 		final OfficeFloorManagedObject mo = this
 				.createMock(OfficeFloorManagedObject.class);
 		this.recordReturn(source, source.addOfficeFloorManagedObject(
-				firstAutoWire.getQualifiedType(), ManagedObjectScope.PROCESS),
-				mo);
-		this.managedObjects.put(firstAutoWire, mo);
-
-		if (isLinkToOffice) {
-			// Record the managed object into the office
-			this.recordOfficeObject(mo, autoWiring);
-		}
+				autoWire.getQualifiedType(), ManagedObjectScope.PROCESS), mo);
+		this.managedObjects.put(autoWire, mo);
 
 		// Return the managed object
 		return mo;
-	}
-
-	/**
-	 * Record the {@link OfficeObject} for the {@link OfficeFloorManagedObject}.
-	 * 
-	 * @param managedObject
-	 *            {@link OfficeFloorManagedObject}.
-	 * @param autoWiring
-	 *            {@link AutoWire} instances.
-	 */
-	private void recordOfficeObject(OfficeFloorManagedObject managedObject,
-			AutoWire... autoWiring) {
-		// Record the managed object into the office
-		for (AutoWire autoWire : autoWiring) {
-			final OfficeObject object = this.createMock(OfficeObject.class);
-			this.recordReturn(this.office, this.office
-					.getDeployedOfficeObject(autoWire.getQualifiedType()),
-					object);
-			this.deployer.link(object, managedObject);
-			this.objects.put(autoWire, object);
-		}
 	}
 
 	/**
@@ -2456,12 +2537,6 @@ public class AutoWireOfficeFloorSourceTest extends OfficeFrameTestCase {
 	 */
 	private OfficeFloorInputManagedObject recordInputManagedObject(
 			OfficeFloorManagedObjectSource source, AutoWire autoWire) {
-
-		// Record the managed object into the office
-		final OfficeObject object = this.createMock(OfficeObject.class);
-		this.recordReturn(this.office, this.office
-				.getDeployedOfficeObject(autoWire.getQualifiedType()), object);
-		this.objects.put(autoWire, object);
 
 		// Obtain the Input Managed Object
 		OfficeFloorInputManagedObject input = this.inputManagedObjects
@@ -2475,9 +2550,6 @@ public class AutoWireOfficeFloorSourceTest extends OfficeFrameTestCase {
 
 			// First managed object source is bound
 			input.setBoundOfficeFloorManagedObjectSource(source);
-
-			// Link input office object to input managed object
-			this.deployer.link(object, input);
 		}
 
 		// Link the source to input
@@ -2488,31 +2560,30 @@ public class AutoWireOfficeFloorSourceTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Records obtaining the {@link ManagedObjectType}.
-	 * 
-	 * @param object
-	 *            {@link AutoWireObject}.
-	 * @param extensionInterfaces
-	 *            Extension interfaces.
+	 * Record the {@link OfficeObject} for the {@link OfficeFloorManagedObject}.
 	 */
-	private void recordManagedObjectType(AutoWireObject object,
-			Class<?>... extensionInterfaces) {
+	private void recordOfficeObject(OfficeFloorManagedObject managedObject,
+			AutoWire autoWire) {
+		// Record the managed object into the office
+		final OfficeObject object = this.createMock(OfficeObject.class);
+		this.recordReturn(this.office, this.office
+				.getDeployedOfficeObject(autoWire.getQualifiedType()), object);
+		this.deployer.link(object, managedObject);
+		this.objects.put(autoWire, object);
+	}
 
-		// Record the managed object type
-		ManagedObjectType<?> managedObjectType = this
-				.createMock(ManagedObjectType.class);
-		this.recordReturn(
-				this.context,
-				this.context.loadManagedObjectType(
-						object.getManagedObjectSourceClassName(),
-						object.getProperties()), managedObjectType);
-
-		// Record obtaining extension interfaces
-		this.recordReturn(managedObjectType,
-				managedObjectType.getExtensionInterfaces(), extensionInterfaces);
-
-		// Register the managed object type
-		this.managedObjectTypes.put(object, managedObjectType);
+	/**
+	 * Record the {@link OfficeObject} for the
+	 * {@link OfficeFloorInputManagedObject}.
+	 */
+	private void recordOfficeObject(
+			OfficeFloorInputManagedObject inputManagedObject, AutoWire autoWire) {
+		// Record the managed object into the office
+		final OfficeObject object = this.createMock(OfficeObject.class);
+		this.recordReturn(this.office, this.office
+				.getDeployedOfficeObject(autoWire.getQualifiedType()), object);
+		this.deployer.link(object, inputManagedObject);
+		this.objects.put(autoWire, object);
 	}
 
 	/**

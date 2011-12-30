@@ -444,8 +444,16 @@ public class AutoWireOfficeSource extends AbstractOfficeSource {
 				// Link to appropriate Office Object
 				OfficeObject officeObject = objects.get(autoWire);
 				if (officeObject == null) {
+					
+					// Create the office object
 					officeObject = architect.addOfficeObject(
 							autoWire.getQualifiedType(), autoWire.getType());
+					String autoWireQualifier = autoWire.getQualifier();
+					if (autoWireQualifier != null) {
+						officeObject.setTypeQualifier(autoWireQualifier);
+					}
+					
+					// Register the office object
 					objects.put(autoWire, officeObject);
 				}
 				architect.link(object, officeObject);
