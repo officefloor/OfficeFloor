@@ -317,18 +317,21 @@ public class AutoWireOfficeSource extends AbstractOfficeSource {
 	 * Adds that the {@link OfficeObject} has the ability to be used with the
 	 * specified extension interfaces.
 	 * <p>
-	 * This aids auto-wiring the {@link Governance} for the {@link OfficeObject}.
+	 * This aids both auto-wiring use and {@link Governance} for the
+	 * {@link OfficeObject}.
 	 * 
 	 * @param autoWire
 	 *            {@link OfficeObject} {@link AutoWire}.
 	 * @param extensionInterfaces
 	 *            Extension interfaces available for the {@link OfficeObject}.
-	 *
-	 * @deprecated
-	 * TODO rename to addAvailableOfficeObject
 	 */
-	public void addOfficeObjectExtension(AutoWire autoWire,
+	public void addAvailableOfficeObject(AutoWire autoWire,
 			Class<?>... extensionInterfaces) {
+
+		// Add the available auto-wiring
+		this.availableAutoWiring.add(autoWire);
+
+		// Map auto-wiring for extensions
 		for (Class<?> extensionInterface : extensionInterfaces) {
 
 			// Obtain the auto wiring for the extension type
@@ -343,19 +346,6 @@ public class AutoWireOfficeSource extends AbstractOfficeSource {
 			// Add the auto wire
 			autoWiring.add(autoWire);
 		}
-	}
-
-	/**
-	 * Adds an available {@link AutoWire}.
-	 * 
-	 * @param autoWire
-	 *            {@link AutoWire}.
-	 * 
-	 * @deprecated
-	 * TODO remove and just use addOfficeObjectExtension
-	 */
-	public void addAvailableAutoWire(AutoWire autoWire) {
-		this.availableAutoWiring.add(autoWire);
 	}
 
 	/**
