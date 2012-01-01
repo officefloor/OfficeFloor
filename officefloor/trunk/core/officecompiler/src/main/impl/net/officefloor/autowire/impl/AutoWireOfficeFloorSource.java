@@ -46,6 +46,8 @@ import net.officefloor.compile.OfficeFloorCompiler;
 import net.officefloor.compile.impl.OfficeFloorCompilerAdapter;
 import net.officefloor.compile.impl.issues.FailCompilerIssues;
 import net.officefloor.compile.managedobject.ManagedObjectDependencyType;
+import net.officefloor.compile.managedobject.ManagedObjectFlowType;
+import net.officefloor.compile.managedobject.ManagedObjectTeamType;
 import net.officefloor.compile.managedobject.ManagedObjectType;
 import net.officefloor.compile.office.OfficeInputType;
 import net.officefloor.compile.office.OfficeManagedObjectType;
@@ -474,7 +476,7 @@ public class AutoWireOfficeFloorSource extends AbstractOfficeFloorSource
 
 			// Obtain the extension interfaces for object type
 			Class<?>[] extensionInterfaces = objectInstance
-					.getExtensionInterfaces(context);
+					.getExtensionInterfaces(deployer, context);
 
 			// Load the first available auto-wire for office objects
 			for (AutoWire autoWire : autoWiring) {
@@ -579,7 +581,7 @@ public class AutoWireOfficeFloorSource extends AbstractOfficeFloorSource
 		for (AutoWireObjectInstance objectInstance : this.objectInstances) {
 
 			// Initialise the object
-			objectInstance.initManagedObject();
+			objectInstance.initManagedObject(deployer, context);
 
 			// Register if input object instance
 			if (objectInstance.isInput) {
@@ -948,15 +950,17 @@ public class AutoWireOfficeFloorSource extends AbstractOfficeFloorSource
 		/**
 		 * Obtains the extension interfaces.
 		 * 
+		 * @param deployer
+		 *            {@link OfficeFloorDeployer}.
 		 * @param context
 		 *            {@link OfficeFloorSourceContext}.
 		 * @return Extension interfaces.
 		 */
-		public Class<?>[] getExtensionInterfaces(
+		public Class<?>[] getExtensionInterfaces(OfficeFloorDeployer deployer,
 				OfficeFloorSourceContext context) {
 
 			// Obtain the managed object type
-			this.loadManagedObjectType(context);
+			this.loadManagedObjectType(deployer, context);
 			if (this.managedObjectType == null) {
 				return new Class<?>[0]; // no type
 			}
@@ -969,13 +973,15 @@ public class AutoWireOfficeFloorSource extends AbstractOfficeFloorSource
 		 * Obtains the {@link AutoWireManagedObjectDependency} instances for the
 		 * type.
 		 * 
+		 * @param deployer
+		 *            {@link OfficeFloorDeployer}.
 		 * @param context
 		 *            {@link OfficeFloorSourceContext}.
 		 * @return {@link AutoWireManagedObjectDependency} instances for the
 		 *         type.
 		 */
 		public AutoWireManagedObjectDependency[] getTypeDependencies(
-				OfficeFloorSourceContext context) {
+				OfficeFloorDeployer deployer, OfficeFloorSourceContext context) {
 
 			// No dependencies if raw object
 			if (this.rawObject != null) {
@@ -983,7 +989,7 @@ public class AutoWireOfficeFloorSource extends AbstractOfficeFloorSource
 			}
 
 			// Obtain the managed object type
-			this.loadManagedObjectType(context);
+			this.loadManagedObjectType(deployer, context);
 			if (this.managedObjectType == null) {
 				// No type, no dependencies
 				return new AutoWireManagedObjectDependency[0];
@@ -1014,20 +1020,30 @@ public class AutoWireOfficeFloorSource extends AbstractOfficeFloorSource
 		/**
 		 * Loads the {@link ManagedObjectType}.
 		 * 
+		 * @param deployer
+		 *            {@link OfficeFloorDeployer}.
 		 * @param context
 		 *            {@link OfficeFloorSourceContext}.
 		 */
-		private void loadManagedObjectType(OfficeFloorSourceContext context) {
+		private void loadManagedObjectType(OfficeFloorDeployer deployer,
+				OfficeFloorSourceContext context) {
 
 			// Lazy load the managed object type
 			if (this.managedObjectType == null) {
 
 				// Determine if raw object
 				if (this.rawObject != null) {
+
+					// Create the managed object source
+					ManagedObjectSource<?, ?> singleton = this
+							.createSingletonManagedObjectSource(deployer);
+					if (singleton == null) {
+						return; // must have singleton
+					}
+
 					// Obtain type from raw object
 					this.managedObjectType = context.loadManagedObjectType(
-							new SingletonManagedObjectSource(this.rawObject),
-							this.autoWireObject.getProperties());
+							singleton, this.autoWireObject.getProperties());
 
 				} else {
 					// Obtain type from managed object
@@ -1036,13 +1052,49 @@ public class AutoWireOfficeFloorSource extends AbstractOfficeFloorSource
 									.getManagedObjectSourceClassName(),
 							this.autoWireObject.getProperties());
 				}
+
+				// Determine if input
+				ManagedObjectFlowType<?>[] flowTypes = this.managedObjectType
+						.getFlowTypes();
+				ManagedObjectTeamType[] teamTypes = this.managedObjectType
+						.getTeamTypes();
+				this.isInput = (flowTypes.length > 0) || (teamTypes.length > 0);
+			}
+		}
+
+		/**
+		 * Obtains the singleton {@link ManagedObjectSource} for the raw object.
+		 * 
+		 * @param deployer
+		 *            {@link OfficeFloorDeployer}.
+		 * @return Singleton {@link ManagedObjectSource}.
+		 */
+		private ManagedObjectSource<?, ?> createSingletonManagedObjectSource(
+				OfficeFloorDeployer deployer) {
+			try {
+				return OfficeFloorCompilerAdapter
+						.createSingletonManagedObjectSource(this.compiler,
+								this.rawObject,
+								this.autoWireObject.getAutoWiring());
+			} catch (ClassNotFoundException ex) {
+				// Not able to create singleton
+				deployer.addIssue("Unable to manage raw object "
+						+ this.managedObjectName, ex, AssetType.MANAGED_OBJECT,
+						this.managedObjectName);
+				return null; // must be able to create singleton
 			}
 		}
 
 		/**
 		 * Initialise the {@link ManagedObject}.
+		 * 
+		 * @param deployer
+		 *            {@link OfficeFloorDeployer}.
+		 * @param context
+		 *            {@link OfficeFloorSourceContext}.
 		 */
-		public void initManagedObject() {
+		public void initManagedObject(OfficeFloorDeployer deployer,
+				OfficeFloorSourceContext context) {
 
 			// Wire the managed object
 			ManagedObjectSourceWirer wirer = this.autoWireObject
@@ -1074,25 +1126,20 @@ public class AutoWireOfficeFloorSource extends AbstractOfficeFloorSource
 
 			// Determine if raw object
 			if (this.rawObject != null) {
-				// Bind the raw object
-				ManagedObjectSource<?, ?> singleton;
-				try {
-					singleton = OfficeFloorCompilerAdapter
-							.createSingletonManagedObjectSource(this.compiler,
-									this.rawObject, autoWiring);
-				} catch (ClassNotFoundException ex) {
-					// Not able to create singleton
-					state.deployer.addIssue("Unable to manage raw object "
-							+ this.managedObjectName, ex,
-							AssetType.MANAGED_OBJECT, this.managedObjectName);
+				// Create singleton for the raw object
+				ManagedObjectSource<?, ?> singleton = this
+						.createSingletonManagedObjectSource(state.deployer);
+				if (singleton == null) {
 					return; // must be able to create singleton
 				}
+
+				// Build the managed object source
 				this.managedObjectSource = state.deployer
 						.addManagedObjectSource(this.managedObjectName,
 								singleton);
 
 			} else {
-				// Bind the managed object source
+				// Build the managed object source
 				this.managedObjectSource = state.deployer
 						.addManagedObjectSource(this.managedObjectName,
 								managedObjectSourceClassName);
@@ -1220,7 +1267,7 @@ public class AutoWireOfficeFloorSource extends AbstractOfficeFloorSource
 
 			// Load the type dependencies
 			for (AutoWireManagedObjectDependency typeDependency : this
-					.getTypeDependencies(state.context)) {
+					.getTypeDependencies(state.deployer, state.context)) {
 				dependencies.put(typeDependency.dependencyName,
 						typeDependency.dependencyAutoWire);
 			}
@@ -1383,7 +1430,8 @@ public class AutoWireOfficeFloorSource extends AbstractOfficeFloorSource
 
 		@Override
 		public void setInput(boolean isInput) {
-			this.isInput = isInput;
+			// TODO remove as deprecating
+			// this.isInput = isInput;
 		}
 
 		@Override
