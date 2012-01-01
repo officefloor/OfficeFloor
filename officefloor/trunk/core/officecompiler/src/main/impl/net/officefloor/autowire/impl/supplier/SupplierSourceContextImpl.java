@@ -54,7 +54,6 @@ import net.officefloor.compile.managedobject.ManagedObjectType;
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.spi.office.OfficeSection;
 import net.officefloor.compile.spi.office.OfficeSectionInput;
-import net.officefloor.compile.spi.officefloor.OfficeFloorInputManagedObject;
 import net.officefloor.compile.spi.officefloor.OfficeFloorSupplier;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.impl.construct.source.SourceContextImpl;
@@ -275,7 +274,8 @@ public class SupplierSourceContextImpl extends SourceContextImpl implements
 
 			// Obtain the flow types
 			List<SuppliedManagedObjectFlowType> flows = new LinkedList<SuppliedManagedObjectFlowType>();
-			for (ManagedObjectFlowType<?> flowType : moType.getFlowTypes()) {
+			ManagedObjectFlowType<?>[] moFlowTypes = moType.getFlowTypes();
+			for (ManagedObjectFlowType<?> flowType : moFlowTypes) {
 
 				// Obtain the flow name
 				String flowName = flowType.getFlowName();
@@ -306,7 +306,8 @@ public class SupplierSourceContextImpl extends SourceContextImpl implements
 			// Obtain the supplied teams and required team types
 			List<SuppliedManagedObjectTeam> suppliedTeams = new LinkedList<SuppliedManagedObjectTeam>();
 			List<SuppliedManagedObjectTeamType> requiredTeams = new LinkedList<SuppliedManagedObjectTeamType>();
-			for (ManagedObjectTeamType teamType : moType.getTeamTypes()) {
+			ManagedObjectTeamType[] moTeamTypes = moType.getTeamTypes();
+			for (ManagedObjectTeamType teamType : moTeamTypes) {
 
 				// Obtain the team name
 				String teamName = teamType.getTeamName();
@@ -347,6 +348,10 @@ public class SupplierSourceContextImpl extends SourceContextImpl implements
 						+ ManagedObjectType.class.getSimpleName() + issueSuffix);
 			}
 
+			// Input Managed Object if have flow or team
+			boolean isInput = (moFlowTypes.length > 0)
+					|| (moTeamTypes.length > 0);
+
 			// Add the supplied managed object type
 			SuppliedManagedObjectDependencyType[] dependencyTypes = dependencies
 					.toArray(new SuppliedManagedObjectDependencyType[dependencies
@@ -357,8 +362,8 @@ public class SupplierSourceContextImpl extends SourceContextImpl implements
 					.toArray(new SuppliedManagedObjectTeamType[requiredTeams
 							.size()]);
 			managedObjects.add(new SuppliedManagedObjectTypeImpl(
-					object.autoWiring, object.isInput, dependencyTypes,
-					flowTypes, teamTypes));
+					object.autoWiring, isInput, dependencyTypes, flowTypes,
+					teamTypes));
 
 			// Create the supplied managed object
 			SuppliedManagedObjectTeam[] teams = suppliedTeams
@@ -470,11 +475,6 @@ public class SupplierSourceContextImpl extends SourceContextImpl implements
 		private long timeout = 0;
 
 		/**
-		 * Indicates if this is an {@link OfficeFloorInputManagedObject}.
-		 */
-		private boolean isInput = false;
-
-		/**
 		 * Mapped dependencies.
 		 */
 		private final Map<String, AutoWire> dependencies = new HashMap<String, AutoWire>();
@@ -561,7 +561,8 @@ public class SupplierSourceContextImpl extends SourceContextImpl implements
 
 		@Override
 		public void setInput(boolean isInput) {
-			this.isInput = isInput;
+			// TODO remove as deprecating
+			// this.isInput = isInput;
 		}
 
 		@Override
