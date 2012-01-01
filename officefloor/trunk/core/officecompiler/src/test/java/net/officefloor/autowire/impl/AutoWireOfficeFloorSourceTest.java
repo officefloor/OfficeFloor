@@ -20,6 +20,7 @@ package net.officefloor.autowire.impl;
 
 import java.io.File;
 import java.sql.Connection;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -45,6 +46,8 @@ import net.officefloor.autowire.supplier.SuppliedManagedObjectTeamType;
 import net.officefloor.autowire.supplier.SuppliedManagedObjectType;
 import net.officefloor.compile.integrate.managedobject.CompileOfficeFloorManagedObjectTest.InputManagedObject;
 import net.officefloor.compile.managedobject.ManagedObjectDependencyType;
+import net.officefloor.compile.managedobject.ManagedObjectFlowType;
+import net.officefloor.compile.managedobject.ManagedObjectTeamType;
 import net.officefloor.compile.managedobject.ManagedObjectType;
 import net.officefloor.compile.office.OfficeInputType;
 import net.officefloor.compile.office.OfficeManagedObjectType;
@@ -1212,6 +1215,8 @@ public class AutoWireOfficeFloorSourceTest extends OfficeFrameTestCase {
 		// Record Managed Object Source
 		this.recordTeam();
 		this.recordRawObjectType(connection);
+		this.registerManagedObjectFlowType(object, "flow");
+		this.registerManagedObjectTeamType(object, "team");
 		this.recordManagedObjectType(object);
 		this.registerOfficeInput("section", "sectionInput");
 		this.recordOffice(); // handled input managed object always loaded
@@ -1260,6 +1265,7 @@ public class AutoWireOfficeFloorSourceTest extends OfficeFrameTestCase {
 
 		// Record team and office
 		this.recordTeam();
+		this.registerManagedObjectFlowType(object, "flow");
 		this.recordManagedObjectType(object);
 		this.registerOfficeInput("section", "sectionInput");
 		this.recordOffice(); // input loaded as handled
@@ -1391,6 +1397,7 @@ public class AutoWireOfficeFloorSourceTest extends OfficeFrameTestCase {
 
 		// Record Managed Object Source
 		this.recordTeam();
+		this.registerManagedObjectFlowType(object, "flow");
 		this.recordManagedObjectType(object);
 		this.registerOfficeInput("section", "sectionInput");
 		this.recordOffice();
@@ -1438,7 +1445,9 @@ public class AutoWireOfficeFloorSourceTest extends OfficeFrameTestCase {
 
 		// Record team and office
 		this.recordTeam();
+		this.registerManagedObjectFlowType(firstObject, "flow");
 		this.recordManagedObjectType(firstObject);
+		this.registerManagedObjectFlowType(secondObject, "flow");
 		this.recordManagedObjectType(secondObject);
 		this.registerOfficeInput("section", "sectionInput");
 		this.recordOffice(); // both should be handled and therefore loaded
@@ -2085,6 +2094,16 @@ public class AutoWireOfficeFloorSourceTest extends OfficeFrameTestCase {
 	private final Map<AutoWireObject, ManagedObjectType<?>> managedObjectTypes = new HashMap<AutoWireObject, ManagedObjectType<?>>();
 
 	/**
+	 * {@link ManagedObjectFlowType} names by {@link AutoWireObject}.
+	 */
+	private final Map<AutoWireObject, List<String>> managedObjectFlowTypes = new HashMap<AutoWireObject, List<String>>();
+
+	/**
+	 * {@link ManagedObjectTeamType} names by {@link AutoWireObject}.
+	 */
+	private final Map<AutoWireObject, List<String>> managedObjectTeamTypes = new HashMap<AutoWireObject, List<String>>();
+
+	/**
 	 * Adds {@link SupplierSource}.
 	 * 
 	 * @param init
@@ -2552,9 +2571,53 @@ public class AutoWireOfficeFloorSourceTest extends OfficeFrameTestCase {
 			this.isRawObjectTypeMatcherSpecified = true;
 		}
 
+		// No flows and teams for raw object
+		this.recordReturn(managedObjectType, managedObjectType.getFlowTypes(),
+				new ManagedObjectFlowType<?>[0]);
+		this.recordReturn(managedObjectType, managedObjectType.getTeamTypes(),
+				new ManagedObjectTeamType[0]);
+
 		// Record obtaining extension interfaces
 		this.recordReturn(managedObjectType,
 				managedObjectType.getExtensionInterfaces(), extensionInterfaces);
+	}
+
+	/**
+	 * Register the {@link ManagedObjectFlowType} for the {@link ManagedObject}
+	 * of the {@link AutoWireObject}.
+	 * 
+	 * @param object
+	 *            {@link AutoWireObject}.
+	 * @param flowNames
+	 *            Names of {@link ManagedObjectFlowType}.
+	 */
+	private void registerManagedObjectFlowType(AutoWireObject object,
+			String... flowNames) {
+		List<String> flows = this.managedObjectFlowTypes.get(object);
+		if (flows == null) {
+			flows = new LinkedList<String>();
+			this.managedObjectFlowTypes.put(object, flows);
+		}
+		flows.addAll(Arrays.asList(flowNames));
+	}
+
+	/**
+	 * Register the {@link ManagedObjectTeamType} for the {@link ManagedObject}
+	 * of the {@link AutoWireObject}.
+	 * 
+	 * @param object
+	 *            {@link AutoWireObject}.
+	 * @param teamNames
+	 *            Names of {@link ManagedObjectTeamType}.
+	 */
+	private void registerManagedObjectTeamType(AutoWireObject object,
+			String... teamNames) {
+		List<String> teams = this.managedObjectTeamTypes.get(object);
+		if (teams == null) {
+			teams = new LinkedList<String>();
+			this.managedObjectFlowTypes.put(object, teams);
+		}
+		teams.addAll(Arrays.asList(teamNames));
 	}
 
 	/**
@@ -2576,6 +2639,18 @@ public class AutoWireOfficeFloorSourceTest extends OfficeFrameTestCase {
 				this.context.loadManagedObjectType(
 						object.getManagedObjectSourceClassName(),
 						object.getProperties()), managedObjectType);
+
+		// Record flow types
+		List<String> flowNames = this.managedObjectFlowTypes.get(object);
+		int flowCount = (flowNames == null ? 0 : flowNames.size());
+		this.recordReturn(managedObjectType, managedObjectType.getFlowTypes(),
+				new ManagedObjectFlowType<?>[flowCount]);
+
+		// Record team types
+		List<String> teamNames = this.managedObjectTeamTypes.get(object);
+		int teamCount = (teamNames == null ? 0 : teamNames.size());
+		this.recordReturn(managedObjectType, managedObjectType.getTeamTypes(),
+				new ManagedObjectTeamType[teamCount]);
 
 		// Record obtaining extension interfaces
 		this.recordReturn(managedObjectType,
