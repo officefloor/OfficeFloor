@@ -21,7 +21,6 @@ package net.officefloor.autowire;
 import net.officefloor.compile.spi.office.ManagedObjectTeam;
 import net.officefloor.compile.spi.office.OfficeSection;
 import net.officefloor.compile.spi.office.OfficeSectionInput;
-import net.officefloor.compile.spi.officefloor.OfficeFloorInputManagedObject;
 import net.officefloor.compile.spi.section.ManagedObjectDependency;
 import net.officefloor.compile.spi.section.ManagedObjectFlow;
 import net.officefloor.frame.spi.team.Team;
@@ -33,19 +32,6 @@ import net.officefloor.frame.spi.team.source.TeamSource;
  * @author Daniel Sagenschneider
  */
 public interface ManagedObjectSourceWirerContext {
-
-	/**
-	 * Flags whether an {@link OfficeFloorInputManagedObject}.
-	 * 
-	 * @param isInput
-	 *            <code>true</code> if {@link OfficeFloorInputManagedObject}.
-	 * 
-	 * @deprecated TODO Derive being Input from Flows/Teams. Should the
-	 *             ManagedObjectType or SuppliedManagedObjectType have a flow or
-	 *             team then it is an {@link OfficeFloorInputManagedObject}. It
-	 *             therefore is not necessary to explicitly specify this.
-	 */
-	void setInput(boolean isInput);
 
 	/**
 	 * Maps a {@link TeamSource} for the {@link ManagedObjectTeam}.
