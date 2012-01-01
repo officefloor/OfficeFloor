@@ -164,7 +164,6 @@ public class MockLoadSupplierSource extends AbstractSupplierSource {
 		context.addManagedObject(complex, new ManagedObjectSourceWirer() {
 			@Override
 			public void wire(ManagedObjectSourceWirerContext context) {
-				context.setInput(true);
 				context.mapDependency("overridden", new AutoWire("OVERRIDDEN",
 						String.class.getName()));
 				context.mapFlow("flow", "SECTION", "INPUT");

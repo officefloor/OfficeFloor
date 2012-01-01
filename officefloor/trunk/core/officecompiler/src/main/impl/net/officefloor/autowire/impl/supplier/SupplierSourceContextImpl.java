@@ -560,12 +560,6 @@ public class SupplierSourceContextImpl extends SourceContextImpl implements
 		 */
 
 		@Override
-		public void setInput(boolean isInput) {
-			// TODO remove as deprecating
-			// this.isInput = isInput;
-		}
-
-		@Override
 		public void mapDependency(String dependencyName, AutoWire autoWire) {
 			this.dependencies.put(dependencyName, autoWire);
 		}

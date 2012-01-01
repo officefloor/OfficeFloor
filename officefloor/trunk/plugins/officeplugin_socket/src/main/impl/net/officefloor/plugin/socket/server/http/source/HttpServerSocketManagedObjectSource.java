@@ -65,9 +65,6 @@ public class HttpServerSocketManagedObjectSource extends
 			@Override
 			public void wire(ManagedObjectSourceWirerContext context) {
 
-				// Is input
-				context.setInput(true);
-
 				// Provide teams
 				context.mapTeam("accepter", OnePersonTeamSource.class.getName());
 				context.mapTeam("listener",

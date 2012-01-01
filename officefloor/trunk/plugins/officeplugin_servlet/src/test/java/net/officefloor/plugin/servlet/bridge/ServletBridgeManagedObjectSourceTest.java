@@ -133,7 +133,6 @@ public class ServletBridgeManagedObjectSourceTest extends OfficeFrameTestCase {
 				new ManagedObjectSourceWirer() {
 					@Override
 					public void wire(ManagedObjectSourceWirerContext context) {
-						context.setInput(true);
 						context.mapFlow(FlowKeys.SERVICE.name(), "SECTION",
 								"service");
 					}

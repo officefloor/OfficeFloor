@@ -1429,12 +1429,6 @@ public class AutoWireOfficeFloorSource extends AbstractOfficeFloorSource
 		 */
 
 		@Override
-		public void setInput(boolean isInput) {
-			// TODO remove as deprecating
-			// this.isInput = isInput;
-		}
-
-		@Override
 		public void mapDependency(String dependencyName, AutoWire autoWire) {
 			this.moDependencies.add(new AutoWireManagedObjectDependency(
 					dependencyName, autoWire));

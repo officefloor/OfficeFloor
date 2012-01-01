@@ -98,6 +98,14 @@ import org.junit.Ignore;
 public class AutoWireOfficeFloorSourceTest extends OfficeFrameTestCase {
 
 	/**
+	 * Ensure issue if {@link ManagedObject} depends on an unhandled
+	 * {@link OfficeFloorInputManagedObject} (ie not loaded).
+	 */
+	public void testManagedObjectDependsOnUnhandledInputManagedObject() {
+		fail("TODO implement test");
+	}
+
+	/**
 	 * {@link AutoWireOfficeFloorSource} to test.
 	 */
 	private final AutoWireApplication source = new AutoWireOfficeFloorSource();
@@ -1186,9 +1194,6 @@ public class AutoWireOfficeFloorSourceTest extends OfficeFrameTestCase {
 			@Override
 			public void wire(ManagedObjectSourceWirerContext context) {
 
-				// Input
-				context.setInput(true);
-
 				// Map flow
 				context.mapFlow("flow", "section", "sectionInput");
 
@@ -1249,7 +1254,6 @@ public class AutoWireOfficeFloorSourceTest extends OfficeFrameTestCase {
 		ManagedObjectSourceWirer wirer = new ManagedObjectSourceWirer() {
 			@Override
 			public void wire(ManagedObjectSourceWirerContext context) {
-				context.setInput(true);
 				context.mapFlow("flow", "section", "sectionInput");
 			}
 		};
@@ -1294,7 +1298,6 @@ public class AutoWireOfficeFloorSourceTest extends OfficeFrameTestCase {
 		final ManagedObjectSourceWirer wirer = new ManagedObjectSourceWirer() {
 			@Override
 			public void wire(ManagedObjectSourceWirerContext context) {
-				context.setInput(true);
 				context.mapFlow("flow", "section", "sectionInput");
 			}
 		};
@@ -1336,7 +1339,6 @@ public class AutoWireOfficeFloorSourceTest extends OfficeFrameTestCase {
 		final ManagedObjectSourceWirer wirer = new ManagedObjectSourceWirer() {
 			@Override
 			public void wire(ManagedObjectSourceWirerContext context) {
-				context.setInput(true);
 				context.mapFlow("flowOne", "handled", "input");
 				context.mapFlow("flowTwo", "unhandled", "input");
 			}
@@ -1380,7 +1382,6 @@ public class AutoWireOfficeFloorSourceTest extends OfficeFrameTestCase {
 		final ManagedObjectSourceWirer wirer = new ManagedObjectSourceWirer() {
 			@Override
 			public void wire(ManagedObjectSourceWirerContext context) {
-				context.setInput(true);
 				context.mapFlow("flow", "section", "sectionInput");
 			}
 		};
@@ -1422,7 +1423,6 @@ public class AutoWireOfficeFloorSourceTest extends OfficeFrameTestCase {
 		ManagedObjectSourceWirer wirer = new ManagedObjectSourceWirer() {
 			@Override
 			public void wire(ManagedObjectSourceWirerContext context) {
-				context.setInput(true);
 				context.mapFlow("flow", "section", "sectionInput");
 			}
 		};
