@@ -18,10 +18,10 @@
 package net.officefloor.autowire.supplier;
 
 import net.officefloor.autowire.AutoWire;
-import net.officefloor.autowire.AutoWireApplication;
+import net.officefloor.autowire.ManagedObjectSourceWirer;
 import net.officefloor.compile.managedobject.ManagedObjectFlowType;
 import net.officefloor.compile.spi.officefloor.OfficeFloorInputManagedObject;
-import net.officefloor.frame.internal.structure.ProcessState;
+import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.spi.team.Team;
 import net.officefloor.plugin.section.clazz.ManagedObject;
 
@@ -45,10 +45,10 @@ public interface SuppliedManagedObjectType {
 	 * <p>
 	 * Indicates if this is to be an {@link OfficeFloorInputManagedObject}.
 	 * <p>
-	 * {@link OfficeFloorInputManagedObject} instances are always loaded as they
-	 * may potentially not be depended on by {@link AutoWire} but may trigger
-	 * {@link ProcessState}, so must be loaded to ensure all inputs are
-	 * triggered for the {@link AutoWireApplication}.
+	 * The {@link ManagedObjectSourceWirer} may provide the necessary
+	 * {@link Task} instances and {@link Team} instances, so that that they may
+	 * not visible on the type. It is therefore necessary to provide this method
+	 * to identify if this is the case.
 	 * 
 	 * @return <code>true</code> if this is an
 	 *         {@link OfficeFloorInputManagedObject}.

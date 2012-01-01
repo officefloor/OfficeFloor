@@ -39,6 +39,11 @@ public interface ManagedObjectSourceWirerContext {
 	 * 
 	 * @param isInput
 	 *            <code>true</code> if {@link OfficeFloorInputManagedObject}.
+	 * 
+	 * @deprecated TODO Derive being Input from Flows/Teams. Should the
+	 *             ManagedObjectType or SuppliedManagedObjectType have a flow or
+	 *             team then it is an {@link OfficeFloorInputManagedObject}. It
+	 *             therefore is not necessary to explicitly specify this.
 	 */
 	void setInput(boolean isInput);
 
