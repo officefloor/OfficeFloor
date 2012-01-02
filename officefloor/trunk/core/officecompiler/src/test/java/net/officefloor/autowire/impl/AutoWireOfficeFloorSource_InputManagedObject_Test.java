@@ -19,8 +19,6 @@ package net.officefloor.autowire.impl;
 
 import java.sql.Connection;
 
-import org.junit.Ignore;
-
 import net.officefloor.autowire.AutoWire;
 import net.officefloor.autowire.AutoWireObject;
 import net.officefloor.autowire.ManagedObjectSourceWirer;
@@ -29,6 +27,7 @@ import net.officefloor.compile.spi.office.ManagedObjectTeam;
 import net.officefloor.compile.spi.officefloor.OfficeFloorInputManagedObject;
 import net.officefloor.compile.spi.officefloor.OfficeFloorManagedObjectSource;
 import net.officefloor.compile.spi.officefloor.OfficeFloorTeam;
+import net.officefloor.compile.spi.section.ManagedObjectDependency;
 import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
 import net.officefloor.frame.impl.spi.team.LeaderFollowerTeam;
 import net.officefloor.frame.impl.spi.team.OnePersonTeamSource;
@@ -41,7 +40,6 @@ import net.officefloor.plugin.managedobject.clazz.ClassManagedObjectSource;
  * 
  * @author Daniel Sagenschneider
  */
-@Ignore("TODO implement depend on unhandled InputManagedObject test")
 public class AutoWireOfficeFloorSource_InputManagedObject_Test extends
 		AbstractAutoWireOfficeFloorSourceTestCase {
 
@@ -558,8 +556,72 @@ public class AutoWireOfficeFloorSource_InputManagedObject_Test extends
 	 * Ensure issue if {@link ManagedObject} depends on an unhandled
 	 * {@link OfficeFloorInputManagedObject} (ie not loaded).
 	 */
-	public void testManagedObjectDependsOnUnhandledInputManagedObject() {
-		fail("TODO implement test");
+	public void testManagedObjectDependsOnUnhandledInputManagedObject()
+			throws Exception {
+
+		final AutoWire rawTypeAutoWire = new AutoWire(MockRawType.class);
+		final AutoWire connectionAutoWire = new AutoWire(Connection.class);
+
+		// Add the wiring of the handled managed object
+		final ManagedObjectSourceWirer handledWirer = new ManagedObjectSourceWirer() {
+			@Override
+			public void wire(ManagedObjectSourceWirerContext context) {
+				context.mapFlow("flow", "handled", "input");
+			}
+		};
+		AutoWireObject handled = this.source.addManagedObject(
+				ClassManagedObjectSource.class.getName(), handledWirer,
+				rawTypeAutoWire);
+		handled.addProperty(ClassManagedObjectSource.CLASS_NAME_PROPERTY_NAME,
+				MockRawObject.class.getName());
+
+		// Add the wiring of the unhandled managed object
+		final ManagedObjectSourceWirer unhandledWirer = new ManagedObjectSourceWirer() {
+			@Override
+			public void wire(ManagedObjectSourceWirerContext context) {
+				context.mapFlow("flow", "unhandled", "input");
+			}
+		};
+		AutoWireObject unhandled = this.source.addManagedObject(
+				ClassManagedObjectSource.class.getName(), unhandledWirer,
+				connectionAutoWire);
+		unhandled.addProperty(
+				ClassManagedObjectSource.CLASS_NAME_PROPERTY_NAME,
+				Connection.class.getName());
+
+		// Record
+		this.recordTeam();
+		this.registerManagedObjectFlowType(handled, "flow");
+		this.recordManagedObjectType(handled);
+		this.registerManagedObjectFlowType(unhandled, "flow");
+		this.recordManagedObjectType(unhandled);
+		this.registerOfficeInput("handled", "input");
+		this.recordOffice(); // handled input managed object always loaded
+		OfficeFloorManagedObjectSource source = this.recordManagedObjectSource(
+				rawTypeAutoWire, ClassManagedObjectSource.class, 0, 0,
+				ClassManagedObjectSource.CLASS_NAME_PROPERTY_NAME,
+				MockRawObject.class.getName());
+		this.recordInputManagedObject(source, rawTypeAutoWire);
+		this.recordManagedObjectDependencies(handled, "dependency",
+				connectionAutoWire);
+
+		// Record issue linking to unhandled InputManagedObject
+		final ManagedObjectDependency moDependency = this
+				.createMock(ManagedObjectDependency.class);
+		this.recordReturn(source,
+				source.getInputManagedObjectDependency("dependency"),
+				moDependency);
+		this.deployer.addIssue(
+				"May only depend on OfficeFloorInputManagedObject "
+						+ connectionAutoWire.getQualifiedType()
+						+ " if all of its flows are handled",
+				AssetType.MANAGED_OBJECT, rawTypeAutoWire.getQualifiedType());
+
+		// Record linking flow
+		this.recordManagedObjectFlow(source, "flow", "handled", "input");
+
+		// Test
+		this.doSourceOfficeFloorTest();
 	}
 
 }
