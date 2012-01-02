@@ -897,8 +897,8 @@ public abstract class AbstractAutoWireOfficeFloorSourceTestCase extends
 		// Create the Office Floor team
 		OfficeFloorTeam officeFloorTeam = this
 				.createMock(OfficeFloorTeam.class);
-		this.recordReturn(this.deployer, this.deployer.addTeam("team-"
-				+ nameAutoWire.getQualifiedType(),
+		this.recordReturn(this.deployer, this.deployer.addTeam(
+				nameAutoWire.getQualifiedType(),
 				OnePersonTeamSource.class.getName()), officeFloorTeam);
 		if (propertyNameValuePairs != null) {
 			for (int i = 0; i < propertyNameValuePairs.length; i += 2) {
@@ -911,10 +911,9 @@ public abstract class AbstractAutoWireOfficeFloorSourceTestCase extends
 		// Create and link the responsibilities, along with registering teams
 		for (AutoWire autoWire : autoWiring) {
 			OfficeTeam officeTeam = this.createMock(OfficeTeam.class);
-			this.recordReturn(
-					this.office,
-					this.office.getDeployedOfficeTeam("team-"
-							+ autoWire.getQualifiedType()), officeTeam);
+			this.recordReturn(this.office, this.office
+					.getDeployedOfficeTeam(autoWire.getQualifiedType()),
+					officeTeam);
 			this.deployer.link(officeTeam, officeFloorTeam);
 
 			// Register the team
