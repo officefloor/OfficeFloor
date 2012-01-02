@@ -578,10 +578,12 @@ public class AutoWireOfficeFloorSource extends AbstractOfficeFloorSource
 		// Create the mapping of auto-wiring to realised objects
 		Map<AutoWire, AutoWireObjectInstance> autoWireObjectInstances = new HashMap<AutoWire, AutoWireObjectInstance>();
 		List<AutoWireObjectInstance> inputObjectInstances = new LinkedList<AutoWireObjectInstance>();
+		List<AutoWireObjectInstance> unhandledInputObjectInstances = new LinkedList<AutoWireObjectInstance>();
+		Map<AutoWire, Integer> nameIndex = new HashMap<AutoWire, Integer>();
 		for (AutoWireObjectInstance objectInstance : this.objectInstances) {
 
 			// Initialise the object
-			objectInstance.initManagedObject(deployer, context);
+			objectInstance.initManagedObject(deployer, context, nameIndex);
 
 			// Register if input object instance
 			if (objectInstance.isInput) {
@@ -616,8 +618,9 @@ public class AutoWireOfficeFloorSource extends AbstractOfficeFloorSource
 					// Include Input Managed Object
 					inputObjectInstances.add(objectInstance);
 				} else {
-					// Not include, so do not make available
-					continue;
+					// Not handled, so do not include
+					unhandledInputObjectInstances.add(objectInstance);
+					continue; // do not include as primary auto-wire
 				}
 			}
 
@@ -627,6 +630,16 @@ public class AutoWireOfficeFloorSource extends AbstractOfficeFloorSource
 				if (!(autoWireObjectInstances.containsKey(autoWire))) {
 					autoWireObjectInstances.put(autoWire, objectInstance);
 				}
+			}
+		}
+
+		// Add unhandled input managed objects for better error messaging
+		for (AutoWireObjectInstance unhandledInputObjectInstance : unhandledInputObjectInstances) {
+			AutoWire autoWire = unhandledInputObjectInstance.autoWireObject
+					.getAutoWiring()[0];
+			if (!(autoWireObjectInstances.containsKey(autoWire))) {
+				autoWireObjectInstances.put(autoWire,
+						unhandledInputObjectInstance);
 			}
 		}
 
@@ -659,6 +672,11 @@ public class AutoWireOfficeFloorSource extends AbstractOfficeFloorSource
 				continue; // must have auto-wire context to load managed object
 			}
 
+			// Do not build if input (as should already be built above)
+			if (autoWireObjectInstance.isInput) {
+				continue;
+			}
+
 			// Build the used managed object
 			autoWireObjectInstance.buildManagedObject(state, usedAutoWire);
 		}
@@ -688,11 +706,6 @@ public class AutoWireOfficeFloorSource extends AbstractOfficeFloorSource
 		 * {@link AutoWireObjectInstance} by its {@link AutoWire}.
 		 */
 		private final Map<AutoWire, AutoWireObjectInstance> autoWireObjectInstances;
-
-		/**
-		 * Index suffix for {@link AutoWireInstance} naming.
-		 */
-		private final Map<AutoWire, Integer> typeIndex = new HashMap<AutoWire, Integer>();
 
 		/**
 		 * {@link OfficeFloorInputManagedObject} for {@link AutoWire}.
@@ -727,37 +740,6 @@ public class AutoWireOfficeFloorSource extends AbstractOfficeFloorSource
 			this.office = office;
 			this.autoWireObjectInstances = autoWireObjectInstances;
 			this.autoWireTeamInstances = autoWireTeamInstances;
-		}
-
-		/**
-		 * Obtains the unique {@link ManagedObject} name.
-		 * 
-		 * @param autoWire
-		 *            {@link AutoWire} for naming.
-		 * @return Unique {@link ManagedObject} name.
-		 */
-		public String getUniqueManagedObjectName(AutoWire autoWire) {
-
-			// Obtain the raw name
-			String name = autoWire.getQualifiedType();
-
-			// Determine the unique managed object name
-			Integer index = this.typeIndex.get(autoWire);
-			if (index == null) {
-				// First, so do not index name (as most cases only one)
-				index = new Integer(1);
-			} else {
-				// Provide index on name and increment for next
-				int indexValue = index.intValue();
-				name = name + String.valueOf(indexValue);
-				index = new Integer(indexValue + 1);
-			}
-
-			// Register index for next naming
-			this.typeIndex.put(autoWire, index);
-
-			// Return the unique name
-			return name;
 		}
 
 		/**
@@ -1092,9 +1074,30 @@ public class AutoWireOfficeFloorSource extends AbstractOfficeFloorSource
 		 *            {@link OfficeFloorDeployer}.
 		 * @param context
 		 *            {@link OfficeFloorSourceContext}.
+		 * @param nameIndex
+		 *            Index suffix for naming the {@link ManagedObject}.
 		 */
 		public void initManagedObject(OfficeFloorDeployer deployer,
-				OfficeFloorSourceContext context) {
+				OfficeFloorSourceContext context,
+				Map<AutoWire, Integer> nameIndex) {
+
+			// Obtain the raw managed object name (from first auto-wire)
+			AutoWire firstAutoWire = this.autoWireObject.getAutoWiring()[0];
+			String rawName = firstAutoWire.getQualifiedType();
+
+			// Specify the unique managed object name
+			Integer index = nameIndex.get(firstAutoWire);
+			if (index == null) {
+				// First, so do not index name (as most cases only one)
+				this.managedObjectName = rawName;
+				index = new Integer(1);
+			} else {
+				// Provide index on name and increment for next
+				int indexValue = index.intValue();
+				this.managedObjectName = rawName + String.valueOf(indexValue);
+				index = new Integer(indexValue + 1);
+			}
+			nameIndex.put(firstAutoWire, index); // for next naming
 
 			// Wire the managed object
 			ManagedObjectSourceWirer wirer = this.autoWireObject
@@ -1117,12 +1120,6 @@ public class AutoWireOfficeFloorSource extends AbstractOfficeFloorSource
 					.getManagedObjectSourceClassName();
 			long timeout = this.autoWireObject.getTimeout();
 			PropertyList properties = this.autoWireObject.getProperties();
-			AutoWire[] autoWiring = this.autoWireObject.getAutoWiring();
-
-			// Use first auto wiring for naming
-			AutoWire firstAutoWire = autoWiring[0];
-			this.managedObjectName = state
-					.getUniqueManagedObjectName(firstAutoWire);
 
 			// Determine if raw object
 			if (this.rawObject != null) {
@@ -1199,23 +1196,10 @@ public class AutoWireOfficeFloorSource extends AbstractOfficeFloorSource
 		public void buildManagedObject(AutoWireState state,
 				AutoWire officeObjectAutoWire) {
 
-			// Determine if input managed object
+			// Ensure if Input Managed Object that not built as Managed Object
 			if (this.isInput) {
-
-				// Ensure that the input managed object built
-				if (this.inputManagedObject == null) {
-					state.deployer.addIssue(
-							"May only use "
-									+ OfficeFloorInputManagedObject.class
-											.getSimpleName() + " if "
-									+ DeployedOffice.class.getSimpleName()
-									+ " providing handling of its input",
-							AssetType.MANAGED_OBJECT, this.managedObjectName);
-					return;
-				}
-
-				// Linked as input managed object
-				return;
+				throw new IllegalStateException(
+						"Can not build InputManagedObject as ManagedObject");
 			}
 
 			// Only build once
@@ -1397,10 +1381,26 @@ public class AutoWireOfficeFloorSource extends AbstractOfficeFloorSource
 
 				// First try as Input Managed Object.
 				// (This stops the Managed Object from having to be built)
-				OfficeFloorInputManagedObject inputMo = objectInstance.inputManagedObject;
-				if (inputMo != null) {
+				if (objectInstance.isInput) {
+
+					// Obtain the Input Managed Object
+					OfficeFloorInputManagedObject inputMo = objectInstance.inputManagedObject;
+					if (inputMo == null) {
+						// Must be handled Input Managed Object
+						state.deployer.addIssue(
+								"May only depend on "
+										+ OfficeFloorInputManagedObject.class
+												.getSimpleName() + " "
+										+ objectInstance.managedObjectName
+										+ " if all of its flows are handled",
+								AssetType.MANAGED_OBJECT,
+								this.managedObjectName);
+						return;
+					}
+
+					// Depends on input managed object
 					state.deployer.link(dependency, inputMo);
-					return; // depends on input managed object
+					return;
 				}
 
 				// Not input, so ensure managed object is built for trying
