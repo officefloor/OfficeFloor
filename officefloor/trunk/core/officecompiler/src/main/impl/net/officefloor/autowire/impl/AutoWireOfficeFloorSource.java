@@ -35,7 +35,6 @@ import net.officefloor.autowire.AutoWireGovernance;
 import net.officefloor.autowire.AutoWireManagement;
 import net.officefloor.autowire.AutoWireObject;
 import net.officefloor.autowire.AutoWireOfficeFloor;
-import net.officefloor.autowire.AutoWireResponsibility;
 import net.officefloor.autowire.AutoWireSection;
 import net.officefloor.autowire.AutoWireSectionFactory;
 import net.officefloor.autowire.AutoWireSupplier;
@@ -374,21 +373,14 @@ public class AutoWireOfficeFloorSource extends AbstractOfficeFloorSource
 		}
 
 		// Determine name of team
-		String teamName = "team-" + autoWiring[0].getQualifiedType();
-
-		// Create the responsibilities
-		AutoWireResponsibility[] responsibilities = new AutoWireResponsibility[autoWiring.length];
-		for (int i = 0; i < autoWiring.length; i++) {
-			responsibilities[i] = this.officeSource
-					.addResponsibility(autoWiring[i]);
-		}
+		String teamName = autoWiring[0].getQualifiedType();
 
 		// Create the properties
 		PropertyList properties = this.compiler.createPropertyList();
 
 		// Create and add the team
 		AutoWireTeam team = new AutoWireTeamImpl(this.compiler, teamName,
-				teamSourceClassName, properties, responsibilities);
+				teamSourceClassName, properties, autoWiring);
 		this.teams.add(team);
 
 		// Return the team
@@ -483,13 +475,20 @@ public class AutoWireOfficeFloorSource extends AbstractOfficeFloorSource
 
 				// Ensure only load the first auto-wire
 				if (availableAutoWires.contains(autoWire)) {
-					continue; // already identified available
+					continue; // already available
 				}
 				availableAutoWires.add(autoWire);
 
 				// Load the auto-wire as an available office object
 				this.officeSource.addAvailableOfficeObject(autoWire,
 						extensionInterfaces);
+			}
+		}
+
+		// Load available office teams
+		for (AutoWireTeam autoWireTeam : this.teams) {
+			for (AutoWire autoWire : autoWireTeam.getAutoWiring()) {
+				this.officeSource.addAvailableOfficeTeam(autoWire);
 			}
 		}
 
@@ -555,21 +554,17 @@ public class AutoWireOfficeFloorSource extends AbstractOfficeFloorSource
 						property.getValue());
 			}
 
-			// Link responsible team to its responsibilities
-			for (AutoWireResponsibility autoWireResponsibility : autoWireTeam
-					.getResponsibilities()) {
+			// Link team to its responsibilities
+			for (AutoWire autoWire : autoWireTeam.getAutoWiring()) {
 
 				// Link responsibility to team
 				OfficeTeam responsibility = office
-						.getDeployedOfficeTeam(autoWireResponsibility
-								.getOfficeTeamName());
+						.getDeployedOfficeTeam(autoWire.getQualifiedType());
 				deployer.link(responsibility, responsibleTeam);
 
 				// Only load the first registered for auto-wire
-				AutoWire dependencyAutoWire = autoWireResponsibility
-						.getDependencyAutoWire();
-				if (!(autoWireTeamInstances.containsKey(dependencyAutoWire))) {
-					autoWireTeamInstances.put(dependencyAutoWire,
+				if (!(autoWireTeamInstances.containsKey(autoWire))) {
+					autoWireTeamInstances.put(autoWire,
 							new AutoWireTeamInstance(responsibleTeam));
 				}
 			}

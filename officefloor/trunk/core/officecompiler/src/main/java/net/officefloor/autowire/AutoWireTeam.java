@@ -45,12 +45,10 @@ public interface AutoWireTeam extends AutoWireProperties {
 	String getTeamSourceClassName();
 
 	/**
-	 * Obtains the {@link AutoWireResponsibility} instances for this
-	 * {@link AutoWireTeam}.
+	 * Obtains the {@link AutoWire} instances for this {@link AutoWireTeam}.
 	 * 
-	 * @return {@link AutoWireResponsibility} instances for this
-	 *         {@link AutoWireTeam}.
+	 * @return {@link AutoWire} instances for this {@link AutoWireTeam}.
 	 */
-	AutoWireResponsibility[] getResponsibilities();
+	AutoWire[] getAutoWiring();
 
 }

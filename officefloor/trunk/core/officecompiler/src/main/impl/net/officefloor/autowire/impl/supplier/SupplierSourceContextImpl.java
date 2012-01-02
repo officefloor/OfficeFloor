@@ -27,7 +27,6 @@ import java.util.Set;
 
 import net.officefloor.autowire.AutoWire;
 import net.officefloor.autowire.AutoWireObject;
-import net.officefloor.autowire.AutoWireResponsibility;
 import net.officefloor.autowire.AutoWireTeam;
 import net.officefloor.autowire.ManagedObjectSourceWirer;
 import net.officefloor.autowire.ManagedObjectSourceWirerContext;
@@ -644,9 +643,9 @@ public class SupplierSourceContextImpl extends SourceContextImpl implements
 		}
 
 		@Override
-		public AutoWireResponsibility[] getResponsibilities() {
-			// Only responsible for managed object
-			return new AutoWireResponsibility[0];
+		public AutoWire[] getAutoWiring() {
+			// Only auto-wiring for supplied managed object team
+			return new AutoWire[0];
 		}
 	}
 

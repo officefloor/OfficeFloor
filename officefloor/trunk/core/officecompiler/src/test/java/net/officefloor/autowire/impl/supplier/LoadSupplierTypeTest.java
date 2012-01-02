@@ -349,8 +349,8 @@ public class LoadSupplierTypeTest extends OfficeFrameTestCase {
 				assertEquals("Incorrect team property", "VALUE",
 						properties.getProperty("NAME"));
 				assertEquals(
-						"Should have no responsibilities other than to the managed object",
-						0, team.getResponsibilities().length);
+						"Should have no auto-wiring as just for the managed object",
+						0, team.getAutoWiring().length);
 			}
 		};
 

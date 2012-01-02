@@ -17,7 +17,7 @@
  */
 package net.officefloor.autowire.impl;
 
-import net.officefloor.autowire.AutoWireResponsibility;
+import net.officefloor.autowire.AutoWire;
 import net.officefloor.autowire.AutoWireTeam;
 import net.officefloor.compile.OfficeFloorCompiler;
 import net.officefloor.compile.properties.PropertyList;
@@ -43,9 +43,9 @@ public class AutoWireTeamImpl extends AutoWirePropertiesImpl implements
 	private final String teamSourceClassName;
 
 	/**
-	 * {@link AutoWireResponsibility} instances.
+	 * {@link AutoWire} instances.
 	 */
-	private final AutoWireResponsibility[] responsibilities;
+	private final AutoWire[] autoWiring;
 
 	/**
 	 * Initiate.
@@ -58,16 +58,16 @@ public class AutoWireTeamImpl extends AutoWirePropertiesImpl implements
 	 *            {@link TeamSource} class name. May be an alias.
 	 * @param properties
 	 *            {@link PropertyList} for the {@link TeamSource}.
-	 * @param responsibilities
-	 *            {@link AutoWireResponsibility} instances.
+	 * @param autoWiring
+	 *            {@link AutoWire} instances.
 	 */
 	public AutoWireTeamImpl(OfficeFloorCompiler compiler, String teamName,
 			String teamSourceClassName, PropertyList properties,
-			AutoWireResponsibility... responsibilities) {
+			AutoWire... autoWiring) {
 		super(compiler, properties);
 		this.teamName = teamName;
 		this.teamSourceClassName = teamSourceClassName;
-		this.responsibilities = responsibilities;
+		this.autoWiring = autoWiring;
 	}
 
 	/*
@@ -85,8 +85,8 @@ public class AutoWireTeamImpl extends AutoWirePropertiesImpl implements
 	}
 
 	@Override
-	public AutoWireResponsibility[] getResponsibilities() {
-		return this.responsibilities;
+	public AutoWire[] getAutoWiring() {
+		return this.autoWiring;
 	}
 
 }

@@ -28,7 +28,6 @@ import java.util.Set;
 
 import net.officefloor.autowire.AutoWire;
 import net.officefloor.autowire.AutoWireGovernance;
-import net.officefloor.autowire.AutoWireResponsibility;
 import net.officefloor.autowire.AutoWireSection;
 import net.officefloor.autowire.AutoWireSectionFactory;
 import net.officefloor.compile.OfficeFloorCompiler;
@@ -95,14 +94,9 @@ public class AutoWireOfficeSource extends AbstractOfficeSource {
 	private final List<EscalationLink> escalations = new LinkedList<EscalationLink>();
 
 	/**
-	 * {@link AutoWireResponsibility} instances.
+	 * Available {@link OfficeObject} {@link AutoWire} instances.
 	 */
-	private final List<AutoWireResponsibility> responsibilities = new LinkedList<AutoWireResponsibility>();
-
-	/**
-	 * {@link AutoWireGovernance} instances.
-	 */
-	private final List<AutoWireGovernance> governances = new LinkedList<AutoWireGovernance>();
+	private final List<AutoWire> availableObjectAutoWiring = new LinkedList<AutoWire>();
 
 	/**
 	 * Extension interface to their {@link AutoWire} instances.
@@ -110,9 +104,14 @@ public class AutoWireOfficeSource extends AbstractOfficeSource {
 	private final Map<Class<?>, List<AutoWire>> extensionInterfaceToAutoWiring = new HashMap<Class<?>, List<AutoWire>>();
 
 	/**
-	 * Available {@link AutoWire} instances.
+	 * {@link AutoWireGovernance} instances.
 	 */
-	private final List<AutoWire> availableAutoWiring = new LinkedList<AutoWire>();
+	private final List<AutoWireGovernance> governances = new LinkedList<AutoWireGovernance>();
+
+	/**
+	 * Available {@link OfficeTeam} {@link AutoWire} instances.
+	 */
+	private final List<AutoWire> availableTeamAutoWiring = new LinkedList<AutoWire>();
 
 	/**
 	 * Initiate.
@@ -328,8 +327,8 @@ public class AutoWireOfficeSource extends AbstractOfficeSource {
 	public void addAvailableOfficeObject(AutoWire autoWire,
 			Class<?>... extensionInterfaces) {
 
-		// Add the available auto-wiring
-		this.availableAutoWiring.add(autoWire);
+		// Add the available Object auto-wiring
+		this.availableObjectAutoWiring.add(autoWire);
 
 		// Map auto-wiring for extensions
 		for (Class<?> extensionInterface : extensionInterfaces) {
@@ -349,18 +348,14 @@ public class AutoWireOfficeSource extends AbstractOfficeSource {
 	}
 
 	/**
-	 * Adds an {@link OfficeTeam} responsible for executing {@link Task}
-	 * instances that has an object dependency of the input type.
+	 * Adds an available {@link OfficeTeam} for executing {@link Task} instances
+	 * that has an object dependency of the input type.
 	 * 
 	 * @param autoWire
 	 *            Object dependency {@link AutoWire} for the {@link Task}.
-	 * @return {@link AutoWireResponsibility} for the {@link OfficeTeam}.
 	 */
-	public AutoWireResponsibility addResponsibility(AutoWire autoWire) {
-		AutoWireResponsibility responsibility = new AutoWireResponsibilityImpl(
-				autoWire);
-		this.responsibilities.add(responsibility);
-		return responsibility;
+	public void addAvailableOfficeTeam(AutoWire autoWire) {
+		this.availableTeamAutoWiring.add(autoWire);
 	}
 
 	/*
@@ -379,20 +374,18 @@ public class AutoWireOfficeSource extends AbstractOfficeSource {
 		// Add the default team
 		OfficeTeam defaultTeam = architect.addOfficeTeam("team");
 
-		// Add the responsibility teams
+		// Add the available teams
 		List<ResponsibleTeam> responsibleTeams = new ArrayList<ResponsibleTeam>(
-				this.responsibilities.size());
-		for (AutoWireResponsibility responsibility : this.responsibilities) {
+				this.availableTeamAutoWiring.size());
+		for (AutoWire availableTeamAutoWire : this.availableTeamAutoWiring) {
 
 			// Add the Office Team
-			OfficeTeam officeTeam = architect.addOfficeTeam(responsibility
-					.getOfficeTeamName());
+			OfficeTeam officeTeam = architect
+					.addOfficeTeam(availableTeamAutoWire.getQualifiedType());
 
 			// Register the responsible team
-			AutoWire dependencyAutoWire = responsibility
-					.getDependencyAutoWire();
 			ResponsibleTeam responsibleTeam = new ResponsibleTeam(
-					dependencyAutoWire, officeTeam);
+					availableTeamAutoWire, officeTeam);
 
 			// Add the responsible team
 			responsibleTeams.add(responsibleTeam);
@@ -429,7 +422,7 @@ public class AutoWireOfficeSource extends AbstractOfficeSource {
 				// Obtain appropriate auto-wire
 				AutoWire autoWire = AutoWireOfficeFloorSource
 						.getAppropriateAutoWire(typeQualifier, objectType,
-								this.availableAutoWiring);
+								this.availableObjectAutoWiring);
 				if (autoWire == null) {
 					String objectName = object.getOfficeSectionObjectName();
 					architect.addIssue("No available auto-wiring for "
@@ -444,7 +437,7 @@ public class AutoWireOfficeSource extends AbstractOfficeSource {
 				// Link to appropriate Office Object
 				OfficeObject officeObject = objects.get(autoWire);
 				if (officeObject == null) {
-					
+
 					// Create the office object
 					officeObject = architect.addOfficeObject(
 							autoWire.getQualifiedType(), autoWire.getType());
@@ -452,7 +445,7 @@ public class AutoWireOfficeSource extends AbstractOfficeSource {
 					if (autoWireQualifier != null) {
 						officeObject.setTypeQualifier(autoWireQualifier);
 					}
-					
+
 					// Register the office object
 					objects.put(autoWire, officeObject);
 				}
@@ -623,7 +616,7 @@ public class AutoWireOfficeSource extends AbstractOfficeSource {
 					// Obtain the office object
 					OfficeObject officeObject = objects.get(autoWire);
 					if (officeObject == null) {
-						continue; // no office object for type
+						continue; // office object not used
 					}
 
 					// Govern the office object
