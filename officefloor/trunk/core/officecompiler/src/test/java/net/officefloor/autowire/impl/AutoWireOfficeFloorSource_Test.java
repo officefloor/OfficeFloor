@@ -28,7 +28,7 @@ import net.officefloor.plugin.managedobject.clazz.ClassManagedObjectSource;
  * 
  * @author Daniel Sagenschneider
  */
-public class AutoWireOfficeFloorSourceTest extends
+public class AutoWireOfficeFloorSource_Test extends
 		AbstractAutoWireOfficeFloorSourceTestCase {
 
 	/**
