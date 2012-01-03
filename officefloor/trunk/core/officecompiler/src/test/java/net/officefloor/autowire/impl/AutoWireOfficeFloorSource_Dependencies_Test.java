@@ -182,7 +182,6 @@ public class AutoWireOfficeFloorSource_Dependencies_Test extends
 		// ------------------------------
 
 		// Record
-		this.recordTeam();
 		this.recordObjectType(usedObject, usedType);
 		this.recordObjectType(dependencyObject, dependencyType);
 		this.registerOfficeInput("SECTION", "INPUT");

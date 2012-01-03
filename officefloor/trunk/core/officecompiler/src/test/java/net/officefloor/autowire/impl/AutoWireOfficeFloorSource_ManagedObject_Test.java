@@ -22,6 +22,8 @@ import java.sql.Connection;
 
 import javax.sql.DataSource;
 
+import org.junit.Ignore;
+
 import net.officefloor.autowire.AutoWire;
 import net.officefloor.autowire.AutoWireObject;
 import net.officefloor.autowire.AutoWireProperties;
@@ -43,6 +45,7 @@ import net.officefloor.plugin.managedobject.clazz.ClassManagedObjectSource;
  * 
  * @author Daniel Sagenschneider
  */
+@Ignore("TODO only load used Teams")
 public class AutoWireOfficeFloorSource_ManagedObject_Test extends
 		AbstractAutoWireOfficeFloorSourceTestCase {
 
@@ -60,7 +63,6 @@ public class AutoWireOfficeFloorSource_ManagedObject_Test extends
 				MockRawObject.class.getName());
 
 		// Record
-		this.recordTeam();
 		this.recordManagedObjectType(object);
 		this.recordOffice(autoWire);
 		OfficeFloorManagedObjectSource source = this.recordManagedObjectSource(
@@ -106,7 +108,6 @@ public class AutoWireOfficeFloorSource_ManagedObject_Test extends
 				MockRawObject.class.getName());
 
 		// Record (not load managed object)
-		this.recordTeam();
 		this.recordManagedObjectType(object);
 		this.recordOffice(); // no objects used
 
@@ -130,7 +131,6 @@ public class AutoWireOfficeFloorSource_ManagedObject_Test extends
 				MockRawObject.class.getName());
 
 		// Record
-		this.recordTeam();
 		this.recordManagedObjectType(object);
 		this.recordOffice(typeAutoWire); // only one used
 		OfficeFloorManagedObjectSource source = this.recordManagedObjectSource(
@@ -162,7 +162,6 @@ public class AutoWireOfficeFloorSource_ManagedObject_Test extends
 				MockRawObject.class.getName());
 
 		// Record
-		this.recordTeam();
 		this.recordManagedObjectType(object);
 		this.recordOffice(typeAutoWire, objectAutoWire); // both used
 		OfficeFloorManagedObjectSource source = this.recordManagedObjectSource(
@@ -194,7 +193,6 @@ public class AutoWireOfficeFloorSource_ManagedObject_Test extends
 				MockRawObject.class.getName());
 
 		// Record
-		this.recordTeam();
 		this.recordManagedObjectType(object);
 		this.recordOffice(autoWire);
 		OfficeFloorManagedObjectSource source = this.recordManagedObjectSource(
@@ -224,7 +222,6 @@ public class AutoWireOfficeFloorSource_ManagedObject_Test extends
 		object.setTimeout(TIMEOUT);
 
 		// Record
-		this.recordTeam();
 		this.recordManagedObjectType(object);
 		this.recordOffice(autoWire);
 		OfficeFloorManagedObjectSource source = this.recordManagedObjectSource(
@@ -256,7 +253,6 @@ public class AutoWireOfficeFloorSource_ManagedObject_Test extends
 				+ "/object.properties");
 
 		// Record
-		this.recordTeam();
 		this.recordManagedObjectType(object);
 		this.recordOffice(autoWire);
 		OfficeFloorManagedObjectSource source = this.recordManagedObjectSource(
@@ -292,7 +288,6 @@ public class AutoWireOfficeFloorSource_ManagedObject_Test extends
 		object.loadProperties("object.properties");
 
 		// Record
-		this.recordTeam();
 		this.recordManagedObjectType(object);
 		this.recordOffice(autoWire);
 		OfficeFloorManagedObjectSource source = this.recordManagedObjectSource(
@@ -327,7 +322,6 @@ public class AutoWireOfficeFloorSource_ManagedObject_Test extends
 				MockRawObject.class.getName());
 
 		// Record Managed Object
-		this.recordTeam();
 		this.recordRawObjectType(connection);
 		this.recordManagedObjectType(object);
 		this.recordOffice(rawTypeAutoWire); // dependency should also load
@@ -374,7 +368,6 @@ public class AutoWireOfficeFloorSource_ManagedObject_Test extends
 				MockRawObject.class.getName());
 
 		// Record Managed Object Source (only used will be loaded)
-		this.recordTeam();
 		this.recordRawObjectType(connectionOne);
 		this.recordRawObjectType(connectionTwo);
 		this.recordManagedObjectType(object);
@@ -419,7 +412,6 @@ public class AutoWireOfficeFloorSource_ManagedObject_Test extends
 				MockRawObject.class.getName());
 
 		// Record Managed Object Source
-		this.recordTeam();
 		this.recordRawObjectType(connection);
 		this.recordManagedObjectType(object);
 		this.recordOffice(rawTypeAutoWire); // dependency should also load
@@ -468,7 +460,6 @@ public class AutoWireOfficeFloorSource_ManagedObject_Test extends
 				MockRawObject.class.getName());
 
 		// Record Managed Object Source
-		this.recordTeam();
 		this.recordRawObjectType(connection);
 		this.recordManagedObjectType(object);
 		this.recordOffice(rawTypeAutoWire); // dependency should also load
@@ -527,7 +518,6 @@ public class AutoWireOfficeFloorSource_ManagedObject_Test extends
 				MockRawObject.class.getName());
 
 		// Record Managed Object Source (with non-specific dependency types)
-		this.recordTeam();
 		this.recordRawObjectType(connection);
 		this.recordManagedObjectType(object);
 		this.recordOffice(rawTypeAutoWire); // dependency should also load
@@ -570,7 +560,6 @@ public class AutoWireOfficeFloorSource_ManagedObject_Test extends
 		this.source.addObject(connection, connectionAutoWire);
 
 		// Record Managed Object Source (with non-specific dependency types)
-		this.recordTeam();
 		this.recordManagedObjectType(object);
 		this.recordRawObjectType(connection);
 		this.recordOffice(rawTypeAutoWire, connectionAutoWire); // both used
@@ -616,7 +605,6 @@ public class AutoWireOfficeFloorSource_ManagedObject_Test extends
 				MockRawObject.class.getName());
 
 		// Record Managed Object Source (with non-specific dependency types)
-		this.recordTeam();
 		this.recordRawObjectType(connection);
 		this.recordRawObjectType(dataSource);
 		this.recordManagedObjectType(object);
@@ -678,7 +666,6 @@ public class AutoWireOfficeFloorSource_ManagedObject_Test extends
 				MockRawObject.class.getName());
 
 		// Record Managed Object Source (with non-specific dependency types)
-		this.recordTeam();
 		this.recordRawObjectType(connection);
 		this.recordRawObjectType(dataSource);
 		this.recordManagedObjectType(object);
@@ -719,7 +706,6 @@ public class AutoWireOfficeFloorSource_ManagedObject_Test extends
 				MockRawObject.class.getName());
 
 		// Record Managed Object Source
-		this.recordTeam();
 		this.recordManagedObjectType(object);
 		this.recordOffice(cyclicAutoWire);
 		OfficeFloorManagedObjectSource source = this.recordManagedObjectSource(
@@ -762,7 +748,6 @@ public class AutoWireOfficeFloorSource_ManagedObject_Test extends
 				MockRawObject.class.getName());
 
 		// Record Managed Object Source
-		this.recordTeam();
 		this.recordManagedObjectType(oneObject);
 		this.recordManagedObjectType(twoObject);
 		this.recordOffice(oneAutoWire);

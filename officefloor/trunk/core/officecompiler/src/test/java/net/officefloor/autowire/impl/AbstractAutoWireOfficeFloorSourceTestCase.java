@@ -28,6 +28,7 @@ import net.officefloor.autowire.AutoWire;
 import net.officefloor.autowire.AutoWireApplication;
 import net.officefloor.autowire.AutoWireObject;
 import net.officefloor.autowire.AutoWireSupplier;
+import net.officefloor.autowire.AutoWireTeam;
 import net.officefloor.autowire.spi.supplier.source.SupplierSource;
 import net.officefloor.autowire.spi.supplier.source.SupplierSourceContext;
 import net.officefloor.autowire.spi.supplier.source.impl.AbstractSupplierSource;
@@ -38,7 +39,9 @@ import net.officefloor.compile.managedobject.ManagedObjectTeamType;
 import net.officefloor.compile.managedobject.ManagedObjectType;
 import net.officefloor.compile.office.OfficeInputType;
 import net.officefloor.compile.office.OfficeManagedObjectType;
+import net.officefloor.compile.office.OfficeTeamType;
 import net.officefloor.compile.office.OfficeType;
+import net.officefloor.compile.properties.Property;
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.spi.office.ManagedObjectTeam;
 import net.officefloor.compile.spi.office.OfficeObject;
@@ -58,7 +61,6 @@ import net.officefloor.compile.spi.officefloor.source.OfficeFloorSource;
 import net.officefloor.compile.spi.officefloor.source.OfficeFloorSourceContext;
 import net.officefloor.compile.spi.section.ManagedObjectDependency;
 import net.officefloor.compile.spi.section.ManagedObjectFlow;
-import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.impl.spi.team.OnePersonTeamSource;
 import net.officefloor.frame.impl.spi.team.ProcessContextTeamSource;
@@ -66,7 +68,6 @@ import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.frame.spi.TestSource;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
-import net.officefloor.frame.spi.team.Team;
 import net.officefloor.frame.spi.team.source.TeamSource;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 
@@ -211,14 +212,9 @@ public abstract class AbstractAutoWireOfficeFloorSourceTestCase extends
 	}
 
 	/**
-	 * {@link OfficeFloorTeam}.
+	 * {@link AutoWire} for the default {@link AutoWireTeam}.
 	 */
-	private final OfficeFloorTeam team = this.createMock(OfficeFloorTeam.class);
-
-	/**
-	 * {@link OfficeFloorTeam} instances by {@link AutoWire}.
-	 */
-	private final Map<AutoWire, OfficeFloorTeam> teams = new HashMap<AutoWire, OfficeFloorTeam>();
+	protected static final AutoWire DEFAULT_TEAM = new AutoWire("team");
 
 	/**
 	 * {@link DeployedOffice}.
@@ -226,9 +222,26 @@ public abstract class AbstractAutoWireOfficeFloorSourceTestCase extends
 	private final DeployedOffice office = this.createMock(DeployedOffice.class);
 
 	/**
-	 * Handled instances.
+	 * {@link AutoWire} for the {@link OfficeManagedObjectType} instances on the
+	 * {@link OfficeType}.
 	 */
-	private final List<AutoWire> handledInputs = new LinkedList<AutoWire>();
+	private final List<AutoWire> officeObjectTypes = new LinkedList<AutoWire>();
+
+	/**
+	 * {@link AutoWire} for the {@link OfficeTeamType} instances on the
+	 * {@link OfficeType}.
+	 */
+	private final List<AutoWire> officeTeamTypes = new LinkedList<AutoWire>();
+
+	/**
+	 * Handled {@link OfficeSectionInput} instances by the {@link OfficeType}.
+	 */
+	private final List<AutoWire> officeInputTypes = new LinkedList<AutoWire>();
+
+	/**
+	 * {@link OfficeFloorTeam} instances by {@link AutoWire}.
+	 */
+	private final Map<AutoWire, OfficeFloorTeam> teams = new HashMap<AutoWire, OfficeFloorTeam>();
 
 	/**
 	 * {@link OfficeFloorManagedObject} instances by {@link AutoWire}.
@@ -261,17 +274,99 @@ public abstract class AbstractAutoWireOfficeFloorSourceTestCase extends
 	private final Map<AutoWireObject, List<String>> managedObjectTeamTypes = new HashMap<AutoWireObject, List<String>>();
 
 	/**
-	 * Records the {@link Team}.
+	 * Records creating the {@link OfficeFloorTeam}.
+	 * 
+	 * @param teamSourceClass
+	 *            {@link TeamSource} {@link Class}.
+	 * @param nameAutoWire
+	 *            First {@link AutoWire} for the {@link AutoWireTeam}. Allows
+	 *            naming the {@link OfficeFloorTeam}.
+	 * @param propertyNameValuePairs
+	 *            {@link Property} name value pairs.
+	 * @return {@link OfficeFloorTeam}.
 	 */
-	protected void recordTeam() {
-		this.recordReturn(
-				this.deployer,
-				this.deployer.addTeam("team",
-						ProcessContextTeamSource.class.getName()), this.team);
+	protected OfficeFloorTeam recordTeam(Class<?> teamSourceClass,
+			AutoWire nameAutoWire, String... propertyNameValuePairs) {
+
+		// Create the Office Floor team
+		OfficeFloorTeam officeFloorTeam = this
+				.createMock(OfficeFloorTeam.class);
+		this.recordReturn(this.deployer, this.deployer.addTeam(
+				nameAutoWire.getQualifiedType(),
+				OnePersonTeamSource.class.getName()), officeFloorTeam);
+		if (propertyNameValuePairs != null) {
+			for (int i = 0; i < propertyNameValuePairs.length; i += 2) {
+				String name = propertyNameValuePairs[i];
+				String value = propertyNameValuePairs[i + 1];
+				officeFloorTeam.addProperty(name, value);
+			}
+		}
+
+		// Register the team
+		this.teams.put(nameAutoWire, officeFloorTeam);
+
+		// Return the Office Floor team
+		return officeFloorTeam;
 	}
 
 	/**
-	 * Records the {@link DeployedOfficeInput}.
+	 * Convenience method to record the default {@link OfficeFloorTeam}.
+	 */
+	protected OfficeFloorTeam recordDefaultTeam() {
+		return this.recordTeam(ProcessContextTeamSource.class, DEFAULT_TEAM);
+	}
+
+	/**
+	 * Convenience method to record linking the default {@link OfficeFloorTeam}
+	 * to its respective {@link OfficeTeam}.
+	 */
+	protected void recordDefaultTeamLinkedToOffice() {
+		this.recordDefaultTeam();
+		this.recordLinkTeamToOffice(DEFAULT_TEAM, DEFAULT_TEAM);
+	}
+
+	/**
+	 * Records linking the {@link OfficeFloorTeam} to the {@link OfficeTeam}.
+	 * 
+	 * @param teamAutoWire
+	 *            {@link AutoWire} to identify the {@link OfficeFloorTeam}.
+	 * @param officeTeamAutoWire
+	 *            {@link AutoWire} to identify the {@link OfficeTeam}.
+	 */
+	protected void recordLinkTeamToOffice(AutoWire teamAutoWire,
+			AutoWire officeTeamAutoWire) {
+
+		// Obtain the OfficeFloorTeam
+		OfficeFloorTeam officeFloorTeam = this.teams.get(teamAutoWire);
+		if (officeFloorTeam == null) {
+			// Ensure have OfficeFloorTeam
+			fail("No OfficeFloorTeam by name "
+					+ teamAutoWire.getQualifiedType()
+					+ " has been recorded as built");
+		}
+
+		// Record obtaining the OfficeTeam
+		OfficeTeam officeTeam = this.createMock(OfficeTeam.class);
+		this.recordReturn(this.office, this.office
+				.getDeployedOfficeTeam(officeTeamAutoWire.getQualifiedType()),
+				officeTeam);
+
+		// Record linking OfficeTeam with OfficeFloorTeam
+		this.deployer.link(officeTeam, officeFloorTeam);
+	}
+
+	/**
+	 * Records the {@link OfficeManagedObjectType}.
+	 * 
+	 * @param objectAutoWire
+	 *            {@link AutoWire} for the {@link OfficeManagedObjectType}.
+	 */
+	protected void registerOfficeObject(AutoWire objectAutoWire) {
+		this.officeObjectTypes.add(objectAutoWire);
+	}
+
+	/**
+	 * Records the {@link OfficeInputType}.
 	 * 
 	 * @param sectionName
 	 *            Name of the {@link OfficeSection}.
@@ -279,46 +374,59 @@ public abstract class AbstractAutoWireOfficeFloorSourceTestCase extends
 	 *            Name of the {@link OfficeSectionInput}.
 	 */
 	protected void registerOfficeInput(String sectionName, String inputName) {
-		this.handledInputs.add(new AutoWire(sectionName, inputName));
+		this.officeInputTypes.add(new AutoWire(sectionName, inputName));
 	}
 
 	/**
-	 * Records the {@link Office}.
+	 * Records the {@link OfficeTeamType}.
 	 * 
-	 * @param officeObjectAutoWiring
-	 *            {@link AutoWire} instances to identify the used
-	 *            {@link OfficeObject} instances.
-	 * @return {@link DeployedOffice}.
+	 * @param teamAutoWire
+	 *            {@link AutoWire} for the {@link OfficeTeamType}.
 	 */
-	protected DeployedOffice recordOffice(AutoWire... officeObjectAutoWiring) {
-		return this.recordOffice(this.team, officeObjectAutoWiring);
+	protected void registerOfficeTeam(AutoWire teamAutoWire) {
+		this.officeTeamTypes.add(teamAutoWire);
+	}
+
+	/**
+	 * Register the default {@link OfficeTeamType}.
+	 */
+	protected void registerDefaultOfficeTeam() {
+		this.registerOfficeTeam(new AutoWire("team"));
 	}
 
 	/**
 	 * Records the office.
 	 * 
-	 * @param defaultTeam
-	 *            Default {@link Team}.
 	 * @param officeObjectAutoWiring
-	 *            {@link AutoWire} instances to identify the used
-	 *            {@link OfficeObject} instances.
+	 *            Convenience to add additional {@link AutoWire} instances to
+	 *            identify the used {@link OfficeManagedObjectType} instances.
 	 * @return {@link DeployedOffice}.
 	 */
-	protected DeployedOffice recordOffice(OfficeFloorTeam defaultTeam,
-			AutoWire... officeObjectAutoWiring) {
+	protected DeployedOffice recordOffice(AutoWire... officeObjectAutoWiring) {
 
 		final PropertyList propertyList = this.createMock(PropertyList.class);
 		final OfficeType officeType = this.createMock(OfficeType.class);
 
+		// Create the office team types
+		final OfficeTeamType[] officeTeams = new OfficeTeamType[this.officeTeamTypes
+				.size()];
+		for (int i = 0; i < officeTeams.length; i++) {
+			officeTeams[i] = this.createMock(OfficeTeamType.class);
+		}
+
 		// Create the office input types
-		final OfficeInputType[] officeInputs = new OfficeInputType[this.handledInputs
+		final OfficeInputType[] officeInputs = new OfficeInputType[this.officeInputTypes
 				.size()];
 		for (int i = 0; i < officeInputs.length; i++) {
 			officeInputs[i] = this.createMock(OfficeInputType.class);
 		}
 
+		// Add the additional object auto-wiring
+		this.officeObjectTypes.addAll(Arrays.asList(officeObjectAutoWiring));
+
 		// Create the office managed object types
-		final OfficeManagedObjectType[] officeObjects = new OfficeManagedObjectType[officeObjectAutoWiring.length];
+		final OfficeManagedObjectType[] officeObjects = new OfficeManagedObjectType[this.officeObjectTypes
+				.size()];
 		for (int i = 0; i < officeObjects.length; i++) {
 			officeObjects[i] = this.createMock(OfficeManagedObjectType.class);
 		}
@@ -341,12 +449,22 @@ public abstract class AbstractAutoWireOfficeFloorSourceTestCase extends
 					}
 				});
 
+		// Record the office team types
+		this.recordReturn(officeType, officeType.getOfficeTeamTypes(),
+				officeTeams);
+		for (int i = 0; i < officeTeams.length; i++) {
+			OfficeTeamType officeTeam = officeTeams[i];
+			AutoWire officeTeamAutoWire = this.officeTeamTypes.get(i);
+			this.recordReturn(officeTeam, officeTeam.getOfficeTeamName(),
+					officeTeamAutoWire.getQualifiedType());
+		}
+
 		// Record the office input types
 		this.recordReturn(officeType, officeType.getOfficeInputTypes(),
 				officeInputs);
 		for (int i = 0; i < officeInputs.length; i++) {
 			OfficeInputType officeInput = officeInputs[i];
-			AutoWire handledInput = this.handledInputs.get(i);
+			AutoWire handledInput = this.officeInputTypes.get(i);
 			this.recordReturn(officeInput, officeInput.getOfficeSectionName(),
 					handledInput.getQualifier());
 			this.recordReturn(officeInput,
@@ -359,7 +477,7 @@ public abstract class AbstractAutoWireOfficeFloorSourceTestCase extends
 				officeObjects);
 		for (int i = 0; i < officeObjects.length; i++) {
 			OfficeManagedObjectType officeObject = officeObjects[i];
-			AutoWire officeObjectAutoWire = officeObjectAutoWiring[i];
+			AutoWire officeObjectAutoWire = this.officeObjectTypes.get(i);
 			this.recordReturn(officeObject, officeObject.getObjectType(),
 					officeObjectAutoWire.getType());
 			this.recordReturn(officeObject, officeObject.getTypeQualifier(),
@@ -381,12 +499,6 @@ public abstract class AbstractAutoWireOfficeFloorSourceTestCase extends
 						return true;
 					}
 				});
-
-		// Record binding office team to team
-		OfficeTeam officeTeam = this.createMock(OfficeTeam.class);
-		this.recordReturn(this.office,
-				this.office.getDeployedOfficeTeam("team"), officeTeam);
-		this.deployer.link(officeTeam, defaultTeam);
 
 		// Return the office
 		return this.office;
@@ -843,16 +955,12 @@ public abstract class AbstractAutoWireOfficeFloorSourceTestCase extends
 				source.getManagedObjectTeam(managedObjectTeamName), moTeam);
 
 		// Register the team
-		final OfficeFloorTeam team = this.createMock(OfficeFloorTeam.class);
 		this.recordReturn(source,
-				source.getOfficeFloorManagedObjectSourceName(), "TestName");
-		this.recordReturn(this.deployer, this.deployer.addTeam("TestName-"
-				+ managedObjectTeamName, teamSourceClass.getName()), team);
-		for (int i = 0; i < propertyNameValues.length; i += 2) {
-			String name = propertyNameValues[i];
-			String value = propertyNameValues[i + 1];
-			team.addProperty(name, value);
-		}
+				source.getOfficeFloorManagedObjectSourceName(),
+				"TestManagedObjectSourceName");
+		OfficeFloorTeam team = this.recordTeam(teamSourceClass, new AutoWire(
+				"TestManagedObjectSourceName", managedObjectTeamName),
+				propertyNameValues);
 
 		// Link team
 		this.deployer.link(moTeam, team);
@@ -873,55 +981,13 @@ public abstract class AbstractAutoWireOfficeFloorSourceTestCase extends
 
 		// Obtain the team to link
 		OfficeFloorTeam officeFloorTeam = this.teams.get(autoWire);
+		if (officeFloorTeam == null) {
+			fail("No OfficeFloorTeam " + autoWire.getQualifiedType()
+					+ " recorded to link to ManagedObjectTeam");
+		}
 
 		// Record linking team
 		this.deployer.link(moTeam, officeFloorTeam);
-	}
-
-	/**
-	 * Records the {@link Team}.
-	 * 
-	 * @param propertyNameValuePairs
-	 *            Name value pairs. May be <code>null</code> to indicate no
-	 *            properties.
-	 * @param autoWiring
-	 *            {@link AutoWire} instances.
-	 * @return {@link OfficeFloorTeam}.
-	 */
-	protected OfficeFloorTeam recordTeam(String[] propertyNameValuePairs,
-			AutoWire... autoWiring) {
-
-		// Base name of first auto-wire
-		AutoWire nameAutoWire = autoWiring[0];
-
-		// Create the Office Floor team
-		OfficeFloorTeam officeFloorTeam = this
-				.createMock(OfficeFloorTeam.class);
-		this.recordReturn(this.deployer, this.deployer.addTeam(
-				nameAutoWire.getQualifiedType(),
-				OnePersonTeamSource.class.getName()), officeFloorTeam);
-		if (propertyNameValuePairs != null) {
-			for (int i = 0; i < propertyNameValuePairs.length; i += 2) {
-				String name = propertyNameValuePairs[i];
-				String value = propertyNameValuePairs[i + 1];
-				officeFloorTeam.addProperty(name, value);
-			}
-		}
-
-		// Create and link the responsibilities, along with registering teams
-		for (AutoWire autoWire : autoWiring) {
-			OfficeTeam officeTeam = this.createMock(OfficeTeam.class);
-			this.recordReturn(this.office, this.office
-					.getDeployedOfficeTeam(autoWire.getQualifiedType()),
-					officeTeam);
-			this.deployer.link(officeTeam, officeFloorTeam);
-
-			// Register the team
-			this.teams.put(autoWire, officeFloorTeam);
-		}
-
-		// Return the team
-		return officeFloorTeam;
 	}
 
 	/**

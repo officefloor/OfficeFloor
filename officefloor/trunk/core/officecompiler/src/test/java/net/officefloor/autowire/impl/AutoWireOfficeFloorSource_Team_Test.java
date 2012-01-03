@@ -25,9 +25,10 @@ import org.junit.Ignore;
 
 import net.officefloor.autowire.AutoWire;
 import net.officefloor.autowire.AutoWireTeam;
+import net.officefloor.compile.spi.office.OfficeTeam;
 import net.officefloor.compile.spi.officefloor.OfficeFloorTeam;
+import net.officefloor.frame.impl.spi.team.LeaderFollowerTeamSource;
 import net.officefloor.frame.impl.spi.team.OnePersonTeamSource;
-import net.officefloor.frame.impl.spi.team.PassiveTeamSource;
 import net.officefloor.frame.spi.team.Team;
 
 /**
@@ -36,74 +37,36 @@ import net.officefloor.frame.spi.team.Team;
  * 
  * @author Daniel Sagenschneider
  */
-@Ignore("TODO create tests to build the Team only if used")
+@Ignore("TODO only load used Teams")
 public class AutoWireOfficeFloorSource_Team_Test extends
 		AbstractAutoWireOfficeFloorSourceTestCase {
 
-	// TODO change team testing to only load the Team if required
-	public void test_TODO_buildTeamOnlyAsRequired() {
-		fail("TODO change team testing to only load the Team if required");
-	}
-
 	/**
-	 * Ensure able to assign a {@link Team}.
+	 * Ensure not build {@link Team} if unused.
 	 */
-	public void testAssignTeam() throws Exception {
+	public void testUnusedTeams() throws Exception {
 
 		final AutoWire autoWire = new AutoWire(Connection.class);
 
-		// Assign the team
-		AutoWireTeam team = this.source.assignTeam(
-				OnePersonTeamSource.class.getName(), autoWire);
-		team.addProperty("name", "value");
+		// Assign an unused team (default team also unused)
+		this.source.assignTeam(OnePersonTeamSource.class.getName(), autoWire);
 
-		// Record
-		this.recordTeam();
+		// Record (no used teams)
 		this.recordOffice();
-		this.recordTeam(new String[] { "name", "value" }, autoWire);
 
 		// Test
 		this.doSourceOfficeFloorTest();
 	}
 
 	/**
-	 * Ensure able to assign a {@link Team} with qualified type.
+	 * Ensure build {@link Team} as used.
 	 */
-	public void testAssignTeamWithQualifiedType() throws Exception {
+	public void testDefaultTeam() throws Exception {
 
-		final AutoWire autoWire = new AutoWire("QUALIFIED",
-				Connection.class.getName());
-
-		// Assign the team
-		AutoWireTeam team = this.source.assignTeam(
-				OnePersonTeamSource.class.getName(), autoWire);
-		team.addProperty("name", "value");
-
-		// Record
-		this.recordTeam();
+		// Record (default team)
+		this.registerDefaultOfficeTeam();
 		this.recordOffice();
-		this.recordTeam(new String[] { "name", "value" }, autoWire);
-
-		// Test
-		this.doSourceOfficeFloorTest();
-	}
-
-	/**
-	 * Ensure able to assign a {@link Team} multiple responsibilities.
-	 */
-	public void testAssignTeamMultipleResponsibilities() throws Exception {
-
-		final AutoWire connectionAutoWire = new AutoWire(Connection.class);
-		final AutoWire dataSourceAutoWire = new AutoWire(DataSource.class);
-
-		// Assign the team with multiple responsibilities
-		this.source.assignTeam(OnePersonTeamSource.class.getName(),
-				connectionAutoWire, dataSourceAutoWire);
-
-		// Record
-		this.recordTeam();
-		this.recordOffice();
-		this.recordTeam(null, connectionAutoWire, dataSourceAutoWire);
+		this.recordDefaultTeamLinkedToOffice();
 
 		// Test
 		this.doSourceOfficeFloorTest();
@@ -114,18 +77,123 @@ public class AutoWireOfficeFloorSource_Team_Test extends
 	 */
 	public void testOverrideDefaultTeam() throws Exception {
 
-		// Assign the default team
+		// Override the default team
 		AutoWireTeam defaultTeam = this.source
-				.assignDefaultTeam(PassiveTeamSource.class.getName());
+				.assignDefaultTeam(OnePersonTeamSource.class.getName());
 		defaultTeam.addProperty("name", "value");
 
 		// Record
-		OfficeFloorTeam officeFloorTeam = this
-				.createMock(OfficeFloorTeam.class);
-		this.recordReturn(this.deployer, this.deployer.addTeam("team",
-				PassiveTeamSource.class.getName()), officeFloorTeam);
+		this.registerOfficeTeam(DEFAULT_TEAM);
+		this.recordOffice();
+		OfficeFloorTeam officeFloorTeam = this.recordTeam(
+				OnePersonTeamSource.class, DEFAULT_TEAM, "name", "value");
 		officeFloorTeam.addProperty("name", "value");
-		this.recordOffice(officeFloorTeam);
+		this.recordLinkTeamToOffice(DEFAULT_TEAM, DEFAULT_TEAM);
+
+		// Test
+		this.doSourceOfficeFloorTest();
+	}
+
+	/**
+	 * Ensure able to assign a {@link Team} to non-qualified {@link OfficeTeam}.
+	 */
+	public void testAssignTeamToOfficeTeam() throws Exception {
+
+		final AutoWire autoWire = new AutoWire(Connection.class);
+
+		// Assign the team
+		AutoWireTeam team = this.source.assignTeam(
+				OnePersonTeamSource.class.getName(), autoWire);
+		team.addProperty("name", "value");
+
+		// Record
+		this.registerOfficeTeam(autoWire);
+		this.recordOffice();
+		this.recordTeam(OnePersonTeamSource.class, autoWire, "name", "value");
+		this.recordLinkTeamToOffice(autoWire, autoWire);
+
+		// Test
+		this.doSourceOfficeFloorTest();
+	}
+
+	/**
+	 * Ensure able to assign a {@link Team} to qualified {@link OfficeTeam}.
+	 */
+	public void testAssignQualifiedTeamToQualifiedOfficeTeam() throws Exception {
+
+		final AutoWire autoWire = new AutoWire("QUALIFIED",
+				Connection.class.getName());
+
+		// Assign the team
+		AutoWireTeam team = this.source.assignTeam(
+				OnePersonTeamSource.class.getName(), autoWire);
+		team.addProperty("name", "value");
+
+		// Record
+		this.registerOfficeTeam(autoWire);
+		this.recordOffice();
+		this.recordTeam(OnePersonTeamSource.class, autoWire, "name", "value");
+		this.recordLinkTeamToOffice(autoWire, autoWire);
+
+		// Test
+		this.doSourceOfficeFloorTest();
+	}
+
+	/**
+	 * Ensure able to assign a non-qualified {@link Team} to qualified
+	 * {@link AutoWire}.
+	 */
+	public void testAssignTeamToQualifiedOfficeTeam() throws Exception {
+
+		final AutoWire unqualified = new AutoWire(Connection.class);
+		final AutoWire qualified = new AutoWire("QUALIFIED",
+				Connection.class.getName());
+
+		// Assign the team
+		AutoWireTeam team = this.source.assignTeam(
+				OnePersonTeamSource.class.getName(), unqualified);
+		team.addProperty("name", "value");
+
+		// Record
+		this.registerOfficeTeam(qualified);
+		this.recordOffice();
+		this.recordTeam(OnePersonTeamSource.class, unqualified, "name", "value");
+		this.recordLinkTeamToOffice(unqualified, qualified);
+
+		// Test
+		this.doSourceOfficeFloorTest();
+	}
+
+	/**
+	 * Ensure able to assign a {@link Team} to multiple {@link OfficeTeam}
+	 * instances.
+	 */
+	public void testAssignTeamToMultipleOfficeTeams() throws Exception {
+
+		final AutoWire connectionAutoWire = new AutoWire(Connection.class);
+		final AutoWire qualifiedConnectionAutoWire = new AutoWire("QUALIFIED",
+				Connection.class.getName());
+		final AutoWire dataSourceAutoWire = new AutoWire(DataSource.class);
+		final AutoWire qualifiedDataSourceAutoWire = new AutoWire("QUALIFIED",
+				DataSource.class.getName());
+
+		// Assign the team with multiple matching OfficeTeams
+		this.source.assignTeam(LeaderFollowerTeamSource.class.getName(),
+				connectionAutoWire, dataSourceAutoWire);
+
+		// Record
+		this.registerOfficeTeam(connectionAutoWire);
+		this.registerOfficeTeam(qualifiedConnectionAutoWire);
+		this.registerOfficeTeam(dataSourceAutoWire);
+		this.registerOfficeTeam(qualifiedDataSourceAutoWire);
+		this.recordOffice();
+		this.recordTeam(LeaderFollowerTeamSource.class, connectionAutoWire);
+		this.recordLinkTeamToOffice(connectionAutoWire, connectionAutoWire);
+		this.recordLinkTeamToOffice(connectionAutoWire,
+				qualifiedConnectionAutoWire);
+		this.recordLinkTeamToOffice(connectionAutoWire, dataSourceAutoWire);
+		this.recordLinkTeamToOffice(connectionAutoWire,
+				qualifiedDataSourceAutoWire);
 
 		// Test
 		this.doSourceOfficeFloorTest();
