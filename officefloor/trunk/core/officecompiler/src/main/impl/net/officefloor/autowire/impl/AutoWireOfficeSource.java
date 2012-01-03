@@ -371,25 +371,15 @@ public class AutoWireOfficeSource extends AbstractOfficeSource {
 	public void sourceOffice(OfficeArchitect architect,
 			OfficeSourceContext context) throws Exception {
 
-		// Add the default team
-		OfficeTeam defaultTeam = architect.addOfficeTeam("team");
-
 		// Add the available teams
 		List<ResponsibleTeam> responsibleTeams = new ArrayList<ResponsibleTeam>(
 				this.availableTeamAutoWiring.size());
 		for (AutoWire availableTeamAutoWire : this.availableTeamAutoWiring) {
-
-			// Add the Office Team
-			OfficeTeam officeTeam = architect
-					.addOfficeTeam(availableTeamAutoWire.getQualifiedType());
-
-			// Register the responsible team
-			ResponsibleTeam responsibleTeam = new ResponsibleTeam(
-					availableTeamAutoWire, officeTeam);
-
-			// Add the responsible team
-			responsibleTeams.add(responsibleTeam);
+			responsibleTeams.add(new ResponsibleTeam(availableTeamAutoWire));
 		}
+
+		// Create the default team responsibility
+		ResponsibleTeam defaultTeam = new ResponsibleTeam(new AutoWire("team"));
 
 		// Load the sections
 		List<OfficeSection> officeSections = new LinkedList<OfficeSection>();
@@ -679,13 +669,13 @@ public class AutoWireOfficeSource extends AbstractOfficeSource {
 	 * @param responsibleTeams
 	 *            {@link ResponsibleTeam} instances.
 	 * @param defaultTeam
-	 *            {@link OfficeTeam}.
+	 *            {@link ResponsibleTeam}.
 	 * @param architect
 	 *            {@link OfficeArchitect}.
 	 */
 	private void linkTasksToTeams(OfficeSubSection subSection,
-			List<ResponsibleTeam> responsibleTeams, OfficeTeam defaultTeam,
-			OfficeArchitect architect) {
+			List<ResponsibleTeam> responsibleTeams,
+			ResponsibleTeam defaultTeam, OfficeArchitect architect) {
 
 		// Link section tasks to team
 		for (OfficeTask task : subSection.getOfficeTasks()) {
@@ -707,20 +697,23 @@ public class AutoWireOfficeSource extends AbstractOfficeSource {
 	 * @param responsibleTeams
 	 *            {@link ResponsibleTeam} instances.
 	 * @param defaultTeam
-	 *            Default {@link OfficeTeam}.
+	 *            Default {@link ResponsibleTeam}.
 	 * @param architect
 	 *            {@link OfficeArchitect}.
 	 */
 	private void assignTeam(OfficeTask task,
-			List<ResponsibleTeam> responsibleTeams, OfficeTeam defaultTeam,
-			OfficeArchitect architect) {
+			List<ResponsibleTeam> responsibleTeams,
+			ResponsibleTeam defaultTeam, OfficeArchitect architect) {
 
 		// Determine if team to be responsible
 		for (ResponsibleTeam responsibleTeam : responsibleTeams) {
 			if (responsibleTeam.isResponsible(task)) {
+
+				// Obtain the OfficeTeam responsible
+				OfficeTeam team = responsibleTeam.getOfficeTeam(architect);
+
 				// Team responsible for the task, so link
-				architect.link(task.getTeamResponsible(),
-						responsibleTeam.officeTeam);
+				architect.link(task.getTeamResponsible(), team);
 
 				// Team assigned
 				return;
@@ -728,7 +721,8 @@ public class AutoWireOfficeSource extends AbstractOfficeSource {
 		}
 
 		// As here, default team is responsible
-		architect.link(task.getTeamResponsible(), defaultTeam);
+		OfficeTeam team = defaultTeam.getOfficeTeam(architect);
+		architect.link(task.getTeamResponsible(), team);
 	}
 
 	/**
@@ -741,20 +735,24 @@ public class AutoWireOfficeSource extends AbstractOfficeSource {
 	 * @param responsibleTeams
 	 *            {@link ResponsibleTeam} instances.
 	 * @param defaultTeam
-	 *            Default {@link OfficeTeam}.
+	 *            Default {@link ResponsibleTeam}.
 	 * @param architect
 	 *            {@link OfficeArchitect}.
 	 */
 	private void assignTeam(OfficeGovernance governance,
 			Class<?> extensionInterface,
-			List<ResponsibleTeam> responsibleTeams, OfficeTeam defaultTeam,
-			OfficeArchitect architect) {
+			List<ResponsibleTeam> responsibleTeams,
+			ResponsibleTeam defaultTeam, OfficeArchitect architect) {
 
 		// Determine if team to be responsible
 		for (ResponsibleTeam responsibleTeam : responsibleTeams) {
 			if (responsibleTeam.isResponsible(extensionInterface)) {
+
+				// Obtain the OfficeTeam responsible
+				OfficeTeam team = responsibleTeam.getOfficeTeam(architect);
+
 				// Team responsible for the governance, so link
-				architect.link(governance, responsibleTeam.officeTeam);
+				architect.link(governance, team);
 
 				// Team assigned
 				return;
@@ -762,7 +760,8 @@ public class AutoWireOfficeSource extends AbstractOfficeSource {
 		}
 
 		// As here, default team is responsible
-		architect.link(governance, defaultTeam);
+		OfficeTeam team = defaultTeam.getOfficeTeam(architect);
+		architect.link(governance, team);
 	}
 
 	/**
@@ -860,22 +859,38 @@ public class AutoWireOfficeSource extends AbstractOfficeSource {
 		private final AutoWire dependencyAutoWire;
 
 		/**
-		 * {@link OfficeTeam}.
+		 * {@link OfficeTeam} (loaded only if used).
 		 */
-		public final OfficeTeam officeTeam;
+		private OfficeTeam officeTeam = null;
 
 		/**
 		 * Initiate.
 		 * 
 		 * @param dependencyAutoWire
 		 *            Dependency {@link AutoWire}.
-		 * @param officeTeam
-		 *            {@link OfficeTeam}.
 		 */
-		public ResponsibleTeam(AutoWire dependencyAutoWire,
-				OfficeTeam officeTeam) {
+		public ResponsibleTeam(AutoWire dependencyAutoWire) {
 			this.dependencyAutoWire = dependencyAutoWire;
-			this.officeTeam = officeTeam;
+		}
+
+		/**
+		 * Obtains the {@link OfficeTeam} for this responsibility.
+		 * 
+		 * @param architect
+		 *            {@link OfficeArchitect}.
+		 * @return {@link OfficeTeam}.
+		 */
+		public OfficeTeam getOfficeTeam(OfficeArchitect architect) {
+
+			// Lazy create the OfficeTeam
+			if (this.officeTeam == null) {
+				this.officeTeam = architect
+						.addOfficeTeam(this.dependencyAutoWire
+								.getQualifiedType());
+			}
+
+			// Return the OfficeTeam
+			return this.officeTeam;
 		}
 
 		/**
