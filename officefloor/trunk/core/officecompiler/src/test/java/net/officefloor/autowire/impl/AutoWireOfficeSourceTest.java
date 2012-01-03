@@ -30,6 +30,8 @@ import java.util.Map;
 import javax.sql.DataSource;
 import javax.transaction.xa.XAResource;
 
+import org.junit.Ignore;
+
 import net.officefloor.autowire.AutoWire;
 import net.officefloor.autowire.AutoWireGovernance;
 import net.officefloor.autowire.AutoWireSection;
@@ -55,6 +57,7 @@ import net.officefloor.compile.spi.office.OfficeTask;
 import net.officefloor.compile.spi.office.OfficeTeam;
 import net.officefloor.compile.spi.office.TaskTeam;
 import net.officefloor.compile.spi.office.source.OfficeSourceContext;
+import net.officefloor.compile.spi.section.TaskObject;
 import net.officefloor.compile.spi.section.source.SectionSource;
 import net.officefloor.compile.test.section.SectionLoaderUtil;
 import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
@@ -62,6 +65,7 @@ import net.officefloor.frame.api.escalate.Escalation;
 import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.spi.governance.Governance;
 import net.officefloor.frame.spi.team.Team;
+import net.officefloor.frame.spi.team.source.TeamSource;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.managedobject.clazz.ClassManagedObjectSource;
 import net.officefloor.plugin.managedobject.clazz.Dependency;
@@ -76,6 +80,7 @@ import net.officefloor.plugin.work.clazz.Qualifier;
  * 
  * @author Daniel Sagenschneider
  */
+@Ignore("TODO load Team only if required")
 public class AutoWireOfficeSourceTest extends OfficeFrameTestCase {
 
 	/**
@@ -837,18 +842,35 @@ public class AutoWireOfficeSourceTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensure can assign a {@link Team} responsibility.
+	 * Ensure can assign a {@link Team} for {@link TaskObject}.
 	 */
-	public void testAssignTeamForOfficeObject() throws Exception {
+	public void testAssignTeamForTaskObject() throws Exception {
 		this.doAssignTeamTest(new AutoWire(Connection.class), true,
-				MockTeamOfficeObjectSection.class, new AutoWire(
-						Connection.class), new AutoWire(String.class));
+				MockTeamTaskObjectSection.class,
+				new AutoWire(Connection.class), new AutoWire(String.class));
+	}
+
+	/**
+	 * Ensure unused {@link Team} not loaded for {@link TaskObject}.
+	 */
+	public void testUnusedTeamForTaskObject() throws Exception {
+		this.doAssignTeamTest(new AutoWire(UnusedTeam.class), false,
+				MockTeamTaskObjectSection.class,
+				new AutoWire(Connection.class), new AutoWire(String.class));
+	}
+
+	/**
+	 * Interface to identify unused {@link Team} in testing. This should not
+	 * match any of the dependencies and therefore cause the {@link TeamSource}
+	 * not to be loaded.
+	 */
+	private static interface UnusedTeam {
 	}
 
 	/**
 	 * Mock {@link Team} section class with direct dependency.
 	 */
-	public static class MockTeamOfficeObjectSection {
+	public static class MockTeamTaskObjectSection {
 
 		public void taskNotAssign(String value) {
 		}
@@ -858,12 +880,22 @@ public class AutoWireOfficeSourceTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensure can assign a {@link Team} responsibility based on qualified
-	 * {@link Task} dependency.
+	 * Ensure can assign a {@link Team} for qualified {@link TaskObject}.
 	 */
-	public void testAssignTeamForQualifiedOfficeObject() throws Exception {
+	public void testAssignTeamForQualifiedTaskObject() throws Exception {
 		this.doAssignTeamTest(new AutoWire(MockQualifier.class, Integer.class),
-				true, MockTeamQualifiedOfficeObjectSection.class, new AutoWire(
+				true, MockTeamQualifiedTaskObjectSection.class, new AutoWire(
+						Integer.class), new AutoWire(MockQualifier.class,
+						Integer.class));
+	}
+
+	/**
+	 * Ensure used {@link Team} not loaded for qualified {@link Task}
+	 * dependency.
+	 */
+	public void testUnusedTeamForQualifiedTaskObject() throws Exception {
+		this.doAssignTeamTest(new AutoWire(UnusedTeam.class), false,
+				MockTeamQualifiedTaskObjectSection.class, new AutoWire(
 						Integer.class), new AutoWire(MockQualifier.class,
 						Integer.class));
 	}
@@ -871,7 +903,7 @@ public class AutoWireOfficeSourceTest extends OfficeFrameTestCase {
 	/**
 	 * Mock {@link Team} section class with qualified {@link Dependency}.
 	 */
-	public static class MockTeamQualifiedOfficeObjectSection {
+	public static class MockTeamQualifiedTaskObjectSection {
 
 		public void taskAssign(@MockQualifier Integer object) {
 		}
@@ -881,11 +913,19 @@ public class AutoWireOfficeSourceTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensure can assign a {@link Team} responsibility based on
-	 * {@link ManagedObject}.
+	 * Ensure can assign a {@link Team} for {@link ManagedObject}.
 	 */
 	public void testAssignTeamForManagedObject() throws Exception {
 		this.doAssignTeamTest(new AutoWire(MockManagedObject.class), true,
+				MockTeamManagedObjectSection.class, new AutoWire(
+						MockManagedObject.class));
+	}
+
+	/**
+	 * Ensure not load unused {@link Team} for {@link ManagedObject}.
+	 */
+	public void testUnusedTeamForManagedObject() throws Exception {
+		this.doAssignTeamTest(new AutoWire(UnusedTeam.class), false,
 				MockTeamManagedObjectSection.class, new AutoWire(
 						MockManagedObject.class));
 	}
@@ -912,13 +952,21 @@ public class AutoWireOfficeSourceTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensure can assign a {@link Team} responsibility based on qualified
-	 * {@link ManagedObject}.
+	 * Ensure can assign a {@link Team} for qualified {@link ManagedObject}.
 	 */
 	public void testAssignTeamForQualifiedManagedObject() throws Exception {
 		this.doAssignTeamTest(new AutoWire(MockQualifier.class, Integer.class),
 				true, MockTeamQualifiedManagedObjectSection.class,
 				new AutoWire(Integer.class));
+	}
+
+	/**
+	 * Ensure not load unused {@link Team} for qualified {@link ManagedObject}.
+	 */
+	public void testUnusedTeamForQualifiedManagedObject() throws Exception {
+		this.doAssignTeamTest(new AutoWire(UnusedTeam.class), true,
+				MockTeamQualifiedManagedObjectSection.class, new AutoWire(
+						Integer.class));
 	}
 
 	/**
@@ -951,12 +999,21 @@ public class AutoWireOfficeSourceTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensure can assign a {@link Team} responsibility based on {@link Task}
-	 * having dependency on a {@link ManagedObject} that depends on the object
-	 * type.
+	 * Ensure can assign a {@link Team} for {@link Task} having dependency on a
+	 * {@link ManagedObject} that depends on the matching {@link AutoWire}.
 	 */
 	public void testAssignTeamForManagedObjectDependency() throws Exception {
 		this.doAssignTeamTest(new AutoWire(Connection.class), true,
+				MockTeamManagedObjectDependencySection.class, new AutoWire(
+						Connection.class));
+	}
+
+	/**
+	 * Ensure not load unused {@link Team} for {@link Task} having dependency on
+	 * a {@link ManagedObject} that depends on the matching {@link AutoWire}.
+	 */
+	public void testUnusedTeamForManagedObjectDependency() throws Exception {
+		this.doAssignTeamTest(new AutoWire(UnusedTeam.class), false,
 				MockTeamManagedObjectDependencySection.class, new AutoWire(
 						Connection.class));
 	}
@@ -988,11 +1045,24 @@ public class AutoWireOfficeSourceTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensure can assign a {@link Team} responsibility based on {@link Task}
-	 * having dependency on a {@link ManagedObject} that depends on the
-	 * qualified object type.
+	 * Ensure can assign a {@link Team} for {@link Task} having dependency on a
+	 * {@link ManagedObject} that depends on the matching qualified
+	 * {@link AutoWire}.
 	 */
 	public void testAssignTeamForQualifiedManagedObjectDependency()
+			throws Exception {
+		this.doAssignTeamTest(new AutoWire(MockQualifier.class,
+				Connection.class), true,
+				MockTeamQualifiedManagedObjectDependencySection.class,
+				new AutoWire(MockQualifier.class, Connection.class));
+	}
+
+	/**
+	 * Ensure not load unused {@link Team} for {@link Task} having dependency on
+	 * a {@link ManagedObject} that depends on the matching qualified
+	 * {@link AutoWire}.
+	 */
+	public void testUnusedTeamForQualifiedManagedObjectDependency()
 			throws Exception {
 		this.doAssignTeamTest(new AutoWire(MockQualifier.class,
 				Connection.class), true,
