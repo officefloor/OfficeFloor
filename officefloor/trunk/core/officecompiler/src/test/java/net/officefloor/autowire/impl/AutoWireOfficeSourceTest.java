@@ -30,8 +30,6 @@ import java.util.Map;
 import javax.sql.DataSource;
 import javax.transaction.xa.XAResource;
 
-import org.junit.Ignore;
-
 import net.officefloor.autowire.AutoWire;
 import net.officefloor.autowire.AutoWireGovernance;
 import net.officefloor.autowire.AutoWireSection;
@@ -80,7 +78,6 @@ import net.officefloor.plugin.work.clazz.Qualifier;
  * 
  * @author Daniel Sagenschneider
  */
-@Ignore("TODO load Team only if required")
 public class AutoWireOfficeSourceTest extends OfficeFrameTestCase {
 
 	/**
@@ -107,7 +104,6 @@ public class AutoWireOfficeSourceTest extends OfficeFrameTestCase {
 		this.addSection(source, SECTION, "name", "value");
 
 		// Record creating the section
-		this.recordTeam();
 		this.recordOfficeSection(SECTION);
 		this.recordSectionObjects(SECTION);
 		this.recordSectionInputs(SECTION);
@@ -148,7 +144,6 @@ public class AutoWireOfficeSourceTest extends OfficeFrameTestCase {
 		this.recordReturn(overridden, overridden.getSectionName(), SECTION);
 		this.recordReturn(overridden, overridden.getSectionSourceClassName(),
 				SectionSource.class.getName());
-		this.recordTeam();
 		this.recordReturn(overridden, overridden.getSectionLocation(),
 				SECTION_LOCATION);
 		this.recordReturn(overridden, overridden.getProperties(), properties);
@@ -193,7 +188,6 @@ public class AutoWireOfficeSourceTest extends OfficeFrameTestCase {
 		this.addSection(source, SECTION, "name", "value");
 
 		// Record creating the section
-		this.recordTeam();
 		this.recordOfficeSection(SECTION);
 		this.recordSectionObjects(SECTION);
 		this.recordSectionInputs(SECTION);
@@ -227,7 +221,6 @@ public class AutoWireOfficeSourceTest extends OfficeFrameTestCase {
 		source.link(one, ONE_OUTPUT, two, TWO_INPUT);
 
 		// Record creating the section
-		this.recordTeam();
 		this.recordOfficeSection(ONE);
 		this.recordSectionObjects(ONE);
 		this.recordSectionInputs(ONE);
@@ -311,7 +304,6 @@ public class AutoWireOfficeSourceTest extends OfficeFrameTestCase {
 		source.link(one, ONE_OUTPUT, two, TWO_INPUT);
 
 		// Record creating the section
-		this.recordTeam();
 		this.recordOfficeSection(ONE);
 		this.recordSectionObjects(ONE);
 		this.recordSectionInputs(ONE);
@@ -350,7 +342,6 @@ public class AutoWireOfficeSourceTest extends OfficeFrameTestCase {
 		source.link(one, ONE_OUTPUT, two, TWO_INPUT);
 
 		// Record creating the section
-		this.recordTeam();
 		this.recordOfficeSection(ONE);
 		this.recordSectionObjects(ONE);
 		this.recordSectionInputs(ONE);
@@ -383,7 +374,6 @@ public class AutoWireOfficeSourceTest extends OfficeFrameTestCase {
 		source.linkEscalation(Exception.class, section, "INPUT");
 
 		// Record linking escalation
-		this.recordTeam();
 		this.recordOfficeSection("SECTION");
 		this.recordSectionObjects("SECTION");
 		this.recordSectionInputs("SECTION", "INPUT");
@@ -410,7 +400,6 @@ public class AutoWireOfficeSourceTest extends OfficeFrameTestCase {
 		source.addAvailableOfficeObject(new AutoWire(Connection.class));
 
 		// Record creating the section
-		this.recordTeam();
 		this.recordOfficeSection(SECTION);
 		this.recordSectionObjects(SECTION, new ExpectedAutoWire(
 				Connection.class));
@@ -435,6 +424,7 @@ public class AutoWireOfficeSourceTest extends OfficeFrameTestCase {
 				"QUALIFIED", "QUALIFIED", Connection.class);
 		final ExpectedAutoWire unqualifiedConnection = new ExpectedAutoWire(
 				Connection.class);
+
 		final ExpectedAutoWire qualifiedString = new ExpectedAutoWire(
 				"QUALIFIED", "QUALIFIED", String.class);
 
@@ -448,7 +438,6 @@ public class AutoWireOfficeSourceTest extends OfficeFrameTestCase {
 		source.addAvailableOfficeObject(qualifiedString.requestedAutoWire);
 
 		// Record creating the section
-		this.recordTeam();
 		this.recordOfficeSection(SECTION);
 
 		// Record combinations of same qualifiers and types
@@ -481,7 +470,6 @@ public class AutoWireOfficeSourceTest extends OfficeFrameTestCase {
 		source.addAvailableOfficeObject(new AutoWire(Connection.class));
 
 		// Record creating the section
-		this.recordTeam();
 		this.recordOfficeSection(SECTION);
 
 		// Record fall back to unqualified type
@@ -517,7 +505,6 @@ public class AutoWireOfficeSourceTest extends OfficeFrameTestCase {
 				Connection.class.getName()));
 
 		// Record creating the section
-		this.recordTeam();
 		this.recordOfficeSection(SECTION);
 
 		// Record office section object that not matches available auto-wiring
@@ -564,7 +551,6 @@ public class AutoWireOfficeSourceTest extends OfficeFrameTestCase {
 		source.addAvailableOfficeObject(new AutoWire(DataSource.class));
 
 		// Record creating the section
-		this.recordTeam();
 		this.recordOfficeSection(SECTION);
 		this.recordSectionObjects(SECTION);
 		this.recordSectionInputs(SECTION);
@@ -594,14 +580,16 @@ public class AutoWireOfficeSourceTest extends OfficeFrameTestCase {
 				XAResource.class);
 
 		// Record governance over office object
-		OfficeTeam team = this.recordTeam();
 		this.recordOfficeSection(SECTION);
 		this.recordSectionObjects(SECTION, new ExpectedAutoWire(
 				Connection.class));
 		this.recordSectionInputs(SECTION);
 		this.recordSectionOutputs(SECTION);
 		this.recordSubSections(SECTION);
-		this.recordGovernance(GOVERNANCE, XAResource.class, team);
+		OfficeGovernance governance = this.recordGovernance(GOVERNANCE,
+				XAResource.class);
+		OfficeTeam team = this.recordTeam();
+		this.architect.link(governance, team);
 		this.recordGovernOfficeObject(GOVERNANCE,
 				new AutoWire(Connection.class));
 		this.recordGovernManagedObject(GOVERNANCE, SECTION, null, false);
@@ -636,14 +624,16 @@ public class AutoWireOfficeSourceTest extends OfficeFrameTestCase {
 				XAResource.class);
 
 		// Record governance over the used OfficeObject
-		OfficeTeam team = this.recordTeam();
 		this.recordOfficeSection(SECTION);
 		this.recordSectionObjects(SECTION, new ExpectedAutoWire(
 				Connection.class));
 		this.recordSectionInputs(SECTION);
 		this.recordSectionOutputs(SECTION);
 		this.recordSubSections(SECTION);
-		this.recordGovernance(GOVERNANCE, XAResource.class, team);
+		OfficeGovernance governance = this.recordGovernance(GOVERNANCE,
+				XAResource.class);
+		OfficeTeam team = this.recordTeam();
+		this.architect.link(governance, team);
 		this.recordGovernOfficeObject(GOVERNANCE,
 				new AutoWire(Connection.class));
 		this.recordGovernManagedObject(GOVERNANCE, SECTION, null, false);
@@ -671,7 +661,6 @@ public class AutoWireOfficeSourceTest extends OfficeFrameTestCase {
 				"PROPERTY_VALUE");
 
 		// Record governance over office object
-		OfficeTeam team = this.recordTeam();
 		this.recordOfficeSection(SECTION);
 		this.recordSectionObjects(SECTION);
 		this.recordSectionInputs(SECTION);
@@ -679,7 +668,10 @@ public class AutoWireOfficeSourceTest extends OfficeFrameTestCase {
 		this.recordSubSections(SECTION, SUB_SECTION);
 		this.recordSubSections(SUB_SECTION, SUB_SUB_SECTION);
 		this.recordSubSections(SUB_SUB_SECTION);
-		this.recordGovernance(GOVERNANCE, XAResource.class, team);
+		OfficeGovernance governance = this.recordGovernance(GOVERNANCE,
+				XAResource.class);
+		OfficeTeam team = this.recordTeam();
+		this.architect.link(governance, team);
 		this.recordGovernManagedObject(GOVERNANCE, SECTION, XAResource.class,
 				true, SUB_SECTION);
 		this.recordGovernManagedObject(GOVERNANCE, SUB_SECTION, Map.class,
@@ -694,7 +686,7 @@ public class AutoWireOfficeSourceTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensure issue if unkonwn {@link AutoWireSection} for {@link Governance}.
+	 * Ensure issue if unknown {@link AutoWireSection} for {@link Governance}.
 	 */
 	public void testUnknownSectionGovernance() throws Exception {
 
@@ -712,13 +704,15 @@ public class AutoWireOfficeSourceTest extends OfficeFrameTestCase {
 		governance.governSection(unknownSection);
 
 		// Record governance over office object
-		OfficeTeam team = this.recordTeam();
 		this.recordOfficeSection(SECTION);
 		this.recordSectionObjects(SECTION);
 		this.recordSectionInputs(SECTION);
 		this.recordSectionOutputs(SECTION);
 		this.recordSubSections(SECTION);
-		this.recordGovernance(GOVERNANCE, XAResource.class, team);
+		OfficeGovernance officeGovernance = this.recordGovernance(GOVERNANCE,
+				XAResource.class);
+		OfficeTeam team = this.recordTeam();
+		this.architect.link(officeGovernance, team);
 		this.recordReturn(unknownSection, unknownSection.getSectionName(),
 				UNKNOWN_SECTION);
 		this.architect.addIssue("Unknown section '" + UNKNOWN_SECTION
@@ -747,13 +741,15 @@ public class AutoWireOfficeSourceTest extends OfficeFrameTestCase {
 		governance.governSection(section);
 
 		// Record governance over office object
-		OfficeTeam team = this.recordTeam();
 		this.recordOfficeSection(SECTION);
 		this.recordSectionObjects(SECTION);
 		this.recordSectionInputs(SECTION);
 		this.recordSectionOutputs(SECTION);
 		this.recordSubSections(SECTION);
-		this.recordGovernance(GOVERNANCE, XAResource.class, team);
+		OfficeGovernance officeGovernance = this.recordGovernance(GOVERNANCE,
+				XAResource.class);
+		OfficeTeam team = this.recordTeam();
+		this.architect.link(officeGovernance, team);
 		this.recordGovernSections(GOVERNANCE, SECTION);
 		this.recordGovernManagedObject(GOVERNANCE, SECTION, null, false);
 
@@ -778,9 +774,10 @@ public class AutoWireOfficeSourceTest extends OfficeFrameTestCase {
 				"PROPERTY_VALUE");
 
 		// Record governance over office object
-		this.recordTeam();
+		OfficeGovernance governance = this.recordGovernance(GOVERNANCE,
+				XAResource.class);
 		OfficeTeam team = this.recordTeam(new AutoWire(XAResource.class));
-		this.recordGovernance(GOVERNANCE, XAResource.class, team);
+		this.architect.link(governance, team);
 		this.recordGovernSections(GOVERNANCE);
 
 		// Test
@@ -806,11 +803,11 @@ public class AutoWireOfficeSourceTest extends OfficeFrameTestCase {
 		this.addGovernance(source, GOVERNANCE, "PROPERTY_NAME",
 				"PROPERTY_VALUE");
 
-		// Record governance over office object
-		this.recordTeam();
-		this.recordTeam(new AutoWire("QUALIFIED", XAResource.class.getName()));
+		// Record governance over office object (not loading unused teams)
+		OfficeGovernance governance = this.recordGovernance(GOVERNANCE,
+				XAResource.class);
 		OfficeTeam team = this.recordTeam(new AutoWire(XAResource.class));
-		this.recordGovernance(GOVERNANCE, XAResource.class, team);
+		this.architect.link(governance, team);
 		this.recordGovernSections(GOVERNANCE);
 
 		// Test
@@ -831,8 +828,10 @@ public class AutoWireOfficeSourceTest extends OfficeFrameTestCase {
 		this.addGovernance(source, GOVERNANCE);
 
 		// Record governance over office object
+		OfficeGovernance governance = this.recordGovernance(GOVERNANCE,
+				XAResource.class);
 		OfficeTeam team = this.recordTeam();
-		this.recordGovernance(GOVERNANCE, XAResource.class, team);
+		this.architect.link(governance, team);
 		this.recordGovernSections(GOVERNANCE);
 
 		// Test
@@ -964,7 +963,7 @@ public class AutoWireOfficeSourceTest extends OfficeFrameTestCase {
 	 * Ensure not load unused {@link Team} for qualified {@link ManagedObject}.
 	 */
 	public void testUnusedTeamForQualifiedManagedObject() throws Exception {
-		this.doAssignTeamTest(new AutoWire(UnusedTeam.class), true,
+		this.doAssignTeamTest(new AutoWire(UnusedTeam.class), false,
 				MockTeamQualifiedManagedObjectSection.class, new AutoWire(
 						Integer.class));
 	}
@@ -1109,9 +1108,9 @@ public class AutoWireOfficeSourceTest extends OfficeFrameTestCase {
 	 * @param objectAutoWiring
 	 *            Object {@link AutoWire} instances.
 	 */
-	private void doAssignTeamTest(AutoWire teamAutoWire, boolean isUseTeam,
-			Class<?> sectionClass, AutoWire... objectAutoWiring)
-			throws Exception {
+	private void doAssignTeamTest(final AutoWire teamAutoWire,
+			final boolean isUseTeam, Class<?> sectionClass,
+			AutoWire... objectAutoWiring) throws Exception {
 
 		// Create and configure the source
 		AutoWireOfficeSource source = new AutoWireOfficeSource();
@@ -1125,26 +1124,38 @@ public class AutoWireOfficeSourceTest extends OfficeFrameTestCase {
 			source.addAvailableOfficeObject(autoWire);
 		}
 
-		// Record creating the teams (responsibilities)
-		final OfficeTeam defaultTeam = this.recordTeam();
-		OfficeTeam usedTeam = null;
-		if (isUseTeam) {
-			usedTeam = this.recordTeam(teamAutoWire);
-		}
-		final OfficeTeam autoWireTeam = usedTeam;
-
 		// Record creating the section
 		this.recordOfficeSection(sectionClass, new TeamAssigner() {
+
+			private OfficeTeam usedTeam = null;
+
+			private OfficeTeam defaultTeam = null;
+
 			@Override
 			public void recordAssignTeam(OfficeTask task) {
 
-				// Determine team responsible
-				OfficeTeam assignedTeam;
-				if ("taskAssign".equals(task.getOfficeTaskName())) {
-					assignedTeam = (autoWireTeam != null ? autoWireTeam
-							: defaultTeam);
-				} else {
-					assignedTeam = defaultTeam;
+				// Obtain team responsible
+				OfficeTeam assignedTeam = null;
+
+				// Determine if using specific assigned team
+				if (isUseTeam
+						&& ("taskAssign".equals(task.getOfficeTaskName()))) {
+					// Only obtain the used team once if using
+					if (this.usedTeam == null) {
+						this.usedTeam = AutoWireOfficeSourceTest.this
+								.recordTeam(teamAutoWire);
+					}
+					assignedTeam = this.usedTeam;
+				}
+
+				// Using default team
+				if (assignedTeam == null) {
+					// Only create default team once
+					if (this.defaultTeam == null) {
+						this.defaultTeam = AutoWireOfficeSourceTest.this
+								.recordTeam();
+					}
+					assignedTeam = this.defaultTeam;
 				}
 
 				// Assign the team
@@ -1158,11 +1169,6 @@ public class AutoWireOfficeSourceTest extends OfficeFrameTestCase {
 		source.sourceOffice(this.architect, this.context);
 		this.verifyMockObjects();
 	}
-
-	/**
-	 * Mock {@link OfficeTeam}.
-	 */
-	private final OfficeTeam team = this.createMock(OfficeTeam.class);
 
 	/**
 	 * {@link PropertyList} instances by section name.
@@ -1213,13 +1219,25 @@ public class AutoWireOfficeSourceTest extends OfficeFrameTestCase {
 	private final Map<String, PropertyList> governanceProperties = new HashMap<String, PropertyList>();
 
 	/**
+	 * Mock default {@link OfficeTeam}.
+	 */
+	private OfficeTeam team = null;
+
+	/**
 	 * Records the {@link OfficeTeam}.
 	 * 
 	 * @return {@link OfficeTeam}.
 	 */
 	private OfficeTeam recordTeam() {
-		this.recordReturn(this.architect, this.architect.addOfficeTeam("team"),
-				this.team);
+
+		// Only load the default team once
+		if (this.team == null) {
+			this.team = this.createMock(OfficeTeam.class);
+			this.recordReturn(this.architect,
+					this.architect.addOfficeTeam("team"), this.team);
+		}
+
+		// Return the team
 		return this.team;
 	}
 
@@ -1502,11 +1520,9 @@ public class AutoWireOfficeSourceTest extends OfficeFrameTestCase {
 	 *            Name of the {@link Governance}.
 	 * @param extensionInterface
 	 *            Extension interface.
-	 * @param team
-	 *            {@link OfficeTeam} for the {@link Governance}.
 	 */
-	private void recordGovernance(String governanceName,
-			Class<?> extensionInterface, OfficeTeam team) {
+	private OfficeGovernance recordGovernance(String governanceName,
+			Class<?> extensionInterface) {
 		assertNull("Already Governance by name " + governanceName,
 				this.governances.get(governanceName));
 
@@ -1537,8 +1553,8 @@ public class AutoWireOfficeSourceTest extends OfficeFrameTestCase {
 		this.recordReturn(governanceType,
 				governanceType.getExtensionInterface(), extensionInterface);
 
-		// Record specifying the team
-		this.architect.link(governance, team);
+		// Return the governance
+		return governance;
 	}
 
 	/**
@@ -1787,9 +1803,14 @@ public class AutoWireOfficeSourceTest extends OfficeFrameTestCase {
 		OfficeTask task = this.createMock(OfficeTask.class);
 		this.recordReturn(section, section.getOfficeTasks(),
 				new OfficeTask[] { task });
+
+		// Record obtaining the default team
+		OfficeTeam defaultTeam = this.recordTeam();
+
+		// Link task to default team
 		TaskTeam taskTeam = this.createMock(TaskTeam.class);
 		this.recordReturn(task, task.getTeamResponsible(), taskTeam);
-		this.architect.link(taskTeam, this.team);
+		this.architect.link(taskTeam, defaultTeam);
 
 		// Record obtaining the sub sections
 		this.recordReturn(section, section.getOfficeSubSections(), subSections);
