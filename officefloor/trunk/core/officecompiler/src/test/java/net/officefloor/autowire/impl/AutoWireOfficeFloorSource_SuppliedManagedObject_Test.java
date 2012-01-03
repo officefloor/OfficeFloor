@@ -19,8 +19,6 @@ package net.officefloor.autowire.impl;
 
 import java.sql.Connection;
 
-import org.junit.Ignore;
-
 import net.officefloor.autowire.AutoWire;
 import net.officefloor.autowire.AutoWireObject;
 import net.officefloor.autowire.ManagedObjectSourceWirer;
@@ -35,8 +33,10 @@ import net.officefloor.compile.spi.office.ManagedObjectTeam;
 import net.officefloor.compile.spi.officefloor.OfficeFloorManagedObject;
 import net.officefloor.compile.spi.officefloor.OfficeFloorManagedObjectSource;
 import net.officefloor.compile.spi.officefloor.OfficeFloorTeam;
-import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
+import net.officefloor.frame.impl.spi.team.OnePersonTeamSource;
 import net.officefloor.plugin.managedobject.clazz.ClassManagedObjectSource;
+
+import org.junit.Ignore;
 
 /**
  * Tests the {@link SuppliedManagedObject} configuration of the
@@ -69,7 +69,6 @@ public class AutoWireOfficeFloorSource_SuppliedManagedObject_Test extends
 		});
 
 		// Record
-		this.recordTeam();
 		this.recordOffice(autoWire);
 		OfficeFloorManagedObjectSource source = this.recordManagedObjectSource(
 				autoWire, mos, 0, 0,
@@ -106,7 +105,6 @@ public class AutoWireOfficeFloorSource_SuppliedManagedObject_Test extends
 		});
 
 		// Record (only two is loaded)
-		this.recordTeam();
 		this.recordOffice(two.getAutoWire()); // selectively only use two
 		OfficeFloorManagedObjectSource source = this.recordManagedObjectSource(
 				two.getAutoWire(), two, 0, 0);
@@ -143,7 +141,6 @@ public class AutoWireOfficeFloorSource_SuppliedManagedObject_Test extends
 		});
 
 		// Record
-		this.recordTeam();
 		// TODO supplied managed object type
 		this.registerOfficeInput("SECTION", "INPUT");
 		this.recordOffice();
@@ -221,16 +218,16 @@ public class AutoWireOfficeFloorSource_SuppliedManagedObject_Test extends
 		});
 
 		// Provide team
-		this.source.assignTeam("TEAM", officeFloorTeamAutoWire);
+		this.source.assignTeam(OnePersonTeamSource.class.getName(),
+				officeFloorTeamAutoWire);
 
 		// Record
-		this.recordTeam();
 		// TODO supplied managed object type
 		this.recordOffice();
-		this.recordTeam(new String[] {}, officeFloorTeamAutoWire);
 		OfficeFloorManagedObjectSource mos = this.recordManagedObjectSource(
 				source.getAutoWire(), source, 0, 0);
 		this.recordInputManagedObject(mos, source.getAutoWire());
+		this.recordTeam(OnePersonTeamSource.class, officeFloorTeamAutoWire);
 		this.recordManagedObjectTeam(mos, "team", officeFloorTeamAutoWire);
 
 		// Test
@@ -241,7 +238,8 @@ public class AutoWireOfficeFloorSource_SuppliedManagedObject_Test extends
 	 * Ensure issue if no {@link OfficeFloorTeam} for
 	 * {@link SuppliedManagedObjectTeamType}.
 	 */
-	public void testNoTeamForSuppliedManagedObjectTeam() throws Exception {
+	public void testSuppliedManagedObjectTeamWiredToDefaultTeam()
+			throws Exception {
 
 		final MockTypeManagedObjectSource source = new MockTypeManagedObjectSource(
 				String.class);
@@ -265,20 +263,13 @@ public class AutoWireOfficeFloorSource_SuppliedManagedObject_Test extends
 		// No OfficeFloor Team
 
 		// Record
-		this.recordTeam();
 		// TODO supplied managed object type
 		this.recordOffice(source.getAutoWire());
 		OfficeFloorManagedObjectSource mos = this.recordManagedObjectSource(
 				source.getAutoWire(), source, 0, 0);
 		this.recordInputManagedObject(mos, source.getAutoWire());
-
-		// Record issue as no corresponding OfficeFloor Team
-		this.deployer
-				.addIssue(
-						"No OfficeFloorTeam available for ManagedObjectTeam 'team' (qualifier=null, type="
-								+ Connection.class.getName() + ")",
-						AssetType.MANAGED_OBJECT, source.getAutoWire()
-								.getQualifiedType());
+		this.recordDefaultTeam();
+		this.recordManagedObjectTeam(mos, "team", DEFAULT_TEAM);
 
 		// Test
 		this.doSourceOfficeFloorTest();

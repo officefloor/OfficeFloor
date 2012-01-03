@@ -17,6 +17,8 @@
  */
 package net.officefloor.autowire.impl;
 
+import org.junit.Ignore;
+
 import net.officefloor.autowire.AutoWire;
 import net.officefloor.compile.spi.officefloor.OfficeFloorManagedObject;
 
@@ -25,6 +27,7 @@ import net.officefloor.compile.spi.officefloor.OfficeFloorManagedObject;
  * 
  * @author Daniel Sagenschneider
  */
+@Ignore("TODO only load used Teams")
 public class AutoWireOfficeFloorSource_RawObject_Test extends
 		AbstractAutoWireOfficeFloorSourceTestCase {
 
@@ -40,7 +43,6 @@ public class AutoWireOfficeFloorSource_RawObject_Test extends
 		this.source.addObject(dependency, autoWire);
 
 		// Record
-		this.recordTeam();
 		this.recordRawObjectType(dependency);
 		this.recordOffice(autoWire);
 		OfficeFloorManagedObject mo = this
@@ -63,7 +65,6 @@ public class AutoWireOfficeFloorSource_RawObject_Test extends
 		this.source.addObject(dependency, autoWire);
 
 		// Record (not load raw object)
-		this.recordTeam();
 		this.recordRawObjectType(dependency);
 		this.recordOffice(); // no objects used
 
@@ -83,7 +84,6 @@ public class AutoWireOfficeFloorSource_RawObject_Test extends
 		this.source.addObject(object);
 
 		// Record
-		this.recordTeam();
 		this.recordRawObjectType(object);
 		this.recordOffice(new AutoWire(String.class));
 		OfficeFloorManagedObject mo = this.recordRawObject(object, autoWire);
@@ -106,7 +106,6 @@ public class AutoWireOfficeFloorSource_RawObject_Test extends
 		this.source.addObject(dependency, autoWire);
 
 		// Record
-		this.recordTeam();
 		this.recordRawObjectType(dependency);
 		this.recordOffice(autoWire);
 		OfficeFloorManagedObject mo = this
@@ -130,7 +129,6 @@ public class AutoWireOfficeFloorSource_RawObject_Test extends
 		this.source.addObject(object, typeAutoWire, objectAutoWire);
 
 		// Record
-		this.recordTeam();
 		this.recordRawObjectType(object);
 		this.recordOffice(typeAutoWire); // only use one
 		OfficeFloorManagedObject mo = this
@@ -154,7 +152,6 @@ public class AutoWireOfficeFloorSource_RawObject_Test extends
 		this.source.addObject(object, typeAutoWire, objectAutoWire);
 
 		// Record
-		this.recordTeam();
 		this.recordRawObjectType(object);
 		this.recordOffice(typeAutoWire, objectAutoWire); // both types used
 		OfficeFloorManagedObject managedObject = this.recordRawObject(object,
