@@ -19,8 +19,6 @@ package net.officefloor.autowire.impl;
 
 import java.sql.Connection;
 
-import org.junit.Ignore;
-
 import net.officefloor.autowire.AutoWire;
 import net.officefloor.autowire.AutoWireObject;
 import net.officefloor.autowire.AutoWireTeam;
@@ -45,7 +43,6 @@ import net.officefloor.plugin.managedobject.clazz.ClassManagedObjectSource;
  * 
  * @author Daniel Sagenschneider
  */
-@Ignore("TODO only load used Teams")
 public class AutoWireOfficeFloorSource_InputManagedObject_Test extends
 		AbstractAutoWireOfficeFloorSourceTestCase {
 

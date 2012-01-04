@@ -19,12 +19,45 @@ package net.officefloor.autowire;
 
 import java.lang.annotation.Annotation;
 
+import net.officefloor.compile.impl.util.CompileUtil;
+
 /**
  * Provides details of an auto-wire.
  * 
  * @author Daniel Sagenschneider
  */
 public final class AutoWire {
+
+	/**
+	 * Creates the {@link AutoWire} from the qualified type.
+	 * 
+	 * @param qualifiedType
+	 *            Qualified type.
+	 * @return {@link AutoWire}.
+	 */
+	public static AutoWire valueOf(String qualifiedType) {
+
+		// Determine if qualifier and type
+		String qualifier;
+		String type;
+		int index = qualifiedType.lastIndexOf('-');
+		if (index < 0) {
+			// No qualifier, just type
+			qualifier = null;
+			type = qualifiedType;
+
+		} else {
+			// Parse out the qualifier (should not be empty string)
+			qualifier = qualifiedType.substring(0, index);
+			qualifier = (CompileUtil.isBlank(qualifier) ? null : qualifier);
+
+			// Parse out the type
+			type = qualifiedType.substring(index + 1); // ignore '-'
+		}
+
+		// Create and return the auto-wire
+		return new AutoWire(qualifier, type);
+	}
 
 	/**
 	 * <p>

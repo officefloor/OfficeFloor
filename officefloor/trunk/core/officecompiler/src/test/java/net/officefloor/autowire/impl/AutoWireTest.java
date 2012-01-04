@@ -33,30 +33,30 @@ public class AutoWireTest extends OfficeFrameTestCase {
 	 * Default type.
 	 */
 	public void testDefaultType() {
-		this.verifyAutoWire(new AutoWire("TYPE"), null, "TYPE", "TYPE");
+		verifyAutoWire(new AutoWire("TYPE"), null, "TYPE", "TYPE");
 	}
 
 	/**
 	 * Qualified type.
 	 */
 	public void testQualifiedType() {
-		this.verifyAutoWire(new AutoWire("QUALIFIED", "TYPE"), "QUALIFIED",
-				"TYPE", "QUALIFIED-TYPE");
+		verifyAutoWire(new AutoWire("QUALIFIED", "TYPE"), "QUALIFIED", "TYPE",
+				"QUALIFIED-TYPE");
 	}
 
 	/**
 	 * Default safe type.
 	 */
 	public void testDefaultSafeType() {
-		this.verifyAutoWire(new AutoWire(Object.class), null,
-				"java.lang.Object", "java.lang.Object");
+		verifyAutoWire(new AutoWire(Object.class), null, "java.lang.Object",
+				"java.lang.Object");
 	}
 
 	/**
 	 * Qualified safe type.
 	 */
 	public void testQualifiedSafeType() {
-		this.verifyAutoWire(new AutoWire(Documented.class, Object.class),
+		verifyAutoWire(new AutoWire(Documented.class, Object.class),
 				"java.lang.annotation.Documented", "java.lang.Object",
 				"java.lang.annotation.Documented-java.lang.Object");
 	}
@@ -87,6 +87,36 @@ public class AutoWireTest extends OfficeFrameTestCase {
 	}
 
 	/**
+	 * Ensure can appropriately create {@link AutoWire} from its qualified type.
+	 */
+	public void testValueOf() {
+
+		// Unqualified
+		validateValueOf(new AutoWire(Object.class));
+
+		// Qualified
+		validateValueOf(new AutoWire(Documented.class, Object.class));
+
+		// As last is typically a class it should not have a '-'
+		validateValueOf(new AutoWire("qualifier-with-hyphens", "type"));
+
+		// Edge cases
+		validateValueOf(new AutoWire("notype", ""));
+	}
+
+	/**
+	 * Validates the {@link AutoWire#valueOf(String)}.
+	 * 
+	 * @param autoWire
+	 *            {@link AutoWire} to use to get qualified type to test.
+	 */
+	private static void validateValueOf(AutoWire autoWire) {
+		verifyAutoWire(AutoWire.valueOf(autoWire.getQualifiedType()),
+				autoWire.getQualifier(), autoWire.getType(),
+				autoWire.getQualifiedType());
+	}
+
+	/**
 	 * Verifies the {@link AutoWire}.
 	 * 
 	 * @param wire
@@ -98,7 +128,7 @@ public class AutoWireTest extends OfficeFrameTestCase {
 	 * @param expectedQualifiedType
 	 *            Expected qualified type.
 	 */
-	private void verifyAutoWire(AutoWire wire, String expectedQualifier,
+	private static void verifyAutoWire(AutoWire wire, String expectedQualifier,
 			String expectedType, String expectedQualifiedType) {
 		assertEquals("Incorrect qualifier", expectedQualifier,
 				wire.getQualifier());
