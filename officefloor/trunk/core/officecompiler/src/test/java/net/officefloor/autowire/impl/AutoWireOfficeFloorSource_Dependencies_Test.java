@@ -29,17 +29,14 @@ import net.officefloor.autowire.impl.supplier.MockTypeManagedObjectSource;
 import net.officefloor.autowire.spi.supplier.source.SupplierSourceContext;
 import net.officefloor.compile.spi.officefloor.OfficeFloorManagedObject;
 import net.officefloor.compile.spi.officefloor.OfficeFloorManagedObjectSource;
-import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
+import net.officefloor.compile.spi.officefloor.OfficeFloorSupplier;
 import net.officefloor.plugin.managedobject.clazz.ClassManagedObjectSource;
-
-import org.junit.Ignore;
 
 /**
  * Tests connecting the various objects together as dependencies.
  * 
  * @author Daniel Sagenschneider
  */
-@Ignore("TODO addSupplier functionality")
 public class AutoWireOfficeFloorSource_Dependencies_Test extends
 		AbstractAutoWireOfficeFloorSourceTestCase {
 
@@ -173,9 +170,10 @@ public class AutoWireOfficeFloorSource_Dependencies_Test extends
 		final Class<?> dependencyClass = Connection.class;
 
 		// Add the objects
-		Object usedObject = this.addObject(usedClass, usedType, null);
+		Object usedObject = this.addObject(usedClass, usedType, null,
+				"dependency", dependencyClass, dependencyQualifier);
 		Object dependencyObject = this.addObject(dependencyClass,
-				dependencyType, typeQualifier);
+				dependencyType, typeQualifier, null, null, null);
 
 		// ------------------------------
 		// Build Managed Object Types
@@ -313,15 +311,23 @@ public class AutoWireOfficeFloorSource_Dependencies_Test extends
 	 *            {@link Class} of the object.
 	 * @param sourceType
 	 *            {@link SourceObjectType}.
-	 * @param qualifier
+	 * @param typeQualifier
 	 *            Type qualifier for the object.
-	 * @return Raw Object, {@link AutoWireObject} or {@link ManagedObjectSource}
-	 *         based on {@link SourceObjectType}.
+	 * @param dependencyName
+	 *            Name of dependency. May be <code>null</code> for no
+	 *            dependency.
+	 * @param dependencyType
+	 *            Type of dependency.
+	 * @param dependencyQualifier
+	 *            Qualifier for the required dependency.
+	 * @return Raw Object, {@link AutoWireObject} or {@link OfficeFloorSupplier}
+	 *         identifier based on {@link SourceObjectType}.
 	 */
 	private Object addObject(Class<?> clazz, SourceObjectType sourceType,
-			String qualifier) {
+			String typeQualifier, String dependencyName,
+			Class<?> dependencyType, String dependencyQualifier) {
 
-		final AutoWire autoWire = new AutoWire(qualifier, clazz.getName());
+		final AutoWire autoWire = new AutoWire(typeQualifier, clazz.getName());
 
 		// Load based on source type
 		switch (sourceType) {
@@ -360,14 +366,21 @@ public class AutoWireOfficeFloorSource_Dependencies_Test extends
 			// Add and return the supplied managed object
 			final MockTypeManagedObjectSource supplied = new MockTypeManagedObjectSource(
 					clazz);
-			this.addSupplier(new SupplierInit() {
+
+			// Add dependency (if required)
+			if (dependencyName != null) {
+				supplied.addDependency(dependencyName, dependencyType,
+						dependencyQualifier);
+			}
+
+			int identifier = this.addSupplierAndRecordType(new SupplierInit() {
 				@Override
 				public void supply(SupplierSourceContext context)
 						throws Exception {
 					context.addManagedObject(supplied, null, autoWire);
 				}
 			});
-			return supplied;
+			return Integer.valueOf(identifier);
 
 		default:
 			fail("Unknown source type");
@@ -404,7 +417,7 @@ public class AutoWireOfficeFloorSource_Dependencies_Test extends
 			break;
 
 		case SupplidManagedObject:
-			// Type loaded without mocks
+			// Type already recorded on adding supplier
 			break;
 
 		default:
@@ -450,8 +463,9 @@ public class AutoWireOfficeFloorSource_Dependencies_Test extends
 
 		case SupplidManagedObject:
 			// Record supplied managed object source
-			MockTypeManagedObjectSource mosSource = (MockTypeManagedObjectSource) object;
-			mos = this.recordManagedObjectSource(autoWire, mosSource, 0, 0);
+			Integer identifier = (Integer) object;
+			mos = this.recordSuppliedManagedObjectSource(identifier.intValue(),
+					autoWire);
 			break;
 
 		default:
@@ -529,16 +543,8 @@ public class AutoWireOfficeFloorSource_Dependencies_Test extends
 			break;
 
 		case SupplidManagedObject:
-			// Record adding supplied managed object
-			MockTypeManagedObjectSource mosSource = (MockTypeManagedObjectSource) object;
+			// Record adding supplied managed object (dependencies from type)
 			mo = this.recordManagedObject(mos, autoWire);
-
-			// Add dependency (if required)
-			if (dependencyName != null) {
-				// Type should only be loaded in sourcing OfficeFloor.
-				// Therefore type should not be loaded, and ok to define here.
-				mosSource.addDependency(dependencyName, dependencyType, null);
-			}
 			break;
 
 		default:

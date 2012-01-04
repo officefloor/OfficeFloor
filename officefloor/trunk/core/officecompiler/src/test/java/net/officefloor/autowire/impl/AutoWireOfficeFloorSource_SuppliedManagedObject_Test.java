@@ -19,6 +19,9 @@ package net.officefloor.autowire.impl;
 
 import java.sql.Connection;
 
+import javax.sql.DataSource;
+import javax.transaction.xa.XAResource;
+
 import net.officefloor.autowire.AutoWire;
 import net.officefloor.autowire.AutoWireObject;
 import net.officefloor.autowire.ManagedObjectSourceWirer;
@@ -32,11 +35,10 @@ import net.officefloor.autowire.supplier.SuppliedManagedObjectType;
 import net.officefloor.compile.spi.office.ManagedObjectTeam;
 import net.officefloor.compile.spi.officefloor.OfficeFloorManagedObject;
 import net.officefloor.compile.spi.officefloor.OfficeFloorManagedObjectSource;
+import net.officefloor.compile.spi.officefloor.OfficeFloorSupplier;
 import net.officefloor.compile.spi.officefloor.OfficeFloorTeam;
 import net.officefloor.frame.impl.spi.team.OnePersonTeamSource;
 import net.officefloor.plugin.managedobject.clazz.ClassManagedObjectSource;
-
-import org.junit.Ignore;
 
 /**
  * Tests the {@link SuppliedManagedObject} configuration of the
@@ -44,7 +46,6 @@ import org.junit.Ignore;
  * 
  * @author Daniel Sagenschneider
  */
-@Ignore("TODO addSupplier functionality")
 public class AutoWireOfficeFloorSource_SuppliedManagedObject_Test extends
 		AbstractAutoWireOfficeFloorSourceTestCase {
 
@@ -57,7 +58,7 @@ public class AutoWireOfficeFloorSource_SuppliedManagedObject_Test extends
 		final ClassManagedObjectSource mos = new ClassManagedObjectSource();
 
 		// Add the supplier
-		this.addSupplier(new SupplierInit() {
+		int identifier = this.addSupplierAndRecordType(new SupplierInit() {
 			@Override
 			public void supply(SupplierSourceContext context) throws Exception {
 				AutoWireObject object = context.addManagedObject(mos, null,
@@ -70,10 +71,8 @@ public class AutoWireOfficeFloorSource_SuppliedManagedObject_Test extends
 
 		// Record
 		this.recordOffice(autoWire);
-		OfficeFloorManagedObjectSource source = this.recordManagedObjectSource(
-				autoWire, mos, 0, 0,
-				ClassManagedObjectSource.CLASS_NAME_PROPERTY_NAME,
-				MockRawObject.class.getName());
+		OfficeFloorManagedObjectSource source = this
+				.recordSuppliedManagedObjectSource(identifier, autoWire);
 		OfficeFloorManagedObject mo = this
 				.recordManagedObject(source, autoWire);
 		this.recordOfficeObject(mo, autoWire);
@@ -95,7 +94,7 @@ public class AutoWireOfficeFloorSource_SuppliedManagedObject_Test extends
 				Integer.class);
 
 		// Add the supplier
-		this.addSupplier(new SupplierInit() {
+		int identifier = this.addSupplierAndRecordType(new SupplierInit() {
 			@Override
 			public void supply(SupplierSourceContext context) throws Exception {
 				one.addAsManagedObject(context, null);
@@ -105,12 +104,105 @@ public class AutoWireOfficeFloorSource_SuppliedManagedObject_Test extends
 		});
 
 		// Record (only two is loaded)
-		this.recordOffice(two.getAutoWire()); // selectively only use two
-		OfficeFloorManagedObjectSource source = this.recordManagedObjectSource(
-				two.getAutoWire(), two, 0, 0);
+		this.recordOffice(two.getAutoWire()); // selectively only use 'two'
+		OfficeFloorManagedObjectSource source = this
+				.recordSuppliedManagedObjectSource(identifier,
+						two.getAutoWire());
 		OfficeFloorManagedObject mo = this.recordManagedObject(source,
 				two.getAutoWire());
 		this.recordOfficeObject(mo, two.getAutoWire());
+
+		// Test
+		this.doSourceOfficeFloorTest();
+	}
+
+	/**
+	 * Ensure can use multiple {@link OfficeFloorManagedObjectSource} instances
+	 * from a {@link OfficeFloorSupplier}.
+	 */
+	public void testUseMultipleSuppliedManagedObjects() throws Exception {
+
+		final MockTypeManagedObjectSource one = new MockTypeManagedObjectSource(
+				String.class);
+		final MockTypeManagedObjectSource two = new MockTypeManagedObjectSource(
+				Connection.class);
+		final MockTypeManagedObjectSource three = new MockTypeManagedObjectSource(
+				Integer.class);
+
+		// Add the supplier
+		int identifier = this.addSupplierAndRecordType(new SupplierInit() {
+			@Override
+			public void supply(SupplierSourceContext context) throws Exception {
+				one.addAsManagedObject(context, null);
+				two.addAsManagedObject(context, null);
+				three.addAsManagedObject(context, null);
+			}
+		});
+
+		// Record
+		this.recordOffice(one.getAutoWire(), two.getAutoWire(),
+				three.getAutoWire());
+
+		// Record one
+		OfficeFloorManagedObjectSource sourceOne = this
+				.recordSuppliedManagedObjectSource(identifier,
+						one.getAutoWire());
+		OfficeFloorManagedObject moOne = this.recordManagedObject(sourceOne,
+				one.getAutoWire());
+		this.recordOfficeObject(moOne, one.getAutoWire());
+
+		// Record two
+		OfficeFloorManagedObjectSource sourceTwo = this
+				.recordSuppliedManagedObjectSource(identifier,
+						two.getAutoWire());
+		OfficeFloorManagedObject moTwo = this.recordManagedObject(sourceTwo,
+				two.getAutoWire());
+		this.recordOfficeObject(moTwo, two.getAutoWire());
+
+		// Record three
+		OfficeFloorManagedObjectSource sourceThree = this
+				.recordSuppliedManagedObjectSource(identifier,
+						three.getAutoWire());
+		OfficeFloorManagedObject moThree = this.recordManagedObject(
+				sourceThree, three.getAutoWire());
+		this.recordOfficeObject(moThree, three.getAutoWire());
+
+		// Test
+		this.doSourceOfficeFloorTest();
+	}
+
+	/**
+	 * Ensure re-use the {@link SuppliedManagedObject} for multiple
+	 * {@link AutoWire} instances.
+	 */
+	public void testMultipleUseOfSuppliedManagedObject() throws Exception {
+
+		final AutoWire autoWireOne = new AutoWire(Connection.class);
+		final AutoWire autoWireTwo = new AutoWire(DataSource.class);
+		final AutoWire autoWireThree = new AutoWire(XAResource.class);
+		final ClassManagedObjectSource mos = new ClassManagedObjectSource();
+
+		// Add the supplier
+		int identifier = this.addSupplierAndRecordType(new SupplierInit() {
+			@Override
+			public void supply(SupplierSourceContext context) throws Exception {
+				AutoWireObject object = context.addManagedObject(mos, null,
+						autoWireOne, autoWireTwo, autoWireThree);
+				object.addProperty(
+						ClassManagedObjectSource.CLASS_NAME_PROPERTY_NAME,
+						MockRawObject.class.getName());
+			}
+		});
+
+		// Record
+		this.recordOffice(autoWireOne, autoWireTwo, autoWireThree);
+		OfficeFloorManagedObjectSource source = this
+				.recordSuppliedManagedObjectSource(identifier, autoWireOne);
+		OfficeFloorManagedObject mo = this.recordManagedObject(source,
+				autoWireOne);
+		this.recordOfficeObject(mo, autoWireOne);
+		this.recordOfficeObject(mo, autoWireTwo);
+		this.recordOfficeObject(mo, autoWireThree);
 
 		// Test
 		this.doSourceOfficeFloorTest();
@@ -133,7 +225,7 @@ public class AutoWireOfficeFloorSource_SuppliedManagedObject_Test extends
 		};
 
 		// Add the supplier
-		this.addSupplier(new SupplierInit() {
+		int identifier = this.addSupplierAndRecordType(new SupplierInit() {
 			@Override
 			public void supply(SupplierSourceContext context) throws Exception {
 				source.addAsManagedObject(context, wirer);
@@ -141,11 +233,11 @@ public class AutoWireOfficeFloorSource_SuppliedManagedObject_Test extends
 		});
 
 		// Record
-		// TODO supplied managed object type
 		this.registerOfficeInput("SECTION", "INPUT");
 		this.recordOffice();
-		OfficeFloorManagedObjectSource mos = this.recordManagedObjectSource(
-				source.getAutoWire(), source, 0, 0);
+		OfficeFloorManagedObjectSource mos = this
+				.recordSuppliedManagedObjectSource(identifier,
+						source.getAutoWire());
 		this.recordInputManagedObject(mos, source.getAutoWire());
 		this.recordManagedObjectFlow(mos, "flow", "SECTION", "INPUT");
 
@@ -210,7 +302,7 @@ public class AutoWireOfficeFloorSource_SuppliedManagedObject_Test extends
 		};
 
 		// Add the supplier
-		this.addSupplier(new SupplierInit() {
+		int identifier = this.addSupplierAndRecordType(new SupplierInit() {
 			@Override
 			public void supply(SupplierSourceContext context) throws Exception {
 				source.addAsManagedObject(context, wirer);
@@ -222,10 +314,10 @@ public class AutoWireOfficeFloorSource_SuppliedManagedObject_Test extends
 				officeFloorTeamAutoWire);
 
 		// Record
-		// TODO supplied managed object type
 		this.recordOffice();
-		OfficeFloorManagedObjectSource mos = this.recordManagedObjectSource(
-				source.getAutoWire(), source, 0, 0);
+		OfficeFloorManagedObjectSource mos = this
+				.recordSuppliedManagedObjectSource(identifier,
+						source.getAutoWire());
 		this.recordInputManagedObject(mos, source.getAutoWire());
 		this.recordTeam(OnePersonTeamSource.class, officeFloorTeamAutoWire);
 		this.recordManagedObjectTeam(mos, "team", officeFloorTeamAutoWire);
@@ -253,7 +345,7 @@ public class AutoWireOfficeFloorSource_SuppliedManagedObject_Test extends
 		};
 
 		// Add the supplier
-		this.addSupplier(new SupplierInit() {
+		int identifier = this.addSupplierAndRecordType(new SupplierInit() {
 			@Override
 			public void supply(SupplierSourceContext context) throws Exception {
 				source.addAsManagedObject(context, wirer);
@@ -263,10 +355,10 @@ public class AutoWireOfficeFloorSource_SuppliedManagedObject_Test extends
 		// No OfficeFloor Team
 
 		// Record
-		// TODO supplied managed object type
 		this.recordOffice(source.getAutoWire());
-		OfficeFloorManagedObjectSource mos = this.recordManagedObjectSource(
-				source.getAutoWire(), source, 0, 0);
+		OfficeFloorManagedObjectSource mos = this
+				.recordSuppliedManagedObjectSource(identifier,
+						source.getAutoWire());
 		this.recordInputManagedObject(mos, source.getAutoWire());
 		this.recordDefaultTeam();
 		this.recordManagedObjectTeam(mos, "team", DEFAULT_TEAM);

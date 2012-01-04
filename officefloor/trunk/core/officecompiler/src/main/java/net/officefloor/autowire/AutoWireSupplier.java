@@ -17,6 +17,7 @@
  */
 package net.officefloor.autowire;
 
+import net.officefloor.autowire.spi.supplier.source.SupplierSource;
 import net.officefloor.plugin.section.clazz.ManagedObject;
 
 /**
@@ -25,4 +26,15 @@ import net.officefloor.plugin.section.clazz.ManagedObject;
  * @author Daniel Sagenschneider
  */
 public interface AutoWireSupplier extends AutoWireProperties {
+
+	/**
+	 * <p>
+	 * Obtains the {@link SupplierSource} class name.
+	 * <p>
+	 * May be an alias.
+	 * 
+	 * @return {@link SupplierSource} class name.
+	 */
+	String getSupplierSourceClassName();
+
 }
