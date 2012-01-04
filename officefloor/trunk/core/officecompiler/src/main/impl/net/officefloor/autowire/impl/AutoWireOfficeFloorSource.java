@@ -50,6 +50,7 @@ import net.officefloor.compile.managedobject.ManagedObjectTeamType;
 import net.officefloor.compile.managedobject.ManagedObjectType;
 import net.officefloor.compile.office.OfficeInputType;
 import net.officefloor.compile.office.OfficeManagedObjectType;
+import net.officefloor.compile.office.OfficeTeamType;
 import net.officefloor.compile.office.OfficeType;
 import net.officefloor.compile.properties.Property;
 import net.officefloor.compile.properties.PropertyList;
@@ -437,27 +438,6 @@ public class AutoWireOfficeFloorSource extends AbstractOfficeFloorSource
 		// Allow initialising the OfficeFloor
 		this.initOfficeFloor(deployer, context);
 
-		// Add the default team
-		OfficeFloorTeam team;
-		if (this.defaultTeam != null) {
-			// Configure the default team
-			team = deployer.addTeam("team",
-					this.defaultTeam.getTeamSourceClassName());
-			for (Property property : this.defaultTeam.getProperties()) {
-				team.addProperty(property.getName(), property.getValue());
-			}
-
-		} else {
-			/*
-			 * Create the default Team by default to always use invoking thread.
-			 * This is to allow use within an application server, as use within
-			 * other contexts should specify an appropriate default Team if
-			 * requiring different default behaviour.
-			 */
-			team = deployer.addTeam("team",
-					ProcessContextTeamSource.class.getName());
-		}
-
 		// Load available office objects
 		Set<AutoWire> availableAutoWires = new HashSet<AutoWire>();
 		for (AutoWireObjectInstance objectInstance : this.objectInstances) {
@@ -509,19 +489,33 @@ public class AutoWireOfficeFloorSource extends AbstractOfficeFloorSource
 			handledInputs.add(handledInput);
 		}
 
-		// Obtain all used auto-wiring
-		List<AutoWire> usedAutoWiring = new LinkedList<AutoWire>();
+		// Obtain all used Team auto-wiring
+		List<AutoWire> usedTeamAutoWiring = new LinkedList<AutoWire>();
+		for (OfficeTeamType officeTeam : officeType.getOfficeTeamTypes()) {
+
+			// Parse out the auto-wire
+			AutoWire usedTeamAutoWire = AutoWire.valueOf(officeTeam
+					.getOfficeTeamName());
+
+			// Add the used team auto-wire (uniquely)
+			if (!(usedTeamAutoWiring.contains(usedTeamAutoWire))) {
+				usedTeamAutoWiring.add(usedTeamAutoWire);
+			}
+		}
+
+		// Obtain all used Object auto-wiring
+		List<AutoWire> usedObjectAutoWiring = new LinkedList<AutoWire>();
 		for (OfficeManagedObjectType officeObject : officeType
 				.getOfficeManagedObjectTypes()) {
 
 			// Obtain the auto-wire for the office object
 			String type = officeObject.getObjectType();
 			String qualifier = officeObject.getTypeQualifier();
-			AutoWire usedAutoWire = new AutoWire(qualifier, type);
+			AutoWire usedObjectAutoWire = new AutoWire(qualifier, type);
 
-			// Add the used auto-wire (uniquely)
-			if (!(usedAutoWiring.contains(usedAutoWire))) {
-				usedAutoWiring.add(usedAutoWire);
+			// Add the used object auto-wire (uniquely)
+			if (!(usedObjectAutoWiring.contains(usedObjectAutoWire))) {
+				usedObjectAutoWiring.add(usedObjectAutoWire);
 			}
 		}
 
@@ -529,43 +523,38 @@ public class AutoWireOfficeFloorSource extends AbstractOfficeFloorSource
 		DeployedOffice office = deployer.addDeployedOffice(OFFICE_NAME,
 				this.officeSource, "auto-wire");
 
-		// Link default team for office
-		OfficeTeam officeTeam = office.getDeployedOfficeTeam("team");
-		deployer.link(officeTeam, team);
+		// Ensure have default AutoWireTeam
+		AutoWireTeamInstance defaultAutoWireTeamInstance;
+		if (this.defaultTeam != null) {
+			// Use the specified default team
+			defaultAutoWireTeamInstance = new AutoWireTeamInstance(
+					this.defaultTeam);
 
-		// Link team via object dependency responsibility
+		} else {
+			/*
+			 * Create the default Team by default to always use invoking thread.
+			 * This is to allow use within an application server, as use within
+			 * other contexts should specify an appropriate default Team if
+			 * requiring different default behaviour.
+			 */
+			defaultAutoWireTeamInstance = new AutoWireTeamInstance(
+					new AutoWireTeamImpl(this.compiler, "team",
+							ProcessContextTeamSource.class.getName(),
+							this.compiler.createPropertyList()));
+		}
+
+		// Create the mapping of auto-wiring to realised teams
 		Map<AutoWire, AutoWireTeamInstance> autoWireTeamInstances = new HashMap<AutoWire, AutoWireTeamInstance>();
 		for (AutoWireTeam autoWireTeam : this.teams) {
 
-			/*
-			 * TODO derive used Teams in similar way to Objects. In other words,
-			 * provide AutoWireOfficeSource.addAvailableResponsibility(AutoWire)
-			 * so that required teams can be defined by the OfficeType (using
-			 * naming convention to extract the AutoWire from the
-			 * OfficeTeamType). Then load only the necessary teams.
-			 */
+			// Create the auto-wire team instance
+			AutoWireTeamInstance teamInstance = new AutoWireTeamInstance(
+					autoWireTeam);
 
-			// Add the responsible team
-			OfficeFloorTeam responsibleTeam = deployer.addTeam(
-					autoWireTeam.getTeamName(),
-					autoWireTeam.getTeamSourceClassName());
-			for (Property property : autoWireTeam.getProperties()) {
-				responsibleTeam.addProperty(property.getName(),
-						property.getValue());
-			}
-
-			// Link team to its responsibilities
+			// Only load the first registered for auto-wire
 			for (AutoWire autoWire : autoWireTeam.getAutoWiring()) {
-
-				// Link responsibility to team
-				OfficeTeam responsibility = office
-						.getDeployedOfficeTeam(autoWire.getQualifiedType());
-				deployer.link(responsibility, responsibleTeam);
-
-				// Only load the first registered for auto-wire
 				if (!(autoWireTeamInstances.containsKey(autoWire))) {
-					autoWireTeamInstances.put(autoWire,
-							new AutoWireTeamInstance(responsibleTeam));
+					autoWireTeamInstances.put(autoWire, teamInstance);
 				}
 			}
 		}
@@ -640,7 +629,21 @@ public class AutoWireOfficeFloorSource extends AbstractOfficeFloorSource
 
 		// Create the auto-wire state
 		AutoWireState state = new AutoWireState(deployer, context, office,
-				autoWireObjectInstances, autoWireTeamInstances);
+				autoWireObjectInstances, autoWireTeamInstances,
+				defaultAutoWireTeamInstance);
+
+		// Build the used auto-wire teams by Office
+		for (AutoWire usedTeamAutoWire : usedTeamAutoWiring) {
+
+			// Obtain the corresponding auto-wire team instance
+			String qualifier = usedTeamAutoWire.getQualifier();
+			String type = usedTeamAutoWire.getType();
+			AutoWireTeamInstance autoWireTeamInstance = state
+					.getAppropriateTeamInstance(qualifier, type);
+
+			// Build the used team (and link to Office)
+			autoWireTeamInstance.buildTeam(state, usedTeamAutoWire);
+		}
 
 		// Build the input auto-wire objects
 		for (AutoWireObjectInstance inputObjectInstance : inputObjectInstances) {
@@ -653,18 +656,20 @@ public class AutoWireOfficeFloorSource extends AbstractOfficeFloorSource
 			inputObjectInstance.linkManagedObject(state);
 		}
 
-		// Load the required auto-wire objects
-		for (AutoWire usedAutoWire : usedAutoWiring) {
+		// Build the used auto-wire objects by Office
+		for (AutoWire usedObjectAutoWire : usedObjectAutoWiring) {
 
-			// Obtain the corresponding auto-wire context
-			AutoWireObjectInstance autoWireObjectInstance = autoWireObjectInstances
-					.get(usedAutoWire);
+			// Obtain the corresponding auto-wire object instance
+			String qualifier = usedObjectAutoWire.getQualifier();
+			String type = usedObjectAutoWire.getType();
+			AutoWireObjectInstance autoWireObjectInstance = state
+					.getAppropriateObjectInstance(qualifier, type);
 			if (autoWireObjectInstance == null) {
 				deployer.addIssue("No auto-wire object available for "
-						+ usedAutoWire.getQualifiedType(),
+						+ usedObjectAutoWire.getQualifiedType(),
 						AssetType.MANAGED_OBJECT,
-						usedAutoWire.getQualifiedType());
-				continue; // must have auto-wire context to load managed object
+						usedObjectAutoWire.getQualifiedType());
+				continue; // must have auto-wire object to load managed object
 			}
 
 			// Do not build if input (as should already be built above)
@@ -672,8 +677,9 @@ public class AutoWireOfficeFloorSource extends AbstractOfficeFloorSource
 				continue;
 			}
 
-			// Build the used managed object
-			autoWireObjectInstance.buildManagedObject(state, usedAutoWire);
+			// Build the used managed object (and link to Office)
+			autoWireObjectInstance
+					.buildManagedObject(state, usedObjectAutoWire);
 		}
 	}
 
@@ -708,9 +714,14 @@ public class AutoWireOfficeFloorSource extends AbstractOfficeFloorSource
 		private final Map<AutoWire, OfficeFloorInputManagedObject> inputManagedObjects = new HashMap<AutoWire, OfficeFloorInputManagedObject>();
 
 		/**
-		 * {@link OfficeFloorTeam} instance for {@link AutoWire}.
+		 * {@link AutoWireTeamInstance} instance for {@link AutoWire}.
 		 */
 		private final Map<AutoWire, AutoWireTeamInstance> autoWireTeamInstances;
+
+		/**
+		 * Default {@link AutoWireTeamInstance}.
+		 */
+		private final AutoWireTeamInstance defaultAutoWireTeamInstance;
 
 		/**
 		 * Initiate.
@@ -725,16 +736,20 @@ public class AutoWireOfficeFloorSource extends AbstractOfficeFloorSource
 		 *            {@link AutoWireObjectInstance} by its {@link AutoWire}.
 		 * @param autoWireTeamInstances
 		 *            {@link AutoWireTeamInstance} by its {@link AutoWire}.
+		 * @param defaultAutoWireTeamInstance
+		 *            Default {@link AutoWireTeamInstance}.
 		 */
 		public AutoWireState(OfficeFloorDeployer deployer,
 				OfficeFloorSourceContext context, DeployedOffice office,
 				Map<AutoWire, AutoWireObjectInstance> autoWireObjectInstances,
-				Map<AutoWire, AutoWireTeamInstance> autoWireTeamInstances) {
+				Map<AutoWire, AutoWireTeamInstance> autoWireTeamInstances,
+				AutoWireTeamInstance defaultAutoWireTeamInstance) {
 			this.deployer = deployer;
 			this.context = context;
 			this.office = office;
 			this.autoWireObjectInstances = autoWireObjectInstances;
 			this.autoWireTeamInstances = autoWireTeamInstances;
+			this.defaultAutoWireTeamInstance = defaultAutoWireTeamInstance;
 		}
 
 		/**
@@ -824,6 +839,11 @@ public class AutoWireOfficeFloorSource extends AbstractOfficeFloorSource
 			if (appropriateAutoWire != null) {
 				teamInstance = this.autoWireTeamInstances
 						.get(appropriateAutoWire);
+			}
+
+			// Use Default Team if no auto-wire Team
+			if (teamInstance == null) {
+				teamInstance = this.defaultAutoWireTeamInstance;
 			}
 
 			// Return the team instance
@@ -1311,21 +1331,13 @@ public class AutoWireOfficeFloorSource extends AbstractOfficeFloorSource
 				String teamQualifier = team.teamAutoWire.getQualifier();
 				AutoWireTeamInstance teamInstance = state
 						.getAppropriateTeamInstance(teamQualifier, teamType);
-				if (teamInstance == null) {
-					// No appropriate team for auto-wiring
-					state.deployer.addIssue(
-							"No " + Team.class.getSimpleName()
-									+ " for auto-wiring "
-									+ ManagedObjectTeam.class.getSimpleName()
-									+ " " + teamName + " (qualifier="
-									+ teamQualifier + ", type=" + teamType
-									+ ")", AssetType.MANAGED_OBJECT,
-							this.managedObjectName);
-					continue; // can not link team
-				}
+
+				// Build the Team (if necessary)
+				OfficeFloorTeam officeFloorTeam = teamInstance.buildTeam(state,
+						null);
 
 				// Link managed object team to office floor team
-				state.deployer.link(moTeam, teamInstance.team);
+				state.deployer.link(moTeam, officeFloorTeam);
 			}
 
 			// Build wired in teams
@@ -1469,18 +1481,71 @@ public class AutoWireOfficeFloorSource extends AbstractOfficeFloorSource
 	private static class AutoWireTeamInstance {
 
 		/**
+		 * {@link AutoWireTeam}.
+		 */
+		private final AutoWireTeam autoWireTeam;
+
+		/**
+		 * Indicates if the {@link OfficeFloorTeam} has been built.
+		 */
+		private boolean isBuilt = false;
+
+		/**
 		 * {@link OfficeFloorTeam}.
 		 */
-		public final OfficeFloorTeam team;
+		private OfficeFloorTeam officeFloorTeam = null;
 
 		/**
 		 * Initiate.
 		 * 
 		 * @param team
-		 *            {@link OfficeFloorTeam}.
+		 *            {@link AutoWireTeam}.
 		 */
-		public AutoWireTeamInstance(OfficeFloorTeam team) {
-			this.team = team;
+		public AutoWireTeamInstance(AutoWireTeam autoWireTeam) {
+			this.autoWireTeam = autoWireTeam;
+		}
+
+		/**
+		 * Builds the {@link OfficeFloorTeam} for this
+		 * {@link AutoWireTeamInstance}.
+		 * 
+		 * @param state
+		 *            {@link AutoWireState}.
+		 * @param officeTeamAutoWire
+		 *            {@link AutoWire} to load this {@link AutoWireTeamInstance}
+		 *            as an {@link OfficeTeam}. May be <code>null</code> to not
+		 *            load the {@link OfficeTeam}.
+		 */
+		public OfficeFloorTeam buildTeam(AutoWireState state,
+				AutoWire officeTeamAutoWire) {
+
+			// Only build once
+			if (!this.isBuilt) {
+
+				// Only one attempt to build
+				this.isBuilt = true;
+
+				// Build the team
+				this.officeFloorTeam = state.deployer.addTeam(
+						this.autoWireTeam.getTeamName(),
+						this.autoWireTeam.getTeamSourceClassName());
+				for (Property property : this.autoWireTeam.getProperties()) {
+					this.officeFloorTeam.addProperty(property.getName(),
+							property.getValue());
+				}
+			}
+
+			// Load team to office if OfficeTeam auto-wire
+			if (officeTeamAutoWire != null) {
+				// Link Team to the Office
+				OfficeTeam officeTeam = state.office
+						.getDeployedOfficeTeam(officeTeamAutoWire
+								.getQualifiedType());
+				state.deployer.link(officeTeam, this.officeFloorTeam);
+			}
+
+			// Return the team
+			return this.officeFloorTeam;
 		}
 	}
 

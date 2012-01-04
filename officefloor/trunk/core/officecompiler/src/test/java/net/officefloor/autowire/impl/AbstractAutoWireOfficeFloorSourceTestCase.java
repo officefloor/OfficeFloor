@@ -62,7 +62,6 @@ import net.officefloor.compile.spi.officefloor.source.OfficeFloorSourceContext;
 import net.officefloor.compile.spi.section.ManagedObjectDependency;
 import net.officefloor.compile.spi.section.ManagedObjectFlow;
 import net.officefloor.frame.api.manage.OfficeFloor;
-import net.officefloor.frame.impl.spi.team.OnePersonTeamSource;
 import net.officefloor.frame.impl.spi.team.ProcessContextTeamSource;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.frame.spi.TestSource;
@@ -292,8 +291,8 @@ public abstract class AbstractAutoWireOfficeFloorSourceTestCase extends
 		OfficeFloorTeam officeFloorTeam = this
 				.createMock(OfficeFloorTeam.class);
 		this.recordReturn(this.deployer, this.deployer.addTeam(
-				nameAutoWire.getQualifiedType(),
-				OnePersonTeamSource.class.getName()), officeFloorTeam);
+				nameAutoWire.getQualifiedType(), teamSourceClass.getName()),
+				officeFloorTeam);
 		if (propertyNameValuePairs != null) {
 			for (int i = 0; i < propertyNameValuePairs.length; i += 2) {
 				String name = propertyNameValuePairs[i];
@@ -407,18 +406,18 @@ public abstract class AbstractAutoWireOfficeFloorSourceTestCase extends
 		final PropertyList propertyList = this.createMock(PropertyList.class);
 		final OfficeType officeType = this.createMock(OfficeType.class);
 
-		// Create the office team types
-		final OfficeTeamType[] officeTeams = new OfficeTeamType[this.officeTeamTypes
-				.size()];
-		for (int i = 0; i < officeTeams.length; i++) {
-			officeTeams[i] = this.createMock(OfficeTeamType.class);
-		}
-
 		// Create the office input types
 		final OfficeInputType[] officeInputs = new OfficeInputType[this.officeInputTypes
 				.size()];
 		for (int i = 0; i < officeInputs.length; i++) {
 			officeInputs[i] = this.createMock(OfficeInputType.class);
+		}
+
+		// Create the office team types
+		final OfficeTeamType[] officeTeams = new OfficeTeamType[this.officeTeamTypes
+				.size()];
+		for (int i = 0; i < officeTeams.length; i++) {
+			officeTeams[i] = this.createMock(OfficeTeamType.class);
 		}
 
 		// Add the additional object auto-wiring
@@ -449,16 +448,6 @@ public abstract class AbstractAutoWireOfficeFloorSourceTestCase extends
 					}
 				});
 
-		// Record the office team types
-		this.recordReturn(officeType, officeType.getOfficeTeamTypes(),
-				officeTeams);
-		for (int i = 0; i < officeTeams.length; i++) {
-			OfficeTeamType officeTeam = officeTeams[i];
-			AutoWire officeTeamAutoWire = this.officeTeamTypes.get(i);
-			this.recordReturn(officeTeam, officeTeam.getOfficeTeamName(),
-					officeTeamAutoWire.getQualifiedType());
-		}
-
 		// Record the office input types
 		this.recordReturn(officeType, officeType.getOfficeInputTypes(),
 				officeInputs);
@@ -470,6 +459,16 @@ public abstract class AbstractAutoWireOfficeFloorSourceTestCase extends
 			this.recordReturn(officeInput,
 					officeInput.getOfficeSectionInputName(),
 					handledInput.getType());
+		}
+
+		// Record the office team types
+		this.recordReturn(officeType, officeType.getOfficeTeamTypes(),
+				officeTeams);
+		for (int i = 0; i < officeTeams.length; i++) {
+			OfficeTeamType officeTeam = officeTeams[i];
+			AutoWire officeTeamAutoWire = this.officeTeamTypes.get(i);
+			this.recordReturn(officeTeam, officeTeam.getOfficeTeamName(),
+					officeTeamAutoWire.getQualifiedType());
 		}
 
 		// Record the office managed object types

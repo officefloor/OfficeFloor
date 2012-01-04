@@ -17,8 +17,6 @@
  */
 package net.officefloor.autowire.impl;
 
-import org.junit.Ignore;
-
 import net.officefloor.autowire.AutoWire;
 import net.officefloor.compile.spi.officefloor.OfficeFloorManagedObject;
 
@@ -27,7 +25,6 @@ import net.officefloor.compile.spi.officefloor.OfficeFloorManagedObject;
  * 
  * @author Daniel Sagenschneider
  */
-@Ignore("TODO only load used Teams")
 public class AutoWireOfficeFloorSource_RawObject_Test extends
 		AbstractAutoWireOfficeFloorSourceTestCase {
 

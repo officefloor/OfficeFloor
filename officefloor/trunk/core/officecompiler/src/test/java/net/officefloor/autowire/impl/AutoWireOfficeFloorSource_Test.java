@@ -18,8 +18,6 @@
 
 package net.officefloor.autowire.impl;
 
-import org.junit.Ignore;
-
 import net.officefloor.autowire.AutoWire;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
@@ -30,7 +28,6 @@ import net.officefloor.plugin.managedobject.clazz.ClassManagedObjectSource;
  * 
  * @author Daniel Sagenschneider
  */
-@Ignore("TODO only load used Teams")
 public class AutoWireOfficeFloorSource_Test extends
 		AbstractAutoWireOfficeFloorSourceTestCase {
 

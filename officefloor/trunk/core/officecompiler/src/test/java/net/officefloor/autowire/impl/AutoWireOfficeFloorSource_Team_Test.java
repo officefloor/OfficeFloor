@@ -21,8 +21,6 @@ import java.sql.Connection;
 
 import javax.sql.DataSource;
 
-import org.junit.Ignore;
-
 import net.officefloor.autowire.AutoWire;
 import net.officefloor.autowire.AutoWireTeam;
 import net.officefloor.compile.spi.office.OfficeTeam;
@@ -37,7 +35,6 @@ import net.officefloor.frame.spi.team.Team;
  * 
  * @author Daniel Sagenschneider
  */
-@Ignore("TODO only load used Teams")
 public class AutoWireOfficeFloorSource_Team_Test extends
 		AbstractAutoWireOfficeFloorSourceTestCase {
 
@@ -85,9 +82,8 @@ public class AutoWireOfficeFloorSource_Team_Test extends
 		// Record
 		this.registerOfficeTeam(DEFAULT_TEAM);
 		this.recordOffice();
-		OfficeFloorTeam officeFloorTeam = this.recordTeam(
-				OnePersonTeamSource.class, DEFAULT_TEAM, "name", "value");
-		officeFloorTeam.addProperty("name", "value");
+		this.recordTeam(OnePersonTeamSource.class, DEFAULT_TEAM, "name",
+				"value");
 		this.recordLinkTeamToOffice(DEFAULT_TEAM, DEFAULT_TEAM);
 
 		// Test
