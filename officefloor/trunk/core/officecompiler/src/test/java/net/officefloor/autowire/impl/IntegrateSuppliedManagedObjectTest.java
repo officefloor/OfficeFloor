@@ -30,6 +30,8 @@ import net.officefloor.frame.test.OfficeFrameTestCase;
 @Ignore("TODO implement")
 public class IntegrateSuppliedManagedObjectTest extends OfficeFrameTestCase {
 
+	// TODO ensure includes Governance (to test extensions)
+	
 	/**
 	 * Ensure can use {@link SuppliedManagedObject}.
 	 */

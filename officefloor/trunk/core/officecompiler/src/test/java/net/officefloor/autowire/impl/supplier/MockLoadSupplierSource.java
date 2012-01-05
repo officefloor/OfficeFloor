@@ -19,6 +19,8 @@ package net.officefloor.autowire.impl.supplier;
 
 import java.sql.Connection;
 
+import javax.transaction.xa.XAResource;
+
 import junit.framework.TestCase;
 import net.officefloor.autowire.AutoWire;
 import net.officefloor.autowire.ManagedObjectSourceWirer;
@@ -118,6 +120,14 @@ public class MockLoadSupplierSource extends AbstractSupplierSource {
 		TestCase.assertEquals("Incorrect team auto-wire", new AutoWire(
 				"SPECIFIC", Integer.class.getName()), team.getTeamAutoWire());
 
+		// Validate extension interfaces
+		Class<?>[] extensionInterfaces = complexMo.getExtensionInterfaces();
+		TestCase.assertEquals("Incorrect number of extension interfaces", 1,
+				extensionInterfaces.length);
+		Class<?> extensionInterface = extensionInterfaces[0];
+		TestCase.assertEquals("Incorrect extension interface",
+				XAResource.class, extensionInterface);
+
 		// Validate the simple managed object
 		SuppliedManagedObjectType simpleMo = moTypes[1];
 		AutoWire[] simpleAutoWiring = simpleMo.getAutoWiring();
@@ -134,6 +144,8 @@ public class MockLoadSupplierSource extends AbstractSupplierSource {
 				simpleMo.getFlowTypes().length);
 		TestCase.assertEquals("Should be no teams", 0,
 				simpleMo.getTeamTypes().length);
+		TestCase.assertEquals("Should be no extension interfaces", 0,
+				simpleMo.getExtensionInterfaces().length);
 	}
 
 	/*
@@ -161,6 +173,7 @@ public class MockLoadSupplierSource extends AbstractSupplierSource {
 		complex.addFlow("flow", Integer.class);
 		complex.addTeam("team");
 		complex.addTeam("provided");
+		complex.addExtensionInterface(XAResource.class);
 		context.addManagedObject(complex, new ManagedObjectSourceWirer() {
 			@Override
 			public void wire(ManagedObjectSourceWirerContext context) {

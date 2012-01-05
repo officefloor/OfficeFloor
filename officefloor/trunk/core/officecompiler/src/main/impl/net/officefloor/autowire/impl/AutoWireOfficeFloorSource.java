@@ -642,7 +642,7 @@ public class AutoWireOfficeFloorSource extends AbstractOfficeFloorSource
 					unhandledInputObjectInstances.add(objectInstance);
 				}
 			}
-			
+
 			// Only load the first registered for auto-wire (if not input)
 			for (AutoWire autoWire : objectInstance.getAutoWiring()) {
 				if (!(autoWireObjectInstances.containsKey(autoWire))) {
@@ -1094,7 +1094,10 @@ public class AutoWireOfficeFloorSource extends AbstractOfficeFloorSource
 		public Class<?>[] getExtensionInterfaces(OfficeFloorDeployer deployer,
 				OfficeFloorSourceContext context) {
 
-			// TODO obtain extension interfaces from supplied managed object
+			// Obtain from supplied managed object type
+			if (this.suppliedManagedObjectType != null) {
+				this.suppliedManagedObjectType.getExtensionInterfaces();
+			}
 
 			// Obtain the managed object type
 			this.loadManagedObjectType(deployer, context);

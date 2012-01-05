@@ -57,6 +57,11 @@ public class SuppliedManagedObjectTypeImpl implements SuppliedManagedObjectType 
 	private final SuppliedManagedObjectTeamType[] teamTypes;
 
 	/**
+	 * Extension interfaces.
+	 */
+	private final Class<?>[] extensionInterfaces;
+
+	/**
 	 * Initiate.
 	 * 
 	 * @param autoWiring
@@ -69,17 +74,21 @@ public class SuppliedManagedObjectTypeImpl implements SuppliedManagedObjectType 
 	 *            {@link SuppliedManagedObjectFlowType} instances.
 	 * @param teamTypes
 	 *            {@link SuppliedManagedObjectTeamType} instances.
+	 * @param extensionInterfaces
+	 *            Extension interfaces.
 	 */
 	public SuppliedManagedObjectTypeImpl(AutoWire[] autoWiring,
 			boolean isInputManagedObject,
 			SuppliedManagedObjectDependencyType[] dependencyTypes,
 			SuppliedManagedObjectFlowType[] flowTypes,
-			SuppliedManagedObjectTeamType[] teamTypes) {
+			SuppliedManagedObjectTeamType[] teamTypes,
+			Class<?>[] extensionInterfaces) {
 		this.autoWiring = autoWiring;
 		this.isInputManagedObject = isInputManagedObject;
 		this.dependencyTypes = dependencyTypes;
 		this.flowTypes = flowTypes;
 		this.teamTypes = teamTypes;
+		this.extensionInterfaces = extensionInterfaces;
 	}
 
 	/*
@@ -109,6 +118,11 @@ public class SuppliedManagedObjectTypeImpl implements SuppliedManagedObjectType 
 	@Override
 	public SuppliedManagedObjectTeamType[] getTeamTypes() {
 		return this.teamTypes;
+	}
+
+	@Override
+	public Class<?>[] getExtensionInterfaces() {
+		return this.extensionInterfaces;
 	}
 
 }

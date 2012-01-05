@@ -360,9 +360,10 @@ public class SupplierSourceContextImpl extends SourceContextImpl implements
 			SuppliedManagedObjectTeamType[] teamTypes = requiredTeams
 					.toArray(new SuppliedManagedObjectTeamType[requiredTeams
 							.size()]);
+			Class<?>[] extensionInterfaces = moType.getExtensionInterfaces();
 			managedObjects.add(new SuppliedManagedObjectTypeImpl(
 					object.autoWiring, isInput, dependencyTypes, flowTypes,
-					teamTypes));
+					teamTypes, extensionInterfaces));
 
 			// Create the supplied managed object
 			SuppliedManagedObjectTeam[] teams = suppliedTeams
