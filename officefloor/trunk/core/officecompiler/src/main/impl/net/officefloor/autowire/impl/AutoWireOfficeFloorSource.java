@@ -197,16 +197,9 @@ public class AutoWireOfficeFloorSource extends AbstractOfficeFloorSource
 	private final AutoWireOfficeSource officeSource;
 
 	/**
-	 * {@link AutoWireObjectInstance} instances for the {@link AutoWireObject}
-	 * instances.
+	 * {@link AutoWireObjectSource} instances.
 	 */
-	private final List<AutoWireObjectInstance> objectInstances = new LinkedList<AutoWireObjectInstance>();
-
-	/**
-	 * {@link AutoWireSupplier} instances.
-	 */
-	// TODO create single list with objectInstances to allow priority loading
-	private final List<AutoWireSupplierInstance> supplierInstances = new LinkedList<AutoWireSupplierInstance>();
+	private final List<AutoWireObjectSource> objectSources = new LinkedList<AutoWireObjectSource>();
 
 	/**
 	 * Default {@link AutoWireTeam}.
@@ -312,7 +305,7 @@ public class AutoWireOfficeFloorSource extends AbstractOfficeFloorSource
 		PropertyList properties = this.compiler.createPropertyList();
 
 		// Register the raw object
-		this.objectInstances.add(new AutoWireObjectInstance(
+		this.objectSources.add(new AutoWireObjectInstance(
 				new AutoWireObjectImpl(this.compiler, null, properties, null,
 						autoWiring), object, this.compiler));
 	}
@@ -335,7 +328,7 @@ public class AutoWireOfficeFloorSource extends AbstractOfficeFloorSource
 				managedObjectSourceClassName, properties, wirer, autoWiring);
 
 		// Register the managed object
-		this.objectInstances.add(new AutoWireObjectInstance(object, null,
+		this.objectSources.add(new AutoWireObjectInstance(object, null,
 				this.compiler));
 
 		// Return the auto wire object
@@ -353,7 +346,7 @@ public class AutoWireOfficeFloorSource extends AbstractOfficeFloorSource
 				supplierSourceClassName, properties);
 
 		// Register the supplier
-		this.supplierInstances.add(new AutoWireSupplierInstance(supplier));
+		this.objectSources.add(new AutoWireSupplierInstance(supplier));
 
 		// Return the auto-wire supplier
 		return supplier;
@@ -363,10 +356,14 @@ public class AutoWireOfficeFloorSource extends AbstractOfficeFloorSource
 	public boolean isObjectAvailable(AutoWire autoWire) {
 
 		// Determine if the auto wire is available
-		for (AutoWireObjectInstance objectInstance : this.objectInstances) {
-			for (AutoWire availableAutoWire : objectInstance.getAutoWiring()) {
-				if (autoWire.equals(availableAutoWire)) {
-					return true; // auto wire is available
+		for (AutoWireObjectSource objectSource : this.objectSources) {
+			if (objectSource instanceof AutoWireObjectInstance) {
+				AutoWireObjectInstance objectInstance = (AutoWireObjectInstance) objectSource;
+				for (AutoWire availableAutoWire : objectInstance
+						.getAutoWiring()) {
+					if (autoWire.equals(availableAutoWire)) {
+						return true; // auto wire is available
+					}
 				}
 			}
 		}
@@ -460,20 +457,17 @@ public class AutoWireOfficeFloorSource extends AbstractOfficeFloorSource
 		// Allow initialising the OfficeFloor
 		this.initOfficeFloor(deployer, context);
 
-		// Load the supplied objects
-		List<AutoWireObjectInstance> allObjectInstances = new LinkedList<AutoWireObjectInstance>();
-		for (AutoWireSupplierInstance supplierInstance : this.supplierInstances) {
-			AutoWireObjectInstance[] suppliedObjects = supplierInstance
-					.loadSuppliedObjectInstances(context, this.compiler);
-			allObjectInstances.addAll(Arrays.asList(suppliedObjects));
+		// Source the objects
+		List<AutoWireObjectInstance> objectInstances = new LinkedList<AutoWireObjectInstance>();
+		for (AutoWireObjectSource objectSource : this.objectSources) {
+			AutoWireObjectInstance[] sourcedObjectInstances = objectSource
+					.sourceObjectInstances(context, this.compiler);
+			objectInstances.addAll(Arrays.asList(sourcedObjectInstances));
 		}
-
-		// Include the auto-wire object instances
-		allObjectInstances.addAll(this.objectInstances);
 
 		// Load available office objects
 		Set<AutoWire> availableAutoWires = new HashSet<AutoWire>();
-		for (AutoWireObjectInstance objectInstance : allObjectInstances) {
+		for (AutoWireObjectInstance objectInstance : objectInstances) {
 
 			// Obtain the available auto-wiring
 			AutoWire[] autoWiring = objectInstance.getAutoWiring();
@@ -596,12 +590,12 @@ public class AutoWireOfficeFloorSource extends AbstractOfficeFloorSource
 		List<AutoWireObjectInstance> inputObjectInstances = new LinkedList<AutoWireObjectInstance>();
 		List<AutoWireObjectInstance> unhandledInputObjectInstances = new LinkedList<AutoWireObjectInstance>();
 		Map<AutoWire, Integer> nameIndex = new HashMap<AutoWire, Integer>();
-		for (AutoWireObjectInstance objectInstance : allObjectInstances) {
+		for (AutoWireObjectInstance objectInstance : objectInstances) {
 
 			// Initialise the object
 			objectInstance.initManagedObject(deployer, context, nameIndex);
 
-			// Register if input object instance
+			// Handle input to allow overriding non-input managed object
 			if (objectInstance.isInput) {
 
 				// Ensure only one auto-wire for input managed object
@@ -632,14 +626,24 @@ public class AutoWireOfficeFloorSource extends AbstractOfficeFloorSource
 				if (isInclude) {
 					// Include Input Managed Object
 					inputObjectInstances.add(objectInstance);
+
+					// Override object instance if not input managed object
+					AutoWire inputAutoWire = objectInstance.getAutoWiring()[0];
+					AutoWireObjectInstance mappedObjectInstance = autoWireObjectInstances
+							.get(inputAutoWire);
+					if ((mappedObjectInstance != null)
+							&& (mappedObjectInstance.isInput)) {
+						continue; // already input managed object mapped
+					}
+					autoWireObjectInstances.put(inputAutoWire, objectInstance);
+
 				} else {
 					// Not handled, so do not include
 					unhandledInputObjectInstances.add(objectInstance);
-					continue; // do not include as primary auto-wire
 				}
 			}
-
-			// Only load the first registered for auto-wire
+			
+			// Only load the first registered for auto-wire (if not input)
 			for (AutoWire autoWire : objectInstance.getAutoWiring()) {
 				if (!(autoWireObjectInstances.containsKey(autoWire))) {
 					autoWireObjectInstances.put(autoWire, objectInstance);
@@ -675,9 +679,17 @@ public class AutoWireOfficeFloorSource extends AbstractOfficeFloorSource
 		}
 
 		// Build the input auto-wire objects
+		Set<AutoWire> usedInputAutoWiring = new HashSet<AutoWire>();
 		for (AutoWireObjectInstance inputObjectInstance : inputObjectInstances) {
-			inputObjectInstance.buildInputManagedObject(state,
-					inputObjectInstance.getAutoWiring()[0]);
+
+			// Above should confirm the one auto-wire for input managed object
+			AutoWire inputAutoWire = inputObjectInstance.getAutoWiring()[0];
+
+			// Build the input managed object
+			inputObjectInstance.buildInputManagedObject(state, inputAutoWire);
+
+			// Register the input managed object as used
+			usedInputAutoWiring.add(inputAutoWire);
 		}
 
 		// Link the input auto-wire objects
@@ -701,8 +713,23 @@ public class AutoWireOfficeFloorSource extends AbstractOfficeFloorSource
 				continue; // must have auto-wire object to load managed object
 			}
 
-			// Do not build if input (as should already be built above)
+			// Do not build if input
 			if (autoWireObjectInstance.isInput) {
+				continue; // already loaded above
+
+			} else if (usedInputAutoWiring.contains(usedObjectAutoWire)) {
+				// Auto-wire already loaded as input managed object
+				deployer.addIssue(
+						"Auto-wire "
+								+ usedObjectAutoWire.getQualifiedType()
+								+ " has both "
+								+ OfficeFloorInputManagedObject.class
+										.getSimpleName()
+								+ " and "
+								+ OfficeFloorManagedObject.class
+										.getSimpleName() + " mapped to it",
+						AssetType.MANAGED_OBJECT,
+						autoWireObjectInstance.managedObjectName);
 				continue;
 			}
 
@@ -881,10 +908,28 @@ public class AutoWireOfficeFloorSource extends AbstractOfficeFloorSource
 	}
 
 	/**
+	 * Source to obtain {@link AutoWireObjectInstance} instances.
+	 */
+	private static interface AutoWireObjectSource {
+
+		/**
+		 * Sources the {@link AutoWireObjectInstance}.
+		 * 
+		 * @param context
+		 *            {@link OfficeFloorSourceContext}.
+		 * @param compiler
+		 *            {@link OfficeFloorCompiler}.
+		 * @return Sourced {@link AutoWireObjectInstance} instances.
+		 */
+		public AutoWireObjectInstance[] sourceObjectInstances(
+				OfficeFloorSourceContext context, OfficeFloorCompiler compiler);
+	}
+
+	/**
 	 * Instance of an {@link AutoWire} object.
 	 */
 	private static class AutoWireObjectInstance implements
-			ManagedObjectSourceWirerContext {
+			AutoWireObjectSource, ManagedObjectSourceWirerContext {
 
 		/**
 		 * {@link AutoWireObject}.
@@ -1005,6 +1050,13 @@ public class AutoWireOfficeFloorSource extends AbstractOfficeFloorSource
 			this.supplierInstance = supplierInstance;
 			this.rawObject = null;
 			this.compiler = compiler;
+		}
+
+		@Override
+		public AutoWireObjectInstance[] sourceObjectInstances(
+				OfficeFloorSourceContext context, OfficeFloorCompiler compiler) {
+			// Only this to source
+			return new AutoWireObjectInstance[] { this };
 		}
 
 		/**
@@ -1648,7 +1700,8 @@ public class AutoWireOfficeFloorSource extends AbstractOfficeFloorSource
 	/**
 	 * Instance of an {@link AutoWireSupplier}.
 	 */
-	private static class AutoWireSupplierInstance {
+	private static class AutoWireSupplierInstance implements
+			AutoWireObjectSource {
 
 		/**
 		 * {@link AutoWireSupplier}.
@@ -1665,19 +1718,9 @@ public class AutoWireOfficeFloorSource extends AbstractOfficeFloorSource
 			this.autoWireSupplier = autoWireSupplier;
 		}
 
-		/**
-		 * Obtains the supplied {@link AutoWireObjectInstance} instances from
-		 * the {@link AutoWireSupplier}.
-		 * 
-		 * @param context
-		 *            {@link OfficeFloorSourceContext}.
-		 * @param compiler
-		 *            {@link OfficeFloorCompiler}.
-		 * @return Supplied {@link AutoWireObjectInstance} instances.
-		 */
-		public AutoWireObjectInstance[] loadSuppliedObjectInstances(
+		@Override
+		public AutoWireObjectInstance[] sourceObjectInstances(
 				OfficeFloorSourceContext context, OfficeFloorCompiler compiler) {
-
 			// Load the supplier type
 			SupplierType supplier = context.loadSupplierType(
 					this.autoWireSupplier.getSupplierSourceClassName(),

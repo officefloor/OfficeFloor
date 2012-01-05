@@ -29,10 +29,14 @@ import net.officefloor.autowire.AutoWireApplication;
 import net.officefloor.autowire.AutoWireObject;
 import net.officefloor.autowire.AutoWireSupplier;
 import net.officefloor.autowire.AutoWireTeam;
+import net.officefloor.autowire.ManagedObjectSourceWirer;
+import net.officefloor.autowire.ManagedObjectSourceWirerContext;
+import net.officefloor.autowire.impl.supplier.MockTypeManagedObjectSource;
 import net.officefloor.autowire.spi.supplier.source.SupplierSource;
 import net.officefloor.autowire.spi.supplier.source.SupplierSourceContext;
 import net.officefloor.autowire.spi.supplier.source.impl.AbstractSupplierSource;
 import net.officefloor.autowire.supplier.SuppliedManagedObject;
+import net.officefloor.autowire.supplier.SuppliedManagedObjectType;
 import net.officefloor.autowire.supplier.SupplierType;
 import net.officefloor.compile.integrate.managedobject.CompileOfficeFloorManagedObjectTest.InputManagedObject;
 import net.officefloor.compile.managedobject.ManagedObjectDependencyType;
@@ -73,6 +77,7 @@ import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.spi.team.source.TeamSource;
 import net.officefloor.frame.test.OfficeFrameTestCase;
+import net.officefloor.plugin.managedobject.clazz.ClassManagedObjectSource;
 
 import org.easymock.AbstractMatcher;
 
@@ -254,6 +259,297 @@ public abstract class AbstractAutoWireOfficeFloorSourceTestCase extends
 
 			// Initialise the supplier
 			init.supply(context);
+		}
+	}
+
+	/**
+	 * Type of generic sourcing for the object.
+	 */
+	protected static enum SourceObjectType {
+		RawObject, ManagedObject, InputManagedObject, SupplidManagedObject
+	}
+
+	/**
+	 * Generic method to add a source object.
+	 * 
+	 * @param clazz
+	 *            {@link Class} of the object.
+	 * @param sourceType
+	 *            {@link SourceObjectType}.
+	 * @param typeQualifier
+	 *            Type qualifier for the object.
+	 * @param dependencyName
+	 *            Name of dependency. May be <code>null</code> for no
+	 *            dependency. Required for recording
+	 *            {@link SuppliedManagedObjectType}.
+	 * @param dependencyType
+	 *            Type of dependency.
+	 * @param dependencyQualifier
+	 *            Qualifier for the required dependency.
+	 * @return Raw Object, {@link AutoWireObject} or {@link OfficeFloorSupplier}
+	 *         identifier based on {@link SourceObjectType}.
+	 */
+	protected Object addObject(Class<?> clazz, SourceObjectType sourceType,
+			String typeQualifier, String dependencyName,
+			Class<?> dependencyType, String dependencyQualifier) {
+
+		final AutoWire autoWire = new AutoWire(typeQualifier, clazz.getName());
+
+		// Load based on source type
+		switch (sourceType) {
+		case RawObject:
+			// Add and return the raw object
+			Object rawObject = this.createMock(clazz);
+			this.source.addObject(rawObject, autoWire);
+			return rawObject;
+
+		case ManagedObject:
+			// Add and return the managed object
+			AutoWireObject managedObject = this.source.addManagedObject(
+					ClassManagedObjectSource.class.getName(), null, autoWire);
+			managedObject.addProperty(
+					ClassManagedObjectSource.CLASS_NAME_PROPERTY_NAME,
+					clazz.getName());
+			return managedObject;
+
+		case InputManagedObject:
+			// Add and return the input managed object
+			ManagedObjectSourceWirer inputManagedObjectWirer = new ManagedObjectSourceWirer() {
+				@Override
+				public void wire(ManagedObjectSourceWirerContext context) {
+					context.mapFlow("flow", "SECTION", "INPUT");
+				}
+			};
+			AutoWireObject inputManagedObject = this.source.addManagedObject(
+					ClassManagedObjectSource.class.getName(),
+					inputManagedObjectWirer, autoWire);
+			inputManagedObject.addProperty(
+					ClassManagedObjectSource.CLASS_NAME_PROPERTY_NAME,
+					clazz.getName());
+			return inputManagedObject;
+
+		case SupplidManagedObject:
+			// Add and return the supplied managed object
+			final MockTypeManagedObjectSource supplied = new MockTypeManagedObjectSource(
+					clazz);
+
+			// Add dependency (if required)
+			if (dependencyName != null) {
+				supplied.addDependency(dependencyName, dependencyType,
+						dependencyQualifier);
+			}
+
+			int identifier = this.addSupplierAndRecordType(new SupplierInit() {
+				@Override
+				public void supply(SupplierSourceContext context)
+						throws Exception {
+					context.addManagedObject(supplied, null, autoWire);
+				}
+			});
+			return Integer.valueOf(identifier);
+
+		default:
+			fail("Unknown source type");
+			return null;
+		}
+	}
+
+	/**
+	 * Generic method to record the type for the object.
+	 * 
+	 * @param object
+	 *            Raw Object, {@link AutoWireObject} or <code>null</code>.
+	 * @param sourceType
+	 *            {@link SourceObjectType}.
+	 */
+	protected void recordObjectType(Object object, SourceObjectType sourceType) {
+		switch (sourceType) {
+		case RawObject:
+			// Record raw object type
+			this.recordRawObjectType(object);
+			break;
+
+		case ManagedObject:
+			// Record managed object type
+			AutoWireObject managedObject = (AutoWireObject) object;
+			this.recordManagedObjectType(managedObject);
+			break;
+
+		case InputManagedObject:
+			// Record input managed object type
+			AutoWireObject inputManagedObject = (AutoWireObject) object;
+			this.registerManagedObjectFlowType(inputManagedObject, "flow");
+			this.recordManagedObjectType(inputManagedObject);
+			break;
+
+		case SupplidManagedObject:
+			// Type already recorded on adding supplier
+			break;
+
+		default:
+			fail("Unknown source type");
+		}
+	}
+
+	/**
+	 * Generic method to record adding the object source.
+	 * 
+	 * @param object
+	 *            Raw Object, {@link AutoWireObject} or <code>null</code>.
+	 * @param objectType
+	 *            Type of object.
+	 * @param typeQualifier
+	 *            Qualifier of object.
+	 * @param sourceType
+	 *            {@link SourceObjectType}.
+	 * @return {@link OfficeFloorManagedObjectSource}.
+	 */
+	protected OfficeFloorManagedObjectSource recordObjectSource(Object object,
+			Class<?> objectType, String typeQualifier,
+			SourceObjectType sourceType) {
+
+		final AutoWire autoWire = new AutoWire(typeQualifier,
+				objectType.getName());
+
+		// Record obtaining the managed object source
+		OfficeFloorManagedObjectSource mos = null;
+		switch (sourceType) {
+		case RawObject:
+			// Recorded in creating the Raw Object
+			break;
+
+		case ManagedObject:
+		case InputManagedObject:
+			// Record managed object source
+			mos = this.recordManagedObjectSource(autoWire,
+					ClassManagedObjectSource.class, 0, 0,
+					ClassManagedObjectSource.CLASS_NAME_PROPERTY_NAME,
+					objectType.getName());
+			break;
+
+		case SupplidManagedObject:
+			// Record supplied managed object source
+			Integer identifier = (Integer) object;
+			mos = this.recordSuppliedManagedObjectSource(identifier.intValue(),
+					autoWire);
+			break;
+
+		default:
+			fail("Unknown source type");
+		}
+
+		// Return the managed object source
+		return mos;
+	}
+
+	/**
+	 * Generic method to record adding the object.
+	 * 
+	 * @param object
+	 *            Raw Object, {@link AutoWireObject} or <code>null</code>.
+	 * @param objectType
+	 *            Type of object.
+	 * @param typeQualifier
+	 *            Qualifier of object.
+	 * @param sourceType
+	 *            {@link SourceObjectType}.
+	 * @param mos
+	 *            {@link OfficeFloorManagedObjectSource}.
+	 * @param dependencyName
+	 *            Name of dependency. May be <code>null</code> for no
+	 *            dependency.
+	 * @param dependencyType
+	 *            Type of dependency.
+	 * @param dependencyQualifier
+	 *            Qualifier for the required dependency.
+	 */
+	protected OfficeFloorManagedObject recordObject(Object object,
+			Class<?> objectType, String typeQualifier,
+			SourceObjectType sourceType, OfficeFloorManagedObjectSource mos,
+			String dependencyName, Class<?> dependencyType,
+			String dependencyQualifier) {
+
+		// Create the listing for the dependency
+		Object[] dependencyNameAutoWirePairing;
+		if (dependencyName == null) {
+			// No dependencies
+			dependencyNameAutoWirePairing = new Object[0];
+		} else {
+			// Provide dependency
+			dependencyNameAutoWirePairing = new Object[] { dependencyName,
+					new AutoWire(dependencyQualifier, dependencyType.getName()) };
+		}
+
+		final AutoWire autoWire = new AutoWire(typeQualifier,
+				objectType.getName());
+
+		// Record source object
+		OfficeFloorManagedObject mo = null;
+		switch (sourceType) {
+		case RawObject:
+			// Record adding raw object
+			mo = this.recordRawObject(object, autoWire);
+			assertNull("Raw object can not have dependencies", dependencyName);
+			break;
+
+		case ManagedObject:
+			// Record adding managed object
+			mo = this.recordManagedObject(mos, autoWire);
+			AutoWireObject autoWireManagedObject = (AutoWireObject) object;
+			this.recordManagedObjectDependencies(autoWireManagedObject,
+					dependencyNameAutoWirePairing);
+			break;
+
+		case InputManagedObject:
+			// Record adding input managed object
+			this.recordInputManagedObject(mos, autoWire);
+			AutoWireObject autoWireInputManagedObject = (AutoWireObject) object;
+			this.recordManagedObjectDependencies(autoWireInputManagedObject,
+					dependencyNameAutoWirePairing);
+			break;
+
+		case SupplidManagedObject:
+			// Record adding supplied managed object (dependencies from type)
+			mo = this.recordManagedObject(mos, autoWire);
+			break;
+
+		default:
+			fail("Unknown source type");
+		}
+
+		// Return the managed object
+		return mo;
+	}
+
+	/**
+	 * Generic method to record a flow.
+	 * 
+	 * @param mos
+	 *            {@link OfficeFloorManagedObjectSource}.
+	 * @param sourceType
+	 *            {@link SourceObjectType}.
+	 */
+	protected void recordObjectFlow(OfficeFloorManagedObjectSource mos,
+			SourceObjectType sourceType) {
+
+		// Record source object
+		switch (sourceType) {
+		case RawObject:
+		case ManagedObject:
+			// No flows
+			break;
+
+		case InputManagedObject:
+			// Record flow for input managed object
+			this.recordManagedObjectFlow(mos, "flow", "SECTION", "INPUT");
+			break;
+
+		case SupplidManagedObject:
+			// No flows
+			break;
+
+		default:
+			fail("Unknown source type");
 		}
 	}
 
