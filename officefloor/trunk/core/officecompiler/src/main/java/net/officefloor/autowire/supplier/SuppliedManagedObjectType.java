@@ -81,4 +81,11 @@ public interface SuppliedManagedObjectType {
 	 */
 	SuppliedManagedObjectTeamType[] getTeamTypes();
 
+	/**
+	 * Obtains the extension interfaces.
+	 * 
+	 * @return Extension interfaces.
+	 */
+	Class<?>[] getExtensionInterfaces();
+
 }

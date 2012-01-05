@@ -21,7 +21,6 @@ import java.util.LinkedList;
 import java.util.List;
 
 import junit.framework.TestCase;
-
 import net.officefloor.autowire.AutoWire;
 import net.officefloor.autowire.ManagedObjectSourceWirer;
 import net.officefloor.autowire.spi.supplier.source.SupplierSourceContext;
@@ -34,6 +33,7 @@ import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.spi.TestSource;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
+import net.officefloor.frame.spi.managedobject.extension.ExtensionInterfaceFactory;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceContext;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectTaskBuilder;
@@ -48,7 +48,8 @@ import net.officefloor.frame.spi.managedobject.source.impl.AbstractManagedObject
 @TestSource
 public class MockTypeManagedObjectSource extends
 		AbstractManagedObjectSource<Indexed, Indexed> implements
-		WorkFactory<Work>, TaskFactory<Work, Indexed, Indexed> {
+		WorkFactory<Work>, TaskFactory<Work, Indexed, Indexed>,
+		ExtensionInterfaceFactory<Object> {
 
 	/**
 	 * Object type.
@@ -69,6 +70,11 @@ public class MockTypeManagedObjectSource extends
 	 * {@link ManagedObjectTeam} instances.
 	 */
 	private final List<String> teams = new LinkedList<String>();
+
+	/**
+	 * Extension interfaces.
+	 */
+	private final List<Class<?>> extensionInterfaces = new LinkedList<Class<?>>();
 
 	/**
 	 * Initiate.
@@ -140,6 +146,16 @@ public class MockTypeManagedObjectSource extends
 		this.teams.add(name);
 	}
 
+	/**
+	 * Adds an extension interface.
+	 * 
+	 * @param extensionInterface
+	 *            Extension interface.
+	 */
+	public void addExtensionInterface(Class<?> extensionInterface) {
+		this.extensionInterfaces.add(extensionInterface);
+	}
+
 	/*
 	 * ================== ManagedObjectSource ===================
 	 */
@@ -150,6 +166,7 @@ public class MockTypeManagedObjectSource extends
 	}
 
 	@Override
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	protected void loadMetaData(MetaDataContext<Indexed, Indexed> context)
 			throws Exception {
 
@@ -182,6 +199,11 @@ public class MockTypeManagedObjectSource extends
 					"TASK-" + teamName, this);
 			task.setTeam(teamName);
 		}
+
+		// Configure the extension interfaces
+		for (Class extensionInterface : this.extensionInterfaces) {
+			context.addManagedObjectExtensionInterface(extensionInterface, this);
+		}
 	}
 
 	@Override
@@ -209,7 +231,17 @@ public class MockTypeManagedObjectSource extends
 		TestCase.fail("Should not require creating a task for type testing");
 		return null;
 	}
-	
+
+	/*
+	 * ===================== ExtensionInterfaceFactory ======================
+	 */
+
+	@Override
+	public Object createExtensionInterface(ManagedObject managedObject) {
+		TestCase.fail("Should not require creating an extension for type testing");
+		return null;
+	}
+
 	/**
 	 * {@link MockTypeManagedObjectSource} dependency.
 	 */
