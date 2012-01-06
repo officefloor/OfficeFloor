@@ -994,6 +994,23 @@ public class ProcessManager implements ProcessManagerMBean {
 				// finally block flags process complete.
 
 			} catch (Throwable ex) {
+
+				// Determine if potential wrapped EOF cause
+				Throwable previousCause = null; // stops infinite loop
+				Throwable currentCause = ex.getCause();
+				while ((currentCause != null)
+						&& (currentCause != previousCause)) {
+
+					// Determine if EOF cause (assumed to be process completed)
+					if (currentCause instanceof EOFException) {
+						return; // EOF cause as process assumed complete
+					}
+
+					// Setup for next iteration
+					previousCause = currentCause;
+					currentCause = currentCause.getCause();
+				}
+
 				// Indicate failure, as not process complete
 				this.processManager.setProcessShellFailure(ex);
 
