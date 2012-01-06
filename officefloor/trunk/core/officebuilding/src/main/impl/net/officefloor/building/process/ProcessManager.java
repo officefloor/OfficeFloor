@@ -995,7 +995,7 @@ public class ProcessManager implements ProcessManagerMBean {
 
 			} catch (Throwable ex) {
 
-				// Determine if potential wrapped EOF cause
+				// Determine if potential wrapped EOF cause (e.g. from MBean)
 				Throwable previousCause = null; // stops infinite loop
 				Throwable currentCause = ex.getCause();
 				while ((currentCause != null)
