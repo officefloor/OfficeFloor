@@ -469,6 +469,18 @@ public class AutoWireOfficeFloorSource extends AbstractOfficeFloorSource
 		Set<AutoWire> availableAutoWires = new HashSet<AutoWire>();
 		for (AutoWireObjectInstance objectInstance : objectInstances) {
 
+			/*
+			 * TODO EDGE CASE: Handled InputManagedObject instances override
+			 * ManagedObject instances. Issue however is that can not determine
+			 * handling of InputManagedObject until the OfficeType is loaded
+			 * (which requires the avaiableOfficeObjects).
+			 * 
+			 * To overcome may need to just work of premise that
+			 * InputManagedObject always overrides ManagedObject (whether
+			 * handled or not). Need to consider but for now leaving as EDGE
+			 * CASE that very unlikely to occur with reasonable configuration.
+			 */
+
 			// Obtain the available auto-wiring
 			AutoWire[] autoWiring = objectInstance.getAutoWiring();
 
@@ -614,7 +626,8 @@ public class AutoWireOfficeFloorSource extends AbstractOfficeFloorSource
 
 				// Include input managed object only if all flows handled
 				boolean isInclude = true;
-				for (AutoWireManagedObjectFlow flow : objectInstance.moFlows) {
+				for (AutoWireManagedObjectFlow flow : objectInstance
+						.getTypeFlows()) {
 					if (!(handledInputs.contains(new AutoWire(flow.sectionName,
 							flow.sectionInputName)))) {
 						// Flow not handled, so do not include
@@ -1096,7 +1109,7 @@ public class AutoWireOfficeFloorSource extends AbstractOfficeFloorSource
 
 			// Obtain from supplied managed object type
 			if (this.suppliedManagedObjectType != null) {
-				this.suppliedManagedObjectType.getExtensionInterfaces();
+				return this.suppliedManagedObjectType.getExtensionInterfaces();
 			}
 
 			// Obtain the managed object type
@@ -1185,6 +1198,37 @@ public class AutoWireOfficeFloorSource extends AbstractOfficeFloorSource
 		}
 
 		/**
+		 * Obtains the {@link AutoWireManagedObjectFlow} instances for the type.
+		 * 
+		 * @return {@link AutoWireManagedObjectFlow} instances for the type.
+		 */
+		public AutoWireManagedObjectFlow[] getTypeFlows() {
+
+			// Determine if supplied managed object
+			List<AutoWireManagedObjectFlow> flows;
+			if (this.suppliedManagedObjectType != null) {
+				// Supplied, so obtain from supplied type
+				SuppliedManagedObjectFlowType[] flowTypes = this.suppliedManagedObjectType
+						.getFlowTypes();
+				flows = new ArrayList<AutoWireManagedObjectFlow>(
+						flowTypes.length);
+				for (int i = 0; i < flowTypes.length; i++) {
+					SuppliedManagedObjectFlowType flowType = flowTypes[i];
+					flows.add(new AutoWireManagedObjectFlow(flowType
+							.getFlowName(), flowType.getSectionName(), flowType
+							.getSectionInputName()));
+				}
+
+			} else {
+				// Managed Object, so use flows configured from wiring
+				flows = this.moFlows;
+			}
+
+			// Return the listing of type flows
+			return flows.toArray(new AutoWireManagedObjectFlow[flows.size()]);
+		}
+
+		/**
 		 * Loads the {@link ManagedObjectType}.
 		 * 
 		 * @param deployer
@@ -1269,6 +1313,9 @@ public class AutoWireOfficeFloorSource extends AbstractOfficeFloorSource
 		public void initManagedObject(OfficeFloorDeployer deployer,
 				OfficeFloorSourceContext context,
 				Map<AutoWire, Integer> nameIndex) {
+
+			// Ensure load managed object type (and subsequent state)
+			this.loadManagedObjectType(deployer, context);
 
 			// Obtain the raw managed object name (from first auto-wire)
 			AutoWire firstAutoWire = this.getAutoWiring()[0];
@@ -1488,28 +1535,8 @@ public class AutoWireOfficeFloorSource extends AbstractOfficeFloorSource
 				this.linkDependency(dependency, dependencyAutoWire, state);
 			}
 
-			// Obtain the listing of auto-wire flows
-			List<AutoWireManagedObjectFlow> flows;
-			if (this.suppliedManagedObjectType != null) {
-				// Supplied, so obtain from supplied type
-				SuppliedManagedObjectFlowType[] flowTypes = this.suppliedManagedObjectType
-						.getFlowTypes();
-				flows = new ArrayList<AutoWireManagedObjectFlow>(
-						flowTypes.length);
-				for (int i = 0; i < flowTypes.length; i++) {
-					SuppliedManagedObjectFlowType flowType = flowTypes[i];
-					flows.add(new AutoWireManagedObjectFlow(flowType
-							.getFlowName(), flowType.getSectionName(), flowType
-							.getSectionInputName()));
-				}
-
-			} else {
-				// Managed Object, so use flows configured from wiring
-				flows = this.moFlows;
-			}
-
 			// Link flows
-			for (AutoWireManagedObjectFlow flow : flows) {
+			for (AutoWireManagedObjectFlow flow : this.getTypeFlows()) {
 
 				// Obtain the managed object flow
 				ManagedObjectFlow moFlow = this.managedObjectSource
@@ -1712,6 +1739,16 @@ public class AutoWireOfficeFloorSource extends AbstractOfficeFloorSource
 		private final AutoWireSupplier autoWireSupplier;
 
 		/**
+		 * Flag indicating if the {@link OfficeFloorSupplier} has been built.
+		 */
+		private boolean isBuilt = false;
+
+		/**
+		 * Built {@link OfficeFloorSupplier}.
+		 */
+		private OfficeFloorSupplier officeFloorSupplier;
+
+		/**
 		 * Initiate.
 		 * 
 		 * @param autoWireSupplier
@@ -1724,6 +1761,7 @@ public class AutoWireOfficeFloorSource extends AbstractOfficeFloorSource
 		@Override
 		public AutoWireObjectInstance[] sourceObjectInstances(
 				OfficeFloorSourceContext context, OfficeFloorCompiler compiler) {
+
 			// Load the supplier type
 			SupplierType supplier = context.loadSupplierType(
 					this.autoWireSupplier.getSupplierSourceClassName(),
@@ -1752,18 +1790,26 @@ public class AutoWireOfficeFloorSource extends AbstractOfficeFloorSource
 		 * @return {@link OfficeFloorSupplier}.
 		 */
 		public OfficeFloorSupplier buildSupplier(AutoWireState state) {
-			String supplierSourceClassName = this.autoWireSupplier
-					.getSupplierSourceClassName();
 
-			// Build the Supplier
-			OfficeFloorSupplier supplier = state.deployer.addSupplier(
-					supplierSourceClassName, supplierSourceClassName);
-			for (Property property : this.autoWireSupplier.getProperties()) {
-				supplier.addProperty(property.getName(), property.getValue());
+			// Determine if built
+			if (!this.isBuilt) {
+
+				// Only one attempt to build
+				this.isBuilt = true;
+
+				// Build the Supplier
+				String supplierSourceClassName = this.autoWireSupplier
+						.getSupplierSourceClassName();
+				this.officeFloorSupplier = state.deployer.addSupplier(
+						supplierSourceClassName, supplierSourceClassName);
+				for (Property property : this.autoWireSupplier.getProperties()) {
+					this.officeFloorSupplier.addProperty(property.getName(),
+							property.getValue());
+				}
 			}
 
 			// Return the Supplier
-			return supplier;
+			return this.officeFloorSupplier;
 		}
 	}
 
