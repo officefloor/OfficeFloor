@@ -143,26 +143,26 @@ public class AutoWireOfficeFloorSource_SuppliedManagedObject_Test extends
 		this.recordOffice(one.getAutoWire(), two.getAutoWire(),
 				three.getAutoWire());
 
+		// Record the supplier
+		this.recordSupplier(identifier);
+
 		// Record one
 		OfficeFloorManagedObjectSource sourceOne = this
-				.recordSuppliedManagedObjectSource(identifier,
-						one.getAutoWire());
+				.recordManagedObjectSource(identifier, one.getAutoWire());
 		OfficeFloorManagedObject moOne = this.recordManagedObject(sourceOne,
 				one.getAutoWire());
 		this.recordOfficeObject(moOne, one.getAutoWire());
 
 		// Record two
 		OfficeFloorManagedObjectSource sourceTwo = this
-				.recordSuppliedManagedObjectSource(identifier,
-						two.getAutoWire());
+				.recordManagedObjectSource(identifier, two.getAutoWire());
 		OfficeFloorManagedObject moTwo = this.recordManagedObject(sourceTwo,
 				two.getAutoWire());
 		this.recordOfficeObject(moTwo, two.getAutoWire());
 
 		// Record three
 		OfficeFloorManagedObjectSource sourceThree = this
-				.recordSuppliedManagedObjectSource(identifier,
-						three.getAutoWire());
+				.recordManagedObjectSource(identifier, three.getAutoWire());
 		OfficeFloorManagedObject moThree = this.recordManagedObject(
 				sourceThree, three.getAutoWire());
 		this.recordOfficeObject(moThree, three.getAutoWire());
