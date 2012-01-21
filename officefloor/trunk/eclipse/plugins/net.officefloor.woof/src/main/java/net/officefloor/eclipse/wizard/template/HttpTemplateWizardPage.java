@@ -17,6 +17,7 @@
  */
 package net.officefloor.eclipse.wizard.template;
 
+import java.io.InputStream;
 import java.lang.reflect.Method;
 import java.util.LinkedList;
 import java.util.List;
@@ -37,15 +38,19 @@ import net.officefloor.eclipse.common.dialog.input.impl.BooleanInput;
 import net.officefloor.eclipse.common.dialog.input.impl.ClassMethodInput;
 import net.officefloor.eclipse.common.dialog.input.impl.ClasspathClassInput;
 import net.officefloor.eclipse.common.dialog.input.impl.ClasspathFileInput;
+import net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart;
 import net.officefloor.eclipse.extension.ExtensionUtil;
 import net.officefloor.eclipse.extension.sectionsource.SectionSourceExtensionContext;
 import net.officefloor.eclipse.util.EclipseUtil;
 import net.officefloor.eclipse.web.HttpTemplateSectionSourceExtension;
 import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
+import net.officefloor.frame.spi.source.ResourceSource;
 import net.officefloor.plugin.web.http.template.parse.HttpTemplate;
 import net.officefloor.plugin.web.http.template.section.HttpTemplateSectionSource;
 
+import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyEvent;
@@ -140,18 +145,45 @@ public class HttpTemplateWizardPage extends WizardPage implements
 	 * 
 	 * @param project
 	 *            {@link IProject}.
+	 * @param editPart
+	 *            {@link AbstractOfficeFloorEditPart}.
 	 */
-	protected HttpTemplateWizardPage(IProject project) {
+	protected HttpTemplateWizardPage(final IProject project,
+			final AbstractOfficeFloorEditPart<?, ?, ?> editPart) {
 		super("HTTP Template");
 		this.project = project;
 
 		// Obtain the class loader for the project
 		this.classLoader = ProjectClassLoader.create(project);
 
-		// Obtain the section loader
+		// Configure the OfficeFloor compiler to obtain the section loader
 		this.compiler = OfficeFloorCompiler
 				.newOfficeFloorCompiler(this.classLoader);
 		this.compiler.setCompilerIssues(this);
+
+		// Add Raw HTTP Template Loader for Maven WebApp
+		this.compiler.addResources(new ResourceSource() {
+			@Override
+			public InputStream sourceResource(String location) {
+
+				// Attempt to find file within project
+				IFile file = project.getFile("src/main/webapp/" + location);
+				if ((file == null) || (!file.exists())) {
+					return null; // Not within webapp
+				}
+
+				// Found file so return
+				try {
+					return file.getContents();
+				} catch (CoreException ex) {
+					// Failed to obtain content
+					editPart.messageError(ex);
+					return null;
+				}
+			}
+		});
+
+		// Obtain the section loader
 		this.sectionLoader = this.compiler.getSectionLoader();
 
 		// Create the property list

@@ -18,7 +18,6 @@
 
 package net.officefloor.plugin.web.http.template;
 
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -40,6 +39,7 @@ import net.officefloor.compile.spi.work.source.WorkTypeBuilder;
 import net.officefloor.compile.spi.work.source.impl.AbstractWorkSource;
 import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.build.None;
+import net.officefloor.frame.spi.source.SourceContext;
 import net.officefloor.frame.spi.source.SourceProperties;
 import net.officefloor.plugin.socket.server.http.response.HttpResponseWriterFactory;
 import net.officefloor.plugin.socket.server.http.response.HttpResponseWriterFactoryImpl;
@@ -91,55 +91,20 @@ public class HttpTemplateWorkSource extends
 	public static final String LINK_URL_EXTENSION = ".task";
 
 	/**
-	 * Registered {@link RawHttpTemplateLoader} instances.
-	 */
-	private static final List<RawHttpTemplateLoader> loaders = new LinkedList<RawHttpTemplateLoader>();
-
-	/**
-	 * Registers the {@link RawHttpTemplateLoader}.
-	 * 
-	 * @param rawHttpTemplateLoader
-	 *            {@link RawHttpTemplateLoader}.
-	 */
-	@Deprecated
-	// TODO use ResourceSource
-	public static void registerRawHttpTemplateLoader(
-			RawHttpTemplateLoader rawHttpTemplateLoader) {
-		synchronized (loaders) {
-			loaders.add(rawHttpTemplateLoader);
-		}
-	}
-
-	/**
-	 * <p>
-	 * Unregisters all the {@link RawHttpTemplateLoader} instances.
-	 * <p>
-	 * This is typically only made available to allow resetting content for
-	 * testing.
-	 */
-	public static void unregisterAllRawHttpTemplateLoaders() {
-		synchronized (loaders) {
-			loaders.clear();
-		}
-	}
-
-	/**
 	 * Obtains the {@link HttpTemplate}.
 	 * 
-	 * @param properties
-	 *            {@link SourceProperties} providing details about the
+	 * @param context
+	 *            {@link SourceContext} providing details about the
 	 *            {@link HttpTemplate}.
-	 * @param classLoader
-	 *            {@link ClassLoader}.
 	 * @return {@link HttpTemplate}.
 	 * @throws IOException
 	 *             If fails to obtain the {@link HttpTemplate}.
 	 */
-	public static HttpTemplate getHttpTemplate(SourceProperties properties,
-			ClassLoader classLoader) throws IOException {
+	public static HttpTemplate getHttpTemplate(SourceContext context)
+			throws IOException {
 
 		// Obtain the template content
-		Reader content = getHttpTemplateContent(properties, classLoader);
+		Reader content = getHttpTemplateContent(context);
 
 		// Obtain the template
 		HttpTemplate template = getHttpTemplate(content);
@@ -154,49 +119,30 @@ public class HttpTemplateWorkSource extends
 	/**
 	 * Obtains the raw {@link HttpTemplate} content.
 	 * 
-	 * @param properties
-	 *            {@link SourceProperties} providing details about the
+	 * @param context
+	 *            {@link SourceContext} providing details about the
 	 *            {@link HttpTemplate}.
-	 * @param classLoader
-	 *            {@link ClassLoader}.
 	 * @return Raw {@link HttpTemplate} content.
 	 * @throws IOException
 	 *             If fails to obtain the raw {@link HttpTemplate} content.
 	 */
-	public static Reader getHttpTemplateContent(SourceProperties properties,
-			ClassLoader classLoader) throws IOException {
+	public static Reader getHttpTemplateContent(SourceContext context)
+			throws IOException {
 
 		// Determine if content provided by property
-		String templateContent = properties.getProperty(
-				PROPERTY_TEMPLATE_CONTENT, null);
+		String templateContent = context.getProperty(PROPERTY_TEMPLATE_CONTENT,
+				null);
 		if (templateContent != null) {
 			// Provided template content
 			return new StringReader(templateContent);
 		}
 
 		// Not in property, so obtain details from file
-		String templateFilePath = properties
-				.getProperty(PROPERTY_TEMPLATE_FILE);
-		Charset charset = getCharset(properties);
+		String templateFilePath = context.getProperty(PROPERTY_TEMPLATE_FILE);
+		Charset charset = getCharset(context);
 
-		// Try the Raw HTTP Template Loaders first
-		synchronized (loaders) {
-			for (RawHttpTemplateLoader loader : loaders) {
-				Reader content = loader.loadRawHttpTemplate(templateFilePath,
-						charset);
-				if (content != null) {
-					return content; // found content
-				}
-			}
-		}
-
-		// Last attempt on the class path
-		InputStream configuration = classLoader
-				.getResourceAsStream(templateFilePath);
-		if (configuration == null) {
-			throw new FileNotFoundException("Can not find template '"
-					+ templateFilePath + "'");
-		}
+		// Obtain the configuration
+		InputStream configuration = context.getResource(templateFilePath);
 
 		// Return the reader to the template content
 		return new InputStreamReader(configuration, charset);
@@ -322,8 +268,7 @@ public class HttpTemplateWorkSource extends
 			WorkSourceContext context) throws Exception {
 
 		// Obtain the template
-		HttpTemplate template = getHttpTemplate(context,
-				context.getClassLoader());
+		HttpTemplate template = getHttpTemplate(context);
 
 		// Obtain the details of the template
 		String contentType = context.getProperty(PROPERTY_CONTENT_TYPE,

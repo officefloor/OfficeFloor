@@ -19,9 +19,6 @@ package net.officefloor.plugin.servlet;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.Reader;
-import java.nio.charset.Charset;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -46,6 +43,7 @@ import net.officefloor.compile.spi.office.OfficeSectionOutput;
 import net.officefloor.frame.api.escalate.Escalation;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.impl.spi.team.ProcessContextTeamSource;
+import net.officefloor.frame.spi.source.ResourceSource;
 import net.officefloor.plugin.servlet.bridge.ServletBridgeManagedObjectSource;
 import net.officefloor.plugin.servlet.bridge.spi.ServletServiceBridger;
 import net.officefloor.plugin.servlet.socket.server.http.ServletServerHttpConnection;
@@ -59,8 +57,6 @@ import net.officefloor.plugin.web.http.application.HttpRequestState;
 import net.officefloor.plugin.web.http.application.WebApplicationAutoWireOfficeFloorSource;
 import net.officefloor.plugin.web.http.application.WebAutoWireApplication;
 import net.officefloor.plugin.web.http.session.HttpSession;
-import net.officefloor.plugin.web.http.template.RawHttpTemplateLoader;
-import net.officefloor.plugin.web.http.template.section.HttpTemplateSectionSource;
 
 /**
  * {@link Filter} to invoke processing within an {@link OfficeFloor}.
@@ -159,26 +155,23 @@ public abstract class OfficeFloorServletFilter extends
 
 		// Allow loading template content from ServletContext.
 		// (Allows integration into the WAR structure)
-		HttpTemplateSectionSource
-				.registerRawHttpTemplateLoader(new RawHttpTemplateLoader() {
-					@Override
-					public Reader loadRawHttpTemplate(String templatePath,
-							Charset charset) throws IOException {
+		this.getOfficeFloorCompiler().addResources(new ResourceSource() {
+			@Override
+			public InputStream sourceResource(String location) {
 
-						// Ensure template path is always absolute
-						templatePath = (templatePath.startsWith("/") ? templatePath
-								: "/" + templatePath);
+				// Ensure location is always absolute
+				location = (location.startsWith("/") ? location : "/"
+						+ location);
 
-						// Attempt to obtain resource
-						InputStream resource = OfficeFloorServletFilter.this
-								.getFilterConfig().getServletContext()
-								.getResourceAsStream(templatePath);
+				// Attempt to obtain resource
+				InputStream resource = OfficeFloorServletFilter.this
+						.getFilterConfig().getServletContext()
+						.getResourceAsStream(location);
 
-						// Return resource (if obtained)
-						return (resource == null ? null
-								: new InputStreamReader(resource, charset));
-					}
-				});
+				// Return resource (if obtained)
+				return resource;
+			}
+		});
 
 		// Configure Server HTTP connection
 		this.addManagedObject(
