@@ -46,7 +46,7 @@ public class FreeformWrapperFigure extends Figure {
 	public FreeformWrapperFigure(Figure figure) {
 		this.wrappedFigure = figure;
 		this.setLayoutManager(new NoSpacingToolbarLayout(true));
-		this.setOpaque(true);
+		this.setOpaque(false);
 		
 		// Add to this (not wrapped figure)
 		super.add(this.wrappedFigure, null, -1);
