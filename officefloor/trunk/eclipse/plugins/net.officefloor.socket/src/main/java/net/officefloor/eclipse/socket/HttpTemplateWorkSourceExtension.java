@@ -38,6 +38,9 @@ import net.officefloor.eclipse.extension.worksource.WorkSourceExtension;
 import net.officefloor.eclipse.extension.worksource.WorkSourceExtensionContext;
 import net.officefloor.eclipse.socket.HttpRouteWorkSourceExtension.RoutingEntry;
 import net.officefloor.eclipse.util.EclipseUtil;
+import net.officefloor.frame.impl.construct.source.SourceContextImpl;
+import net.officefloor.frame.spi.source.SourceContext;
+import net.officefloor.frame.spi.source.UnknownResourceError;
 import net.officefloor.plugin.socket.server.http.HttpResponse;
 import net.officefloor.plugin.web.http.template.HttpTemplateWork;
 import net.officefloor.plugin.web.http.template.HttpTemplateWorkSource;
@@ -155,13 +158,17 @@ public class HttpTemplateWorkSourceExtension
 			properties.removeProperty(properties.getProperty(name));
 		}
 
+		// Create the source context
+		SourceContext sourceContext = new SourceContextImpl(
+				context.getClassLoader());
+		sourceContext = new SourceContextImpl(sourceContext,
+				new PropertyListSourceProperties(properties));
+
 		// Obtain the template file
 		HttpTemplate template;
 		try {
-			template = HttpTemplateWorkSource.getHttpTemplate(
-					new PropertyListSourceProperties(properties),
-					context.getClassLoader());
-		} catch (FileNotFoundException ex) {
+			template = HttpTemplateWorkSource.getHttpTemplate(sourceContext);
+		} catch (UnknownResourceError ex) {
 			// No file so no properties
 			return;
 		}

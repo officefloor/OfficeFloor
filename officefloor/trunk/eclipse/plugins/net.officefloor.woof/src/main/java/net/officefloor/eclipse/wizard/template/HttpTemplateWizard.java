@@ -92,7 +92,7 @@ public class HttpTemplateWizard extends Wizard {
 						WoofExtensionClasspathProvider.class.getName());
 
 		// Create the HTTP template wizard page
-		this.templatePage = new HttpTemplateWizardPage(project);
+		this.templatePage = new HttpTemplateWizardPage(project, editPart);
 	}
 
 	/**

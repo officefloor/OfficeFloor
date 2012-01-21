@@ -47,9 +47,11 @@ import net.officefloor.compile.spi.section.source.SectionSourceContext;
 import net.officefloor.compile.work.TaskType;
 import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
 import net.officefloor.frame.api.execute.Task;
+import net.officefloor.frame.impl.construct.source.SourceContextImpl;
 import net.officefloor.frame.impl.construct.source.SourcePropertiesImpl;
 import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
+import net.officefloor.frame.spi.source.SourceContext;
 import net.officefloor.frame.spi.source.UnknownPropertyError;
 import net.officefloor.plugin.managedobject.clazz.ClassManagedObjectSource;
 import net.officefloor.plugin.managedobject.clazz.DependencyMetaData;
@@ -60,7 +62,6 @@ import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
 import net.officefloor.plugin.web.http.application.HttpSessionStateful;
 import net.officefloor.plugin.web.http.session.clazz.source.HttpSessionClassManagedObjectSource;
 import net.officefloor.plugin.web.http.template.HttpTemplateWorkSource;
-import net.officefloor.plugin.web.http.template.RawHttpTemplateLoader;
 import net.officefloor.plugin.web.http.template.parse.HttpTemplate;
 import net.officefloor.plugin.web.http.template.parse.HttpTemplateSection;
 
@@ -70,29 +71,6 @@ import net.officefloor.plugin.web.http.template.parse.HttpTemplateSection;
  * @author Daniel Sagenschneider
  */
 public class HttpTemplateSectionSource extends ClassSectionSource {
-
-	/**
-	 * Registers the {@link RawHttpTemplateLoader}.
-	 * 
-	 * @param rawHttpTemplateLoader
-	 *            {@link RawHttpTemplateLoader}.
-	 */
-	public static void registerRawHttpTemplateLoader(
-			RawHttpTemplateLoader rawHttpTemplateLoader) {
-		HttpTemplateWorkSource
-				.registerRawHttpTemplateLoader(rawHttpTemplateLoader);
-	}
-
-	/**
-	 * <p>
-	 * Unregisters all the {@link RawHttpTemplateLoader} instances.
-	 * <p>
-	 * This is typically only made available to allow resetting content for
-	 * testing.
-	 */
-	public static void unregisterAllRawHttpTemplateLoaders() {
-		HttpTemplateWorkSource.unregisterAllRawHttpTemplateLoaders();
-	}
 
 	/**
 	 * Property name for the {@link Class} providing the backing logic to the
@@ -154,9 +132,6 @@ public class HttpTemplateSectionSource extends ClassSectionSource {
 	public void sourceSection(SectionDesigner designer,
 			SectionSourceContext context) throws Exception {
 
-		// Obtain the class loader
-		ClassLoader classLoader = context.getClassLoader();
-
 		// Load the section class work and tasks
 		String sectionClassName = context.getProperty(PROPERTY_CLASS_NAME);
 		this.sectionClass = context.loadClass(sectionClassName);
@@ -169,8 +144,10 @@ public class HttpTemplateSectionSource extends ClassSectionSource {
 		templateProperties
 				.addProperty(HttpTemplateWorkSource.PROPERTY_TEMPLATE_FILE,
 						templateLocation);
+		SourceContext templateContext = new SourceContextImpl(context,
+				templateProperties);
 		Reader templateContentReader = HttpTemplateWorkSource
-				.getHttpTemplateContent(templateProperties, classLoader);
+				.getHttpTemplateContent(templateContext);
 		StringBuilder templateContentBuffer = new StringBuilder();
 		for (int character = templateContentReader.read(); character != -1; character = templateContentReader
 				.read()) {

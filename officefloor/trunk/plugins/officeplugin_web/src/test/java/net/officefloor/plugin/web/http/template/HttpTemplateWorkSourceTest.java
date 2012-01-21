@@ -18,10 +18,9 @@
 
 package net.officefloor.plugin.web.http.template;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.io.Reader;
-import java.io.StringReader;
-import java.nio.charset.Charset;
+import java.io.InputStream;
 
 import net.officefloor.compile.OfficeFloorCompiler;
 import net.officefloor.compile.issues.CompilerIssues;
@@ -37,6 +36,7 @@ import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
 import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.execute.TaskContext;
+import net.officefloor.frame.spi.source.ResourceSource;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
 import net.officefloor.plugin.socket.server.http.parse.UsAsciiUtil;
@@ -315,76 +315,70 @@ public class HttpTemplateWorkSourceTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensure able to override loading the raw {@link HttpTemplate} content.
+	 * Ensure able to use {@link ResourceSource} to load the
+	 * {@link HttpTemplate}.
 	 */
 	@SuppressWarnings({ "rawtypes", "unchecked" })
-	public void testRawHttpTemplateLoader() throws Throwable {
-		try {
+	public void testLoadWithResourceSource() throws Throwable {
 
-			// Create the mock objects
-			TaskContext taskContext = this.createMock(TaskContext.class);
-			ServerHttpConnection httpConnection = this
-					.createMock(ServerHttpConnection.class);
-			MockHttpResponse httpResponse = new MockHttpResponse();
+		// Create the mock objects
+		TaskContext taskContext = this.createMock(TaskContext.class);
+		ServerHttpConnection httpConnection = this
+				.createMock(ServerHttpConnection.class);
+		MockHttpResponse httpResponse = new MockHttpResponse();
 
-			// Template Content
-			final String templateContent = "RAW TEMPLATE";
-			final Reader reader = new StringReader(templateContent);
+		// Template Content
+		final String templateContent = "RAW TEMPLATE";
+		final InputStream templateInput = new ByteArrayInputStream(
+				templateContent.getBytes());
 
-			// Register Loader to not provide content
-			HttpTemplateWorkSource
-					.registerRawHttpTemplateLoader(new RawHttpTemplateLoader() {
-						@Override
-						public Reader loadRawHttpTemplate(String templatePath,
-								Charset charset) throws IOException {
-							return null; // not able to provide content
-						}
-					});
+		// Configure the compiler the to load resources
+		OfficeFloorCompiler compiler = OfficeFloorCompiler
+				.newOfficeFloorCompiler(null);
 
-			// Register the Raw HTTP Template Loader
-			HttpTemplateWorkSource
-					.registerRawHttpTemplateLoader(new RawHttpTemplateLoader() {
-						@Override
-						public Reader loadRawHttpTemplate(String templatePath,
-								Charset charset) throws IOException {
-							// Ensure appropriate template path
-							assertEquals(
-									"Incorrect template path",
-									HttpTemplateWorkSourceTest.this.templatePath,
-									templatePath);
-							return reader;
-						}
-					});
+		// Register Loader to not provide content
+		compiler.addResources(new ResourceSource() {
+			@Override
+			public InputStream sourceResource(String location) {
+				return null; // not able to provide content
+			}
+		});
 
-			// Load the work type
-			WorkType<HttpTemplateWork> workType = WorkLoaderUtil.loadWorkType(
-					HttpTemplateWorkSource.class, this.properties);
+		// Register the Raw HTTP Template Loader
+		compiler.addResources(new ResourceSource() {
+			@Override
+			public InputStream sourceResource(String location) {
+				// Ensure appropriate template path
+				assertEquals("Incorrect template path",
+						HttpTemplateWorkSourceTest.this.templatePath,
+						templatePath);
+				return templateInput;
+			}
+		});
 
-			// Create the work and provide name
-			HttpTemplateWork work = workType.getWorkFactory().createWork();
-			work.setBoundWorkName("WORK");
+		// Load the work type
+		WorkType<HttpTemplateWork> workType = WorkLoaderUtil.loadWorkType(
+				HttpTemplateWorkSource.class, compiler, this.properties);
 
-			// Record undertaking task to use raw content
-			this.recordReturn(taskContext, taskContext.getObject(0),
-					httpConnection);
-			this.recordReturn(httpConnection, httpConnection.getHttpResponse(),
-					httpResponse);
-			this.recordReturn(taskContext, taskContext.getWork(), work);
+		// Create the work and provide name
+		HttpTemplateWork work = workType.getWorkFactory().createWork();
+		work.setBoundWorkName("WORK");
 
-			// Test
-			this.replayMockObjects();
-			this.doTask("template", work, workType, taskContext);
-			this.verifyMockObjects();
+		// Record undertaking task to use raw content
+		this.recordReturn(taskContext, taskContext.getObject(0), httpConnection);
+		this.recordReturn(httpConnection, httpConnection.getHttpResponse(),
+				httpResponse);
+		this.recordReturn(taskContext, taskContext.getWork(), work);
 
-			// Ensure raw HTTP template content
-			String output = UsAsciiUtil.convertToString(httpResponse
-					.getBodyContent());
-			assertTextEquals("Incorrect output", templateContent, output);
+		// Test
+		this.replayMockObjects();
+		this.doTask("template", work, workType, taskContext);
+		this.verifyMockObjects();
 
-		} finally {
-			// Ensure clear loaders
-			HttpTemplateWorkSource.unregisterAllRawHttpTemplateLoaders();
-		}
+		// Ensure raw HTTP template content
+		String output = UsAsciiUtil.convertToString(httpResponse
+				.getBodyContent());
+		assertTextEquals("Incorrect output", templateContent, output);
 	}
 
 	/**
