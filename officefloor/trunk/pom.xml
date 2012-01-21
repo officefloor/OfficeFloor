@@ -156,6 +156,11 @@
 			</dependency>
 			<dependency>
 				<groupId>net.officefloor.plugin</groupId>
+				<artifactId>officeplugin_jpa</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>net.officefloor.plugin</groupId>
 				<artifactId>officeplugin_servlet</artifactId>
 				<version>${project.version}</version>
 			</dependency>
