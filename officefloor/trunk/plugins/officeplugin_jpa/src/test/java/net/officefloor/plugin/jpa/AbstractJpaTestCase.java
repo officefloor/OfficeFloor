@@ -27,6 +27,7 @@ import javax.persistence.Persistence;
 
 import org.hsqldb.jdbcDriver;
 
+import net.officefloor.autowire.AutoWireManagement;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 
 /**
@@ -55,7 +56,7 @@ public abstract class AbstractJpaTestCase extends OfficeFrameTestCase {
 				"sa", "");
 		Statement statement = this.connection.createStatement();
 		statement
-				.execute("CREATE TABLE MOCKENTITY ( ID IDENTITY PRIMARY KEY, NAME VARCHAR(20), DESCRIPTION VARCHAR(256) )");
+				.execute("CREATE TABLE MOCKENTITY ( ID IDENTITY PRIMARY KEY, NAME VARCHAR(20) NOT NULL, DESCRIPTION VARCHAR(256) )");
 		statement.close();
 
 		// Create the entity manager factory
@@ -64,6 +65,9 @@ public abstract class AbstractJpaTestCase extends OfficeFrameTestCase {
 
 	@Override
 	protected void tearDown() throws Exception {
+
+		// Close any OfficeFloor instances
+		AutoWireManagement.closeAllOfficeFloors();
 
 		// Stop factory
 		this.factory.close();

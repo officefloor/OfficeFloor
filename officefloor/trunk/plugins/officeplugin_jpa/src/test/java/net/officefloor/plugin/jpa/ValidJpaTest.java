@@ -21,6 +21,7 @@ import java.sql.ResultSet;
 import java.sql.Statement;
 
 import javax.persistence.EntityManager;
+import javax.persistence.PersistenceException;
 
 /**
  * Ensure correct setup of JPA.
@@ -41,6 +42,7 @@ public class ValidJpaTest extends AbstractJpaTestCase {
 		statement.close();
 
 		// Obtain object identifier
+		statement = this.connection.createStatement();
 		ResultSet results = statement.executeQuery("SELECT ID FROM MOCKENTITY");
 		assertTrue("Should be entry in database", results.next());
 		long identifier = results.getLong("ID");
@@ -87,6 +89,21 @@ public class ValidJpaTest extends AbstractJpaTestCase {
 		assertNotNull("Should retrieve", retrieved);
 		assertNotSame("Should be new instance", entity, retrieved);
 		retrieveManager.close();
+	}
+
+	/**
+	 * Ensure failure in attempting to write (for not null violation).
+	 */
+	public void testFailWrite() throws Exception {
+		try {
+			// Store entity causing not null violation
+			EntityManager entityManager = this.createEntityManager();
+			entityManager.persist(new MockEntity(null, "Not null violation"));
+			fail("Should not be successful");
+
+		} catch (PersistenceException ex) {
+			// Correctly fails
+		}
 	}
 
 	/**
