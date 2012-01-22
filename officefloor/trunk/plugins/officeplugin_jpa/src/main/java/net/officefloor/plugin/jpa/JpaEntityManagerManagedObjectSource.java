@@ -19,13 +19,51 @@ package net.officefloor.plugin.jpa;
 
 import javax.persistence.EntityManager;
 
+import net.officefloor.frame.api.build.None;
+import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
+import net.officefloor.frame.spi.managedobject.source.impl.AbstractManagedObjectSource;
 
 /**
  * {@link ManagedObjectSource} to provide a JPA {@link EntityManager}.
  * 
  * @author Daniel Sagenschneider
  */
-public class JpaEntityManagerManagedObjectSource {
+public class JpaEntityManagerManagedObjectSource extends
+		AbstractManagedObjectSource<None, None> {
+
+	/**
+	 * Name of property providing the persistence unit name.
+	 */
+	public static final String PROPERTY_PERSISTENCE_UNIT_NAME = "persistence.unit.name";
+
+	/*
+	 * ================ ManagedObjectSource ========================
+	 */
+
+	@Override
+	protected void loadSpecification(SpecificationContext context) {
+		// TODO implement
+		// AbstractAsyncManagedObjectSource<None,None>.loadSpecification
+		throw new UnsupportedOperationException(
+				"TODO implement AbstractAsyncManagedObjectSource<None,None>.loadSpecification");
+	}
+
+	@Override
+	protected void loadMetaData(MetaDataContext<None, None> context)
+			throws Exception {
+		// TODO implement
+		// AbstractAsyncManagedObjectSource<None,None>.loadMetaData
+		throw new UnsupportedOperationException(
+				"TODO implement AbstractAsyncManagedObjectSource<None,None>.loadMetaData");
+	}
+
+	@Override
+	protected ManagedObject getManagedObject() throws Throwable {
+		// TODO implement
+		// AbstractManagedObjectSource<None,None>.getManagedObject
+		throw new UnsupportedOperationException(
+				"TODO implement AbstractManagedObjectSource<None,None>.getManagedObject");
+	}
 
 }
