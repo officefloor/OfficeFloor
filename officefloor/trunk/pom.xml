@@ -74,6 +74,7 @@
 		<jetty-version>7.1.5.v20100705</jetty-version>
 		<gwt-version>2.1.0</gwt-version>
 		<syncrpc-version>0.2</syncrpc-version>
+		<datanucleus-version>3.0.5</datanucleus-version>
 	</properties>
 	<dependencyManagement>
 		<dependencies>
@@ -311,6 +312,11 @@
 				<version>6.0</version>
 			</dependency>
 			<dependency>
+				<groupId>org.apache.geronimo.specs</groupId>
+				<artifactId>geronimo-jpa_2.0_spec</artifactId>
+				<version>1.1</version>
+			</dependency>
+			<dependency>
 				<groupId>junit</groupId>
 				<artifactId>junit</artifactId>
 				<version>4.8.2</version>
@@ -480,6 +486,31 @@
 				<groupId>com.gdevelop.gwt</groupId>
 				<artifactId>syncrpc</artifactId>
 				<version>${syncrpc-version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.datanucleus</groupId>
+				<artifactId>datanucleus-core</artifactId>
+				<version>${datanucleus-version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.datanucleus</groupId>
+				<artifactId>datanucleus-api-jpa</artifactId>
+				<version>${datanucleus-version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.datanucleus</groupId>
+				<artifactId>datanucleus-rdbms</artifactId>
+				<version>${datanucleus-version}</version>
+			</dependency>
+			<dependency>
+				<groupId>javax.jdo</groupId>
+				<artifactId>jdo-api</artifactId>
+				<version>3.0</version>
+			</dependency>
+			<dependency>
+				<groupId>org.projectlombok</groupId>
+				<artifactId>lombok</artifactId>
+				<version>0.10.8</version>
 			</dependency>
 		</dependencies>
 	</dependencyManagement>
@@ -693,6 +724,11 @@
 					<groupId>org.codehaus.mojo</groupId>
 					<artifactId>gwt-maven-plugin</artifactId>
 					<version>${gwt-version}</version>
+				</plugin>
+				<plugin>
+					<groupId>org.datanucleus</groupId>
+					<artifactId>maven-datanucleus-plugin</artifactId>
+					<version>3.0.1</version>
 				</plugin>
 			</plugins>
 		</pluginManagement>
