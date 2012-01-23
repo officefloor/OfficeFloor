@@ -280,8 +280,7 @@ public class CompileOfficeManagedObjectTest extends AbstractCompileTestCase {
 				"OFFICE.MANAGED_OBJECT_SOURCE", ClassManagedObjectSource.class,
 				0, "class.name", ProcessManagedObject.class.getName());
 		this.record_managedObjectBuilder_setManagingOffice("OFFICE");
-		this
-				.record_managingOfficeBuilder_setInputManagedObjectName("OFFICE.MANAGED_OBJECT_SOURCE");
+		this.record_managingOfficeBuilder_setInputManagedObjectName("OFFICE.MANAGED_OBJECT_SOURCE");
 		this.issues.addIssue(LocationType.OFFICE, "office",
 				AssetType.MANAGED_OBJECT, "MANAGED_OBJECT_SOURCE",
 				"Managed object flow doProcess is not linked to a TaskNode");
@@ -310,8 +309,7 @@ public class CompileOfficeManagedObjectTest extends AbstractCompileTestCase {
 				0, "class.name", ProcessManagedObject.class.getName());
 		ManagingOfficeBuilder<?> managingOffice = this
 				.record_managedObjectBuilder_setManagingOffice("OFFICE");
-		this
-				.record_managingOfficeBuilder_setInputManagedObjectName("OFFICE.MANAGED_OBJECT_SOURCE");
+		this.record_managingOfficeBuilder_setInputManagedObjectName("OFFICE.MANAGED_OBJECT_SOURCE");
 		managingOffice.linkProcess(0, "SECTION.WORK", "INPUT");
 
 		// Compile the office floor
@@ -329,8 +327,6 @@ public class CompileOfficeManagedObjectTest extends AbstractCompileTestCase {
 		this.record_officeFloorBuilder_addManagedObject(
 				"OFFICE.MANAGED_OBJECT_SOURCE", TeamManagedObject.class, 0);
 		this.record_managedObjectBuilder_setManagingOffice("OFFICE");
-		this
-				.record_managingOfficeBuilder_setInputManagedObjectName("OFFICE.MANAGED_OBJECT_SOURCE");
 		this.issues
 				.addIssue(LocationType.OFFICE, "office",
 						AssetType.MANAGED_OBJECT, "MANAGED_OBJECT_SOURCE",
@@ -353,8 +349,6 @@ public class CompileOfficeManagedObjectTest extends AbstractCompileTestCase {
 		this.record_officeFloorBuilder_addManagedObject(
 				"OFFICE.MANAGED_OBJECT_SOURCE", TeamManagedObject.class, 0);
 		this.record_managedObjectBuilder_setManagingOffice("OFFICE");
-		this
-				.record_managingOfficeBuilder_setInputManagedObjectName("OFFICE.MANAGED_OBJECT_SOURCE");
 		this.record_officeBuilder_registerTeam("OFFICE_TEAM", "TEAM");
 		this.record_officeBuilder_registerTeam(
 				"OFFICE.MANAGED_OBJECT_SOURCE.MANAGED_OBJECT_SOURCE_TEAM",
@@ -445,8 +439,8 @@ public class CompileOfficeManagedObjectTest extends AbstractCompileTestCase {
 			// Require a team
 			ManagedObjectSourceContext<?> mosContext = context
 					.getManagedObjectSourceContext();
-			mosContext.addWork("WORK", this).addTask("TASK", this).setTeam(
-					"MANAGED_OBJECT_SOURCE_TEAM");
+			mosContext.addWork("WORK", this).addTask("TASK", this)
+					.setTeam("MANAGED_OBJECT_SOURCE_TEAM");
 		}
 
 		@Override
