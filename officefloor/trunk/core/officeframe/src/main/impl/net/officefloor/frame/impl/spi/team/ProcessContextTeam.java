@@ -91,35 +91,17 @@ public class ProcessContextTeam implements Team, ProcessContextListener {
 	 * @throws InterruptedException
 	 *             Should this blocking call be interrupted.
 	 */
-	public static void doWork(WorkManager workManager, Object parameter)
-			throws NoInitialTaskException, InvalidParameterTypeException,
-			InterruptedException {
-
-		// Obtain the current Thread
-		Thread currentThread = Thread.currentThread();
-		try {
-
-			// Register the Job Queue Executor for the Thread.
-			// Must be done before invoking work to ensure available.
-			JobQueueExecutor executor = new JobQueueExecutor();
-			synchronized (threadToExecutor) {
-				threadToExecutor.put(currentThread, executor);
+	public static void doWork(final WorkManager workManager,
+			final Object parameter) throws NoInitialTaskException,
+			InvalidParameterTypeException, InterruptedException {
+		doProcess(new InvokeProcessState() {
+			@Override
+			public ProcessFuture invokeProcessState()
+					throws NoInitialTaskException,
+					InvalidParameterTypeException {
+				return workManager.invokeWork(parameter);
 			}
-
-			// Invoke the work
-			ProcessFuture future = workManager.invokeWork(parameter);
-
-			// Blocking call to execute the Jobs
-			executor.executeJobs(future);
-
-		} finally {
-			// Ensure unregister current Thread
-			synchronized (threadToExecutor) {
-				threadToExecutor.remove(currentThread);
-			}
-
-			// All Jobs should be completed with completion of Process
-		}
+		});
 	}
 
 	/**
@@ -140,33 +122,20 @@ public class ProcessContextTeam implements Team, ProcessContextListener {
 	 * @throws InterruptedException
 	 *             Should this blocking call be interrupted.
 	 */
-	public static void doTask(TaskManager taskManager, Object parameter)
-			throws InvalidParameterTypeException, InterruptedException {
-
-		// Obtain the current Thread
-		Thread currentThread = Thread.currentThread();
+	public static void doTask(final TaskManager taskManager,
+			final Object parameter) throws InvalidParameterTypeException,
+			InterruptedException {
 		try {
-
-			// Register the Job Queue Executor for the Thread.
-			// Must be done before invoking task to ensure available.
-			JobQueueExecutor executor = new JobQueueExecutor();
-			synchronized (threadToExecutor) {
-				threadToExecutor.put(currentThread, executor);
-			}
-
-			// Invoke the task
-			ProcessFuture future = taskManager.invokeTask(parameter);
-
-			// Blocking call to execute the Jobs
-			executor.executeJobs(future);
-
-		} finally {
-			// Ensure unregister current Thread
-			synchronized (threadToExecutor) {
-				threadToExecutor.remove(currentThread);
-			}
-
-			// All Jobs should be completed with completion of Process
+			doProcess(new InvokeProcessState() {
+				@Override
+				public ProcessFuture invokeProcessState()
+						throws InvalidParameterTypeException {
+					return taskManager.invokeTask(parameter);
+				}
+			});
+		} catch (NoInitialTaskException ex) {
+			throw new IllegalStateException(
+					"Should not be able to throw this exception", ex);
 		}
 	}
 
@@ -222,9 +191,69 @@ public class ProcessContextTeam implements Team, ProcessContextListener {
 	 * @throws InterruptedException
 	 *             Should this blocking call be interrupted.
 	 */
-	public static void doProcess(ManagedObjectExecuteContext<?> executeContext,
-			int flowIndex, Object parameter, ManagedObject managedObject,
-			EscalationHandler escalationHandler) throws InterruptedException {
+	public static void doProcess(
+			final ManagedObjectExecuteContext<?> executeContext,
+			final int flowIndex, final Object parameter,
+			final ManagedObject managedObject,
+			final EscalationHandler escalationHandler)
+			throws InterruptedException {
+		try {
+			doProcess(new InvokeProcessState() {
+				@Override
+				public ProcessFuture invokeProcessState() {
+					return executeContext.invokeProcess(flowIndex, parameter,
+							managedObject, 0, escalationHandler);
+				}
+			});
+		} catch (NoInitialTaskException ex) {
+			throw new IllegalStateException(
+					"Should not be able to throw this exception", ex);
+		} catch (InvalidParameterTypeException ex) {
+			throw new IllegalStateException(
+					"Should not be able to throw this exception", ex);
+		}
+	}
+
+	/**
+	 * Interface to wrap invoking the {@link ProcessState}.
+	 */
+	private static interface InvokeProcessState {
+
+		/**
+		 * Invokes the {@link ProcessState}.
+		 * 
+		 * @return {@link ProcessFuture} for the {@link ProcessState}.
+		 * @throws NoInitialTaskException
+		 *             If {@link Work} of the {@link WorkManager} has no initial
+		 *             {@link Task}.
+		 * @throws InvalidParameterTypeException
+		 *             Should the parameter type be invalid for {@link Task}.
+		 */
+		ProcessFuture invokeProcessState() throws NoInitialTaskException,
+				InvalidParameterTypeException;
+	}
+
+	/**
+	 * <p>
+	 * Wrap invoking {@link ProcessState} on the {@link InvokeProcessState} to
+	 * allow the {@link Thread} to be available to execute the {@link Task}
+	 * instances of the {@link ProcessState}.
+	 * <p>
+	 * This method blocks until the invoked {@link ProcessState} is complete.
+	 * 
+	 * @param invoker
+	 *            {@link InvokeProcessState}.
+	 * @throws NoInitialTaskException
+	 *             If {@link Work} of the {@link WorkManager} has no initial
+	 *             {@link Task}.
+	 * @throws InvalidParameterTypeException
+	 *             Should the parameter type be invalid for the {@link Task}.
+	 * @throws InterruptedException
+	 *             Should this blocking call be interrupted.
+	 */
+	private static void doProcess(InvokeProcessState invoker)
+			throws NoInitialTaskException, InvalidParameterTypeException,
+			InterruptedException {
 
 		// Obtain the current Thread
 		Thread currentThread = Thread.currentThread();
@@ -238,19 +267,37 @@ public class ProcessContextTeam implements Team, ProcessContextListener {
 			}
 
 			// Invoke the process
-			ProcessFuture future = executeContext.invokeProcess(flowIndex,
-					parameter, managedObject, 0, escalationHandler);
+			ProcessFuture future = invoker.invokeProcessState();
 
 			// Blocking call to execute the Jobs
 			executor.executeJobs(future);
 
 		} finally {
-			// Ensure unregister current Thread
+			// Ensure unregister current Thread (no further Jobs registered)
+			JobQueueExecutor executor;
 			synchronized (threadToExecutor) {
-				threadToExecutor.remove(currentThread);
+				executor = threadToExecutor.remove(currentThread);
 			}
 
-			// All Jobs should be completed with completion of Process
+			// Jobs can exist for another invoked Process (eg recycling)
+			if (executor != null) {
+
+				// Determine if Jobs to complete
+				Job job = executor.jobQueue.dequeue();
+				if (job != null) {
+					// Complete execution of existing Jobs
+					JobExecutor completionExecutor = new JobExecutor(
+							executor.instance);
+					while (job != null) {
+						
+						// Complete the Job
+						completionExecutor.doJob(job);
+						
+						// Obtain potential next Job to complete
+						job = executor.jobQueue.dequeue();
+					}
+				}
+			}
 		}
 	}
 
