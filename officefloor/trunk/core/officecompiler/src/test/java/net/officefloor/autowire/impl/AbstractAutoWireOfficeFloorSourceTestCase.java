@@ -266,7 +266,7 @@ public abstract class AbstractAutoWireOfficeFloorSourceTestCase extends
 	 * Type of generic sourcing for the object.
 	 */
 	protected static enum SourceObjectType {
-		RawObject, ManagedObject, InputManagedObject, SupplidManagedObject
+		RawObject, ManagedObject, InputManagedObject, SuppliedManagedObject
 	}
 
 	/**
@@ -328,7 +328,7 @@ public abstract class AbstractAutoWireOfficeFloorSourceTestCase extends
 					clazz.getName());
 			return inputManagedObject;
 
-		case SupplidManagedObject:
+		case SuppliedManagedObject:
 			// Add and return the supplied managed object
 			final MockTypeManagedObjectSource supplied = new MockTypeManagedObjectSource(
 					clazz);
@@ -382,7 +382,7 @@ public abstract class AbstractAutoWireOfficeFloorSourceTestCase extends
 			this.recordManagedObjectType(inputManagedObject);
 			break;
 
-		case SupplidManagedObject:
+		case SuppliedManagedObject:
 			// Type already recorded on adding supplier
 			break;
 
@@ -427,7 +427,7 @@ public abstract class AbstractAutoWireOfficeFloorSourceTestCase extends
 					objectType.getName());
 			break;
 
-		case SupplidManagedObject:
+		case SuppliedManagedObject:
 			// Record supplied managed object source
 			Integer identifier = (Integer) object;
 			mos = this.recordSuppliedManagedObjectSource(identifier.intValue(),
@@ -508,7 +508,7 @@ public abstract class AbstractAutoWireOfficeFloorSourceTestCase extends
 					dependencyNameAutoWirePairing);
 			break;
 
-		case SupplidManagedObject:
+		case SuppliedManagedObject:
 			// Record adding supplied managed object (dependencies from type)
 			mo = this.recordManagedObject(mos, autoWire);
 			break;
@@ -544,7 +544,7 @@ public abstract class AbstractAutoWireOfficeFloorSourceTestCase extends
 			this.recordManagedObjectFlow(mos, "flow", "SECTION", "INPUT");
 			break;
 
-		case SupplidManagedObject:
+		case SuppliedManagedObject:
 			// No flows
 			break;
 
@@ -889,11 +889,9 @@ public abstract class AbstractAutoWireOfficeFloorSourceTestCase extends
 			this.isRawObjectTypeMatcherSpecified = true;
 		}
 
-		// No flows and teams for raw object
-		this.recordReturn(managedObjectType, managedObjectType.getFlowTypes(),
-				new ManagedObjectFlowType<?>[0]);
-		this.recordReturn(managedObjectType, managedObjectType.getTeamTypes(),
-				new ManagedObjectTeamType[0]);
+		// Raw object should never be input managed object
+		this.recordReturn(this.context,
+				this.context.isInputManagedObject(managedObjectType), false);
 
 		// Record obtaining extension interfaces
 		this.recordReturn(managedObjectType,
@@ -958,17 +956,13 @@ public abstract class AbstractAutoWireOfficeFloorSourceTestCase extends
 						object.getManagedObjectSourceClassName(),
 						object.getProperties()), managedObjectType);
 
-		// Record flow types
+		// Record whether an input managed object
 		List<String> flowNames = this.managedObjectFlowTypes.get(object);
-		int flowCount = (flowNames == null ? 0 : flowNames.size());
-		this.recordReturn(managedObjectType, managedObjectType.getFlowTypes(),
-				new ManagedObjectFlowType<?>[flowCount]);
-
-		// Record team types
-		List<String> teamNames = this.managedObjectTeamTypes.get(object);
-		int teamCount = (teamNames == null ? 0 : teamNames.size());
-		this.recordReturn(managedObjectType, managedObjectType.getTeamTypes(),
-				new ManagedObjectTeamType[teamCount]);
+		boolean isInputManagedObject = (flowNames == null ? false : (flowNames
+				.size() > 0));
+		this.recordReturn(this.context,
+				this.context.isInputManagedObject(managedObjectType),
+				isInputManagedObject);
 
 		// Record obtaining extension interfaces
 		this.recordReturn(managedObjectType,

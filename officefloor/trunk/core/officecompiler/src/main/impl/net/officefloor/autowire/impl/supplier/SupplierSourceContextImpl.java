@@ -235,6 +235,9 @@ public class SupplierSourceContextImpl extends SourceContextImpl implements
 				continue; // can not load supplied managed object
 			}
 
+			// Determine if an input managed object
+			boolean isInput = managedObjectLoader.isInputManagedObject(moType);
+
 			// Wire in the configuration for the managed object
 			if (object.wirer != null) {
 				object.wirer.wire(object);
@@ -273,8 +276,7 @@ public class SupplierSourceContextImpl extends SourceContextImpl implements
 
 			// Obtain the flow types
 			List<SuppliedManagedObjectFlowType> flows = new LinkedList<SuppliedManagedObjectFlowType>();
-			ManagedObjectFlowType<?>[] moFlowTypes = moType.getFlowTypes();
-			for (ManagedObjectFlowType<?> flowType : moFlowTypes) {
+			for (ManagedObjectFlowType<?> flowType : moType.getFlowTypes()) {
 
 				// Obtain the flow name
 				String flowName = flowType.getFlowName();
@@ -305,8 +307,7 @@ public class SupplierSourceContextImpl extends SourceContextImpl implements
 			// Obtain the supplied teams and required team types
 			List<SuppliedManagedObjectTeam> suppliedTeams = new LinkedList<SuppliedManagedObjectTeam>();
 			List<SuppliedManagedObjectTeamType> requiredTeams = new LinkedList<SuppliedManagedObjectTeamType>();
-			ManagedObjectTeamType[] moTeamTypes = moType.getTeamTypes();
-			for (ManagedObjectTeamType teamType : moTeamTypes) {
+			for (ManagedObjectTeamType teamType : moType.getTeamTypes()) {
 
 				// Obtain the team name
 				String teamName = teamType.getTeamName();
@@ -346,10 +347,6 @@ public class SupplierSourceContextImpl extends SourceContextImpl implements
 				this.addIssue("Wired team '" + teamName + "' not specified on "
 						+ ManagedObjectType.class.getSimpleName() + issueSuffix);
 			}
-
-			// Input Managed Object if have flow or team
-			boolean isInput = (moFlowTypes.length > 0)
-					|| (moTeamTypes.length > 0);
 
 			// Add the supplied managed object type
 			SuppliedManagedObjectDependencyType[] dependencyTypes = dependencies

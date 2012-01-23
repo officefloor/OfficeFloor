@@ -412,6 +412,15 @@ public class ManagedObjectLoaderImpl implements ManagedObjectLoader {
 				extensionInterfaces);
 	}
 
+	@Override
+	public boolean isInputManagedObject(ManagedObjectType<?> managedObjectType) {
+		/*
+		 * Input if has flows to be linked, as can share the managed object
+		 * reference with other input managed objects.
+		 */
+		return managedObjectType.getFlowTypes().length > 0;
+	}
+
 	/**
 	 * Filters out any {@link ManagedObjectFlowType} instances of the
 	 * {@link ManagedObjectSourceMetaData} that are linked to an added

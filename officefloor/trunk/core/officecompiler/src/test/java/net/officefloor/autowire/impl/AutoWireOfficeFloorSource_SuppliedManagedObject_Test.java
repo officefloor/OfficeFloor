@@ -314,13 +314,15 @@ public class AutoWireOfficeFloorSource_SuppliedManagedObject_Test extends
 				officeFloorTeamAutoWire);
 
 		// Record
-		this.recordOffice();
+		this.recordOffice(source.getAutoWire());
 		OfficeFloorManagedObjectSource mos = this
 				.recordSuppliedManagedObjectSource(identifier,
 						source.getAutoWire());
-		this.recordInputManagedObject(mos, source.getAutoWire());
+		OfficeFloorManagedObject mo = this.recordManagedObject(mos,
+				source.getAutoWire());
 		this.recordTeam(OnePersonTeamSource.class, officeFloorTeamAutoWire);
 		this.recordManagedObjectTeam(mos, "team", officeFloorTeamAutoWire);
+		this.recordOfficeObject(mo, source.getAutoWire());
 
 		// Test
 		this.doSourceOfficeFloorTest();
@@ -359,9 +361,11 @@ public class AutoWireOfficeFloorSource_SuppliedManagedObject_Test extends
 		OfficeFloorManagedObjectSource mos = this
 				.recordSuppliedManagedObjectSource(identifier,
 						source.getAutoWire());
-		this.recordInputManagedObject(mos, source.getAutoWire());
+		OfficeFloorManagedObject mo = this.recordManagedObject(mos,
+				source.getAutoWire());
 		this.recordDefaultTeam();
 		this.recordManagedObjectTeam(mos, "team", DEFAULT_TEAM);
+		this.recordOfficeObject(mo, source.getAutoWire());
 
 		// Test
 		this.doSourceOfficeFloorTest();

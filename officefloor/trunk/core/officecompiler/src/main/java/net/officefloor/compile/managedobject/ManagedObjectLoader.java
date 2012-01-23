@@ -20,6 +20,7 @@ package net.officefloor.compile.managedobject;
 
 import net.officefloor.compile.issues.CompilerIssues;
 import net.officefloor.compile.properties.PropertyList;
+import net.officefloor.compile.spi.officefloor.OfficeFloorInputManagedObject;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceProperty;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceSpecification;
@@ -76,5 +77,16 @@ public interface ManagedObjectLoader {
 	<D extends Enum<D>, F extends Enum<F>> ManagedObjectType<D> loadManagedObjectType(
 			ManagedObjectSource<D, F> managedObjectSource,
 			PropertyList propertyList);
+
+	/**
+	 * Determines if the {@link ManagedObjectType} requires to be configured as
+	 * an {@link OfficeFloorInputManagedObject}.
+	 * 
+	 * @param managedObjectType
+	 *            {@link ManagedObjectType}.
+	 * @return <code>true</code> if the {@link ManagedObjectType} is to be
+	 *         configured as an {@link OfficeFloorInputManagedObject}.
+	 */
+	boolean isInputManagedObject(ManagedObjectType<?> managedObjectType);
 
 }
