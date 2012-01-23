@@ -694,13 +694,12 @@ public class ManagedObjectSourceNodeImpl implements ManagedObjectSourceNode {
 		ManagingOfficeBuilder managingOfficeBuilder = moBuilder
 				.setManagingOffice(managingOffice.getDeployedOfficeName());
 
-		// Obtain the flow and team types for the managed object source
-		ManagedObjectFlowType<?>[] flowTypes = managedObjectType.getFlowTypes();
-		ManagedObjectTeamType[] teamTypes = managedObjectType.getTeamTypes();
+		// Obtain the managed object loader
+		ManagedObjectLoader loader = this.context.getManagedObjectLoader(
+				this.locationType, this.location, this.managedObjectSourceName);
 
-		// Provide process bound name if have flows or teams.
-		// (flows may be linked so not appear in type - therefore use teams)
-		if ((flowTypes.length > 0) || (teamTypes.length > 0)) {
+		// Provide process bound name if input managed object
+		if (loader.isInputManagedObject(managedObjectType)) {
 
 			// Ensure have Input ManagedObject name
 			String inputBoundManagedObjectName = null;
@@ -801,7 +800,8 @@ public class ManagedObjectSourceNodeImpl implements ManagedObjectSourceNode {
 		}
 
 		// Link in the flows for the managed object source
-		for (final ManagedObjectFlowType<?> flowType : flowTypes) {
+		for (final ManagedObjectFlowType<?> flowType : managedObjectType
+				.getFlowTypes()) {
 
 			// Obtain the flow type details
 			String flowName = flowType.getFlowName();
@@ -889,7 +889,7 @@ public class ManagedObjectSourceNodeImpl implements ManagedObjectSourceNode {
 		}
 
 		// Link in the teams for the managed object source
-		for (ManagedObjectTeamType teamType : teamTypes) {
+		for (ManagedObjectTeamType teamType : managedObjectType.getTeamTypes()) {
 
 			// Obtain the team type details
 			String teamName = teamType.getTeamName();
