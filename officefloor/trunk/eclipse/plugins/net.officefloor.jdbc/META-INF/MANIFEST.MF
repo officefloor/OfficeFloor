@@ -12,8 +12,7 @@ Require-Bundle: net.officefloor.ui;bundle-version="2.0.0",
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Eclipse-RegisterBuddy: net.officefloor.core,
  net.officefloor.ui
-Export-Package: net.officefloor.eclipse.jdbc,
- net.officefloor.plugin.jdbc.connection,
+Export-Package: net.officefloor.plugin.jdbc.connection,
  net.officefloor.plugin.jdbc.datasource,
  net.officefloor.plugin.jdbc.util
 Bundle-ClassPath: .,

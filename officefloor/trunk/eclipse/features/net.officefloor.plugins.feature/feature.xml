@@ -33,14 +33,7 @@
    </requires>
 
    <plugin
-         id="net.officefloor.jdbc"
-         version="2.0.0"
-         download-size="0"
-         install-size="0"
-         unpack="true"/>
-         
-   <plugin
-         id="net.officefloor.jndi"
+         id="net.officefloor.plugins"
          version="2.0.0"
          download-size="0"
          install-size="0"
