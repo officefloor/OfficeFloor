@@ -17,12 +17,13 @@
  */
 package net.officefloor.plugin.jpa;
 
-import javax.persistence.EntityManager;
 import javax.persistence.EntityTransaction;
 
 import net.officefloor.compile.spi.governance.source.GovernanceSource;
 import net.officefloor.compile.spi.governance.source.impl.AbstractGovernanceSource;
+import net.officefloor.frame.api.build.GovernanceFactory;
 import net.officefloor.frame.api.build.None;
+import net.officefloor.frame.spi.governance.Governance;
 
 /**
  * {@link GovernanceSource} to provide JPA {@link EntityTransaction} management.
@@ -30,7 +31,8 @@ import net.officefloor.frame.api.build.None;
  * @author Daniel Sagenschneider
  */
 public class JpaTransactionGovernanceSource extends
-		AbstractGovernanceSource<EntityManager, None> {
+		AbstractGovernanceSource<EntityTransaction, None> implements
+		GovernanceFactory<EntityTransaction, None> {
 
 	/*
 	 * ===================== GovernanceSource =========================
@@ -38,19 +40,25 @@ public class JpaTransactionGovernanceSource extends
 
 	@Override
 	protected void loadSpecification(SpecificationContext context) {
-		// TODO implement
-		// AbstractGovernanceSource<EntityManager,None>.loadSpecification
-		throw new UnsupportedOperationException(
-				"TODO implement AbstractGovernanceSource<EntityManager,None>.loadSpecification");
+		// No properties required
 	}
 
 	@Override
-	protected void loadMetaData(MetaDataContext<EntityManager, None> context)
+	protected void loadMetaData(MetaDataContext<EntityTransaction, None> context)
 			throws Exception {
-		// TODO implement
-		// AbstractGovernanceSource<EntityManager,None>.loadMetaData
-		throw new UnsupportedOperationException(
-				"TODO implement AbstractGovernanceSource<EntityManager,None>.loadMetaData");
+		// Provide the meta-data
+		context.setExtensionInterface(EntityTransaction.class);
+		context.setGovernanceFactory(this);
+	}
+
+	/*
+	 * ==================== GovernanceFactory =========================
+	 */
+
+	@Override
+	public Governance<EntityTransaction, None> createGovernance()
+			throws Throwable {
+		return new JpaTransactionGovernance();
 	}
 
 }

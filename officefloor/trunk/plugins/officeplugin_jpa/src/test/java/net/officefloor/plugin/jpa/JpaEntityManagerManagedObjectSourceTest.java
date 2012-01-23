@@ -21,27 +21,61 @@ import java.sql.ResultSet;
 import java.sql.Statement;
 
 import javax.persistence.EntityManager;
+import javax.persistence.EntityTransaction;
 import javax.persistence.TypedQuery;
 
 import net.officefloor.autowire.AutoWire;
 import net.officefloor.autowire.AutoWireApplication;
 import net.officefloor.autowire.AutoWireObject;
 import net.officefloor.autowire.AutoWireOfficeFloor;
+import net.officefloor.autowire.ManagedObjectSourceWirer;
+import net.officefloor.autowire.ManagedObjectSourceWirerContext;
 import net.officefloor.autowire.impl.AutoWireOfficeFloorSource;
+import net.officefloor.compile.test.managedobject.ManagedObjectLoaderUtil;
+import net.officefloor.compile.test.managedobject.ManagedObjectTypeBuilder;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.plugin.section.clazz.ClassSectionSource;
 import net.officefloor.plugin.section.clazz.Parameter;
-
-import org.junit.Ignore;
 
 /**
  * Tests the {@link JpaEntityManagerManagedObjectSource}.
  * 
  * @author Daniel Sagenschneider
  */
-@Ignore
 public class JpaEntityManagerManagedObjectSourceTest extends
 		AbstractJpaTestCase {
+
+	/**
+	 * Validate the specification.
+	 */
+	public void testSpecification() {
+		ManagedObjectLoaderUtil
+				.validateSpecification(
+						JpaEntityManagerManagedObjectSource.class,
+						JpaEntityManagerManagedObjectSource.PROPERTY_PERSISTENCE_UNIT_NAME,
+						"Persistence Unit");
+	}
+
+	/**
+	 * Validate the type.
+	 */
+	public void testType() {
+
+		// Create the expected type
+		ManagedObjectTypeBuilder type = ManagedObjectLoaderUtil
+				.createManagedObjectTypeBuilder();
+		type.setObjectClass(EntityManager.class);
+		type.addTeam(JpaEntityManagerManagedObjectSource.TEAM_CLOSE);
+		type.addExtensionInterface(EntityTransaction.class);
+
+		// Validate type
+		ManagedObjectLoaderUtil
+				.validateManagedObjectType(
+						type,
+						JpaEntityManagerManagedObjectSource.class,
+						JpaEntityManagerManagedObjectSource.PROPERTY_PERSISTENCE_UNIT_NAME,
+						"test");
+	}
 
 	/**
 	 * Ensure able to read entry from database.
@@ -59,8 +93,15 @@ public class JpaEntityManagerManagedObjectSourceTest extends
 		app.addSection("READ", ClassSectionSource.class.getName(),
 				ReadWork.class.getName());
 		AutoWireObject jpa = app.addManagedObject(
-				JpaEntityManagerManagedObjectSource.class.getName(), null,
-				new AutoWire(EntityManager.class));
+				JpaEntityManagerManagedObjectSource.class.getName(),
+				new ManagedObjectSourceWirer() {
+					@Override
+					public void wire(ManagedObjectSourceWirerContext context) {
+						context.mapTeam(
+								JpaEntityManagerManagedObjectSource.TEAM_CLOSE,
+								new AutoWire(EntityManager.class));
+					}
+				}, new AutoWire(EntityManager.class));
 		jpa.addProperty(
 				JpaEntityManagerManagedObjectSource.PROPERTY_PERSISTENCE_UNIT_NAME,
 				"test");
@@ -68,7 +109,7 @@ public class JpaEntityManagerManagedObjectSourceTest extends
 		// Invoke task to retrieve entity
 		AutoWireOfficeFloor officeFloor = app.openOfficeFloor();
 		Result result = new Result();
-		officeFloor.invokeTask("READ", "task", result);
+		officeFloor.invokeTask("READ.WORK", "task", result);
 
 		// Validate the result
 		assertNotNull("Should have result", result.entity);
@@ -92,7 +133,8 @@ public class JpaEntityManagerManagedObjectSourceTest extends
 
 			// Retrieve the entity
 			TypedQuery<MockEntity> query = entityManager.createQuery(
-					"SELECT MockEntity WHERE NAME = 'test'", MockEntity.class);
+					"SELECT M FROM MockEntity M WHERE M.name = 'test'",
+					MockEntity.class);
 			MockEntity entity = query.getSingleResult();
 
 			// Specify the result
@@ -110,15 +152,22 @@ public class JpaEntityManagerManagedObjectSourceTest extends
 		app.addSection("WRITE", ClassSectionSource.class.getName(),
 				WriteWork.class.getName());
 		AutoWireObject jpa = app.addManagedObject(
-				JpaEntityManagerManagedObjectSource.class.getName(), null,
-				new AutoWire(EntityManager.class));
+				JpaEntityManagerManagedObjectSource.class.getName(),
+				new ManagedObjectSourceWirer() {
+					@Override
+					public void wire(ManagedObjectSourceWirerContext context) {
+						context.mapTeam(
+								JpaEntityManagerManagedObjectSource.TEAM_CLOSE,
+								new AutoWire(EntityManager.class));
+					}
+				}, new AutoWire(EntityManager.class));
 		jpa.addProperty(
 				JpaEntityManagerManagedObjectSource.PROPERTY_PERSISTENCE_UNIT_NAME,
 				"test");
 
 		// Invoke task to retrieve entity
 		AutoWireOfficeFloor officeFloor = app.openOfficeFloor();
-		officeFloor.invokeTask("WRITE", "task", null);
+		officeFloor.invokeTask("WRITE.WORK", "task", null);
 
 		// Validate the entry written to database
 		Statement statement = this.connection.createStatement();
