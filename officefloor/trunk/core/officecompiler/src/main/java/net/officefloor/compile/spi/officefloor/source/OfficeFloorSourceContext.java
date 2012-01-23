@@ -24,6 +24,7 @@ import net.officefloor.compile.managedobject.ManagedObjectType;
 import net.officefloor.compile.office.OfficeType;
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.spi.office.source.OfficeSource;
+import net.officefloor.compile.spi.officefloor.OfficeFloorInputManagedObject;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
@@ -94,6 +95,17 @@ public interface OfficeFloorSourceContext extends SourceContext {
 	ManagedObjectType<?> loadManagedObjectType(
 			ManagedObjectSource<?, ?> managedObjectSource,
 			PropertyList properties);
+
+	/**
+	 * Determines if the {@link ManagedObjectType} requires to be configured as
+	 * an {@link OfficeFloorInputManagedObject}.
+	 * 
+	 * @param managedObjectType
+	 *            {@link ManagedObjectType}.
+	 * @return <code>true</code> if the {@link ManagedObjectType} is to be
+	 *         configured as an {@link OfficeFloorInputManagedObject}.
+	 */
+	boolean isInputManagedObject(ManagedObjectType<?> managedObjectType);
 
 	/**
 	 * <p>

@@ -232,7 +232,7 @@ public class AutoWireOfficeFloorSource_Dependencies_Test extends
 
 		case RawObject:
 		case ManagedObject:
-		case SupplidManagedObject:
+		case SuppliedManagedObject:
 			// No input linking
 			break;
 
@@ -254,7 +254,7 @@ public class AutoWireOfficeFloorSource_Dependencies_Test extends
 
 		case RawObject:
 		case ManagedObject:
-		case SupplidManagedObject:
+		case SuppliedManagedObject:
 			// No flow/team linking required
 			break;
 
@@ -274,7 +274,7 @@ public class AutoWireOfficeFloorSource_Dependencies_Test extends
 
 		case RawObject:
 		case ManagedObject:
-		case SupplidManagedObject:
+		case SuppliedManagedObject:
 			// Link the dependency
 			this.recordLinkManagedObjectDependency(new AutoWire(usedClass),
 					"dependency",

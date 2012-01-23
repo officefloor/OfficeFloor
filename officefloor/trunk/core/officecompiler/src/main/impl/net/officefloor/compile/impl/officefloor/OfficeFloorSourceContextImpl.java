@@ -142,6 +142,18 @@ public class OfficeFloorSourceContextImpl extends SourceContextImpl implements
 	}
 
 	@Override
+	public boolean isInputManagedObject(ManagedObjectType<?> managedObjectType) {
+
+		// Obtain the managed object loader
+		ManagedObjectLoader managedObjectLoader = this.context
+				.getManagedObjectLoader(LocationType.OFFICE_FLOOR,
+						this.officeFloorLocation, "loadManagedObjectType");
+
+		// Return whether should be an input managed object
+		return managedObjectLoader.isInputManagedObject(managedObjectType);
+	}
+
+	@Override
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public SupplierType loadSupplierType(String supplierSourceClassName,
 			PropertyList properties) {

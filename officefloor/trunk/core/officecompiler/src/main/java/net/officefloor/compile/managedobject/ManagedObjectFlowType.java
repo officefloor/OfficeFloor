@@ -20,6 +20,7 @@ package net.officefloor.compile.managedobject;
 
 import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.execute.Work;
+import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.internal.structure.JobSequence;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 
@@ -39,22 +40,37 @@ public interface ManagedObjectFlowType<F extends Enum<F>> {
 	String getFlowName();
 
 	/**
-	 * Obtains the name of the {@link Work} instigating the {@link JobSequence}. Should
-	 * the {@link JobSequence} be instigated by the {@link ManagedObjectSource}
-	 * directly (rather than a {@link Task} it added) this will return
-	 * <code>null</code>.
+	 * Obtains the name of the {@link Work} instigating the {@link JobSequence}.
+	 * Should the {@link JobSequence} be instigated by the
+	 * {@link ManagedObjectSource} directly (rather than a {@link Task} it
+	 * added) this will return <code>null</code>.
 	 * 
-	 * @return {@link Work} name or <code>null</code>.
+	 * @return {@link Work} name instigating {@link JobSequence} or
+	 *         <code>null</code> if instigated directly by
+	 *         {@link ManagedObjectSource}.
+	 * 
+	 * @see #getTaskName()
 	 */
 	String getWorkName();
 
 	/**
-	 * Obtains the name of the {@link Task} instigating the {@link JobSequence}. Should
-	 * the {@link JobSequence} be instigated by the {@link ManagedObjectSource}
-	 * directly (rather than a {@link Task} it added) this will return
-	 * <code>null</code>.
+	 * <p>
+	 * Obtains the name of the {@link Task} instigating the {@link JobSequence}.
+	 * Should the {@link JobSequence} be instigated by the
+	 * {@link ManagedObjectSource} directly (rather than a {@link Task} it
+	 * added) this will return <code>null</code>.
+	 * <p>
+	 * For clarity, this is not the name of the {@link Task} to be invoked by
+	 * the {@link JobSequence} but rather the {@link Task} triggering the
+	 * {@link JobSequence}. In other words, it is a {@link JobSequence}
+	 * invocation that requires to be defined for the
+	 * {@link ManagedObjectSource} as it is triggered from a {@link Task} added
+	 * by the {@link ManagedObjectSource} and handled by some {@link Office}
+	 * {@link Task}.
 	 * 
-	 * @return {@link Task} name or <code>null</code>.
+	 * @return {@link Task} name instigating {@link JobSequence} or
+	 *         <code>null</code> if instigated directly by
+	 *         {@link ManagedObjectSource}.
 	 */
 	String getTaskName();
 

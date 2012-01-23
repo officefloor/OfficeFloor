@@ -51,8 +51,6 @@ import net.officefloor.compile.OfficeFloorCompiler;
 import net.officefloor.compile.impl.OfficeFloorCompilerAdapter;
 import net.officefloor.compile.impl.issues.FailCompilerIssues;
 import net.officefloor.compile.managedobject.ManagedObjectDependencyType;
-import net.officefloor.compile.managedobject.ManagedObjectFlowType;
-import net.officefloor.compile.managedobject.ManagedObjectTeamType;
 import net.officefloor.compile.managedobject.ManagedObjectType;
 import net.officefloor.compile.office.OfficeInputType;
 import net.officefloor.compile.office.OfficeManagedObjectType;
@@ -1269,11 +1267,8 @@ public class AutoWireOfficeFloorSource extends AbstractOfficeFloorSource
 				}
 
 				// Determine if input
-				ManagedObjectFlowType<?>[] flowTypes = this.managedObjectType
-						.getFlowTypes();
-				ManagedObjectTeamType[] teamTypes = this.managedObjectType
-						.getTeamTypes();
-				this.isInput = (flowTypes.length > 0) || (teamTypes.length > 0);
+				this.isInput = context
+						.isInputManagedObject(this.managedObjectType);
 			}
 		}
 
