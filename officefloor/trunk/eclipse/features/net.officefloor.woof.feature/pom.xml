@@ -22,7 +22,7 @@
 		</dependency>
 		<dependency>
 			<groupId>${project.groupId}</groupId>
-			<artifactId>net.officefloor.socket</artifactId>
+			<artifactId>net.officefloor.plugins.feature</artifactId>
 			<scope>provided</scope>
 		</dependency>
 		<dependency>

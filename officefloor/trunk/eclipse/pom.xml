@@ -23,9 +23,6 @@
 		<module>features/net.officefloor.feature</module>
 
 		<!-- Plug-in eclipse functionality -->
-		<module>plugins/net.officefloor.socket</module>
-		<module>plugins/net.officefloor.jdbc</module>
-		<module>plugins/net.officefloor.jndi</module>
 		<module>plugins/net.officefloor.plugins</module>
 		<module>features/net.officefloor.plugins.feature</module>
 

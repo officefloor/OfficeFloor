@@ -17,11 +17,7 @@
 		</file>
 		<file>
 			<location>feature.xml</location>
-			<contains><![CDATA[id="net.officefloor.jdbc"(\s+)version="@{net.officefloor.jdbc_version}"]]></contains>
-		</file>
-		<file>
-			<location>feature.xml</location>
-			<contains><![CDATA[id="net.officefloor.jndi"(\s+)version="@{net.officefloor.jndi_version}"]]></contains>
+			<contains><![CDATA[id="net.officefloor.plugins"(\s+)version="@{net.officefloor.plugins_version}"]]></contains>
 		</file>
 	</files>
 </verifications>

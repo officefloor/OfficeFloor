@@ -10,8 +10,7 @@ Require-Bundle: net.officefloor.core;bundle-version="2.0.0",
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Eclipse-RegisterBuddy: net.officefloor.core, 
  net.officefloor.ui
-Export-Package: net.officefloor.eclipse.socket,
- net.officefloor.plugin.socket.server,
+Export-Package: net.officefloor.plugin.socket.server,
  net.officefloor.plugin.socket.server.http,
  net.officefloor.plugin.socket.server.http.conversation,
  net.officefloor.plugin.socket.server.http.conversation.impl,
