@@ -18,11 +18,22 @@
 package net.officefloor.plugin.jpa;
 
 import javax.persistence.EntityManager;
+import javax.persistence.EntityManagerFactory;
+import javax.persistence.EntityTransaction;
+import javax.persistence.Persistence;
 
 import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
+import net.officefloor.frame.spi.managedobject.extension.ExtensionInterfaceFactory;
+import net.officefloor.frame.spi.managedobject.recycle.RecycleManagedObjectParameter;
+import net.officefloor.frame.spi.managedobject.source.ManagedObjectExecuteContext;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
+import net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceContext;
+import net.officefloor.frame.spi.managedobject.source.ManagedObjectTaskBuilder;
+import net.officefloor.frame.spi.managedobject.source.ManagedObjectWorkBuilder;
 import net.officefloor.frame.spi.managedobject.source.impl.AbstractManagedObjectSource;
+import net.officefloor.frame.spi.team.Team;
+import net.officefloor.plugin.jpa.CloseEntityManagerTask.CloseEntityManagerDependencies;
 
 /**
  * {@link ManagedObjectSource} to provide a JPA {@link EntityManager}.
@@ -30,12 +41,28 @@ import net.officefloor.frame.spi.managedobject.source.impl.AbstractManagedObject
  * @author Daniel Sagenschneider
  */
 public class JpaEntityManagerManagedObjectSource extends
-		AbstractManagedObjectSource<None, None> {
+		AbstractManagedObjectSource<None, None> implements
+		ExtensionInterfaceFactory<EntityTransaction> {
 
 	/**
 	 * Name of property providing the persistence unit name.
 	 */
 	public static final String PROPERTY_PERSISTENCE_UNIT_NAME = "persistence.unit.name";
+
+	/**
+	 * Name of {@link Team} to close the {@link EntityManager}.
+	 */
+	public static final String TEAM_CLOSE = "CLOSE";
+
+	/**
+	 * Persistence unit name.
+	 */
+	private String persistenceUnitName;
+
+	/**
+	 * {@link EntityManagerFactory}.
+	 */
+	private EntityManagerFactory entityManagerFactory;
 
 	/*
 	 * ================ ManagedObjectSource ========================
@@ -43,27 +70,61 @@ public class JpaEntityManagerManagedObjectSource extends
 
 	@Override
 	protected void loadSpecification(SpecificationContext context) {
-		// TODO implement
-		// AbstractAsyncManagedObjectSource<None,None>.loadSpecification
-		throw new UnsupportedOperationException(
-				"TODO implement AbstractAsyncManagedObjectSource<None,None>.loadSpecification");
+		context.addProperty(PROPERTY_PERSISTENCE_UNIT_NAME, "Persistence Unit");
 	}
 
 	@Override
 	protected void loadMetaData(MetaDataContext<None, None> context)
 			throws Exception {
-		// TODO implement
-		// AbstractAsyncManagedObjectSource<None,None>.loadMetaData
-		throw new UnsupportedOperationException(
-				"TODO implement AbstractAsyncManagedObjectSource<None,None>.loadMetaData");
+		ManagedObjectSourceContext<None> mosContext = context
+				.getManagedObjectSourceContext();
+
+		// Obtain the persistence unit name
+		this.persistenceUnitName = mosContext
+				.getProperty(PROPERTY_PERSISTENCE_UNIT_NAME);
+
+		// Specify meta-data
+		context.setObjectClass(EntityManager.class);
+
+		// Provide close entity manager
+		CloseEntityManagerTask closeTask = new CloseEntityManagerTask();
+		ManagedObjectWorkBuilder<CloseEntityManagerTask> recycleWork = mosContext
+				.getRecycleWork(closeTask);
+		ManagedObjectTaskBuilder<CloseEntityManagerDependencies, None> recycleTask = recycleWork
+				.addTask("CLOSE", closeTask);
+		recycleTask.linkParameter(
+				CloseEntityManagerDependencies.MANAGED_OBJECT,
+				RecycleManagedObjectParameter.class);
+		recycleTask.setTeam(TEAM_CLOSE);
+
+		// Extension interface
+		context.addManagedObjectExtensionInterface(EntityTransaction.class,
+				this);
+	}
+
+	@Override
+	public void start(ManagedObjectExecuteContext<None> context)
+			throws Exception {
+		this.entityManagerFactory = Persistence
+				.createEntityManagerFactory(this.persistenceUnitName);
 	}
 
 	@Override
 	protected ManagedObject getManagedObject() throws Throwable {
-		// TODO implement
-		// AbstractManagedObjectSource<None,None>.getManagedObject
-		throw new UnsupportedOperationException(
-				"TODO implement AbstractManagedObjectSource<None,None>.getManagedObject");
+
+		// Create the entity manager
+		EntityManager entityManager = this.entityManagerFactory
+				.createEntityManager();
+
+		// Create and return the managed object
+		return new JpaEntityManagerManagedObject(entityManager);
+	}
+
+	@Override
+	public EntityTransaction createExtensionInterface(
+			ManagedObject managedObject) {
+		JpaEntityManagerManagedObject jpaEntityManagerMo = (JpaEntityManagerManagedObject) managedObject;
+		return jpaEntityManagerMo.getEntityTransaction();
 	}
 
 }

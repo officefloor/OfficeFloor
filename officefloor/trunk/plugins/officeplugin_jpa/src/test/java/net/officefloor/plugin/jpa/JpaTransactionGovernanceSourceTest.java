@@ -23,15 +23,18 @@ import java.sql.SQLException;
 import java.sql.Statement;
 
 import javax.persistence.EntityManager;
+import javax.persistence.EntityTransaction;
 import javax.persistence.PersistenceException;
-
-import org.junit.Ignore;
 
 import net.officefloor.autowire.AutoWire;
 import net.officefloor.autowire.AutoWireApplication;
 import net.officefloor.autowire.AutoWireOfficeFloor;
 import net.officefloor.autowire.AutoWireSection;
+import net.officefloor.autowire.ManagedObjectSourceWirer;
+import net.officefloor.autowire.ManagedObjectSourceWirerContext;
 import net.officefloor.autowire.impl.AutoWireOfficeFloorSource;
+import net.officefloor.compile.test.governance.GovernanceLoaderUtil;
+import net.officefloor.compile.test.governance.GovernanceTypeBuilder;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.spi.governance.Governance;
 import net.officefloor.plugin.section.clazz.ClassSectionSource;
@@ -43,7 +46,6 @@ import net.officefloor.plugin.section.clazz.Parameter;
  * 
  * @author Daniel Sagenschneider
  */
-@Ignore
 public class JpaTransactionGovernanceSourceTest extends AbstractJpaTestCase {
 
 	/**
@@ -53,6 +55,9 @@ public class JpaTransactionGovernanceSourceTest extends AbstractJpaTestCase {
 
 	@Override
 	protected void setUp() throws Exception {
+
+		// Setup the connection
+		super.setUp();
 
 		// Configure the application
 		AutoWireApplication app = new AutoWireOfficeFloorSource();
@@ -67,8 +72,15 @@ public class JpaTransactionGovernanceSourceTest extends AbstractJpaTestCase {
 				"handleFailure");
 		app.addObject(this.connection, new AutoWire(Connection.class));
 		app.addManagedObject(
-				JpaEntityManagerManagedObjectSource.class.getName(), null,
-				new AutoWire(EntityManager.class))
+				JpaEntityManagerManagedObjectSource.class.getName(),
+				new ManagedObjectSourceWirer() {
+					@Override
+					public void wire(ManagedObjectSourceWirerContext context) {
+						context.mapTeam(
+								JpaEntityManagerManagedObjectSource.TEAM_CLOSE,
+								new AutoWire(EntityManager.class));
+					}
+				}, new AutoWire(EntityManager.class))
 				.addProperty(
 						JpaEntityManagerManagedObjectSource.PROPERTY_PERSISTENCE_UNIT_NAME,
 						"test");
@@ -81,12 +93,35 @@ public class JpaTransactionGovernanceSourceTest extends AbstractJpaTestCase {
 	}
 
 	/**
+	 * Validate the specification.
+	 */
+	public void testSpecification() {
+		GovernanceLoaderUtil
+				.validateSpecification(JpaTransactionGovernanceSource.class);
+	}
+
+	/**
+	 * Validate the type.
+	 */
+	public void testType() {
+
+		// Create the expected type
+		GovernanceTypeBuilder<?> type = GovernanceLoaderUtil
+				.createGovernanceTypeBuilder();
+		type.setExtensionInterface(EntityTransaction.class);
+
+		// Validate the type
+		GovernanceLoaderUtil.validateGovernanceType(type,
+				JpaTransactionGovernanceSource.class);
+	}
+
+	/**
 	 * Ensure {@link Governance} commits transaction.
 	 */
 	public void testCommitTransaction() throws Exception {
 
 		// Invoke task to write entity within transaction
-		this.officeFloor.invokeTask("TRANSACTION", "task", null);
+		this.officeFloor.invokeTask("TRANSACTION.WORK", "task", null);
 
 		// Validate the entry is within the database
 		assertEntry(this.connection);
@@ -98,7 +133,7 @@ public class JpaTransactionGovernanceSourceTest extends AbstractJpaTestCase {
 	public void testRollbackTransaction() throws Exception {
 
 		// Invoke task that fails rolling back transaction
-		this.officeFloor.invokeTask("TRANSACTION", "failingTask", null);
+		this.officeFloor.invokeTask("TRANSACTION.WORK", "failingTask", null);
 
 		// Validate no entries as rollback
 		assertNoEntries(this.connection);
@@ -130,7 +165,7 @@ public class JpaTransactionGovernanceSourceTest extends AbstractJpaTestCase {
 		// Validate entry in database
 		Statement statement = connection.createStatement();
 		ResultSet results = statement
-				.executeQuery("SELECT NAME, DESCRIPTION FROM MOCKENTITY");
+				.executeQuery("SELECT ID, NAME, DESCRIPTION FROM MOCKENTITY");
 		assertTrue("Should have entry", results.next());
 		assertEquals("Incorrect name", "transaction", results.getString("NAME"));
 		assertEquals("Incorrect description", "mock transaction entity",
@@ -164,6 +199,10 @@ public class JpaTransactionGovernanceSourceTest extends AbstractJpaTestCase {
 		}
 
 		public void failingTask(EntityManager entityManager) {
+
+			// Ensure within transaction
+			assertTrue("Should be within transaction", entityManager
+					.getTransaction().isActive());
 
 			// Write an entry that will persist (but be rolled back)
 			entityManager.persist(new MockEntity("VALID",
