@@ -73,4 +73,3 @@ Bundle-ClassPath: .,
  officeplugin_jndi-2.0.0.jar,
  officeplugin_socket-2.0.0.jar,
  officeplugin_web-2.0.0.jar
- 
