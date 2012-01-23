@@ -231,6 +231,11 @@
 			</dependency>
 			<dependency>
 				<groupId>net.officefloor.eclipse</groupId>
+				<artifactId>net.officefloor.plugins</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>net.officefloor.eclipse</groupId>
 				<artifactId>net.officefloor.socket</artifactId>
 				<version>${project.version}</version>
 			</dependency>
