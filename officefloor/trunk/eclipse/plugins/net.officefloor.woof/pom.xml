@@ -26,6 +26,11 @@
 			<artifactId>net.officefloor.ui</artifactId>
 			<scope>provided</scope>
 		</dependency>
+		<dependency>
+			<groupId>${project.groupId}</groupId>
+			<artifactId>net.officefloor.plugins</artifactId>
+			<scope>provided</scope>
+		</dependency>
 
 		<!-- Required -->
 		<dependency>
