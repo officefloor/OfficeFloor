@@ -1,9 +1,0 @@
-                                       ---------------------------
-                                              Eclipse JNDI
-                                       ---------------------------
-                                          Daniel Sagenschneider
-                                       ---------------------------
-
-  <<Eclipse JNDI>>
-  
-  This module provides an Eclipse plug-in to enable custom graphical configuration for the JNDI functionality of the {{{/plugins/officeplugin_jndi/index.html}OfficeFloor JNDI plug-in}}.

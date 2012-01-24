@@ -1,9 +1,0 @@
-                                       ---------------------------
-                                              Eclipse JDBC
-                                       ---------------------------
-                                          Daniel Sagenschneider
-                                       ---------------------------
-
-  <<Eclipse JDBC>>
-  
-  This module provides an Eclipse plug-in to enable custom graphical configuration for the JDBC functionality of the {{{/plugins/officeplugin_jdbc/index.html}OfficeFloor JDBC plug-in}}.
