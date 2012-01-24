@@ -16,10 +16,6 @@
 
 		<!-- WoOF eclipse modules are inheriting correct version -->
 		<file>
-			<location>plugins/net.officefloor.socket/pom.xml</location>
-			<contains><![CDATA[<version>${project.version}</version>(\s)*</parent>]]></contains>
-		</file>
-		<file>
 			<location>plugins/net.officefloor.woof/pom.xml</location>
 			<contains><![CDATA[<version>${project.version}</version>(\s)*</parent>]]></contains>
 		</file>
@@ -30,11 +26,7 @@
 
 		<!-- Plug-in eclipse modules are inheriting correct version -->
 		<file>
-			<location>plugins/net.officefloor.jdbc/pom.xml</location>
-			<contains><![CDATA[<version>${project.version}</version>(\s)*</parent>]]></contains>
-		</file>
-		<file>
-			<location>plugins/net.officefloor.jndi/pom.xml</location>
+			<location>plugins/net.officefloor.plugins/pom.xml</location>
 			<contains><![CDATA[<version>${project.version}</version>(\s)*</parent>]]></contains>
 		</file>
 		<file>
