@@ -327,6 +327,7 @@ public class CompileOfficeManagedObjectTest extends AbstractCompileTestCase {
 		this.record_officeFloorBuilder_addManagedObject(
 				"OFFICE.MANAGED_OBJECT_SOURCE", TeamManagedObject.class, 0);
 		this.record_managedObjectBuilder_setManagingOffice("OFFICE");
+		this.record_managingOfficeBuilder_setInputManagedObjectName("OFFICE.MANAGED_OBJECT_SOURCE");
 		this.issues
 				.addIssue(LocationType.OFFICE, "office",
 						AssetType.MANAGED_OBJECT, "MANAGED_OBJECT_SOURCE",
@@ -349,6 +350,7 @@ public class CompileOfficeManagedObjectTest extends AbstractCompileTestCase {
 		this.record_officeFloorBuilder_addManagedObject(
 				"OFFICE.MANAGED_OBJECT_SOURCE", TeamManagedObject.class, 0);
 		this.record_managedObjectBuilder_setManagingOffice("OFFICE");
+		this.record_managingOfficeBuilder_setInputManagedObjectName("OFFICE.MANAGED_OBJECT_SOURCE");
 		this.record_officeBuilder_registerTeam("OFFICE_TEAM", "TEAM");
 		this.record_officeBuilder_registerTeam(
 				"OFFICE.MANAGED_OBJECT_SOURCE.MANAGED_OBJECT_SOURCE_TEAM",
