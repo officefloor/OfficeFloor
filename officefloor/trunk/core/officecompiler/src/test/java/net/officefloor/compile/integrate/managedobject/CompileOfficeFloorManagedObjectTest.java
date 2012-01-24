@@ -182,6 +182,7 @@ public class CompileOfficeFloorManagedObjectTest extends
 
 		// Record managing office
 		this.record_managedObjectBuilder_setManagingOffice("OFFICE");
+		this.record_managingOfficeBuilder_setInputManagedObjectName("MANAGED_OBJECT_SOURCE");
 
 		// Compile the office floor
 		this.compile(true);
@@ -494,6 +495,7 @@ public class CompileOfficeFloorManagedObjectTest extends
 		this.record_officeFloorBuilder_addManagedObject(
 				"MANAGED_OBJECT_SOURCE", TeamManagedObject.class, 0);
 		this.record_managedObjectBuilder_setManagingOffice("OFFICE");
+		this.record_managingOfficeBuilder_setInputManagedObjectName("MANAGED_OBJECT_SOURCE");
 		this.issues
 				.addIssue(LocationType.OFFICE_FLOOR, "office-floor",
 						AssetType.MANAGED_OBJECT, "MANAGED_OBJECT_SOURCE",
@@ -516,6 +518,7 @@ public class CompileOfficeFloorManagedObjectTest extends
 		this.record_officeFloorBuilder_addManagedObject(
 				"MANAGED_OBJECT_SOURCE", TeamManagedObject.class, 0);
 		this.record_managedObjectBuilder_setManagingOffice("OFFICE");
+		this.record_managingOfficeBuilder_setInputManagedObjectName("MANAGED_OBJECT_SOURCE");
 		this.record_officeBuilder_registerTeam(
 				"MANAGED_OBJECT_SOURCE.MANAGED_OBJECT_SOURCE_TEAM", "TEAM");
 
