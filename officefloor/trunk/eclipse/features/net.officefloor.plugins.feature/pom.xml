@@ -22,12 +22,7 @@
 		</dependency>
 		<dependency>
 			<groupId>${project.groupId}</groupId>
-			<artifactId>net.officefloor.jdbc</artifactId>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>${project.groupId}</groupId>
-			<artifactId>net.officefloor.jndi</artifactId>
+			<artifactId>net.officefloor.plugins</artifactId>
 			<scope>provided</scope>
 		</dependency>
 	</dependencies>

@@ -414,11 +414,20 @@ public class ManagedObjectLoaderImpl implements ManagedObjectLoader {
 
 	@Override
 	public boolean isInputManagedObject(ManagedObjectType<?> managedObjectType) {
-		/*
-		 * Input if has flows to be linked, as can share the managed object
-		 * reference with other input managed objects.
-		 */
-		return managedObjectType.getFlowTypes().length > 0;
+
+		// Input if flows to link, as can share reference with other inputs
+		if (managedObjectType.getFlowTypes().length > 0) {
+			return true;
+		}
+
+		// Input if private tasks (indicated by team) and needs dependencies
+		if ((managedObjectType.getTeamTypes().length > 0)
+				&& (managedObjectType.getDependencyTypes().length > 0)) {
+			return true;
+		}
+
+		// As here, not an input managed object
+		return false;
 	}
 
 	/**
