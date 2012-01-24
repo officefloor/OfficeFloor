@@ -694,20 +694,30 @@ public class ManagedObjectSourceNodeImpl implements ManagedObjectSourceNode {
 		ManagingOfficeBuilder managingOfficeBuilder = moBuilder
 				.setManagingOffice(managingOffice.getDeployedOfficeName());
 
-		// Obtain the managed object loader
-		ManagedObjectLoader loader = this.context.getManagedObjectLoader(
-				this.locationType, this.location, this.managedObjectSourceName);
+		// Obtain the flow types and team types
+		ManagedObjectFlowType<?>[] flowTypes = managedObjectType.getFlowTypes();
+		ManagedObjectTeamType[] teamTypes = managedObjectType.getTeamTypes();
 
 		// Provide process bound name if input managed object
-		if (loader.isInputManagedObject(managedObjectType)) {
+		if ((flowTypes.length > 0) || (teamTypes.length > 0)) {
 
 			// Ensure have Input ManagedObject name
 			String inputBoundManagedObjectName = null;
 			switch (this.locationType) {
 			case OFFICE_FLOOR:
-				if (this.inputManagedObjectNode != null) {
-					inputBoundManagedObjectName = this.inputManagedObjectNode
-							.getBoundManagedObjectName();
+				// Determine if require configuring as Input Managed Object
+				ManagedObjectLoader loader = this.context
+						.getManagedObjectLoader(this.locationType,
+								this.location, this.managedObjectSourceName);
+				if (loader.isInputManagedObject(managedObjectType)) {
+					// Must configure as Input Managed Object (as shared)
+					if (this.inputManagedObjectNode != null) {
+						inputBoundManagedObjectName = this.inputManagedObjectNode
+								.getBoundManagedObjectName();
+					}
+				} else {
+					// Never shared (tasks specific to Managed Object Source)
+					inputBoundManagedObjectName = managedObjectSourceName;
 				}
 				break;
 			case OFFICE:
@@ -800,8 +810,7 @@ public class ManagedObjectSourceNodeImpl implements ManagedObjectSourceNode {
 		}
 
 		// Link in the flows for the managed object source
-		for (final ManagedObjectFlowType<?> flowType : managedObjectType
-				.getFlowTypes()) {
+		for (final ManagedObjectFlowType<?> flowType : flowTypes) {
 
 			// Obtain the flow type details
 			String flowName = flowType.getFlowName();
@@ -889,7 +898,7 @@ public class ManagedObjectSourceNodeImpl implements ManagedObjectSourceNode {
 		}
 
 		// Link in the teams for the managed object source
-		for (ManagedObjectTeamType teamType : managedObjectType.getTeamTypes()) {
+		for (ManagedObjectTeamType teamType : teamTypes) {
 
 			// Obtain the team type details
 			String teamName = teamType.getTeamName();
