@@ -52,7 +52,7 @@ public interface AutoWireObjectsRepository {
 	 * @throws Exception
 	 *             If fails to store the {@link AutoWireObjectsModel}.
 	 */
-	void storeAutoWireObjects(AutoWireObjectsModel services,
+	void storeAutoWireObjects(AutoWireObjectsModel objects,
 			ConfigurationItem configuration) throws Exception;
 
 }

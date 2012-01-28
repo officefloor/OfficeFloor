@@ -17,15 +17,42 @@
  */
 package net.officefloor.model.teams;
 
-import net.officefloor.autowire.impl.AutoWireOfficeFloorSource;
-import net.officefloor.frame.spi.team.Team;
+import net.officefloor.autowire.AutoWireApplication;
+import net.officefloor.model.repository.ConfigurationItem;
 
 /**
- * Repository for obtaining the {@link Team} model for auto-wiring into an
- * {@link AutoWireOfficeFloorSource}.
+ * Repository for obtaining the {@link AutoWireTeamsModel} for auto-wiring into
+ * an {@link AutoWireApplication}.
  * 
  * @author Daniel Sagenschneider
  */
 public interface AutoWireTeamsRepository {
+
+	/**
+	 * Retrieves the {@link AutoWireTeamsModel} from the
+	 * {@link ConfigurationItem}.
+	 * 
+	 * @param configuration
+	 *            {@link ConfigurationItem}.
+	 * @return {@link AutoWireTeamsModel}.
+	 * @throws Exception
+	 *             If fails to retrieve the {@link AutoWireTeamsModel}.
+	 */
+	AutoWireTeamsModel retrieveAutoWireTeams(ConfigurationItem configuration)
+			throws Exception;
+
+	/**
+	 * Stores the {@link AutoWireTeamsModel} within the
+	 * {@link ConfigurationItem}.
+	 * 
+	 * @param teams
+	 *            {@link AutoWireTeamsModel}.
+	 * @param configuration
+	 *            {@link ConfigurationItem}.
+	 * @throws Exception
+	 *             If fails to store the {@link AutoWireTeamsModel}.
+	 */
+	void storeAutoWireTeams(AutoWireTeamsModel teams,
+			ConfigurationItem configuration) throws Exception;
 
 }
