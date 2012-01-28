@@ -17,6 +17,10 @@
  */
 package net.officefloor.model.objects;
 
+import java.util.List;
+
+import org.junit.Ignore;
+
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.model.RemoveConnectionsAction;
 import net.officefloor.model.impl.repository.ModelRepositoryImpl;
@@ -24,23 +28,18 @@ import net.officefloor.model.impl.repository.filesystem.FileSystemConfigurationI
 import net.officefloor.model.impl.repository.memory.MemoryConfigurationItem;
 import net.officefloor.model.repository.ConfigurationItem;
 import net.officefloor.model.repository.ModelRepository;
-import net.officefloor.model.service.PropertyFileModel;
-import net.officefloor.model.service.PropertyModel;
-import net.officefloor.model.service.ServiceManagedObjectModel;
-import net.officefloor.model.service.ServiceManagedObjectTypeModel;
-import net.officefloor.model.service.ServiceTeamModel;
-import net.officefloor.model.service.ServicesModel;
 
 /**
- * Tests the marshaling/unmarshaling of the {@link ServiceModel} via the
+ * Tests the marshaling/unmarshaling of the {@link AutoWireObjectsModel} via the
  * {@link ModelRepository}.
  * 
  * @author Daniel Sagenschneider
  */
+@Ignore
 public class AutoWireObjectsModelRepositoryTest extends OfficeFrameTestCase {
 
 	/**
-	 * {@link ConfigurationItem} containing the {@link ServiceModel}.
+	 * {@link ConfigurationItem} containing the {@link AutoWireObjectsModel}.
 	 */
 	private ConfigurationItem configurationItem;
 
@@ -48,77 +47,143 @@ public class AutoWireObjectsModelRepositoryTest extends OfficeFrameTestCase {
 	protected void setUp() throws Exception {
 		// Specify location of the configuration
 		this.configurationItem = new FileSystemConfigurationItem(this.findFile(
-				this.getClass(), "Services.services.xml"), null);
+				this.getClass(), "Objects.objects.xml"), null);
 	}
 
 	/**
-	 * Ensure retrieve the {@link ServiceModel}.
+	 * Ensure retrieve the {@link AutoWireObjectsModel}.
 	 */
-	public void testRetrieveServices() throws Exception {
+	public void testRetrieveObjects() throws Exception {
 
-		// Load the Services
+		// Load the Objects
 		ModelRepository repository = new ModelRepositoryImpl();
-		ServicesModel services = new ServicesModel();
-		services = repository.retrieve(services, this.configurationItem);
+		AutoWireObjectsModel objects = new AutoWireObjectsModel();
+		objects = repository.retrieve(objects, this.configurationItem);
 
 		// ----------------------------------------
-		// Validate the managed objects
+		// Validate the objects
 		// ----------------------------------------
-		assertList(new String[] { "getServiceManagedObjectName",
-				"getManagedObjectSourceClassName", "getX", "getY" },
-				services.getServiceManagedObjects(),
-				new ServiceManagedObjectModel("MANAGED_OBJECT",
-						"net.example.ExampleManagedObjectSource", null, null,
-						null, 100, 101));
-		ServiceManagedObjectModel managedObject = services
-				.getServiceManagedObjects().get(0);
-		assertList(new String[] { "getName", "getValue" },
-				managedObject.getProperties(), new PropertyModel("MO_ONE",
-						"VALUE_ONE"), new PropertyModel("MO_TWO", "VALUE_TWO"));
-		assertList(new String[] { "getPath" },
-				managedObject.getPropertyFiles(), new PropertyFileModel(
-						"example/object.properties"));
-		assertList(new String[] {}, managedObject.getObjectTypes(),
-				new ServiceManagedObjectTypeModel("net.orm.Session"),
-				new ServiceManagedObjectTypeModel("net.orm.SessionLocal"));
+		List<AutoWireObjectSourceModel> objectSources = objects
+				.getAutoWireObjectSources();
+		assertEquals("Incorrect number of auto-wire object sources", 4,
+				objectSources.size());
 
-		// ----------------------------------------
-		// Validate the teams
-		// ----------------------------------------
-		assertList(new String[] { "getServiceTeamName",
-				"getTeamSourceClassName", "getX", "getY" },
-				services.getServiceTeams(), new ServiceTeamModel("TEAM",
-						"net.example.ExampleTeamSource", null, null, 200, 201));
-		ServiceTeamModel team = services.getServiceTeams().get(0);
-		assertList(new String[] { "getName", "getValue" },
-				team.getProperties(),
-				new PropertyModel("TEAM_ONE", "VALUE_ONE"), new PropertyModel(
-						"TEAM_TWO", "VALUE_TWO"));
-		assertList(new String[] { "getPath" }, team.getPropertyFiles(),
-				new PropertyFileModel("example/team.properties"));
+		final String[] MANAGED_OBJECT_METHODS = new String[] {
+				"getManagedObjectSourceClassName", "getTimeout",
+				"getQualifier", "getType" };
+
+		// Validate the first object source (managed object)
+		AutoWireManagedObjectModel moOne = assertType(
+				AutoWireManagedObjectModel.class, objectSources.get(0));
+		assertProperties(new AutoWireManagedObjectModel(
+				"net.example.ExampleManagedObjectSourceA", 10, null, null),
+				moOne, MANAGED_OBJECT_METHODS);
+		assertProperties(new PropertyModel("MO_ONE", "VALUE_ONE"),
+				new PropertyFileModel("example/object.properties"),
+				new PropertyModel("MO_TWO", "VALUE_TWO"),
+				moOne.getPropertySources());
+		assertList(new String[] { "getQualifier", "getType" },
+				moOne.getAutoWiring(), new AutoWireModel("QUALIFIED",
+						"net.orm.Session"), new AutoWireModel(null,
+						"net.orm.SessionLocal"));
+		assertList(new String[] { "getName", "getSection", "getInput" },
+				moOne.getFlows(), new AutoWireFlowModel("FLOW", "SECTION",
+						"INPUT"));
+		assertList(new String[] { "getName", "getQualifier", "getType" },
+				moOne.getTeams(), new AutoWireTeamModel("TEAM", "QUALIFIER",
+						"net.example.Type"));
+		assertList(new String[] { "getName", "getQualifier", "getType" },
+				moOne.getDependencies(), new AutoWireDependencyModel(
+						"DEPENDENCY", "QUALIFIER", "net.example.Dependency"));
+
+		// Validate the second object source (supplier)
+		AutoWireSupplierModel supplierOne = assertType(
+				AutoWireSupplierModel.class, objectSources.get(1));
+		assertProperties(new AutoWireSupplierModel(
+				"net.example.ExampleSupplierSourceA"), supplierOne,
+				"getSupplierSourceClassName");
+		assertProperties(new PropertyModel("SUPPLIER_A", "VALUE_A"),
+				new PropertyFileModel("example/supplier.properties"),
+				new PropertyModel("SUPPLIER_B", "VALUE_B"),
+				supplierOne.getPropertySources());
+
+		// Validate the third object source (managed object short-cut entry)
+		assertProperties(
+				new AutoWireManagedObjectModel(
+						"net.example.ExampleManagedObjectSourceB", 0,
+						"QUALIFIER", "net.example.Type"),
+				assertType(AutoWireManagedObjectModel.class,
+						objectSources.get(2)), MANAGED_OBJECT_METHODS);
+
+		// Validate the fourth object source (supplier)
+		assertProperties(new AutoWireSupplierModel(
+				"net.example.ExampleSupplierSourceB"),
+				assertType(AutoWireSupplierModel.class, objectSources.get(3)),
+				"getSupplierSourceClassName");
+	}
+
+	/**
+	 * Asserts the object is of the type.
+	 * 
+	 * @param type
+	 *            Expected type.
+	 * @param object
+	 *            Object to validate.
+	 * @return Object cast to type for convenience.
+	 */
+	@SuppressWarnings("unchecked")
+	private static <T> T assertType(Class<T> type, Object object) {
+		assertEquals("Incorrect object type", type, object.getClass());
+		return (T) object;
+	}
+
+	/**
+	 * Asserts the {@link PropertySourceModel}.
+	 * 
+	 * @param propertyOne
+	 *            Expected {@link PropertyModel}.
+	 * @param propertyFile
+	 *            Expected {@link PropertyFileModel}.
+	 * @param propertyTwo
+	 *            Expected {@link PropertyModel}.
+	 * @param actual
+	 *            Actual {@link PropertySourceModel} instances.
+	 */
+	private static void assertProperties(PropertyModel propertyOne,
+			PropertyFileModel propertyFile, PropertyModel propertyTwo,
+			List<PropertySourceModel> actual) {
+		assertEquals("Incorrect number of property sources", 3, actual.size());
+		assertProperties(propertyOne,
+				assertType(PropertyModel.class, actual.get(0)), "getName",
+				"getValue");
+		assertProperties(propertyFile,
+				assertType(PropertyFileModel.class, actual.get(1)), "getPath");
+		assertProperties(propertyTwo,
+				assertType(PropertyModel.class, actual.get(2)), "getName",
+				"getValue");
 	}
 
 	/**
 	 * Ensure able to round trip storing and retrieving the
-	 * {@link ServicesModel}.
+	 * {@link AutoWireObjectsModel}.
 	 */
-	public void testRoundTripStoreRetrieveServices() throws Exception {
+	public void testRoundTripStoreRetrieveObjects() throws Exception {
 
-		// Load the services
+		// Load the objects
 		ModelRepository repository = new ModelRepositoryImpl();
-		ServicesModel services = new ServicesModel();
-		services = repository.retrieve(services, this.configurationItem);
+		AutoWireObjectsModel objects = new AutoWireObjectsModel();
+		objects = repository.retrieve(objects, this.configurationItem);
 
-		// Store the services
+		// Store the objects
 		MemoryConfigurationItem contents = new MemoryConfigurationItem();
-		repository.store(services, contents);
+		repository.store(objects, contents);
 
-		// Reload the services
-		ServicesModel reloadedServices = new ServicesModel();
-		reloadedServices = repository.retrieve(reloadedServices, contents);
+		// Reload the objects
+		AutoWireObjectsModel reloadedObjects = new AutoWireObjectsModel();
+		reloadedObjects = repository.retrieve(reloadedObjects, contents);
 
 		// Validate round trip
-		assertGraph(services, reloadedServices,
+		assertGraph(objects, reloadedObjects,
 				RemoveConnectionsAction.REMOVE_CONNECTIONS_METHOD_NAME);
 	}
 

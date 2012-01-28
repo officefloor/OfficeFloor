@@ -17,41 +17,42 @@
  */
 package net.officefloor.model.objects;
 
-import net.officefloor.autowire.impl.AutoWireOfficeFloorSource;
+import net.officefloor.autowire.AutoWireApplication;
 import net.officefloor.model.repository.ConfigurationItem;
-import net.officefloor.model.service.ServicesModel;
 
 /**
- * Repository for obtaining the objects model for auto-wiring into an
- * {@link AutoWireOfficeFloorSource}.
+ * Repository for obtaining the {@link AutoWireObjectsModel} for auto-wiring
+ * into an {@link AutoWireApplication}.
  * 
  * @author Daniel Sagenschneider
  */
 public interface AutoWireObjectsRepository {
 
 	/**
-	 * Retrieves the {@link ServicesModel} from the {@link ConfigurationItem}.
+	 * Retrieves the {@link AutoWireObjectsModel} from the
+	 * {@link ConfigurationItem}.
 	 * 
 	 * @param configuration
 	 *            {@link ConfigurationItem}.
-	 * @return {@link ServicesModel}.
+	 * @return {@link AutoWireObjectsModel}.
 	 * @throws Exception
-	 *             If fails to retrieve the {@link ServicesModel}.
+	 *             If fails to retrieve the {@link AutoWireObjectsModel}.
 	 */
-	ServicesModel retrieveServices(ConfigurationItem configuration)
+	AutoWireObjectsModel retrieveAutoWireObjects(ConfigurationItem configuration)
 			throws Exception;
 
 	/**
-	 * Stores the {@link ServicesModel} within the {@link ConfigurationItem}.
+	 * Stores the {@link AutoWireObjectsModel} within the
+	 * {@link ConfigurationItem}.
 	 * 
-	 * @param services
-	 *            {@link ServicesModel}.
+	 * @param objects
+	 *            {@link AutoWireObjectsModel}.
 	 * @param configuration
 	 *            {@link ConfigurationItem}.
 	 * @throws Exception
-	 *             If fails to store the {@link ServicesModel}.
+	 *             If fails to store the {@link AutoWireObjectsModel}.
 	 */
-	void storeServices(ServicesModel services, ConfigurationItem configuration)
-			throws Exception;
+	void storeAutoWireObjects(AutoWireObjectsModel services,
+			ConfigurationItem configuration) throws Exception;
 
 }
