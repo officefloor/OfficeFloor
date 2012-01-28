@@ -850,8 +850,8 @@ public abstract class OfficeFrameTestCase extends TestCase {
 		int lineNumber = 1;
 		while ((actualLine = actualReader.readLine()) != null) {
 			expectedLine = expectedReader.readLine();
-			assertEquals("Incorrect line " + lineNumber, actualLine,
-					expectedLine);
+			assertEquals("Incorrect line " + lineNumber, expectedLine,
+					actualLine);
 			lineNumber++;
 		}
 	}
