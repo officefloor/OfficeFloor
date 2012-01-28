@@ -32,7 +32,7 @@ import net.officefloor.model.generate.model.ModelMetaData;
 
 /**
  * Tests the {@link net.officefloor.model.generate.ModelGenerator}.
- *
+ * 
  * @author Daniel Sagenschneider
  */
 public class ModelGeneratorTest extends OfficeFrameTestCase {
@@ -48,6 +48,7 @@ public class ModelGeneratorTest extends OfficeFrameTestCase {
 		// Create the model meta-data
 		ModelMetaData metaData = new ModelMetaData("Class", "net.officefloor",
 				"", new String[] { "net.officefloor.test.SpecialType" },
+				new String[] { "net.officefloor.test.MarkerInterface" },
 				new FieldMetaData[] {
 						new FieldMetaData("field one", "int", "Field one.",
 								null, null),
@@ -86,7 +87,7 @@ public class ModelGeneratorTest extends OfficeFrameTestCase {
 
 		// Create the model meta-data
 		ModelMetaData metaData = new ModelMetaData("Class", "net.officefloor",
-				"", new String[] {}, new FieldMetaData[] {
+				"", new String[] {}, new String[] {}, new FieldMetaData[] {
 						new FieldMetaData("field one", "String",
 								"Test field one.", "link one", null),
 						new FieldMetaData("field two", "String",

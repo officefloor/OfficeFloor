@@ -45,15 +45,21 @@ public class ModelMetaData {
 	 *            Class suffix.
 	 * @param imports
 	 *            Imports.
+	 * @param interfaces
+	 *            Interfaces.
 	 * @param fields
 	 *            Fields.
 	 * @param lists
 	 *            Lists.
 	 */
 	public ModelMetaData(String name, String packageName, String classSuffix,
-			String[] imports, FieldMetaData[] fields, ListMetaData[] lists) {
+			String[] imports, String[] interfaces, FieldMetaData[] fields,
+			ListMetaData[] lists) {
 		this.name = name;
 		this.packageName = packageName;
+		for (String interfaceName : interfaces) {
+			this.interfaces.add(interfaceName);
+		}
 		for (String model : imports) {
 			this.imports.add(model);
 		}
@@ -78,7 +84,7 @@ public class ModelMetaData {
 	public String getEventName() {
 		return this.name + "Event";
 	}
-	
+
 	/**
 	 * <code>true</code> if is a connection model.
 	 */
@@ -89,7 +95,7 @@ public class ModelMetaData {
 				return true;
 			}
 		}
-		
+
 		// Not a connection
 		return false;
 	}
@@ -121,6 +127,19 @@ public class ModelMetaData {
 	}
 
 	/**
+	 * Import classes.
+	 */
+	private List<String> imports = new LinkedList<String>();
+
+	public List<String> getImportClasses() {
+		return this.imports;
+	}
+
+	public void addImportClass(String importClass) {
+		this.imports.add(importClass);
+	}
+
+	/**
 	 * Class suffix.
 	 */
 	private String classSuffix;
@@ -134,16 +153,17 @@ public class ModelMetaData {
 	}
 
 	/**
-	 * Import classes.
+	 * Interfaces to implement. These are typically marker interfaces without
+	 * methods.
 	 */
-	private List<String> imports = new LinkedList<String>();
+	private List<String> interfaces = new LinkedList<String>();
 
-	public List<String> getImportClasses() {
-		return this.imports;
+	public List<String> getInterfaces() {
+		return this.interfaces;
 	}
 
-	public void addImportClass(String importClass) {
-		this.imports.add(importClass);
+	public void addInterface(String interfaceName) {
+		this.interfaces.add(interfaceName);
 	}
 
 	/**

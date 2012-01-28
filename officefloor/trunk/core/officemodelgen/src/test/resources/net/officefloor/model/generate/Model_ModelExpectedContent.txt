@@ -14,7 +14,7 @@ import net.officefloor.model.ItemModel;
 import net.officefloor.model.RemoveConnectionsAction;
 
 @Generated("net.officefloor.model.generate.ModelGenerator")
-public class ClassModel extends AbstractModel implements ItemModel<ClassModel> {
+public class ClassModel extends AbstractModel implements ItemModel<ClassModel>, net.officefloor.test.MarkerInterface {
 
     public static enum ClassEvent {
      CHANGE_FIELD_ONE, CHANGE_FIELD_TWO, ADD_LIST_ONE, REMOVE_LIST_ONE, ADD_LIST_TWO, REMOVE_LIST_TWO
