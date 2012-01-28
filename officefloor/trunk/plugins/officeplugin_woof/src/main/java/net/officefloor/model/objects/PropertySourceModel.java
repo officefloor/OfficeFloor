@@ -17,12 +17,12 @@
  */
 package net.officefloor.model.objects;
 
-import com.google.gwt.junit.client.WithProperties.Property;
+import net.officefloor.compile.properties.Property;
 
 /**
  * Marker interface to distinguish source of {@link Property} instances.
  * 
  * @author Daniel Sagenschneider
  */
-public abstract class PropertySourceModel {
+public interface PropertySourceModel {
 }

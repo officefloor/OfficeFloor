@@ -22,5 +22,5 @@ package net.officefloor.model.objects;
  *
  * @author Daniel Sagenschneider
  */
-public abstract class ObjectSourceModel {
+public interface AutoWireObjectSourceModel {
 }

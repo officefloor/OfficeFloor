@@ -1,4 +1,4 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <model>
-	<list type="TeamSourceModel" name="team source" />
+	<list type="AutoWireTeamModel" name="team" />
 </model>
