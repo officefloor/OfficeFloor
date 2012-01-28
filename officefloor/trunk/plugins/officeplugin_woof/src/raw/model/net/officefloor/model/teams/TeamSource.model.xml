@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<model>
+	<field type="String" name="team name" />
+	<field type="String" name="team source class name" />
+	<list type="PropertySourceModel" name="property source" />
+</model>

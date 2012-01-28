@@ -15,7 +15,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.model.service;
+package net.officefloor.model.objects;
 
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.model.RemoveConnectionsAction;
@@ -24,6 +24,12 @@ import net.officefloor.model.impl.repository.filesystem.FileSystemConfigurationI
 import net.officefloor.model.impl.repository.memory.MemoryConfigurationItem;
 import net.officefloor.model.repository.ConfigurationItem;
 import net.officefloor.model.repository.ModelRepository;
+import net.officefloor.model.service.PropertyFileModel;
+import net.officefloor.model.service.PropertyModel;
+import net.officefloor.model.service.ServiceManagedObjectModel;
+import net.officefloor.model.service.ServiceManagedObjectTypeModel;
+import net.officefloor.model.service.ServiceTeamModel;
+import net.officefloor.model.service.ServicesModel;
 
 /**
  * Tests the marshaling/unmarshaling of the {@link ServiceModel} via the
@@ -31,7 +37,7 @@ import net.officefloor.model.repository.ModelRepository;
  * 
  * @author Daniel Sagenschneider
  */
-public class ServiceModelRepositoryTest extends OfficeFrameTestCase {
+public class AutoWireObjectsModelRepositoryTest extends OfficeFrameTestCase {
 
 	/**
 	 * {@link ConfigurationItem} containing the {@link ServiceModel}.

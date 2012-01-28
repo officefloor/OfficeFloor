@@ -15,18 +15,19 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.model.service;
+package net.officefloor.model.objects;
 
 import net.officefloor.autowire.impl.AutoWireOfficeFloorSource;
 import net.officefloor.model.repository.ConfigurationItem;
+import net.officefloor.model.service.ServicesModel;
 
 /**
- * Repository for obtaining the services model for auto-wiring into an
+ * Repository for obtaining the objects model for auto-wiring into an
  * {@link AutoWireOfficeFloorSource}.
  * 
  * @author Daniel Sagenschneider
  */
-public interface ServiceRepository {
+public interface AutoWireObjectsRepository {
 
 	/**
 	 * Retrieves the {@link ServicesModel} from the {@link ConfigurationItem}.
