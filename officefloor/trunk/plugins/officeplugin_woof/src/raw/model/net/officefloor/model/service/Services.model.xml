@@ -1,5 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<model>
-	<list type="ServiceManagedObjectModel" name="service managed object" />
-	<list type="ServiceTeamModel" name="service team" />
-</model>
