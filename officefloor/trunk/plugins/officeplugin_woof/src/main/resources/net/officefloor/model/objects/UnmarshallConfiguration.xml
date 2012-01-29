@@ -1,42 +1,59 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<unmarshall node="services" class="net.officefloor.model.service.ServicesModel">
+<unmarshall node="objects"
+	class="net.officefloor.model.objects.AutoWireObjectsModel">
 
 	<!-- MANAGED OBJECTS -->
-	<object method="addServiceManagedObject" node="managed-object"
-		class="net.officefloor.model.service.ServiceManagedObjectModel">
-		<value method="setServiceManagedObjectName" node="managed-object@name" />
+	<object method="addAutoWireObjectSource" node="managed-object"
+		class="net.officefloor.model.objects.AutoWireManagedObjectModel">
 		<value method="setManagedObjectSourceClassName" node="managed-object@source" />
-		<value method="setX" node="managed-object@x" />
-		<value method="setY" node="managed-object@y" />
-		<object method="addProperty" node="property"
-			class="net.officefloor.model.service.PropertyModel">
+		<value method="setTimeout" node="managed-object@timeout" />
+		<value method="setQualifier" node="managed-object@qualifier" />
+		<value method="setType" node="managed-object@type" />
+		<object method="addPropertySource" node="property"
+			class="net.officefloor.model.objects.PropertyModel">
 			<value method="setName" node="property@name" />
 			<value method="setValue" node="property@value" />
 		</object>
-		<object method="addPropertyFile" node="property-file"
-			class="net.officefloor.model.service.PropertyFileModel">
+		<object method="addPropertySource" node="property-file"
+			class="net.officefloor.model.objects.PropertyFileModel">
 			<value method="setPath" node="property-file@path" />
 		</object>
-		<object method="addObjectType" node="object-type"
-			class="net.officefloor.model.service.ServiceManagedObjectTypeModel">
-			<value method="setObjectType" node="object-type@type" />
+		<object method="addAutoWire" node="auto-wire"
+			class="net.officefloor.model.objects.AutoWireModel">
+			<value method="setQualifier" node="auto-wire@qualifier" />
+			<value method="setType" node="auto-wire@type" />
+		</object>
+		<object method="addFlow" node="flow"
+			class="net.officefloor.model.objects.AutoWireFlowModel">
+			<value method="setName" node="flow@name" />
+			<value method="setSection" node="flow@section" />
+			<value method="setInput" node="flow@input" />
+		</object>
+		<object method="addTeam" node="team"
+			class="net.officefloor.model.objects.AutoWireTeamModel">
+			<value method="setName" node="team@name" />
+			<value method="setQualifier" node="team@qualifier" />
+			<value method="setType" node="team@type" />
+		</object>
+		<object method="addDependency" node="dependency"
+			class="net.officefloor.model.objects.AutoWireDependencyModel">
+			<value method="setName" node="dependency@name" />
+			<value method="setQualifier" node="dependency@qualifier" />
+			<value method="setType" node="dependency@type" />
 		</object>
 	</object>
 
-	<!-- TEAMS -->
-	<object method="addServiceTeam" node="team"
-		class="net.officefloor.model.service.ServiceTeamModel">
-		<value method="setServiceTeamName" node="team@name" />
-		<value method="setTeamSourceClassName" node="team@source" />
-		<value method="setX" node="team@x" />
-		<value method="setY" node="team@y" />
-		<object method="addProperty" node="property"
-			class="net.officefloor.model.service.PropertyModel">
+	<!-- SUPPLIERS -->
+	<object method="addAutoWireObjectSource" node="supplier"
+		class="net.officefloor.model.objects.AutoWireSupplierModel">
+		<value method="setSupplierSourceClassName" node="supplier@source" />
+		<object method="addPropertySource" node="property"
+			class="net.officefloor.model.objects.PropertyModel">
 			<value method="setName" node="property@name" />
 			<value method="setValue" node="property@value" />
 		</object>
-		<object method="addPropertyFile" node="property-file"
-			class="net.officefloor.model.service.PropertyFileModel">
+		<object method="addPropertySource" node="property-file"
+			class="net.officefloor.model.objects.PropertyFileModel">
 			<value method="setPath" node="property-file@path" />
 		</object>
 	</object>

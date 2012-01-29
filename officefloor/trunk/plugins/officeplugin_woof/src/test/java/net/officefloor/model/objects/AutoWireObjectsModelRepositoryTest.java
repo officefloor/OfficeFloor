@@ -19,8 +19,6 @@ package net.officefloor.model.objects;
 
 import java.util.List;
 
-import org.junit.Ignore;
-
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.model.RemoveConnectionsAction;
 import net.officefloor.model.impl.repository.ModelRepositoryImpl;
@@ -35,7 +33,6 @@ import net.officefloor.model.repository.ModelRepository;
  * 
  * @author Daniel Sagenschneider
  */
-@Ignore
 public class AutoWireObjectsModelRepositoryTest extends OfficeFrameTestCase {
 
 	/**
