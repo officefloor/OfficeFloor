@@ -51,17 +51,14 @@ public class AutoWireObjectsRepositoryImpl implements AutoWireObjectsRepository 
 	@Override
 	public AutoWireObjectsModel retrieveAutoWireObjects(
 			ConfigurationItem configuration) throws Exception {
-		// TODO implement AutoWireObjectsRepository.retrieveAutoWireObjects
-		throw new UnsupportedOperationException(
-				"TODO implement AutoWireObjectsRepository.retrieveAutoWireObjects");
+		return this.modelRepository.retrieve(new AutoWireObjectsModel(),
+				configuration);
 	}
 
 	@Override
 	public void storeAutoWireObjects(AutoWireObjectsModel objects,
 			ConfigurationItem configuration) throws Exception {
-		// TODO implement AutoWireObjectsRepository.storeAutoWireObjects
-		throw new UnsupportedOperationException(
-				"TODO implement AutoWireObjectsRepository.storeAutoWireObjects");
+		this.modelRepository.store(objects, configuration);
 	}
 
 }

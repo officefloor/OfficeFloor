@@ -17,6 +17,8 @@
  */
 package net.officefloor.plugin.teams;
 
+import org.easymock.AbstractMatcher;
+
 import net.officefloor.autowire.AutoWire;
 import net.officefloor.autowire.AutoWireApplication;
 import net.officefloor.autowire.AutoWireTeam;
@@ -28,14 +30,11 @@ import net.officefloor.model.repository.ConfigurationContext;
 import net.officefloor.model.repository.ConfigurationItem;
 import net.officefloor.model.teams.AutoWireTeamsRepositoryImpl;
 
-import org.junit.Ignore;
-
 /**
  * Tests the {@link AutoWireTeamsLoader}.
  * 
  * @author Daniel Sagenschneider
  */
-@Ignore
 public class AutoWireTeamsLoaderTest extends OfficeFrameTestCase {
 
 	/**
@@ -66,7 +65,25 @@ public class AutoWireTeamsLoaderTest extends OfficeFrameTestCase {
 		this.recordReturn(this.app,
 				this.app.assignTeam("net.example.ExampleTeamSource",
 						new AutoWire("QUALIFIED_ONE", "TYPE_ONE"),
-						new AutoWire("QUALIFIED_TWO", "TYPE_TWO")), teamOne);
+						new AutoWire("QUALIFIED_TWO", "TYPE_TWO")), teamOne,
+				new AbstractMatcher() {
+					@Override
+					public boolean matches(Object[] expected, Object[] actual) {
+						boolean isMatch = expected[0].equals(actual[0]);
+						AutoWire[] eAutoWiring = (AutoWire[]) expected[1];
+						AutoWire[] aAutoWiring = (AutoWire[]) actual[1];
+						isMatch = isMatch
+								&& (eAutoWiring.length == aAutoWiring.length);
+						if (isMatch) {
+							for (int i = 0; i < eAutoWiring.length; i++) {
+								isMatch = isMatch
+										&& (eAutoWiring[i]
+												.equals(aAutoWiring[i]));
+							}
+						}
+						return isMatch;
+					}
+				});
 		teamOne.addProperty("NAME_ONE", "VALUE_ONE");
 		teamOne.loadProperties("example/team.properties");
 		teamOne.addProperty("NAME_TWO", "VALUE_TWO");

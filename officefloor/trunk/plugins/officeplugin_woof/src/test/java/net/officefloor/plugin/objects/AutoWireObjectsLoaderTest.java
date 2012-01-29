@@ -32,14 +32,12 @@ import net.officefloor.model.repository.ConfigurationContext;
 import net.officefloor.model.repository.ConfigurationItem;
 
 import org.easymock.AbstractMatcher;
-import org.junit.Ignore;
 
 /**
  * Tests the {@link AutoWireObjectsLoader}.
  * 
  * @author Daniel Sagenschneider
  */
-@Ignore
 public class AutoWireObjectsLoaderTest extends OfficeFrameTestCase {
 
 	/**
