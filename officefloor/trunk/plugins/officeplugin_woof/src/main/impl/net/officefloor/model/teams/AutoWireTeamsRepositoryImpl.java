@@ -49,17 +49,14 @@ public class AutoWireTeamsRepositoryImpl implements AutoWireTeamsRepository {
 	@Override
 	public AutoWireTeamsModel retrieveAutoWireTeams(
 			ConfigurationItem configuration) throws Exception {
-		// TODO implement AutoWireTeamsRepository.retrieveAutoWireTeams
-		throw new UnsupportedOperationException(
-				"TODO implement AutoWireTeamsRepository.retrieveAutoWireTeams");
+		return this.modelRepository.retrieve(new AutoWireTeamsModel(),
+				configuration);
 	}
 
 	@Override
 	public void storeAutoWireTeams(AutoWireTeamsModel teams,
 			ConfigurationItem configuration) throws Exception {
-		// TODO implement AutoWireTeamsRepository.storeAutoWireTeams
-		throw new UnsupportedOperationException(
-				"TODO implement AutoWireTeamsRepository.storeAutoWireTeams");
+		this.modelRepository.store(teams, configuration);
 	}
 
 }
