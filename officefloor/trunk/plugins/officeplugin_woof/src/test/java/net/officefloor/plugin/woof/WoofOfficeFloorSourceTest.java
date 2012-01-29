@@ -33,14 +33,12 @@ import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.DefaultHttpClient;
-import org.junit.Ignore;
 
 /**
  * Tests the {@link WoofOfficeFloorSource}.
  * 
  * @author Daniel Sagenschneider
  */
-@Ignore
 public class WoofOfficeFloorSourceTest extends OfficeFrameTestCase {
 
 	@Override
@@ -122,7 +120,7 @@ public class WoofOfficeFloorSourceTest extends OfficeFrameTestCase {
 				.getStatusCode());
 		ByteArrayOutputStream buffer = new ByteArrayOutputStream();
 		response.getEntity().writeTo(buffer);
-		assertEquals("Incorrect response body", "WOOF TEST "
+		assertEquals("Incorrect response body", "WOOF TEST OnePersonTeam_"
 				+ new AutoWire(MockDependency.class).getQualifiedType(),
 				new String(buffer.toByteArray()));
 	}

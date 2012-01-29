@@ -26,7 +26,6 @@ import net.officefloor.model.impl.repository.ModelRepositoryImpl;
 import net.officefloor.model.impl.repository.classloader.ClassLoaderConfigurationContext;
 import net.officefloor.model.repository.ConfigurationContext;
 import net.officefloor.model.repository.ConfigurationItem;
-import net.officefloor.model.repository.ModelRepository;
 import net.officefloor.model.woof.WoofRepositoryImpl;
 import net.officefloor.plugin.servlet.OfficeFloorServletFilter;
 import net.officefloor.plugin.woof.WoofLoader;
@@ -46,9 +45,29 @@ public class WoofServletFilter extends OfficeFloorServletFilter {
 	public static final String DEFAULT_WOOF_CONFIGUARTION_LOCATION = WoofOfficeFloorSource.DEFAULT_WOOF_CONFIGUARTION_LOCATION;
 
 	/**
-	 * Property for the location of the WoOF configuration for the application.
+	 * Property for the location of the WoOF configuration.
 	 */
 	public static final String PROPERTY_WOOF_CONFIGURATION_LOCATION = WoofOfficeFloorSource.PROPERTY_WOOF_CONFIGURATION_LOCATION;
+
+	/**
+	 * Default Objects configuration location.
+	 */
+	public static final String DEFAULT_OBJECTS_CONFIGURATION_LOCATION = WoofOfficeFloorSource.DEFAULT_OBJECTS_CONFIGURATION_LOCATION;
+
+	/**
+	 * Property for the location of the Objects configuration.
+	 */
+	public static final String PROPERTY_OBJECTS_CONFIGURATION_LOCATION = WoofOfficeFloorSource.PROPERTY_OBJECTS_CONFIGURATION_LOCATION;
+
+	/**
+	 * Default Teams configuration location.
+	 */
+	public static final String DEFAULT_TEAMS_CONFIGURATION_LOCATION = WoofOfficeFloorSource.DEFAULT_TEAMS_CONFIGURATION_LOCATION;
+
+	/**
+	 * Property for the location of the Teams configuration.
+	 */
+	public static final String PROPERTY_TEAMS_CONFIGURATION_LOCATION = WoofOfficeFloorSource.PROPERTY_TEAMS_CONFIGURATION_LOCATION;
 
 	/*
 	 * ======================= OfficeFloorServletFilter ====================
@@ -57,34 +76,54 @@ public class WoofServletFilter extends OfficeFloorServletFilter {
 	@Override
 	protected void configure() throws Exception {
 
-		// Obtain the location of the configuration
-		String location = this.getFilterConfig().getInitParameter(
-				PROPERTY_WOOF_CONFIGURATION_LOCATION);
-		if ((location == null) || (location.trim().length() == 0)) {
-			location = DEFAULT_WOOF_CONFIGUARTION_LOCATION;
-		}
-
 		// Create the configuration context
 		ClassLoader classLoader = this.getOfficeFloorCompiler()
 				.getClassLoader();
 		ConfigurationContext configurationContext = new ClassLoaderConfigurationContext(
 				classLoader);
 
-		// Create the model repository
-		ModelRepository modelRepository = new ModelRepositoryImpl();
-
 		// Obtain the woof configuration (ensuring exists)
-		ConfigurationItem configuration = configurationContext
-				.getConfigurationItem(location);
-		if (configuration == null) {
+		String woofLocation = this.getInitParamValue(
+				PROPERTY_WOOF_CONFIGURATION_LOCATION,
+				DEFAULT_WOOF_CONFIGUARTION_LOCATION);
+		ConfigurationItem woofConfiguration = configurationContext
+				.getConfigurationItem(woofLocation);
+		if (woofConfiguration == null) {
 			throw new FileNotFoundException(
-					"Can not find WoOF configuration at " + location);
+					"Can not find WoOF configuration at " + woofLocation);
 		}
 
 		// Configure this filter with WoOF functionality
 		WoofLoader woofLoader = new WoofLoaderImpl(new WoofRepositoryImpl(
-				modelRepository));
-		woofLoader.loadWoofConfiguration(configuration, this);
+				new ModelRepositoryImpl()));
+		woofLoader.loadWoofConfiguration(woofConfiguration, this);
+
+		// Load the optional configuration
+		String objectsLocation = this.getInitParamValue(
+				PROPERTY_OBJECTS_CONFIGURATION_LOCATION,
+				DEFAULT_OBJECTS_CONFIGURATION_LOCATION);
+		String teamsLocation = this.getInitParamValue(
+				PROPERTY_TEAMS_CONFIGURATION_LOCATION,
+				DEFAULT_TEAMS_CONFIGURATION_LOCATION);
+		WoofOfficeFloorSource.loadOptionalConfiguration(this, objectsLocation,
+				teamsLocation, configurationContext);
+	}
+
+	/**
+	 * Obtains the init parameter value.
+	 * 
+	 * @param propertyName
+	 *            Name of property.
+	 * @param defaultValue
+	 *            Default value.
+	 * @return Init parameter value or the default value.
+	 */
+	private String getInitParamValue(String propertyName, String defaultValue) {
+		String value = this.getFilterConfig().getInitParameter(propertyName);
+		if ((value == null) || (value.trim().length() == 0)) {
+			value = defaultValue;
+		}
+		return value;
 	}
 
 }

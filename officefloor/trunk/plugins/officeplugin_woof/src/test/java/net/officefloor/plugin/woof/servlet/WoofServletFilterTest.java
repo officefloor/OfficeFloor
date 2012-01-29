@@ -35,14 +35,12 @@ import org.eclipse.jetty.server.session.SessionHandler;
 import org.eclipse.jetty.servlet.FilterHolder;
 import org.eclipse.jetty.servlet.FilterMapping;
 import org.eclipse.jetty.servlet.ServletContextHandler;
-import org.junit.Ignore;
 
 /**
  * Tests the {@link WoofServletFilter}.
  * 
  * @author Daniel Sagenschneider
  */
-@Ignore
 public class WoofServletFilterTest extends OfficeFrameTestCase {
 
 	/**
@@ -110,8 +108,10 @@ public class WoofServletFilterTest extends OfficeFrameTestCase {
 		ByteArrayOutputStream buffer = new ByteArrayOutputStream();
 		response.getEntity().writeTo(buffer);
 		String responseText = new String(buffer.toByteArray());
-		assertEquals("Incorrect template content", "TEMPLATE TEST "
-				+ new AutoWire(MockDependency.class).getQualifiedType(),
+		assertEquals(
+				"Incorrect template content",
+				"TEMPLATE TEST OnePersonTeam_"
+						+ new AutoWire(MockDependency.class).getQualifiedType(),
 				responseText);
 	}
 
