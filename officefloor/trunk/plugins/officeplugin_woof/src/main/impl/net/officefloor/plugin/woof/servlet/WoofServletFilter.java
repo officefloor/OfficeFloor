@@ -26,7 +26,7 @@ import net.officefloor.model.impl.repository.ModelRepositoryImpl;
 import net.officefloor.model.impl.repository.classloader.ClassLoaderConfigurationContext;
 import net.officefloor.model.repository.ConfigurationContext;
 import net.officefloor.model.repository.ConfigurationItem;
-import net.officefloor.model.woof.WoofRepository;
+import net.officefloor.model.repository.ModelRepository;
 import net.officefloor.model.woof.WoofRepositoryImpl;
 import net.officefloor.plugin.servlet.OfficeFloorServletFilter;
 import net.officefloor.plugin.woof.WoofLoader;
@@ -64,11 +64,16 @@ public class WoofServletFilter extends OfficeFloorServletFilter {
 			location = DEFAULT_WOOF_CONFIGUARTION_LOCATION;
 		}
 
-		// Obtain the woof configuration (ensuring exists)
+		// Create the configuration context
 		ClassLoader classLoader = this.getOfficeFloorCompiler()
 				.getClassLoader();
 		ConfigurationContext configurationContext = new ClassLoaderConfigurationContext(
 				classLoader);
+
+		// Create the model repository
+		ModelRepository modelRepository = new ModelRepositoryImpl();
+
+		// Obtain the woof configuration (ensuring exists)
 		ConfigurationItem configuration = configurationContext
 				.getConfigurationItem(location);
 		if (configuration == null) {
@@ -76,12 +81,9 @@ public class WoofServletFilter extends OfficeFloorServletFilter {
 					"Can not find WoOF configuration at " + location);
 		}
 
-		// Create the WoOF loader
-		WoofRepository repository = new WoofRepositoryImpl(
-				new ModelRepositoryImpl());
-		WoofLoader woofLoader = new WoofLoaderImpl(repository);
-
-		// Configure this filter
+		// Configure this filter with WoOF functionality
+		WoofLoader woofLoader = new WoofLoaderImpl(new WoofRepositoryImpl(
+				modelRepository));
 		woofLoader.loadWoofConfiguration(configuration, this);
 	}
 

@@ -20,6 +20,7 @@ package net.officefloor.plugin.woof;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 
+import net.officefloor.autowire.AutoWire;
 import net.officefloor.autowire.AutoWireManagement;
 import net.officefloor.autowire.AutoWireSection;
 import net.officefloor.frame.test.OfficeFrameTestCase;
@@ -32,12 +33,14 @@ import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.DefaultHttpClient;
+import org.junit.Ignore;
 
 /**
  * Tests the {@link WoofOfficeFloorSource}.
  * 
  * @author Daniel Sagenschneider
  */
+@Ignore
 public class WoofOfficeFloorSourceTest extends OfficeFrameTestCase {
 
 	@Override
@@ -119,7 +122,8 @@ public class WoofOfficeFloorSourceTest extends OfficeFrameTestCase {
 				.getStatusCode());
 		ByteArrayOutputStream buffer = new ByteArrayOutputStream();
 		response.getEntity().writeTo(buffer);
-		assertEquals("Incorrect response body", "TEST",
+		assertEquals("Incorrect response body", "WOOF TEST "
+				+ new AutoWire(MockDependency.class).getQualifiedType(),
 				new String(buffer.toByteArray()));
 	}
 
@@ -127,10 +131,18 @@ public class WoofOfficeFloorSourceTest extends OfficeFrameTestCase {
 	 * Class for {@link ClassSectionSource} in testing.
 	 */
 	public static class Section {
-		public void service(ServerHttpConnection connection) throws IOException {
+		public void service(ServerHttpConnection connection,
+				MockDependency dependency) throws IOException {
+
+			// Obtain content to validate objects and teams
+			Thread thread = Thread.currentThread();
+			String content = "WOOF " + dependency.getMessage() + " "
+					+ thread.getName();
+
+			// Write response
 			net.officefloor.plugin.socket.server.http.HttpResponse response = connection
 					.getHttpResponse();
-			response.getBody().getOutputStream().write("TEST".getBytes());
+			response.getBody().getOutputStream().write(content.getBytes());
 		}
 	}
 

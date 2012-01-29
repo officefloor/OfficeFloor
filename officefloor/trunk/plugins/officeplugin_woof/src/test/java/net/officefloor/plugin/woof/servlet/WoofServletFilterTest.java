@@ -21,8 +21,10 @@ import java.io.ByteArrayOutputStream;
 
 import javax.servlet.http.HttpServlet;
 
+import net.officefloor.autowire.AutoWire;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.socket.server.http.server.MockHttpServer;
+import net.officefloor.plugin.woof.MockDependency;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
@@ -33,12 +35,14 @@ import org.eclipse.jetty.server.session.SessionHandler;
 import org.eclipse.jetty.servlet.FilterHolder;
 import org.eclipse.jetty.servlet.FilterMapping;
 import org.eclipse.jetty.servlet.ServletContextHandler;
+import org.junit.Ignore;
 
 /**
  * Tests the {@link WoofServletFilter}.
  * 
  * @author Daniel Sagenschneider
  */
+@Ignore
 public class WoofServletFilterTest extends OfficeFrameTestCase {
 
 	/**
@@ -106,14 +110,35 @@ public class WoofServletFilterTest extends OfficeFrameTestCase {
 		ByteArrayOutputStream buffer = new ByteArrayOutputStream();
 		response.getEntity().writeTo(buffer);
 		String responseText = new String(buffer.toByteArray());
-		assertEquals("Incorrect template content", "TEMPLATE", responseText);
+		assertEquals("Incorrect template content", "TEMPLATE TEST "
+				+ new AutoWire(MockDependency.class).getQualifiedType(),
+				responseText);
 	}
 
 	/**
 	 * Mock template logic class.
 	 */
 	public static class MockTemplate {
-		public void submit() {
+		public MockContent getTemplate(MockDependency dependency) {
+			Thread thread = Thread.currentThread();
+			return new MockContent(dependency.getMessage() + " "
+					+ thread.getName());
+		}
+	}
+
+	/**
+	 * Mock content for the template.
+	 */
+	public static class MockContent {
+
+		private String text;
+
+		public MockContent(String text) {
+			this.text = text;
+		}
+
+		public String getText() {
+			return this.text;
 		}
 	}
 
