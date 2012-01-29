@@ -19,8 +19,6 @@ package net.officefloor.model.teams;
 
 import java.util.List;
 
-import org.junit.Ignore;
-
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.model.RemoveConnectionsAction;
 import net.officefloor.model.impl.repository.ModelRepositoryImpl;
@@ -35,7 +33,6 @@ import net.officefloor.model.repository.ModelRepository;
  * 
  * @author Daniel Sagenschneider
  */
-@Ignore
 public class AutoWireTeamsModelRepositoryTest extends OfficeFrameTestCase {
 
 	/**
@@ -64,11 +61,11 @@ public class AutoWireTeamsModelRepositoryTest extends OfficeFrameTestCase {
 		// Validate the teams
 		// ----------------------------------------
 		assertList(new String[] { "getTeamSourceClassName", "getQualifier",
-				"getType" }, teams.getTeams(), new AutoWireTeamModel(
+				"getType" }, teams.getAutoWireTeams(), new AutoWireTeamModel(
 				"net.example.ExampleTeamSource", null, null),
 				new AutoWireTeamModel("PASSIVE", "QUALIFIED",
 						"net.example.Type"));
-		AutoWireTeamModel team = teams.getTeams().get(0);
+		AutoWireTeamModel team = teams.getAutoWireTeams().get(0);
 
 		// Validate the properties
 		assertProperties(new PropertyModel("NAME_ONE", "VALUE_ONE"),
