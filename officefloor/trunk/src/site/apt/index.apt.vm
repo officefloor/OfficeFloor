@@ -6,9 +6,21 @@
 
   <<Welcome to OfficeFloor>>
 
+~~ spacing
+---
+ 
+---
+
 [./images/OfficeFloor_Blurb.png] OfficeFloor is a simple yet powerful framework for building Java web applications that is a build once run anywhere solution – even with Cloud Computing.
 
-  In addition to making it simple to build a Java web application, once the application is built OfficeFloor enables it to be run by any of the Cloud Computing providers.  OfficeFloor web applications can also be run within JEE Application Servers or even stand-alone.  This run anywhere flexibility is a unique aspect of the OfficeFloor framework due to its core fundamentals of:
+~~ spacing
+---
+ 
+---
+
+  In addition to making it simple to build a Java web application, once the application is built OfficeFloor enables it to be run by any of the Cloud Computing providers, within a JEE Application Server or even stand-alone.
+  
+  The run anywhere flexibility is a unique aspect of the OfficeFloor framework due to its core fundamentals of:
   
    * <<context>>
 
@@ -21,6 +33,11 @@
   Further focus on intuitive graphical configuration makes applications built with OfficeFloor self documenting - which works great with both Agile and Support.
 
   OfficeFloor is freely distributed under GPL (LGPL also available on request) and the source is available {{{./source-repository.html}here}}.
+
+~~ spacing
+---
+ 
+---
   
   The following are the simple steps to build a web application with OfficeFloor.
 
@@ -29,17 +46,17 @@
 
   OfficeFloor dynamic web pages only require the following 3 non-obtrusive tags to enable OfficeFloor functionality:
      
-   * << \<!-- {section} --\> >> : segments the HTML web page into functions
+   * << \<!-- {section} --\> >> : segments the web page into functions
        
    * << $\{property\} >> : allows dynamic content from POJOs (plain old Java objects) to be presented on the web page
        
    * << #\{link\} >> : allows indirection for links to enable graphical configuration of the web site navigation
   
-  The reason for using non-obtrusive tags in the HTML web pages is to allow OfficeFloor to integrate with WYSIWYG web design tools (e.g. {{{http://www.adobe.com/products/dreamweaver.html}DreamWeaver}}, {{{http://kompozer.net}KompoZer}}) to create and more importantly edit the web pages.
+  The reason for using non-obtrusive tags in the web pages is to allow OfficeFloor to integrate with WYSIWYG web design tools (e.g. {{{http://www.adobe.com/products/dreamweaver.html}DreamWeaver}}, {{{http://kompozer.net}KompoZer}}) to create and more importantly edit the web pages.
   
-  Also reviewers can open the raw HTML web pages in any web browser.  This makes for faster feedback loops with the Web Designer enabling just the right look and feel to be created.
+  Also reviewers can open the raw web pages in any web browser.  This makes for faster feedback loops with the Web Designer enabling just the right look and feel to be created for the web application.
   
-  
+
 [./images/OfficeFloor_StepTwo.png] OfficeFloor Step Two.
 
   The application logic is written with POJOs (plain old Java objects) but in a slightly different focus to many dependency injection frameworks.  Instead of injecting the dependency into the object, OfficeFloor injects the dependency as a parameter into the method.  This slight difference is key to OfficeFloor's simplicity yet power!
@@ -54,22 +71,48 @@
 
   OfficeFloor focuses on the method and its <<context>>, <<dependent injection>> and the invoking thread (<<thread injection>>).
 
-  OfficeFloor also provides simplified integration with {{{http://code.google.com/webtoolkit/}GWT}} so that the AJAX rich user web page experience can be written in Java.  This keeps all code in the one language for easier development and support - though it does not prevent the use of JavaScript, {{{http://jquery.com}jQuery}} or any other rich user interface technology.
+  OfficeFloor also provides simplified integration with {{{http://code.google.com/webtoolkit/}GWT}} so that the AJAX rich user web page experience can be written in Java.  This keeps all code in the one programming language for easier development and support - though it does not prevent the use of JavaScript, {{{http://jquery.com}jQuery}} or any other rich user interface technologies.
 
    
 [./images/OfficeFloor_StepThree.png] OfficeFloor Step Three.
 
-  Dependency Injection, Context, Thread Injection is all great but now we have a lot of functions to be invoked that are not connected together.
+  The web pages and POJO methods are connected together via OfficeFloor's <<function orchestration>> to work as a cohesive web application.  
+  
+  OfficeFloor's function orchestration is via graphical configuration:
+  
+   * which provides a visual representation of the OfficeFloor web application that all stakeholders can use to ensure the application is doing the right things
+  
+   * makes OfficeFloor web applications self documenting, which is great for Agile and Support teams
+
+   * simplifies changing the application  
+   
+  Unlike most orchestration frameworks, OfficeFloor function orchestration requires no additional coding/configuration.  OfficeFloor will interrogate the web pages and POJO methods to obtain all necessary information.
+  
+  An {{{./eclipse/index.html}OfficeFloor Eclipse plug-in}} provides the tools to graphically configure the function orchestration.
 
 
 [./images/OfficeFloor_StepFour.png] OfficeFloor Step Four.
 
-  As you can see by now that OfficeFloor through its fundamentals can be deployed anywhere.
+  The run anywhere flexibility provided by OfficeFloor's fundamentals means that web applications built with the OfficeFloor framework can be run where ever is most appropriate:
+  
+   * on the developer's or tester's workstation
+   
+   * as a stand-alone web application
+   
+   * within an existing JEE Application Server
+   
+   * by a Cloud Computing provider
+  
+  The <<build once run anywhere>> flexibility of OfficeFloor allows the decision of where to run the web application to be deferred to when the web application is to go live - allowing the best location to be used.  And if the location is no longer the best, OfficeFloor enables moving the web application to a better location without having to rebuild the web application.
+    
+  <Please note that OfficeFloor is currently available to run stand-alone and within a JEE Application Server, which means it can also run within Amazon and RedHat Clouds.  Work is currently focused on running OfficeFloor within Google's App Engine - along with simplifying the packaging and deployment process.>
 
+~~ spacing
+---
+ 
+---
 
-  <<Find out more>>  
-
-  To find out more about OfficeFloor:
+  To <<find out more>> about OfficeFloor:
   
    * Check out the {{{./tutorials/index.html}Quick Tutorials}} for 2 minute overviews of various features and capabilities of OfficeFloor.
    
