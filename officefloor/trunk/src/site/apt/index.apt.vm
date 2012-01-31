@@ -33,14 +33,13 @@
   Further focus on intuitive graphical configuration makes applications built with OfficeFloor self documenting - which works great with both Agile and Support.
 
   OfficeFloor is freely distributed under GPL (LGPL also available on request) and the source is available {{{./source-repository.html}here}}.
+  
+  The following are the simple steps to build a web application with OfficeFloor.
 
 ~~ spacing
 ---
  
 ---
-  
-  The following are the simple steps to build a web application with OfficeFloor.
-
   
 [./images/OfficeFloor_StepOne.png] OfficeFloor Step One.
 
@@ -56,6 +55,10 @@
   
   Also reviewers can open the raw web pages in any web browser.  This makes for faster feedback loops with the Web Designer enabling just the right look and feel to be created for the web application.
   
+~~ spacing
+---
+ 
+---
 
 [./images/OfficeFloor_StepTwo.png] OfficeFloor Step Two.
 
@@ -73,6 +76,10 @@
 
   OfficeFloor also provides simplified integration with {{{http://code.google.com/webtoolkit/}GWT}} so that the AJAX rich user web page experience can be written in Java.  This keeps all code in the one programming language for easier development and support - though it does not prevent the use of JavaScript, {{{http://jquery.com}jQuery}} or any other rich user interface technologies.
 
+~~ spacing
+---
+ 
+---
    
 [./images/OfficeFloor_StepThree.png] OfficeFloor Step Three.
 
@@ -90,6 +97,10 @@
   
   An {{{./eclipse/index.html}OfficeFloor Eclipse plug-in}} provides the tools to graphically configure the function orchestration.
 
+~~ spacing
+---
+ 
+---
 
 [./images/OfficeFloor_StepFour.png] OfficeFloor Step Four.
 
