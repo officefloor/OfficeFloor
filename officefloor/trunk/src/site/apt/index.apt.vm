@@ -6,45 +6,68 @@
 
   <<Welcome to OfficeFloor>>
 
-  OfficeFloor is an Inversion of Control 2.0 implementation that focuses on multi-threaded dependency injection into methods rather than into objects and improves on existing dependency injection frameworks by letting you specify the Thread to execute the method - thereby really adhering to the "Hollywood Principle" (don't call us, we "really" will call you).
+[./images/OfficeFloor_Blurb.png] OfficeFloor is a simple yet powerful framework for building Java web applications that is a build once run anywhere solution – even with Cloud Computing.
+
+  In addition to making it simple to build a Java web application, once the application is built OfficeFloor enables it to be run by any of the Cloud Computing providers.  OfficeFloor web applications can also be run within JEE Application Servers or even stand-alone.  This run anywhere flexibility is a unique aspect of the OfficeFloor framework due to its core fundamentals of:
   
+   * <<context>>
+
+   * <<dependency injection>>
+  
+   * <<thread injection>>
+
+   * <<function orchestration>>
+
+  Further focus on intuitive graphical configuration makes applications built with OfficeFloor self documenting - which works great with both Agile and Support.
+
   OfficeFloor is freely distributed under GPL (LGPL also available on request) and the source is available {{{./source-repository.html}here}}.
   
-Features
-
-  * Combines the object oriented ease of programming with the multi-threaded performance of functional programming.
-
-  * Provides both auto-wiring of dependencies and manual graphical configuration.
-
-  * WoOF (Web on OfficeFloor - {{{http://webfloor.org}http://webfloor.org}}) provides simplified web application development that allows easy integration with WSYWIG web design tools.
-  
-  * JEE Servlet Filter that enables introducing OfficeFloor functionality to your existing applications without change.
-  
-  * Integration with frameworks such as Spring, Hibernate and GWT to simplify integrating OfficeFloor functionality into your existing applications.
-
-
-Example Capabilities
-
-  The following code provides a simple example of OfficeFloor capabilities: 
-
-%{code-snippet|brush-autodetect=1|file=src/site/snippets/HttpServer.java}
-
-  Further examples can be found in the {{{./tutorials/index.html}Quick Tutorials}}.
+  The following are the simple steps to build a web application with OfficeFloor.
 
   
-Graphical Configuration
+[./images/OfficeFloor_StepOne.png] OfficeFloor Step One.
 
-  The above example was limited to code configuration.  The further value of OfficeFloor lies in its {{{./eclipse/graphical-configuration.html}graphical configuration}}, which is the more preferred means of configuration.  
+  OfficeFloor dynamic web pages only require the following 3 non-obtrusive tags to enable OfficeFloor functionality:
+     
+   * << \<!-- {section} --\> >> : segments the HTML web page into functions
+       
+   * << $\{property\} >> : allows dynamic content from POJOs (plain old Java objects) to be presented on the web page
+       
+   * << #\{link\} >> : allows indirection for links to enable graphical configuration of the web site navigation
   
-  An example graphical configuration from {{{http://webfloor.org}WoOF (Web on OfficeFloor)}} for web site navigation is:
-
-[./images/graphical-configuration.png] Example graphical configuration of WoOF.
-
-  To use the graphical configuration install the {{{./eclipse/index.html}OfficeFloor Eclipse plug-ins}}.
-
+  The reason for using non-obtrusive tags in the HTML web pages is to allow OfficeFloor to integrate with WYSIWYG web design tools (e.g. {{{http://www.adobe.com/products/dreamweaver.html}DreamWeaver}}, {{{http://kompozer.net}KompoZer}}) to create and more importantly edit the web pages.
   
+  Also reviewers can open the raw HTML web pages in any web browser.  This makes for faster feedback loops with the Web Designer enabling just the right look and feel to be created.
+  
+  
+[./images/OfficeFloor_StepTwo.png] OfficeFloor Step Two.
 
-Find out more
+  The application logic is written with POJOs (plain old Java objects) but in a slightly different focus to many dependency injection frameworks.  Instead of injecting the dependency into the object, OfficeFloor injects the dependency as a parameter into the method.  This slight difference is key to OfficeFloor's simplicity yet power!
+  
+  So why dependency inject into the method?  Methods are the natural building blocks for managed code, just look at the JEE API's to see this:
+  
+   * Servlet has the service(...) method
+   
+   * JMS has the onMessage(...) method
+   
+   * Session Beans contain methods run within a context
+
+  OfficeFloor focuses on the method and its <<context>>, <<dependent injection>> and the invoking thread (<<thread injection>>).
+
+  OfficeFloor also provides simplified integration with {{{http://code.google.com/webtoolkit/}GWT}} so that the AJAX rich user web page experience can be written in Java.  This keeps all code in the one language for easier development and support - though it does not prevent the use of JavaScript, {{{http://jquery.com}jQuery}} or any other rich user interface technology.
+
+   
+[./images/OfficeFloor_StepThree.png] OfficeFloor Step Three.
+
+  Dependency Injection, Context, Thread Injection is all great but now we have a lot of functions to be invoked that are not connected together.
+
+
+[./images/OfficeFloor_StepFour.png] OfficeFloor Step Four.
+
+  As you can see by now that OfficeFloor through its fundamentals can be deployed anywhere.
+
+
+  <<Find out more>>  
 
   To find out more about OfficeFloor:
   
