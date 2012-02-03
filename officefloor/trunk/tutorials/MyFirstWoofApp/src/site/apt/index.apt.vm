@@ -6,20 +6,20 @@
 
   <<My first WoOF application>>
   
-  This tutorial walks you through adding WoOF capabilities to an existing JEE Web Application to provide as always the following simple example (with <World> dynamically rendered):
-  
+  This tutorial walks you through adding WoOF to an existing JEE web application to provide the following simple example (with <World> dynamically rendered):
+
 [./images/MyFirstWoofApp-hello-world.png] Hello World screenshot.
 
-  Please be aware that this tutorial does not highlight many features of WoOF as it walks through introducing WoOF to an existing Java Web Application.  Please skip to the {{{../DynamicHttpServer/index.html}next tutorial}} should you want to start looking at the features of WoOF.
+  Please be aware that this tutorial does not highlight many features of WoOF as it walks through introducing WoOF to an existing Java Web Application.  Please see the {{{../index.html}other tutorials}} should you want to start looking at the features of WoOF.
 
-  To keep the tutorial focused on introducing WoOF the default {{{http://maven.apache.org}Maven}} webapp archetype will be used as the existing application.  Therefore, please have {{{http://maven.apache.org}Maven}} installed.
+  The default {{{http://maven.apache.org}Maven}} webapp archetype will be used as the existing application.
   
-  Should you have any questions regarding this tutorial, please do not hesitate to ask (click on bottom right hand box to chat with us online).  We are happy to answer your questions.  Should we all happen to be offline, please use {{{../../getting-help.html}Getting Help}}.
-
-  {{{http://sourceforge.net/projects/officefloor/files/maven/maven2/net/officefloor/tutorial/MyFirstWoofApp/${projectVersion}/MyFirstWoofApp-${projectVersion}-project.zip/download}Download Tutorial Source}} if you want to see the completed tutorial source code.
+  Download the {{{http://sourceforge.net/projects/officefloor/files/maven/maven2/net/officefloor/tutorial/MyFirstWoofApp/${projectVersion}/MyFirstWoofApp-${projectVersion}-project.zip/download}Tutorial Source}} if you want to see the completed tutorial source code.
 
 Steps
-  
+
+  The following are the steps to adding WoOF to an existing JEE web application.  As WoOF runs as a Filter, it can run along side your existing JEE code.
+
 %{toc|fromDepth=2}
 
 *1. Create the existing WebApp

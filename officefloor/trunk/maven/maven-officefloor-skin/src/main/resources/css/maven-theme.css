@@ -93,6 +93,11 @@ p {
   color: #000000;
 }
 
+table {
+  width: 90%;
+  margin: 20px;
+}
+
 table.bodyTable th {
   color: white;
   background-color: #c0c0c0;

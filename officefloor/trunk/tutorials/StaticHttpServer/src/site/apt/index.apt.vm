@@ -4,9 +4,9 @@
 					        Daniel Sagenschneider
                                                -----------------------
 
-  <<Static Http Server Tutorial>>
+  <<Running WoOF Stand-Alone Tutorial>>
 
-  This tutorial explains the basic layout of a web application and how to run the web application.  
+  This tutorial covers the basic layout of a web application and how to run the web application.  
   
   To demonstrate this the tutorial will illustrate starting a HTTP server and have it respond with the following static <<<index.html>>> page:
   
@@ -14,7 +14,8 @@
   
   You may skip ahead to the {{{../DynamicHttpServer/index.html}next tutorial}} to look a dynamic content as this tutorial covers some very basics regarding static content.  Later you can come back to this tutorial for running a WoOF (Web on OfficeFloor) application. 
    
-  {{{http://sourceforge.net/projects/officefloor/files/maven/maven2/net/officefloor/tutorial/StaticHttpServer/${projectVersion}/StaticHttpServer-${projectVersion}-project.zip/download}Download Tutorial Source}}
+  This tutorial will require {{{http://sourceforge.net/projects/officefloor/files/maven/maven2/net/officefloor/tutorial/StaticHttpServer/${projectVersion}/StaticHttpServer-${projectVersion}-project.zip/download}downloading the Tutorial Source}} to have it available to run.
+
   
 Layout
 
@@ -36,11 +37,11 @@ Layout
   
   Note that only files under the <<<PUBLIC>>> directory will be made available which keeps the code private (e.g. the <<<net.officefloor.tutorial.Example>>> and <<<application.woof>>> files will not be visible).  This structure also allows using the jar normally on a class path without any special class loading - unlike the WAR layout that requires special class loading to access its contained classes.
 
+
 JEE Servlet Container (WAR Layout)
-  
-  Please note that when using WoOF within a JEE Servlet Container, WoOF will respect the WAR layout and obtain web content from the top level and classes from the respective <<<WEB-INF>>> directories.  This enables both easier integration of WoOF into your existing Servlet applications and also lets you use standard build tools (such as {{{http://maven.apache.org}Maven}}) to continue to create the WAR (i.e. there is no special build steps required to integrate WoOF into existing Servlet applications).  The above WoOF layout is <only> for using WoOF stand alone outside a JEE Servlet Container.
-  
-  Please see the {{{../index.html}Servlet tutorials}} for running WoOF within a JEE Servlet Container.
+
+  When using WoOF within a JEE Servlet Container, WoOF will respect the WAR layout and obtain web content from the top level and classes from the respective <<<WEB-INF>>> directories.  This enables both easier integration of WoOF into your existing Servlet applications and also lets you use standard build tools (such as {{{http://maven.apache.org}Maven}}) to continue to create the WAR.  There are no special build steps required to integrate WoOF into existing Servlet applications.
+
 
 Running
   
@@ -62,9 +63,8 @@ Running
         </settings>
 +-------------------------------+
   
-  The above command will start a HTTP Server on the default port 7878 (i.e. http://localhost:7878) servicing files from the class path under the <<<PUBLIC>>> directory.  In other words the <<<index.html>>> file would be located on the class path as <<<PUBLIC/index.html>>>.
+  The above command will start a HTTP Server on the default port 7878 (i.e. http://localhost:7878) servicing files from the class path under the <<<PUBLIC>>> directory.
 
-  The reason for using the class path is that all web content need not be deployed in the one jar.  This allows for modular construction of a web site.  For example the images and css can be maintained in one jar while the web pages provided in another jar.  Further to this, though not within the scope of this example, is using  {{{/apidocs/net/officefloor/compile/spi/section/source/SectionSource.html}SectionSource}} implementations to modularise the functionality of the web site.
 
 OfficeBuilding
 
@@ -72,7 +72,7 @@ OfficeBuilding
   
   The first process is the OfficeBuilding which is a central control process.  Rather than having a single process which hosts each application that must be run, OfficeFloor has a central process (OfficeBuilding) which spawns each application (OfficeFloor) to run in its own process.  This central control process, OfficeBuilding, will expose JMX beans for controlling the OfficeFloor instances on port 13778.  The above command will ensure OfficeBuilding is running and then start the web application.
   
-  The second process is an OfficeFloor process which is the actual Web Application.  It is possible to run this without OfficeBuiling by using the main class {{{/apidocs/net/officefloor/plugin/woof/WoofOfficeFloorSource.html}WoofOfficeFloorSource}}.  The advantage of using the OfficeBuilding is that OfficeFloor integrates with {{{http://maven.apache.org}Maven}} to take advantage of the Maven repositories to obtain the artifacts and add them to the class path to run the application.  Therefore there is no need to package your application to run it - making it much faster to run the code just developed.  It also enables easier management of applications on a grid as the OfficeBuilding process acts as an agent on each grid node that can start any application by downloading the necessary artifacts from a Maven repository - further discussion of this however is beyond the scope of this example.
+  The second process is an OfficeFloor process which is the actual Web Application.  It is possible to run this without OfficeBuiling by using the main class {{{/apidocs/net/officefloor/plugin/woof/WoofOfficeFloorSource.html}WoofOfficeFloorSource}}.  The advantage of using the OfficeBuilding is that OfficeFloor integrates with {{{http://maven.apache.org}Maven}} to take advantage of the Maven repositories to obtain the artifacts and add them to the class path to run the application.  Therefore there is no need to package your application to run it - making it much faster to run the code just developed.  It also enables easier management of applications on a grid as the OfficeBuilding process acts as an agent on each grid node that can start any application by downloading the necessary artifacts from a Maven repository - further discussion of this however is beyond the scope of this tutorial.
   
   To stop the OfficeBuilding and the OfficeFloor instances running within it, use the following command:
   
@@ -105,5 +105,5 @@ Unit Test
 
 Next
 
-  The {{{../DynamicHttpServer/index.html}next tutorial}} looks at dynamic content.
+  See the {{{../index.html}other tutorials}} for the features of OfficeFloor.
 

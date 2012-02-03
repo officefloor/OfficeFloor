@@ -125,7 +125,11 @@
 
   To <<find out more>> about OfficeFloor:
   
-   * Check out the {{{./tutorials/index.html}Quick Tutorials}} for 2 minute overviews of various features and capabilities of OfficeFloor.
+   * Check out the {{{./tutorials/index.html}Tutorials}} covering various features of OfficeFloor.
    
-   * Ask questions by catching us online (click on bottom right hand box - many thanks goes to {{{http://woopra.com}Woopra}} for this great service).
+   * Read this site's {{{./OfficeFloor.pdf}documentation offline}}
+   
+   * Install the {{{./eclipse/index.html}OfficeFloor Eclipse plug-in}} and try out OfficeFloor.
+   
+   * Ask questions by catching us online.  Many thanks goes to {{{http://woopra.com}Woopra}} for this great service.
 

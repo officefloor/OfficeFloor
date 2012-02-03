@@ -26,11 +26,6 @@
 		<head>
 			<!-- shortcut icon -->
 			<link rel="shortcut icon" href="./favicon.ico" />
-			<!-- Search Engine details -->
-			<meta name="keywords"
-				content="Java,IOC,inversion of control,DI,dependency injection,visual configuration,graphical configuration,application framework" />
-			<meta name="description"
-				content="OfficeFloor is an inversion of control 2.0 that enables dependency injection of the thread for running a method" />
 			<!-- Syntax Highlighter -->
 			<link type="text/css" rel="stylesheet" href="./css/shCore.css" />
 			<link type="text/css" rel="stylesheet" href="./css/shThemeDefault.css" />
@@ -43,31 +38,6 @@
 				SyntaxHighlighter.defaults['toolbar'] = false;
 				SyntaxHighlighter.all();
             </script>
-			<!-- Piwik -->
-			<script type="text/javascript">
-				var pkBaseURL = (("https:" ==
-				document.location.protocol) ?
-				"https://apps.sourceforge.net/piwik/officefloor/" :
-				"http://apps.sourceforge.net/piwik/officefloor/");
-				document.write(unescape("%3Cscript src='" + pkBaseURL + "piwik.js'
-				type='text/javascript'%3E%3C/script%3E"));
-            </script>
-			<script type="text/javascript">
-				piwik_action_name = '';
-				piwik_idsite = 1;
-				piwik_url = pkBaseURL + "piwik.php";
-				piwik_log(piwik_action_name,
-				piwik_idsite, piwik_url);
-            </script>
-			<object>
-				<noscript>
-					<p>
-						<img
-							src="http://apps.sourceforge.net/piwik/officefloor/piwik.php?idsite=1"
-							alt="piwik" />
-					</p>
-				</noscript>
-			</object>
 			<!-- Google Analytics -->
 			<script type="text/javascript">
 				var _gaq = _gaq || [];
@@ -87,7 +57,7 @@
 				s.parentNode.insertBefore(ga, s);
 				})();
   			</script>
-			<!-- Start of Woopra Code -->
+			<!-- Woopra -->
 			<script>
 				var woo_settings = {idle_timeout:'300000',
 				domain:'officefloor.net'};
@@ -108,26 +78,19 @@
 			<item name="Welcome" href="./index.html" />
 		</menu>
 		<menu name="Getting Started">
-			<item name="My First WoOF App" href="./tutorials/MyFirstWoofApp/index.html" />
-			<item name="Quick Tutorials" href="./tutorials/index.html" />
-			<item name="Eclipse Plug-ins" href="./eclipse/index.html" />
-			<item name="Download/Maven" href="./download.html" />
+			<item name="Tutorials" href="./tutorials/index.html" />
+			<item name="Eclipse Plug-in" href="./eclipse/index.html" />
+			<item name="Download / Maven" href="./download.html" />
 		</menu>
 		<menu name="Help">
 			<item name="Getting Help" href="./getting-help.html" />
-			<item name="Search Forums"
-				href="http://sourceforge.net/search/?group_id=156349&amp;type_of_search=forums" />
-			<item name="Site doc in PDF" href="./OfficeFloor.pdf" />
+			<item name="Site as PDF" href="./OfficeFloor.pdf" />
 			<item name="Issue Tracking" href="./issue-tracking.html" />
 		</menu>
 		<menu name="Technical">
-			<item name="Architecture" href="./architecture.html" />
-			<item name="Principles" href="./principles.html" />
-			<item name="Source Repository" href="./source-repository.html" />
-			<item name="SourceForge Page" href="http://sourceforge.net/projects/officefloor" />
 			<item name="Releases" href="./changes-report.html" />
-			<item name="Job Based Architecture" href="./core/officeframe/job-based-architecture.html" />
-			<item name="Graphical Configuration" href="./eclipse/graphical-configuration.html" />
+			<item name="Architecture" href="./architecture.html" />
+			<item name="Source Repository" href="./source-repository.html" />
 		</menu>
 		<menu ref="modules" />
 	</body>
