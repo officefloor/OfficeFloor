@@ -113,11 +113,11 @@ Dependency Injection
 *----------------------------------------------------------+-----------------------------------------------------------+
 | {{{./DatabaseHttpServer/index.html}Dependency injection}}  | WoOF with dependency injection.
 *----------------------------------------------------------+-----------------------------------------------------------+
-| <<TODO qualified dependency injection>>  | Qualification of dependencies with same type.
+| <Coming Soon>                                            | Qualification of dependencies with same type.
 *----------------------------------------------------------+-----------------------------------------------------------+
-| <<TODO Spring supplier>>  | Tutorial coming soon to allow re-using Spring beans.
+| <Coming Soon>                                            | Integration with Spring.
 *----------------------------------------------------------+-----------------------------------------------------------+
-| <<TODO Guice supplier>>  | Tutorial coming soon to allow re-using Guice objects.
+| <Coming Soon>                                            | Integration with Guice.
 *----------------------------------------------------------+-----------------------------------------------------------+
 
 
@@ -128,7 +128,7 @@ Context
 *----------------------------------------------------------+-----------------------------------------------------------+
 || Tutorial                                                || Description                                             
 *----------------------------------------------------------+-----------------------------------------------------------+
-| <<TODO provide Governance tutorial>>  | Configuring the governing the transactions of an OfficeFloor web application.
+| <Coming Soon>                                            | Managing transactions of an OfficeFloor web application.
 *----------------------------------------------------------+-----------------------------------------------------------+
 
 
@@ -139,6 +139,6 @@ Thread Injection
 *----------------------------------------------------------+-----------------------------------------------------------+
 || Tutorial                                                || Description
 *----------------------------------------------------------+-----------------------------------------------------------+
-| {{{./TeamHttpServer/index.html}Thread Injection}}  | WoOF with thread injection.
+| {{{./TeamHttpServer/index.html}Thread Injection}}        | WoOF with thread injection.
 *----------------------------------------------------------+-----------------------------------------------------------+
 

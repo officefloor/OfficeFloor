@@ -6,43 +6,50 @@
 
   <<WoOF within JEE Servlet Container Tutorial>>
 
-  This tutorial demonstrates running the WoOF within a JEE Servlet container.
+  This tutorial demonstrates running an OfficeFloor web application within a JEE Servlet container.
     
   {{{http://sourceforge.net/projects/officefloor/files/maven/maven2/net/officefloor/tutorial/ServletFilterWebApplication/${projectVersion}/ServletFilterWebApplication-${projectVersion}-project.zip/download}Download Tutorial Source}}
-  
+
+
 WoofServletFilter
 
-  To utilise WoOF within a JEE Servlet container, {{{/apidocs/net/officefloor/plugin/woof/servlet/WoofServletFilter.html}WoofServletFilter}} is a Servlet Filter which provides the necessary hooks for running WoOF within a JEE Servlet container.  The following is the configuration for this tutorial:
+  The {{{/apidocs/net/officefloor/plugin/woof/servlet/WoofServletFilter.html}WoofServletFilter}} is a Servlet Filter which provides the necessary hooks for running WoOF within a JEE Servlet container.
+  
+  The following is the configuration for this tutorial.
 
 [./images/servlet-woof.png] application.woof configuration.
 
   The above configuration provides the following:
   
-   * OfficeFloor dynamic web template available at the uri <<</template>>>
+   * OfficeFloor dynamic web template
    
-   * Rendering of a JSP (by the Servlet container) as response for a navigation link from the above web template.
+   * Rendering of a JSP (by the Servlet container) as a navigation link from the above web template
    
-   * Utilising a class method, <<<example(...)>>>, to service the uri <<</class>>>
+   * Utilising a class method <<<example(...)>>> to service the uri <<</class>>>
    
   For further explanation of the above WoOF configuration see the previous tutorials.
   
-  The difference in running WoOF within a JEE Servlet Container is that resources are handled by the JEE Servlet Container (rather than taken from the class path).  The ability to link to Servlet container resources (e.g. JSPs, Servlets) is provided to allow introducing WoOF into JEE web applications without having to rewrite the web applications.  WoOF will quite happily co-exist with other frameworks within a Servlet container as it is configured as a Filter.
-  
+  Within a JEE Servlet Container WoOF defers to the JEE Servlet Container to provide the resources.  The ability to link to Servlet container resources (e.g. JSPs, Servlets, static pages, etc) is provided to allow introducing WoOF into JEE web applications without having to rewrite the web applications.  WoOF will also happily co-exist with other frameworks within a Servlet container.
+
 
 web.xml
 
-  The following highlighted configuration provides the necessary configuration in the <<<web.xml>>> for running WoOF within the Servlet container.
+  The following highlighted configuration adds the {{{/apidocs/net/officefloor/plugin/woof/servlet/WoofServletFilter.html}WoofServletFilter}} to the <<<web.xml>>> for running WoOF within the Servlet container.
 
 %{code-snippet|sh-params=highlight:[4,5,6,7,8,9,10,11]|brush-autodetect=1|file=${basedir}/src/main/webapp/WEB-INF/web.xml}
 
-  For WoOF to effectively be used, its Filter mapping should be to <<</*>>> so that it has the ability to intercept each request.  WoOF will only service the requests it is configured for and will allow the Servlet container to process all remaining requests.
+  WoOF's filter mapping should be <<</*>>> so that it can intercept each request.  WoOF will however only service the requests it is configured to handle and let the Servlet application handle the rest.
+
 
   
 ExampleClass
 
-  The class used for the section has the input parameter {{{/apidocs/net/officefloor/plugin/socket/server/http/ServerHttpConnection.html}ServerHttpConnection}} which wraps the <<<ServletRequest>>> and <<<ServletResponse>>> so that existing stand-alone WoOF applications can be run within a JEE Servlet Container.  It is actually by re-implementing the base objects for the WoOF interfaces ( {{{/apidocs/net/officefloor/plugin/socket/server/http/ServerHttpConnection.html}ServerHttpConnection}} , {{{/apidocs/net/officefloor/plugin/web/http/session/HttpSession.html}HttpSession}} ) to use the JEE Servlet Container APIs that the JEE Servlet integration is achieved. 
+  As per the above configuration, the following class directly handles a web request.
 
 %{code-snippet|brush-autodetect=1|id=example|file=${basedir}/src/main/java/net/officefloor/tutorial/servletfilterwebapplication/ExampleClass.java}
+
+  Running within a JEE Servlet container the {{{/apidocs/net/officefloor/plugin/socket/server/http/ServerHttpConnection.html}ServerHttpConnection}} implementation wraps the <<<ServletRequest>>> and <<<ServletResponse>>> so that existing stand-alone WoOF applications can be run.  It is the re-implementing of the base WoOF objects ( {{{/apidocs/net/officefloor/plugin/socket/server/http/ServerHttpConnection.html}ServerHttpConnection}} , {{{/apidocs/net/officefloor/plugin/web/http/session/HttpSession.html}HttpSession}} ) to use the JEE Servlet Container APIs that the JEE Servlet integration is achieved.
+
 
 
 Remaining Code
@@ -57,19 +64,19 @@ Remaining Code
 
 * ExampleTemplateLogic
 
-  Identifies that the <<<link>>> in the above template should be handled by <<<LINK>>> output which in the above configuration is mapped to a JSP.
+  Identifies that the <<<link>>> in the above template should be handled by the <<<LINK>>> output.  The above configuration maps this to a JSP for the response.
 
 %{code-snippet|brush-autodetect=1|id=example|file=${basedir}/src/main/java/net/officefloor/tutorial/servletfilterwebapplication/ExampleTemplateLogic.java}
 
 * Template.jsp
 
-  JSP for the Servlet Container that is linked to by WoOF as a resource.
+  JSP run by Servlet Container.  WoOF navigates to this JSP in the above configuration.
 
 %{code-snippet|brush=xml|file=${basedir}/src/main/webapp/Template.jsp}
 
 * MockHttpServlet
 
-  Not part of the WoOF but is included to know when a request is being serviced by the Servlet container (and not OfficeFloor).
+  This is included to know when a request is being serviced by the Servlet container (and not OfficeFloor).
 
 %{code-snippet|brush-autodetect=1|id=example|file=${basedir}/src/main/java/net/officefloor/tutorial/servletfilterwebapplication/MockHttpServlet.java}
 

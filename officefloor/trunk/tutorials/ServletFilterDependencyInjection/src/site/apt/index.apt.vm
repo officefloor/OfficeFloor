@@ -12,50 +12,46 @@
   
 EJB
 
-  To illustrate using the Servlet container dependency injection, the following simple EJB will be used:
+  To illustrate using the Servlet container dependency injection the following simple EJB will be used
   
 %{code-snippet|brush-autodetect=1|id=example|file=${basedir}/src/main/java/net/officefloor/tutorial/servletfilterdependencyinjection/ExampleDependency.java}
   
-  with a local interface as follows:
+  with a local interface as follows
 
 %{code-snippet|brush-autodetect=1|id=example|file=${basedir}/src/main/java/net/officefloor/tutorial/servletfilterdependencyinjection/ExampleDependencyLocal.java}
 
-  and a returned object as follows (which is a simple POJO to be used to render the WoOF dynamic web template):
+  and a returned object as follows.
   
 %{code-snippet|brush-autodetect=1|id=example|file=${basedir}/src/main/java/net/officefloor/tutorial/servletfilterdependencyinjection/Message.java}
 
 
-Making use of the EJB within the WoofServletFilter
+Making use of an EJB within the WoofServletFilter
 
-  Making the above EJB available to WoOF is no different to making it available to any other Servlet component via dependency injection within a JEE application server.  The following example {{{/apidocs/net/officefloor/plugin/woof/servlet/WoofServletFilter.html}WoofServletFilter}} is the only code necessary to make use of the above EJB:
+  To use an EJB extend {{{/apidocs/net/officefloor/plugin/woof/servlet/WoofServletFilter.html}WoofServletFilter}} and add the necessary EJB fields as follows.
 
 %{code-snippet|brush-autodetect=1|id=example|file=${basedir}/src/main/java/net/officefloor/tutorial/servletfilterdependencyinjection/ExampleFilter.java}
 
-  Configured into the <<<web.xml>>> as follows:
+  The extended Filter is then configured into the <<<web.xml>>> as follows.
 
 %{code-snippet|brush-autodetect=1|file=${basedir}/src/main/webapp/WEB-INF/web.xml}
 
-  Notice that the <<<Filter>>> extends {{{/apidocs/net/officefloor/plugin/woof/servlet/WoofServletFilter.html}WoofServletFilter}} and only provides the EJB declarations.  Nothing needs to be implemented as on start up, the {{{/apidocs/net/officefloor/plugin/woof/servlet/WoofServletFilter.html}WoofServletFilter}} will configure itself from the <<<application.woof>>> file and will also automatically interrogate itself for Servlet container dependency injected objects.  WoOF will then make these Servlet dependency injected objects available for dependency injection into the methods within the template logic methods.
+  On start up the {{{/apidocs/net/officefloor/plugin/woof/servlet/WoofServletFilter.html}WoofServletFilter}} will interrogate itself for JEE Servlet container dependency injected objects.  WoOF will make these Servlet dependency injected objects available for dependency injection into the template logic methods.
   
-  The following logic of the configured template shows the use of the Servlet dependency injected object:
+  The template logic shows the use of the Servlet dependency injected object.
   
 %{code-snippet|brush-autodetect=1|id=example|file=${basedir}/src/main/java/net/officefloor/tutorial/servletfilterdependencyinjection/ExampleTemplateLogic.java}
 
-  The dynamic web template is as follows:
+  The template is as follows.
   
-%{code-snippet|sh-params=highlight:[13]|brush=xml|file=${basedir}/src/main/webapp/Template.html}
-
-  For further explanation of WoOF dynamic web templates please see the specific tutorials.  Please note the continued ease of unit testing the template logic class just as a POJO (plain old java object) by mocking the EJB interface.
-
-  Therefore to make use of an existing EJB service layer, you need only extend {{{/apidocs/net/officefloor/plugin/woof/servlet/WoofServletFilter.html}WoofServletFilter}} to create a Servlet Filter that just declares the JEE application dependencies to be injected and WoOF will handle making them available to the template logic methods.
+%{code-snippet|brush=xml|file=${basedir}/src/main/webapp/Template.html}
   
-  Please note that as JEE containers assumes single threaded execution with heavy use of ThreadLocal variables, WoOF will use the invoking Thread to execute all methods using a dependency from the Servlet container.  This is necessary to allow EJBs to pick up the appropriate context for executing correctly.  WoOF will however allow multi-threading all other methods that do not use dependencies from the JEE container.
+  WoOF will use the JEE container thread to execute all methods using a dependency from the JEE container.  This is necessary to allow EJBs to pick up the appropriate context for executing correctly.  WoOF will however allow multi-threading all other methods that do not use dependencies from the JEE container.
 
 
 
 Remaining Code  
 
-  For completeness of the tutorial the mock servlet is included to show servicing by a component of the Servlet Container.
+  For completeness of the tutorial the mock servlet is as follows.
 
 %{code-snippet|brush-autodetect=1|id=example|file=${basedir}/src/main/java/net/officefloor/tutorial/servletfilterdependencyinjection/MockHttpServlet.java}
 
@@ -63,17 +59,15 @@ Remaining Code
 
 Unit Test
 
-  The following unit test illustrates the ease in which to test the template logic class as a POJO:
+  The following unit test illustrates the ease in which to test the template logic class as a POJO.
   
 %{code-snippet|brush-autodetect=1|id=test|file=${basedir}/src/test/java/net/officefloor/tutorial/servletfilterdependencyinjection/ExampleTest.java}
 
-  The servicing by the:
+  The following uint tests show servicing of a request by the:
   
-   * Servlet (as WoOF will only service requests it is configured to do)
+   * Servlet
    
-   * configured WoOF dynamic web template which utilises the dependency injected EJB
-   
-  is shown in the following tests: 
+   * WoOF template utilising the dependency injected EJB
 
 %{code-snippet|brush-autodetect=1|id=example|file=${basedir}/src/test/java/net/officefloor/tutorial/servletfilterdependencyinjection/ExampleIT.java}
 
@@ -81,4 +75,4 @@ Unit Test
 
 Next
 
-  This has now covered how to use WoOF within a JEE Servlet Container.  Please see {{{../index.html}further tutorials}} for using OfficeFloor services.
+  Please see {{{../index.html}further tutorials}} for further features of OfficeFloor.
