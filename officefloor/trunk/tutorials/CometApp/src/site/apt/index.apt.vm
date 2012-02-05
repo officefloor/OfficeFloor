@@ -6,9 +6,9 @@
 
   <<Comet Application Tutorial>>
 
-  This tutorial demonstrates the simplicity in providing Comet (AJAX push, reverse AJAX) functionality to a web application built with WoOF.
+  This tutorial demonstrates the simplicity in providing Comet (AJAX push, reverse AJAX) functionality to an OfficeFloor web application.
   
-  To demonstrate the ease of using Comet functionality within a WoOF application, the following simple chat application will be used for this tutorial:
+  To demonstrate the ease of using Comet functionality the following simple chat application will be used for this tutorial.
   
 [./images/CometApp-screenshot.png] CometApp screenshot.
 
@@ -18,7 +18,7 @@
   
 Template.html
 
-  The below is the content of the <<<Template.html>>>.  WoOF utilises {{{http://gwt.google.com}GWT}} for client side logic and the simple web page provides the necessary GWT hook (id="chat").  Please see the {{{../index.html}other tutorials}}} for the ease of using {{{http://gwt.google.com}GWT}} with WoOF.
+  The below is the content of the <<<Template.html>>>.
 
 %{code-snippet|brush=xml|file=${basedir}/src/main/resources/Template.html}
   
@@ -26,15 +26,15 @@ Template.html
 
 ConversationSubscription Class
 
-  As a web browser typically will allow only two connections back to the server, a connection can not be used for each Comet subscription.  Therefore the Comet subscription is multiplexed over one of the connections leaving the other connection available for servicing the other web page requests.  To distinguish between subscriptions and allow type safety in publishing and subscribing to Comet events, each subscription is identified by an interface.  For this example the interface is as follows: 
+  As a web browser typically will allow only two connections back to the server, a connection can not be used for each Comet subscription.  OfficeFloor handles the Comet subscriptions by multiplexing them over one of the connections leaving the other connection available for servicing the other web page requests.  To distinguish between subscriptions each subscription is identified by an interface.  For this tutorial the interface is as follows.
 
 %{code-snippet|brush-autodetect=1|id=example|file=${basedir}/src/main/java/net/officefloor/tutorial/cometapp/client/ConversationSubscription.java}
 
-  The definition of the interface is relatively free to be defined per your need, however it must adhere to the following:
+  The definition of the interface is free to be defined per your need, however it must adhere to the following:
   
   * Must be an interface
   
-  * May only have one method with a single parameter (the event payload)
+  * Must have only one method with a single parameter (the event payload)
   
   * Must extend <<<CometSubscriber>>> (necessary for GWT client side code generation)
 
@@ -42,25 +42,29 @@ ConversationSubscription Class
 
 EntryPoint Class
 
-  The following class is the GWT <<<EntryPoint>>> class for this example and demonstrates how the above interface is used in both subscribing to Comet events and publishing Comet events from the client.
+  The following class is the GWT <<<EntryPoint>>> class for this tutorial.  It demonstrates how the above interface is used in both subscribing to Comet events and publishing Comet events.
 
 %{code-snippet|brush-autodetect=1|id=example|file=${basedir}/src/main/java/net/officefloor/tutorial/cometapp/client/CometAppEntryPoint.java}
 
   The next sections explain how <<<OfficeFloorComet>>> is used for the subscription to Comet events and publication of Comet events.
 
+
 * Comet Subscription
 
-  The <<<OfficeFloorComet.subscribe(...)>>> method is provided the interface and an implementation of the interface to handle the event.  On the first subscribe, <<<OfficeFloorComet>>> will establish a connection with the server and start the long polling for events.  On receiving the event, <<<OfficeFloorComet>>> will appropriately invoke the handler (interface implementation) with the event and then send another long poll request for the next event.  This means that you need only provide the handler for events and not worry about the "plumbing" necessary for Comet functionality.
+  The <<<OfficeFloorComet.subscribe(...)>>> method registers subscription to Comet events for the provided interface.  On the first subscribe <<<OfficeFloorComet>>> will establish a connection with the server and start the long polling for events.  On receiving an event <<<OfficeFloorComet>>> will appropriately invoke the handler (interface implementation) with the event.  It will then send another long poll request for the next event.  This means only the handler implementation is required and OfficeFloor takes care of listening for events from the server.
 
   It is possible to subscribe to more than one interface within the same GWT client.  Please see the {{{../../apidocs/net/officefloor/plugin/comet/api/OfficeFloorComet.html}OfficeFloorComet API}} for further details regarding multiple subscriptions.
   
-  In the case of this example, the handle of the event is simply appending the text as the next line in the conversation. 
+  In the case of this tutorial the handle of the event is simply appending the text as the next line in the conversation. 
+
 
 * Comet Publication
 
-  The <<<OfficeFloorComet.createPublisher(...)>>> method creates an implementation of the interface to enable publishing an event.  Events are sent immediately via the second connection from the browser and a response is immediately returned freeing the connection for other web browser requests.
+  The <<<OfficeFloorComet.createPublisher(...)>>> method creates an implementation of the interface to enable publishing an event.  
   
-  In the case of this example, the publish sends the message text to the server.  The server will then notify the appropriate subscribers of the event, which subsequently causes the conversation text box to be updated with the message.
+  OfficeFloor sends the published events immediately.  It does this via the second connection from the browser.  As OfficeFloor's server functionality sends an immediate response acknowledging the event, the connection is then free to serve further web requests.
+  
+  In the case of this tutorial the publish sends the message text to the server.  The server will then notify the appropriate subscribers of the event.  This causes the conversation text box to be updated with the message.
 
 
 
@@ -69,8 +73,6 @@ Server Side
   The following demonstrates the configuration necessary for supporting Comet on the server:
   
 [./images/CometApp-add-template-dialog.png] CometApp Add template dialog screenshot.
-
-  Yes, just tick the box.
   
   There is no additional configuration or coding necessary to support a single server providing Comet functionality.
 
