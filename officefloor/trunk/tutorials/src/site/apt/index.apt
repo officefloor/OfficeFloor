@@ -8,9 +8,9 @@
   
   The tutorials below providing working examples and explanations of the features of OfficeFloor.
 
-  The acronym <<WoOF>> stands for Web on OfficeFloor.  OfficeFloor at its core is actually a <true> inversion of control engine as it inverts control of dependencies, threads and the order methods are executed.  The OfficeFloor web functionality is actually supported through plug-ins, which is why OfficeFloor is flexible to run anywhere - the API stays consistant but differing implementations can be used to adapt to the particular environment.  Please see {{{../architecture.html}OfficeFloor's architecture}} for more details.
+  The acronym <<WoOF>> stands for Web on OfficeFloor.  OfficeFloor at its core is actually a <true> inversion of control engine as it inverts control of dependencies, threads and the order methods are executed.  The OfficeFloor web functionality is supported through plug-ins, which is why OfficeFloor is flexible to run anywhere - the API stays consistant but differing implementations can be used to adapt to the particular environment.  Please see {{{../architecture.html}OfficeFloor's architecture}} for more details.
 
-  All tutorials have respective sources that can be downloaded and run with {{{http://maven.apache.org}Maven}}.  To view and run the tutorials within an IDE, use the appropriate Maven setup for the IDE (for example run <<<mvn eclipse:eclipse>>> to use within {{{http://eclipse.org}Eclipse}}).  Also installing the {{{../eclipse/index.html}OfficeFloor Eclipse Plug-in}} will allow viewing and editing the graphical configuration.
+  The source code for each tutorial can be downloaded and run with {{{http://maven.apache.org}Maven}}.  To view and run the tutorials within an IDE use the appropriate Maven setup for the IDE (for example run <<<mvn eclipse:eclipse>>> to use within {{{http://eclipse.org}Eclipse}}).  Also installing the {{{../eclipse/index.html}OfficeFloor Eclipse Plug-in}} will allow viewing and editing the graphical configuration.
 
   
   
