@@ -6,4 +6,5 @@
 	<list type="OfficeManagedObjectSourceFlowToOfficeSectionInputModel"
 		name="office managed object source flow" />
 	<list type="OfficeEscalationToOfficeSectionInputModel" name="office escalation" />
+	<list type="OfficeStartToOfficeSectionInputModel" name="office start" />
 </model>

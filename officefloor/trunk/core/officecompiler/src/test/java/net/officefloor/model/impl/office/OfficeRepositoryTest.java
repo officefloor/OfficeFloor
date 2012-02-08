@@ -60,6 +60,8 @@ import net.officefloor.model.office.OfficeSectionOutputModel;
 import net.officefloor.model.office.OfficeSectionOutputToOfficeSectionInputModel;
 import net.officefloor.model.office.OfficeSectionResponsibilityModel;
 import net.officefloor.model.office.OfficeSectionResponsibilityToOfficeTeamModel;
+import net.officefloor.model.office.OfficeStartModel;
+import net.officefloor.model.office.OfficeStartToOfficeSectionInputModel;
 import net.officefloor.model.office.OfficeSubSectionModel;
 import net.officefloor.model.office.OfficeSubSectionToOfficeGovernanceModel;
 import net.officefloor.model.office.OfficeTaskModel;
@@ -150,6 +152,8 @@ public class OfficeRepositoryTest extends OfficeFrameTestCase {
 		OfficeGovernanceModel governance = new OfficeGovernanceModel(
 				"GOVERNANCE", "net.example.ExampleGovernanceSource");
 		office.addOfficeGovernance(governance);
+		OfficeStartModel start = new OfficeStartModel("START");
+		office.addOfficeStart(start);
 		OfficeSectionModel targetSection = new OfficeSectionModel(
 				"SECTION_TARGET", "net.example.ExampleSectionSource",
 				"SECTION_LOCATION");
@@ -190,6 +194,11 @@ public class OfficeRepositoryTest extends OfficeFrameTestCase {
 		OfficeGovernanceToOfficeTeamModel govToTeam = new OfficeGovernanceToOfficeTeamModel(
 				"TEAM");
 		governance.setOfficeTeam(govToTeam);
+
+		// start -> section input
+		OfficeStartToOfficeSectionInputModel startToInput = new OfficeStartToOfficeSectionInputModel(
+				"SECTION_TARGET", "INPUT");
+		start.setOfficeSectionInput(startToInput);
 
 		// office task -> duty (setup)
 		OfficeSubSectionModel subSection = new OfficeSubSectionModel();
@@ -363,6 +372,12 @@ public class OfficeRepositoryTest extends OfficeFrameTestCase {
 				govToTeam.getOfficeGovernance());
 		assertEquals("governance -> team", team, govToTeam.getOfficeTeam());
 
+		// Ensure start flows connected
+		assertEquals("start <- section input", start,
+				startToInput.getOfficeStart());
+		assertEquals("start -> section input", targetInput,
+				startToInput.getOfficeSectionInput());
+
 		// Ensure the office task pre duties connected
 		assertEquals("task <- pre duty", officeTask,
 				taskToPreDuty.getOfficeTask());
@@ -499,6 +514,8 @@ public class OfficeRepositoryTest extends OfficeFrameTestCase {
 		OfficeGovernanceModel governance = new OfficeGovernanceModel(
 				"GOVERNANCE", "net.example.ExampleGovernanceSource");
 		office.addOfficeGovernance(governance);
+		OfficeStartModel start = new OfficeStartModel("START");
+		office.addOfficeStart(start);
 
 		// responsibility -> team
 		OfficeSectionResponsibilityToOfficeTeamModel respToTeam = new OfficeSectionResponsibilityToOfficeTeamModel();
@@ -589,6 +606,12 @@ public class OfficeRepositoryTest extends OfficeFrameTestCase {
 		govToTeam.setOfficeGovernance(governance);
 		govToTeam.setOfficeTeam(team);
 		govToTeam.connect();
+
+		// start -> input
+		OfficeStartToOfficeSectionInputModel startToInput = new OfficeStartToOfficeSectionInputModel();
+		startToInput.setOfficeStart(start);
+		startToInput.setOfficeSectionInput(targetInput);
+		startToInput.connect();
 
 		// office task -> duty (setup)
 		OfficeSubSectionModel subSection = new OfficeSubSectionModel();
@@ -705,6 +728,10 @@ public class OfficeRepositoryTest extends OfficeFrameTestCase {
 		assertEquals("administrator - team", "TEAM",
 				adminToTeam.getOfficeTeamName());
 		assertEquals("governance - team", "TEAM", govToTeam.getOfficeTeamName());
+		assertEquals("start - input (section name)", "SECTION_TARGET",
+				startToInput.getOfficeSectionName());
+		assertEquals("start - input (input name)", "INPUT",
+				startToInput.getOfficeSectionInputName());
 		assertEquals("task - pre duty (administrator name)", "ADMINISTRATOR",
 				taskToPreDuty.getAdministratorName());
 		assertEquals("task - pre duty (duty name)", "DUTY",

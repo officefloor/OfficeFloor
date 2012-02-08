@@ -170,6 +170,19 @@
 		</object>
 	</object>
 
+	<!-- OFFICE START -->
+	<object method="addOfficeStart" node="start"
+		class="net.officefloor.model.office.OfficeStartModel">
+		<value method="setStartName" node="start@name" />
+		<value method="setX" node="start@x" />
+		<value method="setY" node="start@y" />
+		<object method="setOfficeSectionInput" node="flow"
+			class="net.officefloor.model.office.OfficeStartToOfficeSectionInputModel">
+			<value method="setOfficeSectionName" node="flow@section" />
+			<value method="setOfficeSectionInputName" node="flow@input" />
+		</object>
+	</object>
+
 	<!-- OFFICE SECTIONS -->
 	<object method="addOfficeSection" node="section"
 		class="net.officefloor.model.office.OfficeSectionModel">

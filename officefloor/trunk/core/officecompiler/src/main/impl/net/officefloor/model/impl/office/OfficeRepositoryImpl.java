@@ -63,6 +63,8 @@ import net.officefloor.model.office.OfficeSectionOutputModel;
 import net.officefloor.model.office.OfficeSectionOutputToOfficeSectionInputModel;
 import net.officefloor.model.office.OfficeSectionResponsibilityModel;
 import net.officefloor.model.office.OfficeSectionResponsibilityToOfficeTeamModel;
+import net.officefloor.model.office.OfficeStartModel;
+import net.officefloor.model.office.OfficeStartToOfficeSectionInputModel;
 import net.officefloor.model.office.OfficeSubSectionModel;
 import net.officefloor.model.office.OfficeSubSectionToOfficeGovernanceModel;
 import net.officefloor.model.office.OfficeTaskModel;
@@ -181,6 +183,22 @@ public class OfficeRepositoryImpl implements OfficeRepository {
 					.getOfficeSectionInputs()) {
 				inputs.put(section.getOfficeSectionName(),
 						input.getOfficeSectionInputName(), input);
+			}
+		}
+
+		// Connect the starts to the inputs
+		for (OfficeStartModel start : office.getOfficeStarts()) {
+			OfficeStartToOfficeSectionInputModel conn = start
+					.getOfficeSectionInput();
+			if (conn != null) {
+				OfficeSectionInputModel input = inputs.get(
+						conn.getOfficeSectionName(),
+						conn.getOfficeSectionInputName());
+				if (input != null) {
+					conn.setOfficeStart(start);
+					conn.setOfficeSectionInput(input);
+					conn.connect();
+				}
 			}
 		}
 
@@ -602,6 +620,19 @@ public class OfficeRepositoryImpl implements OfficeRepository {
 			for (OfficeGovernanceToOfficeTeamModel conn : team
 					.getOfficeGovernances()) {
 				conn.setOfficeTeamName(team.getOfficeTeamName());
+			}
+		}
+
+		// Specify starts to inputs
+		for (OfficeSectionModel section : office.getOfficeSections()) {
+			for (OfficeSectionInputModel input : section
+					.getOfficeSectionInputs()) {
+				for (OfficeStartToOfficeSectionInputModel conn : input
+						.getOfficeStarts()) {
+					conn.setOfficeSectionName(section.getOfficeSectionName());
+					conn.setOfficeSectionInputName(input
+							.getOfficeSectionInputName());
+				}
 			}
 		}
 

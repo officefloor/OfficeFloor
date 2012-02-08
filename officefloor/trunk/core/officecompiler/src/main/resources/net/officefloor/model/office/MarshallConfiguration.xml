@@ -283,6 +283,24 @@
 		</item>
 	</collection>
 
+	<!-- OFFICE STARTS -->
+	<collection method="getOfficeStarts" element="starting">
+		<item type="net.officefloor.model.office.OfficeStartModel"
+			element="start">
+			<attributes>
+				<attribute method="getStartName" attribute="name" />
+				<attribute method="getX" attribute="x" />
+				<attribute method="getY" attribute="y" />
+			</attributes>
+			<object method="getOfficeSectionInput" element="flow">
+				<attributes>
+					<attribute method="getOfficeSectionName" attribute="section" />
+					<attribute method="getOfficeSectionInputName" attribute="input" />
+				</attributes>
+			</object>
+		</item>
+	</collection>
+
 	<!-- OFFICE SECTIONS -->
 	<collection method="getOfficeSections" element="sections">
 		<item type="net.officefloor.model.office.OfficeSectionModel"
