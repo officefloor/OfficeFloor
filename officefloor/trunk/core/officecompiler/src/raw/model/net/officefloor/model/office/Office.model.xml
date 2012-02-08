@@ -8,4 +8,5 @@
 	<list type="OfficeEscalationModel" name="office escalation" />
 	<list type="AdministratorModel" name="office administrator" />
 	<list type="OfficeGovernanceModel" name="office governance" />
+	<list type="OfficeStartModel" name="office start" />
 </model>

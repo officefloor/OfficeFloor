@@ -88,10 +88,16 @@
 			<governance-area x="710" y="711" height="720" width="721" />
 		</governance>
 	</governances>
+	
+	<starting>
+		<start name="START" x="800" y="801">
+			<flow section="SECTION" input="INPUT" />
+		</start>
+	</starting>
 
 	<sections>
 		<section name="SECTION" source="net.example.ExampleSectionSource"
-			location="SECTION_LOCATION" x="800" y="801">
+			location="SECTION_LOCATION" x="900" y="901">
 			<properties>
 				<property name="PROP_ONE" value="VALUE_ONE" />
 				<property name="PROP_TWO" value="VALUE_TWO" />
@@ -135,7 +141,7 @@
 			</sub-section>
 		</section>
 		<section name="SECTION_TARGET" source="net.example.ExampleSectionSource"
-			location="SECTION_LOCATION" x="810" y="811">
+			location="SECTION_LOCATION" x="910" y="911">
 			<input name="INPUT" parameter-type="java.lang.Float" />
 		</section>
 	</sections>

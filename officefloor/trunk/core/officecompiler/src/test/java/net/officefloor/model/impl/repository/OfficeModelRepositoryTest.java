@@ -64,6 +64,8 @@ import net.officefloor.model.office.OfficeSectionOutputToOfficeSectionInputModel
 import net.officefloor.model.office.OfficeSectionResponsibilityModel;
 import net.officefloor.model.office.OfficeSectionResponsibilityObjectModel;
 import net.officefloor.model.office.OfficeSectionResponsibilityToOfficeTeamModel;
+import net.officefloor.model.office.OfficeStartModel;
+import net.officefloor.model.office.OfficeStartToOfficeSectionInputModel;
 import net.officefloor.model.office.OfficeSubSectionModel;
 import net.officefloor.model.office.OfficeSubSectionToOfficeGovernanceModel;
 import net.officefloor.model.office.OfficeTaskModel;
@@ -280,16 +282,27 @@ public class OfficeModelRepositoryTest extends OfficeFrameTestCase {
 						720, 721, 710, 711));
 
 		// ----------------------------------------
+		// Validate the start triggers
+		// ----------------------------------------
+		assertList(new String[] { "getStartName", "getX", "getY" },
+				office.getOfficeStarts(), new OfficeStartModel("START", null,
+						800, 801));
+		OfficeStartModel start = office.getOfficeStarts().get(0);
+		assertProperties(new OfficeStartToOfficeSectionInputModel("SECTION",
+				"INPUT"), start.getOfficeSectionInput(),
+				"getOfficeSectionName", "getOfficeSectionInputName");
+
+		// ----------------------------------------
 		// Validate the sections
 		// ----------------------------------------
 		assertList(new String[] { "getOfficeSectionName",
 				"getSectionSourceClassName", "getSectionLocation", "getX",
 				"getY" }, office.getOfficeSections(), new OfficeSectionModel(
 				"SECTION", "net.example.ExampleSectionSource",
-				"SECTION_LOCATION", null, null, null, null, null, null, 800,
-				801), new OfficeSectionModel("SECTION_TARGET",
+				"SECTION_LOCATION", null, null, null, null, null, null, 900,
+				901), new OfficeSectionModel("SECTION_TARGET",
 				"net.example.ExampleSectionSource", "SECTION_LOCATION", null,
-				null, null, null, null, null, 810, 811));
+				null, null, null, null, null, 910, 911));
 		OfficeSectionModel section = office.getOfficeSections().get(0);
 		assertList(new String[] { "getName", "getValue" },
 				section.getProperties(), new PropertyModel("PROP_ONE",
