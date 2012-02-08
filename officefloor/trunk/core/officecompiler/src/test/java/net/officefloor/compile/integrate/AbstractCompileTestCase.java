@@ -511,6 +511,19 @@ public abstract class AbstractCompileTestCase extends OfficeFrameTestCase {
 	}
 
 	/**
+	 * Records adding a start-up {@link Task} to the {@link OfficeBuilder}.
+	 * 
+	 * @param workName
+	 *            Name of {@link Work} for the start-up {@link Task}.
+	 * @param taskName
+	 *            Name of start-up {@link Task}.
+	 */
+	protected void record_officeBuilder_addStartupTask(String workName,
+			String taskName) {
+		this.officeBuilder.addStartupTask(workName, taskName);
+	}
+
+	/**
 	 * Current {@link WorkBuilder}.
 	 */
 	private WorkBuilder<Work> workBuilder = null;

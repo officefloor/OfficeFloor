@@ -641,6 +641,25 @@ public class CompileTaskTest extends AbstractCompileTestCase {
 	}
 
 	/**
+	 * Tests compiling a {@link Task} linking a {@link JobSequence} to a
+	 * {@link Task} in a different {@link OfficeSection}.
+	 */
+	public void testLinkStartToOfficeSectionInput() {
+
+		// Record building the office floor
+		this.record_officeFloorBuilder_addTeam("TEAM",
+				OnePersonTeamSource.class);
+		this.record_officeFloorBuilder_addOffice("OFFICE", "OFFICE_TEAM",
+				"TEAM");
+		this.record_officeBuilder_addWork("SECTION.WORK");
+		this.record_workBuilder_addTask("INPUT", "OFFICE_TEAM");
+		this.record_officeBuilder_addStartupTask("SECTION.WORK", "INPUT");
+		
+		// Compile the office floor
+		this.compile(true);
+	}
+
+	/**
 	 * {@link FlowInterface} for {@link CompileTaskWork}.
 	 */
 	@FlowInterface

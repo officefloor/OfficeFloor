@@ -175,6 +175,15 @@ public interface OfficeArchitect {
 	OfficeEscalation addOfficeEscalation(String escalationTypeName);
 
 	/**
+	 * Adds an {@link OfficeStart}.
+	 * 
+	 * @param startName
+	 *            Name of the {@link OfficeStart}.
+	 * @return Added {@link OfficeStart}.
+	 */
+	OfficeStart addOfficeStart(String startName);
+
+	/**
 	 * Links the {@link OfficeSectionObject} to be the
 	 * {@link OfficeManagedObject}.
 	 * 
@@ -250,6 +259,16 @@ public interface OfficeArchitect {
 	 *            {@link OfficeSectionInput}.
 	 */
 	void link(OfficeEscalation escalation, OfficeSectionInput input);
+
+	/**
+	 * Links the {@link OfficeStart} to trigger the {@link OfficeSectionInput}.
+	 * 
+	 * @param start
+	 *            {@link OfficeStart}.
+	 * @param input
+	 *            {@link OfficeSectionInput}.
+	 */
+	void link(OfficeStart start, OfficeSectionInput input);
 
 	/**
 	 * Links the {@link TaskTeam} to be the {@link OfficeTeam}.
