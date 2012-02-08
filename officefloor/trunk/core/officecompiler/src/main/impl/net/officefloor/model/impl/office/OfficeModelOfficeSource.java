@@ -47,6 +47,7 @@ import net.officefloor.compile.spi.office.OfficeSectionManagedObject;
 import net.officefloor.compile.spi.office.OfficeSectionManagedObjectSource;
 import net.officefloor.compile.spi.office.OfficeSectionObject;
 import net.officefloor.compile.spi.office.OfficeSectionOutput;
+import net.officefloor.compile.spi.office.OfficeStart;
 import net.officefloor.compile.spi.office.OfficeSubSection;
 import net.officefloor.compile.spi.office.OfficeTask;
 import net.officefloor.compile.spi.office.OfficeTeam;
@@ -102,6 +103,8 @@ import net.officefloor.model.office.OfficeSectionOutputModel;
 import net.officefloor.model.office.OfficeSectionOutputToOfficeSectionInputModel;
 import net.officefloor.model.office.OfficeSectionResponsibilityModel;
 import net.officefloor.model.office.OfficeSectionResponsibilityToOfficeTeamModel;
+import net.officefloor.model.office.OfficeStartModel;
+import net.officefloor.model.office.OfficeStartToOfficeSectionInputModel;
 import net.officefloor.model.office.OfficeSubSectionModel;
 import net.officefloor.model.office.OfficeSubSectionToOfficeGovernanceModel;
 import net.officefloor.model.office.OfficeTaskModel;
@@ -512,6 +515,28 @@ public class OfficeModelOfficeSource extends AbstractOfficeSource implements
 					// Add the governance to the section
 					section.addGovernance(governance);
 				}
+			}
+		}
+
+		// Link start-up triggers to office section inputs
+		for (OfficeStartModel startModel : office.getOfficeStarts()) {
+
+			// Obtain the office start
+			String startName = startModel.getStartName();
+			OfficeStart start = architect.addOfficeStart(startName);
+
+			// Obtain the flow to trigger on start-up
+			OfficeSectionInput officeSectionInput = null;
+			OfficeStartToOfficeSectionInputModel connToInput = startModel
+					.getOfficeSectionInput();
+			if (connToInput != null) {
+				officeSectionInput = inputs.get(
+						connToInput.getOfficeSectionName(),
+						connToInput.getOfficeSectionInputName());
+			}
+			if (officeSectionInput != null) {
+				// Link start-up to section input
+				architect.link(start, officeSectionInput);
 			}
 		}
 

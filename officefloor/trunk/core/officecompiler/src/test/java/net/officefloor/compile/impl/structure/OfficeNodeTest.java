@@ -41,6 +41,7 @@ import net.officefloor.compile.spi.office.OfficeSectionManagedObject;
 import net.officefloor.compile.spi.office.OfficeSectionManagedObjectSource;
 import net.officefloor.compile.spi.office.OfficeSectionObject;
 import net.officefloor.compile.spi.office.OfficeSectionOutput;
+import net.officefloor.compile.spi.office.OfficeStart;
 import net.officefloor.compile.spi.office.OfficeSubSection;
 import net.officefloor.compile.spi.office.OfficeTask;
 import net.officefloor.compile.spi.office.OfficeTeam;
@@ -477,6 +478,40 @@ public class OfficeNodeTest extends AbstractStructureTestCase {
 		// Should be the same escalation
 		assertEquals("Should be same escalation on adding twice",
 				escalationFirst, escalationSecond);
+	}
+
+	/**
+	 * Tests adding an {@link OfficeStart}.
+	 */
+	public void testAddOfficeStart() {
+		// Add two different escalations verifying details
+		this.replayMockObjects();
+		OfficeStart start = this.node.addOfficeStart("START");
+		assertNotNull("Must have start", start);
+		assertEquals("Incorrect start name", "START",
+				start.getOfficeStartName());
+		assertNotSame("Should obtain another start", start,
+				this.node.addOfficeStart("ANOTHER"));
+		this.verifyMockObjects();
+	}
+
+	/**
+	 * Ensure issue if add the {@link OfficeStart} twice.
+	 */
+	public void testAddOfficeStartTwice() {
+
+		// Record issue in adding the start twice
+		this.record_issue("Office start-up trigger START already added");
+
+		// Add the start twice
+		this.replayMockObjects();
+		OfficeStart startFirst = this.node.addOfficeStart("START");
+		OfficeStart startSecond = this.node.addOfficeStart("START");
+		this.verifyMockObjects();
+
+		// Should be the same start
+		assertEquals("Should be same start on adding twice", startFirst,
+				startSecond);
 	}
 
 	/**
@@ -1577,6 +1612,48 @@ public class OfficeNodeTest extends AbstractStructureTestCase {
 		// Ensure only can link once
 		this.node.link(escalation, inputSection.getOfficeSectionInputs()[0]); // ordered
 		assertFlowLink("Can only link once", escalation, sectionInput);
+
+		this.verifyMockObjects();
+	}
+
+	/**
+	 * Ensures can link {@link OfficeStart} to the {@link OfficeSectionInput}.
+	 */
+	public void testLinkOfficeStartToOfficeSectionInput() {
+
+		// Record already being linked
+		this.record_issue("Office start-up trigger START linked more than once");
+
+		this.replayMockObjects();
+
+		// Add start
+		OfficeStart start = this.node.addOfficeStart("START");
+		assertEquals("Incorrect office start", "START",
+				start.getOfficeStartName());
+
+		// Add section with section inputs
+		OfficeSection inputSection = this.addSection(this.node,
+				"INPUT_SECTION", new SectionMaker() {
+					@Override
+					public void make(SectionMakerContext context) {
+						context.getBuilder().addSectionInput("SECTION_INPUT",
+								Object.class.getName());
+						context.getBuilder().addSectionInput("ANOTHER",
+								String.class.getName());
+					}
+				});
+		// Should be ordered (so will be second input)
+		OfficeSectionInput sectionInput = inputSection.getOfficeSectionInputs()[1];
+		assertEquals("Incorrect office section input", "SECTION_INPUT",
+				sectionInput.getOfficeSectionInputName());
+
+		// Link
+		this.node.link(start, sectionInput);
+		assertFlowLink("start -> section input", start, sectionInput);
+
+		// Ensure only can link once
+		this.node.link(start, inputSection.getOfficeSectionInputs()[0]); // ordered
+		assertFlowLink("Can only link once", start, sectionInput);
 
 		this.verifyMockObjects();
 	}

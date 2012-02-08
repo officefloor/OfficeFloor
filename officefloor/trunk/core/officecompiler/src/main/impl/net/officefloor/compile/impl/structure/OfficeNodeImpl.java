@@ -44,6 +44,7 @@ import net.officefloor.compile.internal.structure.ManagedObjectSourceNode;
 import net.officefloor.compile.internal.structure.NodeContext;
 import net.officefloor.compile.internal.structure.OfficeNode;
 import net.officefloor.compile.internal.structure.OfficeObjectNode;
+import net.officefloor.compile.internal.structure.OfficeStartNode;
 import net.officefloor.compile.internal.structure.OfficeTeamNode;
 import net.officefloor.compile.internal.structure.SectionNode;
 import net.officefloor.compile.internal.structure.TaskNode;
@@ -67,6 +68,7 @@ import net.officefloor.compile.spi.office.OfficeSection;
 import net.officefloor.compile.spi.office.OfficeSectionInput;
 import net.officefloor.compile.spi.office.OfficeSectionObject;
 import net.officefloor.compile.spi.office.OfficeSectionOutput;
+import net.officefloor.compile.spi.office.OfficeStart;
 import net.officefloor.compile.spi.office.OfficeTeam;
 import net.officefloor.compile.spi.office.TaskTeam;
 import net.officefloor.compile.spi.office.source.OfficeSource;
@@ -170,6 +172,11 @@ public class OfficeNodeImpl extends AbstractNode implements OfficeNode {
 	 * {@link EscalationNode} instances by their {@link OfficeEscalation} type.
 	 */
 	private final Map<String, EscalationNode> escalations = new HashMap<String, EscalationNode>();
+
+	/**
+	 * {@link OfficeStartNode} instances by their {@link OfficeStart} name.
+	 */
+	private final Map<String, OfficeStartNode> starts = new HashMap<String, OfficeStartNode>();
 
 	/**
 	 * Flag indicating if in the {@link OfficeFloor} context.
@@ -648,6 +655,32 @@ public class OfficeNodeImpl extends AbstractNode implements OfficeNode {
 			officeBuilder.addEscalation(escalation.type, workName, taskName);
 		}
 
+		// Build the start-up triggers for the office (in deterministic order)
+		OfficeStartNode[] startTriggers = CompileUtil.toSortedArray(
+				this.starts.values(), new OfficeStartNode[0],
+				new StringExtractor<OfficeStartNode>() {
+					@Override
+					public String toString(OfficeStartNode object) {
+						return object.getOfficeStartName();
+					}
+				});
+		for (OfficeStartNode start : startTriggers) {
+
+			// Obtain the target task
+			TaskNode task = LinkUtil.findTarget(start, TaskNode.class,
+					"Office start-up trigger " + start.getOfficeStartName(),
+					LocationType.OFFICE, this.officeLocation, null, null,
+					this.context.getCompilerIssues());
+			if (task == null) {
+				continue; // task not linked
+			}
+
+			// Build the start-up trigger
+			String workName = task.getWorkNode().getQualifiedWorkName();
+			String taskName = task.getOfficeTaskName();
+			officeBuilder.addStartupTask(workName, taskName);
+		}
+
 		// Return the office builder
 		return officeBuilder;
 	}
@@ -920,6 +953,23 @@ public class OfficeNodeImpl extends AbstractNode implements OfficeNode {
 	}
 
 	@Override
+	public OfficeStart addOfficeStart(String startName) {
+		// Obtain and return the start-up trigger
+		OfficeStartNode start = this.starts.get(startName);
+		if (start == null) {
+			// Add the start
+			start = new OfficeStartNodeImpl(startName, this.officeLocation,
+					this.context);
+			this.starts.put(startName, start);
+		} else {
+			// Start already added
+			this.addIssue("Office start-up trigger " + startName
+					+ " already added");
+		}
+		return start;
+	}
+
+	@Override
 	public void link(OfficeSectionObject sectionObject,
 			OfficeManagedObject managedObject) {
 		this.linkObject(sectionObject, managedObject);
@@ -976,6 +1026,11 @@ public class OfficeNodeImpl extends AbstractNode implements OfficeNode {
 	@Override
 	public void link(OfficeAdministrator administrator, OfficeTeam officeTeam) {
 		this.linkTeam(administrator, officeTeam);
+	}
+
+	@Override
+	public void link(OfficeStart start, OfficeSectionInput input) {
+		this.linkFlow(start, input);
 	}
 
 	@Override
