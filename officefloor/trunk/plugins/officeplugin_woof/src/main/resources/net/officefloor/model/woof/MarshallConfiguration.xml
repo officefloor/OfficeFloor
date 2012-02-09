@@ -188,4 +188,21 @@
 		</item>
 	</collection>
 
+	<!-- STARTS -->
+	<collection method="getWoofStarts" element="starting">
+		<item type="net.officefloor.model.woof.WoofStartModel"
+			element="start">
+			<attributes>
+				<attribute method="getX" attribute="x" />
+				<attribute method="getY" attribute="y" />
+			</attributes>
+			<object method="getWoofSectionInput" element="flow">
+				<attributes>
+					<attribute method="getSectionName" attribute="section" />
+					<attribute method="getInputName" attribute="input" />
+				</attributes>
+			</object>
+		</item>
+	</collection>
+
 </marshall>

@@ -69,4 +69,13 @@
         <exception class="java.io.IOException"/>
     </exceptions>
     
+    <starting>
+        <start>
+            <flow section="SECTION_A" input="INPUT_A" />
+        </start>
+        <start>
+            <flow section="SECTION_B" input="INPUT_1" />
+        </start>
+    </starting>
+    
 </woof>

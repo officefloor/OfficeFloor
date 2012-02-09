@@ -5,4 +5,5 @@
 	<list type="WoofGovernanceModel" name="woof governance" />
 	<list type="WoofResourceModel" name="woof resource" />
 	<list type="WoofExceptionModel" name="woof exception" />
+	<list type="WoofStartModel" name="woof start" />
 </model>
