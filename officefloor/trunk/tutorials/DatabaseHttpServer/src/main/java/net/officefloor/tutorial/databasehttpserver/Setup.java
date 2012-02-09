@@ -17,54 +17,32 @@
  */
 package net.officefloor.tutorial.databasehttpserver;
 
-import net.officefloor.plugin.web.http.application.HttpParameters;
+import java.sql.Connection;
+
+import javax.sql.DataSource;
 
 /**
- * Represents a row from the table in the database.
+ * Sets up the database.
  * 
  * @author Daniel Sagenschneider
  */
 // START SNIPPET: example
-@HttpParameters
-public class Row {
+public class Setup {
 
-	private int id;
-
-	private String name;
-
-	private String description;
-
-	public Row() {
-	}
-
-	public Row(int id, String name, String description) {
-		this.id = id;
-		this.name = name;
-		this.description = description;
-	}
-
-	public int getId() {
-		return this.id;
-	}
-
-	public void setId(String id) {
-		this.id = Integer.parseInt(id);
-	}
-
-	public String getName() {
-		return this.name;
-	}
-
-	public void setName(String name) {
-		this.name = name;
-	}
-
-	public String getDescription() {
-		return this.description;
-	}
-
-	public void setDescription(String description) {
-		this.description = description;
+	public void setupDatabase(DataSource dataSource) throws Exception {
+		Connection connection = dataSource.getConnection();
+		try {
+			connection
+					.createStatement()
+					.execute(
+							"CREATE TABLE EXAMPLE ( ID IDENTITY PRIMARY KEY, NAME VARCHAR(20), DESCRIPTION VARCHAR(256) )");
+			connection
+					.createStatement()
+					.execute(
+							"INSERT INTO EXAMPLE ( NAME, DESCRIPTION ) VALUES ( 'TEST', 'TEST' )");
+		} finally {
+			connection.close();
+		}
 	}
 
 }
