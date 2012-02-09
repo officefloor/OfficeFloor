@@ -74,4 +74,10 @@
 		<exception class="java.io.IOException" x="706" y="707" />
 	</exceptions>
 
+	<starting>
+		<start x="800" y="801">
+			<flow section="SECTION_A" input="INPUT_A" />
+		</start>
+	</starting>
+
 </woof>

@@ -182,6 +182,16 @@ public class WoofModelRepositoryTest extends OfficeFrameTestCase {
 		WoofExceptionModel exception3 = woof.getWoofExceptions().get(2);
 		assertProperties(new WoofExceptionToWoofResourceModel("RESOURCE"),
 				exception3.getWoofResource(), "getResourceName");
+
+		// ----------------------------------------
+		// Validate the starts
+		// ----------------------------------------
+		assertList(new String[] { "getX", "getY" }, woof.getWoofStarts(),
+				new WoofStartModel(null, 800, 801));
+		WoofStartModel start = woof.getWoofStarts().get(0);
+		assertProperties(new WoofStartToWoofSectionInputModel("SECTION_A",
+				"INPUT_A"), start.getWoofSectionInput(), "getSectionName",
+				"getInputName");
 	}
 
 	/**

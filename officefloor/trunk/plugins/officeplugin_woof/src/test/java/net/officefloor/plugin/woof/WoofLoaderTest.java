@@ -206,6 +206,10 @@ public class WoofLoaderTest extends OfficeFrameTestCase {
 		this.app.linkEscalation(Exception.class, sectionA, "INPUT_A");
 		this.app.linkEscalation(RuntimeException.class, templateA);
 		this.app.linkEscalation(SQLException.class, "Example.html");
+		
+		// Record linking starts
+		this.app.addStartupFlow(sectionA, "INPUT_A");
+		this.app.addStartupFlow(sectionB, "INPUT_1");
 
 		// Record loading governances
 		this.recordReturn(this.app, this.app.addGovernance("GOVERNANCE_A",

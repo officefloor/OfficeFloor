@@ -129,4 +129,16 @@
 		</object>
 	</object>
 
+	<!-- START -->
+	<object method="addWoofStart" node="start"
+		class="net.officefloor.model.woof.WoofStartModel">
+		<value method="setX" node="start@x" />
+		<value method="setY" node="start@y" />
+		<object method="setWoofSectionInput" node="flow"
+			class="net.officefloor.model.woof.WoofStartToWoofSectionInputModel">
+			<value method="setSectionName" node="flow@section" />
+			<value method="setInputName" node="flow@input" />
+		</object>
+	</object>
+
 </unmarshall>

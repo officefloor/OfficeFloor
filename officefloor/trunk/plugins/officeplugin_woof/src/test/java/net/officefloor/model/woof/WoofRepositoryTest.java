@@ -75,6 +75,8 @@ public class WoofRepositoryTest extends OfficeFrameTestCase {
 		woof.addWoofResource(resource);
 		WoofExceptionModel exception = new WoofExceptionModel("EXCEPTION");
 		woof.addWoofException(exception);
+		WoofStartModel start = new WoofStartModel();
+		woof.addWoofStart(start);
 
 		// Template Output -> Section Input
 		WoofTemplateOutputToWoofSectionInputModel templateToSection = new WoofTemplateOutputToWoofSectionInputModel(
@@ -120,6 +122,11 @@ public class WoofRepositoryTest extends OfficeFrameTestCase {
 		WoofExceptionToWoofResourceModel exceptionToResource = new WoofExceptionToWoofResourceModel(
 				"RESOURCE");
 		exception.setWoofResource(exceptionToResource);
+
+		// Start -> Section Input
+		WoofStartToWoofSectionInputModel startToSection = new WoofStartToWoofSectionInputModel(
+				"SECTION", "SECTION_INPUT");
+		start.setWoofSectionInput(startToSection);
 
 		// Record retrieving the WoOF
 		this.recordReturn(this.modelRepository,
@@ -196,6 +203,12 @@ public class WoofRepositoryTest extends OfficeFrameTestCase {
 				exceptionToResource.getWoofException());
 		assertEquals("exception -> resource", resource,
 				exceptionToResource.getWoofResource());
+
+		// Ensure start connected to section input
+		assertEquals("start <- section input", start,
+				startToSection.getWoofStart());
+		assertEquals("start -> section input", sectionInput,
+				startToSection.getWoofSectionInput());
 	}
 
 	/**
@@ -224,6 +237,8 @@ public class WoofRepositoryTest extends OfficeFrameTestCase {
 		woof.addWoofResource(resource);
 		WoofExceptionModel exception = new WoofExceptionModel("EXCEPTION");
 		woof.addWoofException(exception);
+		WoofStartModel start = new WoofStartModel();
+		woof.addWoofStart(start);
 
 		// Template Output -> Section Input
 		WoofTemplateOutputToWoofSectionInputModel templateToSection = new WoofTemplateOutputToWoofSectionInputModel();
@@ -279,6 +294,12 @@ public class WoofRepositoryTest extends OfficeFrameTestCase {
 		exceptionToResource.setWoofResource(resource);
 		exceptionToResource.connect();
 
+		// Start -> Section Input
+		WoofStartToWoofSectionInputModel startToSection = new WoofStartToWoofSectionInputModel();
+		startToSection.setWoofStart(start);
+		startToSection.setWoofSectionInput(sectionInput);
+		startToSection.connect();
+
 		// Record storing the WoOf
 		this.modelRepository.store(woof, this.configurationItem);
 
@@ -312,6 +333,10 @@ public class WoofRepositoryTest extends OfficeFrameTestCase {
 				exceptionToTemplate.getTemplateName());
 		assertEquals("exception - resource", "RESOURCE",
 				exceptionToResource.getResourceName());
+		assertEquals("start - section input (section name)", "SECTION",
+				startToSection.getSectionName());
+		assertEquals("start - section input (input name)", "SECTION_INPUT",
+				startToSection.getInputName());
 	}
 
 }

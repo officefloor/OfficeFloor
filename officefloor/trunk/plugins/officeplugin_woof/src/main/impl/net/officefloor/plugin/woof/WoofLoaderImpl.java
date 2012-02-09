@@ -48,6 +48,8 @@ import net.officefloor.model.woof.WoofSectionOutputModel;
 import net.officefloor.model.woof.WoofSectionOutputToWoofResourceModel;
 import net.officefloor.model.woof.WoofSectionOutputToWoofSectionInputModel;
 import net.officefloor.model.woof.WoofSectionOutputToWoofTemplateModel;
+import net.officefloor.model.woof.WoofStartModel;
+import net.officefloor.model.woof.WoofStartToWoofSectionInputModel;
 import net.officefloor.model.woof.WoofTemplateExtensionModel;
 import net.officefloor.model.woof.WoofTemplateModel;
 import net.officefloor.model.woof.WoofTemplateOutputModel;
@@ -417,6 +419,33 @@ public class WoofLoaderImpl implements WoofLoader {
 				if (resourceModel != null) {
 					application.linkEscalation(exceptionType,
 							resourceModel.getResourcePath());
+				}
+			}
+		}
+
+		// Link the starts
+		for (WoofStartModel startModel : woof.getWoofStarts()) {
+
+			// Link potential section input
+			WoofStartToWoofSectionInputModel sectionLink = startModel
+					.getWoofSectionInput();
+			if (sectionLink != null) {
+				WoofSectionInputModel sectionInput = sectionLink
+						.getWoofSectionInput();
+				if (sectionInput != null) {
+
+					// Obtain target input name
+					String targetInputName = sectionInput
+							.getWoofSectionInputName();
+
+					// Obtain the target section
+					WoofSectionModel targetSectionModel = inputToSection
+							.get(sectionInput);
+					AutoWireSection targetSection = sections
+							.get(targetSectionModel.getWoofSectionName());
+
+					// Add start-up flow
+					application.addStartupFlow(targetSection, targetInputName);
 				}
 			}
 		}

@@ -215,6 +215,24 @@ public class WoofRepositoryImpl implements WoofRepository {
 			}
 		}
 
+		// Connect Starts
+		for (WoofStartModel start : woof.getWoofStarts()) {
+
+			// Connect Start to Section Input
+			WoofStartToWoofSectionInputModel connSection = start
+					.getWoofSectionInput();
+			if (connSection != null) {
+				WoofSectionInputModel sectionInput = sectionInputs.get(
+						connSection.getSectionName(),
+						connSection.getInputName());
+				if (sectionInput != null) {
+					connSection.setWoofStart(start);
+					connSection.setWoofSectionInput(sectionInput);
+					connSection.connect();
+				}
+			}
+		}
+
 		// Return the WoOF
 		return woof;
 	}
@@ -244,6 +262,13 @@ public class WoofRepositoryImpl implements WoofRepository {
 				// Specify section inputs for exception
 				for (WoofExceptionToWoofSectionInputModel conn : input
 						.getWoofExceptions()) {
+					conn.setSectionName(section.getWoofSectionName());
+					conn.setInputName(input.getWoofSectionInputName());
+				}
+
+				// Specify section inputs for start
+				for (WoofStartToWoofSectionInputModel conn : input
+						.getWoofStarts()) {
 					conn.setSectionName(section.getWoofSectionName());
 					conn.setInputName(input.getWoofSectionInputName());
 				}
