@@ -35,5 +35,11 @@
 			<resource name="RESOURCE" />
 		</exception>
 	</exceptions>
+	
+	<starting>
+	    <start>
+	    	<flow section="SECTION" input="INPUT" />
+	    </start>
+	</starting>
 
 </woof>

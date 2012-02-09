@@ -98,4 +98,17 @@ public class RemoveUnconnectedTest extends AbstractWoofChangesTestCase {
 				"Remove exception java.lang.Exception", true);
 	}
 
+	/**
+	 * Ensure able to remove the {@link WoofStartModel}.
+	 */
+	public void testRemoveStart() {
+
+		// Obtain the start to remove
+		WoofStartModel start = this.model.getWoofStarts().get(0);
+
+		// Remove the start
+		Change<WoofStartModel> change = this.operations.removeStart(start);
+		this.assertChange(change, start, "Remove start", true);
+	}
+
 }

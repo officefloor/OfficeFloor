@@ -228,6 +228,22 @@ public interface WoofChanges {
 	Change<WoofExceptionModel> removeException(WoofExceptionModel exception);
 
 	/**
+	 * Adds a {@link WoofStartModel}.
+	 * 
+	 * @return {@link Change} to add the {@link WoofStartModel}.
+	 */
+	Change<WoofStartModel> addStart();
+
+	/**
+	 * Removes the {@link WoofStartModel}.
+	 * 
+	 * @param start
+	 *            {@link WoofStartModel} to remove.
+	 * @return {@link Change} to remove the {@link WoofStartModel}.
+	 */
+	Change<WoofStartModel> removeStart(WoofStartModel start);
+
+	/**
 	 * Links the {@link WoofTemplateOutputModel} to the
 	 * {@link WoofTemplateModel}.
 	 * 
@@ -433,5 +449,27 @@ public interface WoofChanges {
 	 */
 	Change<WoofExceptionToWoofResourceModel> removeExceptionToResource(
 			WoofExceptionToWoofResourceModel link);
+
+	/**
+	 * Links the {@link WoofStartModel} to the {@link WoofSectionInputModel}.
+	 * 
+	 * @param start
+	 *            {@link WoofStartModel}.
+	 * @param sectionInput
+	 *            {@link WoofSectionInputModel}.
+	 * @return {@link Change} to make the link.
+	 */
+	Change<WoofStartToWoofSectionInputModel> linkStartToSectionInput(
+			WoofStartModel start, WoofSectionInputModel sectionInput);
+
+	/**
+	 * Removes the {@link WoofStartToWoofSectionInputModel}.
+	 * 
+	 * @param link
+	 *            {@link WoofStartToWoofSectionInputModel}.
+	 * @return {@link Change} to remove the link.
+	 */
+	Change<WoofStartToWoofSectionInputModel> removeStartToSectionInput(
+			WoofStartToWoofSectionInputModel link);
 
 }

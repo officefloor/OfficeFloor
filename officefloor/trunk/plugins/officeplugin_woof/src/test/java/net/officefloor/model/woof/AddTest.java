@@ -386,4 +386,40 @@ public class AddTest extends AbstractWoofChangesTestCase {
 		this.validateModel();
 	}
 
+	/**
+	 * Ensure able to add {@link WoofStartModel}.
+	 */
+	public void testAddStart() {
+
+		// Validate add start
+		Change<WoofStartModel> change = this.operations.addStart();
+		change.getTarget().setX(100);
+		change.getTarget().setY(101);
+
+		// Validate change
+		this.assertChange(change, null, "Add Start", true);
+
+		// Ensure appropriately added exception
+		change.apply();
+		WoofStartModel start = this.model.getWoofStarts().get(0);
+		assertSame("Incorrect start", start, change.getTarget());
+	}
+
+	/**
+	 * Ensure able to add multiple {@link WoofStartModel} instances.
+	 */
+	public void testAddMultipleStarts() {
+
+		// Add the starts
+		for (int i = 0; i <= 2; i++) {
+			Change<WoofStartModel> change = this.operations.addStart();
+			change.getTarget().setX(i);
+			change.getTarget().setY(i);
+			change.apply();
+		}
+
+		// Validate appropriately added starts
+		this.validateModel();
+	}
+
 }

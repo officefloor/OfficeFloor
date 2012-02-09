@@ -1,6 +1,8 @@
 <woof>
 
-	<templates />
+	<templates>
+		<template name="TEMPLATE" path="example/Template.ofp" class="net.example.LogicClass" />
+	</templates>
 
 	<sections>
 		<section name="SECTION" source="net.example.ExampleSectionSource"
@@ -19,8 +21,6 @@
 		<exception class="java.lang.Exception" />
 	</exceptions>
 	
-	<starting>
-		<start />
-	</starting>
+	<starting />
 
 </woof>
