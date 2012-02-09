@@ -18,5 +18,9 @@
 	</resources>
 
 	<exceptions />
+	
+	<starting>
+		<start />
+	</starting>
 
 </woof>

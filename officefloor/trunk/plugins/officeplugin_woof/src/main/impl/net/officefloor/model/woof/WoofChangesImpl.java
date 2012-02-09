@@ -813,6 +813,7 @@ public class WoofChangesImpl implements WoofChanges {
 					removeConnections(input.getWoofTemplateOutputs(), list);
 					removeConnections(input.getWoofSectionOutputs(), list);
 					removeConnections(input.getWoofExceptions(), list);
+					removeConnections(input.getWoofStarts(), list);
 				}
 				for (WoofSectionOutputModel output : section.getOutputs()) {
 					removeConnection(output.getWoofTemplate(), list);
@@ -1188,6 +1189,59 @@ public class WoofChangesImpl implements WoofChanges {
 	}
 
 	@Override
+	public Change<WoofStartModel> addStart() {
+
+		// Create the start
+		final WoofStartModel start = new WoofStartModel();
+
+		// Return change to add start
+		return new AbstractChange<WoofStartModel>(start, "Add Start") {
+			@Override
+			public void apply() {
+				WoofChangesImpl.this.model.addWoofStart(start);
+			}
+
+			@Override
+			public void revert() {
+				WoofChangesImpl.this.model.removeWoofStart(start);
+			}
+		};
+	}
+
+	@Override
+	public Change<WoofStartModel> removeStart(final WoofStartModel start) {
+
+		// Return change to remove start
+		return new AbstractChange<WoofStartModel>(start, "Remove start") {
+
+			/**
+			 * {@link ConnectionModel} instances.
+			 */
+			private ConnectionModel[] connections;
+
+			@Override
+			public void apply() {
+
+				// Remove the connections
+				List<ConnectionModel> list = new LinkedList<ConnectionModel>();
+				removeConnection(start.getWoofSectionInput(), list);
+				this.connections = list
+						.toArray(new ConnectionModel[list.size()]);
+
+				// Remove the start
+				WoofChangesImpl.this.model.removeWoofStart(start);
+			}
+
+			@Override
+			public void revert() {
+				// Add back the start
+				WoofChangesImpl.this.model.addWoofStart(start);
+				reconnectConnections(this.connections);
+			}
+		};
+	}
+
+	@Override
 	public Change<WoofTemplateOutputToWoofTemplateModel> linkTemplateOutputToTemplate(
 			final WoofTemplateOutputModel templateOutput,
 			WoofTemplateModel template) {
@@ -1477,6 +1531,43 @@ public class WoofChangesImpl implements WoofChanges {
 			WoofExceptionToWoofResourceModel link) {
 		return new RemoveLinkChange<WoofExceptionToWoofResourceModel>(link,
 				"Remove Exception to Resource");
+	}
+
+	@Override
+	public Change<WoofStartToWoofSectionInputModel> linkStartToSectionInput(
+			WoofStartModel start, WoofSectionInputModel sectionInput) {
+
+		// Obtain the containing section
+		WoofSectionModel section = this.getSection(sectionInput);
+		if (section == null) {
+			return new NoChange<WoofStartToWoofSectionInputModel>(
+					new WoofStartToWoofSectionInputModel(),
+					"The section input '"
+							+ sectionInput.getWoofSectionInputName()
+							+ "' was not found");
+		}
+
+		// Create the connection
+		final WoofStartToWoofSectionInputModel connection = new WoofStartToWoofSectionInputModel(
+				section.getWoofSectionName(),
+				sectionInput.getWoofSectionInputName(), start, sectionInput);
+
+		// Return change to add connection
+		return new AddLinkChange<WoofStartToWoofSectionInputModel, WoofStartModel>(
+				connection, start, "Link Start to Section Input") {
+			@Override
+			protected void addExistingConnections(WoofStartModel source,
+					List<ConnectionModel> list) {
+				list.add(source.getWoofSectionInput());
+			}
+		};
+	}
+
+	@Override
+	public Change<WoofStartToWoofSectionInputModel> removeStartToSectionInput(
+			WoofStartToWoofSectionInputModel link) {
+		return new RemoveLinkChange<WoofStartToWoofSectionInputModel>(link,
+				"Remove Start to Section Input");
 	}
 
 	/**

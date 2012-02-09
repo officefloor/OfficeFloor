@@ -33,5 +33,9 @@
 			<resource name="RESOURCE" />
 		</exception>
 	</exceptions>
+	
+	<starting>
+	    <start />
+	</starting>
 
 </woof>

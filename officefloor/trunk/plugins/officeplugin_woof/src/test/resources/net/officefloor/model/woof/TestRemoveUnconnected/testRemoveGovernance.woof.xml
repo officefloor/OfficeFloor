@@ -18,5 +18,9 @@
 	<exceptions>
 		<exception class="java.lang.Exception" />
 	</exceptions>
+	
+	<starting>
+		<start />
+	</starting>
 
 </woof>
