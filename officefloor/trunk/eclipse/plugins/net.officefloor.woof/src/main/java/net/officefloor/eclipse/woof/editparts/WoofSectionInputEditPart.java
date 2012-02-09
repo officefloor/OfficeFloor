@@ -55,6 +55,7 @@ public class WoofSectionInputEditPart
 		models.addAll(this.getCastedModel().getWoofTemplateOutputs());
 		models.addAll(this.getCastedModel().getWoofSectionOutputs());
 		models.addAll(this.getCastedModel().getWoofExceptions());
+		models.addAll(this.getCastedModel().getWoofStarts());
 	}
 
 	@Override
@@ -100,6 +101,8 @@ public class WoofSectionInputEditPart
 		case REMOVE_WOOF_SECTION_OUTPUT:
 		case ADD_WOOF_EXCEPTION:
 		case REMOVE_WOOF_EXCEPTION:
+		case ADD_WOOF_START:
+		case REMOVE_WOOF_START:
 			this.refreshTargetConnections();
 			break;
 		}

@@ -49,6 +49,7 @@ public class WoofEditPart extends AbstractOfficeFloorDiagramEditPart<WoofModel> 
 		childModels.addAll(woof.getWoofSections());
 		childModels.addAll(woof.getWoofResources());
 		childModels.addAll(woof.getWoofExceptions());
+		childModels.addAll(woof.getWoofStarts());
 	}
 
 }

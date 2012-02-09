@@ -25,6 +25,7 @@ import net.officefloor.model.woof.WoofModel;
 import net.officefloor.model.woof.WoofSectionOutputToWoofResourceModel;
 import net.officefloor.model.woof.WoofSectionOutputToWoofSectionInputModel;
 import net.officefloor.model.woof.WoofSectionOutputToWoofTemplateModel;
+import net.officefloor.model.woof.WoofStartToWoofSectionInputModel;
 import net.officefloor.model.woof.WoofTemplateOutputToWoofResourceModel;
 import net.officefloor.model.woof.WoofTemplateOutputToWoofSectionInputModel;
 import net.officefloor.model.woof.WoofTemplateOutputToWoofTemplateModel;
@@ -124,6 +125,15 @@ public interface WoofFigureFactory {
 	 * @return {@link ExceptionFigure}.
 	 */
 	ExceptionFigure createExceptionFigure(ExceptionFigureContext context);
+
+	/**
+	 * Creates the {@link StartFigure}.
+	 * 
+	 * @param context
+	 *            {@link StartFigureContext}.
+	 * @return {@link StartFigure}.
+	 */
+	StartFigure createStartFigure(StartFigureContext context);
 
 	/**
 	 * Decorates the {@link WoofTemplateOutputToWoofTemplateModel} figure.
@@ -234,5 +244,16 @@ public interface WoofFigureFactory {
 	 */
 	void decorateExceptionToResourceFigure(PolylineConnection figure,
 			ExceptionToResourceFigureContext context);
+
+	/**
+	 * Decorates the {@link WoofStartToWoofSectionInputModel} figure.
+	 * 
+	 * @param figure
+	 *            {@link IFigure} to decorate.
+	 * @param context
+	 *            {@link StartToSectionInputFigureContext}.
+	 */
+	void decorateStartToSectionInputFigure(PolylineConnection figure,
+			StartToSectionInputFigureContext context);
 
 }

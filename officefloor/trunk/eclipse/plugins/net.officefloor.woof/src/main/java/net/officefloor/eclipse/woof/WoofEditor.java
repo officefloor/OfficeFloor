@@ -42,6 +42,8 @@ import net.officefloor.eclipse.woof.editparts.WoofSectionOutputEditPart;
 import net.officefloor.eclipse.woof.editparts.WoofSectionOutputToWoofResourceEditPart;
 import net.officefloor.eclipse.woof.editparts.WoofSectionOutputToWoofSectionInputEditPart;
 import net.officefloor.eclipse.woof.editparts.WoofSectionOutputToWoofTemplateEditPart;
+import net.officefloor.eclipse.woof.editparts.WoofStartEditPart;
+import net.officefloor.eclipse.woof.editparts.WoofStartToWoofSectionInputEditPart;
 import net.officefloor.eclipse.woof.editparts.WoofTemplateEditPart;
 import net.officefloor.eclipse.woof.editparts.WoofTemplateOutputEditPart;
 import net.officefloor.eclipse.woof.editparts.WoofTemplateOutputToWoofResourceEditPart;
@@ -52,6 +54,7 @@ import net.officefloor.eclipse.woof.operations.AddGovernanceAreaOperation;
 import net.officefloor.eclipse.woof.operations.AddGovernanceOperation;
 import net.officefloor.eclipse.woof.operations.AddResourceOperation;
 import net.officefloor.eclipse.woof.operations.AddSectionOperation;
+import net.officefloor.eclipse.woof.operations.AddStartOperation;
 import net.officefloor.eclipse.woof.operations.AddTemplateOperation;
 import net.officefloor.model.change.Change;
 import net.officefloor.model.impl.repository.ModelRepositoryImpl;
@@ -75,6 +78,8 @@ import net.officefloor.model.woof.WoofSectionOutputModel;
 import net.officefloor.model.woof.WoofSectionOutputToWoofResourceModel;
 import net.officefloor.model.woof.WoofSectionOutputToWoofSectionInputModel;
 import net.officefloor.model.woof.WoofSectionOutputToWoofTemplateModel;
+import net.officefloor.model.woof.WoofStartModel;
+import net.officefloor.model.woof.WoofStartToWoofSectionInputModel;
 import net.officefloor.model.woof.WoofTemplateModel;
 import net.officefloor.model.woof.WoofTemplateOutputModel;
 import net.officefloor.model.woof.WoofTemplateOutputToWoofResourceModel;
@@ -164,6 +169,7 @@ public class WoofEditor extends
 		map.put(WoofGovernanceAreaModel.class, WoofGovernanceAreaEditPart.class);
 		map.put(WoofResourceModel.class, WoofResourceEditPart.class);
 		map.put(WoofExceptionModel.class, WoofExceptionEditPart.class);
+		map.put(WoofStartModel.class, WoofStartEditPart.class);
 
 		// Connections
 		map.put(WoofTemplateOutputToWoofTemplateModel.class,
@@ -186,6 +192,8 @@ public class WoofEditor extends
 				WoofExceptionToWoofSectionInputEditPart.class);
 		map.put(WoofExceptionToWoofResourceModel.class,
 				WoofExceptionToWoofResourceEditPart.class);
+		map.put(WoofStartToWoofSectionInputModel.class,
+				WoofStartToWoofSectionInputEditPart.class);
 	}
 
 	@Override
@@ -201,6 +209,7 @@ public class WoofEditor extends
 		list.add(new AddGovernanceAreaOperation(woofChanges));
 		list.add(new AddResourceOperation(woofChanges));
 		list.add(new AddExceptionOperation(woofChanges));
+		list.add(new AddStartOperation(woofChanges));
 	}
 
 	@Override
@@ -277,6 +286,17 @@ public class WoofEditor extends
 							WoofExceptionModel target) {
 						return WoofEditor.this.getModelChanges()
 								.removeException(target);
+					}
+				});
+
+		// Allow deleting start
+		policy.addDelete(WoofStartModel.class,
+				new DeleteChangeFactory<WoofStartModel>() {
+					@Override
+					public Change<WoofStartModel> createChange(
+							WoofStartModel target) {
+						return WoofEditor.this.getModelChanges().removeStart(
+								target);
 					}
 				});
 
@@ -383,6 +403,17 @@ public class WoofEditor extends
 							WoofExceptionToWoofResourceModel target) {
 						return WoofEditor.this.getModelChanges()
 								.removeExceptionToResource(target);
+					}
+				});
+
+		// Allow deleting start to section input
+		policy.addDelete(WoofStartToWoofSectionInputModel.class,
+				new DeleteChangeFactory<WoofStartToWoofSectionInputModel>() {
+					@Override
+					public Change<WoofStartToWoofSectionInputModel> createChange(
+							WoofStartToWoofSectionInputModel target) {
+						return WoofEditor.this.getModelChanges()
+								.removeStartToSectionInput(target);
 					}
 				});
 	}
@@ -522,6 +553,20 @@ public class WoofEditor extends
 							CreateConnectionRequest request) {
 						return WoofEditor.this.getModelChanges()
 								.linkExceptionToResource(source, target);
+					}
+				});
+
+		// Connect start to section input
+		policy.addConnection(
+				WoofStartModel.class,
+				WoofSectionInputModel.class,
+				new ConnectionChangeFactory<WoofStartModel, WoofSectionInputModel>() {
+					@Override
+					public Change<?> createChange(WoofStartModel source,
+							WoofSectionInputModel target,
+							CreateConnectionRequest request) {
+						return WoofEditor.this.getModelChanges()
+								.linkStartToSectionInput(source, target);
 					}
 				});
 	}
