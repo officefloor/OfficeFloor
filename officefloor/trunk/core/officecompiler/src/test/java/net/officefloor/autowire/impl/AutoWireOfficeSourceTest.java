@@ -50,6 +50,7 @@ import net.officefloor.compile.spi.office.OfficeSectionManagedObject;
 import net.officefloor.compile.spi.office.OfficeSectionManagedObjectSource;
 import net.officefloor.compile.spi.office.OfficeSectionObject;
 import net.officefloor.compile.spi.office.OfficeSectionOutput;
+import net.officefloor.compile.spi.office.OfficeStart;
 import net.officefloor.compile.spi.office.OfficeSubSection;
 import net.officefloor.compile.spi.office.OfficeTask;
 import net.officefloor.compile.spi.office.OfficeTeam;
@@ -380,6 +381,31 @@ public class AutoWireOfficeSourceTest extends OfficeFrameTestCase {
 		this.recordSectionOutputs("SECTION");
 		this.recordSubSections("SECTION");
 		this.recordEscalation(Exception.class, "SECTION", "INPUT");
+
+		// Test
+		this.replayMockObjects();
+		source.sourceOffice(this.architect, this.context);
+		this.verifyMockObjects();
+	}
+
+	/**
+	 * Ensure able to add {@link OfficeStart} linked to
+	 * {@link OfficeSectionInput}.
+	 */
+	public void testAddStartupFlow() throws Exception {
+
+		// Create and configure the source
+		AutoWireOfficeSource source = new AutoWireOfficeSource();
+		AutoWireSection section = this.addSection(source, "SECTION");
+		source.addStartupFlow(section, "INPUT");
+
+		// Record linking start-up flow
+		this.recordOfficeSection("SECTION");
+		this.recordSectionObjects("SECTION");
+		this.recordSectionInputs("SECTION", "INPUT");
+		this.recordSectionOutputs("SECTION");
+		this.recordSubSections("SECTION");
+		this.recordStartupFlow("SECTION", "INPUT");
 
 		// Test
 		this.replayMockObjects();
@@ -1835,6 +1861,24 @@ public class AutoWireOfficeSourceTest extends OfficeFrameTestCase {
 		OfficeSectionInput sectionInput = this.inputs.get(sectionName).get(
 				inputName);
 		this.architect.link(escalation, sectionInput);
+	}
+
+	/**
+	 * Records adding an {@link OfficeStart}.
+	 * 
+	 * @param sectionName
+	 *            {@link AutoWireSection} name.
+	 * @param inputName
+	 *            Name of the {@link OfficeSectionInput}.
+	 */
+	private void recordStartupFlow(String sectionName, String inputName) {
+		OfficeStart start = this.createMock(OfficeStart.class);
+		this.recordReturn(this.architect,
+				this.architect.addOfficeStart(sectionName + "-" + inputName),
+				start);
+		OfficeSectionInput sectionInput = this.inputs.get(sectionName).get(
+				inputName);
+		this.architect.link(start, sectionInput);
 	}
 
 	/**
