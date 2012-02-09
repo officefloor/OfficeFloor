@@ -27,6 +27,7 @@ import net.officefloor.eclipse.skin.woof.SectionInputFigureContext;
 import net.officefloor.eclipse.util.EclipseUtil;
 import net.officefloor.model.woof.WoofExceptionToWoofSectionInputModel;
 import net.officefloor.model.woof.WoofSectionOutputToWoofSectionInputModel;
+import net.officefloor.model.woof.WoofStartToWoofSectionInputModel;
 import net.officefloor.model.woof.WoofTemplateOutputToWoofSectionInputModel;
 
 import org.eclipse.draw2d.ConnectionAnchor;
@@ -74,6 +75,8 @@ public class StandardSectionInputFigure extends AbstractOfficeFloorFigure
 				WoofSectionOutputToWoofSectionInputModel.class, anchor);
 		this.registerConnectionAnchor(
 				WoofExceptionToWoofSectionInputModel.class, anchor);
+		this.registerConnectionAnchor(WoofStartToWoofSectionInputModel.class,
+				anchor);
 
 		this.setFigure(connector);
 	}

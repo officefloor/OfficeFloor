@@ -42,6 +42,9 @@ import net.officefloor.eclipse.skin.woof.SectionOutputFigureContext;
 import net.officefloor.eclipse.skin.woof.SectionOutputToResourceFigureContext;
 import net.officefloor.eclipse.skin.woof.SectionOutputToSectionInputFigureContext;
 import net.officefloor.eclipse.skin.woof.SectionOutputToTemplateFigureContext;
+import net.officefloor.eclipse.skin.woof.StartFigure;
+import net.officefloor.eclipse.skin.woof.StartFigureContext;
+import net.officefloor.eclipse.skin.woof.StartToSectionInputFigureContext;
 import net.officefloor.eclipse.skin.woof.TemplateFigure;
 import net.officefloor.eclipse.skin.woof.TemplateFigureContext;
 import net.officefloor.eclipse.skin.woof.TemplateOutputFigure;
@@ -113,6 +116,11 @@ public class StandardWoofFigureFactory implements WoofFigureFactory {
 	}
 
 	@Override
+	public StartFigure createStartFigure(StartFigureContext context) {
+		return new StandardStartFigure(context);
+	}
+
+	@Override
 	public void decorateTemplateOutputToTemplateFigure(
 			PolylineConnection figure,
 			TemplateOutputToTemplateFigureContext context) {
@@ -177,6 +185,12 @@ public class StandardWoofFigureFactory implements WoofFigureFactory {
 	@Override
 	public void decorateExceptionToResourceFigure(PolylineConnection figure,
 			ExceptionToResourceFigureContext context) {
+		figure.setTargetDecoration(new PolylineDecoration());
+	}
+
+	@Override
+	public void decorateStartToSectionInputFigure(PolylineConnection figure,
+			StartToSectionInputFigureContext context) {
 		figure.setTargetDecoration(new PolylineDecoration());
 	}
 
