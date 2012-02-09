@@ -47,6 +47,7 @@ import net.officefloor.compile.spi.office.OfficeSectionManagedObject;
 import net.officefloor.compile.spi.office.OfficeSectionManagedObjectSource;
 import net.officefloor.compile.spi.office.OfficeSectionObject;
 import net.officefloor.compile.spi.office.OfficeSectionOutput;
+import net.officefloor.compile.spi.office.OfficeStart;
 import net.officefloor.compile.spi.office.OfficeSubSection;
 import net.officefloor.compile.spi.office.OfficeTask;
 import net.officefloor.compile.spi.office.OfficeTeam;
@@ -92,6 +93,11 @@ public class AutoWireOfficeSource extends AbstractOfficeSource {
 	 * {@link EscalationLink} instances.
 	 */
 	private final List<EscalationLink> escalations = new LinkedList<EscalationLink>();
+
+	/**
+	 * {@link StartupLink} instances.
+	 */
+	private final List<StartupLink> startups = new LinkedList<StartupLink>();
 
 	/**
 	 * Available {@link OfficeObject} {@link AutoWire} instances.
@@ -275,6 +281,19 @@ public class AutoWireOfficeSource extends AbstractOfficeSource {
 			AutoWireSection section, String sectionInputName) {
 		this.escalations.add(new EscalationLink(escalationType, section,
 				sectionInputName));
+	}
+
+	/**
+	 * Adds a flow to be triggered on start-up.
+	 * 
+	 * @param section
+	 *            {@link AutoWireSection}.
+	 * @param inputName
+	 *            Name of the {@link AutoWireSection} input to trigger on
+	 *            start-up.
+	 */
+	public void addStartupFlow(AutoWireSection section, String inputName) {
+		this.startups.add(new StartupLink(section, inputName));
 	}
 
 	/**
@@ -620,6 +639,36 @@ public class AutoWireOfficeSource extends AbstractOfficeSource {
 						officeGovernance);
 			}
 		}
+
+		// Link the start-up triggers
+		for (StartupLink startup : this.startups) {
+
+			// Create the start-up name
+			String startupSection = startup.targetSection.getSectionName();
+			String startupInput = startup.targetInputName;
+			String startName = startupSection + "-" + startupInput;
+
+			// Create the start-up
+			OfficeStart start = architect.addOfficeStart(startName);
+
+			// Obtain the section input
+			OfficeSectionInput input = null;
+			Map<String, OfficeSectionInput> sectionInputs = inputs
+					.get(startupSection);
+			if (sectionInputs != null) {
+				input = sectionInputs.get(startupInput);
+			}
+			if (input == null) {
+				architect.addIssue("Unknown section '" + startupSection
+						+ "' input '" + startupInput
+						+ "' to be triggered on start-up", AssetType.OFFICE,
+						"startup");
+				continue; // can not trigger flow on start-up
+			}
+
+			// Link the flow to be triggered on start-up
+			architect.link(start, input);
+		}
 	}
 
 	/**
@@ -843,6 +892,35 @@ public class AutoWireOfficeSource extends AbstractOfficeSource {
 		public EscalationLink(Class<? extends Throwable> escalationType,
 				AutoWireSection targetSection, String targetInputName) {
 			this.escalationType = escalationType;
+			this.targetSection = targetSection;
+			this.targetInputName = targetInputName;
+		}
+	}
+
+	/**
+	 * Link for start-up trigger.
+	 */
+	private static class StartupLink {
+
+		/**
+		 * {@link AutoWireSection}.
+		 */
+		public final AutoWireSection targetSection;
+
+		/**
+		 * Target {@link SectionInput} name.
+		 */
+		public final String targetInputName;
+
+		/**
+		 * Initiate.
+		 * 
+		 * @param targetSection
+		 *            Target {@link AutoWireSection}.
+		 * @param targetInputName
+		 *            Target {@link SectionInput} name.
+		 */
+		public StartupLink(AutoWireSection targetSection, String targetInputName) {
 			this.targetSection = targetSection;
 			this.targetInputName = targetInputName;
 		}

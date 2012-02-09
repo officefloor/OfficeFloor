@@ -146,6 +146,17 @@ public interface AutoWireApplication {
 			AutoWireSection section, String inputName);
 
 	/**
+	 * Adds a flow to be triggered on start-up.
+	 * 
+	 * @param section
+	 *            {@link AutoWireSection}.
+	 * @param inputName
+	 *            Name of the {@link AutoWireSection} input to trigger on
+	 *            start-up.
+	 */
+	void addStartupFlow(AutoWireSection section, String inputName);
+
+	/**
 	 * Adds a raw object for dependency injection.
 	 * 
 	 * @param object

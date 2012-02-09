@@ -292,6 +292,11 @@ public class AutoWireOfficeFloorSource extends AbstractOfficeFloorSource
 	}
 
 	@Override
+	public void addStartupFlow(AutoWireSection section, String inputName) {
+		this.officeSource.addStartupFlow(section, inputName);
+	}
+
+	@Override
 	public void addObject(Object object, AutoWire... autoWiring) {
 
 		// Default the object type if not provided
