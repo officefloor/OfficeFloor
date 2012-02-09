@@ -25,7 +25,7 @@ import javax.sql.DataSource;
 
 import junit.framework.TestCase;
 import net.officefloor.autowire.AutoWireManagement;
-import net.officefloor.tutorial.databasehttpserver.DatabaseHttpServer;
+import net.officefloor.plugin.woof.WoofOfficeFloorSource;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
@@ -53,7 +53,7 @@ public class DatabaseHttpServerTest extends TestCase {
 	@Override
 	protected void setUp() throws Exception {
 		// Start the database and HTTP Server
-		DatabaseHttpServer.main(new String[0]);
+		WoofOfficeFloorSource.main();
 	}
 
 	@Override
@@ -74,6 +74,9 @@ public class DatabaseHttpServerTest extends TestCase {
 	 * Ensure able to connect to database with {@link DataSource}.
 	 */
 	public void testConnection() throws Exception {
+
+		// Undertake request to allow set-up
+		this.doRequest("http://localhost:7878/example");
 
 		// Obtain connection via DataSource
 		jdbcDataSource dataSource = new jdbcDataSource();
