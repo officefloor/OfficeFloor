@@ -1,125 +1,124 @@
                                                -----------------------
-                                              Team HTTP Server Tutorial
+                                         Thread Injection HTTP Server Tutorial
                                                -----------------------
 					        Daniel Sagenschneider
                                                -----------------------
 
-  <<Team Http Server Tutorial>>
+  <<Thread Injection Http Server Tutorial>>
 
-  OfficeFloor refers to a thread pool as a {{{/apidocs/net/officefloor/frame/spi/team/Team.html}Team}}.
+  This tutorial demonstrates the ability to assign a thread pool to execute specific methods (i.e. thread injection).  OfficeFloor refers to a thread pool as a {{{/apidocs/net/officefloor/frame/spi/team/Team.html}Team}}.
+  
+  The example used for this tutorial is an encrypter for a letter.  A database table stores the encryption by mapping the letter to an alternate letter.  Once the letter encryption is looked up in the database it is cached to provide quicker subsequent lookups for that letter.  The example's web page is as follows and has been kept simple to focus on thread injection.
 
-  This tutorial demonstrates the ability to assign a {{{/apidocs/net/officefloor/frame/spi/team/Team.html}Team}} (thread pool) to execute specific tasks.
+[./images/TeamHttpServer-screenshot.png] TeamHttpServer screenshot.
   
-  The application for this tutorial provides encrypting of a letter.  The letter is encrypted by a database table providing mapping of the letter to an alternate letter.  The mapping is cached within the application to provide quicker lookups.  The database tasks of the application are executed by a separate {{{/apidocs/net/officefloor/frame/spi/team/Team.html}Team}}.
+  The example displays the names of two threads to show the different thread pools (Teams) servicing the request.
   
-  The reason for separating the database tasks to be executed by another thread is to increase through put and responsiveness of the application.  Web servers hosting applications will typically have a single thread pool to service all requests.  Database I/O is blocking meaning that the thread is blocked while servicing the HTTP request.  Under heavy loads, all threads can end up in this blocked state and the web server has to queue remaining requests as no threads are available to service the requests.  Many requests for the web server are however for static content that is typically cached and only requires a few cpu cycles of a thread to service the request.  Increasing the number of threads causes increased lock contention and potential stavation from the cpu leading to degraded performance.  The answer is not in a single thread pool (or optimsing the scheduling of requests to service as this can lead to stavation and increased application complexity) but in creating further thread pools. 
-  
-  This tutorial shows how OfficeFloor makes it simple for all database tasks to be executed by a separate thread pool leaving the HTTP request servicing thread pool free to service these smaller requests.
-  
+   * thread to obtain cached letter encryption
+   
+   * thread (pool) to look up letter encryption within the database
+   
   {{{http://sourceforge.net/projects/officefloor/files/maven/maven2/net/officefloor/tutorial/TeamHttpServer/${projectVersion}/TeamHttpServer-${projectVersion}-project.zip/download}Download Tutorial Source}}
 
-
-Code
-
-  The following is the <<<main>>> method to run the application.
-
-%{code-snippet|sh-params=highlight:[16,17,18,19]|brush-autodetect=1|id=example|file=${basedir}/src/main/java/net/officefloor/tutorial/teamhttpserver/TeamHttpServer.java}
-
-  The leader follower team is a {{{/apidocs/net/officefloor/frame/spi/team/source/TeamSource.html}TeamSource}} implementation that is a pool of multiple threads following the leader follower pattern to reduce lock contention.  The above configured <<<Team>>> will have 10 threads to execute tasks assigned to it.
-
-  The ability to determine database tasks are via the dependencies for the task.  Tasks wanting to interact with the database will need access to a <<<DataSource>>> and therefore any task depending on a <<<DataSource>>> to be database task.
-
-  The {{{/apidocs/net/officefloor/plugin/autowire/AutoWireOfficeFloorSource.html}AutoWireOfficeFloorSource}} nature of the {{{/apidocs/net/officefloor/plugin/web/http/server/HttpServerAutoWireOfficeFloorSource.html}HttpServerAutoWireOfficeFloorSource}} provides the ability to specify which <<<Team>>> is responsibly for executing which task by the task's dependencies.  In this case, any task with a <<<DataSource>>> dependency will be executed by the leader follower team.  All other tasks are executed by the default <<<Team>>>, which in the case for the <<<HttpServerAutoWireOfficeFloorSource>>> is by default a {{{/apidocs/net/officefloor/frame/impl/spi/team/OnePersonTeamSource.html}OnePersonTeamSource}}.
-    
-* Template.ofp
-
-  The following is the content of the template:
-
-%{code-snippet|brush=xml|file=${basedir}/src/main/resources/Template.ofp}
-
-  The addition to the template is to output the name of the thread executing particular tasks:
   
-   * <<<encrypt>>> : encrypting the letter from cache (no database interaction required)
-   
-   * <<<retrieveFromDatabase>>> : retrieving the letter encrypting from the database
-   
-  This allows indicating that different threads (from different teams) are executing these tasks.
+Web Server Efficiency and Responsiveness
 
-* Template class
+  The thread per request architecture of most web servers will typically have a single thread pool to service all requests.  Database I/O is typically blocking.  Under heavy loads all threads can end up blocked waiting on the database.  As the web server has no free threads, it queues further requests degrading the responsiveness of the web application.
 
-  The first aspect of the template logic is to provide the values for the <<< $\{tag\} >>> entries.  
+  Most requests to a web server are for static cached content.  Having these requests wait behind longer database requests means non-optimal use of the web server.  The blocked threads leaves the web server's CPU idle.  Having an additional thread would allow the web server to continue servicing the static cached content requests.  This is especially relevant as the company's home page is usually static cached content and users have a low tolerance for slow web site responsiveness.  Also increasing the number of threads for cached content can cause lock contention and potential stavation resulting in degraded responsiveness. 
   
-  Along with providing the values, the class is also annotated so that it is stored within the HTTP session.  This allows the simple <<<cache>>> field to be a cache of retrieved mappings from the database.
-
-%{code-snippet|brush-autodetect=1|id=values|file=${basedir}/src/main/java/net/officefloor/tutorial/teamhttpserver/Template.java}
-
-  The following provides the ability to specify the <<<displayCode>>> field: 
-
-%{code-snippet|sh-params=first-line:25|brush-autodetect=1|id=setDisplayCode|file=${basedir}/src/main/java/net/officefloor/tutorial/teamhttpserver/Template.java}
-
-  The {{{/apidocs/net/officefloor/plugin/section/clazz/Parameter.html}Parameter}} annotation is flag that the <<<LetterEncryption>>> is not a dependency to be provided by a {{{/apidocs/net/officefloor/frame/spi/managedobject/source/ManagedObjectSource.html}ManagedObjectSource}} but rather is passed from the previous task.  OfficeFloor provides this capability to allow tasks to communicate to each other.  OfficeFloor at start up ensures that the output argument type from the previous task matches the input parameter type of the task to reduce runtime issues.
+  Serving cached content is best by a single thread while database content is best by a pool of threads.  These two types of request are typically handled by most web servers with a single thread pool.  However increasing the efficiency and responsiveness of a web server is not acheived by increasing the number of threads but by increasing the number of thread pools.
   
-  Initially nothing will be cached.  The following method will retrieve the mapping for the encrypting of a particular letter from the database and caches it.  As it has a <<<DataSource>>> dependency it will be executed by the leader follower team configured in the <<<main>>> method above. 
+  The example for this tutorial shows how OfficeFloor enables increasing the number of thread pools for efficient servicing of cached and database requests. 
 
-%{code-snippet|sh-params=first-line:29|brush-autodetect=1|id=retrieveFromDatabase|file=${basedir}/src/main/java/net/officefloor/tutorial/teamhttpserver/Template.java}
-    
-  Once the <<<LetterEncryption>>> is retrieved from the database it is returned from the above method.  As the above method is annotated to execute the <<<setDisplayCode>>> next, the returned <<<LetterEncryption>>> becomes the parameter for the execution of the <<<setDisplayCode>>> method.
 
-  Finally is the handling method for the encrypt form submission: 
+Configuration
 
-%{code-snippet|sh-params=first-line:55|brush-autodetect=1|id=encrypt|file=${basedir}/src/main/java/net/officefloor/tutorial/teamhttpserver/Template.java}
+  The following is the <<<application.woof>>> configuration for the example application.
 
-  The above method handles the HTTP request by determining if the letter encryption is cached.  Should it be cached, the cached <<<LetterEncryption>>> is returned as the parameter for the next task (<<<setDisplayCode>>> method).  On the other hand, if the letter is not cached the <<<retrieveFromDatabase>>> is triggered next (instead of <<<setDisplayCode>>>) to retrieve the encryption for the letter.
+[./images/team-woof.png] application.woof configuration.
+
+  The <<<DataSource>>> to the database is configured as follows.
   
-  Therefore depending on whether cached the execution flow of tasks is as follows:
-  
-   * Not cached
-   
-     [[1]] <<<encrypt>>> (executed by default team) does not find the letter within the cache, so triggers to retrieve from database (passing the particular letter to retrieve)
-     
-     [[1]] <<<retrieveFromDatabase>>> (executed by leader follower team) retrieves the letter encryption from the database along with caching it.  It then returns the <<<LetterEncryption>>> for the next task
-     
-     [[1]] <<<setDisplayCode>>> (executed by default team) specifies the <<<LetterEncryption>>> for display
-     
-     [[1]] template is rendered (by default team) for response to the client
-     
-   * Cached
-   
-     [[1]] <<<encrypt>>> (executed by default team) finds the letter within the cache and returns the cached <<<LetterEncryption>>> for the next task
-     
-     [[1]] <<<setDisplayCode>>> (executed by default team) specifies the <<<LetterEncryption>>> for display
-     
-     [[1]] template is rendered (by default team) for response to the client
-     
-  Though this is a simple example it does highlight that under heavy load that cached letter encryptions can still be serviced even if all database (leader follower) threads are blocked waiting on the database. 
-  
-* Remaining code
+%{code-snippet|brush=xml|file=${basedir}/src/main/resources/application.objects}
 
-  The remaining code is included for completeness of this tutorial. 
-
-** datasource.properties
+  With the following properties.
   
 %{code-snippet|brush=plain|file=${basedir}/src/main/resources/datasource.properties}
 
-** createDatabase method
+  See the {{{../index.html}other tutorials}} for explanation of the above configuration.
 
-%{code-snippet|sh-params=first-line:24|brush-autodetect=1|id=createDatabase|file=${basedir}/src/main/java/net/officefloor/tutorial/teamhttpserver/TeamHttpServer.java}
 
-** EncryptLetter class
+* Thread Injection Configuration
+  
+  The thread injection configuration is contained in the <<<application.teams>>> file at the root of the class path.  For the example application it is as follows.
+  
+%{code-snippet|brush=xml|file=${basedir}/src/main/resources/application.teams}
+  
+  The leader follower team is a {{{/apidocs/net/officefloor/frame/spi/team/source/TeamSource.html}TeamSource}} implementation that implements the leader follower thread pool pattern to reduce lock contention.
+  
+  WoOF uses the method's dependencies to determine the type of functionality being undertaken by the method.  The method's dependencies give an indicator of what the method is likely to be doing.  In this case if the method requires a <<<DataSource>>> it is very likely that it will be doing blocking database I/O calls.  This means of classifying methods allows OfficeFloor to automagically use the appropriate thread pool to execute the method.  It is what OfficeFloor considers thread injection.
+
+  All other methods are executed by the default <<<Team>>>.  Running stand-alone this would be the {{{/apidocs/net/officefloor/frame/impl/spi/team/OnePersonTeamSource.html}OnePersonTeamSource}} which is a single threaded team.
+  
+  Adding thread pools is optional and therefore the inclusion of the <<<application.teams>>> file is optional.  It is anticipated that threading will be configured closely to the dependencies available within an environment.  In many cases this will be handled by the environment deployment.  The file however is supported for extending WoOF web applications by customising the thread pools.
+
+
+
+Code
+  
+  The following is the content of the template.
+
+%{code-snippet|brush=xml|file=${basedir}/src/main/resources/Template.ofp}
+
+  The following provides the values for the <<< $\{property\} >>> entries from the template logic.  
+
+%{code-snippet|brush-autodetect=1|id=values|file=${basedir}/src/main/java/net/officefloor/tutorial/teamhttpserver/Template.java}
+  
+  Along with providing the values the class is also annotated so that it is stored within the HTTP session.  This allows the <<<cache>>> field to act as a cache across requests.  See the {{{../index.html}other tutorials}} for further details.
+  
+  The example application first tries the cache for the encrypted code.
+  
+%{code-snippet|brush-autodetect=1|id=cache|file=${basedir}/src/main/java/net/officefloor/tutorial/teamhttpserver/Template.java}
+
+  Should the encrypted code be found in the cache it is passed as a parameter to the setter method.  The setter method keeps reference to the encrypted code for rendering the web page response.  See the {{{../index.html}other tutorials}} for explanation of this WoOF functionality.
+
+  On not finding the encrypted code in the cache the above method triggers for it to be retrieved from the database.  The following method retrieves the encrypted code from the database.  The returned encrypted code is passed to the setter method for rendering to the web page.
+
+%{code-snippet|brush-autodetect=1|id=database|file=${basedir}/src/main/java/net/officefloor/tutorial/teamhttpserver/Template.java}
+
+  As the method has a <<<DataSource>>> dependency it is executed by the leader follower team.  This is reflected by the web page response showing different threads executing the cache and database methods.
+     
+  Though this is a simple example it does highlight that under heavy load that cached letter encryptions can still be serviced even if all database (leader follower) threads are blocked waiting on the database.
+
+  
+* Remaining code
+
+  For completeness of the tutorial the remaining code for the example application is included below.
+
+** Database Setup
+
+%{code-snippet|brush-autodetect=1|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/teamhttpserver/Setup.java}
+
+** EncryptLetter
 
 %{code-snippet|brush-autodetect=1|id=example|file=${basedir}/src/main/java/net/officefloor/tutorial/teamhttpserver/EncryptLetter.java}
 
-** LetterEncryption class
+** LetterEncryption
 
 %{code-snippet|brush-autodetect=1|id=example|file=${basedir}/src/main/java/net/officefloor/tutorial/teamhttpserver/LetterEncryption.java}
 
+
+
 Unit Test
 
-  The unit test requests the encrypting of a letter twice:
-  
-   * first time retrieving from database and caching
-   
-   * second time retriving from cache
+  The following unit test makes requests to encrypt a letter.
 
 %{code-snippet|brush-autodetect=1|id=test|file=${basedir}/src/test/java/net/officefloor/tutorial/teamhttpserver/TeamHttpServerTest.java}
+
+  As the same letter is requested, the
+  
+   * first request retrieves the encrypted code from the database (and caches it)
+   
+   * second request retrives it from the cache
 

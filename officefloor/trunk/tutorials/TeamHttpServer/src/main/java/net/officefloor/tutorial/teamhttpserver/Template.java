@@ -44,27 +44,27 @@ public class Template implements Serializable {
 	private Map<Character, LetterEncryption> cache = new HashMap<Character, LetterEncryption>();
 
 	private LetterEncryption displayCode;
-	private String encryptThreadName;
-	private String retrieveFromDatabaseThreadName;
+	private String cacheThreadName;
+	private String databaseThreadName;
 
 	public LetterEncryption getTemplate() {
 		return this.displayCode;
 	}
-	
+
 	public Template getThreadNames() {
 		return this;
 	}
 
-	public String getEncryptThreadName() {
-		return this.encryptThreadName;
+	public String getCacheThreadName() {
+		return this.cacheThreadName;
 	}
 
-	public String getRetrieveFromDatabaseThreadName() {
-		return this.retrieveFromDatabaseThreadName;
+	public String getDatabaseThreadName() {
+		return this.databaseThreadName;
 	}
 	// END SNIPPET: values
 
-	// START SNIPPET: encrypt
+	// START SNIPPET: cache
 	@FlowInterface
 	public static interface PageFlows {
 		void retrieveFromDatabase(char letter);
@@ -74,8 +74,8 @@ public class Template implements Serializable {
 	public LetterEncryption encrypt(EncryptLetter request, PageFlows flows) {
 
 		// Specify thread name (clearing database thread)
-		this.encryptThreadName = Thread.currentThread().getName();
-		this.retrieveFromDatabaseThreadName = "[cached]";
+		this.cacheThreadName = Thread.currentThread().getName();
+		this.databaseThreadName = "[cached]";
 
 		// Obtain from cache
 		char letter = request.getLetter();
@@ -88,15 +88,19 @@ public class Template implements Serializable {
 		flows.retrieveFromDatabase(letter);
 		return null; // for compiler
 	}
-	// END SNIPPET: encrypt
 
-	// START SNIPPET: retrieveFromDatabase
+	public void setDisplayCode(@Parameter LetterEncryption encryption) {
+		this.displayCode = encryption;
+	}
+	// END SNIPPET: cache
+
+	// START SNIPPET: database
 	@NextTask("setDisplayCode")
 	public LetterEncryption retrieveFromDatabase(@Parameter char letter,
 			DataSource dataSource) throws SQLException {
 
 		// Specify thread name
-		this.retrieveFromDatabaseThreadName = Thread.currentThread().getName();
+		this.databaseThreadName = Thread.currentThread().getName();
 
 		// Retrieve from database and cache
 		Connection connection = dataSource.getConnection();
@@ -107,7 +111,8 @@ public class Template implements Serializable {
 			ResultSet resultSet = statement.executeQuery();
 			resultSet.next();
 			String code = resultSet.getString("CODE");
-			LetterEncryption letterCode = new LetterEncryption(letter, code.charAt(0));
+			LetterEncryption letterCode = new LetterEncryption(letter,
+					code.charAt(0));
 
 			// Cache
 			this.cache.put(new Character(letter), letterCode);
@@ -117,12 +122,6 @@ public class Template implements Serializable {
 			connection.close();
 		}
 	}
-	// END SNIPPET: retrieveFromDatabase
-
-	// START SNIPPET: setDisplayCode
-	public void setDisplayCode(@Parameter LetterEncryption encryption) {
-		this.displayCode = encryption;
-	}
-	// END SNIPPET: setDisplayCode
+	// END SNIPPET: database
 
 }

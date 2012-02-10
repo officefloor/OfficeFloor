@@ -28,6 +28,7 @@ import javax.sql.DataSource;
  * 
  * @author Daniel Sagenschneider
  */
+// START SNIPPET: tutorial
 public class Setup {
 
 	public void setupDatabase(DataSource dataSource) throws SQLException {
@@ -53,3 +54,4 @@ public class Setup {
 	}
 
 }
+// END SNIPPET: tutorial
