@@ -1,10 +1,11 @@
 <html>
 	<body>
-		<table>
+		<br />
+		<table border="1">
 			<tr>
 				<td>Name</td>
 				<td>Description</td>
-				<td />
+				<td>Remove</td>
 			</tr>
 			<!-- {Rows} -->
 			<tr>
@@ -14,6 +15,7 @@
 			</tr>
 			<!-- {EndRows} -->
 		</table>
+		<br />
 		<form action="#{addRow}" method="POST">
 			Name: <input name="name" type="text" />
 			Description: <input name="description" type="text" />

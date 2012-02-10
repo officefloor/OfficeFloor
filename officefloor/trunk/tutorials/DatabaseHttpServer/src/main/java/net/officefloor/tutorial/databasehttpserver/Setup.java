@@ -30,6 +30,7 @@ import javax.sql.DataSource;
 public class Setup {
 
 	public void setupDatabase(DataSource dataSource) throws Exception {
+
 		Connection connection = dataSource.getConnection();
 		try {
 			connection
@@ -39,7 +40,7 @@ public class Setup {
 			connection
 					.createStatement()
 					.execute(
-							"INSERT INTO EXAMPLE ( NAME, DESCRIPTION ) VALUES ( 'TEST', 'TEST' )");
+							"INSERT INTO EXAMPLE ( NAME, DESCRIPTION ) VALUES ( 'WoOF', 'Web on OfficeFloor' )");
 		} finally {
 			connection.close();
 		}
