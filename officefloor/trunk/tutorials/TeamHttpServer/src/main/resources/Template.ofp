@@ -4,10 +4,10 @@
 			Letter: <input name="letter" value="${letter}" type="text" maxlength="1" />
 			<input type="submit" value="Code" />
 		</form>
-		<p>Code: ${code}</p>
+		<p>Encrypted code: ${code}</p>
 		<br />
 		<!-- {ThreadNames} -->
-		<p>Encrypt thread: ${encryptThreadName}</p>
-		<p>Retrieve from database thread: ${retrieveFromDatabaseThreadName}</p>
+		<p>Cache thread: ${cacheThreadName}</p>
+		<p>Database I/O thread: ${databaseThreadName}</p>
 	</body>
 </html>

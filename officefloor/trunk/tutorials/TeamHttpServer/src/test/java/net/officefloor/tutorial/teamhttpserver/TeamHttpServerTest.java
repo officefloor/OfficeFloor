@@ -105,9 +105,6 @@ public class TeamHttpServerTest extends TestCase {
 	// START SNIPPET: test
 	public void testRetrieveEncryptions() throws Exception {
 
-		// Request page
-		this.doRequest("http://localhost:7878/example");
-
 		// Retrieving from database
 		this.doRequest("http://localhost:7878/example.links-encrypt.task?letter=A");
 
