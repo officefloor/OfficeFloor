@@ -75,7 +75,7 @@ public class Template implements Serializable {
 
 		// Specify thread name (clearing database thread)
 		this.encryptThreadName = Thread.currentThread().getName();
-		this.retrieveFromDatabaseThreadName = null;
+		this.retrieveFromDatabaseThreadName = "[cached]";
 
 		// Obtain from cache
 		char letter = request.getLetter();
@@ -120,7 +120,6 @@ public class Template implements Serializable {
 	// END SNIPPET: retrieveFromDatabase
 
 	// START SNIPPET: setDisplayCode
-	@NextTask("getTemplate")
 	public void setDisplayCode(@Parameter LetterEncryption encryption) {
 		this.displayCode = encryption;
 	}
