@@ -17,12 +17,15 @@
  */
 package net.officefloor.tutorial.teamhttpserver;
 
+import net.officefloor.plugin.web.http.application.HttpParameters;
+
 /**
  * Request to encode the letter.
  * 
  * @author Daniel Sagenschneider
  */
 // START SNIPPET: example
+@HttpParameters
 public class EncryptLetter {
 
 	private char letter;
