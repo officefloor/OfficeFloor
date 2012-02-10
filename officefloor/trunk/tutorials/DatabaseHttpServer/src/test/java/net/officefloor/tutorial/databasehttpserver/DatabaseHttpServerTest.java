@@ -88,7 +88,9 @@ public class DatabaseHttpServerTest extends TestCase {
 		ResultSet resultSet = connection.createStatement().executeQuery(
 				"SELECT * FROM EXAMPLE");
 		assertTrue("Ensure have result", resultSet.next());
-		assertEquals("Incorrect name", "TEST", resultSet.getString("NAME"));
+		assertEquals("Incorrect name", "WoOF", resultSet.getString("NAME"));
+		assertEquals("Incorrect description", "Web on OfficeFloor",
+				resultSet.getString("DESCRIPTION"));
 		assertFalse("Ensure no further results", resultSet.next());
 		resultSet.close();
 	}
