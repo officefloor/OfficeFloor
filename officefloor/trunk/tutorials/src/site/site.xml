@@ -34,7 +34,7 @@
 			<item name="Dependency Injection" href="./DatabaseHttpServer/index.html" />
 		</menu>
 		<menu name="Context Tutorials">
-			<item name="Transactions" href="./TransactionHttpServer/index.html" />
+			<item name="Transaction Management" href="./TransactionHttpServer/index.html" />
 		</menu>
 		<menu name="Threading Tutorials">
 			<item name="Thread Injection" href="./TeamHttpServer/index.html" />
