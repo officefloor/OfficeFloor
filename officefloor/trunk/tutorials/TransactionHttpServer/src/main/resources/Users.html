@@ -1,0 +1,21 @@
+<html>
+	<body>
+		<table border="1">
+			<tr>
+				<td>User</td>
+				<td>Name</td>
+			</tr>
+			<!-- {Users} -->
+			<tr>
+				<td>${userName}</td>
+				<td>${fullName}</td>
+			</td>
+			<!-- {EndUsers} -->
+		</table>
+		<form action="#{create}">
+			User: <input name="userName" type="text" />
+			Name: <input name="fullName" type="text" />
+			<input type="submit" value="Add" />
+		</form>
+	</body>
+</html>
