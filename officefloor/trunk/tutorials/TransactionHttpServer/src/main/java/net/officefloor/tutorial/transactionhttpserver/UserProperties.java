@@ -24,6 +24,7 @@ import net.officefloor.plugin.web.http.application.HttpParameters;
  * 
  * @author Daniel Sagenschneider
  */
+// START SNIPPET: tutorial
 @HttpParameters
 public class UserProperties {
 
@@ -56,3 +57,4 @@ public class UserProperties {
 	}
 
 }
+// END SNIPPET: tutorial

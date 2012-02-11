@@ -31,6 +31,7 @@ import lombok.Data;
  * 
  * @author Daniel Sagenschneider
  */
+// START SNIPPET: tutorial
 @Data
 @Entity
 public class User {
@@ -44,3 +45,4 @@ public class User {
 	@OneToOne(mappedBy = "user", fetch = FetchType.EAGER)
 	private Person person;
 }
+// END SNIPPET: tutorial

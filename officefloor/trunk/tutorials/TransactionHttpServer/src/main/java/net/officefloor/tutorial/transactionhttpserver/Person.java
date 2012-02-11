@@ -29,9 +29,10 @@ import lombok.Data;
 
 /**
  * Person entity
- *
+ * 
  * @author Daniel Sagenschneider
  */
+// START SNIPPET: tutorial
 @Data
 @Entity
 public class Person {
@@ -41,8 +42,9 @@ public class Person {
 	private int id;
 
 	private String fullName;
-	
+
 	@OneToOne(cascade = CascadeType.ALL)
-	@JoinColumn(name="USER_ID")
+	@JoinColumn(name = "USER_ID")
 	private User user;
 }
+// END SNIPPET: tutorial

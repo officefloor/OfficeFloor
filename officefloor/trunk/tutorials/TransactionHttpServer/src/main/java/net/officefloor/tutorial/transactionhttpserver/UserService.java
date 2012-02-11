@@ -27,6 +27,7 @@ import net.officefloor.plugin.section.clazz.Parameter;
  * 
  * @author Daniel Sagenschneider
  */
+// START SNIPPET: tutorial
 public class UserService {
 
 	@NextTask("userAdded")
@@ -41,3 +42,4 @@ public class UserService {
 	}
 
 }
+// END SNIPPET: tutorial
