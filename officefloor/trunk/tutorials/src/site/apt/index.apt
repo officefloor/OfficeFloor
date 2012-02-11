@@ -23,7 +23,7 @@ Running a Web Application
 *--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
 | {{{./MyFirstWoofApp/index.html}Running within JEE App Server}}   | Walks through the simple steps to run WoOF within a JEE Application Server.  Anyone familiar with {{{http://eclipse.org}Eclipse}} and {{{http://maven.org}Maven}} can skip this tutorial.        | {{{http://eclipse.org}Eclipse}} and {{{http://maven.org}Maven}} 
 *--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
-| {{{./StaticHttpServer/index.html}Running stand-alone}}       | Demonstrates how to run WoOF stand-alone                   | WoofOfficeFloorSource and mvn\ woof:run
+| {{{./StaticHttpServer/index.html}Running stand-alone}}       | Demonstrates how to run WoOF stand-alone                   | mvn woof:run, WoofOfficeFloorSource 
 *--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
 
 
@@ -128,7 +128,7 @@ Context
 *----------------------------------------------------------+-----------------------------------------------------------+
 || Tutorial                                                || Description                                             
 *----------------------------------------------------------+-----------------------------------------------------------+
-| <Coming Soon>                                            | Managing transactions of an OfficeFloor web application.
+| {{{./TransactionHttpServer/index.html}Transaction Management}}  | Managing transactions of an OfficeFloor web application.
 *----------------------------------------------------------+-----------------------------------------------------------+
 
 
