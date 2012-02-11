@@ -41,7 +41,7 @@ Configuration
   
 %{code-snippet|brush=xml|file=${basedir}/src/main/resources/application.objects}
 
-  The team is required for the <<<EntityManager>>> object as a <<<Task>>> is triggered to automatically close the <<<EntityManager>>>.  OfficeFloor enables {{{/api/net/officefloor/frame/spi/managedobject/source/ManagedObjectSource.html}ManagedObjectSource}} to clean up themselves so that this code need not be in the POJOs. 
+  The team is required for the <<<EntityManager>>> object as a <<<Task>>> is triggered to automatically close the <<<EntityManager>>>.  OfficeFloor enables {{{/apidocs/net/officefloor/frame/spi/managedobject/source/ManagedObjectSource.html}ManagedObjectSource}} to clean up themselves so that this code need not be in the POJOs. 
 
 ** datasource.properties
 
@@ -51,7 +51,7 @@ Configuration
 
 Code
 
-  Governance provides context to the {{{/api/net/officefloor/frame/spi/managedobject/ManagedObject.html}ManagedObject}} instances used by the <<<Task>>>.  In the example application it is providing a transaction (context) to the <<<EntityManager>>> for creating the user.  Governance interacts with the extension interfaces of the <<<ManagedObject>>>.
+  Governance provides context to the {{{/apidocs/net/officefloor/frame/spi/managedobject/ManagedObject.html}ManagedObject}} instances used by the <<<Task>>>.  In the example application it is providing a transaction (context) to the <<<EntityManager>>> for creating the user.  Governance interacts with the extension interfaces of the <<<ManagedObject>>>.
   
   As Governance only applies to the <<<ManagedObject>>> instances it is unobtrusive to the POJO methods.  Therefore see the {{{../index.html}other tutorials}} for explanation of the example application's code.
   

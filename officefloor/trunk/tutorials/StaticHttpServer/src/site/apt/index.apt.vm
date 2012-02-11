@@ -101,7 +101,7 @@ Unit Test
 
 %{code-snippet|brush-autodetect=1|sh-params=first-line:17|id=teardown|file=${basedir}/src/test/java/net/officefloor/tutorial/statichttpserver/StaticHttpServerTest.java}
 
-  As the code to run the HTTP Server is contained within the <<<main>>> method, the {{{/apidocs/net/officefloor/plugin/autowire/AutoWireAdministration.html}AutoWireAdministration}} provides means to stop the HTTP Server via JMX.  This means that the unit test code need not maintain reference to the underlying {{{/apidocs/net/officefloor/frame/api/manage/OfficeFloor.html}OfficeFloor}} for closing between tests.
+  As the code to run the HTTP Server is contained within the <<<main>>> method, the {{{/apidocs/net/officefloor/autowire/AutoWireManagement.html}AutoWireManagement}} provides means to stop the HTTP Server via JMX.  This means that the unit test code need not maintain reference to the underlying {{{/apidocs/net/officefloor/frame/api/manage/OfficeFloor.html}OfficeFloor}} for closing between tests.
 
 Next
 
