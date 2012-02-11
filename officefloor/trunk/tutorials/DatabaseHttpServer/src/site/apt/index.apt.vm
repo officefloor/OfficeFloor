@@ -44,7 +44,7 @@ Configuring Objects
 
   The <<<DataSource>>> is provided by a {{{/apidocs/net/officefloor/frame/spi/managedobject/source/ManagedObjectSource.html}ManagedObjectSource}} implementation.  The <<<type>>> attribute is necessary as OfficeFloor will dependency inject by matching on type.
   
-  Properties to configure the {{{/apidocs/net/officefloor/frame/spi/managedobject/source/ManagedObjectSource.html}ManagedObjectSource}} implementations can be provided in the above file or within a properties file.  The reason for using a property file is that different property files can be used for each environment.  See the System property on the {{{/apidocs/net.officefloor.autowire.impl.AutoWirePropertiesImpl.html}AutoWirePropertiesImpl}} to specify an environment directory location to find the property files.
+  Properties to configure the {{{/apidocs/net/officefloor/frame/spi/managedobject/source/ManagedObjectSource.html}ManagedObjectSource}} implementations can be provided in the above file or within a properties file.  The reason for using a property file is that different property files can be used for each environment.  See the System property on the {{{/apidocs/net/officefloor/autowire/impl/AutoWirePropertiesImpl.html}AutoWirePropertiesImpl}} to specify an environment directory location to find the property files.
   
   The contents of <<<DataSource>>> property file is as follows.
 

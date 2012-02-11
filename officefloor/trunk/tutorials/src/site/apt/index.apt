@@ -16,12 +16,12 @@
   
 Running a Web Application
 
-  The tutorials in the table below provide a step by step guide to setting up an OfficeFloor web application.  If you are familar with {{{http://eclipse.org}Eclipse}} and {{{http://maven.org}Maven}} these tutorials can be skipped.  Return to them later when ready to start running an OfficeFloor web application.
+  The tutorials in the table below provide a step by step guide to setting up an OfficeFloor web application.  If you are familar with {{{http://eclipse.org}Eclipse}} and {{{http://maven.apache.org}Maven}} these tutorials can be skipped.  Return to them later when ready to start running an OfficeFloor web application.
 
 *--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
 || Tutorial                                                    || Description                                               || Covered
 *--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
-| {{{./MyFirstWoofApp/index.html}Running within JEE App Server}}   | Walks through the simple steps to run WoOF within a JEE Application Server.  Anyone familiar with {{{http://eclipse.org}Eclipse}} and {{{http://maven.org}Maven}} can skip this tutorial.        | {{{http://eclipse.org}Eclipse}} and {{{http://maven.org}Maven}} 
+| {{{./MyFirstWoofApp/index.html}Running within JEE App Server}}   | Walks through the simple steps to run WoOF within a JEE Application Server.  Anyone familiar with {{{http://eclipse.org}Eclipse}} and {{{http://maven.apache.org}Maven}} can skip this tutorial.        | {{{http://eclipse.org}Eclipse}} and {{{http://maven.apache.org}Maven}} 
 *--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
 | {{{./StaticHttpServer/index.html}Running stand-alone}}       | Demonstrates how to run WoOF stand-alone                   | mvn woof:run, WoofOfficeFloorSource 
 *--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
