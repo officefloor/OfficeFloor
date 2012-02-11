@@ -28,6 +28,7 @@
 		<module>ServletFilterJspIntegration</module>
 		<module>ServletFilterDependencyInjection</module>
 		<module>DatabaseHttpServer</module>
+		<module>TransactionHttpServer</module>
 		<module>TeamHttpServer</module>
 	</modules>
 	<build>
