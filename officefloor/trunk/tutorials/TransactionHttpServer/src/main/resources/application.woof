@@ -15,7 +15,7 @@
         <template name="users"/>
       </output>
     </section>
-    <section name="Setup" source="net.officefloor.plugin.section.clazz.ClassSectionSource" location="net.officefloor.tutorial.transactionhttpserver.Setup" x="440" y="57">
+    <section name="Setup" source="net.officefloor.plugin.section.clazz.ClassSectionSource" location="net.officefloor.tutorial.transactionhttpserver.Setup" x="108" y="296">
       <input name="setupDatabase" parameter-type="" uri=""/>
     </section>
   </sections>
@@ -32,7 +32,7 @@
     </exception>
   </exceptions>
   <starting>
-    <start x="382" y="80">
+    <start x="50" y="319">
       <flow section="Setup" input="setupDatabase"/>
     </start>
   </starting>

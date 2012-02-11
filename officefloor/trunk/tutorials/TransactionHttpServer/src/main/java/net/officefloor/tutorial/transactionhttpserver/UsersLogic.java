@@ -31,6 +31,7 @@ import net.officefloor.plugin.section.clazz.NextTask;
  * @author Daniel Sagenschneider
  */
 @SuppressWarnings("unchecked")
+// START SNIPPET: tutorial
 public class UsersLogic {
 
 	public UserProperties[] getUsers(EntityManager entityManager) {
@@ -54,3 +55,4 @@ public class UsersLogic {
 	}
 
 }
+// END SNIPPET: tutorial
