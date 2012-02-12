@@ -1,0 +1,14 @@
+<desk>
+	<external-flows />
+	<works>
+		<work name="WORK" source="net.example.ExampleWorkSource">
+			<work-task name="WORK_TASK" />
+		</work>
+	</works>
+	<tasks>
+		<task name="TASK" work="WORK" task="WORK_TASK" return-type="java.lang.Integer">
+			<task-flow name="TASK_FLOW" argument-type="java.lang.String" />
+			<task-escalation escalation-type="java.lang.Exception" />
+		</task>
+	</tasks>
+</desk>
