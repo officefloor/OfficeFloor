@@ -1,0 +1,18 @@
+<marshall type="net.officefloor.eclipse.classpathcontainer.OfficeFloorClasspathContainer" element="officefloor">
+    <collection method="getSourceAttachmentEntries" element="source-attachments">
+        <item type="net.officefloor.eclipse.classpathcontainer.SourceAttachmentEntry" element="source-attachment">
+            <attributes>
+                <attribute method="getClasspathPath" attribute="class-path"/>
+                <attribute method="getSourceAttachmentPath" attribute="path"/>
+                <attribute method="getSourceAttachmentRootPath" attribute="root-path"/>
+            </attributes>
+        </item>
+    </collection>
+    <collection method="getExtensionClasspathProviderEntries" element="extension-classpath-providers">
+        <item type="net.officefloor.eclipse.classpathcontainer.ExtensionClasspathProviderEntry" element="extension-classpath-provider">
+            <attributes>
+                <attribute method="getExtensionClassName" attribute="class-name"/>
+            </attributes>
+        </item>
+    </collection>
+</marshall>

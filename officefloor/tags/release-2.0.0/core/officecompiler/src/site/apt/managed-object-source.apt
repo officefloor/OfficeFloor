@@ -1,0 +1,105 @@
+                                         --------------------
+                                         ManagedObjectSource
+                                         --------------------
+                                         Daniel Sagenschneider
+                                         --------------------
+
+  ManagedObjectSource provides the objects to be managed by OfficeFloor.  What specifically an object is, is left to developers to define.  The objects are, however, used by Tasks to support the necessary functionality for an application.  One way to consider them is that they are any object that a developer would have dependency injected.  These objects however, go beyond dependency injection and it is the way they are managed that provides this greater flexibility.
+
+  [ManagedObjectSource] The ManagedObjectSource provides ManagedObject instances.
+
+  [ManagedObject] The ManagedObject wraps the object for management.  It also provides the extension interfaces to administer the object.
+
+  [extension interface] Used by the Administrator to administer the ManagedObject.
+
+  [object] The actual object being managed.
+
+
+
+Responsibilities
+
+  The managing of the objects is broken down into the following responsibilities:
+
+   * ManagedObjectSource provides the ManagedObject, along with additional Tasks to aid OfficeFrame in managing the ManagedObject lifecycle.
+
+   * ManagedObjectPoolSource provides pooling of ManagedObject instances.
+
+   * WorkSource provides Tasks to manipulate the object from the ManagedObject.
+
+   * AdministratorSource uses the extension interfaces of the ManagedObjects to provide administration of the ManagedObject.
+
+   * OfficeFrame manages the lifecycle of the ManagedObject, provides the ManagedObject with any required dependencies and executes any Tasks arrising from the ManagedObjectSource.
+
+  The following discussion of implementing a ManagedObjectSource for a <<<java.sql.Connection>>> will be used as an example to illustrate the various responsibilities in managing an object.
+
+
+* ManagedObjectSource
+
+  Before being able to use the connection it must be created.  To create the connection the details of the database, port, authentication, etc are required.  The ManagedObjectSource is responsible for obtaining these from configuration and subsequently creating the connections.
+
+  As creating connections can be an 'expensive' operation, the ManagedObjectSource may wish to assign this responsibility to an appropriate Team (thread pool).  The ManagedObjectSource can provide a Task to OfficeFrame that creates a connection.  As sourcing of a ManagedObject from a ManagedObjectSource is non-blocking, the Teams can get on with other work and then come back to use the connection once the Task to create the connection has completed.
+
+  On using connections the method <<<close()>>> must be called once the connection is no longer required.  This 'cleanup' Task however, is not related to processing application functionality (eg once the web request transaction is committed, closing the connection is only releasing resources so that the web server can process further requests).  To ensure <<<close()>>> is always called and that it is not involved with application functionality, the ManagedObjectSource can provide OfficeFloor a Recycle Task.  The Recycle Task is invoked for the ManagedObject when it goes out of scope.  Calling <<<close()>>> in the Recycle Task removes this responsibility for the developer and also takes it off the critical path for processing application functionality.
+
+  As OfficeFrame follows a Job Based Architecture, the ManagedObjectSource can utilise this to assign Tasks (Jobs) to Teams and subsequently become an active object.  This capability allows ManagedObjectSources to move beyond just dependency injection to allow it to react to changes in the state of the object being managed.
+
+  Two examples of ManagedObjectSources being used as active objects is sockets and JMS.  When a request/message arrives the ManagedObjectSource can invoke a Task that an application can then link into to provide servicing of the request/message.  See these Source Plug-ins for more details.
+
+  The ability to make ManagedObjectSources active objects means that 'special' containers are not required by OfficeFloor for each type of service.  Should an application require a certain type of service it can plug-in the appropriate ManagedObjectSource providing the service.  Furthermore, additional threads are not required for each type of service as the Jobs from each service can be assigned to the same thread pools (Teams).
+
+
+* ManagedObjectPoolSource
+
+  Pooling of <<<java.sql.Connection>>> instances is expected of many applications and OfficeFrame provides it via a ManagedObjectPoolSource.  Different pooling strategies can be used by selecting different ManagedObjectPoolSource implementations.
+
+  Much like the ManagedObjectSource, the ManagedObjectPoolSource can tap into the Job Based Architecture of OfficeFrame to invoke Tasks to process changes in the state of the pool.  This allows ManagedObjectPool instances to be active objects without having to dedicate threads for this (they utilise existing Teams in the OfficeFrame).
+
+
+* WorkSource
+
+  The <<<java.sql.Connection>>> is made available as an object to a Task.  This allows the Task to use the connection to make calls to the database to provide the necessary functionality required by the application.  As discussed above, the <<<close()>>> method is handled by the Recycle Task so that the developer can focus on writing application functionality.
+
+  The developer may wish to manage transactions on the <<<java.sql.Connection>>>, however OfficeFrame provides another means (Administration) that may be more appealing.
+
+
+* AdministratorSource
+
+  The AdministratorSource provides Administrators which carry out certain Duties on ManagedObject instances (or more specifically extension interfaces of ManagedObjects).  The Duty is a Job and is executed like other Jobs within the Job Based Architecture of OfficeFrame.  The difference between a Task and Duty is that the Duty is supplied a list of extension interfaces from ManagedObjects rather than the objects.
+
+   [extension interface] An extension interface is an additional interface supported by the ManagedObject.  These interfaces allow the ManagedObject to be administered by an Administrator Duty.  Taking the <<<java.sql.Connection>>> example, an extension interface that may be supported by the ManagedObject is <<<javax.transaction.xa.XAResource>>> so that it may participate in transactions.  Other ManagedObjects (such as JMS) may also support this extension interface and can be passed together to the Administrator Duty for transaction management.  A ManagedObject may support more than one extension interface.
+
+  The reason for having extension interfaces is so that the developer of the Task need not get involved with the technical aspects of administering the ManagedObject.  It also means that a ManagedObjectSource implementation can be selected based on the extension interfaces it supports.
+
+
+* OfficeFrame
+
+  OfficeFrame provides the ability for the ManagedObjectSource to provide it Tasks to manage the lifecycle of the ManagedObject.  This ability enables the appropriate creation and reuse/destruction of ManagedObjects and also allows managing state changes of the object.  This however, does not indicate if the ManagedObject is ready for use.
+
+  To ensure Tasks are not executed unless all ManagedObjects are ready for use, a ManagedObject may implement the AsynchronousManagedObject interface to identify that it may be involved with asynchronous operations (eg waiting for a response from a network call).  This interface provides hooks that inform OfficeFrame that the ManagedObject is currently waiting for an asynchronous operation to complete and is not yet ready for use.  OfficeFrame will then only execute the Task requiring the ManagedObject at a later time when the asynchronous operation is complete (or timed out).  As the Jobs requiring the ManagedObject are put into a waiting state, OfficeFrame is free to process other Jobs.
+
+  Objects also tend to have dependencies on other objects.  The ManagedObject may implement the CoordinatingManagedObject interface to allow OfficeFrame to provide it with the dependencies it requires.  These dependencies come from other ManagedObjectSources within the OfficeFrame.  OfficeFrame also enable dependencies to have their own dependencies and so forth, where each ManagedObject in this graph is managed as described above.
+
+
+
+Writing your own ManagedObjectSource implementation
+
+  Before writing your own implementation please have a quick check as there may be an implementation already existing that suits your requirements.
+
+  If however, you have found nothing that meets your requirements you can write your own implementation. The following table provides starting points for writing your own implementation.
+
+*--------------------------------------------------------------------------------------+--------------------------------------------------+
+|| Class                                                                               || Description                                     |
+*--------------------------------------------------------------------------------------+--------------------------------------------------+
+| {{{/apidocs/net/officefloor/frame/spi/managedobject/source/ManagedObjectSource.html}net.officefloor.frame.spi.managedobject.source.ManagedObjectSource}}                   | This is the interface that all ManagedObjectSource implementations must implement |
+*--------------------------------------------------------------------------------------+--------------------------------------------------+
+| {{{/apidocs/net/officefloor/frame/spi/managedobject/source/impl/AbstractAsyncManagedObjectSource.html}net.officefloor.frame.spi.managedobject.source.impl.AbstractAsyncManagedObjectSource}} | Provides abstract functionality to simplify implementing a ManagedObjectSource |
+*--------------------------------------------------------------------------------------+--------------------------------------------------+
+| {{{/apidocs/net/officefloor/frame/spi/managedobject/source/impl/AbstractManagedObjectSource.html}net.officefloor.frame.spi.managedobject.source.impl.AbstractManagedObjectSource}}      | Provides abstract functionality to create a factory like ManagedObjectSource.  This should only be used if creation of the ManagedObject is not an 'expensive' operation.|
+*--------------------------------------------------------------------------------------+--------------------------------------------------+
+| {{{/apidocs/net/officefloor/compile/test/managedobject/ManagedObjectLoaderUtil.html}net.officefloor.compile.test.managedobject.ManagedObjectLoaderUtil}}                   | Utility class to aid in testing your implemented ManagedObjectSource |
+*--------------------------------------------------------------------------------------+--------------------------------------------------+
+| {{{/apidocs/net/officefloor/compile/ManagedObjectSourceService.html}net.officefloor.compile.ManagedObjectSourceService}}                                   | Allows using the ServiceLoader functionality to provide additional meta-data about your ManagedObjectSource. Providing this is optional. |
+*--------------------------------------------------------------------------------------+--------------------------------------------------+
+
+  Also see the graphical editors for details on how you can also provide customised graphical configuration of your ManagedObjectSource.
+

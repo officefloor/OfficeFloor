@@ -1,0 +1,5 @@
+<teams>
+
+	<team source="ONE_PERSON" type="net.officefloor.plugin.woof.MockDependency" />
+
+</teams>

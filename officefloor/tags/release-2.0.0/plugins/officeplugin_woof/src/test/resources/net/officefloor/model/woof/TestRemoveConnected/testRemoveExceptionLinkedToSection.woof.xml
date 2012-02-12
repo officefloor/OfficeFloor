@@ -1,0 +1,57 @@
+<woof>
+
+	<templates>
+		<template name="TEMPLATE" path="example/Template.ofp" class="net.example.LogicClass">
+			<output name="OUTPUT_1">
+				<input section="SECTION" input="INPUT" />
+			</output>
+			<output name="OUTPUT_2">
+				<template name="TEMPLATE_LINK" />
+			</output>
+			<output name="OUTPUT_3">
+				<resource name="RESOURCE" />
+			</output>
+		</template>
+		<template name="TEMPLATE_LINK" path="example/Link.ofp" class="net.example.LinkClass" />
+	</templates>
+
+	<sections>
+		<section name="SECTION" source="net.example.ExampleSectionSource"
+			location="SECTION_LOCATION">
+			<input name="INPUT" />
+			<output name="OUTPUT_A">
+				<input section="SECTION_LINK" input="INPUT" />
+			</output>
+			<output name="OUTPUT_B">
+				<template name="TEMPLATE" />
+			</output>
+			<output name="OUTPUT_C">
+				<resource name="RESOURCE" />
+			</output>
+		</section>
+		<section name="SECTION_LINK" source="net.example.LinkSectionSource"
+			location="LINK_LOCATION">
+			<input name="INPUT" />
+		</section>
+	</sections>
+
+	<resources>
+		<resource name="RESOURCE" path="Example.html" />
+	</resources>
+
+	<exceptions>
+		<exception class="java.lang.RuntimeException">
+			<template name="TEMPLATE" />
+		</exception>
+		<exception class="java.sql.SQLException">
+			<resource name="RESOURCE" />
+		</exception>
+	</exceptions>
+	
+	<starting>
+	    <start>
+	    	<flow section="SECTION" input="INPUT" />
+	    </start>
+	</starting>
+
+</woof>
