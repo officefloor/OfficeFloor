@@ -1,0 +1,10 @@
+                                         --------------------
+                                            OfficeBuilding
+                                         --------------------
+                                         Daniel Sagenschneider
+                                         --------------------
+
+  OfficeBuilding provides management of the OfficeFloor instances running on a computer and enables both command line and JMX control over the OfficeFloor instances.  It derives its name as it provides the container to run multiple OfficeFloor instances, much like a building may have multiple floors.
+
+  OfficeBuiding is the installation package for running OfficeFloor applications.  The OfficeFloor core functionality and selected plug-ins are packaged together along with the OfficeBuilding functionality to create the installation package.  The installation package is the means to distribute OfficeFloor for running OfficeFloor built applications (please see the Eclipse plug-ins for building OfficeFloor applications).
+
