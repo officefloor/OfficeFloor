@@ -1,8 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<model>
-	<field type="String" name="office managed object source name" />
-	<field type="OfficeManagedObjectModel" name="office managed object"
-		end-field="office managed object source" />
-	<field type="OfficeManagedObjectSourceModel" name="office managed object source"
-		end-list="office managed object" />
-</model>

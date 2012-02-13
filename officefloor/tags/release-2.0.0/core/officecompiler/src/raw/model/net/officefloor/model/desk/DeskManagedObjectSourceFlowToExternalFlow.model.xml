@@ -1,8 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<model>
-	<field type="String" name="external flow name" />
-	<field type="DeskManagedObjectSourceFlowModel" name="desk managed object source flow"
-		end-field="external flow" />
-	<field type="ExternalFlowModel" name="external flow"
-		end-list="desk managed object source flow" />
-</model>

@@ -1,7 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<model>
-    <field type="String" name="administrator name" />
-    <field type="String" name="duty name" />
-    <field type="OfficeTaskModel" name="office task" end-list="post duty" />
-    <field type="DutyModel" name="duty" end-list="post office task" />
-</model>

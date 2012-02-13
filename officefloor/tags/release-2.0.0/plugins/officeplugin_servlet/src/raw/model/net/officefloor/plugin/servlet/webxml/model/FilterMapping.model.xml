@@ -1,6 +1,0 @@
-<model>
-	<field type="String" name="filter name" />
-	<list type="String" name="url pattern" />
-	<list type="String" name="servlet name" />
-	<list type="String" name="dispatcher" />
-</model>

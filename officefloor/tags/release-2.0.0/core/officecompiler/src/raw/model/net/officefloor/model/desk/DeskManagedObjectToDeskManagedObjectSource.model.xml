@@ -1,8 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<model>
-	<field type="String" name="desk managed object source name" />
-	<field type="DeskManagedObjectModel" name="desk managed object"
-		end-field="desk managed object source" />
-	<field type="DeskManagedObjectSourceModel" name="desk managed object source"
-		end-list="desk managed object" />
-</model>

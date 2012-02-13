@@ -1,6 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<unmarshall node="module"
-	class="net.officefloor.model.gwt.module.GwtModuleModel">
-	<value method="setRenameTo" node="module@rename-to" />
-	<value method="setEntryPointClassName" node="entry-point@class" />
-</unmarshall>

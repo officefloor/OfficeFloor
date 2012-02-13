@@ -1,5 +1,0 @@
-<html>
-<body>
-Page containing a single bean where its name property is ${name}.
-</body>
-</html>

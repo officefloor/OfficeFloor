@@ -1,6 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<model>
-	<field type="String" name="name" />
-	<field type="String" name="qualifier" />
-	<field type="String" name="type" />
-</model>

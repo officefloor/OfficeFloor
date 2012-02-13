@@ -1,9 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<model name="test" package="net.officefloor.test">
-	<import>net.officefloor.test.ImportOne</import>
-	<import>net.officefloor.test.ImportTwo</import>
-	<interface>net.officefloor.test.InterfaceOne</interface>
-	<interface>net.officefloor.test.InterfaceTwo</interface>
-	<field type="String" name="Field One" cascade-remove="true" description="Test field" end-field="Link One" end-list="Link Two"/>
-	<list type="ImportOne" name="List One" cascade-remove="true" description="Test list"/>
-</model>

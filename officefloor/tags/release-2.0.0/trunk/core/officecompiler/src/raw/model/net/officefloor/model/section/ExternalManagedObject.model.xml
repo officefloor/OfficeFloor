@@ -1,8 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<model>
-	<field type="String" name="external managed object name" />
-	<field type="String" name="object type" />
-	<list type="SubSectionObjectToExternalManagedObjectModel" name="sub section object" />
-	<list type="SectionManagedObjectDependencyToExternalManagedObjectModel"
-		name="dependent section managed object" />
-</model>

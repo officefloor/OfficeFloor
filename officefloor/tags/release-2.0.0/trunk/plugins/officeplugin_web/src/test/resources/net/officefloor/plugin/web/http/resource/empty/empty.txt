@@ -1,1 +1,0 @@
-Empty directory.  This file is created to ensure directory is copied to class path.

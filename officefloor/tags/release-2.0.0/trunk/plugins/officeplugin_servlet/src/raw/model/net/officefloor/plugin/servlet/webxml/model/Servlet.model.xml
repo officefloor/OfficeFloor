@@ -1,5 +1,0 @@
-<model>
-	<field type="String" name="servlet name" />
-	<field type="String" name="servlet class" />
-	<list type="InitParamModel" name="init param" />
-</model>

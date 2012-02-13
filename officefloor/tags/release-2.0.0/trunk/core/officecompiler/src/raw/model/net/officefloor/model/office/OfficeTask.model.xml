@@ -1,7 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<model>
-	<field type="String" name="office task name" />
-	<list type="OfficeTaskToPreDutyModel" name="pre duty" plural="pre duties" />
-	<list type="OfficeTaskToPostDutyModel" name="post duty" plural="post duties" />
-	<list type="OfficeTaskToOfficeGovernanceModel" name="office governance" />
-</model>
