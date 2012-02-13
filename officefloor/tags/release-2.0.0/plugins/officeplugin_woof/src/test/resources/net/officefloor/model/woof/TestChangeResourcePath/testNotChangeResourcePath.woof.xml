@@ -1,0 +1,8 @@
+<woof>
+
+	<resources>
+		<resource name="path" path="path" />
+		<resource name="same/path" path="same/path" />
+	</resources>
+
+</woof>
