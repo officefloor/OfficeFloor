@@ -1,7 +1,0 @@
-<woof>
-
-	<exceptions>
-		<exception class="java.sql.SQLException" x="2" y="2" />
-	</exceptions>
-
-</woof>

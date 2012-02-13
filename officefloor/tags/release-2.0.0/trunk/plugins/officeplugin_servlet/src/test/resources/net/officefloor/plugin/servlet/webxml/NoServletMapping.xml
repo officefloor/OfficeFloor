@@ -1,7 +1,0 @@
-<web-app>
-	<servlet>
-		<servlet-name>Test</servlet-name>
-		<servlet-class>net.officefloor.plugin.servlet.webxml.MockHttpServlet
-		</servlet-class>
-	</servlet>
-</web-app>

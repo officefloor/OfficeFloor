@@ -1,8 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<model>
-	<field type="String" name="work name" />
-	<field type="String" name="work source class name" />
-	<field type="WorkToInitialTaskModel" name="initial task" />
-	<list type="WorkTaskModel" name="work task" cascade-remove="true" />
-	<list type="PropertyModel" name="property" plural="properties" />
-</model>

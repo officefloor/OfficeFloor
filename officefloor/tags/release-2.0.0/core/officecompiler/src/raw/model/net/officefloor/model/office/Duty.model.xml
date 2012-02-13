@@ -1,6 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<model>
-    <field type="String" name="duty name" />
-    <list type="OfficeTaskToPreDutyModel" name="pre office task" />
-    <list type="OfficeTaskToPostDutyModel" name="post office task" />
-</model>

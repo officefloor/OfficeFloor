@@ -1,3 +1,0 @@
-# File not containing the algorithm definition but has entries
-
-daniel:not reach here:as,no,algorithm,definition

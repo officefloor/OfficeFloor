@@ -1,5 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<model>
-	<field type="int" name="height" />
-	<field type="int" name="width" />
-</model>

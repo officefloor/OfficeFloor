@@ -1,1 +1,0 @@
-Resource to be located in testing.

@@ -1,6 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<model>
-	<field type="String" name="work task name" />
-	<list type="WorkTaskObjectModel" name="task object" cascade-remove="true" />
-	<list type="WorkTaskToTaskModel" name="task" />
-</model>

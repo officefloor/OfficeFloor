@@ -1,8 +1,0 @@
-<context>
-	<office-floor>
-		<offices>
-			<office name="${office.name}" source="OFFICE" location="${office.location}" />
-		</offices>
-	</office-floor>
-	<office />
-</context>

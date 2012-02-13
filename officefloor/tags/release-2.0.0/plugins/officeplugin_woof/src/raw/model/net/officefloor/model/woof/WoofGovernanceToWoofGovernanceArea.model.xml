@@ -1,7 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<model>
-	<field type="WoofGovernanceModel" name="governance"
-		end-list="governance area connection" />
-	<field type="WoofGovernanceAreaModel" name="governance area"
-		end-field="governance connection" />
-</model>

@@ -1,7 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<model>
-	<field type="String" name="template name" />
-	<field type="WoofSectionOutputModel" name="woof section output"
-		end-field="woof template" />
-	<field type="WoofTemplateModel" name="woof template" end-list="woof section output" />
-</model>
