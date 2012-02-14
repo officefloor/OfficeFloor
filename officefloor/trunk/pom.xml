@@ -4,7 +4,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>net.officefloor</groupId>
 	<artifactId>officefloor</artifactId>
-	<version>2.0.0</version>
+	<version>2.1.0</version>
 	<packaging>pom</packaging>
 	<name>OfficeFloor</name>
 	<description>Parent OfficeFloor</description>
@@ -772,6 +772,9 @@
 					<header>src/license/license-header.txt</header>
 					<strictCheck>true</strictCheck>
 					<aggregate>true</aggregate>
+					<properties>
+						<currentYear>2012</currentYear>
+					</properties>
 					<excludes>
 						<!-- Directories to exclude -->
 						<exclude>**/META-INF/services/**</exclude>
@@ -794,6 +797,7 @@
 						<exclude>**/*.jar</exclude>
 						<exclude>**/*.css</exclude>
 						<exclude>**/*.bsh</exclude>
+						<exclude>**/*.sh </exclude>
 						<exclude>**/*.js</exclude>
 						<exclude>**/*.jsp</exclude>
 						<exclude>**/*.log</exclude>
@@ -803,15 +807,15 @@
 						<exclude>**/*.section</exclude>
 						<exclude>**/*.office</exclude>
 						<exclude>**/*.officefloor</exclude>
+						<exclude>**/*.woof</exclude>
+						<exclude>**/*.objects</exclude>
+						<exclude>**/*.teams</exclude>
 						<!-- Files to exclude -->
 						<exclude>**/officebuilding</exclude>
 						<exclude>**/officefloor</exclude>
 						<exclude>**/officeconsole</exclude>
 						<exclude>**/officedemo</exclude>
 					</excludes>
-					<properties>
-						<currentYear>2011</currentYear>
-					</properties>
 					<headerDefinitions>
 						<headerDefinition>src/license/java-header-style.xml</headerDefinition>
 					</headerDefinitions>
