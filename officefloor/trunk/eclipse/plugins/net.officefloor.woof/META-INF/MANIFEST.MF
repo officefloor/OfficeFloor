@@ -2,13 +2,13 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Eclipse Woof Plug-in
 Bundle-SymbolicName: net.officefloor.woof;singleton:=true
-Bundle-Version: 2.0.0
+Bundle-Version: 2.1.0
 Bundle-Vendor: OfficeFloor
 Bundle-Activator: net.officefloor.eclipse.WoofPlugin
 Bundle-ActivationPolicy: lazy
-Require-Bundle: net.officefloor.core;bundle-version="2.0.0",
- net.officefloor.ui;bundle-version="2.0.0",
- net.officefloor.plugins;bundle-version="2.0.0"
+Require-Bundle: net.officefloor.core;bundle-version="2.1.0",
+ net.officefloor.ui;bundle-version="2.1.0",
+ net.officefloor.plugins;bundle-version="2.1.0"
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Eclipse-RegisterBuddy: net.officefloor.core, 
  net.officefloor.ui
@@ -39,8 +39,8 @@ Import-Package: org.eclipse.core.commands.common,
  org.eclipse.ui.plugin,
  org.osgi.framework
 Bundle-ClassPath: .,
- officeplugin_gwt-2.0.0.jar,
- officeplugin_servlet-2.0.0.jar,
- officeplugin_web-2.0.0.jar,
- officeplugin_woof-2.0.0.jar,
- officeplugin_comet-2.0.0.jar
+ officeplugin_gwt-2.1.0.jar,
+ officeplugin_servlet-2.1.0.jar,
+ officeplugin_web-2.1.0.jar,
+ officeplugin_woof-2.1.0.jar,
+ officeplugin_comet-2.1.0.jar
