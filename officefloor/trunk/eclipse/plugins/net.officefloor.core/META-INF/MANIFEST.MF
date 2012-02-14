@@ -3,7 +3,7 @@ Bundle-ManifestVersion: 2
 Bundle-Name: Eclipse Core
 Bundle-SymbolicName: net.officefloor.core;singleton:=true
 Bundle-Vendor: OfficeFloor
-Bundle-Version: 2.0.0
+Bundle-Version: 2.1.0
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Eclipse-BuddyPolicy: registered
 Export-Package: net.officefloor.bootstrap,
@@ -187,11 +187,11 @@ Bundle-ClassPath: .,
  maven-settings-builder-3.0.1.jar,
  mx4j-tools-3.0.1.jar,
  netty-3.2.3.Final.jar,
- officebuilding-2.0.0.jar,
- officecompiler-2.0.0.jar,
- officeframe-2.0.0.jar,
- officemodelgen-2.0.0.jar,
- officexml-2.0.0.jar,
+ officebuilding-2.1.0.jar,
+ officecompiler-2.1.0.jar,
+ officeframe-2.1.0.jar,
+ officemodelgen-2.1.0.jar,
+ officexml-2.1.0.jar,
  plexus-cipher-1.4.jar,
  plexus-classworlds-2.2.2.jar,
  plexus-component-annotations-1.5.5.jar,
