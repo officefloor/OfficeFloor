@@ -19,6 +19,7 @@
 package net.officefloor.building.manager;
 
 import java.io.File;
+import java.io.IOException;
 import java.lang.management.ManagementFactory;
 import java.net.InetAddress;
 import java.rmi.ConnectException;
@@ -41,7 +42,6 @@ import net.officefloor.building.process.ProcessManagerMBean;
 import net.officefloor.building.process.ProcessShell;
 import net.officefloor.building.process.ProcessShellMBean;
 import net.officefloor.building.process.officefloor.MockWork;
-import net.officefloor.building.process.officefloor.OfficeFloorManager;
 import net.officefloor.building.process.officefloor.OfficeFloorManagerMBean;
 import net.officefloor.building.util.OfficeBuildingTestUtil;
 import net.officefloor.compile.OfficeFloorCompiler;
@@ -302,20 +302,14 @@ public class OfficeBuildingManagerTest extends TestCase {
 		String remoteHostName = processManager.getProcessHostName();
 		int remotePort = processManager.getProcessPort();
 		String serviceUrlValue = localProcessShell.getJmxConnectorServiceUrl();
-		JMXServiceURL serviceUrl = new JMXServiceURL(serviceUrlValue);
-		assertEquals("Incorrect process host", serviceUrl.getHost(),
+		JMXServiceURL remoteServiceUrl = new JMXServiceURL(serviceUrlValue);
+		assertEquals("Incorrect process host", remoteServiceUrl.getHost(),
 				remoteHostName);
-		assertEquals("Incorrect process port", serviceUrl.getPort(), remotePort);
+		assertEquals("Incorrect process port", remoteServiceUrl.getPort(),
+				remotePort);
 
-		// Obtain the MBean Server connection direct to process
-		JMXConnector connector = JMXConnectorFactory.connect(serviceUrl);
-		MBeanServerConnection remoteMBeanServer = connector
-				.getMBeanServerConnection();
-
-		// Ensure OfficeFloor running locally
-		assertTrue("OfficeFloor manager should be running locally",
-				remoteMBeanServer.isRegistered(OfficeFloorManager
-						.getOfficeFloorManagerObjectName()));
+		// Ensure OfficeFloor running
+		validateRemoteProcessRunning(remoteServiceUrl);
 
 		// Ensure the tasks are available
 		StringBuilder taskListing = new StringBuilder();
@@ -335,11 +329,6 @@ public class OfficeBuildingManagerTest extends TestCase {
 		OfficeBuildingTestUtil.validateFileContent("Work should be invoked",
 				MockWork.MESSAGE, file);
 
-		// Obtain the remote process shell
-		ProcessShellMBean remoteProcessShell = JMX.newMBeanProxy(
-				remoteMBeanServer, ProcessShell.getProcessShellObjectName(),
-				ProcessShellMBean.class);
-
 		// Obtain expected details of stopping the OfficeBuilding
 		String expectedStopDetails = "Stopping processes:\n\t"
 				+ processManager.getProcessName() + " ["
@@ -352,7 +341,7 @@ public class OfficeBuildingManagerTest extends TestCase {
 				stopDetails);
 
 		// Ensure the OfficeFloor process is also stopped
-		validateProcessStopped(remoteProcessShell);
+		validateRemoteProcessStopped(remoteServiceUrl);
 	}
 
 	/**
@@ -390,15 +379,12 @@ public class OfficeBuildingManagerTest extends TestCase {
 						ProcessShell.getProcessShellObjectName()),
 				ProcessShellMBean.class);
 
-		// Obtain the remote process shell (containing the OfficeFloor)
-		JMXConnector remoteConnector = JMXConnectorFactory
-				.connect(new JMXServiceURL(localProcessShell
-						.getJmxConnectorServiceUrl()));
-		MBeanServerConnection remoteMBeanServer = remoteConnector
-				.getMBeanServerConnection();
-		ProcessShellMBean remoteProcessShell = JMX.newMBeanProxy(
-				remoteMBeanServer, ProcessShell.getProcessShellObjectName(),
-				ProcessShellMBean.class);
+		// Obtain the remote process JMX service URL
+		JMXServiceURL remoteServiceUrl = new JMXServiceURL(
+				localProcessShell.getJmxConnectorServiceUrl());
+
+		// Ensure the OfficeFloor process is running
+		validateRemoteProcessRunning(remoteServiceUrl);
 
 		// Close the OfficeFloor
 		String closeText = buildingManager.closeOfficeFloor(processNamespace,
@@ -406,7 +392,7 @@ public class OfficeBuildingManagerTest extends TestCase {
 		assertEquals("Should be closed", "Closed", closeText);
 
 		// Ensure the OfficeFloor process is closed
-		validateProcessStopped(remoteProcessShell);
+		validateRemoteProcessStopped(remoteServiceUrl);
 	}
 
 	/**
@@ -453,33 +439,53 @@ public class OfficeBuildingManagerTest extends TestCase {
 	}
 
 	/**
-	 * Validate {@link ProcessShellMBean} is stopped.
+	 * Validates {@link ProcessShellMBean} is running.
 	 * 
-	 * @param shell
-	 *            {@link ProcessShellMBean} to determine if stopped.
+	 * @param serviceUrl
+	 *            {@link JMXServiceURL} to determine if running.
 	 */
-	private static void validateProcessStopped(ProcessShellMBean shell) {
-
-		long endTime = System.currentTimeMillis() + 10000;
-		for (;;) {
-
-			// Attempt to determine the OfficeFloor process is stopped
-			Throwable cause = null;
-			try {
-				shell.triggerStopProcess();
-				fail("Process should already be stopped (or be stopping)");
-			} catch (Exception ex) {
-				// Ensure issue connecting (as stopped)
-				cause = ex.getCause();
-				if (cause instanceof ConnectException) {
-					return; // identified as correctly closed
-				}
-			}
-
-			// Determine if timed out waiting for close
-			assertTrue("Timed out waiting for process to stop (last was "
-					+ cause.getClass().getName() + ": " + cause.getMessage()
-					+ ")", (System.currentTimeMillis() < endTime));
+	private static void validateRemoteProcessRunning(JMXServiceURL serviceUrl)
+			throws IOException {
+		try {
+			JMXConnectorFactory.connect(serviceUrl);
+			fail("Security should prevent connection to running remote process");
+		} catch (SecurityException ex) {
+			assertEquals("Incorrect cause", "Bad credentials", ex.getMessage());
 		}
 	}
+
+	/**
+	 * Validate {@link ProcessShellMBean} is stopped.
+	 * 
+	 * @param serviceUrl
+	 *            {@link JMXServiceURL} to determine if stopped.
+	 */
+	private static void validateRemoteProcessStopped(JMXServiceURL serviceUrl)
+			throws InterruptedException {
+
+		// Allow time for process to stop (10 seconds)
+		long endTime = System.currentTimeMillis() + 10000;
+		while (System.currentTimeMillis() < endTime) {
+
+			try {
+				JMXConnectorFactory.connect(serviceUrl);
+				fail("Should not connect to stopped remote process");
+				
+			} catch (ConnectException ex) {
+				assertEquals("Incorrect cause", "Connection refused", ex
+						.getCause().getMessage());
+				return; // successfully identified as closed
+				
+			} catch (IOException ex) {
+				// Ignore and try again as process may not be fully stopped
+			}
+
+			// Allow some time for process to complete
+			Thread.sleep(100);
+		}
+		
+		// As here process failed to stop in time
+		fail("Process took too long to stop");
+	}
+
 }

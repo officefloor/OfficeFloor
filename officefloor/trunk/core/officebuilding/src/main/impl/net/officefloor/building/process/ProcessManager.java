@@ -36,9 +36,11 @@ import java.net.URLClassLoader;
 import java.rmi.registry.Registry;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -385,9 +387,13 @@ public class ProcessManager implements ProcessManagerMBean {
 			processManager = new ProcessManager(processName, mbeanNamespace,
 					process, completionListener, mbeanServer);
 
+			// Obtain pipe to process
+			ObjectOutputStream toProcessPipe = new ObjectOutputStream(
+					process.getOutputStream());
+
 			// Handle process responses
 			ProcessNotificationHandler notificationHandler = new ProcessNotificationHandler(
-					processManager);
+					processManager, toProcessPipe);
 			int fromProcessPort = notificationHandler.getFromProcessPort();
 			notificationHandler.start();
 			Thread.yield(); // give chance to start
@@ -398,8 +404,6 @@ public class ProcessManager implements ProcessManagerMBean {
 			Thread.yield(); // give change to start
 
 			// Send managed process and response port to process
-			ObjectOutputStream toProcessPipe = new ObjectOutputStream(
-					process.getOutputStream());
 			toProcessPipe.writeObject(mbeanNamespace);
 			toProcessPipe.writeObject(managedProcess);
 			toProcessPipe.writeInt(fromProcessPort);
@@ -857,6 +861,11 @@ public class ProcessManager implements ProcessManagerMBean {
 		private final ProcessManager processManager;
 
 		/**
+		 * Pipe to the {@link Process}.
+		 */
+		private final ObjectOutputStream toProcessPipe;
+
+		/**
 		 * {@link ServerSocket} to receive {@link ProcessResponse} instances.
 		 */
 		private final ServerSocket fromProcessServerSocket;
@@ -872,10 +881,13 @@ public class ProcessManager implements ProcessManagerMBean {
 		 * 
 		 * @param processManager
 		 *            {@link ProcessManager}.
+		 * @param toProcessPipe
+		 *            Pipe to the {@link Process}.
 		 */
-		public ProcessNotificationHandler(ProcessManager processManager)
-				throws IOException {
+		public ProcessNotificationHandler(ProcessManager processManager,
+				ObjectOutputStream toProcessPipe) throws IOException {
 			this.processManager = processManager;
+			this.toProcessPipe = toProcessPipe;
 
 			// Create the from process communication pipe.
 			// Must synchronise as used by another Thread.
@@ -906,113 +918,129 @@ public class ProcessManager implements ProcessManagerMBean {
 
 		@Override
 		public void run() {
+
+			// Ensure flag process completed
 			try {
-				// Accept only the first connection (from process)
-				ServerSocket serverSocket;
-				synchronized (this) {
-					serverSocket = this.fromProcessServerSocket;
+
+				// Establish the Process
+				ObjectInputStream fromProcessPipe;
+				try {
+					// Accept only the first connection (from process).
+					// (allow only 10 seconds to connect)
+					ServerSocket serverSocket;
+					synchronized (this) {
+						serverSocket = this.fromProcessServerSocket;
+					}
+					serverSocket.setSoTimeout(10000);
+					Socket socket = serverSocket.accept();
+
+					// Register the Process Manager MBean
+					this.processManager.registerMBean(this.processManager,
+							ProcessManager.PROCESS_MANAGER_OBJECT_NAME);
+
+					// Obtain pipe from process
+					fromProcessPipe = new ObjectInputStream(
+							socket.getInputStream());
+
+					// Obtain connection details
+					Object[] connectionDetails = (Object[]) fromProcessPipe
+							.readObject();
+					JMXServiceURL processServiceUrl = (JMXServiceURL) connectionDetails[0];
+					String userName = (String) connectionDetails[1];
+					String password = (String) connectionDetails[2];
+
+					// Specify the host and port
+					this.processManager.setProcessHostAndPort(
+							processServiceUrl.getHost(),
+							processServiceUrl.getPort());
+
+					// Connect to the process
+					Map<String, Object> env = new HashMap<String, Object>();
+					env.put(JMXConnector.CREDENTIALS, new String[] { userName,
+							password });
+					JMXConnector connector = JMXConnectorFactory.connect(
+							processServiceUrl, env);
+					this.connection = connector.getMBeanServerConnection();
+
+					// Provide notification that connected to process
+					this.toProcessPipe.writeBoolean(true);
+					this.toProcessPipe.flush();
+
+				} catch (Throwable ex) {
+					// Indicate failure, as process not established
+					this.processManager.setProcessShellFailure(ex);
+					return;
 				}
-				serverSocket.setSoTimeout(10000); // allow 10 seconds to connect
-				Socket socket = serverSocket.accept();
 
-				// Register the Process Manager MBean
-				this.processManager.registerMBean(this.processManager,
-						ProcessManager.PROCESS_MANAGER_OBJECT_NAME);
+				// Process established, listen for MBean registrations
+				try {
+					// Loop until pipe closes (or indicated to close)
+					for (;;) {
 
-				// Obtain pipe from process
-				ObjectInputStream fromProcessPipe = new ObjectInputStream(
-						socket.getInputStream());
+						// Read in next Object
+						Object object = fromProcessPipe.readObject();
 
-				// Loop until pipe closes (or indicated to close)
-				for (;;) {
+						// Determine if exception
+						if (object instanceof Throwable) {
+							// Flag process shell failure
+							Throwable failure = (Throwable) object;
+							this.processManager.setProcessShellFailure(failure);
 
-					// Read in next Object
-					Object object = fromProcessPipe.readObject();
-
-					// Determine if exception
-					if (object instanceof Throwable) {
-						// Flag process shell failure
-						Throwable failure = (Throwable) object;
-						this.processManager.setProcessShellFailure(failure);
-
-						// Failure indicates process complete.
-						// (finally block handles completion)
-						return;
-					}
-
-					// Determine if notification
-					if (!(object instanceof MBeanRegistrationNotification)) {
-						throw new IllegalArgumentException("Unknown response: "
-								+ object
-								+ " ["
-								+ (object == null ? "null" : object.getClass()
-										.getName()));
-					}
-					MBeanRegistrationNotification registration = (MBeanRegistrationNotification) object;
-
-					// Lazy create the JMX connector.
-					// Must be lazy created as will be listening now.
-					if (this.connection == null) {
-						// Obtain the service URL for the process
-						JMXServiceURL processServiceUrl = registration
-								.getServiceUrl();
-
-						// Specify the host and port
-						this.processManager.setProcessHostAndPort(
-								processServiceUrl.getHost(),
-								processServiceUrl.getPort());
-
-						// Connect to the process
-						try {
-							JMXConnector connector = JMXConnectorFactory
-									.connect(processServiceUrl);
-							this.connection = connector
-									.getMBeanServerConnection();
-						} catch (Exception ex) {
-							// Ignore failure to connect.
-							// (Likely process completed quickly)
+							// Failure indicates process complete.
+							// (finally block handles completion)
+							return;
 						}
-					}
 
-					// Register the remote MBean locally
-					ObjectName remoteMBeanName = registration.getMBeanName();
-					if (this.connection != null) {
+						// Determine if notification
+						if (!(object instanceof MBeanRegistrationNotification)) {
+							throw new IllegalArgumentException(
+									"Unknown response: "
+											+ object
+											+ " ["
+											+ (object == null ? "null" : object
+													.getClass().getName()));
+						}
+						MBeanRegistrationNotification registration = (MBeanRegistrationNotification) object;
+
+						// Register the remote MBean locally
+						ObjectName remoteMBeanName = registration
+								.getMBeanName();
 						this.processManager.registerRemoteMBeanLocally(
 								remoteMBeanName, this.connection);
+
+						// Determine if process shell MBean.
+						// Must be done after registering to ensure available.
+						if (ProcessShell.PROCESS_SHELL_OBJECT_NAME
+								.equals(remoteMBeanName)) {
+							// Have process shell MBean so now initialised
+							this.processManager.flagInitialised();
+
+							// Notify process that registered initialised
+							this.toProcessPipe.writeBoolean(true);
+							this.toProcessPipe.flush();
+						}
+					}
+				} catch (Throwable ex) {
+
+					// Determine if potential wrapped EOF cause
+					Throwable previousCause = null; // stops infinite loop
+					Throwable currentCause = ex;
+					while ((currentCause != null)
+							&& (currentCause != previousCause)) {
+
+						// Determine if EOF cause (assumed process completed)
+						if (currentCause instanceof EOFException) {
+							return; // EOF cause as process assumed complete
+						}
+						
+						// Setup for next iteration
+						previousCause = currentCause;
+						currentCause = currentCause.getCause();
 					}
 
-					// Determine if process shell MBean.
-					// Must be done after registering to ensure available.
-					if (ProcessShell.PROCESS_SHELL_OBJECT_NAME
-							.equals(remoteMBeanName)) {
-						// Have process shell MBean so now initialised
-						this.processManager.flagInitialised();
-					}
+					// Indicate failure, as not process complete
+					this.processManager.setProcessShellFailure(ex);
 				}
-			} catch (EOFException ex) {
-				// Process completed, as from process pipe closed.
-				// finally block flags process complete.
-
-			} catch (Throwable ex) {
-
-				// Determine if potential wrapped EOF cause (e.g. from MBean)
-				Throwable previousCause = null; // stops infinite loop
-				Throwable currentCause = ex.getCause();
-				while ((currentCause != null)
-						&& (currentCause != previousCause)) {
-
-					// Determine if EOF cause (assumed to be process completed)
-					if (currentCause instanceof EOFException) {
-						return; // EOF cause as process assumed complete
-					}
-
-					// Setup for next iteration
-					previousCause = currentCause;
-					currentCause = currentCause.getCause();
-				}
-
-				// Indicate failure, as not process complete
-				this.processManager.setProcessShellFailure(ex);
 
 			} finally {
 				// Flag that process is now complete

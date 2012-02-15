@@ -32,6 +32,7 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -45,6 +46,8 @@ import javax.management.remote.JMXConnectorServer;
 import javax.management.remote.JMXConnectorServerFactory;
 import javax.management.remote.JMXServiceURL;
 import javax.management.remote.rmi.RMIConnectorServer;
+
+import mx4j.tools.remote.PasswordAuthenticator;
 
 /**
  * Provides the <code>main</code> method of an invoked {@link Process} for a
@@ -209,6 +212,17 @@ public class ProcessShell implements ManagedProcessContext, ProcessShellMBean {
 							}
 						});
 
+				// Use password to secure JMX Connector Server
+				UUID passwordUuid = UUID.randomUUID();
+				String userName = processName;
+				String password = String.valueOf(passwordUuid
+						.getMostSignificantBits())
+						+ String.valueOf(passwordUuid.getLeastSignificantBits());
+				InputStream passwordStream = new ByteArrayInputStream((userName
+						+ "=" + password).getBytes());
+				environment.put(RMIConnectorServer.AUTHENTICATOR,
+						new PasswordAuthenticator(passwordStream));
+
 				// Start the JMX Connecter Server (also ensure shutdown)
 				connectorServer = JMXConnectorServerFactory
 						.newJMXConnectorServer(new JMXServiceURL(
@@ -216,15 +230,29 @@ public class ProcessShell implements ManagedProcessContext, ProcessShellMBean {
 								environment, mbeanServer);
 				connectorServer.start();
 
+				// Send connection details back to parent
+				Object[] connectionDetails = new Object[3];
+				connectionDetails[0] = connectorServer.getAddress();
+				connectionDetails[1] = userName;
+				connectionDetails[2] = password;
+				toParentPipe.writeObject(connectionDetails);
+				toParentPipe.flush();
+
+				// Wait on parent to connect
+				fromParentObjectPipe.readBoolean();
+
 				// Create instance as context
 				ProcessShell context = new ProcessShell(processName,
 						connectorServer, toParentPipe);
-
+				
 				// Initialise the managed process
 				managedProcess.init(context);
 
 				// Initialised so register the process shell MBean
 				context.registerMBean(context, PROCESS_SHELL_OBJECT_NAME);
+				
+				// Wait on parent to register initialised
+				fromParentObjectPipe.readBoolean();
 
 				// Run the managed process
 				managedProcess.main();
