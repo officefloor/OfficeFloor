@@ -48,6 +48,16 @@ public class OfficeBuildingManagedProcess implements ManagedProcess {
 	private final String keyStorePassword;
 
 	/**
+	 * User name to allow connections.
+	 */
+	private final String userName;
+
+	/**
+	 * Password to allow connections.
+	 */
+	private final String password;
+
+	/**
 	 * Environment {@link Properties}.
 	 */
 	private final Properties environment;
@@ -71,14 +81,21 @@ public class OfficeBuildingManagedProcess implements ManagedProcess {
 	 *            Key store {@link File}.
 	 * @param keyStorePassword
 	 *            Password to the key store {@link File}.
+	 * @param userName
+	 *            User name to allow connections.
+	 * @param password
+	 *            Password to allow connections.
 	 * @param environment
 	 *            Environment {@link Properties}.
 	 */
 	public OfficeBuildingManagedProcess(int port, File keyStore,
-			String keyStorePassword, Properties environment) {
+			String keyStorePassword, String userName, String password,
+			Properties environment) {
 		this.port = port;
 		this.keyStoreLocation = keyStore.getAbsolutePath();
 		this.keyStorePassword = keyStorePassword;
+		this.userName = userName;
+		this.password = password;
 		this.environment = environment;
 	}
 
@@ -93,7 +110,7 @@ public class OfficeBuildingManagedProcess implements ManagedProcess {
 		// Start the OfficeBuilding
 		this.manager = OfficeBuildingManager.startOfficeBuilding(this.port,
 				new File(this.keyStoreLocation), this.keyStorePassword,
-				this.environment, null);
+				this.userName, this.password, this.environment, null);
 	}
 
 	@Override

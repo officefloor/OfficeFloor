@@ -31,8 +31,10 @@ import net.officefloor.building.command.parameters.OfficeBuildingHostOfficeFloor
 import net.officefloor.building.command.parameters.OfficeBuildingPortOfficeFloorCommandParameter;
 import net.officefloor.building.command.parameters.OfficeNameOfficeFloorCommandParameter;
 import net.officefloor.building.command.parameters.ParameterOfficeFloorCommandParameter;
+import net.officefloor.building.command.parameters.PasswordOfficeFloorCommandParameterImpl;
 import net.officefloor.building.command.parameters.ProcessNameOfficeFloorCommandParameter;
 import net.officefloor.building.command.parameters.TaskNameOfficeFloorCommandParameter;
+import net.officefloor.building.command.parameters.UsernameOfficeFloorCommandParameterImpl;
 import net.officefloor.building.command.parameters.WorkNameOfficeFloorCommandParameter;
 import net.officefloor.building.manager.OfficeBuildingManager;
 import net.officefloor.building.process.ManagedProcess;
@@ -77,6 +79,16 @@ public class OfficeBuildingInvokeOfficeFloorCommand implements
 	 * Password to the trust store {@link File}.
 	 */
 	private final KeyStorePasswordOfficeFloorCommandParameterImpl trustStorePassword = new KeyStorePasswordOfficeFloorCommandParameterImpl();
+
+	/**
+	 * User name.
+	 */
+	private final UsernameOfficeFloorCommandParameterImpl userName = new UsernameOfficeFloorCommandParameterImpl();
+
+	/**
+	 * Password.
+	 */
+	private final PasswordOfficeFloorCommandParameterImpl password = new PasswordOfficeFloorCommandParameterImpl();
 
 	/**
 	 * {@link Office} name.
@@ -125,8 +137,8 @@ public class OfficeBuildingInvokeOfficeFloorCommand implements
 	public OfficeFloorCommandParameter[] getParameters() {
 		return new OfficeFloorCommandParameter[] { this.officeBuildingHost,
 				this.officeBuildingPort, this.processName, this.trustStore,
-				this.trustStorePassword, this.officeName, this.workName,
-				this.taskName, this.parameter };
+				this.trustStorePassword, this.userName, this.password,
+				this.officeName, this.workName, this.taskName, this.parameter };
 	}
 
 	@Override
@@ -148,6 +160,8 @@ public class OfficeBuildingInvokeOfficeFloorCommand implements
 		File trustStore = this.trustStore.getKeyStore();
 		String trustStorePassword = this.trustStorePassword
 				.getKeyStorePassword();
+		String userName = this.userName.getUserName();
+		String password = this.password.getPassword();
 		String officeName = this.officeName.getOfficeName();
 		String workName = this.workName.getWorkName();
 		String taskName = this.taskName.getTaskName();
@@ -155,8 +169,8 @@ public class OfficeBuildingInvokeOfficeFloorCommand implements
 
 		// Create and return process to invoke the task
 		return new InvokeManagedProcess(officeBuildingHost, officeBuildingPort,
-				processNamespace, trustStore, trustStorePassword, officeName,
-				workName, taskName, parameter);
+				processNamespace, trustStore, trustStorePassword, userName,
+				password, officeName, workName, taskName, parameter);
 	}
 
 	/**
@@ -188,6 +202,16 @@ public class OfficeBuildingInvokeOfficeFloorCommand implements
 		 * Password to the trust store {@link File}.
 		 */
 		private final String trustStorePassword;
+
+		/**
+		 * User name to connect.
+		 */
+		private final String userName;
+
+		/**
+		 * Password to connect.
+		 */
+		private final String password;
 
 		/**
 		 * {@link Office} name.
@@ -222,6 +246,10 @@ public class OfficeBuildingInvokeOfficeFloorCommand implements
 		 *            Trust store {@link File}.
 		 * @param trustStorePassword
 		 *            Password to the trust store {@link File}.
+		 * @param userName
+		 *            User name to connect.
+		 * @param password
+		 *            Password to connect.
 		 * @param officeName
 		 *            {@link Office} name.
 		 * @param workName
@@ -233,13 +261,16 @@ public class OfficeBuildingInvokeOfficeFloorCommand implements
 		 */
 		public InvokeManagedProcess(String officeBuildingHost,
 				int officeBuildingPort, String processNamespace,
-				File trustStore, String trustStorePassword, String officeName,
-				String workName, String taskName, String parameter) {
+				File trustStore, String trustStorePassword, String userName,
+				String password, String officeName, String workName,
+				String taskName, String parameter) {
 			this.officeBuildingHost = officeBuildingHost;
 			this.officeBuildingPort = officeBuildingPort;
 			this.processNamespace = processNamespace;
 			this.trustStoreLocation = trustStore.getAbsolutePath();
 			this.trustStorePassword = trustStorePassword;
+			this.userName = userName;
+			this.password = password;
 			this.officeName = officeName;
 			this.workName = workName;
 			this.taskName = taskName;
@@ -263,7 +294,8 @@ public class OfficeBuildingInvokeOfficeFloorCommand implements
 					.getOfficeFloorManager(this.officeBuildingHost,
 							this.officeBuildingPort, this.processNamespace,
 							new File(this.trustStoreLocation),
-							this.trustStorePassword);
+							this.trustStorePassword, this.userName,
+							this.password);
 
 			// Invoke the Task within the OfficeFloor
 			officeFloorManager.invokeTask(this.officeName, this.workName,

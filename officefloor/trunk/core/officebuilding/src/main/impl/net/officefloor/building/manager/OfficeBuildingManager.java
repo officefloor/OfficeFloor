@@ -18,13 +18,17 @@
 
 package net.officefloor.building.manager;
 
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.PrintStream;
 import java.lang.management.ManagementFactory;
 import java.net.InetAddress;
 import java.rmi.ConnectException;
+import java.rmi.NotBoundException;
+import java.rmi.Remote;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.rmi.server.RMIClientSocketFactory;
@@ -50,6 +54,7 @@ import javax.management.remote.rmi.RMIConnectorServer;
 import javax.rmi.ssl.SslRMIClientSocketFactory;
 import javax.rmi.ssl.SslRMIServerSocketFactory;
 
+import mx4j.tools.remote.PasswordAuthenticator;
 import net.officefloor.building.console.OfficeFloorConsole;
 import net.officefloor.building.process.ProcessCompletionListener;
 import net.officefloor.building.process.ProcessConfiguration;
@@ -79,6 +84,11 @@ public class OfficeBuildingManager implements OfficeBuildingManagerMBean,
 	public static final String OFFICE_BUIDLING_ARTIFACT_ID = "officebuilding";
 
 	/**
+	 * Name of the {@link OfficeBuilding} within the {@link Registry}.
+	 */
+	private static final String OFFICE_BUILDING_REGISTERED_NAME = "OfficeBuilding";
+
+	/**
 	 * {@link ObjectName} for the {@link OfficeBuildingManagerMBean}.
 	 */
 	static ObjectName OFFICE_BUILDING_MANAGER_OBJECT_NAME;
@@ -86,7 +96,8 @@ public class OfficeBuildingManager implements OfficeBuildingManagerMBean,
 	static {
 		try {
 			OFFICE_BUILDING_MANAGER_OBJECT_NAME = new ObjectName(
-					"OfficeBuilding", "type", "OfficeBuildingManager");
+					OFFICE_BUILDING_REGISTERED_NAME, "type",
+					"OfficeBuildingManager");
 		} catch (MalformedObjectNameException ex) {
 			// This should never be the case
 		}
@@ -132,6 +143,12 @@ public class OfficeBuildingManager implements OfficeBuildingManagerMBean,
 	 *            {@link File} containing the security keys.
 	 * @param keyStorePassword
 	 *            Password to the key store {@link File}.
+	 * @param userName
+	 *            User name to allow connecting to the
+	 *            {@link OfficeBuildingManager}.
+	 * @param password
+	 *            Password to allow connecting to the
+	 *            {@link OfficeBuildingManager}.
 	 * @param environment
 	 *            Environment {@link Properties}.
 	 * @param mbeanServer
@@ -143,8 +160,9 @@ public class OfficeBuildingManager implements OfficeBuildingManagerMBean,
 	 *             If fails to start the {@link OfficeBuilding}.
 	 */
 	public static OfficeBuildingManagerMBean startOfficeBuilding(int port,
-			File keyStore, String keyStorePassword, Properties environment,
-			MBeanServer mbeanServer) throws Exception {
+			File keyStore, String keyStorePassword, String userName,
+			String password, Properties environment, MBeanServer mbeanServer)
+			throws Exception {
 
 		// Obtain the start time
 		Date startTime = new Date(System.currentTimeMillis());
@@ -180,26 +198,38 @@ public class OfficeBuildingManager implements OfficeBuildingManagerMBean,
 		}
 
 		// Determine if already running the Office Building
+		Remote officeBuildingRemote = null;
 		try {
-			// Obtain the OfficeBuilding manager
-			OfficeBuildingManagerMBean manager = getOfficeBuildingManager(null,
-					port, keyStore, keyStorePassword);
-
-			// Already running, so return
-			return manager;
-
-		} catch (Exception ex) {
+			// Determine if Office Building Manager in registry
+			officeBuildingRemote = registry
+					.lookup(OFFICE_BUILDING_REGISTERED_NAME);
+		} catch (NotBoundException ex) {
 			// Not available, so carry on to start
 		}
+		if (officeBuildingRemote != null) {
+			// Return the already running Office Building Manager
+			return getOfficeBuildingManager(null, port, keyStore,
+					keyStorePassword, userName, password);
+		}
 
-		// Start the JMX connector server (on local host)
-		JMXServiceURL serviceUrl = getOfficeBuildingJmxServiceUrl(null, port);
+		// Provide secure server environment
 		Map<String, Object> serverEnv = new HashMap<String, Object>();
+
+		// Configure authenticated communication
+		InputStream passwordStream = new ByteArrayInputStream(
+				(userName + "=" + password).getBytes());
+		serverEnv.put(RMIConnectorServer.AUTHENTICATOR,
+				new PasswordAuthenticator(passwordStream));
+
+		// Configure encrypted communication
 		serverEnv.put(RMIConnectorServer.RMI_CLIENT_SOCKET_FACTORY_ATTRIBUTE,
 				clientSocketFactory);
 		serverEnv.put(RMIConnectorServer.RMI_SERVER_SOCKET_FACTORY_ATTRIBUTE,
 				serverSocketFactory);
 		serverEnv.put(PROPERTY_RMI_CLIENT_SOCKET_FACTORY, clientSocketFactory);
+
+		// Start the JMX connector server (on local host)
+		JMXServiceURL serviceUrl = getOfficeBuildingJmxServiceUrl(null, port);
 		JMXConnectorServer connectorServer = JMXConnectorServerFactory
 				.newJMXConnectorServer(serviceUrl, serverEnv, mbeanServer);
 		connectorServer.start();
@@ -227,14 +257,20 @@ public class OfficeBuildingManager implements OfficeBuildingManagerMBean,
 	 *            {@link File} containing the trusted security keys.
 	 * @param trustStorePassword
 	 *            Password to the trusted key store {@link File}.
+	 * @param userName
+	 *            User name to connect.
+	 * @param password
+	 *            Password to connect.
 	 * @return <code>true</code> if the {@link OfficeBuilding} is available.
 	 */
 	public static boolean isOfficeBuildingAvailable(String hostName, int port,
-			File trustStore, String trustStorePassword) {
+			File trustStore, String trustStorePassword, String userName,
+			String password) {
 		try {
 			// Obtain the OfficeBuilding manager
 			OfficeBuildingManagerMBean manager = getOfficeBuildingManager(
-					hostName, port, trustStore, trustStorePassword);
+					hostName, port, trustStore, trustStorePassword, userName,
+					password);
 
 			// Available if not stopped
 			return (!manager.isOfficeBuildingStopped());
@@ -252,6 +288,10 @@ public class OfficeBuildingManager implements OfficeBuildingManagerMBean,
 	 *            {@link File} containing the security keys.
 	 * @param keyStorePassword
 	 *            Password to the key store {@link File}.
+	 * @param userName
+	 *            User name to connect.
+	 * @param password
+	 *            Password to connect.
 	 * @param environment
 	 *            Environment {@link Properties}. May be <code>null</code>.
 	 * @param configuration
@@ -262,8 +302,9 @@ public class OfficeBuildingManager implements OfficeBuildingManagerMBean,
 	 *             If fails to spawn the {@link OfficeBuilding}.
 	 */
 	public static ProcessManager spawnOfficeBuilding(int port, File keyStore,
-			String keyStorePassword, Properties environment,
-			ProcessConfiguration configuration) throws ProcessException {
+			String keyStorePassword, String userName, String password,
+			Properties environment, ProcessConfiguration configuration)
+			throws ProcessException {
 
 		// Ensure have environment
 		if (environment == null) {
@@ -272,7 +313,8 @@ public class OfficeBuildingManager implements OfficeBuildingManagerMBean,
 
 		// Create the OfficeBuilding managed process
 		OfficeBuildingManagedProcess managedProcess = new OfficeBuildingManagedProcess(
-				port, keyStore, keyStorePassword, environment);
+				port, keyStore, keyStorePassword, userName, password,
+				environment);
 
 		// Ensure have process configuration
 		if (configuration == null) {
@@ -304,15 +346,20 @@ public class OfficeBuildingManager implements OfficeBuildingManagerMBean,
 	 *            {@link File} containing the trusted security keys.
 	 * @param trustStorePassword
 	 *            Password to the trusted key store {@link File}.
+	 * @param userName
+	 *            User name to connect.
+	 * @param password
+	 *            Password to connect.
 	 * @return {@link OfficeBuildingManagerMBean}.
 	 * @throws Exception
 	 *             If fails to obtain the {@link OfficeBuildingManagerMBean}.
 	 */
 	public static OfficeBuildingManagerMBean getOfficeBuildingManager(
 			String hostName, int port, File trustStore,
-			String trustStorePassword) throws Exception {
+			String trustStorePassword, String userName, String password)
+			throws Exception {
 		return getMBeanProxy(hostName, port, trustStore, trustStorePassword,
-				OFFICE_BUILDING_MANAGER_OBJECT_NAME,
+				userName, password, OFFICE_BUILDING_MANAGER_OBJECT_NAME,
 				OfficeBuildingManagerMBean.class);
 	}
 
@@ -337,17 +384,22 @@ public class OfficeBuildingManager implements OfficeBuildingManagerMBean,
 	 *            {@link File} containing the trusted security keys.
 	 * @param trustStorePassword
 	 *            Password to the trusted key store {@link File}.
+	 * @param userName
+	 *            User name to connect.
+	 * @param password
+	 *            Password to connect.
 	 * @return {@link ProcessManagerMBean}.
 	 * @throws Exception
 	 *             If fails to obtain the {@link ProcessManagerMBean}.
 	 */
 	public static ProcessManagerMBean getProcessManager(String hostName,
 			int port, String processNamespace, File trustStore,
-			String trustStorePassword) throws Exception {
+			String trustStorePassword, String userName, String password)
+			throws Exception {
 		ObjectName objectName = ProcessManager.getLocalObjectName(
 				processNamespace, ProcessManager.getProcessManagerObjectName());
 		return getMBeanProxy(hostName, port, trustStore, trustStorePassword,
-				objectName, ProcessManagerMBean.class);
+				userName, password, objectName, ProcessManagerMBean.class);
 	}
 
 	/**
@@ -371,17 +423,22 @@ public class OfficeBuildingManager implements OfficeBuildingManagerMBean,
 	 *            {@link File} containing the trusted security keys.
 	 * @param trustStorePassword
 	 *            Password to the trusted key store {@link File}.
+	 * @param userName
+	 *            User name to connect.
+	 * @param password
+	 *            Password to connect.
 	 * @return {@link ProcessShellMBean}.
 	 * @throws Exception
 	 *             If fails to obtain the {@link ProcessShellMBean}.
 	 */
 	public static ProcessShellMBean getProcessShell(String hostName, int port,
-			String processNamespace, File trustStore, String trustStorePassword)
+			String processNamespace, File trustStore,
+			String trustStorePassword, String userName, String password)
 			throws Exception {
 		ObjectName objectName = ProcessManager.getLocalObjectName(
 				processNamespace, ProcessShell.getProcessShellObjectName());
 		return getMBeanProxy(hostName, port, trustStore, trustStorePassword,
-				objectName, ProcessShellMBean.class);
+				userName, password, objectName, ProcessShellMBean.class);
 	}
 
 	/**
@@ -402,6 +459,10 @@ public class OfficeBuildingManager implements OfficeBuildingManagerMBean,
 	 *            {@link File} containing the trusted security keys.
 	 * @param trustStorePassword
 	 *            Password to the trusted key store {@link File}.
+	 * @param userName
+	 *            User name to connect.
+	 * @param password
+	 *            Password to connect.
 	 * @param processNamespace
 	 *            Namespace of the {@link OfficeFloorManagerMBean}.
 	 * @return {@link OfficeFloorManagerMBean}.
@@ -410,12 +471,13 @@ public class OfficeBuildingManager implements OfficeBuildingManagerMBean,
 	 */
 	public static OfficeFloorManagerMBean getOfficeFloorManager(
 			String hostName, int port, String processNamespace,
-			File trustStore, String trustStorePassword) throws Exception {
+			File trustStore, String trustStorePassword, String userName,
+			String password) throws Exception {
 		ObjectName objectName = ProcessManager.getLocalObjectName(
 				processNamespace,
 				OfficeFloorManager.getOfficeFloorManagerObjectName());
 		return getMBeanProxy(hostName, port, trustStore, trustStorePassword,
-				objectName, OfficeFloorManagerMBean.class);
+				userName, password, objectName, OfficeFloorManagerMBean.class);
 	}
 
 	/**
@@ -465,6 +527,10 @@ public class OfficeBuildingManager implements OfficeBuildingManagerMBean,
 	 *            {@link File} containing the trusted security keys.
 	 * @param trustStorePassword
 	 *            Password to the trusted key store {@link File}.
+	 * @param userName
+	 *            User name to connect.
+	 * @param password
+	 *            Password to connect.
 	 * @param mbeanName
 	 *            {@link ObjectName} for the MBean.
 	 * @param mbeanInterface
@@ -474,8 +540,9 @@ public class OfficeBuildingManager implements OfficeBuildingManagerMBean,
 	 *             If fails to obtain the MBean proxy.
 	 */
 	public static <I> I getMBeanProxy(String hostName, int port,
-			File trustStore, String trustStorePassword, ObjectName mbeanName,
-			Class<I> mbeanInterface) throws IOException {
+			File trustStore, String trustStorePassword, String userName,
+			String password, ObjectName mbeanName, Class<I> mbeanInterface)
+			throws IOException {
 
 		// Trust the JMX Agent
 		trustJmxAgent(trustStore, trustStorePassword);
@@ -486,6 +553,8 @@ public class OfficeBuildingManager implements OfficeBuildingManagerMBean,
 		Map<String, Object> environment = new HashMap<String, Object>();
 		environment.put(PROPERTY_RMI_CLIENT_SOCKET_FACTORY,
 				new SslRMIClientSocketFactory());
+		environment.put(JMXConnector.CREDENTIALS, new String[] { userName,
+				password });
 		JMXConnector connector = JMXConnectorFactory.connect(serviceUrl,
 				environment);
 		MBeanServerConnection connection = connector.getMBeanServerConnection();

@@ -40,9 +40,11 @@ import net.officefloor.building.command.parameters.OfficeFloorLocationOfficeFloo
 import net.officefloor.building.command.parameters.OfficeFloorSourceOfficeFloorCommandParameter;
 import net.officefloor.building.command.parameters.OfficeNameOfficeFloorCommandParameter;
 import net.officefloor.building.command.parameters.ParameterOfficeFloorCommandParameter;
+import net.officefloor.building.command.parameters.PasswordOfficeFloorCommandParameterImpl;
 import net.officefloor.building.command.parameters.ProcessNameOfficeFloorCommandParameter;
 import net.officefloor.building.command.parameters.PropertiesOfficeFloorCommandParameter;
 import net.officefloor.building.command.parameters.TaskNameOfficeFloorCommandParameter;
+import net.officefloor.building.command.parameters.UsernameOfficeFloorCommandParameterImpl;
 import net.officefloor.building.command.parameters.WorkNameOfficeFloorCommandParameter;
 import net.officefloor.building.manager.OfficeBuildingManager;
 import net.officefloor.building.manager.OfficeBuildingManagerMBean;
@@ -93,6 +95,16 @@ public class OfficeBuildingOpenOfficeFloorCommand implements
 	 * Password to the trust store {@link File}.
 	 */
 	private final KeyStorePasswordOfficeFloorCommandParameterImpl trustStorePassword = new KeyStorePasswordOfficeFloorCommandParameterImpl();
+
+	/**
+	 * User name.
+	 */
+	private final UsernameOfficeFloorCommandParameterImpl userName = new UsernameOfficeFloorCommandParameterImpl();
+
+	/**
+	 * Password.
+	 */
+	private final PasswordOfficeFloorCommandParameterImpl password = new PasswordOfficeFloorCommandParameterImpl();
 
 	/**
 	 * {@link OfficeFloorSource} class name.
@@ -171,11 +183,11 @@ public class OfficeBuildingOpenOfficeFloorCommand implements
 	public OfficeFloorCommandParameter[] getParameters() {
 		return new OfficeFloorCommandParameter[] { this.officeBuildingHost,
 				this.officeBuildingPort, this.jvmOptions, this.processName,
-				this.trustStore, this.trustStorePassword,
-				this.officeFloorSource, this.officeFloorLocation,
-				this.officeFloorProperties, this.archives, this.artifacts,
-				this.classpath, this.officeName, this.workName, this.taskName,
-				this.parameter };
+				this.trustStore, this.trustStorePassword, this.userName,
+				this.password, this.officeFloorSource,
+				this.officeFloorLocation, this.officeFloorProperties,
+				this.archives, this.artifacts, this.classpath, this.officeName,
+				this.workName, this.taskName, this.parameter };
 	}
 
 	@Override
@@ -212,6 +224,8 @@ public class OfficeBuildingOpenOfficeFloorCommand implements
 		File trustStore = this.trustStore.getKeyStore();
 		String trustStorePassword = this.trustStorePassword
 				.getKeyStorePassword();
+		String userName = this.userName.getUserName();
+		String password = this.password.getPassword();
 
 		// Construct the arguments
 		CommandLineBuilder arguments = new CommandLineBuilder();
@@ -282,8 +296,8 @@ public class OfficeBuildingOpenOfficeFloorCommand implements
 
 		// Create and return managed process to open OfficeFloor
 		return new OpenManagedProcess(officeBuildingHost, officeBuildingPort,
-				trustStore, trustStorePassword, arguments.getCommandLine(),
-				outputSuffix.toString());
+				trustStore, trustStorePassword, userName, password,
+				arguments.getCommandLine(), outputSuffix.toString());
 	}
 
 	/**
@@ -313,6 +327,16 @@ public class OfficeBuildingOpenOfficeFloorCommand implements
 		private final String trustStorePassword;
 
 		/**
+		 * User name to connect.
+		 */
+		private final String userName;
+
+		/**
+		 * Password to connect.
+		 */
+		private final String password;
+
+		/**
 		 * Arguments to open the {@link OfficeFloor}.
 		 */
 		private final String[] arguments;
@@ -333,6 +357,10 @@ public class OfficeBuildingOpenOfficeFloorCommand implements
 		 *            Trust store {@link File}.
 		 * @param trustStorePassword
 		 *            Password to the trust store {@link File}.
+		 * @param userName
+		 *            User name to connect.
+		 * @param password
+		 *            Password to connect.
 		 * @param arguments
 		 *            Arguments to open the {@link OfficeFloor}.
 		 * @param outputSuffix
@@ -341,12 +369,14 @@ public class OfficeBuildingOpenOfficeFloorCommand implements
 		 */
 		public OpenManagedProcess(String officeBuildingHost,
 				int officeBuildingPort, File trustStore,
-				String trustStorePassword, String[] arguments,
-				String outputSuffix) {
+				String trustStorePassword, String userName, String password,
+				String[] arguments, String outputSuffix) {
 			this.officeBuildingHost = officeBuildingHost;
 			this.officeBuildingPort = officeBuildingPort;
 			this.trustStoreLocation = trustStore.getAbsolutePath();
 			this.trustStorePassword = trustStorePassword;
+			this.userName = userName;
+			this.password = password;
 			this.arguments = arguments;
 			this.outputSuffix = outputSuffix;
 		}
@@ -368,7 +398,8 @@ public class OfficeBuildingOpenOfficeFloorCommand implements
 					.getOfficeBuildingManager(this.officeBuildingHost,
 							this.officeBuildingPort, new File(
 									this.trustStoreLocation),
-							this.trustStorePassword);
+							this.trustStorePassword, this.userName,
+							this.password);
 
 			// Open the OfficeFloor
 			String processNamespace = manager.openOfficeFloor(this.arguments);

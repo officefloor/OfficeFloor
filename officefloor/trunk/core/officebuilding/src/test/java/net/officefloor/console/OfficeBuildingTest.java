@@ -26,7 +26,6 @@ import java.util.List;
 
 import javax.management.InstanceNotFoundException;
 
-import net.officefloor.building.command.OfficeFloorCommand;
 import net.officefloor.building.command.parameters.OfficeBuildingPortOfficeFloorCommandParameter;
 import net.officefloor.building.manager.OfficeBuildingManager;
 import net.officefloor.building.manager.OfficeBuildingManagerMBean;
@@ -51,16 +50,6 @@ public class OfficeBuildingTest extends AbstractConsoleMainTestCase {
 	private String officeBuildingStartLine;
 
 	/**
-	 * Trust store {@link File}.
-	 */
-	private File trustStore;
-
-	/**
-	 * Password to the trust store {@link File}.
-	 */
-	private static final String TRUST_STORE_PASSWORD = "changeit";
-
-	/**
 	 * Initiate.
 	 */
 	public OfficeBuildingTest() {
@@ -80,10 +69,6 @@ public class OfficeBuildingTest extends AbstractConsoleMainTestCase {
 								null,
 								OfficeBuildingPortOfficeFloorCommandParameter.DEFAULT_OFFICE_BUILDING_PORT)
 						.toString();
-
-		// Obtain trust store details
-		this.trustStore = this
-				.findFile("src/main/resources/config/keystore.jks");
 	}
 
 	/**
@@ -100,7 +85,8 @@ public class OfficeBuildingTest extends AbstractConsoleMainTestCase {
 				.getOfficeBuildingManager(
 						null,
 						OfficeBuildingPortOfficeFloorCommandParameter.DEFAULT_OFFICE_BUILDING_PORT,
-						this.trustStore, TRUST_STORE_PASSWORD);
+						getTrustStore(), TRUST_STORE_PASSWORD, MOCK_USER_NAME,
+						MOCK_PASSWORD);
 
 		// Ensure correct start time
 		long afterStartTime = System.currentTimeMillis();
@@ -292,7 +278,8 @@ public class OfficeBuildingTest extends AbstractConsoleMainTestCase {
 					.getProcessManager(
 							null,
 							OfficeBuildingPortOfficeFloorCommandParameter.DEFAULT_OFFICE_BUILDING_PORT,
-							PROCESS_NAME, this.trustStore, TRUST_STORE_PASSWORD);
+							PROCESS_NAME, getTrustStore(),
+							TRUST_STORE_PASSWORD, MOCK_USER_NAME, MOCK_PASSWORD);
 			OfficeBuildingTestUtil.waitUntilProcessComplete(manager, this);
 		} catch (UndeclaredThrowableException ex) {
 			// May have already finished and unregistered before check
@@ -381,89 +368,83 @@ public class OfficeBuildingTest extends AbstractConsoleMainTestCase {
 				"       -kp,--key_store_password <arg>       Password to the key store file",
 				"       -ks,--key_store <arg>                Location of the key store file",
 				"       -lr,--local_repository <arg>         Local repository for caching Artifacts",
-				"       -p,--office_building_port <arg>      Port for the OfficeBuilding. Default is 13778",
+				"       --office_building_port <arg>         Port for the OfficeBuilding. Default is 13778",
+				"       -p,--password <arg>                  Password",
 				"       -rr,--remote_repository_urls <arg>   Remote repository URL to retrieve Artifacts",
+				"       -u,--username <arg>                  User name",
 				"                                                         ",
 				"url : Obtains the URL for the OfficeBuilding             ",
 				"    Options:                                             ",
-				"     --office_building_host <arg>      OfficeBuilding Host. Default is localhost",
-				"     -p,--office_building_port <arg>   Port for the OfficeBuilding. Default is 13778",
+				"     --office_building_host <arg>   OfficeBuilding Host. Default is localhost",
+				"     --office_building_port <arg>   Port for the OfficeBuilding. Default is 13778",
 				"                                                         ",
 				"open : Opens an OfficeFloor within the OfficeBuilding    ",
 				"     Options:                                            ",
-				"      -a,--artifact <arg>               Artifact to include on the class path",
-				"      -cp,--classpath <arg>             Raw entry to include on the class path",
-				"      -j,--jar <arg>                    Archive to include on the class path",
-				"      --jvm_option <arg>                JVM option       ",
-				"      -kp,--key_store_password <arg>    Password to the key store file",
-				"      -ks,--key_store <arg>             Location of the key store file",
-				"      -o,--office <arg>                 Name of the Office",
-				"      -of,--officefloor <arg>           Location of the OfficeFloor",
-				"      --office_building_host <arg>      OfficeBuilding Host. Default is localhost",
-				"      -ofs,--officefloorsource <arg>    OfficeFloorSource",
-				"      -p,--office_building_port <arg>   Port for the OfficeBuilding. Default is 13778",
-				"      --parameter <arg>                 Parameter for the Task",
-				"      --process_name <arg>              Process name space. Default is Process",
-				"      --property <arg>                  Property for the OfficeFloor in the form of name=value",
-				"      -t,--task <arg>                   Name of the Task ",
-				"      -w,--work <arg>                   Name of the Work ",
+				"      -a,--artifact <arg>              Artifact to include on the class path",
+				"      -cp,--classpath <arg>            Raw entry to include on the class path",
+				"      -j,--jar <arg>                   Archive to include on the class path",
+				"      --jvm_option <arg>               JVM option       ",
+				"      -kp,--key_store_password <arg>   Password to the key store file",
+				"      -ks,--key_store <arg>            Location of the key store file",
+				"      -o,--office <arg>                Name of the Office",
+				"      -of,--officefloor <arg>          Location of the OfficeFloor",
+				"      --office_building_host <arg>     OfficeBuilding Host. Default is localhost",
+				"      --office_building_port <arg>     Port for the OfficeBuilding. Default is 13778",
+				"      -ofs,--officefloorsource <arg>   OfficeFloorSource",
+				"      -p,--password <arg>              Password",
+				"      --parameter <arg>                Parameter for the Task",
+				"      --process_name <arg>             Process name space. Default is Process",
+				"      --property <arg>                 Property for the OfficeFloor in the form of name=value",
+				"      -t,--task <arg>                  Name of the Task ",
+				"      -u,--username <arg>              User name",
+				"      -w,--work <arg>                  Name of the Work ",
 				"                                                         ",
 				"list : Lists details of the OfficeBuilding/OfficeFloor   ",
 				"     Options:                                            ",
-				"      -kp,--key_store_password <arg>    Password to the key store file",
-				"      -ks,--key_store <arg>             Location of the key store file",
-				"      --office_building_host <arg>      OfficeBuilding Host. Default is localhost",
-				"      -p,--office_building_port <arg>   Port for the OfficeBuilding. Default is 13778",
-				"      --process_name <arg>              Process name space. Default is Process",
+				"      -kp,--key_store_password <arg>   Password to the key store file",
+				"      -ks,--key_store <arg>            Location of the key store file",
+				"      --office_building_host <arg>     OfficeBuilding Host. Default is localhost",
+				"      --office_building_port <arg>     Port for the OfficeBuilding. Default is 13778",
+				"      -p,--password <arg>              Password",
+				"      --process_name <arg>             Process name space. Default is Process",
+				"      -u,--username <arg>              User name",
 				"                                                         ",
 				"invoke : Invokes a Task within a running OfficeFloor     ",
 				"       Options:                                          ",
-				"        -kp,--key_store_password <arg>    Password to the key store file",
-				"        -ks,--key_store <arg>             Location of the key store file",
-				"        -o,--office <arg>                 Name of the Office",
-				"        --office_building_host <arg>      OfficeBuilding Host. Default is localhost",
-				"        -p,--office_building_port <arg>   Port for the OfficeBuilding. Default is 13778",
-				"        --parameter <arg>                 Parameter for the Task",
-				"        --process_name <arg>              Process name space. Default is Process",
-				"        -t,--task <arg>                   Name of the Task",
-				"        -w,--work <arg>                   Name of the Work",
+				"        -kp,--key_store_password <arg>   Password to the key store file",
+				"        -ks,--key_store <arg>            Location of the key store file",
+				"        -o,--office <arg>                Name of the Office",
+				"        --office_building_host <arg>     OfficeBuilding Host. Default is localhost",
+				"        --office_building_port <arg>     Port for the OfficeBuilding. Default is 13778",
+				"        -p,--password <arg>              Password",
+				"        --parameter <arg>                Parameter for the Task",
+				"        --process_name <arg>             Process name space. Default is Process",
+				"        -t,--task <arg>                  Name of the Task",
+				"        -u,--username <arg>              User name",
+				"        -w,--work <arg>                  Name of the Work",
 				"                                                         ",
 				"close : Closes an OfficeFloor within the OfficeBuilding  ",
 				"      Options:                                           ",
-				"       -kp,--key_store_password <arg>    Password to the key store file",
-				"       -ks,--key_store <arg>             Location of the key store file",
-				"       --office_building_host <arg>      OfficeBuilding Host. Default is localhost",
-				"       -p,--office_building_port <arg>   Port for the OfficeBuilding. Default is 13778",
-				"       --process_name <arg>              Process name space. Default is Process",
-				"       --stop_max_wait_time <arg>        Maximum time in milliseconds to wait to stop. Default is 10000",
+				"       -kp,--key_store_password <arg>   Password to the key store file",
+				"       -ks,--key_store <arg>            Location of the key store file",
+				"       --office_building_host <arg>     OfficeBuilding Host. Default is localhost",
+				"       --office_building_port <arg>     Port for the OfficeBuilding. Default is 13778",
+				"       -p,--password <arg>              Password",
+				"       --process_name <arg>             Process name space. Default is Process",
+				"       --stop_max_wait_time <arg>       Maximum time in milliseconds to wait to stop. Default is 10000",
+				"       -u,--username <arg>              User name",
 				"                                                         ",
 				"stop : Stops the OfficeBuilding                          ",
 				"     Options:                                            ",
-				"      -kp,--key_store_password <arg>    Password to the key store file",
-				"      -ks,--key_store <arg>             Location of the key store file",
-				"      --office_building_host <arg>      OfficeBuilding Host. Default is localhost",
-				"      -p,--office_building_port <arg>   Port for the OfficeBuilding. Default is 13778",
-				"      --stop_max_wait_time <arg>        Maximum time in milliseconds to wait to stop. Default is 10000",
+				"      -kp,--key_store_password <arg>   Password to the key store file",
+				"      -ks,--key_store <arg>            Location of the key store file",
+				"      --office_building_host <arg>     OfficeBuilding Host. Default is localhost",
+				"      --office_building_port <arg>     Port for the OfficeBuilding. Default is 13778",
+				"      -p,--password <arg>              Password",
+				"      --stop_max_wait_time <arg>       Maximum time in milliseconds to wait to stop. Default is 10000",
+				"      -u,--username <arg>              User name",
 				"                                                         ",
 				"help : This help message                                 ");
-	}
-
-	/**
-	 * Does the {@link OfficeFloorCommand} with security keys.
-	 * 
-	 * @param arguments
-	 *            Arguments for {@link OfficeBuilding}.
-	 */
-	private void doSecureMain(String arguments) throws Throwable {
-
-		// Obtain the key store details
-		File keyStore = this.findFile("src/main/resources/config/keystore.jks");
-		String keyStorePassword = "changeit";
-		String keyStoreArguments = "--key_store " + keyStore.getAbsolutePath()
-				+ " --key_store_password " + keyStorePassword;
-
-		// Execure the secure command
-		this.doMain(keyStoreArguments + " " + arguments);
 	}
 
 }

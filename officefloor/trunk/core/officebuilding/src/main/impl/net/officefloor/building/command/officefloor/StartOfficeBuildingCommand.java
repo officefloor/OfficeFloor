@@ -32,7 +32,9 @@ import net.officefloor.building.command.parameters.KeyStoreOfficeFloorCommandPar
 import net.officefloor.building.command.parameters.KeyStorePasswordOfficeFloorCommandParameterImpl;
 import net.officefloor.building.command.parameters.LocalRepositoryOfficeFloorCommandParameterImpl;
 import net.officefloor.building.command.parameters.OfficeBuildingPortOfficeFloorCommandParameter;
+import net.officefloor.building.command.parameters.PasswordOfficeFloorCommandParameterImpl;
 import net.officefloor.building.command.parameters.RemoteRepositoryUrlsOfficeFloorCommandParameterImpl;
+import net.officefloor.building.command.parameters.UsernameOfficeFloorCommandParameterImpl;
 import net.officefloor.building.manager.OfficeBuildingManager;
 import net.officefloor.building.manager.OfficeBuildingManagerMBean;
 import net.officefloor.building.process.ManagedProcess;
@@ -61,6 +63,16 @@ public class StartOfficeBuildingCommand implements OfficeFloorCommandFactory,
 	 * Password to the key store {@link File}.
 	 */
 	private final KeyStorePasswordOfficeFloorCommandParameterImpl keyStorePassword = new KeyStorePasswordOfficeFloorCommandParameterImpl();
+
+	/**
+	 * User name.
+	 */
+	private final UsernameOfficeFloorCommandParameterImpl userName = new UsernameOfficeFloorCommandParameterImpl();
+
+	/**
+	 * Password.
+	 */
+	private final PasswordOfficeFloorCommandParameterImpl password = new PasswordOfficeFloorCommandParameterImpl();
 
 	/**
 	 * Location of the local repository.
@@ -113,8 +125,8 @@ public class StartOfficeBuildingCommand implements OfficeFloorCommandFactory,
 	@Override
 	public OfficeFloorCommandParameter[] getParameters() {
 		return new OfficeFloorCommandParameter[] { this.officeBuildingPort,
-				this.keyStore, this.keyStorePassword, this.localRepository,
-				this.remoteRepositoryUrls };
+				this.keyStore, this.keyStorePassword, this.userName,
+				this.password, this.localRepository, this.remoteRepositoryUrls };
 	}
 
 	@Override
@@ -132,6 +144,8 @@ public class StartOfficeBuildingCommand implements OfficeFloorCommandFactory,
 				.getOfficeBuildingPort();
 		File keyStore = this.keyStore.getKeyStore();
 		String keyStorePassword = this.keyStorePassword.getKeyStorePassword();
+		String userName = this.userName.getUserName();
+		String password = this.password.getPassword();
 		File localRepository = this.localRepository.getLocalRepository();
 		String[] remoteRepositoryUrls = this.remoteRepositoryUrls
 				.getRemoteRepositoryUrls();
@@ -142,8 +156,8 @@ public class StartOfficeBuildingCommand implements OfficeFloorCommandFactory,
 
 		// Create and return managed process to start office building
 		return new StartOfficeBuildingManagedProcess(officeBuildingPort,
-				keyStore, keyStorePassword, localRepositoryLocation,
-				remoteRepositoryUrls, this.environment);
+				keyStore, keyStorePassword, userName, password,
+				localRepositoryLocation, remoteRepositoryUrls, this.environment);
 	}
 
 	/**
@@ -166,6 +180,16 @@ public class StartOfficeBuildingCommand implements OfficeFloorCommandFactory,
 		 * Password to the key store {@link File}.
 		 */
 		private final String keyStorePassword;
+
+		/**
+		 * User name to allow connections.
+		 */
+		private final String userName;
+
+		/**
+		 * Password to allow connections.
+		 */
+		private final String password;
 
 		/**
 		 * Location of the local repository.
@@ -191,6 +215,10 @@ public class StartOfficeBuildingCommand implements OfficeFloorCommandFactory,
 		 *            Key store {@link File}.
 		 * @param keyStorePassword
 		 *            Password to the key store {@link File}.
+		 * @param userName
+		 *            User name to allow connections.
+		 * @param password
+		 *            Password to allow connections.
 		 * @param localRepository
 		 *            Location of the local repository.
 		 * @param remoteRepositoryUrls
@@ -199,11 +227,14 @@ public class StartOfficeBuildingCommand implements OfficeFloorCommandFactory,
 		 *            Environment {@link Properties}.
 		 */
 		public StartOfficeBuildingManagedProcess(int officeBuildingPort,
-				File keyStore, String keyStorePassword, String localRepository,
+				File keyStore, String keyStorePassword, String userName,
+				String password, String localRepository,
 				String[] remoteRepositoryUrls, Properties environment) {
 			this.officeBuildingPort = officeBuildingPort;
 			this.keyStoreLocation = keyStore.getAbsolutePath();
 			this.keyStorePassword = keyStorePassword;
+			this.userName = userName;
+			this.password = password;
 			this.localRepository = localRepository;
 			this.remoteRepositoryUrls = remoteRepositoryUrls;
 			this.environment = environment;
@@ -241,8 +272,8 @@ public class StartOfficeBuildingCommand implements OfficeFloorCommandFactory,
 			// Start the OfficeBuilding
 			OfficeBuildingManagerMBean manager = OfficeBuildingManager
 					.startOfficeBuilding(this.officeBuildingPort, new File(
-							this.keyStoreLocation), this.keyStorePassword, env,
-							null);
+							this.keyStoreLocation), this.keyStorePassword,
+							this.userName, this.password, env, null);
 
 			// Indicate started and location
 			String serviceUrl = manager.getOfficeBuildingJmxServiceUrl();
