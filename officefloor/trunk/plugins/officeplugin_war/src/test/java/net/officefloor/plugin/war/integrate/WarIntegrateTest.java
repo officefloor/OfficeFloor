@@ -21,6 +21,8 @@ package net.officefloor.plugin.war.integrate;
 import java.io.File;
 import java.util.Properties;
 
+import net.officefloor.building.command.parameters.KeyStoreOfficeFloorCommandParameterImpl;
+import net.officefloor.building.command.parameters.KeyStorePasswordOfficeFloorCommandParameterImpl;
 import net.officefloor.building.console.OfficeFloorConsole;
 import net.officefloor.console.OfficeBuilding;
 import net.officefloor.frame.test.OfficeFrameTestCase;
@@ -51,19 +53,31 @@ public class WarIntegrateTest extends OfficeFrameTestCase {
 
 		// Obtain location of war directory
 		File warDir = new File(".", "target/test-classes");
-		assertTrue("Test invalid as WAR directory not available", warDir
-				.isDirectory());
+		assertTrue("Test invalid as WAR directory not available",
+				warDir.isDirectory());
+
+		// Provide security for running
+		Properties environment = new Properties();
+		environment.setProperty("key_store",
+				KeyStoreOfficeFloorCommandParameterImpl
+						.getDefaultKeyStoreFile().getAbsolutePath());
+		environment
+				.setProperty(
+						"key_store_password",
+						KeyStorePasswordOfficeFloorCommandParameterImpl.DEFAULT_KEY_STORE_PASSWORD);
+		environment.setProperty("username", "admin");
+		environment.setProperty("password", "password");
 
 		// Open the OfficeBuilding
 		OfficeFloorConsole console = new OfficeBuilding()
-				.createOfficeFloorConsole(this.getName(), new Properties());
+				.createOfficeFloorConsole(this.getName(), environment);
 		console.run(System.out, System.err, null, null, "start");
 
 		try {
 
 			// Open the WAR by decoration of OfficeFloor
-			console.run(System.out, System.err, null, null, "--jar", warDir
-					.getAbsolutePath(), "open");
+			console.run(System.out, System.err, null, null, "--jar",
+					warDir.getAbsolutePath(), "open");
 
 			// Request data from servlet
 			HttpClient client = new DefaultHttpClient();
