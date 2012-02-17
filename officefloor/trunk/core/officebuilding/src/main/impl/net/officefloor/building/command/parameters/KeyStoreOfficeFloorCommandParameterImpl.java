@@ -20,6 +20,9 @@ package net.officefloor.building.command.parameters;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 
 import net.officefloor.building.command.OfficeFloorCommandParameter;
 
@@ -35,6 +38,45 @@ public class KeyStoreOfficeFloorCommandParameterImpl extends
 	 * Location of the default key store on the classpath.
 	 */
 	public static final String DEFAULT_KEY_STORE_CLASSPATH_LOCATION = "config/keystore.jks";
+
+	/**
+	 * <p>
+	 * Makes the default key store file available.
+	 * <p>
+	 * This is only for development and testing. Within production the keys
+	 * should be changed and therefore the default key store file will not be
+	 * useful.
+	 * 
+	 * @return Key store {@link File}.
+	 * @throws IOException
+	 *             If fails to obtain the key store {@link File}.
+	 */
+	public static File getDefaultKeyStoreFile() throws IOException {
+
+		// Obtain location for the key store file
+		File tempDir = new File(System.getProperty("java.io.tmpdir"));
+		File keyStore = new File(tempDir, "officefloorkeystore.jks");
+
+		// Ensure the key store file exists
+		if (!(keyStore.exists())) {
+			// Create the file
+			InputStream contents = Thread
+					.currentThread()
+					.getContextClassLoader()
+					.getResourceAsStream(
+							KeyStoreOfficeFloorCommandParameterImpl.DEFAULT_KEY_STORE_CLASSPATH_LOCATION);
+			FileOutputStream output = new FileOutputStream(keyStore, false);
+			for (int value = contents.read(); value != -1; value = contents
+					.read()) {
+				output.write(value);
+			}
+			output.close();
+			contents.close();
+		}
+
+		// Return the key store file
+		return keyStore;
+	}
 
 	/**
 	 * Initiate.
