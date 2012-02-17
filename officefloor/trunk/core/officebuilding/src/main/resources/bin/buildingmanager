@@ -16,10 +16,18 @@ fi
 # Load the properties
 . ${OFFICE_FLOOR_HOME}/config/OfficeFloor.properties
 
-# Default to local host
+# Connect to PID if not remote host
 OFFICE_BUILDING_HOST=$1
 if [ -z ${OFFICE_BUILDING_HOST} ]; then
-    OFFICE_BUILDING_HOST=localhost
+
+    # Obtain the pid of OfficeBuilding process
+    OFFICE_BUILDING_PID=`ps -aef | egrep [j]ava.*OfficeBuilding.*start | awk '{print $2}'`
+
+    # Connect to local process
+    jconsole ${OFFICE_BUILDING_PID} 
+
+    # Run console locally so now quit
+    exit
 fi
 
 # Default port
@@ -27,7 +35,6 @@ OFFICE_BUILDING_PORT=$2
 if [ -z ${OFFICE_BUILDING_PORT} ]; then
     OFFICE_BUILDING_PORT=13778
 fi
-
 
 # Start jconcole trusting SSL certificate
 jconsole -J-Djavax.net.ssl.trustStore=${key_store} \
