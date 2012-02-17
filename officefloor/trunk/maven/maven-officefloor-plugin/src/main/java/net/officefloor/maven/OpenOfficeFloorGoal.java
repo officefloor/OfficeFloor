@@ -213,7 +213,9 @@ public class OpenOfficeFloorGoal extends AbstractGoal {
 		OfficeBuildingManagerMBean officeBuildingManager;
 		try {
 			officeBuildingManager = OfficeBuildingManager
-					.getOfficeBuildingManager(null, this.port.intValue());
+					.getOfficeBuildingManager(null, this.port.intValue(),
+							StartOfficeBuildingGoal.getKeyStoreFile(),
+							StartOfficeBuildingGoal.KEY_STORE_PASSWORD);
 		} catch (Throwable ex) {
 			throw this.newMojoExecutionException("Failed accessing the "
 					+ OfficeBuilding.class.getSimpleName(), ex);

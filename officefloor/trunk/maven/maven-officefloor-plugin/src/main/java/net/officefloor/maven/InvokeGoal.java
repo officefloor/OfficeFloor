@@ -118,7 +118,9 @@ public class InvokeGoal extends AbstractGoal {
 		OfficeFloorManagerMBean manager;
 		try {
 			manager = OfficeBuildingManager.getOfficeFloorManager(null,
-					this.port.intValue(), this.processName);
+					this.port.intValue(), this.processName,
+					StartOfficeBuildingGoal.getKeyStoreFile(),
+					StartOfficeBuildingGoal.KEY_STORE_PASSWORD);
 		} catch (Throwable ex) {
 			throw this.newMojoExecutionException("Failed accessing the "
 					+ OfficeFloor.class.getSimpleName(), ex);
