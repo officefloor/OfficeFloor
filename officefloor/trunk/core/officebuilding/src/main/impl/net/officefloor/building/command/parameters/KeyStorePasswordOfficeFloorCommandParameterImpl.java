@@ -30,6 +30,11 @@ import net.officefloor.building.command.OfficeFloorCommandParameter;
  */
 public class KeyStorePasswordOfficeFloorCommandParameterImpl extends
 		AbstractSingleValueOfficeFloorCommandParameter {
+	
+	/**
+	 * Default key store password.
+	 */
+	public static final String DEFAULT_KEY_STORE_PASSWORD = "changeit";
 
 	/**
 	 * Initiate.

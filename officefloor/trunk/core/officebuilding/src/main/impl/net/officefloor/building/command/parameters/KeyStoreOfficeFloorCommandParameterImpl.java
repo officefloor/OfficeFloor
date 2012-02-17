@@ -32,6 +32,11 @@ public class KeyStoreOfficeFloorCommandParameterImpl extends
 		AbstractSingleValueOfficeFloorCommandParameter {
 
 	/**
+	 * Location of the default key store on the classpath.
+	 */
+	public static final String DEFAULT_KEY_STORE_CLASSPATH_LOCATION = "config/keystore.jks";
+
+	/**
 	 * Initiate.
 	 */
 	public KeyStoreOfficeFloorCommandParameterImpl() {

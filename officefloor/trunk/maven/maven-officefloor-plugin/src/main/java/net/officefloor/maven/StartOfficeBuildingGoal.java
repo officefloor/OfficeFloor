@@ -18,12 +18,18 @@
 
 package net.officefloor.maven;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Properties;
 
 import net.officefloor.building.command.LocalRepositoryOfficeFloorCommandParameter;
 import net.officefloor.building.command.RemoteRepositoryUrlsOfficeFloorCommandParameter;
+import net.officefloor.building.command.parameters.KeyStoreOfficeFloorCommandParameterImpl;
+import net.officefloor.building.command.parameters.KeyStorePasswordOfficeFloorCommandParameterImpl;
 import net.officefloor.building.command.parameters.OfficeBuildingPortOfficeFloorCommandParameter;
 import net.officefloor.building.command.parameters.RemoteRepositoryUrlsOfficeFloorCommandParameterImpl;
 import net.officefloor.building.manager.OfficeBuildingManager;
@@ -68,6 +74,52 @@ public class StartOfficeBuildingGoal extends AbstractGoal {
 			.valueOf(OfficeBuildingPortOfficeFloorCommandParameter.DEFAULT_OFFICE_BUILDING_PORT);
 
 	/**
+	 * Makes the default key store file available.
+	 * 
+	 * @return Key store {@link File}.
+	 * @throws MojoFailureException
+	 *             If fails to obtian the key store {@link File}.
+	 */
+	public static File getKeyStoreFile() throws MojoFailureException {
+
+		// Obtain location for the key store file
+		File tempDir = new File(System.getProperty("java.io.tmpdir"));
+		File keyStore = new File(tempDir, "officefloorkeystore.jks");
+
+		// Ensure the key store file exists
+		if (!(keyStore.exists())) {
+			try {
+				// Create the file
+				InputStream contents = Thread
+						.currentThread()
+						.getContextClassLoader()
+						.getResourceAsStream(
+								KeyStoreOfficeFloorCommandParameterImpl.DEFAULT_KEY_STORE_CLASSPATH_LOCATION);
+				FileOutputStream output = new FileOutputStream(keyStore, false);
+				for (int value = contents.read(); value != -1; value = contents
+						.read()) {
+					output.write(value);
+				}
+				output.close();
+				contents.close();
+			} catch (IOException ex) {
+				throw new MojoFailureException(
+						"Failed making default key store available: "
+								+ ex.getMessage() + " ["
+								+ ex.getClass().getName() + "]");
+			}
+		}
+
+		// Return the key store file
+		return keyStore;
+	}
+
+	/**
+	 * Key store {@link File} password.
+	 */
+	public static final String KEY_STORE_PASSWORD = KeyStorePasswordOfficeFloorCommandParameterImpl.DEFAULT_KEY_STORE_PASSWORD;
+
+	/**
 	 * Ensures the {@link OfficeBuilding} is running on the
 	 * {@link #DEFAULT_OFFICE_BUILDING_PORT}.
 	 * 
@@ -93,7 +145,8 @@ public class StartOfficeBuildingGoal extends AbstractGoal {
 
 		// Ensure the OfficeBuilding is available
 		if (!OfficeBuildingManager.isOfficeBuildingAvailable(null,
-				DEFAULT_OFFICE_BUILDING_PORT.intValue())) {
+				DEFAULT_OFFICE_BUILDING_PORT.intValue(), getKeyStoreFile(),
+				KEY_STORE_PASSWORD)) {
 
 			// OfficeBuilding not available, so start it
 			StartOfficeBuildingGoal.createStartOfficeBuildingGoal(project,
@@ -289,7 +342,8 @@ public class StartOfficeBuildingGoal extends AbstractGoal {
 		// Start the OfficeBuilding
 		try {
 			OfficeBuildingManager.spawnOfficeBuilding(this.port.intValue(),
-					environment, configuration);
+					getKeyStoreFile(), KEY_STORE_PASSWORD, environment,
+					configuration);
 		} catch (Throwable ex) {
 			// Provide details of the failure
 			final String MESSAGE = "Failed starting the "
