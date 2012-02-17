@@ -32,7 +32,7 @@ public class OfficeBuildingPortOfficeFloorCommandParameter extends
 	/**
 	 * Parameter name for the {@link OfficeBuilding} port.
 	 */
-	public static final String PARAMETER_OFFICE_BUILDING_PORT = "office-building-port";
+	public static final String PARAMETER_OFFICE_BUILDING_PORT = "office_building_port";
 
 	/**
 	 * Default {@link OfficeBuilding} port.

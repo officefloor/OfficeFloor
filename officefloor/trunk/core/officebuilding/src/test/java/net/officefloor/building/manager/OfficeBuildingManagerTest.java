@@ -23,6 +23,8 @@ import java.io.IOException;
 import java.lang.management.ManagementFactory;
 import java.net.InetAddress;
 import java.rmi.ConnectException;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Properties;
 
 import javax.management.JMX;
@@ -31,8 +33,8 @@ import javax.management.MBeanServerConnection;
 import javax.management.remote.JMXConnector;
 import javax.management.remote.JMXConnectorFactory;
 import javax.management.remote.JMXServiceURL;
+import javax.rmi.ssl.SslRMIClientSocketFactory;
 
-import junit.framework.TestCase;
 import net.officefloor.building.command.CommandLineBuilder;
 import net.officefloor.building.command.LocalRepositoryOfficeFloorCommandParameter;
 import net.officefloor.building.command.RemoteRepositoryUrlsOfficeFloorCommandParameter;
@@ -47,13 +49,14 @@ import net.officefloor.building.util.OfficeBuildingTestUtil;
 import net.officefloor.compile.OfficeFloorCompiler;
 import net.officefloor.console.OfficeBuilding;
 import net.officefloor.frame.api.manage.OfficeFloor;
+import net.officefloor.frame.test.OfficeFrameTestCase;
 
 /**
  * Tests the {@link OfficeBuildingManager}.
  * 
  * @author Daniel Sagenschneider
  */
-public class OfficeBuildingManagerTest extends TestCase {
+public class OfficeBuildingManagerTest extends OfficeFrameTestCase {
 
 	/**
 	 * Port to run the current test.
@@ -66,12 +69,27 @@ public class OfficeBuildingManagerTest extends TestCase {
 	private final Properties environment = new Properties();
 
 	/**
+	 * Key store file.
+	 */
+	private File keyStore;
+
+	/**
+	 * Password to key store.
+	 */
+	private static final String KEY_STORE_PASSWORD = "changeit";
+
+	/**
 	 * {@link MBeanServer}.
 	 */
 	private MBeanServer mbeanServer;
 
 	@Override
 	protected void setUp() throws Exception {
+
+		// Obtain the key store for SSL to work
+		this.keyStore = this.findFile("src/main/resources/config/keystore.jks");
+
+		// Obtain the MBean Server
 		this.mbeanServer = ManagementFactory.getPlatformMBeanServer();
 
 		// Setup the environment
@@ -94,9 +112,9 @@ public class OfficeBuildingManagerTest extends TestCase {
 	 * 
 	 * @return {@link OfficeBuildingManager}.
 	 */
-	private OfficeBuildingManager startOfficeBuilding() throws Exception {
-		return OfficeBuildingManager.startOfficeBuilding(PORT,
-				this.environment, this.mbeanServer);
+	private OfficeBuildingManagerMBean startOfficeBuilding() throws Exception {
+		return OfficeBuildingManager.startOfficeBuilding(PORT, this.keyStore,
+				KEY_STORE_PASSWORD, this.environment, this.mbeanServer);
 	}
 
 	/**
@@ -106,12 +124,13 @@ public class OfficeBuildingManagerTest extends TestCase {
 
 		// Start the Office Building (recording times before/after)
 		long beforeTime = System.currentTimeMillis();
-		OfficeBuildingManager manager = this.startOfficeBuilding();
+		OfficeBuildingManagerMBean manager = this.startOfficeBuilding();
 		long afterTime = System.currentTimeMillis();
 
 		// Ensure OfficeBuilding is available
 		assertTrue("OfficeBuilding should be available",
-				OfficeBuildingManager.isOfficeBuildingAvailable(null, PORT));
+				OfficeBuildingManager.isOfficeBuildingAvailable(null, PORT,
+						this.keyStore, KEY_STORE_PASSWORD));
 
 		// Ensure correct JMX Service URL
 		String actualServiceUrl = manager.getOfficeBuildingJmxServiceUrl();
@@ -124,7 +143,8 @@ public class OfficeBuildingManagerTest extends TestCase {
 
 		// Obtain the Office Building Manager MBean
 		OfficeBuildingManagerMBean managerMBean = OfficeBuildingManager
-				.getOfficeBuildingManager(hostName, PORT);
+				.getOfficeBuildingManager(hostName, PORT, this.keyStore,
+						KEY_STORE_PASSWORD);
 
 		// Ensure start time is accurate
 		long startTime = managerMBean.getStartTime().getTime();
@@ -150,7 +170,8 @@ public class OfficeBuildingManagerTest extends TestCase {
 
 		// OfficeBuilding should still be available
 		assertTrue("OfficeBuilding should still be available",
-				OfficeBuildingManager.isOfficeBuildingAvailable(null, PORT));
+				OfficeBuildingManager.isOfficeBuildingAvailable(null, PORT,
+						this.keyStore, KEY_STORE_PASSWORD));
 
 		// Stop the Office Building
 		String stopDetails = managerMBean.stopOfficeBuilding(10000);
@@ -160,7 +181,8 @@ public class OfficeBuildingManagerTest extends TestCase {
 		// OfficeBuilding now not be available
 		assertFalse(
 				"OfficeBuilding should be stopped and therefore unavailable",
-				OfficeBuildingManager.isOfficeBuildingAvailable(null, PORT));
+				OfficeBuildingManager.isOfficeBuildingAvailable(null, PORT,
+						this.keyStore, KEY_STORE_PASSWORD));
 	}
 
 	/**
@@ -272,7 +294,8 @@ public class OfficeBuildingManagerTest extends TestCase {
 
 		// Obtain the manager MBean
 		OfficeBuildingManagerMBean buildingManager = OfficeBuildingManager
-				.getOfficeBuildingManager(null, PORT);
+				.getOfficeBuildingManager(null, PORT, this.keyStore,
+						KEY_STORE_PASSWORD);
 
 		// Open the OfficeFloor
 		String officeFloorLocation = this.getOfficeFloorLocation();
@@ -286,17 +309,20 @@ public class OfficeBuildingManagerTest extends TestCase {
 
 		// Ensure OfficeFloor opened (obtaining local floor manager)
 		OfficeFloorManagerMBean localFloorManager = OfficeBuildingManager
-				.getOfficeFloorManager(null, PORT, processNamespace);
+				.getOfficeFloorManager(null, PORT, processNamespace,
+						this.keyStore, KEY_STORE_PASSWORD);
 		assertEquals("Incorrect OfficeFloor location", officeFloorLocation,
 				localFloorManager.getOfficeFloorLocation());
 
 		// Obtain the local Process Manager MBean
 		ProcessManagerMBean processManager = OfficeBuildingManager
-				.getProcessManager(null, PORT, processNamespace);
+				.getProcessManager(null, PORT, processNamespace, this.keyStore,
+						KEY_STORE_PASSWORD);
 
 		// Obtain the local Process Shell MBean
 		ProcessShellMBean localProcessShell = OfficeBuildingManager
-				.getProcessShell(null, PORT, processNamespace);
+				.getProcessShell(null, PORT, processNamespace, this.keyStore,
+						KEY_STORE_PASSWORD);
 
 		// Validate the process host and port
 		String remoteHostName = processManager.getProcessHostName();
@@ -354,7 +380,8 @@ public class OfficeBuildingManagerTest extends TestCase {
 
 		// Obtain the manager MBean
 		OfficeBuildingManagerMBean buildingManager = OfficeBuildingManager
-				.getOfficeBuildingManager(null, PORT);
+				.getOfficeBuildingManager(null, PORT, this.keyStore,
+						KEY_STORE_PASSWORD);
 
 		// Open the OfficeFloor
 		String officeFloorLocation = this.getOfficeFloorLocation();
@@ -363,14 +390,14 @@ public class OfficeBuildingManagerTest extends TestCase {
 
 		// Ensure OfficeFloor opened (obtaining local floor manager)
 		OfficeFloorManagerMBean localFloorManager = OfficeBuildingManager
-				.getOfficeFloorManager(null, PORT, processNamespace);
+				.getOfficeFloorManager(null, PORT, processNamespace,
+						this.keyStore, KEY_STORE_PASSWORD);
 		assertEquals("Incorrect OfficeFloor location", officeFloorLocation,
 				localFloorManager.getOfficeFloorLocation());
 
 		// Obtain the local process shell
-		JMXConnector localConnector = JMXConnectorFactory
-				.connect(new JMXServiceURL(buildingManager
-						.getOfficeBuildingJmxServiceUrl()));
+		JMXConnector localConnector = connectToJmxAgent(new JMXServiceURL(
+				buildingManager.getOfficeBuildingJmxServiceUrl()));
 		MBeanServerConnection localMBeanServer = localConnector
 				.getMBeanServerConnection();
 		ProcessShellMBean localProcessShell = JMX.newMBeanProxy(
@@ -404,23 +431,24 @@ public class OfficeBuildingManagerTest extends TestCase {
 
 		// Spawn the OfficeBuilding
 		ProcessManager process = OfficeBuildingManager.spawnOfficeBuilding(
-				SPAWN_PORT, null, null);
+				SPAWN_PORT, this.keyStore, KEY_STORE_PASSWORD, null, null);
 		try {
 
 			// Ensure the OfficeBuilding is available
 			assertTrue("OfficeBuilding should be available",
 					OfficeBuildingManager.isOfficeBuildingAvailable(null,
-							SPAWN_PORT));
+							SPAWN_PORT, this.keyStore, KEY_STORE_PASSWORD));
 
 			// Stop the spawned OfficeBuilding
 			OfficeBuildingManagerMBean manager = OfficeBuildingManager
-					.getOfficeBuildingManager(null, SPAWN_PORT);
+					.getOfficeBuildingManager(null, SPAWN_PORT, this.keyStore,
+							KEY_STORE_PASSWORD);
 			manager.stopOfficeBuilding(1000);
 
 			// Ensure the OfficeBuilding stopped
 			assertFalse("OfficeBuilding should be stopped",
 					OfficeBuildingManager.isOfficeBuildingAvailable(null,
-							SPAWN_PORT));
+							SPAWN_PORT, this.keyStore, KEY_STORE_PASSWORD));
 
 		} finally {
 			// Ensure process stopped
@@ -447,7 +475,7 @@ public class OfficeBuildingManagerTest extends TestCase {
 	private static void validateRemoteProcessRunning(JMXServiceURL serviceUrl)
 			throws IOException {
 		try {
-			JMXConnectorFactory.connect(serviceUrl);
+			connectToJmxAgent(serviceUrl);
 			fail("Security should prevent connection to running remote process");
 		} catch (SecurityException ex) {
 			assertEquals("Incorrect cause", "Bad credentials", ex.getMessage());
@@ -468,14 +496,14 @@ public class OfficeBuildingManagerTest extends TestCase {
 		while (System.currentTimeMillis() < endTime) {
 
 			try {
-				JMXConnectorFactory.connect(serviceUrl);
+				connectToJmxAgent(serviceUrl);
 				fail("Should not connect to stopped remote process");
-				
+
 			} catch (ConnectException ex) {
 				assertEquals("Incorrect cause", "Connection refused", ex
 						.getCause().getMessage());
 				return; // successfully identified as closed
-				
+
 			} catch (IOException ex) {
 				// Ignore and try again as process may not be fully stopped
 			}
@@ -483,9 +511,24 @@ public class OfficeBuildingManagerTest extends TestCase {
 			// Allow some time for process to complete
 			Thread.sleep(100);
 		}
-		
+
 		// As here process failed to stop in time
 		fail("Process took too long to stop");
+	}
+
+	/**
+	 * Connects to the JMX agent.
+	 * 
+	 * @param serviceUrl
+	 *            {@link JMXServiceURL}.
+	 * @return {@link JMXConnector}.
+	 */
+	private static JMXConnector connectToJmxAgent(JMXServiceURL serviceUrl)
+			throws IOException {
+		Map<String, Object> environment = new HashMap<String, Object>();
+		environment.put("com.sun.jndi.rmi.factory.socket",
+				new SslRMIClientSocketFactory());
+		return JMXConnectorFactory.connect(serviceUrl, environment);
 	}
 
 }

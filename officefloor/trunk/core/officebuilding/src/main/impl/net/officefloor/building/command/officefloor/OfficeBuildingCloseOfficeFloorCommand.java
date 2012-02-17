@@ -18,11 +18,15 @@
 
 package net.officefloor.building.command.officefloor;
 
+import java.io.File;
+
 import net.officefloor.building.command.OfficeFloorCommand;
 import net.officefloor.building.command.OfficeFloorCommandContext;
 import net.officefloor.building.command.OfficeFloorCommandEnvironment;
 import net.officefloor.building.command.OfficeFloorCommandFactory;
 import net.officefloor.building.command.OfficeFloorCommandParameter;
+import net.officefloor.building.command.parameters.KeyStoreOfficeFloorCommandParameterImpl;
+import net.officefloor.building.command.parameters.KeyStorePasswordOfficeFloorCommandParameterImpl;
 import net.officefloor.building.command.parameters.OfficeBuildingHostOfficeFloorCommandParameter;
 import net.officefloor.building.command.parameters.OfficeBuildingPortOfficeFloorCommandParameter;
 import net.officefloor.building.command.parameters.ProcessNameOfficeFloorCommandParameter;
@@ -59,6 +63,16 @@ public class OfficeBuildingCloseOfficeFloorCommand implements
 	private final ProcessNameOfficeFloorCommandParameter processName = new ProcessNameOfficeFloorCommandParameter();
 
 	/**
+	 * Trust store {@link File}.
+	 */
+	private final KeyStoreOfficeFloorCommandParameterImpl trustStore = new KeyStoreOfficeFloorCommandParameterImpl();
+
+	/**
+	 * Password to the trust store {@link File}.
+	 */
+	private final KeyStorePasswordOfficeFloorCommandParameterImpl trustStorePassword = new KeyStorePasswordOfficeFloorCommandParameterImpl();
+
+	/**
 	 * Stop maximum wait time.
 	 */
 	private final StopMaxWaitTimeOfficeFloorCommandParameter stopMaxWaitTime = new StopMaxWaitTimeOfficeFloorCommandParameter();
@@ -89,7 +103,8 @@ public class OfficeBuildingCloseOfficeFloorCommand implements
 	@Override
 	public OfficeFloorCommandParameter[] getParameters() {
 		return new OfficeFloorCommandParameter[] { this.officeBuildingHost,
-				this.officeBuildingPort, this.processName, this.stopMaxWaitTime };
+				this.officeBuildingPort, this.processName, this.trustStore,
+				this.trustStorePassword, this.stopMaxWaitTime };
 	}
 
 	@Override
@@ -108,11 +123,15 @@ public class OfficeBuildingCloseOfficeFloorCommand implements
 		int officeBuildingPort = this.officeBuildingPort
 				.getOfficeBuildingPort();
 		String processNamespace = this.processName.getProcessName();
+		File trustStore = this.trustStore.getKeyStore();
+		String trustStorePassword = this.trustStorePassword
+				.getKeyStorePassword();
 		long stopMaxWaitTime = this.stopMaxWaitTime.getStopMaxWaitTime();
 
 		// Create and return the managed process
 		return new CloseManagedProcess(officeBuildingHost, officeBuildingPort,
-				processNamespace, stopMaxWaitTime);
+				processNamespace, trustStore, trustStorePassword,
+				stopMaxWaitTime);
 	}
 
 	/**
@@ -136,6 +155,16 @@ public class OfficeBuildingCloseOfficeFloorCommand implements
 		private final String processNamespace;
 
 		/**
+		 * Location of the trust store {@link File}.
+		 */
+		private final String trustStoreLocation;
+
+		/**
+		 * Password to the trust store {@link File}.
+		 */
+		private final String trustStorePassword;
+
+		/**
 		 * Stop maximum wait time.
 		 */
 		private final long stopMaxWaitTime;
@@ -149,15 +178,21 @@ public class OfficeBuildingCloseOfficeFloorCommand implements
 		 *            {@link OfficeBuilding} port.
 		 * @param processNamespace
 		 *            {@link OfficeFloor} process name space.
+		 * @param trustStore
+		 *            Trust store {@link File}.
+		 * @param trustStorePassword
+		 *            Password to the trust store {@link File}.
 		 * @param stopMaxWaitTime
 		 *            Stop maximum wait time.
 		 */
 		public CloseManagedProcess(String officeBuildingHost,
 				int officeBuildingPort, String processNamespace,
-				long stopMaxWaitTime) {
+				File trustStore, String trustStorePassword, long stopMaxWaitTime) {
 			this.officeBuildingHost = officeBuildingHost;
 			this.officeBuildingPort = officeBuildingPort;
 			this.processNamespace = processNamespace;
+			this.trustStoreLocation = trustStore.getAbsolutePath();
+			this.trustStorePassword = trustStorePassword;
 			this.stopMaxWaitTime = stopMaxWaitTime;
 		}
 
@@ -176,7 +211,9 @@ public class OfficeBuildingCloseOfficeFloorCommand implements
 			// Obtain the OfficeBuilding manager
 			OfficeBuildingManagerMBean officeBuildingManager = OfficeBuildingManager
 					.getOfficeBuildingManager(this.officeBuildingHost,
-							this.officeBuildingPort);
+							this.officeBuildingPort, new File(
+									this.trustStoreLocation),
+							this.trustStorePassword);
 
 			// Close the OfficeFloor
 			String result = officeBuildingManager.closeOfficeFloor(

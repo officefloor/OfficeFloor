@@ -18,6 +18,7 @@
 
 package net.officefloor.building.command.officefloor;
 
+import java.io.File;
 import java.util.Properties;
 
 import net.officefloor.building.command.CommandLineBuilder;
@@ -30,6 +31,8 @@ import net.officefloor.building.command.parameters.ArtifactArgument;
 import net.officefloor.building.command.parameters.ClassPathOfficeFloorCommandParameter;
 import net.officefloor.building.command.parameters.JarOfficeFloorCommandParameter;
 import net.officefloor.building.command.parameters.JvmOptionOfficeFloorCommandParameter;
+import net.officefloor.building.command.parameters.KeyStoreOfficeFloorCommandParameterImpl;
+import net.officefloor.building.command.parameters.KeyStorePasswordOfficeFloorCommandParameterImpl;
 import net.officefloor.building.command.parameters.MultipleArtifactsOfficeFloorCommandParameter;
 import net.officefloor.building.command.parameters.OfficeBuildingHostOfficeFloorCommandParameter;
 import net.officefloor.building.command.parameters.OfficeBuildingPortOfficeFloorCommandParameter;
@@ -80,6 +83,16 @@ public class OfficeBuildingOpenOfficeFloorCommand implements
 	 * {@link Process} name.
 	 */
 	private final ProcessNameOfficeFloorCommandParameter processName = new ProcessNameOfficeFloorCommandParameter();
+
+	/**
+	 * Trust store {@link File}.
+	 */
+	private final KeyStoreOfficeFloorCommandParameterImpl trustStore = new KeyStoreOfficeFloorCommandParameterImpl();
+
+	/**
+	 * Password to the trust store {@link File}.
+	 */
+	private final KeyStorePasswordOfficeFloorCommandParameterImpl trustStorePassword = new KeyStorePasswordOfficeFloorCommandParameterImpl();
 
 	/**
 	 * {@link OfficeFloorSource} class name.
@@ -158,6 +171,7 @@ public class OfficeBuildingOpenOfficeFloorCommand implements
 	public OfficeFloorCommandParameter[] getParameters() {
 		return new OfficeFloorCommandParameter[] { this.officeBuildingHost,
 				this.officeBuildingPort, this.jvmOptions, this.processName,
+				this.trustStore, this.trustStorePassword,
 				this.officeFloorSource, this.officeFloorLocation,
 				this.officeFloorProperties, this.archives, this.artifacts,
 				this.classpath, this.officeName, this.workName, this.taskName,
@@ -195,6 +209,9 @@ public class OfficeBuildingOpenOfficeFloorCommand implements
 				.getOfficeBuildingHost();
 		int officeBuildingPort = this.officeBuildingPort
 				.getOfficeBuildingPort();
+		File trustStore = this.trustStore.getKeyStore();
+		String trustStorePassword = this.trustStorePassword
+				.getKeyStorePassword();
 
 		// Construct the arguments
 		CommandLineBuilder arguments = new CommandLineBuilder();
@@ -265,7 +282,8 @@ public class OfficeBuildingOpenOfficeFloorCommand implements
 
 		// Create and return managed process to open OfficeFloor
 		return new OpenManagedProcess(officeBuildingHost, officeBuildingPort,
-				arguments.getCommandLine(), outputSuffix.toString());
+				trustStore, trustStorePassword, arguments.getCommandLine(),
+				outputSuffix.toString());
 	}
 
 	/**
@@ -285,6 +303,16 @@ public class OfficeBuildingOpenOfficeFloorCommand implements
 		private final int officeBuildingPort;
 
 		/**
+		 * Location of the trust store {@link File}.
+		 */
+		private final String trustStoreLocation;
+
+		/**
+		 * Password to the trust store {@link File}.
+		 */
+		private final String trustStorePassword;
+
+		/**
 		 * Arguments to open the {@link OfficeFloor}.
 		 */
 		private final String[] arguments;
@@ -301,6 +329,10 @@ public class OfficeBuildingOpenOfficeFloorCommand implements
 		 *            {@link OfficeBuilding} host.
 		 * @param officeBuildingPort
 		 *            {@link OfficeBuilding} port.
+		 * @param trustStore
+		 *            Trust store {@link File}.
+		 * @param trustStorePassword
+		 *            Password to the trust store {@link File}.
 		 * @param arguments
 		 *            Arguments to open the {@link OfficeFloor}.
 		 * @param outputSuffix
@@ -308,9 +340,13 @@ public class OfficeBuildingOpenOfficeFloorCommand implements
 		 *            {@link OfficeFloor}.
 		 */
 		public OpenManagedProcess(String officeBuildingHost,
-				int officeBuildingPort, String[] arguments, String outputSuffix) {
+				int officeBuildingPort, File trustStore,
+				String trustStorePassword, String[] arguments,
+				String outputSuffix) {
 			this.officeBuildingHost = officeBuildingHost;
 			this.officeBuildingPort = officeBuildingPort;
+			this.trustStoreLocation = trustStore.getAbsolutePath();
+			this.trustStorePassword = trustStorePassword;
 			this.arguments = arguments;
 			this.outputSuffix = outputSuffix;
 		}
@@ -330,7 +366,9 @@ public class OfficeBuildingOpenOfficeFloorCommand implements
 			// Obtain the OfficeBuilding manager
 			OfficeBuildingManagerMBean manager = OfficeBuildingManager
 					.getOfficeBuildingManager(this.officeBuildingHost,
-							this.officeBuildingPort);
+							this.officeBuildingPort, new File(
+									this.trustStoreLocation),
+							this.trustStorePassword);
 
 			// Open the OfficeFloor
 			String processNamespace = manager.openOfficeFloor(this.arguments);

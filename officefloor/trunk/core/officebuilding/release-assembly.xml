@@ -36,10 +36,6 @@
 		<dependencySet>
 			<!-- OfficeFloor core jars -->
 			<outputDirectory>lib</outputDirectory>
-			<excludes>
-				<exclude>junit:*</exclude>
-				<exclude>easymock:*</exclude>
-			</excludes>
 		</dependencySet>
 	</dependencySets>
 </assembly>

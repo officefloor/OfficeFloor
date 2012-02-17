@@ -212,7 +212,13 @@ public class ProcessShell implements ManagedProcessContext, ProcessShellMBean {
 							}
 						});
 
-				// Use password to secure JMX Connector Server
+				/*
+				 * Use password to secure JMX Connector Server.
+				 * 
+				 * No need to encrypt information (i.e. SSL not needed) as only
+				 * the parent process will be provided the password and will be
+				 * interprocess communication on the same machine.
+				 */
 				UUID passwordUuid = UUID.randomUUID();
 				String userName = processName;
 				String password = String.valueOf(passwordUuid
@@ -244,13 +250,13 @@ public class ProcessShell implements ManagedProcessContext, ProcessShellMBean {
 				// Create instance as context
 				ProcessShell context = new ProcessShell(processName,
 						connectorServer, toParentPipe);
-				
+
 				// Initialise the managed process
 				managedProcess.init(context);
 
 				// Initialised so register the process shell MBean
 				context.registerMBean(context, PROCESS_SHELL_OBJECT_NAME);
-				
+
 				// Wait on parent to register initialised
 				fromParentObjectPipe.readBoolean();
 

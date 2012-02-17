@@ -18,11 +18,15 @@
 
 package net.officefloor.building.command.officefloor;
 
+import java.io.File;
+
 import net.officefloor.building.command.OfficeFloorCommand;
 import net.officefloor.building.command.OfficeFloorCommandContext;
 import net.officefloor.building.command.OfficeFloorCommandEnvironment;
 import net.officefloor.building.command.OfficeFloorCommandFactory;
 import net.officefloor.building.command.OfficeFloorCommandParameter;
+import net.officefloor.building.command.parameters.KeyStoreOfficeFloorCommandParameterImpl;
+import net.officefloor.building.command.parameters.KeyStorePasswordOfficeFloorCommandParameterImpl;
 import net.officefloor.building.command.parameters.OfficeBuildingHostOfficeFloorCommandParameter;
 import net.officefloor.building.command.parameters.OfficeBuildingPortOfficeFloorCommandParameter;
 import net.officefloor.building.command.parameters.ProcessNameOfficeFloorCommandParameter;
@@ -58,6 +62,16 @@ public class OfficeBuildingListOfficeFloorCommand implements
 	 */
 	private final ProcessNameOfficeFloorCommandParameter processName = new ProcessNameOfficeFloorCommandParameter();
 
+	/**
+	 * Trust store {@link File}.
+	 */
+	private final KeyStoreOfficeFloorCommandParameterImpl trustStore = new KeyStoreOfficeFloorCommandParameterImpl();
+
+	/**
+	 * Password to the trust store {@link File}.
+	 */
+	private final KeyStorePasswordOfficeFloorCommandParameterImpl trustStorePassword = new KeyStorePasswordOfficeFloorCommandParameterImpl();
+
 	/*
 	 * ======================= OfficeFloorCommandFactory ===================
 	 */
@@ -84,7 +98,8 @@ public class OfficeBuildingListOfficeFloorCommand implements
 	@Override
 	public OfficeFloorCommandParameter[] getParameters() {
 		return new OfficeFloorCommandParameter[] { this.officeBuildingHost,
-				this.officeBuildingPort, this.processName };
+				this.officeBuildingPort, this.processName, this.trustStore,
+				this.trustStorePassword };
 	}
 
 	@Override
@@ -103,10 +118,13 @@ public class OfficeBuildingListOfficeFloorCommand implements
 		int officeBuildingPort = this.officeBuildingPort
 				.getOfficeBuildingPort();
 		String processName = this.processName.getProcessName();
+		File trustStore = this.trustStore.getKeyStore();
+		String trustStorePassword = this.trustStorePassword
+				.getKeyStorePassword();
 
 		// Return the list managed process
 		return new ListManagedProcess(officeBuildingHost, officeBuildingPort,
-				processName);
+				processName, trustStore, trustStorePassword);
 	}
 
 	/**
@@ -131,6 +149,16 @@ public class OfficeBuildingListOfficeFloorCommand implements
 		private final String processNamespace;
 
 		/**
+		 * Location of the trust store {@link File}.
+		 */
+		private final String trustStoreLocation;
+
+		/**
+		 * Password to the trust store {@link File}.
+		 */
+		private final String trustStorePassword;
+
+		/**
 		 * Initiate.
 		 * 
 		 * @param officeBuildingHost
@@ -139,12 +167,19 @@ public class OfficeBuildingListOfficeFloorCommand implements
 		 *            {@link OfficeBuilding} port.
 		 * @param processNamespace
 		 *            {@link Process} namespace.
+		 * @param trustStore
+		 *            Trust store {@link File}.
+		 * @param trustStorePassword
+		 *            Password to the trust store {@link File}.
 		 */
 		public ListManagedProcess(String officeBuildingHost,
-				int officeBuildingPort, String processNamespace) {
+				int officeBuildingPort, String processNamespace,
+				File trustStore, String trustStorePassword) {
 			this.officeBuildingHost = officeBuildingHost;
 			this.officeBuildingPort = officeBuildingPort;
 			this.processNamespace = processNamespace;
+			this.trustStoreLocation = trustStore.getAbsolutePath();
+			this.trustStorePassword = trustStorePassword;
 		}
 
 		/*
@@ -164,13 +199,17 @@ public class OfficeBuildingListOfficeFloorCommand implements
 				// List the processes
 				OfficeBuildingManagerMBean officeBuildingManager = OfficeBuildingManager
 						.getOfficeBuildingManager(this.officeBuildingHost,
-								this.officeBuildingPort);
+								this.officeBuildingPort, new File(
+										this.trustStoreLocation),
+								this.trustStorePassword);
 				listing = officeBuildingManager.listProcessNamespaces();
 			} else {
 				// List the tasks of the process name space
 				OfficeFloorManagerMBean officeFloorManager = OfficeBuildingManager
 						.getOfficeFloorManager(this.officeBuildingHost,
-								this.officeBuildingPort, this.processNamespace);
+								this.officeBuildingPort, this.processNamespace,
+								new File(this.trustStoreLocation),
+								this.trustStorePassword);
 				listing = officeFloorManager.listTasks();
 			}
 

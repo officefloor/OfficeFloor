@@ -18,46 +18,33 @@
 
 package net.officefloor.building.command.parameters;
 
+import java.io.File;
+
 import net.officefloor.building.command.OfficeFloorCommandParameter;
 
 /**
- * {@link OfficeFloorCommandParameter} for the stop max wait time.
+ * {@link OfficeFloorCommandParameter} for the password to the key store
+ * {@link File}.
  * 
  * @author Daniel Sagenschneider
  */
-public class StopMaxWaitTimeOfficeFloorCommandParameter extends
+public class KeyStorePasswordOfficeFloorCommandParameterImpl extends
 		AbstractSingleValueOfficeFloorCommandParameter {
-
-	/**
-	 * Default stop wait time.
-	 */
-	public static final long DEFAULT_STOP_WAIT_TIME = 10000;
 
 	/**
 	 * Initiate.
 	 */
-	public StopMaxWaitTimeOfficeFloorCommandParameter() {
-		super("stop_max_wait_time", null,
-				"Maximum time in milliseconds to wait to stop. Default is "
-						+ DEFAULT_STOP_WAIT_TIME);
+	public KeyStorePasswordOfficeFloorCommandParameterImpl() {
+		super("key_store_password", "kp", "Password to the key store file");
 	}
 
 	/**
-	 * Obtains the stop max wait time.
+	 * Obtains password to the key store {@link File}.
 	 * 
-	 * @return Stop max wait time.
+	 * @return Password to the key store {@link File}.
 	 */
-	public long getStopMaxWaitTime() {
-
-		// Obtain the stop max wait time
-		long stopMaxWaitTime = DEFAULT_STOP_WAIT_TIME;
-		String value = this.getValue();
-		if (value != null) {
-			stopMaxWaitTime = Long.parseLong(value);
-		}
-
-		// Return the stop max wait time
-		return stopMaxWaitTime;
+	public String getKeyStorePassword() {
+		return this.getValue();
 	}
 
 }

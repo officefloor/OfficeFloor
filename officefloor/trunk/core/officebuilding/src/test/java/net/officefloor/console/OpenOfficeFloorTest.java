@@ -54,7 +54,7 @@ public class OpenOfficeFloorTest extends AbstractConsoleMainTestCase {
 		File tempFile = File.createTempFile(this.getName(), "txt");
 
 		// Run the OfficeFloor and invoke task
-		String openCommand = "--process-name "
+		String openCommand = "--process_name "
 				+ PROCESS_NAME
 				+ " --office OFFICE"
 				+ " --work SECTION.WORK"
@@ -106,7 +106,7 @@ public class OpenOfficeFloorTest extends AbstractConsoleMainTestCase {
 				" -of,--officefloor <arg>          Location of the OfficeFloor           ",
 				" -ofs,--officefloorsource <arg>   OfficeFloorSource",
 				" --parameter <arg>                Parameter for the Task                ",
-				" --process-name <arg>             Process name space. Default is Process",
+				" --process_name <arg>             Process name space. Default is Process",
 				" --property <arg>                 Property for the OfficeFloor in the form of name=value",
 				" -t,--task <arg>                  Name of the Task                      ",
 				" -w,--work <arg>                  Name of the Work                      ");

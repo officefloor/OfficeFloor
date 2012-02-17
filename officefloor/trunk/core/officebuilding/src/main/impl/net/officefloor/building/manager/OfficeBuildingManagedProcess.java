@@ -18,6 +18,7 @@
 
 package net.officefloor.building.manager;
 
+import java.io.File;
 import java.util.Properties;
 
 import net.officefloor.building.process.ManagedProcess;
@@ -37,30 +38,47 @@ public class OfficeBuildingManagedProcess implements ManagedProcess {
 	private final int port;
 
 	/**
+	 * Location of the key store {@link File}.
+	 */
+	private final String keyStoreLocation;
+
+	/**
+	 * Password to the key store {@link File}.
+	 */
+	private final String keyStorePassword;
+
+	/**
 	 * Environment {@link Properties}.
 	 */
 	private final Properties environment;
 
 	/**
-	 * {@link ManagedProcessContext}.s
+	 * {@link ManagedProcessContext}.
 	 */
 	private ManagedProcessContext context;
 
 	/**
 	 * {@link OfficeBuildingManager}.
 	 */
-	private OfficeBuildingManager manager;
+	private OfficeBuildingManagerMBean manager;
 
 	/**
 	 * Initiate.
 	 * 
 	 * @param port
 	 *            Port for the {@link OfficeBuilding}.
+	 * @param keyStore
+	 *            Key store {@link File}.
+	 * @param keyStorePassword
+	 *            Password to the key store {@link File}.
 	 * @param environment
 	 *            Environment {@link Properties}.
 	 */
-	public OfficeBuildingManagedProcess(int port, Properties environment) {
+	public OfficeBuildingManagedProcess(int port, File keyStore,
+			String keyStorePassword, Properties environment) {
 		this.port = port;
+		this.keyStoreLocation = keyStore.getAbsolutePath();
+		this.keyStorePassword = keyStorePassword;
 		this.environment = environment;
 	}
 
@@ -74,6 +92,7 @@ public class OfficeBuildingManagedProcess implements ManagedProcess {
 
 		// Start the OfficeBuilding
 		this.manager = OfficeBuildingManager.startOfficeBuilding(this.port,
+				new File(this.keyStoreLocation), this.keyStorePassword,
 				this.environment, null);
 	}
 
