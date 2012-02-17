@@ -27,6 +27,11 @@ import net.officefloor.building.command.OfficeFloorCommandParameter;
  */
 public class UsernameOfficeFloorCommandParameterImpl extends
 		AbstractSingleValueOfficeFloorCommandParameter {
+	
+	/**
+	 * Default user name.
+	 */
+	public static final String DEFAULT_USER_NAME = "admin";
 
 	/**
 	 * Initiate.
