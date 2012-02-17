@@ -29,7 +29,9 @@ import net.officefloor.building.command.parameters.KeyStoreOfficeFloorCommandPar
 import net.officefloor.building.command.parameters.KeyStorePasswordOfficeFloorCommandParameterImpl;
 import net.officefloor.building.command.parameters.OfficeBuildingHostOfficeFloorCommandParameter;
 import net.officefloor.building.command.parameters.OfficeBuildingPortOfficeFloorCommandParameter;
+import net.officefloor.building.command.parameters.PasswordOfficeFloorCommandParameterImpl;
 import net.officefloor.building.command.parameters.ProcessNameOfficeFloorCommandParameter;
+import net.officefloor.building.command.parameters.UsernameOfficeFloorCommandParameterImpl;
 import net.officefloor.building.manager.OfficeBuildingManager;
 import net.officefloor.building.manager.OfficeBuildingManagerMBean;
 import net.officefloor.building.process.ManagedProcess;
@@ -72,6 +74,16 @@ public class OfficeBuildingListOfficeFloorCommand implements
 	 */
 	private final KeyStorePasswordOfficeFloorCommandParameterImpl trustStorePassword = new KeyStorePasswordOfficeFloorCommandParameterImpl();
 
+	/**
+	 * User name.
+	 */
+	private final UsernameOfficeFloorCommandParameterImpl userName = new UsernameOfficeFloorCommandParameterImpl();
+
+	/**
+	 * Password.
+	 */
+	private final PasswordOfficeFloorCommandParameterImpl password = new PasswordOfficeFloorCommandParameterImpl();
+
 	/*
 	 * ======================= OfficeFloorCommandFactory ===================
 	 */
@@ -99,7 +111,7 @@ public class OfficeBuildingListOfficeFloorCommand implements
 	public OfficeFloorCommandParameter[] getParameters() {
 		return new OfficeFloorCommandParameter[] { this.officeBuildingHost,
 				this.officeBuildingPort, this.processName, this.trustStore,
-				this.trustStorePassword };
+				this.trustStorePassword, this.userName, this.password };
 	}
 
 	@Override
@@ -121,10 +133,12 @@ public class OfficeBuildingListOfficeFloorCommand implements
 		File trustStore = this.trustStore.getKeyStore();
 		String trustStorePassword = this.trustStorePassword
 				.getKeyStorePassword();
+		String userName = this.userName.getUserName();
+		String password = this.password.getPassword();
 
 		// Return the list managed process
 		return new ListManagedProcess(officeBuildingHost, officeBuildingPort,
-				processName, trustStore, trustStorePassword);
+				processName, trustStore, trustStorePassword, userName, password);
 	}
 
 	/**
@@ -159,6 +173,16 @@ public class OfficeBuildingListOfficeFloorCommand implements
 		private final String trustStorePassword;
 
 		/**
+		 * User name to connect.
+		 */
+		private final String userName;
+
+		/**
+		 * Password to connect.
+		 */
+		private final String password;
+
+		/**
 		 * Initiate.
 		 * 
 		 * @param officeBuildingHost
@@ -171,15 +195,22 @@ public class OfficeBuildingListOfficeFloorCommand implements
 		 *            Trust store {@link File}.
 		 * @param trustStorePassword
 		 *            Password to the trust store {@link File}.
+		 * @param userName
+		 *            User name to connect.
+		 * @param password
+		 *            Password to connect.
 		 */
 		public ListManagedProcess(String officeBuildingHost,
 				int officeBuildingPort, String processNamespace,
-				File trustStore, String trustStorePassword) {
+				File trustStore, String trustStorePassword, String userName,
+				String password) {
 			this.officeBuildingHost = officeBuildingHost;
 			this.officeBuildingPort = officeBuildingPort;
 			this.processNamespace = processNamespace;
 			this.trustStoreLocation = trustStore.getAbsolutePath();
 			this.trustStorePassword = trustStorePassword;
+			this.userName = userName;
+			this.password = password;
 		}
 
 		/*
@@ -201,7 +232,8 @@ public class OfficeBuildingListOfficeFloorCommand implements
 						.getOfficeBuildingManager(this.officeBuildingHost,
 								this.officeBuildingPort, new File(
 										this.trustStoreLocation),
-								this.trustStorePassword);
+								this.trustStorePassword, this.userName,
+								this.password);
 				listing = officeBuildingManager.listProcessNamespaces();
 			} else {
 				// List the tasks of the process name space
@@ -209,7 +241,8 @@ public class OfficeBuildingListOfficeFloorCommand implements
 						.getOfficeFloorManager(this.officeBuildingHost,
 								this.officeBuildingPort, this.processNamespace,
 								new File(this.trustStoreLocation),
-								this.trustStorePassword);
+								this.trustStorePassword, this.userName,
+								this.password);
 				listing = officeFloorManager.listTasks();
 			}
 

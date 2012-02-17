@@ -19,51 +19,39 @@
 package net.officefloor.building.command.parameters;
 
 import net.officefloor.building.command.OfficeFloorCommandParameter;
-import net.officefloor.console.OfficeBuilding;
 
 /**
- * {@link OfficeFloorCommandParameter} for the {@link OfficeBuilding} port.
+ * {@link OfficeFloorCommandParameter} for the password.
  * 
  * @author Daniel Sagenschneider
  */
-public class OfficeBuildingPortOfficeFloorCommandParameter extends
+public class PasswordOfficeFloorCommandParameterImpl extends
 		AbstractSingleValueOfficeFloorCommandParameter {
-
-	/**
-	 * Parameter name for the {@link OfficeBuilding} port.
-	 */
-	public static final String PARAMETER_OFFICE_BUILDING_PORT = "office_building_port";
-
-	/**
-	 * Default {@link OfficeBuilding} port.
-	 */
-	public static final int DEFAULT_OFFICE_BUILDING_PORT = 13778;
 
 	/**
 	 * Initiate.
 	 */
-	public OfficeBuildingPortOfficeFloorCommandParameter() {
-		super(PARAMETER_OFFICE_BUILDING_PORT, null,
-				"Port for the OfficeBuilding. Default is "
-						+ DEFAULT_OFFICE_BUILDING_PORT);
+	public PasswordOfficeFloorCommandParameterImpl() {
+		super("password", "p", "Password");
 	}
 
 	/**
-	 * Obtains the {@link OfficeBuilding} port.
+	 * Obtains password.
 	 * 
-	 * @return {@link OfficeBuilding} port.
+	 * @return Password.
+	 * @throws IllegalArgumentException
+	 *             If no password provided.
 	 */
-	public int getOfficeBuildingPort() {
+	public String getPassword() throws IllegalArgumentException {
 
-		// Obtain the port
-		int port = DEFAULT_OFFICE_BUILDING_PORT;
-		String portValue = this.getValue();
-		if (portValue != null) {
-			port = Integer.parseInt(portValue);
+		// Ensure have password
+		String password = this.getValue();
+		if ((password == null) || (password.trim().length() == 0)) {
+			throw new IllegalArgumentException("No password provided");
 		}
 
-		// Return the port
-		return port;
+		// Return the password
+		return password;
 	}
 
 }

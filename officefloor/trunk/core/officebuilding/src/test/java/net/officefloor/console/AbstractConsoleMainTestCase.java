@@ -20,12 +20,14 @@ package net.officefloor.console;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.PrintStream;
 
 import net.officefloor.building.command.OfficeFloorCommand;
 import net.officefloor.building.console.AbstractConsoleTestCase;
 import net.officefloor.building.console.OfficeFloorConsoleFactory;
 import net.officefloor.building.console.OfficeFloorConsoleMain;
+import net.officefloor.frame.test.OfficeFrameTestCase;
 
 /**
  * Abstract functionality for testing {@link OfficeFloorConsoleMain}.
@@ -45,6 +47,29 @@ public abstract class AbstractConsoleMainTestCase extends
 	 * setup.
 	 */
 	private final boolean isEnsureOfficeBuildingNotRunningForTest;
+
+	/**
+	 * Trust store {@link File}.
+	 */
+	public static File getTrustStore() throws FileNotFoundException {
+		return new OfficeFrameTestCase() {
+		}.findFile("src/main/resources/config/keystore.jks");
+	}
+
+	/**
+	 * Password to the trust store {@link File}.
+	 */
+	public static final String TRUST_STORE_PASSWORD = "changeit";
+
+	/**
+	 * Mock user name.
+	 */
+	public static final String MOCK_USER_NAME = "username";
+
+	/**
+	 * Mock password.
+	 */
+	public static final String MOCK_PASSWORD = "password";
 
 	/**
 	 * Initiate.
@@ -110,6 +135,25 @@ public abstract class AbstractConsoleMainTestCase extends
 
 		// Remove pipes
 		super.tearDown();
+	}
+
+	/**
+	 * Does the {@link OfficeFloorCommand} with security keys.
+	 * 
+	 * @param arguments
+	 *            Arguments for {@link OfficeBuilding}.
+	 */
+	protected void doSecureMain(String arguments) throws Throwable {
+
+		// Obtain the key store details
+		File keyStore = this.findFile("src/main/resources/config/keystore.jks");
+		String keyStorePassword = "changeit";
+		String keyStoreArguments = "--key_store " + keyStore.getAbsolutePath()
+				+ " --key_store_password " + keyStorePassword + " --username "
+				+ MOCK_USER_NAME + " --password " + MOCK_PASSWORD;
+
+		// Execure the secure command
+		this.doMain(keyStoreArguments + " " + arguments);
 	}
 
 	/**
