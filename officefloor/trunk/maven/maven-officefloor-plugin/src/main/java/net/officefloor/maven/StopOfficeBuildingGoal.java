@@ -70,7 +70,9 @@ public class StopOfficeBuildingGoal extends AbstractGoal {
 			officeBuildingManager = OfficeBuildingManager
 					.getOfficeBuildingManager(null, this.port.intValue(),
 							StartOfficeBuildingGoal.getKeyStoreFile(),
-							StartOfficeBuildingGoal.KEY_STORE_PASSWORD);
+							StartOfficeBuildingGoal.KEY_STORE_PASSWORD,
+							StartOfficeBuildingGoal.USER_NAME,
+							StartOfficeBuildingGoal.PASSWORD);
 		} catch (Throwable ex) {
 			throw this.newMojoExecutionException("Failed accessing the "
 					+ OfficeBuilding.class.getSimpleName(), ex);

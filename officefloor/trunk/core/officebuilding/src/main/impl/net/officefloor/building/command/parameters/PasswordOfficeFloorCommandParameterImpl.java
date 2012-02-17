@@ -27,6 +27,11 @@ import net.officefloor.building.command.OfficeFloorCommandParameter;
  */
 public class PasswordOfficeFloorCommandParameterImpl extends
 		AbstractSingleValueOfficeFloorCommandParameter {
+	
+	/**
+	 * Default password.
+	 */
+	public static final String DEFAULT_PASSWORD = "password";
 
 	/**
 	 * Initiate.

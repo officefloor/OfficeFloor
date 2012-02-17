@@ -31,7 +31,9 @@ import net.officefloor.building.command.RemoteRepositoryUrlsOfficeFloorCommandPa
 import net.officefloor.building.command.parameters.KeyStoreOfficeFloorCommandParameterImpl;
 import net.officefloor.building.command.parameters.KeyStorePasswordOfficeFloorCommandParameterImpl;
 import net.officefloor.building.command.parameters.OfficeBuildingPortOfficeFloorCommandParameter;
+import net.officefloor.building.command.parameters.PasswordOfficeFloorCommandParameterImpl;
 import net.officefloor.building.command.parameters.RemoteRepositoryUrlsOfficeFloorCommandParameterImpl;
+import net.officefloor.building.command.parameters.UsernameOfficeFloorCommandParameterImpl;
 import net.officefloor.building.manager.OfficeBuildingManager;
 import net.officefloor.building.process.ProcessConfiguration;
 import net.officefloor.console.OfficeBuilding;
@@ -120,6 +122,16 @@ public class StartOfficeBuildingGoal extends AbstractGoal {
 	public static final String KEY_STORE_PASSWORD = KeyStorePasswordOfficeFloorCommandParameterImpl.DEFAULT_KEY_STORE_PASSWORD;
 
 	/**
+	 * Client user name.
+	 */
+	public static final String USER_NAME = UsernameOfficeFloorCommandParameterImpl.DEFAULT_USER_NAME;
+
+	/**
+	 * Client password.
+	 */
+	public static final String PASSWORD = PasswordOfficeFloorCommandParameterImpl.DEFAULT_PASSWORD;
+
+	/**
 	 * Ensures the {@link OfficeBuilding} is running on the
 	 * {@link #DEFAULT_OFFICE_BUILDING_PORT}.
 	 * 
@@ -146,7 +158,7 @@ public class StartOfficeBuildingGoal extends AbstractGoal {
 		// Ensure the OfficeBuilding is available
 		if (!OfficeBuildingManager.isOfficeBuildingAvailable(null,
 				DEFAULT_OFFICE_BUILDING_PORT.intValue(), getKeyStoreFile(),
-				KEY_STORE_PASSWORD)) {
+				KEY_STORE_PASSWORD, USER_NAME, PASSWORD)) {
 
 			// OfficeBuilding not available, so start it
 			StartOfficeBuildingGoal.createStartOfficeBuildingGoal(project,
@@ -342,8 +354,8 @@ public class StartOfficeBuildingGoal extends AbstractGoal {
 		// Start the OfficeBuilding
 		try {
 			OfficeBuildingManager.spawnOfficeBuilding(this.port.intValue(),
-					getKeyStoreFile(), KEY_STORE_PASSWORD, environment,
-					configuration);
+					getKeyStoreFile(), KEY_STORE_PASSWORD, USER_NAME, PASSWORD,
+					environment, configuration);
 		} catch (Throwable ex) {
 			// Provide details of the failure
 			final String MESSAGE = "Failed starting the "
