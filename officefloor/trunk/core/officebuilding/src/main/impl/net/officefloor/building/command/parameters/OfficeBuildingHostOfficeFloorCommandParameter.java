@@ -32,7 +32,7 @@ public class OfficeBuildingHostOfficeFloorCommandParameter extends
 	/**
 	 * Parameter name for the {@link OfficeBuilding} host.
 	 */
-	public static final String PARAMETER_OFFICE_BUILDING_HOST = "office-building-host";
+	public static final String PARAMETER_OFFICE_BUILDING_HOST = "office_building_host";
 
 	/**
 	 * Initiate.

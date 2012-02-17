@@ -32,7 +32,7 @@ public interface LocalRepositoryOfficeFloorCommandParameter extends
 	/**
 	 * Parameter name for the local repository.
 	 */
-	String PARAMETER_LOCAL_REPOSITORY = "local-repository";
+	String PARAMETER_LOCAL_REPOSITORY = "local_repository";
 
 	/**
 	 * Obtains the local repository.

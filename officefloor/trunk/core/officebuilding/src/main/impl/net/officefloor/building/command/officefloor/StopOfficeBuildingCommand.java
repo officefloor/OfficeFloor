@@ -18,11 +18,15 @@
 
 package net.officefloor.building.command.officefloor;
 
+import java.io.File;
+
 import net.officefloor.building.command.OfficeFloorCommand;
 import net.officefloor.building.command.OfficeFloorCommandContext;
 import net.officefloor.building.command.OfficeFloorCommandEnvironment;
 import net.officefloor.building.command.OfficeFloorCommandFactory;
 import net.officefloor.building.command.OfficeFloorCommandParameter;
+import net.officefloor.building.command.parameters.KeyStoreOfficeFloorCommandParameterImpl;
+import net.officefloor.building.command.parameters.KeyStorePasswordOfficeFloorCommandParameterImpl;
 import net.officefloor.building.command.parameters.OfficeBuildingHostOfficeFloorCommandParameter;
 import net.officefloor.building.command.parameters.OfficeBuildingPortOfficeFloorCommandParameter;
 import net.officefloor.building.command.parameters.StopMaxWaitTimeOfficeFloorCommandParameter;
@@ -49,6 +53,16 @@ public class StopOfficeBuildingCommand implements OfficeFloorCommandFactory,
 	 * {@link OfficeBuilding} port.
 	 */
 	private final OfficeBuildingPortOfficeFloorCommandParameter officeBuildingPort = new OfficeBuildingPortOfficeFloorCommandParameter();
+
+	/**
+	 * Trust store {@link File}.
+	 */
+	private final KeyStoreOfficeFloorCommandParameterImpl trustStore = new KeyStoreOfficeFloorCommandParameterImpl();
+
+	/**
+	 * Password to the trust store {@link File}.
+	 */
+	private final KeyStorePasswordOfficeFloorCommandParameterImpl trustStorePassword = new KeyStorePasswordOfficeFloorCommandParameterImpl();
 
 	/**
 	 * Stop max wait time.
@@ -81,7 +95,8 @@ public class StopOfficeBuildingCommand implements OfficeFloorCommandFactory,
 	@Override
 	public OfficeFloorCommandParameter[] getParameters() {
 		return new OfficeFloorCommandParameter[] { this.officeBuildingHost,
-				this.officeBuildingPort, this.stopMaxWaitTime };
+				this.officeBuildingPort, this.trustStore,
+				this.trustStorePassword, this.stopMaxWaitTime };
 	}
 
 	@Override
@@ -99,11 +114,15 @@ public class StopOfficeBuildingCommand implements OfficeFloorCommandFactory,
 				.getOfficeBuildingHost();
 		int officeBuildingPort = this.officeBuildingPort
 				.getOfficeBuildingPort();
+		File trustStore = this.trustStore.getKeyStore();
+		String trustStorePassword = this.trustStorePassword
+				.getKeyStorePassword();
 		long stopMaxWaitTime = this.stopMaxWaitTime.getStopMaxWaitTime();
 
 		// Create and return process to stop the OfficeBuilding
 		return new StopOfficeBuildingManagedProcess(officeBuildingHost,
-				officeBuildingPort, stopMaxWaitTime);
+				officeBuildingPort, trustStore, trustStorePassword,
+				stopMaxWaitTime);
 	}
 
 	/**
@@ -123,6 +142,16 @@ public class StopOfficeBuildingCommand implements OfficeFloorCommandFactory,
 		private final int officeBuildingPort;
 
 		/**
+		 * Location of the trust store {@link File}.
+		 */
+		private final String trustStoreLocation;
+
+		/**
+		 * Password to the trust store {@link File}.
+		 */
+		private final String trustStorePassword;
+
+		/**
 		 * Stop max wait time.
 		 */
 		private final long stopMaxWaitTime;
@@ -134,13 +163,20 @@ public class StopOfficeBuildingCommand implements OfficeFloorCommandFactory,
 		 *            {@link OfficeBuilding} host.
 		 * @param officeBuildingPort
 		 *            {@link OfficeBuilding} port.
+		 * @param trustStore
+		 *            Trust store {@link File}.
+		 * @param trustStorePassword
+		 *            Password to the trust store {@link File}.
 		 * @param stopMaxWaitTime
 		 *            Stop max wait time.
 		 */
 		public StopOfficeBuildingManagedProcess(String officeBuildingHost,
-				int officeBuildingPort, long stopMaxWaitTime) {
+				int officeBuildingPort, File trustStore,
+				String trustStorePassword, long stopMaxWaitTime) {
 			this.officeBuildingHost = officeBuildingHost;
 			this.officeBuildingPort = officeBuildingPort;
+			this.trustStoreLocation = trustStore.getAbsolutePath();
+			this.trustStorePassword = trustStorePassword;
 			this.stopMaxWaitTime = stopMaxWaitTime;
 		}
 
@@ -159,7 +195,9 @@ public class StopOfficeBuildingCommand implements OfficeFloorCommandFactory,
 			// Stop the OfficeBuilding
 			OfficeBuildingManagerMBean manager = OfficeBuildingManager
 					.getOfficeBuildingManager(this.officeBuildingHost,
-							this.officeBuildingPort);
+							this.officeBuildingPort, new File(
+									this.trustStoreLocation),
+							this.trustStorePassword);
 			String stopDetails = manager
 					.stopOfficeBuilding(this.stopMaxWaitTime);
 

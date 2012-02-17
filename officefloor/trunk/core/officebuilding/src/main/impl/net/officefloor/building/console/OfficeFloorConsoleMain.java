@@ -21,6 +21,9 @@ package net.officefloor.building.console;
 import java.io.File;
 import java.io.FileReader;
 import java.io.InputStreamReader;
+import java.io.Reader;
+import java.io.StringReader;
+import java.io.StringWriter;
 import java.util.Properties;
 
 import net.officefloor.building.command.OfficeFloorCommand;
@@ -89,7 +92,8 @@ public final class OfficeFloorConsoleMain {
 		final String[] INVALID_CALL_FROM_SCRIPT = new String[] {
 				"ERROR: Invalid call from script.",
 				"",
-				"usage: java ... net.officefloor.building.console.OfficeFloorConsoleMain <script> <factory> <\"run\"|\"start\"> <args>" };
+				"usage: java ... " + OfficeFloorConsoleMain.class.getName()
+						+ " <script> <factory> <\"run\"|\"start\"> <args>" };
 
 		// Ensure appropriate number of arguments to run/start console
 		final int SCRIPT_INDEX = 0;
@@ -124,7 +128,20 @@ public final class OfficeFloorConsoleMain {
 				PROPERTIES_FILE_RELATIVE_PATH);
 		if (propertiesFile.isFile()) {
 			// Load the properties to environment
-			environment.load(new FileReader(propertiesFile));
+			StringWriter propertiesFileContent = new StringWriter();
+			Reader propertiesFileReader = new FileReader(propertiesFile);
+			for (int character = propertiesFileReader.read(); character >= 0; character = propertiesFileReader
+					.read()) {
+				propertiesFileContent.write(character);
+			}
+
+			// Replace OFFICE_FLOOR_HOME to allow absolute configuration
+			String propertiesContent = propertiesFileContent.toString()
+					.replace("${" + OFFICE_FLOOR_HOME + "}", officeFloorHome);
+
+			// Load the properties
+			environment.load(new StringReader(propertiesContent));
+
 		} else {
 			// Warn no properties file available
 			System.err

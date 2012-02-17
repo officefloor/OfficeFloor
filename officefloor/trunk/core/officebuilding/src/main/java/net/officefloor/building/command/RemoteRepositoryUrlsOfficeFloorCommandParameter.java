@@ -30,7 +30,7 @@ public interface RemoteRepositoryUrlsOfficeFloorCommandParameter extends
 	/**
 	 * Parameter name for the remote repository URLs.
 	 */
-	String PARAMETER_REMOTE_REPOSITORY_URLS = "remote-repository-urls";
+	String PARAMETER_REMOTE_REPOSITORY_URLS = "remote_repository_urls";
 
 	/**
 	 * Obtains the remote repository URLs.

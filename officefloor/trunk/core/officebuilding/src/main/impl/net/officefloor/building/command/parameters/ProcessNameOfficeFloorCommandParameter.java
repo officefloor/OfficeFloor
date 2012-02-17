@@ -31,7 +31,7 @@ public class ProcessNameOfficeFloorCommandParameter extends
 	/**
 	 * Parameter name for the {@link Process} name.
 	 */
-	public static final String PARAMTER_PROCESS_NAME = "process-name";
+	public static final String PARAMTER_PROCESS_NAME = "process_name";
 
 	/**
 	 * Initiate.

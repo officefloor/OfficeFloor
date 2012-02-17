@@ -106,8 +106,8 @@ public class OfficeFloorExecutionUnitFactoryImpl implements
 			for (String warning : warnings) {
 				writer.println(warning);
 			}
-			throw new OfficeFloorExecutionUnitCreateException(warningText
-					.toString());
+			throw new OfficeFloorExecutionUnitCreateException(
+					warningText.toString());
 		}
 
 		// Obtain the decorated command options

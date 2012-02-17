@@ -31,7 +31,7 @@ public class JvmOptionOfficeFloorCommandParameter extends
 	/**
 	 * Parameter name for a JVM option.
 	 */
-	public static final String PARAMETER_JVM_OPTION = "jvm-option";
+	public static final String PARAMETER_JVM_OPTION = "jvm_option";
 
 	/**
 	 * Initiate.

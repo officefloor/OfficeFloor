@@ -19,6 +19,7 @@
 package net.officefloor.building.manager;
 
 import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.lang.management.ManagementFactory;
@@ -26,9 +27,13 @@ import java.net.InetAddress;
 import java.rmi.ConnectException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
+import java.rmi.server.RMIClientSocketFactory;
+import java.rmi.server.RMIServerSocketFactory;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 
 import javax.management.JMX;
@@ -41,6 +46,9 @@ import javax.management.remote.JMXConnectorFactory;
 import javax.management.remote.JMXConnectorServer;
 import javax.management.remote.JMXConnectorServerFactory;
 import javax.management.remote.JMXServiceURL;
+import javax.management.remote.rmi.RMIConnectorServer;
+import javax.rmi.ssl.SslRMIClientSocketFactory;
+import javax.rmi.ssl.SslRMIServerSocketFactory;
 
 import net.officefloor.building.console.OfficeFloorConsole;
 import net.officefloor.building.process.ProcessCompletionListener;
@@ -94,10 +102,36 @@ public class OfficeBuildingManager implements OfficeBuildingManagerMBean,
 	}
 
 	/**
+	 * Property specify the {@link Registry} client socket factory.
+	 */
+	private static final String PROPERTY_RMI_CLIENT_SOCKET_FACTORY = "com.sun.jndi.rmi.factory.socket";
+
+	/**
+	 * Sets up trusting the JMX Agent.
+	 * 
+	 * @param trustStore
+	 *            {@link File} containing the trusted keys.
+	 * @param trustStorePassword
+	 *            Password to the trusted key {@link File}.
+	 */
+	private static void trustJmxAgent(File trustStore, String trustStorePassword) {
+		System.setProperty("javax.net.ssl.trustStore",
+				trustStore.getAbsolutePath());
+		if (trustStorePassword != null) {
+			System.setProperty("javax.net.ssl.trustStorePassword",
+					trustStorePassword);
+		}
+	}
+
+	/**
 	 * Starts the {@link OfficeBuilding}.
 	 * 
 	 * @param port
 	 *            Port for the {@link OfficeBuilding}.
+	 * @param keyStore
+	 *            {@link File} containing the security keys.
+	 * @param keyStorePassword
+	 *            Password to the key store {@link File}.
 	 * @param environment
 	 *            Environment {@link Properties}.
 	 * @param mbeanServer
@@ -108,8 +142,9 @@ public class OfficeBuildingManager implements OfficeBuildingManagerMBean,
 	 * @throws Exception
 	 *             If fails to start the {@link OfficeBuilding}.
 	 */
-	public static OfficeBuildingManager startOfficeBuilding(int port,
-			Properties environment, MBeanServer mbeanServer) throws Exception {
+	public static OfficeBuildingManagerMBean startOfficeBuilding(int port,
+			File keyStore, String keyStorePassword, Properties environment,
+			MBeanServer mbeanServer) throws Exception {
 
 		// Obtain the start time
 		Date startTime = new Date(System.currentTimeMillis());
@@ -119,20 +154,54 @@ public class OfficeBuildingManager implements OfficeBuildingManagerMBean,
 			mbeanServer = ManagementFactory.getPlatformMBeanServer();
 		}
 
+		// Specify SSL connection details
+		String keyStoreLocation = keyStore.getAbsolutePath();
+		System.setProperty("javax.net.ssl.keyStore", keyStoreLocation);
+		if (keyStorePassword != null) {
+			System.setProperty("javax.net.ssl.keyStorePassword",
+					keyStorePassword);
+		}
+		trustJmxAgent(keyStore, keyStorePassword); // trust to register JMX
+
+		// Create the socket factories
+		RMIClientSocketFactory clientSocketFactory = new SslRMIClientSocketFactory();
+		RMIServerSocketFactory serverSocketFactory = new SslRMIServerSocketFactory();
+
 		// Ensure have Registry on the port
-		Registry registry = LocateRegistry.getRegistry(port);
+		Registry registry = LocateRegistry.getRegistry(null, port,
+				clientSocketFactory);
 		try {
 			// Attempt to communicate to validate if registry exists
 			registry.list();
 		} catch (ConnectException ex) {
 			// Registry not exist, so create it
-			LocateRegistry.createRegistry(port);
+			registry = LocateRegistry.createRegistry(port, clientSocketFactory,
+					serverSocketFactory);
+		}
+
+		// Determine if already running the Office Building
+		try {
+			// Obtain the OfficeBuilding manager
+			OfficeBuildingManagerMBean manager = getOfficeBuildingManager(null,
+					port, keyStore, keyStorePassword);
+
+			// Already running, so return
+			return manager;
+
+		} catch (Exception ex) {
+			// Not available, so carry on to start
 		}
 
 		// Start the JMX connector server (on local host)
 		JMXServiceURL serviceUrl = getOfficeBuildingJmxServiceUrl(null, port);
+		Map<String, Object> serverEnv = new HashMap<String, Object>();
+		serverEnv.put(RMIConnectorServer.RMI_CLIENT_SOCKET_FACTORY_ATTRIBUTE,
+				clientSocketFactory);
+		serverEnv.put(RMIConnectorServer.RMI_SERVER_SOCKET_FACTORY_ATTRIBUTE,
+				serverSocketFactory);
+		serverEnv.put(PROPERTY_RMI_CLIENT_SOCKET_FACTORY, clientSocketFactory);
 		JMXConnectorServer connectorServer = JMXConnectorServerFactory
-				.newJMXConnectorServer(serviceUrl, null, mbeanServer);
+				.newJMXConnectorServer(serviceUrl, serverEnv, mbeanServer);
 		connectorServer.start();
 
 		// Create the Office Building Manager
@@ -154,13 +223,18 @@ public class OfficeBuildingManager implements OfficeBuildingManagerMBean,
 	 *            available.
 	 * @param port
 	 *            Port on which the {@link OfficeBuilding} should be available.
+	 * @param trustStore
+	 *            {@link File} containing the trusted security keys.
+	 * @param trustStorePassword
+	 *            Password to the trusted key store {@link File}.
 	 * @return <code>true</code> if the {@link OfficeBuilding} is available.
 	 */
-	public static boolean isOfficeBuildingAvailable(String hostName, int port) {
+	public static boolean isOfficeBuildingAvailable(String hostName, int port,
+			File trustStore, String trustStorePassword) {
 		try {
 			// Obtain the OfficeBuilding manager
 			OfficeBuildingManagerMBean manager = getOfficeBuildingManager(
-					hostName, port);
+					hostName, port, trustStore, trustStorePassword);
 
 			// Available if not stopped
 			return (!manager.isOfficeBuildingStopped());
@@ -174,6 +248,10 @@ public class OfficeBuildingManager implements OfficeBuildingManagerMBean,
 	 * 
 	 * @param port
 	 *            Port for the {@link OfficeBuilding}.
+	 * @param keyStore
+	 *            {@link File} containing the security keys.
+	 * @param keyStorePassword
+	 *            Password to the key store {@link File}.
 	 * @param environment
 	 *            Environment {@link Properties}. May be <code>null</code>.
 	 * @param configuration
@@ -183,9 +261,9 @@ public class OfficeBuildingManager implements OfficeBuildingManagerMBean,
 	 * @throws ProcessException
 	 *             If fails to spawn the {@link OfficeBuilding}.
 	 */
-	public static ProcessManager spawnOfficeBuilding(int port,
-			Properties environment, ProcessConfiguration configuration)
-			throws ProcessException {
+	public static ProcessManager spawnOfficeBuilding(int port, File keyStore,
+			String keyStorePassword, Properties environment,
+			ProcessConfiguration configuration) throws ProcessException {
 
 		// Ensure have environment
 		if (environment == null) {
@@ -194,7 +272,7 @@ public class OfficeBuildingManager implements OfficeBuildingManagerMBean,
 
 		// Create the OfficeBuilding managed process
 		OfficeBuildingManagedProcess managedProcess = new OfficeBuildingManagedProcess(
-				port, environment);
+				port, keyStore, keyStorePassword, environment);
 
 		// Ensure have process configuration
 		if (configuration == null) {
@@ -222,13 +300,18 @@ public class OfficeBuildingManager implements OfficeBuildingManagerMBean,
 	 *            <code>null</code> indicates localhost.
 	 * @param port
 	 *            Port where the {@link OfficeBuilding} resides.
+	 * @param trustStore
+	 *            {@link File} containing the trusted security keys.
+	 * @param trustStorePassword
+	 *            Password to the trusted key store {@link File}.
 	 * @return {@link OfficeBuildingManagerMBean}.
 	 * @throws Exception
 	 *             If fails to obtain the {@link OfficeBuildingManagerMBean}.
 	 */
 	public static OfficeBuildingManagerMBean getOfficeBuildingManager(
-			String hostName, int port) throws Exception {
-		return getMBeanProxy(hostName, port,
+			String hostName, int port, File trustStore,
+			String trustStorePassword) throws Exception {
+		return getMBeanProxy(hostName, port, trustStore, trustStorePassword,
 				OFFICE_BUILDING_MANAGER_OBJECT_NAME,
 				OfficeBuildingManagerMBean.class);
 	}
@@ -250,16 +333,21 @@ public class OfficeBuildingManager implements OfficeBuildingManagerMBean,
 	 * @param processNamespace
 	 *            Name of the {@link Process} to obtain its
 	 *            {@link ProcessManagerMBean}.
+	 * @param trustStore
+	 *            {@link File} containing the trusted security keys.
+	 * @param trustStorePassword
+	 *            Password to the trusted key store {@link File}.
 	 * @return {@link ProcessManagerMBean}.
 	 * @throws Exception
 	 *             If fails to obtain the {@link ProcessManagerMBean}.
 	 */
 	public static ProcessManagerMBean getProcessManager(String hostName,
-			int port, String processNamespace) throws Exception {
+			int port, String processNamespace, File trustStore,
+			String trustStorePassword) throws Exception {
 		ObjectName objectName = ProcessManager.getLocalObjectName(
 				processNamespace, ProcessManager.getProcessManagerObjectName());
-		return getMBeanProxy(hostName, port, objectName,
-				ProcessManagerMBean.class);
+		return getMBeanProxy(hostName, port, trustStore, trustStorePassword,
+				objectName, ProcessManagerMBean.class);
 	}
 
 	/**
@@ -279,16 +367,21 @@ public class OfficeBuildingManager implements OfficeBuildingManagerMBean,
 	 * @param processNamespace
 	 *            Name of the {@link Process} to obtain its
 	 *            {@link ProcessShellMBean}.
+	 * @param trustStore
+	 *            {@link File} containing the trusted security keys.
+	 * @param trustStorePassword
+	 *            Password to the trusted key store {@link File}.
 	 * @return {@link ProcessShellMBean}.
 	 * @throws Exception
 	 *             If fails to obtain the {@link ProcessShellMBean}.
 	 */
 	public static ProcessShellMBean getProcessShell(String hostName, int port,
-			String processNamespace) throws Exception {
+			String processNamespace, File trustStore, String trustStorePassword)
+			throws Exception {
 		ObjectName objectName = ProcessManager.getLocalObjectName(
 				processNamespace, ProcessShell.getProcessShellObjectName());
-		return getMBeanProxy(hostName, port, objectName,
-				ProcessShellMBean.class);
+		return getMBeanProxy(hostName, port, trustStore, trustStorePassword,
+				objectName, ProcessShellMBean.class);
 	}
 
 	/**
@@ -305,20 +398,24 @@ public class OfficeBuildingManager implements OfficeBuildingManagerMBean,
 	 *            <code>null</code> indicates localhost.
 	 * @param port
 	 *            Port where the {@link OfficeBuilding} resides.
-	 * @param officeFloorManagerUrl
-	 *            URL of the {@link OfficeFloorManagerMBean}.
+	 * @param trustStore
+	 *            {@link File} containing the trusted security keys.
+	 * @param trustStorePassword
+	 *            Password to the trusted key store {@link File}.
+	 * @param processNamespace
+	 *            Namespace of the {@link OfficeFloorManagerMBean}.
 	 * @return {@link OfficeFloorManagerMBean}.
 	 * @throws Exception
 	 *             If fails to obtain {@link OfficeFloorManagerMBean}.
 	 */
 	public static OfficeFloorManagerMBean getOfficeFloorManager(
-			String hostName, int port, String processNamespace)
-			throws Exception {
+			String hostName, int port, String processNamespace,
+			File trustStore, String trustStorePassword) throws Exception {
 		ObjectName objectName = ProcessManager.getLocalObjectName(
 				processNamespace,
 				OfficeFloorManager.getOfficeFloorManagerObjectName());
-		return getMBeanProxy(hostName, port, objectName,
-				OfficeFloorManagerMBean.class);
+		return getMBeanProxy(hostName, port, trustStore, trustStorePassword,
+				objectName, OfficeFloorManagerMBean.class);
 	}
 
 	/**
@@ -364,6 +461,10 @@ public class OfficeBuildingManager implements OfficeBuildingManagerMBean,
 	 *            Host where the {@link OfficeBuilding} resides.
 	 * @param port
 	 *            Port where the {@link OfficeBuilding} resides.
+	 * @param trustStore
+	 *            {@link File} containing the trusted security keys.
+	 * @param trustStorePassword
+	 *            Password to the trusted key store {@link File}.
 	 * @param mbeanName
 	 *            {@link ObjectName} for the MBean.
 	 * @param mbeanInterface
@@ -373,12 +474,20 @@ public class OfficeBuildingManager implements OfficeBuildingManagerMBean,
 	 *             If fails to obtain the MBean proxy.
 	 */
 	public static <I> I getMBeanProxy(String hostName, int port,
-			ObjectName mbeanName, Class<I> mbeanInterface) throws IOException {
+			File trustStore, String trustStorePassword, ObjectName mbeanName,
+			Class<I> mbeanInterface) throws IOException {
+
+		// Trust the JMX Agent
+		trustJmxAgent(trustStore, trustStorePassword);
 
 		// Obtain the MBean Server connection
 		JMXServiceURL serviceUrl = getOfficeBuildingJmxServiceUrl(hostName,
 				port);
-		JMXConnector connector = JMXConnectorFactory.connect(serviceUrl);
+		Map<String, Object> environment = new HashMap<String, Object>();
+		environment.put(PROPERTY_RMI_CLIENT_SOCKET_FACTORY,
+				new SslRMIClientSocketFactory());
+		JMXConnector connector = JMXConnectorFactory.connect(serviceUrl,
+				environment);
 		MBeanServerConnection connection = connector.getMBeanServerConnection();
 
 		// Create and return the MBean proxy
