@@ -368,6 +368,7 @@ public class OfficeBuildingTest extends AbstractConsoleMainTestCase {
 				"       -kp,--key_store_password <arg>       Password to the key store file",
 				"       -ks,--key_store <arg>                Location of the key store file",
 				"       -lr,--local_repository <arg>         Local repository for caching Artifacts",
+				"       --office_building_host <arg>         OfficeBuilding Host. Default is localhost",
 				"       --office_building_port <arg>         Port for the OfficeBuilding. Default is 13778",
 				"       -p,--password <arg>                  Password",
 				"       -rr,--remote_repository_urls <arg>   Remote repository URL to retrieve Artifacts",
