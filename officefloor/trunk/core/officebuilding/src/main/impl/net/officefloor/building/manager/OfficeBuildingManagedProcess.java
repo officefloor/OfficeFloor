@@ -33,6 +33,11 @@ import net.officefloor.console.OfficeBuilding;
 public class OfficeBuildingManagedProcess implements ManagedProcess {
 
 	/**
+	 * Host name for the {@link OfficeBuilding}.
+	 */
+	private final String hostName;
+
+	/**
 	 * Port for the {@link OfficeBuilding}.
 	 */
 	private final int port;
@@ -75,6 +80,8 @@ public class OfficeBuildingManagedProcess implements ManagedProcess {
 	/**
 	 * Initiate.
 	 * 
+	 * @param hostName
+	 *            Host name for the {@link OfficeBuilding}.
 	 * @param port
 	 *            Port for the {@link OfficeBuilding}.
 	 * @param keyStore
@@ -88,9 +95,10 @@ public class OfficeBuildingManagedProcess implements ManagedProcess {
 	 * @param environment
 	 *            Environment {@link Properties}.
 	 */
-	public OfficeBuildingManagedProcess(int port, File keyStore,
-			String keyStorePassword, String userName, String password,
-			Properties environment) {
+	public OfficeBuildingManagedProcess(String hostName, int port,
+			File keyStore, String keyStorePassword, String userName,
+			String password, Properties environment) {
+		this.hostName = hostName;
 		this.port = port;
 		this.keyStoreLocation = keyStore.getAbsolutePath();
 		this.keyStorePassword = keyStorePassword;
@@ -108,9 +116,10 @@ public class OfficeBuildingManagedProcess implements ManagedProcess {
 		this.context = context;
 
 		// Start the OfficeBuilding
-		this.manager = OfficeBuildingManager.startOfficeBuilding(this.port,
-				new File(this.keyStoreLocation), this.keyStorePassword,
-				this.userName, this.password, this.environment, null);
+		this.manager = OfficeBuildingManager.startOfficeBuilding(this.hostName,
+				this.port, new File(this.keyStoreLocation),
+				this.keyStorePassword, this.userName, this.password,
+				this.environment, null);
 	}
 
 	@Override

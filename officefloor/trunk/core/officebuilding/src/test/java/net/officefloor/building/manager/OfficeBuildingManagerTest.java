@@ -124,9 +124,9 @@ public class OfficeBuildingManagerTest extends OfficeFrameTestCase {
 	 * @return {@link OfficeBuildingManager}.
 	 */
 	private OfficeBuildingManagerMBean startOfficeBuilding() throws Exception {
-		return OfficeBuildingManager.startOfficeBuilding(PORT, this.keyStore,
-				KEY_STORE_PASSWORD, MOCK_USER_NAME, MOCK_PASSWORD,
-				this.environment, this.mbeanServer);
+		return OfficeBuildingManager.startOfficeBuilding(null, PORT,
+				this.keyStore, KEY_STORE_PASSWORD, MOCK_USER_NAME,
+				MOCK_PASSWORD, this.environment, this.mbeanServer);
 	}
 
 	/**
@@ -448,8 +448,8 @@ public class OfficeBuildingManagerTest extends OfficeFrameTestCase {
 
 		// Spawn the OfficeBuilding
 		ProcessManager process = OfficeBuildingManager.spawnOfficeBuilding(
-				SPAWN_PORT, this.keyStore, KEY_STORE_PASSWORD, MOCK_USER_NAME,
-				MOCK_PASSWORD, null, null);
+				null, SPAWN_PORT, this.keyStore, KEY_STORE_PASSWORD,
+				MOCK_USER_NAME, MOCK_PASSWORD, null, null);
 		try {
 
 			// Ensure the OfficeBuilding is available

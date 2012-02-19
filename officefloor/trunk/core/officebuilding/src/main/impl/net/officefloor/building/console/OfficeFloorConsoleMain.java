@@ -135,9 +135,13 @@ public final class OfficeFloorConsoleMain {
 				propertiesFileContent.write(character);
 			}
 
-			// Replace OFFICE_FLOOR_HOME to allow absolute configuration
-			String propertiesContent = propertiesFileContent.toString()
-					.replace("${" + OFFICE_FLOOR_HOME + "}", officeFloorHome);
+			// Replace tags in properties (e.g. allows OFFICE_FLOOR_HOME use)
+			String propertiesContent = propertiesFileContent.toString();
+			for (String tagName : environment.stringPropertyNames()) {
+				String tag = "${" + tagName + "}";
+				String tagValue = environment.getProperty(tagName);
+				propertiesContent = propertiesContent.replace(tag, tagValue);
+			}
 
 			// Load the properties
 			environment.load(new StringReader(propertiesContent));

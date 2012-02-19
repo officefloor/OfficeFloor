@@ -137,6 +137,11 @@ public class OfficeBuildingManager implements OfficeBuildingManagerMBean,
 	/**
 	 * Starts the {@link OfficeBuilding}.
 	 * 
+	 * @param hostName
+	 *            Host for the {@link OfficeBuilding}. This is necessary as the
+	 *            RMI {@link JMXConnector} uses this to connect to the
+	 *            {@link OfficeBuilding}. May be <code>null</code> to use the
+	 *            localhost's host name.
 	 * @param port
 	 *            Port for the {@link OfficeBuilding}.
 	 * @param keyStore
@@ -159,10 +164,10 @@ public class OfficeBuildingManager implements OfficeBuildingManagerMBean,
 	 * @throws Exception
 	 *             If fails to start the {@link OfficeBuilding}.
 	 */
-	public static OfficeBuildingManagerMBean startOfficeBuilding(int port,
-			File keyStore, String keyStorePassword, String userName,
-			String password, Properties environment, MBeanServer mbeanServer)
-			throws Exception {
+	public static OfficeBuildingManagerMBean startOfficeBuilding(
+			String hostName, int port, File keyStore, String keyStorePassword,
+			String userName, String password, Properties environment,
+			MBeanServer mbeanServer) throws Exception {
 
 		// Obtain the start time
 		Date startTime = new Date(System.currentTimeMillis());
@@ -180,6 +185,12 @@ public class OfficeBuildingManager implements OfficeBuildingManagerMBean,
 					keyStorePassword);
 		}
 		trustJmxAgent(keyStore, keyStorePassword); // trust to register JMX
+
+		// Use host name (rather than IP address) for client JMX connections
+		if (hostName == null) {
+			hostName = InetAddress.getLocalHost().getHostName();
+		}
+		System.setProperty("java.rmi.server.hostname", hostName);
 
 		// Create the socket factories
 		RMIClientSocketFactory clientSocketFactory = new SslRMIClientSocketFactory();
@@ -282,6 +293,11 @@ public class OfficeBuildingManager implements OfficeBuildingManagerMBean,
 	/**
 	 * Spawns an {@link OfficeBuilding} in a new {@link Process}.
 	 * 
+	 * @param hostName
+	 *            Host for the {@link OfficeBuilding}. This is necessary as the
+	 *            RMI {@link JMXConnector} uses this to connect to the
+	 *            {@link OfficeBuilding}. May be <code>null</code> to use the
+	 *            localhost's host name.
 	 * @param port
 	 *            Port for the {@link OfficeBuilding}.
 	 * @param keyStore
@@ -301,10 +317,10 @@ public class OfficeBuildingManager implements OfficeBuildingManagerMBean,
 	 * @throws ProcessException
 	 *             If fails to spawn the {@link OfficeBuilding}.
 	 */
-	public static ProcessManager spawnOfficeBuilding(int port, File keyStore,
-			String keyStorePassword, String userName, String password,
-			Properties environment, ProcessConfiguration configuration)
-			throws ProcessException {
+	public static ProcessManager spawnOfficeBuilding(String hostName, int port,
+			File keyStore, String keyStorePassword, String userName,
+			String password, Properties environment,
+			ProcessConfiguration configuration) throws ProcessException {
 
 		// Ensure have environment
 		if (environment == null) {
@@ -313,7 +329,7 @@ public class OfficeBuildingManager implements OfficeBuildingManagerMBean,
 
 		// Create the OfficeBuilding managed process
 		OfficeBuildingManagedProcess managedProcess = new OfficeBuildingManagedProcess(
-				port, keyStore, keyStorePassword, userName, password,
+				hostName, port, keyStore, keyStorePassword, userName, password,
 				environment);
 
 		// Ensure have process configuration
@@ -690,18 +706,14 @@ public class OfficeBuildingManager implements OfficeBuildingManagerMBean,
 					manager[0] = processManager;
 				}
 
-				// Determine if process already complete
-				boolean isProcessComplete;
-				synchronized (processManager) {
-					isProcessComplete = processManager.isProcessComplete();
-				}
-
+				// Only register if process not already complete
 				synchronized (OfficeBuildingManager.this) {
-					// Only register if process not already complete
-					if (!isProcessComplete) {
-						// Register the manager for the running process
-						OfficeBuildingManager.this.processManagers
-								.add(processManager);
+					synchronized (processManager) {
+						if (!processManager.isProcessComplete()) {
+							// Register the manager for the running process
+							OfficeBuildingManager.this.processManagers
+									.add(processManager);
+						}
 					}
 				}
 			}
