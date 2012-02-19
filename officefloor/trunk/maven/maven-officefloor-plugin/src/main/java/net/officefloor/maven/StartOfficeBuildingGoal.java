@@ -329,9 +329,10 @@ public class StartOfficeBuildingGoal extends AbstractGoal {
 
 		// Start the OfficeBuilding
 		try {
-			OfficeBuildingManager.spawnOfficeBuilding(this.port.intValue(),
-					getKeyStoreFile(), KEY_STORE_PASSWORD, USER_NAME, PASSWORD,
-					environment, configuration);
+			OfficeBuildingManager.spawnOfficeBuilding(null,
+					this.port.intValue(), getKeyStoreFile(),
+					KEY_STORE_PASSWORD, USER_NAME, PASSWORD, environment,
+					configuration);
 		} catch (Throwable ex) {
 			// Provide details of the failure
 			final String MESSAGE = "Failed starting the "
