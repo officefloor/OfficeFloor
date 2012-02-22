@@ -21,8 +21,8 @@ package net.officefloor.plugin.war.integrate;
 import java.io.File;
 import java.util.Properties;
 
-import net.officefloor.building.command.parameters.KeyStoreOfficeFloorCommandParameterImpl;
-import net.officefloor.building.command.parameters.KeyStorePasswordOfficeFloorCommandParameterImpl;
+import net.officefloor.building.command.parameters.KeyStoreOfficeFloorCommandParameter;
+import net.officefloor.building.command.parameters.KeyStorePasswordOfficeFloorCommandParameter;
 import net.officefloor.building.console.OfficeFloorConsole;
 import net.officefloor.console.OfficeBuilding;
 import net.officefloor.frame.test.OfficeFrameTestCase;
@@ -59,12 +59,12 @@ public class WarIntegrateTest extends OfficeFrameTestCase {
 		// Provide security for running
 		Properties environment = new Properties();
 		environment.setProperty("key_store",
-				KeyStoreOfficeFloorCommandParameterImpl
+				KeyStoreOfficeFloorCommandParameter
 						.getDefaultKeyStoreFile().getAbsolutePath());
 		environment
 				.setProperty(
 						"key_store_password",
-						KeyStorePasswordOfficeFloorCommandParameterImpl.DEFAULT_KEY_STORE_PASSWORD);
+						KeyStorePasswordOfficeFloorCommandParameter.DEFAULT_KEY_STORE_PASSWORD);
 		environment.setProperty("username", "admin");
 		environment.setProperty("password", "password");
 
