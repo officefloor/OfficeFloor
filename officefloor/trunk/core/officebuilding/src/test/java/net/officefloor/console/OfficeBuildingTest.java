@@ -27,8 +27,10 @@ import java.util.List;
 import javax.management.InstanceNotFoundException;
 
 import net.officefloor.building.command.parameters.OfficeBuildingPortOfficeFloorCommandParameter;
+import net.officefloor.building.manager.ArtifactReference;
 import net.officefloor.building.manager.OfficeBuildingManager;
 import net.officefloor.building.manager.OfficeBuildingManagerMBean;
+import net.officefloor.building.manager.UploadArtifact;
 import net.officefloor.building.process.ProcessManagerMBean;
 import net.officefloor.building.process.officefloor.MockOfficeFloorSource;
 import net.officefloor.building.process.officefloor.MockWork;
@@ -134,12 +136,12 @@ public class OfficeBuildingTest extends AbstractConsoleMainTestCase {
 	}
 
 	/**
-	 * Ensure able to open the {@link OfficeFloor} from via an archive and list
-	 * processes then tasks.
+	 * Ensure able to open the {@link OfficeFloor} from via an
+	 * {@link UploadArtifact} and list processes then tasks.
 	 */
-	public void testOpenOfficeFloorViaArchiveAndList() throws Throwable {
+	public void testOpenOfficeFloorViaUploadArtifactAndList() throws Throwable {
 
-		final String PROCESS_NAME = "Process";
+		final String PROCESS_NAME = "officefloor";
 
 		// Obtain location of Jar file
 		File jarFilePath = this.findFile("lib/MockCore.jar");
@@ -151,9 +153,14 @@ public class OfficeBuildingTest extends AbstractConsoleMainTestCase {
 		this.doSecureMain("start");
 		out.add(this.officeBuildingStartLine);
 
-		// Open the OfficeFloor (via a Jar)
-		this.doSecureMain("--jar "
-				+ jarFilePath.getParentFile().getAbsolutePath()
+		// Ensure MockCore.jar is not existing
+		File mockJar = new File(System.getProperty("java.io.tmpdir"),
+				"officebuilding/officefloor1/MockCore.jar");
+		assertFalse("MockCore.jar should not yet be uploaded", mockJar.exists());
+
+		// Open the OfficeFloor (via an uploaded artifact)
+		this.doSecureMain("--upload_artifact "
+				+ jarFilePath.getAbsolutePath()
 				+ " --officefloor net/officefloor/building/process/officefloor/TestOfficeFloor.officefloor"
 				+ " --property team.name=TEAM" + " open");
 		out.add("OfficeFloor open under process name space '" + PROCESS_NAME
@@ -169,9 +176,15 @@ public class OfficeBuildingTest extends AbstractConsoleMainTestCase {
 		out.add("\tSECTION.WORK");
 		out.add("\t\twriteMessage (String)");
 
+		// Validate the MockCore.jar is available
+		assertTrue("MockCore.jar should be uploaded", mockJar.exists());
+
 		// Close the OfficeFloor
 		this.doSecureMain("--process_name " + PROCESS_NAME + " close");
 		out.add("Closed");
+
+		// Validate the process work space cleaned up
+		assertFalse("MockCore.jar should be cleaned up", mockJar.exists());
 
 		// Stop the OfficeBuilding
 		this.doSecureMain("stop");
@@ -183,9 +196,11 @@ public class OfficeBuildingTest extends AbstractConsoleMainTestCase {
 	}
 
 	/**
-	 * Ensure able to open the {@link OfficeFloor} from an artifact and invoke.
+	 * Ensure able to open the {@link OfficeFloor} from an
+	 * {@link ArtifactReference} and invoke.
 	 */
-	public void testOpenOfficeFloorViaArtifactAndInvoke() throws Throwable {
+	public void testOpenOfficeFloorViaArtifactReferenceAndInvoke()
+			throws Throwable {
 
 		final String PROCESS_NAME = this.getName();
 		final String OFFICE_FLOOR_VERSION = OfficeBuildingTestUtil
@@ -365,40 +380,42 @@ public class OfficeBuildingTest extends AbstractConsoleMainTestCase {
 				"                                                         ",
 				"start : Starts the OfficeBuilding                        ",
 				"      Options:                                           ",
+				"       --isolate_processes <arg>            True to isolate the processes",
+				"       --jvm_option <arg>                   JVM option",
 				"       -kp,--key_store_password <arg>       Password to the key store file",
 				"       -ks,--key_store <arg>                Location of the key store file",
-				"       -lr,--local_repository <arg>         Local repository for caching Artifacts",
 				"       --office_building_host <arg>         OfficeBuilding Host. Default is localhost",
 				"       --office_building_port <arg>         Port for the OfficeBuilding. Default is 13778",
 				"       -p,--password <arg>                  Password",
 				"       -rr,--remote_repository_urls <arg>   Remote repository URL to retrieve Artifacts",
 				"       -u,--username <arg>                  User name",
+				"       --workspace <arg>                    Workspace for the OfficeBuilding",
 				"                                                         ",
 				"url : Obtains the URL for the OfficeBuilding             ",
 				"    Options:                                             ",
 				"     --office_building_host <arg>   OfficeBuilding Host. Default is localhost",
 				"     --office_building_port <arg>   Port for the OfficeBuilding. Default is 13778",
 				"                                                         ",
-				"open : Opens an OfficeFloor within the OfficeBuilding    ",
+				"open : Opens an OfficeFloor within the OfficeBuilding",
 				"     Options:                                            ",
-				"      -a,--artifact <arg>              Artifact to include on the class path",
-				"      -cp,--classpath <arg>            Raw entry to include on the class path",
-				"      -j,--jar <arg>                   Archive to include on the class path",
-				"      --jvm_option <arg>               JVM option       ",
-				"      -kp,--key_store_password <arg>   Password to the key store file",
-				"      -ks,--key_store <arg>            Location of the key store file",
-				"      -o,--office <arg>                Name of the Office",
-				"      -of,--officefloor <arg>          Location of the OfficeFloor",
-				"      --office_building_host <arg>     OfficeBuilding Host. Default is localhost",
-				"      --office_building_port <arg>     Port for the OfficeBuilding. Default is 13778",
-				"      -ofs,--officefloorsource <arg>   OfficeFloorSource",
-				"      -p,--password <arg>              Password",
-				"      --parameter <arg>                Parameter for the Task",
-				"      --process_name <arg>             Process name space. Default is Process",
-				"      --property <arg>                 Property for the OfficeFloor in the form of name=value",
-				"      -t,--task <arg>                  Name of the Task ",
-				"      -u,--username <arg>              User name",
-				"      -w,--work <arg>                  Name of the Work ",
+				"      -a,--artifact <arg>                  Artifact to include on the class path",
+				"      --jvm_option <arg>                   JVM option       ",
+				"      -kp,--key_store_password <arg>       Password to the key store file",
+				"      -ks,--key_store <arg>                Location of the key store file",
+				"      -o,--office <arg>                    Name of the Office",
+				"      -of,--officefloor <arg>              Location of the OfficeFloor",
+				"      --office_building_host <arg>         OfficeBuilding Host. Default is localhost",
+				"      --office_building_port <arg>         Port for the OfficeBuilding. Default is 13778",
+				"      -ofs,--officefloorsource <arg>       OfficeFloorSource",
+				"      -p,--password <arg>                  Password",
+				"      --parameter <arg>                    Parameter for the Task",
+				"      --process_name <arg>                 Process name space. Default is Process",
+				"      --property <arg>                     Property for the OfficeFloor in the form of name=value",
+				"      -rr,--remote_repository_urls <arg>   Remote repository URL to retrieve Artifacts",
+				"      -t,--task <arg>                      Name of the Task ",
+				"      -u,--username <arg>                  User name",
+				"      --upload_artifact <arg>              Artifact to be uploaded for inclusion on the class path",
+				"      -w,--work <arg>                      Name of the Work ",
 				"                                                         ",
 				"list : Lists details of the OfficeBuilding/OfficeFloor   ",
 				"     Options:                                            ",

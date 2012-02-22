@@ -115,8 +115,6 @@ public abstract class AbstractConsoleMainTestCase extends
 				this.doMain("stop");
 			} catch (Throwable ex) {
 				// Ignore failure to stop office
-				System.err
-						.println("NOTE: Ignore previous error as ensuring OfficeBuilding not running.");
 			} finally {
 				// Reinstate stdErr
 				System.setErr(stdErr);

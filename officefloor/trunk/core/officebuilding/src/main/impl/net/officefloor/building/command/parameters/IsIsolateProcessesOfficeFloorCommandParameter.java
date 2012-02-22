@@ -16,29 +16,38 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package net.officefloor.building.command;
+package net.officefloor.building.command.parameters;
 
-import java.io.File;
+import net.officefloor.building.command.OfficeFloorCommandParameter;
 
 /**
- * Identifies the {@link OfficeFloorCommandParameter} providing the local
- * repository.
+ * {@link OfficeFloorCommandParameter} to indicate if isolating the
+ * {@link Process} instances.
  * 
  * @author Daniel Sagenschneider
  */
-public interface LocalRepositoryOfficeFloorCommandParameter extends
-		OfficeFloorCommandParameter {
+public class IsIsolateProcessesOfficeFloorCommandParameter extends
+		AbstractSingleValueOfficeFloorCommandParameter {
 
 	/**
-	 * Parameter name for the local repository.
+	 * Initiate.
 	 */
-	String PARAMETER_LOCAL_REPOSITORY = "local_repository";
+	public IsIsolateProcessesOfficeFloorCommandParameter() {
+		super("isolate_processes", null, "True to isolate the processes");
+	}
 
 	/**
-	 * Obtains the local repository.
+	 * Indicates if isolating the {@link Process} instances.
 	 * 
-	 * @return Local repository. May be <code>null</code> if not provided.
+	 * @return <code>true</code> to isolate the {@link Process} instances.
 	 */
-	File getLocalRepository();
+	public boolean isIsolateProcesses() {
+
+		// Obtain the value
+		String value = this.getValue();
+
+		// Return whether isolated
+		return Boolean.parseBoolean(value);
+	}
 
 }

@@ -21,21 +21,21 @@ package net.officefloor.building.command.officefloor;
 import java.io.File;
 import java.util.Properties;
 
-import net.officefloor.building.command.LocalRepositoryOfficeFloorCommandParameter;
 import net.officefloor.building.command.OfficeFloorCommand;
 import net.officefloor.building.command.OfficeFloorCommandContext;
 import net.officefloor.building.command.OfficeFloorCommandEnvironment;
 import net.officefloor.building.command.OfficeFloorCommandFactory;
 import net.officefloor.building.command.OfficeFloorCommandParameter;
-import net.officefloor.building.command.RemoteRepositoryUrlsOfficeFloorCommandParameter;
-import net.officefloor.building.command.parameters.KeyStoreOfficeFloorCommandParameterImpl;
-import net.officefloor.building.command.parameters.KeyStorePasswordOfficeFloorCommandParameterImpl;
-import net.officefloor.building.command.parameters.LocalRepositoryOfficeFloorCommandParameterImpl;
+import net.officefloor.building.command.parameters.IsIsolateProcessesOfficeFloorCommandParameter;
+import net.officefloor.building.command.parameters.JvmOptionOfficeFloorCommandParameter;
+import net.officefloor.building.command.parameters.KeyStoreOfficeFloorCommandParameter;
+import net.officefloor.building.command.parameters.KeyStorePasswordOfficeFloorCommandParameter;
 import net.officefloor.building.command.parameters.OfficeBuildingHostOfficeFloorCommandParameter;
 import net.officefloor.building.command.parameters.OfficeBuildingPortOfficeFloorCommandParameter;
-import net.officefloor.building.command.parameters.PasswordOfficeFloorCommandParameterImpl;
+import net.officefloor.building.command.parameters.PasswordOfficeFloorCommandParameter;
 import net.officefloor.building.command.parameters.RemoteRepositoryUrlsOfficeFloorCommandParameterImpl;
-import net.officefloor.building.command.parameters.UsernameOfficeFloorCommandParameterImpl;
+import net.officefloor.building.command.parameters.UsernameOfficeFloorCommandParameter;
+import net.officefloor.building.command.parameters.WorkspaceOfficeFloorCommandParameter;
 import net.officefloor.building.manager.OfficeBuildingManager;
 import net.officefloor.building.manager.OfficeBuildingManagerMBean;
 import net.officefloor.building.process.ManagedProcess;
@@ -63,27 +63,37 @@ public class StartOfficeBuildingCommand implements OfficeFloorCommandFactory,
 	/**
 	 * Key store {@link File}.
 	 */
-	private final KeyStoreOfficeFloorCommandParameterImpl keyStore = new KeyStoreOfficeFloorCommandParameterImpl();
+	private final KeyStoreOfficeFloorCommandParameter keyStore = new KeyStoreOfficeFloorCommandParameter();
 
 	/**
 	 * Password to the key store {@link File}.
 	 */
-	private final KeyStorePasswordOfficeFloorCommandParameterImpl keyStorePassword = new KeyStorePasswordOfficeFloorCommandParameterImpl();
+	private final KeyStorePasswordOfficeFloorCommandParameter keyStorePassword = new KeyStorePasswordOfficeFloorCommandParameter();
 
 	/**
 	 * User name.
 	 */
-	private final UsernameOfficeFloorCommandParameterImpl userName = new UsernameOfficeFloorCommandParameterImpl();
+	private final UsernameOfficeFloorCommandParameter userName = new UsernameOfficeFloorCommandParameter();
 
 	/**
 	 * Password.
 	 */
-	private final PasswordOfficeFloorCommandParameterImpl password = new PasswordOfficeFloorCommandParameterImpl();
+	private final PasswordOfficeFloorCommandParameter password = new PasswordOfficeFloorCommandParameter();
 
 	/**
-	 * Location of the local repository.
+	 * Workspace.
 	 */
-	private final LocalRepositoryOfficeFloorCommandParameterImpl localRepository = new LocalRepositoryOfficeFloorCommandParameterImpl();
+	private final WorkspaceOfficeFloorCommandParameter workspace = new WorkspaceOfficeFloorCommandParameter();
+
+	/**
+	 * Flag indicating to isolate the {@link Process} instances.
+	 */
+	private final IsIsolateProcessesOfficeFloorCommandParameter isIsolateProcesses = new IsIsolateProcessesOfficeFloorCommandParameter();
+
+	/**
+	 * JVM options.
+	 */
+	private final JvmOptionOfficeFloorCommandParameter jvmOptions = new JvmOptionOfficeFloorCommandParameter();
 
 	/**
 	 * Remote repository URLs.
@@ -132,7 +142,8 @@ public class StartOfficeBuildingCommand implements OfficeFloorCommandFactory,
 	public OfficeFloorCommandParameter[] getParameters() {
 		return new OfficeFloorCommandParameter[] { this.officeBuildingHost,
 				this.officeBuildingPort, this.keyStore, this.keyStorePassword,
-				this.userName, this.password, this.localRepository,
+				this.userName, this.password, this.workspace,
+				this.isIsolateProcesses, this.jvmOptions,
 				this.remoteRepositoryUrls };
 	}
 
@@ -155,19 +166,18 @@ public class StartOfficeBuildingCommand implements OfficeFloorCommandFactory,
 		String keyStorePassword = this.keyStorePassword.getKeyStorePassword();
 		String userName = this.userName.getUserName();
 		String password = this.password.getPassword();
-		File localRepository = this.localRepository.getLocalRepository();
+		File workspace = this.workspace.getWorkspace();
+		boolean isIsolateProcesses = this.isIsolateProcesses
+				.isIsolateProcesses();
+		String[] jvmOptions = this.jvmOptions.getJvmOptions();
 		String[] remoteRepositoryUrls = this.remoteRepositoryUrls
 				.getRemoteRepositoryUrls();
-
-		// Obtain the local repository location
-		String localRepositoryLocation = (localRepository == null ? null
-				: localRepository.getAbsolutePath());
 
 		// Create and return managed process to start office building
 		return new StartOfficeBuildingManagedProcess(officeBuildingHost,
 				officeBuildingPort, keyStore, keyStorePassword, userName,
-				password, localRepositoryLocation, remoteRepositoryUrls,
-				this.environment);
+				password, workspace, isIsolateProcesses, this.environment,
+				jvmOptions, remoteRepositoryUrls);
 	}
 
 	/**
@@ -207,19 +217,30 @@ public class StartOfficeBuildingCommand implements OfficeFloorCommandFactory,
 		private final String password;
 
 		/**
-		 * Location of the local repository.
+		 * Location of the work space. May be <code>null</code> to use default
+		 * location.
 		 */
-		private final String localRepository;
+		private final String workspaceLocation;
 
 		/**
-		 * Remote repository URLs.
+		 * Flag indicating to isolate the {@link Process} instances.
 		 */
-		private final String[] remoteRepositoryUrls;
+		private final boolean isIsolateProcesses;
 
 		/**
 		 * Environment {@link Properties}.
 		 */
 		private final Properties environment;
+
+		/**
+		 * JVM options for the {@link Process} instances.
+		 */
+		private final String[] jvmOptions;
+
+		/**
+		 * Remote repository URLs.
+		 */
+		private final String[] remoteRepositoryUrls;
 
 		/**
 		 * Initiate.
@@ -236,26 +257,35 @@ public class StartOfficeBuildingCommand implements OfficeFloorCommandFactory,
 		 *            User name to allow connections.
 		 * @param password
 		 *            Password to allow connections.
-		 * @param localRepository
-		 *            Location of the local repository.
-		 * @param remoteRepositoryUrls
-		 *            Remote repository URLs.
+		 * @param workspace
+		 *            Work space for the {@link OfficeBuilding}. May be
+		 *            <code>null</code> to use default location.
+		 * @param isIsolateProcesses
+		 *            Flag indicating to isolate the {@link Process} instances.
 		 * @param environment
 		 *            Environment {@link Properties}.
+		 * @param jvmOptions
+		 *            JVM options for the {@link Process} instances.
+		 * @param remoteRepositoryUrls
+		 *            Remote repository URLs.
 		 */
 		public StartOfficeBuildingManagedProcess(String officeBuildingHost,
 				int officeBuildingPort, File keyStore, String keyStorePassword,
-				String userName, String password, String localRepository,
-				String[] remoteRepositoryUrls, Properties environment) {
+				String userName, String password, File workspace,
+				boolean isIsolateProcesses, Properties environment,
+				String[] jvmOptions, String[] remoteRepositoryUrls) {
 			this.officeBuildingHost = officeBuildingHost;
 			this.officeBuildingPort = officeBuildingPort;
 			this.keyStoreLocation = keyStore.getAbsolutePath();
 			this.keyStorePassword = keyStorePassword;
 			this.userName = userName;
 			this.password = password;
-			this.localRepository = localRepository;
-			this.remoteRepositoryUrls = remoteRepositoryUrls;
+			this.workspaceLocation = (workspace == null ? null : workspace
+					.getAbsolutePath());
+			this.isIsolateProcesses = isIsolateProcesses;
 			this.environment = environment;
+			this.jvmOptions = jvmOptions;
+			this.remoteRepositoryUrls = remoteRepositoryUrls;
 		}
 
 		/*
@@ -274,17 +304,10 @@ public class StartOfficeBuildingCommand implements OfficeFloorCommandFactory,
 			Properties env = new Properties();
 			env.putAll(this.environment);
 
-			// Override local repository if provided by parameter
-			if (this.localRepository != null) {
-				env.put(LocalRepositoryOfficeFloorCommandParameter.PARAMETER_LOCAL_REPOSITORY,
-						this.localRepository);
-			}
-
-			// Override remote repository URLs if provided by parameter
-			if (this.remoteRepositoryUrls.length > 0) {
-				env.put(RemoteRepositoryUrlsOfficeFloorCommandParameter.PARAMETER_REMOTE_REPOSITORY_URLS,
-						RemoteRepositoryUrlsOfficeFloorCommandParameterImpl
-								.transformForParameterValue(this.remoteRepositoryUrls));
+			// Obtain the work space
+			File workspace = null;
+			if (this.workspaceLocation != null) {
+				workspace = new File(this.workspaceLocation);
 			}
 
 			// Start the OfficeBuilding
@@ -293,7 +316,9 @@ public class StartOfficeBuildingCommand implements OfficeFloorCommandFactory,
 							this.officeBuildingPort, new File(
 									this.keyStoreLocation),
 							this.keyStorePassword, this.userName,
-							this.password, env, null);
+							this.password, workspace, this.isIsolateProcesses,
+							env, null, this.jvmOptions,
+							this.remoteRepositoryUrls);
 
 			// Indicate started and location
 			String serviceUrl = manager.getOfficeBuildingJmxServiceUrl();

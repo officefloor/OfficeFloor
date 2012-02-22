@@ -19,35 +19,38 @@
 package net.officefloor.building.command.officefloor;
 
 import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Properties;
 
-import net.officefloor.building.command.CommandLineBuilder;
 import net.officefloor.building.command.OfficeFloorCommand;
 import net.officefloor.building.command.OfficeFloorCommandContext;
 import net.officefloor.building.command.OfficeFloorCommandEnvironment;
 import net.officefloor.building.command.OfficeFloorCommandFactory;
 import net.officefloor.building.command.OfficeFloorCommandParameter;
-import net.officefloor.building.command.parameters.ArtifactArgument;
-import net.officefloor.building.command.parameters.ClassPathOfficeFloorCommandParameter;
-import net.officefloor.building.command.parameters.JarOfficeFloorCommandParameter;
+import net.officefloor.building.command.parameters.ArtifactReferencesOfficeFloorCommandParameter;
 import net.officefloor.building.command.parameters.JvmOptionOfficeFloorCommandParameter;
-import net.officefloor.building.command.parameters.KeyStoreOfficeFloorCommandParameterImpl;
-import net.officefloor.building.command.parameters.KeyStorePasswordOfficeFloorCommandParameterImpl;
-import net.officefloor.building.command.parameters.MultipleArtifactsOfficeFloorCommandParameter;
+import net.officefloor.building.command.parameters.KeyStoreOfficeFloorCommandParameter;
+import net.officefloor.building.command.parameters.KeyStorePasswordOfficeFloorCommandParameter;
 import net.officefloor.building.command.parameters.OfficeBuildingHostOfficeFloorCommandParameter;
 import net.officefloor.building.command.parameters.OfficeBuildingPortOfficeFloorCommandParameter;
 import net.officefloor.building.command.parameters.OfficeFloorLocationOfficeFloorCommandParameter;
 import net.officefloor.building.command.parameters.OfficeFloorSourceOfficeFloorCommandParameter;
 import net.officefloor.building.command.parameters.OfficeNameOfficeFloorCommandParameter;
 import net.officefloor.building.command.parameters.ParameterOfficeFloorCommandParameter;
-import net.officefloor.building.command.parameters.PasswordOfficeFloorCommandParameterImpl;
+import net.officefloor.building.command.parameters.PasswordOfficeFloorCommandParameter;
 import net.officefloor.building.command.parameters.ProcessNameOfficeFloorCommandParameter;
 import net.officefloor.building.command.parameters.PropertiesOfficeFloorCommandParameter;
+import net.officefloor.building.command.parameters.RemoteRepositoryUrlsOfficeFloorCommandParameterImpl;
 import net.officefloor.building.command.parameters.TaskNameOfficeFloorCommandParameter;
-import net.officefloor.building.command.parameters.UsernameOfficeFloorCommandParameterImpl;
+import net.officefloor.building.command.parameters.UploadArtifactsOfficeFloorCommandParameter;
+import net.officefloor.building.command.parameters.UsernameOfficeFloorCommandParameter;
 import net.officefloor.building.command.parameters.WorkNameOfficeFloorCommandParameter;
+import net.officefloor.building.manager.ArtifactReference;
 import net.officefloor.building.manager.OfficeBuildingManager;
 import net.officefloor.building.manager.OfficeBuildingManagerMBean;
+import net.officefloor.building.manager.OpenOfficeFloorConfiguration;
+import net.officefloor.building.manager.UploadArtifact;
 import net.officefloor.building.process.ManagedProcess;
 import net.officefloor.building.process.ManagedProcessContext;
 import net.officefloor.compile.spi.officefloor.source.OfficeFloorSource;
@@ -67,6 +70,11 @@ public class OfficeBuildingOpenOfficeFloorCommand implements
 		OfficeFloorCommandFactory, OfficeFloorCommand {
 
 	/**
+	 * Flag indicating if remote invocation of opening the {@link OfficeFloor}.
+	 */
+	private final boolean isRemote;
+
+	/**
 	 * {@link OfficeBuilding} host.
 	 */
 	private final OfficeBuildingHostOfficeFloorCommandParameter officeBuildingHost = new OfficeBuildingHostOfficeFloorCommandParameter();
@@ -77,34 +85,29 @@ public class OfficeBuildingOpenOfficeFloorCommand implements
 	private final OfficeBuildingPortOfficeFloorCommandParameter officeBuildingPort = new OfficeBuildingPortOfficeFloorCommandParameter();
 
 	/**
-	 * JVM options.
+	 * Trust store {@link File}.
 	 */
-	private final JvmOptionOfficeFloorCommandParameter jvmOptions = new JvmOptionOfficeFloorCommandParameter();
+	private final KeyStoreOfficeFloorCommandParameter trustStore = new KeyStoreOfficeFloorCommandParameter();
+
+	/**
+	 * Password to the trust store {@link File}.
+	 */
+	private final KeyStorePasswordOfficeFloorCommandParameter trustStorePassword = new KeyStorePasswordOfficeFloorCommandParameter();
+
+	/**
+	 * User name.
+	 */
+	private final UsernameOfficeFloorCommandParameter userName = new UsernameOfficeFloorCommandParameter();
+
+	/**
+	 * Password.
+	 */
+	private final PasswordOfficeFloorCommandParameter password = new PasswordOfficeFloorCommandParameter();
 
 	/**
 	 * {@link Process} name.
 	 */
 	private final ProcessNameOfficeFloorCommandParameter processName = new ProcessNameOfficeFloorCommandParameter();
-
-	/**
-	 * Trust store {@link File}.
-	 */
-	private final KeyStoreOfficeFloorCommandParameterImpl trustStore = new KeyStoreOfficeFloorCommandParameterImpl();
-
-	/**
-	 * Password to the trust store {@link File}.
-	 */
-	private final KeyStorePasswordOfficeFloorCommandParameterImpl trustStorePassword = new KeyStorePasswordOfficeFloorCommandParameterImpl();
-
-	/**
-	 * User name.
-	 */
-	private final UsernameOfficeFloorCommandParameterImpl userName = new UsernameOfficeFloorCommandParameterImpl();
-
-	/**
-	 * Password.
-	 */
-	private final PasswordOfficeFloorCommandParameterImpl password = new PasswordOfficeFloorCommandParameterImpl();
 
 	/**
 	 * {@link OfficeFloorSource} class name.
@@ -122,19 +125,14 @@ public class OfficeBuildingOpenOfficeFloorCommand implements
 	private final PropertiesOfficeFloorCommandParameter officeFloorProperties = new PropertiesOfficeFloorCommandParameter();
 
 	/**
-	 * Archives to include on the class path.
+	 * Artifacts to upload to be included on the class path.
 	 */
-	private final JarOfficeFloorCommandParameter archives = new JarOfficeFloorCommandParameter();
+	private final UploadArtifactsOfficeFloorCommandParameter uploadArtifacts = new UploadArtifactsOfficeFloorCommandParameter();
 
 	/**
-	 * Artifacts to include on the class path.
+	 * References to artifacts to be included on the class path.
 	 */
-	private final MultipleArtifactsOfficeFloorCommandParameter artifacts = new MultipleArtifactsOfficeFloorCommandParameter();
-
-	/**
-	 * Addition to the class path.
-	 */
-	private final ClassPathOfficeFloorCommandParameter classpath = new ClassPathOfficeFloorCommandParameter();
+	private final ArtifactReferencesOfficeFloorCommandParameter artifactReferences = new ArtifactReferencesOfficeFloorCommandParameter();
 
 	/**
 	 * {@link Office} name.
@@ -156,6 +154,85 @@ public class OfficeBuildingOpenOfficeFloorCommand implements
 	 */
 	private final ParameterOfficeFloorCommandParameter parameter = new ParameterOfficeFloorCommandParameter();
 
+	/**
+	 * JVM options.
+	 */
+	private final JvmOptionOfficeFloorCommandParameter jvmOptions = new JvmOptionOfficeFloorCommandParameter();
+
+	/**
+	 * Remote repository URLs.
+	 */
+	private final RemoteRepositoryUrlsOfficeFloorCommandParameterImpl remoteRepositoryUrls = new RemoteRepositoryUrlsOfficeFloorCommandParameterImpl();
+
+	/**
+	 * Initiate.
+	 * 
+	 * @param isRemote
+	 *            <true> to remotely invoke opening the {@link OfficeFloor}.
+	 */
+	public OfficeBuildingOpenOfficeFloorCommand(boolean isRemote) {
+		this.isRemote = isRemote;
+	}
+
+	/**
+	 * Obtains the {@link OpenOfficeFloorConfiguration}.
+	 * 
+	 * @return {@link OpenOfficeFloorConfiguration}.
+	 * @throws Exception
+	 *             If fails to obtain the {@link OpenOfficeFloorConfiguration}.
+	 */
+	public OpenOfficeFloorConfiguration getOpenOfficeFloorConfiguration()
+			throws Exception {
+
+		// Obtain the OfficeFloor details
+		String processName = this.processName.getProcessName();
+		String officeFloorSourceClassName = this.officeFloorSource
+				.getOfficeFloorSourceClassName();
+		String officeFloorLocation = this.officeFloorLocation
+				.getOfficeFloorLocation();
+		Properties officeFloorProperties = this.officeFloorProperties
+				.getProperties();
+		UploadArtifact[] uploadArtifacts = this.uploadArtifacts
+				.getUploadArtifacts();
+		ArtifactReference[] artifactReferences = this.artifactReferences
+				.getArtifactReferences();
+		String[] jvmOptions = this.jvmOptions.getJvmOptions();
+		String[] remoteRepositoryUrls = this.remoteRepositoryUrls
+				.getRemoteRepositoryUrls();
+		String officeName = this.officeName.getOfficeName();
+		String workName = this.workName.getWorkName();
+		String taskName = this.taskName.getTaskName();
+		String parameterValue = this.parameter.getParameterValue();
+
+		// Create the open OfficeFloor configuration
+		OpenOfficeFloorConfiguration configuration = new OpenOfficeFloorConfiguration(
+				officeFloorLocation);
+		configuration.setProcessName(processName);
+		configuration.setOfficeFloorSourceClassName(officeFloorSourceClassName);
+		for (String propertyName : officeFloorProperties.stringPropertyNames()) {
+			String propertyValue = officeFloorProperties
+					.getProperty(propertyName);
+			configuration.addOfficeFloorProperty(propertyName, propertyValue);
+		}
+		for (UploadArtifact uploadArtifact : uploadArtifacts) {
+			configuration.addUploadArtifact(uploadArtifact);
+		}
+		for (ArtifactReference artifactReference : artifactReferences) {
+			configuration.addArtifactReference(artifactReference);
+		}
+		for (String jvmOption : jvmOptions) {
+			configuration.addJvmOption(jvmOption);
+		}
+		for (String remoteRepositoryUrl : remoteRepositoryUrls) {
+			configuration.addRemoteRepositoryUrl(remoteRepositoryUrl);
+		}
+		configuration.setOpenTask(officeName, workName, taskName,
+				parameterValue);
+
+		// Return the configuration
+		return configuration;
+	}
+
 	/*
 	 * ======================= OfficeFloorCommandFactory =====================
 	 */
@@ -167,7 +244,7 @@ public class OfficeBuildingOpenOfficeFloorCommand implements
 
 	@Override
 	public OfficeFloorCommand createCommand() {
-		return new OfficeBuildingOpenOfficeFloorCommand();
+		return new OfficeBuildingOpenOfficeFloorCommand(this.isRemote);
 	}
 
 	/*
@@ -181,35 +258,40 @@ public class OfficeBuildingOpenOfficeFloorCommand implements
 
 	@Override
 	public OfficeFloorCommandParameter[] getParameters() {
-		return new OfficeFloorCommandParameter[] { this.officeBuildingHost,
-				this.officeBuildingPort, this.jvmOptions, this.processName,
-				this.trustStore, this.trustStorePassword, this.userName,
-				this.password, this.officeFloorSource,
-				this.officeFloorLocation, this.officeFloorProperties,
-				this.archives, this.artifacts, this.classpath, this.officeName,
-				this.workName, this.taskName, this.parameter };
+
+		// Create the listing of command parameters
+		List<OfficeFloorCommandParameter> parameters = new ArrayList<OfficeFloorCommandParameter>(
+				18);
+		if (this.isRemote) {
+			parameters.add(this.officeBuildingHost);
+			parameters.add(this.officeBuildingPort);
+			parameters.add(this.trustStore);
+			parameters.add(this.trustStorePassword);
+			parameters.add(this.userName);
+			parameters.add(this.password);
+			parameters.add(this.uploadArtifacts);
+		}
+		parameters.add(this.processName);
+		parameters.add(this.officeFloorSource);
+		parameters.add(this.officeFloorLocation);
+		parameters.add(this.officeFloorProperties);
+		parameters.add(this.artifactReferences);
+		parameters.add(this.officeName);
+		parameters.add(this.workName);
+		parameters.add(this.taskName);
+		parameters.add(this.parameter);
+		parameters.add(this.jvmOptions);
+		parameters.add(this.remoteRepositoryUrls);
+
+		// Return the command parameters
+		return parameters.toArray(new OfficeFloorCommandParameter[parameters
+				.size()]);
 	}
 
 	@Override
 	public void initialiseEnvironment(OfficeFloorCommandContext context)
 			throws Exception {
-
-		// Include the raw class paths
-		for (String classPathEntry : this.classpath.getClassPathEntries()) {
-			context.includeClassPathEntry(classPathEntry);
-		}
-
-		// Include the archives on the class path
-		for (String archive : this.archives.getArchives()) {
-			context.includeClassPathArtifact(archive);
-		}
-
-		// Include the artifacts on the class path
-		for (ArtifactArgument artifact : this.artifacts.getArtifacts()) {
-			context.includeClassPathArtifact(artifact.getGroupId(),
-					artifact.getArtifactId(), artifact.getVersion(),
-					artifact.getType(), artifact.getClassifier());
-		}
+		// Environment initialised by the OfficeBuilding
 	}
 
 	@Override
@@ -227,54 +309,15 @@ public class OfficeBuildingOpenOfficeFloorCommand implements
 		String userName = this.userName.getUserName();
 		String password = this.password.getPassword();
 
-		// Construct the arguments
-		CommandLineBuilder arguments = new CommandLineBuilder();
-
-		// Add the JVM options
-		for (String jvmOption : this.jvmOptions.getJvmOptions()) {
-			arguments.addJvmOption(jvmOption);
-		}
-
-		// Specify process name
-		String processName = this.processName.getProcessName();
-		environment.setProcessName(processName);
-		arguments.addProcessName(processName);
-
-		// Add the OfficeFloorSource
-		arguments.addOfficeFloorSource(this.officeFloorSource
-				.getOfficeFloorSourceClassName());
-
-		// Add the OfficeFloor
-		arguments.addOfficeFloor(this.officeFloorLocation
-				.getOfficeFloorLocation());
-
-		// Add the properties for the OfficeFloor
-		arguments.addOfficeFloorProperties(this.officeFloorProperties
-				.getProperties());
-
-		// Add archives
-		for (String archive : this.archives.getArchives()) {
-			arguments.addArchive(archive);
-		}
-
-		// Add the artifacts
-		for (ArtifactArgument artifact : this.artifacts.getArtifacts()) {
-			arguments.addArtifact(artifact.getId());
-		}
-
-		// Add the class path entries
-		for (String classPathEntry : this.classpath.getClassPathEntries()) {
-			arguments.addClassPathEntry(classPathEntry);
-		}
+		// Obtain the open OfficeFloor configuration
+		OpenOfficeFloorConfiguration openOfficeFloorConfiguration = this
+				.getOpenOfficeFloorConfiguration();
 
 		// Obtain details to invoke a task
 		String officeName = this.officeName.getOfficeName();
 		String workName = this.workName.getWorkName();
 		String taskName = this.taskName.getTaskName();
 		String parameterValue = this.parameter.getParameterValue();
-
-		// Add the invoke task arguments (arguments only added if available)
-		arguments.addInvokeTask(officeName, workName, taskName, parameterValue);
 
 		// Generate the output suffix
 		StringBuilder outputSuffix = new StringBuilder();
@@ -297,7 +340,7 @@ public class OfficeBuildingOpenOfficeFloorCommand implements
 		// Create and return managed process to open OfficeFloor
 		return new OpenManagedProcess(officeBuildingHost, officeBuildingPort,
 				trustStore, trustStorePassword, userName, password,
-				arguments.getCommandLine(), outputSuffix.toString());
+				openOfficeFloorConfiguration, outputSuffix.toString());
 	}
 
 	/**
@@ -337,9 +380,9 @@ public class OfficeBuildingOpenOfficeFloorCommand implements
 		private final String password;
 
 		/**
-		 * Arguments to open the {@link OfficeFloor}.
+		 * {@link OpenOfficeFloorConfiguration}.
 		 */
-		private final String[] arguments;
+		private final OpenOfficeFloorConfiguration openOfficeFloorConfiguration;
 
 		/**
 		 * Suffix of output indicating the opening of the {@link OfficeFloor}.
@@ -361,8 +404,8 @@ public class OfficeBuildingOpenOfficeFloorCommand implements
 		 *            User name to connect.
 		 * @param password
 		 *            Password to connect.
-		 * @param arguments
-		 *            Arguments to open the {@link OfficeFloor}.
+		 * @param openOfficeFloorConfiguration
+		 *            {@link OpenOfficeFloorConfiguration}.
 		 * @param outputSuffix
 		 *            Suffix of output indicating the opening of the
 		 *            {@link OfficeFloor}.
@@ -370,14 +413,15 @@ public class OfficeBuildingOpenOfficeFloorCommand implements
 		public OpenManagedProcess(String officeBuildingHost,
 				int officeBuildingPort, File trustStore,
 				String trustStorePassword, String userName, String password,
-				String[] arguments, String outputSuffix) {
+				OpenOfficeFloorConfiguration openOfficeFloorConfiguration,
+				String outputSuffix) {
 			this.officeBuildingHost = officeBuildingHost;
 			this.officeBuildingPort = officeBuildingPort;
 			this.trustStoreLocation = trustStore.getAbsolutePath();
 			this.trustStorePassword = trustStorePassword;
 			this.userName = userName;
 			this.password = password;
-			this.arguments = arguments;
+			this.openOfficeFloorConfiguration = openOfficeFloorConfiguration;
 			this.outputSuffix = outputSuffix;
 		}
 
@@ -402,7 +446,8 @@ public class OfficeBuildingOpenOfficeFloorCommand implements
 							this.password);
 
 			// Open the OfficeFloor
-			String processNamespace = manager.openOfficeFloor(this.arguments);
+			String processNamespace = manager
+					.openOfficeFloor(this.openOfficeFloorConfiguration);
 
 			// Construct message for OfficeFloor
 			StringBuilder message = new StringBuilder();

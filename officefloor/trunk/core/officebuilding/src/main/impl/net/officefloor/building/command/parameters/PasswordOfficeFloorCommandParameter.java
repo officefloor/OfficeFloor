@@ -18,39 +18,45 @@
 
 package net.officefloor.building.command.parameters;
 
-import java.io.File;
-
 import net.officefloor.building.command.OfficeFloorCommandParameter;
 
 /**
- * {@link OfficeFloorCommandParameter} for a Jar.
+ * {@link OfficeFloorCommandParameter} for the password.
  * 
  * @author Daniel Sagenschneider
  */
-public class JarOfficeFloorCommandParameter extends
-		AbstractMultiplePathsOfficeFloorCommandParameter {
-
+public class PasswordOfficeFloorCommandParameter extends
+		AbstractSingleValueOfficeFloorCommandParameter {
+	
 	/**
-	 * Name of {@link OfficeFloorCommandParameter} for the possible archive
-	 * locations.
+	 * Default password.
 	 */
-	public static final String PARAMETER_ARCHIVE_LOCATION = "jar";
+	public static final String DEFAULT_PASSWORD = "password";
 
 	/**
 	 * Initiate.
 	 */
-	public JarOfficeFloorCommandParameter() {
-		super(PARAMETER_ARCHIVE_LOCATION, "j", File.pathSeparator,
-				"Archive to include on the class path");
+	public PasswordOfficeFloorCommandParameter() {
+		super("password", "p", "Password");
 	}
 
 	/**
-	 * Obtains the listing archives.
+	 * Obtains password.
 	 * 
-	 * @return Listing of archives.
+	 * @return Password.
+	 * @throws IllegalArgumentException
+	 *             If no password provided.
 	 */
-	public String[] getArchives() {
-		return this.getPaths();
+	public String getPassword() throws IllegalArgumentException {
+
+		// Ensure have password
+		String password = this.getValue();
+		if ((password == null) || (password.trim().length() == 0)) {
+			throw new IllegalArgumentException("No password provided");
+		}
+
+		// Return the password
+		return password;
 	}
 
 }

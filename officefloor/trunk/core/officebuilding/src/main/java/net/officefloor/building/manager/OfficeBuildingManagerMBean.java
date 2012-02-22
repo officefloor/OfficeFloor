@@ -92,29 +92,6 @@ public interface OfficeBuildingManagerMBean {
 	 * <p>
 	 * Opens an {@link OfficeFloor} within the {@link OfficeBuilding}.
 	 * <p>
-	 * The complex arguments means this method will typically only be able to be
-	 * programmatically invoked - not for JMX console invocation. Use the other
-	 * <code>openOfficeFloor</code> for this type of invocation.
-	 * <p>
-	 * Also note that due to this method&apos;s flexibility and non-typed
-	 * interface that caution should be taken in using this programmatically as
-	 * arguments may change.
-	 * 
-	 * @param arguments
-	 *            {@link OfficeFloor} arguments.
-	 * @return {@link Process} name space of the opened {@link OfficeFloor}.
-	 * @throws Exception
-	 *             If fails to open the {@link OfficeFloor}.
-	 * 
-	 * @see ProcessManagerMBean#getProcessNamespace()
-	 */
-	@Deprecated
-	String openOfficeFloor(String[] arguments) throws Exception;
-
-	/**
-	 * <p>
-	 * Opens an {@link OfficeFloor} within the {@link OfficeBuilding}.
-	 * <p>
 	 * The complex argument means this method will typically only be able to be
 	 * programmatically invoked - not for JMX console invocation. Use the other
 	 * <code>openOfficeFloor</code> for this type of invocation.
@@ -127,7 +104,8 @@ public interface OfficeBuildingManagerMBean {
 	 * 
 	 * @see ProcessManagerMBean#getProcessNamespace()
 	 */
-	// String openOfficeFloor(OpenOfficeFloorConfiguration configuration) throws Exception;
+	String openOfficeFloor(OpenOfficeFloorConfiguration configuration)
+			throws Exception;
 
 	/**
 	 * Provides a listing of the {@link Process} name spaces currently running

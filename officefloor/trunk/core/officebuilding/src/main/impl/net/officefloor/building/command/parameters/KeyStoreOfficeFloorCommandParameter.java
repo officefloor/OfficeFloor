@@ -31,7 +31,7 @@ import net.officefloor.building.command.OfficeFloorCommandParameter;
  * 
  * @author Daniel Sagenschneider
  */
-public class KeyStoreOfficeFloorCommandParameterImpl extends
+public class KeyStoreOfficeFloorCommandParameter extends
 		AbstractSingleValueOfficeFloorCommandParameter {
 
 	/**
@@ -64,7 +64,7 @@ public class KeyStoreOfficeFloorCommandParameterImpl extends
 					.currentThread()
 					.getContextClassLoader()
 					.getResourceAsStream(
-							KeyStoreOfficeFloorCommandParameterImpl.DEFAULT_KEY_STORE_CLASSPATH_LOCATION);
+							KeyStoreOfficeFloorCommandParameter.DEFAULT_KEY_STORE_CLASSPATH_LOCATION);
 			FileOutputStream output = new FileOutputStream(keyStore, false);
 			for (int value = contents.read(); value != -1; value = contents
 					.read()) {
@@ -81,7 +81,7 @@ public class KeyStoreOfficeFloorCommandParameterImpl extends
 	/**
 	 * Initiate.
 	 */
-	public KeyStoreOfficeFloorCommandParameterImpl() {
+	public KeyStoreOfficeFloorCommandParameter() {
 		super("key_store", "ks", "Location of the key store file");
 	}
 

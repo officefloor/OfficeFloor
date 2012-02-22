@@ -18,38 +18,45 @@
 
 package net.officefloor.building.command.parameters;
 
-import java.io.File;
-
 import net.officefloor.building.command.OfficeFloorCommandParameter;
 
 /**
- * {@link OfficeFloorCommandParameter} for the password to the key store
- * {@link File}.
+ * {@link OfficeFloorCommandParameter} for the user name.
  * 
  * @author Daniel Sagenschneider
  */
-public class KeyStorePasswordOfficeFloorCommandParameterImpl extends
+public class UsernameOfficeFloorCommandParameter extends
 		AbstractSingleValueOfficeFloorCommandParameter {
 	
 	/**
-	 * Default key store password.
+	 * Default user name.
 	 */
-	public static final String DEFAULT_KEY_STORE_PASSWORD = "changeit";
+	public static final String DEFAULT_USER_NAME = "admin";
 
 	/**
 	 * Initiate.
 	 */
-	public KeyStorePasswordOfficeFloorCommandParameterImpl() {
-		super("key_store_password", "kp", "Password to the key store file");
+	public UsernameOfficeFloorCommandParameter() {
+		super("username", "u", "User name");
 	}
 
 	/**
-	 * Obtains password to the key store {@link File}.
+	 * Obtains user name.
 	 * 
-	 * @return Password to the key store {@link File}.
+	 * @return User name.
+	 * @throws IllegalArgumentException
+	 *             If no user name provided.
 	 */
-	public String getKeyStorePassword() {
-		return this.getValue();
+	public String getUserName() throws IllegalArgumentException {
+
+		// Ensure have user name
+		String userName = this.getValue();
+		if ((userName == null) || (userName.trim().length() == 0)) {
+			throw new IllegalArgumentException("No user name provided");
+		}
+
+		// Return the user name
+		return userName;
 	}
 
 }

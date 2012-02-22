@@ -21,9 +21,10 @@ package net.officefloor.building.manager;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.PrintStream;
+import java.io.ObjectOutputStream;
 import java.lang.management.ManagementFactory;
 import java.net.InetAddress;
 import java.rmi.ConnectException;
@@ -33,12 +34,16 @@ import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.rmi.server.RMIClientSocketFactory;
 import java.rmi.server.RMIServerSocketFactory;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.management.JMX;
 import javax.management.MBeanServer;
@@ -55,7 +60,11 @@ import javax.rmi.ssl.SslRMIClientSocketFactory;
 import javax.rmi.ssl.SslRMIServerSocketFactory;
 
 import mx4j.tools.remote.PasswordAuthenticator;
-import net.officefloor.building.console.OfficeFloorConsole;
+import net.officefloor.building.classpath.ClassPathFactoryImpl;
+import net.officefloor.building.command.OfficeFloorCommand;
+import net.officefloor.building.command.OfficeFloorCommandParser;
+import net.officefloor.building.command.OfficeFloorCommandParserImpl;
+import net.officefloor.building.command.officefloor.OfficeBuildingOpenOfficeFloorCommand;
 import net.officefloor.building.process.ProcessCompletionListener;
 import net.officefloor.building.process.ProcessConfiguration;
 import net.officefloor.building.process.ProcessException;
@@ -67,16 +76,22 @@ import net.officefloor.building.process.ProcessStartListener;
 import net.officefloor.building.process.officefloor.OfficeFloorManager;
 import net.officefloor.building.process.officefloor.OfficeFloorManagerMBean;
 import net.officefloor.console.OfficeBuilding;
-import net.officefloor.console.OpenOfficeFloor;
 import net.officefloor.frame.api.manage.OfficeFloor;
+
+import org.codehaus.plexus.DefaultPlexusContainer;
 
 /**
  * {@link OfficeBuilding} Manager.
  * 
  * @author Daniel Sagenschneider
  */
-public class OfficeBuildingManager implements OfficeBuildingManagerMBean,
-		ProcessCompletionListener {
+public class OfficeBuildingManager implements OfficeBuildingManagerMBean {
+
+	/**
+	 * {@link Logger}.
+	 */
+	private static final Logger LOGGER = Logger
+			.getLogger(OfficeBuildingManager.class.getName());
 
 	/**
 	 * Artifact Id for this {@link OfficeBuilding}.
@@ -135,6 +150,49 @@ public class OfficeBuildingManager implements OfficeBuildingManagerMBean,
 	}
 
 	/**
+	 * Propagates the MBean exception so that able to be received by the JMX
+	 * client.
+	 * 
+	 * @param ex
+	 *            Exception to propagate.
+	 * @return {@link Exception} to propagate.
+	 */
+	public static Exception propagateMBeanException(Exception ex) {
+
+		// Ensure able to serialize the exception
+		try {
+
+			// Attempt to serialize the exception
+			ByteArrayOutputStream temp = new ByteArrayOutputStream();
+			ObjectOutputStream serializer = new ObjectOutputStream(temp);
+			serializer.writeObject(ex);
+			serializer.flush();
+
+			// Able to serialize so propagate as is
+			return ex;
+
+		} catch (IOException notSerializable) {
+
+			// Create a message describing the exception
+			StringBuilder msg = new StringBuilder();
+			msg.append(ex.getMessage());
+			Throwable previous = ex;
+			Throwable current = ex.getCause();
+			while ((current != null) && (current != previous)) {
+				msg.append("\n\tCaused by");
+				msg.append(current.getMessage());
+
+				// Setup for next iteration
+				previous = current;
+				current = current.getCause();
+			}
+
+			// Return serializable exception to propagate exception details
+			return new Exception(msg.toString());
+		}
+	}
+
+	/**
 	 * Starts the {@link OfficeBuilding}.
 	 * 
 	 * @param hostName
@@ -154,11 +212,23 @@ public class OfficeBuildingManager implements OfficeBuildingManagerMBean,
 	 * @param password
 	 *            Password to allow connecting to the
 	 *            {@link OfficeBuildingManager}.
+	 * @param workspace
+	 *            Work space for the {@link OfficeBuilding}. May be
+	 *            <code>null</code> to use default location (temp directory).
+	 * @param isIsolateProcesses
+	 *            Flag indicating to isolate each {@link Process}.
+	 *            <code>false</code> will have artifacts shared between
+	 *            {@link Process} instances.
 	 * @param environment
 	 *            Environment {@link Properties}.
 	 * @param mbeanServer
 	 *            {@link MBeanServer}. May be <code>null</code> to use platform
 	 *            {@link MBeanServer}.
+	 * @param jvmOptions
+	 *            JVM options for the spawned {@link Process} instances.
+	 * @param remoteRepositoryUrls
+	 *            Remote repository URLs to find artifacts by their
+	 *            {@link ArtifactReference}.
 	 * @return {@link OfficeBuildingManager} managing the started
 	 *         {@link OfficeBuilding}.
 	 * @throws Exception
@@ -166,8 +236,10 @@ public class OfficeBuildingManager implements OfficeBuildingManagerMBean,
 	 */
 	public static OfficeBuildingManagerMBean startOfficeBuilding(
 			String hostName, int port, File keyStore, String keyStorePassword,
-			String userName, String password, Properties environment,
-			MBeanServer mbeanServer) throws Exception {
+			String userName, String password, File workspace,
+			boolean isIsolateProcesses, Properties environment,
+			MBeanServer mbeanServer, String[] jvmOptions,
+			String[] remoteRepositoryUrls) throws Exception {
 
 		// Obtain the start time
 		Date startTime = new Date(System.currentTimeMillis());
@@ -191,6 +263,22 @@ public class OfficeBuildingManager implements OfficeBuildingManagerMBean,
 			hostName = InetAddress.getLocalHost().getHostName();
 		}
 		System.setProperty("java.rmi.server.hostname", hostName);
+
+		// Obtain the work space location
+		if (workspace == null) {
+			// Use default location of temp directory
+			workspace = new File(System.getProperty("java.io.tmpdir"),
+					"officebuilding");
+		}
+
+		// Ensure start with empty work space
+		deleteDirectory(workspace, "Failed clearing work space for "
+				+ OfficeBuildingManager.class.getSimpleName());
+
+		// Ensure the work space exists
+		if (!(workspace.exists())) {
+			workspace.mkdir();
+		}
 
 		// Create the socket factories
 		RMIClientSocketFactory clientSocketFactory = new SslRMIClientSocketFactory();
@@ -247,7 +335,9 @@ public class OfficeBuildingManager implements OfficeBuildingManagerMBean,
 
 		// Create the Office Building Manager
 		OfficeBuildingManager manager = new OfficeBuildingManager(startTime,
-				serviceUrl, connectorServer, mbeanServer, environment);
+				serviceUrl, connectorServer, mbeanServer, workspace,
+				isIsolateProcesses, environment, jvmOptions,
+				remoteRepositoryUrls);
 
 		// Register the Office Building Manager
 		mbeanServer.registerMBean(manager, OFFICE_BUILDING_MANAGER_OBJECT_NAME);
@@ -308,10 +398,18 @@ public class OfficeBuildingManager implements OfficeBuildingManagerMBean,
 	 *            User name to connect.
 	 * @param password
 	 *            Password to connect.
+	 * @param workspace
+	 *            Workspace for the {@link OfficeBuilding}.
+	 * @param isIsolateProcesses
+	 *            Flag indicating to isolate the {@link Process} instances.
 	 * @param environment
 	 *            Environment {@link Properties}. May be <code>null</code>.
 	 * @param configuration
 	 *            {@link ProcessConfiguration}. May be <code>null</code>.
+	 * @param jvmOptions
+	 *            JVM options for the {@link Process} instances.
+	 * @param remoteRepositoryUrls
+	 *            Remote repository URLs.
 	 * @return {@link ProcessManager} managing the started
 	 *         {@link OfficeBuilding}.
 	 * @throws ProcessException
@@ -319,8 +417,10 @@ public class OfficeBuildingManager implements OfficeBuildingManagerMBean,
 	 */
 	public static ProcessManager spawnOfficeBuilding(String hostName, int port,
 			File keyStore, String keyStorePassword, String userName,
-			String password, Properties environment,
-			ProcessConfiguration configuration) throws ProcessException {
+			String password, File workspace, boolean isIsolateProcesses,
+			Properties environment, String[] jvmOptions,
+			String[] remoteRepositoryUrls, ProcessConfiguration configuration)
+			throws ProcessException {
 
 		// Ensure have environment
 		if (environment == null) {
@@ -330,7 +430,8 @@ public class OfficeBuildingManager implements OfficeBuildingManagerMBean,
 		// Create the OfficeBuilding managed process
 		OfficeBuildingManagedProcess managedProcess = new OfficeBuildingManagedProcess(
 				hostName, port, keyStore, keyStorePassword, userName, password,
-				environment);
+				workspace, isIsolateProcesses, environment, jvmOptions,
+				remoteRepositoryUrls);
 
 		// Ensure have process configuration
 		if (configuration == null) {
@@ -580,6 +681,44 @@ public class OfficeBuildingManager implements OfficeBuildingManagerMBean,
 	}
 
 	/**
+	 * Deletes the directory.
+	 * 
+	 * @param directory
+	 *            Directory to delete.
+	 * @param errorMessage
+	 *            Message to propagate if fials to delete the directory.
+	 * @throws IOException
+	 *             If fails to delete the directory.
+	 */
+	private static void deleteDirectory(File directory, String errorMessage)
+			throws IOException {
+
+		// Do nothing if directory not exists
+		if (!(directory.exists())) {
+			return; // not exist so no need to delete
+		}
+
+		// Delete the children of directory
+		for (File child : directory.listFiles()) {
+			if (child.isDirectory()) {
+				// Recursively delete sub directories
+				deleteDirectory(child, errorMessage);
+
+			} else {
+				// Delete the file
+				if (!(child.delete())) {
+					throw new IOException(errorMessage);
+				}
+			}
+		}
+
+		// Delete the directory
+		if (!(directory.delete())) {
+			throw new IOException(errorMessage);
+		}
+	}
+
+	/**
 	 * {@link ProcessManagerMBean} instances of currently running
 	 * {@link Process} instances.
 	 */
@@ -616,9 +755,35 @@ public class OfficeBuildingManager implements OfficeBuildingManagerMBean,
 	private final MBeanServer mbeanServer;
 
 	/**
+	 * Work space for the {@link OfficeBuilding}.
+	 */
+	private final File workspace;
+
+	/**
 	 * Environment {@link Properties}.
 	 */
 	private final Properties environment;
+
+	/**
+	 * Flag indicating whether to isolate the artifacts of the {@link Process}.
+	 */
+	private final boolean isIsolateProcesses;
+
+	/**
+	 * JVM options for the {@link Process}.
+	 */
+	private final String[] jvmOptions;
+
+	/**
+	 * Listing of remote repository URLs to obtain artifacts for the
+	 * {@link ArtifactReference} instances.
+	 */
+	private final String[] remoteRepositoryUrls;
+
+	/**
+	 * Index of the next {@link Process}.
+	 */
+	private long processInstanceIndex = 0;
 
 	/**
 	 * May only create by starting.
@@ -631,18 +796,43 @@ public class OfficeBuildingManager implements OfficeBuildingManagerMBean,
 	 *            {@link JMXConnectorServer} for the {@link OfficeBuilding}.
 	 * @param mbeanServer
 	 *            {@link MBeanServer}.
+	 * @param workspace
+	 *            Work space for the {@link OfficeBuilding}.
+	 * @param isIsolateProcesses
+	 *            Flag indicating whether to isolate the artifacts of the
+	 *            {@link Process}.
 	 * @param environment
 	 *            Environment {@link Properties}.
+	 * @param jvmOptions
+	 *            JVM options for the {@link Process}.
+	 * @param remoteRepositoryUrls
+	 *            Listing of remote repository URLs to obtain artifacts for the
+	 *            {@link ArtifactReference} instances.
 	 */
 	private OfficeBuildingManager(Date startTime,
 			JMXServiceURL officeBuildingServiceUrl,
 			JMXConnectorServer connectorServer, MBeanServer mbeanServer,
-			Properties environment) {
+			File workspace, boolean isIsolateProcesses, Properties environment,
+			String[] jvmOptions, String[] remoteRepositoryUrls) {
 		this.startTime = startTime;
 		this.officeBuildingServiceUrl = officeBuildingServiceUrl;
 		this.connectorServer = connectorServer;
 		this.mbeanServer = mbeanServer;
+		this.workspace = workspace;
+		this.isIsolateProcesses = isIsolateProcesses;
 		this.environment = environment;
+		this.jvmOptions = (jvmOptions == null ? new String[0] : jvmOptions);
+		this.remoteRepositoryUrls = (remoteRepositoryUrls == null ? new String[0]
+				: remoteRepositoryUrls);
+	}
+
+	/**
+	 * Obtains the instance index for the {@link Process}.
+	 * 
+	 * @return Instance index for the {@link Process}.
+	 */
+	private synchronized long getProcessInstanceIndex() {
+		return ++this.processInstanceIndex;
 	}
 
 	/*
@@ -675,74 +865,251 @@ public class OfficeBuildingManager implements OfficeBuildingManagerMBean,
 		// Split out the arguments
 		String[] argumentEntries = arguments.trim().split("\\s+");
 
+		// Parse the parameters (always the one command)
+		OfficeFloorCommandParser parser = new OfficeFloorCommandParserImpl(
+				new OfficeBuildingOpenOfficeFloorCommand(false));
+		OfficeFloorCommand[] commands = parser.parseCommands(argumentEntries);
+		OfficeBuildingOpenOfficeFloorCommand command = (OfficeBuildingOpenOfficeFloorCommand) commands[0];
+
+		// Obtain the open OfficeFloor configuration
+		OpenOfficeFloorConfiguration configuration = command
+				.getOpenOfficeFloorConfiguration();
+
 		// Open the OfficeFloor
-		return this.openOfficeFloor(argumentEntries);
+		return this.openOfficeFloor(configuration);
 	}
 
 	@Override
-	public String openOfficeFloor(String[] arguments) throws Exception {
+	public String openOfficeFloor(OpenOfficeFloorConfiguration configuration)
+			throws Exception {
+		try {
 
-		// Ensure the OfficeBuilding is open
-		synchronized (this) {
-			if (!this.isOfficeBuildingOpen) {
-				throw new IllegalStateException("OfficeBuilding closed");
+			// Ensure the OfficeBuilding is open
+			synchronized (this) {
+				if (!this.isOfficeBuildingOpen) {
+					throw new IllegalStateException("OfficeBuilding closed");
+				}
 			}
-		}
 
-		// Create the console to open OfficeFloor in spawned process
-		OfficeFloorConsole console = new OpenOfficeFloor(true)
-				.createOfficeFloorConsole("JMX", this.environment);
+			// Obtain the process name
+			String processName = configuration.getProcessName();
+			if ((processName == null) || (processName.trim().length() == 0)) {
+				processName = "officefloor";
+			}
 
-		// Handle to load the process manager
-		final ProcessManagerMBean[] manager = new ProcessManagerMBean[1];
+			// Obtain the process work space location
+			String processWorkspaceFolderName = processName
+					+ this.getProcessInstanceIndex();
+			final File processWorkspace = new File(this.workspace,
+					processWorkspaceFolderName);
 
-		// Create the listener
-		ProcessStartListener listener = new ProcessStartListener() {
-			@Override
-			public void processStarted(ProcessManagerMBean processManager) {
+			// Ensure clean up process
+			boolean isCleanup = true;
+			try {
 
-				// Register the process manager
-				synchronized (manager) {
-					manager[0] = processManager;
+				// Create the process work space
+				if (!(processWorkspace.mkdirs())) {
+					// Failed to create the process workspace
+					throw new IOException(
+							"Failed to create process workspace directory");
 				}
 
-				// Only register if process not already complete
-				synchronized (OfficeBuildingManager.this) {
-					synchronized (processManager) {
-						if (!processManager.isProcessComplete()) {
-							// Register the manager for the running process
-							OfficeBuildingManager.this.processManagers
-									.add(processManager);
+				// Obtain the local repository (null will share the artifacts)
+				File localRepository = null;
+				if (this.isIsolateProcesses) {
+					// Create isolated local repository
+					localRepository = new File(processWorkspace, "repo");
+					if (!(localRepository.mkdirs())) {
+						// Failed to create isolated local repository
+						throw new IOException(
+								"Failed to create isolated local repository");
+					}
+				}
+
+				// Configure class path factory
+				ClassPathFactoryImpl classPathFactory = new ClassPathFactoryImpl(
+						new DefaultPlexusContainer(), localRepository);
+				int remoteRepositoryIndex = 0;
+				for (String remoteRepositoryUrl : this.remoteRepositoryUrls) {
+					classPathFactory.registerRemoteRepository("repo"
+							+ (remoteRepositoryIndex++), "default",
+							remoteRepositoryUrl);
+				}
+				for (String remoteRepositoryUrl : configuration
+						.getRemoteRepositoryUrls()) {
+					classPathFactory.registerRemoteRepository("repo"
+							+ (remoteRepositoryIndex++), "default",
+							remoteRepositoryUrl);
+				}
+
+				// Create the class path
+				List<String> classPathEntries = new ArrayList<String>();
+
+				// Make the uploaded artifacts available on the class path
+				for (UploadArtifact artifact : configuration
+						.getUploadArtifacts()) {
+
+					// Write the artifact to the workspace
+					String fileName = artifact.getName();
+					File artifactFile = new File(processWorkspace, fileName);
+					FileOutputStream output = new FileOutputStream(
+							artifactFile, false);
+					output.write(artifact.getContent());
+					output.close();
+
+					// Add the uploaded artifact to the class path
+					String[] artifactClassPathEntries = classPathFactory
+							.createArtifactClassPath(artifactFile
+									.getAbsolutePath());
+					classPathEntries.addAll(Arrays
+							.asList(artifactClassPathEntries));
+				}
+
+				// Make the reference artifacts available on the class path
+				for (ArtifactReference reference : configuration
+						.getArtifactReferences()) {
+
+					// Obtain the class path for the artifacts
+					String[] artifactClassPathEntries = classPathFactory
+							.createArtifactClassPath(reference.getGroupId(),
+									reference.getArtifactId(),
+									reference.getVersion(),
+									reference.getType(),
+									reference.getClassifier());
+
+					// Add the referenced artifacts to the class path
+					classPathEntries.addAll(Arrays
+							.asList(artifactClassPathEntries));
+				}
+
+				// Create the class path argument
+				StringBuilder classPath = new StringBuilder();
+				boolean isFirst = true;
+				for (String classPathEntry : classPathEntries) {
+
+					// Provide separator of class path
+					if (!isFirst) {
+						classPath.append(File.pathSeparator);
+					}
+					isFirst = false;
+
+					// Add the class path entry
+					classPath.append(classPathEntry);
+				}
+
+				// Configure the process for the OfficeFloor
+				ProcessConfiguration processConfig = new ProcessConfiguration();
+				processConfig.setProcessName(processName);
+				processConfig.setAdditionalClassPath(classPath.toString());
+				processConfig.setMbeanServer(this.mbeanServer);
+
+				// Add the JVM options
+				for (String jvmOption : this.jvmOptions) {
+					processConfig.addJvmOption(jvmOption);
+				}
+				for (String jvmOption : configuration.getJvmOptions()) {
+					processConfig.addJvmOption(jvmOption);
+				}
+
+				// Create the start listener
+				ProcessStartListener startListener = new ProcessStartListener() {
+					@Override
+					public void processStarted(
+							ProcessManagerMBean processManager) {
+
+						// Only register if process not already complete
+						synchronized (OfficeBuildingManager.this) {
+							synchronized (processManager) {
+								if (!processManager.isProcessComplete()) {
+									// Register the manager for the running
+									// process
+									OfficeBuildingManager.this.processManagers
+											.add(processManager);
+								}
+							}
 						}
+					}
+				};
+				processConfig.setProcessStartListener(startListener);
+
+				// Create the completion listener
+				ProcessCompletionListener completionListener = new ProcessCompletionListener() {
+					@Override
+					public void processCompleted(ProcessManagerMBean manager) {
+
+						// Unregister the process
+						synchronized (OfficeBuildingManager.this) {
+							// Remove manager as process no longer running
+							OfficeBuildingManager.this.processManagers
+									.remove(manager);
+
+							// Notify that a process manager complete
+							OfficeBuildingManager.this.notify();
+						}
+
+						// Clean up the process work space
+						try {
+							deleteDirectory(processWorkspace,
+									"Failed cleaning up workspace for process "
+											+ manager.getProcessNamespace());
+						} catch (IOException ex) {
+							// Log warning but do no further
+							LOGGER.log(Level.WARNING, ex.getMessage());
+						}
+					}
+				};
+				processConfig.setProcessCompletionListener(completionListener);
+
+				// Create the OfficeFloor manager (process)
+				String officeFloorSourceClassName = configuration
+						.getOfficeFloorSourceClassName();
+				String officeFloorLocation = configuration
+						.getOfficeFloorLocation();
+				Properties officeFloorProperties = new Properties();
+				officeFloorProperties.putAll(this.environment);
+				officeFloorProperties.putAll(configuration
+						.getOfficeFloorProperties());
+				OfficeFloorManager officeFloorManager = new OfficeFloorManager(
+						officeFloorSourceClassName, officeFloorLocation,
+						officeFloorProperties);
+
+				// Determine if invoking task
+				String officeName = configuration.getOfficeName();
+				String workName = configuration.getWorkName();
+				String taskName = configuration.getTaskName();
+				String parameter = configuration.getParameter();
+				if (workName != null) {
+					officeFloorManager.invokeTask(officeName, workName,
+							taskName, parameter);
+				}
+
+				// Open the OfficeFloor
+				ProcessManager processManager = ProcessManager.startProcess(
+						officeFloorManager, processConfig);
+
+				// Started so allow process to clean itself
+				isCleanup = false;
+
+				// Return the process name space
+				return processManager.getProcessNamespace();
+
+			} finally {
+
+				// Determine if clean up
+				if (isCleanup) {
+					try {
+						deleteDirectory(processWorkspace,
+								"Failed to clean up workspace for process");
+					} catch (IOException ex) {
+						// Log warning but do no further
+						LOGGER.log(Level.WARNING, ex.getMessage());
 					}
 				}
 			}
-		};
 
-		// Create streams for out and err
-		ByteArrayOutputStream stdOut = new ByteArrayOutputStream();
-		PrintStream out = new PrintStream(stdOut);
-		ByteArrayOutputStream stdErr = new ByteArrayOutputStream();
-		PrintStream err = new PrintStream(stdErr);
-
-		// Run the command
-		boolean isSuccessful = console.run(out, err, listener, this, arguments);
-
-		// Ensure successful
-		if (!isSuccessful) {
-			// Failed, so provide error
-			String message = new String(stdErr.toByteArray());
-			throw new Exception(message);
+		} catch (Exception ex) {
+			throw propagateMBeanException(ex);
 		}
-
-		// Obtain the process manager
-		ProcessManagerMBean processManager;
-		synchronized (manager) {
-			processManager = manager[0];
-		}
-
-		// Return the process name space
-		return processManager.getProcessNamespace();
 	}
 
 	@Override
@@ -770,110 +1137,77 @@ public class OfficeBuildingManager implements OfficeBuildingManagerMBean,
 	@Override
 	public synchronized String closeOfficeFloor(String processNamespace,
 			long waitTime) throws Exception {
-
-		// Find the process manager for the OfficeFloor
-		ProcessManagerMBean processManager = null;
-		for (ProcessManagerMBean manager : this.processManagers) {
-			if (manager.getProcessNamespace().equals(processNamespace)) {
-				processManager = manager;
-			}
-		}
-		if (processManager == null) {
-			// OfficeFloor not running
-			return "OfficeFloor by process name space '" + processNamespace
-					+ "' not running";
-		}
-
-		// Close the OfficeFloor
-		processManager.triggerStopProcess();
-
-		// Wait until processes complete (or time out waiting)
-		long startTime = System.currentTimeMillis();
-		for (;;) {
-
-			// Wait some time for OfficeFloor to close
-			this.wait(1000);
-
-			// Determine if OfficeFloor closed
-			if (processManager.isProcessComplete()) {
-				return "Closed"; // OfficeFloor closed
-			}
-
-			// Determine if time out waiting
-			long currentTime = System.currentTimeMillis();
-			if ((currentTime - startTime) > waitTime) {
-				// Timed out waiting, so destroy processes
-				processManager.destroyProcess();
-
-				// Indicate failure in closing OfficeFloor
-				return "Destroyed OfficeFloor '" + processNamespace
-						+ "' as timed out waiting for close of " + waitTime
-						+ " milliseconds";
-			}
-		}
-	}
-
-	@Override
-	public synchronized String stopOfficeBuilding(long waitTime)
-			throws Exception {
-
-		// Flag no longer open
-		this.isOfficeBuildingOpen = false;
-
-		// Status of stopping
-		StringBuilder status = new StringBuilder();
 		try {
 
-			// Stop the running processes (if any)
-			if (this.processManagers.size() > 0) {
-				status.append("Stopping processes:\n");
-				for (ProcessManagerMBean processManager : this.processManagers) {
-					try {
-						// Stop process, keeping track if successful
-						status.append("\t" + processManager.getProcessName()
-								+ " [" + processManager.getProcessNamespace()
-								+ "]");
-						processManager.triggerStopProcess();
-						status.append("\n");
-					} catch (Throwable ex) {
-						// Indicate failure in stopping process
-						status.append(" failed: " + ex.getMessage() + " ["
-								+ ex.getClass().getName() + "]\n");
-					}
+			// Find the process manager for the OfficeFloor
+			ProcessManagerMBean processManager = null;
+			for (ProcessManagerMBean manager : this.processManagers) {
+				if (manager.getProcessNamespace().equals(processNamespace)) {
+					processManager = manager;
 				}
-				status.append("\n");
 			}
+			if (processManager == null) {
+				// OfficeFloor not running
+				return "OfficeFloor by process name space '" + processNamespace
+						+ "' not running";
+			}
+
+			// Close the OfficeFloor
+			processManager.triggerStopProcess();
 
 			// Wait until processes complete (or time out waiting)
 			long startTime = System.currentTimeMillis();
-			WAIT_FOR_COMPLETION: for (;;) {
+			for (;;) {
 
-				// Determine if all processes complete
-				boolean isAllComplete = true;
-				for (ProcessManagerMBean processManager : this.processManagers) {
-					if (!processManager.isProcessComplete()) {
-						// Process still running so not all complete
-						isAllComplete = false;
-					}
-				}
+				// Wait some time for OfficeFloor to close
+				this.wait(1000);
 
-				// No further checking if all processes complete
-				if (isAllComplete) {
-					break WAIT_FOR_COMPLETION;
+				// Determine if OfficeFloor closed
+				if (processManager.isProcessComplete()) {
+					return "Closed"; // OfficeFloor closed
 				}
 
 				// Determine if time out waiting
 				long currentTime = System.currentTimeMillis();
 				if ((currentTime - startTime) > waitTime) {
 					// Timed out waiting, so destroy processes
-					status.append("\nStop timeout, destroying processes:\n");
+					processManager.destroyProcess();
+
+					// Indicate failure in closing OfficeFloor
+					return "Destroyed OfficeFloor '" + processNamespace
+							+ "' as timed out waiting for close of " + waitTime
+							+ " milliseconds";
+				}
+			}
+
+		} catch (Exception ex) {
+			throw propagateMBeanException(ex);
+		}
+	}
+
+	@Override
+	public synchronized String stopOfficeBuilding(long waitTime)
+			throws Exception {
+		try {
+
+			// Flag no longer open
+			this.isOfficeBuildingOpen = false;
+
+			// Status of stopping
+			StringBuilder status = new StringBuilder();
+			try {
+
+				// Stop the running processes (if any)
+				if (this.processManagers.size() > 0) {
+					status.append("Stopping processes:\n");
 					for (ProcessManagerMBean processManager : this.processManagers) {
 						try {
+							// Stop process, keeping track if successful
 							status.append("\t"
 									+ processManager.getProcessName() + " ["
 									+ processManager.getProcessNamespace()
 									+ "]");
-							processManager.destroyProcess();
+							processManager.triggerStopProcess();
 							status.append("\n");
 						} catch (Throwable ex) {
 							// Indicate failure in stopping process
@@ -882,51 +1216,84 @@ public class OfficeBuildingManager implements OfficeBuildingManagerMBean,
 						}
 					}
 					status.append("\n");
-
-					// Timed out so no further waiting
-					break WAIT_FOR_COMPLETION;
 				}
 
-				// Wait some time for the processes to complete
-				this.wait(1000);
+				// Wait until processes complete (or time out waiting)
+				long startTime = System.currentTimeMillis();
+				WAIT_FOR_COMPLETION: for (;;) {
+
+					// Determine if all processes complete
+					boolean isAllComplete = true;
+					for (ProcessManagerMBean processManager : this.processManagers) {
+						if (!processManager.isProcessComplete()) {
+							// Process still running so not all complete
+							isAllComplete = false;
+						}
+					}
+
+					// No further checking if all processes complete
+					if (isAllComplete) {
+						break WAIT_FOR_COMPLETION;
+					}
+
+					// Determine if time out waiting
+					long currentTime = System.currentTimeMillis();
+					if ((currentTime - startTime) > waitTime) {
+						// Timed out waiting, so destroy processes
+						status.append("\nStop timeout, destroying processes:\n");
+						for (ProcessManagerMBean processManager : this.processManagers) {
+							try {
+								status.append("\t"
+										+ processManager.getProcessName()
+										+ " ["
+										+ processManager.getProcessNamespace()
+										+ "]");
+								processManager.destroyProcess();
+								status.append("\n");
+							} catch (Throwable ex) {
+								// Indicate failure in stopping process
+								status.append(" failed: " + ex.getMessage()
+										+ " [" + ex.getClass().getName()
+										+ "]\n");
+							}
+						}
+						status.append("\n");
+
+						// Timed out so no further waiting
+						break WAIT_FOR_COMPLETION;
+					}
+
+					// Wait some time for the processes to complete
+					this.wait(1000);
+				}
+
+				// Return status of stopping
+				status.append(OfficeBuilding.class.getSimpleName() + " stopped");
+				return status.toString();
+
+			} finally {
+				// Flag the OfficeBuilding as stopped
+				this.isOfficeBuildingStopped = true;
+
+				// Stop the connector server
+				this.connectorServer.stop();
+
+				// Unregister the Office Building Manager MBean
+				this.mbeanServer
+						.unregisterMBean(OFFICE_BUILDING_MANAGER_OBJECT_NAME);
+
+				// Notify that stopped (responsive stop spawned OfficeBuilding)
+				this.notifyAll();
 			}
 
-			// Return status of stopping
-			status.append(OfficeBuilding.class.getSimpleName() + " stopped");
-			return status.toString();
-
-		} finally {
-			// Flag the OfficeBuilding as stopped
-			this.isOfficeBuildingStopped = true;
-
-			// Stop the connector server
-			this.connectorServer.stop();
-
-			// Unregister the Office Building Manager MBean
-			this.mbeanServer
-					.unregisterMBean(OFFICE_BUILDING_MANAGER_OBJECT_NAME);
-
-			// Notify that stopped (responsive stop spawned OfficeBuilding)
-			this.notifyAll();
+		} catch (Exception ex) {
+			throw propagateMBeanException(ex);
 		}
 	}
 
 	@Override
 	public boolean isOfficeBuildingStopped() {
 		return this.isOfficeBuildingStopped;
-	}
-
-	/*
-	 * =================== ProcessCompletionListener ===========================
-	 */
-
-	@Override
-	public synchronized void processCompleted(ProcessManagerMBean manager) {
-		// Remove manager as process no longer running
-		this.processManagers.remove(manager);
-
-		// Notify that a process manager complete
-		this.notify();
 	}
 
 }

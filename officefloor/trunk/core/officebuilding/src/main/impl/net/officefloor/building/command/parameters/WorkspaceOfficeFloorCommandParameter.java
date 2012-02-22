@@ -18,45 +18,39 @@
 
 package net.officefloor.building.command.parameters;
 
+import java.io.File;
+
 import net.officefloor.building.command.OfficeFloorCommandParameter;
+import net.officefloor.console.OfficeBuilding;
 
 /**
- * {@link OfficeFloorCommandParameter} for the password.
+ * {@link OfficeFloorCommandParameter} for the {@link OfficeBuilding} work
+ * space.
  * 
  * @author Daniel Sagenschneider
  */
-public class PasswordOfficeFloorCommandParameterImpl extends
+public class WorkspaceOfficeFloorCommandParameter extends
 		AbstractSingleValueOfficeFloorCommandParameter {
-	
-	/**
-	 * Default password.
-	 */
-	public static final String DEFAULT_PASSWORD = "password";
 
 	/**
 	 * Initiate.
 	 */
-	public PasswordOfficeFloorCommandParameterImpl() {
-		super("password", "p", "Password");
+	public WorkspaceOfficeFloorCommandParameter() {
+		super("workspace", null, "Workspace for the OfficeBuilding");
 	}
 
 	/**
-	 * Obtains password.
+	 * Obtains the workspace.
 	 * 
-	 * @return Password.
-	 * @throws IllegalArgumentException
-	 *             If no password provided.
+	 * @return Workspace.
 	 */
-	public String getPassword() throws IllegalArgumentException {
+	public File getWorkspace() {
 
-		// Ensure have password
-		String password = this.getValue();
-		if ((password == null) || (password.trim().length() == 0)) {
-			throw new IllegalArgumentException("No password provided");
-		}
+		// Obtain the location
+		String workspaceLocation = this.getValue();
 
-		// Return the password
-		return password;
+		// Return work space
+		return (workspaceLocation == null ? null : new File(workspaceLocation));
 	}
 
 }

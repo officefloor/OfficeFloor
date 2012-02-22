@@ -35,10 +35,6 @@ import javax.management.remote.JMXConnectorFactory;
 import javax.management.remote.JMXServiceURL;
 import javax.rmi.ssl.SslRMIClientSocketFactory;
 
-import net.officefloor.building.command.CommandLineBuilder;
-import net.officefloor.building.command.LocalRepositoryOfficeFloorCommandParameter;
-import net.officefloor.building.command.RemoteRepositoryUrlsOfficeFloorCommandParameter;
-import net.officefloor.building.command.parameters.RemoteRepositoryUrlsOfficeFloorCommandParameterImpl;
 import net.officefloor.building.process.ProcessManager;
 import net.officefloor.building.process.ProcessManagerMBean;
 import net.officefloor.building.process.ProcessShell;
@@ -65,11 +61,6 @@ public class OfficeBuildingManagerTest extends OfficeFrameTestCase {
 	private static final int PORT = 13778;
 
 	/**
-	 * Environment {@link Properties}.
-	 */
-	private final Properties environment = new Properties();
-
-	/**
 	 * Key store file.
 	 */
 	private File keyStore;
@@ -94,6 +85,11 @@ public class OfficeBuildingManagerTest extends OfficeFrameTestCase {
 	 */
 	private MBeanServer mbeanServer;
 
+	/**
+	 * Remote repository URLs.
+	 */
+	private String[] remoteRepositoryUrls;
+
 	@Override
 	protected void setUp() throws Exception {
 
@@ -103,19 +99,10 @@ public class OfficeBuildingManagerTest extends OfficeFrameTestCase {
 		// Obtain the MBean Server
 		this.mbeanServer = ManagementFactory.getPlatformMBeanServer();
 
-		// Setup the environment
-		File localRepositoryDirectory = OfficeBuildingTestUtil
-				.getTestLocalRepository();
-		String[] remoteRepositoryUrls = new String[] { "file://"
+		// Setup the remote repository URLs
+		this.remoteRepositoryUrls = new String[] { "file://"
 				+ OfficeBuildingTestUtil.getUserLocalRepository()
 						.getAbsolutePath() };
-		this.environment
-				.put(LocalRepositoryOfficeFloorCommandParameter.PARAMETER_LOCAL_REPOSITORY,
-						localRepositoryDirectory.getAbsoluteFile());
-		this.environment
-				.put(RemoteRepositoryUrlsOfficeFloorCommandParameter.PARAMETER_REMOTE_REPOSITORY_URLS,
-						RemoteRepositoryUrlsOfficeFloorCommandParameterImpl
-								.transformForParameterValue(remoteRepositoryUrls));
 	}
 
 	/**
@@ -126,7 +113,8 @@ public class OfficeBuildingManagerTest extends OfficeFrameTestCase {
 	private OfficeBuildingManagerMBean startOfficeBuilding() throws Exception {
 		return OfficeBuildingManager.startOfficeBuilding(null, PORT,
 				this.keyStore, KEY_STORE_PASSWORD, MOCK_USER_NAME,
-				MOCK_PASSWORD, this.environment, this.mbeanServer);
+				MOCK_PASSWORD, null, false, new Properties(), this.mbeanServer,
+				new String[0], this.remoteRepositoryUrls);
 	}
 
 	/**
@@ -223,13 +211,12 @@ public class OfficeBuildingManagerTest extends OfficeFrameTestCase {
 					String officeFloorLocation,
 					OfficeBuildingManagerMBean buildingManager)
 					throws Exception {
-				CommandLineBuilder arguments = new CommandLineBuilder();
-				arguments.addProcessName(processName);
-				arguments.addOfficeFloor(officeFloorLocation);
-				arguments.addArchive(OfficeBuildingTestUtil
-						.getOfficeCompilerArtifactJar().getAbsolutePath());
-				return buildingManager.openOfficeFloor(arguments
-						.getCommandLine());
+				OpenOfficeFloorConfiguration config = new OpenOfficeFloorConfiguration(
+						officeFloorLocation);
+				config.setProcessName(processName);
+				config.addUploadArtifact(new UploadArtifact(
+						OfficeBuildingTestUtil.getOfficeCompilerArtifactJar()));
+				return buildingManager.openOfficeFloor(config);
 			}
 		});
 	}
@@ -244,20 +231,22 @@ public class OfficeBuildingManagerTest extends OfficeFrameTestCase {
 					String officeFloorLocation,
 					OfficeBuildingManagerMBean buildingManager)
 					throws Exception {
-				CommandLineBuilder arguments = new CommandLineBuilder();
-				arguments.addProcessName(processName);
-				arguments.addOfficeFloor(officeFloorLocation);
-				arguments.addArtifact("net.officefloor.core:officecompiler:"
-						+ OfficeBuildingTestUtil
-								.getOfficeCompilerArtifactVersion());
-				return buildingManager.openOfficeFloor(arguments
-						.getCommandLine());
+				OpenOfficeFloorConfiguration config = new OpenOfficeFloorConfiguration(
+						officeFloorLocation);
+				config.setProcessName(processName);
+				config.addArtifactReference(new ArtifactReference(
+						"net.officefloor.core", "officecompiler",
+						OfficeBuildingTestUtil
+								.getOfficeCompilerArtifactVersion(), null, null));
+				config.addRemoteRepositoryUrl(OfficeBuildingTestUtil
+						.getUserLocalRepository().toURI().toURL().toString());
+				return buildingManager.openOfficeFloor(config);
 			}
 		});
 	}
 
 	/**
-	 * Ensure able to open the {@link OfficeFloor} with arguments.
+	 * Ensure able to open the {@link OfficeFloor} with JMX string command.
 	 */
 	public void testOfficeFloorJmxManagement() throws Exception {
 		this.doOfficeFloorManagementTest(new OfficeFloorOpener() {
@@ -402,7 +391,8 @@ public class OfficeBuildingManagerTest extends OfficeFrameTestCase {
 		// Open the OfficeFloor
 		String officeFloorLocation = this.getOfficeFloorLocation();
 		String processNamespace = buildingManager
-				.openOfficeFloor("--officefloor " + officeFloorLocation);
+				.openOfficeFloor(new OpenOfficeFloorConfiguration(
+						officeFloorLocation));
 
 		// Ensure OfficeFloor opened (obtaining local floor manager)
 		OfficeFloorManagerMBean localFloorManager = OfficeBuildingManager
@@ -449,7 +439,9 @@ public class OfficeBuildingManagerTest extends OfficeFrameTestCase {
 		// Spawn the OfficeBuilding
 		ProcessManager process = OfficeBuildingManager.spawnOfficeBuilding(
 				null, SPAWN_PORT, this.keyStore, KEY_STORE_PASSWORD,
-				MOCK_USER_NAME, MOCK_PASSWORD, null, null);
+				MOCK_USER_NAME, MOCK_PASSWORD, null, false, null, null,
+				new String[] { OfficeBuildingTestUtil.getUserLocalRepository()
+						.getAbsolutePath() }, null);
 		try {
 
 			// Ensure the OfficeBuilding is available
