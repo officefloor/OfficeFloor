@@ -18,7 +18,6 @@
 
 package net.officefloor.building.console;
 
-import java.io.File;
 import java.io.PrintStream;
 import java.io.Reader;
 import java.util.Arrays;
@@ -26,10 +25,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Properties;
 
-import org.codehaus.plexus.DefaultPlexusContainer;
-
 import net.officefloor.building.classpath.ClassPathFactoryImpl;
-import net.officefloor.building.command.LocalRepositoryOfficeFloorCommandParameter;
 import net.officefloor.building.command.OfficeFloorCommand;
 import net.officefloor.building.command.OfficeFloorCommandFactory;
 import net.officefloor.building.command.OfficeFloorCommandParameter;
@@ -37,7 +33,6 @@ import net.officefloor.building.command.OfficeFloorCommandParseException;
 import net.officefloor.building.command.OfficeFloorCommandParser;
 import net.officefloor.building.command.OfficeFloorCommandParserImpl;
 import net.officefloor.building.command.RemoteRepositoryUrlsOfficeFloorCommandParameter;
-import net.officefloor.building.command.parameters.LocalRepositoryOfficeFloorCommandParameterImpl;
 import net.officefloor.building.command.parameters.RemoteRepositoryUrlsOfficeFloorCommandParameterImpl;
 import net.officefloor.building.decorate.OfficeFloorDecorator;
 import net.officefloor.building.execute.OfficeFloorExecutionUnit;
@@ -50,6 +45,8 @@ import net.officefloor.building.process.ProcessConfiguration;
 import net.officefloor.building.process.ProcessException;
 import net.officefloor.building.process.ProcessManager;
 import net.officefloor.building.process.ProcessStartListener;
+
+import org.codehaus.plexus.DefaultPlexusContainer;
 
 /**
  * {@link OfficeFloorConsole} implementation.
@@ -178,22 +175,6 @@ public class OfficeFloorConsoleImpl implements OfficeFloorConsole {
 			// Obtain the parameters
 			OfficeFloorCommandParameter[] parameters = command.getParameters();
 
-			// Attempt to obtain local repository
-			File localRepository = null;
-			for (OfficeFloorCommandParameter parameter : parameters) {
-				if (parameter instanceof LocalRepositoryOfficeFloorCommandParameter) {
-					// Have local repository parameter so use
-					LocalRepositoryOfficeFloorCommandParameter localRepositoryParameter = (LocalRepositoryOfficeFloorCommandParameter) parameter;
-					localRepository = localRepositoryParameter
-							.getLocalRepository();
-				}
-			}
-			if (localRepository == null) {
-				// Not available on parameter so try the environment
-				localRepository = LocalRepositoryOfficeFloorCommandParameterImpl
-						.getLocalRepository(this.environment);
-			}
-
 			// Obtain remote repository URLs (from properties and environment)
 			List<String> remoteRepositoryUrls = new LinkedList<String>();
 			for (OfficeFloorCommandParameter parameter : parameters) {
@@ -213,7 +194,7 @@ public class OfficeFloorConsoleImpl implements OfficeFloorConsole {
 			ClassPathFactoryImpl classPathFactory;
 			try {
 				classPathFactory = new ClassPathFactoryImpl(
-						new DefaultPlexusContainer(), localRepository);
+						new DefaultPlexusContainer(), null);
 				int remoteRepositoryIndex = 1;
 				for (String remoteRepositoryUrl : remoteRepositoryUrls) {
 					classPathFactory.registerRemoteRepository("repo"

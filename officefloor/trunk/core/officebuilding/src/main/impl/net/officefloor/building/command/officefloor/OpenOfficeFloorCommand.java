@@ -28,11 +28,9 @@ import net.officefloor.building.command.OfficeFloorCommandContext;
 import net.officefloor.building.command.OfficeFloorCommandEnvironment;
 import net.officefloor.building.command.OfficeFloorCommandFactory;
 import net.officefloor.building.command.OfficeFloorCommandParameter;
-import net.officefloor.building.command.parameters.ArtifactArgument;
+import net.officefloor.building.command.parameters.ArtifactReferencesOfficeFloorCommandParameter;
 import net.officefloor.building.command.parameters.ClassPathOfficeFloorCommandParameter;
-import net.officefloor.building.command.parameters.JarOfficeFloorCommandParameter;
 import net.officefloor.building.command.parameters.JvmOptionOfficeFloorCommandParameter;
-import net.officefloor.building.command.parameters.MultipleArtifactsOfficeFloorCommandParameter;
 import net.officefloor.building.command.parameters.OfficeFloorLocationOfficeFloorCommandParameter;
 import net.officefloor.building.command.parameters.OfficeFloorSourceOfficeFloorCommandParameter;
 import net.officefloor.building.command.parameters.OfficeNameOfficeFloorCommandParameter;
@@ -41,6 +39,7 @@ import net.officefloor.building.command.parameters.ProcessNameOfficeFloorCommand
 import net.officefloor.building.command.parameters.PropertiesOfficeFloorCommandParameter;
 import net.officefloor.building.command.parameters.TaskNameOfficeFloorCommandParameter;
 import net.officefloor.building.command.parameters.WorkNameOfficeFloorCommandParameter;
+import net.officefloor.building.manager.ArtifactReference;
 import net.officefloor.building.process.ManagedProcess;
 import net.officefloor.building.process.ManagedProcessContext;
 import net.officefloor.building.process.ProcessManager;
@@ -70,14 +69,9 @@ public class OpenOfficeFloorCommand implements OfficeFloorCommandFactory,
 	private final OfficeFloorLocationOfficeFloorCommandParameter officeFloorLocation = new OfficeFloorLocationOfficeFloorCommandParameter();
 
 	/**
-	 * Archives to include on the class path.
+	 * {@link ArtifactReference} instances to include on the class path.
 	 */
-	private final JarOfficeFloorCommandParameter archives = new JarOfficeFloorCommandParameter();
-
-	/**
-	 * Artifacts to include on the class path.
-	 */
-	private final MultipleArtifactsOfficeFloorCommandParameter artifacts = new MultipleArtifactsOfficeFloorCommandParameter();
+	private final ArtifactReferencesOfficeFloorCommandParameter artifactReferences = new ArtifactReferencesOfficeFloorCommandParameter();
 
 	/**
 	 * JVM options.
@@ -155,9 +149,9 @@ public class OpenOfficeFloorCommand implements OfficeFloorCommandFactory,
 				10);
 		parameters.addAll(Arrays.asList(new OfficeFloorCommandParameter[] {
 				this.officeFloorSource, this.officeFloorLocation,
-				this.archives, this.artifacts, this.classpath,
-				this.processName, this.officeName, this.workName,
-				this.taskName, this.parameter, this.properties }));
+				this.artifactReferences, this.classpath, this.processName,
+				this.officeName, this.workName, this.taskName, this.parameter,
+				this.properties }));
 		if (isSpawn) {
 			// Spawning so include JVM options
 			parameters.add(this.jvmOptions);
@@ -200,16 +194,12 @@ public class OpenOfficeFloorCommand implements OfficeFloorCommandFactory,
 
 		// Include the raw class paths
 		for (String classPathEntry : this.classpath.getClassPathEntries()) {
-			context.includeClassPathEntry(classPathEntry);
-		}
-
-		// Include the archives on the class path
-		for (String archive : this.archives.getArchives()) {
-			context.includeClassPathArtifact(archive);
+			context.includeClassPathArtifact(classPathEntry);
 		}
 
 		// Include the artifacts on the class path
-		for (ArtifactArgument artifact : this.artifacts.getArtifacts()) {
+		for (ArtifactReference artifact : this.artifactReferences
+				.getArtifactReferences()) {
 			context.includeClassPathArtifact(artifact.getGroupId(),
 					artifact.getArtifactId(), artifact.getVersion(),
 					artifact.getType(), artifact.getClassifier());

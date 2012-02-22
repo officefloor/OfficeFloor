@@ -17,6 +17,10 @@
  */
 package net.officefloor.building.manager;
 
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
 import java.io.Serializable;
 
 import net.officefloor.frame.api.manage.OfficeFloor;
@@ -50,6 +54,49 @@ public final class UploadArtifact implements Serializable {
 	public UploadArtifact(String name, byte[] content) {
 		this.name = name;
 		this.content = content;
+	}
+
+	/**
+	 * Convenience constructor to upload a {@link File} as the artifact.
+	 * 
+	 * @param file
+	 *            {@link File} to upload as the artifact.
+	 * @throws IOException
+	 *             If fails to obtain the {@link File} for upload.
+	 */
+	public UploadArtifact(File file) throws IOException {
+
+		// Use the file's name
+		this.name = file.getName();
+
+		// Load the file contents
+		FileInputStream input = new FileInputStream(file);
+		ByteArrayOutputStream buffer = new ByteArrayOutputStream();
+		for (int value = input.read(); value != -1; value = input.read()) {
+			buffer.write(value);
+		}
+		input.close();
+
+		// Reference contents for upload
+		this.content = buffer.toByteArray();
+	}
+
+	/**
+	 * Obtains the name of the artifact.
+	 * 
+	 * @return Name of the artifact.
+	 */
+	public String getName() {
+		return this.name;
+	}
+
+	/**
+	 * Obtains the content of the artifact.
+	 * 
+	 * @return Content of the artifact.
+	 */
+	public byte[] getContent() {
+		return this.content;
 	}
 
 }

@@ -110,6 +110,8 @@ public class ClassPathFactoryImpl implements ClassPathFactory {
 	/**
 	 * Initiate.
 	 * 
+	 * @param plexusContainer
+	 *            {@link PlexusContainer}.
 	 * @param localRepository
 	 *            Local repository. May be <code>null</code> to use default user
 	 *            local repository.

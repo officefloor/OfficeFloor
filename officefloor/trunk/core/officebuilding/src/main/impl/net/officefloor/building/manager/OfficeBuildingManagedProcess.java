@@ -63,9 +63,29 @@ public class OfficeBuildingManagedProcess implements ManagedProcess {
 	private final String password;
 
 	/**
+	 * Workspace location.
+	 */
+	private final String workspaceLocation;
+
+	/**
+	 * Flag indicating to isolate {@link Process} instances.
+	 */
+	private final boolean isIsolateProcesses;
+
+	/**
 	 * Environment {@link Properties}.
 	 */
 	private final Properties environment;
+
+	/**
+	 * JVM options for the {@link Process}.
+	 */
+	private final String[] jvmOptions;
+
+	/**
+	 * Remote repository URLs.
+	 */
+	private final String[] remoteRepositoryUrls;
 
 	/**
 	 * {@link ManagedProcessContext}.
@@ -92,19 +112,34 @@ public class OfficeBuildingManagedProcess implements ManagedProcess {
 	 *            User name to allow connections.
 	 * @param password
 	 *            Password to allow connections.
+	 * @param workspaceLocation
+	 *            Workspace location.
+	 * @param isIsolateProcesses
+	 *            Flag indicating to isolate {@link Process} instances.
 	 * @param environment
 	 *            Environment {@link Properties}.
+	 * @param jvmOptions
+	 *            JVM options for the {@link Process}.
+	 * @param remoteRepositoryUrls
+	 *            Remote repository URLs.
 	 */
 	public OfficeBuildingManagedProcess(String hostName, int port,
 			File keyStore, String keyStorePassword, String userName,
-			String password, Properties environment) {
+			String password, File workspaceLocation,
+			boolean isIsolateProcesses, Properties environment,
+			String[] jvmOptions, String[] remoteRepositoryUrls) {
 		this.hostName = hostName;
 		this.port = port;
 		this.keyStoreLocation = keyStore.getAbsolutePath();
 		this.keyStorePassword = keyStorePassword;
 		this.userName = userName;
 		this.password = password;
+		this.workspaceLocation = (workspaceLocation == null ? null
+				: workspaceLocation.getAbsolutePath());
+		this.isIsolateProcesses = isIsolateProcesses;
 		this.environment = environment;
+		this.jvmOptions = jvmOptions;
+		this.remoteRepositoryUrls = remoteRepositoryUrls;
 	}
 
 	/*
@@ -115,11 +150,16 @@ public class OfficeBuildingManagedProcess implements ManagedProcess {
 	public void init(ManagedProcessContext context) throws Throwable {
 		this.context = context;
 
+		// Obtain the workspace
+		File workspace = (this.workspaceLocation == null ? null : new File(
+				this.workspaceLocation));
+
 		// Start the OfficeBuilding
 		this.manager = OfficeBuildingManager.startOfficeBuilding(this.hostName,
 				this.port, new File(this.keyStoreLocation),
-				this.keyStorePassword, this.userName, this.password,
-				this.environment, null);
+				this.keyStorePassword, this.userName, this.password, workspace,
+				this.isIsolateProcesses, this.environment, null,
+				this.jvmOptions, this.remoteRepositoryUrls);
 	}
 
 	@Override

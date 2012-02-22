@@ -22,13 +22,15 @@ import java.util.LinkedList;
 import java.util.List;
 
 import net.officefloor.building.command.OfficeFloorCommandParameter;
+import net.officefloor.building.manager.ArtifactReference;
 
 /**
- * {@link OfficeFloorCommandParameter} for multiple Artifact instances.
+ * {@link OfficeFloorCommandParameter} for multiple {@link ArtifactReference}
+ * instances.
  * 
  * @author Daniel Sagenschneider
  */
-public class MultipleArtifactsOfficeFloorCommandParameter extends
+public class ArtifactReferencesOfficeFloorCommandParameter extends
 		AbstractOfficeFloorCommandParameter {
 
 	/**
@@ -37,7 +39,7 @@ public class MultipleArtifactsOfficeFloorCommandParameter extends
 	public static final String PARAMETER_ARTIFACT = "artifact";
 
 	/**
-	 * Obtains the command line argument value for an {@link ArtifactArgument}.
+	 * Obtains the command line argument value for an {@link ArtifactReference}.
 	 * 
 	 * @param groupId
 	 *            Group Id.
@@ -71,25 +73,25 @@ public class MultipleArtifactsOfficeFloorCommandParameter extends
 	}
 
 	/**
-	 * Listing of the {@link ArtifactArgument} instances.
+	 * Listing of the {@link ArtifactReference} instances.
 	 */
-	private final List<ArtifactArgument> artifacts = new LinkedList<ArtifactArgument>();
+	private final List<ArtifactReference> artifacts = new LinkedList<ArtifactReference>();
 
 	/**
 	 * Initiate.
 	 */
-	public MultipleArtifactsOfficeFloorCommandParameter() {
+	public ArtifactReferencesOfficeFloorCommandParameter() {
 		super(PARAMETER_ARTIFACT, "a", "Artifact to include on the class path",
 				true);
 	}
 
 	/**
-	 * Obtains the {@link ArtifactArgument} instances.
+	 * Obtains the {@link ArtifactReference} instances.
 	 * 
-	 * @return {@link ArtifactArgument} instances.
+	 * @return {@link ArtifactReference} instances.
 	 */
-	public ArtifactArgument[] getArtifacts() {
-		return this.artifacts.toArray(new ArtifactArgument[this.artifacts
+	public ArtifactReference[] getArtifactReferences() {
+		return this.artifacts.toArray(new ArtifactReference[this.artifacts
 				.size()]);
 	}
 
@@ -133,8 +135,8 @@ public class MultipleArtifactsOfficeFloorCommandParameter extends
 			classifier = null;
 		}
 
-		// Register the artifact
-		this.artifacts.add(new ArtifactArgument(groupId, artifactId, version,
+		// Register the artifact reference
+		this.artifacts.add(new ArtifactReference(groupId, artifactId, version,
 				type, classifier));
 	}
 

@@ -23,9 +23,9 @@ import java.util.List;
 import java.util.Properties;
 
 import net.officefloor.building.command.parameters.ClassPathOfficeFloorCommandParameter;
-import net.officefloor.building.command.parameters.JarOfficeFloorCommandParameter;
+import net.officefloor.building.command.parameters.UploadArtifactsOfficeFloorCommandParameter;
 import net.officefloor.building.command.parameters.JvmOptionOfficeFloorCommandParameter;
-import net.officefloor.building.command.parameters.MultipleArtifactsOfficeFloorCommandParameter;
+import net.officefloor.building.command.parameters.ArtifactReferencesOfficeFloorCommandParameter;
 import net.officefloor.building.command.parameters.OfficeFloorLocationOfficeFloorCommandParameter;
 import net.officefloor.building.command.parameters.OfficeFloorSourceOfficeFloorCommandParameter;
 import net.officefloor.building.command.parameters.OfficeNameOfficeFloorCommandParameter;
@@ -34,6 +34,8 @@ import net.officefloor.building.command.parameters.ProcessNameOfficeFloorCommand
 import net.officefloor.building.command.parameters.PropertiesOfficeFloorCommandParameter;
 import net.officefloor.building.command.parameters.TaskNameOfficeFloorCommandParameter;
 import net.officefloor.building.command.parameters.WorkNameOfficeFloorCommandParameter;
+import net.officefloor.building.manager.ArtifactReference;
+import net.officefloor.building.manager.UploadArtifact;
 import net.officefloor.building.process.ManagedProcess;
 import net.officefloor.compile.spi.officefloor.source.OfficeFloorSource;
 import net.officefloor.frame.api.execute.Task;
@@ -59,38 +61,26 @@ public class CommandLineBuilder {
 	private final List<String> commandLine = new LinkedList<String>();
 
 	/**
-	 * Adds the local repository.
+	 * Adds an {@link UploadArtifact} to the command line.
 	 * 
-	 * @param localRepository
-	 *            Local repository.
+	 * @param artifactLocation
+	 *            {@link UploadArtifact} location.
 	 */
-	public void addLocalRepository(String localRepository) {
+	public void addUploadArtifact(String artifactLocation) {
 		this.addOption(
-				LocalRepositoryOfficeFloorCommandParameter.PARAMETER_LOCAL_REPOSITORY,
-				localRepository);
+				UploadArtifactsOfficeFloorCommandParameter.PARAMETER_UPLOAD_ARTIFACT_LOCATION,
+				artifactLocation);
 	}
 
 	/**
-	 * Adds an archive to the command line.
-	 * 
-	 * @param archiveLocation
-	 *            Archive location.
-	 */
-	public void addArchive(String archiveLocation) {
-		this.addOption(
-				JarOfficeFloorCommandParameter.PARAMETER_ARCHIVE_LOCATION,
-				archiveLocation);
-	}
-
-	/**
-	 * Adds an artifact to the command line.
+	 * Adds an {@link ArtifactReference} to the command line.
 	 * 
 	 * @param artifactIdentifier
-	 *            Artifact identifier.
+	 *            {@link ArtifactReference} identifier.
 	 */
-	public void addArtifact(String artifactIdentifier) {
+	public void addArtifactReference(String artifactIdentifier) {
 		this.addOption(
-				MultipleArtifactsOfficeFloorCommandParameter.PARAMETER_ARTIFACT,
+				ArtifactReferencesOfficeFloorCommandParameter.PARAMETER_ARTIFACT,
 				artifactIdentifier);
 	}
 

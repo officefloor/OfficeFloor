@@ -101,7 +101,6 @@ public class OpenOfficeFloorTest extends AbstractConsoleMainTestCase {
 				" -a,--artifact <arg>              Artifact to include on the class path ",
 				" -cp,--classpath <arg>            Raw entry to include on the class path",
 				" -h,--help                        This help message                     ",
-				" -j,--jar <arg>                   Archive to include on the class path  ",
 				" -o,--office <arg>                Name of the Office                    ",
 				" -of,--officefloor <arg>          Location of the OfficeFloor           ",
 				" -ofs,--officefloorsource <arg>   OfficeFloorSource",

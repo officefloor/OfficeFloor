@@ -54,7 +54,7 @@ public class OfficeBuilding implements OfficeFloorConsoleFactory {
 		OfficeFloorCommandFactory[] commandFactories = new OfficeFloorCommandFactory[] {
 				new StartOfficeBuildingCommand(environment),
 				new OfficeBuildingUrlCommand(),
-				new OfficeBuildingOpenOfficeFloorCommand(),
+				new OfficeBuildingOpenOfficeFloorCommand(true),
 				new OfficeBuildingListOfficeFloorCommand(),
 				new OfficeBuildingInvokeOfficeFloorCommand(),
 				new OfficeBuildingCloseOfficeFloorCommand(),

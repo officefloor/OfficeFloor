@@ -25,7 +25,6 @@ import java.util.List;
 import java.util.Properties;
 
 import junit.framework.TestCase;
-import net.officefloor.building.command.LocalRepositoryOfficeFloorCommandParameter;
 import net.officefloor.building.command.OfficeFloorCommand;
 import net.officefloor.building.command.OfficeFloorCommandParameter;
 import net.officefloor.building.command.RemoteRepositoryUrlsOfficeFloorCommandParameter;
@@ -222,22 +221,14 @@ public class OfficeFloorConsoleTest extends AbstractConsoleTestCase {
 	public void testExtractLocalAndRemoteRepositories() throws Exception {
 
 		// Create the mocks
-		LocalRepositoryOfficeFloorCommandParameter localRepository = this
-				.createMock(LocalRepositoryOfficeFloorCommandParameter.class);
 		RemoteRepositoryUrlsOfficeFloorCommandParameter remoteRepositoryUrls = this
 				.createMock(RemoteRepositoryUrlsOfficeFloorCommandParameter.class);
 
 		// Create command with local and remote repository parameters
 		MockCommand command = this.createCommand("command");
-		command.addParameter(localRepository);
 		command.addParameter(remoteRepositoryUrls);
 
 		// Recording initialising parser
-		this.recordReturn(localRepository, localRepository.getName(),
-				"local-repository");
-		this.recordReturn(localRepository, localRepository.getShortName(), null);
-		this.recordReturn(localRepository, localRepository.isRequireValue(),
-				true);
 		this.recordReturn(remoteRepositoryUrls, remoteRepositoryUrls.getName(),
 				"remote-repository-urls");
 		this.recordReturn(remoteRepositoryUrls,
@@ -246,23 +237,16 @@ public class OfficeFloorConsoleTest extends AbstractConsoleTestCase {
 				remoteRepositoryUrls.isRequireValue(), true);
 
 		// Record parsing
-		this.recordReturn(localRepository, localRepository.getName(),
-				"local-repository");
-		this.recordReturn(localRepository, localRepository.getShortName(), null);
 		this.recordReturn(remoteRepositoryUrls, remoteRepositoryUrls.getName(),
 				"remote-repository-urls");
 		this.recordReturn(remoteRepositoryUrls,
 				remoteRepositoryUrls.getShortName(), null);
 
-		// Record obtaining both local and remote repositories
-		this.recordReturn(localRepository,
-				localRepository.getLocalRepository(), new File("."));
+		// Record obtaining remote repositories
 		this.recordReturn(remoteRepositoryUrls,
 				remoteRepositoryUrls.getRemoteRepositoryUrls(), new String[0]);
 
 		// Record environment loading onto parameters
-		this.recordReturn(localRepository, localRepository.getName(),
-				"local-repository");
 		this.recordReturn(remoteRepositoryUrls, remoteRepositoryUrls.getName(),
 				"remote-repository-urls");
 

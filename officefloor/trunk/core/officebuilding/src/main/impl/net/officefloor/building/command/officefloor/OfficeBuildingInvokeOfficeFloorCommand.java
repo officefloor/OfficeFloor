@@ -25,16 +25,16 @@ import net.officefloor.building.command.OfficeFloorCommandContext;
 import net.officefloor.building.command.OfficeFloorCommandEnvironment;
 import net.officefloor.building.command.OfficeFloorCommandFactory;
 import net.officefloor.building.command.OfficeFloorCommandParameter;
-import net.officefloor.building.command.parameters.KeyStoreOfficeFloorCommandParameterImpl;
-import net.officefloor.building.command.parameters.KeyStorePasswordOfficeFloorCommandParameterImpl;
+import net.officefloor.building.command.parameters.KeyStoreOfficeFloorCommandParameter;
+import net.officefloor.building.command.parameters.KeyStorePasswordOfficeFloorCommandParameter;
 import net.officefloor.building.command.parameters.OfficeBuildingHostOfficeFloorCommandParameter;
 import net.officefloor.building.command.parameters.OfficeBuildingPortOfficeFloorCommandParameter;
 import net.officefloor.building.command.parameters.OfficeNameOfficeFloorCommandParameter;
 import net.officefloor.building.command.parameters.ParameterOfficeFloorCommandParameter;
-import net.officefloor.building.command.parameters.PasswordOfficeFloorCommandParameterImpl;
+import net.officefloor.building.command.parameters.PasswordOfficeFloorCommandParameter;
 import net.officefloor.building.command.parameters.ProcessNameOfficeFloorCommandParameter;
 import net.officefloor.building.command.parameters.TaskNameOfficeFloorCommandParameter;
-import net.officefloor.building.command.parameters.UsernameOfficeFloorCommandParameterImpl;
+import net.officefloor.building.command.parameters.UsernameOfficeFloorCommandParameter;
 import net.officefloor.building.command.parameters.WorkNameOfficeFloorCommandParameter;
 import net.officefloor.building.manager.OfficeBuildingManager;
 import net.officefloor.building.process.ManagedProcess;
@@ -73,22 +73,22 @@ public class OfficeBuildingInvokeOfficeFloorCommand implements
 	/**
 	 * Trust store {@link File}.
 	 */
-	private final KeyStoreOfficeFloorCommandParameterImpl trustStore = new KeyStoreOfficeFloorCommandParameterImpl();
+	private final KeyStoreOfficeFloorCommandParameter trustStore = new KeyStoreOfficeFloorCommandParameter();
 
 	/**
 	 * Password to the trust store {@link File}.
 	 */
-	private final KeyStorePasswordOfficeFloorCommandParameterImpl trustStorePassword = new KeyStorePasswordOfficeFloorCommandParameterImpl();
+	private final KeyStorePasswordOfficeFloorCommandParameter trustStorePassword = new KeyStorePasswordOfficeFloorCommandParameter();
 
 	/**
 	 * User name.
 	 */
-	private final UsernameOfficeFloorCommandParameterImpl userName = new UsernameOfficeFloorCommandParameterImpl();
+	private final UsernameOfficeFloorCommandParameter userName = new UsernameOfficeFloorCommandParameter();
 
 	/**
 	 * Password.
 	 */
-	private final PasswordOfficeFloorCommandParameterImpl password = new PasswordOfficeFloorCommandParameterImpl();
+	private final PasswordOfficeFloorCommandParameter password = new PasswordOfficeFloorCommandParameter();
 
 	/**
 	 * {@link Office} name.
