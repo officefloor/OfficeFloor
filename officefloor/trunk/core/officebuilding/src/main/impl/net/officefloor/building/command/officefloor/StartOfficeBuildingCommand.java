@@ -317,7 +317,7 @@ public class StartOfficeBuildingCommand implements OfficeFloorCommandFactory,
 									this.keyStoreLocation),
 							this.keyStorePassword, this.userName,
 							this.password, workspace, this.isIsolateProcesses,
-							env, null, this.jvmOptions,
+							env, null, this.jvmOptions, false,
 							this.remoteRepositoryUrls);
 
 			// Indicate started and location

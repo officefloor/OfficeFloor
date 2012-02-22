@@ -83,6 +83,12 @@ public class OfficeBuildingManagedProcess implements ManagedProcess {
 	private final String[] jvmOptions;
 
 	/**
+	 * Flag indicating if the {@link OfficeBuilding} will allow configured class
+	 * path entries.
+	 */
+	private final boolean isAllowClassPathEntries;
+
+	/**
 	 * Remote repository URLs.
 	 */
 	private final String[] remoteRepositoryUrls;
@@ -120,6 +126,9 @@ public class OfficeBuildingManagedProcess implements ManagedProcess {
 	 *            Environment {@link Properties}.
 	 * @param jvmOptions
 	 *            JVM options for the {@link Process}.
+	 * @param isAllowClassPathEntries
+	 *            Flag indicating if the {@link OfficeBuilding} will allow
+	 *            configured class path entries.
 	 * @param remoteRepositoryUrls
 	 *            Remote repository URLs.
 	 */
@@ -127,7 +136,8 @@ public class OfficeBuildingManagedProcess implements ManagedProcess {
 			File keyStore, String keyStorePassword, String userName,
 			String password, File workspaceLocation,
 			boolean isIsolateProcesses, Properties environment,
-			String[] jvmOptions, String[] remoteRepositoryUrls) {
+			String[] jvmOptions, boolean isAllowClassPathEntries,
+			String[] remoteRepositoryUrls) {
 		this.hostName = hostName;
 		this.port = port;
 		this.keyStoreLocation = keyStore.getAbsolutePath();
@@ -139,6 +149,7 @@ public class OfficeBuildingManagedProcess implements ManagedProcess {
 		this.isIsolateProcesses = isIsolateProcesses;
 		this.environment = environment;
 		this.jvmOptions = jvmOptions;
+		this.isAllowClassPathEntries = isAllowClassPathEntries;
 		this.remoteRepositoryUrls = remoteRepositoryUrls;
 	}
 
@@ -159,7 +170,8 @@ public class OfficeBuildingManagedProcess implements ManagedProcess {
 				this.port, new File(this.keyStoreLocation),
 				this.keyStorePassword, this.userName, this.password, workspace,
 				this.isIsolateProcesses, this.environment, null,
-				this.jvmOptions, this.remoteRepositoryUrls);
+				this.jvmOptions, this.isAllowClassPathEntries,
+				this.remoteRepositoryUrls);
 	}
 
 	@Override

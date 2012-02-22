@@ -24,14 +24,11 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Properties;
 
-import net.officefloor.building.command.LocalRepositoryOfficeFloorCommandParameter;
-import net.officefloor.building.command.RemoteRepositoryUrlsOfficeFloorCommandParameter;
-import net.officefloor.building.command.parameters.KeyStoreOfficeFloorCommandParameterImpl;
-import net.officefloor.building.command.parameters.KeyStorePasswordOfficeFloorCommandParameterImpl;
+import net.officefloor.building.command.parameters.KeyStoreOfficeFloorCommandParameter;
+import net.officefloor.building.command.parameters.KeyStorePasswordOfficeFloorCommandParameter;
 import net.officefloor.building.command.parameters.OfficeBuildingPortOfficeFloorCommandParameter;
-import net.officefloor.building.command.parameters.PasswordOfficeFloorCommandParameterImpl;
-import net.officefloor.building.command.parameters.RemoteRepositoryUrlsOfficeFloorCommandParameterImpl;
-import net.officefloor.building.command.parameters.UsernameOfficeFloorCommandParameterImpl;
+import net.officefloor.building.command.parameters.PasswordOfficeFloorCommandParameter;
+import net.officefloor.building.command.parameters.UsernameOfficeFloorCommandParameter;
 import net.officefloor.building.manager.OfficeBuildingManager;
 import net.officefloor.building.process.ProcessConfiguration;
 import net.officefloor.console.OfficeBuilding;
@@ -82,8 +79,7 @@ public class StartOfficeBuildingGoal extends AbstractGoal {
 	 */
 	public static File getKeyStoreFile() throws MojoFailureException {
 		try {
-			return KeyStoreOfficeFloorCommandParameterImpl
-					.getDefaultKeyStoreFile();
+			return KeyStoreOfficeFloorCommandParameter.getDefaultKeyStoreFile();
 		} catch (IOException ex) {
 			throw new MojoFailureException(
 					"Failed making default key store available: "
@@ -95,17 +91,17 @@ public class StartOfficeBuildingGoal extends AbstractGoal {
 	/**
 	 * Key store {@link File} password.
 	 */
-	public static final String KEY_STORE_PASSWORD = KeyStorePasswordOfficeFloorCommandParameterImpl.DEFAULT_KEY_STORE_PASSWORD;
+	public static final String KEY_STORE_PASSWORD = KeyStorePasswordOfficeFloorCommandParameter.DEFAULT_KEY_STORE_PASSWORD;
 
 	/**
 	 * Client user name.
 	 */
-	public static final String USER_NAME = UsernameOfficeFloorCommandParameterImpl.DEFAULT_USER_NAME;
+	public static final String USER_NAME = UsernameOfficeFloorCommandParameter.DEFAULT_USER_NAME;
 
 	/**
 	 * Client password.
 	 */
-	public static final String PASSWORD = PasswordOfficeFloorCommandParameterImpl.DEFAULT_PASSWORD;
+	public static final String PASSWORD = PasswordOfficeFloorCommandParameter.DEFAULT_PASSWORD;
 
 	/**
 	 * Ensures the {@link OfficeBuilding} is running on the
@@ -242,13 +238,6 @@ public class StartOfficeBuildingGoal extends AbstractGoal {
 		// Create the environment properties
 		Properties environment = new Properties();
 		environment.putAll(this.project.getProperties());
-		environment
-				.put(LocalRepositoryOfficeFloorCommandParameter.PARAMETER_LOCAL_REPOSITORY,
-						this.localRepository.getBasedir());
-		environment
-				.put(RemoteRepositoryUrlsOfficeFloorCommandParameter.PARAMETER_REMOTE_REPOSITORY_URLS,
-						RemoteRepositoryUrlsOfficeFloorCommandParameterImpl
-								.transformForParameterValue(remoteRepositoryURLs));
 
 		// Obtain the OfficeBuilding Artifact
 		Artifact officeBuildingArtifact = null;
@@ -331,7 +320,8 @@ public class StartOfficeBuildingGoal extends AbstractGoal {
 		try {
 			OfficeBuildingManager.spawnOfficeBuilding(null,
 					this.port.intValue(), getKeyStoreFile(),
-					KEY_STORE_PASSWORD, USER_NAME, PASSWORD, environment,
+					KEY_STORE_PASSWORD, USER_NAME, PASSWORD, null, false,
+					environment, null, true, remoteRepositoryURLs,
 					configuration);
 		} catch (Throwable ex) {
 			// Provide details of the failure
