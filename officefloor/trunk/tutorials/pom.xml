@@ -20,6 +20,7 @@
 		<module>NavigateHttpServer</module>
 		<module>SessionHttpServer</module>
 		<module>ExceptionHttpServer</module>
+		<module>FeatureApp</module>
 		<module>GwtApp</module>
 		<module>GwtService</module>
 		<module>CometApp</module>
