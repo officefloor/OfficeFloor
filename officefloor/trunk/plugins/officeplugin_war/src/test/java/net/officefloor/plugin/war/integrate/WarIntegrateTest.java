@@ -23,8 +23,11 @@ import java.util.Properties;
 
 import net.officefloor.building.command.parameters.KeyStoreOfficeFloorCommandParameter;
 import net.officefloor.building.command.parameters.KeyStorePasswordOfficeFloorCommandParameter;
-import net.officefloor.building.console.OfficeFloorConsole;
-import net.officefloor.console.OfficeBuilding;
+import net.officefloor.building.command.parameters.OfficeBuildingPortOfficeFloorCommandParameter;
+import net.officefloor.building.command.parameters.RemoteRepositoryUrlsOfficeFloorCommandParameterImpl;
+import net.officefloor.building.manager.OfficeBuildingManager;
+import net.officefloor.building.manager.OfficeBuildingManagerMBean;
+import net.officefloor.building.manager.OpenOfficeFloorConfiguration;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.socket.server.http.HttpRequest;
 import net.officefloor.plugin.socket.server.http.server.MockHttpServer;
@@ -56,28 +59,38 @@ public class WarIntegrateTest extends OfficeFrameTestCase {
 		assertTrue("Test invalid as WAR directory not available",
 				warDir.isDirectory());
 
-		// Provide security for running
-		Properties environment = new Properties();
-		environment.setProperty("key_store",
-				KeyStoreOfficeFloorCommandParameter
-						.getDefaultKeyStoreFile().getAbsolutePath());
-		environment
-				.setProperty(
-						"key_store_password",
-						KeyStorePasswordOfficeFloorCommandParameter.DEFAULT_KEY_STORE_PASSWORD);
-		environment.setProperty("username", "admin");
-		environment.setProperty("password", "password");
+		// Obtain the password file location
+		File passwordFile = this.findFile(this.getClass(), "../password.txt");
 
 		// Open the OfficeBuilding
-		OfficeFloorConsole console = new OfficeBuilding()
-				.createOfficeFloorConsole(this.getName(), environment);
-		console.run(System.out, System.err, null, null, "start");
+		OfficeBuildingManagerMBean officeBuildingManager = OfficeBuildingManager
+				.startOfficeBuilding(
+						null,
+						OfficeBuildingPortOfficeFloorCommandParameter.DEFAULT_OFFICE_BUILDING_PORT,
+						KeyStoreOfficeFloorCommandParameter
+								.getDefaultKeyStoreFile(),
+						KeyStorePasswordOfficeFloorCommandParameter.DEFAULT_KEY_STORE_PASSWORD,
+						"admin",
+						"password",
+						null,
+						false,
+						new Properties(),
+						null,
+						null,
+						true,
+						RemoteRepositoryUrlsOfficeFloorCommandParameterImpl.DEFAULT_REMOTE_REPOSITORY_URLS);
 
 		try {
 
 			// Open the WAR by decoration of OfficeFloor
-			console.run(System.out, System.err, null, null, "--jar",
-					warDir.getAbsolutePath(), "open");
+			OpenOfficeFloorConfiguration configuration = new OpenOfficeFloorConfiguration(
+					"net/officefloor/plugin/war/WarOfficeFloor.officefloor");
+			configuration.addClassPathEntry(warDir.getAbsolutePath());
+			configuration.addOfficeFloorProperty("http.port",
+					String.valueOf(PORT));
+			configuration.addOfficeFloorProperty("password.file.location",
+					passwordFile.getAbsolutePath());
+			officeBuildingManager.openOfficeFloor(configuration);
 
 			// Request data from servlet
 			HttpClient client = new DefaultHttpClient();
@@ -95,8 +108,7 @@ public class WarIntegrateTest extends OfficeFrameTestCase {
 			System.clearProperty("http.port");
 
 			// Ensure stop the OfficeBuilding (and subsequently OfficeFloor)
-			console.run(System.out, System.err, null, null, "stop");
+			officeBuildingManager.stopOfficeBuilding(10000);
 		}
 	}
-
 }
