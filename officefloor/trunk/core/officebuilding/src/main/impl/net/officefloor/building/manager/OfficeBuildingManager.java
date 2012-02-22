@@ -226,6 +226,9 @@ public class OfficeBuildingManager implements OfficeBuildingManagerMBean {
 	 *            {@link MBeanServer}.
 	 * @param jvmOptions
 	 *            JVM options for the spawned {@link Process} instances.
+	 * @param isAllowClassPathEntries
+	 *            Flag indicating if allow class path entries via the
+	 *            {@link OpenOfficeFloorConfiguration}.
 	 * @param remoteRepositoryUrls
 	 *            Remote repository URLs to find artifacts by their
 	 *            {@link ArtifactReference}.
@@ -239,7 +242,8 @@ public class OfficeBuildingManager implements OfficeBuildingManagerMBean {
 			String userName, String password, File workspace,
 			boolean isIsolateProcesses, Properties environment,
 			MBeanServer mbeanServer, String[] jvmOptions,
-			String[] remoteRepositoryUrls) throws Exception {
+			boolean isAllowClassPathEntries, String[] remoteRepositoryUrls)
+			throws Exception {
 
 		// Obtain the start time
 		Date startTime = new Date(System.currentTimeMillis());
@@ -337,7 +341,7 @@ public class OfficeBuildingManager implements OfficeBuildingManagerMBean {
 		OfficeBuildingManager manager = new OfficeBuildingManager(startTime,
 				serviceUrl, connectorServer, mbeanServer, workspace,
 				isIsolateProcesses, environment, jvmOptions,
-				remoteRepositoryUrls);
+				isAllowClassPathEntries, remoteRepositoryUrls);
 
 		// Register the Office Building Manager
 		mbeanServer.registerMBean(manager, OFFICE_BUILDING_MANAGER_OBJECT_NAME);
@@ -408,6 +412,9 @@ public class OfficeBuildingManager implements OfficeBuildingManagerMBean {
 	 *            {@link ProcessConfiguration}. May be <code>null</code>.
 	 * @param jvmOptions
 	 *            JVM options for the {@link Process} instances.
+	 * @param isAllowClassPathEntries
+	 *            Flag indicating if the {@link OfficeBuilding} will allow
+	 *            configured class path entries.
 	 * @param remoteRepositoryUrls
 	 *            Remote repository URLs.
 	 * @return {@link ProcessManager} managing the started
@@ -419,8 +426,8 @@ public class OfficeBuildingManager implements OfficeBuildingManagerMBean {
 			File keyStore, String keyStorePassword, String userName,
 			String password, File workspace, boolean isIsolateProcesses,
 			Properties environment, String[] jvmOptions,
-			String[] remoteRepositoryUrls, ProcessConfiguration configuration)
-			throws ProcessException {
+			boolean isAllowClassPathEntries, String[] remoteRepositoryUrls,
+			ProcessConfiguration configuration) throws ProcessException {
 
 		// Ensure have environment
 		if (environment == null) {
@@ -431,7 +438,7 @@ public class OfficeBuildingManager implements OfficeBuildingManagerMBean {
 		OfficeBuildingManagedProcess managedProcess = new OfficeBuildingManagedProcess(
 				hostName, port, keyStore, keyStorePassword, userName, password,
 				workspace, isIsolateProcesses, environment, jvmOptions,
-				remoteRepositoryUrls);
+				isAllowClassPathEntries, remoteRepositoryUrls);
 
 		// Ensure have process configuration
 		if (configuration == null) {
@@ -775,6 +782,12 @@ public class OfficeBuildingManager implements OfficeBuildingManagerMBean {
 	private final String[] jvmOptions;
 
 	/**
+	 * Flag indicating if allow class path entries via the
+	 * {@link OpenOfficeFloorConfiguration}.
+	 */
+	private final boolean isAllowClassPathEntries;
+
+	/**
 	 * Listing of remote repository URLs to obtain artifacts for the
 	 * {@link ArtifactReference} instances.
 	 */
@@ -805,6 +818,9 @@ public class OfficeBuildingManager implements OfficeBuildingManagerMBean {
 	 *            Environment {@link Properties}.
 	 * @param jvmOptions
 	 *            JVM options for the {@link Process}.
+	 * @param isAllowClassPathEntries
+	 *            Flag indicating if allow class path entries via the
+	 *            {@link OpenOfficeFloorConfiguration}.
 	 * @param remoteRepositoryUrls
 	 *            Listing of remote repository URLs to obtain artifacts for the
 	 *            {@link ArtifactReference} instances.
@@ -813,7 +829,8 @@ public class OfficeBuildingManager implements OfficeBuildingManagerMBean {
 			JMXServiceURL officeBuildingServiceUrl,
 			JMXConnectorServer connectorServer, MBeanServer mbeanServer,
 			File workspace, boolean isIsolateProcesses, Properties environment,
-			String[] jvmOptions, String[] remoteRepositoryUrls) {
+			String[] jvmOptions, boolean isAllowClassPathEntries,
+			String[] remoteRepositoryUrls) {
 		this.startTime = startTime;
 		this.officeBuildingServiceUrl = officeBuildingServiceUrl;
 		this.connectorServer = connectorServer;
@@ -822,6 +839,7 @@ public class OfficeBuildingManager implements OfficeBuildingManagerMBean {
 		this.isIsolateProcesses = isIsolateProcesses;
 		this.environment = environment;
 		this.jvmOptions = (jvmOptions == null ? new String[0] : jvmOptions);
+		this.isAllowClassPathEntries = isAllowClassPathEntries;
 		this.remoteRepositoryUrls = (remoteRepositoryUrls == null ? new String[0]
 				: remoteRepositoryUrls);
 	}
@@ -980,6 +998,23 @@ public class OfficeBuildingManager implements OfficeBuildingManagerMBean {
 					// Add the referenced artifacts to the class path
 					classPathEntries.addAll(Arrays
 							.asList(artifactClassPathEntries));
+				}
+
+				// Make the class path entries available on the class path
+				String[] configuredClassPathEntries = configuration
+						.getClassPathEntries();
+				if (configuredClassPathEntries.length > 0) {
+
+					// Ensure allowed to provide class path entries
+					if (!this.isAllowClassPathEntries) {
+						throw new IllegalArgumentException(
+								OfficeBuilding.class.getSimpleName()
+										+ " is not allowing configured class path entries");
+					}
+
+					// Include the class path entries
+					classPathEntries.addAll(Arrays
+							.asList(configuredClassPathEntries));
 				}
 
 				// Create the class path argument

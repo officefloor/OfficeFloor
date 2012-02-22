@@ -73,6 +73,11 @@ public final class OpenOfficeFloorConfiguration implements Serializable {
 	private List<String> remoteRepositoryUrls = new LinkedList<String>();
 
 	/**
+	 * Class path entries.
+	 */
+	private List<String> classPathEntries = new LinkedList<String>();
+
+	/**
 	 * JVM options for the {@link Process} running the {@link OfficeFloor}.
 	 */
 	private List<String> jvmOptions = new LinkedList<String>();
@@ -184,6 +189,34 @@ public final class OpenOfficeFloorConfiguration implements Serializable {
 	public String[] getRemoteRepositoryUrls() {
 		return this.remoteRepositoryUrls
 				.toArray(new String[this.remoteRepositoryUrls.size()]);
+	}
+
+	/**
+	 * <p>
+	 * Adds a configured class path entry.
+	 * <p>
+	 * Please be aware that the {@link OfficeBuildingManager} may disallow
+	 * opening {@link OfficeFloor} instances with configured class path entries.
+	 * <p>
+	 * This should never be used in Production. It is made available for the
+	 * maven plug-ins to be able to run {@link OfficeFloor} instances from
+	 * project configuration.
+	 * 
+	 * @param classPathEntry
+	 *            Class path entry.
+	 */
+	public void addClassPathEntry(String classPathEntry) {
+		this.classPathEntries.add(classPathEntry);
+	}
+
+	/**
+	 * Obtains configured class path entries.
+	 * 
+	 * @return Class path entries.
+	 */
+	public String[] getClassPathEntries() {
+		return this.classPathEntries.toArray(new String[this.classPathEntries
+				.size()]);
 	}
 
 	/**

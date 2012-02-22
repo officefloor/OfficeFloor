@@ -20,9 +20,9 @@ package net.officefloor.maven;
 
 import java.util.List;
 
-import net.officefloor.building.command.CommandLineBuilder;
 import net.officefloor.building.manager.OfficeBuildingManager;
 import net.officefloor.building.manager.OfficeBuildingManagerMBean;
+import net.officefloor.building.manager.OpenOfficeFloorConfiguration;
 import net.officefloor.compile.spi.officefloor.source.OfficeFloorSource;
 import net.officefloor.console.OfficeBuilding;
 import net.officefloor.frame.api.manage.OfficeFloor;
@@ -171,23 +171,6 @@ public class OpenOfficeFloorGoal extends AbstractGoal {
 		this.jvmOptions = jvmOptions;
 	}
 
-	/**
-	 * Indicates whether to provide verbose output.
-	 * 
-	 * @parameter
-	 */
-	private Boolean verbose = Boolean.valueOf(false);
-
-	/**
-	 * Specifies whether verbose.
-	 * 
-	 * @param isVerbose
-	 *            <code>true</code> if verbose.
-	 */
-	public void setVerbose(boolean isVerbose) {
-		this.verbose = Boolean.valueOf(isVerbose);
-	}
-
 	/*
 	 * ======================== Mojo ==========================
 	 */
@@ -223,12 +206,24 @@ public class OpenOfficeFloorGoal extends AbstractGoal {
 					+ OfficeBuilding.class.getSimpleName(), ex);
 		}
 
-		// Create the arguments for class path of project
-		CommandLineBuilder arguments = new CommandLineBuilder();
+		// Create the open OfficeFloor configuration
+		OpenOfficeFloorConfiguration configuration = new OpenOfficeFloorConfiguration(
+				this.officeFloorLocation);
+		configuration.setOfficeFloorSourceClassName(this.officeFloorSource);
+		configuration.setProcessName(this.processName);
+
+		// Provide JVM options (if specified)
+		if (this.jvmOptions != null) {
+			for (String jvmOption : this.jvmOptions) {
+				configuration.addJvmOption(jvmOption);
+			}
+		}
+
+		// Add class path of project
 		try {
 			List<String> elements = this.project.getCompileClasspathElements();
 			for (String element : elements) {
-				arguments.addClassPathEntry(element);
+				configuration.addClassPathEntry(element);
 			}
 		} catch (Throwable ex) {
 			throw this.newMojoExecutionException(
@@ -238,30 +233,15 @@ public class OpenOfficeFloorGoal extends AbstractGoal {
 
 		// Add plug-in dependencies (makes OfficeFloor functionality available)
 		for (Artifact artifact : this.pluginDependencies) {
-			arguments.addClassPathEntry(artifact.getFile().getAbsolutePath());
-		}
-
-		// Specify the OfficeFloorSource
-		arguments.addOfficeFloorSource(this.officeFloorSource);
-
-		// Specify location of OfficeFloor
-		arguments.addOfficeFloor(this.officeFloorLocation);
-
-		// Specify the process name
-		arguments.addProcessName(this.processName);
-
-		// Provide JVM options (if specified)
-		if (this.jvmOptions != null) {
-			for (String jvmOption : this.jvmOptions) {
-				arguments.addJvmOption(jvmOption);
-			}
+			configuration.addClassPathEntry(artifact.getFile()
+					.getAbsolutePath());
 		}
 
 		// Open the OfficeFloor
 		String processNameSpace;
 		try {
-			processNameSpace = officeBuildingManager.openOfficeFloor(arguments
-					.getCommandLine());
+			processNameSpace = officeBuildingManager
+					.openOfficeFloor(configuration);
 		} catch (Throwable ex) {
 			throw this.newMojoExecutionException("Failed opening the "
 					+ OfficeFloor.class.getSimpleName(), ex);
@@ -272,17 +252,6 @@ public class OpenOfficeFloorGoal extends AbstractGoal {
 				"Opened " + OfficeFloor.class.getSimpleName()
 						+ " under process name space '" + processNameSpace
 						+ "' for " + this.officeFloorLocation);
-
-		// Determine if provide verbose output
-		if (this.verbose.booleanValue()) {
-			StringBuilder message = new StringBuilder();
-			message.append("ARGUMENTS: ");
-			for (String argument : arguments.getCommandLine()) {
-				message.append(" ");
-				message.append(argument);
-			}
-			this.getLog().info(message.toString());
-		}
 	}
 
 }

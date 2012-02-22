@@ -114,7 +114,7 @@ public class OfficeBuildingManagerTest extends OfficeFrameTestCase {
 		return OfficeBuildingManager.startOfficeBuilding(null, PORT,
 				this.keyStore, KEY_STORE_PASSWORD, MOCK_USER_NAME,
 				MOCK_PASSWORD, null, false, new Properties(), this.mbeanServer,
-				new String[0], this.remoteRepositoryUrls);
+				new String[0], false, this.remoteRepositoryUrls);
 	}
 
 	/**
@@ -439,7 +439,7 @@ public class OfficeBuildingManagerTest extends OfficeFrameTestCase {
 		// Spawn the OfficeBuilding
 		ProcessManager process = OfficeBuildingManager.spawnOfficeBuilding(
 				null, SPAWN_PORT, this.keyStore, KEY_STORE_PASSWORD,
-				MOCK_USER_NAME, MOCK_PASSWORD, null, false, null, null,
+				MOCK_USER_NAME, MOCK_PASSWORD, null, false, null, null, false,
 				new String[] { OfficeBuildingTestUtil.getUserLocalRepository()
 						.getAbsolutePath() }, null);
 		try {
