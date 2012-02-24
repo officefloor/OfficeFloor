@@ -18,6 +18,10 @@
 
 package net.officefloor.maven;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.util.List;
 
 import net.officefloor.building.manager.OfficeBuildingManager;
@@ -237,6 +241,27 @@ public class OpenOfficeFloorGoal extends AbstractGoal {
 					.getAbsolutePath());
 		}
 
+		// Determine if WAR project
+		if ("war".equalsIgnoreCase(this.project.getPackaging())) {
+
+			// WAR project, so make web resources available
+			File baseDir = this.project.getBasedir();
+			File woofDir = new File(baseDir, "target/woof");
+
+			// Make the woof directory available
+			configuration.addClassPathEntry(woofDir.getAbsolutePath());
+
+			// Make the PUBLIC directory available
+			File publicDir = new File(woofDir, "PUBLIC");
+			publicDir.mkdirs(); // copy will error if not created
+
+			// Obtain the webapp directory
+			File webAppDir = new File(baseDir, "src/main/webapp");
+
+			// Update web app resources to be made available
+			this.updateResources(webAppDir, publicDir);
+		}
+
 		// Open the OfficeFloor
 		String processNameSpace;
 		try {
@@ -252,6 +277,62 @@ public class OpenOfficeFloorGoal extends AbstractGoal {
 				"Opened " + OfficeFloor.class.getSimpleName()
 						+ " under process name space '" + processNameSpace
 						+ "' for " + this.officeFloorLocation);
+	}
+
+	/**
+	 * Update the resources in the destination directory from the source
+	 * directory.
+	 * 
+	 * @param srcDir
+	 *            Source directory.
+	 * @param destDir
+	 *            Destination directory.
+	 * @throws MojoExecutionException
+	 *             If fails to update resources.
+	 */
+	private void updateResources(File srcDir, File destDir)
+			throws MojoExecutionException {
+		try {
+
+			// Ensure destination directory exists
+			destDir.mkdir(); // not fail as may already exist
+
+			// Copy the files
+			for (File srcFile : srcDir.listFiles()) {
+
+				// Determine if directory
+				if (srcFile.isDirectory()) {
+					// Recursively update the sub directories
+					this.updateResources(srcFile,
+							new File(destDir, srcFile.getName()));
+
+				} else {
+					// Determine if destination file is latest
+					File destFile = new File(destDir, srcFile.getName());
+					if ((destFile.exists())
+							&& (srcFile.lastModified() <= destFile
+									.lastModified())) {
+						// Have latest file, so do not update
+						continue;
+					}
+
+					// Update the destination file to latest
+					FileInputStream srcContent = new FileInputStream(srcFile);
+					FileOutputStream destContent = new FileOutputStream(
+							destFile, false);
+					for (int value = srcContent.read(); value != -1; value = srcContent
+							.read()) {
+						destContent.write(value);
+					}
+					destContent.close();
+					srcContent.close();
+				}
+			}
+
+		} catch (IOException ex) {
+			throw this.newMojoExecutionException(
+					"Failed making WebApp resources available", ex);
+		}
 	}
 
 }
