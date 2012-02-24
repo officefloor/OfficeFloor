@@ -1,0 +1,18 @@
+<html>
+</body>
+<div>
+<h1>OfficeFloor</h1>
+<p>True inversion of control allowing build once deploy anywhere web applications.</p>
+</div>
+<div>
+	<form action="#{answer}">
+		<!-- {Question} -->
+		<p>${text}</p>
+		<input type="hidden" name="question" value="${questionIndex}" />
+		<!-- {Answers} -->
+		<input type="radio" name="answer" value="${index}" onClick="this.form.submit()" />${text}<br/>
+		<!-- {EndAnswers} -->
+	</form>
+</div>
+</body>
+</html>
