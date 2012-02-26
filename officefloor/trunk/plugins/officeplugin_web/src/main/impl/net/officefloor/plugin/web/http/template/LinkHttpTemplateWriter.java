@@ -69,6 +69,12 @@ public class LinkHttpTemplateWriter implements HttpTemplateWriter {
 	@Override
 	public void write(HttpResponseWriter writer, String workName, Object bean)
 			throws IOException {
+
+		// Strip / if root work
+		if (workName.startsWith("/")) {
+			workName = workName.substring("/".length());
+		}
+
 		// Write the content
 		writer.write(this.contentType, this.linkPrefix + workName
 				+ this.linkSuffix);

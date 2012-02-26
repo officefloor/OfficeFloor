@@ -53,11 +53,6 @@ import org.easymock.AbstractMatcher;
 public class HttpTemplateWorkSourceTest extends OfficeFrameTestCase {
 
 	/**
-	 * Properties to load the {@link WorkType}.
-	 */
-	private final String[] properties;
-
-	/**
 	 * Path to template for missing items to check errors.
 	 */
 	private final String missingTemplateFilePath = this.getClass().getPackage()
@@ -72,23 +67,11 @@ public class HttpTemplateWorkSourceTest extends OfficeFrameTestCase {
 			+ "/Template.ofp";
 
 	/**
-	 * Initiate.
+	 * Root template path.
 	 */
-	public HttpTemplateWorkSourceTest() {
-		// Create the properties
-		this.properties = new String[8];
-		this.properties[0] = HttpTemplateWorkSource.PROPERTY_TEMPLATE_FILE;
-		this.properties[1] = templatePath;
-		this.properties[2] = HttpTemplateWorkSource.PROPERTY_BEAN_PREFIX
-				+ "template";
-		this.properties[3] = TemplateBean.class.getName();
-		this.properties[4] = HttpTemplateWorkSource.PROPERTY_BEAN_PREFIX
-				+ "NullBean";
-		this.properties[5] = TemplateBean.class.getName();
-		this.properties[6] = HttpTemplateWorkSource.PROPERTY_BEAN_PREFIX
-				+ "List";
-		this.properties[7] = TableRowBean.class.getName();
-	}
+	private final String rootTemplatePath = this.getClass().getPackage()
+			.getName().replace('.', '/')
+			+ "/RootTemplate.ofp";
 
 	/**
 	 * Verifies the specification.
@@ -156,7 +139,7 @@ public class HttpTemplateWorkSourceTest extends OfficeFrameTestCase {
 
 		// Verify the work type
 		WorkLoaderUtil.validateWorkType(work, HttpTemplateWorkSource.class,
-				this.properties);
+				this.getProperties(this.templatePath));
 	}
 
 	/**
@@ -252,7 +235,8 @@ public class HttpTemplateWorkSourceTest extends OfficeFrameTestCase {
 
 		// Load the work type
 		WorkType<HttpTemplateWork> workType = WorkLoaderUtil.loadWorkType(
-				HttpTemplateWorkSource.class, this.properties);
+				HttpTemplateWorkSource.class,
+				this.getProperties(this.templatePath));
 
 		// Create the work and provide name
 		HttpTemplateWork work = workType.getWorkFactory().createWork();
@@ -350,15 +334,15 @@ public class HttpTemplateWorkSourceTest extends OfficeFrameTestCase {
 			public InputStream sourceResource(String location) {
 				// Ensure appropriate template path
 				assertEquals("Incorrect template path",
-						HttpTemplateWorkSourceTest.this.templatePath,
-						templatePath);
+						HttpTemplateWorkSourceTest.this.templatePath, location);
 				return templateInput;
 			}
 		});
 
 		// Load the work type
 		WorkType<HttpTemplateWork> workType = WorkLoaderUtil.loadWorkType(
-				HttpTemplateWorkSource.class, compiler, this.properties);
+				HttpTemplateWorkSource.class, compiler,
+				this.getProperties(this.templatePath));
 
 		// Create the work and provide name
 		HttpTemplateWork work = workType.getWorkFactory().createWork();
@@ -379,6 +363,56 @@ public class HttpTemplateWorkSourceTest extends OfficeFrameTestCase {
 		String output = UsAsciiUtil.convertToString(httpResponse
 				.getBodyContent());
 		assertTextEquals("Incorrect output", templateContent, output);
+	}
+
+	/**
+	 * Tests the root template.
+	 */
+	@SuppressWarnings({ "rawtypes", "unchecked" })
+	public void testRootTemplate() throws Throwable {
+
+		// Create the mock objects
+		TaskContext taskContext = this.createMock(TaskContext.class);
+		ServerHttpConnection httpConnection = this
+				.createMock(ServerHttpConnection.class);
+
+		// Create the HTTP response to record output
+		MockHttpResponse httpResponse = new MockHttpResponse();
+
+		// Load the work type
+		WorkType<HttpTemplateWork> workType = WorkLoaderUtil.loadWorkType(
+				HttpTemplateWorkSource.class,
+				this.getProperties(this.rootTemplatePath));
+
+		// Create as root template
+		HttpTemplateWork work = workType.getWorkFactory().createWork();
+		work.setBoundWorkName("/.links");
+
+		// Record
+		this.recordReturn(taskContext, taskContext.getObject(0), httpConnection);
+		this.recordReturn(httpConnection, httpConnection.getHttpResponse(),
+				httpResponse);
+		this.recordReturn(taskContext, taskContext.getWork(), work);
+
+		// Test
+		this.replayMockObjects();
+
+		// Execute the 'template' task
+		this.doTask("template", work, workType, taskContext);
+
+		// Verify mocks
+		this.verifyMockObjects();
+
+		// Obtain the output template
+		String actualOutput = UsAsciiUtil.convertToString(httpResponse
+				.getBodyContent());
+
+		// Expected output (removing last end of line appended)
+		String expectedOutput = this.getFileContents(this.findFile(
+				this.getClass(), "RootTemplate.expected"));
+
+		// Validate output
+		assertTextEquals("Incorrect output", expectedOutput, actualOutput);
 	}
 
 	/**
@@ -418,6 +452,29 @@ public class HttpTemplateWorkSourceTest extends OfficeFrameTestCase {
 
 		// Execute the task
 		task.doTask(taskContext);
+	}
+
+	/**
+	 * Obtain the properties.
+	 * 
+	 * @return Properties.
+	 */
+	public String[] getProperties(String templatePath) {
+		// Create the properties
+		String[] properties = new String[8];
+		properties[0] = HttpTemplateWorkSource.PROPERTY_TEMPLATE_FILE;
+		properties[1] = templatePath;
+		properties[2] = HttpTemplateWorkSource.PROPERTY_BEAN_PREFIX
+				+ "template";
+		properties[3] = TemplateBean.class.getName();
+		properties[4] = HttpTemplateWorkSource.PROPERTY_BEAN_PREFIX
+				+ "NullBean";
+		properties[5] = TemplateBean.class.getName();
+		properties[6] = HttpTemplateWorkSource.PROPERTY_BEAN_PREFIX + "List";
+		properties[7] = TableRowBean.class.getName();
+
+		// Return the properties
+		return properties;
 	}
 
 }

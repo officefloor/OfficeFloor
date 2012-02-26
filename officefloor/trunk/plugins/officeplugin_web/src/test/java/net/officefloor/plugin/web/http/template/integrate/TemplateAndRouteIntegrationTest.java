@@ -102,6 +102,21 @@ public class TemplateAndRouteIntegrationTest extends TestCase {
 	}
 
 	/**
+	 * Ensure that root {@link HttpTemplate} link is routed to the handling
+	 * {@link Task}.
+	 */
+	public void testRouteRoot() throws Exception {
+
+		// Create HTTP Client
+		HttpClient client = new DefaultHttpClient();
+
+		// Root page link
+		Properties linkedPage = this.doRequest("/.links-link.task", client);
+		assertEquals("Incorrect root page link", "One",
+				linkedPage.getProperty("page"));
+	}
+
+	/**
 	 * Does the request.
 	 * 
 	 * @param uriPath

@@ -81,6 +81,34 @@ public class HttpTemplateRouteTaskTest extends OfficeFrameTestCase {
 	}
 
 	/**
+	 * Ensure can route to {@link Task} for root.
+	 */
+	public void testRouteRoot() throws Throwable {
+		// Record
+		this.record_cacheOfficeMetaData("/", "TASK",
+				new HttpTemplateRequestHandlerDifferentiator());
+		this.record_requestURI("/-TASK.task");
+		this.taskContext.doFlow("/", "TASK", null);
+
+		// Test
+		this.doTest();
+	}
+
+	/**
+	 * Ensure can route to {@link Task} for root link.
+	 */
+	public void testRouteRootLink() throws Throwable {
+		// Record
+		this.record_cacheOfficeMetaData("/.links", "TASK",
+				new HttpTemplateRequestHandlerDifferentiator());
+		this.record_requestURI("/.links-TASK.task");
+		this.taskContext.doFlow("/.links", "TASK", null);
+
+		// Test
+		this.doTest();
+	}
+
+	/**
 	 * Ensure can route to {@link Task} that has a {@link Task} name prefix.
 	 */
 	public void testRouteWithTaskNamePrefix() throws Throwable {

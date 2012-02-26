@@ -44,15 +44,15 @@ public class HttpResourceUtil {
 	public static String transformToCanonicalPath(String path)
 			throws InvalidHttpRequestUriException {
 
-		// Ensure not empty path
+		// Root if empty path
 		if (path == null) {
-			throw createInvalidHttpRequestUriException(path);
+			return "/"; // root path
 		}
 
 		// Trim path and ensure not empty/blank
 		path = path.trim();
 		if (path.length() == 0) {
-			throw createInvalidHttpRequestUriException(path);
+			return "/"; // root path
 		}
 
 		// Determine if starting with protocol and/or domain
