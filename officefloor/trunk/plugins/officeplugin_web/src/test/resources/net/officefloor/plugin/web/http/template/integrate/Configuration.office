@@ -14,6 +14,10 @@
   </escalations>
   <administrators>
   </administrators>
+  <governances>
+  </governances>
+  <starting>
+  </starting>
   <sections>
     <section name="Route" source="net.officefloor.model.impl.desk.DeskModelSectionSource" location="net/officefloor/plugin/web/http/template/integrate/Route.desk" x="52" y="371">
       <properties>
@@ -76,6 +80,19 @@
       <output name="Exception" argument-type="java.lang.Exception" escalation-only="true">
       </output>
       <object name="HTTP" object-type="net.officefloor.plugin.socket.server.http.ServerHttpConnection">
+        <external-managed-object name="HTTP"/>
+      </object>
+      <responsibility name="Responsibility">
+        <team name="Team"/>
+      </responsibility>
+    </section>
+    <section name="/" source="net.officefloor.model.impl.desk.DeskModelSectionSource" location="net/officefloor/plugin/web/http/template/integrate/Root.desk" x="137" y="257">
+      <properties>
+      </properties>
+      <output name="Link" argument-type="java.lang.Void" escalation-only="false">
+        <section-input section="PageOne" input="template"/>
+      </output>
+      <object name="HTTP" object-type="net.officefloor.plugin.socket.server.http.source.HttpServerSocketManagedObjectSource">
         <external-managed-object name="HTTP"/>
       </object>
       <responsibility name="Responsibility">

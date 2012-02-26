@@ -28,9 +28,6 @@ import net.officefloor.frame.api.execute.TaskContext;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.socket.server.http.HttpRequest;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
-import net.officefloor.plugin.socket.server.http.protocol.HttpStatus;
-import net.officefloor.plugin.web.http.resource.InvalidHttpRequestUriException;
-import net.officefloor.plugin.web.http.route.source.HttpRouteTask;
 import net.officefloor.plugin.web.http.route.source.HttpRouteTask.HttpRouteTaskDependencies;
 
 /**
@@ -107,29 +104,17 @@ public class HttpRouteTaskTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensures to able route {@link HttpRequest} with no path.
+	 * Ensures to able route {@link HttpRequest} with no path to root.
 	 */
 	public void testRouteNoPath() throws Throwable {
-		try {
-			this.doRouteTest("", -1);
-			fail("Should not be successful");
-		} catch (InvalidHttpRequestUriException ex) {
-			assertEquals("Incorrect status", HttpStatus.SC_BAD_REQUEST,
-					ex.getHttpStatus());
-		}
+		this.doRouteTest("", 0); // not matched
 	}
 
 	/**
 	 * Ensures able to route {@link HttpRequest} with <code>null</code> path.
 	 */
 	public void testRouteNullPath() throws Throwable {
-		try {
-			this.doRouteTest(null, -1);
-			fail("Should not be successful");
-		} catch (InvalidHttpRequestUriException ex) {
-			assertEquals("Incorrect status", HttpStatus.SC_BAD_REQUEST,
-					ex.getHttpStatus());
-		}
+		this.doRouteTest(null, 0, "/"); // root path
 	}
 
 	/**
@@ -137,6 +122,13 @@ public class HttpRouteTaskTest extends OfficeFrameTestCase {
 	 */
 	public void testRouteRoot() throws Throwable {
 		this.doRouteTest("/", 0, "/");
+	}
+
+	/**
+	 * Ensure able to route {@link HttpRequest} with default root path.
+	 */
+	public void testRouteDefaultRoot() throws Throwable {
+		this.doRouteTest("", 0, "/");
 	}
 
 	/**

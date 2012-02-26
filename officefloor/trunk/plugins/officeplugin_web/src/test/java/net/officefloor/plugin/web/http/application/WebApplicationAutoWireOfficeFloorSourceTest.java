@@ -128,6 +128,38 @@ public class WebApplicationAutoWireOfficeFloorSourceTest extends
 	}
 
 	/**
+	 * Ensure able to add HTTP template that is available for default root.
+	 */
+	public void testRootTemplate() throws Exception {
+
+		final String SUBMIT_URI = "/.links-submit.task";
+
+		final String templatePath = this.getClassPath("template.ofp");
+
+		// Add HTTP template (with URL)
+		HttpTemplateAutoWireSection section = this.source.addHttpTemplate(
+				templatePath, MockTemplateLogic.class, "/");
+		this.source.openOfficeFloor();
+
+		// Ensure correct section details
+		assertEquals("Incorrect section name", "/", section.getSectionName());
+		assertEquals("Incorrect section source",
+				HttpTemplateSectionSource.class.getName(),
+				section.getSectionSourceClassName());
+		assertEquals("Incorrect section location",
+				this.getClassPath("template.ofp"), templatePath);
+		assertEquals("Incorrect template path", templatePath,
+				section.getTemplatePath());
+		assertEquals("Incorrect template URI", "/", section.getTemplateUri());
+
+		// Ensure template available at default root
+		this.assertHttpRequest("", 200, SUBMIT_URI);
+
+		// Ensure root link works
+		this.assertHttpRequest(SUBMIT_URI, 200, "submitted" + SUBMIT_URI);
+	}
+
+	/**
 	 * Mock logic for the template.
 	 */
 	public static class MockTemplateLogic {

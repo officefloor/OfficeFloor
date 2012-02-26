@@ -148,10 +148,15 @@ public class HttpTemplateRouteTask
 			path = path.substring("/".length(), path.length()
 					- HttpTemplateWorkSource.LINK_URL_EXTENSION.length());
 			int workTaskPos = path.lastIndexOf('-');
-			if (workTaskPos > 0) {
+			if (workTaskPos >= 0) {
 				// Work and Task name within URL
 				String workName = path.substring(0, workTaskPos);
 				String taskName = path.substring(workTaskPos + "-".length());
+
+				// Default to root work
+				if ("".equals(workName) || (workName.charAt(0) == '.')) {
+					workName = "/" + workName;
+				}
 
 				// Prefix task name (if required)
 				if (this.taskNamePrefix != null) {
