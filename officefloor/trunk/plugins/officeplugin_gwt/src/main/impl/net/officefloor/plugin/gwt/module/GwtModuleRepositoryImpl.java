@@ -36,6 +36,7 @@ import net.officefloor.model.gwt.module.GwtModuleModel;
 import net.officefloor.model.repository.ConfigurationContext;
 import net.officefloor.model.repository.ConfigurationItem;
 import net.officefloor.model.repository.ModelRepository;
+import net.officefloor.plugin.gwt.web.http.section.GwtHttpTemplateSectionExtension;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -183,9 +184,11 @@ public class GwtModuleRepositoryImpl implements GwtModuleRepository {
 		String modulePath = entryPointClassName.substring(0, index).replace(
 				'.', '/');
 
-		// Obtain path to GWT Module
-		String templateName = module.getRenameTo();
-		modulePath = modulePath + "/" + templateName + ".gwt.xml";
+		// Obtain the module name
+		String moduleName = this.getGwtModuleName(module);
+
+		// Obtain the path to the GWT Module
+		modulePath = modulePath + "/" + moduleName + ".gwt.xml";
 
 		// Return the GWT Module path
 		return modulePath;
@@ -235,7 +238,8 @@ public class GwtModuleRepositoryImpl implements GwtModuleRepository {
 		}
 
 		// Ensure rename-to attribute is updated
-		moduleNode.setAttribute("rename-to", module.getRenameTo());
+		String moduleName = this.getGwtModuleName(module);
+		moduleNode.setAttribute("rename-to", moduleName);
 
 		// Element names
 		final String ENTRY_POINT = "entry-point";
@@ -371,6 +375,24 @@ public class GwtModuleRepositoryImpl implements GwtModuleRepository {
 		ByteArrayInputStream templateConfiguration = new ByteArrayInputStream(
 				moduleContent.getBytes(defaultCharset));
 		return templateConfiguration;
+	}
+
+	/**
+	 * Obtains the {@link GwtModuleModel} name.
+	 * 
+	 * @param module
+	 *            {@link GwtModuleModel}.
+	 * @return {@link GwtModuleModel} name.
+	 */
+	private String getGwtModuleName(GwtModuleModel module) {
+
+		// Obtain the module name
+		String moduleName = module.getRenameTo();
+		moduleName = GwtHttpTemplateSectionExtension
+				.getGwtModuleName(moduleName);
+
+		// Return the module name
+		return moduleName;
 	}
 
 }

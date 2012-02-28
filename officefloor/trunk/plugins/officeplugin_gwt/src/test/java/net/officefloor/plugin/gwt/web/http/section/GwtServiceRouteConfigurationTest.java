@@ -97,6 +97,24 @@ public class GwtServiceRouteConfigurationTest extends OfficeFrameTestCase {
 	}
 
 	/**
+	 * Ensure extend configuration to route GWT service requests for root
+	 * template.
+	 */
+	public void testGwtServiceForRootTemplate() throws Exception {
+
+		// Record configuring a GWT Service
+		this.recordInit("/", GwtServiceInterfaceAsync.class.getName());
+		this.application.linkUri("root/GwtServicePath", this.template,
+				"GWT_GwtServicePath");
+
+		// Test configuration
+		this.replayMockObjects();
+		GwtHttpTemplateSectionExtension.extendTemplate(this.template,
+				this.application, this.properties, this.classLoader);
+		this.verifyMockObjects();
+	}
+
+	/**
 	 * Ensure extend configuration to route multiple GWT services.
 	 */
 	public void testMultipleGwtServices() throws Exception {

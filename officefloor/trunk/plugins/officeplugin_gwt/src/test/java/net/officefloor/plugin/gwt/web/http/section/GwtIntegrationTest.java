@@ -26,6 +26,7 @@ import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.gwt.service.MockGwtServiceInterface;
 import net.officefloor.plugin.gwt.service.MockGwtServiceInterfaceAsync;
 import net.officefloor.plugin.section.clazz.Parameter;
+import net.officefloor.plugin.socket.server.http.server.MockHttpServer;
 import net.officefloor.plugin.web.http.application.HttpTemplateAutoWireSection;
 import net.officefloor.plugin.web.http.server.HttpServerAutoWireOfficeFloorSource;
 
@@ -47,12 +48,24 @@ public class GwtIntegrationTest extends OfficeFrameTestCase {
 	/**
 	 * HTTP Server.
 	 */
-	private final HttpServerAutoWireOfficeFloorSource source = new HttpServerAutoWireOfficeFloorSource();
+	private HttpServerAutoWireOfficeFloorSource source;
+
+	/**
+	 * Port for testing.
+	 */
+	private int port;
 
 	/**
 	 * HTTP Client.
 	 */
 	private final HttpClient client = new DefaultHttpClient();
+
+	@Override
+	protected void setUp() throws Exception {
+		// Configure the port
+		this.port = MockHttpServer.getAvailablePort();
+		this.source = new HttpServerAutoWireOfficeFloorSource(this.port);
+	}
 
 	/**
 	 * Ensure issue if no Template URI.
@@ -82,12 +95,33 @@ public class GwtIntegrationTest extends OfficeFrameTestCase {
 	 * Ensure transforms HTML to include GWT.
 	 */
 	public void testTransformation() throws Exception {
+		this.doTransformationTest("template", "template");
+	}
+
+	/**
+	 * Ensures handles root template (/) transformation for HTML to include GWT.
+	 */
+	public void testRootTransformation() throws Exception {
+		this.doTransformationTest("/", "root");
+	}
+
+	/**
+	 * Undertakes the transformation for HTML to include GWT.
+	 * 
+	 * @param templateUri
+	 *            Template URI.
+	 * @param gwtServiceUri
+	 *            GWT Service URI.
+	 */
+	private void doTransformationTest(String templateUri, String gwtServiceUri)
+			throws Exception {
 
 		// Configure the template with GWT
 		String templatePath = this.getFileLocation(this.getClass(),
 				"Template.html");
-		HttpTemplateAutoWireSection section = this.source.addHttpTemplate(
-				templatePath, GwtTransformationTemplateLogic.class, "template");
+		HttpTemplateAutoWireSection section = this.source
+				.addHttpTemplate(templatePath,
+						GwtTransformationTemplateLogic.class, templateUri);
 
 		// Add the GWT Extension
 		GwtHttpTemplateSectionExtension.extendTemplate(section, this.source,
@@ -99,7 +133,8 @@ public class GwtIntegrationTest extends OfficeFrameTestCase {
 
 		// Request the template
 		HttpResponse response = this.client.execute(new HttpGet(
-				"http://localhost:7878/template"));
+				"http://localhost:" + this.port + "/"
+						+ ("/".equals(templateUri) ? "" : templateUri)));
 		assertEquals("Should be successful", 200, response.getStatusLine()
 				.getStatusCode());
 
@@ -109,7 +144,11 @@ public class GwtIntegrationTest extends OfficeFrameTestCase {
 		String responseBody = buffer.toString();
 
 		// Ensure expected response
-		final String GWT_SCRIPT = "<script type=\"text/javascript\" language=\"javascript\" src=\"template/template.nocache.js\"></script>";
+		final String GWT_SCRIPT = "<script type=\"text/javascript\" language=\"javascript\" src=\""
+				+ gwtServiceUri
+				+ "/"
+				+ gwtServiceUri
+				+ ".nocache.js\"></script>";
 		final String GWT_HISTORY_IFRAME = "<iframe src=\"javascript:''\" id=\"__gwt_historyFrame\" tabIndex='-1' style=\"position:absolute;width:0;height:0;border:0\"></iframe>";
 		final String EXPECTED_RESPONSE = "<html><head>" + GWT_SCRIPT
 				+ "<title>GWT</title></head><body>" + GWT_HISTORY_IFRAME
@@ -121,12 +160,32 @@ public class GwtIntegrationTest extends OfficeFrameTestCase {
 	 * Ensure able to invoke GWT Service.
 	 */
 	public void testGwtService() throws Exception {
+		this.doGwtServiceTest("template", "template");
+	}
+
+	/**
+	 * Ensure able to invoke GWT Service for root template.
+	 */
+	public void testRootGwtService() throws Exception {
+		this.doGwtServiceTest("/", "root");
+	}
+
+	/**
+	 * Undertakes invoking the GWT Service.
+	 * 
+	 * @param templateUri
+	 *            Template URI.
+	 * @param gwtServiceUri
+	 *            GWT service URI.
+	 */
+	private void doGwtServiceTest(String templateUri, String gwtServiceUri)
+			throws Exception {
 
 		// Configure the template with GWT Service
 		String templatePath = this.getFileLocation(this.getClass(),
 				"Template.html");
 		HttpTemplateAutoWireSection section = this.source.addHttpTemplate(
-				templatePath, GwtServiceTemplateLogic.class, "template");
+				templatePath, GwtServiceTemplateLogic.class, templateUri);
 
 		// Add the GWT Extension
 		SourcePropertiesImpl properties = new SourcePropertiesImpl();
@@ -141,9 +200,11 @@ public class GwtIntegrationTest extends OfficeFrameTestCase {
 		this.source.openOfficeFloor();
 
 		// Invoke GWT Service and validate returns successfully
+		String moduleBaseURL = "http://localhost:" + this.port + "/"
+				+ gwtServiceUri + "/";
 		MockGwtServiceInterface service = (MockGwtServiceInterface) SyncProxy
-				.newProxyInstance(MockGwtServiceInterface.class,
-						"http://localhost:7878/template/", "GwtServicePath");
+				.newProxyInstance(MockGwtServiceInterface.class, moduleBaseURL,
+						"GwtServicePath");
 		String result = service.service(new Integer(10));
 		assertEquals("Incorrect result", "10", result);
 	}
@@ -151,8 +212,8 @@ public class GwtIntegrationTest extends OfficeFrameTestCase {
 	@Override
 	protected void tearDown() throws Exception {
 		// Shutdown
-		this.client.getConnectionManager().shutdown();
 		AutoWireManagement.closeAllOfficeFloors();
+		this.client.getConnectionManager().shutdown();
 	}
 
 	/**

@@ -34,6 +34,7 @@ import net.officefloor.compile.work.TaskType;
 import net.officefloor.compile.work.WorkType;
 import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
 import net.officefloor.frame.spi.source.SourceProperties;
+import net.officefloor.model.gwt.module.GwtModuleModel;
 import net.officefloor.plugin.gwt.service.GwtServiceTask.Dependencies;
 import net.officefloor.plugin.gwt.service.GwtServiceWorkSource;
 import net.officefloor.plugin.gwt.service.ServerGwtRpcConnection;
@@ -58,6 +59,25 @@ import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
  */
 public class GwtHttpTemplateSectionExtension implements
 		HttpTemplateSectionExtension {
+
+	/**
+	 * Obtains the {@link GwtModuleModel} name from the template URI.
+	 * 
+	 * @param templateUri
+	 *            template URI.
+	 * @return {@link GwtModuleModel} name.
+	 */
+	public static String getGwtModuleName(String templateUri) {
+
+		// Default root ('/') to 'root;
+		String moduleName = templateUri;
+		if ("/".equals(moduleName)) {
+			moduleName = "root"; // default '/' to root
+		}
+
+		// return the module name
+		return moduleName;
+	}
 
 	/**
 	 * Name of property specifying the URI for the template.
@@ -138,8 +158,13 @@ public class GwtHttpTemplateSectionExtension implements
 						@Override
 						public void configure(Class<?> gwtServiceInterface,
 								String relativePath, String gwtServiceName) {
+
+							// Obtain the module name
+							String moduleName = GwtHttpTemplateSectionExtension
+									.getGwtModuleName(templateUri);
+
 							// Route GWT Service
-							String uri = templateUri + "/" + relativePath;
+							String uri = moduleName + "/" + relativePath;
 							application.linkUri(uri, template, gwtServiceName);
 						}
 					});
@@ -238,7 +263,9 @@ public class GwtHttpTemplateSectionExtension implements
 
 		// Construct GWT script
 		String templateUri = context.getProperty(PROPERTY_TEMPLATE_URI);
-		String scriptPath = templateUri + "/" + templateUri + ".nocache.js";
+		String moduleName = GwtHttpTemplateSectionExtension
+				.getGwtModuleName(templateUri);
+		String scriptPath = moduleName + "/" + moduleName + ".nocache.js";
 		String script = "<script type=\"text/javascript\" language=\"javascript\" src=\""
 				+ scriptPath + "\"></script>";
 
