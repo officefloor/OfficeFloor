@@ -69,6 +69,17 @@ public class GwtChangesTest extends OfficeFrameTestCase {
 	}
 
 	/**
+	 * Ensure correct GWT Module path for root template.
+	 */
+	public void testRootGwtModulePath() {
+		GwtModuleModel module = new GwtModuleModel("/",
+				"net.example.client.ExampleEntryPoint", null);
+		String gwtModulePath = this.changes.createGwtModulePath(module);
+		assertEquals("Incorrect GWT Module path", "net/example/root.gwt.xml",
+				gwtModulePath);
+	}
+
+	/**
 	 * Ensure able to retrieve the GWT Module.
 	 */
 	public void testRetrieveGwtModule() throws Exception {
@@ -90,6 +101,27 @@ public class GwtChangesTest extends OfficeFrameTestCase {
 	}
 
 	/**
+	 * Ensure able to retrieve the root GWT Module.
+	 */
+	public void testRetrieveRootGwtModule() throws Exception {
+
+		// Create the GWT Module to retrieve
+		GwtModuleModel module = new GwtModuleModel("/",
+				"net.officefloor.client.ExampleEntryPoint", null);
+		this.repository.storeGwtModule(module, this.context, null);
+
+		// Retrieve the module
+		GwtModuleModel retrieved = this.changes
+				.retrieveGwtModule("net/officefloor/root.gwt.xml");
+		assertNotNull("Should obtain module", retrieved);
+		assertEquals("Incorrect retrieved module rename-to", "root",
+				retrieved.getRenameTo());
+		assertEquals("Incorrect retrieved module EntryPoint",
+				"net.officefloor.client.ExampleEntryPoint",
+				retrieved.getEntryPointClassName());
+	}
+
+	/**
 	 * Ensure can create.
 	 */
 	public void testCreate() throws Exception {
@@ -100,6 +132,40 @@ public class GwtChangesTest extends OfficeFrameTestCase {
 		// GWT Module
 		GwtModuleModel module = new GwtModuleModel();
 		module.setRenameTo("create");
+		module.setEntryPointClassName(ENTRY_POINT_CLASS);
+
+		// Test
+		this.replayMockObjects();
+
+		// Update the GWT Module
+		Change<?> change = this.changes.updateGwtModule(module, null);
+
+		// Ensure not available before applying
+		this.assertConfiguration(CONFIGURATION_PATH, null);
+
+		// Ensure created GWT Module
+		change.apply();
+		this.assertConfiguration(CONFIGURATION_PATH, ENTRY_POINT_CLASS);
+
+		// Ensure delete GWT Module on reverting
+		change.revert();
+		this.assertConfiguration(CONFIGURATION_PATH, null);
+
+		// Verify
+		this.verifyMockObjects();
+	}
+
+	/**
+	 * Ensure can create GWT Module for root template.
+	 */
+	public void testCreateRootGwtModule() throws Exception {
+
+		final String CONFIGURATION_PATH = "net/officefloor/root.gwt.xml";
+		final String ENTRY_POINT_CLASS = "net.officefloor.client.Root";
+
+		// GWT Module
+		GwtModuleModel module = new GwtModuleModel();
+		module.setRenameTo("/");
 		module.setEntryPointClassName(ENTRY_POINT_CLASS);
 
 		// Test

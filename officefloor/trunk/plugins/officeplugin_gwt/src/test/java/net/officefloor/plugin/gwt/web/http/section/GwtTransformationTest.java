@@ -32,7 +32,7 @@ public class GwtTransformationTest extends OfficeFrameTestCase {
 	/**
 	 * Script to be added to the template.
 	 */
-	private static final String SCRIPT = "<script type=\"text/javascript\" language=\"javascript\" src=\"template/template.nocache.js\"></script>";
+	private static final String SCRIPT = "<script type=\"text/javascript\" language=\"javascript\" src=\"URI/URI.nocache.js\"></script>";
 
 	/**
 	 * IFrame to be added to the template.
@@ -54,8 +54,8 @@ public class GwtTransformationTest extends OfficeFrameTestCase {
 	 * Ensure can include GWT on empty HTML.
 	 */
 	public void testEmptyHtml() throws Exception {
-		this.doTest("<html/>", "<html><head>" + SCRIPT + "</head><body>"
-				+ IFRAME + "</body></html>");
+		this.doTest("<html/>",
+				"<html><head>SCRIPT</head><body>IFRAME</body></html>");
 	}
 
 	/**
@@ -89,6 +89,15 @@ public class GwtTransformationTest extends OfficeFrameTestCase {
 	}
 
 	/**
+	 * Ensure can handle root template.
+	 */
+	public void testRootTemplate() throws Exception {
+		this.doTest("<html/>",
+				"<html><head>SCRIPT</head><body>IFRAME</body></html>", "/",
+				"root");
+	}
+
+	/**
 	 * Undertakes the test.
 	 * 
 	 * @param templateHtml
@@ -108,13 +117,33 @@ public class GwtTransformationTest extends OfficeFrameTestCase {
 	 */
 	private void doTest(String rawHtml, String transformedHtml)
 			throws Exception {
+		this.doTest(rawHtml, transformedHtml, "template", "template");
+	}
+
+	/**
+	 * Undertakes the test.
+	 * 
+	 * @param rawHtml
+	 *            Raw HTML.
+	 * @param transformedHtml
+	 *            Transformed HTML.
+	 * @param templateUri
+	 *            Template URI.
+	 * @param gwtServiceUri
+	 *            GWT Service URI.
+	 */
+	private void doTest(String rawHtml, String transformedHtml,
+			String templateUri, String gwtServiceUri) throws Exception {
+
+		// Transform the the script
+		String scriptValue = SCRIPT.replace("URI", gwtServiceUri);
 
 		// Transform template
 		final String SCRIPT_TAG = "SCRIPT";
 		final String IFRAME_TAG = "IFRAME";
 		rawHtml = rawHtml.replace(SCRIPT_TAG, "").replace(IFRAME_TAG, "");
-		transformedHtml = transformedHtml.replace(SCRIPT_TAG, SCRIPT).replace(
-				IFRAME_TAG, IFRAME);
+		transformedHtml = transformedHtml.replace(SCRIPT_TAG, scriptValue)
+				.replace(IFRAME_TAG, IFRAME);
 
 		// Record adding GWT
 		this.recordReturn(this.context, this.context.getTemplateContent(),
@@ -123,7 +152,7 @@ public class GwtTransformationTest extends OfficeFrameTestCase {
 				this.context,
 				this.context
 						.getProperty(GwtHttpTemplateSectionExtension.PROPERTY_TEMPLATE_URI),
-				"template");
+				templateUri);
 		this.context.setTemplateContent(transformedHtml);
 		this.recordReturn(
 				this.context,
