@@ -260,6 +260,18 @@ public class OpenOfficeFloorGoal extends AbstractGoal {
 
 			// Update web app resources to be made available
 			this.updateResources(webAppDir, publicDir);
+
+			// Include compiled web app resources (such as GWT)
+			String version = this.project.getVersion();
+			if ((version == null) || (version.trim().length() == 0)) {
+				MavenProject parent = this.project.getParent();
+				if (parent != null) {
+					version = parent.getVersion();
+				}
+			}
+			File packageDir = new File(baseDir, "target/"
+					+ this.project.getArtifactId() + "-" + version);
+			this.updateResources(packageDir, publicDir, "WEB-INF", "META-INF");
 		}
 
 		// Open the OfficeFloor
@@ -287,18 +299,28 @@ public class OpenOfficeFloorGoal extends AbstractGoal {
 	 *            Source directory.
 	 * @param destDir
 	 *            Destination directory.
+	 * @param ignoreFileNames
+	 *            File names to ignore in updating.
 	 * @throws MojoExecutionException
 	 *             If fails to update resources.
 	 */
-	private void updateResources(File srcDir, File destDir)
-			throws MojoExecutionException {
+	private void updateResources(File srcDir, File destDir,
+			String... ignoreFileNames) throws MojoExecutionException {
 		try {
 
 			// Ensure destination directory exists
 			destDir.mkdir(); // not fail as may already exist
 
 			// Copy the files
-			for (File srcFile : srcDir.listFiles()) {
+			NEXT_FILE: for (File srcFile : srcDir.listFiles()) {
+
+				// Determine if ignore directory
+				String srcFileName = srcFile.getName();
+				for (String ignoreFileName : ignoreFileNames) {
+					if (ignoreFileName.equals(srcFileName)) {
+						continue NEXT_FILE; // ignore file
+					}
+				}
 
 				// Determine if directory
 				if (srcFile.isDirectory()) {
