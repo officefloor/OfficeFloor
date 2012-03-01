@@ -72,8 +72,8 @@
 		<aether-version>1.8</aether-version>
 		<plexus-version>1.5.5</plexus-version>
 		<jetty-version>7.1.5.v20100705</jetty-version>
-		<gwt-version>2.1.0</gwt-version>
-		<syncrpc-version>0.2</syncrpc-version>
+		<gwt-version>2.4.0</gwt-version>
+		<syncrpc-version>0.3</syncrpc-version>
 		<datanucleus-version>3.0.5</datanucleus-version>
 	</properties>
 	<dependencyManagement>

@@ -21,8 +21,6 @@ package net.officefloor.plugin.gwt.service;
 import java.lang.reflect.Method;
 import java.util.Map;
 
-import org.easymock.AbstractMatcher;
-
 import net.officefloor.autowire.AutoWire;
 import net.officefloor.autowire.AutoWireManagement;
 import net.officefloor.autowire.AutoWireSection;
@@ -54,9 +52,11 @@ import net.officefloor.plugin.socket.server.http.server.MockHttpServer;
 import net.officefloor.plugin.web.http.server.HttpServerAutoWireOfficeFloorSource;
 import net.officefloor.plugin.work.clazz.ClassWorkSource;
 
+import org.easymock.AbstractMatcher;
+
 import com.gdevelop.gwt.syncrpc.SyncProxy;
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.google.gwt.user.client.rpc.InvocationException;
+import com.google.gwt.user.client.rpc.IncompatibleRemoteServiceException;
 
 /**
  * Tests the {@link GwtServiceWorkSource}.
@@ -197,8 +197,8 @@ public class GwtServiceWorkSourceTest extends OfficeFrameTestCase {
 		try {
 			service.unknown("UNKNOWN");
 			fail("Should not be successful on unknown method");
-		} catch (InvocationException ex) {
-			String causeMessage = ex.getCause().getMessage();
+		} catch (IncompatibleRemoteServiceException ex) {
+			String causeMessage = ex.getMessage();
 			assertTrue(
 					"Incorrect exception: " + causeMessage,
 					causeMessage
