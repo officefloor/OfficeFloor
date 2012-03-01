@@ -169,13 +169,9 @@ public class ServerGwtRpcConnectionManagedObjectSourceTest extends
 		try {
 			service.service(new Integer(1));
 			fail("Should not be successful");
-		} catch (InvocationException ex) {
-			assertTrue("Should be due to status code issue",
-					(ex.getCause() instanceof StatusCodeException));
-			StatusCodeException statusCode = (StatusCodeException) ex
-					.getCause();
+		} catch (StatusCodeException ex) {
 			assertEquals("Incorrect status code for no return", 204,
-					statusCode.getStatusCode());
+					ex.getStatusCode());
 		}
 	}
 
