@@ -307,52 +307,52 @@ public class OpenOfficeFloorGoal extends AbstractGoal {
 	private void updateResources(File srcDir, File destDir,
 			String... ignoreFileNames) throws MojoExecutionException {
 		try {
-			
-			// Ignore null source directory
-			if (srcDir == null) {
-				return;
-			}
 
 			// Ensure destination directory exists
 			destDir.mkdir(); // not fail as may already exist
 
 			// Copy the files
-			NEXT_FILE: for (File srcFile : srcDir.listFiles()) {
+			File[] childFiles = srcDir.listFiles();
+			if (childFiles != null) {
+				// Have files to copy
+				NEXT_FILE: for (File srcFile : childFiles) {
 
-				// Determine if ignore directory
-				String srcFileName = srcFile.getName();
-				for (String ignoreFileName : ignoreFileNames) {
-					if (ignoreFileName.equals(srcFileName)) {
-						continue NEXT_FILE; // ignore file
-					}
-				}
-
-				// Determine if directory
-				if (srcFile.isDirectory()) {
-					// Recursively update the sub directories
-					this.updateResources(srcFile,
-							new File(destDir, srcFile.getName()));
-
-				} else {
-					// Determine if destination file is latest
-					File destFile = new File(destDir, srcFile.getName());
-					if ((destFile.exists())
-							&& (srcFile.lastModified() <= destFile
-									.lastModified())) {
-						// Have latest file, so do not update
-						continue;
+					// Determine if ignore directory
+					String srcFileName = srcFile.getName();
+					for (String ignoreFileName : ignoreFileNames) {
+						if (ignoreFileName.equals(srcFileName)) {
+							continue NEXT_FILE; // ignore file
+						}
 					}
 
-					// Update the destination file to latest
-					FileInputStream srcContent = new FileInputStream(srcFile);
-					FileOutputStream destContent = new FileOutputStream(
-							destFile, false);
-					for (int value = srcContent.read(); value != -1; value = srcContent
-							.read()) {
-						destContent.write(value);
+					// Determine if directory
+					if (srcFile.isDirectory()) {
+						// Recursively update the sub directories
+						this.updateResources(srcFile,
+								new File(destDir, srcFile.getName()));
+
+					} else {
+						// Determine if destination file is latest
+						File destFile = new File(destDir, srcFile.getName());
+						if ((destFile.exists())
+								&& (srcFile.lastModified() <= destFile
+										.lastModified())) {
+							// Have latest file, so do not update
+							continue;
+						}
+
+						// Update the destination file to latest
+						FileInputStream srcContent = new FileInputStream(
+								srcFile);
+						FileOutputStream destContent = new FileOutputStream(
+								destFile, false);
+						for (int value = srcContent.read(); value != -1; value = srcContent
+								.read()) {
+							destContent.write(value);
+						}
+						destContent.close();
+						srcContent.close();
 					}
-					destContent.close();
-					srcContent.close();
 				}
 			}
 
