@@ -307,6 +307,11 @@ public class OpenOfficeFloorGoal extends AbstractGoal {
 	private void updateResources(File srcDir, File destDir,
 			String... ignoreFileNames) throws MojoExecutionException {
 		try {
+			
+			// Ignore null source directory
+			if (srcDir == null) {
+				return;
+			}
 
 			// Ensure destination directory exists
 			destDir.mkdir(); // not fail as may already exist
