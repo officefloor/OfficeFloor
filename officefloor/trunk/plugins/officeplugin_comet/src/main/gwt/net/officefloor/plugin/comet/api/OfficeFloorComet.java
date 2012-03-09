@@ -35,8 +35,13 @@ import net.officefloor.plugin.comet.internal.CometSubscriptionService;
 import net.officefloor.plugin.comet.internal.CometSubscriptionServiceAsync;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.google.gwt.user.client.ui.Label;
+import com.google.gwt.user.client.ui.PopupPanel;
 
 /**
  * Provides means to register an event listener.
@@ -223,10 +228,8 @@ public class OfficeFloorComet {
 						// No longer subscribed
 						isSubscribed = false;
 
-						// Alert error
-						Window.alert("COMET SUBSCRIBE FAILURE: "
-								+ caught.getMessage() + " ["
-								+ caught.getClass().getName() + "]");
+						// Attempt to re-establish connection
+						new ReestablishConnection(caught).schedule(5000);
 					}
 				});
 	}
@@ -346,6 +349,66 @@ public class OfficeFloorComet {
 			this.interest = interest;
 			this.handler = handler;
 			this.adapter = adapter;
+		}
+	}
+
+	/**
+	 * {@link Timer} attempting to re-establish the connection.
+	 */
+	private static class ReestablishConnection extends Timer {
+
+		/**
+		 * Failure of the connection.
+		 */
+		private final Throwable failure;
+
+		/**
+		 * {@link PopupPanel} to display on waiting to re-establish connection.
+		 */
+		private PopupPanel panel;
+
+		/**
+		 * Initiate.
+		 */
+		public ReestablishConnection(Throwable failure) {
+			this.failure = failure;
+
+			// Initiate the panel
+			this.panel = new PopupPanel();
+			this.panel.setModal(true);
+			this.panel.setGlassEnabled(true);
+
+			// Provide detail of failure
+			Label reestablish = new Label("Re-establishing connection ...");
+			this.panel.add(reestablish);
+			reestablish.addClickHandler(new ClickHandler() {
+				@Override
+				public void onClick(ClickEvent event) {
+					// Display the error
+					Window.alert("COMET SUBSCRIBE FAILURE: "
+							+ ReestablishConnection.this.failure.getMessage()
+							+ " ["
+							+ ReestablishConnection.this.failure.getClass()
+									.getName() + "]");
+				}
+			});
+
+			// Display re-establishing connection
+			this.panel.center();
+		}
+
+		/*
+		 * ================== Timer ===========================
+		 */
+
+		@Override
+		public void run() {
+
+			// Hide the panel and try re-connecting
+			this.panel.hide();
+
+			// Attempt to connect
+			OfficeFloorComet.subscribe();
 		}
 	}
 
