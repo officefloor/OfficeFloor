@@ -67,7 +67,7 @@ public class CometHttpTemplateSectionExtensionTest extends OfficeFrameTestCase {
 		System.out.println("Manually running Comet test application");
 
 		// Start the server
-		startServer(HttpServerAutoWireOfficeFloorSource.DEFAULT_HTTP_PORT);
+		startServer(HttpServerAutoWireOfficeFloorSource.DEFAULT_HTTP_PORT, "/");
 	}
 
 	/**
@@ -91,23 +91,45 @@ public class CometHttpTemplateSectionExtensionTest extends OfficeFrameTestCase {
 	 * server.
 	 */
 	public void testAutomaticPublish() {
+		this.doAutomaticPublish("template", "template");
+	}
+
+	/**
+	 * Ensure automatic publishing of {@link CometEvent} to the others on the
+	 * server for root template.
+	 */
+	public void testAutomaticPublishForRoot() {
+		this.doAutomaticPublish("/", "root");
+	}
+
+	/**
+	 * Ensure automatic publishing of {@link CometEvent} to the others on the
+	 * server.
+	 * 
+	 * @param templateUri
+	 *            Template URI.
+	 * @param gwtServiceRelativePath
+	 *            GWT service relative path.
+	 */
+	private void doAutomaticPublish(String templateUri,
+			String gwtServiceRelativePath) {
 
 		// Start the server
 		int port = MockHttpServer.getAvailablePort();
-		startServer(port);
+		startServer(port, templateUri);
 
 		// Subscribe for event
 		CometServiceInvoker subscription = CometServiceInvoker.subscribe(port,
-				"/template/comet-subscribe",
+				"/" + gwtServiceRelativePath + "/comet-subscribe",
 				CometRequest.FIRST_REQUEST_SEQUENCE_NUMBER, new CometInterest(
 						MockCometSubscriber.class.getName(), null));
 		assertNull("Should not have a response",
 				subscription.checkForResponse());
 
 		// Publish an event
-		long sequenceNumber = CometServiceInvoker.publish(port,
-				"/template/comet-publish", new CometEvent(
-						MockCometSubscriber.class.getName(), "EVENT", null));
+		long sequenceNumber = CometServiceInvoker.publish(port, "/"
+				+ gwtServiceRelativePath + "/comet-publish", new CometEvent(
+				MockCometSubscriber.class.getName(), "EVENT", null));
 
 		// Obtain the subscribed event
 		CometResponse response = subscription.waitOnResponse();
@@ -127,26 +149,48 @@ public class CometHttpTemplateSectionExtensionTest extends OfficeFrameTestCase {
 	 * Ensure able to manually publish the {@link CometEvent}.
 	 */
 	public void testManuallyPublish() {
+		this.doManuallyPublishTest("template", "template");
+	}
+
+	/**
+	 * Ensure able to manually publish the {@link CometEvent} for the root
+	 * template.
+	 */
+	public void testManuallyPublishForRoot() {
+		this.doManuallyPublishTest("/", "root");
+	}
+
+	/**
+	 * Ensure able to manually publish the {@link CometEvent}.
+	 * 
+	 * @param templateUri
+	 *            Template URI.
+	 * @param gwtServiceRelativePath
+	 *            GWT service relative path.
+	 */
+	public void doManuallyPublishTest(String templateUri,
+			String gwtServiceRelativePath) {
 
 		// Start the server (with manual handling of publishing)
 		int port = MockHttpServer.getAvailablePort();
 		startServer(
 				port,
+				templateUri,
 				CometHttpTemplateSectionExtension.PROPERTY_MANUAL_PUBLISH_METHOD_NAME,
 				"manualPublish");
 
 		// Subscribe for event
 		CometServiceInvoker subscription = CometServiceInvoker.subscribe(port,
-				"/template/comet-subscribe",
+				"/" + gwtServiceRelativePath + "/comet-subscribe",
 				CometRequest.FIRST_REQUEST_SEQUENCE_NUMBER, new CometInterest(
 						MockCometSubscriber.class.getName(), null));
 		assertNull("Should not have a response",
 				subscription.checkForResponse());
 
 		// Publish an event
-		long sequenceNumber = CometServiceInvoker.publish(port,
-				"/template/comet-publish", new CometEvent(
-						MockCometSubscriber.class.getName(), "EVENT", null));
+		long sequenceNumber = CometServiceInvoker.publish(port, "/"
+				+ gwtServiceRelativePath + "/comet-publish", new CometEvent(
+				MockCometSubscriber.class.getName(), "EVENT", null));
 
 		// Obtain the subscribed event
 		CometResponse response = subscription.waitOnResponse();
@@ -167,14 +211,38 @@ public class CometHttpTemplateSectionExtensionTest extends OfficeFrameTestCase {
 	 * {@link CometPublisher} {@link Proxy}.
 	 */
 	public void testServerPublish() throws Exception {
+		this.doServerPublishTest("template", "template", "template");
+	}
+
+	/**
+	 * Ensure server able to publish a {@link CometEvent} via a
+	 * {@link CometPublisher} {@link Proxy} for root template.
+	 */
+	public void testServerPublishForRoot() throws Exception {
+		this.doServerPublishTest("/", "root", "");
+	}
+
+	/**
+	 * Ensure server able to publish a {@link CometEvent} via a
+	 * {@link CometPublisher} {@link Proxy}.
+	 * 
+	 * @param templateUri
+	 *            Template URI.
+	 * @param gwtServiceRelativePath
+	 *            GWT service relative path.
+	 * @param linkUri
+	 *            Link URI.
+	 */
+	public void doServerPublishTest(String templateUri,
+			String gwtServiceRelativePath, String linkUri) throws Exception {
 
 		// Start the server (with manual handling of publishing)
 		int port = MockHttpServer.getAvailablePort();
-		startServer(port);
+		startServer(port, templateUri);
 
 		// Subscribe for event
 		CometServiceInvoker subscription = CometServiceInvoker.subscribe(port,
-				"/template/comet-subscribe",
+				"/" + gwtServiceRelativePath + "/comet-subscribe",
 				CometRequest.FIRST_REQUEST_SEQUENCE_NUMBER, new CometInterest(
 						MockCometSubscriber.class.getName(), null));
 		assertNull("Should not have a response",
@@ -183,8 +251,8 @@ public class CometHttpTemplateSectionExtensionTest extends OfficeFrameTestCase {
 		// Trigger server to publish an event
 		HttpClient client = new DefaultHttpClient();
 		HttpResponse httpResponse = client.execute(new HttpGet(
-				"http://localhost:" + port
-						+ "/template.links-triggerServerEvent.task"));
+				"http://localhost:" + port + "/" + linkUri
+						+ ".links-triggerServerEvent.task"));
 		assertEquals("Ensure successful", 200, httpResponse.getStatusLine()
 				.getStatusCode());
 		assertTrue("Should have a response entity", httpResponse.getEntity()
@@ -211,11 +279,14 @@ public class CometHttpTemplateSectionExtensionTest extends OfficeFrameTestCase {
 	 * 
 	 * @param port
 	 *            Port server is to listen on.
+	 * @param templateUri
+	 *            Template URI.
 	 * @param propertyNameValuePairs
 	 *            Property name value pairs for the
 	 *            {@link CometHttpTemplateSectionExtension}.
 	 */
-	private static void startServer(int port, String... propertyNameValuePairs) {
+	private static void startServer(int port, String templateUri,
+			String... propertyNameValuePairs) {
 		try {
 
 			// Obtain the path to the template
@@ -227,7 +298,7 @@ public class CometHttpTemplateSectionExtensionTest extends OfficeFrameTestCase {
 			HttpServerAutoWireOfficeFloorSource source = new HttpServerAutoWireOfficeFloorSource(
 					port);
 			HttpTemplateAutoWireSection template = source.addHttpTemplate(
-					templatePath, TemplateLogic.class, "template");
+					templatePath, TemplateLogic.class, templateUri);
 
 			// Extend the template for GWT
 			GwtHttpTemplateSectionExtension.extendTemplate(template, source,
