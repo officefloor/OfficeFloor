@@ -1080,6 +1080,12 @@ public abstract class AbstractJobContainerTest extends OfficeFrameTestCase {
 		 */
 
 		@Override
+		protected void loadJobName(StringBuilder message) {
+			message.append("Mock ");
+			message.append(this.getClass().getSimpleName());
+		}
+
+		@Override
 		protected Object executeJob(JobExecuteContext context,
 				JobContext jobContext, JobNodeActivateSet activateSet)
 				throws Throwable {

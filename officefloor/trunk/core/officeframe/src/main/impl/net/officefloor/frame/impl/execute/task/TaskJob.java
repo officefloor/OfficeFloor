@@ -118,6 +118,17 @@ public class TaskJob<W extends Work, D extends Enum<D>, F extends Enum<F>>
 	 */
 
 	@Override
+	protected void loadJobName(StringBuilder message) {
+		message.append("Task ");
+		message.append(this.nodeMetaData.getTaskName());
+		message.append("(");
+		message.append(this.parameter);
+		message.append(")");
+		message.append(" of Work ");
+		message.append(this.nodeMetaData.getWorkMetaData().getWorkName());
+	}
+
+	@Override
 	protected Object executeJob(JobExecuteContext context,
 			JobContext jobContext, JobNodeActivateSet activateSet)
 			throws Throwable {
