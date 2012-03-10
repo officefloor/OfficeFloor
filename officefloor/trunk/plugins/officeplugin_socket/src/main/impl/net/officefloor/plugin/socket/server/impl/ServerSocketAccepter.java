@@ -146,7 +146,7 @@ public class ServerSocketAccepter<CH extends ConnectionHandler>
 		try {
 			long startTime = System.currentTimeMillis();
 			while ((!this.isUnbound)
-					&& ((System.currentTimeMillis() - startTime) < 10000)) {
+					&& ((System.currentTimeMillis() - startTime) < 20000)) {
 
 				// Process accepting connections
 				if (this.selector != null) {
@@ -173,8 +173,8 @@ public class ServerSocketAccepter<CH extends ConnectionHandler>
 		// Loop accepting connections
 		for (;;) {
 
-			// Wait some time for a connection
-			if (this.selector.select(1000) == 0) {
+			// Wait some time for a connection (10 seconds)
+			if (this.selector.select(10000) == 0) {
 
 				// Determine if complete
 				boolean isComplete = this.isComplete;
