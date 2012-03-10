@@ -17,8 +17,14 @@
  */
 package net.officefloor.tutorial.featureapp;
 
+import java.util.logging.ConsoleHandler;
+import java.util.logging.Handler;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 import junit.framework.TestCase;
 import net.officefloor.autowire.AutoWireManagement;
+import net.officefloor.frame.api.OfficeFrame;
 import net.officefloor.plugin.woof.WoofOfficeFloorSource;
 
 /**
@@ -33,14 +39,36 @@ public class RunFeatureAppTest extends TestCase {
 		// Stop all other offices
 		AutoWireManagement.closeAllOfficeFloors();
 
-		// Start
-		WoofOfficeFloorSource.main();
+		// Determine if waiting
+		boolean isWait = ("wait".equals(System.getProperty("block.test")));
 
-		// Wait to stop
-		if ("wait".equals(System.getProperty("block.test"))) {
-			System.out.print("Press enter to finish");
-			System.out.flush();
-			System.in.read();
+		// Provide logging of jobs
+		Logger logger = Logger.getLogger(OfficeFrame.class.getName());
+		Level logLevel = logger.getLevel();
+		Handler logHandler = new ConsoleHandler();
+		logHandler.setLevel(Level.FINER);
+		try {
+			if (isWait) {
+				logger.setLevel(Level.FINER);
+				logger.addHandler(logHandler);
+			}
+			
+			// Start
+			WoofOfficeFloorSource.main();
+
+			// Wait to stop
+			if (isWait) {
+				System.out.print("Press enter to finish");
+				System.out.flush();
+				System.in.read();
+			}
+
+		} finally {
+			// Reset logging level
+			if (isWait) {
+				logger.setLevel(logLevel);
+				logger.removeHandler(logHandler);
+			}
 		}
 	}
 
