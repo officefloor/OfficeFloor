@@ -236,81 +236,94 @@ public class ServerGwtRpcConnectionManagedObjectSource
 
 		@Override
 		public synchronized void onSuccess(T result) {
-
-			// Ensure can send a response
-			this.ensureCanSendResponse();
-
-			// Ensure appropriate return type
-			if ((this.requiredReturnType != null) && (result != null)) {
-				Class<?> resultType = result.getClass();
-				if (!(this.requiredReturnType.isAssignableFrom(resultType))) {
-					throw new ServerGwtRpcConnectionException(
-							"Return value of type "
-									+ resultType.getName()
-									+ " is not assignable to required return type "
-									+ this.requiredReturnType.getName()
-									+ " for GWT RPC");
-				}
-			}
-
-			// Obtain the request
-			RPCRequest rpc = this.getRpcRequest();
-
-			// Obtain the response payload
-			String payload;
 			try {
-				payload = RPC.encodeResponseForSuccess(rpc.getMethod(), result,
-						rpc.getSerializationPolicy(), rpc.getFlags());
-			} catch (Exception ex) {
-				// Indicate failure encoding response
-				this.onFailure(ex);
-				return;
-			}
 
-			// Send response
-			this.sendResponse(payload);
+				// Ensure can send a response
+				this.ensureCanSendResponse();
+
+				// Ensure appropriate return type
+				if ((this.requiredReturnType != null) && (result != null)) {
+					Class<?> resultType = result.getClass();
+					if (!(this.requiredReturnType.isAssignableFrom(resultType))) {
+						throw new ServerGwtRpcConnectionException(
+								"Return value of type "
+										+ resultType.getName()
+										+ " is not assignable to required return type "
+										+ this.requiredReturnType.getName()
+										+ " for GWT RPC");
+					}
+				}
+
+				// Obtain the request
+				RPCRequest rpc = this.getRpcRequest();
+
+				// Obtain the response payload
+				String payload;
+				try {
+					payload = RPC.encodeResponseForSuccess(rpc.getMethod(),
+							result, rpc.getSerializationPolicy(),
+							rpc.getFlags());
+				} catch (Exception ex) {
+					// Indicate failure encoding response
+					this.onFailure(ex);
+					return;
+				}
+
+				// Send response
+				this.sendResponse(payload);
+
+			} catch (Exception ex) {
+				// Ensure always propagate appropriately (unless serious)
+				throw ServerGwtRpcConnectionException.newException(ex);
+			}
 		}
 
 		@Override
 		public synchronized void onFailure(Throwable caught) {
-
-			// Ensure can send a response
-			this.ensureCanSendResponse();
-
-			// Attempt to obtain RPC request
-			RPCRequest rpc = null;
 			try {
-				rpc = this.getRpcRequest();
-			} catch (Throwable ex) {
-				// send failure without specific RPC request details
-			}
 
-			// Obtain RPC request details
-			SerializationPolicy serializationPolicy;
-			int flags;
-			if (rpc != null) {
-				// Use details from request
-				serializationPolicy = rpc.getSerializationPolicy();
-				flags = rpc.getFlags();
-			} else {
-				// Use default details
-				serializationPolicy = RPC.getDefaultSerializationPolicy();
-				flags = 0;
-			}
+				// Ensure can send a response
+				this.ensureCanSendResponse();
 
-			// Obtain the response payload
-			String payload;
-			try {
-				payload = RPC.encodeResponseForFailure(null, caught,
-						serializationPolicy, flags);
+				// Attempt to obtain RPC request
+				RPCRequest rpc = null;
+				try {
+					rpc = this.getRpcRequest();
+				} catch (Throwable ex) {
+					// send failure without specific RPC request details
+				}
+
+				// Obtain RPC request details
+				SerializationPolicy serializationPolicy;
+				int flags;
+				if (rpc != null) {
+					// Use details from request
+					serializationPolicy = rpc.getSerializationPolicy();
+					flags = rpc.getFlags();
+				} else {
+					// Use default details
+					serializationPolicy = RPC.getDefaultSerializationPolicy();
+					flags = 0;
+				}
+
+				// Obtain the response payload
+				String payload;
+				try {
+					payload = RPC.encodeResponseForFailure(null, caught,
+							serializationPolicy, flags);
+				} catch (Exception ex) {
+					// Indicate failure encoding response
+					this.sendFailure(ex);
+					return;
+				}
+
+				// Send response
+				this.sendResponse(payload);
+
 			} catch (Exception ex) {
-				// Indicate failure encoding response
-				this.sendFailure(ex);
-				return;
+				// Ensure always propagate appropriately (unless serious)
+				throw ServerGwtRpcConnectionException.newException(ex);
 			}
-
-			// Send response
-			this.sendResponse(payload);
 		}
 	}
 
