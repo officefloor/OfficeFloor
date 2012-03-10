@@ -224,7 +224,7 @@ public class ServerGwtRpcConnectionManagedObjectSourceTest extends
 			try {
 				connection.setReturnType(Integer.class);
 				fail("Should not be successful");
-			} catch (IllegalStateException ex) {
+			} catch (ServerGwtRpcConnectionException ex) {
 				assertEquals(
 						"Incorrect exception",
 						"java.lang.Integer can not be set as GWT RPC return type, as it does not specialise already specified return type java.lang.CharSequence",
@@ -238,7 +238,7 @@ public class ServerGwtRpcConnectionManagedObjectSourceTest extends
 			try {
 				callback.onSuccess(new Integer(1));
 				fail("Should not successfully send wrong type");
-			} catch (IllegalStateException ex) {
+			} catch (ServerGwtRpcConnectionException ex) {
 				assertEquals(
 						"Incorrect exception",
 						"Return value of type java.lang.Integer is not assignable to required return type java.lang.String for GWT RPC",
@@ -371,7 +371,7 @@ public class ServerGwtRpcConnectionManagedObjectSourceTest extends
 		try {
 			callback.onSuccess("Should not be able send another success");
 			fail("Should not be successful");
-		} catch (IllegalStateException ex) {
+		} catch (ServerGwtRpcConnectionException ex) {
 			assertEquals("Incorrect another success exception",
 					"GWT RPC response already provided", ex.getMessage());
 		}
@@ -381,7 +381,7 @@ public class ServerGwtRpcConnectionManagedObjectSourceTest extends
 			callback.onFailure(new MockGwtServiceException(
 					"Should not be able send another failure"));
 			fail("Should not be successful");
-		} catch (IllegalStateException ex) {
+		} catch (ServerGwtRpcConnectionException ex) {
 			assertEquals("Incorrect another failure exception",
 					"GWT RPC response already provided", ex.getMessage());
 		}

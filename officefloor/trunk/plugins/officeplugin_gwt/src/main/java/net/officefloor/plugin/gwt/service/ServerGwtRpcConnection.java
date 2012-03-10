@@ -29,8 +29,13 @@ import com.google.gwt.user.server.rpc.RPCRequest;
  * <p>
  * To send the response use the appropriate {@link AsyncCallback} method. This
  * is to enable the injection of an {@link AsyncCallback} as a dependency.
+ * <p>
+ * Should there be a failure sending a response the {@link AsyncCallback}
+ * methods will propagate an {@link ServerGwtRpcConnectionException}.
  * 
  * @author Daniel Sagenschneider
+ * 
+ * @see ServerGwtRpcConnectionException
  */
 public interface ServerGwtRpcConnection<T> extends AsyncCallback<T> {
 
