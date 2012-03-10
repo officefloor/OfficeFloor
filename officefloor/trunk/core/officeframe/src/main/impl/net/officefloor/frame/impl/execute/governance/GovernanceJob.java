@@ -85,6 +85,13 @@ public class GovernanceJob<I, F extends Enum<F>, W extends Work> extends
 	 */
 
 	@Override
+	protected void loadJobName(StringBuilder message) {
+		message.append("Governance ");
+		message.append(this.governanceActivity.getGovernanceMetaData()
+				.getGovernanceName());
+	}
+
+	@Override
 	protected Object executeJob(JobExecuteContext context,
 			JobContext jobContext, JobNodeActivateSet activateSet)
 			throws Throwable {

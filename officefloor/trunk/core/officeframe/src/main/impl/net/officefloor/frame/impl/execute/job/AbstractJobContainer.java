@@ -163,6 +163,14 @@ public abstract class AbstractJobContainer<W extends Work, N extends JobMetaData
 	}
 
 	/**
+	 * Loads the {@link Job} name to the message.
+	 * 
+	 * @param message
+	 *            Message to receive the {@link Job} name.
+	 */
+	protected abstract void loadJobName(StringBuilder message);
+
+	/**
 	 * Overridden by specific container to execute the {@link Job}.
 	 * 
 	 * @param context
@@ -518,6 +526,21 @@ public abstract class AbstractJobContainer<W extends Work, N extends JobMetaData
 							// Flag complete by default and not waiting
 							this.isComplete = true;
 
+							// Log execution of the Job
+							if (LOGGER.isLoggable(Level.FINER)) {
+								StringBuilder msg = new StringBuilder();
+								msg.append("Executing job ");
+								this.loadJobName(msg);
+								msg.append(" (thread=");
+								msg.append(threadState);
+								msg.append(" process=");
+								msg.append(processState);
+								msg.append(", team=");
+								msg.append(Thread.currentThread().getName());
+								msg.append(")");
+								LOGGER.log(Level.FINER, msg.toString());
+							}
+
 							try {
 								// Execute the job
 								this.nextJobParameter = this.executeJob(this,
@@ -636,6 +659,21 @@ public abstract class AbstractJobContainer<W extends Work, N extends JobMetaData
 					} catch (Throwable ex) {
 						// Flag for escalation
 						escalationCause = ex;
+
+						// Log execution of the Job
+						if (LOGGER.isLoggable(Level.FINE)) {
+							StringBuilder msg = new StringBuilder();
+							msg.append("EXCEPTION from job ");
+							this.loadJobName(msg);
+							msg.append(" (thread=");
+							msg.append(threadState);
+							msg.append(" process=");
+							msg.append(processState);
+							msg.append(", team=");
+							msg.append(Thread.currentThread().getName());
+							msg.append(")");
+							LOGGER.log(Level.FINE, msg.toString(), ex);
+						}
 					}
 
 					// Job failure

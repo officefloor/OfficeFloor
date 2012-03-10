@@ -85,6 +85,11 @@ public class DutyJob<W extends Work, I, A extends Enum<A>> extends
 	 */
 
 	@Override
+	protected void loadJobName(StringBuilder message) {
+		message.append("Duty");
+	}
+
+	@Override
 	protected Object executeJob(JobExecuteContext context,
 			JobContext jobContext, JobNodeActivateSet activateSet)
 			throws Throwable {
