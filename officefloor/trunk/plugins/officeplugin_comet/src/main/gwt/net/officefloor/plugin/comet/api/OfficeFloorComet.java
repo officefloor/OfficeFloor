@@ -86,6 +86,11 @@ public class OfficeFloorComet {
 	private static List<CometSubscription> subscriptions = new LinkedList<CometSubscription>();
 
 	/**
+	 * Indicates if first subscription.
+	 */
+	private static boolean isFirstSubscription = true;
+
+	/**
 	 * Indicates if subscribed.
 	 */
 	private static boolean isSubscribed = false;
@@ -146,12 +151,46 @@ public class OfficeFloorComet {
 	 * Undertakes subscribing for {@link CometEvent} instances.
 	 */
 	public static void subscribe() {
+		subscribe(false);
+	}
+
+	/**
+	 * <p>
+	 * Undertakes subscribing for {@link CometEvent} instances.
+	 * <p>
+	 * Initiation of subscription will typically occur within the
+	 * <code>onModuleLoad</code>, which in some browsers keeps page load status
+	 * going until all AJAX call chains are complete. To get around this the
+	 * first subscribe occurs within a {@link Timer} to allow the
+	 * <code>onModuleLoad</code> to complete.
+	 * 
+	 * @param isDetachedSubscribe
+	 *            Indicates if detached subscribe.
+	 */
+	private static void subscribe(boolean isDetachedSubscribe) {
+		
+		// Determine if first subscription
+		if (isFirstSubscription) {
+			if (isDetachedSubscribe) {
+				// Will no longer be first subscription
+				isFirstSubscription = false;
+			} else {
+				// Detach subscribe to allow onModuleLoad to complete
+				new Timer() {
+					@Override
+					public void run() {
+						OfficeFloorComet.subscribe(true);
+					}
+				}.schedule(1000);
+				return; // detached will subscribe
+			}
+		}
 
 		// Do not subscribe if already subscribed
 		if (isSubscribed) {
 			return; // already subscribed
 		}
-		isSubscribed = true; // subscribing
+		isSubscribed = true;
 
 		// Create the list of interests
 		List<CometInterest> interests = new ArrayList<CometInterest>(
