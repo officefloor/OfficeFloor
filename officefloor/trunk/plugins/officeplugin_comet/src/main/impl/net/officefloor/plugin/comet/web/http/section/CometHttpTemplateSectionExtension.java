@@ -40,6 +40,7 @@ import net.officefloor.plugin.comet.section.CometSectionSource;
 import net.officefloor.plugin.comet.spi.CometService;
 import net.officefloor.plugin.comet.spi.CometServiceManagedObjectSource;
 import net.officefloor.plugin.gwt.service.ServerGwtRpcConnection;
+import net.officefloor.plugin.gwt.web.http.section.GwtHttpTemplateSectionExtension;
 import net.officefloor.plugin.section.clazz.ClassSectionSource;
 import net.officefloor.plugin.section.clazz.NextTask;
 import net.officefloor.plugin.section.clazz.Parameter;
@@ -161,18 +162,22 @@ public class CometHttpTemplateSectionExtension implements
 					+ " must have a URI as being extended by Comet services");
 		}
 
+		// Obtain the GWT module name
+		String gwtModuleName = GwtHttpTemplateSectionExtension
+				.getGwtModuleName(templateUri);
+
 		// Determine if manually publishing
 		String manualPublishMethodName = properties.getProperty(
 				PROPERTY_MANUAL_PUBLISH_METHOD_NAME, null);
 		if (manualPublishMethodName != null) {
 
 			// Manually handle publishing, strip template URI to flow name
-			String flowName = templateUri.replace("/", "");
+			String flowName = gwtModuleName.replace("/", "");
 
 			// Configure work for manualling handling publish
 			String propertyName = CometSectionSource.PROPERTY_MANUAL_PUBLISH_URI_PREFIX
 					+ flowName;
-			section.addProperty(propertyName, templateUri);
+			section.addProperty(propertyName, gwtModuleName);
 
 			// Link manual publish handling to template logic method
 			String outputFlowName = CometSectionSource.PUBLISH_OUTPUT_PREFIX
@@ -182,9 +187,9 @@ public class CometHttpTemplateSectionExtension implements
 		}
 
 		// Configure the Comet handling for the template
-		application.linkUri(templateUri + "/comet-subscribe", section,
+		application.linkUri(gwtModuleName + "/comet-subscribe", section,
 				CometSectionSource.SUBSCRIBE_INPUT_NAME);
-		application.linkUri(templateUri + "/comet-publish", section,
+		application.linkUri(gwtModuleName + "/comet-publish", section,
 				CometSectionSource.PUBLISH_INPUT_NAME);
 
 		// Provide any CometPublisherInterface proxies as necessary
