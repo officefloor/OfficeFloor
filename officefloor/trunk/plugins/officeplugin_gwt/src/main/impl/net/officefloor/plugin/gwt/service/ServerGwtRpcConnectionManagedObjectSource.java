@@ -109,7 +109,7 @@ public class ServerGwtRpcConnectionManagedObjectSource
 		private void ensureCanSendResponse() {
 			// Ensure response not already sent
 			if (this.isResponseSent) {
-				throw new IllegalStateException(
+				throw new ServerGwtRpcConnectionException(
 						"GWT RPC response already provided");
 			}
 		}
@@ -154,7 +154,7 @@ public class ServerGwtRpcConnectionManagedObjectSource
 					HttpStatus.SC_INTERNAL_SERVER_ERROR);
 
 			// Best attempts on sending failure, now notify of failure
-			throw new IllegalStateException("Failed GWT RPC servicing", cause);
+			throw ServerGwtRpcConnectionException.newException(cause);
 		}
 
 		/*
@@ -186,7 +186,7 @@ public class ServerGwtRpcConnectionManagedObjectSource
 				// Ensure only specialising the required return type
 				if (!(this.requiredReturnType.isAssignableFrom(returnType))) {
 					// Not specialising
-					throw new IllegalStateException(
+					throw new ServerGwtRpcConnectionException(
 							returnType.getName()
 									+ " can not be set as GWT RPC return type, as it does not specialise already specified return type "
 									+ this.requiredReturnType.getName());
@@ -244,11 +244,12 @@ public class ServerGwtRpcConnectionManagedObjectSource
 			if ((this.requiredReturnType != null) && (result != null)) {
 				Class<?> resultType = result.getClass();
 				if (!(this.requiredReturnType.isAssignableFrom(resultType))) {
-					throw new IllegalStateException("Return value of type "
-							+ resultType.getName()
-							+ " is not assignable to required return type "
-							+ this.requiredReturnType.getName()
-							+ " for GWT RPC");
+					throw new ServerGwtRpcConnectionException(
+							"Return value of type "
+									+ resultType.getName()
+									+ " is not assignable to required return type "
+									+ this.requiredReturnType.getName()
+									+ " for GWT RPC");
 				}
 			}
 

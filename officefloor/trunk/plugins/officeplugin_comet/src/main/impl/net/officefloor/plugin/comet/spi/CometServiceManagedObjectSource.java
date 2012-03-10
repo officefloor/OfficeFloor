@@ -23,6 +23,8 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.api.execute.Task;
@@ -41,6 +43,7 @@ import net.officefloor.plugin.comet.internal.CometRequest;
 import net.officefloor.plugin.comet.internal.CometResponse;
 import net.officefloor.plugin.comet.spi.CometServiceManagedObject.Dependencies;
 import net.officefloor.plugin.gwt.service.ServerGwtRpcConnection;
+import net.officefloor.plugin.gwt.service.ServerGwtRpcConnectionException;
 
 import com.google.gwt.user.server.rpc.RPCRequest;
 
@@ -52,6 +55,12 @@ import com.google.gwt.user.server.rpc.RPCRequest;
 public class CometServiceManagedObjectSource
 		extends
 		AbstractManagedObjectSource<Dependencies, CometServiceManagedObjectSource.Flows> {
+
+	/**
+	 * {@link Logger}.
+	 */
+	private static final Logger LOGGER = Logger
+			.getLogger(CometServiceManagedObjectSource.class.getName());
 
 	/**
 	 * Flow keys.
@@ -562,8 +571,20 @@ public class CometServiceManagedObjectSource
 		 */
 		public void sendResponse(CometEvent[] events) {
 			try {
+				// Send response
 				this.connection.onSuccess(new CometResponse(events));
+
+			} catch (ServerGwtRpcConnectionException ex) {
+				// Likely that connection closed
+				if (LOGGER.isLoggable(Level.FINE)) {
+					StringBuilder msg = new StringBuilder();
+					msg.append("Failed sending Events for ");
+					msg.append(this.connection.getHttpRequest().getRequestURI());
+					LOGGER.log(Level.FINE, msg.toString(), ex);
+				}
+
 			} finally {
+				// Allow subscriber to complete
 				this.asynchronousListener.notifyComplete();
 			}
 		}
