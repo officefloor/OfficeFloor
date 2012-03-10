@@ -18,17 +18,25 @@
 
 package net.officefloor.plugin.comet.spi;
 
+import org.easymock.internal.AlwaysMatcher;
+
 import net.officefloor.compile.test.managedobject.ManagedObjectLoaderUtil;
 import net.officefloor.compile.test.managedobject.ManagedObjectTypeBuilder;
 import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.execute.TaskContext;
+import net.officefloor.frame.spi.managedobject.AsynchronousListener;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.frame.util.ManagedObjectSourceStandAlone;
 import net.officefloor.frame.util.ManagedObjectUserStandAlone;
+import net.officefloor.plugin.comet.client.MockCometListener;
+import net.officefloor.plugin.comet.internal.CometInterest;
+import net.officefloor.plugin.comet.internal.CometRequest;
+import net.officefloor.plugin.comet.internal.CometResponse;
 import net.officefloor.plugin.comet.spi.CometServiceManagedObject.Dependencies;
 import net.officefloor.plugin.comet.spi.CometServiceManagedObjectSource.Flows;
 import net.officefloor.plugin.gwt.service.ServerGwtRpcConnection;
+import net.officefloor.plugin.gwt.service.ServerGwtRpcConnectionException;
 
 /**
  * Tests the {@link CometServiceManagedObjectSource}.
@@ -94,6 +102,52 @@ public class CometServiceManagedObjectSourceTest extends OfficeFrameTestCase {
 		// Obtain the object
 		Object object = mo.getObject();
 		assertTrue("Incorrect object type", object instanceof CometService);
+
+		// Verify
+		this.verifyMockObjects();
+	}
+
+	/**
+	 * Ensure publishing an event is not affected by a subscriber connection.
+	 */
+	@SuppressWarnings({ "rawtypes", "unchecked" })
+	public void testSubscriptionConnectionFailureIsolatedFromPublish()
+			throws Throwable {
+
+		final Task task = this.createMock(Task.class);
+		final TaskContext taskContext = this.createMock(TaskContext.class);
+		final ServerGwtRpcConnection<CometResponse> subscription = this
+				.createMock(ServerGwtRpcConnection.class);
+		final AsynchronousListener listener = this
+				.createMock(AsynchronousListener.class);
+
+		// Record sourcing
+		this.recordReturn(task, task.doTask(taskContext), null);
+
+		// Record subscriber waiting and failing on event
+		listener.notifyStarted();
+		subscription.onSuccess(null);
+		this.control(subscription).setMatcher(new AlwaysMatcher());
+		this.control(subscription).setThrowable(
+				new ServerGwtRpcConnectionException("Connection failed"));
+		listener.notifyComplete();
+
+		// Test
+		this.replayMockObjects();
+
+		// Load the source
+		ManagedObjectSourceStandAlone loader = new ManagedObjectSourceStandAlone();
+		loader.registerInvokeProcessTask(Flows.EXPIRE, task, taskContext);
+		CometServiceManagedObjectSource source = loader
+				.loadManagedObjectSource(CometServiceManagedObjectSource.class);
+
+		// Add subscriber
+		source.receiveOrWaitOnEvents(new CometInterest[] { new CometInterest(
+				MockCometListener.class.getName(), null) }, subscription,
+				listener, CometRequest.FIRST_REQUEST_SEQUENCE_NUMBER);
+
+		// Publish ensuring connection isolated from subscriber failure
+		source.publishEvent(1, MockCometListener.class.getName(), "TEST", null);
 
 		// Verify
 		this.verifyMockObjects();
