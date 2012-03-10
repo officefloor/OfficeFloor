@@ -169,6 +169,7 @@ public class FeatureAppEntryPoint implements EntryPoint {
 				}
 			});
 			userDialog.center();
+			nameText.setFocus(true);
 			return; // message sent on ok
 		}
 
