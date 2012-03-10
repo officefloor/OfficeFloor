@@ -12,7 +12,7 @@
 
 	<servlet>
 		<servlet-name>Mock</servlet-name>
-		<servlet-class>net.officefloor.tutorial.servletfilterwebapplication.MockHttpServlet</servlet-class>
+		<servlet-class>net.officefloor.tutorial.featureapp.MockHttpServlet</servlet-class>
 	</servlet>
 	<servlet-mapping>
 		<servlet-name>Mock</servlet-name>

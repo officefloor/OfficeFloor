@@ -15,35 +15,18 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.tutorial.featureapp;
 
-import net.officefloor.plugin.section.clazz.NextTask;
+package net.officefloor.tutorial.featureapp.client;
+
+import net.officefloor.plugin.comet.api.CometSubscriber;
 
 /**
- * Logic for <code>results.html</code>.
+ * {@link CometSubscriber} for a conversation.
  * 
  * @author Daniel Sagenschneider
  */
-public class ResultsLogic {
+public interface ConversationSubscription extends CometSubscriber {
 
-	public Result[] getResults(UserAnswers answers, Quiz quiz) {
-
-		Question[] questions = quiz.getQuestions();
-		Result[] results = new Result[questions.length];
-		for (int i = 0; i < questions.length; i++) {
-			String text;
-			if (answers.getAnswers()[i] == questions[i].getCorrectAnswer()) {
-				text = "Correct";
-			} else {
-				text = "Incorrect. " + questions[i].getExplanation();
-			}
-			results[i] = new Result(questions[i].getQuestionIndex() + 1, text);
-		}
-		return results;
-	}
-
-	@NextTask("main")
-	public void home() {
-	}
+	void sendMessage(ChatMessage message);
 
 }

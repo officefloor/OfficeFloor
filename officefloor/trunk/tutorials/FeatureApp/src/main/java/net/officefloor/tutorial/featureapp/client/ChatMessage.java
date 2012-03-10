@@ -15,35 +15,35 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.tutorial.featureapp;
+package net.officefloor.tutorial.featureapp.client;
 
-import net.officefloor.plugin.section.clazz.NextTask;
+import com.google.gwt.user.client.rpc.IsSerializable;
 
 /**
- * Logic for <code>results.html</code>.
+ * Chat message.
  * 
  * @author Daniel Sagenschneider
  */
-public class ResultsLogic {
+public class ChatMessage implements IsSerializable {
 
-	public Result[] getResults(UserAnswers answers, Quiz quiz) {
+	private String userName;
 
-		Question[] questions = quiz.getQuestions();
-		Result[] results = new Result[questions.length];
-		for (int i = 0; i < questions.length; i++) {
-			String text;
-			if (answers.getAnswers()[i] == questions[i].getCorrectAnswer()) {
-				text = "Correct";
-			} else {
-				text = "Incorrect. " + questions[i].getExplanation();
-			}
-			results[i] = new Result(questions[i].getQuestionIndex() + 1, text);
-		}
-		return results;
+	private String message;
+
+	public ChatMessage() {
 	}
 
-	@NextTask("main")
-	public void home() {
+	public ChatMessage(String userName, String message) {
+		this.userName = userName;
+		this.message = message;
+	}
+
+	public String getUserName() {
+		return this.userName;
+	}
+
+	public String getMessage() {
+		return this.message;
 	}
 
 }
