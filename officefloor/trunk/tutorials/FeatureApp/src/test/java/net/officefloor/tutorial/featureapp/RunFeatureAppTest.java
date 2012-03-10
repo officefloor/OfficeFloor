@@ -17,33 +17,37 @@
  */
 package net.officefloor.tutorial.featureapp;
 
-import net.officefloor.plugin.section.clazz.NextTask;
+import junit.framework.TestCase;
+import net.officefloor.autowire.AutoWireManagement;
+import net.officefloor.plugin.woof.WoofOfficeFloorSource;
 
 /**
- * Logic for <code>results.html</code>.
+ * Test to run within Eclipse IDE.
  * 
  * @author Daniel Sagenschneider
  */
-public class ResultsLogic {
+public class RunFeatureAppTest extends TestCase {
 
-	public Result[] getResults(UserAnswers answers, Quiz quiz) {
+	public void testRun() throws Exception {
 
-		Question[] questions = quiz.getQuestions();
-		Result[] results = new Result[questions.length];
-		for (int i = 0; i < questions.length; i++) {
-			String text;
-			if (answers.getAnswers()[i] == questions[i].getCorrectAnswer()) {
-				text = "Correct";
-			} else {
-				text = "Incorrect. " + questions[i].getExplanation();
-			}
-			results[i] = new Result(questions[i].getQuestionIndex() + 1, text);
+		// Stop all other offices
+		AutoWireManagement.closeAllOfficeFloors();
+
+		// Start
+		WoofOfficeFloorSource.main();
+
+		// Wait to stop
+		if ("wait".equals(System.getProperty("block.test"))) {
+			System.out.print("Press enter to finish");
+			System.out.flush();
+			System.in.read();
 		}
-		return results;
 	}
 
-	@NextTask("main")
-	public void home() {
+	@Override
+	protected void tearDown() throws Exception {
+		// Stop the office
+		AutoWireManagement.closeAllOfficeFloors();
 	}
 
 }
