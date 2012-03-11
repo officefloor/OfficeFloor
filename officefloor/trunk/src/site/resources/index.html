@@ -51,6 +51,10 @@ body {
 	font-family: verdana,helvetica,arial,sans-serif;
 }
 
+a {
+	text-decoration: none;
+}
+
 
 .information {
 	list-style: none outside none;
@@ -104,7 +108,12 @@ body {
 }
 #overview .info {
 	background-color: #E5E5E5;
-	width: 40%;
+	width: 35%;
+	height: 27em;
+	padding: 1em;
+}
+#overview img {
+	width: 100%;
 }
 
 
@@ -119,6 +128,12 @@ body {
 	width: 100%;
 	height: 20em;
 }
+#examples h2 {
+	color: #505050;
+	font-size: 1.3em;
+	font-weight: normal;
+}
+
 
 #steps {
 	background-color: #00B3FF;
@@ -134,9 +149,15 @@ body {
 	width: 22%;
 	height: 55em;
 }
+#steps h2 {
+	color: #505050;
+	font-size: 1.3em;
+	font-weight: normal;
+}
 #steps img {
 	width: 100%;
 }
+
 
 #footer {
 	margin: 0;
@@ -162,7 +183,7 @@ body {
 <body>
 
 <div id="introduction">
-		<img id="logo" src="http://officefloor.net/images/OfficeFloorBannerImage.png" />
+		<img src="http://officefloor.net/images/OfficeFloorBannerImage.png" />
 
 		<p>OfficeFloor is a true inversion of control container making it a simple yet very powerful framework for building Java web applications that is a build once run anywhere solution - even with Cloud Computing.</p>
 
@@ -179,7 +200,9 @@ body {
 <div id="overview">
 	<ul class="information">
 	<li class="info">
-		<p>The run anywhere flexibility is a unique aspect of the OfficeFloor framework due to its inversion of control fundamentals of:</p>
+		<img src="http://officefloor.net/images/OfficeFloorBannerImage.png" />
+
+		<p>The run anywhere flexibility is unique to OfficeFloor due to its inversion of control fundamentals of:</p>
   
 		<ul>
 			<li><b>context</b></li>
@@ -188,16 +211,20 @@ body {
 			<li><b>function orchestration</b></li>
 		</ul>
 
-		<p>Further focus on intuitive graphical configuration (right) makes applications built with OfficeFloor self documenting - which works great with both Agile and Support.</p>
-
 		<p>OfficeFloor is freely distributed under GPL (LGPL also available on request) and the source is available <a href="./source-repository.html">here</a>.</p>
+	</li>
+	
+	<li class="info">
+		<img src="./images/landing_application_woof.png" alt="Example OfficeFloor Graphical Configuration" />
+		
+		<p>The intuitive graphical configuration makes OfficeFloor applications self documenting - which works great with both Agile and Support.</p>
 	</li>
 	</ul>
 </div>
 
 
 <div id="examples">
-	<p>Same OfficeFloor application running on Cloud Computing providers</p>
+	<h2>Example of an OfficeFloor <a href="./tutorials/FeatureApp/index.html">application</a> running on various Cloud Computing providers</h2>
 	<br />
 	
 	<ul class="information">
@@ -218,7 +245,7 @@ body {
 
 
 <div id="steps">
-	<p>Four steps to build an OfficeFloor web application</p>
+	<h2>Four steps to build an OfficeFloor web application</h2>
 	<br />
 
 	<ul class="information">
