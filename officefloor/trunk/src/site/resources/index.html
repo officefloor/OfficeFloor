@@ -55,7 +55,7 @@ a {
 	margin: 0 auto;
 	width: 100%;
 }
-.information:after {
+.informationClear:after {
 	clear: both;
 	content: ".";
 	display: block;
@@ -96,13 +96,14 @@ a {
 }
 
 #overview {
+	width: 100%;
 	background-color: #00B3FF;
 	font-size: medium;
-	padding: 3em 0em 2em 10%;
+	padding: 3em 0em 2em 15%;
 }
 #overview .info {
 	background-color: #E5E5E5;
-	width: 35%;
+	width: 30%;
 	height: 27em;
 	padding: 1em;
 }
@@ -130,6 +131,7 @@ a {
 
 
 #steps {
+	width: 100%;
 	background-color: #00B3FF;
 	padding: 2em 0em 2em 0em;
 	margin: 0;
@@ -202,7 +204,7 @@ a {
 </div>
 
 
-<div id="overview">
+<div id="overview" class="informationClear">
 	<ul class="information">
 	<li class="info">
 		<img src="http://officefloor.net/images/OfficeFloorBannerImage.png" />
@@ -228,7 +230,7 @@ a {
 </div>
 
 
-<div id="examples">
+<div id="examples" class="informationClear">
 	<h2>Example of an OfficeFloor <a href="./tutorials/FeatureApp/index.html">application</a> running on various Cloud Computing providers</h2>
 	<br />
 	
@@ -249,7 +251,7 @@ a {
 </div>
 
 
-<div id="steps">
+<div id="steps" class="informationClear">
 	<h2>Four steps to build an OfficeFloor web application</h2>
 	<br />
 
@@ -324,9 +326,9 @@ a {
 </div>
 
 
-<div id="footer">
+<div id="footer" class="informationClear">
 
-	<ul class="information">
+	<ul class="information informationClear">
 	<li class="info">
 		<a href="./download.html">Download</a>
 		<p>OfficeFloor is available as a download or maven plug-ins</p>
