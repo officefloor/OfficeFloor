@@ -188,9 +188,9 @@ a {
 	</style>
 	<script type="text/javascript">
 window.onload = function() {
-	var a = document.getElementById("downloadLink");
-	a.onclick = function() {
-		window.open("http://sourceforge.net/projects/officefloor/files/latest/download", "_blank", "width=960,height=150");
+	var downloadLink = document.getElementById("downloadLink");
+	downloadLink.onclick = function() {
+		var downloadWindow = window.open("http://sourceforge.net/projects/officefloor/files/latest/download", "_blank", "width=960,height=150");
 		return true;
 	}
 }
