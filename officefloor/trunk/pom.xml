@@ -67,6 +67,7 @@
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<officefloor.skin.version>${project.version}</officefloor.skin.version>
+		<projectVersion>${project.version}</projectVersion>
 		<tycho-version>0.10.0</tycho-version>
 		<maven-version>3.0.1</maven-version>
 		<aether-version>1.8</aether-version>
