@@ -184,15 +184,11 @@ a {
 	padding: 0em 1em 0em 1em;
 	vertical-align: middle;
 }
-
 	</style>
 	<script type="text/javascript">
-window.onload = function() {
-	var downloadLink = document.getElementById("downloadLink");
-	downloadLink.onclick = function() {
-		var downloadWindow = window.open("http://sourceforge.net/projects/officefloor/files/latest/download", "_blank", "width=960,height=150");
-		return true;
-	}
+function openDownloadLinks() {
+	window.open('http://sourceforge.net/projects/officefloor/files/latest/download', '_blank', 'width=960,height=150'); 
+	return true;
 }
 	</script>
 </head>
@@ -204,7 +200,7 @@ window.onload = function() {
 		<p>OfficeFloor is a true inversion of control container making it a simple yet very powerful framework for building Java web applications that is a build once run anywhere solution - even with Cloud Computing.</p>
 
 		<p class="linkButtons">
-			<a id="downloadLink" class="linkButton" href="./download.html">Download</a>
+			<a class="linkButton" href="./download.html" onclick="openDownloadLinks()">Download</a>
 			<a class="linkButton" href="./eclipse/index.html">Eclipse Plug-in</a>
 			<a class="linkButton" href="./tutorials/index.html">Tutorials</a>
 		</p>
