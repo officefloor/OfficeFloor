@@ -34,8 +34,6 @@ import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.rmi.server.RMIClientSocketFactory;
 import java.rmi.server.RMIServerSocketFactory;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -65,6 +63,9 @@ import net.officefloor.building.command.OfficeFloorCommand;
 import net.officefloor.building.command.OfficeFloorCommandParser;
 import net.officefloor.building.command.OfficeFloorCommandParserImpl;
 import net.officefloor.building.command.officefloor.OfficeBuildingOpenOfficeFloorCommand;
+import net.officefloor.building.decorate.OfficeFloorDecorator;
+import net.officefloor.building.decorate.OfficeFloorDecoratorServiceLoader;
+import net.officefloor.building.execute.OfficeFloorCommandContextImpl;
 import net.officefloor.building.process.ProcessCompletionListener;
 import net.officefloor.building.process.ProcessConfiguration;
 import net.officefloor.building.process.ProcessException;
@@ -311,7 +312,7 @@ public class OfficeBuildingManager implements OfficeBuildingManagerMBean {
 		}
 		if (officeBuildingRemote != null) {
 			// Return the already running Office Building Manager
-			return getOfficeBuildingManager(null, port, keyStore,
+			return getOfficeBuildingManager(hostName, port, keyStore,
 					keyStorePassword, userName, password);
 		}
 
@@ -332,7 +333,8 @@ public class OfficeBuildingManager implements OfficeBuildingManagerMBean {
 		serverEnv.put(PROPERTY_RMI_CLIENT_SOCKET_FACTORY, clientSocketFactory);
 
 		// Start the JMX connector server (on local host)
-		JMXServiceURL serviceUrl = getOfficeBuildingJmxServiceUrl(null, port);
+		JMXServiceURL serviceUrl = getOfficeBuildingJmxServiceUrl(hostName,
+				port);
 		JMXConnectorServer connectorServer = JMXConnectorServerFactory
 				.newJMXConnectorServer(serviceUrl, serverEnv, mbeanServer);
 		connectorServer.start();
@@ -444,6 +446,16 @@ public class OfficeBuildingManager implements OfficeBuildingManagerMBean {
 		if (configuration == null) {
 			configuration = new ProcessConfiguration();
 		}
+
+		// Add key and trust store (as must connect to self)
+		configuration.addJvmOption("-Djavax.net.ssl.keyStore="
+				+ keyStore.getAbsolutePath());
+		configuration.addJvmOption("-Djavax.net.ssl.keyStorePassword="
+				+ password);
+		configuration.addJvmOption("-Djavax.net.ssl.trustStore="
+				+ keyStore.getAbsolutePath());
+		configuration.addJvmOption("-Djavax.net.ssl.trustStorePassword="
+				+ password);
 
 		// Spawn the OfficeBuilding
 		ProcessManager manager = ProcessManager.startProcess(managedProcess,
@@ -960,8 +972,14 @@ public class OfficeBuildingManager implements OfficeBuildingManagerMBean {
 							remoteRepositoryUrl);
 				}
 
-				// Create the class path
-				List<String> classPathEntries = new ArrayList<String>();
+				// Obtain the decorators
+				OfficeFloorDecorator[] decorators = OfficeFloorDecoratorServiceLoader
+						.loadOfficeFloorDecorators(Thread.currentThread()
+								.getContextClassLoader());
+
+				// Create the context for building class path
+				OfficeFloorCommandContextImpl commandContext = new OfficeFloorCommandContextImpl(
+						classPathFactory, processWorkspace, decorators);
 
 				// Make the uploaded artifacts available on the class path
 				for (UploadArtifact artifact : configuration
@@ -976,28 +994,19 @@ public class OfficeBuildingManager implements OfficeBuildingManagerMBean {
 					output.close();
 
 					// Add the uploaded artifact to the class path
-					String[] artifactClassPathEntries = classPathFactory
-							.createArtifactClassPath(artifactFile
-									.getAbsolutePath());
-					classPathEntries.addAll(Arrays
-							.asList(artifactClassPathEntries));
+					commandContext.includeClassPathArtifact(artifactFile
+							.getAbsolutePath());
 				}
 
 				// Make the reference artifacts available on the class path
 				for (ArtifactReference reference : configuration
 						.getArtifactReferences()) {
 
-					// Obtain the class path for the artifacts
-					String[] artifactClassPathEntries = classPathFactory
-							.createArtifactClassPath(reference.getGroupId(),
-									reference.getArtifactId(),
-									reference.getVersion(),
-									reference.getType(),
-									reference.getClassifier());
-
 					// Add the referenced artifacts to the class path
-					classPathEntries.addAll(Arrays
-							.asList(artifactClassPathEntries));
+					commandContext.includeClassPathArtifact(
+							reference.getGroupId(), reference.getArtifactId(),
+							reference.getVersion(), reference.getType(),
+							reference.getClassifier());
 				}
 
 				// Make the class path entries available on the class path
@@ -1013,29 +1022,17 @@ public class OfficeBuildingManager implements OfficeBuildingManagerMBean {
 					}
 
 					// Include the class path entries
-					classPathEntries.addAll(Arrays
-							.asList(configuredClassPathEntries));
-				}
-
-				// Create the class path argument
-				StringBuilder classPath = new StringBuilder();
-				boolean isFirst = true;
-				for (String classPathEntry : classPathEntries) {
-
-					// Provide separator of class path
-					if (!isFirst) {
-						classPath.append(File.pathSeparator);
+					for (String configuredClassPathEntry : configuredClassPathEntries) {
+						commandContext
+								.includeClassPathArtifact(configuredClassPathEntry);
 					}
-					isFirst = false;
-
-					// Add the class path entry
-					classPath.append(classPathEntry);
 				}
 
 				// Configure the process for the OfficeFloor
 				ProcessConfiguration processConfig = new ProcessConfiguration();
 				processConfig.setProcessName(processName);
-				processConfig.setAdditionalClassPath(classPath.toString());
+				processConfig.setAdditionalClassPath(commandContext
+						.getCommandClassPath());
 				processConfig.setMbeanServer(this.mbeanServer);
 
 				// Add the JVM options

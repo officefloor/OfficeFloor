@@ -19,6 +19,7 @@
 package net.officefloor.building.execute;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -31,6 +32,7 @@ import net.officefloor.building.command.OfficeFloorCommandContext;
 import net.officefloor.building.command.OfficeFloorCommandParameter;
 import net.officefloor.building.decorate.OfficeFloorDecorator;
 import net.officefloor.building.decorate.OfficeFloorDecoratorContext;
+import net.officefloor.frame.api.manage.OfficeFloor;
 
 /**
  * {@link OfficeFloorCommandContext} implementation.
@@ -48,6 +50,11 @@ public class OfficeFloorCommandContextImpl implements OfficeFloorCommandContext 
 	 * {@link OfficeFloorDecorator} instances.
 	 */
 	private final OfficeFloorDecorator[] decorators;
+
+	/**
+	 * Workspace for the {@link OfficeFloor}.
+	 */
+	private final File workspace;
 
 	/**
 	 * Listing of class path entries in order for the realised class path.
@@ -74,12 +81,15 @@ public class OfficeFloorCommandContextImpl implements OfficeFloorCommandContext 
 	 * 
 	 * @param classPathFactory
 	 *            {@link ClassPathFactory}.
+	 * @param workspace
+	 *            Workspace for the {@link OfficeFloor}.
 	 * @param decorators
 	 *            {@link OfficeFloorDecorator} instances.
 	 */
 	public OfficeFloorCommandContextImpl(ClassPathFactory classPathFactory,
-			OfficeFloorDecorator[] decorators) {
+			File workspace, OfficeFloorDecorator[] decorators) {
 		this.classPathFactory = classPathFactory;
+		this.workspace = workspace;
 		this.decorators = decorators;
 	}
 
@@ -257,6 +267,22 @@ public class OfficeFloorCommandContextImpl implements OfficeFloorCommandContext 
 		@Override
 		public String getRawClassPathEntry() {
 			return this.rawClassPathEntry;
+		}
+
+		@Override
+		public File createWorkspaceFile(String identifier, String extension) {
+			try {
+				// Create and return the temporary file
+				return File.createTempFile(identifier, "." + extension,
+						OfficeFloorCommandContextImpl.this.workspace);
+
+			} catch (IOException ex) {
+				// Propagate failure
+				throw new RuntimeException(
+						"Failed to create workspace file for decoration (identifier="
+								+ identifier + ", extension=" + extension + ")",
+						ex);
+			}
 		}
 
 		@Override

@@ -18,6 +18,7 @@
 
 package net.officefloor.building.execute;
 
+import java.io.File;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.LinkedList;
@@ -83,9 +84,12 @@ public class OfficeFloorExecutionUnitFactoryImpl implements
 			OfficeFloorCommand command)
 			throws OfficeFloorExecutionUnitCreateException {
 
+		// TODO obtain OfficeFloor workspace
+		File workspace = null;
+
 		// Create the command context
 		OfficeFloorCommandContextImpl context = new OfficeFloorCommandContextImpl(
-				this.classPathFactory, this.decorators);
+				this.classPathFactory, workspace, this.decorators);
 
 		// Initialise the environment
 		try {

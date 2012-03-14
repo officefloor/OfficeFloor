@@ -50,6 +50,11 @@ public interface WebAutoWireApplication extends AutoWireApplication {
 	static String HANDLER_INPUT_NAME = "HANDLE_HTTP_INPUT";
 
 	/**
+	 * Prefix to append to web resources to locate them on the class path.
+	 */
+	static final String WEB_PUBLIC_RESOURCES_CLASS_PATH_PREFIX = "PUBLIC";
+
+	/**
 	 * Adds a {@link HttpTemplate} available at the specified URI.
 	 * 
 	 * @param templatePath

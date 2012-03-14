@@ -55,9 +55,22 @@ public class HttpServerAutoWireOfficeFloorSource extends
 		HttpServerAutoWireApplication {
 
 	/**
+	 * <p>
+	 * Property to configure the default HTTP port.
+	 * <p>
+	 * This property will be ignored if HTTP Sockets are added.
+	 */
+	public static final String PROPERTY_HTTP_PORT = "http.port";
+
+	/**
 	 * Default HTTP port to listen for connections.
 	 */
 	public static final int DEFAULT_HTTP_PORT = 7878;
+
+	/**
+	 * Value indicating the HTTP port has not been specified.
+	 */
+	private static final int UNSET_HTTP_PORT = -1;
 
 	/**
 	 * {@link HttpSocket} instances.
@@ -72,13 +85,13 @@ public class HttpServerAutoWireOfficeFloorSource extends
 	/**
 	 * Default port.
 	 */
-	private final int defaultPort;
+	private int defaultPort = UNSET_HTTP_PORT;
 
 	/**
 	 * Initiate.
 	 */
 	public HttpServerAutoWireOfficeFloorSource() {
-		this(DEFAULT_HTTP_PORT);
+		this(UNSET_HTTP_PORT);
 	}
 
 	/**
@@ -147,6 +160,7 @@ public class HttpServerAutoWireOfficeFloorSource extends
 			// Add the default HTTP Socket
 			HttpServerSocketManagedObjectSource.autoWire(application,
 					this.defaultPort, HANDLER_SECTION_NAME, HANDLER_INPUT_NAME);
+
 		} else {
 			// Override the HTTP Socket
 			for (HttpSocket socket : this.httpSockets) {
@@ -193,6 +207,13 @@ public class HttpServerAutoWireOfficeFloorSource extends
 	@Override
 	protected void initOfficeFloor(OfficeFloorDeployer deployer,
 			OfficeFloorSourceContext context) throws Exception {
+
+		// Only configure default HTTP port if not specified
+		if (this.defaultPort == UNSET_HTTP_PORT) {
+			// Obtain the HTTP port
+			this.defaultPort = Integer.parseInt(context.getProperty(
+					PROPERTY_HTTP_PORT, String.valueOf(DEFAULT_HTTP_PORT)));
+		}
 
 		// Initiate this web application
 		super.initOfficeFloor(deployer, context);

@@ -64,8 +64,7 @@ public class WarOfficeFloorDecoratorTest extends OfficeFrameTestCase {
 	@Override
 	protected void tearDown() throws Exception {
 		// Clean up test
-		System
-				.clearProperty(WarOfficeFloorDecorator.SYSTEM_PROPERTY_PASSWORD_FILE_LOCATION);
+		System.clearProperty(WarOfficeFloorDecorator.SYSTEM_PROPERTY_PASSWORD_FILE_LOCATION);
 		System.clearProperty(WarOfficeFloorDecorator.SYSTEM_PROPERTY_HTTP_PORT);
 	}
 
@@ -118,9 +117,9 @@ public class WarOfficeFloorDecoratorTest extends OfficeFrameTestCase {
 	public void testExtractedDirectory() throws Exception {
 
 		// Obtain the extracted directory
-		File extractedDirectory = this.findFile(this.getClass(),
-				"ExtractedDirectory/WEB-INF/web.xml").getParentFile()
-				.getParentFile();
+		File extractedDirectory = this
+				.findFile(this.getClass(), "ExtractedDirectory/WEB-INF/web.xml")
+				.getParentFile().getParentFile();
 
 		// Map war name
 		this.archiveNameMappings.put("war", "ExtractedDirectory_war");
@@ -136,9 +135,9 @@ public class WarOfficeFloorDecoratorTest extends OfficeFrameTestCase {
 	public void testConfigurationBySystemProperties() throws Exception {
 
 		// Obtain the extracted directory
-		File extractedDirectory = this.findFile(this.getClass(),
-				"ExtractedDirectory/WEB-INF/web.xml").getParentFile()
-				.getParentFile();
+		File extractedDirectory = this
+				.findFile(this.getClass(), "ExtractedDirectory/WEB-INF/web.xml")
+				.getParentFile().getParentFile();
 
 		// Obtain the password file
 		File passwordFile = this.findFile(this.getClass(), "password.txt");
@@ -172,8 +171,7 @@ public class WarOfficeFloorDecoratorTest extends OfficeFrameTestCase {
 		// Specify the system properties for decoration
 		if (expectedHttpPort == null) {
 			// Ensure HTTP port not specified
-			System
-					.clearProperty(WarOfficeFloorDecorator.SYSTEM_PROPERTY_HTTP_PORT);
+			System.clearProperty(WarOfficeFloorDecorator.SYSTEM_PROPERTY_HTTP_PORT);
 
 			// Default HTTP port
 			expectedHttpPort = "8080";
@@ -186,14 +184,12 @@ public class WarOfficeFloorDecoratorTest extends OfficeFrameTestCase {
 		}
 		if (expectedPasswordFileLocation == null) {
 			// Ensure password file not specified
-			System
-					.clearProperty(WarOfficeFloorDecorator.SYSTEM_PROPERTY_PASSWORD_FILE_LOCATION);
+			System.clearProperty(WarOfficeFloorDecorator.SYSTEM_PROPERTY_PASSWORD_FILE_LOCATION);
 		} else {
 			// Ensure password file specified
-			System
-					.setProperty(
-							WarOfficeFloorDecorator.SYSTEM_PROPERTY_PASSWORD_FILE_LOCATION,
-							expectedPasswordFileLocation);
+			System.setProperty(
+					WarOfficeFloorDecorator.SYSTEM_PROPERTY_PASSWORD_FILE_LOCATION,
+					expectedPasswordFileLocation);
 		}
 
 		// Run decoration
@@ -203,10 +199,10 @@ public class WarOfficeFloorDecoratorTest extends OfficeFrameTestCase {
 		// Determine if expecting decoration
 		if (expectedDirectoryName == null) {
 			// No decoration expected
-			assertEquals("Should not be decorating", 0, this.resolvedArchives
-					.size());
-			assertEquals("Should not decorate environment", 0, this.environment
-					.size());
+			assertEquals("Should not be decorating", 0,
+					this.resolvedArchives.size());
+			assertEquals("Should not decorate environment", 0,
+					this.environment.size());
 			assertEquals("Should not decorate command options", 0,
 					this.commandOptions.size());
 
@@ -223,8 +219,7 @@ public class WarOfficeFloorDecoratorTest extends OfficeFrameTestCase {
 			assertNotNull("Should have officefloor command option", officefloor);
 			assertEquals("Expecting only one officefloor command option", 1,
 					officefloor.size());
-			assertEquals(
-					"Incorrect officefloor",
+			assertEquals("Incorrect officefloor",
 					"net/officefloor/plugin/war/WarOfficeFloor.officefloor",
 					officefloor.get(0));
 
@@ -246,8 +241,8 @@ public class WarOfficeFloorDecoratorTest extends OfficeFrameTestCase {
 				assertTrue("Should be temporary password file",
 						passwordFileLocation.startsWith(tmpDir));
 				assertEquals("Incorrect temporary password file content",
-						"algorithm=-", this.getFileContents(new File(
-								passwordFileLocation)));
+						"algorithm=-",
+						this.getFileContents(new File(passwordFileLocation)));
 
 			} else {
 				// Validate specified location
@@ -336,6 +331,16 @@ public class WarOfficeFloorDecoratorTest extends OfficeFrameTestCase {
 		@Override
 		public String getRawClassPathEntry() {
 			return this.rawClassPathEntry;
+		}
+
+		@Override
+		public File createWorkspaceFile(String identifier, String extension) {
+			try {
+				return File.createTempFile(identifier, "." + extension);
+			} catch (IOException ex) {
+				// Not testing failure of creating file in this test
+				throw fail(ex);
+			}
 		}
 
 		@Override
