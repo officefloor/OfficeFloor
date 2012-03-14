@@ -36,6 +36,7 @@ import net.officefloor.building.command.parameters.OfficeFloorLocationOfficeFloo
 import net.officefloor.building.command.parameters.PropertiesOfficeFloorCommandParameter;
 import net.officefloor.building.decorate.OfficeFloorDecorator;
 import net.officefloor.building.decorate.OfficeFloorDecoratorContext;
+import net.officefloor.plugin.web.http.application.WebAutoWireApplication;
 
 /**
  * {@link OfficeFloorDecorator} for a WAR.
@@ -76,9 +77,10 @@ public class WarOfficeFloorDecorator implements OfficeFloorDecorator {
 	public static final String WEB_INF_WEB_XML = WEB_INF + "web.xml";
 
 	/**
-	 * Directory to contain the public content.
+	 * Directory to contain the public web content.
 	 */
-	public static final String WEB_PUBLIC = "WEB-PUBLIC/";
+	public static final String WEB_PUBLIC = WebAutoWireApplication.WEB_PUBLIC_RESOURCES_CLASS_PATH_PREFIX
+			+ "/";
 
 	/*
 	 * ==================== OfficeFloorDecorator ========================
@@ -108,10 +110,9 @@ public class WarOfficeFloorDecorator implements OfficeFloorDecorator {
 		if (isWar) {
 
 			// Default OfficeFloor configuration for running a WAR
-			context
-					.addCommandOption(
-							OfficeFloorLocationOfficeFloorCommandParameter.PARAMETER_OFFICE_FLOOR_LOCATION,
-							"net/officefloor/plugin/war/WarOfficeFloor.officefloor");
+			context.addCommandOption(
+					OfficeFloorLocationOfficeFloorCommandParameter.PARAMETER_OFFICE_FLOOR_LOCATION,
+					"net/officefloor/plugin/war/WarOfficeFloor.officefloor");
 
 			// Default properties values for default OfficeFloor configuration
 			String httpPort = System.getProperty(SYSTEM_PROPERTY_HTTP_PORT,
@@ -176,7 +177,7 @@ public class WarOfficeFloorDecorator implements OfficeFloorDecorator {
 		}
 
 		// Create output web archive
-		File warFile = File.createTempFile(webArchiveName, ".war");
+		File warFile = context.createWorkspaceFile(webArchiveName, "war");
 		JarOutputStream output = new JarOutputStream(new FileOutputStream(
 				warFile));
 
@@ -299,8 +300,8 @@ public class WarOfficeFloorDecorator implements OfficeFloorDecorator {
 		}
 
 		// Create archive for contents
-		File warFile = File.createTempFile(rawClassPathDirectory.getName(),
-				".war");
+		File warFile = context.createWorkspaceFile(
+				rawClassPathDirectory.getName(), "war");
 		JarOutputStream output = new JarOutputStream(new FileOutputStream(
 				warFile));
 

@@ -28,7 +28,7 @@ import net.officefloor.building.classpath.ClassPathFactory;
 import net.officefloor.building.command.OfficeFloorCommandContext;
 import net.officefloor.building.decorate.OfficeFloorDecorator;
 import net.officefloor.building.decorate.OfficeFloorDecoratorContext;
-import net.officefloor.building.execute.OfficeFloorCommandContextImpl;
+import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 
 /**
@@ -49,8 +49,16 @@ public class OfficeFloorCommandContextTest extends OfficeFrameTestCase {
 	 */
 	private OfficeFloorCommandContextImpl context;
 
+	/**
+	 * Workspace for the {@link OfficeFloor}.
+	 */
+	private File workspace;
+
 	@Override
 	protected void setUp() throws Exception {
+
+		// Obtain the workspace location
+		this.workspace = new File(System.getProperty("java.io.tmpdir"));
 
 		// Create non-decorated context for testing
 		this.context = this.createContext();
@@ -84,8 +92,9 @@ public class OfficeFloorCommandContextTest extends OfficeFrameTestCase {
 
 		final String LOCATION = "test.jar";
 		final String PATH = "path.jar";
-		this.recordReturn(this.classPathFactory, this.classPathFactory
-				.createArtifactClassPath(LOCATION), new String[] { PATH });
+		this.recordReturn(this.classPathFactory,
+				this.classPathFactory.createArtifactClassPath(LOCATION),
+				new String[] { PATH });
 
 		// Include jar
 		this.replayMockObjects();
@@ -125,16 +134,17 @@ public class OfficeFloorCommandContextTest extends OfficeFrameTestCase {
 
 		// Obtain path to jar
 		final String JAR = "test.jar";
-		this.recordReturn(this.classPathFactory, this.classPathFactory
-				.createArtifactClassPath(JAR), new String[] { JAR });
+		this.recordReturn(this.classPathFactory,
+				this.classPathFactory.createArtifactClassPath(JAR),
+				new String[] { JAR });
 
 		// Create the decorator
 		final OfficeFloorDecorator decorator = new OfficeFloorDecorator() {
 			@Override
 			public void decorate(OfficeFloorDecoratorContext context)
 					throws Exception {
-				assertEquals("Incorrect entry", JAR, context
-						.getRawClassPathEntry());
+				assertEquals("Incorrect entry", JAR,
+						context.getRawClassPathEntry());
 				context.setEnvironmentProperty(NAME, VALUE);
 			}
 		};
@@ -169,8 +179,9 @@ public class OfficeFloorCommandContextTest extends OfficeFrameTestCase {
 
 		// Obtain path to jar
 		final String JAR = "test.jar";
-		this.recordReturn(this.classPathFactory, this.classPathFactory
-				.createArtifactClassPath(JAR), new String[] { JAR });
+		this.recordReturn(this.classPathFactory,
+				this.classPathFactory.createArtifactClassPath(JAR),
+				new String[] { JAR });
 
 		// Create the decorators
 		final OfficeFloorDecorator decoratorOne = new OfficeFloorDecorator() {
@@ -216,16 +227,17 @@ public class OfficeFloorCommandContextTest extends OfficeFrameTestCase {
 
 		// Obtain path to jar
 		final String JAR = "test.jar";
-		this.recordReturn(this.classPathFactory, this.classPathFactory
-				.createArtifactClassPath(JAR), new String[] { JAR });
+		this.recordReturn(this.classPathFactory,
+				this.classPathFactory.createArtifactClassPath(JAR),
+				new String[] { JAR });
 
 		// Create the decorator
 		final OfficeFloorDecorator decorator = new OfficeFloorDecorator() {
 			@Override
 			public void decorate(OfficeFloorDecoratorContext context)
 					throws Exception {
-				assertEquals("Incorrect entry", JAR, context
-						.getRawClassPathEntry());
+				assertEquals("Incorrect entry", JAR,
+						context.getRawClassPathEntry());
 				context.addCommandOption(NAME, VALUE);
 			}
 		};
@@ -261,16 +273,17 @@ public class OfficeFloorCommandContextTest extends OfficeFrameTestCase {
 
 		// Obtain path to jar
 		final String JAR = "test.jar";
-		this.recordReturn(this.classPathFactory, this.classPathFactory
-				.createArtifactClassPath(JAR), new String[] { JAR });
+		this.recordReturn(this.classPathFactory,
+				this.classPathFactory.createArtifactClassPath(JAR),
+				new String[] { JAR });
 
 		// Create the decorator
 		final OfficeFloorDecorator decorator = new OfficeFloorDecorator() {
 			@Override
 			public void decorate(OfficeFloorDecoratorContext context)
 					throws Exception {
-				assertEquals("Incorrect entry", JAR, context
-						.getRawClassPathEntry());
+				assertEquals("Incorrect entry", JAR,
+						context.getRawClassPathEntry());
 				context.addCommandOption(NAME, VALUE_ONE);
 				context.addCommandOption(NAME, VALUE_TWO);
 				context.addCommandOption(NAME, VALUE_THREE);
@@ -306,16 +319,17 @@ public class OfficeFloorCommandContextTest extends OfficeFrameTestCase {
 
 		// Obtain path to jar
 		final String JAR = "test.jar";
-		this.recordReturn(this.classPathFactory, this.classPathFactory
-				.createArtifactClassPath(JAR), new String[] { JAR });
+		this.recordReturn(this.classPathFactory,
+				this.classPathFactory.createArtifactClassPath(JAR),
+				new String[] { JAR });
 
 		// Create the decorator
 		final OfficeFloorDecorator decorator = new OfficeFloorDecorator() {
 			@Override
 			public void decorate(OfficeFloorDecoratorContext context)
 					throws Exception {
-				assertEquals("Incorrect entry", JAR, context
-						.getRawClassPathEntry());
+				assertEquals("Incorrect entry", JAR,
+						context.getRawClassPathEntry());
 				context.includeResolvedClassPathEntry(CLASS_PATH_OVERRIDE);
 			}
 		};
@@ -385,6 +399,47 @@ public class OfficeFloorCommandContextTest extends OfficeFrameTestCase {
 	}
 
 	/**
+	 * Ensure able to create a {@link File} by the {@link OfficeFloorDecorator}.
+	 */
+	public void testDecoratingCreateFile() throws Exception {
+
+		final String FILE_PATH = "test.war";
+
+		// Record not enhancing class path
+		this.recordReturn(this.classPathFactory,
+				this.classPathFactory.createArtifactClassPath(FILE_PATH),
+				new String[] { FILE_PATH });
+
+		// Create the decorator
+		final File[] file = new File[1];
+		final OfficeFloorDecorator decorator = new OfficeFloorDecorator() {
+			@Override
+			public void decorate(OfficeFloorDecoratorContext context)
+					throws Exception {
+				// Create the file
+				file[0] = context.createWorkspaceFile("decorate", "test");
+			}
+		};
+
+		// Create the context with the decorator
+		this.context = this.createContext(decorator);
+
+		// Include artifact with dependencies
+		this.replayMockObjects();
+		this.context.includeClassPathArtifact(FILE_PATH);
+		this.verifyMockObjects();
+
+		// Ensure no class path warnings
+		assertEquals("Should be no class path warnings", 0,
+				this.context.getWarnings().length);
+
+		// Ensure file created in the workspace
+		assertTrue("File should be created", file[0].exists());
+		assertEquals("File should be in workspace", this.workspace,
+				file[0].getParentFile());
+	}
+
+	/**
 	 * Creates the {@link OfficeFloorCommandContext} for testing.
 	 * 
 	 * @param decorators
@@ -394,7 +449,7 @@ public class OfficeFloorCommandContextTest extends OfficeFrameTestCase {
 	private OfficeFloorCommandContextImpl createContext(
 			OfficeFloorDecorator... decorators) throws Exception {
 		return new OfficeFloorCommandContextImpl(this.classPathFactory,
-				decorators);
+				this.workspace, decorators);
 	}
 
 	/**

@@ -18,10 +18,13 @@
 
 package net.officefloor.building.decorate;
 
+import java.io.File;
+
 import net.officefloor.building.command.OfficeFloorCommand;
 import net.officefloor.building.command.OfficeFloorCommandEnvironment;
 import net.officefloor.building.command.OfficeFloorCommandParameter;
 import net.officefloor.compile.properties.Property;
+import net.officefloor.console.OfficeBuilding;
 import net.officefloor.frame.api.manage.OfficeFloor;
 
 /**
@@ -47,6 +50,22 @@ public interface OfficeFloorDecoratorContext {
 	void includeResolvedClassPathEntry(String classpathEntry);
 
 	/**
+	 * <p>
+	 * Creates a {@link File} for decoration.
+	 * <p>
+	 * This will create the {@link File} within the {@link OfficeFloor}
+	 * workspace within the {@link OfficeBuilding}. As within the workspace, it
+	 * will be cleaned up on the {@link OfficeFloor} closing.
+	 * 
+	 * @param identifier
+	 *            Identifier added to the file name.
+	 * @param extension
+	 *            Extension for the {@link File}.
+	 * @return Created empty {@link File}.
+	 */
+	File createWorkspaceFile(String identifier, String extension);
+
+	/**
 	 * Specifies a {@link Property} for the
 	 * {@link OfficeFloorCommandEnvironment}.
 	 * 
@@ -55,6 +74,8 @@ public interface OfficeFloorDecoratorContext {
 	 * @param value
 	 *            {@link Property} value.
 	 */
+	@Deprecated
+	// TODO remove in favour of more specific overrides
 	void setEnvironmentProperty(String name, String value);
 
 	/**
@@ -70,6 +91,8 @@ public interface OfficeFloorDecoratorContext {
 	 * @param value
 	 *            Value.
 	 */
+	@Deprecated
+	// TODO remove in favour of more specific overrides
 	void addCommandOption(String parameterName, String value);
 
 }

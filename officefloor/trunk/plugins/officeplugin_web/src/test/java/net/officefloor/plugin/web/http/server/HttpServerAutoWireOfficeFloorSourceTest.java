@@ -25,6 +25,7 @@ import java.io.Writer;
 
 import net.officefloor.autowire.AutoWireManagement;
 import net.officefloor.autowire.AutoWireSection;
+import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.section.clazz.ClassSectionSource;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
@@ -103,6 +104,27 @@ public class HttpServerAutoWireOfficeFloorSourceTest extends
 		// Ensure handles unknown resource
 		this.assertHttpRequest("http://localhost:7878/unknown", 404,
 				fileNotFound);
+	}
+
+	/**
+	 * Ensure can provide {@link OfficeFloor} property to configure the HTTP
+	 * port.
+	 */
+	public void testConfigureHttpPort() throws Exception {
+
+		final int PORT = MockHttpServer.getAvailablePort();
+
+		// Open on alternate port (via OfficeFloor configuration)
+		this.source.getOfficeFloorCompiler().addProperty(
+				HttpServerAutoWireOfficeFloorSource.PROPERTY_HTTP_PORT,
+				String.valueOf(PORT));
+		this.source.openOfficeFloor();
+
+		// Obtain the expected content
+		String expected = this.getFileContents("PUBLIC/index.html");
+
+		// Ensure able to service by configured HTTP port
+		this.assertHttpRequest("http://localhost:" + PORT, 200, expected);
 	}
 
 	/**

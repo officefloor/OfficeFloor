@@ -395,8 +395,6 @@ public class WebApplicationAutoWireOfficeFloorSource extends
 	protected void initOfficeFloor(OfficeFloorDeployer deployer,
 			OfficeFloorSourceContext context) throws Exception {
 
-		final String CLASS_PATH_PREFIX = "PUBLIC";
-
 		// Add the HTTP section
 		AutoWireSection httpSection = this.addSection(HANDLER_SECTION_NAME,
 				WebApplicationSectionSource.class.getName(), null);
@@ -422,7 +420,7 @@ public class WebApplicationAutoWireOfficeFloorSource extends
 					nonHandledServicer,
 					context,
 					ClasspathHttpFileSenderWorkSource.PROPERTY_CLASSPATH_PREFIX,
-					CLASS_PATH_PREFIX);
+					WEB_PUBLIC_RESOURCES_CLASS_PATH_PREFIX);
 			this.addProperty(
 					nonHandledServicer,
 					context,
@@ -465,7 +463,8 @@ public class WebApplicationAutoWireOfficeFloorSource extends
 
 			// Create section to send resources
 			AutoWireSection section = this.addSection("RESOURCES",
-					HttpFileSectionSource.class.getName(), CLASS_PATH_PREFIX);
+					HttpFileSectionSource.class.getName(),
+					WEB_PUBLIC_RESOURCES_CLASS_PATH_PREFIX);
 
 			// Link section outputs to the resources
 			for (ResourceLink resourceLink : this.resourceLinks) {
