@@ -108,10 +108,10 @@ public class OfficeBuildingTest extends AbstractConsoleMainTestCase {
 		try {
 			manager.getStartTime();
 			fail("Office Building should be stopped");
-		} catch (UndeclaredThrowableException ex) {
+		} catch (IOException ex) {
 			// Ensure cause is IO failure as Office Building stopped
-			Throwable cause = ex.getCause();
-			assertTrue("Incorrect cause", (cause instanceof IOException));
+			assertEquals("Incorrect cause", "no such object in table",
+					ex.getMessage());
 		}
 	}
 

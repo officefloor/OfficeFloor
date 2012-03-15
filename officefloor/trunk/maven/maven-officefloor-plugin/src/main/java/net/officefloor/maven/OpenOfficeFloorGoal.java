@@ -225,7 +225,7 @@ public class OpenOfficeFloorGoal extends AbstractGoal {
 
 		// Add class path of project
 		try {
-			List<String> elements = this.project.getCompileClasspathElements();
+			List<String> elements = this.project.getRuntimeClasspathElements();
 			for (String element : elements) {
 				configuration.addClassPathEntry(element);
 			}
@@ -233,12 +233,6 @@ public class OpenOfficeFloorGoal extends AbstractGoal {
 			throw this.newMojoExecutionException(
 					"Failed creating class path for the "
 							+ OfficeFloor.class.getSimpleName(), ex);
-		}
-
-		// Add plug-in dependencies (makes OfficeFloor functionality available)
-		for (Artifact artifact : this.pluginDependencies) {
-			configuration.addClassPathEntry(artifact.getFile()
-					.getAbsolutePath());
 		}
 
 		// Determine if WAR project

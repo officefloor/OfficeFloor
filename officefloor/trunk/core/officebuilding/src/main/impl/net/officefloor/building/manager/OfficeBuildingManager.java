@@ -19,12 +19,10 @@
 package net.officefloor.building.manager;
 
 import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.ObjectOutputStream;
 import java.lang.management.ManagementFactory;
 import java.net.InetAddress;
 import java.rmi.ConnectException;
@@ -147,49 +145,6 @@ public class OfficeBuildingManager implements OfficeBuildingManagerMBean {
 		if (trustStorePassword != null) {
 			System.setProperty("javax.net.ssl.trustStorePassword",
 					trustStorePassword);
-		}
-	}
-
-	/**
-	 * Propagates the MBean exception so that able to be received by the JMX
-	 * client.
-	 * 
-	 * @param ex
-	 *            Exception to propagate.
-	 * @return {@link Exception} to propagate.
-	 */
-	public static Exception propagateMBeanException(Exception ex) {
-
-		// Ensure able to serialize the exception
-		try {
-
-			// Attempt to serialize the exception
-			ByteArrayOutputStream temp = new ByteArrayOutputStream();
-			ObjectOutputStream serializer = new ObjectOutputStream(temp);
-			serializer.writeObject(ex);
-			serializer.flush();
-
-			// Able to serialize so propagate as is
-			return ex;
-
-		} catch (IOException notSerializable) {
-
-			// Create a message describing the exception
-			StringBuilder msg = new StringBuilder();
-			msg.append(ex.getMessage());
-			Throwable previous = ex;
-			Throwable current = ex.getCause();
-			while ((current != null) && (current != previous)) {
-				msg.append("\n\tCaused by");
-				msg.append(current.getMessage());
-
-				// Setup for next iteration
-				previous = current;
-				current = current.getCause();
-			}
-
-			// Return serializable exception to propagate exception details
-			return new Exception(msg.toString());
 		}
 	}
 
@@ -890,28 +845,35 @@ public class OfficeBuildingManager implements OfficeBuildingManagerMBean {
 	}
 
 	@Override
-	public String openOfficeFloor(String arguments) throws Exception {
+	public String openOfficeFloor(String arguments)
+			throws OfficeBuildingException {
+		try {
 
-		// Split out the arguments
-		String[] argumentEntries = arguments.trim().split("\\s+");
+			// Split out the arguments
+			String[] argumentEntries = arguments.trim().split("\\s+");
 
-		// Parse the parameters (always the one command)
-		OfficeFloorCommandParser parser = new OfficeFloorCommandParserImpl(
-				new OfficeBuildingOpenOfficeFloorCommand(false));
-		OfficeFloorCommand[] commands = parser.parseCommands(argumentEntries);
-		OfficeBuildingOpenOfficeFloorCommand command = (OfficeBuildingOpenOfficeFloorCommand) commands[0];
+			// Parse the parameters (always the one command)
+			OfficeFloorCommandParser parser = new OfficeFloorCommandParserImpl(
+					new OfficeBuildingOpenOfficeFloorCommand(false));
+			OfficeFloorCommand[] commands = parser
+					.parseCommands(argumentEntries);
+			OfficeBuildingOpenOfficeFloorCommand command = (OfficeBuildingOpenOfficeFloorCommand) commands[0];
 
-		// Obtain the open OfficeFloor configuration
-		OpenOfficeFloorConfiguration configuration = command
-				.getOpenOfficeFloorConfiguration();
+			// Obtain the open OfficeFloor configuration
+			OpenOfficeFloorConfiguration configuration = command
+					.getOpenOfficeFloorConfiguration();
 
-		// Open the OfficeFloor
-		return this.openOfficeFloor(configuration);
+			// Open the OfficeFloor
+			return this.openOfficeFloor(configuration);
+
+		} catch (Throwable ex) {
+			throw OfficeBuildingException.newException(ex);
+		}
 	}
 
 	@Override
 	public String openOfficeFloor(OpenOfficeFloorConfiguration configuration)
-			throws Exception {
+			throws OfficeBuildingException {
 		try {
 
 			// Ensure the OfficeBuilding is open
@@ -1021,10 +983,21 @@ public class OfficeBuildingManager implements OfficeBuildingManagerMBean {
 										+ " is not allowing configured class path entries");
 					}
 
-					// Include the class path entries
+					/*
+					 * Include the class path entries.
+					 * 
+					 * Class path entries are made available due to the
+					 * OfficeFloor maven plug-ins to include the project's class
+					 * path. These are already resolved class path entries from
+					 * the project's artifacts (so are NOT artifacts).
+					 * 
+					 * Note: adding these class path entries as artifacts causes
+					 * issues as it seems they contain pom.xml files that point
+					 * to potentially non-resolvable artifacts.
+					 */
 					for (String configuredClassPathEntry : configuredClassPathEntries) {
 						commandContext
-								.includeClassPathArtifact(configuredClassPathEntry);
+								.includeClassPathEntry(configuredClassPathEntry);
 					}
 				}
 
@@ -1139,36 +1112,43 @@ public class OfficeBuildingManager implements OfficeBuildingManagerMBean {
 				}
 			}
 
-		} catch (Exception ex) {
-			throw propagateMBeanException(ex);
+		} catch (Throwable ex) {
+			throw OfficeBuildingException.newException(ex);
 		}
 	}
 
 	@Override
-	public synchronized String listProcessNamespaces() {
-		// Create listing of process name spaces
-		StringBuilder namespaces = new StringBuilder();
-		boolean isFirst = true;
-		for (ProcessManagerMBean manager : this.processManagers) {
+	public synchronized String listProcessNamespaces()
+			throws OfficeBuildingException {
+		try {
 
-			// Separate name spaces by end of line
-			if (!isFirst) {
-				namespaces.append("\n");
+			// Create listing of process name spaces
+			StringBuilder namespaces = new StringBuilder();
+			boolean isFirst = true;
+			for (ProcessManagerMBean manager : this.processManagers) {
+
+				// Separate name spaces by end of line
+				if (!isFirst) {
+					namespaces.append("\n");
+				}
+				isFirst = false;
+
+				// Output the name space
+				String namespace = manager.getProcessNamespace();
+				namespaces.append(namespace);
 			}
-			isFirst = false;
 
-			// Output the name space
-			String namespace = manager.getProcessNamespace();
-			namespaces.append(namespace);
+			// Return the listing of process name spaces
+			return namespaces.toString();
+
+		} catch (Throwable ex) {
+			throw OfficeBuildingException.newException(ex);
 		}
-
-		// Return the listing of process name spaces
-		return namespaces.toString();
 	}
 
 	@Override
 	public synchronized String closeOfficeFloor(String processNamespace,
-			long waitTime) throws Exception {
+			long waitTime) throws OfficeBuildingException {
 		try {
 
 			// Find the process manager for the OfficeFloor
@@ -1212,14 +1192,14 @@ public class OfficeBuildingManager implements OfficeBuildingManagerMBean {
 				}
 			}
 
-		} catch (Exception ex) {
-			throw propagateMBeanException(ex);
+		} catch (Throwable ex) {
+			throw OfficeBuildingException.newException(ex);
 		}
 	}
 
 	@Override
 	public synchronized String stopOfficeBuilding(long waitTime)
-			throws Exception {
+			throws OfficeBuildingException {
 		try {
 
 			// Flag no longer open
@@ -1318,8 +1298,8 @@ public class OfficeBuildingManager implements OfficeBuildingManagerMBean {
 				this.notifyAll();
 			}
 
-		} catch (Exception ex) {
-			throw propagateMBeanException(ex);
+		} catch (Throwable ex) {
+			throw OfficeBuildingException.newException(ex);
 		}
 	}
 

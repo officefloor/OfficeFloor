@@ -18,6 +18,7 @@
 
 package net.officefloor.building.manager;
 
+import java.io.IOException;
 import java.util.Date;
 
 import javax.management.remote.JMXServiceURL;
@@ -42,8 +43,11 @@ public interface OfficeBuildingManagerMBean {
 	 * on.
 	 * 
 	 * @return Time the {@link OfficeBuilding} was started.
+	 * @throws IOException
+	 *             If fails communication with the remote
+	 *             {@link OfficeBuildingManager}.
 	 */
-	Date getStartTime();
+	Date getStartTime() throws IOException;
 
 	/**
 	 * <p>
@@ -55,22 +59,31 @@ public interface OfficeBuildingManagerMBean {
 	 * 
 	 * @return {@link JMXServiceURL} of the {@link OfficeBuilding} being managed
 	 *         by this {@link OfficeBuildingManager}.
+	 * @throws IOException
+	 *             If fails communication with the remote
+	 *             {@link OfficeBuildingManager}.
 	 */
-	String getOfficeBuildingJmxServiceUrl();
+	String getOfficeBuildingJmxServiceUrl() throws IOException;
 
 	/**
 	 * Obtains the name of the host running the {@link OfficeBuilding}.
 	 * 
 	 * @return Name of the host running the {@link OfficeBuilding}.
+	 * @throws IOException
+	 *             If fails communication with the remote
+	 *             {@link OfficeBuildingManager}.
 	 */
-	String getOfficeBuildingHostName();
+	String getOfficeBuildingHostName() throws IOException;
 
 	/**
 	 * Obtains the port that the {@link OfficeBuilding} is listening on.
 	 * 
 	 * @return Port that the {@link OfficeBuilding} is listening on.
+	 * @throws IOException
+	 *             If fails communication with the remote
+	 *             {@link OfficeBuildingManager}.
 	 */
-	int getOfficeBuildingPort();
+	int getOfficeBuildingPort() throws IOException;
 
 	/**
 	 * <p>
@@ -81,12 +94,16 @@ public interface OfficeBuildingManagerMBean {
 	 * @param arguments
 	 *            {@link OfficeFloor} arguments separated by white spacing.
 	 * @return {@link Process} name space of the opened {@link OfficeFloor}.
-	 * @throws Exception
+	 * @throws OfficeBuildingException
 	 *             If fails to open the {@link OfficeFloor}.
+	 * @throws IOException
+	 *             If fails communication with the remote
+	 *             {@link OfficeBuildingManager}.
 	 * 
 	 * @see ProcessManagerMBean#getProcessNamespace()
 	 */
-	String openOfficeFloor(String arguments) throws Exception;
+	String openOfficeFloor(String arguments) throws OfficeBuildingException,
+			IOException;
 
 	/**
 	 * <p>
@@ -99,13 +116,16 @@ public interface OfficeBuildingManagerMBean {
 	 * @param configuration
 	 *            {@link OpenOfficeFloorConfiguration}.
 	 * @return {@link Process} name space of the opened {@link OfficeFloor}.
-	 * @throws Exception
+	 * @throws OfficeBuildingException
 	 *             If fails to open the {@link OfficeFloor}.
+	 * @throws IOException
+	 *             If fails communication with the remote
+	 *             {@link OfficeBuildingManager}.
 	 * 
 	 * @see ProcessManagerMBean#getProcessNamespace()
 	 */
 	String openOfficeFloor(OpenOfficeFloorConfiguration configuration)
-			throws Exception;
+			throws OfficeBuildingException, IOException;
 
 	/**
 	 * Provides a listing of the {@link Process} name spaces currently running
@@ -113,8 +133,13 @@ public interface OfficeBuildingManagerMBean {
 	 * 
 	 * @return Listing of the {@link Process} name spaces currently running
 	 *         within the {@link OfficeBuilding}.
+	 * @throws OfficeBuildingException
+	 *             If fails to list process namespaces.
+	 * @throws IOException
+	 *             If fails communication with the remote
+	 *             {@link OfficeBuildingManager}.
 	 */
-	String listProcessNamespaces();
+	String listProcessNamespaces() throws OfficeBuildingException, IOException;
 
 	/**
 	 * Closes the {@link OfficeFloor}.
@@ -126,12 +151,15 @@ public interface OfficeBuildingManagerMBean {
 	 *            destroyed.
 	 * @return <code>&quot;Closed&quot;</code> or text explaining why not
 	 *         closed.
-	 * @throws Exception
+	 * @throws OfficeBuildingException
 	 *             If fails to close the {@link OfficeFloor}.
+	 * @throws IOException
+	 *             If fails communication with the remote
+	 *             {@link OfficeBuildingManager}.
 	 * @see ProcessManagerMBean#getProcessNamespace()
 	 */
 	String closeOfficeFloor(String processNamespace, long waitTime)
-			throws Exception;
+			throws OfficeBuildingException, IOException;
 
 	/**
 	 * Stops the {@link OfficeBuilding}.
@@ -142,14 +170,21 @@ public interface OfficeBuildingManagerMBean {
 	 * @return Details of stopping the {@link OfficeBuilding}.
 	 * @throws Exception
 	 *             If fails to stop the {@link OfficeBuilding}.
+	 * @throws IOException
+	 *             If fails communication with the remote
+	 *             {@link OfficeBuildingManager}.
 	 */
-	String stopOfficeBuilding(long waitTime) throws Exception;
+	String stopOfficeBuilding(long waitTime) throws OfficeBuildingException,
+			IOException;
 
 	/**
 	 * Indicates if the {@link OfficeBuilding} has been stopped.
 	 * 
 	 * @return <code>true</code> should the {@link OfficeBuilding} be stopped.
+	 * @throws IOException
+	 *             If fails communication with the remote
+	 *             {@link OfficeBuildingManager}.
 	 */
-	boolean isOfficeBuildingStopped();
+	boolean isOfficeBuildingStopped() throws IOException;
 
 }
