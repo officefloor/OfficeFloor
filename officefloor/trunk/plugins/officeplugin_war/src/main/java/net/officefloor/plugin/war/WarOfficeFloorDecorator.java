@@ -22,7 +22,6 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.LinkedList;
@@ -32,8 +31,6 @@ import java.util.jar.JarFile;
 import java.util.jar.JarInputStream;
 import java.util.jar.JarOutputStream;
 
-import net.officefloor.building.command.parameters.OfficeFloorLocationOfficeFloorCommandParameter;
-import net.officefloor.building.command.parameters.PropertiesOfficeFloorCommandParameter;
 import net.officefloor.building.decorate.OfficeFloorDecorator;
 import net.officefloor.building.decorate.OfficeFloorDecoratorContext;
 import net.officefloor.plugin.web.http.application.WebAutoWireApplication;
@@ -96,48 +93,13 @@ public class WarOfficeFloorDecorator implements OfficeFloorDecorator {
 		}
 
 		// Decorate based on whether directory or file (archive)
-		boolean isWar;
 		if (rawClassPathFile.isDirectory()) {
 			// Attempt to decorate as directory
-			isWar = this.decorateDirectory(rawClassPathFile, context);
+			this.decorateDirectory(rawClassPathFile, context);
 
 		} else {
 			// Attempt to decorate as archive
-			isWar = this.decorateArchive(rawClassPathFile, context);
-		}
-
-		// If WAR, default details for running
-		if (isWar) {
-
-			// Default OfficeFloor configuration for running a WAR
-			context.addCommandOption(
-					OfficeFloorLocationOfficeFloorCommandParameter.PARAMETER_OFFICE_FLOOR_LOCATION,
-					"net/officefloor/plugin/war/WarOfficeFloor.officefloor");
-
-			// Default properties values for default OfficeFloor configuration
-			String httpPort = System.getProperty(SYSTEM_PROPERTY_HTTP_PORT,
-					"8080");
-			context.addCommandOption(
-					PropertiesOfficeFloorCommandParameter.PARAMETER_PROPERTY,
-					"http.port=" + httpPort);
-
-			// Provide password file location (determine if specified)
-			String passwordFileLocation = System
-					.getProperty(SYSTEM_PROPERTY_PASSWORD_FILE_LOCATION);
-			if ((passwordFileLocation == null)
-					|| (passwordFileLocation.trim().length() == 0)) {
-				// No password file, so utilise temporary password file
-				File passwordFile = File.createTempFile("password", ".txt");
-				passwordFileLocation = passwordFile.getAbsolutePath();
-
-				// Write content for using password file
-				FileWriter writer = new FileWriter(passwordFileLocation);
-				writer.write("algorithm=-");
-				writer.close();
-			}
-			context.addCommandOption(
-					PropertiesOfficeFloorCommandParameter.PARAMETER_PROPERTY,
-					"password.file.location=" + passwordFileLocation);
+			this.decorateArchive(rawClassPathFile, context);
 		}
 	}
 
@@ -176,8 +138,8 @@ public class WarOfficeFloorDecorator implements OfficeFloorDecorator {
 			webArchiveName = webArchiveName.substring(0, extIndex);
 		}
 
-		// Create output web archive
-		File warFile = context.createWorkspaceFile(webArchiveName, "war");
+		// Create output archive for web class path content
+		File warFile = context.createWorkspaceFile(webArchiveName, "jar");
 		JarOutputStream output = new JarOutputStream(new FileOutputStream(
 				warFile));
 
@@ -215,12 +177,13 @@ public class WarOfficeFloorDecorator implements OfficeFloorDecorator {
 				splitIndex = libName.lastIndexOf('.');
 				if (splitIndex >= 0) {
 					// Has extension
-					libExtension = libName.substring(splitIndex);
+					libExtension = libName.substring(splitIndex + ".".length());
 					libName = libName.substring(0, splitIndex);
 				}
 
 				// Extract the lib file
-				File libFile = File.createTempFile(libName, libExtension);
+				File libFile = context.createWorkspaceFile(libName,
+						libExtension);
 				FileOutputStream libOutput = new FileOutputStream(libFile);
 				libOutput.write(data);
 				libOutput.close();
@@ -299,9 +262,9 @@ public class WarOfficeFloorDecorator implements OfficeFloorDecorator {
 			return false; // no web.xml, so not war, so no decoration
 		}
 
-		// Create archive for contents
+		// Create archive for war class path contents
 		File warFile = context.createWorkspaceFile(
-				rawClassPathDirectory.getName(), "war");
+				rawClassPathDirectory.getName(), "jar");
 		JarOutputStream output = new JarOutputStream(new FileOutputStream(
 				warFile));
 

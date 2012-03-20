@@ -21,6 +21,7 @@
 		<dependency>
 			<groupId>${project.groupId}</groupId>
 			<artifactId>officeplugin_servlet</artifactId>
+			<scope>test</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.eclipse.jetty</groupId>
