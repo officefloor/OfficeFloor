@@ -24,10 +24,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.Map;
-import java.util.Properties;
 import java.util.jar.JarEntry;
 import java.util.jar.JarInputStream;
 
@@ -52,23 +49,6 @@ public class WarOfficeFloorDecoratorTest extends OfficeFrameTestCase {
 	private final Map<String, String> archiveNameMappings = new HashMap<String, String>();
 
 	/**
-	 * Environment {@link Properties}.
-	 */
-	private final Properties environment = new Properties();
-
-	/**
-	 * Command options.
-	 */
-	private final Map<String, List<String>> commandOptions = new HashMap<String, List<String>>();
-
-	@Override
-	protected void tearDown() throws Exception {
-		// Clean up test
-		System.clearProperty(WarOfficeFloorDecorator.SYSTEM_PROPERTY_PASSWORD_FILE_LOCATION);
-		System.clearProperty(WarOfficeFloorDecorator.SYSTEM_PROPERTY_HTTP_PORT);
-	}
-
-	/**
 	 * Ensure can restructure WAR.
 	 */
 	public void testWebArchive() throws Exception {
@@ -77,7 +57,7 @@ public class WarOfficeFloorDecoratorTest extends OfficeFrameTestCase {
 		File webArchive = this.findFile(this.getClass(), "WebArchive.war");
 
 		// Map war name
-		this.archiveNameMappings.put("war", "WebArchive_war");
+		this.archiveNameMappings.put("war", "WebArchive_jar");
 
 		// Test decoration
 		this.doTest(webArchive.getAbsolutePath(), "ExpectedWarDecoration",
@@ -122,7 +102,7 @@ public class WarOfficeFloorDecoratorTest extends OfficeFrameTestCase {
 				.getParentFile().getParentFile();
 
 		// Map war name
-		this.archiveNameMappings.put("war", "ExtractedDirectory_war");
+		this.archiveNameMappings.put("war", "ExtractedDirectory_jar");
 
 		// Test decoration
 		this.doTest(extractedDirectory.getAbsolutePath(),
@@ -143,7 +123,7 @@ public class WarOfficeFloorDecoratorTest extends OfficeFrameTestCase {
 		File passwordFile = this.findFile(this.getClass(), "password.txt");
 
 		// Map war name
-		this.archiveNameMappings.put("war", "ExtractedDirectory_war");
+		this.archiveNameMappings.put("war", "ExtractedDirectory_jar");
 
 		// Test decoration
 		this.doTest(extractedDirectory.getAbsolutePath(),
@@ -168,29 +148,6 @@ public class WarOfficeFloorDecoratorTest extends OfficeFrameTestCase {
 			String expectedHttpPort, String expectedPasswordFileLocation)
 			throws Exception {
 
-		// Specify the system properties for decoration
-		if (expectedHttpPort == null) {
-			// Ensure HTTP port not specified
-			System.clearProperty(WarOfficeFloorDecorator.SYSTEM_PROPERTY_HTTP_PORT);
-
-			// Default HTTP port
-			expectedHttpPort = "8080";
-
-		} else {
-			// Ensure HTTP port specified
-			System.setProperty(
-					WarOfficeFloorDecorator.SYSTEM_PROPERTY_HTTP_PORT,
-					expectedHttpPort);
-		}
-		if (expectedPasswordFileLocation == null) {
-			// Ensure password file not specified
-			System.clearProperty(WarOfficeFloorDecorator.SYSTEM_PROPERTY_PASSWORD_FILE_LOCATION);
-		} else {
-			// Ensure password file specified
-			System.setProperty(
-					WarOfficeFloorDecorator.SYSTEM_PROPERTY_PASSWORD_FILE_LOCATION,
-					expectedPasswordFileLocation);
-		}
 
 		// Run decoration
 		new WarOfficeFloorDecorator()
@@ -201,56 +158,10 @@ public class WarOfficeFloorDecoratorTest extends OfficeFrameTestCase {
 			// No decoration expected
 			assertEquals("Should not be decorating", 0,
 					this.resolvedArchives.size());
-			assertEquals("Should not decorate environment", 0,
-					this.environment.size());
-			assertEquals("Should not decorate command options", 0,
-					this.commandOptions.size());
 
 		} else {
 			// Validate archive decoration
 			this.assertResolvedArchives(expectedDirectoryName);
-
-			// Should provide appropriate properties
-			assertEquals("Incorrect number command option types", 2,
-					this.commandOptions.size());
-
-			// Validate the officefloor command options
-			List<String> officefloor = this.commandOptions.get("officefloor");
-			assertNotNull("Should have officefloor command option", officefloor);
-			assertEquals("Expecting only one officefloor command option", 1,
-					officefloor.size());
-			assertEquals("Incorrect officefloor",
-					"net/officefloor/plugin/war/WarOfficeFloor.officefloor",
-					officefloor.get(0));
-
-			// Validate the property command options
-			List<String> properties = this.commandOptions.get("property");
-			assertNotNull("Should have property command options", properties);
-			assertEquals("Incorrect number of property command options", 2,
-					properties.size());
-			assertEquals("Incorrect http.port",
-					"http.port=" + expectedHttpPort, properties.get(0));
-
-			// Determine if temporary directory
-			String passwordProperty = properties.get(1);
-			if (expectedPasswordFileLocation == null) {
-				// Validate temporary password file created
-				final String tmpDir = System.getProperty("java.io.tmpdir");
-				String passwordFileLocation = passwordProperty
-						.substring("password.file.location=".length());
-				assertTrue("Should be temporary password file",
-						passwordFileLocation.startsWith(tmpDir));
-				assertEquals("Incorrect temporary password file content",
-						"algorithm=-",
-						this.getFileContents(new File(passwordFileLocation)));
-
-			} else {
-				// Validate specified location
-				assertEquals("Incorrect password file location",
-						"password.file.location="
-								+ expectedPasswordFileLocation,
-						passwordProperty);
-			}
 		}
 	}
 
@@ -364,24 +275,6 @@ public class WarOfficeFloorDecoratorTest extends OfficeFrameTestCase {
 			// Register the resolved archive
 			WarOfficeFloorDecoratorTest.this.resolvedArchives.put(archiveName,
 					resolvedJarFile);
-		}
-
-		@Override
-		public void setEnvironmentProperty(String name, String value) {
-			// Register the properties
-			WarOfficeFloorDecoratorTest.this.environment.put(name, value);
-		}
-
-		@Override
-		public void addCommandOption(String parameterName, String value) {
-			List<String> options = WarOfficeFloorDecoratorTest.this.commandOptions
-					.get(parameterName);
-			if (options == null) {
-				options = new LinkedList<String>();
-				WarOfficeFloorDecoratorTest.this.commandOptions.put(
-						parameterName, options);
-			}
-			options.add(value);
 		}
 	}
 

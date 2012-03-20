@@ -20,10 +20,6 @@ package net.officefloor.building.decorate;
 
 import java.io.File;
 
-import net.officefloor.building.command.OfficeFloorCommand;
-import net.officefloor.building.command.OfficeFloorCommandEnvironment;
-import net.officefloor.building.command.OfficeFloorCommandParameter;
-import net.officefloor.compile.properties.Property;
 import net.officefloor.console.OfficeBuilding;
 import net.officefloor.frame.api.manage.OfficeFloor;
 
@@ -64,35 +60,5 @@ public interface OfficeFloorDecoratorContext {
 	 * @return Created empty {@link File}.
 	 */
 	File createWorkspaceFile(String identifier, String extension);
-
-	/**
-	 * Specifies a {@link Property} for the
-	 * {@link OfficeFloorCommandEnvironment}.
-	 * 
-	 * @param name
-	 *            {@link Property} name.
-	 * @param value
-	 *            {@link Property} value.
-	 */
-	@Deprecated
-	// TODO remove in favour of more specific overrides
-	void setEnvironmentProperty(String name, String value);
-
-	/**
-	 * <p>
-	 * Adds an additional {@link OfficeFloorCommandParameter} value.
-	 * <p>
-	 * This allows for adding multiple values for a single
-	 * {@link OfficeFloorCommandParameter}. It also allows for enriching the
-	 * {@link OfficeFloorCommand} without enriching the environment.
-	 * 
-	 * @param parameterName
-	 *            Name of the {@link OfficeFloorCommandParameter}.
-	 * @param value
-	 *            Value.
-	 */
-	@Deprecated
-	// TODO remove in favour of more specific overrides
-	void addCommandOption(String parameterName, String value);
 
 }

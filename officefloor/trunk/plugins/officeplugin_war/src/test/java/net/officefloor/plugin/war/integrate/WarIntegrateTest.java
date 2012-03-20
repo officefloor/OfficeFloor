@@ -51,9 +51,6 @@ public class WarIntegrateTest extends OfficeFrameTestCase {
 
 		final int PORT = MockHttpServer.getAvailablePort();
 
-		// Provide port to decorator
-		System.setProperty("http.port", String.valueOf(PORT));
-
 		// Obtain location of war directory
 		File warDir = new File(".", "target/test-classes");
 		assertTrue("Test invalid as WAR directory not available",
@@ -84,7 +81,7 @@ public class WarIntegrateTest extends OfficeFrameTestCase {
 
 			// Open the WAR by decoration of OfficeFloor
 			OpenOfficeFloorConfiguration configuration = new OpenOfficeFloorConfiguration(
-					"net/officefloor/plugin/war/WarOfficeFloor.officefloor");
+					"net/officefloor/plugin/war/integrate/WarOfficeFloor.officefloor");
 			configuration.addClassPathEntry(warDir.getAbsolutePath());
 			configuration.addOfficeFloorProperty("http.port",
 					String.valueOf(PORT));

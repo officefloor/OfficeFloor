@@ -20,16 +20,12 @@ package net.officefloor.building.execute;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
-import java.util.Properties;
 
 import net.officefloor.building.classpath.ClassPathFactory;
 import net.officefloor.building.command.OfficeFloorCommand;
 import net.officefloor.building.command.OfficeFloorCommandContext;
-import net.officefloor.building.command.OfficeFloorCommandParameter;
 import net.officefloor.building.decorate.OfficeFloorDecorator;
 import net.officefloor.building.decorate.OfficeFloorDecoratorContext;
 import net.officefloor.frame.api.manage.OfficeFloor;
@@ -60,16 +56,6 @@ public class OfficeFloorCommandContextImpl implements OfficeFloorCommandContext 
 	 * Listing of class path entries in order for the realised class path.
 	 */
 	private final List<String> classPathEntries = new LinkedList<String>();
-
-	/**
-	 * Environment.
-	 */
-	private final Properties environment = new Properties();
-
-	/**
-	 * {@link OfficeFloorCommandParameter} options.
-	 */
-	private final Map<String, List<String>> options = new HashMap<String, List<String>>();
 
 	/**
 	 * Warnings regarding building the class path.
@@ -117,24 +103,6 @@ public class OfficeFloorCommandContextImpl implements OfficeFloorCommandContext 
 
 		// Return the class path
 		return path.toString();
-	}
-
-	/**
-	 * Obtains the {@link OfficeFloorCommand} environment.
-	 * 
-	 * @return {@link OfficeFloorCommand} environment.
-	 */
-	public Properties getCommandEnvironment() {
-		return this.environment;
-	}
-
-	/**
-	 * Obtains the {@link OfficeFloorCommandParameter} values.
-	 * 
-	 * @return {@link OfficeFloorCommandParameter} values.
-	 */
-	public Map<String, List<String>> getCommandOptions() {
-		return this.options;
 	}
 
 	/**
@@ -199,6 +167,7 @@ public class OfficeFloorCommandContextImpl implements OfficeFloorCommandContext 
 	@Override
 	public void includeClassPathArtifact(String artifactLocation) {
 		try {
+
 			// Obtain the class path entries
 			String[] classPathEntries = this.classPathFactory
 					.createArtifactClassPath(artifactLocation);
@@ -288,32 +257,6 @@ public class OfficeFloorCommandContextImpl implements OfficeFloorCommandContext 
 		@Override
 		public void includeResolvedClassPathEntry(String classpathEntry) {
 			this.resolvedClassPathEntries.add(classpathEntry);
-		}
-
-		@Override
-		public void setEnvironmentProperty(String name, String value) {
-			// Load property if not overriding existing environment property
-			if (!OfficeFloorCommandContextImpl.this.environment
-					.containsKey(name)) {
-				OfficeFloorCommandContextImpl.this.environment.setProperty(
-						name, value);
-			}
-		}
-
-		@Override
-		public void addCommandOption(String parameterName, String value) {
-
-			// Lazy obtain the values for the parameter
-			List<String> values = OfficeFloorCommandContextImpl.this.options
-					.get(parameterName);
-			if (values == null) {
-				values = new LinkedList<String>();
-				OfficeFloorCommandContextImpl.this.options.put(parameterName,
-						values);
-			}
-
-			// Add the value
-			values.add(value);
 		}
 	}
 

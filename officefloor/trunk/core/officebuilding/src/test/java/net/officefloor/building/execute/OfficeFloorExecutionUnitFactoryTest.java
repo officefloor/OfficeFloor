@@ -56,107 +56,35 @@ public class OfficeFloorExecutionUnitFactoryTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensure {@link OfficeFloorDecorator} can specify environment value.
+	 * Ensure {@link OfficeFloorDecorator} alter the class path.
 	 */
 	public void testDecorateClassPathEntry() throws Exception {
 
-		final String CLASS_PATH_ENTRY = "entry";
-		final String NAME = "name";
-		final String VALUE = "value";
+		final String RAW_CLASS_PATH_ENTRY = "raw_entry";
+		final String RESOLVED_CLASS_PATH_ENTRY = "resolved_entry";
 
 		// Create the command expecting environment property
 		MockCommand command = this.createCommand("test", new MockInitialiser() {
 			@Override
 			public void initialiseEnvironment(OfficeFloorCommandContext context)
 					throws Exception {
-				context.includeClassPathEntry(CLASS_PATH_ENTRY);
+				context.includeClassPathEntry(RAW_CLASS_PATH_ENTRY);
 			}
 		});
-		command.addExpectedEnvironmentProperty(NAME, VALUE);
 
 		// Decorate the environment property
 		final OfficeFloorDecorator decorator = new OfficeFloorDecorator() {
 			@Override
 			public void decorate(OfficeFloorDecoratorContext context)
 					throws Exception {
-				assertEquals("Incorrect class path", CLASS_PATH_ENTRY, context
-						.getRawClassPathEntry());
-				context.setEnvironmentProperty(NAME, VALUE);
+				assertEquals("Incorrect raw class path", RAW_CLASS_PATH_ENTRY,
+						context.getRawClassPathEntry());
+				context.includeResolvedClassPathEntry(RESOLVED_CLASS_PATH_ENTRY);
 			}
 		};
 
 		// Test
-		this.doTest(command, CLASS_PATH_ENTRY, false, decorator);
-	}
-
-	/**
-	 * Ensure {@link OfficeFloorDecorator} can specify environment value.
-	 */
-	public void testDecorateEnvironment() throws Exception {
-
-		final String CLASS_PATH_ENTRY = "entry";
-		final String NAME = "name";
-		final String VALUE = "value";
-
-		// Create the command expecting environment property
-		MockCommand command = this.createCommand("test", new MockInitialiser() {
-			@Override
-			public void initialiseEnvironment(OfficeFloorCommandContext context)
-					throws Exception {
-				context.includeClassPathArtifact(CLASS_PATH_ENTRY);
-			}
-		});
-		command.addExpectedEnvironmentProperty(NAME, VALUE);
-
-		// Decorate the environment property
-		final OfficeFloorDecorator decorator = new OfficeFloorDecorator() {
-			@Override
-			public void decorate(OfficeFloorDecoratorContext context)
-					throws Exception {
-				assertEquals("Incorrect class path", CLASS_PATH_ENTRY, context
-						.getRawClassPathEntry());
-				context.setEnvironmentProperty(NAME, VALUE);
-			}
-		};
-
-		// Test
-		this.doTest(command, CLASS_PATH_ENTRY, false, decorator);
-	}
-
-	/**
-	 * Ensure {@link OfficeFloorDecorator} can specify environment value that is
-	 * also mapped onto an {@link OfficeFloorCommandParameter}.
-	 */
-	public void testDecorateCommandParameterFromEnvironmentProperty()
-			throws Exception {
-		final String CLASS_PATH_ENTRY = "entry";
-		final String NAME = "name";
-		final String VALUE = "value";
-
-		// Create the command expecting environment property
-		MockCommand command = this.createCommand("test", new MockInitialiser() {
-			@Override
-			public void initialiseEnvironment(OfficeFloorCommandContext context)
-					throws Exception {
-				context.includeClassPathArtifact(CLASS_PATH_ENTRY);
-			}
-		}, NAME);
-		command.addExpectedEnvironmentProperty(NAME, VALUE);
-		command.addExepctedParameter(NAME, VALUE);
-
-		// Decorate the environment property
-		final OfficeFloorDecorator decorator = new OfficeFloorDecorator() {
-			@Override
-			public void decorate(OfficeFloorDecoratorContext context)
-					throws Exception {
-				assertEquals("Incorrect class path", CLASS_PATH_ENTRY, context
-						.getRawClassPathEntry());
-				context.setEnvironmentProperty(NAME, VALUE);
-			}
-		};
-
-		// Test
-		this.doTest(command, CLASS_PATH_ENTRY, false, decorator);
+		this.doTest(command, RESOLVED_CLASS_PATH_ENTRY, false, decorator);
 	}
 
 	/**
@@ -179,42 +107,8 @@ public class OfficeFloorExecutionUnitFactoryTest extends OfficeFrameTestCase {
 
 		// Ensure parameter loaded onto command parameter
 		assertEquals("Parameter value not loaded from environment",
-				PARAMETER_VALUE, command.getParameterValues().get(
-						PARAMETER_NAME));
-	}
-
-	/**
-	 * Ensure can configure {@link OfficeFloorCommandParameter} from decorated
-	 * command option.
-	 */
-	public void testDecorateCommandOption() throws Exception {
-		final String CLASS_PATH_ENTRY = "entry";
-		final String NAME = "name";
-		final String VALUE = "value";
-
-		// Create the command expecting command option
-		MockCommand command = this.createCommand("test", new MockInitialiser() {
-			@Override
-			public void initialiseEnvironment(OfficeFloorCommandContext context)
-					throws Exception {
-				context.includeClassPathArtifact(CLASS_PATH_ENTRY);
-			}
-		}, NAME);
-		command.addExepctedParameter(NAME, VALUE);
-
-		// Decorate the environment property
-		final OfficeFloorDecorator decorator = new OfficeFloorDecorator() {
-			@Override
-			public void decorate(OfficeFloorDecoratorContext context)
-					throws Exception {
-				assertEquals("Incorrect class path", CLASS_PATH_ENTRY, context
-						.getRawClassPathEntry());
-				context.addCommandOption(NAME, VALUE);
-			}
-		};
-
-		// Test
-		this.doTest(command, CLASS_PATH_ENTRY, false, decorator);
+				PARAMETER_VALUE,
+				command.getParameterValues().get(PARAMETER_NAME));
 	}
 
 	/**
@@ -238,8 +132,8 @@ public class OfficeFloorExecutionUnitFactoryTest extends OfficeFrameTestCase {
 		// Ensure correct configuration
 		ProcessConfiguration configuration = executionUnit
 				.getProcessConfiguration();
-		assertEquals("Incorrect process name", "test", configuration
-				.getProcessName());
+		assertEquals("Incorrect process name", "test",
+				configuration.getProcessName());
 		String[] jvmOptions = configuration.getJvmOptions();
 		assertEquals("Incorrect number of JVM options", 2, jvmOptions.length);
 		assertEquals("Incorrect first JVM option", "-Done=a", jvmOptions[0]);
@@ -330,8 +224,8 @@ public class OfficeFloorExecutionUnitFactoryTest extends OfficeFrameTestCase {
 	private static void assertExecutionUnit(
 			OfficeFloorExecutionUnit executionUnit, MockCommand command,
 			String additionalClassPath, boolean isSpawnProcess) {
-		assertEquals("Incorrect managed process", executionUnit
-				.getManagedProcess(), command.getManagedProcess());
+		assertEquals("Incorrect managed process",
+				executionUnit.getManagedProcess(), command.getManagedProcess());
 		ProcessConfiguration configuration = executionUnit
 				.getProcessConfiguration();
 		assertEquals("Incorrect process name", command.getCommandName(),

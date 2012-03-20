@@ -21,8 +21,6 @@ package net.officefloor.building.execute;
 import java.io.File;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
-import java.util.Properties;
 
 import net.officefloor.building.classpath.ClassPathFactory;
 import net.officefloor.building.command.OfficeFloorCommandContext;
@@ -124,192 +122,6 @@ public class OfficeFloorCommandContextTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensure can decorate with environment property.
-	 */
-	public void testEnvironmentPropertyDecoration() throws Exception {
-
-		// Property details
-		final String NAME = "name";
-		final String VALUE = "value";
-
-		// Obtain path to jar
-		final String JAR = "test.jar";
-		this.recordReturn(this.classPathFactory,
-				this.classPathFactory.createArtifactClassPath(JAR),
-				new String[] { JAR });
-
-		// Create the decorator
-		final OfficeFloorDecorator decorator = new OfficeFloorDecorator() {
-			@Override
-			public void decorate(OfficeFloorDecoratorContext context)
-					throws Exception {
-				assertEquals("Incorrect entry", JAR,
-						context.getRawClassPathEntry());
-				context.setEnvironmentProperty(NAME, VALUE);
-			}
-		};
-
-		// Create the context with the decorator
-		this.context = this.createContext(decorator);
-
-		// Include jar for decoration
-		this.replayMockObjects();
-		this.context.includeClassPathArtifact(JAR);
-		this.verifyMockObjects();
-
-		// Ensure class path not changed (not decorated)
-		assertNoWarnings(this.context);
-		assertClassPath(this.context, JAR);
-		assertCommandOptions(this.context);
-
-		// Ensure property in command environment
-		assertEnvironment(this.context, NAME, VALUE);
-	}
-
-	/**
-	 * Ensure not override environment property for second decoration.
-	 */
-	public void testNotOverrideEnvironmentPropertyForSecondDecoration()
-			throws Exception {
-
-		// Property details
-		final String NAME = "name";
-		final String VALUE_ONE = "one";
-		final String VALUE_TWO = "two";
-
-		// Obtain path to jar
-		final String JAR = "test.jar";
-		this.recordReturn(this.classPathFactory,
-				this.classPathFactory.createArtifactClassPath(JAR),
-				new String[] { JAR });
-
-		// Create the decorators
-		final OfficeFloorDecorator decoratorOne = new OfficeFloorDecorator() {
-			@Override
-			public void decorate(OfficeFloorDecoratorContext context)
-					throws Exception {
-				context.setEnvironmentProperty(NAME, VALUE_ONE);
-			}
-		};
-		final OfficeFloorDecorator decoratorTwo = new OfficeFloorDecorator() {
-			@Override
-			public void decorate(OfficeFloorDecoratorContext context)
-					throws Exception {
-				context.setEnvironmentProperty(NAME, VALUE_TWO);
-			}
-		};
-
-		// Create the context with the decorators
-		this.context = this.createContext(decoratorOne, decoratorTwo);
-
-		// Include jar for decoration
-		this.replayMockObjects();
-		this.context.includeClassPathArtifact(JAR);
-		this.verifyMockObjects();
-
-		// Ensure class path not changed (not decorated)
-		assertNoWarnings(this.context);
-		assertClassPath(this.context, JAR);
-		assertCommandOptions(this.context);
-
-		// Ensure property in command environment
-		assertEnvironment(this.context, NAME, VALUE_ONE);
-	}
-
-	/**
-	 * Ensure can decorate with command option.
-	 */
-	public void testCommandOptionDecoration() throws Exception {
-
-		// Command option
-		final String NAME = "name";
-		final String VALUE = "value";
-
-		// Obtain path to jar
-		final String JAR = "test.jar";
-		this.recordReturn(this.classPathFactory,
-				this.classPathFactory.createArtifactClassPath(JAR),
-				new String[] { JAR });
-
-		// Create the decorator
-		final OfficeFloorDecorator decorator = new OfficeFloorDecorator() {
-			@Override
-			public void decorate(OfficeFloorDecoratorContext context)
-					throws Exception {
-				assertEquals("Incorrect entry", JAR,
-						context.getRawClassPathEntry());
-				context.addCommandOption(NAME, VALUE);
-			}
-		};
-
-		// Create the context with the decorator
-		this.context = this.createContext(decorator);
-
-		// Include jar for decoration
-		this.replayMockObjects();
-		this.context.includeClassPathArtifact(JAR);
-		this.verifyMockObjects();
-
-		// Ensure class path not changed (not decorated)
-		assertNoWarnings(this.context);
-		assertClassPath(this.context, JAR);
-		assertEnvironment(this.context);
-
-		// Ensure command option
-		assertCommandOptions(this.context, NAME, VALUE);
-	}
-
-	/**
-	 * Ensure can decorate with multiple command option values.
-	 */
-	public void testMultipleCommandOptionValuesDecoration() throws Exception {
-
-		// Command option
-		final String NAME = "name";
-		final String VALUE_ONE = "one";
-		final String VALUE_TWO = "two";
-		final String VALUE_THREE = "three";
-		final String VALUE_FOUR = "four";
-
-		// Obtain path to jar
-		final String JAR = "test.jar";
-		this.recordReturn(this.classPathFactory,
-				this.classPathFactory.createArtifactClassPath(JAR),
-				new String[] { JAR });
-
-		// Create the decorator
-		final OfficeFloorDecorator decorator = new OfficeFloorDecorator() {
-			@Override
-			public void decorate(OfficeFloorDecoratorContext context)
-					throws Exception {
-				assertEquals("Incorrect entry", JAR,
-						context.getRawClassPathEntry());
-				context.addCommandOption(NAME, VALUE_ONE);
-				context.addCommandOption(NAME, VALUE_TWO);
-				context.addCommandOption(NAME, VALUE_THREE);
-				context.addCommandOption(NAME, VALUE_FOUR);
-			}
-		};
-
-		// Create the context with the decorator
-		this.context = this.createContext(decorator);
-
-		// Include jar for decoration
-		this.replayMockObjects();
-		this.context.includeClassPathArtifact(JAR);
-		this.verifyMockObjects();
-
-		// Ensure class path not changed (not decorated)
-		assertNoWarnings(this.context);
-		assertClassPath(this.context, JAR);
-		assertEnvironment(this.context);
-
-		// Ensure command option
-		assertCommandOptions(this.context, NAME, VALUE_ONE + "," + VALUE_TWO
-				+ "," + VALUE_THREE + "," + VALUE_FOUR);
-	}
-
-	/**
 	 * Ensure {@link OfficeFloorDecorator} can override the class path entry.
 	 */
 	public void testDecoratorOverrideClassPathEntry() throws Exception {
@@ -345,8 +157,6 @@ public class OfficeFloorCommandContextTest extends OfficeFrameTestCase {
 		// Ensure class path not changed (not decorated)
 		assertNoWarnings(this.context);
 		assertClassPath(this.context, CLASS_PATH_OVERRIDE);
-		assertEnvironment(this.context);
-		assertCommandOptions(this.context);
 	}
 
 	/**
@@ -385,8 +195,6 @@ public class OfficeFloorCommandContextTest extends OfficeFrameTestCase {
 		// Ensure class path not changed (not decorated)
 		assertNoWarnings(this.context);
 		assertClassPath(this.context, JAR_ONE, JAR_TWO);
-		assertEnvironment(this.context);
-		assertCommandOptions(this.context);
 
 		// Ensure all dependencies able to be decorated
 		assertEquals(
@@ -497,55 +305,6 @@ public class OfficeFloorCommandContextTest extends OfficeFrameTestCase {
 
 		// Ensure correct class path
 		assertEquals(expectedClassPath, actualClassPath);
-	}
-
-	/**
-	 * Asserts the built environment is correct.
-	 * 
-	 * @param context
-	 *            {@link OfficeFloorCommandContext}.
-	 * @param nameValuePairs
-	 *            Expected property name value pairs.
-	 */
-	private static void assertEnvironment(
-			OfficeFloorCommandContextImpl context, String... nameValuePairs) {
-		Properties environment = context.getCommandEnvironment();
-		assertEquals("Incorrect number of properties",
-				(nameValuePairs.length / 2), environment.size());
-		for (int i = 0; i < nameValuePairs.length; i += 2) {
-			String name = nameValuePairs[i];
-			String value = nameValuePairs[i + 1];
-			assertEquals("Incorrect property value for '" + name + "'", value,
-					environment.getProperty(name));
-		}
-	}
-
-	/**
-	 * Asserts the command options are correct.
-	 * 
-	 * @param context
-	 *            OfficeFloorCommandContext.
-	 * @param nameValuesPairs
-	 *            Expected command option and possibly multiple values
-	 *            (separated by comma ',') pairs.
-	 */
-	private static void assertCommandOptions(
-			OfficeFloorCommandContextImpl context, String... nameValuesPairs) {
-		Map<String, List<String>> options = context.getCommandOptions();
-		assertEquals("Incorrect number of options",
-				(nameValuesPairs.length / 2), options.size());
-		for (int i = 0; i < nameValuesPairs.length; i += 2) {
-			String name = nameValuesPairs[i];
-			String[] values = nameValuesPairs[i + 1].split(",");
-			List<String> actual = options.get(name);
-			assertNotNull("Expecting value for option '" + name + "'", actual);
-			assertEquals("Incorrect number of values for option " + name,
-					values.length, actual.size());
-			for (int j = 0; j < values.length; j++) {
-				assertEquals("Incorrect value for option " + name + " index "
-						+ j, values[j], actual.get(j));
-			}
-		}
 	}
 
 }
