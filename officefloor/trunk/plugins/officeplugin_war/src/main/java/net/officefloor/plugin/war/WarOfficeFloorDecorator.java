@@ -33,7 +33,6 @@ import java.util.jar.JarOutputStream;
 
 import net.officefloor.building.decorate.OfficeFloorDecorator;
 import net.officefloor.building.decorate.OfficeFloorDecoratorContext;
-import net.officefloor.plugin.web.http.application.WebAutoWireApplication;
 
 /**
  * {@link OfficeFloorDecorator} for a WAR.
@@ -41,16 +40,6 @@ import net.officefloor.plugin.web.http.application.WebAutoWireApplication;
  * @author Daniel Sagenschneider
  */
 public class WarOfficeFloorDecorator implements OfficeFloorDecorator {
-
-	/**
-	 * {@link System} property for the password file location.
-	 */
-	public static final String SYSTEM_PROPERTY_PASSWORD_FILE_LOCATION = "password.file.location";
-
-	/**
-	 * {@link System} property for the HTTP port.
-	 */
-	public static final String SYSTEM_PROPERTY_HTTP_PORT = "http.port";
 
 	/**
 	 * WEB-INF directory name.
@@ -76,8 +65,7 @@ public class WarOfficeFloorDecorator implements OfficeFloorDecorator {
 	/**
 	 * Directory to contain the public web content.
 	 */
-	public static final String WEB_PUBLIC = WebAutoWireApplication.WEB_PUBLIC_RESOURCES_CLASS_PATH_PREFIX
-			+ "/";
+	public static final String WEB_PUBLIC = "PUBLIC/";
 
 	/*
 	 * ==================== OfficeFloorDecorator ========================

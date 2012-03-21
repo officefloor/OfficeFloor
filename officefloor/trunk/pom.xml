@@ -48,6 +48,13 @@
 				<role>Graphics</role>
 			</roles>
 		</contributor>
+		<contributor>
+			<name>Matthew Brown</name>
+			<email>yellowduckphoto@users.sourceforge.net</email>
+			<roles>
+				<role>Marketing</role>
+			</roles>
+		</contributor>
 	</contributors>
 	<distributionManagement>
 		<site>
@@ -63,6 +70,7 @@
 		<module>eclipse</module>
 		<module>maven</module>
 		<module>tutorials</module>
+		<module>package</module>
 	</modules>
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -112,6 +120,13 @@
 			<dependency>
 				<groupId>net.officefloor.core</groupId>
 				<artifactId>officebuilding</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>net.officefloor.core</groupId>
+				<artifactId>officebuilding</artifactId>
+				<classifier>release</classifier>
+				<type>zip</type>
 				<version>${project.version}</version>
 			</dependency>
 			<!-- Plugins -->
@@ -285,6 +300,18 @@
 			<dependency>
 				<groupId>net.officefloor.maven</groupId>
 				<artifactId>maven-site-aggregate-plugin</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<!-- Package -->
+			<dependency>
+				<groupId>net.officefloor.package</groupId>
+				<artifactId>package</artifactId>
+				<version>${project.version}</version>
+				<type>pom</type>
+			</dependency>
+			<dependency>
+				<groupId>net.officefloor.package</groupId>
+				<artifactId>officefloor</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 

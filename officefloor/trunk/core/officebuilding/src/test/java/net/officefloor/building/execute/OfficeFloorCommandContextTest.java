@@ -19,8 +19,6 @@
 package net.officefloor.building.execute;
 
 import java.io.File;
-import java.util.LinkedList;
-import java.util.List;
 
 import net.officefloor.building.classpath.ClassPathFactory;
 import net.officefloor.building.command.OfficeFloorCommandContext;
@@ -129,11 +127,8 @@ public class OfficeFloorCommandContextTest extends OfficeFrameTestCase {
 		// Override class path entry
 		final String CLASS_PATH_OVERRIDE = "/test/override.jar";
 
-		// Obtain path to jar
+		// Path to jar
 		final String JAR = "test.jar";
-		this.recordReturn(this.classPathFactory,
-				this.classPathFactory.createArtifactClassPath(JAR),
-				new String[] { JAR });
 
 		// Create the decorator
 		final OfficeFloorDecorator decorator = new OfficeFloorDecorator() {
@@ -151,7 +146,7 @@ public class OfficeFloorCommandContextTest extends OfficeFrameTestCase {
 
 		// Include jar for decoration
 		this.replayMockObjects();
-		this.context.includeClassPathArtifact(JAR);
+		this.context.includeClassPathEntry(JAR);
 		this.verifyMockObjects();
 
 		// Ensure class path not changed (not decorated)
@@ -160,9 +155,48 @@ public class OfficeFloorCommandContextTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensure {@link OfficeFloorDecorator} can decorate all dependencies.
+	 * Ensure {@link OfficeFloorDecorator} can override the artifact
+	 * dependencies.
 	 */
-	public void testDecoratingAllDependencies() throws Exception {
+	public void testDecoratorOverrideArtifactDependencies() throws Exception {
+
+		// Override class path entry
+		final String CLASS_PATH_OVERRIDE = "/test/override.jar";
+
+		// Path to artifact
+		final String ARTIFACT = "test.jar";
+
+		// Create the decorator
+		final OfficeFloorDecorator decorator = new OfficeFloorDecorator() {
+			@Override
+			public void decorate(OfficeFloorDecoratorContext context)
+					throws Exception {
+				assertEquals("Incorrect entry", ARTIFACT,
+						context.getRawClassPathEntry());
+				context.includeResolvedClassPathEntry(CLASS_PATH_OVERRIDE);
+			}
+		};
+
+		// Create the context with the decorator
+		this.context = this.createContext(decorator);
+
+		// Include jar for decoration
+		this.replayMockObjects();
+		this.context.includeClassPathArtifact(ARTIFACT);
+		this.verifyMockObjects();
+
+		// Ensure class path not changed (not decorated)
+		assertNoWarnings(this.context);
+		assertClassPath(this.context, CLASS_PATH_OVERRIDE);
+	}
+
+	/**
+	 * Ensure {@link OfficeFloorDecorator} will not resolve remaining
+	 * dependencies of a reference artifact should the reference artifact be
+	 * decorated.
+	 */
+	public void testDecoratorOverrideReferencedArtifactResolution()
+			throws Exception {
 
 		// Obtain paths to jars
 		final String JAR_ONE = "one.jar";
@@ -174,12 +208,13 @@ public class OfficeFloorCommandContextTest extends OfficeFrameTestCase {
 						"jar", "test"), new String[] { JAR_ONE, JAR_TWO });
 
 		// Create the decorator
-		final List<String> rawClassPathEntries = new LinkedList<String>();
 		final OfficeFloorDecorator decorator = new OfficeFloorDecorator() {
 			@Override
 			public void decorate(OfficeFloorDecoratorContext context)
 					throws Exception {
-				rawClassPathEntries.add(context.getRawClassPathEntry());
+				// Will only include the first resolved class path entry
+				context.includeResolvedClassPathEntry(context
+						.getRawClassPathEntry());
 			}
 		};
 
@@ -192,18 +227,9 @@ public class OfficeFloorCommandContextTest extends OfficeFrameTestCase {
 				"jar", "test");
 		this.verifyMockObjects();
 
-		// Ensure class path not changed (not decorated)
+		// Ensure only the first class path entry included due to decoration
 		assertNoWarnings(this.context);
-		assertClassPath(this.context, JAR_ONE, JAR_TWO);
-
-		// Ensure all dependencies able to be decorated
-		assertEquals(
-				"Incorrect number of raw class path entries for decoration", 2,
-				rawClassPathEntries.size());
-		assertEquals("Incorrect first raw class path entry", JAR_ONE,
-				rawClassPathEntries.get(0));
-		assertEquals("Incorrect second raw class path entry", JAR_TWO,
-				rawClassPathEntries.get(1));
+		assertClassPath(this.context, JAR_ONE);
 	}
 
 	/**

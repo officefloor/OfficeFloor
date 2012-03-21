@@ -1,0 +1,27 @@
+<assembly>
+	<id>release</id>
+	<formats>
+		<!-- Release bundles -->
+		<format>zip</format>
+		<format>tar.gz</format>
+		<!-- Provide directory for testing -->
+		<format>dir</format>
+	</formats>
+	<dependencySets>
+		<dependencySet>
+			<!-- OfficeBuilding Layout -->
+			<outputDirectory>/</outputDirectory>
+			<unpack>true</unpack>
+			<includes>
+				<include>net.officefloor.core:officebuilding:zip:release</include>
+			</includes>
+		</dependencySet>
+		<dependencySet>
+			<!-- OfficeFloor core jars -->
+			<outputDirectory>lib</outputDirectory>
+			<excludes>
+				<exclude>net.officefloor.core:officebuilding:zip:release</exclude>
+			</excludes>
+		</dependencySet>
+	</dependencySets>
+</assembly>
