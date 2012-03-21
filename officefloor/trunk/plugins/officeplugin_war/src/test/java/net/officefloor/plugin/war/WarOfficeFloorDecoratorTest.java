@@ -29,7 +29,9 @@ import java.util.jar.JarEntry;
 import java.util.jar.JarInputStream;
 
 import net.officefloor.building.decorate.OfficeFloorDecoratorContext;
+import net.officefloor.console.OfficeBuilding;
 import net.officefloor.frame.test.OfficeFrameTestCase;
+import net.officefloor.plugin.web.http.application.WebAutoWireApplication;
 
 /**
  * Tests the {@link WarOfficeFloorDecoratorTest}.
@@ -47,6 +49,21 @@ public class WarOfficeFloorDecoratorTest extends OfficeFrameTestCase {
 	 * Maps an expected archive directory name to resolved archive name.
 	 */
 	private final Map<String, String> archiveNameMappings = new HashMap<String, String>();
+
+	/**
+	 * <p>
+	 * Ensure the same class path directory is used for public files as
+	 * {@link WebAutoWireApplication}.
+	 * <p>
+	 * This test ensures they stay the same and allows this project to not have
+	 * to reference the {@link WebAutoWireApplication} at run time (pulling in
+	 * their dependencies for the {@link OfficeBuilding}).
+	 */
+	public void testMatchingPublicClassPathDirectory() {
+		assertEquals("Incorrect public class path directory",
+				WebAutoWireApplication.WEB_PUBLIC_RESOURCES_CLASS_PATH_PREFIX
+						+ "/", WarOfficeFloorDecorator.WEB_PUBLIC);
+	}
 
 	/**
 	 * Ensure can restructure WAR.
@@ -147,7 +164,6 @@ public class WarOfficeFloorDecoratorTest extends OfficeFrameTestCase {
 	private void doTest(String rawClassPathEntry, String expectedDirectoryName,
 			String expectedHttpPort, String expectedPasswordFileLocation)
 			throws Exception {
-
 
 		// Run decoration
 		new WarOfficeFloorDecorator()

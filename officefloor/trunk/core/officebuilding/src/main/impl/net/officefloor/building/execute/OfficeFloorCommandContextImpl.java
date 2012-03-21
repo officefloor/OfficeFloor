@@ -131,12 +131,15 @@ public class OfficeFloorCommandContextImpl implements OfficeFloorCommandContext 
 		this.classPathWarnings.add(description + " (" + causeMessage + ")");
 	}
 
-	/*
-	 * ======================= OfficeFloorCommandContext ======================
+	/**
+	 * Obtains the decorated class path for the input class path entry.
+	 * 
+	 * @param classPathEntry
+	 *            Class path entry to potentially decorate.
+	 * @return Decorated class path or <code>null</code> if class path entry not
+	 *         decorated.
 	 */
-
-	@Override
-	public void includeClassPathEntry(String classPathEntry) {
+	private List<String> getDecoratedClassPath(String classPathEntry) {
 
 		// Create the decorator context
 		DecoratorContext context = new DecoratorContext(classPathEntry);
@@ -152,21 +155,80 @@ public class OfficeFloorCommandContextImpl implements OfficeFloorCommandContext 
 			}
 		}
 
-		// Determine if class path entry overridden
-		if (context.resolvedClassPathEntries.size() > 0) {
-			// Include the overridden class path entries
-			for (String resolvedClassPathEntry : context.resolvedClassPathEntries) {
+		// Return based on whether decorated class path
+		return (context.resolvedClassPathEntries.size() > 0 ? context.resolvedClassPathEntries
+				: null);
+	}
+
+	/**
+	 * Loads the decorated class path.
+	 * 
+	 * @param classPathEntry
+	 *            Class path entry to potentially decorate.
+	 * @return <code>true</code> if loaded the decorated class path.
+	 *         <code>false</code> if not decorated and will not have loaded
+	 *         class path entries.
+	 */
+	private boolean loadDecoratedClassPath(String classPathEntry) {
+
+		// Obtain the decorated class path
+		List<String> decoratedClassPath = this
+				.getDecoratedClassPath(classPathEntry);
+
+		// Determine if have decorated class path
+		if (decoratedClassPath != null) {
+			// Include the decorated class path entries
+			for (String resolvedClassPathEntry : decoratedClassPath) {
 				this.classPathEntries.add(resolvedClassPathEntry);
 			}
-		} else {
-			// Not overridden so include class path entry
+
+			// Loaded the decorated class path
+			return true;
+		}
+
+		// As here, class path entry was not decorated
+		return false;
+	}
+
+	/*
+	 * ======================= OfficeFloorCommandContext ======================
+	 */
+
+	@Override
+	public void includeClassPathEntry(String classPathEntry) {
+		try {
+
+			// Attempt to load the decorated class path
+			if (this.loadDecoratedClassPath(classPathEntry)) {
+				return; // loaded decorated class path
+			}
+
+			// Not decorated so include class path entry as is
 			this.classPathEntries.add(classPathEntry);
+
+		} catch (Exception ex) {
+			// Propagate failure back to execution unit
+			throw new ClassPathError(ex);
 		}
 	}
 
 	@Override
 	public void includeClassPathArtifact(String artifactLocation) {
 		try {
+
+			// Attempt to load the decorated class path
+			if (this.loadDecoratedClassPath(artifactLocation)) {
+				/*
+				 * As class path was decorated do not undertake artifact
+				 * resolution.
+				 * 
+				 * The example case is a WAR file that will have its decoration
+				 * extract the dependencies for use and therefore should not
+				 * have its dependent artifacts attempted to be resolved as
+				 * would create duplicate entries on the class path.
+				 */
+				return;
+			}
 
 			// Obtain the class path entries
 			String[] classPathEntries = this.classPathFactory
@@ -193,7 +255,15 @@ public class OfficeFloorCommandContextImpl implements OfficeFloorCommandContext 
 					.createArtifactClassPath(groupId, artifactId, version,
 							type, classifier);
 
-			// Include the class path entries
+			// Determine if decorate the artifact (should always be first entry)
+			if (classPathEntries.length > 0) {
+				if (this.loadDecoratedClassPath(classPathEntries[0])) {
+					// Decorated the artifact so do not include its dependencies
+					return;
+				}
+			}
+
+			// Include the resolved class path entries
 			for (String classPathEntry : classPathEntries) {
 				this.includeClassPathEntry(classPathEntry);
 			}
