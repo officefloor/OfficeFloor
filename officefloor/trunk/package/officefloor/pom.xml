@@ -12,6 +12,10 @@
 	<description>Server for running OfficeFloor application</description>
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<packageProperties>WoOF
+officefloorsource=net.officefloor.plugin.woof.WoofOfficeFloorSource
+officefloor=WoOF
+</packageProperties>
 	</properties>
 	<build>
 		<plugins>
@@ -42,10 +46,12 @@
 			<artifactId>officebuilding</artifactId>
 			<classifier>release</classifier>
 			<type>zip</type>
+			<version>${project.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>net.officefloor.plugin</groupId>
 			<artifactId>officeplugin_war</artifactId>
+			<version>${project.version}</version>
 		</dependency>
 	</dependencies>
 </project>

@@ -1,12 +1,12 @@
 <assembly>
 	<id>release</id>
 	<formats>
-		<!-- Release bundles -->
+		<!-- Raw content ready for packaging -->
 		<format>zip</format>
-		<format>tar.gz</format>
 		<!-- Provide directory for testing -->
 		<format>dir</format>
 	</formats>
+	<includeBaseDirectory>false</includeBaseDirectory>
 	<fileSets>
 		<fileSet>
 			<!-- boot.jar -->

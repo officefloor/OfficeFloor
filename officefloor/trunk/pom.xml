@@ -122,13 +122,6 @@
 				<artifactId>officebuilding</artifactId>
 				<version>${project.version}</version>
 			</dependency>
-			<dependency>
-				<groupId>net.officefloor.core</groupId>
-				<artifactId>officebuilding</artifactId>
-				<classifier>release</classifier>
-				<type>zip</type>
-				<version>${project.version}</version>
-			</dependency>
 			<!-- Plugins -->
 			<dependency>
 				<groupId>net.officefloor.plugin</groupId>
