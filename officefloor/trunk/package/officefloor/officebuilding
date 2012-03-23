@@ -10,7 +10,7 @@
 set -e
 
 # Change to release directory package ('*' to match current version as should only be one version being built)
-cd target/officefloor-*-release/officefloor-*/bin
+cd target/OfficeFloor-*-release/OfficeFloor-*/bin
 
 # Delegate to the bin executable
 . ./officebuilding $@
