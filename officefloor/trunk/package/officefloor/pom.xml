@@ -7,14 +7,14 @@
 		<artifactId>package</artifactId>
 		<version>2.1.0</version>
 	</parent>
-	<artifactId>officefloor</artifactId>
+	<artifactId>OfficeFloor</artifactId>
 	<name>OfficeFloor Server</name>
 	<description>Server for running OfficeFloor application</description>
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<packageProperties>WoOF
-officefloorsource=net.officefloor.plugin.woof.WoofOfficeFloorSource
-officefloor=WoOF
+			officefloorsource=net.officefloor.plugin.woof.WoofOfficeFloorSource
+			officefloor=WoOF
 </packageProperties>
 	</properties>
 	<build>
@@ -38,6 +38,80 @@ officefloor=WoOF
 					</execution>
 				</executions>
 			</plugin>
+			<plugin>
+				<!-- Integration test setup and teardown -->
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-antrun-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>integration test setup</id>
+						<phase>pre-integration-test</phase>
+						<goals>
+							<goal>run</goal>
+						</goals>
+						<configuration>
+							<target>
+								<property name="binDir"
+									value="${basedir}/target/OfficeFloor-${project.version}-release/OfficeFloor-${project.version}/bin" />
+
+								<echo>Starting OfficeBuilding</echo>
+								<chmod file="${binDir}/officebuilding" perm="555" />
+								<exec dir="${binDir}" executable="${binDir}/officebuilding"
+									spawn="true">
+									<arg value="start" />
+								</exec>
+								<sleep seconds="5" /> <!-- allow time to start -->
+
+								<echo>Opening FeatureApp</echo>
+								<exec dir="${binDir}" executable="${binDir}/officebuilding"
+									failonerror="true">
+									<arg value="-a" />
+									<arg
+										value="net.officefloor.tutorial:FeatureApp:war:${project.version}" />
+									<arg value="open" />
+								</exec>
+							</target>
+						</configuration>
+					</execution>
+					<execution>
+						<id>integration test teardown</id>
+						<phase>post-integration-test</phase>
+						<goals>
+							<goal>run</goal>
+						</goals>
+						<configuration>
+							<target>
+								<property name="binDir"
+									value="${basedir}/target/OfficeFloor-${project.version}-release/OfficeFloor-${project.version}/bin" />
+
+								<echo>Stop OfficeBuilding</echo>
+								<exec dir="${binDir}" executable="${binDir}/officebuilding"
+									failonerror="true">
+									<arg value="stop" />
+								</exec>
+							</target>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-failsafe-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>failsafe-integration-test</id>
+						<goals>
+							<goal>integration-test</goal>
+						</goals>
+					</execution>
+					<execution>
+						<id>failsafe-verify</id>
+						<goals>
+							<goal>verify</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
 		</plugins>
 	</build>
 	<dependencies>
@@ -52,6 +126,11 @@ officefloor=WoOF
 			<groupId>net.officefloor.plugin</groupId>
 			<artifactId>officeplugin_war</artifactId>
 			<version>${project.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.httpcomponents</groupId>
+			<artifactId>httpclient</artifactId>
+			<scope>test</scope>
 		</dependency>
 	</dependencies>
 </project>

@@ -304,7 +304,7 @@
 			</dependency>
 			<dependency>
 				<groupId>net.officefloor.package</groupId>
-				<artifactId>officefloor</artifactId>
+				<artifactId>OfficeFloor</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 
