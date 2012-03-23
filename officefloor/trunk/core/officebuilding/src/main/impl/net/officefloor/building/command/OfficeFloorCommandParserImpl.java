@@ -124,8 +124,8 @@ public class OfficeFloorCommandParserImpl implements OfficeFloorCommandParser {
 					throw new IllegalStateException("Conflict in parameter '"
 							+ name + "' requiring value");
 				}
-				this.parameterNameToRequireValue.put(name, Boolean
-						.valueOf(isRequireValue));
+				this.parameterNameToRequireValue.put(name,
+						Boolean.valueOf(isRequireValue));
 
 				// Specify short name (if available)
 				if (shortName != null) {
@@ -232,7 +232,7 @@ public class OfficeFloorCommandParserImpl implements OfficeFloorCommandParser {
 		} else {
 			// Multiple commands (and ensure command specified)
 			if (commandIndex < 0) {
-				throw new OfficeFloorCommandParseException(
+				throw new OfficeFloorNoCommandsException(
 						"Must specify a command");
 			}
 
