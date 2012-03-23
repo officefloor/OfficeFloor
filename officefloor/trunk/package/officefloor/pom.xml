@@ -64,7 +64,7 @@
 
 								<echo>Opening FeatureApp</echo>
 								<exec dir="${binDir}" executable="${binDir}/officebuilding"
-									failonerror="true">
+									failonerror="false">
 									<arg value="-a" />
 									<arg
 										value="net.officefloor.tutorial:FeatureApp:war:${project.version}" />
@@ -86,7 +86,7 @@
 
 								<echo>Stop OfficeBuilding</echo>
 								<exec dir="${binDir}" executable="${binDir}/officebuilding"
-									failonerror="true">
+									failonerror="true"> <!-- must always stop -->
 									<arg value="stop" />
 								</exec>
 							</target>
