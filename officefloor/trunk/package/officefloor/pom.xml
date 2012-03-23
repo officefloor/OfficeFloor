@@ -112,6 +112,29 @@
 					</execution>
 				</executions>
 			</plugin>
+			<plugin>
+				<!-- Test the install pom.xml (as OfficeFloor should now be built) -->
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-invoker-plugin</artifactId>
+				<configuration>
+					<projectsDirectory>${project.basedir}/../../src/site/resources</projectsDirectory>
+					<cloneProjectsTo>${project.build.directory}/install</cloneProjectsTo>
+					<pomIncludes>
+						<pomInclude>pom.xml</pomInclude>
+					</pomIncludes>
+					<postBuildHookScript>../../verify.bsh</postBuildHookScript>
+				</configuration>
+				<executions>
+					<execution>
+						<id>test-install</id>
+						<goals>
+							<!-- Make this OfficeFloor release available -->
+							<goal>install</goal>
+							<goal>run</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
 		</plugins>
 	</build>
 	<dependencies>
