@@ -1270,6 +1270,12 @@
 			</activation>
 			<repositories>
 				<repository>
+					<!-- Maven Central (first) -->
+					<id>central</id>
+					<name>Maven central</name>
+					<url>http://repo1.maven.org/maven2/</url>
+				</repository>
+				<repository>
 					<!-- OfficeFloor -->
 					<id>maven2-repository.officefloor.net</id>
 					<name>OfficeFloor Repository for Maven</name>
@@ -1301,6 +1307,12 @@
 				</repository>
 			</repositories>
 			<pluginRepositories>
+				<pluginRepository>
+					<!-- Maven Central (first) -->
+					<id>central</id>
+					<name>Maven central</name>
+					<url>http://repo1.maven.org/maven2/</url>
+				</pluginRepository>
 				<pluginRepository>
 					<!-- OfficeFloor -->
 					<id>maven2-plugin-repository.officefloor.net</id>

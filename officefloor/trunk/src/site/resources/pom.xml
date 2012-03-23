@@ -39,8 +39,8 @@
 							<outputDirectory>${java.io.tmpdir}</outputDirectory>
 							<artifactItems>
 								<artifactItem>
-									<groupId>net.officefloor.core</groupId>
-									<artifactId>officebuilding</artifactId>
+									<groupId>net.officefloor.package</groupId>
+									<artifactId>OfficeFloor</artifactId>
 									<version>${install.version}</version>
 									<type>zip</type>
 									<classifier>release</classifier>
@@ -62,14 +62,17 @@
 							<goal>run</goal>
 						</goals>
 						<configuration>
-							<tasks>
+							<target>
+								<property name="install.dirname" value="OfficeFloor-${install.version}" />
+
 								<!-- Copy the files for install -->
-								<copy todir="${basedir}">
-									<fileset dir="${java.io.tmpdir}/officebuilding-${install.version}/" />
+								<mkdir dir="${basedir}/${install.dirname}" />
+								<copy todir="${basedir}/${install.dirname}">
+									<fileset dir="${java.io.tmpdir}/${install.dirname}/" />
 								</copy>
 								<!-- Ensure bin files are executable -->
-								<chmod dir="${basedir}/bin" includes="**" perm="555" />
-							</tasks>
+								<chmod dir="${basedir}/${install.dirname}/bin" includes="**" perm="555" />
+							</target>
 						</configuration>
 					</execution>
 				</executions>
