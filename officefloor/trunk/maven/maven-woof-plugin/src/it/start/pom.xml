@@ -8,6 +8,11 @@
 	<description>Tests the WoOF maven plugin</description>
 	<dependencies>
 		<dependency>
+			<groupId>net.officefloor.plugin</groupId>
+			<artifactId>officeplugin_woof</artifactId>
+			<version>@project.version@</version>
+		</dependency>
+		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
 			<version>3.8.2</version>
