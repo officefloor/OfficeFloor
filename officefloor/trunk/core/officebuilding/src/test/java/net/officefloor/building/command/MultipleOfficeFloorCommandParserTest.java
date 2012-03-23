@@ -39,8 +39,8 @@ public class MultipleOfficeFloorCommandParserTest extends
 			fail("Should not parse");
 		} catch (IllegalStateException ex) {
 			assertEquals("Incorrect cause",
-					"Conflict in parameter 'option' requiring value", ex
-							.getMessage());
+					"Conflict in parameter 'option' requiring value",
+					ex.getMessage());
 		}
 	}
 
@@ -56,22 +56,22 @@ public class MultipleOfficeFloorCommandParserTest extends
 			fail("Should not parse");
 		} catch (IllegalStateException ex) {
 			assertEquals("Incorrect cause",
-					"Conflict in parameter 'o' requiring value", ex
-							.getMessage());
+					"Conflict in parameter 'o' requiring value",
+					ex.getMessage());
 		}
 	}
 
 	/**
 	 * Must have command for multiple commands.
 	 */
-	public void testNoCommand() {
+	public void testNoCommand() throws Exception {
 		this.record_Factory("command");
 		try {
 			this.doTest("");
 			fail("Should not parse");
-		} catch (OfficeFloorCommandParseException ex) {
-			assertEquals("Incorrect cause", "Must specify a command", ex
-					.getMessage());
+		} catch (OfficeFloorNoCommandsException ex) {
+			assertEquals("Incorrect cause", "Must specify a command",
+					ex.getMessage());
 		}
 	}
 
@@ -113,28 +113,28 @@ public class MultipleOfficeFloorCommandParserTest extends
 	/**
 	 * Must have command even if flags provided.
 	 */
-	public void testFlagButNoCommand() {
+	public void testFlagButNoCommand() throws Exception {
 		this.record_Factory("command", "option", "o", false);
 		try {
 			this.doTest("-o");
 			fail("Should not parse");
-		} catch (OfficeFloorCommandParseException ex) {
-			assertEquals("Incorrect cause", "Must specify a command", ex
-					.getMessage());
+		} catch (OfficeFloorNoCommandsException ex) {
+			assertEquals("Incorrect cause", "Must specify a command",
+					ex.getMessage());
 		}
 	}
 
 	/**
 	 * Must have command even if options provided.
 	 */
-	public void testOptionButNoCommand() {
+	public void testOptionButNoCommand() throws Exception {
 		this.record_Factory("command", "option", "o", true);
 		try {
 			this.doTest("-o option");
 			fail("Should not parse");
-		} catch (OfficeFloorCommandParseException ex) {
-			assertEquals("Incorrect cause", "Must specify a command", ex
-					.getMessage());
+		} catch (OfficeFloorNoCommandsException ex) {
+			assertEquals("Incorrect cause", "Must specify a command",
+					ex.getMessage());
 		}
 	}
 
@@ -342,8 +342,8 @@ public class MultipleOfficeFloorCommandParserTest extends
 			this.doTest("--flag -Done=a command");
 			fail("Should not parse");
 		} catch (OfficeFloorCommandParseException ex) {
-			assertEquals("Incorrect cause", "Unknown option -Done=a", ex
-					.getMessage());
+			assertEquals("Incorrect cause", "Unknown option -Done=a",
+					ex.getMessage());
 		}
 	}
 
@@ -357,8 +357,8 @@ public class MultipleOfficeFloorCommandParserTest extends
 			this.doTest("-f -Done=a command");
 			fail("Should not parse");
 		} catch (OfficeFloorCommandParseException ex) {
-			assertEquals("Incorrect cause", "Unknown option -Done=a", ex
-					.getMessage());
+			assertEquals("Incorrect cause", "Unknown option -Done=a",
+					ex.getMessage());
 		}
 	}
 

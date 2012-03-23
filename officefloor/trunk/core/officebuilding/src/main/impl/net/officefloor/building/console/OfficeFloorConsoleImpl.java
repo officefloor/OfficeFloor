@@ -32,6 +32,7 @@ import net.officefloor.building.command.OfficeFloorCommandParameter;
 import net.officefloor.building.command.OfficeFloorCommandParseException;
 import net.officefloor.building.command.OfficeFloorCommandParser;
 import net.officefloor.building.command.OfficeFloorCommandParserImpl;
+import net.officefloor.building.command.OfficeFloorNoCommandsException;
 import net.officefloor.building.command.RemoteRepositoryUrlsOfficeFloorCommandParameter;
 import net.officefloor.building.command.parameters.RemoteRepositoryUrlsOfficeFloorCommandParameterImpl;
 import net.officefloor.building.decorate.OfficeFloorDecorator;
@@ -81,6 +82,11 @@ public class OfficeFloorConsoleImpl implements OfficeFloorConsole {
 	private final OfficeFloorDecorator[] decorators;
 
 	/**
+	 * {@link HelpOfficeFloorCommandFactory}.
+	 */
+	private final HelpOfficeFloorCommandFactory helpCommandFactory;
+
+	/**
 	 * Initiate.
 	 * 
 	 * @param scriptName
@@ -106,13 +112,17 @@ public class OfficeFloorConsoleImpl implements OfficeFloorConsole {
 					commandFactories[0]);
 			this.parser = new OfficeFloorCommandParserImpl(commandWithHelp);
 			this.commandFactories = new OfficeFloorCommandFactory[] { commandWithHelp };
+			this.helpCommandFactory = null; // no help as always a command
+
 		} else {
+			// Multiple commands so include help
+			this.helpCommandFactory = new HelpOfficeFloorCommandFactory(null);
+
 			// Multiple commands (+1 to include help command)
 			this.commandFactories = new OfficeFloorCommandFactory[commandFactories.length + 1];
 			System.arraycopy(commandFactories, 0, this.commandFactories, 0,
 					commandFactories.length);
-			this.commandFactories[commandFactories.length] = new HelpOfficeFloorCommandFactory(
-					null);
+			this.commandFactories[commandFactories.length] = this.helpCommandFactory;
 			this.parser = new OfficeFloorCommandParserImpl(
 					this.commandFactories);
 		}
@@ -163,6 +173,13 @@ public class OfficeFloorConsoleImpl implements OfficeFloorConsole {
 		OfficeFloorCommand[] commands;
 		try {
 			commands = this.parser.parseCommands(arguments);
+
+		} catch (OfficeFloorNoCommandsException ex) {
+			// Provide help message as no command
+			OfficeFloorCommand helpCommand = this.helpCommandFactory
+					.createCommand();
+			commands = new OfficeFloorCommand[] { helpCommand };
+
 		} catch (OfficeFloorCommandParseException ex) {
 			// Failed to parse commands
 			this.writeErr(err, ex);
