@@ -35,7 +35,7 @@
 		<!-- Ensure pom.xml install using latest version -->
 		<file>
 			<location>src/site/resources/pom.xml</location>
-			<contains><![CDATA[<version>${project.version}</version>(\s)*</package>]]></contains>
+			<contains><![CDATA[<version>${project.version}</version>(\s)*<packaging>]]></contains>
 		</file>
 		
 		<!-- Ensure release notes for latest -->
