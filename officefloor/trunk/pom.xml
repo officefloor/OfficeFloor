@@ -83,7 +83,7 @@
 		<jetty-version>7.1.5.v20100705</jetty-version>
 		<gwt-version>2.4.0</gwt-version>
 		<syncrpc-version>0.3</syncrpc-version>
-		<datanucleus-version>3.0.5</datanucleus-version>
+		<datanucleus-version>3.0.8</datanucleus-version>
 	</properties>
 	<dependencyManagement>
 		<dependencies>
@@ -739,7 +739,15 @@
 				<plugin>
 					<groupId>org.datanucleus</groupId>
 					<artifactId>maven-datanucleus-plugin</artifactId>
-					<version>3.0.1</version>
+					<version>3.0.2</version>
+					<dependencies>
+						<!-- Ensure enhancing uses same version -->
+						<dependency>
+							<groupId>org.datanucleus</groupId>
+							<artifactId>datanucleus-core</artifactId>
+							<version>${datanucleus-version}</version>
+						</dependency>
+					</dependencies>
 				</plugin>
 			</plugins>
 		</pluginManagement>
