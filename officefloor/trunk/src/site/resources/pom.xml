@@ -4,7 +4,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>net.officefloor</groupId>
 	<artifactId>install</artifactId>
-	<version>${install.version}</version>
+	<version>2.1.0</version>
 	<packaging>pom</packaging>
 	<name>OfficeFloor Install</name>
 	<description>OfficeFloor installation pom</description>
@@ -21,13 +21,15 @@
 		</repository>
 	</repositories>
 	<properties>
-		<install.version>2.1.0</install.version>
+		<install.version>${project.version}</install.version>
 	</properties>
 	<build>
 		<plugins>
 			<plugin>
 				<!-- Download and unpack OfficeFloor to tmp directory -->
+				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-dependency-plugin</artifactId>
+				<version>2.4</version>
 				<executions>
 					<execution>
 						<id>Download and unpack OfficeFloor to tmp</id>
@@ -53,7 +55,9 @@
 			</plugin>
 			<plugin>
 				<!-- Copy OfficeFloor files for install -->
+				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-antrun-plugin</artifactId>
+				<version>1.7</version>
 				<executions>
 					<execution>
 						<id>Install OfficeFloor</id>
@@ -71,7 +75,8 @@
 									<fileset dir="${java.io.tmpdir}/${install.dirname}/" />
 								</copy>
 								<!-- Ensure bin files are executable -->
-								<chmod dir="${basedir}/${install.dirname}/bin" includes="**" perm="555" />
+								<chmod dir="${basedir}/${install.dirname}/bin" includes="**"
+									perm="555" />
 							</target>
 						</configuration>
 					</execution>

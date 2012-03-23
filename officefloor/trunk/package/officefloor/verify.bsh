@@ -3,13 +3,26 @@
 import java.io.*;
 
 // Log verifying installation
-System.out.println("Verifying install");
+System.out.println("Verifying install from basedir " + basedir.getAbsolutePath());
 
 // Method to simplify verifying files exist
 void verifyFileExists(String fileName, boolean isExecutable) {
+
+	// Find the OfficeFloor extracted directory
+	File extractDir = null;
+	for (File checkFile : basedir.listFiles()) {
+		if (checkFile.getName().startsWith("OfficeFloor-")) {
+			extractDir = checkFile;
+		}
+	}
+	if ( extractDir == null ) {
+		throw new FileNotFoundException("Unable to find OfficeFloor extracted directory");
+	}
+
+	// Verify file exists
 	System.out.print("    " + fileName);
 	System.out.flush();
-	File file = new File(basedir, fileName); 
+	File file = new File(extractDir, fileName); 
 	if ( !file.isFile() ) {
 		throw new FileNotFoundException("Missing expected file: " + file.getName() + "  [" + file.getPath() + "]");
 	}
