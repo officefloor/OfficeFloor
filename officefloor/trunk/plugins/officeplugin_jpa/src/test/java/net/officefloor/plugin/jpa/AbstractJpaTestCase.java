@@ -70,13 +70,18 @@ public abstract class AbstractJpaTestCase extends OfficeFrameTestCase {
 		// Close any OfficeFloor instances
 		AutoWireManagement.closeAllOfficeFloors();
 
-		// Stop factory
-		this.factory.close();
+		try {
+			// Stop factory
+			this.factory.close();
 
-		// Ensure destroy database
-		Statement statement = this.connection.createStatement();
-		statement.execute("SHUTDOWN");
-		this.connection.close();
+		} finally {
+			// Ensure destroy database
+			if (this.connection != null) {
+				Statement statement = this.connection.createStatement();
+				statement.execute("SHUTDOWN IMMEDIATELY");
+				this.connection.close();
+			}
+		}
 	}
 
 	/**

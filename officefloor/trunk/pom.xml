@@ -83,7 +83,7 @@
 		<jetty-version>7.1.5.v20100705</jetty-version>
 		<gwt-version>2.4.0</gwt-version>
 		<syncrpc-version>0.3</syncrpc-version>
-		<datanucleus-version>3.0.8</datanucleus-version>
+		<datanucleus-version>3.0.7</datanucleus-version>
 	</properties>
 	<dependencyManagement>
 		<dependencies>
