@@ -219,7 +219,7 @@ public class SocketListener<CH extends ConnectionHandler>
 		// Listen on the socket.
 		// This is outside locks so that other connections may be registered
 		// while waiting. On registering a connection this will be waked up.
-		this.selector.select(10000); // 10 seconds
+		this.selector.select(1000); // 1 second
 
 		// Synchronising at this point as may be removing connections altering
 		// counts that the registerConnection utilises.
