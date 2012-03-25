@@ -63,6 +63,7 @@ public class Template implements Serializable {
 	public String getDatabaseThreadName() {
 		return this.databaseThreadName;
 	}
+
 	// END SNIPPET: values
 
 	// START SNIPPET: cache
@@ -93,6 +94,7 @@ public class Template implements Serializable {
 	public void setDisplayCode(@Parameter LetterEncryption encryption) {
 		this.displayCode = encryption;
 	}
+
 	// END SNIPPET: cache
 
 	// START SNIPPET: database
@@ -114,7 +116,7 @@ public class Template implements Serializable {
 			String code = resultSet.getString("CODE");
 			LetterEncryption letterCode = new LetterEncryption(letter,
 					code.charAt(0));
-
+			
 			// Cache
 			this.cache.put(new Character(letter), letterCode);
 
@@ -123,6 +125,12 @@ public class Template implements Serializable {
 			connection.close();
 		}
 	}
+
 	// END SNIPPET: database
+
+	public void handleException(@Parameter SQLException ex) throws Throwable {
+		ex.printStackTrace();
+		throw ex;
+	}
 
 }
