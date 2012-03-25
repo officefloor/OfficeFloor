@@ -106,6 +106,9 @@ public class TeamHttpServerTest extends TestCase {
 	// START SNIPPET: test
 	public void testRetrieveEncryptions() throws Exception {
 
+		// Request page to allow time for database setup
+		this.doRequest("http://localhost:7878/example");
+
 		// Retrieving from database
 		this.doRequest("http://localhost:7878/example.links-encrypt.task?letter=A");
 
@@ -115,9 +118,9 @@ public class TeamHttpServerTest extends TestCase {
 
 	private void doRequest(String url) throws Exception {
 		HttpResponse response = this.client.execute(new HttpGet(url));
+		response.getEntity().writeTo(System.out);
 		assertEquals("Request should be successful", 200, response
 				.getStatusLine().getStatusCode());
-		response.getEntity().writeTo(System.out);
 	}
 	// END SNIPPET: test
 
