@@ -53,6 +53,7 @@ a {
 .chapter {
 	margin: 0;
 	width: 100%;
+	position: relative;
 }
 .columns {
 	width: 100%;
@@ -62,7 +63,8 @@ a {
 	clear: left;
 	content: ".";
 	display: block;
-	height: 0px;
+	height: 0em;
+	width: 0em;
 	visibility: hidden;
 }
 .column {
@@ -191,19 +193,24 @@ a {
 	vertical-align: middle;
 }
 	</style>
+
+
 	<script type="text/javascript">
+	
 function openDownloadLinks() {
 	window.open('http://sourceforge.net/projects/officefloor/files/latest/download', '_blank', 'width=960,height=150'); 
 	return true;
 }
+
 	</script>
+	
 </head>
 <body>
 
 <div id="introduction" class="chapter">
 	<div class="content">
 		<img src="http://officefloor.net/images/OfficeFloorBannerImage.png" />
-		<p>OfficeFloor is a true inversion of control container making it a simple yet very powerful framework for building Java web applications that is a build once run anywhere solution - even with Cloud Computing.</p>
+		<p>OfficeFloor is a true inversion of control container for building Java real-time web applications that is a build once run anywhere solution - even with Cloud Computing.</p>
 		<p class="linkButtons">
 			<a class="linkButton" href="./download.html" onclick="openDownloadLinks()">Download</a>
 			<a class="linkButton" href="./eclipse/index.html">Eclipse Plug-in</a>
