@@ -1,0 +1,7 @@
+<desk>
+	<works>
+		<work name="WORK" source="net.example.ExampleWorkSource">
+			<work-task name="TASK" />
+		</work>
+	</works>
+</desk>

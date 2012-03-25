@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<template xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:noNamespaceSchemaLocation="Test.xsd">
+	<section name="template">
+		<static>
+			<content><![CDATA[<html>
+<body>
+Static page.
+</body>
+</html>
+]]></content>
+		</static>
+	</section>
+</template>

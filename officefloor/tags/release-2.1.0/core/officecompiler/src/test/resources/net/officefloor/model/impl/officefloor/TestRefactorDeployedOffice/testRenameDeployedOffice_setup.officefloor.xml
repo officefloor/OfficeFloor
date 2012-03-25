@@ -1,0 +1,6 @@
+<office-floor>
+	<offices>
+		<office name="OLD_NAME" source="net.example.ExampleOfficeSource"
+			location="LOCATION" />
+	</offices>
+</office-floor>
