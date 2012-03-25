@@ -1,0 +1,14 @@
+<desk>
+    <works>
+        <work name="WORK" source="net.example.ExampleWorkSource">
+            <work-task name="WORK_TASK" />
+        </work>
+    </works>
+    <tasks>
+        <task name="TASK" work="WORK" task="WORK_TASK">
+            <task-flow name="ONE" key="ONE" />
+            <task-flow name="TWO" key="TWO" />
+            <task-escalation escalation-type="java.lang.Exception" />
+        </task>
+    </tasks>
+</desk>

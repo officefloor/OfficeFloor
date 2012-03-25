@@ -1,0 +1,8 @@
+<office-floor>
+	<offices>
+		<office name="NAME" source="net.example.ExampleOfficeSource"
+			location="LOCATION">
+			<team name="RENAME_OLD" />
+		</office>
+	</offices>
+</office-floor>
