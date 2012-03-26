@@ -36,7 +36,7 @@ import net.officefloor.plugin.stream.InputBufferStream;
 
 /**
  * HTTP {@link ConnectionHandler}.
- *
+ * 
  * @author Daniel Sagenschneider
  */
 public class HttpConnectionHandler implements ConnectionHandler {
@@ -64,18 +64,18 @@ public class HttpConnectionHandler implements ConnectionHandler {
 	/**
 	 * Time of last interaction. Will be set on the first read.
 	 */
-	private long lastInteractionTime;
+	private long lastInteractionTime = -1;
 
 	/**
-	 * Flag indicating if {@link HttpRequestParseException} on processing input. Once a
-	 * {@link HttpRequestParseException} occurs it is unrecoverable and the
-	 * {@link Connection} should be closed.
+	 * Flag indicating if {@link HttpRequestParseException} on processing input.
+	 * Once a {@link HttpRequestParseException} occurs it is unrecoverable and
+	 * the {@link Connection} should be closed.
 	 */
 	private boolean isParseFailure = false;
 
 	/**
 	 * Initiate.
-	 *
+	 * 
 	 * @param conversation
 	 *            {@link HttpConversation}.
 	 * @param parser
@@ -165,6 +165,13 @@ public class HttpConnectionHandler implements ConnectionHandler {
 
 	@Override
 	public void handleIdleConnection(IdleContext context) {
+
+		// May not have received data from client on creating connection
+		if (this.lastInteractionTime == -1) {
+			// Allow for time out of connection if no data
+			this.lastInteractionTime = context.getTime();
+			return;
+		}
 
 		// Obtain the current time
 		long currentTime = context.getTime();
