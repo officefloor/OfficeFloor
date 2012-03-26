@@ -38,7 +38,7 @@ import net.officefloor.plugin.stream.InputBufferStream;
 
 /**
  * Tests the {@link HttpConnectionHandler}.
- *
+ * 
  * @author Daniel Sagenschneider
  */
 public class HttpConnectionHandlerTest extends OfficeFrameTestCase {
@@ -102,14 +102,14 @@ public class HttpConnectionHandlerTest extends OfficeFrameTestCase {
 				.createMock(HttpManagedObject.class);
 
 		// Record actions
-		this.recordReturn(this.readContext, this.readContext.getTime(), System
-				.currentTimeMillis());
+		this.recordReturn(this.readContext, this.readContext.getTime(),
+				System.currentTimeMillis());
 		this.recordReturn(this.readContext,
 				this.readContext.getContextObject(), tempBuffer);
-		this.recordReturn(this.readContext, this.readContext
-				.getInputBufferStream(), this.inputBufferStream);
-		this.recordReturn(this.parser, this.parser.parse(
-				this.inputBufferStream, tempBuffer), true);
+		this.recordReturn(this.readContext,
+				this.readContext.getInputBufferStream(), this.inputBufferStream);
+		this.recordReturn(this.parser,
+				this.parser.parse(this.inputBufferStream, tempBuffer), true);
 		this.recordReturn(this.parser, this.parser.getMethod(), method);
 		this.recordReturn(this.parser, this.parser.getRequestURI(), requestURI);
 		this.recordReturn(this.parser, this.parser.getHttpVersion(),
@@ -120,8 +120,8 @@ public class HttpConnectionHandlerTest extends OfficeFrameTestCase {
 		this.recordReturn(this.conversation, this.conversation.addRequest(
 				method, requestURI, httpVersion, headers, body), managedObject);
 		this.readContext.processRequest(managedObject);
-		this.recordReturn(this.parser, this.parser.parse(
-				this.inputBufferStream, tempBuffer), false);
+		this.recordReturn(this.parser,
+				this.parser.parse(this.inputBufferStream, tempBuffer), false);
 
 		// Replay mocks
 		this.replayMockObjects();
@@ -144,12 +144,12 @@ public class HttpConnectionHandlerTest extends OfficeFrameTestCase {
 				HttpStatus.SC_BAD_REQUEST, "Parse Failure");
 
 		// Record actions
-		this.recordReturn(this.readContext, this.readContext.getTime(), System
-				.currentTimeMillis());
+		this.recordReturn(this.readContext, this.readContext.getTime(),
+				System.currentTimeMillis());
 		this.recordReturn(this.readContext,
 				this.readContext.getContextObject(), tempBuffer);
-		this.recordReturn(this.readContext, this.readContext
-				.getInputBufferStream(), this.inputBufferStream);
+		this.recordReturn(this.readContext,
+				this.readContext.getInputBufferStream(), this.inputBufferStream);
 		this.parser.parse(this.inputBufferStream, tempBuffer);
 		this.control(this.parser).setThrowable(failure);
 		this.conversation.parseFailure(failure, true);
@@ -231,6 +231,33 @@ public class HttpConnectionHandlerTest extends OfficeFrameTestCase {
 		this.handler.handleIdleConnection(this.idleContext);
 
 		// Invoke idle that times out connection
+		this.handler.handleIdleConnection(this.idleContext);
+
+		// Verify mocks
+		this.verifyMockObjects();
+	}
+
+	/**
+	 * Ensure closes {@link Connection} if established and no data received for
+	 * long period of time.
+	 */
+	public void testIdleNoData() {
+
+		// Record actions
+		final long START_TIME = System.currentTimeMillis();
+		final long TIMEOUT_IDLE_TIME = START_TIME + CONNECTION_TIMEOUT;
+		this.recordReturn(this.idleContext, this.idleContext.getTime(),
+				START_TIME);
+		this.recordReturn(this.idleContext, this.idleContext, TIMEOUT_IDLE_TIME);
+		this.idleContext.setCloseConnection(true);
+
+		// Replay mocks
+		this.replayMockObjects();
+
+		// Invoke idle waiting on data
+		this.handler.handleIdleConnection(this.idleContext);
+
+		// Invoke idle still waiting on data and times out
 		this.handler.handleIdleConnection(this.idleContext);
 
 		// Verify mocks
