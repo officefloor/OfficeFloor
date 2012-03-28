@@ -61,6 +61,7 @@ public class GovernanceNodeImpl implements GovernanceNode {
 	 * {@link GovernanceSource} instance to use. Should this be specified it
 	 * overrides the {@link Class}.
 	 */
+	@SuppressWarnings("unused")
 	private final GovernanceSource<?, ?> governanceSource;
 
 	/**
@@ -87,7 +88,7 @@ public class GovernanceNodeImpl implements GovernanceNode {
 	/**
 	 * {@link GovernanceType} for this {@link GovernanceNode}.
 	 */
-	private GovernanceType governanceType = null;
+	private GovernanceType<?, ?> governanceType = null;
 
 	/**
 	 * Initiate.

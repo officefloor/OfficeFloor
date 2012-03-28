@@ -7,7 +7,6 @@
 		<artifactId>tutorials</artifactId>
 		<version>2.1.0</version>
 	</parent>
-	<groupId>net.officefloor.tutorial</groupId>
 	<artifactId>DynamicHttpServer</artifactId>
 	<name>Dynamic HTTP Server Tutorial</name>
 	<description>Tutorial of using OfficeFloor for dynamic content from a HTTP Server</description>

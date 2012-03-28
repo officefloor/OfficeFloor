@@ -22,13 +22,10 @@
 		<projectVersion>${project.version}</projectVersion>
 	</properties>
 	<dependencies>
-		<!-- START SNIPPET: woof -->
 		<dependency>
 			<groupId>net.officefloor.plugin</groupId>
 			<artifactId>officeplugin_woof</artifactId>
-			<version>2.1.0</version>
 		</dependency>
-		<!-- END SNIPPET: woof -->
 		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>

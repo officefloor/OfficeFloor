@@ -61,9 +61,8 @@ public class OfficeFloorLaunchConfigurationDelegate extends
 		IVMRunner runner = this.getVMRunner(configuration, mode);
 
 		// Obtain the main type name
-		// TODO validate can open OfficeFloor
 		String mainTypeName = OpenOfficeFloor.class.getName();
-
+		
 		// Create class path
 		String[] classpath = this.getClasspath(configuration);
 

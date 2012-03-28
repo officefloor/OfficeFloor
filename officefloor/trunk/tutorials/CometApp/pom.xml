@@ -7,7 +7,6 @@
 		<artifactId>tutorials</artifactId>
 		<version>2.1.0</version>
 	</parent>
-	<groupId>net.officefloor.tutorial</groupId>
 	<artifactId>CometApp</artifactId>
 	<name>Comet Application Tutorial</name>
 	<description>Tutorial of using Comet within a WoOF Template</description>

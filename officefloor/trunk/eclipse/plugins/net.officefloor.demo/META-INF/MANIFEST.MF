@@ -22,4 +22,8 @@ Import-Package: org.eclipse.core.resources,
  org.eclipse.swt.widgets,
  org.eclipse.ui
 Bundle-ClassPath: .,
+ officecompiler-2.1.0.jar,
+ officeframe-2.1.0.jar,
+ officemodelgen-2.1.0.jar,
+ officexml-2.1.0.jar,
  officetool_demo-2.1.0.jar
