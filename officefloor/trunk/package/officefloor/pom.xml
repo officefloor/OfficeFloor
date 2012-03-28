@@ -143,12 +143,10 @@
 			<artifactId>officebuilding</artifactId>
 			<classifier>release</classifier>
 			<type>zip</type>
-			<version>${project.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>net.officefloor.plugin</groupId>
 			<artifactId>officeplugin_war</artifactId>
-			<version>${project.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.httpcomponents</groupId>

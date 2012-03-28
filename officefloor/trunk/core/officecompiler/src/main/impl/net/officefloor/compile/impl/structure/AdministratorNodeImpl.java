@@ -71,6 +71,7 @@ public class AdministratorNodeImpl implements AdministratorNode {
 	 * {@link AdministratorSource} instance to use. Should this be specified it
 	 * overrides the {@link Class}.
 	 */
+	@SuppressWarnings("unused")
 	private final AdministratorSource<?, ?> administratorSource;
 
 	/**

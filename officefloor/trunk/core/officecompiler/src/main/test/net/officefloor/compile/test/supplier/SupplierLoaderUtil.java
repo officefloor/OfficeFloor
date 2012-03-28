@@ -39,7 +39,7 @@ public class SupplierLoaderUtil {
 	// TODO determine how to provide this
 	private static interface SupplierTypeBuilder {
 	}
-	
+
 	/**
 	 * Validates the {@link SupplierSourceSpecification} for the
 	 * {@link SupplierSource}.
@@ -129,10 +129,8 @@ public class SupplierLoaderUtil {
 		SupplierType expectedSupplier = (SupplierType) expectedSupplierType;
 
 		// TODO implement
-		if (true) throw new UnsupportedOperationException("TODO implement");
-
-		// Return the actual supplier type
-		return null;
+		throw new UnsupportedOperationException(
+				"TODO implement validateSupplierType " + expectedSupplier);
 	}
 
 	/**

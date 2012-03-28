@@ -182,7 +182,7 @@
 					<!-- Eclipse -->
 					<id>eclipse-helios</id>
 					<layout>p2</layout>
-					<url>http://download.eclipse.org/releases/helios</url>
+					<url>http://download.eclipse.org/releases/indigo</url>
 				</repository>
 			</repositories>
 		</profile>

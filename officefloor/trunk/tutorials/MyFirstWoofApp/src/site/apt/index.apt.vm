@@ -61,7 +61,13 @@ Steps
 
   First things first, add the following dependency for WoOF to the <<<pom.xml>>> file:
   
-%{code-snippet|brush-autodetect=1|id=woof|file=${basedir}/pom.xml}
++-----------------------------------------+
+		<dependency>
+			<groupId>net.officefloor.plugin</groupId>
+			<artifactId>officeplugin_woof</artifactId>
+			<version>${projectVersion}</version>
+		</dependency>
++-----------------------------------------+
 
   Once added you will likely need to re-create the Eclipse files to pick up the WoOF dependency with the following command:
   

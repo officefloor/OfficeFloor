@@ -92,6 +92,7 @@ public class WorkNodeImpl implements WorkNode {
 	 * {@link WorkSource} instance to use. If this is specified it overrides
 	 * using the {@link Class} name.
 	 */
+	@SuppressWarnings("unused")
 	private final WorkSource<?> workSource;
 
 	/**
