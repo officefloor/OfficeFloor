@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>net.officefloor.plugin</groupId>
 		<artifactId>plugins</artifactId>
-		<version>2.1.0</version>
+		<version>2.2.0</version>
 	</parent>
 	<artifactId>officeplugin_servlet</artifactId>
 	<name>Servlet Plug-in</name>
@@ -84,7 +84,11 @@
 				<configuration>
 					<filesets>
 						<fileset>
-							<directory>src/auto/model/net</directory>
+							<directory>${basedir}</directory>
+							<includes>
+								<include>src/auto/model/net/</include>
+								<include>bin/</include>
+							</includes>
 						</fileset>
 					</filesets>
 				</configuration>

@@ -4,7 +4,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>net.officefloor</groupId>
 	<artifactId>officefloor</artifactId>
-	<version>2.1.0</version>
+	<version>2.2.0</version>
 	<packaging>pom</packaging>
 	<name>OfficeFloor</name>
 	<description>Parent OfficeFloor</description>
@@ -828,6 +828,23 @@
 				<configuration>
 					<downloadSources>true</downloadSources>
 					<downloadJavadocs>true</downloadJavadocs>
+				</configuration>
+			</plugin>
+
+			<plugin>
+				<!-- Clean bin folder from m2e within Eclipse -->
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-clean-plugin</artifactId>
+				<configuration>
+					<filesets>
+						<fileset>
+							<directory>${basedir}</directory>
+							<includes>
+								<include>bin/</include>
+							</includes>
+							<followSymlinks>false</followSymlinks>
+						</fileset>
+					</filesets>
 				</configuration>
 			</plugin>
 
