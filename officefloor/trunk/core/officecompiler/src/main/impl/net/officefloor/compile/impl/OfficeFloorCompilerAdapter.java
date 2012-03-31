@@ -27,6 +27,7 @@ import net.officefloor.autowire.impl.SingletonManagedObjectSource;
 import net.officefloor.autowire.spi.supplier.source.SupplierSource;
 import net.officefloor.autowire.supplier.SupplierLoader;
 import net.officefloor.compile.OfficeFloorCompiler;
+import net.officefloor.compile.TypeLoader;
 import net.officefloor.compile.administrator.AdministratorLoader;
 import net.officefloor.compile.governance.GovernanceLoader;
 import net.officefloor.compile.issues.CompilerIssues;
@@ -300,6 +301,11 @@ public class OfficeFloorCompilerAdapter extends OfficeFloorCompiler {
 	@Override
 	public PropertyList createPropertyList() {
 		return (PropertyList) this.invokeMethod("createPropertyList", null);
+	}
+
+	@Override
+	public TypeLoader getTypeLoader() {
+		return (TypeLoader) this.invokeMethod("getTypeLoader", null);
 	}
 
 	@Override
