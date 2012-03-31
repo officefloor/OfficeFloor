@@ -142,4 +142,22 @@ public class StockPrice implements IsSerializable {
 		return this.timestamp;
 	}
 
+	/*
+	 * ========================= Object =========================
+	 */
+
+	@Override
+	public boolean equals(Object obj) {
+
+		// Ensure same type
+		if (!(obj instanceof StockPrice)) {
+			return false;
+		}
+		StockPrice that = (StockPrice) obj;
+
+		// Same if same stock
+		return this.getStock().getMarketId()
+				.equals(that.getStock().getMarketId());
+	}
+
 }

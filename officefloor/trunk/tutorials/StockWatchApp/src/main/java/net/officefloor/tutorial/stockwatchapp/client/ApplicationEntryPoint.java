@@ -56,9 +56,11 @@ public class ApplicationEntryPoint implements EntryPoint {
 		StockWatchWidget stockWatch = new StockWatchWidget();
 		panel.add(stockWatch);
 
-		// Watch a stock
-		Stock stock = MockMarket.listedStocks[0];
-		stockWatch.watchStock(stock, new StockPrice(stock, 10, 1, 20, 2, 3000));
+		// Watch all stocks
+		for (Stock stock : MockMarket.listedStocks) {
+			stockWatch.watchStock(stock, new StockPrice(stock, 10, 1, 20, 2,
+					3000));
+		}
 
 		// Subscribe to stock price events
 		OfficeFloorComet.subscribe();
