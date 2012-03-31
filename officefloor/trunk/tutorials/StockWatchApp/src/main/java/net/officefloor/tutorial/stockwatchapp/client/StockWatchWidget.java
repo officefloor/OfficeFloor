@@ -171,8 +171,8 @@ public class StockWatchWidget extends VerticalPanel {
 						stockPrices.remove(stockPrice);
 						stockPrices.add(stockPrice);
 					}
-				}, this.filter);
-		
+				}, null); // TODO add appropriate filtering
+
 		// Add the table
 		this.add(table);
 	}

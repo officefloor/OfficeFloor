@@ -33,7 +33,6 @@ public class StockWatchLogic {
 	 *            {@link StockPriceEvents}.
 	 */
 	public void getTemplate(StockPriceEvents events) {
-		System.out.println("getTemplate setup");
 	}
 
 }
