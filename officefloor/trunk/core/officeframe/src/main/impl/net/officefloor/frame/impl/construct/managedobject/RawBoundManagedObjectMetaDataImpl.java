@@ -251,6 +251,21 @@ public class RawBoundManagedObjectMetaDataImpl implements
 				RawBoundManagedObjectMetaDataImpl possibleClash = boundMo
 						.get(boundMoName);
 				if ((possibleClash != null) && (!possibleClash.isInput)) {
+
+					// Only clash if not same managed object
+					RawManagedObjectMetaData<?, ?> inputRawMetaData = inputManagedObject
+							.getRawManagedObjectMetaData();
+					for (RawBoundManagedObjectInstanceMetaData<?> possibleClashRawInstanceMetaData : possibleClash
+							.getRawBoundManagedObjectInstanceMetaData()) {
+						RawManagedObjectMetaData<?, ?> possibleClashRawMetaData = possibleClashRawInstanceMetaData
+								.getRawManagedObjectMetaData();
+						if (inputRawMetaData == possibleClashRawMetaData) {
+							// Same object so no clash
+							continue NEXT_MO; // already bound
+						}
+					}
+
+					// Clash of names for different managed objects
 					issues.addIssue(AssetType.MANAGED_OBJECT, boundMoName,
 							"Name clash between bound and input Managed Objects (name="
 									+ boundMoName + ")");

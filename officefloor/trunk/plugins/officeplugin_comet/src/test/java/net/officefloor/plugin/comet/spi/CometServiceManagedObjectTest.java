@@ -23,7 +23,6 @@ import java.util.LinkedList;
 import java.util.List;
 
 import net.officefloor.frame.spi.managedobject.AsynchronousListener;
-import net.officefloor.frame.spi.managedobject.ObjectRegistry;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.comet.api.CometSubscriber;
 import net.officefloor.plugin.comet.internal.CometEvent;
@@ -31,7 +30,6 @@ import net.officefloor.plugin.comet.internal.CometInterest;
 import net.officefloor.plugin.comet.internal.CometRequest;
 import net.officefloor.plugin.comet.internal.CometResponse;
 import net.officefloor.plugin.comet.internal.CometSubscriptionService;
-import net.officefloor.plugin.comet.spi.CometServiceManagedObject.Dependencies;
 import net.officefloor.plugin.gwt.service.ServerGwtRpcConnection;
 
 import org.easymock.AbstractMatcher;
@@ -55,13 +53,6 @@ public class CometServiceManagedObjectTest extends OfficeFrameTestCase {
 	 */
 	private final CometServiceManagedObjectSource source = new CometServiceManagedObjectSource(
 			this.clock);
-
-	/**
-	 * Mock {@link ObjectRegistry}.
-	 */
-	@SuppressWarnings("unchecked")
-	private final ObjectRegistry<Dependencies> objectRegistry = this
-			.createMock(ObjectRegistry.class);
 
 	/**
 	 * Mock {@link ServerGwtRpcConnection}.
@@ -301,7 +292,7 @@ public class CometServiceManagedObjectTest extends OfficeFrameTestCase {
 		}
 
 		// Service
-		service.service();
+		service.service(this.connection);
 
 		// Undertake expiry after servicing
 		if (this.isExpireAfterServicing) {
@@ -448,9 +439,6 @@ public class CometServiceManagedObjectTest extends OfficeFrameTestCase {
 					new Object[] { cometRequest }, null, 0);
 
 			// Record returning the RPC request
-			this.recordReturn(this.objectRegistry, this.objectRegistry
-					.getObject(Dependencies.SERVER_GWT_RPC_CONNECTION),
-					this.connection);
 			this.recordReturn(this.connection, this.connection.getRpcRequest(),
 					rpcRequest);
 
@@ -523,9 +511,6 @@ public class CometServiceManagedObjectTest extends OfficeFrameTestCase {
 
 			// Register the Asynchronous Listener
 			mo.registerAsynchronousCompletionListener(this.async);
-
-			// Load the Managed Object
-			mo.loadObjects(this.objectRegistry);
 
 			// Obtain the Comet Service
 			CometService service = (CometService) mo.getObject();

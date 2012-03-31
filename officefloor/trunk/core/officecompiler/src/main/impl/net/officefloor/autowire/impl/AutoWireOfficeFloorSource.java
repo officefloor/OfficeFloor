@@ -478,7 +478,7 @@ public class AutoWireOfficeFloorSource extends AbstractOfficeFloorSource
 			 * handling of InputManagedObject until the OfficeType is loaded
 			 * (which requires the avaiableOfficeObjects).
 			 * 
-			 * To overcome may need to just work of premise that
+			 * To overcome may need to just work off premise that
 			 * InputManagedObject always overrides ManagedObject (whether
 			 * handled or not). Need to consider but for now leaving as EDGE
 			 * CASE that very unlikely to occur with reasonable configuration.

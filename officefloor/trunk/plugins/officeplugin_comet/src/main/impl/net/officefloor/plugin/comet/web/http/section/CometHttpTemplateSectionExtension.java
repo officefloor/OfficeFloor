@@ -37,6 +37,8 @@ import net.officefloor.plugin.comet.internal.CometEvent;
 import net.officefloor.plugin.comet.internal.CometPublicationService;
 import net.officefloor.plugin.comet.internal.CometSubscriptionService;
 import net.officefloor.plugin.comet.section.CometSectionSource;
+import net.officefloor.plugin.comet.spi.CometRequestServicer;
+import net.officefloor.plugin.comet.spi.CometRequestServicerManagedObjectSource;
 import net.officefloor.plugin.comet.spi.CometService;
 import net.officefloor.plugin.comet.spi.CometServiceManagedObjectSource;
 import net.officefloor.plugin.gwt.service.ServerGwtRpcConnection;
@@ -138,6 +140,15 @@ public class CometHttpTemplateSectionExtension implements
 					}, new AutoWire(CometService.class)).setTimeout(600 * 1000);
 		}
 
+		// Determine if already configured CometRequestServicer
+		if (!application.isObjectAvailable(new AutoWire(
+				CometRequestServicer.class))) {
+			// Configure the Comet Request Servicer
+			application.addManagedObject(
+					CometRequestServicerManagedObjectSource.class.getName(),
+					null, new AutoWire(CometRequestServicer.class));
+		}
+
 		// Determine if already configured CometPublisher
 		if (!application.isObjectAvailable(new AutoWire(CometPublisher.class))) {
 			// Configure the Comet Publisher
@@ -174,7 +185,7 @@ public class CometHttpTemplateSectionExtension implements
 			// Manually handle publishing, strip template URI to flow name
 			String flowName = gwtModuleName.replace("/", "");
 
-			// Configure work for manualling handling publish
+			// Configure work for manually handling publish
 			String propertyName = CometSectionSource.PROPERTY_MANUAL_PUBLISH_URI_PREFIX
 					+ flowName;
 			section.addProperty(propertyName, gwtModuleName);
@@ -237,13 +248,13 @@ public class CometHttpTemplateSectionExtension implements
 		/**
 		 * Initially handles the {@link CometSubscriptionService}.
 		 * 
-		 * @param service
-		 *            {@link CometService}.
+		 * @param servicer
+		 *            {@link CometRequestServicer}.
 		 */
 		@NextTask("finished")
-		public void subscribe(CometService service) {
+		public void subscribe(CometRequestServicer servicer) {
 			// Service subscription
-			service.service();
+			servicer.service();
 		}
 
 		/**
@@ -251,10 +262,10 @@ public class CometHttpTemplateSectionExtension implements
 		 * {@link CometSubscriptionService} or timed out waiting on a
 		 * {@link CometEvent}.
 		 * 
-		 * @param service
-		 *            {@link CometService}.
+		 * @param servicer
+		 *            {@link CometRequestServicer}.
 		 */
-		public void finished(CometService service) {
+		public void finished(CometRequestServicer servicer) {
 			// Waits for CometEvent to be available for subscription
 		}
 

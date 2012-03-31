@@ -69,6 +69,9 @@ public class CometServiceIntegrationTest extends OfficeFrameTestCase {
 		server.addManagedObject(
 				ServerGwtRpcConnectionManagedObjectSource.class.getName(),
 				null, new AutoWire(ServerGwtRpcConnection.class));
+		server.addManagedObject(
+				CometRequestServicerManagedObjectSource.class.getName(), null,
+				new AutoWire(CometRequestServicer.class));
 		AutoWireObject comet = server.addManagedObject(
 				CometServiceManagedObjectSource.class.getName(),
 				new ManagedObjectSourceWirer() {
@@ -249,11 +252,11 @@ public class CometServiceIntegrationTest extends OfficeFrameTestCase {
 	public static class Service {
 
 		@NextTask("finishedServicing")
-		public void service(CometService service) {
-			service.service();
+		public void service(CometRequestServicer servicer) {
+			servicer.service();
 		}
 
-		public void finishedServicing(CometService service) {
+		public void finishedServicing(CometRequestServicer service) {
 			// Need task to trigger waiting on managed object completion
 		}
 

@@ -21,6 +21,8 @@ package net.officefloor.plugin.comet.spi;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 import net.officefloor.plugin.comet.internal.CometEvent;
 import net.officefloor.plugin.comet.internal.CometRequest;
+import net.officefloor.plugin.comet.internal.CometResponse;
+import net.officefloor.plugin.gwt.service.ServerGwtRpcConnection;
 
 /**
  * Services the {@link CometRequest}.
@@ -31,8 +33,11 @@ public interface CometService {
 
 	/**
 	 * Services the {@link CometRequest}.
+	 * 
+	 * @param connection
+	 *            {@link ServerGwtRpcConnection} for the {@link CometRequest}.
 	 */
-	void service();
+	void service(ServerGwtRpcConnection<CometResponse> connection);
 
 	/**
 	 * Publishes an event.

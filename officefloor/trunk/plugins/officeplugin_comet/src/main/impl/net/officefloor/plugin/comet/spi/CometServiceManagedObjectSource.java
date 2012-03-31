@@ -41,7 +41,6 @@ import net.officefloor.plugin.comet.internal.CometEvent;
 import net.officefloor.plugin.comet.internal.CometInterest;
 import net.officefloor.plugin.comet.internal.CometRequest;
 import net.officefloor.plugin.comet.internal.CometResponse;
-import net.officefloor.plugin.comet.spi.CometServiceManagedObject.Dependencies;
 import net.officefloor.plugin.gwt.service.ServerGwtRpcConnection;
 import net.officefloor.plugin.gwt.service.ServerGwtRpcConnectionException;
 
@@ -54,7 +53,7 @@ import com.google.gwt.user.server.rpc.RPCRequest;
  */
 public class CometServiceManagedObjectSource
 		extends
-		AbstractManagedObjectSource<Dependencies, CometServiceManagedObjectSource.Flows> {
+		AbstractManagedObjectSource<None, CometServiceManagedObjectSource.Flows> {
 
 	/**
 	 * {@link Logger}.
@@ -447,7 +446,7 @@ public class CometServiceManagedObjectSource
 	}
 
 	@Override
-	protected void loadMetaData(MetaDataContext<Dependencies, Flows> context)
+	protected void loadMetaData(MetaDataContext<None, Flows> context)
 			throws Exception {
 		ManagedObjectSourceContext<Flows> mosContext = context
 				.getManagedObjectSourceContext();
@@ -469,8 +468,6 @@ public class CometServiceManagedObjectSource
 		// Specify meta-data
 		context.setObjectClass(CometService.class);
 		context.setManagedObjectClass(CometServiceManagedObject.class);
-		context.addDependency(Dependencies.SERVER_GWT_RPC_CONNECTION,
-				ServerGwtRpcConnection.class);
 
 		// Provide task to trigger expire
 		ExpireTask factory = new ExpireTask();

@@ -629,6 +629,8 @@ public class RawBoundManagedObjectMetaDataTest extends OfficeFrameTestCase {
 				.createMock(RawManagingOfficeMetaData.class);
 		final InputManagedObjectConfiguration<?> inputConfiguration = this
 				.createMock(InputManagedObjectConfiguration.class);
+		final RawManagedObjectMetaData<?, ?> inputRawMetaData = this
+				.createMock(RawManagedObjectMetaData.class);
 
 		final String CLASH_NAME = "CLASH";
 
@@ -645,10 +647,68 @@ public class RawBoundManagedObjectMetaDataTest extends OfficeFrameTestCase {
 				inputMo.getInputManagedObjectConfiguration(),
 				inputConfiguration);
 		this.recordReturn(inputConfiguration,
-				inputConfiguration.getBoundManagedObjectName(), "CLASH");
+				inputConfiguration.getBoundManagedObjectName(), CLASH_NAME);
+		this.recordReturn(inputMo, inputMo.getRawManagedObjectMetaData(),
+				inputRawMetaData);
 		this.issues.addIssue(AssetType.MANAGED_OBJECT, CLASH_NAME,
 				"Name clash between bound and input Managed Objects (name="
 						+ CLASH_NAME + ")");
+		this.record_getDependencyMetaData(rawBoundMetaData);
+		this.record_loadManagedObjectMetaData(rawBoundMetaData, CLASH_NAME, 0,
+				null);
+
+		// Construct
+		this.replayMockObjects();
+		RawBoundManagedObjectMetaData boundMetaData = this
+				.constructRawBoundManagedObjectMetaData(
+						1,
+						new ManagedObjectConfiguration[] { boundConfiguration },
+						new RawManagingOfficeMetaData[] { inputMo })[0];
+		this.verifyMockObjects();
+
+		// Ensure only the bound managed object constructed
+		assertEquals("Should not return input managed object", 1,
+				boundMetaData.getRawBoundManagedObjectInstanceMetaData().length);
+		RawBoundManagedObjectInstanceMetaData<?> instanceMetaData = boundMetaData
+				.getRawBoundManagedObjectInstanceMetaData()[0];
+		assertEquals("Should only return bound managed object",
+				rawBoundMetaData,
+				instanceMetaData.getRawManagedObjectMetaData());
+	}
+
+	/**
+	 * Ensures no issue if name clash is on same {@link ManagedObject}.
+	 */
+	public void testNoClashBetweenSameBoundAndInputManagedObject() {
+
+		final ManagedObjectConfiguration<?> boundConfiguration = this
+				.createMock(ManagedObjectConfiguration.class);
+		final RawManagedObjectMetaData<?, ?> rawBoundMetaData = this
+				.registerRawManagedObjectMetaData("OFFICE_MO");
+
+		final RawManagingOfficeMetaData<?> inputMo = this
+				.createMock(RawManagingOfficeMetaData.class);
+		final InputManagedObjectConfiguration<?> inputConfiguration = this
+				.createMock(InputManagedObjectConfiguration.class);
+
+		final String CLASH_NAME = "CLASH";
+
+		// Record clash between bound and input names
+		this.recordReturn(boundConfiguration,
+				boundConfiguration.getBoundManagedObjectName(), CLASH_NAME);
+		this.recordReturn(boundConfiguration,
+				boundConfiguration.getOfficeManagedObjectName(), "OFFICE_MO");
+		this.recordReturn(boundConfiguration,
+				boundConfiguration.getDependencyConfiguration(), null);
+		this.recordReturn(boundConfiguration,
+				boundConfiguration.getGovernanceConfiguration(), null);
+		this.recordReturn(inputMo,
+				inputMo.getInputManagedObjectConfiguration(),
+				inputConfiguration);
+		this.recordReturn(inputConfiguration,
+				inputConfiguration.getBoundManagedObjectName(), CLASH_NAME);
+		this.recordReturn(inputMo, inputMo.getRawManagedObjectMetaData(),
+				rawBoundMetaData);
 		this.record_getDependencyMetaData(rawBoundMetaData);
 		this.record_loadManagedObjectMetaData(rawBoundMetaData, CLASH_NAME, 0,
 				null);

@@ -33,6 +33,7 @@ import net.officefloor.plugin.comet.internal.CometEvent;
 import net.officefloor.plugin.comet.internal.CometPublicationService;
 import net.officefloor.plugin.comet.internal.CometSubscriptionService;
 import net.officefloor.plugin.comet.section.PublishWorkSource.Dependencies;
+import net.officefloor.plugin.comet.spi.CometRequestServicer;
 import net.officefloor.plugin.comet.spi.CometService;
 import net.officefloor.plugin.gwt.service.ServerGwtRpcConnection;
 import net.officefloor.plugin.work.clazz.ClassWorkSource;
@@ -86,6 +87,9 @@ public class CometSectionSource extends AbstractSectionSource {
 				ServerGwtRpcConnection.class.getName());
 		SectionObject cometService = designer.addSectionObject(
 				CometService.class.getName(), CometService.class.getName());
+		SectionObject cometRequestServicer = designer.addSectionObject(
+				CometRequestServicer.class.getName(),
+				CometRequestServicer.class.getName());
 
 		// Register the subscription work
 		SectionWork subscribeWork = designer.addSectionWork("SUBSCRIBE",
@@ -96,16 +100,14 @@ public class CometSectionSource extends AbstractSectionSource {
 		// Configure pre-subscription
 		SectionTask preSubscription = subscribeWork.addSectionTask(
 				"PRE_SUBSCRIBE", "preSubscribe");
-		designer.link(
-				preSubscription.getTaskObject(CometService.class.getName()),
-				cometService);
+		designer.link(preSubscription.getTaskObject(CometRequestServicer.class
+				.getName()), cometRequestServicer);
 
 		// Configure post-subscription (after pre-subscription)
 		SectionTask postSubscription = subscribeWork.addSectionTask(
 				"POST_SUBSCRIBE", "postSubscribe");
-		designer.link(
-				postSubscription.getTaskObject(CometService.class.getName()),
-				cometService);
+		designer.link(postSubscription.getTaskObject(CometRequestServicer.class
+				.getName()), cometRequestServicer);
 		designer.link(preSubscription, postSubscription);
 
 		// Register input to service subscription
@@ -159,12 +161,12 @@ public class CometSectionSource extends AbstractSectionSource {
 		/**
 		 * Initially handles the {@link CometSubscriptionService}.
 		 * 
-		 * @param service
-		 *            {@link CometService}.
+		 * @param servicer
+		 *            {@link CometRequestServicer}.
 		 */
-		public void preSubscribe(CometService service) {
+		public void preSubscribe(CometRequestServicer servicer) {
 			// Service subscription (potentially triggers wait on event)
-			service.service();
+			servicer.service();
 		}
 
 		/**
@@ -175,7 +177,7 @@ public class CometSectionSource extends AbstractSectionSource {
 		 * @param service
 		 *            {@link CometService}.
 		 */
-		public void postSubscribe(CometService service) {
+		public void postSubscribe(CometRequestServicer servicer) {
 			// Waits for CometEvent to be available for subscription
 		}
 	}

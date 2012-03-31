@@ -20,9 +20,7 @@ package net.officefloor.plugin.comet.spi;
 
 import net.officefloor.frame.spi.managedobject.AsynchronousListener;
 import net.officefloor.frame.spi.managedobject.AsynchronousManagedObject;
-import net.officefloor.frame.spi.managedobject.CoordinatingManagedObject;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
-import net.officefloor.frame.spi.managedobject.ObjectRegistry;
 import net.officefloor.plugin.comet.internal.CometRequest;
 import net.officefloor.plugin.comet.internal.CometResponse;
 import net.officefloor.plugin.gwt.service.ServerGwtRpcConnection;
@@ -35,15 +33,7 @@ import com.google.gwt.user.server.rpc.RPCRequest;
  * @author Daniel Sagenschneider
  */
 public class CometServiceManagedObject implements AsynchronousManagedObject,
-		CoordinatingManagedObject<CometServiceManagedObject.Dependencies>,
 		CometService {
-
-	/**
-	 * {@link CometPublisherManagedObject} dependency keys.
-	 */
-	public static enum Dependencies {
-		SERVER_GWT_RPC_CONNECTION
-	}
 
 	/**
 	 * {@link CometServiceManagedObjectSource}.
@@ -54,11 +44,6 @@ public class CometServiceManagedObject implements AsynchronousManagedObject,
 	 * {@link AsynchronousListener}.
 	 */
 	private AsynchronousListener async;
-
-	/**
-	 * {@link ServerGwtRpcConnection}.
-	 */
-	private ServerGwtRpcConnection<CometResponse> connection;
 
 	/**
 	 * Initiate.
@@ -75,16 +60,15 @@ public class CometServiceManagedObject implements AsynchronousManagedObject,
 	 */
 
 	@Override
-	public void service() {
+	public void service(ServerGwtRpcConnection<CometResponse> connection) {
 
 		// Obtain the Comet Request
-		RPCRequest rpcRequest = this.connection.getRpcRequest();
+		RPCRequest rpcRequest = connection.getRpcRequest();
 		CometRequest cometRequest = (CometRequest) rpcRequest.getParameters()[0];
 
 		// Retrieve or wait on events for Comet Request
 		this.source.receiveOrWaitOnEvents(cometRequest.getInterests(),
-				this.connection, this.async,
-				cometRequest.getLastSequenceNumber());
+				connection, this.async, cometRequest.getLastSequenceNumber());
 	}
 
 	@Override
@@ -114,15 +98,6 @@ public class CometServiceManagedObject implements AsynchronousManagedObject,
 	public void registerAsynchronousCompletionListener(
 			AsynchronousListener listener) {
 		this.async = listener;
-	}
-
-	@Override
-	@SuppressWarnings("unchecked")
-	public void loadObjects(ObjectRegistry<Dependencies> registry) {
-
-		// Obtain the Server GWT RPC connection
-		this.connection = (ServerGwtRpcConnection<CometResponse>) registry
-				.getObject(Dependencies.SERVER_GWT_RPC_CONNECTION);
 	}
 
 	@Override
