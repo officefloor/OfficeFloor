@@ -630,6 +630,13 @@ public abstract class OfficeFloorCompiler {
 	public abstract PropertyList createPropertyList();
 
 	/**
+	 * Obtains the {@link TypeLoader}.
+	 * 
+	 * @return {@link TypeLoader}.
+	 */
+	public abstract TypeLoader getTypeLoader();
+
+	/**
 	 * Obtains the {@link OfficeFloorLoader}.
 	 * 
 	 * @return {@link OfficeFloorLoader}.

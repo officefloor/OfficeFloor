@@ -231,8 +231,16 @@ public class TypeAdapter implements InvocationHandler {
 		if ((returnValue != null) && (returnType != null)) {
 			if (Class.class.getName().equals(returnType.getName())) {
 				// Transform class for return
-				returnValue = translateClass((Class<?>) returnValue,
-						clientClassLoader);
+				try {
+					returnValue = translateClass((Class<?>) returnValue,
+							clientClassLoader);
+				} catch (ClassNotFoundException ex) {
+					/*
+					 * Implementation class not on client class path, so just
+					 * return implementation class and hope not assigning to
+					 * class - resulting in incompatible type exception.
+					 */
+				}
 
 			} else if (returnType.isInterface()) {
 				// Adapt the return (need to be available for Class Loader)

@@ -19,16 +19,14 @@
 package net.officefloor.eclipse.util;
 
 import net.officefloor.compile.OfficeFloorCompiler;
+import net.officefloor.compile.TypeLoader;
 import net.officefloor.compile.issues.CompilerIssues;
 import net.officefloor.compile.issues.CompilerIssues.LocationType;
-import net.officefloor.compile.managedobject.ManagedObjectLoader;
 import net.officefloor.compile.managedobject.ManagedObjectType;
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.section.SectionLoader;
 import net.officefloor.compile.spi.office.OfficeSection;
 import net.officefloor.compile.spi.section.source.SectionSource;
-import net.officefloor.compile.spi.work.source.WorkSource;
-import net.officefloor.compile.work.WorkLoader;
 import net.officefloor.compile.work.WorkType;
 import net.officefloor.eclipse.OfficeFloorPlugin;
 import net.officefloor.eclipse.common.editor.AbstractOfficeFloorEditor;
@@ -61,7 +59,6 @@ public class ModelUtil {
 	 *            {@link WorkType}.
 	 * @return {@link WorkType} or <code>null</code> if issue obtaining it.
 	 */
-	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public static WorkType<?> getWorkType(WorkModel workModel,
 			AbstractOfficeFloorEditor<?, ?> editor) {
 
@@ -69,19 +66,8 @@ public class ModelUtil {
 		OfficeFloorCompiler compiler = OfficeFloorPlugin.getDefault()
 				.createCompiler(editor);
 
-		// Obtain the work loader
-		WorkLoader workLoader = compiler.getWorkLoader();
-
-		// Obtain the project class loader
-		ClassLoader classLoader = compiler.getClassLoader();
-
-		// Obtain the work class
-		Class<? extends WorkSource> workSourceClass = obtainClass(
-				workModel.getWorkSourceClassName(), WorkSource.class,
-				classLoader, editor);
-		if (workSourceClass == null) {
-			return null; // must have work source class
-		}
+		// Obtain the type loader
+		TypeLoader typeLoader = compiler.getTypeLoader();
 
 		// Obtain the properties
 		PropertyList properties = compiler.createPropertyList();
@@ -91,8 +77,8 @@ public class ModelUtil {
 		}
 
 		// Load and return the work type
-		WorkType<?> workType = workLoader.loadWorkType(workSourceClass,
-				properties);
+		WorkType<?> workType = typeLoader.loadWorkType(
+				workModel.getWorkSourceClassName(), properties);
 		return workType;
 	}
 
@@ -260,29 +246,16 @@ public class ModelUtil {
 	 * @return {@link ManagedObjectType} or <code>null</code> if issue obtaining
 	 *         it.
 	 */
-	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public static ManagedObjectType<?> getManagedObjectType(
 			String managedObjectSourceClassName, PropertyList properties,
 			OfficeFloorCompiler compiler, AbstractOfficeFloorEditor<?, ?> editor) {
 
-		// Obtain the managed object loader
-		ManagedObjectLoader managedObjectLoader = compiler
-				.getManagedObjectLoader();
-
-		// Obtain the project class loader
-		ClassLoader classLoader = compiler.getClassLoader();
-
-		// Obtain the managed object source class
-		Class managedObjectSourceClass = obtainClass(
-				managedObjectSourceClassName, ManagedObjectSource.class,
-				classLoader, editor);
-		if (managedObjectSourceClass == null) {
-			return null; // must have managed object source class
-		}
+		// Obtain the type loader
+		TypeLoader typeLoader = compiler.getTypeLoader();
 
 		// Load and return the managed object type
-		ManagedObjectType<?> managedObjectType = managedObjectLoader
-				.loadManagedObjectType(managedObjectSourceClass, properties);
+		ManagedObjectType<?> managedObjectType = typeLoader
+				.loadManagedObjectType(managedObjectSourceClassName, properties);
 		return managedObjectType;
 	}
 

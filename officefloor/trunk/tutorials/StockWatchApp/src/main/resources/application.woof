@@ -1,0 +1,27 @@
+<woof>
+  <templates>
+    <template name="stocks" uri="stocks" path="StockWatch.html" class="net.officefloor.tutorial.stockwatchapp.StockWatchLogic" x="72" y="41">
+      <output name="output" argument-type="">
+      </output>
+      <extension class="GWT">
+        <property name="gwt.module.path" value="net/officefloor/tutorial/stockwatchapp/stocks.gwt.xml"/>
+      </extension>
+      <extension class="COMET">
+        <property name="manual.publish.method.name" value=""/>
+      </extension>
+    </template>
+  </templates>
+  <sections>
+    <section name="JeeStockPricePublish" source="net.officefloor.model.impl.desk.DeskModelSectionSource" location="JeeStockPricePublish.desk" x="265" y="161">
+      <input name="PUBLISH" parameter-type="net.officefloor.tutorial.stockwatchapp.client.StockPrice" uri=""/>
+    </section>
+  </sections>
+  <governances>
+  </governances>
+  <resources>
+  </resources>
+  <exceptions>
+  </exceptions>
+  <starting>
+  </starting>
+</woof>

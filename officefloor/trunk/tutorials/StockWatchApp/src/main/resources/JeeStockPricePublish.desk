@@ -1,0 +1,28 @@
+<desk>
+  <external-managed-objects>
+    <external-managed-object name="StockPriceEvents" object-type="net.officefloor.tutorial.stockwatchapp.client.StockPriceEvents" x="392" y="287"/>
+  </external-managed-objects>
+  <managed-object-sources>
+  </managed-object-sources>
+  <managed-objects>
+  </managed-objects>
+  <external-flows>
+  </external-flows>
+  <works>
+    <work name="Publish" source="net.officefloor.tutorial.stockwatchapp.JeeStockPricePublisherWorkSource" x="182" y="196">
+      <properties>
+      </properties>
+      <work-task name="PUBLISH">
+        <task-object name="STOCK_PRICE" key="STOCK_PRICE" object-type="net.officefloor.tutorial.stockwatchapp.client.StockPrice" parameter="true">
+        </task-object>
+        <task-object name="STOCK_PRICE_EVENT" key="STOCK_PRICE_EVENT" object-type="net.officefloor.tutorial.stockwatchapp.client.StockPriceEvents" parameter="false">
+          <external-managed-object name="StockPriceEvents"/>
+        </task-object>
+      </work-task>
+    </work>
+  </works>
+  <tasks>
+    <task name="PUBLISH" public="true" work="Publish" task="PUBLISH" return-type="" x="190" y="95">
+    </task>
+  </tasks>
+</desk>

@@ -33,6 +33,7 @@ import net.officefloor.autowire.spi.supplier.source.SupplierSourceContext;
 import net.officefloor.autowire.spi.supplier.source.impl.AbstractSupplierSource;
 import net.officefloor.autowire.supplier.SupplierLoader;
 import net.officefloor.compile.OfficeFloorCompiler;
+import net.officefloor.compile.TypeLoader;
 import net.officefloor.compile.administrator.AdministratorLoader;
 import net.officefloor.compile.governance.GovernanceLoader;
 import net.officefloor.compile.issues.CompilerIssues;
@@ -44,6 +45,7 @@ import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.section.SectionLoader;
 import net.officefloor.compile.team.TeamLoader;
 import net.officefloor.compile.work.WorkLoader;
+import net.officefloor.compile.work.WorkType;
 import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
 import net.officefloor.frame.api.execute.Task;
@@ -78,6 +80,11 @@ public class OfficeFloorCompilerAdapterTest extends OfficeFrameTestCase {
 	 */
 	private OfficeFloorCompiler compiler;
 
+	/**
+	 * {@link TypeLoader}.
+	 */
+	private TypeLoader typeLoader;
+
 	@Override
 	protected void setUp() throws Exception {
 
@@ -104,6 +111,9 @@ public class OfficeFloorCompilerAdapterTest extends OfficeFrameTestCase {
 		// Load the properties and aliases
 		this.compiler.addEnvProperties();
 		this.compiler.addSourceAliases();
+
+		// Obtain the type loader
+		this.typeLoader = this.compiler.getTypeLoader();
 	}
 
 	@Override
@@ -313,14 +323,26 @@ public class OfficeFloorCompilerAdapterTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Tests the {@link WorkLoader}.
+	 * Tests obtaining specification from {@link WorkLoader}.
 	 */
-	public void testWorkLoader() {
+	public void testWorkLoaderSpecification() {
 		WorkLoader loader = this.compiler.getWorkLoader();
 		PropertyList specification = loader
 				.loadSpecification(ClassWorkSource.class);
 		assertEquals("Should have a property", 1,
 				specification.getPropertyNames().length);
+	}
+
+	/**
+	 * Tests obtaining {@link WorkType} from {@link TypeLoader}.
+	 */
+	public void testWorkFromTypeLoader() {
+		PropertyList properties = this.compiler.createPropertyList();
+		properties.addProperty(ClassWorkSource.CLASS_NAME_PROPERTY_NAME)
+				.setValue(AdaptManagedObjectWork.class.getName());
+		WorkType<?> workType = this.typeLoader.loadWorkType(
+				ClassWorkSource.class.getName(), properties);
+		assertNotNull("Must have work type", workType);
 	}
 
 	/**
@@ -332,6 +354,20 @@ public class OfficeFloorCompilerAdapterTest extends OfficeFrameTestCase {
 				.loadSpecification(ClassManagedObjectSource.class);
 		assertEquals("Should have a property", 1,
 				specification.getPropertyNames().length);
+	}
+
+	/**
+	 * Tests obtaining {@link ManagedObjectType} from {@link TypeLoader}.
+	 */
+	public void testManagedObjectFromTypeLoader() {
+		PropertyList properties = this.compiler.createPropertyList();
+		properties.addProperty(
+				ClassManagedObjectSource.CLASS_NAME_PROPERTY_NAME).setValue(
+				AdaptManagedObjectImpl.class.getName());
+		ManagedObjectType<?> managedObjectType = this.typeLoader
+				.loadManagedObjectType(
+						ClassManagedObjectSource.class.getName(), properties);
+		assertNotNull("Must have managed object type", managedObjectType);
 	}
 
 	/**

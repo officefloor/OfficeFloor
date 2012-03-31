@@ -27,6 +27,7 @@ import net.officefloor.autowire.impl.supplier.SupplierLoaderImpl;
 import net.officefloor.autowire.spi.supplier.source.SupplierSource;
 import net.officefloor.autowire.supplier.SupplierLoader;
 import net.officefloor.compile.OfficeFloorCompiler;
+import net.officefloor.compile.TypeLoader;
 import net.officefloor.compile.administrator.AdministratorLoader;
 import net.officefloor.compile.governance.GovernanceLoader;
 import net.officefloor.compile.impl.administrator.AdministratorLoaderImpl;
@@ -45,6 +46,7 @@ import net.officefloor.compile.internal.structure.NodeContext;
 import net.officefloor.compile.issues.CompilerIssues;
 import net.officefloor.compile.issues.CompilerIssues.LocationType;
 import net.officefloor.compile.managedobject.ManagedObjectLoader;
+import net.officefloor.compile.managedobject.ManagedObjectType;
 import net.officefloor.compile.office.OfficeLoader;
 import net.officefloor.compile.officefloor.OfficeFloorLoader;
 import net.officefloor.compile.pool.ManagedObjectPoolLoader;
@@ -57,6 +59,7 @@ import net.officefloor.compile.spi.section.source.SectionSource;
 import net.officefloor.compile.spi.work.source.WorkSource;
 import net.officefloor.compile.team.TeamLoader;
 import net.officefloor.compile.work.WorkLoader;
+import net.officefloor.compile.work.WorkType;
 import net.officefloor.frame.api.OfficeFrame;
 import net.officefloor.frame.api.build.OfficeFloorBuilder;
 import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
@@ -80,7 +83,7 @@ import net.officefloor.model.impl.officefloor.OfficeFloorModelOfficeFloorSource;
  * @author Daniel Sagenschneider
  */
 public class OfficeFloorCompilerImpl extends OfficeFloorCompiler implements
-		NodeContext {
+		NodeContext, TypeLoader {
 
 	/**
 	 * {@link ResourceSource} instances.
@@ -308,6 +311,11 @@ public class OfficeFloorCompilerImpl extends OfficeFloorCompiler implements
 	}
 
 	@Override
+	public TypeLoader getTypeLoader() {
+		return this;
+	}
+
+	@Override
 	public OfficeFloorLoader getOfficeFloorLoader() {
 		return new OfficeFloorLoaderImpl(this);
 	}
@@ -381,6 +389,43 @@ public class OfficeFloorCompilerImpl extends OfficeFloorCompiler implements
 			return officeFloorLoader.loadOfficeFloor(officeFloorSourceClass,
 					officeFloorLocation, this.properties);
 		}
+	}
+
+	/*
+	 * ======================= TypeLoader ===================================
+	 */
+
+	@Override
+	@SuppressWarnings({ "rawtypes", "unchecked" })
+	public WorkType<?> loadWorkType(String workSourceClassName,
+			PropertyList properties) {
+
+		// Obtain the work source class
+		Class workSourceClass = this.getWorkSourceClass(workSourceClassName,
+				null, null);
+		if (workSourceClass == null) {
+			return null; // not able to load type
+		}
+
+		// Load and return the work type
+		return this.getWorkLoader().loadWorkType(workSourceClass, properties);
+	}
+
+	@Override
+	@SuppressWarnings({ "rawtypes", "unchecked" })
+	public ManagedObjectType<?> loadManagedObjectType(
+			String managedObjectSourceClassName, PropertyList properties) {
+
+		// Obtain the managed object source class
+		Class managedObjectSourceClass = this.getManagedObjectSourceClass(
+				managedObjectSourceClassName, null, null, null);
+		if (managedObjectSourceClass == null) {
+			return null; // not able to load type
+		}
+
+		// Load and return the managed object type
+		return this.getManagedObjectLoader().loadManagedObjectType(
+				managedObjectSourceClass, properties);
 	}
 
 	/*
