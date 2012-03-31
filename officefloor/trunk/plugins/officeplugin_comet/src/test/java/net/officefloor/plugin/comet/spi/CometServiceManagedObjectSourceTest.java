@@ -18,8 +18,6 @@
 
 package net.officefloor.plugin.comet.spi;
 
-import org.easymock.internal.AlwaysMatcher;
-
 import net.officefloor.compile.test.managedobject.ManagedObjectLoaderUtil;
 import net.officefloor.compile.test.managedobject.ManagedObjectTypeBuilder;
 import net.officefloor.frame.api.execute.Task;
@@ -33,10 +31,11 @@ import net.officefloor.plugin.comet.client.MockCometListener;
 import net.officefloor.plugin.comet.internal.CometInterest;
 import net.officefloor.plugin.comet.internal.CometRequest;
 import net.officefloor.plugin.comet.internal.CometResponse;
-import net.officefloor.plugin.comet.spi.CometServiceManagedObject.Dependencies;
 import net.officefloor.plugin.comet.spi.CometServiceManagedObjectSource.Flows;
 import net.officefloor.plugin.gwt.service.ServerGwtRpcConnection;
 import net.officefloor.plugin.gwt.service.ServerGwtRpcConnectionException;
+
+import org.easymock.internal.AlwaysMatcher;
 
 /**
  * Tests the {@link CometServiceManagedObjectSource}.
@@ -62,8 +61,6 @@ public class CometServiceManagedObjectSourceTest extends OfficeFrameTestCase {
 		ManagedObjectTypeBuilder type = ManagedObjectLoaderUtil
 				.createManagedObjectTypeBuilder();
 		type.setObjectClass(CometService.class);
-		type.addDependency(Dependencies.SERVER_GWT_RPC_CONNECTION,
-				ServerGwtRpcConnection.class, null);
 		type.addTeam("EXPIRE_TEAM");
 
 		// Validate type
@@ -77,8 +74,6 @@ public class CometServiceManagedObjectSourceTest extends OfficeFrameTestCase {
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public void testSource() throws Throwable {
 
-		final ServerGwtRpcConnection<?> connection = this
-				.createMock(ServerGwtRpcConnection.class);
 		final Task task = this.createMock(Task.class);
 		final TaskContext taskContext = this.createMock(TaskContext.class);
 
@@ -96,7 +91,6 @@ public class CometServiceManagedObjectSourceTest extends OfficeFrameTestCase {
 
 		// Source the managed object
 		ManagedObjectUserStandAlone user = new ManagedObjectUserStandAlone();
-		user.mapDependency(Dependencies.SERVER_GWT_RPC_CONNECTION, connection);
 		ManagedObject mo = user.sourceManagedObject(source);
 
 		// Obtain the object

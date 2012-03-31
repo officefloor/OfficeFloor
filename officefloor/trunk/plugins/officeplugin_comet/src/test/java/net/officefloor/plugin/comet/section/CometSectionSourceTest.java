@@ -22,6 +22,7 @@ import net.officefloor.compile.spi.section.SectionDesigner;
 import net.officefloor.compile.test.section.SectionLoaderUtil;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.comet.internal.CometEvent;
+import net.officefloor.plugin.comet.spi.CometRequestServicer;
 import net.officefloor.plugin.comet.spi.CometService;
 import net.officefloor.plugin.gwt.service.ServerGwtRpcConnection;
 
@@ -49,6 +50,8 @@ public class CometSectionSourceTest extends OfficeFrameTestCase {
 				.createSectionDesigner(CometSectionSource.class);
 		type.addSectionInput(CometSectionSource.SUBSCRIBE_INPUT_NAME, null);
 		type.addSectionInput(CometSectionSource.PUBLISH_INPUT_NAME, null);
+		type.addSectionObject(CometRequestServicer.class.getName(),
+				CometRequestServicer.class.getName());
 		type.addSectionObject(CometService.class.getName(),
 				CometService.class.getName());
 		type.addSectionObject(ServerGwtRpcConnection.class.getName(),
@@ -71,6 +74,8 @@ public class CometSectionSourceTest extends OfficeFrameTestCase {
 		type.addSectionInput(CometSectionSource.PUBLISH_INPUT_NAME, null);
 		type.addSectionOutput(CometSectionSource.PUBLISH_OUTPUT_PREFIX
 				+ "template", CometEvent.class.getName(), false);
+		type.addSectionObject(CometRequestServicer.class.getName(),
+				CometRequestServicer.class.getName());
 		type.addSectionObject(CometService.class.getName(),
 				CometService.class.getName());
 		type.addSectionObject(ServerGwtRpcConnection.class.getName(),
