@@ -27,7 +27,7 @@ import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.frame.util.ManagedObjectSourceStandAlone;
 import net.officefloor.frame.util.ManagedObjectUserStandAlone;
-import net.officefloor.plugin.comet.client.MockCometListener;
+import net.officefloor.plugin.comet.client.MockCometEventListener;
 import net.officefloor.plugin.comet.internal.CometInterest;
 import net.officefloor.plugin.comet.internal.CometRequest;
 import net.officefloor.plugin.comet.internal.CometResponse;
@@ -137,11 +137,11 @@ public class CometServiceManagedObjectSourceTest extends OfficeFrameTestCase {
 
 		// Add subscriber
 		source.receiveOrWaitOnEvents(new CometInterest[] { new CometInterest(
-				MockCometListener.class.getName(), null) }, subscription,
+				MockCometEventListener.class.getName(), null) }, subscription,
 				listener, CometRequest.FIRST_REQUEST_SEQUENCE_NUMBER);
 
 		// Publish ensuring connection isolated from subscriber failure
-		source.publishEvent(1, MockCometListener.class.getName(), "TEST", null);
+		source.publishEvent(1, MockCometEventListener.class.getName(), "TEST", null);
 
 		// Verify
 		this.verifyMockObjects();

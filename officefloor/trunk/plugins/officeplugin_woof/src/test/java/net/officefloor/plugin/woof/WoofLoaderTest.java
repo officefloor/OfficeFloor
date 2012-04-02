@@ -37,6 +37,7 @@ import net.officefloor.model.repository.ConfigurationItem;
 import net.officefloor.model.woof.WoofRepositoryImpl;
 import net.officefloor.plugin.comet.CometPublisher;
 import net.officefloor.plugin.comet.section.CometSectionSource;
+import net.officefloor.plugin.comet.spi.CometRequestServicer;
 import net.officefloor.plugin.comet.spi.CometService;
 import net.officefloor.plugin.comet.web.http.section.CometHttpTemplateSectionExtension;
 import net.officefloor.plugin.governance.clazz.ClassGovernanceSource;
@@ -207,7 +208,7 @@ public class WoofLoaderTest extends OfficeFrameTestCase {
 		this.app.linkEscalation(Exception.class, sectionA, "INPUT_A");
 		this.app.linkEscalation(RuntimeException.class, templateA);
 		this.app.linkEscalation(SQLException.class, "Example.html");
-		
+
 		// Record linking starts
 		this.app.addStartupFlow(sectionA, "INPUT_A");
 		this.app.addStartupFlow(sectionB, "INPUT_1");
@@ -289,6 +290,8 @@ public class WoofLoaderTest extends OfficeFrameTestCase {
 		this.recordReturn(this.app,
 				this.app.isObjectAvailable(new AutoWire(CometService.class)),
 				true);
+		this.recordReturn(this.app, this.app.isObjectAvailable(new AutoWire(
+				CometRequestServicer.class)), true);
 		this.recordReturn(this.app,
 				this.app.isObjectAvailable(new AutoWire(CometPublisher.class)),
 				true);

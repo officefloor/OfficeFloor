@@ -15,23 +15,30 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+package net.officefloor.plugin.comet;
 
-package net.officefloor.plugin.comet.api;
+import net.officefloor.plugin.comet.api.OfficeFloorComet;
+import net.officefloor.plugin.comet.web.http.section.CometHttpTemplateSectionExtensionTest;
 
 /**
- * <p>
- * Marker interface that all {@link CometSubscriber} interfaces should extend.
- * <p>
- * The extending interface must having the following criteria:
- * <ol>
- * <li>only one method</li>
- * <li>the method should have only one to two parameters (with the first
- * specifying the type of event and second optional parameter specifying the
- * match key)</li>
- * <li>the method should not throw any exceptions</li>
- * </ol>
+ * Main class to run the Comet Application for manually checking
+ * {@link OfficeFloorComet} functionality within a Web Browser.
  * 
  * @author Daniel Sagenschneider
  */
-public interface CometSubscriber {
+public class RunCometApplicationForManualWebBrowserCheck {
+
+	/**
+	 * Main method to manually test with a browser to test
+	 * {@link OfficeFloorComet} interaction.
+	 * 
+	 * @param args
+	 *            Command line arguments.
+	 */
+	public static void main(String... args) throws Exception {
+
+		// Start the server
+		CometHttpTemplateSectionExtensionTest.main(args);
+	}
+
 }

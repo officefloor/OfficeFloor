@@ -115,9 +115,8 @@ public class CometProxyPublisherManagedObjectSource
 					.getObject(Dependencies.COMET_PUBLISHER);
 
 			// Create the proxy
-			this.proxy = publisher.createPublisher(
-					CometProxyPublisherManagedObjectSource.this.proxyInterface,
-					null);
+			this.proxy = publisher
+					.createPublisher(CometProxyPublisherManagedObjectSource.this.proxyInterface);
 		}
 
 		@Override

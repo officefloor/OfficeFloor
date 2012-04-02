@@ -18,11 +18,13 @@
 
 package net.officefloor.plugin.comet;
 
+import java.lang.reflect.Proxy;
+
 import net.officefloor.plugin.comet.api.CometSubscriber;
 import net.officefloor.plugin.comet.api.OfficeFloorComet;
 
 /**
- * Creates the Comet publishers for {@link OfficeFloorComet}.
+ * Creates the Comet {@link Proxy} publishers for {@link OfficeFloorComet}.
  * 
  * @author Daniel Sagenschneider
  */
@@ -34,13 +36,9 @@ public interface CometPublisher {
 	 * @param listenerType
 	 *            Listener interface type that should be marked by extending
 	 *            {@link CometSubscriber}.
-	 * @param matchKey
-	 *            Key to match events. The {@link Object#equals(Object)} is used
-	 *            to match event meta-data to determine filtering. This may be
-	 *            <code>null</code> to not be filtered.
-	 * @return {@link CometSubscriber} to publish events.
+	 * @return {@link Proxy} to publish events to the {@link CometSubscriber}
+	 *         instances.
 	 */
-	<L extends CometSubscriber> L createPublisher(Class<L> listenerType,
-			Object matchKey);
+	<L extends CometSubscriber> L createPublisher(Class<L> listenerType);
 
 }

@@ -78,9 +78,8 @@ public class CometProxyPublisherManagedObjectSourceTest extends
 
 		// Record
 		this.recordReturn(publisher,
-				publisher.createPublisher(MockCometSubscriber.class, null),
-				mockProxy);
-		mockProxy.publish("TEST");
+				publisher.createPublisher(MockCometSubscriber.class), mockProxy);
+		mockProxy.publish("TEST", "MATCH_KEY");
 
 		// Test
 		this.replayMockObjects();
@@ -102,7 +101,7 @@ public class CometProxyPublisherManagedObjectSourceTest extends
 		MockCometSubscriber proxy = (MockCometSubscriber) object;
 
 		// Publish an event
-		proxy.publish("TEST");
+		proxy.publish("TEST", "MATCH_KEY");
 
 		// Verify
 		this.verifyMockObjects();
@@ -112,7 +111,7 @@ public class CometProxyPublisherManagedObjectSourceTest extends
 	 * Mock {@link CometSubscriber}.
 	 */
 	public static interface MockCometSubscriber extends CometSubscriber {
-		void publish(String message);
+		void publish(String event, String matchKey);
 	}
 
 }

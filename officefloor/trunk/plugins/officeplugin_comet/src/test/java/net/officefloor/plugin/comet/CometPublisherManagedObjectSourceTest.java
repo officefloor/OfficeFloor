@@ -18,6 +18,8 @@
 
 package net.officefloor.plugin.comet;
 
+import java.lang.reflect.Proxy;
+
 import net.officefloor.compile.test.managedobject.ManagedObjectLoaderUtil;
 import net.officefloor.compile.test.managedobject.ManagedObjectTypeBuilder;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
@@ -60,19 +62,131 @@ public class CometPublisherManagedObjectSourceTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Validate loading.
+	 * Validate loading notification.
 	 */
-	public void testLoad() throws Throwable {
+	public void testLoadNotification() throws Throwable {
 
 		final CometService service = this.createMock(CometService.class);
 
-		// Record publishing an event
+		// Record publishing a notification
 		this.recordReturn(service, service.publishEvent(
-				MockCometPublisher.class.getName(), "TEST", "MATCH_KEY"), Long
+				MockNotificationCometPublisher.class.getName(), null, null),
+				Long.valueOf(1));
+
+		// Test
+		this.replayMockObjects();
+
+		// Load the publisher factory
+		CometPublisher factory = this.loadCometPublisher(service);
+
+		// Create the publisher
+		MockNotificationCometPublisher publisher = factory
+				.createPublisher(MockNotificationCometPublisher.class);
+		publisher.notificaiton();
+
+		// Verify
+		this.verifyMockObjects();
+	}
+
+	/**
+	 * Validate loading without a match key.
+	 */
+	public void testLoadWithoutMatchKey() throws Throwable {
+
+		final CometService service = this.createMock(CometService.class);
+
+		// Record publishing an event without match key
+		this.recordReturn(service, service.publishEvent(
+				MockCometPublisher.class.getName(), "TEST", null), Long
 				.valueOf(1));
 
 		// Test
 		this.replayMockObjects();
+
+		// Load the publisher factory
+		CometPublisher factory = this.loadCometPublisher(service);
+
+		// Create the publisher
+		MockCometPublisher publisher = factory
+				.createPublisher(MockCometPublisher.class);
+		publisher.send("TEST");
+
+		// Verify
+		this.verifyMockObjects();
+	}
+
+	/**
+	 * Validate loading with a match key.
+	 */
+	public void testLoadWithMatchKey() throws Throwable {
+
+		final CometService service = this.createMock(CometService.class);
+
+		// Record publishing an event without match key
+		this.recordReturn(service,
+				service.publishEvent(
+						MockMatchKeyCometPublisher.class.getName(), "TEST",
+						"MATCH_KEY"), Long.valueOf(1));
+
+		// Test
+		this.replayMockObjects();
+
+		// Load the publisher factory
+		CometPublisher factory = this.loadCometPublisher(service);
+
+		// Create the publisher
+		MockMatchKeyCometPublisher publisher = factory
+				.createPublisher(MockMatchKeyCometPublisher.class);
+		publisher.send("TEST", "MATCH_KEY");
+
+		// Verify
+		this.verifyMockObjects();
+	}
+
+	/**
+	 * Ensure issue if creating {@link CometPublisher} {@link Proxy} that has
+	 * too many parameters.
+	 */
+	public void testLoadWithTooManyParameters() throws Throwable {
+
+		final CometService service = this.createMock(CometService.class);
+
+		// Test
+		this.replayMockObjects();
+
+		// Load the publisher factory
+		CometPublisher factory = this.loadCometPublisher(service);
+
+		// Fail to create publisher as too many parameters
+		MockTooManyParametersCometPublisher publisher = factory
+				.createPublisher(MockTooManyParametersCometPublisher.class);
+		try {
+			publisher.send("EVENT", "MATCH_KEY", new Error(
+					"Too many parameters"));
+			fail("Should not be successful as too many parameters");
+		} catch (IllegalStateException ex) {
+			assertEquals(
+					"Incorrect cause",
+					MockTooManyParametersCometPublisher.class.getName()
+							+ " has too many parameters for "
+							+ CometSubscriber.class.getSimpleName()
+							+ " publish method. At most should be event data and match key.",
+					ex.getMessage());
+		}
+
+		// Verify
+		this.verifyMockObjects();
+	}
+
+	/**
+	 * Loads the {@link CometPublisher}.
+	 * 
+	 * @param cometService
+	 *            {@link CometService}.
+	 * @return Loaded {@link CometPublisher}.
+	 */
+	private CometPublisher loadCometPublisher(CometService cometService)
+			throws Throwable {
 
 		// Load the source
 		ManagedObjectSourceStandAlone loader = new ManagedObjectSourceStandAlone();
@@ -81,7 +195,7 @@ public class CometPublisherManagedObjectSourceTest extends OfficeFrameTestCase {
 
 		// Source the managed object
 		ManagedObjectUserStandAlone user = new ManagedObjectUserStandAlone();
-		user.mapDependency(Dependencies.COMET_SERVICE, service);
+		user.mapDependency(Dependencies.COMET_SERVICE, cometService);
 		ManagedObject mo = user.sourceManagedObject(source);
 		assertNotNull("Should have managed object", mo);
 
@@ -90,13 +204,16 @@ public class CometPublisherManagedObjectSourceTest extends OfficeFrameTestCase {
 		assertTrue("Incorrect object type", object instanceof CometPublisher);
 		CometPublisher factory = (CometPublisher) object;
 
-		// Create the publisher
-		MockCometPublisher publisher = factory.createPublisher(
-				MockCometPublisher.class, "MATCH_KEY");
-		publisher.send("TEST");
+		// Return the Comet Publisher factory
+		return factory;
+	}
 
-		// Verify
-		this.verifyMockObjects();
+	/**
+	 * Mock interface for {@link CometPublisher} with no event data.
+	 */
+	public static interface MockNotificationCometPublisher extends
+			CometSubscriber {
+		void notificaiton();
 	}
 
 	/**
@@ -104,6 +221,21 @@ public class CometPublisherManagedObjectSourceTest extends OfficeFrameTestCase {
 	 */
 	public static interface MockCometPublisher extends CometSubscriber {
 		void send(String event);
+	}
+
+	/**
+	 * Mock interface for {@link CometPublisher} with match key.
+	 */
+	public static interface MockMatchKeyCometPublisher extends CometSubscriber {
+		void send(String event, String matchKey);
+	}
+
+	/**
+	 * Mock interface for {@link CometPublisher} with too many parameters.
+	 */
+	public static interface MockTooManyParametersCometPublisher extends
+			CometSubscriber {
+		void send(String event, String matchKey, Error tooManyParameters);
 	}
 
 }
