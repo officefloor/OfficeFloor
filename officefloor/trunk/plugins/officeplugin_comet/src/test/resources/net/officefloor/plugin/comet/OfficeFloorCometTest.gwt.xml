@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<module rename-to="template">
+<module rename-to="root">
 	<inherits name="com.google.gwt.user.User" />
 	<inherits name="net.officefloor.plugin.comet.OfficeFloorComet" />
 	<inherits name="com.google.gwt.user.theme.standard.Standard" />

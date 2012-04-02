@@ -118,11 +118,11 @@ public class CometPublisherManagedObjectSource
 		@Override
 		@SuppressWarnings("unchecked")
 		public <L extends CometSubscriber> L createPublisher(
-				Class<L> listenerType, Object matchKey) {
+				Class<L> listenerType) {
 
 			// Create the handler
 			InvocationHandler handler = new CometPublisherInvocationHandler(
-					listenerType, matchKey, this.service);
+					listenerType, this.service);
 
 			// Return the proxy for publishing events
 			return (L) Proxy.newProxyInstance(
@@ -144,11 +144,6 @@ public class CometPublisherManagedObjectSource
 		private final Class<?> listenerType;
 
 		/**
-		 * Match key.
-		 */
-		private final Object matchKey;
-
-		/**
 		 * {@link CometService}.
 		 */
 		private final CometService service;
@@ -158,15 +153,12 @@ public class CometPublisherManagedObjectSource
 		 * 
 		 * @param listenerType
 		 *            Listener type.
-		 * @param matchKey
-		 *            Match key.
 		 * @param service
 		 *            {@link CometService}.
 		 */
 		public CometPublisherInvocationHandler(Class<?> listenerType,
-				Object matchKey, CometService service) {
+				CometService service) {
 			this.listenerType = listenerType;
-			this.matchKey = matchKey;
 			this.service = service;
 		}
 
@@ -179,11 +171,28 @@ public class CometPublisherManagedObjectSource
 				throws Throwable {
 
 			// First parameter is the event data
-			Object data = (args.length > 0 ? args[0] : null);
+			Object data = null;
+			Object matchKey = null;
+			switch (args == null ? 0 : args.length) {
+			case 2:
+				matchKey = args[1];
+			case 1:
+				data = args[0];
+			case 0:
+				// May be just notification
+				break;
+			default:
+				// Indicate invalid interface
+				throw new IllegalStateException(
+						this.listenerType.getName()
+								+ " has too many parameters for "
+								+ CometSubscriber.class.getSimpleName()
+								+ " publish method. At most should be event data and match key.");
+			}
 
 			// Publish the event
 			this.service.publishEvent(this.listenerType.getName(), data,
-					this.matchKey);
+					matchKey);
 
 			// Nothing to return as should be void method
 			return null;

@@ -25,7 +25,7 @@ import net.officefloor.plugin.comet.api.CometSubscriber;
  * 
  * @author Daniel Sagenschneider
  */
-public interface MockCometListener extends CometSubscriber {
+public interface MockCometEventListener extends CometSubscriber {
 
 	/**
 	 * Method to handle the event.

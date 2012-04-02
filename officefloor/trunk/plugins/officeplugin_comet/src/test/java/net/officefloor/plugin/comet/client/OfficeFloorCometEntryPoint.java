@@ -24,6 +24,7 @@ import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.ui.Button;
+import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Panel;
@@ -38,6 +39,21 @@ import com.google.gwt.user.client.ui.VerticalPanel;
  */
 public class OfficeFloorCometEntryPoint implements EntryPoint {
 
+	/**
+	 * Notification toggle.
+	 */
+	private boolean notificationToggle = false;
+
+	/**
+	 * Indicates the number of events received.
+	 */
+	private int eventCount = 0;
+
+	/**
+	 * Indicates the number of match keys received.
+	 */
+	private int matchKeyCount = 0;
+
 	/*
 	 * ====================== EntryPoint ======================
 	 */
@@ -45,47 +61,88 @@ public class OfficeFloorCometEntryPoint implements EntryPoint {
 	@Override
 	public void onModuleLoad() {
 
-		// Create publisher
-		final MockCometListener publisher = OfficeFloorComet.createPublisher(
-				MockCometListener.class, null);
+		// Create the publishers
+		final MockCometNotificationListener notificationPublisher = OfficeFloorComet
+				.createPublisher(MockCometNotificationListener.class);
+		final MockCometEventListener eventPublisher = OfficeFloorComet
+				.createPublisher(MockCometEventListener.class);
+		final MockCometMatchKeyListener matchKeyPublisher = OfficeFloorComet
+				.createPublisher(MockCometMatchKeyListener.class);
 
 		// Provide the widgets
 		Panel root = RootPanel.get("comet");
 		VerticalPanel panel = new VerticalPanel();
 		root.add(panel);
 
-		// Provide widgets to publish event
-		HorizontalPanel publishPanel = new HorizontalPanel();
-		panel.add(publishPanel);
+		// Provide event text widget
+		HorizontalPanel eventPanel = new HorizontalPanel();
+		panel.add(eventPanel);
+		eventPanel.add(new Label("Event text: "));
 		final TextBox eventText = new TextBox();
 		eventText.setText("TEST");
-		publishPanel.add(eventText);
+		eventPanel.add(eventText);
+
+		// Provide match key widget
+		HorizontalPanel matchKeyPanel = new HorizontalPanel();
+		panel.add(matchKeyPanel);
+		matchKeyPanel.add(new Label("Match key: "));
+		final TextBox matchKeyText = new TextBox();
+		matchKeyText.setText("MATCH");
+		matchKeyPanel.add(matchKeyText);
+
+		// Provide button to trigger publishing
 		Button publishButton = new Button("Publish");
-		publishPanel.add(publishButton);
+		panel.add(publishButton);
 		publishButton.addClickHandler(new ClickHandler() {
 			@Override
 			public void onClick(ClickEvent event) {
-				// Publish event
-				publisher.handleEvent(eventText.getText());
+				// Publish events
+				notificationPublisher.handleNotification();
+				eventPublisher.handleEvent(eventText.getText());
+				matchKeyPublisher.handleEvent(eventText.getText(),
+						eventText.getText());
 			}
 		});
 
-		// Provide the widgets to subscribe to event
-		HorizontalPanel subscribePanel = new HorizontalPanel();
-		panel.add(subscribePanel);
-		final Label label = new Label("Subscribed events:");
-		subscribePanel.add(label);
+		// Multiple subscriptions
+		OfficeFloorComet.setMultipleSubscriptions(true);
 
-		// Create handler for handling events
-		final MockCometListener handler = new MockCometListener() {
-			@Override
-			public void handleEvent(String event) {
-				label.setText(label.getText() + " " + event);
-			}
-		};
+		// Provide notification subscription
+		HorizontalPanel notificationSubscribePanel = new HorizontalPanel();
+		panel.add(notificationSubscribePanel);
+		notificationSubscribePanel.add(new Label("Subscribe notification: "));
+		final CheckBox notificationCheckBox = new CheckBox();
+		notificationSubscribePanel.add(notificationCheckBox);
+		OfficeFloorComet.subscribe(MockCometNotificationListener.class,
+				new MockCometNotificationListener() {
+					@Override
+					public void handleNotification() {
+						OfficeFloorCometEntryPoint.this.notificationToggle = !OfficeFloorCometEntryPoint.this.notificationToggle;
+						notificationCheckBox.setValue(Boolean
+								.valueOf(OfficeFloorCometEntryPoint.this.notificationToggle));
+					}
+				}, null);
 
-		// Subscribe to events
-		OfficeFloorComet.subscribe(MockCometListener.class, handler, null);
+		// Provide event subscription
+		HorizontalPanel eventSubscribePanel = new HorizontalPanel();
+		panel.add(eventSubscribePanel);
+		eventSubscribePanel.add(new Label("Subscribed event: "));
+		final Label eventSubscribeLabel = new Label("[no event]");
+		eventSubscribePanel.add(eventSubscribeLabel);
+		OfficeFloorComet.subscribe(MockCometEventListener.class,
+				new MockCometEventListener() {
+					@Override
+					public void handleEvent(String event) {
+						eventSubscribeLabel
+								.setText(event
+										+ " ("
+										+ (++OfficeFloorCometEntryPoint.this.eventCount)
+										+ ")");
+					}
+				}, null);
+
+		// Subscribe
+		OfficeFloorComet.subscribe();
 	}
 
 }

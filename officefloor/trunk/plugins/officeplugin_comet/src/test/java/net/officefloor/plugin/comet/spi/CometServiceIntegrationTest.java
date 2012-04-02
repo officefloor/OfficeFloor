@@ -28,7 +28,7 @@ import net.officefloor.frame.impl.spi.team.OnePersonTeamSource;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.comet.CometServiceInvoker;
 import net.officefloor.plugin.comet.api.CometSubscriber;
-import net.officefloor.plugin.comet.client.MockCometListener;
+import net.officefloor.plugin.comet.client.MockCometEventListener;
 import net.officefloor.plugin.comet.internal.CometEvent;
 import net.officefloor.plugin.comet.internal.CometInterest;
 import net.officefloor.plugin.comet.internal.CometRequest;
@@ -243,7 +243,7 @@ public class CometServiceIntegrationTest extends OfficeFrameTestCase {
 	 */
 	public void publishEvent() {
 		CometServiceInvoker.publish(this.port, "publishEvent", new CometEvent(
-				MockCometListener.class.getName(), "EVENT", null));
+				MockCometEventListener.class.getName(), "EVENT", null));
 	}
 
 	/**

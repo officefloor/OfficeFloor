@@ -168,7 +168,7 @@ public class OfficeFloorComet {
 	 *            Indicates if detached subscribe.
 	 */
 	private static void subscribe(boolean isDetachedSubscribe) {
-		
+
 		// Determine if first subscription
 		if (isFirstSubscription) {
 			if (isDetachedSubscribe) {
@@ -248,7 +248,8 @@ public class OfficeFloorComet {
 								try {
 									subscription.adapter.handleEvent(
 											subscription.handler,
-											event.getData());
+											event.getData(),
+											event.getFilterKey());
 								} catch (Throwable ex) {
 									Window.alert("COMET HANDLE EVENT FAILURE: "
 											+ ex.getMessage() + " ["
@@ -327,21 +328,18 @@ public class OfficeFloorComet {
 	 * @param listenerType
 	 *            Listener interface type that should be marked by extending
 	 *            {@link CometSubscriber}.
-	 * @param matchKey
-	 *            Match key to enable filtering. May be <code>null</code> to not
-	 *            have the event filtered.
 	 * @return Implementation of {@link CometSubscriber} to enable invoking its
 	 *         method to publish an event.
 	 */
 	@SuppressWarnings("unchecked")
 	public static <L extends CometSubscriber> L createPublisher(
-			Class<L> listenerType, Object matchKey) {
+			Class<L> listenerType) {
 
 		// Obtain the adapter
 		final CometAdapter adapter = adapters.get(listenerType);
 
 		// Create the publisher
-		L publisher = (L) adapter.createPublisher(matchKey);
+		L publisher = (L) adapter.createPublisher();
 
 		// Return the publisher
 		return publisher;

@@ -81,18 +81,27 @@ public class CometAdapterGenerator extends Generator {
 
 		// Ensure method has only one parameter
 		JParameter[] parameters = method.getParameters();
-		if (parameters.length != 1) {
+		JParameter eventParameter = null;
+		JParameter matchKeyParameter = null;
+		switch (parameters.length) {
+		case 2:
+			matchKeyParameter = parameters[1];
+		case 1:
+			eventParameter = parameters[0];
+		case 0:
+			break;
+		default:
+			// Too many parameters
 			logger.log(
 					Type.ERROR,
 					"Interface method "
 							+ type.getQualifiedSourceName()
 							+ "."
 							+ method.getName()
-							+ " must only have one parameter as the interface is marked with "
+							+ " must have no more than two parameters (event and match key) as the interface is marked with "
 							+ CometSubscriber.class.getSimpleName());
 			throw new UnableToCompleteException();
 		}
-		JParameter parameter = parameters[0];
 
 		// Ensure no throws on the method
 		if (method.getThrows().length != 0) {
@@ -112,7 +121,6 @@ public class CometAdapterGenerator extends Generator {
 		String simpleName = type.getSimpleSourceName() + "Adapter";
 		String qualifiedName = packageName + "." + simpleName;
 		String methodName = method.getName();
-		String parameterType = parameter.getType().getQualifiedSourceName();
 		logger.log(Type.TRACE,
 				"Generating " + CometSubscriber.class.getSimpleName()
 						+ " Adapter for " + typeName + " [resulting class "
@@ -135,21 +143,42 @@ public class CometAdapterGenerator extends Generator {
 
 		// Provide handleEvent method
 		writer.println("@Override");
-		writer.println("public void handleEvent(Object handler, Object event) {");
-		writer.println("    ((" + typeName + ") handler)." + methodName + "(("
-				+ parameterType + ") event);");
+		writer.println("public void handleEvent(Object handler, Object event, Object matchKey) {");
+		writer.print("    ((" + typeName + ") handler)." + methodName + "(");
+		if (eventParameter != null) {
+			writer.print("("
+					+ eventParameter.getType().getQualifiedSourceName()
+					+ ") event");
+		}
+		if (matchKeyParameter != null) {
+			writer.print(", ("
+					+ matchKeyParameter.getType().getQualifiedSourceName()
+					+ ") matchKey");
+		}
+		writer.println(");");
 		writer.println("}");
 		writer.println();
 
 		// Provide createPublisher method
 		writer.println("@Override");
-		writer.println("public Object createPublisher(final Object matchKey) {");
+		writer.println("public Object createPublisher() {");
 		writer.println("    return new " + typeName + "() {");
 		writer.println("        @Override");
-		writer.println("        public void " + methodName + "("
-				+ parameterType + " data) {");
+		writer.print("        public void " + methodName + "(");
+		if (eventParameter != null) {
+			writer.print(eventParameter.getType().getQualifiedSourceName()
+					+ " event");
+		}
+		if (matchKeyParameter != null) {
+			writer.print(", "
+					+ matchKeyParameter.getType().getQualifiedSourceName()
+					+ " matchKey");
+		}
+		writer.print(") {");
 		writer.println("            OfficeFloorComet.publish(" + typeName
-				+ ".class, data, matchKey);");
+				+ ".class, " + (eventParameter == null ? "null" : "event")
+				+ ", " + (matchKeyParameter == null ? "null" : "matchKey")
+				+ ");");
 		writer.println("        }");
 		writer.println("    };");
 		writer.println("}");

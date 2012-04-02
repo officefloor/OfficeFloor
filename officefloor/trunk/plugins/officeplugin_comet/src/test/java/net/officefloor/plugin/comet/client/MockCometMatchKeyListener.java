@@ -16,22 +16,25 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package net.officefloor.plugin.comet.api;
+package net.officefloor.plugin.comet.client;
+
+import net.officefloor.plugin.comet.api.CometSubscriber;
 
 /**
- * <p>
- * Marker interface that all {@link CometSubscriber} interfaces should extend.
- * <p>
- * The extending interface must having the following criteria:
- * <ol>
- * <li>only one method</li>
- * <li>the method should have only one to two parameters (with the first
- * specifying the type of event and second optional parameter specifying the
- * match key)</li>
- * <li>the method should not throw any exceptions</li>
- * </ol>
+ * Comet listener with Match Key for testing.
  * 
  * @author Daniel Sagenschneider
  */
-public interface CometSubscriber {
+public interface MockCometMatchKeyListener extends CometSubscriber {
+
+	/**
+	 * Method to handle the event.
+	 * 
+	 * @param event
+	 *            Event.
+	 * @param matchKey
+	 *            Match Key.
+	 */
+	void handleEvent(String event, String matchKey);
+
 }

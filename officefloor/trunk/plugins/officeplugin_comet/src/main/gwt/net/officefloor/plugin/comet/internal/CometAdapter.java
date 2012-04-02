@@ -41,17 +41,17 @@ public interface CometAdapter {
 	 *            Handler to handle the event.
 	 * @param event
 	 *            Event.
+	 * @param matchKey
+	 *            Match key. May be <code>null</code>.
 	 */
-	void handleEvent(Object handler, Object event);
+	void handleEvent(Object handler, Object event, Object matchKey);
 
 	/**
 	 * Creates the type safe publisher.
 	 * 
-	 * @param matchKey
-	 *            Match key. May be <code>null</code>.
 	 * @return Type safe publisher that implements the {@link CometSubscriber}
 	 *         interface.
 	 */
-	Object createPublisher(Object matchKey);
+	Object createPublisher();
 
 }
