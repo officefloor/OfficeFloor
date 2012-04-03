@@ -21,11 +21,11 @@ package net.officefloor.plugin.comet.client;
 import net.officefloor.plugin.comet.api.CometSubscriber;
 
 /**
- * Comet listener with Match Key for testing.
+ * Comet listener with <code>null</code> filter key for testing.
  * 
  * @author Daniel Sagenschneider
  */
-public interface MockCometMatchKeyListener extends CometSubscriber {
+public interface MockCometNullFilterKeyListener extends CometSubscriber {
 
 	/**
 	 * Method to handle the event.

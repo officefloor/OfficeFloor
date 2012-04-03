@@ -52,7 +52,18 @@ public class OfficeFloorCometEntryPoint implements EntryPoint {
 	/**
 	 * Indicates the number of match keys received.
 	 */
-	private int matchKeyCount = 0;
+	private int filterKeyCount = 0;
+
+	/**
+	 * Indicates the number of match keys received on <code>null</code> filter
+	 * key.
+	 */
+	private int nullFilterKeyCount = 0;
+
+	/**
+	 * {@link MockFilterKey}.
+	 */
+	private MockFilterKey filterKey = new MockFilterKey(null);
 
 	/*
 	 * ====================== EntryPoint ======================
@@ -68,6 +79,8 @@ public class OfficeFloorCometEntryPoint implements EntryPoint {
 				.createPublisher(MockCometEventListener.class);
 		final MockCometMatchKeyListener matchKeyPublisher = OfficeFloorComet
 				.createPublisher(MockCometMatchKeyListener.class);
+		final MockCometNullFilterKeyListener nullFilterKeyPublisher = OfficeFloorComet
+				.createPublisher(MockCometNullFilterKeyListener.class);
 
 		// Provide the widgets
 		Panel root = RootPanel.get("comet");
@@ -89,20 +102,6 @@ public class OfficeFloorCometEntryPoint implements EntryPoint {
 		final TextBox matchKeyText = new TextBox();
 		matchKeyText.setText("MATCH");
 		matchKeyPanel.add(matchKeyText);
-
-		// Provide button to trigger publishing
-		Button publishButton = new Button("Publish");
-		panel.add(publishButton);
-		publishButton.addClickHandler(new ClickHandler() {
-			@Override
-			public void onClick(ClickEvent event) {
-				// Publish events
-				notificationPublisher.handleNotification();
-				eventPublisher.handleEvent(eventText.getText());
-				matchKeyPublisher.handleEvent(eventText.getText(),
-						eventText.getText());
-			}
-		});
 
 		// Multiple subscriptions
 		OfficeFloorComet.setMultipleSubscriptions(true);
@@ -141,8 +140,91 @@ public class OfficeFloorCometEntryPoint implements EntryPoint {
 					}
 				}, null);
 
+		// Provide filter key subscription
+		HorizontalPanel filterKeySubscribePanel = new HorizontalPanel();
+		panel.add(filterKeySubscribePanel);
+		filterKeySubscribePanel.add(new Label("Filter Key: "));
+		final TextBox filterKeyText = new TextBox();
+		filterKeyText.setText(matchKeyText.getText());
+		filterKeySubscribePanel.add(filterKeyText);
+		filterKeySubscribePanel.add(new Label("Additional: "));
+		final TextBox additionalText = new TextBox();
+		additionalText.setText("additional");
+		filterKeySubscribePanel.add(additionalText);
+		filterKeySubscribePanel.add(new Label("Subscribe filter key: "));
+		final Label matchKeySubscribeLabel = new Label("[no event]");
+		filterKeySubscribePanel.add(matchKeySubscribeLabel);
+		OfficeFloorComet.subscribe(MockCometMatchKeyListener.class,
+				new MockCometMatchKeyListener() {
+					@Override
+					public void handleEvent(String event, MockFilterKey matchKey) {
+						matchKeySubscribeLabel
+								.setText(event
+										+ "("
+										+ (++OfficeFloorCometEntryPoint.this.filterKeyCount)
+										+ ") - "
+										+ (matchKey == null ? "NONE" : matchKey
+												.getAdditionalText()));
+					}
+				}, this.filterKey);
+
+		// Provide null filter key subscription
+		HorizontalPanel nullFilterKeySubscribePanel = new HorizontalPanel();
+		panel.add(nullFilterKeySubscribePanel);
+		nullFilterKeySubscribePanel
+				.add(new Label("Subscribe null filter key: "));
+		final Label nullMatchKeySubscribeLabel = new Label("[no event]");
+		nullFilterKeySubscribePanel.add(nullMatchKeySubscribeLabel);
+		OfficeFloorComet.subscribe(MockCometNullFilterKeyListener.class,
+				new MockCometNullFilterKeyListener() {
+					@Override
+					public void handleEvent(String event, MockFilterKey matchKey) {
+						nullMatchKeySubscribeLabel
+								.setText(event
+										+ "("
+										+ (++OfficeFloorCometEntryPoint.this.nullFilterKeyCount)
+										+ ") - "
+										+ (matchKey == null ? "NONE" : matchKey
+												.getAdditionalText()));
+					}
+				}, null);
+
 		// Subscribe
 		OfficeFloorComet.subscribe();
+
+		// Provide button to trigger publishing
+		Button publishButton = new Button("Publish");
+		panel.add(publishButton);
+		publishButton.addClickHandler(new ClickHandler() {
+			@Override
+			public void onClick(ClickEvent clickEvent) {
+
+				// Specify the filter key (may take two events to update)
+				String filterKey = filterKeyText.getText();
+				OfficeFloorCometEntryPoint.this.filterKey
+						.setFilterText(filterKey);
+
+				// Create the match key
+				MockFilterKey matchKey;
+				String matchKeyValue = matchKeyText.getText();
+				if ((matchKeyValue == null)
+						|| (matchKeyValue.trim().length() == 0)) {
+					// No match key
+					matchKey = null;
+				} else {
+					// Provide the match key
+					matchKey = new MockFilterKey(additionalText.getText());
+					matchKey.setFilterText(matchKeyValue);
+				}
+
+				// Publish events
+				String event = eventText.getText();
+				notificationPublisher.handleNotification();
+				eventPublisher.handleEvent(event);
+				matchKeyPublisher.handleEvent(event, matchKey);
+				nullFilterKeyPublisher.handleEvent(event, matchKey);
+			}
+		});
 	}
 
 }

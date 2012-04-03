@@ -114,7 +114,7 @@ public class CometManualAppEntryPoint implements EntryPoint {
 
 		// Handle submitting a message
 		final ConversationSubscription publisher = OfficeFloorComet
-				.createPublisher(ConversationSubscription.class, null);
+				.createPublisher(ConversationSubscription.class);
 		send.addClickHandler(new ClickHandler() {
 			@Override
 			public void onClick(ClickEvent event) {
