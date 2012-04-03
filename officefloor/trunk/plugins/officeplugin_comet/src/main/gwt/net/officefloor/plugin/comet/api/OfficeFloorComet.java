@@ -240,8 +240,6 @@ public class OfficeFloorComet {
 											.getFilterKey()))) {
 										continue; // mis-match on filter key
 									}
-								} else if (event.getFilterKey() != null) {
-									continue; // only match if no filter key
 								}
 
 								// Handle event

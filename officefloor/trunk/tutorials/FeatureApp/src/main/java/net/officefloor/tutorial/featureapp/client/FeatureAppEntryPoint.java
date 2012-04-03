@@ -108,7 +108,7 @@ public class FeatureAppEntryPoint implements EntryPoint {
 
 		// Handle submitting a message
 		final ConversationSubscription publisher = OfficeFloorComet
-				.createPublisher(ConversationSubscription.class, null);
+				.createPublisher(ConversationSubscription.class);
 		messageText.addKeyDownHandler(new KeyDownHandler() {
 			@Override
 			public void onKeyDown(KeyDownEvent event) {
