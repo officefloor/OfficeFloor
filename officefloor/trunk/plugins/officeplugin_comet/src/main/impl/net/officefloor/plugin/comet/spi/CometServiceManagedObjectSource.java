@@ -229,7 +229,7 @@ public class CometServiceManagedObjectSource
 
 			// Determine if match event matches request
 			List<CometEvent> events = null;
-			for (int i = 0; i < request.interests.length; i++) {
+			INTERESTED: for (int i = 0; i < request.interests.length; i++) {
 				CometInterest interest = request.interests[i];
 				if (this.isMatch(interest, newEvent)) {
 
@@ -242,7 +242,13 @@ public class CometServiceManagedObjectSource
 					events.add(new CometEvent(
 							newEvent.getEventSequenceNumber(), interest
 									.getListenerTypeName(), newEvent.getData(),
-							interest.getFilterKey()));
+							newEvent.getMatchKey()));
+
+					/*
+					 * Only include the event once. It is responsibility of
+					 * subscriber to multiplex events to interests.
+					 */
+					break INTERESTED;
 				}
 			}
 			if (events != null) {
@@ -294,7 +300,7 @@ public class CometServiceManagedObjectSource
 		while (node != null) {
 
 			// Determine if match
-			for (int i = 0; i < interests.length; i++) {
+			NEXT_NODE: for (int i = 0; i < interests.length; i++) {
 				CometInterest interest = interests[i];
 				if (this.isMatch(interest, node)) {
 
@@ -306,7 +312,13 @@ public class CometServiceManagedObjectSource
 					// Add the event for the interest
 					events.add(new CometEvent(node.getEventSequenceNumber(),
 							interest.getListenerTypeName(), node.getData(),
-							interest.getFilterKey()));
+							node.getMatchKey()));
+
+					/*
+					 * Only include the event once. It is responsibility of
+					 * subscriber to multiplex events to interests.
+					 */
+					break NEXT_NODE;
 				}
 			}
 
@@ -406,11 +418,11 @@ public class CometServiceManagedObjectSource
 		}
 
 		// Determine if filtered
-		Object matchKey = event.getMatchKey();
 		Object filterKey = interest.getFilterKey();
-		if ((matchKey != null) && (filterKey != null)) {
-			if (!matchKey.equals(filterKey)) {
-				return false; // filtered
+		if (filterKey != null) {
+			Object matchKey = event.getMatchKey();
+			if (!(filterKey.equals(matchKey))) {
+				return false; // filtered from response
 			}
 		}
 

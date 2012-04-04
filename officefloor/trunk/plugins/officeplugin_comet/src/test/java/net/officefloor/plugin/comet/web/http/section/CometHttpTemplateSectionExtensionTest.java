@@ -345,7 +345,7 @@ public class CometHttpTemplateSectionExtensionTest extends OfficeFrameTestCase {
 			// Publish the event
 			long sequenceNumber = service.publishEvent(
 					event.getListenerTypeName(), event.getData(),
-					event.getFilterKey());
+					event.getMatchKey());
 
 			// Flag manually published
 			CometHttpTemplateSectionExtensionTest.isManualPublish = true;
