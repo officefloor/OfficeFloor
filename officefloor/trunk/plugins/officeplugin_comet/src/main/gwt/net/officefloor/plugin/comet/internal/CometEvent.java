@@ -55,16 +55,14 @@ public class CometEvent implements IsSerializable {
 	private IsSerializable data_IsSerializable = null;
 
 	/**
-	 * {@link Serializable} filter key used on the {@link CometInterest}. May be
-	 * <code>null</code>.
+	 * {@link Serializable} match key. May be <code>null</code>.
 	 */
-	private Serializable filterKey_Serializable = null;
+	private Serializable matchKey_Serializable = null;
 
 	/**
-	 * {@link IsSerializable} filter key used on the {@link CometInterest}. May
-	 * be <code>null</code>.
+	 * {@link IsSerializable} match key. May be <code>null</code>.
 	 */
-	private IsSerializable filterKey_IsSerializable = null;
+	private IsSerializable matchKey_IsSerializable = null;
 
 	/**
 	 * Initiate for publishing without a sequence number. Sequence number to be
@@ -75,9 +73,7 @@ public class CometEvent implements IsSerializable {
 	 * @param data
 	 *            Data.
 	 * @param matchKey
-	 *            Match key used on the {@link CometInterest}. May be
-	 *            <code>null</code> to match all {@link CometInterest} instances
-	 *            of appropriate type.
+	 *            Match key. May be <code>null</code>.
 	 */
 	public CometEvent(String listenerTypeName, Object data, Object matchKey) {
 		this(NO_SEQUENCE_NUMBER, listenerTypeName, data, matchKey);
@@ -92,12 +88,11 @@ public class CometEvent implements IsSerializable {
 	 *            Listener type name.
 	 * @param data
 	 *            Data.
-	 * @param filterKey
-	 *            Filter key used on the {@link CometInterest}. May be
-	 *            <code>null</code>.
+	 * @param matchKey
+	 *            Match key. May be <code>null</code>.
 	 */
 	public CometEvent(long sequenceNumber, String listenerTypeName,
-			Object data, Object filterKey) {
+			Object data, Object matchKey) {
 		this.sequenceNumber = sequenceNumber;
 		this.listenerTypeName = listenerTypeName;
 
@@ -113,15 +108,15 @@ public class CometEvent implements IsSerializable {
 			}
 		}
 
-		// Specify the filter key
-		if (filterKey != null) {
-			if (filterKey instanceof IsSerializable) {
-				this.filterKey_IsSerializable = (IsSerializable) filterKey;
-			} else if (filterKey instanceof Serializable) {
-				this.filterKey_Serializable = (Serializable) filterKey;
+		// Specify the match key
+		if (matchKey != null) {
+			if (matchKey instanceof IsSerializable) {
+				this.matchKey_IsSerializable = (IsSerializable) matchKey;
+			} else if (matchKey instanceof Serializable) {
+				this.matchKey_Serializable = (Serializable) matchKey;
 			} else {
-				throw new IllegalArgumentException("Type for filterKey ("
-						+ filterKey.getClass().getName()
+				throw new IllegalArgumentException("Type for matchKey ("
+						+ matchKey.getClass().getName()
 						+ ") is not serialisable");
 			}
 		}
@@ -162,14 +157,13 @@ public class CometEvent implements IsSerializable {
 	}
 
 	/**
-	 * Filter key used on the {@link CometInterest}. May be <code>null</code>.
+	 * Obtains the match key.
 	 * 
-	 * @return Filter key used on the {@link CometInterest}. May be
-	 *         <code>null</code>.
+	 * @return Match key. May be <code>null</code>.
 	 */
-	public Object getFilterKey() {
-		return (this.filterKey_IsSerializable != null ? this.filterKey_IsSerializable
-				: this.filterKey_Serializable);
+	public Object getMatchKey() {
+		return (this.matchKey_IsSerializable != null ? this.matchKey_IsSerializable
+				: this.matchKey_Serializable);
 	}
 
 }

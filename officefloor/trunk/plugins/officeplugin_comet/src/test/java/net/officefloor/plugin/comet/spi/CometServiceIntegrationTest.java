@@ -207,10 +207,10 @@ public class CometServiceIntegrationTest extends OfficeFrameTestCase {
 			assertEquals("Incorrect listener type for event " + i,
 					MockListener.class.getName(),
 					actualEvent.getListenerTypeName());
-			assertEquals("Incorrect payload for event " + i, "EVENT",
+			assertEquals("Incorrect data for event " + i, "EVENT",
 					actualEvent.getData());
-			assertNull("Should not have filter key for event " + i,
-					actualEvent.getFilterKey());
+			assertNull("Should not have match key for event " + i,
+					actualEvent.getMatchKey());
 		}
 	}
 

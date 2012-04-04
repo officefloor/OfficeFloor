@@ -76,7 +76,7 @@ public interface PublishedEvent {
 	/**
 	 * Obtains the match key.
 	 * 
-	 * @return Match key. May be <code>null</code> to indicate to not filter.
+	 * @return Match key. May be <code>null</code>.
 	 */
 	Object getMatchKey();
 

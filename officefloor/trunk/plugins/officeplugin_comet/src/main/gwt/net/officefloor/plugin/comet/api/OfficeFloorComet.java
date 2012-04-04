@@ -237,7 +237,7 @@ public class OfficeFloorComet {
 										.getFilterKey();
 								if (interestFilterKey != null) {
 									if (!(interestFilterKey.equals(event
-											.getFilterKey()))) {
+											.getMatchKey()))) {
 										continue; // mis-match on filter key
 									}
 								}
@@ -247,7 +247,7 @@ public class OfficeFloorComet {
 									subscription.adapter.handleEvent(
 											subscription.handler,
 											event.getData(),
-											event.getFilterKey());
+											event.getMatchKey());
 								} catch (Throwable ex) {
 									Window.alert("COMET HANDLE EVENT FAILURE: "
 											+ ex.getMessage() + " ["

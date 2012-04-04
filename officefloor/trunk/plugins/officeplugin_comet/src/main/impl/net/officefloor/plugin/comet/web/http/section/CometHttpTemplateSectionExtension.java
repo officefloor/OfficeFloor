@@ -309,7 +309,7 @@ public class CometHttpTemplateSectionExtension implements
 				// Publish the event
 				sequenceNumber = service.publishEvent(
 						event.getSequenceNumber(), event.getListenerTypeName(),
-						event.getData(), event.getFilterKey());
+						event.getData(), event.getMatchKey());
 
 			} catch (Exception ex) {
 				// Failed to publish event

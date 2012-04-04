@@ -25,6 +25,7 @@ import java.util.List;
 import net.officefloor.frame.spi.managedobject.AsynchronousListener;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.comet.api.CometSubscriber;
+import net.officefloor.plugin.comet.api.OfficeFloorComet;
 import net.officefloor.plugin.comet.internal.CometEvent;
 import net.officefloor.plugin.comet.internal.CometInterest;
 import net.officefloor.plugin.comet.internal.CometRequest;
@@ -34,6 +35,7 @@ import net.officefloor.plugin.gwt.service.ServerGwtRpcConnection;
 
 import org.easymock.AbstractMatcher;
 
+import com.google.gwt.user.client.rpc.IsSerializable;
 import com.google.gwt.user.server.rpc.RPCRequest;
 
 /**
@@ -99,7 +101,7 @@ public class CometServiceManagedObjectTest extends OfficeFrameTestCase {
 	/**
 	 * Ensure wait if no matching event by listener type.
 	 */
-	public void testNoMatchingEventByListenerType() {
+	public void testNotMatchEventByListenerType() {
 		this.recordEvent(1, MockOneListener.class, "EVENT", null);
 		this.recordInit(new CometInterest(MockTwoListener.class.getName(), null));
 		this.recordWait(10);
@@ -124,7 +126,7 @@ public class CometServiceManagedObjectTest extends OfficeFrameTestCase {
 		this.recordEvent(1, MockOneListener.class, "EVENT", "MATCH_KEY");
 		this.recordInit(new CometInterest(MockOneListener.class.getName(), null));
 		this.recordResponse(new CometEvent(1, MockOneListener.class.getName(),
-				"EVENT", null));
+				"EVENT", "MATCH_KEY"));
 		this.doTest();
 	}
 
@@ -132,11 +134,18 @@ public class CometServiceManagedObjectTest extends OfficeFrameTestCase {
 	 * Ensure if no match key to match to all events for listener type.
 	 */
 	public void testMatchByNoMatchKey() {
+		final Object filterKey = new MockKey() {
+			@Override
+			public boolean equals(Object obj) {
+				assertNull("Should not have a match key", obj);
+				return true;
+			}
+		};
 		this.recordEvent(1, MockOneListener.class, "EVENT", null);
 		this.recordInit(new CometInterest(MockOneListener.class.getName(),
-				"FILTER_KEY"));
+				filterKey));
 		this.recordResponse(new CometEvent(1, MockOneListener.class.getName(),
-				"EVENT", "FILTER_KEY"));
+				"EVENT", null));
 		this.doTest();
 	}
 
@@ -164,8 +173,67 @@ public class CometServiceManagedObjectTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensure able retrieve multiple {@link CometEvent} instances on multiple
-	 * {@link CometInterest} instances.
+	 * Ensure that it is the Filter key that checks the Match key. In other
+	 * words, it is the {@link CometSubscriber} that provides the logic to match
+	 * {@link CometEvent} instances of interest.
+	 */
+	public void testFilterChecksOnMatchKey() {
+		final Object matchKey = new MockKey() {
+			@Override
+			public boolean equals(Object obj) {
+				if (obj == this) {
+					return true; // for assertion
+				}
+				fail("Match key should not be checking for filtering");
+				return false;
+			}
+		};
+		final Object filterKey = new MockKey() {
+			@Override
+			public boolean equals(Object obj) {
+				assertEquals("Incorrect match key", matchKey, obj);
+				return true; // match
+			}
+		};
+		this.recordEvent(1, MockOneListener.class, "EVENT", matchKey);
+		this.recordInit(new CometInterest(MockOneListener.class.getName(),
+				filterKey));
+		this.recordResponse(new CometEvent(1, MockOneListener.class.getName(),
+				"EVENT", matchKey));
+		this.doTest();
+	}
+
+	/**
+	 * Ensure that if Filter key is provided that it checks all
+	 * {@link CometEvent} instances, even if <code>null</code> match key.
+	 */
+	public void testFilterChecksOnNullMatchKey() {
+		final boolean[] isInvokedForNull = new boolean[1];
+		isInvokedForNull[0] = false;
+		final Object filterKey = new MockKey() {
+			@Override
+			public boolean equals(Object obj) {
+				assertNull("Should be no match key", obj);
+				isInvokedForNull[0] = true;
+				return true; // filter matches null
+			}
+		};
+		this.recordEvent(1, MockOneListener.class, "EVENT", null);
+		this.recordInit(new CometInterest(MockOneListener.class.getName(),
+				filterKey));
+		this.recordResponse(new CometEvent(1, MockOneListener.class.getName(),
+				"EVENT", null));
+		this.doTest();
+		assertTrue("Ensure filter check on null match key", isInvokedForNull[0]);
+	}
+
+	/**
+	 * <p>
+	 * Ensure single transferred {@link CometEvent} instance on matching
+	 * multiple {@link CometInterest} instances.
+	 * <p>
+	 * {@link OfficeFloorComet} will handle distributing to appropriate
+	 * {@link CometSubscriber} instances.
 	 */
 	public void testMatchMultipleInterests() {
 		this.recordEvent(1, MockOneListener.class, "EVENT", "MATCH");
@@ -174,9 +242,7 @@ public class CometServiceManagedObjectTest extends OfficeFrameTestCase {
 				"MATCH"), new CometInterest(MockTwoListener.class.getName(),
 				"NOT_MATCH"));
 		this.recordResponse(new CometEvent(1, MockOneListener.class.getName(),
-				"EVENT", "MATCH"),
-				new CometEvent(1, MockOneListener.class.getName(), "EVENT",
-						"MATCH"));
+				"EVENT", "MATCH"));
 		this.doTest();
 	}
 
@@ -208,6 +274,23 @@ public class CometServiceManagedObjectTest extends OfficeFrameTestCase {
 		this.async.notifyComplete();
 		this.recordResponse(new CometEvent(1, MockOneListener.class.getName(),
 				"EVENT", null));
+		this.doTest();
+	}
+
+	/**
+	 * Ensure single transferred {@link CometEvent} instance on multiple waiting
+	 * {@link CometInterest} instances for a published {@link CometEvent}.
+	 */
+	public void testPublishToMultipleInterests() {
+		this.recordInit(
+				new CometInterest(MockOneListener.class.getName(), null),
+				new CometInterest(MockOneListener.class.getName(), null),
+				new CometInterest(MockTwoListener.class.getName(), "NOT_MATCH"));
+		this.recordWait(10);
+		this.recordPublishEvent(MockOneListener.class, "EVENT", "MATCH");
+		this.async.notifyComplete();
+		this.recordResponse(new CometEvent(1, MockOneListener.class.getName(),
+				"EVENT", "MATCH"));
 		this.doTest();
 	}
 
@@ -484,9 +567,9 @@ public class CometServiceManagedObjectTest extends OfficeFrameTestCase {
 							actualEvent.getListenerTypeName());
 					assertEquals("Incorrect data for event " + i,
 							expectedEvent.getData(), actualEvent.getData());
-					assertEquals("Incorrect filter key for event " + i,
-							expectedEvent.getFilterKey(),
-							actualEvent.getFilterKey());
+					assertEquals("Incorrect match key for event " + i,
+							expectedEvent.getMatchKey(),
+							actualEvent.getMatchKey());
 				}
 
 				// Match
@@ -574,6 +657,12 @@ public class CometServiceManagedObjectTest extends OfficeFrameTestCase {
 	public static interface MockTwoListener extends CometSubscriber {
 
 		void listenTwo(String message);
+	}
+
+	/**
+	 * Mock filter/match key.
+	 */
+	public static class MockKey implements IsSerializable {
 	}
 
 }

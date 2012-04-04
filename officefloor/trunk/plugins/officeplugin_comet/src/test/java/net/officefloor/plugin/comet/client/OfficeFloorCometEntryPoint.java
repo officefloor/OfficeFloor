@@ -84,6 +84,7 @@ public class OfficeFloorCometEntryPoint implements EntryPoint {
 
 		// Provide the widgets
 		Panel root = RootPanel.get("comet");
+		root.clear();
 		VerticalPanel panel = new VerticalPanel();
 		root.add(panel);
 
@@ -102,6 +103,10 @@ public class OfficeFloorCometEntryPoint implements EntryPoint {
 		final TextBox matchKeyText = new TextBox();
 		matchKeyText.setText("MATCH");
 		matchKeyPanel.add(matchKeyText);
+		matchKeyPanel.add(new Label("Additional: "));
+		final TextBox additionalText = new TextBox();
+		additionalText.setText("additional");
+		matchKeyPanel.add(additionalText);
 
 		// Multiple subscriptions
 		OfficeFloorComet.setMultipleSubscriptions(true);
@@ -147,10 +152,6 @@ public class OfficeFloorCometEntryPoint implements EntryPoint {
 		final TextBox filterKeyText = new TextBox();
 		filterKeyText.setText(matchKeyText.getText());
 		filterKeySubscribePanel.add(filterKeyText);
-		filterKeySubscribePanel.add(new Label("Additional: "));
-		final TextBox additionalText = new TextBox();
-		additionalText.setText("additional");
-		filterKeySubscribePanel.add(additionalText);
 		filterKeySubscribePanel.add(new Label("Subscribe filter key: "));
 		final Label matchKeySubscribeLabel = new Label("[no event]");
 		filterKeySubscribePanel.add(matchKeySubscribeLabel);
