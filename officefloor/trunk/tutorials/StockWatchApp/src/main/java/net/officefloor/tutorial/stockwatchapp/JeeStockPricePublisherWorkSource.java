@@ -30,6 +30,7 @@ import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.manage.TaskManager;
 import net.officefloor.frame.api.manage.WorkManager;
 import net.officefloor.frame.util.AbstractSingleTask;
+import net.officefloor.tutorial.stockwatchapp.client.Stock;
 import net.officefloor.tutorial.stockwatchapp.client.StockPrice;
 import net.officefloor.tutorial.stockwatchapp.client.StockPriceEvents;
 
@@ -51,10 +52,15 @@ public class JeeStockPricePublisherWorkSource
 	/**
 	 * Use this method to publish a {@link StockPrice} to all clients interested
 	 * in the {@link StockPrice} from within JEE application code.
+	 * 
+	 * @param stock
+	 *            {@link Stock}.
+	 * @param price
+	 *            {@link StockPrice} for the {@link Stock}.
 	 */
-	public static void publishStockPrice(StockPrice stockPrice) {
+	public static void publishStockPrice(Stock stock, StockPrice price) {
 		try {
-			publishTask.invokeTask(stockPrice);
+			publishTask.invokeTask(new StockUpdate(stock, price));
 		} catch (InvalidParameterTypeException ex) {
 			// Only invalid if this class is itself invalid
 			throw new IllegalStateException(
@@ -73,7 +79,7 @@ public class JeeStockPricePublisherWorkSource
 	 * Dependency to publish the {@link StockPrice}.
 	 */
 	public static enum Dependency {
-		STOCK_PRICE, STOCK_PRICE_EVENT
+		STOCK_UPDATE, STOCK_PRICE_EVENT
 	}
 
 	/*
@@ -95,7 +101,7 @@ public class JeeStockPricePublisherWorkSource
 		workTypeBuilder.setWorkFactory(factory);
 		TaskTypeBuilder<Dependency, None> task = workTypeBuilder.addTaskType(
 				"PUBLISH", factory, Dependency.class, None.class);
-		task.addObject(StockPrice.class).setKey(Dependency.STOCK_PRICE);
+		task.addObject(StockUpdate.class).setKey(Dependency.STOCK_UPDATE);
 		task.addObject(StockPriceEvents.class).setKey(
 				Dependency.STOCK_PRICE_EVENT);
 		task.setDifferentiator(this);
@@ -134,16 +140,45 @@ public class JeeStockPricePublisherWorkSource
 				throws Throwable {
 
 			// Obtain dependencies
-			StockPrice stockPrice = (StockPrice) context
-					.getObject(Dependency.STOCK_PRICE);
+			StockUpdate stockUpdate = (StockUpdate) context
+					.getObject(Dependency.STOCK_UPDATE);
 			StockPriceEvents events = (StockPriceEvents) context
 					.getObject(Dependency.STOCK_PRICE_EVENT);
 
 			// Publish the stock price event
-			events.event(stockPrice);
+			events.event(stockUpdate.price, stockUpdate.stock);
 
 			// Published
 			return null;
+		}
+	}
+
+	/**
+	 * {@link StockPrice} update for a {@link Stock}.
+	 */
+	public static class StockUpdate {
+
+		/**
+		 * {@link Stock}.
+		 */
+		public final Stock stock;
+
+		/**
+		 * {@link StockPrice}.
+		 */
+		public final StockPrice price;
+
+		/**
+		 * Initiate.
+		 * 
+		 * @param stock
+		 *            {@link Stock}.
+		 * @param price
+		 *            {@link StockPrice}.
+		 */
+		public StockUpdate(Stock stock, StockPrice price) {
+			this.stock = stock;
+			this.price = price;
 		}
 	}
 

@@ -27,11 +27,6 @@ import com.google.gwt.user.client.rpc.IsSerializable;
 public class StockPrice implements IsSerializable {
 
 	/**
-	 * {@link Stock}.
-	 */
-	private Stock stock;
-
-	/**
 	 * Bid size.
 	 */
 	private int bidSize;
@@ -59,8 +54,6 @@ public class StockPrice implements IsSerializable {
 	/**
 	 * Initiate.
 	 * 
-	 * @param stock
-	 *            {@link Stock}.
 	 * @param bidSize
 	 *            Bid size.
 	 * @param bidPrice
@@ -72,9 +65,8 @@ public class StockPrice implements IsSerializable {
 	 * @param timestamp
 	 *            Timestamp.
 	 */
-	public StockPrice(Stock stock, int bidSize, double bidPrice, int askSize,
+	public StockPrice(int bidSize, double bidPrice, int askSize,
 			double askPrice, long timestamp) {
-		this.stock = stock;
 		this.bidSize = bidSize;
 		this.bidPrice = bidPrice;
 		this.askSize = askSize;
@@ -86,15 +78,6 @@ public class StockPrice implements IsSerializable {
 	 * Initiate for GWT serialise.
 	 */
 	public StockPrice() {
-	}
-
-	/**
-	 * Obtains the {@link Stock}.
-	 * 
-	 * @return {@link Stock}.
-	 */
-	public Stock getStock() {
-		return this.stock;
 	}
 
 	/**
@@ -140,24 +123,6 @@ public class StockPrice implements IsSerializable {
 	 */
 	public long getTimestamp() {
 		return this.timestamp;
-	}
-
-	/*
-	 * ========================= Object =========================
-	 */
-
-	@Override
-	public boolean equals(Object obj) {
-
-		// Ensure same type
-		if (!(obj instanceof StockPrice)) {
-			return false;
-		}
-		StockPrice that = (StockPrice) obj;
-
-		// Same if same stock
-		return this.getStock().getMarketId()
-				.equals(that.getStock().getMarketId());
 	}
 
 }

@@ -1,0 +1,61 @@
+
+
+.StockWatchTh {
+	background-color: #00B3FF;
+	padding-left: 1em;
+	font-size: x-small;
+	text-align: right;
+}
+
+.StockWatchTd {
+	font-size: x-small;
+}
+
+.StockWatchHeader {
+	color: #FFFFFF;
+}
+
+
+.StockWatchFirstColumn {
+	padding-left: 0em !important;
+	text-align: left !important;
+}
+
+.StockWatchTd {
+	padding-left: 1em;
+	text-align: right;
+}
+
+.StockWatchEvenRow {
+	background-color: #EFEFEF;
+}
+
+.StockWatchOddRow {
+	background-color: #E5E5E5;
+}
+
+.StockWatchName {
+	color: #505050;
+}
+
+.StockWatchHighlightPositive {
+	background-color: #AFFFAF;
+}
+
+.StockWatchHighlightNegative {
+	background-color: #FFDD44;
+}
+
+.StockWatchChangePositive {
+	color: #00BB00;
+	font-weight: bold;
+}
+
+.StockWatchChangeNegative {
+	color: #EE0000;
+	font-weight: bold;
+}
+
+.StockWatchNumber {
+	color: #505050;
+}

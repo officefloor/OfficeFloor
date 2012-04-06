@@ -13,7 +13,7 @@
       <properties>
       </properties>
       <work-task name="PUBLISH">
-        <task-object name="STOCK_PRICE" key="STOCK_PRICE" object-type="net.officefloor.tutorial.stockwatchapp.client.StockPrice" parameter="true">
+        <task-object name="STOCK_UPDATE" key="STOCK_UPDATE" object-type="net.officefloor.tutorial.stockwatchapp.JeeStockPricePublisherWorkSource$StockUpdate" parameter="true">
         </task-object>
         <task-object name="STOCK_PRICE_EVENT" key="STOCK_PRICE_EVENT" object-type="net.officefloor.tutorial.stockwatchapp.client.StockPriceEvents" parameter="false">
           <external-managed-object name="StockPriceEvents"/>
