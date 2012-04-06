@@ -27,7 +27,60 @@ public class MockMarket {
 	/**
 	 * Listed {@link Stock} instances for the mock market.
 	 */
-	public static final Stock[] listedStocks = new Stock[] {
-			new Stock("M", "Mock Stock"), new Stock("A", "Another mock stock") };
+	public static final MockStock[] listedStocks = new MockStock[] {
+			new MockStock("B", "Brokers Ltd", 3.02),
+			new MockStock("F", "Futures Fund", 2.53),
+			new MockStock("L", "LFTF Resources", 3.27),
+			new MockStock("M", "MCK Ltd", 3.04),
+			new MockStock("X", "XMPL PLC", 3.78),
+			new MockStock("Z", "ZBL Group", 2.96) };
+
+	/**
+	 * Mock {@link Stock}.
+	 */
+	public static class MockStock {
+
+		/**
+		 * Market identifier.
+		 */
+		public final String marketId;
+
+		/**
+		 * {@link Stock} name.
+		 */
+		public final String name;
+
+		/**
+		 * Base price for simulation.
+		 */
+		public final double basePrice;
+
+		/**
+		 * Current price for simulation.
+		 */
+		public double currentPrice;
+
+		/**
+		 * Last time prices reset to open.
+		 */
+		public long lastResetTime = -1;
+
+		/**
+		 * Initiate.
+		 * 
+		 * @param marketId
+		 *            Market identifier.
+		 * @param name
+		 *            {@link Stock} name.
+		 * @param basePrice
+		 *            Base price for simulation.
+		 */
+		public MockStock(String marketId, String name, double basePrice) {
+			this.marketId = marketId;
+			this.name = name;
+			this.basePrice = basePrice;
+			this.currentPrice = basePrice;
+		}
+	}
 
 }

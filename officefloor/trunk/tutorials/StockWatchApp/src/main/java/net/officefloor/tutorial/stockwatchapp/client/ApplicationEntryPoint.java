@@ -18,6 +18,7 @@
 package net.officefloor.tutorial.stockwatchapp.client;
 
 import net.officefloor.plugin.comet.api.OfficeFloorComet;
+import net.officefloor.tutorial.stockwatchapp.client.MockMarket.MockStock;
 
 import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.core.client.GWT;
@@ -53,13 +54,14 @@ public class ApplicationEntryPoint implements EntryPoint {
 
 		// Add the stock watch widget
 		RootPanel panel = RootPanel.get("StockWatch");
-		StockWatchWidget stockWatch = new StockWatchWidget();
+		StockWatchWidget stockWatch = new StockWatchWidget(10);
 		panel.add(stockWatch);
 
 		// Watch all stocks
-		for (Stock stock : MockMarket.listedStocks) {
-			stockWatch.watchStock(stock, new StockPrice(stock, 10, 1, 20, 2,
-					3000));
+		for (MockStock stock : MockMarket.listedStocks) {
+			stockWatch.watchStock(new Stock(stock.marketId, stock.name),
+					new StockPrice(100, stock.basePrice - 1, 200,
+							stock.basePrice, 0));
 		}
 
 		// Subscribe to stock price events

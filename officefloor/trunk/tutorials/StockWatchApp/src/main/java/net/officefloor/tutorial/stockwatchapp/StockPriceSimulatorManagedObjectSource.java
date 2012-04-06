@@ -26,6 +26,7 @@ import net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceContext
 import net.officefloor.frame.spi.managedobject.source.impl.AbstractManagedObjectSource;
 import net.officefloor.frame.util.AbstractSingleTask;
 import net.officefloor.tutorial.stockwatchapp.client.MockMarket;
+import net.officefloor.tutorial.stockwatchapp.client.MockMarket.MockStock;
 import net.officefloor.tutorial.stockwatchapp.client.Stock;
 import net.officefloor.tutorial.stockwatchapp.client.StockPrice;
 import net.officefloor.tutorial.stockwatchapp.client.StockPriceEvents;
@@ -126,28 +127,46 @@ public class StockPriceSimulatorManagedObjectSource
 				throws Throwable {
 
 			// Obtain random numbers for simulation
-			double bidRandomNumber = Math.random();
-			double askRandomNumber = Math.random();
+			double selectionRandomNumber = Math.random();
+			double priceRandomNumber = Math.random();
 
 			// Determine stock
-			int randomStockIndex = ((int) (bidRandomNumber * 1000))
+			int randomStockIndex = ((int) (selectionRandomNumber * 1000))
 					% MockMarket.listedStocks.length;
-			Stock stock = MockMarket.listedStocks[randomStockIndex];
+			MockStock stock = MockMarket.listedStocks[randomStockIndex];
 
 			// Provide random price details for stock
-			int bidSize = (int) (Math.abs(bidRandomNumber - askRandomNumber) * 10000);
-			double bidPrice = bidRandomNumber * 10;
-			int askSize = (int) ((bidRandomNumber + askRandomNumber) * 10000);
-			double askPrice = bidPrice + 0.01 + askRandomNumber;
-			StockPrice stockPrice = new StockPrice(stock, bidSize, bidPrice,
-					askSize, askPrice, System.currentTimeMillis());
+			int bidSize = (int) (selectionRandomNumber * 10000);
+			double bidPrice = stock.currentPrice
+					+ ((priceRandomNumber / 10) - 0.06);
+			if (bidPrice < 0) {
+				bidPrice = 0; // ensure not go into negative simulated prices
+			}
+			int askSize = (int) (priceRandomNumber * 10000);
+			double askPrice = bidPrice + 0.01;
+			StockPrice stockPrice = new StockPrice(bidSize, bidPrice, askSize,
+					askPrice, System.currentTimeMillis());
+
+			// Determine if reset base price
+			long currentTime = System.currentTimeMillis();
+			if (stock.lastResetTime < 0) {
+				stock.lastResetTime = currentTime;
+			}
+			if ((stock.lastResetTime + (24 * 60 * 60 * 1000)) > currentTime) {
+				// Reset price back to base price
+				stock.currentPrice = stock.basePrice;
+			} else {
+				// Update price for stock for next change
+				stock.currentPrice = askPrice;
+			}
 
 			// Publish the stock price
-			JeeStockPricePublisherWorkSource.publishStockPrice(stockPrice);
+			JeeStockPricePublisherWorkSource.publishStockPrice(new Stock(
+					stock.marketId, stock.name), stockPrice);
 
 			// Trigger next price
 			// (+500 to conserve on example's running costs)
-			long nextPriceDelay = (long) (bidRandomNumber * 1000) + 500;
+			long nextPriceDelay = (long) (priceRandomNumber * 1000) + 500;
 			StockPriceSimulatorManagedObjectSource.this.context
 					.invokeProcess(Flows.PUBLISH_STOCK_PRICE, null,
 							StockPriceSimulatorManagedObjectSource.this,

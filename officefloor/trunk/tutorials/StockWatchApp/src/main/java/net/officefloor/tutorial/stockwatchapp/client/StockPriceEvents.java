@@ -33,7 +33,9 @@ public interface StockPriceEvents extends CometSubscriber {
 	 * 
 	 * @param stockPrice
 	 *            {@link StockPrice}.
+	 * @param stock
+	 *            {@link Stock}.
 	 */
-	void event(StockPrice stockPrice);
+	void event(StockPrice stockPrice, Stock stock);
 
 }
