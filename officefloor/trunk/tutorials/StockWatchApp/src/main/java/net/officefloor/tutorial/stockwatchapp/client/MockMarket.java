@@ -29,10 +29,10 @@ public class MockMarket {
 	 */
 	public static final MockStock[] listedStocks = new MockStock[] {
 			new MockStock("B", "Brokers Ltd", 3.02),
-			new MockStock("F", "Futures Fund", 2.53),
-			new MockStock("L", "LFTF Resources", 3.27),
+			new MockStock("F", "Futures Fund", 2.93),
+			new MockStock("L", "LFTF Resources", 3.07),
 			new MockStock("M", "MCK Ltd", 3.04),
-			new MockStock("X", "XMPL PLC", 3.78),
+			new MockStock("X", "XMPL PLC", 3.08),
 			new MockStock("Z", "ZBL Group", 2.96) };
 
 	/**

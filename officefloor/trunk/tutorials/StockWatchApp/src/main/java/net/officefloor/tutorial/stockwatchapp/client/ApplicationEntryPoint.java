@@ -44,8 +44,9 @@ public class ApplicationEntryPoint implements EntryPoint {
 		GWT.setUncaughtExceptionHandler(new UncaughtExceptionHandler() {
 			@Override
 			public void onUncaughtException(Throwable e) {
-				Window.alert("ERROR: " + e.getMessage() + " ["
-						+ e.getClass().getName() + "]");
+				Window.alert("ERROR: " + (e == null ? "NULL" : e.getMessage())
+						+ " [" + (e == null ? "null" : e.getClass().getName())
+						+ "]");
 			}
 		});
 
@@ -53,9 +54,9 @@ public class ApplicationEntryPoint implements EntryPoint {
 		OfficeFloorComet.setMultipleSubscriptions(true);
 
 		// Add the stock watch widget
-		RootPanel panel = RootPanel.get("StockWatch");
+		RootPanel watchPanel = RootPanel.get("StockWatch");
 		StockWatchWidget stockWatch = new StockWatchWidget(10);
-		panel.add(stockWatch);
+		watchPanel.add(stockWatch);
 
 		// Watch all stocks
 		for (MockStock stock : MockMarket.listedStocks) {
@@ -63,6 +64,17 @@ public class ApplicationEntryPoint implements EntryPoint {
 					new StockPrice(100, stock.basePrice - 1, 200,
 							stock.basePrice, 0));
 		}
+
+		// Add the stock graph widget
+		RootPanel graphPanel = RootPanel.get("StockGraph");
+		Stock[] stocks = new Stock[MockMarket.listedStocks.length];
+		for (int i = 0; i < stocks.length; i++) {
+			MockStock mockStock = MockMarket.listedStocks[i];
+			stocks[i] = new Stock(mockStock.marketId, mockStock.name);
+		}
+		StockGraphWidget stockGraph = new StockGraphWidget((2 * 60 * 1000),
+				(60 * 1000), 400, 240, stocks);
+		graphPanel.add(stockGraph);
 
 		// Subscribe to stock price events
 		OfficeFloorComet.subscribe();
