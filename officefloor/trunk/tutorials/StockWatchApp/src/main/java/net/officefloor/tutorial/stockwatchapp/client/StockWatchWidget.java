@@ -454,7 +454,7 @@ public class StockWatchWidget extends VerticalPanel {
 
 			// Provide highlight for change
 			double lastPriceChange = this.getLastPriceChange();
-			this.highlightCssClass = (lastPriceChange < 0 ? "StockWatchHighlightPositive"
+			this.highlightCssClass = (lastPriceChange >= 0 ? "StockWatchHighlightPositive"
 					: "StockWatchHighlightNegative");
 
 			// Clear highlight after a moment
