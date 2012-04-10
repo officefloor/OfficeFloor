@@ -73,7 +73,7 @@ public class ApplicationEntryPoint implements EntryPoint {
 			stocks[i] = new Stock(mockStock.marketId, mockStock.name);
 		}
 		StockGraphWidget stockGraph = new StockGraphWidget((2 * 60 * 1000),
-				(60 * 1000), 400, 240, stocks);
+				(60 * 1000), "27em", "10em", stocks);
 		graphPanel.add(stockGraph);
 
 		// Subscribe to stock price events

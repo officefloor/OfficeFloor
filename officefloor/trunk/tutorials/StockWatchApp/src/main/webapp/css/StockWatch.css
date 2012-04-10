@@ -1,5 +1,11 @@
 
 
+.gwt-TabBarItem {
+	font-size: 0.5em;
+	font-weight: normal;
+}
+
+
 .StockWatchTh {
 	background-color: #00B3FF;
 	padding-left: 1em;
