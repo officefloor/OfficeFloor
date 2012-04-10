@@ -59,7 +59,7 @@ public class StockGraphWidget extends VerticalPanel {
 	 *            {@link Stock} instances to graph.
 	 */
 	public StockGraphWidget(final long historyPeriod, final long redrawPeriod,
-			final int width, final int height, Stock... stocks) {
+			final String width, final String height, Stock... stocks) {
 
 		// Create sorted copy of stocks
 		final Stock[] orderedStocks = new Stock[stocks.length];
@@ -81,8 +81,9 @@ public class StockGraphWidget extends VerticalPanel {
 
 				// Provide tab panel for graphs
 				TabPanel tab = new TabPanel();
-				tab.setSize(String.valueOf(width) + "px",
-						String.valueOf(height) + "px");
+				tab.setWidth(width);
+				tab.getTabBar().setWidth(width);
+				tab.getDeckPanel().setWidth(width);
 				StockGraphWidget.this.add(tab);
 
 				// Load each graph onto a tab
@@ -179,7 +180,7 @@ public class StockGraphWidget extends VerticalPanel {
 		 *            Height.
 		 */
 		public StockGraph(Stock stock, long historyPeriod, long redrawPeriod,
-				int width, int height) {
+				String width, String height) {
 			this.stock = stock;
 			this.historyPeriod = historyPeriod;
 			this.redrawPeriod = redrawPeriod;
@@ -187,8 +188,7 @@ public class StockGraphWidget extends VerticalPanel {
 			// Initiate the data for the stocks
 			this.data = DataTable.create();
 			this.data.addColumn(ColumnType.DATETIME);
-			this.data.addColumn(ColumnType.NUMBER, this.stock.getName(),
-					this.stock.getMarketId());
+			this.data.addColumn(ColumnType.NUMBER, this.stock.getName());
 
 			// Configure the chart
 			this.options = Options.create();
@@ -196,19 +196,21 @@ public class StockGraphWidget extends VerticalPanel {
 			this.options.setDisplayZoomButtons(false);
 			this.options.setOption("dateFormat", "d MMM yyyy");
 			this.options.setOption("displayRangeSelector", false);
+			this.options.setOption("displayLegendDots", false);
 			this.options.setScaleType(ScaleType.MAXIMIZE);
 			this.options.setOption("allowRedraw", true);
 
 			// Add the chart
-			this.chart = new AnnotatedTimeLine(this.data, this.options, width
-					+ "px", height + "px");
+			this.chart = new AnnotatedTimeLine(this.data, this.options, width,
+					height);
 
 			// Listen for stock price events
 			OfficeFloorComet.subscribe(StockPriceEvents.class,
 					new StockPriceEvents() {
 						@Override
 						public void event(StockPrice stockPrice, Stock stock) {
-							StockGraph.this.addPrice(stock, stockPrice);
+							StockGraph.this.addPrice(stockPrice.getTimestamp(),
+									stockPrice);
 						}
 					}, new StockFilter(this.stock));
 		}
@@ -241,12 +243,13 @@ public class StockGraphWidget extends VerticalPanel {
 		/**
 		 * Adds a price to the display.
 		 * 
-		 * @param stock
-		 *            {@link Stock}.
+		 * @param priceTimestamp
+		 *            {@link StockPrice} time stamp.
 		 * @param price
-		 *            {@link StockPrice}.
+		 *            {@link StockPrice}. May be <code>null</code> if no price
+		 *            to allow moving graph to time stamp.
 		 */
-		private void addPrice(Stock stock, StockPrice price) {
+		private void addPrice(long priceTimestamp, StockPrice price) {
 
 			// Only add price when chart available
 			if (this.chart == null) {
@@ -255,9 +258,6 @@ public class StockGraphWidget extends VerticalPanel {
 
 			// By default allow to redraw graph (for dynamic values)
 			boolean isAllowRedraw = true;
-
-			// Determine current time
-			long priceTimestamp = price.getTimestamp();
 
 			// Only truncate if have rows (no rows on first price)
 			if (this.data.getNumberOfRows() > 0) {
@@ -321,7 +321,9 @@ public class StockGraphWidget extends VerticalPanel {
 			// Add the price for the stock
 			int rowIndex = this.data.addRow();
 			this.data.setValue(rowIndex, 0, new Date(priceTimestamp));
-			this.data.setValue(rowIndex, 1, price.getAskPrice());
+			if (price != null) {
+				this.data.setValue(rowIndex, 1, price.getAskPrice());
+			}
 
 			// Only draw if selected
 			if (this.isSelected) {
