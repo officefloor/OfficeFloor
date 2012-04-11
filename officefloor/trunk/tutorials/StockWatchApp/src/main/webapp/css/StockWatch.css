@@ -1,5 +1,25 @@
 
 
+h2 {
+	margin-left: 1em;
+	font-size: medium;
+	font-family: verdana,helvetica,arial,sans-serif;
+	color: #505050;
+}
+
+p {
+	margin-left: 1em;
+	font-size: x-small;
+}
+
+#StockWatch {
+	margin-left: 1em;
+}
+
+#StockGraph {
+	margin-left: 0.5em;
+}
+
 .gwt-TabBarItem {
 	font-size: 0.5em;
 	font-weight: normal;
