@@ -26,7 +26,7 @@ import net.officefloor.plugin.socket.server.tcp.protocol.TcpConnectionHandler;
 
 /**
  * Tests the {@link TcpConnectionHandler}.
- *
+ * 
  * @author Daniel Sagenschneider
  */
 public class TcpConnectionHandlerTest extends AbstractWriteRead {
@@ -80,6 +80,7 @@ public class TcpConnectionHandlerTest extends AbstractWriteRead {
 		this.runSocketListener();
 		assertFalse("Key should be cancelled", this.selectionKey.isValid());
 		assertTrue("Channel should be closed", this.socketChannel.isClosed());
+		assertTrue("Selector should be closed", this.selector.isClosed());
 	}
 
 	/**
@@ -93,15 +94,16 @@ public class TcpConnectionHandlerTest extends AbstractWriteRead {
 		this.validateConnectionRead(REQUEST);
 		this.connectionWrite(RESPONSE);
 		this.serverTcpConnection.getOutputBufferStream().close();
-		this.runSocketListener(); // specifies writing
-		this.runSocketListener(); // does the writing
+		this.runSocketListener(); // writes response to client
+		this.validateOutputToClient(RESPONSE);
 		assertFalse("Key should be cancelled", this.selectionKey.isValid());
 		assertTrue("Channel should be closed", this.socketChannel.isClosed());
+		assertTrue("Selector should be closed", this.selector.isClosed());
 	}
 
 	/**
 	 * Validates the read on the {@link ServerTcpConnection}.
-	 *
+	 * 
 	 * @param text
 	 *            Expected text.
 	 */
@@ -126,7 +128,7 @@ public class TcpConnectionHandlerTest extends AbstractWriteRead {
 
 	/**
 	 * Writes to the {@link ServerTcpConnection}.
-	 *
+	 * 
 	 * @param text
 	 *            Text to write.
 	 */

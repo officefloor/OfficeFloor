@@ -41,6 +41,11 @@ public class MockSelector extends Selector {
 	private final SelectionKey selectionKey;
 
 	/**
+	 * Flag indicating if {@link Selector} is closed.
+	 */
+	private boolean isClosed = false;
+
+	/**
 	 * Initiate.
 	 * 
 	 * @param selectionKey
@@ -50,28 +55,50 @@ public class MockSelector extends Selector {
 		this.selectionKey = selectionKey;
 	}
 
+	/**
+	 * Indicates if closed.
+	 * 
+	 * @return <code>true</code> if closed.
+	 */
+	public boolean isClosed() {
+		return this.isClosed;
+	}
+
+	/**
+	 * Ensures that this {@link Selector} is not closed.
+	 */
+	private void ensureNotClosed() {
+		TestCase.assertFalse("Selector is closed", this.isClosed);
+	}
+
 	/*
 	 * ================= Selector ================================
 	 */
 
 	@Override
 	public int select(long timeout) throws IOException {
+		this.ensureNotClosed();
+
 		// Always the one key
 		return 1;
 	}
 
 	@Override
 	public Set<SelectionKey> selectedKeys() {
+		this.ensureNotClosed();
 		return new HashSet<SelectionKey>(Arrays.asList(this.selectionKey));
 	}
 
 	@Override
 	public Set<SelectionKey> keys() {
+		this.ensureNotClosed();
 		return new HashSet<SelectionKey>(Arrays.asList(this.selectionKey));
 	}
 
 	@Override
 	public Selector wakeup() {
+		this.ensureNotClosed();
+
 		// Do nothing as mocking
 		return this;
 	}
@@ -102,7 +129,7 @@ public class MockSelector extends Selector {
 
 	@Override
 	public void close() throws IOException {
-		TestCase.fail("Should not be invoked");
+		this.isClosed = true;
 	}
 
 }

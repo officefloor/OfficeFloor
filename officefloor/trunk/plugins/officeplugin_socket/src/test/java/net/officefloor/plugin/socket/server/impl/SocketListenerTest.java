@@ -20,7 +20,7 @@ package net.officefloor.plugin.socket.server.impl;
 
 /**
  * Tests the {@link SocketListener}.
- *
+ * 
  * @author Daniel Sagenschneider
  */
 public class SocketListenerTest extends AbstractWriteRead {
@@ -54,6 +54,7 @@ public class SocketListenerTest extends AbstractWriteRead {
 		this.runSocketListener();
 		assertFalse("Key should be cancelled", this.selectionKey.isValid());
 		assertTrue("Channel should be closed", this.socketChannel.isClosed());
+		assertTrue("Selector should be closed", this.selector.isClosed());
 	}
 
 	/**
@@ -69,8 +70,10 @@ public class SocketListenerTest extends AbstractWriteRead {
 		this.flagCloseConnection();
 		this.runSocketListener(); // specifies writing
 		this.runSocketListener(); // does the writing
+		this.validateOutputToClient(RESPONSE);
 		assertFalse("Key should be cancelled", this.selectionKey.isValid());
 		assertTrue("Channel should be closed", this.socketChannel.isClosed());
+		assertTrue("Selector should be closed", this.selector.isClosed());
 	}
 
 }
