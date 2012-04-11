@@ -378,6 +378,9 @@ public class SocketListener<CH extends ConnectionHandler>
 
 				// Unregister from connection manager
 				isUnregisterFromConnectionManager = true;
+				
+				// Close the selector to release resources
+				this.selector.close();
 			}
 		}
 
@@ -415,7 +418,7 @@ public class SocketListener<CH extends ConnectionHandler>
 
 		// All data written so terminate the connection
 		this.terminateConnection(key, connection);
-
+		
 		// Connection closed
 		return true;
 	}

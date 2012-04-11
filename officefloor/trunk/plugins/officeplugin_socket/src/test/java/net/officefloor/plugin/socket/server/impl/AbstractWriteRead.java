@@ -63,7 +63,7 @@ public abstract class AbstractWriteRead extends OfficeFrameTestCase {
 	/**
 	 * Test {@link Selector}.
 	 */
-	private final MockSelector selector = new MockSelector(this.selectionKey);
+	protected final MockSelector selector = new MockSelector(this.selectionKey);
 
 	/**
 	 * {@link Server}.

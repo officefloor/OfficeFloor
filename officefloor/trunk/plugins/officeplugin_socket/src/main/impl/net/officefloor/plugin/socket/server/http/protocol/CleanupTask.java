@@ -19,6 +19,9 @@
 package net.officefloor.plugin.socket.server.http.protocol;
 
 import java.io.IOException;
+import java.nio.channels.ClosedChannelException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.api.execute.TaskContext;
@@ -31,20 +34,42 @@ import net.officefloor.plugin.socket.server.http.conversation.HttpManagedObject;
 /**
  * Cleans up the {@link HttpManagedObject} (particular {@link HttpRequest} /
  * {@link HttpResponse} combination).
- *
+ * 
  * @author Daniel Sagenschneider
  */
 public class CleanupTask extends AbstractSingleTask<Work, None, None> {
+
+	/**
+	 * {@link Logger}.
+	 */
+	private static final Logger LOGGER = Logger.getLogger(CleanupTask.class
+			.getName());
+
+	/*
+	 * ======================= Task ===============================
+	 */
 
 	@Override
 	public Object doTask(TaskContext<Work, None, None> context)
 			throws IOException {
 
-		// Flag to clean up the http managed object
+		// Obtain the HTTP managed object
 		HttpManagedObject managedObject = this
 				.getRecycleManagedObjectParameter(context,
 						HttpManagedObject.class).getManagedObject();
-		managedObject.cleanup();
+
+		try {
+			// Clean up the HTTP managed object
+			managedObject.cleanup();
+
+		} catch (ClosedChannelException ex) {
+			// Connection closed. Must handle as recycle task in new process
+			if (LOGGER.isLoggable(Level.FINE)) {
+				LOGGER.log(Level.FINE, "Failed cleaning up "
+						+ HttpManagedObject.class.getSimpleName()
+						+ " as connection closed", ex);
+			}
+		}
 
 		// No further processing
 		return null;
