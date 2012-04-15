@@ -534,7 +534,7 @@ public class HttpRequestParserImpl implements HttpRequestParser {
 					}
 
 				case HEADER_NAME:
-					if (character == COLON) {
+					if ((character == COLON) && (!isEscaped)) {
 						// Header name obtained
 						this.text_headerName = this.transformToString(
 								inputBufferStream, tempBuffer,

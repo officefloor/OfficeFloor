@@ -124,6 +124,16 @@ public class HttpRequestParserTest extends OfficeFrameTestCase {
 		this.doMethodTest("GET /path HTTP/1.1\nContent-Length:", false, "GET",
 				"/path", "HTTP/1.1", null);
 	}
+	
+	/**
+	 * Ensure able to parse header name with escaped length.
+	 */
+	public void testToHeaderNameContainsEscapedColon() {
+		this.doMethodTest("GET /path HTTP/1.1\nbefore%20%3A%20after : colon \n", false, "GET",
+				"/path", "HTTP/1.1", null, "before : after", "colon");
+	}
+	
+	
 
 	/**
 	 * Ensure able to parse up to just the header name.

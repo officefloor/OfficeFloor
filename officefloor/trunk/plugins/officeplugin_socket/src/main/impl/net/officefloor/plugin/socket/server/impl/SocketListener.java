@@ -338,7 +338,7 @@ public class SocketListener<CH extends ConnectionHandler>
 							key.interestOps(interestOps);
 						}
 
-					} catch (Exception ex) {
+					} catch (Exception ex) {						
 						// Terminate connection on failure
 						this.terminateConnection(key, connection);
 
