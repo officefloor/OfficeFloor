@@ -358,6 +358,58 @@ public class HttpRequestParserImpl implements HttpRequestParser {
 		return text;
 	}
 
+	/**
+	 * Processes the header to ensure correct and possibly obtain the
+	 * <code>Content-Length</code> for the body.
+	 * 
+	 * @throws HttpRequestParseException
+	 *             If invalid header.
+	 */
+	private void processHeader() throws HttpRequestParseException {
+
+		// Attempt to obtain the Content-Length
+		String contentLengthValue = null;
+		for (HttpHeader header : this.headers) {
+			if (HEADER_NAME_CONTENT_LENGTH.equalsIgnoreCase(header.getName())) {
+				contentLengthValue = header.getValue();
+				break;
+			}
+		}
+
+		// Ensure valid Content-Length
+		if (contentLengthValue != null) {
+			// Should always be able to convert to an integer
+			try {
+				this.contentLength = Long.parseLong(contentLengthValue);
+			} catch (NumberFormatException ex) {
+				throw new HttpRequestParseException(
+						HttpStatus.SC_LENGTH_REQUIRED,
+						"Content-Length header value must be an integer");
+			}
+		}
+
+		// Ensure the Content-Length within limits
+		if (this.contentLength > 0) {
+			if (this.contentLength > this.maxBodyLength) {
+				throw new HttpRequestParseException(
+						HttpStatus.SC_REQUEST_ENTITY_TOO_LARGE,
+						"Request entity must be less than maximum of "
+								+ this.maxBodyLength + " bytes");
+			}
+		}
+
+		// Ensure POST and PUT methods provided Content-Length
+		if (("POST".equalsIgnoreCase(this.text_method))
+				|| ("PUT".equalsIgnoreCase(this.text_method))) {
+			if (this.contentLength < 0) {
+				throw new HttpRequestParseException(
+						HttpStatus.SC_LENGTH_REQUIRED,
+						"Must provide Content-Length header for "
+								+ this.text_method);
+			}
+		}
+	}
+
 	/*
 	 * ====================== HttpRequestParser ===========================
 	 */
@@ -499,15 +551,16 @@ public class HttpRequestParserImpl implements HttpRequestParser {
 					this.parseState = ParseState.VERSION;
 
 				case VERSION:
-					if (character == CR) {
+					if ((character == CR) || (character == LF)) {
 						// Version read in (consumes bytes)
 						this.text_version = this.transformToString(
 								inputBufferStream, tempBuffer,
 								HttpStatus.SC_BAD_REQUEST, "Version too long");
 
-						// Skip CR and move to header
+						// Skip CR / LF and move to header
 						inputBufferStream.skip(1);
-						this.parseState = ParseState.HEADER_CR;
+						this.parseState = (character == CR ? ParseState.HEADER_CR
+								: ParseState.HEADER_CR_NAME_SEPARATION);
 					} else {
 						// Append character to version
 						this.textLength++;
@@ -532,6 +585,14 @@ public class HttpRequestParserImpl implements HttpRequestParser {
 						// Skip CR and move to body
 						inputBufferStream.skip(1);
 						this.parseState = ParseState.BODY_CR;
+						break;
+					} else if (character == LF) {
+						// Tolerant request so process header
+						this.processHeader();
+
+						// Skip LF and move to body
+						inputBufferStream.skip(1);
+						this.parseState = ParseState.BODY;
 						break;
 					} else if (isWs(character)) {
 						// Continue previous header value
@@ -592,7 +653,7 @@ public class HttpRequestParserImpl implements HttpRequestParser {
 					this.parseState = ParseState.HEADER_VALUE;
 
 				case HEADER_VALUE:
-					if (character == CR) {
+					if ((character == CR) || (character == LF)) {
 						// Header name and value obtained
 						String headerValue = this.transformToString(
 								inputBufferStream, tempBuffer,
@@ -604,7 +665,8 @@ public class HttpRequestParserImpl implements HttpRequestParser {
 
 						// Skip CR and move to next header
 						inputBufferStream.skip(1);
-						this.parseState = ParseState.HEADER_CR;
+						this.parseState = (character == CR ? ParseState.HEADER_CR
+								: ParseState.HEADER_CR_NAME_SEPARATION);
 					} else if (!isCtl(character)) {
 						// Append the header value character
 						this.textLength++;
@@ -628,49 +690,8 @@ public class HttpRequestParserImpl implements HttpRequestParser {
 						inputBufferStream.skip(1);
 					}
 
-					// Attempt to obtain the Content-Length
-					String contentLengthValue = null;
-					for (HttpHeader header : this.headers) {
-						if (HEADER_NAME_CONTENT_LENGTH.equalsIgnoreCase(header
-								.getName())) {
-							contentLengthValue = header.getValue();
-							break;
-						}
-					}
-
-					// Ensure valid Content-Length
-					if (contentLengthValue != null) {
-						// Should always be able to convert to an integer
-						try {
-							this.contentLength = Long
-									.parseLong(contentLengthValue);
-						} catch (NumberFormatException ex) {
-							throw new HttpRequestParseException(
-									HttpStatus.SC_LENGTH_REQUIRED,
-									"Content-Length header value must be an integer");
-						}
-					}
-
-					// Ensure the Content-Length within limits
-					if (this.contentLength > 0) {
-						if (this.contentLength > this.maxBodyLength) {
-							throw new HttpRequestParseException(
-									HttpStatus.SC_REQUEST_ENTITY_TOO_LARGE,
-									"Request entity must be less than maximum of "
-											+ this.maxBodyLength + " bytes");
-						}
-					}
-
-					// Ensure POST and PUT methods provided Content-Length
-					if (("POST".equalsIgnoreCase(this.text_method))
-							|| ("PUT".equalsIgnoreCase(this.text_method))) {
-						if (this.contentLength < 0) {
-							throw new HttpRequestParseException(
-									HttpStatus.SC_LENGTH_REQUIRED,
-									"Must provide Content-Length header for "
-											+ this.text_method);
-						}
-					}
+					// Process the header
+					this.processHeader();
 
 					// Have LF and headers valid, so continue onto body
 					this.parseState = ParseState.BODY;

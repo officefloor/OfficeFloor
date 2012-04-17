@@ -18,6 +18,7 @@
 
 package net.officefloor.plugin.socket.server.http.parse;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.Arrays;
 
@@ -118,22 +119,29 @@ public class HttpRequestParserTest extends OfficeFrameTestCase {
 	}
 
 	/**
+	 * Ensure tolerance if request line contains LF without preceding CR.
+	 */
+	public void testToVersionMissingCR() {
+		this.doMethodTest(true, "GET /path HTTP/1.1\n", false, "GET", "/path",
+				"HTTP/1.1", null);
+	}
+
+	/**
 	 * Ensure able to parse up to just the header name.
 	 */
 	public void testToHeaderName() {
 		this.doMethodTest("GET /path HTTP/1.1\nContent-Length:", false, "GET",
 				"/path", "HTTP/1.1", null);
 	}
-	
+
 	/**
 	 * Ensure able to parse header name with escaped length.
 	 */
 	public void testToHeaderNameContainsEscapedColon() {
-		this.doMethodTest("GET /path HTTP/1.1\nbefore%20%3A%20after : colon \n", false, "GET",
-				"/path", "HTTP/1.1", null, "before : after", "colon");
+		this.doMethodTest(
+				"GET /path HTTP/1.1\nbefore%20%3A%20after : colon \n", false,
+				"GET", "/path", "HTTP/1.1", null, "before : after", "colon");
 	}
-	
-	
 
 	/**
 	 * Ensure able to parse up to just the header name.
@@ -142,6 +150,15 @@ public class HttpRequestParserTest extends OfficeFrameTestCase {
 		this.doMethodTest("POST /path HTTP/1.1\nContent-Length: 10\nHost",
 				false, "POST", "/path", "HTTP/1.1", null, "Content-Length",
 				"10");
+	}
+
+	/**
+	 * Ensure tolerance if header contains LF without preceding CR.
+	 */
+	public void testHeaderMissingCR() {
+		this.doMethodTest(true,
+				"POST /path HTTP/1.1\nContent-Length: 10\nHost", false, "POST",
+				"/path", "HTTP/1.1", null, "Content-Length", "10");
 	}
 
 	/**
@@ -155,10 +172,29 @@ public class HttpRequestParserTest extends OfficeFrameTestCase {
 	}
 
 	/**
+	 * Ensure tolerance if header separation from body contains LF without
+	 * preceding CR.
+	 */
+	public void testToBodyMissingCR() {
+		this.doMethodTest(true,
+				"POST /path HTTP/1.1\nContent-Length: 1000\n\nNOT ALL CONTENT",
+				false, "POST", "/path", "HTTP/1.1", null, "Content-Length",
+				"1000");
+	}
+
+	/**
 	 * Validate GET.
 	 */
 	public void testGet() {
 		this.doMethodTest("GET /path HTTP/1.1\n\n", true, "GET", "/path",
+				"HTTP/1.1", "");
+	}
+
+	/**
+	 * Ensure tolerance if GET request is missing CR before the LF.
+	 */
+	public void testGetMissingCR() {
+		this.doMethodTest(true, "GET /path HTTP/1.1\n\n", true, "GET", "/path",
 				"HTTP/1.1", "");
 	}
 
@@ -221,6 +257,15 @@ public class HttpRequestParserTest extends OfficeFrameTestCase {
 		this.doMethodTest("POST /path HTTP/1.1\nContent-Length: 4\n\nTEST",
 				true, "POST", "/path", "HTTP/1.1", "TEST", "Content-Length",
 				"4");
+	}
+
+	/**
+	 * Ensure tolerance if POST request is missing CR before the LF.
+	 */
+	public void testPostMissingCR() {
+		this.doMethodTest(true,
+				"POST /path HTTP/1.1\nContent-Length: 4\n\nTEST", true, "POST",
+				"/path", "HTTP/1.1", "TEST", "Content-Length", "4");
 	}
 
 	/**
@@ -521,10 +566,50 @@ public class HttpRequestParserTest extends OfficeFrameTestCase {
 	private void doMethodTest(String httpRequest, boolean expectedIsComplete,
 			String expectedMethod, String expectedPath, String expectedVersion,
 			String expectedBody, String... expectedHeaderNameValues) {
+		this.doMethodTest(false, httpRequest, expectedIsComplete,
+				expectedMethod, expectedPath, expectedVersion, expectedBody,
+				expectedHeaderNameValues);
+	}
+
+	/**
+	 * Does a valid HTTP request test.
+	 * 
+	 * @param isRemoveCR
+	 *            Flag indicating to remove the CR (typically before the LF).
+	 *            This is to allow more tolerant handling of requests.
+	 * @param httpRequest
+	 *            HTTP request content.
+	 * @param expectedMethod
+	 *            Expected method.
+	 * @param expectedPath
+	 *            Expected path.
+	 * @param expectedVersion
+	 *            Expected version.
+	 * @param expectedBody
+	 *            Expected body.
+	 * @param expectedHeaderNameValues
+	 *            Expected listing of header name/values.
+	 */
+	private void doMethodTest(boolean isRemoveCR, String httpRequest,
+			boolean expectedIsComplete, String expectedMethod,
+			String expectedPath, String expectedVersion, String expectedBody,
+			String... expectedHeaderNameValues) {
 		try {
 
 			// Create input buffer stream with content
 			byte[] content = UsAsciiUtil.convertToHttp(httpRequest);
+			if (isRemoveCR) {
+				// Remove the CR characters (testing tolerance)
+				byte CR = UsAsciiUtil.convertToUsAscii('\r');
+				ByteArrayOutputStream buffer = new ByteArrayOutputStream();
+				for (byte value : content) {
+					if (value == CR) {
+						continue; // do not include CR
+					}
+					buffer.write(value);
+				}
+				content = buffer.toByteArray();
+			}
 			BufferStream bufferStream = new BufferStreamImpl(
 					new HeapByteBufferSquirtFactory(1024));
 			bufferStream.getOutputBufferStream().write(content);
