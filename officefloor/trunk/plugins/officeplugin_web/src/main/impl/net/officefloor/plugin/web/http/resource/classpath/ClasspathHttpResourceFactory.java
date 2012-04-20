@@ -16,37 +16,30 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package net.officefloor.plugin.web.http.resource;
+package net.officefloor.plugin.web.http.resource.classpath;
 
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
-import java.nio.charset.Charset;
 import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.Map;
 
+import net.officefloor.plugin.web.http.resource.AbstractHttpFileDescription;
+import net.officefloor.plugin.web.http.resource.AbstractHttpResourceFactory;
 import net.officefloor.plugin.web.http.resource.HttpFile;
-import net.officefloor.plugin.web.http.resource.HttpFileDescriber;
 import net.officefloor.plugin.web.http.resource.HttpFileDescription;
 import net.officefloor.plugin.web.http.resource.HttpResource;
 import net.officefloor.plugin.web.http.resource.HttpResourceFactory;
+import net.officefloor.plugin.web.http.resource.HttpResourceUtil;
 import net.officefloor.plugin.web.http.resource.InvalidHttpRequestUriException;
+import net.officefloor.plugin.web.http.resource.NotExistHttpResource;
 
 /**
  * Locates a {@link HttpFile} from a {@link ClassLoader}.
  * 
  * @author Daniel Sagenschneider
  */
-public class ClasspathHttpResourceFactory implements HttpResourceFactory {
-
-	/**
-	 * Empty {@link ByteBuffer}.
-	 */
-	private static final ByteBuffer EMPTY_BUFFER = ByteBuffer.wrap(new byte[0])
-			.asReadOnlyBuffer();
+public class ClasspathHttpResourceFactory extends AbstractHttpResourceFactory {
 
 	/**
 	 * <p>
@@ -111,31 +104,9 @@ public class ClasspathHttpResourceFactory implements HttpResourceFactory {
 	 * @return Class path of the {@link HttpResource}.
 	 */
 	public static ByteBuffer getHttpResourceContents(String classPath) {
-
-		// Attempt to obtain the file
 		InputStream inputStream = Thread.currentThread()
 				.getContextClassLoader().getResourceAsStream(classPath);
-		if (inputStream == null) {
-			// Can not locate the file, return no content
-			return EMPTY_BUFFER;
-		}
-
-		try {
-			// Obtain the contents of the file
-			ByteArrayOutputStream data = new ByteArrayOutputStream();
-			for (int value = inputStream.read(); value != -1; value = inputStream
-					.read()) {
-				data.write(value);
-			}
-			inputStream.close();
-
-			// Return the contents of the file
-			return ByteBuffer.wrap(data.toByteArray()).asReadOnlyBuffer();
-
-		} catch (IOException ex) {
-			// Failed obtaining contents, return no content
-			return EMPTY_BUFFER;
-		}
+		return getHttpResourceContents(inputStream, classPath);
 	}
 
 	/**
@@ -152,12 +123,6 @@ public class ClasspathHttpResourceFactory implements HttpResourceFactory {
 	 * Names of files within the directory for searching for the default file.
 	 */
 	private final String[] defaultDirectoryFileNames;
-
-	/**
-	 * Listing of {@link HttpFileDescriber} instances to describe the created
-	 * {@link HttpFile} instances.
-	 */
-	private final List<HttpFileDescriber> describers = new LinkedList<HttpFileDescriber>();
 
 	/**
 	 * Obtain an instance via static method
@@ -245,30 +210,18 @@ public class ClasspathHttpResourceFactory implements HttpResourceFactory {
 		// Determine if a directory
 		if (node.isDirectory()) {
 			// Directory, so create and return the directory
-			return new HttpDirectoryImpl(node.getResourcePath(),
+			return new ClasspathHttpDirectory(node.getResourcePath(),
 					this.classPathPrefix, this.defaultDirectoryFileNames);
 		}
 
 		// As here, resource is a file so have file described
-		HttpFileDescriptionImpl description = new HttpFileDescriptionImpl(node
-				.getResourcePath(), node.getClassPath(), true);
-		DESCRIBED: for (HttpFileDescriber describer : this.describers) {
-			describer.describe(description);
-			if (description.isDescribed()) {
-				break DESCRIBED; // have description
-			}
-		}
-
-		// Obtain the file description
-		String contentEncoding = (description.contentEncoding == null ? ""
-				: description.contentEncoding);
-		String contentType = (description.contentType == null ? ""
-				: description.contentType);
-		Charset charset = description.charset;
+		HttpFileDescriptionImpl description = new HttpFileDescriptionImpl(
+				node.getResourcePath(), node.getClassPath());
+		this.describeFile(description);
 
 		// Create the HTTP File
-		HttpFile httpFile = new HttpFileImpl(node.getResourcePath(), node
-				.getClassPath(), contentEncoding, contentType, charset);
+		HttpFile httpFile = new ClasspathHttpFile(node.getResourcePath(),
+				node.getClassPath(), description);
 
 		// Return the HTTP File
 		return httpFile;
@@ -277,11 +230,6 @@ public class ClasspathHttpResourceFactory implements HttpResourceFactory {
 	/*
 	 * ===================== HttpResourceFactory ===============================
 	 */
-
-	@Override
-	public void addHttpFileDescriber(HttpFileDescriber httpFileDescriber) {
-		this.describers.add(httpFileDescriber);
-	}
 
 	@Override
 	public HttpResource createHttpResource(String requestUriPath)
@@ -305,38 +253,13 @@ public class ClasspathHttpResourceFactory implements HttpResourceFactory {
 	/**
 	 * {@link HttpFileDescription} implementation.
 	 */
-	private static class HttpFileDescriptionImpl implements
-			HttpFileDescription, HttpResource {
-
-		/**
-		 * {@link HttpResource} path.
-		 */
-		private final String resourcePath;
+	private static class HttpFileDescriptionImpl extends
+			AbstractHttpFileDescription {
 
 		/**
 		 * Class path.
 		 */
 		private final String classPath;
-
-		/**
-		 * Flags if the {@link HttpFile} exists.
-		 */
-		private final boolean isExist;
-
-		/**
-		 * <code>Content-Encoding</code> for the {@link HttpFile}.
-		 */
-		public String contentEncoding = null;
-
-		/**
-		 * <code>Content-Type</code> for the {@link HttpFile}.
-		 */
-		public String contentType = null;
-
-		/**
-		 * {@link Charset} for the {@link HttpFile}.
-		 */
-		public Charset charset = null;
 
 		/**
 		 * Initiate.
@@ -345,24 +268,10 @@ public class ClasspathHttpResourceFactory implements HttpResourceFactory {
 		 *            {@link HttpResource} path.
 		 * @param classPath
 		 *            Class path.
-		 * @param isExist
-		 *            Flags if exists.
 		 */
-		public HttpFileDescriptionImpl(String resourcePath, String classPath,
-				boolean isExist) {
-			this.resourcePath = resourcePath;
+		public HttpFileDescriptionImpl(String resourcePath, String classPath) {
+			super(resourcePath);
 			this.classPath = classPath;
-			this.isExist = isExist;
-		}
-
-		/**
-		 * Indicates if the {@link HttpFile} is described.
-		 * 
-		 * @return <code>true</code> if the {@link HttpFile} is described.
-		 */
-		public boolean isDescribed() {
-			// Describe if have encoding and type (charset optional)
-			return ((this.contentEncoding != null) && (this.contentType != null));
 		}
 
 		/*
@@ -370,39 +279,9 @@ public class ClasspathHttpResourceFactory implements HttpResourceFactory {
 		 */
 
 		@Override
-		public HttpResource getResource() {
-			return this;
-		}
-
-		@Override
 		public ByteBuffer getContents() {
 			// Always attempt to obtain contents for file
 			return getHttpResourceContents(this.classPath);
-		}
-
-		@Override
-		public void setContentEncoding(String encoding) {
-			this.contentEncoding = encoding;
-		}
-
-		@Override
-		public void setContentType(String type, Charset charset) {
-			this.contentType = type;
-			this.charset = charset;
-		}
-
-		/*
-		 * ======================= HttpResource ========================
-		 */
-
-		@Override
-		public String getPath() {
-			return this.resourcePath;
-		}
-
-		@Override
-		public boolean isExist() {
-			return this.isExist;
 		}
 	}
 

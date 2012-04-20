@@ -16,23 +16,20 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package net.officefloor.plugin.web.http.resource;
+package net.officefloor.plugin.web.http.resource.classpath;
 
+import net.officefloor.plugin.web.http.resource.AbstractHttpResource;
 import net.officefloor.plugin.web.http.resource.HttpDirectory;
 import net.officefloor.plugin.web.http.resource.HttpFile;
 import net.officefloor.plugin.web.http.resource.HttpResource;
 
 /**
- * {@link HttpDirectory} implementation.
+ * Classpath {@link HttpDirectory} implementation.
  * 
  * @author Daniel Sagenschneider
  */
-public class HttpDirectoryImpl implements HttpDirectory {
-
-	/**
-	 * Resource path.
-	 */
-	private final String resourcePath;
+public class ClasspathHttpDirectory extends AbstractHttpResource implements
+		HttpDirectory {
 
 	/**
 	 * Class path prefix.
@@ -56,9 +53,9 @@ public class HttpDirectoryImpl implements HttpDirectory {
 	 *            Names of the default {@link HttpFile} instances in order of
 	 *            searching for the default {@link HttpFile}.
 	 */
-	public HttpDirectoryImpl(String resourcePath, String classPathPrefix,
-			String... defaultFileNames) {
-		this.resourcePath = resourcePath;
+	public ClasspathHttpDirectory(String resourcePath,
+			String classPathPrefix, String... defaultFileNames) {
+		super(resourcePath);
 		this.classPathPrefix = classPathPrefix;
 		this.defaultFileNames = defaultFileNames;
 	}
@@ -78,11 +75,6 @@ public class HttpDirectoryImpl implements HttpDirectory {
 	 */
 
 	@Override
-	public String getPath() {
-		return this.resourcePath;
-	}
-
-	@Override
 	public boolean isExist() {
 		// Directory always exists
 		return true;
@@ -95,7 +87,7 @@ public class HttpDirectoryImpl implements HttpDirectory {
 		ClasspathHttpResourceFactory factory = this.getFactory();
 
 		// Obtain the node for this directory
-		ClassPathHttpResourceNode node = factory.getNode(this.resourcePath);
+		ClassPathHttpResourceNode node = factory.getNode(this.getPath());
 		if (node == null) {
 			return null; // no node, so no default file
 		}
@@ -129,7 +121,7 @@ public class HttpDirectoryImpl implements HttpDirectory {
 		ClasspathHttpResourceFactory factory = this.getFactory();
 
 		// Obtain the node for this directory
-		ClassPathHttpResourceNode node = factory.getNode(this.resourcePath);
+		ClassPathHttpResourceNode node = factory.getNode(this.getPath());
 		if (node == null) {
 			return new HttpResource[0]; // no node, so children
 		}
@@ -152,38 +144,11 @@ public class HttpDirectoryImpl implements HttpDirectory {
 	 */
 
 	@Override
-	public boolean equals(Object obj) {
-
-		// Check if same object
-		if (this == obj) {
-			return true;
-		}
-
-		// Ensure same type
-		if (!(obj instanceof HttpDirectoryImpl)) {
-			return false;
-		}
-		HttpDirectoryImpl that = (HttpDirectoryImpl) obj;
-
-		// Return whether details same
-		return (this.resourcePath.equals(that.getPath()))
-				&& (this.classPathPrefix.equals(that.classPathPrefix));
-	}
-
-	@Override
-	public int hashCode() {
-		int hash = this.getClass().hashCode();
-		hash = (hash * 31) + this.resourcePath.hashCode();
-		hash = (hash * 31) + this.classPathPrefix.hashCode();
-		return hash;
-	}
-
-	@Override
 	public String toString() {
 		StringBuilder text = new StringBuilder();
 		text.append(this.getClass().getSimpleName());
 		text.append(": ");
-		text.append(this.resourcePath);
+		text.append(this.getPath());
 		text.append(" (Class path prefix: ");
 		text.append(this.classPathPrefix);
 		text.append(")");

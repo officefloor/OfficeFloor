@@ -47,6 +47,18 @@ public abstract class AbstractHttpResourceFactoryTestCase extends
 		OfficeFrameTestCase {
 
 	/**
+	 * Obtains the test resource directory.
+	 * 
+	 * @return Test resource directory.
+	 */
+	public static File getTestResourceDirectory() throws IOException {
+		File resourceDirectory = new OfficeFrameTestCase() {
+		}.findFile(AbstractHttpResourceFactoryTestCase.class, "index.html")
+				.getParentFile();
+		return resourceDirectory;
+	}
+
+	/**
 	 * {@link Charset} for description.
 	 */
 	private static final Charset CHARSET = Charset.defaultCharset();
@@ -70,7 +82,7 @@ public abstract class AbstractHttpResourceFactoryTestCase extends
 	 * @return {@link HttpResourceFactory} to test.
 	 */
 	protected abstract HttpResourceFactory createHttpResourceFactory(
-			String namespace);
+			String namespace) throws Exception;
 
 	/**
 	 * {@link HttpResourceFactory} being tested.
@@ -86,13 +98,14 @@ public abstract class AbstractHttpResourceFactoryTestCase extends
 	protected void setUp() throws Exception {
 
 		// Create the factory to create the resources
-		this.factory = this.createHttpResourceFactory(this.getClass()
-				.getPackage().getName());
+		this.factory = this
+				.createHttpResourceFactory(AbstractHttpResourceFactoryTestCase.class
+						.getPackage().getName());
 
 		// Add HTTP file describer for testing
 		this.factory.addHttpFileDescriber(new HttpFileDescriber() {
 			@Override
-			public void describe(HttpFileDescription description) {
+			public boolean describe(HttpFileDescription description) {
 
 				// Obtain the next expected description
 				assertTrue(
@@ -118,6 +131,9 @@ public abstract class AbstractHttpResourceFactoryTestCase extends
 				// Provide the description
 				description.setContentType(CONTENT_TYPE, CHARSET);
 				description.setContentEncoding(CONTENT_ENCODING);
+
+				// Described
+				return true;
 			}
 		});
 	}
@@ -177,7 +193,7 @@ public abstract class AbstractHttpResourceFactoryTestCase extends
 	/**
 	 * Ensure exception thrown if request URI path is invalid.
 	 */
-	public void testFailOnInvalidPath() throws IOException {
+	public void testFailOnInvalidPath() throws Exception {
 
 		// Obtain the HTTP resource factory
 		HttpResourceFactory factory = this.createHttpResourceFactory("");
@@ -495,7 +511,8 @@ public abstract class AbstractHttpResourceFactoryTestCase extends
 
 			} else {
 				// Obtain the expected content
-				File expectedFile = this.findFile(this.getClass(),
+				File expectedFile = this.findFile(
+						AbstractHttpResourceFactoryTestCase.class,
 						fileNameForExpectedContent);
 				InputStream inputStream = new FileInputStream(expectedFile);
 				ByteArrayOutputStream outputStream = new ByteArrayOutputStream();

@@ -25,47 +25,46 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 
 import net.officefloor.frame.test.OfficeFrameTestCase;
-import net.officefloor.plugin.web.http.resource.HttpDirectory;
-import net.officefloor.plugin.web.http.resource.HttpDirectoryImpl;
-import net.officefloor.plugin.web.http.resource.HttpFile;
-import net.officefloor.plugin.web.http.resource.HttpResource;
 
 /**
  * Tests the {@link HttpDirectory}.
  * 
  * @author Daniel Sagenschneider
  */
-public class HttpDirectoryTest extends OfficeFrameTestCase {
+public abstract class AbstractHttpDirectoryTestCase extends OfficeFrameTestCase {
 
 	/**
 	 * Underlying directory for HTTP directory.
 	 */
-	private File classPathDirectory;
-
-	/**
-	 * Class path prefix
-	 */
-	private String classPathPrefix;
+	private File testDirectory;
 
 	/**
 	 * {@link HttpDirectory} to test.
 	 */
-	private HttpDirectory directory;
+	private HttpDirectory httpDirectory;
+
+	/**
+	 * Creates the {@link HttpDirectory}.
+	 * 
+	 * @param resourcePath
+	 *            Path to the {@link HttpDirectory}.
+	 * @param defaultFileNames
+	 *            Default file names.
+	 * @return {@link HttpDirectory}.
+	 */
+	protected abstract HttpDirectory createHttpDirectory(String resourcePath,
+			String... defaultFileNames);
 
 	@Override
 	protected void setUp() throws Exception {
 
 		// Obtain the underlying directory for HTTP directory
-		this.classPathDirectory = this.findFile(this.getClass(),
+		this.testDirectory = this.findFile(AbstractHttpDirectoryTestCase.class,
 				"directory/index.html").getParentFile();
 
-		// Obtain class path prefix
-		this.classPathPrefix = this.getClass().getPackage().getName().replace(
-				'.', '/');
-
 		// Create the HTTP directory
-		this.directory = new HttpDirectoryImpl("/directory/",
-				this.classPathPrefix, "index.html");
+		this.httpDirectory = this.createHttpDirectory("/directory/",
+				"index.html");
 	}
 
 	/**
@@ -74,7 +73,7 @@ public class HttpDirectoryTest extends OfficeFrameTestCase {
 	public void testDefaultFile() {
 
 		// Obtain the default file
-		HttpFile defaultFile = this.directory.getDefaultFile();
+		HttpFile defaultFile = this.httpDirectory.getDefaultFile();
 
 		// Ensure correct default file
 		assertNotNull("Should have default file", defaultFile);
@@ -88,7 +87,7 @@ public class HttpDirectoryTest extends OfficeFrameTestCase {
 	public void testListResources() {
 
 		// List the resources
-		HttpResource[] resources = this.directory.listResources();
+		HttpResource[] resources = this.httpDirectory.listResources();
 
 		// Ensure correct resources
 		assertEquals("Incorrect number of resources", 2, resources.length);
@@ -105,18 +104,18 @@ public class HttpDirectoryTest extends OfficeFrameTestCase {
 	 */
 	public void testSerialise() throws Exception {
 		// Ensure can serialise
-		this.doSerialiseTest(this.directory, "/directory/",
-				this.classPathDirectory);
+		this.doSerialiseTest(this.httpDirectory, "/directory/",
+				this.testDirectory);
 	}
 
 	/**
 	 * Ensure appropriately equals.
 	 */
 	public void testEquals() {
-		HttpDirectory one = new HttpDirectoryImpl("/directory/",
-				"class/path/prefix", "index.html");
-		HttpDirectory two = new HttpDirectoryImpl("/directory/",
-				"class/path/prefix", "index.html");
+		HttpDirectory one = this.createHttpDirectory("/directory/",
+				"index.html");
+		HttpDirectory two = this.createHttpDirectory("/directory/",
+				"index.html");
 		assertTrue("Should be equal", one.equals(two));
 		assertEquals("Hash should match", one.hashCode(), two.hashCode());
 	}
@@ -126,26 +125,10 @@ public class HttpDirectoryTest extends OfficeFrameTestCase {
 	 */
 	public void testNotEquals() {
 		final String RESOURCE_PATH = "/directory/";
-		final String CLASS_PATH_PREFIX = "class/path/prefix";
-		final HttpDirectory directory = new HttpDirectoryImpl(RESOURCE_PATH,
-				CLASS_PATH_PREFIX);
-		assertFalse("Should not match if different resource path", directory
-				.equals(new HttpDirectoryImpl("/wrong/resource/path",
-						CLASS_PATH_PREFIX)));
-		assertFalse("Should not match if different class path prefix",
-				directory.equals(new HttpDirectoryImpl(RESOURCE_PATH,
-						"wrong/class/path/prefix")));
-	}
-
-	/**
-	 * Ensure correct toString().
-	 */
-	public void testToString() {
-		assertEquals(
-				"Incorrect toString details",
-				"HttpDirectoryImpl: /directory/ (Class path prefix: class/path/prefix)",
-				new HttpDirectoryImpl("/directory/", "class/path/prefix")
-						.toString());
+		final HttpDirectory directory = this.createHttpDirectory(RESOURCE_PATH);
+		assertFalse("Should not match if different resource path",
+				directory.equals(this
+						.createHttpDirectory("/wrong/resource/path")));
 	}
 
 	/**
@@ -176,8 +159,8 @@ public class HttpDirectoryTest extends OfficeFrameTestCase {
 				retrievedDirectory);
 
 		// Validate the retrieved file
-		assertEquals("Incorrect path", resourcePath, retrievedDirectory
-				.getPath());
+		assertEquals("Incorrect path", resourcePath,
+				retrievedDirectory.getPath());
 		assertTrue("Should exist", retrievedDirectory.isExist());
 
 		// Ensure able to retrieve default file

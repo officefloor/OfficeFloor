@@ -20,17 +20,20 @@ package net.officefloor.plugin.web.http.resource;
 
 /**
  * Populates the {@link HttpFileDescription} for a {@link HttpFile}.
- *
+ * 
  * @author Daniel Sagenschneider
  */
 public interface HttpFileDescriber {
 
 	/**
 	 * Describes the {@link HttpFileDescription}.
-	 *
+	 * 
 	 * @param description
 	 *            {@link HttpFileDescription}.
+	 * @return <code>true</code> should the {@link HttpFile} be described.
+	 *         <code>false</code> indicates unable to describe and should use
+	 *         alternate {@link HttpFileDescriber}.
 	 */
-	void describe(HttpFileDescription description);
+	boolean describe(HttpFileDescription description);
 
 }
