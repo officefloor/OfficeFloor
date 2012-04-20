@@ -27,15 +27,29 @@ import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 
 import net.officefloor.frame.test.OfficeFrameTestCase;
-import net.officefloor.plugin.web.http.resource.HttpFile;
-import net.officefloor.plugin.web.http.resource.HttpFileImpl;
 
 /**
  * Test the {@link HttpFile}.
  * 
  * @author Daniel Sagenschneider
  */
-public class HttpFileTest extends OfficeFrameTestCase {
+public abstract class AbstractHttpFileTestCase extends OfficeFrameTestCase {
+
+	/**
+	 * Creates the {@link HttpFile}.
+	 * 
+	 * @param resourcePath
+	 *            Resource path.
+	 * @param contentEncoding
+	 *            Content encoding.
+	 * @param contentType
+	 *            Content type.
+	 * @param charset
+	 *            {@link Charset}.
+	 * @return {@link HttpFile}.
+	 */
+	protected abstract HttpFile createHttpFile(String resourcePath,
+			String contentEncoding, String contentType, Charset charset);
 
 	/**
 	 * Ensure can serialise a {@link HttpFile} with no description.
@@ -43,16 +57,12 @@ public class HttpFileTest extends OfficeFrameTestCase {
 	public void testSerialise() throws Exception {
 
 		// Obtain the underlying file for HTTP file
-		File classPathFile = this.findFile(this.getClass(), "index.html");
-
-		// Obtain class path for file
-		String classPath = this.getClass().getPackage().getName().replace('.',
-				'/')
-				+ "/index.html";
+		File classPathFile = this.findFile(AbstractHttpFileTestCase.class,
+				"index.html");
 
 		// Create HTTP File (with no description)
-		HttpFile httpFile = new HttpFileImpl("/index.html", classPath, null,
-				null, null);
+		HttpFile httpFile = this
+				.createHttpFile("/index.html", null, null, null);
 
 		// Ensure can serialise
 		this.doSerialiseTest(httpFile, "/index.html", classPathFile, "", "",
@@ -66,18 +76,14 @@ public class HttpFileTest extends OfficeFrameTestCase {
 	public void testSerialiseWithDescription() throws Exception {
 
 		// Obtain the underlying file for HTTP file
-		File classPathFile = this.findFile(this.getClass(), "index.html");
-
-		// Obtain class path for file
-		String classPath = this.getClass().getPackage().getName().replace('.',
-				'/')
-				+ "/index.html";
+		File classPathFile = this.findFile(AbstractHttpFileTestCase.class,
+				"index.html");
 
 		// Create the charset
 		Charset charset = Charset.defaultCharset();
 
 		// Create Http File (with mock details)
-		HttpFile httpFile = new HttpFileImpl("/index.html", classPath, "zip",
+		HttpFile httpFile = this.createHttpFile("/index.html", "zip",
 				"text/html", charset);
 
 		// Ensure can serialise
@@ -90,10 +96,10 @@ public class HttpFileTest extends OfficeFrameTestCase {
 	 */
 	public void testEquals() {
 		Charset charset = Charset.defaultCharset();
-		HttpFile one = new HttpFileImpl("/resource.html", "resource.html",
-				"encoding", "type", charset);
-		HttpFile two = new HttpFileImpl("/resource.html", "resource.html",
-				"encoding", "type", charset);
+		HttpFile one = this.createHttpFile("/resource.html", "encoding",
+				"type", charset);
+		HttpFile two = this.createHttpFile("/resource.html", "encoding",
+				"type", charset);
 		assertEquals("Should equal", one, two);
 		assertEquals("Same hash", one.hashCode(), two.hashCode());
 	}
@@ -103,44 +109,20 @@ public class HttpFileTest extends OfficeFrameTestCase {
 	 */
 	public void testNotEquals() {
 		final String RESOURCE_PATH = "/resource.html";
-		final String CLASS_PATH = "resource.html";
 		final String ENCODING = "encoding";
 		final String TYPE = "type";
 		final Charset CHARSET = Charset.defaultCharset();
-		HttpFile file = new HttpFileImpl(RESOURCE_PATH, CLASS_PATH, ENCODING,
-				TYPE, CHARSET);
-		assertFalse("Should not match if different resource path", file
-				.equals(new HttpFileImpl("/wrong.html", CLASS_PATH, ENCODING,
-						TYPE, CHARSET)));
-		assertFalse("Should not match if different class path", file
-				.equals(new HttpFileImpl(RESOURCE_PATH, "wrong.html", ENCODING,
-						TYPE, CHARSET)));
-		assertFalse("Should not match if different encoding", file
-				.equals(new HttpFileImpl(RESOURCE_PATH, CLASS_PATH, "wrong",
-						TYPE, CHARSET)));
-		assertFalse("Should not match if different type", file
-				.equals(new HttpFileImpl(RESOURCE_PATH, CLASS_PATH, ENCODING,
-						"wrong", CHARSET)));
-		assertFalse("Should not match if different charset", file
-				.equals(new HttpFileImpl(RESOURCE_PATH, CLASS_PATH, ENCODING,
-						TYPE, null)));
-	}
-
-	/**
-	 * Ensure obtain details from <code>toString</code> method.
-	 */
-	public void testToString() {
-		final Charset charset = Charset.defaultCharset();
-		assertEquals(
-				"Incorrect toString with full details",
-				"HttpFileImpl: /resource.html (Class path: resource.html, Content-Encoding: encoding, Content-Type: type; charset="
-						+ charset.name() + ")", new HttpFileImpl(
-						"/resource.html", "resource.html", "encoding", "type",
-						charset).toString());
-		assertEquals("Incorrect toString with no details",
-				"HttpFileImpl: /resource.html (Class path: resource.html)",
-				new HttpFileImpl("/resource.html", "resource.html", null, null,
-						null).toString());
+		HttpFile file = this.createHttpFile(RESOURCE_PATH, ENCODING, TYPE,
+				CHARSET);
+		assertFalse("Should not match if different resource path",
+				file.equals(this.createHttpFile("/wrong.html", ENCODING, TYPE,
+						CHARSET)));
+		assertFalse("Should not match if different encoding", file.equals(this
+				.createHttpFile(RESOURCE_PATH, "wrong", TYPE, CHARSET)));
+		assertFalse("Should not match if different type", file.equals(this
+				.createHttpFile(RESOURCE_PATH, ENCODING, "wrong", CHARSET)));
+		assertFalse("Should not match if different charset", file.equals(this
+				.createHttpFile(RESOURCE_PATH, ENCODING, TYPE, null)));
 	}
 
 	/**
@@ -182,8 +164,8 @@ public class HttpFileTest extends OfficeFrameTestCase {
 		assertTrue("Should exist", retrievedFile.isExist());
 		assertEquals("Incorrect content-encoding", contentEncoding,
 				retrievedFile.getContentEncoding());
-		assertEquals("Incorrect content-type", contentType, retrievedFile
-				.getContentType());
+		assertEquals("Incorrect content-type", contentType,
+				retrievedFile.getContentType());
 		assertEquals("Incorrect charset", charset, retrievedFile.getCharset());
 
 		// Obtain the expected contents

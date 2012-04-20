@@ -16,7 +16,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package net.officefloor.plugin.web.http.resource;
+package net.officefloor.plugin.web.http.resource.classpath;
 
 import java.io.File;
 import java.io.IOException;
@@ -26,7 +26,7 @@ import java.util.Iterator;
 import java.util.List;
 
 import net.officefloor.frame.test.OfficeFrameTestCase;
-import net.officefloor.plugin.web.http.resource.ClassPathHttpResourceNode;
+import net.officefloor.plugin.web.http.resource.AbstractHttpResourceFactoryTestCase;
 
 /**
  * Tests the {@link ClassPathHttpResourceNode}.
@@ -59,10 +59,11 @@ public class ClassPathHttpResourceNodeTest extends OfficeFrameTestCase {
 	public void testDirectoryTree() throws IOException {
 
 		// Specify java.class.path for isolation of testing
-		File resourceDirectory = this.findFile(this.getClass(),
-				"directory/index.html").getParentFile();
-		System.setProperty("java.class.path", resourceDirectory
-				.getAbsolutePath());
+		File resourceDirectory = new File(
+				AbstractHttpResourceFactoryTestCase.getTestResourceDirectory(),
+				"directory");
+		System.setProperty("java.class.path",
+				resourceDirectory.getAbsolutePath());
 
 		// Create the class path resource tree (no class prefix)
 		ClassPathHttpResourceNode tree = ClassPathHttpResourceNode
@@ -83,10 +84,10 @@ public class ClassPathHttpResourceNodeTest extends OfficeFrameTestCase {
 	public void testDirectoryTreeWithClassPathPrefix() throws IOException {
 
 		// Specify java.class.path for isolation of testing
-		File resourceDirectory = this.findFile(this.getClass(), "index.html")
-				.getParentFile();
-		System.setProperty("java.class.path", resourceDirectory
-				.getAbsolutePath());
+		File resourceDirectory = AbstractHttpResourceFactoryTestCase
+				.getTestResourceDirectory();
+		System.setProperty("java.class.path",
+				resourceDirectory.getAbsolutePath());
 
 		// Create the class path resource tree (no class prefix)
 		ClassPathHttpResourceNode tree = ClassPathHttpResourceNode
@@ -109,14 +110,14 @@ public class ClassPathHttpResourceNodeTest extends OfficeFrameTestCase {
 		final String CLASS_PATH_PREFIX = "not_exist";
 
 		// Ensure test valid by class path prefix directory not existing
-		File resourceDirectory = this.findFile(this.getClass(), "index.html")
-				.getParentFile();
+		File resourceDirectory = AbstractHttpResourceFactoryTestCase
+				.getTestResourceDirectory();
 		assertFalse("Invalid test as class path prefix directory exists",
 				new File(resourceDirectory, CLASS_PATH_PREFIX).exists());
 
 		// Specify java.class.path for isolation of testing
-		System.setProperty("java.class.path", resourceDirectory
-				.getAbsolutePath());
+		System.setProperty("java.class.path",
+				resourceDirectory.getAbsolutePath());
 
 		// Create the class path resource tree (no class prefix)
 		ClassPathHttpResourceNode tree = ClassPathHttpResourceNode
@@ -132,7 +133,9 @@ public class ClassPathHttpResourceNodeTest extends OfficeFrameTestCase {
 	public void testJarTree() throws IOException {
 
 		// Specify java.class.path for isolation of testing
-		File jarFile = this.findFile(this.getClass(), "test.jar");
+		File jarFile = new File(
+				AbstractHttpResourceFactoryTestCase.getTestResourceDirectory(),
+				"test.jar");
 		System.setProperty("java.class.path", jarFile.getAbsolutePath());
 
 		// Create the class path resource tree (no class prefix)
@@ -155,7 +158,9 @@ public class ClassPathHttpResourceNodeTest extends OfficeFrameTestCase {
 	public void testJarTreeWithClassPathPrefix() throws IOException {
 
 		// Specify java.class.path for isolation of testing
-		File jarFile = this.findFile(this.getClass(), "test.jar");
+		File jarFile = new File(
+				AbstractHttpResourceFactoryTestCase.getTestResourceDirectory(),
+				"test.jar");
 		System.setProperty("java.class.path", jarFile.getAbsolutePath());
 
 		// Create the class path resource tree (no class prefix)
@@ -176,7 +181,9 @@ public class ClassPathHttpResourceNodeTest extends OfficeFrameTestCase {
 	public void testJarTreeNotContainingClassPathPrefix() throws IOException {
 
 		// Specify java.class.path for isolation of testing
-		File jarFile = this.findFile(this.getClass(), "test.jar");
+		File jarFile = new File(
+				AbstractHttpResourceFactoryTestCase.getTestResourceDirectory(),
+				"test.jar");
 		System.setProperty("java.class.path", jarFile.getAbsolutePath());
 
 		// Create the class path resource tree (no class prefix)
@@ -206,10 +213,10 @@ public class ClassPathHttpResourceNodeTest extends OfficeFrameTestCase {
 			boolean isExpectedToBeDirectory, String... expectedChildren) {
 
 		// Validate details of the node
-		assertEquals("Incorrect resource path", expectedResourcePath, node
-				.getResourcePath());
-		assertEquals("Incorrect class path", expectedClassPath, node
-				.getClassPath());
+		assertEquals("Incorrect resource path", expectedResourcePath,
+				node.getResourcePath());
+		assertEquals("Incorrect class path", expectedClassPath,
+				node.getClassPath());
 		assertEquals("Incorrect indication if directory",
 				isExpectedToBeDirectory, node.isDirectory());
 

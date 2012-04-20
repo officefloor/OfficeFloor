@@ -16,35 +16,35 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package net.officefloor.plugin.web.http.resource;
+package net.officefloor.plugin.web.http.resource.classpath;
 
-import net.officefloor.plugin.web.http.resource.HttpResource;
+import net.officefloor.plugin.web.http.resource.AbstractHttpResourceFactoryTestCase;
+import net.officefloor.plugin.web.http.resource.HttpResourceFactory;
 
 /**
- * Not existing {@link HttpResource}.
+ * Tests the {@link ClasspathHttpResourceFactory}.
  * 
  * @author Daniel Sagenschneider
  */
-public class NotExistHttpResource extends AbstractHttpResource {
-
-	/**
-	 * Initiate.
-	 * 
-	 * @param path
-	 *            Path.
-	 */
-	public NotExistHttpResource(String path) {
-		super(path);
-	}
+public class ClasspathHttpResourceFactoryTest extends
+		AbstractHttpResourceFactoryTestCase {
 
 	/*
-	 * ====================== HttpResource ======================
+	 * ============== AbstractHttpResourceFactoryTestCase ==================
 	 */
 
 	@Override
-	public boolean isExist() {
-		// Not exist
-		return false;
+	protected HttpResourceFactory createHttpResourceFactory(String prefix) {
+
+		// Clear to create new instance
+		ClasspathHttpResourceFactory.clearHttpResourceFactories();
+
+		// Create the factory to obtain files from test package
+		HttpResourceFactory factory = ClasspathHttpResourceFactory
+				.getHttpResourceFactory(prefix, "index.html");
+
+		// Return the factory
+		return factory;
 	}
 
 }

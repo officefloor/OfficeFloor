@@ -21,76 +21,52 @@ package net.officefloor.plugin.web.http.resource;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
-import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 
-import net.officefloor.plugin.web.http.resource.HttpFile;
-
 /**
- * {@link HttpFile} implementation.
+ * Abstract {@link HttpFile} implementation.
  * 
  * @author Daniel Sagenschneider
  */
-public class HttpFileImpl implements HttpFile {
-
-	/**
-	 * Resource path.
-	 */
-	private String resourcePath;
-
-	/**
-	 * Class path.
-	 */
-	private String classPath;
+public abstract class AbstractHttpFile extends AbstractHttpResource implements
+		HttpFile {
 
 	/**
 	 * <code>Content-Encoding</code>.
 	 */
-	private String contentEncoding;
+	protected String contentEncoding;
 
 	/**
 	 * <code>Content-Type</code>.
 	 */
-	private String contentType;
+	protected String contentType;
 
 	/**
 	 * {@link Charset}.
 	 */
-	private transient Charset charset;
+	protected transient Charset charset;
 
 	/**
 	 * Initiate an existing {@link HttpFile}.
 	 * 
 	 * @param resourcePath
 	 *            Resource path.
-	 * @param classPath
-	 *            Class path.
-	 * @param contentEncoding
-	 *            <code>Content-Encoding</code>.
-	 * @param contentType
-	 *            <code>Content-Type</code>.
-	 * @param charset
-	 *            {@link Charset}.
-	 * @param contents
-	 *            Contents.
+	 * @param description
+	 *            {@link AbstractHttpFileDescription}.
 	 */
-	public HttpFileImpl(String resourcePath, String classPath,
-			String contentEncoding, String contentType, Charset charset) {
-		this.resourcePath = resourcePath;
-		this.classPath = classPath;
+	public AbstractHttpFile(String resourcePath,
+			AbstractHttpFileDescription description) {
+		super(resourcePath);
+		String contentEncoding = description.getContentEncoding();
 		this.contentEncoding = (contentEncoding == null ? "" : contentEncoding);
+		String contentType = description.getContentType();
 		this.contentType = (contentType == null ? "" : contentType);
-		this.charset = charset;
+		this.charset = description.getCharset();
 	}
 
 	/*
 	 * ================ HttpFile ======================================
 	 */
-
-	@Override
-	public String getPath() {
-		return this.resourcePath;
-	}
 
 	@Override
 	public boolean isExist() {
@@ -113,12 +89,6 @@ public class HttpFileImpl implements HttpFile {
 		return this.charset;
 	}
 
-	@Override
-	public ByteBuffer getContents() {
-		return ClasspathHttpResourceFactory
-				.getHttpResourceContents(this.classPath);
-	}
-
 	/*
 	 * ===================== Object ===================================
 	 */
@@ -132,14 +102,13 @@ public class HttpFileImpl implements HttpFile {
 		}
 
 		// Ensure same type
-		if (!(obj instanceof HttpFileImpl)) {
+		if (!(obj instanceof AbstractHttpFile)) {
 			return false;
 		}
-		HttpFileImpl that = (HttpFileImpl) obj;
+		AbstractHttpFile that = (AbstractHttpFile) obj;
 
 		// Return whether details same
-		return (this.resourcePath.equals(that.getPath()))
-				&& (this.classPath.equals(that.classPath))
+		return (this.getPath().equals(that.getPath()))
 				&& (this.contentEncoding.equals(that.getContentEncoding()))
 				&& (this.contentType.equals(that.getContentType()) && isCharsetMatch(
 						this.charset, that.getCharset()));
@@ -166,39 +135,13 @@ public class HttpFileImpl implements HttpFile {
 
 	@Override
 	public int hashCode() {
-		int hash = this.getClass().hashCode();
-		hash = (hash * 31) + this.resourcePath.hashCode();
-		hash = (hash * 31) + this.classPath.hashCode();
+		int hash = super.hashCode();
 		hash = (hash * 31) + this.contentEncoding.hashCode();
 		hash = (hash * 31) + this.contentType.hashCode();
 		if (this.charset != null) {
 			hash = (hash * 31) + this.charset.hashCode();
 		}
 		return hash;
-	}
-
-	@Override
-	public String toString() {
-		StringBuilder text = new StringBuilder();
-		text.append(this.getClass().getSimpleName());
-		text.append(": ");
-		text.append(this.resourcePath);
-		text.append(" (Class path: ");
-		text.append(this.classPath);
-		if (this.contentEncoding.length() > 0) {
-			text.append(", Content-Encoding: ");
-			text.append(this.contentEncoding);
-		}
-		if (this.contentType.length() > 0) {
-			text.append(", Content-Type: ");
-			text.append(this.contentType);
-			if (this.charset != null) {
-				text.append("; charset=");
-				text.append(this.charset.name());
-			}
-		}
-		text.append(")");
-		return text.toString();
 	}
 
 	/*
@@ -218,12 +161,25 @@ public class HttpFileImpl implements HttpFile {
 
 		// Write path and description of file
 		stream.writeObject(this.resourcePath);
-		stream.writeObject(this.classPath);
 		stream.writeObject(this.contentEncoding);
 		stream.writeObject(this.contentType);
 		String charsetName = (this.charset == null ? null : this.charset.name());
 		stream.writeObject(charsetName);
+
+//		// Write state of implementation
+//		this.writeImplementingObject(stream);
 	}
+
+//	/**
+//	 * Writes the implementing object state.
+//	 * 
+//	 * @param stream
+//	 *            {@link ObjectOutputStream}.
+//	 * @throws IOException
+//	 *             {@link IOException}.
+//	 */
+//	protected abstract void writeImplementingObject(ObjectOutputStream stream)
+//			throws IOException;
 
 	/**
 	 * Due to the {@link Charset} must manually handle serialising this
@@ -241,12 +197,27 @@ public class HttpFileImpl implements HttpFile {
 
 		// Obtain path and description of file
 		this.resourcePath = (String) stream.readObject();
-		this.classPath = (String) stream.readObject();
 		this.contentEncoding = (String) stream.readObject();
 		this.contentType = (String) stream.readObject();
 		String charsetName = (String) stream.readObject();
 		this.charset = (charsetName == null ? null : Charset
 				.forName(charsetName));
+
+//		// Read state of implementation
+//		this.readImplementingObject(stream);
 	}
+
+//	/**
+//	 * Reads the implementing object state.
+//	 * 
+//	 * @param stream
+//	 *            {@link ObjectInputStream}.
+//	 * @throws IOException
+//	 *             {@link IOException}.
+//	 * @throws ClassNotFoundException
+//	 *             {@link ClassNotFoundException}.
+//	 */
+//	protected abstract void readImplementingObject(ObjectInputStream stream)
+//			throws IOException, ClassNotFoundException;
 
 }

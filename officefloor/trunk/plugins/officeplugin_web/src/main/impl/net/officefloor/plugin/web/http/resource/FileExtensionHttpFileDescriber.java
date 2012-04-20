@@ -219,17 +219,17 @@ public class FileExtensionHttpFileDescriber implements HttpFileDescriber {
 	 */
 
 	@Override
-	public void describe(HttpFileDescription description) {
+	public boolean describe(HttpFileDescription description) {
 
 		// Obtain the file extension
 		String fileExtension = null;
 		HttpResource resource = description.getResource();
 		if (resource == null) {
-			return; // no resource, no description
+			return false; // no resource, no description
 		}
 		String path = resource.getPath();
 		if (path == null) {
-			return; // no path, no description
+			return false; // no path, no description
 		}
 		int extensionSplit = path.lastIndexOf('.');
 		int nameSplit = path.lastIndexOf('/');
@@ -238,14 +238,14 @@ public class FileExtensionHttpFileDescriber implements HttpFileDescriber {
 			fileExtension = path.substring(extensionSplit + 1);
 		}
 		if (fileExtension == null) {
-			return; // no extension, no description
+			return false; // no extension, no description
 		}
 
 		// Obtain the description details for the file extension
 		DescriptionStruct details = this.descriptions.get(fileExtension
 				.toLowerCase());
 		if (details == null) {
-			return; // no description
+			return false; // no description
 		}
 
 		// Load the descriptions
@@ -255,6 +255,9 @@ public class FileExtensionHttpFileDescriber implements HttpFileDescriber {
 		if (details.contentType != null) {
 			description.setContentType(details.contentType, details.charset);
 		}
+
+		// Description provided
+		return true;
 	}
 
 	/**

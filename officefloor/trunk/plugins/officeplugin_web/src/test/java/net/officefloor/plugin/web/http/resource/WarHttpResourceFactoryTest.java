@@ -15,18 +15,22 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
 package net.officefloor.plugin.web.http.resource;
 
-import net.officefloor.plugin.web.http.resource.ClasspathHttpResourceFactory;
-import net.officefloor.plugin.web.http.resource.HttpResourceFactory;
+import java.io.File;
+import java.io.IOException;
+
+import org.junit.Ignore;
+
+import net.officefloor.plugin.web.http.resource.war.WarHttpResourceFactory;
 
 /**
- * Tests the {@link ClasspathHttpResourceFactory}.
+ * Tests the {@link WarHttpResourceFactory}.
  * 
  * @author Daniel Sagenschneider
  */
-public class ClasspathHttpResourceFactoryTest extends
+@Ignore("TODO provide implementation of WarHttpResourceFactory")
+public class WarHttpResourceFactoryTest extends
 		AbstractHttpResourceFactoryTestCase {
 
 	/*
@@ -34,17 +38,15 @@ public class ClasspathHttpResourceFactoryTest extends
 	 */
 
 	@Override
-	protected HttpResourceFactory createHttpResourceFactory(String prefix) {
+	protected HttpResourceFactory createHttpResourceFactory(String namespace)
+			throws IOException {
 
-		// Clear to create new instance
-		ClasspathHttpResourceFactory.clearHttpResourceFactories();
+		// Find the war directory
+		File warDir = this.findFile(this.getClass(), "index.html")
+				.getParentFile();
 
-		// Create the factory to obtain files from test package
-		HttpResourceFactory factory = ClasspathHttpResourceFactory
-				.getHttpResourceFactory(prefix, "index.html");
-
-		// Return the factory
-		return factory;
+		// Create and return the WAR HTTP ResourceFactory
+		return new WarHttpResourceFactory(warDir);
 	}
 
 }

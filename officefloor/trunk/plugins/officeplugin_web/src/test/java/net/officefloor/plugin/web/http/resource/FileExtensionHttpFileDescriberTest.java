@@ -53,14 +53,14 @@ public class FileExtensionHttpFileDescriberTest extends OfficeFrameTestCase {
 	 * Ensure does nothing if <code>null</code> resource path.
 	 */
 	public void testNoDetailsForNullPath() {
-		this.doTest(null, null, null, null);
+		this.doTest(null, null, null, null, false);
 	}
 
 	/**
 	 * Ensure does nothing if unknown extension.
 	 */
 	public void testNoDetailsForUnknownPath() {
-		this.doTest("resource.unknown", null, null, null);
+		this.doTest("resource.unknown", null, null, null, false);
 	}
 
 	/**
@@ -68,7 +68,7 @@ public class FileExtensionHttpFileDescriberTest extends OfficeFrameTestCase {
 	 */
 	public void testHtmlDefault() {
 		this.describer.loadDefaultDescriptions();
-		this.doTest("resource.html", null, "text/html", this.charset);
+		this.doTest("resource.html", null, "text/html", this.charset, true);
 	}
 
 	/**
@@ -76,7 +76,7 @@ public class FileExtensionHttpFileDescriberTest extends OfficeFrameTestCase {
 	 */
 	public void testCaseInsenstive() {
 		this.describer.loadDefaultDescriptions();
-		this.doTest("resource.HtMl", null, "text/html", this.charset);
+		this.doTest("resource.HtMl", null, "text/html", this.charset, true);
 	}
 
 	/**
@@ -85,7 +85,7 @@ public class FileExtensionHttpFileDescriberTest extends OfficeFrameTestCase {
 	public void testDirectoryPath() {
 		this.describer.loadDefaultDescriptions();
 		this.doTest("/path/to/the/resource.html", null, "text/html",
-				this.charset);
+				this.charset, true);
 	}
 
 	/**
@@ -94,7 +94,7 @@ public class FileExtensionHttpFileDescriberTest extends OfficeFrameTestCase {
 	public void testCustomiseDetails() {
 		this.describer.mapContentEncoding("zip", "gzip");
 		this.describer.mapContentType("zip", "custom/type", this.charset);
-		this.doTest("resource.zip", "gzip", "custom/type", this.charset);
+		this.doTest("resource.zip", "gzip", "custom/type", this.charset, true);
 	}
 
 	/**
@@ -104,7 +104,7 @@ public class FileExtensionHttpFileDescriberTest extends OfficeFrameTestCase {
 		this.describer.loadDefaultDescriptions();
 		this.describer.mapContentEncoding("html", "deflate");
 		this.describer.mapContentType("html", "text/plain", null);
-		this.doTest("resource.html", "deflate", "text/plain", null);
+		this.doTest("resource.html", "deflate", "text/plain", null, true);
 	}
 
 	/**
@@ -126,7 +126,8 @@ public class FileExtensionHttpFileDescriberTest extends OfficeFrameTestCase {
 
 		// Load properties and test
 		this.describer.loadDescriptions(properties);
-		this.doTest("resource.html", "compress", "text/html", this.charset);
+		this.doTest("resource.html", "compress", "text/html", this.charset,
+				true);
 	}
 
 	/**
@@ -140,9 +141,11 @@ public class FileExtensionHttpFileDescriberTest extends OfficeFrameTestCase {
 	 *            Expected <code>Content-Type</code> for file extension.
 	 * @param charset
 	 *            Expected {@link Charset}.
+	 * @param isDescriptionExpected
+	 *            Flag indicating if expect description.
 	 */
 	private void doTest(String resourcePath, String contentEncoding,
-			String contentType, Charset charset) {
+			String contentType, Charset charset, boolean isDescriptionExpected) {
 
 		final HttpResource resource = this.createMock(HttpResource.class);
 
@@ -161,8 +164,12 @@ public class FileExtensionHttpFileDescriberTest extends OfficeFrameTestCase {
 
 		// Test
 		this.replayMockObjects();
-		this.describer.describe(this.description);
+		boolean isDescribed = this.describer.describe(this.description);
 		this.verifyMockObjects();
+
+		// Ensure indicate if described
+		assertEquals("Incorrectly identified if described",
+				isDescriptionExpected, isDescribed);
 	}
 
 }
