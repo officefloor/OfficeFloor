@@ -21,6 +21,7 @@ package net.officefloor.plugin.web.http.resource;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.nio.ByteBuffer;
@@ -47,9 +48,12 @@ public abstract class AbstractHttpFileTestCase extends OfficeFrameTestCase {
 	 * @param charset
 	 *            {@link Charset}.
 	 * @return {@link HttpFile}.
+	 * @throws IOException
+	 *             If fails to obtain the {@link HttpFile}.
 	 */
 	protected abstract HttpFile createHttpFile(String resourcePath,
-			String contentEncoding, String contentType, Charset charset);
+			String contentEncoding, String contentType, Charset charset)
+			throws IOException;
 
 	/**
 	 * Ensure can serialise a {@link HttpFile} with no description.
@@ -94,12 +98,12 @@ public abstract class AbstractHttpFileTestCase extends OfficeFrameTestCase {
 	/**
 	 * Ensure equals is based on details of {@link HttpFile}.
 	 */
-	public void testEquals() {
+	public void testEquals() throws IOException {
 		Charset charset = Charset.defaultCharset();
-		HttpFile one = this.createHttpFile("/resource.html", "encoding",
-				"type", charset);
-		HttpFile two = this.createHttpFile("/resource.html", "encoding",
-				"type", charset);
+		HttpFile one = this.createHttpFile("/index.html", "encoding", "type",
+				charset);
+		HttpFile two = this.createHttpFile("/index.html", "encoding", "type",
+				charset);
 		assertEquals("Should equal", one, two);
 		assertEquals("Same hash", one.hashCode(), two.hashCode());
 	}
@@ -107,16 +111,16 @@ public abstract class AbstractHttpFileTestCase extends OfficeFrameTestCase {
 	/**
 	 * Ensures not equals should details differ.
 	 */
-	public void testNotEquals() {
-		final String RESOURCE_PATH = "/resource.html";
+	public void testNotEquals() throws IOException {
+		final String RESOURCE_PATH = "/index.html";
 		final String ENCODING = "encoding";
 		final String TYPE = "type";
 		final Charset CHARSET = Charset.defaultCharset();
 		HttpFile file = this.createHttpFile(RESOURCE_PATH, ENCODING, TYPE,
 				CHARSET);
 		assertFalse("Should not match if different resource path",
-				file.equals(this.createHttpFile("/wrong.html", ENCODING, TYPE,
-						CHARSET)));
+				file.equals(this.createHttpFile("/directory/index.html",
+						ENCODING, TYPE, CHARSET)));
 		assertFalse("Should not match if different encoding", file.equals(this
 				.createHttpFile(RESOURCE_PATH, "wrong", TYPE, CHARSET)));
 		assertFalse("Should not match if different type", file.equals(this

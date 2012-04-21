@@ -21,8 +21,11 @@ package net.officefloor.plugin.web.http.resource;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.util.Arrays;
+import java.util.Comparator;
 
 import net.officefloor.frame.test.OfficeFrameTestCase;
 
@@ -51,9 +54,11 @@ public abstract class AbstractHttpDirectoryTestCase extends OfficeFrameTestCase 
 	 * @param defaultFileNames
 	 *            Default file names.
 	 * @return {@link HttpDirectory}.
+	 * @throws IOException
+	 *             If fails to create {@link HttpDirectory}.
 	 */
 	protected abstract HttpDirectory createHttpDirectory(String resourcePath,
-			String... defaultFileNames);
+			String... defaultFileNames) throws IOException;
 
 	@Override
 	protected void setUp() throws Exception {
@@ -89,6 +94,15 @@ public abstract class AbstractHttpDirectoryTestCase extends OfficeFrameTestCase 
 		// List the resources
 		HttpResource[] resources = this.httpDirectory.listResources();
 
+		// Sort the resources for deterministic testing
+		Arrays.sort(resources, new Comparator<HttpResource>() {
+			@Override
+			public int compare(HttpResource a, HttpResource b) {
+				return String.CASE_INSENSITIVE_ORDER.compare(a.getPath(),
+						b.getPath());
+			}
+		});
+
 		// Ensure correct resources
 		assertEquals("Incorrect number of resources", 2, resources.length);
 		HttpFile indexHtml = (HttpFile) resources[0];
@@ -111,7 +125,7 @@ public abstract class AbstractHttpDirectoryTestCase extends OfficeFrameTestCase 
 	/**
 	 * Ensure appropriately equals.
 	 */
-	public void testEquals() {
+	public void testEquals() throws IOException {
 		HttpDirectory one = this.createHttpDirectory("/directory/",
 				"index.html");
 		HttpDirectory two = this.createHttpDirectory("/directory/",
@@ -123,12 +137,11 @@ public abstract class AbstractHttpDirectoryTestCase extends OfficeFrameTestCase 
 	/**
 	 * Ensure not equal on differences.
 	 */
-	public void testNotEquals() {
+	public void testNotEquals() throws IOException {
 		final String RESOURCE_PATH = "/directory/";
 		final HttpDirectory directory = this.createHttpDirectory(RESOURCE_PATH);
 		assertFalse("Should not match if different resource path",
-				directory.equals(this
-						.createHttpDirectory("/wrong/resource/path")));
+				directory.equals(this.createHttpDirectory("/empty")));
 	}
 
 	/**
@@ -170,6 +183,17 @@ public abstract class AbstractHttpDirectoryTestCase extends OfficeFrameTestCase 
 
 		// Ensure able to retrieve children
 		HttpResource[] children = retrievedDirectory.listResources();
+
+		// Sort the children for deterministic testing
+		Arrays.sort(children, new Comparator<HttpResource>() {
+			@Override
+			public int compare(HttpResource a, HttpResource b) {
+				return String.CASE_INSENSITIVE_ORDER.compare(a.getPath(),
+						b.getPath());
+			}
+		});
+
+		// Ensure correct children
 		assertEquals("Incorrect number of children", 2, children.length);
 		assertEquals("Incorrect first child", "/directory/index.html",
 				children[0].getPath());
