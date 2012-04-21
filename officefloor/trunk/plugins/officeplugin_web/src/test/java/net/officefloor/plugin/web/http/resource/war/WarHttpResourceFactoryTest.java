@@ -15,13 +15,13 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.plugin.web.http.resource;
+package net.officefloor.plugin.web.http.resource.war;
 
 import java.io.File;
 import java.io.IOException;
 
-import org.junit.Ignore;
-
+import net.officefloor.plugin.web.http.resource.AbstractHttpResourceFactoryTestCase;
+import net.officefloor.plugin.web.http.resource.HttpResourceFactory;
 import net.officefloor.plugin.web.http.resource.war.WarHttpResourceFactory;
 
 /**
@@ -29,7 +29,6 @@ import net.officefloor.plugin.web.http.resource.war.WarHttpResourceFactory;
  * 
  * @author Daniel Sagenschneider
  */
-@Ignore("TODO provide implementation of WarHttpResourceFactory")
 public class WarHttpResourceFactoryTest extends
 		AbstractHttpResourceFactoryTestCase {
 
@@ -42,11 +41,14 @@ public class WarHttpResourceFactoryTest extends
 			throws IOException {
 
 		// Find the war directory
-		File warDir = this.findFile(this.getClass(), "index.html")
+		File warDirectory = this.findFile(
+				AbstractHttpResourceFactoryTestCase.class, "index.html")
 				.getParentFile();
 
 		// Create and return the WAR HTTP ResourceFactory
-		return new WarHttpResourceFactory(warDir);
+		WarHttpResourceFactory.clearHttpResourceFactories();
+		return WarHttpResourceFactory.getHttpResourceFactory(warDirectory,
+				"index.html");
 	}
 
 }

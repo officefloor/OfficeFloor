@@ -25,6 +25,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
+import java.util.Arrays;
+import java.util.Comparator;
 import java.util.Deque;
 import java.util.LinkedList;
 
@@ -320,39 +322,22 @@ public abstract class AbstractHttpResourceFactoryTestCase extends
 		HttpDirectory directory = this.assertHttpDirectory(resource,
 				"/directory/", "/directory/index.html",
 				"/directory/sub_directory/");
+
+		// Obtain the children in deterministic order
 		HttpResource[] children = directory.listResources();
+		Arrays.sort(children, new Comparator<HttpResource>() {
+			@Override
+			public int compare(HttpResource a, HttpResource b) {
+				return String.CASE_INSENSITIVE_ORDER.compare(a.getPath(),
+						b.getPath());
+			}
+		});
+
+		// Test children
 		this.assertHttpFile(children[0], "/directory/index.html",
 				"directory/index.html");
 		this.assertHttpDirectory(children[1], "/directory/sub_directory/",
 				"/directory/sub_directory/index.html");
-	}
-
-	/**
-	 * Tests retrieving directory from a JAR (as most tests are using
-	 * directories).
-	 * 
-	 * Note test expects JUnit 4.8.2 on class path.
-	 */
-	public void testObtainDirectoryFromJar() throws Exception {
-		HttpResourceFactory factory = this.createHttpResourceFactory("");
-		HttpResource directory = factory.createHttpResource("/junit");
-		this.assertHttpDirectory(directory, "/junit/", "/junit/extensions/",
-				"/junit/framework/", "/junit/runner/", "/junit/textui/");
-	}
-
-	/**
-	 * Tests retrieving file from a JAR (as most tests are using directories).
-	 * 
-	 * Note test expects JUnit 4.8.2 on class path.
-	 */
-	public void testObtainFileFromJar() throws Exception {
-		HttpResourceFactory factory = this.createHttpResourceFactory("");
-		HttpResource file = factory
-				.createHttpResource("/junit/framework/Test.class");
-		assertTrue("Expecting file", file instanceof HttpFile);
-		assertEquals("Incorrect file path", "/junit/framework/Test.class",
-				file.getPath());
-		assertTrue("File should exist", file.isExist());
 	}
 
 	/**
@@ -424,7 +409,7 @@ public abstract class AbstractHttpResourceFactoryTestCase extends
 	 *            Name of file containing the expected content.
 	 * @return {@link HttpFile}.
 	 */
-	private HttpFile assertHttpFile(HttpResource resource, String expectedPath,
+	protected HttpFile assertHttpFile(HttpResource resource, String expectedPath,
 			String fileNameForExpectedContent) {
 
 		// Ensure is a file
@@ -462,8 +447,11 @@ public abstract class AbstractHttpResourceFactoryTestCase extends
 	 *            {@link HttpDirectory}.
 	 * @return {@link HttpDirectory}.
 	 */
-	private HttpDirectory assertHttpDirectory(HttpResource resource,
+	protected HttpDirectory assertHttpDirectory(HttpResource resource,
 			String expectedPath, String... childResourcePaths) {
+
+		// Sort the expected resource paths
+		Arrays.sort(childResourcePaths, String.CASE_INSENSITIVE_ORDER);
 
 		// Ensure is a file
 		assertTrue("Resource is not a HttpDirectory",
@@ -474,8 +462,17 @@ public abstract class AbstractHttpResourceFactoryTestCase extends
 		assertEquals("Incorrect path for file", expectedPath,
 				httpDirectory.getPath());
 
-		// Ensure the correct children
+		// Obtain the children in deterministic order for testing
 		HttpResource[] children = httpDirectory.listResources();
+		Arrays.sort(children, new Comparator<HttpResource>() {
+			@Override
+			public int compare(HttpResource a, HttpResource b) {
+				return String.CASE_INSENSITIVE_ORDER.compare(a.getPath(),
+						b.getPath());
+			}
+		});
+
+		// Ensure the correct children
 		assertEquals("Incorrect number of children for directory",
 				childResourcePaths.length, children.length);
 		for (int i = 0; i < childResourcePaths.length; i++) {
