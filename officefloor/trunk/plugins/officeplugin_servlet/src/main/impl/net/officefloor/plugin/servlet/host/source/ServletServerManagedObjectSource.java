@@ -95,8 +95,9 @@ public class ServletServerManagedObjectSource extends
 		// Create the resource locator
 		String classPathPrefix = mosContext.getProperty(
 				PROPERTY_CLASS_PATH_PREFIX, DEFAULT_CLASS_PATH_PREFIX);
+		ClassLoader classLoader = mosContext.getClassLoader();
 		ResourceLocator resourceLocator = new ClassPathResourceLocator(
-				classPathPrefix);
+				classPathPrefix, classLoader);
 
 		// Create the logger
 		Logger logger = new StdoutLogger();

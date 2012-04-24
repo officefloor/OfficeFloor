@@ -53,8 +53,8 @@ public class ClasspathHttpDirectory extends AbstractHttpResource implements
 	 *            Names of the default {@link HttpFile} instances in order of
 	 *            searching for the default {@link HttpFile}.
 	 */
-	public ClasspathHttpDirectory(String resourcePath,
-			String classPathPrefix, String... defaultFileNames) {
+	public ClasspathHttpDirectory(String resourcePath, String classPathPrefix,
+			String... defaultFileNames) {
 		super(resourcePath);
 		this.classPathPrefix = classPathPrefix;
 		this.defaultFileNames = defaultFileNames;
@@ -67,7 +67,7 @@ public class ClasspathHttpDirectory extends AbstractHttpResource implements
 	 */
 	private ClasspathHttpResourceFactory getFactory() {
 		return ClasspathHttpResourceFactory.getHttpResourceFactory(
-				this.classPathPrefix, this.defaultFileNames);
+				this.classPathPrefix, null);
 	}
 
 	/*

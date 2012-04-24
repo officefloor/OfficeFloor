@@ -41,17 +41,25 @@ public class ClassPathResourceLocator implements ResourceLocator {
 	private final ClasspathHttpResourceFactory factory;
 
 	/**
+	 * {@link ClassLoader} to use to locate resources.
+	 */
+	private final ClassLoader classLoader;
+
+	/**
 	 * Initiate.
 	 * 
 	 * @param classPathPrefix
 	 *            Class path prefix.
+	 * @param classLoader
+	 *            {@link ClassLoader} to use to locate resources.
 	 * @param defaultDirectoryFileNames
 	 *            Names of the default files within a directory.
 	 */
 	public ClassPathResourceLocator(String classPathPrefix,
-			String... defaultDirectoryFileNames) {
+			ClassLoader classLoader, String... defaultDirectoryFileNames) {
 		this.factory = ClasspathHttpResourceFactory.getHttpResourceFactory(
-				classPathPrefix, defaultDirectoryFileNames);
+				classPathPrefix, classLoader, defaultDirectoryFileNames);
+		this.classLoader = classLoader;
 	}
 
 	/*
@@ -88,8 +96,7 @@ public class ClassPathResourceLocator implements ResourceLocator {
 		}
 
 		// Return the input stream for the resource
-		return Thread.currentThread().getContextClassLoader().getResource(
-				node.getClassPath());
+		return this.classLoader.getResource(node.getClassPath());
 	}
 
 	@Override
@@ -102,8 +109,7 @@ public class ClassPathResourceLocator implements ResourceLocator {
 		}
 
 		// Return the input stream for the resource
-		return Thread.currentThread().getContextClassLoader()
-				.getResourceAsStream(node.getClassPath());
+		return this.classLoader.getResourceAsStream(node.getClassPath());
 	}
 
 }

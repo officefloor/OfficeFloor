@@ -66,12 +66,16 @@ public class ClasspathHttpResourceFactoryTest extends
 	@Override
 	protected HttpResourceFactory createHttpResourceFactory(String prefix) {
 
+		// Obtain the class loader
+		ClassLoader classLoader = Thread.currentThread()
+				.getContextClassLoader();
+
 		// Clear to create new instance
 		ClasspathHttpResourceFactory.clearHttpResourceFactories();
 
 		// Create the factory to obtain files from test package
 		HttpResourceFactory factory = ClasspathHttpResourceFactory
-				.getHttpResourceFactory(prefix, "index.html");
+				.getHttpResourceFactory(prefix, classLoader, "index.html");
 
 		// Return the factory
 		return factory;

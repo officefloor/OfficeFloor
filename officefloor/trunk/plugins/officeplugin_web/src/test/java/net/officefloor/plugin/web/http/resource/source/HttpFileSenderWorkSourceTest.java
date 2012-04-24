@@ -45,11 +45,11 @@ import net.officefloor.plugin.web.http.resource.source.HttpFileFactoryTask.Depen
 import org.easymock.AbstractMatcher;
 
 /**
- * Tests the {@link ClasspathHttpFileSenderWorkSource}.
+ * Tests the {@link HttpFileSenderWorkSource}.
  * 
  * @author Daniel Sagenschneider
  */
-public class ClasspathHttpFileSenderWorkSourceTest extends OfficeFrameTestCase {
+public class HttpFileSenderWorkSourceTest extends OfficeFrameTestCase {
 
 	/**
 	 * Mock {@link TaskContext}.
@@ -94,12 +94,7 @@ public class ClasspathHttpFileSenderWorkSourceTest extends OfficeFrameTestCase {
 	 * Validates the specification.
 	 */
 	public void testSpecification() {
-		WorkLoaderUtil.validateSpecification(
-				ClasspathHttpFileSenderWorkSource.class,
-				ClasspathHttpFileSenderWorkSource.PROPERTY_CLASSPATH_PREFIX,
-				"classpath.prefix",
-				ClasspathHttpFileSenderWorkSource.PROPERTY_DEFAULT_FILE_NAME,
-				"default.file.name");
+		WorkLoaderUtil.validateSpecification(HttpFileSenderWorkSource.class);
 	}
 
 	/**
@@ -122,12 +117,14 @@ public class ClasspathHttpFileSenderWorkSourceTest extends OfficeFrameTestCase {
 		taskBuilder.addEscalation(InvalidHttpRequestUriException.class);
 
 		// Validate
-		WorkLoaderUtil.validateWorkType(workBuilder,
-				ClasspathHttpFileSenderWorkSource.class,
-				ClasspathHttpFileSenderWorkSource.PROPERTY_CLASSPATH_PREFIX,
-				this.getClass().getPackage().getName(),
-				ClasspathHttpFileSenderWorkSource.PROPERTY_DEFAULT_FILE_NAME,
-				"index.html");
+		WorkLoaderUtil
+				.validateWorkType(
+						workBuilder,
+						HttpFileSenderWorkSource.class,
+						SourceHttpResourceFactory.PROPERTY_CLASS_PATH_PREFIX,
+						this.getClass().getPackage().getName(),
+						SourceHttpResourceFactory.PROPERTY_DEFAULT_DIRECTORY_FILE_NAMES,
+						"index.html");
 	}
 
 	/**
@@ -200,7 +197,7 @@ public class ClasspathHttpFileSenderWorkSourceTest extends OfficeFrameTestCase {
 		// Load work and obtain the task
 		Task<HttpFileFactoryTask<None>, DependencyKeys, None> task = this
 				.loadWorkAndObtainTask(
-						ClasspathHttpFileSenderWorkSource.PROPERTY_NOT_FOUND_FILE_PATH,
+						HttpFileSenderWorkSource.PROPERTY_NOT_FOUND_FILE_PATH,
 						"OverrideFileNotFound.html");
 
 		// Execute the task to send the HTTP file
@@ -227,11 +224,10 @@ public class ClasspathHttpFileSenderWorkSourceTest extends OfficeFrameTestCase {
 		// Create the listing of parameters
 		List<String> parameters = new ArrayList<String>(
 				4 + (additionalParameterNameValues.length / 2));
-		parameters
-				.add(ClasspathHttpFileSenderWorkSource.PROPERTY_CLASSPATH_PREFIX);
+		parameters.add(SourceHttpResourceFactory.PROPERTY_CLASS_PATH_PREFIX);
 		parameters.add(this.getClass().getPackage().getName());
 		parameters
-				.add(ClasspathHttpFileSenderWorkSource.PROPERTY_DEFAULT_FILE_NAME);
+				.add(SourceHttpResourceFactory.PROPERTY_DEFAULT_DIRECTORY_FILE_NAMES);
 		parameters.add("index.html");
 		for (String parameterNameValue : additionalParameterNameValues) {
 			parameters.add(parameterNameValue);
@@ -239,7 +235,7 @@ public class ClasspathHttpFileSenderWorkSourceTest extends OfficeFrameTestCase {
 
 		// Load the work type
 		WorkType<HttpFileFactoryTask<None>> workType = WorkLoaderUtil
-				.loadWorkType((Class) ClasspathHttpFileSenderWorkSource.class,
+				.loadWorkType((Class) HttpFileSenderWorkSource.class,
 						parameters.toArray(new String[parameters.size()]));
 
 		// Create the task
@@ -289,7 +285,7 @@ public class ClasspathHttpFileSenderWorkSourceTest extends OfficeFrameTestCase {
 		String fileContents = this.getFileContents(file);
 
 		// Indicate expected file sent content
-		ClasspathHttpFileSenderWorkSourceTest.this.expectedFileSentContent += fileContents;
+		HttpFileSenderWorkSourceTest.this.expectedFileSentContent += fileContents;
 
 		// Record obtaining the file content
 		this.body.append((ByteBuffer) null);
@@ -303,7 +299,7 @@ public class ClasspathHttpFileSenderWorkSourceTest extends OfficeFrameTestCase {
 				String actualContents = new String(data);
 
 				// Append the file content
-				ClasspathHttpFileSenderWorkSourceTest.this.actualFileSentContent += actualContents;
+				HttpFileSenderWorkSourceTest.this.actualFileSentContent += actualContents;
 
 				// Always match
 				return true;

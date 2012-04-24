@@ -57,20 +57,8 @@ import net.officefloor.plugin.web.http.resource.source.HttpFileFactoryTask.Depen
  * 
  * @author Daniel Sagenschneider
  */
-public class ClasspathHttpFileSenderWorkSource extends
+public class HttpFileSenderWorkSource extends
 		AbstractWorkSource<HttpFileFactoryTask<None>> {
-
-	/**
-	 * Property to obtain the class path prefix on the request URI path to
-	 * locate the {@link HttpFile}.
-	 */
-	public static final String PROPERTY_CLASSPATH_PREFIX = "classpath.prefix";
-
-	/**
-	 * Property to obtain the default file name should the request URI path
-	 * resolve to a directory.
-	 */
-	public static final String PROPERTY_DEFAULT_FILE_NAME = "default.file.name";
 
 	/**
 	 * Property to obtain the path to the file containing the &quot;not
@@ -91,7 +79,7 @@ public class ClasspathHttpFileSenderWorkSource extends
 	/**
 	 * Prefix for the default not found file.
 	 */
-	private static final String DEFAULT_NOT_FOUND_PREFIX = ClasspathHttpFileSenderWorkSource.class
+	private static final String DEFAULT_NOT_FOUND_PREFIX = HttpFileSenderWorkSource.class
 			.getPackage().getName().replace('.', '/');
 
 	/**
@@ -106,8 +94,7 @@ public class ClasspathHttpFileSenderWorkSource extends
 
 	@Override
 	protected void loadSpecification(SpecificationContext context) {
-		context.addProperty(PROPERTY_CLASSPATH_PREFIX);
-		context.addProperty(PROPERTY_DEFAULT_FILE_NAME);
+		// No required configuration as defaults available
 	}
 
 	@Override
@@ -116,17 +103,15 @@ public class ClasspathHttpFileSenderWorkSource extends
 			WorkSourceContext context) throws Exception {
 
 		// Obtain the properties
-		String classpathPrefix = context.getProperty(PROPERTY_CLASSPATH_PREFIX);
-		String defaultFileName = context
-				.getProperty(PROPERTY_DEFAULT_FILE_NAME);
 		String notFoundContentPath = context.getProperty(
 				PROPERTY_NOT_FOUND_FILE_PATH, null);
 
-		// TODO allow configuring multiple default file names
+		// Obtain the class loader
+		ClassLoader classLoader = context.getClassLoader();
 
-		// Create the class path HTTP resource factory
-		HttpResourceFactory httpResourceFactory = ClasspathHttpResourceFactory
-				.getHttpResourceFactory(classpathPrefix, defaultFileName);
+		// Create the HTTP resource factory
+		HttpResourceFactory httpResourceFactory = SourceHttpResourceFactory
+				.createHttpResourceFactory(context);
 
 		// Add the file extension HTTP file describer by file extension
 		FileExtensionHttpFileDescriber describer = new FileExtensionHttpFileDescriber();
@@ -141,7 +126,7 @@ public class ClasspathHttpFileSenderWorkSource extends
 			notFoundContentPath = DEFAULT_NOT_FOUND_FILE_NAME;
 			notFoundResourceFactory = ClasspathHttpResourceFactory
 					.getHttpResourceFactory(DEFAULT_NOT_FOUND_PREFIX,
-							notFoundContentPath);
+							classLoader, notFoundContentPath);
 			notFoundResourceFactory.addHttpFileDescriber(describer);
 
 		} else {
@@ -183,14 +168,14 @@ public class ClasspathHttpFileSenderWorkSource extends
 					HttpFile httpFile = (HttpFile) httpResource;
 
 					// Send the HTTP File
-					body.append(httpFile.getContents());
+					body.append(httpFile.getContents().duplicate());
 
 					// Specify found status
 					response.setStatus(HttpStatus.SC_OK);
 
 				} else {
 					// File not found so write file not found content
-					body.append(fileNotFoundContent.getContents());
+					body.append(fileNotFoundContent.getContents().duplicate());
 
 					// Specify not found status
 					response.setStatus(HttpStatus.SC_NOT_FOUND);
