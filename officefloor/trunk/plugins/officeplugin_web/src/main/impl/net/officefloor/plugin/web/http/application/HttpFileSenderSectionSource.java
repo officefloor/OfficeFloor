@@ -34,8 +34,8 @@ import net.officefloor.plugin.socket.server.http.HttpResponse;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
 import net.officefloor.plugin.web.http.resource.HttpFile;
 import net.officefloor.plugin.web.http.resource.InvalidHttpRequestUriException;
-import net.officefloor.plugin.web.http.resource.source.ClasspathHttpFileSenderWorkSource;
 import net.officefloor.plugin.web.http.resource.source.HttpFileFactoryTask.DependencyKeys;
+import net.officefloor.plugin.web.http.resource.source.HttpFileSenderWorkSource;
 
 /**
  * Provides sending {@link HttpFile} instances for the HTTP server.
@@ -74,17 +74,10 @@ public class HttpFileSenderSectionSource extends AbstractSectionSource {
 
 		// Add file sender
 		SectionWork sendFileWork = designer.addSectionWork("FILE",
-				ClasspathHttpFileSenderWorkSource.class.getName());
-		final String[] SEND_FILE_PROPERTIES = new String[] {
-				ClasspathHttpFileSenderWorkSource.PROPERTY_CLASSPATH_PREFIX,
-				ClasspathHttpFileSenderWorkSource.PROPERTY_DEFAULT_FILE_NAME };
-		for (String propertyName : SEND_FILE_PROPERTIES) {
-			sendFileWork.addProperty(propertyName,
-					context.getProperty(propertyName));
-		}
+				HttpFileSenderWorkSource.class.getName());
 		SectionTask sendFileTask = sendFileWork.addSectionTask(
-				ClasspathHttpFileSenderWorkSource.TASK_NAME,
-				ClasspathHttpFileSenderWorkSource.TASK_NAME);
+				HttpFileSenderWorkSource.TASK_NAME,
+				HttpFileSenderWorkSource.TASK_NAME);
 		WebApplicationSectionSource.linkObject(sendFileTask,
 				DependencyKeys.SERVER_HTTP_CONNECTION.name(),
 				ServerHttpConnection.class, designer, objects);

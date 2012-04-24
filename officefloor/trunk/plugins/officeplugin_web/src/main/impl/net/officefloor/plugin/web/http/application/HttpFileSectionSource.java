@@ -35,8 +35,9 @@ import net.officefloor.compile.spi.section.source.impl.AbstractSectionSource;
 import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
 import net.officefloor.plugin.web.http.resource.HttpFile;
-import net.officefloor.plugin.web.http.resource.source.ClasspathHttpFileWorkSource;
-import net.officefloor.plugin.web.http.resource.source.ClasspathHttpFileWorkSource.DependencyKeys;
+import net.officefloor.plugin.web.http.resource.source.HttpFileWorkSource;
+import net.officefloor.plugin.web.http.resource.source.HttpFileWorkSource.DependencyKeys;
+import net.officefloor.plugin.web.http.resource.source.SourceHttpResourceFactory;
 
 /**
  * Provides sending a particular {@link HttpFile}.
@@ -91,15 +92,14 @@ public class HttpFileSectionSource extends AbstractSectionSource {
 
 				// Create the resource task
 				SectionWork work = designer.addSectionWork(resourcePath,
-						ClasspathHttpFileWorkSource.class.getName());
+						HttpFileWorkSource.class.getName());
 				work.addProperty(
-						ClasspathHttpFileWorkSource.PROPERTY_CLASSPATH_PREFIX,
+						SourceHttpResourceFactory.PROPERTY_CLASS_PATH_PREFIX,
 						classPathPrefix);
-				work.addProperty(
-						ClasspathHttpFileWorkSource.PROPERTY_RESOURCE_PATH,
+				work.addProperty(HttpFileWorkSource.PROPERTY_RESOURCE_PATH,
 						resourcePath);
 				SectionTask task = work.addSectionTask(resourcePath,
-						ClasspathHttpFileWorkSource.TASK_HTTP_FILE);
+						HttpFileWorkSource.TASK_HTTP_FILE);
 
 				// Link Server HTTP Connection
 				TaskObject serverHttpConnectionObject = task

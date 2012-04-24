@@ -73,6 +73,8 @@ public class ClasspathHttpFileTest extends AbstractHttpFileTestCase {
 	protected HttpFile createHttpFile(String resourcePath,
 			String contentEncoding, String contentType, Charset charset) {
 
+		final String CLASS_PATH_PREFIX = "PREFIX";
+
 		// Obtain class path for resource
 		String classPath = this.getClassPath(resourcePath);
 
@@ -88,9 +90,16 @@ public class ClasspathHttpFileTest extends AbstractHttpFileTestCase {
 		description.setContentEncoding(contentEncoding);
 		description.setContentType(contentType, charset);
 
+		// Ensure the resource factory is available
+		ClasspathHttpResourceFactory.clearHttpResourceFactories();
+		ClassLoader classLoader = Thread.currentThread()
+				.getContextClassLoader();
+		ClasspathHttpResourceFactory.getHttpResourceFactory(CLASS_PATH_PREFIX,
+				classLoader);
+
 		// Create HTTP File
 		HttpFile httpFile = new ClasspathHttpFile(resourcePath, classPath,
-				description);
+				CLASS_PATH_PREFIX, description);
 
 		// Return the HTTP File
 		return httpFile;

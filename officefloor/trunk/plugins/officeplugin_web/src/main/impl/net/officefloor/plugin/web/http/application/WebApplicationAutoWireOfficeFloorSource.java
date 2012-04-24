@@ -38,7 +38,6 @@ import net.officefloor.compile.spi.section.SectionOutput;
 import net.officefloor.frame.api.escalate.Escalation;
 import net.officefloor.frame.api.execute.Task;
 import net.officefloor.plugin.web.http.parameters.source.HttpParametersObjectManagedObjectSource;
-import net.officefloor.plugin.web.http.resource.source.ClasspathHttpFileSenderWorkSource;
 import net.officefloor.plugin.web.http.session.clazz.source.HttpSessionClassManagedObjectSource;
 import net.officefloor.plugin.web.http.template.section.HttpTemplateSectionSource;
 
@@ -416,16 +415,6 @@ public class WebApplicationAutoWireOfficeFloorSource extends
 			AutoWireSection nonHandledServicer = this.addSection(
 					"NON_HANDLED_SERVICER",
 					HttpFileSenderSectionSource.class.getName(), null);
-			this.addProperty(
-					nonHandledServicer,
-					context,
-					ClasspathHttpFileSenderWorkSource.PROPERTY_CLASSPATH_PREFIX,
-					WEB_PUBLIC_RESOURCES_CLASS_PATH_PREFIX);
-			this.addProperty(
-					nonHandledServicer,
-					context,
-					ClasspathHttpFileSenderWorkSource.PROPERTY_DEFAULT_FILE_NAME,
-					"index.html");
 			this.link(httpSection,
 					WebApplicationSectionSource.UNHANDLED_REQUEST_OUTPUT_NAME,
 					nonHandledServicer,
@@ -492,25 +481,6 @@ public class WebApplicationAutoWireOfficeFloorSource extends
 			this.link(link.section, link.outputName, httpSection,
 					WebApplicationSectionSource.SEND_RESPONSE_INPUT_NAME);
 		}
-	}
-
-	/**
-	 * Adds the property.
-	 * 
-	 * @param section
-	 *            {@link AutoWireSection}.
-	 * @param context
-	 *            {@link OfficeFloorSourceContext}.
-	 * @param propertyName
-	 *            Name of the property.
-	 * @param defaultValue
-	 *            Default value for the property.
-	 */
-	private void addProperty(AutoWireSection section,
-			OfficeFloorSourceContext context, String propertyName,
-			String defaultValue) {
-		section.addProperty(propertyName,
-				context.getProperty(propertyName, defaultValue));
 	}
 
 	/**

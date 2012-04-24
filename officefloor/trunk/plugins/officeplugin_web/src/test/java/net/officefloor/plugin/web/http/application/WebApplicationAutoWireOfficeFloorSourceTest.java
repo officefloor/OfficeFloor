@@ -36,7 +36,7 @@ import net.officefloor.plugin.section.clazz.NextTask;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
 import net.officefloor.plugin.socket.server.http.server.MockHttpServer;
 import net.officefloor.plugin.socket.server.http.source.HttpServerSocketManagedObjectSource;
-import net.officefloor.plugin.web.http.resource.source.ClasspathHttpFileSenderWorkSource;
+import net.officefloor.plugin.web.http.resource.source.HttpFileSenderWorkSource;
 import net.officefloor.plugin.web.http.session.HttpSession;
 import net.officefloor.plugin.web.http.session.source.HttpSessionManagedObjectSource;
 import net.officefloor.plugin.web.http.template.parse.HttpTemplate;
@@ -65,7 +65,7 @@ public class WebApplicationAutoWireOfficeFloorSourceTest extends
 	/**
 	 * Default not found file path.
 	 */
-	private final String DEFAULT_NOT_FOUND_PATH = ClasspathHttpFileSenderWorkSource.DEFAULT_NOT_FOUND_FILE_PATH;
+	private final String DEFAULT_NOT_FOUND_PATH = HttpFileSenderWorkSource.DEFAULT_NOT_FOUND_FILE_PATH;
 
 	/**
 	 * {@link HttpClient}.

@@ -32,8 +32,12 @@ public class ClassPathResourceLocatorTest extends
 		// Obtain the class path prefix
 		String classPathPrefix = this.getClass().getPackage().getName();
 
+		// Obtain the class loader
+		ClassLoader classLoader = Thread.currentThread()
+				.getContextClassLoader();
+
 		// Create and return the resource locator
-		return new ClassPathResourceLocator(classPathPrefix);
+		return new ClassPathResourceLocator(classPathPrefix, classLoader);
 	}
 
 }

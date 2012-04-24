@@ -32,6 +32,11 @@ import net.officefloor.plugin.web.http.resource.HttpFile;
 public class ClasspathHttpFile extends AbstractHttpFile {
 
 	/**
+	 * Class path prefix.
+	 */
+	private String classpathPrefix;
+
+	/**
 	 * Class path.
 	 */
 	private String classPath;
@@ -43,13 +48,16 @@ public class ClasspathHttpFile extends AbstractHttpFile {
 	 *            Resource path.
 	 * @param classPath
 	 *            Class path.
+	 * @param classpathPrefix
+	 *            Class path prefix.
 	 * @param description
 	 *            {@link AbstractHttpFileDescription}.
 	 */
 	public ClasspathHttpFile(String resourcePath, String classPath,
-			AbstractHttpFileDescription description) {
+			String classpathPrefix, AbstractHttpFileDescription description) {
 		super(resourcePath, description);
 		this.classPath = classPath;
+		this.classpathPrefix = classpathPrefix;
 	}
 
 	/*
@@ -58,8 +66,8 @@ public class ClasspathHttpFile extends AbstractHttpFile {
 
 	@Override
 	public ByteBuffer getContents() {
-		return ClasspathHttpResourceFactory
-				.getHttpResourceContents(this.classPath);
+		return ClasspathHttpResourceFactory.getHttpResourceContents(
+				this.classpathPrefix, this.classPath);
 	}
 
 	/*

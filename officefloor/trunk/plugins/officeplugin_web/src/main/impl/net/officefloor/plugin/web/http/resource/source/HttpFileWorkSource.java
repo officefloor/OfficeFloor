@@ -36,15 +36,14 @@ import net.officefloor.plugin.web.http.resource.FileExtensionHttpFileDescriber;
 import net.officefloor.plugin.web.http.resource.HttpFile;
 import net.officefloor.plugin.web.http.resource.HttpResource;
 import net.officefloor.plugin.web.http.resource.HttpResourceFactory;
-import net.officefloor.plugin.web.http.resource.classpath.ClasspathHttpResourceFactory;
 
 /**
  * {@link WorkSource} for always sending a particular {@link HttpFile}.
  * 
  * @author Daniel Sagenschneider
  */
-public class ClasspathHttpFileWorkSource extends
-		AbstractWorkSource<ClasspathHttpFileWorkSource.ClasspathHttpFileTask> {
+public class HttpFileWorkSource extends
+		AbstractWorkSource<HttpFileWorkSource.ClasspathHttpFileTask> {
 
 	/**
 	 * Dependency keys for the {@link ClasspathHttpFileTask}.
@@ -52,12 +51,6 @@ public class ClasspathHttpFileWorkSource extends
 	public static enum DependencyKeys {
 		SERVER_HTTP_CONNECTION
 	}
-
-	/**
-	 * Property to obtain the class path prefix on resource path to locate the
-	 * {@link HttpFile}.
-	 */
-	public static final String PROPERTY_CLASSPATH_PREFIX = "classpath.prefix";
 
 	/**
 	 * Property to obtain the path to the resource on the class path.
@@ -75,7 +68,6 @@ public class ClasspathHttpFileWorkSource extends
 
 	@Override
 	protected void loadSpecification(SpecificationContext context) {
-		context.addProperty(PROPERTY_CLASSPATH_PREFIX, "Classpath Prefix");
 		context.addProperty(PROPERTY_RESOURCE_PATH, "Resource Path");
 	}
 
@@ -85,12 +77,11 @@ public class ClasspathHttpFileWorkSource extends
 			WorkSourceContext context) throws Exception {
 
 		// Obtain the properties
-		String classpathPrefix = context.getProperty(PROPERTY_CLASSPATH_PREFIX);
 		String resourcePath = context.getProperty(PROPERTY_RESOURCE_PATH);
 
 		// Create the class path HTTP resource factory
-		HttpResourceFactory httpResourceFactory = ClasspathHttpResourceFactory
-				.getHttpResourceFactory(classpathPrefix);
+		HttpResourceFactory httpResourceFactory = SourceHttpResourceFactory
+				.createHttpResourceFactory(context);
 
 		// Add the file extension HTTP file describer by file extension
 		FileExtensionHttpFileDescriber describer = new FileExtensionHttpFileDescriber();
@@ -107,9 +98,8 @@ public class ClasspathHttpFileWorkSource extends
 		HttpResource resource = httpResourceFactory
 				.createHttpResource(resourcePath);
 		if (!(resource instanceof HttpFile)) {
-			throw new FileNotFoundException("Can not find resource "
-					+ resourcePath + " (with class path prefix "
-					+ classpathPrefix + ")");
+			throw new FileNotFoundException("Can not find resource '"
+					+ resourcePath + "'");
 		}
 		HttpFile file = (HttpFile) resource;
 
@@ -162,7 +152,7 @@ public class ClasspathHttpFileWorkSource extends
 			HttpResponse response = connection.getHttpResponse();
 
 			// Write the HTTP file to response
-			response.getBody().append(this.file.getContents());
+			response.getBody().append(this.file.getContents().duplicate());
 
 			// Nothing to return
 			return null;

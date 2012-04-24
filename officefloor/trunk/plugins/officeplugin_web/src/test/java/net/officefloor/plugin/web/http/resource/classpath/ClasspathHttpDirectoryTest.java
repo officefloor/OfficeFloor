@@ -19,6 +19,7 @@ package net.officefloor.plugin.web.http.resource.classpath;
 
 import net.officefloor.plugin.web.http.resource.AbstractHttpDirectoryTestCase;
 import net.officefloor.plugin.web.http.resource.HttpDirectory;
+import net.officefloor.plugin.web.http.resource.HttpResource;
 
 /**
  * Tests the {@link ClasspathHttpDirectory}.
@@ -50,9 +51,26 @@ public class ClasspathHttpDirectoryTest extends AbstractHttpDirectoryTestCase {
 		String classPathPrefix = AbstractHttpDirectoryTestCase.class
 				.getPackage().getName().replace('.', '/');
 
+		// Obtain the class loader
+		ClassLoader classLoader = Thread.currentThread()
+				.getContextClassLoader();
+
+		// Ensure fresh resource factories
+		ClasspathHttpResourceFactory.clearHttpResourceFactories();
+
+		// Create the resource factory
+		ClasspathHttpResourceFactory factory = ClasspathHttpResourceFactory
+				.getHttpResourceFactory(classPathPrefix, classLoader,
+						defaultFileNames);
+
 		// Create and return the HTTP directory
-		return new ClasspathHttpDirectory(resourcePath, classPathPrefix,
-				defaultFileNames);
+		HttpResource resource;
+		try {
+			resource = factory.createHttpResource(resourcePath);
+		} catch (Exception ex) {
+			throw fail(ex);
+		}
+		return (HttpDirectory) resource;
 	}
 
 }

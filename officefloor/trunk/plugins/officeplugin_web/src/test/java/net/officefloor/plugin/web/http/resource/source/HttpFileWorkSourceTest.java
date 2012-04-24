@@ -34,17 +34,17 @@ import net.officefloor.plugin.socket.server.http.HttpResponse;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
 import net.officefloor.plugin.stream.OutputBufferStream;
 import net.officefloor.plugin.web.http.resource.HttpFile;
-import net.officefloor.plugin.web.http.resource.source.ClasspathHttpFileWorkSource.ClasspathHttpFileTask;
-import net.officefloor.plugin.web.http.resource.source.ClasspathHttpFileWorkSource.DependencyKeys;
+import net.officefloor.plugin.web.http.resource.source.HttpFileWorkSource.ClasspathHttpFileTask;
+import net.officefloor.plugin.web.http.resource.source.HttpFileWorkSource.DependencyKeys;
 
 import org.easymock.AbstractMatcher;
 
 /**
- * Tests the {@link ClasspathHttpFileWorkSource}.
+ * Tests the {@link HttpFileWorkSource}.
  * 
  * @author Daniel Sagenschneider
  */
-public class ClasspathHttpFileWorkSourceTest extends OfficeFrameTestCase {
+public class HttpFileWorkSourceTest extends OfficeFrameTestCase {
 
 	/**
 	 * Mock {@link TaskContext}.
@@ -79,11 +79,8 @@ public class ClasspathHttpFileWorkSourceTest extends OfficeFrameTestCase {
 	 * Validate specification.
 	 */
 	public void testSpecification() {
-		WorkLoaderUtil.validateSpecification(ClasspathHttpFileWorkSource.class,
-				ClasspathHttpFileWorkSource.PROPERTY_CLASSPATH_PREFIX,
-				"Classpath Prefix",
-				ClasspathHttpFileWorkSource.PROPERTY_RESOURCE_PATH,
-				"Resource Path");
+		WorkLoaderUtil.validateSpecification(HttpFileWorkSource.class,
+				HttpFileWorkSource.PROPERTY_RESOURCE_PATH, "Resource Path");
 	}
 
 	/**
@@ -97,19 +94,17 @@ public class ClasspathHttpFileWorkSourceTest extends OfficeFrameTestCase {
 		ClasspathHttpFileTask factory = new ClasspathHttpFileTask(null);
 		type.setWorkFactory(factory);
 		TaskTypeBuilder<DependencyKeys, None> task = type.addTaskType(
-				ClasspathHttpFileWorkSource.TASK_HTTP_FILE, factory,
+				HttpFileWorkSource.TASK_HTTP_FILE, factory,
 				DependencyKeys.class, None.class);
 		task.addObject(ServerHttpConnection.class).setKey(
 				DependencyKeys.SERVER_HTTP_CONNECTION);
 		task.addEscalation(IOException.class);
 
 		// Validate type
-		WorkLoaderUtil.validateWorkType(type,
-				ClasspathHttpFileWorkSource.class,
-				ClasspathHttpFileWorkSource.PROPERTY_CLASSPATH_PREFIX, this
+		WorkLoaderUtil.validateWorkType(type, HttpFileWorkSource.class,
+				SourceHttpResourceFactory.PROPERTY_CLASS_PATH_PREFIX, this
 						.getClass().getPackage().getName(),
-				ClasspathHttpFileWorkSource.PROPERTY_RESOURCE_PATH,
-				"index.html");
+				HttpFileWorkSource.PROPERTY_RESOURCE_PATH, "index.html");
 	}
 
 	/**
@@ -135,14 +130,20 @@ public class ClasspathHttpFileWorkSourceTest extends OfficeFrameTestCase {
 		this.control(this.body).setMatcher(new AbstractMatcher() {
 			@Override
 			public boolean matches(Object[] expected, Object[] actual) {
+
 				// Obtain the actual contents
 				ByteBuffer buffer = (ByteBuffer) actual[0];
 				byte[] data = new byte[buffer.limit()];
 				buffer.get(data);
 				String actualContents = new String(data);
 
+				// Ensure a direct byte buffer for faster writing
+				assertTrue("Expecting direct byte buffer", buffer.isDirect());
+				assertTrue("Expecting byte buffer to be read only",
+						buffer.isReadOnly());
+
 				// Append the file content
-				ClasspathHttpFileWorkSourceTest.this.actualFileSentContent += actualContents;
+				HttpFileWorkSourceTest.this.actualFileSentContent += actualContents;
 
 				// Always match
 				return true;
@@ -154,11 +155,10 @@ public class ClasspathHttpFileWorkSourceTest extends OfficeFrameTestCase {
 
 		// Load the work type
 		WorkType<ClasspathHttpFileTask> workType = WorkLoaderUtil.loadWorkType(
-				ClasspathHttpFileWorkSource.class,
-				ClasspathHttpFileWorkSource.PROPERTY_CLASSPATH_PREFIX, this
+				HttpFileWorkSource.class,
+				SourceHttpResourceFactory.PROPERTY_CLASS_PATH_PREFIX, this
 						.getClass().getPackage().getName(),
-				ClasspathHttpFileWorkSource.PROPERTY_RESOURCE_PATH,
-				"index.html");
+				HttpFileWorkSource.PROPERTY_RESOURCE_PATH, "index.html");
 
 		// Create the task
 		Task task = workType.getTaskTypes()[0].getTaskFactory().createTask(
