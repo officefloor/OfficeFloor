@@ -29,6 +29,11 @@ import java.util.zip.ZipFile;
 import org.apache.maven.model.Model;
 import org.apache.maven.model.Parent;
 import org.apache.maven.model.io.ModelReader;
+import org.apache.maven.project.DefaultProjectBuildingRequest;
+import org.apache.maven.project.MavenProject;
+import org.apache.maven.project.ProjectBuilder;
+import org.apache.maven.project.ProjectBuildingRequest;
+import org.apache.maven.project.ProjectBuildingResult;
 import org.apache.maven.repository.internal.MavenRepositorySystemSession;
 import org.apache.maven.settings.building.DefaultSettingsBuildingRequest;
 import org.apache.maven.settings.building.SettingsBuilder;
@@ -126,6 +131,40 @@ public class ClassPathFactoryImpl implements ClassPathFactory {
 	}
 
 	/**
+	 * Obtains the {@link MavenProject} for the <code>pom.xml</code>.
+	 * 
+	 * @param pomFile
+	 *            <code>pom.xml</code> {@link File}.
+	 * @return {@link MavenProject} for the <code>pom.xml</code>.
+	 * @throws Exception
+	 *             If fails to obtain the {@link MavenProject}.
+	 */
+	public MavenProject getMavenProject(File pomFile) throws Exception {
+
+		// Obtain the repository system
+		RepositorySystem system = this.plexusContainer
+				.lookup(RepositorySystem.class);
+
+		// Create the maven session
+		MavenRepositorySystemSession session = new MavenRepositorySystemSession();
+		LocalRepository localRepository = new LocalRepository(
+				this.localRepository);
+		session.setLocalRepositoryManager(system
+				.newLocalRepositoryManager(localRepository));
+
+		// Obtain the Maven Project
+		ProjectBuilder builder = this.plexusContainer
+				.lookup(ProjectBuilder.class);
+		ProjectBuildingRequest request = new DefaultProjectBuildingRequest();
+		request.setRepositorySession(session);
+		ProjectBuildingResult result = builder.build(pomFile, request);
+		MavenProject project = result.getProject();
+
+		// Return the Maven Project
+		return project;
+	}
+
+	/**
 	 * Registers a {@link RemoteRepository}.
 	 * 
 	 * @param id
@@ -200,7 +239,7 @@ public class ClassPathFactoryImpl implements ClassPathFactory {
 		}
 
 		// Obtain the repository system
-		RepositorySystem system = plexusContainer
+		RepositorySystem system = this.plexusContainer
 				.lookup(RepositorySystem.class);
 
 		// Create the maven session
@@ -277,7 +316,7 @@ public class ClassPathFactoryImpl implements ClassPathFactory {
 		}
 
 		// Obtain model for POM
-		ModelReader reader = plexusContainer.lookup(ModelReader.class);
+		ModelReader reader = this.plexusContainer.lookup(ModelReader.class);
 		InputStream pomContents = archive.getInputStream(pomEntry);
 		Model pomModel = reader.read(pomContents, null);
 		pomContents.close();

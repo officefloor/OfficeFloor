@@ -19,11 +19,14 @@
 package net.officefloor.building.classpath;
 
 import java.io.File;
+import java.util.List;
 
 import junit.framework.TestCase;
 import net.officefloor.building.util.OfficeBuildingTestUtil;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 
+import org.apache.maven.model.Dependency;
+import org.apache.maven.project.MavenProject;
 import org.codehaus.plexus.DefaultPlexusContainer;
 
 /**
@@ -205,6 +208,39 @@ public class ClassPathFactoryTest extends OfficeFrameTestCase {
 
 		// Ensure jars on class path
 		assertClassPath(classPath, JAR_WITH_DEPENDENCIES, JAR);
+	}
+
+	/**
+	 * Ensure able to resolve the {@link Dependency} instances for
+	 * <code>pom.xml</code> {@link File}.
+	 */
+	public void testGetMavenProject() throws Exception {
+
+		// Obtain the pom.xml file
+		File pomFile = this.findFile(this.getClass(), "pom.test.xml");
+
+		// Obtain the Maven Project (using build local repository)
+		ClassPathFactoryImpl factory = new ClassPathFactoryImpl(
+				new DefaultPlexusContainer(), null);
+		MavenProject project = factory.getMavenProject(pomFile);
+
+		// Ensure contains appropriate dependencies
+		List<Dependency> dependencies = project.getDependencies();
+		assertTrue("Should have dependencies for project",
+				dependencies.size() > 0);
+		Dependency gwtUserDependency = null;
+		for (Dependency dependency : dependencies) {
+			if (("com.google.gwt".equals(dependency.getGroupId()))
+					&& ("gwt-user".equals(dependency.getArtifactId()))) {
+				assertNull("Should only be the one dependency",
+						gwtUserDependency);
+				gwtUserDependency = dependency;
+			}
+		}
+
+		// Ensure able to resolve version
+		assertNotNull("Must be able to resolve version",
+				gwtUserDependency.getVersion());
 	}
 
 	/**
