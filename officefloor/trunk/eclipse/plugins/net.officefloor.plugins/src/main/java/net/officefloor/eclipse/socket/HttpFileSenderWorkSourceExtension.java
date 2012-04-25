@@ -24,10 +24,11 @@ import net.officefloor.eclipse.extension.worksource.WorkSourceExtension;
 import net.officefloor.eclipse.extension.worksource.WorkSourceExtensionContext;
 import net.officefloor.frame.api.build.None;
 import net.officefloor.plugin.socket.server.http.HttpRequest;
+import net.officefloor.plugin.web.http.application.WebAutoWireApplication;
 import net.officefloor.plugin.web.http.resource.HttpFile;
-import net.officefloor.plugin.web.http.resource.source.ClasspathHttpFileFactoryWorkSource;
-import net.officefloor.plugin.web.http.resource.source.ClasspathHttpFileSenderWorkSource;
 import net.officefloor.plugin.web.http.resource.source.HttpFileFactoryTask;
+import net.officefloor.plugin.web.http.resource.source.HttpFileSenderWorkSource;
+import net.officefloor.plugin.web.http.resource.source.SourceHttpResourceFactory;
 
 import org.eclipse.swt.widgets.Composite;
 
@@ -36,15 +37,15 @@ import org.eclipse.swt.widgets.Composite;
  * 
  * @author Daniel Sagenschneider
  */
-public class ClasspathHttpFileSenderWorkSourceExtension
+public class HttpFileSenderWorkSourceExtension
 		extends
-		AbstractSocketWorkSourceExtension<HttpFileFactoryTask<None>, ClasspathHttpFileSenderWorkSource> {
+		AbstractSocketWorkSourceExtension<HttpFileFactoryTask<None>, HttpFileSenderWorkSource> {
 
 	/**
 	 * Initiate.
 	 */
-	public ClasspathHttpFileSenderWorkSourceExtension() {
-		super(ClasspathHttpFileSenderWorkSource.class, "Send Http File");
+	public HttpFileSenderWorkSourceExtension() {
+		super(HttpFileSenderWorkSource.class, "Send Http File");
 	}
 
 	/*
@@ -57,16 +58,18 @@ public class ClasspathHttpFileSenderWorkSourceExtension
 		// Provide properties
 		SourceExtensionUtil.loadPropertyLayout(page);
 		SourceExtensionUtil.createPropertyText("Package prefix",
-				ClasspathHttpFileSenderWorkSource.PROPERTY_CLASSPATH_PREFIX,
-				"html", page, context, null);
-		SourceExtensionUtil.createPropertyText("Directory index file name",
-				ClasspathHttpFileSenderWorkSource.PROPERTY_DEFAULT_FILE_NAME,
-				"index.html", page, context, null);
+				SourceHttpResourceFactory.PROPERTY_CLASS_PATH_PREFIX,
+				WebAutoWireApplication.WEB_PUBLIC_RESOURCES_CLASS_PATH_PREFIX,
+				page, context, null);
 		SourceExtensionUtil
 				.createPropertyText(
-						"Resource not found content path",
-						ClasspathHttpFileSenderWorkSource.PROPERTY_NOT_FOUND_FILE_PATH,
-						"FileNotFound.html", page, context, null);
+						"Directory index file name",
+						SourceHttpResourceFactory.PROPERTY_DEFAULT_DIRECTORY_FILE_NAMES,
+						"index.html", page, context, null);
+		SourceExtensionUtil.createPropertyText(
+				"Resource not found content path",
+				HttpFileSenderWorkSource.PROPERTY_NOT_FOUND_FILE_PATH,
+				"FileNotFound.html", page, context, null);
 	}
 
 	@Override
@@ -77,7 +80,7 @@ public class ClasspathHttpFileSenderWorkSourceExtension
 
 		// Obtain the prefix
 		String prefix = context.getPropertyList().getPropertyValue(
-				ClasspathHttpFileFactoryWorkSource.PROPERTY_CLASSPATH_PREFIX,
+				SourceHttpResourceFactory.PROPERTY_CLASS_PATH_PREFIX,
 				"<not specified>");
 
 		// Return the documentation
