@@ -179,6 +179,15 @@ public class SourceHttpResourceFactory implements HttpResourceFactory {
 	}
 
 	/**
+	 * Clears the {@link HttpResourceFactory} instances. This is useful for
+	 * testing to have a fresh {@link HttpResourceFactory}.
+	 */
+	public static void clearHttpResourceFactories() {
+		WarHttpResourceFactory.clearHttpResourceFactories();
+		ClasspathHttpResourceFactory.clearHttpResourceFactories();
+	}
+
+	/**
 	 * {@link HttpResourceFactory} instances for delegation to obtain the
 	 * {@link HttpResource} instances.
 	 */
