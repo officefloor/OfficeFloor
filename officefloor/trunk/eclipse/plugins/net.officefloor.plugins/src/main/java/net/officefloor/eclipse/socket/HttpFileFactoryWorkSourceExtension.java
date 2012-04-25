@@ -23,10 +23,12 @@ import net.officefloor.eclipse.extension.worksource.TaskDocumentationContext;
 import net.officefloor.eclipse.extension.worksource.WorkSourceExtension;
 import net.officefloor.eclipse.extension.worksource.WorkSourceExtensionContext;
 import net.officefloor.plugin.socket.server.http.HttpRequest;
+import net.officefloor.plugin.web.http.application.WebAutoWireApplication;
 import net.officefloor.plugin.web.http.resource.HttpFile;
-import net.officefloor.plugin.web.http.resource.source.ClasspathHttpFileFactoryWorkSource;
-import net.officefloor.plugin.web.http.resource.source.ClasspathHttpFileFactoryWorkSource.HttpFileFactoryTaskFlows;
 import net.officefloor.plugin.web.http.resource.source.HttpFileFactoryTask;
+import net.officefloor.plugin.web.http.resource.source.HttpFileFactoryWorkSource;
+import net.officefloor.plugin.web.http.resource.source.HttpFileFactoryWorkSource.HttpFileFactoryTaskFlows;
+import net.officefloor.plugin.web.http.resource.source.SourceHttpResourceFactory;
 
 import org.eclipse.swt.widgets.Composite;
 
@@ -36,15 +38,15 @@ import org.eclipse.swt.widgets.Composite;
  * 
  * @author Daniel Sagenschneider
  */
-public class ClasspathHttpFileFactoryWorkSourceExtension
+public class HttpFileFactoryWorkSourceExtension
 		extends
-		AbstractSocketWorkSourceExtension<HttpFileFactoryTask<HttpFileFactoryTaskFlows>, ClasspathHttpFileFactoryWorkSource> {
+		AbstractSocketWorkSourceExtension<HttpFileFactoryTask<HttpFileFactoryTaskFlows>, HttpFileFactoryWorkSource> {
 
 	/**
 	 * Initiate.
 	 */
-	public ClasspathHttpFileFactoryWorkSourceExtension() {
-		super(ClasspathHttpFileFactoryWorkSource.class, "Get Http File");
+	public HttpFileFactoryWorkSourceExtension() {
+		super(HttpFileFactoryWorkSource.class, "Get Http File");
 	}
 
 	/*
@@ -58,11 +60,14 @@ public class ClasspathHttpFileFactoryWorkSourceExtension
 		// Provide properties
 		SourceExtensionUtil.loadPropertyLayout(page);
 		SourceExtensionUtil.createPropertyText("Package prefix",
-				ClasspathHttpFileFactoryWorkSource.PROPERTY_CLASSPATH_PREFIX,
-				"html", page, context, null);
-		SourceExtensionUtil.createPropertyText("Directory index file name",
-				ClasspathHttpFileFactoryWorkSource.PROPERTY_DEFAULT_FILE_NAME,
-				"index.html", page, context, null);
+				SourceHttpResourceFactory.PROPERTY_CLASS_PATH_PREFIX,
+				WebAutoWireApplication.WEB_PUBLIC_RESOURCES_CLASS_PATH_PREFIX,
+				page, context, null);
+		SourceExtensionUtil
+				.createPropertyText(
+						"Directory index file name",
+						SourceHttpResourceFactory.PROPERTY_DEFAULT_DIRECTORY_FILE_NAMES,
+						"index.html", page, context, null);
 	}
 
 	@Override
@@ -73,7 +78,7 @@ public class ClasspathHttpFileFactoryWorkSourceExtension
 
 		// Obtain the prefix
 		String prefix = context.getPropertyList().getPropertyValue(
-				ClasspathHttpFileFactoryWorkSource.PROPERTY_CLASSPATH_PREFIX,
+				SourceHttpResourceFactory.PROPERTY_CLASS_PATH_PREFIX,
 				"<not specified>");
 
 		// Return the documentation

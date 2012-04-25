@@ -31,11 +31,11 @@
 	</extension>
 	<extension point="net.officefloor.ui.worksources">
 		<worksource
-			class="net.officefloor.eclipse.socket.ClasspathHttpFileFactoryWorkSourceExtension" />
+			class="net.officefloor.eclipse.socket.HttpFileFactoryWorkSourceExtension" />
 	</extension>
 	<extension point="net.officefloor.ui.worksources">
 		<worksource
-			class="net.officefloor.eclipse.socket.ClasspathHttpFileSenderWorkSourceExtension" />
+			class="net.officefloor.eclipse.socket.HttpFileSenderWorkSourceExtension" />
 	</extension>
 	<extension point="net.officefloor.ui.worksources">
 		<worksource
