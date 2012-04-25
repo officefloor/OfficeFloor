@@ -8,7 +8,7 @@
 		
 		<file>
 			<!-- Ensure testing with latest version -->
-			<location>${basedir}/src/test/resource/net/officefloor/building/classpath/pom.test.xml</location>
+			<location>${basedir}/src/test/resources/net/officefloor/building/classpath/pom.test.xml</location>
 			<contains><![CDATA[<version>${project.version}</version>(\s)*</parent>]]></contains>
 		</file>
 	</files>
