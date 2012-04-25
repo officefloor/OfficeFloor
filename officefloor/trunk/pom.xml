@@ -340,29 +340,9 @@
 				<version>4.8.2</version>
 			</dependency>
 			<dependency>
-				<groupId>org.codehaus.plexus</groupId>
-				<artifactId>plexus-container-default</artifactId>
-				<version>${plexus-version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.codehaus.plexus</groupId>
-				<artifactId>plexus-utils</artifactId>
-				<version>${plexus-version}</version>
-			</dependency>
-			<dependency>
 				<groupId>org.apache.maven</groupId>
-				<artifactId>maven-aether-provider</artifactId>
+				<artifactId>maven-embedder</artifactId>
 				<version>${maven-version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.apache.maven</groupId>
-				<artifactId>maven-core</artifactId>
-				<version>${maven-version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.sonatype.aether</groupId>
-				<artifactId>aether-api</artifactId>
-				<version>${aether-version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.sonatype.aether</groupId>
@@ -524,6 +504,11 @@
 				<groupId>javax.jdo</groupId>
 				<artifactId>jdo-api</artifactId>
 				<version>3.0</version>
+			</dependency>
+			<dependency>
+				<groupId>com.google.gwt.google-apis</groupId>
+				<artifactId>gwt-visualization</artifactId>
+				<version>1.0.2</version>
 			</dependency>
 			<dependency>
 				<groupId>org.projectlombok</groupId>
