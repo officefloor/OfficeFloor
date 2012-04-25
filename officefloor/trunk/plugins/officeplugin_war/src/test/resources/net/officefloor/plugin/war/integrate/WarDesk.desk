@@ -10,10 +10,9 @@
 	</external-flows>
 
 	<works>
-		<work name="sender" source="net.officefloor.plugin.web.http.resource.source.ClasspathHttpFileSenderWorkSource">
+		<work name="sender" source="net.officefloor.plugin.web.http.resource.source.HttpFileSenderWorkSource">
 			<properties>
-				<property name="classpath.prefix" value="WEB-PUBLIC" />
-				<property name="default.file.name" value="index.html" />
+				<property name="http.classpath.prefix" value="WEB-PUBLIC" />
 				<property name="file.not.found.content.path" value="FileNotFound.html" />
 			</properties>
 			<work-task name="SendFile">
