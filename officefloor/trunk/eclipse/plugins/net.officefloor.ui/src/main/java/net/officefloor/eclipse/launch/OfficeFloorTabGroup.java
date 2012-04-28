@@ -36,11 +36,9 @@ import org.eclipse.jdt.debug.ui.launchConfigurations.JavaJRETab;
 public class OfficeFloorTabGroup extends AbstractLaunchConfigurationTabGroup {
 
 	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.eclipse.debug.ui.ILaunchConfigurationTabGroup#createTabs(org.eclipse.debug.ui.ILaunchConfigurationDialog,
-	 *      java.lang.String)
+	 * ================ AbstractLaunchConfigurationTabGroup =================
 	 */
+
 	@Override
 	public void createTabs(ILaunchConfigurationDialog dialog, String mode) {
 		ILaunchConfigurationTab[] tabs = new ILaunchConfigurationTab[] {
