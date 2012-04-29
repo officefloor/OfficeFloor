@@ -178,6 +178,11 @@
 			</dependency>
 			<dependency>
 				<groupId>net.officefloor.plugin</groupId>
+				<artifactId>officeplugin_launch</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>net.officefloor.plugin</groupId>
 				<artifactId>officeplugin_servlet</artifactId>
 				<version>${project.version}</version>
 			</dependency>
