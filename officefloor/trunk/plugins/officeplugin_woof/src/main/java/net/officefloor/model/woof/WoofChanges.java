@@ -36,6 +36,11 @@ import net.officefloor.plugin.comet.internal.CometEvent;
 public interface WoofChanges {
 
 	/**
+	 * Name of the extension property for the GWT Module path.
+	 */
+	String PROPERTY_GWT_MODULE_PATH = "gwt.module.path";
+
+	/**
 	 * Adds a {@link WoofTemplateModel}.
 	 * 
 	 * @param templatePath

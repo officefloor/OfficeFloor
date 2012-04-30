@@ -53,11 +53,6 @@ import net.officefloor.plugin.woof.gwt.GwtWoofTemplateExtensionService;
 public class WoofChangesImpl implements WoofChanges {
 
 	/**
-	 * Name of the property for the GWT Module path.
-	 */
-	private static final String PROPERTY_GWT_MODULE_PATH = "gwt.module.path";
-
-	/**
 	 * {@link WoofTemplateModel} {@link NameExtractor}.
 	 */
 	private static final NameExtractor<WoofTemplateModel> TEMPLATE_NAME_EXTRACTOR = new NameExtractor<WoofTemplateModel>() {
@@ -497,8 +492,8 @@ public class WoofChangesImpl implements WoofChanges {
 
 			// Add property for the GWT Module path
 			String gwtModulePath = this.gwtChanges.createGwtModulePath(module);
-			gwtExtension.addProperty(new PropertyModel("gwt.module.path",
-					gwtModulePath));
+			gwtExtension.addProperty(new PropertyModel(
+					PROPERTY_GWT_MODULE_PATH, gwtModulePath));
 
 			// Include change for adding GWT Module
 			Change<?> gwtChange = this.gwtChanges.updateGwtModule(module, null);
