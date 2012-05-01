@@ -24,7 +24,7 @@ Steps
 
 *1. Create the existing WebApp
 
-  As per {{{http://maven.apache.org/guides/mini/guide-webapp.html}Maven Guide to WebApps}}, the default WebApp is created with the following command:
+  As per {{{http://maven.apache.org/guides/mini/guide-webapp.html}Maven Guide to WebApps}}, the default WebApp is created with the following command within an empty directory:
   
 +-----------------------------------------+
     mvn archetype:create -DarchetypeArtifactId=maven-archetype-webapp -DgroupId=my.first.woof -DartifactId=MyFirstWoofApp
