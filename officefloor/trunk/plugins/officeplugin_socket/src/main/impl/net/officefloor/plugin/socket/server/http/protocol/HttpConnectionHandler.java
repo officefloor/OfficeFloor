@@ -20,8 +20,6 @@ package net.officefloor.plugin.socket.server.http.protocol;
 
 import java.io.IOException;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import net.officefloor.plugin.socket.server.Connection;
 import net.officefloor.plugin.socket.server.ConnectionHandler;
@@ -42,12 +40,6 @@ import net.officefloor.plugin.stream.InputBufferStream;
  * @author Daniel Sagenschneider
  */
 public class HttpConnectionHandler implements ConnectionHandler {
-
-	/**
-	 * {@link Logger}.
-	 */
-	private static final Logger LOGGER = Logger
-			.getLogger(HttpConnectionHandler.class.getName());
 
 	/**
 	 * {@link HttpConversation}.
@@ -166,27 +158,6 @@ public class HttpConnectionHandler implements ConnectionHandler {
 		} catch (IOException ex) {
 			// As error in I/O connection no longer valid
 			this.isParseFailure = true; // skip remaining content if can read
-
-			// Provide details of failed HTTP request
-			if (LOGGER.isLoggable(Level.INFO)) {
-				StringBuilder msg = new StringBuilder();
-				msg.append(ex.getClass().getSimpleName());
-				msg.append(" for HTTP Request:\n");
-				msg.append(this.parser.getMethod());
-				msg.append(" ");
-				msg.append(this.parser.getRequestURI());
-				msg.append(" ");
-				msg.append(this.parser.getHttpVersion());
-				msg.append("\n");
-				for (HttpHeader header : this.parser.getHeaders()) {
-					msg.append(header.getName());
-					msg.append(": ");
-					msg.append(header.getValue());
-					msg.append("\n");
-				}
-				msg.append("<body>");
-				LOGGER.log(Level.WARNING, msg.toString());
-			}
 
 			// Propagate failure
 			throw ex;

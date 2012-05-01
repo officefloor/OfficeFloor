@@ -207,6 +207,35 @@ public class HttpRequestParserTest extends OfficeFrameTestCase {
 	}
 
 	/**
+	 * Ensure multiple parsing for completing the body content.
+	 */
+	public void testPartialBodyThenComplete() throws Exception {
+
+		// Create the buffer stream
+		BufferStream bufferStream = this.createBufferStream(
+				"POST /path HTTP/1.1\nContent-Length: 4\n\nTE", false);
+
+		// Provide only partial body (typically if network packet is split)
+		InputBufferStream firstPacket = bufferStream.getInputBufferStream();
+		boolean isCompleteOnFirstPacket = this.httpRequestParser.parse(
+				firstPacket, this.tempBuffer);
+		assertFalse("Should not complete if partial body",
+				isCompleteOnFirstPacket);
+
+		// Provide remaining of body
+		bufferStream.write(UsAsciiUtil.convertToUsAscii("ST"));
+		InputBufferStream secondPacket = bufferStream.getInputBufferStream();
+		boolean isCompleteOnSecondPacket = this.httpRequestParser.parse(
+				secondPacket, this.tempBuffer);
+		assertTrue("Should be complete with remaining of body received",
+				isCompleteOnSecondPacket);
+
+		// Validate the parsing
+		this.validateHttpRequestParserState("POST", "/path", "HTTP/1.1",
+				"TEST", "Content-Length", "4");
+	}
+
+	/**
 	 * Ensure able to handle first header with leading space gracefully.
 	 */
 	public void testLeadingSpaceToHeader() {
@@ -640,10 +669,115 @@ public class HttpRequestParserTest extends OfficeFrameTestCase {
 	}
 
 	/**
+	 * Creates the {@link BufferStream} with the content.
+	 * 
+	 * @param httpRequest
+	 *            HTTP request content.
+	 * @param isRemoveCR
+	 *            Flag indicating to remove the CR (typically before the LF).
+	 *            This is to allow more tolerant handling of requests.
+	 * @return {@link BufferStream}.
+	 */
+	private BufferStream createBufferStream(String httpRequest,
+			boolean isRemoveCR) throws IOException {
+
+		// Create buffer stream with content
+		byte[] content = UsAsciiUtil.convertToHttp(httpRequest);
+		if (isRemoveCR) {
+			// Remove the CR characters (testing tolerance)
+			byte CR = UsAsciiUtil.convertToUsAscii('\r');
+			ByteArrayOutputStream buffer = new ByteArrayOutputStream();
+			for (byte value : content) {
+				if (value == CR) {
+					continue; // do not include CR
+				}
+				buffer.write(value);
+			}
+			content = buffer.toByteArray();
+		}
+		BufferStream bufferStream = new BufferStreamImpl(
+				new HeapByteBufferSquirtFactory(1024));
+		bufferStream.getOutputBufferStream().write(content);
+
+		// Return the buffer stream
+		return bufferStream;
+	}
+
+	/**
+	 * Validates the {@link HttpRequestParser} state.
+	 * 
+	 * @param expectedMethod
+	 *            Expected method.
+	 * @param expectedPath
+	 *            Expected path.
+	 * @param expectedVersion
+	 *            Expected version.
+	 * @param expectedBody
+	 *            Expected body.
+	 * @param expectedHeaderNameValues
+	 *            Expected listing of header name/values.
+	 */
+	private void validateHttpRequestParserState(String expectedMethod,
+			String expectedPath, String expectedVersion, String expectedBody,
+			String... expectedHeaderNameValues) throws IOException {
+
+		// Validate request line
+		assertEquals((expectedMethod == null ? "" : expectedMethod),
+				this.httpRequestParser.getMethod());
+		assertEquals((expectedPath == null ? "" : expectedPath),
+				this.httpRequestParser.getRequestURI());
+		assertEquals((expectedVersion == null ? "" : expectedVersion),
+				this.httpRequestParser.getHttpVersion());
+
+		// Validate correct number of headers
+		assertEquals("Incorrect number of headers",
+				(expectedHeaderNameValues.length / 2), this.httpRequestParser
+						.getHeaders().size());
+
+		// Validate correct headers
+		for (int i = 0; i < expectedHeaderNameValues.length; i += 2) {
+			String expectedHeaderName = expectedHeaderNameValues[i];
+			String expectedHeaderValue = expectedHeaderNameValues[i + 1];
+			int headerIndex = i / 2;
+			HttpHeader header = this.httpRequestParser.getHeaders().get(
+					headerIndex);
+			assertEquals("Incorrect name for header (" + headerIndex + ")",
+					expectedHeaderName, header.getName());
+			assertEquals("Incorrect value for header '" + expectedHeaderName
+					+ "' (" + headerIndex + ")", expectedHeaderValue,
+					header.getValue());
+		}
+
+		// Validate the body
+		InputBufferStream bodyStream = this.httpRequestParser.getBody();
+		if (expectedBody == null) {
+			// Should not have a body
+			if (bodyStream != null) {
+				// Body being parsed so ensure no content yet
+				assertEquals("Should not have a body", 0,
+						bodyStream.available());
+				assertEquals("Should not be end of stream", 0,
+						bodyStream.read(new byte[10]));
+			}
+
+		} else {
+			// Obtain the body content
+			long available = this.httpRequestParser.getBody().available();
+			byte[] body = new byte[(int) (available < 0 ? 0 : available)];
+			int bodySize = this.httpRequestParser.getBody().read(body);
+			body = Arrays.copyOfRange(body, 0, (bodySize < 0 ? 0 : bodySize));
+			UsAsciiUtil.assertEquals("Incorrect body",
+					(expectedBody == null ? "" : expectedBody), body);
+		}
+	}
+
+	/**
 	 * Does a valid HTTP request test.
 	 * 
 	 * @param httpRequest
 	 *            HTTP request content.
+	 * @param expectedIsComplete
+	 *            Flag indicating if expecting HTTP request to be complete.
 	 * @param expectedMethod
 	 *            Expected method.
 	 * @param expectedPath
@@ -671,6 +805,8 @@ public class HttpRequestParserTest extends OfficeFrameTestCase {
 	 *            This is to allow more tolerant handling of requests.
 	 * @param httpRequest
 	 *            HTTP request content.
+	 * @param expectedIsComplete
+	 *            Flag indicating if expecting HTTP request to be complete.
 	 * @param expectedMethod
 	 *            Expected method.
 	 * @param expectedPath
@@ -689,78 +825,16 @@ public class HttpRequestParserTest extends OfficeFrameTestCase {
 		try {
 
 			// Create input buffer stream with content
-			byte[] content = UsAsciiUtil.convertToHttp(httpRequest);
-			if (isRemoveCR) {
-				// Remove the CR characters (testing tolerance)
-				byte CR = UsAsciiUtil.convertToUsAscii('\r');
-				ByteArrayOutputStream buffer = new ByteArrayOutputStream();
-				for (byte value : content) {
-					if (value == CR) {
-						continue; // do not include CR
-					}
-					buffer.write(value);
-				}
-				content = buffer.toByteArray();
-			}
-			BufferStream bufferStream = new BufferStreamImpl(
-					new HeapByteBufferSquirtFactory(1024));
-			bufferStream.getOutputBufferStream().write(content);
-			InputBufferStream inputBufferStream = bufferStream
-					.getInputBufferStream();
+			InputBufferStream inputBufferStream = this.createBufferStream(
+					httpRequest, isRemoveCR).getInputBufferStream();
 
 			// Parse the content
 			boolean isComplete = this.httpRequestParser.parse(
 					inputBufferStream, this.tempBuffer);
 
-			// Validate request line
-			assertEquals((expectedMethod == null ? "" : expectedMethod),
-					this.httpRequestParser.getMethod());
-			assertEquals((expectedPath == null ? "" : expectedPath),
-					this.httpRequestParser.getRequestURI());
-			assertEquals((expectedVersion == null ? "" : expectedVersion),
-					this.httpRequestParser.getHttpVersion());
-
-			// Validate correct number of headers
-			assertEquals("Incorrect number of headers",
-					(expectedHeaderNameValues.length / 2),
-					this.httpRequestParser.getHeaders().size());
-
-			// Validate correct headers
-			for (int i = 0; i < expectedHeaderNameValues.length; i += 2) {
-				String expectedHeaderName = expectedHeaderNameValues[i];
-				String expectedHeaderValue = expectedHeaderNameValues[i + 1];
-				int headerIndex = i / 2;
-				HttpHeader header = this.httpRequestParser.getHeaders().get(
-						headerIndex);
-				assertEquals("Incorrect name for header (" + headerIndex + ")",
-						expectedHeaderName, header.getName());
-				assertEquals("Incorrect value for header '"
-						+ expectedHeaderName + "' (" + headerIndex + ")",
-						expectedHeaderValue, header.getValue());
-			}
-
-			// Validate the body
-			InputBufferStream bodyStream = this.httpRequestParser.getBody();
-			if (expectedBody == null) {
-				// Should not have a body
-				if (bodyStream != null) {
-					// Body being parsed so ensure no content yet
-					assertEquals("Should not have a body", 0,
-							bodyStream.available());
-					assertEquals("Should not be end of stream", 0,
-							bodyStream.read(new byte[10]));
-				}
-
-			} else {
-				// Obtain the body content
-				long available = this.httpRequestParser.getBody().available();
-				byte[] body = new byte[(int) (available < 0 ? 0 : available)];
-				int bodySize = this.httpRequestParser.getBody().read(body);
-				body = Arrays.copyOfRange(body, 0,
-						(bodySize < 0 ? 0 : bodySize));
-				UsAsciiUtil.assertEquals("Incorrect body",
-						(expectedBody == null ? "" : expectedBody), body);
-			}
+			// Validate the parse state
+			this.validateHttpRequestParserState(expectedMethod, expectedPath,
+					expectedVersion, expectedBody, expectedHeaderNameValues);
 
 			// Validate if complete
 			assertEquals("Incorrect completion", expectedIsComplete, isComplete);
