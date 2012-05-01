@@ -135,12 +135,36 @@ public class HttpRequestParserTest extends OfficeFrameTestCase {
 	}
 
 	/**
+	 * Ensure issue if missing header name.
+	 */
+	public void testMissingHeaderName() {
+		this.doInvalidMethodTest("GET /path HTTP/1.1\n: value\n",
+				HttpStatus.SC_BAD_REQUEST, "Missing header name");
+	}
+
+	/**
 	 * Ensure able to parse header name with escaped length.
 	 */
 	public void testToHeaderNameContainsEscapedColon() {
 		this.doMethodTest(
 				"GET /path HTTP/1.1\nbefore%20%3A%20after : colon \n", false,
 				"GET", "/path", "HTTP/1.1", null, "before : after", "colon");
+	}
+
+	/**
+	 * Ensure able to delimit header name via CR.
+	 */
+	public void testToHeaderNameNoValue() {
+		this.doMethodTest("GET /path HTTP/1.1\nHeader\n", false, "GET",
+				"/path", "HTTP/1.1", null, "Header", "");
+	}
+
+	/**
+	 * Ensure able to delimit header name via LF.
+	 */
+	public void testToHeaderNameNoValueMissingCR() {
+		this.doMethodTest(true, "GET /path HTTP/1.1\nHeader\n", false, "GET",
+				"/path", "HTTP/1.1", null, "Header", "");
 	}
 
 	/**
@@ -180,6 +204,74 @@ public class HttpRequestParserTest extends OfficeFrameTestCase {
 				"POST /path HTTP/1.1\nContent-Length: 1000\n\nNOT ALL CONTENT",
 				false, "POST", "/path", "HTTP/1.1", null, "Content-Length",
 				"1000");
+	}
+
+	/**
+	 * Ensure able to handle first header with leading space gracefully.
+	 */
+	public void testLeadingSpaceToHeader() {
+		this.doInvalidMethodTest(
+				"GET /path HTTP/1.1\n \t WhiteSpaceBeforeHeader: value\n",
+				HttpStatus.SC_BAD_REQUEST,
+				"White spacing before first HTTP header");
+	}
+
+	/**
+	 * Ensure able to have header value on multiple lines.
+	 */
+	public void testMultiplelineHeaderValue() {
+		this.doMethodTest(
+				"GET /path HTTP/1.1\nMultiline: Value One\n Value Two\n\n",
+				true, "GET", "/path", "HTTP/1.1", "", "Multiline",
+				"Value One Value Two");
+	}
+
+	/**
+	 * Ensure able to have header value on multiple lines with missing CR.
+	 */
+	public void testMultiplelineHeaderValueMissingCR() {
+		this.doMethodTest(true,
+				"GET /path HTTP/1.1\nMultiline: Value One\n Value Two\n\n",
+				true, "GET", "/path", "HTTP/1.1", "", "Multiline",
+				"Value One Value Two");
+	}
+
+	/**
+	 * Ensure able to parse header and body separation containing white spacing.
+	 * This is to be more tolerant of the client.
+	 */
+	public void testHeaderToBodyHavingWhitespacing() {
+		this.doMethodTest("POST /path HTTP/1.1\nContent-Length: 4\n \t\nTEST",
+				true, "POST", "/path", "HTTP/1.1", "TEST", "Content-Length",
+				"4");
+	}
+
+	/**
+	 * Ensure able to parse header and body separation containing white spacing.
+	 * This is to be more tolerant of the client. Also tolerant of missing CR.
+	 */
+	public void testHeaderToBodyHavingWhitespacingMissingCR() {
+		this.doMethodTest(true,
+				"POST /path HTTP/1.1\nContent-Length: 4\n \t\nTEST", true,
+				"POST", "/path", "HTTP/1.1", "TEST", "Content-Length", "4");
+	}
+
+	/**
+	 * Ensure able to parse header separation containing white spacing to no
+	 * body. This is to be more tolerant of the client.
+	 */
+	public void testWhitespacingInGetCompletion() {
+		this.doMethodTest("GET /path HTTP/1.1\n \t\n", true, "GET", "/path",
+				"HTTP/1.1", "");
+	}
+
+	/**
+	 * Ensure able to parse header and body separation containing white spacing.
+	 * This is to be more tolerant of the client. Also tolerant of missing CR.
+	 */
+	public void testWhitespacingInGetCompletionMissingCR() {
+		this.doMethodTest(true, "GET /path HTTP/1.1\n \t\n", true, "GET",
+				"/path", "HTTP/1.1", "");
 	}
 
 	/**
