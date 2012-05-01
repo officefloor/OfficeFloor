@@ -31,7 +31,6 @@ import net.officefloor.plugin.socket.server.http.parse.HttpRequestParser;
 import net.officefloor.plugin.socket.server.http.protocol.HttpStatus;
 import net.officefloor.plugin.stream.BufferStream;
 import net.officefloor.plugin.stream.InputBufferStream;
-import net.officefloor.plugin.stream.NoBufferStreamContentException;
 import net.officefloor.plugin.stream.OutputBufferStream;
 import net.officefloor.plugin.stream.impl.BufferStreamImpl;
 import net.officefloor.plugin.stream.squirtfactory.NotCreateBufferSquirtFactory;
@@ -320,18 +319,7 @@ public class HttpRequestParserImpl implements HttpRequestParser {
 		NEXT_CHARACTER: for (int i = 0; i < this.textLength; i++) {
 
 			// Read in the next character
-			byte character;
-			try {
-				character = (byte) inputStream.read();
-			} catch (NoBufferStreamContentException ex) {
-				// Provide details of expected content
-				String text = new String(tempBuffer, 0, characterIndex);
-				throw new IOException("HTTP PARSE ERROR: Expecting "
-						+ this.textLength
-						+ " characters for transform but only " + i
-						+ " characters available (transformed text '" + text
-						+ "')");
-			}
+			byte character = (byte) inputStream.read();
 
 			// Determine if escaping
 			switch (escapedCharacterState) {

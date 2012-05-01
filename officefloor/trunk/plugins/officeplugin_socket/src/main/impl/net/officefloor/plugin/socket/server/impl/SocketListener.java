@@ -41,6 +41,7 @@ import net.officefloor.plugin.socket.server.ReadContext;
 import net.officefloor.plugin.socket.server.Server;
 import net.officefloor.plugin.socket.server.WriteContext;
 import net.officefloor.plugin.stream.InputBufferStream;
+import net.officefloor.plugin.stream.NoBufferStreamContentException;
 
 /**
  * Listens to {@link Socket} instances.
@@ -338,7 +339,7 @@ public class SocketListener<CH extends ConnectionHandler>
 							key.interestOps(interestOps);
 						}
 
-					} catch (Exception ex) {						
+					} catch (Exception ex) {
 						// Terminate connection on failure
 						this.terminateConnection(key, connection);
 
@@ -348,6 +349,14 @@ public class SocketListener<CH extends ConnectionHandler>
 							if (LOGGER.isLoggable(Level.FINE)) {
 								LOGGER.log(Level.FINE,
 										"Peer closed connection", ex);
+							}
+						} else if (ex instanceof NoBufferStreamContentException) {
+							// Stream of information has become corrupt
+							if (LOGGER.isLoggable(Level.FINE)) {
+								LOGGER.log(
+										Level.FINE,
+										"Stream of information has become corrupt",
+										ex);
 							}
 						} else {
 							// Another error so provide full details
@@ -378,7 +387,7 @@ public class SocketListener<CH extends ConnectionHandler>
 
 				// Unregister from connection manager
 				isUnregisterFromConnectionManager = true;
-				
+
 				// Close the selector to release resources
 				this.selector.close();
 			}
@@ -418,7 +427,7 @@ public class SocketListener<CH extends ConnectionHandler>
 
 		// All data written so terminate the connection
 		this.terminateConnection(key, connection);
-		
+
 		// Connection closed
 		return true;
 	}
