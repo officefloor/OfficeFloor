@@ -21,13 +21,13 @@ package net.officefloor.plugin.socket.server.http.parse.impl;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.Charset;
-import java.util.LinkedList;
+import java.util.ArrayList;
 import java.util.List;
 
 import net.officefloor.plugin.socket.server.http.HttpHeader;
 import net.officefloor.plugin.socket.server.http.HttpRequest;
-import net.officefloor.plugin.socket.server.http.parse.HttpRequestParser;
 import net.officefloor.plugin.socket.server.http.parse.HttpRequestParseException;
+import net.officefloor.plugin.socket.server.http.parse.HttpRequestParser;
 import net.officefloor.plugin.socket.server.http.protocol.HttpStatus;
 import net.officefloor.plugin.stream.BufferStream;
 import net.officefloor.plugin.stream.InputBufferStream;
@@ -121,6 +121,17 @@ public class HttpRequestParserImpl implements HttpRequestParser {
 	 */
 	private static boolean isWs(byte character) {
 		return (character == SP) || (character == HT);
+	}
+
+	/**
+	 * Determines if a character may be constituted in text.
+	 * 
+	 * @param character
+	 *            ASCII character.
+	 * @return <code>true</code> if valid character for text.
+	 */
+	private static boolean isText(byte character) {
+		return (!isCtl(character)) || isWs(character);
 	}
 
 	/**
@@ -242,6 +253,11 @@ public class HttpRequestParserImpl implements HttpRequestParser {
 	private String text_headerName;
 
 	/**
+	 * Flag indicating if multiple line {@link HttpHeader} value.
+	 */
+	private boolean isMultipleLineHeaderValue;
+
+	/**
 	 * {@link HttpHeader} instances.
 	 */
 	private List<HttpHeader> headers;
@@ -359,6 +375,65 @@ public class HttpRequestParserImpl implements HttpRequestParser {
 	}
 
 	/**
+	 * Adds a {@link HttpHeader} and manages the {@link #parseState} for next
+	 * character.
+	 * 
+	 * @param name
+	 *            Name for {@link HttpHeader}.
+	 * @param value
+	 *            Value for {@link HttpHeader}.
+	 * @param terminatingCharacter
+	 *            Character terminating the {@link HttpHeader} value. Aids in
+	 *            determining next {@link ParseState}.
+	 * @throws HttpRequestParseException
+	 *             If invalid {@link HttpRequest}.
+	 */
+	private void addHttpHeaderAndManageParseState(String name, String value,
+			byte terminatingCharacter) throws HttpRequestParseException {
+
+		// Determine if multiple line header value
+		if (this.isMultipleLineHeaderValue) {
+
+			// Determine if no value
+			if (value.length() == 0) {
+				// No multiple line value so consider blank separating line
+				this.processHeader();
+				this.parseState = (terminatingCharacter == CR ? ParseState.BODY_CR
+						: ParseState.BODY);
+				return;
+			}
+
+			// Remove last HTTP header and append value to re-add
+			int numberOfHeaders = this.headers.size();
+			if (numberOfHeaders == 0) {
+				// Must have at least one HTTP header for multiple line value
+				throw new HttpRequestParseException(HttpStatus.SC_BAD_REQUEST,
+						"White spacing before first HTTP header");
+			}
+			HttpHeader header = this.headers.remove(numberOfHeaders - 1);
+			name = header.getName();
+			value = header.getValue() + " " + value; // multiple line value
+		}
+
+		// Must have header name
+		if (name.length() == 0) {
+			throw new HttpRequestParseException(HttpStatus.SC_BAD_REQUEST,
+					"Missing header name");
+		}
+
+		// Add the header
+		this.headers.add(new HttpHeaderImpl(name, value));
+
+		// Reset for next header
+		this.text_headerName = "";
+		this.isMultipleLineHeaderValue = false;
+
+		// Move to next state
+		this.parseState = (terminatingCharacter == CR ? ParseState.HEADER_CR
+				: ParseState.HEADER_CR_NAME_SEPARATION);
+	}
+
+	/**
 	 * Processes the header to ensure correct and possibly obtain the
 	 * <code>Content-Length</code> for the body.
 	 * 
@@ -423,7 +498,9 @@ public class HttpRequestParserImpl implements HttpRequestParser {
 		this.text_path = "";
 		this.text_version = "";
 		this.text_headerName = "";
-		this.headers = new LinkedList<HttpHeader>();
+		this.isMultipleLineHeaderValue = false;
+		// Allow reasonable number of headers
+		this.headers = new ArrayList<HttpHeader>(16);
 		this.body = null;
 	}
 
@@ -595,7 +672,13 @@ public class HttpRequestParserImpl implements HttpRequestParser {
 						this.parseState = ParseState.BODY;
 						break;
 					} else if (isWs(character)) {
-						// Continue previous header value
+						// Continue previous header value, ignoring space
+						inputBufferStream.skip(1);
+
+						// Flag that potentially multiple line value
+						this.isMultipleLineHeaderValue = true;
+
+						// Continue parsing header value
 						this.parseState = ParseState.HEADER_NAME_VALUE_SEPARATION;
 						break;
 					} else {
@@ -614,24 +697,25 @@ public class HttpRequestParserImpl implements HttpRequestParser {
 						this.text_headerName = this.transformToString(
 								inputBufferStream, tempBuffer,
 								HttpStatus.SC_BAD_REQUEST,
-								"Header name too long");
+								"Header name too long").trim();
 
 						// Skip colon and move to name value separation
 						inputBufferStream.skip(1);
 						this.parseState = ParseState.HEADER_NAME_VALUE_SEPARATION;
-					} else if (character == CR) {
-						// No value for header, so provide blank value
+					} else if ((character == CR) || (character == LF)) {
+						// Obtain the header name
 						this.text_headerName = this.transformToString(
 								inputBufferStream, tempBuffer,
 								HttpStatus.SC_BAD_REQUEST,
-								"Header name too long");
-						this.headers.add(new HttpHeaderImpl(
-								this.text_headerName.trim(), ""));
+								"Header name too long").trim();
 
-						// Skip CR and move to next header
+						// Skip CR/LF
 						inputBufferStream.skip(1);
-						this.parseState = ParseState.HEADER_CR;
-					} else if (!isCtl(character)) {
+
+						// Provide blank header value and move to next header
+						this.addHttpHeaderAndManageParseState(
+								this.text_headerName, "", character);
+					} else if (isText(character)) {
 						// Append the header name character
 						this.textLength++;
 					} else {
@@ -658,16 +742,15 @@ public class HttpRequestParserImpl implements HttpRequestParser {
 						String headerValue = this.transformToString(
 								inputBufferStream, tempBuffer,
 								HttpStatus.SC_BAD_REQUEST,
-								"Header value too long");
-						this.headers
-								.add(new HttpHeaderImpl(this.text_headerName
-										.trim(), headerValue.trim()));
+								"Header value too long").trim();
 
-						// Skip CR and move to next header
+						// Skip CR/LF and move to next header
 						inputBufferStream.skip(1);
-						this.parseState = (character == CR ? ParseState.HEADER_CR
-								: ParseState.HEADER_CR_NAME_SEPARATION);
-					} else if (!isCtl(character)) {
+
+						// Add header and move to next header
+						this.addHttpHeaderAndManageParseState(
+								this.text_headerName, headerValue, character);
+					} else if (isText(character)) {
 						// Append the header value character
 						this.textLength++;
 					} else {
