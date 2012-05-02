@@ -20,6 +20,10 @@ package net.officefloor.launch.woof;
 import java.io.File;
 import java.net.BindException;
 
+import net.officefloor.autowire.AutoWireOfficeFloor;
+import net.officefloor.frame.api.manage.OfficeFloor;
+import net.officefloor.plugin.woof.WoofOfficeFloorSource;
+
 import com.google.gwt.core.ext.ServletContainer;
 import com.google.gwt.core.ext.ServletContainerLauncher;
 import com.google.gwt.core.ext.TreeLogger;
@@ -37,14 +41,15 @@ public class WoofServletContainerLauncher extends ServletContainerLauncher {
 	 */
 
 	@Override
+	public String getName() {
+		return "WoOF";
+	}
+
+	@Override
 	public ServletContainer start(TreeLogger logger, int port, File appRootDir)
 			throws BindException, Exception {
-
-		// TODO remove
-		System.out.println("Starting WoOF container on port " + port + " ...");
-
 		// Create and return the WoOF container
-		return new WoofServletContainer(port);
+		return new WoofServletContainer(port, appRootDir);
 	}
 
 	/**
@@ -58,13 +63,26 @@ public class WoofServletContainerLauncher extends ServletContainerLauncher {
 		private final int port;
 
 		/**
+		 * {@link AutoWireOfficeFloor}.
+		 */
+		private AutoWireOfficeFloor officeFloor;
+
+		/**
 		 * Initiate.
 		 * 
 		 * @param port
 		 *            Port.
+		 * @param appRootDir
+		 *            Application root directory.
+		 * @throws Exception
+		 *             If fails to open {@link OfficeFloor}.
 		 */
-		public WoofServletContainer(int port) {
+		public WoofServletContainer(int port, File appRootDir) throws Exception {
 			this.port = port;
+
+			// Open the OfficeFloor
+			WoofOfficeFloorSource source = new WoofOfficeFloorSource();
+			this.officeFloor = source.openOfficeFloor();
 		}
 
 		/*
@@ -78,16 +96,14 @@ public class WoofServletContainerLauncher extends ServletContainerLauncher {
 
 		@Override
 		public void refresh() throws UnableToCompleteException {
-			// TODO implement ServletContainer.refresh
-			throw new UnsupportedOperationException(
-					"TODO implement ServletContainer.refresh");
+			// TODO consider allowing restart
+			throw new UnableToCompleteException();
 		}
 
 		@Override
 		public void stop() throws UnableToCompleteException {
-			// TODO implement ServletContainer.stop
-			throw new UnsupportedOperationException(
-					"TODO implement ServletContainer.stop");
+			// Close OfficeFloor (stopping container)
+			this.officeFloor.closeOfficeFloor();
 		}
 	}
 

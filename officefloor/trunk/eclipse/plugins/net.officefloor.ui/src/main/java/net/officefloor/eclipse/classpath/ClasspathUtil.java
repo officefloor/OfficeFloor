@@ -227,7 +227,8 @@ public class ClasspathUtil {
 	 * @param clazz
 	 *            {@link Class}.
 	 * @param container
-	 *            {@link OfficeFloorClasspathContainer}.
+	 *            {@link OfficeFloorClasspathContainer}. May be
+	 *            <code>null</code> if do not require source attachments.
 	 * @return {@link IClasspathEntry} of the class path containing the
 	 *         {@link Class} or <code>null</code> if issue obtaining.
 	 */
@@ -266,12 +267,15 @@ public class ClasspathUtil {
 			// Obtain the source attachment paths
 			IPath sourceAttachmentPath = null;
 			IPath sourceAttachmentRootPath = null;
-			SourceAttachmentEntry entry = container
-					.getSourceAttachmentEntry(classpathPath);
-			if (entry != null) {
-				// Provide source attachment paths
-				sourceAttachmentPath = entry.getSourceAttachmentIPath();
-				sourceAttachmentRootPath = entry.getSourceAttachmentRootIPath();
+			if (container != null) {
+				SourceAttachmentEntry entry = container
+						.getSourceAttachmentEntry(classpathPath);
+				if (entry != null) {
+					// Provide source attachment paths
+					sourceAttachmentPath = entry.getSourceAttachmentIPath();
+					sourceAttachmentRootPath = entry
+							.getSourceAttachmentRootIPath();
+				}
 			}
 
 			// Return the class path entry

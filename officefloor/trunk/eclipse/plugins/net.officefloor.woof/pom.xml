@@ -48,6 +48,10 @@
 			<artifactId>officeplugin_woof</artifactId>
 		</dependency>
 		<dependency>
+			<groupId>net.officefloor.plugin</groupId>
+			<artifactId>officeplugin_launch</artifactId>
+		</dependency>
+		<dependency>
 			<groupId>easymock</groupId>
 			<artifactId>easymock</artifactId>
 			<scope>test</scope>

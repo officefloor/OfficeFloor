@@ -18,12 +18,18 @@
 package net.officefloor.eclipse.woof.launch;
 
 import java.io.File;
+import java.io.InputStream;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
 import net.officefloor.eclipse.WoofPlugin;
+import net.officefloor.eclipse.classpath.ClasspathUtil;
+import net.officefloor.eclipse.classpath.ProjectClassLoader;
+import net.officefloor.launch.woof.WoofDevelopmentConfiguration;
+import net.officefloor.launch.woof.WoofDevelopmentConfigurationLoader;
+import net.officefloor.launch.woof.WoofDevelopmentLauncher;
 import net.officefloor.plugin.woof.WoofOfficeFloorSource;
 
 import org.eclipse.core.resources.IResource;
@@ -39,6 +45,8 @@ import org.eclipse.debug.core.sourcelookup.ISourceContainer;
 import org.eclipse.debug.core.sourcelookup.containers.ArchiveSourceContainer;
 import org.eclipse.debug.core.sourcelookup.containers.ExternalArchiveSourceContainer;
 import org.eclipse.debug.core.sourcelookup.containers.FolderSourceContainer;
+import org.eclipse.jdt.core.IClasspathEntry;
+import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.launching.AbstractJavaLaunchConfigurationDelegate;
 import org.eclipse.jdt.launching.ExecutionArguments;
@@ -185,16 +193,20 @@ public class WoofLaunchConfigurationDelegate extends
 			// Indicate verifying launch
 			monitor.subTask("Verifying WoOF launch");
 
+			// Default main class
+			Class<?> defaultMainClass = WoofDevelopmentLauncher.class;
+
+			// Obtain the Java Project
+			IJavaProject javaProject = JavaRuntime
+					.getJavaProject(configuration);
+
 			// Ensure valid main type
 			String mainTypeName = this.getMainTypeName(configuration);
 			if ((mainTypeName == null) || (mainTypeName.trim().length() == 0)) {
-				// TODO Default main type
-				mainTypeName = "todo.launch.gwt.DevMode";
+				// Default main type
+				mainTypeName = defaultMainClass.getName();
 			}
 			IVMRunner runner = this.getVMRunner(configuration, mode);
-
-			// TODO remove
-			mainTypeName = WoofOfficeFloorSource.class.getName();
 
 			// Obtain the working directory
 			File workingDir = this.verifyWorkingDirectory(configuration);
@@ -214,9 +226,48 @@ public class WoofLaunchConfigurationDelegate extends
 			ExecutionArguments executionArguments = new ExecutionArguments(
 					vmArgumentsConfiguration, programArgumentsConfiguration);
 
-			// TODO provide configuration for DevMode WoOF Server
-			String[] programArguments = executionArguments
-					.getProgramArgumentsArray();
+			// Obtain application.woof file for the project
+			final String APPLICATION_WOOF_FILE_NAME = "application.woof";
+			ClassLoader projectClassLoader = ProjectClassLoader
+					.create(javaProject.getProject());
+			InputStream applicationWoofInputStream = projectClassLoader
+					.getResourceAsStream(APPLICATION_WOOF_FILE_NAME);
+			if (applicationWoofInputStream == null) {
+				// Must find file for project
+				throw new CoreException(new Status(IStatus.ERROR,
+						WoofPlugin.PLUGIN_ID, "Can not find "
+								+ APPLICATION_WOOF_FILE_NAME
+								+ " within project "
+								+ javaProject.getElementName()));
+			}
+
+			// Create configuration file for launching
+			File configurationFile;
+			try {
+				configurationFile = File.createTempFile("woof-launch-",
+						".properties");
+				WoofDevelopmentConfiguration developmentConfiguration = WoofDevelopmentConfigurationLoader
+						.loadConfiguration(applicationWoofInputStream);
+				developmentConfiguration.storeConfiguration(configurationFile);
+			} catch (Exception ex) {
+				// Propagate failure
+				throw new CoreException(
+						new Status(
+								IStatus.ERROR,
+								WoofPlugin.PLUGIN_ID,
+								"Failed to obtain WoOF development launch configuration",
+								ex));
+			}
+
+			// Provide configuration for DevMode WoOF Server
+			List<String> programArguments = new LinkedList<String>();
+
+			// First argument is the location of the configuration file
+			programArguments.add(configurationFile.getAbsolutePath());
+
+			// Append configured program arguments
+			programArguments.addAll(Arrays.asList(executionArguments
+					.getProgramArgumentsArray()));
 
 			// Obtain the VM specific attributes
 			Map<String, String[]> vmAttributes = this
@@ -228,7 +279,20 @@ public class WoofLaunchConfigurationDelegate extends
 			// Compute class path entries
 			List<String> classpathEntries = new LinkedList<String>();
 
-			// TODO Include GWT DevMode on class path
+			// Include the Office plug-in Launch jar on class path
+			IClasspathEntry officePluginLaunchClassPathEntry = ClasspathUtil
+					.createClasspathEntry(defaultMainClass, null);
+			String officePluginLaunchClassPathLocation = officePluginLaunchClassPathEntry
+					.getPath().toOSString();
+			classpathEntries.add(officePluginLaunchClassPathLocation);
+
+			// Include GWT DevMode on class path
+			String projectLocation = javaProject.getProject().getLocation()
+					.toOSString();
+			File pomFile = new File(projectLocation, "pom.xml");
+			String[] devModeClassPath = WoofDevelopmentConfigurationLoader
+					.getDevModeClassPath(pomFile);
+			classpathEntries.addAll(Arrays.asList(devModeClassPath));
 
 			// Include the source paths on class path
 			String[] sourcePath = getSourcePath(configuration);
@@ -243,7 +307,8 @@ public class WoofLaunchConfigurationDelegate extends
 					mainTypeName,
 					classpathEntries.toArray(new String[classpathEntries.size()]));
 			runConfiguration.setBootClassPath(bootPath);
-			runConfiguration.setProgramArguments(programArguments);
+			runConfiguration.setProgramArguments(programArguments
+					.toArray(new String[programArguments.size()]));
 			runConfiguration.setEnvironment(environment);
 			runConfiguration.setVMArguments(executionArguments
 					.getVMArgumentsArray());
