@@ -4,14 +4,14 @@
 			class="net.officefloor.launch.woof.MockTemplateLogic">
 			<extension class="GWT">
 				<property name="gwt.module.path"
-					value="net/officefloor/launch/woof/template.gwt.xml" />
+					value="net/officefloor/launch/woof/Test.gwt.xml" />
 			</extension>
 		</template>
 	</templates>
 	<sections>
-		<section name="SECTION" source="DESK" location="DESK_LOCATION">
-			<input name="INPUT_NO_URI" parameter-type="java.lang.Integer" />
-			<input name="INPUT" uri="section" />
+		<section name="SECTION" source="CLASS" location="net.officefloor.launch.woof.MockTemplateLogic">
+			<input name="inputOne" parameter-type="java.lang.Integer" />
+			<input name="inputTwo" uri="section" />
 		</section>
 	</sections>
 </woof>

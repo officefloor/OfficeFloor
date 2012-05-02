@@ -95,11 +95,12 @@ public class WoofDevelopmentLauncher {
 	 */
 	public static void main(String... arguments) throws Exception {
 
-		// Obtain the project directory
-		File projectDirectory = new File(arguments[0]);
+		// Obtain the configuration file
+		File configurationFile = new File(arguments[0]);
 
-		// Load the Maven Project
-		
+		// Load the configuration
+		WoofDevelopmentConfiguration configuration = new WoofDevelopmentConfiguration(
+				configurationFile);
 
 		// Create the arguments
 		List<String> gwtArguments = new LinkedList<String>();
@@ -108,8 +109,25 @@ public class WoofDevelopmentLauncher {
 		gwtArguments.addAll(Arrays.asList("-server",
 				WoofServletContainerLauncher.class.getName()));
 
-		// Configure specific arguments
-		gwtArguments.addAll(Arrays.asList(arguments));
+		// Add Startup URLs
+		for (String startupUrl : configuration.getStartupUrls()) {
+			gwtArguments.add("-startupUrl");
+			gwtArguments.add(startupUrl);
+		}
+
+		// Configure specific arguments (removing configuration file argument)
+		String[] devModeArguments = new String[arguments.length - 1];
+		if (devModeArguments.length > 0) {
+			// Strip of configuration file argument and include
+			System.arraycopy(arguments, 1, devModeArguments, 0,
+					devModeArguments.length);
+			gwtArguments.addAll(Arrays.asList(arguments));
+		}
+
+		// Add GWT module names
+		for (String moduleName : configuration.getModuleNames()) {
+			gwtArguments.add(moduleName);
+		}
 
 		// Obtain the GWT Launcher
 		GwtLauncher gwtLauncher = launcher;
