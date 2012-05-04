@@ -862,7 +862,8 @@ public class WebApplicationAutoWireOfficeFloorSourceTest extends
 
 		// Add configuration
 		OfficeFloorCompiler compiler = this.source.getOfficeFloorCompiler();
-		compiler.addProperty(SourceHttpResourceFactory.PROPERTY_WAR_DIRECTORY,
+		compiler.addProperty(
+				SourceHttpResourceFactory.PROPERTY_RESOURCE_DIRECTORIES,
 				warDirectory.getAbsolutePath());
 		compiler.addProperty(
 				SourceHttpResourceFactory.PROPERTY_DEFAULT_DIRECTORY_FILE_NAMES,
@@ -899,7 +900,8 @@ public class WebApplicationAutoWireOfficeFloorSourceTest extends
 
 		// Add configuration
 		OfficeFloorCompiler compiler = this.source.getOfficeFloorCompiler();
-		compiler.addProperty(SourceHttpResourceFactory.PROPERTY_WAR_DIRECTORY,
+		compiler.addProperty(
+				SourceHttpResourceFactory.PROPERTY_RESOURCE_DIRECTORIES,
 				warDirectory.getAbsolutePath());
 		compiler.addProperty(
 				SourceHttpResourceFactory.PROPERTY_DEFAULT_DIRECTORY_FILE_NAMES,

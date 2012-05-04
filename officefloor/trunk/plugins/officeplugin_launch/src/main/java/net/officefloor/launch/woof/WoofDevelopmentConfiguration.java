@@ -21,6 +21,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Properties;
@@ -33,6 +34,16 @@ import java.util.Properties;
 public class WoofDevelopmentConfiguration {
 
 	/**
+	 * Property name to provide the WAR directory.
+	 */
+	private static final String PROPERTY_WAR_DIRECTORY = "war.directory";
+
+	/**
+	 * Prefix of the property name to provide the resource directories.
+	 */
+	private static final String PROPERTY_RESOURCE_DIRECTORY_PREFIX = "resource.directory";
+
+	/**
 	 * Prefix of the property name to provide the GWT Module Names.
 	 */
 	private static final String PROPERTY_GWT_MODULE_NAME_PREFIX = "gwt.module.name";
@@ -41,6 +52,16 @@ public class WoofDevelopmentConfiguration {
 	 * Prefix of the property name to provide the Startup URL.
 	 */
 	private static final String PROPERTY_STARTUP_URL_PREFIX = "startup.url";
+
+	/**
+	 * WAR directory for deployed GWT files.
+	 */
+	private File warDirectory = null;
+
+	/**
+	 * Resource directories.
+	 */
+	private final List<File> resourceDirectories = new LinkedList<File>();
 
 	/**
 	 * Listing of the startup URLs.
@@ -75,6 +96,13 @@ public class WoofDevelopmentConfiguration {
 		properties.load(inputStream);
 		inputStream.close();
 
+		// Obtain the WAR directory
+		String warDirectoryPath = properties
+				.getProperty(PROPERTY_WAR_DIRECTORY);
+		if (warDirectoryPath != null) {
+			this.warDirectory = new File(warDirectoryPath);
+		}
+
 		// Load the GWT module names
 		this.loadValues(PROPERTY_GWT_MODULE_NAME_PREFIX, properties,
 				this.moduleNames);
@@ -82,6 +110,53 @@ public class WoofDevelopmentConfiguration {
 		// Load the Startup URLs
 		this.loadValues(PROPERTY_STARTUP_URL_PREFIX, properties,
 				this.startupUrls);
+
+		// Load the resource directories
+		List<String> resourceDirectoryPaths = new LinkedList<String>();
+		this.loadValues(PROPERTY_RESOURCE_DIRECTORY_PREFIX, properties,
+				resourceDirectoryPaths);
+		for (String resourceDirectoryPath : resourceDirectoryPaths) {
+			this.resourceDirectories.add(new File(resourceDirectoryPath));
+		}
+	}
+
+	/**
+	 * Specifies the WAR directory for deployed GWT files.
+	 * 
+	 * @param warDirectory
+	 *            WAR directory.
+	 */
+	public void setWarDirectory(File warDirectory) {
+		this.warDirectory = warDirectory;
+	}
+
+	/**
+	 * Obtains the WAR directory for deployed GWT files.
+	 * 
+	 * @return WAR directory.
+	 */
+	public File getWarDirectory() {
+		return this.warDirectory;
+	}
+
+	/**
+	 * Obtains the resource directories.
+	 * 
+	 * @return Resource directories.
+	 */
+	public File[] getResourceDirectories() {
+		return this.resourceDirectories
+				.toArray(new File[this.resourceDirectories.size()]);
+	}
+
+	/**
+	 * Adds a resource directory.
+	 * 
+	 * @param resourceDirectory
+	 *            Resource directory.
+	 */
+	public void addResourceDirectory(File resourceDirectory) {
+		this.resourceDirectories.add(resourceDirectory);
 	}
 
 	/**
@@ -146,6 +221,12 @@ public class WoofDevelopmentConfiguration {
 		// Create the properties
 		Properties properties = new Properties();
 
+		// Load the WAR directory
+		if (this.warDirectory != null) {
+			properties.setProperty(PROPERTY_WAR_DIRECTORY,
+					this.warDirectory.getAbsolutePath());
+		}
+
 		// Load the GWT module names
 		this.storeValues(PROPERTY_GWT_MODULE_NAME_PREFIX, this.moduleNames,
 				properties);
@@ -153,6 +234,15 @@ public class WoofDevelopmentConfiguration {
 		// Load the Startup URLs
 		this.storeValues(PROPERTY_STARTUP_URL_PREFIX, this.startupUrls,
 				properties);
+
+		// Load the resource directory paths
+		List<String> resourceDirectoryPaths = new ArrayList<String>(
+				this.resourceDirectories.size());
+		for (File resourceDirectory : this.resourceDirectories) {
+			resourceDirectoryPaths.add(resourceDirectory.getAbsolutePath());
+		}
+		this.storeValues(PROPERTY_RESOURCE_DIRECTORY_PREFIX,
+				resourceDirectoryPaths, properties);
 
 		// Write properties to configuration file
 		FileOutputStream outputStream = new FileOutputStream(configurationFile);

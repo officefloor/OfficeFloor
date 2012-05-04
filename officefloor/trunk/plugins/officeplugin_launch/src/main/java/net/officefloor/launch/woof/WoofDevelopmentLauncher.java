@@ -109,10 +109,14 @@ public class WoofDevelopmentLauncher {
 		gwtArguments.addAll(Arrays.asList("-server",
 				WoofServletContainerLauncher.class.getName()));
 
+		// Configure the war as configuration file
+		File warDirectory = configuration.getWarDirectory();
+		gwtArguments.addAll(Arrays.asList("-war",
+				warDirectory.getAbsolutePath()));
+
 		// Add Startup URLs
 		for (String startupUrl : configuration.getStartupUrls()) {
-			gwtArguments.add("-startupUrl");
-			gwtArguments.add(startupUrl);
+			gwtArguments.addAll(Arrays.asList("-startupUrl", startupUrl));
 		}
 
 		// Configure specific arguments (removing configuration file argument)
