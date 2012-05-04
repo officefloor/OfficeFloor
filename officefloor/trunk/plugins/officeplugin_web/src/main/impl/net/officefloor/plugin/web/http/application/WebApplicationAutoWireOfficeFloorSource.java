@@ -38,6 +38,7 @@ import net.officefloor.compile.spi.section.SectionOutput;
 import net.officefloor.frame.api.escalate.Escalation;
 import net.officefloor.frame.api.execute.Task;
 import net.officefloor.plugin.web.http.parameters.source.HttpParametersObjectManagedObjectSource;
+import net.officefloor.plugin.web.http.resource.source.SourceHttpResourceFactory;
 import net.officefloor.plugin.web.http.session.clazz.source.HttpSessionClassManagedObjectSource;
 import net.officefloor.plugin.web.http.template.section.HttpTemplateSectionSource;
 
@@ -412,9 +413,16 @@ public class WebApplicationAutoWireOfficeFloorSource extends
 
 		} else {
 			// Use default non-handled servicer (file sending)
-			AutoWireSection nonHandledServicer = this.addSection(
+			final AutoWireSection nonHandledServicer = this.addSection(
 					"NON_HANDLED_SERVICER",
 					HttpFileSenderSectionSource.class.getName(), null);
+			SourceHttpResourceFactory.copyProperties(context,
+					new SourceHttpResourceFactory.PropertyTarget() {
+						@Override
+						public void addProperty(String name, String value) {
+							nonHandledServicer.addProperty(name, value);
+						}
+					});
 			this.link(httpSection,
 					WebApplicationSectionSource.UNHANDLED_REQUEST_OUTPUT_NAME,
 					nonHandledServicer,

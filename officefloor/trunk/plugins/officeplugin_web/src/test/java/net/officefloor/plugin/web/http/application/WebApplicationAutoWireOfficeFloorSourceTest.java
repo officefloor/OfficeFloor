@@ -18,6 +18,8 @@
 
 package net.officefloor.plugin.web.http.application;
 
+import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.Serializable;
@@ -27,6 +29,7 @@ import java.sql.SQLException;
 import net.officefloor.autowire.AutoWire;
 import net.officefloor.autowire.AutoWireManagement;
 import net.officefloor.autowire.AutoWireSection;
+import net.officefloor.compile.OfficeFloorCompiler;
 import net.officefloor.compile.spi.office.OfficeSectionInput;
 import net.officefloor.compile.spi.office.OfficeSectionOutput;
 import net.officefloor.frame.api.escalate.Escalation;
@@ -37,6 +40,7 @@ import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
 import net.officefloor.plugin.socket.server.http.server.MockHttpServer;
 import net.officefloor.plugin.socket.server.http.source.HttpServerSocketManagedObjectSource;
 import net.officefloor.plugin.web.http.resource.source.HttpFileSenderWorkSource;
+import net.officefloor.plugin.web.http.resource.source.SourceHttpResourceFactory;
 import net.officefloor.plugin.web.http.session.HttpSession;
 import net.officefloor.plugin.web.http.session.source.HttpSessionManagedObjectSource;
 import net.officefloor.plugin.web.http.template.parse.HttpTemplate;
@@ -845,6 +849,80 @@ public class WebApplicationAutoWireOfficeFloorSourceTest extends
 			WebApplicationAutoWireOfficeFloorSourceTest.writeResponse(
 					"NON_ROUTED - " + uri, connection);
 		}
+	}
+
+	/**
+	 * Ensure able to obtain resources.
+	 */
+	public void testObtainResources() throws Exception {
+
+		// Obtain war directory
+		File warDirectory = this.findFile(this.getClass(), "template.ofp")
+				.getParentFile();
+
+		// Add configuration
+		OfficeFloorCompiler compiler = this.source.getOfficeFloorCompiler();
+		compiler.addProperty(SourceHttpResourceFactory.PROPERTY_WAR_DIRECTORY,
+				warDirectory.getAbsolutePath());
+		compiler.addProperty(
+				SourceHttpResourceFactory.PROPERTY_DEFAULT_DIRECTORY_FILE_NAMES,
+				"resource.html");
+
+		// Start the HTTP Server
+		this.source.openOfficeFloor();
+
+		// Ensure class path resources are available
+		this.assertHttpRequest("/resource.html", 200, "RESOURCE");
+		this.assertHttpRequest("/", 200, "RESOURCE");
+
+		// Ensure WAR directory resource are available
+		this.assertHttpRequest("/template.ofp", 200, "#{submit}");
+	}
+
+	/**
+	 * Ensure able to obtain changing resources.
+	 */
+	public void testObtainChangingResources() throws Exception {
+
+		// Create WAR directory in temp for testing
+		File warDirectory = new File(System.getProperty("java.io.tmpdir"), this
+				.getClass().getSimpleName() + "-" + this.getName());
+		if (warDirectory.exists()) {
+			this.deleteDirectory(warDirectory);
+		}
+		assertTrue("Failed to create WAR directory", warDirectory.mkdir());
+
+		// Create file within war directory
+		FileWriter writer = new FileWriter(new File(warDirectory, "test.html"));
+		writer.write(this.getName());
+		writer.close();
+
+		// Add configuration
+		OfficeFloorCompiler compiler = this.source.getOfficeFloorCompiler();
+		compiler.addProperty(SourceHttpResourceFactory.PROPERTY_WAR_DIRECTORY,
+				warDirectory.getAbsolutePath());
+		compiler.addProperty(
+				SourceHttpResourceFactory.PROPERTY_DEFAULT_DIRECTORY_FILE_NAMES,
+				"test.html");
+		compiler.addProperty(
+				SourceHttpResourceFactory.PROPERTY_DIRECT_STATIC_CONTENT,
+				String.valueOf(false));
+
+		// Start the HTTP Server
+		this.source.openOfficeFloor();
+
+		// Ensure obtain resource
+		this.assertHttpRequest("/test.html", 200, this.getName());
+		this.assertHttpRequest("/", 200, this.getName());
+
+		// Change the resource
+		writer = new FileWriter(new File(warDirectory, "test.html"));
+		writer.write("CHANGED");
+		writer.close();
+
+		// Ensure as not keeping in direct memory that pick up changes
+		this.assertHttpRequest("/test.html", 200, "CHANGED");
+		this.assertHttpRequest("/", 200, "CHANGED");
 	}
 
 	/**

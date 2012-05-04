@@ -24,6 +24,7 @@ import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 
 import net.officefloor.frame.spi.source.SourceContext;
+import net.officefloor.frame.spi.source.SourceProperties;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.web.http.application.WebAutoWireApplication;
 import net.officefloor.plugin.web.http.resource.FileExtensionHttpFileDescriber;
@@ -31,6 +32,7 @@ import net.officefloor.plugin.web.http.resource.HttpFile;
 import net.officefloor.plugin.web.http.resource.HttpFileDescriber;
 import net.officefloor.plugin.web.http.resource.HttpResource;
 import net.officefloor.plugin.web.http.resource.HttpResourceFactory;
+import net.officefloor.plugin.web.http.resource.source.SourceHttpResourceFactory.PropertyTarget;
 
 /**
  * Tests the {@link SourceHttpResourceFactory}.
@@ -48,6 +50,86 @@ public class SourceHttpResourceFactoryTest extends OfficeFrameTestCase {
 	 * {@link HttpResourceFactory}.
 	 */
 	private HttpResourceFactory factory;
+
+	/**
+	 * Ensure if no properties specified that none are copied (handles nulls).
+	 */
+	public void testCopyNoProperties() {
+
+		final SourceProperties properties = this
+				.createMock(SourceProperties.class);
+		final PropertyTarget target = this.createMock(PropertyTarget.class);
+
+		// Record no properties
+		this.recordReturn(properties, properties.getProperty(
+				SourceHttpResourceFactory.PROPERTY_CLASS_PATH_PREFIX, null),
+				null);
+		this.recordReturn(properties, properties.getProperty(
+				SourceHttpResourceFactory.PROPERTY_WAR_DIRECTORY, null), null);
+		this.recordReturn(
+				properties,
+				properties
+						.getProperty(
+								SourceHttpResourceFactory.PROPERTY_DEFAULT_DIRECTORY_FILE_NAMES,
+								null), null);
+		this.recordReturn(
+				properties,
+				properties
+						.getProperty(
+								SourceHttpResourceFactory.PROPERTY_DIRECT_STATIC_CONTENT,
+								null), null);
+
+		// Test no properties
+		this.replayMockObjects();
+		SourceHttpResourceFactory.copyProperties(properties, target);
+		this.verifyMockObjects();
+	}
+
+	/**
+	 * Ensure able to copy properties.
+	 */
+	public void testCopyProperties() {
+
+		final SourceProperties properties = this
+				.createMock(SourceProperties.class);
+		final PropertyTarget target = this.createMock(PropertyTarget.class);
+
+		// Record properties
+		this.recordReturn(properties, properties.getProperty(
+				SourceHttpResourceFactory.PROPERTY_CLASS_PATH_PREFIX, null),
+				"CLASSPATH");
+		target.addProperty(
+				SourceHttpResourceFactory.PROPERTY_CLASS_PATH_PREFIX,
+				"CLASSPATH");
+		this.recordReturn(properties, properties.getProperty(
+				SourceHttpResourceFactory.PROPERTY_WAR_DIRECTORY, null),
+				"WAR_DIRECTORY");
+		target.addProperty(SourceHttpResourceFactory.PROPERTY_WAR_DIRECTORY,
+				"WAR_DIRECTORY");
+		this.recordReturn(
+				properties,
+				properties
+						.getProperty(
+								SourceHttpResourceFactory.PROPERTY_DEFAULT_DIRECTORY_FILE_NAMES,
+								null), "DEFAULT_FILE");
+		target.addProperty(
+				SourceHttpResourceFactory.PROPERTY_DEFAULT_DIRECTORY_FILE_NAMES,
+				"DEFAULT_FILE");
+		this.recordReturn(
+				properties,
+				properties
+						.getProperty(
+								SourceHttpResourceFactory.PROPERTY_DIRECT_STATIC_CONTENT,
+								null), "DIRECT_CONTENT");
+		target.addProperty(
+				SourceHttpResourceFactory.PROPERTY_DIRECT_STATIC_CONTENT,
+				"DIRECT_CONTENT");
+
+		// Test no properties
+		this.replayMockObjects();
+		SourceHttpResourceFactory.copyProperties(properties, target);
+		this.verifyMockObjects();
+	}
 
 	/**
 	 * Ensure defaults with
