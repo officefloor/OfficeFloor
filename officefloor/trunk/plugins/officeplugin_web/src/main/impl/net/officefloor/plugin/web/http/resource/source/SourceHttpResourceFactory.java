@@ -24,6 +24,8 @@ import java.nio.ByteBuffer;
 import java.util.LinkedList;
 import java.util.List;
 
+import net.officefloor.compile.properties.Property;
+import net.officefloor.compile.spi.officefloor.OfficeFloorDeployer;
 import net.officefloor.compile.spi.work.source.WorkSource;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.spi.source.SourceContext;
@@ -53,6 +55,68 @@ import net.officefloor.plugin.web.http.resource.war.WarHttpResourceFactory;
  * @author Daniel Sagenschneider
  */
 public class SourceHttpResourceFactory implements HttpResourceFactory {
+
+	/**
+	 * <p>
+	 * Target to add {@link Property} values.
+	 * <p>
+	 * This allows differing target types to receive the {@link Property}
+	 * values.
+	 */
+	public static interface PropertyTarget {
+
+		/**
+		 * Adds the {@link Property}.
+		 * 
+		 * @param name
+		 *            Name.
+		 * @param value
+		 *            Value.
+		 */
+		void addProperty(String name, String value);
+	}
+
+	/**
+	 * <p>
+	 * Copies the {@link Property} values of interest.
+	 * <p>
+	 * This is to aid configuration within the {@link OfficeFloorDeployer} to be
+	 * provided down to this.
+	 * 
+	 * @param properties
+	 *            {@link SourceProperties}.
+	 * @param target
+	 *            {@link PropertyTarget}.
+	 */
+	public static void copyProperties(SourceProperties properties,
+			PropertyTarget target) {
+		copyProperty(properties, PROPERTY_CLASS_PATH_PREFIX, target);
+		copyProperty(properties, PROPERTY_WAR_DIRECTORY, target);
+		copyProperty(properties, PROPERTY_DEFAULT_DIRECTORY_FILE_NAMES, target);
+		copyProperty(properties, PROPERTY_DIRECT_STATIC_CONTENT, target);
+	}
+
+	/**
+	 * Copies a particular {@link Property}.
+	 * 
+	 * @param properties
+	 *            {@link SourceProperties}.
+	 * @param propertyName
+	 *            Name of {@link Property} to copy.
+	 * @param target
+	 *            {@link PropertyTarget}.
+	 */
+	private static void copyProperty(SourceProperties properties,
+			String propertyName, PropertyTarget target) {
+
+		// Obtain the property value
+		String propertyValue = properties.getProperty(propertyName, null);
+
+		// Only copy if have a value
+		if (propertyValue != null) {
+			target.addProperty(propertyName, propertyValue);
+		}
+	}
 
 	/**
 	 * Property to specify the WAR directory.
