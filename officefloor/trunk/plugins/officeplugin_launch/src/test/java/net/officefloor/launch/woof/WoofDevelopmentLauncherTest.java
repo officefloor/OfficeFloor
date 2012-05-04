@@ -35,7 +35,6 @@ import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.maven.model.Dependency;
 import org.apache.maven.project.MavenProject;
 import org.codehaus.plexus.DefaultPlexusContainer;
-import org.junit.Ignore;
 
 import com.google.gwt.dev.DevMode;
 
@@ -44,7 +43,6 @@ import com.google.gwt.dev.DevMode;
  * 
  * @author Daniel Sagenschneider
  */
-@Ignore("TODO include when WoofServletContainerLauncher able to serve content")
 public class WoofDevelopmentLauncherTest extends OfficeFrameTestCase implements
 		GwtLauncher {
 
@@ -178,12 +176,23 @@ public class WoofDevelopmentLauncherTest extends OfficeFrameTestCase implements
 
 		// Re-use test class path for running
 
+		// Create the WAR directory
+		File warDirectory = new File(System.getProperty("java.io.tmpdir"), this
+				.getClass().getSimpleName() + "-" + this.getName());
+		if (warDirectory.exists()) {
+			this.deleteDirectory(warDirectory);
+		}
+		assertTrue("Ensure WAR directory available", warDirectory.mkdir());
+
 		// Create configuration for running (keeps command smaller)
 		File woofFile = this.findFile("application.woof");
 		WoofDevelopmentConfiguration configuration = WoofDevelopmentConfigurationLoader
 				.loadConfiguration(new FileInputStream(woofFile));
-		File configurationFile = File.createTempFile("woof-configuration-",
-				".properties");
+		configuration.setWarDirectory(warDirectory);
+
+		// Store the configuration
+		File configurationFile = new File(warDirectory,
+				WoofServletContainerLauncher.CONFIGURATION_FILE_NAME);
 		configuration.storeConfiguration(configurationFile);
 
 		// Run the dev mode (with WoOF embedded server)
@@ -192,9 +201,9 @@ public class WoofDevelopmentLauncherTest extends OfficeFrameTestCase implements
 
 		// Validate the arguments
 		final String[] expectedArguments = new String[] { "-server",
-				WoofServletContainerLauncher.class.getName(), "-startupUrl",
-				"/template", "-startupUrl", "/section",
-				"net.officefloor.launch.woof.Test" };
+				WoofServletContainerLauncher.class.getName(), "-war",
+				warDirectory.getAbsolutePath(), "-startupUrl", "/template",
+				"-startupUrl", "/section", "net.officefloor.launch.woof.Test" };
 		assertEquals("Incorrect number of arguments", expectedArguments.length,
 				this.devMode.arguments.length);
 		for (int i = 0; i < expectedArguments.length; i++) {
@@ -203,13 +212,16 @@ public class WoofDevelopmentLauncherTest extends OfficeFrameTestCase implements
 		}
 
 		// Allow some time for GWT development to start up
-		Thread.sleep(10000);
+		Thread.sleep(5000);
 
 		// Ensure template available
 		this.doHttpRequest(8888, "template", "TEMPLATE");
 
 		// Ensure section available
 		this.doHttpRequest(8888, "section", "SECTION");
+
+		// Ensure able to obtain resource
+		this.doHttpRequest(8888, "classpath.html", "CLASSPATH");
 	}
 
 	/**

@@ -65,7 +65,8 @@ public class SourceHttpResourceFactoryTest extends OfficeFrameTestCase {
 				SourceHttpResourceFactory.PROPERTY_CLASS_PATH_PREFIX, null),
 				null);
 		this.recordReturn(properties, properties.getProperty(
-				SourceHttpResourceFactory.PROPERTY_WAR_DIRECTORY, null), null);
+				SourceHttpResourceFactory.PROPERTY_RESOURCE_DIRECTORIES, null),
+				null);
 		this.recordReturn(
 				properties,
 				properties
@@ -102,9 +103,10 @@ public class SourceHttpResourceFactoryTest extends OfficeFrameTestCase {
 				SourceHttpResourceFactory.PROPERTY_CLASS_PATH_PREFIX,
 				"CLASSPATH");
 		this.recordReturn(properties, properties.getProperty(
-				SourceHttpResourceFactory.PROPERTY_WAR_DIRECTORY, null),
+				SourceHttpResourceFactory.PROPERTY_RESOURCE_DIRECTORIES, null),
 				"WAR_DIRECTORY");
-		target.addProperty(SourceHttpResourceFactory.PROPERTY_WAR_DIRECTORY,
+		target.addProperty(
+				SourceHttpResourceFactory.PROPERTY_RESOURCE_DIRECTORIES,
 				"WAR_DIRECTORY");
 		this.recordReturn(
 				properties,
@@ -128,6 +130,59 @@ public class SourceHttpResourceFactoryTest extends OfficeFrameTestCase {
 		// Test no properties
 		this.replayMockObjects();
 		SourceHttpResourceFactory.copyProperties(properties, target);
+		this.verifyMockObjects();
+	}
+
+	/**
+	 * Ensure loads the properties if no configuration provided.
+	 */
+	public void testLoadNoProperties() {
+
+		final PropertyTarget target = this.createMock(PropertyTarget.class);
+
+		// Test
+		this.replayMockObjects();
+
+		// Null for no configuration
+		SourceHttpResourceFactory
+				.loadProperties(null, null, null, null, target);
+
+		// Empty values for no configuration
+		SourceHttpResourceFactory.loadProperties("", new File[0],
+				new String[0], null, target);
+
+		this.verifyMockObjects();
+	}
+
+	/**
+	 * Ensure loads the properties.
+	 */
+	public void testLoadProperties() throws Exception {
+
+		final PropertyTarget target = this.createMock(PropertyTarget.class);
+
+		File dirOne = this.findFile(this.getClass(), "index.html")
+				.getParentFile();
+		File dirTwo = this.findFile("PUBLIC/resource.html").getParentFile();
+
+		// Record properties
+		target.addProperty(
+				SourceHttpResourceFactory.PROPERTY_CLASS_PATH_PREFIX, "PREFIX");
+		target.addProperty(
+				SourceHttpResourceFactory.PROPERTY_RESOURCE_DIRECTORIES,
+				dirOne.getAbsolutePath() + ";" + dirTwo.getAbsolutePath());
+		target.addProperty(
+				SourceHttpResourceFactory.PROPERTY_DEFAULT_DIRECTORY_FILE_NAMES,
+				"another.html;test.html");
+		target.addProperty(
+				SourceHttpResourceFactory.PROPERTY_DIRECT_STATIC_CONTENT,
+				"false");
+
+		// Test
+		this.replayMockObjects();
+		SourceHttpResourceFactory.loadProperties("PREFIX", new File[] { dirOne,
+				dirTwo }, new String[] { "another.html", "test.html" },
+				Boolean.FALSE, target);
 		this.verifyMockObjects();
 	}
 
@@ -292,7 +347,7 @@ public class SourceHttpResourceFactoryTest extends OfficeFrameTestCase {
 
 		// Record the creation
 		this.recordReturn(this.context, this.context.getProperty(
-				SourceHttpResourceFactory.PROPERTY_WAR_DIRECTORY, null),
+				SourceHttpResourceFactory.PROPERTY_RESOURCE_DIRECTORIES, null),
 				warDirectory);
 		this.recordReturn(
 				this.context,

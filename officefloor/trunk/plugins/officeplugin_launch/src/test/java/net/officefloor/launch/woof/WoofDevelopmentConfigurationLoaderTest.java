@@ -54,10 +54,18 @@ public class WoofDevelopmentConfigurationLoaderTest extends OfficeFrameTestCase 
 		WoofDevelopmentConfiguration configuration = WoofDevelopmentConfigurationLoader
 				.loadConfiguration(new FileInputStream(woofFile));
 
-		// Obtain the configuration file
-		File configurationFile = File.createTempFile(this.getName(), ".test");
+		// Add WAR directory
+		File warDirectory = woofFile.getParentFile();
+		configuration.setWarDirectory(warDirectory);
+
+		// Add additional resource directories
+		File resourceDirectoryOne = warDirectory.getParentFile();
+		configuration.addResourceDirectory(resourceDirectoryOne);
+		File resourceDirectoryTwo = resourceDirectoryOne.getParentFile();
+		configuration.addResourceDirectory(resourceDirectoryTwo);
 
 		// Serialise the configuration
+		File configurationFile = File.createTempFile(this.getName(), ".test");
 		configuration.storeConfiguration(configurationFile);
 
 		// Obtain the configuration from store
@@ -66,6 +74,24 @@ public class WoofDevelopmentConfigurationLoaderTest extends OfficeFrameTestCase 
 
 		// Validate the serialised configuration
 		assertWoofDevelopmentConfiguration(serialisedConfiguration);
+
+		// Validate the WAR directory
+		assertEquals("Incorrect WAR directory",
+				warDirectory.getCanonicalPath(), serialisedConfiguration
+						.getWarDirectory().getCanonicalPath());
+
+		// Validate the resource directories
+		File[] resourceDirectories = serialisedConfiguration
+				.getResourceDirectories();
+		String[] resourceDirectoryPaths = new String[resourceDirectories.length];
+		for (int i = 0; i < resourceDirectories.length; i++) {
+			resourceDirectoryPaths[i] = resourceDirectories[i]
+					.getCanonicalPath();
+		}
+		assertStringArraySet("Incorrect resource directories",
+				resourceDirectoryPaths,
+				resourceDirectoryOne.getCanonicalPath(),
+				resourceDirectoryTwo.getCanonicalPath());
 	}
 
 	/**

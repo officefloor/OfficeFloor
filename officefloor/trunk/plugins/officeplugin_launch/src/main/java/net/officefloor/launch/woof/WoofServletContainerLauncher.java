@@ -20,14 +20,9 @@ package net.officefloor.launch.woof;
 import java.io.File;
 import java.net.BindException;
 
-import net.officefloor.autowire.AutoWireOfficeFloor;
-import net.officefloor.frame.api.manage.OfficeFloor;
-import net.officefloor.plugin.woof.WoofOfficeFloorSource;
-
 import com.google.gwt.core.ext.ServletContainer;
 import com.google.gwt.core.ext.ServletContainerLauncher;
 import com.google.gwt.core.ext.TreeLogger;
-import com.google.gwt.core.ext.UnableToCompleteException;
 
 /**
  * WoOF {@link ServletContainerLauncher}.
@@ -36,75 +31,40 @@ import com.google.gwt.core.ext.UnableToCompleteException;
  */
 public class WoofServletContainerLauncher extends ServletContainerLauncher {
 
+	/**
+	 * {@link File} name containing the {@link WoofDevelopmentConfiguration}
+	 * within the WAR directory.
+	 */
+	public static final String CONFIGURATION_FILE_NAME = "woof-development-configuration.properties";
+
 	/*
 	 * ==================== ServletContainerLauncher =======================
 	 */
 
 	@Override
 	public String getName() {
-		return "WoOF";
+		return "OfficeFloor (WoOF)";
 	}
 
 	@Override
 	public ServletContainer start(TreeLogger logger, int port, File appRootDir)
 			throws BindException, Exception {
+
+		// Load the WoOF configuration
+		WoofDevelopmentConfiguration configuration = new WoofDevelopmentConfiguration(
+				new File(appRootDir, CONFIGURATION_FILE_NAME));
+
+		// Include WAR directory in resource directories
+		File[] configuredDirectories = configuration.getResourceDirectories();
+		File[] resourceDirectories = new File[configuredDirectories.length + 1];
+		resourceDirectories[0] = appRootDir;
+		if (configuredDirectories.length > 0) {
+			System.arraycopy(configuredDirectories, 0, resourceDirectories, 1,
+					configuredDirectories.length);
+		}
+
 		// Create and return the WoOF container
-		return new WoofServletContainer(port, appRootDir);
-	}
-
-	/**
-	 * Woof {@link ServletContainer}.
-	 */
-	private static class WoofServletContainer extends ServletContainer {
-
-		/**
-		 * Port.
-		 */
-		private final int port;
-
-		/**
-		 * {@link AutoWireOfficeFloor}.
-		 */
-		private AutoWireOfficeFloor officeFloor;
-
-		/**
-		 * Initiate.
-		 * 
-		 * @param port
-		 *            Port.
-		 * @param appRootDir
-		 *            Application root directory.
-		 * @throws Exception
-		 *             If fails to open {@link OfficeFloor}.
-		 */
-		public WoofServletContainer(int port, File appRootDir) throws Exception {
-			this.port = port;
-
-			// Open the OfficeFloor
-			WoofOfficeFloorSource source = new WoofOfficeFloorSource();
-			this.officeFloor = source.openOfficeFloor();
-		}
-
-		/*
-		 * ====================== ServletContainer ==========================
-		 */
-
-		@Override
-		public int getPort() {
-			return this.port;
-		}
-
-		@Override
-		public void refresh() throws UnableToCompleteException {
-			// TODO consider allowing restart
-			throw new UnableToCompleteException();
-		}
-
-		@Override
-		public void stop() throws UnableToCompleteException {
-			// Close OfficeFloor (stopping container)
-			this.officeFloor.closeOfficeFloor();
-		}
+		return new WoofServletContainer(logger, port, resourceDirectories);
 	}
 
 }
