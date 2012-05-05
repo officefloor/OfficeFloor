@@ -44,6 +44,11 @@ public class WoofServletContainer extends ServletContainer {
 	private final TreeLogger logger;
 
 	/**
+	 * Name of this container.
+	 */
+	private final String containerName;
+
+	/**
 	 * Port.
 	 */
 	private final int port;
@@ -63,6 +68,8 @@ public class WoofServletContainer extends ServletContainer {
 	 * 
 	 * @param logger
 	 *            {@link TreeLogger}.
+	 * @param containerName
+	 *            Name of this container.
 	 * @param port
 	 *            Port.
 	 * @param resourceDirectories
@@ -70,9 +77,10 @@ public class WoofServletContainer extends ServletContainer {
 	 * @throws Exception
 	 *             If fails to open {@link OfficeFloor}.
 	 */
-	public WoofServletContainer(TreeLogger logger, int port,
-			File[] resourceDirectories) throws Exception {
+	public WoofServletContainer(TreeLogger logger, String containerName,
+			int port, File[] resourceDirectories) throws Exception {
 		this.logger = logger;
+		this.containerName = containerName;
 		this.port = port;
 		this.resourceDirectories = resourceDirectories;
 
@@ -98,7 +106,7 @@ public class WoofServletContainer extends ServletContainer {
 	 * @throws Exception
 	 *             If fails to start.
 	 */
-	public void start() throws Exception {
+	public void start() {
 
 		// Create WoOF
 		WebAutoWireApplication source = this.createWebAutoWireApplication();
@@ -122,9 +130,17 @@ public class WoofServletContainer extends ServletContainer {
 			// Open the OfficeFloor
 			this.officeFloor = source.openOfficeFloor();
 
+			// Log started
+			if (this.logger.isLoggable(Type.INFO)) {
+				this.logger.log(Type.INFO, this.containerName
+						+ " started on port " + this.port);
+			}
+
 		} catch (Throwable ex) {
 			// Log failure
-			this.logger.log(Type.ERROR, ex.getMessage(), ex);
+			if (this.logger.isLoggable(Type.ERROR)) {
+				this.logger.log(Type.ERROR, ex.getMessage(), ex);
+			}
 		}
 	}
 
@@ -144,16 +160,7 @@ public class WoofServletContainer extends ServletContainer {
 		this.stop();
 
 		// Start
-		try {
-			this.start();
-
-		} catch (Exception ex) {
-			// Log failure
-			this.logger.log(Type.ERROR, "Failed to re-start WoOF", ex);
-
-			// Indicate failure
-			throw new UnableToCompleteException();
-		}
+		this.start();
 	}
 
 	@Override
@@ -161,8 +168,15 @@ public class WoofServletContainer extends ServletContainer {
 
 		// Close OfficeFloor if running (stopping container)
 		if (this.officeFloor != null) {
+
+			// Stop container
 			this.officeFloor.closeOfficeFloor();
 			this.officeFloor = null; // clear reference
+
+			// Log container stopped
+			if (this.logger.isLoggable(Type.INFO)) {
+				this.logger.log(Type.INFO, this.containerName + " stopped");
+			}
 		}
 	}
 

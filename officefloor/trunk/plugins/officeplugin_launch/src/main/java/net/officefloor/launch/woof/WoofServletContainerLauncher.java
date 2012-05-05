@@ -64,7 +64,8 @@ public class WoofServletContainerLauncher extends ServletContainerLauncher {
 		}
 
 		// Create and return the WoOF container
-		return new WoofServletContainer(logger, port, resourceDirectories);
+		return new WoofServletContainer(logger, this.getName(), port,
+				resourceDirectories);
 	}
 
 }
