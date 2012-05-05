@@ -255,7 +255,7 @@ public class WoofLaunchConfigurationDelegate extends
 						new Status(
 								IStatus.ERROR,
 								WoofPlugin.PLUGIN_ID,
-								"Failed to obtain WoOF development launch configuration",
+								"Failed to create WoOF development launch configuration",
 								ex));
 			}
 
@@ -287,12 +287,19 @@ public class WoofLaunchConfigurationDelegate extends
 			classpathEntries.add(officePluginLaunchClassPathLocation);
 
 			// Include GWT DevMode on class path
-			String projectLocation = javaProject.getProject().getLocation()
-					.toOSString();
-			File pomFile = new File(projectLocation, "pom.xml");
-			String[] devModeClassPath = WoofDevelopmentConfigurationLoader
-					.getDevModeClassPath(pomFile);
-			classpathEntries.addAll(Arrays.asList(devModeClassPath));
+			try {
+				String projectLocation = javaProject.getProject().getLocation()
+						.toOSString();
+				File pomFile = new File(projectLocation, "pom.xml");
+				String[] devModeClassPath = WoofDevelopmentConfigurationLoader
+						.getDevModeClassPath(pomFile);
+				classpathEntries.addAll(Arrays.asList(devModeClassPath));
+			} catch (Exception ex) {
+				// Propagate failure
+				throw new CoreException(new Status(IStatus.ERROR,
+						WoofPlugin.PLUGIN_ID,
+						"Failed to obtain GWT development class path", ex));
+			}
 
 			// Include the source paths on class path
 			String[] sourcePath = getSourcePath(configuration);
