@@ -30,6 +30,7 @@ import net.officefloor.eclipse.classpath.ProjectClassLoader;
 import net.officefloor.launch.woof.WoofDevelopmentConfiguration;
 import net.officefloor.launch.woof.WoofDevelopmentConfigurationLoader;
 import net.officefloor.launch.woof.WoofDevelopmentLauncher;
+import net.officefloor.launch.woof.WoofServletContainerLauncher;
 import net.officefloor.plugin.woof.WoofOfficeFloorSource;
 
 import org.eclipse.core.resources.IResource;
@@ -196,9 +197,11 @@ public class WoofLaunchConfigurationDelegate extends
 			// Default main class
 			Class<?> defaultMainClass = WoofDevelopmentLauncher.class;
 
-			// Obtain the Java Project
+			// Obtain the Java Project and project directory
 			IJavaProject javaProject = JavaRuntime
 					.getJavaProject(configuration);
+			File projectDirectory = javaProject.getProject().getLocation()
+					.toFile();
 
 			// Ensure valid main type
 			String mainTypeName = this.getMainTypeName(configuration);
@@ -241,13 +244,45 @@ public class WoofLaunchConfigurationDelegate extends
 								+ javaProject.getElementName()));
 			}
 
+			// Load the WoOF development configuration
+			WoofDevelopmentConfiguration developmentConfiguration;
+			try {
+				developmentConfiguration = WoofDevelopmentConfigurationLoader
+						.loadConfiguration(applicationWoofInputStream);
+			} catch (Exception ex) {
+				// Propagate failure
+				throw new CoreException(new Status(IStatus.ERROR,
+						WoofPlugin.PLUGIN_ID,
+						"Fail to load "
+								+ WoofDevelopmentConfiguration.class
+										.getSimpleName(), ex));
+			}
+
+			// Register WAR target directory for configuration and GWT deploy
+			File targetWarDirectory = new File(projectDirectory, "target/war");
+			if (!(targetWarDirectory.exists())
+					&& (!(targetWarDirectory.mkdirs()))) {
+				// Ensure have target directory
+				throw new CoreException(new Status(IStatus.ERROR,
+						WoofPlugin.PLUGIN_ID, "Unable to create "
+								+ targetWarDirectory.getAbsolutePath()));
+			}
+			developmentConfiguration.setWarDirectory(targetWarDirectory);
+
+			// Add the source webapp directory (if available)
+			File srcMainWebappDirectory = new File(projectDirectory,
+					"src/main/webapp");
+			if (srcMainWebappDirectory.exists()) {
+				developmentConfiguration
+						.addResourceDirectory(srcMainWebappDirectory);
+			}
+
 			// Create configuration file for launching
 			File configurationFile;
 			try {
-				configurationFile = File.createTempFile("woof-launch-",
-						".properties");
-				WoofDevelopmentConfiguration developmentConfiguration = WoofDevelopmentConfigurationLoader
-						.loadConfiguration(applicationWoofInputStream);
+				// Must be in WAR directory for WoOF container to find
+				configurationFile = new File(targetWarDirectory,
+						WoofServletContainerLauncher.CONFIGURATION_FILE_NAME);
 				developmentConfiguration.storeConfiguration(configurationFile);
 			} catch (Exception ex) {
 				// Propagate failure
