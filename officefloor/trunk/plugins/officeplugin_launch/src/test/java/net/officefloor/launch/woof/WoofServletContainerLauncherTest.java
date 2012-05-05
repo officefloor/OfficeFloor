@@ -22,6 +22,8 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.Writer;
+import java.util.ArrayList;
+import java.util.List;
 
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.test.OfficeFrameTestCase;
@@ -67,6 +69,11 @@ public class WoofServletContainerLauncherTest extends OfficeFrameTestCase {
 	 * keep raw source and generated content separate.
 	 */
 	private File warDirectory;
+
+	/**
+	 * {@link MockTreeLogger}.
+	 */
+	private MockTreeLogger logger;
 
 	/**
 	 * {@link ServletContainer}.
@@ -115,9 +122,10 @@ public class WoofServletContainerLauncherTest extends OfficeFrameTestCase {
 				WoofServletContainerLauncher.CONFIGURATION_FILE_NAME));
 
 		// Start WoOF
+		this.logger = new MockTreeLogger();
 		WoofServletContainerLauncher launcher = new WoofServletContainerLauncher();
-		this.servletContainer = launcher.start(new MockTreeLogger(false),
-				this.port, this.warDirectory);
+		this.servletContainer = launcher.start(this.logger, this.port,
+				this.warDirectory);
 	}
 
 	@Override
@@ -190,11 +198,11 @@ public class WoofServletContainerLauncherTest extends OfficeFrameTestCase {
 		// Stop setup instance
 		this.servletContainer.stop();
 
-		// Create logger to receive failure to start
-		MockTreeLogger logger = new MockTreeLogger(true);
+		// Use fresh logger to just receive failure to start
+		MockTreeLogger logger = new MockTreeLogger();
 
 		// Attempt to start new instance that has invalid configuration
-		this.servletContainer = new WoofServletContainer(logger,
+		this.servletContainer = new WoofServletContainer(logger, "NAME",
 				MockHttpServer.getAvailablePort(), new File[0]) {
 			@Override
 			protected WebAutoWireApplication createWebAutoWireApplication() {
@@ -215,9 +223,7 @@ public class WoofServletContainerLauncherTest extends OfficeFrameTestCase {
 		String expectedMessage = "null null: Failed to source OfficeFloor from OfficeFloorSource (source="
 				+ WoofOfficeFloorSource.class.getName()
 				+ ", location=auto-wire)";
-		assertEquals("Incorrect log message", expectedMessage, logger.message);
-		assertEquals("Incorrect cause type", expectedMessage,
-				logger.cause.getMessage());
+		logger.validateLogMessages(expectedMessage);
 	}
 
 	/**
@@ -232,6 +238,11 @@ public class WoofServletContainerLauncherTest extends OfficeFrameTestCase {
 		this.doHttpRequest("source.html", "SOURCE");
 		this.doHttpRequest("target.html", "TARGET");
 		this.doHttpRequest("classpath.html", "CLASSPATH");
+
+		// Validate logging (starting/stopping)
+		this.logger.validateLogMessages("OfficeFloor (WoOF) started on port "
+				+ this.port, "OfficeFloor (WoOF) stopped",
+				"OfficeFloor (WoOF) started on port " + this.port);
 	}
 
 	/**
@@ -284,28 +295,23 @@ public class WoofServletContainerLauncherTest extends OfficeFrameTestCase {
 	private static class MockTreeLogger extends TreeLogger {
 
 		/**
-		 * Indicates if expecting logging within testing.
+		 * Log messages.
 		 */
-		private final boolean isExpectLogging;
+		public List<String> messages = new ArrayList<String>();
 
 		/**
-		 * Message.
-		 */
-		public String message = null;
-
-		/**
-		 * Cause.
-		 */
-		public Throwable cause = null;
-
-		/**
-		 * Initiate.
+		 * Validates the log messages.
 		 * 
-		 * @param isExpectLogging
-		 *            Indicates if expecting logging within testing.
+		 * @param expectedMessages
+		 *            Expected messages.
 		 */
-		public MockTreeLogger(boolean isExpectLogging) {
-			this.isExpectLogging = isExpectLogging;
+		private void validateLogMessages(String... expectedMessages) {
+			assertEquals("Incorrect number of log messages",
+					expectedMessages.length, this.messages.size());
+			for (int i = 0; i < expectedMessages.length; i++) {
+				assertEquals("Incorrect log message " + i, expectedMessages[i],
+						this.messages.get(i));
+			}
 		}
 
 		/*
@@ -321,28 +327,13 @@ public class WoofServletContainerLauncherTest extends OfficeFrameTestCase {
 
 		@Override
 		public boolean isLoggable(Type type) {
-			fail("Not expecting to check isLoggable");
-			return true;
+			return true; // always log for testing
 		}
 
 		@Override
 		public void log(Type type, String msg, Throwable caught,
 				HelpInfo helpInfo) {
-
-			// Ensure log
-			if (!this.isExpectLogging) {
-				fail("Not expecting to log");
-			}
-
-			// Log should always be for error
-			assertEquals("Incorrect log type", Type.ERROR, type);
-
-			// Ensure only the one log
-			assertNull("Should only expect one log", this.message);
-
-			// Provide details of log
-			this.message = msg;
-			this.cause = caught;
+			this.messages.add(msg);
 		}
 	}
 
