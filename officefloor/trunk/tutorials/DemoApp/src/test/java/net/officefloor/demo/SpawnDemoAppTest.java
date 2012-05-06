@@ -15,16 +15,10 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.tutorial.featureapp;
+package net.officefloor.demo;
 
 import java.io.File;
 import java.util.Properties;
-
-import org.apache.http.HttpResponse;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.conn.HttpHostConnectException;
-import org.apache.http.impl.client.DefaultHttpClient;
 
 import net.officefloor.building.command.parameters.KeyStoreOfficeFloorCommandParameter;
 import net.officefloor.building.command.parameters.KeyStorePasswordOfficeFloorCommandParameter;
@@ -39,12 +33,18 @@ import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.socket.server.http.server.MockHttpServer;
 import net.officefloor.plugin.woof.WoofOfficeFloorSource;
 
+import org.apache.http.HttpResponse;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.conn.HttpHostConnectException;
+import org.apache.http.impl.client.DefaultHttpClient;
+
 /**
  * Tests having the {@link OfficeBuilding} run this application.
  * 
  * @author Daniel Sagenschneider
  */
-public class SpawnFeatureAppTest extends OfficeFrameTestCase {
+public class SpawnDemoAppTest extends OfficeFrameTestCase {
 
 	/**
 	 * Ensure able to have {@link OfficeBuilding} run this application.
@@ -106,7 +106,7 @@ public class SpawnFeatureAppTest extends OfficeFrameTestCase {
 				try {
 					// Ensure able to obtain css file (via war plugin)
 					response = client.execute(new HttpGet("http://localhost:"
-							+ applicationPort + "/css/feature.css"));
+							+ applicationPort + "/css/Stocks.css"));
 					break CONNECTING; // connected
 				} catch (HttpHostConnectException ex) {
 					// Try again, after a moment

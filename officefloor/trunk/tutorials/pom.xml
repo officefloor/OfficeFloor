@@ -13,25 +13,24 @@
 	<name>Tutorials</name>
 	<description>Tutorials for OfficeFloor</description>
 	<modules>
-		<module>MyFirstWoofApp</module>
-		<module>StaticHttpServer</module>
-		<module>DynamicHttpServer</module>
-		<module>PageFlowHttpServer</module>
-		<module>NavigateHttpServer</module>
-		<module>SessionHttpServer</module>
-		<module>ExceptionHttpServer</module>
-		<module>FeatureApp</module>
-		<module>GwtApp</module>
-		<module>GwtService</module>
 		<module>CometApp</module>
 		<module>CometManualApp</module>
-		<module>ServletFilterWebApplication</module>
-		<module>ServletFilterJspIntegration</module>
-		<module>ServletFilterDependencyInjection</module>
 		<module>DatabaseHttpServer</module>
-		<module>StockWatchApp</module>
-		<module>TransactionHttpServer</module>
+		<module>DemoApp</module>
+		<module>DynamicHttpServer</module>
+		<module>ExceptionHttpServer</module>
+		<module>GwtApp</module>
+		<module>GwtService</module>
+		<module>MyFirstWoofApp</module>
+		<module>NavigateHttpServer</module>
+		<module>PageFlowHttpServer</module>
+		<module>ServletFilterDependencyInjection</module>
+		<module>ServletFilterJspIntegration</module>
+		<module>ServletFilterWebApplication</module>
+		<module>SessionHttpServer</module>
+		<module>StaticHttpServer</module>
 		<module>TeamHttpServer</module>
+		<module>TransactionHttpServer</module>
 	</modules>
 	<build>
 		<plugins>
