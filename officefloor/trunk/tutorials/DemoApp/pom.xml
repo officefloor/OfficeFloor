@@ -26,18 +26,12 @@
 			<artifactId>gwt-user</artifactId>
 		</dependency>
 		<dependency>
+			<groupId>com.google.gwt.google-apis</groupId>
+			<artifactId>gwt-visualization</artifactId>
+		</dependency>
+		<dependency>
 			<groupId>org.apache.httpcomponents</groupId>
 			<artifactId>httpclient</artifactId>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>net.officefloor.core</groupId>
-			<artifactId>officebuilding</artifactId>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>net.officefloor.plugin</groupId>
-			<artifactId>officeplugin_war</artifactId>
 			<scope>test</scope>
 		</dependency>
 	</dependencies>
