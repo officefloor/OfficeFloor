@@ -17,6 +17,7 @@
  */
 package net.officefloor.eclipse.woof.launch;
 
+import net.officefloor.launch.woof.WoofDevelopmentLauncher;
 import net.officefloor.plugin.woof.WoofOfficeFloorSource;
 
 import org.eclipse.core.resources.IProject;
@@ -124,8 +125,8 @@ public class WoofLaunchShortcut implements ILaunchShortcut {
 			// Obtain the configuration type
 			ILaunchConfigurationType configurationType = getConfigurationType();
 
-			// TODO Obtain the GWT DevMode
-			String devModeClassName = "todo.gwt.DevMode";
+			// Obtain the launcher for GWT DevMode with WoOF
+			String devModeClassName = WoofDevelopmentLauncher.class.getName();
 
 			// Create the working copy of configuration
 			workingCopy = configurationType.newInstance(

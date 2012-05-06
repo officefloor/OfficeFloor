@@ -192,7 +192,7 @@ public class WoofLaunchConfigurationDelegate extends
 		try {
 
 			// Indicate verifying launch
-			monitor.subTask("Verifying WoOF launch");
+			monitor.subTask("Configuring WoOF launch");
 
 			// Default main class
 			Class<?> defaultMainClass = WoofDevelopmentLauncher.class;
@@ -311,6 +311,12 @@ public class WoofLaunchConfigurationDelegate extends
 			// Obtain the boot path
 			String[] bootPath = this.getBootpath(configuration);
 
+			// Ensure continue to launch WoOF
+			if (monitor.isCanceled()) {
+				return; // cancel launch
+			}
+			monitor.subTask("Determining GWT development mode class path");
+
 			// Compute class path entries
 			List<String> classpathEntries = new LinkedList<String>();
 
@@ -374,6 +380,7 @@ public class WoofLaunchConfigurationDelegate extends
 			monitor.worked(1);
 
 			// Launch WoOF
+			monitor.subTask("Starting WoOF");
 			runner.run(runConfiguration, launch, monitor);
 
 			// check for cancellation
