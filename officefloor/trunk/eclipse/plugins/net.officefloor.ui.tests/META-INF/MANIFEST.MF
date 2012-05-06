@@ -5,10 +5,7 @@ Bundle-SymbolicName: net.officefloor.ui.tests;singleton:=true
 Bundle-Version: 2.2.0
 Fragment-Host: net.officefloor.ui;bundle-version="2.2.0"
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
-Export-Package: net.officefloor.eclipse.classpathcontainer,
- net.officefloor.eclipse.common.dialog,
- net.officefloor.eclipse.repository.project
-Import-Package: org.eclipse.core.runtime.content,
- org.eclipse.core.runtime.preferences;version="3.3.0",
- org.junit;version="4.8.1"
-Bundle-ClassPath: .
+Import-Package: org.junit;version="4.8.2"
+Bundle-ClassPath: .,
+ easymock-1.1.jar,
+ junit-4.8.2.jar
