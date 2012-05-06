@@ -56,7 +56,7 @@ public class ChatEntryPoint implements EntryPoint {
 	public void onModuleLoad() {
 
 		// Vertically align contents
-		RootPanel panel = RootPanel.get("chat");
+		RootPanel panel = RootPanel.get("ChatWidget");
 		VerticalPanel chatPanel = new VerticalPanel();
 		panel.add(chatPanel);
 

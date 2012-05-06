@@ -1,6 +1,16 @@
 <woof>
   <templates>
-    <template name="stocks" uri="stocks" path="stocks.html" class="net.officefloor.demo.stocks.StocksLogic" x="141" y="82">
+    <template name="chat" uri="chat" path="chat.html" class="net.officefloor.demo.chat.ChatLogic" x="65" y="137">
+      <output name="output" argument-type="">
+      </output>
+      <extension class="GWT">
+        <property name="gwt.module.path" value="net/officefloor/demo/chat/chat.gwt.xml"/>
+      </extension>
+      <extension class="COMET">
+        <property name="manual.publish.method.name" value=""/>
+      </extension>
+    </template>
+    <template name="stocks" uri="stocks" path="stocks.html" class="net.officefloor.demo.stocks.StocksLogic" x="61" y="57">
       <output name="output" argument-type="">
       </output>
       <extension class="GWT">
@@ -12,7 +22,7 @@
     </template>
   </templates>
   <sections>
-    <section name="JeeStockPricePublisher" source="net.officefloor.model.impl.desk.DeskModelSectionSource" location="JeeStockPricePublisher.desk" x="294" y="227">
+    <section name="JeeStockPricePublisher" source="net.officefloor.model.impl.desk.DeskModelSectionSource" location="JeeStockPricePublisher.desk" x="177" y="58">
       <input name="PUBLISH" parameter-type="net.officefloor.demo.stocks.JeeStockPricePublisherWorkSource$StockUpdate" uri=""/>
     </section>
   </sections>
