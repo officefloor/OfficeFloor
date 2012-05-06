@@ -15,27 +15,42 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.tutorial.stockwatchapp.client;
+package net.officefloor.demo;
 
-import net.officefloor.plugin.comet.CometPublisherInterface;
-import net.officefloor.plugin.comet.api.CometSubscriber;
+import net.officefloor.autowire.AutoWireManagement;
+import net.officefloor.frame.test.OfficeFrameTestCase;
+import net.officefloor.plugin.woof.WoofOfficeFloorSource;
 
 /**
- * {@link StockPrice} events.
+ * Test to run the application.
  * 
  * @author Daniel Sagenschneider
  */
-@CometPublisherInterface
-public interface StockPriceEvents extends CometSubscriber {
+public class RunDemoAppTest extends OfficeFrameTestCase {
 
 	/**
-	 * {@link StockPrice} event.
-	 * 
-	 * @param stockPrice
-	 *            {@link StockPrice}.
-	 * @param stock
-	 *            {@link Stock}.
+	 * Runs the application.
 	 */
-	void event(StockPrice stockPrice, Stock stock);
+	public void testRun() throws Exception {
+
+		// Stop all other offices
+		AutoWireManagement.closeAllOfficeFloors();
+
+		// Start
+		WoofOfficeFloorSource.main();
+
+		// Wait to stop
+		if ("wait".equals(System.getProperty("block.test"))) {
+			System.out.print("Press enter to finish");
+			System.out.flush();
+			System.in.read();
+		}
+	}
+
+	@Override
+	protected void tearDown() throws Exception {
+		// Stop the office
+		AutoWireManagement.closeAllOfficeFloors();
+	}
 
 }
