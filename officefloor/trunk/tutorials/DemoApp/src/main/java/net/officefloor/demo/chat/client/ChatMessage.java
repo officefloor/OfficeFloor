@@ -26,22 +26,69 @@ import com.google.gwt.user.client.rpc.IsSerializable;
  */
 public class ChatMessage implements IsSerializable {
 
+	/**
+	 * User name of user sending the {@link ChatMessage}.
+	 */
 	private String userName;
 
+	/**
+	 * Flag indicating if the user is typing.
+	 */
+	private boolean isTyping;
+
+	/**
+	 * Message text sent. May be <code>null</code> if user start typing
+	 * notification.
+	 */
 	private String message;
 
+	/**
+	 * Default constructor for {@link IsSerializable}.
+	 */
 	public ChatMessage() {
 	}
 
-	public ChatMessage(String userName, String message) {
+	/**
+	 * Initiate.
+	 * 
+	 * @param userName
+	 *            User name of user sending the {@link ChatMessage}.
+	 * @param isTyping
+	 *            Flag indicating if the user is typing.
+	 * @param message
+	 *            Message text sent. May be <code>null</code> if user start
+	 *            typing notification.
+	 */
+	public ChatMessage(String userName, boolean isTyping, String message) {
 		this.userName = userName;
+		this.isTyping = isTyping;
 		this.message = message;
 	}
 
+	/**
+	 * Obtains the user name of user sending the {@link ChatMessage}.
+	 * 
+	 * @return User name of user sending the {@link ChatMessage}.
+	 */
 	public String getUserName() {
 		return this.userName;
 	}
 
+	/**
+	 * Indicates if the user is typing.
+	 * 
+	 * @return <code>true</code> if the user is typing.
+	 */
+	public boolean isTyping() {
+		return this.isTyping;
+	}
+
+	/**
+	 * Obtains the message text sent.
+	 * 
+	 * @return Message text sent. May be <code>null</code> if a user start
+	 *         typing notification.
+	 */
 	public String getMessage() {
 		return this.message;
 	}
