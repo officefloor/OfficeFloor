@@ -27,6 +27,12 @@ import net.officefloor.plugin.comet.api.CometSubscriber;
  */
 public interface ConversationSubscription extends CometSubscriber {
 
-	void sendMessage(ChatMessage message);
+	/**
+	 * {@link ChatMessage} events.
+	 * 
+	 * @param message
+	 *            {@link ChatMessage}.
+	 */
+	void message(ChatMessage message);
 
 }

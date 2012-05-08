@@ -89,7 +89,9 @@ public class WoofDevelopmentLauncher {
 	 * <code>main</code> method to launch WoOF.
 	 * 
 	 * @param arguments
-	 *            Arguments.
+	 *            The first argument must be the location of the
+	 *            {@link WoofDevelopmentConfiguration} file. The remaining
+	 *            arguments are passed as is to the {@link GwtLauncher}.
 	 * @throws Exception
 	 *             If fails to launch WoOF.
 	 */

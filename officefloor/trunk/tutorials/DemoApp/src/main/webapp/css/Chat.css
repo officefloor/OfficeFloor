@@ -13,11 +13,21 @@ h2 {
 }
 
 .message {
-	width: 23em !important;	
+	width: 23em !important;
+	border-radius: 5px;	
 }
 
 .gwt-Button {
     border-radius: 5px;
+}
+
+.typing {
+	color: #C0C0C0;	
+}
+
+.messages {
+	height: 7em;
+	width: 100%;
 }
 
 #ChatWidget {
