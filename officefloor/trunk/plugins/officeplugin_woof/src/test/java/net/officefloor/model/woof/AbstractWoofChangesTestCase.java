@@ -32,6 +32,7 @@ import net.officefloor.compile.section.SectionType;
 import net.officefloor.model.change.Change;
 import net.officefloor.model.gwt.module.GwtModuleModel;
 import net.officefloor.model.impl.repository.ModelRepositoryImpl;
+import net.officefloor.model.impl.repository.memory.MemoryConfigurationItem;
 import net.officefloor.model.repository.ConfigurationItem;
 import net.officefloor.model.test.changes.AbstractChangesTestCase;
 import net.officefloor.plugin.gwt.module.GwtChanges;
@@ -146,6 +147,36 @@ public abstract class AbstractWoofChangesTestCase extends
 	@Override
 	protected WoofChanges createModelOperations(WoofModel model) {
 		return new WoofChangesImpl(model, this.getGwtChanges());
+	}
+
+	@Override
+	protected void assertModels(WoofModel expected, WoofModel actual)
+			throws Exception {
+
+		// Determine if output XML of actual
+		if (this.isPrintMessages()) {
+
+			// Provide details of the model compare
+			this.printMessage("=============== MODEL COMPARE ================");
+
+			// Provide details of expected model
+			this.printMessage("------------------ EXPECTED ------------------");
+			ConfigurationItem expectedConfig = new MemoryConfigurationItem();
+			new WoofRepositoryImpl(new ModelRepositoryImpl()).storeWoOF(
+					expected, expectedConfig);
+			this.printMessage(expectedConfig.getConfiguration());
+
+			// Provide details of actual model
+			this.printMessage("------------------- ACTUAL -------------------");
+			ConfigurationItem actualConfig = new MemoryConfigurationItem();
+			new WoofRepositoryImpl(new ModelRepositoryImpl()).storeWoOF(actual,
+					actualConfig);
+			this.printMessage(actualConfig.getConfiguration());
+			this.printMessage("================ END COMPARE =================");
+		}
+
+		// Under take the compare
+		super.assertModels(expected, actual);
 	}
 
 	/**

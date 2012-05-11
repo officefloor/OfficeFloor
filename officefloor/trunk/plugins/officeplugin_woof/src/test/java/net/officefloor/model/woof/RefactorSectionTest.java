@@ -23,8 +23,6 @@ import java.util.Map;
 
 import javax.sql.DataSource;
 
-import org.junit.Ignore;
-
 import net.officefloor.compile.OfficeFloorCompiler;
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.section.SectionType;
@@ -35,7 +33,6 @@ import net.officefloor.model.change.Change;
  * 
  * @author Daniel Sagenschneider
  */
-@Ignore("TODO provide implementation")
 public class RefactorSectionTest extends AbstractWoofChangesTestCase {
 
 	/**
@@ -62,7 +59,7 @@ public class RefactorSectionTest extends AbstractWoofChangesTestCase {
 	/**
 	 * Initiate.
 	 */
-	public RefactorSectionTest(boolean isSpecificSetupFilePerTest) {
+	public RefactorSectionTest() {
 		super(true);
 	}
 
@@ -76,7 +73,7 @@ public class RefactorSectionTest extends AbstractWoofChangesTestCase {
 				.constructSectionType(new SectionTypeConstructor() {
 					@Override
 					public void construct(SectionTypeContext context) {
-						context.addSectionInput("INPUT", null);
+						context.addSectionInput("INPUT", Double.class);
 						context.addSectionOutput("OUTPUT_A", Integer.class,
 								false);
 						context.addSectionOutput("OUTPUT_B", String.class,
@@ -116,13 +113,13 @@ public class RefactorSectionTest extends AbstractWoofChangesTestCase {
 	 * Ensure handle change to all details.
 	 */
 	public void testChange() {
-
+		
 		// Create the section type
 		SectionType sectionType = this
 				.constructSectionType(new SectionTypeConstructor() {
 					@Override
 					public void construct(SectionTypeContext context) {
-						context.addSectionInput("INPUT", null);
+						context.addSectionInput("INPUT_CHANGE", Double.class);
 						context.addSectionOutput("OUTPUT_A", Integer.class,
 								false);
 						context.addSectionOutput("OUTPUT_B", String.class,
@@ -141,12 +138,12 @@ public class RefactorSectionTest extends AbstractWoofChangesTestCase {
 		properties.addProperty("name.two").setValue("value.2");
 
 		// Keep section input names
-		this.sectionInputNameMapping.put("INPUT", "INPUT_CHANGE");
+		this.sectionInputNameMapping.put("INPUT_CHANGE", "INPUT");
 
 		// Keep section output names
-		this.sectionOutputNameMapping.put("OUTPUT_A", "OUTPUT_B");
-		this.sectionOutputNameMapping.put("OUTPUT_B", "OUTPUT_C");
-		this.sectionOutputNameMapping.put("OUTPUT_C", "OUTPUT_A");
+		this.sectionOutputNameMapping.put("OUTPUT_B", "OUTPUT_A");
+		this.sectionOutputNameMapping.put("OUTPUT_C", "OUTPUT_B");
+		this.sectionOutputNameMapping.put("OUTPUT_A", "OUTPUT_C");
 
 		// Refactor the section with same details
 		Change<WoofSectionModel> change = this.operations.refactorSection(
@@ -193,7 +190,8 @@ public class RefactorSectionTest extends AbstractWoofChangesTestCase {
 				.constructSectionType(new SectionTypeConstructor() {
 					@Override
 					public void construct(SectionTypeContext context) {
-						context.addSectionInput("INPUT", null);
+						context.addSectionInput("INPUT_1", Double.class);
+						context.addSectionInput("INPUT_2", null);
 						context.addSectionOutput("OUTPUT_A", Integer.class,
 								false);
 						context.addSectionOutput("OUTPUT_B", String.class,

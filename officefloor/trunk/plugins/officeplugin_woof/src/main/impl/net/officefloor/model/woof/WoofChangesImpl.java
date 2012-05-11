@@ -21,6 +21,7 @@ package net.officefloor.model.woof;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -69,6 +70,26 @@ public class WoofChangesImpl implements WoofChanges {
 		@Override
 		public String extractName(WoofSectionModel model) {
 			return model.getWoofSectionName();
+		}
+	};
+
+	/**
+	 * {@link WoofSectionInputModel} {@link NameExtractor}.
+	 */
+	private static final NameExtractor<WoofSectionInputModel> SECTION_INPUT_NAME_EXTRACTOR = new NameExtractor<WoofSectionInputModel>() {
+		@Override
+		public String extractName(WoofSectionInputModel model) {
+			return model.getWoofSectionInputName();
+		}
+	};
+
+	/**
+	 * {@link WoofSectionOutputModel} {@link NameExtractor}.
+	 */
+	private static final NameExtractor<WoofSectionOutputModel> SECTION_OUTPUT_NAME_EXTRACTOR = new NameExtractor<WoofSectionOutputModel>() {
+		@Override
+		public String extractName(WoofSectionOutputModel model) {
+			return model.getWoofSectionOutputName();
 		}
 	};
 
@@ -766,15 +787,367 @@ public class WoofChangesImpl implements WoofChanges {
 	}
 
 	@Override
-	public Change<WoofSectionModel> refactorSection(WoofSectionModel section,
-			String sectionName, String sectionSourceClassName,
-			String sectionLocation, PropertyList properties,
-			SectionType sectionType,
+	public Change<WoofSectionModel> refactorSection(
+			final WoofSectionModel section, final String sectionName,
+			final String sectionSourceClassName, final String sectionLocation,
+			final PropertyList properties, final SectionType sectionType,
 			Map<String, String> sectionInputNameMapping,
 			Map<String, String> sectionOutputNameMapping) {
-		// TODO implement WoofChanges.refactorSection
-		throw new UnsupportedOperationException(
-				"TODO implement WoofChanges.refactorSection");
+
+		// Ensure section available to remove
+		boolean isInModel = false;
+		for (WoofSectionModel model : this.model.getWoofSections()) {
+			if (model == section) {
+				isInModel = true;
+			}
+		}
+		if (!isInModel) {
+			// Section model not in model
+			return new NoChange<WoofSectionModel>(section, "Refactor section",
+					"Section " + section.getWoofSectionName()
+							+ " is not in WoOF model");
+		}
+
+		// Create change to sort inputs/outputs
+		Change<WoofSectionModel> sortChange = new AbstractChange<WoofSectionModel>(
+				section, "Sort inputs/outputs") {
+			@Override
+			public void apply() {
+				sortByName(section.getInputs(), SECTION_INPUT_NAME_EXTRACTOR);
+				sortByName(section.getOutputs(), SECTION_OUTPUT_NAME_EXTRACTOR);
+			}
+
+			@Override
+			public void revert() {
+				this.apply();
+			}
+		};
+
+		// Provide list of changes to aggregate
+		List<Change<?>> changes = new LinkedList<Change<?>>();
+
+		// Sort inputs/outputs at start (so revert has right order)
+		changes.add(sortChange);
+
+		// Obtain the existing details
+		final String existingSectionName = section.getWoofSectionName();
+		final String existingSectionSourceClassName = section
+				.getSectionSourceClassName();
+		final String existingSectionLocation = section.getSectionLocation();
+		final List<PropertyModel> existingProperties = new ArrayList<PropertyModel>(
+				section.getProperties());
+
+		// Create change to attributes and properties
+		Change<WoofSectionModel> attributeChange = new AbstractChange<WoofSectionModel>(
+				section, "Refactor attributes") {
+			@Override
+			public void apply() {
+				// Refactor details
+				section.setWoofSectionName(sectionName);
+				section.setSectionSourceClassName(sectionSourceClassName);
+				section.setSectionLocation(sectionLocation);
+
+				// Refactor the properties
+				section.getProperties().clear();
+				if (properties != null) {
+					for (Property property : properties) {
+						section.addProperty(new PropertyModel(property
+								.getName(), property.getValue()));
+					}
+				}
+			}
+
+			@Override
+			public void revert() {
+				// Revert attributes
+				section.setWoofSectionName(existingSectionName);
+				section.setSectionSourceClassName(existingSectionSourceClassName);
+				section.setSectionLocation(existingSectionLocation);
+
+				// Revert the properties
+				section.getProperties().clear();
+				for (PropertyModel property : existingProperties) {
+					section.addProperty(property);
+				}
+			}
+		};
+		changes.add(attributeChange);
+
+		// Obtain the mapping of existing inputs
+		Map<String, WoofSectionInputModel> existingInputNameMapping = new HashMap<String, WoofSectionInputModel>();
+		for (WoofSectionInputModel input : new ArrayList<WoofSectionInputModel>(
+				section.getInputs())) {
+			existingInputNameMapping
+					.put(input.getWoofSectionInputName(), input);
+		}
+
+		// Refactor the inputs (either refactoring, adding or removing)
+		for (final SectionInputType inputType : sectionType
+				.getSectionInputTypes()) {
+
+			// Obtain the mapped section input model
+			final String inputName = inputType.getSectionInputName();
+			String mappedInputName = sectionInputNameMapping.get(inputName);
+			final WoofSectionInputModel existingInputModel = existingInputNameMapping
+					.remove(mappedInputName);
+
+			// Obtain further type details
+			final String parameterType = inputType.getParameterType();
+
+			// Determine action to take based on existing input
+			Change<WoofSectionInputModel> sectionInputChange;
+			if (existingInputModel != null) {
+				// Create change to refactor existing input
+				final String existingInputName = existingInputModel
+						.getWoofSectionInputName();
+				final String existingParameterType = existingInputModel
+						.getParameterType();
+				sectionInputChange = new AbstractChange<WoofSectionInputModel>(
+						existingInputModel, "Refactor Section Input") {
+					@Override
+					public void apply() {
+						existingInputModel.setWoofSectionInputName(inputName);
+						existingInputModel.setParameterType(parameterType);
+
+						// Rename connections links
+						this.renameConnections(sectionName, inputName);
+					}
+
+					@Override
+					public void revert() {
+						existingInputModel
+								.setWoofSectionInputName(existingInputName);
+						existingInputModel
+								.setParameterType(existingParameterType);
+
+						// Revert connection links
+						this.renameConnections(existingSectionName,
+								existingInputName);
+					}
+
+					/**
+					 * Renames the {@link WoofSectionInputModel} connection
+					 * names.
+					 * 
+					 * @param sectionName
+					 *            {@link WoofSectionModel} name.
+					 */
+					private void renameConnections(String sectionName,
+							String inputName) {
+						for (WoofSectionInputModel input : section.getInputs()) {
+
+							// Rename exception connections
+							for (WoofExceptionToWoofSectionInputModel conn : input
+									.getWoofExceptions()) {
+								conn.setSectionName(sectionName);
+								conn.setInputName(inputName);
+							}
+
+							// Rename section output connections
+							for (WoofSectionOutputToWoofSectionInputModel conn : input
+									.getWoofSectionOutputs()) {
+								conn.setSectionName(sectionName);
+								conn.setInputName(inputName);
+							}
+
+							// Rename start connections
+							for (WoofStartToWoofSectionInputModel conn : input
+									.getWoofStarts()) {
+								conn.setSectionName(sectionName);
+								conn.setInputName(inputName);
+							}
+
+							// Rename template connections
+							for (WoofTemplateOutputToWoofSectionInputModel conn : input
+									.getWoofTemplateOutputs()) {
+								conn.setSectionName(sectionName);
+								conn.setInputName(inputName);
+							}
+						}
+					}
+				};
+
+			} else {
+				// Create change to add input (with no URI)
+				final WoofSectionInputModel newInputModel = new WoofSectionInputModel(
+						inputName, parameterType, null);
+				sectionInputChange = new AbstractChange<WoofSectionInputModel>(
+						newInputModel, "Add Section Input") {
+					@Override
+					public void apply() {
+						section.addInput(newInputModel);
+					}
+
+					@Override
+					public void revert() {
+						section.removeInput(newInputModel);
+					}
+				};
+			}
+			changes.add(sectionInputChange);
+		}
+		for (final WoofSectionInputModel unmappedInputModel : existingInputNameMapping
+				.values()) {
+			// Create change to remove the unmapped input model
+			Change<WoofSectionInputModel> unmappedInputChange = new AbstractChange<WoofSectionInputModel>(
+					unmappedInputModel, "Remove Section Input") {
+
+				/**
+				 * {@link ConnectionModel} instances removed.
+				 */
+				private ConnectionModel[] connections;
+
+				@Override
+				public void apply() {
+
+					// Remove the connections
+					List<ConnectionModel> list = new LinkedList<ConnectionModel>();
+					removeConnections(unmappedInputModel.getWoofExceptions(),
+							list);
+					removeConnections(
+							unmappedInputModel.getWoofSectionOutputs(), list);
+					removeConnections(unmappedInputModel.getWoofStarts(), list);
+					removeConnections(
+							unmappedInputModel.getWoofTemplateOutputs(), list);
+					this.connections = list.toArray(new ConnectionModel[list
+							.size()]);
+
+					// Remove the section input
+					section.removeInput(unmappedInputModel);
+				}
+
+				@Override
+				public void revert() {
+
+					// Add input back to section
+					section.addInput(unmappedInputModel);
+
+					// Add back in connections
+					reconnectConnections(this.connections);
+				}
+			};
+			changes.add(unmappedInputChange);
+		}
+
+		// Obtain the mapping of existing outputs
+		Map<String, WoofSectionOutputModel> existingOutputNameMapping = new HashMap<String, WoofSectionOutputModel>();
+		for (WoofSectionOutputModel output : new ArrayList<WoofSectionOutputModel>(
+				section.getOutputs())) {
+			existingOutputNameMapping.put(output.getWoofSectionOutputName(),
+					output);
+		}
+
+		// Refactor the ouputs (either refactoring, adding or removing)
+		for (final SectionOutputType outputType : sectionType
+				.getSectionOutputTypes()) {
+
+			// Ignore escalations
+			if (outputType.isEscalationOnly()) {
+				continue;
+			}
+
+			// Obtain the mapped section output model
+			final String outputName = outputType.getSectionOutputName();
+			String mappedOutputName = sectionOutputNameMapping.get(outputName);
+			final WoofSectionOutputModel existingOutputModel = existingOutputNameMapping
+					.remove(mappedOutputName);
+
+			// Obtain further type details
+			final String argumentType = outputType.getArgumentType();
+
+			// Determine action to take based on existing output
+			Change<WoofSectionOutputModel> sectionOutputChange;
+			if (existingOutputModel != null) {
+				// Create change to refactor existing output
+				final String existingOutputName = existingOutputModel
+						.getWoofSectionOutputName();
+				final String existingArgumentType = existingOutputModel
+						.getArgumentType();
+				sectionOutputChange = new AbstractChange<WoofSectionOutputModel>(
+						existingOutputModel, "Refactor Section Output") {
+					@Override
+					public void apply() {
+						existingOutputModel
+								.setWoofSectionOutputName(outputName);
+						existingOutputModel.setArgumentType(argumentType);
+					}
+
+					@Override
+					public void revert() {
+						existingOutputModel
+								.setWoofSectionOutputName(existingOutputName);
+						existingOutputModel
+								.setArgumentType(existingArgumentType);
+					}
+				};
+
+			} else {
+				// Create change to add output (with no URI)
+				final WoofSectionOutputModel newOutputModel = new WoofSectionOutputModel(
+						outputName, argumentType);
+				sectionOutputChange = new AbstractChange<WoofSectionOutputModel>(
+						newOutputModel, "Add Section Output") {
+					@Override
+					public void apply() {
+						section.addOutput(newOutputModel);
+					}
+
+					@Override
+					public void revert() {
+						section.removeOutput(newOutputModel);
+					}
+				};
+			}
+			changes.add(sectionOutputChange);
+		}
+		for (final WoofSectionOutputModel unmappedOutputModel : existingOutputNameMapping
+				.values()) {
+			// Create change to remove the unmapped output model
+			Change<WoofSectionOutputModel> unmappedOutputChange = new AbstractChange<WoofSectionOutputModel>(
+					unmappedOutputModel, "Remove Section Output") {
+
+				/**
+				 * {@link ConnectionModel} instances removed.
+				 */
+				private ConnectionModel[] connections;
+
+				@Override
+				public void apply() {
+
+					// Remove the connections
+					List<ConnectionModel> list = new LinkedList<ConnectionModel>();
+					removeConnection(unmappedOutputModel.getWoofResource(),
+							list);
+					removeConnection(unmappedOutputModel.getWoofSectionInput(),
+							list);
+					removeConnection(unmappedOutputModel.getWoofTemplate(),
+							list);
+					this.connections = list.toArray(new ConnectionModel[list
+							.size()]);
+
+					// Remove the section output
+					section.removeOutput(unmappedOutputModel);
+				}
+
+				@Override
+				public void revert() {
+
+					// Add output back to section
+					section.addOutput(unmappedOutputModel);
+
+					// Add back in connections
+					reconnectConnections(this.connections);
+				}
+			};
+			changes.add(unmappedOutputChange);
+		}
+
+		// Sort inputs/outputs at end (so apply has right order)
+		changes.add(sortChange);
+
+		// Return aggregate change for refactoring
+		return new AggregateChange<WoofSectionModel>(section,
+				"Refactor Section", changes.toArray(new Change[changes.size()]));
 	}
 
 	@Override
@@ -897,12 +1270,80 @@ public class WoofChangesImpl implements WoofChanges {
 
 	@Override
 	public Change<WoofGovernanceModel> refactorGovernance(
-			WoofGovernanceModel governance, String governanceName,
-			String governanceSourceClassName, PropertyList properties,
-			GovernanceType<?, ?> governanceType) {
-		// TODO implement WoofChanges.refactorGovernance
-		throw new UnsupportedOperationException(
-				"TODO implement WoofChanges.refactorGovernance");
+			final WoofGovernanceModel governance, String governanceName,
+			final String governanceSourceClassName,
+			final PropertyList properties, GovernanceType<?, ?> governanceType) {
+
+		// Ensure governance available to remove
+		boolean isInModel = false;
+		for (WoofGovernanceModel model : this.model.getWoofGovernances()) {
+			if (model == governance) {
+				isInModel = true;
+			}
+		}
+		if (!isInModel) {
+			// Governance model not in model
+			return new NoChange<WoofGovernanceModel>(
+					governance,
+					"Refactor governance " + governance.getWoofGovernanceName(),
+					"Governance " + governance.getWoofGovernanceName()
+							+ " is not in WoOF model");
+		}
+
+		// Obtain the existing details
+		final String existingGovernanceName = governance
+				.getWoofGovernanceName();
+		final String existingGovernanceSourceClassName = governance
+				.getGovernanceSourceClassName();
+		final List<PropertyModel> existingProperties = new ArrayList<PropertyModel>(
+				governance.getProperties());
+
+		// Obtain the unique governance name
+		final String uniqueGovernanceName = getUniqueName(governanceName,
+				governance, this.model.getWoofGovernances(),
+				GOVERNANCE_NAME_EXTRACTOR);
+
+		// Return change to refactor governance
+		return new AbstractChange<WoofGovernanceModel>(governance,
+				"Refactor Governance") {
+
+			@Override
+			public void apply() {
+				// Apply attribute changes
+				governance.setWoofGovernanceName(uniqueGovernanceName);
+				governance
+						.setGovernanceSourceClassName(governanceSourceClassName);
+
+				// Apply property changes
+				governance.getProperties().clear();
+				if (properties != null) {
+					for (Property property : properties) {
+						governance.addProperty(new PropertyModel(property
+								.getName(), property.getValue()));
+					}
+				}
+
+				// Update order of governances (after name change)
+				WoofChangesImpl.this.sortGovernances();
+			}
+
+			@Override
+			public void revert() {
+				// Revert attributes
+				governance.setWoofGovernanceName(existingGovernanceName);
+				governance
+						.setGovernanceSourceClassName(existingGovernanceSourceClassName);
+
+				// Revert properties
+				governance.getProperties().clear();
+				for (PropertyModel property : existingProperties) {
+					governance.addProperty(property);
+				}
+
+				// Update order of governances (after name revert)
+				WoofChangesImpl.this.sortGovernances();
+			}
+		};
 	}
 
 	@Override
@@ -1029,19 +1470,36 @@ public class WoofChangesImpl implements WoofChanges {
 	@Override
 	public Change<WoofResourceModel> refactorResource(
 			WoofResourceModel resource, String resourcePath) {
-		// TODO implement WoofChanges.refactorResource
-		throw new UnsupportedOperationException(
-				"TODO implement WoofChanges.refactorResource");
+		return this.changeResourcePath(resource, resourcePath,
+				"Refactor Resource");
 	}
 
 	@Override
 	public Change<WoofResourceModel> changeResourcePath(
 			final WoofResourceModel resource, final String resourcePath) {
+		return this.changeResourcePath(resource, resourcePath,
+				"Change Resource Path");
+	}
+
+	/**
+	 * Changes the path for the {@link WoofResourceModel}.
+	 * 
+	 * @param resource
+	 *            {@link WoofResourceModel} to have is path changed.
+	 * @param resourcePath
+	 *            New path for the {@link WoofResourceModel}.
+	 * @param changeDescription
+	 *            Description of type of {@link Change}.
+	 * @return {@link Change} to the path for the {@link WoofResourceModel}.
+	 */
+	private Change<WoofResourceModel> changeResourcePath(
+			final WoofResourceModel resource, final String resourcePath,
+			String changeDescription) {
 
 		// No change if no resource path
 		if (CompileUtil.isBlank(resourcePath)) {
-			return new NoChange<WoofResourceModel>(resource,
-					"Change Resource Path", "Must provide resource path");
+			return new NoChange<WoofResourceModel>(resource, changeDescription,
+					"Must provide resource path");
 		}
 
 		// Track original values
@@ -1054,7 +1512,7 @@ public class WoofChangesImpl implements WoofChanges {
 
 		// Return change to resource path
 		return new AbstractChange<WoofResourceModel>(resource,
-				"Change Resource Path") {
+				changeDescription) {
 			@Override
 			public void apply() {
 				resource.setResourcePath(resourcePath);
@@ -1176,10 +1634,45 @@ public class WoofChangesImpl implements WoofChanges {
 
 	@Override
 	public Change<WoofExceptionModel> refactorException(
-			WoofExceptionModel exception, String exceptionClassName) {
-		// TODO implement WoofChanges.refactorException
-		throw new UnsupportedOperationException(
-				"TODO implement WoofChanges.refactorException");
+			final WoofExceptionModel exception, final String exceptionClassName) {
+
+		// Determine if the exception has already been handled
+		boolean isAlreadyHandled = false;
+		for (WoofExceptionModel model : this.model.getWoofExceptions()) {
+
+			// Ignore the exception being refactored
+			if (model == exception) {
+				continue; // ignore
+			}
+
+			// Determine if handling exception
+			if (model.getClassName().equals(exceptionClassName)) {
+				isAlreadyHandled = true;
+			}
+		}
+		if (isAlreadyHandled) {
+			// Exception already handled
+			return new NoChange<WoofExceptionModel>(exception,
+					"Refactor Exception", "Exception " + exceptionClassName
+							+ " is already handled");
+		}
+
+		// Obtain the existing exception class name (for revert)
+		final String existingExceptionClassName = exception.getClassName();
+
+		// Return change to refactor exception
+		return new AbstractChange<WoofExceptionModel>(exception,
+				"Refactor Exception") {
+			@Override
+			public void apply() {
+				exception.setClassName(exceptionClassName);
+			}
+
+			@Override
+			public void revert() {
+				exception.setClassName(existingExceptionClassName);
+			}
+		};
 	}
 
 	@Override

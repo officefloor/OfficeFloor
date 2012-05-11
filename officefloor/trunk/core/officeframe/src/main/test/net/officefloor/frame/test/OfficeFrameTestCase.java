@@ -1615,7 +1615,7 @@ public abstract class OfficeFrameTestCase extends TestCase {
 	 * 
 	 * @return <code>true</code> to print messages.
 	 */
-	private boolean isPrintMessages() {
+	protected boolean isPrintMessages() {
 		return Boolean.parseBoolean(System.getProperty("print.messages",
 				Boolean.FALSE.toString())) || this.isVerbose;
 	}

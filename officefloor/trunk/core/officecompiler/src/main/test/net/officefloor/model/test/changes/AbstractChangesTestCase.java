@@ -265,16 +265,29 @@ public abstract class AbstractChangesTestCase<M extends Model, O> extends
 		M compareModel = this.retrieveModel(testName, specific);
 
 		try {
-			// Ensure the models are the same
-			assertGraph(compareModel, this.model,
-					RemoveConnectionsAction.REMOVE_CONNECTIONS_METHOD_NAME);
+
+			// Assert the models are the same
+			this.assertModels(compareModel, this.model);
 
 		} catch (Exception ex) {
 			// Fail on failure (stops have to throw exception in tests)
-			StringWriter msg = new StringWriter();
-			ex.printStackTrace(new PrintWriter(msg));
-			fail("Failed to validate graph");
+			throw fail(ex);
 		}
+	}
+
+	/**
+	 * Asserts the models are the same.
+	 * 
+	 * @param expected
+	 *            Expected model.
+	 * @param actual
+	 *            Actual model.
+	 */
+	protected void assertModels(M expected, M actual) throws Exception {
+
+		// Ensure the models are the same
+		assertGraph(expected, actual,
+				RemoveConnectionsAction.REMOVE_CONNECTIONS_METHOD_NAME);
 	}
 
 	/**

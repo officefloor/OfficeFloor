@@ -17,8 +17,6 @@
  */
 package net.officefloor.model.woof;
 
-import org.junit.Ignore;
-
 import net.officefloor.compile.OfficeFloorCompiler;
 import net.officefloor.compile.governance.GovernanceType;
 import net.officefloor.compile.properties.PropertyList;
@@ -29,7 +27,6 @@ import net.officefloor.model.change.Change;
  * 
  * @author Daniel Sagenschneider
  */
-@Ignore("TODO provide implementation")
 public class RefactorGovernanceTest extends AbstractWoofChangesTestCase {
 
 	/**
@@ -136,15 +133,16 @@ public class RefactorGovernanceTest extends AbstractWoofChangesTestCase {
 
 		// Create the properties
 		PropertyList properties = OfficeFloorCompiler.newPropertyList();
-		properties.addProperty("name.one").setValue("value.one");
-		properties.addProperty("name.two").setValue("value.two");
-		properties.addProperty("name.three").setValue("value.three");
-		properties.addProperty("name.four").setValue("value.four");
+		properties.addProperty("name.a").setValue("value.a");
+		properties.addProperty("name.b").setValue("value.b");
+		properties.addProperty("name.c").setValue("value.c");
+		properties.addProperty("name.d").setValue("value.d");
 
 		// Refactor the governance with added details
 		Change<WoofGovernanceModel> change = this.operations
 				.refactorGovernance(this.governance, "ADD",
-						"net.example.AddGovernanceSource", null, governanceType);
+						"net.example.AddGovernanceSource", properties,
+						governanceType);
 
 		// Validate change
 		this.assertChange(change, null, "Refactor Governance", true);
