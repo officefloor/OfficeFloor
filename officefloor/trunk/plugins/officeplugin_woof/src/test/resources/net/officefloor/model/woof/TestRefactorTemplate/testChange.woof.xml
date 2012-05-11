@@ -1,0 +1,39 @@
+<woof>
+
+	<templates>
+		<template name="change" uri="change" path="example/Change.html"
+			class="net.example.ChangeClass">
+			<output name="OUTPUT_1">
+				<resource name="RESOURCE" />
+			</output>
+			<output name="OUTPUT_2">
+				<input section="SECTION" input="INPUT" />
+			</output>
+			<output name="OUTPUT_3">
+				<template name="TEMPLATE_LINK" />
+			</output>
+			<extension class="GWT">
+				<property name="gwt.module.path" value="net/example/change.gwt.xml" />
+				<property name="gwt.async.service.interfaces"
+					value="net.example.GwtChangeAsync" />
+			</extension>
+			<extension class="COMET">
+				<property name="manual.publish.method.name" value="manualChange" />
+			</extension>
+		</template>
+		<template name="TEMPLATE_LINK" path="example/Link.html"
+			class="net.example.LinkClass" />
+	</templates>
+
+	<sections>
+		<section name="SECTION" source="net.example.ExampleSectionSource"
+			location="SECTION_LOCATION">
+			<input name="INPUT" />
+		</section>
+	</sections>
+
+	<resources>
+		<resource name="RESOURCE" path="Example.html" />
+	</resources>
+
+</woof>

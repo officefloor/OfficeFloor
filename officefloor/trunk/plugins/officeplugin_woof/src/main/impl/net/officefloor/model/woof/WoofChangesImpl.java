@@ -547,6 +547,19 @@ public class WoofChangesImpl implements WoofChanges {
 	}
 
 	@Override
+	public Change<WoofTemplateModel> refactorTemplate(
+			WoofTemplateModel template, String templatePath,
+			String templateLogicClass, SectionType sectionType, String uri,
+			String gwtEntryPointClassName,
+			String[] gwtServiceAsyncInterfaceNames, boolean isEnableComet,
+			String cometManualPublishMethodName,
+			Map<String, String> templateOutputNameMapping) {
+		// TODO implement WoofChanges.refactorTemplate
+		throw new UnsupportedOperationException(
+				"TODO implement WoofChanges.refactorTemplate");
+	}
+
+	@Override
 	public Change<WoofTemplateModel> changeTemplateUri(
 			final WoofTemplateModel template, final String uri) {
 
@@ -753,6 +766,18 @@ public class WoofChangesImpl implements WoofChanges {
 	}
 
 	@Override
+	public Change<WoofSectionModel> refactorSection(WoofSectionModel section,
+			String sectionName, String sectionSourceClassName,
+			String sectionLocation, PropertyList properties,
+			SectionType sectionType,
+			Map<String, String> sectionInputNameMapping,
+			Map<String, String> sectionOutputNameMapping) {
+		// TODO implement WoofChanges.refactorSection
+		throw new UnsupportedOperationException(
+				"TODO implement WoofChanges.refactorSection");
+	}
+
+	@Override
 	public Change<WoofSectionInputModel> changeSectionInputUri(
 			final WoofSectionInputModel sectionInput, final String uri) {
 
@@ -868,6 +893,16 @@ public class WoofChangesImpl implements WoofChanges {
 				WoofChangesImpl.this.model.removeWoofGovernance(woofGovernance);
 			}
 		};
+	}
+
+	@Override
+	public Change<WoofGovernanceModel> refactorGovernance(
+			WoofGovernanceModel governance, String governanceName,
+			String governanceSourceClassName, PropertyList properties,
+			GovernanceType<?, ?> governanceType) {
+		// TODO implement WoofChanges.refactorGovernance
+		throw new UnsupportedOperationException(
+				"TODO implement WoofChanges.refactorGovernance");
 	}
 
 	@Override
@@ -989,6 +1024,14 @@ public class WoofChangesImpl implements WoofChanges {
 				WoofChangesImpl.this.model.removeWoofResource(resource);
 			}
 		};
+	}
+
+	@Override
+	public Change<WoofResourceModel> refactorResource(
+			WoofResourceModel resource, String resourcePath) {
+		// TODO implement WoofChanges.refactorResource
+		throw new UnsupportedOperationException(
+				"TODO implement WoofChanges.refactorResource");
 	}
 
 	@Override
@@ -1129,6 +1172,14 @@ public class WoofChangesImpl implements WoofChanges {
 				WoofChangesImpl.this.model.removeWoofException(exception);
 			}
 		};
+	}
+
+	@Override
+	public Change<WoofExceptionModel> refactorException(
+			WoofExceptionModel exception, String exceptionClassName) {
+		// TODO implement WoofChanges.refactorException
+		throw new UnsupportedOperationException(
+				"TODO implement WoofChanges.refactorException");
 	}
 
 	@Override
