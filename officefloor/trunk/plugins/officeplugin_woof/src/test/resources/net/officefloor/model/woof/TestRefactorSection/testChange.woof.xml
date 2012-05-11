@@ -13,11 +13,11 @@
 			location="CHANGE_LOCATION">
 			<property name="name.1" value="value.one" />
 			<property name="name.two" value="value.2" />
-			<input name="INPUT_CHANGE" />
-			<output name="OUTPUT_A">
+			<input name="INPUT_CHANGE" parameter-type="java.lang.Double" />
+			<output name="OUTPUT_A" argument-type="java.lang.Integer">
 				<resource name="RESOURCE" />
 			</output>
-			<output name="OUTPUT_B">
+			<output name="OUTPUT_B" argument-type="java.lang.String">
 				<input section="SECTION_LINK" input="INPUT" />
 			</output>
 			<output name="OUTPUT_C">

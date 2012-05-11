@@ -17,8 +17,6 @@
  */
 package net.officefloor.model.woof;
 
-import org.junit.Ignore;
-
 import net.officefloor.model.change.Change;
 
 /**
@@ -26,7 +24,6 @@ import net.officefloor.model.change.Change;
  * 
  * @author Daniel Sagenschneider
  */
-@Ignore("TODO provide implementation")
 public class RefactorResourceTest extends AbstractWoofChangesTestCase {
 
 	/**
@@ -51,8 +48,8 @@ public class RefactorResourceTest extends AbstractWoofChangesTestCase {
 		 * simple test to ensure delegating.
 		 */
 
-		// Change template to unique path
-		Change<WoofResourceModel> change = this.operations.changeResourcePath(
+		// Refactor template to change path
+		Change<WoofResourceModel> change = this.operations.refactorResource(
 				this.resource, "change/path");
 
 		// Validate the change

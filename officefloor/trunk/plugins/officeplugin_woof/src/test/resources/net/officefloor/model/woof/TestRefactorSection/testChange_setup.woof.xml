@@ -14,10 +14,10 @@
 			<property name="name.one" value="value.one" />
 			<property name="name.two" value="value.two" />
 			<input name="INPUT" />
-			<output name="OUTPUT_A">
+			<output name="OUTPUT_A" argument-type="java.lang.Integer">
 				<input section="SECTION_LINK" input="INPUT" />
 			</output>
-			<output name="OUTPUT_B">
+			<output name="OUTPUT_B" argument-type="java.lang.String">
 				<template name="TEMPLATE" />
 			</output>
 			<output name="OUTPUT_C">

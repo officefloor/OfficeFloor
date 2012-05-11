@@ -17,7 +17,7 @@
  */
 package net.officefloor.model.woof;
 
-import org.junit.Ignore;
+import java.io.IOException;
 
 import net.officefloor.model.change.Change;
 
@@ -26,7 +26,6 @@ import net.officefloor.model.change.Change;
  * 
  * @author Daniel Sagenschneider
  */
-@Ignore("TODO provide implementation")
 public class RefactorExceptionTest extends AbstractWoofChangesTestCase {
 
 	/**
@@ -38,6 +37,19 @@ public class RefactorExceptionTest extends AbstractWoofChangesTestCase {
 	protected void setUp() throws Exception {
 		super.setUp();
 		this.exception = this.model.getWoofExceptions().get(0);
+	}
+
+	/**
+	 * Ensure no issue if refactored to same exception.
+	 */
+	public void testNoChange() {
+
+		// Change to a unique exception
+		Change<WoofExceptionModel> change = this.operations.refactorException(
+				this.exception, RuntimeException.class.getName());
+
+		// Validate the change
+		this.assertChange(change, this.exception, "Refactor Exception", true);
 	}
 
 	/**
@@ -58,15 +70,14 @@ public class RefactorExceptionTest extends AbstractWoofChangesTestCase {
 	 */
 	public void testExceptionAlreadyExists() {
 
-		// TODO determine what to do for change if not able to change
-		fail("TODO determine what to do for no operation change");
-
 		// Change to a unique exception
 		Change<WoofExceptionModel> change = this.operations.refactorException(
-				this.exception, NullPointerException.class.getName());
+				this.exception, IOException.class.getName());
 
-		// Validate the change
-		this.assertChange(change, this.exception, "Refactor Exception", true);
+		// Validate no change (as exception is already handled)
+		this.assertChange(change, this.exception, "Refactor Exception", false,
+				"Exception " + IOException.class.getName()
+						+ " is already handled");
 	}
 
 }

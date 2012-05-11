@@ -22,6 +22,8 @@ import java.util.Map;
 
 import net.officefloor.compile.governance.GovernanceType;
 import net.officefloor.compile.properties.PropertyList;
+import net.officefloor.compile.section.SectionInputType;
+import net.officefloor.compile.section.SectionOutputType;
 import net.officefloor.compile.section.SectionType;
 import net.officefloor.compile.spi.governance.source.GovernanceSource;
 import net.officefloor.compile.spi.section.source.SectionSource;
@@ -95,9 +97,9 @@ public interface WoofChanges {
 	 * @param cometManualPublishMethodName
 	 *            New Comet manual publish method name.
 	 * @param templateOutputNameMapping
-	 *            Mapping of existing {@link WoofTemplateOutputModel} names to
-	 *            refactored names to allow maintaining links to other items
-	 *            within the {@link WoofModel}.
+	 *            Mapping of {@link SectionOutputType} name to existing
+	 *            {@link WoofTemplateOutputModel} name to allow maintaining
+	 *            links to other items within the {@link WoofModel}.
 	 * @return {@link Change} to refactor the {@link WoofTemplateModel}.
 	 */
 	Change<WoofTemplateModel> refactorTemplate(WoofTemplateModel template,
@@ -167,13 +169,13 @@ public interface WoofChanges {
 	 * @param sectionType
 	 *            {@link SectionType} of the refactor {@link WoofSectionModel}.
 	 * @param sectionInputNameMapping
-	 *            Mapping of existing {@link WoofSectionInputModel} names to
-	 *            refactored names to allow maintaining links to other items
-	 *            within the {@link WoofModel}.
+	 *            Mapping of {@link SectionInputType} name to existing
+	 *            {@link WoofSectionInputModel} name to allow maintaining links
+	 *            to other items within the {@link WoofModel}.
 	 * @param sectionOutputNameMapping
-	 *            Mapping of existing {@link WoofSectionOutputModel} names to
-	 *            refactored names to allow maintaining links to other items
-	 *            within the {@link WoofModel}.
+	 *            Mapping of {@link SectionOutputType} name to existing
+	 *            {@link WoofSectionOutputModel} name to allow maintaining links
+	 *            to other items within the {@link WoofModel}.
 	 * @return {@link Change} to refactor the {@link WoofSectionModel}.
 	 */
 	Change<WoofSectionModel> refactorSection(WoofSectionModel section,
