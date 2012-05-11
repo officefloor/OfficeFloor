@@ -72,6 +72,42 @@ public interface WoofChanges {
 			String cometManualPublishMethodName);
 
 	/**
+	 * Refactors the {@link WoofTemplateModel}.
+	 * 
+	 * @param template
+	 *            {@link WoofTemplateModel} to refactor.
+	 * @param templatePath
+	 *            New template path for the {@link WoofTemplateModel}.
+	 * @param templateLogicClass
+	 *            New logic class for the {@link WoofTemplateModel}.
+	 * @param sectionType
+	 *            {@link SectionType} for the refactored
+	 *            {@link WoofTemplateModel}.
+	 * @param uri
+	 *            New URI for the {@link WoofTemplateModel}.
+	 * @param gwtEntryPointClassName
+	 *            New GWT EntryPoint class name.
+	 * @param gwtServiceAsyncInterfaceNames
+	 *            New GWT Service Async Interface names.
+	 * @param isEnableComet
+	 *            Flags whether refactor {@link WoofTemplateModel} is to enable
+	 *            Comet.
+	 * @param cometManualPublishMethodName
+	 *            New Comet manual publish method name.
+	 * @param templateOutputNameMapping
+	 *            Mapping of existing {@link WoofTemplateOutputModel} names to
+	 *            refactored names to allow maintaining links to other items
+	 *            within the {@link WoofModel}.
+	 * @return {@link Change} to refactor the {@link WoofTemplateModel}.
+	 */
+	Change<WoofTemplateModel> refactorTemplate(WoofTemplateModel template,
+			String templatePath, String templateLogicClass,
+			SectionType sectionType, String uri, String gwtEntryPointClassName,
+			String[] gwtServiceAsyncInterfaceNames, boolean isEnableComet,
+			String cometManualPublishMethodName,
+			Map<String, String> templateOutputNameMapping);
+
+	/**
 	 * Changes the URI for the {@link WoofTemplateModel}.
 	 * 
 	 * @param template
@@ -115,6 +151,39 @@ public interface WoofChanges {
 			Map<String, String> inputToUri);
 
 	/**
+	 * Refactors the {@link WoofSectionModel}.
+	 * 
+	 * @param section
+	 *            {@link WoofSectionModel} to refactor.
+	 * @param sectionName
+	 *            New name of the {@link WoofSectionModel}.
+	 * @param sectionSourceClassName
+	 *            New {@link SectionSource} class name for the
+	 *            {@link WoofSectionModel}.
+	 * @param sectionLocation
+	 *            New location for the {@link WoofSectionModel}.
+	 * @param properties
+	 *            New {@link PropertyList} for the {@link WoofSectionModel}.
+	 * @param sectionType
+	 *            {@link SectionType} of the refactor {@link WoofSectionModel}.
+	 * @param sectionInputNameMapping
+	 *            Mapping of existing {@link WoofSectionInputModel} names to
+	 *            refactored names to allow maintaining links to other items
+	 *            within the {@link WoofModel}.
+	 * @param sectionOutputNameMapping
+	 *            Mapping of existing {@link WoofSectionOutputModel} names to
+	 *            refactored names to allow maintaining links to other items
+	 *            within the {@link WoofModel}.
+	 * @return {@link Change} to refactor the {@link WoofSectionModel}.
+	 */
+	Change<WoofSectionModel> refactorSection(WoofSectionModel section,
+			String sectionName, String sectionSourceClassName,
+			String sectionLocation, PropertyList properties,
+			SectionType sectionType,
+			Map<String, String> sectionInputNameMapping,
+			Map<String, String> sectionOutputNameMapping);
+
+	/**
 	 * Changes the URI for the {@link WoofSectionInputModel}.
 	 * 
 	 * @param sectionInput
@@ -149,6 +218,28 @@ public interface WoofChanges {
 	 * @return {@link Change} to add the {@link WoofGovernanceModel}.
 	 */
 	Change<WoofGovernanceModel> addGovernance(String governanceName,
+			String governanceSourceClassName, PropertyList properties,
+			GovernanceType<?, ?> governanceType);
+
+	/**
+	 * Refactors the {@link WoofGovernanceModel}.
+	 * 
+	 * @param governance
+	 *            {@link WoofGovernanceModel} to refactor.
+	 * @param governanceName
+	 *            New name of the {@link WoofGovernanceModel}.
+	 * @param governanceSourceClassName
+	 *            New {@link GovernanceSource} class name for the
+	 *            {@link WoofGovernanceModel}.
+	 * @param properties
+	 *            New {@link PropertyList} for the {@link WoofGovernanceModel}.
+	 * @param governanceType
+	 *            {@link GovernanceType} of the refactored
+	 *            {@link WoofGovernanceModel}.
+	 * @return {@link Change} to refactor the {@link WoofGovernanceModel}.
+	 */
+	Change<WoofGovernanceModel> refactorGovernance(
+			WoofGovernanceModel governance, String governanceName,
 			String governanceSourceClassName, PropertyList properties,
 			GovernanceType<?, ?> governanceType);
 
@@ -195,6 +286,18 @@ public interface WoofChanges {
 	Change<WoofResourceModel> addResource(String resourcePath);
 
 	/**
+	 * Refactors the {@link WoofResourceModel}.
+	 * 
+	 * @param resource
+	 *            {@link WoofResourceModel} to refactor.
+	 * @param resourcePath
+	 *            New resource path.
+	 * @return {@link Change} to refactor the {@link WoofResourceModel}.
+	 */
+	Change<WoofResourceModel> refactorResource(WoofResourceModel resource,
+			String resourcePath);
+
+	/**
 	 * Changes the resource path for the {@link WoofResourceModel}.
 	 * 
 	 * @param resource
@@ -223,6 +326,18 @@ public interface WoofChanges {
 	 * @return {@link Change} to add the {@link WoofExceptionModel}.
 	 */
 	Change<WoofExceptionModel> addException(String exceptionClassName);
+
+	/**
+	 * Refactors a {@link WoofExceptionModel}.
+	 * 
+	 * @param exception
+	 *            {@link WoofExceptionModel} to refactor.
+	 * @param exceptionClassName
+	 *            New {@link Exception} class name.
+	 * @return {@link Change} to refactor the {@link WoofExceptionModel}.
+	 */
+	Change<WoofExceptionModel> refactorException(WoofExceptionModel exception,
+			String exceptionClassName);
 
 	/**
 	 * Removes the {@link WoofExceptionModel}.

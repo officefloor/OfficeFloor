@@ -1,0 +1,18 @@
+<woof>
+
+	<templates>
+		<template name="add" uri="add" path="example/Add.html" class="net.example.AddClass">
+			<output name="OUTPUT_1" />
+			<output name="OUTPUT_2" />
+			<output name="OUTPUT_3" />
+			<extension class="GWT">
+				<property name="gwt.module.path" value="net/example/add.gwt.xml" />
+				<property name="gwt.async.service.interfaces" value="net.example.GwtAddAsync" />
+			</extension>
+			<extension class="COMET">
+				<property name="manual.publish.method.name" value="manualAdd" />
+			</extension>
+		</template>
+	</templates>
+
+</woof>

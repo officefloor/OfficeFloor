@@ -1,0 +1,15 @@
+<woof>
+
+	<sections>
+		<section name="ADD" source="net.example.AddSectionSource"
+			location="ADD_LOCATION">
+			<property name="name.one" value="value.one" />
+			<property name="name.two" value="value.two" />
+			<input name="INPUT" />
+			<output name="OUTPUT_A" />
+			<output name="OUTPUT_B" />
+			<output name="OUTPUT_C" />
+		</section>
+	</sections>
+
+</woof>
