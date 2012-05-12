@@ -43,6 +43,7 @@ import net.officefloor.model.impl.change.NoChange;
 import net.officefloor.plugin.comet.web.http.section.CometHttpTemplateSectionExtension;
 import net.officefloor.plugin.gwt.module.GwtChanges;
 import net.officefloor.plugin.gwt.web.http.section.GwtHttpTemplateSectionExtension;
+import net.officefloor.plugin.web.http.template.section.HttpTemplateSectionSource;
 import net.officefloor.plugin.woof.comet.CometWoofTemplateExtensionService;
 import net.officefloor.plugin.woof.gwt.GwtWoofTemplateExtensionService;
 
@@ -60,6 +61,16 @@ public class WoofChangesImpl implements WoofChanges {
 		@Override
 		public String extractName(WoofTemplateModel model) {
 			return model.getWoofTemplateName();
+		}
+	};
+
+	/**
+	 * {@link WoofTemplateExtensionModel} {@link NameExtractor}.
+	 */
+	private static final NameExtractor<WoofTemplateExtensionModel> TEMPLATE_EXTENSION_NAME_EXTRACTOR = new NameExtractor<WoofTemplateExtensionModel>() {
+		@Override
+		public String extractName(WoofTemplateExtensionModel model) {
+			return model.getExtensionClassName();
 		}
 	};
 
@@ -151,6 +162,55 @@ public class WoofChangesImpl implements WoofChanges {
 				return String.CASE_INSENSITIVE_ORDER.compare(nameA, nameB);
 			}
 		});
+	}
+
+	/**
+	 * Sorts the {@link WoofTemplateOutputModel} and
+	 * {@link WoofTemplateExtensionModel} instances of the
+	 * {@link WoofTemplateModel}.
+	 * 
+	 * @param template
+	 *            {@link WoofTemplateModel}.
+	 */
+	private static void sortTemplateOutputsExtensions(WoofTemplateModel template) {
+		// Sort outputs keeping template render complete output last
+		Collections.sort(template.getOutputs(),
+				new Comparator<WoofTemplateOutputModel>() {
+					@Override
+					public int compare(WoofTemplateOutputModel a,
+							WoofTemplateOutputModel b) {
+						String nameA = a.getWoofTemplateOutputName();
+						String nameB = b.getWoofTemplateOutputName();
+						if (nameA.equals(nameB)) {
+							return 0; // same
+						} else if (HttpTemplateSectionSource.ON_COMPLETION_OUTPUT_NAME
+								.equals(nameA)) {
+							return 1; // render complete output always last
+						} else if (HttpTemplateSectionSource.ON_COMPLETION_OUTPUT_NAME
+								.equals(nameB)) {
+							return -1; // render complete output always last
+						} else {
+							// Sort by name
+							return String.CASE_INSENSITIVE_ORDER.compare(nameA,
+									nameB);
+						}
+					}
+				});
+
+		// Sort the extensions
+		sortByName(template.getExtensions(), TEMPLATE_EXTENSION_NAME_EXTRACTOR);
+	}
+
+	/**
+	 * Sorts the {@link WoofSectionInputModel} and
+	 * {@link WoofSectionOutputModel} instances of the {@link WoofSectionModel}.
+	 * 
+	 * @param section
+	 *            {@link WoofSectionModel}.
+	 */
+	private static void sortSectionInputOutputs(WoofSectionModel section) {
+		sortByName(section.getInputs(), SECTION_INPUT_NAME_EXTRACTOR);
+		sortByName(section.getOutputs(), SECTION_OUTPUT_NAME_EXTRACTOR);
 	}
 
 	/**
@@ -249,6 +309,33 @@ public class WoofChangesImpl implements WoofChanges {
 
 		// Return the template name
 		return templateName;
+	}
+
+	/**
+	 * Obtains the property value for GWT Asynchronous Services.
+	 * 
+	 * @param gwtServiceAsyncInterfaceNames
+	 *            Listing of GWT Asynchronous Service Interface names.
+	 * @return Property value for GWT Asynchronous Services.
+	 */
+	private static String getGwtAsyncServicesPropertyValue(
+			String[] gwtServiceAsyncInterfaceNames) {
+
+		// Obtain the property value for the GWT Services
+		StringBuilder propertyValue = new StringBuilder();
+		boolean isFirst = true;
+		if (gwtServiceAsyncInterfaceNames != null) {
+			for (String gstServiceAsyncInterfaceName : gwtServiceAsyncInterfaceNames) {
+				if (!isFirst) {
+					propertyValue.append(",");
+				}
+				isFirst = false;
+				propertyValue.append(gstServiceAsyncInterfaceName);
+			}
+		}
+
+		// Return the property value
+		return propertyValue.toString();
 	}
 
 	/**
@@ -528,21 +615,13 @@ public class WoofChangesImpl implements WoofChanges {
 					&& (gwtServiceAsyncInterfaceNames.length > 0)) {
 
 				// Obtain the property value for the GWT Services
-				StringBuilder propertyValue = new StringBuilder();
-				boolean isFirst = true;
-				for (String gstServiceAsyncInterfaceName : gwtServiceAsyncInterfaceNames) {
-					if (!isFirst) {
-						propertyValue.append(",");
-					}
-					isFirst = false;
-					propertyValue.append(gstServiceAsyncInterfaceName);
-				}
+				String propertyValue = getGwtAsyncServicesPropertyValue(gwtServiceAsyncInterfaceNames);
 
 				// Add the property
 				gwtExtension
 						.addProperty(new PropertyModel(
 								GwtHttpTemplateSectionExtension.PROPERTY_GWT_ASYNC_SERVICE_INTERFACES,
-								propertyValue.toString()));
+								propertyValue));
 			}
 		}
 
@@ -563,21 +642,472 @@ public class WoofChangesImpl implements WoofChanges {
 			}
 		}
 
+		// Sort outputs and extensions
+		sortTemplateOutputsExtensions(template);
+
 		// Return the change
 		return change;
 	}
 
 	@Override
 	public Change<WoofTemplateModel> refactorTemplate(
-			WoofTemplateModel template, String templatePath,
-			String templateLogicClass, SectionType sectionType, String uri,
-			String gwtEntryPointClassName,
+			final WoofTemplateModel template, final String templatePath,
+			final String templateLogicClass, SectionType sectionType,
+			final String uri, String gwtEntryPointClassName,
 			String[] gwtServiceAsyncInterfaceNames, boolean isEnableComet,
-			String cometManualPublishMethodName,
+			final String cometManualPublishMethodName,
 			Map<String, String> templateOutputNameMapping) {
-		// TODO implement WoofChanges.refactorTemplate
-		throw new UnsupportedOperationException(
-				"TODO implement WoofChanges.refactorTemplate");
+
+		// Obtain the template name after URI change
+		final String newTemplateName = getTemplateName(templatePath, uri,
+				template, this.model.getWoofTemplates());
+
+		// Create change to sort outputs
+		Change<WoofTemplateModel> sortChange = new AbstractChange<WoofTemplateModel>(
+				template, "Sort outputs") {
+			@Override
+			public void apply() {
+				sortTemplateOutputsExtensions(template);
+			}
+
+			@Override
+			public void revert() {
+				this.apply(); // sort
+			}
+		};
+
+		// Provide list of changes to aggregate
+		List<Change<?>> changes = new LinkedList<Change<?>>();
+
+		// Sort outputs at start (so revert has right order)
+		changes.add(sortChange);
+
+		// Obtain the existing details
+		final String existingTemplateName = template.getWoofTemplateName();
+		final String existingTemplatePath = template.getTemplatePath();
+		final String existingTemplateClassName = template
+				.getTemplateClassName();
+		final String existingUri = template.getUri();
+
+		// Create change to attributes
+		Change<WoofTemplateModel> attributeChange = new AbstractChange<WoofTemplateModel>(
+				template, "Refactor attributes") {
+			@Override
+			public void apply() {
+				// Refactor details
+				template.setWoofTemplateName(newTemplateName);
+				template.setTemplatePath(templatePath);
+				template.setTemplateClassName(templateLogicClass);
+				template.setUri(uri);
+			}
+
+			@Override
+			public void revert() {
+				// Revert attributes
+				template.setWoofTemplateName(existingTemplateName);
+				template.setTemplatePath(existingTemplatePath);
+				template.setTemplateClassName(existingTemplateClassName);
+				template.setUri(existingUri);
+			}
+		};
+		changes.add(attributeChange);
+
+		// Obtain the GWT extension (and GWT Module Path)
+		WoofTemplateExtensionModel gwtExtension = null;
+		PropertyModel gwtModulePathProperty = null;
+		PropertyModel gwtAsyncInterfacesProperty = null;
+		for (WoofTemplateExtensionModel extension : template.getExtensions()) {
+			if (GwtWoofTemplateExtensionService.EXTENSION_ALIAS
+					.equals(extension.getExtensionClassName())) {
+				gwtExtension = extension;
+			}
+		}
+		if (gwtExtension != null) {
+			// Obtain the GWT Module path and GWT Async Interfaces
+			for (PropertyModel property : gwtExtension.getProperties()) {
+				String propertyName = property.getName();
+				if (PROPERTY_GWT_MODULE_PATH.equals(propertyName)) {
+					gwtModulePathProperty = property;
+				}
+				if (GwtHttpTemplateSectionExtension.PROPERTY_GWT_ASYNC_SERVICE_INTERFACES
+						.equals(propertyName)) {
+					gwtAsyncInterfacesProperty = property;
+				}
+			}
+		}
+		final String existingGwtModulePath = (gwtModulePathProperty == null ? null
+				: gwtModulePathProperty.getValue());
+		final String existingGwtAsyncInterfaces = (gwtAsyncInterfacesProperty == null ? null
+				: gwtAsyncInterfacesProperty.getValue());
+
+		// Create the potential GWT Module and new property values
+		GwtModuleModel gwtModule = new GwtModuleModel(uri,
+				gwtEntryPointClassName, null);
+		if (isEnableComet) {
+			// Extend potential GWT Module for Comet
+			CometHttpTemplateSectionExtension.extendGwtModule(gwtModule);
+		}
+		final String newGwtModulePath = this.gwtChanges
+				.createGwtModulePath(gwtModule);
+		final String newGwtAsyncInterfaces = getGwtAsyncServicesPropertyValue(gwtServiceAsyncInterfaceNames);
+
+		// Provide details for GWT Module refactoring
+		boolean isUpdateGwtModule = false;
+		final WoofTemplateExtensionModel finalGwtExtension = gwtExtension;
+		final boolean hasExistingGwtModulePathProperty;
+		final PropertyModel finalGwtModulePathProperty;
+		if (gwtModulePathProperty == null) {
+			// No existing GWT Module Path property
+			hasExistingGwtModulePathProperty = false;
+			finalGwtModulePathProperty = new PropertyModel(
+					PROPERTY_GWT_MODULE_PATH, newGwtModulePath);
+		} else {
+			// Has existing GWT Module Path property
+			hasExistingGwtModulePathProperty = true;
+			finalGwtModulePathProperty = gwtModulePathProperty;
+		}
+		final boolean hasExistingGwtAsyncServicesProperty;
+		final PropertyModel finalGwtAsyncServicesProperty;
+		if (gwtAsyncInterfacesProperty == null) {
+			// No existing GWT Async Services property
+			hasExistingGwtAsyncServicesProperty = false;
+			finalGwtAsyncServicesProperty = new PropertyModel(
+					GwtHttpTemplateSectionExtension.PROPERTY_GWT_ASYNC_SERVICE_INTERFACES,
+					newGwtAsyncInterfaces);
+		} else {
+			// Has existing GWT Async Services property
+			hasExistingGwtAsyncServicesProperty = true;
+			finalGwtAsyncServicesProperty = gwtAsyncInterfacesProperty;
+		}
+
+		// Refactor the GWT extension (either refactoring, adding or removing)
+		boolean isExistingEntryPointClass = (gwtExtension != null);
+		boolean isRefactoringToHaveEntryPointClass = (gwtEntryPointClassName != null)
+				&& (gwtEntryPointClassName.trim().length() > 0);
+		if (isExistingEntryPointClass) {
+			// Existing to refactor or remove
+			if (isRefactoringToHaveEntryPointClass) {
+				// Refactor the GWT extension (and set to update GWT Module)
+				isUpdateGwtModule = true;
+				Change<WoofTemplateExtensionModel> change = new AbstractChange<WoofTemplateExtensionModel>(
+						finalGwtExtension, "Refactor GWT Extension") {
+					@Override
+					public void apply() {
+
+						// Refactor GWT Module Path
+						finalGwtModulePathProperty.setValue(newGwtModulePath);
+						if (!hasExistingGwtModulePathProperty) {
+							finalGwtExtension
+									.addProperty(finalGwtModulePathProperty);
+						}
+
+						// Refactor GWT Async Services
+						finalGwtAsyncServicesProperty
+								.setValue(newGwtAsyncInterfaces);
+						if (!hasExistingGwtAsyncServicesProperty) {
+							finalGwtExtension
+									.addProperty(finalGwtAsyncServicesProperty);
+						}
+					}
+
+					@Override
+					public void revert() {
+
+						// Refactor GWT Module Path
+						finalGwtModulePathProperty
+								.setValue(existingGwtModulePath);
+						if (!hasExistingGwtModulePathProperty) {
+							finalGwtExtension
+									.removeProperty(finalGwtModulePathProperty);
+						}
+
+						// Refactor GWT Async Services
+						finalGwtAsyncServicesProperty
+								.setValue(existingGwtAsyncInterfaces);
+						if (!hasExistingGwtAsyncServicesProperty) {
+							finalGwtExtension
+									.removeProperty(finalGwtAsyncServicesProperty);
+						}
+					}
+				};
+				changes.add(change);
+
+			} else {
+				// Remove the GWT extension
+				Change<WoofTemplateExtensionModel> change = new AbstractChange<WoofTemplateExtensionModel>(
+						finalGwtExtension, "Remove GWT Extension") {
+					@Override
+					public void apply() {
+						template.removeExtension(finalGwtExtension);
+					}
+
+					@Override
+					public void revert() {
+						template.addExtension(finalGwtExtension);
+					}
+				};
+				changes.add(change);
+			}
+
+		} else if (isRefactoringToHaveEntryPointClass) {
+			// Add the GWT extension (and set to update GWT Module)
+			isUpdateGwtModule = true;
+			final WoofTemplateExtensionModel addGwtExtension = new WoofTemplateExtensionModel(
+					GwtWoofTemplateExtensionService.EXTENSION_ALIAS);
+			addGwtExtension.addProperty(finalGwtModulePathProperty);
+			addGwtExtension.addProperty(finalGwtAsyncServicesProperty);
+			Change<WoofTemplateExtensionModel> change = new AbstractChange<WoofTemplateExtensionModel>(
+					addGwtExtension, "Add GWT Extension") {
+				@Override
+				public void apply() {
+					template.addExtension(addGwtExtension);
+				}
+
+				@Override
+				public void revert() {
+					template.removeExtension(addGwtExtension);
+				}
+			};
+			changes.add(change);
+		}
+
+		// Add change to refactor the GWT Module (if required)
+		if (isUpdateGwtModule) {
+			changes.add(this.gwtChanges.updateGwtModule(gwtModule,
+					existingGwtModulePath));
+		}
+
+		// Obtain the Comet extension (and manual publish property)
+		WoofTemplateExtensionModel cometExtension = null;
+		PropertyModel cometManualPublishProperty = null;
+		for (WoofTemplateExtensionModel extension : template.getExtensions()) {
+			if (CometWoofTemplateExtensionService.EXTENSION_ALIAS
+					.equals(extension.getExtensionClassName())) {
+				cometExtension = extension;
+			}
+		}
+		if (cometExtension != null) {
+			// Obtain the manual publish property
+			for (PropertyModel property : cometExtension.getProperties()) {
+				if (CometHttpTemplateSectionExtension.PROPERTY_MANUAL_PUBLISH_METHOD_NAME
+						.equals(property.getName())) {
+					cometManualPublishProperty = property;
+				}
+			}
+		}
+		final String existingCometManualPublishMethodName = (cometManualPublishProperty == null ? null
+				: cometManualPublishProperty.getValue());
+
+		// Provide details for Comet refactoring
+		final WoofTemplateExtensionModel finalCometExtension = cometExtension;
+		final boolean hasExistingCometManualPathPathProperty;
+		final PropertyModel finalCometManualPathProperty;
+		if (cometManualPublishProperty == null) {
+			// No existing Comet manual publish property
+			hasExistingCometManualPathPathProperty = false;
+			finalCometManualPathProperty = new PropertyModel(
+					CometHttpTemplateSectionExtension.PROPERTY_MANUAL_PUBLISH_METHOD_NAME,
+					cometManualPublishMethodName);
+		} else {
+			// Has existing Comet manual publish property
+			hasExistingCometManualPathPathProperty = true;
+			finalCometManualPathProperty = cometManualPublishProperty;
+		}
+
+		// Refactor the Comet extension (either refactoring, adding or removing)
+		boolean isExistingCometExtension = (cometExtension != null);
+		if (isExistingCometExtension) {
+			// Existing to refactor or remove
+			if (isEnableComet) {
+				// Refactor Comet extension
+				Change<WoofTemplateExtensionModel> change = new AbstractChange<WoofTemplateExtensionModel>(
+						cometExtension, "Refactor Comet Extension") {
+					@Override
+					public void apply() {
+						// Refactor manual publish
+						finalCometManualPathProperty
+								.setValue(cometManualPublishMethodName);
+						if (!hasExistingCometManualPathPathProperty) {
+							finalCometExtension
+									.addProperty(finalCometManualPathProperty);
+						}
+					}
+
+					@Override
+					public void revert() {
+						// Revert manual publish
+						finalCometManualPathProperty
+								.setValue(existingCometManualPublishMethodName);
+						if (!hasExistingCometManualPathPathProperty) {
+							finalCometExtension
+									.removeProperty(finalCometManualPathProperty);
+						}
+					}
+				};
+				changes.add(change);
+
+			} else {
+				// Remove Comet extension
+				Change<WoofTemplateExtensionModel> change = new AbstractChange<WoofTemplateExtensionModel>(
+						cometExtension, "Remove Comet Extension") {
+					@Override
+					public void apply() {
+						template.removeExtension(finalCometExtension);
+					}
+
+					@Override
+					public void revert() {
+						template.addExtension(finalCometExtension);
+					}
+				};
+				changes.add(change);
+			}
+
+		} else if (isEnableComet) {
+			// Create Comet extension to add
+			final WoofTemplateExtensionModel addCometExtension = new WoofTemplateExtensionModel(
+					CometWoofTemplateExtensionService.EXTENSION_ALIAS);
+			if ((cometManualPublishMethodName != null)
+					&& (cometManualPublishMethodName.trim().length() > 0)) {
+				// Add manual publish method name
+				addCometExtension.addProperty(finalCometManualPathProperty);
+			}
+
+			// Add Comet extension
+			Change<WoofTemplateExtensionModel> change = new AbstractChange<WoofTemplateExtensionModel>(
+					cometExtension, "Add Comet Extension") {
+				@Override
+				public void apply() {
+					template.addExtension(addCometExtension);
+				}
+
+				@Override
+				public void revert() {
+					template.removeExtension(addCometExtension);
+				}
+			};
+			changes.add(change);
+		}
+
+		// Obtain the mapping of existing outputs
+		Map<String, WoofTemplateOutputModel> existingOutputNameMapping = new HashMap<String, WoofTemplateOutputModel>();
+		for (WoofTemplateOutputModel output : template.getOutputs()) {
+			existingOutputNameMapping.put(output.getWoofTemplateOutputName(),
+					output);
+		}
+
+		// Refactor the outputs (either refactoring, adding or removing)
+		for (final SectionOutputType outputType : sectionType
+				.getSectionOutputTypes()) {
+
+			// Ignore escalations
+			if (outputType.isEscalationOnly()) {
+				continue;
+			}
+
+			// Obtain the mapped section output model
+			final String outputName = outputType.getSectionOutputName();
+			String mappedOutputName = templateOutputNameMapping.get(outputName);
+			final WoofTemplateOutputModel existingOutputModel = existingOutputNameMapping
+					.remove(mappedOutputName);
+
+			// Obtain further type details
+			final String argumentType = outputType.getArgumentType();
+
+			// Determine action to take based on existing output
+			Change<WoofTemplateOutputModel> templateOutputChange;
+			if (existingOutputModel != null) {
+				// Create change to refactor existing output
+				final String existingOutputName = existingOutputModel
+						.getWoofTemplateOutputName();
+				final String existingArgumentType = existingOutputModel
+						.getArgumentType();
+				templateOutputChange = new AbstractChange<WoofTemplateOutputModel>(
+						existingOutputModel, "Refactor Template Output") {
+					@Override
+					public void apply() {
+						existingOutputModel
+								.setWoofTemplateOutputName(outputName);
+						existingOutputModel.setArgumentType(argumentType);
+					}
+
+					@Override
+					public void revert() {
+						existingOutputModel
+								.setWoofTemplateOutputName(existingOutputName);
+						existingOutputModel
+								.setArgumentType(existingArgumentType);
+					}
+				};
+
+			} else {
+				// Create change to add output (with no URI)
+				final WoofTemplateOutputModel newOutputModel = new WoofTemplateOutputModel(
+						outputName, argumentType);
+				templateOutputChange = new AbstractChange<WoofTemplateOutputModel>(
+						newOutputModel, "Add Template Output") {
+					@Override
+					public void apply() {
+						template.addOutput(newOutputModel);
+					}
+
+					@Override
+					public void revert() {
+						template.removeOutput(newOutputModel);
+					}
+				};
+			}
+			changes.add(templateOutputChange);
+		}
+		for (final WoofTemplateOutputModel unmappedOutputModel : existingOutputNameMapping
+				.values()) {
+			// Create change to remove the unmapped output model
+			Change<WoofTemplateOutputModel> unmappedOutputChange = new AbstractChange<WoofTemplateOutputModel>(
+					unmappedOutputModel, "Remove Template Output") {
+
+				/**
+				 * {@link ConnectionModel} instances removed.
+				 */
+				private ConnectionModel[] connections;
+
+				@Override
+				public void apply() {
+
+					// Remove the connections
+					List<ConnectionModel> list = new LinkedList<ConnectionModel>();
+					removeConnection(unmappedOutputModel.getWoofResource(),
+							list);
+					removeConnection(unmappedOutputModel.getWoofSectionInput(),
+							list);
+					removeConnection(unmappedOutputModel.getWoofTemplate(),
+							list);
+					this.connections = list.toArray(new ConnectionModel[list
+							.size()]);
+
+					// Remove the template output
+					template.removeOutput(unmappedOutputModel);
+				}
+
+				@Override
+				public void revert() {
+
+					// Add output back to template
+					template.addOutput(unmappedOutputModel);
+
+					// Add back in connections
+					reconnectConnections(this.connections);
+				}
+			};
+			changes.add(unmappedOutputChange);
+		}
+
+		// Sort outputs at end (so apply has right order)
+		changes.add(sortChange);
+
+		// Return aggregate change for refactoring
+		return new AggregateChange<WoofTemplateModel>(template,
+				"Refactor Template",
+				changes.toArray(new Change[changes.size()]));
 	}
 
 	@Override
@@ -771,6 +1301,9 @@ public class WoofChangesImpl implements WoofChanges {
 					argumentType));
 		}
 
+		// Sort the inputs/outputs
+		sortSectionInputOutputs(woofSection);
+
 		// Return the change to add section
 		return new AbstractChange<WoofSectionModel>(woofSection, "Add Section") {
 			@Override
@@ -813,13 +1346,12 @@ public class WoofChangesImpl implements WoofChanges {
 				section, "Sort inputs/outputs") {
 			@Override
 			public void apply() {
-				sortByName(section.getInputs(), SECTION_INPUT_NAME_EXTRACTOR);
-				sortByName(section.getOutputs(), SECTION_OUTPUT_NAME_EXTRACTOR);
+				sortSectionInputOutputs(section);
 			}
 
 			@Override
 			public void revert() {
-				this.apply();
+				this.apply(); // sort
 			}
 		};
 
@@ -875,8 +1407,7 @@ public class WoofChangesImpl implements WoofChanges {
 
 		// Obtain the mapping of existing inputs
 		Map<String, WoofSectionInputModel> existingInputNameMapping = new HashMap<String, WoofSectionInputModel>();
-		for (WoofSectionInputModel input : new ArrayList<WoofSectionInputModel>(
-				section.getInputs())) {
+		for (WoofSectionInputModel input : section.getInputs()) {
 			existingInputNameMapping
 					.put(input.getWoofSectionInputName(), input);
 		}
@@ -1031,8 +1562,7 @@ public class WoofChangesImpl implements WoofChanges {
 
 		// Obtain the mapping of existing outputs
 		Map<String, WoofSectionOutputModel> existingOutputNameMapping = new HashMap<String, WoofSectionOutputModel>();
-		for (WoofSectionOutputModel output : new ArrayList<WoofSectionOutputModel>(
-				section.getOutputs())) {
+		for (WoofSectionOutputModel output : section.getOutputs()) {
 			existingOutputNameMapping.put(output.getWoofSectionOutputName(),
 					output);
 		}
