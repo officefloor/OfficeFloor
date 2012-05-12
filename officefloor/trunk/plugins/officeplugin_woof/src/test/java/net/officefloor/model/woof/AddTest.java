@@ -30,6 +30,7 @@ import net.officefloor.compile.governance.GovernanceType;
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.section.SectionType;
 import net.officefloor.model.change.Change;
+import net.officefloor.plugin.web.http.template.section.HttpTemplateSectionSource;
 
 /**
  * Tests adding to a {@link WoofModel}.
@@ -49,6 +50,9 @@ public class AddTest extends AbstractWoofChangesTestCase {
 					@Override
 					public void construct(SectionTypeContext context) {
 						context.addSectionInput("renderTemplate", null);
+						context.addSectionOutput(
+								HttpTemplateSectionSource.ON_COMPLETION_OUTPUT_NAME,
+								null, false);
 						context.addSectionOutput("OUTPUT_1", Integer.class,
 								false);
 						context.addSectionOutput("OUTPUT_2", null, false);

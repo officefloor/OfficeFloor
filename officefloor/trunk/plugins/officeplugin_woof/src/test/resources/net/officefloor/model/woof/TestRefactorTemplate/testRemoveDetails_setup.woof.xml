@@ -12,13 +12,13 @@
 			<output name="OUTPUT_3">
 				<resource name="RESOURCE" />
 			</output>
+			<extension class="COMET">
+				<property name="manual.publish.method.name" value="manualPublish" />
+			</extension>
 			<extension class="GWT">
 				<property name="gwt.module.path" value="net/example/template.gwt.xml" />
 				<property name="gwt.async.service.interfaces"
 					value="net.example.GwtServiceAsync,net.example.GwtAnotherAsync" />
-			</extension>
-			<extension class="COMET">
-				<property name="manual.publish.method.name" value="manualPublish" />
 			</extension>
 		</template>
 		<template name="TEMPLATE_LINK" path="example/Link.html"

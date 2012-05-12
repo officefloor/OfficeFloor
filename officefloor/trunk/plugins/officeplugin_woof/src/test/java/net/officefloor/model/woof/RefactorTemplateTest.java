@@ -23,17 +23,15 @@ import java.util.Map;
 
 import javax.sql.DataSource;
 
-import org.junit.Ignore;
-
 import net.officefloor.compile.section.SectionType;
 import net.officefloor.model.change.Change;
+import net.officefloor.model.change.Conflict;
 
 /**
  * Tests refactoring the {@link WoofTemplateModel}.
  * 
  * @author Daniel Sagenschneider
  */
-@Ignore("TODO provide implementation")
 public class RefactorTemplateTest extends AbstractWoofChangesTestCase {
 
 	/**
@@ -64,6 +62,18 @@ public class RefactorTemplateTest extends AbstractWoofChangesTestCase {
 	 */
 	public void testNoChange() {
 
+		// Record GWT changes
+		this.recordGwtModulePath("net/example/template.gwt.xml");
+		Change<?> gwtUpdateChange = this.recordGwtUpdate("template",
+				"net.example.client.ExampleGwtEntryPoint",
+				"net/example/template.gwt.xml");
+		this.recordReturn(gwtUpdateChange, gwtUpdateChange.getConflicts(),
+				new Conflict[0]);
+		gwtUpdateChange.apply();
+		gwtUpdateChange.revert();
+		gwtUpdateChange.apply();
+		gwtUpdateChange.revert();
+
 		// Create the section type
 		SectionType section = this
 				.constructSectionType(new SectionTypeConstructor() {
@@ -87,23 +97,41 @@ public class RefactorTemplateTest extends AbstractWoofChangesTestCase {
 		this.templateOutputNameMapping.put("OUTPUT_2", "OUTPUT_2");
 		this.templateOutputNameMapping.put("OUTPUT_3", "OUTPUT_3");
 
+		// Test
+		this.replayMockObjects();
+
 		// Refactor the template with same details
 		Change<WoofTemplateModel> change = this.operations.refactorTemplate(
 				this.template, "example/Template.html",
 				"net.example.LogicClass", section, "template",
-				"net/example/template.gwt.xml", new String[] {
+				"net.example.client.ExampleGwtEntryPoint", new String[] {
 						"net.example.GwtServiceAsync",
 						"net.example.GwtAnotherAsync" }, true, "manualPublish",
 				this.templateOutputNameMapping);
 
 		// Validate change
 		this.assertChange(change, null, "Refactor Template", true);
+
+		// Verify
+		this.verifyMockObjects();
 	}
 
 	/**
 	 * Ensure change all values.
 	 */
 	public void testChange() {
+
+		// Record GWT changes
+		this.recordGwtModulePath("net/example/change.gwt.xml");
+		Change<?> gwtUpdateChange = this.recordGwtUpdate("change",
+				"net.example.client.ExampleGwtEntryPoint",
+				"net/example/template.gwt.xml");
+		this.recordReturn(gwtUpdateChange, gwtUpdateChange.getConflicts(),
+				new Conflict[0]);
+		gwtUpdateChange.apply();
+		gwtUpdateChange.revert();
+		gwtUpdateChange.apply();
+		gwtUpdateChange.revert();
 
 		// Create the section type
 		SectionType section = this
@@ -120,20 +148,26 @@ public class RefactorTemplateTest extends AbstractWoofChangesTestCase {
 				});
 
 		// Re-map template output names
-		this.templateOutputNameMapping.put("OUTPUT_1", "OUTPUT_2");
-		this.templateOutputNameMapping.put("OUTPUT_2", "OUTPUT_3");
-		this.templateOutputNameMapping.put("OUTPUT_3", "OUTPUT_1");
+		this.templateOutputNameMapping.put("OUTPUT_2", "OUTPUT_1");
+		this.templateOutputNameMapping.put("OUTPUT_3", "OUTPUT_2");
+		this.templateOutputNameMapping.put("OUTPUT_1", "OUTPUT_3");
+
+		// Test
+		this.replayMockObjects();
 
 		// Refactor the template with changed details
 		Change<WoofTemplateModel> change = this.operations.refactorTemplate(
 				this.template, "example/Change.html",
 				"net.example.ChangeClass", section, "change",
-				"net/example/change.gwt.xml",
+				"net.example.client.ExampleGwtEntryPoint",
 				new String[] { "net.example.GwtChangeAsync" }, true,
 				"manualChange", this.templateOutputNameMapping);
 
 		// Validate change
 		this.assertChange(change, null, "Refactor Template", true);
+
+		// Verify
+		this.verifyMockObjects();
 	}
 
 	/**
@@ -141,6 +175,9 @@ public class RefactorTemplateTest extends AbstractWoofChangesTestCase {
 	 * {@link WoofTemplateExtensionModel} instances.
 	 */
 	public void testRemoveDetails() {
+
+		// Record GWT changes
+		this.recordGwtModulePath("net/example/remove.gwt.xml");
 
 		// Create the section type
 		SectionType section = this
@@ -152,6 +189,9 @@ public class RefactorTemplateTest extends AbstractWoofChangesTestCase {
 					}
 				});
 
+		// Test
+		this.replayMockObjects();
+
 		// Refactor the template removing outputs and extensions
 		Change<WoofTemplateModel> change = this.operations.refactorTemplate(
 				this.template, "example/Remove.html",
@@ -160,6 +200,9 @@ public class RefactorTemplateTest extends AbstractWoofChangesTestCase {
 
 		// Validate change
 		this.assertChange(change, null, "Refactor Template", true);
+
+		// Verify
+		this.verifyMockObjects();
 	}
 
 	/**
@@ -167,6 +210,17 @@ public class RefactorTemplateTest extends AbstractWoofChangesTestCase {
 	 * {@link WoofTemplateExtensionModel} instances.
 	 */
 	public void testAddDetails() {
+
+		// Record GWT changes
+		this.recordGwtModulePath("net/example/add.gwt.xml");
+		Change<?> gwtUpdateChange = this.recordGwtUpdate("add",
+				"net.example.client.AddGwtEntryPoint", null);
+		this.recordReturn(gwtUpdateChange, gwtUpdateChange.getConflicts(),
+				new Conflict[0]);
+		gwtUpdateChange.apply();
+		gwtUpdateChange.revert();
+		gwtUpdateChange.apply();
+		gwtUpdateChange.revert();
 
 		// Create the section type
 		SectionType section = this
@@ -186,15 +240,21 @@ public class RefactorTemplateTest extends AbstractWoofChangesTestCase {
 					}
 				});
 
+		// Test
+		this.replayMockObjects();
+
 		// Refactor the template removing outputs and extensions
 		Change<WoofTemplateModel> change = this.operations.refactorTemplate(
 				this.template, "example/Add.html", "net.example.AddClass",
-				section, "add", "net/example/add.gwt.xml",
+				section, "add", "net.example.client.AddGwtEntryPoint",
 				new String[] { "net.example.GwtAddAsync" }, true, "manualAdd",
 				this.templateOutputNameMapping);
 
 		// Validate change
 		this.assertChange(change, null, "Refactor Template", true);
+
+		// Verify
+		this.verifyMockObjects();
 	}
 
 }

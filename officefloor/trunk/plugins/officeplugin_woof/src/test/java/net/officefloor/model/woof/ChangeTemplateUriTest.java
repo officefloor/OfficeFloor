@@ -43,12 +43,18 @@ public class ChangeTemplateUriTest extends AbstractWoofChangesTestCase {
 	 */
 	public void testNotChangeUri() {
 
+		// Test
+		this.replayMockObjects();
+
 		// Change template to unique URI
 		Change<WoofTemplateModel> change = this.operations.changeTemplateUri(
 				this.template, "path");
 
 		// Validate the change
 		this.assertChange(change, this.template, "Change Template URI", true);
+
+		// Verify
+		this.verifyMockObjects();
 	}
 
 	/**
@@ -56,12 +62,18 @@ public class ChangeTemplateUriTest extends AbstractWoofChangesTestCase {
 	 */
 	public void testUniqueUri() {
 
+		// Test
+		this.replayMockObjects();
+
 		// Change template to unique URI
 		Change<WoofTemplateModel> change = this.operations.changeTemplateUri(
 				this.template, "unique/uri");
 
 		// Validate the change
 		this.assertChange(change, this.template, "Change Template URI", true);
+
+		// Verify
+		this.verifyMockObjects();
 	}
 
 	/**
@@ -69,12 +81,18 @@ public class ChangeTemplateUriTest extends AbstractWoofChangesTestCase {
 	 */
 	public void testNonUniqueUri() {
 
+		// Test
+		this.replayMockObjects();
+
 		// Change template to unique URI
 		Change<WoofTemplateModel> change = this.operations.changeTemplateUri(
 				this.template, "same/uri");
 
 		// Validate the change
 		this.assertChange(change, this.template, "Change Template URI", true);
+
+		// Verify
+		this.verifyMockObjects();
 	}
 
 	/**
@@ -82,12 +100,18 @@ public class ChangeTemplateUriTest extends AbstractWoofChangesTestCase {
 	 */
 	public void testClearUri() {
 
+		// Test
+		this.replayMockObjects();
+
 		// Change template to unique URI
 		Change<WoofTemplateModel> change = this.operations.changeTemplateUri(
 				this.template, null);
 
 		// Validate the change
 		this.assertChange(change, this.template, "Change Template URI", true);
+
+		// Verify
+		this.verifyMockObjects();
 	}
 
 }
