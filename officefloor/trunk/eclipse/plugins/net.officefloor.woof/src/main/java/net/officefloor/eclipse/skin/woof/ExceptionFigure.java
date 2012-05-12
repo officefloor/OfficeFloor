@@ -27,4 +27,13 @@ import net.officefloor.model.woof.WoofExceptionModel;
  * @author Daniel Sagenschneider
  */
 public interface ExceptionFigure extends OfficeFloorFigure {
+
+	/**
+	 * Specifies a new name to display.
+	 * 
+	 * @param exceptionName
+	 *            New name to display.
+	 */
+	void setExceptionName(String exceptionName);
+
 }

@@ -57,6 +57,14 @@ import net.officefloor.eclipse.woof.operations.AddResourceOperation;
 import net.officefloor.eclipse.woof.operations.AddSectionOperation;
 import net.officefloor.eclipse.woof.operations.AddStartOperation;
 import net.officefloor.eclipse.woof.operations.AddTemplateOperation;
+import net.officefloor.eclipse.woof.operations.DeleteExceptionOperation;
+import net.officefloor.eclipse.woof.operations.DeleteGovernanceAreaOperation;
+import net.officefloor.eclipse.woof.operations.DeleteGovernanceOperation;
+import net.officefloor.eclipse.woof.operations.DeleteResourceOperation;
+import net.officefloor.eclipse.woof.operations.DeleteStartOperation;
+import net.officefloor.eclipse.woof.operations.RefactorExceptionOperation;
+import net.officefloor.eclipse.woof.operations.RefactorGovernanceOperation;
+import net.officefloor.eclipse.woof.operations.RefactorResourceOperation;
 import net.officefloor.model.change.Change;
 import net.officefloor.model.impl.repository.ModelRepositoryImpl;
 import net.officefloor.model.repository.ConfigurationContext;
@@ -203,14 +211,32 @@ public class WoofEditor extends
 		// Obtain the WoOF changes
 		WoofChanges woofChanges = this.getModelChanges();
 
-		// Add actions
+		// Template actions
 		list.add(new AddTemplateOperation(woofChanges));
+
+		// Section actions
 		list.add(new AddSectionOperation(woofChanges));
+
+		// Governance actions
 		list.add(new AddGovernanceOperation(woofChanges));
+		list.add(new RefactorGovernanceOperation(woofChanges));
+		list.add(new DeleteGovernanceOperation(woofChanges));
 		list.add(new AddGovernanceAreaOperation(woofChanges));
+		list.add(new DeleteGovernanceAreaOperation(woofChanges));
+
+		// Resource actions
 		list.add(new AddResourceOperation(woofChanges));
+		list.add(new RefactorResourceOperation(woofChanges));
+		list.add(new DeleteResourceOperation(woofChanges));
+
+		// Exception actions
 		list.add(new AddExceptionOperation(woofChanges));
+		list.add(new RefactorExceptionOperation(woofChanges));
+		list.add(new DeleteExceptionOperation(woofChanges));
+
+		// Start actions
 		list.add(new AddStartOperation(woofChanges));
+		list.add(new DeleteStartOperation(woofChanges));
 	}
 
 	@Override

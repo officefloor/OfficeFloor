@@ -64,6 +64,10 @@ public class WoofExceptionEditPart
 	protected void handlePropertyChange(WoofExceptionEvent property,
 			PropertyChangeEvent evt) {
 		switch (property) {
+		case CHANGE_CLASS_NAME:
+			this.getOfficeFloorFigure().setExceptionName(
+					this.getExceptionName());
+			break;
 		case CHANGE_WOOF_TEMPLATE:
 		case CHANGE_WOOF_SECTION_INPUT:
 		case CHANGE_WOOF_RESOURCE:

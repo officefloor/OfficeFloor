@@ -29,6 +29,7 @@ import net.officefloor.model.woof.WoofExceptionToWoofSectionInputModel;
 import net.officefloor.model.woof.WoofExceptionToWoofTemplateModel;
 
 import org.eclipse.draw2d.ConnectionAnchor;
+import org.eclipse.draw2d.Label;
 
 /**
  * Standard {@link ExceptionFigure}.
@@ -37,6 +38,11 @@ import org.eclipse.draw2d.ConnectionAnchor;
  */
 public class StandardExceptionFigure extends AbstractOfficeFloorFigure
 		implements ExceptionFigure {
+
+	/**
+	 * Display name.
+	 */
+	private final Label name;
 
 	/**
 	 * Initiate.
@@ -49,6 +55,7 @@ public class StandardExceptionFigure extends AbstractOfficeFloorFigure
 		LabelConnectorFigure figure = new LabelConnectorFigure(
 				context.getExceptionName(), ConnectorDirection.EAST,
 				StandardOfficeFloorColours.BLACK());
+		this.name = figure.getLabel();
 
 		// Register anchors
 		ConnectionAnchor anchor = figure.getConnectionAnchor();
@@ -60,6 +67,15 @@ public class StandardExceptionFigure extends AbstractOfficeFloorFigure
 				anchor);
 
 		this.setFigure(figure);
+	}
+
+	/*
+	 * =========================== ExceptionFigure ==========================+
+	 */
+
+	@Override
+	public void setExceptionName(String exceptionName) {
+		this.name.setText(exceptionName);
 	}
 
 }
