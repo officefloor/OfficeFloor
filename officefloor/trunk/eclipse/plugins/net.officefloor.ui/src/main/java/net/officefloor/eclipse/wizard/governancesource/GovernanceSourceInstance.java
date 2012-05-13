@@ -82,6 +82,11 @@ public class GovernanceSourceInstance implements
 	private final GovernanceSourceInstanceContext context;
 
 	/**
+	 * {@link GovernanceInstance}.
+	 */
+	private GovernanceInstance governanceInstance;
+
+	/**
 	 * {@link GovernanceSource} class.
 	 */
 	private Class<? extends GovernanceSource<?, ?>> governanceSourceClass;
@@ -143,6 +148,17 @@ public class GovernanceSourceInstance implements
 
 		// Notify properties changed as now have location
 		this.notifyPropertiesChanged();
+	}
+
+	/**
+	 * Loads the particular {@link GovernanceInstance} for this
+	 * {@link GovernanceSourceInstance} to configure properties from.
+	 * 
+	 * @param governanceInstance
+	 *            {@link GovernanceInstance}.
+	 */
+	public void loadGovernanceInstance(GovernanceInstance governanceInstance) {
+		this.governanceInstance = governanceInstance;
 	}
 
 	/**
@@ -269,6 +285,14 @@ public class GovernanceSourceInstance implements
 		// Obtain specification properties for governance source
 		this.properties = this.governanceLoader
 				.loadSpecification(this.governanceSourceClass);
+
+		// Load governance instance properties if available
+		if (this.governanceInstance != null) {
+			for (Property property : this.governanceInstance.getPropertyList()) {
+				this.properties.getOrAddProperty(property.getName()).setValue(
+						property.getValue());
+			}
+		}
 
 		// Determine if have extension
 		if (this.governanceSourceExtension != null) {

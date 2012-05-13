@@ -81,14 +81,15 @@ public class WoofGovernanceEditPart
 			PropertyChangeEvent evt) {
 		switch (property) {
 		case CHANGE_WOOF_GOVERNANCE_NAME:
-			// TODO handle
+			this.getOfficeFloorFigure().setGovernanceName(
+					this.getGovernanceName());
 			break;
 		case ADD_GOVERNANCE_AREA:
 		case REMOVE_GOVERNANCE_AREA:
 			// Refresh woof as area added graphically to top level
 			WoofEditPart woofEditPart = (WoofEditPart) this.getParent();
 			woofEditPart.refresh();
-			
+
 			// Refresh connections to areas
 			this.refreshSourceConnections();
 			break;

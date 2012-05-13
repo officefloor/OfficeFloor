@@ -64,7 +64,7 @@ public class AddGovernanceOperation extends
 		String governanceName = instance.getGovernanceName();
 		String governanceSourceClassName = instance
 				.getGovernanceSourceClassName();
-		PropertyList properties = instance.getPropertylist();
+		PropertyList properties = instance.getPropertyList();
 		GovernanceType<?, ?> governanceType = instance.getGovernanceType();
 
 		// Create change to add governance

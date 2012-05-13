@@ -36,6 +36,11 @@ public class StandardGovernanceFigure extends AbstractOfficeFloorFigure
 		implements GovernanceFigure {
 
 	/**
+	 * Name.
+	 */
+	private final Label name;
+
+	/**
 	 * Initiate.
 	 * 
 	 * @param context
@@ -52,11 +57,20 @@ public class StandardGovernanceFigure extends AbstractOfficeFloorFigure
 		triangle.setLayoutManager(new NoSpacingGridLayout(1));
 
 		// Add name
-		Label name = new Label(context.getGovernanceName());
-		name.setLayoutManager(new NoSpacingGridLayout(1));
-		triangle.add(name);
+		this.name = new Label(context.getGovernanceName());
+		this.name.setLayoutManager(new NoSpacingGridLayout(1));
+		triangle.add(this.name);
 
 		this.setFigure(triangle);
+	}
+
+	/*
+	 * ======================= GovernanceFigure ========================
+	 */
+
+	@Override
+	public void setGovernanceName(String governanceName) {
+		this.name.setText(governanceName);
 	}
 
 }
