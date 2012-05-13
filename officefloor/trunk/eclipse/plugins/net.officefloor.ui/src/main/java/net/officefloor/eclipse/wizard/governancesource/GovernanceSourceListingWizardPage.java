@@ -37,7 +37,8 @@ import org.eclipse.swt.widgets.List;
 import org.eclipse.swt.widgets.Text;
 
 /**
- * {@link IWizardPage} providing the listing of {@link GovernanceSourceInstance}.
+ * {@link IWizardPage} providing the listing of {@link GovernanceSourceInstance}
+ * .
  * 
  * @author Daniel Sagenschneider
  */
@@ -47,6 +48,12 @@ public class GovernanceSourceListingWizardPage extends WizardPage {
 	 * {@link GovernanceSourceInstance} listing.
 	 */
 	private final GovernanceSourceInstance[] governanceSourceInstances;
+
+	/**
+	 * {@link GovernanceInstance} being refactor or <code>null</code> if
+	 * creating.
+	 */
+	private final GovernanceInstance governanceInstance;
 
 	/**
 	 * Listing of {@link GovernanceSource} labels in order of
@@ -69,10 +76,16 @@ public class GovernanceSourceListingWizardPage extends WizardPage {
 	 * 
 	 * @param governanceSourceInstances
 	 *            Listing of {@link GovernanceSourceInstance}.
+	 * @param governanceInstance
+	 *            {@link GovernanceInstance} being refactor or <code>null</code>
+	 *            if creating.
 	 */
-	GovernanceSourceListingWizardPage(GovernanceSourceInstance[] governanceSourceInstances) {
+	GovernanceSourceListingWizardPage(
+			GovernanceSourceInstance[] governanceSourceInstances,
+			GovernanceInstance governanceInstance) {
 		super("GovernanceSource listing");
 		this.governanceSourceInstances = governanceSourceInstances;
+		this.governanceInstance = governanceInstance;
 
 		// Create the listing of labels
 		this.governanceSourceLabels = new String[this.governanceSourceInstances.length];
@@ -88,8 +101,8 @@ public class GovernanceSourceListingWizardPage extends WizardPage {
 	/**
 	 * Obtains the selected {@link GovernanceSourceInstance}.
 	 * 
-	 * @return Selected {@link GovernanceSourceInstance} or <code>null</code> if not
-	 *         selected.
+	 * @return Selected {@link GovernanceSourceInstance} or <code>null</code> if
+	 *         not selected.
 	 */
 	public GovernanceSourceInstance getSelectedGovernanceSourceInstance() {
 		int selectedIndex = this.list.getSelectionIndex();
@@ -120,8 +133,14 @@ public class GovernanceSourceListingWizardPage extends WizardPage {
 		Label nameLabel = new Label(nameComposite, SWT.NONE);
 		nameLabel.setText("Governance name: ");
 		this.governanceName = new Text(nameComposite, SWT.BORDER);
-		this.governanceName.setLayoutData(new GridData(SWT.FILL, SWT.BEGINNING, true,
-				false));
+		this.governanceName.setLayoutData(new GridData(SWT.FILL, SWT.BEGINNING,
+				true, false));
+		if (this.governanceInstance != null) {
+			// Provide governance name if refactoring.
+			// (Must be done before modifyier listener)
+			this.governanceName.setText(this.governanceInstance
+					.getGovernanceName());
+		}
 		this.governanceName.addModifyListener(new ModifyListener() {
 			@Override
 			public void modifyText(ModifyEvent e) {
@@ -142,8 +161,21 @@ public class GovernanceSourceListingWizardPage extends WizardPage {
 			}
 		});
 
-		// Initially page not complete (as must select governance source)
-		this.setPageComplete(false);
+		// Flag selected governance instance (if refactoring work)
+		if (this.governanceInstance != null) {
+			for (int i = 0; i < this.governanceSourceInstances.length; i++) {
+				if (this.governanceSourceInstances[i]
+						.getGovernanceSourceClassName().equals(
+								this.governanceInstance
+										.getGovernanceSourceClassName())) {
+					// Governance source for the selected instance
+					this.list.select(i);
+				}
+			}
+		}
+
+		// Trigger handle change to set initial state
+		this.handleChange();
 
 		// Provide error if no governance loaders available
 		if (this.governanceSourceInstances.length == 0) {

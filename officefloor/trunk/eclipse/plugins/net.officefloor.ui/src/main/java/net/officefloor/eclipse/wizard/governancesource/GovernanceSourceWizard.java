@@ -212,11 +212,26 @@ public class GovernanceSourceWizard extends Wizard implements
 
 		// Create the pages
 		this.listingPage = new GovernanceSourceListingWizardPage(
-				governanceSourceInstanceListing);
+				governanceSourceInstanceListing, governanceInstance);
 		for (GovernanceSourceInstance governanceSourceInstance : governanceSourceInstanceListing) {
 			this.propertiesPages.put(governanceSourceInstance,
 					new GovernanceSourcePropertiesWizardPage(this,
 							governanceSourceInstance));
+		}
+
+		// Add refactor governance
+		if (governanceInstance != null) {
+
+			// Load governance instance for matching governance source instance
+			String governanceSourceClassName = governanceInstance
+					.getGovernanceSourceClassName();
+			for (GovernanceSourceInstance governanceSourceInstance : governanceSourceInstanceListing) {
+				if (governanceSourceClassName.equals(governanceSourceInstance
+						.getGovernanceSourceClassName())) {
+					governanceSourceInstance
+							.loadGovernanceInstance(governanceInstance);
+				}
+			}
 		}
 	}
 

@@ -61,7 +61,7 @@ public class RefactorGovernanceOperation extends
 				governance.getWoofGovernanceName(),
 				governance.getGovernanceSourceClassName());
 		for (PropertyModel property : governance.getProperties()) {
-			existing.getPropertylist().addProperty(property.getName())
+			existing.getPropertyList().addProperty(property.getName())
 					.setValue(property.getValue());
 		}
 
@@ -76,7 +76,7 @@ public class RefactorGovernanceOperation extends
 		String governanceName = instance.getGovernanceName();
 		String governanceSourceClassName = instance
 				.getGovernanceSourceClassName();
-		PropertyList properties = instance.getPropertylist();
+		PropertyList properties = instance.getPropertyList();
 		GovernanceType<?, ?> governanceType = instance.getGovernanceType();
 
 		// Create change to refactor governance

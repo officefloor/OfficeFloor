@@ -27,4 +27,13 @@ import net.officefloor.model.woof.WoofGovernanceModel;
  * @author Daniel Sagenschneider
  */
 public interface GovernanceFigure extends OfficeFloorFigure {
+
+	/**
+	 * Specifies the name to display.
+	 * 
+	 * @param governanceName
+	 *            Name to display.
+	 */
+	void setGovernanceName(String governanceName);
+
 }

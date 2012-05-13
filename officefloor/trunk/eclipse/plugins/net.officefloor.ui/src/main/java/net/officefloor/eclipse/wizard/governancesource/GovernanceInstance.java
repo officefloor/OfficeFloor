@@ -110,7 +110,7 @@ public class GovernanceInstance {
 	 * 
 	 * @return {@link PropertyList}.
 	 */
-	public PropertyList getPropertylist() {
+	public PropertyList getPropertyList() {
 		return this.propertyList;
 	}
 
