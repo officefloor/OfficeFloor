@@ -18,6 +18,8 @@
 
 package net.officefloor.eclipse.skin.standard.woof;
 
+import org.eclipse.draw2d.Label;
+
 import net.officefloor.eclipse.skin.standard.AbstractOfficeFloorFigure;
 import net.officefloor.eclipse.skin.standard.StandardWoofColours;
 import net.officefloor.eclipse.skin.standard.figure.RoundedContainerFigure;
@@ -34,6 +36,11 @@ public class StandardSectionFigure extends AbstractOfficeFloorFigure implements
 		SectionFigure {
 
 	/**
+	 * Name.
+	 */
+	private final Label name;
+
+	/**
 	 * Initiate.
 	 * 
 	 * @param context
@@ -45,10 +52,20 @@ public class StandardSectionFigure extends AbstractOfficeFloorFigure implements
 		RoundedContainerFigure figure = new RoundedContainerFigure(
 				context.getSectionName(), StandardWoofColours.SECTION(), 5,
 				false);
+		this.name = figure.getContainerName();
 
 		// Specify the figures
 		this.setFigure(figure);
 		this.setContentPane(figure.getContentPane());
+	}
+
+	/*
+	 * ===================== SectionFigure ==========================
+	 */
+
+	@Override
+	public void setSectionName(String sectionName) {
+		this.name.setText(sectionName);
 	}
 
 }

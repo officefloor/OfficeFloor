@@ -60,12 +60,14 @@ public class SectionSourceWizard extends Wizard implements
 	 * @param sectionInstance
 	 *            {@link SectionInstance} to based decisions. <code>null</code>
 	 *            if creating new {@link SectionInstance}.
+	 * @param isAutoWire
+	 *            Flag indicating if configuring for auto-wire.
 	 * @return {@link SectionInstance} or <code>null</code> if cancelled.
 	 */
 	public static SectionInstance loadSectionType(
 			AbstractOfficeFloorEditPart<?, ?, ?> editPart,
-			SectionInstance sectionInstance) {
-		return getSectionInstance(true, editPart, sectionInstance);
+			SectionInstance sectionInstance, boolean isAutoWire) {
+		return getSectionInstance(true, editPart, sectionInstance, isAutoWire);
 	}
 
 	/**
@@ -78,12 +80,14 @@ public class SectionSourceWizard extends Wizard implements
 	 * @param sectionInstance
 	 *            {@link SectionInstance} to based decisions. <code>null</code>
 	 *            if creating new {@link SectionInstance}.
+	 * @param isAutoWire
+	 *            Flag indicating if configuring for auto-wire.
 	 * @return {@link SectionInstance} or <code>null</code> if cancelled.
 	 */
 	public static SectionInstance loadOfficeSection(
 			AbstractOfficeFloorEditPart<?, ?, ?> editPart,
-			SectionInstance sectionInstance) {
-		return getSectionInstance(false, editPart, sectionInstance);
+			SectionInstance sectionInstance, boolean isAutoWire) {
+		return getSectionInstance(false, editPart, sectionInstance, isAutoWire);
 	}
 
 	/**
@@ -95,11 +99,13 @@ public class SectionSourceWizard extends Wizard implements
 	 * @param sectionInstance
 	 *            {@link SectionInstance} to based decisions. <code>null</code>
 	 *            if creating new {@link SectionInstance}.
+	 * @param isAutoWire
+	 *            Flag indicating if configuring for auto-wire.
 	 * @return {@link SectionInstance} or <code>null</code> if cancelled.
 	 */
 	public static SectionInstance getSectionInstance(boolean isLoadType,
 			AbstractOfficeFloorEditPart<?, ?, ?> editPart,
-			SectionInstance sectionInstance) {
+			SectionInstance sectionInstance, boolean isAutoWire) {
 
 		// Obtain the project
 		IProject project = ProjectConfigurationContext.getProject(editPart
@@ -107,7 +113,7 @@ public class SectionSourceWizard extends Wizard implements
 
 		// Create and run the wizard
 		SectionSourceWizard wizard = new SectionSourceWizard(isLoadType,
-				project, sectionInstance);
+				project, sectionInstance, isAutoWire);
 		if (WizardUtil.runWizard(wizard, editPart)) {
 			// Successful so return the section instance
 			return wizard.getSectionInstance();
@@ -223,9 +229,12 @@ public class SectionSourceWizard extends Wizard implements
 	 *            {@link OfficeSection}.
 	 * @param project
 	 *            {@link IProject}.
+	 * @param isAutoWire
+	 *            Flag indicating if configuring for auto-wire.
 	 */
-	public SectionSourceWizard(boolean isLoadType, IProject project) {
-		this(isLoadType, project, null);
+	public SectionSourceWizard(boolean isLoadType, IProject project,
+			boolean isAutoWire) {
+		this(isLoadType, project, null, isAutoWire);
 	}
 
 	/**
@@ -239,9 +248,11 @@ public class SectionSourceWizard extends Wizard implements
 	 * @param sectionInstance
 	 *            {@link SectionInstance} to be edited, or <code>null</code> to
 	 *            create a new {@link SectionInstance}.
+	 * @param isAutoWire
+	 *            Flag indicating if configuring for auto-wire.
 	 */
 	public SectionSourceWizard(boolean isLoadType, IProject project,
-			SectionInstance sectionInstance) {
+			SectionInstance sectionInstance, boolean isAutoWire) {
 		this.isLoadType = isLoadType;
 
 		// Obtain the class loader for the project
@@ -277,7 +288,18 @@ public class SectionSourceWizard extends Wizard implements
 		if (sectionInstance != null) {
 			// Refactoring section
 			this.officeSectionAlignPage = new SectionSourceAlignOfficeSectionWizardPage(
-					sectionInstance);
+					sectionInstance, isLoadType, isAutoWire);
+
+			// Load section instance for matching section source instance
+			String sectionSourceClassName = sectionInstance
+					.getSectionSourceClassName();
+			for (SectionSourceInstance sectionSourceInstance : sectionSourceInstanceListing) {
+				if (sectionSourceClassName.equals(sectionSourceInstance
+						.getSectionSourceClassName())) {
+					sectionSourceInstance.loadSectionInstance(sectionInstance);
+				}
+			}
+
 		} else {
 			// Creating new section
 			this.officeSectionAlignPage = null;

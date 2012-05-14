@@ -31,6 +31,14 @@ import net.officefloor.model.woof.WoofSectionInputModel;
 public interface SectionInputFigure extends OfficeFloorFigure {
 
 	/**
+	 * Specifies the section input name to display.
+	 * 
+	 * @param sectionInputName
+	 *            Section input name to display.
+	 */
+	void setSectionInputName(String sectionInputName);
+
+	/**
 	 * Specifies the URI to be displayed.
 	 * 
 	 * @param uri

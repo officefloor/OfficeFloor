@@ -27,4 +27,13 @@ import net.officefloor.model.woof.WoofSectionModel;
  * @author Daniel Sagenschneider
  */
 public interface SectionFigure extends OfficeFloorFigure {
+
+	/**
+	 * Specifies the name to display.
+	 * 
+	 * @param sectionName
+	 *            Name to display.
+	 */
+	void setSectionName(String sectionName);
+
 }

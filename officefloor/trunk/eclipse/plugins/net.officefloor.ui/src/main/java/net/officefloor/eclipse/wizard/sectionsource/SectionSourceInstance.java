@@ -20,6 +20,7 @@ package net.officefloor.eclipse.wizard.sectionsource;
 
 import net.officefloor.compile.OfficeFloorCompiler;
 import net.officefloor.compile.issues.CompilerIssues;
+import net.officefloor.compile.properties.Property;
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.section.SectionLoader;
 import net.officefloor.compile.section.SectionType;
@@ -80,6 +81,11 @@ public class SectionSourceInstance implements SectionSourceExtensionContext,
 	 * {@link SectionSourceInstanceContext}.
 	 */
 	private final SectionSourceInstanceContext context;
+
+	/**
+	 * {@link SectionInstance}.
+	 */
+	private SectionInstance sectionInstance;
 
 	/**
 	 * {@link SectionSource} class.
@@ -154,6 +160,17 @@ public class SectionSourceInstance implements SectionSourceExtensionContext,
 
 		// Notify properties changed as now have location
 		this.notifyPropertiesChanged();
+	}
+
+	/**
+	 * Loads the particular {@link SectionInstance} for this
+	 * {@link SectionSourceInstance} to configure properties from.
+	 * 
+	 * @param sectionInstance
+	 *            {@link SectionInstance}.
+	 */
+	public void loadSectionInstance(SectionInstance sectionInstance) {
+		this.sectionInstance = sectionInstance;
 	}
 
 	/**
@@ -335,6 +352,14 @@ public class SectionSourceInstance implements SectionSourceExtensionContext,
 		// Obtain specification properties for section source
 		this.properties = this.sectionLoader
 				.loadSpecification(this.sectionSourceClass);
+
+		// Load section instance properties if available
+		if (this.sectionInstance != null) {
+			for (Property property : this.sectionInstance.getPropertylist()) {
+				this.properties.getOrAddProperty(property.getName()).setValue(
+						property.getValue());
+			}
+		}
 
 		// Determine if have extension
 		if (this.sectionSourceExtension != null) {

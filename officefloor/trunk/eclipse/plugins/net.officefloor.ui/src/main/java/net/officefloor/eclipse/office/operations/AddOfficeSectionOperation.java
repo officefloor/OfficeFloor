@@ -51,16 +51,17 @@ public class AddOfficeSectionOperation extends
 	protected Change<?> getChange(OfficeChanges changes, Context context) {
 
 		// Obtain the section instance with the office section
-		SectionInstance section = SectionSourceWizard.loadOfficeSection(context
-				.getEditPart(), null);
+		SectionInstance section = SectionSourceWizard.loadOfficeSection(
+				context.getEditPart(), null, false);
 		if (section == null) {
 			return null; // must have section
 		}
 
 		// Obtain the add office section change
-		Change<OfficeSectionModel> change = changes.addOfficeSection(section
-				.getSectionSourceClassName(), section.getSectionLocation(),
-				section.getPropertylist(), section.getOfficeSection());
+		Change<OfficeSectionModel> change = changes.addOfficeSection(
+				section.getSectionSourceClassName(),
+				section.getSectionLocation(), section.getPropertylist(),
+				section.getOfficeSection());
 
 		// Position the office section
 		context.positionModel(change.getTarget());
