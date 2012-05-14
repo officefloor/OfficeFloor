@@ -61,6 +61,9 @@ public class WoofSectionEditPart
 	protected void handlePropertyChange(WoofSectionEvent property,
 			PropertyChangeEvent evt) {
 		switch (property) {
+		case CHANGE_WOOF_SECTION_NAME:
+			this.getOfficeFloorFigure().setSectionName(this.getSectionName());
+			break;
 		case ADD_INPUT:
 		case REMOVE_INPUT:
 		case ADD_OUTPUT:

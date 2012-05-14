@@ -30,7 +30,7 @@ import net.officefloor.model.office.OfficeSectionModel;
 
 /**
  * {@link Operation} to refactor an {@link OfficeSectionModel}.
- *
+ * 
  * @author Daniel Sagenschneider
  */
 public class RefactorOfficeSectionChangeOperation extends
@@ -38,7 +38,7 @@ public class RefactorOfficeSectionChangeOperation extends
 
 	/**
 	 * Initiate.
-	 *
+	 * 
 	 * @param officeChanges
 	 *            {@link OfficeChanges}.
 	 */
@@ -59,7 +59,8 @@ public class RefactorOfficeSectionChangeOperation extends
 
 		// Obtain the refactored office section
 		SectionInstance sectionInstance = SectionSourceWizard
-				.loadOfficeSection(editPart, new SectionInstance(officeSection));
+				.loadOfficeSection(editPart,
+						new SectionInstance(officeSection), false);
 		if (sectionInstance == null) {
 			return null; // section not being refactored
 		}
@@ -73,11 +74,13 @@ public class RefactorOfficeSectionChangeOperation extends
 				.getObjectNameMapping();
 
 		// Return change to refactor the office section
-		return changes.refactorOfficeSection(officeSection, sectionInstance
-				.getSectionName(), sectionInstance.getSectionSourceClassName(),
-				sectionInstance.getSectionLocation(), sectionInstance
-						.getPropertylist(), sectionInstance.getOfficeSection(),
-				inputNameMapping, outputNameMapping, objectNameMapping);
+		return changes.refactorOfficeSection(officeSection,
+				sectionInstance.getSectionName(),
+				sectionInstance.getSectionSourceClassName(),
+				sectionInstance.getSectionLocation(),
+				sectionInstance.getPropertylist(),
+				sectionInstance.getOfficeSection(), inputNameMapping,
+				outputNameMapping, objectNameMapping);
 	}
 
 }

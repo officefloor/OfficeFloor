@@ -61,10 +61,14 @@ import net.officefloor.eclipse.woof.operations.DeleteExceptionOperation;
 import net.officefloor.eclipse.woof.operations.DeleteGovernanceAreaOperation;
 import net.officefloor.eclipse.woof.operations.DeleteGovernanceOperation;
 import net.officefloor.eclipse.woof.operations.DeleteResourceOperation;
+import net.officefloor.eclipse.woof.operations.DeleteSectionOperation;
 import net.officefloor.eclipse.woof.operations.DeleteStartOperation;
+import net.officefloor.eclipse.woof.operations.DeleteTemplateOperation;
 import net.officefloor.eclipse.woof.operations.RefactorExceptionOperation;
 import net.officefloor.eclipse.woof.operations.RefactorGovernanceOperation;
 import net.officefloor.eclipse.woof.operations.RefactorResourceOperation;
+import net.officefloor.eclipse.woof.operations.RefactorSectionOperation;
+import net.officefloor.eclipse.woof.operations.RefactorTemplateOperation;
 import net.officefloor.model.change.Change;
 import net.officefloor.model.impl.repository.ModelRepositoryImpl;
 import net.officefloor.model.repository.ConfigurationContext;
@@ -213,9 +217,13 @@ public class WoofEditor extends
 
 		// Template actions
 		list.add(new AddTemplateOperation(woofChanges));
+		list.add(new RefactorTemplateOperation(woofChanges));
+		list.add(new DeleteTemplateOperation(woofChanges));
 
 		// Section actions
 		list.add(new AddSectionOperation(woofChanges));
+		list.add(new RefactorSectionOperation(woofChanges));
+		list.add(new DeleteSectionOperation(woofChanges));
 
 		// Governance actions
 		list.add(new AddGovernanceOperation(woofChanges));

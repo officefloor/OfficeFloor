@@ -52,17 +52,17 @@ public class AddSubSectionOperation extends
 	protected Change<?> getChange(SectionChanges changes, Context context) {
 
 		// Obtain the section instance with the section type
-		SectionInstance section = SectionSourceWizard.loadSectionType(context
-				.getEditPart(), null);
+		SectionInstance section = SectionSourceWizard.loadSectionType(
+				context.getEditPart(), null, false);
 		if (section == null) {
 			return null; // must have section
 		}
 
 		// Obtain the add sub section change
-		Change<SubSectionModel> change = changes.addSubSection(section
-				.getSectionName(), section.getSectionSourceClassName(), section
-				.getSectionLocation(), section.getPropertylist(), section
-				.getSectionType());
+		Change<SubSectionModel> change = changes.addSubSection(
+				section.getSectionName(), section.getSectionSourceClassName(),
+				section.getSectionLocation(), section.getPropertylist(),
+				section.getSectionType());
 
 		// Position the section
 		context.positionModel(change.getTarget());

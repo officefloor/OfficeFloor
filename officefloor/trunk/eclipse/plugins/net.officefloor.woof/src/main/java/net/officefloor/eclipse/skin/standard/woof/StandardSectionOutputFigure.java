@@ -29,6 +29,7 @@ import net.officefloor.model.woof.WoofSectionOutputToWoofSectionInputModel;
 import net.officefloor.model.woof.WoofSectionOutputToWoofTemplateModel;
 
 import org.eclipse.draw2d.ConnectionAnchor;
+import org.eclipse.draw2d.Label;
 
 /**
  * Standard {@link SectionOutputFigure}.
@@ -37,6 +38,11 @@ import org.eclipse.draw2d.ConnectionAnchor;
  */
 public class StandardSectionOutputFigure extends AbstractOfficeFloorFigure
 		implements SectionOutputFigure {
+
+	/**
+	 * Name.
+	 */
+	private final Label name;
 
 	/**
 	 * Initiate.
@@ -50,6 +56,7 @@ public class StandardSectionOutputFigure extends AbstractOfficeFloorFigure
 		LabelConnectorFigure connector = new LabelConnectorFigure(
 				context.getSectionOutputName(), ConnectorDirection.EAST,
 				StandardOfficeFloorColours.BLACK());
+		this.name = connector.getLabel();
 
 		// Register the anchors
 		ConnectionAnchor anchor = connector.getConnectionAnchor();
@@ -61,6 +68,15 @@ public class StandardSectionOutputFigure extends AbstractOfficeFloorFigure
 				WoofSectionOutputToWoofResourceModel.class, anchor);
 
 		this.setFigure(connector);
+	}
+
+	/*
+	 * ====================== SectionOutputFigure =============================
+	 */
+
+	@Override
+	public void setSectionOutputName(String sectionOutputName) {
+		this.name.setText(sectionOutputName);
 	}
 
 }

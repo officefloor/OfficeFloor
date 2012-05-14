@@ -93,6 +93,9 @@ public class WoofSectionInputEditPart
 			PropertyChangeEvent evt) {
 		switch (property) {
 		case CHANGE_WOOF_SECTION_INPUT_NAME:
+			this.getOfficeFloorFigure().setSectionInputName(
+					this.getCastedModel().getWoofSectionInputName());
+			break;
 		case CHANGE_URI:
 			this.getOfficeFloorFigure().setUri(this.getCastedModel().getUri());
 			break;

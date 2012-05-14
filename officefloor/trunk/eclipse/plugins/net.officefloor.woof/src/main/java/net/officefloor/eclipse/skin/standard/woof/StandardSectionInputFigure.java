@@ -97,6 +97,11 @@ public class StandardSectionInputFigure extends AbstractOfficeFloorFigure
 	 */
 
 	@Override
+	public void setSectionInputName(String sectionInputName) {
+		this.name.setText(this.getDisplayName());
+	}
+
+	@Override
 	public void setUri(String uri) {
 		this.name.setText(this.getDisplayName());
 	}

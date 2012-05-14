@@ -19,8 +19,13 @@
 package net.officefloor.eclipse.wizard.template;
 
 import java.lang.reflect.Method;
+import java.util.Map;
 
+import net.officefloor.compile.section.SectionOutputType;
 import net.officefloor.compile.section.SectionType;
+import net.officefloor.model.woof.WoofChangesImpl;
+import net.officefloor.model.woof.WoofTemplateModel;
+import net.officefloor.model.woof.WoofTemplateOutputModel;
 import net.officefloor.plugin.web.http.template.parse.HttpTemplate;
 
 /**
@@ -73,6 +78,12 @@ public class HttpTemplateInstance {
 	private final String cometManualPublishMethodName;
 
 	/**
+	 * Mapping of {@link SectionOutputType} name to existing
+	 * {@link WoofTemplateOutputModel} name.
+	 */
+	private final Map<String, String> ouputNameMapping;
+
+	/**
 	 * Initiate.
 	 * 
 	 * @param templatePath
@@ -106,6 +117,72 @@ public class HttpTemplateInstance {
 		this.gwtServerAsyncInterfaceNames = gwtServerAsyncInterfaceNames;
 		this.isEnableComet = isEnableComet;
 		this.cometManualPublishMethodName = cometManualPublishMethodName;
+		this.ouputNameMapping = null;
+	}
+
+	/**
+	 * Initiate deriving details from {@link WoofTemplateModel}.
+	 * 
+	 * @param template
+	 *            {@link WoofTemplateModel}.
+	 */
+	public HttpTemplateInstance(WoofTemplateModel template) {
+		this.templatePath = template.getTemplatePath();
+		this.logicClassName = template.getTemplateClassName();
+		this.sectionType = null;
+		this.uri = template.getUri();
+
+		// Obtain the extension details
+		this.gwtEntryPointClassName = WoofChangesImpl
+				.getGwtEntryPointClassName(template);
+		this.gwtServerAsyncInterfaceNames = WoofChangesImpl
+				.getGwtAsyncServiceInterfaceNames(template);
+		this.isEnableComet = WoofChangesImpl.isCometEnabled(template);
+		this.cometManualPublishMethodName = WoofChangesImpl
+				.getCometManualPublishMethodName(template);
+
+		this.ouputNameMapping = null;
+	}
+
+	/**
+	 * Initiate from {@link HttpTemplateWizard}.
+	 * 
+	 * @param templatePath
+	 *            Path to the {@link HttpTemplate}.
+	 * @param logicClassName
+	 *            Name of the logic class.
+	 * @param sectionType
+	 *            {@link SectionType}.
+	 * @param uri
+	 *            URI.
+	 * @param gwtEntryPointClassName
+	 *            GWT EntryPoint class name.
+	 * @param gwtServerAsyncInterfaceNames
+	 *            GWT Service Async Interface names.
+	 * @param isEnableComet
+	 *            Flag indicating if to enable Comet for the template.
+	 * @param cometManualPublishMethodName
+	 *            {@link Method} name on the template logic {@link Class} to
+	 *            handle manually publishing a Comet event. May be
+	 *            <code>null</code> to automatically handle.
+	 * @param outputNameMapping
+	 *            Mapping of {@link SectionOutputType} name to existing
+	 *            {@link WoofTemplateOutputModel} name.
+	 */
+	HttpTemplateInstance(String templatePath, String logicClassName,
+			SectionType sectionType, String uri, String gwtEntryPointClassName,
+			String[] gwtServerAsyncInterfaceNames, boolean isEnableComet,
+			String cometManualPublishMethodName,
+			Map<String, String> outputNameMapping) {
+		this.templatePath = templatePath;
+		this.logicClassName = logicClassName;
+		this.sectionType = sectionType;
+		this.uri = uri;
+		this.gwtEntryPointClassName = gwtEntryPointClassName;
+		this.gwtServerAsyncInterfaceNames = gwtServerAsyncInterfaceNames;
+		this.isEnableComet = isEnableComet;
+		this.cometManualPublishMethodName = cometManualPublishMethodName;
+		this.ouputNameMapping = outputNameMapping;
 	}
 
 	/**
@@ -180,6 +257,17 @@ public class HttpTemplateInstance {
 	 */
 	public String getCometManualPublishMethodName() {
 		return this.cometManualPublishMethodName;
+	}
+
+	/**
+	 * Obtains the mapping of refactored {@link SectionOutputType} name to
+	 * existing {@link WoofTemplateOutputModel} name.
+	 * 
+	 * @return Mapping of refactored {@link SectionOutputType} name to existing
+	 *         {@link WoofTemplateOutputModel} name.
+	 */
+	public Map<String, String> getOutputNameMapping() {
+		return this.ouputNameMapping;
 	}
 
 }

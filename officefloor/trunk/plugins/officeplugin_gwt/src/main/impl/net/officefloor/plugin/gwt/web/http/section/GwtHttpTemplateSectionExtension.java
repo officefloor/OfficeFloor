@@ -172,6 +172,34 @@ public class GwtHttpTemplateSectionExtension implements
 	}
 
 	/**
+	 * Obtains the GWT Async Service Interface names from the property value.
+	 * 
+	 * @param gwtAsyncServiceInterfaceNamesPropertyValue
+	 *            GWT Async Service Interface name property value. May be
+	 *            <code>null</code>.
+	 * @return GWT Async Service Interface names.
+	 */
+	public static String[] getGwtAsyncServiceInterfaceNames(
+			String gwtAsyncServiceInterfaceNamesPropertyValue) {
+
+		// Ensure have value
+		if ((gwtAsyncServiceInterfaceNamesPropertyValue == null)
+				|| (gwtAsyncServiceInterfaceNamesPropertyValue.trim().length() == 0)) {
+			return new String[0]; // no interfaces
+		}
+
+		// Obtain the values
+		String[] interfaceNames = gwtAsyncServiceInterfaceNamesPropertyValue
+				.split(",");
+		for (int i = 0; i < interfaceNames.length; i++) {
+			interfaceNames[i] = interfaceNames[i].trim();
+		}
+
+		// Return the interface names
+		return interfaceNames;
+	}
+
+	/**
 	 * Configures the GWT services.
 	 * 
 	 * @param gwtServiceInterfaceNames
@@ -188,8 +216,7 @@ public class GwtHttpTemplateSectionExtension implements
 			GwtServiceConfigurer configurer) throws Exception {
 
 		// Configure the GWT Service Interfaces
-		for (String gwtServiceInterfaceName : gwtServiceInterfaceNames
-				.split(",")) {
+		for (String gwtServiceInterfaceName : getGwtAsyncServiceInterfaceNames(gwtServiceInterfaceNames)) {
 
 			// Load the GWT Service Async interface
 			gwtServiceInterfaceName = gwtServiceInterfaceName.trim();

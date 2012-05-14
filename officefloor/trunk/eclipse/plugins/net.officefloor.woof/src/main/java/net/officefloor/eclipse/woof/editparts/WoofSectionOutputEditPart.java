@@ -64,6 +64,10 @@ public class WoofSectionOutputEditPart
 	protected void handlePropertyChange(WoofSectionOutputEvent property,
 			PropertyChangeEvent evt) {
 		switch (property) {
+		case CHANGE_WOOF_SECTION_OUTPUT_NAME:
+			this.getOfficeFloorFigure().setSectionOutputName(
+					this.getCastedModel().getWoofSectionOutputName());
+			break;
 		case CHANGE_WOOF_TEMPLATE:
 		case CHANGE_WOOF_SECTION_INPUT:
 		case CHANGE_WOOF_RESOURCE:

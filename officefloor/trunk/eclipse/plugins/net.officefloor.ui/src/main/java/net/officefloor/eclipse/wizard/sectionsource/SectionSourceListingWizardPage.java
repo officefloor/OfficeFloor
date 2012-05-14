@@ -260,9 +260,10 @@ public class SectionSourceListingWizardPage extends WizardPage implements
 
 		// Add listing for selecting the class
 		new Label(classComposite, SWT.NONE).setText("Class:");
+		this.sectionClassName = initialSectionLocation;
 		InputHandler<String> sectionClass = new InputHandler<String>(
 				classComposite, new ClasspathClassInput(this.project,
-						initialSectionLocation, page.getShell()),
+						this.sectionClassName, page.getShell()),
 				new InputListener() {
 					@Override
 					public void notifyValueChanged(Object value) {
