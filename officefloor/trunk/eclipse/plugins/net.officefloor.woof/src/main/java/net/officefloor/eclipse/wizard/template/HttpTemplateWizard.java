@@ -53,7 +53,8 @@ public class HttpTemplateWizard extends Wizard {
 			HttpTemplateInstance templateInstance) {
 
 		// Create and run the wizard
-		HttpTemplateWizard wizard = new HttpTemplateWizard(editPart);
+		HttpTemplateWizard wizard = new HttpTemplateWizard(editPart,
+				templateInstance);
 		if (WizardUtil.runWizard(wizard, editPart)) {
 			// Successful so return the HTTP Template instance
 			return wizard.getHttpTemplateInstance();
@@ -78,8 +79,13 @@ public class HttpTemplateWizard extends Wizard {
 	 * 
 	 * @param editPart
 	 *            {@link AbstractOfficeFloorEditPart}.
+	 * @param templateInstance
+	 *            {@link HttpTemplateInstance} to base decisions on. May be
+	 *            <code>null</code> for creating a new
+	 *            {@link HttpTemplateInstance}.
 	 */
-	public HttpTemplateWizard(AbstractOfficeFloorEditPart<?, ?, ?> editPart) {
+	public HttpTemplateWizard(AbstractOfficeFloorEditPart<?, ?, ?> editPart,
+			HttpTemplateInstance templateInstance) {
 
 		// Obtain the project
 		EditorPart editorPart = editPart.getEditor();
@@ -93,7 +99,8 @@ public class HttpTemplateWizard extends Wizard {
 						WoofExtensionClasspathProvider.class.getName());
 
 		// Create the HTTP template wizard page
-		this.templatePage = new HttpTemplateWizardPage(project, editPart);
+		this.templatePage = new HttpTemplateWizardPage(project, editPart,
+				templateInstance);
 	}
 
 	/**

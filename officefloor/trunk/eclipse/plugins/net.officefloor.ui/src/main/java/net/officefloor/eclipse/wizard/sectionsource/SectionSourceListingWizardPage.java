@@ -263,7 +263,7 @@ public class SectionSourceListingWizardPage extends WizardPage implements
 		this.sectionClassName = initialSectionLocation;
 		InputHandler<String> sectionClass = new InputHandler<String>(
 				classComposite, new ClasspathClassInput(this.project,
-						this.sectionClassName, page.getShell()),
+						page.getShell()), this.sectionClassName,
 				new InputListener() {
 					@Override
 					public void notifyValueChanged(Object value) {

@@ -43,6 +43,44 @@ public interface WoofChanges {
 	String PROPERTY_GWT_MODULE_PATH = "gwt.module.path";
 
 	/**
+	 * Obtains the GWT entry point class name for the {@link WoofTemplateModel}.
+	 * 
+	 * @param template
+	 *            {@link WoofTemplateModel}.
+	 * @return GWT entry point class name or <code>null</code>.
+	 */
+	String getGwtEntryPointClassName(WoofTemplateModel template);
+
+	/**
+	 * Obtains the GWT Async Service Interfaces for the
+	 * {@link WoofTemplateModel}.
+	 * 
+	 * @param template
+	 *            {@link WoofTemplateModel}.
+	 * @return GWT Async Service Interfaces.
+	 */
+	String[] getGwtAsyncServiceInterfaceNames(WoofTemplateModel template);
+
+	/**
+	 * Indicates if Comet is enabled for the {@link WoofTemplateModel}.
+	 * 
+	 * @param template
+	 *            {@link WoofTemplateModel}.
+	 * @return <code>true</code> Comet is enabled for the
+	 *         {@link WoofTemplateModel}.
+	 */
+	boolean isCometEnabled(WoofTemplateModel template);
+
+	/**
+	 * Obtains the Comet manual publish method name.
+	 * 
+	 * @param template
+	 *            {@link WoofTemplateExtensionModel}.
+	 * @return Comet manual publish method name or <code>null</code>.
+	 */
+	String getCometManualPublishMethodName(WoofTemplateModel template);
+
+	/**
 	 * Adds a {@link WoofTemplateModel}.
 	 * 
 	 * @param templatePath

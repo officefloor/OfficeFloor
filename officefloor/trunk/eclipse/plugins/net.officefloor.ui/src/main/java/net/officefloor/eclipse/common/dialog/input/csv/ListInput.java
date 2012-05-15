@@ -94,9 +94,10 @@ public class ListInput<C extends Control> implements Input<Composite> {
 	/**
 	 * Adds an {@link Input}.
 	 * 
-	 * @param initialText
+	 * @param initialValue
+	 *            Initial value for the added {@link Input}.
 	 */
-	private void addInput(String initialValue) {
+	private void addInput(Object initialValue) {
 
 		// Create the input Container
 		final Composite inputContainer = new Composite(this.container, SWT.NONE);
@@ -107,7 +108,7 @@ public class ListInput<C extends Control> implements Input<Composite> {
 		// Create the input
 		Input<C> input = this.factory.createInput();
 		InputHandler<Object> handler = new InputHandler<Object>(inputContainer,
-				input);
+				input, initialValue);
 		handler.getControl().setLayoutData(
 				new GridData(SWT.FILL, SWT.BEGINNING, true, false));
 
@@ -179,6 +180,14 @@ public class ListInput<C extends Control> implements Input<Composite> {
 		this.container.setLayoutData(new GridData(SWT.FILL, SWT.BEGINNING,
 				true, false));
 
+		// Add the initial values
+		Object initialValues = context.getInitialValue();
+		if ((initialValues != null) && (initialValues.getClass().isArray())) {
+			for (Object initialValue : ((Object[]) initialValues)) {
+				this.addInput(initialValue);
+			}
+		}
+
 		// Button to add Input
 		Button button = new Button(control, SWT.PUSH);
 		button.setText("+");
@@ -186,8 +195,8 @@ public class ListInput<C extends Control> implements Input<Composite> {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 
-				// Add the Input
-				ListInput.this.addInput("");
+				// Add the Input (with no initial value)
+				ListInput.this.addInput(null);
 
 				// Notify the value changed
 				ListInput.this.context.notifyValueChanged(ListInput.this

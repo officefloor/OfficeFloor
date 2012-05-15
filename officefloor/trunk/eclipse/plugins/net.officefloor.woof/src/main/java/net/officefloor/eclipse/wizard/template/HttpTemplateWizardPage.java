@@ -148,11 +148,15 @@ public class HttpTemplateWizardPage extends WizardPage implements
 	 *            {@link IProject}.
 	 * @param editPart
 	 *            {@link AbstractOfficeFloorEditPart}.
+	 * @param templateInstance
+	 *            {@link HttpTemplateInstance}.
 	 */
 	protected HttpTemplateWizardPage(final IProject project,
-			final AbstractOfficeFloorEditPart<?, ?, ?> editPart) {
+			final AbstractOfficeFloorEditPart<?, ?, ?> editPart,
+			HttpTemplateInstance templateInstance) {
 		super("HTTP Template");
 		this.project = project;
+		this.instance = templateInstance;
 
 		// Obtain the class loader for the project
 		this.classLoader = ProjectClassLoader.create(project);
@@ -187,8 +191,14 @@ public class HttpTemplateWizardPage extends WizardPage implements
 		// Obtain the section loader
 		this.sectionLoader = this.compiler.getSectionLoader();
 
-		// Create the property list
+		// Create the property list (and load existing properties)
 		this.properties = this.compiler.createPropertyList();
+		if (this.instance != null) {
+			// Add the properties from base instance
+			this.properties.addProperty(
+					HttpTemplateSectionSource.PROPERTY_CLASS_NAME).setValue(
+					this.instance.getLogicClassName());
+		}
 
 		// Specify the title
 		this.setTitle("Add Template");
@@ -231,14 +241,29 @@ public class HttpTemplateWizardPage extends WizardPage implements
 
 		// Obtain initial values
 		String initialTemplatePath = "";
+		String initialLogicClassName = "";
 		String initialUri = "";
 		String initialGwtEntryPoint = "";
+		String[] initialGwtAsyncInterfaces = new String[0];
+		boolean initiallyEnableComet = false;
+		String initialCometManualPublishMethodName = "";
+		if (this.instance != null) {
+			initialTemplatePath = this.instance.getTemplatePath();
+			initialLogicClassName = this.instance.getLogicClassName();
+			initialUri = this.instance.getUri();
+			initialGwtEntryPoint = this.instance.getGwtEntryPointClassName();
+			initialGwtAsyncInterfaces = this.instance
+					.getGwtServerAsyncInterfaceNames();
+			initiallyEnableComet = this.instance.isEnableComet();
+			initialCometManualPublishMethodName = this.instance
+					.getCometManualPublishMethodName();
+		}
 
 		// Provide means to specify template location
 		new Label(page, SWT.NONE).setText("Template path: ");
 		this.templatePath = initialTemplatePath;
 		InputHandler<String> path = new InputHandler<String>(page,
-				new ClasspathFileInput(this.project, initialTemplatePath,
+				new ClasspathFileInput(this.project, this.templatePath,
 						page.getShell()), new InputListener() {
 					@Override
 					public void notifyValueChanged(Object value) {
@@ -275,9 +300,10 @@ public class HttpTemplateWizardPage extends WizardPage implements
 
 		// Provide means to specify GWT extension
 		new Label(page, SWT.NONE).setText("GWT Enty Point Class: ");
+		this.gwtEntryPointClassName = initialGwtEntryPoint;
 		InputHandler<String> gwtEntryPoint = new InputHandler<String>(page,
-				new ClasspathClassInput(this.project, initialGwtEntryPoint,
-						page.getShell()), new InputListener() {
+				new ClasspathClassInput(this.project, page.getShell()),
+				this.gwtEntryPointClassName, new InputListener() {
 					@Override
 					public void notifyValueChanged(Object value) {
 						// Specify the EntyPoint and indicate changed
@@ -296,16 +322,19 @@ public class HttpTemplateWizardPage extends WizardPage implements
 
 		// Provide means to specify GWT Service Async Interfaces
 		new Label(page, SWT.NONE).setText("GWT Service Async Interfaces: ");
+		ListInput<Composite> gwtServicesAsyncInterfacesListInput = new ListInput<Composite>(
+				String.class, page, new InputFactory<Composite>() {
+					@Override
+					public Input<Composite> createInput() {
+						return new ClasspathClassInput(
+								HttpTemplateWizardPage.this.project,
+								page.getShell());
+					}
+				});
+		this.gwtServiceAsyncInterfaces = initialGwtAsyncInterfaces;
 		InputHandler<String[]> gwtAsyncServices = new InputHandler<String[]>(
-				page, new ListInput<Composite>(String.class, page,
-						new InputFactory<Composite>() {
-							@Override
-							public Input<Composite> createInput() {
-								return new ClasspathClassInput(
-										HttpTemplateWizardPage.this.project,
-										"", page.getShell());
-							}
-						}), new InputListener() {
+				page, gwtServicesAsyncInterfacesListInput,
+				this.gwtServiceAsyncInterfaces, new InputListener() {
 					@Override
 					public void notifyValueChanged(Object value) {
 						// Specify GWT Async Interfaces and indicate changed
@@ -324,7 +353,7 @@ public class HttpTemplateWizardPage extends WizardPage implements
 		// Provide means to enable Comet
 		new Label(page, SWT.NONE).setText("Enable Comet: ");
 		this.enableComet = new InputHandler<Boolean>(page, new BooleanInput(),
-				new InputListener() {
+				Boolean.valueOf(initiallyEnableComet), new InputListener() {
 					@Override
 					public void notifyValueInvalid(String message) {
 						// Should never be invalid
@@ -341,8 +370,10 @@ public class HttpTemplateWizardPage extends WizardPage implements
 		new Label(page, SWT.NONE).setText("Comet Manual Publish Method: ");
 		this.cometManualPublishMethodInput = new ClassMethodInput(
 				this.classLoader);
+		this.cometManualPublishMethodInput.setClassName(initialLogicClassName);
 		this.cometManualPublishMethodName = new InputHandler<String>(page,
-				this.cometManualPublishMethodInput, new InputListener() {
+				this.cometManualPublishMethodInput,
+				initialCometManualPublishMethodName, new InputListener() {
 					@Override
 					public void notifyValueInvalid(String message) {
 						// Should never be invalid
