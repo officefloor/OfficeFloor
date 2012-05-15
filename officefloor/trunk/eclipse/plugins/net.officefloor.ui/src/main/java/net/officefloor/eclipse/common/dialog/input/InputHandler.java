@@ -77,7 +77,22 @@ public class InputHandler<T> implements InputContext {
 	 *            {@link Input} being handled.
 	 */
 	public InputHandler(Composite parent, Input<? extends Control> input) {
-		this(parent, input, null, null);
+		this(parent, input, null);
+	}
+
+	/**
+	 * Convenience constructor.
+	 * 
+	 * @param parent
+	 *            Parent {@link Composite}.
+	 * @param input
+	 *            {@link Input} being handled.
+	 * @param initialValue
+	 *            Initial value.
+	 */
+	public InputHandler(Composite parent, Input<? extends Control> input,
+			Object initialValue) {
+		this(parent, input, initialValue, (ValueTranslator) null);
 	}
 
 	/**
@@ -92,7 +107,24 @@ public class InputHandler<T> implements InputContext {
 	 */
 	public InputHandler(Composite parent, Input<? extends Control> input,
 			InputListener listener) {
-		this(parent, input, null, null);
+		this(parent, input, null, listener);
+	}
+
+	/**
+	 * Convenience constructor.
+	 * 
+	 * @param parent
+	 *            Parent {@link Composite}.
+	 * @param input
+	 *            {@link Input} being handled.
+	 * @param initialValue
+	 *            Initial value.
+	 * @param listener
+	 *            {@link InputListener}.
+	 */
+	public InputHandler(Composite parent, Input<? extends Control> input,
+			Object initialValue, InputListener listener) {
+		this(parent, input, initialValue, (ValueTranslator) null);
 		this.listener = listener;
 	}
 

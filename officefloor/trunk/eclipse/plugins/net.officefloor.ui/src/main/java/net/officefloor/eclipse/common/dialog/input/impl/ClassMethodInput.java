@@ -145,8 +145,14 @@ public class ClassMethodInput implements Input<Combo> {
 			}
 		});
 
+		// Specify the initial value
+		Object initialValue = context.getInitialValue();
+		String initialMethodName = (initialValue == null ? "" : initialValue
+				.toString());
+		this.combo.setText(initialMethodName);
+
 		// Return the combo
-		return combo;
+		return this.combo;
 	}
 
 	@Override

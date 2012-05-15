@@ -71,32 +71,9 @@ public class ClasspathClassInput implements Input<Composite> {
 	private final Shell shell;
 
 	/**
-	 * Initial class name.
-	 */
-	private final String initialClassName;
-
-	/**
 	 * {@link Text} containing the class name.
 	 */
 	private Text className;
-
-	/**
-	 * Initialise.
-	 * 
-	 * @param project
-	 *            {@link IProject} to be root.
-	 * @param initialClassName
-	 *            Initial class name.
-	 * @param shell
-	 *            {@link Shell}.
-	 */
-	public ClasspathClassInput(IProject project, String initialClassName,
-			Shell shell) {
-		this.project = JavaCore.create(project);
-		this.shell = shell;
-		this.initialClassName = (initialClassName == null ? ""
-				: initialClassName);
-	}
 
 	/**
 	 * Initiate.
@@ -107,7 +84,8 @@ public class ClasspathClassInput implements Input<Composite> {
 	 *            {@link Shell}.
 	 */
 	public ClasspathClassInput(IProject project, Shell shell) {
-		this(project, null, shell);
+		this.project = JavaCore.create(project);
+		this.shell = shell;
 	}
 
 	/**
@@ -171,7 +149,10 @@ public class ClasspathClassInput implements Input<Composite> {
 		});
 
 		// Specify the initial class name
-		this.className.setText(this.initialClassName);
+		Object initialValue = context.getInitialValue();
+		String initialClassName = (initialValue == null ? "" : initialValue
+				.toString());
+		this.className.setText(initialClassName);
 
 		// Return the container
 		return container;

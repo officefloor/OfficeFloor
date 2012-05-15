@@ -64,22 +64,22 @@ public class HttpTemplateSectionSourceExtension implements
 			SourceExtensionUtil.loadPropertyLayout(page);
 		}
 
-		// Obtain the template path property
+		// Obtain the logic class property
 		final Property propertyLogicClass = context
 				.getPropertyList()
 				.getOrAddProperty(HttpTemplateSectionSource.PROPERTY_CLASS_NAME);
+		String initialLogicClassName = propertyLogicClass.getValue();
 
 		// Provide means to specify logic class
 		new Label(page, SWT.NONE).setText("Logic class: ");
 		InputHandler<String> logicClass = new InputHandler<String>(page,
-				new ClasspathClassInput(context.getProject(),
-						propertyLogicClass.getValue(), page.getShell()),
-				new InputListener() {
+				new ClasspathClassInput(context.getProject(), page.getShell()),
+				initialLogicClassName, new InputListener() {
 					@Override
 					public void notifyValueChanged(Object value) {
 						// Specify the logic class name
-						String logicClassName = (value == null ? "" : value
-								.toString());
+						String logicClassName = (value == null ? ""
+								: value.toString());
 						propertyLogicClass.setValue(logicClassName);
 						context.notifyPropertiesChanged();
 					}

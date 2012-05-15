@@ -165,14 +165,14 @@ public class SourceExtensionUtil {
 
 		// Create the input to obtain the class
 		ClasspathClassInput input = new ClasspathClassInput(
-				context.getProject(), property.getValue(), container.getShell());
+				context.getProject(), container.getShell());
 
 		// Provide the label
 		new Label(container, SWT.NONE).setText(label + ": ");
 
 		// Provide the input to specify value
 		InputHandler<String> handler = new InputHandler<String>(container,
-				input, new InputListener() {
+				input, property.getValue(), new InputListener() {
 					@Override
 					public void notifyValueChanged(Object value) {
 						String propertyValue = (String) value;

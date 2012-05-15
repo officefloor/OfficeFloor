@@ -58,7 +58,8 @@ public class RefactorTemplateOperation extends
 		WoofTemplateModel template = context.getEditPart().getCastedModel();
 
 		// Create the instance to aid refactoring
-		HttpTemplateInstance existing = new HttpTemplateInstance(template);
+		HttpTemplateInstance existing = new HttpTemplateInstance(template,
+				changes);
 
 		// Obtain the template instance
 		HttpTemplateInstance instance = HttpTemplateWizard

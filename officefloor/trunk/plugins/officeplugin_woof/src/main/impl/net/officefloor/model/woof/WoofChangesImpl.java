@@ -145,62 +145,6 @@ public class WoofChangesImpl implements WoofChanges {
 	};
 
 	/**
-	 * Obtains the GWT entry point class name for the {@link WoofTemplateModel}.
-	 * 
-	 * @param template
-	 *            {@link WoofTemplateModel}.
-	 * @return GWT entry point class name or <code>null</code>.
-	 */
-	public static String getGwtEntryPointClassName(WoofTemplateModel template) {
-		WoofTemplateExtensionModel gwtExtension = getGwtTemplateExtension(template);
-		return (gwtExtension == null ? null : gwtExtension
-				.getExtensionClassName());
-	}
-
-	/**
-	 * Obtains the GWT Async Service Interfaces for the
-	 * {@link WoofTemplateModel}.
-	 * 
-	 * @param template
-	 *            {@link WoofTemplateModel}.
-	 * @return GWT Async Service Interfaces.
-	 */
-	public static String[] getGwtAsyncServiceInterfaceNames(WoofTemplateModel template) {
-		WoofTemplateExtensionModel gwtExtension = getGwtTemplateExtension(template);
-		PropertyModel gwtAsyncInterfacesProperty = getGwtAsyncInterfacesProperty(gwtExtension);
-		String gwtAsyncInterfaceValue = getPropertyValue(gwtAsyncInterfacesProperty);
-		String[] gwtAsyncServiceInterfaceNames = GwtHttpTemplateSectionExtension
-				.getGwtAsyncServiceInterfaceNames(gwtAsyncInterfaceValue);
-		return gwtAsyncServiceInterfaceNames;
-	}
-
-	/**
-	 * Indicates if Comet is enabled for the {@link WoofTemplateModel}.
-	 * 
-	 * @param template
-	 *            {@link WoofTemplateModel}.
-	 * @return <code>true</code> Comet is enabled for the
-	 *         {@link WoofTemplateModel}.
-	 */
-	public static boolean isCometEnabled(WoofTemplateModel template) {
-		WoofTemplateExtensionModel cometExtension = getCometTemplateExtension(template);
-		return (cometExtension != null);
-	}
-
-	/**
-	 * Obtains the Comet manual publish method name.
-	 * 
-	 * @param template
-	 *            {@link WoofTemplateExtensionModel}.
-	 * @return Comet manual publish method name or <code>null</code>.
-	 */
-	public static String getCometManualPublishMethodName(WoofTemplateModel template) {
-		WoofTemplateExtensionModel cometExtension = getCometTemplateExtension(template);
-		PropertyModel cometManualPublishMethodProperty = getCometManualPublishMethodProperty(cometExtension);
-		return getPropertyValue(cometManualPublishMethodProperty);
-	}
-
-	/**
 	 * Obtains the {@link #PROPERTY_GWT_MODULE_PATH} {@link PropertyModel}.
 	 * 
 	 * @param extension
@@ -718,6 +662,52 @@ public class WoofChangesImpl implements WoofChanges {
 	/*
 	 * ======================= WoofChanges =======================
 	 */
+
+	@Override
+	public String getGwtEntryPointClassName(WoofTemplateModel template) {
+
+		// Obtain the GWT module path
+		WoofTemplateExtensionModel gwtExtension = getGwtTemplateExtension(template);
+		PropertyModel gwtModulePathProperty = getGwtModulePathProperty(gwtExtension);
+		String gwtModulePath = getPropertyValue(gwtModulePathProperty);
+		if (gwtModulePath != null) {
+
+			// Obtain the GWT module
+			GwtModuleModel gwtModule = this.gwtChanges
+					.retrieveGwtModule(gwtModulePath);
+			if (gwtModule != null) {
+
+				// Return the EntryPoint class name
+				return gwtModule.getEntryPointClassName();
+			}
+		}
+
+		// As here, no GWT EntryPoint class name
+		return null;
+	}
+
+	@Override
+	public String[] getGwtAsyncServiceInterfaceNames(WoofTemplateModel template) {
+		WoofTemplateExtensionModel gwtExtension = getGwtTemplateExtension(template);
+		PropertyModel gwtAsyncInterfacesProperty = getGwtAsyncInterfacesProperty(gwtExtension);
+		String gwtAsyncInterfaceValue = getPropertyValue(gwtAsyncInterfacesProperty);
+		String[] gwtAsyncServiceInterfaceNames = GwtHttpTemplateSectionExtension
+				.getGwtAsyncServiceInterfaceNames(gwtAsyncInterfaceValue);
+		return gwtAsyncServiceInterfaceNames;
+	}
+
+	@Override
+	public boolean isCometEnabled(WoofTemplateModel template) {
+		WoofTemplateExtensionModel cometExtension = getCometTemplateExtension(template);
+		return (cometExtension != null);
+	}
+
+	@Override
+	public String getCometManualPublishMethodName(WoofTemplateModel template) {
+		WoofTemplateExtensionModel cometExtension = getCometTemplateExtension(template);
+		PropertyModel cometManualPublishMethodProperty = getCometManualPublishMethodProperty(cometExtension);
+		return getPropertyValue(cometManualPublishMethodProperty);
+	}
 
 	@Override
 	public Change<WoofTemplateModel> addTemplate(String templatePath,

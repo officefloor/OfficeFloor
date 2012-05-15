@@ -23,7 +23,7 @@ import java.util.Map;
 
 import net.officefloor.compile.section.SectionOutputType;
 import net.officefloor.compile.section.SectionType;
-import net.officefloor.model.woof.WoofChangesImpl;
+import net.officefloor.model.woof.WoofChanges;
 import net.officefloor.model.woof.WoofTemplateModel;
 import net.officefloor.model.woof.WoofTemplateOutputModel;
 import net.officefloor.plugin.web.http.template.parse.HttpTemplate;
@@ -125,20 +125,22 @@ public class HttpTemplateInstance {
 	 * 
 	 * @param template
 	 *            {@link WoofTemplateModel}.
+	 * @param changes
+	 *            {@link WoofChanges}.
 	 */
-	public HttpTemplateInstance(WoofTemplateModel template) {
+	public HttpTemplateInstance(WoofTemplateModel template, WoofChanges changes) {
 		this.templatePath = template.getTemplatePath();
 		this.logicClassName = template.getTemplateClassName();
 		this.sectionType = null;
 		this.uri = template.getUri();
 
 		// Obtain the extension details
-		this.gwtEntryPointClassName = WoofChangesImpl
+		this.gwtEntryPointClassName = changes
 				.getGwtEntryPointClassName(template);
-		this.gwtServerAsyncInterfaceNames = WoofChangesImpl
+		this.gwtServerAsyncInterfaceNames = changes
 				.getGwtAsyncServiceInterfaceNames(template);
-		this.isEnableComet = WoofChangesImpl.isCometEnabled(template);
-		this.cometManualPublishMethodName = WoofChangesImpl
+		this.isEnableComet = changes.isCometEnabled(template);
+		this.cometManualPublishMethodName = changes
 				.getCometManualPublishMethodName(template);
 
 		this.ouputNameMapping = null;
