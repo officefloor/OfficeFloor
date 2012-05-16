@@ -28,4 +28,12 @@ import net.officefloor.model.woof.WoofTemplateOutputModel;
  */
 public interface TemplateOutputFigure extends OfficeFloorFigure {
 
+	/**
+	 * Specifies the new name to display.
+	 * 
+	 * @param templateOutputName
+	 *            New name to display.
+	 */
+	void setTemplateOutputName(String templateOutputName);
+
 }

@@ -23,12 +23,10 @@ import net.officefloor.compile.issues.CompilerIssues;
 import net.officefloor.compile.managedobject.ManagedObjectLoader;
 import net.officefloor.compile.managedobject.ManagedObjectType;
 import net.officefloor.compile.properties.PropertyList;
-import net.officefloor.eclipse.classpath.ClasspathUtil;
 import net.officefloor.eclipse.classpath.ProjectClassLoader;
 import net.officefloor.eclipse.common.dialog.input.InputAdapter;
 import net.officefloor.eclipse.common.dialog.input.InputHandler;
 import net.officefloor.eclipse.common.dialog.input.impl.PropertyListInput;
-import net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart;
 import net.officefloor.eclipse.extension.managedobjectsource.ManagedObjectSourceExtension;
 import net.officefloor.eclipse.extension.managedobjectsource.ManagedObjectSourceExtensionContext;
 import net.officefloor.eclipse.util.EclipseUtil;
@@ -38,7 +36,6 @@ import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.draw2d.ColorConstants;
-import org.eclipse.gef.EditPart;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
@@ -153,27 +150,6 @@ public class ManagedObjectSourceInstance implements
 		this.managedObjectType = this.managedObjectLoader
 				.loadManagedObjectType(this.managedObjectSourceClass,
 						this.properties);
-	}
-
-	/**
-	 * Includes the {@link ManagedObjectSourceExtension} on the {@link IProject}
-	 * class path.
-	 * 
-	 * @param editPart
-	 *            {@link EditPart} adding the {@link ManagedObjectSource}.
-	 */
-	public void includeExtensionOnProjectClassPath(
-			AbstractOfficeFloorEditPart<?, ?, ?> editPart) {
-
-		// Only include if have extension
-		if (this.managedObjectSourceExtension == null) {
-			return;
-		}
-
-		// Update the class path to include the extension
-		ClasspathUtil
-				.attemptAddExtensionClasspathProvidersToOfficeFloorClasspath(
-						editPart, null, this.managedObjectSourceClassName);
 	}
 
 	/**
