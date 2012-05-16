@@ -894,15 +894,18 @@ public class WoofChangesImpl implements WoofChanges {
 		PropertyModel gwtAsyncInterfacesProperty = getGwtAsyncInterfacesProperty(gwtExtension);
 		final String existingGwtAsyncInterfaces = getPropertyValue(gwtAsyncInterfacesProperty);
 
-		// Create the potential GWT Module and new property values
-		GwtModuleModel gwtModule = new GwtModuleModel(uri,
-				gwtEntryPointClassName, null);
-		if (isEnableComet) {
-			// Extend potential GWT Module for Comet
-			CometHttpTemplateSectionExtension.extendGwtModule(gwtModule);
+		// Create the GWT Module and associated property values
+		GwtModuleModel gwtModule = null;
+		if (gwtEntryPointClassName != null) {
+			// Create the GWT Module and new property values
+			gwtModule = new GwtModuleModel(uri, gwtEntryPointClassName, null);
+			if (isEnableComet) {
+				// Extend potential GWT Module for Comet
+				CometHttpTemplateSectionExtension.extendGwtModule(gwtModule);
+			}
 		}
-		final String newGwtModulePath = this.gwtChanges
-				.createGwtModulePath(gwtModule);
+		final String newGwtModulePath = (gwtModule == null ? null
+				: this.gwtChanges.createGwtModulePath(gwtModule));
 		final String newGwtAsyncInterfaces = getGwtAsyncServicesPropertyValue(gwtServiceAsyncInterfaceNames);
 
 		// Provide details for GWT Module refactoring

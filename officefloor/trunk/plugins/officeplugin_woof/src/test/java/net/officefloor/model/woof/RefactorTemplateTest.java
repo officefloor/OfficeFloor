@@ -176,8 +176,10 @@ public class RefactorTemplateTest extends AbstractWoofChangesTestCase {
 	 */
 	public void testRemoveDetails() {
 
-		// Record GWT changes
-		this.recordGwtModulePath("net/example/remove.gwt.xml");
+		/*
+		 * Remove Woof configuration but leave GWT configuration (i.e. no GWT
+		 * changes).
+		 */
 
 		// Create the section type
 		SectionType section = this

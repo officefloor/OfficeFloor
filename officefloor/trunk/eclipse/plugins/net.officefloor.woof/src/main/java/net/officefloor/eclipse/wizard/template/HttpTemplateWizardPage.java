@@ -71,6 +71,12 @@ public class HttpTemplateWizardPage extends WizardPage implements
 		CompilerIssues, SectionSourceExtensionContext {
 
 	/**
+	 * {@link HttpTemplateInstance} to base decisions. May be <code>null</code>
+	 * if creating new {@link HttpTemplateInstance}.
+	 */
+	private final HttpTemplateInstance templateInstance;
+
+	/**
 	 * {@link IProject}.
 	 */
 	private final IProject project;
@@ -99,6 +105,11 @@ public class HttpTemplateWizardPage extends WizardPage implements
 	 * Path to the {@link HttpTemplate}.
 	 */
 	private String templatePath;
+
+	/**
+	 * Logic class name.
+	 */
+	private String logicClassName;
 
 	/**
 	 * URI for the {@link HttpTemplate}.
@@ -132,9 +143,9 @@ public class HttpTemplateWizardPage extends WizardPage implements
 	private InputHandler<String> cometManualPublishMethodName;
 
 	/**
-	 * {@link HttpTemplateInstance}.
+	 * {@link SectionType} for the {@link HttpTemplateInstance}.
 	 */
-	private HttpTemplateInstance instance = null;
+	private SectionType sectionType = null;
 
 	/**
 	 * {@link HttpTemplateSectionSourceExtension}.
@@ -156,7 +167,7 @@ public class HttpTemplateWizardPage extends WizardPage implements
 			HttpTemplateInstance templateInstance) {
 		super("HTTP Template");
 		this.project = project;
-		this.instance = templateInstance;
+		this.templateInstance = templateInstance;
 
 		// Obtain the class loader for the project
 		this.classLoader = ProjectClassLoader.create(project);
@@ -193,11 +204,11 @@ public class HttpTemplateWizardPage extends WizardPage implements
 
 		// Create the property list (and load existing properties)
 		this.properties = this.compiler.createPropertyList();
-		if (this.instance != null) {
+		if (this.templateInstance != null) {
 			// Add the properties from base instance
 			this.properties.addProperty(
 					HttpTemplateSectionSource.PROPERTY_CLASS_NAME).setValue(
-					this.instance.getLogicClassName());
+					this.templateInstance.getLogicClassName());
 		}
 
 		// Specify the title
@@ -205,12 +216,93 @@ public class HttpTemplateWizardPage extends WizardPage implements
 	}
 
 	/**
-	 * Obtains the {@link HttpTemplateInstance}.
+	 * Obtains the template path.
 	 * 
-	 * @return {@link HttpTemplateInstance}.
+	 * @return Template path.
 	 */
-	public HttpTemplateInstance getHttpTemplateInstance() {
-		return this.instance;
+	public String getTemplatePath() {
+		return this.templatePath;
+	}
+
+	/**
+	 * Obtains the logic class name.
+	 * 
+	 * @return Logic class name.
+	 */
+	public String getLogicClassName() {
+		return this.logicClassName;
+	}
+
+	/**
+	 * Obtains the {@link SectionType} for the {@link HttpTemplateInstance}.
+	 * 
+	 * @return {@link SectionType} for the {@link HttpTemplateInstance}.
+	 */
+	public SectionType getSectionType() {
+		return this.sectionType;
+	}
+
+	/**
+	 * Obtains the URI.
+	 * 
+	 * @return URI.
+	 */
+	public String getUri() {
+		String uriValue = this.uri.getText();
+		return (EclipseUtil.isBlank(uriValue) ? null : uriValue.trim());
+	}
+
+	/**
+	 * Obtains the GWT EntryPoint class name.
+	 * 
+	 * @return GWT EntryPoint class name.
+	 */
+	public String getGwtEntryPointClassName() {
+		return (EclipseUtil.isBlank(this.gwtEntryPointClassName) ? null
+				: this.gwtEntryPointClassName);
+	}
+
+	/**
+	 * Obtains the GWT Async Interface names.
+	 * 
+	 * @return GWT Async Interface names.
+	 */
+	public String[] getGwtAsyncInterfaceNames() {
+
+		// Obtain the listing of async interfaces
+		List<String> gwtAsyncList = new LinkedList<String>();
+		if (this.gwtServiceAsyncInterfaces != null) {
+			for (Object asyncInterface : this.gwtServiceAsyncInterfaces) {
+				String asyncInterfaceName = (asyncInterface == null ? null
+						: asyncInterface.toString());
+				if (!(EclipseUtil.isBlank(asyncInterfaceName))) {
+					gwtAsyncList.add(asyncInterfaceName);
+				}
+			}
+		}
+		String[] gwtAsyncInterfaces = gwtAsyncList
+				.toArray(new String[gwtAsyncList.size()]);
+
+		// Return the async interface listing
+		return gwtAsyncInterfaces;
+	}
+
+	/**
+	 * Indicates if Comet is enabled.
+	 * 
+	 * @return <code>true</code> if Comet is enabled.
+	 */
+	public boolean isEnableComet() {
+		return this.enableComet.getTrySafeValue().booleanValue();
+	}
+
+	/**
+	 * Obtains the Comet manual publish method name.
+	 * 
+	 * @return Comet manual publish method name.
+	 */
+	public String getCometManualPublishMethodName() {
+		return this.cometManualPublishMethodName.getTrySafeValue();
 	}
 
 	/*
@@ -247,15 +339,16 @@ public class HttpTemplateWizardPage extends WizardPage implements
 		String[] initialGwtAsyncInterfaces = new String[0];
 		boolean initiallyEnableComet = false;
 		String initialCometManualPublishMethodName = "";
-		if (this.instance != null) {
-			initialTemplatePath = this.instance.getTemplatePath();
-			initialLogicClassName = this.instance.getLogicClassName();
-			initialUri = this.instance.getUri();
-			initialGwtEntryPoint = this.instance.getGwtEntryPointClassName();
-			initialGwtAsyncInterfaces = this.instance
+		if (this.templateInstance != null) {
+			initialTemplatePath = this.templateInstance.getTemplatePath();
+			initialLogicClassName = this.templateInstance.getLogicClassName();
+			initialUri = this.templateInstance.getUri();
+			initialGwtEntryPoint = this.templateInstance
+					.getGwtEntryPointClassName();
+			initialGwtAsyncInterfaces = this.templateInstance
 					.getGwtServerAsyncInterfaceNames();
-			initiallyEnableComet = this.instance.isEnableComet();
-			initialCometManualPublishMethodName = this.instance
+			initiallyEnableComet = this.templateInstance.isEnableComet();
+			initialCometManualPublishMethodName = this.templateInstance
 					.getCometManualPublishMethodName();
 		}
 
@@ -415,8 +508,8 @@ public class HttpTemplateWizardPage extends WizardPage implements
 			return;
 		}
 
-		// Clear instance (as changing)
-		this.instance = null;
+		// Clear section type (as potentially changing)
+		this.sectionType = null;
 
 		// Ensure have template path
 		if (EclipseUtil.isBlank(this.templatePath)) {
@@ -433,6 +526,9 @@ public class HttpTemplateWizardPage extends WizardPage implements
 			this.setErrorMessage("Must specify logic class");
 			this.setPageComplete(false);
 			return;
+		} else {
+			// Set value for return
+			this.logicClassName = propertyLogicClass.getValue();
 		}
 
 		// Obtain the HTTP Template Section Source class
@@ -445,22 +541,19 @@ public class HttpTemplateWizardPage extends WizardPage implements
 				.setValue("LINK_");
 
 		// Load the Section Type
-		SectionType sectionType = this.sectionLoader.loadSectionType(
+		this.sectionType = this.sectionLoader.loadSectionType(
 				sectionSourceClass, this.templatePath, this.properties);
-		if (sectionType == null) {
+		if (this.sectionType == null) {
 			// Must have section (issue reported as error message)
 			this.setPageComplete(false);
 			return;
 		}
 
 		// Obtain the URI
-		String uriValue = this.uri.getText();
-		uriValue = (EclipseUtil.isBlank(uriValue) ? null : uriValue.trim());
+		String uriValue = this.getUri();
 
 		// Ensure have URI if have GWT Entry Point Class
-		String gwtEntryPoint = (EclipseUtil
-				.isBlank(this.gwtEntryPointClassName) ? null
-				: this.gwtEntryPointClassName);
+		String gwtEntryPoint = this.getGwtEntryPointClassName();
 		if ((gwtEntryPoint != null) && (uriValue == null)) {
 			// Must have URI if using GWT
 			this.setErrorMessage("Must provide URI if using GWT");
@@ -469,30 +562,7 @@ public class HttpTemplateWizardPage extends WizardPage implements
 		}
 
 		// Obtain the GWT Service Async Interfaces
-		List<String> gwtAsyncList = new LinkedList<String>();
-		if (this.gwtServiceAsyncInterfaces != null) {
-			for (Object asyncInterface : this.gwtServiceAsyncInterfaces) {
-				String asyncInterfaceName = (asyncInterface == null ? null
-						: asyncInterface.toString());
-				if (!(EclipseUtil.isBlank(asyncInterfaceName))) {
-					gwtAsyncList.add(asyncInterfaceName);
-				}
-			}
-		}
-		String[] gwtAsyncInterfaces = gwtAsyncList
-				.toArray(new String[gwtAsyncList.size()]);
-
-		// Determine if enable Comet
-		boolean isEnableComet = this.enableComet.getTrySafeValue()
-				.booleanValue();
-
-		// Determine manual publish method name
-		String cometMethodName = null;
-		if (isEnableComet) {
-			// Obtain method name as enabled comet
-			cometMethodName = this.cometManualPublishMethodName
-					.getTrySafeValue();
-		}
+		String[] gwtAsyncInterfaces = this.getGwtAsyncInterfaceNames();
 
 		// Ensure have GWT Entry Point Class if have GWT Services
 		if ((gwtAsyncInterfaces.length > 0) && (gwtEntryPoint == null)) {
@@ -501,12 +571,6 @@ public class HttpTemplateWizardPage extends WizardPage implements
 			this.setPageComplete(false);
 			return;
 		}
-
-		// Create the HTTP Template Instance
-		String logicClassName = propertyLogicClass.getValue();
-		this.instance = new HttpTemplateInstance(this.templatePath,
-				logicClassName, sectionType, uriValue, gwtEntryPoint,
-				gwtAsyncInterfaces, isEnableComet, cometMethodName);
 
 		// Specification of template details complete
 		this.setErrorMessage(null);

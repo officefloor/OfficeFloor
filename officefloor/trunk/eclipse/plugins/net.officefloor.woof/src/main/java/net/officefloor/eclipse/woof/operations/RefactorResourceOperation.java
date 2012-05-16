@@ -61,7 +61,8 @@ public class RefactorResourceOperation extends
 		WoofResourceModel resource = editPart.getCastedModel();
 
 		// Create the populated Resource
-		WoofResourceModel bean = new WoofResourceModel();
+		WoofResourceModel bean = new WoofResourceModel(
+				resource.getWoofResourceName(), resource.getResourcePath());
 		BeanDialog dialog = context.getEditPart().createBeanDialog(bean,
 				"Woof Resource Name", "X", "Y");
 		dialog.addIgnoreType(WoofTemplateOutputToWoofResourceModel.class);

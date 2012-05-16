@@ -139,11 +139,6 @@ public class WorkSourceWizard extends Wizard implements
 	}
 
 	/**
-	 * {@link AbstractOfficeFloorEditPart}.
-	 */
-	private final AbstractOfficeFloorEditPart<?, ?, ?> editPart;
-
-	/**
 	 * {@link WorkSourceListingWizardPage}.
 	 */
 	private final WorkSourceListingWizardPage listingPage;
@@ -210,7 +205,6 @@ public class WorkSourceWizard extends Wizard implements
 	 */
 	public WorkSourceWizard(AbstractOfficeFloorEditPart<?, ?, ?> editPart,
 			WorkInstance workInstance) {
-		this.editPart = editPart;
 
 		// Obtain the project
 		EditorPart editorPart = editPart.getEditor();
@@ -412,10 +406,6 @@ public class WorkSourceWizard extends Wizard implements
 				propertyList, workType, taskTypes, workTaskNameMapping,
 				taskObjectNameMappingForWorkTask, taskFlowNameMappingForTask,
 				taskEscalationTypeMappingForTask);
-
-		// Include extension on project class path
-		this.selectedWorkSourceInstance
-				.includeExtensionOnProjectClassPath(this.editPart);
 
 		// Finished
 		return true;

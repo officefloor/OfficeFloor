@@ -18,14 +18,16 @@
 
 package net.officefloor.eclipse.wizard.template;
 
-import net.officefloor.eclipse.classpath.ClasspathUtil;
+import java.util.Map;
+
+import net.officefloor.compile.section.SectionType;
 import net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart;
 import net.officefloor.eclipse.repository.project.ProjectConfigurationContext;
 import net.officefloor.eclipse.wizard.WizardUtil;
-import net.officefloor.eclipse.woof.WoofExtensionClasspathProvider;
 import net.officefloor.plugin.web.http.template.parse.HttpTemplate;
 
 import org.eclipse.core.resources.IProject;
+import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.jface.wizard.Wizard;
 import org.eclipse.ui.part.EditorPart;
 
@@ -70,6 +72,11 @@ public class HttpTemplateWizard extends Wizard {
 	private final HttpTemplateWizardPage templatePage;
 
 	/**
+	 * {@link HttpTemplateAlignSectionWizardPage}.
+	 */
+	private final HttpTemplateAlignSectionWizardPage templateAlignPage;
+
+	/**
 	 * {@link HttpTemplateInstance}.
 	 */
 	private HttpTemplateInstance httpTemplateInstance = null;
@@ -92,15 +99,20 @@ public class HttpTemplateWizard extends Wizard {
 		IProject project = ProjectConfigurationContext.getProject(editorPart
 				.getEditorInput());
 
-		// Ensure WoOF class path
-		ClasspathUtil
-				.attemptAddExtensionClasspathProvidersToOfficeFloorClasspath(
-						editPart, null,
-						WoofExtensionClasspathProvider.class.getName());
-
 		// Create the HTTP template wizard page
 		this.templatePage = new HttpTemplateWizardPage(project, editPart,
 				templateInstance);
+
+		// Determine if refactoring template
+		if (templateInstance != null) {
+			// Create the align page
+			this.templateAlignPage = new HttpTemplateAlignSectionWizardPage(
+					templateInstance);
+
+		} else {
+			// Creating new template
+			this.templateAlignPage = null;
+		}
 	}
 
 	/**
@@ -118,21 +130,79 @@ public class HttpTemplateWizard extends Wizard {
 
 	@Override
 	public void addPages() {
+		// Add template details page
 		this.addPage(this.templatePage);
+
+		// Add refactoring outputs page
+		if (this.templateAlignPage != null) {
+			this.addPage(this.templateAlignPage);
+		}
+	}
+
+	@Override
+	public IWizardPage getNextPage(IWizardPage page) {
+
+		// Determine if currently template page
+		if (page == this.templatePage) {
+
+			// Determine if refactoring
+			if (this.templateAlignPage != null) {
+				// Refactor template outputs
+				this.templateAlignPage.loadSectionType(this.templatePage
+						.getSectionType());
+				return this.templateAlignPage;
+			}
+		}
+
+		// As here no further pages
+		return null;
 	}
 
 	@Override
 	public boolean canFinish() {
-		// Able to finish if have HTTP Template Instance
-		boolean isCanFinish = (this.templatePage.getHttpTemplateInstance() != null);
-		return isCanFinish;
+
+		// Ensure template page is complete
+		if (!(this.templatePage.isPageComplete())) {
+			return false;
+		}
+
+		// Ensure refactoring is complete
+		if ((this.templateAlignPage != null)
+				&& (!this.templatePage.isPageComplete())) {
+			return false;
+		}
+
+		// As here, able to finish
+		return true;
 	}
 
 	@Override
 	public boolean performFinish() {
 
-		// Obtain the HTTP Template Instance
-		this.httpTemplateInstance = this.templatePage.getHttpTemplateInstance();
+		// Obtain the HTTP Template details
+		String templatePath = this.templatePage.getTemplatePath();
+		String logicClassName = this.templatePage.getLogicClassName();
+		SectionType sectionType = this.templatePage.getSectionType();
+		String uri = this.templatePage.getUri();
+		String gwtEntryPointClassName = this.templatePage
+				.getGwtEntryPointClassName();
+		String[] gwtServerAsyncInterfaceNames = this.templatePage
+				.getGwtAsyncInterfaceNames();
+		boolean isEnableComet = this.templatePage.isEnableComet();
+		String cometManualPublishMethodName = this.templatePage
+				.getCometManualPublishMethodName();
+
+		// Obtain the refactor details
+		Map<String, String> outputNameMapping = null;
+		if (this.templateAlignPage != null) {
+			outputNameMapping = this.templateAlignPage.getOutputNameMapping();
+		}
+
+		// Create HTTP Template Instance
+		this.httpTemplateInstance = new HttpTemplateInstance(templatePath,
+				logicClassName, sectionType, uri, gwtEntryPointClassName,
+				gwtServerAsyncInterfaceNames, isEnableComet,
+				cometManualPublishMethodName, outputNameMapping);
 
 		// Use the HTTP Template Instance
 		return true;

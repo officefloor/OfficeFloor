@@ -22,7 +22,6 @@ import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.lang.reflect.InvocationTargetException;
 
-import net.officefloor.eclipse.classpath.ClasspathUtil;
 import net.officefloor.model.desk.DeskModel;
 
 import org.eclipse.core.resources.IContainer;
@@ -30,8 +29,6 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.Path;
-import org.eclipse.jdt.core.IJavaProject;
-import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.viewers.IStructuredSelection;
@@ -154,8 +151,8 @@ public abstract class AbstractNewWizard extends Wizard implements INewWizard {
 			return false;
 		} catch (InvocationTargetException e) {
 			Throwable realException = e.getTargetException();
-			MessageDialog.openError(this.getShell(), "Error", realException
-					.getMessage());
+			MessageDialog.openError(this.getShell(), "Error",
+					realException.getMessage());
 			return false;
 		}
 		return true;
@@ -188,8 +185,8 @@ public abstract class AbstractNewWizard extends Wizard implements INewWizard {
 		// Create the file for the item
 		monitor.setTaskName("Creating item file ...");
 		final IFile file = container.getFile(new Path(itemName));
-		InputStream stream = new ByteArrayInputStream(this.itemFileContents
-				.getBytes());
+		InputStream stream = new ByteArrayInputStream(
+				this.itemFileContents.getBytes());
 		if (file.exists()) {
 			file.setContents(stream, true, true, monitor);
 		} else {
@@ -210,11 +207,6 @@ public abstract class AbstractNewWizard extends Wizard implements INewWizard {
 			}
 		});
 		monitor.worked(1);
-
-		// Ensure the OfficeFloor class path container available
-		IJavaProject project = JavaCore.create(resource.getProject());
-		ClasspathUtil.ensureProjectHasOfficeFloorClasspathContainer(project,
-				monitor);
 	}
 
 }

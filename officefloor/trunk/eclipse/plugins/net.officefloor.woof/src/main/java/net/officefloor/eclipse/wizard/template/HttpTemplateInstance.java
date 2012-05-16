@@ -19,6 +19,8 @@
 package net.officefloor.eclipse.wizard.template;
 
 import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 import net.officefloor.compile.section.SectionOutputType;
@@ -78,6 +80,12 @@ public class HttpTemplateInstance {
 	private final String cometManualPublishMethodName;
 
 	/**
+	 * {@link WoofTemplateOutputModel} names on the {@link WoofTemplateModel}
+	 * being refactored.
+	 */
+	private final String[] outputNames;
+
+	/**
 	 * Mapping of {@link SectionOutputType} name to existing
 	 * {@link WoofTemplateOutputModel} name.
 	 */
@@ -117,6 +125,7 @@ public class HttpTemplateInstance {
 		this.gwtServerAsyncInterfaceNames = gwtServerAsyncInterfaceNames;
 		this.isEnableComet = isEnableComet;
 		this.cometManualPublishMethodName = cometManualPublishMethodName;
+		this.outputNames = null;
 		this.ouputNameMapping = null;
 	}
 
@@ -142,6 +151,16 @@ public class HttpTemplateInstance {
 		this.isEnableComet = changes.isCometEnabled(template);
 		this.cometManualPublishMethodName = changes
 				.getCometManualPublishMethodName(template);
+
+		// Create the listing of output names
+		List<WoofTemplateOutputModel> templateOutputs = template.getOutputs();
+		List<String> outputNameListing = new ArrayList<String>(
+				templateOutputs.size());
+		for (WoofTemplateOutputModel templateOutput : templateOutputs) {
+			outputNameListing.add(templateOutput.getWoofTemplateOutputName());
+		}
+		this.outputNames = outputNameListing
+				.toArray(new String[outputNameListing.size()]);
 
 		this.ouputNameMapping = null;
 	}
@@ -184,6 +203,7 @@ public class HttpTemplateInstance {
 		this.gwtServerAsyncInterfaceNames = gwtServerAsyncInterfaceNames;
 		this.isEnableComet = isEnableComet;
 		this.cometManualPublishMethodName = cometManualPublishMethodName;
+		this.outputNames = null;
 		this.ouputNameMapping = outputNameMapping;
 	}
 
@@ -262,11 +282,23 @@ public class HttpTemplateInstance {
 	}
 
 	/**
+	 * Obtains the {@link WoofTemplateOutputModel} names on the
+	 * {@link WoofTemplateModel} being refactored.
+	 * 
+	 * @return {@link WoofTemplateOutputModel} names on the
+	 *         {@link WoofTemplateModel} being refactored. May be
+	 *         <code>null</code>
+	 */
+	public String[] getTemplateOutputNames() {
+		return this.outputNames;
+	}
+
+	/**
 	 * Obtains the mapping of refactored {@link SectionOutputType} name to
 	 * existing {@link WoofTemplateOutputModel} name.
 	 * 
 	 * @return Mapping of refactored {@link SectionOutputType} name to existing
-	 *         {@link WoofTemplateOutputModel} name.
+	 *         {@link WoofTemplateOutputModel} name. May be <code>null</code>.
 	 */
 	public Map<String, String> getOutputNameMapping() {
 		return this.ouputNameMapping;

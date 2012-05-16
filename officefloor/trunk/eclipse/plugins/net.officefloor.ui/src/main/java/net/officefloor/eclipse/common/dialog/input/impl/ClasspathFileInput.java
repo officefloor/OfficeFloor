@@ -166,6 +166,12 @@ public class ClasspathFileInput implements Input<Composite> {
 			}
 		});
 
+		// Specify the initial file name
+		Object initialValue = context.getInitialValue();
+		String initialFileName = (initialValue == null ? "" : initialValue
+				.toString());
+		this.fileName.setText(initialFileName);
+
 		// Return the container
 		return container;
 	}

@@ -142,11 +142,6 @@ public class ManagedObjectSourceWizard extends Wizard implements
 	}
 
 	/**
-	 * {@link AbstractOfficeFloorEditPart}.
-	 */
-	private final AbstractOfficeFloorEditPart<?, ?, ?> editPart;
-
-	/**
 	 * {@link ManagedObjectSourceListingWizardPage}.
 	 */
 	private final ManagedObjectSourceListingWizardPage listingPage;
@@ -201,7 +196,6 @@ public class ManagedObjectSourceWizard extends Wizard implements
 	public ManagedObjectSourceWizard(
 			AbstractOfficeFloorEditPart<?, ?, ?> editPart,
 			ManagedObjectInstance managedObjectInstance) {
-		this.editPart = editPart;
 
 		// Obtain the project
 		IProject project = ProjectConfigurationContext.getProject(editPart
@@ -332,10 +326,6 @@ public class ManagedObjectSourceWizard extends Wizard implements
 		this.managedObjectInstance = new ManagedObjectInstance(
 				managedObjectName, managedObjectSourceClassName, propertyList,
 				managedObjectType, defaultTimetout);
-
-		// Include extension on project class path
-		this.selectedManagedObjectSourceInstance
-				.includeExtensionOnProjectClassPath(this.editPart);
 
 		// Finished
 		return true;

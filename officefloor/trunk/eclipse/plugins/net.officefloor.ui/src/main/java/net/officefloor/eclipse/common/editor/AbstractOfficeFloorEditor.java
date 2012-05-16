@@ -78,7 +78,7 @@ import org.eclipse.ui.IEditorInput;
 /**
  * Provides an abstract {@link GraphicalEditor} for the Office Floor items to
  * edit.
- *
+ * 
  * @author Daniel Sagenschneider
  */
 public abstract class AbstractOfficeFloorEditor<M extends Model, C> extends
@@ -143,7 +143,7 @@ public abstract class AbstractOfficeFloorEditor<M extends Model, C> extends
 
 	/**
 	 * Specifies the Model.
-	 *
+	 * 
 	 * @param model
 	 *            Model.
 	 */
@@ -153,7 +153,7 @@ public abstract class AbstractOfficeFloorEditor<M extends Model, C> extends
 
 	/**
 	 * Obtains the {@link Model}.
-	 *
+	 * 
 	 * @return {@link Model}.
 	 */
 	public M getCastedModel() {
@@ -162,7 +162,7 @@ public abstract class AbstractOfficeFloorEditor<M extends Model, C> extends
 
 	/**
 	 * Obtains the {@link RootEditPart}.
-	 *
+	 * 
 	 * @return {@link RootEditPart}.
 	 */
 	public RootEditPart getRootEditPart() {
@@ -171,7 +171,7 @@ public abstract class AbstractOfficeFloorEditor<M extends Model, C> extends
 
 	/**
 	 * Obtains the {@link Model} change functionality.
-	 *
+	 * 
 	 * @return {@link Model} change functionality.
 	 */
 	public C getModelChanges() {
@@ -181,7 +181,7 @@ public abstract class AbstractOfficeFloorEditor<M extends Model, C> extends
 	/**
 	 * Displays the {@link Throwable} error details as an error
 	 * {@link MessageDialog}.
-	 *
+	 * 
 	 * @param error
 	 *            Error.
 	 */
@@ -208,7 +208,7 @@ public abstract class AbstractOfficeFloorEditor<M extends Model, C> extends
 
 	/**
 	 * Displays the message as an error {@link MessageDialog}.
-	 *
+	 * 
 	 * @param message
 	 *            Error message.
 	 */
@@ -219,7 +219,7 @@ public abstract class AbstractOfficeFloorEditor<M extends Model, C> extends
 
 	/**
 	 * Displays the message and its cause as an error {@link MessageDialog}.
-	 *
+	 * 
 	 * @param message
 	 *            Error message.
 	 * @param cause
@@ -232,7 +232,7 @@ public abstract class AbstractOfficeFloorEditor<M extends Model, C> extends
 
 	/**
 	 * Displays the message as a warning {@link MessageDialog}.
-	 *
+	 * 
 	 * @param message
 	 *            Warning message
 	 */
@@ -243,7 +243,7 @@ public abstract class AbstractOfficeFloorEditor<M extends Model, C> extends
 
 	/**
 	 * Displays the {@link IStatus} error.
-	 *
+	 * 
 	 * @param status
 	 *            {@link IStatus} error.
 	 */
@@ -253,7 +253,7 @@ public abstract class AbstractOfficeFloorEditor<M extends Model, C> extends
 
 	/**
 	 * Displays a {@link Dialog} for the {@link IStatus}.
-	 *
+	 * 
 	 * @param status
 	 *            {@link IStatus}.
 	 * @param title
@@ -266,7 +266,7 @@ public abstract class AbstractOfficeFloorEditor<M extends Model, C> extends
 
 	/**
 	 * Creates the {@link LayoutEditPolicy} to be installed.
-	 *
+	 * 
 	 * @return {@link LayoutEditPolicy} to be installed.
 	 */
 	public LayoutEditPolicy createLayoutEditPolicy() {
@@ -277,7 +277,7 @@ public abstract class AbstractOfficeFloorEditor<M extends Model, C> extends
 
 	/**
 	 * Populates the {@link OfficeFloorLayoutEditPolicy}.
-	 *
+	 * 
 	 * @param policy
 	 *            {@link OfficeFloorLayoutEditPolicy}.
 	 */
@@ -286,7 +286,7 @@ public abstract class AbstractOfficeFloorEditor<M extends Model, C> extends
 
 	/**
 	 * Creates the {@link GraphicalEditPolicy} to be installed.
-	 *
+	 * 
 	 * @return {@link GraphicalEditPolicy} to be installed.
 	 */
 	public GraphicalNodeEditPolicy createGraphicalEditPolicy() {
@@ -297,7 +297,7 @@ public abstract class AbstractOfficeFloorEditor<M extends Model, C> extends
 
 	/**
 	 * Populates the {@link OfficeFloorGraphicalNodeEditPolicy}.
-	 *
+	 * 
 	 * @param policy
 	 *            {@link OfficeFloorGraphicalNodeEditPolicy}.
 	 */
@@ -353,7 +353,7 @@ public abstract class AbstractOfficeFloorEditor<M extends Model, C> extends
 
 		/**
 		 * Obtains the location of the mouse for the down event.
-		 *
+		 * 
 		 * @return Location of the mouse for the down event.
 		 */
 		public Point getLocation() {
@@ -382,8 +382,8 @@ public abstract class AbstractOfficeFloorEditor<M extends Model, C> extends
 		this.getGraphicalControl().addMouseListener(mouseLocation);
 
 		// Create the context menu
-		ContextMenuProvider menuProvider = new ContextMenuProvider(this
-				.getGraphicalViewer()) {
+		ContextMenuProvider menuProvider = new ContextMenuProvider(
+				this.getGraphicalViewer()) {
 			@Override
 			public void buildContextMenu(IMenuManager menuManager) {
 
@@ -434,13 +434,11 @@ public abstract class AbstractOfficeFloorEditor<M extends Model, C> extends
 
 		// Register the context menu
 		this.getGraphicalControl().setMenu(menu);
-		this.getEditorSite().registerContextMenu(menuProvider,
-				this.getGraphicalViewer());
 	}
 
 	/**
 	 * Populates the listing of {@link Operation} instances.
-	 *
+	 * 
 	 * @param list
 	 *            Listing to add {@link Operation} instances.
 	 */
@@ -504,7 +502,7 @@ public abstract class AbstractOfficeFloorEditor<M extends Model, C> extends
 
 	/**
 	 * Populates the {@link EditPart} types for their respective model.
-	 *
+	 * 
 	 * @param mapping
 	 *            Registry to load the mappings.
 	 */
@@ -513,7 +511,7 @@ public abstract class AbstractOfficeFloorEditor<M extends Model, C> extends
 
 	/**
 	 * Indicates if able to be a drop target listener.
-	 *
+	 * 
 	 * @return <code>true</code> if this Editor is able to be a drop target.
 	 */
 	protected abstract boolean isDragTarget();
@@ -527,8 +525,8 @@ public abstract class AbstractOfficeFloorEditor<M extends Model, C> extends
 		super.setInput(input);
 
 		// Obtain the configuration
-		FileConfigurationItem configuration = new FileConfigurationItem(this
-				.getEditorInput());
+		FileConfigurationItem configuration = new FileConfigurationItem(
+				this.getEditorInput());
 
 		// Retrieve the Model
 		try {
@@ -547,7 +545,7 @@ public abstract class AbstractOfficeFloorEditor<M extends Model, C> extends
 
 	/**
 	 * Creates the {@link Model} change functionality.
-	 *
+	 * 
 	 * @param model
 	 *            Root {@link Model}.
 	 * @return {@link Model} change functionality.
@@ -556,7 +554,7 @@ public abstract class AbstractOfficeFloorEditor<M extends Model, C> extends
 
 	/**
 	 * Retrieves the Model.
-	 *
+	 * 
 	 * @param configuration
 	 *            Configuration of the Model.
 	 * @return Model to be edited.
@@ -573,8 +571,8 @@ public abstract class AbstractOfficeFloorEditor<M extends Model, C> extends
 	@Override
 	public void doSave(IProgressMonitor monitor) {
 		// Obtain the configuration
-		FileConfigurationItem configuration = new FileConfigurationItem(this
-				.getEditorInput(), monitor);
+		FileConfigurationItem configuration = new FileConfigurationItem(
+				this.getEditorInput(), monitor);
 
 		try {
 			// Store the Model
@@ -590,7 +588,7 @@ public abstract class AbstractOfficeFloorEditor<M extends Model, C> extends
 
 	/**
 	 * Stores the Model.
-	 *
+	 * 
 	 * @param model
 	 *            Model to be stored.
 	 * @param configuration
@@ -655,7 +653,7 @@ public abstract class AbstractOfficeFloorEditor<M extends Model, C> extends
 
 	/**
 	 * Override to initialise the {@link PaletteRoot}.
-	 *
+	 * 
 	 * @see #getPaletteRoot()
 	 */
 	protected void initialisePaletteRoot() {
