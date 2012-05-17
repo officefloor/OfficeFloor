@@ -26,6 +26,9 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Properties;
 
+import net.officefloor.compile.OfficeFloorCompiler;
+import net.officefloor.compile.properties.PropertyList;
+
 /**
  * Configuration for the {@link WoofDevelopmentLauncher}.
  * 
@@ -54,6 +57,12 @@ public class WoofDevelopmentConfiguration {
 	private static final String PROPERTY_STARTUP_URL_PREFIX = "startup.url";
 
 	/**
+	 * Prefix of the property name for the {@link OfficeFloorCompiler}
+	 * properties.
+	 */
+	private static final String PROPERTY_PROPERTIES_PREFIX = "properties";
+
+	/**
 	 * WAR directory for deployed GWT files.
 	 */
 	private File warDirectory = null;
@@ -72,6 +81,11 @@ public class WoofDevelopmentConfiguration {
 	 * Listing of the GWT modules.
 	 */
 	private final List<String> moduleNames = new LinkedList<String>();
+
+	/**
+	 * Listing of property name/values.
+	 */
+	private final List<String> propertyNameValues = new LinkedList<String>();
 
 	/**
 	 * Initiate with no configuration.
@@ -110,6 +124,10 @@ public class WoofDevelopmentConfiguration {
 		// Load the Startup URLs
 		this.loadValues(PROPERTY_STARTUP_URL_PREFIX, properties,
 				this.startupUrls);
+
+		// Load the properties
+		this.loadValues(PROPERTY_PROPERTIES_PREFIX, properties,
+				this.propertyNameValues);
 
 		// Load the resource directories
 		List<String> resourceDirectoryPaths = new LinkedList<String>();
@@ -208,6 +226,70 @@ public class WoofDevelopmentConfiguration {
 	}
 
 	/**
+	 * Adds a property.
+	 * 
+	 * @param name
+	 *            Name.
+	 * @param value
+	 *            Value.
+	 */
+	public void addProperty(String name, String value) {
+		this.propertyNameValues.add(name);
+		this.propertyNameValues.add(value);
+	}
+
+	/**
+	 * Adds property name/values from the arguments.
+	 * 
+	 * @param arguments
+	 *            Arguments.
+	 */
+	public void addPropertyArguments(String... arguments) {
+		for (int i = 0; i < arguments.length; i += 2) {
+
+			// Obtain the name
+			String name = arguments[i];
+
+			// Obtain the value (must have value to keep name/value pairs)
+			int valueIndex = i + 1;
+			String value = (valueIndex >= arguments.length ? ""
+					: arguments[valueIndex]);
+
+			// Add the property
+			this.addProperty(name, value);
+		}
+	}
+
+	/**
+	 * Obtains the properties.
+	 * 
+	 * @return Properties.
+	 */
+	public PropertyList getProperties() {
+
+		// Load the properties
+		PropertyList properties = OfficeFloorCompiler.newPropertyList();
+		String[] nameValues = this.propertyNameValues
+				.toArray(new String[this.propertyNameValues.size()]);
+		for (int i = 0; i < nameValues.length; i += 2) {
+
+			// Obtain the name
+			String name = nameValues[i];
+
+			// Obtain the value (may be deleted from properties file)
+			int valueIndex = i + 1;
+			String value = (valueIndex >= nameValues.length ? ""
+					: nameValues[valueIndex]);
+
+			// Add property
+			properties.addProperty(name).setValue(value);
+		}
+
+		// Return the properties
+		return properties;
+	}
+
+	/**
 	 * Stores the {@link WoofDevelopmentConfiguration}.
 	 * 
 	 * @param configurationFile
@@ -233,6 +315,10 @@ public class WoofDevelopmentConfiguration {
 
 		// Load the Startup URLs
 		this.storeValues(PROPERTY_STARTUP_URL_PREFIX, this.startupUrls,
+				properties);
+
+		// Load the properties
+		this.storeValues(PROPERTY_PROPERTIES_PREFIX, this.propertyNameValues,
 				properties);
 
 		// Load the resource directory paths

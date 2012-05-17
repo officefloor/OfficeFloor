@@ -21,6 +21,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.util.Arrays;
 
+import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 
 /**
@@ -40,6 +41,10 @@ public class WoofDevelopmentConfigurationLoaderTest extends OfficeFrameTestCase 
 		WoofDevelopmentConfiguration configuration = WoofDevelopmentConfigurationLoader
 				.loadConfiguration(new FileInputStream(woofFile));
 
+		// Add property (not provided from WoOF configuration)
+		configuration.addPropertyArguments("name", "value", "no.value");
+		configuration.addProperty("one", "two");
+
 		// Validate the configuration
 		assertWoofDevelopmentConfiguration(configuration);
 	}
@@ -53,6 +58,11 @@ public class WoofDevelopmentConfigurationLoaderTest extends OfficeFrameTestCase 
 		File woofFile = this.findFile(this.getClass(), "application.woof");
 		WoofDevelopmentConfiguration configuration = WoofDevelopmentConfigurationLoader
 				.loadConfiguration(new FileInputStream(woofFile));
+
+		// Add property (not provided from WoOF configuration)
+		configuration.addProperty("name", "value");
+		configuration.addProperty("no.value", "");
+		configuration.addProperty("one", "two");
 
 		// Add WAR directory
 		File warDirectory = woofFile.getParentFile();
@@ -114,6 +124,17 @@ public class WoofDevelopmentConfigurationLoaderTest extends OfficeFrameTestCase 
 		assertStringArraySet("module names", moduleNames,
 				"net.officefloor.launch.woof.template",
 				"net.officefloor.launch.woof.another");
+
+		// Validate the WoOF servlet container properties
+		PropertyList properties = configuration.getProperties();
+		assertEquals("Incorrect number of properties", 3, properties
+				.getProperties().size());
+		assertEquals("Incorrect property name", "value", properties
+				.getProperty("name").getValue());
+		assertEquals("Incorrect property no.value", "",
+				properties.getProperty("no.value").getValue());
+		assertEquals("Incorrect property one", "two",
+				properties.getProperty("one").getValue());
 	}
 
 	/**

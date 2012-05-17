@@ -21,6 +21,8 @@ import java.io.File;
 
 import net.officefloor.autowire.AutoWireOfficeFloor;
 import net.officefloor.compile.OfficeFloorCompiler;
+import net.officefloor.compile.properties.Property;
+import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.plugin.web.http.application.WebAutoWireApplication;
 import net.officefloor.plugin.web.http.resource.source.SourceHttpResourceFactory;
@@ -59,6 +61,11 @@ public class WoofServletContainer extends ServletContainer {
 	private final File[] resourceDirectories;
 
 	/**
+	 * {@link PropertyList}.
+	 */
+	private final PropertyList properties;
+
+	/**
 	 * {@link AutoWireOfficeFloor}.
 	 */
 	private AutoWireOfficeFloor officeFloor;
@@ -74,18 +81,25 @@ public class WoofServletContainer extends ServletContainer {
 	 *            Port.
 	 * @param resourceDirectories
 	 *            Resource directories.
+	 * @param properties
+	 *            {@link PropertyList}.
 	 * @throws Exception
 	 *             If fails to open {@link OfficeFloor}.
 	 */
 	public WoofServletContainer(TreeLogger logger, String containerName,
-			int port, File[] resourceDirectories) throws Exception {
+			int port, File[] resourceDirectories, PropertyList properties)
+			throws Exception {
 		this.logger = logger;
 		this.containerName = containerName;
 		this.port = port;
 		this.resourceDirectories = resourceDirectories;
+		this.properties = properties;
 
 		// Start
-		this.start();
+		if (!this.start()) {
+			// Failed to start
+			throw new UnableToCompleteException();
+		}
 	}
 
 	/**
@@ -103,10 +117,9 @@ public class WoofServletContainer extends ServletContainer {
 	/**
 	 * Starts WoOF.
 	 * 
-	 * @throws Exception
-	 *             If fails to start.
+	 * @return <code>true</code> if able to start.
 	 */
-	public void start() {
+	public boolean start() {
 
 		// Create WoOF
 		WebAutoWireApplication source = this.createWebAutoWireApplication();
@@ -114,7 +127,7 @@ public class WoofServletContainer extends ServletContainer {
 
 		// Configure port
 		compiler.addProperty(WoofOfficeFloorSource.PROPERTY_HTTP_PORT,
-				String.valueOf(port));
+				String.valueOf(this.port));
 
 		// Configure resource directories
 		SourceHttpResourceFactory.loadProperties(null,
@@ -126,6 +139,13 @@ public class WoofServletContainer extends ServletContainer {
 					}
 				});
 
+		// Load the additional properties
+		for (Property property : this.properties) {
+			compiler.addProperty(property.getName(), property.getValue());
+		}
+		compiler.addSystemProperties();
+		compiler.addEnvProperties();
+
 		try {
 			// Open the OfficeFloor
 			this.officeFloor = source.openOfficeFloor();
@@ -136,11 +156,17 @@ public class WoofServletContainer extends ServletContainer {
 						+ " started on port " + this.port);
 			}
 
+			// Successfully started
+			return true;
+
 		} catch (Throwable ex) {
 			// Log failure
 			if (this.logger.isLoggable(Type.ERROR)) {
 				this.logger.log(Type.ERROR, ex.getMessage(), ex);
 			}
+
+			// Failed to start
+			return false;
 		}
 	}
 
@@ -160,7 +186,10 @@ public class WoofServletContainer extends ServletContainer {
 		this.stop();
 
 		// Start
-		this.start();
+		if (!this.start()) {
+			// Failed to start
+			throw new UnableToCompleteException();
+		}
 	}
 
 	@Override

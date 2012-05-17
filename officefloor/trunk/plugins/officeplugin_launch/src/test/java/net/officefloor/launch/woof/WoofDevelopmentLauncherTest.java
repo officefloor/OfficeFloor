@@ -21,10 +21,16 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.LinkedList;
+import java.util.List;
 
 import net.officefloor.autowire.AutoWireManagement;
 import net.officefloor.building.classpath.ClassPathFactoryImpl;
+import net.officefloor.compile.impl.issues.FailCompilerIssues;
 import net.officefloor.frame.test.OfficeFrameTestCase;
+import net.officefloor.plugin.socket.server.http.server.MockHttpServer;
 import net.officefloor.plugin.woof.WoofOfficeFloorSource;
 
 import org.apache.http.HttpRequest;
@@ -174,7 +180,111 @@ public class WoofDevelopmentLauncherTest extends OfficeFrameTestCase implements
 	 */
 	public void testEmbeddedWoofServer() throws Exception {
 
+		// Launch the application with default configuration
+		this.launchApplication(null, "net.officefloor.launch.woof.Test",
+				"/template", "/section");
+
+		// Ensure template available
+		this.doHttpRequest(8888, "template", "TEMPLATE");
+
+		// Ensure section available
+		this.doHttpRequest(8888, "section", "SECTION");
+
+		// Ensure able to obtain resource
+		this.doHttpRequest(8888, "classpath.html", "CLASSPATH");
+	}
+
+	/**
+	 * Ensure the application with no GWT runs.
+	 */
+	public void testEnsureNoGwtRuns() throws Exception {
+		try {
+			// Run application
+			WoofOfficeFloorSource.main(
+					WoofOfficeFloorSource.PROPERTY_WOOF_CONFIGURATION_LOCATION,
+					"noGwt.woof");
+
+			// Ensure template available
+			this.doHttpRequest(7878, "noGwt", "TEMPLATE");
+
+		} finally {
+			// Ensure clean up and stop
+			AutoWireManagement.closeAllOfficeFloors();
+		}
+	}
+
+	/**
+	 * Ensure can start the embedded WoOF server within {@link DevMode} that has
+	 * no GWT modules.
+	 */
+	public void testEmbeddedNoGwtWoofServer() throws Exception {
+
+		// Launch the application with alternate configuration
+		this.launchApplication("noGwt.woof", "net.officefloor.launch.NoGwt",
+				"/noGwt");
+
+		// Ensure start alternate configuration
+		this.doHttpRequest(8888, "noGwt", "TEMPLATE");
+	}
+
+	/**
+	 * Ensure the application with invalid WoOF configuration.
+	 */
+	public void testEnsureInvalidWoof() throws Exception {
+		try {
+			// Run application
+			WoofOfficeFloorSource.main(
+					WoofOfficeFloorSource.PROPERTY_WOOF_CONFIGURATION_LOCATION,
+					"invalid.woof");
+
+			// Ensure did not successfully start (as invalid)
+			fail("Should not be valid");
+
+		} catch (FailCompilerIssues ex) {
+			// Cause should be class not found
+			assertTrue("Invalid cause",
+					ex.getCause() instanceof ClassNotFoundException);
+
+		} finally {
+			// Ensure clean up and stop
+			AutoWireManagement.closeAllOfficeFloors();
+		}
+	}
+
+	/**
+	 * Ensure can handle invalid embedded WoOF server within {@link DevMode}.
+	 */
+	public void testEmbeddedInvalidWoofServer() throws Exception {
+
+		// Launch the application with alternate configuration
+		this.launchApplication("invalid.woof", "net.officefloor.launch.NoGwt",
+				"/invalid");
+
+	}
+
+	/**
+	 * Launches the application.
+	 * 
+	 * @param woofFileName
+	 *            WoOF file name. May be <code>null</code> for default
+	 *            configuration.
+	 * @param gwtModuleName
+	 *            GWT Module name.
+	 * @param expectedStartupUrls
+	 *            Expected startup URLs.
+	 */
+	private void launchApplication(String woofFileName, String gwtModuleName,
+			String... expectedStartupUrls) throws Exception {
+
 		// Re-use test class path for running
+
+		// Default the WoOF file name (if required)
+		boolean isDefaultWoofConfiguration = false;
+		if (woofFileName == null) {
+			// Default WoOF configuration
+			isDefaultWoofConfiguration = true;
+			woofFileName = "application.woof";
+		}
 
 		// Create the WAR directory
 		File warDirectory = new File(System.getProperty("java.io.tmpdir"), this
@@ -185,10 +295,17 @@ public class WoofDevelopmentLauncherTest extends OfficeFrameTestCase implements
 		assertTrue("Ensure WAR directory available", warDirectory.mkdir());
 
 		// Create configuration for running (keeps command smaller)
-		File woofFile = this.findFile("application.woof");
+		File woofFile = this.findFile(woofFileName);
 		WoofDevelopmentConfiguration configuration = WoofDevelopmentConfigurationLoader
 				.loadConfiguration(new FileInputStream(woofFile));
 		configuration.setWarDirectory(warDirectory);
+
+		// Provide alternate WoOF configuration
+		if (!isDefaultWoofConfiguration) {
+			configuration.addProperty(
+					WoofOfficeFloorSource.PROPERTY_WOOF_CONFIGURATION_LOCATION,
+					woofFileName);
+		}
 
 		// Store the configuration
 		File configurationFile = new File(warDirectory,
@@ -196,14 +313,20 @@ public class WoofDevelopmentLauncherTest extends OfficeFrameTestCase implements
 		configuration.storeConfiguration(configurationFile);
 
 		// Run the dev mode (with WoOF embedded server)
-		String configurationFilePath = configurationFile.getAbsolutePath();
-		WoofDevelopmentLauncher.main(configurationFilePath);
+		WoofDevelopmentLauncher.main(configurationFile.getAbsolutePath());
 
-		// Validate the arguments
-		final String[] expectedArguments = new String[] { "-server",
+		// Validate the arguments for dev mode
+		List<String> expectedArgumentList = new LinkedList<String>();
+		expectedArgumentList.addAll(Arrays.asList("-server",
 				WoofServletContainerLauncher.class.getName(), "-war",
-				warDirectory.getAbsolutePath(), "-startupUrl", "/template",
-				"-startupUrl", "/section", "net.officefloor.launch.woof.Test" };
+				warDirectory.getAbsolutePath()));
+		for (String startupUrl : expectedStartupUrls) {
+			expectedArgumentList.addAll(Arrays
+					.asList("-startupUrl", startupUrl));
+		}
+		expectedArgumentList.add(gwtModuleName);
+		String[] expectedArguments = expectedArgumentList
+				.toArray(new String[expectedArgumentList.size()]);
 		assertEquals("Incorrect number of arguments", expectedArguments.length,
 				this.devMode.arguments.length);
 		for (int i = 0; i < expectedArguments.length; i++) {
@@ -213,15 +336,6 @@ public class WoofDevelopmentLauncherTest extends OfficeFrameTestCase implements
 
 		// Allow some time for GWT development to start up
 		Thread.sleep(5000);
-
-		// Ensure template available
-		this.doHttpRequest(8888, "template", "TEMPLATE");
-
-		// Ensure section available
-		this.doHttpRequest(8888, "section", "SECTION");
-
-		// Ensure able to obtain resource
-		this.doHttpRequest(8888, "classpath.html", "CLASSPATH");
 	}
 
 	/**
@@ -291,13 +405,21 @@ public class WoofDevelopmentLauncherTest extends OfficeFrameTestCase implements
 			// Specify arguments
 			this.arguments = arguments;
 
+			// Run GWT on unique port (to stop conflicts)
+			List<String> argumentsList = new ArrayList<String>(
+					this.arguments.length + 2);
+			argumentsList.addAll(Arrays.asList("-codeServerPort",
+					String.valueOf(MockHttpServer.getAvailablePort())));
+			argumentsList.addAll(Arrays.asList(this.arguments));
+
 			// By default run head less (for continuous integration)
 			boolean isHeadless = Boolean.parseBoolean(System.getProperty(
 					"hide.gwt.devmode", String.valueOf(true)));
 			this.setHeadless(isHeadless);
 
 			// Process arguments and if successful run
-			if (new ArgProcessor(this.options).processArgs(arguments)) {
+			if (new ArgProcessor(this.options).processArgs(argumentsList
+					.toArray(new String[argumentsList.size()]))) {
 				// Run in new thread as blocks until complete
 				new Thread() {
 					@Override

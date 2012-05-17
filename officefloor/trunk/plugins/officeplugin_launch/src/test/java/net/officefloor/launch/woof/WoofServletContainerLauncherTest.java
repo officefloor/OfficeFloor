@@ -25,6 +25,7 @@ import java.io.Writer;
 import java.util.ArrayList;
 import java.util.List;
 
+import net.officefloor.compile.OfficeFloorCompiler;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.socket.server.http.server.MockHttpServer;
@@ -38,6 +39,7 @@ import org.apache.http.impl.client.DefaultHttpClient;
 
 import com.google.gwt.core.ext.ServletContainer;
 import com.google.gwt.core.ext.TreeLogger;
+import com.google.gwt.core.ext.UnableToCompleteException;
 
 /**
  * Tests the {@link WoofServletContainerLauncher}.
@@ -201,23 +203,33 @@ public class WoofServletContainerLauncherTest extends OfficeFrameTestCase {
 		// Use fresh logger to just receive failure to start
 		MockTreeLogger logger = new MockTreeLogger();
 
-		// Attempt to start new instance that has invalid configuration
-		this.servletContainer = new WoofServletContainer(logger, "NAME",
-				MockHttpServer.getAvailablePort(), new File[0]) {
-			@Override
-			protected WebAutoWireApplication createWebAutoWireApplication() {
+		try {
+			// Attempt to start new instance that has invalid configuration
+			this.servletContainer = new WoofServletContainer(logger, "NAME",
+					MockHttpServer.getAvailablePort(), new File[0],
+					OfficeFloorCompiler.newPropertyList()) {
+				@Override
+				protected WebAutoWireApplication createWebAutoWireApplication() {
 
-				// Create WoOF configured with invalid configuration
-				WoofOfficeFloorSource source = new WoofOfficeFloorSource();
-				source.getOfficeFloorCompiler()
-						.addProperty(
-								WoofOfficeFloorSource.PROPERTY_WOOF_CONFIGURATION_LOCATION,
-								"fail.woof");
+					// Create WoOF configured with invalid configuration
+					WoofOfficeFloorSource source = new WoofOfficeFloorSource();
+					source.getOfficeFloorCompiler()
+							.addProperty(
+									WoofOfficeFloorSource.PROPERTY_WOOF_CONFIGURATION_LOCATION,
+									"fail.woof");
 
-				// Return WoOF
-				return source;
-			}
-		};
+					// Return WoOF
+					return source;
+				}
+			};
+
+			// Should not be successful in starting
+			fail("Should not be successful in starting");
+
+		} catch (UnableToCompleteException ex) {
+			assertEquals("Incorrect cause", "(see previous log entries)",
+					ex.getMessage());
+		}
 
 		// Validate the logging of failure to start
 		String expectedMessage = "null null: Failed to source OfficeFloor from OfficeFloorSource (source="

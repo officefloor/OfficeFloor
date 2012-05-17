@@ -67,31 +67,9 @@ public class ClasspathFileInput implements Input<Composite> {
 	private final Shell shell;
 
 	/**
-	 * Initial path to the file.
-	 */
-	private final String initialPath;
-
-	/**
 	 * {@link Text} containing the file name.
 	 */
 	private Text fileName;
-
-	/**
-	 * Initiate.
-	 * 
-	 * @param container
-	 *            {@link IContainer} to find the file within.
-	 * @param initialPath
-	 *            Initial path to the file.
-	 * @param shell
-	 *            {@link Shell}.
-	 */
-	public ClasspathFileInput(IContainer container, String initialPath,
-			Shell shell) {
-		this.container = container;
-		this.initialPath = (initialPath == null ? "" : initialPath);
-		this.shell = shell;
-	}
 
 	/**
 	 * Initiate.
@@ -102,7 +80,8 @@ public class ClasspathFileInput implements Input<Composite> {
 	 *            {@link Shell}.
 	 */
 	public ClasspathFileInput(IContainer container, Shell shell) {
-		this(container, null, shell);
+		this.container = container;
+		this.shell = shell;
 	}
 
 	/**
@@ -134,7 +113,6 @@ public class ClasspathFileInput implements Input<Composite> {
 		this.fileName = new Text(container, SWT.BORDER);
 		this.fileName.setLayoutData(new GridData(SWT.FILL, SWT.BEGINNING, true,
 				false));
-		this.fileName.setText(this.initialPath);
 		this.fileName.addModifyListener(new ModifyListener() {
 			@Override
 			public void modifyText(ModifyEvent e) {
