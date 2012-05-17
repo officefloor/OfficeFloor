@@ -19,6 +19,8 @@
 package net.officefloor.plugin.woof;
 
 import net.officefloor.autowire.AutoWireApplication;
+import net.officefloor.compile.OfficeFloorCompiler;
+import net.officefloor.compile.properties.Property;
 import net.officefloor.compile.spi.officefloor.OfficeFloorDeployer;
 import net.officefloor.compile.spi.officefloor.source.OfficeFloorSourceContext;
 import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
@@ -80,12 +82,39 @@ public class WoofOfficeFloorSource extends HttpServerAutoWireOfficeFloorSource {
 	 * <code>main</code> to run the {@link WoofModel}.
 	 * 
 	 * @param args
-	 *            Command line arguments.
+	 *            Command line arguments which are paired name/values for the
+	 *            {@link Property} loaded to the {@link OfficeFloorCompiler} for
+	 *            compiling and running.
 	 * @throws Exception
 	 *             If fails to run.
 	 */
 	public static void main(String... args) throws Exception {
-		run(new WoofOfficeFloorSource());
+
+		// Create the WoOF source
+		WoofOfficeFloorSource source = new WoofOfficeFloorSource();
+
+		// Configure properties from environment, system and command line
+		OfficeFloorCompiler compiler = source.getOfficeFloorCompiler();
+		for (int i = 0; i < args.length; i += 2) {
+
+			// Obtain the name (stripping off possible leading '-')
+			String name = args[i];
+			if (name.startsWith("-")) {
+				name = name.substring("-".length());
+			}
+
+			// Obtain the value (if available - ie not odd number of arguments)
+			int valueIndex = i + 1;
+			String value = (valueIndex >= args.length ? "" : args[valueIndex]);
+
+			// Add the property value
+			compiler.addProperty(name, value);
+		}
+		compiler.addSystemProperties();
+		compiler.addEnvProperties();
+
+		// Run WoOF
+		run(source);
 	}
 
 	/**

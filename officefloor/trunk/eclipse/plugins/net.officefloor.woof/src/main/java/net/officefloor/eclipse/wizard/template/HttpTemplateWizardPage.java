@@ -356,8 +356,8 @@ public class HttpTemplateWizardPage extends WizardPage implements
 		new Label(page, SWT.NONE).setText("Template path: ");
 		this.templatePath = initialTemplatePath;
 		InputHandler<String> path = new InputHandler<String>(page,
-				new ClasspathFileInput(this.project, this.templatePath,
-						page.getShell()), new InputListener() {
+				new ClasspathFileInput(this.project, page.getShell()),
+				this.templatePath, new InputListener() {
 					@Override
 					public void notifyValueChanged(Object value) {
 						// Specify the location and indicate changed

@@ -42,7 +42,7 @@ import org.eclipse.swt.widgets.Text;
 
 /**
  * {@link IWizardPage} providing the listing of {@link OfficeSourceInstance}.
- *
+ * 
  * @author Daniel Sagenschneider
  */
 public class OfficeSourceListingWizardPage extends WizardPage {
@@ -85,7 +85,7 @@ public class OfficeSourceListingWizardPage extends WizardPage {
 
 	/**
 	 * Initiate.
-	 *
+	 * 
 	 * @param officeSourceInstances
 	 *            Listing of {@link OfficeSourceInstance}.
 	 * @param project
@@ -114,7 +114,7 @@ public class OfficeSourceListingWizardPage extends WizardPage {
 
 	/**
 	 * Obtains the selected {@link OfficeSourceInstance}.
-	 *
+	 * 
 	 * @return Selected {@link OfficeSourceInstance} or <code>null</code> if not
 	 *         selected.
 	 */
@@ -199,7 +199,7 @@ public class OfficeSourceListingWizardPage extends WizardPage {
 		this.officeLocation = initialOfficeLocation;
 		InputHandler<String> location = new InputHandler<String>(
 				locationComposite, new ClasspathFileInput(this.project,
-						initialOfficeLocation, page.getShell()),
+						page.getShell()), initialOfficeLocation,
 				new InputListener() {
 					@Override
 					public void notifyValueChanged(Object value) {

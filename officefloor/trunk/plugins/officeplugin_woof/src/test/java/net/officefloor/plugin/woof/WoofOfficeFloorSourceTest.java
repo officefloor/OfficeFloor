@@ -77,6 +77,45 @@ public class WoofOfficeFloorSourceTest extends OfficeFrameTestCase {
 	}
 
 	/**
+	 * Ensure can provide command line configuration.
+	 */
+	public void testCommandLineConfiguration() throws Exception {
+
+		// Obtain alternate configuration location
+		String alternateConfigurationLocation = this
+				.getPackageRelativePath(this.getClass()) + "/commandline.woof";
+
+		// Run the application with properties for alternate configuration
+		WoofOfficeFloorSource.main(
+				WoofOfficeFloorSource.PROPERTY_WOOF_CONFIGURATION_LOCATION,
+				alternateConfigurationLocation);
+
+		// Test
+		this.doTestRequest("/commandline");
+	}
+
+	/**
+	 * Ensure can provide command line configuration with property name of the
+	 * form <code>-name</code>.
+	 */
+	public void testCommandLineConfigurationWithPropertyNameHyphenPrefix()
+			throws Exception {
+
+		// Obtain alternate configuration location
+		String alternateConfigurationLocation = this
+				.getPackageRelativePath(this.getClass()) + "/commandline.woof";
+
+		// Run the application with properties for alternate configuration
+		WoofOfficeFloorSource.main("-"
+				+ WoofOfficeFloorSource.PROPERTY_WOOF_CONFIGURATION_LOCATION,
+				alternateConfigurationLocation,
+				"only.property.name.to.have.blank.value");
+
+		// Test
+		this.doTestRequest("/commandline");
+	}
+
+	/**
 	 * Provides additional configuration to {@link WoofOfficeFloorSource} for
 	 * testing.
 	 */

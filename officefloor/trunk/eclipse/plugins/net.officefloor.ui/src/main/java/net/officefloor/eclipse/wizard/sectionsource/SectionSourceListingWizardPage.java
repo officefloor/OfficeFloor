@@ -309,7 +309,7 @@ public class SectionSourceListingWizardPage extends WizardPage implements
 		this.sectionLocation = initialSectionLocation;
 		InputHandler<String> location = new InputHandler<String>(
 				locationComposite, new ClasspathFileInput(this.project,
-						initialSectionLocation, page.getShell()),
+						page.getShell()), initialSectionLocation,
 				new InputListener() {
 					@Override
 					public void notifyValueChanged(Object value) {

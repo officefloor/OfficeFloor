@@ -277,6 +277,10 @@ public class WoofLaunchConfigurationDelegate extends
 						.addResourceDirectory(srcMainWebappDirectory);
 			}
 
+			// Add the program arguments as properties for WoOF
+			developmentConfiguration.addPropertyArguments(executionArguments
+					.getProgramArgumentsArray());
+
 			// Create configuration file for launching
 			File configurationFile;
 			try {
@@ -293,16 +297,6 @@ public class WoofLaunchConfigurationDelegate extends
 								"Failed to create WoOF development launch configuration",
 								ex));
 			}
-
-			// Provide configuration for DevMode WoOF Server
-			List<String> programArguments = new LinkedList<String>();
-
-			// First argument is the location of the configuration file
-			programArguments.add(configurationFile.getAbsolutePath());
-
-			// Append configured program arguments
-			programArguments.addAll(Arrays.asList(executionArguments
-					.getProgramArgumentsArray()));
 
 			// Obtain the VM specific attributes
 			Map<String, String[]> vmAttributes = this
@@ -355,8 +349,9 @@ public class WoofLaunchConfigurationDelegate extends
 					mainTypeName,
 					classpathEntries.toArray(new String[classpathEntries.size()]));
 			runConfiguration.setBootClassPath(bootPath);
-			runConfiguration.setProgramArguments(programArguments
-					.toArray(new String[programArguments.size()]));
+			runConfiguration
+					.setProgramArguments(new String[] { configurationFile
+							.getAbsolutePath() });
 			runConfiguration.setEnvironment(environment);
 			runConfiguration.setVMArguments(executionArguments
 					.getVMArgumentsArray());

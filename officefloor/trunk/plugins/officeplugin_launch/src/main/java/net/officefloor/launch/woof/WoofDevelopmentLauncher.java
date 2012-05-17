@@ -41,6 +41,11 @@ public class WoofDevelopmentLauncher {
 	public static final String DEFAULT_GWT_MAIN_CLASS_NAME = "com.google.gwt.dev.DevMode";
 
 	/**
+	 * Name of the GWT Module to use should the application not be using GWT.
+	 */
+	public static final String NO_GWT_MODULE_NAME = "net.officefloor.launch.NoGwt";
+
+	/**
 	 * {@link GwtLauncher} to use to launch GWT.
 	 */
 	private static GwtLauncher launcher = null;
@@ -121,18 +126,17 @@ public class WoofDevelopmentLauncher {
 			gwtArguments.addAll(Arrays.asList("-startupUrl", startupUrl));
 		}
 
-		// Configure specific arguments (removing configuration file argument)
-		String[] devModeArguments = new String[arguments.length - 1];
-		if (devModeArguments.length > 0) {
-			// Strip of configuration file argument and include
-			System.arraycopy(arguments, 1, devModeArguments, 0,
-					devModeArguments.length);
-			gwtArguments.addAll(Arrays.asList(arguments));
-		}
-
 		// Add GWT module names
-		for (String moduleName : configuration.getModuleNames()) {
-			gwtArguments.add(moduleName);
+		String[] moduleNames = configuration.getModuleNames();
+		if (moduleNames.length == 0) {
+			// Use the no GWT module
+			gwtArguments.add(NO_GWT_MODULE_NAME);
+
+		} else {
+			// Load the GWT modules
+			for (String moduleName : moduleNames) {
+				gwtArguments.add(moduleName);
+			}
 		}
 
 		// Obtain the GWT Launcher

@@ -20,6 +20,8 @@ package net.officefloor.launch.woof;
 import java.io.File;
 import java.net.BindException;
 
+import net.officefloor.compile.properties.PropertyList;
+
 import com.google.gwt.core.ext.ServletContainer;
 import com.google.gwt.core.ext.ServletContainerLauncher;
 import com.google.gwt.core.ext.TreeLogger;
@@ -63,9 +65,12 @@ public class WoofServletContainerLauncher extends ServletContainerLauncher {
 					configuredDirectories.length);
 		}
 
+		// Obtain the properties
+		PropertyList properties = configuration.getProperties();
+
 		// Create and return the WoOF container
 		return new WoofServletContainer(logger, this.getName(), port,
-				resourceDirectories);
+				resourceDirectories, properties);
 	}
 
 }
