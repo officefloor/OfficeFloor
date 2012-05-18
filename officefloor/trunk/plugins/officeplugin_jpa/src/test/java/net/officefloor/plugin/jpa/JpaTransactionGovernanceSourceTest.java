@@ -27,8 +27,11 @@ import javax.persistence.EntityManager;
 import javax.persistence.EntityTransaction;
 import javax.persistence.PersistenceException;
 
+import org.hsqldb.jdbcDriver;
+
 import net.officefloor.autowire.AutoWire;
 import net.officefloor.autowire.AutoWireApplication;
+import net.officefloor.autowire.AutoWireObject;
 import net.officefloor.autowire.AutoWireOfficeFloor;
 import net.officefloor.autowire.AutoWireSection;
 import net.officefloor.autowire.ManagedObjectSourceWirer;
@@ -72,7 +75,7 @@ public class JpaTransactionGovernanceSourceTest extends AbstractJpaTestCase {
 		app.linkEscalation(PersistenceException.class, nonTransactionSection,
 				"handleFailure");
 		app.addObject(this.connection, new AutoWire(Connection.class));
-		app.addManagedObject(
+		AutoWireObject jpaObject = app.addManagedObject(
 				JpaEntityManagerManagedObjectSource.class.getName(),
 				new ManagedObjectSourceWirer() {
 					@Override
@@ -81,10 +84,13 @@ public class JpaTransactionGovernanceSourceTest extends AbstractJpaTestCase {
 								JpaEntityManagerManagedObjectSource.TEAM_CLOSE,
 								new AutoWire(EntityManager.class));
 					}
-				}, new AutoWire(EntityManager.class))
+				}, new AutoWire(EntityManager.class));
+		jpaObject
 				.addProperty(
 						JpaEntityManagerManagedObjectSource.PROPERTY_PERSISTENCE_UNIT_NAME,
 						"test");
+		jpaObject.addProperty("datanucleus.ConnectionDriverName",
+				jdbcDriver.class.getName());
 		app.addGovernance("TRANSACTION",
 				JpaTransactionGovernanceSource.class.getName()).governSection(
 				transactionSection);
