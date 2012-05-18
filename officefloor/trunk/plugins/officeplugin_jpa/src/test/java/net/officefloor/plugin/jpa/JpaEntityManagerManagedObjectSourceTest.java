@@ -25,6 +25,8 @@ import javax.persistence.EntityManager;
 import javax.persistence.EntityTransaction;
 import javax.persistence.TypedQuery;
 
+import org.hsqldb.jdbcDriver;
+
 import net.officefloor.autowire.AutoWire;
 import net.officefloor.autowire.AutoWireApplication;
 import net.officefloor.autowire.AutoWireObject;
@@ -106,6 +108,8 @@ public class JpaEntityManagerManagedObjectSourceTest extends
 		jpa.addProperty(
 				JpaEntityManagerManagedObjectSource.PROPERTY_PERSISTENCE_UNIT_NAME,
 				"test");
+		jpa.addProperty("datanucleus.ConnectionDriverName",
+				jdbcDriver.class.getName());
 
 		// Invoke task to retrieve entity
 		AutoWireOfficeFloor officeFloor = app.openOfficeFloor();
@@ -165,6 +169,8 @@ public class JpaEntityManagerManagedObjectSourceTest extends
 		jpa.addProperty(
 				JpaEntityManagerManagedObjectSource.PROPERTY_PERSISTENCE_UNIT_NAME,
 				"test");
+		jpa.addProperty("datanucleus.ConnectionDriverName",
+				jdbcDriver.class.getName());
 
 		// Invoke task to retrieve entity
 		AutoWireOfficeFloor officeFloor = app.openOfficeFloor();

@@ -18,6 +18,8 @@
 
 package net.officefloor.plugin.jpa;
 
+import java.util.Properties;
+
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.EntityTransaction;
@@ -61,6 +63,12 @@ public class JpaEntityManagerManagedObjectSource extends
 	private String persistenceUnitName;
 
 	/**
+	 * {@link Properties} to configure the {@link EntityManagerFactory}. Enables
+	 * providing differing {@link Properties} values between environments.
+	 */
+	private Properties properties;
+
+	/**
 	 * {@link EntityManagerFactory}.
 	 */
 	private EntityManagerFactory entityManagerFactory;
@@ -84,6 +92,9 @@ public class JpaEntityManagerManagedObjectSource extends
 		this.persistenceUnitName = mosContext
 				.getProperty(PROPERTY_PERSISTENCE_UNIT_NAME);
 
+		// Obtain the additional properties for the entity manager factory
+		this.properties = mosContext.getProperties();
+
 		// Specify meta-data
 		context.setObjectClass(EntityManager.class);
 
@@ -106,8 +117,8 @@ public class JpaEntityManagerManagedObjectSource extends
 	@Override
 	public void start(ManagedObjectExecuteContext<None> context)
 			throws Exception {
-		this.entityManagerFactory = Persistence
-				.createEntityManagerFactory(this.persistenceUnitName);
+		this.entityManagerFactory = Persistence.createEntityManagerFactory(
+				this.persistenceUnitName, this.properties);
 	}
 
 	@Override

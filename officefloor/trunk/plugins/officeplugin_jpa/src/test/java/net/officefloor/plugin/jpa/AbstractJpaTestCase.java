@@ -21,6 +21,7 @@ package net.officefloor.plugin.jpa;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.Statement;
+import java.util.Properties;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
@@ -61,7 +62,11 @@ public abstract class AbstractJpaTestCase extends OfficeFrameTestCase {
 		statement.close();
 
 		// Create the entity manager factory
-		this.factory = Persistence.createEntityManagerFactory("test");
+		Properties properties = new Properties();
+		properties.put("datanucleus.ConnectionDriverName",
+				jdbcDriver.class.getName());
+		this.factory = Persistence.createEntityManagerFactory("test",
+				properties);
 	}
 
 	@Override
