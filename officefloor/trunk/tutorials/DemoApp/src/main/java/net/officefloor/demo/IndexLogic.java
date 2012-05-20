@@ -15,14 +15,29 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.demo.servlet;
+package net.officefloor.demo;
 
-import javax.servlet.http.HttpServlet;
+import net.officefloor.plugin.section.clazz.NextTask;
 
 /**
- * Mock {@link HttpServlet}. 
- *
+ * Logic class for <code>index.html</code>.
+ * 
  * @author Daniel Sagenschneider
  */
-public class MockHttpServlet extends HttpServlet {
+public class IndexLogic {
+
+	/**
+	 * Route to chat application.
+	 */
+	@NextTask("ChatApplication")
+	public void chat() {
+	}
+
+	/**
+	 * Rout to stocks application.
+	 */
+	@NextTask("StocksApplication")
+	public void stocks() {
+	}
+
 }
