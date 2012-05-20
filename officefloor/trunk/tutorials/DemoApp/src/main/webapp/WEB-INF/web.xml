@@ -1,28 +1,4 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <web-app>
-
-<!--  
-	<filter>
-		<filter-name>WoOF</filter-name>
-		<filter-class>net.officefloor.plugin.woof.servlet.WoofServletFilter</filter-class>
-	</filter>
-	<filter-mapping>
-		<filter-name>WoOF</filter-name>
-		<url-pattern>/*</url-pattern>
-	</filter-mapping>
-
-	<servlet>
-		<servlet-name>Mock</servlet-name>
-		<servlet-class>net.officefloor.demo.servlet.MockHttpServlet</servlet-class>
-	</servlet>
-	<servlet-mapping>
-		<servlet-name>Mock</servlet-name>
-		<url-pattern>/</url-pattern>
-	</servlet-mapping>
--->
-
-	<welcome-file-list>
-		<welcome-file>index.html</welcome-file>
-	</welcome-file-list>
-
+	<!-- Only necessary to identify WAR structure on deployment -->
 </web-app>
