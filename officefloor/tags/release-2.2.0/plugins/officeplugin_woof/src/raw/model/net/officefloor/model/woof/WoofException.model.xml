@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<model>
+	<field type="String" name="class name" />
+	<field type="WoofExceptionToWoofSectionInputModel" name="woof section input" />
+	<field type="WoofExceptionToWoofTemplateModel" name="woof template" />
+	<field type="WoofExceptionToWoofResourceModel" name="woof resource" />
+</model>
