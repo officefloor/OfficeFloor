@@ -1,0 +1,10 @@
+import java.io.*;
+
+// Log verifying
+System.out.println("Verifying project run");
+
+// Ensure file created
+File file = new File(basedir, "target/OfficeFloorRun.txt");
+if ( !file.isFile() ) {
+	throw new FileNotFoundException("OfficeFloor not run as file not existing: " + file);
+}
