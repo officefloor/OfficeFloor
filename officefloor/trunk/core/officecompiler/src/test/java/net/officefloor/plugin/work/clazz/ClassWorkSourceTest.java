@@ -445,6 +445,20 @@ public class ClassWorkSourceTest extends OfficeFrameTestCase {
 		Object nonTaskMethod(Object parameter) {
 			return null;
 		}
+
+		/**
+		 * Annotated method to NOT be a {@link Task}.
+		 */
+		@NonTaskMethod
+		public void nonTaskMethod() {
+		}
+
+		/**
+		 * Annotated static method to NOT be a {@link Task}.
+		 */
+		@NonTaskMethod
+		public static void nonStaticTaskMethod() {
+		}
 	}
 
 	/**
