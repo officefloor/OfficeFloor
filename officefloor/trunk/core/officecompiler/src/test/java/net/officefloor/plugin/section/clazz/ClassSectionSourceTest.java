@@ -56,6 +56,7 @@ import net.officefloor.plugin.managedobject.clazz.ClassManagedObjectSource;
 import net.officefloor.plugin.managedobject.clazz.Dependency;
 import net.officefloor.plugin.work.clazz.ClassWorkSource;
 import net.officefloor.plugin.work.clazz.FlowInterface;
+import net.officefloor.plugin.work.clazz.NonTaskMethod;
 import net.officefloor.plugin.work.clazz.Qualifier;
 
 import org.easymock.AbstractMatcher;
@@ -108,6 +109,36 @@ public class ClassSectionSourceTest extends OfficeFrameTestCase {
 	 */
 	public static class MockInputSection {
 		public void doInput() {
+		}
+	}
+
+	/**
+	 * Ensure ignore methods annotated with {@link NonTaskMethod}.
+	 */
+	public void testIgnoreNonTaskMethods() {
+		// Create the expected section
+		SectionDesigner expected = this.createSectionDesigner(
+				MockIgnoreInputSection.class, "includedInput");
+		expected.addSectionInput("includedInput", null);
+
+		// Validate section
+		SectionLoaderUtil.validateSection(expected, ClassSectionSource.class,
+				MockIgnoreInputSection.class.getName());
+	}
+
+	/**
+	 * Section with methods to not be {@link Task} instances.
+	 */
+	public static class MockIgnoreInputSection {
+		public void includedInput() {
+		}
+
+		@NonTaskMethod
+		public void nonIncludedInput() {
+		}
+
+		@NonTaskMethod
+		public void nonIncludedStaticInput() {
 		}
 	}
 

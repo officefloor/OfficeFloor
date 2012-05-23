@@ -198,6 +198,11 @@ public class ClassWorkSource extends AbstractWorkSource<ClassWork> implements
 			if (Object.class.equals(method.getDeclaringClass())) {
 				continue;
 			}
+			
+			// Ignore methods annotated to not be tasks
+			if (method.isAnnotationPresent(NonTaskMethod.class)) {
+				continue;
+			}
 
 			// Obtain details of the method
 			String methodName = method.getName();
