@@ -19,5 +19,6 @@ Template ${TemplateName}:
 <form action="#{submit}">
     <input type="submit" />
 </form>
+<a href="#{nonMethodLink}">Non-method link</a>
 </body>
 </html>
