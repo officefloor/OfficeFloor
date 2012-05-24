@@ -418,9 +418,11 @@ public class HttpTemplateSectionSource extends ClassSectionSource {
 			TemplateClassTask methodTask = this.sectionClassMethodTasksByName
 					.get(linkMethodTaskKey);
 			if (methodTask == null) {
-				designer.addIssue("No backing method for link '" + linkTaskName
-						+ "'", AssetType.TASK, linkTaskName);
-				continue; // must have link method
+				// No backing method, so output flow from template
+				SectionOutput sectionOutput = this.getOrCreateOutput(
+						linkTaskName, null, false);
+				designer.link(linkTask, sectionOutput);
+				continue; // linked
 			}
 
 			// Link handling of request to method

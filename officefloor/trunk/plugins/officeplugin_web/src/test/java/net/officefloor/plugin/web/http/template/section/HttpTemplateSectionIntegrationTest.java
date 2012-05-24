@@ -62,7 +62,7 @@ public class HttpTemplateSectionIntegrationTest extends OfficeFrameTestCase {
 			+ "<tr><td>row</td><td>test row</td></tr></table>"
 			+ "<form action=\"/SECTION.links-nextTask.task\"><input type=\"submit\"/></form>"
 			+ "<form action=\"/SECTION.links-submit.task\"><input type=\"submit\"/></form>"
-			+ "</body></html>";
+			+ "<a href=\"/SECTION.links-nonMethodLink.task\">Non-method link</a></body></html>";
 
 	/**
 	 * Mock {@link Connection}.
@@ -74,6 +74,11 @@ public class HttpTemplateSectionIntegrationTest extends OfficeFrameTestCase {
 	 * Port for running on.
 	 */
 	private int port;
+
+	/**
+	 * Indicates if non-method link is provided.
+	 */
+	private boolean isNonMethodLink = false;
 
 	/**
 	 * {@link AutoWireOfficeFloor}.
@@ -103,6 +108,7 @@ public class HttpTemplateSectionIntegrationTest extends OfficeFrameTestCase {
 	public void testRenderTemplate() throws Exception {
 
 		// Start the server
+		this.isNonMethodLink = true;
 		this.startHttpServer("Template.ofp", TemplateLogic.class);
 
 		// Ensure correct rendering of template
@@ -117,6 +123,7 @@ public class HttpTemplateSectionIntegrationTest extends OfficeFrameTestCase {
 	public void testSubmitWithNextTask() throws Exception {
 
 		// Start the server
+		this.isNonMethodLink = true;
 		this.startHttpServer("Template.ofp", TemplateLogic.class);
 
 		final String RESPONSE = "nextTask - finished(NextTask)";
@@ -132,6 +139,7 @@ public class HttpTemplateSectionIntegrationTest extends OfficeFrameTestCase {
 	public void testSubmitWithoutNextTask() throws Exception {
 
 		// Start the server
+		this.isNonMethodLink = true;
 		this.startHttpServer("Template.ofp", TemplateLogic.class);
 
 		final String RESPONSE = "<submit />" + RENDERED_TEMPLATE_XML;
@@ -148,6 +156,7 @@ public class HttpTemplateSectionIntegrationTest extends OfficeFrameTestCase {
 	public void testSubmitInvokingFlow() throws Exception {
 
 		// Start the server
+		this.isNonMethodLink = true;
 		this.startHttpServer("Template.ofp", TemplateLogic.class);
 
 		final String RESPONSE = "<submit /> - doInternalFlow[1] - finished(Parameter for External Flow)";
@@ -155,6 +164,21 @@ public class HttpTemplateSectionIntegrationTest extends OfficeFrameTestCase {
 		// Ensure correctly renders template on submit when invoking flow
 		this.assertHttpRequest("/SECTION.links-submit.task?doFlow=true",
 				RESPONSE);
+	}
+
+	/**
+	 * Ensure link straight to template output.
+	 */
+	public void testNonMethodLink() throws Exception {
+
+		// Start the server
+		this.isNonMethodLink = true;
+		this.startHttpServer("Template.ofp", TemplateLogic.class);
+
+		final String RESPONSE = "LINKED";
+
+		// Ensure links out from template
+		this.assertHttpRequest("/SECTION.links-nonMethodLink.task", RESPONSE);
 	}
 
 	/**
@@ -469,6 +493,15 @@ public class HttpTemplateSectionIntegrationTest extends OfficeFrameTestCase {
 		source.link(templateSection, "doExternalFlow", handleOutputSection,
 				"finished");
 
+		// Link non-method link
+		if (this.isNonMethodLink) {
+			AutoWireSection handleOutputLink = source.addSection("LINK",
+					ClassSectionSource.class.getName(),
+					MockLink.class.getName());
+			source.link(templateSection, "nonMethodLink", handleOutputLink,
+					"linked");
+		}
+
 		// Open the OfficeFloor
 		this.officeFloor = source.openOfficeFloor();
 	}
@@ -505,6 +538,18 @@ public class HttpTemplateSectionIntegrationTest extends OfficeFrameTestCase {
 				writer.write(")");
 				writer.flush();
 			}
+		}
+	}
+
+	/**
+	 * Mock section for non-method link from the template.
+	 */
+	public static class MockLink {
+		public void linked(ServerHttpConnection connection) throws IOException {
+			Writer writer = new OutputStreamWriter(connection.getHttpResponse()
+					.getBody().getOutputStream());
+			writer.write("LINKED");
+			writer.flush();
 		}
 	}
 

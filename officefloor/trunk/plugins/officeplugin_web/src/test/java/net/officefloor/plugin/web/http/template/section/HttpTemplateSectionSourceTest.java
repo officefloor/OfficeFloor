@@ -76,6 +76,7 @@ public class HttpTemplateSectionSourceTest extends OfficeFrameTestCase {
 		// Outputs
 		expected.addSectionOutput("doExternalFlow", String.class.getName(),
 				false);
+		expected.addSectionOutput("nonMethodLink", null, false);
 		expected.addSectionOutput("output", null, false);
 		expected.addSectionOutput(SQLException.class.getName(),
 				SQLException.class.getName(), true);
@@ -141,6 +142,9 @@ public class HttpTemplateSectionSourceTest extends OfficeFrameTestCase {
 		SectionTask submitMethod = classWork.addSectionTask("submit", "submit");
 		submitMethod.getTaskObject("OBJECT");
 		submitMethod.getTaskObject(ServerHttpConnection.class.getName());
+		
+		// Route non-method link
+		templateWork.addSectionTask("LINK_nonMethodLink", "nonMethodLink");
 
 		// Extra task
 		SectionTask doInternalFlow = classWork.addSectionTask("doInternalFlow",
