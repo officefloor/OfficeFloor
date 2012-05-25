@@ -30,6 +30,7 @@ import net.officefloor.autowire.AutoWireGovernance;
 import net.officefloor.autowire.AutoWireSection;
 import net.officefloor.compile.OfficeFloorCompiler;
 import net.officefloor.compile.impl.properties.PropertyListSourceProperties;
+import net.officefloor.compile.impl.util.CompileUtil;
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.frame.impl.construct.source.SourcePropertiesImpl;
 import net.officefloor.model.repository.ConfigurationItem;
@@ -140,8 +141,9 @@ public class WoofLoaderImpl implements WoofLoader {
 			String templateClassName = templateModel.getTemplateClassName();
 			String uri = templateModel.getUri();
 
-			// Obtain the template logic class
-			Class<?> templateLogicClass = classLoader
+			// Obtain the template logic class (if provided)
+			Class<?> templateLogicClass = CompileUtil
+					.isBlank(templateClassName) ? null : classLoader
 					.loadClass(templateClassName);
 
 			// Configure the template

@@ -177,8 +177,9 @@ public class WoofLoaderTest extends OfficeFrameTestCase {
 		// Record loading templates
 		this.recordReturn(this.app, this.app.addHttpTemplate(
 				"WOOF/TemplateA.ofp", Template.class, "example"), templateA);
-		this.recordReturn(this.app, this.app.addHttpTemplate(
-				"WOOF/TemplateB.ofp", Template.class, null), templateB);
+		this.recordReturn(this.app,
+				this.app.addHttpTemplate("WOOF/TemplateB.ofp", null, null),
+				templateB);
 
 		// Record loading sections
 		this.recordReturn(

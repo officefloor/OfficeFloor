@@ -196,9 +196,8 @@ public class RefactorTemplateTest extends AbstractWoofChangesTestCase {
 
 		// Refactor the template removing outputs and extensions
 		Change<WoofTemplateModel> change = this.operations.refactorTemplate(
-				this.template, "example/Remove.html",
-				"net.example.RemoveClass", section, null, null, null, false,
-				null, null);
+				this.template, "example/Remove.html", null, section, null,
+				null, null, false, null, null);
 
 		// Validate change
 		this.assertChange(change, null, "Refactor Template", true);
