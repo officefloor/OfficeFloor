@@ -101,6 +101,26 @@ public class WebApplicationAutoWireOfficeFloorSourceTest extends
 	}
 
 	/**
+	 * Ensure able to auto-wire template with no logic class.
+	 */
+	public void testTemplateWithNoLogicClass() throws Exception {
+
+		final String templatePath = this.getClassPath("NoLogicTemplate.ofp");
+
+		// Add HTTP template with no logic class
+		HttpTemplateAutoWireSection template = this.source.addHttpTemplate(
+				templatePath, null, "template");
+		this.source.linkToResource(template, "link", "resource.html");
+		this.source.openOfficeFloor();
+
+		// Ensure template available
+		this.assertHttpRequest("/template", 200, "/template.links-link.task");
+
+		// Ensure link connected to resource
+		this.assertHttpRequest("/template.links-link.task", 200, "RESOURCE");
+	}
+
+	/**
 	 * Ensure able to add HTTP template that is available via URI.
 	 */
 	public void testTemplateWithUri() throws Exception {

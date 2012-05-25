@@ -149,8 +149,10 @@ public class WebApplicationAutoWireOfficeFloorSource extends
 								templateLogicClass, templateUri);
 					}
 				});
-		template.addProperty(HttpTemplateSectionSource.PROPERTY_CLASS_NAME,
-				templateLogicClass.getName());
+		if (templateLogicClass != null) {
+			template.addProperty(HttpTemplateSectionSource.PROPERTY_CLASS_NAME,
+					templateLogicClass.getName());
+		}
 		template.addProperty(
 				HttpTemplateSectionSource.PROPERTY_LINK_TASK_NAME_PREFIX,
 				LINK_SERVICE_TASK_NAME_PREFIX);
@@ -158,37 +160,39 @@ public class WebApplicationAutoWireOfficeFloorSource extends
 		// Register the HTTP template
 		this.httpTemplates.add(template);
 
-		// Add the annotated parameters
-		for (Method method : templateLogicClass.getMethods()) {
-			for (Class<?> parameterType : method.getParameterTypes()) {
+		// Add the annotated parameters (if have template logic class)
+		if (templateLogicClass != null) {
+			for (Method method : templateLogicClass.getMethods()) {
+				for (Class<?> parameterType : method.getParameterTypes()) {
 
-				// HTTP Application Stateful
-				HttpApplicationStateful applicationAnnotation = parameterType
-						.getAnnotation(HttpApplicationStateful.class);
-				if (applicationAnnotation != null) {
-					this.addHttpApplicationObject(parameterType,
-							applicationAnnotation.value());
-				}
+					// HTTP Application Stateful
+					HttpApplicationStateful applicationAnnotation = parameterType
+							.getAnnotation(HttpApplicationStateful.class);
+					if (applicationAnnotation != null) {
+						this.addHttpApplicationObject(parameterType,
+								applicationAnnotation.value());
+					}
 
-				// HTTP Session Stateful
-				HttpSessionStateful sessionAnnotation = parameterType
-						.getAnnotation(HttpSessionStateful.class);
-				if (sessionAnnotation != null) {
-					this.addHttpSessionObject(parameterType,
-							sessionAnnotation.value());
-				}
+					// HTTP Session Stateful
+					HttpSessionStateful sessionAnnotation = parameterType
+							.getAnnotation(HttpSessionStateful.class);
+					if (sessionAnnotation != null) {
+						this.addHttpSessionObject(parameterType,
+								sessionAnnotation.value());
+					}
 
-				// HTTP Request Stateful
-				HttpRequestStateful requestAnnotation = parameterType
-						.getAnnotation(HttpRequestStateful.class);
-				if (requestAnnotation != null) {
-					this.addHttpRequestObject(parameterType,
-							requestAnnotation.value());
-				}
+					// HTTP Request Stateful
+					HttpRequestStateful requestAnnotation = parameterType
+							.getAnnotation(HttpRequestStateful.class);
+					if (requestAnnotation != null) {
+						this.addHttpRequestObject(parameterType,
+								requestAnnotation.value());
+					}
 
-				// HTTP Parameters
-				if (parameterType.isAnnotationPresent(HttpParameters.class)) {
-					this.addHttpParametersObject(parameterType);
+					// HTTP Parameters
+					if (parameterType.isAnnotationPresent(HttpParameters.class)) {
+						this.addHttpParametersObject(parameterType);
+					}
 				}
 			}
 		}
