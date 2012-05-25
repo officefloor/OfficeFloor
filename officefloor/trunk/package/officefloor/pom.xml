@@ -15,7 +15,7 @@
 		<packageProperties>WoOF
 			officefloorsource=net.officefloor.plugin.woof.WoofOfficeFloorSource
 			officefloor=WoOF
-</packageProperties>
+		</packageProperties>
 	</properties>
 	<build>
 		<plugins>
@@ -53,7 +53,8 @@
 							<target>
 								<property name="binDir"
 									value="${basedir}/target/OfficeFloor-${project.version}-release/OfficeFloor-${project.version}/bin" />
-
+								<property name="mavenLocalRepository" value="file://${settings.localRepository}" />
+									
 								<echo>Starting OfficeBuilding</echo>
 								<chmod file="${binDir}/officebuilding" perm="555" />
 								<exec dir="${binDir}" executable="${binDir}/officebuilding"
@@ -63,11 +64,13 @@
 								<sleep seconds="5" /> <!-- allow time to start -->
 
 								<echo>Opening FeatureApp</echo>
+								<echo>Using local repository ${mavenLocalRepository}</echo>
 								<exec dir="${binDir}" executable="${binDir}/officebuilding"
-									failonerror="false">
+									failonerror="true">
+									<arg value="--remote_repository_urls" />
+									<arg value="${mavenLocalRepository}" />
 									<arg value="-a" />
-									<arg
-										value="net.officefloor.tutorial:FeatureApp:war:${project.version}" />
+									<arg value="net.officefloor.tutorial:DemoApp:war:${project.version}" />
 									<arg value="open" />
 								</exec>
 							</target>
