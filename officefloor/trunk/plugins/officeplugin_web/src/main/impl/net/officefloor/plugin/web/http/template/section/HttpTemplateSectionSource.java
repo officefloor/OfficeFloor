@@ -79,6 +79,17 @@ public class HttpTemplateSectionSource extends ClassSectionSource {
 	public static final String PROPERTY_CLASS_NAME = ClassManagedObjectSource.CLASS_NAME_PROPERTY_NAME;
 
 	/**
+	 * <p>
+	 * Class to use if no class specified.
+	 * <p>
+	 * Must have a public method for {@link ClassSectionSource}.
+	 */
+	public static final class NoLogicClass {
+		public void notIncludedInput() {
+		}
+	}
+
+	/**
 	 * Name of property for the prefix on the {@link HttpTemplateWorkSource}
 	 * link {@link Task} instances.
 	 */
@@ -123,7 +134,6 @@ public class HttpTemplateSectionSource extends ClassSectionSource {
 
 	@Override
 	protected void loadSpecification(SpecificationContext context) {
-		context.addProperty(PROPERTY_CLASS_NAME, "Class");
 		context.addProperty(PROPERTY_LINK_TASK_NAME_PREFIX,
 				"Link service Task name prefix");
 	}
@@ -132,8 +142,15 @@ public class HttpTemplateSectionSource extends ClassSectionSource {
 	public void sourceSection(SectionDesigner designer,
 			SectionSourceContext context) throws Exception {
 
+		// Obtain the section class
+		String sectionClassName = context
+				.getProperty(PROPERTY_CLASS_NAME, null);
+		if (sectionClassName == null) {
+			// Use the no logic class
+			sectionClassName = NoLogicClass.class.getName();
+		}
+
 		// Load the section class work and tasks
-		String sectionClassName = context.getProperty(PROPERTY_CLASS_NAME);
 		this.sectionClass = context.loadClass(sectionClassName);
 		super.sourceSection(designer, context);
 
@@ -271,7 +288,7 @@ public class HttpTemplateSectionSource extends ClassSectionSource {
 				// Must have template bean task
 				if (beanTask == null) {
 					designer.addIssue("Missing method '" + beanTaskName
-							+ "' on class " + sectionClass.getName()
+							+ "' on class " + this.sectionClass.getName()
 							+ " to provide bean for template "
 							+ templateLocation, AssetType.WORK,
 							TEMPLATE_WORK_NANE);
@@ -837,6 +854,11 @@ public class HttpTemplateSectionSource extends ClassSectionSource {
 	@Override
 	protected void enrichTask(SectionTask task, TaskType<?, ?, ?> taskType,
 			Method method, Class<?> parameterType) {
+
+		// Do not include if no logic class
+		if (NoLogicClass.class.equals(this.sectionClass)) {
+			return;
+		}
 
 		// Keep track of the tasks to allow linking by case-insensitive names
 		String taskKey = task.getSectionTaskName().toUpperCase();

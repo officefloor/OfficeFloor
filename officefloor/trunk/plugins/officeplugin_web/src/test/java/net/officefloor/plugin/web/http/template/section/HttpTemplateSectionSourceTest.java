@@ -33,6 +33,7 @@ import net.officefloor.plugin.section.clazz.SectionClassManagedObjectSource;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
 import net.officefloor.plugin.web.http.session.HttpSession;
 import net.officefloor.plugin.web.http.template.HttpTemplateWorkSource;
+import net.officefloor.plugin.web.http.template.section.HttpTemplateSectionSource.NoLogicClass;
 import net.officefloor.plugin.web.http.template.section.TemplateLogic.RowBean;
 
 /**
@@ -48,7 +49,6 @@ public class HttpTemplateSectionSourceTest extends OfficeFrameTestCase {
 	public void testSpecification() {
 		SectionLoaderUtil.validateSpecification(
 				HttpTemplateSectionSource.class,
-				HttpTemplateSectionSource.PROPERTY_CLASS_NAME, "Class",
 				HttpTemplateSectionSource.PROPERTY_LINK_TASK_NAME_PREFIX,
 				"Link service Task name prefix");
 	}
@@ -142,7 +142,7 @@ public class HttpTemplateSectionSourceTest extends OfficeFrameTestCase {
 		SectionTask submitMethod = classWork.addSectionTask("submit", "submit");
 		submitMethod.getTaskObject("OBJECT");
 		submitMethod.getTaskObject(ServerHttpConnection.class.getName());
-		
+
 		// Route non-method link
 		templateWork.addSectionTask("LINK_nonMethodLink", "nonMethodLink");
 
@@ -172,4 +172,61 @@ public class HttpTemplateSectionSourceTest extends OfficeFrameTestCase {
 				HttpTemplateSectionSource.PROPERTY_LINK_TASK_NAME_PREFIX,
 				"LINK_");
 	}
+
+	/**
+	 * Ensure can use {@link HttpTemplateSectionSource} without a logic class.
+	 */
+	public void testTypeWithNoLogicClass() {
+
+		// Create the expected type
+		SectionDesigner expected = SectionLoaderUtil
+				.createSectionDesigner(HttpTemplateSectionSource.class);
+
+		// Input (for HTTP Template rending)
+		expected.addSectionInput("renderTemplate", null);
+
+		// Outputs
+		expected.addSectionOutput("output", null, false);
+		expected.addSectionOutput("nonMethodLink", null, false);
+		expected.addSectionOutput("doExternalFlow", null, false);
+		expected.addSectionOutput(IOException.class.getName(),
+				IOException.class.getName(), true);
+
+		// Objects
+		expected.addSectionObject(ServerHttpConnection.class.getName(),
+				ServerHttpConnection.class.getName());
+
+		// Add the no logic class (with internal task)
+		SectionWork classWork = expected.addSectionWork("WORK",
+				ClassSectionSource.class.getName());
+		SectionTask getTemplate = classWork.addSectionTask("notIncludedInput",
+				"notIncluded");
+		getTemplate.getTaskObject("OBJECT");
+
+		// Template work
+		SectionWork templateWork = expected.addSectionWork("TEMPLATE",
+				HttpTemplateWorkSource.class.getName());
+
+		// Section
+		SectionTask section = templateWork.addSectionTask("Section", "Section");
+		section.getTaskObject("SERVER_HTTP_CONNECTION");
+
+		// Links
+		templateWork.addSectionTask("LINK_nonMethodLink", "nonMethodLink");
+		templateWork.addSectionTask("LINK_doExternalFlow", "doExternalFlow");
+
+		// Managed Object Sources
+		expected.addSectionManagedObjectSource("OBJECT",
+				SectionClassManagedObjectSource.class.getName()).addProperty(
+				SectionClassManagedObjectSource.CLASS_NAME_PROPERTY_NAME,
+				NoLogicClass.class.getName());
+
+		// Validate type
+		SectionLoaderUtil.validateSection(expected,
+				HttpTemplateSectionSource.class, this.getClass(),
+				"NoLogicTemplate.ofp",
+				HttpTemplateSectionSource.PROPERTY_LINK_TASK_NAME_PREFIX,
+				"LINK_");
+	}
+
 }

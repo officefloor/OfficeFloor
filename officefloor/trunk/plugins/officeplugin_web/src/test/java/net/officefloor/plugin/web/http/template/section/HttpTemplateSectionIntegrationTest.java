@@ -182,6 +182,22 @@ public class HttpTemplateSectionIntegrationTest extends OfficeFrameTestCase {
 	}
 
 	/**
+	 * Ensure can render template without logic class and have links.
+	 */
+	public void testNoLogicClass() throws Exception {
+
+		// Start the server
+		this.isNonMethodLink = true;
+		this.startHttpServer("NoLogicTemplate.ofp", null);
+
+		// Ensure template is correct
+		this.assertHttpRequest("", " /SECTION.links-nonMethodLink.task /SECTION.links-doExternalFlow.task");
+
+		// Ensure links out from template
+		this.assertHttpRequest("/SECTION.links-nonMethodLink.task", "LINKED");
+	}
+
+	/**
 	 * Ensure able to invoke flows by template logic to alter template
 	 * rendering.
 	 */
@@ -469,9 +485,11 @@ public class HttpTemplateSectionIntegrationTest extends OfficeFrameTestCase {
 				+ "/" + templateName;
 		AutoWireSection templateSection = source.addSection("SECTION",
 				HttpTemplateSectionSource.class.getName(), templateLocation);
-		templateSection.addProperty(
-				HttpTemplateSectionSource.PROPERTY_CLASS_NAME,
-				logicClass.getName());
+		if (logicClass != null) {
+			templateSection.addProperty(
+					HttpTemplateSectionSource.PROPERTY_CLASS_NAME,
+					logicClass.getName());
+		}
 		templateSection.addProperty(
 				HttpTemplateSectionSource.PROPERTY_LINK_TASK_NAME_PREFIX,
 				LINK_SERVICE_TASK_NAME_PREFIX);
