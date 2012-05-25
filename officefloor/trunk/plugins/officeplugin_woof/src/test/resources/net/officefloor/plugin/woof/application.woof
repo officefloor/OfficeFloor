@@ -14,8 +14,7 @@
             </output>
             <output name="OUTPUT_4"/>
         </template>
-        <template name="TEMPLATE_B" path="WOOF/TemplateB.ofp"
-         class="net.officefloor.plugin.woof.WoofLoaderTest$Template"/>
+        <template name="TEMPLATE_B" path="WOOF/TemplateB.ofp" />
     </templates>
     
     <sections>

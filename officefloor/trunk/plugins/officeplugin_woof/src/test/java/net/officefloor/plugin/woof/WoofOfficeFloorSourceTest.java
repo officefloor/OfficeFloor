@@ -42,6 +42,11 @@ import org.apache.http.impl.client.DefaultHttpClient;
  */
 public class WoofOfficeFloorSourceTest extends OfficeFrameTestCase {
 
+	/**
+	 * {@link HttpClient}.
+	 */
+	private final HttpClient client = new DefaultHttpClient();
+
 	@Override
 	protected void setUp() throws Exception {
 		WoofLoaderTest.ignoreExtensionServiceFailures();
@@ -49,7 +54,11 @@ public class WoofOfficeFloorSourceTest extends OfficeFrameTestCase {
 
 	@Override
 	protected void tearDown() throws Exception {
-		AutoWireManagement.closeAllOfficeFloors();
+		try {
+			this.client.getConnectionManager().shutdown();
+		} finally {
+			AutoWireManagement.closeAllOfficeFloors();
+		}
 	}
 
 	/**
@@ -74,6 +83,26 @@ public class WoofOfficeFloorSourceTest extends OfficeFrameTestCase {
 
 		// Test
 		this.doTestRequest("/another");
+	}
+
+	/**
+	 * Ensure can render template.
+	 */
+	public void testTemplateNoLogic() throws Exception {
+
+		// Obtain no logic template WoOF configuration
+		String noLogicTemplateConfigurationLocation = this
+				.getPackageRelativePath(this.getClass())
+				+ "/NoLogicTemplate.woof";
+
+		// Run the application with no logic template
+		WoofOfficeFloorSource.main(
+				WoofOfficeFloorSource.PROPERTY_WOOF_CONFIGURATION_LOCATION,
+				noLogicTemplateConfigurationLocation);
+
+		// Test
+		String response = this.doRequest("/template");
+		assertEquals("Incorrect response", "NO LOGIC TEMPLATE", response);
 	}
 
 	/**
@@ -152,17 +181,30 @@ public class WoofOfficeFloorSourceTest extends OfficeFrameTestCase {
 	 */
 	private void doTestRequest(String uri) throws Exception {
 
-		// Ensure is configured by responding to request
-		HttpClient client = new DefaultHttpClient();
+		// Undertake the request
+		String response = this.doRequest(uri);
+
+		// Ensure is configured correctly by correct response
+		assertEquals("Incorrect response body", "WOOF TEST OnePersonTeam_"
+				+ new AutoWire(MockDependency.class).getQualifiedType(),
+				response);
+	}
+
+	/**
+	 * Does the request to test the running {@link WoofOfficeFloorSource}.
+	 * 
+	 * @param uri
+	 *            URI.
+	 * @return Response entity for request.
+	 */
+	private String doRequest(String uri) throws Exception {
 		HttpGet request = new HttpGet("http://localhost:7878" + uri);
-		HttpResponse response = client.execute(request);
+		HttpResponse response = this.client.execute(request);
 		assertEquals("Should be successful", 200, response.getStatusLine()
 				.getStatusCode());
 		ByteArrayOutputStream buffer = new ByteArrayOutputStream();
 		response.getEntity().writeTo(buffer);
-		assertEquals("Incorrect response body", "WOOF TEST OnePersonTeam_"
-				+ new AutoWire(MockDependency.class).getQualifiedType(),
-				new String(buffer.toByteArray()));
+		return new String(buffer.toByteArray());
 	}
 
 	/**
