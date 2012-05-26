@@ -33,6 +33,7 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 
+import net.officefloor.compile.impl.util.CompileUtil;
 import net.officefloor.compile.spi.section.SectionDesigner;
 import net.officefloor.compile.spi.section.SectionInput;
 import net.officefloor.compile.spi.section.SectionManagedObject;
@@ -145,7 +146,7 @@ public class HttpTemplateSectionSource extends ClassSectionSource {
 		// Obtain the section class
 		String sectionClassName = context
 				.getProperty(PROPERTY_CLASS_NAME, null);
-		if (sectionClassName == null) {
+		if (CompileUtil.isBlank(sectionClassName)) {
 			// Use the no logic class
 			sectionClassName = NoLogicClass.class.getName();
 		}

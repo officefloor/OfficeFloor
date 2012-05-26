@@ -71,6 +71,17 @@ public class HttpTemplateWizardPage extends WizardPage implements
 		CompilerIssues, SectionSourceExtensionContext {
 
 	/**
+	 * Obtains the text value.
+	 * 
+	 * @param value
+	 *            Value that may be <code>null</code>.
+	 * @return Text value with blank string for <code>null</code> value.
+	 */
+	private static String getTextValue(String value) {
+		return (value == null ? "" : value);
+	}
+
+	/**
 	 * {@link HttpTemplateInstance} to base decisions. May be <code>null</code>
 	 * if creating new {@link HttpTemplateInstance}.
 	 */
@@ -340,16 +351,18 @@ public class HttpTemplateWizardPage extends WizardPage implements
 		boolean initiallyEnableComet = false;
 		String initialCometManualPublishMethodName = "";
 		if (this.templateInstance != null) {
-			initialTemplatePath = this.templateInstance.getTemplatePath();
-			initialLogicClassName = this.templateInstance.getLogicClassName();
-			initialUri = this.templateInstance.getUri();
-			initialGwtEntryPoint = this.templateInstance
-					.getGwtEntryPointClassName();
+			initialTemplatePath = getTextValue(this.templateInstance
+					.getTemplatePath());
+			initialLogicClassName = getTextValue(this.templateInstance
+					.getLogicClassName());
+			initialUri = getTextValue(this.templateInstance.getUri());
+			initialGwtEntryPoint = getTextValue(this.templateInstance
+					.getGwtEntryPointClassName());
 			initialGwtAsyncInterfaces = this.templateInstance
 					.getGwtServerAsyncInterfaceNames();
 			initiallyEnableComet = this.templateInstance.isEnableComet();
-			initialCometManualPublishMethodName = this.templateInstance
-					.getCometManualPublishMethodName();
+			initialCometManualPublishMethodName = getTextValue(this.templateInstance
+					.getCometManualPublishMethodName());
 		}
 
 		// Provide means to specify template location
@@ -374,9 +387,6 @@ public class HttpTemplateWizardPage extends WizardPage implements
 		path.getControl().setLayoutData(
 				new GridData(SWT.FILL, SWT.BEGINNING, true, false));
 
-		// Provide means to configure the properties
-		this.templateExtension.createControl(page, this);
-
 		// Add means to specify URI
 		new Label(page, SWT.NONE).setText("URI: ");
 		this.uri = new Text(page, SWT.BORDER);
@@ -390,6 +400,9 @@ public class HttpTemplateWizardPage extends WizardPage implements
 				HttpTemplateWizardPage.this.handleChange();
 			}
 		});
+
+		// Provide means to configure the properties
+		this.templateExtension.createControl(page, this);
 
 		// Provide means to specify GWT extension
 		new Label(page, SWT.NONE).setText("GWT Enty Point Class: ");
@@ -518,18 +531,13 @@ public class HttpTemplateWizardPage extends WizardPage implements
 			return;
 		}
 
-		// Ensure have logic class
+		// Obtain the possible logic class
 		Property propertyLogicClass = this.properties
 				.getProperty(HttpTemplateSectionSource.PROPERTY_CLASS_NAME);
-		if ((propertyLogicClass == null)
-				|| (EclipseUtil.isBlank(propertyLogicClass.getValue()))) {
-			this.setErrorMessage("Must specify logic class");
-			this.setPageComplete(false);
-			return;
-		} else {
-			// Set value for return
-			this.logicClassName = propertyLogicClass.getValue();
-		}
+		String propertyLogicClassName = (propertyLogicClass == null ? null
+				: propertyLogicClass.getValue());
+		this.logicClassName = (EclipseUtil.isBlank(propertyLogicClassName) ? null
+				: propertyLogicClassName);
 
 		// Obtain the HTTP Template Section Source class
 		Class sectionSourceClass = this.templateExtension
