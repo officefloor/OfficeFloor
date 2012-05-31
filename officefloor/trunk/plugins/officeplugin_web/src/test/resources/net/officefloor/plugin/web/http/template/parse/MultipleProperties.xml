@@ -13,7 +13,7 @@
 			<content><![CDATA[
 Name for bean one: ]]></content>
 		</static>
-		<reference key="name" />
+		<property name="name" />
 		<static>
 			<content><![CDATA[
 <br />
@@ -25,7 +25,7 @@ Name for bean one: ]]></content>
 			<content><![CDATA[
 Name for bean two: ]]></content>
 		</static>
-		<reference key="name" />
+		<property name="name" />
 		<static>
 			<content><![CDATA[
 <br />
@@ -37,7 +37,7 @@ Name for bean two: ]]></content>
 			<content><![CDATA[
 Name for bean three: ]]></content>
 		</static>
-		<reference key="name" />
+		<property name="name" />
 		<static>
 			<content><![CDATA[
 <br />

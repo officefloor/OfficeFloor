@@ -19,12 +19,12 @@
     <tr>
         <td>]]></content>
 		</static>
-		<reference key="name" />
+		<property name="name" />
 		<static>
 			<content><![CDATA[</td>
         <td>]]></content>
 		</static>
-        <reference key="description" />
+        <property name="description" />
         <static>
             <content><![CDATA[</td>
     </tr>

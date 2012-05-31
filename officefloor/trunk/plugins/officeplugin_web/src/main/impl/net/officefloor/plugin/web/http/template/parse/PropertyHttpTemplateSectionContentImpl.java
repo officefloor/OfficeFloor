@@ -18,19 +18,38 @@
 
 package net.officefloor.plugin.web.http.template.parse;
 
+import net.officefloor.plugin.web.http.template.parse.PropertyHttpTemplateSectionContent;
+
 /**
- * {@link HttpTemplateSectionContent} that references other content to use.
- *
+ * {@link PropertyHttpTemplateSectionContent} implementation.
+ * 
  * @author Daniel Sagenschneider
  */
-public interface ReferenceHttpTemplateSectionContent extends
-		HttpTemplateSectionContent {
+public class PropertyHttpTemplateSectionContentImpl implements
+		PropertyHttpTemplateSectionContent {
 
 	/**
-	 * Obtains the key identifying the other content to use.
-	 *
-	 * @return Key identifying the other content to use.
+	 * Property name.
 	 */
-	String getKey();
+	private final String propertyName;
+
+	/**
+	 * Initiate.
+	 * 
+	 * @param propertyName
+	 *            Property name.
+	 */
+	public PropertyHttpTemplateSectionContentImpl(String propertyName) {
+		this.propertyName = propertyName;
+	}
+
+	/*
+	 * =================== PropertyHttpTemplateSectionContent =================
+	 */
+
+	@Override
+	public String getPropertyName() {
+		return this.propertyName;
+	}
 
 }

@@ -6,25 +6,18 @@
 
 	<xs:complexType name="templateType">
 		<xs:sequence>
-			<xs:element name="section" type="sectionType" maxOccurs="unbounded"
-				minOccurs="1" />
+			<xs:element name="section" type="sectionType" minOccurs="0"
+				maxOccurs="unbounded" />
 		</xs:sequence>
 	</xs:complexType>
 
 	<xs:complexType name="sectionType">
-		<xs:choice maxOccurs="unbounded" minOccurs="1">
+		<xs:choice minOccurs="0" maxOccurs="unbounded">
 			<xs:element name="static" type="staticType" />
-			<xs:element name="reference" type="referenceType" />
+			<xs:element name="bean" type="beanType" />
+			<xs:element name="property" type="propertyType" />
 			<xs:element name="link" type="linkType" />
 		</xs:choice>
-		<xs:attribute name="name" type="xs:string" use="required" />
-	</xs:complexType>
-
-	<xs:complexType name="referenceType">
-		<xs:attribute name="key" type="xs:string" use="required" />
-	</xs:complexType>
-
-	<xs:complexType name="linkType">
 		<xs:attribute name="name" type="xs:string" use="required" />
 	</xs:complexType>
 
@@ -33,6 +26,25 @@
 			<xs:element name="content" type="xs:string" maxOccurs="1"
 				minOccurs="1" />
 		</xs:sequence>
+	</xs:complexType>
+
+	<xs:complexType name="beanType">
+		<xs:choice minOccurs="0" maxOccurs="unbounded">
+			<xs:element name="static" type="staticType" />
+			<xs:element name="property" type="propertyType" />
+			<xs:element name="link" type="linkType" />
+			<xs:element name="bean" type="beanType" />
+		</xs:choice>
+		<xs:attribute name="name" type="xs:string" use="required" />
+	</xs:complexType>
+
+	<xs:complexType name="propertyType">
+		<xs:attribute name="name" type="xs:string" use="required" />
+	</xs:complexType>
+
+
+	<xs:complexType name="linkType">
+		<xs:attribute name="name" type="xs:string" use="required" />
 	</xs:complexType>
 
 </xs:schema>

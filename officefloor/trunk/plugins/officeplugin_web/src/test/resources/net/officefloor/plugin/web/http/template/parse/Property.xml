@@ -5,15 +5,11 @@
 		<static>
 			<content><![CDATA[<html>
 <body>
-]]></content>
+Page containing a single bean where its name property is ]]></content>
 		</static>
-		<bean name="bean">
-			<static>
-				<content>content within bean</content>
-			</static>
-		</bean>
+		<property name="name" />
 		<static>
-			<content><![CDATA[
+			<content><![CDATA[.
 </body>
 </html>]]></content>
 		</static>

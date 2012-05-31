@@ -5,15 +5,11 @@
 		<static>
 			<content><![CDATA[<html>
 <body>
-]]></content>
+Page containing property reference ]]></content>
 		</static>
-		<bean name="bean">
-			<static>
-				<content>content within bean</content>
-			</static>
-		</bean>
+		<property name="property.reference.path" />
 		<static>
-			<content><![CDATA[
+			<content><![CDATA[.
 </body>
 </html>]]></content>
 		</static>

@@ -7,7 +7,7 @@
 <body>
 Page containing a single link ]]></content>
 		</static>
-		<link name="link-name" />
+		<link name="link_name" />
 		<static>
 			<content><![CDATA[.
 </body>

@@ -25,14 +25,14 @@ import java.lang.reflect.Method;
 import net.officefloor.plugin.socket.server.http.response.HttpResponseWriter;
 import net.officefloor.plugin.value.retriever.ValueRetriever;
 import net.officefloor.plugin.web.http.template.HttpTemplateWriter;
-import net.officefloor.plugin.web.http.template.parse.ReferenceHttpTemplateSectionContent;
+import net.officefloor.plugin.web.http.template.parse.PropertyHttpTemplateSectionContent;
 
 /**
  * {@link HttpTemplateWriter} to write a bean property.
  * 
  * @author Daniel Sagenschneider
  */
-public class BeanPropertyHttpTemplateWriter implements HttpTemplateWriter {
+public class PropertyHttpTemplateWriter implements HttpTemplateWriter {
 
 	/**
 	 * <code>Content-Type</code>.
@@ -53,7 +53,7 @@ public class BeanPropertyHttpTemplateWriter implements HttpTemplateWriter {
 	 * Initiate.
 	 * 
 	 * @param content
-	 *            {@link ReferenceHttpTemplateSectionContent}.
+	 *            {@link PropertyHttpTemplateSectionContent}.
 	 * @param valueRetriever
 	 *            {@link ValueRetriever}.
 	 * @param contentType
@@ -64,13 +64,13 @@ public class BeanPropertyHttpTemplateWriter implements HttpTemplateWriter {
 	 *             If {@link Method} to obtain the value to write is not
 	 *             available on the bean type.
 	 */
-	public BeanPropertyHttpTemplateWriter(
-			ReferenceHttpTemplateSectionContent content,
+	public PropertyHttpTemplateWriter(
+			PropertyHttpTemplateSectionContent content,
 			ValueRetriever<Object> valueRetriever, String contentType,
 			Class<?> beanType) throws Exception {
 		this.contentType = contentType;
 		this.valueRetriever = valueRetriever;
-		this.propertyName = content.getKey();
+		this.propertyName = content.getPropertyName();
 
 		// Ensure the property is retrievable
 		if (!this.valueRetriever.isValueRetrievable(this.propertyName)) {
