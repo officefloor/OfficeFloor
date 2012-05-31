@@ -18,26 +18,20 @@
 
 package net.officefloor.plugin.web.http.template.parse;
 
-import java.io.IOException;
-
 /**
- * Parses the template.
+ * {@link HttpTemplateSectionContent} that references a property of the bean to
+ * render.
  * 
  * @author Daniel Sagenschneider
  */
-public interface HttpTemplateParser {
+public interface PropertyHttpTemplateSectionContent extends
+		HttpTemplateSectionContent {
 
 	/**
-	 * <p>
-	 * Parses the {@link HttpTemplate}.
-	 * <p>
-	 * It is anticipated that the content of the template will be passed to the
-	 * constructor of this implementation.
+	 * Obtains the name of the property to render.
 	 * 
-	 * @return Parsed {@link HttpTemplate}.
-	 * @throws IOException
-	 *             If fails to parse the {@link HttpTemplate}.
+	 * @return Name of the property to render.
 	 */
-	HttpTemplate parse() throws IOException;
+	String getPropertyName();
 
 }

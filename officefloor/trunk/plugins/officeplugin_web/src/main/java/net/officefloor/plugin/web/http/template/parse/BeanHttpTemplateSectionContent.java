@@ -18,38 +18,28 @@
 
 package net.officefloor.plugin.web.http.template.parse;
 
-import net.officefloor.plugin.web.http.template.parse.ReferenceHttpTemplateSectionContent;
-
 /**
- * {@link ReferenceHttpTemplateSectionContent} implementation.
- *
+ * {@link HttpTemplateSectionContent} that references a bean to use.
+ * 
  * @author Daniel Sagenschneider
  */
-public class ReferenceHttpTemplateSectionContentImpl implements
-		ReferenceHttpTemplateSectionContent {
+public interface BeanHttpTemplateSectionContent extends
+		HttpTemplateSectionContent {
 
 	/**
-	 * Key.
+	 * Obtains the name of the property to obtain the bean.
+	 * 
+	 * @return Name of the property to obtain the bean.
 	 */
-	private final String key;
+	String getPropertyName();
 
 	/**
-	 * Initiate.
-	 *
-	 * @param key
-	 *            Key.
+	 * Obtains the {@link HttpTemplateSectionContent} instances that comprise
+	 * the content for this {@link BeanHttpTemplateSectionContent}.
+	 * 
+	 * @return {@link HttpTemplateSectionContent} instances that comprise the
+	 *         content for this {@link BeanHttpTemplateSectionContent}.
 	 */
-	public ReferenceHttpTemplateSectionContentImpl(String key) {
-		this.key = key;
-	}
-
-	/*
-	 * =================== ReferenceHttpTemplateSectionContent =================
-	 */
-
-	@Override
-	public String getKey() {
-		return this.key;
-	}
+	HttpTemplateSectionContent[] getContent();
 
 }

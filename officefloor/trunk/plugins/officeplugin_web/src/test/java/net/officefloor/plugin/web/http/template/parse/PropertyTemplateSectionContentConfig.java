@@ -23,15 +23,15 @@ package net.officefloor.plugin.web.http.template.parse;
  * 
  * @author Daniel Sagenschneider
  */
-public class ReferenceTemplateSectionContentConfig implements
+public class PropertyTemplateSectionContentConfig implements
 		TemplateSectionContentConfig {
 
 	/**
-	 * Key for lookup of content.
+	 * Property name for lookup of content.
 	 */
-	public String key;
+	public String propertyName;
 
-	public void setKey(String key) {
-		this.key = key;
+	public void setPropertyName(String propertyName) {
+		this.propertyName = propertyName;
 	}
 }

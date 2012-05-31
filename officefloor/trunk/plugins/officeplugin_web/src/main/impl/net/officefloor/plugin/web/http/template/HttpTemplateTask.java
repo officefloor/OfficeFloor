@@ -45,7 +45,7 @@ import net.officefloor.plugin.web.http.template.parse.HttpTemplate;
 import net.officefloor.plugin.web.http.template.parse.HttpTemplateSection;
 import net.officefloor.plugin.web.http.template.parse.HttpTemplateSectionContent;
 import net.officefloor.plugin.web.http.template.parse.LinkHttpTemplateSectionContent;
-import net.officefloor.plugin.web.http.template.parse.ReferenceHttpTemplateSectionContent;
+import net.officefloor.plugin.web.http.template.parse.PropertyHttpTemplateSectionContent;
 import net.officefloor.plugin.web.http.template.parse.StaticHttpTemplateSectionContent;
 
 /**
@@ -107,9 +107,9 @@ public class HttpTemplateTask extends
 				contentWriterList.add(new StaticHttpTemplateWriter(
 						staticContent, contentType, charset));
 
-			} else if (content instanceof ReferenceHttpTemplateSectionContent) {
+			} else if (content instanceof PropertyHttpTemplateSectionContent) {
 				// Add the reference template writer
-				ReferenceHttpTemplateSectionContent referenceContent = (ReferenceHttpTemplateSectionContent) content;
+				PropertyHttpTemplateSectionContent referenceContent = (PropertyHttpTemplateSectionContent) content;
 
 				// Ensure have the value loader for the bean
 				if (valueRetriever == null) {
@@ -128,7 +128,7 @@ public class HttpTemplateTask extends
 				}
 
 				// Add the content writer
-				contentWriterList.add(new BeanPropertyHttpTemplateWriter(
+				contentWriterList.add(new PropertyHttpTemplateWriter(
 						referenceContent, valueRetriever, contentType,
 						beanClass));
 

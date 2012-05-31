@@ -8,9 +8,7 @@
 ]]></content>
 		</static>
 		<bean name="bean">
-			<static>
-				<content>content within bean</content>
-			</static>
+			<property name="property" />
 		</bean>
 		<static>
 			<content><![CDATA[

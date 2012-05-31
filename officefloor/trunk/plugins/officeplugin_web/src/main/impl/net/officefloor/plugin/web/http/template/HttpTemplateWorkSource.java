@@ -48,7 +48,7 @@ import net.officefloor.plugin.web.http.template.parse.HttpTemplateParserImpl;
 import net.officefloor.plugin.web.http.template.parse.HttpTemplateSection;
 import net.officefloor.plugin.web.http.template.parse.HttpTemplateSectionContent;
 import net.officefloor.plugin.web.http.template.parse.LinkHttpTemplateSectionContent;
-import net.officefloor.plugin.web.http.template.parse.ReferenceHttpTemplateSectionContent;
+import net.officefloor.plugin.web.http.template.parse.PropertyHttpTemplateSectionContent;
 
 /**
  * {@link WorkSource} for the HTTP template.
@@ -161,8 +161,8 @@ public class HttpTemplateWorkSource extends
 			throws IOException {
 
 		// Parse the template
-		HttpTemplate template = new HttpTemplateParserImpl()
-				.parse(templateContent);
+		HttpTemplate template = new HttpTemplateParserImpl(templateContent)
+				.parse();
 
 		// Return the template
 		return template;
@@ -181,7 +181,7 @@ public class HttpTemplateWorkSource extends
 
 		// Determine if contains reference content
 		for (HttpTemplateSectionContent content : section.getContent()) {
-			if (content instanceof ReferenceHttpTemplateSectionContent) {
+			if (content instanceof PropertyHttpTemplateSectionContent) {
 				// Section contains reference content, so requires bean
 				return true;
 			}
