@@ -61,7 +61,7 @@ public class HttpTemplateParserTest extends OfficeFrameTestCase {
 	public void testProperty() {
 		this.doTest();
 	}
-	
+
 	/**
 	 * Ensure can load property content that is a reference.
 	 */
@@ -87,6 +87,13 @@ public class HttpTemplateParserTest extends OfficeFrameTestCase {
 	 * Ensure able to load bean with property.
 	 */
 	public void testBeanProperty() {
+		this.doTest();
+	}
+
+	/**
+	 * Ensure able to load mixed bean content.
+	 */
+	public void testBeanMixedContent() {
 		this.doTest();
 	}
 
@@ -205,8 +212,9 @@ public class HttpTemplateParserTest extends OfficeFrameTestCase {
 				StaticTemplateSectionContentConfig expectedStaticContent = (StaticTemplateSectionContentConfig) expectedContent;
 				StaticHttpTemplateSectionContent staticContent = (StaticHttpTemplateSectionContent) content;
 				assertTextEquals("Incorrect content for " + contentIdentifier,
-						expectedStaticContent.content.trim(), staticContent
-								.getStaticContent().trim());
+						(expectedStaticContent.content == null ? ""
+								: expectedStaticContent.content.trim()),
+						staticContent.getStaticContent().trim());
 
 			} else if (expectedContent instanceof BeanTemplateSectionContentConfig) {
 				// Bean content
