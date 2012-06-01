@@ -525,6 +525,11 @@
 				<artifactId>lombok</artifactId>
 				<version>0.10.8</version>
 			</dependency>
+			<dependency>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>javacc-maven-plugin</artifactId>
+				<version>2.6</version>
+			</dependency>
 		</dependencies>
 	</dependencyManagement>
 	<build>
@@ -793,6 +798,25 @@
 										<versionRange>[3.0.2,)</versionRange>
 										<goals>
 											<goal>enhance</goal>
+										</goals>
+									</pluginExecutionFilter>
+									<action>
+										<ignore></ignore>
+									</action>
+								</pluginExecution>
+								<pluginExecution>
+									<pluginExecutionFilter>
+										<groupId>
+											org.codehaus.mojo
+										</groupId>
+										<artifactId>
+											javacc-maven-plugin
+										</artifactId>
+										<versionRange>
+											[2.6,)
+										</versionRange>
+										<goals>
+											<goal>javacc</goal>
 										</goals>
 									</pluginExecutionFilter>
 									<action>
