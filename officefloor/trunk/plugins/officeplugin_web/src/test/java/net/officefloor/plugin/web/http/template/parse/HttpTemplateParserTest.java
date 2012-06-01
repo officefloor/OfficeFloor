@@ -20,6 +20,7 @@ package net.officefloor.plugin.web.http.template.parse;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.IOException;
 import java.io.StringReader;
 import java.util.List;
 
@@ -98,6 +99,49 @@ public class HttpTemplateParserTest extends OfficeFrameTestCase {
 	}
 
 	/**
+	 * Ensure able to load tree of beans.
+	 */
+	public void testBeanTree() {
+		this.doTest();
+	}
+
+	/**
+	 * Ensure can put bean tags within comment. Allows for hiding from raw HTML
+	 * rendering.
+	 */
+	public void testBeanWithinComment() {
+		this.doTest();
+	}
+
+	/**
+	 * Ensure that section closes any open beans.
+	 */
+	public void testSectionClosesBean() {
+		this.doTest();
+	}
+
+	/**
+	 * Ensure that EOF closes any open beans.
+	 */
+	public void testEofClosesBean() {
+		this.doTest();
+	}
+
+	/**
+	 * Ensure that there is an error on attempting to close a non-open bean.
+	 */
+	public void testErrorOnClosingNonOpenBean() {
+		try {
+			this.doParse();
+			fail("Should not successfully parse template");
+		} catch (IOException ex) {
+			assertEquals("Incorrect cause", ParseException.class.getName()
+					+ ": No open Bean to close at line 3 column 31",
+					ex.getMessage());
+		}
+	}
+
+	/**
 	 * Ensure can load link content.
 	 */
 	public void testLink() {
@@ -120,14 +164,51 @@ public class HttpTemplateParserTest extends OfficeFrameTestCase {
 	}
 
 	/**
+	 * Obtains the template file name.
+	 * 
+	 * @return Template file name.
+	 */
+	private String getTemplateFileName() {
+
+		// Obtain the template file name
+		String testName = this.getName();
+		String templateFileName = testName.substring("test".length());
+
+		// Return the template file name
+		return templateFileName;
+	}
+
+	/**
+	 * Undertakes parsing the template.
+	 * 
+	 * @return {@link HttpTemplate}.
+	 */
+	private HttpTemplate doParse() throws IOException {
+
+		// Obtain the template file name
+		String templateFileName = this.getTemplateFileName();
+
+		// Load the template
+		File templateFile = this.findFile(this.getClass(), templateFileName
+				+ ".ofp");
+		HttpTemplate template = new HttpTemplateParserImpl(new StringReader(
+				this.getFileContents(templateFile))).parse();
+
+		// Return the template
+		return template;
+	}
+
+	/**
 	 * Does the test.
 	 */
 	private void doTest() {
 		try {
 
 			// Obtain the template file name
-			String testName = this.getName();
-			String templateFileName = testName.substring("test".length());
+			String templateFileName = this.getTemplateFileName();
+
+			// Parse the template
+			HttpTemplate template = this.doParse();
 
 			// Obtain unmarshaller to expected content
 			File unmarshallerConfigFile = this.findFile(this.getClass(),
@@ -142,13 +223,6 @@ public class HttpTemplateParserTest extends OfficeFrameTestCase {
 			TemplateConfig expectedTemplate = new TemplateConfig();
 			unmarshaller.unmarshall(new FileInputStream(expectedFile),
 					expectedTemplate);
-
-			// Load the template
-			File templateFile = this.findFile(this.getClass(), templateFileName
-					+ ".ofp");
-			HttpTemplate template = new HttpTemplateParserImpl(
-					new StringReader(this.getFileContents(templateFile)))
-					.parse();
 
 			// Ensure template is as expected
 			HttpTemplateSection[] sections = template.getSections();
