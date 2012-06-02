@@ -68,6 +68,10 @@ public class HttpTemplateSectionSourceTest extends OfficeFrameTestCase {
 		// Inputs (for Template Logic methods - enables reuse of class)
 		expected.addSectionInput("getTemplate", null);
 		expected.addSectionInput("getTemplateName", null);
+		expected.addSectionInput("getNullBean", null);
+		expected.addSectionInput("getBean", null);
+		expected.addSectionInput("getBeanProperty", null);
+		expected.addSectionInput("getBeanArray", null);
 		expected.addSectionInput("getList", null);
 		expected.addSectionInput("nextTask", null);
 		expected.addSectionInput("submit", null);
@@ -105,6 +109,14 @@ public class HttpTemplateSectionSourceTest extends OfficeFrameTestCase {
 				"template");
 		template.getTaskObject("SERVER_HTTP_CONNECTION");
 		template.getTaskObject("OBJECT");
+
+		// Methods for beans
+		for (String beanMethodName : new String[] { "getNullBean", "getBean",
+				"getBeanProperty", "getBeanArray" }) {
+			SectionTask beanMethodTask = classWork.addSectionTask(
+					beanMethodName, beanMethodName);
+			beanMethodTask.getTaskObject("OBJECT");
+		}
 
 		// List
 		SectionTask getList = classWork.addSectionTask("getList", "getList");

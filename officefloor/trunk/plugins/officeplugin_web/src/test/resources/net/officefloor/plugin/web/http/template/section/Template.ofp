@@ -1,7 +1,7 @@
 <html>
 <body>
 <p>Template ${TemplateName}</p>
-<p>${nullBean not to be displayed $} <!-- ${bean --> Bean with property ${beanProperty} <!-- $} --></p>
+<p>${nullBean not to be displayed $} <!-- ${bean --> Bean with property ${beanProperty} <!-- $} --> ${beanArray ${count}  $}</p>
 <table>
     <tr>
         <td>Name</td>
