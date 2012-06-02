@@ -22,6 +22,8 @@ import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
+import org.apache.commons.lang.StringEscapeUtils;
+
 import net.officefloor.plugin.socket.server.http.response.HttpResponseWriter;
 import net.officefloor.plugin.value.retriever.ValueRetriever;
 import net.officefloor.plugin.web.http.template.HttpTemplateWriter;
@@ -48,6 +50,11 @@ public class PropertyHttpTemplateWriter implements HttpTemplateWriter {
 	 * Property name.
 	 */
 	private final String propertyName;
+
+	/**
+	 * Indicates if the property is to be rendered escaped.
+	 */
+	private final boolean isEscaped;
 
 	/**
 	 * Initiate.
@@ -79,6 +86,9 @@ public class PropertyHttpTemplateWriter implements HttpTemplateWriter {
 					+ "' can not be sourced from bean type "
 					+ beanType.getName());
 		}
+
+		// Determine if should be escaped
+		this.isEscaped = !(method.isAnnotationPresent(UnescapedHtml.class));
 	}
 
 	/*
@@ -111,6 +121,11 @@ public class PropertyHttpTemplateWriter implements HttpTemplateWriter {
 		} catch (Exception ex) {
 			// Propagate failure
 			throw new IOException(ex);
+		}
+
+		// Escape the value for HTML
+		if (this.isEscaped) {
+			propertyTextValue = StringEscapeUtils.escapeHtml(propertyTextValue);
 		}
 
 		// Write the text

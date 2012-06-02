@@ -58,6 +58,7 @@ public class HttpTemplateSectionIntegrationTest extends OfficeFrameTestCase {
 	 * Rendered template XML.
 	 */
 	private static final String RENDERED_TEMPLATE_XML = "<html><body><p>Template Test</p>"
+			+"<p>&lt;img src=&quot;Test.png&quot; /&gt; <img src=\"Test.png\" /></p>"
 			+ "<p>Bean with property bean-property  0 1 2 3 4 5 6 7 8 9</p><table>"
 			+ "<tr><td>Name</td><td>Description</td></tr>"
 			+ "<tr><td>row</td><td>test row</td></tr></table>"
