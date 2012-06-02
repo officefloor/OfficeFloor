@@ -2,6 +2,9 @@
 <body>
 Template ${TemplateName}
 <br />
+<!-- {BeanTree} -->
+Provide ${nullBean not to be displayed $} ${bean tree ${value} $}
+<br />
 <!-- {NullBean} -->
 Should be no template name ${TemplateName} available.
 <br />

@@ -67,9 +67,8 @@ public class RetrieveValueTest extends OfficeFrameTestCase {
 	 */
 	public void testObjectValue() {
 		final PropertyObject property = this.createMock(PropertyObject.class);
-		final String propertyValue = property.toString();
 		this.recordReturn(this.object, this.object.getProperty(), property);
-		this.doTest("Property", propertyValue);
+		this.doTest("Property", property);
 	}
 
 	/**
@@ -124,7 +123,7 @@ public class RetrieveValueTest extends OfficeFrameTestCase {
 	 * @param nameValuePairs
 	 *            Name value pairs expected to be retrieved.
 	 */
-	private void doTest(String... nameValuePairs) {
+	private void doTest(Object... nameValuePairs) {
 		try {
 			// Create the value retriever
 			ValueRetrieverSource source = new ValueRetrieverSourceImpl();
@@ -135,11 +134,11 @@ public class RetrieveValueTest extends OfficeFrameTestCase {
 			// Test
 			this.replayMockObjects();
 			for (int i = 0; i < nameValuePairs.length; i += 2) {
-				String name = nameValuePairs[i];
-				String expectedValue = nameValuePairs[i + 1];
+				String name = nameValuePairs[i].toString();
+				Object expectedValue = nameValuePairs[i + 1];
 
 				// Retrieve the value
-				String actualValue = retriever.retrieveValue(this.object, name);
+				Object actualValue = retriever.retrieveValue(this.object, name);
 
 				// Ensure expected value
 				assertEquals("Incorrect value for property '" + name + "'",

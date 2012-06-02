@@ -18,6 +18,8 @@
 
 package net.officefloor.plugin.value.retriever;
 
+import java.lang.reflect.Method;
+
 import net.officefloor.frame.test.OfficeFrameTestCase;
 
 /**
@@ -36,7 +38,7 @@ public class ValueRetrievableTest extends OfficeFrameTestCase {
 	 * Ensure can retrieve simple property.
 	 */
 	public void testSimpleProperty() {
-		this.doTest("Value", true);
+		this.doTest("Value", String.class);
 	}
 
 	/**
@@ -44,29 +46,29 @@ public class ValueRetrievableTest extends OfficeFrameTestCase {
 	 */
 	public void testCaseInsensitiveSimpleProperty() {
 		this.isCaseSensitive = false;
-		this.doTest("VALUE", true);
-		this.doTest("value", true);
+		this.doTest("VALUE", String.class);
+		this.doTest("value", String.class);
 	}
 
 	/**
 	 * Ensure no value on unknown property.
 	 */
 	public void testUnknownProperty() {
-		this.doTest("Unknown", false);
+		this.doTest("Unknown", null);
 	}
 
 	/**
 	 * Ensure able to obtain object <code>toString</code> value.
 	 */
 	public void testObjectValue() {
-		this.doTest("Property", true);
+		this.doTest("Property", PropertyObject.class);
 	}
 
 	/**
 	 * Ensure can obtain property following object graph.
 	 */
 	public void testGraphProperty() {
-		this.doTest("Property.Text", true);
+		this.doTest("Property.Text", String.class);
 	}
 
 	/**
@@ -74,15 +76,15 @@ public class ValueRetrievableTest extends OfficeFrameTestCase {
 	 */
 	public void testCaseInsensitiveGraphProperty() {
 		this.isCaseSensitive = false;
-		this.doTest("PROPERTY.TEXT", true);
-		this.doTest("property.text", true);
+		this.doTest("PROPERTY.TEXT", String.class);
+		this.doTest("property.text", String.class);
 	}
 
 	/**
 	 * Ensure no value for unknown graph property.
 	 */
 	public void testUnknownGraphProperty() {
-		this.doTest("Property.Unkown", false);
+		this.doTest("Property.Unkown", null);
 	}
 
 	/**
@@ -90,10 +92,11 @@ public class ValueRetrievableTest extends OfficeFrameTestCase {
 	 * 
 	 * @param name
 	 *            Name of property to check is available.
-	 * @param isExpectRetrievable
-	 *            Indicates if expect to be able to retrieve the value.
+	 * @param expectedMethodReturnType
+	 *            Expected return type from the {@link Method}. May be
+	 *            <code>null</code> to indicate method not found.
 	 */
-	private void doTest(String name, boolean isExpectRetrievable) {
+	private void doTest(String name, Class<?> expectedMethodReturnType) {
 		try {
 			// Create the value retriever
 			ValueRetrieverSource source = new ValueRetrieverSourceImpl();
@@ -102,9 +105,14 @@ public class ValueRetrievableTest extends OfficeFrameTestCase {
 					.sourceValueRetriever(RootObject.class);
 
 			// Test
-			boolean isActualRetrievable = retriever.isValueRetrievable(name);
-			assertEquals("Incorrectly determined if retrievable for property '"
-					+ name + "'", isExpectRetrievable, isActualRetrievable);
+			Method method = retriever.getTypeMethod(name);
+			if (expectedMethodReturnType == null) {
+				assertNull("Not expecting method for " + name, method);
+			} else {
+				Class<?> returnType = method.getReturnType();
+				assertEquals("Incorrect method return type",
+						expectedMethodReturnType, returnType);
+			}
 
 		} catch (Exception ex) {
 			throw fail(ex);

@@ -104,6 +104,14 @@ public class HttpTemplateWorkSourceTest extends OfficeFrameTestCase {
 		template.addObject(TemplateBean.class).setLabel("OBJECT");
 		template.addEscalation(IOException.class);
 
+		// 'BeanTree' task
+		TaskTypeBuilder<Indexed, None> beanTree = work.addTaskType("BeanTree",
+				httpTemplateTaskFactory, Indexed.class, None.class);
+		beanTree.addObject(ServerHttpConnection.class).setLabel(
+				"SERVER_HTTP_CONNECTION");
+		beanTree.addObject(BeanTreeBean.class).setLabel("OBJECT");
+		beanTree.addEscalation(IOException.class);
+
 		// 'NullBean' task
 		TaskTypeBuilder<Indexed, None> nullBean = work.addTaskType("NullBean",
 				httpTemplateTaskFactory, Indexed.class, None.class);
@@ -461,7 +469,7 @@ public class HttpTemplateWorkSourceTest extends OfficeFrameTestCase {
 	 */
 	public String[] getProperties(String templatePath) {
 		// Create the properties
-		String[] properties = new String[8];
+		String[] properties = new String[10];
 		properties[0] = HttpTemplateWorkSource.PROPERTY_TEMPLATE_FILE;
 		properties[1] = templatePath;
 		properties[2] = HttpTemplateWorkSource.PROPERTY_BEAN_PREFIX
@@ -472,9 +480,11 @@ public class HttpTemplateWorkSourceTest extends OfficeFrameTestCase {
 		properties[5] = TemplateBean.class.getName();
 		properties[6] = HttpTemplateWorkSource.PROPERTY_BEAN_PREFIX + "List";
 		properties[7] = TableRowBean.class.getName();
+		properties[8] = HttpTemplateWorkSource.PROPERTY_BEAN_PREFIX
+				+ "BeanTree";
+		properties[9] = BeanTreeBean.class.getName();
 
 		// Return the properties
 		return properties;
 	}
-
 }

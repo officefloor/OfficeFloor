@@ -18,6 +18,7 @@
 
 package net.officefloor.plugin.value.retriever;
 
+import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -29,9 +30,9 @@ import java.util.Map;
 public class RootValueRetrieverImpl<T> implements ValueRetriever<T> {
 
 	/**
-	 * Mapping of the property name to the {@link ValueRetriever}.
+	 * Mapping of the property name to the {@link RetrieverStruct}.
 	 */
-	private final Map<String, ValueRetriever<Object>> propertyToRetriever = new HashMap<String, ValueRetriever<Object>>();
+	private final Map<String, RetrieveStruct> propertyToRetriever = new HashMap<String, RetrieveStruct>();
 
 	/**
 	 * Indicates if case insensitive.
@@ -85,7 +86,8 @@ public class RootValueRetrieverImpl<T> implements ValueRetriever<T> {
 			}
 
 			// Register the property retriever
-			this.propertyToRetriever.put(propertyName, propertyRetriever);
+			this.propertyToRetriever.put(propertyName, new RetrieveStruct(
+					propertyRetriever, property));
 		}
 	}
 
@@ -96,39 +98,40 @@ public class RootValueRetrieverImpl<T> implements ValueRetriever<T> {
 	/**
 	 * {@link Processor} to determine if value is retrievable.
 	 */
-	private static Processor<Boolean> retrievable = new Processor<Boolean>() {
+	private static Processor<Method> retrievable = new Processor<Method>() {
 		@Override
-		public Boolean process(ValueRetriever<Object> propertyRetriever,
-				Object object, String remainingName) throws Exception {
+		public Method process(RetrieveStruct propertyRetriever, Object object,
+				String remainingName) throws Exception {
 
 			// Must be retriever to obtain value
 			if (propertyRetriever == null) {
-				return false; // property not retrievable
+				return null; // property not retrievable
 			}
 
 			// Determine if further property
 			if (remainingName.length() == 0) {
-				return true; // property is retrievable
+				// No further properties, so provide type method
+				return propertyRetriever.metaData.getTypeMethod();
 			}
 
-			// Delegate to determine if retrievable
-			return propertyRetriever.isValueRetrievable(remainingName);
+			// Delegate to obtain type method
+			return propertyRetriever.retriever.getTypeMethod(remainingName);
 		}
 	};
 
 	@Override
-	public boolean isValueRetrievable(String name) throws Exception {
-		// Return if value retrievable
-		return this.process(name, null, retrievable).booleanValue();
+	public Method getTypeMethod(String name) throws Exception {
+		// Return type method
+		return this.process(name, null, retrievable);
 	}
 
 	/**
 	 * {@link Processor} to retrieve the value.
 	 */
-	private static Processor<String> retriever = new Processor<String>() {
+	private static Processor<Object> retriever = new Processor<Object>() {
 		@Override
-		public String process(ValueRetriever<Object> propertyRetriever,
-				Object object, String remainingName) throws Exception {
+		public Object process(RetrieveStruct propertyRetriever, Object object,
+				String remainingName) throws Exception {
 
 			// Ensure able to retrieve value
 			if (propertyRetriever == null) {
@@ -136,12 +139,13 @@ public class RootValueRetrieverImpl<T> implements ValueRetriever<T> {
 			}
 
 			// Return the retrieved value
-			return propertyRetriever.retrieveValue(object, remainingName);
+			return propertyRetriever.retriever.retrieveValue(object,
+					remainingName);
 		}
 	};
 
 	@Override
-	public String retrieveValue(T object, String name) throws Exception {
+	public Object retrieveValue(T object, String name) throws Exception {
 		// Return the retrieved value
 		return this.process(name, object, retriever);
 	}
@@ -179,12 +183,12 @@ public class RootValueRetrieverImpl<T> implements ValueRetriever<T> {
 			propertyName = propertyName.toLowerCase();
 		}
 
-		// Obtain the property value retriever
-		ValueRetriever<Object> propertyRetriever = this.propertyToRetriever
+		// Obtain the property value retrieve struct
+		RetrieveStruct retrieveStruct = this.propertyToRetriever
 				.get(propertyName);
 
 		// Process
-		return processor.process(propertyRetriever, object, remainingName);
+		return processor.process(retrieveStruct, object, remainingName);
 	}
 
 	/**
@@ -195,8 +199,8 @@ public class RootValueRetrieverImpl<T> implements ValueRetriever<T> {
 		/**
 		 * Processes the details.
 		 * 
-		 * @param propertyRetriever
-		 *            {@link ValueRetriever} for the property. May be
+		 * @param retrieveStruct
+		 *            {@link RetrieveStruct} for the property. May be
 		 *            <code>null</code>.
 		 * @param object
 		 *            Object to retrieve value from.
@@ -206,8 +210,38 @@ public class RootValueRetrieverImpl<T> implements ValueRetriever<T> {
 		 * @throws Exception
 		 *             If fails to process.
 		 */
-		R process(ValueRetriever<Object> propertyRetriever, Object object,
+		R process(RetrieveStruct retrieveStruct, Object object,
 				String remainingName) throws Exception;
+	}
+
+	/**
+	 * Retrieve struct.
+	 */
+	private static class RetrieveStruct {
+
+		/**
+		 * {@link ValueRetriever}.
+		 */
+		public final ValueRetriever<Object> retriever;
+
+		/**
+		 * {@link PropertyMetaData}.
+		 */
+		public final PropertyMetaData metaData;
+
+		/**
+		 * Initiate.
+		 * 
+		 * @param retriever
+		 *            {@link ValueRetriever}.
+		 * @param metaData
+		 *            {@link PropertyMetaData}.
+		 */
+		public RetrieveStruct(ValueRetriever<Object> retriever,
+				PropertyMetaData metaData) {
+			this.retriever = retriever;
+			this.metaData = metaData;
+		}
 	}
 
 }

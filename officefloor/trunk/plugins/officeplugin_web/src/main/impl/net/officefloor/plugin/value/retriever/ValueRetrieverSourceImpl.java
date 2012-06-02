@@ -156,7 +156,7 @@ public class ValueRetrieverSourceImpl implements ValueRetrieverSource {
 
 			// Create and register the meta data for the property
 			PropertyMetaData propertyMetaData = new PropertyMetaData(
-					propertyName, methodName, returnTypeMetaData);
+					propertyName, method, returnTypeMetaData);
 			metaData[i] = propertyMetaData;
 		}
 

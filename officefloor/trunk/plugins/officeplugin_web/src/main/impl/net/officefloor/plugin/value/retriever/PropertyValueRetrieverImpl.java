@@ -68,13 +68,13 @@ public class PropertyValueRetrieverImpl<T> implements ValueRetriever<T> {
 	 */
 
 	@Override
-	public boolean isValueRetrievable(String name) throws Exception {
-		// Delegate to determine if retrievable
-		return this.delegate.isValueRetrievable(name);
+	public Method getTypeMethod(String name) throws Exception {
+		// Delegate to obtain type method
+		return this.delegate.getTypeMethod(name);
 	}
 
 	@Override
-	public String retrieveValue(T object, String name) throws Exception {
+	public Object retrieveValue(T object, String name) throws Exception {
 
 		// Ensure have value
 		if (object == null) {
@@ -93,7 +93,7 @@ public class PropertyValueRetrieverImpl<T> implements ValueRetriever<T> {
 			return this.delegate.retrieveValue(value, name);
 		} else {
 			// Navigated to the value, so return the value
-			return (value == null ? null : value.toString());
+			return value;
 		}
 	}
 

@@ -73,6 +73,33 @@ public class TemplateLogic {
 	}
 
 	/**
+	 * Obtains <code>null</code> value for bean to not render.
+	 * 
+	 * @return <code>null</code>.
+	 */
+	public Object getNullBean() {
+		return null;
+	}
+
+	/**
+	 * Obtains the bean to render.
+	 * 
+	 * @return Bean to render.
+	 */
+	public TemplateLogic getBean() {
+		return this;
+	}
+
+	/**
+	 * Obtains the bean property.
+	 * 
+	 * @return Bean property.
+	 */
+	public String getBeanProperty() {
+		return "bean-property";
+	}
+
+	/**
 	 * Obtains the {@link RowBean} instances.
 	 * 
 	 * @param session
