@@ -57,7 +57,8 @@ public class HttpTemplateSectionIntegrationTest extends OfficeFrameTestCase {
 	/**
 	 * Rendered template XML.
 	 */
-	private static final String RENDERED_TEMPLATE_XML = "<html><body>Template Test:<table>"
+	private static final String RENDERED_TEMPLATE_XML = "<html><body><p>Template Test</p>"
+			+ "<p>Bean with property bean-property</p><table>"
 			+ "<tr><td>Name</td><td>Description</td></tr>"
 			+ "<tr><td>row</td><td>test row</td></tr></table>"
 			+ "<form action=\"/SECTION.links-nextTask.task\"><input type=\"submit\"/></form>"
@@ -191,7 +192,8 @@ public class HttpTemplateSectionIntegrationTest extends OfficeFrameTestCase {
 		this.startHttpServer("NoLogicTemplate.ofp", null);
 
 		// Ensure template is correct
-		this.assertHttpRequest("", " /SECTION.links-nonMethodLink.task /SECTION.links-doExternalFlow.task");
+		this.assertHttpRequest("",
+				" /SECTION.links-nonMethodLink.task /SECTION.links-doExternalFlow.task");
 
 		// Ensure links out from template
 		this.assertHttpRequest("/SECTION.links-nonMethodLink.task", "LINKED");

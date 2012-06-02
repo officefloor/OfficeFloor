@@ -35,9 +35,9 @@ public class PropertyMetaData {
 	private final String propertyName;
 
 	/**
-	 * {@link Method} name.
+	 * {@link Method} for the type.
 	 */
-	private final String methodName;
+	private final Method typeMethod;
 
 	/**
 	 * Mapping of {@link Method} to the particular type.
@@ -54,15 +54,15 @@ public class PropertyMetaData {
 	 * 
 	 * @param propertyName
 	 *            Property name.
-	 * @param methodName
-	 *            {@link Method} name.
+	 * @param typeMethod
+	 *            {@link Method} for the type.
 	 * @param properties
 	 *            Properties on the resulting property object.
 	 */
-	public PropertyMetaData(String propertyName, String methodName,
+	public PropertyMetaData(String propertyName, Method typeMethod,
 			PropertyMetaData[] properties) {
 		this.propertyName = propertyName;
-		this.methodName = methodName;
+		this.typeMethod = typeMethod;
 		this.properties = properties;
 	}
 
@@ -73,6 +73,18 @@ public class PropertyMetaData {
 	 */
 	public String getPropertyName() {
 		return this.propertyName;
+	}
+
+	/**
+	 * <p>
+	 * Obtains the type {@link Method}.
+	 * <p>
+	 * This is the {@link Method} base on the type and may be abstract.
+	 * 
+	 * @return Type {@link Method}.
+	 */
+	public Method getTypeMethod() {
+		return this.typeMethod;
 	}
 
 	/**
@@ -89,7 +101,7 @@ public class PropertyMetaData {
 		// Lazy obtain the method
 		Method method = this.typeToMethod.get(type);
 		if (method == null) {
-			method = type.getMethod(this.methodName);
+			method = type.getMethod(this.typeMethod.getName());
 			this.typeToMethod.put(type, method);
 		}
 

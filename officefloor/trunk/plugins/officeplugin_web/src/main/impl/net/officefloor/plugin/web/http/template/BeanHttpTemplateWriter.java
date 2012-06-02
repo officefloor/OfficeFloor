@@ -24,20 +24,14 @@ import java.lang.reflect.Method;
 
 import net.officefloor.plugin.socket.server.http.response.HttpResponseWriter;
 import net.officefloor.plugin.value.retriever.ValueRetriever;
-import net.officefloor.plugin.web.http.template.HttpTemplateWriter;
-import net.officefloor.plugin.web.http.template.parse.PropertyHttpTemplateSectionContent;
+import net.officefloor.plugin.web.http.template.parse.BeanHttpTemplateSectionContent;
 
 /**
- * {@link HttpTemplateWriter} to write a bean property.
+ * {@link BeanTemplateWriter} to write a bean.
  * 
  * @author Daniel Sagenschneider
  */
-public class PropertyHttpTemplateWriter implements HttpTemplateWriter {
-
-	/**
-	 * <code>Content-Type</code>.
-	 */
-	private final String contentType;
+public class BeanHttpTemplateWriter implements HttpTemplateWriter {
 
 	/**
 	 * {@link ValueRetriever}.
@@ -50,35 +44,32 @@ public class PropertyHttpTemplateWriter implements HttpTemplateWriter {
 	private final String propertyName;
 
 	/**
+	 * {@link HttpTemplateWriter} instances for the bean.
+	 */
+	private final HttpTemplateWriter[] beanWriters;
+
+	/**
 	 * Initiate.
 	 * 
 	 * @param content
-	 *            {@link PropertyHttpTemplateSectionContent}.
+	 *            {@link BeanHttpTemplateSectionContent}.
 	 * @param valueRetriever
 	 *            {@link ValueRetriever}.
-	 * @param contentType
-	 *            <code>Content-Type</code>.
+	 * @param beanWriters
+	 *            {@link HttpTemplateWriter} instances for the bean.
 	 * @param beanType
 	 *            Bean type for the property.
 	 * @throws Exception
 	 *             If {@link Method} to obtain the value to write is not
 	 *             available on the bean type.
 	 */
-	public PropertyHttpTemplateWriter(
-			PropertyHttpTemplateSectionContent content,
-			ValueRetriever<Object> valueRetriever, String contentType,
-			Class<?> beanType) throws Exception {
-		this.contentType = contentType;
+	public BeanHttpTemplateWriter(BeanHttpTemplateSectionContent content,
+			ValueRetriever<Object> valueRetriever,
+			HttpTemplateWriter[] beanWriters, Class<?> beanType)
+			throws Exception {
 		this.valueRetriever = valueRetriever;
 		this.propertyName = content.getPropertyName();
-
-		// Ensure the property is retrievable
-		Method method = this.valueRetriever.getTypeMethod(this.propertyName);
-		if (method == null) {
-			throw new Exception("Property '" + this.propertyName
-					+ "' can not be sourced from bean type "
-					+ beanType.getName());
-		}
+		this.beanWriters = beanWriters;
 	}
 
 	/*
@@ -94,16 +85,13 @@ public class PropertyHttpTemplateWriter implements HttpTemplateWriter {
 			return;
 		}
 
-		// Obtain the property text value
-		String propertyTextValue;
+		// Obtain the bean
+		Object writerBean;
 		try {
 
-			// Obtain the property value from bean
-			Object value = this.valueRetriever.retrieveValue(bean,
+			// Obtain the bean
+			writerBean = this.valueRetriever.retrieveValue(bean,
 					this.propertyName);
-
-			// Obtain the text value to write as content
-			propertyTextValue = (value == null ? "" : value.toString());
 
 		} catch (InvocationTargetException ex) {
 			// Propagate cause of method failure
@@ -113,8 +101,15 @@ public class PropertyHttpTemplateWriter implements HttpTemplateWriter {
 			throw new IOException(ex);
 		}
 
-		// Write the text
-		writer.write(this.contentType, propertyTextValue);
+		// Only write content if have the bean
+		if (writerBean == null) {
+			return;
+		}
+
+		// Write the content for the bean
+		for (HttpTemplateWriter beanWriter : this.beanWriters) {
+			beanWriter.write(writer, workName, writerBean);
+		}
 	}
 
 }

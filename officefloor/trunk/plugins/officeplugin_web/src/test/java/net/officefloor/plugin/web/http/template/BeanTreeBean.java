@@ -15,33 +15,31 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
-package net.officefloor.plugin.value.retriever;
+package net.officefloor.plugin.web.http.template;
 
 /**
- * Sources a {@link ValueRetriever}.
+ * BeanTree bean.
  * 
  * @author Daniel Sagenschneider
  */
-public interface ValueRetrieverSource {
+public class BeanTreeBean {
 
 	/**
-	 * Initialises.
+	 * Null bean property.
 	 * 
-	 * @param isCaseInsensitive
-	 *            Indicates if property name comparison is case insensitive.
+	 * @return <code>null</code>.
 	 */
-	void init(boolean isCaseInsensitive) throws Exception;
+	public Object getNullBean() {
+		return null;
+	}
 
 	/**
-	 * Sources the {@link ValueRetriever} for the type.
+	 * Bean property.
 	 * 
-	 * @param type
-	 *            Type.
-	 * @return {@link ValueRetriever} for the <code>type</code>.
-	 * @throws Exception
-	 *             If fails to obtain the {@link ValueRetriever}.
+	 * @return {@link PropertyBean}.
 	 */
-	<T> ValueRetriever<T> sourceValueRetriever(Class<T> type) throws Exception;
+	public PropertyBean getBean() {
+		return new PropertyBean("tree");
+	}
 
 }

@@ -18,6 +18,8 @@
 
 package net.officefloor.plugin.value.retriever;
 
+import java.lang.reflect.Method;
+
 /**
  * Retrieves a value from an object graph.
  * 
@@ -36,19 +38,24 @@ public interface ValueRetriever<T> {
 	 * @throws Exception
 	 *             If fails to retrieve the value.
 	 */
-	String retrieveValue(T object, String name) throws Exception;
+	Object retrieveValue(T object, String name) throws Exception;
 
 	/**
-	 * Indicates if name maps to getter on the object graph to actually be able
-	 * to provide the value.
+	 * <p>
+	 * Obtains the {@link Method} getter on the object graph that will provide
+	 * the value.
+	 * <p>
+	 * This is the {@link Method} on the last bean in the path. It may be
+	 * <code>null</code> indicating the path does not exist on the bean graph.
 	 * 
 	 * @param name
-	 *            Property name to check is available from the object graph.
-	 * @return <code>true</code> if the object graph provides a corresponding
-	 *         getter for the property name.
+	 *            Property name.
+	 * @return {@link Method} of the object graph that provides the
+	 *         corresponding getter for the property name. May be
+	 *         <code>null</code> if the path not exists.
 	 * @throws Exception
 	 *             If fails to determine if value is retrievable.
 	 */
-	boolean isValueRetrievable(String name) throws Exception;
+	Method getTypeMethod(String name) throws Exception;
 
 }

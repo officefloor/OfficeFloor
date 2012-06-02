@@ -1,6 +1,7 @@
 <html>
 <body>
-Template ${TemplateName}:
+<p>Template ${TemplateName}</p>
+<p>${nullBean not to be displayed $} <!-- ${bean --> Bean with property ${beanProperty} <!-- $} --></p>
 <table>
     <tr>
         <td>Name</td>

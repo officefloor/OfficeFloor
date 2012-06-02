@@ -19,6 +19,7 @@
 package net.officefloor.plugin.web.http.template;
 
 import java.io.IOException;
+import java.lang.reflect.Method;
 import java.nio.charset.Charset;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -41,6 +42,7 @@ import net.officefloor.plugin.value.retriever.ValueRetriever;
 import net.officefloor.plugin.value.retriever.ValueRetrieverSource;
 import net.officefloor.plugin.value.retriever.ValueRetrieverSourceImpl;
 import net.officefloor.plugin.web.http.template.HttpTemplateWriter;
+import net.officefloor.plugin.web.http.template.parse.BeanHttpTemplateSectionContent;
 import net.officefloor.plugin.web.http.template.parse.HttpTemplate;
 import net.officefloor.plugin.web.http.template.parse.HttpTemplateSection;
 import net.officefloor.plugin.web.http.template.parse.HttpTemplateSectionContent;
@@ -81,7 +83,6 @@ public class HttpTemplateTask extends
 	 * @throws Exception
 	 *             If fails to prepare the template.
 	 */
-	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public static String[] loadTaskType(HttpTemplateSection section,
 			String contentType, Charset charset,
 			HttpResponseWriterFactory writerFactory,
@@ -95,10 +96,93 @@ public class HttpTemplateTask extends
 		Set<String> linkTaskNames = new HashSet<String>();
 
 		// Create the content writers for the section
+		SectionWriterStruct writerStruct = createHttpTemplateWriters(
+				section.getContent(), null, sectionAndTaskName, linkTaskNames,
+				contentType, charset, context);
+
+		// Determine if requires bean
+		boolean isRequireBean = (writerStruct.beanClass != null);
+
+		// Create the task factory
+		HttpTemplateTask task = new HttpTemplateTask(writerStruct.writers,
+				isRequireBean, writerFactory);
+
+		// Define the task to write the section
+		TaskTypeBuilder<Indexed, None> taskBuilder = workTypeBuilder
+				.addTaskType(sectionAndTaskName, task, Indexed.class,
+						None.class);
+		taskBuilder.addObject(ServerHttpConnection.class).setLabel(
+				"SERVER_HTTP_CONNECTION");
+		if (isRequireBean) {
+			taskBuilder.addObject(writerStruct.beanClass).setLabel("OBJECT");
+		}
+		taskBuilder.addEscalation(IOException.class);
+
+		// Return the link task names
+		return linkTaskNames.toArray(new String[0]);
+	}
+
+	/**
+	 * Section {@link HttpTemplateWriter} struct.
+	 */
+	private static class SectionWriterStruct {
+
+		/**
+		 * {@link HttpTemplateWriter} instances.
+		 */
+		public final HttpTemplateWriter[] writers;
+
+		/**
+		 * Bean class. <code>null</code> indicates no bean required.
+		 */
+		public final Class<?> beanClass;
+
+		/**
+		 * Initiate.
+		 * 
+		 * @param writers
+		 *            {@link HttpTemplateWriter} instances.
+		 * @param beanClass
+		 *            Bean class.
+		 */
+		public SectionWriterStruct(HttpTemplateWriter[] writers,
+				Class<?> beanClass) {
+			this.writers = writers;
+			this.beanClass = beanClass;
+		}
+	}
+
+	/**
+	 * Obtains the {@link SectionWriterStruct}.
+	 * 
+	 * @param contents
+	 *            {@link HttpTemplateSectionContent} instances.
+	 * @param beanClass
+	 *            Bean {@link Class}.
+	 * @param sectionAndTaskName
+	 *            Section and task name.
+	 * @param linkTaskNames
+	 *            List task names.
+	 * @param contentType
+	 *            Content type.
+	 * @param charset
+	 *            Charset.
+	 * @param context
+	 *            {@link WorkSourceContext}.
+	 * @return {@link SectionWriterStruct}.
+	 * @throws Exception
+	 *             If fails to create the {@link SectionWriterStruct}.
+	 */
+	private static SectionWriterStruct createHttpTemplateWriters(
+			HttpTemplateSectionContent[] contents, Class<?> beanClass,
+			String sectionAndTaskName, Set<String> linkTaskNames,
+			String contentType, Charset charset, WorkSourceContext context)
+			throws Exception {
+
+		// Create the content writers for the section
 		List<HttpTemplateWriter> contentWriterList = new LinkedList<HttpTemplateWriter>();
-		Class<?> beanClass = null;
-		ValueRetriever valueRetriever = null;
-		for (HttpTemplateSectionContent content : section.getContent()) {
+		ValueRetriever<Object> valueRetriever = null;
+		for (HttpTemplateSectionContent content : contents) {
 
 			// Handle based on type
 			if (content instanceof StaticHttpTemplateSectionContent) {
@@ -107,30 +191,57 @@ public class HttpTemplateTask extends
 				contentWriterList.add(new StaticHttpTemplateWriter(
 						staticContent, contentType, charset));
 
-			} else if (content instanceof PropertyHttpTemplateSectionContent) {
-				// Add the reference template writer
-				PropertyHttpTemplateSectionContent referenceContent = (PropertyHttpTemplateSectionContent) content;
+			} else if (content instanceof BeanHttpTemplateSectionContent) {
+				// Add the bean template writer
+				BeanHttpTemplateSectionContent beanContent = (BeanHttpTemplateSectionContent) content;
+
+				// Ensure have bean class
+				if (beanClass == null) {
+					beanClass = getBeanClass(sectionAndTaskName, context);
+				}
 
 				// Ensure have the value loader for the bean
 				if (valueRetriever == null) {
-					String beanClassPropertyName = PROPERTY_BEAN_PREFIX
-							+ sectionAndTaskName;
-					String beanClassName = context
-							.getProperty(beanClassPropertyName);
+					valueRetriever = createValueRetriever(beanClass);
+				}
 
-					// Obtain the class
-					beanClass = context.loadClass(beanClassName);
+				// Obtain the bean method
+				String beanPropertyName = beanContent.getPropertyName();
+				Method beanMethod = valueRetriever
+						.getTypeMethod(beanPropertyName);
+				if (beanMethod == null) {
+					throw new Exception("Bean '" + beanPropertyName
+							+ "' can not be sourced from bean type "
+							+ beanClass.getName());
+				}
 
-					// Obtain the value retriever
-					ValueRetrieverSource source = new ValueRetrieverSourceImpl();
-					source.init(true);
-					valueRetriever = source.sourceValueRetriever(beanClass);
+				// Obtain the writers for the bean
+				SectionWriterStruct beanStruct = createHttpTemplateWriters(
+						beanContent.getContent(), beanMethod.getReturnType(),
+						null, linkTaskNames, contentType, charset, null);
+
+				// Add the content writer
+				contentWriterList.add(new BeanHttpTemplateWriter(beanContent,
+						valueRetriever, beanStruct.writers, beanClass));
+
+			} else if (content instanceof PropertyHttpTemplateSectionContent) {
+				// Add the property template writer
+				PropertyHttpTemplateSectionContent propertyContent = (PropertyHttpTemplateSectionContent) content;
+
+				// Ensure have bean class
+				if (beanClass == null) {
+					beanClass = getBeanClass(sectionAndTaskName, context);
+				}
+
+				// Ensure have the value loader for the bean
+				if (valueRetriever == null) {
+					valueRetriever = createValueRetriever(beanClass);
 				}
 
 				// Add the content writer
-				contentWriterList.add(new PropertyHttpTemplateWriter(
-						referenceContent, valueRetriever, contentType,
-						beanClass));
+				contentWriterList
+						.add(new PropertyHttpTemplateWriter(propertyContent,
+								valueRetriever, contentType, beanClass));
 
 			} else if (content instanceof LinkHttpTemplateSectionContent) {
 				// Add the link template writer
@@ -148,27 +259,57 @@ public class HttpTemplateTask extends
 			}
 		}
 
-		// Determine if requires bean
-		boolean isRequireBean = (valueRetriever != null);
+		// Return the HTTP Template writers
+		return new SectionWriterStruct(
+				contentWriterList.toArray(new HttpTemplateWriter[contentWriterList
+						.size()]), beanClass);
+	}
 
-		// Create the task factory
-		HttpTemplateTask task = new HttpTemplateTask(
-				contentWriterList.toArray(new HttpTemplateWriter[0]),
-				isRequireBean, writerFactory);
+	/**
+	 * Obtains the bean {@link Class}.
+	 * 
+	 * @param sectionAndTaskName
+	 *            Section and task name.
+	 * @param context
+	 *            {@link WorkSourceContext}.
+	 * @return Bean {@link Class}.
+	 */
+	private static Class<?> getBeanClass(String sectionAndTaskName,
+			WorkSourceContext context) {
 
-		// Define the task to write the section
-		TaskTypeBuilder<Indexed, None> taskBuilder = workTypeBuilder
-				.addTaskType(sectionAndTaskName, task, Indexed.class,
-						None.class);
-		taskBuilder.addObject(ServerHttpConnection.class).setLabel(
-				"SERVER_HTTP_CONNECTION");
-		if (isRequireBean) {
-			taskBuilder.addObject(beanClass).setLabel("OBJECT");
-		}
-		taskBuilder.addEscalation(IOException.class);
+		// Obtain the bean class name
+		String beanClassPropertyName = PROPERTY_BEAN_PREFIX
+				+ sectionAndTaskName;
+		String beanClassName = context.getProperty(beanClassPropertyName);
 
-		// Return the link task names
-		return linkTaskNames.toArray(new String[0]);
+		// Obtain the class
+		Class<?> beanClass = context.loadClass(beanClassName);
+
+		// Return the class
+		return beanClass;
+	}
+
+	/**
+	 * Creates the {@link ValueRetriever}.
+	 * 
+	 * @param beanClass
+	 *            {@link Class} of the bean. May be <code>null</code> if top
+	 *            level content.
+	 * @return {@link ValueRetriever}.
+	 * @throws Exception
+	 *             If fails to create the {@link ValueRetriever}.
+	 */
+	@SuppressWarnings({ "rawtypes", "unchecked" })
+	private static ValueRetriever<Object> createValueRetriever(
+			Class<?> beanClass) throws Exception {
+
+		// Obtain the value retriever
+		ValueRetrieverSource source = new ValueRetrieverSourceImpl();
+		source.init(true);
+		ValueRetriever valueRetriever = source.sourceValueRetriever(beanClass);
+
+		// Return the value retriever
+		return valueRetriever;
 	}
 
 	/**
