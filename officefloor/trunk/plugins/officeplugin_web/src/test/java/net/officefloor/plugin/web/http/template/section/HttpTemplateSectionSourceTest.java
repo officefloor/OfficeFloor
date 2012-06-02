@@ -68,6 +68,8 @@ public class HttpTemplateSectionSourceTest extends OfficeFrameTestCase {
 		// Inputs (for Template Logic methods - enables reuse of class)
 		expected.addSectionInput("getTemplate", null);
 		expected.addSectionInput("getTemplateName", null);
+		expected.addSectionInput("getEscapedHtml", null);
+		expected.addSectionInput("getUnescapedHtml", null);
 		expected.addSectionInput("getNullBean", null);
 		expected.addSectionInput("getBean", null);
 		expected.addSectionInput("getBeanProperty", null);
@@ -110,8 +112,9 @@ public class HttpTemplateSectionSourceTest extends OfficeFrameTestCase {
 		template.getTaskObject("SERVER_HTTP_CONNECTION");
 		template.getTaskObject("OBJECT");
 
-		// Methods for beans
-		for (String beanMethodName : new String[] { "getNullBean", "getBean",
+		// Methods for beans/properties
+		for (String beanMethodName : new String[] { "getTemplateName",
+				"getEscapedHtml", "getUnescapedHtml", "getNullBean", "getBean",
 				"getBeanProperty", "getBeanArray" }) {
 			SectionTask beanMethodTask = classWork.addSectionTask(
 					beanMethodName, beanMethodName);
@@ -132,11 +135,6 @@ public class HttpTemplateSectionSourceTest extends OfficeFrameTestCase {
 		// Tail
 		SectionTask tail = templateWork.addSectionTask("Tail", "Tail");
 		tail.getTaskObject("SERVER_HTTP_CONNECTION");
-
-		// Additional bean method being task
-		SectionTask templateName = classWork.addSectionTask("getTemplateName",
-				"getTemplateName");
-		templateName.getTaskObject("OBJECT");
 
 		// Route nextTask link
 		templateWork.addSectionTask("LINK_nextTask", "nextTask");

@@ -32,6 +32,7 @@ import net.officefloor.plugin.section.clazz.Parameter;
 import net.officefloor.plugin.section.clazz.Property;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
 import net.officefloor.plugin.web.http.session.HttpSession;
+import net.officefloor.plugin.web.http.template.UnescapedHtml;
 import net.officefloor.plugin.web.http.tokenise.HttpRequestTokeniserImpl;
 import net.officefloor.plugin.work.clazz.FlowInterface;
 
@@ -70,6 +71,25 @@ public class TemplateLogic {
 	 */
 	public String getTemplateName() {
 		return "Test";
+	}
+
+	/**
+	 * Obtains the HTML to be escaped.
+	 * 
+	 * @return HTML to be escaped.
+	 */
+	public String getEscapedHtml() {
+		return this.getUnescapedHtml();
+	}
+
+	/**
+	 * Obtains the HTML to be rendered as is.
+	 * 
+	 * @return HTML to be rendered as is.
+	 */
+	@UnescapedHtml
+	public String getUnescapedHtml() {
+		return "<img src=\"Test.png\" />";
 	}
 
 	/**
