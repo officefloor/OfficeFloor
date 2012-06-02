@@ -44,6 +44,11 @@ public class BeanHttpTemplateWriter implements HttpTemplateWriter {
 	private final String propertyName;
 
 	/**
+	 * Flag indicating if an array of beans to render.
+	 */
+	private final boolean isArray;
+
+	/**
 	 * {@link HttpTemplateWriter} instances for the bean.
 	 */
 	private final HttpTemplateWriter[] beanWriters;
@@ -55,20 +60,20 @@ public class BeanHttpTemplateWriter implements HttpTemplateWriter {
 	 *            {@link BeanHttpTemplateSectionContent}.
 	 * @param valueRetriever
 	 *            {@link ValueRetriever}.
+	 * @param isArray
+	 *            Indicates if an array of beans to render.
 	 * @param beanWriters
 	 *            {@link HttpTemplateWriter} instances for the bean.
-	 * @param beanType
-	 *            Bean type for the property.
 	 * @throws Exception
 	 *             If {@link Method} to obtain the value to write is not
 	 *             available on the bean type.
 	 */
 	public BeanHttpTemplateWriter(BeanHttpTemplateSectionContent content,
-			ValueRetriever<Object> valueRetriever,
-			HttpTemplateWriter[] beanWriters, Class<?> beanType)
-			throws Exception {
+			ValueRetriever<Object> valueRetriever, boolean isArray,
+			HttpTemplateWriter[] beanWriters) throws Exception {
 		this.valueRetriever = valueRetriever;
 		this.propertyName = content.getPropertyName();
+		this.isArray = isArray;
 		this.beanWriters = beanWriters;
 	}
 
@@ -106,9 +111,21 @@ public class BeanHttpTemplateWriter implements HttpTemplateWriter {
 			return;
 		}
 
-		// Write the content for the bean
-		for (HttpTemplateWriter beanWriter : this.beanWriters) {
-			beanWriter.write(writer, workName, writerBean);
+		// Determine if an array
+		if (this.isArray) {
+			// Write the content for the array of beans
+			Object[] arrayBeans = (Object[]) writerBean;
+			for (Object arrayBean : arrayBeans) {
+				for (HttpTemplateWriter beanWriter : this.beanWriters) {
+					beanWriter.write(writer, workName, arrayBean);
+				}
+			}
+
+		} else {
+			// Write the content for the bean
+			for (HttpTemplateWriter beanWriter : this.beanWriters) {
+				beanWriter.write(writer, workName, writerBean);
+			}
 		}
 	}
 

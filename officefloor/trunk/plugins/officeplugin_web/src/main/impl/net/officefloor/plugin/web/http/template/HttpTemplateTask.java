@@ -215,14 +215,22 @@ public class HttpTemplateTask extends
 							+ beanClass.getName());
 				}
 
+				// Determine if an array of beans
+				boolean isArray = false;
+				Class<?> beanType = beanMethod.getReturnType();
+				if (beanType.isArray()) {
+					isArray = true;
+					beanType = beanType.getComponentType();
+				}
+
 				// Obtain the writers for the bean
 				SectionWriterStruct beanStruct = createHttpTemplateWriters(
-						beanContent.getContent(), beanMethod.getReturnType(),
-						null, linkTaskNames, contentType, charset, null);
+						beanContent.getContent(), beanType, null,
+						linkTaskNames, contentType, charset, null);
 
 				// Add the content writer
 				contentWriterList.add(new BeanHttpTemplateWriter(beanContent,
-						valueRetriever, beanStruct.writers, beanClass));
+						valueRetriever, isArray, beanStruct.writers));
 
 			} else if (content instanceof PropertyHttpTemplateSectionContent) {
 				// Add the property template writer

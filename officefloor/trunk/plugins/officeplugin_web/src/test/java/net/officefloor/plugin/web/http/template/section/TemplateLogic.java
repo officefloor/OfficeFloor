@@ -100,6 +100,19 @@ public class TemplateLogic {
 	}
 
 	/**
+	 * Obtains the bean array.
+	 * 
+	 * @return Bean array.
+	 */
+	public ArrayBean[] getBeanArray() {
+		ArrayBean[] beans = new ArrayBean[10];
+		for (int i = 0; i < beans.length; i++) {
+			beans[i] = new ArrayBean(i);
+		}
+		return beans;
+	}
+
+	/**
 	 * Obtains the {@link RowBean} instances.
 	 * 
 	 * @param session
@@ -213,6 +226,36 @@ public class TemplateLogic {
 
 		// Return parameter for next flow
 		return "Parameter for External Flow";
+	}
+
+	/**
+	 * Array bean.
+	 */
+	public static class ArrayBean {
+
+		/**
+		 * Count.
+		 */
+		private int count;
+
+		/**
+		 * Initiate.
+		 * 
+		 * @param count
+		 *            Count.
+		 */
+		public ArrayBean(int count) {
+			this.count = count;
+		}
+
+		/**
+		 * Obtains the count.
+		 * 
+		 * @return Count.
+		 */
+		public int getCount() {
+			return this.count;
+		}
 	}
 
 	/**
