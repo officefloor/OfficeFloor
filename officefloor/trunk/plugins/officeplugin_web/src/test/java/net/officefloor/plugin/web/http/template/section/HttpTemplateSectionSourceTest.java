@@ -22,13 +22,20 @@ import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
 
+import net.officefloor.compile.OfficeFloorCompiler;
+import net.officefloor.compile.issues.CompilerIssues;
+import net.officefloor.compile.issues.CompilerIssues.LocationType;
+import net.officefloor.compile.properties.PropertyList;
+import net.officefloor.compile.section.SectionLoader;
 import net.officefloor.compile.spi.section.SectionDesigner;
 import net.officefloor.compile.spi.section.SectionTask;
 import net.officefloor.compile.spi.section.SectionWork;
 import net.officefloor.compile.test.section.SectionLoaderUtil;
+import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.managedobject.clazz.ClassManagedObjectSource;
 import net.officefloor.plugin.section.clazz.ClassSectionSource;
+import net.officefloor.plugin.section.clazz.NextTask;
 import net.officefloor.plugin.section.clazz.SectionClassManagedObjectSource;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
 import net.officefloor.plugin.web.http.session.HttpSession;
@@ -237,6 +244,43 @@ public class HttpTemplateSectionSourceTest extends OfficeFrameTestCase {
 				"NoLogicTemplate.ofp",
 				HttpTemplateSectionSource.PROPERTY_LINK_TASK_NAME_PREFIX,
 				"LINK_");
+	}
+
+	/**
+	 * Section method may not be annotated with {@link NextTask}.
+	 */
+	public void testNoNextTaskAnnotationForSectionMethod() {
+
+		CompilerIssues issues = this.createMock(CompilerIssues.class);
+
+		// Obtain the template location
+		String templatePath = this.getPackageRelativePath(this.getClass())
+				+ "/NextTaskErrorTemplate.ofp";
+
+		// Record errors
+		issues.addIssue(LocationType.SECTION, templatePath, AssetType.TASK,
+				"GETSECTION",
+				"Template bean method 'getSection' must not be annotated with NextTask");
+
+		// Create loader
+		OfficeFloorCompiler compiler = OfficeFloorCompiler
+				.newOfficeFloorCompiler(null);
+		compiler.setCompilerIssues(issues);
+		SectionLoader loader = compiler.getSectionLoader();
+
+		// Create the properties
+		PropertyList properties = compiler.createPropertyList();
+		properties.addProperty(HttpTemplateSectionSource.PROPERTY_CLASS_NAME)
+				.setValue(NextTaskErrorLogic.class.getName());
+		properties.addProperty(
+				HttpTemplateSectionSource.PROPERTY_LINK_TASK_NAME_PREFIX)
+				.setValue("LINK_");
+
+		// Test
+		this.replayMockObjects();
+		loader.loadSectionType(HttpTemplateSectionSource.class, templatePath,
+				properties);
+		this.verifyMockObjects();
 	}
 
 }

@@ -280,6 +280,22 @@ public class HttpTemplateSectionSource extends ClassSectionSource {
 			TemplateClassTask beanTask = this.sectionClassMethodTasksByName
 					.get(beanTaskKey);
 
+			// Ensure that not annotated with NextTask
+			if (beanTask != null) {
+				// Method providing bean, so ensure no next task
+				Method method = beanTask.method;
+				if (method.isAnnotationPresent(NextTask.class)) {
+					designer.addIssue(
+							"Template bean method '" + method.getName()
+									+ "' must not be annotated with "
+									+ NextTask.class.getSimpleName(),
+							AssetType.TASK, beanTaskKey);
+
+					// As NextTask annotation, do not render section
+					continue;
+				}
+			}
+
 			// Keep track of bean task keys
 			templateBeanTaskKeys.add(beanTaskKey);
 
@@ -453,25 +469,16 @@ public class HttpTemplateSectionSource extends ClassSectionSource {
 		Collections.sort(sectionClassMethodTaskNames);
 		for (String beanTaskKey : sectionClassMethodTaskNames) {
 
-			// Obtain the class method
-			TemplateClassTask methodTask = this.sectionClassMethodTasksByName
-					.get(beanTaskKey);
-			Method method = methodTask.method;
+			// Determine if method not providing bean to template
+			if (!(templateBeanTaskKeys.contains(beanTaskKey))) {
 
-			// Determine if method providing bean to template
-			if (templateBeanTaskKeys.contains(beanTaskKey)) {
-				// Method providing bean, so ensure no next task
-				if (method.isAnnotationPresent(NextTask.class)) {
-					designer.addIssue(
-							"Template bean method '" + method.getName()
-									+ "' must not be annotated with "
-									+ NextTask.class.getSimpleName(),
-							AssetType.TASK, beanTaskKey);
-				}
+				// Obtain the class method
+				TemplateClassTask methodTask = this.sectionClassMethodTasksByName
+						.get(beanTaskKey);
+				Method method = methodTask.method;
 
-			} else {
 				// Determine if method already indicating next task
-				if (!(methodTask.method.isAnnotationPresent(NextTask.class))) {
+				if (!(method.isAnnotationPresent(NextTask.class))) {
 					// Next task not linked, so link to render template
 					designer.link(methodTask.task, firstTemplateTask);
 				}
