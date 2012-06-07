@@ -43,6 +43,7 @@ import net.officefloor.frame.spi.source.SourceContext;
 import net.officefloor.frame.spi.source.SourceProperties;
 import net.officefloor.plugin.socket.server.http.response.HttpResponseWriterFactory;
 import net.officefloor.plugin.socket.server.http.response.HttpResponseWriterFactoryImpl;
+import net.officefloor.plugin.web.http.template.parse.BeanHttpTemplateSectionContent;
 import net.officefloor.plugin.web.http.template.parse.HttpTemplate;
 import net.officefloor.plugin.web.http.template.parse.HttpTemplateParserImpl;
 import net.officefloor.plugin.web.http.template.parse.HttpTemplateSection;
@@ -181,13 +182,14 @@ public class HttpTemplateWorkSource extends
 
 		// Determine if contains reference content
 		for (HttpTemplateSectionContent content : section.getContent()) {
-			if (content instanceof PropertyHttpTemplateSectionContent) {
-				// Section contains reference content, so requires bean
+			if ((content instanceof PropertyHttpTemplateSectionContent)
+					|| (content instanceof BeanHttpTemplateSectionContent)) {
+				// Section contains property/bean reference, so requires bean
 				return true;
 			}
 		}
 
-		// No reference content, so does not require bean
+		// No reference to property/bean, so does not require bean
 		return false;
 	}
 
@@ -203,23 +205,47 @@ public class HttpTemplateWorkSource extends
 		// Obtain the listing of link names
 		List<String> linkNames = new LinkedList<String>();
 		for (HttpTemplateSection section : template.getSections()) {
-			for (HttpTemplateSectionContent content : section.getContent()) {
-				if (content instanceof LinkHttpTemplateSectionContent) {
-					LinkHttpTemplateSectionContent link = (LinkHttpTemplateSectionContent) content;
-
-					// Obtain the link name
-					String linkName = link.getName();
-
-					// Add the link name
-					if (!linkNames.contains(linkName)) {
-						linkNames.add(linkName);
-					}
-				}
-			}
+			loadLinkNames(section.getContent(), linkNames);
 		}
 
 		// Return the link names
 		return linkNames.toArray(new String[linkNames.size()]);
+	}
+
+	/**
+	 * Loads the link names from the {@link HttpTemplateSectionContent}
+	 * instances.
+	 * 
+	 * @param contents
+	 *            {@link HttpTemplateSectionContent} instances.
+	 * @param linkNames
+	 *            {@link List} to receive the unique link names.
+	 */
+	private static void loadLinkNames(HttpTemplateSectionContent[] contents,
+			List<String> linkNames) {
+
+		// Interrogate contents for links
+		for (HttpTemplateSectionContent content : contents) {
+
+			// Add the link
+			if (content instanceof LinkHttpTemplateSectionContent) {
+				LinkHttpTemplateSectionContent link = (LinkHttpTemplateSectionContent) content;
+
+				// Obtain the link name
+				String linkName = link.getName();
+
+				// Add the link name
+				if (!linkNames.contains(linkName)) {
+					linkNames.add(linkName);
+				}
+			}
+
+			// Recursively check bean content for links
+			if (content instanceof BeanHttpTemplateSectionContent) {
+				BeanHttpTemplateSectionContent beanContent = (BeanHttpTemplateSectionContent) content;
+				loadLinkNames(beanContent.getContent(), linkNames);
+			}
+		}
 	}
 
 	/**

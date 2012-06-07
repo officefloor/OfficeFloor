@@ -40,8 +40,16 @@ import net.officefloor.frame.spi.source.ResourceSource;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
 import net.officefloor.plugin.socket.server.http.parse.UsAsciiUtil;
+import net.officefloor.plugin.web.http.template.parse.BeanHttpTemplateSectionContent;
+import net.officefloor.plugin.web.http.template.parse.BeanHttpTemplateSectionContentImpl;
 import net.officefloor.plugin.web.http.template.parse.HttpTemplate;
+import net.officefloor.plugin.web.http.template.parse.HttpTemplateImpl;
 import net.officefloor.plugin.web.http.template.parse.HttpTemplateSection;
+import net.officefloor.plugin.web.http.template.parse.HttpTemplateSectionContent;
+import net.officefloor.plugin.web.http.template.parse.HttpTemplateSectionImpl;
+import net.officefloor.plugin.web.http.template.parse.LinkHttpTemplateSectionContentImpl;
+import net.officefloor.plugin.web.http.template.parse.PropertyHttpTemplateSectionContentImpl;
+import net.officefloor.plugin.web.http.template.parse.StaticHttpTemplateSectionContentImpl;
 
 import org.easymock.AbstractMatcher;
 
@@ -421,6 +429,87 @@ public class HttpTemplateWorkSourceTest extends OfficeFrameTestCase {
 
 		// Validate output
 		assertTextEquals("Incorrect output", expectedOutput, actualOutput);
+	}
+
+	/**
+	 * Ensure appropriately indicates if {@link HttpTemplateSection} requires a
+	 * bean.
+	 */
+	public void testHttpTemplateSectionRequireBean() {
+
+		// Ensure not require on no properties or beans
+		HttpTemplateSection staticSection = new HttpTemplateSectionImpl(
+				"STATIC", new HttpTemplateSectionContent[] {
+						new StaticHttpTemplateSectionContentImpl(
+								"STATIC CONTENT"),
+						new LinkHttpTemplateSectionContentImpl("LINK") });
+		assertFalse("Should not require bean",
+				HttpTemplateWorkSource
+						.isHttpTemplateSectionRequireBean(staticSection));
+
+		// Ensure require bean on property
+		HttpTemplateSection propertySection = new HttpTemplateSectionImpl(
+				"PROPERTY",
+				new HttpTemplateSectionContent[] { new PropertyHttpTemplateSectionContentImpl(
+						"Property") });
+		assertTrue("Require bean if have property in section",
+				HttpTemplateWorkSource
+						.isHttpTemplateSectionRequireBean(propertySection));
+
+		// Ensure require bean on bean
+		HttpTemplateSection beanSection = new HttpTemplateSectionImpl(
+				"BEAN",
+				new HttpTemplateSectionContent[] { new BeanHttpTemplateSectionContentImpl(
+						"Bean", new HttpTemplateSectionContent[0]) });
+		assertTrue("Require bean if have bean in section",
+				HttpTemplateWorkSource
+						.isHttpTemplateSectionRequireBean(beanSection));
+	}
+
+	/**
+	 * Ensure appropriately obtains links from {@link HttpTemplateSection} and
+	 * any {@link BeanHttpTemplateSectionContent}.
+	 */
+	public void testHttpTemplateLinkNames() {
+
+		// Section with no beans but has link
+		HttpTemplateSection noBeanSection = new HttpTemplateSectionImpl(
+				"STATIC", new HttpTemplateSectionContent[] {
+						new LinkHttpTemplateSectionContentImpl("STATIC_LINK"),
+						new StaticHttpTemplateSectionContentImpl(
+								"STATIC CONTENT"),
+						new LinkHttpTemplateSectionContentImpl("STATIC_LINK") });
+
+		// Section where link is within a bean
+		HttpTemplateSection beanSection = new HttpTemplateSectionImpl(
+				"BEAN",
+				new HttpTemplateSectionContent[] {
+						new BeanHttpTemplateSectionContentImpl("STATIC_REPEAT",
+								noBeanSection.getContent()),
+						new StaticHttpTemplateSectionContentImpl(
+								"STATIC CONTENT"),
+						new BeanHttpTemplateSectionContentImpl(
+								"DYNAMIC_BEAN",
+								new HttpTemplateSectionContent[] {
+										new LinkHttpTemplateSectionContentImpl(
+												"BEAN_LINK"),
+										new StaticHttpTemplateSectionContentImpl(
+												"STATIC CONTENT"),
+										new BeanHttpTemplateSectionContentImpl(
+												"SUB_BEAN",
+												new HttpTemplateSectionContent[] { new LinkHttpTemplateSectionContentImpl(
+														"SUB_BEAN_LINK") }) }) });
+
+		// Obtain the links
+		String[] links = HttpTemplateWorkSource
+				.getHttpTemplateLinkNames(new HttpTemplateImpl(
+						new HttpTemplateSection[] { noBeanSection, beanSection }));
+
+		// Validate correct links
+		assertEquals("Incorrect number of links", 3, links.length);
+		assertEquals("Incorrect static section link", "STATIC_LINK", links[0]);
+		assertEquals("Incorrect bean link", "BEAN_LINK", links[1]);
+		assertEquals("Incorrect sub bean link", "SUB_BEAN_LINK", links[2]);
 	}
 
 	/**

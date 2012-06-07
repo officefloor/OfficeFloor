@@ -163,41 +163,26 @@ public class ClassPathHttpResourceNode implements Serializable {
 				continue; // tree root directory, so not include
 			}
 
-			// Add the node for this entry
-			addNode(tree, resourcePath, jarEntry.isDirectory());
+			// Split resource path into child node paths for loading
+			String[] nodePaths = resourcePath.split("/");
+
+			// Add the parent directories (-1 to ignore leaf node)
+			ClassPathHttpResourceNode parent = tree;
+			for (int i = 0; i < (nodePaths.length - 1); i++) {
+				String nodePath = nodePaths[i];
+
+				// Add the child directory
+				ClassPathHttpResourceNode child = addChild(parent, nodePath,
+						true);
+
+				// Child becomes parent for next iteration
+				parent = child;
+			}
+
+			// Create the leaf node being added
+			addChild(parent, nodePaths[nodePaths.length - 1],
+					jarEntry.isDirectory());
 		}
-	}
-
-	/**
-	 * Loads a {@link ClassPathHttpResourceNode} to the tree.
-	 * 
-	 * @param tree
-	 *            Tree.
-	 * @param resourcePath
-	 *            Resource path.
-	 * @param isDirectory
-	 *            Indicates if directory.
-	 */
-	private static void addNode(ClassPathHttpResourceNode tree,
-			String resourcePath, boolean isDirectory) {
-
-		// Split resource path into child node paths for loading
-		String[] nodePaths = resourcePath.split(File.separator);
-
-		// Add the parent directories (-1 to ignore leaf node)
-		ClassPathHttpResourceNode parent = tree;
-		for (int i = 0; i < (nodePaths.length - 1); i++) {
-			String nodePath = nodePaths[i];
-
-			// Add the child directory
-			ClassPathHttpResourceNode child = addChild(parent, nodePath, true);
-
-			// Child becomes parent for next iteration
-			parent = child;
-		}
-
-		// Create the leaf node being added
-		addChild(parent, nodePaths[nodePaths.length - 1], isDirectory);
 	}
 
 	/**
