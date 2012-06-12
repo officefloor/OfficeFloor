@@ -67,6 +67,39 @@ public class WarOfficeFloorDecorator implements OfficeFloorDecorator {
 	 */
 	public static final String WEB_PUBLIC = "PUBLIC/";
 
+	/**
+	 * Determine if WoOF resource to stay on class path.
+	 * 
+	 * @param entryName
+	 *            Entry name.
+	 * @return <code>true</code> if WoOF resource.
+	 */
+	private static boolean isWoofResource(String entryName) {
+
+		// Strip off to just file name (no directory names)
+		int index = entryName.lastIndexOf('/');
+		if (index >= 0) {
+			entryName = entryName.substring(index + "/".length());
+		}
+
+		// Strip off the extension
+		index = entryName.lastIndexOf('.');
+		if (index < 0) {
+			return false; // must have extension for WoOF resource
+		}
+		entryName = entryName.substring(0, index);
+
+		// Strip off woof marker
+		index = entryName.lastIndexOf('.');
+		if (index < 0) {
+			return false; // must have woof marker in name
+		}
+		entryName = entryName.substring(index + ".".length());
+
+		// WoOF resource if WoOF marker
+		return ("woof".equalsIgnoreCase(entryName));
+	}
+
 	/*
 	 * ==================== OfficeFloorDecorator ========================
 	 */
@@ -183,6 +216,10 @@ public class WarOfficeFloorDecorator implements OfficeFloorDecorator {
 				outputName = "";
 
 			} else if (entryName.startsWith(WEB_INF)) {
+				// Leave in current location
+				outputName = entryName;
+
+			} else if (isWoofResource(entryName)) {
 				// Leave in current location
 				outputName = entryName;
 
@@ -358,6 +395,10 @@ public class WarOfficeFloorDecorator implements OfficeFloorDecorator {
 			return;
 
 		} else if (rawEntryName.startsWith(WEB_INF)) {
+			// Leave in current location
+			outputName = rawEntryName;
+
+		} else if (isWoofResource(rawEntryName)) {
 			// Leave in current location
 			outputName = rawEntryName;
 
