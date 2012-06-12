@@ -77,8 +77,7 @@ public class WarOfficeFloorDecoratorTest extends OfficeFrameTestCase {
 		this.archiveNameMappings.put("war", "WebArchive_jar");
 
 		// Test decoration
-		this.doTest(webArchive.getAbsolutePath(), "ExpectedWarDecoration",
-				null, null);
+		this.doTest(webArchive.getAbsolutePath(), "ExpectedWarDecoration");
 	}
 
 	/**
@@ -91,7 +90,7 @@ public class WarOfficeFloorDecoratorTest extends OfficeFrameTestCase {
 				"ExtractedDirectory/WEB-INF/lib/test.jar");
 
 		// Test no decoration
-		this.doTest(jarArchive.getAbsolutePath(), null, null, null);
+		this.doTest(jarArchive.getAbsolutePath(), null);
 	}
 
 	/**
@@ -105,7 +104,7 @@ public class WarOfficeFloorDecoratorTest extends OfficeFrameTestCase {
 				new File(notExistRawClassPathEntry).exists());
 
 		// Test no decoration
-		this.doTest(notExistRawClassPathEntry, null, null, null);
+		this.doTest(notExistRawClassPathEntry, null);
 	}
 
 	/**
@@ -123,28 +122,7 @@ public class WarOfficeFloorDecoratorTest extends OfficeFrameTestCase {
 
 		// Test decoration
 		this.doTest(extractedDirectory.getAbsolutePath(),
-				"ExpectedWarDecoration", null, null);
-	}
-
-	/**
-	 * Ensure can configure by system properties.
-	 */
-	public void testConfigurationBySystemProperties() throws Exception {
-
-		// Obtain the extracted directory
-		File extractedDirectory = this
-				.findFile(this.getClass(), "ExtractedDirectory/WEB-INF/web.xml")
-				.getParentFile().getParentFile();
-
-		// Obtain the password file
-		File passwordFile = this.findFile(this.getClass(), "password.txt");
-
-		// Map war name
-		this.archiveNameMappings.put("war", "ExtractedDirectory_jar");
-
-		// Test decoration
-		this.doTest(extractedDirectory.getAbsolutePath(),
-				"ExpectedWarDecoration", "80", passwordFile.getAbsolutePath());
+				"ExpectedWarDecoration");
 	}
 
 	/**
@@ -155,14 +133,8 @@ public class WarOfficeFloorDecoratorTest extends OfficeFrameTestCase {
 	 * @param expectedDirectoryName
 	 *            Expected directory name. <code>null</code> indicates no
 	 *            decoration.
-	 * @param expectedHttpPort
-	 *            Expected HTTP port.
-	 * @param expectedPasswordFileLocation
-	 *            Expected password file location. <code>null</code> indicates
-	 *            temporary password file created.
 	 */
-	private void doTest(String rawClassPathEntry, String expectedDirectoryName,
-			String expectedHttpPort, String expectedPasswordFileLocation)
+	private void doTest(String rawClassPathEntry, String expectedDirectoryName)
 			throws Exception {
 
 		// Run decoration
