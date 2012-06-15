@@ -274,6 +274,8 @@ public class WoofLaunchConfigurationDelegate extends
 					"src/main/webapp");
 			if (srcMainWebappDirectory.exists()) {
 				developmentConfiguration
+						.setWebAppDirectory(srcMainWebappDirectory);
+				developmentConfiguration
 						.addResourceDirectory(srcMainWebappDirectory);
 			}
 

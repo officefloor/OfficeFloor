@@ -24,6 +24,7 @@ import net.officefloor.console.OfficeBuilding;
 
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
+import org.apache.maven.plugin.logging.Log;
 
 /**
  * Maven goal to stop the {@link OfficeBuilding}.
@@ -33,6 +34,29 @@ import org.apache.maven.plugin.MojoFailureException;
  * @author Daniel Sagenschneider
  */
 public class StopOfficeBuildingGoal extends AbstractGoal {
+
+	/**
+	 * Creates the {@link StopOfficeBuildingGoal} with the required parameters.
+	 * 
+	 * @param port
+	 *            Port that {@link OfficeBuilding} is running on. May be
+	 *            <code>null</code> to use default port.
+	 * @param waitTime
+	 *            Time to wait in stopping the {@link OfficeBuilding}. May be
+	 *            <code>null</code> to use default time.
+	 * @param log
+	 *            {@link Log}.
+	 * @return {@link StopOfficeBuildingGoal}.
+	 */
+	public static StopOfficeBuildingGoal createStopOfficeBuildingGoal(
+			Integer port, Long waitTime, Log log) {
+		StopOfficeBuildingGoal goal = new StopOfficeBuildingGoal();
+		goal.port = (port != null ? port
+				: StartOfficeBuildingGoal.DEFAULT_OFFICE_BUILDING_PORT);
+		goal.waitTime = waitTime;
+		goal.setLog(log);
+		return goal;
+	}
 
 	/**
 	 * Port that {@link OfficeBuilding} is running on.
@@ -56,12 +80,12 @@ public class StopOfficeBuildingGoal extends AbstractGoal {
 	public void execute() throws MojoExecutionException, MojoFailureException {
 
 		// Ensure have required values
-		assertNotNull(
+		ensureNotNull(
 				"Port not configured for the "
 						+ OfficeBuilding.class.getSimpleName(), this.port);
 
 		// Ensure default non-required values
-		long stopWaitTime = defaultValue(this.waitTime, new Long(10000))
+		long stopWaitTime = defaultValue(this.waitTime, Long.valueOf(10000))
 				.longValue();
 
 		// Obtain the OfficeBuilding manager
@@ -74,7 +98,7 @@ public class StopOfficeBuildingGoal extends AbstractGoal {
 							StartOfficeBuildingGoal.USER_NAME,
 							StartOfficeBuildingGoal.PASSWORD);
 		} catch (Throwable ex) {
-			throw this.newMojoExecutionException("Failed accessing the "
+			throw newMojoExecutionException("Failed accessing the "
 					+ OfficeBuilding.class.getSimpleName(), ex);
 		}
 
@@ -82,7 +106,7 @@ public class StopOfficeBuildingGoal extends AbstractGoal {
 		try {
 			officeBuildingManager.stopOfficeBuilding(stopWaitTime);
 		} catch (Throwable ex) {
-			throw this.newMojoExecutionException("Failed stopping the "
+			throw newMojoExecutionException("Failed stopping the "
 					+ OfficeBuilding.class.getSimpleName(), ex);
 		}
 

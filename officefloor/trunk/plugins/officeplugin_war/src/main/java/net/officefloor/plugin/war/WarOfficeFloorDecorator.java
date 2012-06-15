@@ -33,6 +33,7 @@ import java.util.jar.JarOutputStream;
 
 import net.officefloor.building.decorate.OfficeFloorDecorator;
 import net.officefloor.building.decorate.OfficeFloorDecoratorContext;
+import net.officefloor.plugin.woof.WoofUtil;
 
 /**
  * {@link OfficeFloorDecorator} for a WAR.
@@ -40,6 +41,16 @@ import net.officefloor.building.decorate.OfficeFloorDecoratorContext;
  * @author Daniel Sagenschneider
  */
 public class WarOfficeFloorDecorator implements OfficeFloorDecorator {
+
+	/**
+	 * Maven Group Id for the {@link WarOfficeFloorDecorator}.
+	 */
+	public static final String PLUGIN_WAR_GROUP_ID = "net.officefloor.plugin";
+
+	/**
+	 * Maven Artifact Id for the {@link WarOfficeFloorDecorator}.
+	 */
+	public static final String PLUGIN_WAR_ARTIFACT_ID = "officeplugin_war";
 
 	/**
 	 * WEB-INF directory name.
@@ -66,39 +77,6 @@ public class WarOfficeFloorDecorator implements OfficeFloorDecorator {
 	 * Directory to contain the public web content.
 	 */
 	public static final String WEB_PUBLIC = "PUBLIC/";
-
-	/**
-	 * Determine if WoOF resource to stay on class path.
-	 * 
-	 * @param entryName
-	 *            Entry name.
-	 * @return <code>true</code> if WoOF resource.
-	 */
-	private static boolean isWoofResource(String entryName) {
-
-		// Strip off to just file name (no directory names)
-		int index = entryName.lastIndexOf('/');
-		if (index >= 0) {
-			entryName = entryName.substring(index + "/".length());
-		}
-
-		// Strip off the extension
-		index = entryName.lastIndexOf('.');
-		if (index < 0) {
-			return false; // must have extension for WoOF resource
-		}
-		entryName = entryName.substring(0, index);
-
-		// Strip off woof marker
-		index = entryName.lastIndexOf('.');
-		if (index < 0) {
-			return false; // must have woof marker in name
-		}
-		entryName = entryName.substring(index + ".".length());
-
-		// WoOF resource if WoOF marker
-		return ("woof".equalsIgnoreCase(entryName));
-	}
 
 	/*
 	 * ==================== OfficeFloorDecorator ========================
@@ -219,7 +197,7 @@ public class WarOfficeFloorDecorator implements OfficeFloorDecorator {
 				// Leave in current location
 				outputName = entryName;
 
-			} else if (isWoofResource(entryName)) {
+			} else if (WoofUtil.isWoofResource(entryName)) {
 				// Leave in current location
 				outputName = entryName;
 
@@ -398,7 +376,7 @@ public class WarOfficeFloorDecorator implements OfficeFloorDecorator {
 			// Leave in current location
 			outputName = rawEntryName;
 
-		} else if (isWoofResource(rawEntryName)) {
+		} else if (WoofUtil.isWoofResource(rawEntryName)) {
 			// Leave in current location
 			outputName = rawEntryName;
 

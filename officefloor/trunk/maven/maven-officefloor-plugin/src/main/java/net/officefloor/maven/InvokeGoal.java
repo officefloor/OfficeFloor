@@ -93,13 +93,13 @@ public class InvokeGoal extends AbstractGoal {
 	public void execute() throws MojoExecutionException, MojoFailureException {
 
 		// Ensure have required values
-		assertNotNull(
+		ensureNotNull(
 				"Port not configured for the "
 						+ OfficeBuilding.class.getSimpleName(), this.port);
-		assertNotNull(
+		ensureNotNull(
 				"Office not configured for the "
 						+ OfficeBuilding.class.getSimpleName(), this.office);
-		assertNotNull(
+		ensureNotNull(
 				"Work not configured for the "
 						+ OfficeBuilding.class.getSimpleName(), this.office);
 
@@ -124,7 +124,7 @@ public class InvokeGoal extends AbstractGoal {
 					StartOfficeBuildingGoal.USER_NAME,
 					StartOfficeBuildingGoal.PASSWORD);
 		} catch (Throwable ex) {
-			throw this.newMojoExecutionException("Failed accessing the "
+			throw newMojoExecutionException("Failed accessing the "
 					+ OfficeFloor.class.getSimpleName(), ex);
 		}
 
@@ -133,7 +133,7 @@ public class InvokeGoal extends AbstractGoal {
 			manager.invokeTask(this.office, this.work, this.task,
 					this.parameter);
 		} catch (Throwable ex) {
-			throw this.newMojoExecutionException("Failed invoking task "
+			throw newMojoExecutionException("Failed invoking task "
 					+ referenceName + ": " + ex.getMessage(), ex);
 		}
 

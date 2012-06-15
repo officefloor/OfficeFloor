@@ -1,1 +1,7 @@
-<woof/>
+<woof>
+
+	<templates>
+		<template name="woof" uri="woof" path="resource.woof.html" />
+	</templates>
+
+</woof>

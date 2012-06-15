@@ -182,7 +182,7 @@ public class WoofDevelopmentConfigurationLoader {
 				String sectionInputUri = sectionInput.getUri();
 				if ((sectionInputUri != null)
 						&& (sectionInputUri.trim().length() > 0)) {
-					// Section INput URI provided so include
+					// Section Input URI provided so include
 					String startupUrl = transformUriToStartupUrl(sectionInputUri);
 					configuration.addStartupUrl(startupUrl);
 				}

@@ -93,9 +93,14 @@ public class OfficeBuildingManager implements OfficeBuildingManagerMBean {
 			.getLogger(OfficeBuildingManager.class.getName());
 
 	/**
-	 * Artifact Id for this {@link OfficeBuilding}.
+	 * Maven Group Id for the {@link OfficeBuilding}.
 	 */
-	public static final String OFFICE_BUIDLING_ARTIFACT_ID = "officebuilding";
+	public static final String OFFICE_BUILDING_GROUP_ID = "net.officefloor.core";
+
+	/**
+	 * Maven Artifact Id for this {@link OfficeBuilding}.
+	 */
+	public static final String OFFICE_BUILDING_ARTIFACT_ID = "officebuilding";
 
 	/**
 	 * Name of the {@link OfficeBuilding} within the {@link Registry}.

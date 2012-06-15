@@ -41,6 +41,7 @@ import org.apache.maven.settings.building.SettingsBuildingRequest;
 import org.apache.maven.settings.building.SettingsBuildingResult;
 import org.codehaus.plexus.PlexusContainer;
 import org.sonatype.aether.RepositorySystem;
+import org.sonatype.aether.artifact.Artifact;
 import org.sonatype.aether.collection.CollectRequest;
 import org.sonatype.aether.collection.CollectResult;
 import org.sonatype.aether.graph.Dependency;
@@ -56,6 +57,33 @@ import org.sonatype.aether.util.graph.PreorderNodeListGenerator;
  * @author Daniel Sagenschneider
  */
 public class ClassPathFactoryImpl implements ClassPathFactory {
+
+	/**
+	 * Transforms the class path entries to a class path.
+	 * 
+	 * @param classPathEntries
+	 *            Class path entries.
+	 * @return Class path.
+	 */
+	public static String transformClassPathEntriesToClassPath(
+			String... classPathEntries) {
+
+		// Build the class path
+		StringBuilder classPath = new StringBuilder();
+		for (int i = 0; i < classPathEntries.length; i++) {
+
+			// Include separator after first entry
+			if (i > 0) {
+				classPath.append(File.pathSeparator);
+			}
+
+			// Include the class path entry
+			classPath.append(classPathEntries[i]);
+		}
+
+		// Return the class path
+		return classPath.toString();
+	}
 
 	/**
 	 * Obtains the local repository as configured for the user.
@@ -100,7 +128,12 @@ public class ClassPathFactoryImpl implements ClassPathFactory {
 	/**
 	 * {@link PlexusContainer}.
 	 */
-	private PlexusContainer plexusContainer;
+	private final PlexusContainer plexusContainer;
+
+	/**
+	 * {@link RepositorySystem}.
+	 */
+	private final RepositorySystem repositorySystem;
 
 	/**
 	 * Local repository.
@@ -117,6 +150,33 @@ public class ClassPathFactoryImpl implements ClassPathFactory {
 	 * 
 	 * @param plexusContainer
 	 *            {@link PlexusContainer}.
+	 * @param repositorySystem
+	 *            {@link RepositorySystem}. May be <code>null</code>.
+	 * @param localRepository
+	 *            Local repository. May be <code>null</code> to use default user
+	 *            local repository.
+	 * @throws Exception
+	 *             If fails to initiate.
+	 */
+	public ClassPathFactoryImpl(PlexusContainer plexusContainer,
+			RepositorySystem repositorySystem, File localRepository)
+			throws Exception {
+		this.plexusContainer = plexusContainer;
+
+		// Obtain the repository system
+		this.repositorySystem = (repositorySystem != null ? repositorySystem
+				: this.plexusContainer.lookup(RepositorySystem.class));
+
+		// Obtain the local repository
+		this.localRepository = (localRepository != null ? localRepository
+				: getUserLocalRepository(this.plexusContainer));
+	}
+
+	/**
+	 * Initiate.
+	 * 
+	 * @param plexusContainer
+	 *            {@link PlexusContainer}.
 	 * @param localRepository
 	 *            Local repository. May be <code>null</code> to use default user
 	 *            local repository.
@@ -125,9 +185,7 @@ public class ClassPathFactoryImpl implements ClassPathFactory {
 	 */
 	public ClassPathFactoryImpl(PlexusContainer plexusContainer,
 			File localRepository) throws Exception {
-		this.plexusContainer = plexusContainer;
-		this.localRepository = (localRepository != null ? localRepository
-				: getUserLocalRepository(this.plexusContainer));
+		this(plexusContainer, null, localRepository);
 	}
 
 	/**
@@ -141,15 +199,11 @@ public class ClassPathFactoryImpl implements ClassPathFactory {
 	 */
 	public MavenProject getMavenProject(File pomFile) throws Exception {
 
-		// Obtain the repository system
-		RepositorySystem system = this.plexusContainer
-				.lookup(RepositorySystem.class);
-
-		// Create the maven session
+		// Create the Maven session
 		MavenRepositorySystemSession session = new MavenRepositorySystemSession();
 		LocalRepository localRepository = new LocalRepository(
 				this.localRepository);
-		session.setLocalRepositoryManager(system
+		session.setLocalRepositoryManager(this.repositorySystem
 				.newLocalRepositoryManager(localRepository));
 
 		// Obtain the Maven Project
@@ -238,43 +292,15 @@ public class ClassPathFactoryImpl implements ClassPathFactory {
 			type = "jar";
 		}
 
-		// Obtain the repository system
-		RepositorySystem system = this.plexusContainer
-				.lookup(RepositorySystem.class);
+		// Resolve the class path
+		ArtifactClassPathResolver resolver = new ArtifactClassPathResolver(
+				new DefaultArtifact(groupId, artifactId, classifier, type,
+						version), this.repositorySystem, this.localRepository,
+				this.remoteRepositories);
+		new Thread(resolver).start();
 
-		// Create the maven session
-		MavenRepositorySystemSession session = new MavenRepositorySystemSession();
-		LocalRepository localRepository = new LocalRepository(
-				this.localRepository);
-		session.setLocalRepositoryManager(system
-				.newLocalRepositoryManager(localRepository));
-
-		// Create the dependency
-		Dependency dependency = new Dependency(new DefaultArtifact(groupId,
-				artifactId, classifier, type, version), "compile");
-
-		// Create request to collect dependencies
-		CollectRequest request = new CollectRequest();
-		request.setRoot(dependency);
-		for (RemoteRepository remoteRepository : this.remoteRepositories) {
-			request.addRepository(remoteRepository);
-		}
-
-		// Collect the results
-		CollectResult result = system.collectDependencies(session, request);
-		DependencyNode node = result.getRoot();
-		system.resolveDependencies(session, node, null);
-
-		// Generate the class path
-		PreorderNodeListGenerator generator = new PreorderNodeListGenerator();
-		node.accept(generator);
-		String classPath = generator.getClassPath();
-
-		// Split into class path entries
-		String[] classPathEntries = classPath.split(File.pathSeparator);
-
-		// Return the class path entries
-		return classPathEntries;
+		// Return the resolved class path
+		return resolver.blockWaitingForResolvedClassPath();
 	}
 
 	/**
@@ -323,6 +349,153 @@ public class ClassPathFactoryImpl implements ClassPathFactory {
 
 		// Return the POM model
 		return pomModel;
+	}
+
+	/**
+	 * Resolver of the artifact class path.
+	 */
+	private class ArtifactClassPathResolver implements Runnable {
+
+		/**
+		 * {@link Artifact}.
+		 */
+		private final Artifact artifact;
+
+		/**
+		 * {@link RepositorySystem}.
+		 */
+		private final RepositorySystem repositorySystem;
+
+		/**
+		 * Local repository directory.
+		 */
+		private final File localRepositoryDirectory;
+
+		/**
+		 * Remote repositories.
+		 */
+		private final List<RemoteRepository> remoteRepositories;
+
+		/**
+		 * Resolved class path entries.
+		 */
+		private String[] classPathEntries = null;
+
+		/**
+		 * Failure of resolving the class path.
+		 */
+		private Exception failure = null;
+
+		/**
+		 * Initiate.
+		 * 
+		 * @param artifact
+		 *            {@link Artifact} to be resolved.
+		 * @param repositorySystem
+		 *            {@link RepositorySystem}.
+		 * @param localRepositoryDirectory
+		 *            Local repository directory.
+		 * @param remoteRepositories
+		 *            Listing of {@link RemoteRepository} instances.
+		 */
+		public ArtifactClassPathResolver(Artifact artifact,
+				RepositorySystem repositorySystem,
+				File localRepositoryDirectory,
+				List<RemoteRepository> remoteRepositories) {
+			this.artifact = artifact;
+			this.repositorySystem = repositorySystem;
+			this.localRepositoryDirectory = localRepositoryDirectory;
+			this.remoteRepositories = remoteRepositories;
+		}
+
+		/**
+		 * Blocks waiting for resolution of the class path (or time out).
+		 * 
+		 * @return Resolved class path.
+		 * @throws Exception
+		 *             If fails to obtain the resolved class path.
+		 */
+		public String[] blockWaitingForResolvedClassPath() throws Exception {
+
+			// Loop until complete or timed out (60 seconds)
+			long timeoutTime = (System.currentTimeMillis() + (60L * 1000));
+			for (;;) {
+
+				// Determine if have resolved class path or failure
+				synchronized (this) {
+
+					// Determine if have resolved class path
+					if (this.classPathEntries != null) {
+						return this.classPathEntries;
+					}
+
+					// Determine if exception
+					if (this.failure != null) {
+						throw this.failure;
+					}
+
+					// Wait some time for resolution
+					this.wait(1000);
+				}
+
+				// Determine if timed out
+				if (System.currentTimeMillis() > timeoutTime) {
+					throw new Exception(
+							"Timed out waiting for resolution of class path for artifact "
+									+ this.artifact.toString());
+				}
+			}
+		}
+
+		/*
+		 * ====================== Runnable ============================
+		 */
+
+		@Override
+		public void run() {
+			try {
+
+				// Create the maven session
+				MavenRepositorySystemSession session = new MavenRepositorySystemSession();
+				LocalRepository localRepository = new LocalRepository(
+						this.localRepositoryDirectory);
+				session.setLocalRepositoryManager(this.repositorySystem
+						.newLocalRepositoryManager(localRepository));
+
+				// Create the dependency
+				Dependency dependency = new Dependency(this.artifact, "compile");
+
+				// Create request to collect dependencies
+				CollectRequest request = new CollectRequest();
+				request.setRoot(dependency);
+				for (RemoteRepository remoteRepository : this.remoteRepositories) {
+					request.addRepository(remoteRepository);
+				}
+
+				// Collect the results
+				CollectResult result = this.repositorySystem
+						.collectDependencies(session, request);
+				DependencyNode node = result.getRoot();
+				this.repositorySystem.resolveDependencies(session, node, null);
+
+				// Generate the class path
+				PreorderNodeListGenerator generator = new PreorderNodeListGenerator();
+				node.accept(generator);
+				String classPath = generator.getClassPath();
+
+				// Split into class path entries
+				synchronized (this) {
+					this.classPathEntries = classPath.split(File.pathSeparator);
+					this.notifyAll(); // notify class path available
+				}
+
+			} catch (Exception ex) {
+				synchronized (this) {
+					this.failure = ex;
+					this.notifyAll(); // notify of failure
+				}
+			}
+		}
 	}
 
 }

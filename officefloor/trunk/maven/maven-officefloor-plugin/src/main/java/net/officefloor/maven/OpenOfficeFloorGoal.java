@@ -18,10 +18,7 @@
 
 package net.officefloor.maven;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
+import java.util.LinkedList;
 import java.util.List;
 
 import net.officefloor.building.manager.OfficeBuildingManager;
@@ -175,6 +172,21 @@ public class OpenOfficeFloorGoal extends AbstractGoal {
 		this.jvmOptions = jvmOptions;
 	}
 
+	/**
+	 * Listing of additional class path entries to include.
+	 */
+	private List<String> classPathEntries = new LinkedList<String>();
+
+	/**
+	 * Adds a class path entry.
+	 * 
+	 * @param classPathEntry
+	 *            Class path entry.
+	 */
+	public void addClassPathEntry(String classPathEntry) {
+		this.classPathEntries.add(classPathEntry);
+	}
+
 	/*
 	 * ======================== Mojo ==========================
 	 */
@@ -183,12 +195,12 @@ public class OpenOfficeFloorGoal extends AbstractGoal {
 	public void execute() throws MojoExecutionException, MojoFailureException {
 
 		// Ensure have required values
-		assertNotNull("Must have project", this.project);
-		assertNotNull("Must have plug-in dependencies", this.pluginDependencies);
-		assertNotNull(
+		ensureNotNull("Must have project", this.project);
+		ensureNotNull("Must have plug-in dependencies", this.pluginDependencies);
+		ensureNotNull(
 				"Port not configured for the "
 						+ OfficeBuilding.class.getSimpleName(), this.port);
-		assertNotNull(OfficeFloor.class.getSimpleName()
+		ensureNotNull(OfficeFloor.class.getSimpleName()
 				+ " configuration location not specified",
 				this.officeFloorLocation);
 
@@ -206,7 +218,7 @@ public class OpenOfficeFloorGoal extends AbstractGoal {
 							StartOfficeBuildingGoal.USER_NAME,
 							StartOfficeBuildingGoal.PASSWORD);
 		} catch (Throwable ex) {
-			throw this.newMojoExecutionException("Failed accessing the "
+			throw newMojoExecutionException("Failed accessing the "
 					+ OfficeBuilding.class.getSimpleName(), ex);
 		}
 
@@ -230,42 +242,14 @@ public class OpenOfficeFloorGoal extends AbstractGoal {
 				configuration.addClassPathEntry(element);
 			}
 		} catch (Throwable ex) {
-			throw this.newMojoExecutionException(
+			throw newMojoExecutionException(
 					"Failed creating class path for the "
 							+ OfficeFloor.class.getSimpleName(), ex);
 		}
 
-		// Determine if WAR project
-		if ("war".equalsIgnoreCase(this.project.getPackaging())) {
-
-			// WAR project, so make web resources available
-			File baseDir = this.project.getBasedir();
-			File woofDir = new File(baseDir, "target/woof");
-
-			// Make the woof directory available
-			configuration.addClassPathEntry(woofDir.getAbsolutePath());
-
-			// Make the PUBLIC directory available
-			File publicDir = new File(woofDir, "PUBLIC");
-			publicDir.mkdirs(); // copy will error if not created
-
-			// Obtain the webapp directory
-			File webAppDir = new File(baseDir, "src/main/webapp");
-
-			// Update web app resources to be made available
-			this.updateResources(webAppDir, publicDir);
-
-			// Include compiled web app resources (such as GWT)
-			String version = this.project.getVersion();
-			if ((version == null) || (version.trim().length() == 0)) {
-				MavenProject parent = this.project.getParent();
-				if (parent != null) {
-					version = parent.getVersion();
-				}
-			}
-			File packageDir = new File(baseDir, "target/"
-					+ this.project.getArtifactId() + "-" + version);
-			this.updateResources(packageDir, publicDir, "WEB-INF", "META-INF");
+		// Add additional class path entries
+		for (String classPathEntry : this.classPathEntries) {
+			configuration.addClassPathEntry(classPathEntry);
 		}
 
 		// Open the OfficeFloor
@@ -274,7 +258,7 @@ public class OpenOfficeFloorGoal extends AbstractGoal {
 			processNameSpace = officeBuildingManager
 					.openOfficeFloor(configuration);
 		} catch (Throwable ex) {
-			throw this.newMojoExecutionException("Failed opening the "
+			throw newMojoExecutionException("Failed opening the "
 					+ OfficeFloor.class.getSimpleName(), ex);
 		}
 
@@ -283,77 +267,6 @@ public class OpenOfficeFloorGoal extends AbstractGoal {
 				"Opened " + OfficeFloor.class.getSimpleName()
 						+ " under process name space '" + processNameSpace
 						+ "' for " + this.officeFloorLocation);
-	}
-
-	/**
-	 * Update the resources in the destination directory from the source
-	 * directory.
-	 * 
-	 * @param srcDir
-	 *            Source directory.
-	 * @param destDir
-	 *            Destination directory.
-	 * @param ignoreFileNames
-	 *            File names to ignore in updating.
-	 * @throws MojoExecutionException
-	 *             If fails to update resources.
-	 */
-	private void updateResources(File srcDir, File destDir,
-			String... ignoreFileNames) throws MojoExecutionException {
-		try {
-
-			// Ensure destination directory exists
-			destDir.mkdir(); // not fail as may already exist
-
-			// Copy the files
-			File[] childFiles = srcDir.listFiles();
-			if (childFiles != null) {
-				// Have files to copy
-				NEXT_FILE: for (File srcFile : childFiles) {
-
-					// Determine if ignore directory
-					String srcFileName = srcFile.getName();
-					for (String ignoreFileName : ignoreFileNames) {
-						if (ignoreFileName.equals(srcFileName)) {
-							continue NEXT_FILE; // ignore file
-						}
-					}
-
-					// Determine if directory
-					if (srcFile.isDirectory()) {
-						// Recursively update the sub directories
-						this.updateResources(srcFile,
-								new File(destDir, srcFile.getName()));
-
-					} else {
-						// Determine if destination file is latest
-						File destFile = new File(destDir, srcFile.getName());
-						if ((destFile.exists())
-								&& (srcFile.lastModified() <= destFile
-										.lastModified())) {
-							// Have latest file, so do not update
-							continue;
-						}
-
-						// Update the destination file to latest
-						FileInputStream srcContent = new FileInputStream(
-								srcFile);
-						FileOutputStream destContent = new FileOutputStream(
-								destFile, false);
-						for (int value = srcContent.read(); value != -1; value = srcContent
-								.read()) {
-							destContent.write(value);
-						}
-						destContent.close();
-						srcContent.close();
-					}
-				}
-			}
-
-		} catch (IOException ex) {
-			throw this.newMojoExecutionException(
-					"Failed making WebApp resources available", ex);
-		}
 	}
 
 }

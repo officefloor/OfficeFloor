@@ -42,6 +42,11 @@ public class WoofDevelopmentConfiguration {
 	private static final String PROPERTY_WAR_DIRECTORY = "war.directory";
 
 	/**
+	 * Property name to provide the webapp directory.
+	 */
+	private static final String PROPERTY_WEB_APP_DIRECTORY = "webapp.directory";
+
+	/**
 	 * Prefix of the property name to provide the resource directories.
 	 */
 	private static final String PROPERTY_RESOURCE_DIRECTORY_PREFIX = "resource.directory";
@@ -66,6 +71,11 @@ public class WoofDevelopmentConfiguration {
 	 * WAR directory for deployed GWT files.
 	 */
 	private File warDirectory = null;
+
+	/**
+	 * Web App directory for web resources.
+	 */
+	private File webAppDirectory = null;
 
 	/**
 	 * Resource directories.
@@ -117,6 +127,13 @@ public class WoofDevelopmentConfiguration {
 			this.warDirectory = new File(warDirectoryPath);
 		}
 
+		// Obtain the web app directory
+		String webAppDirectoryPath = properties
+				.getProperty(PROPERTY_WEB_APP_DIRECTORY);
+		if (webAppDirectoryPath != null) {
+			this.webAppDirectory = new File(webAppDirectoryPath);
+		}
+
 		// Load the GWT module names
 		this.loadValues(PROPERTY_GWT_MODULE_NAME_PREFIX, properties,
 				this.moduleNames);
@@ -155,6 +172,25 @@ public class WoofDevelopmentConfiguration {
 	 */
 	public File getWarDirectory() {
 		return this.warDirectory;
+	}
+
+	/**
+	 * Specifies the web app directory for web resources.
+	 * 
+	 * @param webAppDirectory
+	 *            Web App directory.
+	 */
+	public void setWebAppDirectory(File webAppDirectory) {
+		this.webAppDirectory = webAppDirectory;
+	}
+
+	/**
+	 * Obtains the web app directory for web resources.
+	 * 
+	 * @return Web app directory.
+	 */
+	public File getWebAppDirectory() {
+		return this.webAppDirectory;
 	}
 
 	/**
@@ -307,6 +343,12 @@ public class WoofDevelopmentConfiguration {
 		if (this.warDirectory != null) {
 			properties.setProperty(PROPERTY_WAR_DIRECTORY,
 					this.warDirectory.getAbsolutePath());
+		}
+
+		// Load the web app directory
+		if (this.webAppDirectory != null) {
+			properties.setProperty(PROPERTY_WEB_APP_DIRECTORY,
+					this.webAppDirectory.getAbsolutePath());
 		}
 
 		// Load the GWT module names
