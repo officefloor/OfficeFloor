@@ -56,6 +56,9 @@ public class WoofServletContainerLauncher extends ServletContainerLauncher {
 		WoofDevelopmentConfiguration configuration = new WoofDevelopmentConfiguration(
 				new File(appRootDir, CONFIGURATION_FILE_NAME));
 
+		// Obtain the web app directory
+		File webAppDirectory = configuration.getWebAppDirectory();
+
 		// Include WAR directory in resource directories
 		File[] configuredDirectories = configuration.getResourceDirectories();
 		File[] resourceDirectories = new File[configuredDirectories.length + 1];
@@ -70,7 +73,7 @@ public class WoofServletContainerLauncher extends ServletContainerLauncher {
 
 		// Create and return the WoOF container
 		return new WoofServletContainer(logger, this.getName(), port,
-				resourceDirectories, properties);
+				webAppDirectory, resourceDirectories, properties);
 	}
 
 }

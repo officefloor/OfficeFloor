@@ -117,6 +117,20 @@ public class ClassPathFactoryTest extends OfficeFrameTestCase {
 	}
 
 	/**
+	 * Ensure able to transform to class path.
+	 */
+	public void testTransformToClassPath() {
+
+		// Transform to class path
+		String classPath = ClassPathFactoryImpl
+				.transformClassPathEntriesToClassPath("ONE", "TWO", "THREE");
+
+		// Ensure correct class path
+		assertEquals("Incorrect class path", "ONE" + File.pathSeparator + "TWO"
+				+ File.pathSeparator + "THREE", classPath);
+	}
+
+	/**
 	 * Ensure able to include a jar in class path.
 	 */
 	public void testIncludeJar() throws Exception {

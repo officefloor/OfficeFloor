@@ -112,6 +112,10 @@
 			<artifactId>officeplugin_woof</artifactId>
 		</dependency>
 		<dependency>
+			<groupId>net.officefloor.plugin</groupId>
+			<artifactId>officeplugin_war</artifactId>
+		</dependency>
+		<dependency>
 			<groupId>net.officefloor.maven</groupId>
 			<artifactId>maven-officefloor-plugin</artifactId>
 		</dependency>

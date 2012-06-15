@@ -30,22 +30,49 @@ import junit.framework.TestCase;
 public class RunWoofGoalTest extends TestCase {
 
 	/**
-	 * Ensure WoOF running.
+	 * Ensure able to obtain class path resource.
 	 */
-	public void testRunning() throws Exception {
+	public void testClassPathResource() throws Exception {
+		this.doTest("/classpath.html",
+				"<html><body>CLASS PATH RESOURCE</body></html>");
+	}
 
-		// Connect to obtain 'index.html'
-		URL url = new URL("http", "localhost", 7878, "/index.html");
+	/**
+	 * Ensure able to obtain web app resource.
+	 */
+	public void testWebappResource() throws Exception {
+		this.doTest("/webapp.html",
+				"<html><body>WEB APP RESOURCE</body></html>");
+	}
+
+	/**
+	 * Ensure appropriately handles WoOF resources.
+	 */
+	public void testWoofResource() throws Exception {
+		this.doTest("/woof", "<html><body>WOOF RESOURCE</body></html>");
+	}
+
+	/**
+	 * Undertakes the tests.
+	 * 
+	 * @param uri
+	 *            URI.
+	 * @param expectedResponse
+	 *            Expected response.
+	 */
+	private void doTest(String uri, String expectedResponse) throws Exception {
+
+		// Connect
+		URL url = new URL("http", "localhost", 7878, uri);
 		InputStream input = url.openConnection().getInputStream();
 
-		// Ensure provides 'index.html' to be running
+		// Ensure provides expected response
 		ByteArrayOutputStream buffer = new ByteArrayOutputStream();
 		for (int character = input.read(); character != -1; character = input
 				.read()) {
 			buffer.write(character);
 		}
-		assertEquals("Incorrect content",
-				"<html><body>Hello World</body></html>",
+		assertEquals("Incorrect content", expectedResponse,
 				new String(buffer.toByteArray()));
 	}
 

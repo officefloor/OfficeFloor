@@ -8,7 +8,19 @@
 		
 		<!-- Ensure all the modules inheriting latest -->
 		<file>
+			<location>officeplugin_base/pom.xml</location>
+			<contains><![CDATA[<version>${project.version}</version>(\s)*</parent>]]></contains>
+		</file>
+		<file>
+			<location>officeplugin_comet/pom.xml</location>
+			<contains><![CDATA[<version>${project.version}</version>(\s)*</parent>]]></contains>
+		</file>
+		<file>
 			<location>officeplugin_ejb/pom.xml</location>
+			<contains><![CDATA[<version>${project.version}</version>(\s)*</parent>]]></contains>
+		</file>
+		<file>
+			<location>officeplugin_gwt/pom.xml</location>
 			<contains><![CDATA[<version>${project.version}</version>(\s)*</parent>]]></contains>
 		</file>
 		<file>
@@ -48,8 +60,16 @@
 			<contains><![CDATA[<version>${pom.version}</version>(\s)*</parent>]]></contains>
 		</file>
 		<file>
+			<location>officeplugin_war/pom.xml</location>
+			<contains><![CDATA[<version>${project.version}</version>(\s)*</parent>]]></contains>
+		</file>
+		<file>
 			<location>officeplugin_web/pom.xml</location>
 			<contains><![CDATA[<version>${pom.version}</version>(\s)*</parent>]]></contains>
+		</file>
+		<file>
+			<location>officeplugin_woof/pom.xml</location>
+			<contains><![CDATA[<version>${project.version}</version>(\s)*</parent>]]></contains>
 		</file>
 		
 	</files>

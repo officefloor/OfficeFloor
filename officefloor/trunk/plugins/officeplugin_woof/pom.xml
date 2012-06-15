@@ -98,6 +98,10 @@
 	<dependencies>
 		<dependency>
 			<groupId>${project.groupId}</groupId>
+			<artifactId>officeplugin_base</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>${project.groupId}</groupId>
 			<artifactId>officeplugin_web</artifactId>
 		</dependency>
 		<dependency>

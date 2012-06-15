@@ -15,7 +15,7 @@
 		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
-			<version>3.8.2</version>
+			<version>4.8.2</version>
 		</dependency>
 	</dependencies>
 	<build>
@@ -27,23 +27,15 @@
 				<executions>
 					<execution>
 						<!-- Start running for tests -->
+						<id>start-woof</id>
 						<phase>process-test-classes</phase>
 						<goals>
 							<goal>run</goal>
 						</goals>
 					</execution>
-				</executions>
-			</plugin>
-			<plugin>
-				<groupId>@project.groupId@</groupId>
-				<artifactId>maven-officefloor-plugin</artifactId>
-				<version>@project.version@</version>
-				<configuration>
-					<port>13778</port>
-				</configuration>
-				<executions>
 					<execution>
 						<!-- Stop running after tests -->
+						<id>stop-woof</id>
 						<phase>prepare-package</phase>
 						<goals>
 							<goal>stop</goal>

@@ -20,39 +20,34 @@ package net.officefloor.maven;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Properties;
 
+import net.officefloor.building.classpath.ClassPathFactoryImpl;
 import net.officefloor.building.command.parameters.KeyStoreOfficeFloorCommandParameter;
 import net.officefloor.building.command.parameters.KeyStorePasswordOfficeFloorCommandParameter;
 import net.officefloor.building.command.parameters.OfficeBuildingPortOfficeFloorCommandParameter;
 import net.officefloor.building.command.parameters.PasswordOfficeFloorCommandParameter;
 import net.officefloor.building.command.parameters.UsernameOfficeFloorCommandParameter;
+import net.officefloor.building.decorate.OfficeFloorDecorator;
 import net.officefloor.building.manager.OfficeBuildingManager;
 import net.officefloor.building.process.ProcessConfiguration;
 import net.officefloor.console.OfficeBuilding;
 
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.repository.ArtifactRepository;
-import org.apache.maven.plugin.Mojo;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugin.logging.Log;
 import org.apache.maven.project.MavenProject;
 import org.apache.maven.repository.internal.DefaultServiceLocator;
-import org.apache.maven.repository.internal.MavenRepositorySystemSession;
+import org.codehaus.plexus.PlexusContainer;
 import org.sonatype.aether.RepositorySystem;
-import org.sonatype.aether.collection.CollectRequest;
 import org.sonatype.aether.connector.wagon.WagonProvider;
 import org.sonatype.aether.connector.wagon.WagonRepositoryConnectorFactory;
-import org.sonatype.aether.graph.Dependency;
-import org.sonatype.aether.graph.DependencyNode;
-import org.sonatype.aether.repository.LocalRepository;
-import org.sonatype.aether.repository.RemoteRepository;
 import org.sonatype.aether.spi.connector.RepositoryConnectorFactory;
-import org.sonatype.aether.util.artifact.DefaultArtifact;
-import org.sonatype.aether.util.graph.PreorderNodeListGenerator;
 
 /**
  * Maven goal to start the {@link OfficeBuilding}.
@@ -104,42 +99,6 @@ public class StartOfficeBuildingGoal extends AbstractGoal {
 	public static final String PASSWORD = PasswordOfficeFloorCommandParameter.DEFAULT_PASSWORD;
 
 	/**
-	 * Ensures the {@link OfficeBuilding} is running on the
-	 * {@link #DEFAULT_OFFICE_BUILDING_PORT}.
-	 * 
-	 * @param project
-	 *            {@link MavenProject}.
-	 * @param pluginDependencies
-	 *            Plug-in dependencies.
-	 * @param localRepository
-	 *            Local repository.
-	 * @param wagonProvider
-	 *            {@link WagonProvider}.
-	 * @param log
-	 *            {@link Log}.
-	 * @throws MojoExecutionException
-	 *             As per {@link Mojo} API.
-	 * @throws MojoFailureException
-	 *             As per {@link Mojo} API.
-	 */
-	public static void ensureDefaultOfficeBuildingAvailable(
-			MavenProject project, List<Artifact> pluginDependencies,
-			ArtifactRepository localRepository, WagonProvider wagonProvider,
-			Log log) throws MojoExecutionException, MojoFailureException {
-
-		// Ensure the OfficeBuilding is available
-		if (!OfficeBuildingManager.isOfficeBuildingAvailable(null,
-				DEFAULT_OFFICE_BUILDING_PORT.intValue(), getKeyStoreFile(),
-				KEY_STORE_PASSWORD, USER_NAME, PASSWORD)) {
-
-			// OfficeBuilding not available, so start it
-			StartOfficeBuildingGoal.createStartOfficeBuildingGoal(project,
-					pluginDependencies, localRepository, wagonProvider, log)
-					.execute();
-		}
-	}
-
-	/**
 	 * Creates the {@link StartOfficeBuildingGoal} with the required parameters.
 	 * 
 	 * @param project
@@ -148,6 +107,8 @@ public class StartOfficeBuildingGoal extends AbstractGoal {
 	 *            Plug-in dependencies.
 	 * @param localRepository
 	 *            Local repository.
+	 * @param plexusContainer
+	 *            {@link PlexusContainer}.
 	 * @param wagonProvider
 	 *            {@link WagonProvider}.
 	 * @param log
@@ -156,10 +117,12 @@ public class StartOfficeBuildingGoal extends AbstractGoal {
 	 */
 	public static StartOfficeBuildingGoal createStartOfficeBuildingGoal(
 			MavenProject project, List<Artifact> pluginDependencies,
-			ArtifactRepository localRepository, WagonProvider wagonProvider,
+			ArtifactRepository localRepository,
+			PlexusContainer plexusContainer, WagonProvider wagonProvider,
 			Log log) {
 		StartOfficeBuildingGoal goal = new StartOfficeBuildingGoal();
 		goal.project = project;
+		goal.plexusContainer = plexusContainer;
 		goal.wagonProvider = wagonProvider;
 		goal.pluginDependencies = pluginDependencies;
 		goal.localRepository = localRepository;
@@ -174,6 +137,13 @@ public class StartOfficeBuildingGoal extends AbstractGoal {
 	 * @required
 	 */
 	private MavenProject project;
+
+	/**
+	 * {@link PlexusContainer}.
+	 * 
+	 * @component
+	 */
+	private PlexusContainer plexusContainer;
 
 	/**
 	 * {@link WagonProvider}.
@@ -205,6 +175,50 @@ public class StartOfficeBuildingGoal extends AbstractGoal {
 	 */
 	private Integer port = DEFAULT_OFFICE_BUILDING_PORT;
 
+	/**
+	 * {@link PluginDependencyInclusion} instances.
+	 */
+	private final List<PluginDependencyInclusion> dependencyInclusions = new ArrayList<PluginDependencyInclusion>(
+			2);
+
+	/**
+	 * Initiate.
+	 */
+	public StartOfficeBuildingGoal() {
+		// Always include the OfficeBuilding
+		this.includePluginDependencyToOfficeBuildingClassPath(
+				OfficeBuildingManager.OFFICE_BUILDING_GROUP_ID,
+				OfficeBuildingManager.OFFICE_BUILDING_ARTIFACT_ID, "jar", null);
+	}
+
+	/**
+	 * <p>
+	 * Provides ability to selectively include plugin dependencies on the class
+	 * path of the started {@link OfficeBuilding}.
+	 * <p>
+	 * This allows for additional plugins such {@link OfficeFloorDecorator}
+	 * instances.
+	 * <p>
+	 * Please note that it must be a dependency of the plugin. Not found
+	 * dependencies will result in a build failure.
+	 * <p>
+	 * The version is derived from the maven configuration.
+	 * 
+	 * @param groupId
+	 *            Group Id of the dependency.
+	 * @param artifactId
+	 *            Artifact Id of the dependency.
+	 * @param type
+	 *            Type of the dependency.
+	 * @param classifier
+	 *            Classifier. May be <code>null</code>.
+	 */
+	public void includePluginDependencyToOfficeBuildingClassPath(
+			String groupId, String artifactId, String type, String classifier) {
+		this.dependencyInclusions.add(new PluginDependencyInclusion(groupId,
+				artifactId, type, classifier));
+	}
+
 	/*
 	 * ======================== Mojo ==========================
 	 */
@@ -213,52 +227,58 @@ public class StartOfficeBuildingGoal extends AbstractGoal {
 	public void execute() throws MojoExecutionException, MojoFailureException {
 
 		// Ensure have configured values
-		assertNotNull("Must have project", this.project);
-		assertNotNull("Must have plug-in dependencies", this.pluginDependencies);
-		assertNotNull("Must have local repository", this.localRepository);
-		assertNotNull("Must have wagon provider", this.wagonProvider);
-		assertNotNull(
+		ensureNotNull("Must have project", this.project);
+		ensureNotNull("Must have plug-in dependencies", this.pluginDependencies);
+		ensureNotNull("Must have local repository", this.localRepository);
+		ensureNotNull("Must have plexus container", this.plexusContainer);
+		ensureNotNull("Must have wagon provider", this.wagonProvider);
+		ensureNotNull(
 				"Port not configured for the "
 						+ OfficeBuilding.class.getSimpleName(), this.port);
-
-		// Obtain the remote repository URLs
-		String[] remoteRepositoryURLs;
-		try {
-			List<String> urls = new LinkedList<String>();
-			for (Object object : this.project.getRemoteArtifactRepositories()) {
-				ArtifactRepository repository = (ArtifactRepository) object;
-				urls.add(repository.getUrl());
-			}
-			remoteRepositoryURLs = urls.toArray(new String[0]);
-		} catch (Throwable ex) {
-			throw this.newMojoExecutionException(
-					"Failed obtaining Remote Repository URLs", ex);
-		}
 
 		// Create the environment properties
 		Properties environment = new Properties();
 		environment.putAll(this.project.getProperties());
 
-		// Obtain the OfficeBuilding Artifact
-		Artifact officeBuildingArtifact = null;
-		for (Artifact dependency : this.pluginDependencies) {
-			if (OfficeBuildingManager.OFFICE_BUIDLING_ARTIFACT_ID
-					.equals(dependency.getArtifactId())) {
-				// Found the OfficeBuilding Artifact
-				officeBuildingArtifact = dependency;
+		// Obtain the plugin dependency inclusions
+		List<Artifact> artifactInclusions = new ArrayList<Artifact>(
+				this.pluginDependencies.size());
+		for (PluginDependencyInclusion inclusion : this.dependencyInclusions) {
+
+			// Must match on dependency for inclusion
+			Artifact includedDependency = null;
+			for (Artifact dependency : this.pluginDependencies) {
+				if ((inclusion.groupId.equals(dependency.getGroupId()))
+						&& (inclusion.artifactId.equals(dependency
+								.getArtifactId()))
+						&& (inclusion.type.equals(dependency.getType()))
+						&& ((inclusion.classifier == null) || (inclusion.classifier
+								.equals(dependency.getClassifier())))) {
+					// Found the dependency to include
+					includedDependency = dependency;
+				}
 			}
-		}
-		if (officeBuildingArtifact == null) {
-			// Must have OfficeBuilding Artifact
-			throw this
-					.newMojoExecutionException(
-							"Failed to obtain plug-in dependency "
-									+ OfficeBuildingManager.OFFICE_BUIDLING_ARTIFACT_ID,
-							null);
+
+			// Ensure have dependency for inclusion
+			if (includedDependency == null) {
+				throw newMojoExecutionException(
+						"Failed to obtain plug-in dependency "
+								+ inclusion.groupId
+								+ ":"
+								+ inclusion.artifactId
+								+ (inclusion.classifier == null ? "" : ":"
+										+ inclusion.classifier) + ":"
+								+ inclusion.type, null);
+
+			}
+
+			// Include the dependency
+			artifactInclusions.add(includedDependency);
 		}
 
 		// Obtain the class path for OfficeBuilding
 		String classPath = null;
+		String[] remoteRepositoryURLs;
 		try {
 
 			// Obtain the repository system
@@ -269,47 +289,54 @@ public class StartOfficeBuildingGoal extends AbstractGoal {
 			RepositorySystem repoSystem = locator
 					.getService(RepositorySystem.class);
 
-			// Obtain the repository session
-			MavenRepositorySystemSession repoSession = new MavenRepositorySystemSession();
-			LocalRepository localRepo = new LocalRepository(
+			// Create the class path factory and add remote repositories
+			File localRepositoryDirectory = new File(
 					this.localRepository.getBasedir());
-			repoSession.setLocalRepositoryManager(repoSystem
-					.newLocalRepositoryManager(localRepo));
+			ClassPathFactoryImpl classPathFactory = new ClassPathFactoryImpl(
+					this.plexusContainer, repoSystem, localRepositoryDirectory);
 
-			// Create the OfficeBuilding dependency
-			Dependency dependency = new Dependency(new DefaultArtifact(
-					officeBuildingArtifact.getGroupId(),
-					officeBuildingArtifact.getArtifactId(),
-					officeBuildingArtifact.getType(),
-					officeBuildingArtifact.getVersion()), "compile");
-
-			// Create the Collect Request for OfficeBuilding dependencies
-			CollectRequest collectRequest = new CollectRequest();
-			collectRequest.setRoot(dependency);
+			// Obtain remote repositories and load to class path factory
+			List<String> urls = new LinkedList<String>();
 			for (Object object : this.project.getRemoteArtifactRepositories()) {
 				ArtifactRepository repository = (ArtifactRepository) object;
-				RemoteRepository remoteRepository = new RemoteRepository(
-						repository.getId(), repository.getLayout().getId(),
-						repository.getUrl());
-				collectRequest.addRepository(remoteRepository);
+				String remoteRepositoryUrl = repository.getUrl();
+				classPathFactory.registerRemoteRepository(repository.getId(),
+						repository.getLayout().getId(), remoteRepositoryUrl);
+				urls.add(remoteRepositoryUrl);
+			}
+			remoteRepositoryURLs = urls.toArray(new String[urls.size()]);
+
+			// Obtain the class path entries for each included artifact
+			List<String> classPathEntries = new LinkedList<String>();
+			for (Artifact dependency : artifactInclusions) {
+
+				// Obtain the class path entries for the dependency
+				String[] entries = classPathFactory.createArtifactClassPath(
+						dependency.getGroupId(), dependency.getArtifactId(),
+						dependency.getVersion(), dependency.getType(),
+						dependency.getClassifier());
+
+				// Uniquely include the class path entries
+				for (String entry : entries) {
+					if (classPathEntries.contains(entry)) {
+						continue; // ignore as already included
+					}
+					classPathEntries.add(entry);
+				}
 			}
 
-			// Collect the dependencies and generate the Class Path
-			DependencyNode node = repoSystem.collectDependencies(repoSession,
-					collectRequest).getRoot();
-			repoSystem.resolveDependencies(repoSession, node, null);
-			PreorderNodeListGenerator generator = new PreorderNodeListGenerator();
-			node.accept(generator);
-			classPath = generator.getClassPath();
+			// Obtain the class path
+			classPath = ClassPathFactoryImpl
+					.transformClassPathEntriesToClassPath(classPathEntries
+							.toArray(new String[classPathEntries.size()]));
 
 			// Indicate the class path
 			this.getLog().debug("OfficeBuilding class path: " + classPath);
 
 		} catch (Exception ex) {
-			throw this
-					.newMojoExecutionException(
-							"Failed obtaining dependencies for launching OfficeBuilding",
-							ex);
+			throw newMojoExecutionException(
+					"Failed obtaining dependencies for launching OfficeBuilding",
+					ex);
 		}
 
 		// Create the process configuration
@@ -337,13 +364,59 @@ public class StartOfficeBuildingGoal extends AbstractGoal {
 			this.getLog().error("   additional classpath='" + classPath + "'");
 
 			// Propagate the failure
-			throw this.newMojoExecutionException(MESSAGE, ex);
+			throw newMojoExecutionException(MESSAGE, ex);
 		}
 
 		// Log started OfficeBuilding
 		this.getLog().info(
 				"Started " + OfficeBuilding.class.getSimpleName() + " on port "
 						+ this.port.intValue());
+	}
+
+	/**
+	 * Plugin dependency inclusion.
+	 */
+	private static class PluginDependencyInclusion {
+
+		/**
+		 * Group Id.
+		 */
+		public final String groupId;
+
+		/**
+		 * Artifact Id.
+		 */
+		public final String artifactId;
+
+		/**
+		 * Type.
+		 */
+		public final String type;
+
+		/**
+		 * Classifier. May be <code>null</code>.
+		 */
+		public final String classifier;
+
+		/**
+		 * Initiate.
+		 * 
+		 * @param groupId
+		 *            Group Id.
+		 * @param artifactId
+		 *            Artifact Id.
+		 * @param type
+		 *            Type.
+		 * @param classifier
+		 *            Classifier. May be <code>null</code>.
+		 */
+		public PluginDependencyInclusion(String groupId, String artifactId,
+				String type, String classifier) {
+			this.groupId = groupId;
+			this.artifactId = artifactId;
+			this.type = type;
+			this.classifier = classifier;
+		}
 	}
 
 }

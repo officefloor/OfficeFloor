@@ -25,7 +25,6 @@ import net.officefloor.compile.properties.Property;
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.plugin.web.http.application.WebAutoWireApplication;
-import net.officefloor.plugin.web.http.resource.source.SourceHttpResourceFactory;
 import net.officefloor.plugin.woof.WoofOfficeFloorSource;
 
 import com.google.gwt.core.ext.ServletContainer;
@@ -56,6 +55,11 @@ public class WoofServletContainer extends ServletContainer {
 	private final int port;
 
 	/**
+	 * Web App directory.
+	 */
+	private final File webAppDirectory;
+
+	/**
 	 * Resource directories.
 	 */
 	private final File[] resourceDirectories;
@@ -79,6 +83,8 @@ public class WoofServletContainer extends ServletContainer {
 	 *            Name of this container.
 	 * @param port
 	 *            Port.
+	 * @param webAppDirectory
+	 *            Web App directory.
 	 * @param resourceDirectories
 	 *            Resource directories.
 	 * @param properties
@@ -87,11 +93,12 @@ public class WoofServletContainer extends ServletContainer {
 	 *             If fails to open {@link OfficeFloor}.
 	 */
 	public WoofServletContainer(TreeLogger logger, String containerName,
-			int port, File[] resourceDirectories, PropertyList properties)
-			throws Exception {
+			int port, File webAppDirectory, File[] resourceDirectories,
+			PropertyList properties) throws Exception {
 		this.logger = logger;
 		this.containerName = containerName;
 		this.port = port;
+		this.webAppDirectory = webAppDirectory;
 		this.resourceDirectories = resourceDirectories;
 		this.properties = properties;
 
@@ -129,15 +136,9 @@ public class WoofServletContainer extends ServletContainer {
 		compiler.addProperty(WoofOfficeFloorSource.PROPERTY_HTTP_PORT,
 				String.valueOf(this.port));
 
-		// Configure resource directories
-		SourceHttpResourceFactory.loadProperties(null,
-				this.resourceDirectories, null, Boolean.FALSE,
-				new SourceHttpResourceFactory.PropertyTarget() {
-					@Override
-					public void addProperty(String name, String value) {
-						compiler.addProperty(name, value);
-					}
-				});
+		// Configure access to web resources
+		WoofOfficeFloorSource.loadWebResources(compiler, this.webAppDirectory,
+				this.resourceDirectories);
 
 		// Load the additional properties
 		for (Property property : this.properties) {

@@ -138,6 +138,11 @@
 			</dependency>
 			<dependency>
 				<groupId>net.officefloor.plugin</groupId>
+				<artifactId>officeplugin_base</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>net.officefloor.plugin</groupId>
 				<artifactId>officeplugin_comet</artifactId>
 				<version>${project.version}</version>
 			</dependency>

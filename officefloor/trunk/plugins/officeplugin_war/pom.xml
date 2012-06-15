@@ -19,6 +19,10 @@
 			<artifactId>officebuilding</artifactId>
 		</dependency>
 		<dependency>
+			<groupId>net.officefloor.plugin</groupId>
+			<artifactId>officeplugin_base</artifactId>
+		</dependency>
+		<dependency>
 			<groupId>${project.groupId}</groupId>
 			<artifactId>officeplugin_servlet</artifactId>
 			<scope>test</scope>

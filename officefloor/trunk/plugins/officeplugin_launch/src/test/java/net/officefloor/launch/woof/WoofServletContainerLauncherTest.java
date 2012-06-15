@@ -101,6 +101,11 @@ public class WoofServletContainerLauncherTest extends OfficeFrameTestCase {
 		assertTrue("Failed to setup src directory",
 				this.webappDirectory.mkdir());
 
+		// Ensure webapp directory contains web.xml
+		File webInfDir = new File(this.webappDirectory, "WEB-INF");
+		assertTrue("Failed to setup web app directory", webInfDir.mkdir());
+		this.writeFile(webInfDir, "web.xml", "marker file");
+
 		// Create file within webapp directory
 		this.writeFile(this.webappDirectory, "source.html", "SOURCE");
 
@@ -119,6 +124,8 @@ public class WoofServletContainerLauncherTest extends OfficeFrameTestCase {
 
 		// Provide WoOF configuration for launcher
 		WoofDevelopmentConfiguration configuration = new WoofDevelopmentConfiguration();
+		configuration.setWarDirectory(this.warDirectory);
+		configuration.setWebAppDirectory(this.webappDirectory);
 		configuration.addResourceDirectory(this.webappDirectory);
 		configuration.storeConfiguration(new File(this.warDirectory,
 				WoofServletContainerLauncher.CONFIGURATION_FILE_NAME));
@@ -206,8 +213,8 @@ public class WoofServletContainerLauncherTest extends OfficeFrameTestCase {
 		try {
 			// Attempt to start new instance that has invalid configuration
 			this.servletContainer = new WoofServletContainer(logger, "NAME",
-					MockHttpServer.getAvailablePort(), new File[0],
-					OfficeFloorCompiler.newPropertyList()) {
+					MockHttpServer.getAvailablePort(), this.webappDirectory,
+					new File[0], OfficeFloorCompiler.newPropertyList()) {
 				@Override
 				protected WebAutoWireApplication createWebAutoWireApplication() {
 

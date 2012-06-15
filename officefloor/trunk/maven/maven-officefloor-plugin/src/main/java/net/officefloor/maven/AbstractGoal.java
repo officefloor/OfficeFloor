@@ -39,7 +39,7 @@ public abstract class AbstractGoal extends AbstractMojo {
 	 * @throws MojoFailureException
 	 *             If value is <code>null</code>.
 	 */
-	protected static void assertNotNull(String message, Object value)
+	protected static void ensureNotNull(String message, Object value)
 			throws MojoFailureException {
 		if (value == null) {
 			throw new MojoFailureException(message);
@@ -84,7 +84,7 @@ public abstract class AbstractGoal extends AbstractMojo {
 	 *            Cause.
 	 * @return {@link MojoExecutionException}.
 	 */
-	protected MojoExecutionException newMojoExecutionException(String message,
+	public static MojoExecutionException newMojoExecutionException(String message,
 			Throwable cause) {
 
 		// Create the message

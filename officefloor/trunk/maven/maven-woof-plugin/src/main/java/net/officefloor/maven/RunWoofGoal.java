@@ -18,17 +18,22 @@
 
 package net.officefloor.maven;
 
+import java.io.File;
 import java.util.List;
 
+import net.officefloor.building.manager.OfficeBuildingManager;
 import net.officefloor.frame.api.manage.OfficeFloor;
+import net.officefloor.plugin.war.WarOfficeFloorDecorator;
 import net.officefloor.plugin.woof.WoofOfficeFloorSource;
 
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.repository.ArtifactRepository;
+import org.apache.maven.model.Build;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.project.MavenProject;
+import org.codehaus.plexus.PlexusContainer;
 import org.sonatype.aether.connector.wagon.WagonProvider;
 
 /**
@@ -48,6 +53,13 @@ public class RunWoofGoal extends AbstractMojo {
 	 * @required
 	 */
 	private MavenProject project;
+
+	/**
+	 * {@link PlexusContainer}.
+	 * 
+	 * @component
+	 */
+	private PlexusContainer plexusContainer;
 
 	/**
 	 * {@link WagonProvider}.
@@ -86,10 +98,35 @@ public class RunWoofGoal extends AbstractMojo {
 	@Override
 	public void execute() throws MojoExecutionException, MojoFailureException {
 
-		// Ensure the OfficeBuilding is available
-		StartOfficeBuildingGoal.ensureDefaultOfficeBuildingAvailable(
-				this.project, this.pluginDependencies, this.localRepository,
-				this.wagonProvider, this.getLog());
+		// Determine if OfficeBuilding is running
+		if (OfficeBuildingManager
+				.isOfficeBuildingAvailable(null,
+						StartOfficeBuildingGoal.DEFAULT_OFFICE_BUILDING_PORT
+								.intValue(), StartOfficeBuildingGoal
+								.getKeyStoreFile(),
+						StartOfficeBuildingGoal.KEY_STORE_PASSWORD,
+						StartOfficeBuildingGoal.USER_NAME,
+						StartOfficeBuildingGoal.PASSWORD)) {
+
+			// OfficeBuilding running, so shutdown (allow clean start)
+			StopOfficeBuildingGoal.createStopOfficeBuildingGoal(
+					StartOfficeBuildingGoal.DEFAULT_OFFICE_BUILDING_PORT, null,
+					this.getLog()).execute();
+		}
+
+		// Create goal to start the OfficeBuilding
+		StartOfficeBuildingGoal startGoal = StartOfficeBuildingGoal
+				.createStartOfficeBuildingGoal(this.project,
+						this.pluginDependencies, this.localRepository,
+						this.plexusContainer, this.wagonProvider, this.getLog());
+
+		// Include officeplugin_war on class path (handle WoOF resources)
+		startGoal.includePluginDependencyToOfficeBuildingClassPath(
+				WarOfficeFloorDecorator.PLUGIN_WAR_GROUP_ID,
+				WarOfficeFloorDecorator.PLUGIN_WAR_ARTIFACT_ID, "jar", null);
+
+		// Start the OfficeBuilding
+		startGoal.execute();
 
 		// Create the open goal and configure for WoOF
 		OpenOfficeFloorGoal openGoal = OpenOfficeFloorGoal
@@ -98,11 +135,36 @@ public class RunWoofGoal extends AbstractMojo {
 						this.getLog());
 		openGoal.setOfficeFloorSource(WoofOfficeFloorSource.class.getName());
 
+		/*
+		 * Include the web app directory as class path entry so that may run
+		 * without requiring packaging.
+		 */
+		File baseDir = this.project.getBasedir();
+		File webAppDir = new File(baseDir, "src/main/webapp");
+		openGoal.addClassPathEntry(webAppDir.getAbsolutePath());
+
+		/*
+		 * Include resulting pre-WAR directory. This allows inclusion of GWT
+		 * content.
+		 */
+		Build build = this.project.getBuild();
+		String assemblePath = build.getDirectory() + "/" + build.getFinalName();
+		File assembleDir = new File(assemblePath);
+		if (!(assembleDir.exists())) {
+			this.getLog()
+					.warn("No GWT functionality will be available.  Please package project to create content in "
+							+ assembleDir.getAbsolutePath());
+		}
+		openGoal.addClassPathEntry(assembleDir.getAbsolutePath());
+
 		// Indicate WoOF application running
-		this.getLog().info("Application running");
+		this.getLog().info("Starting WoOF application");
 
 		// Open the WoOF
 		openGoal.execute();
+
+		// Indicate WoOF application running
+		this.getLog().info("WoOF application running");
 	}
 
 }

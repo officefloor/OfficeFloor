@@ -68,10 +68,14 @@ public class WoofDevelopmentConfigurationLoaderTest extends OfficeFrameTestCase 
 		File warDirectory = woofFile.getParentFile();
 		configuration.setWarDirectory(warDirectory);
 
+		// Add webapp directory
+		File webAppDirectory = woofFile.getParentFile().getParentFile();
+		configuration.setWebAppDirectory(webAppDirectory);
+
 		// Add additional resource directories
-		File resourceDirectoryOne = warDirectory.getParentFile();
+		File resourceDirectoryOne = warDirectory;
 		configuration.addResourceDirectory(resourceDirectoryOne);
-		File resourceDirectoryTwo = resourceDirectoryOne.getParentFile();
+		File resourceDirectoryTwo = webAppDirectory;
 		configuration.addResourceDirectory(resourceDirectoryTwo);
 
 		// Serialise the configuration
@@ -89,6 +93,11 @@ public class WoofDevelopmentConfigurationLoaderTest extends OfficeFrameTestCase 
 		assertEquals("Incorrect WAR directory",
 				warDirectory.getCanonicalPath(), serialisedConfiguration
 						.getWarDirectory().getCanonicalPath());
+
+		// Validate the web app directory
+		assertEquals("Incorrect web app directory",
+				webAppDirectory.getCanonicalPath(), serialisedConfiguration
+						.getWebAppDirectory().getCanonicalPath());
 
 		// Validate the resource directories
 		File[] resourceDirectories = serialisedConfiguration

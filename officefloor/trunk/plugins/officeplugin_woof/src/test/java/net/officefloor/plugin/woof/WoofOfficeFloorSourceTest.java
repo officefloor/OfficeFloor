@@ -19,11 +19,14 @@
 package net.officefloor.plugin.woof;
 
 import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.IOException;
 
 import net.officefloor.autowire.AutoWire;
 import net.officefloor.autowire.AutoWireManagement;
 import net.officefloor.autowire.AutoWireSection;
+import net.officefloor.compile.impl.issues.FailCompilerIssues;
+import net.officefloor.frame.spi.source.UnknownResourceError;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.model.woof.WoofModel;
 import net.officefloor.plugin.section.clazz.ClassSectionSource;
@@ -142,6 +145,86 @@ public class WoofOfficeFloorSourceTest extends OfficeFrameTestCase {
 
 		// Test
 		this.doTestRequest("/commandline");
+	}
+
+	/**
+	 * Ensure can retrieve <code>*.woof.html</code> files from the
+	 * <code>src/main/webapp</code> directory for running within unit tests for
+	 * maven.
+	 */
+	public void testSrcMainWebappWoofResources() throws Exception {
+
+		// Obtain webapp configuration location
+		String alternateConfigurationLocation = this
+				.getPackageRelativePath(this.getClass()) + "/webapp.woof";
+
+		// Run the application for woof resource
+		WoofOfficeFloorSource.main("-"
+				+ WoofOfficeFloorSource.PROPERTY_WOOF_CONFIGURATION_LOCATION,
+				alternateConfigurationLocation);
+
+		// Test
+		String response = this.doRequest("/woofResource");
+		assertEquals(
+				"Incorrect response",
+				"This is only for testing and should not be included in built jar for project",
+				response);
+	}
+
+	/**
+	 * Ensure can retrieve static files from the <code>src/main/webapp</code>
+	 * directory for running within unit tests for maven.
+	 */
+	public void testSrcMainWebappStaticResources() throws Exception {
+
+		// Obtain webapp configuration location
+		String alternateConfigurationLocation = this
+				.getPackageRelativePath(this.getClass()) + "/webapp.woof";
+
+		// Run the application for woof resource
+		WoofOfficeFloorSource.main("-"
+				+ WoofOfficeFloorSource.PROPERTY_WOOF_CONFIGURATION_LOCATION,
+				alternateConfigurationLocation);
+
+		// Test
+		String response = this.doRequest("/NonWoof.html");
+		assertEquals(
+				"Incorrect response",
+				"Not a WoOF resource.  Also should not be included in resulting built jar.",
+				response);
+	}
+
+	/**
+	 * Ensure only retrieve <code>*.woof.html</code> files from the
+	 * <code>src/main/webapp</code> directory.
+	 */
+	public void testSrcMainWebappIgnoreOtherResources() throws Exception {
+
+		// Ensure the resource is available
+		File nonWoofResource = new File(".", "src/main/webapp/NonWoof.html");
+		assertTrue("Invalid test as non-WoOF resource not exists",
+				(nonWoofResource.exists() && nonWoofResource.isFile()));
+
+		// Obtain webapp configuration location
+		String alternateConfigurationLocation = this
+				.getPackageRelativePath(this.getClass()) + "/webappOther.woof";
+
+		try {
+			// Run the application for woof resource
+			WoofOfficeFloorSource
+					.main("-"
+							+ WoofOfficeFloorSource.PROPERTY_WOOF_CONFIGURATION_LOCATION,
+							alternateConfigurationLocation);
+			fail("Should not successfully find resource and therefore should not start");
+
+		} catch (FailCompilerIssues ex) {
+			// Should not start due to unknown resource
+			Throwable cause = ex.getCause();
+			assertTrue("Incorrect cause",
+					(cause instanceof UnknownResourceError));
+			assertEquals("Incorrect reason", "Unknown resource 'NonWoof.html'",
+					cause.getMessage());
+		}
 	}
 
 	/**

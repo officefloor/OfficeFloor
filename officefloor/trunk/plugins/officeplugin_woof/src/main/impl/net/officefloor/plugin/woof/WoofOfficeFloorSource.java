@@ -18,12 +18,19 @@
 
 package net.officefloor.plugin.woof;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.logging.Logger;
+
 import net.officefloor.autowire.AutoWireApplication;
 import net.officefloor.compile.OfficeFloorCompiler;
 import net.officefloor.compile.properties.Property;
 import net.officefloor.compile.spi.officefloor.OfficeFloorDeployer;
 import net.officefloor.compile.spi.officefloor.source.OfficeFloorSourceContext;
 import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
+import net.officefloor.frame.spi.source.ResourceSource;
 import net.officefloor.model.impl.repository.ModelRepositoryImpl;
 import net.officefloor.model.impl.repository.classloader.ClassLoaderConfigurationContext;
 import net.officefloor.model.objects.AutoWireObjectsRepositoryImpl;
@@ -36,6 +43,7 @@ import net.officefloor.plugin.objects.AutoWireObjectsLoader;
 import net.officefloor.plugin.objects.AutoWireObjectsLoaderImpl;
 import net.officefloor.plugin.teams.AutoWireTeamsLoader;
 import net.officefloor.plugin.teams.AutoWireTeamsLoaderImpl;
+import net.officefloor.plugin.web.http.resource.source.SourceHttpResourceFactory;
 import net.officefloor.plugin.web.http.server.HttpServerAutoWireApplication;
 import net.officefloor.plugin.web.http.server.HttpServerAutoWireOfficeFloorSource;
 
@@ -46,6 +54,12 @@ import net.officefloor.plugin.web.http.server.HttpServerAutoWireOfficeFloorSourc
  * @author Daniel Sagenschneider
  */
 public class WoofOfficeFloorSource extends HttpServerAutoWireOfficeFloorSource {
+
+	/**
+	 * {@link Logger}.
+	 */
+	private static final Logger LOGGER = Logger
+			.getLogger(WoofOfficeFloorSource.class.getName());
 
 	/**
 	 * Property for the location of the WoOF configuration for the application.
@@ -77,6 +91,11 @@ public class WoofOfficeFloorSource extends HttpServerAutoWireOfficeFloorSource {
 	 * Default Teams configuration location.
 	 */
 	public static final String DEFAULT_TEAMS_CONFIGURATION_LOCATION = "application.teams";
+
+	/**
+	 * Path within Maven project to the <code>webapp</code> directory.
+	 */
+	private static final String WEBAPP_PATH = "src/main/webapp";
 
 	/**
 	 * <code>main</code> to run the {@link WoofModel}.
@@ -126,8 +145,99 @@ public class WoofOfficeFloorSource extends HttpServerAutoWireOfficeFloorSource {
 	 *             If fails to run.
 	 */
 	public static void run(WoofOfficeFloorSource application) throws Exception {
+
+		// Load the WoOF resources
+		loadWebResourcesFromMavenProject(application.getOfficeFloorCompiler());
+
 		// Start the application
 		application.openOfficeFloor();
+	}
+
+	/**
+	 * Loads the web application resources for WoOF within a Maven project.
+	 * 
+	 * @param compiler
+	 *            {@link OfficeFloorCompiler}.
+	 */
+	public static void loadWebResourcesFromMavenProject(
+			OfficeFloorCompiler compiler) {
+
+		// Determine if running within maven project
+		File projectDir = new File(".");
+		if (new File(projectDir, "pom.xml").exists()) {
+
+			// Within maven project, so include webapp WoOF resources
+			final File webAppDir = new File(projectDir, WEBAPP_PATH);
+			if (!(webAppDir.exists())) {
+				LOGGER.info(WEBAPP_PATH
+						+ " not found. Typically should exist in project for web content.");
+				return; // not include
+			}
+
+			// Load the web resources
+			loadWebResources(compiler, webAppDir, new File[] { webAppDir });
+		}
+	}
+
+	/**
+	 * Loads the web application resources for WoOF within a Maven project.
+	 * 
+	 * @param compiler
+	 *            {@link OfficeFloorCompiler}.
+	 */
+	public static void loadWebResources(final OfficeFloorCompiler compiler,
+			final File webAppDir, File[] resourceDirectories) {
+
+		// Ensure have web app directory
+		if (webAppDir == null) {
+			LOGGER.warning("No web app directory provided so not including web resources");
+			return; // must have web app directory
+		}
+
+		// Ensure the WEB-INF/web.xml file exists
+		final String webXmlPath = "WEB-INF/web.xml";
+		if (!(new File(webAppDir, webXmlPath).exists())) {
+			LOGGER.warning("Not including " + WEBAPP_PATH + " content as "
+					+ webXmlPath + " not found within "
+					+ webAppDir.getAbsolutePath());
+			return; // not include
+		}
+
+		// Configure webapp as resource directory
+		SourceHttpResourceFactory.loadProperties(null, resourceDirectories,
+				null, Boolean.FALSE,
+				new SourceHttpResourceFactory.PropertyTarget() {
+					@Override
+					public void addProperty(String name, String value) {
+						compiler.addProperty(name, value);
+					}
+				});
+
+		// Make WoOF resources available
+		compiler.addResources(new ResourceSource() {
+			@Override
+			public InputStream sourceResource(String location) {
+
+				// Determine if WoOF resource
+				if (!(WoofUtil.isWoofResource(location))) {
+					return null; // not WoOF resource
+				}
+
+				try {
+					// Determine if within webapp directory
+					File resource = new File(webAppDir, location);
+					if (resource.exists()) {
+						// Provide resource from webapp directory
+						return new FileInputStream(resource);
+					}
+				} catch (IOException ex) {
+					// Indicate unable to obtain resource
+				}
+
+				// Not found within webapp directory
+				return null;
+			}
+		});
 	}
 
 	/**
