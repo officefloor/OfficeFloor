@@ -20,7 +20,7 @@ Template throwing exception
 
   The following is the template:
   
-%{code-snippet|brush=xml|file=${basedir}/src/main/resources/Template.html}
+%{code-snippet|brush=xml|file=${basedir}/src/main/webapp/Template.woof.html}
 
   with the logic throwing the exception:
   
@@ -72,7 +72,7 @@ Resource
   
   The remaining configuration indicates that the <<<TechnicalFault>>> should send the following static response.
   
-%{code-snippet|brush=xml|file=${basedir}/src/main/resources/PUBLIC/Error.html}
+%{code-snippet|brush=xml|file=${basedir}/src/main/webapp/Error.html}
 
   It is possible to use the details of the exception within a template to generate a response.  For simplicity of this tutorial however a static resource is used (right click and add resource).
 
