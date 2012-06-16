@@ -30,6 +30,7 @@ import net.officefloor.frame.spi.source.UnknownResourceError;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.model.woof.WoofModel;
 import net.officefloor.plugin.section.clazz.ClassSectionSource;
+import net.officefloor.plugin.section.clazz.NextTask;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
 import net.officefloor.plugin.web.http.server.HttpServerAutoWireOfficeFloorSource;
 
@@ -172,6 +173,30 @@ public class WoofOfficeFloorSourceTest extends OfficeFrameTestCase {
 	}
 
 	/**
+	 * Ensure can retrieve configured resource from the
+	 * <code>src/main/webapp</code> directory for running within unit tests for
+	 * maven.
+	 */
+	public void testSrcMainWebappConfiguredResource() throws Exception {
+
+		// Obtain webapp configuration location
+		String alternateConfigurationLocation = this
+				.getPackageRelativePath(this.getClass()) + "/webapp.woof";
+
+		// Run the application for woof resource
+		WoofOfficeFloorSource.main("-"
+				+ WoofOfficeFloorSource.PROPERTY_WOOF_CONFIGURATION_LOCATION,
+				alternateConfigurationLocation);
+
+		// Test
+		String response = this.doRequest("/resource");
+		assertEquals(
+				"Incorrect response",
+				"Configured resource for testing that should not be included in built jar for project",
+				response);
+	}
+
+	/**
 	 * Ensure can retrieve static files from the <code>src/main/webapp</code>
 	 * directory for running within unit tests for maven.
 	 */
@@ -288,6 +313,15 @@ public class WoofOfficeFloorSourceTest extends OfficeFrameTestCase {
 		ByteArrayOutputStream buffer = new ByteArrayOutputStream();
 		response.getEntity().writeTo(buffer);
 		return new String(buffer.toByteArray());
+	}
+
+	/**
+	 * Class for {@link ClassSectionSource} in testing.
+	 */
+	public static class LinkToResource {
+		@NextTask("resource")
+		public void service() {
+		}
 	}
 
 	/**
