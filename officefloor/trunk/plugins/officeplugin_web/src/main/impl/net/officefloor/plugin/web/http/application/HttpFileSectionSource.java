@@ -64,9 +64,6 @@ public class HttpFileSectionSource extends AbstractSectionSource {
 	public void sourceSection(SectionDesigner designer,
 			SectionSourceContext context) throws Exception {
 
-		// Obtain the class path prefix
-		String classPathPrefix = context.getSectionLocation();
-
 		// Create the Server HTTP Connection dependency
 		SectionObject serverHttpConnectionDependency = designer
 				.addSectionObject(ServerHttpConnection.class.getSimpleName(),
@@ -91,11 +88,15 @@ public class HttpFileSectionSource extends AbstractSectionSource {
 				}
 
 				// Create the resource task
-				SectionWork work = designer.addSectionWork(resourcePath,
+				final SectionWork work = designer.addSectionWork(resourcePath,
 						HttpFileWorkSource.class.getName());
-				work.addProperty(
-						SourceHttpResourceFactory.PROPERTY_CLASS_PATH_PREFIX,
-						classPathPrefix);
+				SourceHttpResourceFactory.copyProperties(context,
+						new SourceHttpResourceFactory.PropertyTarget() {
+							@Override
+							public void addProperty(String name, String value) {
+								work.addProperty(name, value);
+							}
+						});
 				work.addProperty(HttpFileWorkSource.PROPERTY_RESOURCE_PATH,
 						resourcePath);
 				SectionTask task = work.addSectionTask(resourcePath,

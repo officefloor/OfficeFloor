@@ -463,9 +463,16 @@ public class WebApplicationAutoWireOfficeFloorSource extends
 				|| (this.escalationResources.size() > 0)) {
 
 			// Create section to send resources
-			AutoWireSection section = this.addSection("RESOURCES",
+			final AutoWireSection section = this.addSection("RESOURCES",
 					HttpFileSectionSource.class.getName(),
 					WEB_PUBLIC_RESOURCES_CLASS_PATH_PREFIX);
+			SourceHttpResourceFactory.copyProperties(context,
+					new SourceHttpResourceFactory.PropertyTarget() {
+						@Override
+						public void addProperty(String name, String value) {
+							section.addProperty(name, value);
+						}
+					});
 
 			// Link section outputs to the resources
 			for (ResourceLink resourceLink : this.resourceLinks) {

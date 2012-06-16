@@ -54,7 +54,9 @@
 								<property name="binDir"
 									value="${basedir}/target/OfficeFloor-${project.version}-release/OfficeFloor-${project.version}/bin" />
 								<property name="mavenLocalRepository" value="file://${settings.localRepository}" />
-									
+								<property name="runApplicationArtifact"
+									value="net.officefloor.tutorial:DemoApp:war:${project.version}" />
+
 								<echo>Starting OfficeBuilding</echo>
 								<chmod file="${binDir}/officebuilding" perm="555" />
 								<exec dir="${binDir}" executable="${binDir}/officebuilding"
@@ -63,14 +65,14 @@
 								</exec>
 								<sleep seconds="5" /> <!-- allow time to start -->
 
-								<echo>Opening FeatureApp</echo>
+								<echo>Opening ${runApplicationArtifact}</echo>
 								<echo>Using local repository ${mavenLocalRepository}</echo>
 								<exec dir="${binDir}" executable="${binDir}/officebuilding"
 									failonerror="true">
 									<arg value="--remote_repository_urls" />
 									<arg value="${mavenLocalRepository}" />
 									<arg value="-a" />
-									<arg value="net.officefloor.tutorial:DemoApp:war:${project.version}" />
+									<arg value="${runApplicationArtifact}" />
 									<arg value="open" />
 								</exec>
 							</target>
