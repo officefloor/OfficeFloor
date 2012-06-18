@@ -19,8 +19,13 @@ package net.officefloor.launch.woof;
 
 import java.io.File;
 import java.io.InputStream;
+import java.util.Arrays;
+import java.util.LinkedList;
+import java.util.List;
 
+import net.officefloor.building.classpath.ClassPathFactory;
 import net.officefloor.building.classpath.ClassPathFactoryImpl;
+import net.officefloor.building.classpath.RemoteRepository;
 import net.officefloor.model.impl.repository.ModelRepositoryImpl;
 import net.officefloor.model.impl.repository.inputstream.InputStreamConfigurationItem;
 import net.officefloor.model.woof.PropertyModel;
@@ -34,10 +39,11 @@ import net.officefloor.model.woof.WoofTemplateExtensionModel;
 import net.officefloor.model.woof.WoofTemplateModel;
 import net.officefloor.plugin.woof.gwt.GwtWoofTemplateExtensionService;
 
+import org.apache.maven.artifact.repository.ArtifactRepository;
 import org.apache.maven.model.Dependency;
 import org.apache.maven.project.MavenProject;
 import org.codehaus.plexus.DefaultPlexusContainer;
-import org.sonatype.aether.repository.RemoteRepository;
+import org.codehaus.plexus.PlexusContainer;
 
 /**
  * Loads the {@link WoofDevelopmentConfiguration} from the project.
@@ -62,6 +68,11 @@ public class WoofDevelopmentConfigurationLoader {
 	public static final String GWT_DEV_ARTIFACT_ID = "gwt-dev";
 
 	/**
+	 * Default version for GWT Dev artifact to use.
+	 */
+	public static final String DEFAULT_GWT_DEV_VERSION = "2.4.0";
+
+	/**
 	 * Obtains the GWT development class path to match POM configuration. In
 	 * particular to ensure same version of <code>gwt-dev</code> as the
 	 * <code>gwt-user</code> used.
@@ -74,12 +85,31 @@ public class WoofDevelopmentConfigurationLoader {
 	 */
 	public static String[] getDevModeClassPath(File pomFile) throws Exception {
 
-		// Obtain the class path factory
-		ClassPathFactoryImpl factory = new ClassPathFactoryImpl(
-				new DefaultPlexusContainer(), null);
+		// Create initial class path factory
+		PlexusContainer plexusContainer = new DefaultPlexusContainer();
+		ClassPathFactoryImpl initial = new ClassPathFactoryImpl(
+				plexusContainer, null, new RemoteRepository[0]);
+
+		// Obtain the Maven project and its remote repositories
+		MavenProject project = initial.getMavenProject(pomFile);
+		List<RemoteRepository> remoteRepositories = new LinkedList<RemoteRepository>();
+		for (ArtifactRepository repository : project
+				.getRemoteArtifactRepositories()) {
+			remoteRepositories.add(new RemoteRepository(repository.getId(),
+					repository.getLayout().getId(), repository.getUrl()));
+		}
+
+		// Create class path factory from POM remote repositories
+		ClassPathFactory factory = new ClassPathFactoryImpl(
+				plexusContainer,
+				null,
+				remoteRepositories
+						.toArray(new RemoteRepository[remoteRepositories.size()]));
+
+		// Keep track of class path
+		List<String> gwtClassPath = new LinkedList<String>();
 
 		// Obtain the GWT version
-		MavenProject project = factory.getMavenProject(pomFile);
 		String gwtDevVersion = null;
 		for (Dependency dependency : project.getDependencies()) {
 			String groupId = dependency.getGroupId();
@@ -90,29 +120,32 @@ public class WoofDevelopmentConfigurationLoader {
 			}
 		}
 		if (gwtDevVersion == null) {
-			// Should have GWT version
-			throw new Exception(
-					"Can not find GWT dependency "
-							+ GWT_GROUP_ID
-							+ ":"
-							+ GWT_USER_ARTIFACT_ID
-							+ " within project's POM file. Necessary to determine GWT version to use.");
+			// Use default version of GWT
+			gwtDevVersion = DEFAULT_GWT_DEV_VERSION;
+
+			// Must include GWT User for running
+			String[] userClassPath = factory.createArtifactClassPath(
+					GWT_GROUP_ID, GWT_USER_ARTIFACT_ID, gwtDevVersion, null,
+					null);
+			gwtClassPath.addAll(Arrays.asList(userClassPath));
 		}
 
-		// Add remote repositories to resolve dependencies (if necessary)
-		for (RemoteRepository remoteRepository : project
-				.getRemoteProjectRepositories()) {
-			factory.registerRemoteRepository(remoteRepository.getId(),
-					remoteRepository.getContentType(),
-					remoteRepository.getUrl());
-		}
-
-		// Obtain the class path for gwt-dev
-		String[] classPath = factory.createArtifactClassPath(GWT_GROUP_ID,
+		// Include the class path for gwt-dev
+		String[] devClassPath = factory.createArtifactClassPath(GWT_GROUP_ID,
 				GWT_DEV_ARTIFACT_ID, gwtDevVersion, null, null);
+		for (String classPathEntry : devClassPath) {
 
-		// Return the class path
-		return classPath;
+			// Ignore if already included
+			if (gwtClassPath.contains(classPathEntry)) {
+				continue;
+			}
+
+			// Include class path
+			gwtClassPath.add(classPathEntry);
+		}
+
+		// Return the GWT class path
+		return gwtClassPath.toArray(new String[gwtClassPath.size()]);
 	}
 
 	/**

@@ -92,7 +92,7 @@ public class ClassPathFactoryTest extends OfficeFrameTestCase {
 	/**
 	 * {@link ClassPathFactory} to test.
 	 */
-	private ClassPathFactoryImpl classPathFactory;
+	private ClassPathFactory classPathFactory;
 
 	/**
 	 * Local repository.
@@ -106,14 +106,12 @@ public class ClassPathFactoryTest extends OfficeFrameTestCase {
 		this.localRepository = OfficeBuildingTestUtil.getTestLocalRepository();
 
 		// Create the class path factory to test
-		this.classPathFactory = new ClassPathFactoryImpl(
-				new DefaultPlexusContainer(), this.localRepository);
-
-		// Register the test remove repository
 		File remoteRepository = new File(".",
 				"src/test/resources/remoteRepository");
-		this.classPathFactory.registerRemoteRepository("test", null,
-				remoteRepository.toURI().toURL().toString());
+		this.classPathFactory = new ClassPathFactoryImpl(
+				new DefaultPlexusContainer(), this.localRepository,
+				new RemoteRepository[] { new RemoteRepository(remoteRepository
+						.toURI().toURL().toString()) });
 	}
 
 	/**
@@ -235,7 +233,7 @@ public class ClassPathFactoryTest extends OfficeFrameTestCase {
 
 		// Obtain the Maven Project (using build local repository)
 		ClassPathFactoryImpl factory = new ClassPathFactoryImpl(
-				new DefaultPlexusContainer(), null);
+				new DefaultPlexusContainer(), null, new RemoteRepository[0]);
 		MavenProject project = factory.getMavenProject(pomFile);
 
 		// Ensure contains appropriate dependencies

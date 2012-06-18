@@ -55,4 +55,5 @@ Bundle-ClassPath: .,
  officeplugin_gwt-2.3.0.jar,
  officeplugin_launch-2.3.0.jar,
  officeplugin_servlet-2.3.0.jar,
+ officeplugin_base-2.3.0.jar,
  officeplugin_woof-2.3.0.jar

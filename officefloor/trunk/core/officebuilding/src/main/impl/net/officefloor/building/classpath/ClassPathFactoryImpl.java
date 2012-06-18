@@ -21,8 +21,10 @@ package net.officefloor.building.classpath;
 import java.io.File;
 import java.io.InputStream;
 import java.util.Enumeration;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
@@ -47,7 +49,6 @@ import org.sonatype.aether.collection.CollectResult;
 import org.sonatype.aether.graph.Dependency;
 import org.sonatype.aether.graph.DependencyNode;
 import org.sonatype.aether.repository.LocalRepository;
-import org.sonatype.aether.repository.RemoteRepository;
 import org.sonatype.aether.util.artifact.DefaultArtifact;
 import org.sonatype.aether.util.graph.PreorderNodeListGenerator;
 
@@ -141,9 +142,9 @@ public class ClassPathFactoryImpl implements ClassPathFactory {
 	private final File localRepository;
 
 	/**
-	 * Remote repositories.
+	 * {@link RemoteRepository} instances.
 	 */
-	private final List<RemoteRepository> remoteRepositories = new LinkedList<RemoteRepository>();
+	private final RemoteRepository[] remoteRepositories;
 
 	/**
 	 * Initiate.
@@ -155,13 +156,16 @@ public class ClassPathFactoryImpl implements ClassPathFactory {
 	 * @param localRepository
 	 *            Local repository. May be <code>null</code> to use default user
 	 *            local repository.
+	 * @param remoteRepositories
+	 *            {@link RemoteRepository} instances.
 	 * @throws Exception
 	 *             If fails to initiate.
 	 */
 	public ClassPathFactoryImpl(PlexusContainer plexusContainer,
-			RepositorySystem repositorySystem, File localRepository)
-			throws Exception {
+			RepositorySystem repositorySystem, File localRepository,
+			RemoteRepository[] remoteRepositories) throws Exception {
 		this.plexusContainer = plexusContainer;
+		this.remoteRepositories = remoteRepositories;
 
 		// Obtain the repository system
 		this.repositorySystem = (repositorySystem != null ? repositorySystem
@@ -180,12 +184,15 @@ public class ClassPathFactoryImpl implements ClassPathFactory {
 	 * @param localRepository
 	 *            Local repository. May be <code>null</code> to use default user
 	 *            local repository.
+	 * @param remoteRepositories
+	 *            {@link RemoteRepository} instances.
 	 * @throws Exception
 	 *             If fails to initiate.
 	 */
 	public ClassPathFactoryImpl(PlexusContainer plexusContainer,
-			File localRepository) throws Exception {
-		this(plexusContainer, null, localRepository);
+			File localRepository, RemoteRepository[] remoteRepositories)
+			throws Exception {
+		this(plexusContainer, null, localRepository, remoteRepositories);
 	}
 
 	/**
@@ -216,21 +223,6 @@ public class ClassPathFactoryImpl implements ClassPathFactory {
 
 		// Return the Maven Project
 		return project;
-	}
-
-	/**
-	 * Registers a {@link RemoteRepository}.
-	 * 
-	 * @param id
-	 *            Id of repository.
-	 * @param type
-	 *            Type of repository. May be <code>null</code>.
-	 * @param url
-	 *            URL of repository.
-	 */
-	public void registerRemoteRepository(String id, String type, String url) {
-		this.remoteRepositories.add(new RemoteRepository(id,
-				(type != null ? type : "default"), url));
 	}
 
 	/*
@@ -374,7 +366,7 @@ public class ClassPathFactoryImpl implements ClassPathFactory {
 		/**
 		 * Remote repositories.
 		 */
-		private final List<RemoteRepository> remoteRepositories;
+		private final RemoteRepository[] remoteRepositories;
 
 		/**
 		 * Resolved class path entries.
@@ -401,7 +393,7 @@ public class ClassPathFactoryImpl implements ClassPathFactory {
 		public ArtifactClassPathResolver(Artifact artifact,
 				RepositorySystem repositorySystem,
 				File localRepositoryDirectory,
-				List<RemoteRepository> remoteRepositories) {
+				RemoteRepository[] remoteRepositories) {
 			this.artifact = artifact;
 			this.repositorySystem = repositorySystem;
 			this.localRepositoryDirectory = localRepositoryDirectory;
@@ -468,8 +460,23 @@ public class ClassPathFactoryImpl implements ClassPathFactory {
 				// Create request to collect dependencies
 				CollectRequest request = new CollectRequest();
 				request.setRoot(dependency);
+				Set<String> uniqueIds = new HashSet<String>();
 				for (RemoteRepository remoteRepository : this.remoteRepositories) {
-					request.addRepository(remoteRepository);
+
+					// Obtain unique id for repository
+					int index = 0;
+					String prefix = remoteRepository.getId();
+					String uniqueId = prefix;
+					while (uniqueIds.contains(uniqueId)) {
+						index++;
+						uniqueId = prefix + index;
+					}
+					uniqueIds.add(uniqueId);
+
+					// Add the remote repository
+					request.addRepository(new org.sonatype.aether.repository.RemoteRepository(
+							uniqueId, remoteRepository.getType(),
+							remoteRepository.getUrl()));
 				}
 
 				// Collect the results

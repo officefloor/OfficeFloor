@@ -20,12 +20,13 @@ package net.officefloor.building.console;
 
 import java.io.PrintStream;
 import java.io.Reader;
-import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Properties;
 
+import net.officefloor.building.classpath.ClassPathFactory;
 import net.officefloor.building.classpath.ClassPathFactoryImpl;
+import net.officefloor.building.classpath.RemoteRepository;
 import net.officefloor.building.command.OfficeFloorCommand;
 import net.officefloor.building.command.OfficeFloorCommandFactory;
 import net.officefloor.building.command.OfficeFloorCommandParameter;
@@ -192,32 +193,34 @@ public class OfficeFloorConsoleImpl implements OfficeFloorConsole {
 			// Obtain the parameters
 			OfficeFloorCommandParameter[] parameters = command.getParameters();
 
-			// Obtain remote repository URLs (from properties and environment)
-			List<String> remoteRepositoryUrls = new LinkedList<String>();
+			// Obtain remote repositories (from properties and environment)
+			List<RemoteRepository> remoteRepositories = new LinkedList<RemoteRepository>();
 			for (OfficeFloorCommandParameter parameter : parameters) {
 				if (parameter instanceof RemoteRepositoryUrlsOfficeFloorCommandParameter) {
 					// Have remote repository URLs parameter so use
 					RemoteRepositoryUrlsOfficeFloorCommandParameter remoteRepositoryUrlsParameter = (RemoteRepositoryUrlsOfficeFloorCommandParameter) parameter;
-					remoteRepositoryUrls.addAll(Arrays
-							.asList(remoteRepositoryUrlsParameter
-									.getRemoteRepositoryUrls()));
+					for (String remoteRepositoryUrl : remoteRepositoryUrlsParameter
+							.getRemoteRepositoryUrls()) {
+						remoteRepositories.add(new RemoteRepository(
+								remoteRepositoryUrl));
+					}
 				}
 			}
-			remoteRepositoryUrls.addAll(Arrays
-					.asList(RemoteRepositoryUrlsOfficeFloorCommandParameterImpl
-							.getRemoteRepositoryUrls(this.environment)));
+			for (String remoteRepositoryUrl : RemoteRepositoryUrlsOfficeFloorCommandParameterImpl
+					.getRemoteRepositoryUrls(this.environment)) {
+				remoteRepositories
+						.add(new RemoteRepository(remoteRepositoryUrl));
+			}
 
 			// Create the class path factory
-			ClassPathFactoryImpl classPathFactory;
+			ClassPathFactory classPathFactory;
 			try {
 				classPathFactory = new ClassPathFactoryImpl(
-						new DefaultPlexusContainer(), null);
-				int remoteRepositoryIndex = 1;
-				for (String remoteRepositoryUrl : remoteRepositoryUrls) {
-					classPathFactory.registerRemoteRepository("repo"
-							+ (remoteRepositoryIndex++), "default",
-							remoteRepositoryUrl);
-				}
+						new DefaultPlexusContainer(),
+						null,
+						remoteRepositories
+								.toArray(new RemoteRepository[remoteRepositories
+										.size()]));
 			} catch (Exception ex) {
 				// Failed to create execution unit for command
 				this.writeErr(err, ex);

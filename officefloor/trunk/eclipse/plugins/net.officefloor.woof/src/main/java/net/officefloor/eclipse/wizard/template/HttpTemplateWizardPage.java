@@ -18,7 +18,7 @@
 
 package net.officefloor.eclipse.wizard.template;
 
-import java.io.InputStream;
+import java.io.File;
 import java.lang.reflect.Method;
 import java.util.LinkedList;
 import java.util.List;
@@ -38,20 +38,18 @@ import net.officefloor.eclipse.common.dialog.input.csv.ListInput;
 import net.officefloor.eclipse.common.dialog.input.impl.BooleanInput;
 import net.officefloor.eclipse.common.dialog.input.impl.ClassMethodInput;
 import net.officefloor.eclipse.common.dialog.input.impl.ClasspathClassInput;
-import net.officefloor.eclipse.common.dialog.input.impl.ClasspathFileInput;
 import net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart;
+import net.officefloor.eclipse.dialog.input.WoofFileInput;
 import net.officefloor.eclipse.extension.ExtensionUtil;
 import net.officefloor.eclipse.extension.sectionsource.SectionSourceExtensionContext;
 import net.officefloor.eclipse.util.EclipseUtil;
 import net.officefloor.eclipse.web.HttpTemplateSectionSourceExtension;
 import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
-import net.officefloor.frame.spi.source.ResourceSource;
 import net.officefloor.plugin.web.http.template.parse.HttpTemplate;
 import net.officefloor.plugin.web.http.template.section.HttpTemplateSectionSource;
+import net.officefloor.plugin.woof.WoofOfficeFloorSource;
 
-import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
-import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyEvent;
@@ -188,27 +186,10 @@ public class HttpTemplateWizardPage extends WizardPage implements
 				.newOfficeFloorCompiler(this.classLoader);
 		this.compiler.setCompilerIssues(this);
 
-		// Add Raw HTTP Template Loader for Maven WebApp
-		this.compiler.addResources(new ResourceSource() {
-			@Override
-			public InputStream sourceResource(String location) {
-
-				// Attempt to find file within project
-				IFile file = project.getFile("src/main/webapp/" + location);
-				if ((file == null) || (!file.exists())) {
-					return null; // Not within webapp
-				}
-
-				// Found file so return
-				try {
-					return file.getContents();
-				} catch (CoreException ex) {
-					// Failed to obtain content
-					editPart.messageError(ex);
-					return null;
-				}
-			}
-		});
+		// Load access to web resources
+		File projectDir = project.getLocation().toFile();
+		WoofOfficeFloorSource.loadWebResourcesFromMavenProject(this.compiler,
+				projectDir);
 
 		// Obtain the section loader
 		this.sectionLoader = this.compiler.getSectionLoader();
@@ -369,7 +350,7 @@ public class HttpTemplateWizardPage extends WizardPage implements
 		new Label(page, SWT.NONE).setText("Template path: ");
 		this.templatePath = initialTemplatePath;
 		InputHandler<String> path = new InputHandler<String>(page,
-				new ClasspathFileInput(this.project, page.getShell()),
+				new WoofFileInput(this.project, page.getShell()),
 				this.templatePath, new InputListener() {
 					@Override
 					public void notifyValueChanged(Object value) {

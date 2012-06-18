@@ -557,7 +557,13 @@ public class ClasspathUtil {
 			// Obtain the parent java element
 			javaElement = javaElement.getParent();
 
-		} while (fragmentRoot == null);
+		} while ((fragmentRoot == null) && (javaElement != null));
+
+		// Determine if have fragment root
+		if (fragmentRoot == null) {
+			// Return path as is
+			return path.toString();
+		}
 
 		// Obtain the fragment root full path
 		String fragmentPath = fragmentRoot.getResource().getFullPath()

@@ -56,7 +56,9 @@ import javax.rmi.ssl.SslRMIClientSocketFactory;
 import javax.rmi.ssl.SslRMIServerSocketFactory;
 
 import mx4j.tools.remote.PasswordAuthenticator;
+import net.officefloor.building.classpath.ClassPathFactory;
 import net.officefloor.building.classpath.ClassPathFactoryImpl;
+import net.officefloor.building.classpath.RemoteRepository;
 import net.officefloor.building.command.OfficeFloorCommand;
 import net.officefloor.building.command.OfficeFloorCommandParser;
 import net.officefloor.building.command.OfficeFloorCommandParserImpl;
@@ -923,21 +925,25 @@ public class OfficeBuildingManager implements OfficeBuildingManagerMBean {
 					}
 				}
 
-				// Configure class path factory
-				ClassPathFactoryImpl classPathFactory = new ClassPathFactoryImpl(
-						new DefaultPlexusContainer(), localRepository);
-				int remoteRepositoryIndex = 0;
+				// Obtain the remote repositories
+				List<RemoteRepository> remoteRepositories = new LinkedList<RemoteRepository>();
 				for (String remoteRepositoryUrl : this.remoteRepositoryUrls) {
-					classPathFactory.registerRemoteRepository("repo"
-							+ (remoteRepositoryIndex++), "default",
-							remoteRepositoryUrl);
+					remoteRepositories.add(new RemoteRepository(
+							remoteRepositoryUrl));
 				}
 				for (String remoteRepositoryUrl : configuration
 						.getRemoteRepositoryUrls()) {
-					classPathFactory.registerRemoteRepository("repo"
-							+ (remoteRepositoryIndex++), "default",
-							remoteRepositoryUrl);
+					remoteRepositories.add(new RemoteRepository(
+							remoteRepositoryUrl));
 				}
+
+				// Configure class path factory
+				ClassPathFactory classPathFactory = new ClassPathFactoryImpl(
+						new DefaultPlexusContainer(),
+						localRepository,
+						remoteRepositories
+								.toArray(new RemoteRepository[remoteRepositories
+										.size()]));
 
 				// Obtain the decorators
 				OfficeFloorDecorator[] decorators = OfficeFloorDecoratorServiceLoader
