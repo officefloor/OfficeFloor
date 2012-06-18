@@ -146,8 +146,12 @@ public class WoofOfficeFloorSource extends HttpServerAutoWireOfficeFloorSource {
 	 */
 	public static void run(WoofOfficeFloorSource application) throws Exception {
 
+		// Maven project directory should be current directory
+		File projectDir = new File(".");
+
 		// Load the WoOF resources
-		loadWebResourcesFromMavenProject(application.getOfficeFloorCompiler());
+		loadWebResourcesFromMavenProject(application.getOfficeFloorCompiler(),
+				projectDir);
 
 		// Start the application
 		application.openOfficeFloor();
@@ -158,25 +162,29 @@ public class WoofOfficeFloorSource extends HttpServerAutoWireOfficeFloorSource {
 	 * 
 	 * @param compiler
 	 *            {@link OfficeFloorCompiler}.
+	 * @param projectDirectory
+	 *            Maven project directory.
 	 */
 	public static void loadWebResourcesFromMavenProject(
-			OfficeFloorCompiler compiler) {
+			OfficeFloorCompiler compiler, File projectDirectory) {
 
 		// Determine if running within maven project
-		File projectDir = new File(".");
-		if (new File(projectDir, "pom.xml").exists()) {
-
-			// Within maven project, so include webapp WoOF resources
-			final File webAppDir = new File(projectDir, WEBAPP_PATH);
-			if (!(webAppDir.exists())) {
-				LOGGER.info(WEBAPP_PATH
-						+ " not found. Typically should exist in project for web content.");
-				return; // not include
-			}
-
-			// Load the web resources
-			loadWebResources(compiler, webAppDir, new File[] { webAppDir });
+		if (!(new File(projectDirectory, "pom.xml").exists())) {
+			LOGGER.warning("Not a Maven project as can not find pom.xml in "
+					+ projectDirectory.getAbsolutePath());
+			return; // must be a maven project
 		}
+
+		// Within maven project, so include webapp WoOF resources
+		final File webAppDir = new File(projectDirectory, WEBAPP_PATH);
+		if (!(webAppDir.exists())) {
+			LOGGER.info(WEBAPP_PATH
+					+ " not found and therefore not including. Typically should exist in project for web content.");
+			return; // not include
+		}
+
+		// Load the web resources
+		loadWebResources(compiler, webAppDir, new File[] { webAppDir });
 	}
 
 	/**
@@ -203,7 +211,7 @@ public class WoofOfficeFloorSource extends HttpServerAutoWireOfficeFloorSource {
 			return; // not include
 		}
 
-		// Configure webapp as resource directory
+		// Configure resource directories
 		SourceHttpResourceFactory.loadProperties(null, resourceDirectories,
 				null, Boolean.FALSE,
 				new SourceHttpResourceFactory.PropertyTarget() {

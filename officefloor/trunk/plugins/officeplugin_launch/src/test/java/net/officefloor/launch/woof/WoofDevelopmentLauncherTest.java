@@ -28,6 +28,7 @@ import java.util.List;
 
 import net.officefloor.autowire.AutoWireManagement;
 import net.officefloor.building.classpath.ClassPathFactoryImpl;
+import net.officefloor.building.classpath.RemoteRepository;
 import net.officefloor.compile.impl.issues.FailCompilerIssues;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.socket.server.http.server.MockHttpServer;
@@ -92,6 +93,16 @@ public class WoofDevelopmentLauncherTest extends OfficeFrameTestCase implements
 	}
 
 	/**
+	 * Ensure GWT default version is aligned to OfficeFloor configuration.
+	 */
+	public void testDefaultGwtVersion() throws Exception {
+		String officeFloorGwtVersion = this.getGwtVersion();
+		assertEquals("Not using GWT version aligned to OfficeFloor",
+				officeFloorGwtVersion,
+				WoofDevelopmentConfigurationLoader.DEFAULT_GWT_DEV_VERSION);
+	}
+
+	/**
 	 * Ensure given the project <code>pom.xml</code> that able to determine the
 	 * appropriate class path for GWT {@link DevMode}.
 	 */
@@ -100,21 +111,32 @@ public class WoofDevelopmentLauncherTest extends OfficeFrameTestCase implements
 		// Obtain the POM file (with GWT user dependency)
 		File pomFile = this.findFile("pom.xml");
 
-		// Obtain the expected version
-		MavenProject project = new ClassPathFactoryImpl(
-				new DefaultPlexusContainer(), null).getMavenProject(pomFile);
-		String gwtDevVersion = null;
-		for (Dependency dependency : project.getDependencies()) {
-			String groupId = dependency.getGroupId();
-			String artifactId = dependency.getArtifactId();
-			if ((WoofDevelopmentConfigurationLoader.GWT_GROUP_ID
-					.equals(groupId))
-					&& (WoofDevelopmentConfigurationLoader.GWT_DEV_ARTIFACT_ID
-							.equals(artifactId))) {
-				gwtDevVersion = dependency.getVersion();
-			}
-		}
-		assertNotNull("Ensure have GWT version", gwtDevVersion);
+		// Test
+		this.doGwtOnClassPath(pomFile);
+	}
+
+	/**
+	 * Ensure issue raised if GWT not on class path.
+	 */
+	public void testGwtNotOnClasspath() throws Exception {
+
+		// Find the POM file containing no dependencies
+		File pomFile = this.findFile(this.getClass(), "NoDependencyPom.xml");
+
+		// Test
+		this.doGwtOnClassPath(pomFile);
+	}
+
+	/**
+	 * Undertakes obtaining the class path for GWT.
+	 * 
+	 * @param pomFile
+	 *            POM file.
+	 */
+	private void doGwtOnClassPath(File pomFile) throws Exception {
+
+		// Obtain the GWT version
+		String gwtDevVersion = this.getGwtVersion();
 
 		// Load the class path entries
 		String[] classpathEntries = WoofDevelopmentConfigurationLoader
@@ -134,24 +156,34 @@ public class WoofDevelopmentLauncherTest extends OfficeFrameTestCase implements
 	}
 
 	/**
-	 * Ensure issue raised if GWT not on class path.
+	 * Obtains the GWT version.
+	 * 
+	 * @return GWT version.
 	 */
-	public void testGwtNotOnClasspath() throws Exception {
+	private String getGwtVersion() throws Exception {
 
-		// Find the POM file containing no dependencies
-		File pomFile = this.findFile(this.getClass(), "NoDependencyPom.xml");
+		// Obtain the POM file (with GWT user dependency)
+		File pomFile = this.findFile("pom.xml");
 
-		// Ensure issue as GWT not referenced by POM file
-		try {
-			WoofDevelopmentConfigurationLoader.getDevModeClassPath(pomFile);
-			fail("Should not be successful in obtaining the class path");
-		} catch (Exception ex) {
-			// Ensure correct cause
-			assertEquals(
-					"Incorrect cause",
-					"Can not find GWT dependency com.google.gwt:gwt-user within project's POM file. Necessary to determine GWT version to use.",
-					ex.getMessage());
+		// Obtain the GWT version
+		MavenProject project = new ClassPathFactoryImpl(
+				new DefaultPlexusContainer(), null, new RemoteRepository[0])
+				.getMavenProject(pomFile);
+		String gwtDevVersion = null;
+		for (Dependency dependency : project.getDependencies()) {
+			String groupId = dependency.getGroupId();
+			String artifactId = dependency.getArtifactId();
+			if ((WoofDevelopmentConfigurationLoader.GWT_GROUP_ID
+					.equals(groupId))
+					&& (WoofDevelopmentConfigurationLoader.GWT_DEV_ARTIFACT_ID
+							.equals(artifactId))) {
+				gwtDevVersion = dependency.getVersion();
+			}
 		}
+		assertNotNull("Ensure have GWT version", gwtDevVersion);
+
+		// Return the GWT version
+		return gwtDevVersion;
 	}
 
 	/**

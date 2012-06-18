@@ -98,6 +98,20 @@ public class ClasspathFileInput implements Input<Composite> {
 				editor.getEditorSite().getShell());
 	}
 
+	/**
+	 * <p>
+	 * Transforms the {@link IFile} to the path to use.
+	 * <p>
+	 * Allows overriding for more specialised transformation.
+	 * 
+	 * @param file
+	 *            {@link IFile}.
+	 * @return path to use.
+	 */
+	protected String transformToPath(IFile file) {
+		return ClasspathUtil.getClassPathLocation(file.getFullPath());
+	}
+
 	/*
 	 * ================= Input ===================================
 	 */
@@ -219,8 +233,7 @@ public class ClasspathFileInput implements Input<Composite> {
 			if (selectedItem instanceof IFile) {
 				// Specify class path location for file
 				IFile file = (IFile) selectedItem;
-				String filePath = ClasspathUtil.getClassPathLocation(file
-						.getFullPath());
+				String filePath = this.transformToPath(file);
 				this.fileName.setText(filePath);
 			} else {
 				// Unknown type

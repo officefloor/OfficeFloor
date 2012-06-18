@@ -19,7 +19,7 @@
 package net.officefloor.eclipse.woof.operations;
 
 import net.officefloor.eclipse.common.dialog.BeanDialog;
-import net.officefloor.eclipse.common.dialog.input.impl.ClasspathFileInput;
+import net.officefloor.eclipse.dialog.input.WoofFileInput;
 import net.officefloor.eclipse.woof.editparts.WoofEditPart;
 import net.officefloor.model.change.Change;
 import net.officefloor.model.woof.WoofChanges;
@@ -64,7 +64,7 @@ public class AddResourceOperation extends
 		dialog.addIgnoreType(WoofTemplateOutputToWoofResourceModel.class);
 		dialog.addIgnoreType(WoofSectionOutputToWoofResourceModel.class);
 		dialog.addIgnoreType(WoofExceptionToWoofResourceModel.class);
-		dialog.registerPropertyInput("Resource Path", new ClasspathFileInput(
+		dialog.registerPropertyInput("Resource Path", new WoofFileInput(
 				editPart.getEditor()));
 		if (!dialog.populate()) {
 			// Not created

@@ -25,7 +25,9 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Properties;
 
+import net.officefloor.building.classpath.ClassPathFactory;
 import net.officefloor.building.classpath.ClassPathFactoryImpl;
+import net.officefloor.building.classpath.RemoteRepository;
 import net.officefloor.building.command.parameters.KeyStoreOfficeFloorCommandParameter;
 import net.officefloor.building.command.parameters.KeyStorePasswordOfficeFloorCommandParameter;
 import net.officefloor.building.command.parameters.OfficeBuildingPortOfficeFloorCommandParameter;
@@ -289,22 +291,26 @@ public class StartOfficeBuildingGoal extends AbstractGoal {
 			RepositorySystem repoSystem = locator
 					.getService(RepositorySystem.class);
 
-			// Create the class path factory and add remote repositories
-			File localRepositoryDirectory = new File(
-					this.localRepository.getBasedir());
-			ClassPathFactoryImpl classPathFactory = new ClassPathFactoryImpl(
-					this.plexusContainer, repoSystem, localRepositoryDirectory);
-
 			// Obtain remote repositories and load to class path factory
+			List<RemoteRepository> remoteRepositories = new LinkedList<RemoteRepository>();
 			List<String> urls = new LinkedList<String>();
 			for (Object object : this.project.getRemoteArtifactRepositories()) {
 				ArtifactRepository repository = (ArtifactRepository) object;
 				String remoteRepositoryUrl = repository.getUrl();
-				classPathFactory.registerRemoteRepository(repository.getId(),
-						repository.getLayout().getId(), remoteRepositoryUrl);
+				remoteRepositories.add(new RemoteRepository(repository.getId(),
+						repository.getLayout().getId(), remoteRepositoryUrl));
 				urls.add(remoteRepositoryUrl);
 			}
 			remoteRepositoryURLs = urls.toArray(new String[urls.size()]);
+
+			// Create the class path factory and add remote repositories
+			File localRepositoryDirectory = new File(
+					this.localRepository.getBasedir());
+			ClassPathFactory classPathFactory = new ClassPathFactoryImpl(
+					this.plexusContainer, repoSystem, localRepositoryDirectory,
+					remoteRepositories
+							.toArray(new RemoteRepository[remoteRepositories
+									.size()]));
 
 			// Obtain the class path entries for each included artifact
 			List<String> classPathEntries = new LinkedList<String>();

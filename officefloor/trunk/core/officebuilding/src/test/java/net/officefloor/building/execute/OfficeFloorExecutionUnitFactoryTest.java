@@ -21,9 +21,9 @@ package net.officefloor.building.execute;
 import java.io.File;
 import java.util.Properties;
 
-import org.codehaus.plexus.DefaultPlexusContainer;
-
+import net.officefloor.building.classpath.ClassPathFactory;
 import net.officefloor.building.classpath.ClassPathFactoryImpl;
+import net.officefloor.building.classpath.RemoteRepository;
 import net.officefloor.building.command.OfficeFloorCommandContext;
 import net.officefloor.building.command.OfficeFloorCommandParameter;
 import net.officefloor.building.decorate.OfficeFloorDecorator;
@@ -33,6 +33,8 @@ import net.officefloor.building.process.ManagedProcess;
 import net.officefloor.building.process.ProcessConfiguration;
 import net.officefloor.building.util.OfficeBuildingTestUtil;
 import net.officefloor.frame.test.OfficeFrameTestCase;
+
+import org.codehaus.plexus.DefaultPlexusContainer;
 
 /**
  * Tests the {@link OfficeFloorExecutionUnit}.
@@ -163,10 +165,10 @@ public class OfficeFloorExecutionUnitFactoryTest extends OfficeFrameTestCase {
 		String remoteRepositoryUrl = "file://"
 				+ OfficeBuildingTestUtil.getUserLocalRepository()
 						.getAbsolutePath();
-		ClassPathFactoryImpl classPathFactory = new ClassPathFactoryImpl(
-				new DefaultPlexusContainer(), localRepositoryDirectory);
-		classPathFactory.registerRemoteRepository("test", "default",
-				remoteRepositoryUrl);
+		ClassPathFactory classPathFactory = new ClassPathFactoryImpl(
+				new DefaultPlexusContainer(), localRepositoryDirectory,
+				new RemoteRepository[] { new RemoteRepository(
+						remoteRepositoryUrl) });
 
 		// Test
 		this.replayMockObjects();
