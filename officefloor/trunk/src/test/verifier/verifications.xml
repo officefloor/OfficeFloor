@@ -29,7 +29,7 @@
 		<!-- Ensure site identifying latest version -->
 		<file>
 			<location>src/site/resources/index.html</location>
-			<contains><![CDATA[<p class="version">v${project.version}</p>]]></contains>
+			<contains><![CDATA[class="version">v${project.version}</p>]]></contains>
 		</file>
 		
 		<!-- Ensure pom.xml install using latest version -->
