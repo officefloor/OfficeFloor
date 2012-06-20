@@ -106,7 +106,7 @@
 								<get dest="${site.vm.file}" src="${site.vm.url}" verbose="true"
 									skipexisting="false" />
 
-								<!-- Alter default site.vm for use -->
+								<!-- Alter default site.vm for Sharing -->
 								<replace file="${site.vm.file}">
 									<replacetoken><![CDATA[<div id="breadcrumbs">]]></replacetoken>
 									<replacevalue><![CDATA[<div id="breadcrumbs">
@@ -117,6 +117,38 @@
 <script type="text/javascript" src="http://s7.addthis.com/js/250/addthis_widget.js#username=sagenschneider"></script>
 <!-- AddThis Button END -->
 									
+									]]></replacevalue>
+								</replace>
+								
+								<!-- Alter default site.vm for Facebook comments -->
+								<replace file="${site.vm.file}">
+									<replacetoken><![CDATA[<body class="composite">]]></replacetoken>
+									<replacevalue><![CDATA[<body class="composite">
+
+<!-- Facebook comments setup BEGIN -->
+<div id="fb-root"></div>
+<script>(function(d, s, id) {
+  var js, fjs = d.getElementsByTagName(s)[0];
+  if (d.getElementById(id)) return;
+  js = d.createElement(s); js.id = id;
+  js.src = "//connect.facebook.net/en_GB/all.js#xfbml=1&appId=336336786442645";
+  fjs.parentNode.insertBefore(js, fjs);
+}(document, 'script', 'facebook-jssdk'));</script>
+<!-- Facebook comments setup END -->
+									
+									]]></replacevalue>
+								</replace>
+								<replace file="${site.vm.file}">
+									<replacetoken><![CDATA[<div id="footer">]]></replacetoken>
+									<replacevalue><![CDATA[
+
+<div style="padding: 20em">
+<!-- Facebook comments box BEGIN -->
+<div class="fb-comments" data-href="$project.url/$currentFileName" data-num-posts="5" data-width="500"></div>
+<!-- Facebook comments box END -->
+</div>
+
+<div id="footer">
 									]]></replacevalue>
 								</replace>
 							</target>
