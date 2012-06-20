@@ -73,6 +73,9 @@
 				ssc.parentNode.insertBefore(wsc, ssc);
 				})();
 			</script>
+			<!-- Facebook administration -->
+			<meta property="fb:admins" content="sagenschneider"/>
+			<meta property="fb:app_id" content="336336786442645"/>
 		</head>
 		<menu name="${project.name}">
 			<item name="Welcome" href="./index.html" />
