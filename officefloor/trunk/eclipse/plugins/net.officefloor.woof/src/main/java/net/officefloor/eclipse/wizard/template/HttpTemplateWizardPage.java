@@ -49,7 +49,10 @@ import net.officefloor.plugin.web.http.template.parse.HttpTemplate;
 import net.officefloor.plugin.web.http.template.section.HttpTemplateSectionSource;
 import net.officefloor.plugin.woof.WoofOfficeFloorSource;
 
+import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
+import org.eclipse.draw2d.ColorConstants;
 import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyEvent;
@@ -344,6 +347,23 @@ public class HttpTemplateWizardPage extends WizardPage implements
 			initiallyEnableComet = this.templateInstance.isEnableComet();
 			initialCometManualPublishMethodName = getTextValue(this.templateInstance
 					.getCometManualPublishMethodName());
+		}
+
+		// Determine if valid src/main/webapp directory
+		IFolder webappDirectory = this.project
+				.getFolder(WoofOfficeFloorSource.WEBAPP_PATH);
+		IFile webXmlFile = webappDirectory
+				.getFile(WoofOfficeFloorSource.WEBXML_FILE_PATH);
+		if ((webappDirectory != null && webappDirectory.exists())
+				&& (!(webXmlFile.exists()))) {
+			// Invalid webapp directory
+			new Label(page, SWT.NONE);
+			Label webappInvalid = new Label(page, SWT.NONE);
+			webappInvalid.setForeground(ColorConstants.red);
+			webappInvalid.setText("WARNING: "
+					+ WoofOfficeFloorSource.WEBAPP_PATH
+					+ " resources unavailable as missing "
+					+ WoofOfficeFloorSource.WEBXML_FILE_PATH);
 		}
 
 		// Provide means to specify template location
