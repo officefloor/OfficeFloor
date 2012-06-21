@@ -95,7 +95,12 @@ public class WoofOfficeFloorSource extends HttpServerAutoWireOfficeFloorSource {
 	/**
 	 * Path within Maven project to the <code>webapp</code> directory.
 	 */
-	private static final String WEBAPP_PATH = "src/main/webapp";
+	public static final String WEBAPP_PATH = "src/main/webapp";
+
+	/**
+	 * Path within {@link #WEBAPP_PATH} for the <code>web.xml</code> file.
+	 */
+	public static final String WEBXML_FILE_PATH = "WEB-INF/web.xml";
 
 	/**
 	 * <code>main</code> to run the {@link WoofModel}.
@@ -203,10 +208,9 @@ public class WoofOfficeFloorSource extends HttpServerAutoWireOfficeFloorSource {
 		}
 
 		// Ensure the WEB-INF/web.xml file exists
-		final String webXmlPath = "WEB-INF/web.xml";
-		if (!(new File(webAppDir, webXmlPath).exists())) {
+		if (!(new File(webAppDir, WEBXML_FILE_PATH).exists())) {
 			LOGGER.warning("Not including " + WEBAPP_PATH + " content as "
-					+ webXmlPath + " not found within "
+					+ WEBXML_FILE_PATH + " not found within "
 					+ webAppDir.getAbsolutePath());
 			return; // not include
 		}
