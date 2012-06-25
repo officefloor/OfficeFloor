@@ -18,7 +18,8 @@
 	<modules>
 		<module>maven-officefloor-plugin</module>
 		<module>maven-officefloor-skin</module>
-		<module>maven-woof-plugin</module>
 		<module>maven-site-aggregate-plugin</module>
+		<module>maven-woof-plugin</module>
+		<module>woof-archetype</module>
 	</modules>
 </project>

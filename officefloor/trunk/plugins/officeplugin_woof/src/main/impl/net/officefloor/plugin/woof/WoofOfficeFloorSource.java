@@ -25,11 +25,13 @@ import java.io.InputStream;
 import java.util.logging.Logger;
 
 import net.officefloor.autowire.AutoWireApplication;
+import net.officefloor.autowire.AutoWireManagement;
 import net.officefloor.compile.OfficeFloorCompiler;
 import net.officefloor.compile.properties.Property;
 import net.officefloor.compile.spi.officefloor.OfficeFloorDeployer;
 import net.officefloor.compile.spi.officefloor.source.OfficeFloorSourceContext;
 import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
+import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.spi.source.ResourceSource;
 import net.officefloor.model.impl.repository.ModelRepositoryImpl;
 import net.officefloor.model.impl.repository.classloader.ClassLoaderConfigurationContext;
@@ -101,6 +103,37 @@ public class WoofOfficeFloorSource extends HttpServerAutoWireOfficeFloorSource {
 	 * Path within {@link #WEBAPP_PATH} for the <code>web.xml</code> file.
 	 */
 	public static final String WEBXML_FILE_PATH = "WEB-INF/web.xml";
+
+	/**
+	 * <p>
+	 * Starts the {@link WoofOfficeFloorSource} for unit testing.
+	 * <p>
+	 * This will attempt to close all existing {@link OfficeFloor} instances to
+	 * have a clean start.
+	 * 
+	 * @param args
+	 *            Command line arguments which are paired name/values for the
+	 *            {@link Property} loaded to the {@link OfficeFloorCompiler} for
+	 *            compiling and running.
+	 * @throws Exception
+	 *             If fails to start.
+	 */
+	public static void start(String... args) throws Exception {
+
+		// Stop all existing OfficeFloor instances
+		stop();
+
+		// Run the application
+		main(args);
+	}
+
+	/**
+	 * Stops the {@link WoofOfficeFloorSource} for unit testing.
+	 */
+	public static void stop() {
+		// Stop all existing OfficeFloor instances
+		AutoWireManagement.closeAllOfficeFloors();
+	}
 
 	/**
 	 * <code>main</code> to run the {@link WoofModel}.
