@@ -144,7 +144,7 @@
 
 <div style="padding: 20em">
 <!-- Facebook comments box BEGIN -->
-<div class="fb-comments" data-href="$project.url/$currentFileName" data-num-posts="5" data-width="500"></div>
+<div class="fb-comments" data-href="$project.url$currentFileName" data-num-posts="5" data-width="500"></div>
 <!-- Facebook comments box END -->
 </div>
 

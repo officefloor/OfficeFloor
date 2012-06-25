@@ -1,0 +1,36 @@
+<woof>
+  <templates>
+    <template name="form" uri="form" path="form.woof.html" class="${package}.form.FormLogic" x="279" y="99">
+      <output name="complete" argument-type="">
+        <template name="ria"/>
+      </output>
+      <output name="output" argument-type="">
+      </output>
+    </template>
+    <template name="ria" uri="ria" path="ria.woof.html" class="${package}.ria.RiaLogic" x="449" y="105">
+      <output name="output" argument-type="">
+      </output>
+      <extension class="GWT">
+        <property name="gwt.module.path" value="net/officefloor/test/ria/ria.gwt.xml"/>
+        <property name="gwt.async.service.interfaces" value="${package}.ria.client.CounterServiceAsync"/>
+      </extension>
+    </template>
+    <template name="static" uri="static" path="static.woof.html" class="" x="138" y="98">
+      <output name="link" argument-type="">
+        <template name="form"/>
+      </output>
+      <output name="output" argument-type="">
+      </output>
+    </template>
+  </templates>
+  <sections>
+  </sections>
+  <governances>
+  </governances>
+  <resources>
+  </resources>
+  <exceptions>
+  </exceptions>
+  <starting>
+  </starting>
+</woof>

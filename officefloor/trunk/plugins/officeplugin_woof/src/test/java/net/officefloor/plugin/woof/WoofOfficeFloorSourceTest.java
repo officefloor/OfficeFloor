@@ -23,7 +23,6 @@ import java.io.File;
 import java.io.IOException;
 
 import net.officefloor.autowire.AutoWire;
-import net.officefloor.autowire.AutoWireManagement;
 import net.officefloor.autowire.AutoWireSection;
 import net.officefloor.compile.impl.issues.FailCompilerIssues;
 import net.officefloor.frame.spi.source.UnknownResourceError;
@@ -37,6 +36,7 @@ import net.officefloor.plugin.web.http.server.HttpServerAutoWireOfficeFloorSourc
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
+import org.apache.http.conn.HttpHostConnectException;
 import org.apache.http.impl.client.DefaultHttpClient;
 
 /**
@@ -61,7 +61,7 @@ public class WoofOfficeFloorSourceTest extends OfficeFrameTestCase {
 		try {
 			this.client.getConnectionManager().shutdown();
 		} finally {
-			AutoWireManagement.closeAllOfficeFloors();
+			WoofOfficeFloorSource.stop();
 		}
 	}
 
@@ -71,19 +71,69 @@ public class WoofOfficeFloorSourceTest extends OfficeFrameTestCase {
 	public void testLoadsAndRuns() throws Exception {
 
 		// Run the application
-		WoofOfficeFloorSource.main(new String[0]);
+		WoofOfficeFloorSource.start();
 
 		// Test
 		this.doTestRequest("/test");
 	}
 
 	/**
-	 * Ensure can provide additional configuration.
+	 * Ensure can run the application from default configuration.
+	 */
+	public void testDefaultApplicationConfiguration() throws Exception {
+
+		// Run the application with default configuration
+		WoofOfficeFloorSource.start();
+
+		// Test
+		this.doTestRequest("/test");
+	}
+
+	/**
+	 * Ensure unit test methods appropriately start and stop.
+	 */
+	public void testUnitTestMethods() throws Exception {
+
+		// Should not successfully connect
+		try {
+			this.doRequest("/test");
+			fail("Should not be successful");
+		} catch (HttpHostConnectException ex) {
+			assertEquals("Incorrect cause",
+					"Connection to http://localhost:7878 refused",
+					ex.getMessage());
+		}
+
+		// Run the application
+		WoofOfficeFloorSource.start();
+
+		// Should now be running
+		this.doTestRequest("/test");
+
+		// Stop the application
+		WoofOfficeFloorSource.stop();
+
+		// Should not successfully connect
+		HttpClient refreshedClient = new DefaultHttpClient();
+		try {
+			refreshedClient.execute(new HttpGet("http://localhost:7878/test"));
+			fail("Should not be successful");
+		} catch (HttpHostConnectException ex) {
+			assertEquals("Incorrect cause",
+					"Connection to http://localhost:7878 refused",
+					ex.getMessage());
+		} finally {
+			refreshedClient.getConnectionManager().shutdown();
+		}
+	}
+
+	/**
+	 * Ensure can run the application with additional configuration.
 	 */
 	public void testAdditionalConfiguration() throws Exception {
 
 		// Run the additionally configured application
-		MockWoofMain.main(new String[0]);
+		MockWoofMain.main();
 
 		// Test
 		this.doTestRequest("/another");
@@ -100,7 +150,7 @@ public class WoofOfficeFloorSourceTest extends OfficeFrameTestCase {
 				+ "/NoLogicTemplate.woof";
 
 		// Run the application with no logic template
-		WoofOfficeFloorSource.main(
+		WoofOfficeFloorSource.start(
 				WoofOfficeFloorSource.PROPERTY_WOOF_CONFIGURATION_LOCATION,
 				noLogicTemplateConfigurationLocation);
 
