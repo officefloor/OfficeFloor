@@ -5,29 +5,20 @@ import java.io.Reader;
 import java.io.StringWriter;
 import java.net.URL;
 
-import net.officefloor.plugin.woof.WoofOfficeFloorSource;
-
-import org.junit.After;
 import org.junit.Assert;
-import org.junit.Before;
 import org.junit.Test;
 
 /**
- * Runs application and ensures a page is available.
+ * Tests the application running within JEE Container and ensures a page is
+ * available.
  */
-public class RunApplicationTest {
-
-	@Before
-	public void runApplication() throws Exception {
-		// Start the application
-		WoofOfficeFloorSource.start();
-	}
+public class RunApplicationIT {
 
 	@Test
 	public void ensureApplicationAvailable() throws Exception {
 
 		// Connect to application and obtain page
-		URL url = new URL("http://localhost:7878/static");
+		URL url = new URL("http://localhost:8080/form");
 		Reader response = new InputStreamReader(url.openStream());
 		StringWriter content = new StringWriter();
 		for (int character = response.read(); character != -1; character = response
@@ -37,13 +28,7 @@ public class RunApplicationTest {
 
 		// Ensure correct page
 		Assert.assertTrue("Incorrect page",
-				content.toString().contains("<title>Static Page</title>"));
-	}
-
-	@After
-	public void stopApplication() {
-		// Stop the application
-		WoofOfficeFloorSource.stop();
+				content.toString().contains("<title>Page with form submission</title>"));
 	}
 
 }

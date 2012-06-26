@@ -13,7 +13,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 /**
- * Runs application and ensures each page is available.
+ * Runs application and ensures a page is available.
  */
 public class RunApplicationTest {
 
