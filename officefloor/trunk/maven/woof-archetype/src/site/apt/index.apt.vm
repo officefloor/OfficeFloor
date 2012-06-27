@@ -62,8 +62,10 @@ Running the WoOF project from Maven
     mvn woof:stop
 +-----------------------------------------+
 
+  Running the above commands will actually start two processes.  The first process is the OfficeBuilding while the second is the OfficeFloor WoOF web application.  Rather than having a single process which hosts each application, OfficeFloor has a central process (OfficeBuilding) which spawns each application (OfficeFloor) to run in its own process.  This central control process, OfficeBuilding, will expose JMX beans for controlling the OfficeFloor instances on port 13778.  The above command will ensure OfficeBuilding is running and then start the WoOF web application.
 
 
+  
 Running the WoOF project within a JEE container
 
   {{{http://wiki.eclipse.org/Jetty/Feature/Jetty_Maven_Plugin#Quick_Start:_Get_Up_and_Running}Jetty}} provides a Maven plug-in for running a WebApp project within a JEE (Servlet) container.

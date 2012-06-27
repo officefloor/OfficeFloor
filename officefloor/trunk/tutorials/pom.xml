@@ -21,14 +21,12 @@
 		<module>ExceptionHttpServer</module>
 		<module>GwtApp</module>
 		<module>GwtService</module>
-		<module>MyFirstWoofApp</module>
 		<module>NavigateHttpServer</module>
 		<module>PageFlowHttpServer</module>
 		<module>ServletFilterDependencyInjection</module>
 		<module>ServletFilterJspIntegration</module>
 		<module>ServletFilterWebApplication</module>
 		<module>SessionHttpServer</module>
-		<module>StaticHttpServer</module>
 		<module>TeamHttpServer</module>
 		<module>TransactionHttpServer</module>
 	</modules>
