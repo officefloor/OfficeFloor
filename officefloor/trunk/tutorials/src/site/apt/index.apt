@@ -1,39 +1,22 @@
 				       ------------------
-				            Tutorials
+				         WoOF Tutorials
 				       ------------------
 				      Daniel Sagenschneider
 				       ------------------
+               
+  <<Web on OfficeFloor (WoOF) Tutorials>>
   
-  <<OfficeFloor Tutorials>>
-  
-  The tutorials below providing working examples and explanations of the features of OfficeFloor.
-
-  The acronym <<WoOF>> stands for Web on OfficeFloor.  OfficeFloor at its core is actually a <true> inversion of control engine as it inverts control of dependencies, threads and the order methods are executed.  The OfficeFloor web functionality is supported through plug-ins, which is why OfficeFloor is flexible to run anywhere - the API stays consistant but differing implementations can be used to adapt to the particular environment.  Please see {{{../architecture.html}OfficeFloor's architecture}} for more details.
-
-  The source code for each tutorial can be downloaded and run with {{{http://maven.apache.org}Maven}}.  To view and run the tutorials within an IDE use the appropriate Maven setup for the IDE (for example run <<<mvn eclipse:eclipse>>> to use within {{{http://eclipse.org}Eclipse}}).  Also installing the {{{../eclipse/index.html}OfficeFloor Eclipse Plug-in}} will allow viewing and editing the graphical configuration.
+  The tutorials below providing working examples and explanations of the features of WoOF.
 
   
-  
-Running a Web Application
+Basics
 
-  The tutorials in the table below provide a step by step guide to setting up an OfficeFloor web application.  If you are familar with {{{http://eclipse.org}Eclipse}} and {{{http://maven.apache.org}Maven}} these tutorials can be skipped.  Return to them later when ready to start running an OfficeFloor web application.
+  The following tutorials cover the basics for developing WoOF web applications.
 
 *--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
 || Tutorial                                                    || Description                                               || Covered
 *--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
-| {{{./MyFirstWoofApp/index.html}Running within JEE App Server}}   | Walks through the simple steps to run WoOF within a JEE Application Server.  Anyone familiar with {{{http://eclipse.org}Eclipse}} and {{{http://maven.apache.org}Maven}} can skip this tutorial.        | {{{http://eclipse.org}Eclipse}} and {{{http://maven.apache.org}Maven}} 
-*--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
-| {{{./StaticHttpServer/index.html}Running stand-alone}}       | Demonstrates how to run WoOF stand-alone                   | mvn woof:run, WoofOfficeFloorSource 
-*--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
-
-
-
-Web Pages
-
-  The following tutorials cover using dynamic web pages within OfficeFloor for building web applications.
-  
-*--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
-|| Tutorial                                                    || Description                                               || Covered
+| {{{../maven/woof-archetype/index.html}My first WoOF application}} | Walks through the simple steps to create and run a WoOF application. | Basics to creating and running a WoOF project |  
 *--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
 | {{{./DynamicHttpServer/index.html}Dynamic web page}}         | Rendering of dynamic content.                              | \<!-- {section} --\> , $\{property\}
 *--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
@@ -44,18 +27,6 @@ Web Pages
 | {{{./SessionHttpServer/index.html}Session state}}            | Storing state between requests within the HTTP session.    | @HttpSessionStateful
 *--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
 | {{{./ExceptionHttpServer/index.html}Exception handling}}     | Handling exceptions.                                       | @Parameter
-*--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
-
-
-
-Mobile
-
-  The following tutorials cover mobile functionality for OfficeFloor web applications.
-  
-*--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
-|| Tutorial                                                    || Description                                               || Covered
-*--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
-| <Coming Soon>                                                | Providing a mobile view of the web page.                   | 
 *--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
 
 
@@ -76,7 +47,7 @@ GWT integration
 
 AJAX push (reverse AJAX, Comet)
 
-  OfficeFloor is a multi-threaded container allowing methods to be executed by different threads.  As OfficeFloor is not limited by the Thread-per-Request architecture, it makes implementing AJAX push applications significantly easier.  The following tutorials show the ease in which events can be pushed out to web clients.
+  OfficeFloor is a multi-threaded container allowing methods to be executed by different threads.  As OfficeFloor is not limited by the Thread-per-Request architecture, it makes implementing AJAX push applications significantly easier.  The following tutorials show the ease in which events can be pushed out to web clients in real-time.
   
 *--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
 || Tutorial                                                    || Description                                               || Covered
@@ -106,19 +77,14 @@ WoOF running within a JEE Servlet Container
 
 Dependency Injection
 
-  Previous tutorials have covered the built in objects for WoOF's dependency injection.  The following tutorials focus extending the web applications functionality by adding further objects for dependency injection.
+  Previous tutorials have covered the built in objects for WoOF's dependency injection.  The following tutorials focus on extending the web applications functionality by adding further objects for dependency injection.
   
 *----------------------------------------------------------+-----------------------------------------------------------+
 || Tutorial                                                || Description                                             
 *----------------------------------------------------------+-----------------------------------------------------------+
 | {{{./DatabaseHttpServer/index.html}Dependency injection}}  | WoOF with dependency injection.
 *----------------------------------------------------------+-----------------------------------------------------------+
-| <Coming Soon>                                            | Qualification of dependencies with same type.
-*----------------------------------------------------------+-----------------------------------------------------------+
-| <Coming Soon>                                            | Integration with Spring.
-*----------------------------------------------------------+-----------------------------------------------------------+
-| <Coming Soon>                                            | Integration with Guice.
-*----------------------------------------------------------+-----------------------------------------------------------+
+
 
 
 Context
@@ -132,9 +98,10 @@ Context
 *----------------------------------------------------------+-----------------------------------------------------------+
 
 
+
 Thread Injection
 
-  OfficeFloor provides thread injection.
+  OfficeFloor provides thread injection.  This is an advanced feature of WoOF provided by its underlying OfficeFloor technology to allow tuning the web application to the hardware it is running on. 
 
 *----------------------------------------------------------+-----------------------------------------------------------+
 || Tutorial                                                || Description
