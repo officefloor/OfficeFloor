@@ -4,7 +4,7 @@ import net.officefloor.plugin.web.http.application.HttpParameters;
 import net.officefloor.plugin.work.clazz.FlowInterface;
 
 /**
- * Logic for the <code>static.woof.html</code>.
+ * Logic for the <code>form.woof.html</code>.
  */
 public class FormLogic {
 
