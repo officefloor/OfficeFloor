@@ -54,8 +54,10 @@ Running the WoOF project from Maven
     mvn woof:run
 +-----------------------------------------+
 
-  The application will now be available at: <<<http://localhost:7878/static>>>
-
+  The application will now be available at: <<<http://localhost:7878/static>>>  (and look as follows)
+  
+[./images/woof-archetype-static-screenshot.png] WoOF Archetype Static Page Screen Shot
+  
   To stop the application, run:
 
 +-----------------------------------------+
@@ -142,8 +144,12 @@ WoOF graphical configuration
   There are various other configuration items that can be added by right clicking within the WoOF editor.  Please see the {{{../../tutorials/index.html}tutorials}} for further details.
 
   
-  
+
 HTML templating and Java server logic
+
+  The form page looks as follows:
+  
+[./images/woof-archetype-form-screenshot.png] WoOF Archetype Form Page Screen Shot
 
   The following is the HTML for the form page.
 

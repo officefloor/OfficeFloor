@@ -16,17 +16,21 @@ Basics
 *--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
 || Tutorial                                                    || Description                                               || Covered
 *--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
-| {{{../maven/woof-archetype/index.html}My first WoOF application}} | Walks through the simple steps to create and run a WoOF application. | Basics to creating and running a WoOF project |  
+| {{{../maven/woof-archetype/index.html}My first WoOF application}} | Walks through the simple steps to create and run a WoOF application. | {{{http://maven.apache.org}Maven}} and {{{http://eclipse.org}Eclipse}} plug-ins |
 *--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
-| {{{./DynamicHttpServer/index.html}Dynamic web page}}         | Rendering of dynamic content.                              | \<!-- {section} --\> , $\{property\}
+| {{{./PrototypeHttpServer/index.html}Wireframe Prototyping}} <<TODO create>>  | Building working wireframed web prototypes.                | #\{link\}
 *--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
-| {{{./PageFlowHttpServer/index.html}Interactive web page}}    | Handling of requests to provide interactive pages.         | #\{link\} , @HttpParameters
+| {{{./DynamicHttpServer/index.html}Dynamic web page}} <<TODO alter to not use sections just beans and properties>>        | Rendering of dynamic content.                              | $\{bean ... $\} , $\{property\}
 *--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
-| {{{./NavigateHttpServer/index.html}Navigate between pages}}  | Navigation between pages.                                  | @NextTask , @FlowInterface
+| {{{./PageFlowHttpServer/index.html}Interactive web page}}  <<TODO alter to not use sections>>    | Handling of requests to provide interactive pages.         | #\{link\} , @HttpParameters
+*--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
+| {{{./NavigateHttpServer/index.html}Dynamic navigation between pages}}  | Controlling the navigation between pages.                                  | @NextTask , @FlowInterface
 *--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
 | {{{./SessionHttpServer/index.html}Session state}}            | Storing state between requests within the HTTP session.    | @HttpSessionStateful
 *--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
 | {{{./ExceptionHttpServer/index.html}Exception handling}}     | Handling exceptions.                                       | @Parameter
+*--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
+| {{{./RecursiveHttpServer/index.html}Rendering recursive content}} <<TODO create>>     | Handling rendering tree of content.               | \<!-- {section} --\>
 *--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
 
 
