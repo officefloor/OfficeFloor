@@ -18,9 +18,9 @@ Basics
 *--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
 | {{{../maven/woof-archetype/index.html}My first WoOF application}} | Walks through the simple steps to create and run a WoOF application. | {{{http://maven.apache.org}Maven}} and {{{http://eclipse.org}Eclipse}} plug-ins |
 *--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
-| {{{./PrototypeHttpServer/index.html}Wireframe Prototyping}} <<TODO create>>  | Building working wireframed web prototypes.                | #\{link\}
+| {{{./PrototypeHttpServer/index.html}Wireframe Prototyping}}  | Build working web prototypes and then later extend into a working web application.  | #\{link\}
 *--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
-| {{{./DynamicHttpServer/index.html}Dynamic web page}} <<TODO alter to not use sections just beans and properties>>        | Rendering of dynamic content.                              | $\{bean ... $\} , $\{property\}
+| {{{./DynamicHttpServer/index.html}Dynamic web page}} <<TODO alter to not use sections just beans and properties>>        | Rendering of dynamic content.  | $\{bean ... $\} , $\{property\}
 *--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
 | {{{./PageFlowHttpServer/index.html}Interactive web page}}  <<TODO alter to not use sections>>    | Handling of requests to provide interactive pages.         | #\{link\} , @HttpParameters
 *--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
@@ -30,7 +30,7 @@ Basics
 *--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
 | {{{./ExceptionHttpServer/index.html}Exception handling}}     | Handling exceptions.                                       | @Parameter
 *--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
-| {{{./RecursiveHttpServer/index.html}Rendering recursive content}} <<TODO create>>     | Handling rendering tree of content.               | \<!-- {section} --\>
+| {{{./RecursiveHttpServer/index.html}Rendering recursive content}} <<TODO create>>     | Handling rendering tree of content.               | \<!-- {section} --\o>
 *--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
 
 
