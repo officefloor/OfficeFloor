@@ -6,11 +6,13 @@
 		<href>http://www.officefloor.net/</href>
 	</bannerLeft>
 	<body>
-		<menu name="Running Tutorials">
-			<item name="Within JEE App Server" href="./MyFirstWoofApp/index.html" />
-			<item name="Stand-alone" href="./StaticHttpServer/index.html" />
-		</menu>
-		<menu name="Web Tutorials">
+		<menu name="Basics">
+			<item name="My First WoOF app" href="../maven/woof-archetype/index.html" />
+			
+			<!-- TODO provide wireframe prototype web application tutorial -->
+			<item name="TODO fix links" href="TODO fix tutorial left bar links - show in link check report as reminder to fix" />
+			<!-- TODO simple form application tutorial -->
+			
 			<item name="Dynamic web page" href="./DynamicHttpServer/index.html" />
 			<item name="Interactive web page" href="./PageFlowHttpServer/index.html" />
 			<item name="Navigate between pages" href="./NavigateHttpServer/index.html" />
