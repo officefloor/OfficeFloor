@@ -19,7 +19,6 @@
 package net.officefloor.tutorial.dynamichttpserver;
 
 import junit.framework.TestCase;
-import net.officefloor.autowire.AutoWireManagement;
 import net.officefloor.plugin.woof.WoofOfficeFloorSource;
 
 import org.apache.http.HttpResponse;
@@ -38,8 +37,8 @@ public class DynamicHttpServerTest extends TestCase {
 
 		TemplateLogic logic = new TemplateLogic();
 
-		assertEquals("Number of properties", System.getProperties()
-				.size(), logic.getSystemProperties().length);
+		assertEquals("Number of properties", System.getProperties().size(),
+				logic.getTemplateData().getProperties().length);
 
 	}
 	// END SNIPPET: pojo
@@ -47,7 +46,7 @@ public class DynamicHttpServerTest extends TestCase {
 	public void testDynamicPage() throws Exception {
 
 		// Start server
-		WoofOfficeFloorSource.main();
+		WoofOfficeFloorSource.start();
 
 		// Send request for dynamic page
 		HttpResponse response = new DefaultHttpClient().execute(new HttpGet(
@@ -64,7 +63,7 @@ public class DynamicHttpServerTest extends TestCase {
 	@Override
 	protected void tearDown() throws Exception {
 		// Stop server
-		AutoWireManagement.closeAllOfficeFloors();
+		WoofOfficeFloorSource.stop();
 	}
 
 }

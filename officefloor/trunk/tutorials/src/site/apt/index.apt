@@ -20,11 +20,11 @@ Basics
 *--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
 | {{{./PrototypeHttpServer/index.html}Wireframe Prototyping}}  | Build working web prototypes and then later extend into a working web application.  | #\{link\}
 *--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
-| {{{./DynamicHttpServer/index.html}Dynamic web page}} <<TODO alter to not use sections just beans and properties>>        | Rendering of dynamic content.  | $\{bean ... $\} , $\{property\}
+| {{{./DynamicHttpServer/index.html}Dynamic web page}}         | Rendering of dynamic content.                              | $\{bean ... $\} , $\{property\}
 *--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
 | {{{./PageFlowHttpServer/index.html}Interactive web page}}  <<TODO alter to not use sections>>    | Handling of requests to provide interactive pages.         | #\{link\} , @HttpParameters
 *--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
-| {{{./NavigateHttpServer/index.html}Dynamic navigation between pages}}  | Controlling the navigation between pages.                                  | @NextTask , @FlowInterface
+| {{{./NavigateHttpServer/index.html}Dynamic navigation between pages}}  | Controlling the navigation between pages.        | @NextTask , @FlowInterface
 *--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
 | {{{./SessionHttpServer/index.html}Session state}}            | Storing state between requests within the HTTP session.    | @HttpSessionStateful
 *--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
