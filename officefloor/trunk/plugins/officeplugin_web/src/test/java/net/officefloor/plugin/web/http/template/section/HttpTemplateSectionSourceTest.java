@@ -191,6 +191,89 @@ public class HttpTemplateSectionSourceTest extends OfficeFrameTestCase {
 	}
 
 	/**
+	 * Ensure find methods with Data suffix.
+	 */
+	public void testTypeWithDataSuffix() {
+
+		// Create the expected type
+		SectionDesigner expected = SectionLoaderUtil
+				.createSectionDesigner(HttpTemplateSectionSource.class);
+
+		// Inputs (for HTTP Template rending)
+		expected.addSectionInput("renderTemplate", null);
+
+		// Inputs (for Template Logic methods - enables reuse of class)
+		expected.addSectionInput("getTemplateData", null);
+		expected.addSectionInput("getMessage", null);
+		expected.addSectionInput("getSectionData", null);
+		expected.addSectionInput("getDescription", null);
+		expected.addSectionInput("requiredForIntegration", null);
+
+		// Outputs
+		expected.addSectionOutput("output", null, false);
+		expected.addSectionOutput("doExternalFlow", null, false);
+		expected.addSectionOutput(IOException.class.getName(),
+				IOException.class.getName(), true);
+
+		// Objects
+		expected.addSectionObject(ServerHttpConnection.class.getName(),
+				ServerHttpConnection.class.getName());
+
+		// Managed Object Sources
+		expected.addSectionManagedObjectSource("OBJECT",
+				SectionClassManagedObjectSource.class.getName()).addProperty(
+				SectionClassManagedObjectSource.CLASS_NAME_PROPERTY_NAME,
+				TemplateDataLogic.class.getName());
+
+		// Template and Class work
+		SectionWork templateWork = expected.addSectionWork("TEMPLATE",
+				HttpTemplateWorkSource.class.getName());
+		SectionWork classWork = expected.addSectionWork("WORK",
+				ClassSectionSource.class.getName());
+
+		// Template
+		SectionTask getTemplate = classWork.addSectionTask("getTemplateData",
+				"getTemplateData");
+		getTemplate.getTaskObject("OBJECT");
+		SectionTask template = templateWork.addSectionTask("template",
+				"template");
+		template.getTaskObject("SERVER_HTTP_CONNECTION");
+		template.getTaskObject("OBJECT");
+
+		// Message
+		SectionTask message = classWork.addSectionTask("getMessage",
+				"getMessage");
+		message.getTaskObject("OBJECT");
+
+		// Section
+		SectionTask getSection = classWork.addSectionTask("getSectionData",
+				"getSectionData");
+		getSection.getTaskObject("OBJECT");
+		SectionTask section = templateWork.addSectionTask("section", "section");
+		section.getTaskObject("SERVER_HTTP_CONNECTION");
+		section.getTaskObject("OBJECT");
+
+		// Description
+		SectionTask description = classWork.addSectionTask("getDescription",
+				"getDescription");
+		description.getTaskObject("OBJECT");
+
+		// External flow
+		SectionTask doExternalFlow = classWork.addSectionTask(
+				"requiredForIntegration", "requiredForIntegration");
+		doExternalFlow.getTaskObject("OBJECT");
+
+		// Validate type
+		SectionLoaderUtil.validateSection(expected,
+				HttpTemplateSectionSource.class, this.getClass(),
+				"TemplateData.ofp",
+				HttpTemplateSectionSource.PROPERTY_CLASS_NAME,
+				TemplateDataLogic.class.getName(),
+				HttpTemplateSectionSource.PROPERTY_LINK_TASK_NAME_PREFIX,
+				"LINK_");
+	}
+
+	/**
 	 * Ensure can use {@link HttpTemplateSectionSource} without a logic class.
 	 */
 	public void testTypeWithNoLogicClass() {

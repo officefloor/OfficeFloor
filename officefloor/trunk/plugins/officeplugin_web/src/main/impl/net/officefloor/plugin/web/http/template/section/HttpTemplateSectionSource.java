@@ -279,6 +279,11 @@ public class HttpTemplateSectionSource extends ClassSectionSource {
 			String beanTaskKey = beanTaskName.toUpperCase();
 			TemplateClassTask beanTask = this.sectionClassMethodTasksByName
 					.get(beanTaskKey);
+			if (beanTask == null) {
+				// Attempt to find with Data suffix
+				beanTaskKey = beanTaskKey + "DATA";
+				beanTask = this.sectionClassMethodTasksByName.get(beanTaskKey);
+			}
 
 			// Ensure that not annotated with NextTask
 			if (beanTask != null) {
