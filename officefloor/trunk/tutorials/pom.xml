@@ -24,6 +24,7 @@
 		<module>InteractiveHttpServer</module>
 		<module>NavigateHttpServer</module>
 		<module>PrototypeHttpServer</module>
+		<module>SectionHttpServer</module>
 		<module>ServletFilterDependencyInjection</module>
 		<module>ServletFilterJspIntegration</module>
 		<module>ServletFilterWebApplication</module>
