@@ -6,7 +6,7 @@
 
   <<Comet Application Tutorial>>
 
-  This tutorial demonstrates the simplicity in providing Comet (AJAX push, reverse AJAX) functionality to an OfficeFloor web application.
+  This tutorial demonstrates the simplicity in providing Comet (AJAX push, reverse AJAX) functionality to a WoOF web application.
   
   To demonstrate the ease of using Comet functionality the following simple chat application will be used for this tutorial.
   
@@ -16,11 +16,13 @@
     
   {{{http://sourceforge.net/projects/officefloor/files/maven/maven2/net/officefloor/tutorial/CometApp/${projectVersion}/CometApp-${projectVersion}-project.zip/download}Download Tutorial Source}}
   
-Template.html
+  
 
-  The below is the content of the <<<Template.html>>>.
+Template.woof.html
 
-%{code-snippet|brush=xml|file=${basedir}/src/main/resources/Template.html}
+  The below is the HTML page.
+
+%{code-snippet|brush=xml|file=${basedir}/src/main/webapp/Template.woof.html}
   
 
 
@@ -34,7 +36,7 @@ ConversationSubscription Class
   
   * Must be an interface
   
-  * Must have only one method with a single parameter (the event payload)
+  * Must have only one method with at most two parameters (the first being the event payload and second a filter key)
   
   * Must extend <<<CometSubscriber>>> (necessary for GWT client side code generation)
 
@@ -74,7 +76,7 @@ Server Side
   
 [./images/CometApp-add-template-dialog.png] CometApp Add template dialog screenshot.
   
-  There is no additional configuration or coding necessary to support a single server providing Comet functionality.
+  After checking to enable comet, there is no additional configuration or coding necessary to support a single server providing Comet functionality.
 
 
 

@@ -8,7 +8,7 @@
 
   This tutorial demonstrates the simplicity in publishing events from the Server.
   
-  To demonstrate the ease of using Comet (AJAX push, reverse AJAX) functionality on the Server within a OfficeFloor web application the following simple chat application will be used for this tutorial.
+  To demonstrate the ease of using Comet (AJAX push, reverse AJAX) functionality on the Server within a WoOF web application the following simple chat application will be used for this tutorial.
   
 [./images/CometManualApp-screenshot.png] CometManualApp screenshot.
 
@@ -24,11 +24,11 @@
 
 
 
-Template.html
+Template.woof.html
 
-  The below is the content of the <<<Template.html>>>.
+  The below is the HTML page.
 
-%{code-snippet|brush=xml|file=${basedir}/src/main/resources/Template.html}
+%{code-snippet|brush=xml|file=${basedir}/src/main/webapp/Template.woof.html}
 
 
 
@@ -38,7 +38,7 @@ TemplateLogic Class
 
 %{code-snippet|brush-autodetect=1|id=example|file=${basedir}/src/main/java/net/officefloor/tutorial/cometmanualapp/TemplateLogic.java}
 
-  The above provides two methods, that respectively:
+  The above class provides two methods, that respectively:
 
     * login the user by storing their user name within the HTTP session
     
@@ -62,7 +62,7 @@ TemplateLogic Class
 
   The annotation informs WoOF to dependency inject an implementation of the interface that will allow the server code to publish the {{{/apidocs/net/officefloor/plugin/comet/internal/CometEvent.html}CometEvent}}.
   
-  An interface with this annotation must adhere to the same rules of a {{{/apidocs/net/officefloor/plugin/comet/api/CometSubscriber.html}CometSubscriber}} (e.g. single method with a single parameter).
+  An interface with this annotation must adhere to the same rules of a {{{/apidocs/net/officefloor/plugin/comet/api/CometSubscriber.html}CometSubscriber}}.
   
   OfficeFloor will publish the event with the following details:
   
@@ -70,7 +70,7 @@ TemplateLogic Class
    
    * Data: the value of the first parameter
    
-   * Filter Key: <<<null>>>
+   * Filter Key: the value of the optional second parameter
    
   The reason for using the interface is to allow type safe publishing of events.
   

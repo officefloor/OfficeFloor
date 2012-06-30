@@ -8,6 +8,7 @@
 		<version>2.3.0</version>
 	</parent>
 	<artifactId>CometApp</artifactId>
+	<packaging>war</packaging>
 	<name>Comet Application Tutorial</name>
 	<description>Tutorial of using Comet within a WoOF Template</description>
 	<properties>
@@ -27,7 +28,6 @@
 		<dependency>
 			<groupId>com.google.gwt</groupId>
 			<artifactId>gwt-user</artifactId>
-			<scope>provided</scope>
 		</dependency>
 	</dependencies>
 	<build>
@@ -40,10 +40,6 @@
 						<goals>
 							<goal>compile</goal>
 						</goals>
-						<configuration>
-							<logLevel>TRACE</logLevel>
-							<webappDirectory>${project.build.outputDirectory}/PUBLIC</webappDirectory>
-						</configuration>
 					</execution>
 				</executions>
 			</plugin>

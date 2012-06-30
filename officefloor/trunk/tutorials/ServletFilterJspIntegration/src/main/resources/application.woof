@@ -1,6 +1,6 @@
 <woof>
   <templates>
-    <template name="template" uri="template" path="Template.html" class="net.officefloor.tutorial.servletfilterjspintegration.TemplateLogic" x="28" y="18">
+    <template name="template" uri="template" path="Template.woof.html" class="net.officefloor.tutorial.servletfilterjspintegration.TemplateLogic" x="28" y="18">
       <output name="JSP" argument-type="">
         <resource name="Template.jsp"/>
       </output>

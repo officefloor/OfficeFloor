@@ -18,15 +18,14 @@
 
 package net.officefloor.tutorial.cometmanualapp;
 
-import com.gdevelop.gwt.syncrpc.SyncProxy;
-
 import junit.framework.TestCase;
-import net.officefloor.autowire.AutoWireManagement;
 import net.officefloor.plugin.comet.internal.CometEvent;
 import net.officefloor.plugin.comet.internal.CometPublicationService;
 import net.officefloor.plugin.woof.WoofOfficeFloorSource;
 import net.officefloor.tutorial.cometmanualapp.client.ConversationMessage;
 import net.officefloor.tutorial.cometmanualapp.client.ConversationSubscription;
+
+import com.gdevelop.gwt.syncrpc.SyncProxy;
 
 /**
  * Ensures able to publish a {@link CometEvent}.
@@ -35,17 +34,13 @@ import net.officefloor.tutorial.cometmanualapp.client.ConversationSubscription;
  */
 public class ConversationTest extends TestCase {
 
-	public static void main(String... args) throws Exception {
-		WoofOfficeFloorSource.main();
-	}
-
 	/**
 	 * Ensure able to publish a {@link CometEvent}.
 	 */
 	public void testPublishEvent() throws Exception {
 
 		// Start the application
-		WoofOfficeFloorSource.main();
+		WoofOfficeFloorSource.start();
 
 		// Publish a message
 		CometPublicationService service = (CometPublicationService) SyncProxy
@@ -57,7 +52,7 @@ public class ConversationTest extends TestCase {
 		assertTrue("Invalid sequence number", sequenceNumber.longValue() > 0);
 
 		// Stop the application
-		AutoWireManagement.closeAllOfficeFloors();
+		WoofOfficeFloorSource.stop();
 	}
 
 }
