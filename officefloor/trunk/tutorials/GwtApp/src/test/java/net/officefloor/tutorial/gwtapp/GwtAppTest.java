@@ -21,7 +21,6 @@ package net.officefloor.tutorial.gwtapp;
 import java.io.ByteArrayOutputStream;
 
 import junit.framework.TestCase;
-import net.officefloor.autowire.AutoWireManagement;
 import net.officefloor.plugin.woof.WoofOfficeFloorSource;
 
 import org.apache.http.HttpResponse;
@@ -43,7 +42,7 @@ public class GwtAppTest extends TestCase {
 		final HttpClient client = new DefaultHttpClient();
 		try {
 			// Start server
-			WoofOfficeFloorSource.main();
+			WoofOfficeFloorSource.start();
 
 			// Send request for page
 			HttpResponse response = client.execute(new HttpGet(
@@ -66,7 +65,7 @@ public class GwtAppTest extends TestCase {
 		} finally {
 			// Stop the client and server
 			client.getConnectionManager().shutdown();
-			AutoWireManagement.closeAllOfficeFloors();
+			WoofOfficeFloorSource.stop();
 		}
 	}
 

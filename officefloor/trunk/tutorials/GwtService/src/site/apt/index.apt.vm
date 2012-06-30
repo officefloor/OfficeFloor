@@ -40,11 +40,11 @@ GWT Service Interfaces
   
 
   
-Template.html
+Template.woof.html
 
-  The below is the content of the <<<Template.html>>>.
+  The below is the HTML page.
 
-%{code-snippet|brush=xml|file=${basedir}/src/main/resources/Template.html}
+%{code-snippet|brush=xml|file=${basedir}/src/main/webapp/Template.woof.html}
 
   This simple HTML contains the <<<id>>> attribute for the GWT hook and the WoOF <<<%\{newGame\}>>> link to start a new game.
 

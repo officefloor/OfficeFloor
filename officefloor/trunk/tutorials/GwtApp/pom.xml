@@ -8,6 +8,7 @@
 		<version>2.3.0</version>
 	</parent>
 	<artifactId>GwtApp</artifactId>
+	<packaging>war</packaging>
 	<name>GWT Application Tutorial</name>
 	<description>Tutorial of using GWT within a WoOF Template</description>
 	<properties>
@@ -24,7 +25,6 @@
 		<dependency>
 			<groupId>com.google.gwt</groupId>
 			<artifactId>gwt-user</artifactId>
-			<scope>provided</scope>
 		</dependency>
 		<!-- END SNIPPET: GwtDependency -->
 		<dependency>
@@ -44,9 +44,6 @@
 						<goals>
 							<goal>compile</goal>
 						</goals>
-						<configuration>
-							<webappDirectory>${project.build.outputDirectory}/PUBLIC</webappDirectory>
-						</configuration>
 					</execution>
 				</executions>
 			</plugin>

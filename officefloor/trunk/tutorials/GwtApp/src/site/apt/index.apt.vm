@@ -14,14 +14,18 @@
     
   {{{http://sourceforge.net/projects/officefloor/files/maven/maven2/net/officefloor/tutorial/GwtApp/${projectVersion}/GwtApp-${projectVersion}-project.zip/download}Download Tutorial Source}}
   
-Template.html
 
-  The below is the content of the <<<Template.html>>>.
+  
+Template.woof.html
 
-%{code-snippet|brush=xml|file=${basedir}/src/main/resources/Template.html}
+  The below is the HTML of the page.
 
-  The thing to notice with the template is that it only has the single GWT hook (id="timer").  The other GWT aspects are not present (such as the \<script\> tag to include the GWT JavaScript).  This is because WoOF will automatically add these GWT aspects on rendering the page so that only the necessary <id="xxx"> hooks are required.
+%{code-snippet|brush=xml|file=${basedir}/src/main/webapp/Template.woof.html}
 
+  Notice that the template only has the single GWT hook (id="timer").  The other GWT aspects are not present (such as the \<script\> tag to include the GWT JavaScript).  This is because WoOF will automatically add these GWT aspects on rendering the page so that only the necessary <id="xxx"> hooks are required.
+
+
+  
 EntryPoint Class
 
   Before discussing the Java code for GWT compilation, a very quick summary of the relevant GWT capabilities is provided below.  Please see the {{{http://code.google.com/webtoolkit/overview.html}GWT Overview}} for more in depth documentation of GWT.
@@ -50,7 +54,7 @@ EntryPoint Class
 
 application.woof
 
-  Normally with GWT applications a <<<Module.gwt.xml>>> configuration file is required.  The file indicates to GWT how to compile and create the JavaScript for the web page.
+  Normally with GWT applications a <<<Module.gwt.xml>>> configuration file is required to be written.  The file indicates to GWT how to compile and create the JavaScript for the web page.
   
   WoOF makes the GWT integration simpler by generating the configuration file for you.  All that is necessary to provide GWT functionality onto the page is specifying the <<<EntryPoint>>> class when adding the template.  The following demonstrates the simplified GWT configuration for this tutorial.
   
@@ -61,6 +65,7 @@ application.woof
     * rename-to attribute
     
     * entry-point class attribute
+
 
 
 Compiling GWT with Maven

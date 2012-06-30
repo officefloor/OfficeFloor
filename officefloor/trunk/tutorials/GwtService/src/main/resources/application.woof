@@ -1,6 +1,6 @@
 <woof>
   <templates>
-    <template name="game" uri="game" path="Template.html" class="net.officefloor.tutorial.gwtservice.TemplateLogic" x="33" y="37">
+    <template name="game" uri="game" path="Template.woof.html" class="net.officefloor.tutorial.gwtservice.TemplateLogic" x="33" y="37">
       <output name="output" argument-type="">
       </output>
       <extension class="GWT">
