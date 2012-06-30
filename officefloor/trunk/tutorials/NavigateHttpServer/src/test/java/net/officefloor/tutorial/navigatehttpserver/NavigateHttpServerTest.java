@@ -19,7 +19,6 @@
 package net.officefloor.tutorial.navigatehttpserver;
 
 import junit.framework.TestCase;
-import net.officefloor.autowire.AutoWireManagement;
 import net.officefloor.plugin.woof.WoofOfficeFloorSource;
 
 import org.apache.http.HttpResponse;
@@ -40,7 +39,7 @@ public class NavigateHttpServerTest extends TestCase {
 	public void testNavigate() throws Exception {
 
 		// Start server
-		WoofOfficeFloorSource.main();
+		WoofOfficeFloorSource.start();
 
 		// Request template one
 		this.doRequest("http://localhost:7878/one");
@@ -63,7 +62,7 @@ public class NavigateHttpServerTest extends TestCase {
 	@Override
 	protected void tearDown() throws Exception {
 		this.client.getConnectionManager().shutdown();
-		AutoWireManagement.closeAllOfficeFloors();
+		WoofOfficeFloorSource.stop();
 	}
 
 }

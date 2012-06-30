@@ -1,18 +1,20 @@
                                                -----------------------
-                                             Navigate HTTP Server Tutorial 
+                                             Dynamic Navigation Tutorial 
                                                -----------------------
 					        Daniel Sagenschneider
                                                -----------------------
 
-  <<Navigate Http Server Tutorial>>
+  <<Dynamic Navigation Tutorial>>
 
-  This tutorial demonstrates navigating back and forth between the following two pages:
+  This tutorial demonstrates controlling navigation back and forth between the following two pages:
   
 [./images/NavigateHttpServer-one-screenshot.png] NavigateHttpServer one screenshot.
 
 [./images/NavigateHttpServer-two-screenshot.png] NavigateHttpServer two screenshot.
 
   {{{http://sourceforge.net/projects/officefloor/files/maven/maven2/net/officefloor/tutorial/NavigateHttpServer/${projectVersion}/NavigateHttpServer-${projectVersion}-project.zip/download}Download Tutorial Source}}
+  
+
   
 application.woof
 
@@ -21,52 +23,51 @@ application.woof
 [./images/navigate-woof.png] application.woof configuration.
 
   The links are the navigation paths between the templates.  Each template provides outputs that by the above configuration navigates the user to the other page.
+
+  Note that it is actually possible to string together multiple templates by linking the <<<output>>> of the template to render further templates in a response.  The <<<output>>> link is optional to be connected, however all other outputs must be linked.
   
-  The rest of this tutorial will detail how to add the template outputs.
 
 
 @NextTask
 
   The first template provides a link to navigate to the other template.
 
-%{code-snippet|brush=xml|file=${basedir}/src/main/resources/TemplateOne.html}
-  
-  The stylesheet is not necessary for navigation linking but is included to show that normal HTML/CSS functionality works.  The stylesheets in this case just provides background colouring to the page to highlight navigation back and forth between the two pages (templates).
+%{code-snippet|brush=xml|file=${basedir}/src/main/webapp/TemplateOne.woof.html}
 
-  The link is handled by the following method.  The annotation indicates what is the next task within the flow.
+  The link is handled by the following method.  The annotation indicates the next task within the flow.
 
 %{code-snippet|brush-autodetect=1|id=example|file=${basedir}/src/main/java/net/officefloor/tutorial/navigatehttpserver/TemplateOne.java}
 
-  As the next task name is not a template method name nor a name of a template section it becomes an output from the HTTP template.  From the configuration above, the output is configured to navigate to the other template.
+  As the next task name is not a name of another method (not a template section name, see later tutorials) it becomes an output from the template.  From the configuration above the output is configured to navigate to the other template.
   
-  OfficeFloor strings {{{/apidocs/net/officefloor/frame/api/execute/Task.html}Task}} instances together allowing control over the rendering of templates and navigation between templates.  It is actually possible to string together multiple templates by linking the <<<output>>> of the template to render further templates in a response.  The <<<output>>> link is optional to be connected, however all other outputs must be linked.
+  This is useful should some action be required to be taken when the user clicks to navigate to the next page.
 
-  A template is actually an implementation of a {{{/apidocs/net/officefloor/compile/spi/section/source/SectionSource.html}SectionSource}} within OfficeFloor.  A section has named inputs and outputs that are linked together.  This is the mechanism by which OfficeFloor joins sections (templates) together as functional building blocks of an application.
 
 
 @FlowInterface
 
-  The second template uses a submit to navigate to the original template.
+  The second template uses a submit to navigate to the first template.
 
-%{code-snippet|brush=xml|file=${basedir}/src/main/resources/TemplateTwo.html}
+%{code-snippet|brush=xml|file=${basedir}/src/main/webapp/TemplateTwo.woof.html}
 
-  Much like the first template the logic class also navigates to an external flow.  In this case it uses an interface for programmatic control of flow control.
+  Much like the first template the logic class also navigates to an external flow.  In this case it uses an interface for programmatic control of navigation.
 
 %{code-snippet|brush-autodetect=1|id=example|file=${basedir}/src/main/java/net/officefloor/tutorial/navigatehttpserver/TemplateTwo.java}
 
-  OfficeFloor will provide an implementation of the interface.  Each method on the interface will be linked by name to:
+  As the interface is dependency injected, WoOF sees the <<<@FlowInterface>>> annotation and will provide an implementation of the interface.  Each method on the interface will be linked by name to one of the following:
   
    * a method on the template logic class
    
-   * a section of the template
+   * a section of the template (see later tutorials)
    
    * an external flow from the template.  This is then linked by the <<<application.woof>>> configuration (as is the case above)
    
-  This allows programmatically determining which is the next task.
+  This allows programmatically determining which is the next task.  It is possible to add further methods to the interface to provide alternate navigation paths.  Navigation only occurs if the method is invoked.  Please also be aware that navigation to the page happens after the method has completed.
   
   Both <<<@NextTask>>> and <<<@FlowInterface>>> may also be used in combination. <<<@NextTask>>> will provide the default next task unless overrided by a method of a <<<@FlowInterface>>> being invoked.
 
   The above configuration has the external flow linked back to the first template.
+
 
 
 Unit Test
@@ -74,6 +75,8 @@ Unit Test
   The unit test navigates between the templates.
 
 %{code-snippet|brush-autodetect=1|id=test|file=${basedir}/src/test/java/net/officefloor/tutorial/navigatehttpserver/NavigateHttpServerTest.java}
+
+
 
 Next
 
