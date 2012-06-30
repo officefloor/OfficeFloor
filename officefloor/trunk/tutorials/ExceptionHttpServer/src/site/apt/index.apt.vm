@@ -6,9 +6,9 @@
 
   <<Exception Handling Tutorial>>
 
-  This tutorial demonstrates the ease in handling exceptions within an OfficeFloor web applications.
+  This tutorial demonstrates the ease in handling exceptions within an WoOF web application.
   
-  The tutorial will demonstrate this by a template method throwing an exception that is handled by logging the exception to <<<stderr>>>.  Though this is a simple example it does demonstrate the ease of handling exceptions.
+  The tutorial will demonstrate this by a template method throwing an exception that is handled by writing the exception to <<<stderr>>>.  Though this is a simple example it does demonstrate the ease of handling exceptions.
   
   This tutorial also introduces the <<<@Parameter>>> annotation to allow passing an object between methods.
 
@@ -40,13 +40,13 @@ Exception handling configuration
 
   The exception being handled is an <<<SQLException>>>.  To add the exception right click and add exception.
   
-  The exception is linked to the <<<Handler>>>.  The <<<Handler>>> is a the following POJO.  It is added as a class section (right click and add section).
+  The exception is linked to the <<<Handler>>>.  The <<<Handler>>> is the following POJO.  It is added as a class section (right click and add section).
   
 %{code-snippet|brush-autodetect=1|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/exceptionhttpserver/ExceptionHandler.java}
 
   As per the configuration above, the <<<handleSqlException>>> method is invoked to handle the <<<SQLException>>>.
   
-  Once the method completes, it follows normal WoOF behaviour.  In other words, the <<<@NextTask>>> annotation is honoured resulting in the static error page being sent to client.
+  Once the method completes it follows normal WoOF behaviour.  In other words, the <<<@NextTask>>> annotation is honoured resulting in the static error page being sent to the client.
 
 
 
@@ -64,7 +64,7 @@ Exception handling configuration
    
    * parameter to a <<<@FlowInterface>>> method
    
-  This functionality is useful and provided by the underlying OfficeFloor framework.  However, within WoOF the necessity to pass parameters is used typically only for exception handling.  The use of request dependency injected objects is typically a better way to pass state between methods ({{{/apidocs/net/officefloor/plugin/web/http/application/HttpRequestStateful.html}HttpRequestStateful}}).
+  This functionality is useful and provided by the underlying OfficeFloor framework.  However, within WoOF the necessity to pass parameters is used typically only for exception handling.  The use of dependency injected objects is typically a better way to pass state between methods (i.e. {{{/apidocs/net/officefloor/plugin/web/http/application/HttpRequestStateful.html}HttpRequestStateful}}).
 
 
 

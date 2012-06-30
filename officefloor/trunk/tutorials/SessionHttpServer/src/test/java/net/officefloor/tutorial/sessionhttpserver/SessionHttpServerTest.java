@@ -19,8 +19,9 @@
 package net.officefloor.tutorial.sessionhttpserver;
 
 import junit.framework.TestCase;
-import net.officefloor.autowire.AutoWireManagement;
 import net.officefloor.plugin.woof.WoofOfficeFloorSource;
+import net.officefloor.tutorial.sessionhttpserver.TemplateLogic.Post;
+import net.officefloor.tutorial.sessionhttpserver.TemplateLogic.Posts;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
@@ -45,10 +46,11 @@ public class SessionHttpServerTest extends TestCase {
 		Post post = new Post();
 		post.setText("Test post");
 		logic.post(post, session);
-		assertEquals("Ensure post added", post, session.getPosts()[0]);
+		assertSame("Ensure post added", post, session.getPosts()[0]);
 
 		// Ensure post provided from template logic
-		assertEquals("Ensure post available", post, logic.getPosts(session)[0]);
+		assertSame("Ensure post available", post, logic
+				.getTemplateData(session).getPosts()[0]);
 	}
 	// END SNIPPET: pojo
 
@@ -57,7 +59,7 @@ public class SessionHttpServerTest extends TestCase {
 	public void testSessionPage() throws Exception {
 
 		// Start server
-		WoofOfficeFloorSource.main();
+		WoofOfficeFloorSource.start();
 
 		// Send request for empty session
 		this.doRequest("http://localhost:7878/post");
@@ -76,7 +78,7 @@ public class SessionHttpServerTest extends TestCase {
 	@Override
 	protected void tearDown() throws Exception {
 		// Stop server
-		AutoWireManagement.closeAllOfficeFloors();
+		WoofOfficeFloorSource.stop();
 	}
 
 }

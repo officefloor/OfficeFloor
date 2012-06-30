@@ -22,7 +22,6 @@ import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
 
 import junit.framework.TestCase;
-import net.officefloor.autowire.AutoWireManagement;
 import net.officefloor.plugin.woof.WoofOfficeFloorSource;
 
 import org.apache.http.client.HttpClient;
@@ -44,7 +43,7 @@ public class ExceptionHttpServerTest extends TestCase {
 		System.setErr(new PrintStream(error, true));
 
 		// Start server
-		WoofOfficeFloorSource.main();
+		WoofOfficeFloorSource.start();
 
 		// Submit to trigger the exception
 		this.client.execute(new HttpGet(
@@ -76,7 +75,7 @@ public class ExceptionHttpServerTest extends TestCase {
 		this.client.getConnectionManager().shutdown();
 
 		// Stop server
-		AutoWireManagement.closeAllOfficeFloors();
+		WoofOfficeFloorSource.stop();
 	}
 
 }
