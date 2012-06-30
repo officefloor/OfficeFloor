@@ -6,7 +6,7 @@
 
   <<WoOF within JEE Servlet Container Tutorial>>
 
-  This tutorial demonstrates running an OfficeFloor web application within a JEE Servlet container.
+  This tutorial demonstrates running a WoOF web application within a JEE Servlet container.
     
   {{{http://sourceforge.net/projects/officefloor/files/maven/maven2/net/officefloor/tutorial/ServletFilterWebApplication/${projectVersion}/ServletFilterWebApplication-${projectVersion}-project.zip/download}Download Tutorial Source}}
 
@@ -56,11 +56,11 @@ Remaining Code
 
   For completeness of this tutorial the remaining code is included below.
   
-* Template.html
+* Template.woof.html
 
   Has the <<< #\{link\} >>> for handling by <<<ExampleTemplateLogic>>>.
 
-%{code-snippet|brush=xml|file=${basedir}/src/main/webapp/Template.html}
+%{code-snippet|brush=xml|file=${basedir}/src/main/webapp/Template.woof.html}
 
 * ExampleTemplateLogic
 

@@ -43,7 +43,7 @@ Making use of an EJB within the WoofServletFilter
 
   The template is as follows.
   
-%{code-snippet|brush=xml|file=${basedir}/src/main/webapp/Template.html}
+%{code-snippet|brush=xml|file=${basedir}/src/main/webapp/Template.woof.html}
   
   WoOF will use the JEE container thread to execute all methods using a dependency from the JEE container.  This is necessary to allow EJBs to pick up the appropriate context for executing correctly.  WoOF will however allow multi-threading all other methods that do not use dependencies from the JEE container.
 

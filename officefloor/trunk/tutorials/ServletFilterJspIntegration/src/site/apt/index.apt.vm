@@ -58,7 +58,7 @@ Templates
 
   The equivalent WoOF template is as follows:
 
-%{code-snippet|brush=xml|file=${basedir}/src/main/webapp/Template.html}
+%{code-snippet|brush=xml|file=${basedir}/src/main/webapp/Template.woof.html}
 
   WoOF focuses on minimising the impact to the HTML.  It enables this light instrumentation of the HTML by having a POJO (plain old java object) provide the dynamic logic for the web page rendering.  The {{{./index.html}other tutorials}} contain further details.  
   

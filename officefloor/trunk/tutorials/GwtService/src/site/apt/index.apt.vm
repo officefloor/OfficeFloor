@@ -121,11 +121,14 @@ Client side logic
 %{code-snippet|brush-autodetect=1|id=example|file=${basedir}/src/main/java/net/officefloor/tutorial/gwtservice/client/GwtAppEntryPoint.java}
 
 
+
 Unit Testing
 
   The following unit test shows the use of <<<SyncProxy>>> to test the servicing of the GWT RPC call by the server.
   
 %{code-snippet|brush-autodetect=1|id=test|file=${basedir}/src/test/java/net/officefloor/tutorial/gwtservice/GameTest.java}
+
+
 
 Next
 
