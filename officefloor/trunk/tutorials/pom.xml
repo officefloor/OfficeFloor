@@ -21,8 +21,8 @@
 		<module>ExceptionHttpServer</module>
 		<module>GwtApp</module>
 		<module>GwtService</module>
+		<module>InteractiveHttpServer</module>
 		<module>NavigateHttpServer</module>
-		<module>PageFlowHttpServer</module>
 		<module>PrototypeHttpServer</module>
 		<module>ServletFilterDependencyInjection</module>
 		<module>ServletFilterJspIntegration</module>

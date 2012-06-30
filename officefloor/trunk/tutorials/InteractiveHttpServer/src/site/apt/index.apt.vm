@@ -5,38 +5,24 @@
                                                -----------------------
 
   <<Interactive HTTP Server Tutorial>>
-
-  This tutorial introduces the the final of the 3 web page instrumentations: <<< #\{link\} >>>  
   
-  The other two instrumentations ( <<< <!-- \{section\} --> >>> and <<< $\{property\} >>> ) focus on dynamic content for rending to the web client.  This final instrumentation is focused on processing the requests back from the web client.
+  This tutorial looks at handling a form submission.
   
-  Additionally covered in this tutorial is:
-  
-   * rendering only parts of the template
+  The below example for this tutorial will implement a simple form submission, validate a name was entered, and provide a message if successfully entered values.  The simple for for this tutorial is as follows:
     
-   * maintaining state across requests (via HTTP session)
-   
-  Also touched on are some of OfficeFloor's dependency injection capabilities.
+[./images/InteractiveHttpServer-screenshot.png] InteractiveHttpServer screenshot.
   
-  The below example for this tutorial will implement the ability to add items to a list along with clearing the list.  Different parts of the template will be shown based on whether there are items in the list.  
+  {{{http://sourceforge.net/projects/officefloor/files/maven/maven2/net/officefloor/tutorial/InteractiveHttpServer/${projectVersion}/InteractiveHttpServer-${projectVersion}-project.zip/download}Download Tutorial Source}}
   
-  The following shows the tutorial's example web page with no items in the list:
 
-[./images/PageFlowHttpServer-empty-screenshot.png] PageFlowHttpServer empty screenshot.
-  
-  On adding two entries, the page will look as follows:
-  
-[./images/PageFlowHttpServer-listing-screenshot.png] PageFlowHttpServer listing screenshot.
-  
-  {{{http://sourceforge.net/projects/officefloor/files/maven/maven2/net/officefloor/tutorial/PageFlowHttpServer/${projectVersion}/PageFlowHttpServer-${projectVersion}-project.zip/download}Download Tutorial Source}}
-  
+
 Template.html
 
-  The below is the content of the <<<Template.html>>>.
+  The below is the content of the <<<Template.woof.html>>>.
 
-%{code-snippet|brush=xml|file=${basedir}/src/main/resources/Template.html}
+%{code-snippet|brush=xml|file=${basedir}/src/main/webapp/Template.woof.html}
 
-  This tutorial will use the template section divisions to enable controlling what is rendered along with the <<< #\{link\} >>> to enable user interactions.
+  
   
 
 TemplateLogic Class
