@@ -19,7 +19,6 @@
 package net.officefloor.tutorial.pageflowhttpserver;
 
 import junit.framework.TestCase;
-import net.officefloor.autowire.AutoWireManagement;
 import net.officefloor.plugin.woof.WoofOfficeFloorSource;
 
 import org.apache.http.HttpResponse;
@@ -40,16 +39,13 @@ public class PageFlowHttpServerTest extends TestCase {
 	public void testPageInteraction() throws Exception {
 
 		// Start server
-		WoofOfficeFloorSource.main();
+		WoofOfficeFloorSource.start();
 
 		// Request the template
 		this.doRequest("http://localhost:7878/example");
 
-		// Add an item
-		this.doRequest("http://localhost:7878/example.links-addItem.task?name=Daniel&description=founder");
-
-		// Clear the items
-		this.doRequest("http://localhost:7878/example.links-clear.task");
+		// Send form submission
+		this.doRequest("http://localhost:7878/example.links-handleSubmission.task?name=Daniel&description=founder");
 	}
 
 	private void doRequest(String url) throws Exception {
@@ -63,7 +59,7 @@ public class PageFlowHttpServerTest extends TestCase {
 	@Override
 	protected void tearDown() throws Exception {
 		this.client.getConnectionManager().shutdown();
-		AutoWireManagement.closeAllOfficeFloors();
+		WoofOfficeFloorSource.stop();
 	}
 
 }
