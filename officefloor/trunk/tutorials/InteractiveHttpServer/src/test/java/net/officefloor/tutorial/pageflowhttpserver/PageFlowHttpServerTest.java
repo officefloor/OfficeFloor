@@ -41,7 +41,7 @@ public class PageFlowHttpServerTest extends TestCase {
 		// Start server
 		WoofOfficeFloorSource.start();
 
-		// Request the template
+		// Request the initial blank template
 		this.doRequest("http://localhost:7878/example");
 
 		// Send form submission
