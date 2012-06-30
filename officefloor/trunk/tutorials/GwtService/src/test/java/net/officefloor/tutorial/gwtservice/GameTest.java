@@ -18,13 +18,12 @@
 
 package net.officefloor.tutorial.gwtservice;
 
-import com.gdevelop.gwt.syncrpc.SyncProxy;
-
-import net.officefloor.autowire.AutoWireManagement;
+import junit.framework.TestCase;
 import net.officefloor.plugin.woof.WoofOfficeFloorSource;
 import net.officefloor.tutorial.gwtservice.client.HighLowGame;
 import net.officefloor.tutorial.gwtservice.client.Result;
-import junit.framework.TestCase;
+
+import com.gdevelop.gwt.syncrpc.SyncProxy;
 
 /**
  * Tests the Game service.
@@ -35,7 +34,7 @@ public class GameTest extends TestCase {
 
 	@Override
 	protected void tearDown() throws Exception {
-		AutoWireManagement.closeAllOfficeFloors();
+		WoofOfficeFloorSource.stop();
 	}
 
 	/**
@@ -45,7 +44,7 @@ public class GameTest extends TestCase {
 	public void testCallGwtService() throws Exception {
 
 		// Start Server
-		WoofOfficeFloorSource.main();
+		WoofOfficeFloorSource.start();
 
 		// Invoke the service
 		HighLowGame game = (HighLowGame) SyncProxy.newProxyInstance(

@@ -1,6 +1,6 @@
 <woof>
   <templates>
-    <template name="template" uri="template" path="Template.html" class="net.officefloor.tutorial.gwtapp.TemplateLogic" x="30" y="31">
+    <template name="template" uri="template" path="Template.woof.html" class="net.officefloor.tutorial.gwtapp.TemplateLogic" x="30" y="31">
       <output name="output" argument-type="">
       </output>
       <extension class="GWT">

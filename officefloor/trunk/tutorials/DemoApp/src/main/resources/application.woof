@@ -1,6 +1,6 @@
 <woof>
   <templates>
-    <template name="/" uri="/" path="index.html" class="net.officefloor.demo.IndexLogic" x="29" y="85">
+    <template name="/" uri="/" path="index.woof.html" class="net.officefloor.demo.IndexLogic" x="29" y="85">
       <output name="ChatApplication" argument-type="">
         <template name="chat"/>
       </output>
@@ -10,7 +10,7 @@
       <output name="output" argument-type="">
       </output>
     </template>
-    <template name="chat" uri="chat" path="chat.html" class="net.officefloor.demo.chat.ChatLogic" x="186" y="62">
+    <template name="chat" uri="chat" path="chat.woof.html" class="net.officefloor.demo.chat.ChatLogic" x="186" y="62">
       <output name="output" argument-type="">
       </output>
       <extension class="GWT">
@@ -20,7 +20,7 @@
         <property name="manual.publish.method.name" value=""/>
       </extension>
     </template>
-    <template name="stocks" uri="stocks" path="stocks.html" class="net.officefloor.demo.stocks.StocksLogic" x="188" y="138">
+    <template name="stocks" uri="stocks" path="stocks.woof.html" class="net.officefloor.demo.stocks.StocksLogic" x="188" y="138">
       <output name="output" argument-type="">
       </output>
       <extension class="GWT">
