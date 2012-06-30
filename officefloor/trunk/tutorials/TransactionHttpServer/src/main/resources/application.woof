@@ -1,6 +1,6 @@
 <woof>
   <templates>
-    <template name="users" uri="users" path="Users.html" class="net.officefloor.tutorial.transactionhttpserver.UsersLogic" x="189" y="32">
+    <template name="users" uri="users" path="Users.woof.html" class="net.officefloor.tutorial.transactionhttpserver.UsersLogic" x="189" y="32">
       <output name="createUser" argument-type="net.officefloor.tutorial.transactionhttpserver.UserProperties">
         <input section="CreateUser" input="createUser"/>
       </output>

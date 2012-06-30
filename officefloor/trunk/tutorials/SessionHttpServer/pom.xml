@@ -8,6 +8,7 @@
 		<version>2.3.0</version>
 	</parent>
 	<artifactId>SessionHttpServer</artifactId>
+	<packaging>war</packaging>
 	<name>Session HTTP Server Tutorial</name>
 	<description>Tutorial of using OfficeFloor for a HTTP Server with storing content in the HTTP Session</description>
 	<properties>

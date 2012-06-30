@@ -8,6 +8,7 @@
 		<version>2.3.0</version>
 	</parent>
 	<artifactId>ExceptionHttpServer</artifactId>
+	<packaging>war</packaging>
 	<name>Exception handling HTTP Server Tutorial</name>
 	<description>Tutorial of exception handling within a WoOF web application</description>
 	<properties>
