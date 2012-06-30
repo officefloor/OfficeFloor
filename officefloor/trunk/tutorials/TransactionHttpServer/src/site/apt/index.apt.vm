@@ -59,7 +59,7 @@ Code
 
 * Template
 
-%{code-snippet|brush=xml|file=${basedir}/src/main/resources/Users.html}
+%{code-snippet|brush=xml|file=${basedir}/src/main/webapp/Users.woof.html}
 
 * Template Logic
 

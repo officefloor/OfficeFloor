@@ -25,7 +25,6 @@ import java.sql.ResultSet;
 import javax.sql.DataSource;
 
 import junit.framework.TestCase;
-import net.officefloor.autowire.AutoWireManagement;
 import net.officefloor.plugin.woof.WoofOfficeFloorSource;
 
 import org.apache.http.HttpResponse;
@@ -54,7 +53,7 @@ public class DatabaseHttpServerTest extends TestCase {
 	@Override
 	protected void setUp() throws Exception {
 		// Start the database and HTTP Server
-		WoofOfficeFloorSource.main();
+		WoofOfficeFloorSource.start();
 	}
 
 	@Override
@@ -64,7 +63,7 @@ public class DatabaseHttpServerTest extends TestCase {
 		this.client.getConnectionManager().shutdown();
 
 		// Stop HTTP Server
-		AutoWireManagement.closeAllOfficeFloors();
+		WoofOfficeFloorSource.stop();
 
 		// Stop database for new instance each test
 		DriverManager.getConnection(DATABASE_URL, DATABASE_USER, "")

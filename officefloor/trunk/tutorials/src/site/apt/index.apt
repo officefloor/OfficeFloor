@@ -30,7 +30,7 @@ Basics
 *--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
 | {{{./ExceptionHttpServer/index.html}Exception handling}}     | Handling exceptions.                                       | @Parameter
 *--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
-| {{{./RecursiveHttpServer/index.html}Rendering recursive content}} <<TODO create>>     | Handling rendering tree of content.               | \<!-- {section} --\o>
+| {{{./SectionHttpServer/index.html}Sectional content}} <<TODO create>>     | Sectionally rendering content.               | \<!-- {section} --\>
 *--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
 
 

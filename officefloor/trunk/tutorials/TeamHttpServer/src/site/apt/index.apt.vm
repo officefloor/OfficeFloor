@@ -69,7 +69,7 @@ Code
   
   The following is the content of the template.
 
-%{code-snippet|brush=xml|file=${basedir}/src/main/resources/Template.ofp}
+%{code-snippet|brush=xml|file=${basedir}/src/main/webapp/Template.woof.html}
 
   The following provides the values for the <<< $\{property\} >>> entries from the template logic.  
 
