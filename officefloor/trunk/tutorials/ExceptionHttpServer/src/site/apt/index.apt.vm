@@ -88,5 +88,5 @@ Unit Test
 
 Next
 
-  The basic web page functionality has now been covered. Please look at the {{{../index.html}other tutorials}} for further features of OfficeFloor.
+  The {{{../SectionHttpServer/index.html}next tutorial}} looks at sectioning the template content.
 

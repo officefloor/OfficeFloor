@@ -50,6 +50,10 @@
 			<contains><![CDATA[<version>${project.version}</version>(\s)*</parent>]]></contains>
 		</file>
 		<file>
+			<location>RawHttpServer/pom.xml</location>
+			<contains><![CDATA[<version>${project.version}</version>(\s)*</parent>]]></contains>
+		</file>
+		<file>
 			<location>SectionHttpServer/pom.xml</location>
 			<contains><![CDATA[<version>${project.version}</version>(\s)*</parent>]]></contains>
 		</file>
