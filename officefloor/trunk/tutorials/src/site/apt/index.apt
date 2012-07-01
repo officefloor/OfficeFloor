@@ -22,7 +22,7 @@ Basics
 *--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
 | {{{./DynamicHttpServer/index.html}Dynamic web page}}         | Rendering of dynamic content.                              | $\{bean ... $\} , $\{property\}
 *--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
-| {{{./PageFlowHttpServer/index.html}Interactive web page}}    | Handling of requests to provide interactive pages.         | #\{link\} , @HttpParameters
+| {{{./InteractiveHttpServer/index.html}Interactive web page}} | Handling of requests to provide interactive pages.         | #\{link\} , @HttpParameters
 *--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
 | {{{./NavigateHttpServer/index.html}Dynamic navigation between pages}}  | Controlling the navigation between pages.        | @NextTask , @FlowInterface
 *--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
