@@ -10,7 +10,7 @@
 			<item name="My First WoOF app" href="../maven/woof-archetype/index.html" />
 			<item name="Wireframe Prototyping" href="./PrototypeHttpServer/index.html" />
 			<item name="Dynamic web page" href="./DynamicHttpServer/index.html" />
-			<item name="Interactive web page" href="./PageFlowHttpServer/index.html" />
+			<item name="Interactive web page" href="./InteractiveHttpServer/index.html" />
 			<item name="Navigate between pages" href="./NavigateHttpServer/index.html" />
 			<item name="Session state" href="./SessionHttpServer/index.html" />
 			<item name="Exception handling" href="./ExceptionHttpServer/index.html" />
