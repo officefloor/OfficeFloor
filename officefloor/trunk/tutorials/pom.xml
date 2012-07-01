@@ -23,6 +23,7 @@
 		<module>GwtService</module>
 		<module>InteractiveHttpServer</module>
 		<module>NavigateHttpServer</module>
+		<module>Presentation</module>
 		<module>PrototypeHttpServer</module>
 		<module>SectionHttpServer</module>
 		<module>ServletFilterDependencyInjection</module>
