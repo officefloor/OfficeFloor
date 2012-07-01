@@ -142,7 +142,7 @@
 									<replacetoken><![CDATA[<div id="footer">]]></replacetoken>
 									<replacevalue><![CDATA[
 
-<div style="padding: 20em">
+<div style="padding-left: 20em">
 <!-- Facebook comments box BEGIN -->
 <div class="fb-comments" data-href="$project.url$currentFileName" data-num-posts="5" data-width="500"></div>
 <!-- Facebook comments box END -->
