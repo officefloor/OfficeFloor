@@ -88,5 +88,5 @@ Unit Test
 
 Next
 
-  The {{{../SectionHttpServer/index.html}next tutorial}} looks at sectioning the template content.
+  The {{{../RawHttpServer/index.html}next tutorial}} looks at rendering generated HTML.
 
