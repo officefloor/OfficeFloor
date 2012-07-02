@@ -1,0 +1,21 @@
+<woof>
+    
+    <templates>
+        <template name="woofResource" uri="woofResource" path="test.woof.html" />
+    </templates>
+    
+    <sections>
+        <section name="SECTION" source="CLASS"
+         location="net.officefloor.plugin.woof.WoofOfficeFloorSourceTest$LinkToResource">
+            <input name="service" uri="resource"/>
+            <output name="resource">
+                <resource name="RESOURCE"/>
+            </output>
+        </section>
+    </sections>
+    
+    <resources>
+        <resource name="RESOURCE" path="ConfiguredResource.html"/>
+    </resources>
+
+</woof>
