@@ -1,0 +1,11 @@
+                                       ---------------------------
+                                      Launcher of WoOF for development
+                                       ---------------------------
+                                          Daniel Sagenschneider
+                                       ---------------------------
+
+
+  This module provides launching of WoOF with integration of GWT development mode to improve performance of developing WoOF applications.  It contains the {{{/apidocs/net/officefloor/launch/woof/WoofDevelopmentLauncher.html}WoofDevelopmentLauncher}} class that provides the main method for launching.
+  
+  Please see the {{{../../eclipse/index.html}OfficeFloor Eclipse Plug-in}} for details of use.
+

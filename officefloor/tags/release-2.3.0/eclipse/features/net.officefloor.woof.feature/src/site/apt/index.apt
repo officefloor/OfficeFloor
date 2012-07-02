@@ -1,0 +1,15 @@
+                                       ---------------------------
+                                         Eclipse WoOF Feature
+                                       ---------------------------
+                                          Daniel Sagenschneider
+                                       ---------------------------
+
+  <<Eclipse WoOF Feature>>
+  
+  This module packages up WoOF into an Eclipse feature.  
+  
+  The included tools are:
+   
+   * Eclipse OfficeFloor Socket
+   
+   * Eclipse WoOF
