@@ -9,18 +9,31 @@
 ###########################################################
 
 # Ensure have latest from SVN
+echo "Updating from SVN ..."
 svn update
 
+# Clear Eclipse target files (to ensure it gets built)
+echo "Clearing eclipse target ..."
+rm -rf eclipse/target
+
 # Initial build up to Eclipse
-mvn -DskipTests install
+echo "Starting build ..."
+mvn -DskipTests clean install
 LAST_RESULT=$?
 
+# Ensure got up to building Eclipse
+if [ ! -d "eclipse/target" ]; then
+  echo "ERROR: must build up to Eclipse"
+  exit 1
+fi
+
 # Loop building the Eclipse components to overcome Maven/Eclipse(Tycho) dependency issues
+echo "Fixing Eclipse ..."
 while [ $LAST_RESULT != 0 ]
 do
 
   # Should now just be Eclipse aspects to rebuild until dependencies sort themselves out
-  mvn -DskipTests install -rf :eclipse
+  mvn -DskipTests clean install -rf :eclipse
   LAST_RESULT=$?
 
 done

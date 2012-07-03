@@ -12,8 +12,9 @@
 # Ensure have latest from SVN
 svn update
 
-# Start with Eclipse (as other artifacts in local repository)
-mvn -DskipTests install -rf :eclipse
+# Fix Eclipse only (as other artifacts in local repository)
+cd eclipse
+mvn -DskipTests clean install
 LAST_RESULT=$?
 
 # Loop building the Eclipse components to overcome Maven/Eclipse(Tycho) dependency issues
@@ -21,7 +22,7 @@ while [ $LAST_RESULT != 0 ]
 do
 
   # Should now just rebuild Eclipse until dependencies sort themselves out
-  mvn -DskipTests install -rf :eclipse
+  mvn -DskipTests clean install
   LAST_RESULT=$?
 
 done
