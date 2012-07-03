@@ -4,22 +4,23 @@
 #
 #  This script fixes a small issue between Maven and Eclipse dependencies
 #  of the build by building the eclipse components multiple times.  Run
-#  this script on a new copy from SVN.
+#  this script on a release jobs from SVN (artifacts already in local 
+#  repository from other builds).
 #
 ###########################################################
 
 # Ensure have latest from SVN
 svn update
 
-# Initial build up to Eclipse
-mvn -DskipTests install
+# Start with Eclipse (as other artifacts in local repository)
+mvn -DskipTests install -rf :eclipse
 LAST_RESULT=$?
 
 # Loop building the Eclipse components to overcome Maven/Eclipse(Tycho) dependency issues
 while [ $LAST_RESULT != 0 ]
 do
 
-  # Should now just be Eclipse aspects to rebuild until dependencies sort themselves out
+  # Should now just rebuild Eclipse until dependencies sort themselves out
   mvn -DskipTests install -rf :eclipse
   LAST_RESULT=$?
 
