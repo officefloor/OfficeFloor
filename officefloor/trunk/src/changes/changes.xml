@@ -2,7 +2,10 @@
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/changes/1.0.0 http://maven.apache.org/xsd/changes-1.0.0.xsd">
 	<body>
-		<release version="2.3.0" date="In SVN" description="Security to WoOF application">
+		<release version="2.4.0" date="In SVN" description="Security to WoOF application">
+			<action type="add" dev="sagenschneider">Security to WoOF application</action>
+		</release>
+		<release version="2.3.0" date="2012-07-01" description="Prototyping and RAD for WoOF">
 			<action type="add" dev="sagenschneider">Security to WoOF application</action>
 		</release>
 		<release version="2.2.0" date="2012-05-20" description="WoOF launch from Eclipse with GWT DevMode">
