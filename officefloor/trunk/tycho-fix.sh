@@ -28,13 +28,12 @@ if [ ! -d "eclipse/target" ]; then
 fi
 
 # Loop building the Eclipse components to overcome Maven/Eclipse(Tycho) dependency issues
-echo "Fixing Eclipse"
-cd eclipse
+echo "Fixing Eclipse ..."
 while [ $LAST_RESULT != 0 ]
 do
 
   # Should now just rebuild Eclipse until dependencies sort themselves out
-  mvn -DskipTests clean install
+  mvn -DskipTests clean install -rf :eclipse
   LAST_RESULT=$?
 
 done
