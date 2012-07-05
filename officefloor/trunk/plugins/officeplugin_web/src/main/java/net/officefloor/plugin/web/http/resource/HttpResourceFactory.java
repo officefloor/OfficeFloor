@@ -22,6 +22,7 @@ import java.io.IOException;
 
 import net.officefloor.plugin.socket.server.http.HttpRequest;
 import net.officefloor.plugin.socket.server.http.HttpResponse;
+import net.officefloor.plugin.web.http.location.InvalidHttpRequestUriException;
 
 /**
  * Factory to create a {@link HttpResource}.

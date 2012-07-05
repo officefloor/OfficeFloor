@@ -44,7 +44,7 @@ import net.officefloor.plugin.socket.server.http.HttpResponse;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
 import net.officefloor.plugin.socket.server.http.response.source.HttpResponseSendTask.HttpResponseSendTaskDependencies;
 import net.officefloor.plugin.socket.server.http.response.source.HttpResponseSenderWorkSource;
-import net.officefloor.plugin.web.http.resource.InvalidHttpRequestUriException;
+import net.officefloor.plugin.web.http.location.InvalidHttpRequestUriException;
 import net.officefloor.plugin.web.http.route.source.HttpRouteTask.HttpRouteTaskDependencies;
 import net.officefloor.plugin.web.http.route.source.HttpRouteWorkSource;
 import net.officefloor.plugin.web.http.server.HttpServerAutoWireOfficeFloorSource;

@@ -27,7 +27,7 @@ import net.officefloor.compile.work.WorkType;
 import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
-import net.officefloor.plugin.web.http.resource.InvalidHttpRequestUriException;
+import net.officefloor.plugin.web.http.location.InvalidHttpRequestUriException;
 import net.officefloor.plugin.web.http.route.source.HttpRouteTask;
 import net.officefloor.plugin.web.http.route.source.HttpRouteWorkSource;
 import net.officefloor.plugin.web.http.route.source.HttpRouteTask.HttpRouteTaskDependencies;

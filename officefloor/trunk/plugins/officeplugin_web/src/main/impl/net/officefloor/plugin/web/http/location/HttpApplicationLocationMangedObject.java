@@ -15,24 +15,25 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
-package net.officefloor.plugin.web.http.resource;
+package net.officefloor.plugin.web.http.location;
 
 import java.util.Deque;
 import java.util.LinkedList;
 
+import net.officefloor.frame.spi.managedobject.CoordinatingManagedObject;
+import net.officefloor.frame.spi.managedobject.ManagedObject;
+import net.officefloor.frame.spi.managedobject.ObjectRegistry;
+import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
 import net.officefloor.plugin.socket.server.http.protocol.HttpStatus;
-import net.officefloor.plugin.web.http.location.InvalidHttpRequestUriException;
-import net.officefloor.plugin.web.http.resource.HttpResource;
+import net.officefloor.plugin.web.http.location.HttpApplicationLocationManagedObjectSource.Dependencies;
 
 /**
- * Utility functions for a {@link HttpResource}.
+ * {@link HttpApplicationLocation} {@link ManagedObject}.
  * 
  * @author Daniel Sagenschneider
  */
-// TODO use HttpApplicationLocation
-@Deprecated
-public class HttpResourceUtil {
+public class HttpApplicationLocationMangedObject implements
+		CoordinatingManagedObject<Dependencies>, HttpApplicationLocation {
 
 	/**
 	 * Transforms the input Request URI path to a canonical path.
@@ -43,20 +44,8 @@ public class HttpResourceUtil {
 	 * @throws InvalidHttpRequestUriException
 	 *             Should the Request URI path be invalid.
 	 */
-	@Deprecated
 	public static String transformToCanonicalPath(String path)
 			throws InvalidHttpRequestUriException {
-
-		// Root if empty path
-		if (path == null) {
-			return "/"; // root path
-		}
-
-		// Trim path and ensure not empty/blank
-		path = path.trim();
-		if (path.length() == 0) {
-			return "/"; // root path
-		}
 
 		// Determine if starting with protocol and/or domain
 		if (path.charAt(0) != '/') {
@@ -230,9 +219,178 @@ public class HttpResourceUtil {
 	}
 
 	/**
-	 * All access via static methods.
+	 * Domain.
 	 */
-	private HttpResourceUtil() {
+	private final String domain;
+
+	/**
+	 * HTTP port.
+	 */
+	private final int httpPort;
+
+	/**
+	 * HTTPS port.
+	 */
+	private final int httpsPort;
+
+	/**
+	 * Context path.
+	 */
+	private final String contextPath;
+
+	/**
+	 * Cluster host name.
+	 */
+	private final String clusterHostName;
+
+	/**
+	 * Cluster HTTP port.
+	 */
+	private final int clusterHttpPort;
+
+	/**
+	 * Cluster HTTPS port.
+	 */
+	private final int clusterHttpsPort;
+
+	/**
+	 * {@link ServerHttpConnection}.
+	 */
+	private ServerHttpConnection connection;
+
+	/**
+	 * Initiate.
+	 * 
+	 * @param domain
+	 *            Domain.
+	 * @param httpPort
+	 *            HTTP port.
+	 * @param httpsPort
+	 *            HTTPS port.
+	 * @param contextPath
+	 *            Context path.
+	 * @param clusterHostName
+	 *            Cluster host name.
+	 * @param clusterHttpPort
+	 *            Cluster HTTP port.
+	 * @param clusterHttpsPort
+	 *            Cluster HTTPS port.
+	 */
+	public HttpApplicationLocationMangedObject(String domain, int httpPort,
+			int httpsPort, String contextPath, String clusterHostName,
+			int clusterHttpPort, int clusterHttpsPort) {
+		this.domain = domain;
+		this.httpPort = httpPort;
+		this.httpsPort = httpsPort;
+		this.contextPath = contextPath;
+		this.clusterHostName = clusterHostName;
+		this.clusterHttpPort = clusterHttpPort;
+		this.clusterHttpsPort = clusterHttpsPort;
+	}
+
+	/*
+	 * =================== ManagedObject ========================
+	 */
+
+	@Override
+	public void loadObjects(ObjectRegistry<Dependencies> registry)
+			throws Throwable {
+		// Obtain the server HTTP connection
+		this.connection = (ServerHttpConnection) registry
+				.getObject(Dependencies.SERVER_HTTP_CONNECTION);
+	}
+
+	@Override
+	public Object getObject() throws Throwable {
+		return this;
+	}
+
+	/*
+	 * ================ HttpApplicationLocation =================
+	 */
+
+	@Override
+	public String getDomain() {
+		return this.domain;
+	}
+
+	@Override
+	public int getHttpPort() {
+		return this.httpPort;
+	}
+
+	@Override
+	public int getHttpsPort() {
+		return this.httpsPort;
+	}
+
+	@Override
+	public String getContextPath() {
+		return this.contextPath;
+	}
+
+	@Override
+	public String getClusterHostName() {
+		return this.clusterHostName;
+	}
+
+	@Override
+	public int getClusterHttpPort() {
+		return this.clusterHttpPort;
+	}
+
+	@Override
+	public int getClusterHttpsPort() {
+		return this.clusterHttpsPort;
+	}
+
+	@Override
+	public String transformToApplicationCanonicalPath(String requestUri)
+			throws InvalidHttpRequestUriException,
+			IncorrectHttpRequestContextPathException {
+
+		// Root if empty path
+		if (requestUri == null) {
+			return "/"; // root path
+		}
+
+		// Trim path and ensure not empty/blank
+		requestUri = requestUri.trim();
+		if (requestUri.length() == 0) {
+			return "/"; // root path
+		}
+
+		// Transform to a canonical path
+		String canonicalPath = transformToCanonicalPath(requestUri);
+
+		// Determine if need to strip off context path
+		if (this.contextPath != null) {
+
+			// Ensure have context path
+			if (!(canonicalPath.startsWith(this.contextPath))) {
+				throw new IncorrectHttpRequestContextPathException(
+						HttpStatus.SC_NOT_FOUND,
+						"Incorrect context path for application [context="
+								+ this.contextPath + ", request=" + requestUri
+								+ "]");
+			}
+
+			// Strip off the context path
+			canonicalPath = canonicalPath.substring(this.contextPath.length());
+			if (canonicalPath.length() == 0) {
+				canonicalPath = "/"; // root path
+			}
+		}
+
+		// Return the canonical path for the application
+		return canonicalPath;
+	}
+
+	@Override
+	public String transformToClientPath(String applicationPath, boolean isSecure) {
+		// TODO implement HttpApplicationLocation.transformToClientPath
+		throw new UnsupportedOperationException(
+				"TODO implement HttpApplicationLocation.transformToClientPath");
 	}
 
 }
