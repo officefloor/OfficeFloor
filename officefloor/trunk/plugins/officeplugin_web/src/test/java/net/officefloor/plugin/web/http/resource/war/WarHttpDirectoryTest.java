@@ -20,9 +20,9 @@ package net.officefloor.plugin.web.http.resource.war;
 import java.io.File;
 import java.io.IOException;
 
+import net.officefloor.plugin.web.http.location.InvalidHttpRequestUriException;
 import net.officefloor.plugin.web.http.resource.AbstractHttpDirectoryTestCase;
 import net.officefloor.plugin.web.http.resource.HttpDirectory;
-import net.officefloor.plugin.web.http.resource.InvalidHttpRequestUriException;
 
 /**
  * Tests the {@link WarHttpDirectory}.

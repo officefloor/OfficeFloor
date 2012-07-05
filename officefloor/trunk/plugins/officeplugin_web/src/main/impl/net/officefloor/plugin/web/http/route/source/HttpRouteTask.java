@@ -26,8 +26,8 @@ import net.officefloor.frame.api.execute.TaskContext;
 import net.officefloor.frame.util.AbstractSingleTask;
 import net.officefloor.plugin.socket.server.http.HttpRequest;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
+import net.officefloor.plugin.web.http.location.InvalidHttpRequestUriException;
 import net.officefloor.plugin.web.http.resource.HttpResourceUtil;
-import net.officefloor.plugin.web.http.resource.InvalidHttpRequestUriException;
 
 /**
  * {@link Task} for routing a {@link HttpRequest}.

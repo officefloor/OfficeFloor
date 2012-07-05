@@ -30,7 +30,7 @@ import net.officefloor.compile.spi.work.source.WorkTypeBuilder;
 import net.officefloor.compile.spi.work.source.impl.AbstractWorkSource;
 import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
-import net.officefloor.plugin.web.http.resource.InvalidHttpRequestUriException;
+import net.officefloor.plugin.web.http.location.InvalidHttpRequestUriException;
 import net.officefloor.plugin.web.http.route.source.HttpRouteTask.HttpRouteTaskDependencies;
 
 /**

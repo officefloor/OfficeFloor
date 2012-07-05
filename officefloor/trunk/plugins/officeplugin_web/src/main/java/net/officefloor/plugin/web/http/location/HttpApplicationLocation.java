@@ -18,7 +18,6 @@
 package net.officefloor.plugin.web.http.location;
 
 import net.officefloor.plugin.socket.server.http.HttpRequest;
-import net.officefloor.plugin.web.http.resource.InvalidHttpRequestUriException;
 
 /**
  * Location details of the HTTP application.
@@ -28,21 +27,30 @@ import net.officefloor.plugin.web.http.resource.InvalidHttpRequestUriException;
 public interface HttpApplicationLocation {
 
 	/**
+	 * <p>
 	 * Obtains the domain for the application.
+	 * <p>
+	 * This is as the client will see the application.
 	 * 
 	 * @return Domain for the application.
 	 */
 	String getDomain();
 
 	/**
+	 * <p>
 	 * Obtains the HTTP port.
+	 * <p>
+	 * This is as the client will see the application.
 	 * 
 	 * @return HTTP port.
 	 */
 	int getHttpPort();
 
 	/**
+	 * <p>
 	 * Obtains the HTTPS port.
+	 * <p>
+	 * This is as the client will see the application.
 	 * 
 	 * @return HTTPS port.
 	 */
@@ -65,48 +73,52 @@ public interface HttpApplicationLocation {
 	String getClusterHostName();
 
 	/**
-	 * The cluster may be behind a load balancer and running on a different port
-	 * than expected by the client.
+	 * The cluster may be behind a load balancer and the application may be
+	 * running on a different port than expected by the client.
 	 * 
-	 * @return Actual port the application is running on the cluster host.
+	 * @return Actual port on the cluster host the application is running on.
 	 */
 	int getClusterHttpPort();
 
 	/**
-	 * The cluster may be behind a load balancer and running on a different port
-	 * than expected by the client.
+	 * The cluster may be behind a load balancer and the application may be
+	 * running on a different port than expected by the client.
 	 * 
-	 * @return Actual secure port the application is running on the cluster
-	 *         host.
+	 * @return Actual secure port on the cluster host the application is running
+	 *         on.
 	 */
 	int getClusterHttpsPort();
 
 	/**
-	 * Transforms the application path to a client path. It will prepend the
-	 * path with the application context path and if necessary provides
-	 * HTTP/HTTPS protocol and domain.
-	 * 
-	 * @param path
-	 *            Relative path to the application root.
-	 * @param isSecure
-	 *            Indicates if the resulting client path is to be secure. In
-	 *            other words to use the HTTPS protocol.
-	 * @return Client path.
-	 */
-	String transformToClientPath(String path, boolean isSecure);
-
-	/**
 	 * Transforms the {@link HttpRequest} request URI to a canonical path
-	 * relative to the application root. This will strip off the domain and
-	 * context path.
+	 * relative to the application root. This will strip off the domain, port
+	 * and context path.
 	 * 
 	 * @param requestUri
 	 *            Request URI from the {@link HttpRequest}.
 	 * @return Canonical path relative to the application root.
 	 * @throws InvalidHttpRequestUriException
 	 *             Should the {@link HttpRequest} request URI be invalid.
+	 * @throws IncorrectHttpRequestContextPathException
+	 *             Should the {@link HttpRequest} request URI have the incorrect
+	 *             context path for the application.
 	 */
 	String transformToApplicationCanonicalPath(String requestUri)
-			throws InvalidHttpRequestUriException;
+			throws InvalidHttpRequestUriException,
+			IncorrectHttpRequestContextPathException;
+
+	/**
+	 * Transforms the application path to a client path. It will prepend the
+	 * path with the application context path and if necessary provides
+	 * HTTP/HTTPS protocol and domain.
+	 * 
+	 * @param applicationPath
+	 *            Path relative to the application root.
+	 * @param isSecure
+	 *            Indicates if the resulting client path is to be secure. In
+	 *            other words to use the HTTPS protocol.
+	 * @return Client path.
+	 */
+	String transformToClientPath(String applicationPath, boolean isSecure);
 
 }

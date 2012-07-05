@@ -60,11 +60,15 @@ public class HttpServerAutoWireOfficeFloorSource extends
 	 * <p>
 	 * This property will be ignored if HTTP Sockets are added.
 	 */
+	// TODO Drive off HttpApplicationLocation
+	@Deprecated
 	public static final String PROPERTY_HTTP_PORT = "http.port";
 
 	/**
 	 * Default HTTP port to listen for connections.
 	 */
+	// TODO Drive off HttpApplicationLocation
+	@Deprecated
 	public static final int DEFAULT_HTTP_PORT = 7878;
 
 	/**

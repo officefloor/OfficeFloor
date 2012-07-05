@@ -15,29 +15,21 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
-package net.officefloor.plugin.web.http.resource;
-
-import net.officefloor.plugin.socket.server.http.HttpRequest;
-import net.officefloor.plugin.socket.server.http.InvalidHttpRequestException;
+package net.officefloor.plugin.web.http.location;
 
 /**
- * Indicates the {@link HttpRequest} request URI is invalid.
- *
+ * Tests the {@link HttpApplicationLocationMangedObject} with a deep context
+ * path. In other words, multiple directory deep context path.
+ * 
  * @author Daniel Sagenschneider
  */
-public class InvalidHttpRequestUriException extends InvalidHttpRequestException {
+public class DeepContextApplicationPathTest extends
+		AbstractHttpApplicationLocationManagedObjectTestCase {
 
-	/**
-	 * Initiate.
-	 *
-	 * @param httpStatus
-	 *            HTTP status of exception.
-	 * @param message
-	 *            Message.
-	 */
-	public InvalidHttpRequestUriException(int httpStatus, String message) {
-		super(httpStatus, message);
+	@Override
+	protected HttpApplicationLocation createHttpApplicationLocation() {
+		return new HttpApplicationLocationMangedObject("officefloor.net", 80,
+				443, "/context/path", "node.officefloor.net", 7878, 7979);
 	}
 
 }

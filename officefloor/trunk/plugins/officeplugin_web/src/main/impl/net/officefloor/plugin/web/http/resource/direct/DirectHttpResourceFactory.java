@@ -23,6 +23,7 @@ import java.nio.charset.Charset;
 import java.util.HashMap;
 import java.util.Map;
 
+import net.officefloor.plugin.web.http.location.InvalidHttpRequestUriException;
 import net.officefloor.plugin.web.http.resource.AbstractHttpResource;
 import net.officefloor.plugin.web.http.resource.HttpDirectory;
 import net.officefloor.plugin.web.http.resource.HttpFile;
@@ -30,7 +31,6 @@ import net.officefloor.plugin.web.http.resource.HttpFileDescriber;
 import net.officefloor.plugin.web.http.resource.HttpResource;
 import net.officefloor.plugin.web.http.resource.HttpResourceFactory;
 import net.officefloor.plugin.web.http.resource.HttpResourceUtil;
-import net.officefloor.plugin.web.http.resource.InvalidHttpRequestUriException;
 import net.officefloor.plugin.web.http.resource.NotExistHttpResource;
 
 /**

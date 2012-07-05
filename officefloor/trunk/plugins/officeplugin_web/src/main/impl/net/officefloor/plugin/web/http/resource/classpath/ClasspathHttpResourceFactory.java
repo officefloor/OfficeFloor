@@ -24,6 +24,7 @@ import java.nio.ByteBuffer;
 import java.util.HashMap;
 import java.util.Map;
 
+import net.officefloor.plugin.web.http.location.InvalidHttpRequestUriException;
 import net.officefloor.plugin.web.http.resource.AbstractHttpFileDescription;
 import net.officefloor.plugin.web.http.resource.AbstractHttpResourceFactory;
 import net.officefloor.plugin.web.http.resource.HttpFile;
@@ -31,7 +32,6 @@ import net.officefloor.plugin.web.http.resource.HttpFileDescription;
 import net.officefloor.plugin.web.http.resource.HttpResource;
 import net.officefloor.plugin.web.http.resource.HttpResourceFactory;
 import net.officefloor.plugin.web.http.resource.HttpResourceUtil;
-import net.officefloor.plugin.web.http.resource.InvalidHttpRequestUriException;
 import net.officefloor.plugin.web.http.resource.NotExistHttpResource;
 
 /**

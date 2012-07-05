@@ -25,12 +25,12 @@ import net.officefloor.frame.api.execute.TaskContext;
 import net.officefloor.frame.util.AbstractSingleTask;
 import net.officefloor.plugin.socket.server.http.HttpRequest;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
+import net.officefloor.plugin.web.http.location.InvalidHttpRequestUriException;
 import net.officefloor.plugin.web.http.resource.HttpDirectory;
 import net.officefloor.plugin.web.http.resource.HttpFile;
 import net.officefloor.plugin.web.http.resource.HttpResource;
 import net.officefloor.plugin.web.http.resource.HttpResourceCreationListener;
 import net.officefloor.plugin.web.http.resource.HttpResourceFactory;
-import net.officefloor.plugin.web.http.resource.InvalidHttpRequestUriException;
 import net.officefloor.plugin.web.http.resource.NotExistHttpResource;
 
 /**
