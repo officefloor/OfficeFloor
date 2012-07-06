@@ -29,7 +29,7 @@
 			<task-escalation escalation-type="java.io.IOException">
 				<external-flow name="escalation" />
 			</task-escalation>
-			<task-escalation escalation-type="net.officefloor.plugin.web.http.resource.InvalidHttpRequestUriException">
+			<task-escalation escalation-type="net.officefloor.plugin.web.http.location.InvalidHttpRequestUriException">
 				<external-flow name="escalation" />
 			</task-escalation>
 		</task>
