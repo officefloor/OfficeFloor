@@ -47,6 +47,17 @@ public class HttpApplicationLocationMangedObject implements
 	public static String transformToCanonicalPath(String path)
 			throws InvalidHttpRequestUriException {
 
+		// Root if empty path
+		if (path == null) {
+			return "/"; // root path
+		}
+
+		// Trim path and ensure not empty/blank
+		path = path.trim();
+		if (path.length() == 0) {
+			return "/"; // root path
+		}
+
 		// Determine if starting with protocol and/or domain
 		if (path.charAt(0) != '/') {
 			// Find first single '/' sequence to remove protocol/domain

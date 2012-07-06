@@ -36,6 +36,7 @@ import net.officefloor.compile.office.OfficeLoader;
 import net.officefloor.compile.officefloor.OfficeFloorLoader;
 import net.officefloor.compile.pool.ManagedObjectPoolLoader;
 import net.officefloor.compile.properties.Property;
+import net.officefloor.compile.properties.PropertyConfigurable;
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.section.SectionLoader;
 import net.officefloor.compile.spi.governance.source.GovernanceSource;
@@ -63,7 +64,7 @@ import net.officefloor.frame.spi.team.source.TeamSource;
  * 
  * @author Daniel Sagenschneider
  */
-public abstract class OfficeFloorCompiler {
+public abstract class OfficeFloorCompiler implements PropertyConfigurable {
 
 	/**
 	 * <p>
@@ -434,17 +435,6 @@ public abstract class OfficeFloorCompiler {
 	 */
 	public abstract void setOfficeFloorSource(
 			OfficeFloorSource officeFloorSource);
-
-	/**
-	 * Adds a {@link Property} that is made available to the
-	 * {@link OfficeFloorSource} to source the {@link OfficeFloor}.
-	 * 
-	 * @param name
-	 *            Name of the {@link Property}.
-	 * @param value
-	 *            Value of the {@link Property}.
-	 */
-	public abstract void addProperty(String name, String value);
 
 	/**
 	 * <p>

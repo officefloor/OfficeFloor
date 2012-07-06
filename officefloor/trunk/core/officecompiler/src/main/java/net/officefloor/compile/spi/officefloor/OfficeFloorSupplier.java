@@ -19,9 +19,8 @@
 package net.officefloor.compile.spi.officefloor;
 
 import net.officefloor.autowire.AutoWire;
-import net.officefloor.autowire.spi.supplier.source.SupplierSource;
 import net.officefloor.autowire.supplier.SuppliedManagedObjectType;
-import net.officefloor.compile.properties.Property;
+import net.officefloor.compile.properties.PropertyConfigurable;
 import net.officefloor.frame.api.manage.OfficeFloor;
 
 /**
@@ -30,7 +29,7 @@ import net.officefloor.frame.api.manage.OfficeFloor;
  * 
  * @author Daniel Sagenschneider
  */
-public interface OfficeFloorSupplier {
+public interface OfficeFloorSupplier extends PropertyConfigurable {
 
 	/**
 	 * Obtains the name of this {@link OfficeFloorSupplier}.
@@ -38,16 +37,6 @@ public interface OfficeFloorSupplier {
 	 * @return Name of this {@link OfficeFloorSupplier}.
 	 */
 	String getOfficeFloorSupplierName();
-
-	/**
-	 * Adds a {@link Property} for the {@link SupplierSource}.
-	 * 
-	 * @param name
-	 *            Name of the {@link Property}.
-	 * @param value
-	 *            Value of the {@link Property}.
-	 */
-	void addProperty(String name, String value);
 
 	/**
 	 * Adds an {@link OfficeFloorManagedObjectSource}.

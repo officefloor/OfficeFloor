@@ -26,6 +26,7 @@ import net.officefloor.frame.api.manage.UnknownTaskException;
 import net.officefloor.frame.api.manage.UnknownWorkException;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
+import net.officefloor.plugin.web.http.location.HttpApplicationLocation;
 import net.officefloor.plugin.web.http.location.InvalidHttpRequestUriException;
 import net.officefloor.plugin.web.http.template.route.HttpTemplateRouteTask;
 import net.officefloor.plugin.web.http.template.route.HttpTemplateRouteWorkSource;
@@ -61,6 +62,8 @@ public class HttpTemplateRouteWorkSourceTest extends OfficeFrameTestCase {
 						HttpTemplateRouteTaskFlows.class);
 		task.addObject(ServerHttpConnection.class).setKey(
 				HttpTemplateRouteDependencies.SERVER_HTTP_CONNECTION);
+		task.addObject(HttpApplicationLocation.class).setKey(
+				HttpTemplateRouteDependencies.HTTP_APPLICATION_LOCATION);
 		task.addFlow().setKey(HttpTemplateRouteTaskFlows.NON_MATCHED_REQUEST);
 		task.addEscalation(InvalidHttpRequestUriException.class);
 		task.addEscalation(UnknownWorkException.class);

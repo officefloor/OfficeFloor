@@ -22,6 +22,7 @@ import java.io.IOException;
 import java.util.Properties;
 
 import net.officefloor.compile.properties.Property;
+import net.officefloor.compile.properties.PropertyConfigurable;
 import net.officefloor.compile.properties.PropertyList;
 
 /**
@@ -29,7 +30,7 @@ import net.officefloor.compile.properties.PropertyList;
  * 
  * @author Daniel Sagenschneider
  */
-public interface AutoWireProperties {
+public interface AutoWireProperties extends PropertyConfigurable {
 
 	/**
 	 * {@link System} property to indicating the location of the
@@ -43,16 +44,6 @@ public interface AutoWireProperties {
 	 * @return {@link PropertyList}.
 	 */
 	PropertyList getProperties();
-
-	/**
-	 * Convenience method to add a {@link Property}.
-	 * 
-	 * @param name
-	 *            {@link Property} name.
-	 * @param value
-	 *            {@link Property} value.
-	 */
-	void addProperty(String name, String value);
 
 	/**
 	 * <p>

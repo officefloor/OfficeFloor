@@ -24,20 +24,20 @@ import java.nio.ByteBuffer;
 import java.util.LinkedList;
 import java.util.List;
 
+import net.officefloor.compile.impl.properties.PropertiesUtil;
 import net.officefloor.compile.properties.Property;
+import net.officefloor.compile.properties.PropertyConfigurable;
 import net.officefloor.compile.spi.officefloor.OfficeFloorDeployer;
 import net.officefloor.compile.spi.work.source.WorkSource;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.spi.source.SourceContext;
 import net.officefloor.frame.spi.source.SourceProperties;
 import net.officefloor.plugin.web.http.application.WebAutoWireApplication;
-import net.officefloor.plugin.web.http.location.InvalidHttpRequestUriException;
 import net.officefloor.plugin.web.http.resource.HttpDirectory;
 import net.officefloor.plugin.web.http.resource.HttpFile;
 import net.officefloor.plugin.web.http.resource.HttpFileDescriber;
 import net.officefloor.plugin.web.http.resource.HttpResource;
 import net.officefloor.plugin.web.http.resource.HttpResourceFactory;
-import net.officefloor.plugin.web.http.resource.HttpResourceUtil;
 import net.officefloor.plugin.web.http.resource.NotExistHttpResource;
 import net.officefloor.plugin.web.http.resource.classpath.ClasspathHttpResourceFactory;
 import net.officefloor.plugin.web.http.resource.direct.DirectHttpResourceFactory;
@@ -58,64 +58,22 @@ public class SourceHttpResourceFactory implements HttpResourceFactory {
 
 	/**
 	 * <p>
-	 * Target to add {@link Property} values.
-	 * <p>
-	 * This allows differing target types to receive the {@link Property}
-	 * values.
-	 */
-	public static interface PropertyTarget {
-
-		/**
-		 * Adds the {@link Property}.
-		 * 
-		 * @param name
-		 *            Name.
-		 * @param value
-		 *            Value.
-		 */
-		void addProperty(String name, String value);
-	}
-
-	/**
-	 * <p>
 	 * Copies the {@link Property} values of interest.
 	 * <p>
 	 * This is to aid configuration within the {@link OfficeFloorDeployer} to be
 	 * provided down to this.
 	 * 
-	 * @param properties
+	 * @param source
 	 *            {@link SourceProperties}.
 	 * @param target
-	 *            {@link PropertyTarget}.
+	 *            {@link PropertyConfigurable}.
 	 */
-	public static void copyProperties(SourceProperties properties,
-			PropertyTarget target) {
-		copyProperty(properties, PROPERTY_CLASS_PATH_PREFIX, target);
-		copyProperty(properties, PROPERTY_RESOURCE_DIRECTORIES, target);
-		copyProperty(properties, PROPERTY_DEFAULT_DIRECTORY_FILE_NAMES, target);
-		copyProperty(properties, PROPERTY_DIRECT_STATIC_CONTENT, target);
-	}
-
-	/**
-	 * Copies a particular {@link Property}.
-	 * 
-	 * @param properties
-	 *            {@link SourceProperties}.
-	 * @param propertyName
-	 *            Name of {@link Property} to copy.
-	 * @param target
-	 *            {@link PropertyTarget}.
-	 */
-	private static void copyProperty(SourceProperties properties,
-			String propertyName, PropertyTarget target) {
-
-		// Obtain the property value
-		String propertyValue = properties.getProperty(propertyName, null);
-
-		// Only copy if have a value
-		if (propertyValue != null) {
-			target.addProperty(propertyName, propertyValue);
-		}
+	public static void copyProperties(SourceProperties source,
+			PropertyConfigurable target) {
+		PropertiesUtil.copyProperties(source, target,
+				PROPERTY_CLASS_PATH_PREFIX, PROPERTY_RESOURCE_DIRECTORIES,
+				PROPERTY_DEFAULT_DIRECTORY_FILE_NAMES,
+				PROPERTY_DIRECT_STATIC_CONTENT);
 	}
 
 	/**
@@ -138,11 +96,11 @@ public class SourceHttpResourceFactory implements HttpResourceFactory {
 	 *            (direct {@link ByteBuffer} instances). May be
 	 *            <code>null</code> to use default.
 	 * @param target
-	 *            {@link PropertyTarget}.
+	 *            {@link PropertyConfigurable}.
 	 */
 	public static void loadProperties(String classPathPrefix,
 			File[] resourceDirectories, String[] defaultDirectoryFileNames,
-			Boolean isDirect, PropertyTarget target) {
+			Boolean isDirect, PropertyConfigurable target) {
 
 		// Load class path prefix (if provided)
 		if ((classPathPrefix != null) && (classPathPrefix.length() > 0)) {
@@ -349,19 +307,15 @@ public class SourceHttpResourceFactory implements HttpResourceFactory {
 	}
 
 	@Override
-	public HttpResource createHttpResource(String requestUriPath)
-			throws IOException, InvalidHttpRequestUriException {
-
-		// Obtain the canoncial path
-		String canonicalPath = HttpResourceUtil
-				.transformToCanonicalPath(requestUriPath);
+	public HttpResource createHttpResource(String applicationCanonicalPath)
+			throws IOException {
 
 		// Use HTTP Resource Factories to locate the resource
 		for (HttpResourceFactory resourceFactory : this.httpResourceFactories) {
 
 			// Attempt to obtain the resource
 			HttpResource resource = resourceFactory
-					.createHttpResource(canonicalPath);
+					.createHttpResource(applicationCanonicalPath);
 			if (resource.isExist()) {
 				// Found the resource
 				return resource;
@@ -369,7 +323,7 @@ public class SourceHttpResourceFactory implements HttpResourceFactory {
 		}
 
 		// As here, the resource was not found
-		return new NotExistHttpResource(canonicalPath);
+		return new NotExistHttpResource(applicationCanonicalPath);
 	}
 
 }

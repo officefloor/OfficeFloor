@@ -22,7 +22,7 @@ import java.io.IOException;
 
 import net.officefloor.plugin.socket.server.http.HttpRequest;
 import net.officefloor.plugin.socket.server.http.HttpResponse;
-import net.officefloor.plugin.web.http.location.InvalidHttpRequestUriException;
+import net.officefloor.plugin.web.http.location.HttpApplicationLocation;
 
 /**
  * Factory to create a {@link HttpResource}.
@@ -46,21 +46,17 @@ public interface HttpResourceFactory {
 	void addHttpFileDescriber(HttpFileDescriber httpFileDescriber);
 
 	/**
-	 * <p>
 	 * Creates the {@link HttpResponse}.
-	 * <p>
-	 * The path on the returned {@link HttpResource} may be different to the
-	 * input path as it is transformed to a canonical path.
 	 * 
-	 * @param requestUriPath
-	 *            {@link HttpRequest} path to the {@link HttpResource}.
+	 * @param applicationCanonicalPath
+	 *            Application canonical path to the {@link HttpResource}. See
+	 *            the {@link HttpApplicationLocation} for obtaining this path
+	 *            from the {@link HttpRequest} request URI.
 	 * @return {@link HttpResource}.
 	 * @throws IOException
 	 *             If failure in finding the {@link HttpResource}.
-	 * @throws InvalidHttpRequestUriException
-	 *             Should the request URI be invalid.
 	 */
-	HttpResource createHttpResource(String requestUriPath) throws IOException,
-			InvalidHttpRequestUriException;
+	HttpResource createHttpResource(String applicationCanonicalPath)
+			throws IOException;
 
 }

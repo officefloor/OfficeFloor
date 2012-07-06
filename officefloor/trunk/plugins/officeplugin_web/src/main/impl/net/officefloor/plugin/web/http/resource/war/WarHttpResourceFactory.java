@@ -27,14 +27,12 @@ import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import net.officefloor.plugin.web.http.location.InvalidHttpRequestUriException;
 import net.officefloor.plugin.web.http.resource.AbstractHttpFileDescription;
 import net.officefloor.plugin.web.http.resource.AbstractHttpResourceFactory;
 import net.officefloor.plugin.web.http.resource.HttpFile;
 import net.officefloor.plugin.web.http.resource.HttpFileDescription;
 import net.officefloor.plugin.web.http.resource.HttpResource;
 import net.officefloor.plugin.web.http.resource.HttpResourceFactory;
-import net.officefloor.plugin.web.http.resource.HttpResourceUtil;
 import net.officefloor.plugin.web.http.resource.NotExistHttpResource;
 
 /**
@@ -245,18 +243,14 @@ public class WarHttpResourceFactory extends AbstractHttpResourceFactory {
 	 */
 
 	@Override
-	public HttpResource createHttpResource(String requestUriPath)
-			throws IOException, InvalidHttpRequestUriException {
-
-		// Transform to canonical path
-		String canonicalPath = HttpResourceUtil
-				.transformToCanonicalPath(requestUriPath);
+	public HttpResource createHttpResource(String applicationCanonicalPath)
+			throws IOException {
 
 		// Obtain the resource
-		File resource = new File(this.warDir, canonicalPath);
+		File resource = new File(this.warDir, applicationCanonicalPath);
 
 		// Create and return the HTTP resource
-		return this.createHttpResource(resource, canonicalPath);
+		return this.createHttpResource(resource, applicationCanonicalPath);
 	}
 
 	/**

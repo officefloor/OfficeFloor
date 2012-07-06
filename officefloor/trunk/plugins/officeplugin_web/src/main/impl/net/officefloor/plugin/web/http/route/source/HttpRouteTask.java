@@ -26,8 +26,9 @@ import net.officefloor.frame.api.execute.TaskContext;
 import net.officefloor.frame.util.AbstractSingleTask;
 import net.officefloor.plugin.socket.server.http.HttpRequest;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
+import net.officefloor.plugin.web.http.location.HttpApplicationLocation;
+import net.officefloor.plugin.web.http.location.IncorrectHttpRequestContextPathException;
 import net.officefloor.plugin.web.http.location.InvalidHttpRequestUriException;
-import net.officefloor.plugin.web.http.resource.HttpResourceUtil;
 
 /**
  * {@link Task} for routing a {@link HttpRequest}.
@@ -42,7 +43,7 @@ public class HttpRouteTask
 	 * Dependencies for the {@link HttpRouteTask}.
 	 */
 	public static enum HttpRouteTaskDependencies {
-		SERVER_HTTP_CONNECTION
+		SERVER_HTTP_CONNECTION, HTTP_APPLICATION_LOCATION
 	}
 
 	/**
@@ -75,22 +76,29 @@ public class HttpRouteTask
 				.getObject(HttpRouteTaskDependencies.SERVER_HTTP_CONNECTION);
 		HttpRequest request = connection.getHttpRequest();
 
-		// Obtain the canonical path from request
-		String path = request.getRequestURI();
-		path = HttpResourceUtil.transformToCanonicalPath(path);
+		try {
+			// Obtain the canonical path from request
+			String path = request.getRequestURI();
+			HttpApplicationLocation location = (HttpApplicationLocation) context
+					.getObject(HttpRouteTaskDependencies.HTTP_APPLICATION_LOCATION);
+			path = location.transformToApplicationCanonicalPath(path);
 
-		// Route to appropriate path
-		for (int i = 0; i < this.routings.length; i++) {
-			Pattern currentPattern = this.routings[i];
+			// Route to appropriate path
+			for (int i = 0; i < this.routings.length; i++) {
+				Pattern currentPattern = this.routings[i];
 
-			// Determine if match
-			if (currentPattern.matcher(path).matches()) {
-				// Found match, route to path
-				context.doFlow(i, null);
+				// Determine if match
+				if (currentPattern.matcher(path).matches()) {
+					// Found match, route to path
+					context.doFlow(i, null);
 
-				// No further routing
-				return null;
+					// No further routing
+					return null;
+				}
 			}
+
+		} catch (IncorrectHttpRequestContextPathException ex) {
+			// Carry on to non matched flow
 		}
 
 		// No route matched, send to default route

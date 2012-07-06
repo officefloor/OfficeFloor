@@ -74,15 +74,9 @@ public class HttpFileSenderSectionSource extends AbstractSectionSource {
 		final Map<Class<?>, SectionOutput> escalations = new HashMap<Class<?>, SectionOutput>();
 
 		// Add file sender
-		final SectionWork sendFileWork = designer.addSectionWork("FILE",
+		SectionWork sendFileWork = designer.addSectionWork("FILE",
 				HttpFileSenderWorkSource.class.getName());
-		SourceHttpResourceFactory.copyProperties(context,
-				new SourceHttpResourceFactory.PropertyTarget() {
-					@Override
-					public void addProperty(String name, String value) {
-						sendFileWork.addProperty(name, value);
-					}
-				});
+		SourceHttpResourceFactory.copyProperties(context, sendFileWork);
 		SectionTask sendFileTask = sendFileWork.addSectionTask(
 				HttpFileSenderWorkSource.TASK_NAME,
 				HttpFileSenderWorkSource.TASK_NAME);

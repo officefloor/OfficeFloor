@@ -20,7 +20,6 @@ package net.officefloor.plugin.web.http.resource.war;
 import java.io.File;
 import java.io.IOException;
 
-import net.officefloor.plugin.web.http.location.InvalidHttpRequestUriException;
 import net.officefloor.plugin.web.http.resource.AbstractHttpDirectoryTestCase;
 import net.officefloor.plugin.web.http.resource.HttpDirectory;
 
@@ -49,11 +48,7 @@ public class WarHttpDirectoryTest extends AbstractHttpDirectoryTestCase {
 				.getHttpResourceFactory(warDirectory, "index.html");
 
 		// Create and return the HTTP Directory
-		try {
-			return (HttpDirectory) factory.createHttpResource(resourcePath);
-		} catch (InvalidHttpRequestUriException ex) {
-			throw fail(ex); // Should not occur
-		}
+		return (HttpDirectory) factory.createHttpResource(resourcePath);
 	}
 
 }

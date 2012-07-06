@@ -88,15 +88,9 @@ public class HttpFileSectionSource extends AbstractSectionSource {
 				}
 
 				// Create the resource task
-				final SectionWork work = designer.addSectionWork(resourcePath,
+				SectionWork work = designer.addSectionWork(resourcePath,
 						HttpFileWorkSource.class.getName());
-				SourceHttpResourceFactory.copyProperties(context,
-						new SourceHttpResourceFactory.PropertyTarget() {
-							@Override
-							public void addProperty(String name, String value) {
-								work.addProperty(name, value);
-							}
-						});
+				SourceHttpResourceFactory.copyProperties(context, work);
 				work.addProperty(HttpFileWorkSource.PROPERTY_RESOURCE_PATH,
 						resourcePath);
 				SectionTask task = work.addSectionTask(resourcePath,

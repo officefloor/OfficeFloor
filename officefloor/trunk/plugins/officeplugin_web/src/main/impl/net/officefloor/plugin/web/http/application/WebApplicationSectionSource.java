@@ -44,6 +44,7 @@ import net.officefloor.plugin.socket.server.http.HttpResponse;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
 import net.officefloor.plugin.socket.server.http.response.source.HttpResponseSendTask.HttpResponseSendTaskDependencies;
 import net.officefloor.plugin.socket.server.http.response.source.HttpResponseSenderWorkSource;
+import net.officefloor.plugin.web.http.location.HttpApplicationLocation;
 import net.officefloor.plugin.web.http.location.InvalidHttpRequestUriException;
 import net.officefloor.plugin.web.http.route.source.HttpRouteTask.HttpRouteTaskDependencies;
 import net.officefloor.plugin.web.http.route.source.HttpRouteWorkSource;
@@ -283,6 +284,9 @@ public class WebApplicationSectionSource extends AbstractSectionSource {
 		linkObject(routeLinkTask,
 				HttpTemplateRouteDependencies.SERVER_HTTP_CONNECTION.name(),
 				ServerHttpConnection.class, designer, objects);
+		linkObject(routeLinkTask,
+				HttpTemplateRouteDependencies.HTTP_APPLICATION_LOCATION.name(),
+				HttpApplicationLocation.class, designer, objects);
 		linkEscalation(routeLinkTask, InvalidHttpRequestUriException.class,
 				designer, escalations);
 		linkEscalation(routeLinkTask, UnknownWorkException.class, designer,
@@ -323,6 +327,9 @@ public class WebApplicationSectionSource extends AbstractSectionSource {
 			linkObject(routeUriTask,
 					HttpRouteTaskDependencies.SERVER_HTTP_CONNECTION.name(),
 					ServerHttpConnection.class, designer, objects);
+			linkObject(routeUriTask,
+					HttpRouteTaskDependencies.HTTP_APPLICATION_LOCATION.name(),
+					HttpApplicationLocation.class, designer, objects);
 			linkEscalation(routeUriTask, InvalidHttpRequestUriException.class,
 					designer, escalations);
 			for (String propertyName : context.getPropertyNames()) {

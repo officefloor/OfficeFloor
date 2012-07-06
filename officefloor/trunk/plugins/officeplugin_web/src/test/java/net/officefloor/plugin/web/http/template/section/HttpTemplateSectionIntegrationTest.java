@@ -38,6 +38,8 @@ import net.officefloor.plugin.socket.server.http.HttpRequest;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
 import net.officefloor.plugin.socket.server.http.server.MockHttpServer;
 import net.officefloor.plugin.socket.server.http.source.HttpServerSocketManagedObjectSource;
+import net.officefloor.plugin.web.http.location.HttpApplicationLocation;
+import net.officefloor.plugin.web.http.location.HttpApplicationLocationManagedObjectSource;
 import net.officefloor.plugin.web.http.session.HttpSession;
 import net.officefloor.plugin.web.http.session.source.HttpSessionManagedObjectSource;
 import net.officefloor.plugin.web.http.template.route.HttpTemplateRouteWorkSource;
@@ -486,6 +488,9 @@ public class HttpTemplateSectionIntegrationTest extends OfficeFrameTestCase {
 		source.addObject(this.connection, new AutoWire(Connection.class));
 		source.addManagedObject(HttpSessionManagedObjectSource.class.getName(),
 				null, new AutoWire(HttpSession.class)).setTimeout(10 * 1000);
+		source.addManagedObject(
+				HttpApplicationLocationManagedObjectSource.class.getName(),
+				null, new AutoWire(HttpApplicationLocation.class));
 
 		// Link service Task name prefix
 		final String LINK_SERVICE_TASK_NAME_PREFIX = "LINK_";

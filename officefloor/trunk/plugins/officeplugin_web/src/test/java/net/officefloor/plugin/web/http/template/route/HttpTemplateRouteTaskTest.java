@@ -27,6 +27,9 @@ import net.officefloor.frame.api.manage.WorkManager;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.socket.server.http.HttpRequest;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
+import net.officefloor.plugin.web.http.location.HttpApplicationLocation;
+import net.officefloor.plugin.web.http.location.HttpApplicationLocationMangedObject;
+import net.officefloor.plugin.web.http.location.IncorrectHttpRequestContextPathException;
 import net.officefloor.plugin.web.http.template.HttpTemplateRequestHandlerDifferentiator;
 import net.officefloor.plugin.web.http.template.route.HttpTemplateRouteTask.HttpTemplateRouteDependencies;
 import net.officefloor.plugin.web.http.template.route.HttpTemplateRouteTask.HttpTemplateRouteTaskFlows;
@@ -60,6 +63,12 @@ public class HttpTemplateRouteTaskTest extends OfficeFrameTestCase {
 	 * Mock {@link HttpRequest}.
 	 */
 	private final HttpRequest request = this.createMock(HttpRequest.class);
+
+	/**
+	 * Mock {@link HttpApplicationLocation}.
+	 */
+	private final HttpApplicationLocation location = this
+			.createMock(HttpApplicationLocation.class);
 
 	/**
 	 * {@link Task} name prefix to use for testing.
@@ -184,6 +193,20 @@ public class HttpTemplateRouteTaskTest extends OfficeFrameTestCase {
 	}
 
 	/**
+	 * Ensure non-matching flow if incorrect context path.
+	 */
+	public void testIncorrectContextPath() throws Throwable {
+		// Record
+		this.record_cacheOfficeMetaData("NO", "CONTEXT",
+				new HttpTemplateRequestHandlerDifferentiator());
+		this.record_requestURI("/NO-CONTEXT.task");
+		this.record_doNonMatchedRequestFlow();
+
+		// Test
+		this.doTest();
+	}
+
+	/**
 	 * Does the test.
 	 */
 	private void doTest() throws Throwable {
@@ -260,15 +283,36 @@ public class HttpTemplateRouteTaskTest extends OfficeFrameTestCase {
 	 *            Request URI.
 	 */
 	private void record_requestURI(String requestUri) {
-		this.recordReturn(
-				this.taskContext,
-				this.taskContext
-						.getObject(HttpTemplateRouteDependencies.SERVER_HTTP_CONNECTION),
-				this.connection);
-		this.recordReturn(this.connection, this.connection.getHttpRequest(),
-				this.request);
-		this.recordReturn(this.request, this.request.getRequestURI(),
-				requestUri);
+		try {
+			this.recordReturn(
+					this.taskContext,
+					this.taskContext
+							.getObject(HttpTemplateRouteDependencies.SERVER_HTTP_CONNECTION),
+					this.connection);
+			this.recordReturn(this.connection,
+					this.connection.getHttpRequest(), this.request);
+			this.recordReturn(this.request, this.request.getRequestURI(),
+					requestUri);
+			this.recordReturn(
+					this.taskContext,
+					this.taskContext
+							.getObject(HttpTemplateRouteDependencies.HTTP_APPLICATION_LOCATION),
+					this.location);
+			this.location.transformToApplicationCanonicalPath(requestUri);
+			if ("/NO-CONTEXT.task".equals(requestUri)) {
+				// Incorrect context path
+				this.control(this.location).setThrowable(
+						new IncorrectHttpRequestContextPathException(404,
+								"TEST"));
+			} else {
+				// Provide path
+				String path = HttpApplicationLocationMangedObject
+						.transformToCanonicalPath(requestUri);
+				this.control(this.location).setReturnValue(path);
+			}
+		} catch (Exception ex) {
+			throw fail(ex);
+		}
 	}
 
 	/**

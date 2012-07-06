@@ -49,11 +49,39 @@ public interface HttpServerAutoWireApplication extends WebAutoWireApplication {
 	 * @return {@link PropertyList} for configuring the
 	 *         {@link ManagedObjectSource}.
 	 * 
+	 * @deprecated use addHttpSocket and addHttpsSocket
+	 * 
 	 * @see #HANDLER_SECTION_NAME
 	 * @see #HANDLER_INPUT_NAME
 	 */
 	PropertyList addHttpSocket(String managedObjectSourceClassName,
 			ManagedObjectSourceWirer wirer);
+
+	/**
+	 * <p>
+	 * Adds listening for HTTP on the specified port.
+	 * <p>
+	 * The first added port will be the HTTP port for the
+	 * {@link HttpApplicationLocation}. Note configuring the HTTP port location
+	 * through properties overrides this behaviour.
+	 * 
+	 * @param port
+	 *            Port to listen on.
+	 */
+	// void addHttpSocket(int port);
+
+	/**
+	 * <p>
+	 * Adds listening for HTTPS on the specified port.
+	 * <p>
+	 * The first added port will be the HTTPS port for the
+	 * {@link HttpApplicationLocation}. Note configuring the HTTPS port location
+	 * through properties overrides this behaviour.
+	 * 
+	 * @param port
+	 *            Port to listen on.
+	 */
+	// void addHttpsSocket(int port);
 
 	/**
 	 * <p>

@@ -19,11 +19,15 @@ package net.officefloor.plugin.web.http.location;
 
 import java.net.InetAddress;
 
+import net.officefloor.compile.impl.properties.PropertiesUtil;
+import net.officefloor.compile.properties.Property;
+import net.officefloor.compile.properties.PropertyConfigurable;
 import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceContext;
 import net.officefloor.frame.spi.managedobject.source.impl.AbstractManagedObjectSource;
+import net.officefloor.frame.spi.source.SourceProperties;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
 
 /**
@@ -34,6 +38,22 @@ import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
 public class HttpApplicationLocationManagedObjectSource
 		extends
 		AbstractManagedObjectSource<HttpApplicationLocationManagedObjectSource.Dependencies, None> {
+
+	/**
+	 * Copies the {@link Property} instances.
+	 * 
+	 * @param source
+	 *            {@link SourceProperties}.
+	 * @param target
+	 *            {@link PropertyConfigurable}.
+	 */
+	public static void copyProperties(SourceProperties source,
+			PropertyConfigurable target) {
+		PropertiesUtil.copyProperties(source, target, PROPERTY_DOMAIN,
+				PROPERTY_HTTP_PORT, PROPERTY_HTTPS_PORT, PROPERTY_CONTEXT_PATH,
+				PROPERTY_CLUSTER_HOST, PROPERTY_CLUSTER_HTTP_PORT,
+				PROPERTY_CLUSTER_HTTPS_PORT);
+	}
 
 	/**
 	 * Dependency keys.
