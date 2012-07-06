@@ -98,6 +98,13 @@ public abstract class AbstractHttpApplicationLocationManagedObjectTestCase
 	}
 
 	/**
+	 * Ensure trailing slashes (/) are stripped off.
+	 */
+	public void testApplicationPath_TrimTrailingSlash() throws Exception {
+		this.doApplicationPathTest("/path", this.getContextPath() + "/path/");
+	}
+
+	/**
 	 * Ensure transforms to canonical path.
 	 */
 	public void testApplicationPath_CanonicalPath() throws Exception {

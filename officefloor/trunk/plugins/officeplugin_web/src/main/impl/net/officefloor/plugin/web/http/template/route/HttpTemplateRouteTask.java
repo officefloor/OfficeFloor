@@ -36,8 +36,9 @@ import net.officefloor.frame.api.manage.WorkManager;
 import net.officefloor.frame.util.AbstractSingleTask;
 import net.officefloor.plugin.socket.server.http.HttpRequest;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
+import net.officefloor.plugin.web.http.location.HttpApplicationLocation;
+import net.officefloor.plugin.web.http.location.IncorrectHttpRequestContextPathException;
 import net.officefloor.plugin.web.http.location.InvalidHttpRequestUriException;
-import net.officefloor.plugin.web.http.resource.HttpResourceUtil;
 import net.officefloor.plugin.web.http.template.HttpTemplateRequestHandlerDifferentiator;
 import net.officefloor.plugin.web.http.template.HttpTemplateWorkSource;
 import net.officefloor.plugin.web.http.template.parse.HttpTemplate;
@@ -58,7 +59,7 @@ public class HttpTemplateRouteTask
 	 * Keys of dependencies for the {@link HttpTemplateRouteTask}.
 	 */
 	public static enum HttpTemplateRouteDependencies {
-		SERVER_HTTP_CONNECTION
+		SERVER_HTTP_CONNECTION, HTTP_APPLICATION_LOCATION
 	}
 
 	/**
@@ -138,45 +139,56 @@ public class HttpTemplateRouteTask
 				.getObject(HttpTemplateRouteDependencies.SERVER_HTTP_CONNECTION);
 		HttpRequest request = connection.getHttpRequest();
 
-		// Obtain the canonical path from request
-		String path = request.getRequestURI();
-		path = HttpResourceUtil.transformToCanonicalPath(path);
+		try {
 
-		// Determine if link task request
-		if (path.endsWith(HttpTemplateWorkSource.LINK_URL_EXTENSION)) {
-			// Link task request, so obtain work and task names from path
-			path = path.substring("/".length(), path.length()
-					- HttpTemplateWorkSource.LINK_URL_EXTENSION.length());
-			int workTaskPos = path.lastIndexOf('-');
-			if (workTaskPos >= 0) {
-				// Work and Task name within URL
-				String workName = path.substring(0, workTaskPos);
-				String taskName = path.substring(workTaskPos + "-".length());
+			// Obtain the canonical path from request
+			String path = request.getRequestURI();
+			HttpApplicationLocation location = (HttpApplicationLocation) context
+					.getObject(HttpTemplateRouteDependencies.HTTP_APPLICATION_LOCATION);
+			path = location.transformToApplicationCanonicalPath(path);
 
-				// Default to root work
-				if ("".equals(workName) || (workName.charAt(0) == '.')) {
-					workName = "/" + workName;
-				}
+			// Determine if link task request
+			if (path.endsWith(HttpTemplateWorkSource.LINK_URL_EXTENSION)) {
+				// Link task request, so obtain work and task names from path
+				path = path.substring("/".length(), path.length()
+						- HttpTemplateWorkSource.LINK_URL_EXTENSION.length());
+				int workTaskPos = path.lastIndexOf('-');
+				if (workTaskPos >= 0) {
+					// Work and Task name within URL
+					String workName = path.substring(0, workTaskPos);
+					String taskName = path
+							.substring(workTaskPos + "-".length());
 
-				// Prefix task name (if required)
-				if (this.taskNamePrefix != null) {
-					taskName = this.taskNamePrefix + taskName;
-				}
+					// Default to root work
+					if ("".equals(workName) || (workName.charAt(0) == '.')) {
+						workName = "/" + workName;
+					}
 
-				// Determine if handler task
-				String[] taskNames = this.templateHandlerTasks.get(workName);
-				if (taskNames != null) {
-					for (String handlerTaskName : taskNames) {
-						if (handlerTaskName.equals(taskName)) {
-							// Is a handler task, so invoke flow
-							context.doFlow(workName, taskName, null);
+					// Prefix task name (if required)
+					if (this.taskNamePrefix != null) {
+						taskName = this.taskNamePrefix + taskName;
+					}
 
-							// Routed by invoking flow, no further processing
-							return null;
+					// Determine if handler task
+					String[] taskNames = this.templateHandlerTasks
+							.get(workName);
+					if (taskNames != null) {
+						for (String handlerTaskName : taskNames) {
+							if (handlerTaskName.equals(taskName)) {
+								// Is a handler task, so invoke flow
+								context.doFlow(workName, taskName, null);
+
+								// Routed by invoking flow, no further
+								// processing
+								return null;
+							}
 						}
 					}
 				}
 			}
+
+		} catch (IncorrectHttpRequestContextPathException ex) {
+			// Carry on to non matched flow
 		}
 
 		// No handling task so invoke non matched flow

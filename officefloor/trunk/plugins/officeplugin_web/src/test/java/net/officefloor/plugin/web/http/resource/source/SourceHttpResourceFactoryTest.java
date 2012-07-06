@@ -23,6 +23,7 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 
+import net.officefloor.compile.properties.PropertyConfigurable;
 import net.officefloor.frame.spi.source.SourceContext;
 import net.officefloor.frame.spi.source.SourceProperties;
 import net.officefloor.frame.test.OfficeFrameTestCase;
@@ -32,7 +33,6 @@ import net.officefloor.plugin.web.http.resource.HttpFile;
 import net.officefloor.plugin.web.http.resource.HttpFileDescriber;
 import net.officefloor.plugin.web.http.resource.HttpResource;
 import net.officefloor.plugin.web.http.resource.HttpResourceFactory;
-import net.officefloor.plugin.web.http.resource.source.SourceHttpResourceFactory.PropertyTarget;
 
 /**
  * Tests the {@link SourceHttpResourceFactory}.
@@ -58,7 +58,8 @@ public class SourceHttpResourceFactoryTest extends OfficeFrameTestCase {
 
 		final SourceProperties properties = this
 				.createMock(SourceProperties.class);
-		final PropertyTarget target = this.createMock(PropertyTarget.class);
+		final PropertyConfigurable target = this
+				.createMock(PropertyConfigurable.class);
 
 		// Record no properties
 		this.recordReturn(properties, properties.getProperty(
@@ -93,7 +94,8 @@ public class SourceHttpResourceFactoryTest extends OfficeFrameTestCase {
 
 		final SourceProperties properties = this
 				.createMock(SourceProperties.class);
-		final PropertyTarget target = this.createMock(PropertyTarget.class);
+		final PropertyConfigurable target = this
+				.createMock(PropertyConfigurable.class);
 
 		// Record properties
 		this.recordReturn(properties, properties.getProperty(
@@ -138,7 +140,8 @@ public class SourceHttpResourceFactoryTest extends OfficeFrameTestCase {
 	 */
 	public void testLoadNoProperties() {
 
-		final PropertyTarget target = this.createMock(PropertyTarget.class);
+		final PropertyConfigurable target = this
+				.createMock(PropertyConfigurable.class);
 
 		// Test
 		this.replayMockObjects();
@@ -159,7 +162,8 @@ public class SourceHttpResourceFactoryTest extends OfficeFrameTestCase {
 	 */
 	public void testLoadProperties() throws Exception {
 
-		final PropertyTarget target = this.createMock(PropertyTarget.class);
+		final PropertyConfigurable target = this
+				.createMock(PropertyConfigurable.class);
 
 		File dirOne = this.findFile(this.getClass(), "index.html")
 				.getParentFile();

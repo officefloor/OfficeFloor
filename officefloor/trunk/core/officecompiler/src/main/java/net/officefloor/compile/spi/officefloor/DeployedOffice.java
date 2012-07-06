@@ -21,11 +21,10 @@ package net.officefloor.compile.spi.officefloor;
 import net.officefloor.compile.office.OfficeInputType;
 import net.officefloor.compile.office.OfficeManagedObjectType;
 import net.officefloor.compile.office.OfficeTeamType;
-import net.officefloor.compile.properties.Property;
+import net.officefloor.compile.properties.PropertyConfigurable;
 import net.officefloor.compile.spi.office.OfficeObject;
 import net.officefloor.compile.spi.office.OfficeSection;
 import net.officefloor.compile.spi.office.OfficeTeam;
-import net.officefloor.compile.spi.office.source.OfficeSource;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.manage.OfficeFloor;
 
@@ -34,7 +33,7 @@ import net.officefloor.frame.api.manage.OfficeFloor;
  * 
  * @author Daniel Sagenschneider
  */
-public interface DeployedOffice {
+public interface DeployedOffice extends PropertyConfigurable {
 
 	/**
 	 * Obtains the name of this {@link DeployedOffice}.
@@ -42,17 +41,6 @@ public interface DeployedOffice {
 	 * @return Name of this {@link DeployedOffice}.
 	 */
 	String getDeployedOfficeName();
-
-	/**
-	 * Adds a {@link Property} to source the {@link DeployedOffice} from the
-	 * {@link OfficeSource}.
-	 * 
-	 * @param name
-	 *            Name of the {@link Property}.
-	 * @param value
-	 *            Value of the {@link Property}.
-	 */
-	void addProperty(String name, String value);
 
 	/**
 	 * Obtains the {@link DeployedOfficeInput} for the {@link OfficeInputType}.
@@ -77,14 +65,12 @@ public interface DeployedOffice {
 	OfficeTeam getDeployedOfficeTeam(String officeTeamName);
 
 	/**
-	 * Obtains the {@link OfficeObject} for the
-	 * {@link OfficeManagedObjectType}.
+	 * Obtains the {@link OfficeObject} for the {@link OfficeManagedObjectType}.
 	 * 
 	 * @param officeManagedObjectName
 	 *            Name of the {@link OfficeManagedObjectType}.
 	 * @return {@link OfficeObject}.
 	 */
-	OfficeObject getDeployedOfficeObject(
-			String officeManagedObjectName);
+	OfficeObject getDeployedOfficeObject(String officeManagedObjectName);
 
 }

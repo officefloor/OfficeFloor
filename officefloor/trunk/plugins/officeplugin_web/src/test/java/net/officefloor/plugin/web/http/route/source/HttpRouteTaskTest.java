@@ -28,6 +28,9 @@ import net.officefloor.frame.api.execute.TaskContext;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.socket.server.http.HttpRequest;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
+import net.officefloor.plugin.web.http.location.HttpApplicationLocation;
+import net.officefloor.plugin.web.http.location.HttpApplicationLocationMangedObject;
+import net.officefloor.plugin.web.http.location.IncorrectHttpRequestContextPathException;
 import net.officefloor.plugin.web.http.route.source.HttpRouteTask.HttpRouteTaskDependencies;
 
 /**
@@ -59,6 +62,12 @@ public class HttpRouteTaskTest extends OfficeFrameTestCase {
 	 * Mock {@link HttpRequest}.
 	 */
 	private HttpRequest httpRequest = this.createMock(HttpRequest.class);
+
+	/**
+	 * {@link HttpApplicationLocation}.
+	 */
+	private HttpApplicationLocation location = this
+			.createMock(HttpApplicationLocation.class);
 
 	/**
 	 * Ensures able to route {@link HttpRequest}.
@@ -154,6 +163,13 @@ public class HttpRouteTaskTest extends OfficeFrameTestCase {
 	}
 
 	/**
+	 * Ensure send to not handled if incorrect context path.
+	 */
+	public void testIncorrectContextPath() throws Throwable {
+		this.doRouteTest("/noContext", 1, "/noContext");
+	}
+
+	/**
 	 * Does the routing test.
 	 * 
 	 * @param path
@@ -184,10 +200,24 @@ public class HttpRouteTaskTest extends OfficeFrameTestCase {
 				this.serverHttpConnection.getHttpRequest(), this.httpRequest);
 		this.recordReturn(this.httpRequest, this.httpRequest.getRequestURI(),
 				path);
-		if (flowIndex >= 0) {
-			this.recordReturn(this.taskContext,
-					this.taskContext.doFlow(flowIndex, null), this.flowFuture);
+		this.recordReturn(
+				this.taskContext,
+				this.taskContext
+						.getObject(HttpRouteTaskDependencies.HTTP_APPLICATION_LOCATION),
+				this.location);
+		this.location.transformToApplicationCanonicalPath(path);
+		if ("/noContext".equals(path)) {
+			// Fail exception
+			this.control(this.location).setThrowable(
+					new IncorrectHttpRequestContextPathException(404, "TEST"));
+		} else {
+			// Provide path
+			String canonicalPath = HttpApplicationLocationMangedObject
+					.transformToCanonicalPath(path);
+			this.control(this.location).setReturnValue(canonicalPath);
 		}
+		this.recordReturn(this.taskContext,
+				this.taskContext.doFlow(flowIndex, null), this.flowFuture);
 
 		// Replay mocks
 		this.replayMockObjects();

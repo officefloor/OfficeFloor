@@ -23,14 +23,12 @@ import java.nio.charset.Charset;
 import java.util.HashMap;
 import java.util.Map;
 
-import net.officefloor.plugin.web.http.location.InvalidHttpRequestUriException;
 import net.officefloor.plugin.web.http.resource.AbstractHttpResource;
 import net.officefloor.plugin.web.http.resource.HttpDirectory;
 import net.officefloor.plugin.web.http.resource.HttpFile;
 import net.officefloor.plugin.web.http.resource.HttpFileDescriber;
 import net.officefloor.plugin.web.http.resource.HttpResource;
 import net.officefloor.plugin.web.http.resource.HttpResourceFactory;
-import net.officefloor.plugin.web.http.resource.HttpResourceUtil;
 import net.officefloor.plugin.web.http.resource.NotExistHttpResource;
 
 /**
@@ -81,17 +79,13 @@ public class DirectHttpResourceFactory implements HttpResourceFactory {
 	}
 
 	@Override
-	public HttpResource createHttpResource(String requestUriPath)
-			throws IOException, InvalidHttpRequestUriException {
-
-		// Obtain the canonical path
-		String canonicalPath = HttpResourceUtil
-				.transformToCanonicalPath(requestUriPath);
+	public HttpResource createHttpResource(String applicationCanonicalPath)
+			throws IOException {
 
 		// Attempt to obtain in memory resource
 		HttpResource resource;
 		synchronized (this.resources) {
-			resource = this.resources.get(canonicalPath);
+			resource = this.resources.get(applicationCanonicalPath);
 		}
 		if (resource != null) {
 			// Use the in memory resource
@@ -99,17 +93,18 @@ public class DirectHttpResourceFactory implements HttpResourceFactory {
 		}
 
 		// Obtain the resource from delegate
-		resource = this.delegate.createHttpResource(canonicalPath);
+		resource = this.delegate.createHttpResource(applicationCanonicalPath);
 
 		// Determine if HTTP File
 		if (resource instanceof HttpFile) {
 			// Create the in memory HTTP File
 			HttpFile delegateFile = (HttpFile) resource;
-			HttpFile file = new DirectHttpFile(canonicalPath, delegateFile);
+			HttpFile file = new DirectHttpFile(applicationCanonicalPath,
+					delegateFile);
 
 			// Register for further look ups
 			synchronized (this.resources) {
-				this.resources.put(canonicalPath, file);
+				this.resources.put(applicationCanonicalPath, file);
 			}
 
 			// Return the HTTP file
@@ -117,8 +112,9 @@ public class DirectHttpResourceFactory implements HttpResourceFactory {
 
 		} else if (resource instanceof HttpDirectory) {
 			// Obtain the default file for HTTP directory
-			String directoryResourcePath = (canonicalPath.endsWith("/") ? canonicalPath
-					: canonicalPath + "/");
+			String directoryResourcePath = (applicationCanonicalPath
+					.endsWith("/") ? applicationCanonicalPath
+					: applicationCanonicalPath + "/");
 			HttpFile defaultFile = null;
 			FOUND_DEFAULT_FILE: for (String defaultFileName : this.defaultDirectoryFileNames) {
 
@@ -165,7 +161,7 @@ public class DirectHttpResourceFactory implements HttpResourceFactory {
 
 			// Register for further look ups
 			synchronized (this.resources) {
-				this.resources.put(canonicalPath, directory);
+				this.resources.put(applicationCanonicalPath, directory);
 			}
 
 			// Return the HTTP directory
@@ -177,7 +173,7 @@ public class DirectHttpResourceFactory implements HttpResourceFactory {
 		 * error on a well built application often enough to require improved
 		 * performance. Plus keeping in memory runs risk of Out of Memory error.
 		 */
-		return new NotExistHttpResource(canonicalPath);
+		return new NotExistHttpResource(applicationCanonicalPath);
 	}
 
 	/**

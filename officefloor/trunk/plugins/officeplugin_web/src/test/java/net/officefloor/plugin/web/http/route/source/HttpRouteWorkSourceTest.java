@@ -27,6 +27,7 @@ import net.officefloor.compile.work.WorkType;
 import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
+import net.officefloor.plugin.web.http.location.HttpApplicationLocation;
 import net.officefloor.plugin.web.http.location.InvalidHttpRequestUriException;
 import net.officefloor.plugin.web.http.route.source.HttpRouteTask;
 import net.officefloor.plugin.web.http.route.source.HttpRouteWorkSource;
@@ -34,7 +35,7 @@ import net.officefloor.plugin.web.http.route.source.HttpRouteTask.HttpRouteTaskD
 
 /**
  * Tests the {@link HttpRouteWorkSource}.
- *
+ * 
  * @author Daniel Sagenschneider
  */
 public class HttpRouteWorkSourceTest extends OfficeFrameTestCase {
@@ -55,6 +56,10 @@ public class HttpRouteWorkSourceTest extends OfficeFrameTestCase {
 			WorkLoaderUtil.loadWorkType(HttpRouteWorkSource.class);
 			fail("Should not be able to load without routings");
 		} catch (Throwable ex) {
+			assertTrue(
+					"Incorrect cause",
+					ex.getMessage().contains(
+							"Must have at least one routing entry"));
 		}
 	}
 
@@ -74,7 +79,7 @@ public class HttpRouteWorkSourceTest extends OfficeFrameTestCase {
 
 	/**
 	 * Tests the {@link HttpRouteWorkSource}.
-	 *
+	 * 
 	 * @param properties
 	 *            Name/value property pairs.
 	 */
@@ -102,7 +107,7 @@ public class HttpRouteWorkSourceTest extends OfficeFrameTestCase {
 
 	/**
 	 * Creates the HTTP route {@link WorkType} for comparison testing.
-	 *
+	 * 
 	 * @param flowNames
 	 *            Names of the flows.
 	 * @return {@link WorkType}.
@@ -118,6 +123,8 @@ public class HttpRouteWorkSourceTest extends OfficeFrameTestCase {
 						HttpRouteTaskDependencies.class, Indexed.class);
 		task.addObject(ServerHttpConnection.class).setKey(
 				HttpRouteTaskDependencies.SERVER_HTTP_CONNECTION);
+		task.addObject(HttpApplicationLocation.class).setKey(
+				HttpRouteTaskDependencies.HTTP_APPLICATION_LOCATION);
 
 		// Create the flows for each flow name
 		for (String flowName : flowNames) {
@@ -137,7 +144,7 @@ public class HttpRouteWorkSourceTest extends OfficeFrameTestCase {
 	/**
 	 * Transforms the property names to be prefixed with
 	 * {@link HttpRouteWorkSource#ROUTE_PROPERTY_PREFIX}.
-	 *
+	 * 
 	 * @param properties
 	 *            Name value property pairings.
 	 * @return Transformed properties.

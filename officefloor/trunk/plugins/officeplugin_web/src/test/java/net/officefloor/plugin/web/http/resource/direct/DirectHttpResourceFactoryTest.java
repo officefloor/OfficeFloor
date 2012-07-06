@@ -187,13 +187,6 @@ public class DirectHttpResourceFactoryTest extends OfficeFrameTestCase {
 		this.assertHttpDirectory(sameResource, true);
 		assertSame("Should be same directory", resource, sameResource);
 
-		// Ensure obtain same directory with trailing slash (/)
-		HttpResource trailingSlashResource = this.factory
-				.createHttpResource(REQUEST_URI_PATH + "/");
-		this.assertHttpDirectory(trailingSlashResource, true);
-		assertSame("Should be same directory even with trailing slash",
-				resource, trailingSlashResource);
-
 		// Ensure file is registered in memory for lookup
 		HttpResource file = this.factory.createHttpResource(REQUEST_URI_PATH
 				+ "/default.html");
@@ -267,7 +260,7 @@ public class DirectHttpResourceFactoryTest extends OfficeFrameTestCase {
 		this.assertHttpFile(file);
 
 		// Lazy create the directory
-		HttpResource resource = this.factory.createHttpResource("/directory/");
+		HttpResource resource = this.factory.createHttpResource("/directory");
 		HttpDirectory directory = this.assertHttpDirectory(resource, true);
 
 		// Ensure same file

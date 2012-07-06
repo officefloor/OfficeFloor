@@ -18,17 +18,16 @@
 
 package net.officefloor.compile.spi.office;
 
-import net.officefloor.compile.properties.Property;
+import net.officefloor.compile.properties.PropertyConfigurable;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.spi.administration.Administrator;
-import net.officefloor.frame.spi.administration.source.AdministratorSource;
 
 /**
  * {@link Administrator} within the {@link Office}.
  * 
  * @author Daniel Sagenschneider
  */
-public interface OfficeAdministrator {
+public interface OfficeAdministrator extends PropertyConfigurable {
 
 	/**
 	 * Obtains the name of this {@link OfficeAdministrator}.
@@ -36,17 +35,6 @@ public interface OfficeAdministrator {
 	 * @return Name of this {@link OfficeAdministrator}.
 	 */
 	String getOfficeAdministratorName();
-
-	/**
-	 * Adds a {@link Property} to source the {@link Administrator} from the
-	 * {@link AdministratorSource}.
-	 * 
-	 * @param name
-	 *            Name of the {@link Property}.
-	 * @param value
-	 *            Value of the {@link Property}.
-	 */
-	void addProperty(String name, String value);
 
 	/**
 	 * Obtains the {@link OfficeDuty}.

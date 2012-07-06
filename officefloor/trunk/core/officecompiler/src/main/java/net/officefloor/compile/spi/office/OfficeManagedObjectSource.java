@@ -21,7 +21,7 @@ package net.officefloor.compile.spi.office;
 import net.officefloor.compile.managedobject.ManagedObjectDependencyType;
 import net.officefloor.compile.managedobject.ManagedObjectFlowType;
 import net.officefloor.compile.managedobject.ManagedObjectTeamType;
-import net.officefloor.compile.properties.Property;
+import net.officefloor.compile.properties.PropertyConfigurable;
 import net.officefloor.compile.spi.section.ManagedObjectDependency;
 import net.officefloor.compile.spi.section.ManagedObjectFlow;
 import net.officefloor.frame.api.manage.Office;
@@ -34,7 +34,7 @@ import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
  * 
  * @author Daniel Sagenschneider
  */
-public interface OfficeManagedObjectSource {
+public interface OfficeManagedObjectSource extends PropertyConfigurable {
 
 	/**
 	 * Obtains the name of this {@link OfficeManagedObjectSource}.
@@ -42,17 +42,6 @@ public interface OfficeManagedObjectSource {
 	 * @return Name of this {@link OfficeManagedObjectSource}.
 	 */
 	String getOfficeManagedObjectSourceName();
-
-	/**
-	 * Adds a {@link Property} to source the {@link ManagedObject} from the
-	 * {@link ManagedObjectSource}.
-	 * 
-	 * @param name
-	 *            Name of the {@link Property}.
-	 * @param value
-	 *            Value of the {@link Property}.
-	 */
-	void addProperty(String name, String value);
 
 	/**
 	 * Specifies the timeout for the {@link ManagedObject}.

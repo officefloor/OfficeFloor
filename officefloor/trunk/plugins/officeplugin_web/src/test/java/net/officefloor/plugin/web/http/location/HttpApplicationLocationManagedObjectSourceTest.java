@@ -19,10 +19,13 @@ package net.officefloor.plugin.web.http.location;
 
 import java.net.InetAddress;
 
+import net.officefloor.compile.properties.Property;
+import net.officefloor.compile.properties.PropertyConfigurable;
 import net.officefloor.compile.test.managedobject.ManagedObjectLoaderUtil;
 import net.officefloor.compile.test.managedobject.ManagedObjectTypeBuilder;
 import net.officefloor.frame.spi.managedobject.CoordinatingManagedObject;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
+import net.officefloor.frame.spi.source.SourceProperties;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.frame.util.ManagedObjectSourceStandAlone;
 import net.officefloor.frame.util.ManagedObjectUserStandAlone;
@@ -52,6 +55,51 @@ public class HttpApplicationLocationManagedObjectSourceTest extends
 	protected void setUp() throws Exception {
 		// Obtain the host name
 		this.hostName = InetAddress.getLocalHost().getCanonicalHostName();
+	}
+
+	/**
+	 * Ensure all properties are copied.
+	 */
+	public void testCopyProperties() {
+
+		final SourceProperties source = this.createMock(SourceProperties.class);
+		final PropertyConfigurable target = this
+				.createMock(PropertyConfigurable.class);
+
+		// Record copying the properties
+		this.recordCopyProperty(source, target, "http.host",
+				"test.officefloor.net");
+		this.recordCopyProperty(source, target, "http.port", "7878");
+		this.recordCopyProperty(source, target, "https.port", "7979");
+		this.recordCopyProperty(source, target, "http.context.path", "/context");
+		this.recordCopyProperty(source, target, "cluster.http.host",
+				"node.officefloor.net");
+		this.recordCopyProperty(source, target, "cluster.http.port", "2323");
+		this.recordCopyProperty(source, target, "cluster.https.port", "2424");
+
+		// Copy the properties
+		this.replayMockObjects();
+		HttpApplicationLocationManagedObjectSource.copyProperties(source,
+				target);
+		this.verifyMockObjects();
+	}
+
+	/**
+	 * Records copying the {@link Property}.
+	 * 
+	 * @param source
+	 *            {@link SourceProperties}.
+	 * @param target
+	 *            {@link PropertyConfigurable}.
+	 * @param name
+	 *            Name of {@link Property}.
+	 * @param value
+	 *            Value of {@link Property}.
+	 */
+	private void recordCopyProperty(SourceProperties source,
+			PropertyConfigurable target, String name, String value) {
+		this.recordReturn(source, source.getProperty(name, null), value);
+		target.addProperty(name, value);
 	}
 
 	/**

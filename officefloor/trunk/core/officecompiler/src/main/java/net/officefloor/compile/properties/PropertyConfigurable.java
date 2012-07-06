@@ -15,33 +15,23 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
-package net.officefloor.compile.spi.office;
-
-import net.officefloor.compile.properties.PropertyConfigurable;
-import net.officefloor.frame.api.manage.Office;
-import net.officefloor.frame.spi.governance.Governance;
+package net.officefloor.compile.properties;
 
 /**
- * {@link Governance} within the {@link Office}.
+ * Item that is configurable with {@link Property} instances.
  * 
  * @author Daniel Sagenschneider
  */
-public interface OfficeGovernance extends PropertyConfigurable {
+public interface PropertyConfigurable {
 
 	/**
-	 * Obtains the name of this {@link OfficeGovernance}.
+	 * Adds a {@link Property} to configure the item.
 	 * 
-	 * @return Name of this {@link OfficeGovernance}.
+	 * @param name
+	 *            Name of {@link Property}.
+	 * @param value
+	 *            Value of {@link Property}.
 	 */
-	String getOfficeGovernanceName();
-
-	/**
-	 * Governs the {@link GovernerableManagedObject}.
-	 * 
-	 * @param managedObject
-	 *            {@link GovernerableManagedObject} to be governed.
-	 */
-	void governManagedObject(GovernerableManagedObject managedObject);
+	void addProperty(String name, String value);
 
 }

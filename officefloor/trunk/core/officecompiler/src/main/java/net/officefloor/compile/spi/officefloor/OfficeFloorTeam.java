@@ -18,7 +18,7 @@
 
 package net.officefloor.compile.spi.officefloor;
 
-import net.officefloor.compile.properties.Property;
+import net.officefloor.compile.properties.PropertyConfigurable;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.spi.team.Team;
 
@@ -27,7 +27,7 @@ import net.officefloor.frame.spi.team.Team;
  * 
  * @author Daniel Sagenschneider
  */
-public interface OfficeFloorTeam {
+public interface OfficeFloorTeam extends PropertyConfigurable {
 
 	/**
 	 * Obtains the name of this {@link OfficeFloorTeam}.
@@ -35,15 +35,5 @@ public interface OfficeFloorTeam {
 	 * @return Name of this {@link OfficeFloorTeam}.
 	 */
 	String getOfficeFloorTeamName();
-
-	/**
-	 * Adds a {@link Property} to source the {@link Team}.
-	 * 
-	 * @param name
-	 *            Name of the {@link Property}.
-	 * @param value
-	 *            Value of the {@link Property}.
-	 */
-	void addProperty(String name, String value);
 
 }

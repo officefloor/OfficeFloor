@@ -30,12 +30,13 @@ import net.officefloor.compile.spi.work.source.WorkTypeBuilder;
 import net.officefloor.compile.spi.work.source.impl.AbstractWorkSource;
 import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
+import net.officefloor.plugin.web.http.location.HttpApplicationLocation;
 import net.officefloor.plugin.web.http.location.InvalidHttpRequestUriException;
 import net.officefloor.plugin.web.http.route.source.HttpRouteTask.HttpRouteTaskDependencies;
 
 /**
  * {@link WorkSource} to provide routing of HTTP requests.
- *
+ * 
  * @author Daniel Sagenschneider
  */
 public class HttpRouteWorkSource extends AbstractWorkSource<HttpRouteTask> {
@@ -92,8 +93,8 @@ public class HttpRouteWorkSource extends AbstractWorkSource<HttpRouteTask> {
 		}
 
 		// Create the task to route
-		HttpRouteTask task = new HttpRouteTask(routePatterns
-				.toArray(new Pattern[0]));
+		HttpRouteTask task = new HttpRouteTask(
+				routePatterns.toArray(new Pattern[0]));
 
 		// Define the task
 		workTypeBuilder.setWorkFactory(task);
@@ -102,6 +103,8 @@ public class HttpRouteWorkSource extends AbstractWorkSource<HttpRouteTask> {
 						Indexed.class);
 		taskBuilder.addObject(ServerHttpConnection.class).setKey(
 				HttpRouteTaskDependencies.SERVER_HTTP_CONNECTION);
+		taskBuilder.addObject(HttpApplicationLocation.class).setKey(
+				HttpRouteTaskDependencies.HTTP_APPLICATION_LOCATION);
 
 		// Create the routes for the task
 		for (String routeName : routeNames) {

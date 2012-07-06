@@ -31,14 +31,6 @@ import java.util.Deque;
 import java.util.LinkedList;
 
 import net.officefloor.frame.test.OfficeFrameTestCase;
-import net.officefloor.plugin.socket.server.http.protocol.HttpStatus;
-import net.officefloor.plugin.web.http.location.InvalidHttpRequestUriException;
-import net.officefloor.plugin.web.http.resource.HttpDirectory;
-import net.officefloor.plugin.web.http.resource.HttpFile;
-import net.officefloor.plugin.web.http.resource.HttpFileDescriber;
-import net.officefloor.plugin.web.http.resource.HttpFileDescription;
-import net.officefloor.plugin.web.http.resource.HttpResource;
-import net.officefloor.plugin.web.http.resource.HttpResourceFactory;
 
 /**
  * Abstract testing of the {@link HttpResourceFactory}.
@@ -157,78 +149,6 @@ public abstract class AbstractHttpResourceFactoryTestCase extends
 				resource instanceof HttpFile);
 		assertFalse("Non-existing resource should not be HttpDirectory",
 				resource instanceof HttpDirectory);
-	}
-
-	/**
-	 * Ensure can locate via non-canonical path for {@link HttpFile}.
-	 */
-	public void testNotCanonicalFilePath() {
-		this.doFileTest("/path/.././index.html", "/index.html", "index.html");
-	}
-
-	/**
-	 * Ensure can locate via non-canonical path for {@link HttpDirectory}.
-	 */
-	public void testNotCanonicalDirectoryPath() {
-		this.recordFileDescription("/directory/sub_directory/index.html",
-				"directory/sub_directory/index.html");
-		HttpResource resource = this.createHttpResource(
-				"/path/../directory/./sub_directory/../sub_directory",
-				"/directory/sub_directory/", true, null);
-		this.assertHttpDirectory(resource, "/directory/sub_directory/",
-				"/directory/sub_directory/index.html");
-	}
-
-	/**
-	 * Ensure not existing {@link HttpResource} still provide canonical path.
-	 * This allows for better caching of non-existing resources.
-	 */
-	public void testNotExistNotCanonicalPath() {
-		HttpResource resource = this.createHttpResource(
-				"/path/.././not_exist.html", "/not_exist.html", false, null);
-		assertFalse("Non-existing resource should not be HttpFile",
-				resource instanceof HttpFile);
-		assertFalse("Non-existing resource should not be HttpDirectory",
-				resource instanceof HttpDirectory);
-	}
-
-	/**
-	 * Ensure exception thrown if request URI path is invalid.
-	 */
-	public void testFailOnInvalidPath() throws Exception {
-
-		// Obtain the HTTP resource factory
-		HttpResourceFactory factory = this.createHttpResourceFactory("");
-
-		// Ensure issue if try to go above root
-		try {
-			factory.createHttpResource("/..");
-			fail("Should not succeed");
-		} catch (InvalidHttpRequestUriException ex) {
-			assertEquals("Incorrect http status", HttpStatus.SC_BAD_REQUEST,
-					ex.getHttpStatus());
-		}
-	}
-
-	/**
-	 * Ensure ignores repeated separators in path for {@link HttpFile}.
-	 */
-	public void testIgnoreRepeatedSeparatorsForFile() {
-		this.doFileTest("//directory///index.html", "/directory/index.html",
-				"directory/index.html");
-	}
-
-	/**
-	 * Ensure ignores repeated separators in path for {@link HttpDirectory}.
-	 */
-	public void testIgnoreRepeatedSeparatorsForDirectory() {
-		this.recordFileDescription("/directory/sub_directory/index.html",
-				"directory/sub_directory/index.html");
-		HttpResource resource = this.createHttpResource(
-				"///directory///sub_directory///", "/directory/sub_directory/",
-				true, null);
-		this.assertHttpDirectory(resource, "/directory/sub_directory/",
-				"/directory/sub_directory/index.html");
 	}
 
 	/**
@@ -409,8 +329,8 @@ public abstract class AbstractHttpResourceFactoryTestCase extends
 	 *            Name of file containing the expected content.
 	 * @return {@link HttpFile}.
 	 */
-	protected HttpFile assertHttpFile(HttpResource resource, String expectedPath,
-			String fileNameForExpectedContent) {
+	protected HttpFile assertHttpFile(HttpResource resource,
+			String expectedPath, String fileNameForExpectedContent) {
 
 		// Ensure is a file
 		assertTrue("Resource is not a HttpFile", resource instanceof HttpFile);

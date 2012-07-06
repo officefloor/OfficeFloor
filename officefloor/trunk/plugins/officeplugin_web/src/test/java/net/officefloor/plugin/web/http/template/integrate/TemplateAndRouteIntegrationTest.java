@@ -117,6 +117,22 @@ public class TemplateAndRouteIntegrationTest extends TestCase {
 	}
 
 	/**
+	 * Ensure that {@link HttpTemplate} link is routed as canonical path.
+	 */
+	public void testRouteCanonicalPath() throws Exception {
+
+		// Create HTTP Client
+		HttpClient client = new DefaultHttpClient();
+
+		// Request the initial page with non-canonical path
+		Properties initialPage = this
+				.doRequest(
+						"/non-canonical-path/../PageTwo.HttpTemplate-PageTwo.ofp-link.task/",
+						client);
+		assertEquals("Incorrect page", "One", initialPage.getProperty("page"));
+	}
+
+	/**
 	 * Does the request.
 	 * 
 	 * @param uriPath

@@ -1,7 +1,7 @@
 <office>
   <external-managed-objects>
-    <external-managed-object name="HTTP" object-type="net.officefloor.plugin.socket.server.http.ServerHttpConnection" x="417" y="387">
-    </external-managed-object>
+    <external-managed-object name="HTTP" object-type="net.officefloor.plugin.socket.server.http.ServerHttpConnection" x="417" y="387"/>
+    <external-managed-object name="LOCATION" object-type="net.officefloor.plugin.web.http.location.HttpApplicationLocation" x="417" y="437"/>
   </external-managed-objects>
   <managed-object-sources>
   </managed-object-sources>
@@ -30,6 +30,9 @@
       </output>
       <object name="HTTP" object-type="net.officefloor.plugin.socket.server.http.ServerHttpConnection">
         <external-managed-object name="HTTP"/>
+      </object>
+      <object name="LOCATION" object-type="net.officefloor.plugin.web.http.location.HttpApplicationLocation">
+        <external-managed-object name="LOCATION"/>
       </object>
       <responsibility name="Responsibility">
         <team name="Team"/>

@@ -24,14 +24,12 @@ import java.nio.ByteBuffer;
 import java.util.HashMap;
 import java.util.Map;
 
-import net.officefloor.plugin.web.http.location.InvalidHttpRequestUriException;
 import net.officefloor.plugin.web.http.resource.AbstractHttpFileDescription;
 import net.officefloor.plugin.web.http.resource.AbstractHttpResourceFactory;
 import net.officefloor.plugin.web.http.resource.HttpFile;
 import net.officefloor.plugin.web.http.resource.HttpFileDescription;
 import net.officefloor.plugin.web.http.resource.HttpResource;
 import net.officefloor.plugin.web.http.resource.HttpResourceFactory;
-import net.officefloor.plugin.web.http.resource.HttpResourceUtil;
 import net.officefloor.plugin.web.http.resource.NotExistHttpResource;
 
 /**
@@ -269,18 +267,14 @@ public class ClasspathHttpResourceFactory extends AbstractHttpResourceFactory {
 	 */
 
 	@Override
-	public HttpResource createHttpResource(String requestUriPath)
-			throws IOException, InvalidHttpRequestUriException {
-
-		// Transform to canonical path
-		String canonicalPath = HttpResourceUtil
-				.transformToCanonicalPath(requestUriPath);
+	public HttpResource createHttpResource(String applicationCanonicalPath)
+			throws IOException {
 
 		// Obtains the node for the path
-		ClassPathHttpResourceNode node = this.getNode(canonicalPath);
+		ClassPathHttpResourceNode node = this.getNode(applicationCanonicalPath);
 		if (node == null) {
 			// Not existing resource
-			return new NotExistHttpResource(canonicalPath);
+			return new NotExistHttpResource(applicationCanonicalPath);
 		}
 
 		// Return the created HTTP resource

@@ -18,14 +18,14 @@
 
 package net.officefloor.compile.spi.section;
 
-import net.officefloor.compile.properties.Property;
+import net.officefloor.compile.properties.PropertyConfigurable;
 
 /**
  * {@link SubSection} of a {@link Section}.
  * 
  * @author Daniel Sagenschneider
  */
-public interface SubSection {
+public interface SubSection extends PropertyConfigurable {
 
 	/**
 	 * Obtains the name of this {@link SubSection}.
@@ -33,16 +33,6 @@ public interface SubSection {
 	 * @return Name of this {@link SubSection}.
 	 */
 	String getSubSectionName();
-
-	/**
-	 * Adds a {@link Property} to source this {@link SubSection}.
-	 * 
-	 * @param name
-	 *            Name of the {@link Property}.
-	 * @param value
-	 *            Value of the {@link Property}.
-	 */
-	void addProperty(String name, String value);
 
 	/**
 	 * Obtains the {@link SubSectionInput}.

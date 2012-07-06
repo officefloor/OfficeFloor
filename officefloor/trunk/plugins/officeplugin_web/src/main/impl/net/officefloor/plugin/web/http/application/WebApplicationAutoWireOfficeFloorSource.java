@@ -37,6 +37,8 @@ import net.officefloor.compile.spi.section.SectionInput;
 import net.officefloor.compile.spi.section.SectionOutput;
 import net.officefloor.frame.api.escalate.Escalation;
 import net.officefloor.frame.api.execute.Task;
+import net.officefloor.plugin.web.http.location.HttpApplicationLocation;
+import net.officefloor.plugin.web.http.location.HttpApplicationLocationManagedObjectSource;
 import net.officefloor.plugin.web.http.parameters.source.HttpParametersObjectManagedObjectSource;
 import net.officefloor.plugin.web.http.resource.source.SourceHttpResourceFactory;
 import net.officefloor.plugin.web.http.session.clazz.source.HttpSessionClassManagedObjectSource;
@@ -407,6 +409,17 @@ public class WebApplicationAutoWireOfficeFloorSource extends
 						WebApplicationSectionSource.PROPERTY_LINK_SERVICE_TASK_NAME_PREFIX,
 						LINK_SERVICE_TASK_NAME_PREFIX);
 
+		// Ensure have HTTP Application Location
+		AutoWire locationAutoWire = new AutoWire(HttpApplicationLocation.class);
+		if (!(this.isObjectAvailable(locationAutoWire))) {
+			// Add the HTTP Application Location
+			AutoWireObject location = this.addManagedObject(
+					HttpApplicationLocationManagedObjectSource.class.getName(),
+					null, locationAutoWire);
+			HttpApplicationLocationManagedObjectSource.copyProperties(context,
+					location);
+		}
+
 		// Provide the non-handled servicer
 		if (this.nonHandledServicer != null) {
 			// Use overridden servicer
@@ -417,16 +430,11 @@ public class WebApplicationAutoWireOfficeFloorSource extends
 
 		} else {
 			// Use default non-handled servicer (file sending)
-			final AutoWireSection nonHandledServicer = this.addSection(
+			AutoWireSection nonHandledServicer = this.addSection(
 					"NON_HANDLED_SERVICER",
 					HttpFileSenderSectionSource.class.getName(), null);
 			SourceHttpResourceFactory.copyProperties(context,
-					new SourceHttpResourceFactory.PropertyTarget() {
-						@Override
-						public void addProperty(String name, String value) {
-							nonHandledServicer.addProperty(name, value);
-						}
-					});
+					nonHandledServicer);
 			this.link(httpSection,
 					WebApplicationSectionSource.UNHANDLED_REQUEST_OUTPUT_NAME,
 					nonHandledServicer,
@@ -463,16 +471,10 @@ public class WebApplicationAutoWireOfficeFloorSource extends
 				|| (this.escalationResources.size() > 0)) {
 
 			// Create section to send resources
-			final AutoWireSection section = this.addSection("RESOURCES",
+			AutoWireSection section = this.addSection("RESOURCES",
 					HttpFileSectionSource.class.getName(),
 					WEB_PUBLIC_RESOURCES_CLASS_PATH_PREFIX);
-			SourceHttpResourceFactory.copyProperties(context,
-					new SourceHttpResourceFactory.PropertyTarget() {
-						@Override
-						public void addProperty(String name, String value) {
-							section.addProperty(name, value);
-						}
-					});
+			SourceHttpResourceFactory.copyProperties(context, section);
 
 			// Link section outputs to the resources
 			for (ResourceLink resourceLink : this.resourceLinks) {
