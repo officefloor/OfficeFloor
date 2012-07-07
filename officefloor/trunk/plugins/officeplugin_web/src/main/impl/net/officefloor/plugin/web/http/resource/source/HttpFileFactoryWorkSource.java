@@ -28,6 +28,7 @@ import net.officefloor.compile.spi.work.source.WorkTypeBuilder;
 import net.officefloor.compile.spi.work.source.impl.AbstractWorkSource;
 import net.officefloor.frame.api.execute.TaskContext;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
+import net.officefloor.plugin.web.http.location.HttpApplicationLocation;
 import net.officefloor.plugin.web.http.location.InvalidHttpRequestUriException;
 import net.officefloor.plugin.web.http.resource.FileExtensionHttpFileDescriber;
 import net.officefloor.plugin.web.http.resource.HttpFile;
@@ -105,6 +106,8 @@ public class HttpFileFactoryWorkSource
 						HttpFileFactoryTaskFlows.class);
 		taskTypeBuilder.addObject(ServerHttpConnection.class).setKey(
 				DependencyKeys.SERVER_HTTP_CONNECTION);
+		taskTypeBuilder.addObject(HttpApplicationLocation.class).setKey(
+				DependencyKeys.HTTP_APPLICATION_LOCATION);
 		TaskFlowTypeBuilder<HttpFileFactoryTaskFlows> flowTypeBuilder = taskTypeBuilder
 				.addFlow();
 		flowTypeBuilder.setKey(HttpFileFactoryTaskFlows.HTTP_FILE_NOT_FOUND);

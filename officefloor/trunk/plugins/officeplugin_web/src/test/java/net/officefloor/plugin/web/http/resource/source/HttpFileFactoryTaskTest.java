@@ -19,10 +19,13 @@
 package net.officefloor.plugin.web.http.resource.source;
 
 import net.officefloor.frame.api.build.Indexed;
+import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.execute.TaskContext;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.socket.server.http.HttpRequest;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
+import net.officefloor.plugin.web.http.location.HttpApplicationLocation;
+import net.officefloor.plugin.web.http.location.IncorrectHttpRequestContextPathException;
 import net.officefloor.plugin.web.http.resource.HttpDirectory;
 import net.officefloor.plugin.web.http.resource.HttpFile;
 import net.officefloor.plugin.web.http.resource.HttpResource;
@@ -64,6 +67,12 @@ public class HttpFileFactoryTaskTest extends OfficeFrameTestCase {
 	private final HttpRequest request = this.createMock(HttpRequest.class);
 
 	/**
+	 * Mock {@link HttpApplicationLocation}.
+	 */
+	private final HttpApplicationLocation location = this
+			.createMock(HttpApplicationLocation.class);
+
+	/**
 	 * Mock {@link HttpFile}.
 	 */
 	private final HttpFile httpFile = this.createMock(HttpFile.class);
@@ -79,38 +88,61 @@ public class HttpFileFactoryTaskTest extends OfficeFrameTestCase {
 	 * Ensures handle if {@link HttpFile} exists.
 	 */
 	public void testFileExists() throws Throwable {
+		this.doTaskTest("/path", true, "/path", false, this.httpFile);
+	}
 
-		final String PATH = "/path";
-
-		// Record
-		this.recordReturn(this.taskContext, this.taskContext
-				.getObject(DependencyKeys.SERVER_HTTP_CONNECTION),
-				this.connection);
-		this.recordReturn(this.connection, this.connection.getHttpRequest(),
-				this.request);
-		this.recordReturn(this.request, this.request.getRequestURI(), PATH);
-		this.recordReturn(this.factory, this.factory.createHttpResource(PATH),
+	/**
+	 * Ensures handle non canonical path to {@link HttpFile}.
+	 */
+	public void testNonCanonicalPath() throws Throwable {
+		this.doTaskTest("/non-canonical/../path", true, "/path", false,
 				this.httpFile);
-		this.creationListener.httpResourceCreated(this.httpFile,
-				this.connection, this.taskContext);
+	}
 
-		// Test
-		this.replayMockObjects();
-		HttpFileFactoryTask<Indexed> task = new HttpFileFactoryTask<Indexed>(
-				this.factory, this.creationListener);
-		HttpFile file = (HttpFile) task.doTask(this.taskContext);
-		this.verifyMockObjects();
-		assertEquals("Incorrect resulting HTTP file", this.httpFile, file);
+	/**
+	 * Ensures handle non canonical path to {@link HttpFile}.
+	 */
+	public void testIncorrectContextForApplication() throws Throwable {
+		NotExistHttpResource notExistResource = new NotExistHttpResource(
+				"/incorrect-context/path");
+		this.doTaskTest("/incorrect-context/path", false, "/path", false,
+				notExistResource);
 	}
 
 	/**
 	 * Ensures handle if {@link HttpFile} does not exist.
 	 */
 	public void testFileNotExists() throws Throwable {
+		NotExistHttpResource notExistResource = new NotExistHttpResource(
+				"/path");
+		this.doTaskTest("/path", true, "/path", false, notExistResource);
+	}
 
-		final String PATH = "/path";
-		final NotExistHttpResource notExistResource = new NotExistHttpResource(
-				PATH);
+	/**
+	 * Ensures handle if default {@link HttpFile}.
+	 */
+	public void testDefaultFile() throws Throwable {
+		this.doTaskTest("/path", true, "/path", true, this.httpFile);
+	}
+
+	/**
+	 * Undertakes the test.
+	 * 
+	 * @param requestUri
+	 *            Request URI.
+	 * @param isValidContext
+	 *            Indicates if valid context for application.
+	 * @param filePath
+	 *            File path.
+	 * @param isDirectory
+	 *            Indicates if directory.
+	 * @param file
+	 *            {@link HttpResource}.
+	 * @return {@link HttpResource} returned from {@link Task}.
+	 */
+	private void doTaskTest(String requestUri, boolean isValidContext,
+			String filePath, boolean isDirectory, HttpResource file)
+			throws Throwable {
 
 		// Record
 		this.recordReturn(this.taskContext, this.taskContext
@@ -118,11 +150,35 @@ public class HttpFileFactoryTaskTest extends OfficeFrameTestCase {
 				this.connection);
 		this.recordReturn(this.connection, this.connection.getHttpRequest(),
 				this.request);
-		this.recordReturn(this.request, this.request.getRequestURI(), PATH);
-		this.recordReturn(this.factory, this.factory.createHttpResource(PATH),
-				notExistResource);
-		this.creationListener.httpResourceCreated(notExistResource,
-				this.connection, this.taskContext);
+		this.recordReturn(this.request, this.request.getRequestURI(),
+				requestUri);
+		this.recordReturn(this.taskContext, this.taskContext
+				.getObject(DependencyKeys.HTTP_APPLICATION_LOCATION),
+				this.location);
+		this.location.transformToApplicationCanonicalPath(requestUri);
+		if (isValidContext) {
+			// Valid context
+			this.control(this.location).setReturnValue(filePath);
+			if (isDirectory) {
+				// Record directory
+				final HttpDirectory directory = this
+						.createMock(HttpDirectory.class);
+				this.recordReturn(this.factory,
+						this.factory.createHttpResource(filePath), directory);
+				this.recordReturn(directory, directory.getDefaultFile(), file);
+			} else {
+				// Record file
+				this.recordReturn(this.factory,
+						this.factory.createHttpResource(filePath), file);
+			}
+			
+		} else {
+			// Incorrect context
+			this.control(this.location).setThrowable(
+					new IncorrectHttpRequestContextPathException(404, "TEST"));
+		}
+		this.creationListener.httpResourceCreated(file, this.connection,
+				this.taskContext);
 
 		// Test
 		this.replayMockObjects();
@@ -130,39 +186,6 @@ public class HttpFileFactoryTaskTest extends OfficeFrameTestCase {
 				this.factory, this.creationListener);
 		HttpResource resource = (HttpResource) task.doTask(this.taskContext);
 		this.verifyMockObjects();
-		assertEquals("Incorrect resulting HTTP resource", notExistResource,
-				resource);
+		assertEquals("Incorrect returned HTTP file", file, resource);
 	}
-
-	/**
-	 * Ensures handle if default {@link HttpFile}.
-	 */
-	public void testDefaultFile() throws Throwable {
-
-		final String PATH = "/path";
-		final HttpDirectory directory = this.createMock(HttpDirectory.class);
-
-		// Record
-		this.recordReturn(this.taskContext, this.taskContext
-				.getObject(DependencyKeys.SERVER_HTTP_CONNECTION),
-				this.connection);
-		this.recordReturn(this.connection, this.connection.getHttpRequest(),
-				this.request);
-		this.recordReturn(this.request, this.request.getRequestURI(), PATH);
-		this.recordReturn(this.factory, this.factory.createHttpResource(PATH),
-				directory);
-		this.recordReturn(directory, directory.getDefaultFile(), this.httpFile);
-		this.creationListener.httpResourceCreated(this.httpFile,
-				this.connection, this.taskContext);
-
-		// Test
-		this.replayMockObjects();
-		HttpFileFactoryTask<Indexed> task = new HttpFileFactoryTask<Indexed>(
-				this.factory, this.creationListener);
-		HttpFile file = (HttpFile) task.doTask(this.taskContext);
-		this.verifyMockObjects();
-		assertEquals("Incorrect resulting default HTTP file", this.httpFile,
-				file);
-	}
-
 }

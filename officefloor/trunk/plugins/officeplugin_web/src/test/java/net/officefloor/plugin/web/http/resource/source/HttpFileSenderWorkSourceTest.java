@@ -37,6 +37,7 @@ import net.officefloor.plugin.socket.server.http.HttpRequest;
 import net.officefloor.plugin.socket.server.http.HttpResponse;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
 import net.officefloor.plugin.stream.OutputBufferStream;
+import net.officefloor.plugin.web.http.location.HttpApplicationLocation;
 import net.officefloor.plugin.web.http.location.InvalidHttpRequestUriException;
 import net.officefloor.plugin.web.http.resource.HttpFile;
 import net.officefloor.plugin.web.http.resource.HttpResource;
@@ -68,6 +69,12 @@ public class HttpFileSenderWorkSourceTest extends OfficeFrameTestCase {
 	 * Mock {@link HttpRequest}.
 	 */
 	private final HttpRequest request = this.createMock(HttpRequest.class);
+
+	/**
+	 * Mock {@link HttpApplicationLocation}.
+	 */
+	private final HttpApplicationLocation location = this
+			.createMock(HttpApplicationLocation.class);
 
 	/**
 	 * Mock {@link HttpResponse}.
@@ -113,6 +120,8 @@ public class HttpFileSenderWorkSourceTest extends OfficeFrameTestCase {
 				.addTaskType("SendFile", task, DependencyKeys.class, None.class);
 		taskBuilder.addObject(ServerHttpConnection.class).setKey(
 				DependencyKeys.SERVER_HTTP_CONNECTION);
+		taskBuilder.addObject(HttpApplicationLocation.class).setKey(
+				DependencyKeys.HTTP_APPLICATION_LOCATION);
 		taskBuilder.addEscalation(IOException.class);
 		taskBuilder.addEscalation(InvalidHttpRequestUriException.class);
 
@@ -211,6 +220,36 @@ public class HttpFileSenderWorkSourceTest extends OfficeFrameTestCase {
 	}
 
 	/**
+	 * Validate overriding file not found content for not finding the
+	 * {@link HttpFile} with configuration of a non-canonical path.
+	 */
+	public void testNotFoundOverrideWithCanonicalPath() throws Throwable {
+
+		final String URI = "/missing-file.html";
+
+		// Record
+		this.recordSendFile(URI, "OverrideFileNotFound.html", 404);
+
+		// Test
+		this.replayMockObjects();
+
+		// Load work and obtain the task
+		Task<HttpFileFactoryTask<None>, DependencyKeys, None> task = this
+				.loadWorkAndObtainTask(
+						HttpFileSenderWorkSource.PROPERTY_NOT_FOUND_FILE_PATH,
+						"non-canonical/../OverrideFileNotFound.html");
+
+		// Execute the task to send the HTTP file
+		Object result = task.doTask(this.taskContext);
+		assertNotNull("Ensure have HTTP resource returned", result);
+		HttpResource httpResource = (HttpResource) result;
+		assertFalse("HTTP resource should be missing", httpResource.isExist());
+
+		// Verify
+		this.verifyFileSent();
+	}
+
+	/**
 	 * Loads the {@link WorkSource} and returns a created {@link Task}.
 	 * 
 	 * @param additionalParameterNameValues
@@ -257,13 +296,18 @@ public class HttpFileSenderWorkSourceTest extends OfficeFrameTestCase {
 	 *            Status.
 	 */
 	private void recordSendFile(String uri, String fileName, int status)
-			throws IOException {
+			throws Exception {
 		this.recordReturn(this.taskContext, this.taskContext
 				.getObject(DependencyKeys.SERVER_HTTP_CONNECTION),
 				this.connection);
 		this.recordReturn(this.connection, this.connection.getHttpRequest(),
 				this.request);
 		this.recordReturn(this.request, this.request.getRequestURI(), uri);
+		this.recordReturn(this.taskContext, this.taskContext
+				.getObject(DependencyKeys.HTTP_APPLICATION_LOCATION),
+				this.location);
+		this.recordReturn(this.location,
+				this.location.transformToApplicationCanonicalPath(uri), uri);
 		this.recordReturn(this.connection, this.connection.getHttpResponse(),
 				this.response);
 		this.recordReturn(this.response, this.response.getBody(), this.body);

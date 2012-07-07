@@ -108,13 +108,28 @@ public class HttpFileWorkSourceTest extends OfficeFrameTestCase {
 	}
 
 	/**
+	 * Ensure can send {@link HttpFile}.
+	 */
+	public void testSendHttpFile() throws Throwable {
+		this.doSendHttpFileTest("index.html", "index.html");
+	}
+
+	/**
+	 * Ensure find {@link HttpFile} with canonical path.
+	 */
+	public void testCanonicalPathToSendHttpFile() throws Throwable {
+		this.doSendHttpFileTest("index.html", "/non-canonical/../index.html");
+	}
+
+	/**
 	 * Ensures that sends the {@link HttpFile}.
 	 */
 	@SuppressWarnings({ "unchecked", "rawtypes" })
-	public void testSendHttpFile() throws Throwable {
+	public void doSendHttpFileTest(String fileName, String configuredFilePath)
+			throws Throwable {
 
 		// Read in the expected file content
-		File file = this.findFile(this.getClass(), "index.html");
+		File file = this.findFile(this.getClass(), fileName);
 		String fileContents = this.getFileContents(file);
 
 		// Record obtaining body to send HTTP file
@@ -158,7 +173,7 @@ public class HttpFileWorkSourceTest extends OfficeFrameTestCase {
 				HttpFileWorkSource.class,
 				SourceHttpResourceFactory.PROPERTY_CLASS_PATH_PREFIX, this
 						.getClass().getPackage().getName(),
-				HttpFileWorkSource.PROPERTY_RESOURCE_PATH, "index.html");
+				HttpFileWorkSource.PROPERTY_RESOURCE_PATH, configuredFilePath);
 
 		// Create the task
 		Task task = workType.getTaskTypes()[0].getTaskFactory().createTask(

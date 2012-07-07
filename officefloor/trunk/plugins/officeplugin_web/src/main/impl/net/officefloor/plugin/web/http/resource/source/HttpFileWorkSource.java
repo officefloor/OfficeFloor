@@ -32,6 +32,7 @@ import net.officefloor.frame.api.execute.TaskContext;
 import net.officefloor.frame.util.AbstractSingleTask;
 import net.officefloor.plugin.socket.server.http.HttpResponse;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
+import net.officefloor.plugin.web.http.location.HttpApplicationLocationMangedObject;
 import net.officefloor.plugin.web.http.resource.FileExtensionHttpFileDescriber;
 import net.officefloor.plugin.web.http.resource.HttpFile;
 import net.officefloor.plugin.web.http.resource.HttpResource;
@@ -89,10 +90,12 @@ public class HttpFileWorkSource extends
 		describer.loadDescriptions(context.getProperties());
 		httpResourceFactory.addHttpFileDescriber(describer);
 
-		// Ensure resource path is URI (prefixed with '/')
+		// Ensure resource path canonical
 		if (!(resourcePath.startsWith("/"))) {
 			resourcePath = "/" + resourcePath;
 		}
+		resourcePath = HttpApplicationLocationMangedObject
+				.transformToCanonicalPath(resourcePath);
 
 		// Obtain the HTTP file
 		HttpResource resource = httpResourceFactory

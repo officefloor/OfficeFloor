@@ -25,6 +25,8 @@ import net.officefloor.frame.api.execute.TaskContext;
 import net.officefloor.frame.util.AbstractSingleTask;
 import net.officefloor.plugin.socket.server.http.HttpRequest;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
+import net.officefloor.plugin.web.http.location.HttpApplicationLocation;
+import net.officefloor.plugin.web.http.location.IncorrectHttpRequestContextPathException;
 import net.officefloor.plugin.web.http.location.InvalidHttpRequestUriException;
 import net.officefloor.plugin.web.http.resource.HttpDirectory;
 import net.officefloor.plugin.web.http.resource.HttpFile;
@@ -46,7 +48,7 @@ public class HttpFileFactoryTask<F extends Enum<F>>
 	 * Dependency keys for the {@link HttpFileFactoryTask}.
 	 */
 	public enum DependencyKeys {
-		SERVER_HTTP_CONNECTION
+		SERVER_HTTP_CONNECTION, HTTP_APPLICATION_LOCATION
 	}
 
 	/**
@@ -87,19 +89,34 @@ public class HttpFileFactoryTask<F extends Enum<F>>
 				.getObject(DependencyKeys.SERVER_HTTP_CONNECTION);
 		HttpRequest request = connection.getHttpRequest();
 
-		// Create the HTTP resource for the request
+		// Obtain the request URI
 		String requestUriPath = request.getRequestURI();
-		HttpResource resource = this.httpResourceFactory
-				.createHttpResource(requestUriPath);
 
-		// Ensure obtain default file (if directory)
-		if (resource instanceof HttpDirectory) {
-			HttpDirectory directory = (HttpDirectory) resource;
-			HttpFile defaultFile = directory.getDefaultFile();
+		// Obtain the resource
+		HttpResource resource;
+		try {
 
-			// Provide resource based on default file existing
-			resource = (defaultFile != null ? defaultFile
-					: new NotExistHttpResource(resource.getPath()));
+			// Obtain the file path
+			HttpApplicationLocation location = (HttpApplicationLocation) context
+					.getObject(DependencyKeys.HTTP_APPLICATION_LOCATION);
+			String filePath = location
+					.transformToApplicationCanonicalPath(requestUriPath);
+
+			// Create the HTTP resource for the request
+			resource = this.httpResourceFactory.createHttpResource(filePath);
+
+			// Ensure obtain default file (if directory)
+			if (resource instanceof HttpDirectory) {
+				HttpDirectory directory = (HttpDirectory) resource;
+				HttpFile defaultFile = directory.getDefaultFile();
+
+				// Provide resource based on default file existing
+				resource = (defaultFile != null ? defaultFile
+						: new NotExistHttpResource(resource.getPath()));
+			}
+
+		} catch (IncorrectHttpRequestContextPathException ex) {
+			resource = new NotExistHttpResource(requestUriPath);
 		}
 
 		// Notify the HTTP resource created
