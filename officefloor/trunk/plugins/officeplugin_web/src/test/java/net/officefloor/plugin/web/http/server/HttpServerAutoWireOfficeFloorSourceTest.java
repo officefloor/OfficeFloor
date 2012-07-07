@@ -24,18 +24,20 @@ import java.io.Serializable;
 import java.io.Writer;
 
 import net.officefloor.autowire.AutoWireManagement;
+import net.officefloor.autowire.AutoWireObject;
 import net.officefloor.autowire.AutoWireSection;
+import net.officefloor.compile.OfficeFloorCompiler;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.section.clazz.ClassSectionSource;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
 import net.officefloor.plugin.socket.server.http.server.MockHttpServer;
-import net.officefloor.plugin.socket.server.http.source.HttpServerSocketManagedObjectSource;
 import net.officefloor.plugin.web.http.application.HttpApplicationState;
 import net.officefloor.plugin.web.http.application.HttpApplicationStateful;
 import net.officefloor.plugin.web.http.application.HttpRequestState;
 import net.officefloor.plugin.web.http.application.HttpRequestStateful;
 import net.officefloor.plugin.web.http.application.HttpSessionStateful;
+import net.officefloor.plugin.web.http.location.HttpApplicationLocationManagedObjectSource;
 import net.officefloor.plugin.web.http.resource.source.HttpFileSenderWorkSource;
 import net.officefloor.plugin.web.http.session.HttpSession;
 
@@ -56,7 +58,7 @@ public class HttpServerAutoWireOfficeFloorSourceTest extends
 	/**
 	 * {@link HttpServerAutoWireOfficeFloorSource} to test.
 	 */
-	private final HttpServerAutoWireApplication source = new HttpServerAutoWireOfficeFloorSource();
+	private HttpServerAutoWireApplication source = new HttpServerAutoWireOfficeFloorSource();
 
 	/**
 	 * Value indicating that connection was expected to be refused.
@@ -75,11 +77,14 @@ public class HttpServerAutoWireOfficeFloorSourceTest extends
 
 	@Override
 	protected void tearDown() throws Exception {
-		// Ensure close
-		AutoWireManagement.closeAllOfficeFloors();
+		try {
+			// Stop the client
+			this.client.getConnectionManager().shutdown();
 
-		// Stop the client
-		this.client.getConnectionManager().shutdown();
+		} finally {
+			// Ensure close
+			AutoWireManagement.closeAllOfficeFloors();
+		}
 	}
 
 	/**
@@ -107,6 +112,62 @@ public class HttpServerAutoWireOfficeFloorSourceTest extends
 	}
 
 	/**
+	 * Ensure able to construct specifying HTTP port.
+	 */
+	public void testInitiateHttpPort() throws Exception {
+
+		final int PORT = MockHttpServer.getAvailablePort();
+
+		// Construct HTTP instance with specified port
+		this.source = new HttpServerAutoWireOfficeFloorSource(PORT);
+		this.source.openOfficeFloor();
+
+		// Obtain the expected content
+		String expected = this.getFileContents("PUBLIC/index.html");
+
+		// Ensure able to service by initiated HTTP port
+		this.assertHttpRequest("http://localhost:" + PORT, 200, expected);
+	}
+
+	/**
+	 * Ensure specify HTTP port.
+	 */
+	public void testAddHttpSocket() throws Exception {
+
+		final int PORT = MockHttpServer.getAvailablePort();
+
+		// Specify the HTTP port
+		this.source.addHttpServerSocket(PORT);
+		this.source.openOfficeFloor();
+
+		// Obtain the expected content
+		String expected = this.getFileContents("PUBLIC/index.html");
+
+		// Ensure able to service by added HTTP port
+		this.assertHttpRequest("http://localhost:" + PORT, 200, expected);
+	}
+
+	/**
+	 * Ensure same {@link AutoWireObject} should HTTP port be added twice.
+	 */
+	public void testAddSameHttpSocketTwice() throws Exception {
+
+		final int PORT = MockHttpServer.getAvailablePort();
+
+		// Add the port twice
+		AutoWireObject one = this.source.addHttpServerSocket(PORT);
+		AutoWireObject two = this.source.addHttpServerSocket(PORT);
+		assertSame("Ensure same object for same port", one, two);
+		this.source.openOfficeFloor();
+
+		// Obtain the expected content
+		String expected = this.getFileContents("PUBLIC/index.html");
+
+		// Ensure able to service by added HTTP port
+		this.assertHttpRequest("http://localhost:" + PORT, 200, expected);
+	}
+
+	/**
 	 * Ensure can provide {@link OfficeFloor} property to configure the HTTP
 	 * port.
 	 */
@@ -116,7 +177,7 @@ public class HttpServerAutoWireOfficeFloorSourceTest extends
 
 		// Open on alternate port (via OfficeFloor configuration)
 		this.source.getOfficeFloorCompiler().addProperty(
-				HttpServerAutoWireOfficeFloorSource.PROPERTY_HTTP_PORT,
+				HttpApplicationLocationManagedObjectSource.PROPERTY_HTTP_PORT,
 				String.valueOf(PORT));
 		this.source.openOfficeFloor();
 
@@ -128,21 +189,27 @@ public class HttpServerAutoWireOfficeFloorSourceTest extends
 	}
 
 	/**
-	 * Ensure can override the {@link HttpServerSocketManagedObjectSource}.
+	 * Ensure can provide {@link OfficeFloor} property to configure the HTTP
+	 * port.
 	 */
-	public void testOverrideHttpServerSocketManagedObjectSource()
-			throws Exception {
+	public void testConfigureClusterHttpPort() throws Exception {
 
 		final int PORT = MockHttpServer.getAvailablePort();
 
-		// Override the HTTP Server socket
-		this.addHttpSocket(PORT);
+		// Open on alternate port (via OfficeFloor configuration)
+		OfficeFloorCompiler compiler = this.source.getOfficeFloorCompiler();
+		compiler.addProperty(
+				HttpApplicationLocationManagedObjectSource.PROPERTY_HTTP_PORT,
+				String.valueOf(-1)); // should not be used as cluster HTTP port
+		compiler.addProperty(
+				HttpApplicationLocationManagedObjectSource.PROPERTY_CLUSTER_HTTP_PORT,
+				String.valueOf(PORT));
 		this.source.openOfficeFloor();
 
 		// Obtain the expected content
 		String expected = this.getFileContents("PUBLIC/index.html");
 
-		// Ensure able to service by overridden HTTP Server socket
+		// Ensure able to service by configured HTTP port
 		this.assertHttpRequest("http://localhost:" + PORT, 200, expected);
 	}
 
@@ -156,9 +223,9 @@ public class HttpServerAutoWireOfficeFloorSourceTest extends
 		final int DEFAULT_PORT = 7878; // listen on default port as well
 
 		// Listen on multiple HTTP Server socket
-		this.addHttpSocket(EXTRA_PORT_ONE);
-		this.addHttpSocket(EXTRA_PORT_TWO);
-		this.addHttpSocket(DEFAULT_PORT);
+		this.source = new HttpServerAutoWireOfficeFloorSource(EXTRA_PORT_ONE);
+		this.source.addHttpServerSocket(EXTRA_PORT_TWO);
+		this.source.addHttpServerSocket(DEFAULT_PORT);
 		this.source.openOfficeFloor();
 
 		// Obtain the expected content
@@ -361,24 +428,6 @@ public class HttpServerAutoWireOfficeFloorSourceTest extends
 		} catch (Exception ex) {
 			throw fail(ex);
 		}
-	}
-
-	/**
-	 * Convenience method to add a {@link HttpServerSocketManagedObjectSource}.
-	 * 
-	 * @param port
-	 *            Port to listen on.
-	 */
-	private void addHttpSocket(int port) {
-		this.source
-				.addHttpSocket(
-						HttpServerSocketManagedObjectSource.class.getName(),
-						HttpServerSocketManagedObjectSource
-								.createManagedObjectSourceWirer(
-										HttpServerAutoWireOfficeFloorSource.HANDLER_SECTION_NAME,
-										HttpServerAutoWireOfficeFloorSource.HANDLER_INPUT_NAME))
-				.addProperty(HttpServerSocketManagedObjectSource.PROPERTY_PORT)
-				.setValue(String.valueOf(port));
 	}
 
 	/**
