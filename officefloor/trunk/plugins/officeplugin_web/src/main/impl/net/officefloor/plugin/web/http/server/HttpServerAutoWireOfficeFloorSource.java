@@ -18,28 +18,23 @@
 
 package net.officefloor.plugin.web.http.server;
 
-import java.util.LinkedList;
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 
 import net.officefloor.autowire.AutoWire;
 import net.officefloor.autowire.AutoWireObject;
-import net.officefloor.autowire.AutoWireOfficeFloor;
-import net.officefloor.autowire.ManagedObjectSourceWirer;
 import net.officefloor.compile.properties.Property;
-import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.spi.officefloor.OfficeFloorDeployer;
 import net.officefloor.compile.spi.officefloor.source.OfficeFloorSource;
 import net.officefloor.compile.spi.officefloor.source.OfficeFloorSourceContext;
 import net.officefloor.frame.impl.spi.team.OnePersonTeamSource;
-import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
-import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
 import net.officefloor.plugin.socket.server.http.source.HttpServerSocketManagedObjectSource;
 import net.officefloor.plugin.web.http.application.HttpApplicationState;
 import net.officefloor.plugin.web.http.application.HttpApplicationStateManagedObjectSource;
 import net.officefloor.plugin.web.http.application.HttpRequestState;
 import net.officefloor.plugin.web.http.application.HttpRequestStateManagedObjectSource;
 import net.officefloor.plugin.web.http.application.WebApplicationAutoWireOfficeFloorSource;
-import net.officefloor.plugin.web.http.application.WebAutoWireApplication;
+import net.officefloor.plugin.web.http.location.HttpApplicationLocationManagedObjectSource;
 import net.officefloor.plugin.web.http.session.HttpSession;
 import net.officefloor.plugin.web.http.session.source.HttpSessionManagedObjectSource;
 
@@ -55,58 +50,39 @@ public class HttpServerAutoWireOfficeFloorSource extends
 		HttpServerAutoWireApplication {
 
 	/**
-	 * <p>
-	 * Property to configure the default HTTP port.
-	 * <p>
-	 * This property will be ignored if HTTP Sockets are added.
-	 */
-	// TODO Drive off HttpApplicationLocation
-	@Deprecated
-	public static final String PROPERTY_HTTP_PORT = "http.port";
-
-	/**
-	 * Default HTTP port to listen for connections.
-	 */
-	// TODO Drive off HttpApplicationLocation
-	@Deprecated
-	public static final int DEFAULT_HTTP_PORT = 7878;
-
-	/**
-	 * Value indicating the HTTP port has not been specified.
-	 */
-	private static final int UNSET_HTTP_PORT = -1;
-
-	/**
-	 * {@link HttpSocket} instances.
-	 */
-	private final List<HttpSocket> httpSockets = new LinkedList<HttpSocket>();
-
-	/**
 	 * {@link AutoWireObject} for the {@link HttpSession}.
 	 */
 	private final AutoWireObject httpSession;
 
 	/**
-	 * Default port.
+	 * Added HTTP ports. Typically HTTP ports will be added through
+	 * {@link Property} configuration.
 	 */
-	private int defaultPort = UNSET_HTTP_PORT;
+	private final Map<Integer, AutoWireObject> addedHttpPorts = new HashMap<Integer, AutoWireObject>(
+			0);
 
 	/**
 	 * Initiate.
 	 */
 	public HttpServerAutoWireOfficeFloorSource() {
-		this(UNSET_HTTP_PORT);
+		this(-1);
 	}
 
 	/**
-	 * Initiate to use the specified port (unless overridden by another HTTP
-	 * socket).
+	 * Initiate to use the specified HTTP port.
 	 * 
-	 * @param defaultPort
-	 *            Default port (unless overridden).
+	 * @param httpPort
+	 *            HTTP port.
 	 */
-	public HttpServerAutoWireOfficeFloorSource(int defaultPort) {
-		this.defaultPort = defaultPort;
+	public HttpServerAutoWireOfficeFloorSource(int httpPort) {
+
+		// Configure to use the HTTP port
+		if (httpPort > 0) {
+			this.getOfficeFloorCompiler()
+					.addProperty(
+							HttpApplicationLocationManagedObjectSource.PROPERTY_HTTP_PORT,
+							String.valueOf(httpPort));
+		}
 
 		// Use active team by default - done early so allow further overriding
 		this.assignDefaultTeam(OnePersonTeamSource.class.getName());
@@ -126,77 +102,35 @@ public class HttpServerAutoWireOfficeFloorSource extends
 				new AutoWire(HttpRequestState.class));
 	}
 
-	/**
-	 * <p>
-	 * Uses the configuration of this {@link HttpServerAutoWireApplication} to
-	 * start the input {@link WebAutoWireApplication}.
-	 * <p>
-	 * Please note that the {@link WebAutoWireApplication} is not copied to the
-	 * input {@link WebAutoWireApplication}.
-	 * 
-	 * @param application
-	 *            {@link WebAutoWireApplication}.
-	 * @return {@link AutoWireOfficeFloor} of the started
-	 *         {@link WebAutoWireApplication}.
-	 * @throws Exception
-	 *             If fails to start the {@link WebAutoWireApplication}.
-	 */
-	public AutoWireOfficeFloor startWebApplication(
-			WebAutoWireApplication application) throws Exception {
-
-		// Configure the web application
-		this.configureWebApplication(application);
-
-		// Return the started web application
-		return application.openOfficeFloor();
-	}
-
-	/**
-	 * Configures the {@link WebAutoWireApplication}.
-	 * 
-	 * @param application
-	 *            {@link WebAutoWireApplication} to configure.
-	 */
-	private void configureWebApplication(WebAutoWireApplication application) {
-
-		// Add the HTTP Socket
-		if (this.httpSockets.size() == 0) {
-			// Add the default HTTP Socket
-			HttpServerSocketManagedObjectSource.autoWire(application,
-					this.defaultPort, HANDLER_SECTION_NAME, HANDLER_INPUT_NAME);
-
-		} else {
-			// Override the HTTP Socket
-			for (HttpSocket socket : this.httpSockets) {
-				AutoWireObject object = application.addManagedObject(
-						socket.managedObjectSourceClassName, socket.wirer,
-						new AutoWire(ServerHttpConnection.class));
-				for (Property property : socket.properties) {
-					object.addProperty(property.getName(), property.getValue());
-				}
-			}
-		}
-	}
-
 	/*
 	 * ===================== HttpServerAutoWireApplication ===================
 	 */
 
 	@Override
-	public PropertyList addHttpSocket(String managedObjectSourceClassName,
-			ManagedObjectSourceWirer wirer) {
+	public AutoWireObject addHttpServerSocket(int port) {
 
-		// Create the properties
-		PropertyList properties = this.getOfficeFloorCompiler()
-				.createPropertyList();
+		// Lazy create the HTTP Server Socket on the port
+		Integer portInteger = Integer.valueOf(port);
+		AutoWireObject object = this.addedHttpPorts.get(portInteger);
+		if (object == null) {
 
-		// Create and register the HTTP socket
-		HttpSocket httpSocket = new HttpSocket(managedObjectSourceClassName,
-				wirer, properties);
-		this.httpSockets.add(httpSocket);
+			// Create the HTTP Server Socket on the port
+			object = HttpServerSocketManagedObjectSource.autoWire(this, port,
+					HANDLER_SECTION_NAME, HANDLER_INPUT_NAME);
 
-		// Return the properties
-		return properties;
+			// Register adding the HTTP port
+			this.addedHttpPorts.put(Integer.valueOf(port), object);
+		}
+
+		// Return the HTTP Server Socket
+		return object;
+	}
+
+	@Override
+	public AutoWireObject addHttpsServerSocket(int port) {
+		// TODO implement HttpServerAutoWireApplication.addHttpsSocket
+		throw new UnsupportedOperationException(
+				"TODO implement HttpServerAutoWireApplication.addHttpsSocket");
 	}
 
 	@Override
@@ -212,55 +146,23 @@ public class HttpServerAutoWireOfficeFloorSource extends
 	protected void initOfficeFloor(OfficeFloorDeployer deployer,
 			OfficeFloorSourceContext context) throws Exception {
 
-		// Only configure default HTTP port if not specified
-		if (this.defaultPort == UNSET_HTTP_PORT) {
-			// Obtain the HTTP port
-			this.defaultPort = Integer.parseInt(context.getProperty(
-					PROPERTY_HTTP_PORT, String.valueOf(DEFAULT_HTTP_PORT)));
-		}
-
 		// Initiate this web application
 		super.initOfficeFloor(deployer, context);
 
-		// Configure this web application
-		this.configureWebApplication(this);
-	}
+		// Add the configured HTTP port
+		String httpPort = context
+				.getProperty(
+						HttpApplicationLocationManagedObjectSource.PROPERTY_CLUSTER_HTTP_PORT,
+						context.getProperty(
+								HttpApplicationLocationManagedObjectSource.PROPERTY_HTTP_PORT,
+								null));
+		if (httpPort != null) {
+			// Add the configured HTTP port
+			this.addHttpServerSocket(Integer.parseInt(httpPort));
 
-	/**
-	 * Configuration of a HTTP socket.
-	 */
-	private static class HttpSocket {
-
-		/**
-		 * {@link ManagedObjectSource} class name.
-		 */
-		public final String managedObjectSourceClassName;
-
-		/**
-		 * {@link ManagedObjectSourceWirer}.
-		 */
-		public final ManagedObjectSourceWirer wirer;
-
-		/**
-		 * {@link PropertyList}.
-		 */
-		public final PropertyList properties;
-
-		/**
-		 * Initiate.
-		 * 
-		 * @param managedObjectSourceClassName
-		 *            {@link ManagedObjectSource} class name.
-		 * @param wirer
-		 *            {@link ManagedObjectSourceWirer}.
-		 * @param properties
-		 *            {@link PropertyList}.
-		 */
-		public HttpSocket(String managedObjectSourceClassName,
-				ManagedObjectSourceWirer wirer, PropertyList properties) {
-			this.managedObjectSourceClassName = managedObjectSourceClassName;
-			this.wirer = wirer;
-			this.properties = properties;
+		} else if (this.addedHttpPorts.size() == 0) {
+			// Provide default HTTP port
+			this.addHttpServerSocket(HttpApplicationLocationManagedObjectSource.DEFAULT_HTTP_PORT);
 		}
 	}
 

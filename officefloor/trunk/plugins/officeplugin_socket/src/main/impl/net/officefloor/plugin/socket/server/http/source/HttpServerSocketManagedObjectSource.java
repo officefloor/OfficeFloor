@@ -87,8 +87,9 @@ public class HttpServerSocketManagedObjectSource extends
 	 *            {@link WebAutoWireApplication}.
 	 * @param port
 	 *            Port to listen for HTTP requests.
+	 * @return {@link AutoWireObject}.
 	 */
-	public static void autoWire(AutoWireApplication source, int port,
+	public static AutoWireObject autoWire(AutoWireApplication source, int port,
 			String sectionName, String sectionInputName) {
 
 		// Create the wirer
@@ -100,6 +101,9 @@ public class HttpServerSocketManagedObjectSource extends
 				HttpServerSocketManagedObjectSource.class.getName(), wirer,
 				new AutoWire(ServerHttpConnection.class));
 		object.addProperty(PROPERTY_PORT, String.valueOf(port));
+
+		// Return the object
+		return object;
 	}
 
 	/*

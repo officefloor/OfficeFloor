@@ -40,6 +40,7 @@ import net.officefloor.plugin.section.clazz.Parameter;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
 import net.officefloor.plugin.socket.server.http.server.MockHttpServer;
 import net.officefloor.plugin.web.http.application.HttpTemplateAutoWireSection;
+import net.officefloor.plugin.web.http.location.HttpApplicationLocationManagedObjectSource;
 import net.officefloor.plugin.web.http.server.HttpServerAutoWireOfficeFloorSource;
 
 import org.apache.http.HttpResponse;
@@ -67,7 +68,9 @@ public class CometHttpTemplateSectionExtensionTest extends OfficeFrameTestCase {
 		System.out.println("Manually running Comet test application");
 
 		// Start the server
-		startServer(HttpServerAutoWireOfficeFloorSource.DEFAULT_HTTP_PORT, "/");
+		startServer(
+				HttpApplicationLocationManagedObjectSource.DEFAULT_HTTP_PORT,
+				"/");
 	}
 
 	/**

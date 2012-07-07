@@ -19,10 +19,6 @@
 package net.officefloor.plugin.web.http.server;
 
 import net.officefloor.autowire.AutoWireObject;
-import net.officefloor.autowire.ManagedObjectSourceWirer;
-import net.officefloor.compile.properties.PropertyList;
-import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
-import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
 import net.officefloor.plugin.web.http.application.WebAutoWireApplication;
 import net.officefloor.plugin.web.http.session.HttpSession;
 import net.officefloor.plugin.web.http.session.source.HttpSessionManagedObjectSource;
@@ -35,53 +31,22 @@ import net.officefloor.plugin.web.http.session.source.HttpSessionManagedObjectSo
 public interface HttpServerAutoWireApplication extends WebAutoWireApplication {
 
 	/**
-	 * <p>
-	 * Allows overriding the {@link ManagedObjectSource} providing the
-	 * {@link ServerHttpConnection}.
-	 * <p>
-	 * This may be called multiple times to add listeners on more than one port.
-	 * 
-	 * @param managedObjectSourceClassName
-	 *            {@link ManagedObjectSource} providing the
-	 *            {@link ServerHttpConnection}. May be an alias.
-	 * @param wirer
-	 *            {@link ManagedObjectSourceWirer}. May be <code>null</code>.
-	 * @return {@link PropertyList} for configuring the
-	 *         {@link ManagedObjectSource}.
-	 * 
-	 * @deprecated use addHttpSocket and addHttpsSocket
-	 * 
-	 * @see #HANDLER_SECTION_NAME
-	 * @see #HANDLER_INPUT_NAME
-	 */
-	PropertyList addHttpSocket(String managedObjectSourceClassName,
-			ManagedObjectSourceWirer wirer);
-
-	/**
-	 * <p>
 	 * Adds listening for HTTP on the specified port.
-	 * <p>
-	 * The first added port will be the HTTP port for the
-	 * {@link HttpApplicationLocation}. Note configuring the HTTP port location
-	 * through properties overrides this behaviour.
 	 * 
 	 * @param port
 	 *            Port to listen on.
+	 * @return {@link AutoWireObject} of the added HTTP server socket.
 	 */
-	// void addHttpSocket(int port);
+	AutoWireObject addHttpServerSocket(int port);
 
 	/**
-	 * <p>
 	 * Adds listening for HTTPS on the specified port.
-	 * <p>
-	 * The first added port will be the HTTPS port for the
-	 * {@link HttpApplicationLocation}. Note configuring the HTTPS port location
-	 * through properties overrides this behaviour.
 	 * 
 	 * @param port
 	 *            Port to listen on.
+	 * @return {@link AutoWireObject} of the added HTTPS server socket.
 	 */
-	// void addHttpsSocket(int port);
+	AutoWireObject addHttpsServerSocket(int port);
 
 	/**
 	 * <p>
