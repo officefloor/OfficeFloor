@@ -32,6 +32,7 @@ import net.officefloor.compile.spi.section.source.SectionSourceContext;
 import net.officefloor.compile.spi.section.source.impl.AbstractSectionSource;
 import net.officefloor.plugin.socket.server.http.HttpResponse;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
+import net.officefloor.plugin.web.http.location.HttpApplicationLocation;
 import net.officefloor.plugin.web.http.location.InvalidHttpRequestUriException;
 import net.officefloor.plugin.web.http.resource.HttpFile;
 import net.officefloor.plugin.web.http.resource.source.HttpFileFactoryTask.DependencyKeys;
@@ -83,6 +84,9 @@ public class HttpFileSenderSectionSource extends AbstractSectionSource {
 		WebApplicationSectionSource.linkObject(sendFileTask,
 				DependencyKeys.SERVER_HTTP_CONNECTION.name(),
 				ServerHttpConnection.class, designer, objects);
+		WebApplicationSectionSource.linkObject(sendFileTask,
+				DependencyKeys.HTTP_APPLICATION_LOCATION.name(),
+				HttpApplicationLocation.class, designer, objects);
 		WebApplicationSectionSource.linkEscalation(sendFileTask,
 				IOException.class, designer, escalations);
 		WebApplicationSectionSource.linkEscalation(sendFileTask,

@@ -31,6 +31,7 @@ import net.officefloor.frame.api.execute.TaskContext;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.socket.server.http.HttpRequest;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
+import net.officefloor.plugin.web.http.location.HttpApplicationLocation;
 import net.officefloor.plugin.web.http.location.InvalidHttpRequestUriException;
 import net.officefloor.plugin.web.http.resource.AbstractHttpResourceFactoryTestCase;
 import net.officefloor.plugin.web.http.resource.HttpDirectory;
@@ -76,6 +77,8 @@ public class HttpFileFactoryWorkSourceTest extends OfficeFrameTestCase {
 						HttpFileFactoryTaskFlows.class);
 		taskBuilder.addObject(ServerHttpConnection.class).setKey(
 				DependencyKeys.SERVER_HTTP_CONNECTION);
+		taskBuilder.addObject(HttpApplicationLocation.class).setKey(
+				DependencyKeys.HTTP_APPLICATION_LOCATION);
 		TaskFlowTypeBuilder<HttpFileFactoryTaskFlows> flowBuilder = taskBuilder
 				.addFlow();
 		flowBuilder.setKey(HttpFileFactoryTaskFlows.HTTP_FILE_NOT_FOUND);
@@ -100,6 +103,8 @@ public class HttpFileFactoryWorkSourceTest extends OfficeFrameTestCase {
 		ServerHttpConnection connection = this
 				.createMock(ServerHttpConnection.class);
 		HttpRequest request = this.createMock(HttpRequest.class);
+		HttpApplicationLocation location = this
+				.createMock(HttpApplicationLocation.class);
 
 		// Record
 		this.recordReturn(taskContext,
@@ -107,6 +112,13 @@ public class HttpFileFactoryWorkSourceTest extends OfficeFrameTestCase {
 				connection);
 		this.recordReturn(connection, connection.getHttpRequest(), request);
 		this.recordReturn(request, request.getRequestURI(), "/index.html");
+		this.recordReturn(
+				taskContext,
+				taskContext.getObject(DependencyKeys.HTTP_APPLICATION_LOCATION),
+				location);
+		this.recordReturn(location,
+				location.transformToApplicationCanonicalPath("/index.html"),
+				"/index.html");
 
 		// Test
 		this.replayMockObjects();
@@ -146,6 +158,8 @@ public class HttpFileFactoryWorkSourceTest extends OfficeFrameTestCase {
 		ServerHttpConnection connection = this
 				.createMock(ServerHttpConnection.class);
 		HttpRequest request = this.createMock(HttpRequest.class);
+		HttpApplicationLocation location = this
+				.createMock(HttpApplicationLocation.class);
 
 		// Record
 		this.recordReturn(taskContext,
@@ -153,6 +167,12 @@ public class HttpFileFactoryWorkSourceTest extends OfficeFrameTestCase {
 				connection);
 		this.recordReturn(connection, connection.getHttpRequest(), request);
 		this.recordReturn(request, request.getRequestURI(), "/");
+		this.recordReturn(
+				taskContext,
+				taskContext.getObject(DependencyKeys.HTTP_APPLICATION_LOCATION),
+				location);
+		this.recordReturn(location,
+				location.transformToApplicationCanonicalPath("/"), "/");
 
 		// Test
 		this.replayMockObjects();
@@ -189,6 +209,8 @@ public class HttpFileFactoryWorkSourceTest extends OfficeFrameTestCase {
 				.createMock(ServerHttpConnection.class);
 		HttpRequest request = this.createMock(HttpRequest.class);
 		FlowFuture flowFuture = this.createMock(FlowFuture.class);
+		HttpApplicationLocation location = this
+				.createMock(HttpApplicationLocation.class);
 
 		// Record
 		this.recordReturn(taskContext,
@@ -196,6 +218,13 @@ public class HttpFileFactoryWorkSourceTest extends OfficeFrameTestCase {
 				connection);
 		this.recordReturn(connection, connection.getHttpRequest(), request);
 		this.recordReturn(request, request.getRequestURI(),
+				"/missing-file.html");
+		this.recordReturn(
+				taskContext,
+				taskContext.getObject(DependencyKeys.HTTP_APPLICATION_LOCATION),
+				location);
+		this.recordReturn(location, location
+				.transformToApplicationCanonicalPath("/missing-file.html"),
 				"/missing-file.html");
 		this.recordReturn(taskContext, taskContext.doFlow(
 				HttpFileFactoryTaskFlows.HTTP_FILE_NOT_FOUND, null), flowFuture);

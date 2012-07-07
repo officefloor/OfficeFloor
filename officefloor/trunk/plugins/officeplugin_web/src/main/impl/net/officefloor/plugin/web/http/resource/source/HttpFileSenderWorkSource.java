@@ -33,6 +33,8 @@ import net.officefloor.plugin.socket.server.http.HttpResponse;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
 import net.officefloor.plugin.socket.server.http.protocol.HttpStatus;
 import net.officefloor.plugin.stream.OutputBufferStream;
+import net.officefloor.plugin.web.http.location.HttpApplicationLocation;
+import net.officefloor.plugin.web.http.location.HttpApplicationLocationMangedObject;
 import net.officefloor.plugin.web.http.location.InvalidHttpRequestUriException;
 import net.officefloor.plugin.web.http.resource.FileExtensionHttpFileDescriber;
 import net.officefloor.plugin.web.http.resource.HttpFile;
@@ -134,10 +136,12 @@ public class HttpFileSenderWorkSource extends
 			notFoundResourceFactory = httpResourceFactory;
 		}
 
-		// Ensure file not found content path is request URI
+		// Ensure file not found content path is canonical path
 		if (!notFoundContentPath.startsWith("/")) {
 			notFoundContentPath = "/" + notFoundContentPath;
 		}
+		notFoundContentPath = HttpApplicationLocationMangedObject
+				.transformToCanonicalPath(notFoundContentPath);
 
 		// Obtain the file not found content
 		HttpResource notFoundResource = notFoundResourceFactory
@@ -198,6 +202,8 @@ public class HttpFileSenderWorkSource extends
 				.addTaskType(TASK_NAME, task, DependencyKeys.class, None.class);
 		taskTypeBuilder.addObject(ServerHttpConnection.class).setKey(
 				DependencyKeys.SERVER_HTTP_CONNECTION);
+		taskTypeBuilder.addObject(HttpApplicationLocation.class).setKey(
+				DependencyKeys.HTTP_APPLICATION_LOCATION);
 		taskTypeBuilder.addEscalation(IOException.class);
 		taskTypeBuilder.addEscalation(InvalidHttpRequestUriException.class);
 	}

@@ -250,13 +250,7 @@ public class WoofOfficeFloorSource extends HttpServerAutoWireOfficeFloorSource {
 
 		// Configure resource directories
 		SourceHttpResourceFactory.loadProperties(null, resourceDirectories,
-				null, Boolean.FALSE,
-				new SourceHttpResourceFactory.PropertyTarget() {
-					@Override
-					public void addProperty(String name, String value) {
-						compiler.addProperty(name, value);
-					}
-				});
+				null, Boolean.FALSE, compiler);
 
 		// Make WoOF resources available
 		compiler.addResources(new ResourceSource() {
