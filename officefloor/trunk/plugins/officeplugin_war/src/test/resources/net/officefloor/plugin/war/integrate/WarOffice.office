@@ -9,6 +9,9 @@
 		<external-managed-object name="HTTP_CONNECTION"
 			object-type="net.officefloor.plugin.socket.server.http.ServerHttpConnection"
 			object-scope="PROCESS" />
+		<external-managed-object name="HTTP_LOCATION"
+			object-type="net.officefloor.plugin.web.http.location.HttpApplicationLocation"
+			object-scope="PROCESS" />
 		<external-managed-object name="HTTP_SESSION"
 			object-type="net.officefloor.plugin.web.http.session.HttpSession"
 			object-scope="PROCESS" />
@@ -64,6 +67,10 @@
 			<object name="HTTP_CONNECTION"
 				object-type="net.officefloor.plugin.socket.server.http.ServerHttpConnection">
 				<external-managed-object name="HTTP_CONNECTION" />
+			</object>
+			<object name="HTTP_LOCATION"
+				object-type="net.officefloor.plugin.web.http.location.HttpApplicationLocation">
+				<external-managed-object name="HTTP_LOCATION" />
 			</object>
 			<responsibility name="RESPONSIBILITY">
 				<team name="SERVLET_TEAM" />

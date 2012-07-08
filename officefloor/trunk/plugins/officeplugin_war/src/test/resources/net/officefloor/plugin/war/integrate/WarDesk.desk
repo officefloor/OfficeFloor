@@ -3,6 +3,8 @@
 	<external-managed-objects>
 		<external-managed-object name="HTTP_CONNECTION"
 			object-type="net.officefloor.plugin.socket.server.http.ServerHttpConnection" />
+		<external-managed-object name="HTTP_LOCATION"
+			object-type="net.officefloor.plugin.web.http.location.HttpApplicationLocation" />
 	</external-managed-objects>
 
 	<external-flows>
@@ -18,6 +20,9 @@
 			<work-task name="SendFile">
 				<task-object name="SERVER_HTTP_CONNECTION" key="SERVER_HTTP_CONNECTION" object-type="net.officefloor.plugin.socket.server.http.ServerHttpConnection">
 					<external-managed-object name="HTTP_CONNECTION" />
+				</task-object>
+				<task-object name="HTTP_APPLICATION_LOCATION" key="HTTP_APPLICATION_LOCATION" object-type="net.officefloor.plugin.web.http.location.HttpApplicationLocation">
+					<external-managed-object name="HTTP_LOCATION" />
 				</task-object>
 			</work-task>
 		</work>
