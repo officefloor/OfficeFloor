@@ -128,14 +128,12 @@ public class ServletServerHttpConnectionTest extends OfficeFrameTestCase {
 		final String QUERY_STRING = "name=value";
 		this.recordReturn(this.request, this.request.getRequestURI(),
 				CONTEXT_PATH + REQUEST_URI);
-		this.recordReturn(this.request, this.request.getContextPath(),
-				CONTEXT_PATH);
 		this.recordReturn(this.request, this.request.getQueryString(),
 				QUERY_STRING);
 		this.replayMockObjects();
 		HttpRequest request = this.connection.getHttpRequest();
-		assertEquals("Incorrect request URI", REQUEST_URI + "?" + QUERY_STRING,
-				request.getRequestURI());
+		assertEquals("Incorrect request URI", CONTEXT_PATH + REQUEST_URI + "?"
+				+ QUERY_STRING, request.getRequestURI());
 		this.verifyMockObjects();
 	}
 

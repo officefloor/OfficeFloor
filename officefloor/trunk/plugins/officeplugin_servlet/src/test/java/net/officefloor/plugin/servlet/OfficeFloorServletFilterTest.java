@@ -227,9 +227,9 @@ public class OfficeFloorServletFilterTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensures the context path is stripped off the request URI.
+	 * Ensures the context path is handled for the request URI.
 	 */
-	public void testStripOffContextPath() throws Exception {
+	public void testServiceWithContextPath() throws Exception {
 		this.contextPath = "/path";
 		assertEquals("Should be handled by template", "TEMPLATE",
 				this.doGetBody("/path/test"));
