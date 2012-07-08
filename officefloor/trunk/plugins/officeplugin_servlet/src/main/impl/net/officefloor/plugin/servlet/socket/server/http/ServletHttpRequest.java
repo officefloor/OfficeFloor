@@ -75,7 +75,13 @@ public class ServletHttpRequest implements HttpRequest {
 
 	@Override
 	public String getRequestURI() {
-		return ServletServerHttpConnection.getRequestPath(this.servletRequest);
+		String requestUri = this.servletRequest.getRequestURI();
+		String queryString = this.servletRequest.getQueryString();
+		if ((queryString == null) || (queryString.length() == 0)) {
+			return requestUri; // no query string
+		} else {
+			return requestUri + "?" + queryString;
+		}
 	}
 
 	@Override

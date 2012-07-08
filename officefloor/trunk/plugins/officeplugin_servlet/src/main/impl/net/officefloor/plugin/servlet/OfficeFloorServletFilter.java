@@ -40,6 +40,7 @@ import net.officefloor.autowire.AutoWire;
 import net.officefloor.autowire.AutoWireObject;
 import net.officefloor.autowire.AutoWireOfficeFloor;
 import net.officefloor.autowire.AutoWireSection;
+import net.officefloor.compile.OfficeFloorCompiler;
 import net.officefloor.compile.spi.office.OfficeSectionOutput;
 import net.officefloor.frame.api.escalate.Escalation;
 import net.officefloor.frame.api.manage.OfficeFloor;
@@ -47,7 +48,6 @@ import net.officefloor.frame.impl.spi.team.ProcessContextTeamSource;
 import net.officefloor.frame.spi.source.ResourceSource;
 import net.officefloor.plugin.servlet.bridge.ServletBridgeManagedObjectSource;
 import net.officefloor.plugin.servlet.bridge.spi.ServletServiceBridger;
-import net.officefloor.plugin.servlet.socket.server.http.ServletServerHttpConnection;
 import net.officefloor.plugin.servlet.socket.server.http.source.ServletServerHttpConnectionManagedObjectSource;
 import net.officefloor.plugin.servlet.web.http.application.ServletHttpApplicationStateManagedObjectSource;
 import net.officefloor.plugin.servlet.web.http.application.ServletHttpRequestStateManagedObjectSource;
@@ -57,6 +57,7 @@ import net.officefloor.plugin.web.http.application.HttpApplicationState;
 import net.officefloor.plugin.web.http.application.HttpRequestState;
 import net.officefloor.plugin.web.http.application.WebApplicationAutoWireOfficeFloorSource;
 import net.officefloor.plugin.web.http.application.WebAutoWireApplication;
+import net.officefloor.plugin.web.http.location.HttpApplicationLocationManagedObjectSource;
 import net.officefloor.plugin.web.http.session.HttpSession;
 
 /**
@@ -156,7 +157,8 @@ public abstract class OfficeFloorServletFilter extends
 
 		// Allow loading template content from ServletContext.
 		// (Allows integration into the WAR structure)
-		this.getOfficeFloorCompiler().addResources(new ResourceSource() {
+		OfficeFloorCompiler compiler = this.getOfficeFloorCompiler();
+		compiler.addResources(new ResourceSource() {
 			@Override
 			public InputStream sourceResource(String location) {
 
@@ -226,6 +228,12 @@ public abstract class OfficeFloorServletFilter extends
 					autoWiring);
 		}
 
+		// Configure the context path
+		String contextPath = config.getServletContext().getContextPath();
+		compiler.addProperty(
+				HttpApplicationLocationManagedObjectSource.PROPERTY_CONTEXT_PATH,
+				contextPath);
+
 		// Configure the web application
 		try {
 			this.configure();
@@ -237,9 +245,12 @@ public abstract class OfficeFloorServletFilter extends
 			throw new ServletException(ex);
 		}
 
-		// Load the handled URIs
+		// Load the handled URIs (being absolute to domain)
 		for (String uri : this.getURIs()) {
 			uri = (uri.startsWith("/") ? uri : "/" + uri);
+			if ((contextPath != null) && (!("/".equals(contextPath)))) {
+				uri = contextPath + uri;
+			}
 			this.handledURIs.add(uri);
 		}
 
@@ -278,7 +289,7 @@ public abstract class OfficeFloorServletFilter extends
 		HttpServletResponse httpResponse = (HttpServletResponse) response;
 
 		// Obtain the URI
-		String uri = ServletServerHttpConnection.getRequestUri(httpRequest);
+		String uri = httpRequest.getRequestURI();
 
 		// Determine handling request (quick cache look-up to save invoking)
 		if (this.handledURIs.contains(uri) || (uri.endsWith(".task"))) {
