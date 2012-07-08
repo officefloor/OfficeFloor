@@ -37,6 +37,11 @@
 				<office-floor-team name="SERVLET_TEAM" />
 			</team>
 		</managed-object-source>
+		<managed-object-source name="HTTP_LOCATION"
+			source="net.officefloor.plugin.web.http.location.HttpApplicationLocationManagedObjectSource"
+			object-type="net.officefloor.plugin.web.http.location.HttpApplicationLocation">
+			<managing-office name="OFFICE" />
+		</managed-object-source>
 		<managed-object-source name="HTTP_SESSION"
 			source="net.officefloor.plugin.web.http.session.source.HttpSessionManagedObjectSource"
 			object-type="net.officefloor.plugin.web.http.session.HttpSession"
@@ -89,6 +94,13 @@
 		<managed-object name="SERVLET_SERVER" scope="PROCESS">
 			<managed-object-source name="SERVLET_SERVER" />
 		</managed-object>
+		<managed-object name="HTTP_LOCATION" scope="PROCESS">
+			<managed-object-source name="HTTP_LOCATION" />
+			<dependency name="SERVER_HTTP_CONNECTION"
+				object-type="net.officefloor.plugin.socket.server.http.ServerHttpConnection">
+				<input-managed-object name="HTTP_CONNECTION" />
+			</dependency>
+		</managed-object>
 		<managed-object name="HTTP_SESSION" scope="PROCESS">
 			<managed-object-source name="HTTP_SESSION" />
 			<dependency name="HTTP_CONNECTION"
@@ -132,6 +144,10 @@
 			<object name="HTTP_CONNECTION"
 				object-type="net.officefloor.plugin.socket.server.http.ServerHttpConnection">
 				<input-managed-object name="HTTP_CONNECTION" />
+			</object>
+			<object name="HTTP_LOCATION"
+				object-type="net.officefloor.plugin.web.http.location.HttpApplicationLocation">
+				<managed-object name="HTTP_LOCATION" />
 			</object>
 			<object name="HTTP_SESSION"
 				object-type="net.officefloor.plugin.web.http.session.HttpSession">

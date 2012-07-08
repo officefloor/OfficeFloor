@@ -45,6 +45,7 @@ import net.officefloor.plugin.objects.AutoWireObjectsLoader;
 import net.officefloor.plugin.objects.AutoWireObjectsLoaderImpl;
 import net.officefloor.plugin.teams.AutoWireTeamsLoader;
 import net.officefloor.plugin.teams.AutoWireTeamsLoaderImpl;
+import net.officefloor.plugin.web.http.location.HttpApplicationLocationManagedObjectSource;
 import net.officefloor.plugin.web.http.resource.source.SourceHttpResourceFactory;
 import net.officefloor.plugin.web.http.server.HttpServerAutoWireApplication;
 import net.officefloor.plugin.web.http.server.HttpServerAutoWireOfficeFloorSource;
@@ -103,6 +104,11 @@ public class WoofOfficeFloorSource extends HttpServerAutoWireOfficeFloorSource {
 	 * Path within {@link #WEBAPP_PATH} for the <code>web.xml</code> file.
 	 */
 	public static final String WEBXML_FILE_PATH = "WEB-INF/web.xml";
+
+	/**
+	 * Property to specify the HTTP port.
+	 */
+	public static final String PROPERTY_HTTP_PORT = HttpApplicationLocationManagedObjectSource.PROPERTY_HTTP_PORT;
 
 	/**
 	 * <p>

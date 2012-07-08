@@ -31,6 +31,7 @@ import net.officefloor.model.woof.WoofModel;
 import net.officefloor.plugin.section.clazz.ClassSectionSource;
 import net.officefloor.plugin.section.clazz.NextTask;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
+import net.officefloor.plugin.web.http.location.HttpApplicationLocationManagedObjectSource;
 import net.officefloor.plugin.web.http.server.HttpServerAutoWireOfficeFloorSource;
 
 import org.apache.http.HttpResponse;
@@ -63,6 +64,15 @@ public class WoofOfficeFloorSourceTest extends OfficeFrameTestCase {
 		} finally {
 			WoofOfficeFloorSource.stop();
 		}
+	}
+
+	/**
+	 * Ensure convenience constants are correctly specified.
+	 */
+	public void testConvenienceConstants() {
+		assertEquals("Incorrect convenience HTTP port property name",
+				HttpApplicationLocationManagedObjectSource.PROPERTY_HTTP_PORT,
+				WoofOfficeFloorSource.PROPERTY_HTTP_PORT);
 	}
 
 	/**
