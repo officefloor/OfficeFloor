@@ -17,9 +17,12 @@
  */
 package net.officefloor.plugin.web.http.location;
 
+import net.officefloor.frame.spi.managedobject.ObjectRegistry;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.socket.server.http.HttpRequest;
+import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
 import net.officefloor.plugin.socket.server.http.protocol.HttpStatus;
+import net.officefloor.plugin.web.http.location.HttpApplicationLocationManagedObjectSource.Dependencies;
 
 /**
  * Provides listing of common tests for the various states of the
@@ -31,21 +34,18 @@ public abstract class AbstractHttpApplicationLocationManagedObjectTestCase
 		extends OfficeFrameTestCase {
 
 	/**
-	 * {@link HttpApplicationLocation}.
-	 */
-	private HttpApplicationLocation location;
-
-	/**
 	 * Creates the {@link HttpApplicationLocation} for test.
 	 * 
+	 * @param domain
+	 *            Domain.
+	 * @param httpPort
+	 *            HTTP port.
+	 * @param httpsPort
+	 *            HTTPS port.
 	 * @return {@link HttpApplicationLocation} for test.
 	 */
-	protected abstract HttpApplicationLocation createHttpApplicationLocation();
-
-	@Override
-	protected void setUp() throws Exception {
-		this.location = this.createHttpApplicationLocation();
-	}
+	protected abstract HttpApplicationLocationMangedObject createHttpApplicationLocation(
+			String domain, int httpPort, int httpsPort);
 
 	/**
 	 * Ensure null path is defaulted to root.
@@ -72,54 +72,59 @@ public abstract class AbstractHttpApplicationLocationManagedObjectTestCase
 	 * Ensure context path is root for application.
 	 */
 	public void testApplicationPath_ContextPath() throws Exception {
-		this.doApplicationPathTest("/", this.getContextPath());
+		this.doApplicationPathTest("/", "/CONTEXT");
 	}
 
 	/**
 	 * Ensure leading white space is stripped off.
 	 */
 	public void testApplicationPath_TrimLeadingWhiteSpace() throws Exception {
-		this.doApplicationPathTest("/path", "\t " + this.getContextPath()
-				+ "/path");
+		this.doApplicationPathTest("/path", "\t /CONTEXT/path");
 	}
 
 	/**
 	 * Ensure trailing white space is stripped off.
 	 */
 	public void testApplicationPath_TrimTrailingWhiteSpace() throws Exception {
-		this.doApplicationPathTest("/path", this.getContextPath() + "/path \n");
+		this.doApplicationPathTest("/path", "/CONTEXT/path \n");
 	}
 
 	/**
 	 * Ensure the same path is returned if already canonical.
 	 */
 	public void testApplicationPath_SameCanonicalPath() throws Exception {
-		this.doApplicationPathTest("/path", this.getContextPath() + "/path");
+		this.doApplicationPathTest("/path", "/CONTEXT/path");
 	}
 
 	/**
 	 * Ensure trailing slashes (/) are stripped off.
 	 */
 	public void testApplicationPath_TrimTrailingSlash() throws Exception {
-		this.doApplicationPathTest("/path", this.getContextPath() + "/path/");
+		this.doApplicationPathTest("/path", "/CONTEXT/path/");
 	}
 
 	/**
 	 * Ensure transforms to canonical path.
 	 */
 	public void testApplicationPath_CanonicalPath() throws Exception {
-		this.doApplicationPathTest("/path", "//." + this.getContextPath()
-				+ "//./path/../path");
+		this.doApplicationPathTest("/path", "//./CONTEXT//./path/../path");
 	}
 
 	/**
 	 * Ensure invalid if parent path.
 	 */
 	public void testApplicationPath_ParentCanonicalPath() throws Exception {
-		String contextPath = this.getContextPath();
+
+		// Create the application location
+		HttpApplicationLocation location = this.createHttpApplicationLocation(
+				"host.officefloor.net", 80, 443);
+
+		String contextPath = location.getContextPath();
+		contextPath = (contextPath == null ? "" : contextPath);
 		String requestUri = contextPath + "/..";
 		try {
-			this.doApplicationPathTest(null, requestUri);
+			// Transform to application path
+			location.transformToApplicationCanonicalPath(requestUri);
 			fail("Should not be successful");
 
 		} catch (InvalidHttpRequestUriException ex) {
@@ -147,7 +152,7 @@ public abstract class AbstractHttpApplicationLocationManagedObjectTestCase
 	 * Ensure no segments canonical path results in root path.
 	 */
 	public void testApplicationPath_RootCanonicalPath() throws Exception {
-		this.doApplicationPathTest("/", this.getContextPath() + "/path/..");
+		this.doApplicationPathTest("/", "/CONTEXT/path/..");
 	}
 
 	/**
@@ -155,7 +160,7 @@ public abstract class AbstractHttpApplicationLocationManagedObjectTestCase
 	 */
 	public void testApplicationPath_RootCanonicalPathWithTrailingSlash()
 			throws Exception {
-		this.doApplicationPathTest("/", this.getContextPath() + "/path/../");
+		this.doApplicationPathTest("/", "/CONTEXT/path/../");
 	}
 
 	/**
@@ -163,8 +168,7 @@ public abstract class AbstractHttpApplicationLocationManagedObjectTestCase
 	 */
 	public void testApplicationPath_RootPathWithOnlyProtocolAndDomainName()
 			throws Exception {
-		this.doApplicationPathTest("/",
-				"http://www.officefloor.net" + this.getContextPath());
+		this.doApplicationPathTest("/", "http://www.officefloor.net/CONTEXT");
 	}
 
 	/**
@@ -172,8 +176,8 @@ public abstract class AbstractHttpApplicationLocationManagedObjectTestCase
 	 */
 	public void testApplicationPath_RootPathWithDomainAndPort()
 			throws Exception {
-		this.doApplicationPathTest("/", "http://www.officefloor.net:7878"
-				+ this.getContextPath());
+		this.doApplicationPathTest("/",
+				"http://www.officefloor.net:7878/CONTEXT");
 	}
 
 	/**
@@ -181,24 +185,23 @@ public abstract class AbstractHttpApplicationLocationManagedObjectTestCase
 	 */
 	public void testApplicationPath_PathWithProtocolAndDomainName()
 			throws Exception {
-		this.doApplicationPathTest("/path", "https://www.officefloor.net"
-				+ this.getContextPath() + "/path");
+		this.doApplicationPathTest("/path",
+				"https://www.officefloor.net/CONTEXT/path");
 	}
 
 	/**
 	 * Ensure returns canonical path if starts with Domain and Port.
 	 */
 	public void testApplicationPath_PathWithDomainAndPort() throws Exception {
-		this.doApplicationPathTest("/path", "https://www.officefloor.net:7979"
-				+ this.getContextPath() + "/path");
+		this.doApplicationPathTest("/path",
+				"https://www.officefloor.net:7979/CONTEXT/path");
 	}
 
 	/**
 	 * Ensures parameters are not included with the path.
 	 */
 	public void testApplicationPath_PathWithParameters() throws Exception {
-		this.doApplicationPathTest("/path", this.getContextPath()
-				+ "/path?name=value");
+		this.doApplicationPathTest("/path", "/CONTEXT/path?name=value");
 	}
 
 	/**
@@ -206,22 +209,21 @@ public abstract class AbstractHttpApplicationLocationManagedObjectTestCase
 	 */
 	public void testApplicationPath_RootPathWithParametersOnly()
 			throws Exception {
-		this.doApplicationPathTest("/", this.getContextPath() + "?name=value");
+		this.doApplicationPathTest("/", "/CONTEXT?name=value");
 	}
 
 	/**
 	 * Ensures fragment is not included with the path.
 	 */
 	public void testApplicationPath_PathWithFragment() throws Exception {
-		this.doApplicationPathTest("/path", this.getContextPath()
-				+ "/path#fragment");
+		this.doApplicationPathTest("/path", "/CONTEXT/path#fragment");
 	}
 
 	/**
 	 * Ensures that with only fragment that returns root path.
 	 */
 	public void testApplicationPath_RootPathWithFragmentOnly() throws Exception {
-		this.doApplicationPathTest("/", this.getContextPath() + "#fragment");
+		this.doApplicationPathTest("/", "/CONTEXT#fragment");
 	}
 
 	/**
@@ -229,25 +231,76 @@ public abstract class AbstractHttpApplicationLocationManagedObjectTestCase
 	 */
 	public void testApplicationPath_DirectoryPathWithParameters()
 			throws Exception {
-		this.doApplicationPathTest("/path", this.getContextPath()
-				+ "/path/?name=value");
+		this.doApplicationPathTest("/path", "/CONTEXT/path/?name=value");
 	}
 
 	/**
 	 * Ensure root path returned in root path followed by a fragment.
 	 */
 	public void testApplicationPath_RootPathWithFragment() throws Exception {
-		this.doApplicationPathTest("/", this.getContextPath() + "/#fragment");
+		this.doApplicationPathTest("/", "/CONTEXT/#fragment");
 	}
 
 	/**
-	 * Obtains the context path to prefix paths.
-	 * 
-	 * @return Context path.
+	 * Ensure use unqualified link as both unsecured.
 	 */
-	protected String getContextPath() {
-		String contextPath = this.location.getContextPath();
-		return (contextPath == null ? "" : contextPath);
+	public void testClientPath_UnsecureConnectionWithUnsecureLink() {
+		this.doClientPathTest("/CONTEXT/path", false, "/path", false);
+	}
+
+	/**
+	 * Ensure use qualified link as require secure.
+	 */
+	public void testClientPath_UnsecureConnectionWithSecureLink() {
+		this.doClientPathTest("https://host.officefloor.net/CONTEXT/path",
+				false, "/path", true);
+	}
+
+	/**
+	 * Ensure use qualified link as require not secure.
+	 */
+	public void testClientPath_SecureConnectionWithUnsecureLink() {
+		this.doClientPathTest("http://host.officefloor.net/CONTEXT/path", true,
+				"/path", false);
+	}
+
+	/**
+	 * Ensure use unqualified link as both secure.
+	 */
+	public void testClientPath_SecureConnectionWithSecureLink() {
+		this.doClientPathTest("/CONTEXT/path", true, "/path", true);
+	}
+
+	/**
+	 * Ensure provide HTTP port if not standard port.
+	 */
+	public void testClientPath_HttpPort() {
+		this.doClientPathTest("http://host.officefloor.net:7878/CONTEXT/path",
+				true, "host.officefloor.net", 7878, 7979, "/path", false);
+	}
+
+	/**
+	 * Ensure provide HTTPS port if not standard port.
+	 */
+	public void testClientPath_HttpsPort() {
+		this.doClientPathTest("https://host.officefloor.net:7979/CONTEXT/path",
+				false, "host.officefloor.net", 7878, 7979, "/path", true);
+	}
+
+	/**
+	 * Ensure provide appropriate unsecured client path for root.
+	 */
+	public void testClientPath_UnsecureRootPath() {
+		this.doClientPathTest("http://host.officefloor.net/CONTEXT/", true,
+				"/", false);
+	}
+
+	/**
+	 * Ensure provide appropriate secured client path for root.
+	 */
+	public void testClientPath_SecureRoot() {
+		this.doClientPathTest("https://host.officefloor.net/CONTEXT/", false,
+				"/", true);
 	}
 
 	/**
@@ -261,12 +314,102 @@ public abstract class AbstractHttpApplicationLocationManagedObjectTestCase
 	private void doApplicationPathTest(String expectedPath, String requestUri)
 			throws Exception {
 
+		// Create the application location
+		HttpApplicationLocation location = this.createHttpApplicationLocation(
+				"host.officefloor.net", 80, 443);
+
+		// Transform request URI for context
+		if (requestUri != null) {
+			String contextPath = location.getContextPath();
+			contextPath = (contextPath == null ? "" : contextPath);
+			requestUri = requestUri.replace("/CONTEXT", contextPath);
+		}
+
 		// Transform to application path
-		String actualPath = this.location
+		String actualPath = location
 				.transformToApplicationCanonicalPath(requestUri);
 
 		// Ensure correct path
 		assertEquals("Incorrect application path", expectedPath, actualPath);
+	}
+
+	/**
+	 * Undertakes the client path test with default details.
+	 * 
+	 * @param expectedPath
+	 *            Expected path.
+	 * @param isSecureConnection
+	 *            Indicates if the {@link ServerHttpConnection} is secure.
+	 * @param applicationPath
+	 *            Application path.
+	 * @param isSecureLink
+	 *            Indicates whether link is to be secure.
+	 */
+	private void doClientPathTest(String expectedPath,
+			boolean isSecureConnection, String applicationPath,
+			boolean isSecureLink) {
+		this.doClientPathTest(expectedPath, isSecureConnection,
+				"host.officefloor.net", 80, 443, applicationPath, isSecureLink);
+	}
+
+	/**
+	 * Undertakes the client path test.
+	 * 
+	 * @param expectedPath
+	 *            Expected path.
+	 * @param isSecureConnection
+	 *            Indicates if the {@link ServerHttpConnection} is secure.
+	 * @param domain
+	 *            Domain.
+	 * @param httpPort
+	 *            HTTP port.
+	 * @param httpsPort
+	 *            HTTPS port.
+	 * @param applicationPath
+	 *            Application path.
+	 * @param isSecureLink
+	 *            Indicates whether link is to be secure.
+	 */
+	@SuppressWarnings({ "rawtypes", "unchecked" })
+	private void doClientPathTest(String expectedPath,
+			boolean isSecureConnection, String domain, int httpPort,
+			int httpsPort, String applicationPath, boolean isSecureLink) {
+		try {
+
+			// Create the application location
+			HttpApplicationLocationMangedObject location = this
+					.createHttpApplicationLocation(domain, httpPort, httpsPort);
+
+			final ObjectRegistry registry = this
+					.createMock(ObjectRegistry.class);
+			final ServerHttpConnection connection = this
+					.createMock(ServerHttpConnection.class);
+
+			// Record determine if over secure link
+			this.recordReturn(registry,
+					registry.getObject(Dependencies.SERVER_HTTP_CONNECTION),
+					connection);
+			this.recordReturn(connection, connection.isSecure(),
+					isSecureConnection);
+
+			// Test
+			this.replayMockObjects();
+			location.loadObjects(registry);
+			String clientPath = location.transformToClientPath(applicationPath,
+					isSecureLink);
+			this.verifyMockObjects();
+
+			// Transform expected path for context
+			String contextPath = location.getContextPath();
+			contextPath = (contextPath == null ? "" : contextPath);
+			expectedPath = expectedPath.replace("/CONTEXT", contextPath);
+
+			// Validate correct client path
+			assertEquals("Incorrect client path", expectedPath, clientPath);
+
+		} catch (Throwable ex) {
+			throw fail(ex);
+		}
 	}
 
 }

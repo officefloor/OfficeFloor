@@ -265,6 +265,16 @@ public class HttpApplicationLocationMangedObject implements
 	private final int clusterHttpsPort;
 
 	/**
+	 * Unsecured prefix.
+	 */
+	private final String unsecuredPrefix;
+
+	/**
+	 * Secured prefix.
+	 */
+	private final String securedPrefix;
+
+	/**
 	 * {@link ServerHttpConnection}.
 	 */
 	private ServerHttpConnection connection;
@@ -297,6 +307,16 @@ public class HttpApplicationLocationMangedObject implements
 		this.clusterHostName = clusterHostName;
 		this.clusterHttpPort = clusterHttpPort;
 		this.clusterHttpsPort = clusterHttpsPort;
+
+		// Determine the unsecured prefix for a client link
+		this.unsecuredPrefix = "http://" + this.domain
+				+ (this.httpPort == 80 ? "" : ":" + this.httpPort)
+				+ (this.contextPath == null ? "" : this.contextPath);
+
+		// Determine the secured prefix for a client link
+		this.securedPrefix = "https://" + this.domain
+				+ (this.httpsPort == 443 ? "" : ":" + this.httpsPort)
+				+ (this.contextPath == null ? "" : this.contextPath);
 	}
 
 	/*
@@ -399,9 +419,43 @@ public class HttpApplicationLocationMangedObject implements
 
 	@Override
 	public String transformToClientPath(String applicationPath, boolean isSecure) {
-		// TODO implement HttpApplicationLocation.transformToClientPath
-		throw new UnsupportedOperationException(
-				"TODO implement HttpApplicationLocation.transformToClientPath");
+
+		// Handle based on whether over secure connection
+		if (this.connection.isSecure()) {
+			// Over secure connection
+			if (isSecure) {
+				// Both secure so provide context prefix
+				return this.prefixWithContextPath(applicationPath);
+			} else {
+				// Require unsecuring link
+				return this.unsecuredPrefix + applicationPath;
+			}
+
+		} else {
+			// Over unsecured connection
+			if (!isSecure) {
+				// Both unsecure so provide context prefix
+				return this.prefixWithContextPath(applicationPath);
+			} else {
+				// Require securing link
+				return this.securedPrefix + applicationPath;
+			}
+		}
+	}
+
+	/**
+	 * Prefixes the application path with the context path.
+	 * 
+	 * @param applicationPath
+	 *            Application path.
+	 * @return Application path prefixed with the context path.
+	 */
+	private String prefixWithContextPath(String applicationPath) {
+		if (this.contextPath == null) {
+			return applicationPath;
+		} else {
+			return this.contextPath + applicationPath;
+		}
 	}
 
 }

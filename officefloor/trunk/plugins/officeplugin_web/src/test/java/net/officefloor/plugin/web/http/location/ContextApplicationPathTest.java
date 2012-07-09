@@ -26,9 +26,10 @@ public class ContextApplicationPathTest extends
 		AbstractHttpApplicationLocationManagedObjectTestCase {
 
 	@Override
-	protected HttpApplicationLocation createHttpApplicationLocation() {
-		return new HttpApplicationLocationMangedObject("officefloor.net", 80,
-				443, "/context", "node.officefloor.net", 7878, 7979);
+	protected HttpApplicationLocationMangedObject createHttpApplicationLocation(
+			String domain, int httpPort, int httpsPort) {
+		return new HttpApplicationLocationMangedObject(domain, httpPort,
+				httpsPort, "/context", "node.officefloor.net", 7878, 7979);
 	}
 
 }
