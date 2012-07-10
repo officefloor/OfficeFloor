@@ -47,9 +47,9 @@
     </section>
   </sections>
   <governances>
-    <governance name="Transaction" source="net.officefloor.plugin.governance.clazz.ClassGovernanceSource" x="249" y="113">
+    <governance name="Transaction" source="net.officefloor.plugin.governance.clazz.ClassGovernanceSource" x="250" y="113">
       <property name="class.name" value="net.officefloor.tutorials.presentation.TransactionPojo"/>
-      <governance-area x="202" y="139" width="177" height="66"/>
+      <governance-area x="202" y="140" width="174" height="56"/>
     </governance>
   </governances>
   <resources>
