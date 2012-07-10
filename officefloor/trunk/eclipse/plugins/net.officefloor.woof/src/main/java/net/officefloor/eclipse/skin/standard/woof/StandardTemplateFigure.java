@@ -19,11 +19,10 @@
 package net.officefloor.eclipse.skin.standard.woof;
 
 import net.officefloor.eclipse.skin.standard.AbstractOfficeFloorFigure;
-import net.officefloor.eclipse.skin.standard.StandardWoofColours;
 import net.officefloor.eclipse.skin.standard.figure.ConnectorFigure;
 import net.officefloor.eclipse.skin.standard.figure.ConnectorFigure.ConnectorDirection;
 import net.officefloor.eclipse.skin.standard.figure.NoSpacingGridLayout;
-import net.officefloor.eclipse.skin.standard.figure.RectangleContainerFigure;
+import net.officefloor.eclipse.skin.standard.figure.NoSpacingToolbarLayout;
 import net.officefloor.eclipse.skin.woof.TemplateFigure;
 import net.officefloor.eclipse.skin.woof.TemplateFigureContext;
 import net.officefloor.model.woof.WoofExceptionToWoofTemplateModel;
@@ -36,7 +35,10 @@ import org.eclipse.draw2d.GridData;
 import org.eclipse.draw2d.IFigure;
 import org.eclipse.draw2d.Label;
 import org.eclipse.draw2d.MarginBorder;
+import org.eclipse.draw2d.RectangleFigure;
+import org.eclipse.draw2d.RoundedRectangle;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.graphics.Color;
 
 /**
  * Standard {@link TemplateFigure}.
@@ -65,6 +67,13 @@ public class StandardTemplateFigure extends AbstractOfficeFloorFigure implements
 	public StandardTemplateFigure(TemplateFigureContext context) {
 		this.context = context;
 
+		// Colours
+		final Color titleBarTextColor = new Color(null, 0, 0, 0);
+		final Color titleBarTopColour = new Color(null, 203, 235, 255);
+		final Color titleBarBottomColour = new Color(null, 0, 139, 255);
+		final Color windowColour = new Color(null, 229, 229, 229);
+		final Color contentColour = new Color(null, 240, 249, 255);
+
 		// Create the figure
 		Figure figure = new Figure();
 		NoSpacingGridLayout layout = new NoSpacingGridLayout(2);
@@ -72,7 +81,7 @@ public class StandardTemplateFigure extends AbstractOfficeFloorFigure implements
 
 		// Link to template
 		ConnectorFigure templateInput = new ConnectorFigure(
-				ConnectorDirection.WEST, StandardWoofColours.CONNECTOR());
+				ConnectorDirection.WEST, CommonWoofColours.CONNECTIONS());
 		templateInput.setBorder(new MarginBorder(10, 0, 0, 0));
 		ConnectionAnchor templateInputAnchor = templateInput
 				.getConnectionAnchor();
@@ -87,17 +96,44 @@ public class StandardTemplateFigure extends AbstractOfficeFloorFigure implements
 				SWT.BEGINNING, false, false));
 		figure.add(templateInput);
 
-		// Create the container for the template
-		RectangleContainerFigure templateFigure = new RectangleContainerFigure(
-				this.getDisplayName(), StandardWoofColours.TEMPLATE(), 5, false);
-		figure.add(templateFigure);
+		// Create the rounded rectangle container
+		final RoundedRectangle window = new RoundedRectangle();
+		NoSpacingGridLayout windowLayout = new NoSpacingGridLayout(1);
+		window.setLayoutManager(windowLayout);
+		window.setBackgroundColor(windowColour);
+		window.setOutline(false);
+		figure.add(window);
 
-		// Specify the template name figure
-		this.templateNameFigure = templateFigure.getContainerName();
+		// Create the title bar for URI and security
+		TitleBarFigure titleBar = new TitleBarFigure(context.getTemplateName(),
+				titleBarTextColor, titleBarTopColour, titleBarBottomColour);
+		this.templateNameFigure = titleBar.getTitleNameFigure();
+		window.add(titleBar);
+		windowLayout.setConstraint(titleBar, new GridData(SWT.FILL, 0, true,
+				false));
+
+		// Provide window border to content
+		Figure contentPaneWrap = new Figure();
+		NoSpacingGridLayout contentPaneWrapLayout = new NoSpacingGridLayout(1);
+		contentPaneWrap.setLayoutManager(contentPaneWrapLayout);
+		contentPaneWrap.setBorder(new MarginBorder(4, 4, 4, 4));
+		window.add(contentPaneWrap);
+		windowLayout.setConstraint(contentPaneWrap, new GridData(SWT.FILL, 0,
+				true, false));
+
+		// Add content pane
+		RectangleFigure contentPane = new RectangleFigure();
+		contentPane.setLayoutManager(new NoSpacingToolbarLayout(false));
+		contentPane.setBorder(new MarginBorder(2, 2, 2, 2));
+		contentPane.setBackgroundColor(contentColour);
+		contentPane.setOutline(false);
+		contentPaneWrap.add(contentPane);
+		contentPaneWrapLayout.setConstraint(contentPane, new GridData(SWT.FILL,
+				0, true, false));
 
 		// Specify the figures
 		this.setFigure(figure);
-		this.setContentPane(templateFigure.getContentPane());
+		this.setContentPane(contentPane);
 	}
 
 	/**

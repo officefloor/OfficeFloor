@@ -95,6 +95,7 @@ public class ConnectorFigure extends Figure {
 		RectangleFigure rectangleShape = new RectangleFigure();
 		rectangleShape.setBackgroundColor(colour);
 		rectangleShape.setForegroundColor(colour);
+		rectangleShape.setAlpha(50);
 		rectangleShape.setOpaque(true);
 		int topInset = 0;
 		int leftInset = 0;
@@ -117,6 +118,7 @@ public class ConnectorFigure extends Figure {
 		Ellipse point = new Ellipse();
 		point.setBackgroundColor(colour);
 		point.setForegroundColor(colour);
+		point.setAlpha(100);
 		point.setOpaque(true);
 		point.setSize(SIZE, SIZE);
 

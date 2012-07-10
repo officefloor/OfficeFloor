@@ -19,7 +19,6 @@
 package net.officefloor.eclipse.skin.standard.woof;
 
 import net.officefloor.eclipse.skin.standard.AbstractOfficeFloorFigure;
-import net.officefloor.eclipse.skin.standard.StandardWoofColours;
 import net.officefloor.eclipse.skin.woof.StartFigure;
 import net.officefloor.eclipse.skin.woof.StartFigureContext;
 
@@ -41,8 +40,9 @@ public class StandardStartFigure extends AbstractOfficeFloorFigure implements
 	 */
 	public StandardStartFigure(StartFigureContext context) {
 		Ellipse figure = new Ellipse();
-		figure.setBackgroundColor(StandardWoofColours.BLACK());
+		figure.setBackgroundColor(CommonWoofColours.CONNECTIONS());
 		figure.setOpaque(true);
+		figure.setOutline(false);
 		figure.setSize(15, 15);
 		this.setFigure(figure);
 	}

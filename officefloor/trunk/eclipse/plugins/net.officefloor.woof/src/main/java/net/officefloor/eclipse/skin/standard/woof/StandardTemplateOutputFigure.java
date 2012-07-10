@@ -19,7 +19,6 @@
 package net.officefloor.eclipse.skin.standard.woof;
 
 import net.officefloor.eclipse.skin.standard.AbstractOfficeFloorFigure;
-import net.officefloor.eclipse.skin.standard.StandardWoofColours;
 import net.officefloor.eclipse.skin.standard.figure.ConnectorFigure.ConnectorDirection;
 import net.officefloor.eclipse.skin.standard.figure.LabelConnectorFigure;
 import net.officefloor.eclipse.skin.woof.TemplateOutputFigure;
@@ -54,9 +53,8 @@ public class StandardTemplateOutputFigure extends AbstractOfficeFloorFigure
 	public StandardTemplateOutputFigure(TemplateOutputFigureContext context) {
 
 		// Determine colour based on whether render complete output
-		Color colour = (context.isRenderCompleteOutput() ? StandardWoofColours
-				.RENDER_COMPLETE_TEMPLATE_OUTPUT() : StandardWoofColours
-				.BLACK());
+		Color colour = (context.isRenderCompleteOutput() ? new Color(null, 0,
+				200, 200) : CommonWoofColours.CONNECTIONS());
 
 		// Create figure
 		LabelConnectorFigure connector = new LabelConnectorFigure(

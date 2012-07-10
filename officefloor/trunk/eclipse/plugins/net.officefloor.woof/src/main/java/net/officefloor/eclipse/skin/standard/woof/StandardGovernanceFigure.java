@@ -19,7 +19,6 @@
 package net.officefloor.eclipse.skin.standard.woof;
 
 import net.officefloor.eclipse.skin.standard.AbstractOfficeFloorFigure;
-import net.officefloor.eclipse.skin.standard.StandardWoofColours;
 import net.officefloor.eclipse.skin.standard.figure.NoSpacingGridLayout;
 import net.officefloor.eclipse.skin.woof.GovernanceFigure;
 import net.officefloor.eclipse.skin.woof.GovernanceFigureContext;
@@ -50,9 +49,9 @@ public class StandardGovernanceFigure extends AbstractOfficeFloorFigure
 
 		// Governance figure
 		Triangle triangle = new Triangle();
-		triangle.setBackgroundColor(StandardWoofColours.GOVERNANCE());
+		triangle.setForegroundColor(CommonWoofColours.CONNECTIONS());
+		triangle.setBackgroundColor(CommonWoofColours.GOVERNANCE());
 		triangle.setOutline(false);
-		triangle.setOpaque(true);
 		triangle.setDirection(Triangle.SOUTH);
 		triangle.setLayoutManager(new NoSpacingGridLayout(1));
 
@@ -60,6 +59,10 @@ public class StandardGovernanceFigure extends AbstractOfficeFloorFigure
 		this.name = new Label(context.getGovernanceName());
 		this.name.setLayoutManager(new NoSpacingGridLayout(1));
 		triangle.add(this.name);
+		
+		// Match transparency of areas
+		triangle.setAlpha(100);
+		triangle.setOpaque(false);
 
 		this.setFigure(triangle);
 	}
