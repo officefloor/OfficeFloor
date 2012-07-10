@@ -20,9 +20,9 @@ package net.officefloor.eclipse.skin.standard.woof;
 
 import org.eclipse.draw2d.IFigure;
 import org.eclipse.draw2d.Label;
+import org.eclipse.swt.graphics.Color;
 
 import net.officefloor.eclipse.skin.standard.AbstractOfficeFloorFigure;
-import net.officefloor.eclipse.skin.standard.StandardWoofColours;
 import net.officefloor.eclipse.skin.standard.figure.EllipseFigure;
 import net.officefloor.eclipse.skin.woof.ResourceFigure;
 import net.officefloor.eclipse.skin.woof.ResourceFigureContext;
@@ -54,7 +54,8 @@ public class StandardResourceFigure extends AbstractOfficeFloorFigure implements
 	public StandardResourceFigure(ResourceFigureContext context) {
 		this.context = context;
 		EllipseFigure figure = new EllipseFigure(this.getDisplayName(),
-				StandardWoofColours.RESOURCE());
+				new Color(null, 229, 229, 229));
+		figure.setOutline(false);
 		this.name = figure.getLabel();
 		this.setFigure(figure);
 	}

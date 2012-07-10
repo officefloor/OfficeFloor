@@ -19,7 +19,6 @@
 package net.officefloor.eclipse.skin.standard.woof;
 
 import net.officefloor.eclipse.skin.standard.AbstractOfficeFloorFigure;
-import net.officefloor.eclipse.skin.standard.StandardOfficeFloorColours;
 import net.officefloor.eclipse.skin.standard.figure.ConnectorFigure.ConnectorDirection;
 import net.officefloor.eclipse.skin.standard.figure.LabelConnectorFigure;
 import net.officefloor.eclipse.skin.woof.ExceptionFigure;
@@ -54,7 +53,7 @@ public class StandardExceptionFigure extends AbstractOfficeFloorFigure
 
 		LabelConnectorFigure figure = new LabelConnectorFigure(
 				context.getExceptionName(), ConnectorDirection.EAST,
-				StandardOfficeFloorColours.BLACK());
+				CommonWoofColours.CONNECTIONS());
 		this.name = figure.getLabel();
 
 		// Register anchors

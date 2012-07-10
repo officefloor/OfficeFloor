@@ -18,10 +18,6 @@
 
 package net.officefloor.eclipse.skin.standard.woof;
 
-import org.eclipse.draw2d.PolylineConnection;
-import org.eclipse.draw2d.PolylineDecoration;
-
-import net.officefloor.eclipse.skin.standard.StandardWoofColours;
 import net.officefloor.eclipse.skin.woof.ExceptionFigure;
 import net.officefloor.eclipse.skin.woof.ExceptionFigureContext;
 import net.officefloor.eclipse.skin.woof.ExceptionToResourceFigureContext;
@@ -55,12 +51,36 @@ import net.officefloor.eclipse.skin.woof.TemplateOutputToSectionInputFigureConte
 import net.officefloor.eclipse.skin.woof.TemplateOutputToTemplateFigureContext;
 import net.officefloor.eclipse.skin.woof.WoofFigureFactory;
 
+import org.eclipse.draw2d.PolylineConnection;
+import org.eclipse.draw2d.PolylineDecoration;
+
 /**
  * Standard {@link WoofFigureFactory}.
  * 
  * @author Daniel Sagenschneider
  */
 public class StandardWoofFigureFactory implements WoofFigureFactory {
+
+	/**
+	 * Decorates the connection.
+	 * 
+	 * @param figure
+	 *            {@link PolylineConnection}.
+	 */
+	private void decorateConnection(PolylineConnection figure) {
+
+		// Provide arrow
+		PolylineDecoration arrow = new PolylineDecoration();
+		arrow.setBackgroundColor(CommonWoofColours.CONNECTIONS());
+		arrow.setAlpha(100);
+		arrow.setOpaque(true);
+
+		// Decorate connection
+		figure.setTargetDecoration(arrow);
+		figure.setForegroundColor(CommonWoofColours.CONNECTIONS());
+		figure.setAlpha(100);
+		figure.setOpaque(false);
+	}
 
 	/*
 	 * ======================== WoofFigureFactory =========================
@@ -125,74 +145,78 @@ public class StandardWoofFigureFactory implements WoofFigureFactory {
 	public void decorateTemplateOutputToTemplateFigure(
 			PolylineConnection figure,
 			TemplateOutputToTemplateFigureContext context) {
-		figure.setTargetDecoration(new PolylineDecoration());
+		this.decorateConnection(figure);
 	}
 
 	@Override
 	public void decorateTemplateOutputToSectionInputFigure(
 			PolylineConnection figure,
 			TemplateOutputToSectionInputFigureContext context) {
-		figure.setTargetDecoration(new PolylineDecoration());
+		this.decorateConnection(figure);
 	}
 
 	@Override
 	public void decorateTemplateOutputToResourceFigure(
 			PolylineConnection figure,
 			TemplateOutputToResourceFigureContext context) {
-		figure.setTargetDecoration(new PolylineDecoration());
+		this.decorateConnection(figure);
 	}
 
 	@Override
 	public void decorateSectionOutputToTemplateFigure(
 			PolylineConnection figure,
 			SectionOutputToTemplateFigureContext context) {
-		figure.setTargetDecoration(new PolylineDecoration());
+		this.decorateConnection(figure);
 	}
 
 	@Override
 	public void decorateSectionOutputToSectionInputFigure(
 			PolylineConnection figure,
 			SectionOutputToSectionInputFigureContext context) {
-		figure.setTargetDecoration(new PolylineDecoration());
+		this.decorateConnection(figure);
 	}
 
 	@Override
 	public void decorateSectionOutputToResourceFigure(
 			PolylineConnection figure,
 			SectionOutputToResourceFigureContext context) {
-		figure.setTargetDecoration(new PolylineDecoration());
+		this.decorateConnection(figure);
 	}
 
 	@Override
 	public void decorateGovernanceToGovernanceAreaFigure(
 			PolylineConnection figure,
 			GovernanceToGovernanceAreaFigureContext context) {
-		figure.setForegroundColor(StandardWoofColours.GOVERNANCE());
+		figure.setForegroundColor(CommonWoofColours.CONNECTIONS());
+		
+		// Match governance outline
+		figure.setAlpha(100);
+		figure.setOpaque(false);
 	}
 
 	@Override
 	public void decorateExceptionToTemplateFigure(PolylineConnection figure,
 			ExceptionToTemplateFigureContext context) {
-		figure.setTargetDecoration(new PolylineDecoration());
+		this.decorateConnection(figure);
 	}
 
 	@Override
 	public void decorateExceptionToSectionInputFigure(
 			PolylineConnection figure,
 			ExceptionToSectionInputFigureContext context) {
-		figure.setTargetDecoration(new PolylineDecoration());
+		this.decorateConnection(figure);
 	}
 
 	@Override
 	public void decorateExceptionToResourceFigure(PolylineConnection figure,
 			ExceptionToResourceFigureContext context) {
-		figure.setTargetDecoration(new PolylineDecoration());
+		this.decorateConnection(figure);
 	}
 
 	@Override
 	public void decorateStartToSectionInputFigure(PolylineConnection figure,
 			StartToSectionInputFigureContext context) {
-		figure.setTargetDecoration(new PolylineDecoration());
+		this.decorateConnection(figure);
 	}
 
 }

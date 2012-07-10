@@ -18,14 +18,19 @@
 
 package net.officefloor.eclipse.skin.standard.woof;
 
-import org.eclipse.draw2d.Label;
-
 import net.officefloor.eclipse.skin.standard.AbstractOfficeFloorFigure;
-import net.officefloor.eclipse.skin.standard.StandardWoofColours;
-import net.officefloor.eclipse.skin.standard.figure.RoundedContainerFigure;
+import net.officefloor.eclipse.skin.standard.figure.NoSpacingGridLayout;
 import net.officefloor.eclipse.skin.woof.SectionFigure;
 import net.officefloor.eclipse.skin.woof.SectionFigureContext;
 import net.officefloor.eclipse.skin.woof.TemplateFigureContext;
+
+import org.eclipse.draw2d.Figure;
+import org.eclipse.draw2d.GridData;
+import org.eclipse.draw2d.Label;
+import org.eclipse.draw2d.MarginBorder;
+import org.eclipse.draw2d.RoundedRectangle;
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.graphics.Color;
 
 /**
  * Standard {@link SectionFigure}.
@@ -48,15 +53,34 @@ public class StandardSectionFigure extends AbstractOfficeFloorFigure implements
 	 */
 	public StandardSectionFigure(SectionFigureContext context) {
 
-		// Create the container for the section
-		RoundedContainerFigure figure = new RoundedContainerFigure(
-				context.getSectionName(), StandardWoofColours.SECTION(), 5,
-				false);
-		this.name = figure.getContainerName();
+		final Color titleBarTextColour = new Color(null, 255, 255, 255);
+		final Color titleBarTopColour = new Color(null, 177, 232, 177);
+		final Color titleBarBottomColour = new Color(null, 0, 127, 0);
+
+		// Create the rounded rectangle container
+		RoundedRectangle container = new RoundedRectangle();
+		NoSpacingGridLayout containerLayout = new NoSpacingGridLayout(1);
+		container.setLayoutManager(containerLayout);
+		container.setBackgroundColor(titleBarTopColour);
+		container.setOutline(false);
+
+		// Add the title bar
+		TitleBarFigure titleBar = new TitleBarFigure(context.getSectionName(),
+				titleBarTextColour, titleBarTopColour, titleBarBottomColour);
+		this.name = titleBar.getTitleNameFigure();
+		container.add(titleBar);
+
+		// Provide window border to content
+		Figure contentPane = new Figure();
+		contentPane.setLayoutManager(new NoSpacingGridLayout(1));
+		contentPane.setBorder(new MarginBorder(2, 2, 2, 2));
+		container.add(contentPane);
+		containerLayout.setConstraint(contentPane, new GridData(SWT.FILL, 0,
+				true, false));
 
 		// Specify the figures
-		this.setFigure(figure);
-		this.setContentPane(figure.getContentPane());
+		this.setFigure(container);
+		this.setContentPane(contentPane);
 	}
 
 	/*

@@ -19,12 +19,11 @@
 package net.officefloor.eclipse.skin.standard.woof;
 
 import net.officefloor.eclipse.skin.standard.AbstractOfficeFloorFigure;
-import net.officefloor.eclipse.skin.standard.StandardWoofColours;
 import net.officefloor.eclipse.skin.woof.GovernanceAreaFigure;
 import net.officefloor.eclipse.skin.woof.GovernanceAreaFigureContext;
 import net.officefloor.model.woof.WoofGovernanceAreaModel;
 
-import org.eclipse.draw2d.RectangleFigure;
+import org.eclipse.draw2d.RoundedRectangle;
 
 /**
  * Standard {@link GovernanceAreaFigure}.
@@ -35,9 +34,9 @@ public class StandardGovernanceAreaFigure extends AbstractOfficeFloorFigure
 		implements GovernanceAreaFigure {
 
 	/**
-	 * {@link RectangleFigure} for {@link WoofGovernanceAreaModel}.
+	 * {@link RoundedRectangle} for {@link WoofGovernanceAreaModel}.
 	 */
-	private final RectangleFigure figure;
+	private final RoundedRectangle figure;
 
 	/**
 	 * Initiate.
@@ -48,8 +47,8 @@ public class StandardGovernanceAreaFigure extends AbstractOfficeFloorFigure
 	public StandardGovernanceAreaFigure(GovernanceAreaFigureContext context) {
 
 		// Governance area figure
-		this.figure = new RectangleFigure();
-		this.figure.setBackgroundColor(StandardWoofColours.GOVERNANCE());
+		this.figure = new RoundedRectangle();
+		this.figure.setBackgroundColor(CommonWoofColours.GOVERNANCE());
 		this.figure.setSize(context.getWidth(), context.getHeight());
 
 		// Provide transparency to see overlapping governance areas
