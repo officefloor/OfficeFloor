@@ -118,11 +118,6 @@ public class ConformEditor extends AbstractOfficeFloorEditor<Model, Object> {
 	}
 
 	@Override
-	protected boolean isDragTarget() {
-		return false;
-	}
-
-	@Override
 	protected void populateEditPartTypes(
 			Map<Class<?>, Class<? extends EditPart>> map) {
 		// Keep reference to allow population
@@ -134,48 +129,47 @@ public class ConformEditor extends AbstractOfficeFloorEditor<Model, Object> {
 			OfficeFloorGraphicalNodeEditPolicy policy) {
 
 		// Connect existing item to target item
-		policy
-				.addConnection(
-						ExistingItemModel.class,
-						TargetItemModel.class,
-						new ConnectionChangeFactory<ExistingItemModel, TargetItemModel>() {
+		policy.addConnection(
+				ExistingItemModel.class,
+				TargetItemModel.class,
+				new ConnectionChangeFactory<ExistingItemModel, TargetItemModel>() {
+					@Override
+					public Change<?> createChange(
+							final ExistingItemModel source,
+							final TargetItemModel target,
+							CreateConnectionRequest request) {
+
+						// Create the connection
+						final ExistingItemToTargetItemModel conn = new ExistingItemToTargetItemModel(
+								source, target);
+
+						// Return change to connect source to target
+						return new AbstractChange<ExistingItemToTargetItemModel>(
+								conn, "Connect") {
 							@Override
-							public Change<?> createChange(
-									final ExistingItemModel source,
-									final TargetItemModel target,
-									CreateConnectionRequest request) {
+							public void apply() {
 
-								// Create the connection
-								final ExistingItemToTargetItemModel conn = new ExistingItemToTargetItemModel(
-										source, target);
+								// Remove possible existing connection
+								if (source.getTargetItem() != null) {
+									source.getTargetItem().remove();
+								}
 
-								// Return change to connect source to target
-								return new AbstractChange<ExistingItemToTargetItemModel>(
-										conn, "Connect") {
-									@Override
-									public void apply() {
+								// Remove possible target connection
+								if (target.getExistingItem() != null) {
+									target.getExistingItem().remove();
+								}
 
-										// Remove possible existing connection
-										if (source.getTargetItem() != null) {
-											source.getTargetItem().remove();
-										}
-
-										// Remove possible target connection
-										if (target.getExistingItem() != null) {
-											target.getExistingItem().remove();
-										}
-
-										// Add the new connection
-										conn.connect();
-									}
-
-									@Override
-									public void revert() {
-										// Can not revert
-									}
-								};
+								// Add the new connection
+								conn.connect();
 							}
-						});
+
+							@Override
+							public void revert() {
+								// Can not revert
+							}
+						};
+					}
+				});
 	}
 
 	@Override

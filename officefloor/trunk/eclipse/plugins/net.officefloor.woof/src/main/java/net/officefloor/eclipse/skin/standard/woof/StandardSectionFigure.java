@@ -69,6 +69,8 @@ public class StandardSectionFigure extends AbstractOfficeFloorFigure implements
 				titleBarTextColour, titleBarTopColour, titleBarBottomColour);
 		this.name = titleBar.getTitleNameFigure();
 		container.add(titleBar);
+		containerLayout.setConstraint(titleBar, new GridData(SWT.FILL, 0, true,
+				false));
 
 		// Provide window border to content
 		Figure contentPane = new Figure();

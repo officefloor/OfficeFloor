@@ -30,8 +30,6 @@ import net.officefloor.model.woof.WoofGovernanceAreaModel.WoofGovernanceAreaEven
 
 import org.eclipse.draw2d.geometry.Rectangle;
 import org.eclipse.gef.EditPart;
-import org.eclipse.gef.EditPolicy;
-import org.eclipse.gef.editpolicies.ResizableEditPolicy;
 
 /**
  * {@link EditPart} for the {@link WoofGovernanceAreaModel}.
@@ -42,25 +40,6 @@ public class WoofGovernanceAreaEditPart
 		extends
 		AbstractOfficeFloorEditPart<WoofGovernanceAreaModel, WoofGovernanceAreaEvent, GovernanceAreaFigure>
 		implements GovernanceAreaFigureContext {
-
-	/**
-	 * Resizes the {@link WoofGovernanceAreaModel}.
-	 * 
-	 * @param bounds
-	 *            Bounds for resizing.
-	 */
-	public void resize(Rectangle bounds) {
-
-		// Resize the governance area
-		WoofGovernanceAreaModel area = this.getCastedModel();
-		area.setX(bounds.x);
-		area.setY(bounds.y);
-		area.setWidth(bounds.width);
-		area.setHeight(bounds.height);
-
-		// Resize the figure
-		this.getOfficeFloorFigure().resize(bounds.width, bounds.height);
-	}
 
 	/*
 	 * ================== AbstractOfficeFloorEditPart ===================
@@ -83,6 +62,9 @@ public class WoofGovernanceAreaEditPart
 		switch (property) {
 		case CHANGE_HEIGHT:
 		case CHANGE_WIDTH:
+			WoofGovernanceAreaModel area = this.getCastedModel();
+			this.getOfficeFloorFigure().resize(area.getWidth(),
+					area.getHeight());
 			this.refresh();
 			break;
 		}
@@ -95,17 +77,6 @@ public class WoofGovernanceAreaEditPart
 				.getWoofGovernanceToWoofGovernanceArea(this.getCastedModel()));
 	}
 
-	@Override
-	protected void createEditPolicies() {
-
-		// Allow resizing
-		this.createEditPolicies(false);
-
-		// Enable resizing (handled by parent)
-		this.installEditPolicy(EditPolicy.SELECTION_FEEDBACK_ROLE,
-				new ResizableEditPolicy());
-	}
-
 	/**
 	 * Refresh the visuals.
 	 */
@@ -115,7 +86,7 @@ public class WoofGovernanceAreaEditPart
 		// Obtain model for bounds refresh (possibly after resize)
 		WoofGovernanceAreaModel model = this.getCastedModel();
 
-		// Refresh the view off the model
+		// Refresh the view off bounds defined by the model
 		this.getFigure().setBounds(
 				new Rectangle(model.getX(), model.getY(), model.getWidth(),
 						model.getHeight()));
