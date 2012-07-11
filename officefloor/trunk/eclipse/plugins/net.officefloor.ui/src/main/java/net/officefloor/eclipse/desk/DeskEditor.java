@@ -112,7 +112,7 @@ import org.eclipse.ui.IEditorPart;
 
 /**
  * Editor for the {@link DeskModel}.
- *
+ * 
  * @author Daniel Sagenschneider
  */
 public class DeskEditor extends
@@ -126,12 +126,6 @@ public class DeskEditor extends
 	@Override
 	protected DeskChanges createModelChanges(DeskModel model) {
 		return new DeskChangesImpl(model);
-	}
-
-	@Override
-	protected boolean isDragTarget() {
-		// Disallow as drag target
-		return false;
 	}
 
 	@Override
@@ -196,10 +190,8 @@ public class DeskEditor extends
 				DeskManagedObjectSourceFlowToTaskEditPart.class);
 		map.put(DeskManagedObjectDependencyToDeskManagedObjectModel.class,
 				DeskManagedObjectDependencyToDeskManagedObjectEditPart.class);
-		map
-				.put(
-						DeskManagedObjectDependencyToExternalManagedObjectModel.class,
-						DeskManagedObjectDependencyToExternalManagedObjectEditPart.class);
+		map.put(DeskManagedObjectDependencyToExternalManagedObjectModel.class,
+				DeskManagedObjectDependencyToExternalManagedObjectEditPart.class);
 	}
 
 	@Override
@@ -332,34 +324,30 @@ public class DeskEditor extends
 				});
 
 		// Allow deleting work task object to external managed object
-		policy
-				.addDelete(
-						WorkTaskObjectToExternalManagedObjectModel.class,
-						new DeleteChangeFactory<WorkTaskObjectToExternalManagedObjectModel>() {
-							@Override
-							public Change<WorkTaskObjectToExternalManagedObjectModel> createChange(
-									WorkTaskObjectToExternalManagedObjectModel target) {
-								return DeskEditor.this
-										.getModelChanges()
-										.removeWorkTaskObjectToExternalManagedObject(
-												target);
-							}
-						});
+		policy.addDelete(
+				WorkTaskObjectToExternalManagedObjectModel.class,
+				new DeleteChangeFactory<WorkTaskObjectToExternalManagedObjectModel>() {
+					@Override
+					public Change<WorkTaskObjectToExternalManagedObjectModel> createChange(
+							WorkTaskObjectToExternalManagedObjectModel target) {
+						return DeskEditor.this.getModelChanges()
+								.removeWorkTaskObjectToExternalManagedObject(
+										target);
+					}
+				});
 
 		// Allow deleting work task object to managed object
-		policy
-				.addDelete(
-						WorkTaskObjectToDeskManagedObjectModel.class,
-						new DeleteChangeFactory<WorkTaskObjectToDeskManagedObjectModel>() {
-							@Override
-							public Change<WorkTaskObjectToDeskManagedObjectModel> createChange(
-									WorkTaskObjectToDeskManagedObjectModel target) {
-								return DeskEditor.this
-										.getModelChanges()
-										.removeWorkTaskObjectToDeskManagedObject(
-												target);
-							}
-						});
+		policy.addDelete(
+				WorkTaskObjectToDeskManagedObjectModel.class,
+				new DeleteChangeFactory<WorkTaskObjectToDeskManagedObjectModel>() {
+					@Override
+					public Change<WorkTaskObjectToDeskManagedObjectModel> createChange(
+							WorkTaskObjectToDeskManagedObjectModel target) {
+						return DeskEditor.this
+								.getModelChanges()
+								.removeWorkTaskObjectToDeskManagedObject(target);
+					}
+				});
 
 		// Allow deleting work to initial task
 		policy.addDelete(WorkToInitialTaskModel.class,
@@ -373,64 +361,59 @@ public class DeskEditor extends
 				});
 
 		// Allow deleting managed object source flow to task
-		policy
-				.addDelete(
-						DeskManagedObjectSourceFlowToTaskModel.class,
-						new DeleteChangeFactory<DeskManagedObjectSourceFlowToTaskModel>() {
-							@Override
-							public Change<DeskManagedObjectSourceFlowToTaskModel> createChange(
-									DeskManagedObjectSourceFlowToTaskModel target) {
-								return DeskEditor.this
-										.getModelChanges()
-										.removeDeskManagedObjectSourceFlowToTask(
-												target);
-							}
-						});
+		policy.addDelete(
+				DeskManagedObjectSourceFlowToTaskModel.class,
+				new DeleteChangeFactory<DeskManagedObjectSourceFlowToTaskModel>() {
+					@Override
+					public Change<DeskManagedObjectSourceFlowToTaskModel> createChange(
+							DeskManagedObjectSourceFlowToTaskModel target) {
+						return DeskEditor.this
+								.getModelChanges()
+								.removeDeskManagedObjectSourceFlowToTask(target);
+					}
+				});
 
 		// Allow deleting managed object source flow to external flow
-		policy
-				.addDelete(
-						DeskManagedObjectSourceFlowToExternalFlowModel.class,
-						new DeleteChangeFactory<DeskManagedObjectSourceFlowToExternalFlowModel>() {
-							@Override
-							public Change<DeskManagedObjectSourceFlowToExternalFlowModel> createChange(
-									DeskManagedObjectSourceFlowToExternalFlowModel target) {
-								return DeskEditor.this
-										.getModelChanges()
-										.removeDeskManagedObjectSourceFlowToExternalFlow(
-												target);
-							}
-						});
+		policy.addDelete(
+				DeskManagedObjectSourceFlowToExternalFlowModel.class,
+				new DeleteChangeFactory<DeskManagedObjectSourceFlowToExternalFlowModel>() {
+					@Override
+					public Change<DeskManagedObjectSourceFlowToExternalFlowModel> createChange(
+							DeskManagedObjectSourceFlowToExternalFlowModel target) {
+						return DeskEditor.this
+								.getModelChanges()
+								.removeDeskManagedObjectSourceFlowToExternalFlow(
+										target);
+					}
+				});
 
 		// Allow deleting managed object dependency to managed object
-		policy
-				.addDelete(
-						DeskManagedObjectDependencyToDeskManagedObjectModel.class,
-						new DeleteChangeFactory<DeskManagedObjectDependencyToDeskManagedObjectModel>() {
-							@Override
-							public Change<DeskManagedObjectDependencyToDeskManagedObjectModel> createChange(
-									DeskManagedObjectDependencyToDeskManagedObjectModel target) {
-								return DeskEditor.this
-										.getModelChanges()
-										.removeDeskManagedObjectDependencyToDeskManagedObject(
-												target);
-							}
-						});
+		policy.addDelete(
+				DeskManagedObjectDependencyToDeskManagedObjectModel.class,
+				new DeleteChangeFactory<DeskManagedObjectDependencyToDeskManagedObjectModel>() {
+					@Override
+					public Change<DeskManagedObjectDependencyToDeskManagedObjectModel> createChange(
+							DeskManagedObjectDependencyToDeskManagedObjectModel target) {
+						return DeskEditor.this
+								.getModelChanges()
+								.removeDeskManagedObjectDependencyToDeskManagedObject(
+										target);
+					}
+				});
 
 		// Allow deleting managed object dependency to external managed object
-		policy
-				.addDelete(
-						DeskManagedObjectDependencyToExternalManagedObjectModel.class,
-						new DeleteChangeFactory<DeskManagedObjectDependencyToExternalManagedObjectModel>() {
-							@Override
-							public Change<DeskManagedObjectDependencyToExternalManagedObjectModel> createChange(
-									DeskManagedObjectDependencyToExternalManagedObjectModel target) {
-								return DeskEditor.this
-										.getModelChanges()
-										.removeDeskManagedObjectDependencyToExternalManagedObject(
-												target);
-							}
-						});
+		policy.addDelete(
+				DeskManagedObjectDependencyToExternalManagedObjectModel.class,
+				new DeleteChangeFactory<DeskManagedObjectDependencyToExternalManagedObjectModel>() {
+					@Override
+					public Change<DeskManagedObjectDependencyToExternalManagedObjectModel> createChange(
+							DeskManagedObjectDependencyToExternalManagedObjectModel target) {
+						return DeskEditor.this
+								.getModelChanges()
+								.removeDeskManagedObjectDependencyToExternalManagedObject(
+										target);
+					}
+				});
 	}
 
 	@Override
@@ -438,39 +421,34 @@ public class DeskEditor extends
 			OfficeFloorGraphicalNodeEditPolicy policy) {
 
 		// Connect work task object to external managed object
-		policy
-				.addConnection(
-						WorkTaskObjectModel.class,
-						ExternalManagedObjectModel.class,
-						new ConnectionChangeFactory<WorkTaskObjectModel, ExternalManagedObjectModel>() {
-							@Override
-							public Change<?> createChange(
-									WorkTaskObjectModel source,
-									ExternalManagedObjectModel target,
-									CreateConnectionRequest request) {
-								return DeskEditor.this
-										.getModelChanges()
-										.linkWorkTaskObjectToExternalManagedObject(
-												source, target);
-							}
-						});
+		policy.addConnection(
+				WorkTaskObjectModel.class,
+				ExternalManagedObjectModel.class,
+				new ConnectionChangeFactory<WorkTaskObjectModel, ExternalManagedObjectModel>() {
+					@Override
+					public Change<?> createChange(WorkTaskObjectModel source,
+							ExternalManagedObjectModel target,
+							CreateConnectionRequest request) {
+						return DeskEditor.this.getModelChanges()
+								.linkWorkTaskObjectToExternalManagedObject(
+										source, target);
+					}
+				});
 
 		// Connect work task object to managed object
-		policy
-				.addConnection(
-						WorkTaskObjectModel.class,
-						DeskManagedObjectModel.class,
-						new ConnectionChangeFactory<WorkTaskObjectModel, DeskManagedObjectModel>() {
-							@Override
-							public Change<?> createChange(
-									WorkTaskObjectModel source,
-									DeskManagedObjectModel target,
-									CreateConnectionRequest request) {
-								return DeskEditor.this.getModelChanges()
-										.linkWorkTaskObjectToDeskManagedObject(
-												source, target);
-							}
-						});
+		policy.addConnection(
+				WorkTaskObjectModel.class,
+				DeskManagedObjectModel.class,
+				new ConnectionChangeFactory<WorkTaskObjectModel, DeskManagedObjectModel>() {
+					@Override
+					public Change<?> createChange(WorkTaskObjectModel source,
+							DeskManagedObjectModel target,
+							CreateConnectionRequest request) {
+						return DeskEditor.this.getModelChanges()
+								.linkWorkTaskObjectToDeskManagedObject(source,
+										target);
+					}
+				});
 
 		// Connect task flow to task
 		policy.addConnection(TaskFlowModel.class, TaskModel.class,
@@ -494,31 +472,30 @@ public class DeskEditor extends
 				});
 
 		// Connect task flow to external flow
-		policy
-				.addConnection(
-						TaskFlowModel.class,
-						ExternalFlowModel.class,
-						new ConnectionChangeFactory<TaskFlowModel, ExternalFlowModel>() {
-							@Override
-							public Change<?> createChange(TaskFlowModel source,
-									ExternalFlowModel target,
-									CreateConnectionRequest request) {
+		policy.addConnection(
+				TaskFlowModel.class,
+				ExternalFlowModel.class,
+				new ConnectionChangeFactory<TaskFlowModel, ExternalFlowModel>() {
+					@Override
+					public Change<?> createChange(TaskFlowModel source,
+							ExternalFlowModel target,
+							CreateConnectionRequest request) {
 
-								// Obtain the instigation strategy
-								FlowInstigationStrategyEnum strategy = DeskEditor.this
-										.getFlowInstigationStrategy(request
-												.getNewObject());
-								if (strategy == null) {
-									return null; // must have instigation
-									// strategy
-								}
+						// Obtain the instigation strategy
+						FlowInstigationStrategyEnum strategy = DeskEditor.this
+								.getFlowInstigationStrategy(request
+										.getNewObject());
+						if (strategy == null) {
+							return null; // must have instigation
+							// strategy
+						}
 
-								// Return the change to the link
-								return DeskEditor.this.getModelChanges()
-										.linkTaskFlowToExternalFlow(source,
-												target, strategy);
-							}
-						});
+						// Return the change to the link
+						return DeskEditor.this.getModelChanges()
+								.linkTaskFlowToExternalFlow(source, target,
+										strategy);
+					}
+				});
 
 		// Connect task to next task
 		policy.addConnection(TaskModel.class, TaskModel.class,
@@ -555,21 +532,19 @@ public class DeskEditor extends
 				});
 
 		// Connect task escalation to external flow
-		policy
-				.addConnection(
-						TaskEscalationModel.class,
-						ExternalFlowModel.class,
-						new ConnectionChangeFactory<TaskEscalationModel, ExternalFlowModel>() {
-							@Override
-							public Change<?> createChange(
-									TaskEscalationModel source,
-									ExternalFlowModel target,
-									CreateConnectionRequest request) {
-								return DeskEditor.this.getModelChanges()
-										.linkTaskEscalationToExternalFlow(
-												source, target);
-							}
-						});
+		policy.addConnection(
+				TaskEscalationModel.class,
+				ExternalFlowModel.class,
+				new ConnectionChangeFactory<TaskEscalationModel, ExternalFlowModel>() {
+					@Override
+					public Change<?> createChange(TaskEscalationModel source,
+							ExternalFlowModel target,
+							CreateConnectionRequest request) {
+						return DeskEditor.this.getModelChanges()
+								.linkTaskEscalationToExternalFlow(source,
+										target);
+					}
+				});
 
 		// Connect work to initial task
 		policy.addConnection(WorkModel.class, TaskModel.class,
@@ -583,75 +558,69 @@ public class DeskEditor extends
 				});
 
 		// Connect managed object source flow to task
-		policy
-				.addConnection(
-						DeskManagedObjectSourceFlowModel.class,
-						TaskModel.class,
-						new ConnectionChangeFactory<DeskManagedObjectSourceFlowModel, TaskModel>() {
-							@Override
-							public Change<?> createChange(
-									DeskManagedObjectSourceFlowModel source,
-									TaskModel target,
-									CreateConnectionRequest request) {
-								return DeskEditor.this.getModelChanges()
-										.linkDeskManagedObjectSourceFlowToTask(
-												source, target);
-							}
-						});
+		policy.addConnection(
+				DeskManagedObjectSourceFlowModel.class,
+				TaskModel.class,
+				new ConnectionChangeFactory<DeskManagedObjectSourceFlowModel, TaskModel>() {
+					@Override
+					public Change<?> createChange(
+							DeskManagedObjectSourceFlowModel source,
+							TaskModel target, CreateConnectionRequest request) {
+						return DeskEditor.this.getModelChanges()
+								.linkDeskManagedObjectSourceFlowToTask(source,
+										target);
+					}
+				});
 
 		// Connect managed object source flow to external flow
-		policy
-				.addConnection(
-						DeskManagedObjectSourceFlowModel.class,
-						ExternalFlowModel.class,
-						new ConnectionChangeFactory<DeskManagedObjectSourceFlowModel, ExternalFlowModel>() {
-							@Override
-							public Change<?> createChange(
-									DeskManagedObjectSourceFlowModel source,
-									ExternalFlowModel target,
-									CreateConnectionRequest request) {
-								return DeskEditor.this
-										.getModelChanges()
-										.linkDeskManagedObjectSourceFlowToExternalFlow(
-												source, target);
-							}
-						});
+		policy.addConnection(
+				DeskManagedObjectSourceFlowModel.class,
+				ExternalFlowModel.class,
+				new ConnectionChangeFactory<DeskManagedObjectSourceFlowModel, ExternalFlowModel>() {
+					@Override
+					public Change<?> createChange(
+							DeskManagedObjectSourceFlowModel source,
+							ExternalFlowModel target,
+							CreateConnectionRequest request) {
+						return DeskEditor.this.getModelChanges()
+								.linkDeskManagedObjectSourceFlowToExternalFlow(
+										source, target);
+					}
+				});
 
 		// Connect managed object dependency to managed object
-		policy
-				.addConnection(
-						DeskManagedObjectDependencyModel.class,
-						DeskManagedObjectModel.class,
-						new ConnectionChangeFactory<DeskManagedObjectDependencyModel, DeskManagedObjectModel>() {
-							@Override
-							public Change<?> createChange(
-									DeskManagedObjectDependencyModel source,
-									DeskManagedObjectModel target,
-									CreateConnectionRequest request) {
-								return DeskEditor.this
-										.getModelChanges()
-										.linkDeskManagedObjectDependencyToDeskManagedObject(
-												source, target);
-							}
-						});
+		policy.addConnection(
+				DeskManagedObjectDependencyModel.class,
+				DeskManagedObjectModel.class,
+				new ConnectionChangeFactory<DeskManagedObjectDependencyModel, DeskManagedObjectModel>() {
+					@Override
+					public Change<?> createChange(
+							DeskManagedObjectDependencyModel source,
+							DeskManagedObjectModel target,
+							CreateConnectionRequest request) {
+						return DeskEditor.this
+								.getModelChanges()
+								.linkDeskManagedObjectDependencyToDeskManagedObject(
+										source, target);
+					}
+				});
 
 		// Connect managed object dependency to external managed object
-		policy
-				.addConnection(
-						DeskManagedObjectDependencyModel.class,
-						ExternalManagedObjectModel.class,
-						new ConnectionChangeFactory<DeskManagedObjectDependencyModel, ExternalManagedObjectModel>() {
-							@Override
-							public Change<?> createChange(
-									DeskManagedObjectDependencyModel source,
-									ExternalManagedObjectModel target,
-									CreateConnectionRequest request) {
-								return DeskEditor.this
-										.getModelChanges()
-										.linkDeskManagedObjectDependencyToExternalManagedObject(
-												source, target);
-							}
-						});
+		policy.addConnection(
+				DeskManagedObjectDependencyModel.class,
+				ExternalManagedObjectModel.class,
+				new ConnectionChangeFactory<DeskManagedObjectDependencyModel, ExternalManagedObjectModel>() {
+					@Override
+					public Change<?> createChange(
+							DeskManagedObjectDependencyModel source,
+							ExternalManagedObjectModel target,
+							CreateConnectionRequest request) {
+						return DeskEditor.this
+								.getModelChanges()
+								.linkDeskManagedObjectDependencyToExternalManagedObject(
+										source, target);
+					}
+				});
 	}
 
 	@Override
@@ -702,7 +671,7 @@ public class DeskEditor extends
 
 	/**
 	 * Obtains the {@link FlowInstigationStrategyEnum}.
-	 *
+	 * 
 	 * @param instigationType
 	 *            Instigation type.
 	 * @return {@link FlowInstigationStrategyEnum} or <code>null</code> if
@@ -732,7 +701,7 @@ public class DeskEditor extends
 
 	/**
 	 * Obtains the {@link FlowInstigationStrategyEnum}.
-	 *
+	 * 
 	 * @param instigationStrategy
 	 *            Text name of the {@link FlowInstigationStrategyEnum}.
 	 * @return {@link FlowInstigationStrategyEnum} or <code>null</code> if

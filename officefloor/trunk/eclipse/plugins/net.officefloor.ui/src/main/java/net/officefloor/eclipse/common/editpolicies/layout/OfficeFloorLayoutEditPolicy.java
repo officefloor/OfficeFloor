@@ -30,10 +30,12 @@ import net.officefloor.model.change.Change;
 import org.eclipse.draw2d.geometry.Point;
 import org.eclipse.draw2d.geometry.Rectangle;
 import org.eclipse.gef.EditPart;
+import org.eclipse.gef.EditPolicy;
 import org.eclipse.gef.Request;
 import org.eclipse.gef.commands.Command;
 import org.eclipse.gef.commands.CompoundCommand;
 import org.eclipse.gef.editpolicies.LayoutEditPolicy;
+import org.eclipse.gef.editpolicies.NonResizableEditPolicy;
 import org.eclipse.gef.editpolicies.XYLayoutEditPolicy;
 import org.eclipse.gef.requests.CreateRequest;
 
@@ -49,6 +51,28 @@ public class OfficeFloorLayoutEditPolicy extends XYLayoutEditPolicy {
 	 * create.
 	 */
 	private final Map<Class<?>, CreateChangeFactory<?>> createFactories = new HashMap<Class<?>, CreateChangeFactory<?>>();
+
+	/**
+	 * {@link ChildEditPolicyFactory} instances by the child {@link Model} type.
+	 */
+	private final Map<Class<?>, ChildEditPolicyFactory<?>> childFactories = new HashMap<Class<?>, ChildEditPolicyFactory<?>>();
+
+	/**
+	 * Default {@link ChildEditPolicyFactory}.
+	 */
+	@SuppressWarnings("rawtypes")
+	private ChildEditPolicyFactory defaultChildEditPolicyFactory = new ChildEditPolicyFactory<Object>() {
+		@Override
+		public EditPolicy createEditPolicy(Object target) {
+			return new NonResizableEditPolicy();
+		}
+	};
+
+	/**
+	 * {@link ConstraintChangeFactory} instances by the {@link Model} they
+	 * change constraints on.
+	 */
+	private final Map<Class<?>, ConstraintChangeFactory<?>> constraintFactories = new HashMap<Class<?>, ConstraintChangeFactory<?>>();
 
 	/**
 	 * {@link DeleteChangeFactory} instances by the {@link Model} they delete.
@@ -70,6 +94,45 @@ public class OfficeFloorLayoutEditPolicy extends XYLayoutEditPolicy {
 	}
 
 	/**
+	 * Registers a {@link ChildEditPolicyFactory}.
+	 * 
+	 * @param modelType
+	 *            Type of child {@link Model}.
+	 * @param factory
+	 *            {@link ChildEditPolicyFactory} to create {@link EditPolicy}
+	 *            for child {@link Model}.
+	 */
+	public <M> void addChild(Class<M> modelType,
+			ChildEditPolicyFactory<M> factory) {
+		this.childFactories.put(modelType, factory);
+	}
+
+	/**
+	 * Specifies the default {@link ChildEditPolicyFactory}.
+	 * 
+	 * @param factory
+	 *            {@link ChildEditPolicyFactory} to use should there be no
+	 *            specific {@link ChildEditPolicyFactory}.
+	 */
+	public void setDefaultChild(ChildEditPolicyFactory<?> factory) {
+		this.defaultChildEditPolicyFactory = factory;
+	}
+
+	/**
+	 * Registers a {@link ConstraintChangeFactory}.
+	 * 
+	 * @param modelType
+	 *            Type of {@link Model} to have its constraints changed.
+	 * @param factory
+	 *            {@link ConstraintChangeFactory} to change constraints on the
+	 *            {@link Model} instances of the type.
+	 */
+	public <M> void addConstraint(Class<M> modelType,
+			ConstraintChangeFactory<M> factory) {
+		this.constraintFactories.put(modelType, factory);
+	}
+
+	/**
 	 * Registers a {@link DeleteChangeFactory}.
 	 * 
 	 * @param modelType
@@ -85,20 +148,6 @@ public class OfficeFloorLayoutEditPolicy extends XYLayoutEditPolicy {
 	/*
 	 * =================== LayoutEditPolicy ===================================
 	 */
-
-	@Override
-	protected Command createChangeConstraintCommand(EditPart child,
-			Object constraint) {
-
-		// Obtain the bounds of the constraint
-		Rectangle rectangle = (Rectangle) constraint;
-
-		// Obtain the edit part and its positional model
-		AbstractOfficeFloorEditPart<?, ?, ?> editPart = (AbstractOfficeFloorEditPart<?, ?, ?>) child;
-
-		// Return the move command
-		return new MovePositionalModelCommand(editPart, rectangle.getLocation());
-	}
 
 	@Override
 	@SuppressWarnings("rawtypes")
@@ -123,6 +172,56 @@ public class OfficeFloorLayoutEditPolicy extends XYLayoutEditPolicy {
 
 		// Return the change
 		return new ChangeCommand(change);
+	}
+
+	@Override
+	@SuppressWarnings({ "unchecked", "rawtypes" })
+	protected EditPolicy createChildEditPolicy(EditPart child) {
+
+		// Obtain the model
+		Object model = child.getModel();
+
+		// Determine if specific child edit policy
+		Class<?> modelType = model.getClass();
+		ChildEditPolicyFactory factory = this.childFactories.get(modelType);
+		if (factory != null) {
+			// Return specific child edit policy
+			return factory.createEditPolicy(model);
+		}
+
+		// Use the default child edit policy
+		return this.defaultChildEditPolicyFactory.createEditPolicy(model);
+	}
+
+	@Override
+	@SuppressWarnings({ "unchecked", "rawtypes" })
+	protected Command createChangeConstraintCommand(EditPart child,
+			Object constraint) {
+
+		// Obtain the bounds of the constraint
+		Rectangle rectangle = (Rectangle) constraint;
+
+		// Obtain the edit part and its positional model
+		AbstractOfficeFloorEditPart<?, ?, ?> editPart = (AbstractOfficeFloorEditPart<?, ?, ?>) child;
+
+		// Obtain the constraint factory
+		Object model = child.getModel();
+		Class<?> modelType = model.getClass();
+		ConstraintChangeFactory factory = this.constraintFactories
+				.get(modelType);
+		if (factory != null) {
+			// Let factory determine if can change constraint
+			Change change = factory.createChange(model, rectangle);
+			if (change == null) {
+				return null; // no change on constraint
+			}
+
+			// Return change on constraint
+			return new ChangeCommand(change);
+		}
+
+		// Return the move command by default
+		return new MovePositionalModelCommand(editPart, rectangle.getLocation());
 	}
 
 	@Override

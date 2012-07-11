@@ -91,7 +91,7 @@ import org.eclipse.ui.IEditorPart;
 
 /**
  * Editor for the {@link OfficeFloorModel}.
- *
+ * 
  * @author Daniel Sagenschneider
  */
 public class OfficeFloorEditor extends
@@ -101,11 +101,6 @@ public class OfficeFloorEditor extends
 	 * ID for this {@link IEditorPart}.
 	 */
 	public static final String EDITOR_ID = "net.officefloor.editors.officefloor";
-
-	@Override
-	protected boolean isDragTarget() {
-		return false;
-	}
 
 	@Override
 	protected OfficeFloorModel retrieveModel(ConfigurationItem configuration)
@@ -149,46 +144,30 @@ public class OfficeFloorEditor extends
 				DeployedOfficeInputEditPart.class);
 		map.put(DeployedOfficeObjectModel.class,
 				DeployedOfficeObjectEditPart.class);
-		map
-				.put(DeployedOfficeTeamModel.class,
-						DeployedOfficeTeamEditPart.class);
+		map.put(DeployedOfficeTeamModel.class, DeployedOfficeTeamEditPart.class);
 		map.put(OfficeFloorTeamModel.class, OfficeFloorTeamEditPart.class);
 
 		// Connections
 		map.put(DeployedOfficeObjectToOfficeFloorManagedObjectModel.class,
 				DeployedOfficeObjectToOfficeFloorManagedObjectEditPart.class);
-		map
-				.put(
-						DeployedOfficeObjectToOfficeFloorInputManagedObjectModel.class,
-						DeployedOfficeObjectToOfficeFloorInputManagedObjectEditPart.class);
+		map.put(DeployedOfficeObjectToOfficeFloorInputManagedObjectModel.class,
+				DeployedOfficeObjectToOfficeFloorInputManagedObjectEditPart.class);
 		map.put(DeployedOfficeTeamToOfficeFloorTeamModel.class,
 				DeployedOfficeTeamToOfficeFloorTeamEditPart.class);
-		map
-				.put(
-						OfficeFloorManagedObjectToOfficeFloorManagedObjectSourceModel.class,
-						OfficeFloorManagedObjectToOfficeFloorManagedObjectSourceEditPart.class);
-		map
-				.put(
-						OfficeFloorManagedObjectDependencyToOfficeFloorManagedObjectModel.class,
-						OfficeFloorManagedObjectDependencyToOfficeFloorManagedObjectEditPart.class);
+		map.put(OfficeFloorManagedObjectToOfficeFloorManagedObjectSourceModel.class,
+				OfficeFloorManagedObjectToOfficeFloorManagedObjectSourceEditPart.class);
+		map.put(OfficeFloorManagedObjectDependencyToOfficeFloorManagedObjectModel.class,
+				OfficeFloorManagedObjectDependencyToOfficeFloorManagedObjectEditPart.class);
 		map.put(OfficeFloorManagedObjectSourceToDeployedOfficeModel.class,
 				OfficeFloorManagedObjectSourceToDeployedOfficeEditPart.class);
-		map
-				.put(
-						OfficeFloorManagedObjectSourceToOfficeFloorInputManagedObjectModel.class,
-						OfficeFloorManagedObjectSourceToOfficeFloorInputManagedObjectEditPart.class);
-		map
-				.put(
-						OfficeFloorInputManagedObjectToBoundOfficeFloorManagedObjectSourceModel.class,
-						OfficeFloorInputManagedObjectToBoundOfficeFloorManagedObjectSourceEditPart.class);
-		map
-				.put(
-						OfficeFloorManagedObjectSourceFlowToDeployedOfficeInputModel.class,
-						OfficeFloorManagedObjectSourceFlowToDeployedOfficeInputEditPart.class);
-		map
-				.put(
-						OfficeFloorManagedObjectSourceTeamToOfficeFloorTeamModel.class,
-						OfficeFloorManagedObjectSourceTeamToOfficeFloorTeamEditPart.class);
+		map.put(OfficeFloorManagedObjectSourceToOfficeFloorInputManagedObjectModel.class,
+				OfficeFloorManagedObjectSourceToOfficeFloorInputManagedObjectEditPart.class);
+		map.put(OfficeFloorInputManagedObjectToBoundOfficeFloorManagedObjectSourceModel.class,
+				OfficeFloorInputManagedObjectToBoundOfficeFloorManagedObjectSourceEditPart.class);
+		map.put(OfficeFloorManagedObjectSourceFlowToDeployedOfficeInputModel.class,
+				OfficeFloorManagedObjectSourceFlowToDeployedOfficeInputEditPart.class);
+		map.put(OfficeFloorManagedObjectSourceTeamToOfficeFloorTeamModel.class,
+				OfficeFloorManagedObjectSourceTeamToOfficeFloorTeamEditPart.class);
 	}
 
 	@Override
@@ -250,139 +229,129 @@ public class OfficeFloorEditor extends
 				});
 
 		// Allow deleting deployed office object to managed object
-		policy
-				.addDelete(
-						DeployedOfficeObjectToOfficeFloorManagedObjectModel.class,
-						new DeleteChangeFactory<DeployedOfficeObjectToOfficeFloorManagedObjectModel>() {
-							@Override
-							public Change<DeployedOfficeObjectToOfficeFloorManagedObjectModel> createChange(
-									DeployedOfficeObjectToOfficeFloorManagedObjectModel target) {
-								return OfficeFloorEditor.this
-										.getModelChanges()
-										.removeDeployedOfficeObjectToOfficeFloorManagedObject(
-												target);
-							}
-						});
+		policy.addDelete(
+				DeployedOfficeObjectToOfficeFloorManagedObjectModel.class,
+				new DeleteChangeFactory<DeployedOfficeObjectToOfficeFloorManagedObjectModel>() {
+					@Override
+					public Change<DeployedOfficeObjectToOfficeFloorManagedObjectModel> createChange(
+							DeployedOfficeObjectToOfficeFloorManagedObjectModel target) {
+						return OfficeFloorEditor.this
+								.getModelChanges()
+								.removeDeployedOfficeObjectToOfficeFloorManagedObject(
+										target);
+					}
+				});
 
 		// All deleting deployed office object to input managed object
-		policy
-				.addDelete(
-						DeployedOfficeObjectToOfficeFloorInputManagedObjectModel.class,
-						new DeleteChangeFactory<DeployedOfficeObjectToOfficeFloorInputManagedObjectModel>() {
-							@Override
-							public Change<DeployedOfficeObjectToOfficeFloorInputManagedObjectModel> createChange(
-									DeployedOfficeObjectToOfficeFloorInputManagedObjectModel target) {
-								return OfficeFloorEditor.this
-										.getModelChanges()
-										.removeDeployedOfficeObjectToOfficeFloorInputManagedObject(
-												target);
-							}
-						});
+		policy.addDelete(
+				DeployedOfficeObjectToOfficeFloorInputManagedObjectModel.class,
+				new DeleteChangeFactory<DeployedOfficeObjectToOfficeFloorInputManagedObjectModel>() {
+					@Override
+					public Change<DeployedOfficeObjectToOfficeFloorInputManagedObjectModel> createChange(
+							DeployedOfficeObjectToOfficeFloorInputManagedObjectModel target) {
+						return OfficeFloorEditor.this
+								.getModelChanges()
+								.removeDeployedOfficeObjectToOfficeFloorInputManagedObject(
+										target);
+					}
+				});
 
 		// Allow deleting deployed office team to office floor team
-		policy
-				.addDelete(
-						DeployedOfficeTeamToOfficeFloorTeamModel.class,
-						new DeleteChangeFactory<DeployedOfficeTeamToOfficeFloorTeamModel>() {
-							@Override
-							public Change<DeployedOfficeTeamToOfficeFloorTeamModel> createChange(
-									DeployedOfficeTeamToOfficeFloorTeamModel target) {
-								return OfficeFloorEditor.this
-										.getModelChanges()
-										.removeDeployedOfficeTeamToOfficeFloorTeam(
-												target);
-							}
-						});
+		policy.addDelete(
+				DeployedOfficeTeamToOfficeFloorTeamModel.class,
+				new DeleteChangeFactory<DeployedOfficeTeamToOfficeFloorTeamModel>() {
+					@Override
+					public Change<DeployedOfficeTeamToOfficeFloorTeamModel> createChange(
+							DeployedOfficeTeamToOfficeFloorTeamModel target) {
+						return OfficeFloorEditor.this.getModelChanges()
+								.removeDeployedOfficeTeamToOfficeFloorTeam(
+										target);
+					}
+				});
 
 		// Allow deleting managed object dependency to managed object
-		policy
-				.addDelete(
-						OfficeFloorManagedObjectDependencyToOfficeFloorManagedObjectModel.class,
-						new DeleteChangeFactory<OfficeFloorManagedObjectDependencyToOfficeFloorManagedObjectModel>() {
-							@Override
-							public Change<OfficeFloorManagedObjectDependencyToOfficeFloorManagedObjectModel> createChange(
-									OfficeFloorManagedObjectDependencyToOfficeFloorManagedObjectModel target) {
-								return OfficeFloorEditor.this
-										.getModelChanges()
-										.removeOfficeFloorManagedObjectDependencyToOfficeFloorManagedObject(
-												target);
-							}
-						});
+		policy.addDelete(
+				OfficeFloorManagedObjectDependencyToOfficeFloorManagedObjectModel.class,
+				new DeleteChangeFactory<OfficeFloorManagedObjectDependencyToOfficeFloorManagedObjectModel>() {
+					@Override
+					public Change<OfficeFloorManagedObjectDependencyToOfficeFloorManagedObjectModel> createChange(
+							OfficeFloorManagedObjectDependencyToOfficeFloorManagedObjectModel target) {
+						return OfficeFloorEditor.this
+								.getModelChanges()
+								.removeOfficeFloorManagedObjectDependencyToOfficeFloorManagedObject(
+										target);
+					}
+				});
 
 		// Allow deleting managed object source to deployed office
-		policy
-				.addDelete(
-						OfficeFloorManagedObjectSourceToDeployedOfficeModel.class,
-						new DeleteChangeFactory<OfficeFloorManagedObjectSourceToDeployedOfficeModel>() {
-							@Override
-							public Change<OfficeFloorManagedObjectSourceToDeployedOfficeModel> createChange(
-									OfficeFloorManagedObjectSourceToDeployedOfficeModel target) {
-								return OfficeFloorEditor.this
-										.getModelChanges()
-										.removeOfficeFloorManagedObjectSourceToDeployedOffice(
-												target);
-							}
-						});
+		policy.addDelete(
+				OfficeFloorManagedObjectSourceToDeployedOfficeModel.class,
+				new DeleteChangeFactory<OfficeFloorManagedObjectSourceToDeployedOfficeModel>() {
+					@Override
+					public Change<OfficeFloorManagedObjectSourceToDeployedOfficeModel> createChange(
+							OfficeFloorManagedObjectSourceToDeployedOfficeModel target) {
+						return OfficeFloorEditor.this
+								.getModelChanges()
+								.removeOfficeFloorManagedObjectSourceToDeployedOffice(
+										target);
+					}
+				});
 
 		// Allow deleting managed object source flow to office input
-		policy
-				.addDelete(
-						OfficeFloorManagedObjectSourceFlowToDeployedOfficeInputModel.class,
-						new DeleteChangeFactory<OfficeFloorManagedObjectSourceFlowToDeployedOfficeInputModel>() {
-							@Override
-							public Change<OfficeFloorManagedObjectSourceFlowToDeployedOfficeInputModel> createChange(
-									OfficeFloorManagedObjectSourceFlowToDeployedOfficeInputModel target) {
-								return OfficeFloorEditor.this
-										.getModelChanges()
-										.removeOfficeFloorManagedObjectSourceFlowToDeployedOfficeInput(
-												target);
-							}
-						});
+		policy.addDelete(
+				OfficeFloorManagedObjectSourceFlowToDeployedOfficeInputModel.class,
+				new DeleteChangeFactory<OfficeFloorManagedObjectSourceFlowToDeployedOfficeInputModel>() {
+					@Override
+					public Change<OfficeFloorManagedObjectSourceFlowToDeployedOfficeInputModel> createChange(
+							OfficeFloorManagedObjectSourceFlowToDeployedOfficeInputModel target) {
+						return OfficeFloorEditor.this
+								.getModelChanges()
+								.removeOfficeFloorManagedObjectSourceFlowToDeployedOfficeInput(
+										target);
+					}
+				});
 
 		// Allow deleting managed object source team to office team
-		policy
-				.addDelete(
-						OfficeFloorManagedObjectSourceTeamToOfficeFloorTeamModel.class,
-						new DeleteChangeFactory<OfficeFloorManagedObjectSourceTeamToOfficeFloorTeamModel>() {
-							@Override
-							public Change<OfficeFloorManagedObjectSourceTeamToOfficeFloorTeamModel> createChange(
-									OfficeFloorManagedObjectSourceTeamToOfficeFloorTeamModel target) {
-								return OfficeFloorEditor.this
-										.getModelChanges()
-										.removeOfficeFloorManagedObjectSourceTeamToOfficeFloorTeam(
-												target);
-							}
-						});
+		policy.addDelete(
+				OfficeFloorManagedObjectSourceTeamToOfficeFloorTeamModel.class,
+				new DeleteChangeFactory<OfficeFloorManagedObjectSourceTeamToOfficeFloorTeamModel>() {
+					@Override
+					public Change<OfficeFloorManagedObjectSourceTeamToOfficeFloorTeamModel> createChange(
+							OfficeFloorManagedObjectSourceTeamToOfficeFloorTeamModel target) {
+						return OfficeFloorEditor.this
+								.getModelChanges()
+								.removeOfficeFloorManagedObjectSourceTeamToOfficeFloorTeam(
+										target);
+					}
+				});
 
 		// Allow deleting managed object source to input managed object
-		policy
-				.addDelete(
-						OfficeFloorManagedObjectSourceToOfficeFloorInputManagedObjectModel.class,
-						new DeleteChangeFactory<OfficeFloorManagedObjectSourceToOfficeFloorInputManagedObjectModel>() {
-							@Override
-							public Change<OfficeFloorManagedObjectSourceToOfficeFloorInputManagedObjectModel> createChange(
-									OfficeFloorManagedObjectSourceToOfficeFloorInputManagedObjectModel target) {
-								return OfficeFloorEditor.this
-										.getModelChanges()
-										.removeOfficeFloorManagedObjectSourceToOfficeFloorInputManagedObject(
-												target);
-							}
-						});
+		policy.addDelete(
+				OfficeFloorManagedObjectSourceToOfficeFloorInputManagedObjectModel.class,
+				new DeleteChangeFactory<OfficeFloorManagedObjectSourceToOfficeFloorInputManagedObjectModel>() {
+					@Override
+					public Change<OfficeFloorManagedObjectSourceToOfficeFloorInputManagedObjectModel> createChange(
+							OfficeFloorManagedObjectSourceToOfficeFloorInputManagedObjectModel target) {
+						return OfficeFloorEditor.this
+								.getModelChanges()
+								.removeOfficeFloorManagedObjectSourceToOfficeFloorInputManagedObject(
+										target);
+					}
+				});
 
 		// Allow deleting input managed object to bound managed object source
-		policy
-				.addDelete(
-						OfficeFloorInputManagedObjectToBoundOfficeFloorManagedObjectSourceModel.class,
-						new DeleteChangeFactory<OfficeFloorInputManagedObjectToBoundOfficeFloorManagedObjectSourceModel>() {
-							@Override
-							public Change<OfficeFloorInputManagedObjectToBoundOfficeFloorManagedObjectSourceModel> createChange(
-									OfficeFloorInputManagedObjectToBoundOfficeFloorManagedObjectSourceModel target) {
-								return OfficeFloorEditor.this
-										.getModelChanges()
-										.removeOfficeFloorInputManagedObjectToBoundOfficeFloorManagedObjectSource(
-												target);
-							}
-						});
+		policy.addDelete(
+				OfficeFloorInputManagedObjectToBoundOfficeFloorManagedObjectSourceModel.class,
+				new DeleteChangeFactory<OfficeFloorInputManagedObjectToBoundOfficeFloorManagedObjectSourceModel>() {
+					@Override
+					public Change<OfficeFloorInputManagedObjectToBoundOfficeFloorManagedObjectSourceModel> createChange(
+							OfficeFloorInputManagedObjectToBoundOfficeFloorManagedObjectSourceModel target) {
+						return OfficeFloorEditor.this
+								.getModelChanges()
+								.removeOfficeFloorInputManagedObjectToBoundOfficeFloorManagedObjectSource(
+										target);
+					}
+				});
 	}
 
 	@Override
@@ -390,166 +359,156 @@ public class OfficeFloorEditor extends
 			OfficeFloorGraphicalNodeEditPolicy policy) {
 
 		// Connect deployed office object to managed object
-		policy
-				.addConnection(
-						DeployedOfficeObjectModel.class,
-						OfficeFloorManagedObjectModel.class,
-						new ConnectionChangeFactory<DeployedOfficeObjectModel, OfficeFloorManagedObjectModel>() {
-							@Override
-							public Change<?> createChange(
-									DeployedOfficeObjectModel source,
-									OfficeFloorManagedObjectModel target,
-									CreateConnectionRequest request) {
-								return OfficeFloorEditor.this
-										.getModelChanges()
-										.linkDeployedOfficeObjectToOfficeFloorManagedObject(
-												source, target);
-							}
-						});
+		policy.addConnection(
+				DeployedOfficeObjectModel.class,
+				OfficeFloorManagedObjectModel.class,
+				new ConnectionChangeFactory<DeployedOfficeObjectModel, OfficeFloorManagedObjectModel>() {
+					@Override
+					public Change<?> createChange(
+							DeployedOfficeObjectModel source,
+							OfficeFloorManagedObjectModel target,
+							CreateConnectionRequest request) {
+						return OfficeFloorEditor.this
+								.getModelChanges()
+								.linkDeployedOfficeObjectToOfficeFloorManagedObject(
+										source, target);
+					}
+				});
 
 		// Connect deployed office object to input managed object
-		policy
-				.addConnection(
-						DeployedOfficeObjectModel.class,
-						OfficeFloorInputManagedObjectModel.class,
-						new ConnectionChangeFactory<DeployedOfficeObjectModel, OfficeFloorInputManagedObjectModel>() {
-							@Override
-							public Change<?> createChange(
-									DeployedOfficeObjectModel source,
-									OfficeFloorInputManagedObjectModel target,
-									CreateConnectionRequest request) {
-								return OfficeFloorEditor.this
-										.getModelChanges()
-										.linkDeployedOfficeObjectToOfficeFloorInputManagedObject(
-												source, target);
-							}
-						});
+		policy.addConnection(
+				DeployedOfficeObjectModel.class,
+				OfficeFloorInputManagedObjectModel.class,
+				new ConnectionChangeFactory<DeployedOfficeObjectModel, OfficeFloorInputManagedObjectModel>() {
+					@Override
+					public Change<?> createChange(
+							DeployedOfficeObjectModel source,
+							OfficeFloorInputManagedObjectModel target,
+							CreateConnectionRequest request) {
+						return OfficeFloorEditor.this
+								.getModelChanges()
+								.linkDeployedOfficeObjectToOfficeFloorInputManagedObject(
+										source, target);
+					}
+				});
 
 		// Connect deployed office team to office floor team
-		policy
-				.addConnection(
-						DeployedOfficeTeamModel.class,
-						OfficeFloorTeamModel.class,
-						new ConnectionChangeFactory<DeployedOfficeTeamModel, OfficeFloorTeamModel>() {
-							@Override
-							public Change<?> createChange(
-									DeployedOfficeTeamModel source,
-									OfficeFloorTeamModel target,
-									CreateConnectionRequest request) {
-								return OfficeFloorEditor.this
-										.getModelChanges()
-										.linkDeployedOfficeTeamToOfficeFloorTeam(
-												source, target);
-							}
-						});
+		policy.addConnection(
+				DeployedOfficeTeamModel.class,
+				OfficeFloorTeamModel.class,
+				new ConnectionChangeFactory<DeployedOfficeTeamModel, OfficeFloorTeamModel>() {
+					@Override
+					public Change<?> createChange(
+							DeployedOfficeTeamModel source,
+							OfficeFloorTeamModel target,
+							CreateConnectionRequest request) {
+						return OfficeFloorEditor.this.getModelChanges()
+								.linkDeployedOfficeTeamToOfficeFloorTeam(
+										source, target);
+					}
+				});
 
 		// Connect managed object dependency to managed object
-		policy
-				.addConnection(
-						OfficeFloorManagedObjectDependencyModel.class,
-						OfficeFloorManagedObjectModel.class,
-						new ConnectionChangeFactory<OfficeFloorManagedObjectDependencyModel, OfficeFloorManagedObjectModel>() {
-							@Override
-							public Change<?> createChange(
-									OfficeFloorManagedObjectDependencyModel source,
-									OfficeFloorManagedObjectModel target,
-									CreateConnectionRequest request) {
-								return OfficeFloorEditor.this
-										.getModelChanges()
-										.linkOfficeFloorManagedObjectDependencyToOfficeFloorManagedObject(
-												source, target);
-							}
-						});
+		policy.addConnection(
+				OfficeFloorManagedObjectDependencyModel.class,
+				OfficeFloorManagedObjectModel.class,
+				new ConnectionChangeFactory<OfficeFloorManagedObjectDependencyModel, OfficeFloorManagedObjectModel>() {
+					@Override
+					public Change<?> createChange(
+							OfficeFloorManagedObjectDependencyModel source,
+							OfficeFloorManagedObjectModel target,
+							CreateConnectionRequest request) {
+						return OfficeFloorEditor.this
+								.getModelChanges()
+								.linkOfficeFloorManagedObjectDependencyToOfficeFloorManagedObject(
+										source, target);
+					}
+				});
 
 		// Connect managed object source to deployed office
-		policy
-				.addConnection(
-						OfficeFloorManagedObjectSourceModel.class,
-						DeployedOfficeModel.class,
-						new ConnectionChangeFactory<OfficeFloorManagedObjectSourceModel, DeployedOfficeModel>() {
-							@Override
-							public Change<?> createChange(
-									OfficeFloorManagedObjectSourceModel source,
-									DeployedOfficeModel target,
-									CreateConnectionRequest request) {
-								return OfficeFloorEditor.this
-										.getModelChanges()
-										.linkOfficeFloorManagedObjectSourceToDeployedOffice(
-												source, target);
-							}
-						});
+		policy.addConnection(
+				OfficeFloorManagedObjectSourceModel.class,
+				DeployedOfficeModel.class,
+				new ConnectionChangeFactory<OfficeFloorManagedObjectSourceModel, DeployedOfficeModel>() {
+					@Override
+					public Change<?> createChange(
+							OfficeFloorManagedObjectSourceModel source,
+							DeployedOfficeModel target,
+							CreateConnectionRequest request) {
+						return OfficeFloorEditor.this
+								.getModelChanges()
+								.linkOfficeFloorManagedObjectSourceToDeployedOffice(
+										source, target);
+					}
+				});
 
 		// Connect managed object source flow to office input
-		policy
-				.addConnection(
-						OfficeFloorManagedObjectSourceFlowModel.class,
-						DeployedOfficeInputModel.class,
-						new ConnectionChangeFactory<OfficeFloorManagedObjectSourceFlowModel, DeployedOfficeInputModel>() {
-							@Override
-							public Change<?> createChange(
-									OfficeFloorManagedObjectSourceFlowModel source,
-									DeployedOfficeInputModel target,
-									CreateConnectionRequest request) {
-								return OfficeFloorEditor.this
-										.getModelChanges()
-										.linkOfficeFloorManagedObjectSourceFlowToDeployedOfficeInput(
-												source, target);
-							}
-						});
+		policy.addConnection(
+				OfficeFloorManagedObjectSourceFlowModel.class,
+				DeployedOfficeInputModel.class,
+				new ConnectionChangeFactory<OfficeFloorManagedObjectSourceFlowModel, DeployedOfficeInputModel>() {
+					@Override
+					public Change<?> createChange(
+							OfficeFloorManagedObjectSourceFlowModel source,
+							DeployedOfficeInputModel target,
+							CreateConnectionRequest request) {
+						return OfficeFloorEditor.this
+								.getModelChanges()
+								.linkOfficeFloorManagedObjectSourceFlowToDeployedOfficeInput(
+										source, target);
+					}
+				});
 
 		// Connect managed object source team to office team
-		policy
-				.addConnection(
-						OfficeFloorManagedObjectSourceTeamModel.class,
-						OfficeFloorTeamModel.class,
-						new ConnectionChangeFactory<OfficeFloorManagedObjectSourceTeamModel, OfficeFloorTeamModel>() {
-							@Override
-							public Change<?> createChange(
-									OfficeFloorManagedObjectSourceTeamModel source,
-									OfficeFloorTeamModel target,
-									CreateConnectionRequest request) {
-								return OfficeFloorEditor.this
-										.getModelChanges()
-										.linkOfficeFloorManagedObjectSourceTeamToOfficeFloorTeam(
-												source, target);
-							}
-						});
+		policy.addConnection(
+				OfficeFloorManagedObjectSourceTeamModel.class,
+				OfficeFloorTeamModel.class,
+				new ConnectionChangeFactory<OfficeFloorManagedObjectSourceTeamModel, OfficeFloorTeamModel>() {
+					@Override
+					public Change<?> createChange(
+							OfficeFloorManagedObjectSourceTeamModel source,
+							OfficeFloorTeamModel target,
+							CreateConnectionRequest request) {
+						return OfficeFloorEditor.this
+								.getModelChanges()
+								.linkOfficeFloorManagedObjectSourceTeamToOfficeFloorTeam(
+										source, target);
+					}
+				});
 
 		// Connect managed object source to input managed object
-		policy
-				.addConnection(
-						OfficeFloorManagedObjectSourceModel.class,
-						OfficeFloorInputManagedObjectModel.class,
-						new ConnectionChangeFactory<OfficeFloorManagedObjectSourceModel, OfficeFloorInputManagedObjectModel>() {
-							@Override
-							public Change<?> createChange(
-									OfficeFloorManagedObjectSourceModel source,
-									OfficeFloorInputManagedObjectModel target,
-									CreateConnectionRequest request) {
-								return OfficeFloorEditor.this
-										.getModelChanges()
-										.linkOfficeFloorManagedObjectSourceToOfficeFloorInputManagedObject(
-												source, target);
-							}
-						});
+		policy.addConnection(
+				OfficeFloorManagedObjectSourceModel.class,
+				OfficeFloorInputManagedObjectModel.class,
+				new ConnectionChangeFactory<OfficeFloorManagedObjectSourceModel, OfficeFloorInputManagedObjectModel>() {
+					@Override
+					public Change<?> createChange(
+							OfficeFloorManagedObjectSourceModel source,
+							OfficeFloorInputManagedObjectModel target,
+							CreateConnectionRequest request) {
+						return OfficeFloorEditor.this
+								.getModelChanges()
+								.linkOfficeFloorManagedObjectSourceToOfficeFloorInputManagedObject(
+										source, target);
+					}
+				});
 
 		// Connect input managed object to bound managed object source
-		policy
-				.addConnection(
-						OfficeFloorInputManagedObjectModel.class,
-						OfficeFloorManagedObjectSourceModel.class,
-						new ConnectionChangeFactory<OfficeFloorInputManagedObjectModel, OfficeFloorManagedObjectSourceModel>() {
-							@Override
-							public Change<?> createChange(
-									OfficeFloorInputManagedObjectModel source,
-									OfficeFloorManagedObjectSourceModel target,
-									CreateConnectionRequest request) {
-								return OfficeFloorEditor.this
-										.getModelChanges()
-										.linkOfficeFloorInputManagedObjectToBoundOfficeFloorManagedObjectSource(
-												source, target);
-							}
-						});
+		policy.addConnection(
+				OfficeFloorInputManagedObjectModel.class,
+				OfficeFloorManagedObjectSourceModel.class,
+				new ConnectionChangeFactory<OfficeFloorInputManagedObjectModel, OfficeFloorManagedObjectSourceModel>() {
+					@Override
+					public Change<?> createChange(
+							OfficeFloorInputManagedObjectModel source,
+							OfficeFloorManagedObjectSourceModel target,
+							CreateConnectionRequest request) {
+						return OfficeFloorEditor.this
+								.getModelChanges()
+								.linkOfficeFloorInputManagedObjectToBoundOfficeFloorManagedObjectSource(
+										source, target);
+					}
+				});
 	}
 
 	@Override

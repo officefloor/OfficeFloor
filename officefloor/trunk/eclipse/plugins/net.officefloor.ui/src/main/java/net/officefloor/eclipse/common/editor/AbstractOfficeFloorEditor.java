@@ -509,13 +509,6 @@ public abstract class AbstractOfficeFloorEditor<M extends Model, C> extends
 	protected abstract void populateEditPartTypes(
 			Map<Class<?>, Class<? extends EditPart>> map);
 
-	/**
-	 * Indicates if able to be a drop target listener.
-	 * 
-	 * @return <code>true</code> if this Editor is able to be a drop target.
-	 */
-	protected abstract boolean isDragTarget();
-
 	/*
 	 * ================== EditorPart ====================================
 	 */

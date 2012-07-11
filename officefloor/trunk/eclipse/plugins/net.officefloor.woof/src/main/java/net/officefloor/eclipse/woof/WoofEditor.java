@@ -25,6 +25,8 @@ import net.officefloor.eclipse.common.action.Operation;
 import net.officefloor.eclipse.common.editor.AbstractOfficeFloorEditor;
 import net.officefloor.eclipse.common.editpolicies.connection.ConnectionChangeFactory;
 import net.officefloor.eclipse.common.editpolicies.connection.OfficeFloorGraphicalNodeEditPolicy;
+import net.officefloor.eclipse.common.editpolicies.layout.ChildEditPolicyFactory;
+import net.officefloor.eclipse.common.editpolicies.layout.ConstraintChangeFactory;
 import net.officefloor.eclipse.common.editpolicies.layout.DeleteChangeFactory;
 import net.officefloor.eclipse.common.editpolicies.layout.OfficeFloorLayoutEditPolicy;
 import net.officefloor.eclipse.repository.project.ProjectConfigurationContext;
@@ -103,8 +105,10 @@ import net.officefloor.plugin.gwt.module.GwtChangesImpl;
 import net.officefloor.plugin.gwt.module.GwtFailureListener;
 import net.officefloor.plugin.gwt.module.GwtModuleRepositoryImpl;
 
+import org.eclipse.draw2d.geometry.Rectangle;
 import org.eclipse.gef.EditPart;
-import org.eclipse.gef.editpolicies.LayoutEditPolicy;
+import org.eclipse.gef.EditPolicy;
+import org.eclipse.gef.editpolicies.ResizableEditPolicy;
 import org.eclipse.gef.requests.CreateConnectionRequest;
 import org.eclipse.ui.IEditorPart;
 
@@ -124,11 +128,6 @@ public class WoofEditor extends
 	/*
 	 * ======================== Editor ================================
 	 */
-
-	@Override
-	protected boolean isDragTarget() {
-		return false;
-	}
 
 	@Override
 	protected WoofChanges createModelChanges(WoofModel model) {
@@ -248,15 +247,26 @@ public class WoofEditor extends
 	}
 
 	@Override
-	public LayoutEditPolicy createLayoutEditPolicy() {
-		// Override layout policy to allow resizing governance areas
-		OfficeFloorLayoutEditPolicy policy = new WoofLayoutEdityPolicy();
-		this.populateLayoutEditPolicy(policy);
-		return policy;
-	}
-
-	@Override
 	protected void populateLayoutEditPolicy(OfficeFloorLayoutEditPolicy policy) {
+
+		// Allow resizing governance area
+		policy.addConstraint(WoofGovernanceAreaModel.class,
+				new ConstraintChangeFactory<WoofGovernanceAreaModel>() {
+					@Override
+					public Change<WoofGovernanceAreaModel> createChange(
+							WoofGovernanceAreaModel target, Rectangle constraint) {
+						return new ResizeWoofGovernanceAreaChange(target,
+								constraint);
+					}
+				});
+		policy.addChild(WoofGovernanceAreaModel.class,
+				new ChildEditPolicyFactory<WoofGovernanceAreaModel>() {
+					@Override
+					public EditPolicy createEditPolicy(
+							WoofGovernanceAreaModel target) {
+						return new ResizableEditPolicy();
+					}
+				});
 
 		// Allow deleting template
 		policy.addDelete(WoofTemplateModel.class,

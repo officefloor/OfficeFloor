@@ -51,7 +51,6 @@ import org.eclipse.gef.RequestConstants;
 import org.eclipse.gef.RootEditPart;
 import org.eclipse.gef.commands.Command;
 import org.eclipse.gef.editparts.AbstractGraphicalEditPart;
-import org.eclipse.gef.editpolicies.NonResizableEditPolicy;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.widgets.Shell;
 
@@ -258,23 +257,6 @@ public abstract class AbstractOfficeFloorEditPart<M extends Model, E extends Enu
 
 	@Override
 	protected void createEditPolicies() {
-		this.createEditPolicies(true);
-	}
-
-	/**
-	 * Creates and installs the {@link EditPolicy} instances.
-	 * 
-	 * @param isDisableResize
-	 *            <code>true</code> to disable re-sizing the {@link Figure}.
-	 */
-	protected void createEditPolicies(boolean isDisableResize) {
-
-		// Determine if disable re-sizing the figure
-		if (isDisableResize) {
-			// Disallow resizing
-			this.installEditPolicy(EditPolicy.SELECTION_FEEDBACK_ROLE,
-					new NonResizableEditPolicy());
-		}
 
 		// Allow direct editing (if configured)
 		this.officeFloorDirectEditPolicy = new OfficeFloorDirectEditPolicy<M>();

@@ -86,7 +86,7 @@ import org.eclipse.ui.IEditorPart;
 
 /**
  * Editor for the {@link SectionModel}.
- *
+ * 
  * @author Daniel Sagenschneider
  */
 public class SectionEditor extends
@@ -96,12 +96,6 @@ public class SectionEditor extends
 	 * ID for this {@link IEditorPart}.
 	 */
 	public static final String EDITOR_ID = "net.officefloor.editors.section";
-
-	@Override
-	protected boolean isDragTarget() {
-		// Disallow as drag target
-		return false;
-	}
 
 	@Override
 	protected SectionModel retrieveModel(ConfigurationItem configuration)
@@ -148,14 +142,10 @@ public class SectionEditor extends
 				SectionManagedObjectSourceFlowToSubSectionInputEditPart.class);
 		map.put(SectionManagedObjectSourceFlowToExternalFlowModel.class,
 				SectionManagedObjectSourceFlowToExternalFlowEditPart.class);
-		map
-				.put(
-						SectionManagedObjectDependencyToSectionManagedObjectModel.class,
-						SectionManagedObjectDependencyToSectionManagedObjectEditPart.class);
-		map
-				.put(
-						SectionManagedObjectDependencyToExternalManagedObjectModel.class,
-						SectionManagedObjectDependencyToExternalManagedObjectEditPart.class);
+		map.put(SectionManagedObjectDependencyToSectionManagedObjectModel.class,
+				SectionManagedObjectDependencyToSectionManagedObjectEditPart.class);
+		map.put(SectionManagedObjectDependencyToExternalManagedObjectModel.class,
+				SectionManagedObjectDependencyToExternalManagedObjectEditPart.class);
 		map.put(SectionManagedObjectToSectionManagedObjectSourceModel.class,
 				SectionManagedObjectToSectionManagedObjectSourceEditPart.class);
 		map.put(SubSectionObjectToExternalManagedObjectModel.class,
@@ -227,49 +217,43 @@ public class SectionEditor extends
 				});
 
 		// Allow deleting sub section object to external managed object
-		policy
-				.addDelete(
-						SubSectionObjectToExternalManagedObjectModel.class,
-						new DeleteChangeFactory<SubSectionObjectToExternalManagedObjectModel>() {
-							@Override
-							public Change<SubSectionObjectToExternalManagedObjectModel> createChange(
-									SubSectionObjectToExternalManagedObjectModel target) {
-								return SectionEditor.this
-										.getModelChanges()
-										.removeSubSectionObjectToExternalManagedObject(
-												target);
-							}
-						});
+		policy.addDelete(
+				SubSectionObjectToExternalManagedObjectModel.class,
+				new DeleteChangeFactory<SubSectionObjectToExternalManagedObjectModel>() {
+					@Override
+					public Change<SubSectionObjectToExternalManagedObjectModel> createChange(
+							SubSectionObjectToExternalManagedObjectModel target) {
+						return SectionEditor.this.getModelChanges()
+								.removeSubSectionObjectToExternalManagedObject(
+										target);
+					}
+				});
 
 		// Allow deleting sub section object to managed object
-		policy
-				.addDelete(
-						SubSectionObjectToSectionManagedObjectModel.class,
-						new DeleteChangeFactory<SubSectionObjectToSectionManagedObjectModel>() {
-							@Override
-							public Change<SubSectionObjectToSectionManagedObjectModel> createChange(
-									SubSectionObjectToSectionManagedObjectModel target) {
-								return SectionEditor.this
-										.getModelChanges()
-										.removeSubSectionObjectToSectionManagedObject(
-												target);
-							}
-						});
+		policy.addDelete(
+				SubSectionObjectToSectionManagedObjectModel.class,
+				new DeleteChangeFactory<SubSectionObjectToSectionManagedObjectModel>() {
+					@Override
+					public Change<SubSectionObjectToSectionManagedObjectModel> createChange(
+							SubSectionObjectToSectionManagedObjectModel target) {
+						return SectionEditor.this.getModelChanges()
+								.removeSubSectionObjectToSectionManagedObject(
+										target);
+					}
+				});
 
 		// Allow deleting sub section output to sub section input
-		policy
-				.addDelete(
-						SubSectionOutputToSubSectionInputModel.class,
-						new DeleteChangeFactory<SubSectionOutputToSubSectionInputModel>() {
-							@Override
-							public Change<SubSectionOutputToSubSectionInputModel> createChange(
-									SubSectionOutputToSubSectionInputModel target) {
-								return SectionEditor.this
-										.getModelChanges()
-										.removeSubSectionOutputToSubSectionInput(
-												target);
-							}
-						});
+		policy.addDelete(
+				SubSectionOutputToSubSectionInputModel.class,
+				new DeleteChangeFactory<SubSectionOutputToSubSectionInputModel>() {
+					@Override
+					public Change<SubSectionOutputToSubSectionInputModel> createChange(
+							SubSectionOutputToSubSectionInputModel target) {
+						return SectionEditor.this
+								.getModelChanges()
+								.removeSubSectionOutputToSubSectionInput(target);
+					}
+				});
 
 		// Allow deleting sub section output to external flow
 		policy.addDelete(SubSectionOutputToExternalFlowModel.class,
@@ -283,64 +267,60 @@ public class SectionEditor extends
 				});
 
 		// Allow deleting managed object source flow to sub section input
-		policy
-				.addDelete(
-						SectionManagedObjectSourceFlowToSubSectionInputModel.class,
-						new DeleteChangeFactory<SectionManagedObjectSourceFlowToSubSectionInputModel>() {
-							@Override
-							public Change<SectionManagedObjectSourceFlowToSubSectionInputModel> createChange(
-									SectionManagedObjectSourceFlowToSubSectionInputModel target) {
-								return SectionEditor.this
-										.getModelChanges()
-										.removeSectionManagedObjectSourceFlowToSubSectionInput(
-												target);
-							}
-						});
+		policy.addDelete(
+				SectionManagedObjectSourceFlowToSubSectionInputModel.class,
+				new DeleteChangeFactory<SectionManagedObjectSourceFlowToSubSectionInputModel>() {
+					@Override
+					public Change<SectionManagedObjectSourceFlowToSubSectionInputModel> createChange(
+							SectionManagedObjectSourceFlowToSubSectionInputModel target) {
+						return SectionEditor.this
+								.getModelChanges()
+								.removeSectionManagedObjectSourceFlowToSubSectionInput(
+										target);
+					}
+				});
 
 		// Allow deleting managed object source flow to external flow
-		policy
-				.addDelete(
-						SectionManagedObjectSourceFlowToExternalFlowModel.class,
-						new DeleteChangeFactory<SectionManagedObjectSourceFlowToExternalFlowModel>() {
-							@Override
-							public Change<SectionManagedObjectSourceFlowToExternalFlowModel> createChange(
-									SectionManagedObjectSourceFlowToExternalFlowModel target) {
-								return SectionEditor.this
-										.getModelChanges()
-										.removeSectionManagedObjectSourceFlowToExternalFlow(
-												target);
-							}
-						});
+		policy.addDelete(
+				SectionManagedObjectSourceFlowToExternalFlowModel.class,
+				new DeleteChangeFactory<SectionManagedObjectSourceFlowToExternalFlowModel>() {
+					@Override
+					public Change<SectionManagedObjectSourceFlowToExternalFlowModel> createChange(
+							SectionManagedObjectSourceFlowToExternalFlowModel target) {
+						return SectionEditor.this
+								.getModelChanges()
+								.removeSectionManagedObjectSourceFlowToExternalFlow(
+										target);
+					}
+				});
 
 		// Allow deleting managed object dependency to managed object
-		policy
-				.addDelete(
-						SectionManagedObjectDependencyToSectionManagedObjectModel.class,
-						new DeleteChangeFactory<SectionManagedObjectDependencyToSectionManagedObjectModel>() {
-							@Override
-							public Change<SectionManagedObjectDependencyToSectionManagedObjectModel> createChange(
-									SectionManagedObjectDependencyToSectionManagedObjectModel target) {
-								return SectionEditor.this
-										.getModelChanges()
-										.removeSectionManagedObjectDependencyToSectionManagedObject(
-												target);
-							}
-						});
+		policy.addDelete(
+				SectionManagedObjectDependencyToSectionManagedObjectModel.class,
+				new DeleteChangeFactory<SectionManagedObjectDependencyToSectionManagedObjectModel>() {
+					@Override
+					public Change<SectionManagedObjectDependencyToSectionManagedObjectModel> createChange(
+							SectionManagedObjectDependencyToSectionManagedObjectModel target) {
+						return SectionEditor.this
+								.getModelChanges()
+								.removeSectionManagedObjectDependencyToSectionManagedObject(
+										target);
+					}
+				});
 
 		// Allow deleting managed object dependency to external managed object
-		policy
-				.addDelete(
-						SectionManagedObjectDependencyToExternalManagedObjectModel.class,
-						new DeleteChangeFactory<SectionManagedObjectDependencyToExternalManagedObjectModel>() {
-							@Override
-							public Change<SectionManagedObjectDependencyToExternalManagedObjectModel> createChange(
-									SectionManagedObjectDependencyToExternalManagedObjectModel target) {
-								return SectionEditor.this
-										.getModelChanges()
-										.removeSectionManagedObjectDependencyToExternalManagedObject(
-												target);
-							}
-						});
+		policy.addDelete(
+				SectionManagedObjectDependencyToExternalManagedObjectModel.class,
+				new DeleteChangeFactory<SectionManagedObjectDependencyToExternalManagedObjectModel>() {
+					@Override
+					public Change<SectionManagedObjectDependencyToExternalManagedObjectModel> createChange(
+							SectionManagedObjectDependencyToExternalManagedObjectModel target) {
+						return SectionEditor.this
+								.getModelChanges()
+								.removeSectionManagedObjectDependencyToExternalManagedObject(
+										target);
+					}
+				});
 	}
 
 	@Override
@@ -348,146 +328,132 @@ public class SectionEditor extends
 			OfficeFloorGraphicalNodeEditPolicy policy) {
 
 		// Connect sub section object to external managed object
-		policy
-				.addConnection(
-						SubSectionObjectModel.class,
-						ExternalManagedObjectModel.class,
-						new ConnectionChangeFactory<SubSectionObjectModel, ExternalManagedObjectModel>() {
-							@Override
-							public Change<?> createChange(
-									SubSectionObjectModel source,
-									ExternalManagedObjectModel target,
-									CreateConnectionRequest request) {
-								return SectionEditor.this
-										.getModelChanges()
-										.linkSubSectionObjectToExternalManagedObject(
-												source, target);
-							}
-						});
+		policy.addConnection(
+				SubSectionObjectModel.class,
+				ExternalManagedObjectModel.class,
+				new ConnectionChangeFactory<SubSectionObjectModel, ExternalManagedObjectModel>() {
+					@Override
+					public Change<?> createChange(SubSectionObjectModel source,
+							ExternalManagedObjectModel target,
+							CreateConnectionRequest request) {
+						return SectionEditor.this.getModelChanges()
+								.linkSubSectionObjectToExternalManagedObject(
+										source, target);
+					}
+				});
 
 		// Connection sub section object to managed object
-		policy
-				.addConnection(
-						SubSectionObjectModel.class,
-						SectionManagedObjectModel.class,
-						new ConnectionChangeFactory<SubSectionObjectModel, SectionManagedObjectModel>() {
-							@Override
-							public Change<?> createChange(
-									SubSectionObjectModel source,
-									SectionManagedObjectModel target,
-									CreateConnectionRequest request) {
-								return SectionEditor.this
-										.getModelChanges()
-										.linkSubSectionObjectToSectionManagedObject(
-												source, target);
-							}
-						});
+		policy.addConnection(
+				SubSectionObjectModel.class,
+				SectionManagedObjectModel.class,
+				new ConnectionChangeFactory<SubSectionObjectModel, SectionManagedObjectModel>() {
+					@Override
+					public Change<?> createChange(SubSectionObjectModel source,
+							SectionManagedObjectModel target,
+							CreateConnectionRequest request) {
+						return SectionEditor.this.getModelChanges()
+								.linkSubSectionObjectToSectionManagedObject(
+										source, target);
+					}
+				});
 
 		// Connect sub section output to sub section input
-		policy
-				.addConnection(
-						SubSectionOutputModel.class,
-						SubSectionInputModel.class,
-						new ConnectionChangeFactory<SubSectionOutputModel, SubSectionInputModel>() {
-							@Override
-							public Change<?> createChange(
-									SubSectionOutputModel source,
-									SubSectionInputModel target,
-									CreateConnectionRequest request) {
-								return SectionEditor.this.getModelChanges()
-										.linkSubSectionOutputToSubSectionInput(
-												source, target);
-							}
-						});
+		policy.addConnection(
+				SubSectionOutputModel.class,
+				SubSectionInputModel.class,
+				new ConnectionChangeFactory<SubSectionOutputModel, SubSectionInputModel>() {
+					@Override
+					public Change<?> createChange(SubSectionOutputModel source,
+							SubSectionInputModel target,
+							CreateConnectionRequest request) {
+						return SectionEditor.this.getModelChanges()
+								.linkSubSectionOutputToSubSectionInput(source,
+										target);
+					}
+				});
 
 		// Connect sub section output to external flow
-		policy
-				.addConnection(
-						SubSectionOutputModel.class,
-						ExternalFlowModel.class,
-						new ConnectionChangeFactory<SubSectionOutputModel, ExternalFlowModel>() {
-							@Override
-							public Change<?> createChange(
-									SubSectionOutputModel source,
-									ExternalFlowModel target,
-									CreateConnectionRequest request) {
-								return SectionEditor.this.getModelChanges()
-										.linkSubSectionOutputToExternalFlow(
-												source, target);
-							}
-						});
+		policy.addConnection(
+				SubSectionOutputModel.class,
+				ExternalFlowModel.class,
+				new ConnectionChangeFactory<SubSectionOutputModel, ExternalFlowModel>() {
+					@Override
+					public Change<?> createChange(SubSectionOutputModel source,
+							ExternalFlowModel target,
+							CreateConnectionRequest request) {
+						return SectionEditor.this.getModelChanges()
+								.linkSubSectionOutputToExternalFlow(source,
+										target);
+					}
+				});
 
 		// Connect managed object source flow to sub section input
-		policy
-				.addConnection(
-						SectionManagedObjectSourceFlowModel.class,
-						SubSectionInputModel.class,
-						new ConnectionChangeFactory<SectionManagedObjectSourceFlowModel, SubSectionInputModel>() {
-							@Override
-							public Change<?> createChange(
-									SectionManagedObjectSourceFlowModel source,
-									SubSectionInputModel target,
-									CreateConnectionRequest request) {
-								return SectionEditor.this
-										.getModelChanges()
-										.linkSectionManagedObjectSourceFlowToSubSectionInput(
-												source, target);
-							}
-						});
+		policy.addConnection(
+				SectionManagedObjectSourceFlowModel.class,
+				SubSectionInputModel.class,
+				new ConnectionChangeFactory<SectionManagedObjectSourceFlowModel, SubSectionInputModel>() {
+					@Override
+					public Change<?> createChange(
+							SectionManagedObjectSourceFlowModel source,
+							SubSectionInputModel target,
+							CreateConnectionRequest request) {
+						return SectionEditor.this
+								.getModelChanges()
+								.linkSectionManagedObjectSourceFlowToSubSectionInput(
+										source, target);
+					}
+				});
 
 		// Connect managed object source flow to external flow
-		policy
-				.addConnection(
-						SectionManagedObjectSourceFlowModel.class,
-						ExternalFlowModel.class,
-						new ConnectionChangeFactory<SectionManagedObjectSourceFlowModel, ExternalFlowModel>() {
-							@Override
-							public Change<?> createChange(
-									SectionManagedObjectSourceFlowModel source,
-									ExternalFlowModel target,
-									CreateConnectionRequest request) {
-								return SectionEditor.this
-										.getModelChanges()
-										.linkSectionManagedObjectSourceFlowToExternalFlow(
-												source, target);
-							}
-						});
+		policy.addConnection(
+				SectionManagedObjectSourceFlowModel.class,
+				ExternalFlowModel.class,
+				new ConnectionChangeFactory<SectionManagedObjectSourceFlowModel, ExternalFlowModel>() {
+					@Override
+					public Change<?> createChange(
+							SectionManagedObjectSourceFlowModel source,
+							ExternalFlowModel target,
+							CreateConnectionRequest request) {
+						return SectionEditor.this
+								.getModelChanges()
+								.linkSectionManagedObjectSourceFlowToExternalFlow(
+										source, target);
+					}
+				});
 
 		// Connect managed object dependency to managed object
-		policy
-				.addConnection(
-						SectionManagedObjectDependencyModel.class,
-						SectionManagedObjectModel.class,
-						new ConnectionChangeFactory<SectionManagedObjectDependencyModel, SectionManagedObjectModel>() {
-							@Override
-							public Change<?> createChange(
-									SectionManagedObjectDependencyModel source,
-									SectionManagedObjectModel target,
-									CreateConnectionRequest request) {
-								return SectionEditor.this
-										.getModelChanges()
-										.linkSectionManagedObjectDependencyToSectionManagedObject(
-												source, target);
-							}
-						});
+		policy.addConnection(
+				SectionManagedObjectDependencyModel.class,
+				SectionManagedObjectModel.class,
+				new ConnectionChangeFactory<SectionManagedObjectDependencyModel, SectionManagedObjectModel>() {
+					@Override
+					public Change<?> createChange(
+							SectionManagedObjectDependencyModel source,
+							SectionManagedObjectModel target,
+							CreateConnectionRequest request) {
+						return SectionEditor.this
+								.getModelChanges()
+								.linkSectionManagedObjectDependencyToSectionManagedObject(
+										source, target);
+					}
+				});
 
 		// Connect managed object dependency to external managed object
-		policy
-				.addConnection(
-						SectionManagedObjectDependencyModel.class,
-						ExternalManagedObjectModel.class,
-						new ConnectionChangeFactory<SectionManagedObjectDependencyModel, ExternalManagedObjectModel>() {
-							@Override
-							public Change<?> createChange(
-									SectionManagedObjectDependencyModel source,
-									ExternalManagedObjectModel target,
-									CreateConnectionRequest request) {
-								return SectionEditor.this
-										.getModelChanges()
-										.linkSectionManagedObjectDependencyToExternalManagedObject(
-												source, target);
-							}
-						});
+		policy.addConnection(
+				SectionManagedObjectDependencyModel.class,
+				ExternalManagedObjectModel.class,
+				new ConnectionChangeFactory<SectionManagedObjectDependencyModel, ExternalManagedObjectModel>() {
+					@Override
+					public Change<?> createChange(
+							SectionManagedObjectDependencyModel source,
+							ExternalManagedObjectModel target,
+							CreateConnectionRequest request) {
+						return SectionEditor.this
+								.getModelChanges()
+								.linkSectionManagedObjectDependencyToExternalManagedObject(
+										source, target);
+					}
+				});
 	}
 
 	@Override
