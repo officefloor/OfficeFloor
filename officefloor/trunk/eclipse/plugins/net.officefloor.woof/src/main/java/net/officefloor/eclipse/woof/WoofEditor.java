@@ -108,7 +108,6 @@ import net.officefloor.plugin.gwt.module.GwtModuleRepositoryImpl;
 import org.eclipse.draw2d.geometry.Rectangle;
 import org.eclipse.gef.EditPart;
 import org.eclipse.gef.EditPolicy;
-import org.eclipse.gef.editpolicies.ResizableEditPolicy;
 import org.eclipse.gef.requests.CreateConnectionRequest;
 import org.eclipse.ui.IEditorPart;
 
@@ -249,6 +248,14 @@ public class WoofEditor extends
 	@Override
 	protected void populateLayoutEditPolicy(OfficeFloorLayoutEditPolicy policy) {
 
+		// Provide default child edit policy
+		policy.setDefaultChild(new ChildEditPolicyFactory<Object>() {
+			@Override
+			public EditPolicy createEditPolicy(Object target) {
+				return new WoofNonResizableEditPolicy();
+			}
+		});
+
 		// Allow resizing governance area
 		policy.addConstraint(WoofGovernanceAreaModel.class,
 				new ConstraintChangeFactory<WoofGovernanceAreaModel>() {
@@ -264,7 +271,7 @@ public class WoofEditor extends
 					@Override
 					public EditPolicy createEditPolicy(
 							WoofGovernanceAreaModel target) {
-						return new ResizableEditPolicy();
+						return new WoofResizableEditPolicy();
 					}
 				});
 
