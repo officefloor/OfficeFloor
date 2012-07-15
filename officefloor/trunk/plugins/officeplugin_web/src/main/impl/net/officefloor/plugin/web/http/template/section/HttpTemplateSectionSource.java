@@ -61,6 +61,7 @@ import net.officefloor.plugin.section.clazz.NextTask;
 import net.officefloor.plugin.section.clazz.Parameter;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
 import net.officefloor.plugin.web.http.application.HttpSessionStateful;
+import net.officefloor.plugin.web.http.location.HttpApplicationLocation;
 import net.officefloor.plugin.web.http.session.clazz.source.HttpSessionClassManagedObjectSource;
 import net.officefloor.plugin.web.http.template.HttpTemplateWorkSource;
 import net.officefloor.plugin.web.http.template.parse.HttpTemplate;
@@ -260,6 +261,13 @@ public class HttpTemplateSectionSource extends ClassSectionSource {
 					ServerHttpConnection.class.getName());
 			designer.link(templateTask.getTaskObject("SERVER_HTTP_CONNECTION"),
 					connectionObject);
+
+			// Link the HTTP Application Location dependency
+			SectionObject locationObject = this.getOrCreateObject(null,
+					HttpApplicationLocation.class.getName());
+			designer.link(
+					templateTask.getTaskObject("HTTP_APPLICATION_LOCATION"),
+					locationObject);
 
 			// Flag bean as parameter if requires a bean
 			if (isRequireBean) {

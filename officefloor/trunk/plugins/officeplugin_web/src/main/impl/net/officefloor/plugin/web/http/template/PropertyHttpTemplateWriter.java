@@ -26,6 +26,7 @@ import org.apache.commons.lang.StringEscapeUtils;
 
 import net.officefloor.plugin.socket.server.http.response.HttpResponseWriter;
 import net.officefloor.plugin.value.retriever.ValueRetriever;
+import net.officefloor.plugin.web.http.location.HttpApplicationLocation;
 import net.officefloor.plugin.web.http.template.HttpTemplateWriter;
 import net.officefloor.plugin.web.http.template.parse.PropertyHttpTemplateSectionContent;
 
@@ -96,8 +97,8 @@ public class PropertyHttpTemplateWriter implements HttpTemplateWriter {
 	 */
 
 	@Override
-	public void write(HttpResponseWriter writer, String workName, Object bean)
-			throws IOException {
+	public void write(HttpResponseWriter writer, String workName, Object bean,
+			HttpApplicationLocation location) throws IOException {
 
 		// If no bean, then no value to output
 		if (bean == null) {

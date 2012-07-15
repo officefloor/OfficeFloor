@@ -38,6 +38,7 @@ import net.officefloor.plugin.section.clazz.ClassSectionSource;
 import net.officefloor.plugin.section.clazz.NextTask;
 import net.officefloor.plugin.section.clazz.SectionClassManagedObjectSource;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
+import net.officefloor.plugin.web.http.location.HttpApplicationLocation;
 import net.officefloor.plugin.web.http.session.HttpSession;
 import net.officefloor.plugin.web.http.template.HttpTemplateWorkSource;
 import net.officefloor.plugin.web.http.template.section.HttpTemplateSectionSource.NoLogicClass;
@@ -103,6 +104,8 @@ public class HttpTemplateSectionSourceTest extends OfficeFrameTestCase {
 				HttpSession.class.getName());
 		expected.addSectionObject(ServerHttpConnection.class.getName(),
 				ServerHttpConnection.class.getName());
+		expected.addSectionObject(HttpApplicationLocation.class.getName(),
+				HttpApplicationLocation.class.getName());
 
 		// Template and Class work
 		SectionWork templateWork = expected.addSectionWork("TEMPLATE",
@@ -117,6 +120,7 @@ public class HttpTemplateSectionSourceTest extends OfficeFrameTestCase {
 		SectionTask template = templateWork.addSectionTask("template",
 				"template");
 		template.getTaskObject("SERVER_HTTP_CONNECTION");
+		template.getTaskObject("HTTP_APPLICATION_LOCATION");
 		template.getTaskObject("OBJECT");
 
 		// Methods for beans/properties
@@ -137,11 +141,13 @@ public class HttpTemplateSectionSourceTest extends OfficeFrameTestCase {
 		listArrayIterator.getTaskObject("ARRAY");
 		SectionTask list = templateWork.addSectionTask("List", "List");
 		list.getTaskObject("SERVER_HTTP_CONNECTION");
+		list.getTaskObject("HTTP_APPLICATION_LOCATION");
 		list.getTaskObject("OBJECT");
 
 		// Tail
 		SectionTask tail = templateWork.addSectionTask("Tail", "Tail");
 		tail.getTaskObject("SERVER_HTTP_CONNECTION");
+		tail.getTaskObject("HTTP_APPLICATION_LOCATION");
 
 		// Route nextTask link
 		templateWork.addSectionTask("LINK_nextTask", "nextTask");
@@ -218,6 +224,8 @@ public class HttpTemplateSectionSourceTest extends OfficeFrameTestCase {
 		// Objects
 		expected.addSectionObject(ServerHttpConnection.class.getName(),
 				ServerHttpConnection.class.getName());
+		expected.addSectionObject(HttpApplicationLocation.class.getName(),
+				HttpApplicationLocation.class.getName());
 
 		// Managed Object Sources
 		expected.addSectionManagedObjectSource("OBJECT",
@@ -238,6 +246,7 @@ public class HttpTemplateSectionSourceTest extends OfficeFrameTestCase {
 		SectionTask template = templateWork.addSectionTask("template",
 				"template");
 		template.getTaskObject("SERVER_HTTP_CONNECTION");
+		template.getTaskObject("HTTP_APPLICATION_LOCATION");
 		template.getTaskObject("OBJECT");
 
 		// Message
@@ -251,6 +260,7 @@ public class HttpTemplateSectionSourceTest extends OfficeFrameTestCase {
 		getSection.getTaskObject("OBJECT");
 		SectionTask section = templateWork.addSectionTask("section", "section");
 		section.getTaskObject("SERVER_HTTP_CONNECTION");
+		section.getTaskObject("HTTP_APPLICATION_LOCATION");
 		section.getTaskObject("OBJECT");
 
 		// Description
@@ -295,6 +305,8 @@ public class HttpTemplateSectionSourceTest extends OfficeFrameTestCase {
 		// Objects
 		expected.addSectionObject(ServerHttpConnection.class.getName(),
 				ServerHttpConnection.class.getName());
+		expected.addSectionObject(HttpApplicationLocation.class.getName(),
+				HttpApplicationLocation.class.getName());
 
 		// Add the no logic class (with internal task)
 		SectionWork classWork = expected.addSectionWork("WORK",
@@ -310,6 +322,7 @@ public class HttpTemplateSectionSourceTest extends OfficeFrameTestCase {
 		// Section
 		SectionTask section = templateWork.addSectionTask("Section", "Section");
 		section.getTaskObject("SERVER_HTTP_CONNECTION");
+		section.getTaskObject("HTTP_APPLICATION_LOCATION");
 
 		// Links
 		templateWork.addSectionTask("LINK_nonMethodLink", "nonMethodLink");

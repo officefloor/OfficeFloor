@@ -40,6 +40,7 @@ import net.officefloor.frame.spi.source.ResourceSource;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
 import net.officefloor.plugin.socket.server.http.parse.UsAsciiUtil;
+import net.officefloor.plugin.web.http.location.HttpApplicationLocation;
 import net.officefloor.plugin.web.http.template.parse.BeanHttpTemplateSectionContent;
 import net.officefloor.plugin.web.http.template.parse.BeanHttpTemplateSectionContentImpl;
 import net.officefloor.plugin.web.http.template.parse.HttpTemplate;
@@ -109,6 +110,8 @@ public class HttpTemplateWorkSourceTest extends OfficeFrameTestCase {
 				httpTemplateTaskFactory, Indexed.class, None.class);
 		template.addObject(ServerHttpConnection.class).setLabel(
 				"SERVER_HTTP_CONNECTION");
+		template.addObject(HttpApplicationLocation.class).setLabel(
+				"HTTP_APPLICATION_LOCATION");
 		template.addObject(TemplateBean.class).setLabel("OBJECT");
 		template.addEscalation(IOException.class);
 
@@ -117,6 +120,8 @@ public class HttpTemplateWorkSourceTest extends OfficeFrameTestCase {
 				httpTemplateTaskFactory, Indexed.class, None.class);
 		beanTree.addObject(ServerHttpConnection.class).setLabel(
 				"SERVER_HTTP_CONNECTION");
+		beanTree.addObject(HttpApplicationLocation.class).setLabel(
+				"HTTP_APPLICATION_LOCATION");
 		beanTree.addObject(BeanTreeBean.class).setLabel("OBJECT");
 		beanTree.addEscalation(IOException.class);
 
@@ -125,6 +130,8 @@ public class HttpTemplateWorkSourceTest extends OfficeFrameTestCase {
 				httpTemplateTaskFactory, Indexed.class, None.class);
 		nullBean.addObject(ServerHttpConnection.class).setLabel(
 				"SERVER_HTTP_CONNECTION");
+		nullBean.addObject(HttpApplicationLocation.class).setLabel(
+				"HTTP_APPLICATION_LOCATION");
 		nullBean.addObject(TemplateBean.class).setLabel("OBJECT");
 		nullBean.addEscalation(IOException.class);
 
@@ -133,6 +140,8 @@ public class HttpTemplateWorkSourceTest extends OfficeFrameTestCase {
 				httpTemplateTaskFactory, Indexed.class, None.class);
 		list.addObject(ServerHttpConnection.class).setLabel(
 				"SERVER_HTTP_CONNECTION");
+		list.addObject(HttpApplicationLocation.class).setLabel(
+				"HTTP_APPLICATION_LOCATION");
 		list.addObject(TableRowBean.class).setLabel("OBJECT");
 		list.addEscalation(IOException.class);
 
@@ -141,6 +150,8 @@ public class HttpTemplateWorkSourceTest extends OfficeFrameTestCase {
 				httpTemplateTaskFactory, Indexed.class, None.class);
 		tail.addObject(ServerHttpConnection.class).setLabel(
 				"SERVER_HTTP_CONNECTION");
+		tail.addObject(HttpApplicationLocation.class).setLabel(
+				"HTTP_APPLICATION_LOCATION");
 		tail.addEscalation(IOException.class);
 
 		// Handle link 'beans' task
@@ -245,6 +256,8 @@ public class HttpTemplateWorkSourceTest extends OfficeFrameTestCase {
 		TaskContext taskContext = this.createMock(TaskContext.class);
 		ServerHttpConnection httpConnection = this
 				.createMock(ServerHttpConnection.class);
+		HttpApplicationLocation location = this
+				.createMock(HttpApplicationLocation.class);
 
 		// Create the HTTP response to record output
 		MockHttpResponse httpResponse = new MockHttpResponse();
@@ -276,8 +289,9 @@ public class HttpTemplateWorkSourceTest extends OfficeFrameTestCase {
 					httpConnection);
 			this.recordReturn(httpConnection, httpConnection.getHttpResponse(),
 					httpResponse);
+			this.recordReturn(taskContext, taskContext.getObject(1), location);
 			if ((beans[i] != null) || (i == NULL_BEAN_INDEX)) {
-				this.recordReturn(taskContext, taskContext.getObject(1),
+				this.recordReturn(taskContext, taskContext.getObject(2),
 						beans[i]);
 			}
 			this.recordReturn(taskContext, taskContext.getWork(), work);
@@ -326,6 +340,8 @@ public class HttpTemplateWorkSourceTest extends OfficeFrameTestCase {
 		ServerHttpConnection httpConnection = this
 				.createMock(ServerHttpConnection.class);
 		MockHttpResponse httpResponse = new MockHttpResponse();
+		HttpApplicationLocation location = this
+				.createMock(HttpApplicationLocation.class);
 
 		// Template Content
 		final String templateContent = "RAW TEMPLATE";
@@ -368,6 +384,7 @@ public class HttpTemplateWorkSourceTest extends OfficeFrameTestCase {
 		this.recordReturn(taskContext, taskContext.getObject(0), httpConnection);
 		this.recordReturn(httpConnection, httpConnection.getHttpResponse(),
 				httpResponse);
+		this.recordReturn(taskContext, taskContext.getObject(1), location);
 		this.recordReturn(taskContext, taskContext.getWork(), work);
 
 		// Test
@@ -391,6 +408,8 @@ public class HttpTemplateWorkSourceTest extends OfficeFrameTestCase {
 		TaskContext taskContext = this.createMock(TaskContext.class);
 		ServerHttpConnection httpConnection = this
 				.createMock(ServerHttpConnection.class);
+		HttpApplicationLocation location = this
+				.createMock(HttpApplicationLocation.class);
 
 		// Create the HTTP response to record output
 		MockHttpResponse httpResponse = new MockHttpResponse();
@@ -408,6 +427,7 @@ public class HttpTemplateWorkSourceTest extends OfficeFrameTestCase {
 		this.recordReturn(taskContext, taskContext.getObject(0), httpConnection);
 		this.recordReturn(httpConnection, httpConnection.getHttpResponse(),
 				httpResponse);
+		this.recordReturn(taskContext, taskContext.getObject(1), location);
 		this.recordReturn(taskContext, taskContext.getWork(), work);
 
 		// Test

@@ -41,6 +41,7 @@ import net.officefloor.plugin.socket.server.http.response.HttpResponseWriterFact
 import net.officefloor.plugin.value.retriever.ValueRetriever;
 import net.officefloor.plugin.value.retriever.ValueRetrieverSource;
 import net.officefloor.plugin.value.retriever.ValueRetrieverSourceImpl;
+import net.officefloor.plugin.web.http.location.HttpApplicationLocation;
 import net.officefloor.plugin.web.http.template.HttpTemplateWriter;
 import net.officefloor.plugin.web.http.template.parse.BeanHttpTemplateSectionContent;
 import net.officefloor.plugin.web.http.template.parse.HttpTemplate;
@@ -113,6 +114,8 @@ public class HttpTemplateTask extends
 						None.class);
 		taskBuilder.addObject(ServerHttpConnection.class).setLabel(
 				"SERVER_HTTP_CONNECTION");
+		taskBuilder.addObject(HttpApplicationLocation.class).setLabel(
+				"HTTP_APPLICATION_LOCATION");
 		if (isRequireBean) {
 			taskBuilder.addObject(writerStruct.beanClass).setLabel("OBJECT");
 		}
@@ -363,7 +366,9 @@ public class HttpTemplateTask extends
 		// Obtain the dependencies
 		ServerHttpConnection connection = (ServerHttpConnection) context
 				.getObject(0);
-		Object bean = (this.isRequireBean ? context.getObject(1) : null);
+		HttpApplicationLocation location = (HttpApplicationLocation) context
+				.getObject(1);
+		Object bean = (this.isRequireBean ? context.getObject(2) : null);
 
 		// Create the response writer
 		HttpResponseWriter writer = this.writerFactory
@@ -374,7 +379,7 @@ public class HttpTemplateTask extends
 
 		// Write the contents
 		for (HttpTemplateWriter contentWriter : this.contentWriters) {
-			contentWriter.write(writer, workName, bean);
+			contentWriter.write(writer, workName, bean, location);
 		}
 
 		// Template written, nothing to return
