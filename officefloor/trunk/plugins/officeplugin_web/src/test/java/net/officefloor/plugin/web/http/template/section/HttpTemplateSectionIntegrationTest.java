@@ -24,6 +24,7 @@ import java.io.Writer;
 import java.sql.Connection;
 
 import net.officefloor.autowire.AutoWire;
+import net.officefloor.autowire.AutoWireObject;
 import net.officefloor.autowire.AutoWireOfficeFloor;
 import net.officefloor.autowire.AutoWireSection;
 import net.officefloor.autowire.impl.AutoWireOfficeFloorSource;
@@ -216,6 +217,25 @@ public class HttpTemplateSectionIntegrationTest extends OfficeFrameTestCase {
 
 		// Ensure links out from template
 		this.assertHttpRequest("/SECTION.links-nonMethodLink.task", "LINKED");
+	}
+
+	/**
+	 * Ensure add context path to link.
+	 */
+	public void testContextPathForLink() throws Exception {
+
+		// Start the server (with context path)
+		this.isNonMethodLink = true;
+		this.startHttpServer(
+				"NoLogicTemplate.ofp",
+				null,
+				HttpApplicationLocationManagedObjectSource.PROPERTY_CONTEXT_PATH,
+				"context");
+
+		// Ensure template has context path for links
+		this.assertHttpRequest(
+				"",
+				" /context/SECTION.links-nonMethodLink.task /context/SECTION.links-doExternalFlow.task");
 	}
 
 	/**
@@ -488,7 +508,7 @@ public class HttpTemplateSectionIntegrationTest extends OfficeFrameTestCase {
 		source.addObject(this.connection, new AutoWire(Connection.class));
 		source.addManagedObject(HttpSessionManagedObjectSource.class.getName(),
 				null, new AutoWire(HttpSession.class)).setTimeout(10 * 1000);
-		source.addManagedObject(
+		AutoWireObject location = source.addManagedObject(
 				HttpApplicationLocationManagedObjectSource.class.getName(),
 				null, new AutoWire(HttpApplicationLocation.class));
 
@@ -517,10 +537,13 @@ public class HttpTemplateSectionIntegrationTest extends OfficeFrameTestCase {
 		templateSection.addProperty(
 				HttpTemplateSectionSource.PROPERTY_LINK_TASK_NAME_PREFIX,
 				LINK_SERVICE_TASK_NAME_PREFIX);
+		
+		// Load the additional properties
 		for (int i = 0; i < templatePropertyPairs.length; i += 2) {
 			String name = templatePropertyPairs[i];
 			String value = templatePropertyPairs[i + 1];
 			templateSection.addProperty(name, value);
+			location.addProperty(name, value);
 		}
 
 		// Load mock section for handling outputs

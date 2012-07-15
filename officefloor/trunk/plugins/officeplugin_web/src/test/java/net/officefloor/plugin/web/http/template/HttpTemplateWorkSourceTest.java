@@ -295,6 +295,20 @@ public class HttpTemplateWorkSourceTest extends OfficeFrameTestCase {
 						beans[i]);
 			}
 			this.recordReturn(taskContext, taskContext.getWork(), work);
+
+			// Provide link recording
+			switch (i) {
+			case 1:
+				// #{beans} of NullBean section
+				this.recordReturn(location, location.transformToClientPath(
+						"/WORK-beans.task", false), "/WORK-beans.task");
+				break;
+			case 4:
+				// #{submit} of Tail section
+				this.recordReturn(location, location.transformToClientPath(
+						"/WORK-submit.task", false), "/WORK-submit.task");
+				break;
+			}
 		}
 
 		// Replay mocks
@@ -429,6 +443,10 @@ public class HttpTemplateWorkSourceTest extends OfficeFrameTestCase {
 				httpResponse);
 		this.recordReturn(taskContext, taskContext.getObject(1), location);
 		this.recordReturn(taskContext, taskContext.getWork(), work);
+		this.recordReturn(
+				location,
+				location.transformToClientPath("/.links-something.task", false),
+				"/.links-something.task");
 
 		// Test
 		this.replayMockObjects();
