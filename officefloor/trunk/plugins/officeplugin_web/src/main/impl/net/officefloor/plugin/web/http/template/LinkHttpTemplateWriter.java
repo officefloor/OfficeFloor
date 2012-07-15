@@ -76,9 +76,15 @@ public class LinkHttpTemplateWriter implements HttpTemplateWriter {
 			workName = workName.substring("/".length());
 		}
 
+		// TODO allow configuring if link should be secure
+		boolean isSecure = false;
+
+		// Obtain the link path
+		String linkPath = location.transformToClientPath(this.linkPrefix
+				+ workName + this.linkSuffix, isSecure);
+
 		// Write the content
-		writer.write(this.contentType, this.linkPrefix + workName
-				+ this.linkSuffix);
+		writer.write(this.contentType, linkPath);
 	}
 
 }
