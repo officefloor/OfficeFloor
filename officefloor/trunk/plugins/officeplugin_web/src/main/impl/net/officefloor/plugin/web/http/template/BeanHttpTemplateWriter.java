@@ -24,6 +24,7 @@ import java.lang.reflect.Method;
 
 import net.officefloor.plugin.socket.server.http.response.HttpResponseWriter;
 import net.officefloor.plugin.value.retriever.ValueRetriever;
+import net.officefloor.plugin.web.http.location.HttpApplicationLocation;
 import net.officefloor.plugin.web.http.template.parse.BeanHttpTemplateSectionContent;
 
 /**
@@ -82,8 +83,8 @@ public class BeanHttpTemplateWriter implements HttpTemplateWriter {
 	 */
 
 	@Override
-	public void write(HttpResponseWriter writer, String workName, Object bean)
-			throws IOException {
+	public void write(HttpResponseWriter writer, String workName, Object bean,
+			HttpApplicationLocation location) throws IOException {
 
 		// If no bean, then no value to output
 		if (bean == null) {
@@ -117,14 +118,14 @@ public class BeanHttpTemplateWriter implements HttpTemplateWriter {
 			Object[] arrayBeans = (Object[]) writerBean;
 			for (Object arrayBean : arrayBeans) {
 				for (HttpTemplateWriter beanWriter : this.beanWriters) {
-					beanWriter.write(writer, workName, arrayBean);
+					beanWriter.write(writer, workName, arrayBean, location);
 				}
 			}
 
 		} else {
 			// Write the content for the bean
 			for (HttpTemplateWriter beanWriter : this.beanWriters) {
-				beanWriter.write(writer, workName, writerBean);
+				beanWriter.write(writer, workName, writerBean, location);
 			}
 		}
 	}

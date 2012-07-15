@@ -21,6 +21,7 @@ package net.officefloor.plugin.web.http.template;
 import java.io.IOException;
 
 import net.officefloor.plugin.socket.server.http.response.HttpResponseWriter;
+import net.officefloor.plugin.web.http.location.HttpApplicationLocation;
 import net.officefloor.plugin.web.http.template.HttpTemplateWriter;
 import net.officefloor.plugin.web.http.template.parse.LinkHttpTemplateSectionContent;
 
@@ -67,8 +68,8 @@ public class LinkHttpTemplateWriter implements HttpTemplateWriter {
 	 */
 
 	@Override
-	public void write(HttpResponseWriter writer, String workName, Object bean)
-			throws IOException {
+	public void write(HttpResponseWriter writer, String workName, Object bean,
+			HttpApplicationLocation location) throws IOException {
 
 		// Strip / if root work
 		if (workName.startsWith("/")) {

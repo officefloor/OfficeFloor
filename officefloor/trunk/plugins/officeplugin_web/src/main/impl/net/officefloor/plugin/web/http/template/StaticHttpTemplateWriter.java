@@ -26,6 +26,7 @@ import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 
 import net.officefloor.plugin.socket.server.http.response.HttpResponseWriter;
+import net.officefloor.plugin.web.http.location.HttpApplicationLocation;
 import net.officefloor.plugin.web.http.template.HttpTemplateWriter;
 import net.officefloor.plugin.web.http.template.parse.StaticHttpTemplateSectionContent;
 
@@ -95,8 +96,8 @@ public class StaticHttpTemplateWriter implements HttpTemplateWriter {
 	 */
 
 	@Override
-	public void write(HttpResponseWriter writer, String workName, Object bean)
-			throws IOException {
+	public void write(HttpResponseWriter writer, String workName, Object bean,
+			HttpApplicationLocation location) throws IOException {
 
 		// Duplicate to not move original buffer position when written
 		ByteBuffer writeContent = this.content.duplicate();

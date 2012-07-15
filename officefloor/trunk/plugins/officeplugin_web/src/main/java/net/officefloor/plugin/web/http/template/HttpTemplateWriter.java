@@ -22,6 +22,7 @@ import java.io.IOException;
 
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.plugin.socket.server.http.response.HttpResponseWriter;
+import net.officefloor.plugin.web.http.location.HttpApplicationLocation;
 
 /**
  * Interface to write the template content to {@link HttpResponseWriter}.
@@ -41,10 +42,13 @@ public interface HttpTemplateWriter {
 	 * @param bean
 	 *            Bean to potentially obtain data. May be <code>null</code> if
 	 *            template contents does not require a bean.
+	 * @param location
+	 *            {@link HttpApplicationLocation} to assist in providing web
+	 *            location.
 	 * @throws IOException
 	 *             If fails to write content.
 	 */
-	void write(HttpResponseWriter writer, String workName, Object bean)
-			throws IOException;
+	void write(HttpResponseWriter writer, String workName, Object bean,
+			HttpApplicationLocation location) throws IOException;
 
 }
