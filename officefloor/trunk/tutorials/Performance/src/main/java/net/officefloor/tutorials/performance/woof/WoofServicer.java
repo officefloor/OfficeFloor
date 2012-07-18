@@ -15,29 +15,26 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.tutorials.performance;
+package net.officefloor.tutorials.performance.woof;
+
+import net.officefloor.plugin.woof.WoofOfficeFloorSource;
+import net.officefloor.tutorials.performance.Servicer;
 
 /**
- * Interface to manage a servicer.
+ * WoOF {@link Servicer}
  * 
  * @author Daniel Sagenschneider
  */
-public interface Servicer {
+public class WoofServicer implements Servicer {
 
-	/**
-	 * Starts the {@link Servicer}.
-	 * 
-	 * @throws Exception
-	 *             If fails to start.
-	 */
-	void start() throws Exception;
+	@Override
+	public void start() throws Exception {
+		WoofOfficeFloorSource.start();
+	}
 
-	/**
-	 * Stops the {@link Servicer}.
-	 * 
-	 * @throws Exception
-	 *             If fails to stop.
-	 */
-	void stop() throws Exception;
+	@Override
+	public void stop() throws Exception {
+		WoofOfficeFloorSource.stop();
+	}
 
 }

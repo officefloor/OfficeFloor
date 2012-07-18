@@ -17,6 +17,7 @@
  */
 package net.officefloor.tutorials.performance;
 
+import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpUriRequest;
 
 /**
@@ -25,6 +26,11 @@ import org.apache.http.client.methods.HttpUriRequest;
  * @author Daniel Sagenschneider
  */
 public class Request {
+
+	/**
+	 * URI.
+	 */
+	private final String uri;
 
 	/**
 	 * {@link HttpUriRequest}.
@@ -39,14 +45,33 @@ public class Request {
 	/**
 	 * Initiate.
 	 * 
-	 * @param httpRequest
-	 *            {@link HttpUriRequest}.
+	 * @param serverLocation
+	 *            Server location. May be <code>null</code> to not make
+	 *            requests.
+	 * @param uri
+	 *            URI to request on the server.
 	 * @param expectedResponse
 	 *            Expected response.
 	 */
-	public Request(HttpUriRequest httpRequest, char expectedResponse) {
-		this.httpRequest = httpRequest;
+	public Request(String serverLocation, String uri, char expectedResponse) {
+		this.uri = (uri.startsWith("/") ? uri : "/" + uri);
 		this.expectedResponse = expectedResponse;
+
+		// Construct the HTTP request
+		if (serverLocation == null) {
+			this.httpRequest = null;
+		} else {
+			this.httpRequest = new HttpGet("http://" + serverLocation + uri);
+		}
+	}
+
+	/**
+	 * Obtains the URI.
+	 * 
+	 * @return URI.
+	 */
+	public String getUri() {
+		return this.uri;
 	}
 
 	/**

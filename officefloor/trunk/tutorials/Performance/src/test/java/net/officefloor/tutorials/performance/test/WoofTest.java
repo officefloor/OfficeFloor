@@ -15,29 +15,28 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.tutorials.performance;
+package net.officefloor.tutorials.performance.test;
+
+import net.officefloor.plugin.web.http.location.HttpApplicationLocationManagedObjectSource;
+import net.officefloor.tutorials.performance.Servicer;
+import net.officefloor.tutorials.performance.woof.WoofServicer;
 
 /**
- * Interface to manage a servicer.
+ * Tests WoOF.
  * 
  * @author Daniel Sagenschneider
  */
-public interface Servicer {
+public class WoofTest extends AbstractRunnerTestCase {
 
-	/**
-	 * Starts the {@link Servicer}.
-	 * 
-	 * @throws Exception
-	 *             If fails to start.
-	 */
-	void start() throws Exception;
+	@Override
+	protected Integer getServerPort() {
+		return Integer
+				.valueOf(HttpApplicationLocationManagedObjectSource.DEFAULT_HTTP_PORT);
+	}
 
-	/**
-	 * Stops the {@link Servicer}.
-	 * 
-	 * @throws Exception
-	 *             If fails to stop.
-	 */
-	void stop() throws Exception;
+	@Override
+	protected Servicer getServicer() {
+		return new WoofServicer();
+	}
 
 }

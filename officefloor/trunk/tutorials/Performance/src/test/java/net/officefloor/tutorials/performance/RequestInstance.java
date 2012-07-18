@@ -17,6 +17,8 @@
  */
 package net.officefloor.tutorials.performance;
 
+import net.officefloor.tutorials.performance.Client.RequestIteration;
+
 /**
  * Particular instance of a {@link Request}.
  * 
@@ -28,6 +30,11 @@ public class RequestInstance {
 	 * {@link Request}.
 	 */
 	private final Request request;
+
+	/**
+	 * {@link RequestIteration}.
+	 */
+	private final RequestIteration iteration;
 
 	/**
 	 * {@link Listener}.
@@ -45,15 +52,25 @@ public class RequestInstance {
 	private volatile long endTime = -1;
 
 	/**
+	 * Failure.
+	 */
+	private volatile Throwable failure = null;
+
+	/**
 	 * Initiate.
 	 * 
 	 * @param request
 	 *            {@link Request}.
+	 * @param iteration
+	 *            {@link RequestIteration} that this {@link RequestInstance} is
+	 *            part of.
 	 * @param listener
 	 *            {@link Listener}.
 	 */
-	public RequestInstance(Request request, Listener listener) {
+	public RequestInstance(Request request, RequestIteration iteration,
+			Listener listener) {
 		this.request = request;
+		this.iteration = iteration;
 		this.listener = listener;
 	}
 
@@ -64,6 +81,15 @@ public class RequestInstance {
 	 */
 	public Request getRequest() {
 		return this.request;
+	}
+
+	/**
+	 * Obtains the {@link RequestIteration}.
+	 * 
+	 * @return {@link RequestIteration}.
+	 */
+	public RequestIteration getIteration() {
+		return this.iteration;
 	}
 
 	/**
@@ -80,6 +106,30 @@ public class RequestInstance {
 		this.startTime = startTime;
 		this.endTime = endTime;
 
+		// Trigger listener
+		this.triggerListener();
+	}
+
+	/**
+	 * Flags failure of the {@link RequestInstance}.
+	 * 
+	 * @param failure
+	 *            Failure.
+	 */
+	public void failed(Throwable failure) {
+		
+		// Store failure
+		this.failure = failure;
+		this.endTime = 1; // indicate complete
+		
+		// Trigger listener
+		this.triggerListener();
+	}
+	
+	/**
+	 * Triggers the possible listener.
+	 */
+	private void triggerListener() {
 		// Trigger possible listener
 		if (this.listener != null) {
 			this.listener.trigger();
@@ -111,6 +161,15 @@ public class RequestInstance {
 	 */
 	public long getEndTime() {
 		return this.endTime;
+	}
+
+	/**
+	 * Obtains the possible failure.
+	 * 
+	 * @return Failure. Most likely <code>null</code>.
+	 */
+	public Throwable getFailure() {
+		return this.failure;
 	}
 
 }

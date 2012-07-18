@@ -15,29 +15,12 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.tutorials.performance;
+package net.officefloor.tutorials.performance.woof;
 
 /**
- * Interface to manage a servicer.
+ * {@link Object} as database dependency.
  * 
  * @author Daniel Sagenschneider
  */
-public interface Servicer {
-
-	/**
-	 * Starts the {@link Servicer}.
-	 * 
-	 * @throws Exception
-	 *             If fails to start.
-	 */
-	void start() throws Exception;
-
-	/**
-	 * Stops the {@link Servicer}.
-	 * 
-	 * @throws Exception
-	 *             If fails to stop.
-	 */
-	void stop() throws Exception;
-
+public class DatabaseConnectionDependency {
 }
