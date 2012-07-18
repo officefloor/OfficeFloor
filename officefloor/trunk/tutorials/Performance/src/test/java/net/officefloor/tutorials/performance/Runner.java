@@ -17,7 +17,8 @@
  */
 package net.officefloor.tutorials.performance;
 
-import org.apache.http.client.methods.HttpGet;
+import java.text.DateFormat;
+import java.util.Date;
 
 /**
  * Runs the {@link RequestInstance}.
@@ -32,6 +33,11 @@ public class Runner {
 	private final Client[] clients;
 
 	/**
+	 * Number of iterations.
+	 */
+	private final int numberOfIterations;
+
+	/**
 	 * Initiate.
 	 * 
 	 * @param clients
@@ -39,73 +45,77 @@ public class Runner {
 	 * @param connectionsPerClient
 	 *            Number of {@link Connection} instances per {@link Client}.
 	 * @param iterations
-	 *            Number of iterations through the {@link Request} sequence.
-	 * @param staticRequests
-	 *            Number of static (low overhead) {@link Request} instances.
+	 *            Number of iterations.
 	 */
-	public Runner(int clients, int connectionsPerClient, int iterations,
-			int staticRequests) {
+	public Runner(int clients, int connectionsPerClient, int iterations) {
+		this.numberOfIterations = iterations;
 
-		// Create the requests (first is dynamic then rest static)
-		Request[] requests = new Request[staticRequests + 1];
-		requests[0] = new Request(new HttpGet("http://localhost:8080/dynamic"),
-				'd');
-		for (int i = 1; i < requests.length; i++) {
-			requests[i] = new Request(new HttpGet(
-					"http://localhost:8080/static"), 's');
-		}
-
-		// Create the clients
+		// Create the clients and their connections
 		this.clients = new Client[clients];
 		for (int i = 0; i < this.clients.length; i++) {
-			this.clients[i] = new Client(requests, iterations,
-					connectionsPerClient);
+			this.clients[i] = new Client(connectionsPerClient);
 		}
 	}
 
 	/**
-	 * Runs requests for the particular {@link Servicer}.
+	 * Obtains the number of {@link Client} instances.
 	 * 
-	 * @param servicer
-	 *            {@link Servicer}.
-	 * @param threads
-	 *            Number of servicing {@link Thread} instances to use by the
-	 *            {@link Servicer}.
-	 * @return Results.
-	 * @throws InterruptedException
-	 *             If interrupted.
+	 * @return Number of {@link Client} instances.
 	 */
-	public RequestInstance[][][] run(Servicer servicer, int threads)
-			throws InterruptedException {
+	public int getClientCount() {
+		return this.clients.length;
+	}
 
-		// Start the servicer
-		servicer.start(threads);
+	/**
+	 * Undertakes run returning results of run.
+	 * 
+	 * @param requests
+	 *            {@link Request} instances for run.
+	 * @return Results.
+	 * @throws Exception
+	 *             If failure in run.
+	 */
+	public RequestInstance[][][] run(Request... requests) throws Exception {
 
-		// Allow time to come up
-		Thread.sleep(1000);
+		// Obtain the date format
+		DateFormat formatter = DateFormat.getDateTimeInstance(DateFormat.SHORT,
+				DateFormat.FULL);
 
-		// Warm up the servicer
-		// for (int i = 0; i < this.clients.length; i++) {
-		// this.clients[i].triggerWarmUp();
-		// }
-		// for (int i = 0; i < this.clients.length; i++) {
-		// this.clients[i].waitUntilComplete();
-		// }
+		// Indicate running
+		System.out.print("Run started at " + formatter.format(new Date())
+				+ " ...");
+		System.out.flush();
 
 		// Run the requests
 		RequestInstance[][][] results = new RequestInstance[this.clients.length][][];
 		for (int i = 0; i < this.clients.length; i++) {
-			this.clients[i].triggerRun(servicer.isHandleRequests());
+			this.clients[i].triggerNextRun(this.numberOfIterations, requests);
 		}
 		for (int i = 0; i < this.clients.length; i++) {
 			results[i] = this.clients[i].waitUntilComplete();
 		}
 
-		// Stop the servicer
-		servicer.stop();
+		// Indicating stopping
+		System.out.println(" run complete at " + formatter.format(new Date()));
 
 		// Return the results
 		return results;
+	}
+
+	/**
+	 * Stops the {@link Runner} and releases all {@link Thread} instances.
+	 */
+	public void stop() {
+
+		// Flag all clients to stop
+		for (int i = 0; i < this.clients.length; i++) {
+			this.clients[i].flagStop();
+		}
+
+		// Wait on the clients to stop
+		for (int i = 0; i < this.clients.length; i++) {
+			this.clients[i].waitUntilStopped();
+		}
 	}
 
 }

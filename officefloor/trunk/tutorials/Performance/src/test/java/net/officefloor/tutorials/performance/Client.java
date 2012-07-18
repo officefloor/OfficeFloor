@@ -25,24 +25,29 @@ package net.officefloor.tutorials.performance;
 public class Client {
 
 	/**
-	 * {@link Request} sequence.
-	 */
-	private final Request[] requests;
-
-	/**
-	 * Number of iterations through the {@link Request} sequence.
-	 */
-	private final int numberOfIterations;
-
-	/**
 	 * {@link Connection} instances.
 	 */
 	private final Connection[] connections;
 
 	/**
+	 * {@link Thread} instances.
+	 */
+	private final Thread[] threads;
+
+	/**
+	 * Flag to keep connections alive.
+	 */
+	private volatile boolean isKeepAlive = true;
+
+	/**
 	 * {@link Request} iterations.
 	 */
 	private RequestIteration[] iterations;
+
+	/**
+	 * Current {@link RequestIteration}.
+	 */
+	private RequestIteration currentIteration;
 
 	/**
 	 * Results (iteration then {@link Request} index).
@@ -57,44 +62,24 @@ public class Client {
 	/**
 	 * Initiate.
 	 * 
-	 * @param requests
-	 *            {@link Request} sequence.
-	 * @param iterations
-	 *            Number of iterations of the {@link Request} sequence.
 	 * @param connections
 	 *            Number of {@link Connection} instances.
 	 */
-	public Client(Request[] requests, int iterations, int connections) {
-		this.requests = requests;
-		this.numberOfIterations = iterations;
+	public Client(int connections) {
 
-		// Create the connections
+		// Create the connections and threads for connections
 		this.connections = new Connection[connections];
+		this.threads = new Thread[connections];
 		for (int i = 0; i < this.connections.length; i++) {
+
+			// Create the connection
 			this.connections[i] = new Connection(this);
-			new Thread(this.connections[i]).start();
+
+			// Create and start the connection thread
+			this.threads[i] = new Thread(this.connections[i]);
+			this.threads[i].setDaemon(true);
+			this.threads[i].start();
 		}
-	}
-
-	/**
-	 * Triggers the warm up.
-	 * 
-	 * @param isMakeRequest
-	 *            Flags whether to make the {@link Request}.
-	 */
-	public void triggerWarmUp(boolean isMakeRequest) {
-		// Provide two iterations for warm up
-		this.triggerNextRun(2, isMakeRequest);
-	}
-
-	/**
-	 * Triggers the run.
-	 * 
-	 * @param isMakeRequest
-	 *            Flags whether to make the {@link Request}.
-	 */
-	public void triggerRun(boolean isMakeRequest) {
-		this.triggerNextRun(this.numberOfIterations, isMakeRequest);
 	}
 
 	/**
@@ -102,18 +87,20 @@ public class Client {
 	 * 
 	 * @param numberOfIterations
 	 *            Number of iterations for run.
-	 * @param isMakeRequest
-	 *            Flags whether to make the {@link Request}.
+	 * @param requests
+	 *            {@link Request} instances. Array elements may be
+	 *            <code>null</code> to not send a {@link Request} (enables
+	 *            validating test framework).
 	 */
-	private synchronized void triggerNextRun(int numberOfIterations,
-			boolean isMakeRequest) {
+	public synchronized void triggerNextRun(int numberOfIterations,
+			Request... requests) {
 
 		// Create the listeners
 		this.completionListener = new CompletionListener();
 
 		// Create the new results
 		this.iterations = new RequestIteration[numberOfIterations];
-		this.results = new RequestInstance[numberOfIterations][this.requests.length];
+		this.results = new RequestInstance[numberOfIterations][requests.length];
 		for (int i = 0; i < this.results.length; i++) {
 
 			// Create the request iteration
@@ -129,20 +116,35 @@ public class Client {
 					listener = new FirstListener(this.iterations[i]);
 
 				} else if ((i == (numberOfIterations - 1))
-						&& (r == (this.requests.length - 1))) {
+						&& (r == (requests.length - 1))) {
 					// Last request
 					listener = this.completionListener;
 				}
 
 				// Create the request instance
-				this.results[i][r] = new RequestInstance(
-						(isMakeRequest ? this.requests[r] : null), listener);
+				this.results[i][r] = new RequestInstance(requests[r],
+						this.iterations[i], listener);
 			}
 		}
 
 		// Start processing
 		this.currentIteration = this.iterations[0];
 		this.notify(); // wake up one connection for first request
+	}
+
+	/**
+	 * Indicates if all {@link Connection} instances have connected.
+	 * 
+	 * @return <code>true</code> if all connected.
+	 */
+	public boolean hasAllConnectionsConnected() {
+		boolean hasAllConnected = true;
+		for (int i = 0; i < this.connections.length; i++) {
+			if (!(this.connections[i].isConnected())) {
+				hasAllConnected = false;
+			}
+		}
+		return hasAllConnected;
 	}
 
 	/**
@@ -161,6 +163,11 @@ public class Client {
 		// Wait to be notified that complete
 		complete.waitOnCompletion();
 
+		// Ensure iterations complete
+		while (this.currentIteration != null) {
+			Thread.sleep(100);
+		}
+
 		// Check that all request instances complete
 		boolean isComplete;
 		do {
@@ -175,11 +182,9 @@ public class Client {
 				}
 			}
 
-			// Wait very short time as should complete shortly
+			// Wait some time to complete
 			if (!isComplete) {
-				synchronized (instances) {
-					instances.wait(0, 10);
-				}
+				Thread.sleep(100);
 			}
 
 		} while (!isComplete);
@@ -187,11 +192,6 @@ public class Client {
 		// Return the results
 		return instances;
 	}
-
-	/**
-	 * Current {@link RequestIteration}.
-	 */
-	private RequestIteration currentIteration;
 
 	/**
 	 * Invoked by the {@link Connection} to obtain the next
@@ -208,7 +208,12 @@ public class Client {
 
 			// Wait to start
 			while (this.currentIteration == null) {
-				this.wait(1000);
+				this.wait(100);
+
+				// Determine if further requests
+				if (!this.isKeepAlive) {
+					return null;
+				}
 			}
 
 			// Obtain the current iteration
@@ -243,10 +248,15 @@ public class Client {
 						}
 					}
 
+					/*
+					 * Wait until all connections are complete.
+					 * 
+					 * Note that the last completing connection/thread will
+					 * always pass this point and not require to wait.
+					 */
 					if (!isComplete) {
 						this.wait(100);
 					}
-
 				} while (!isComplete);
 
 				// Flag request iteration is complete
@@ -274,8 +284,51 @@ public class Client {
 				iteration.nextRequest++;
 				return instance;
 			}
-
 		}
+	}
+
+	/**
+	 * Flags the {@link Client} to stop.
+	 */
+	public synchronized void flagStop() {
+
+		// Do not keep connections alive
+		this.isKeepAlive = false;
+
+		// Notify all connections to stop
+		this.notifyAll();
+	}
+
+	/**
+	 * Blocks waiting on the {@link Connection} instances to stop.
+	 */
+	public void waitUntilStopped() {
+
+		// Ensure flag stopping
+		this.flagStop();
+
+		boolean isComplete;
+		do {
+
+			// Determine if complete
+			isComplete = true;
+			for (int i = 0; i < this.connections.length; i++) {
+				if (!(this.connections[i].isComplete())) {
+					isComplete = false;
+				}
+			}
+
+			// Allow some time for completion
+			if (!isComplete) {
+				try {
+					Thread.sleep(100);
+				} catch (InterruptedException ex) {
+					// Should not happen so finish
+					return;
+				}
+			}
+
+		} while (!isComplete);
 	}
 
 	/**

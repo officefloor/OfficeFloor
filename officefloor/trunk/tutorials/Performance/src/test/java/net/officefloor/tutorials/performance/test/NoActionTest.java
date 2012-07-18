@@ -15,30 +15,27 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.tutorials.performance.none;
+package net.officefloor.tutorials.performance.test;
 
+import net.officefloor.tutorials.performance.Request;
 import net.officefloor.tutorials.performance.Servicer;
 
 /**
- * No action {@link Servicer} to validate the test framework.
+ * Tests the client framework to not have significant overheads by running
+ * without sending {@link Request} instances.
  * 
  * @author Daniel Sagenschneider
  */
-public class NoActionServicer implements Servicer {
+public class NoActionTest extends AbstractRunnerTestCase {
 
 	@Override
-	public void start(int threads) {
-		// Do nothing
+	protected Integer getServerPort() {
+		return null;
 	}
 
 	@Override
-	public boolean isHandleRequests() {
-		return false;
-	}
-
-	@Override
-	public void stop() {
-		// Do nothing
+	protected Servicer getServicer() {
+		return null;
 	}
 
 }

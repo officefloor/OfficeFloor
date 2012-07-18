@@ -20,7 +20,9 @@ package net.officefloor.tutorials.performance;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.params.CoreConnectionPNames;
 import org.junit.Assert;
 
 /**
@@ -38,7 +40,17 @@ public class Connection implements Runnable {
 	/**
 	 * {@link HttpClient}.
 	 */
-	private HttpClient httpClient = new DefaultHttpClient();
+	private final HttpClient httpClient = new DefaultHttpClient();
+
+	/**
+	 * Indicates if connected.
+	 */
+	private volatile boolean isConnected = false;
+
+	/**
+	 * Indicates if complete.
+	 */
+	private volatile boolean isComplete = false;
 
 	/**
 	 * Initiate.
@@ -48,6 +60,32 @@ public class Connection implements Runnable {
 	 */
 	public Connection(Client client) {
 		this.client = client;
+
+		// Configure the HTTP client
+		this.httpClient.getParams().setIntParameter(
+				CoreConnectionPNames.CONNECTION_TIMEOUT, 0);
+		this.httpClient.getParams().setIntParameter(
+				CoreConnectionPNames.SO_TIMEOUT, 0);
+		this.httpClient.getParams().setBooleanParameter(
+				CoreConnectionPNames.STALE_CONNECTION_CHECK, false);
+	}
+
+	/**
+	 * Indicates if connected.
+	 * 
+	 * @return <code>true</code> if connected.
+	 */
+	public boolean isConnected() {
+		return this.isConnected;
+	}
+
+	/**
+	 * Indicates if complete.
+	 * 
+	 * @return <code>true</code> if complete.
+	 */
+	public boolean isComplete() {
+		return this.isComplete;
 	}
 
 	/*
@@ -58,50 +96,64 @@ public class Connection implements Runnable {
 	public void run() {
 		try {
 			for (;;) {
+				try {
 
-				// Keep making requests until interrupted
-				RequestInstance instance = this.client.nextRequest();
-				Request request = instance.getRequest();
+					// Keep making requests until interrupted
+					RequestInstance instance = this.client.nextRequest();
+					if (instance == null) {
+						// No further requests
+						this.httpClient.getConnectionManager().shutdown();
+						return;
+					}
+					Request request = instance.getRequest();
+					HttpUriRequest httpRequest = request.getHttpRequest();
 
-				// TODO re-establish connection on new request iteration
+					try {
 
-				// Obtain the start time
-				long startTime = System.nanoTime();
+						// Obtain the start time
+						long startTime = System.nanoTime();
 
-				// Make the request (if required)
-				HttpResponse response = null;
-				if (request != null) {
-					response = this.httpClient
-							.execute(request.getHttpRequest());
+						// Make the request
+						HttpResponse response = null;
+						if (httpRequest != null) {
+							response = this.httpClient.execute(httpRequest);
+						}
+
+						// Validate response (to ensure full response received)
+						if (response != null) {
+							Assert.assertEquals("Should be successful", 200,
+									response.getStatusLine().getStatusCode());
+
+							// Ensure correct response
+							HttpEntity entity = response.getEntity();
+							int value = entity.getContent().read();
+							Assert.assertEquals("Incorrect response",
+									request.getExpectedResponse(), (char) value);
+							entity.consumeContent();
+						}
+
+						// Obtain the end time
+						long endTime = System.nanoTime();
+
+						// Flag now that connected
+						this.isConnected = true;
+
+						// Notify completed request instance
+						instance.complete(startTime, endTime);
+
+					} catch (Exception ex) {
+						// Flag failure on instance
+						instance.failed(ex);
+					}
+
+				} catch (InterruptedException ex) {
+					// Just keep asking for next request until null
 				}
-
-				// Obtain the end time
-				long endTime = System.nanoTime();
-
-				// Validate the response (if made)
-				if (response != null) {
-					Assert.assertEquals("Should be successful", 200,
-							response.getStatusLine());
-
-					// Ensure correct response
-					HttpEntity entity = response.getEntity();
-					int value = entity.getContent().read();
-					Assert.assertEquals("Incorrect response",
-							request.getExpectedResponse(), (char) value);
-					entity.consumeContent();
-				}
-
-				// Notify completed request instance
-				instance.complete(startTime, endTime);
-
 			}
-		} catch (InterruptedException ex) {
-			ex.printStackTrace();
-			return;
 
-		} catch (Exception ex) {
-			// TODO provide better detail of error
-			ex.printStackTrace();
+		} finally {
+			// Flag completed
+			this.isComplete = true;
 		}
 	}
 

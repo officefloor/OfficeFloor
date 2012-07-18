@@ -1,0 +1,7 @@
+<objects>
+
+	<managed-object source="CLASS" type="net.officefloor.tutorials.performance.woof.DatabaseConnectionDependency">
+		<property name="class.name" value="net.officefloor.tutorials.performance.woof.DatabaseConnectionDependency" />
+	</managed-object>
+
+</objects>
