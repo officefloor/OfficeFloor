@@ -35,6 +35,11 @@ public class Client {
 	private final Thread[] threads;
 
 	/**
+	 * Mask that must match {@link Request} instances to be run.
+	 */
+	private final int mask;
+
+	/**
 	 * Flag to keep connections alive.
 	 */
 	private volatile boolean isKeepAlive = true;
@@ -62,10 +67,13 @@ public class Client {
 	/**
 	 * Initiate.
 	 * 
+	 * @param mask
+	 *            Mask that must match {@link Request} instances to be run.
 	 * @param connections
 	 *            Number of {@link Connection} instances.
 	 */
-	public Client(int connections) {
+	public Client(int connections, int mask) {
+		this.mask = mask;
 
 		// Create the connections and threads for connections
 		this.connections = new Connection[connections];
@@ -106,17 +114,35 @@ public class Client {
 			// Create the request iteration
 			this.iterations[i] = new RequestIteration(i);
 
+			// Find index of first and last request for client
+			int firstIndex = 0; // first if no match
+			int lastIndex = requests.length - 1; // last if no match
+			boolean isFirst = true;
+			for (int r = 0; r < this.results[i].length; r++) {
+				if (this.isMatchingRequest(requests[r])) {
+
+					// Determine if first
+					if (isFirst) {
+						firstIndex = r;
+						isFirst = false; // no longer first
+					}
+
+					// Take highest last
+					lastIndex = r;
+				}
+			}
+
 			// Create requests for iteration
 			for (int r = 0; r < this.results[i].length; r++) {
 
 				// Create the appropriate listener
 				Listener listener = null;
-				if (r == 0) {
-					// First request of iteration
+				if (r == firstIndex) {
+					// First request of iteration for client
 					listener = new FirstListener(this.iterations[i]);
+					isFirst = false; // no longer first for iteration
 
-				} else if ((i == (numberOfIterations - 1))
-						&& (r == (requests.length - 1))) {
+				} else if ((i == (numberOfIterations - 1)) && (r == lastIndex)) {
 					// Last request
 					listener = this.completionListener;
 				}
@@ -226,8 +252,15 @@ public class Client {
 			if (!iteration.isFirstSent) {
 				// Send first request
 				iteration.isFirstSent = true;
-				RequestInstance instance = requests[0];
-				return instance;
+				RequestInstance instance = this
+						.nextRequestInstanceForIteration(iteration);
+				if (instance == null) {
+					// No first request (so is complete)
+					iteration.isFirstComplete = true;
+				} else {
+					// Return the first request
+					return instance;
+				}
 			}
 
 			// Wait until first is complete
@@ -235,56 +268,102 @@ public class Client {
 				this.wait(100);
 			}
 
-			// Obtain the subsequent requests
-			if (iteration.nextRequest == requests.length) {
-				// No further requests, wait until iteration complete
-				boolean isComplete;
-				do {
-					isComplete = true;
-					CHECK_COMPLETE: for (int r = 0; r < requests.length; r++) {
-						if (!(requests[r].isComplete())) {
-							isComplete = false;
-							break CHECK_COMPLETE;
-						}
-					}
+			// Obtain the next request
+			RequestInstance instance = this
+					.nextRequestInstanceForIteration(iteration);
+			if (instance != null) {
+				// Provide the next request
+				return instance;
+			}
 
-					/*
-					 * Wait until all connections are complete.
-					 * 
-					 * Note that the last completing connection/thread will
-					 * always pass this point and not require to wait.
-					 */
-					if (!isComplete) {
-						this.wait(100);
-					}
-				} while (!isComplete);
-
-				// Flag request iteration is complete
-				if (!(iteration.isIterationComplete)) {
-					// Iteration complete and move to next iteration
-					iteration.isIterationComplete = true;
-
-					// Only move to next iteration if the current iteration
-					if ((this.currentIteration != null)
-							&& (this.currentIteration.iterationIndex == iteration.iterationIndex)) {
-						int nextIterationIndex = iteration.iterationIndex + 1;
-						if (nextIterationIndex == this.iterations.length) {
-							// No further iterations
-							this.currentIteration = null;
-						} else {
-							// Move to next iteration
-							this.currentIteration = this.iterations[nextIterationIndex];
-						}
+			// No further requests, wait until iteration complete
+			boolean isComplete;
+			do {
+				isComplete = true;
+				CHECK_COMPLETE: for (int r = 0; r < requests.length; r++) {
+					if (!(requests[r].isComplete())) {
+						isComplete = false;
+						break CHECK_COMPLETE;
 					}
 				}
 
-			} else {
-				// Obtain the next request
-				RequestInstance instance = requests[iteration.nextRequest];
-				iteration.nextRequest++;
-				return instance;
+				/*
+				 * Wait until all connections are complete.
+				 * 
+				 * Note that the last completing connection/thread will always
+				 * pass this point and not require to wait.
+				 */
+				if (!isComplete) {
+					this.wait(100);
+				}
+			} while (!isComplete);
+
+			// Flag request iteration is complete
+			if (!(iteration.isIterationComplete)) {
+				// Iteration complete and move to next iteration
+				iteration.isIterationComplete = true;
+
+				// Only move to next iteration if the current iteration
+				if ((this.currentIteration != null)
+						&& (this.currentIteration.iterationIndex == iteration.iterationIndex)) {
+					int nextIterationIndex = iteration.iterationIndex + 1;
+					if (nextIterationIndex == this.iterations.length) {
+						// No further iterations
+						this.currentIteration = null;
+					} else {
+						// Move to next iteration
+						this.currentIteration = this.iterations[nextIterationIndex];
+					}
+				}
 			}
 		}
+	}
+
+	/**
+	 * Obtains the next {@link RequestInstance} for the {@link RequestIteration}
+	 * .
+	 * 
+	 * @param iteration
+	 *            {@link RequestIteration}.
+	 * @return Next {@link RequestInstance} or <code>null</code> to indicate no
+	 *         further {@link RequestInstance} instances for the
+	 *         {@link RequestIteration}.
+	 */
+	private RequestInstance nextRequestInstanceForIteration(
+			RequestIteration iteration) {
+
+		// Obtain the requests
+		RequestInstance[] instances = this.results[iteration.iterationIndex];
+
+		// Find next request matching client mask
+		for (int i = iteration.nextRequest; i < instances.length; i++) {
+			RequestInstance instance = instances[i];
+
+			// Move to next request
+			iteration.nextRequest++;
+
+			// Determine if found request
+			if (this.isMatchingRequest(instance.getRequest())) {
+				return instance; // found next for client
+			}
+
+			// Indicate request skipped
+			instance.skip();
+		}
+
+		// As here, no further requests for iteration
+		return null;
+	}
+
+	/**
+	 * Determines if matching request to be run by this {@link Client}.
+	 * 
+	 * @param request
+	 *            {@link Request}.
+	 * @return <code>true</code> to run the {@link Request}.
+	 */
+	private boolean isMatchingRequest(Request request) {
+		return (request.getMask() & this.mask) == this.mask;
 	}
 
 	/**
@@ -354,7 +433,7 @@ public class Client {
 		/**
 		 * Next {@link Request} to send.
 		 */
-		public int nextRequest = 1;
+		public int nextRequest = 0;
 
 		/**
 		 * Indicates if {@link RequestIteration} is complete.

@@ -80,7 +80,7 @@
 		<maven-version>3.0.1</maven-version>
 		<aether-version>1.8</aether-version>
 		<plexus-version>1.5.5</plexus-version>
-		<jetty-version>7.1.5.v20100705</jetty-version>
+		<jetty-version>8.1.4.v20120524</jetty-version>
 		<gwt-version>2.4.0</gwt-version>
 		<syncrpc-version>0.3</syncrpc-version>
 		<datanucleus-version>3.0.7</datanucleus-version>

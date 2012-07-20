@@ -207,6 +207,9 @@ public abstract class AbstractServerSocketManagedObjectSource<CH extends Connect
 
 		// Flag to start accepter on server start up
 		mosContext.addStartupTask("accepter", "accepter");
+		
+		// TODO register the listener tasks on server start up
+		
 	}
 
 	@Override

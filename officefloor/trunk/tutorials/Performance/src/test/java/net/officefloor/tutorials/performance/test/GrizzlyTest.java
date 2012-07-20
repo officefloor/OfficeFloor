@@ -15,12 +15,26 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.tutorials.performance.woof;
+package net.officefloor.tutorials.performance.test;
+
+import net.officefloor.tutorials.performance.Servicer;
+import net.officefloor.tutorials.performance.grizzly.GrizzlyServicer;
 
 /**
- * {@link Object} as database dependency.
+ * Tests Grizzly.
  * 
  * @author Daniel Sagenschneider
  */
-public class DatabaseConnectionDependency {
+public class GrizzlyTest extends AbstractRunnerTestCase {
+
+	@Override
+	protected Integer getServerPort() {
+		return Integer.valueOf(7000);
+	}
+
+	@Override
+	protected Servicer getServicer() {
+		return new GrizzlyServicer();
+	}
+
 }

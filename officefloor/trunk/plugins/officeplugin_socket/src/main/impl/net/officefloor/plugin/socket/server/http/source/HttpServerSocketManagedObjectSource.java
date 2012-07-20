@@ -67,6 +67,8 @@ public class HttpServerSocketManagedObjectSource extends
 
 				// Provide teams
 				context.mapTeam("accepter", OnePersonTeamSource.class.getName());
+
+				// TODO map these to singleton teams via AutoWire
 				context.mapTeam("listener",
 						WorkerPerTaskTeamSource.class.getName());
 				context.mapTeam("cleanup", OnePersonTeamSource.class.getName());

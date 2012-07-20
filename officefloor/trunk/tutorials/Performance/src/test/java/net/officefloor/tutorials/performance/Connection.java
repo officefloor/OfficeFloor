@@ -108,13 +108,13 @@ public class Connection implements Runnable {
 					Request request = instance.getRequest();
 					HttpUriRequest httpRequest = request.getHttpRequest();
 
+					HttpResponse response = null;
 					try {
 
 						// Obtain the start time
 						long startTime = System.nanoTime();
 
 						// Make the request
-						HttpResponse response = null;
 						if (httpRequest != null) {
 							response = this.httpClient.execute(httpRequest);
 						}
@@ -128,7 +128,7 @@ public class Connection implements Runnable {
 							HttpEntity entity = response.getEntity();
 							int value = entity.getContent().read();
 							Assert.assertEquals("Incorrect response",
-									request.getExpectedResponse(), (char) value);
+									request.getExpectedResponse(), value);
 							entity.consumeContent();
 						}
 
@@ -141,9 +141,18 @@ public class Connection implements Runnable {
 						// Notify completed request instance
 						instance.complete(startTime, endTime);
 
-					} catch (Exception ex) {
+					} catch (Throwable ex) {
 						// Flag failure on instance
 						instance.failed(ex);
+
+						// Ensure consume content to re-use connection
+						try {
+							if (response != null) {
+								response.getEntity().consumeContent();
+							}
+						} catch (Exception failure) {
+							failure.printStackTrace();
+						}
 					}
 
 				} catch (InterruptedException ex) {

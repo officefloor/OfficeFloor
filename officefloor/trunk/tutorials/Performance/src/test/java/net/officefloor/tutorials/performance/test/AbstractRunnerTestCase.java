@@ -59,12 +59,12 @@ public abstract class AbstractRunnerTestCase extends TestCase {
 	/**
 	 * {@link Connection} instances per {@link Client}.
 	 */
-	private final int connectionsPerClient = 2;
+	private final int connectionsPerClient = 1;
 
 	/**
 	 * Number of iterations.
 	 */
-	private final int numberOfIterations = 100;
+	private final int numberOfIterations = 1000;
 
 	/**
 	 * Address of the server.
@@ -125,19 +125,19 @@ public abstract class AbstractRunnerTestCase extends TestCase {
 	 */
 	public void testRuns() throws Exception {
 
+		// Provide mask distribution
+		int[] maskDistribution = new int[] { 1 };
+
 		// Obtain the requests
 		Request[] requests = new Request[] {
-				new Request(this.serverAddress, "page", 'p'),
-				new Request(this.serverAddress, "serviceA", 'a'),
-				new Request(this.serverAddress, "serviceB", 'b'),
-				new Request(this.serverAddress, "static.html", 's'),
-				new Request(this.serverAddress, "static.html", 's'),
-				new Request(this.serverAddress, "static.html", 's') };
+				new Request(this.serverAddress, "info.php?v=N", 'n', 1),
+				new Request(this.serverAddress, "info.php?v=Y", 'y', 1) };
 
 		// Do warm up
 		this.runner = new Runner(100, this.connectionsPerClient,
-				this.numberOfIterations);
+				this.numberOfIterations, maskDistribution);
 		this.doTestRun("WARM UP", requests);
+		this.doTestRun("AGAIN", requests);
 		this.runner.stop();
 	}
 
