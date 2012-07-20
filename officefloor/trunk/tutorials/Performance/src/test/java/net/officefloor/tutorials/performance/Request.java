@@ -43,6 +43,11 @@ public class Request {
 	private final char expectedResponse;
 
 	/**
+	 * Mask that must match {@link Client} instances to be run.
+	 */
+	private final int mask;
+
+	/**
 	 * Initiate.
 	 * 
 	 * @param serverLocation
@@ -52,16 +57,21 @@ public class Request {
 	 *            URI to request on the server.
 	 * @param expectedResponse
 	 *            Expected response.
+	 * @param mask
+	 *            Mask that must match {@link Request} instances to be run.
 	 */
-	public Request(String serverLocation, String uri, char expectedResponse) {
+	public Request(String serverLocation, String uri, char expectedResponse,
+			int mask) {
 		this.uri = (uri.startsWith("/") ? uri : "/" + uri);
 		this.expectedResponse = expectedResponse;
+		this.mask = mask;
 
 		// Construct the HTTP request
 		if (serverLocation == null) {
 			this.httpRequest = null;
 		} else {
-			this.httpRequest = new HttpGet("http://" + serverLocation + uri);
+			this.httpRequest = new HttpGet("http://" + serverLocation
+					+ this.uri);
 		}
 	}
 
@@ -90,6 +100,15 @@ public class Request {
 	 */
 	public char getExpectedResponse() {
 		return this.expectedResponse;
+	}
+
+	/**
+	 * Obtains the mask that must match {@link Request} instances to be run.
+	 * 
+	 * @return Mask that must match {@link Request} instances to be run.
+	 */
+	public int getMask() {
+		return this.mask;
 	}
 
 }

@@ -2,8 +2,9 @@
   <templates>
   </templates>
   <sections>
-    <section name="DatabaseServicer" source="net.officefloor.plugin.section.clazz.ClassSectionSource" location="net.officefloor.tutorials.performance.woof.DatabaseLogic" x="81" y="61">
-      <input name="service" parameter-type="" uri="dynamic"/>
+    <section name="ServiceLogic" source="net.officefloor.plugin.section.clazz.ClassSectionSource" location="net.officefloor.tutorials.performance.woof.ServiceLogic" x="131" y="76">
+      <input name="insert" parameter-type="char" uri=""/>
+      <input name="validate" parameter-type="" uri="info.php"/>
     </section>
   </sections>
   <governances>

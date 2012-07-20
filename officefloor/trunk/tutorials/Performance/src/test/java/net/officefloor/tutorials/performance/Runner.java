@@ -46,14 +46,27 @@ public class Runner {
 	 *            Number of {@link Connection} instances per {@link Client}.
 	 * @param iterations
 	 *            Number of iterations.
+	 * @param maskDistribution
+	 *            Distribution of masks across the {@link Client} instances.
 	 */
-	public Runner(int clients, int connectionsPerClient, int iterations) {
+	public Runner(int clients, int connectionsPerClient, int iterations,
+			int... maskDistribution) {
 		this.numberOfIterations = iterations;
+
+		// Ensure have a mask
+		if (maskDistribution.length == 0) {
+			maskDistribution = new int[] { 1 };
+		}
 
 		// Create the clients and their connections
 		this.clients = new Client[clients];
 		for (int i = 0; i < this.clients.length; i++) {
-			this.clients[i] = new Client(connectionsPerClient);
+
+			// Obtain the mask for the client
+			int maskIndex = (i % maskDistribution.length);
+			int mask = maskDistribution[maskIndex];
+
+			this.clients[i] = new Client(connectionsPerClient, mask);
 		}
 	}
 

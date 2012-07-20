@@ -127,8 +127,9 @@ public class ServerSocketAccepter<CH extends ConnectionHandler>
 		// Bind to the socket to start listening
 		this.channel = ServerSocketChannel.open();
 		this.channel.configureBlocking(false);
-		this.channel.socket().bind(this.serverSocketAddress);
-
+		// TODO make the ServerSocket bind backlog configurable
+		this.channel.socket().bind(this.serverSocketAddress, 1000);
+		
 		// Register the channel with the selector
 		this.selector = Selector.open();
 		this.channel.register(this.selector, SelectionKey.OP_ACCEPT);
@@ -216,7 +217,12 @@ public class ServerSocketAccepter<CH extends ConnectionHandler>
 
 							// Flag socket as unblocking
 							socketChannel.configureBlocking(false);
-
+							
+							// Configure the socket
+							Socket socket = socketChannel.socket();
+							socket.setTcpNoDelay(true);
+							socket.setSoLinger(false, 0);
+							
 							// Create the connection
 							ConnectionImpl<CH> connection = new ConnectionImpl<CH>(
 									new NonblockingSocketChannelImpl(

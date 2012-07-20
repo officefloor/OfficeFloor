@@ -52,6 +52,11 @@ public class RequestInstance {
 	private volatile long endTime = -1;
 
 	/**
+	 * Indicates if {@link RequestInstance} skipped by {@link Client}.
+	 */
+	private volatile boolean isSkipped = false;
+
+	/**
 	 * Failure.
 	 */
 	private volatile Throwable failure = null;
@@ -117,15 +122,28 @@ public class RequestInstance {
 	 *            Failure.
 	 */
 	public void failed(Throwable failure) {
-		
+
 		// Store failure
 		this.failure = failure;
 		this.endTime = 1; // indicate complete
-		
+
 		// Trigger listener
 		this.triggerListener();
 	}
-	
+
+	/**
+	 * Flags skipping the {@link RequestInstance}.
+	 */
+	public void skip() {
+
+		// Indicate skipped
+		this.isSkipped = true;
+		this.endTime = 1; // indicate complete
+
+		// Trigger listener
+		this.triggerListener();
+	}
+
 	/**
 	 * Triggers the possible listener.
 	 */
@@ -143,6 +161,15 @@ public class RequestInstance {
 	 */
 	public boolean isComplete() {
 		return (this.endTime > 0);
+	}
+
+	/**
+	 * Indicates if {@link Client} skipped {@link RequestInstance}.
+	 * 
+	 * @return <code>true</code> if skipped.
+	 */
+	public boolean isSkipped() {
+		return this.isSkipped;
 	}
 
 	/**
