@@ -28,6 +28,7 @@ import net.officefloor.plugin.socket.server.Connection;
 import net.officefloor.plugin.socket.server.ConnectionHandler;
 import net.officefloor.plugin.socket.server.IdleContext;
 import net.officefloor.plugin.socket.server.ReadContext;
+import net.officefloor.plugin.socket.server.Server;
 import net.officefloor.plugin.socket.server.WriteContext;
 import net.officefloor.plugin.socket.server.tcp.ServerTcpConnection;
 import net.officefloor.plugin.stream.InputBufferStream;
@@ -46,6 +47,11 @@ public class TcpConnectionHandler implements ConnectionHandler,
 	 * idle.
 	 */
 	private static final long NON_IDLE_SINCE_TIMESTAMP = -1;
+
+	/**
+	 * {@link Server}.
+	 */
+	private final Server<TcpConnectionHandler> server;
 
 	/**
 	 * {@link Connection}.
@@ -75,13 +81,17 @@ public class TcpConnectionHandler implements ConnectionHandler,
 	/**
 	 * Initiate.
 	 * 
+	 * @param server
+	 *            {@link Server}.
 	 * @param connection
 	 *            {@link Connection}.
 	 * @param maxIdleTime
 	 *            Maximum idle time for the {@link Connection} measured in
 	 *            milliseconds.
 	 */
-	public TcpConnectionHandler(Connection connection, long maxIdleTime) {
+	public TcpConnectionHandler(Server<TcpConnectionHandler> server,
+			Connection connection, long maxIdleTime) {
+		this.server = server;
 		this.connection = connection;
 		this.maxIdleTime = maxIdleTime;
 	}
@@ -162,7 +172,7 @@ public class TcpConnectionHandler implements ConnectionHandler,
 		// Always new message on start reading to kick of processing
 		if (!this.isReadStarted) {
 			// To ensure streaming always input first read
-			context.processRequest(null);
+			this.server.processRequest(this, null);
 
 			// Flag that the read has started
 			this.isReadStarted = true;

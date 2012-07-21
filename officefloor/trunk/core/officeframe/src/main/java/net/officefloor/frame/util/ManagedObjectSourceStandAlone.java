@@ -108,12 +108,12 @@ public class ManagedObjectSourceStandAlone {
 				.addOffice(STAND_ALONE_MANAGING_OFFICE_NAME);
 
 		// Create the delegate source context
-		SourceContext context = new SourceContextImpl(Thread.currentThread()
-				.getContextClassLoader());
+		SourceContext context = new SourceContextImpl(false, Thread
+				.currentThread().getContextClassLoader());
 
 		// Initialise the managed object source
 		ManagedObjectSourceContextImpl sourceContext = new ManagedObjectSourceContextImpl(
-				STAND_ALONE_MANAGED_OBJECT_SOURCE_NAME, this.properties,
+				false, STAND_ALONE_MANAGED_OBJECT_SOURCE_NAME, this.properties,
 				context, managingOfficeBuilder, officeBuilder);
 		moSource.init(sourceContext);
 

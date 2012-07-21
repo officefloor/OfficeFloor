@@ -25,6 +25,7 @@ import net.officefloor.plugin.socket.server.Connection;
 import net.officefloor.plugin.socket.server.ConnectionHandler;
 import net.officefloor.plugin.socket.server.IdleContext;
 import net.officefloor.plugin.socket.server.ReadContext;
+import net.officefloor.plugin.socket.server.Server;
 import net.officefloor.plugin.socket.server.WriteContext;
 import net.officefloor.plugin.socket.server.http.HttpHeader;
 import net.officefloor.plugin.socket.server.http.HttpRequest;
@@ -40,6 +41,11 @@ import net.officefloor.plugin.stream.InputBufferStream;
  * @author Daniel Sagenschneider
  */
 public class HttpConnectionHandler implements ConnectionHandler {
+
+	/**
+	 * {@link Server}.
+	 */
+	private final Server<HttpConnectionHandler> server;
 
 	/**
 	 * {@link HttpConversation}.
@@ -76,6 +82,8 @@ public class HttpConnectionHandler implements ConnectionHandler {
 	/**
 	 * Initiate.
 	 * 
+	 * @param server
+	 *            {@link Server}.
 	 * @param conversation
 	 *            {@link HttpConversation}.
 	 * @param parser
@@ -85,9 +93,10 @@ public class HttpConnectionHandler implements ConnectionHandler {
 	 * @param connectionTimeout
 	 *            {@link Connection} timeout in milliseconds.
 	 */
-	public HttpConnectionHandler(HttpConversation conversation,
-			HttpRequestParser parser, int maxTextPartLength,
-			long connectionTimeout) {
+	public HttpConnectionHandler(Server<HttpConnectionHandler> server,
+			HttpConversation conversation, HttpRequestParser parser,
+			int maxTextPartLength, long connectionTimeout) {
+		this.server = server;
 		this.conversation = conversation;
 		this.parser = parser;
 		this.maxTextPartLength = maxTextPartLength;
@@ -140,7 +149,7 @@ public class HttpConnectionHandler implements ConnectionHandler {
 					HttpManagedObject managedObject = this.conversation
 							.addRequest(method, requestURI, httpVersion,
 									headers, body);
-					context.processRequest(managedObject);
+					this.server.processRequest(this, managedObject);
 
 				} else {
 					// No further content to parse

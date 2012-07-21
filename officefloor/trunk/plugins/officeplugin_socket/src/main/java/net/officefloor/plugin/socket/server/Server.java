@@ -29,7 +29,7 @@ import net.officefloor.frame.spi.managedobject.source.ManagedObjectExecuteContex
  * {@link Server} to handle the input.
  * <p>
  * Required to be implemented by the handler provider.
- *
+ * 
  * @author Daniel Sagenschneider
  */
 public interface Server<CH extends ConnectionHandler> {
@@ -37,7 +37,7 @@ public interface Server<CH extends ConnectionHandler> {
 	/**
 	 * Provides the {@link Server} the {@link ManagedObjectExecuteContext} to
 	 * enable it to invoke {@link ProcessState} instances to process input.
-	 *
+	 * 
 	 * @param executeContext
 	 *            {@link ManagedObjectExecuteContext}.
 	 */
@@ -45,21 +45,28 @@ public interface Server<CH extends ConnectionHandler> {
 			ManagedObjectExecuteContext<Indexed> executeContext);
 
 	/**
+	 * Creates a {@link ConnectionHandler} for a new {@link Connection}.
+	 * 
+	 * @param connection
+	 *            A new {@link Connection} requiring handling.
+	 * @return {@link ConnectionHandler} to handle the new {@link Connection}.
+	 */
+	CH createConnectionHandler(Connection connection);
+
+	/**
 	 * <p>
-	 * Starts the processing the request identified by the
-	 * {@link ConnectionHandler} with the {@link Server}.
+	 * Starts the processing the request by the {@link Server}.
 	 * <p>
-	 * To process a stream of input have the {@link ConnectionHandler} complete
-	 * the {@link Request} with zero size and use the {@link Connection} passed
-	 * to the {@link ConnectionHandler}.
-	 *
+	 * To process a stream of input have the {@link ConnectionHandler} process
+	 * the request with zero size and use the {@link Connection} passed to the
+	 * {@link ConnectionHandler}.
+	 * 
 	 * @param connectionHandler
 	 *            {@link ConnectionHandler} for the {@link Connection}.
 	 * @param attachment
-	 *            Optional attachment provided by the {@link ConnectionHandler}
-	 *            specific to this request. May be <code>null</code>.
+	 *            Optional attachment for the request. May be <code>null</code>.
 	 * @throws IOException
-	 *             If fails to start processing the request.
+	 *             If fails to process request.
 	 */
 	void processRequest(CH connectionHandler, Object attachment)
 			throws IOException;

@@ -96,6 +96,8 @@ public class SupplierSourceContextImpl extends SourceContextImpl implements
 	/**
 	 * Initiate.
 	 * 
+	 * @param isLoadingType
+	 *            Indicates if loading type.
 	 * @param supplierName
 	 *            {@link OfficeFloorSupplier} name.
 	 * @param officeFloorLocation
@@ -105,11 +107,11 @@ public class SupplierSourceContextImpl extends SourceContextImpl implements
 	 * @param context
 	 *            {@link NodeContext}.
 	 */
-	public SupplierSourceContextImpl(String supplierName,
-			String officeFloorLocation, PropertyList propertyList,
-			NodeContext context) {
-		super(context.getSourceContext(), new PropertyListSourceProperties(
-				propertyList));
+	public SupplierSourceContextImpl(boolean isLoadingType,
+			String supplierName, String officeFloorLocation,
+			PropertyList propertyList, NodeContext context) {
+		super(isLoadingType, context.getSourceContext(),
+				new PropertyListSourceProperties(propertyList));
 		this.supplierName = supplierName;
 		this.officeFloorLocation = officeFloorLocation;
 		this.context = context;

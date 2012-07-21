@@ -345,7 +345,7 @@ public class OfficeNodeImpl extends AbstractNode implements OfficeNode {
 	public boolean loadOffice(OfficeSource officeSource, PropertyList properties) {
 
 		// Create the office source context
-		OfficeSourceContext context = new OfficeSourceContextImpl(
+		OfficeSourceContext context = new OfficeSourceContextImpl(false,
 				this.officeLocation, properties, this.context);
 
 		try {

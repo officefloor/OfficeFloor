@@ -35,6 +35,21 @@ import net.officefloor.frame.test.OfficeFrameTestCase;
 public class SourceContextTest extends OfficeFrameTestCase {
 
 	/**
+	 * Ensure appropriately indicate if loading type.
+	 */
+	public void testLoadingType() {
+
+		ClassLoader classLoader = Thread.currentThread()
+				.getContextClassLoader();
+
+		// Ensure correct indication of loading type
+		assertTrue("Should be loading type", new SourceContextImpl(true,
+				classLoader).isLoadingType());
+		assertFalse("Should be loading live configuration",
+				new SourceContextImpl(false, classLoader).isLoadingType());
+	}
+
+	/**
 	 * Ensure appropriate class loader.
 	 */
 	public void testClassLoader() {
@@ -43,7 +58,7 @@ public class SourceContextTest extends OfficeFrameTestCase {
 				.getContextClassLoader();
 
 		// Create the context
-		SourceContext context = new SourceContextImpl(classLoader);
+		SourceContext context = new SourceContextImpl(false, classLoader);
 
 		// Ensure correct class loader
 		assertSame("Incorrect class loader", classLoader,
@@ -56,8 +71,8 @@ public class SourceContextTest extends OfficeFrameTestCase {
 	public void testLoadOptionalClass() {
 
 		// Create the context
-		SourceContext context = new SourceContextImpl(Thread.currentThread()
-				.getContextClassLoader());
+		SourceContext context = new SourceContextImpl(false, Thread
+				.currentThread().getContextClassLoader());
 
 		// Ensure able to load class
 		assertEquals("Should load Object class", Object.class,
@@ -75,8 +90,8 @@ public class SourceContextTest extends OfficeFrameTestCase {
 	public void testLoadClass() {
 
 		// Create the context
-		SourceContext context = new SourceContextImpl(Thread.currentThread()
-				.getContextClassLoader());
+		SourceContext context = new SourceContextImpl(false, Thread
+				.currentThread().getContextClassLoader());
 
 		// Ensure able to load class
 		assertEquals("Should load Object class", Object.class,
@@ -98,8 +113,8 @@ public class SourceContextTest extends OfficeFrameTestCase {
 	public void testGetOptionalResource() {
 
 		// Create the context
-		SourceContext context = new SourceContextImpl(Thread.currentThread()
-				.getContextClassLoader());
+		SourceContext context = new SourceContextImpl(false, Thread
+				.currentThread().getContextClassLoader());
 
 		// Ensure able to load Object resource
 		assertNotNull(
@@ -119,8 +134,8 @@ public class SourceContextTest extends OfficeFrameTestCase {
 	public void testGetResource() {
 
 		// Create the context
-		SourceContext context = new SourceContextImpl(Thread.currentThread()
-				.getContextClassLoader());
+		SourceContext context = new SourceContextImpl(false, Thread
+				.currentThread().getContextClassLoader());
 
 		// Ensure able to load Object resource
 		assertNotNull(
@@ -166,8 +181,8 @@ public class SourceContextTest extends OfficeFrameTestCase {
 		this.replayMockObjects();
 
 		// Create context
-		SourceContext context = new SourceContextImpl(Thread.currentThread()
-				.getContextClassLoader(), source);
+		SourceContext context = new SourceContextImpl(false, Thread
+				.currentThread().getContextClassLoader(), source);
 
 		// Obtain from resource source
 		assertSame("Ensure obtain via resource source", resource,
@@ -224,11 +239,15 @@ public class SourceContextTest extends OfficeFrameTestCase {
 		properties.addProperty("NAME", "VALUE");
 
 		// Create context with the properties
-		SourceContext context = new SourceContextImpl(delegate, properties);
+		SourceContext context = new SourceContextImpl(true, delegate,
+				properties);
 
 		// Ensure the property is available
 		assertEquals("Property should be available", "VALUE",
 				context.getProperty("NAME"));
+
+		// Ensure indicate differently of loading type
+		assertTrue("Should now be loading type", context.isLoadingType());
 
 		// Ensure correct class loader
 		assertSame("Incorrect class loader", classLoader,

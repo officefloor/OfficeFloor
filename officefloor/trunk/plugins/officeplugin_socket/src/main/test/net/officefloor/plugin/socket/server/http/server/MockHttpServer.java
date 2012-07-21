@@ -41,6 +41,7 @@ import net.officefloor.frame.api.build.ManagedObjectBuilder;
 import net.officefloor.frame.api.build.ManagingOfficeBuilder;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.impl.spi.team.OnePersonTeam;
+import net.officefloor.frame.impl.spi.team.PassiveTeam;
 import net.officefloor.frame.impl.spi.team.WorkerPerTaskTeam;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
@@ -48,6 +49,7 @@ import net.officefloor.frame.spi.team.Team;
 import net.officefloor.frame.test.AbstractOfficeConstructTestCase;
 import net.officefloor.plugin.socket.server.http.source.HttpServerSocketManagedObjectSource;
 import net.officefloor.plugin.socket.server.http.source.HttpsServerSocketManagedObjectSource;
+import net.officefloor.plugin.socket.server.impl.AbstractServerSocketManagedObjectSource;
 import net.officefloor.plugin.socket.server.ssl.SslEngineConfigurator;
 import net.officefloor.plugin.socket.server.ssl.protocol.SslCommunicationProtocol;
 
@@ -171,8 +173,11 @@ public abstract class MockHttpServer extends AbstractOfficeConstructTestCase
 		// Initiate for starting the office floor
 		super.setUp();
 
+		// Ensure any previous is shutdown
+		AbstractServerSocketManagedObjectSource.closeConnectionManager();
+
 		// Specify the port
-		port = getAvailablePort();
+		this.port = getAvailablePort();
 
 		// Obtain the office name and builder
 		String officeName = this.getOfficeName();
@@ -199,8 +204,8 @@ public abstract class MockHttpServer extends AbstractOfficeConstructTestCase
 
 		// Add common properties
 		serverSocketBuilder.addProperty(
-				HttpServerSocketManagedObjectSource.PROPERTY_PORT, String
-						.valueOf(port));
+				HttpServerSocketManagedObjectSource.PROPERTY_PORT,
+				String.valueOf(port));
 		serverSocketBuilder.addProperty(
 				HttpServerSocketManagedObjectSource.PROPERTY_BUFFER_SIZE,
 				"1024");
@@ -213,11 +218,11 @@ public abstract class MockHttpServer extends AbstractOfficeConstructTestCase
 
 		// Register the necessary teams for socket listening
 		this.constructManagedObjectSourceTeam(MO_NAME, "accepter",
-				new OnePersonTeam("accepter", 100));
+				new WorkerPerTaskTeam("accepter"));
 		this.constructManagedObjectSourceTeam(MO_NAME, "listener",
-				new WorkerPerTaskTeam("Listener"));
+				new WorkerPerTaskTeam("listener"));
 		this.constructManagedObjectSourceTeam(MO_NAME, "cleanup",
-				new OnePersonTeam("cleanup", 100));
+				new PassiveTeam());
 
 		// Register the task to service the HTTP requests
 		HttpServicerTask task = servicerBuilder.buildServicer(MO_NAME, this);

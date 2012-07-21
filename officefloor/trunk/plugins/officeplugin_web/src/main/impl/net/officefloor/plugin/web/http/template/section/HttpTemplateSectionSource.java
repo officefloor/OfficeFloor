@@ -163,8 +163,8 @@ public class HttpTemplateSectionSource extends ClassSectionSource {
 		templateProperties
 				.addProperty(HttpTemplateWorkSource.PROPERTY_TEMPLATE_FILE,
 						templateLocation);
-		SourceContext templateContext = new SourceContextImpl(context,
-				templateProperties);
+		SourceContext templateContext = new SourceContextImpl(
+				context.isLoadingType(), context, templateProperties);
 		Reader templateContentReader = HttpTemplateWorkSource
 				.getHttpTemplateContent(templateContext);
 		StringBuilder templateContentBuffer = new StringBuilder();

@@ -27,7 +27,7 @@ import net.officefloor.plugin.socket.server.ConnectionHandler;
 import net.officefloor.plugin.socket.server.ConnectionHandlerContext;
 import net.officefloor.plugin.socket.server.IdleContext;
 import net.officefloor.plugin.socket.server.ReadContext;
-import net.officefloor.plugin.socket.server.ServerSocketHandler;
+import net.officefloor.plugin.socket.server.Server;
 import net.officefloor.plugin.socket.server.WriteContext;
 import net.officefloor.plugin.socket.server.ssl.SslConnection;
 import net.officefloor.plugin.socket.server.ssl.SslTaskExecutor;
@@ -72,11 +72,6 @@ public class SslConnectionHandler<CH extends ConnectionHandler> implements
 	private ConnectionHandlerContext connectionHandlerContext;
 
 	/**
-	 * {@link ReadContext} for additional read methods.
-	 */
-	private ReadContext readContext;
-
-	/**
 	 * Initiate.
 	 * 
 	 * @param connection
@@ -87,13 +82,12 @@ public class SslConnectionHandler<CH extends ConnectionHandler> implements
 	 *            {@link BufferSquirtFactory}.
 	 * @param taskExecutor
 	 *            {@link SslTaskExecutor}.
-	 * @param wrappedServerSocketHandler
-	 *            Wrapped {@link ServerSocketHandler}.
+	 * @param wrappedServer
+	 *            Wrapped {@link Server}.
 	 */
 	public SslConnectionHandler(Connection connection, SSLEngine engine,
 			BufferSquirtFactory bufferSquirtFactory,
-			SslTaskExecutor taskExecutor,
-			ServerSocketHandler<CH> wrappedServerSocketHandler) {
+			SslTaskExecutor taskExecutor, Server<CH> wrappedServer) {
 
 		// Creates the SSL connection
 		this.connection = new SslConnectionImpl(connection.getLock(),
@@ -103,7 +97,7 @@ public class SslConnectionHandler<CH extends ConnectionHandler> implements
 				bufferSquirtFactory, this, taskExecutor);
 
 		// Create the connection handler to wrap
-		this.wrappedConnectionHandler = wrappedServerSocketHandler
+		this.wrappedConnectionHandler = wrappedServer
 				.createConnectionHandler(this.connection);
 	}
 
@@ -146,7 +140,6 @@ public class SslConnectionHandler<CH extends ConnectionHandler> implements
 
 		// Always handle read even if no application data (stop timeouts)
 		this.connectionHandlerContext = context;
-		this.readContext = context;
 		this.wrappedConnectionHandler.handleRead(this);
 	}
 
@@ -244,11 +237,6 @@ public class SslConnectionHandler<CH extends ConnectionHandler> implements
 	public InputBufferStream getInputBufferStream() {
 		// Use the plain text input
 		return this.connection.getInputBufferStream();
-	}
-
-	@Override
-	public void processRequest(Object attachment) throws IOException {
-		this.readContext.processRequest(attachment);
 	}
 
 	/**

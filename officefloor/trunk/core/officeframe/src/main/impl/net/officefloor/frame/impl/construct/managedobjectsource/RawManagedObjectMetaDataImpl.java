@@ -260,7 +260,7 @@ public class RawManagedObjectMetaDataImpl<D extends Enum<D>, F extends Enum<F>>
 
 		// Create the context for the managed object source
 		ManagedObjectSourceContextImpl<h> context = new ManagedObjectSourceContextImpl<h>(
-				managedObjectSourceName, properties, sourceContext,
+				false, managedObjectSourceName, properties, sourceContext,
 				managingOfficeBuilder, officeBuilder);
 
 		try {

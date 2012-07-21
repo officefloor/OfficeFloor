@@ -67,11 +67,11 @@ public class TeamSourceStandAlone {
 		TS teamSource = teamSourceClass.newInstance();
 
 		// Create default source context
-		SourceContext sourceContext = new SourceContextImpl(Thread
+		SourceContext sourceContext = new SourceContextImpl(false, Thread
 				.currentThread().getContextClassLoader());
 
 		// Initialise the team source
-		TeamSourceContext context = new TeamSourceContextImpl(
+		TeamSourceContext context = new TeamSourceContextImpl(false,
 				teamSourceClass.getSimpleName(), this.properties, sourceContext);
 		teamSource.init(context);
 

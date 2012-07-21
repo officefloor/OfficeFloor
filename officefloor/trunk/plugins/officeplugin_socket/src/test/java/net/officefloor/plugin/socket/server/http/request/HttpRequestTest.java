@@ -68,7 +68,8 @@ public class HttpRequestTest extends AbstractOfficeConstructTestCase {
 		try {
 
 			// Create an instance of the test to obtain test methods
-			HttpRequestTest util = new HttpRequestTest(null, null, null);
+			HttpRequestTest util = new HttpRequestTest(null, null, null, false,
+					null);
 
 			// Obtain the file containing XML Unmarshaller configuration
 			File unmarshallerConfigFile = util.findFile(HttpRequestTest.class,
@@ -100,27 +101,18 @@ public class HttpRequestTest extends AbstractOfficeConstructTestCase {
 				}
 			};
 
-			// Start up the HTTP server
+			// Load the non-secure tests
 			final MockHttpServer httpServer = new MockHttpServer() {
 			};
-			httpServer.startup(httpServicerBuilder);
-			assertFalse("Server should not be secure", httpServer
-					.isServerSecure());
-
-			// Load the non-secure tests
 			loadTests("http", unmarshallerConfigFile.getParentFile(),
-					unmarshaller, httpServer, suite);
+					unmarshaller, httpServer, false, httpServicerBuilder, suite);
 
-			// Start up the HTTPS server
+			// Load the secure tests
 			final MockHttpServer httpsServer = new MockHttpServer() {
 			};
 			httpsServer.setupSecure();
-			httpsServer.startup(httpServicerBuilder);
-			assertTrue("Server should be secure", httpsServer.isServerSecure());
-
-			// Load the secure tests
 			loadTests("https", unmarshallerConfigFile.getParentFile(),
-					unmarshaller, httpsServer, suite);
+					unmarshaller, httpsServer, true, httpServicerBuilder, suite);
 
 			// Add a task to shutdown the servers
 			suite.addTest(new TestCase("Shutdown HTTP Server") {
@@ -154,25 +146,30 @@ public class HttpRequestTest extends AbstractOfficeConstructTestCase {
 	 *            {@link XmlUnmarshaller} to unmarshal the test.
 	 * @param server
 	 *            {@link MockHttpServer}.
+	 * @param isSecure
+	 *            Indicates if to be secure.
+	 * @param httpServicerBuilder
+	 *            {@link HttpServicerBuilder}.
 	 * @param suite
 	 *            {@link TestSuite} to add the tests.
 	 */
 	private static void loadTests(String testNamePrefix, File directory,
-			XmlUnmarshaller unmarshaller, MockHttpServer server, TestSuite suite)
-			throws Exception {
+			XmlUnmarshaller unmarshaller, MockHttpServer server,
+			boolean isSecure, HttpServicerBuilder httpServicerBuilder,
+			TestSuite suite) throws Exception {
 
 		// Obtain the tests
 		for (File file : directory.listFiles()) {
 
 			// Obtain the corresponding test name for the file
 			String testName = (testNamePrefix.length() == 0 ? ""
-					: testNamePrefix + ".")
-					+ file.getName();
+					: testNamePrefix + ".") + file.getName();
 
 			// Determine if child directory
 			if (file.isDirectory()) {
 				// Child directory, so find tests recursively
-				loadTests(testName, file, unmarshaller, server, suite);
+				loadTests(testName, file, unmarshaller, server, isSecure,
+						httpServicerBuilder, suite);
 
 			} else {
 				// File and ensure is a test file
@@ -188,7 +185,7 @@ public class HttpRequestTest extends AbstractOfficeConstructTestCase {
 
 				// Create the test
 				suite.addTest(new HttpRequestTest(testName, configuration,
-						server));
+						server, isSecure, httpServicerBuilder));
 			}
 		}
 	}
@@ -204,6 +201,16 @@ public class HttpRequestTest extends AbstractOfficeConstructTestCase {
 	private final MockHttpServer server;
 
 	/**
+	 * Indicates if the {@link MockHttpServer} is to be secure.
+	 */
+	private final boolean isSecure;
+
+	/**
+	 * {@link HttpServicerBuilder}.
+	 */
+	private final HttpServicerBuilder httpServicerBuilder;
+
+	/**
 	 * Instantiate.
 	 * 
 	 * @param testName
@@ -212,21 +219,32 @@ public class HttpRequestTest extends AbstractOfficeConstructTestCase {
 	 *            {@link RunConfig}.
 	 * @param server
 	 *            {@link MockHttpServer}.
+	 * @param isSecure
+	 *            Indicates if the {@link MockHttpServer} is to be secure.
+	 * @param httpServicerBuilder
+	 *            {@link HttpServicerBuilder}.
 	 */
 	public HttpRequestTest(String testName, RunConfig configuration,
-			MockHttpServer server) {
+			MockHttpServer server, boolean isSecure,
+			HttpServicerBuilder httpServicerBuilder) {
 		this.setName(testName);
 		this.configuration = configuration;
 		this.server = server;
+		this.isSecure = isSecure;
+		this.httpServicerBuilder = httpServicerBuilder;
 	}
 
 	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see junit.framework.TestCase#runTest()
+	 * ==================== TestCase =================================
 	 */
+
 	@Override
 	protected void runTest() throws Throwable {
+
+		// Start the server
+		this.server.startup(this.httpServicerBuilder);
+		assertEquals("Incorrect secureness for server", this.isSecure,
+				this.server.isServerSecure());
 
 		// Validate the configuration
 		assertTrue("Must have at least 1 communication",
@@ -271,8 +289,7 @@ public class HttpRequestTest extends AbstractOfficeConstructTestCase {
 				post.setEntity(new StringEntity(request.body));
 				method = post;
 			} else {
-				TestCase
-						.fail("Unknown request method '" + request.method + "'");
+				TestCase.fail("Unknown request method '" + request.method + "'");
 				return;
 			}
 
@@ -321,10 +338,10 @@ public class HttpRequestTest extends AbstractOfficeConstructTestCase {
 			System.out.println(actualResponseBody);
 
 			// Validate the response
-			assertEquals("Incorrect response status", response.status, status
-					.getStatusCode());
-			assertEquals("Incorrect status message", response.message, status
-					.getReasonPhrase());
+			assertEquals("Incorrect response status", response.status,
+					status.getStatusCode());
+			assertEquals("Incorrect status message", response.message,
+					status.getReasonPhrase());
 			assertEquals("Incorrect response HTTP version", response.version,
 					status.getProtocolVersion().toString());
 			for (HeaderConfig header : response.headers) {

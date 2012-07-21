@@ -283,8 +283,8 @@ public class ManagedObjectLoaderImpl implements ManagedObjectLoader {
 		OfficeConfiguration office = new OfficeBuilderImpl(officeName);
 		String namespaceName = null; // stops the name spacing
 		ManagedObjectSourceContext<F> sourceContext = new ManagedObjectSourceContextImpl<F>(
-				namespaceName, new PropertyListSourceProperties(propertyList),
-				this.nodeContext.getSourceContext(),
+				true, namespaceName, new PropertyListSourceProperties(
+						propertyList), this.nodeContext.getSourceContext(),
 				managingOffice.getBuilder(), office.getBuilder());
 
 		try {

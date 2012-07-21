@@ -18,6 +18,8 @@
 
 package net.officefloor.plugin.socket.server.impl;
 
+import java.nio.channels.Selector;
+
 /**
  * Tests the {@link SocketListener}.
  * 
@@ -47,14 +49,14 @@ public class SocketListenerTest extends AbstractWriteRead {
 	}
 
 	/**
-	 * Validates closes.
+	 * Validates handles closing connection.
 	 */
-	public void testClose() throws Exception {
+	public void testCloseConnection() throws Exception {
 		this.flagCloseConnection();
 		this.runSocketListener();
 		assertFalse("Key should be cancelled", this.selectionKey.isValid());
 		assertTrue("Channel should be closed", this.socketChannel.isClosed());
-		assertTrue("Selector should be closed", this.selector.isClosed());
+		assertFalse("Selector should still be open", this.selector.isClosed());
 	}
 
 	/**
@@ -73,7 +75,14 @@ public class SocketListenerTest extends AbstractWriteRead {
 		this.validateOutputToClient(RESPONSE);
 		assertFalse("Key should be cancelled", this.selectionKey.isValid());
 		assertTrue("Channel should be closed", this.socketChannel.isClosed());
-		assertTrue("Selector should be closed", this.selector.isClosed());
+		assertFalse("Selector should still be open", this.selector.isClosed());
+	}
+
+	/**
+	 * Ensure appropriately closes the {@link Selector}.
+	 */
+	public void testCloseSelector() {
+		fail("TODO handle closing the selector");
 	}
 
 }

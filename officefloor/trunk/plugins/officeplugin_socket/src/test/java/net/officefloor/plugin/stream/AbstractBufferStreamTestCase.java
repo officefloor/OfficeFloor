@@ -32,7 +32,7 @@ import net.officefloor.frame.test.OfficeFrameTestCase;
  *
  * @author Daniel Sagenschneider
  */
-public abstract class AbstractBufferStreamTest extends OfficeFrameTestCase {
+public abstract class AbstractBufferStreamTestCase extends OfficeFrameTestCase {
 
 	/**
 	 * {@link BufferStream} to test.
@@ -1497,7 +1497,7 @@ public abstract class AbstractBufferStreamTest extends OfficeFrameTestCase {
 			// Ensure contents are correct
 			byte[] actual = new byte[this.expected.length];
 			buffer.get(actual);
-			AbstractBufferStreamTest.assertEquals(this.expected, actual);
+			AbstractBufferStreamTestCase.assertEquals(this.expected, actual);
 		}
 	}
 
@@ -1614,7 +1614,7 @@ public abstract class AbstractBufferStreamTest extends OfficeFrameTestCase {
 				// Ensure contents are correct
 				byte[] actual = new byte[expectedContent.length];
 				buffer.get(actual);
-				AbstractBufferStreamTest.assertEquals(expectedContent, actual);
+				AbstractBufferStreamTestCase.assertEquals(expectedContent, actual);
 			}
 		}
 	}

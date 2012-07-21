@@ -210,6 +210,7 @@ public class OfficeFloorBuilderImpl implements OfficeFloorBuilder,
 
 		// Create and return the source context
 		return new SourceContextImpl(
+				false,
 				classLoader,
 				this.resourceSources
 						.toArray(new ResourceSource[this.resourceSources.size()]));

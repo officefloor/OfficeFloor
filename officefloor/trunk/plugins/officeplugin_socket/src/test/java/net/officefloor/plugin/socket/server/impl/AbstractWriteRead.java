@@ -24,22 +24,17 @@ import java.nio.channels.Selector;
 
 import junit.framework.TestCase;
 import net.officefloor.frame.api.build.Indexed;
+import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.api.execute.TaskContext;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.socket.server.Connection;
 import net.officefloor.plugin.socket.server.ConnectionHandler;
 import net.officefloor.plugin.socket.server.Server;
-import net.officefloor.plugin.socket.server.impl.ConnectionImpl;
-import net.officefloor.plugin.socket.server.impl.ConnectionManager;
-import net.officefloor.plugin.socket.server.impl.NonblockingSocketChannel;
-import net.officefloor.plugin.socket.server.impl.SelectorFactory;
-import net.officefloor.plugin.socket.server.impl.SocketListener;
-import net.officefloor.plugin.socket.server.impl.SocketListener.SocketListenerDependencies;
 import net.officefloor.plugin.stream.squirtfactory.HeapByteBufferSquirtFactory;
 
 /**
  * Abstract {@link TestCase} for setting up write/read testing.
- *
+ * 
  * @author Daniel Sagenschneider
  */
 public abstract class AbstractWriteRead extends OfficeFrameTestCase {
@@ -61,14 +56,23 @@ public abstract class AbstractWriteRead extends OfficeFrameTestCase {
 			this.selectionKey);
 
 	/**
+	 * {@link Server}.
+	 */
+	@SuppressWarnings("rawtypes")
+	protected final Server server = new MockServer(this.connectionHandler);
+
+	/**
+	 * {@link ConnectionImpl}.
+	 */
+	@SuppressWarnings("unchecked")
+	protected final ConnectionImpl<ConnectionHandler> connection = new ConnectionImpl<ConnectionHandler>(
+			this.socketChannel, this.server,
+			new HeapByteBufferSquirtFactory(64));
+
+	/**
 	 * Test {@link Selector}.
 	 */
 	protected final MockSelector selector = new MockSelector(this.selectionKey);
-
-	/**
-	 * {@link Server}.
-	 */
-	private final Server<ConnectionHandler> server = new MockServer();
 
 	/**
 	 * {@link SelectorFactory}.
@@ -84,27 +88,21 @@ public abstract class AbstractWriteRead extends OfficeFrameTestCase {
 	 * {@link SocketListener}.
 	 */
 	protected final SocketListener<ConnectionHandler> socketListener = new SocketListener<ConnectionHandler>(
-			this.selectorFactory, this.server, 1);
-
-	/**
-	 * {@link ConnectionImpl}.
-	 */
-	protected final ConnectionImpl<ConnectionHandler> connection = new ConnectionImpl<ConnectionHandler>(
-			this.socketChannel, new MockServerSocketHandler(
-					this.connectionHandler),
-			new HeapByteBufferSquirtFactory(64));
-
-	/**
-	 * {@link ConnectionManager}.
-	 */
-	private final ConnectionManager<ConnectionHandler> connectionManager = new ConnectionManager<ConnectionHandler>(
-			this.selectorFactory, this.server, 1);
+			this.selectorFactory);
 
 	/**
 	 * {@link TaskContext}.
 	 */
-	private final TaskContext<ConnectionManager<ConnectionHandler>, SocketListenerDependencies, Indexed> taskContext = new MockTaskContext(
-			this.connectionManager, this.connection);
+	private final TaskContext<SocketListener<ConnectionHandler>, None, Indexed> taskContext = new MockTaskContext();
+
+	@Override
+	protected void setUp() throws Exception {
+		// Ensure socket listener selector open
+		this.socketListener.openSelector();
+
+		// Associate connection to selection key
+		this.selectionKey.attach(this.connection);
+	}
 
 	/**
 	 * Runs the {@link SocketListener}.
@@ -115,7 +113,7 @@ public abstract class AbstractWriteRead extends OfficeFrameTestCase {
 
 	/**
 	 * Mocks inputting text from the client.
-	 *
+	 * 
 	 * @param text
 	 *            Text from the client.
 	 */
@@ -125,7 +123,7 @@ public abstract class AbstractWriteRead extends OfficeFrameTestCase {
 
 	/**
 	 * Validates the read on the {@link Connection}.
-	 *
+	 * 
 	 * @param text
 	 *            Expected text.
 	 */
@@ -148,7 +146,7 @@ public abstract class AbstractWriteRead extends OfficeFrameTestCase {
 
 	/**
 	 * Writes data to the {@link Connection}.
-	 *
+	 * 
 	 * @param text
 	 *            Text to be written to the {@link Connection}.
 	 */
@@ -170,7 +168,7 @@ public abstract class AbstractWriteRead extends OfficeFrameTestCase {
 
 	/**
 	 * Validates the data is written to the client.
-	 *
+	 * 
 	 * @param text
 	 *            Text expected to be written to the client.
 	 */

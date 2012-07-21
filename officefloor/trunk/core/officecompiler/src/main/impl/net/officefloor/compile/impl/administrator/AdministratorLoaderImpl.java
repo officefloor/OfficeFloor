@@ -251,7 +251,7 @@ public class AdministratorLoaderImpl implements AdministratorLoader {
 		SourceProperties properties = new PropertyListSourceProperties(
 				propertyList);
 		AdministratorSourceContext context = new AdministratorSourceContextImpl(
-				properties, sourceContext);
+				true, properties, sourceContext);
 
 		try {
 			// Initialise the administrator source

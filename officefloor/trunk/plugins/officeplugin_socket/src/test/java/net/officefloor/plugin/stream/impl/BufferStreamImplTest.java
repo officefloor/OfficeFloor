@@ -22,7 +22,7 @@ import java.nio.ByteBuffer;
 import java.util.LinkedList;
 import java.util.List;
 
-import net.officefloor.plugin.stream.AbstractBufferStreamTest;
+import net.officefloor.plugin.stream.AbstractBufferStreamTestCase;
 import net.officefloor.plugin.stream.BufferSquirt;
 import net.officefloor.plugin.stream.BufferSquirtFactory;
 import net.officefloor.plugin.stream.BufferStream;
@@ -32,7 +32,7 @@ import net.officefloor.plugin.stream.BufferStream;
  *
  * @author Daniel Sagenschneider
  */
-public class BufferStreamImplTest extends AbstractBufferStreamTest implements
+public class BufferStreamImplTest extends AbstractBufferStreamTestCase implements
 		BufferSquirtFactory {
 
 	/**

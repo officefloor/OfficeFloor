@@ -34,8 +34,9 @@ public class TcpConnectionHandlerTest extends AbstractWriteRead {
 	/**
 	 * {@link TcpConnectionHandler}.
 	 */
+	@SuppressWarnings("unchecked")
 	private TcpConnectionHandler tcpConnectionHandler = new TcpConnectionHandler(
-			this.connection, 1000);
+			this.server, this.connection, 1000);
 
 	/**
 	 * {@link ServerTcpConnection} which is implemented by the
@@ -80,7 +81,7 @@ public class TcpConnectionHandlerTest extends AbstractWriteRead {
 		this.runSocketListener();
 		assertFalse("Key should be cancelled", this.selectionKey.isValid());
 		assertTrue("Channel should be closed", this.socketChannel.isClosed());
-		assertTrue("Selector should be closed", this.selector.isClosed());
+		assertFalse("Selector should still be open", this.selector.isClosed());
 	}
 
 	/**
@@ -98,7 +99,7 @@ public class TcpConnectionHandlerTest extends AbstractWriteRead {
 		this.validateOutputToClient(RESPONSE);
 		assertFalse("Key should be cancelled", this.selectionKey.isValid());
 		assertTrue("Channel should be closed", this.socketChannel.isClosed());
-		assertTrue("Selector should be closed", this.selector.isClosed());
+		assertFalse("Selector should still be open", this.selector.isClosed());
 	}
 
 	/**

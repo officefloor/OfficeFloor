@@ -18,8 +18,6 @@
 
 package net.officefloor.plugin.socket.server;
 
-import java.io.IOException;
-
 import net.officefloor.plugin.stream.InputBufferStream;
 
 /**
@@ -35,16 +33,5 @@ public interface ReadContext extends ConnectionHandlerContext {
 	 * @return {@link InputBufferStream}.
 	 */
 	InputBufferStream getInputBufferStream();
-
-	/**
-	 * Flags that the request has been received. This will subsequently have the
-	 * {@link Server} process the request.
-	 *
-	 * @param attachment
-	 *            Optional attachment for the request. May be <code>null</code>.
-	 * @throws IOException
-	 *             If fails to process request.
-	 */
-	void processRequest(Object attachment) throws IOException;
 
 }

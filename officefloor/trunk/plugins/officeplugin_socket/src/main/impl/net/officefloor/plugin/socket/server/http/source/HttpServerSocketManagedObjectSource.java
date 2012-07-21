@@ -27,7 +27,7 @@ import net.officefloor.compile.ManagedObjectSourceService;
 import net.officefloor.compile.spi.section.SectionInput;
 import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.build.None;
-import net.officefloor.frame.impl.spi.team.OnePersonTeamSource;
+import net.officefloor.frame.impl.spi.team.PassiveTeamSource;
 import net.officefloor.frame.impl.spi.team.WorkerPerTaskTeamSource;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 import net.officefloor.plugin.socket.server.CommunicationProtocol;
@@ -65,13 +65,14 @@ public class HttpServerSocketManagedObjectSource extends
 			@Override
 			public void wire(ManagedObjectSourceWirerContext context) {
 
-				// Provide teams
-				context.mapTeam("accepter", OnePersonTeamSource.class.getName());
-
-				// TODO map these to singleton teams via AutoWire
+				// Provide thread per each accepter and listener
+				context.mapTeam("accepter",
+						WorkerPerTaskTeamSource.class.getName());
 				context.mapTeam("listener",
 						WorkerPerTaskTeamSource.class.getName());
-				context.mapTeam("cleanup", OnePersonTeamSource.class.getName());
+
+				// Clean up (without thread context switch)
+				context.mapTeam("cleanup", PassiveTeamSource.class.getName());
 
 				// Map request handler
 				context.mapFlow("HANDLE_HTTP_REQUEST", sectionName,

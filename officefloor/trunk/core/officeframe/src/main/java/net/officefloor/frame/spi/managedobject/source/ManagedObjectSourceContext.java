@@ -33,12 +33,13 @@ import net.officefloor.frame.spi.source.SourceContext;
  * 
  * @author Daniel Sagenschneider
  */
-public interface ManagedObjectSourceContext<F extends Enum<F>> extends SourceContext {
+public interface ManagedObjectSourceContext<F extends Enum<F>> extends
+		SourceContext {
 
 	/**
 	 * <p>
-	 * Links in a {@link JobSequence} by specifying the first {@link Task} of the
-	 * {@link JobSequence}.
+	 * Links in a {@link JobSequence} by specifying the first {@link Task} of
+	 * the {@link JobSequence}.
 	 * <p>
 	 * The {@link Task} must be registered by this {@link ManagedObjectSource}.
 	 * 
@@ -54,8 +55,8 @@ public interface ManagedObjectSourceContext<F extends Enum<F>> extends SourceCon
 
 	/**
 	 * <p>
-	 * Links in a {@link JobSequence} by specifying the first {@link Task} of the
-	 * {@link JobSequence}.
+	 * Links in a {@link JobSequence} by specifying the first {@link Task} of
+	 * the {@link JobSequence}.
 	 * <p>
 	 * The {@link Task} must be registered by this {@link ManagedObjectSource}.
 	 * 

@@ -33,7 +33,7 @@ import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.api.execute.TaskContext;
 import net.officefloor.frame.util.AbstractSingleTask;
 import net.officefloor.plugin.socket.server.ConnectionHandler;
-import net.officefloor.plugin.socket.server.ServerSocketHandler;
+import net.officefloor.plugin.socket.server.Server;
 import net.officefloor.plugin.stream.BufferSquirtFactory;
 
 /**
@@ -41,16 +41,8 @@ import net.officefloor.plugin.stream.BufferSquirtFactory;
  * 
  * @author Daniel Sagenschneider
  */
-public class ServerSocketAccepter<CH extends ConnectionHandler>
-		extends
-		AbstractSingleTask<ServerSocketAccepter<CH>, None, ServerSocketAccepter.ServerSocketAccepterFlows> {
-
-	/**
-	 * Flow instances for the {@link ServerSocketAccepter}.
-	 */
-	public static enum ServerSocketAccepterFlows {
-		LISTEN
-	}
+public class ServerSocketAccepter<CH extends ConnectionHandler> extends
+		AbstractSingleTask<ServerSocketAccepter<CH>, None, None> {
 
 	/**
 	 * {@link ConnectionManager}.
@@ -63,38 +55,14 @@ public class ServerSocketAccepter<CH extends ConnectionHandler>
 	private final BufferSquirtFactory bufferSquirtFactory;
 
 	/**
-	 * {@link ServerSocketHandler}.
+	 * {@link Server} for the {@link ServerSocket}.
 	 */
-	private final ServerSocketHandler<CH> serverSocketHandler;
+	private final Server<CH> server;
 
 	/**
 	 * {@link InetSocketAddress} to listen for connections.
 	 */
-	private InetSocketAddress serverSocketAddress;
-
-	/**
-	 * Initiate.
-	 * 
-	 * @param serverSocketAddress
-	 *            {@link InetSocketAddress} to listen for connections.
-	 * @param serverSocketHandler
-	 *            {@link ServerSocketHandler}.
-	 * @param connectionManager
-	 *            {@link ConnectionManager}.
-	 * @param bufferSquirtFactory
-	 *            {@link BufferSquirtFactory}.
-	 * @throws IOException
-	 *             If fails to set up the {@link ServerSocket}.
-	 */
-	public ServerSocketAccepter(InetSocketAddress serverSocketAddress,
-			ServerSocketHandler<CH> serverSocketHandler,
-			ConnectionManager<CH> connectionManager,
-			BufferSquirtFactory bufferSquirtFactory) throws IOException {
-		this.serverSocketHandler = serverSocketHandler;
-		this.connectionManager = connectionManager;
-		this.bufferSquirtFactory = bufferSquirtFactory;
-		this.serverSocketAddress = serverSocketAddress;
-	}
+	private final InetSocketAddress serverSocketAddress;
 
 	/**
 	 * {@link ServerSocketChannel} to listen for connections.
@@ -117,19 +85,42 @@ public class ServerSocketAccepter<CH extends ConnectionHandler>
 	private volatile boolean isUnbound = false;
 
 	/**
+	 * Initiate.
+	 * 
+	 * @param serverSocketAddress
+	 *            {@link InetSocketAddress} to listen for connections.
+	 * @param server
+	 *            {@link Server} for the {@link ServerSocket}.
+	 * @param connectionManager
+	 *            {@link ConnectionManager}.
+	 * @param bufferSquirtFactory
+	 *            {@link BufferSquirtFactory}.
+	 * @throws IOException
+	 *             If fails to set up the {@link ServerSocket}.
+	 */
+	public ServerSocketAccepter(InetSocketAddress serverSocketAddress,
+			Server<CH> server, ConnectionManager<CH> connectionManager,
+			BufferSquirtFactory bufferSquirtFactory) throws IOException {
+		this.server = server;
+		this.connectionManager = connectionManager;
+		this.bufferSquirtFactory = bufferSquirtFactory;
+		this.serverSocketAddress = serverSocketAddress;
+	}
+
+	/**
 	 * Opens and binds the {@link ServerSocketChannel}.
 	 * 
 	 * @throws IOException
 	 *             {@link IOException}.
 	 */
-	public void bindToSocket() throws IOException {
+	void bindToSocket() throws IOException {
 
 		// Bind to the socket to start listening
 		this.channel = ServerSocketChannel.open();
 		this.channel.configureBlocking(false);
 		// TODO make the ServerSocket bind backlog configurable
 		this.channel.socket().bind(this.serverSocketAddress, 1000);
-		
+
 		// Register the channel with the selector
 		this.selector = Selector.open();
 		this.channel.register(this.selector, SelectionKey.OP_ACCEPT);
@@ -138,7 +129,7 @@ public class ServerSocketAccepter<CH extends ConnectionHandler>
 	/**
 	 * Unbinds from the {@link ServerSocketChannel}.
 	 */
-	public void unbindFromSocket() {
+	void unbindFromSocket() {
 
 		// Flag to complete processing
 		this.isComplete = true;
@@ -168,14 +159,18 @@ public class ServerSocketAccepter<CH extends ConnectionHandler>
 
 	@Override
 	public Object doTask(
-			TaskContext<ServerSocketAccepter<CH>, None, ServerSocketAccepterFlows> context)
+			TaskContext<ServerSocketAccepter<CH>, None, None> context)
 			throws Exception {
 
-		// Loop accepting connections
-		for (;;) {
+		// Flag to loop forever (or until told to accepting connections)
+		context.setComplete(false);
 
-			// Wait some time for a connection (10 seconds)
-			if (this.selector.select(10000) == 0) {
+		// Wait some time for a connection (10 seconds)
+		int numberSelected = this.selector.select(10000);
+
+		// Synchronized as may be called by differing threads
+		synchronized (this) {
+			if (numberSelected == 0) {
 
 				// Determine if complete
 				boolean isComplete = this.isComplete;
@@ -217,17 +212,16 @@ public class ServerSocketAccepter<CH extends ConnectionHandler>
 
 							// Flag socket as unblocking
 							socketChannel.configureBlocking(false);
-							
+
 							// Configure the socket
 							Socket socket = socketChannel.socket();
 							socket.setTcpNoDelay(true);
 							socket.setSoLinger(false, 0);
-							
+
 							// Create the connection
 							ConnectionImpl<CH> connection = new ConnectionImpl<CH>(
 									new NonblockingSocketChannelImpl(
-											socketChannel),
-									this.serverSocketHandler,
+											socketChannel), this.server,
 									this.bufferSquirtFactory);
 
 							// Register the connection for management
@@ -238,6 +232,9 @@ public class ServerSocketAccepter<CH extends ConnectionHandler>
 				}
 			}
 		}
+
+		// No further tasks as should loop until shutdown
+		return null;
 	}
 
 	/**

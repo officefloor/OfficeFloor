@@ -18,26 +18,28 @@
 
 package net.officefloor.plugin.socket.server.tcp.protocol;
 
+import java.io.IOException;
+
 import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.build.None;
+import net.officefloor.frame.spi.managedobject.source.ManagedObjectExecuteContext;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceContext;
 import net.officefloor.frame.spi.managedobject.source.impl.AbstractAsyncManagedObjectSource.MetaDataContext;
 import net.officefloor.frame.spi.managedobject.source.impl.AbstractAsyncManagedObjectSource.SpecificationContext;
 import net.officefloor.plugin.socket.server.CommunicationProtocol;
 import net.officefloor.plugin.socket.server.Connection;
 import net.officefloor.plugin.socket.server.Server;
-import net.officefloor.plugin.socket.server.ServerSocketHandler;
 import net.officefloor.plugin.socket.server.tcp.ServerTcpConnection;
 import net.officefloor.plugin.stream.BufferSquirtFactory;
 
 /**
  * TCP {@link CommunicationProtocol}.
- *
+ * 
  * @author Daniel Sagenschneider
  */
 public class TcpCommunicationProtocol implements
 		CommunicationProtocol<TcpConnectionHandler>,
-		ServerSocketHandler<TcpConnectionHandler> {
+		Server<TcpConnectionHandler> {
 
 	/**
 	 * Property to obtain the maximum idle time before the {@link Connection} is
@@ -55,6 +57,11 @@ public class TcpCommunicationProtocol implements
 	 */
 	private int newConnectionFlowIndex;
 
+	/**
+	 * {@link ManagedObjectExecuteContext}.
+	 */
+	private ManagedObjectExecuteContext<Indexed> executeContext;
+
 	/*
 	 * =================== CommunicationProtocol ==============================
 	 */
@@ -65,7 +72,7 @@ public class TcpCommunicationProtocol implements
 	}
 
 	@Override
-	public ServerSocketHandler<TcpConnectionHandler> createServerSocketHandler(
+	public Server<TcpConnectionHandler> createServer(
 			MetaDataContext<None, Indexed> context,
 			BufferSquirtFactory bufferSquirtFactory) throws Exception {
 		ManagedObjectSourceContext<Indexed> mosContext = context
@@ -92,17 +99,26 @@ public class TcpCommunicationProtocol implements
 	}
 
 	/*
-	 * ======================= ServerSocketHandler ===========================
+	 * ======================= Server ===========================
 	 */
 
 	@Override
-	public Server<TcpConnectionHandler> createServer() {
-		return new TcpServer(this.newConnectionFlowIndex);
+	public void setManagedObjectExecuteContext(
+			ManagedObjectExecuteContext<Indexed> executeContext) {
+		this.executeContext = executeContext;
 	}
 
 	@Override
 	public TcpConnectionHandler createConnectionHandler(Connection connection) {
-		return new TcpConnectionHandler(connection, this.maxIdleTime);
+		return new TcpConnectionHandler(this, connection, this.maxIdleTime);
+	}
+
+	@Override
+	public void processRequest(TcpConnectionHandler connectionHandler,
+			Object attachment) throws IOException {
+		// Let connection handler invoke as need only once for streaming content
+		connectionHandler.invokeProcess(this.newConnectionFlowIndex,
+				this.executeContext);
 	}
 
 }

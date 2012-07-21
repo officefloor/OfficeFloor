@@ -18,23 +18,26 @@
 
 package net.officefloor.plugin.socket.server.impl;
 
+import java.io.IOException;
 import java.net.InetSocketAddress;
+import java.nio.channels.Selector;
 import java.nio.channels.ServerSocketChannel;
 
 import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.build.None;
-import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
+import net.officefloor.frame.api.execute.TaskContext;
+import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectExecuteContext;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceContext;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectTaskBuilder;
 import net.officefloor.frame.spi.managedobject.source.impl.AbstractManagedObjectSource;
+import net.officefloor.frame.util.AbstractSingleTask;
 import net.officefloor.plugin.socket.server.CommunicationProtocol;
+import net.officefloor.plugin.socket.server.Connection;
 import net.officefloor.plugin.socket.server.ConnectionHandler;
 import net.officefloor.plugin.socket.server.Server;
-import net.officefloor.plugin.socket.server.ServerSocketHandler;
-import net.officefloor.plugin.socket.server.impl.SocketListener.SocketListenerDependencies;
 import net.officefloor.plugin.stream.BufferSquirtFactory;
 import net.officefloor.plugin.stream.squirtfactory.HeapByteBufferSquirtFactory;
 
@@ -60,6 +63,105 @@ public abstract class AbstractServerSocketManagedObjectSource<CH extends Connect
 	 * Maximum connections property name.
 	 */
 	public static final String PROPERTY_MAXIMUM_CONNECTIONS_PER_LISTENER = "max.connections.per.listener";
+
+	/**
+	 * Singleton {@link ConnectionManager} for all {@link Connection} instances.
+	 */
+	private static ConnectionManager<?> singletonConnectionManager;
+
+	/**
+	 * Obtains the {@link ConnectionManager}.
+	 * 
+	 * @param mosContext
+	 *            {@link ManagedObjectSourceContext}.
+	 * @return {@link ConnectionManager}.
+	 */
+	@SuppressWarnings({ "rawtypes", "unchecked" })
+	private static synchronized ConnectionManager getConnectionManager(
+			ManagedObjectSourceContext<Indexed> mosContext,
+			SelectorFactory selectorFactory) {
+
+		// Lazy create the singleton connection manager
+		if ((!mosContext.isLoadingType())
+				&& (singletonConnectionManager == null)) {
+
+			// One socket lister per processor to spread load
+			int numberOfSocketListeners = Runtime.getRuntime()
+					.availableProcessors();
+
+			// Create the socket listeners
+			SocketListener[] socketListeners = new SocketListener[numberOfSocketListeners];
+			for (int i = 0; i < socketListeners.length; i++) {
+
+				// Create the socket listener
+				SocketListener socketListener = new SocketListener(
+						selectorFactory);
+
+				// Register the socket listener
+				socketListeners[i] = socketListener;
+
+				// Register the listening of connections
+				String listenerName = "listener-" + i;
+				ManagedObjectTaskBuilder listenerTask = mosContext.addWork(
+						listenerName, socketListener).addTask(listenerName,
+						socketListener);
+				listenerTask.setTeam("listener");
+
+				// Flag to start listener on server start up
+				mosContext.addStartupTask(listenerName, listenerName);
+			}
+
+			// Create the connection manager
+			singletonConnectionManager = new ConnectionManager(socketListeners);
+		}
+
+		// Provide dummy task for consistency across all server sockets
+		AbstractSingleTask<Work, None, None> dummy = new AbstractSingleTask<Work, None, None>() {
+			@Override
+			public Object doTask(TaskContext<Work, None, None> context)
+					throws Throwable {
+				throw new IllegalStateException(
+						"Dummy auto-wire listener task should not be invoked");
+			}
+		};
+		mosContext.addWork("SetupAutoWireListener", dummy)
+				.addTask("SetupAutoWireListener", dummy).setTeam("listener");
+
+		// Return the singleton connection manager
+		return singletonConnectionManager;
+	}
+
+	/**
+	 * Opens the {@link Selector} instances for the {@link SocketListener}
+	 * instances.
+	 * 
+	 * @throws IOException
+	 *             If fails to open all the {@link Selector} instances.
+	 */
+	private static synchronized void openSocketListenerSelectors()
+			throws IOException {
+		// Should be created at this time
+		singletonConnectionManager.openSocketListenerSelectors();
+	}
+
+	/**
+	 * <p>
+	 * Closes the possible open {@link ConnectionManager} and releases all
+	 * {@link Selector} instances for the {@link SocketListener} instances.
+	 * <p>
+	 * Made public so that tests may use to close.
+	 */
+	public static synchronized void closeConnectionManager() {
+
+		// Determine if active connection manager
+		if (singletonConnectionManager != null) {
+			// Close the socket listener selectors
+			singletonConnectionManager.closeSocketListenerSelectors();
+		}
+
+		// Close (release) the connection manager to create again
+		singletonConnectionManager = null;
+	}
 
 	/**
 	 * {@link SelectorFactory}.
@@ -156,6 +258,7 @@ public abstract class AbstractServerSocketManagedObjectSource<CH extends Connect
 	}
 
 	@Override
+	@SuppressWarnings("unchecked")
 	protected void loadMetaData(MetaDataContext<None, Indexed> context)
 			throws Exception {
 
@@ -167,49 +270,30 @@ public abstract class AbstractServerSocketManagedObjectSource<CH extends Connect
 		int port = Integer.parseInt(mosContext.getProperty(PROPERTY_PORT));
 		final int bufferSize = Integer.parseInt(mosContext.getProperty(
 				PROPERTY_BUFFER_SIZE, "1024"));
-		int maxConn = Integer.parseInt(mosContext.getProperty(
-				PROPERTY_MAXIMUM_CONNECTIONS_PER_LISTENER,
-				String.valueOf(SocketListener.UNBOUNDED_MAX_CONNECTIONS)));
+
+		// Obtain the connection manager
+		ConnectionManager<CH> connectionManager = getConnectionManager(
+				mosContext, this.selectorFactory);
 
 		// Create the buffer squirt factory
 		BufferSquirtFactory bufferSquirtFactory = new HeapByteBufferSquirtFactory(
 				bufferSize);
 
-		// Create the server socket handler and create the server
-		ServerSocketHandler<CH> serverSocketHandler = this.communicationProtocol
-				.createServerSocketHandler(context, bufferSquirtFactory);
-		this.server = serverSocketHandler.createServer();
-
-		// Create the connection manager
-		ConnectionManager<CH> connectionManager = new ConnectionManager<CH>(
-				this.selectorFactory, this.server, maxConn);
+		// Create the server
+		this.server = this.communicationProtocol.createServer(context,
+				bufferSquirtFactory);
 
 		// Register the accepter of connections
 		this.serverSocketAccepter = new ServerSocketAccepter<CH>(
-				new InetSocketAddress(port), serverSocketHandler,
-				connectionManager, bufferSquirtFactory);
-		ManagedObjectTaskBuilder<None, ServerSocketAccepter.ServerSocketAccepterFlows> accepterTask = mosContext
-				.addWork("accepter", this.serverSocketAccepter).addTask(
-						"accepter", this.serverSocketAccepter);
+				new InetSocketAddress(port), this.server, connectionManager,
+				bufferSquirtFactory);
+		ManagedObjectTaskBuilder<None, None> accepterTask = mosContext.addWork(
+				"accepter", this.serverSocketAccepter).addTask("accepter",
+				this.serverSocketAccepter);
 		accepterTask.setTeam("accepter");
-		accepterTask.linkFlow(
-				ServerSocketAccepter.ServerSocketAccepterFlows.LISTEN,
-				"listener", "listener",
-				FlowInstigationStrategyEnum.ASYNCHRONOUS, ConnectionImpl.class);
-
-		// Register the listening of connections
-		ManagedObjectTaskBuilder<SocketListenerDependencies, Indexed> listenerTask = mosContext
-				.addWork("listener", connectionManager).addTask("listener",
-						connectionManager);
-		listenerTask.linkParameter(SocketListenerDependencies.CONNECTION,
-				ConnectionImpl.class);
-		listenerTask.setTeam("listener");
 
 		// Flag to start accepter on server start up
 		mosContext.addStartupTask("accepter", "accepter");
-		
-		// TODO register the listener tasks on server start up
-		
 	}
 
 	@Override
@@ -218,7 +302,10 @@ public abstract class AbstractServerSocketManagedObjectSource<CH extends Connect
 		// Make the execute context available to the server
 		this.server.setManagedObjectExecuteContext(context);
 
-		// Bind to socket to listen for connections
+		// Open selectors for socket listeners
+		openSocketListenerSelectors();
+
+		// Bind to server socket to accept connections
 		this.serverSocketAccepter.bindToSocket();
 	}
 
@@ -233,6 +320,9 @@ public abstract class AbstractServerSocketManagedObjectSource<CH extends Connect
 	public void stop() {
 		// Unbind acceptor socket to listen for new connections
 		this.serverSocketAccepter.unbindFromSocket();
+
+		// Close connection manager and all socket listener selectors
+		closeConnectionManager();
 	}
 
 }
