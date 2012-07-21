@@ -26,31 +26,31 @@ import net.officefloor.plugin.stream.BufferSquirtFactory;
 
 /**
  * Provides implementation of a communication protocol.
- *
+ * 
  * @author Daniel Sagenschneider
  */
 public interface CommunicationProtocol<CH extends ConnectionHandler> {
 
 	/**
 	 * Loads any specifications for this communication protocol.
-	 *
+	 * 
 	 * @param context
 	 *            {@link SpecificationContext}.
 	 */
 	void loadSpecification(SpecificationContext context);
 
 	/**
-	 * Creates the {@link ServerSocketHandler}.
-	 *
+	 * Creates the {@link Server}.
+	 * 
 	 * @param context
 	 *            {@link MetaDataContext}.
 	 * @param bufferSquirtFactory
 	 *            {@link BufferSquirtFactory}.
+	 * @return {@link Server}.
 	 * @throws Exception
-	 *             If fails to create the {@link ServerSocketHandler}.
+	 *             If fails to create the {@link Server}.
 	 */
-	ServerSocketHandler<CH> createServerSocketHandler(
-			MetaDataContext<None, Indexed> context,
+	Server<CH> createServer(MetaDataContext<None, Indexed> context,
 			BufferSquirtFactory bufferSquirtFactory) throws Exception;
 
 }

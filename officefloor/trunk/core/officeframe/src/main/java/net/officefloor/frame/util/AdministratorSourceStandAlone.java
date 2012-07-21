@@ -69,12 +69,12 @@ public class AdministratorSourceStandAlone {
 		AS administratorSource = administratorSourceClass.newInstance();
 
 		// Create the source context
-		SourceContext sourceContext = new SourceContextImpl(Thread
+		SourceContext sourceContext = new SourceContextImpl(false, Thread
 				.currentThread().getContextClassLoader());
 
 		// Initialise the administrator source
 		AdministratorSourceContext context = new AdministratorSourceContextImpl(
-				this.properties, sourceContext);
+				false, this.properties, sourceContext);
 		administratorSource.init(context);
 
 		// Return the initialised administrator source

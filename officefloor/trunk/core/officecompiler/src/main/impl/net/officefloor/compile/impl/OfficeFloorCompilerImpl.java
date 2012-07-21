@@ -436,7 +436,8 @@ public class OfficeFloorCompilerImpl extends OfficeFloorCompiler implements
 	public SourceContext getSourceContext() {
 		// Ensure have source context
 		if (this.sourceContext == null) {
-			this.sourceContext = new SourceContextImpl(this.getClassLoader(),
+			this.sourceContext = new SourceContextImpl(false,
+					this.getClassLoader(),
 					this.resourceSources
 							.toArray(new ResourceSource[this.resourceSources
 									.size()]));

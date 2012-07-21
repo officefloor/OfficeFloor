@@ -227,8 +227,8 @@ public class WorkLoaderImpl implements WorkLoader {
 		}
 
 		// Create the work source context
-		WorkSourceContext context = new WorkSourceContextImpl(propertyList,
-				this.nodeContext);
+		WorkSourceContext context = new WorkSourceContextImpl(true,
+				propertyList, this.nodeContext);
 
 		// Create the work type builder
 		WorkTypeImpl<W> workType = new WorkTypeImpl<W>();

@@ -40,7 +40,6 @@ import net.officefloor.plugin.socket.server.ConnectionHandler;
 import net.officefloor.plugin.socket.server.IdleContext;
 import net.officefloor.plugin.socket.server.ReadContext;
 import net.officefloor.plugin.socket.server.Server;
-import net.officefloor.plugin.socket.server.ServerSocketHandler;
 import net.officefloor.plugin.socket.server.WriteContext;
 import net.officefloor.plugin.stream.BufferSquirtFactory;
 
@@ -50,8 +49,7 @@ import net.officefloor.plugin.stream.BufferSquirtFactory;
  * @author Daniel Sagenschneider
  */
 public class ServerSocketTest extends AbstractOfficeConstructTestCase implements
-		ServerSocketHandler<ConnectionHandler>, Server<ConnectionHandler>,
-		ConnectionHandler {
+		Server<ConnectionHandler>, ConnectionHandler {
 
 	/**
 	 * Request message.
@@ -153,12 +151,47 @@ public class ServerSocketTest extends AbstractOfficeConstructTestCase implements
 	}
 
 	/*
-	 * =================== ServerSocketHandler ===========================
+	 * ================== ConnectionHandler ================================
 	 */
 
 	@Override
-	public Server<ConnectionHandler> createServer() {
-		return this;
+	public void handleRead(ReadContext context) throws IOException {
+
+		// Obtain the data (for small amount should all be available)
+		byte[] data = new byte[REQUEST_MSG.length];
+		int readSize = context.getInputBufferStream().getBrowseStream()
+				.read(data);
+		assertEquals("Message missing data", readSize, REQUEST_MSG.length);
+
+		// Validate message is correct
+		for (int i = 0; i < REQUEST_MSG.length; i++) {
+			assertEquals("Incorrect request message byte at " + i,
+					REQUEST_MSG[i], data[i]);
+		}
+
+		// Process the request
+		this.processRequest(this, null);
+	}
+
+	@Override
+	public void handleWrite(WriteContext context) {
+		// Message being written so close connection (once done)
+		context.setCloseConnection(true);
+	}
+
+	@Override
+	public void handleIdleConnection(IdleContext context) {
+		this.printMessage("Connection is idle");
+	}
+
+	/*
+	 * ==================== Server ==========================================
+	 */
+
+	@Override
+	public void setManagedObjectExecuteContext(
+			ManagedObjectExecuteContext<Indexed> executeContext) {
+		// Do nothing
 	}
 
 	@Override
@@ -195,50 +228,6 @@ public class ServerSocketTest extends AbstractOfficeConstructTestCase implements
 		}
 
 		return this;
-	}
-
-	/*
-	 * ================== ConnectionHandler ================================
-	 */
-
-	@Override
-	public void handleRead(ReadContext context) throws IOException {
-
-		// Obtain the data (for small amount should all be available)
-		byte[] data = new byte[REQUEST_MSG.length];
-		int readSize = context.getInputBufferStream().getBrowseStream()
-				.read(data);
-		assertEquals("Message missing data", readSize, REQUEST_MSG.length);
-
-		// Validate message is correct
-		for (int i = 0; i < REQUEST_MSG.length; i++) {
-			assertEquals("Incorrect request message byte at " + i,
-					REQUEST_MSG[i], data[i]);
-		}
-
-		// Process the request
-		context.processRequest(null);
-	}
-
-	@Override
-	public void handleWrite(WriteContext context) {
-		// Message being written so close connection (once done)
-		context.setCloseConnection(true);
-	}
-
-	@Override
-	public void handleIdleConnection(IdleContext context) {
-		this.printMessage("Connection is idle");
-	}
-
-	/*
-	 * ==================== Server ==========================================
-	 */
-
-	@Override
-	public void setManagedObjectExecuteContext(
-			ManagedObjectExecuteContext<Indexed> executeContext) {
-		// Do nothing
 	}
 
 	@Override
@@ -282,7 +271,7 @@ public class ServerSocketTest extends AbstractOfficeConstructTestCase implements
 				}
 
 				@Override
-				public ServerSocketHandler<ConnectionHandler> createServerSocketHandler(
+				public Server<ConnectionHandler> createServer(
 						MetaDataContext<None, Indexed> context,
 						BufferSquirtFactory bufferSquirtFactory)
 						throws Exception {

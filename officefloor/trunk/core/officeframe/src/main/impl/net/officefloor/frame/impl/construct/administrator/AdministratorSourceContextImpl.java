@@ -34,14 +34,16 @@ public class AdministratorSourceContextImpl extends SourceContextImpl implements
 	/**
 	 * Initiate.
 	 * 
+	 * @param isLoadingType
+	 *            Indicates if loading type.
 	 * @param properties
 	 *            {@link SourceProperties}.
 	 * @param sourceContext
 	 *            Delegate {@link SourceContext}.
 	 */
-	public AdministratorSourceContextImpl(SourceProperties properties,
-			SourceContext sourceContext) {
-		super(sourceContext, properties);
+	public AdministratorSourceContextImpl(boolean isLoadingType,
+			SourceProperties properties, SourceContext sourceContext) {
+		super(isLoadingType, sourceContext, properties);
 	}
 
 	/*

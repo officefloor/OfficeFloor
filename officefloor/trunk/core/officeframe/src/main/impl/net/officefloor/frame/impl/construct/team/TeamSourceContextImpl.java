@@ -54,6 +54,8 @@ public class TeamSourceContextImpl extends SourceContextImpl implements
 	/**
 	 * Initialise.
 	 * 
+	 * @param isLoadingType
+	 *            Indicates if loading type.
 	 * @param teamName
 	 *            Name of the {@link Team} to be created from the
 	 *            {@link TeamSource}.
@@ -62,9 +64,9 @@ public class TeamSourceContextImpl extends SourceContextImpl implements
 	 * @param sourceContext
 	 *            {@link SourceContext}.
 	 */
-	public TeamSourceContextImpl(String teamName, SourceProperties properties,
-			SourceContext sourceContext) {
-		super(sourceContext, properties);
+	public TeamSourceContextImpl(boolean isLoadingType, String teamName,
+			SourceProperties properties, SourceContext sourceContext) {
+		super(isLoadingType, sourceContext, properties);
 		this.teamName = teamName;
 	}
 

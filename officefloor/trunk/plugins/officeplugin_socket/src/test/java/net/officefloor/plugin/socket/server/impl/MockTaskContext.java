@@ -20,49 +20,21 @@ package net.officefloor.plugin.socket.server.impl;
 
 import junit.framework.TestCase;
 import net.officefloor.frame.api.build.Indexed;
+import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.api.execute.FlowFuture;
 import net.officefloor.frame.api.execute.TaskContext;
 import net.officefloor.frame.api.manage.InvalidParameterTypeException;
 import net.officefloor.frame.api.manage.UnknownTaskException;
 import net.officefloor.frame.api.manage.UnknownWorkException;
 import net.officefloor.plugin.socket.server.ConnectionHandler;
-import net.officefloor.plugin.socket.server.impl.ConnectionImpl;
-import net.officefloor.plugin.socket.server.impl.ConnectionManager;
-import net.officefloor.plugin.socket.server.impl.SocketListener.SocketListenerDependencies;
 
 /**
  * Test {@link TaskContext}.
  * 
  * @author Daniel Sagenschneider
  */
-public class MockTaskContext
-		implements
-		TaskContext<ConnectionManager<ConnectionHandler>, SocketListenerDependencies, Indexed> {
-
-	/**
-	 * {@link ConnectionManager}.
-	 */
-	private final ConnectionManager<ConnectionHandler> connectionManager;
-
-	/**
-	 * Parameter.
-	 */
-	private final ConnectionImpl<ConnectionHandler> parameter;
-
-	/**
-	 * Initiate.
-	 * 
-	 * @param connectionManager
-	 *            {@link ConnectionManager}.
-	 * @param parameter
-	 *            Parameter.
-	 */
-	public MockTaskContext(
-			ConnectionManager<ConnectionHandler> connectionManager,
-			ConnectionImpl<ConnectionHandler> parameter) {
-		this.connectionManager = connectionManager;
-		this.parameter = parameter;
-	}
+public class MockTaskContext implements
+		TaskContext<SocketListener<ConnectionHandler>, None, Indexed> {
 
 	/*
 	 * =================== TaskContext ================================
@@ -93,13 +65,15 @@ public class MockTaskContext
 	}
 
 	@Override
-	public Object getObject(SocketListenerDependencies key) {
-		return this.parameter;
+	public Object getObject(None key) {
+		TestCase.fail("Should not be invoked");
+		return null;
 	}
 
 	@Override
 	public Object getObject(int managedObjectIndex) {
-		return this.parameter;
+		TestCase.fail("Should not be invoked");
+		return null;
 	}
 
 	@Override
@@ -109,8 +83,9 @@ public class MockTaskContext
 	}
 
 	@Override
-	public ConnectionManager<ConnectionHandler> getWork() {
-		return this.connectionManager;
+	public SocketListener<ConnectionHandler> getWork() {
+		TestCase.fail("Should not be invoked");
+		return null;
 	}
 
 	@Override

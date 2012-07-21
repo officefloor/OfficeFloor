@@ -189,7 +189,7 @@ public class SectionLoaderImpl implements SectionLoader {
 		}
 
 		// Create the section source context
-		SectionSourceContext context = new SectionSourceContextImpl(
+		SectionSourceContext context = new SectionSourceContextImpl(true,
 				sectionLocation, propertyList, this.nodeContext);
 
 		// Create the section designer

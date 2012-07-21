@@ -26,14 +26,14 @@ import java.nio.channels.SocketChannel;
  * Handler for a {@link Connection}.
  * <p>
  * Required to be implemented by the handler provider.
- *
+ * 
  * @author Daniel Sagenschneider
  */
 public interface ConnectionHandler {
 
 	/**
 	 * Handles a read from the {@link SocketChannel}.
-	 *
+	 * 
 	 * @param context
 	 *            {@link ReadContext}.
 	 * @throws IOException
@@ -43,7 +43,7 @@ public interface ConnectionHandler {
 
 	/**
 	 * Handles a potential write to the {@link SocketChannel}.
-	 *
+	 * 
 	 * @param context
 	 *            {@link WriteContext}.
 	 * @throws IOException
@@ -53,7 +53,7 @@ public interface ConnectionHandler {
 
 	/**
 	 * Handles a {@link Connection} being idled.
-	 *
+	 * 
 	 * @param context
 	 *            {@link IdleContext}.
 	 * @throws IOException

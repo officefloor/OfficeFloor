@@ -19,11 +19,13 @@
 package net.officefloor.frame.impl.construct.source;
 
 import java.io.InputStream;
+import java.util.Properties;
 
 import net.officefloor.frame.spi.source.ResourceSource;
 import net.officefloor.frame.spi.source.SourceContext;
 import net.officefloor.frame.spi.source.SourceProperties;
 import net.officefloor.frame.spi.source.UnknownClassError;
+import net.officefloor.frame.spi.source.UnknownPropertyError;
 import net.officefloor.frame.spi.source.UnknownResourceError;
 
 /**
@@ -43,34 +45,44 @@ public class SourceContextImpl extends SourcePropertiesImpl implements
 	 * Initiate the raw {@link SourceContext} to seed other
 	 * {@link SourceContext} instances.
 	 * 
+	 * @param isLoadingType
+	 *            Indicates if loading type.
 	 * @param classLoader
 	 *            {@link ClassLoader}.
 	 * @param resourceSources
 	 *            {@link ResourceSource} instances.
 	 */
-	public SourceContextImpl(ClassLoader classLoader,
+	public SourceContextImpl(boolean isLoadingType, ClassLoader classLoader,
 			ResourceSource... resourceSources) {
-		this.delegate = new DelegateSourceContext(classLoader, resourceSources);
+		this.delegate = new DelegateSourceContext(isLoadingType, classLoader,
+				resourceSources);
 	}
 
 	/**
 	 * Initiate specific {@link SourceContext} with necessary
 	 * {@link SourceProperties}.
 	 * 
+	 * @param isLoadingType
+	 *            Indicates if loading type.
 	 * @param delegate
 	 *            Delegate {@link SourceContext}.
 	 * @param sourceProperties
 	 *            {@link SourceProperties}.
 	 */
-	public SourceContextImpl(SourceContext delegate,
+	public SourceContextImpl(boolean isLoadingType, SourceContext delegate,
 			SourceProperties sourceProperties) {
 		super(sourceProperties);
-		this.delegate = delegate;
+		this.delegate = new DelegateWrapSourceContext(isLoadingType, delegate);
 	}
 
 	/*
 	 * ================== SourceContext =======================
 	 */
+
+	@Override
+	public boolean isLoadingType() {
+		return this.delegate.isLoadingType();
+	}
 
 	@Override
 	public Class<?> loadOptionalClass(String name) {
@@ -98,12 +110,100 @@ public class SourceContextImpl extends SourcePropertiesImpl implements
 	}
 
 	/**
+	 * Wraps a delegate {@link SourceContext}.
+	 */
+	private static class DelegateWrapSourceContext implements SourceContext {
+
+		/**
+		 * Indicates if loading type.
+		 */
+		private final boolean isLoadingType;
+
+		/**
+		 * {@link SourceContext}.
+		 */
+		private final SourceContext delegate;
+
+		/**
+		 * Initiate.
+		 * 
+		 * @param isLoadingType
+		 *            Indicates if loading type.
+		 * @param delegate
+		 *            Delegate {@link SourceContext}.
+		 */
+		public DelegateWrapSourceContext(boolean isLoadingType,
+				SourceContext delegate) {
+			this.isLoadingType = isLoadingType;
+			this.delegate = delegate;
+		}
+
+		/*
+		 * =================== SourceContext ====================
+		 */
+
+		@Override
+		public boolean isLoadingType() {
+			return this.isLoadingType;
+		}
+
+		@Override
+		public String[] getPropertyNames() {
+			return this.delegate.getPropertyNames();
+		}
+
+		@Override
+		public String getProperty(String name) throws UnknownPropertyError {
+			return this.delegate.getProperty(name);
+		}
+
+		@Override
+		public String getProperty(String name, String defaultValue) {
+			return this.delegate.getProperty(name, defaultValue);
+		}
+
+		@Override
+		public Properties getProperties() {
+			return this.delegate.getProperties();
+		}
+
+		@Override
+		public Class<?> loadOptionalClass(String name) {
+			return this.delegate.loadOptionalClass(name);
+		}
+
+		@Override
+		public Class<?> loadClass(String name) throws UnknownClassError {
+			return this.delegate.loadClass(name);
+		}
+
+		@Override
+		public InputStream getOptionalResource(String location) {
+			return this.delegate.getOptionalResource(location);
+		}
+
+		@Override
+		public InputStream getResource(String location)
+				throws UnknownResourceError {
+			return this.delegate.getResource(location);
+		}
+
+		@Override
+		public ClassLoader getClassLoader() {
+			return this.delegate.getClassLoader();
+		}
+	}
+
+	/**
 	 * Delegate {@link SourceContext}.
-	 * 
-	 * @author Daniel Sagenschneider
 	 */
 	private static class DelegateSourceContext extends SourcePropertiesImpl
 			implements SourceContext {
+
+		/**
+		 * Indicates if loading type.
+		 */
+		private final boolean isLoadingType;
 
 		/**
 		 * {@link ClassLoader}.
@@ -118,13 +218,16 @@ public class SourceContextImpl extends SourcePropertiesImpl implements
 		/**
 		 * Initiate.
 		 * 
+		 * @param isLoadingType
+		 *            Indicates if loading type.
 		 * @param classLoader
 		 *            {@link ClassLoader}.
 		 * @param resourceSources
 		 *            {@link ResourceSource} instances.
 		 */
-		public DelegateSourceContext(ClassLoader classLoader,
-				ResourceSource[] resourceSources) {
+		public DelegateSourceContext(boolean isLoadingType,
+				ClassLoader classLoader, ResourceSource[] resourceSources) {
+			this.isLoadingType = isLoadingType;
 			this.classLoader = classLoader;
 			this.resourceSources = resourceSources;
 		}
@@ -132,6 +235,11 @@ public class SourceContextImpl extends SourcePropertiesImpl implements
 		/*
 		 * =================== SourceContext ====================
 		 */
+
+		@Override
+		public boolean isLoadingType() {
+			return this.isLoadingType;
+		}
 
 		@Override
 		public Class<?> loadOptionalClass(String name) {

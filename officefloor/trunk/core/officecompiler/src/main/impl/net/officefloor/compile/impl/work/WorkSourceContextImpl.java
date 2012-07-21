@@ -35,14 +35,17 @@ public class WorkSourceContextImpl extends SourceContextImpl implements
 	/**
 	 * Initiate.
 	 * 
+	 * @param isLoadingType
+	 *            Indicates if loading type.
 	 * @param propertyList
 	 *            {@link PropertyList}.
 	 * @param context
 	 *            {@link NodeContext}.
 	 */
-	public WorkSourceContextImpl(PropertyList propertyList, NodeContext context) {
-		super(context.getSourceContext(), new PropertyListSourceProperties(
-				propertyList));
+	public WorkSourceContextImpl(boolean isLoadingType,
+			PropertyList propertyList, NodeContext context) {
+		super(isLoadingType, context.getSourceContext(),
+				new PropertyListSourceProperties(propertyList));
 	}
 
 }

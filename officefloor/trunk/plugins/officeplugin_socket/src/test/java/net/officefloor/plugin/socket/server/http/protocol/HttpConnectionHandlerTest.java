@@ -25,15 +25,14 @@ import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.socket.server.Connection;
 import net.officefloor.plugin.socket.server.IdleContext;
 import net.officefloor.plugin.socket.server.ReadContext;
+import net.officefloor.plugin.socket.server.Server;
 import net.officefloor.plugin.socket.server.WriteContext;
 import net.officefloor.plugin.socket.server.http.HttpHeader;
 import net.officefloor.plugin.socket.server.http.HttpRequest;
 import net.officefloor.plugin.socket.server.http.conversation.HttpConversation;
 import net.officefloor.plugin.socket.server.http.conversation.HttpManagedObject;
-import net.officefloor.plugin.socket.server.http.parse.HttpRequestParser;
 import net.officefloor.plugin.socket.server.http.parse.HttpRequestParseException;
-import net.officefloor.plugin.socket.server.http.protocol.HttpConnectionHandler;
-import net.officefloor.plugin.socket.server.http.protocol.HttpStatus;
+import net.officefloor.plugin.socket.server.http.parse.HttpRequestParser;
 import net.officefloor.plugin.stream.InputBufferStream;
 
 /**
@@ -81,10 +80,18 @@ public class HttpConnectionHandlerTest extends OfficeFrameTestCase {
 	private HttpRequestParser parser = this.createMock(HttpRequestParser.class);
 
 	/**
+	 * Mock {@link Server}.
+	 */
+	@SuppressWarnings("unchecked")
+	private Server<HttpConnectionHandler> server = this
+			.createMock(Server.class);
+
+	/**
 	 * {@link HttpConnectionHandler} being tested.
 	 */
 	public HttpConnectionHandler handler = new HttpConnectionHandler(
-			this.conversation, this.parser, 255, CONNECTION_TIMEOUT);
+			this.server, this.conversation, this.parser, 255,
+			CONNECTION_TIMEOUT);
 
 	/**
 	 * Ensures successful read of {@link HttpRequest}.
@@ -119,7 +126,7 @@ public class HttpConnectionHandlerTest extends OfficeFrameTestCase {
 		this.parser.reset();
 		this.recordReturn(this.conversation, this.conversation.addRequest(
 				method, requestURI, httpVersion, headers, body), managedObject);
-		this.readContext.processRequest(managedObject);
+		this.server.processRequest(this.handler, managedObject);
 		this.recordReturn(this.parser,
 				this.parser.parse(this.inputBufferStream, tempBuffer), false);
 

@@ -250,7 +250,7 @@ public class GovernanceLoaderImpl implements GovernanceLoader {
 		SourceProperties sourceProperties = new PropertyListSourceProperties(
 				properties);
 		GovernanceSourceContextImpl context = new GovernanceSourceContextImpl(
-				sourceContext, sourceProperties);
+				true, sourceContext, sourceProperties);
 
 		try {
 			// Initialise the governance source
@@ -549,9 +549,9 @@ public class GovernanceLoaderImpl implements GovernanceLoader {
 		 * @param sourceProperties
 		 *            {@link SourceProperties}.
 		 */
-		public GovernanceSourceContextImpl(SourceContext delegate,
-				SourceProperties sourceProperties) {
-			super(delegate, sourceProperties);
+		public GovernanceSourceContextImpl(boolean isLoadingType,
+				SourceContext delegate, SourceProperties sourceProperties) {
+			super(isLoadingType, delegate, sourceProperties);
 		}
 	}
 

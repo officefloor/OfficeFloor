@@ -53,15 +53,18 @@ public class SectionSourceContextImpl extends SourceContextImpl implements
 	/**
 	 * Initiate.
 	 * 
+	 * @param isLoadingType
+	 *            Indicates if loading type.
 	 * @param sectionLocation
 	 *            Location of the {@link section}.
 	 * @param context
 	 *            {@link NodeContext}.
 	 */
-	public SectionSourceContextImpl(String sectionLocation,
-			PropertyList propertyList, NodeContext context) {
-		super(context.getSourceContext(), new PropertyListSourceProperties(
-				propertyList));
+	public SectionSourceContextImpl(boolean isLoadingType,
+			String sectionLocation, PropertyList propertyList,
+			NodeContext context) {
+		super(isLoadingType, context.getSourceContext(),
+				new PropertyListSourceProperties(propertyList));
 		this.sectionLocation = sectionLocation;
 		this.context = context;
 	}

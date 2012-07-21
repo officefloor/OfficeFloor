@@ -207,7 +207,7 @@ public class OfficeFloorLoaderImpl implements OfficeFloorLoader {
 
 		// Create the office floor source context
 		OfficeFloorSourceContext sourceContext = new OfficeFloorSourceContextImpl(
-				officeFloorLocation, propertyList, this.nodeContext);
+				true, officeFloorLocation, propertyList, this.nodeContext);
 
 		// Create the required properties
 		final PropertyList requiredPropertyList = new PropertyListImpl();
@@ -311,7 +311,7 @@ public class OfficeFloorLoaderImpl implements OfficeFloorLoader {
 
 		// Create the OfficeFloor source context
 		OfficeFloorSourceContext sourceContext = new OfficeFloorSourceContextImpl(
-				officeFloorLocation, propertyList, this.nodeContext);
+				false, officeFloorLocation, propertyList, this.nodeContext);
 
 		// Obtain the OfficeFloor source class for logging
 		Class<?> officeFloorSourceClass = officeFloorSource.getClass();

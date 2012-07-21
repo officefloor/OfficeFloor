@@ -36,7 +36,6 @@ import net.officefloor.plugin.socket.server.CommunicationProtocol;
 import net.officefloor.plugin.socket.server.Connection;
 import net.officefloor.plugin.socket.server.ConnectionHandler;
 import net.officefloor.plugin.socket.server.Server;
-import net.officefloor.plugin.socket.server.ServerSocketHandler;
 import net.officefloor.plugin.socket.server.ssl.SslEngineConfigurator;
 import net.officefloor.plugin.socket.server.ssl.SslTaskExecutor;
 import net.officefloor.plugin.socket.server.ssl.protocol.SslTaskWork.SslTaskDependencies;
@@ -50,7 +49,6 @@ import net.officefloor.plugin.stream.BufferSquirtFactory;
  */
 public class SslCommunicationProtocol<CH extends ConnectionHandler> implements
 		CommunicationProtocol<SslConnectionHandler<CH>>,
-		ServerSocketHandler<SslConnectionHandler<CH>>,
 		Server<SslConnectionHandler<CH>>, SslTaskExecutor,
 		SslEngineConfigurator {
 
@@ -74,11 +72,6 @@ public class SslCommunicationProtocol<CH extends ConnectionHandler> implements
 	 * Wrapped {@link CommunicationProtocol}.
 	 */
 	private final CommunicationProtocol<CH> wrappedCommunicationProtocol;
-
-	/**
-	 * Wrapped {@link ServerSocketHandler}.
-	 */
-	private ServerSocketHandler<CH> wrappedServerSocketHandler;
 
 	/**
 	 * Wrapped {@link Server}.
@@ -133,15 +126,15 @@ public class SslCommunicationProtocol<CH extends ConnectionHandler> implements
 	}
 
 	@Override
-	public ServerSocketHandler<SslConnectionHandler<CH>> createServerSocketHandler(
+	public Server<SslConnectionHandler<CH>> createServer(
 			MetaDataContext<None, Indexed> context,
 			BufferSquirtFactory bufferSquirtFactory) throws Exception {
 		ManagedObjectSourceContext<Indexed> mosContext = context
 				.getManagedObjectSourceContext();
 
 		// Create the server socket handler to wrap
-		this.wrappedServerSocketHandler = this.wrappedCommunicationProtocol
-				.createServerSocketHandler(context, bufferSquirtFactory);
+		this.wrappedServer = this.wrappedCommunicationProtocol.createServer(
+				context, bufferSquirtFactory);
 
 		// Create the SSL context
 		String sslProtocol = mosContext
@@ -198,17 +191,18 @@ public class SslCommunicationProtocol<CH extends ConnectionHandler> implements
 	}
 
 	/*
-	 * ====================== ServerSocketHandler ============================
+	 * ====================== Server ============================
 	 */
 
 	@Override
-	public Server<SslConnectionHandler<CH>> createServer() {
+	public void setManagedObjectExecuteContext(
+			ManagedObjectExecuteContext<Indexed> executeContext) {
 
-		// Create the server to wrap
-		this.wrappedServer = this.wrappedServerSocketHandler.createServer();
+		// Store execution context for executing SSL tasks
+		this.executeContext = executeContext;
 
-		// Return this wrapping the server
-		return this;
+		// Provide execution context to wrapped server
+		this.wrappedServer.setManagedObjectExecuteContext(executeContext);
 	}
 
 	@Override
@@ -229,25 +223,10 @@ public class SslCommunicationProtocol<CH extends ConnectionHandler> implements
 		// Create the SSL connection wrapping the connection
 		SslConnectionHandler<CH> connectionHandler = new SslConnectionHandler<CH>(
 				connection, engine, this.bufferSquirtFactory, this,
-				this.wrappedServerSocketHandler);
+				this.wrappedServer);
 
 		// Return the SSL connection handler
 		return connectionHandler;
-	}
-
-	/*
-	 * ======================= Server ========================================
-	 */
-
-	@Override
-	public void setManagedObjectExecuteContext(
-			ManagedObjectExecuteContext<Indexed> executeContext) {
-
-		// Store execution context for executing SSL tasks
-		this.executeContext = executeContext;
-
-		// Provide execution context to wrapped server
-		this.wrappedServer.setManagedObjectExecuteContext(executeContext);
 	}
 
 	@Override

@@ -29,6 +29,21 @@ import java.lang.reflect.Proxy;
 public interface SourceContext extends SourceProperties {
 
 	/**
+	 * <p>
+	 * Indicates if just loading as a type.
+	 * <p>
+	 * When loading as a type the configuration provided is disregarded. This
+	 * allows sources to know when to load singleton configuration that will
+	 * take effect.
+	 * <p>
+	 * Whether this is <code>true</code> or <code>false</code> the resulting
+	 * type should be the same.
+	 * 
+	 * @return <code>true</code> if loading as a type.
+	 */
+	boolean isLoadingType();
+
+	/**
 	 * Attempts to load the specified {@link Class}.
 	 * 
 	 * @param name

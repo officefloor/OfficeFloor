@@ -432,7 +432,7 @@ public class SectionNodeImpl extends AbstractNode implements SectionNode {
 		}
 
 		// Create the section source context
-		SectionSourceContext context = new SectionSourceContextImpl(
+		SectionSourceContext context = new SectionSourceContextImpl(false,
 				this.sectionLocation, this.propertyList, this.context);
 
 		try {

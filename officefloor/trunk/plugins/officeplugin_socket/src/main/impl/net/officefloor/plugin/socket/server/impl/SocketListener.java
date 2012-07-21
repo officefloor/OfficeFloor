@@ -31,14 +31,15 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import net.officefloor.frame.api.build.Indexed;
+import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.execute.TaskContext;
+import net.officefloor.frame.util.AbstractSingleTask;
 import net.officefloor.plugin.socket.server.Connection;
 import net.officefloor.plugin.socket.server.ConnectionHandler;
 import net.officefloor.plugin.socket.server.ConnectionHandlerContext;
 import net.officefloor.plugin.socket.server.IdleContext;
 import net.officefloor.plugin.socket.server.ReadContext;
-import net.officefloor.plugin.socket.server.Server;
 import net.officefloor.plugin.socket.server.WriteContext;
 import net.officefloor.plugin.stream.InputBufferStream;
 import net.officefloor.plugin.stream.NoBufferStreamContentException;
@@ -48,9 +49,8 @@ import net.officefloor.plugin.stream.NoBufferStreamContentException;
  * 
  * @author Daniel Sagenschneider
  */
-public class SocketListener<CH extends ConnectionHandler>
-		implements
-		Task<ConnectionManager<CH>, SocketListener.SocketListenerDependencies, Indexed>,
+public class SocketListener<CH extends ConnectionHandler> extends
+		AbstractSingleTask<SocketListener<CH>, None, Indexed> implements
 		ReadContext, WriteContext, IdleContext {
 
 	/**
@@ -60,36 +60,12 @@ public class SocketListener<CH extends ConnectionHandler>
 			.getName());
 
 	/**
-	 * Keys for the dependencies for the {@link SocketListener}.
-	 */
-	public static enum SocketListenerDependencies {
-		CONNECTION
-	}
-
-	/**
-	 * Value to indicate an unbounded number of {@link Connection} instances can
-	 * be registered.
-	 */
-	public static final int UNBOUNDED_MAX_CONNECTIONS = 0;
-
-	/**
-	 * Maximum number of {@link Connection} instances that can be registered
-	 * with this {@link SocketListener}.
-	 */
-	private final int maxConnections;
-
-	/**
-	 * {@link Server}.
-	 */
-	private final Server<CH> server;
-
-	/**
 	 * {@link SelectorFactory}.
 	 */
 	private final SelectorFactory selectorFactory;
 
 	/**
-	 * List of {@link InternalCommunication} just registered.
+	 * List of {@link Connection} instances just registered.
 	 */
 	private final List<ConnectionImpl<CH>> justRegistered = new LinkedList<ConnectionImpl<CH>>();
 
@@ -101,35 +77,38 @@ public class SocketListener<CH extends ConnectionHandler>
 	private Selector selector;
 
 	/**
-	 * Flag indicating if have initialised the {@link Task}.
+	 * Flag indicating to stop listening.
 	 */
-	private boolean isInitialised = false;
-
-	/**
-	 * <p>
-	 * Number of registered {@link Connection} instances within this
-	 * {@link SocketListener}.
-	 * <p>
-	 * Initially 1 for the {@link Connection} passed as a parameter.
-	 */
-	private int registeredConnections = 1;
+	private boolean isStopListening = false;
 
 	/**
 	 * Initiate.
 	 * 
 	 * @param selectorFactory
 	 *            {@link SelectorFactory}.
-	 * @param server
-	 *            {@link Server}.
-	 * @param maxCommunications
-	 *            Maximum number of {@link Connection} instances that can be
-	 *            registered with this {@link SocketListener}.
 	 */
-	public SocketListener(SelectorFactory selectorFactory, Server<CH> server,
-			int maxCommunications) {
+	public SocketListener(SelectorFactory selectorFactory) {
 		this.selectorFactory = selectorFactory;
-		this.server = server;
-		this.maxConnections = maxCommunications;
+	}
+
+	/**
+	 * Open the {@link Selector} for this {@link SocketListener}.
+	 * 
+	 * @throws IOException
+	 *             If fails to open the {@link Selector}.
+	 */
+	void openSelector() throws IOException {
+		// Create the selector
+		this.selector = this.selectorFactory.createSelector();
+	}
+
+	/**
+	 * Close the {@link Selector} for this {@link SocketListener}.
+	 */
+	synchronized void closeSelector() {
+		// Flag to stop listening
+		this.isStopListening = true;
+		this.selector.wakeup();
 	}
 
 	/**
@@ -141,37 +120,17 @@ public class SocketListener<CH extends ConnectionHandler>
 	 * @throws IOException
 	 *             If fails to register the connection.
 	 */
-	synchronized boolean registerConnection(ConnectionImpl<CH> connection)
+	synchronized void registerConnection(ConnectionImpl<CH> connection)
 			throws IOException {
-
-		// All connections complete so may not register
-		if (this.registeredConnections <= 0) {
-			// Can not register as complete
-			return false;
-		}
-
-		// Determine if space to register input connection
-		if (this.maxConnections > UNBOUNDED_MAX_CONNECTIONS) {
-			if (this.registeredConnections >= this.maxConnections) {
-				// Can not register connection
-				return false;
-			}
-		}
 
 		// Add just registered listing
 		this.justRegistered.add(connection);
-
-		// Increment the number registered with this listener
-		this.registeredConnections++;
 
 		// May not yet be initialised
 		if (this.selector != null) {
 			// Wake up the selector (to pick up this connection)
 			this.selector.wakeup();
 		}
-
-		// Registered
-		return true;
 	}
 
 	/**
@@ -188,53 +147,46 @@ public class SocketListener<CH extends ConnectionHandler>
 
 	@Override
 	@SuppressWarnings("unchecked")
-	public Object doTask(
-			TaskContext<ConnectionManager<CH>, SocketListenerDependencies, Indexed> context)
+	public Object doTask(TaskContext<SocketListener<CH>, None, Indexed> context)
 			throws Exception {
 
-		// Flag to loop forever
+		// Flag to loop forever (or until told to stop listening)
 		context.setComplete(false);
-
-		// Double check lock to determine if initialised
-		if (!this.isInitialised) {
-			synchronized (this) {
-				if (!this.isInitialised) {
-					// Requires initialising
-
-					// Create the selector
-					this.selector = this.selectorFactory.createSelector();
-
-					// Obtain the Connection
-					ConnectionImpl<CH> connection = (ConnectionImpl<CH>) context
-							.getObject(SocketListenerDependencies.CONNECTION);
-
-					// Listen to the connection
-					this.listenToConnection(connection);
-
-					// Flag initialised
-					this.isInitialised = true;
-				}
-			}
-		}
 
 		// Listen on the socket.
 		// This is outside locks so that other connections may be registered
-		// while waiting. On registering a connection this will be waked up.
+		// while waiting. On registering a connection this will be woken.
 		this.selector.select(1000); // 1 second
 
-		// Synchronising at this point as may be removing connections altering
-		// counts that the registerConnection utilises.
-		boolean isUnregisterFromConnectionManager = false;
+		// Synchronising as may be invoked by differing threads.
 		synchronized (this) {
 
 			// Reset current time (optimisation)
 			this.currentTime = -1;
 
-			// Obtain the selected keys
+			// Obtain the all keys and selected keys
+			Set<SelectionKey> allKeys = this.selector.keys();
 			Set<SelectionKey> selectedKeys = this.selector.selectedKeys();
 
+			// Determine if stop listening
+			if (this.isStopListening) {
+
+				// Terminate all connections
+				for (SelectionKey key : allKeys) {
+					ConnectionImpl<CH> connection = (ConnectionImpl<CH>) key
+							.attachment();
+					this.terminateConnection(key, connection);
+				}
+
+				// Determine if connections to notify (need another select)
+				if (allKeys.size() == 0) {
+					// May complete as no further connections
+					context.setComplete(true);
+				}
+			}
+
 			// Process all the selected channels
-			for (SelectionKey key : this.selector.keys()) {
+			for (SelectionKey key : allKeys) {
 
 				// Obtain the connection
 				ConnectionImpl<CH> connection = (ConnectionImpl<CH>) key
@@ -379,26 +331,9 @@ public class SocketListener<CH extends ConnectionHandler>
 				// Remove from just registered
 				iterator.remove();
 			}
-
-			// Flag that complete if no further connections
-			if (this.registeredConnections <= 0) {
-				// Allow task to complete
-				context.setComplete(true);
-
-				// Unregister from connection manager
-				isUnregisterFromConnectionManager = true;
-
-				// Close the selector to release resources
-				this.selector.close();
-			}
 		}
 
-		// Must unregister from connection manager outside lock
-		if (isUnregisterFromConnectionManager) {
-			context.getWork().socketListenerComplete(this);
-		}
-
-		// No return (as should be looping)
+		// No return (as should be executed again and again until shutdown)
 		return null;
 	}
 
@@ -447,9 +382,6 @@ public class SocketListener<CH extends ConnectionHandler>
 
 		// Flag connection as closed
 		connection.cancel();
-
-		// Connection unregistered
-		this.registeredConnections--;
 
 		// Cancel the key and terminate connection
 		key.cancel();
@@ -667,13 +599,6 @@ public class SocketListener<CH extends ConnectionHandler>
 		return this.contextConnection.getConnectionInputBufferStream();
 	}
 
-	@Override
-	public void processRequest(Object attachment) throws IOException {
-		// Have the server process the request
-		this.server.processRequest(
-				this.contextConnection.getConnectionHandler(), attachment);
-	}
-
 	/*
 	 * ============== IdleContext and WriteContext =========================
 	 * IdleContext and WriteContext does not require thread-safety as only
@@ -681,4 +606,5 @@ public class SocketListener<CH extends ConnectionHandler>
 	 */
 
 	// No specific methods for IdleContext and WriteContext.
+
 }

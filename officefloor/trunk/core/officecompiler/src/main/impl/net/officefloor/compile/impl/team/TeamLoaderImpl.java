@@ -212,7 +212,7 @@ public class TeamLoaderImpl implements TeamLoader {
 
 		// Attempt to initialise the team
 		try {
-			teamSource.init(new TeamSourceContextImpl(this.teamName,
+			teamSource.init(new TeamSourceContextImpl(true, this.teamName,
 					new PropertyListSourceProperties(propertyList),
 					this.nodeContext.getSourceContext()));
 

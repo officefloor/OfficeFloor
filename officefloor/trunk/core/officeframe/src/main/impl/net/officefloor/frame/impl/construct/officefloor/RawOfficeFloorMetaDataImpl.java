@@ -165,7 +165,7 @@ public class RawOfficeFloorMetaDataImpl implements RawOfficeFloorMetaData,
 					+ " provided from configuration");
 
 			// Use default source context
-			sourceContext = new SourceContextImpl(Thread.currentThread()
+			sourceContext = new SourceContextImpl(false, Thread.currentThread()
 					.getContextClassLoader());
 		}
 

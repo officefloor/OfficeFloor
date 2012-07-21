@@ -54,6 +54,8 @@ public class OfficeSourceContextImpl extends SourceContextImpl implements
 	/**
 	 * Initiate.
 	 * 
+	 * @param isLoadingType
+	 *            Indicates if loading type.
 	 * @param officeLocation
 	 *            Location of the {@link Office}.
 	 * @param propertyList
@@ -61,10 +63,11 @@ public class OfficeSourceContextImpl extends SourceContextImpl implements
 	 * @param nodeContext
 	 *            {@link NodeContext}.
 	 */
-	public OfficeSourceContextImpl(String officeLocation,
-			PropertyList propertyList, NodeContext nodeContext) {
-		super(nodeContext.getSourceContext(), new PropertyListSourceProperties(
-				propertyList));
+	public OfficeSourceContextImpl(boolean isLoadingType,
+			String officeLocation, PropertyList propertyList,
+			NodeContext nodeContext) {
+		super(isLoadingType, nodeContext.getSourceContext(),
+				new PropertyListSourceProperties(propertyList));
 		this.officeLocation = officeLocation;
 		this.context = nodeContext;
 	}

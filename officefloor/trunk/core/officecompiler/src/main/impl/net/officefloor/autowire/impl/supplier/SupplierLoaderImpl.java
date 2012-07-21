@@ -195,8 +195,8 @@ public class SupplierLoaderImpl implements SupplierLoader {
 
 		// Create the supplier source context
 		SupplierSourceContextImpl supplierSourceContext = new SupplierSourceContextImpl(
-				this.supplierName, this.officeFloorLocation, propertyList,
-				this.nodeContext);
+				true, this.supplierName, this.officeFloorLocation,
+				propertyList, this.nodeContext);
 
 		// Load and return the supplier type
 		return supplierSourceContext.loadSupplier(supplierSourceClass,
@@ -210,8 +210,8 @@ public class SupplierLoaderImpl implements SupplierLoader {
 
 		// Create the supplier source context
 		SupplierSourceContextImpl supplierSourceContext = new SupplierSourceContextImpl(
-				this.supplierName, this.officeFloorLocation, propertyList,
-				this.nodeContext);
+				true, this.supplierName, this.officeFloorLocation,
+				propertyList, this.nodeContext);
 
 		// Fill the supply orders
 		supplierSourceContext.loadSupplier(supplierSourceClass, propertyList,

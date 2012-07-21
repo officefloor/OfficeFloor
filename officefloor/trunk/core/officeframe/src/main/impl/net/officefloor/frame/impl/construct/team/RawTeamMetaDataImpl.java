@@ -121,8 +121,8 @@ public class RawTeamMetaDataImpl implements RawTeamMetaDataFactory,
 		try {
 			// Initialise the team source
 			SourceProperties properties = configuration.getProperties();
-			TeamSourceContextImpl context = new TeamSourceContextImpl(teamName,
-					properties, sourceContext);
+			TeamSourceContextImpl context = new TeamSourceContextImpl(false,
+					teamName, properties, sourceContext);
 			teamSource.init(context);
 
 			// Obtain the Process Context Listeners

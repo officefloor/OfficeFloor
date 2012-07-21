@@ -268,7 +268,7 @@ public class RawBoundAdministratorMetaDataImpl<I, A extends Enum<A>> implements
 		// Obtain context to initialise the administrator source
 		SourceProperties properties = configuration.getProperties();
 		AdministratorSourceContext context = new AdministratorSourceContextImpl(
-				properties, sourceContext);
+				false, properties, sourceContext);
 
 		try {
 			// Initialise the administrator source

@@ -28,7 +28,7 @@ import java.nio.channels.SocketChannel;
 import net.officefloor.plugin.socket.server.Connection;
 import net.officefloor.plugin.socket.server.ConnectionHandler;
 import net.officefloor.plugin.socket.server.ReadContext;
-import net.officefloor.plugin.socket.server.ServerSocketHandler;
+import net.officefloor.plugin.socket.server.Server;
 import net.officefloor.plugin.stream.BufferPopulator;
 import net.officefloor.plugin.stream.BufferProcessor;
 import net.officefloor.plugin.stream.BufferSquirt;
@@ -105,14 +105,13 @@ public class ConnectionImpl<CH extends ConnectionHandler> implements
 	 * 
 	 * @param nonblockingSocketChannel
 	 *            {@link NonblockingSocketChannel}.
-	 * @param serverSocketHandler
-	 *            {@link ServerSocketHandler}.
+	 * @param server
+	 *            {@link Server}.
 	 * @param bufferSquirtFactory
 	 *            {@link BufferSquirtFactory}.
 	 */
 	public ConnectionImpl(NonblockingSocketChannel nonblockingSocketChannel,
-			ServerSocketHandler<CH> serverSocketHandler,
-			BufferSquirtFactory bufferSquirtFactory) {
+			Server<CH> server, BufferSquirtFactory bufferSquirtFactory) {
 		this.socketChannel = nonblockingSocketChannel;
 
 		// Create the streams
@@ -128,8 +127,7 @@ public class ConnectionImpl<CH extends ConnectionHandler> implements
 				this.getLock());
 
 		// Create the handler for this connection
-		this.connectionHandler = serverSocketHandler
-				.createConnectionHandler(this);
+		this.connectionHandler = server.createConnectionHandler(this);
 	}
 
 	/**

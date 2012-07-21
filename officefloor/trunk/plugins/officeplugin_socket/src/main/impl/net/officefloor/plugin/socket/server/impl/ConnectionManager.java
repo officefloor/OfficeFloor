@@ -19,73 +19,67 @@
 package net.officefloor.plugin.socket.server.impl;
 
 import java.io.IOException;
-import java.util.LinkedList;
-import java.util.List;
+import java.nio.channels.Selector;
 
-import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.build.None;
-import net.officefloor.frame.api.build.TaskFactory;
-import net.officefloor.frame.api.build.WorkFactory;
-import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.execute.TaskContext;
-import net.officefloor.frame.api.execute.Work;
 import net.officefloor.plugin.socket.server.Connection;
 import net.officefloor.plugin.socket.server.ConnectionHandler;
-import net.officefloor.plugin.socket.server.Server;
-import net.officefloor.plugin.socket.server.impl.ServerSocketAccepter.ServerSocketAccepterFlows;
 
 /**
- * Manages the {@link Connection} instances with the {@link Server}.
- *
+ * Manages the {@link Connection} instances for {@link ServerSocketAccepter}
+ * across the available {@link SocketListener} instances.
+ * 
  * @author Daniel Sagenschneider
  */
-public class ConnectionManager<CH extends ConnectionHandler>
-		implements
-		Work,
-		WorkFactory<ConnectionManager<CH>>,
-		TaskFactory<ConnectionManager<CH>, SocketListener.SocketListenerDependencies, Indexed> {
+public class ConnectionManager<CH extends ConnectionHandler> {
 
 	/**
-	 * {@link SelectorFactory}.
+	 * Listing of {@link SocketListener} instances.
 	 */
-	private final SelectorFactory selectorFactory;
+	private final SocketListener<CH>[] socketListeners;
 
 	/**
-	 * {@link Server}.
+	 * Index of the next {@link SocketListener} for a new {@link Connection}.
 	 */
-	private final Server<CH> server;
-
-	/**
-	 * Maximum {@link Connection} instances per {@link SocketListener}.
-	 */
-	private final int maxConnPerListener;
-
-	/**
-	 * Listing of active {@link SocketListener} instances.
-	 */
-	private final List<SocketListener<CH>> socketListeners = new LinkedList<SocketListener<CH>>();
+	private int nextSocketListener = 0;
 
 	/**
 	 * Initiate.
-	 *
-	 * @param moSource
-	 *            {@link AbstractServerSocketManagedObjectSource}.
-	 * @param maxConnPerListener
-	 *            Maximum number of {@link Connection} instances per
-	 *            {@link SocketListener}.
-	 * @throws IOException
-	 *             If fails creation.
+	 * 
+	 * @param socketListeners
+	 *            Available {@link SocketListener} instances.
 	 */
-	public ConnectionManager(SelectorFactory selectorFactory,
-			Server<CH> server, int maxConnPerListener) {
-		this.selectorFactory = selectorFactory;
-		this.server = server;
-		this.maxConnPerListener = maxConnPerListener;
+	public ConnectionManager(SocketListener<CH>[] socketListeners) {
+		this.socketListeners = socketListeners;
+	}
+
+	/**
+	 * Opens the {@link Selector} instances for the {@link SocketListener}
+	 * instances.
+	 * 
+	 * @throws IOException
+	 *             If fails to open all the {@link Selector} instances.
+	 */
+	void openSocketListenerSelectors() throws IOException {
+		for (SocketListener<CH> socketListener : this.socketListeners) {
+			socketListener.openSelector();
+		}
+	}
+
+	/**
+	 * Closes the {@link Selector} instances for the {@link SocketListener}
+	 * instances.
+	 */
+	void closeSocketListenerSelectors() {
+		for (SocketListener<CH> socketListener : this.socketListeners) {
+			socketListener.closeSelector();
+		}
 	}
 
 	/**
 	 * Registers the {@link Connection} for management.
-	 *
+	 * 
 	 * @param connection
 	 *            {@link Connection} to be managed.
 	 * @param taskContext
@@ -93,66 +87,22 @@ public class ConnectionManager<CH extends ConnectionHandler>
 	 * @throws IOException
 	 *             If fails registering the {@link Connection}.
 	 */
-	void registerConnection(
-			ConnectionImpl<CH> connection,
-			TaskContext<ServerSocketAccepter<CH>, None, ServerSocketAccepterFlows> taskContext)
+	void registerConnection(ConnectionImpl<CH> connection,
+			TaskContext<ServerSocketAccepter<CH>, None, None> taskContext)
 			throws IOException {
 
-		// Attempt to register with an existing socket listener
+		// Spread the connections across the socket listeners.
+		// (synchronized as may be called by differing accepters/threads)
+		int next;
 		synchronized (this.socketListeners) {
-			for (SocketListener<CH> listener : this.socketListeners) {
-				if (listener.registerConnection(connection)) {
-					// Registered
-					return;
-				}
-			}
+			// TODO determine if better algorithm than round robin
+			next = this.nextSocketListener;
+			this.nextSocketListener = (this.nextSocketListener + 1)
+					% this.socketListeners.length;
 		}
 
-		// Not registered if at this point, therefore create a new listener
-		taskContext.doFlow(ServerSocketAccepterFlows.LISTEN, connection);
-	}
-
-	/**
-	 * Flags that the input {@link SocketListener} has completed and no further
-	 * {@link Connection} instances may be registered with it.
-	 *
-	 * @param socketListener
-	 *            Completed {@link SocketListener}.
-	 */
-	void socketListenerComplete(SocketListener<CH> socketListener) {
-		synchronized (this.socketListeners) {
-			this.socketListeners.remove(socketListener);
-		}
-	}
-
-	/*
-	 * ===================== WorkFactory =====================================
-	 */
-
-	@Override
-	public ConnectionManager<CH> createWork() {
-		return this;
-	}
-
-	/*
-	 * ===================== TaskFactory =====================================
-	 */
-
-	@Override
-	public Task<ConnectionManager<CH>, SocketListener.SocketListenerDependencies, Indexed> createTask(
-			ConnectionManager<CH> work) {
-
-		// Create the socket listener
-		SocketListener<CH> socketListener = new SocketListener<CH>(
-				this.selectorFactory, this.server, this.maxConnPerListener);
-
-		// Register the socket listener
-		synchronized (this.socketListeners) {
-			this.socketListeners.add(socketListener);
-		}
-
-		// Return the socket listener
-		return socketListener;
+		// Register connection with socket listener
+		this.socketListeners[next].registerConnection(connection);
 	}
 
 }

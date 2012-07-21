@@ -22,15 +22,31 @@ import java.io.IOException;
 
 import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectExecuteContext;
+import net.officefloor.plugin.socket.server.Connection;
 import net.officefloor.plugin.socket.server.ConnectionHandler;
 import net.officefloor.plugin.socket.server.Server;
 
 /**
  * Mock {@link Server}.
- *
+ * 
  * @author Daniel Sagenschneider
  */
 public class MockServer implements Server<ConnectionHandler> {
+
+	/**
+	 * {@link ConnectionHandler}.
+	 */
+	private final ConnectionHandler connectionHandler;
+
+	/**
+	 * Initiate.
+	 * 
+	 * @param connectionHandler
+	 *            {@link ConnectionHandler}.
+	 */
+	public MockServer(ConnectionHandler connectionHandler) {
+		this.connectionHandler = connectionHandler;
+	}
 
 	/*
 	 * ================== Server ==============================
@@ -40,6 +56,11 @@ public class MockServer implements Server<ConnectionHandler> {
 	public void setManagedObjectExecuteContext(
 			ManagedObjectExecuteContext<Indexed> executeContext) {
 		// Do nothing
+	}
+
+	@Override
+	public ConnectionHandler createConnectionHandler(Connection connection) {
+		return this.connectionHandler;
 	}
 
 	@Override
