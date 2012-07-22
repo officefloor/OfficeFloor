@@ -39,7 +39,7 @@ import net.officefloor.plugin.socket.server.Connection;
 import net.officefloor.plugin.socket.server.ConnectionHandler;
 import net.officefloor.plugin.socket.server.Server;
 import net.officefloor.plugin.stream.BufferSquirtFactory;
-import net.officefloor.plugin.stream.squirtfactory.HeapByteBufferSquirtFactory;
+import net.officefloor.plugin.stream.squirtfactory.DirectByteBufferSquirtFactory;
 
 /**
  * Abstract {@link ManagedObjectSource} for a {@link ServerSocketChannel}.
@@ -269,14 +269,14 @@ public abstract class AbstractServerSocketManagedObjectSource<CH extends Connect
 		// Obtain the configuration
 		int port = Integer.parseInt(mosContext.getProperty(PROPERTY_PORT));
 		final int bufferSize = Integer.parseInt(mosContext.getProperty(
-				PROPERTY_BUFFER_SIZE, "1024"));
+				PROPERTY_BUFFER_SIZE, "2048"));
 
 		// Obtain the connection manager
 		ConnectionManager<CH> connectionManager = getConnectionManager(
 				mosContext, this.selectorFactory);
 
 		// Create the buffer squirt factory
-		BufferSquirtFactory bufferSquirtFactory = new HeapByteBufferSquirtFactory(
+		BufferSquirtFactory bufferSquirtFactory = new DirectByteBufferSquirtFactory(
 				bufferSize);
 
 		// Create the server

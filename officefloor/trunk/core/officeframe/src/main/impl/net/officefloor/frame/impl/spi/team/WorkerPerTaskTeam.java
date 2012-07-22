@@ -27,7 +27,7 @@ import net.officefloor.frame.spi.team.Team;
 /**
  * {@link Team} that uses a specific new worker dedicated to each new
  * {@link Job}.
- *
+ * 
  * @author Daniel Sagenschneider
  */
 public class WorkerPerTaskTeam extends ThreadGroup implements Team {
@@ -44,7 +44,7 @@ public class WorkerPerTaskTeam extends ThreadGroup implements Team {
 
 	/**
 	 * Initiate team.
-	 *
+	 * 
 	 * @param teamName
 	 *            Name of this team.
 	 */
@@ -67,7 +67,9 @@ public class WorkerPerTaskTeam extends ThreadGroup implements Team {
 		long threadIndex = this.threadIndex.getAndIncrement();
 		String threadName = this.getClass().getSimpleName() + "_"
 				+ this.getName() + "_" + String.valueOf(threadIndex);
-		new Thread(this, new DedicatedWorker(task), threadName).start();
+		Thread thread = new Thread(this, new DedicatedWorker(task), threadName);
+		thread.setDaemon(true);
+		thread.start();
 	}
 
 	@Override
@@ -98,7 +100,7 @@ public class WorkerPerTaskTeam extends ThreadGroup implements Team {
 
 		/**
 		 * Initiate worker.
-		 *
+		 * 
 		 * @param taskContainer
 		 *            {@link Job} to execute.
 		 */

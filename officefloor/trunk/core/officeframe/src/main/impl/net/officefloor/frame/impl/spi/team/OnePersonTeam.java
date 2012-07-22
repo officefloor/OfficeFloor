@@ -79,7 +79,9 @@ public class OnePersonTeam implements Team {
 		// Start the person working
 		String threadName = this.getClass().getSimpleName() + "_"
 				+ this.teamName;
-		new Thread(this.person, threadName).start();
+		Thread thread = new Thread(this.person, threadName);
+		thread.setDaemon(true);
+		thread.start();
 	}
 
 	@Override

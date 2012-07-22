@@ -15,7 +15,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
 package net.officefloor.plugin.stream.squirtfactory;
 
 import java.nio.ByteBuffer;
@@ -24,7 +23,7 @@ import net.officefloor.plugin.stream.BufferSquirt;
 
 /**
  * {@link BufferSquirt} implementation that wraps a {@link ByteBuffer}.
- *
+ * 
  * @author Daniel Sagenschneider
  */
 public class BufferSquirtImpl implements BufferSquirt {
@@ -36,7 +35,7 @@ public class BufferSquirtImpl implements BufferSquirt {
 
 	/**
 	 * Initiate.
-	 *
+	 * 
 	 * @param buffer
 	 *            {@link ByteBuffer}.
 	 */
@@ -57,5 +56,4 @@ public class BufferSquirtImpl implements BufferSquirt {
 	public void close() {
 		// Do nothing (GC will clean up)
 	}
-
 }

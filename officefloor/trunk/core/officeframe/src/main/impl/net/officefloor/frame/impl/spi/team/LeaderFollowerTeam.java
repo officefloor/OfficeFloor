@@ -91,7 +91,9 @@ public class LeaderFollowerTeam extends ThreadGroup implements Team {
 		for (int i = 0; i < this.teamMembers.length; i++) {
 			String threadName = this.getClass().getSimpleName() + "_"
 					+ this.getName() + "_" + String.valueOf(i);
-			new Thread(this, this.teamMembers[i], threadName).start();
+			Thread thread = new Thread(this, this.teamMembers[i], threadName);
+			thread.setDaemon(true);
+			thread.start();
 		}
 	}
 
