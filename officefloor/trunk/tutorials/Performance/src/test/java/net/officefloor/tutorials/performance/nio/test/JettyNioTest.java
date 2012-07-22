@@ -15,31 +15,21 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.tutorials.performance.woof;
+package net.officefloor.tutorials.performance.nio.test;
 
-import net.officefloor.plugin.woof.WoofOfficeFloorSource;
 import net.officefloor.tutorials.performance.Servicer;
+import net.officefloor.tutorials.performance.jetty.JettyServicer;
 
 /**
- * WoOF {@link Servicer}
+ * Tests Jetty.
  * 
  * @author Daniel Sagenschneider
  */
-public class WoofServicer implements Servicer {
+public class JettyNioTest extends AbstractNioRunnerTestCase {
 
 	@Override
-	public int getPort() {
-		return 7878;
-	}
-
-	@Override
-	public void start() throws Exception {
-		WoofOfficeFloorSource.start();
-	}
-
-	@Override
-	public void stop() throws Exception {
-		WoofOfficeFloorSource.stop();
+	protected Servicer createServicer() {
+		return new JettyServicer();
 	}
 
 }

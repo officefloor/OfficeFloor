@@ -32,10 +32,15 @@ public class TomcatServicer implements Servicer {
 	private Tomcat server;
 
 	@Override
+	public int getPort() {
+		return 8888;
+	}
+
+	@Override
 	public void start() throws Exception {
 		this.server = new Tomcat();
 		this.server.setBaseDir(System.getProperty("java.io.tmpdir"));
-		this.server.setPort(8888);
+		this.server.setPort(this.getPort());
 		this.server.setSilent(true);
 		this.server.addContext("/", System.getProperty("java.io.tmpdir"));
 		this.server.addServlet("/", "test", new HttpServletServicer())

@@ -134,10 +134,13 @@ public abstract class AbstractRunnerTestCase extends TestCase {
 				new Request(this.serverAddress, "info.php?v=Y", 'y', 1) };
 
 		// Do warm up
-		this.runner = new Runner(100, this.connectionsPerClient,
+		this.runner = new Runner(10, this.connectionsPerClient,
 				this.numberOfIterations, maskDistribution);
 		this.doTestRun("WARM UP", requests);
-		this.doTestRun("AGAIN", requests);
+
+		for (int i = 0; i < 10; i++) {
+			this.doTestRun("AGAIN", requests);
+		}
 		this.runner.stop();
 	}
 

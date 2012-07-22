@@ -25,6 +25,13 @@ package net.officefloor.tutorials.performance;
 public interface Servicer {
 
 	/**
+	 * Obtains the port that the {@link Servicer} is running on.
+	 * 
+	 * @return Port that the {@link Servicer} is running on.
+	 */
+	int getPort();
+
+	/**
 	 * Starts the {@link Servicer}.
 	 * 
 	 * @throws Exception

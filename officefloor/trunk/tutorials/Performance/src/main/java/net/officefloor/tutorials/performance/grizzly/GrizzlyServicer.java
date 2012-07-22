@@ -38,10 +38,16 @@ public class GrizzlyServicer implements Servicer {
 	private HttpServer server;
 
 	@Override
+	public int getPort() {
+		return 7000;
+	}
+
+	@Override
 	public void start() throws Exception {
 		this.server = new HttpServer();
 		this.server.addListener(new NetworkListener("grizzly",
-				NetworkListener.DEFAULT_NETWORK_HOST, new PortRange(7000)));
+				NetworkListener.DEFAULT_NETWORK_HOST, new PortRange(this
+						.getPort())));
 		WebappContext context = new WebappContext("Grizzly");
 		context.addServlet("test", new HttpServletServicer());
 		context.deploy(server);
