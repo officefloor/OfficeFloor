@@ -32,6 +32,11 @@ import org.apache.http.impl.client.DefaultHttpClient;
 public class ApacheServicer implements Servicer {
 
 	@Override
+	public int getPort() {
+		return 80;
+	}
+
+	@Override
 	public void start() throws Exception {
 
 		// Ensure Apache running

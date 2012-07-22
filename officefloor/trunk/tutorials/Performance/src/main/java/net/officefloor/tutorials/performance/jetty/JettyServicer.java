@@ -37,16 +37,19 @@ public class JettyServicer implements Servicer {
 	private Server server;
 
 	@Override
+	public int getPort() {
+		return 8080;
+	}
+
+	@Override
 	public void start() throws Exception {
 
 		// Create the server
-		this.server = new Server(8080);
+		this.server = new Server(this.getPort());
 		ServletContextHandler context = new ServletContextHandler();
 		context.setContextPath("/");
 		this.server.setHandler(context);
 		context.addServlet(new ServletHolder(new HttpServletServicer()), "/*");
-		// this.server.setThreadPool(new ExecutorThreadPool(25, 25,
-		// 10000000000L));
 		this.server.start();
 	}
 
