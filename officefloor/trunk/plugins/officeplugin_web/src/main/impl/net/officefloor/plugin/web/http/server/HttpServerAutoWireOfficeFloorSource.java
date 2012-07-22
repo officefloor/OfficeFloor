@@ -27,7 +27,7 @@ import net.officefloor.compile.properties.Property;
 import net.officefloor.compile.spi.officefloor.OfficeFloorDeployer;
 import net.officefloor.compile.spi.officefloor.source.OfficeFloorSource;
 import net.officefloor.compile.spi.officefloor.source.OfficeFloorSourceContext;
-import net.officefloor.frame.impl.spi.team.OnePersonTeamSource;
+import net.officefloor.frame.impl.spi.team.PassiveTeamSource;
 import net.officefloor.plugin.socket.server.http.source.HttpServerSocketManagedObjectSource;
 import net.officefloor.plugin.web.http.application.HttpApplicationState;
 import net.officefloor.plugin.web.http.application.HttpApplicationStateManagedObjectSource;
@@ -84,8 +84,8 @@ public class HttpServerAutoWireOfficeFloorSource extends
 							String.valueOf(httpPort));
 		}
 
-		// Use active team by default - done early so allow further overriding
-		this.assignDefaultTeam(OnePersonTeamSource.class.getName());
+		// Use passive team by default (saves on context switching)
+		this.assignDefaultTeam(PassiveTeamSource.class.getName());
 
 		// Configure HTTP Session (allowing 10 seconds to retrieve session)
 		this.httpSession = this.addManagedObject(

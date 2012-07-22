@@ -25,7 +25,7 @@ import net.officefloor.plugin.stream.BufferSquirtFactory;
 
 /**
  * Heap {@link ByteBuffer} {@link BufferSquirtFactory}.
- *
+ * 
  * @author Daniel Sagenschneider
  */
 public class HeapByteBufferSquirtFactory implements BufferSquirtFactory {
@@ -37,7 +37,7 @@ public class HeapByteBufferSquirtFactory implements BufferSquirtFactory {
 
 	/**
 	 * Initiate.
-	 *
+	 * 
 	 * @param bufferSize
 	 *            Size of the {@link ByteBuffer} instances.
 	 */
