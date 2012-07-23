@@ -18,7 +18,7 @@
 package net.officefloor.tutorials.performance.tomcat;
 
 import net.officefloor.tutorials.performance.Servicer;
-import net.officefloor.tutorials.performance.servlet.HttpServletServicer;
+import net.officefloor.tutorials.performance.logic.HttpServletServicer;
 
 import org.apache.catalina.startup.Tomcat;
 
@@ -34,6 +34,11 @@ public class TomcatServicer implements Servicer {
 	@Override
 	public int getPort() {
 		return 8888;
+	}
+
+	@Override
+	public int getMaximumConnectionCount() {
+		return 1000;
 	}
 
 	@Override

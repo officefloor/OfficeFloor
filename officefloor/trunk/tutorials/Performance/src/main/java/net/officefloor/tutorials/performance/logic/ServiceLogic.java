@@ -15,7 +15,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.tutorials.performance.woof;
+package net.officefloor.tutorials.performance.logic;
 
 import java.io.IOException;
 import java.sql.SQLException;
@@ -64,7 +64,7 @@ public class ServiceLogic {
 		try {
 
 			// Simulate database interaction
-			Thread.sleep(1);
+			Thread.sleep(10);
 
 		} finally {
 			connection.close();

@@ -25,10 +25,20 @@ import net.officefloor.frame.spi.team.source.impl.AbstractTeamSource;
 
 /**
  * {@link TeamSource} for the {@link WorkerPerTaskTeam}.
- *
+ * 
  * @author Daniel Sagenschneider
  */
 public class WorkerPerTaskTeamSource extends AbstractTeamSource {
+
+	/**
+	 * Property to specify the worker {@link Thread} priority.
+	 */
+	public static final String PROPERTY_THREAD_PRIORITY = "worker.thread.priority";
+
+	/**
+	 * Default {@link Thread} priority.
+	 */
+	public static final int DEFAULT_THREAD_PRIORITY = Thread.NORM_PRIORITY;
 
 	/*
 	 * ==================== AbstractTeamSource ===============================
@@ -45,8 +55,13 @@ public class WorkerPerTaskTeamSource extends AbstractTeamSource {
 		// Obtain the team name
 		String teamName = context.getTeamName();
 
+		// Obtain the thread priority
+		int priority = Integer.valueOf(context.getProperty(
+				PROPERTY_THREAD_PRIORITY,
+				String.valueOf(DEFAULT_THREAD_PRIORITY)));
+
 		// Create and return the team
-		return new WorkerPerTaskTeam(teamName);
+		return new WorkerPerTaskTeam(teamName, priority);
 	}
 
 }

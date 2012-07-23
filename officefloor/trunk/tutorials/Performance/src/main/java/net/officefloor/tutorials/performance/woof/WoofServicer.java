@@ -33,6 +33,11 @@ public class WoofServicer implements Servicer {
 	}
 
 	@Override
+	public int getMaximumConnectionCount() {
+		return 10000;
+	}
+
+	@Override
 	public void start() throws Exception {
 		WoofOfficeFloorSource.start();
 	}

@@ -18,6 +18,8 @@
 package net.officefloor.tutorials.performance.pool;
 
 import java.sql.SQLException;
+import java.util.Deque;
+import java.util.LinkedList;
 
 /**
  * Simple object pool.
@@ -42,6 +44,11 @@ public class PooledDataSource {
 	private int numberReleased = 0;
 
 	/**
+	 * Queued {@link Thread} instances.
+	 */
+	private final Deque<boolean[]> queuedThreads = new LinkedList<boolean[]>();
+
+	/**
 	 * Initiate.
 	 * 
 	 * @param maxSize
@@ -58,15 +65,29 @@ public class PooledDataSource {
 	 * @throws SQLException
 	 *             Should not occur for testing.
 	 */
-	public synchronized Connection getConnection() throws SQLException {
+	public Connection getConnection() throws SQLException {
 
-		// Wait for available connection
-		// TODO provide fairness
-		while (this.numberReleased >= this.maxSize) {
-			try {
-				this.wait(100);
-			} catch (InterruptedException ex) {
-				throw new SQLException(ex);
+		// Provide connection on first come first serve basis
+		boolean[] lock = null;
+		synchronized (this) {
+			// Determine if connection available
+			if (this.numberReleased >= this.maxSize) {
+				// Wait for available connection
+				lock = new boolean[] { false };
+				this.queuedThreads.add(lock);
+			}
+		}
+
+		// Wait on available connection
+		if (lock != null) {
+			synchronized (lock) {
+				if (!(lock[0])) {
+					try {
+						lock.wait();
+					} catch (InterruptedException ex) {
+						throw new SQLException(ex);
+					}
+				}
 			}
 		}
 
@@ -87,10 +108,21 @@ public class PooledDataSource {
 		 *             Should not occur for testing.
 		 */
 		public void close() throws SQLException {
+
+			// Release the connection
+			boolean[] lock = null;
 			synchronized (PooledDataSource.this) {
 				// Return connection
 				PooledDataSource.this.numberReleased--;
-				PooledDataSource.this.notify();
+				lock = PooledDataSource.this.queuedThreads.pollFirst();
+			}
+
+			// Notify another thread that connection available
+			if (lock != null) {
+				synchronized (lock) {
+					lock[0] = true;
+					lock.notify();
+				}
 			}
 		}
 	}

@@ -18,7 +18,7 @@
 package net.officefloor.tutorials.performance.jetty;
 
 import net.officefloor.tutorials.performance.Servicer;
-import net.officefloor.tutorials.performance.servlet.HttpServletServicer;
+import net.officefloor.tutorials.performance.logic.HttpServletServicer;
 
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletContextHandler;
@@ -39,6 +39,11 @@ public class JettyServicer implements Servicer {
 	@Override
 	public int getPort() {
 		return 8080;
+	}
+
+	@Override
+	public int getMaximumConnectionCount() {
+		return 10000;
 	}
 
 	@Override

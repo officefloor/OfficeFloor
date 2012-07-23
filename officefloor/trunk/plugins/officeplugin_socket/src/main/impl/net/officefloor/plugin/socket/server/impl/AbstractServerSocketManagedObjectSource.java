@@ -85,7 +85,7 @@ public abstract class AbstractServerSocketManagedObjectSource<CH extends Connect
 		if ((!mosContext.isLoadingType())
 				&& (singletonConnectionManager == null)) {
 
-			// One socket lister per processor to spread load
+			// Spread load if have multiple processors
 			int numberOfSocketListeners = Runtime.getRuntime()
 					.availableProcessors();
 

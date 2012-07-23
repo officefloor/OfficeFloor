@@ -18,7 +18,7 @@
 package net.officefloor.tutorials.performance.grizzly;
 
 import net.officefloor.tutorials.performance.Servicer;
-import net.officefloor.tutorials.performance.servlet.HttpServletServicer;
+import net.officefloor.tutorials.performance.logic.HttpServletServicer;
 
 import org.glassfish.grizzly.PortRange;
 import org.glassfish.grizzly.http.server.HttpServer;
@@ -40,6 +40,11 @@ public class GrizzlyServicer implements Servicer {
 	@Override
 	public int getPort() {
 		return 7000;
+	}
+
+	@Override
+	public int getMaximumConnectionCount() {
+		return 10000;
 	}
 
 	@Override

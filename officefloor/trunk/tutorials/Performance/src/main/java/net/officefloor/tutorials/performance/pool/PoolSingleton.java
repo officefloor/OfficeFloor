@@ -30,9 +30,15 @@ public class PoolSingleton extends AbstractManagedObjectSource<None, None>
 		implements ManagedObject {
 
 	/**
+	 * Indicates the number of pooled connections.
+	 */
+	public static final int NUMBER_OF_POOLED_CONNECTIONS = 50;
+
+	/**
 	 * Singleton {@link PooledDataSource}.
 	 */
-	private final static PooledDataSource singleton = new PooledDataSource(25);
+	private final static PooledDataSource singleton = new PooledDataSource(
+			NUMBER_OF_POOLED_CONNECTIONS);
 
 	/**
 	 * Obtains the {@link PooledDataSource} singleton.
