@@ -20,6 +20,7 @@ package net.officefloor.tutorials.performance.nio.test;
 import junit.framework.TestCase;
 import net.officefloor.tutorials.performance.Servicer;
 import net.officefloor.tutorials.performance.nio.Load;
+import net.officefloor.tutorials.performance.nio.Request;
 import net.officefloor.tutorials.performance.nio.Runner;
 
 /**
@@ -42,20 +43,45 @@ public abstract class AbstractNioRunnerTestCase extends TestCase {
 	protected abstract Servicer createServicer();
 
 	/**
+	 * Tests performance with the same load between CPU and Database.
+	 */
+	public void testPerformance_SameLoad() throws Throwable {
+		this.doPerformanceTest(1, 1);
+	}
+
+	/**
+	 * Tests performance with a magnitude more CPU load.
+	 */
+	public void testPerformance_MagnitudeMoreCpu() throws Throwable {
+		this.doPerformanceTest(10, 1);
+	}
+
+	/**
+	 * Tests performance with a magnitude more Database load.
+	 */
+	public void testPerformance_MagnitudeMoreDatabase() throws Throwable {
+		this.doPerformanceTest(1, 10);
+	}
+
+	/**
 	 * Tests the performance.
 	 */
-	public void testPerformance() throws Exception {
+	public void doPerformanceTest(int cpuSeed, int dbSeed) throws Throwable {
 
 		// Provide details
-		int timeIntervalSeconds = 20;
-		int cpuSeed = 1;
-		int dbSeed = 1;
+		int timeIntervalSeconds = 60;
+		int runsPerIncrement = 10;
+		int maximumNumberOfLoadConnections = 10000;
 
 		// Indicate starting
+		System.out.println();
+		System.out.println();
+		System.out.println();
 		System.out
 				.println("===============================================================");
-		System.out.println("Starting " + this.getClass().getSimpleName()
-				+ " with interval of " + timeIntervalSeconds + " secs");
+		System.out.println("Starting " + this.getClass().getSimpleName() + "."
+				+ this.getName() + " with interval of " + timeIntervalSeconds
+				+ " secs, cpu seed=" + cpuSeed + ", db seed=" + dbSeed);
 		System.out
 				.println("===============================================================");
 
@@ -64,16 +90,20 @@ public abstract class AbstractNioRunnerTestCase extends TestCase {
 
 		// Obtain the host (and start servicer if local host)
 		String host = System.getProperty(PROPERTY_TARGET_HOST, "localhost");
+		boolean isServicerRequireStopping = false;
 		if ("localhost".equals(host)) {
 			// Start the servicer
 			servicer.start();
+			isServicerRequireStopping = true;
 		}
 
 		// Start the runner
 		Runner runner = new Runner(host, servicer.getPort(), 0.1, 0.5, 0.9,
 				0.95, 0.99);
-		Load cpuLoad = runner.addLoad("/info.php?v=N", "n");
-		Load dbLoad = runner.addLoad("/info.php?v=Y", "y");
+		Load cpuLoad = runner.addLoad("cpu", true, new Request("/info.php?v=N",
+				"n", 10));
+		Load dbLoad = runner.addLoad("db", true, new Request("/info.php?v=Y",
+				"y", 10));
 
 		try {
 
@@ -81,28 +111,63 @@ public abstract class AbstractNioRunnerTestCase extends TestCase {
 			cpuLoad.addConnections(cpuSeed);
 			dbLoad.addConnections(dbSeed);
 
-			// Warm up
-			runner.runInterval("WARM UP", 300);
+			// Warm up for 5 times the interval
+			runner.runInterval("STARTUP", (5 * timeIntervalSeconds));
 
-			// Undertake run
-			runner.runInterval("RUN", timeIntervalSeconds);
+			// Undertake the runs
+			boolean isFinished = false;
+			do {
 
-			// Provide 3 levels of magnitude
-			for (int i = 0; i < 3; i++) {
+				// Obtain current magnitude of connections
+				int currentMagnitudeConnectionCount = Math.max(
+						cpuLoad.getConnectionCount(),
+						dbLoad.getConnectionCount());
 
-				// Increment the connections
+				// Undertake warm up
+				System.out.println();
+				System.out.println();
+				runner.runInterval("WARM NEW THREADS ("
+						+ currentMagnitudeConnectionCount
+						+ " connection magnitude)", timeIntervalSeconds);
+
+				// Undertake multiple runs to average results
+				for (int i = 0; i < runsPerIncrement; i++) {
+					runner.runInterval("RUN " + (i + 1), timeIntervalSeconds);
+				}
+
+				// Obtain the next magnitude of connections
+				int nextMagnitudeConnectionCount = currentMagnitudeConnectionCount * 10;
+
+				// Determine if finished
+				if ((nextMagnitudeConnectionCount > maximumNumberOfLoadConnections)
+						|| (nextMagnitudeConnectionCount > servicer
+								.getMaximumConnectionCount())) {
+					// No further runs as reached maximum
+					return;
+				}
+
+				// Increment the connections by another magnitude
 				cpuLoad.addConnections((cpuLoad.getConnectionCount() * 10)
 						- cpuLoad.getConnectionCount());
 				dbLoad.addConnections((dbLoad.getConnectionCount() * 10)
 						- dbLoad.getConnectionCount());
-				
-				// Undertake run
-				runner.runInterval("RUN", timeIntervalSeconds);
-			}
+
+			} while (!isFinished);
+
+		} catch (Throwable ex) {
+			ex.printStackTrace();
+			throw ex;
 
 		} finally {
-			servicer.stop();
+			try {
+				// Stop all connections
+				runner.stop();
+			} finally {
+				// Stop servicer
+				if (isServicerRequireStopping) {
+					servicer.stop();
+				}
+			}
 		}
 	}
-
 }

@@ -40,6 +40,13 @@ public interface Servicer {
 	void start() throws Exception;
 
 	/**
+	 * Obtains the maximum connection count for this {@link Servicer}.
+	 * 
+	 * @return Maximum connection count for this {@link Servicer}.
+	 */
+	int getMaximumConnectionCount();
+
+	/**
 	 * Stops the {@link Servicer}.
 	 * 
 	 * @throws Exception

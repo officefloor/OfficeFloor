@@ -118,8 +118,10 @@ public class ServerSocketAccepter<CH extends ConnectionHandler> extends
 		// Bind to the socket to start listening
 		this.channel = ServerSocketChannel.open();
 		this.channel.configureBlocking(false);
+		ServerSocket socket = this.channel.socket();
+		socket.setReuseAddress(true);
 		// TODO make the ServerSocket bind backlog configurable
-		this.channel.socket().bind(this.serverSocketAddress, 1000);
+		socket.bind(this.serverSocketAddress, 1000);
 
 		// Register the channel with the selector
 		this.selector = Selector.open();

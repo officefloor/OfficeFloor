@@ -15,7 +15,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.tutorials.performance.servlet;
+package net.officefloor.tutorials.performance.logic;
 
 import java.io.IOException;
 
@@ -53,7 +53,7 @@ public class HttpServletServicer extends HttpServlet {
 							.getConnection();
 
 					// Simulate database interaction
-					Thread.sleep(1);
+					Thread.sleep(10);
 
 				} finally {
 					if (connection != null) {

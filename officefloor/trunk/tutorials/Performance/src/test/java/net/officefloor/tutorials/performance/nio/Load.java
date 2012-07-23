@@ -18,13 +18,9 @@
 package net.officefloor.tutorials.performance.nio;
 
 import java.io.IOException;
-import java.net.InetSocketAddress;
-import java.net.Socket;
-import java.nio.ByteBuffer;
-import java.nio.channels.SelectionKey;
-import java.nio.channels.SocketChannel;
+import java.io.PrintStream;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 import net.officefloor.plugin.socket.server.Server;
@@ -37,9 +33,30 @@ import net.officefloor.plugin.socket.server.Server;
 public class Load {
 
 	/**
+	 * {@link DecimalFormat} for the service times.
+	 */
+	private static final DecimalFormat serviceTimeFormat = new DecimalFormat(
+			"0.00");
+
+	/**
+	 * Description of this load for display.
+	 */
+	private final String description;
+
+	/**
 	 * Containing {@link Runner}.
 	 */
 	private final Runner runner;
+
+	/**
+	 * Indicates if to disconnect after the {@link Request} sequence is sent.
+	 */
+	private final boolean isDisconnectAfterSequence;
+
+	/**
+	 * Sequence of {@link Request} instances.
+	 */
+	private final Request[] requests;
 
 	/**
 	 * Listing of {@link Connection} instances for this {@link Load}.
@@ -47,44 +64,24 @@ public class Load {
 	private final List<Connection> connections = new ArrayList<Connection>();
 
 	/**
-	 * Request URI.
-	 */
-	private final String requestUri;
-
-	/**
-	 * {@link ByteBuffer} containing the request for this {@link Load}.
-	 */
-	private final ByteBuffer request;
-
-	/**
-	 * Expected content of the response.
-	 */
-	private final String expectedResponseContent;
-
-	/**
-	 * Servicing times of the responses within an run interval.
-	 */
-	private final List<Long> serviceTimes = new ArrayList<Long>(10000);
-
-	/**
 	 * Initiate.
 	 * 
+	 * @param description
+	 *            Description of the load.
 	 * @param runner
 	 *            Containing {@link Runner}.
-	 * @param requestUri
-	 *            Request URI.
-	 * @param request
-	 *            {@link ByteBuffer} containing the request for this
-	 *            {@link Load}.
-	 * @param expectedResponseContent
-	 *            Expected content of the response.
+	 * @param isDisconnectAfterSequence
+	 *            Indicates if to disconnect after the sequence of
+	 *            {@link Request} instances are serviced.
+	 * @param requests
+	 *            Sequence of {@link Request} instances.
 	 */
-	Load(Runner runner, String requestUri, ByteBuffer request,
-			String expectedResponseContent) {
-		this.requestUri = requestUri;
+	Load(String description, Runner runner, boolean isDisconnectAfterSequence,
+			Request[] requests) {
+		this.description = description;
 		this.runner = runner;
-		this.request = request;
-		this.expectedResponseContent = expectedResponseContent;
+		this.isDisconnectAfterSequence = isDisconnectAfterSequence;
+		this.requests = requests;
 	}
 
 	/**
@@ -102,14 +99,15 @@ public class Load {
 			// Determine if need to start establishing connections
 			if (((i + 1) % 500) == 0) {
 				String message = "Establshing up to " + i + " connections for "
-						+ this.requestUri + " (to avoid SYNC attack)";
+						+ this.description + " (to avoid SYNC attack)";
 				System.out.println(message);
 				this.runner.runInterval(message, -1, false, null, true);
 			}
 		}
 
 		// Connect remaining connections
-		String message = "Establishing all connections for " + this.requestUri
+		String message = "Establishing all " + this.getConnectionCount()
+				+ " connections for " + this.description
 				+ " (to avoid SYNC attack)";
 		System.out.println(message);
 		this.runner.runInterval(message, -1, false, null, true);
@@ -131,32 +129,43 @@ public class Load {
 	 *             If fails to add {@link Connection}.
 	 */
 	void addConnection() throws IOException {
-
-		// Trigger open of connection
-		SocketChannel channel = SocketChannel.open();
-		channel.configureBlocking(false);
-		Socket socket = channel.socket();
-		socket.setSoTimeout(0); // wait forever
-		socket.setTcpNoDelay(false);
-		channel.connect(new InetSocketAddress(this.runner.getHostName(),
-				this.runner.getPort()));
-
-		// Create the connection
-		Connection connection = new Connection(this, channel);
-
-		// Register connection with selector to start requesting
-		channel.register(this.runner.getSelector(), SelectionKey.OP_CONNECT,
-				connection);
-
 		// Add the connection
-		this.connections.add(connection);
+		this.connections.add(new Connection(this));
 	}
 
 	/**
 	 * Reset for the next run interval.
 	 */
 	void reset() {
-		this.serviceTimes.clear();
+
+		// Reset the connection details
+		for (Connection connection : this.connections) {
+			connection.reset();
+		}
+
+		// Reset the request details
+		for (Request request : this.requests) {
+			request.reset();
+		}
+	}
+
+	/**
+	 * Stops all {@link Connection} instances.
+	 */
+	void stop() {
+		// Stop all connections
+		for (Connection connection : this.connections) {
+			connection.stop();
+		}
+	}
+
+	/**
+	 * Obtains the {@link Runner}.
+	 * 
+	 * @return {@link Runner}.
+	 */
+	Runner getRunner() {
+		return this.runner;
 	}
 
 	/**
@@ -178,15 +187,6 @@ public class Load {
 	}
 
 	/**
-	 * Obtains the request URI for this load.
-	 * 
-	 * @return Request URI for this load.
-	 */
-	String getRequestUri() {
-		return this.requestUri;
-	}
-
-	/**
 	 * Obtains the number of failed {@link Connection} instances.
 	 * 
 	 * @return Number of failed {@link Connection} instances.
@@ -202,95 +202,69 @@ public class Load {
 	}
 
 	/**
-	 * Obtains the number of requests serviced.
+	 * Obtains the sequence of {@link Request} instances for this load.
 	 * 
-	 * @return Number of requests serviced.
+	 * @return Sequence of {@link Request} instances for this load.
 	 */
-	int getNumberOfRequestsServiced() {
-		return this.serviceTimes.size();
+	Request[] getRequests() {
+		return this.requests;
 	}
 
 	/**
-	 * Obtains the minimum servicing time that input percentage of requests were
-	 * serviced within.
+	 * Determines if to disconnect after the sequence of {@link Request}
+	 * instances have been sent.
 	 * 
-	 * @param percentage
-	 *            Percentage.
-	 * @return Minimum servicing time that input percentage of requests were
-	 *         serviced within.
+	 * @return <code>true</code> to disconnect.
 	 */
-	long getPercentileServiceTime(double percentage) {
+	boolean isDisconnectAfterSequence() {
+		return this.isDisconnectAfterSequence;
+	}
 
-		// Sort servicing times
-		Collections.sort(this.serviceTimes);
+	/**
+	 * Reports on the results of the last interval.
+	 * 
+	 * @param description
+	 *            Description of the interval.
+	 * @param timeIntervalSeconds
+	 *            Time interval in seconds.
+	 * @param out
+	 *            {@link PrintStream} to write the results.
+	 */
+	void reportLastIntervalResults(String description, int timeIntervalSeconds,
+			PrintStream out) {
 
-		// Return the percentile service time
-		if (this.serviceTimes.size() == 0) {
-			return -1;
-		} else {
-			return this.serviceTimes
-					.get((int) (this.serviceTimes.size() * percentage));
+		// Count the number of reconnects
+		int reconnectCount = 0;
+		for (Connection connection : this.connections) {
+			reconnectCount += connection.getReconnectCount();
 		}
-	}
 
-	/**
-	 * Obtains the {@link ByteBuffer} containing the request.
-	 * 
-	 * @return {@link ByteBuffer} containing the request.
-	 */
-	ByteBuffer getRequest() {
-		return this.request;
-	}
+		// Provide throughput summary
+		out.println("LOAD: " + this.description + " ["
+				+ this.getConnectionCount() + " connections / "
+				+ this.getFailedConnectionCount() + " failed / "
+				+ reconnectCount + " reconnects]");
 
-	/**
-	 * Obtains the expected response content.
-	 * 
-	 * @return Expected response content.
-	 */
-	String getExpectedResponseContent() {
-		return this.expectedResponseContent;
-	}
+		// Provide summary of interval
+		for (Request request : this.requests) {
 
-	/**
-	 * Records the servicing of a request.
-	 * 
-	 * @param requestStart
-	 *            Time in nanoseconds of request start.
-	 * @param requestEnd
-	 *            Time in nanoseconds of request end.
-	 * @throws IOException
-	 *             If invalid time.
-	 */
-	void requestServiced(long requestStart, long requestEnd) throws IOException {
+			// Provide throughput summary
+			out.print("\t" + request.getRequestUri() + ": "
+					+ request.getNumberOfRequestsServiced() + " requests ");
 
-		// Determine the service time
-		long serviceTime;
-		if (requestStart > requestEnd) {
-			throw new IOException("Time recording invalid [" + requestStart
-					+ ", " + requestEnd + "]");
-		}
-		if (requestStart < 0) {
-			if (requestEnd < 0) {
-				// Both start and end time negative
-				serviceTime = Math.abs(requestStart) - Math.abs(requestEnd);
-			} else {
-				// Start negative but end time positive
-				serviceTime = Math.abs(requestStart) + requestEnd;
+			// Provide latency summary
+			for (double percentile : this.runner.getPecentileServiceTimes()) {
+				long percentileServiceTime = request
+						.getPercentileServiceTime(percentile);
+				out.print(" "
+						+ ((int) (percentile * 100))
+						+ "%="
+						+ serviceTimeFormat
+								.format(percentileServiceTime / 1000000.0)
+						+ "ms");
 			}
-		} else {
-			// Both start and end time positive
-			serviceTime = requestEnd - requestStart;
+			out.println();
 		}
-
-		// Add the service time
-		this.serviceTimes.add(Long.valueOf(serviceTime));
-	}
-
-	/**
-	 * Connection failed.
-	 */
-	void connectionFailed() {
-
 	}
 
 }

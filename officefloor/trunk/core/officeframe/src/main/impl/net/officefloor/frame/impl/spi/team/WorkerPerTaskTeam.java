@@ -33,6 +33,11 @@ import net.officefloor.frame.spi.team.Team;
 public class WorkerPerTaskTeam extends ThreadGroup implements Team {
 
 	/**
+	 * Priority for the worker {@link Thread} instances.
+	 */
+	private final int threadPriority;
+
+	/**
 	 * Indicates to continue working.
 	 */
 	private volatile boolean continueWorking = true;
@@ -43,13 +48,26 @@ public class WorkerPerTaskTeam extends ThreadGroup implements Team {
 	private AtomicLong threadIndex = new AtomicLong(0);
 
 	/**
-	 * Initiate team.
+	 * Initiate {@link Team}.
+	 * 
+	 * @param teamName
+	 *            Name of this team.
+	 * @param threadPriority
+	 *            Priority for the worker {@link Thread} instances.
+	 */
+	public WorkerPerTaskTeam(String teamName, int threadPriority) {
+		super(teamName);
+		this.threadPriority = threadPriority;
+	}
+
+	/**
+	 * Initiate {@link Team} with normal priority.
 	 * 
 	 * @param teamName
 	 *            Name of this team.
 	 */
 	public WorkerPerTaskTeam(String teamName) {
-		super(teamName);
+		this(teamName, Thread.NORM_PRIORITY);
 	}
 
 	/*
@@ -68,7 +86,12 @@ public class WorkerPerTaskTeam extends ThreadGroup implements Team {
 		String threadName = this.getClass().getSimpleName() + "_"
 				+ this.getName() + "_" + String.valueOf(threadIndex);
 		Thread thread = new Thread(this, new DedicatedWorker(task), threadName);
-		thread.setDaemon(true);
+		if (thread.getPriority() != this.threadPriority) {
+			thread.setPriority(this.threadPriority);
+		}
+		if (!(thread.isDaemon())) {
+			thread.setDaemon(true);
+		}
 		thread.start();
 	}
 

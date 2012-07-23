@@ -18,7 +18,10 @@
 package net.officefloor.tutorials.performance.nio;
 
 import java.io.IOException;
+import java.net.InetSocketAddress;
+import java.net.Socket;
 import java.nio.ByteBuffer;
+import java.nio.channels.SelectionKey;
 import java.nio.channels.SocketChannel;
 import java.nio.charset.Charset;
 
@@ -40,9 +43,9 @@ public class Connection {
 	private final Load load;
 
 	/**
-	 * {@link SocketChannel}.
+	 * {@link SelectionKey}.
 	 */
-	private final SocketChannel channel;
+	private SelectionKey seletionKey;
 
 	/**
 	 * Read {@link ByteBuffer}.
@@ -55,9 +58,28 @@ public class Connection {
 	private boolean isConnected = false;
 
 	/**
+	 * Number of times this {@link Connection} reconnected.
+	 */
+	private int reconnectCount = 0;
+
+	/**
 	 * Indicates if this {@link Connection} failed.
 	 */
 	private boolean isFailed = false;
+
+	/**
+	 * <p>
+	 * Index of the current {@link Request}.
+	 * <p>
+	 * Moved to 0 on first {@link Request}.
+	 */
+	private int currentRequestIndex = 0;
+
+	/**
+	 * Obtains the number of times the current {@link Request} has been
+	 * repeated.
+	 */
+	private int currentRepeatCount = 0;
 
 	/**
 	 * Servicing start time.
@@ -80,16 +102,54 @@ public class Connection {
 	private int availableResponseData = 0;
 
 	/**
+	 * Indicates if stopped.
+	 */
+	private boolean isStopped = false;
+
+	/**
 	 * Initiate.
 	 * 
 	 * @param load
 	 *            Containing {@link Load}.
-	 * @param channel
-	 *            {@link Connection}.
+	 * @throws IOException
+	 *             If fails to trigger opening a new connection.
 	 */
-	Connection(Load load, SocketChannel channel) {
+	Connection(Load load) throws IOException {
 		this.load = load;
-		this.channel = channel;
+
+		// Trigger establishing the connection
+		this.establishNewConnection();
+	}
+
+	/**
+	 * Establishes a new connection.
+	 * 
+	 * @throws IOException
+	 *             If fails to trigger opening a new connection.
+	 */
+	void establishNewConnection() throws IOException {
+
+		// Trigger open of connection
+		SocketChannel channel = SocketChannel.open();
+		channel.configureBlocking(false);
+		Socket socket = channel.socket();
+		socket.setReuseAddress(true);
+		socket.setSoTimeout(0); // wait forever
+		socket.setTcpNoDelay(false);
+		channel.connect(new InetSocketAddress(this.load.getRunner()
+				.getHostName(), this.load.getRunner().getPort()));
+
+		// Register connection with selector to start requesting
+		this.seletionKey = channel.register(
+				this.load.getRunner().getSelector(), SelectionKey.OP_CONNECT,
+				this);
+	}
+
+	/**
+	 * Stops the {@link Connection}.
+	 */
+	void stop() {
+		this.isStopped = true;
 	}
 
 	/**
@@ -97,7 +157,8 @@ public class Connection {
 	 */
 	boolean finishConnect() throws IOException {
 		this.isConnected = true;
-		return this.channel.finishConnect();
+		this.reconnectCount++;
+		return ((SocketChannel) this.seletionKey.channel()).finishConnect();
 	}
 
 	/**
@@ -106,17 +167,51 @@ public class Connection {
 	 * @return <code>true</code> on full request being written.
 	 */
 	boolean writeRequest() throws IOException {
-		ByteBuffer request = this.load.getRequest();
+
+		// Determine if stop
+		if (this.isStopped) {
+			this.seletionKey.channel().close();
+			return false; // stopped
+		}
+
+		// Obtain the current request
+		Request request = this.load.getRequests()[this.currentRequestIndex];
+		if (this.currentRepeatCount < request.getRepeatCount()) {
+			// Repeat the request
+			this.currentRepeatCount++;
+
+		} else {
+			// Move to next request
+			this.currentRequestIndex = ((this.currentRequestIndex + 1) % this.load
+					.getRequests().length);
+			this.currentRepeatCount = 0;
+
+			// Determine if finished sequence
+			if ((this.load.isDisconnectAfterSequence())
+					&& (this.currentRequestIndex == 0)) {
+
+				// Disconnect and reconnect
+				this.seletionKey.channel().close();
+				this.establishNewConnection();
+
+				// Not written request as disconnecting
+				return false;
+			}
+
+			// Obtain next request in sequence to process
+			request = this.load.getRequests()[this.currentRequestIndex];
+		}
 
 		// Write the bytes
-		ByteBuffer remaining = request.duplicate();
+		ByteBuffer requestData = request.getData();
+		ByteBuffer remaining = requestData.duplicate();
 		remaining.position(this.writtenRequestData);
-		int numberOfBytesWritten = this.channel.write(this.load.getRequest()
-				.duplicate());
+		int numberOfBytesWritten = ((SocketChannel) this.seletionKey.channel())
+				.write(remaining);
 		this.writtenRequestData += numberOfBytesWritten;
 
 		// Determine if full request written
-		if (this.writtenRequestData < request.remaining()) {
+		if (this.writtenRequestData < requestData.remaining()) {
 			// Further request data to write
 			return false;
 		}
@@ -136,9 +231,13 @@ public class Connection {
 	 */
 	boolean readResponse() throws IOException {
 
+		// Obtain the current request
+		Request request = this.load.getRequests()[this.currentRequestIndex];
+
 		// Read from channel
 		ByteBuffer buffer = this.readBuffer.duplicate();
-		int numberBytesRead = this.channel.read(buffer);
+		int numberBytesRead = ((SocketChannel) this.seletionKey.channel())
+				.read(buffer);
 		buffer.flip();
 		if (numberBytesRead > 0) {
 			buffer.get(this.responseData, this.availableResponseData,
@@ -162,7 +261,7 @@ public class Connection {
 					&& (!(response.endsWith(separater)))) {
 
 				// Determine if failed
-				String expectedResponseContent = this.load
+				String expectedResponseContent = request
 						.getExpectedResponseContent();
 				if (!(response.endsWith(expectedResponseContent))) {
 					throw new IOException("Failed response: " + response + " ["
@@ -170,7 +269,7 @@ public class Connection {
 				}
 
 				// Read the full response
-				this.load.requestServiced(this.serviceStart, System.nanoTime());
+				request.requestServiced(this.serviceStart, System.nanoTime());
 				this.availableResponseData = 0;
 				return true;
 			}
@@ -181,12 +280,28 @@ public class Connection {
 	}
 
 	/**
+	 * Reset counters for next iteration.
+	 */
+	void reset() {
+		this.reconnectCount = 0;
+	}
+
+	/**
 	 * Indicates if connected.
 	 * 
 	 * @return <code>true</code> if connected.
 	 */
 	boolean isConnected() {
 		return this.isConnected;
+	}
+
+	/**
+	 * Obtains the number of reconnects.
+	 * 
+	 * @return Number of reconnects.
+	 */
+	int getReconnectCount() {
+		return this.reconnectCount;
 	}
 
 	/**

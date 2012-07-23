@@ -37,6 +37,11 @@ public class ApacheServicer implements Servicer {
 	}
 
 	@Override
+	public int getMaximumConnectionCount() {
+		return 1000;
+	}
+
+	@Override
 	public void start() throws Exception {
 
 		// Ensure Apache running
