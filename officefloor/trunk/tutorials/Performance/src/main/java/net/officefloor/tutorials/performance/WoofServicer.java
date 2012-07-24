@@ -15,30 +15,20 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.tutorials.performance.jetty;
+package net.officefloor.tutorials.performance;
 
-import net.officefloor.tutorials.performance.Servicer;
-import net.officefloor.tutorials.performance.logic.HttpServletServicer;
-
-import org.eclipse.jetty.server.Server;
-import org.eclipse.jetty.servlet.ServletContextHandler;
-import org.eclipse.jetty.servlet.ServletHolder;
+import net.officefloor.plugin.woof.WoofOfficeFloorSource;
 
 /**
- * Jetty {@link Servicer}.
+ * WoOF {@link Servicer}
  * 
  * @author Daniel Sagenschneider
  */
-public class JettyServicer implements Servicer {
-
-	/**
-	 * {@link Server}.
-	 */
-	private Server server;
+public class WoofServicer implements Servicer {
 
 	@Override
 	public int getPort() {
-		return 8080;
+		return 7878;
 	}
 
 	@Override
@@ -48,19 +38,12 @@ public class JettyServicer implements Servicer {
 
 	@Override
 	public void start() throws Exception {
-
-		// Create the server
-		this.server = new Server(this.getPort());
-		ServletContextHandler context = new ServletContextHandler();
-		context.setContextPath("/");
-		this.server.setHandler(context);
-		context.addServlet(new ServletHolder(new HttpServletServicer()), "/*");
-		this.server.start();
+		WoofOfficeFloorSource.start();
 	}
 
 	@Override
 	public void stop() throws Exception {
-		this.server.stop();
+		WoofOfficeFloorSource.stop();
 	}
 
 }

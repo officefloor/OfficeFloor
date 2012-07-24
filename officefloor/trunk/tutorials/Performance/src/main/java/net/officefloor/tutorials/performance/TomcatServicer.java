@@ -15,9 +15,8 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.tutorials.performance.tomcat;
+package net.officefloor.tutorials.performance;
 
-import net.officefloor.tutorials.performance.Servicer;
 import net.officefloor.tutorials.performance.logic.HttpServletServicer;
 
 import org.apache.catalina.startup.Tomcat;

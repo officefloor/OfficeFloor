@@ -15,51 +15,52 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.tutorials.performance.apache;
+package net.officefloor.tutorials.performance;
 
-import net.officefloor.tutorials.performance.Servicer;
+import net.officefloor.tutorials.performance.logic.HttpServletServicer;
 
-import org.apache.http.HttpResponse;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.DefaultHttpClient;
+import org.glassfish.grizzly.PortRange;
+import org.glassfish.grizzly.http.server.HttpServer;
+import org.glassfish.grizzly.http.server.NetworkListener;
+import org.glassfish.grizzly.servlet.WebappContext;
 
 /**
- * Apache {@link Servicer}.
+ * Glassfish {@link Servicer}.
  * 
  * @author Daniel Sagenschneider
  */
-public class ApacheServicer implements Servicer {
+public class GrizzlyServicer implements Servicer {
+
+	/**
+	 * Grizzly server.
+	 */
+	private HttpServer server;
 
 	@Override
 	public int getPort() {
-		return 80;
+		return 7000;
 	}
 
 	@Override
 	public int getMaximumConnectionCount() {
-		return 1000;
+		return 10000;
 	}
 
 	@Override
 	public void start() throws Exception {
-
-		// Ensure Apache running
-		HttpClient client = new DefaultHttpClient();
-		try {
-			HttpResponse response = client.execute(new HttpGet(
-					"http://localhost/index.html"));
-			if (response.getStatusLine().getStatusCode() != 200) {
-				throw new Exception("Apache seems to not be running");
-			}
-		} finally {
-			client.getConnectionManager().shutdown();
-		}
+		this.server = new HttpServer();
+		this.server.addListener(new NetworkListener("grizzly",
+				NetworkListener.DEFAULT_NETWORK_HOST, new PortRange(this
+						.getPort())));
+		WebappContext context = new WebappContext("Grizzly");
+		context.addServlet("test", new HttpServletServicer());
+		context.deploy(server);
+		this.server.start();
 	}
 
 	@Override
 	public void stop() throws Exception {
-		// Just leave running
+		this.server.stop();
 	}
 
 }

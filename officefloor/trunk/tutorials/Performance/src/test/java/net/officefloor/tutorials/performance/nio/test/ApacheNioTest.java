@@ -17,8 +17,8 @@
  */
 package net.officefloor.tutorials.performance.nio.test;
 
+import net.officefloor.tutorials.performance.ApacheServicer;
 import net.officefloor.tutorials.performance.Servicer;
-import net.officefloor.tutorials.performance.apache.ApacheServicer;
 
 /**
  * Tests Apache.

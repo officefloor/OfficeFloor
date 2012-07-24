@@ -24,15 +24,15 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 import junit.framework.TestCase;
+import net.officefloor.tutorials.performance.ApacheServicer;
+import net.officefloor.tutorials.performance.GrizzlyServicer;
+import net.officefloor.tutorials.performance.JettyServicer;
 import net.officefloor.tutorials.performance.Servicer;
-import net.officefloor.tutorials.performance.apache.ApacheServicer;
-import net.officefloor.tutorials.performance.grizzly.GrizzlyServicer;
-import net.officefloor.tutorials.performance.jetty.JettyServicer;
+import net.officefloor.tutorials.performance.TomcatServicer;
+import net.officefloor.tutorials.performance.WoofServicer;
 import net.officefloor.tutorials.performance.nio.Load;
 import net.officefloor.tutorials.performance.nio.Request;
 import net.officefloor.tutorials.performance.nio.Runner;
-import net.officefloor.tutorials.performance.tomcat.TomcatServicer;
-import net.officefloor.tutorials.performance.woof.WoofServicer;
 
 /**
  * Provides individual load testing.

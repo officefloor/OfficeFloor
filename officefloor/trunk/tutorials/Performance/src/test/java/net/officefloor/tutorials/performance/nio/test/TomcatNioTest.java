@@ -18,7 +18,7 @@
 package net.officefloor.tutorials.performance.nio.test;
 
 import net.officefloor.tutorials.performance.Servicer;
-import net.officefloor.tutorials.performance.tomcat.TomcatServicer;
+import net.officefloor.tutorials.performance.TomcatServicer;
 
 /**
  * Tests Tomcat.
