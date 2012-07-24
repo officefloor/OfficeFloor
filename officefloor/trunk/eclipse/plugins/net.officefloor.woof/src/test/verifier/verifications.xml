@@ -45,10 +45,6 @@
 		<!-- Ensure correct versions included for build -->
 		<file>
 			<location>build.properties</location>
-			<contains><![CDATA[bin.includes =([^=]*)officeplugin_servlet-@{officeplugin_servlet_version}.jar]]></contains>
-		</file>
-		<file>
-			<location>build.properties</location>
 			<contains><![CDATA[bin.includes =([^=]*)officeplugin_woof-@{officeplugin_woof_version}.jar]]></contains>
 		</file>
 		<file>
