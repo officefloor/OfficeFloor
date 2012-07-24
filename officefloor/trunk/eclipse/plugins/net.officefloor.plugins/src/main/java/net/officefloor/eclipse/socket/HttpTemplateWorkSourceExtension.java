@@ -159,9 +159,9 @@ public class HttpTemplateWorkSourceExtension
 		}
 
 		// Create the source context
-		SourceContext sourceContext = new SourceContextImpl(
+		SourceContext sourceContext = new SourceContextImpl(true,
 				context.getClassLoader());
-		sourceContext = new SourceContextImpl(sourceContext,
+		sourceContext = new SourceContextImpl(true, sourceContext,
 				new PropertyListSourceProperties(properties));
 
 		// Obtain the template file
