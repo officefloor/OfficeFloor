@@ -27,10 +27,6 @@
 		<!-- Ensure correct versions on build class path -->
 		<file>
 			<location>META-INF/MANIFEST.MF</location>
-			<contains><![CDATA[Bundle-ClassPath:([^:]*)officeplugin_servlet-@{officeplugin_servlet_version}.jar]]></contains>
-		</file>
-		<file>
-			<location>META-INF/MANIFEST.MF</location>
 			<contains><![CDATA[Bundle-ClassPath:([^:]*)officeplugin_woof-@{officeplugin_woof_version}.jar]]></contains>
 		</file>
 		<file>
