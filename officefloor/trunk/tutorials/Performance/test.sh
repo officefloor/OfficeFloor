@@ -29,7 +29,9 @@ fi
 
 
 # Log details of running
-RESULT_FILE=/home/$USER/${SERVICER_NAME}_${TARGET_HOST}.txt
+RESULT_DIR=/home/$USER/results
+mkdir -p ${RESULT_DIR}
+RESULT_FILE=${RESULT_DIR}/${SERVICER_NAME}_${TARGET_HOST}.txt
 TESTCASE=${SERVICER_NAME}NioTest
 echo "Running test ${TESTCASE} writing results to ${RESULT_FILE}"
 
