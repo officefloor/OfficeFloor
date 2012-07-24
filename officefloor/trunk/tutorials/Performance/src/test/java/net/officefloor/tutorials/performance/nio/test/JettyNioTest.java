@@ -17,8 +17,8 @@
  */
 package net.officefloor.tutorials.performance.nio.test;
 
+import net.officefloor.tutorials.performance.JettyServicer;
 import net.officefloor.tutorials.performance.Servicer;
-import net.officefloor.tutorials.performance.jetty.JettyServicer;
 
 /**
  * Tests Jetty.
