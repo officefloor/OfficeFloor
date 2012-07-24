@@ -19,7 +19,9 @@
 package net.officefloor.plugin.servlet;
 
 import java.io.ByteArrayOutputStream;
+import java.util.EnumSet;
 
+import javax.servlet.DispatcherType;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -43,7 +45,6 @@ import org.apache.jasper.servlet.JspServlet;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.session.SessionHandler;
 import org.eclipse.jetty.servlet.FilterHolder;
-import org.eclipse.jetty.servlet.FilterMapping;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
 import org.eclipse.jetty.util.resource.Resource;
@@ -117,7 +118,7 @@ public class OfficeFloorServletFilterIntegrationToContainerTest extends
 
 		// Add the filter for handling requests
 		this.context.addFilter(new FilterHolder(MockJspIntergateFilter.class),
-				"/*", FilterMapping.REQUEST);
+				"/*", EnumSet.of(DispatcherType.REQUEST));
 
 		// Add the JSP
 		this.context.addServlet(new ServletHolder(JspServlet.class), "*.jsp");
@@ -228,8 +229,8 @@ public class OfficeFloorServletFilterIntegrationToContainerTest extends
 
 		// Add the filter for handling requests
 		this.context.addFilter(new FilterHolder(
-				MockServletContextResourceFilter.class), "/*",
-				FilterMapping.REQUEST);
+				MockServletContextResourceFilter.class), "/*", EnumSet
+				.of(DispatcherType.REQUEST));
 
 		// Add the servlet to be filtered
 		this.context.addServlet(new ServletHolder(MockHttpServlet.class), "/");

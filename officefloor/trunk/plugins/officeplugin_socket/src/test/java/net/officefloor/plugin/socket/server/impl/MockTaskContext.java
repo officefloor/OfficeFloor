@@ -36,13 +36,34 @@ import net.officefloor.plugin.socket.server.ConnectionHandler;
 public class MockTaskContext implements
 		TaskContext<SocketListener<ConnectionHandler>, None, Indexed> {
 
+	/**
+	 * By default is complete.
+	 */
+	private boolean isComplete = true;
+
+	/**
+	 * Reset for next execution.
+	 */
+	public void reset() {
+		this.isComplete = true;
+	}
+
+	/**
+	 * Indicates if complete.
+	 * 
+	 * @return <code>true</code> if complete.
+	 */
+	public boolean isComplete() {
+		return this.isComplete;
+	}
+
 	/*
 	 * =================== TaskContext ================================
 	 */
 
 	@Override
 	public void setComplete(boolean isComplete) {
-		// Ignore
+		this.isComplete = isComplete;
 	}
 
 	@Override

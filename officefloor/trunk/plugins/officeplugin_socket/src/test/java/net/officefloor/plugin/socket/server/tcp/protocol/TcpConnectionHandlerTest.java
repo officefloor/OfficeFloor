@@ -58,7 +58,7 @@ public class TcpConnectionHandlerTest extends AbstractWriteRead {
 	public void testReadFromConnection() throws Exception {
 		final String TEXT = "test message";
 		this.inputFromClient(TEXT);
-		this.runSocketListener();
+		this.runSocketListener(false);
 		this.validateConnectionRead(TEXT);
 	}
 
@@ -68,8 +68,8 @@ public class TcpConnectionHandlerTest extends AbstractWriteRead {
 	public void testWriteToConnection() throws Exception {
 		final String TEXT = "test message";
 		this.connectionWrite(TEXT);
-		this.runSocketListener(); // Flag to write
-		this.runSocketListener(); // Writes out
+		this.runSocketListener(false); // Flag to write
+		this.runSocketListener(false); // Writes out
 		this.validateOutputToClient(TEXT);
 	}
 
@@ -78,7 +78,7 @@ public class TcpConnectionHandlerTest extends AbstractWriteRead {
 	 */
 	public void testCloseConnection() throws Exception {
 		this.serverTcpConnection.getOutputBufferStream().close();
-		this.runSocketListener();
+		this.runSocketListener(false);
 		assertFalse("Key should be cancelled", this.selectionKey.isValid());
 		assertTrue("Channel should be closed", this.socketChannel.isClosed());
 		assertFalse("Selector should still be open", this.selector.isClosed());
@@ -91,11 +91,11 @@ public class TcpConnectionHandlerTest extends AbstractWriteRead {
 		final String REQUEST = "request";
 		final String RESPONSE = "response";
 		this.inputFromClient(REQUEST);
-		this.runSocketListener();
+		this.runSocketListener(false);
 		this.validateConnectionRead(REQUEST);
 		this.connectionWrite(RESPONSE);
 		this.serverTcpConnection.getOutputBufferStream().close();
-		this.runSocketListener(); // writes response to client
+		this.runSocketListener(false); // writes response to client
 		this.validateOutputToClient(RESPONSE);
 		assertFalse("Key should be cancelled", this.selectionKey.isValid());
 		assertTrue("Channel should be closed", this.socketChannel.isClosed());

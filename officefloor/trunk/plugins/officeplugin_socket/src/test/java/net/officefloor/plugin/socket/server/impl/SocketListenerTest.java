@@ -33,7 +33,7 @@ public class SocketListenerTest extends AbstractWriteRead {
 	public void testRead() throws Exception {
 		final String TEXT = "test message";
 		this.inputFromClient(TEXT);
-		this.runSocketListener();
+		this.runSocketListener(false);
 		this.validateConnectionRead(TEXT);
 	}
 
@@ -43,8 +43,8 @@ public class SocketListenerTest extends AbstractWriteRead {
 	public void testWrite() throws Exception {
 		final String TEXT = "test message";
 		this.connectionWrite(TEXT);
-		this.runSocketListener(); // specifies writing
-		this.runSocketListener(); // does the writing
+		this.runSocketListener(false); // specifies writing
+		this.runSocketListener(false); // does the writing
 		this.validateOutputToClient(TEXT);
 	}
 
@@ -53,7 +53,7 @@ public class SocketListenerTest extends AbstractWriteRead {
 	 */
 	public void testCloseConnection() throws Exception {
 		this.flagCloseConnection();
-		this.runSocketListener();
+		this.runSocketListener(false);
 		assertFalse("Key should be cancelled", this.selectionKey.isValid());
 		assertTrue("Channel should be closed", this.socketChannel.isClosed());
 		assertFalse("Selector should still be open", this.selector.isClosed());
@@ -66,12 +66,12 @@ public class SocketListenerTest extends AbstractWriteRead {
 		final String REQUEST = "request";
 		final String RESPONSE = "response";
 		this.inputFromClient(REQUEST);
-		this.runSocketListener();
+		this.runSocketListener(false);
 		this.validateConnectionRead(REQUEST);
 		this.connectionWrite(RESPONSE);
 		this.flagCloseConnection();
-		this.runSocketListener(); // specifies writing
-		this.runSocketListener(); // does the writing
+		this.runSocketListener(false); // specifies writing
+		this.runSocketListener(false); // does the writing
 		this.validateOutputToClient(RESPONSE);
 		assertFalse("Key should be cancelled", this.selectionKey.isValid());
 		assertTrue("Channel should be closed", this.socketChannel.isClosed());
@@ -81,8 +81,18 @@ public class SocketListenerTest extends AbstractWriteRead {
 	/**
 	 * Ensure appropriately closes the {@link Selector}.
 	 */
-	public void testCloseSelector() {
-		fail("TODO handle closing the selector");
+	public void testCloseSelector() throws Exception {
+		this.socketListener.closeSelector();
+		assertFalse("Selector should still be open until processed close",
+				this.selector.isClosed());
+		this.runSocketListener(false); // terminates connection, selector stay
+										// open
+		assertFalse("Selection key should be closed",
+				this.selectionKey.isValid());
+		assertFalse("Selector should still be open for connection close",
+				this.selector.isClosed());
+		this.runSocketListener(true); // connection closed, selector closed
+		assertTrue("Selector should be closed", this.selector.isClosed());
 	}
 
 }

@@ -182,6 +182,9 @@ public class SocketListener<CH extends ConnectionHandler> extends
 				if (allKeys.size() == 0) {
 					// May complete as no further connections
 					context.setComplete(true);
+					
+					// Close the selector
+					this.selector.close();
 				}
 			}
 

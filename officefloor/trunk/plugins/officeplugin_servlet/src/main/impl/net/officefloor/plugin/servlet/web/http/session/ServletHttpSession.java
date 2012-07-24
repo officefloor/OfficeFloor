@@ -115,7 +115,6 @@ public class ServletHttpSession implements HttpSession,
 	}
 
 	@Override
-	@SuppressWarnings("unchecked")
 	public Iterator<String> getAttributeNames()
 			throws InvalidatedHttpSessionException {
 		return new EnumerationIterator<String>(this.session.getAttributeNames());

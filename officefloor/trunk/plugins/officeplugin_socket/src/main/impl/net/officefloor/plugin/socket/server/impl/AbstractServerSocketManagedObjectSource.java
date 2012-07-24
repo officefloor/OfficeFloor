@@ -22,6 +22,8 @@ import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.nio.channels.Selector;
 import java.nio.channels.ServerSocketChannel;
+import java.util.HashSet;
+import java.util.Set;
 
 import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.build.None;
@@ -70,20 +72,48 @@ public abstract class AbstractServerSocketManagedObjectSource<CH extends Connect
 	private static ConnectionManager<?> singletonConnectionManager;
 
 	/**
+	 * Registered {@link AbstractServerSocketManagedObjectSource} instances.
+	 */
+	private static Set<AbstractServerSocketManagedObjectSource<?>> registeredServerSockets = new HashSet<AbstractServerSocketManagedObjectSource<?>>();
+
+	/**
 	 * Obtains the {@link ConnectionManager}.
 	 * 
 	 * @param mosContext
 	 *            {@link ManagedObjectSourceContext}.
+	 * @param selectorFactory
+	 *            {@link SelectorFactory}.
+	 * @param instance
+	 *            Instance of the
+	 *            {@link AbstractServerSocketManagedObjectSource} using the
+	 *            {@link ConnectionManager}.
 	 * @return {@link ConnectionManager}.
 	 */
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	private static synchronized ConnectionManager getConnectionManager(
 			ManagedObjectSourceContext<Indexed> mosContext,
-			SelectorFactory selectorFactory) {
+			SelectorFactory selectorFactory,
+			AbstractServerSocketManagedObjectSource<?> instance) {
+
+		// Provide dummy task for consistency across all server sockets
+		AbstractSingleTask<Work, None, None> dummy = new AbstractSingleTask<Work, None, None>() {
+			@Override
+			public Object doTask(TaskContext<Work, None, None> context)
+					throws Throwable {
+				throw new IllegalStateException(
+						"Dummy auto-wire listener task should not be invoked");
+			}
+		};
+		mosContext.addWork("SetupAutoWireListener", dummy)
+				.addTask("SetupAutoWireListener", dummy).setTeam("listener");
+
+		// Do nothing if just loading type
+		if (mosContext.isLoadingType()) {
+			return null;
+		}
 
 		// Lazy create the singleton connection manager
-		if ((!mosContext.isLoadingType())
-				&& (singletonConnectionManager == null)) {
+		if (singletonConnectionManager == null) {
 
 			// Spread load if have multiple processors
 			int numberOfSocketListeners = Runtime.getRuntime()
@@ -115,17 +145,8 @@ public abstract class AbstractServerSocketManagedObjectSource<CH extends Connect
 			singletonConnectionManager = new ConnectionManager(socketListeners);
 		}
 
-		// Provide dummy task for consistency across all server sockets
-		AbstractSingleTask<Work, None, None> dummy = new AbstractSingleTask<Work, None, None>() {
-			@Override
-			public Object doTask(TaskContext<Work, None, None> context)
-					throws Throwable {
-				throw new IllegalStateException(
-						"Dummy auto-wire listener task should not be invoked");
-			}
-		};
-		mosContext.addWork("SetupAutoWireListener", dummy)
-				.addTask("SetupAutoWireListener", dummy).setTeam("listener");
+		// Register the instance for use of the connection manager
+		registeredServerSockets.add(instance);
 
 		// Return the singleton connection manager
 		return singletonConnectionManager;
@@ -153,6 +174,9 @@ public abstract class AbstractServerSocketManagedObjectSource<CH extends Connect
 	 */
 	public static synchronized void closeConnectionManager() {
 
+		// Clear all registered server sockets
+		registeredServerSockets.clear();
+
 		// Determine if active connection manager
 		if (singletonConnectionManager != null) {
 			// Close the socket listener selectors
@@ -161,6 +185,30 @@ public abstract class AbstractServerSocketManagedObjectSource<CH extends Connect
 
 		// Close (release) the connection manager to create again
 		singletonConnectionManager = null;
+	}
+
+	/**
+	 * <p>
+	 * Releases the {@link ConnectionManager} for the
+	 * {@link AbstractServerSocketManagedObjectSource} instance.
+	 * <p>
+	 * Once {@link ConnectionManager} is released for all
+	 * {@link AbstractServerSocketManagedObjectSource} instances it is itself
+	 * closed.
+	 * 
+	 * @param instance
+	 *            {@link AbstractServerSocketManagedObjectSource}.
+	 */
+	private static synchronized void releaseConnectionManager(
+			AbstractServerSocketManagedObjectSource<?> instance) {
+
+		// Unregister from the connection manager
+		registeredServerSockets.remove(instance);
+
+		// Close connection manager if no further server sockets
+		if (registeredServerSockets.size() == 0) {
+			closeConnectionManager();
+		}
 	}
 
 	/**
@@ -273,7 +321,7 @@ public abstract class AbstractServerSocketManagedObjectSource<CH extends Connect
 
 		// Obtain the connection manager
 		ConnectionManager<CH> connectionManager = getConnectionManager(
-				mosContext, this.selectorFactory);
+				mosContext, this.selectorFactory, this);
 
 		// Create the buffer squirt factory
 		BufferSquirtFactory bufferSquirtFactory = new DirectByteBufferSquirtFactory(
@@ -321,8 +369,8 @@ public abstract class AbstractServerSocketManagedObjectSource<CH extends Connect
 		// Unbind acceptor socket to listen for new connections
 		this.serverSocketAccepter.unbindFromSocket();
 
-		// Close connection manager and all socket listener selectors
-		closeConnectionManager();
+		// Release connection manager (closes socket listeners when appropriate)
+		releaseConnectionManager(this);
 	}
 
 }

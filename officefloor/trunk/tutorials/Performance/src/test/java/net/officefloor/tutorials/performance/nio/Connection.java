@@ -58,6 +58,11 @@ public class Connection {
 	private boolean isConnected = false;
 
 	/**
+	 * Number of {@link Request} serviced by this {@link Connection}.
+	 */
+	private int requestCount = 0;
+
+	/**
 	 * Number of times this {@link Connection} reconnected.
 	 */
 	private int reconnectCount = 0;
@@ -269,6 +274,7 @@ public class Connection {
 				}
 
 				// Read the full response
+				this.requestCount++;
 				request.requestServiced(this.serviceStart, System.nanoTime());
 				this.availableResponseData = 0;
 				return true;
@@ -283,6 +289,7 @@ public class Connection {
 	 * Reset counters for next iteration.
 	 */
 	void reset() {
+		this.requestCount = 0;
 		this.reconnectCount = 0;
 	}
 
@@ -293,6 +300,15 @@ public class Connection {
 	 */
 	boolean isConnected() {
 		return this.isConnected;
+	}
+
+	/**
+	 * Obtains the number of requests serviced.
+	 * 
+	 * @return Number of requests serviced.
+	 */
+	int getRequestCount() {
+		return this.requestCount;
 	}
 
 	/**

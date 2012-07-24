@@ -26,6 +26,7 @@ import java.nio.charset.Charset;
 import java.sql.Date;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.Collection;
 import java.util.Locale;
 import java.util.TimeZone;
 import java.util.regex.Matcher;
@@ -313,8 +314,8 @@ public class HttpServletResponseImpl implements HttpServletResponse {
 	public void addCookie(Cookie cookie) {
 
 		// Create the HTTP Cookie
-		HttpCookie httpCookie = new HttpCookie(cookie.getName(), cookie
-				.getValue());
+		HttpCookie httpCookie = new HttpCookie(cookie.getName(),
+				cookie.getValue());
 
 		// Load domain (if provided)
 		String domain = cookie.getDomain();
@@ -361,8 +362,8 @@ public class HttpServletResponseImpl implements HttpServletResponse {
 
 	@Override
 	public void addDateHeader(String name, long date) {
-		this.response.addHeader(name, DATE_HEADER_FORMATTER.format(new Date(
-				date)));
+		this.response.addHeader(name,
+				DATE_HEADER_FORMATTER.format(new Date(date)));
 	}
 
 	@Override
@@ -434,8 +435,7 @@ public class HttpServletResponseImpl implements HttpServletResponse {
 				+ this.request.getServerPort()
 				+ this.request.getContextPath()
 				+ (location.startsWith("/") ? location : this.request
-						.getServletPath()
-						+ "/" + location);
+						.getServletPath() + "/" + location);
 
 		// Specify details of redirect
 		this.response.setStatus(HttpStatus.SC_TEMPORARY_REDIRECT);
@@ -479,6 +479,38 @@ public class HttpServletResponseImpl implements HttpServletResponse {
 	public void setStatus(int sc, String sm) {
 		throw new UnsupportedOperationException(
 				"HttpServletResponse.setStatus deprecated as of version 2.1");
+	}
+
+	/*
+	 * ------------------ Servlet 3.0 methods ----------------------
+	 */
+
+	@Override
+	public String getHeader(String arg0) {
+		// TODO support Servlet 3.0 specification
+		throw new UnsupportedOperationException(
+				"TODO WoOF to support Servlet 3.0 specification");
+	}
+
+	@Override
+	public Collection<String> getHeaderNames() {
+		// TODO support Servlet 3.0 specification
+		throw new UnsupportedOperationException(
+				"TODO WoOF to support Servlet 3.0 specification");
+	}
+
+	@Override
+	public Collection<String> getHeaders(String arg0) {
+		// TODO support Servlet 3.0 specification
+		throw new UnsupportedOperationException(
+				"TODO WoOF to support Servlet 3.0 specification");
+	}
+
+	@Override
+	public int getStatus() {
+		// TODO support Servlet 3.0 specification
+		throw new UnsupportedOperationException(
+				"TODO WoOF to support Servlet 3.0 specification");
 	}
 
 }

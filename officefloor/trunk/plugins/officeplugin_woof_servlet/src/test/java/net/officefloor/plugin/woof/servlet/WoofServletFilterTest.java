@@ -19,13 +19,14 @@
 package net.officefloor.plugin.woof.servlet;
 
 import java.io.ByteArrayOutputStream;
+import java.util.EnumSet;
 
+import javax.servlet.DispatcherType;
 import javax.servlet.http.HttpServlet;
 
 import net.officefloor.autowire.AutoWire;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.socket.server.http.server.MockHttpServer;
-import net.officefloor.plugin.woof.MockDependency;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
@@ -34,7 +35,6 @@ import org.apache.http.impl.client.DefaultHttpClient;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.session.SessionHandler;
 import org.eclipse.jetty.servlet.FilterHolder;
-import org.eclipse.jetty.servlet.FilterMapping;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 
 /**
@@ -60,10 +60,6 @@ public class WoofServletFilterTest extends OfficeFrameTestCase {
 		// Obtain the port for the application
 		this.port = MockHttpServer.getAvailablePort();
 
-		// Obtain the path to the application.woof
-		String applicationWoofPath = this.getPackageRelativePath(this
-				.getClass()) + "/application.woof";
-
 		// Start servlet container with filter
 		this.server = new Server(this.port);
 		ServletContextHandler context = new ServletContextHandler();
@@ -73,10 +69,7 @@ public class WoofServletFilterTest extends OfficeFrameTestCase {
 
 		// Add the WoOF Servlet Filter
 		FilterHolder filter = new FilterHolder(new WoofServletFilter());
-		filter.setInitParameter(
-				WoofServletFilter.PROPERTY_WOOF_CONFIGURATION_LOCATION,
-				applicationWoofPath);
-		context.addFilter(filter, "/*", FilterMapping.REQUEST);
+		context.addFilter(filter, "/*", EnumSet.of(DispatcherType.REQUEST));
 
 		// Add Servlet for being filtered
 		context.addServlet(MockHttpServlet.class, "/");
