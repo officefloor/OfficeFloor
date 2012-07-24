@@ -55,6 +55,5 @@ Bundle-ClassPath: .,
  officeplugin_comet-2.4.0.jar,
  officeplugin_gwt-2.4.0.jar,
  officeplugin_launch-2.4.0.jar,
- officeplugin_servlet-2.4.0.jar,
  officeplugin_base-2.4.0.jar,
  officeplugin_woof-2.4.0.jar
