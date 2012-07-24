@@ -1,7 +1,10 @@
 #!/bin/bash
 
 ##############################################################
-#  Configure Linux to be able to run the high load tests
+#  Configure Linux to be able to run the high load tests.
+#
+#  Configuration is temporary and should reset on a restart.
+#
 ##############################################################
 
 # fail on error
@@ -12,6 +15,7 @@ iptables -F
 
 # For both Server/Client
 sysctl -w vm.swappiness=10
+ifconfig eth0 txqueuelen 10000
 
 # For the Server
 sysctl -w net.core.somaxconn=4096
