@@ -512,7 +512,6 @@ public class HttpServletContainerTest extends OfficeFrameTestCase {
 		// Test
 		this.doTest(new MockHttpServlet() {
 			@Override
-			@SuppressWarnings("unchecked")
 			protected void test(HttpServletRequest req, HttpServletResponse resp)
 					throws ServletException, IOException {
 
@@ -580,7 +579,6 @@ public class HttpServletContainerTest extends OfficeFrameTestCase {
 		// Test
 		this.doTest(new MockHttpServlet() {
 			@Override
-			@SuppressWarnings("unchecked")
 			protected void test(HttpServletRequest req, HttpServletResponse resp)
 					throws ServletException, IOException {
 
@@ -865,7 +863,6 @@ public class HttpServletContainerTest extends OfficeFrameTestCase {
 		this.record_init("/test");
 		this.doTest(new MockHttpServlet() {
 			@Override
-			@SuppressWarnings("unchecked")
 			protected void test(HttpServletRequest req, HttpServletResponse resp)
 					throws ServletException, IOException {
 

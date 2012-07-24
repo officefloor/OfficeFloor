@@ -27,7 +27,7 @@ import java.util.List;
 import java.util.Set;
 
 import junit.framework.TestCase;
-import net.officefloor.plugin.web.http.security.integrate.HttpSecurityIntegrateTest.Servicer;
+import net.officefloor.tutorials.performance.Servicer;
 
 /**
  * Runner to make requests.

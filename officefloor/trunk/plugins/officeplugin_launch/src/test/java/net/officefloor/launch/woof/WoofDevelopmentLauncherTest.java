@@ -193,7 +193,7 @@ public class WoofDevelopmentLauncherTest extends OfficeFrameTestCase implements
 	public void testEnsureApplicationRuns() throws Exception {
 		try {
 			// Run application
-			WoofOfficeFloorSource.main();
+			WoofOfficeFloorSource.start();
 
 			// Ensure template available
 			this.doHttpRequest(7878, "template", "TEMPLATE");
@@ -203,7 +203,7 @@ public class WoofDevelopmentLauncherTest extends OfficeFrameTestCase implements
 
 		} finally {
 			// Ensure stop
-			AutoWireManagement.closeAllOfficeFloors();
+			WoofOfficeFloorSource.stop();
 		}
 	}
 
@@ -232,7 +232,7 @@ public class WoofDevelopmentLauncherTest extends OfficeFrameTestCase implements
 	public void testEnsureNoGwtRuns() throws Exception {
 		try {
 			// Run application
-			WoofOfficeFloorSource.main(
+			WoofOfficeFloorSource.start(
 					WoofOfficeFloorSource.PROPERTY_WOOF_CONFIGURATION_LOCATION,
 					"noGwt.woof");
 
@@ -241,7 +241,7 @@ public class WoofDevelopmentLauncherTest extends OfficeFrameTestCase implements
 
 		} finally {
 			// Ensure clean up and stop
-			AutoWireManagement.closeAllOfficeFloors();
+			WoofOfficeFloorSource.stop();
 		}
 	}
 

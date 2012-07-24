@@ -83,7 +83,7 @@ public class ServletConfigImpl implements ServletConfig {
 	}
 
 	@Override
-	@SuppressWarnings("rawtypes")
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public Enumeration getInitParameterNames() {
 		return new IteratorEnumeration<String>(this.initParameters.keySet()
 				.iterator());

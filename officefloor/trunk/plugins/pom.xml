@@ -29,6 +29,7 @@
 		<module>officeplugin_war</module>
 		<module>officeplugin_web</module>
 		<module>officeplugin_woof</module>
+		<module>officeplugin_woof_servlet</module>
 	</modules>
 	<dependencies>
 		<dependency>

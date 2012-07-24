@@ -22,8 +22,10 @@ import java.io.IOException;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
+import java.util.Enumeration;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Vector;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -205,6 +207,7 @@ public class ServletConfirmer extends HttpServlet {
 	 */
 
 	@Override
+	@SuppressWarnings("unchecked")
 	protected synchronized void service(HttpServletRequest req,
 			HttpServletResponse resp) throws ServletException, IOException {
 		try {
@@ -227,7 +230,20 @@ public class ServletConfirmer extends HttpServlet {
 						invocation.method.getName(), parameterTypes);
 
 				// Invoke the method to obtain as last result
-				this.lastResult = method.invoke(req, invocation.arguments);
+				Object result = method.invoke(req, invocation.arguments);
+
+				// Take copy of enumeration (stop concurrent access)
+				if (result instanceof Enumeration) {
+					Enumeration<Object> enumeration = (Enumeration<Object>) result;
+					Vector<Object> vector = new Vector<Object>();
+					while (enumeration.hasMoreElements()) {
+						vector.add(enumeration.nextElement());
+					}
+					result = vector.elements();
+				}
+
+				// Provide the result
+				this.lastResult = result;
 			}
 		} catch (Exception ex) {
 			throw new ServletException(ex);

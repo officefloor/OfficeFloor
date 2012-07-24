@@ -100,12 +100,21 @@
 			<groupId>org.apache.tomcat</groupId>
 			<artifactId>jasper</artifactId>
 			<scope>provided</scope>
+			<exclusions>
+				<exclusion>
+					<groupId>org.apache.tomcat</groupId>
+					<artifactId>servlet-api</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 		<dependency>
-			<groupId>javax.servlet</groupId>
-			<artifactId>servlet-api</artifactId>
+			<groupId>org.eclipse.jetty</groupId>
+			<artifactId>jetty-servlet</artifactId>
 			<scope>provided</scope>
 		</dependency>
+		<!-- Include Servlet 3.0 spec. But for now rely on Jetty for spec. -->
+		<!-- <dependency> <groupId>javax.servlet</groupId> <artifactId>servlet-api</artifactId> 
+			<scope>provided</scope> </dependency> -->
 		<dependency>
 			<groupId>net.officefloor.core</groupId>
 			<artifactId>officemodelgen</artifactId>
@@ -117,11 +126,6 @@
 		<dependency>
 			<groupId>${project.groupId}</groupId>
 			<artifactId>officeplugin_web</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.eclipse.jetty</groupId>
-			<artifactId>jetty-servlet</artifactId>
-			<scope>test</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.httpcomponents</groupId>

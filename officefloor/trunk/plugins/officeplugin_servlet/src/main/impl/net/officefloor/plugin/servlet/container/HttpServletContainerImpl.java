@@ -342,13 +342,11 @@ public class HttpServletContainerImpl implements HttpServletContainer,
 		}
 
 		@Override
-		@SuppressWarnings("unchecked")
 		public Map<String, String[]> getParameterMap() {
 			return this.request.getParameterMap();
 		}
 
 		@Override
-		@SuppressWarnings("unchecked")
 		public Enumeration<String> getParameterNames() {
 			return this.request.getParameterNames();
 		}

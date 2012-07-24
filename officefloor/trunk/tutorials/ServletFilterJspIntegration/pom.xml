@@ -19,7 +19,7 @@
 	<dependencies>
 		<dependency>
 			<groupId>net.officefloor.plugin</groupId>
-			<artifactId>officeplugin_woof</artifactId>
+			<artifactId>officeplugin_woof_servlet</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>javax</groupId>

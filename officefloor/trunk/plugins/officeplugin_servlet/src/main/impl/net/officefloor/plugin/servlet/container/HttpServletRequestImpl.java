@@ -28,6 +28,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.Enumeration;
@@ -38,13 +39,19 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.TimeZone;
 
+import javax.servlet.AsyncContext;
+import javax.servlet.DispatcherType;
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.ServletInputStream;
+import javax.servlet.ServletRequest;
+import javax.servlet.ServletResponse;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
+import javax.servlet.http.Part;
 
 import net.officefloor.frame.api.execute.TaskContext;
 import net.officefloor.frame.api.manage.InvalidParameterTypeException;
@@ -450,7 +457,7 @@ public class HttpServletRequestImpl implements HttpServletRequest,
 	}
 
 	@Override
-	@SuppressWarnings("rawtypes")
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public Map getParameterMap() {
 
 		// Lazy load the parameter map
@@ -482,7 +489,7 @@ public class HttpServletRequestImpl implements HttpServletRequest,
 	}
 
 	@Override
-	@SuppressWarnings("rawtypes")
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public Enumeration getParameterNames() {
 
 		// Create the unique set of names
@@ -634,7 +641,7 @@ public class HttpServletRequestImpl implements HttpServletRequest,
 	}
 
 	@Override
-	@SuppressWarnings("rawtypes")
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public Enumeration getHeaderNames() {
 
 		// Obtain the headers
@@ -655,7 +662,7 @@ public class HttpServletRequestImpl implements HttpServletRequest,
 	}
 
 	@Override
-	@SuppressWarnings("rawtypes")
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public Enumeration getHeaders(String name) {
 
 		// Obtain the headers
@@ -859,7 +866,7 @@ public class HttpServletRequestImpl implements HttpServletRequest,
 	}
 
 	@Override
-	@SuppressWarnings("rawtypes")
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public Enumeration getAttributeNames() {
 		return new IteratorEnumeration<String>(this.attributes.keySet()
 				.iterator());
@@ -905,7 +912,7 @@ public class HttpServletRequestImpl implements HttpServletRequest,
 	}
 
 	@Override
-	@SuppressWarnings("rawtypes")
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public Enumeration getLocales() {
 		return new IteratorEnumeration<Locale>(Arrays
 				.asList(this.defaultLocale).iterator());
@@ -1040,6 +1047,96 @@ public class HttpServletRequestImpl implements HttpServletRequest,
 			this.name = name;
 			this.value = value;
 		}
+	}
+
+	/*
+	 * ------------------ Servlet 3.0 methods ----------------------
+	 */
+
+	@Override
+	public AsyncContext getAsyncContext() {
+		// TODO support Servlet 3.0 specification
+		throw new UnsupportedOperationException(
+				"TODO WoOF to support Servlet 3.0 specification");
+	}
+
+	@Override
+	public DispatcherType getDispatcherType() {
+		// TODO support Servlet 3.0 specification
+		throw new UnsupportedOperationException(
+				"TODO WoOF to support Servlet 3.0 specification");
+	}
+
+	@Override
+	public ServletContext getServletContext() {
+		// TODO support Servlet 3.0 specification
+		throw new UnsupportedOperationException(
+				"TODO WoOF to support Servlet 3.0 specification");
+	}
+
+	@Override
+	public boolean isAsyncStarted() {
+		// TODO support Servlet 3.0 specification
+		throw new UnsupportedOperationException(
+				"TODO WoOF to support Servlet 3.0 specification");
+	}
+
+	@Override
+	public boolean isAsyncSupported() {
+		// TODO support Servlet 3.0 specification
+		throw new UnsupportedOperationException(
+				"TODO WoOF to support Servlet 3.0 specification");
+	}
+
+	@Override
+	public AsyncContext startAsync() throws IllegalStateException {
+		// TODO support Servlet 3.0 specification
+		throw new UnsupportedOperationException(
+				"TODO WoOF to support Servlet 3.0 specification");
+	}
+
+	@Override
+	public AsyncContext startAsync(ServletRequest arg0, ServletResponse arg1)
+			throws IllegalStateException {
+		// TODO support Servlet 3.0 specification
+		throw new UnsupportedOperationException(
+				"TODO WoOF to support Servlet 3.0 specification");
+	}
+
+	@Override
+	public boolean authenticate(HttpServletResponse arg0) throws IOException,
+			ServletException {
+		// TODO support Servlet 3.0 specification
+		throw new UnsupportedOperationException(
+				"TODO WoOF to support Servlet 3.0 specification");
+	}
+
+	@Override
+	public Part getPart(String arg0) throws IOException, ServletException {
+		// TODO support Servlet 3.0 specification
+		throw new UnsupportedOperationException(
+				"TODO WoOF to support Servlet 3.0 specification");
+	}
+
+	@Override
+	public Collection<Part> getParts() throws IOException, ServletException {
+		// TODO support Servlet 3.0 specification
+		throw new UnsupportedOperationException(
+				"TODO WoOF to support Servlet 3.0 specification");
+	}
+
+	@Override
+	public void login(String arg0, String arg1) throws ServletException {
+		// TODO support Servlet 3.0 specification
+		throw new UnsupportedOperationException(
+				"TODO WoOF to support Servlet 3.0 specification");
+	}
+
+	@Override
+	public void logout() throws ServletException {
+		// TODO support Servlet 3.0 specification
+		throw new UnsupportedOperationException(
+				"TODO WoOF to support Servlet 3.0 specification");
 	}
 
 }

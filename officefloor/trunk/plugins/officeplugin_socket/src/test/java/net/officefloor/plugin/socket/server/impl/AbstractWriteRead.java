@@ -23,8 +23,6 @@ import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 
 import junit.framework.TestCase;
-import net.officefloor.frame.api.build.Indexed;
-import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.api.execute.TaskContext;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.socket.server.Connection;
@@ -93,7 +91,7 @@ public abstract class AbstractWriteRead extends OfficeFrameTestCase {
 	/**
 	 * {@link TaskContext}.
 	 */
-	private final TaskContext<SocketListener<ConnectionHandler>, None, Indexed> taskContext = new MockTaskContext();
+	private final MockTaskContext taskContext = new MockTaskContext();
 
 	@Override
 	protected void setUp() throws Exception {
@@ -106,9 +104,15 @@ public abstract class AbstractWriteRead extends OfficeFrameTestCase {
 
 	/**
 	 * Runs the {@link SocketListener}.
+	 * 
+	 * @param isComplete
+	 *            Expected value for completion.
 	 */
-	protected void runSocketListener() throws Exception {
+	protected void runSocketListener(boolean isComplete) throws Exception {
+		this.taskContext.reset();
 		this.socketListener.doTask(this.taskContext);
+		assertEquals("Incorrect completion", isComplete,
+				this.taskContext.isComplete());
 	}
 
 	/**

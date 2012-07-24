@@ -233,17 +233,31 @@ public class Load {
 	void reportLastIntervalResults(String description, int timeIntervalSeconds,
 			PrintStream out) {
 
-		// Count the number of reconnects
+		// Count the number of requests and reconnects
+		int minRequestsCount = Integer.MAX_VALUE;
+		int maxRequestsCount = -1;
+		int requestsCount = 0;
 		int reconnectCount = 0;
 		for (Connection connection : this.connections) {
+			int requestCount = connection.getRequestCount();
+			if (minRequestsCount > requestCount) {
+				minRequestsCount = requestCount;
+			}
+			if (maxRequestsCount < requestCount) {
+				maxRequestsCount = requestCount;
+			}
+			requestsCount += requestCount;
 			reconnectCount += connection.getReconnectCount();
 		}
+		int averageRequestCount = (requestsCount / this.connections.size());
 
 		// Provide throughput summary
 		out.println("LOAD: " + this.description + " ["
 				+ this.getConnectionCount() + " connections / "
 				+ this.getFailedConnectionCount() + " failed / "
-				+ reconnectCount + " reconnects]");
+				+ reconnectCount + " reconnects / requests min="
+				+ minRequestsCount + " avg=" + averageRequestCount + " max="
+				+ maxRequestsCount + "]");
 
 		// Provide summary of interval
 		for (Request request : this.requests) {

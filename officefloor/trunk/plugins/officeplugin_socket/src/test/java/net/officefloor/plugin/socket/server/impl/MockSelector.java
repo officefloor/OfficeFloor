@@ -38,7 +38,7 @@ public class MockSelector extends Selector {
 	/**
 	 * {@link SelectionKey}.
 	 */
-	private final SelectionKey selectionKey;
+	private SelectionKey selectionKey;
 
 	/**
 	 * Flag indicating if {@link Selector} is closed.
@@ -79,6 +79,11 @@ public class MockSelector extends Selector {
 	public int select(long timeout) throws IOException {
 		this.ensureNotClosed();
 
+		// Remove selection key if no longer valid
+		if (!(this.selectionKey.isValid())) {
+			this.selectionKey = null;
+		}
+
 		// Always the one key
 		return 1;
 	}
@@ -86,13 +91,24 @@ public class MockSelector extends Selector {
 	@Override
 	public Set<SelectionKey> selectedKeys() {
 		this.ensureNotClosed();
-		return new HashSet<SelectionKey>(Arrays.asList(this.selectionKey));
+		return this.getKeySet();
 	}
 
 	@Override
 	public Set<SelectionKey> keys() {
 		this.ensureNotClosed();
-		return new HashSet<SelectionKey>(Arrays.asList(this.selectionKey));
+		return this.getKeySet();
+	}
+
+	/**
+	 * Obtains the {@link SelectionKey} {@link Set}.
+	 * 
+	 * @return {@link SelectionKey} {@link Set}.
+	 */
+	private Set<SelectionKey> getKeySet() {
+		return new HashSet<SelectionKey>(
+				Arrays.asList(this.selectionKey == null ? new SelectionKey[0]
+						: new SelectionKey[] { this.selectionKey }));
 	}
 
 	@Override

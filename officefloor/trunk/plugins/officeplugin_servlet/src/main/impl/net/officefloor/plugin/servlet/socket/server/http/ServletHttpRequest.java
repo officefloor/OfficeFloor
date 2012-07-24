@@ -90,7 +90,6 @@ public class ServletHttpRequest implements HttpRequest {
 	}
 
 	@Override
-	@SuppressWarnings("unchecked")
 	public synchronized List<HttpHeader> getHeaders() {
 
 		// Lazy load the headers

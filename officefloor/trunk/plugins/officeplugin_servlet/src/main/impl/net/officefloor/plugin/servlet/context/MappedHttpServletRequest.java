@@ -22,6 +22,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.security.Principal;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashMap;
@@ -30,11 +31,19 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
+import javax.servlet.AsyncContext;
+import javax.servlet.DispatcherType;
 import javax.servlet.RequestDispatcher;
+import javax.servlet.ServletContext;
+import javax.servlet.ServletException;
 import javax.servlet.ServletInputStream;
+import javax.servlet.ServletRequest;
+import javax.servlet.ServletResponse;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
+import javax.servlet.http.Part;
 
 import net.officefloor.plugin.servlet.container.IteratorEnumeration;
 import net.officefloor.plugin.servlet.mapping.ServicerMapping;
@@ -233,13 +242,13 @@ public class MappedHttpServletRequest implements HttpServletRequest {
 	}
 
 	@Override
-	@SuppressWarnings("rawtypes")
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public Enumeration getHeaderNames() {
 		return this.delegate.getHeaderNames();
 	}
 
 	@Override
-	@SuppressWarnings("rawtypes")
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public Enumeration getHeaders(String name) {
 		return this.delegate.getHeaders(name);
 	}
@@ -303,7 +312,7 @@ public class MappedHttpServletRequest implements HttpServletRequest {
 	}
 
 	@Override
-	@SuppressWarnings("rawtypes")
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public Enumeration getAttributeNames() {
 		return this.delegate.getAttributeNames();
 	}
@@ -344,7 +353,7 @@ public class MappedHttpServletRequest implements HttpServletRequest {
 	}
 
 	@Override
-	@SuppressWarnings("rawtypes")
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public Enumeration getLocales() {
 		return this.delegate.getLocales();
 	}
@@ -426,6 +435,96 @@ public class MappedHttpServletRequest implements HttpServletRequest {
 	@SuppressWarnings("deprecation")
 	public boolean isRequestedSessionIdFromUrl() {
 		return this.delegate.isRequestedSessionIdFromUrl();
+	}
+
+	/*
+	 * ------------------ Servlet 3.0 methods ----------------------
+	 */
+
+	@Override
+	public AsyncContext getAsyncContext() {
+		// TODO support Servlet 3.0 specification
+		throw new UnsupportedOperationException(
+				"TODO WoOF to support Servlet 3.0 specification");
+	}
+
+	@Override
+	public DispatcherType getDispatcherType() {
+		// TODO support Servlet 3.0 specification
+		throw new UnsupportedOperationException(
+				"TODO WoOF to support Servlet 3.0 specification");
+	}
+
+	@Override
+	public ServletContext getServletContext() {
+		// TODO support Servlet 3.0 specification
+		throw new UnsupportedOperationException(
+				"TODO WoOF to support Servlet 3.0 specification");
+	}
+
+	@Override
+	public boolean isAsyncStarted() {
+		// TODO support Servlet 3.0 specification
+		throw new UnsupportedOperationException(
+				"TODO WoOF to support Servlet 3.0 specification");
+	}
+
+	@Override
+	public boolean isAsyncSupported() {
+		// TODO support Servlet 3.0 specification
+		throw new UnsupportedOperationException(
+				"TODO WoOF to support Servlet 3.0 specification");
+	}
+
+	@Override
+	public AsyncContext startAsync() throws IllegalStateException {
+		// TODO support Servlet 3.0 specification
+		throw new UnsupportedOperationException(
+				"TODO WoOF to support Servlet 3.0 specification");
+	}
+
+	@Override
+	public AsyncContext startAsync(ServletRequest arg0, ServletResponse arg1)
+			throws IllegalStateException {
+		// TODO support Servlet 3.0 specification
+		throw new UnsupportedOperationException(
+				"TODO WoOF to support Servlet 3.0 specification");
+	}
+
+	@Override
+	public boolean authenticate(HttpServletResponse arg0) throws IOException,
+			ServletException {
+		// TODO support Servlet 3.0 specification
+		throw new UnsupportedOperationException(
+				"TODO WoOF to support Servlet 3.0 specification");
+	}
+
+	@Override
+	public Part getPart(String arg0) throws IOException, ServletException {
+		// TODO support Servlet 3.0 specification
+		throw new UnsupportedOperationException(
+				"TODO WoOF to support Servlet 3.0 specification");
+	}
+
+	@Override
+	public Collection<Part> getParts() throws IOException, ServletException {
+		// TODO support Servlet 3.0 specification
+		throw new UnsupportedOperationException(
+				"TODO WoOF to support Servlet 3.0 specification");
+	}
+
+	@Override
+	public void login(String arg0, String arg1) throws ServletException {
+		// TODO support Servlet 3.0 specification
+		throw new UnsupportedOperationException(
+				"TODO WoOF to support Servlet 3.0 specification");
+	}
+
+	@Override
+	public void logout() throws ServletException {
+		// TODO support Servlet 3.0 specification
+		throw new UnsupportedOperationException(
+				"TODO WoOF to support Servlet 3.0 specification");
 	}
 
 }

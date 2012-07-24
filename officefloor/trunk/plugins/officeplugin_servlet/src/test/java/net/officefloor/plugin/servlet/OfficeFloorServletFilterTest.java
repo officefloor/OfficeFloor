@@ -23,8 +23,10 @@ import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.Serializable;
 import java.io.Writer;
+import java.util.EnumSet;
 
 import javax.ejb.EJB;
+import javax.servlet.DispatcherType;
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
 import javax.servlet.FilterConfig;
@@ -54,7 +56,6 @@ import org.apache.http.impl.client.DefaultHttpClient;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.session.SessionHandler;
 import org.eclipse.jetty.servlet.FilterHolder;
-import org.eclipse.jetty.servlet.FilterMapping;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
 
@@ -311,7 +312,8 @@ public class OfficeFloorServletFilterTest extends OfficeFrameTestCase {
 		this.server.setHandler(context);
 
 		// Add the filter for handling requests
-		context.addFilter(new FilterHolder(filter), "/*", FilterMapping.REQUEST);
+		context.addFilter(new FilterHolder(filter), "/*",
+				EnumSet.of(DispatcherType.REQUEST));
 
 		// Add the linked Servlet Resource
 		context.addServlet(new ServletHolder(new MockHttpServlet(

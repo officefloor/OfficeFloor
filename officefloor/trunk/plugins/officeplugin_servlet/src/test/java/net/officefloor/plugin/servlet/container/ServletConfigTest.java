@@ -37,7 +37,6 @@ public class ServletConfigTest extends OfficeFrameTestCase {
 	/**
 	 * Ensure methods return correctly.
 	 */
-	@SuppressWarnings("unchecked")
 	public void testServletConfig() {
 
 		// Create mocks

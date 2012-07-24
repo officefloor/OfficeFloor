@@ -114,7 +114,6 @@ public class ServletHttpRequestStateManagedObjectSource
 		}
 
 		@Override
-		@SuppressWarnings("unchecked")
 		public Iterator<String> getAttributeNames() {
 			synchronized (this.request) {
 				// Create copy of names to avoid concurrency issues
