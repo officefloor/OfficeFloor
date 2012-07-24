@@ -17,6 +17,9 @@
  */
 package net.officefloor.tutorials.performance.nio.test;
 
+import java.text.DateFormat;
+import java.util.Date;
+
 import junit.framework.TestCase;
 import net.officefloor.tutorials.performance.Servicer;
 import net.officefloor.tutorials.performance.nio.Load;
@@ -84,6 +87,8 @@ public abstract class AbstractNioRunnerTestCase extends TestCase {
 				+ " secs, cpu seed=" + cpuSeed + ", db seed=" + dbSeed);
 		System.out
 				.println("===============================================================");
+		System.out.println("START: "
+				+ DateFormat.getDateTimeInstance().format(new Date()));
 
 		// Create the servicer
 		Servicer servicer = this.createServicer();
@@ -159,6 +164,8 @@ public abstract class AbstractNioRunnerTestCase extends TestCase {
 			throw ex;
 
 		} finally {
+			System.out.println("END: "
+					+ DateFormat.getDateTimeInstance().format(new Date()));
 			try {
 				// Stop all connections
 				runner.stop();
