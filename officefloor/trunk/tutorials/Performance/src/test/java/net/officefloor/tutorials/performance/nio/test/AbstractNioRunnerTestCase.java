@@ -19,11 +19,15 @@ package net.officefloor.tutorials.performance.nio.test;
 
 import java.text.DateFormat;
 import java.util.Date;
+import java.util.HashSet;
+import java.util.Set;
 
 import junit.framework.TestCase;
 import net.officefloor.tutorials.performance.Servicer;
 import net.officefloor.tutorials.performance.nio.Load;
+import net.officefloor.tutorials.performance.nio.LoadSummary;
 import net.officefloor.tutorials.performance.nio.Request;
+import net.officefloor.tutorials.performance.nio.RequestSummary;
 import net.officefloor.tutorials.performance.nio.Runner;
 
 /**
@@ -32,6 +36,11 @@ import net.officefloor.tutorials.performance.nio.Runner;
  * @author Daniel Sagenschneider
  */
 public abstract class AbstractNioRunnerTestCase extends TestCase {
+
+	/**
+	 * {@link Set} of warmed {@link Servicer} instances to only warm up once.
+	 */
+	private static final Set<Class<?>> warmedServicers = new HashSet<Class<?>>();
 
 	/**
 	 * System property to obtain the target host.
@@ -73,7 +82,7 @@ public abstract class AbstractNioRunnerTestCase extends TestCase {
 
 		// Provide details
 		int timeIntervalSeconds = 60;
-		int runsPerIncrement = 10;
+		int runsPerIncrement = 3;
 		int maximumNumberOfLoadConnections = 10000;
 
 		// Indicate starting
@@ -116,8 +125,15 @@ public abstract class AbstractNioRunnerTestCase extends TestCase {
 			cpuLoad.addConnections(cpuSeed);
 			dbLoad.addConnections(dbSeed);
 
-			// Warm up for 5 times the interval
-			runner.runInterval("STARTUP", (5 * timeIntervalSeconds));
+			// Determine if need warm up
+			Class<?> servicerType = servicer.getClass();
+			if (!(warmedServicers.contains(servicerType))) {
+				// Warm up for 5 times the interval
+				runner.runInterval("STARTUP", (5 * timeIntervalSeconds));
+
+				// Now warm
+				warmedServicers.add(servicerType);
+			}
 
 			// Undertake the runs
 			boolean isFinished = false;
@@ -136,9 +152,19 @@ public abstract class AbstractNioRunnerTestCase extends TestCase {
 						+ " connection magnitude)", timeIntervalSeconds);
 
 				// Undertake multiple runs to average results
+				LoadSummary[][] runSummaries = new LoadSummary[runsPerIncrement][];
 				for (int i = 0; i < runsPerIncrement; i++) {
-					runner.runInterval("RUN " + (i + 1), timeIntervalSeconds);
+					runSummaries[i] = runner.runInterval("RUN " + (i + 1),
+							timeIntervalSeconds);
 				}
+				System.out.println("RUN SUMMARY: cpu "
+						+ cpuLoad.getConnectionCount() + " connections, db "
+						+ dbLoad.getConnectionCount() + " connections");
+				this.reportRunIntervalLoadSummary("cpu", 0, runSummaries,
+						runner);
+				this.reportRunIntervalLoadSummary("db", 1, runSummaries, runner);
+				System.out
+						.println("------------------------------------------------------------");
 
 				// Obtain the next magnitude of connections
 				int nextMagnitudeConnectionCount = currentMagnitudeConnectionCount * 10;
@@ -176,5 +202,54 @@ public abstract class AbstractNioRunnerTestCase extends TestCase {
 				}
 			}
 		}
+	}
+
+	/**
+	 * Reports on a particular {@link Load}.
+	 * 
+	 * @param loadDescription
+	 *            Description of the {@link Load}.
+	 * @param loadIndex
+	 *            Index of the {@link Load}.
+	 * @param runSummaries
+	 *            {@link LoadSummary} instances from the runs.
+	 * @param runner
+	 *            {@link Runner}.
+	 */
+	private void reportRunIntervalLoadSummary(String loadDescription,
+			int loadIndex, LoadSummary[][] runSummaries, Runner runner) {
+
+		// Provide averages for the runs
+		int totalServicedRequests = 0;
+		double[] percentileServiceTimes = runner.getPecentileServiceTimes();
+		long[] totalPercentileServicingTimes = new long[percentileServiceTimes.length];
+		for (LoadSummary[] summaries : runSummaries) {
+
+			// Obtain the request summary (as only one request for load)
+			LoadSummary cpuSummary = summaries[loadIndex];
+			RequestSummary requestSummary = cpuSummary.getRequestSummaries()
+					.get(0);
+
+			// Total request services to be averaged
+			totalServicedRequests += requestSummary.getServicedRequestCount();
+
+			// Total servicing times to be averaged
+			for (int i = 0; i < percentileServiceTimes.length; i++) {
+				totalPercentileServicingTimes[i] += requestSummary
+						.getPercentileServiceTimes().get(i);
+			}
+		}
+		System.out.print("   " + loadDescription + " summary: "
+				+ (totalServicedRequests / runSummaries.length) + " requests ");
+		for (int i = 0; i < totalPercentileServicingTimes.length; i++) {
+			System.out
+					.print(" "
+							+ ((int) (percentileServiceTimes[i] * 100))
+							+ "%="
+							+ Load.serviceTimeFormat
+									.format((totalPercentileServicingTimes[i] / runSummaries.length) / 1000000.0)
+							+ "ms");
+		}
+		System.out.println();
 	}
 }

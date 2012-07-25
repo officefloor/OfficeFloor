@@ -35,7 +35,7 @@ public class Load {
 	/**
 	 * {@link DecimalFormat} for the service times.
 	 */
-	private static final DecimalFormat serviceTimeFormat = new DecimalFormat(
+	public static final DecimalFormat serviceTimeFormat = new DecimalFormat(
 			"0.00");
 
 	/**
@@ -229,9 +229,10 @@ public class Load {
 	 *            Time interval in seconds.
 	 * @param out
 	 *            {@link PrintStream} to write the results.
+	 * @return {@link LoadSummary}.
 	 */
-	void reportLastIntervalResults(String description, int timeIntervalSeconds,
-			PrintStream out) {
+	LoadSummary reportLastIntervalResults(String description,
+			int timeIntervalSeconds, PrintStream out) {
 
 		// Count the number of requests and reconnects
 		int minRequestsCount = Integer.MAX_VALUE;
@@ -259,12 +260,22 @@ public class Load {
 				+ minRequestsCount + " avg=" + averageRequestCount + " max="
 				+ maxRequestsCount + "]");
 
+		// Create the load summary
+		LoadSummary loadSummary = new LoadSummary(this.description,
+				this.getConnectionCount(), this.getFailedConnectionCount());
+
 		// Provide summary of interval
 		for (Request request : this.requests) {
 
 			// Provide throughput summary
-			out.print("\t" + request.getRequestUri() + ": "
-					+ request.getNumberOfRequestsServiced() + " requests ");
+			String requestUri = request.getRequestUri();
+			int requestsServiced = request.getNumberOfRequestsServiced();
+			out.print("\t" + requestUri + ": " + requestsServiced
+					+ " requests ");
+
+			// Summarise the request for the load
+			RequestSummary requestSummary = loadSummary.addRequest(requestUri,
+					requestsServiced);
 
 			// Provide latency summary
 			for (double percentile : this.runner.getPecentileServiceTimes()) {
@@ -276,9 +287,15 @@ public class Load {
 						+ serviceTimeFormat
 								.format(percentileServiceTime / 1000000.0)
 						+ "ms");
+
+				// Summarise the request servicing time
+				requestSummary.addPercentileServiceTime(percentileServiceTime);
 			}
 			out.println();
 		}
+
+		// Return the load summary
+		return loadSummary;
 	}
 
 }

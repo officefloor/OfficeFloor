@@ -129,13 +129,14 @@ public class Runner extends TestCase {
 	 *            Description of the interval.
 	 * @param timeIntervalSeconds
 	 *            Time interval in seconds.
+	 * @return {@link LoadSummary} instances for run interval.
 	 * @throws IOException
 	 *             If a request fails.
 	 */
-	public void runInterval(String description, int timeIntervalSeconds)
+	public LoadSummary[] runInterval(String description, int timeIntervalSeconds)
 			throws IOException {
-		this.runInterval(description, timeIntervalSeconds, true, System.out,
-				false);
+		return this.runInterval(description, timeIntervalSeconds, true,
+				System.out, false);
 	}
 
 	/**
@@ -151,11 +152,12 @@ public class Runner extends TestCase {
 	 *            {@link PrintStream}.
 	 * @param isJustEstablishConnections
 	 *            Indicates whether to just establish connections.
+	 * @return {@link LoadSummary} instances.
 	 * @throws IOException
 	 *             If a request fails.
 	 */
-	synchronized void runInterval(String description, int timeIntervalSeconds,
-			boolean isReport, PrintStream out,
+	synchronized LoadSummary[] runInterval(String description,
+			int timeIntervalSeconds, boolean isReport, PrintStream out,
 			boolean isJustEstablishConnections) throws IOException {
 
 		// Ensure do not run after stopped
@@ -177,13 +179,22 @@ public class Runner extends TestCase {
 
 		// Convert time interval to milliseconds
 		long timeIntervalMilliseconds = (timeIntervalSeconds * 1000);
-
 		long startTime = System.currentTimeMillis();
 		long nextConnectionCheckTime = startTime + 1000;
 		do {
 		} while (this.runSelect(description, startTime,
 				timeIntervalMilliseconds, nextConnectionCheckTime,
-				isJustEstablishConnections, isReport, out));
+				isJustEstablishConnections));
+
+		// Report results of interval
+		LoadSummary[] loadSummary = null;
+		if (isReport) {
+			loadSummary = this.reportLastIntervalResults(description,
+					(int) (timeIntervalMilliseconds / 1000), out);
+		}
+
+		// Return the load summary
+		return loadSummary;
 	}
 
 	/**
@@ -195,8 +206,7 @@ public class Runner extends TestCase {
 	 */
 	private boolean runSelect(String description, long startTime,
 			long timeIntervalMilliseconds, long nextConnectionCheckTime,
-			boolean isJustEstablishConnections, boolean isReport,
-			PrintStream out) throws IOException {
+			boolean isJustEstablishConnections) throws IOException {
 
 		// Select next keys
 		this.selector.select(1000);
@@ -231,13 +241,6 @@ public class Runner extends TestCase {
 		} else {
 			// Determine if time is up
 			if ((System.currentTimeMillis() - startTime) > timeIntervalMilliseconds) {
-
-				// Report results of interval
-				if (isReport) {
-					this.reportLastIntervalResults(description,
-							(int) (timeIntervalMilliseconds / 1000), out);
-				}
-
 				// Time is up (do no process any further results)
 				return false;
 			}
@@ -297,7 +300,7 @@ public class Runner extends TestCase {
 					this.uniqueFailures.add(exceptionIdentifier);
 
 					// Provide the exception
-					ex.printStackTrace(out == null ? System.out : out);
+					ex.printStackTrace(System.out);
 				}
 
 				// Clean up connection
@@ -341,8 +344,7 @@ public class Runner extends TestCase {
 			long timeIntervalMilliseconds = 1 * 1000; // 1 second
 			do {
 			} while (this.runSelect("STOPPING", startTime,
-					timeIntervalMilliseconds, timeIntervalMilliseconds, false,
-					false, null));
+					timeIntervalMilliseconds, timeIntervalMilliseconds, false));
 			System.out.print(".");
 			System.out.flush();
 		} while (!this.isStopped);
@@ -358,16 +360,22 @@ public class Runner extends TestCase {
 	 *            Time interval in seconds.
 	 * @param out
 	 *            {@link PrintStream} to write the results.
+	 * @return {@link LoadSummary} instances.
 	 */
-	void reportLastIntervalResults(String description, int timeIntervalSeconds,
-			PrintStream out) {
+	LoadSummary[] reportLastIntervalResults(String description,
+			int timeIntervalSeconds, PrintStream out) {
 
 		// Provide summary of interval
+		LoadSummary[] summaries = new LoadSummary[this.loads.size()];
+		int summaryIndex = 0;
 		for (Load load : this.loads) {
-			load.reportLastIntervalResults(description, timeIntervalSeconds,
-					out);
+			summaries[summaryIndex++] = load.reportLastIntervalResults(
+					description, timeIntervalSeconds, out);
 		}
 		out.println("------------------------------------------------------------");
+
+		// Return the summaries
+		return summaries;
 	}
 
 	/**
@@ -402,7 +410,7 @@ public class Runner extends TestCase {
 	 * 
 	 * @return Percentile service times to report.
 	 */
-	double[] getPecentileServiceTimes() {
+	public double[] getPecentileServiceTimes() {
 		return this.percentileServiceTimes;
 	}
 
