@@ -107,7 +107,10 @@ public abstract class AbstractNioRunnerTestCase extends TestCase {
 		boolean isServicerRequireStopping = false;
 		if ("localhost".equals(host)) {
 			// Start the servicer
+			System.out.print("Starting servicer ...");
+			System.out.println();
 			servicer.start();
+			System.out.println(" started");
 			isServicerRequireStopping = true;
 		}
 

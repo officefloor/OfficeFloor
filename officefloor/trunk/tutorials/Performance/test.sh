@@ -36,4 +36,6 @@ TESTCASE=${SERVICER_NAME}NioTest
 echo "Running test ${TESTCASE} writing results to ${RESULT_FILE}"
 
 # Run the performance test
-mvn -Dtest=${TESTCASE} test > ${RESULT_FILE} 
+export MAVEN_OPTS="-Xms3g -Xmx3g"
+mvn -o -Dtest=${TESTCASE} test > ${RESULT_FILE} 
+

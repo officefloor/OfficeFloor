@@ -22,4 +22,4 @@ fi
 
 
 # Run the servicer
-mvn exec:exec -Dexec.executable="java" -Dexec.args="-classpath %classpath net.officefloor.tutorials.performance.RunServicer ${SERVICER_NAME}"
+mvn -o exec:exec -Dexec.executable="java" -Dexec.args="-Xms1g -Xmx1g -classpath %classpath net.officefloor.tutorials.performance.RunServicer ${SERVICER_NAME}"

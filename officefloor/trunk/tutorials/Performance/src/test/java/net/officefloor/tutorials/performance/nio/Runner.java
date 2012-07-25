@@ -19,6 +19,7 @@ package net.officefloor.tutorials.performance.nio;
 
 import java.io.IOException;
 import java.io.PrintStream;
+import java.net.InetAddress;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.util.ArrayList;
@@ -42,9 +43,9 @@ public class Runner extends TestCase {
 	private final List<Load> loads = new ArrayList<Load>();
 
 	/**
-	 * Host to send requests.
+	 * Target {@link InetAddress} to send requests.
 	 */
-	private final String host;
+	private final InetAddress targetAddress;
 
 	/**
 	 * Port to send requests.
@@ -90,10 +91,28 @@ public class Runner extends TestCase {
 	 */
 	public Runner(String host, int port, double... percentileServiceTimes)
 			throws IOException {
-		this.host = host;
 		this.port = port;
 		this.percentileServiceTimes = percentileServiceTimes;
 		this.selector = Selector.open();
+
+		// Determine the Inet Address
+		InetAddress address;
+		try {
+			// Determine if IP address
+			String[] addressParts = host.split("\\.");
+			byte[] ipAddress = new byte[4];
+			for (int i = 0; i < ipAddress.length; i++) {
+				ipAddress[i] = Byte.parseByte(addressParts[i]);
+			}
+			address = InetAddress.getByAddress(ipAddress);
+			System.out.println("Running against IP address: " + host);
+
+		} catch (NumberFormatException ex) {
+			// Not a IP address
+			address = InetAddress.getByName(host);
+			System.out.println("Running against Host: " + host);
+		}
+		this.targetAddress = address;
 	}
 
 	/**
@@ -379,12 +398,12 @@ public class Runner extends TestCase {
 	}
 
 	/**
-	 * Obtains the name of the host to send requests.
+	 * Obtains the target {@link InetAddress} to send requests.
 	 * 
-	 * @return Name of host to send requests.
+	 * @return Target {@link InetAddress} to send requests.
 	 */
-	String getHostName() {
-		return this.host;
+	InetAddress getTargetAddress() {
+		return this.targetAddress;
 	}
 
 	/**
