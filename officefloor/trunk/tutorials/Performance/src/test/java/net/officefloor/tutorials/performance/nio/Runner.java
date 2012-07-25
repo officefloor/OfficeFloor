@@ -96,23 +96,7 @@ public class Runner extends TestCase {
 		this.selector = Selector.open();
 
 		// Determine the Inet Address
-		InetAddress address;
-		try {
-			// Determine if IP address
-			String[] addressParts = host.split("\\.");
-			byte[] ipAddress = new byte[4];
-			for (int i = 0; i < ipAddress.length; i++) {
-				ipAddress[i] = Byte.parseByte(addressParts[i]);
-			}
-			address = InetAddress.getByAddress(ipAddress);
-			System.out.println("Running against IP address: " + host);
-
-		} catch (NumberFormatException ex) {
-			// Not a IP address
-			address = InetAddress.getByName(host);
-			System.out.println("Running against Host: " + host);
-		}
-		this.targetAddress = address;
+		this.targetAddress = InetAddress.getByName(host);
 	}
 
 	/**
