@@ -37,5 +37,5 @@ echo "Running test ${TESTCASE} writing results to ${RESULT_FILE}"
 
 # Run the performance test
 export MAVEN_OPTS="-Xms3g -Xmx3g"
-mvn -o -Dtest=${TESTCASE} test > ${RESULT_FILE} 
+mvn -o -Dtest=${TESTCASE} -Dtarget.host=${TARGET_HOST} test > ${RESULT_FILE} 
 
