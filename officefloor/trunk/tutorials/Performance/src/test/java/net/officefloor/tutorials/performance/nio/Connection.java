@@ -142,7 +142,7 @@ public class Connection {
 		socket.setSoTimeout(0); // wait forever
 		socket.setTcpNoDelay(false);
 		channel.connect(new InetSocketAddress(this.load.getRunner()
-				.getHostName(), this.load.getRunner().getPort()));
+				.getTargetAddress(), this.load.getRunner().getPort()));
 
 		// Register connection with selector to start requesting
 		this.seletionKey = channel.register(
