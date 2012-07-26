@@ -182,7 +182,7 @@ public class SocketListener<CH extends ConnectionHandler> extends
 				if (allKeys.size() == 0) {
 					// May complete as no further connections
 					context.setComplete(true);
-					
+
 					// Close the selector
 					this.selector.close();
 				}
@@ -299,7 +299,10 @@ public class SocketListener<CH extends ConnectionHandler> extends
 						this.terminateConnection(key, connection);
 
 						// Indicate failure details
-						if (ex instanceof ClosedChannelException) {
+						if ((ex instanceof ClosedChannelException)
+								|| ((ex instanceof IOException) && (("Connection reset by peer"
+										.equals(ex.getMessage())) || ("Broken pipe"
+										.equals(ex.getMessage()))))) {
 							// Peer closed connection
 							if (LOGGER.isLoggable(Level.FINE)) {
 								LOGGER.log(Level.FINE,

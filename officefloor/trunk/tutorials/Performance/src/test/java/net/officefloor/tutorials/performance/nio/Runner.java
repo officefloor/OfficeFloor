@@ -22,6 +22,7 @@ import java.io.PrintStream;
 import java.net.InetAddress;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
+import java.nio.channels.SocketChannel;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -215,10 +216,21 @@ public class Runner extends TestCase {
 		this.selector.select(1000);
 
 		// Indicate if stopped
-		if ((this.isStopping) && (this.selector.keys().size() == 0)) {
-			// No more keys (all connections closed), so stopped
-			this.isStopped = true;
-			return false;
+		if (this.isStopping) {
+			if (this.selector.keys().size() == 0) {
+				// No more keys (all connections closed), so stopped
+				this.isStopped = true;
+				return false;
+			}
+			
+			// Close all connections
+			for (SelectionKey key : this.selector.keys()) {
+				((SocketChannel)key.channel()).close();
+				key.cancel();
+			}
+			
+			// Another selection necessary to clean up
+			return true;
 		}
 
 		// Determine if just connecting or sending request
@@ -308,11 +320,13 @@ public class Runner extends TestCase {
 
 				// Clean up connection
 				connection.connectionFailed();
-				key.cancel();
 				key.channel().close();
+				key.cancel();
 
-				// Attempt to re-establish connection
-				connection.establishNewConnection();
+				// Attempt to re-establish connection (if testing)
+				if (!this.isStopping) {
+					connection.establishNewConnection();
+				}
 			}
 		}
 

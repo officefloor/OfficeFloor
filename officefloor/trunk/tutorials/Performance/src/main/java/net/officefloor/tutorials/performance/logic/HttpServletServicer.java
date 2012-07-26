@@ -38,23 +38,20 @@ public class HttpServletServicer extends HttpServlet {
 	protected void doGet(HttpServletRequest req, HttpServletResponse resp)
 			throws ServletException, IOException {
 
-		// Check if valid request
 		String queryString = req.getQueryString();
 		char value = queryString.charAt(queryString.length() - 1);
 		if (value == 'N') {
+			// News feed
 			resp.getWriter().write('n');
-		} else {
-			try {
 
-				// Obtain connection
+		} else {
+			// Simulate database interaction
+			try {
 				Connection connection = null;
 				try {
 					connection = PoolSingleton.getPooledDataSource()
 							.getConnection();
-
-					// Simulate database interaction
 					Thread.sleep(10);
-
 				} finally {
 					if (connection != null) {
 						connection.close();
@@ -63,8 +60,7 @@ public class HttpServletServicer extends HttpServlet {
 			} catch (Exception ex) {
 				throw new ServletException(ex);
 			}
-
-			resp.getWriter().write('y');
+			resp.getWriter().write('d');
 		}
 	}
 

@@ -17,6 +17,12 @@
  */
 package net.officefloor.tutorials.performance;
 
+import java.lang.management.ManagementFactory;
+import java.lang.management.MemoryMXBean;
+import java.lang.management.ThreadMXBean;
+import java.util.Timer;
+import java.util.TimerTask;
+
 /**
  * Runs a {@link Servicer}.
  * 
@@ -55,6 +61,24 @@ public class RunServicer {
 		System.out.flush();
 		servicer.start();
 		System.out.println(" started");
+
+		// Monitor memory foot print
+		final MemoryMXBean memoryBean = ManagementFactory.getMemoryMXBean();
+		final ThreadMXBean threadBean = ManagementFactory.getThreadMXBean();
+		Timer timer = new Timer();
+		timer.scheduleAtFixedRate(new TimerTask() {
+			@Override
+			public void run() {
+				int bytesInMegaByte = 1024 * 1024;
+				System.out
+						.println("Memory: heap="
+								+ (memoryBean.getHeapMemoryUsage().getUsed() / bytesInMegaByte)
+								+ " non="
+								+ (memoryBean.getNonHeapMemoryUsage().getUsed() / bytesInMegaByte)
+								+ ", Threads: " + threadBean.getThreadCount()
+								+ " peak " + threadBean.getPeakThreadCount());
+			}
+		}, 1000, 20 * 1000);
 
 		// Add shutdown hook (to attempt to stop servicer gracefully)
 		Runtime.getRuntime().addShutdownHook(new Thread(new Runnable() {

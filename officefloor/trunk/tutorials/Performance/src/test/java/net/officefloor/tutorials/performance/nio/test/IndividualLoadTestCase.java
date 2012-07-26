@@ -58,7 +58,7 @@ public class IndividualLoadTestCase extends TestCase {
 	/**
 	 * Tests Apache.
 	 */
-	public void testApache() throws Exception {
+	public void _testApache() throws Exception {
 		this.doPerformanceTest(new ApacheServicer());
 	}
 
@@ -82,7 +82,7 @@ public class IndividualLoadTestCase extends TestCase {
 	public void doPerformanceTest(Servicer servicer) throws Exception {
 
 		// Provide details
-		int timeIntervalSeconds = 60;
+		int timeIntervalSeconds = 20;
 		int cpuConnectionCount = 1000;
 		int dbConnectionCount = 1000;
 
@@ -99,7 +99,10 @@ public class IndividualLoadTestCase extends TestCase {
 				AbstractNioRunnerTestCase.PROPERTY_TARGET_HOST, "localhost");
 		if ("localhost".equals(host)) {
 			// Start the servicer
+			System.out.print("Starting servicer ...");
+			System.out.flush();
 			servicer.start();
+			System.out.println(" started");
 		}
 
 		// Monitor memory foot print
@@ -123,10 +126,10 @@ public class IndividualLoadTestCase extends TestCase {
 		// Start the runner
 		Runner runner = new Runner(host, servicer.getPort(), 0.1, 0.5, 0.9,
 				0.95, 0.99);
-		Load cpuLoad = runner.addLoad("cpu", true, new Request("/info.php?v=N",
+		Load cpuLoad = runner.addLoad("cpu", true, new Request("/test.php?v=N",
 				"n", 10));
-		Load dbLoad = runner.addLoad("db", true, new Request("/info.php?v=Y",
-				"y", 10));
+		Load dbLoad = runner.addLoad("db", true, new Request("/test.php?v=D",
+				"d", 10));
 
 		try {
 
