@@ -53,8 +53,8 @@ public class GrizzlyServicer implements Servicer {
 				NetworkListener.DEFAULT_NETWORK_HOST, new PortRange(this
 						.getPort())));
 		WebappContext context = new WebappContext("Grizzly");
-		context.addServlet("test", new HttpServletServicer());
-		context.deploy(server);
+		context.addServlet("test", new HttpServletServicer()).addMapping("/*");
+		context.deploy(this.server);
 		this.server.start();
 	}
 

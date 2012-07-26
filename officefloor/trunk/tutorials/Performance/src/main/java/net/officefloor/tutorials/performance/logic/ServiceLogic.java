@@ -35,43 +35,37 @@ public class ServiceLogic {
 
 	@FlowInterface
 	private static interface Flows {
-		void insert(char value);
+		void database(char value);
 	}
 
-	public void validate(ServerHttpConnection connection, Flows flows)
+	public void news(ServerHttpConnection connection, Flows flows)
 			throws IOException {
 
-		// Check if valid request
 		String requestUri = connection.getHttpRequest().getRequestURI();
 		char value = requestUri.charAt(requestUri.length() - 1);
 		if (value == 'N') {
-			// Send response of invalid request
+			// News feed
 			connection.getHttpResponse().getBody().getOutputStream()
 					.write((byte) 'n');
 			return;
 		}
 
-		// Valid request so insert
-		flows.insert(value);
+		// Database
+		flows.database(value);
 	}
 
-	public void insert(@Parameter char value, ServerHttpConnection conn,
+	public void database(@Parameter char value, ServerHttpConnection conn,
 			PooledDataSource dataSource) throws InterruptedException,
 			SQLException, IOException {
 
-		// Obtain connection
+		// Simulate database interaction
 		Connection connection = dataSource.getConnection();
 		try {
-
-			// Simulate database interaction
 			Thread.sleep(10);
-
 		} finally {
 			connection.close();
 		}
-
-		// Send response of valid request
-		conn.getHttpResponse().getBody().getOutputStream().write((byte) 'y');
+		conn.getHttpResponse().getBody().getOutputStream().write((byte) 'd');
 	}
 
 }

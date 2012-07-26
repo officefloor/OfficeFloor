@@ -47,7 +47,7 @@ public class ApacheServicer implements Servicer {
 		HttpClient client = new DefaultHttpClient();
 		try {
 			HttpResponse response = client.execute(new HttpGet(
-					"http://localhost/index.html"));
+					"http://localhost/test.php"));
 			if (response.getStatusLine().getStatusCode() != 200) {
 				throw new Exception("Apache seems to not be running");
 			}
