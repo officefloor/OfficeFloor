@@ -19,7 +19,9 @@ package net.officefloor.tutorials.performance;
 
 import net.officefloor.tutorials.performance.logic.HttpServletServicer;
 
+import org.apache.catalina.connector.Connector;
 import org.apache.catalina.startup.Tomcat;
+import org.apache.coyote.AbstractProtocol;
 
 /**
  * Tomcat {@link Servicer}.
@@ -37,14 +39,17 @@ public class TomcatServicer implements Servicer {
 
 	@Override
 	public int getMaximumConnectionCount() {
-		return 1000;
+		return 10000;
 	}
 
 	@Override
 	public void start() throws Exception {
 		this.server = new Tomcat();
 		this.server.setBaseDir(System.getProperty("java.io.tmpdir"));
-		this.server.setPort(this.getPort());
+		Connector connector = this.server.getConnector();
+		connector.setPort(this.getPort());
+		((AbstractProtocol) this.server.getConnector().getProtocolHandler())
+				.setBacklog(25000);
 		this.server.setSilent(true);
 		this.server.addContext("/", System.getProperty("java.io.tmpdir"));
 		this.server.addServlet("/", "test", new HttpServletServicer())

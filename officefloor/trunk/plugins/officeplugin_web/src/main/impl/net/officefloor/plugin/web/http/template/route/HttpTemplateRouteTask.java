@@ -59,7 +59,7 @@ public class HttpTemplateRouteTask
 	 * Keys of dependencies for the {@link HttpTemplateRouteTask}.
 	 */
 	public static enum HttpTemplateRouteDependencies {
-		SERVER_HTTP_CONNECTION, HTTP_APPLICATION_LOCATION
+		SERVER_HTTP_CONNECTION, HTTP_APPLICATION_LOCATION, HTTP_REQUEST_HANDLER_MARKER
 	}
 
 	/**

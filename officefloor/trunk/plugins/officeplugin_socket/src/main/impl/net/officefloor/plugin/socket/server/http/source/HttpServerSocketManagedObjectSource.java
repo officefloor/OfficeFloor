@@ -67,13 +67,9 @@ public class HttpServerSocketManagedObjectSource extends
 
 				// Provide thread per each accepter and listener
 				context.mapTeam("accepter",
-						WorkerPerTaskTeamSource.class.getName()).addProperty(
-						WorkerPerTaskTeamSource.PROPERTY_THREAD_PRIORITY,
-						String.valueOf(Thread.MAX_PRIORITY));
+						WorkerPerTaskTeamSource.class.getName());
 				context.mapTeam("listener",
-						WorkerPerTaskTeamSource.class.getName()).addProperty(
-						WorkerPerTaskTeamSource.PROPERTY_THREAD_PRIORITY,
-						String.valueOf(Thread.MAX_PRIORITY));
+						WorkerPerTaskTeamSource.class.getName());
 
 				// Clean up (without thread context switch)
 				context.mapTeam("cleanup", PassiveTeamSource.class.getName());

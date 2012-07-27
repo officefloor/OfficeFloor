@@ -85,6 +85,9 @@ public abstract class AbstractNioRunnerTestCase extends TestCase {
 		int runsPerIncrement = 3;
 		int maximumNumberOfLoadConnections = 10000;
 
+		// Provide maximum priority to runner
+		Thread.currentThread().setPriority(Thread.MAX_PRIORITY);
+
 		// Indicate starting
 		System.out.println();
 		System.out.println();

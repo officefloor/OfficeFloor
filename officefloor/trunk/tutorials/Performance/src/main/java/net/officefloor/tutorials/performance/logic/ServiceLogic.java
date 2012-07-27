@@ -40,7 +40,7 @@ public class ServiceLogic {
 
 	public void news(ServerHttpConnection connection, Flows flows)
 			throws IOException {
-
+		
 		String requestUri = connection.getHttpRequest().getRequestURI();
 		char value = requestUri.charAt(requestUri.length() - 1);
 		if (value == 'N') {
@@ -57,11 +57,11 @@ public class ServiceLogic {
 	public void database(@Parameter char value, ServerHttpConnection conn,
 			PooledDataSource dataSource) throws InterruptedException,
 			SQLException, IOException {
-
+		
 		// Simulate database interaction
 		Connection connection = dataSource.getConnection();
 		try {
-			Thread.sleep(10);
+			Thread.sleep(100);
 		} finally {
 			connection.close();
 		}

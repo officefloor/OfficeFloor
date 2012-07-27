@@ -15,49 +15,35 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.tutorials.performance.pool;
+package net.officefloor.plugin.web.http.application;
 
 import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
+import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.spi.managedobject.source.impl.AbstractManagedObjectSource;
 
 /**
- * Singleton pool.
+ * {@link HttpRequestHandlerMarker} {@link ManagedObjectSource}.
  * 
  * @author Daniel Sagenschneider
  */
-public class PoolSingleton extends AbstractManagedObjectSource<None, None>
-		implements ManagedObject {
+public class HttpRequestHandlerMarkerManagedObjectSource extends
+		AbstractManagedObjectSource<None, None> implements ManagedObject,
+		HttpRequestHandlerMarker {
 
-	/**
-	 * Indicates the number of pooled connections.
+	/*
+	 * ========================== ManagedObjectSource =========================
 	 */
-	public static final int NUMBER_OF_POOLED_CONNECTIONS = 100;
-
-	/**
-	 * Singleton {@link PooledDataSource}.
-	 */
-	private final static PooledDataSource singleton = new PooledDataSource(
-			NUMBER_OF_POOLED_CONNECTIONS);
-
-	/**
-	 * Obtains the {@link PooledDataSource} singleton.
-	 * 
-	 * @return {@link PooledDataSource} singleton.
-	 */
-	public static PooledDataSource getPooledDataSource() {
-		return singleton;
-	}
 
 	@Override
 	protected void loadSpecification(SpecificationContext context) {
-		// No properties required
+		// No properties as marker object
 	}
 
 	@Override
 	protected void loadMetaData(MetaDataContext<None, None> context)
 			throws Exception {
-		context.setObjectClass(PooledDataSource.class);
+		context.setObjectClass(HttpRequestHandlerMarker.class);
 	}
 
 	@Override
@@ -65,9 +51,13 @@ public class PoolSingleton extends AbstractManagedObjectSource<None, None>
 		return this;
 	}
 
+	/*
+	 * ============================== ManagedObject ============================
+	 */
+
 	@Override
 	public Object getObject() throws Throwable {
-		return singleton;
+		return this;
 	}
 
 }

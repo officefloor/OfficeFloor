@@ -83,8 +83,8 @@ public class IndividualLoadTestCase extends TestCase {
 
 		// Provide details
 		int timeIntervalSeconds = 20;
-		int cpuConnectionCount = 1000;
-		int dbConnectionCount = 1000;
+		int cpuConnectionCount = 100;
+		int dbConnectionCount = 100;
 
 		// Indicate starting
 		System.out
