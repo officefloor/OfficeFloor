@@ -1,7 +1,5 @@
 <teams>
 
-	<team source="net.officefloor.frame.impl.spi.team.ExecutorFixedTeamSource" type="net.officefloor.tutorials.performance.pool.PooledDataSource">
-	    <property name="team.size" value="54" />
-	</team>
+	<team source="net.officefloor.frame.impl.spi.team.ExecutorCachedTeamSource" type="net.officefloor.tutorials.performance.pool.PooledDataSource" />
 
 </teams>

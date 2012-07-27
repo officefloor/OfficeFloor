@@ -51,7 +51,7 @@ public class HttpServletServicer extends HttpServlet {
 				try {
 					connection = PoolSingleton.getPooledDataSource()
 							.getConnection();
-					Thread.sleep(10);
+					Thread.sleep(100);
 				} finally {
 					if (connection != null) {
 						connection.close();

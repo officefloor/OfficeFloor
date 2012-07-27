@@ -15,39 +15,18 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.frame.impl.spi.team;
+package net.officefloor.plugin.web.http.application;
 
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-
+import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.spi.team.source.TeamSource;
-import net.officefloor.frame.spi.team.source.TeamSourceContext;
+import net.officefloor.plugin.socket.server.http.HttpRequest;
 
 /**
- * {@link TeamSource} utilising a cached {@link ExecutorService}.
+ * Marker dependency for the {@link Task} that is the handler for the
+ * {@link WebAutoWireApplication} to enable auto-wiring the default
+ * {@link TeamSource} for handling {@link HttpRequest} instances.
  * 
  * @author Daniel Sagenschneider
  */
-public class ExecutorCachedTeamSource extends AbstractExecutorTeamSource
-		implements AbstractExecutorTeamSource.ExecutorServiceFactory {
-
-	/*
-	 * ===================== AbstractExecutorTeamSource =====================
-	 */
-
-	@Override
-	protected ExecutorServiceFactory createExecutorServiceFactory(
-			TeamSourceContext context) throws Exception {
-		return this;
-	}
-
-	/*
-	 * ========================= ExecutorServiceFactory ====================
-	 */
-
-	@Override
-	public ExecutorService createExecutorService() {
-		return Executors.newCachedThreadPool();
-	}
-
+public interface HttpRequestHandlerMarker {
 }

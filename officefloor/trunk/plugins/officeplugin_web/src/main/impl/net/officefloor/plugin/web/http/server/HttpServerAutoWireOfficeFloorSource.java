@@ -27,10 +27,12 @@ import net.officefloor.compile.properties.Property;
 import net.officefloor.compile.spi.officefloor.OfficeFloorDeployer;
 import net.officefloor.compile.spi.officefloor.source.OfficeFloorSource;
 import net.officefloor.compile.spi.officefloor.source.OfficeFloorSourceContext;
+import net.officefloor.frame.impl.spi.team.ExecutorCachedTeamSource;
 import net.officefloor.frame.impl.spi.team.PassiveTeamSource;
 import net.officefloor.plugin.socket.server.http.source.HttpServerSocketManagedObjectSource;
 import net.officefloor.plugin.web.http.application.HttpApplicationState;
 import net.officefloor.plugin.web.http.application.HttpApplicationStateManagedObjectSource;
+import net.officefloor.plugin.web.http.application.HttpRequestHandlerMarker;
 import net.officefloor.plugin.web.http.application.HttpRequestState;
 import net.officefloor.plugin.web.http.application.HttpRequestStateManagedObjectSource;
 import net.officefloor.plugin.web.http.application.WebApplicationAutoWireOfficeFloorSource;
@@ -86,6 +88,10 @@ public class HttpServerAutoWireOfficeFloorSource extends
 
 		// Use passive team by default (saves on context switching)
 		this.assignDefaultTeam(PassiveTeamSource.class.getName());
+
+		// Use cached team to handle HTTP requests
+		this.assignTeam(ExecutorCachedTeamSource.class.getName(), new AutoWire(
+				HttpRequestHandlerMarker.class));
 
 		// Configure HTTP Session (allowing 10 seconds to retrieve session)
 		this.httpSession = this.addManagedObject(

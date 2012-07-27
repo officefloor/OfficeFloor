@@ -29,6 +29,7 @@ import net.officefloor.frame.api.manage.InvalidParameterTypeException;
 import net.officefloor.frame.api.manage.UnknownTaskException;
 import net.officefloor.frame.api.manage.UnknownWorkException;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
+import net.officefloor.plugin.web.http.application.HttpRequestHandlerMarker;
 import net.officefloor.plugin.web.http.location.HttpApplicationLocation;
 import net.officefloor.plugin.web.http.location.InvalidHttpRequestUriException;
 import net.officefloor.plugin.web.http.template.parse.LinkHttpTemplateSectionContent;
@@ -98,6 +99,8 @@ public class HttpTemplateRouteWorkSource extends
 				HttpTemplateRouteDependencies.SERVER_HTTP_CONNECTION);
 		task.addObject(HttpApplicationLocation.class).setKey(
 				HttpTemplateRouteDependencies.HTTP_APPLICATION_LOCATION);
+		task.addObject(HttpRequestHandlerMarker.class).setKey(
+				HttpTemplateRouteDependencies.HTTP_REQUEST_HANDLER_MARKER);
 		task.addFlow().setKey(HttpTemplateRouteTaskFlows.NON_MATCHED_REQUEST);
 		task.addEscalation(InvalidHttpRequestUriException.class);
 		task.addEscalation(UnknownWorkException.class);

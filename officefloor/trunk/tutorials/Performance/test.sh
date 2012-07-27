@@ -29,9 +29,10 @@ fi
 
 
 # Log details of running
+DATE_SUFFIX=`date +%Y%m%d-%H-%M-%S`
 RESULT_DIR=/home/$USER/results
 mkdir -p ${RESULT_DIR}
-RESULT_FILE=${RESULT_DIR}/${SERVICER_NAME}_${TARGET_HOST}.txt
+RESULT_FILE=${RESULT_DIR}/${SERVICER_NAME}_${TARGET_HOST}_${DATE_SUFFIX}.txt
 TESTCASE=${SERVICER_NAME}NioTest
 echo "Running test ${TESTCASE} writing results to ${RESULT_FILE}"
 

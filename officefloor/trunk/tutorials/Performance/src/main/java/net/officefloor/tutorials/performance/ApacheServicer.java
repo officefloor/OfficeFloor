@@ -37,7 +37,7 @@ public class ApacheServicer implements Servicer {
 
 	@Override
 	public int getMaximumConnectionCount() {
-		return 1000;
+		return 10000;
 	}
 
 	@Override

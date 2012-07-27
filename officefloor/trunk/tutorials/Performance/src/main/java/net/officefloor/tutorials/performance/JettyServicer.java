@@ -19,7 +19,9 @@ package net.officefloor.tutorials.performance;
 
 import net.officefloor.tutorials.performance.logic.HttpServletServicer;
 
+import org.eclipse.jetty.server.Connector;
 import org.eclipse.jetty.server.Server;
+import org.eclipse.jetty.server.nio.SelectChannelConnector;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
 
@@ -49,7 +51,11 @@ public class JettyServicer implements Servicer {
 	public void start() throws Exception {
 
 		// Create the server
-		this.server = new Server(this.getPort());
+		this.server = new Server();
+		SelectChannelConnector connector = new SelectChannelConnector();
+		connector.setPort(8080);
+		connector.setAcceptQueueSize(25000);
+		this.server.setConnectors(new Connector[] { connector });
 		ServletContextHandler context = new ServletContextHandler();
 		context.setContextPath("/");
 		this.server.setHandler(context);
