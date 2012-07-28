@@ -25,7 +25,9 @@ import net.officefloor.frame.api.manage.InvalidParameterTypeException;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.api.manage.ProcessFuture;
+import net.officefloor.frame.api.profile.Profiler;
 import net.officefloor.frame.impl.execute.process.ProcessStateImpl;
+import net.officefloor.frame.impl.execute.profile.ProcessProfilerImpl;
 import net.officefloor.frame.internal.structure.AssetManager;
 import net.officefloor.frame.internal.structure.EscalationFlow;
 import net.officefloor.frame.internal.structure.EscalationProcedure;
@@ -39,6 +41,7 @@ import net.officefloor.frame.internal.structure.OfficeManager;
 import net.officefloor.frame.internal.structure.OfficeMetaData;
 import net.officefloor.frame.internal.structure.OfficeStartupTask;
 import net.officefloor.frame.internal.structure.ProcessMetaData;
+import net.officefloor.frame.internal.structure.ProcessProfiler;
 import net.officefloor.frame.internal.structure.ProcessState;
 import net.officefloor.frame.internal.structure.ProcessTicker;
 import net.officefloor.frame.internal.structure.TaskMetaData;
@@ -157,6 +160,11 @@ public class OfficeMetaDataImpl implements OfficeMetaData {
 	private final EscalationFlow officeFloorEscalation;
 
 	/**
+	 * {@link Profiler}.
+	 */
+	private final Profiler profiler;
+
+	/**
 	 * Required {@link Governance} for the input {@link ManagedObject}
 	 * {@link EscalationHandler}.
 	 */
@@ -183,13 +191,15 @@ public class OfficeMetaDataImpl implements OfficeMetaData {
 	 *            {@link EscalationProcedure} for the {@link Office}.
 	 * @param officeFloorEscalation
 	 *            {@link OfficeFloor} {@link EscalationFlow}.
+	 * @param profiler
+	 *            {@link Profiler}.
 	 */
 	public OfficeMetaDataImpl(String officeName, OfficeManager officeManager,
 			WorkMetaData<?>[] workMetaDatas, ProcessMetaData processMetaData,
 			ProcessContextListener[] processContextListeners,
 			OfficeStartupTask[] startupTasks,
 			EscalationProcedure escalationProcedure,
-			EscalationFlow officeFloorEscalation) {
+			EscalationFlow officeFloorEscalation, Profiler profiler) {
 		this.officeName = officeName;
 		this.officeManager = officeManager;
 		this.workMetaDatas = workMetaDatas;
@@ -198,6 +208,7 @@ public class OfficeMetaDataImpl implements OfficeMetaData {
 		this.startupTasks = startupTasks;
 		this.escalationProcedure = escalationProcedure;
 		this.officeFloorEscalation = officeFloorEscalation;
+		this.profiler = profiler;
 
 		// Always no governance for input managed object escalation handling
 		GovernanceMetaData<?, ?>[] governanceMetaData = this.processMetaData
@@ -256,20 +267,24 @@ public class OfficeMetaDataImpl implements OfficeMetaData {
 			int processBoundIndexForInputManagedObject,
 			EscalationHandler inputManagedObjectEscalationHandler) {
 
+		// Create the process profiler (if profiling)
+		ProcessProfiler processProfiler = (this.profiler == null ? null
+				: new ProcessProfilerImpl(this.profiler));
+
 		// Create the Process State (based on whether have managed object)
 		ProcessState processState;
 		if (inputManagedObject == null) {
 			// Create Process without an Input Managed Object
 			processState = new ProcessStateImpl(this.processMetaData,
 					this.processContextListeners, this,
-					this.officeFloorEscalation);
+					this.officeFloorEscalation, processProfiler);
 
 		} else {
 			// Create Process with the Input Managed Object
 			processState = new ProcessStateImpl(this.processMetaData,
 					this.processContextListeners, this,
-					this.officeFloorEscalation, inputManagedObject,
-					inputManagedObjectMetaData,
+					this.officeFloorEscalation, processProfiler,
+					inputManagedObject, inputManagedObjectMetaData,
 					processBoundIndexForInputManagedObject,
 					inputManagedObjectEscalationHandler,
 					this.inputManagedObjectEscalationRequiredGovernance);

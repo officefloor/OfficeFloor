@@ -33,6 +33,7 @@ import net.officefloor.frame.api.build.WorkFactory;
 import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.api.manage.Office;
+import net.officefloor.frame.api.profile.Profiler;
 import net.officefloor.frame.impl.construct.administrator.AdministratorBuilderImpl;
 import net.officefloor.frame.impl.construct.governance.GovernanceBuilderImpl;
 import net.officefloor.frame.impl.construct.managedobject.DependencyMappingBuilderImpl;
@@ -161,6 +162,11 @@ public class OfficeBuilderImpl implements OfficeBuilder, OfficeConfiguration {
 	private long monitorOfficeInterval = 1000;
 
 	/**
+	 * {@link Profiler}.
+	 */
+	private Profiler profiler = null;
+
+	/**
 	 * Initiate.
 	 * 
 	 * @param officeName
@@ -284,6 +290,11 @@ public class OfficeBuilderImpl implements OfficeBuilder, OfficeConfiguration {
 				null));
 	}
 
+	@Override
+	public void setProfiler(Profiler profiler) {
+		this.profiler = profiler;
+	}
+
 	/*
 	 * ================= OfficeConfiguration ==============================
 	 */
@@ -394,6 +405,11 @@ public class OfficeBuilderImpl implements OfficeBuilder, OfficeConfiguration {
 	@Override
 	public TaskNodeReference[] getStartupTasks() {
 		return this.startupTasks.toArray(new TaskNodeReference[0]);
+	}
+
+	@Override
+	public Profiler getProfiler() {
+		return this.profiler;
 	}
 
 }

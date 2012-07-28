@@ -22,6 +22,7 @@ import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.manage.OfficeFloor;
+import net.officefloor.frame.api.profile.Profiler;
 import net.officefloor.frame.internal.structure.EscalationFlow;
 import net.officefloor.frame.internal.structure.JobSequence;
 import net.officefloor.frame.internal.structure.JobNode;
@@ -253,5 +254,14 @@ public interface OfficeBuilder {
 	 *            Name of {@link Task} on the {@link Work}.
 	 */
 	void addStartupTask(String workName, String taskName);
+
+	/**
+	 * Allows to optionally specify a {@link Profiler} that listens in on
+	 * profiling information of the {@link Office}.
+	 * 
+	 * @param profiler
+	 *            {@link Profiler}.
+	 */
+	void setProfiler(Profiler profiler);
 
 }

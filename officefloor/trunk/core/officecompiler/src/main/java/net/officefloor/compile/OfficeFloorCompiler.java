@@ -48,7 +48,9 @@ import net.officefloor.compile.team.TeamLoader;
 import net.officefloor.compile.work.WorkLoader;
 import net.officefloor.frame.api.OfficeFrame;
 import net.officefloor.frame.api.execute.Work;
+import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.manage.OfficeFloor;
+import net.officefloor.frame.api.profile.Profiler;
 import net.officefloor.frame.spi.administration.source.AdministratorSource;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.spi.source.ResourceSource;
@@ -611,6 +613,16 @@ public abstract class OfficeFloorCompiler implements PropertyConfigurable {
 	 */
 	public abstract <S extends TeamSource> void addTeamSourceAlias(
 			String alias, Class<S> teamSourceClass);
+
+	/**
+	 * Adds the {@link Profiler} for the {@link Office}.
+	 * 
+	 * @param officeName
+	 *            Name of {@link Office} to be profiled.
+	 * @param profiler
+	 *            {@link Profiler} for the {@link Office}.
+	 */
+	public abstract void addProfiler(String officeName, Profiler profiler);
 
 	/**
 	 * Creates a new empty {@link PropertyList}.

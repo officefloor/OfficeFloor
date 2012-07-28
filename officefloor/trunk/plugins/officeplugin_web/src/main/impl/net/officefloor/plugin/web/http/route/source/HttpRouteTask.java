@@ -26,7 +26,6 @@ import net.officefloor.frame.api.execute.TaskContext;
 import net.officefloor.frame.util.AbstractSingleTask;
 import net.officefloor.plugin.socket.server.http.HttpRequest;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
-import net.officefloor.plugin.socket.server.profile.Profiler;
 import net.officefloor.plugin.web.http.location.HttpApplicationLocation;
 import net.officefloor.plugin.web.http.location.IncorrectHttpRequestContextPathException;
 import net.officefloor.plugin.web.http.location.InvalidHttpRequestUriException;
@@ -72,9 +71,6 @@ public class HttpRouteTask
 			TaskContext<HttpRouteTask, HttpRouteTaskDependencies, Indexed> context)
 			throws InvalidHttpRequestUriException {
 		
-		// Profile
-		Profiler.mark("Routing request");
-
 		// Obtain the request to route it
 		ServerHttpConnection connection = (ServerHttpConnection) context
 				.getObject(HttpRouteTaskDependencies.SERVER_HTTP_CONNECTION);

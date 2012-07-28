@@ -252,8 +252,13 @@ public class ExecutionNode<W extends Work> implements
 	 */
 
 	@Override
+	public String getJobName() {
+		return String.valueOf(this.executionNodeId);
+	}
+
+	@Override
 	public String getTaskName() {
-		return this.getClass().getName();
+		return this.getClass().getSimpleName();
 	}
 
 	@Override

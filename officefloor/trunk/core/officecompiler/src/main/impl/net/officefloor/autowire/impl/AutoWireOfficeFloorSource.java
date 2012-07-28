@@ -81,6 +81,7 @@ import net.officefloor.compile.spi.section.ManagedObjectFlow;
 import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.manage.OfficeFloor;
+import net.officefloor.frame.api.profile.Profiler;
 import net.officefloor.frame.impl.spi.team.ProcessContextTeamSource;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
@@ -422,6 +423,12 @@ public class AutoWireOfficeFloorSource extends AbstractOfficeFloorSource
 
 		// Return the default team
 		return this.defaultTeam;
+	}
+
+	@Override
+	public void setProfiler(Profiler profiler) {
+		// Add the profiler to the office
+		this.getOfficeFloorCompiler().addProfiler(OFFICE_NAME, profiler);
 	}
 
 	@Override

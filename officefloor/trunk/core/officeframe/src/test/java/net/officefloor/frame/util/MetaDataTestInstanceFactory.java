@@ -90,10 +90,14 @@ public class MetaDataTestInstanceFactory {
 			}
 		};
 
+		// Obtain the job name
+		String taskName = "TEST_TASK";
+		String jobName = workMetaData.getWorkName() + "." + taskName;
+
 		// Create and initialise the meta-data
 		TaskMetaDataImpl<W, D, F> metaData = new TaskMetaDataImpl<W, D, F>(
-				"TEST_TASK", taskFactory, "TEST_DIFFERENTIATOR", Object.class,
-				new PassiveTeam(), new ManagedObjectIndex[0],
+				jobName, taskName, taskFactory, "TEST_DIFFERENTIATOR",
+				Object.class, new PassiveTeam(), new ManagedObjectIndex[0],
 				new ManagedObjectIndex[0], new boolean[0],
 				new TaskDutyAssociation<?>[0], new TaskDutyAssociation<?>[0]);
 		metaData.loadRemainingState((WorkMetaData<W>) workMetaData,

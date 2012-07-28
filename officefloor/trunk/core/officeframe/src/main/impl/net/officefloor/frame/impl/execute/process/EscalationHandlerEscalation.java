@@ -261,10 +261,11 @@ public class EscalationHandlerEscalation implements EscalationFlow {
 		public EscalationTaskMetaData(
 				TaskFactory<EscalationHandlerTask, EscalationKey, None> taskFactory,
 				Team team, boolean[] requiredGovernance) {
-			super("Escalation Handler Task", taskFactory, null,
-					Throwable.class, team, REQUIRED_MANAGED_OBJECTS,
-					MANGED_OBJECT_DEPENDENCIES, requiredGovernance,
-					TASK_DUTY_ASSOCIATIONS, TASK_DUTY_ASSOCIATIONS);
+			super("Escalation Handler Task", "Escalation Handler Task",
+					taskFactory, null, Throwable.class, team,
+					REQUIRED_MANAGED_OBJECTS, MANGED_OBJECT_DEPENDENCIES,
+					requiredGovernance, TASK_DUTY_ASSOCIATIONS,
+					TASK_DUTY_ASSOCIATIONS);
 			this.loadRemainingState(WORK_META_DATA, FLOW_META_DATA, null,
 					FURTHER_ESCALATION_PROCEDURE);
 		}

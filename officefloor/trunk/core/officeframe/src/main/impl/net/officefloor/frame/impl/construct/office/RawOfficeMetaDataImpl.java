@@ -27,6 +27,7 @@ import net.officefloor.frame.api.build.OfficeFloorIssues;
 import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.manage.OfficeFloor;
+import net.officefloor.frame.api.profile.Profiler;
 import net.officefloor.frame.impl.construct.asset.AssetManagerFactoryImpl;
 import net.officefloor.frame.impl.construct.util.ConstructUtil;
 import net.officefloor.frame.impl.execute.asset.OfficeManagerImpl;
@@ -586,11 +587,14 @@ public class RawOfficeMetaDataImpl implements RawOfficeMetaDataFactory,
 		ProcessContextListener[] processContextListeners = rawOfficeFloorMetaData
 				.getProcessContextListeners();
 
+		// Obtain the profiler
+		Profiler profiler = configuration.getProfiler();
+
 		// Create the office meta-data
 		rawOfficeMetaData.officeMetaData = new OfficeMetaDataImpl(officeName,
 				officeManager, workMetaDatas.toArray(new WorkMetaData[0]),
 				processMetaData, processContextListeners, startupTasks,
-				officeEscalationProcedure, officeFloorEscalation);
+				officeEscalationProcedure, officeFloorEscalation, profiler);
 
 		// Create the meta-data locator
 		OfficeMetaDataLocator metaDataLocator = new OfficeMetaDataLocatorImpl(

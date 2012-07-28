@@ -242,6 +242,7 @@ public abstract class AbstractJobContainerTest extends OfficeFrameTestCase {
 				this.processState);
 		this.recordReturn(this.threadState, this.threadState.getThreadLock(),
 				"Thread lock");
+		this.threadState.profile(this.jobMetaData);
 		this.recordReturn(this.threadState, this.threadState.getFailure(),
 				threadFailure);
 		if (threadFailure != null) {

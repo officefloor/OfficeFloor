@@ -141,6 +141,12 @@ public class GovernanceMetaDataImpl<I, F extends Enum<F>> implements
 	 */
 
 	@Override
+	public String getJobName() {
+		// TODO indicate type of governance action being undertaken
+		return Governance.class.getSimpleName() + "-" + this.governanceName;
+	}
+
+	@Override
 	public String getGovernanceName() {
 		return this.governanceName;
 	}

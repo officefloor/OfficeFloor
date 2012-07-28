@@ -35,7 +35,6 @@ import net.officefloor.plugin.socket.server.http.HttpResponse;
 import net.officefloor.plugin.socket.server.http.parse.HttpRequestParseException;
 import net.officefloor.plugin.socket.server.http.parse.impl.HttpHeaderImpl;
 import net.officefloor.plugin.socket.server.http.protocol.HttpStatus;
-import net.officefloor.plugin.socket.server.profile.Profiler;
 import net.officefloor.plugin.stream.BufferPopulator;
 import net.officefloor.plugin.stream.BufferSquirt;
 import net.officefloor.plugin.stream.BufferSquirtFactory;
@@ -266,9 +265,6 @@ public class HttpResponseImpl implements HttpResponse {
 	 */
 	private void write() throws IOException {
 		
-		// Profile
-		Profiler.mark("Writing response");
-
 		// Obtain the output buffer stream
 		OutputBufferStream output = this.connection.getOutputBufferStream();
 
@@ -315,9 +311,6 @@ public class HttpResponseImpl implements HttpResponse {
 		}
 		bodyInputBufferStream.read((int) contentLength, output);
 		
-		// Profile
-		Profiler.report("Response written");
-
 		// Close the body (can not add further content)
 		bodyInputBufferStream.close();
 

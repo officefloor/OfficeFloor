@@ -36,6 +36,7 @@ import net.officefloor.frame.internal.structure.WorkMetaData;
 import net.officefloor.frame.spi.administration.Duty;
 import net.officefloor.frame.spi.governance.Governance;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
+import net.officefloor.frame.spi.team.Job;
 import net.officefloor.frame.spi.team.Team;
 
 /**
@@ -47,7 +48,12 @@ public class TaskMetaDataImpl<W extends Work, D extends Enum<D>, F extends Enum<
 		implements TaskMetaData<W, D, F> {
 
 	/**
-	 * Name of the {@link Task}.
+	 * Name of this {@link Job}.
+	 */
+	private final String jobName;
+
+	/**
+	 * Name of the {@link Task} within the {@link Work}.
 	 */
 	private final String taskName;
 
@@ -137,8 +143,10 @@ public class TaskMetaDataImpl<W extends Work, D extends Enum<D>, F extends Enum<
 	/**
 	 * Initiate with details of the meta-data for the {@link Task}.
 	 * 
+	 * @param jobName
+	 *            Name of the {@link Job}.
 	 * @param taskName
-	 *            Name of the {@link Task}.
+	 *            Name of the {@link Task} within the {@link Work}.
 	 * @param taskFactory
 	 *            {@link TaskFactory} to create the {@link Task} of the
 	 *            {@link TaskMetaData}.
@@ -164,13 +172,15 @@ public class TaskMetaDataImpl<W extends Work, D extends Enum<D>, F extends Enum<
 	 *            {@link TaskDutyAssociation} specifying the {@link Duty}
 	 *            instances to be completed after executing the {@link Task}.
 	 */
-	public TaskMetaDataImpl(String taskName, TaskFactory<W, D, F> taskFactory,
-			Object differentiator, Class<?> parameterType, Team team,
+	public TaskMetaDataImpl(String jobName, String taskName,
+			TaskFactory<W, D, F> taskFactory, Object differentiator,
+			Class<?> parameterType, Team team,
 			ManagedObjectIndex[] requiredManagedObjects,
 			ManagedObjectIndex[] taskToWorkMoTranslations,
 			boolean[] requiredGovernance,
 			TaskDutyAssociation<?>[] preTaskDuties,
 			TaskDutyAssociation<?>[] postTaskDuties) {
+		this.jobName = jobName;
 		this.taskName = taskName;
 		this.taskFactory = taskFactory;
 		this.differentiator = differentiator;
@@ -211,6 +221,11 @@ public class TaskMetaDataImpl<W extends Work, D extends Enum<D>, F extends Enum<
 	/*
 	 * ================= TaskMetaData ===================================
 	 */
+
+	@Override
+	public String getJobName() {
+		return this.jobName;
+	}
 
 	@Override
 	public String getTaskName() {
