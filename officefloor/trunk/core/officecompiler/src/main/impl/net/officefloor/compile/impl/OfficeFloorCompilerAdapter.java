@@ -48,6 +48,7 @@ import net.officefloor.frame.api.OfficeFrame;
 import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.api.manage.OfficeFloor;
+import net.officefloor.frame.api.profile.Profiler;
 import net.officefloor.frame.spi.administration.source.AdministratorSource;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.spi.source.ResourceSource;
@@ -296,6 +297,12 @@ public class OfficeFloorCompilerAdapter extends OfficeFloorCompiler {
 			Class<S> teamSourceClass) {
 		this.invokeMethod("addTeamSourceAlias", new Object[] { alias,
 				teamSourceClass }, String.class, Class.class);
+	}
+
+	@Override
+	public void addProfiler(String officeName, Profiler profiler) {
+		this.invokeMethod("addProfiler", new Object[] { officeName, profiler },
+				String.class, Profiler.class);
 	}
 
 	@Override

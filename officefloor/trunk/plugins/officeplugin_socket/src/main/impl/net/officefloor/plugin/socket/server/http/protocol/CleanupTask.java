@@ -30,7 +30,6 @@ import net.officefloor.frame.util.AbstractSingleTask;
 import net.officefloor.plugin.socket.server.http.HttpRequest;
 import net.officefloor.plugin.socket.server.http.HttpResponse;
 import net.officefloor.plugin.socket.server.http.conversation.HttpManagedObject;
-import net.officefloor.plugin.socket.server.profile.Profiler;
 
 /**
  * Cleans up the {@link HttpManagedObject} (particular {@link HttpRequest} /
@@ -60,9 +59,6 @@ public class CleanupTask extends AbstractSingleTask<Work, None, None> {
 						HttpManagedObject.class).getManagedObject();
 
 		try {
-			
-			// Profile
-			Profiler.mark("Clean up");
 			
 			// Clean up the HTTP managed object
 			managedObject.cleanup();

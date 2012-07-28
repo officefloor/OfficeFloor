@@ -26,6 +26,7 @@ import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.manage.OfficeFloor;
+import net.officefloor.frame.api.profile.Profiler;
 import net.officefloor.frame.internal.structure.Asset;
 import net.officefloor.frame.internal.structure.OfficeManager;
 import net.officefloor.frame.internal.structure.ProcessState;
@@ -195,5 +196,12 @@ public interface OfficeConfiguration {
 	 * @return List of start up {@link TaskNodeReference} references.
 	 */
 	TaskNodeReference[] getStartupTasks();
+
+	/**
+	 * Obtains the {@link Profiler} for the {@link Office}.
+	 * 
+	 * @return {@link Profiler} for the {@link Office}.
+	 */
+	Profiler getProfiler();
 
 }

@@ -38,14 +38,17 @@ import net.officefloor.frame.internal.structure.GovernanceActivity;
 import net.officefloor.frame.internal.structure.GovernanceContainer;
 import net.officefloor.frame.internal.structure.GovernanceDeactivationStrategy;
 import net.officefloor.frame.internal.structure.GovernanceMetaData;
+import net.officefloor.frame.internal.structure.JobMetaData;
 import net.officefloor.frame.internal.structure.JobNode;
 import net.officefloor.frame.internal.structure.JobNodeActivateSet;
 import net.officefloor.frame.internal.structure.JobSequence;
 import net.officefloor.frame.internal.structure.ManagedObjectContainer;
 import net.officefloor.frame.internal.structure.ManagedObjectMetaData;
+import net.officefloor.frame.internal.structure.ProcessProfiler;
 import net.officefloor.frame.internal.structure.ProcessState;
 import net.officefloor.frame.internal.structure.TaskMetaData;
 import net.officefloor.frame.internal.structure.ThreadMetaData;
+import net.officefloor.frame.internal.structure.ThreadProfiler;
 import net.officefloor.frame.internal.structure.ThreadState;
 import net.officefloor.frame.internal.structure.WorkMetaData;
 import net.officefloor.frame.spi.governance.Governance;
@@ -55,6 +58,7 @@ import net.officefloor.frame.test.match.TypeMatcher;
 import net.officefloor.frame.util.MetaDataTestInstanceFactory;
 
 import org.easymock.AbstractMatcher;
+import org.easymock.internal.AlwaysMatcher;
 
 /**
  * Tests the {@link ThreadState}.
@@ -80,6 +84,9 @@ public class ThreadStateTest extends OfficeFrameTestCase {
 				.createMock(AdministratorMetaData.class);
 		final AdministratorContainer<?, ?> adminContainer = this
 				.createMock(AdministratorContainer.class);
+		final ThreadProfiler threadProfiler = this
+				.createMock(ThreadProfiler.class);
+		final JobMetaData jobMetaData = this.createMock(JobMetaData.class);
 
 		// Record creating the ThreadState
 		this.recordReturn(this.threadMetaData,
@@ -115,6 +122,13 @@ public class ThreadStateTest extends OfficeFrameTestCase {
 		this.recordReturn(adminMetaData,
 				adminMetaData.createAdministratorContainer(), adminContainer);
 
+		// Record obtaining the Profiler
+		this.processProfiler = this.createMock(ProcessProfiler.class);
+		this.recordReturn(this.processProfiler,
+				this.processProfiler.addThread(null), threadProfiler,
+				new AlwaysMatcher());
+		threadProfiler.profileJob(jobMetaData);
+
 		// Test
 		this.replayMockObjects();
 		ThreadState thread = this.createThreadState();
@@ -130,6 +144,9 @@ public class ThreadStateTest extends OfficeFrameTestCase {
 		// Lazy load administrator container
 		assertEquals("Incorrect administrator container", adminContainer,
 				thread.getAdministratorContainer(0));
+
+		// Profile execution of job on thread
+		thread.profile(jobMetaData);
 
 		// Verify
 		this.verifyMockObjects();
@@ -164,6 +181,23 @@ public class ThreadStateTest extends OfficeFrameTestCase {
 		// Ensure can get same administrator container
 		assertEquals("Incorrect administrator container", adminContainer,
 				thread.getAdministratorContainer(0));
+	}
+
+	/**
+	 * Ensure does nothing if no {@link ProcessProfiler}.
+	 */
+	public void testNotProfile() {
+
+		final JobMetaData jobMetaData = this.createMock(JobMetaData.class);
+
+		// Record creating and completing the ThreadState
+		this.record_ThreadState_init();
+
+		// Test
+		this.replayMockObjects();
+		ThreadState thread = this.createThreadState();
+		thread.profile(jobMetaData);
+		this.verifyMockObjects();
 	}
 
 	/**
@@ -518,6 +552,11 @@ public class ThreadStateTest extends OfficeFrameTestCase {
 			.createMock(JobNodeActivateSet.class);
 
 	/**
+	 * {@link ProcessProfiler}.
+	 */
+	private ProcessProfiler processProfiler = null;
+
+	/**
 	 * Records instantiating the {@link ThreadState}.
 	 */
 	private void record_ThreadState_init() {
@@ -653,7 +692,7 @@ public class ThreadStateTest extends OfficeFrameTestCase {
 	 */
 	private ThreadStateImpl createThreadState() {
 		return new ThreadStateImpl(this.threadMetaData, this.processState,
-				this.threadManager);
+				this.threadManager, this.processProfiler);
 	}
 
 }

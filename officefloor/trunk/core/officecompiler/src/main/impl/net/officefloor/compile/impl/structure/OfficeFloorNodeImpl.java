@@ -52,7 +52,9 @@ import net.officefloor.frame.api.build.OfficeBuilder;
 import net.officefloor.frame.api.build.OfficeFloorBuilder;
 import net.officefloor.frame.api.build.OfficeFloorIssues;
 import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
+import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.manage.OfficeFloor;
+import net.officefloor.frame.api.profile.Profiler;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 
 /**
@@ -72,6 +74,11 @@ public class OfficeFloorNodeImpl extends AbstractNode implements
 	 * {@link NodeContext}.
 	 */
 	private final NodeContext context;
+
+	/**
+	 * Mapping of {@link Profiler} by their {@link Office} name.
+	 */
+	private final Map<String, Profiler> profilers;
 
 	/**
 	 * {@link ManagedObjectSourceNode} instances by their
@@ -113,10 +120,14 @@ public class OfficeFloorNodeImpl extends AbstractNode implements
 	 *            Location of the {@link OfficeFloor}.
 	 * @param context
 	 *            {@link NodeContext}.
+	 * @param profilers
+	 *            Mapping of {@link Profiler} by their {@link Office} name.
 	 */
-	public OfficeFloorNodeImpl(String officeFloorLocation, NodeContext context) {
+	public OfficeFloorNodeImpl(String officeFloorLocation, NodeContext context,
+			Map<String, Profiler> profilers) {
 		this.officeFloorLocation = officeFloorLocation;
 		this.context = context;
+		this.profilers = profilers;
 	}
 
 	/*
@@ -429,6 +440,13 @@ public class OfficeFloorNodeImpl extends AbstractNode implements
 		for (OfficeNode office : offices) {
 			// Build the office
 			OfficeBuilder officeBuilder = office.buildOffice(builder);
+
+			// Provide profiler to office
+			String officeName = office.getDeployedOfficeName();
+			Profiler profiler = this.profilers.get(officeName);
+			if (profiler != null) {
+				officeBuilder.setProfiler(profiler);
+			}
 
 			// Keep track of the office builders
 			officeBuilders.put(office, officeBuilder);

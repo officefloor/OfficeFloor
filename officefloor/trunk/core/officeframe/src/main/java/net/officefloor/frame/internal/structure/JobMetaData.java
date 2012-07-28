@@ -30,6 +30,13 @@ import net.officefloor.frame.spi.team.Team;
 public interface JobMetaData {
 
 	/**
+	 * Obtains the name of the {@link Job}.
+	 * 
+	 * @return Name of the {@link Job}.
+	 */
+	String getJobName();
+
+	/**
 	 * Creates the {@link JobNodeActivatableSet} for executing the {@link Job}.
 	 * 
 	 * @return {@link JobNodeActivatableSet}.

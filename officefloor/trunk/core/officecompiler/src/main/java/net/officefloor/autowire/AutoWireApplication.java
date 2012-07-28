@@ -29,6 +29,7 @@ import net.officefloor.compile.spi.section.source.SectionSource;
 import net.officefloor.frame.api.escalate.Escalation;
 import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.manage.OfficeFloor;
+import net.officefloor.frame.api.profile.Profiler;
 import net.officefloor.frame.spi.governance.Governance;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.spi.team.Team;
@@ -249,6 +250,14 @@ public interface AutoWireApplication {
 	 * @return {@link AutoWireTeam}.
 	 */
 	AutoWireTeam assignDefaultTeam(String teamSourceClassName);
+
+	/**
+	 * Specifies the {@link Profiler}.
+	 * 
+	 * @param profiler
+	 *            {@link Profiler}.
+	 */
+	void setProfiler(Profiler profiler);
 
 	/**
 	 * Opens the {@link AutoWireOfficeFloor}.

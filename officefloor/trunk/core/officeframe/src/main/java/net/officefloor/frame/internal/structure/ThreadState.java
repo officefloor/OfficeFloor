@@ -20,6 +20,7 @@ package net.officefloor.frame.internal.structure;
 
 import net.officefloor.frame.api.execute.FlowFuture;
 import net.officefloor.frame.spi.governance.Governance;
+import net.officefloor.frame.spi.team.Job;
 
 /**
  * <p>
@@ -183,5 +184,13 @@ public interface ThreadState extends FlowAsset, FlowFuture,
 	 *            {@link EscalationLevel}.
 	 */
 	void setEscalationLevel(EscalationLevel escalationLevel);
+
+	/**
+	 * Profiles that {@link Job} is being executed.
+	 * 
+	 * @param jobMetaData
+	 *            {@link JobMetaData} of the {@link Job} being executed.
+	 */
+	void profile(JobMetaData jobMetaData);
 
 }

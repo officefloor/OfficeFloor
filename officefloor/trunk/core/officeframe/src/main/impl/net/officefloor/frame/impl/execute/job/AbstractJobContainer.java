@@ -338,6 +338,9 @@ public abstract class AbstractJobContainer<W extends Work, N extends JobMetaData
 			// Only one job per thread at a time
 			synchronized (threadState.getThreadLock()) {
 
+				// Profile job being executed
+				threadState.profile(this.nodeMetaData);
+
 				// Ensure no longer active
 				try {
 					// Flag active and no longer queued with team

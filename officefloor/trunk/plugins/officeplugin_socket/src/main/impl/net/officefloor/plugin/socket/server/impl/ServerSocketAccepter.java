@@ -34,7 +34,6 @@ import net.officefloor.frame.api.execute.TaskContext;
 import net.officefloor.frame.util.AbstractSingleTask;
 import net.officefloor.plugin.socket.server.ConnectionHandler;
 import net.officefloor.plugin.socket.server.Server;
-import net.officefloor.plugin.socket.server.profile.Profiler;
 import net.officefloor.plugin.stream.BufferSquirtFactory;
 
 /**
@@ -230,9 +229,6 @@ public class ServerSocketAccepter<CH extends ConnectionHandler> extends
 									new NonblockingSocketChannelImpl(
 											socketChannel), this.server,
 									this.bufferSquirtFactory);
-
-							// Profile connection accepted
-							Profiler.mark("Accepted connection");
 
 							// Register the connection for management
 							this.connectionManager.registerConnection(

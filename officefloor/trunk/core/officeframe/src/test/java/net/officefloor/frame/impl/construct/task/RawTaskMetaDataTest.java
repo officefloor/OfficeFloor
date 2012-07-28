@@ -176,6 +176,8 @@ public class RawTaskMetaDataTest<W extends Work, D extends Enum<D>, F extends En
 		// Record no task factory
 		this.recordReturn(this.configuration, this.configuration.getTaskName(),
 				TASK_NAME);
+		this.recordReturn(this.rawWorkMetaData,
+				this.rawWorkMetaData.getWorkName(), DEFAULT_WORK_NAME);
 		this.recordReturn(this.configuration,
 				this.configuration.getTaskFactory(), null);
 		this.record_taskIssue("No TaskFactory provided");
@@ -196,6 +198,8 @@ public class RawTaskMetaDataTest<W extends Work, D extends Enum<D>, F extends En
 		// Record with differentiator
 		this.recordReturn(this.configuration, this.configuration.getTaskName(),
 				TASK_NAME);
+		this.recordReturn(this.rawWorkMetaData,
+				this.rawWorkMetaData.getWorkName(), DEFAULT_WORK_NAME);
 		this.recordReturn(this.configuration,
 				this.configuration.getTaskFactory(), this.taskFactory);
 		this.recordReturn(this.configuration,
@@ -252,6 +256,8 @@ public class RawTaskMetaDataTest<W extends Work, D extends Enum<D>, F extends En
 		// Record no team name
 		this.recordReturn(this.configuration, this.configuration.getTaskName(),
 				TASK_NAME);
+		this.recordReturn(this.rawWorkMetaData,
+				this.rawWorkMetaData.getWorkName(), DEFAULT_WORK_NAME);
 		this.recordReturn(this.configuration,
 				this.configuration.getTaskFactory(), this.taskFactory);
 		this.recordReturn(this.configuration,
@@ -274,6 +280,8 @@ public class RawTaskMetaDataTest<W extends Work, D extends Enum<D>, F extends En
 		// Record unknown team
 		this.recordReturn(this.configuration, this.configuration.getTaskName(),
 				TASK_NAME);
+		this.recordReturn(this.rawWorkMetaData,
+				this.rawWorkMetaData.getWorkName(), DEFAULT_WORK_NAME);
 		this.recordReturn(this.configuration,
 				this.configuration.getTaskFactory(), this.taskFactory);
 		this.recordReturn(this.configuration,
@@ -310,16 +318,19 @@ public class RawTaskMetaDataTest<W extends Work, D extends Enum<D>, F extends En
 		RawTaskMetaData<W, D, F> metaData = this.constructRawTaskMetaData(true);
 		this.verifyMockObjects();
 
-		// Verify initial details
+		// Verify initial raw details
 		assertEquals("Incorrect task name", TASK_NAME, metaData.getTaskName());
 		assertEquals("Incorrect raw work meta-data", this.rawWorkMetaData,
 				metaData.getRawWorkMetaData());
-		assertEquals("Incorect task factory", this.taskFactory, metaData
-				.getTaskMetaData().getTaskFactory());
-		assertNull("No differentiator", metaData.getTaskMetaData()
-				.getDifferentiator());
-		assertEquals("Incorrect team", this.team, metaData.getTaskMetaData()
-				.getTeam());
+
+		// Verify initial details
+		TaskMetaData<?, ?, ?> taskMetaData = metaData.getTaskMetaData();
+		assertEquals("Incorrect job name", DEFAULT_WORK_NAME + "." + TASK_NAME,
+				taskMetaData.getJobName());
+		assertEquals("Incorect task factory", this.taskFactory,
+				taskMetaData.getTaskFactory());
+		assertNull("No differentiator", taskMetaData.getDifferentiator());
+		assertEquals("Incorrect team", this.team, taskMetaData.getTeam());
 	}
 
 	/**
@@ -1958,6 +1969,8 @@ public class RawTaskMetaDataTest<W extends Work, D extends Enum<D>, F extends En
 	private void record_taskNameFactoryTeam() {
 		this.recordReturn(this.configuration, this.configuration.getTaskName(),
 				TASK_NAME);
+		this.recordReturn(this.rawWorkMetaData,
+				this.rawWorkMetaData.getWorkName(), DEFAULT_WORK_NAME);
 		this.recordReturn(this.configuration,
 				this.configuration.getTaskFactory(), this.taskFactory);
 		this.recordReturn(this.configuration,

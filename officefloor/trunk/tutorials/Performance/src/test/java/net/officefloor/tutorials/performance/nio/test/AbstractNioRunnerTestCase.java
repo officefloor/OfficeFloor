@@ -58,21 +58,21 @@ public abstract class AbstractNioRunnerTestCase extends TestCase {
 	 * Tests performance with the same load between CPU and Database.
 	 */
 	public void testPerformance_SameLoad() throws Throwable {
-		this.doPerformanceTest(1, 1);
+		this.doPerformanceTest(100, 100);
 	}
 
 	/**
 	 * Tests performance with a magnitude more CPU load.
 	 */
 	public void testPerformance_MagnitudeMoreCpu() throws Throwable {
-		this.doPerformanceTest(10, 1);
+		this.doPerformanceTest(1000, 100);
 	}
 
 	/**
 	 * Tests performance with a magnitude more Database load.
 	 */
 	public void testPerformance_MagnitudeMoreDatabase() throws Throwable {
-		this.doPerformanceTest(1, 10);
+		this.doPerformanceTest(100, 1000);
 	}
 
 	/**
@@ -121,9 +121,9 @@ public abstract class AbstractNioRunnerTestCase extends TestCase {
 		Runner runner = new Runner(host, servicer.getPort(), 0.1, 0.5, 0.9,
 				0.95, 0.99);
 		Load cpuLoad = runner.addLoad("cpu", true, new Request("/test.php?v=N",
-				"n", 10));
+				"n", 3));
 		Load dbLoad = runner.addLoad("db", true, new Request("/test.php?v=D",
-				"d", 10));
+				"d", 3));
 
 		try {
 

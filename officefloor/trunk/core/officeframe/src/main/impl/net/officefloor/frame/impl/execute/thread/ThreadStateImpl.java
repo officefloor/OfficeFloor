@@ -38,15 +38,18 @@ import net.officefloor.frame.internal.structure.GovernanceActivity;
 import net.officefloor.frame.internal.structure.GovernanceContainer;
 import net.officefloor.frame.internal.structure.GovernanceDeactivationStrategy;
 import net.officefloor.frame.internal.structure.GovernanceMetaData;
+import net.officefloor.frame.internal.structure.JobMetaData;
 import net.officefloor.frame.internal.structure.JobNode;
 import net.officefloor.frame.internal.structure.JobNodeActivateSet;
 import net.officefloor.frame.internal.structure.JobSequence;
 import net.officefloor.frame.internal.structure.LinkedListSet;
 import net.officefloor.frame.internal.structure.ManagedObjectContainer;
 import net.officefloor.frame.internal.structure.ManagedObjectMetaData;
+import net.officefloor.frame.internal.structure.ProcessProfiler;
 import net.officefloor.frame.internal.structure.ProcessState;
 import net.officefloor.frame.internal.structure.TaskMetaData;
 import net.officefloor.frame.internal.structure.ThreadMetaData;
+import net.officefloor.frame.internal.structure.ThreadProfiler;
 import net.officefloor.frame.internal.structure.ThreadState;
 
 /**
@@ -157,6 +160,11 @@ public class ThreadStateImpl extends
 	private final AssetManager threadManager;
 
 	/**
+	 * {@link ThreadProfiler}.
+	 */
+	private final ThreadProfiler profiler;
+
+	/**
 	 * Flag indicating that looking for {@link EscalationFlow}.
 	 */
 	private boolean isEscalating = false;
@@ -194,9 +202,12 @@ public class ThreadStateImpl extends
 	 *            {@link ProcessState} for this {@link ThreadState}.
 	 * @param assetManager
 	 *            {@link AssetManager} for the {@link ThreadState}.
+	 * @param processProfiler
+	 *            {@link ProcessProfiler}. May be <code>null</code>.
 	 */
 	public ThreadStateImpl(ThreadMetaData threadMetaData,
-			ProcessState processState, AssetManager assetManager) {
+			ProcessState processState, AssetManager assetManager,
+			ProcessProfiler processProfiler) {
 		this.threadMetaData = threadMetaData;
 		this.processState = processState;
 		this.threadManager = assetManager;
@@ -215,6 +226,10 @@ public class ThreadStateImpl extends
 		AdministratorMetaData<?, ?>[] adminMetaData = this.threadMetaData
 				.getAdministratorMetaData();
 		this.administratorContainers = new AdministratorContainer[adminMetaData.length];
+
+		// Create thread profiler
+		this.profiler = (processProfiler == null ? null : processProfiler
+				.addThread(this));
 	}
 
 	/*
@@ -420,6 +435,18 @@ public class ThreadStateImpl extends
 	@Override
 	public void setEscalationLevel(EscalationLevel escalationLevel) {
 		this.escalationLevel = escalationLevel;
+	}
+
+	@Override
+	public void profile(JobMetaData jobMetaData) {
+
+		// Only profile if have profiler
+		if (this.profiler == null) {
+			return;
+		}
+
+		// Profile the job execution
+		this.profiler.profileJob(jobMetaData);
 	}
 
 	/*

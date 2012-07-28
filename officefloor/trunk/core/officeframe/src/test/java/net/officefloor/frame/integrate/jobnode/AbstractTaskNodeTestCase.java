@@ -26,25 +26,28 @@ import java.util.Map;
 import net.officefloor.frame.api.build.WorkFactory;
 import net.officefloor.frame.api.execute.FlowFuture;
 import net.officefloor.frame.api.execute.Work;
+import net.officefloor.frame.api.profile.Profiler;
 import net.officefloor.frame.impl.execute.asset.AssetManagerImpl;
 import net.officefloor.frame.impl.execute.flow.FlowMetaDataImpl;
 import net.officefloor.frame.impl.execute.job.AbstractJobContainer;
 import net.officefloor.frame.impl.execute.managedobject.ManagedObjectMetaDataImpl;
 import net.officefloor.frame.impl.execute.process.ProcessMetaDataImpl;
 import net.officefloor.frame.impl.execute.process.ProcessStateImpl;
+import net.officefloor.frame.impl.execute.profile.ProcessProfilerImpl;
 import net.officefloor.frame.impl.execute.thread.ThreadMetaDataImpl;
 import net.officefloor.frame.impl.execute.work.WorkMetaDataImpl;
 import net.officefloor.frame.internal.structure.AdministratorMetaData;
 import net.officefloor.frame.internal.structure.AssetManager;
-import net.officefloor.frame.internal.structure.GovernanceDeactivationStrategy;
-import net.officefloor.frame.internal.structure.JobSequence;
 import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
 import net.officefloor.frame.internal.structure.FlowMetaData;
+import net.officefloor.frame.internal.structure.GovernanceDeactivationStrategy;
 import net.officefloor.frame.internal.structure.GovernanceMetaData;
 import net.officefloor.frame.internal.structure.JobNode;
+import net.officefloor.frame.internal.structure.JobSequence;
 import net.officefloor.frame.internal.structure.ManagedObjectGovernanceMetaData;
 import net.officefloor.frame.internal.structure.ManagedObjectMetaData;
 import net.officefloor.frame.internal.structure.ProcessMetaData;
+import net.officefloor.frame.internal.structure.ProcessProfiler;
 import net.officefloor.frame.internal.structure.ProcessState;
 import net.officefloor.frame.internal.structure.TaskMetaData;
 import net.officefloor.frame.internal.structure.ThreadMetaData;
@@ -88,6 +91,11 @@ public abstract class AbstractTaskNodeTestCase<W extends Work> extends
 	 * {@link Work}.
 	 */
 	private ManagedObjectSource<?, ?> workMoSource;
+
+	/**
+	 * {@link Profiler}.
+	 */
+	private Profiler profiler = null;
 
 	/**
 	 * Initiate the Test.
@@ -168,6 +176,16 @@ public abstract class AbstractTaskNodeTestCase<W extends Work> extends
 	 */
 	protected ManagedObjectSource<?, ?> getWorkManagedObjectSource() {
 		return this.workMoSource;
+	}
+
+	/**
+	 * Specifies the {@link Profiler}.
+	 * 
+	 * @param profiler
+	 *            {@link Profiler}.
+	 */
+	protected void setProfiler(Profiler profiler) {
+		this.profiler = profiler;
 	}
 
 	/**
@@ -307,9 +325,13 @@ public abstract class AbstractTaskNodeTestCase<W extends Work> extends
 				new ManagedObjectMetaData[] { processMoMetaData },
 				new AdministratorMetaData[0], threadMetaData);
 
+		// Create the process profiler
+		ProcessProfiler processProfiler = (this.profiler == null ? null
+				: new ProcessProfilerImpl(this.profiler));
+
 		// Create Flow for executing
 		ProcessState processState = new ProcessStateImpl(processMetaData,
-				new ProcessContextListener[0], null, null);
+				new ProcessContextListener[0], null, null, processProfiler);
 		WorkMetaData<W> workMetaData = this.getInitialNode().getWorkMetaData();
 		FlowMetaData<?> flowMetaData = workMetaData.getInitialFlowMetaData();
 		AssetManager flowAssetManager = flowMetaData.getFlowManager();

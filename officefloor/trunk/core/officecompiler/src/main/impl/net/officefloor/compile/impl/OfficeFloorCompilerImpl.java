@@ -64,7 +64,9 @@ import net.officefloor.frame.api.OfficeFrame;
 import net.officefloor.frame.api.build.OfficeFloorBuilder;
 import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
 import net.officefloor.frame.api.execute.Work;
+import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.manage.OfficeFloor;
+import net.officefloor.frame.api.profile.Profiler;
 import net.officefloor.frame.impl.construct.source.SourceContextImpl;
 import net.officefloor.frame.spi.administration.source.AdministratorSource;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
@@ -159,6 +161,11 @@ public class OfficeFloorCompilerImpl extends OfficeFloorCompiler implements
 	 * {@link TeamSource} {@link Class} instances by their alias name.
 	 */
 	private final Map<String, Class<?>> teamSourceAliases = new HashMap<String, Class<?>>();
+
+	/**
+	 * Mapping of {@link Profiler} by their {@link Office} name.
+	 */
+	private final Map<String, Profiler> profilers = new HashMap<String, Profiler>();
 
 	/**
 	 * Flag indicating if the source aliases have been added.
@@ -306,6 +313,11 @@ public class OfficeFloorCompilerImpl extends OfficeFloorCompiler implements
 	}
 
 	@Override
+	public void addProfiler(String officeName, Profiler profiler) {
+		this.profilers.put(officeName, profiler);
+	}
+
+	@Override
 	public PropertyList createPropertyList() {
 		return new PropertyListImpl();
 	}
@@ -317,7 +329,7 @@ public class OfficeFloorCompilerImpl extends OfficeFloorCompiler implements
 
 	@Override
 	public OfficeFloorLoader getOfficeFloorLoader() {
-		return new OfficeFloorLoaderImpl(this);
+		return new OfficeFloorLoaderImpl(this, this.profilers);
 	}
 
 	@Override

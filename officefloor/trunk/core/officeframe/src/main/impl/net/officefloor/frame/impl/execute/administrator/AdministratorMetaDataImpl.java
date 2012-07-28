@@ -27,9 +27,9 @@ import net.officefloor.frame.internal.structure.AdministratorMetaData;
 import net.officefloor.frame.internal.structure.DutyMetaData;
 import net.officefloor.frame.internal.structure.EscalationProcedure;
 import net.officefloor.frame.internal.structure.ExtensionInterfaceMetaData;
-import net.officefloor.frame.internal.structure.JobSequence;
 import net.officefloor.frame.internal.structure.JobNode;
 import net.officefloor.frame.internal.structure.JobNodeActivatableSet;
+import net.officefloor.frame.internal.structure.JobSequence;
 import net.officefloor.frame.internal.structure.TaskDutyAssociation;
 import net.officefloor.frame.internal.structure.TaskMetaData;
 import net.officefloor.frame.internal.structure.WorkContainer;
@@ -111,6 +111,13 @@ public class AdministratorMetaDataImpl<I extends Object, A extends Enum<A>>
 	/*
 	 * ================= AdministratorMetaData ===============================
 	 */
+
+	@Override
+	public String getJobName() {
+		// TODO provide information of duty
+		return Administrator.class.getSimpleName() + "-"
+				+ this.administratorSource.getClass().getName();
+	}
 
 	@Override
 	public AdministratorContainer<I, A> createAdministratorContainer() {

@@ -28,8 +28,8 @@ import java.util.Map;
 import java.util.Set;
 
 import net.officefloor.frame.api.build.OfficeFloorIssues;
-import net.officefloor.frame.api.build.TaskFactory;
 import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
+import net.officefloor.frame.api.build.TaskFactory;
 import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.api.manage.OfficeFloor;
@@ -90,7 +90,7 @@ public class RawTaskMetaDataImpl<W extends Work, D extends Enum<D>, F extends En
 	}
 
 	/**
-	 * Name of the {@link Task}.
+	 * Name of the {@link Task} within the {@link Work}.
 	 */
 	private final String taskName;
 
@@ -113,7 +113,7 @@ public class RawTaskMetaDataImpl<W extends Work, D extends Enum<D>, F extends En
 	 * Initiate.
 	 * 
 	 * @param taskName
-	 *            Name of the {@link Task}.
+	 *            Name of the {@link Task} within the {@link Work}.
 	 * @param configuration
 	 *            {@link TaskConfiguration}.
 	 * @param taskMetaData
@@ -147,6 +147,9 @@ public class RawTaskMetaDataImpl<W extends Work, D extends Enum<D>, F extends En
 					"Task added without name");
 			return null; // no task name
 		}
+
+		// Create the job name
+		String jobName = rawWorkMetaData.getWorkName() + "." + taskName;
 
 		// Obtain the task factory
 		TaskFactory<w, d, f> taskFactory = configuration.getTaskFactory();
@@ -371,8 +374,8 @@ public class RawTaskMetaDataImpl<W extends Work, D extends Enum<D>, F extends En
 
 		// Create the task meta-data
 		TaskMetaDataImpl<w, d, f> taskMetaData = new TaskMetaDataImpl<w, d, f>(
-				taskName, taskFactory, differentiator, parameterType, team,
-				requiredManagedObjectIndexes, taskToWorkMoTranslations,
+				jobName, taskName, taskFactory, differentiator, parameterType,
+				team, requiredManagedObjectIndexes, taskToWorkMoTranslations,
 				requiredGovernance, preTaskDuties, postTaskDuties);
 
 		// Return the raw task meta-data

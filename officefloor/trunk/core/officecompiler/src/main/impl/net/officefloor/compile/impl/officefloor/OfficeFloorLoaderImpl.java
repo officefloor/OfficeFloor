@@ -18,6 +18,8 @@
 
 package net.officefloor.compile.impl.officefloor;
 
+import java.util.Map;
+
 import net.officefloor.compile.impl.properties.PropertyListImpl;
 import net.officefloor.compile.impl.structure.OfficeFloorNodeImpl;
 import net.officefloor.compile.impl.util.CompileUtil;
@@ -32,7 +34,9 @@ import net.officefloor.compile.spi.officefloor.source.OfficeFloorSourceContext;
 import net.officefloor.compile.spi.officefloor.source.OfficeFloorSourceProperty;
 import net.officefloor.compile.spi.officefloor.source.OfficeFloorSourceSpecification;
 import net.officefloor.compile.spi.officefloor.source.RequiredProperties;
+import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.manage.OfficeFloor;
+import net.officefloor.frame.api.profile.Profiler;
 import net.officefloor.frame.spi.source.UnknownClassError;
 import net.officefloor.frame.spi.source.UnknownPropertyError;
 import net.officefloor.frame.spi.source.UnknownResourceError;
@@ -50,13 +54,22 @@ public class OfficeFloorLoaderImpl implements OfficeFloorLoader {
 	private final NodeContext nodeContext;
 
 	/**
+	 * Mapping of {@link Profiler} by their {@link Office} name.
+	 */
+	private final Map<String, Profiler> profilers;
+
+	/**
 	 * Initiate.
 	 * 
 	 * @param nodeContext
 	 *            {@link NodeContext}.
+	 * @param profilers
+	 *            Mapping of {@link Profiler} by their {@link Office} name.
 	 */
-	public OfficeFloorLoaderImpl(NodeContext nodeContext) {
+	public OfficeFloorLoaderImpl(NodeContext nodeContext,
+			Map<String, Profiler> profilers) {
 		this.nodeContext = nodeContext;
+		this.profilers = profilers;
 	}
 
 	/*
@@ -318,7 +331,7 @@ public class OfficeFloorLoaderImpl implements OfficeFloorLoader {
 
 		// Create the OfficeFloor deployer
 		OfficeFloorNode deployer = new OfficeFloorNodeImpl(officeFloorLocation,
-				this.nodeContext);
+				this.nodeContext, this.profilers);
 
 		try {
 			// Source the OfficeFloor

@@ -45,6 +45,7 @@ import net.officefloor.frame.internal.structure.ManagedObjectMetaData;
 import net.officefloor.frame.internal.structure.OfficeMetaData;
 import net.officefloor.frame.internal.structure.ProcessCompletionListener;
 import net.officefloor.frame.internal.structure.ProcessMetaData;
+import net.officefloor.frame.internal.structure.ProcessProfiler;
 import net.officefloor.frame.internal.structure.ProcessState;
 import net.officefloor.frame.internal.structure.TaskMetaData;
 import net.officefloor.frame.internal.structure.ThreadState;
@@ -135,6 +136,11 @@ public class ProcessStateImpl implements ProcessState {
 	private final EscalationFlow officeFloorEscalation;
 
 	/**
+	 * {@link ProcessProfiler}.
+	 */
+	private final ProcessProfiler processProfiler;
+
+	/**
 	 * Listing of {@link ProcessCompletionListener} instances.
 	 */
 	private final List<ProcessCompletionListener> completionListeners = new java.util.LinkedList<ProcessCompletionListener>();
@@ -158,12 +164,17 @@ public class ProcessStateImpl implements ProcessState {
 	 *            {@link OfficeMetaData}.
 	 * @param officeFloorEscalation
 	 *            {@link OfficeFloor} {@link EscalationFlow}.
+	 * @param processProfiler
+	 *            {@link ProcessProfiler}.
 	 */
 	public ProcessStateImpl(ProcessMetaData processMetaData,
 			ProcessContextListener[] processContextListeners,
-			OfficeMetaData officeMetaData, EscalationFlow officeFloorEscalation) {
+			OfficeMetaData officeMetaData,
+			EscalationFlow officeFloorEscalation,
+			ProcessProfiler processProfiler) {
 		this(processMetaData, processContextListeners, officeMetaData,
-				officeFloorEscalation, null, null, -1, null, null);
+				officeFloorEscalation, processProfiler, null, null, -1, null,
+				null);
 	}
 
 	/**
@@ -177,6 +188,8 @@ public class ProcessStateImpl implements ProcessState {
 	 *            {@link OfficeMetaData}.
 	 * @param officeFloorEscalation
 	 *            {@link OfficeFloor} {@link EscalationFlow}.
+	 * @param processProfiler
+	 *            {@link ProcessProfiler}.
 	 * @param inputManagedObject
 	 *            {@link ManagedObject} that invoked this {@link ProcessState}.
 	 *            May be <code>null</code>.
@@ -197,7 +210,7 @@ public class ProcessStateImpl implements ProcessState {
 			ProcessContextListener[] processContextListeners,
 			OfficeMetaData officeMetaData,
 			EscalationFlow officeFloorEscalation,
-			ManagedObject inputManagedObject,
+			ProcessProfiler processProfiler, ManagedObject inputManagedObject,
 			ManagedObjectMetaData<?> inputManagedObjectMetaData,
 			int inputManagedObjectIndex,
 			EscalationHandler inputManagedObjectEscalationHandler,
@@ -206,6 +219,7 @@ public class ProcessStateImpl implements ProcessState {
 		this.processContextListeners = processContextListeners;
 		this.officeMetaData = officeMetaData;
 		this.officeFloorEscalation = officeFloorEscalation;
+		this.processProfiler = processProfiler;
 
 		// Create array to reference the managed objects
 		ManagedObjectMetaData<?>[] managedObjectMetaData = this.processMetaData
@@ -287,7 +301,8 @@ public class ProcessStateImpl implements ProcessState {
 
 		// Create the thread
 		ThreadState threadState = new ThreadStateImpl(
-				this.processMetaData.getThreadMetaData(), this, assetManager);
+				this.processMetaData.getThreadMetaData(), this, assetManager,
+				this.processProfiler);
 
 		// Register as active thread
 		synchronized (this.getProcessLock()) {
@@ -325,6 +340,11 @@ public class ProcessStateImpl implements ProcessState {
 				// Notify process context complete
 				for (ProcessContextListener listener : this.processContextListeners) {
 					listener.processCompleted(this.processIdentifier);
+				}
+				
+				// Flag to profile that process complete
+				if (this.processProfiler != null) {
+					this.processProfiler.processCompleted();
 				}
 
 				// Flag the process now complete

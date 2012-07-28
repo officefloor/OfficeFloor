@@ -19,6 +19,8 @@
 package net.officefloor.compile.impl.structure;
 
 import java.sql.Connection;
+import java.util.HashMap;
+import java.util.Map;
 
 import net.officefloor.autowire.AutoWire;
 import net.officefloor.autowire.impl.SingletonManagedObjectSource;
@@ -41,7 +43,9 @@ import net.officefloor.compile.spi.officefloor.source.OfficeFloorSource;
 import net.officefloor.compile.spi.section.ManagedObjectDependency;
 import net.officefloor.compile.spi.section.ManagedObjectFlow;
 import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
+import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.manage.OfficeFloor;
+import net.officefloor.frame.api.profile.Profiler;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.model.impl.office.OfficeModelOfficeSource;
 
@@ -58,10 +62,15 @@ public class OfficeFloorNodeTest extends AbstractStructureTestCase {
 	private static final String OFFICE_FLOOR_LOCATION = "OFFICE_FLOOR";
 
 	/**
+	 * Mapping of {@link Profiler} by {@link Office} name.
+	 */
+	private final Map<String, Profiler> profilers = new HashMap<String, Profiler>();
+
+	/**
 	 * {@link OfficeFloorNode} implementation.
 	 */
 	private final OfficeFloorNode node = new OfficeFloorNodeImpl(
-			OFFICE_FLOOR_LOCATION, this.nodeContext);
+			OFFICE_FLOOR_LOCATION, this.nodeContext, this.profilers);
 
 	/**
 	 * Ensure allow {@link OfficeFloorSource} to report issues via the
