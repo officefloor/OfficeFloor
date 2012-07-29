@@ -138,10 +138,10 @@ public class IndividualLoadTestCase extends TestCase {
 			dbLoad.addConnections(dbConnectionCount);
 
 			// Warm up
-			runner.runInterval("WARM UP", timeIntervalSeconds);
+			runner.runInterval("WARM UP", timeIntervalSeconds, null);
 
 			// Undertake run
-			runner.runInterval("RUN", timeIntervalSeconds);
+			runner.runInterval("RUN", timeIntervalSeconds, null);
 
 		} finally {
 			try {

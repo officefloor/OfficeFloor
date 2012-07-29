@@ -41,6 +41,11 @@ public class ProcessProfilerImpl implements ProcessProfiler, ProfiledProcess {
 	private final Profiler profiler;
 
 	/**
+	 * Start time stamp.
+	 */
+	private final long startTimestamp;
+
+	/**
 	 * <p>
 	 * {@link ProfiledThread} instances for this {@link ProcessProfiler}.
 	 * <p>
@@ -54,9 +59,12 @@ public class ProcessProfilerImpl implements ProcessProfiler, ProfiledProcess {
 	 * 
 	 * @param profiler
 	 *            {@link Profiler}.
+	 * @param startTimestamp
+	 *            Start time stamp.
 	 */
-	public ProcessProfilerImpl(Profiler profiler) {
+	public ProcessProfilerImpl(Profiler profiler, long startTimestamp) {
 		this.profiler = profiler;
+		this.startTimestamp = startTimestamp;
 	}
 
 	/*
@@ -65,7 +73,9 @@ public class ProcessProfilerImpl implements ProcessProfiler, ProfiledProcess {
 
 	@Override
 	public ThreadProfiler addThread(ThreadState thread) {
-		ThreadProfilerImpl profiler = new ThreadProfilerImpl();
+		long threadStartTimestamp = System.nanoTime();
+		ThreadProfilerImpl profiler = new ThreadProfilerImpl(
+				threadStartTimestamp);
 		this.threads.add(profiler);
 		return profiler;
 	}
@@ -78,6 +88,11 @@ public class ProcessProfilerImpl implements ProcessProfiler, ProfiledProcess {
 	/*
 	 * ====================== ProfiledProcess ===========================
 	 */
+
+	@Override
+	public long getStartTimestamp() {
+		return this.startTimestamp;
+	}
 
 	@Override
 	public List<ProfiledThread> getProfiledThreads() {

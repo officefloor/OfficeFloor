@@ -15,31 +15,23 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.frame.api.profile;
-
-import java.util.List;
-
-import net.officefloor.frame.internal.structure.ProcessState;
+package net.officefloor.tutorials.performance.nio;
 
 /**
- * Profiled {@link ProcessState}.
+ * Allow listening to {@link Runner}.
  * 
  * @author Daniel Sagenschneider
  */
-public interface ProfiledProcess {
+public interface RunListener {
 
 	/**
-	 * Obtains the start time stamp.
-	 * 
-	 * @return Start time stamp in nanoseconds.
+	 * Notifies that {@link Request} sent.
 	 */
-	long getStartTimestamp();
+	void requestSent();
 
 	/**
-	 * Obtains the {@link ProfiledThread} instances.
-	 * 
-	 * @return {@link ProfiledThread} instances.
+	 * Notifies that response received.
 	 */
-	List<ProfiledThread> getProfiledThreads();
+	void responseReceived();
 
 }

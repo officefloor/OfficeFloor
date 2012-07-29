@@ -135,7 +135,7 @@ public abstract class AbstractNioRunnerTestCase extends TestCase {
 			Class<?> servicerType = servicer.getClass();
 			if (!(warmedServicers.contains(servicerType))) {
 				// Warm up for 5 times the interval
-				runner.runInterval("STARTUP", (5 * timeIntervalSeconds));
+				runner.runInterval("STARTUP", (5 * timeIntervalSeconds), null);
 
 				// Now warm
 				warmedServicers.add(servicerType);
@@ -155,13 +155,13 @@ public abstract class AbstractNioRunnerTestCase extends TestCase {
 				System.out.println();
 				runner.runInterval("WARM NEW THREADS ("
 						+ currentMagnitudeConnectionCount
-						+ " connection magnitude)", timeIntervalSeconds);
+						+ " connection magnitude)", timeIntervalSeconds, null);
 
 				// Undertake multiple runs to average results
 				LoadSummary[][] runSummaries = new LoadSummary[runsPerIncrement][];
 				for (int i = 0; i < runsPerIncrement; i++) {
 					runSummaries[i] = runner.runInterval("RUN " + (i + 1),
-							timeIntervalSeconds);
+							timeIntervalSeconds, null);
 				}
 				System.out.println("RUN SUMMARY: cpu "
 						+ cpuLoad.getConnectionCount() + " connections, db "

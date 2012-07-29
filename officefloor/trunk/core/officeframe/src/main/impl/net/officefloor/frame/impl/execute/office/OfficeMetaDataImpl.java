@@ -269,7 +269,7 @@ public class OfficeMetaDataImpl implements OfficeMetaData {
 
 		// Create the process profiler (if profiling)
 		ProcessProfiler processProfiler = (this.profiler == null ? null
-				: new ProcessProfilerImpl(this.profiler));
+				: new ProcessProfilerImpl(this.profiler, System.nanoTime()));
 
 		// Create the Process State (based on whether have managed object)
 		ProcessState processState;

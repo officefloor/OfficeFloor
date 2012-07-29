@@ -101,7 +101,7 @@ public class Load {
 				String message = "Establshing up to " + i + " connections for "
 						+ this.description + " (to avoid SYNC attack)";
 				System.out.println(message);
-				this.runner.runInterval(message, -1, false, null, true);
+				this.runner.runInterval(message, -1, null, false, null, true);
 			}
 		}
 
@@ -110,7 +110,7 @@ public class Load {
 				+ " connections for " + this.description
 				+ " (to avoid SYNC attack)";
 		System.out.println(message);
-		this.runner.runInterval(message, -1, false, null, true);
+		this.runner.runInterval(message, -1, null, false, null, true);
 	}
 
 	/**

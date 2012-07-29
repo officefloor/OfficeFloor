@@ -327,7 +327,7 @@ public abstract class AbstractTaskNodeTestCase<W extends Work> extends
 
 		// Create the process profiler
 		ProcessProfiler processProfiler = (this.profiler == null ? null
-				: new ProcessProfilerImpl(this.profiler));
+				: new ProcessProfilerImpl(this.profiler, System.nanoTime()));
 
 		// Create Flow for executing
 		ProcessState processState = new ProcessStateImpl(processMetaData,

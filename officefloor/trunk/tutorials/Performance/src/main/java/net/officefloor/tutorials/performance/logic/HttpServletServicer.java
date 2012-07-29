@@ -34,9 +34,23 @@ import net.officefloor.tutorials.performance.pool.PooledDataSource.Connection;
  */
 public class HttpServletServicer extends HttpServlet {
 
+	/**
+	 * Allow hook for profiling.
+	 */
+	public static volatile Runnable runnable = null;
+
+	/*
+	 * ===================== HttpServlet ==============================
+	 */
+
 	@Override
 	protected void doGet(HttpServletRequest req, HttpServletResponse resp)
 			throws ServletException, IOException {
+		
+		// Indicate servicing
+		if (runnable != null) {
+			runnable.run();
+		}
 
 		String queryString = req.getQueryString();
 		char value = queryString.charAt(queryString.length() - 1);
