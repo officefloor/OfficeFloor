@@ -34,9 +34,24 @@ import net.officefloor.frame.spi.team.Job;
 public class ThreadProfilerImpl implements ThreadProfiler, ProfiledThread {
 
 	/**
+	 * Start time stamp.
+	 */
+	private final long startTimestamp;
+
+	/**
 	 * {@link ProfiledJob} instances.
 	 */
 	private final List<ProfiledJob> jobs = new ArrayList<ProfiledJob>(32);
+
+	/**
+	 * Initiate.
+	 * 
+	 * @param startTimestamp
+	 *            Start time stamp.
+	 */
+	public ThreadProfilerImpl(long startTimestamp) {
+		this.startTimestamp = startTimestamp;
+	}
 
 	/*
 	 * ====================== ThreadProfiler ============================
@@ -62,6 +77,11 @@ public class ThreadProfilerImpl implements ThreadProfiler, ProfiledThread {
 	/*
 	 * ======================= ProfiledThread =================================
 	 */
+
+	@Override
+	public long getStartTimestamp() {
+		return this.startTimestamp;
+	}
 
 	@Override
 	public List<ProfiledJob> getProfiledJobs() {

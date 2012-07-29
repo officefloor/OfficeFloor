@@ -29,6 +29,13 @@ import net.officefloor.frame.internal.structure.ThreadState;
 public interface ProfiledThread {
 
 	/**
+	 * Obtains the start time stamp.
+	 * 
+	 * @return Start time stamp in nanoseconds.
+	 */
+	long getStartTimestamp();
+
+	/**
 	 * Obtains the {@link ProfiledJob} instances.
 	 * 
 	 * @return {@link ProfiledJob} instances.

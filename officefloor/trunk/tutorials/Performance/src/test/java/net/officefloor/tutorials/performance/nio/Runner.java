@@ -133,14 +133,16 @@ public class Runner extends TestCase {
 	 *            Description of the interval.
 	 * @param timeIntervalSeconds
 	 *            Time interval in seconds.
+	 * @param listener
+	 *            {@link RunListener}. May be <code>null</code>.
 	 * @return {@link LoadSummary} instances for run interval.
 	 * @throws IOException
 	 *             If a request fails.
 	 */
-	public LoadSummary[] runInterval(String description, int timeIntervalSeconds)
-			throws IOException {
-		return this.runInterval(description, timeIntervalSeconds, true,
-				System.out, false);
+	public LoadSummary[] runInterval(String description,
+			int timeIntervalSeconds, RunListener listener) throws IOException {
+		return this.runInterval(description, timeIntervalSeconds, listener,
+				true, System.out, false);
 	}
 
 	/**
@@ -150,6 +152,8 @@ public class Runner extends TestCase {
 	 *            Description of the interval.
 	 * @param timeIntervalSeconds
 	 *            Time interval in seconds.
+	 * @param listener
+	 *            {@link RunListener}. May be <code>null</code>.
 	 * @param isReport
 	 *            Indicates whether to report.
 	 * @param out
@@ -161,8 +165,9 @@ public class Runner extends TestCase {
 	 *             If a request fails.
 	 */
 	synchronized LoadSummary[] runInterval(String description,
-			int timeIntervalSeconds, boolean isReport, PrintStream out,
-			boolean isJustEstablishConnections) throws IOException {
+			int timeIntervalSeconds, RunListener listener, boolean isReport,
+			PrintStream out, boolean isJustEstablishConnections)
+			throws IOException {
 
 		// Ensure do not run after stopped
 		if (this.isStopped) {
@@ -187,7 +192,7 @@ public class Runner extends TestCase {
 		long nextConnectionCheckTime = startTime + 1000;
 		do {
 		} while (this.runSelect(description, startTime,
-				timeIntervalMilliseconds, nextConnectionCheckTime,
+				timeIntervalMilliseconds, listener, nextConnectionCheckTime,
 				isJustEstablishConnections));
 
 		// Report results of interval
@@ -209,8 +214,9 @@ public class Runner extends TestCase {
 	 *             If failed.
 	 */
 	private boolean runSelect(String description, long startTime,
-			long timeIntervalMilliseconds, long nextConnectionCheckTime,
-			boolean isJustEstablishConnections) throws IOException {
+			long timeIntervalMilliseconds, RunListener listener,
+			long nextConnectionCheckTime, boolean isJustEstablishConnections)
+			throws IOException {
 
 		// Select next keys
 		this.selector.select(1000);
@@ -222,13 +228,13 @@ public class Runner extends TestCase {
 				this.isStopped = true;
 				return false;
 			}
-			
+
 			// Close all connections
 			for (SelectionKey key : this.selector.keys()) {
-				((SocketChannel)key.channel()).close();
+				((SocketChannel) key.channel()).close();
 				key.cancel();
 			}
-			
+
 			// Another selection necessary to clean up
 			return true;
 		}
@@ -290,6 +296,11 @@ public class Runner extends TestCase {
 					if (key.isWritable()) {
 						if (connection.writeRequest()) {
 							key.interestOps(SelectionKey.OP_READ);
+
+							// Indicate request sent
+							if (listener != null) {
+								listener.requestSent();
+							}
 						}
 
 						// Determine if just closed connection
@@ -302,6 +313,11 @@ public class Runner extends TestCase {
 					if (key.isReadable()) {
 						if (connection.readResponse()) {
 							key.interestOps(SelectionKey.OP_WRITE);
+
+							// Indicate response received
+							if (listener != null) {
+								listener.responseReceived();
+							}
 						}
 					}
 				}
@@ -361,7 +377,8 @@ public class Runner extends TestCase {
 			long timeIntervalMilliseconds = 1 * 1000; // 1 second
 			do {
 			} while (this.runSelect("STOPPING", startTime,
-					timeIntervalMilliseconds, timeIntervalMilliseconds, false));
+					timeIntervalMilliseconds, null, timeIntervalMilliseconds,
+					false));
 			System.out.print(".");
 			System.out.flush();
 		} while (!this.isStopped);
