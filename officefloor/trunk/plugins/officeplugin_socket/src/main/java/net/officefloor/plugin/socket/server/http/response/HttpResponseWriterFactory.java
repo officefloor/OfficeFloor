@@ -28,6 +28,8 @@ import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
  *
  * @author Daniel Sagenschneider
  */
+//TODO may just use Writer wrapper around ByteOutputStream
+@Deprecated
 public interface HttpResponseWriterFactory {
 
 	/**

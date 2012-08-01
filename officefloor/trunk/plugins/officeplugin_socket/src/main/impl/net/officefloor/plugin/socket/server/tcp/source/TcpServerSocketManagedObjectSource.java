@@ -19,8 +19,8 @@
 package net.officefloor.plugin.socket.server.tcp.source;
 
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
-import net.officefloor.plugin.socket.server.CommunicationProtocol;
 import net.officefloor.plugin.socket.server.impl.AbstractServerSocketManagedObjectSource;
+import net.officefloor.plugin.socket.server.protocol.CommunicationProtocolSource;
 import net.officefloor.plugin.socket.server.tcp.ServerTcpConnection;
 import net.officefloor.plugin.socket.server.tcp.protocol.TcpCommunicationProtocol;
 import net.officefloor.plugin.socket.server.tcp.protocol.TcpConnectionHandler;
@@ -38,7 +38,7 @@ public class TcpServerSocketManagedObjectSource extends
 	 */
 
 	@Override
-	protected CommunicationProtocol<TcpConnectionHandler> createCommunicationProtocol() {
+	protected CommunicationProtocolSource<TcpConnectionHandler> createCommunicationProtocol() {
 		return new TcpCommunicationProtocol();
 	}
 

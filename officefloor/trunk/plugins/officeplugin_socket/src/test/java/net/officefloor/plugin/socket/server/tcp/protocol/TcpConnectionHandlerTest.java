@@ -18,130 +18,133 @@
 
 package net.officefloor.plugin.socket.server.tcp.protocol;
 
-import java.io.IOException;
-
-import net.officefloor.plugin.socket.server.impl.AbstractWriteRead;
-import net.officefloor.plugin.socket.server.tcp.ServerTcpConnection;
-import net.officefloor.plugin.socket.server.tcp.protocol.TcpConnectionHandler;
+import net.officefloor.frame.test.OfficeFrameTestCase;
 
 /**
  * Tests the {@link TcpConnectionHandler}.
  * 
  * @author Daniel Sagenschneider
  */
-public class TcpConnectionHandlerTest extends AbstractWriteRead {
-
+public class TcpConnectionHandlerTest extends OfficeFrameTestCase {
+	
 	/**
-	 * {@link TcpConnectionHandler}.
+	 * TODO implement TCP ConnectionHandler tests. 
 	 */
-	@SuppressWarnings("unchecked")
-	private TcpConnectionHandler tcpConnectionHandler = new TcpConnectionHandler(
-			this.server, this.connection, 1000);
-
-	/**
-	 * {@link ServerTcpConnection} which is implemented by the
-	 * {@link TcpConnectionHandler}.
-	 */
-	private final ServerTcpConnection serverTcpConnection = this.tcpConnectionHandler;
-
-	/**
-	 * Initiate.
-	 */
-	public TcpConnectionHandlerTest() {
-		this.connectionHandler
-				.setDelegateConnectionHandler(this.tcpConnectionHandler);
+	public void test_TODO_implementTcpConnectionHandlerTests() {
+		fail("TODO implement TCP ConnectionHandler tests");
 	}
 
-	/**
-	 * Ensures can read from {@link ServerTcpConnection}.
-	 */
-	public void testReadFromConnection() throws Exception {
-		final String TEXT = "test message";
-		this.inputFromClient(TEXT);
-		this.runSocketListener(false);
-		this.validateConnectionRead(TEXT);
-	}
-
-	/**
-	 * Ensures can write to {@link ServerTcpConnection}.
-	 */
-	public void testWriteToConnection() throws Exception {
-		final String TEXT = "test message";
-		this.connectionWrite(TEXT);
-		this.runSocketListener(false); // Flag to write
-		this.runSocketListener(false); // Writes out
-		this.validateOutputToClient(TEXT);
-	}
-
-	/**
-	 * Ensures can close {@link ServerTcpConnection}.
-	 */
-	public void testCloseConnection() throws Exception {
-		this.serverTcpConnection.getOutputBufferStream().close();
-		this.runSocketListener(false);
-		assertFalse("Key should be cancelled", this.selectionKey.isValid());
-		assertTrue("Channel should be closed", this.socketChannel.isClosed());
-		assertFalse("Selector should still be open", this.selector.isClosed());
-	}
-
-	/**
-	 * Validates request response.
-	 */
-	public void testRequestResponse() throws Exception {
-		final String REQUEST = "request";
-		final String RESPONSE = "response";
-		this.inputFromClient(REQUEST);
-		this.runSocketListener(false);
-		this.validateConnectionRead(REQUEST);
-		this.connectionWrite(RESPONSE);
-		this.serverTcpConnection.getOutputBufferStream().close();
-		this.runSocketListener(false); // writes response to client
-		this.validateOutputToClient(RESPONSE);
-		assertFalse("Key should be cancelled", this.selectionKey.isValid());
-		assertTrue("Channel should be closed", this.socketChannel.isClosed());
-		assertFalse("Selector should still be open", this.selector.isClosed());
-	}
-
-	/**
-	 * Validates the read on the {@link ServerTcpConnection}.
-	 * 
-	 * @param text
-	 *            Expected text.
-	 */
-	@Override
-	protected void validateConnectionRead(String text) throws IOException {
-
-		// Obtain the buffer to read data
-		byte[] buffer = new byte[text.getBytes().length];
-
-		// Read data from the connection
-		int bytesRead = this.serverTcpConnection.getInputBufferStream().read(
-				buffer, 0, buffer.length);
-
-		// Obtain text of bytes read
-		String actualText = new String(buffer, 0, bytesRead);
-
-		// Validate
-		assertEquals("Incorrect number of bytes read [expected: " + text
-				+ ", actual: " + actualText + "]", buffer.length, bytesRead);
-		assertEquals("Incorrect bytes read", text, actualText);
-	}
-
-	/**
-	 * Writes to the {@link ServerTcpConnection}.
-	 * 
-	 * @param text
-	 *            Text to write.
-	 */
-	@Override
-	protected void connectionWrite(String text) throws IOException {
-
-		// Obtain the data
-		byte[] data = text.getBytes();
-
-		// Write the data to the connection
-		this.serverTcpConnection.getOutputBufferStream().write(data, 0,
-				data.length);
-	}
+//	/**
+//	 * {@link TcpConnectionHandler}.
+//	 */
+//	@SuppressWarnings("unchecked")
+//	private TcpConnectionHandler tcpConnectionHandler = new TcpConnectionHandler(
+//			this.server, this.connection, 1000);
+//
+//	/**
+//	 * {@link ServerTcpConnection} which is implemented by the
+//	 * {@link TcpConnectionHandler}.
+//	 */
+//	private final ServerTcpConnection serverTcpConnection = this.tcpConnectionHandler;
+//
+//	/**
+//	 * Initiate.
+//	 */
+//	public TcpConnectionHandlerTest() {
+//		this.connectionHandler
+//				.setDelegateConnectionHandler(this.tcpConnectionHandler);
+//	}
+//
+//	/**
+//	 * Ensures can read from {@link ServerTcpConnection}.
+//	 */
+//	public void testReadFromConnection() throws Exception {
+//		final String TEXT = "test message";
+//		this.inputFromClient(TEXT);
+//		this.runSocketListener(false);
+//		this.validateConnectionRead(TEXT);
+//	}
+//
+//	/**
+//	 * Ensures can write to {@link ServerTcpConnection}.
+//	 */
+//	public void testWriteToConnection() throws Exception {
+//		final String TEXT = "test message";
+//		this.connectionWrite(TEXT);
+//		this.runSocketListener(false); // Flag to write
+//		this.runSocketListener(false); // Writes out
+//		this.validateOutputToClient(TEXT);
+//	}
+//
+//	/**
+//	 * Ensures can close {@link ServerTcpConnection}.
+//	 */
+//	public void testCloseConnection() throws Exception {
+//		this.serverTcpConnection.getOutputBufferStream().close();
+//		this.runSocketListener(false);
+//		assertFalse("Key should be cancelled", this.selectionKey.isValid());
+//		assertTrue("Channel should be closed", this.socketChannel.isClosed());
+//		assertFalse("Selector should still be open", this.selector.isClosed());
+//	}
+//
+//	/**
+//	 * Validates request response.
+//	 */
+//	public void testRequestResponse() throws Exception {
+//		final String REQUEST = "request";
+//		final String RESPONSE = "response";
+//		this.inputFromClient(REQUEST);
+//		this.runSocketListener(false);
+//		this.validateConnectionRead(REQUEST);
+//		this.connectionWrite(RESPONSE);
+//		this.serverTcpConnection.getOutputBufferStream().close();
+//		this.runSocketListener(false); // writes response to client
+//		this.validateOutputToClient(RESPONSE);
+//		assertFalse("Key should be cancelled", this.selectionKey.isValid());
+//		assertTrue("Channel should be closed", this.socketChannel.isClosed());
+//		assertFalse("Selector should still be open", this.selector.isClosed());
+//	}
+//
+//	/**
+//	 * Validates the read on the {@link ServerTcpConnection}.
+//	 * 
+//	 * @param text
+//	 *            Expected text.
+//	 */
+//	@Override
+//	protected void validateConnectionRead(String text) throws IOException {
+//
+//		// Obtain the buffer to read data
+//		byte[] buffer = new byte[text.getBytes().length];
+//
+//		// Read data from the connection
+//		int bytesRead = this.serverTcpConnection.getInputBufferStream().read(
+//				buffer, 0, buffer.length);
+//
+//		// Obtain text of bytes read
+//		String actualText = new String(buffer, 0, bytesRead);
+//
+//		// Validate
+//		assertEquals("Incorrect number of bytes read [expected: " + text
+//				+ ", actual: " + actualText + "]", buffer.length, bytesRead);
+//		assertEquals("Incorrect bytes read", text, actualText);
+//	}
+//
+//	/**
+//	 * Writes to the {@link ServerTcpConnection}.
+//	 * 
+//	 * @param text
+//	 *            Text to write.
+//	 */
+//	@Override
+//	protected void connectionWrite(String text) throws IOException {
+//
+//		// Obtain the data
+//		byte[] data = text.getBytes();
+//
+//		// Write the data to the connection
+//		this.serverTcpConnection.getOutputBufferStream().write(data, 0,
+//				data.length);
+//	}
 
 }

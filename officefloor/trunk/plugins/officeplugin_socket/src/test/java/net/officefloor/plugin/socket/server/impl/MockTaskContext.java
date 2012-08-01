@@ -19,22 +19,21 @@
 package net.officefloor.plugin.socket.server.impl;
 
 import junit.framework.TestCase;
-import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.api.execute.FlowFuture;
+import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.execute.TaskContext;
+import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.api.manage.InvalidParameterTypeException;
 import net.officefloor.frame.api.manage.UnknownTaskException;
 import net.officefloor.frame.api.manage.UnknownWorkException;
-import net.officefloor.plugin.socket.server.ConnectionHandler;
 
 /**
  * Test {@link TaskContext}.
  * 
  * @author Daniel Sagenschneider
  */
-public class MockTaskContext implements
-		TaskContext<SocketListener<ConnectionHandler>, None, Indexed> {
+public class MockTaskContext implements TaskContext<Work, None, None> {
 
 	/**
 	 * By default is complete.
@@ -42,10 +41,15 @@ public class MockTaskContext implements
 	private boolean isComplete = true;
 
 	/**
-	 * Reset for next execution.
+	 * Executes the {@link Task}.
+	 * 
+	 * @throws Throwable
+	 *             If failure of the {@link Task}.
 	 */
-	public void reset() {
+	@SuppressWarnings({ "rawtypes", "unchecked" })
+	public void execute(Task task) throws Throwable {
 		this.isComplete = true;
+		task.doTask(this);
 	}
 
 	/**
@@ -67,7 +71,7 @@ public class MockTaskContext implements
 	}
 
 	@Override
-	public FlowFuture doFlow(Indexed key, Object parameter) {
+	public FlowFuture doFlow(None key, Object parameter) {
 		TestCase.fail("Should not be invoked");
 		return null;
 	}
@@ -104,7 +108,7 @@ public class MockTaskContext implements
 	}
 
 	@Override
-	public SocketListener<ConnectionHandler> getWork() {
+	public Work getWork() {
 		TestCase.fail("Should not be invoked");
 		return null;
 	}

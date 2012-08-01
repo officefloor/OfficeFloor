@@ -20,16 +20,13 @@ package net.officefloor.plugin.socket.server.http.parse;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.Arrays;
 
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.socket.server.http.HttpHeader;
 import net.officefloor.plugin.socket.server.http.parse.impl.HttpRequestParserImpl;
 import net.officefloor.plugin.socket.server.http.protocol.HttpStatus;
-import net.officefloor.plugin.stream.BufferStream;
-import net.officefloor.plugin.stream.InputBufferStream;
-import net.officefloor.plugin.stream.impl.BufferStreamImpl;
-import net.officefloor.plugin.stream.squirtfactory.HeapByteBufferSquirtFactory;
 
 /**
  * Tests the {@link HttpRequestParser}.
@@ -71,8 +68,8 @@ public class HttpRequestParserTest extends OfficeFrameTestCase {
 				this.httpRequestParser.getHttpVersion());
 		assertEquals("Incorrect initial HTTP headers", 0,
 				this.httpRequestParser.getHeaders().size());
-		assertNull("Initially should be no body",
-				this.httpRequestParser.getBody());
+		assertNull("Initially should be no entity",
+				this.httpRequestParser.getEntity());
 	}
 
 	/**
@@ -211,24 +208,25 @@ public class HttpRequestParserTest extends OfficeFrameTestCase {
 	 */
 	public void testPartialBodyThenComplete() throws Exception {
 
-		// Create the buffer stream
-		BufferStream bufferStream = this.createBufferStream(
-				"POST /path HTTP/1.1\nContent-Length: 4\n\nTE", false);
-
 		// Provide only partial body (typically if network packet is split)
-		InputBufferStream firstPacket = bufferStream.getInputBufferStream();
+		byte[] firstPacket = UsAsciiUtil
+				.convertToUsAscii("POST /path HTTP/1.1\nContent-Length: 4\n\nTE");
 		boolean isCompleteOnFirstPacket = this.httpRequestParser.parse(
 				firstPacket, this.tempBuffer);
 		assertFalse("Should not complete if partial body",
 				isCompleteOnFirstPacket);
+		assertEquals("Should have consumed all bytes", 0,
+				this.httpRequestParser.remainingBytes());
 
-		// Provide remaining of body
-		bufferStream.write(UsAsciiUtil.convertToUsAscii("ST"));
-		InputBufferStream secondPacket = bufferStream.getInputBufferStream();
+		// Provide remaining of body (with some data of next HTTP request)
+		byte[] secondPacket = UsAsciiUtil.convertToUsAscii("ST more");
 		boolean isCompleteOnSecondPacket = this.httpRequestParser.parse(
 				secondPacket, this.tempBuffer);
 		assertTrue("Should be complete with remaining of body received",
 				isCompleteOnSecondPacket);
+		assertEquals("Should have further bytes remaining",
+				UsAsciiUtil.convertToUsAscii(" more").length,
+				this.httpRequestParser.remainingBytes());
 
 		// Validate the parsing
 		this.validateHttpRequestParserState("POST", "/path", "HTTP/1.1",
@@ -669,17 +667,17 @@ public class HttpRequestParserTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Creates the {@link BufferStream} with the content.
+	 * Creates the data to parse.
 	 * 
 	 * @param httpRequest
 	 *            HTTP request content.
 	 * @param isRemoveCR
 	 *            Flag indicating to remove the CR (typically before the LF).
 	 *            This is to allow more tolerant handling of requests.
-	 * @return {@link BufferStream}.
+	 * @return Data to parse.
 	 */
-	private BufferStream createBufferStream(String httpRequest,
-			boolean isRemoveCR) throws IOException {
+	private byte[] createDataToParse(String httpRequest, boolean isRemoveCR)
+			throws IOException {
 
 		// Create buffer stream with content
 		byte[] content = UsAsciiUtil.convertToHttp(httpRequest);
@@ -695,12 +693,9 @@ public class HttpRequestParserTest extends OfficeFrameTestCase {
 			}
 			content = buffer.toByteArray();
 		}
-		BufferStream bufferStream = new BufferStreamImpl(
-				new HeapByteBufferSquirtFactory(1024));
-		bufferStream.getOutputBufferStream().write(content);
 
-		// Return the buffer stream
-		return bufferStream;
+		// Return the data
+		return content;
 	}
 
 	/**
@@ -748,23 +743,23 @@ public class HttpRequestParserTest extends OfficeFrameTestCase {
 					header.getValue());
 		}
 
-		// Validate the body
-		InputBufferStream bodyStream = this.httpRequestParser.getBody();
+		// Validate the entity
+		InputStream entityStream = this.httpRequestParser.getEntity();
 		if (expectedBody == null) {
-			// Should not have a body
-			if (bodyStream != null) {
+			// Should not have a entity
+			if (entityStream != null) {
 				// Body being parsed so ensure no content yet
 				assertEquals("Should not have a body", 0,
-						bodyStream.available());
+						entityStream.available());
 				assertEquals("Should not be end of stream", 0,
-						bodyStream.read(new byte[10]));
+						entityStream.read(new byte[10]));
 			}
 
 		} else {
-			// Obtain the body content
-			long available = this.httpRequestParser.getBody().available();
+			// Obtain the entity content
+			long available = entityStream.available();
 			byte[] body = new byte[(int) (available < 0 ? 0 : available)];
-			int bodySize = this.httpRequestParser.getBody().read(body);
+			int bodySize = entityStream.read(body);
 			body = Arrays.copyOfRange(body, 0, (bodySize < 0 ? 0 : bodySize));
 			UsAsciiUtil.assertEquals("Incorrect body",
 					(expectedBody == null ? "" : expectedBody), body);
@@ -824,13 +819,16 @@ public class HttpRequestParserTest extends OfficeFrameTestCase {
 			String... expectedHeaderNameValues) {
 		try {
 
-			// Create input buffer stream with content
-			InputBufferStream inputBufferStream = this.createBufferStream(
-					httpRequest, isRemoveCR).getInputBufferStream();
+			// Create data to parse
+			byte[] data = this.createDataToParse(httpRequest, isRemoveCR);
 
 			// Parse the content
-			boolean isComplete = this.httpRequestParser.parse(
-					inputBufferStream, this.tempBuffer);
+			boolean isComplete = this.httpRequestParser.parse(data,
+					this.tempBuffer);
+
+			// TODO provide validate on remaining content
+			fail("TODO provide validate on remaining content");
+			this.httpRequestParser.remainingBytes(); // TODO validate
 
 			// Validate the parse state
 			this.validateHttpRequestParserState(expectedMethod, expectedPath,
@@ -864,21 +862,12 @@ public class HttpRequestParserTest extends OfficeFrameTestCase {
 
 		// Create input buffer stream with content
 		byte[] content = UsAsciiUtil.convertToHttp(invalidHttpRequest);
-		BufferStream bufferStream = new BufferStreamImpl(
-				new HeapByteBufferSquirtFactory(1024));
-		try {
-			bufferStream.getOutputBufferStream().write(content);
-		} catch (IOException ex) {
-			fail("Should not fail to write content: " + ex.getMessage());
-		}
-		InputBufferStream inputBufferStream = bufferStream
-				.getInputBufferStream();
 
 		// Should not be able parse invalid method
 		try {
 
 			// Parse the content
-			this.httpRequestParser.parse(inputBufferStream, this.tempBuffer);
+			this.httpRequestParser.parse(content, this.tempBuffer);
 
 			// Should not be parsed
 			fail("Should not parse invalid HTTP request:\n"

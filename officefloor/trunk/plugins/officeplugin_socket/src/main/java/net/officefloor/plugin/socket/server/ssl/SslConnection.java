@@ -20,7 +20,7 @@ package net.officefloor.plugin.socket.server.ssl;
 
 import java.io.IOException;
 
-import net.officefloor.plugin.socket.server.Connection;
+import net.officefloor.plugin.socket.server.protocol.Connection;
 
 /**
  * Secure Socket Layer (SSL) {@link Connection}.

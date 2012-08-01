@@ -26,9 +26,6 @@ import net.officefloor.frame.spi.managedobject.source.ManagedObjectExecuteContex
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceContext;
 import net.officefloor.frame.spi.managedobject.source.impl.AbstractAsyncManagedObjectSource.MetaDataContext;
 import net.officefloor.frame.spi.managedobject.source.impl.AbstractAsyncManagedObjectSource.SpecificationContext;
-import net.officefloor.plugin.socket.server.CommunicationProtocol;
-import net.officefloor.plugin.socket.server.Connection;
-import net.officefloor.plugin.socket.server.Server;
 import net.officefloor.plugin.socket.server.http.HttpHeader;
 import net.officefloor.plugin.socket.server.http.HttpRequest;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
@@ -38,16 +35,19 @@ import net.officefloor.plugin.socket.server.http.conversation.impl.HttpConversat
 import net.officefloor.plugin.socket.server.http.conversation.impl.HttpManagedObjectImpl;
 import net.officefloor.plugin.socket.server.http.parse.HttpRequestParser;
 import net.officefloor.plugin.socket.server.http.parse.impl.HttpRequestParserImpl;
+import net.officefloor.plugin.socket.server.protocol.CommunicationProtocol;
+import net.officefloor.plugin.socket.server.protocol.CommunicationProtocolSource;
+import net.officefloor.plugin.socket.server.protocol.Connection;
 import net.officefloor.plugin.stream.BufferSquirtFactory;
 
 /**
- * HTTP {@link CommunicationProtocol}.
+ * HTTP {@link CommunicationProtocolSource}.
  * 
  * @author Daniel Sagenschneider
  */
 public class HttpCommunicationProtocol implements
-		CommunicationProtocol<HttpConnectionHandler>,
-		Server<HttpConnectionHandler> {
+		CommunicationProtocolSource<HttpConnectionHandler>,
+		CommunicationProtocol<HttpConnectionHandler> {
 
 	/**
 	 * Name of property to determine if send stack trace on failure.
@@ -154,7 +154,7 @@ public class HttpCommunicationProtocol implements
 	}
 
 	@Override
-	public Server<HttpConnectionHandler> createServer(
+	public CommunicationProtocol<HttpConnectionHandler> createServer(
 			MetaDataContext<None, Indexed> context,
 			BufferSquirtFactory bufferSquirtFactory) throws Exception {
 		ManagedObjectSourceContext<Indexed> mosContext = context

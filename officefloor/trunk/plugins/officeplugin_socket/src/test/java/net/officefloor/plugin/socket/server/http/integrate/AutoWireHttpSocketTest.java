@@ -98,8 +98,7 @@ public class AutoWireHttpSocketTest extends OfficeFrameTestCase {
 		public void handleRequest(ServerHttpConnection connection)
 				throws IOException {
 			HttpResponse response = connection.getHttpResponse();
-			Writer writer = new OutputStreamWriter(response.getBody()
-					.getOutputStream());
+			Writer writer = new OutputStreamWriter(response.getEntity());
 			writer.write("hello world");
 			writer.flush();
 		}

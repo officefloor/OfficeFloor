@@ -130,7 +130,7 @@ public class ServerGwtRpcConnectionManagedObjectSource
 
 			// Send the RPC response
 			try {
-				response.getBody().getOutputStream().write(payload.getBytes());
+				response.getEntity().write(payload.getBytes());
 				response.send();
 			} catch (IOException ex) {
 				// Should be very rare that not send GWT RPC response
@@ -214,7 +214,7 @@ public class ServerGwtRpcConnectionManagedObjectSource
 				// Obtain the payload
 				StringBuilder payload = new StringBuilder();
 				try {
-					InputStream body = request.getBody().getInputStream();
+					InputStream body = request.getEntity();
 					for (int value = body.read(); value != -1; value = body
 							.read()) {
 						payload.append((char) value);

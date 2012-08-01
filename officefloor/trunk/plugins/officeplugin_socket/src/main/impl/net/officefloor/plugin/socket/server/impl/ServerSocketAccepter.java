@@ -22,7 +22,6 @@ import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.nio.ByteBuffer;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.channels.ServerSocketChannel;
@@ -32,37 +31,38 @@ import java.util.Iterator;
 import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.api.execute.TaskContext;
 import net.officefloor.frame.util.AbstractSingleTask;
-import net.officefloor.plugin.socket.server.ConnectionHandler;
-import net.officefloor.plugin.socket.server.Server;
-import net.officefloor.plugin.stream.BufferSquirtFactory;
+import net.officefloor.plugin.socket.server.ConnectionManager;
+import net.officefloor.plugin.socket.server.EstablishedConnection;
+import net.officefloor.plugin.socket.server.protocol.CommunicationProtocol;
+import net.officefloor.plugin.socket.server.protocol.Connection;
 
 /**
- * Accepts connections.
+ * Accepts {@link Connection} instances.
  * 
  * @author Daniel Sagenschneider
  */
-public class ServerSocketAccepter<CH extends ConnectionHandler> extends
-		AbstractSingleTask<ServerSocketAccepter<CH>, None, None> {
+public class ServerSocketAccepter extends
+		AbstractSingleTask<ServerSocketAccepter, None, None> {
+
+	/**
+	 * {@link CommunicationProtocol} for the {@link ServerSocket}.
+	 */
+	private final CommunicationProtocol communicationProtocol;
 
 	/**
 	 * {@link ConnectionManager}.
 	 */
-	private final ConnectionManager<CH> connectionManager;
-
-	/**
-	 * {@link BufferSquirtFactory}.
-	 */
-	private final BufferSquirtFactory bufferSquirtFactory;
-
-	/**
-	 * {@link Server} for the {@link ServerSocket}.
-	 */
-	private final Server<CH> server;
+	private final ConnectionManager connectionManager;
 
 	/**
 	 * {@link InetSocketAddress} to listen for connections.
 	 */
 	private final InetSocketAddress serverSocketAddress;
+
+	/**
+	 * Back log size for the {@link ServerSocket}.
+	 */
+	private final int serverSocketBackLogSize;
 
 	/**
 	 * {@link ServerSocketChannel} to listen for connections.
@@ -80,31 +80,27 @@ public class ServerSocketAccepter<CH extends ConnectionHandler> extends
 	private volatile boolean isComplete = false;
 
 	/**
-	 * Flag indicating if unbound the {@link ServerSocketChannel}.
-	 */
-	private volatile boolean isUnbound = false;
-
-	/**
 	 * Initiate.
 	 * 
 	 * @param serverSocketAddress
 	 *            {@link InetSocketAddress} to listen for connections.
-	 * @param server
-	 *            {@link Server} for the {@link ServerSocket}.
+	 * @param communicationProtocol
+	 *            {@link CommunicationProtocol} for the {@link ServerSocket}.
 	 * @param connectionManager
 	 *            {@link ConnectionManager}.
-	 * @param bufferSquirtFactory
-	 *            {@link BufferSquirtFactory}.
+	 * @param serverSocketBackLogSize
+	 *            {@link ServerSocket} back log size.
 	 * @throws IOException
 	 *             If fails to set up the {@link ServerSocket}.
 	 */
 	public ServerSocketAccepter(InetSocketAddress serverSocketAddress,
-			Server<CH> server, ConnectionManager<CH> connectionManager,
-			BufferSquirtFactory bufferSquirtFactory) throws IOException {
-		this.server = server;
+			CommunicationProtocol communicationProtocol,
+			ConnectionManager connectionManager, int serverSocketBackLogSize)
+			throws IOException {
+		this.communicationProtocol = communicationProtocol;
 		this.connectionManager = connectionManager;
-		this.bufferSquirtFactory = bufferSquirtFactory;
 		this.serverSocketAddress = serverSocketAddress;
+		this.serverSocketBackLogSize = serverSocketBackLogSize;
 	}
 
 	/**
@@ -120,12 +116,7 @@ public class ServerSocketAccepter<CH extends ConnectionHandler> extends
 		this.channel.configureBlocking(false);
 		ServerSocket socket = this.channel.socket();
 		socket.setReuseAddress(true);
-		// TODO make the ServerSocket bind backlog configurable
-		/*
-		 * High enough to absorb a burst but keep latency reasonable for static
-		 * requests before pushing back disconnect onto client.
-		 */
-		socket.bind(this.serverSocketAddress, 25000);
+		socket.bind(this.serverSocketAddress, this.serverSocketBackLogSize);
 
 		// Register the channel with the selector
 		this.selector = Selector.open();
@@ -140,22 +131,9 @@ public class ServerSocketAccepter<CH extends ConnectionHandler> extends
 		// Flag to complete processing
 		this.isComplete = true;
 
-		// Wait until unbound server socket (or timed out waiting)
-		try {
-			long startTime = System.currentTimeMillis();
-			while ((!this.isUnbound)
-					&& ((System.currentTimeMillis() - startTime) < 20000)) {
-
-				// Process accepting connections
-				if (this.selector != null) {
-					this.selector.wakeup();
-				}
-
-				// Wait some time for accepting connections
-				Thread.sleep(100);
-			}
-		} catch (InterruptedException ex) {
-			// Assume to be unbound and carry on
+		// Process accepting connections
+		if (this.selector != null) {
+			this.selector.wakeup();
 		}
 	}
 
@@ -164,76 +142,57 @@ public class ServerSocketAccepter<CH extends ConnectionHandler> extends
 	 */
 
 	@Override
-	public Object doTask(
-			TaskContext<ServerSocketAccepter<CH>, None, None> context)
+	public Object doTask(TaskContext<ServerSocketAccepter, None, None> context)
 			throws Exception {
-
-		// Flag to loop forever (or until told to accepting connections)
-		context.setComplete(false);
-
-		// Wait some time for a connection (10 seconds)
-		int numberSelected = this.selector.select(10000);
 
 		// Synchronized as may be called by differing threads
 		synchronized (this) {
-			if (numberSelected == 0) {
 
-				// Determine if complete
-				boolean isComplete = this.isComplete;
+			// Flag whether task complete
+			boolean isComplete = this.isComplete;
+			context.setComplete(isComplete);
 
-				// Flag whether task complete (but allow for closing office)
-				context.setComplete(isComplete);
+			// Unbind socket if complete
+			if (isComplete) {
+				// Close the selector
+				this.selector.close();
 
-				// Unbind socket if complete
-				if (isComplete) {
-					try {
-						// Close the selector
-						this.selector.close();
+				// Unbind the socket
+				this.channel.socket().close();
 
-						// Unbind the socket
-						this.channel.socket().close();
-
-					} finally {
-						// Ensure flagged unbound
-						this.isUnbound = true;
-					}
-				}
-
-				// Iteration of this task finished
+				// Complete
 				return null;
+			}
 
-			} else {
-				// Obtain the selection key
-				for (Iterator<SelectionKey> iterator = this.selector
-						.selectedKeys().iterator(); iterator.hasNext();) {
-					SelectionKey key = iterator.next();
-					iterator.remove();
+			// Wait some time for a connection (10 seconds)
+			this.selector.select(10000);
 
-					// Check if accepting a connection
-					if (key.isAcceptable()) {
+			// Obtain the selection key
+			for (Iterator<SelectionKey> iterator = this.selector.selectedKeys()
+					.iterator(); iterator.hasNext();) {
+				SelectionKey key = iterator.next();
+				iterator.remove();
 
-						// Obtain the socket channel
-						SocketChannel socketChannel = this.channel.accept();
-						if (socketChannel != null) {
+				// Check if accepting a connection
+				if (key.isAcceptable()) {
 
-							// Flag socket as unblocking
-							socketChannel.configureBlocking(false);
+					// Obtain the socket channel
+					final SocketChannel socketChannel = this.channel.accept();
+					if (socketChannel != null) {
 
-							// Configure the socket
-							Socket socket = socketChannel.socket();
-							socket.setTcpNoDelay(true);
-							socket.setSoLinger(false, 0);
+						// Flag socket as unblocking
+						socketChannel.configureBlocking(false);
 
-							// Create the connection
-							ConnectionImpl<CH> connection = new ConnectionImpl<CH>(
-									new NonblockingSocketChannelImpl(
-											socketChannel), this.server,
-									this.bufferSquirtFactory);
+						// Configure the socket
+						Socket socket = socketChannel.socket();
+						socket.setTcpNoDelay(true);
 
-							// Register the connection for management
-							this.connectionManager.registerConnection(
-									connection, context);
-						}
+						// Create the established connection
+						EstablishedConnection connection = new EstablishedConnectionImpl(
+								socketChannel);
+
+						// Manage the connection
+						this.connectionManager.manageConnection(connection);
 					}
 				}
 			}
@@ -244,10 +203,9 @@ public class ServerSocketAccepter<CH extends ConnectionHandler> extends
 	}
 
 	/**
-	 * Implementation of the {@link NonblockingSocketChannel}.
+	 * {@link EstablishedConnection} implementation.
 	 */
-	private static class NonblockingSocketChannelImpl implements
-			NonblockingSocketChannel {
+	private class EstablishedConnectionImpl implements EstablishedConnection {
 
 		/**
 		 * {@link SocketChannel}.
@@ -260,47 +218,22 @@ public class ServerSocketAccepter<CH extends ConnectionHandler> extends
 		 * @param socketChannel
 		 *            {@link SocketChannel}.
 		 */
-		public NonblockingSocketChannelImpl(SocketChannel socketChannel) {
+		public EstablishedConnectionImpl(SocketChannel socketChannel) {
 			this.socketChannel = socketChannel;
 		}
 
 		/*
-		 * ======================= NonblockingSocketChannel ====================
+		 * =================== EstablishedConnection =====================
 		 */
 
 		@Override
-		public SelectionKey register(Selector selector, int ops,
-				Object attachment) throws IOException {
-			return this.socketChannel.register(selector, ops, attachment);
+		public SocketChannel getSocketChannel() {
+			return this.socketChannel;
 		}
 
 		@Override
-		public InetSocketAddress getLocalAddress() {
-			Socket socket = this.socketChannel.socket();
-			return new InetSocketAddress(socket.getLocalAddress(),
-					socket.getLocalPort());
-		}
-
-		@Override
-		public InetSocketAddress getRemoteAddress() {
-			Socket socket = this.socketChannel.socket();
-			return new InetSocketAddress(socket.getInetAddress(),
-					socket.getPort());
-		}
-
-		@Override
-		public int read(ByteBuffer buffer) throws IOException {
-			return this.socketChannel.read(buffer);
-		}
-
-		@Override
-		public int write(ByteBuffer data) throws IOException {
-			return this.socketChannel.write(data);
-		}
-
-		@Override
-		public void close() throws IOException {
-			this.socketChannel.close();
+		public CommunicationProtocol getCommunicationProtocol() {
+			return ServerSocketAccepter.this.communicationProtocol;
 		}
 	}
 

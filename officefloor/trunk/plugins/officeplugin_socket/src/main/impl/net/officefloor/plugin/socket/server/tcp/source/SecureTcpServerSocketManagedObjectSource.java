@@ -19,8 +19,8 @@
 package net.officefloor.plugin.socket.server.tcp.source;
 
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
-import net.officefloor.plugin.socket.server.CommunicationProtocol;
 import net.officefloor.plugin.socket.server.impl.AbstractServerSocketManagedObjectSource;
+import net.officefloor.plugin.socket.server.protocol.CommunicationProtocolSource;
 import net.officefloor.plugin.socket.server.ssl.protocol.SslCommunicationProtocol;
 import net.officefloor.plugin.socket.server.ssl.protocol.SslConnectionHandler;
 import net.officefloor.plugin.socket.server.tcp.ServerTcpConnection;
@@ -42,7 +42,7 @@ public class SecureTcpServerSocketManagedObjectSource
 	 */
 
 	@Override
-	protected CommunicationProtocol<SslConnectionHandler<TcpConnectionHandler>> createCommunicationProtocol() {
+	protected CommunicationProtocolSource<SslConnectionHandler<TcpConnectionHandler>> createCommunicationProtocol() {
 		return new SslCommunicationProtocol<TcpConnectionHandler>(
 				new TcpCommunicationProtocol());
 	}

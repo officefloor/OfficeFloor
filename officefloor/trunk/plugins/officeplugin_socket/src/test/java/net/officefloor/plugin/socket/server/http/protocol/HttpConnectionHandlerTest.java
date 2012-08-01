@@ -22,10 +22,6 @@ import java.util.LinkedList;
 import java.util.List;
 
 import net.officefloor.frame.test.OfficeFrameTestCase;
-import net.officefloor.plugin.socket.server.Connection;
-import net.officefloor.plugin.socket.server.IdleContext;
-import net.officefloor.plugin.socket.server.ReadContext;
-import net.officefloor.plugin.socket.server.Server;
 import net.officefloor.plugin.socket.server.WriteContext;
 import net.officefloor.plugin.socket.server.http.HttpHeader;
 import net.officefloor.plugin.socket.server.http.HttpRequest;
@@ -33,6 +29,10 @@ import net.officefloor.plugin.socket.server.http.conversation.HttpConversation;
 import net.officefloor.plugin.socket.server.http.conversation.HttpManagedObject;
 import net.officefloor.plugin.socket.server.http.parse.HttpRequestParseException;
 import net.officefloor.plugin.socket.server.http.parse.HttpRequestParser;
+import net.officefloor.plugin.socket.server.protocol.CommunicationProtocol;
+import net.officefloor.plugin.socket.server.protocol.Connection;
+import net.officefloor.plugin.socket.server.protocol.HeartBeatContext;
+import net.officefloor.plugin.socket.server.protocol.ReadContext;
 import net.officefloor.plugin.stream.InputBufferStream;
 
 /**
@@ -58,9 +58,9 @@ public class HttpConnectionHandlerTest extends OfficeFrameTestCase {
 	private WriteContext writeContext = this.createMock(WriteContext.class);
 
 	/**
-	 * Mock {@link IdleContext}.
+	 * Mock {@link HeartBeatContext}.
 	 */
-	private IdleContext idleContext = this.createMock(IdleContext.class);
+	private HeartBeatContext idleContext = this.createMock(HeartBeatContext.class);
 
 	/**
 	 * Mock {@link InputBufferStream}.
@@ -80,11 +80,11 @@ public class HttpConnectionHandlerTest extends OfficeFrameTestCase {
 	private HttpRequestParser parser = this.createMock(HttpRequestParser.class);
 
 	/**
-	 * Mock {@link Server}.
+	 * Mock {@link CommunicationProtocol}.
 	 */
 	@SuppressWarnings("unchecked")
-	private Server<HttpConnectionHandler> server = this
-			.createMock(Server.class);
+	private CommunicationProtocol<HttpConnectionHandler> server = this
+			.createMock(CommunicationProtocol.class);
 
 	/**
 	 * {@link HttpConnectionHandler} being tested.

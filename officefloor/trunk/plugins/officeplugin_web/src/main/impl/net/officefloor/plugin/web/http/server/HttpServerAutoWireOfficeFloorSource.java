@@ -87,12 +87,6 @@ public class HttpServerAutoWireOfficeFloorSource extends
 		// Use passive team by default (saves on context switching)
 		this.assignDefaultTeam(PassiveTeamSource.class.getName());
 
-		// Use cached team to handle HTTP requests
-		// Re-using socket listener worker thread to execute tasks
-		// TODO remove if better
-//		this.assignTeam(ExecutorCachedTeamSource.class.getName(), new AutoWire(
-//				HttpRequestHandlerMarker.class));
-
 		// Configure HTTP Session (allowing 10 seconds to retrieve session)
 		this.httpSession = this.addManagedObject(
 				HttpSessionManagedObjectSource.class.getName(), null,

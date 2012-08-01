@@ -35,6 +35,10 @@ import net.officefloor.plugin.stream.OutputBufferStream;
  */
 public class HttpResponseWriterFactoryTest extends OfficeFrameTestCase {
 
+	public void test_REMOVE() {
+		fail("This should be replaced by Reader wrapping ByteOutputStream");
+	}
+
 	/**
 	 * {@link HttpResponseWriterFactory} to test.
 	 */
@@ -56,6 +60,7 @@ public class HttpResponseWriterFactoryTest extends OfficeFrameTestCase {
 	 */
 	private final OutputBufferStream body = this
 			.createMock(OutputBufferStream.class);
+	
 
 	/**
 	 * Ensure can write contents.

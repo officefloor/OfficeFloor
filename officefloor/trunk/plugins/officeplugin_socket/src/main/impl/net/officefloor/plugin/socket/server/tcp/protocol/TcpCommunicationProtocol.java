@@ -26,20 +26,20 @@ import net.officefloor.frame.spi.managedobject.source.ManagedObjectExecuteContex
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceContext;
 import net.officefloor.frame.spi.managedobject.source.impl.AbstractAsyncManagedObjectSource.MetaDataContext;
 import net.officefloor.frame.spi.managedobject.source.impl.AbstractAsyncManagedObjectSource.SpecificationContext;
-import net.officefloor.plugin.socket.server.CommunicationProtocol;
-import net.officefloor.plugin.socket.server.Connection;
-import net.officefloor.plugin.socket.server.Server;
+import net.officefloor.plugin.socket.server.protocol.CommunicationProtocol;
+import net.officefloor.plugin.socket.server.protocol.CommunicationProtocolSource;
+import net.officefloor.plugin.socket.server.protocol.Connection;
 import net.officefloor.plugin.socket.server.tcp.ServerTcpConnection;
 import net.officefloor.plugin.stream.BufferSquirtFactory;
 
 /**
- * TCP {@link CommunicationProtocol}.
+ * TCP {@link CommunicationProtocolSource}.
  * 
  * @author Daniel Sagenschneider
  */
 public class TcpCommunicationProtocol implements
-		CommunicationProtocol<TcpConnectionHandler>,
-		Server<TcpConnectionHandler> {
+		CommunicationProtocolSource<TcpConnectionHandler>,
+		CommunicationProtocol<TcpConnectionHandler> {
 
 	/**
 	 * Property to obtain the maximum idle time before the {@link Connection} is
@@ -72,7 +72,7 @@ public class TcpCommunicationProtocol implements
 	}
 
 	@Override
-	public Server<TcpConnectionHandler> createServer(
+	public CommunicationProtocol<TcpConnectionHandler> createServer(
 			MetaDataContext<None, Indexed> context,
 			BufferSquirtFactory bufferSquirtFactory) throws Exception {
 		ManagedObjectSourceContext<Indexed> mosContext = context

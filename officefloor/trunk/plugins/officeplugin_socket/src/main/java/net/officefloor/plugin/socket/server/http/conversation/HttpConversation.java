@@ -21,22 +21,22 @@ package net.officefloor.plugin.socket.server.http.conversation;
 import java.io.IOException;
 import java.util.List;
 
-import net.officefloor.plugin.socket.server.Connection;
 import net.officefloor.plugin.socket.server.http.HttpHeader;
 import net.officefloor.plugin.socket.server.http.HttpRequest;
 import net.officefloor.plugin.socket.server.http.parse.HttpRequestParseException;
-import net.officefloor.plugin.stream.InputBufferStream;
+import net.officefloor.plugin.socket.server.protocol.Connection;
+import net.officefloor.plugin.stream.NioInputStream;
 
 /**
  * HTTP conversation.
- *
+ * 
  * @author Daniel Sagenschneider
  */
 public interface HttpConversation {
 
 	/**
 	 * Adds a {@link HttpRequest} to the conversation.
-	 *
+	 * 
 	 * @param method
 	 *            Method.
 	 * @param requestURI
@@ -45,17 +45,17 @@ public interface HttpConversation {
 	 *            HTTP Version.
 	 * @param headers
 	 *            {@link HttpHeader} instances.
-	 * @param body
-	 *            {@link InputBufferStream} to the contents of the
+	 * @param entity
+	 *            {@link NioInputStream} to the entity of the
 	 *            {@link HttpRequest}.
 	 * @return {@link HttpManagedObject} to process the {@link HttpRequest}.
 	 */
 	HttpManagedObject addRequest(String method, String requestURI,
-			String httpVersion, List<HttpHeader> headers, InputBufferStream body);
+			String httpVersion, List<HttpHeader> headers, NioInputStream entity);
 
 	/**
 	 * Handles a failure in parsing a {@link HttpRequest}.
-	 *
+	 * 
 	 * @param failure
 	 *            Failure in parsing a {@link HttpRequest}.
 	 * @param isCloseConnection
@@ -65,7 +65,7 @@ public interface HttpConversation {
 	 *             If fails to write response regarding the
 	 *             {@link HttpRequestParseException}.
 	 */
-	void parseFailure(HttpRequestParseException failure, boolean isCloseConnection)
-			throws IOException;
+	void parseFailure(HttpRequestParseException failure,
+			boolean isCloseConnection) throws IOException;
 
 }

@@ -23,10 +23,10 @@ import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
 
-import net.officefloor.plugin.socket.server.Server;
+import net.officefloor.plugin.socket.server.protocol.CommunicationProtocol;
 
 /**
- * Load on the {@link Server}.
+ * Load on the {@link CommunicationProtocol}.
  * 
  * @author Daniel Sagenschneider
  */
