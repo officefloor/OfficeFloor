@@ -55,8 +55,7 @@ public class ServiceLogic {
 		char value = requestUri.charAt(requestUri.length() - 1);
 		if (value == 'N') {
 			// News feed
-			connection.getHttpResponse().getBody().getOutputStream()
-					.write((byte) 'n');
+			connection.getHttpResponse().getEntity().write((byte) 'n');
 			return;
 		}
 
@@ -75,7 +74,7 @@ public class ServiceLogic {
 		} finally {
 			connection.close();
 		}
-		conn.getHttpResponse().getBody().getOutputStream().write((byte) 'd');
+		conn.getHttpResponse().getEntity().write((byte) 'd');
 	}
 
 }

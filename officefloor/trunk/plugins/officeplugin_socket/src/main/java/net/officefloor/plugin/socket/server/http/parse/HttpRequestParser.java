@@ -23,37 +23,43 @@ import java.util.List;
 
 import net.officefloor.plugin.socket.server.http.HttpHeader;
 import net.officefloor.plugin.socket.server.http.HttpRequest;
-import net.officefloor.plugin.stream.InputBufferStream;
+import net.officefloor.plugin.stream.NioInputStream;
 
 /**
  * Parses a {@link HttpRequest}.
- *
+ * 
  * @author Daniel Sagenschneider
  */
 public interface HttpRequestParser {
 
 	/**
-	 * Parses the {@link HttpRequest} bytes from the {@link InputBufferStream}.
-	 *
-	 * @param inputBufferStream
-	 *            {@link InputBufferStream} containing the data to be parsed for
-	 *            the {@link HttpRequest}.
+	 * Parses the {@link HttpRequest} from the data.
+	 * 
+	 * @param data
+	 *            Data to be parsed for the {@link HttpRequest}.
 	 * @param tempBuffer
 	 *            Temporary char buffer that is used to translate bytes into a
 	 *            {@link String}. This allows reducing memory size and creation
 	 *            of arrays. The size of the buffer indicates the maximum size
-	 *            for parts of the {@link HttpRequest} (except the body).
+	 *            for parts of the {@link HttpRequest} (except the entity).
 	 * @return <code>true</code> if the {@link HttpRequest} has been fully
 	 *         parsed. <false>false</false> indicates this method should be
-	 *         called again when further data is available on the
-	 *         {@link InputBufferStream} to obtain the full {@link HttpRequest}.
+	 *         called again when further data is available to obtain the full
+	 *         {@link HttpRequest}.
 	 * @throws IOException
 	 *             If fails to read bytes.
 	 * @throws HttpRequestParseException
 	 *             If failure to parse {@link HttpRequest}.
 	 */
-	boolean parse(InputBufferStream inputBufferStream, char[] tempBuffer)
-			throws IOException, HttpRequestParseException;
+	boolean parse(byte[] data, char[] tempBuffer) throws IOException,
+			HttpRequestParseException;
+
+	/**
+	 * Indicates the number of remaining bytes from last parse.
+	 * 
+	 * @return Number of remaining bytes from last parse.
+	 */
+	int remainingBytes();
 
 	/**
 	 * Resets for parsing another {@link HttpRequest}.
@@ -62,38 +68,38 @@ public interface HttpRequestParser {
 
 	/**
 	 * Obtains the method.
-	 *
+	 * 
 	 * @return Method.
 	 */
 	String getMethod();
 
 	/**
 	 * Obtains the request URI.
-	 *
+	 * 
 	 * @return Request URI.
 	 */
 	String getRequestURI();
 
 	/**
 	 * Obtains the HTTP version.
-	 *
+	 * 
 	 * @return HTTP version.
 	 */
 	String getHttpVersion();
 
 	/**
 	 * Obtains the {@link HttpHeader} instances in the order supplied.
-	 *
+	 * 
 	 * @return {@link HttpHeader} instances in the order supplied.
 	 */
 	List<HttpHeader> getHeaders();
 
 	/**
-	 * Obtains the {@link InputBufferStream} to the body of the
+	 * Obtains the {@link NioInputStream} to the entity of the
 	 * {@link HttpRequest}.
-	 *
-	 * @return {@link InputBufferStream} to the body of the {@link HttpRequest}.
+	 * 
+	 * @return {@link NioInputStream} to the entity of the {@link HttpRequest}.
 	 */
-	InputBufferStream getBody();
+	NioInputStream getEntity();
 
 }

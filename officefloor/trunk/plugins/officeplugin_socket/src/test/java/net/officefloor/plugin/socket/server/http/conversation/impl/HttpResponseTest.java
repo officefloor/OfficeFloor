@@ -30,7 +30,6 @@ import java.util.LinkedList;
 import java.util.List;
 
 import net.officefloor.frame.test.OfficeFrameTestCase;
-import net.officefloor.plugin.socket.server.Connection;
 import net.officefloor.plugin.socket.server.http.HttpHeader;
 import net.officefloor.plugin.socket.server.http.HttpResponse;
 import net.officefloor.plugin.socket.server.http.conversation.HttpConversation;
@@ -38,6 +37,7 @@ import net.officefloor.plugin.socket.server.http.conversation.HttpManagedObject;
 import net.officefloor.plugin.socket.server.http.parse.HttpRequestParseException;
 import net.officefloor.plugin.socket.server.http.parse.UsAsciiUtil;
 import net.officefloor.plugin.socket.server.http.protocol.HttpStatus;
+import net.officefloor.plugin.socket.server.protocol.Connection;
 import net.officefloor.plugin.stream.BufferSquirt;
 import net.officefloor.plugin.stream.BufferSquirtFactory;
 import net.officefloor.plugin.stream.BufferStream;

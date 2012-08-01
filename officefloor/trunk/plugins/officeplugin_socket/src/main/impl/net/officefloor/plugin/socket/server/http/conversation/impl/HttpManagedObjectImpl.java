@@ -26,11 +26,11 @@ import java.util.logging.Logger;
 
 import net.officefloor.frame.api.escalate.EscalationHandler;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
-import net.officefloor.plugin.socket.server.Connection;
 import net.officefloor.plugin.socket.server.http.HttpRequest;
 import net.officefloor.plugin.socket.server.http.HttpResponse;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
 import net.officefloor.plugin.socket.server.http.conversation.HttpManagedObject;
+import net.officefloor.plugin.socket.server.protocol.Connection;
 
 /**
  * {@link ManagedObject} for the {@link ServerHttpConnection}.

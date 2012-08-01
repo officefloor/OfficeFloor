@@ -24,12 +24,12 @@ import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.spi.managedobject.AsynchronousListener;
 import net.officefloor.frame.spi.managedobject.AsynchronousManagedObject;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectExecuteContext;
-import net.officefloor.plugin.socket.server.Connection;
-import net.officefloor.plugin.socket.server.ConnectionHandler;
-import net.officefloor.plugin.socket.server.IdleContext;
-import net.officefloor.plugin.socket.server.ReadContext;
-import net.officefloor.plugin.socket.server.Server;
 import net.officefloor.plugin.socket.server.WriteContext;
+import net.officefloor.plugin.socket.server.protocol.CommunicationProtocol;
+import net.officefloor.plugin.socket.server.protocol.Connection;
+import net.officefloor.plugin.socket.server.protocol.ConnectionHandler;
+import net.officefloor.plugin.socket.server.protocol.HeartBeatContext;
+import net.officefloor.plugin.socket.server.protocol.ReadContext;
 import net.officefloor.plugin.socket.server.tcp.ServerTcpConnection;
 import net.officefloor.plugin.stream.InputBufferStream;
 import net.officefloor.plugin.stream.OutputBufferStream;
@@ -49,9 +49,9 @@ public class TcpConnectionHandler implements ConnectionHandler,
 	private static final long NON_IDLE_SINCE_TIMESTAMP = -1;
 
 	/**
-	 * {@link Server}.
+	 * {@link CommunicationProtocol}.
 	 */
-	private final Server<TcpConnectionHandler> server;
+	private final CommunicationProtocol<TcpConnectionHandler> server;
 
 	/**
 	 * {@link Connection}.
@@ -82,14 +82,14 @@ public class TcpConnectionHandler implements ConnectionHandler,
 	 * Initiate.
 	 * 
 	 * @param server
-	 *            {@link Server}.
+	 *            {@link CommunicationProtocol}.
 	 * @param connection
 	 *            {@link Connection}.
 	 * @param maxIdleTime
 	 *            Maximum idle time for the {@link Connection} measured in
 	 *            milliseconds.
 	 */
-	public TcpConnectionHandler(Server<TcpConnectionHandler> server,
+	public TcpConnectionHandler(CommunicationProtocol<TcpConnectionHandler> server,
 			Connection connection, long maxIdleTime) {
 		this.server = server;
 		this.connection = connection;
@@ -131,7 +131,7 @@ public class TcpConnectionHandler implements ConnectionHandler,
 	 */
 
 	@Override
-	public void handleIdleConnection(IdleContext context) throws IOException {
+	public void handleIdleConnection(HeartBeatContext context) throws IOException {
 
 		// Determine if have to handle connection idle too long
 		if (this.idleSinceTimestamp == NON_IDLE_SINCE_TIMESTAMP) {

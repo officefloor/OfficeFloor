@@ -32,24 +32,24 @@ import net.officefloor.frame.spi.managedobject.source.ManagedObjectTaskBuilder;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectWorkBuilder;
 import net.officefloor.frame.spi.managedobject.source.impl.AbstractAsyncManagedObjectSource.MetaDataContext;
 import net.officefloor.frame.spi.managedobject.source.impl.AbstractAsyncManagedObjectSource.SpecificationContext;
-import net.officefloor.plugin.socket.server.CommunicationProtocol;
-import net.officefloor.plugin.socket.server.Connection;
-import net.officefloor.plugin.socket.server.ConnectionHandler;
-import net.officefloor.plugin.socket.server.Server;
+import net.officefloor.plugin.socket.server.protocol.CommunicationProtocol;
+import net.officefloor.plugin.socket.server.protocol.CommunicationProtocolSource;
+import net.officefloor.plugin.socket.server.protocol.Connection;
+import net.officefloor.plugin.socket.server.protocol.ConnectionHandler;
 import net.officefloor.plugin.socket.server.ssl.SslEngineConfigurator;
 import net.officefloor.plugin.socket.server.ssl.SslTaskExecutor;
 import net.officefloor.plugin.socket.server.ssl.protocol.SslTaskWork.SslTaskDependencies;
 import net.officefloor.plugin.stream.BufferSquirtFactory;
 
 /**
- * SSL {@link CommunicationProtocol} that wraps another
- * {@link CommunicationProtocol}.
+ * SSL {@link CommunicationProtocolSource} that wraps another
+ * {@link CommunicationProtocolSource}.
  * 
  * @author Daniel Sagenschneider
  */
 public class SslCommunicationProtocol<CH extends ConnectionHandler> implements
-		CommunicationProtocol<SslConnectionHandler<CH>>,
-		Server<SslConnectionHandler<CH>>, SslTaskExecutor,
+		CommunicationProtocolSource<SslConnectionHandler<CH>>,
+		CommunicationProtocol<SslConnectionHandler<CH>>, SslTaskExecutor,
 		SslEngineConfigurator {
 
 	/**
@@ -69,14 +69,14 @@ public class SslCommunicationProtocol<CH extends ConnectionHandler> implements
 	public static final String PROPERTY_SSL_ENGINE_CONFIGURATOR = "ssl.engine.configurator.class";
 
 	/**
-	 * Wrapped {@link CommunicationProtocol}.
+	 * Wrapped {@link CommunicationProtocolSource}.
 	 */
-	private final CommunicationProtocol<CH> wrappedCommunicationProtocol;
+	private final CommunicationProtocolSource<CH> wrappedCommunicationProtocol;
 
 	/**
-	 * Wrapped {@link Server}.
+	 * Wrapped {@link CommunicationProtocol}.
 	 */
-	private Server<CH> wrappedServer;
+	private CommunicationProtocol<CH> wrappedServer;
 
 	/**
 	 * {@link SSLContext}.
@@ -107,11 +107,11 @@ public class SslCommunicationProtocol<CH extends ConnectionHandler> implements
 	 * Initiate.
 	 * 
 	 * @param wrappedCommunicationProtocol
-	 *            {@link CommunicationProtocol} to be wrapped with this SSL
-	 *            {@link CommunicationProtocol}.
+	 *            {@link CommunicationProtocolSource} to be wrapped with this SSL
+	 *            {@link CommunicationProtocolSource}.
 	 */
 	public SslCommunicationProtocol(
-			CommunicationProtocol<CH> wrappedCommunicationProtocol) {
+			CommunicationProtocolSource<CH> wrappedCommunicationProtocol) {
 		this.wrappedCommunicationProtocol = wrappedCommunicationProtocol;
 	}
 
@@ -126,7 +126,7 @@ public class SslCommunicationProtocol<CH extends ConnectionHandler> implements
 	}
 
 	@Override
-	public Server<SslConnectionHandler<CH>> createServer(
+	public CommunicationProtocol<SslConnectionHandler<CH>> createServer(
 			MetaDataContext<None, Indexed> context,
 			BufferSquirtFactory bufferSquirtFactory) throws Exception {
 		ManagedObjectSourceContext<Indexed> mosContext = context

@@ -21,11 +21,6 @@ package net.officefloor.plugin.socket.server.http.protocol;
 import java.io.IOException;
 import java.util.List;
 
-import net.officefloor.plugin.socket.server.Connection;
-import net.officefloor.plugin.socket.server.ConnectionHandler;
-import net.officefloor.plugin.socket.server.IdleContext;
-import net.officefloor.plugin.socket.server.ReadContext;
-import net.officefloor.plugin.socket.server.Server;
 import net.officefloor.plugin.socket.server.WriteContext;
 import net.officefloor.plugin.socket.server.http.HttpHeader;
 import net.officefloor.plugin.socket.server.http.HttpRequest;
@@ -33,6 +28,11 @@ import net.officefloor.plugin.socket.server.http.conversation.HttpConversation;
 import net.officefloor.plugin.socket.server.http.conversation.HttpManagedObject;
 import net.officefloor.plugin.socket.server.http.parse.HttpRequestParseException;
 import net.officefloor.plugin.socket.server.http.parse.HttpRequestParser;
+import net.officefloor.plugin.socket.server.protocol.CommunicationProtocol;
+import net.officefloor.plugin.socket.server.protocol.Connection;
+import net.officefloor.plugin.socket.server.protocol.ConnectionHandler;
+import net.officefloor.plugin.socket.server.protocol.HeartBeatContext;
+import net.officefloor.plugin.socket.server.protocol.ReadContext;
 import net.officefloor.plugin.stream.InputBufferStream;
 
 /**
@@ -43,9 +43,9 @@ import net.officefloor.plugin.stream.InputBufferStream;
 public class HttpConnectionHandler implements ConnectionHandler {
 
 	/**
-	 * {@link Server}.
+	 * {@link CommunicationProtocol}.
 	 */
-	private final Server<HttpConnectionHandler> server;
+	private final CommunicationProtocol<HttpConnectionHandler> server;
 
 	/**
 	 * {@link HttpConversation}.
@@ -83,7 +83,7 @@ public class HttpConnectionHandler implements ConnectionHandler {
 	 * Initiate.
 	 * 
 	 * @param server
-	 *            {@link Server}.
+	 *            {@link CommunicationProtocol}.
 	 * @param conversation
 	 *            {@link HttpConversation}.
 	 * @param parser
@@ -93,7 +93,7 @@ public class HttpConnectionHandler implements ConnectionHandler {
 	 * @param connectionTimeout
 	 *            {@link Connection} timeout in milliseconds.
 	 */
-	public HttpConnectionHandler(Server<HttpConnectionHandler> server,
+	public HttpConnectionHandler(CommunicationProtocol<HttpConnectionHandler> server,
 			HttpConversation conversation, HttpRequestParser parser,
 			int maxTextPartLength, long connectionTimeout) {
 		this.server = server;
@@ -180,7 +180,7 @@ public class HttpConnectionHandler implements ConnectionHandler {
 	}
 
 	@Override
-	public void handleIdleConnection(IdleContext context) {
+	public void handleIdleConnection(HeartBeatContext context) {
 
 		// May not have received data from client on creating connection
 		if (this.lastInteractionTime == -1) {

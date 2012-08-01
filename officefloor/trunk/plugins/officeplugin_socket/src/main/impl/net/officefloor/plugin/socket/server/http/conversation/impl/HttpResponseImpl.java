@@ -28,13 +28,13 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
-import net.officefloor.plugin.socket.server.Connection;
 import net.officefloor.plugin.socket.server.http.HttpHeader;
 import net.officefloor.plugin.socket.server.http.HttpRequest;
 import net.officefloor.plugin.socket.server.http.HttpResponse;
 import net.officefloor.plugin.socket.server.http.parse.HttpRequestParseException;
 import net.officefloor.plugin.socket.server.http.parse.impl.HttpHeaderImpl;
 import net.officefloor.plugin.socket.server.http.protocol.HttpStatus;
+import net.officefloor.plugin.socket.server.protocol.Connection;
 import net.officefloor.plugin.stream.BufferPopulator;
 import net.officefloor.plugin.stream.BufferSquirt;
 import net.officefloor.plugin.stream.BufferSquirtFactory;

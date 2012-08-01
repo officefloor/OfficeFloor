@@ -22,13 +22,13 @@ import java.io.IOException;
 
 import javax.net.ssl.SSLEngine;
 
-import net.officefloor.plugin.socket.server.Connection;
-import net.officefloor.plugin.socket.server.ConnectionHandler;
-import net.officefloor.plugin.socket.server.ConnectionHandlerContext;
-import net.officefloor.plugin.socket.server.IdleContext;
-import net.officefloor.plugin.socket.server.ReadContext;
-import net.officefloor.plugin.socket.server.Server;
 import net.officefloor.plugin.socket.server.WriteContext;
+import net.officefloor.plugin.socket.server.protocol.CommunicationProtocol;
+import net.officefloor.plugin.socket.server.protocol.Connection;
+import net.officefloor.plugin.socket.server.protocol.ConnectionHandler;
+import net.officefloor.plugin.socket.server.protocol.ConnectionHandlerContext;
+import net.officefloor.plugin.socket.server.protocol.HeartBeatContext;
+import net.officefloor.plugin.socket.server.protocol.ReadContext;
 import net.officefloor.plugin.socket.server.ssl.SslConnection;
 import net.officefloor.plugin.socket.server.ssl.SslTaskExecutor;
 import net.officefloor.plugin.socket.server.ssl.TemporaryByteArrayFactory;
@@ -42,7 +42,7 @@ import net.officefloor.plugin.stream.InputBufferStream;
  */
 public class SslConnectionHandler<CH extends ConnectionHandler> implements
 		ConnectionHandler, TemporaryByteArrayFactory, ReadContext,
-		WriteContext, IdleContext {
+		WriteContext, HeartBeatContext {
 
 	/**
 	 * {@link SslConnection}.
@@ -83,11 +83,11 @@ public class SslConnectionHandler<CH extends ConnectionHandler> implements
 	 * @param taskExecutor
 	 *            {@link SslTaskExecutor}.
 	 * @param wrappedServer
-	 *            Wrapped {@link Server}.
+	 *            Wrapped {@link CommunicationProtocol}.
 	 */
 	public SslConnectionHandler(Connection connection, SSLEngine engine,
 			BufferSquirtFactory bufferSquirtFactory,
-			SslTaskExecutor taskExecutor, Server<CH> wrappedServer) {
+			SslTaskExecutor taskExecutor, CommunicationProtocol<CH> wrappedServer) {
 
 		// Creates the SSL connection
 		this.connection = new SslConnectionImpl(connection.getLock(),
@@ -151,7 +151,7 @@ public class SslConnectionHandler<CH extends ConnectionHandler> implements
 	}
 
 	@Override
-	public void handleIdleConnection(IdleContext context) throws IOException {
+	public void handleIdleConnection(HeartBeatContext context) throws IOException {
 
 		// Ensure no error in processing
 		this.connection.validate();

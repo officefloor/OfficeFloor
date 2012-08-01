@@ -23,13 +23,13 @@ import java.io.IOException;
 import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
-import net.officefloor.plugin.socket.server.Connection;
-import net.officefloor.plugin.stream.InputBufferStream;
-import net.officefloor.plugin.stream.OutputBufferStream;
+import net.officefloor.plugin.socket.server.protocol.Connection;
+import net.officefloor.plugin.stream.ByteOutputStream;
+import net.officefloor.plugin.stream.NioInputStream;
 
 /**
  * TCP connection to be handled by the {@link OfficeFloor}.
- *
+ * 
  * @author Daniel Sagenschneider
  */
 public interface ServerTcpConnection {
@@ -39,18 +39,18 @@ public interface ServerTcpConnection {
 	 * locking overhead of making multiple calls on this
 	 * {@link ServerTcpConnection}. In other words, it allows course grained
 	 * locking.
-	 *
+	 * 
 	 * @return Lock that governs this {@link ServerTcpConnection}.
 	 */
 	Object getLock();
 
 	/**
-	 * Obtains the {@link InputBufferStream} that provides access to the data
-	 * sent from the client.
-	 *
-	 * @return {@link InputBufferStream}.
+	 * Obtains the {@link NioInputStream} that provides access to the data sent
+	 * from the client.
+	 * 
+	 * @return {@link NioInputStream}.
 	 */
-	InputBufferStream getInputBufferStream();
+	NioInputStream getInputStream();
 
 	/**
 	 * <p>
@@ -59,8 +59,8 @@ public interface ServerTcpConnection {
 	 * <p>
 	 * On calling this the next time a {@link Task} is invoked using this
 	 * {@link ManagedObject}, data will be available from the
-	 * {@link InputBufferStream}.
-	 *
+	 * {@link NioInputStream}.
+	 * 
 	 * @throws IOException
 	 *             If fails to initiate waiting on client.
 	 */
@@ -68,13 +68,13 @@ public interface ServerTcpConnection {
 
 	/**
 	 * <p>
-	 * Obtains the {@link OutputBufferStream} to write data back to the client.
+	 * Obtains the {@link ByteOutputStream} to write data back to the client.
 	 * <p>
-	 * Closing the {@link OutputBufferStream} will result in closing the
+	 * Closing the {@link ByteOutputStream} will result in closing the
 	 * {@link Connection}.
-	 *
-	 * @return {@link OutputBufferStream}.
+	 * 
+	 * @return {@link ByteOutputStream}.
 	 */
-	OutputBufferStream getOutputBufferStream();
+	ByteOutputStream getOutputStream();
 
 }

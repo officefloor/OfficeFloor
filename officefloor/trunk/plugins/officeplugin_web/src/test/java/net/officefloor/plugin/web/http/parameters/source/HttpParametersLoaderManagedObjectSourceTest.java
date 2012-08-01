@@ -27,8 +27,6 @@ import net.officefloor.frame.util.ManagedObjectUserStandAlone;
 import net.officefloor.plugin.socket.server.http.HttpRequest;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
 import net.officefloor.plugin.socket.server.http.conversation.impl.HttpRequestImpl;
-import net.officefloor.plugin.web.http.parameters.source.HttpParametersLoaderDependencies;
-import net.officefloor.plugin.web.http.parameters.source.HttpParametersLoaderManagedObjectSource;
 
 /**
  * Tests the {@link HttpParametersLoaderManagedObjectSource}.

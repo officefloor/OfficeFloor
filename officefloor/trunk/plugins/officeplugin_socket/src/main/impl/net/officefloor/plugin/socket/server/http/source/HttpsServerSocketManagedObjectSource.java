@@ -22,11 +22,11 @@ import net.officefloor.compile.ManagedObjectSourceService;
 import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
-import net.officefloor.plugin.socket.server.CommunicationProtocol;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
 import net.officefloor.plugin.socket.server.http.protocol.HttpCommunicationProtocol;
 import net.officefloor.plugin.socket.server.http.protocol.HttpConnectionHandler;
 import net.officefloor.plugin.socket.server.impl.AbstractServerSocketManagedObjectSource;
+import net.officefloor.plugin.socket.server.protocol.CommunicationProtocolSource;
 import net.officefloor.plugin.socket.server.ssl.protocol.SslCommunicationProtocol;
 import net.officefloor.plugin.socket.server.ssl.protocol.SslConnectionHandler;
 
@@ -60,7 +60,7 @@ public class HttpsServerSocketManagedObjectSource
 	 */
 
 	@Override
-	protected CommunicationProtocol<SslConnectionHandler<HttpConnectionHandler>> createCommunicationProtocol() {
+	protected CommunicationProtocolSource<SslConnectionHandler<HttpConnectionHandler>> createCommunicationProtocol() {
 		return new SslCommunicationProtocol<HttpConnectionHandler>(
 				new HttpCommunicationProtocol());
 	}

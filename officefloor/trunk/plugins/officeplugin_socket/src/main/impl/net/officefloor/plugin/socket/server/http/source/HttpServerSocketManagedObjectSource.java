@@ -30,12 +30,12 @@ import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.impl.spi.team.PassiveTeamSource;
 import net.officefloor.frame.impl.spi.team.WorkerPerTaskTeamSource;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
-import net.officefloor.plugin.socket.server.CommunicationProtocol;
 import net.officefloor.plugin.socket.server.http.HttpRequest;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
 import net.officefloor.plugin.socket.server.http.protocol.HttpCommunicationProtocol;
 import net.officefloor.plugin.socket.server.http.protocol.HttpConnectionHandler;
 import net.officefloor.plugin.socket.server.impl.AbstractServerSocketManagedObjectSource;
+import net.officefloor.plugin.socket.server.protocol.CommunicationProtocolSource;
 
 /**
  * {@link ManagedObjectSource} for a {@link ServerHttpConnection}.
@@ -128,7 +128,7 @@ public class HttpServerSocketManagedObjectSource extends
 	 */
 
 	@Override
-	protected CommunicationProtocol<HttpConnectionHandler> createCommunicationProtocol() {
+	protected CommunicationProtocolSource<HttpConnectionHandler> createCommunicationProtocol() {
 		return new HttpCommunicationProtocol();
 	}
 

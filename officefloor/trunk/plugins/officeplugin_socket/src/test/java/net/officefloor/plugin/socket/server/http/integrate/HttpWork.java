@@ -73,15 +73,15 @@ public class HttpWork {
 
 		// Validate the local address
 		InetSocketAddress actualLocalAddress = connection.getLocalAddress();
-		TestCase.assertNotNull("Must have local host", actualLocalAddress
-				.getHostName());
+		TestCase.assertNotNull("Must have local host",
+				actualLocalAddress.getHostName());
 		TestCase.assertEquals("Incorrect local port", expectedLocalPort,
 				actualLocalAddress.getPort());
 
 		// Validate the remote address (not same port as local)
 		InetSocketAddress actualRemoteAddress = connection.getRemoteAddress();
-		TestCase.assertNotNull("Must have remote host", actualRemoteAddress
-				.getHostName());
+		TestCase.assertNotNull("Must have remote host",
+				actualRemoteAddress.getHostName());
 		TestCase.assertTrue(
 				"Remote address port to be different to local address port",
 				expectedLocalPort != actualRemoteAddress.getPort());
@@ -103,10 +103,9 @@ public class HttpWork {
 
 		// Write the body of the response
 		String message = "Hello World";
-		new OutputStreamWriter(response.getBody().getOutputStream()).append(
-				message).flush();
+		new OutputStreamWriter(response.getEntity()).append(message).flush();
 
 		// Send response
-		response.getBody().close();
+		response.getEntity().close();
 	}
 }

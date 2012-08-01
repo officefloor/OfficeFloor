@@ -23,12 +23,12 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
-import net.officefloor.plugin.socket.server.Connection;
 import net.officefloor.plugin.socket.server.http.HttpHeader;
 import net.officefloor.plugin.socket.server.http.HttpResponse;
 import net.officefloor.plugin.socket.server.http.conversation.HttpConversation;
 import net.officefloor.plugin.socket.server.http.conversation.HttpManagedObject;
 import net.officefloor.plugin.socket.server.http.parse.HttpRequestParseException;
+import net.officefloor.plugin.socket.server.protocol.Connection;
 import net.officefloor.plugin.stream.BufferSquirtFactory;
 import net.officefloor.plugin.stream.InputBufferStream;
 

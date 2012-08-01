@@ -18,15 +18,15 @@
 
 package net.officefloor.plugin.socket.server.tcp.source;
 
+import java.io.InputStream;
+
 import net.officefloor.frame.api.execute.TaskContext;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.plugin.socket.server.tcp.ServerTcpConnection;
-import net.officefloor.plugin.stream.BufferStream;
-import net.officefloor.plugin.stream.InputBufferStream;
 
 /**
  * Provides for processing a {@link Messages} response.
- *
+ * 
  * @author Daniel Sagenschneider
  */
 public class MessageWork {
@@ -38,7 +38,7 @@ public class MessageWork {
 
 	/**
 	 * Obtains the input index of the message and responds with the message.
-	 *
+	 * 
 	 * @param connection
 	 *            {@link ServerTcpConnection}.
 	 * @param taskContext
@@ -56,10 +56,9 @@ public class MessageWork {
 			}
 
 			// Obtain the index
-			InputBufferStream inputBufferStream = connection
-					.getInputBufferStream();
-			switch ((int) inputBufferStream.available()) {
-			case BufferStream.END_OF_STREAM:
+			InputStream inputStream = connection.getInputStream();
+			switch ((int) inputStream.available()) {
+			case -1:
 				// Connection prematurely closed
 				throw new Exception("Connection prematurely closed");
 
@@ -71,13 +70,13 @@ public class MessageWork {
 			}
 
 			// Obtain the index
-			int index = inputBufferStream.getInputStream().read();
+			int index = inputStream.read();
 
 			// Handle message
 			switch (index) {
 			case -1:
 				// Close connection (do not process further messages)
-				connection.getOutputBufferStream().close();
+				connection.getOutputStream().close();
 				break;
 
 			default:
@@ -93,7 +92,7 @@ public class MessageWork {
 				data[data.length - 1] = 0;
 
 				// Write the response
-				connection.getOutputBufferStream().write(data);
+				connection.getOutputStream().write(data);
 
 				// Invoke flow to process another message when arrives
 				connection.waitOnClientData();
@@ -105,7 +104,7 @@ public class MessageWork {
 		} catch (Throwable ex) {
 			// Indicate failure and close connection
 			ex.printStackTrace();
-			connection.getOutputBufferStream().close();
+			connection.getOutputStream().close();
 
 			// Propagate
 			throw ex;

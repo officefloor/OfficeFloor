@@ -36,12 +36,12 @@ import net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceContext
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectTaskBuilder;
 import net.officefloor.frame.spi.managedobject.source.impl.AbstractManagedObjectSource;
 import net.officefloor.frame.util.AbstractSingleTask;
-import net.officefloor.plugin.socket.server.CommunicationProtocol;
-import net.officefloor.plugin.socket.server.Connection;
-import net.officefloor.plugin.socket.server.ConnectionHandler;
-import net.officefloor.plugin.socket.server.Server;
+import net.officefloor.plugin.socket.server.protocol.CommunicationProtocol;
+import net.officefloor.plugin.socket.server.protocol.CommunicationProtocolSource;
+import net.officefloor.plugin.socket.server.protocol.Connection;
+import net.officefloor.plugin.socket.server.protocol.ConnectionHandler;
 import net.officefloor.plugin.stream.BufferSquirtFactory;
-import net.officefloor.plugin.stream.squirtfactory.DirectByteBufferSquirtFactory;
+import net.officefloor.plugin.stream.squirtfactory.HeapByteBufferSquirtFactory;
 
 /**
  * Abstract {@link ManagedObjectSource} for a {@link ServerSocketChannel}.
@@ -67,9 +67,9 @@ public abstract class AbstractServerSocketManagedObjectSource<CH extends Connect
 	public static final String PROPERTY_MAXIMUM_CONNECTIONS_PER_LISTENER = "max.connections.per.listener";
 
 	/**
-	 * Singleton {@link ConnectionManager} for all {@link Connection} instances.
+	 * Singleton {@link ConnectionManagerImpl} for all {@link Connection} instances.
 	 */
-	private static ConnectionManager<?> singletonConnectionManager;
+	private static ConnectionManagerImpl<?> singletonConnectionManager;
 
 	/**
 	 * Registered {@link AbstractServerSocketManagedObjectSource} instances.
@@ -77,7 +77,7 @@ public abstract class AbstractServerSocketManagedObjectSource<CH extends Connect
 	private static Set<AbstractServerSocketManagedObjectSource<?>> registeredServerSockets = new HashSet<AbstractServerSocketManagedObjectSource<?>>();
 
 	/**
-	 * Obtains the {@link ConnectionManager}.
+	 * Obtains the {@link ConnectionManagerImpl}.
 	 * 
 	 * @param mosContext
 	 *            {@link ManagedObjectSourceContext}.
@@ -86,11 +86,11 @@ public abstract class AbstractServerSocketManagedObjectSource<CH extends Connect
 	 * @param instance
 	 *            Instance of the
 	 *            {@link AbstractServerSocketManagedObjectSource} using the
-	 *            {@link ConnectionManager}.
-	 * @return {@link ConnectionManager}.
+	 *            {@link ConnectionManagerImpl}.
+	 * @return {@link ConnectionManagerImpl}.
 	 */
 	@SuppressWarnings({ "rawtypes", "unchecked" })
-	private static synchronized ConnectionManager getConnectionManager(
+	private static synchronized ConnectionManagerImpl getConnectionManager(
 			ManagedObjectSourceContext<Indexed> mosContext,
 			SelectorFactory selectorFactory,
 			AbstractServerSocketManagedObjectSource<?> instance) {
@@ -142,7 +142,7 @@ public abstract class AbstractServerSocketManagedObjectSource<CH extends Connect
 			}
 
 			// Create the connection manager
-			singletonConnectionManager = new ConnectionManager(socketListeners);
+			singletonConnectionManager = new ConnectionManagerImpl(socketListeners);
 		}
 
 		// Register the instance for use of the connection manager
@@ -167,7 +167,7 @@ public abstract class AbstractServerSocketManagedObjectSource<CH extends Connect
 
 	/**
 	 * <p>
-	 * Closes the possible open {@link ConnectionManager} and releases all
+	 * Closes the possible open {@link ConnectionManagerImpl} and releases all
 	 * {@link Selector} instances for the {@link SocketListener} instances.
 	 * <p>
 	 * Made public so that tests may use to close.
@@ -189,10 +189,10 @@ public abstract class AbstractServerSocketManagedObjectSource<CH extends Connect
 
 	/**
 	 * <p>
-	 * Releases the {@link ConnectionManager} for the
+	 * Releases the {@link ConnectionManagerImpl} for the
 	 * {@link AbstractServerSocketManagedObjectSource} instance.
 	 * <p>
-	 * Once {@link ConnectionManager} is released for all
+	 * Once {@link ConnectionManagerImpl} is released for all
 	 * {@link AbstractServerSocketManagedObjectSource} instances it is itself
 	 * closed.
 	 * 
@@ -217,9 +217,9 @@ public abstract class AbstractServerSocketManagedObjectSource<CH extends Connect
 	private final SelectorFactory selectorFactory;
 
 	/**
-	 * {@link CommunicationProtocol}.
+	 * {@link CommunicationProtocolSource}.
 	 */
-	private final CommunicationProtocol<CH> communicationProtocol;
+	private final CommunicationProtocolSource<CH> communicationProtocol;
 
 	/**
 	 * {@link ServerSocketAccepter} that requires binding on starting.
@@ -227,9 +227,9 @@ public abstract class AbstractServerSocketManagedObjectSource<CH extends Connect
 	private ServerSocketAccepter<CH> serverSocketAccepter;
 
 	/**
-	 * {@link Server}.
+	 * {@link CommunicationProtocol}.
 	 */
-	private Server<CH> server;
+	private CommunicationProtocol<CH> server;
 
 	/**
 	 * Default constructor necessary as per {@link ManagedObjectSource}.
@@ -248,7 +248,7 @@ public abstract class AbstractServerSocketManagedObjectSource<CH extends Connect
 		this.selectorFactory = selectorFactory;
 
 		// Create the communication protocol
-		CommunicationProtocol<CH> commProtocol = this
+		CommunicationProtocolSource<CH> commProtocol = this
 				.createCommunicationProtocol();
 
 		// Provide possible wrapping around the communication protocol
@@ -266,29 +266,29 @@ public abstract class AbstractServerSocketManagedObjectSource<CH extends Connect
 	}
 
 	/**
-	 * Creates the {@link CommunicationProtocol}.
+	 * Creates the {@link CommunicationProtocolSource}.
 	 * 
-	 * @return {@link CommunicationProtocol}.
+	 * @return {@link CommunicationProtocolSource}.
 	 */
-	protected abstract CommunicationProtocol<CH> createCommunicationProtocol();
+	protected abstract CommunicationProtocolSource<CH> createCommunicationProtocol();
 
 	/**
 	 * <p>
-	 * Creates a wrapping {@link CommunicationProtocol} around the input
-	 * {@link CommunicationProtocol}.
+	 * Creates a wrapping {@link CommunicationProtocolSource} around the input
+	 * {@link CommunicationProtocolSource}.
 	 * <p>
-	 * An example would be to add SSL {@link CommunicationProtocol}.
+	 * An example would be to add SSL {@link CommunicationProtocolSource}.
 	 * <p>
 	 * This default implementation returns the input
-	 * {@link CommunicationProtocol} as is.
+	 * {@link CommunicationProtocolSource} as is.
 	 * 
 	 * @param communicationProtocol
-	 *            {@link CommunicationProtocol} to possibly wrap.
+	 *            {@link CommunicationProtocolSource} to possibly wrap.
 	 * @return This default implementation returns the input
-	 *         {@link CommunicationProtocol} (no wrapping).
+	 *         {@link CommunicationProtocolSource} (no wrapping).
 	 */
-	protected CommunicationProtocol<CH> createWrappingCommunicationProtocol(
-			CommunicationProtocol<CH> communicationProtocol) {
+	protected CommunicationProtocolSource<CH> createWrappingCommunicationProtocol(
+			CommunicationProtocolSource<CH> communicationProtocol) {
 		return communicationProtocol;
 	}
 
@@ -320,11 +320,11 @@ public abstract class AbstractServerSocketManagedObjectSource<CH extends Connect
 				PROPERTY_BUFFER_SIZE, "2048"));
 
 		// Obtain the connection manager
-		ConnectionManager<CH> connectionManager = getConnectionManager(
+		ConnectionManagerImpl<CH> connectionManager = getConnectionManager(
 				mosContext, this.selectorFactory, this);
 
 		// Create the buffer squirt factory
-		BufferSquirtFactory bufferSquirtFactory = new DirectByteBufferSquirtFactory(
+		BufferSquirtFactory bufferSquirtFactory = new HeapByteBufferSquirtFactory(
 				bufferSize);
 
 		// Create the server

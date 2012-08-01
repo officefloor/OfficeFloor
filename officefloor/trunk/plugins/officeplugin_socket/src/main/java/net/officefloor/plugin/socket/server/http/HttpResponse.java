@@ -20,11 +20,11 @@ package net.officefloor.plugin.socket.server.http;
 
 import java.io.IOException;
 
-import net.officefloor.plugin.stream.OutputBufferStream;
+import net.officefloor.plugin.stream.ByteOutputStream;
 
 /**
  * {@link HttpResponse} for the {@link ServerHttpConnection}.
- *
+ * 
  * @author Daniel Sagenschneider
  */
 public interface HttpResponse {
@@ -35,7 +35,7 @@ public interface HttpResponse {
 	 * either HTTP/1.0 or HTTP/1.1.
 	 * <p>
 	 * This defaults to value on {@link HttpRequest}.
-	 *
+	 * 
 	 * @param version
 	 *            HTTP version.
 	 */
@@ -46,7 +46,7 @@ public interface HttpResponse {
 	 * Specifies the status of the response with the default status message.
 	 * <p>
 	 * This defaults to 200 assuming the request was processed successfully.
-	 *
+	 * 
 	 * @param status
 	 *            Status of the response.
 	 */
@@ -55,7 +55,7 @@ public interface HttpResponse {
 	/**
 	 * Specifies the status of the response including specifying the status
 	 * human readable message.
-	 *
+	 * 
 	 * @param status
 	 *            Status of the response.
 	 * @param statusMessage
@@ -70,7 +70,7 @@ public interface HttpResponse {
 	 * <p>
 	 * {@link HttpHeader} instances are provided on the response in the order
 	 * they are added.
-	 *
+	 * 
 	 * @param name
 	 *            Name of {@link HttpHeader}.
 	 * @param value
@@ -81,7 +81,7 @@ public interface HttpResponse {
 
 	/**
 	 * Obtains the first {@link HttpHeader} by the name.
-	 *
+	 * 
 	 * @param name
 	 *            Name of the {@link HttpHeader}.
 	 * @return First {@link HttpHeader} by the name.
@@ -90,14 +90,14 @@ public interface HttpResponse {
 
 	/**
 	 * Obtains all the {@link HttpHeader} instances for the response.
-	 *
+	 * 
 	 * @return All the {@link HttpHeader} instances for the response.
 	 */
 	HttpHeader[] getHeaders();
 
 	/**
 	 * Removes the particular {@link HttpHeader} from the response.
-	 *
+	 * 
 	 * @param header
 	 *            {@link HttpHeader} to be removed from the response.
 	 */
@@ -109,7 +109,7 @@ public interface HttpResponse {
 	 * <p>
 	 * This method compliments {@link #addHeader(String, String)} to allow
 	 * adding a new single {@link HttpHeader} instance by name.
-	 *
+	 * 
 	 * @param name
 	 *            Name of the {@link HttpHeader} instances to remove.
 	 */
@@ -117,21 +117,21 @@ public interface HttpResponse {
 
 	/**
 	 * <p>
-	 * Obtains the {@link OutputBufferStream} to write the body of the response.
+	 * Obtains the {@link ByteOutputStream} to write the entity of the response.
 	 * <p>
-	 * Closing the returned {@link OutputBufferStream} is similar to calling
+	 * Closing the returned {@link ByteOutputStream} is similar to calling
 	 * {@link #send()}.
-	 *
-	 * @return {@link OutputBufferStream} to write the body of the response.
-	 *
+	 * 
+	 * @return {@link ByteOutputStream} to write the entity of the response.
+	 * 
 	 * @see #send()
 	 */
-	OutputBufferStream getBody();
+	ByteOutputStream getEntity();
 
 	/**
-	 * Sends this {@link HttpResponse}. After calling this {@link #getBody()} is
-	 * closed and the corresponding {@link HttpRequest#getBody()} is closed.
-	 *
+	 * Sends this {@link HttpResponse}. After calling this the
+	 * {@link ByteOutputStream} is closed.
+	 * 
 	 * @throws IOException
 	 *             If fails to send this {@link HttpResponse}.
 	 */

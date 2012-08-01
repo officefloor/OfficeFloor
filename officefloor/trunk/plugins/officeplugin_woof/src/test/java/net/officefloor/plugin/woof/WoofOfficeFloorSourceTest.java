@@ -399,7 +399,7 @@ public class WoofOfficeFloorSourceTest extends OfficeFrameTestCase {
 			// Write response
 			net.officefloor.plugin.socket.server.http.HttpResponse response = connection
 					.getHttpResponse();
-			response.getBody().getOutputStream().write(content.getBytes());
+			response.getEntity().write(content.getBytes());
 		}
 	}
 
