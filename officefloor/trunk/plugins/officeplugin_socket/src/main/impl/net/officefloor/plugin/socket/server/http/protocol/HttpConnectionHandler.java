@@ -45,7 +45,7 @@ public class HttpConnectionHandler implements ConnectionHandler {
 	/**
 	 * {@link CommunicationProtocol}.
 	 */
-	private final CommunicationProtocol<HttpConnectionHandler> server;
+	private final CommunicationProtocol server;
 
 	/**
 	 * {@link HttpConversation}.
@@ -93,7 +93,7 @@ public class HttpConnectionHandler implements ConnectionHandler {
 	 * @param connectionTimeout
 	 *            {@link Connection} timeout in milliseconds.
 	 */
-	public HttpConnectionHandler(CommunicationProtocol<HttpConnectionHandler> server,
+	public HttpConnectionHandler(CommunicationProtocol server,
 			HttpConversation conversation, HttpRequestParser parser,
 			int maxTextPartLength, long connectionTimeout) {
 		this.server = server;
@@ -114,10 +114,7 @@ public class HttpConnectionHandler implements ConnectionHandler {
 
 			// Ignore all further content if parse failure
 			if (this.isParseFailure) {
-				// Consume all content read (ignore as become invalid)
-				InputBufferStream ignore = context.getInputBufferStream();
-				ignore.skip(ignore.available());
-				return; // no further processing
+				return;
 			}
 
 			// New last interaction time
@@ -174,13 +171,7 @@ public class HttpConnectionHandler implements ConnectionHandler {
 	}
 
 	@Override
-	public void handleWrite(WriteContext context) {
-		// New last interaction time
-		this.lastInteractionTime = context.getTime();
-	}
-
-	@Override
-	public void handleIdleConnection(HeartBeatContext context) {
+	public void handleHeartbeat(HeartBeatContext context) {
 
 		// May not have received data from client on creating connection
 		if (this.lastInteractionTime == -1) {

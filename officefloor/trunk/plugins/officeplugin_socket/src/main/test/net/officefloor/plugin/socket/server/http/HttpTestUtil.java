@@ -18,18 +18,13 @@
 
 package net.officefloor.plugin.socket.server.http;
 
-import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 import java.util.LinkedList;
 import java.util.List;
 
-import net.officefloor.plugin.socket.server.http.HttpHeader;
-import net.officefloor.plugin.socket.server.http.HttpRequest;
 import net.officefloor.plugin.socket.server.http.conversation.impl.HttpRequestImpl;
 import net.officefloor.plugin.socket.server.http.parse.impl.HttpHeaderImpl;
-import net.officefloor.plugin.stream.BufferStream;
-import net.officefloor.plugin.stream.InputBufferStream;
-import net.officefloor.plugin.stream.impl.BufferStreamImpl;
+import net.officefloor.plugin.stream.impl.NioInputStreamImpl;
 
 /**
  * Utility class aiding in testing HTTP functionality.
@@ -45,31 +40,26 @@ public class HttpTestUtil {
 	 *            HTTP method (GET, POST).
 	 * @param requestUri
 	 *            Request URI.
-	 * @param body
-	 *            Contents of the {@link HttpRequest} body.
+	 * @param entity
+	 *            Contents of the {@link HttpRequest} entity.
 	 * @param headerNameValues
 	 *            {@link HttpHeader} name values.
 	 * @return {@link HttpRequest}.
 	 */
 	public static HttpRequest createHttpRequest(String method,
-			String requestUri, String body, String... headerNameValues)
+			String requestUri, String entity, String... headerNameValues)
 			throws Exception {
 
-		// Transform the body into input buffer stream
-		byte[] bodyData = (body == null ? new byte[0] : body.getBytes(Charset
-				.forName("UTF-8")));
-		BufferStream bufferStream = new BufferStreamImpl(ByteBuffer
-				.wrap(bodyData));
-		bufferStream.getOutputBufferStream().close(); // all data available
-		InputBufferStream inputBufferStream = bufferStream
-				.getInputBufferStream();
+		// Obtain the entity data
+		byte[] entityData = (entity == null ? new byte[0] : entity
+				.getBytes(Charset.forName("UTF-8")));
 
 		// Create the headers
 		List<HttpHeader> headers = new LinkedList<HttpHeader>();
-		if (body != null) {
-			// Include content length if body
+		if (entity != null) {
+			// Include content length if entity
 			headers.add(new HttpHeaderImpl("content-length", String
-					.valueOf(bodyData.length)));
+					.valueOf(entityData.length)));
 		}
 		for (int i = 0; i < headerNameValues.length; i += 2) {
 			String name = headerNameValues[i];
@@ -77,9 +67,13 @@ public class HttpTestUtil {
 			headers.add(new HttpHeaderImpl(name, value));
 		}
 
+		// Create the entity input stream
+		NioInputStreamImpl inputStream = new NioInputStreamImpl();
+		inputStream.queueData(entityData, false);
+
 		// Return the HTTP request
 		return new HttpRequestImpl(method, requestUri, "HTTP/1.1", headers,
-				inputBufferStream);
+				inputStream);
 	}
 
 	/**

@@ -32,9 +32,9 @@ public class SimpleClientServerTest extends SocketAccepterListenerTestCase {
 	 * Ensure can close the {@link Connection}.
 	 */
 	public void testServerCloseConnection() {
-		this.serverCloseConnection();
+		this.getServerSideConnection().close();
 		this.runServerSelect(); // Do close action
-		this.runClientSelect(""); // Allow to be closed
+		this.assertClientReceivedData(""); // Allow to be closed
 		assertFalse("Client output should be shutdown", this.getClientChannel()
 				.socket().isOutputShutdown());
 		assertFalse("Client input should be shutdown", this.getClientChannel()
@@ -48,7 +48,7 @@ public class SimpleClientServerTest extends SocketAccepterListenerTestCase {
 		this.getClientChannel().close();
 		this.runServerSelect();
 		assertTrue("Server connection should be closed", this
-				.getServerConnection().isClosed());
+				.getServerSideConnection().isClosed());
 	}
 
 	/**
@@ -56,8 +56,8 @@ public class SimpleClientServerTest extends SocketAccepterListenerTestCase {
 	 */
 	public void testWriteToServer() {
 		this.writeDataFromClientToServer("TEST");
-		this.runClientSelect("");
-		assertEquals("Incorrect received data", "TEST", this.runServerSelect());
+		this.runClientSelect();
+		this.assertServerReceivedData("TEST");
 	}
 
 	/**
@@ -65,20 +65,24 @@ public class SimpleClientServerTest extends SocketAccepterListenerTestCase {
 	 */
 	public void testReadFromServer() {
 		this.writeDataFromServerToClient("TEST");
-		assertNull("Should be no data to read", this.runServerSelect());
-		this.runClientSelect("TEST");
+		this.runServerSelect();
+		this.assertClientReceivedData("TEST");
 	}
 
 	/**
 	 * Ensure server can echo data sent by the client back to the client.
 	 */
 	public void testEcho() {
+
+		// Send to server
 		this.writeDataFromClientToServer("TEST");
-		this.runClientSelect("");
-		assertEquals("Incorrect received data", "TEST", this.runServerSelect());
+		this.runClientSelect();
+		this.assertServerReceivedData("TEST");
+
+		// Send to client
 		this.writeDataFromServerToClient("TEST");
-		assertNull("Should be no data to read", this.runServerSelect());
-		this.runClientSelect("TEST");
+		this.runServerSelect();
+		this.assertClientReceivedData("TEST");
 	}
 
 }

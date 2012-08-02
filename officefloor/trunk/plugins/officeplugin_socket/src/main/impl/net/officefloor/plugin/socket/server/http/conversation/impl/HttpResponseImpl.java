@@ -19,10 +19,8 @@
 package net.officefloor.plugin.socket.server.http.conversation.impl;
 
 import java.io.IOException;
-import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
-import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -35,14 +33,8 @@ import net.officefloor.plugin.socket.server.http.parse.HttpRequestParseException
 import net.officefloor.plugin.socket.server.http.parse.impl.HttpHeaderImpl;
 import net.officefloor.plugin.socket.server.http.protocol.HttpStatus;
 import net.officefloor.plugin.socket.server.protocol.Connection;
-import net.officefloor.plugin.stream.BufferPopulator;
-import net.officefloor.plugin.stream.BufferSquirt;
-import net.officefloor.plugin.stream.BufferSquirtFactory;
-import net.officefloor.plugin.stream.BufferStream;
-import net.officefloor.plugin.stream.InputBufferStream;
-import net.officefloor.plugin.stream.OutputBufferStream;
-import net.officefloor.plugin.stream.impl.BufferStreamImpl;
-import net.officefloor.plugin.stream.synchronise.SynchronizedOutputBufferStream;
+import net.officefloor.plugin.stream.ByteOutputStream;
+import net.officefloor.plugin.stream.impl.ByteOutputStreamImpl;
 
 /**
  * {@link HttpResponse}.
@@ -92,15 +84,9 @@ public class HttpResponseImpl implements HttpResponse {
 	private final Connection connection;
 
 	/**
-	 * {@link BufferStream} containing the body content.
+	 * {@link ByteOutputStream} containing the entity content.
 	 */
-	private final BufferStream body;
-
-	/**
-	 * {@link SynchronizedOutputBufferStream} providing access for application
-	 * to write body.
-	 */
-	private final SynchronizedOutputBufferStream safeOutputBufferStream;
+	private final ByteOutputStreamImpl entity;
 
 	/**
 	 * Version.
@@ -140,26 +126,21 @@ public class HttpResponseImpl implements HttpResponse {
 	 *            {@link HttpConversationImpl}.
 	 * @param connection
 	 *            {@link Connection}.
-	 * @param squirtFactory
-	 *            {@link BufferSquirtFactory}.
 	 * @param httpVersion
 	 *            HTTP version.
+	 * @param sendBufferSize
+	 *            Send buffer size.
 	 * @param isCloseConnectionAfterSending
 	 *            Flag indicating to close the {@link Connection} when this
 	 *            {@link HttpResponse} is sent.
 	 */
 	public HttpResponseImpl(HttpConversationImpl conversation,
-			Connection connection, BufferSquirtFactory squirtFactory,
-			String httpVersion, boolean isCloseConnectionAfterSending) {
+			Connection connection, String httpVersion, int sendBufferSize,
+			boolean isCloseConnectionAfterSending) {
 		this.conversation = conversation;
 		this.connection = connection;
 		this.isCloseConnectionAfterSending = isCloseConnectionAfterSending;
-
-		// Create the body buffer
-		this.body = new BufferStreamImpl(squirtFactory);
-		this.safeOutputBufferStream = new SynchronizedOutputBufferStream(
-				new ResponseOutputBufferStream(this.body
-						.getOutputBufferStream()), this.connection.getLock());
+		this.entity = new ByteOutputStreamImpl(connection, sendBufferSize);
 
 		// Specify initial values
 		this.version = httpVersion;
@@ -182,8 +163,7 @@ public class HttpResponseImpl implements HttpResponse {
 
 			// Clear the response to write the failure
 			this.headers.clear();
-			InputBufferStream bodyInput = this.body.getInputBufferStream();
-			bodyInput.skip(bodyInput.available());
+			this.entity.clear();
 
 			// Write the failure header details
 			if (failure instanceof HttpRequestParseException) {
@@ -197,27 +177,26 @@ public class HttpResponseImpl implements HttpResponse {
 			this.addHeader("Content-Type", PARSE_FAILURE_CONTENT_TYPE);
 
 			// Write the failure response
-			OutputBufferStream body = this.getBody();
 			String failMessage = failure.getMessage();
 			if (failMessage == null) {
 				// No message so provide type of error
 				failMessage = failure.getClass().getSimpleName();
 			}
-			body.write(failMessage
+			this.entity.write(failMessage
 					.getBytes(PARSE_FAILURE_CONTENT_ENCODING_CHARSET));
 			if (this.conversation.isSendStackTraceOnFailure()) {
 				// Provide the stack trace
-				body.write("\n\n"
+				this.entity.write("\n\n"
 						.getBytes(PARSE_FAILURE_CONTENT_ENCODING_CHARSET));
 				PrintWriter stackTraceWriter = new PrintWriter(
-						new OutputStreamWriter(body.getOutputStream(),
+						new OutputStreamWriter(this.entity,
 								PARSE_FAILURE_CONTENT_ENCODING_CHARSET));
 				failure.printStackTrace(stackTraceWriter);
 				stackTraceWriter.flush();
 			}
 
 			// Complete the response (triggers sending the failure)
-			this.getBody().close();
+			this.send();
 		}
 	}
 
@@ -264,93 +243,52 @@ public class HttpResponseImpl implements HttpResponse {
 	 *             If fails to load the content.
 	 */
 	private void write() throws IOException {
-		
-		// Obtain the output buffer stream
-		OutputBufferStream output = this.connection.getOutputBufferStream();
 
-		// Create temporary buffer
-		byte[] tempBuffer = new byte[1];
+		// TODO trigger the below on the first write
 
-		// Provide the content length
-		long contentLength = this.body.available();
-		if (contentLength < 0) {
-			// Set to 0 if less than (as may be end of stream with no data)
-			contentLength = 0;
-		}
-		this.headers.add(new HttpHeaderImpl(HEADER_NAME_CONTENT_LENGTH, String
-				.valueOf(contentLength)));
-
-		// Ensure appropriate successful status
-		if ((contentLength == 0) && (this.status == HttpStatus.SC_OK)) {
-			this.setStatus(HttpStatus.SC_NO_CONTENT);
-		}
-
-		// Write the status line
-		writeUsAscii(output, tempBuffer, this.version);
-		writeUsAscii(output, tempBuffer, " ");
-		writeUsAscii(output, tempBuffer, String.valueOf(this.status));
-		writeUsAscii(output, tempBuffer, " ");
-		writeUsAscii(output, tempBuffer, this.statusMessage);
-		writeUsAscii(output, tempBuffer, EOL);
-
-		// Write the headers
-		for (HttpHeader header : this.headers) {
-			writeUsAscii(output, tempBuffer, header.getName());
-			writeUsAscii(output, tempBuffer, ": ");
-			writeUsAscii(output, tempBuffer, header.getValue());
-			writeUsAscii(output, tempBuffer, EOL);
-		}
-		writeUsAscii(output, tempBuffer, EOL);
-
-		// Write the body
-		InputBufferStream bodyInputBufferStream = this.body
-				.getInputBufferStream();
-		while (contentLength > Integer.MAX_VALUE) {
-			bodyInputBufferStream.read(Integer.MAX_VALUE, output);
-			contentLength -= Integer.MAX_VALUE;
-		}
-		bodyInputBufferStream.read((int) contentLength, output);
-		
-		// Close the body (can not add further content)
-		bodyInputBufferStream.close();
-
-		// Response sent, determine if now close the connection
-		if (this.isCloseConnectionAfterSending) {
-			// Close the connection as should be last response sent
-			this.connection.getOutputBufferStream().close();
-		}
-	}
-
-	/**
-	 * Writes the text as US-ASCII to the {@link OutputBufferStream}.
-	 * 
-	 * @param outputBufferStream
-	 *            {@link OutputBufferStream}.
-	 * @param tempBuffer
-	 *            Temporary buffer for writing content.
-	 * @param text
-	 *            Text to be written.
-	 * @throws IOException
-	 *             If fails to write.
-	 */
-	private static void writeUsAscii(OutputBufferStream outputBufferStream,
-			byte[] tempBuffer, String text) throws IOException {
-
-		// Do not write null text
-		if (text == null) {
-			return;
-		}
-
-		// Iterate over the characters writing them
-		for (int i = 0; i < text.length(); i++) {
-			char character = text.charAt(i);
-
-			// Transform character to byte
-			tempBuffer[0] = (byte) character;
-
-			// Write byte to the output buffer stream
-			outputBufferStream.write(tempBuffer, 0, 1);
-		}
+		/*
+		 * // Obtain the output buffer stream OutputBufferStream output =
+		 * this.connection.getOutputBufferStream();
+		 * 
+		 * // Create temporary buffer byte[] tempBuffer = new byte[1];
+		 * 
+		 * // Provide the content length long contentLength =
+		 * this.body.available(); if (contentLength < 0) { // Set to 0 if less
+		 * than (as may be end of stream with no data) contentLength = 0; }
+		 * this.headers.add(new HttpHeaderImpl(HEADER_NAME_CONTENT_LENGTH,
+		 * String .valueOf(contentLength)));
+		 * 
+		 * // Ensure appropriate successful status if ((contentLength == 0) &&
+		 * (this.status == HttpStatus.SC_OK)) {
+		 * this.setStatus(HttpStatus.SC_NO_CONTENT); }
+		 * 
+		 * // Write the status line writeUsAscii(output, tempBuffer,
+		 * this.version); writeUsAscii(output, tempBuffer, " ");
+		 * writeUsAscii(output, tempBuffer, String.valueOf(this.status));
+		 * writeUsAscii(output, tempBuffer, " "); writeUsAscii(output,
+		 * tempBuffer, this.statusMessage); writeUsAscii(output, tempBuffer,
+		 * EOL);
+		 * 
+		 * // Write the headers for (HttpHeader header : this.headers) {
+		 * writeUsAscii(output, tempBuffer, header.getName());
+		 * writeUsAscii(output, tempBuffer, ": "); writeUsAscii(output,
+		 * tempBuffer, header.getValue()); writeUsAscii(output, tempBuffer,
+		 * EOL); } writeUsAscii(output, tempBuffer, EOL);
+		 * 
+		 * // Write the body InputBufferStream bodyInputBufferStream = this.body
+		 * .getInputBufferStream(); while (contentLength > Integer.MAX_VALUE) {
+		 * bodyInputBufferStream.read(Integer.MAX_VALUE, output); contentLength
+		 * -= Integer.MAX_VALUE; } bodyInputBufferStream.read((int)
+		 * contentLength, output);
+		 * 
+		 * // Close the body (can not add further content)
+		 * bodyInputBufferStream.close();
+		 * 
+		 * // Response sent, determine if now close the connection if
+		 * (this.isCloseConnectionAfterSending) { // Close the connection as
+		 * should be last response sent
+		 * this.connection.getOutputBufferStream().close(); }
+		 */
 	}
 
 	/*
@@ -459,132 +397,14 @@ public class HttpResponseImpl implements HttpResponse {
 	}
 
 	@Override
-	public OutputBufferStream getBody() {
-		return this.safeOutputBufferStream;
+	public ByteOutputStream getEntity() {
+		return this.entity;
 	}
 
 	@Override
 	public void send() throws IOException {
-		// Close the body which triggers sending response
-		this.getBody().close();
-	}
-
-	/**
-	 * Response {@link OutputBufferStream}.
-	 */
-	private class ResponseOutputBufferStream implements OutputBufferStream {
-
-		/**
-		 * Backing {@link OutputBufferStream}.
-		 */
-		private final OutputBufferStream backingStream;
-
-		/**
-		 * Initiate.
-		 * 
-		 * @param backingStream
-		 *            Backing {@link OutputBufferStream}.
-		 */
-		public ResponseOutputBufferStream(OutputBufferStream backingStream) {
-			this.backingStream = backingStream;
-		}
-
-		/*
-		 * ================ OutputBufferStream ============================
-		 */
-
-		@Override
-		public OutputStream getOutputStream() {
-			return new ResponseOutputStream(this.backingStream
-					.getOutputStream());
-		}
-
-		@Override
-		public void write(byte[] bytes) throws IOException {
-			this.backingStream.write(bytes);
-		}
-
-		@Override
-		public void write(byte[] data, int offset, int length)
-				throws IOException {
-			this.backingStream.write(data, offset, length);
-		}
-
-		@Override
-		public void write(BufferPopulator populator) throws IOException {
-			this.backingStream.write(populator);
-		}
-
-		@Override
-		public void append(ByteBuffer buffer) throws IOException {
-			this.backingStream.append(buffer);
-		}
-
-		@Override
-		public void append(BufferSquirt squirt) throws IOException {
-			this.backingStream.append(squirt);
-		}
-
-		@Override
-		public void close() throws IOException {
-			this.backingStream.close();
-
-			// Flag response complete
-			HttpResponseImpl.this.flagComplete();
-		}
-	}
-
-	/**
-	 * Response {@link OutputStream}.
-	 */
-	private class ResponseOutputStream extends OutputStream {
-
-		/**
-		 * Backing {@link OutputStream}.
-		 */
-		private final OutputStream backingStream;
-
-		/**
-		 * Initiate.
-		 * 
-		 * @param backingStream
-		 *            Backing {@link OutputStream}.
-		 */
-		public ResponseOutputStream(OutputStream backingStream) {
-			this.backingStream = backingStream;
-		}
-
-		/*
-		 * =================== OutputStream =========================
-		 */
-
-		@Override
-		public void write(int b) throws IOException {
-			this.backingStream.write(b);
-		}
-
-		@Override
-		public void write(byte[] b) throws IOException {
-			this.backingStream.write(b);
-		}
-
-		@Override
-		public void write(byte[] b, int off, int len) throws IOException {
-			this.backingStream.write(b, off, len);
-		}
-
-		@Override
-		public void flush() throws IOException {
-			this.backingStream.flush();
-		}
-
-		@Override
-		public void close() throws IOException {
-			this.backingStream.close();
-
-			// Flag response complete
-			HttpResponseImpl.this.flagComplete();
-		}
+		// Close the entity which triggers sending response
+		this.getEntity().close();
 	}
 
 }

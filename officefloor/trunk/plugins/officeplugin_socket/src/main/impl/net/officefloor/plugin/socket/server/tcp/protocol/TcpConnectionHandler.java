@@ -19,20 +19,21 @@
 package net.officefloor.plugin.socket.server.tcp.protocol;
 
 import java.io.IOException;
+import java.nio.ByteBuffer;
 
-import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.spi.managedobject.AsynchronousListener;
 import net.officefloor.frame.spi.managedobject.AsynchronousManagedObject;
-import net.officefloor.frame.spi.managedobject.source.ManagedObjectExecuteContext;
-import net.officefloor.plugin.socket.server.WriteContext;
-import net.officefloor.plugin.socket.server.protocol.CommunicationProtocol;
 import net.officefloor.plugin.socket.server.protocol.Connection;
 import net.officefloor.plugin.socket.server.protocol.ConnectionHandler;
 import net.officefloor.plugin.socket.server.protocol.HeartBeatContext;
 import net.officefloor.plugin.socket.server.protocol.ReadContext;
+import net.officefloor.plugin.socket.server.protocol.WriteBuffer;
 import net.officefloor.plugin.socket.server.tcp.ServerTcpConnection;
-import net.officefloor.plugin.stream.InputBufferStream;
-import net.officefloor.plugin.stream.OutputBufferStream;
+import net.officefloor.plugin.stream.ByteOutputStream;
+import net.officefloor.plugin.stream.NioInputStream;
+import net.officefloor.plugin.stream.WriteBufferReceiver;
+import net.officefloor.plugin.stream.impl.ByteOutputStreamImpl;
+import net.officefloor.plugin.stream.impl.NioInputStreamImpl;
 
 /**
  * TCP {@link ConnectionHandler}.
@@ -40,7 +41,7 @@ import net.officefloor.plugin.stream.OutputBufferStream;
  * @author Daniel Sagenschneider
  */
 public class TcpConnectionHandler implements ConnectionHandler,
-		AsynchronousManagedObject, ServerTcpConnection {
+		AsynchronousManagedObject, WriteBufferReceiver, ServerTcpConnection {
 
 	/**
 	 * Value of {@link #idleSinceTimestamp} if the {@link Connection} is not
@@ -49,9 +50,9 @@ public class TcpConnectionHandler implements ConnectionHandler,
 	private static final long NON_IDLE_SINCE_TIMESTAMP = -1;
 
 	/**
-	 * {@link CommunicationProtocol}.
+	 * {@link TcpCommunicationProtocol}.
 	 */
-	private final CommunicationProtocol<TcpConnectionHandler> server;
+	private final TcpCommunicationProtocol protocol;
 
 	/**
 	 * {@link Connection}.
@@ -64,9 +65,14 @@ public class TcpConnectionHandler implements ConnectionHandler,
 	private final long maxIdleTime;
 
 	/**
-	 * Flag indicating if read started.
+	 * {@link NioInputStream}.
 	 */
-	private boolean isReadStarted = false;
+	private final NioInputStreamImpl inputStream = new NioInputStreamImpl();
+
+	/**
+	 * {@link ByteOutputStream}.
+	 */
+	private final ByteOutputStreamImpl outputStream;
 
 	/**
 	 * Flag indicating if process started.
@@ -81,70 +87,47 @@ public class TcpConnectionHandler implements ConnectionHandler,
 	/**
 	 * Initiate.
 	 * 
-	 * @param server
-	 *            {@link CommunicationProtocol}.
+	 * @param protocol
+	 *            {@link TcpCommunicationProtocol}.
 	 * @param connection
 	 *            {@link Connection}.
+	 * @param receiverBufferSize
+	 *            Receiver buffer size.
 	 * @param maxIdleTime
 	 *            Maximum idle time for the {@link Connection} measured in
 	 *            milliseconds.
 	 */
-	public TcpConnectionHandler(CommunicationProtocol<TcpConnectionHandler> server,
-			Connection connection, long maxIdleTime) {
-		this.server = server;
+	public TcpConnectionHandler(TcpCommunicationProtocol protocol,
+			Connection connection, int writeBufferSize, long maxIdleTime) {
+		this.protocol = protocol;
 		this.connection = connection;
 		this.maxIdleTime = maxIdleTime;
-	}
 
-	/**
-	 * <p>
-	 * Called by the {@link TcpServer} to start processing the
-	 * {@link Connection} of this {@link ConnectionHandler}.
-	 * <p>
-	 * Called within the lock on the {@link Connection}.
-	 * 
-	 * @param newConnectionFlowIndex
-	 *            Flow index to handle a new connection.
-	 * @param executeContext
-	 *            {@link ManagedObjectExecuteContext}.
-	 */
-	public void invokeProcess(int newConnectionFlowIndex,
-			ManagedObjectExecuteContext<Indexed> executeContext) {
-
-		// Only invoke the process once
-		if (!this.isProcessStarted) {
-
-			// Invokes the process
-			executeContext.invokeProcess(newConnectionFlowIndex, this, this, 0);
-
-			// Indicate process started
-			this.isProcessStarted = true;
-		}
+		// Create the output stream
+		this.outputStream = new ByteOutputStreamImpl(this, writeBufferSize);
 	}
 
 	/*
-	 * ==================================================================
-	 * ConnectionHandler
+	 * ====================== ConnectionHandler =======================
 	 * 
 	 * Thread-safe by the lock taken in SockerListener.
-	 * ==================================================================
 	 */
 
 	@Override
-	public void handleIdleConnection(HeartBeatContext context) throws IOException {
+	public void handleHeartbeat(HeartBeatContext context) throws IOException {
 
 		// Determine if have to handle connection idle too long
 		if (this.idleSinceTimestamp == NON_IDLE_SINCE_TIMESTAMP) {
 			// Connection has now become idle
 			this.idleSinceTimestamp = context.getTime();
+
 		} else {
 			// Connection already idle so determine if idle too long
 			long currentTime = context.getTime();
 			long idleTime = currentTime - this.idleSinceTimestamp;
 			if (idleTime > this.maxIdleTime) {
 				// Connection idle too long so close
-				this.connection.getOutputBufferStream().close();
-				context.setCloseConnection(true);
+				this.connection.close();
 
 				// Awake potential waiting process on client data
 				synchronized (this.getLock()) {
@@ -164,28 +147,46 @@ public class TcpConnectionHandler implements ConnectionHandler,
 
 		// Indicate data available from client
 		synchronized (this.getLock()) {
+
+			// Write the data
+			byte[] data = context.getData();
+			this.inputStream.queueData(data, true);
+
+			// Notify potential waiting servicing
 			if (this.asynchronousListener != null) {
 				this.asynchronousListener.notifyComplete();
 			}
 		}
 
-		// Always new message on start reading to kick of processing
-		if (!this.isReadStarted) {
-			// To ensure streaming always input first read
-			this.server.processRequest(this, null);
-
-			// Flag that the read has started
-			this.isReadStarted = true;
+		// Only trigger servicing the connection once
+		if (!this.isProcessStarted) {
+			this.protocol.serviceConnection(this);
+			this.isProcessStarted = true;
 		}
 	}
 
+	/*
+	 * =================== WriteBufferReceiver ============================+
+	 */
+
 	@Override
-	public void handleWrite(WriteContext context) {
+	public WriteBuffer createWriteBuffer(byte[] data, int length) {
+		return this.connection.createWriteBuffer(data, length);
+	}
+
+	@Override
+	public WriteBuffer createWriteBuffer(ByteBuffer buffer) {
+		return this.connection.createWriteBuffer(buffer);
+	}
+
+	@Override
+	public void writeData(WriteBuffer[] data) {
 
 		// Connection not idle
 		this.idleSinceTimestamp = NON_IDLE_SINCE_TIMESTAMP;
 
-		// Just keep writing
+		// Write the data
+		this.connection.writeData(data);
 	}
 
 	/*
@@ -220,16 +221,11 @@ public class TcpConnectionHandler implements ConnectionHandler,
 	}
 
 	@Override
-	public InputBufferStream getInputBufferStream() {
-		return this.connection.getInputBufferStream();
-	}
-
-	@Override
 	public void waitOnClientData() throws IOException {
 		synchronized (this.getLock()) {
 
 			// Determine if data available to read
-			if (this.connection.getInputBufferStream().available() > 0) {
+			if (this.inputStream.available() > 0) {
 				// Data is available, so do not wait
 				return;
 			}
@@ -240,8 +236,13 @@ public class TcpConnectionHandler implements ConnectionHandler,
 	}
 
 	@Override
-	public OutputBufferStream getOutputBufferStream() {
-		return this.connection.getOutputBufferStream();
+	public NioInputStream getInputStream() {
+		return this.inputStream;
+	}
+
+	@Override
+	public ByteOutputStream getOutputStream() {
+		return this.outputStream;
 	}
 
 }
