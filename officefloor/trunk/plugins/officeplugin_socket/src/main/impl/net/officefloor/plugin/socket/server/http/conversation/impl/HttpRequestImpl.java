@@ -18,12 +18,11 @@
 
 package net.officefloor.plugin.socket.server.http.conversation.impl;
 
-import java.io.IOException;
 import java.util.List;
 
 import net.officefloor.plugin.socket.server.http.HttpHeader;
 import net.officefloor.plugin.socket.server.http.HttpRequest;
-import net.officefloor.plugin.stream.InputBufferStream;
+import net.officefloor.plugin.stream.NioInputStream;
 
 /**
  * {@link HttpRequest} implementation.
@@ -53,9 +52,9 @@ public class HttpRequestImpl implements HttpRequest {
 	private final List<HttpHeader> headers;
 
 	/**
-	 * Body.
+	 * Entity.
 	 */
-	private final InputBufferStream body;
+	private final NioInputStream entity;
 
 	/**
 	 * Initiate.
@@ -68,27 +67,16 @@ public class HttpRequestImpl implements HttpRequest {
 	 *            HTTP version.
 	 * @param headers
 	 *            {@link HttpHeader} instances.
-	 * @param body
-	 *            {@link InputBufferStream} to the body.
+	 * @param entity
+	 *            {@link NioInputStream} to the entity.
 	 */
 	public HttpRequestImpl(String method, String requestURI,
-			String httpVersion, List<HttpHeader> headers, InputBufferStream body) {
+			String httpVersion, List<HttpHeader> headers, NioInputStream entity) {
 		this.method = method;
 		this.requestURI = requestURI;
 		this.version = httpVersion;
 		this.headers = headers;
-		this.body = body;
-	}
-
-	/**
-	 * Cleans up this {@link HttpRequest}.
-	 * 
-	 * @throws IOException
-	 *             If fails to clean up.
-	 */
-	void cleanup() throws IOException {
-		// Close the body to clean it up
-		this.body.close();
+		this.entity = entity;
 	}
 
 	/*
@@ -116,8 +104,8 @@ public class HttpRequestImpl implements HttpRequest {
 	}
 
 	@Override
-	public InputBufferStream getBody() {
-		return this.body;
+	public NioInputStream getEntity() {
+		return this.entity;
 	}
 
 }

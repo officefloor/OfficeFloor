@@ -28,7 +28,7 @@ import net.officefloor.frame.spi.managedobject.source.impl.AbstractAsyncManagedO
  * 
  * @author Daniel Sagenschneider
  */
-public interface CommunicationProtocolSource<CH extends ConnectionHandler> {
+public interface CommunicationProtocolSource {
 
 	/**
 	 * Loads any specifications for this communication protocol.
@@ -49,7 +49,7 @@ public interface CommunicationProtocolSource<CH extends ConnectionHandler> {
 	 * @throws Exception
 	 *             If fails to create the {@link CommunicationProtocol}.
 	 */
-	CommunicationProtocol createServer(
+	CommunicationProtocol createCommunicationProtocol(
 			MetaDataContext<None, Indexed> configurationContext,
 			CommunicationProtocolContext protocolContext) throws Exception;
 

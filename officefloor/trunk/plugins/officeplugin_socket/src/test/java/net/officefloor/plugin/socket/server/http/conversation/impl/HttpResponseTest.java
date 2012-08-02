@@ -18,6 +18,7 @@
 
 package net.officefloor.plugin.socket.server.http.conversation.impl;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
@@ -27,7 +28,6 @@ import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 import java.util.LinkedList;
-import java.util.List;
 
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.socket.server.http.HttpHeader;
@@ -37,21 +37,17 @@ import net.officefloor.plugin.socket.server.http.conversation.HttpManagedObject;
 import net.officefloor.plugin.socket.server.http.parse.HttpRequestParseException;
 import net.officefloor.plugin.socket.server.http.parse.UsAsciiUtil;
 import net.officefloor.plugin.socket.server.http.protocol.HttpStatus;
+import net.officefloor.plugin.socket.server.impl.ArrayWriteBuffer;
 import net.officefloor.plugin.socket.server.protocol.Connection;
-import net.officefloor.plugin.stream.BufferSquirt;
-import net.officefloor.plugin.stream.BufferSquirtFactory;
-import net.officefloor.plugin.stream.BufferStream;
-import net.officefloor.plugin.stream.InputBufferStream;
-import net.officefloor.plugin.stream.OutputBufferStream;
-import net.officefloor.plugin.stream.impl.BufferStreamImpl;
-import net.officefloor.plugin.stream.squirtfactory.HeapByteBufferSquirtFactory;
+import net.officefloor.plugin.socket.server.protocol.WriteBuffer;
+import net.officefloor.plugin.stream.impl.NioInputStreamImpl;
 
 /**
  * Tests the {@link HttpResponseImpl}.
  * 
  * @author Daniel Sagenschneider
  */
-public class HttpResponseTest extends OfficeFrameTestCase {
+public class HttpResponseTest extends OfficeFrameTestCase implements Connection {
 
 	/**
 	 * End of line token.
@@ -66,8 +62,7 @@ public class HttpResponseTest extends OfficeFrameTestCase {
 	/**
 	 * Contains the content written on the wire.
 	 */
-	private final BufferStream wire = new BufferStreamImpl(
-			new HeapByteBufferSquirtFactory(1024));
+	private final ByteArrayOutputStream wire = new ByteArrayOutputStream();
 
 	/**
 	 * {@link HttpConversation} to create the {@link HttpResponse}.
@@ -75,17 +70,12 @@ public class HttpResponseTest extends OfficeFrameTestCase {
 	private HttpConversation conversation = this.createHttpConversation(false);
 
 	/**
-	 * Listing of {@link MockBufferSquirt} instances.
-	 */
-	private final List<MockBufferSquirt> squirts = new LinkedList<MockBufferSquirt>();
-
-	/**
 	 * Ensure can send a simple response.
 	 */
 	public void testSimpleResponse() throws IOException {
 		HttpResponse response = this.createHttpResponse();
 		this.writeBody(response, "TEST");
-		response.getBody().close();
+		response.getEntity().close();
 		this.assertWireContent("HTTP/1.1 200 OK\nContent-Length: 4\n\nTEST");
 	}
 
@@ -94,7 +84,7 @@ public class HttpResponseTest extends OfficeFrameTestCase {
 	 */
 	public void testNoContent() throws IOException {
 		HttpResponse response = this.createHttpResponse();
-		response.getBody().close();
+		response.getEntity().close();
 		this.assertWireContent("HTTP/1.1 204 No Content\nContent-Length: 0\n\n");
 	}
 
@@ -217,6 +207,13 @@ public class HttpResponseTest extends OfficeFrameTestCase {
 				+ "Content-Length: " + contentLength + "\n\n" + content);
 	}
 
+	/**
+	 * Ensure appropriately provides header to cached {@link ByteBuffer}.
+	 */
+	public void testSendCachedByteBuffer() {
+		fail("TODO implement sending for cached ByteBuffer");
+	}
+
 	/*
 	 * ===================== Helper methods ==============================
 	 */
@@ -229,13 +226,7 @@ public class HttpResponseTest extends OfficeFrameTestCase {
 	 */
 	private HttpConversation createHttpConversation(
 			boolean isSendStackTraceOnFailure) {
-		return new HttpConversationImpl(new MockConnection(),
-				new BufferSquirtFactory() {
-					@Override
-					public BufferSquirt createBufferSquirt() {
-						return new MockBufferSquirt();
-					}
-				}, isSendStackTraceOnFailure);
+		return new HttpConversationImpl(this, 1024, isSendStackTraceOnFailure);
 	}
 
 	/**
@@ -244,20 +235,15 @@ public class HttpResponseTest extends OfficeFrameTestCase {
 	 * @return New {@link HttpResponse}.
 	 */
 	private HttpResponse createHttpResponse() {
-		try {
-			// Add the request
-			HttpManagedObject mo = this.conversation.addRequest("GET", "/mock",
-					"HTTP/1.1", new LinkedList<HttpHeader>(),
-					new BufferStreamImpl(ByteBuffer.wrap(new byte[0]))
-							.getInputBufferStream());
 
-			// Return the http response from managed object
-			return mo.getServerHttpConnection().getHttpResponse();
+		// Add the request
+		NioInputStreamImpl entity = new NioInputStreamImpl();
+		entity.queueData(null, false);
+		HttpManagedObject mo = this.conversation.addRequest("GET", "/mock",
+				"HTTP/1.1", new LinkedList<HttpHeader>(), entity);
 
-		} catch (IOException ex) {
-			fail("Should not fail to add request: " + ex.getMessage());
-			return null; // should fail
-		}
+		// Return the http response from managed object
+		return mo.getServerHttpConnection().getHttpResponse();
 	}
 
 	/**
@@ -271,8 +257,7 @@ public class HttpResponseTest extends OfficeFrameTestCase {
 	private void writeBody(HttpResponse response, String content) {
 
 		// Create the writer for the body
-		Writer writer = new OutputStreamWriter(response.getBody()
-				.getOutputStream(), US_ASCII);
+		Writer writer = new OutputStreamWriter(response.getEntity(), US_ASCII);
 
 		// Write the body content
 		try {
@@ -311,19 +296,8 @@ public class HttpResponseTest extends OfficeFrameTestCase {
 				.convertToHttp(expectedContent));
 		expectedHttpContent = expectedHttpContent.replace(EOLN_TOKEN, "\n");
 
-		// Obtain the response on the wire
-		InputBufferStream wireInput = this.wire.getInputBufferStream();
-		byte[] wireContent;
-		try {
-			wireContent = new byte[(int) wireInput.available()];
-			wireInput.read(wireContent);
-		} catch (IOException ex) {
-			fail("Should not fail on wire read: " + ex.getMessage());
-			return; // fails above
-		}
-
 		// Validate the response on the wire
-		String wireText = UsAsciiUtil.convertToString(wireContent);
+		String wireText = UsAsciiUtil.convertToString(this.wire.toByteArray());
 		assertEquals("Incorrect wire content", expectedHttpContent, wireText);
 	}
 
@@ -344,96 +318,62 @@ public class HttpResponseTest extends OfficeFrameTestCase {
 	}
 
 	/*
-	 * ========================== TestCase ====================================
+	 * ========================= WriteBufferReceiver ===========================
 	 */
+
 	@Override
-	protected void tearDown() throws Exception {
-		// Ensure all squirts are closed
-		for (int i = 0; i < this.squirts.size(); i++) {
-			MockBufferSquirt squirt = this.squirts.get(i);
-			assertTrue("Squirt " + i + " must be closed", squirt.isClosed);
+	public WriteBuffer createWriteBuffer(byte[] data, int length) {
+		return new ArrayWriteBuffer(data, length);
+	}
+
+	@Override
+	public WriteBuffer createWriteBuffer(ByteBuffer buffer) {
+		// TODO implement WriteBufferReceiver.createWriteBuffer
+		throw new UnsupportedOperationException(
+				"TODO implement WriteBufferReceiver.createWriteBuffer");
+	}
+
+	@Override
+	public void writeData(WriteBuffer[] data) {
+		// Write the data to the wire
+		for (WriteBuffer buffer : data) {
+			this.wire.write(buffer.getData(), 0, buffer.length());
 		}
 	}
 
-	/**
-	 * Mock {@link BufferSquirt}.
-	 */
-	private class MockBufferSquirt implements BufferSquirt {
-
-		/**
-		 * {@link ByteBuffer}.
-		 */
-		private final ByteBuffer buffer = ByteBuffer.allocate(1024);
-
-		/**
-		 * Flags if this {@link BufferSquirt} was closed.
-		 */
-		public volatile boolean isClosed = false;
-
-		/**
-		 * Register this {@link BufferSquirt}.
-		 */
-		public MockBufferSquirt() {
-			HttpResponseTest.this.squirts.add(this);
-		}
-
-		/*
-		 * ====================== BufferSquirt ===========================
-		 */
-
-		@Override
-		public ByteBuffer getBuffer() {
-			return this.buffer;
-		}
-
-		@Override
-		public void close() {
-			this.isClosed = true;
-		}
+	@Override
+	public Object getLock() {
+		fail("Should not be invoked");
+		return null;
 	}
 
-	/**
-	 * Mock {@link Connection}.
-	 */
-	private class MockConnection implements Connection {
+	@Override
+	public boolean isSecure() {
+		fail("Should not be invoked");
+		return false;
+	}
 
-		/*
-		 * ================== Connection ===========================
-		 */
+	@Override
+	public void close() {
+		fail("Should not be invoked");
+	}
 
-		@Override
-		public Object getLock() {
-			return HttpResponseTest.this.wire;
-		}
+	@Override
+	public boolean isClosed() {
+		fail("Should not be invoked");
+		return false;
+	}
 
-		@Override
-		public InetSocketAddress getLocalAddress() {
-			fail("Local InetSocketAddress should not be required for writing HTTP response");
-			return null;
-		}
+	@Override
+	public InetSocketAddress getLocalAddress() {
+		fail("Should not be invoked");
+		return null;
+	}
 
-		@Override
-		public InetSocketAddress getRemoteAddress() {
-			fail("Remote InetSocketAddress should not be required for writing HTTP response");
-			return null;
-		}
-
-		@Override
-		public boolean isSecure() {
-			fail("Determine if secure should not be required for writing HTTP response");
-			return false;
-		}
-
-		@Override
-		public InputBufferStream getInputBufferStream() {
-			fail("Should not input from connection for response");
-			return null;
-		}
-
-		@Override
-		public OutputBufferStream getOutputBufferStream() {
-			return HttpResponseTest.this.wire.getOutputBufferStream();
-		}
+	@Override
+	public InetSocketAddress getRemoteAddress() {
+		fail("Should not be invoked");
+		return null;
 	}
 
 }

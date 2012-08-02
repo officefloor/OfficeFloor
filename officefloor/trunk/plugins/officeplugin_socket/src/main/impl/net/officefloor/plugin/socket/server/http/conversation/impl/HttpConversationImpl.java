@@ -29,8 +29,7 @@ import net.officefloor.plugin.socket.server.http.conversation.HttpConversation;
 import net.officefloor.plugin.socket.server.http.conversation.HttpManagedObject;
 import net.officefloor.plugin.socket.server.http.parse.HttpRequestParseException;
 import net.officefloor.plugin.socket.server.protocol.Connection;
-import net.officefloor.plugin.stream.BufferSquirtFactory;
-import net.officefloor.plugin.stream.InputBufferStream;
+import net.officefloor.plugin.stream.NioInputStream;
 
 /**
  * Manages the HTTP conversation on a {@link Connection}.
@@ -45,14 +44,14 @@ public class HttpConversationImpl implements HttpConversation {
 	private final Connection connection;
 
 	/**
-	 * {@link BufferSquirtFactory}.
-	 */
-	private final BufferSquirtFactory bufferSquirtFactory;
-
-	/**
 	 * {@link HttpManagedObjectImpl} instances.
 	 */
 	private final List<HttpManagedObjectImpl> managedObjects = new LinkedList<HttpManagedObjectImpl>();
+
+	/**
+	 * Size of the send buffers.
+	 */
+	private final int sendBufferSize;
 
 	/**
 	 * Flags whether to send the stack trace on failure.
@@ -64,16 +63,15 @@ public class HttpConversationImpl implements HttpConversation {
 	 * 
 	 * @param connection
 	 *            {@link Connection}.
-	 * @param bufferSquirtFactory
-	 *            {@link BufferSquirtFactory}.
+	 * @param sendBufferSize
+	 *            Size of the send buffers.
 	 * @param isSendStackTraceOnFailure
 	 *            Flags whether to send the stack trace on failure.
 	 */
-	public HttpConversationImpl(Connection connection,
-			BufferSquirtFactory bufferSquirtFactory,
+	public HttpConversationImpl(Connection connection, int sendBufferSize,
 			boolean isSendStackTraceOnFailure) {
 		this.connection = connection;
-		this.bufferSquirtFactory = bufferSquirtFactory;
+		this.sendBufferSize = sendBufferSize;
 		this.isSendStackTraceOnFailure = isSendStackTraceOnFailure;
 	}
 
@@ -115,15 +113,15 @@ public class HttpConversationImpl implements HttpConversation {
 
 	@Override
 	public HttpManagedObject addRequest(String method, String requestURI,
-			String httpVersion, List<HttpHeader> headers, InputBufferStream body) {
+			String httpVersion, List<HttpHeader> headers, NioInputStream entity) {
 
 		// Create the request
 		HttpRequestImpl request = new HttpRequestImpl(method, requestURI,
-				httpVersion, headers, body);
+				httpVersion, headers, entity);
 
 		// Create the corresponding response (keeping connection open)
 		HttpResponseImpl response = new HttpResponseImpl(this, this.connection,
-				this.bufferSquirtFactory, httpVersion, false);
+				httpVersion, this.sendBufferSize, false);
 
 		// Create the HTTP managed object
 		HttpManagedObjectImpl managedObject = new HttpManagedObjectImpl(
@@ -142,7 +140,7 @@ public class HttpConversationImpl implements HttpConversation {
 
 		// Create response for parse failure
 		HttpResponseImpl response = new HttpResponseImpl(this, this.connection,
-				this.bufferSquirtFactory, "HTTP/1.0", isCloseConnection);
+				"HTTP/1.0", this.sendBufferSize, isCloseConnection);
 
 		// Create the HTTP managed object
 		HttpManagedObjectImpl managedObject = new HttpManagedObjectImpl(

@@ -18,11 +18,13 @@
 
 package net.officefloor.plugin.socket.server.http.protocol;
 
+import java.io.IOException;
 import java.util.LinkedList;
 import java.util.List;
 
+import net.officefloor.frame.api.build.Indexed;
+import net.officefloor.frame.spi.managedobject.source.ManagedObjectExecuteContext;
 import net.officefloor.frame.test.OfficeFrameTestCase;
-import net.officefloor.plugin.socket.server.WriteContext;
 import net.officefloor.plugin.socket.server.http.HttpHeader;
 import net.officefloor.plugin.socket.server.http.HttpRequest;
 import net.officefloor.plugin.socket.server.http.conversation.HttpConversation;
@@ -33,7 +35,8 @@ import net.officefloor.plugin.socket.server.protocol.CommunicationProtocol;
 import net.officefloor.plugin.socket.server.protocol.Connection;
 import net.officefloor.plugin.socket.server.protocol.HeartBeatContext;
 import net.officefloor.plugin.socket.server.protocol.ReadContext;
-import net.officefloor.plugin.stream.InputBufferStream;
+import net.officefloor.plugin.stream.NioInputStream;
+import net.officefloor.plugin.stream.impl.NioInputStreamImpl;
 
 /**
  * Tests the {@link HttpConnectionHandler}.
@@ -53,20 +56,15 @@ public class HttpConnectionHandlerTest extends OfficeFrameTestCase {
 	private ReadContext readContext = this.createMock(ReadContext.class);
 
 	/**
-	 * Mock {@link WriteContext}.
-	 */
-	private WriteContext writeContext = this.createMock(WriteContext.class);
-
-	/**
 	 * Mock {@link HeartBeatContext}.
 	 */
-	private HeartBeatContext idleContext = this.createMock(HeartBeatContext.class);
+	private HeartBeatContext idleContext = this
+			.createMock(HeartBeatContext.class);
 
 	/**
-	 * Mock {@link InputBufferStream}.
+	 * Mock read data.
 	 */
-	private InputBufferStream inputBufferStream = this
-			.createMock(InputBufferStream.class);
+	private byte[] readData = new byte[] { 1 };
 
 	/**
 	 * Mock {@link HttpConversation}.
@@ -80,11 +78,11 @@ public class HttpConnectionHandlerTest extends OfficeFrameTestCase {
 	private HttpRequestParser parser = this.createMock(HttpRequestParser.class);
 
 	/**
-	 * Mock {@link CommunicationProtocol}.
+	 * Mock {@link ManagedObjectExecuteContext}.
 	 */
 	@SuppressWarnings("unchecked")
-	private CommunicationProtocol<HttpConnectionHandler> server = this
-			.createMock(CommunicationProtocol.class);
+	private ManagedObjectExecuteContext<Indexed> executeContext = this
+			.createMock(ManagedObjectExecuteContext.class);
 
 	/**
 	 * {@link HttpConnectionHandler} being tested.
@@ -104,7 +102,7 @@ public class HttpConnectionHandlerTest extends OfficeFrameTestCase {
 		final String requestURI = "/path";
 		final String httpVersion = "HTTP/1.1";
 		final List<HttpHeader> headers = new LinkedList<HttpHeader>();
-		final InputBufferStream body = this.createMock(InputBufferStream.class);
+		final NioInputStream entity = new NioInputStreamImpl();
 		final HttpManagedObject managedObject = this
 				.createMock(HttpManagedObject.class);
 
@@ -113,22 +111,21 @@ public class HttpConnectionHandlerTest extends OfficeFrameTestCase {
 				System.currentTimeMillis());
 		this.recordReturn(this.readContext,
 				this.readContext.getContextObject(), tempBuffer);
-		this.recordReturn(this.readContext,
-				this.readContext.getInputBufferStream(), this.inputBufferStream);
+		this.recordReturn(this.readContext, this.readContext.getData(),
+				this.readData);
 		this.recordReturn(this.parser,
-				this.parser.parse(this.inputBufferStream, tempBuffer), true);
+				this.parser.parse(this.readData, tempBuffer), true);
 		this.recordReturn(this.parser, this.parser.getMethod(), method);
 		this.recordReturn(this.parser, this.parser.getRequestURI(), requestURI);
 		this.recordReturn(this.parser, this.parser.getHttpVersion(),
 				httpVersion);
 		this.recordReturn(this.parser, this.parser.getHeaders(), headers);
-		this.recordReturn(this.parser, this.parser.getBody(), body);
+		this.recordReturn(this.parser, this.parser.getEntity(), entity);
 		this.parser.reset();
 		this.recordReturn(this.conversation, this.conversation.addRequest(
-				method, requestURI, httpVersion, headers, body), managedObject);
+				method, requestURI, httpVersion, headers, entity),
+				managedObject);
 		this.server.processRequest(this.handler, managedObject);
-		this.recordReturn(this.parser,
-				this.parser.parse(this.inputBufferStream, tempBuffer), false);
 
 		// Replay mocks
 		this.replayMockObjects();
@@ -155,9 +152,9 @@ public class HttpConnectionHandlerTest extends OfficeFrameTestCase {
 				System.currentTimeMillis());
 		this.recordReturn(this.readContext,
 				this.readContext.getContextObject(), tempBuffer);
-		this.recordReturn(this.readContext,
-				this.readContext.getInputBufferStream(), this.inputBufferStream);
-		this.parser.parse(this.inputBufferStream, tempBuffer);
+		this.recordReturn(this.readContext, this.readContext.getData(),
+				this.readData);
+		this.parser.parse(this.readData, tempBuffer);
 		this.control(this.parser).setThrowable(failure);
 		this.conversation.parseFailure(failure, true);
 
@@ -172,18 +169,22 @@ public class HttpConnectionHandlerTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensures does nothing on write.
+	 * Ensures checks idle time.
 	 */
-	public void testWrite() {
+	public void testIdleByRead() throws IOException {
 
 		// Record actions
-		this.recordReturn(this.writeContext, this.writeContext.getTime(), 1000);
+		this.recordReturn(this.readContext, this.readContext.getTime(), 1000);
+		this.recordReturn(this.idleContext, this.idleContext.getTime(), 1000);
 
 		// Replay mocks
 		this.replayMockObjects();
 
-		// Handle the write
-		this.handler.handleWrite(this.writeContext);
+		// Invoke read to set last interaction time
+		this.handler.handleRead(this.readContext);
+
+		// Handle the idle (not timing out)
+		this.handler.handleHeartbeat(this.idleContext);
 
 		// Verify mocks
 		this.verifyMockObjects();
@@ -192,20 +193,21 @@ public class HttpConnectionHandlerTest extends OfficeFrameTestCase {
 	/**
 	 * Ensures checks idle time.
 	 */
-	public void testIdle() {
+	public void testIdleByWrite() {
 
 		// Record actions
-		this.recordReturn(this.writeContext, this.writeContext.getTime(), 1000);
+		// TODO record writing
+		fail("TODO record writing");
 		this.recordReturn(this.idleContext, this.idleContext.getTime(), 1000);
 
 		// Replay mocks
 		this.replayMockObjects();
 
 		// Invoke write to set last interaction time
-		this.handler.handleWrite(this.writeContext);
+		// TODO undertake write
 
-		// Handle the idle
-		this.handler.handleIdleConnection(this.idleContext);
+		// Handle the idle (not timing out)
+		this.handler.handleHeartbeat(this.idleContext);
 
 		// Verify mocks
 		this.verifyMockObjects();
@@ -221,24 +223,24 @@ public class HttpConnectionHandlerTest extends OfficeFrameTestCase {
 		final long START_TIME = System.currentTimeMillis();
 		final long FIRST_IDLE_TIME = START_TIME + CONNECTION_TIMEOUT - 1;
 		final long SECOND_IDLE_TIME = START_TIME + CONNECTION_TIMEOUT;
-		this.recordReturn(this.writeContext, this.writeContext.getTime(),
+		this.recordReturn(this.readContext, this.readContext.getTime(),
 				START_TIME);
 		this.recordReturn(this.idleContext, this.idleContext.getTime(),
 				FIRST_IDLE_TIME);
 		this.recordReturn(this.idleContext, this.idleContext, SECOND_IDLE_TIME);
-		this.idleContext.setCloseConnection(true);
+		this.conversation.getConnection().close();
 
 		// Replay mocks
 		this.replayMockObjects();
 
-		// Invoke write to set last interaction time
-		this.handler.handleWrite(this.writeContext);
+		// Invoke read to set last interaction time
+		this.handler.handleRead(this.readContext);
 
 		// Invoke idle that is not timed out
-		this.handler.handleIdleConnection(this.idleContext);
+		this.handler.handleHeartbeat(this.idleContext);
 
 		// Invoke idle that times out connection
-		this.handler.handleIdleConnection(this.idleContext);
+		this.handler.handleHeartbeat(this.idleContext);
 
 		// Verify mocks
 		this.verifyMockObjects();
@@ -256,16 +258,16 @@ public class HttpConnectionHandlerTest extends OfficeFrameTestCase {
 		this.recordReturn(this.idleContext, this.idleContext.getTime(),
 				START_TIME);
 		this.recordReturn(this.idleContext, this.idleContext, TIMEOUT_IDLE_TIME);
-		this.idleContext.setCloseConnection(true);
+		this.conversation.getConnection().close();
 
 		// Replay mocks
 		this.replayMockObjects();
 
 		// Invoke idle waiting on data
-		this.handler.handleIdleConnection(this.idleContext);
+		this.handler.handleHeartbeat(this.idleContext);
 
 		// Invoke idle still waiting on data and times out
-		this.handler.handleIdleConnection(this.idleContext);
+		this.handler.handleHeartbeat(this.idleContext);
 
 		// Verify mocks
 		this.verifyMockObjects();

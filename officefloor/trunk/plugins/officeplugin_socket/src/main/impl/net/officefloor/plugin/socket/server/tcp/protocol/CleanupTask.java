@@ -26,7 +26,7 @@ import net.officefloor.plugin.socket.server.tcp.ServerTcpConnection;
 
 /**
  * Cleans up the {@link ServerTcpConnection}.
- *
+ * 
  * @author Daniel Sagenschneider
  */
 public class CleanupTask extends AbstractSingleTask<Work, None, None> {
@@ -43,7 +43,7 @@ public class CleanupTask extends AbstractSingleTask<Work, None, None> {
 		TcpConnectionHandler connection = this
 				.getRecycleManagedObjectParameter(context,
 						TcpConnectionHandler.class).getManagedObject();
-		connection.getOutputBufferStream().close();
+		connection.getOutputStream().close();
 
 		// No further processing
 		return null;

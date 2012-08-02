@@ -39,9 +39,9 @@ public class ByteOutputStreamImpl extends ByteOutputStream {
 	private final WriteBufferReceiver receiver;
 
 	/**
-	 * Receiver buffer size.
+	 * Write buffer size.
 	 */
-	private final int receiverBufferSize;
+	private final int writeBufferSize;
 
 	/**
 	 * Current data.
@@ -63,13 +63,25 @@ public class ByteOutputStreamImpl extends ByteOutputStream {
 	 * 
 	 * @param receiver
 	 *            {@link WriteBufferReceiver}.
-	 * @param receiverBufferSize
-	 *            Receiver buffer size.
+	 * @param writeBufferSize
+	 *            Write buffer size.
 	 */
 	public ByteOutputStreamImpl(WriteBufferReceiver receiver,
-			int receiverBufferSize) {
+			int writeBufferSize) {
 		this.receiver = receiver;
-		this.receiverBufferSize = receiverBufferSize;
+		this.writeBufferSize = writeBufferSize;
+	}
+
+	/**
+	 * Clears the content.
+	 * 
+	 * @throws IOException
+	 *             If content already provided to {@link WriteBufferReceiver}.
+	 */
+	public void clear() throws IOException {
+		// TODO implement ByteOutputStreamImpl.clear()
+		throw new UnsupportedOperationException(
+				"TODO implement ByteOutputStreamImpl.clear()");
 	}
 
 	/*
@@ -89,7 +101,7 @@ public class ByteOutputStreamImpl extends ByteOutputStream {
 		// Ensure have current data
 		if (this.currentData == null) {
 			// Provide new data for writing
-			this.currentData = new byte[this.receiverBufferSize];
+			this.currentData = new byte[this.writeBufferSize];
 
 			// Write byte immediately
 			this.currentData[0] = (byte) b;
