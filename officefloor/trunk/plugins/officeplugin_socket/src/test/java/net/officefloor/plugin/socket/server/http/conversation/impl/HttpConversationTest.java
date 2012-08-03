@@ -337,7 +337,7 @@ public class HttpConversationTest extends OfficeFrameTestCase {
 		}
 
 		// Create the entity for the request
-		NioInputStreamImpl entityStream = new NioInputStreamImpl();
+		NioInputStreamImpl entityStream = new NioInputStreamImpl(new Object());
 		entity = ((entity == null) || (entity.length() == 0)) ? "" : entity;
 		entityStream.queueData(UsAsciiUtil.convertToUsAscii(entity), false);
 

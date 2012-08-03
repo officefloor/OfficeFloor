@@ -21,19 +21,17 @@ package net.officefloor.plugin.socket.server.http.protocol;
 import java.io.IOException;
 import java.util.List;
 
-import net.officefloor.plugin.socket.server.WriteContext;
 import net.officefloor.plugin.socket.server.http.HttpHeader;
 import net.officefloor.plugin.socket.server.http.HttpRequest;
 import net.officefloor.plugin.socket.server.http.conversation.HttpConversation;
 import net.officefloor.plugin.socket.server.http.conversation.HttpManagedObject;
 import net.officefloor.plugin.socket.server.http.parse.HttpRequestParseException;
 import net.officefloor.plugin.socket.server.http.parse.HttpRequestParser;
-import net.officefloor.plugin.socket.server.protocol.CommunicationProtocol;
 import net.officefloor.plugin.socket.server.protocol.Connection;
 import net.officefloor.plugin.socket.server.protocol.ConnectionHandler;
 import net.officefloor.plugin.socket.server.protocol.HeartBeatContext;
 import net.officefloor.plugin.socket.server.protocol.ReadContext;
-import net.officefloor.plugin.stream.InputBufferStream;
+import net.officefloor.plugin.stream.NioInputStream;
 
 /**
  * HTTP {@link ConnectionHandler}.
@@ -43,9 +41,9 @@ import net.officefloor.plugin.stream.InputBufferStream;
 public class HttpConnectionHandler implements ConnectionHandler {
 
 	/**
-	 * {@link CommunicationProtocol}.
+	 * {@link HttpCommunicationProtocol}.
 	 */
-	private final CommunicationProtocol server;
+	private final HttpCommunicationProtocol communicationProtocol;
 
 	/**
 	 * {@link HttpConversation}.
@@ -82,8 +80,8 @@ public class HttpConnectionHandler implements ConnectionHandler {
 	/**
 	 * Initiate.
 	 * 
-	 * @param server
-	 *            {@link CommunicationProtocol}.
+	 * @param communicationProtocol
+	 *            {@link HttpCommunicationProtocol}.
 	 * @param conversation
 	 *            {@link HttpConversation}.
 	 * @param parser
@@ -93,10 +91,11 @@ public class HttpConnectionHandler implements ConnectionHandler {
 	 * @param connectionTimeout
 	 *            {@link Connection} timeout in milliseconds.
 	 */
-	public HttpConnectionHandler(CommunicationProtocol server,
+	public HttpConnectionHandler(
+			HttpCommunicationProtocol communicationProtocol,
 			HttpConversation conversation, HttpRequestParser parser,
 			int maxTextPartLength, long connectionTimeout) {
-		this.server = server;
+		this.communicationProtocol = communicationProtocol;
 		this.conversation = conversation;
 		this.parser = parser;
 		this.maxTextPartLength = maxTextPartLength;
@@ -128,25 +127,28 @@ public class HttpConnectionHandler implements ConnectionHandler {
 			}
 
 			// Loop as may have more than one request on read
-			InputBufferStream inputBufferStream = context
-					.getInputBufferStream();
+			byte[] readData = context.getData();
 			for (;;) {
+
+				// TODO handle not all data being read
+
 				// Attempt to parse the remaining content of request
-				if (this.parser.parse(inputBufferStream, tempBuffer)) {
+				if (this.parser.parse(readData, tempBuffer)) {
 
 					// Received the full HTTP request to start processing
 					String method = this.parser.getMethod();
 					String requestURI = this.parser.getRequestURI();
 					String httpVersion = this.parser.getHttpVersion();
 					List<HttpHeader> headers = this.parser.getHeaders();
-					InputBufferStream body = this.parser.getBody();
+					NioInputStream entity = this.parser.getEntity();
 					this.parser.reset(); // reset for next request
 
-					// Process the request
+					// Service the request
 					HttpManagedObject managedObject = this.conversation
 							.addRequest(method, requestURI, httpVersion,
-									headers, body);
-					this.server.processRequest(this, managedObject);
+									headers, entity);
+					this.communicationProtocol.serviceHttpRequest(this,
+							managedObject);
 
 				} else {
 					// No further content to parse
@@ -188,7 +190,7 @@ public class HttpConnectionHandler implements ConnectionHandler {
 
 		// Close connection if idle too long
 		if (timeIdle >= this.connectionTimout) {
-			context.setCloseConnection(true);
+			this.conversation.getConnection().close();
 		}
 	}
 

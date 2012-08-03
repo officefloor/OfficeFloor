@@ -43,7 +43,7 @@ import net.officefloor.plugin.socket.server.protocol.CommunicationProtocolSource
  * @author Daniel Sagenschneider
  */
 public class HttpServerSocketManagedObjectSource extends
-		AbstractServerSocketManagedObjectSource<HttpConnectionHandler>
+		AbstractServerSocketManagedObjectSource
 		implements
 		ManagedObjectSourceService<None, Indexed, HttpServerSocketManagedObjectSource> {
 
@@ -128,7 +128,7 @@ public class HttpServerSocketManagedObjectSource extends
 	 */
 
 	@Override
-	protected CommunicationProtocolSource<HttpConnectionHandler> createCommunicationProtocol() {
+	protected CommunicationProtocolSource createCommunicationProtocolSource() {
 		return new HttpCommunicationProtocol();
 	}
 

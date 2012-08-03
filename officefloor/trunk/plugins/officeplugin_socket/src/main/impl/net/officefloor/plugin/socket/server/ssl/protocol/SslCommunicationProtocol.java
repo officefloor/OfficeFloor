@@ -18,7 +18,6 @@
 
 package net.officefloor.plugin.socket.server.ssl.protocol;
 
-import java.io.IOException;
 import java.net.InetSocketAddress;
 
 import javax.net.ssl.SSLContext;
@@ -33,13 +32,12 @@ import net.officefloor.frame.spi.managedobject.source.ManagedObjectWorkBuilder;
 import net.officefloor.frame.spi.managedobject.source.impl.AbstractAsyncManagedObjectSource.MetaDataContext;
 import net.officefloor.frame.spi.managedobject.source.impl.AbstractAsyncManagedObjectSource.SpecificationContext;
 import net.officefloor.plugin.socket.server.protocol.CommunicationProtocol;
+import net.officefloor.plugin.socket.server.protocol.CommunicationProtocolContext;
 import net.officefloor.plugin.socket.server.protocol.CommunicationProtocolSource;
 import net.officefloor.plugin.socket.server.protocol.Connection;
-import net.officefloor.plugin.socket.server.protocol.ConnectionHandler;
 import net.officefloor.plugin.socket.server.ssl.SslEngineConfigurator;
 import net.officefloor.plugin.socket.server.ssl.SslTaskExecutor;
 import net.officefloor.plugin.socket.server.ssl.protocol.SslTaskWork.SslTaskDependencies;
-import net.officefloor.plugin.stream.BufferSquirtFactory;
 
 /**
  * SSL {@link CommunicationProtocolSource} that wraps another
@@ -47,10 +45,8 @@ import net.officefloor.plugin.stream.BufferSquirtFactory;
  * 
  * @author Daniel Sagenschneider
  */
-public class SslCommunicationProtocol<CH extends ConnectionHandler> implements
-		CommunicationProtocolSource<SslConnectionHandler<CH>>,
-		CommunicationProtocol<SslConnectionHandler<CH>>, SslTaskExecutor,
-		SslEngineConfigurator {
+public class SslCommunicationProtocol implements CommunicationProtocolSource,
+		CommunicationProtocol, SslTaskExecutor, SslEngineConfigurator {
 
 	/**
 	 * Property to specify the SSL protocol to use.
@@ -71,12 +67,12 @@ public class SslCommunicationProtocol<CH extends ConnectionHandler> implements
 	/**
 	 * Wrapped {@link CommunicationProtocolSource}.
 	 */
-	private final CommunicationProtocolSource<CH> wrappedCommunicationProtocol;
+	private final CommunicationProtocolSource wrappedCommunicationProtocolSource;
 
 	/**
 	 * Wrapped {@link CommunicationProtocol}.
 	 */
-	private CommunicationProtocol<CH> wrappedServer;
+	private CommunicationProtocol wrappedCommunicationProtocol;
 
 	/**
 	 * {@link SSLContext}.
@@ -87,11 +83,6 @@ public class SslCommunicationProtocol<CH extends ConnectionHandler> implements
 	 * {@link SslEngineConfigurator}.
 	 */
 	private SslEngineConfigurator sslEngineConfigurator;
-
-	/**
-	 * {@link BufferSquirtFactory}.
-	 */
-	private BufferSquirtFactory bufferSquirtFactory;
 
 	/**
 	 * {@link ManagedObjectExecuteContext}.
@@ -106,35 +97,36 @@ public class SslCommunicationProtocol<CH extends ConnectionHandler> implements
 	/**
 	 * Initiate.
 	 * 
-	 * @param wrappedCommunicationProtocol
-	 *            {@link CommunicationProtocolSource} to be wrapped with this SSL
-	 *            {@link CommunicationProtocolSource}.
+	 * @param wrappedCommunicationProtocolSource
+	 *            {@link CommunicationProtocolSource} to be wrapped with this
+	 *            SSL {@link CommunicationProtocolSource}.
 	 */
 	public SslCommunicationProtocol(
-			CommunicationProtocolSource<CH> wrappedCommunicationProtocol) {
-		this.wrappedCommunicationProtocol = wrappedCommunicationProtocol;
+			CommunicationProtocolSource wrappedCommunicationProtocolSource) {
+		this.wrappedCommunicationProtocolSource = wrappedCommunicationProtocolSource;
 	}
 
 	/*
-	 * ====================== CommunicationProtocol ============================
+	 * =================== CommunicationProtocolSource ========================
 	 */
 
 	@Override
 	public void loadSpecification(SpecificationContext context) {
 		// Load wrapped communication specification
-		this.wrappedCommunicationProtocol.loadSpecification(context);
+		this.wrappedCommunicationProtocolSource.loadSpecification(context);
 	}
 
 	@Override
-	public CommunicationProtocol<SslConnectionHandler<CH>> createServer(
-			MetaDataContext<None, Indexed> context,
-			BufferSquirtFactory bufferSquirtFactory) throws Exception {
-		ManagedObjectSourceContext<Indexed> mosContext = context
+	public CommunicationProtocol createCommunicationProtocol(
+			MetaDataContext<None, Indexed> configurationContext,
+			CommunicationProtocolContext protocolContext) throws Exception {
+		ManagedObjectSourceContext<Indexed> mosContext = configurationContext
 				.getManagedObjectSourceContext();
 
-		// Create the server socket handler to wrap
-		this.wrappedServer = this.wrappedCommunicationProtocol.createServer(
-				context, bufferSquirtFactory);
+		// Create the communication protocol to wrap
+		this.wrappedCommunicationProtocol = this.wrappedCommunicationProtocolSource
+				.createCommunicationProtocol(configurationContext,
+						protocolContext);
 
 		// Create the SSL context
 		String sslProtocol = mosContext
@@ -170,11 +162,8 @@ public class SslCommunicationProtocol<CH extends ConnectionHandler> implements
 		// Initialise the SSL Engine Configurator
 		this.sslEngineConfigurator.init(this.sslContext);
 
-		// Store the buffer squirt factory for creating SSL connections
-		this.bufferSquirtFactory = bufferSquirtFactory;
-
 		// Create the flow to execute the SSL tasks
-		this.sslTaskFlowIndex = context.addFlow(Runnable.class)
+		this.sslTaskFlowIndex = configurationContext.addFlow(Runnable.class)
 				.setLabel("SSL_TASKS").getIndex();
 		SslTaskWork sslTaskExecution = new SslTaskWork();
 		ManagedObjectWorkBuilder<SslTaskWork> work = mosContext.addWork(
@@ -191,7 +180,7 @@ public class SslCommunicationProtocol<CH extends ConnectionHandler> implements
 	}
 
 	/*
-	 * ====================== Server ============================
+	 * =================== CommunicationProtocol ==========================
 	 */
 
 	@Override
@@ -202,12 +191,12 @@ public class SslCommunicationProtocol<CH extends ConnectionHandler> implements
 		this.executeContext = executeContext;
 
 		// Provide execution context to wrapped server
-		this.wrappedServer.setManagedObjectExecuteContext(executeContext);
+		this.wrappedCommunicationProtocol
+				.setManagedObjectExecuteContext(executeContext);
 	}
 
 	@Override
-	public SslConnectionHandler<CH> createConnectionHandler(
-			Connection connection) {
+	public SslConnectionHandler createConnectionHandler(Connection connection) {
 
 		// Obtain the remote connection details
 		InetSocketAddress remoteAddress = connection.getRemoteAddress();
@@ -221,24 +210,11 @@ public class SslCommunicationProtocol<CH extends ConnectionHandler> implements
 		engine.setUseClientMode(false); // Always in server mode
 
 		// Create the SSL connection wrapping the connection
-		SslConnectionHandler<CH> connectionHandler = new SslConnectionHandler<CH>(
-				connection, engine, this.bufferSquirtFactory, this,
-				this.wrappedServer);
+		SslConnectionHandler connectionHandler = new SslConnectionHandler(
+				connection, engine, this, this.wrappedCommunicationProtocol);
 
 		// Return the SSL connection handler
 		return connectionHandler;
-	}
-
-	@Override
-	public void processRequest(SslConnectionHandler<CH> connectionHandler,
-			Object attachment) throws IOException {
-
-		// Obtain the wrapped connection handler
-		CH wrappedConnectionHandler = connectionHandler
-				.getWrappedConnectionHandler();
-
-		// Have wrapped server process the request
-		this.wrappedServer.processRequest(wrappedConnectionHandler, attachment);
 	}
 
 	/*

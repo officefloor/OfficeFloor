@@ -29,11 +29,7 @@ import net.officefloor.plugin.socket.server.http.HttpRequest;
 import net.officefloor.plugin.socket.server.http.parse.HttpRequestParseException;
 import net.officefloor.plugin.socket.server.http.parse.HttpRequestParser;
 import net.officefloor.plugin.socket.server.http.protocol.HttpStatus;
-import net.officefloor.plugin.stream.BufferStream;
-import net.officefloor.plugin.stream.InputBufferStream;
-import net.officefloor.plugin.stream.OutputBufferStream;
-import net.officefloor.plugin.stream.impl.BufferStreamImpl;
-import net.officefloor.plugin.stream.squirtfactory.NotCreateBufferSquirtFactory;
+import net.officefloor.plugin.stream.NioInputStream;
 
 /**
  * Parser for a HTTP request.
@@ -262,9 +258,9 @@ public class HttpRequestParserImpl implements HttpRequestParser {
 	private List<HttpHeader> headers;
 
 	/**
-	 * Body.
+	 * Entity.
 	 */
-	private InputBufferStream body;
+	private NioInputStream entity;
 
 	/**
 	 * Initiate.
@@ -489,12 +485,12 @@ public class HttpRequestParserImpl implements HttpRequestParser {
 		this.isMultipleLineHeaderValue = false;
 		// Allow reasonable number of headers
 		this.headers = new ArrayList<HttpHeader>(16);
-		this.body = null;
+		this.entity = null;
 	}
 
 	@Override
-	public boolean parse(InputBufferStream inputBufferStream, char[] tempBuffer)
-			throws IOException, HttpRequestParseException {
+	public boolean parse(byte[] data, char[] tempBuffer) throws IOException,
+			HttpRequestParseException {
 
 		// Provide state of escaping characters
 		EscapedCharacterState escapedCharacterState = EscapedCharacterState.NOT_ESCAPED;
@@ -504,10 +500,7 @@ public class HttpRequestParserImpl implements HttpRequestParser {
 		if (this.parseState != ParseState.BODY) {
 
 			// Loop parsing available content up to body
-			InputStream browse = inputBufferStream.getBrowseStream();
-			NEXT_CHARACTER: for (int value = browse.read(); value != -1; value = browse
-					.read()) {
-				byte character = (byte) value;
+			NEXT_CHARACTER: for (byte character : data) {
 
 				// Determine if escaping
 				boolean isEscaped = false;
@@ -843,8 +836,8 @@ public class HttpRequestParserImpl implements HttpRequestParser {
 	}
 
 	@Override
-	public InputBufferStream getBody() {
-		return this.body;
+	public NioInputStream getEntity() {
+		return this.entity;
 	}
 
 }

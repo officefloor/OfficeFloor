@@ -22,29 +22,25 @@ import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 import net.officefloor.plugin.socket.server.impl.AbstractServerSocketManagedObjectSource;
 import net.officefloor.plugin.socket.server.protocol.CommunicationProtocolSource;
 import net.officefloor.plugin.socket.server.ssl.protocol.SslCommunicationProtocol;
-import net.officefloor.plugin.socket.server.ssl.protocol.SslConnectionHandler;
 import net.officefloor.plugin.socket.server.tcp.ServerTcpConnection;
 import net.officefloor.plugin.socket.server.tcp.protocol.TcpCommunicationProtocol;
-import net.officefloor.plugin.socket.server.tcp.protocol.TcpConnectionHandler;
 
 /**
  * {@link ManagedObjectSource} providing a {@link ServerTcpConnection} that is
  * wrapped with a {@link SslCommunicationProtocol}.
- *
+ * 
  * @author Daniel Sagenschneider
  */
-public class SecureTcpServerSocketManagedObjectSource
-		extends
-		AbstractServerSocketManagedObjectSource<SslConnectionHandler<TcpConnectionHandler>> {
+public class SecureTcpServerSocketManagedObjectSource extends
+		AbstractServerSocketManagedObjectSource {
 
 	/*
 	 * ============== AbstractServerSocketManagedObjectSource ===============
 	 */
 
 	@Override
-	protected CommunicationProtocolSource<SslConnectionHandler<TcpConnectionHandler>> createCommunicationProtocol() {
-		return new SslCommunicationProtocol<TcpConnectionHandler>(
-				new TcpCommunicationProtocol());
+	protected CommunicationProtocolSource createCommunicationProtocolSource() {
+		return new SslCommunicationProtocol(new TcpCommunicationProtocol());
 	}
 
 }

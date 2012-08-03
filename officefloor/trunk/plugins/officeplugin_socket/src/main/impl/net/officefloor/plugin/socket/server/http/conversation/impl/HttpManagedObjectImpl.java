@@ -102,10 +102,7 @@ public class HttpManagedObjectImpl implements HttpManagedObject,
 	boolean attemptSendResponse() throws IOException {
 		// Attempt to send the response
 		if (this.response.attemptSendResponse()) {
-			// Response sent, so clean up request (if available)
-			if (this.request != null) {
-				this.request.cleanup();
-			}
+			// Response sent
 			return true;
 		}
 
@@ -135,7 +132,7 @@ public class HttpManagedObjectImpl implements HttpManagedObject,
 	@Override
 	public void cleanup() throws IOException {
 		// Close the response to trigger sending it
-		this.response.getBody().close();
+		this.response.getEntity().close();
 	}
 
 	/*
