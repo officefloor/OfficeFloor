@@ -48,14 +48,19 @@ public class TcpCommunicationProtocol implements CommunicationProtocolSource,
 	public static final String PROPERTY_MAXIMUM_IDLE_TIME = "max.idle.time";
 
 	/**
+	 * Default time before an idle {@link Connection} is closed.
+	 */
+	public static final int DEFAULT_MAXIMUM_IDLE_TIME = 60;
+
+	/**
 	 * Maximum idle time before the {@link Connection} is closed.
 	 */
 	private long maxIdleTime;
 
 	/**
-	 * Write buffer size.
+	 * Send buffer size.
 	 */
-	private int writeBufferSize;
+	private int sendBufferSize;
 
 	/**
 	 * Flow index to handle a new connection.
@@ -96,11 +101,12 @@ public class TcpCommunicationProtocol implements CommunicationProtocolSource,
 				.getManagedObjectSourceContext();
 
 		// Obtain the maximum idle time
-		this.maxIdleTime = Long.parseLong(mosContext
-				.getProperty(PROPERTY_MAXIMUM_IDLE_TIME));
+		this.maxIdleTime = Long.parseLong(mosContext.getProperty(
+				PROPERTY_MAXIMUM_IDLE_TIME,
+				String.valueOf(DEFAULT_MAXIMUM_IDLE_TIME)));
 
-		// Obtain the receive buffer size
-		this.writeBufferSize = protocolContext.getWriteBufferSize();
+		// Obtain the send buffer size
+		this.sendBufferSize = protocolContext.getSendBufferSize();
 
 		// Specify types
 		configurationContext.setManagedObjectClass(TcpConnectionHandler.class);
@@ -130,7 +136,7 @@ public class TcpCommunicationProtocol implements CommunicationProtocolSource,
 
 	@Override
 	public TcpConnectionHandler createConnectionHandler(Connection connection) {
-		return new TcpConnectionHandler(this, connection, this.writeBufferSize,
+		return new TcpConnectionHandler(this, connection, this.sendBufferSize,
 				this.maxIdleTime);
 	}
 

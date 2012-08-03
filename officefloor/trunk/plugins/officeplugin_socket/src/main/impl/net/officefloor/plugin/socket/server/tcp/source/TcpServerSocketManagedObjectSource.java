@@ -23,22 +23,21 @@ import net.officefloor.plugin.socket.server.impl.AbstractServerSocketManagedObje
 import net.officefloor.plugin.socket.server.protocol.CommunicationProtocolSource;
 import net.officefloor.plugin.socket.server.tcp.ServerTcpConnection;
 import net.officefloor.plugin.socket.server.tcp.protocol.TcpCommunicationProtocol;
-import net.officefloor.plugin.socket.server.tcp.protocol.TcpConnectionHandler;
 
 /**
  * {@link ManagedObjectSource} for a {@link ServerTcpConnection}.
- *
+ * 
  * @author Daniel Sagenschneider
  */
 public class TcpServerSocketManagedObjectSource extends
-		AbstractServerSocketManagedObjectSource<TcpConnectionHandler> {
+		AbstractServerSocketManagedObjectSource {
 
 	/*
 	 * ============== AbstractServerSocketManagedObjectSource ===============
 	 */
 
 	@Override
-	protected CommunicationProtocolSource<TcpConnectionHandler> createCommunicationProtocol() {
+	protected CommunicationProtocolSource createCommunicationProtocolSource() {
 		return new TcpCommunicationProtocol();
 	}
 

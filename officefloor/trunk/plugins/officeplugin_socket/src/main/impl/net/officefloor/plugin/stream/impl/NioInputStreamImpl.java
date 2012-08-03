@@ -32,9 +32,14 @@ import net.officefloor.plugin.stream.NoAvailableInputException;
 public class NioInputStreamImpl extends NioInputStream {
 
 	/**
+	 * Object to <code>synchronize</code> on for operaterations.
+	 */
+	private final Object lock;
+
+	/**
 	 * {@link Queue} of data for reading.
 	 */
-	private Queue<byte[]> data = new LinkedList<byte[]>();
+	private final Queue<byte[]> data = new LinkedList<byte[]>();
 
 	/**
 	 * Current data being read.
@@ -47,9 +52,24 @@ public class NioInputStreamImpl extends NioInputStream {
 	private int currentDataIndex = 0;
 
 	/**
+	 * Number of bytes currently available.
+	 */
+	private int available = 0;
+
+	/**
 	 * Indicates if further data.
 	 */
 	private boolean isFurtherData = true;
+
+	/**
+	 * Initiate.
+	 * 
+	 * @param lock
+	 *            Object to <code>synchronize</code> on for operaterations.
+	 */
+	public NioInputStreamImpl(Object lock) {
+		this.lock = lock;
+	}
 
 	/**
 	 * Queues data for reading.
@@ -59,17 +79,27 @@ public class NioInputStreamImpl extends NioInputStream {
 	 * @param isFurtherData
 	 *            Indicates if further data is going to be made available.
 	 */
-	public synchronized void queueData(byte[] data, boolean isFurtherData) {
+	public void queueData(byte[] data, boolean isFurtherData) {
 
-		// Queue further data
-		if (this.currentData == null) {
-			this.currentData = data;
-		} else {
-			this.data.add(data);
+		synchronized (this.lock) {
+
+			// Ensure have data
+			if (data != null) {
+
+				// Queue further data
+				if (this.currentData == null) {
+					this.currentData = data;
+				} else {
+					this.data.add(data);
+				}
+
+				// Increment the number of bytes available
+				this.available += data.length;
+			}
+
+			// Indicate if further data
+			this.isFurtherData = isFurtherData;
 		}
-
-		// Indicate if further data
-		this.isFurtherData = isFurtherData;
 	}
 
 	/*
@@ -77,31 +107,46 @@ public class NioInputStreamImpl extends NioInputStream {
 	 */
 
 	@Override
-	public synchronized int read() throws IOException,
-			NoAvailableInputException {
+	public int read() throws IOException, NoAvailableInputException {
 
-		for (;;) {
+		synchronized (this.lock) {
 
-			// Ensure have data
-			if (this.currentData == null) {
-				if (this.isFurtherData) {
-					// Not yet end of stream
-					throw new NoAvailableInputException();
-				} else {
-					// End of stream
-					return -1;
+			for (;;) {
+
+				// Ensure have data
+				if (this.currentData == null) {
+					if (this.isFurtherData) {
+						// Not yet end of stream
+						throw new NoAvailableInputException();
+					} else {
+						// End of stream
+						return -1;
+					}
 				}
-			}
 
-			// Determine if data is available
-			if (this.currentDataIndex < this.currentData.length) {
-				// Return the byte
-				return this.currentData[this.currentDataIndex++];
-			}
+				// Determine if data is available
+				if (this.currentDataIndex < this.currentData.length) {
+					// Return the byte (keeping available up to date)
+					this.available--;
+					return this.currentData[this.currentDataIndex++];
+				}
 
-			// Obtain the next data to start reading
-			this.currentData = this.data.poll();
-			this.currentDataIndex = 0;
+				// Obtain the next data to start reading
+				this.currentData = this.data.poll();
+				this.currentDataIndex = 0;
+			}
+		}
+	}
+
+	@Override
+	public int available() throws IOException {
+
+		synchronized (this.lock) {
+
+			// -1 if no available and no further data
+			return ((this.available == 0) && (!this.isFurtherData)) ? -1
+					: this.available;
+
 		}
 	}
 

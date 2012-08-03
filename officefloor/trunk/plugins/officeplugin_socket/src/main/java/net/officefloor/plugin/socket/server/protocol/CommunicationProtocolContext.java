@@ -28,14 +28,14 @@ public interface CommunicationProtocolContext {
 
 	/**
 	 * <p>
-	 * Obtains the size of the {@link ByteBuffer} instances for writing.
+	 * Obtains the size of the {@link ByteBuffer} instances for writing. The
 	 * {@link WriteBuffer} sizes for data should not exceed this value.
 	 * <p>
-	 * This allows the {@link CommunicationProtocolSource} to create buffers that
-	 * match size to reduce the amount of copy routines required.
+	 * This allows the {@link CommunicationProtocolSource} to create buffers
+	 * that match size to reduce the amount of copy routines required.
 	 * 
-	 * @return Size of the write buffers.
+	 * @return Size of the write buffers for sending data.
 	 */
-	int getWriteBufferSize();
+	int getSendBufferSize();
 
 }

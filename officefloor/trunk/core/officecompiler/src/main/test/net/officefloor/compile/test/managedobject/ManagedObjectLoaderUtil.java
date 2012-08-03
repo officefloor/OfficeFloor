@@ -35,8 +35,13 @@ import net.officefloor.compile.properties.Property;
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.test.issues.FailTestCompilerIssues;
 import net.officefloor.compile.test.properties.PropertyListUtil;
+import net.officefloor.frame.api.build.None;
+import net.officefloor.frame.spi.TestSource;
+import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceSpecification;
+import net.officefloor.frame.spi.managedobject.source.impl.AbstractAsyncManagedObjectSource.MetaDataContext;
+import net.officefloor.frame.spi.managedobject.source.impl.AbstractManagedObjectSource;
 
 /**
  * Utility class for testing the {@link ManagedObjectSource}.
@@ -60,7 +65,7 @@ public class ManagedObjectLoaderUtil {
 			Class<S> managedObjectSourceClass, String... propertyNameLabels) {
 
 		// Load the specification
-		PropertyList propertyList = getOfficeFloorCompiler()
+		PropertyList propertyList = getOfficeFloorCompiler(null)
 				.getManagedObjectLoader().loadSpecification(
 						managedObjectSourceClass);
 
@@ -221,7 +226,7 @@ public class ManagedObjectLoaderUtil {
 			String... propertyNameValues) {
 
 		// Load and return the managed object type
-		return getOfficeFloorCompiler().getManagedObjectLoader()
+		return getOfficeFloorCompiler(classLoader).getManagedObjectLoader()
 				.loadManagedObjectType(managedObjectSourceClass,
 						new PropertyListImpl(propertyNameValues));
 	}
@@ -244,9 +249,12 @@ public class ManagedObjectLoaderUtil {
 	/**
 	 * Obtains the {@link OfficeFloorCompiler} setup for use.
 	 * 
+	 * @param classLoader
+	 *            {@link ClassLoader}.
 	 * @return {@link OfficeFloorCompiler}.
 	 */
-	private static OfficeFloorCompiler getOfficeFloorCompiler() {
+	private static OfficeFloorCompiler getOfficeFloorCompiler(
+			ClassLoader classLoader) {
 
 		OfficeFloorCompiler compiler;
 
@@ -257,12 +265,79 @@ public class ManagedObjectLoaderUtil {
 			nextOfficeFloorCompiler = null; // clear for further operations
 		} else {
 			// Create the office floor compiler that fails on first issue
-			compiler = OfficeFloorCompiler.newOfficeFloorCompiler(null);
+			compiler = OfficeFloorCompiler.newOfficeFloorCompiler(classLoader);
 			compiler.setCompilerIssues(new FailTestCompilerIssues());
 		}
 
 		// Return the OfficeFloorCompiler
 		return compiler;
+	}
+
+	/**
+	 * <p>
+	 * Creates a {@link MetaDataContext}.
+	 * <p>
+	 * This is useful for testing abstract {@link ManagedObjectSource} instances
+	 * that delegate configuration to sub classes.
+	 * 
+	 * @param propertyNameValues
+	 *            Property name values for the {@link MetaDataContext}.
+	 * 
+	 * @return {@link MetaDataContext}.
+	 */
+	@SuppressWarnings("unchecked")
+	public synchronized static <D extends Enum<D>, F extends Enum<F>> MetaDataContext<D, F> createMetaDataContext(
+			String... propertyNameValues) {
+
+		// Create the meta data context
+		CollectMetaDataContextManagedObjectSource.metaDataContext = null;
+
+		// Create mock managed object source
+		loadManagedObjectType(CollectMetaDataContextManagedObjectSource.class,
+				propertyNameValues);
+
+		// Return the meta data context
+		return (MetaDataContext<D, F>) CollectMetaDataContextManagedObjectSource.metaDataContext;
+	}
+
+	/**
+	 * {@link ManagedObjectSource} to enable obtaining the
+	 * {@link MetaDataContext}.
+	 */
+	@TestSource
+	public static class CollectMetaDataContextManagedObjectSource extends
+			AbstractManagedObjectSource<None, None> {
+
+		/**
+		 * {@link MetaDataContext}.
+		 */
+		public static MetaDataContext<?, ?> metaDataContext;
+
+		/*
+		 * ================== ManagedObjectSource =========================
+		 */
+
+		@Override
+		protected void loadSpecification(SpecificationContext context) {
+			// No properties required
+		}
+
+		@Override
+		protected void loadMetaData(MetaDataContext<None, None> context)
+				throws Exception {
+
+			// Ensure have minimum configuration specified
+			context.setObjectClass(Object.class);
+
+			// Collect the context
+			metaDataContext = context;
+		}
+
+		@Override
+		protected ManagedObject getManagedObject() throws Throwable {
+			TestCase.fail("Should not require managed object");
+			return null;
+		}
 	}
 
 	/**

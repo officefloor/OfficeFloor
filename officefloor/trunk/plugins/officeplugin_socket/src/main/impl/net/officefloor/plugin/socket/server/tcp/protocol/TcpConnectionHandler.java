@@ -67,7 +67,7 @@ public class TcpConnectionHandler implements ConnectionHandler,
 	/**
 	 * {@link NioInputStream}.
 	 */
-	private final NioInputStreamImpl inputStream = new NioInputStreamImpl();
+	private final NioInputStreamImpl inputStream;
 
 	/**
 	 * {@link ByteOutputStream}.
@@ -91,20 +91,23 @@ public class TcpConnectionHandler implements ConnectionHandler,
 	 *            {@link TcpCommunicationProtocol}.
 	 * @param connection
 	 *            {@link Connection}.
-	 * @param receiverBufferSize
-	 *            Receiver buffer size.
+	 * @param sendBufferSize
+	 *            Send buffer size.
 	 * @param maxIdleTime
 	 *            Maximum idle time for the {@link Connection} measured in
 	 *            milliseconds.
 	 */
 	public TcpConnectionHandler(TcpCommunicationProtocol protocol,
-			Connection connection, int writeBufferSize, long maxIdleTime) {
+			Connection connection, int sendBufferSize, long maxIdleTime) {
 		this.protocol = protocol;
 		this.connection = connection;
 		this.maxIdleTime = maxIdleTime;
 
+		// Create the input stream
+		this.inputStream = new NioInputStreamImpl(connection.getLock());
+
 		// Create the output stream
-		this.outputStream = new ByteOutputStreamImpl(this, writeBufferSize);
+		this.outputStream = new ByteOutputStreamImpl(this, sendBufferSize);
 	}
 
 	/*
@@ -170,6 +173,11 @@ public class TcpConnectionHandler implements ConnectionHandler,
 	 */
 
 	@Override
+	public Object getLock() {
+		return this.connection.getLock();
+	}
+
+	@Override
 	public WriteBuffer createWriteBuffer(byte[] data, int length) {
 		return this.connection.createWriteBuffer(data, length);
 	}
@@ -187,6 +195,16 @@ public class TcpConnectionHandler implements ConnectionHandler,
 
 		// Write the data
 		this.connection.writeData(data);
+	}
+
+	@Override
+	public void close() {
+		this.connection.close();
+	}
+
+	@Override
+	public boolean isClosed() {
+		return this.connection.isClosed();
 	}
 
 	/*
@@ -216,22 +234,18 @@ public class TcpConnectionHandler implements ConnectionHandler,
 	 */
 
 	@Override
-	public Object getLock() {
-		return this.connection.getLock();
-	}
-
-	@Override
-	public void waitOnClientData() throws IOException {
+	public boolean waitOnClientData() throws IOException {
 		synchronized (this.getLock()) {
 
 			// Determine if data available to read
 			if (this.inputStream.available() > 0) {
 				// Data is available, so do not wait
-				return;
+				return false;
 			}
 
 			// Wait for data from client
 			this.asynchronousListener.notifyStarted();
+			return true; // waiting on client data
 		}
 	}
 

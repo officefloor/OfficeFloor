@@ -19,6 +19,7 @@ package net.officefloor.plugin.stream.impl;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.nio.channels.ClosedChannelException;
 import java.util.LinkedList;
 import java.util.Queue;
 
@@ -73,6 +74,18 @@ public class ByteOutputStreamImpl extends ByteOutputStream {
 	}
 
 	/**
+	 * Ensures that not closed.
+	 * 
+	 * @throws ClosedChannelException
+	 *             If closed.
+	 */
+	private void ensureNotClosed() throws ClosedChannelException {
+		if (this.receiver.isClosed()) {
+			throw new ClosedChannelException();
+		}
+	}
+
+	/**
 	 * Clears the content.
 	 * 
 	 * @throws IOException
@@ -96,50 +109,76 @@ public class ByteOutputStreamImpl extends ByteOutputStream {
 	}
 
 	@Override
-	public synchronized void write(int b) throws IOException {
+	public void write(int b) throws IOException {
 
-		// Ensure have current data
-		if (this.currentData == null) {
-			// Provide new data for writing
-			this.currentData = new byte[this.writeBufferSize];
+		synchronized (this.receiver.getLock()) {
 
-			// Write byte immediately
-			this.currentData[0] = (byte) b;
-			this.nextCurrentDataIndex = 1; // after first byte
+			// Ensure not closed
+			this.ensureNotClosed();
 
-			// Data written
-			return;
+			// Ensure have current data
+			if (this.currentData == null) {
+				// Provide new data for writing
+				this.currentData = new byte[this.writeBufferSize];
+
+				// Write byte immediately
+				this.currentData[0] = (byte) b;
+				this.nextCurrentDataIndex = 1; // after first byte
+
+				// Data written
+				return;
+			}
+
+			// TODO handle current data full
+
+			// Write to next index
+			this.currentData[this.nextCurrentDataIndex++] = (byte) b;
 		}
-
-		// TODO handle current data full
-
-		// Write to next index
-		this.currentData[this.nextCurrentDataIndex++] = (byte) b;
 	}
 
 	@Override
-	public synchronized void flush() throws IOException {
+	public void flush() throws IOException {
 
-		// Determine the number of buffers to write
-		int buffersToWrite = this.dataToWrite.size()
-				+ (this.currentData == null ? 0 : 1);
+		synchronized (this.receiver.getLock()) {
 
-		// Ensure there is data to write
-		if (buffersToWrite == 0) {
-			return;
+			// Ensure not closed
+			this.ensureNotClosed();
+
+			// Determine the number of buffers to write
+			int buffersToWrite = this.dataToWrite.size()
+					+ (this.currentData == null ? 0 : 1);
+
+			// Ensure there is data to write
+			if (buffersToWrite == 0) {
+				return;
+			}
+
+			// Create the array of buffers to write
+			WriteBuffer[] buffers = new WriteBuffer[buffersToWrite];
+
+			// TODO provide buffers from queue
+
+			// Provide last buffer
+			buffers[buffers.length - 1] = this.receiver.createWriteBuffer(
+					this.currentData, this.nextCurrentDataIndex);
+
+			// Clear data as about to be written
+			this.currentData = null;
+			this.dataToWrite.clear();
+
+			// Flush the data to the receiver
+			this.receiver.writeData(buffers);
 		}
+	}
 
-		// Create the array of buffers to write
-		WriteBuffer[] buffers = new WriteBuffer[buffersToWrite];
+	@Override
+	public void close() throws IOException {
 
-		// TODO provide buffers from queue
+		synchronized (this.receiver.getLock()) {
 
-		// Provide last buffer
-		buffers[buffers.length - 1] = this.receiver.createWriteBuffer(
-				this.currentData, this.nextCurrentDataIndex);
-
-		// Flush the data to the receiver
-		this.receiver.writeData(buffers);
+			// Close the receiver
+			this.receiver.close();
+		}
 	}
 
 }

@@ -33,7 +33,7 @@ public class NioInputStreamTest extends OfficeFrameTestCase {
 	/**
 	 * {@link NioInputStream}.
 	 */
-	private final NioInputStreamImpl stream = new NioInputStreamImpl();
+	private final NioInputStreamImpl stream = new NioInputStreamImpl(this);
 
 	/**
 	 * Ensure EOF.
@@ -41,12 +41,18 @@ public class NioInputStreamTest extends OfficeFrameTestCase {
 	public void testEof() throws IOException {
 		this.stream.queueData(null, false);
 		assertEquals("Should be EOF", -1, this.stream.read());
+		assertEquals("No available data", -1, this.stream.available());
 	}
 
 	/**
 	 * Ensure {@link NoAvailableInputException} on reading past available.
 	 */
 	public void testNoAvailableInput() throws IOException {
+
+		// Should be no available data
+		assertEquals("No available data", 0, this.stream.available());
+
+		// Attempting to read should cause failure
 		try {
 			this.stream.read();
 			fail("Should not be successful");
@@ -59,19 +65,34 @@ public class NioInputStreamTest extends OfficeFrameTestCase {
 	 * Ensure can read data.
 	 */
 	public void testReadData() throws IOException {
+
+		// Queue the data indicating not further data
 		this.stream.queueData(new byte[] { 10 }, false);
+		assertEquals("Data available", 1, this.stream.available());
+
+		// Read the only data
 		assertEquals("Incorrect read value", 10, this.stream.read());
 		assertEquals("Should be EOF", -1, this.stream.read());
+		assertEquals("No further data available", -1, this.stream.available());
 	}
 
 	/**
 	 * Ensure can read data from multiple backing arrays.
 	 */
 	public void testReadAcrossMultipleData() throws IOException {
+
+		// Queue two arrays of data
 		this.stream.queueData(new byte[] { 11 }, true);
 		this.stream.queueData(new byte[] { 22 }, false);
+		assertEquals("Data should be available", 2, this.stream.available());
+
+		// Read the first datum
 		assertEquals("Incorrect first read", 11, this.stream.read());
+		assertEquals("Data still available", 1, this.stream.available());
+
+		// Read the second datum
 		assertEquals("Incorrect second read", 22, this.stream.read());
+		assertEquals("No available data", -1, this.stream.available());
 		assertEquals("Should be EOF", -1, this.stream.read());
 	}
 

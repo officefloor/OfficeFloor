@@ -23,6 +23,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.InetAddress;
 import java.net.Socket;
+import java.text.DecimalFormat;
 
 import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.execute.Work;
@@ -34,20 +35,21 @@ import net.officefloor.frame.spi.team.Team;
 import net.officefloor.frame.test.AbstractOfficeConstructTestCase;
 import net.officefloor.frame.test.ReflectiveWorkBuilder;
 import net.officefloor.frame.test.ReflectiveWorkBuilder.ReflectiveTaskBuilder;
+import net.officefloor.plugin.socket.server.http.server.MockHttpServer;
 import net.officefloor.plugin.socket.server.tcp.ServerTcpConnection;
 
 /**
  * Provides abstract functionality to test TCP connections.
- *
+ * 
  * @author Daniel Sagenschneider
  */
 public abstract class AbstractTcpServerTestCase extends
 		AbstractOfficeConstructTestCase {
 
 	/**
-	 * Starting port number.
+	 * Formatter of millisecond time.
 	 */
-	private static int portStart = 12346;
+	private static final DecimalFormat FORMATTER = new DecimalFormat("0.00");
 
 	/**
 	 * Port number to use for testing.
@@ -56,7 +58,7 @@ public abstract class AbstractTcpServerTestCase extends
 
 	/**
 	 * Registers the {@link ManagedObjectSource} to handle connections.
-	 *
+	 * 
 	 * @param port
 	 *            Port to bind to receive client connections.
 	 * @param managedObjectName
@@ -74,7 +76,7 @@ public abstract class AbstractTcpServerTestCase extends
 	/**
 	 * Creates the client {@link Socket} connected to the
 	 * {@link ManagedObjectSource}.
-	 *
+	 * 
 	 * @param address
 	 *            {@link InetAddress}.
 	 * @param port
@@ -89,7 +91,7 @@ public abstract class AbstractTcpServerTestCase extends
 	/**
 	 * Helper method to register a {@link Team} for the
 	 * {@link ManagedObjectSource}.
-	 *
+	 * 
 	 * @param managedObjectName
 	 *            Name of the {@link ManagedObject}.
 	 * @param managedObjectTeamName
@@ -117,8 +119,7 @@ public abstract class AbstractTcpServerTestCase extends
 		this.setVerbose(true);
 
 		// Specify the port
-		PORT = portStart;
-		portStart++; // increment for next test
+		PORT = MockHttpServer.getAvailablePort();
 
 		// Names to handle ServerTcpConnection
 		final String MO_NAME = "MO";
@@ -190,7 +191,7 @@ public abstract class AbstractTcpServerTestCase extends
 
 	/**
 	 * Does parallel requesting.
-	 *
+	 * 
 	 * @param numberOfCallers
 	 *            Number of callers making parallel requests.
 	 * @param numberOfRequestsPerCaller
@@ -228,8 +229,8 @@ public abstract class AbstractTcpServerTestCase extends
 						}
 
 						// Execute the requested number of calls
-						AbstractTcpServerTestCase.this.doRequests(String
-								.valueOf(callerIndex),
+						AbstractTcpServerTestCase.this.doRequests(
+								String.valueOf(callerIndex),
 								numberOfRequestsPerCaller, isLog);
 
 					} catch (Throwable ex) {
@@ -307,7 +308,7 @@ public abstract class AbstractTcpServerTestCase extends
 
 	/**
 	 * Do the requests.
-	 *
+	 * 
 	 * @param requesterId
 	 *            Id identifying the requester.
 	 * @param numberOfRequests
@@ -334,7 +335,7 @@ public abstract class AbstractTcpServerTestCase extends
 			int requestIndex = (i % Messages.getSize());
 
 			// Send the index
-			long startTime = System.currentTimeMillis();
+			long startTime = System.nanoTime();
 			outputStream.write(new byte[] { (byte) requestIndex });
 			outputStream.flush();
 
@@ -349,18 +350,19 @@ public abstract class AbstractTcpServerTestCase extends
 				}
 				response.write(value);
 			}
-			long endTime = System.currentTimeMillis();
+			long endTime = System.nanoTime();
 			String responseText = new String(response.toByteArray());
 			if (isLog) {
 				System.out.println("Message [" + requesterId + ":" + i
-						+ "] processed in " + (endTime - startTime)
+						+ "] processed in "
+						+ FORMATTER.format((endTime - startTime) / 1000000.0)
 						+ " milliseconds (returned response '" + responseText
 						+ "')");
 			}
 
 			// Ensure response correct
-			assertEquals("Incorrect response", Messages
-					.getMessage(requestIndex), responseText);
+			assertEquals("Incorrect response",
+					Messages.getMessage(requestIndex), responseText);
 		}
 
 		// Send finished

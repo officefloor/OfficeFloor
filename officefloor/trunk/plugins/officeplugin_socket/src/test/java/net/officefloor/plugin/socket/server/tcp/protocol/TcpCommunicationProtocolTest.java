@@ -23,9 +23,10 @@ import java.io.OutputStream;
 
 import net.officefloor.frame.api.escalate.EscalationHandler;
 import net.officefloor.frame.internal.structure.ProcessState;
+import net.officefloor.frame.spi.managedobject.AsynchronousListener;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.plugin.socket.server.impl.AbstractClientServerTestCase;
-import net.officefloor.plugin.socket.server.protocol.CommunicationProtocol;
+import net.officefloor.plugin.socket.server.protocol.CommunicationProtocolSource;
 import net.officefloor.plugin.socket.server.protocol.Connection;
 import net.officefloor.plugin.socket.server.tcp.ServerTcpConnection;
 
@@ -34,7 +35,8 @@ import net.officefloor.plugin.socket.server.tcp.ServerTcpConnection;
  * 
  * @author Daniel Sagenschneider
  */
-public class TcpCommunicationProtocolTest extends AbstractClientServerTestCase {
+public class TcpCommunicationProtocolTest extends AbstractClientServerTestCase
+		implements AsynchronousListener {
 
 	/**
 	 * {@link ServerTcpConnection}.
@@ -52,12 +54,17 @@ public class TcpCommunicationProtocolTest extends AbstractClientServerTestCase {
 	 */
 	private boolean isProcessInvoked = false;
 
+	/**
+	 * Indicates if within an asynchronous operation.
+	 */
+	private boolean isWithinAsynchronousOperation = false;
+
 	/*
 	 * ================== AbstractClientServerTestCase =========================
 	 */
 
 	@Override
-	protected CommunicationProtocol createCommunicationProtocol() {
+	protected CommunicationProtocolSource getCommunicationProtocolSource() {
 		return new TcpCommunicationProtocol() {
 			@Override
 			public TcpConnectionHandler createConnectionHandler(
@@ -67,6 +74,8 @@ public class TcpCommunicationProtocolTest extends AbstractClientServerTestCase {
 						.createConnectionHandler(connection);
 				TcpCommunicationProtocolTest.this.serverTcpConnection = connectionHandler;
 				TcpCommunicationProtocolTest.this.rawConnection = connection;
+				connectionHandler
+						.registerAsynchronousCompletionListener(TcpCommunicationProtocolTest.this);
 				return connectionHandler;
 			}
 		};
@@ -135,8 +144,30 @@ public class TcpCommunicationProtocolTest extends AbstractClientServerTestCase {
 	/**
 	 * Ensure appropriately waits on the client data.
 	 */
-	public void testWaitOnClientData() {
-		fail("TODO implement test to wait on the client data");
+	public void testWaitOnClientData() throws IOException {
+
+		// No data so should wait
+		assertFalse("Initially should not be waiting",
+				this.isWithinAsynchronousOperation);
+		assertTrue("Should be waiting on client data",
+				this.serverTcpConnection.waitOnClientData());
+		assertTrue("Should be waiting on client data",
+				this.isWithinAsynchronousOperation);
+
+		// Provide some data
+		this.writeDataFromClientToServer("NOTIFY");
+		this.runClientSelect();
+		this.runServerSelect();
+
+		// Should no longer be waiting
+		assertFalse("Should no long be waiting for client data",
+				this.isWithinAsynchronousOperation);
+
+		// Attempting to wait while data is available should not trigger wait
+		assertFalse("Data available so should not wait on client data",
+				this.serverTcpConnection.waitOnClientData());
+		assertFalse("Should not be waiting as data available",
+				this.isWithinAsynchronousOperation);
 	}
 
 	/**
@@ -179,6 +210,20 @@ public class TcpCommunicationProtocolTest extends AbstractClientServerTestCase {
 		OutputStream outputStream = this.serverTcpConnection.getOutputStream();
 		outputStream.write(data, 0, data.length);
 		outputStream.flush();
+	}
+
+	/*
+	 * ===================== AsynchronousListener =============================
+	 */
+
+	@Override
+	public void notifyStarted() {
+		this.isWithinAsynchronousOperation = true;
+	}
+
+	@Override
+	public void notifyComplete() {
+		this.isWithinAsynchronousOperation = false;
 	}
 
 }

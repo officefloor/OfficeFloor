@@ -35,16 +35,6 @@ import net.officefloor.plugin.stream.NioInputStream;
 public interface ServerTcpConnection {
 
 	/**
-	 * Obtains the lock that may be <code>synchronized</code> on to reduce
-	 * locking overhead of making multiple calls on this
-	 * {@link ServerTcpConnection}. In other words, it allows course grained
-	 * locking.
-	 * 
-	 * @return Lock that governs this {@link ServerTcpConnection}.
-	 */
-	Object getLock();
-
-	/**
 	 * Obtains the {@link NioInputStream} that provides access to the data sent
 	 * from the client.
 	 * 
@@ -61,10 +51,13 @@ public interface ServerTcpConnection {
 	 * {@link ManagedObject}, data will be available from the
 	 * {@link NioInputStream}.
 	 * 
+	 * @return <code>true</code> indicating if will wait on client data.
+	 *         <code>false</code> if client data is available and therefore will
+	 *         not wait.
 	 * @throws IOException
 	 *             If fails to initiate waiting on client.
 	 */
-	void waitOnClientData() throws IOException;
+	boolean waitOnClientData() throws IOException;
 
 	/**
 	 * <p>
