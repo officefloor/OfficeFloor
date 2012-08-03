@@ -24,17 +24,22 @@ import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.channels.SocketChannel;
 
+import net.officefloor.compile.test.managedobject.ManagedObjectLoaderUtil;
 import net.officefloor.frame.api.build.Indexed;
+import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.api.escalate.EscalationHandler;
 import net.officefloor.frame.api.execute.TaskContext;
 import net.officefloor.frame.api.manage.ProcessFuture;
 import net.officefloor.frame.internal.structure.ProcessState;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectExecuteContext;
+import net.officefloor.frame.spi.managedobject.source.impl.AbstractAsyncManagedObjectSource.MetaDataContext;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.socket.server.ConnectionManager;
 import net.officefloor.plugin.socket.server.http.server.MockHttpServer;
 import net.officefloor.plugin.socket.server.protocol.CommunicationProtocol;
+import net.officefloor.plugin.socket.server.protocol.CommunicationProtocolContext;
+import net.officefloor.plugin.socket.server.protocol.CommunicationProtocolSource;
 
 /**
  * Functionality for testing server/client.
@@ -42,12 +47,18 @@ import net.officefloor.plugin.socket.server.protocol.CommunicationProtocol;
  * @author Daniel Sagenschneider
  */
 public abstract class AbstractClientServerTestCase extends OfficeFrameTestCase
-		implements ManagedObjectExecuteContext<Indexed> {
+		implements CommunicationProtocolContext,
+		ManagedObjectExecuteContext<Indexed> {
 
 	/**
 	 * Port for {@link ServerSocketAccepter}.
 	 */
 	private int port;
+
+	/**
+	 * Send buffer size.
+	 */
+	private int sendBufferSize;
 
 	/**
 	 * {@link SocketListener}.
@@ -85,11 +96,11 @@ public abstract class AbstractClientServerTestCase extends OfficeFrameTestCase
 	private SelectionKey clientKey;
 
 	/**
-	 * Obtains the {@link CommunicationProtocol}.
+	 * Obtains the {@link CommunicationProtocolSource}.
 	 * 
-	 * @return {@link CommunicationProtocol}.
+	 * @return {@link CommunicationProtocolSource}.
 	 */
-	protected abstract CommunicationProtocol createCommunicationProtocol();
+	protected abstract CommunicationProtocolSource getCommunicationProtocolSource();
 
 	/**
 	 * Allows the test to be notified of {@link ProcessState} invocation.
@@ -115,8 +126,22 @@ public abstract class AbstractClientServerTestCase extends OfficeFrameTestCase
 			// Create the connection manager
 			this.connectionManager = new ConnectionManagerImpl(this.listener);
 
+			// Obtain the communication protocol source
+			CommunicationProtocolSource source = this
+					.getCommunicationProtocolSource();
+
+			// Create the managed object source context
+			MetaDataContext<None, Indexed> configurationContext = ManagedObjectLoaderUtil
+					.createMetaDataContext();
+
+			// Obtain the socket buffer send size
+			Socket socket = new Socket();
+			this.sendBufferSize = socket.getSendBufferSize();
+			socket.close();
+
 			// Create the communication protocol
-			CommunicationProtocol protocol = this.createCommunicationProtocol();
+			CommunicationProtocol protocol = source
+					.createCommunicationProtocol(configurationContext, this);
 			protocol.setManagedObjectExecuteContext(this);
 
 			// Create the accepter
@@ -280,6 +305,15 @@ public abstract class AbstractClientServerTestCase extends OfficeFrameTestCase
 		buffer.get(actualData);
 		assertEquals("Incorrect data received", expectedData, new String(
 				actualData));
+	}
+
+	/*
+	 * =================== CommunicationProtocolContext =====================
+	 */
+
+	@Override
+	public int getSendBufferSize() {
+		return this.sendBufferSize;
 	}
 
 	/*

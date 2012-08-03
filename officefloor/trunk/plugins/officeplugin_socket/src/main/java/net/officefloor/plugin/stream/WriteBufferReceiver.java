@@ -30,6 +30,14 @@ import net.officefloor.plugin.socket.server.protocol.WriteBuffer;
 public interface WriteBufferReceiver {
 
 	/**
+	 * Obtains the lock to <code>synchronize</code> for using this
+	 * {@link WriteBufferReceiver}.
+	 * 
+	 * @return Lock for this {@link WriteBufferReceiver}.
+	 */
+	Object getLock();
+
+	/**
 	 * Creates a {@link WriteBuffer} for the data.
 	 * 
 	 * @param data
@@ -56,5 +64,20 @@ public interface WriteBufferReceiver {
 	 *            Data to be written.
 	 */
 	void writeData(WriteBuffer[] data);
+
+	/**
+	 * <p>
+	 * Flags to close the {@link WriteBufferReceiver}.
+	 * <p>
+	 * Close occurs after all data has been written.
+	 */
+	void close();
+
+	/**
+	 * Indicates if the {@link WriteBufferReceiver} is closed.
+	 * 
+	 * @return <code>true</code> if the {@link WriteBufferReceiver} is closed.
+	 */
+	boolean isClosed();
 
 }

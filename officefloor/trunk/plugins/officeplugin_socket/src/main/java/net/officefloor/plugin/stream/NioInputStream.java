@@ -37,6 +37,9 @@ public abstract class NioInputStream extends InputStream {
 
 	@Override
 	public abstract int read() throws IOException, NoAvailableInputException;
+
+	@Override
+	public abstract int available() throws IOException;
 	
 // TODO provide more efficient implementations of the below
 
@@ -52,4 +55,5 @@ public abstract class NioInputStream extends InputStream {
 //	public abstract long skip(long n) throws IOException,
 //			NoAvailableInputException;
 
+	
 }

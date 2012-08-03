@@ -20,10 +20,15 @@ package net.officefloor.plugin.socket.server.impl;
 import java.io.IOException;
 
 import net.officefloor.frame.api.build.Indexed;
+import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.api.escalate.EscalationHandler;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectExecuteContext;
+import net.officefloor.frame.spi.managedobject.source.impl.AbstractAsyncManagedObjectSource.MetaDataContext;
+import net.officefloor.frame.spi.managedobject.source.impl.AbstractAsyncManagedObjectSource.SpecificationContext;
 import net.officefloor.plugin.socket.server.protocol.CommunicationProtocol;
+import net.officefloor.plugin.socket.server.protocol.CommunicationProtocolContext;
+import net.officefloor.plugin.socket.server.protocol.CommunicationProtocolSource;
 import net.officefloor.plugin.socket.server.protocol.Connection;
 import net.officefloor.plugin.socket.server.protocol.ConnectionHandler;
 import net.officefloor.plugin.socket.server.protocol.HeartBeatContext;
@@ -36,9 +41,9 @@ import net.officefloor.plugin.socket.server.protocol.WriteBuffer;
  * 
  * @author Daniel Sagenschneider
  */
-public abstract class SocketAccepterListenerTestCase extends
-		AbstractClientServerTestCase implements CommunicationProtocol,
-		ConnectionHandler {
+public class SocketAccepterListenerTestCase extends
+		AbstractClientServerTestCase implements CommunicationProtocolSource,
+		CommunicationProtocol, ConnectionHandler {
 
 	/**
 	 * {@link Connection}.
@@ -102,7 +107,7 @@ public abstract class SocketAccepterListenerTestCase extends
 	 */
 
 	@Override
-	protected CommunicationProtocol createCommunicationProtocol() {
+	protected CommunicationProtocolSource getCommunicationProtocolSource() {
 		return this;
 	}
 
@@ -110,6 +115,22 @@ public abstract class SocketAccepterListenerTestCase extends
 	protected void handleInvokeProcess(ManagedObject managedObject,
 			EscalationHandler escalationHandler) {
 		fail("Process should not be invoked");
+	}
+
+	/*
+	 * ============== CommunicationProtocolSource =============================
+	 */
+
+	@Override
+	public void loadSpecification(SpecificationContext context) {
+		// No properties required
+	}
+
+	@Override
+	public CommunicationProtocol createCommunicationProtocol(
+			MetaDataContext<None, Indexed> configurationContext,
+			CommunicationProtocolContext protocolContext) throws Exception {
+		return this;
 	}
 
 	/*

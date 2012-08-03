@@ -50,14 +50,18 @@ public abstract class ByteOutputStream extends OutputStream {
 	@Override
 	public abstract void write(int b) throws IOException;
 
-// TODO provide more performance implementations
-//	@Override
-//	public abstract void write(byte[] b) throws IOException;
-//
-//	@Override
-//	public abstract void write(byte[] b, int off, int len) throws IOException;
+	// TODO provide more performance implementations
+	// @Override
+	// public abstract void write(byte[] b) throws IOException;
+	//
+	// @Override
+	// public abstract void write(byte[] b, int off, int len) throws
+	// IOException;
 
 	@Override
 	public abstract void flush() throws IOException;
+
+	@Override
+	public abstract void close() throws IOException;
 
 }

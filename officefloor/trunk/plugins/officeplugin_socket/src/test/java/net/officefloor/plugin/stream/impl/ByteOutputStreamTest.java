@@ -19,6 +19,7 @@ package net.officefloor.plugin.stream.impl;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.nio.channels.ClosedChannelException;
 
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.socket.server.impl.ArrayWriteBuffer;
@@ -46,6 +47,11 @@ public class ByteOutputStreamTest extends OfficeFrameTestCase implements
 	private WriteBuffer[] writtenData = null;
 
 	/**
+	 * Indicates if closed {@link WriteBufferReceiver}.
+	 */
+	private boolean isClosed = false;
+
+	/**
 	 * Test do nothing if no data to flush.
 	 */
 	public void testFlushNoData() throws IOException {
@@ -67,9 +73,32 @@ public class ByteOutputStreamTest extends OfficeFrameTestCase implements
 		assertEquals("Incorrect written byte", 10, buffer.getData()[0]);
 	}
 
+	/**
+	 * Tests closing.
+	 */
+	public void testClose() throws IOException {
+
+		// Close
+		this.stream.close();
+		assertTrue("Receiver should be closed", this.isClosed);
+
+		// Attempting to write should fail
+		try {
+			this.stream.write(1);
+			fail("Should not successfully write");
+		} catch (ClosedChannelException ex) {
+			// Correct notified that closed
+		}
+	}
+
 	/*
 	 * ========================= WriteBufferReceiver ========================
 	 */
+
+	@Override
+	public Object getLock() {
+		return this;
+	}
 
 	@Override
 	public WriteBuffer createWriteBuffer(byte[] data, int length) {
@@ -86,6 +115,16 @@ public class ByteOutputStreamTest extends OfficeFrameTestCase implements
 	@Override
 	public void writeData(WriteBuffer[] data) {
 		this.writtenData = data;
+	}
+
+	@Override
+	public void close() {
+		this.isClosed = true;
+	}
+
+	@Override
+	public boolean isClosed() {
+		return this.isClosed;
 	}
 
 }

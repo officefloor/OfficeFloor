@@ -32,36 +32,12 @@ import net.officefloor.plugin.stream.WriteBufferReceiver;
 public interface Connection extends WriteBufferReceiver {
 
 	/**
-	 * Obtains the lock to <code>synchronize</code> for using this
-	 * {@link Connection}.
-	 * 
-	 * @return Lock for this {@link Connection}.
-	 */
-	Object getLock();
-
-	/**
 	 * Indicates if the connection is over a secure channel (e.g. utilising
 	 * SSL).
 	 * 
 	 * @return <code>true</code> if connection is over a secure channel.
 	 */
 	boolean isSecure();
-
-	/**
-	 * <p>
-	 * Flags to close the {@link Connection}.
-	 * <p>
-	 * Close occurs after all data has been written to the client. Reading will
-	 * stop as immediately as possible.
-	 */
-	void close();
-
-	/**
-	 * Indicates if the {@link Connection} is closed.
-	 * 
-	 * @return <code>true</code> if the {@link Connection} is closed.
-	 */
-	boolean isClosed();
 
 	/**
 	 * Obtains the local address for the {@link Connection}.

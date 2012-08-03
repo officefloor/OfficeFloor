@@ -20,10 +20,13 @@ package net.officefloor.plugin.socket.server.impl;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
+import java.net.Socket;
 import java.nio.channels.Selector;
 import java.nio.channels.ServerSocketChannel;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.build.None;
@@ -36,20 +39,25 @@ import net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceContext
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectTaskBuilder;
 import net.officefloor.frame.spi.managedobject.source.impl.AbstractManagedObjectSource;
 import net.officefloor.frame.util.AbstractSingleTask;
+import net.officefloor.plugin.socket.server.ConnectionManager;
 import net.officefloor.plugin.socket.server.protocol.CommunicationProtocol;
+import net.officefloor.plugin.socket.server.protocol.CommunicationProtocolContext;
 import net.officefloor.plugin.socket.server.protocol.CommunicationProtocolSource;
 import net.officefloor.plugin.socket.server.protocol.Connection;
-import net.officefloor.plugin.socket.server.protocol.ConnectionHandler;
-import net.officefloor.plugin.stream.BufferSquirtFactory;
-import net.officefloor.plugin.stream.squirtfactory.HeapByteBufferSquirtFactory;
 
 /**
  * Abstract {@link ManagedObjectSource} for a {@link ServerSocketChannel}.
  * 
  * @author Daniel Sagenschneider
  */
-public abstract class AbstractServerSocketManagedObjectSource<CH extends ConnectionHandler>
-		extends AbstractManagedObjectSource<None, Indexed> {
+public abstract class AbstractServerSocketManagedObjectSource extends
+		AbstractManagedObjectSource<None, Indexed> implements
+		CommunicationProtocolContext {
+
+	/**
+	 * {@link Logger}.
+	 */
+	private final Logger LOGGER = Logger.getLogger(this.getClass().getName());
 
 	/**
 	 * Port property name.
@@ -57,43 +65,45 @@ public abstract class AbstractServerSocketManagedObjectSource<CH extends Connect
 	public static final String PROPERTY_PORT = "port";
 
 	/**
-	 * Buffer size property name.
+	 * Name of property to obtain the send buffer size.
 	 */
-	public static final String PROPERTY_BUFFER_SIZE = "buffer.size";
+	public static final String PROPERTY_SEND_BUFFER_SIZE = "send.buffer.size";
 
 	/**
-	 * Maximum connections property name.
+	 * Name of property to obtain the receive buffer size.
 	 */
-	public static final String PROPERTY_MAXIMUM_CONNECTIONS_PER_LISTENER = "max.connections.per.listener";
+	public static final String PROPERTY_RECEIVE_BUFFER_SIZE = "receive.buffer.size";
 
 	/**
-	 * Singleton {@link ConnectionManagerImpl} for all {@link Connection} instances.
+	 * Singleton {@link ConnectionManager} for all {@link Connection} instances.
 	 */
-	private static ConnectionManagerImpl<?> singletonConnectionManager;
+	private static ConnectionManager singletonConnectionManager;
 
 	/**
 	 * Registered {@link AbstractServerSocketManagedObjectSource} instances.
 	 */
-	private static Set<AbstractServerSocketManagedObjectSource<?>> registeredServerSockets = new HashSet<AbstractServerSocketManagedObjectSource<?>>();
+	private static Set<AbstractServerSocketManagedObjectSource> registeredServerSockets = new HashSet<AbstractServerSocketManagedObjectSource>();
 
 	/**
-	 * Obtains the {@link ConnectionManagerImpl}.
+	 * Obtains the {@link ConnectionManager}.
 	 * 
 	 * @param mosContext
 	 *            {@link ManagedObjectSourceContext}.
-	 * @param selectorFactory
-	 *            {@link SelectorFactory}.
 	 * @param instance
 	 *            Instance of the
 	 *            {@link AbstractServerSocketManagedObjectSource} using the
-	 *            {@link ConnectionManagerImpl}.
-	 * @return {@link ConnectionManagerImpl}.
+	 *            {@link ConnectionManager}.
+	 * @param sendBufferSize
+	 *            Send buffer size.
+	 * @param receiveBufferSize
+	 *            Receive buffer size.
+	 * @return {@link ConnectionManager}.
 	 */
-	@SuppressWarnings({ "rawtypes", "unchecked" })
-	private static synchronized ConnectionManagerImpl getConnectionManager(
+	@SuppressWarnings("rawtypes")
+	private static synchronized ConnectionManager getConnectionManager(
 			ManagedObjectSourceContext<Indexed> mosContext,
-			SelectorFactory selectorFactory,
-			AbstractServerSocketManagedObjectSource<?> instance) {
+			AbstractServerSocketManagedObjectSource instance,
+			int sendBufferSize, int receiveBufferSize) {
 
 		// Provide dummy task for consistency across all server sockets
 		AbstractSingleTask<Work, None, None> dummy = new AbstractSingleTask<Work, None, None>() {
@@ -125,7 +135,7 @@ public abstract class AbstractServerSocketManagedObjectSource<CH extends Connect
 
 				// Create the socket listener
 				SocketListener socketListener = new SocketListener(
-						selectorFactory);
+						sendBufferSize, receiveBufferSize);
 
 				// Register the socket listener
 				socketListeners[i] = socketListener;
@@ -142,7 +152,8 @@ public abstract class AbstractServerSocketManagedObjectSource<CH extends Connect
 			}
 
 			// Create the connection manager
-			singletonConnectionManager = new ConnectionManagerImpl(socketListeners);
+			singletonConnectionManager = new ConnectionManagerImpl(
+					socketListeners);
 		}
 
 		// Register the instance for use of the connection manager
@@ -162,17 +173,20 @@ public abstract class AbstractServerSocketManagedObjectSource<CH extends Connect
 	private static synchronized void openSocketListenerSelectors()
 			throws IOException {
 		// Should be created at this time
-		singletonConnectionManager.openSocketListenerSelectors();
+		singletonConnectionManager.openSocketSelectors();
 	}
 
 	/**
 	 * <p>
-	 * Closes the possible open {@link ConnectionManagerImpl} and releases all
+	 * Closes the possible open {@link ConnectionManager} and releases all
 	 * {@link Selector} instances for the {@link SocketListener} instances.
 	 * <p>
 	 * Made public so that tests may use to close.
+	 * 
+	 * @throws IOException
+	 *             If fails to close the {@link ConnectionManager}.
 	 */
-	public static synchronized void closeConnectionManager() {
+	public static synchronized void closeConnectionManager() throws IOException {
 
 		// Clear all registered server sockets
 		registeredServerSockets.clear();
@@ -180,7 +194,7 @@ public abstract class AbstractServerSocketManagedObjectSource<CH extends Connect
 		// Determine if active connection manager
 		if (singletonConnectionManager != null) {
 			// Close the socket listener selectors
-			singletonConnectionManager.closeSocketListenerSelectors();
+			singletonConnectionManager.closeSocketSelectors();
 		}
 
 		// Close (release) the connection manager to create again
@@ -189,18 +203,21 @@ public abstract class AbstractServerSocketManagedObjectSource<CH extends Connect
 
 	/**
 	 * <p>
-	 * Releases the {@link ConnectionManagerImpl} for the
+	 * Releases the {@link ConnectionManager} for the
 	 * {@link AbstractServerSocketManagedObjectSource} instance.
 	 * <p>
-	 * Once {@link ConnectionManagerImpl} is released for all
+	 * Once {@link ConnectionManager} is released for all
 	 * {@link AbstractServerSocketManagedObjectSource} instances it is itself
 	 * closed.
 	 * 
 	 * @param instance
 	 *            {@link AbstractServerSocketManagedObjectSource}.
+	 * @throws IOException
+	 *             If fails to close the {@link ConnectionManager}.
 	 */
 	private static synchronized void releaseConnectionManager(
-			AbstractServerSocketManagedObjectSource<?> instance) {
+			AbstractServerSocketManagedObjectSource instance)
+			throws IOException {
 
 		// Unregister from the connection manager
 		registeredServerSockets.remove(instance);
@@ -212,57 +229,33 @@ public abstract class AbstractServerSocketManagedObjectSource<CH extends Connect
 	}
 
 	/**
-	 * {@link SelectorFactory}.
-	 */
-	private final SelectorFactory selectorFactory;
-
-	/**
 	 * {@link CommunicationProtocolSource}.
 	 */
-	private final CommunicationProtocolSource<CH> communicationProtocol;
+	private final CommunicationProtocolSource communicationProtocolSource;
 
 	/**
 	 * {@link ServerSocketAccepter} that requires binding on starting.
 	 */
-	private ServerSocketAccepter<CH> serverSocketAccepter;
+	private ServerSocketAccepter serverSocketAccepter;
+
+	/**
+	 * Send buffer size.
+	 */
+	private int sendBufferSize;
 
 	/**
 	 * {@link CommunicationProtocol}.
 	 */
-	private CommunicationProtocol<CH> server;
+	private CommunicationProtocol communicationProtocol;
 
 	/**
-	 * Default constructor necessary as per {@link ManagedObjectSource}.
+	 * Initiate.
 	 */
 	public AbstractServerSocketManagedObjectSource() {
-		this(new SelectorFactory());
-	}
 
-	/**
-	 * Allow for hooking in for testing.
-	 * 
-	 * @param selectorFactory
-	 *            {@link SelectorFactory}.
-	 */
-	AbstractServerSocketManagedObjectSource(SelectorFactory selectorFactory) {
-		this.selectorFactory = selectorFactory;
-
-		// Create the communication protocol
-		CommunicationProtocolSource<CH> commProtocol = this
-				.createCommunicationProtocol();
-
-		// Provide possible wrapping around the communication protocol
-		this.communicationProtocol = this
-				.createWrappingCommunicationProtocol(commProtocol);
-	}
-
-	/**
-	 * Obtains the {@link SelectorFactory}.
-	 * 
-	 * @return {@link SelectorFactory}.
-	 */
-	SelectorFactory getSelectorFactory() {
-		return this.selectorFactory;
+		// Create the communication protocol source
+		this.communicationProtocolSource = this
+				.createCommunicationProtocolSource();
 	}
 
 	/**
@@ -270,26 +263,15 @@ public abstract class AbstractServerSocketManagedObjectSource<CH extends Connect
 	 * 
 	 * @return {@link CommunicationProtocolSource}.
 	 */
-	protected abstract CommunicationProtocolSource<CH> createCommunicationProtocol();
+	protected abstract CommunicationProtocolSource createCommunicationProtocolSource();
 
-	/**
-	 * <p>
-	 * Creates a wrapping {@link CommunicationProtocolSource} around the input
-	 * {@link CommunicationProtocolSource}.
-	 * <p>
-	 * An example would be to add SSL {@link CommunicationProtocolSource}.
-	 * <p>
-	 * This default implementation returns the input
-	 * {@link CommunicationProtocolSource} as is.
-	 * 
-	 * @param communicationProtocol
-	 *            {@link CommunicationProtocolSource} to possibly wrap.
-	 * @return This default implementation returns the input
-	 *         {@link CommunicationProtocolSource} (no wrapping).
+	/*
+	 * ====================== CommunicationProtocolContext =====================
 	 */
-	protected CommunicationProtocolSource<CH> createWrappingCommunicationProtocol(
-			CommunicationProtocolSource<CH> communicationProtocol) {
-		return communicationProtocol;
+
+	@Override
+	public int getSendBufferSize() {
+		return this.sendBufferSize;
 	}
 
 	/*
@@ -302,11 +284,10 @@ public abstract class AbstractServerSocketManagedObjectSource<CH extends Connect
 		context.addProperty(PROPERTY_PORT);
 
 		// Add communication protocol required properties
-		this.communicationProtocol.loadSpecification(context);
+		this.communicationProtocolSource.loadSpecification(context);
 	}
 
 	@Override
-	@SuppressWarnings("unchecked")
 	protected void loadMetaData(MetaDataContext<None, Indexed> context)
 			throws Exception {
 
@@ -314,27 +295,35 @@ public abstract class AbstractServerSocketManagedObjectSource<CH extends Connect
 		ManagedObjectSourceContext<Indexed> mosContext = context
 				.getManagedObjectSourceContext();
 
+		// Create socket to obtain operating system details
+		Socket socket = new Socket();
+		int osSendBufferSize = socket.getSendBufferSize();
+		int osReceiveBufferSize = socket.getReceiveBufferSize();
+		socket.close();
+
 		// Obtain the configuration
 		int port = Integer.parseInt(mosContext.getProperty(PROPERTY_PORT));
-		final int bufferSize = Integer.parseInt(mosContext.getProperty(
-				PROPERTY_BUFFER_SIZE, "2048"));
+		this.sendBufferSize = Integer.parseInt(mosContext.getProperty(
+				PROPERTY_SEND_BUFFER_SIZE, String.valueOf(osSendBufferSize)));
+		int receiveBufferSize = Integer.parseInt(mosContext.getProperty(
+				PROPERTY_RECEIVE_BUFFER_SIZE,
+				String.valueOf(osReceiveBufferSize)));
+
+		// Obtain the server socket backlog
+		int serverSocketBackLog = 25000; // TODO make configurable
 
 		// Obtain the connection manager
-		ConnectionManagerImpl<CH> connectionManager = getConnectionManager(
-				mosContext, this.selectorFactory, this);
+		ConnectionManager connectionManager = getConnectionManager(mosContext,
+				this, this.sendBufferSize, receiveBufferSize);
 
-		// Create the buffer squirt factory
-		BufferSquirtFactory bufferSquirtFactory = new HeapByteBufferSquirtFactory(
-				bufferSize);
-
-		// Create the server
-		this.server = this.communicationProtocol.createServer(context,
-				bufferSquirtFactory);
+		// Create the communication protocol
+		this.communicationProtocol = this.communicationProtocolSource
+				.createCommunicationProtocol(context, this);
 
 		// Register the accepter of connections
-		this.serverSocketAccepter = new ServerSocketAccepter<CH>(
-				new InetSocketAddress(port), this.server, connectionManager,
-				bufferSquirtFactory);
+		this.serverSocketAccepter = new ServerSocketAccepter(
+				new InetSocketAddress(port), this.communicationProtocol,
+				connectionManager, serverSocketBackLog);
 		ManagedObjectTaskBuilder<None, None> accepterTask = mosContext.addWork(
 				"accepter", this.serverSocketAccepter).addTask("accepter",
 				this.serverSocketAccepter);
@@ -347,8 +336,9 @@ public abstract class AbstractServerSocketManagedObjectSource<CH extends Connect
 	@Override
 	public void start(ManagedObjectExecuteContext<Indexed> context)
 			throws Exception {
-		// Make the execute context available to the server
-		this.server.setManagedObjectExecuteContext(context);
+
+		// Make the execute context available to the communication protocol
+		this.communicationProtocol.setManagedObjectExecuteContext(context);
 
 		// Open selectors for socket listeners
 		openSocketListenerSelectors();
@@ -366,11 +356,21 @@ public abstract class AbstractServerSocketManagedObjectSource<CH extends Connect
 
 	@Override
 	public void stop() {
+
 		// Unbind acceptor socket to listen for new connections
 		this.serverSocketAccepter.unbindFromSocket();
 
 		// Release connection manager (closes socket listeners when appropriate)
-		releaseConnectionManager(this);
+		try {
+			releaseConnectionManager(this);
+
+		} catch (IOException ex) {
+			// Shutting down so just log issue
+			if (LOGGER.isLoggable(Level.INFO)) {
+				LOGGER.log(Level.INFO, "Failed to release "
+						+ ConnectionManager.class.getSimpleName(), ex);
+			}
+		}
 	}
 
 }

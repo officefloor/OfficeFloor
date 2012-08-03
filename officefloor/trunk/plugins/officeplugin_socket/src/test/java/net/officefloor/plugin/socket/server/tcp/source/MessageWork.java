@@ -19,6 +19,7 @@
 package net.officefloor.plugin.socket.server.tcp.source;
 
 import java.io.InputStream;
+import java.io.OutputStream;
 
 import net.officefloor.frame.api.execute.TaskContext;
 import net.officefloor.frame.api.execute.Work;
@@ -86,13 +87,13 @@ public class MessageWork {
 				// Write the bytes followed by 0 terminator
 				byte[] messageBytes = message.getBytes();
 				byte[] data = new byte[messageBytes.length + 1];
-				for (int i = 0; i < messageBytes.length; i++) {
-					data[i] = messageBytes[i];
-				}
+				System.arraycopy(messageBytes, 0, data, 0, messageBytes.length);
 				data[data.length - 1] = 0;
 
 				// Write the response
-				connection.getOutputStream().write(data);
+				OutputStream output = connection.getOutputStream();
+				output.write(data);
+				output.flush();
 
 				// Invoke flow to process another message when arrives
 				connection.waitOnClientData();
