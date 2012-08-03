@@ -37,7 +37,9 @@ import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.socket.server.http.HttpResponse;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
 import net.officefloor.plugin.socket.server.http.response.source.HttpResponseSendTask.HttpResponseSendTaskDependencies;
-import net.officefloor.plugin.stream.OutputBufferStream;
+import net.officefloor.plugin.socket.server.protocol.WriteBuffer;
+import net.officefloor.plugin.stream.WriteBufferReceiver;
+import net.officefloor.plugin.stream.impl.ByteOutputStreamImpl;
 
 import org.easymock.AbstractMatcher;
 
@@ -132,7 +134,9 @@ public class HttpResponseSenderWorkSourceTest extends OfficeFrameTestCase {
 		ServerHttpConnection connection = this
 				.createMock(ServerHttpConnection.class);
 		HttpResponse response = this.createMock(HttpResponse.class);
-		OutputBufferStream body = this.createMock(OutputBufferStream.class);
+		WriteBufferReceiver receiver = this
+				.createMock(WriteBufferReceiver.class);
+		final WriteBuffer writeBuffer = this.createMock(WriteBuffer.class);
 
 		// Record
 		this.recordReturn(
@@ -142,13 +146,25 @@ public class HttpResponseSenderWorkSourceTest extends OfficeFrameTestCase {
 				connection);
 		this.recordReturn(connection, connection.getHttpResponse(), response);
 		response.setStatus(status);
-		this.recordReturn(response, response.getBody(), body);
-		final ByteBuffer[] bodyContent = new ByteBuffer[1];
-		body.append((ByteBuffer) null);
-		this.control(body).setMatcher(new AbstractMatcher() {
+		this.recordReturn(response, response.getEntity(),
+				new ByteOutputStreamImpl(receiver, 1024));
+		final ByteBuffer[] entityContent = new ByteBuffer[1];
+		this.recordReturn(receiver, receiver.createWriteBuffer(null),
+				writeBuffer, new AbstractMatcher() {
+					@Override
+					public boolean matches(Object[] expected, Object[] actual) {
+						entityContent[0] = (ByteBuffer) actual[0];
+						return true;
+					}
+				});
+		receiver.writeData(null);
+		this.control(receiver).setMatcher(new AbstractMatcher() {
 			@Override
 			public boolean matches(Object[] expected, Object[] actual) {
-				bodyContent[0] = (ByteBuffer) actual[0];
+				WriteBuffer[] buffers = (WriteBuffer[]) actual;
+				assertEquals("Incorrect number of write buffers", 1,
+						buffers.length);
+				assertEquals("Incorrect write buffer", writeBuffer, buffers[0]);
 				return true;
 			}
 		});
@@ -172,11 +188,11 @@ public class HttpResponseSenderWorkSourceTest extends OfficeFrameTestCase {
 		task.doTask(taskContext);
 		this.verifyMockObjects();
 
-		// Validate the body contents
-		byte[] bodyData = new byte[bodyContent[0].limit()];
-		bodyContent[0].get(bodyData);
+		// Validate the entity contents
+		byte[] entityData = new byte[entityContent[0].limit()];
+		entityContent[0].get(entityData);
 		assertContents(new StringReader(testContentFileContents),
-				new InputStreamReader(new ByteArrayInputStream(bodyData)));
+				new InputStreamReader(new ByteArrayInputStream(entityData)));
 	}
 
 }

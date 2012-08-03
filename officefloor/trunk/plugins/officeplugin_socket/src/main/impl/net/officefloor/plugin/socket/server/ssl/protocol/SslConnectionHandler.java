@@ -19,50 +19,76 @@
 package net.officefloor.plugin.socket.server.ssl.protocol;
 
 import java.io.IOException;
+import java.nio.ByteBuffer;
+import java.util.LinkedList;
+import java.util.Queue;
 
 import javax.net.ssl.SSLEngine;
+import javax.net.ssl.SSLEngineResult;
+import javax.net.ssl.SSLEngineResult.HandshakeStatus;
+import javax.net.ssl.SSLEngineResult.Status;
 
-import net.officefloor.plugin.socket.server.WriteContext;
 import net.officefloor.plugin.socket.server.protocol.CommunicationProtocol;
 import net.officefloor.plugin.socket.server.protocol.Connection;
 import net.officefloor.plugin.socket.server.protocol.ConnectionHandler;
 import net.officefloor.plugin.socket.server.protocol.ConnectionHandlerContext;
 import net.officefloor.plugin.socket.server.protocol.HeartBeatContext;
 import net.officefloor.plugin.socket.server.protocol.ReadContext;
-import net.officefloor.plugin.socket.server.ssl.SslConnection;
+import net.officefloor.plugin.socket.server.protocol.WriteBuffer;
 import net.officefloor.plugin.socket.server.ssl.SslTaskExecutor;
-import net.officefloor.plugin.socket.server.ssl.TemporaryByteArrayFactory;
-import net.officefloor.plugin.stream.BufferSquirtFactory;
-import net.officefloor.plugin.stream.InputBufferStream;
 
 /**
  * SSL {@link ConnectionHandler}.
  * 
  * @author Daniel Sagenschneider
  */
-public class SslConnectionHandler<CH extends ConnectionHandler> implements
-		ConnectionHandler, TemporaryByteArrayFactory, ReadContext,
-		WriteContext, HeartBeatContext {
+public class SslConnectionHandler implements ConnectionHandler, ReadContext,
+		HeartBeatContext {
 
 	/**
-	 * {@link SslConnection}.
+	 * {@link Connection}.
 	 */
-	private final SslConnection connection;
+	private final Connection connection;
+
+	/**
+	 * {@link SSLEngine}.
+	 */
+	private final SSLEngine engine;
+
+	/**
+	 * {@link SslTaskExecutor}.
+	 */
+	private final SslTaskExecutor taskExecutor;
 
 	/**
 	 * Wrapped {@link ConnectionHandler}.
 	 */
-	private final CH wrappedConnectionHandler;
+	private final ConnectionHandler wrappedConnectionHandler;
 
 	/**
-	 * <p>
-	 * {@link SslContextObject}.
-	 * <p>
-	 * <code>volatile</code> as {@link TemporaryByteArrayFactory} will require
-	 * to use it from another thread. As set only once on first read, it will
-	 * always be available.
+	 * {@link Queue} of read data to be processed.
 	 */
-	private volatile SslContextObject contextObject;
+	private final Queue<byte[]> readData = new LinkedList<byte[]>();
+
+	/**
+	 * {@link Queue} of write data to be processed.
+	 */
+	private final Queue<WriteBuffer> writeData = new LinkedList<WriteBuffer>();
+
+	/**
+	 * Indicates if closing.
+	 */
+	private boolean isClosing = false;
+
+	/**
+	 * Current {@link SslTask} being run.
+	 */
+	private SslTask task = null;
+
+	/**
+	 * Failure in attempting to process.
+	 */
+	private IOException failure = null;
 
 	/**
 	 * To enable wrapped {@link ConnectionHandler} to use context object, need
@@ -78,36 +104,321 @@ public class SslConnectionHandler<CH extends ConnectionHandler> implements
 	 *            {@link Connection}.
 	 * @param engine
 	 *            {@link SSLEngine}.
-	 * @param bufferSquirtFactory
-	 *            {@link BufferSquirtFactory}.
 	 * @param taskExecutor
 	 *            {@link SslTaskExecutor}.
-	 * @param wrappedServer
+	 * @param wrappedCommunicationProtocol
 	 *            Wrapped {@link CommunicationProtocol}.
 	 */
 	public SslConnectionHandler(Connection connection, SSLEngine engine,
-			BufferSquirtFactory bufferSquirtFactory,
-			SslTaskExecutor taskExecutor, CommunicationProtocol<CH> wrappedServer) {
-
-		// Creates the SSL connection
-		this.connection = new SslConnectionImpl(connection.getLock(),
-				connection.getLocalAddress(), connection.getRemoteAddress(),
-				connection.getInputBufferStream(),
-				connection.getOutputBufferStream(), engine,
-				bufferSquirtFactory, this, taskExecutor);
+			SslTaskExecutor taskExecutor,
+			CommunicationProtocol wrappedCommunicationProtocol) {
+		this.engine = engine;
+		this.taskExecutor = taskExecutor;
+		this.connection = connection;
 
 		// Create the connection handler to wrap
-		this.wrappedConnectionHandler = wrappedServer
-				.createConnectionHandler(this.connection);
+		Connection sslConnection = new SslConnectionImpl(this, this.connection);
+		this.wrappedConnectionHandler = wrappedCommunicationProtocol
+				.createConnectionHandler(sslConnection);
 	}
 
 	/**
-	 * Obtains the wrapped {@link ConnectionHandler}.
-	 * 
-	 * @return Wrapped {@link ConnectionHandler}.
+	 * Process the data.
 	 */
-	public CH getWrappedConnectionHandler() {
-		return this.wrappedConnectionHandler;
+	private void process() {
+
+		try {
+
+			// Do not process if failure
+			if (this.failure != null) {
+				this.readData.clear();
+				this.writeData.clear();
+				return;
+			}
+
+			// Do not process if a task is being run
+			if (this.task != null) {
+				return;
+			}
+
+			// Process until not able to process further
+			for (;;) {
+
+				// Process based on state of engine
+				boolean isInputData = false;
+				boolean isOutputData = false;
+				HandshakeStatus handshakeStatus = this.engine
+						.getHandshakeStatus();
+				switch (handshakeStatus) {
+				case NOT_HANDSHAKING:
+					// Flag data to process
+					isInputData = (this.readData.size() > 0);
+					isOutputData = (this.writeData.size() > 0);
+					break;
+
+				case NEED_WRAP:
+					// Must always output data if required
+					isOutputData = true;
+					break;
+
+				case NEED_UNWRAP:
+					// Ensure have data to unwrap
+					if (this.readData.size() == 0) {
+						return; // must have data available to unwrap
+					} else {
+						// Input the data to unwrap
+						isInputData = true;
+					}
+					break;
+
+				case NEED_TASK:
+					// Trigger processing of the delegated task
+					Runnable delegatedTask = this.engine.getDelegatedTask();
+					this.task = new SslTask(delegatedTask);
+					this.taskExecutor.beginTask(this.task);
+					return; // Must wait on task to complete
+
+				default:
+					// Should only be in above states
+					throw new IllegalStateException("Illegal "
+							+ SSLEngine.class.getSimpleName()
+							+ " handshake state " + handshakeStatus);
+				}
+
+				// Handle actions
+				if (isInputData || this.isClosing) {
+					// Handle inputting data
+
+					// Obtain temporary buffer to receive plain text
+					int applicationBufferSize = this.engine.getSession()
+							.getApplicationBufferSize();
+					byte[] tempBytes = new byte[applicationBufferSize];
+					ByteBuffer tempBuffer = ByteBuffer.wrap(tempBytes);
+
+					// Obtain all the read data
+					int availableData = 0;
+					for (byte[] data : this.readData) {
+						availableData += data.length;
+					}
+					byte[] dataToUnwrap = new byte[availableData];
+					int readDataIndex = 0;
+					for (byte[] data : this.readData) {
+						System.arraycopy(data, 0, dataToUnwrap, readDataIndex,
+								data.length);
+						readDataIndex += data.length;
+					}
+					this.readData.clear();
+
+					// Unwrap the read data
+					SSLEngineResult sslEngineResult = this.engine.unwrap(
+							ByteBuffer.wrap(dataToUnwrap), tempBuffer);
+
+					// Determine if further data to consume on another pass
+					int bytesConsumed = sslEngineResult.bytesConsumed();
+					if (bytesConsumed < availableData) {
+						// Make data available for further reading
+						byte[] furtherData = new byte[availableData
+								- bytesConsumed];
+						System.arraycopy(dataToUnwrap, bytesConsumed,
+								furtherData, 0, furtherData.length);
+						this.readData.add(furtherData);
+					}
+
+					// Process based on status
+					Status status = sslEngineResult.getStatus();
+					switch (status) {
+					case BUFFER_UNDERFLOW:
+						// Return waiting for more data as require more
+						return;
+					case OK:
+						// Handle the unwrapped data
+						int bytesProduced = sslEngineResult.bytesProduced();
+						this.readContextData = new byte[bytesProduced];
+						System.arraycopy(tempBytes, 0, this.readContextData, 0,
+								bytesProduced);
+						this.wrappedConnectionHandler.handleRead(this);
+						break;
+					case CLOSED:
+						// Should be no application input data on close.
+						// Determine if in close handshake.
+						HandshakeStatus closeHandshakeStatus = this.engine
+								.getHandshakeStatus();
+						switch (closeHandshakeStatus) {
+						case NEED_TASK:
+						case NEED_UNWRAP:
+						case NEED_WRAP:
+							// Allow close handshake to proceed
+							break;
+						case NOT_HANDSHAKING:
+							// Close handshake complete, close connection
+							this.connection.close();
+							break;
+						default:
+							throw new IllegalStateException("Unknown status "
+									+ status);
+						}
+						break;
+					default:
+						throw new IllegalStateException("Unknown status "
+								+ status);
+					}
+
+				}
+
+				if (isOutputData || this.isClosing) {
+					// Handle outputting data
+
+					// Obtain temporary buffer to receive cipher text
+					int packetBufferSize = this.engine.getSession()
+							.getPacketBufferSize();
+					byte[] tempBytes = new byte[packetBufferSize];
+					ByteBuffer tempBuffer = ByteBuffer.wrap(tempBytes);
+
+					// Obtain all the write data
+					int availableData = 0;
+					for (WriteBuffer buffer : this.writeData) {
+						int length = buffer.length();
+						length = (length == -1) ? buffer.getDataBuffer()
+								.remaining() : length;
+						availableData += length;
+					}
+					byte[] dataToWrap = new byte[availableData];
+					int writeDataIndex = 0;
+					for (WriteBuffer buffer : this.writeData) {
+						byte[] data = buffer.getData();
+						int length;
+						if (data != null) {
+							length = buffer.length();
+							System.arraycopy(data, 0, dataToWrap,
+									writeDataIndex, length);
+							writeDataIndex += length;
+						} else {
+							ByteBuffer dataBuffer = buffer.getDataBuffer();
+							length = dataBuffer.remaining();
+							dataBuffer.put(dataToWrap, writeDataIndex, length);
+						}
+						writeDataIndex += length;
+					}
+
+					// Wrap the written data
+					SSLEngineResult sslEngineResult = this.engine.wrap(
+							ByteBuffer.wrap(dataToWrap), tempBuffer);
+
+					// Determine if further data to consume on another pass
+					int bytesConsumed = sslEngineResult.bytesConsumed();
+					if (bytesConsumed < availableData) {
+						// Make data available for further writing
+						byte[] furtherData = new byte[availableData
+								- bytesConsumed];
+						System.arraycopy(dataToWrap, bytesConsumed,
+								furtherData, 0, furtherData.length);
+						this.writeData.add(this.connection.createWriteBuffer(
+								furtherData, furtherData.length));
+
+					} else {
+						// All data written, so check if close
+						if (this.isClosing) {
+							this.engine.closeOutbound();
+						}
+					}
+
+					// Process based on status
+					Status status = sslEngineResult.getStatus();
+					switch (status) {
+					case OK:
+					case CLOSED:
+						// Transfer the cipher text to connection
+						int bytesProduced = sslEngineResult.bytesProduced();
+						byte[] cipherData = new byte[bytesProduced];
+						System.arraycopy(tempBytes, 0, cipherData, 0,
+								bytesProduced);
+						this.connection
+								.writeData(new WriteBuffer[] { this.connection
+										.createWriteBuffer(cipherData,
+												cipherData.length) });
+
+						// Handle close
+						if (status == Status.CLOSED) {
+
+							// Determine if in close handshake
+							HandshakeStatus closeHandshakeStatus = this.engine
+									.getHandshakeStatus();
+							switch (closeHandshakeStatus) {
+							case NEED_TASK:
+							case NEED_UNWRAP:
+							case NEED_WRAP:
+								// Allow close handshake to proceed
+								break;
+							case NOT_HANDSHAKING:
+								// Close handshake complete, close connection
+								this.connection.close();
+								break;
+							default:
+								throw new IllegalStateException(
+										"Unknown status " + status);
+							}
+						}
+						break;
+					default:
+						throw new IllegalStateException("Unknown status "
+								+ status);
+					}
+				}
+			}
+
+		} catch (IOException ex) {
+			// Record failure of processing to fail further interaction
+			this.failure = ex;
+		}
+	}
+
+	/**
+	 * Written data to the SSL {@link Connection}.
+	 * 
+	 * @param data
+	 *            {@link WriteBuffer} data.
+	 */
+	void writeData(WriteBuffer[] data) {
+
+		synchronized (this.connection.getLock()) {
+
+			// Queue the data
+			for (WriteBuffer buffer : data) {
+				this.writeData.add(buffer);
+			}
+
+			// Process data
+			this.process();
+		}
+	}
+
+	/**
+	 * Triggers the closing the SSL {@link Connection}.
+	 */
+	void triggerClose() {
+
+		synchronized (this.connection.getLock()) {
+
+			// Flag to close
+			this.isClosing = true;
+
+			// Process the closing
+			this.process();
+		}
+	}
+
+	/**
+	 * Indicates if closing or closed.
+	 * 
+	 * @return <code>true</code> if closing or closed.
+	 */
+	boolean isClosing() {
+
+		synchronized (this.connection.getLock()) {
+
+			// Indicate if closing or closed
+			return this.isClosing;
+		}
 	}
 
 	/*
@@ -115,96 +426,27 @@ public class SslConnectionHandler<CH extends ConnectionHandler> implements
 	 */
 
 	@Override
-	@SuppressWarnings("unchecked")
 	public void handleRead(ReadContext context) throws IOException {
 
-		// Ensure have SSL context object
-		if (this.contextObject == null) {
-			// Attempt to obtain shared context object (via double check lock)
-			this.contextObject = (SslContextObject) context.getContextObject();
-			if (this.contextObject == null) {
-				synchronized (context) {
-					this.contextObject = (SslContextObject) context
-							.getContextObject();
-					if (this.contextObject == null) {
-						// Create as first handle read for context
-						this.contextObject = new SslContextObject();
-						context.setContextObject(this.contextObject);
-					}
-				}
-			}
+		synchronized (this.connection.getLock()) {
+
+			// Queue the data
+			this.readData.add(context.getData());
+
+			// Process data
+			this.process();
 		}
-
-		// Process the data from peer
-		this.connection.processDataFromPeer();
-
-		// Always handle read even if no application data (stop timeouts)
-		this.connectionHandlerContext = context;
-		this.wrappedConnectionHandler.handleRead(this);
 	}
 
 	@Override
-	public void handleWrite(WriteContext context) throws IOException {
-		// Delegate to wrapped handler
-		this.connectionHandlerContext = context;
-		this.wrappedConnectionHandler.handleWrite(this);
-	}
+	public void handleHeartbeat(HeartBeatContext context) throws IOException {
 
-	@Override
-	public void handleIdleConnection(HeartBeatContext context) throws IOException {
-
-		// Ensure no error in processing
-		this.connection.validate();
-
-		// Delegate to wrapped handler
-		this.connectionHandlerContext = context;
-		this.wrappedConnectionHandler.handleIdleConnection(this);
+		// Allow wrapped connection handler to handle heart beat
+		this.wrappedConnectionHandler.handleHeartbeat(context);
 	}
 
 	/*
-	 * ================= TemporaryByteArrayFactory =============================
-	 */
-
-	@Override
-	public byte[] createDestinationByteArray(int minimumSize) {
-
-		// Obtain existing array (context will always be available)
-		byte[] array = this.contextObject.destinationBytes;
-
-		// Ensure have array and is big enough
-		if ((array == null) || (array.length < minimumSize)) {
-			// Increase array size to minimum size required
-			array = new byte[minimumSize];
-
-			// Make larger array available for further processing
-			this.contextObject.destinationBytes = array;
-		}
-
-		// Return the array
-		return array;
-	}
-
-	@Override
-	public byte[] createSourceByteArray(int minimumSize) {
-
-		// Obtain existing array (context will always be available)
-		byte[] array = this.contextObject.sourceBytes;
-
-		// Ensure have array and is big enough
-		if ((array == null) || (array.length < minimumSize)) {
-			// Increase array size to minimum size required
-			array = new byte[minimumSize];
-
-			// Make larger array available for further processing
-			this.contextObject.sourceBytes = array;
-		}
-
-		// Return the array
-		return array;
-	}
-
-	/*
-	 * ===================== ConnectionHandlerContext =========================
+	 * =============== HeartBeatContext & ReadContext ======================
 	 */
 
 	@Override
@@ -212,53 +454,61 @@ public class SslConnectionHandler<CH extends ConnectionHandler> implements
 		return this.connectionHandlerContext.getTime();
 	}
 
-	@Override
-	public void setCloseConnection(boolean isClose) {
-		this.connectionHandlerContext.setCloseConnection(isClose);
-	}
-
-	@Override
-	public Object getContextObject() {
-		// Use context object wrapped object
-		return this.contextObject.wrappedContextObject;
-	}
-
-	@Override
-	public void setContextObject(Object contextObject) {
-		// Use context object wrapped object
-		this.contextObject.wrappedContextObject = contextObject;
-	}
-
-	/*
-	 * ==================== ReadContext =====================================
+	/**
+	 * {@link ReadContext} data.
 	 */
+	private byte[] readContextData = null;
 
 	@Override
-	public InputBufferStream getInputBufferStream() {
-		// Use the plain text input
-		return this.connection.getInputBufferStream();
+	public byte[] getData() {
+		return this.readContextData;
 	}
 
 	/**
-	 * {@link ConnectionHandlerContext} context object for SSL.
+	 * Wraps the SSL task to be executed.
 	 */
-	private class SslContextObject {
+	private class SslTask implements Runnable {
 
 		/**
-		 * Sources bytes for {@link TemporaryByteArrayFactory}.
+		 * Actual SSL task to be run.
 		 */
-		public volatile byte[] sourceBytes = null;
+		private final Runnable task;
 
 		/**
-		 * Destination bytes for {@link TemporaryByteArrayFactory}.
+		 * Initiate.
+		 * 
+		 * @param task
+		 *            SSL task to be run.
 		 */
-		public volatile byte[] destinationBytes = null;
+		public SslTask(Runnable task) {
+			this.task = task;
+		}
 
-		/**
-		 * Wrapped context object.
+		/*
+		 * =============== Runnable ===========================
 		 */
-		public Object wrappedContextObject = null;
 
+		@Override
+		public void run() {
+			try {
+				// Run task and ensure notify when complete
+				this.task.run();
+
+			} catch (Throwable ex) {
+				// Flag failure in running task
+				synchronized (SslConnectionHandler.this.connection.getLock()) {
+					SslConnectionHandler.this.failure = new IOException(
+							"SSL delegated task failed", ex);
+				}
+
+			} finally {
+				// Flag task complete and trigger further processing
+				synchronized (SslConnectionHandler.this.connection.getLock()) {
+					SslConnectionHandler.this.task = null;
+					SslConnectionHandler.this.process();
+				}
+			}
+		}
 	}
 
 }

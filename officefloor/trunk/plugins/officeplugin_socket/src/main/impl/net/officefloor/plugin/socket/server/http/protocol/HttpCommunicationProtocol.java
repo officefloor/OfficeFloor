@@ -18,8 +18,6 @@
 
 package net.officefloor.plugin.socket.server.http.protocol;
 
-import java.io.IOException;
-
 import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectExecuteContext;
@@ -36,18 +34,17 @@ import net.officefloor.plugin.socket.server.http.conversation.impl.HttpManagedOb
 import net.officefloor.plugin.socket.server.http.parse.HttpRequestParser;
 import net.officefloor.plugin.socket.server.http.parse.impl.HttpRequestParserImpl;
 import net.officefloor.plugin.socket.server.protocol.CommunicationProtocol;
+import net.officefloor.plugin.socket.server.protocol.CommunicationProtocolContext;
 import net.officefloor.plugin.socket.server.protocol.CommunicationProtocolSource;
 import net.officefloor.plugin.socket.server.protocol.Connection;
-import net.officefloor.plugin.stream.BufferSquirtFactory;
 
 /**
  * HTTP {@link CommunicationProtocolSource}.
  * 
  * @author Daniel Sagenschneider
  */
-public class HttpCommunicationProtocol implements
-		CommunicationProtocolSource<HttpConnectionHandler>,
-		CommunicationProtocol<HttpConnectionHandler> {
+public class HttpCommunicationProtocol implements CommunicationProtocolSource,
+		CommunicationProtocol {
 
 	/**
 	 * Name of property to determine if send stack trace on failure.
@@ -130,9 +127,9 @@ public class HttpCommunicationProtocol implements
 	private int maxTextPartLength = 255;
 
 	/**
-	 * {@link BufferSquirtFactory}.
+	 * Send buffer size.
 	 */
-	private BufferSquirtFactory bufferSquirtFactory;
+	private int sendBufferSize;
 
 	/**
 	 * Flow index to handle processing {@link HttpRequest}.
@@ -144,8 +141,25 @@ public class HttpCommunicationProtocol implements
 	 */
 	private ManagedObjectExecuteContext<Indexed> executeContext;
 
+	/**
+	 * Services the {@link HttpRequest}.
+	 * 
+	 * @param handler
+	 *            {@link HttpConnectionHandler}.
+	 * @param httpManagedObject
+	 *            {@link HttpManagedObject} for the {@link HttpRequest}.
+	 */
+	public void serviceHttpRequest(HttpConnectionHandler handler,
+			HttpManagedObject httpManagedObject) {
+
+		// Invoke processing of the HTTP managed object
+		this.executeContext.invokeProcess(this.requestHandlingFlowIndex,
+				httpManagedObject.getServerHttpConnection(), httpManagedObject,
+				0, httpManagedObject.getEscalationHandler());
+	}
+
 	/*
-	 * ====================== CommunicationProtocol =========================
+	 * =================== CommunicationProtocolSource ======================
 	 */
 
 	@Override
@@ -154,12 +168,11 @@ public class HttpCommunicationProtocol implements
 	}
 
 	@Override
-	public CommunicationProtocol<HttpConnectionHandler> createServer(
-			MetaDataContext<None, Indexed> context,
-			BufferSquirtFactory bufferSquirtFactory) throws Exception {
-		ManagedObjectSourceContext<Indexed> mosContext = context
+	public CommunicationProtocol createCommunicationProtocol(
+			MetaDataContext<None, Indexed> configurationContext,
+			CommunicationProtocolContext protocolContext) throws Exception {
+		ManagedObjectSourceContext<Indexed> mosContext = configurationContext
 				.getManagedObjectSourceContext();
-		this.bufferSquirtFactory = bufferSquirtFactory;
 
 		// Obtain properties
 		this.isSendStackTraceOnFailure = Boolean
@@ -180,11 +193,11 @@ public class HttpCommunicationProtocol implements
 				String.valueOf(DEFAULT_VALUE_MAXIMUM_TEXT_PART_LENGTH)));
 
 		// Specify types
-		context.setManagedObjectClass(HttpManagedObjectImpl.class);
-		context.setObjectClass(ServerHttpConnection.class);
+		configurationContext.setManagedObjectClass(HttpManagedObjectImpl.class);
+		configurationContext.setObjectClass(ServerHttpConnection.class);
 
 		// Provide the flow to handle the HTTP request
-		this.requestHandlingFlowIndex = context
+		this.requestHandlingFlowIndex = configurationContext
 				.addFlow(ServerHttpConnection.class)
 				.setLabel("HANDLE_HTTP_REQUEST").getIndex();
 
@@ -196,7 +209,7 @@ public class HttpCommunicationProtocol implements
 	}
 
 	/*
-	 * ====================== Server ============================
+	 * ====================== CommunicationProtocol ============================
 	 */
 
 	@Override
@@ -208,24 +221,11 @@ public class HttpCommunicationProtocol implements
 	@Override
 	public HttpConnectionHandler createConnectionHandler(Connection connection) {
 		HttpConversation conversation = new HttpConversationImpl(connection,
-				this.bufferSquirtFactory, this.isSendStackTraceOnFailure);
+				this.sendBufferSize, this.isSendStackTraceOnFailure);
 		HttpRequestParser parser = new HttpRequestParserImpl(
 				this.maximumHttpRequestHeaders, this.maximumRequestBodyLength);
 		return new HttpConnectionHandler(this, conversation, parser,
 				this.maxTextPartLength, this.connectionTimeout);
-	}
-
-	@Override
-	public void processRequest(HttpConnectionHandler handler, Object attachment)
-			throws IOException {
-
-		// Obtain the HTTP managed object
-		HttpManagedObject managedObject = (HttpManagedObject) attachment;
-
-		// Invoke processing of the HTTP managed object
-		this.executeContext.invokeProcess(this.requestHandlingFlowIndex,
-				managedObject.getServerHttpConnection(), managedObject, 0,
-				managedObject.getEscalationHandler());
 	}
 
 }

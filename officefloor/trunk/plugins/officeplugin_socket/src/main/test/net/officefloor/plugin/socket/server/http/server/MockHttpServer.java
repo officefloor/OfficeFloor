@@ -205,10 +205,7 @@ public abstract class MockHttpServer extends AbstractOfficeConstructTestCase
 		// Add common properties
 		serverSocketBuilder.addProperty(
 				HttpServerSocketManagedObjectSource.PROPERTY_PORT,
-				String.valueOf(port));
-		serverSocketBuilder.addProperty(
-				HttpServerSocketManagedObjectSource.PROPERTY_BUFFER_SIZE,
-				"1024");
+				String.valueOf(this.port));
 		serverSocketBuilder.setTimeout(3000);
 
 		// Have server socket managed by office

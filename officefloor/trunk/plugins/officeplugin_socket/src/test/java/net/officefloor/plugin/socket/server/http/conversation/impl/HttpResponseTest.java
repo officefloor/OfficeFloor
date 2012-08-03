@@ -237,7 +237,7 @@ public class HttpResponseTest extends OfficeFrameTestCase implements Connection 
 	private HttpResponse createHttpResponse() {
 
 		// Add the request
-		NioInputStreamImpl entity = new NioInputStreamImpl();
+		NioInputStreamImpl entity = new NioInputStreamImpl(new Object());
 		entity.queueData(null, false);
 		HttpManagedObject mo = this.conversation.addRequest("GET", "/mock",
 				"HTTP/1.1", new LinkedList<HttpHeader>(), entity);

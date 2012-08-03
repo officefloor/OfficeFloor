@@ -123,9 +123,9 @@ public class HttpResponseSendTask
 			response.setStatus(this.status);
 		}
 
-		// Provide body content if have content
+		// Provide entity if have content
 		if (this.content != null) {
-			response.getBody().append(this.content);
+			response.getEntity().write(this.content);
 		}
 
 		// Trigger sending the response

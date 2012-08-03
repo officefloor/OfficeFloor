@@ -35,9 +35,8 @@ import net.officefloor.plugin.socket.server.ssl.protocol.SslConnectionHandler;
  * 
  * @author Daniel Sagenschneider
  */
-public class HttpsServerSocketManagedObjectSource
-		extends
-		AbstractServerSocketManagedObjectSource<SslConnectionHandler<HttpConnectionHandler>>
+public class HttpsServerSocketManagedObjectSource extends
+		AbstractServerSocketManagedObjectSource
 		implements
 		ManagedObjectSourceService<None, Indexed, HttpsServerSocketManagedObjectSource> {
 
@@ -60,9 +59,8 @@ public class HttpsServerSocketManagedObjectSource
 	 */
 
 	@Override
-	protected CommunicationProtocolSource<SslConnectionHandler<HttpConnectionHandler>> createCommunicationProtocol() {
-		return new SslCommunicationProtocol<HttpConnectionHandler>(
-				new HttpCommunicationProtocol());
+	protected CommunicationProtocolSource createCommunicationProtocolSource() {
+		return new SslCommunicationProtocol(new HttpCommunicationProtocol());
 	}
 
 }
