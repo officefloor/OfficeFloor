@@ -39,17 +39,17 @@ public class NioInputStreamImpl extends NioInputStream {
 	/**
 	 * {@link Queue} of data for reading.
 	 */
-	private final Queue<byte[]> data = new LinkedList<byte[]>();
+	private final Queue<ReadBuffer> data = new LinkedList<ReadBuffer>();
 
 	/**
-	 * Current data being read.
+	 * Current {@link ReadBuffer} being read.
 	 */
-	private byte[] currentData = null;
+	private ReadBuffer currentBuffer = null;
 
 	/**
-	 * Current data index.
+	 * Current {@link ReadBuffer} index.
 	 */
-	private int currentDataIndex = 0;
+	private int currentBufferIndex = 0;
 
 	/**
 	 * Number of bytes currently available.
@@ -76,25 +76,35 @@ public class NioInputStreamImpl extends NioInputStream {
 	 * 
 	 * @param data
 	 *            Data for reading.
+	 * @param startIndex
+	 *            Start index within the data.
+	 * @param endIndex
+	 *            End index within the data.
 	 * @param isFurtherData
 	 *            Indicates if further data is going to be made available.
 	 */
-	public void queueData(byte[] data, boolean isFurtherData) {
+	public void queueData(byte[] data, int startIndex, int endIndex,
+			boolean isFurtherData) {
 
 		synchronized (this.lock) {
 
 			// Ensure have data
 			if (data != null) {
 
+				// Create the read buffer
+				ReadBuffer readBuffer = new ReadBuffer(data, startIndex,
+						endIndex);
+
 				// Queue further data
-				if (this.currentData == null) {
-					this.currentData = data;
+				if (this.currentBuffer == null) {
+					this.currentBuffer = readBuffer;
+					this.currentBufferIndex = this.currentBuffer.startIndex;
 				} else {
-					this.data.add(data);
+					this.data.add(readBuffer);
 				}
 
-				// Increment the number of bytes available
-				this.available += data.length;
+				// Increment available bytes (+1 for last byte indexed)
+				this.available += ((endIndex - startIndex) + 1);
 			}
 
 			// Indicate if further data
@@ -114,7 +124,7 @@ public class NioInputStreamImpl extends NioInputStream {
 			for (;;) {
 
 				// Ensure have data
-				if (this.currentData == null) {
+				if (this.currentBuffer == null) {
 					if (this.isFurtherData) {
 						// Not yet end of stream
 						throw new NoAvailableInputException();
@@ -125,15 +135,17 @@ public class NioInputStreamImpl extends NioInputStream {
 				}
 
 				// Determine if data is available
-				if (this.currentDataIndex < this.currentData.length) {
+				if (this.currentBufferIndex <= this.currentBuffer.endIndex) {
 					// Return the byte (keeping available up to date)
 					this.available--;
-					return this.currentData[this.currentDataIndex++];
+					return this.currentBuffer.data[this.currentBufferIndex++];
 				}
 
-				// Obtain the next data to start reading
-				this.currentData = this.data.poll();
-				this.currentDataIndex = 0;
+				// Obtain the next buffer to start reading
+				this.currentBuffer = this.data.poll();
+				if (this.currentBuffer != null) {
+					this.currentBufferIndex = this.currentBuffer.startIndex;
+				}
 			}
 		}
 	}
@@ -147,6 +159,43 @@ public class NioInputStreamImpl extends NioInputStream {
 			return ((this.available == 0) && (!this.isFurtherData)) ? -1
 					: this.available;
 
+		}
+	}
+
+	/**
+	 * Read buffer.
+	 */
+	private static class ReadBuffer {
+
+		/**
+		 * Data.
+		 */
+		public final byte[] data;
+
+		/**
+		 * Start index within the data.
+		 */
+		public final int startIndex;
+
+		/**
+		 * End index within the data.
+		 */
+		public final int endIndex;
+
+		/**
+		 * Initiate.
+		 * 
+		 * @param data
+		 *            Data.
+		 * @param startIndex
+		 *            Start index within the data.
+		 * @param endIndex
+		 *            End index within the data.
+		 */
+		public ReadBuffer(byte[] data, int startIndex, int endIndex) {
+			this.data = data;
+			this.startIndex = startIndex;
+			this.endIndex = endIndex;
 		}
 	}
 

@@ -37,11 +37,8 @@ public interface HttpRequestParser {
 	 * 
 	 * @param data
 	 *            Data to be parsed for the {@link HttpRequest}.
-	 * @param tempBuffer
-	 *            Temporary char buffer that is used to translate bytes into a
-	 *            {@link String}. This allows reducing memory size and creation
-	 *            of arrays. The size of the buffer indicates the maximum size
-	 *            for parts of the {@link HttpRequest} (except the entity).
+	 * @param startIndex
+	 *            Index within the data to start parsing.
 	 * @return <code>true</code> if the {@link HttpRequest} has been fully
 	 *         parsed. <false>false</false> indicates this method should be
 	 *         called again when further data is available to obtain the full
@@ -50,16 +47,25 @@ public interface HttpRequestParser {
 	 *             If fails to read bytes.
 	 * @throws HttpRequestParseException
 	 *             If failure to parse {@link HttpRequest}.
+	 * 
+	 * @see #nextByteToParseIndex()
 	 */
-	boolean parse(byte[] data, char[] tempBuffer) throws IOException,
+	boolean parse(byte[] data, int startIndex) throws IOException,
 			HttpRequestParseException;
 
 	/**
-	 * Indicates the number of remaining bytes from last parse.
+	 * <p>
+	 * Obtains the index of the next byte to parse from the previous
+	 * {@link #parse(byte[], int)}.
+	 * <p>
+	 * Should all bytes be consumed this will return <code>-1</code>. Note that
+	 * if {@link #parse(byte[], int)} returns <code>false</code>, this will
+	 * always return <code>-1</code> as all bytes are to be consumed.
 	 * 
-	 * @return Number of remaining bytes from last parse.
+	 * @return Index of the next byte to parse or <code>-1</code> if all bytes
+	 *         consumed.
 	 */
-	int remainingBytes();
+	int nextByteToParseIndex();
 
 	/**
 	 * Resets for parsing another {@link HttpRequest}.

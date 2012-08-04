@@ -153,7 +153,7 @@ public class TcpConnectionHandler implements ConnectionHandler,
 
 			// Write the data
 			byte[] data = context.getData();
-			this.inputStream.queueData(data, true);
+			this.inputStream.queueData(data, 0, (data.length - 1), true);
 
 			// Notify potential waiting servicing
 			if (this.asynchronousListener != null) {

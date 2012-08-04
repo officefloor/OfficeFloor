@@ -119,13 +119,6 @@ public class HttpConnectionHandler implements ConnectionHandler {
 			// New last interaction time
 			this.lastInteractionTime = context.getTime();
 
-			// Lazy obtain the temporary buffer
-			char[] tempBuffer = (char[]) context.getContextObject();
-			if (tempBuffer == null) {
-				tempBuffer = new char[this.maxTextPartLength];
-				context.setContextObject(tempBuffer);
-			}
-
 			// Loop as may have more than one request on read
 			byte[] readData = context.getData();
 			for (;;) {
@@ -133,7 +126,7 @@ public class HttpConnectionHandler implements ConnectionHandler {
 				// TODO handle not all data being read
 
 				// Attempt to parse the remaining content of request
-				if (this.parser.parse(readData, tempBuffer)) {
+				if (this.parser.parse(readData)) {
 
 					// Received the full HTTP request to start processing
 					String method = this.parser.getMethod();
