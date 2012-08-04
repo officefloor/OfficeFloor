@@ -268,6 +268,18 @@ public class HttpConversationTest extends OfficeFrameTestCase {
 				+ message.length() + "\n\n" + message);
 	}
 
+	/**
+	 * Ensure closes the {@link Connection}.
+	 */
+	public void testCloseConnection() {
+
+		// Close the connection
+		this.conversation.closeConnection();
+
+		// Ensure closed
+		assertTrue("Connection should be closed", this.connection.isClosed());
+	}
+
 	/*
 	 * ================== Helper methods ====================================
 	 */
@@ -339,7 +351,8 @@ public class HttpConversationTest extends OfficeFrameTestCase {
 		// Create the entity for the request
 		NioInputStreamImpl entityStream = new NioInputStreamImpl(new Object());
 		entity = ((entity == null) || (entity.length() == 0)) ? "" : entity;
-		entityStream.queueData(UsAsciiUtil.convertToUsAscii(entity), false);
+		byte[] entityData = UsAsciiUtil.convertToUsAscii(entity);
+		entityStream.queueData(entityData, 0, (entityData.length - 1), false);
 
 		// Add the request
 		return this.conversation.addRequest(method, requestURI, httpVersion,

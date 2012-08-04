@@ -68,4 +68,9 @@ public interface HttpConversation {
 	void parseFailure(HttpRequestParseException failure,
 			boolean isCloseConnection) throws IOException;
 
+	/**
+	 * Closes the {@link Connection}.
+	 */
+	void closeConnection();
+
 }

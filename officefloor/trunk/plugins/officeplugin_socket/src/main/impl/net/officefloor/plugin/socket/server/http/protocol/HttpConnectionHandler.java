@@ -22,7 +22,6 @@ import java.io.IOException;
 import java.util.List;
 
 import net.officefloor.plugin.socket.server.http.HttpHeader;
-import net.officefloor.plugin.socket.server.http.HttpRequest;
 import net.officefloor.plugin.socket.server.http.conversation.HttpConversation;
 import net.officefloor.plugin.socket.server.http.conversation.HttpManagedObject;
 import net.officefloor.plugin.socket.server.http.parse.HttpRequestParseException;
@@ -56,11 +55,6 @@ public class HttpConnectionHandler implements ConnectionHandler {
 	private final HttpRequestParser parser;
 
 	/**
-	 * Maximum length of text part for {@link HttpRequest}.
-	 */
-	private final int maxTextPartLength;
-
-	/**
 	 * {@link Connection} timeout in milliseconds.
 	 */
 	private final long connectionTimout;
@@ -86,19 +80,16 @@ public class HttpConnectionHandler implements ConnectionHandler {
 	 *            {@link HttpConversation}.
 	 * @param parser
 	 *            {@link HttpRequestParser}.
-	 * @param maxTextPartLength
-	 *            Maximum length of text part for {@link HttpRequest}.
 	 * @param connectionTimeout
 	 *            {@link Connection} timeout in milliseconds.
 	 */
 	public HttpConnectionHandler(
 			HttpCommunicationProtocol communicationProtocol,
 			HttpConversation conversation, HttpRequestParser parser,
-			int maxTextPartLength, long connectionTimeout) {
+			long connectionTimeout) {
 		this.communicationProtocol = communicationProtocol;
 		this.conversation = conversation;
 		this.parser = parser;
-		this.maxTextPartLength = maxTextPartLength;
 		this.connectionTimout = connectionTimeout;
 	}
 
@@ -121,12 +112,11 @@ public class HttpConnectionHandler implements ConnectionHandler {
 
 			// Loop as may have more than one request on read
 			byte[] readData = context.getData();
-			for (;;) {
+			int startIndex = 0;
+			while (startIndex > 0) {
 
-				// TODO handle not all data being read
-
-				// Attempt to parse the remaining content of request
-				if (this.parser.parse(readData)) {
+				// Parse the read content
+				if (this.parser.parse(readData, startIndex)) {
 
 					// Received the full HTTP request to start processing
 					String method = this.parser.getMethod();
@@ -142,11 +132,10 @@ public class HttpConnectionHandler implements ConnectionHandler {
 									headers, entity);
 					this.communicationProtocol.serviceHttpRequest(this,
 							managedObject);
-
-				} else {
-					// No further content to parse
-					return;
 				}
+
+				// Obtain the next start index
+				startIndex = this.parser.nextByteToParseIndex();
 			}
 
 		} catch (HttpRequestParseException ex) {
@@ -183,7 +172,7 @@ public class HttpConnectionHandler implements ConnectionHandler {
 
 		// Close connection if idle too long
 		if (timeIdle >= this.connectionTimout) {
-			this.conversation.getConnection().close();
+			this.conversation.closeConnection();
 		}
 	}
 
