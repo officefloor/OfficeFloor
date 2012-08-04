@@ -223,9 +223,10 @@ public class HttpCommunicationProtocol implements CommunicationProtocolSource,
 		HttpConversation conversation = new HttpConversationImpl(connection,
 				this.sendBufferSize, this.isSendStackTraceOnFailure);
 		HttpRequestParser parser = new HttpRequestParserImpl(
-				this.maximumHttpRequestHeaders, this.maximumRequestBodyLength);
+				this.maximumHttpRequestHeaders, this.maxTextPartLength,
+				this.maximumRequestBodyLength);
 		return new HttpConnectionHandler(this, conversation, parser,
-				this.maxTextPartLength, this.connectionTimeout);
+				this.connectionTimeout);
 	}
 
 }

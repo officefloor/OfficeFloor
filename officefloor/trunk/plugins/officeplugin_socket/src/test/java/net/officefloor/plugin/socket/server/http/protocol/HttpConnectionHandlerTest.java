@@ -28,10 +28,9 @@ import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.socket.server.http.HttpHeader;
 import net.officefloor.plugin.socket.server.http.HttpRequest;
 import net.officefloor.plugin.socket.server.http.conversation.HttpConversation;
-import net.officefloor.plugin.socket.server.http.conversation.HttpManagedObject;
+import net.officefloor.plugin.socket.server.http.conversation.impl.HttpManagedObjectImpl;
 import net.officefloor.plugin.socket.server.http.parse.HttpRequestParseException;
 import net.officefloor.plugin.socket.server.http.parse.HttpRequestParser;
-import net.officefloor.plugin.socket.server.protocol.CommunicationProtocol;
 import net.officefloor.plugin.socket.server.protocol.Connection;
 import net.officefloor.plugin.socket.server.protocol.HeartBeatContext;
 import net.officefloor.plugin.socket.server.protocol.ReadContext;
@@ -67,6 +66,11 @@ public class HttpConnectionHandlerTest extends OfficeFrameTestCase {
 	private byte[] readData = new byte[] { 1 };
 
 	/**
+	 * {@link HttpCommunicationProtocol}.
+	 */
+	private HttpCommunicationProtocol communicationProtocol = new HttpCommunicationProtocol();
+
+	/**
 	 * Mock {@link HttpConversation}.
 	 */
 	private HttpConversation conversation = this
@@ -88,7 +92,7 @@ public class HttpConnectionHandlerTest extends OfficeFrameTestCase {
 	 * {@link HttpConnectionHandler} being tested.
 	 */
 	public HttpConnectionHandler handler = new HttpConnectionHandler(
-			this.server, this.conversation, this.parser, 255,
+			this.communicationProtocol, this.conversation, this.parser,
 			CONNECTION_TIMEOUT);
 
 	/**
@@ -97,24 +101,21 @@ public class HttpConnectionHandlerTest extends OfficeFrameTestCase {
 	public void testSuccessfulRead() throws Exception {
 
 		// Additional test objects
-		final char[] tempBuffer = new char[255];
 		final String method = "GET";
 		final String requestURI = "/path";
 		final String httpVersion = "HTTP/1.1";
 		final List<HttpHeader> headers = new LinkedList<HttpHeader>();
-		final NioInputStream entity = new NioInputStreamImpl();
-		final HttpManagedObject managedObject = this
-				.createMock(HttpManagedObject.class);
+		final NioInputStream entity = new NioInputStreamImpl(new Object());
+		final HttpManagedObjectImpl managedObject = new HttpManagedObjectImpl(
+				null);
 
 		// Record actions
 		this.recordReturn(this.readContext, this.readContext.getTime(),
 				System.currentTimeMillis());
-		this.recordReturn(this.readContext,
-				this.readContext.getContextObject(), tempBuffer);
 		this.recordReturn(this.readContext, this.readContext.getData(),
 				this.readData);
-		this.recordReturn(this.parser,
-				this.parser.parse(this.readData, tempBuffer), true);
+		this.recordReturn(this.parser, this.parser.parse(this.readData, 0),
+				true);
 		this.recordReturn(this.parser, this.parser.getMethod(), method);
 		this.recordReturn(this.parser, this.parser.getRequestURI(), requestURI);
 		this.recordReturn(this.parser, this.parser.getHttpVersion(),
@@ -125,7 +126,8 @@ public class HttpConnectionHandlerTest extends OfficeFrameTestCase {
 		this.recordReturn(this.conversation, this.conversation.addRequest(
 				method, requestURI, httpVersion, headers, entity),
 				managedObject);
-		this.server.processRequest(this.handler, managedObject);
+		this.executeContext.invokeProcess(0, managedObject, managedObject, 0,
+				managedObject);
 
 		// Replay mocks
 		this.replayMockObjects();
@@ -143,18 +145,15 @@ public class HttpConnectionHandlerTest extends OfficeFrameTestCase {
 	public void testParseFailure() throws Exception {
 
 		// Additional test objects
-		final char[] tempBuffer = new char[255];
 		final HttpRequestParseException failure = new HttpRequestParseException(
 				HttpStatus.SC_BAD_REQUEST, "Parse Failure");
 
 		// Record actions
 		this.recordReturn(this.readContext, this.readContext.getTime(),
 				System.currentTimeMillis());
-		this.recordReturn(this.readContext,
-				this.readContext.getContextObject(), tempBuffer);
 		this.recordReturn(this.readContext, this.readContext.getData(),
 				this.readData);
-		this.parser.parse(this.readData, tempBuffer);
+		this.parser.parse(this.readData, 0);
 		this.control(this.parser).setThrowable(failure);
 		this.conversation.parseFailure(failure, true);
 
@@ -217,7 +216,7 @@ public class HttpConnectionHandlerTest extends OfficeFrameTestCase {
 	 * Ensures closes {@link Connection} on {@link Connection} being too long
 	 * idle.
 	 */
-	public void testIdleTooLong() {
+	public void testIdleTooLong() throws IOException {
 
 		// Record actions
 		final long START_TIME = System.currentTimeMillis();
@@ -228,7 +227,7 @@ public class HttpConnectionHandlerTest extends OfficeFrameTestCase {
 		this.recordReturn(this.idleContext, this.idleContext.getTime(),
 				FIRST_IDLE_TIME);
 		this.recordReturn(this.idleContext, this.idleContext, SECOND_IDLE_TIME);
-		this.conversation.getConnection().close();
+		this.conversation.closeConnection();
 
 		// Replay mocks
 		this.replayMockObjects();
@@ -258,7 +257,7 @@ public class HttpConnectionHandlerTest extends OfficeFrameTestCase {
 		this.recordReturn(this.idleContext, this.idleContext.getTime(),
 				START_TIME);
 		this.recordReturn(this.idleContext, this.idleContext, TIMEOUT_IDLE_TIME);
-		this.conversation.getConnection().close();
+		this.conversation.closeConnection();
 
 		// Replay mocks
 		this.replayMockObjects();

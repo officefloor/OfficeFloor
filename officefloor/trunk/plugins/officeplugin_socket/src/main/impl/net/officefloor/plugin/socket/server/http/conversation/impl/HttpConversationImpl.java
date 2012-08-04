@@ -153,4 +153,10 @@ public class HttpConversationImpl implements HttpConversation {
 		response.sendFailure(failure);
 	}
 
+	@Override
+	public void closeConnection() {
+		// Close the connection
+		this.connection.close();
+	}
+
 }

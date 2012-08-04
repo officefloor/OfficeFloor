@@ -69,7 +69,7 @@ public class HttpTestUtil {
 
 		// Create the entity input stream
 		NioInputStreamImpl inputStream = new NioInputStreamImpl(new Object());
-		inputStream.queueData(entityData, false);
+		inputStream.queueData(entityData, 0, (entityData.length - 1), false);
 
 		// Return the HTTP request
 		return new HttpRequestImpl(method, requestUri, "HTTP/1.1", headers,
