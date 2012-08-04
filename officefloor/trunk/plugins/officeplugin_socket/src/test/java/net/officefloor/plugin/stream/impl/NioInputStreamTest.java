@@ -39,7 +39,7 @@ public class NioInputStreamTest extends OfficeFrameTestCase {
 	 * Ensure EOF.
 	 */
 	public void testEof() throws IOException {
-		this.stream.queueData(null, false);
+		this.stream.queueData(null, 0, 0, false);
 		assertEquals("Should be EOF", -1, this.stream.read());
 		assertEquals("No available data", -1, this.stream.available());
 	}
@@ -67,11 +67,26 @@ public class NioInputStreamTest extends OfficeFrameTestCase {
 	public void testReadData() throws IOException {
 
 		// Queue the data indicating not further data
-		this.stream.queueData(new byte[] { 10 }, false);
+		this.stream.queueData(new byte[] { 10 }, 0, 0, false);
 		assertEquals("Data available", 1, this.stream.available());
 
 		// Read the only data
 		assertEquals("Incorrect read value", 10, this.stream.read());
+		assertEquals("Should be EOF", -1, this.stream.read());
+		assertEquals("No further data available", -1, this.stream.available());
+	}
+
+	/**
+	 * Ensure can read bounded data.
+	 */
+	public void testReadBoundedData() throws IOException {
+
+		// Queue the data indicating not further data
+		this.stream.queueData(new byte[] { 1, 2, 3 }, 1, 1, false);
+		assertEquals("Data available", 1, this.stream.available());
+
+		// Read the only bounded data
+		assertEquals("Incorrect read value", 2, this.stream.read());
 		assertEquals("Should be EOF", -1, this.stream.read());
 		assertEquals("No further data available", -1, this.stream.available());
 	}
@@ -82,8 +97,8 @@ public class NioInputStreamTest extends OfficeFrameTestCase {
 	public void testReadAcrossMultipleData() throws IOException {
 
 		// Queue two arrays of data
-		this.stream.queueData(new byte[] { 11 }, true);
-		this.stream.queueData(new byte[] { 22 }, false);
+		this.stream.queueData(new byte[] { 11 }, 0, 0, true);
+		this.stream.queueData(new byte[] { 22 }, 0, 0, false);
 		assertEquals("Data should be available", 2, this.stream.available());
 
 		// Read the first datum

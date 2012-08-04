@@ -19,7 +19,6 @@
 package net.officefloor.plugin.socket.server.http.parse.impl;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.List;
@@ -30,6 +29,7 @@ import net.officefloor.plugin.socket.server.http.parse.HttpRequestParseException
 import net.officefloor.plugin.socket.server.http.parse.HttpRequestParser;
 import net.officefloor.plugin.socket.server.http.protocol.HttpStatus;
 import net.officefloor.plugin.stream.NioInputStream;
+import net.officefloor.plugin.stream.impl.NioInputStreamImpl;
 
 /**
  * Parser for a HTTP request.
@@ -192,7 +192,7 @@ public class HttpRequestParserImpl implements HttpRequestParser {
 
 		HEADER_CR, HEADER_CR_NAME_SEPARATION, HEADER_NAME, HEADER_NAME_VALUE_SEPARATION, HEADER_VALUE,
 
-		BODY_CR, BODY
+		ENTITY_CR, ENTITY
 	};
 
 	/**
@@ -208,9 +208,14 @@ public class HttpRequestParserImpl implements HttpRequestParser {
 	private final int maxHeaderCount;
 
 	/**
-	 * Maximum length of the body (entity).
+	 * Maximum length of the entity.
 	 */
-	private final long maxBodyLength;
+	private final long maxEntityLength;
+
+	/**
+	 * Next byte to parse index.
+	 */
+	private int nextByteToParseIndex;
 
 	/**
 	 * {@link ParseState} which starts with the HTTP method.
@@ -223,9 +228,24 @@ public class HttpRequestParserImpl implements HttpRequestParser {
 	private long contentLength;
 
 	/**
-	 * Length of current text of the {@link HttpRequest} being parsed.
+	 * Maximum number of bytes per TEXT.
 	 */
-	private int textLength;
+	private final byte[] textBuffer;
+
+	/**
+	 * Index to load next byte to TEXT buffer.
+	 */
+	private int nextTextIndex;
+
+	/**
+	 * State of escaping
+	 */
+	private EscapedCharacterState escapedCharacterState = EscapedCharacterState.NOT_ESCAPED;
+
+	/**
+	 * High bits of an escaped character.
+	 */
+	private byte escapedCharacterHighBits;
 
 	/**
 	 * Method.
@@ -260,7 +280,7 @@ public class HttpRequestParserImpl implements HttpRequestParser {
 	/**
 	 * Entity.
 	 */
-	private NioInputStream entity;
+	private NioInputStreamImpl entity;
 
 	/**
 	 * Initiate.
@@ -268,93 +288,71 @@ public class HttpRequestParserImpl implements HttpRequestParser {
 	 * @param maxHeaderCount
 	 *            Maximum number of {@link HttpHeader} instances for a
 	 *            {@link HttpRequest}.
-	 * @param maxBodyLength
-	 *            Maximum length of the body buffer. Requests with bodies
-	 *            greater that this will fail parsing.
+	 * @param maxTextLength
+	 *            Maximum number of bytes per TEXT.
+	 * @param maxEntityLength
+	 *            Maximum length of the entity. Requests with entities greater
+	 *            than this will fail parsing.
 	 */
-	public HttpRequestParserImpl(int maxHeaderCount, long maxBodyLength) {
+	public HttpRequestParserImpl(int maxHeaderCount, int maxTextLength,
+			long maxEntityLength) {
 		this.maxHeaderCount = maxHeaderCount;
-		this.maxBodyLength = maxBodyLength;
+		this.maxEntityLength = maxEntityLength;
+
+		// Create the text buffer
+		this.textBuffer = new byte[maxTextLength];
 
 		// Initiate state
 		this.reset();
 	}
 
 	/**
-	 * Transforms the content to a {@link String}.
+	 * Appends the character to the TEXT.
 	 * 
-	 * @param inputBufferStream
-	 *            {@link InputBufferStream} containing the content.
-	 * @param tempBuffer
-	 *            Temporary char array to reduce array creation.
-	 * @param HTTP
-	 *            error status on length being too long.
-	 * @param HTTP
-	 *            error message on length being too long.
-	 * @return Transformed {@link String}.
-	 * @throws IOException
-	 *             If fails to transform.
+	 * @param character
+	 *            Character.
+	 * @param httpErrorStatus
+	 *            HTTP error status on length being too long.
+	 * @param httpErrorMessage
+	 *            HTTP error message on length being too long.
 	 * @throws HttpRequestParseException
-	 *             If text is too long.
+	 *             If TEXT is too long.
 	 */
-	private String transformToString(InputBufferStream inputBufferStream,
-			char[] tempBuffer, int httpErrorStatus, String httpErrorMessage)
-			throws IOException, HttpRequestParseException {
+	private void appendCharacterToText(byte character, int httpErrorStatus,
+			String httpErrorMessage) throws IOException,
+			HttpRequestParseException {
 
-		// Ensure text is too long
-		if (this.textLength > tempBuffer.length) {
+		try {
+			// Append the character
+			this.textBuffer[this.nextTextIndex++] = character;
+
+		} catch (ArrayIndexOutOfBoundsException ex) {
+			// TEXT is too long
 			throw new HttpRequestParseException(httpErrorStatus,
 					httpErrorMessage);
 		}
+	}
 
-		// Load the character values into the temporary buffer
-		InputStream inputStream = inputBufferStream.getInputStream();
-		EscapedCharacterState escapedCharacterState = EscapedCharacterState.NOT_ESCAPED;
-		byte escapedCharacterHighBits = 0;
-		int characterIndex = 0;
-		NEXT_CHARACTER: for (int i = 0; i < this.textLength; i++) {
+	/**
+	 * Obtains the TEXT as {@link String}.
+	 * 
+	 * @param isTrim
+	 *            Indicates whether to trim the String.
+	 * @return TEXT converted to {@link String}.
+	 */
+	private String getTextAsString(boolean isTrim) {
 
-			// Read in the next character
-			byte character = (byte) inputStream.read();
-
-			// Determine if escaping
-			switch (escapedCharacterState) {
-			case NOT_ESCAPED:
-				// Determine if escape character
-				if (character == PERCENTAGE) {
-					// Escaping
-					escapedCharacterState = EscapedCharacterState.HIGH_BITS;
-					continue NEXT_CHARACTER; // loop to next character
-				}
-				break;
-			case HIGH_BITS:
-				// Record the high bits of escaped character
-				escapedCharacterHighBits = character;
-				escapedCharacterState = EscapedCharacterState.LOW_BITS;
-				continue NEXT_CHARACTER; // loop for low bits
-			case LOW_BITS:
-				// Translate to non-escaped character (no longer escaped)
-				character = translateEscapedCharacter(escapedCharacterHighBits,
-						character);
-				escapedCharacterState = EscapedCharacterState.NOT_ESCAPED;
-				break;
-			default:
-				throw new IllegalStateException(
-						"Unknown escaped character state: "
-								+ escapedCharacterState);
-			}
-
-			// Load the character
-			tempBuffer[characterIndex++] = (char) character;
+		// Obtain the string (removing surrounding white spacing)
+		String text = new String(this.textBuffer, 0, this.nextTextIndex,
+				US_ASCII);
+		if (isTrim) {
+			text = text.trim();
 		}
 
-		// Create the string containing the text
-		String text = new String(tempBuffer, 0, characterIndex);
+		// Reset for next TEXT
+		this.nextTextIndex = 0;
 
-		// Reset text length
-		this.textLength = 0;
-
-		// Return the String
+		// Return the TEXT as string
 		return text;
 	}
 
@@ -382,8 +380,8 @@ public class HttpRequestParserImpl implements HttpRequestParser {
 			if (value.length() == 0) {
 				// No multiple line value so consider blank separating line
 				this.processHeader();
-				this.parseState = (terminatingCharacter == CR ? ParseState.BODY_CR
-						: ParseState.BODY);
+				this.parseState = (terminatingCharacter == CR ? ParseState.ENTITY_CR
+						: ParseState.ENTITY);
 				return;
 			}
 
@@ -419,7 +417,7 @@ public class HttpRequestParserImpl implements HttpRequestParser {
 
 	/**
 	 * Processes the header to ensure correct and possibly obtain the
-	 * <code>Content-Length</code> for the body.
+	 * <code>Content-Length</code> for the entity.
 	 * 
 	 * @throws HttpRequestParseException
 	 *             If invalid header.
@@ -449,11 +447,11 @@ public class HttpRequestParserImpl implements HttpRequestParser {
 
 		// Ensure the Content-Length within limits
 		if (this.contentLength > 0) {
-			if (this.contentLength > this.maxBodyLength) {
+			if (this.contentLength > this.maxEntityLength) {
 				throw new HttpRequestParseException(
 						HttpStatus.SC_REQUEST_ENTITY_TOO_LARGE,
 						"Request entity must be less than maximum of "
-								+ this.maxBodyLength + " bytes");
+								+ this.maxEntityLength + " bytes");
 			}
 		}
 
@@ -476,8 +474,9 @@ public class HttpRequestParserImpl implements HttpRequestParser {
 	@Override
 	public void reset() {
 		this.parseState = ParseState.START;
+		this.escapedCharacterState = EscapedCharacterState.NOT_ESCAPED;
 		this.contentLength = -1;
-		this.textLength = 0;
+		this.nextTextIndex = 0;
 		this.text_method = "";
 		this.text_path = "";
 		this.text_version = "";
@@ -485,52 +484,57 @@ public class HttpRequestParserImpl implements HttpRequestParser {
 		this.isMultipleLineHeaderValue = false;
 		// Allow reasonable number of headers
 		this.headers = new ArrayList<HttpHeader>(16);
-		this.entity = null;
+
+		// Once parsed, no further input so do not block writing by input
+		this.entity = new NioInputStreamImpl(new Object());
 	}
 
 	@Override
-	public boolean parse(byte[] data, char[] tempBuffer) throws IOException,
+	public int nextByteToParseIndex() {
+		return this.nextByteToParseIndex;
+	}
+
+	@Override
+	public boolean parse(byte[] data, int startIndex) throws IOException,
 			HttpRequestParseException {
 
-		// Provide state of escaping characters
-		EscapedCharacterState escapedCharacterState = EscapedCharacterState.NOT_ESCAPED;
-		byte escapedCharacterHighBits = 0;
+		// Flag next byte to parse
+		this.nextByteToParseIndex = startIndex;
 
 		// Determine if parsing head
-		if (this.parseState != ParseState.BODY) {
+		if (this.parseState != ParseState.ENTITY) {
 
-			// Loop parsing available content up to body
-			NEXT_CHARACTER: for (byte character : data) {
+			// Loop parsing available content up to entity
+			NEXT_CHARACTER: for (; this.nextByteToParseIndex < data.length; this.nextByteToParseIndex++) {
+				byte character = data[this.nextByteToParseIndex];
 
 				// Determine if escaping
 				boolean isEscaped = false;
-				switch (escapedCharacterState) {
+				switch (this.escapedCharacterState) {
 				case NOT_ESCAPED:
 					// Determine if escape character
 					if (character == PERCENTAGE) {
 						// Escaping
-						escapedCharacterState = EscapedCharacterState.HIGH_BITS;
-						this.textLength++; // include escape
+						this.escapedCharacterState = EscapedCharacterState.HIGH_BITS;
 						continue NEXT_CHARACTER; // loop to next character
 					}
 					break;
 				case HIGH_BITS:
 					// Record the high bits of escaped character
-					escapedCharacterHighBits = character;
-					this.textLength++; // include high bits character
-					escapedCharacterState = EscapedCharacterState.LOW_BITS;
+					this.escapedCharacterHighBits = character;
+					this.escapedCharacterState = EscapedCharacterState.LOW_BITS;
 					continue NEXT_CHARACTER; // loop for low bits
 				case LOW_BITS:
 					// Translate to non-escaped character (no longer escaped)
 					character = translateEscapedCharacter(
-							escapedCharacterHighBits, character);
-					escapedCharacterState = EscapedCharacterState.NOT_ESCAPED;
+							this.escapedCharacterHighBits, character);
+					this.escapedCharacterState = EscapedCharacterState.NOT_ESCAPED;
 					isEscaped = true; // character is escaped
 					break;
 				default:
 					throw new IllegalStateException(
 							"Unknown escaped character state: "
-									+ escapedCharacterState);
+									+ this.escapedCharacterState);
 				}
 
 				// Parse the character of the HTTP request
@@ -540,7 +544,6 @@ public class HttpRequestParserImpl implements HttpRequestParser {
 					if ((character == CR) || (character == LF)
 							|| isWs(character)) {
 						// Skip over white space or end of line
-						inputBufferStream.skip(1);
 						break;
 					}
 					this.parseState = ParseState.METHOD;
@@ -548,15 +551,13 @@ public class HttpRequestParserImpl implements HttpRequestParser {
 				case METHOD:
 					if (isAlpha(character)) {
 						// Append character of the method
-						this.textLength++;
-					} else if (isWs(character)) {
-						// Method name read in (consumes bytes)
-						this.text_method = this.transformToString(
-								inputBufferStream, tempBuffer,
+						this.appendCharacterToText(character,
 								HttpStatus.SC_BAD_REQUEST, "Method too long");
+					} else if (isWs(character)) {
+						// Method name read in
+						this.text_method = this.getTextAsString(true);
 
 						// Skip white space and move to path separation
-						inputBufferStream.skip(1);
 						this.parseState = ParseState.METHOD_PATH_SEPARATION;
 					} else {
 						// Unexpected character
@@ -571,25 +572,22 @@ public class HttpRequestParserImpl implements HttpRequestParser {
 					// Ignore separating linear white space
 					if (isWs(character)) {
 						// Skip over white space
-						inputBufferStream.skip(1);
 						break;
 					}
 					this.parseState = ParseState.PATH;
 
 				case PATH:
 					if (isWs(character) && (!isEscaped)) {
-						// Path read in (consumes bytes)
-						this.text_path = this.transformToString(
-								inputBufferStream, tempBuffer,
-								HttpStatus.SC_REQUEST_URI_TOO_LARGE,
-								"Request-URI Too Long");
+						// Path read in
+						this.text_path = this.getTextAsString(false);
 
 						// Skip white space and move to version separation
-						inputBufferStream.skip(1);
 						this.parseState = ParseState.PATH_VERSION_SEPARATION;
 					} else if (!isCtl(character)) {
 						// Append character to path
-						this.textLength++;
+						this.appendCharacterToText(character,
+								HttpStatus.SC_REQUEST_URI_TOO_LARGE,
+								"Request-URI Too Long");
 					} else {
 						// Unexpected character
 						throw new HttpRequestParseException(
@@ -603,34 +601,28 @@ public class HttpRequestParserImpl implements HttpRequestParser {
 					// Ignore separating linear white space
 					if (isWs(character)) {
 						// Skip over white space
-						inputBufferStream.skip(1);
 						break;
 					}
 					this.parseState = ParseState.VERSION;
 
 				case VERSION:
 					if ((character == CR) || (character == LF)) {
-						// Version read in (consumes bytes)
-						this.text_version = this.transformToString(
-								inputBufferStream, tempBuffer,
-								HttpStatus.SC_BAD_REQUEST, "Version too long");
+						// Version read in
+						this.text_version = this.getTextAsString(true);
 
 						// Skip CR / LF and move to header
-						inputBufferStream.skip(1);
 						this.parseState = (character == CR ? ParseState.HEADER_CR
 								: ParseState.HEADER_CR_NAME_SEPARATION);
 					} else {
 						// Append character to version
-						this.textLength++;
+						this.appendCharacterToText(character,
+								HttpStatus.SC_BAD_REQUEST, "Version too long");
 					}
 					break;
 
 				case HEADER_CR:
 					if (character == LF) {
-						// Skip over LF
-						inputBufferStream.skip(1);
-
-						// Expecting LF, so continue on with header
+						// Skip over LF, continue on with header
 						this.parseState = ParseState.HEADER_CR_NAME_SEPARATION;
 						break;
 					}
@@ -640,23 +632,19 @@ public class HttpRequestParserImpl implements HttpRequestParser {
 
 				case HEADER_CR_NAME_SEPARATION:
 					if (character == CR) {
-						// Skip CR and move to body
-						inputBufferStream.skip(1);
-						this.parseState = ParseState.BODY_CR;
+						// Skip CR and move to entity
+						this.parseState = ParseState.ENTITY_CR;
 						break;
 					} else if (character == LF) {
 						// Tolerant request so process header
 						this.processHeader();
 
-						// Skip LF and move to body
-						inputBufferStream.skip(1);
-						this.parseState = ParseState.BODY;
+						// Skip LF and move to entity
+						this.parseState = ParseState.ENTITY;
 						break;
 					} else if (isWs(character)) {
-						// Continue previous header value, ignoring space
-						inputBufferStream.skip(1);
-
-						// Flag that potentially multiple line value
+						// Continue previous header value.
+						// Flag that potentially multiple line value.
 						this.isMultipleLineHeaderValue = true;
 
 						// Continue parsing header value
@@ -675,30 +663,23 @@ public class HttpRequestParserImpl implements HttpRequestParser {
 				case HEADER_NAME:
 					if ((character == COLON) && (!isEscaped)) {
 						// Header name obtained
-						this.text_headerName = this.transformToString(
-								inputBufferStream, tempBuffer,
-								HttpStatus.SC_BAD_REQUEST,
-								"Header name too long").trim();
+						this.text_headerName = this.getTextAsString(true);
 
 						// Skip colon and move to name value separation
-						inputBufferStream.skip(1);
 						this.parseState = ParseState.HEADER_NAME_VALUE_SEPARATION;
 					} else if ((character == CR) || (character == LF)) {
 						// Obtain the header name
-						this.text_headerName = this.transformToString(
-								inputBufferStream, tempBuffer,
-								HttpStatus.SC_BAD_REQUEST,
-								"Header name too long").trim();
+						this.text_headerName = this.getTextAsString(true);
 
-						// Skip CR/LF
-						inputBufferStream.skip(1);
-
-						// Provide blank header value and move to next header
+						// Skip CR/LF.
+						// Provide blank header value and move to next header.
 						this.addHttpHeaderAndManageParseState(
 								this.text_headerName, "", character);
 					} else if (isText(character)) {
 						// Append the header name character
-						this.textLength++;
+						this.appendCharacterToText(character,
+								HttpStatus.SC_BAD_REQUEST,
+								"Header name too long");
 					} else {
 						// Unknown header name character
 						throw new HttpRequestParseException(
@@ -712,7 +693,6 @@ public class HttpRequestParserImpl implements HttpRequestParser {
 					// Ignore separating linear white space
 					if (isWs(character)) {
 						// Skip the white space
-						inputBufferStream.skip(1);
 						break;
 					}
 					this.parseState = ParseState.HEADER_VALUE;
@@ -720,20 +700,16 @@ public class HttpRequestParserImpl implements HttpRequestParser {
 				case HEADER_VALUE:
 					if ((character == CR) || (character == LF)) {
 						// Header name and value obtained
-						String headerValue = this.transformToString(
-								inputBufferStream, tempBuffer,
-								HttpStatus.SC_BAD_REQUEST,
-								"Header value too long").trim();
+						String headerValue = this.getTextAsString(true);
 
-						// Skip CR/LF and move to next header
-						inputBufferStream.skip(1);
-
-						// Add header and move to next header
+						// Skip CR/LF, add header and move to next header
 						this.addHttpHeaderAndManageParseState(
 								this.text_headerName, headerValue, character);
 					} else if (isText(character)) {
 						// Append the header value character
-						this.textLength++;
+						this.appendCharacterToText(character,
+								HttpStatus.SC_BAD_REQUEST,
+								"Header value too long");
 					} else {
 						// Unknown header value character
 						throw new HttpRequestParseException(
@@ -743,73 +719,79 @@ public class HttpRequestParserImpl implements HttpRequestParser {
 					}
 					break;
 
-				case BODY_CR:
-					// Must have LF after CR for body
+				case ENTITY_CR:
+					// Must have LF after CR for entity
 					if (character != LF) {
 						throw new HttpRequestParseException(
 								HttpStatus.SC_BAD_REQUEST,
 								"Should expect LR after a CR after header");
-					} else {
-						// Skip the LF
-						inputBufferStream.skip(1);
 					}
 
-					// Process the header
+					// Skip the LF and process the header
 					this.processHeader();
 
-					// Have LF and headers valid, so continue onto body
-					this.parseState = ParseState.BODY;
-					break NEXT_CHARACTER; // break loop to start body
+					// Have LF and headers valid, so continue onto entity
+					this.parseState = ParseState.ENTITY;
+					break;
+
+				case ENTITY:
+					// Break loop to start entity
+					break NEXT_CHARACTER;
+
+				default:
+					throw new IllegalStateException("Unknown parse state: "
+							+ this.parseState);
 				}
 			}
 		}
 
-		// Only able to be complete if parsing the body
-		if (this.parseState != ParseState.BODY) {
-
-			// Determine if text too long
-			if (this.textLength > tempBuffer.length) {
-				switch (this.parseState) {
-				case METHOD:
-					throw new HttpRequestParseException(
-							HttpStatus.SC_BAD_REQUEST, "Method too long");
-				case PATH:
-					throw new HttpRequestParseException(
-							HttpStatus.SC_REQUEST_URI_TOO_LARGE,
-							"Request-URI Too Long");
-				case VERSION:
-					throw new HttpRequestParseException(
-							HttpStatus.SC_BAD_REQUEST, "Version too long");
-				case HEADER_NAME:
-					throw new HttpRequestParseException(
-							HttpStatus.SC_BAD_REQUEST, "Header name too long");
-				case HEADER_VALUE:
-					throw new HttpRequestParseException(
-							HttpStatus.SC_BAD_REQUEST, "Header value too long");
-				}
-			}
-
-			// Text within size but request not fully received
+		// Ensure parsing entity
+		if (this.parseState != ParseState.ENTITY) {
+			// All bytes consumed and not yet complete HTTP request
+			this.nextByteToParseIndex = -1;
 			return false;
 		}
 
-		// Ensure all of the body is received
+		// Ensure all of the entity is received
 		if (this.contentLength > 0) {
-			long bodyLength = inputBufferStream.available();
-			if (this.contentLength > bodyLength) {
-				// Body not yet fully received
-				return false;
+
+			// Determine remaining bytes
+			int remainingBytes = data.length - this.nextByteToParseIndex;
+
+			// Determine the number of bytes required for entity
+			long requiredBytes = this.contentLength - this.entity.available();
+
+			// Determine if further data required
+			boolean isFurtherDataRequired = (requiredBytes > remainingBytes);
+
+			// Determine if consume partial of remaining bytes
+			if (remainingBytes > requiredBytes) {
+				// Consume partial of the bytes (-1 as index not length)
+				int endIndex = this.nextByteToParseIndex
+						+ ((int) requiredBytes) - 1;
+				this.entity.queueData(data, this.nextByteToParseIndex,
+						endIndex, false);
+				this.nextByteToParseIndex = endIndex + 1; // after bytes read
+
+			} else {
+				// Consume all of the bytes
+				this.entity.queueData(data, this.nextByteToParseIndex,
+						(data.length - 1), !isFurtherDataRequired);
+				this.nextByteToParseIndex = -1; // all bytes consumed
+			}
+
+			// Indicate if all of request received
+			return !isFurtherDataRequired;
+
+		} else {
+			// No content (indicate no further data)
+			this.entity.queueData(null, 0, 0, false);
+
+			// Determine if consumed all bytes
+			if (this.nextByteToParseIndex == data.length) {
+				this.nextByteToParseIndex = -1; // all bytes consumed
 			}
 		}
-
-		// Create the body
-		BufferStream bodyStream = new BufferStreamImpl(
-				new NotCreateBufferSquirtFactory());
-		OutputBufferStream bodyOutputStream = bodyStream
-				.getOutputBufferStream();
-		inputBufferStream.read((int) this.contentLength, bodyOutputStream);
-		bodyOutputStream.close();
-		this.body = bodyStream.getInputBufferStream();
 
 		// All of request received and parsed
 		return true;
