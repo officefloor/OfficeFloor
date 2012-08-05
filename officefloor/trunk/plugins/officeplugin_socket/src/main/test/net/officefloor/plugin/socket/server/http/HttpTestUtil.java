@@ -24,7 +24,7 @@ import java.util.List;
 
 import net.officefloor.plugin.socket.server.http.conversation.impl.HttpRequestImpl;
 import net.officefloor.plugin.socket.server.http.parse.impl.HttpHeaderImpl;
-import net.officefloor.plugin.stream.impl.NioInputStreamImpl;
+import net.officefloor.plugin.stream.impl.ServerInputStreamImpl;
 
 /**
  * Utility class aiding in testing HTTP functionality.
@@ -68,8 +68,9 @@ public class HttpTestUtil {
 		}
 
 		// Create the entity input stream
-		NioInputStreamImpl inputStream = new NioInputStreamImpl(new Object());
-		inputStream.queueData(entityData, 0, (entityData.length - 1), false);
+		ServerInputStreamImpl inputStream = new ServerInputStreamImpl(
+				new Object());
+		inputStream.inputData(entityData, 0, (entityData.length - 1), false);
 
 		// Return the HTTP request
 		return new HttpRequestImpl(method, requestUri, "HTTP/1.1", headers,

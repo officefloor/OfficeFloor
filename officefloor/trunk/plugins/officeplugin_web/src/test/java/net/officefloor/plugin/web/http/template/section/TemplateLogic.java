@@ -157,7 +157,7 @@ public class TemplateLogic {
 
 		// Indicate next task
 		Writer writer = new OutputStreamWriter(connection.getHttpResponse()
-				.getBody().getOutputStream());
+				.getEntity());
 		writer.write("nextTask");
 		writer.flush();
 
@@ -182,7 +182,7 @@ public class TemplateLogic {
 
 		// Indicate submit
 		Writer writer = new OutputStreamWriter(connection.getHttpResponse()
-				.getBody().getOutputStream());
+				.getEntity());
 		writer.write("<submit />");
 		writer.flush();
 
@@ -238,7 +238,7 @@ public class TemplateLogic {
 
 		// Indicate internal flow with its parameter
 		Writer writer = new OutputStreamWriter(httpConnection.getHttpResponse()
-				.getBody().getOutputStream());
+				.getEntity());
 		writer.write(" - doInternalFlow[");
 		writer.write(String.valueOf(parameter.intValue()));
 		writer.write("]");

@@ -456,7 +456,7 @@ public class HttpServerAutoWireOfficeFloorSourceTest extends
 	private static void writeResponse(String response,
 			ServerHttpConnection connection) throws IOException {
 		Writer writer = new OutputStreamWriter(connection.getHttpResponse()
-				.getBody().getOutputStream());
+				.getEntity());
 		writer.append(response);
 		writer.flush();
 	}

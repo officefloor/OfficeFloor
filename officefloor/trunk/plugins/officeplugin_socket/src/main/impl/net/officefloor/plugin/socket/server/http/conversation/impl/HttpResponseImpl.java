@@ -33,8 +33,9 @@ import net.officefloor.plugin.socket.server.http.parse.HttpRequestParseException
 import net.officefloor.plugin.socket.server.http.parse.impl.HttpHeaderImpl;
 import net.officefloor.plugin.socket.server.http.protocol.HttpStatus;
 import net.officefloor.plugin.socket.server.protocol.Connection;
-import net.officefloor.plugin.stream.ByteOutputStream;
-import net.officefloor.plugin.stream.impl.ByteOutputStreamImpl;
+import net.officefloor.plugin.stream.ServerOutputStream;
+import net.officefloor.plugin.stream.ServerWriter;
+import net.officefloor.plugin.stream.impl.ServerOutputStreamImpl;
 
 /**
  * {@link HttpResponse}.
@@ -84,9 +85,9 @@ public class HttpResponseImpl implements HttpResponse {
 	private final Connection connection;
 
 	/**
-	 * {@link ByteOutputStream} containing the entity content.
+	 * {@link ServerOutputStream} containing the entity content.
 	 */
-	private final ByteOutputStreamImpl entity;
+	private final ServerOutputStreamImpl entity;
 
 	/**
 	 * Version.
@@ -140,7 +141,7 @@ public class HttpResponseImpl implements HttpResponse {
 		this.conversation = conversation;
 		this.connection = connection;
 		this.isCloseConnectionAfterSending = isCloseConnectionAfterSending;
-		this.entity = new ByteOutputStreamImpl(connection, sendBufferSize);
+		this.entity = new ServerOutputStreamImpl(connection, sendBufferSize);
 
 		// Specify initial values
 		this.version = httpVersion;
@@ -397,8 +398,36 @@ public class HttpResponseImpl implements HttpResponse {
 	}
 
 	@Override
-	public ByteOutputStream getEntity() {
+	public ServerOutputStream getEntity() {
 		return this.entity;
+	}
+
+	@Override
+	public void setContentType(String contentType) {
+		// TODO implement HttpResponse.setContentType
+		throw new UnsupportedOperationException(
+				"TODO implement HttpResponse.setContentType");
+	}
+
+	@Override
+	public void setContentCharset(Charset charset) {
+		// TODO implement HttpResponse.setContentCharset
+		throw new UnsupportedOperationException(
+				"TODO implement HttpResponse.setContentCharset");
+	}
+
+	@Override
+	public void setContentCharset(String charset) {
+		// TODO implement HttpResponse.setContentCharset
+		throw new UnsupportedOperationException(
+				"TODO implement HttpResponse.setContentCharset");
+	}
+
+	@Override
+	public ServerWriter getEntityWriter() {
+		// TODO implement HttpResponse.getEntityWriter
+		throw new UnsupportedOperationException(
+				"TODO implement HttpResponse.getEntityWriter");
 	}
 
 	@Override

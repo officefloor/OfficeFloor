@@ -16,24 +16,27 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package net.officefloor.plugin.web.http.response.source;
+package net.officefloor.plugin.web.http.resource.file;
 
+import java.io.IOException;
+
+import net.officefloor.compile.spi.work.source.TaskTypeBuilder;
 import net.officefloor.compile.spi.work.source.WorkSource;
 import net.officefloor.compile.spi.work.source.WorkSourceContext;
 import net.officefloor.compile.spi.work.source.WorkTypeBuilder;
 import net.officefloor.compile.spi.work.source.impl.AbstractWorkSource;
-import net.officefloor.plugin.socket.server.http.HttpResponse;
-import net.officefloor.plugin.socket.server.http.response.HttpResponseWriterFactory;
-import net.officefloor.plugin.socket.server.http.response.HttpResponseWriterFactoryImpl;
-import net.officefloor.plugin.socket.server.http.response.source.HttpResponseWriterWork;
+import net.officefloor.frame.api.build.None;
+import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
+import net.officefloor.plugin.web.http.resource.HttpFile;
+import net.officefloor.plugin.web.http.resource.file.HttpFileWriterTask.HttpFileWriterTaskDependencies;
 
 /**
- * {@link WorkSource} to write the {@link HttpResponse}.
+ * {@link WorkSource} that sends a {@link HttpFile}.
  * 
  * @author Daniel Sagenschneider
  */
-public class HttpResponseWriterWorkSource extends
-		AbstractWorkSource<HttpResponseWriterWork> {
+public class HttpFileWriterWorkSource extends
+		AbstractWorkSource<HttpFileWriterTask> {
 
 	/*
 	 * ======================== AbstractWorkSource =====================
@@ -45,19 +48,24 @@ public class HttpResponseWriterWorkSource extends
 	}
 
 	@Override
-	public void sourceWork(
-			WorkTypeBuilder<HttpResponseWriterWork> workTypeBuilder,
+	public void sourceWork(WorkTypeBuilder<HttpFileWriterTask> workTypeBuilder,
 			WorkSourceContext context) throws Exception {
 
-		// Create the HTTP response writer factory
-		HttpResponseWriterFactory writerFactory = new HttpResponseWriterFactoryImpl();
+		// Create the factory
+		HttpFileWriterTask factory = new HttpFileWriterTask();
 
-		// Provide work type information
-		workTypeBuilder
-				.setWorkFactory(new HttpResponseWriterWork(writerFactory));
+		// Specify the work factory
+		workTypeBuilder.setWorkFactory(factory);
 
-		// Provide the HTTP file writer task
-		HttpFileWriterTaskFactory.addTaskType("WriteFileToResponse", workTypeBuilder);
+		// Add the task
+		TaskTypeBuilder<HttpFileWriterTaskDependencies, None> task = workTypeBuilder
+				.addTaskType("WriteFileToResponse", factory,
+						HttpFileWriterTaskDependencies.class, None.class);
+		task.addObject(HttpFile.class).setKey(
+				HttpFileWriterTaskDependencies.HTTP_FILE);
+		task.addObject(ServerHttpConnection.class).setKey(
+				HttpFileWriterTaskDependencies.SERVER_HTTP_CONNECTION);
+		task.addEscalation(IOException.class);
 	}
 
 }

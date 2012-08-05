@@ -19,10 +19,7 @@
 package net.officefloor.plugin.servlet.container;
 
 import java.io.BufferedReader;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.io.Writer;
 import java.net.InetAddress;
@@ -65,8 +62,8 @@ import net.officefloor.plugin.socket.server.http.HttpRequest;
 import net.officefloor.plugin.socket.server.http.HttpResponse;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
 import net.officefloor.plugin.socket.server.http.parse.impl.HttpHeaderImpl;
-import net.officefloor.plugin.stream.InputBufferStream;
-import net.officefloor.plugin.stream.OutputBufferStream;
+import net.officefloor.plugin.stream.impl.MockServerOutputStream;
+import net.officefloor.plugin.stream.impl.ServerInputStreamImpl;
 import net.officefloor.plugin.web.http.security.HttpSecurity;
 import net.officefloor.plugin.web.http.session.HttpSession;
 
@@ -153,9 +150,9 @@ public class HttpServletContainerTest extends OfficeFrameTestCase {
 	private final Clock clock = this.createMock(Clock.class);
 
 	/**
-	 * {@link OutputStream} for {@link HttpResponse}.
+	 * {@link MockServerOutputStream} for {@link HttpResponse}.
 	 */
-	private final ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+	private final MockServerOutputStream outputStream = new MockServerOutputStream();
 
 	/**
 	 * Init parameters.
@@ -203,8 +200,10 @@ public class HttpServletContainerTest extends OfficeFrameTestCase {
 							"encodeUrl", "URL");
 					assertFail(UnsupportedOperationException.class, resp,
 							"encodeRedirectUrl", "URL");
-					assertFail(UnsupportedOperationException.class, resp, resp
-							.getClass().getMethod("setStatus", int.class,
+					assertFail(
+							UnsupportedOperationException.class,
+							resp,
+							resp.getClass().getMethod("setStatus", int.class,
 									String.class), 200, "message");
 
 				} catch (Throwable ex) {
@@ -228,8 +227,10 @@ public class HttpServletContainerTest extends OfficeFrameTestCase {
 
 		// Record using Servlet Context (init parameter)
 		this.record_init("/test");
-		this.recordReturn(this.officeServletContext, this.officeServletContext
-				.getInitParameter(this.office, "NAME"), "VALUE");
+		this.recordReturn(
+				this.officeServletContext,
+				this.officeServletContext.getInitParameter(this.office, "NAME"),
+				"VALUE");
 
 		// Test
 		this.doTest(new MockHttpServlet() {
@@ -244,15 +245,15 @@ public class HttpServletContainerTest extends OfficeFrameTestCase {
 					throws ServletException, IOException {
 				ServletConfig config = this.getServletConfig();
 				assertEquals("Incorrect servlet name",
-						HttpServletContainerTest.this.servletName, config
-								.getServletName());
+						HttpServletContainerTest.this.servletName,
+						config.getServletName());
 				assertEquals("Incorrect servlet context init parameter",
-						"VALUE", config.getServletContext().getInitParameter(
-								"NAME"));
-				assertEquals("getInitParameter(available)", "value", config
-						.getInitParameter("available"));
-				assertNull("getInitParameter(none)", config
-						.getInitParameter("none"));
+						"VALUE",
+						config.getServletContext().getInitParameter("NAME"));
+				assertEquals("getInitParameter(available)", "value",
+						config.getInitParameter("available"));
+				assertNull("getInitParameter(none)",
+						config.getInitParameter("none"));
 			}
 		});
 
@@ -267,8 +268,9 @@ public class HttpServletContainerTest extends OfficeFrameTestCase {
 
 		// Record obtaining paths
 		this.record_init("/context/servlet/path?name=value");
-		this.recordReturn(this.officeServletContext, this.officeServletContext
-				.getContextPath(this.office), this.contextPath);
+		this.recordReturn(this.officeServletContext,
+				this.officeServletContext.getContextPath(this.office),
+				this.contextPath);
 		this.recordReturn(this.mapping, this.mapping.getServletPath(),
 				"/servlet/path");
 		this.recordReturn(this.mapping, this.mapping.getPathInfo(),
@@ -276,9 +278,7 @@ public class HttpServletContainerTest extends OfficeFrameTestCase {
 
 		// Record no mapping Query String
 		this.recordReturn(this.mapping, this.mapping.getQueryString(), null);
-		this
-				.recordReturn(this.mapping, this.mapping.getParameter("name"),
-						null);
+		this.recordReturn(this.mapping, this.mapping.getParameter("name"), null);
 
 		// Record with mapping Query String
 		this.recordReturn(this.mapping, this.mapping.getQueryString(),
@@ -293,10 +293,10 @@ public class HttpServletContainerTest extends OfficeFrameTestCase {
 					throws ServletException, IOException {
 				// Verify path
 				assertEquals("getContextPath()",
-						HttpServletContainerTest.this.contextPath, req
-								.getContextPath());
-				assertEquals("getServletPath()", "/servlet/path", req
-						.getServletPath());
+						HttpServletContainerTest.this.contextPath,
+						req.getContextPath());
+				assertEquals("getServletPath()", "/servlet/path",
+						req.getServletPath());
 				assertEquals("getPathInfo()", "/path/info", req.getPathInfo());
 
 				// Default to path if no mapping query string
@@ -312,8 +312,8 @@ public class HttpServletContainerTest extends OfficeFrameTestCase {
 						"another", req.getParameter("name"));
 
 				// Always null as far as can be understood
-				assertNull("getPathTranslated() [no mapping query string]", req
-						.getPathTranslated());
+				assertNull("getPathTranslated() [no mapping query string]",
+						req.getPathTranslated());
 			}
 		});
 	}
@@ -328,8 +328,9 @@ public class HttpServletContainerTest extends OfficeFrameTestCase {
 
 		// Record obtaining paths
 		this.record_init("/context/servlet/path");
-		this.recordReturn(this.officeServletContext, this.officeServletContext
-				.getContextPath(this.office), this.contextPath);
+		this.recordReturn(this.officeServletContext,
+				this.officeServletContext.getContextPath(this.office),
+				this.contextPath);
 
 		// Test
 		this.doTest(new MockHttpServlet() {
@@ -337,13 +338,13 @@ public class HttpServletContainerTest extends OfficeFrameTestCase {
 			protected void test(HttpServletRequest req, HttpServletResponse resp)
 					throws ServletException, IOException {
 				assertEquals("getContextPath()",
-						HttpServletContainerTest.this.contextPath, req
-								.getContextPath());
+						HttpServletContainerTest.this.contextPath,
+						req.getContextPath());
 				assertEquals(
 						"getServletPath() [always full path without mapping]",
 						"/servlet/path", req.getServletPath());
-				assertNull("getPathInfo() [always null without mapping]", req
-						.getPathInfo());
+				assertNull("getPathInfo() [always null without mapping]",
+						req.getPathInfo());
 				assertNull("getPathTranslated()", req.getPathTranslated());
 			}
 		});
@@ -362,8 +363,9 @@ public class HttpServletContainerTest extends OfficeFrameTestCase {
 
 		// Record obtaining paths
 		this.record_init("/servlet/path");
-		this.recordReturn(this.officeServletContext, this.officeServletContext
-				.getContextPath(this.office), this.contextPath);
+		this.recordReturn(this.officeServletContext,
+				this.officeServletContext.getContextPath(this.office),
+				this.contextPath);
 
 		// Test
 		this.doTest(new MockHttpServlet() {
@@ -391,8 +393,8 @@ public class HttpServletContainerTest extends OfficeFrameTestCase {
 				"/servlet/path");
 		this.recordReturn(this.mapping, this.mapping.getPathInfo(), null);
 		this.recordReturn(this.mapping, this.mapping.getQueryString(), null);
-		this.recordReturn(this.request, this.request.getHeaders(), this
-				.createHttpHeaders("host", "officefloor.net"));
+		this.recordReturn(this.request, this.request.getHeaders(),
+				this.createHttpHeaders("host", "officefloor.net"));
 		this.recordReturn(this.connection, this.connection.isSecure(), false);
 		this.recordReturn(this.connection, this.connection.isSecure(), true);
 		this.recordReturn(this.request, this.request.getVersion(), "HTTP/1.1");
@@ -403,13 +405,13 @@ public class HttpServletContainerTest extends OfficeFrameTestCase {
 			protected void test(HttpServletRequest req, HttpServletResponse resp)
 					throws ServletException, IOException {
 				assertEquals("getMethod()", "GET", req.getMethod());
-				assertEquals("getServletPath()", "/servlet/path", req
-						.getServletPath());
+				assertEquals("getServletPath()", "/servlet/path",
+						req.getServletPath());
 				assertNull("getPathInfo()", req.getPathInfo());
-				assertEquals("getQueryString()", "one=1&two=2;three=3", req
-						.getQueryString());
-				assertEquals("getRequestURI()", "/context/servlet/path", req
-						.getRequestURI());
+				assertEquals("getQueryString()", "one=1&two=2;three=3",
+						req.getQueryString());
+				assertEquals("getRequestURI()", "/context/servlet/path",
+						req.getRequestURI());
 				assertEquals("getRequestURL",
 						"officefloor.net/context/servlet/path", req
 								.getRequestURL().toString());
@@ -432,8 +434,8 @@ public class HttpServletContainerTest extends OfficeFrameTestCase {
 		this.record_init("/context/servlet/path?one=1&two=2;three=3#fragment");
 		this.recordReturn(this.request, this.request.getMethod(),
 				this.httpMethod);
-		this.recordReturn(this.request, this.request.getHeaders(), this
-				.createHttpHeaders("host", "officefloor.net"));
+		this.recordReturn(this.request, this.request.getHeaders(),
+				this.createHttpHeaders("host", "officefloor.net"));
 		this.recordReturn(this.connection, this.connection.isSecure(), false);
 		this.recordReturn(this.connection, this.connection.isSecure(), true);
 		this.recordReturn(this.request, this.request.getVersion(), "HTTP/1.1");
@@ -444,13 +446,13 @@ public class HttpServletContainerTest extends OfficeFrameTestCase {
 			protected void test(HttpServletRequest req, HttpServletResponse resp)
 					throws ServletException, IOException {
 				assertEquals("getMethod()", "GET", req.getMethod());
-				assertEquals("getServletPath()", "/servlet/path", req
-						.getServletPath());
+				assertEquals("getServletPath()", "/servlet/path",
+						req.getServletPath());
 				assertNull("getPathInfo()", req.getPathInfo());
-				assertEquals("getQueryString()", "one=1&two=2;three=3", req
-						.getQueryString());
-				assertEquals("getRequestURI()", "/context/servlet/path", req
-						.getRequestURI());
+				assertEquals("getQueryString()", "one=1&two=2;three=3",
+						req.getQueryString());
+				assertEquals("getRequestURI()", "/context/servlet/path",
+						req.getRequestURI());
 				assertEquals("getRequestURL",
 						"officefloor.net/context/servlet/path", req
 								.getRequestURL().toString());
@@ -467,24 +469,21 @@ public class HttpServletContainerTest extends OfficeFrameTestCase {
 	public void test_req_Parameters() {
 
 		// Record mapping overriding (or not overriding) parameters
-		this
-				.record_init("/server/path?one=1&two=2&dup1=A;dup1=B;dup2=a;dup2=b#fragment");
+		this.record_init("/server/path?one=1&two=2&dup1=A;dup1=B;dup2=a;dup2=b#fragment");
 
 		// Record single parameters
-		this
-				.recordReturn(this.mapping, this.mapping.getParameter("one"),
-						"ONE");
+		this.recordReturn(this.mapping, this.mapping.getParameter("one"), "ONE");
 		this.recordReturn(this.mapping, this.mapping.getParameter("two"), null);
 		this.recordReturn(this.mapping, this.mapping.getParameter("dup1"),
 				"DUPLICATE");
-		this
-				.recordReturn(this.mapping, this.mapping.getParameter("dup2"),
-						null);
+		this.recordReturn(this.mapping, this.mapping.getParameter("dup2"), null);
 		this.recordReturn(this.mapping, this.mapping.getParameter("unknown"),
 				null);
 
 		// Record parameter names
-		this.recordReturn(this.mapping, this.mapping.getParameterNames(),
+		this.recordReturn(
+				this.mapping,
+				this.mapping.getParameterNames(),
 				new IteratorEnumeration<String>(Arrays.asList("one", "dup1",
 						"three").iterator()));
 
@@ -498,8 +497,8 @@ public class HttpServletContainerTest extends OfficeFrameTestCase {
 				new String[] { "DUPLICATE" });
 		this.recordReturn(this.mapping,
 				this.mapping.getParameterValues("dup2"), null);
-		this.recordReturn(this.mapping, this.mapping
-				.getParameterValues("unknown"), null);
+		this.recordReturn(this.mapping,
+				this.mapping.getParameterValues("unknown"), null);
 
 		// Record map
 		Map<String, String[]> parameterMap = new HashMap<String, String[]>();
@@ -516,13 +515,13 @@ public class HttpServletContainerTest extends OfficeFrameTestCase {
 					throws ServletException, IOException {
 
 				// Validate single parameter value
-				assertEquals("getParameter(one)", "ONE", req
-						.getParameter("one"));
+				assertEquals("getParameter(one)", "ONE",
+						req.getParameter("one"));
 				assertEquals("getParameter(two)", "2", req.getParameter("two"));
-				assertEquals("getParameter(dup1)", "DUPLICATE", req
-						.getParameter("dup1"));
-				assertEquals("getParameter(dup2)", "a", req
-						.getParameter("dup2"));
+				assertEquals("getParameter(dup1)", "DUPLICATE",
+						req.getParameter("dup1"));
+				assertEquals("getParameter(dup2)", "a",
+						req.getParameter("dup2"));
 				assertNull("getParameter(unknown)", req.getParameter("unknown"));
 
 				// Obtain the parameter names
@@ -573,8 +572,7 @@ public class HttpServletContainerTest extends OfficeFrameTestCase {
 		this.mapping = null;
 
 		// Record path
-		this
-				.record_init("/server/path?one=1&two=2;three=3&duplicate=A;duplicate=B#fragment");
+		this.record_init("/server/path?one=1&two=2;three=3&duplicate=A;duplicate=B#fragment");
 
 		// Test
 		this.doTest(new MockHttpServlet() {
@@ -585,10 +583,10 @@ public class HttpServletContainerTest extends OfficeFrameTestCase {
 				// Validate single parameter value
 				assertEquals("getParameter(one)", "1", req.getParameter("one"));
 				assertEquals("getParameter(two)", "2", req.getParameter("two"));
-				assertEquals("getParameter(three)", "3", req
-						.getParameter("three"));
-				assertEquals("getParameter(duplicate)", "A", req
-						.getParameter("duplicate"));
+				assertEquals("getParameter(three)", "3",
+						req.getParameter("three"));
+				assertEquals("getParameter(duplicate)", "A",
+						req.getParameter("duplicate"));
 				assertNull("getParameter(unknown)", req.getParameter("unknown"));
 
 				// Validate parameter names
@@ -600,8 +598,8 @@ public class HttpServletContainerTest extends OfficeFrameTestCase {
 					assertEquals("Incorrect parameter name", expectedName,
 							actualName);
 				}
-				assertFalse("Should be no further names", names
-						.hasMoreElements());
+				assertFalse("Should be no further names",
+						names.hasMoreElements());
 
 				// Validate multiple parameter values
 				assertArray(req.getParameterValues("one"), "1");
@@ -635,8 +633,8 @@ public class HttpServletContainerTest extends OfficeFrameTestCase {
 	 */
 	public void test_req_Cookies() {
 		this.record_init("/test");
-		this.recordReturn(this.request, this.request.getHeaders(), this
-				.createHttpHeaders("cookie", "name=\"value\""));
+		this.recordReturn(this.request, this.request.getHeaders(),
+				this.createHttpHeaders("cookie", "name=\"value\""));
 		this.doTest(new MockHttpServlet() {
 			@Override
 			protected void test(HttpServletRequest req, HttpServletResponse resp)
@@ -645,8 +643,8 @@ public class HttpServletContainerTest extends OfficeFrameTestCase {
 				assertEquals("Incorrect number of cookies", 1, cookies.length);
 				Cookie cookie = cookies[0];
 				assertEquals("Incorrect cookie name", "name", cookie.getName());
-				assertEquals("Incorrect cookie value", "value", cookie
-						.getValue());
+				assertEquals("Incorrect cookie value", "value",
+						cookie.getValue());
 			}
 		});
 	}
@@ -671,11 +669,11 @@ public class HttpServletContainerTest extends OfficeFrameTestCase {
 				assertNull("getHeader(missing)", req.getHeader("missing"));
 				assertEquals("getHeader(name)", "value", req.getHeader("name"));
 				assertEquals("getIntHeader(int)", 1, req.getIntHeader("int"));
-				assertEquals("getDateHeader(date)", 784111777000l, req
-						.getDateHeader("date"));
+				assertEquals("getDateHeader(date)", 784111777000l,
+						req.getDateHeader("date"));
 				assertEquals("getContentLength()", 50, req.getContentLength());
-				assertEquals("getContentType()", "text/html", req
-						.getContentType());
+				assertEquals("getContentType()", "text/html",
+						req.getContentType());
 			}
 		});
 	}
@@ -687,8 +685,8 @@ public class HttpServletContainerTest extends OfficeFrameTestCase {
 		this.record_init("/test");
 
 		// Only single call as should cache headers
-		this.recordReturn(this.request, this.request.getHeaders(), this
-				.createHttpHeaders("one", "10", "one", "11", "two", "20"));
+		this.recordReturn(this.request, this.request.getHeaders(),
+				this.createHttpHeaders("one", "10", "one", "11", "two", "20"));
 
 		// Validate able to obtain headers
 		this.doTest(new MockHttpServlet() {
@@ -699,14 +697,14 @@ public class HttpServletContainerTest extends OfficeFrameTestCase {
 				// Validate unique header names
 				Enumeration<?> names = req.getHeaderNames();
 				for (String expectedName : new String[] { "one", "two" }) {
-					assertTrue("Expect name " + expectedName, names
-							.hasMoreElements());
+					assertTrue("Expect name " + expectedName,
+							names.hasMoreElements());
 					String actualName = (String) names.nextElement();
 					assertEquals("Incorrect header name", expectedName,
 							actualName);
 				}
-				assertFalse("No further names expected", names
-						.hasMoreElements());
+				assertFalse("No further names expected",
+						names.hasMoreElements());
 
 				// Validate the first header value
 				assertEquals("getHeader(one)", "10", req.getHeader("one"));
@@ -714,14 +712,14 @@ public class HttpServletContainerTest extends OfficeFrameTestCase {
 				// Validate the multiple header values
 				Enumeration<?> values = req.getHeaders("one");
 				for (String expectedValue : new String[] { "10", "11" }) {
-					assertTrue("Expect value " + expectedValue, values
-							.hasMoreElements());
+					assertTrue("Expect value " + expectedValue,
+							values.hasMoreElements());
 					String actualValue = (String) values.nextElement();
 					assertEquals("Incorrect header value", expectedValue,
 							actualValue);
 				}
-				assertFalse("No further values expected", names
-						.hasMoreElements());
+				assertFalse("No further values expected",
+						names.hasMoreElements());
 			}
 		});
 	}
@@ -731,14 +729,14 @@ public class HttpServletContainerTest extends OfficeFrameTestCase {
 	 */
 	public void test_req_Server_FromHostHeader() {
 		this.record_init("/test");
-		this.recordReturn(this.request, this.request.getHeaders(), this
-				.createHttpHeaders("Host", "officefloor.net:80"));
+		this.recordReturn(this.request, this.request.getHeaders(),
+				this.createHttpHeaders("Host", "officefloor.net:80"));
 		this.doTest(new MockHttpServlet() {
 			@Override
 			protected void test(HttpServletRequest req, HttpServletResponse resp)
 					throws ServletException, IOException {
-				assertEquals("getServerName()", "officefloor.net", req
-						.getServerName());
+				assertEquals("getServerName()", "officefloor.net",
+						req.getServerName());
 				assertEquals("getServerPort()", 80, req.getServerPort());
 			}
 		});
@@ -759,8 +757,8 @@ public class HttpServletContainerTest extends OfficeFrameTestCase {
 
 		// Record obtaining the local address for server
 		this.record_init("/test");
-		this.recordReturn(this.request, this.request.getHeaders(), this
-				.createHttpHeaders());
+		this.recordReturn(this.request, this.request.getHeaders(),
+				this.createHttpHeaders());
 		this.recordReturn(this.connection, this.connection.getLocalAddress(),
 				localAddress);
 		this.recordReturn(this.connection, this.connection.getLocalAddress(),
@@ -781,17 +779,16 @@ public class HttpServletContainerTest extends OfficeFrameTestCase {
 	 * Ensure able to obtain details of body.
 	 */
 	public void test_req_ServletInputStream() {
-		// Mocks
-		final InputBufferStream bufferStream = this
-				.createMock(InputBufferStream.class);
-		final ByteArrayInputStream inputStream = new ByteArrayInputStream("a"
-				.getBytes(Charset.forName("ASCII")));
+
+		// Provide stream with data
+		final ServerInputStreamImpl inputStream = new ServerInputStreamImpl(
+				new Object());
+		byte[] data = "a".getBytes(Charset.forName("ASCII"));
+		inputStream.inputData(data, 0, (data.length - 1), false);
 
 		// Record obtaining the input streams and data
 		this.record_init("/test");
-		this.recordReturn(this.request, this.request.getBody(), bufferStream);
-		this.recordReturn(bufferStream, bufferStream.getInputStream(),
-				inputStream);
+		this.recordReturn(this.request, this.request.getEntity(), inputStream);
 
 		// Test
 		this.doTest(new MockHttpServlet() {
@@ -820,17 +817,16 @@ public class HttpServletContainerTest extends OfficeFrameTestCase {
 	 * Ensure able to obtain details of body.
 	 */
 	public void test_req_Reader() {
-		// Mocks
-		final InputBufferStream bufferStream = this
-				.createMock(InputBufferStream.class);
-		final ByteArrayInputStream inputStream = new ByteArrayInputStream(
-				"test line\n".getBytes());
+
+		// Provide stream with data
+		final ServerInputStreamImpl inputStream = new ServerInputStreamImpl(
+				new Object());
+		byte[] data = "test line\n".getBytes(Charset.forName("ASCII"));
+		inputStream.inputData(data, 0, (data.length - 1), false);
 
 		// Record obtaining the input streams and data
 		this.record_init("/test");
-		this.recordReturn(this.request, this.request.getBody(), bufferStream);
-		this.recordReturn(bufferStream, bufferStream.getInputStream(),
-				inputStream);
+		this.recordReturn(this.request, this.request.getEntity(), inputStream);
 
 		// Test
 		this.doTest(new MockHttpServlet() {
@@ -840,10 +836,10 @@ public class HttpServletContainerTest extends OfficeFrameTestCase {
 
 				// Validate the Reader
 				BufferedReader reader = req.getReader();
-				assertEquals("Incorrect body line", "test line", reader
-						.readLine());
-				assertNull("Expecting no further body content", reader
-						.readLine());
+				assertEquals("Incorrect body line", "test line",
+						reader.readLine());
+				assertNull("Expecting no further body content",
+						reader.readLine());
 
 				// Ensure not able to obtain InputStream
 				try {
@@ -878,15 +874,15 @@ public class HttpServletContainerTest extends OfficeFrameTestCase {
 				req.setAttribute("attribute", attribute);
 
 				// Validate the loaded attribute
-				assertEquals("Incorrect attribute", attribute, req
-						.getAttribute("attribute"));
+				assertEquals("Incorrect attribute", attribute,
+						req.getAttribute("attribute"));
 				Enumeration<String> names = req.getAttributeNames();
-				assertTrue("Expect an attribute loaded", names
-						.hasMoreElements());
-				assertEquals("Incorrect attribute name", "attribute", names
-						.nextElement());
-				assertFalse("Expect only one attribute loaded", names
-						.hasMoreElements());
+				assertTrue("Expect an attribute loaded",
+						names.hasMoreElements());
+				assertEquals("Incorrect attribute name", "attribute",
+						names.nextElement());
+				assertFalse("Expect only one attribute loaded",
+						names.hasMoreElements());
 
 				// Remove the attribute
 				req.removeAttribute("attribute");
@@ -923,10 +919,10 @@ public class HttpServletContainerTest extends OfficeFrameTestCase {
 		// Record obtaining remote and local addresses appropriate times
 		this.record_init("/test");
 		for (int i = 0; i < 3; i++) {
-			this.recordReturn(this.connection, this.connection
-					.getRemoteAddress(), remoteAddress);
-			this.recordReturn(this.connection, this.connection
-					.getLocalAddress(), localAddress);
+			this.recordReturn(this.connection,
+					this.connection.getRemoteAddress(), remoteAddress);
+			this.recordReturn(this.connection,
+					this.connection.getLocalAddress(), localAddress);
 		}
 		this.doTest(new MockHttpServlet() {
 			@Override
@@ -934,8 +930,8 @@ public class HttpServletContainerTest extends OfficeFrameTestCase {
 					throws ServletException, IOException {
 
 				// Validate address
-				assertEquals("getRemoteAddr", remoteTextAddr, req
-						.getRemoteAddr());
+				assertEquals("getRemoteAddr", remoteTextAddr,
+						req.getRemoteAddr());
 				assertEquals("getLocalAddr", localTextAddr, req.getLocalAddr());
 
 				// Validate host/name
@@ -970,8 +966,8 @@ public class HttpServletContainerTest extends OfficeFrameTestCase {
 	public void test_req_Security() {
 		final Principal principal = this.createMock(Principal.class);
 		this.record_init("/test");
-		this.recordReturn(this.security, this.security
-				.getAuthenticationScheme(), "BASIC");
+		this.recordReturn(this.security,
+				this.security.getAuthenticationScheme(), "BASIC");
 		this.recordReturn(this.security, this.security.getUserPrincipal(),
 				principal);
 		this.recordReturn(this.security, this.security.getRemoteUser(),
@@ -983,8 +979,8 @@ public class HttpServletContainerTest extends OfficeFrameTestCase {
 			protected void test(HttpServletRequest req, HttpServletResponse resp)
 					throws ServletException, IOException {
 				assertEquals("getAuthType()", "BASIC", req.getAuthType());
-				assertEquals("getUserPrincipal()", principal, req
-						.getUserPrincipal());
+				assertEquals("getUserPrincipal()", principal,
+						req.getUserPrincipal());
 				assertEquals("getRemoteUser()", "daniel", req.getRemoteUser());
 				assertTrue("isUserInRole(role)", req.isUserInRole("role"));
 			}
@@ -1018,12 +1014,8 @@ public class HttpServletContainerTest extends OfficeFrameTestCase {
 	public void test_req_HttpSession() {
 		final String SESSION_ID = "SessionId";
 		this.record_init("/test");
-		this
-				.recordReturn(this.session, this.session.getSessionId(),
-						SESSION_ID);
-		this
-				.recordReturn(this.session, this.session.getSessionId(),
-						SESSION_ID);
+		this.recordReturn(this.session, this.session.getSessionId(), SESSION_ID);
+		this.recordReturn(this.session, this.session.getSessionId(), SESSION_ID);
 		this.doTest(new MockHttpServlet() {
 			@Override
 			protected void test(HttpServletRequest req, HttpServletResponse resp)
@@ -1031,13 +1023,13 @@ public class HttpServletContainerTest extends OfficeFrameTestCase {
 
 				// Ensure always obtain session
 				javax.servlet.http.HttpSession httpSession = req.getSession();
-				assertEquals("Must have session", SESSION_ID, httpSession
-						.getId());
+				assertEquals("Must have session", SESSION_ID,
+						httpSession.getId());
 
 				// Will always obtain session
 				httpSession = req.getSession(false);
-				assertEquals("Always have session", SESSION_ID, httpSession
-						.getId());
+				assertEquals("Always have session", SESSION_ID,
+						httpSession.getId());
 			}
 		});
 	}
@@ -1059,8 +1051,9 @@ public class HttpServletContainerTest extends OfficeFrameTestCase {
 			protected void test(HttpServletRequest req, HttpServletResponse resp)
 					throws ServletException, IOException {
 				javax.servlet.http.HttpSession httpSession = req.getSession();
-				assertEquals("Incorrect last access time", LAST_ACCESS_TIME
-						.longValue(), httpSession.getLastAccessedTime());
+				assertEquals("Incorrect last access time",
+						LAST_ACCESS_TIME.longValue(),
+						httpSession.getLastAccessedTime());
 			}
 		});
 	}
@@ -1092,8 +1085,9 @@ public class HttpServletContainerTest extends OfficeFrameTestCase {
 			protected void test(HttpServletRequest req, HttpServletResponse resp)
 					throws ServletException, IOException {
 				javax.servlet.http.HttpSession httpSession = req.getSession();
-				assertEquals("Incorrect last access time", LAST_ACCESS_TIME
-						.longValue(), httpSession.getLastAccessedTime());
+				assertEquals("Incorrect last access time",
+						LAST_ACCESS_TIME.longValue(),
+						httpSession.getLastAccessedTime());
 			}
 		});
 
@@ -1109,8 +1103,8 @@ public class HttpServletContainerTest extends OfficeFrameTestCase {
 		final long CURRENT_TIME = 5000;
 
 		// Record using current time (no previous request)
-		this.recordReturn(this.session, this.session
-				.getAttribute(ATTRIBUTE_LAST_ACCESS_TIME), null);
+		this.recordReturn(this.session,
+				this.session.getAttribute(ATTRIBUTE_LAST_ACCESS_TIME), null);
 		this.recordReturn(this.clock, this.clock.currentTimeMillis(),
 				CURRENT_TIME);
 		this.session.setAttribute(ATTRIBUTE_LAST_ACCESS_TIME, new Long(
@@ -1143,24 +1137,24 @@ public class HttpServletContainerTest extends OfficeFrameTestCase {
 	public void test_req_Session_ViaCookie() {
 		final String SESSION_ID = "SessionId";
 		this.record_init("/test");
-		this.recordReturn(this.request, this.request.getHeaders(), this
-				.createHttpHeaders("cookie", SESSION_ID_TOKEN_NAME + "=\""
+		this.recordReturn(
+				this.request,
+				this.request.getHeaders(),
+				this.createHttpHeaders("cookie", SESSION_ID_TOKEN_NAME + "=\""
 						+ SESSION_ID + "\""));
-		this
-				.recordReturn(this.session, this.session.getSessionId(),
-						SESSION_ID);
+		this.recordReturn(this.session, this.session.getSessionId(), SESSION_ID);
 		this.doTest(new MockHttpServlet() {
 			@Override
 			protected void test(HttpServletRequest req, HttpServletResponse resp)
 					throws ServletException, IOException {
-				assertEquals("getRequestSessionId", SESSION_ID, req
-						.getRequestedSessionId());
-				assertTrue("isRequestedSessionIdFromCookie", req
-						.isRequestedSessionIdFromCookie());
-				assertFalse("isRequestedSessionIdFromUrl", req
-						.isRequestedSessionIdFromURL());
-				assertTrue("isRequestedSessionIdValid", req
-						.isRequestedSessionIdValid());
+				assertEquals("getRequestSessionId", SESSION_ID,
+						req.getRequestedSessionId());
+				assertTrue("isRequestedSessionIdFromCookie",
+						req.isRequestedSessionIdFromCookie());
+				assertFalse("isRequestedSessionIdFromUrl",
+						req.isRequestedSessionIdFromURL());
+				assertTrue("isRequestedSessionIdValid",
+						req.isRequestedSessionIdValid());
 			}
 		});
 	}
@@ -1171,22 +1165,22 @@ public class HttpServletContainerTest extends OfficeFrameTestCase {
 	public void test_req_Session_ViaParameter() {
 		final String SESSION_ID = "SessionId";
 		this.record_init("/test?" + SESSION_ID_TOKEN_NAME + "=" + SESSION_ID);
-		this.recordReturn(this.request, this.request.getHeaders(), this
-				.createHttpHeaders());
+		this.recordReturn(this.request, this.request.getHeaders(),
+				this.createHttpHeaders());
 		this.recordReturn(this.session, this.session.getSessionId(),
 				"Not same Session Id");
 		this.doTest(new MockHttpServlet() {
 			@Override
 			protected void test(HttpServletRequest req, HttpServletResponse resp)
 					throws ServletException, IOException {
-				assertEquals("getRequestSessionId", SESSION_ID, req
-						.getRequestedSessionId());
-				assertFalse("isRequestedSessionIdFromCookie", req
-						.isRequestedSessionIdFromCookie());
-				assertTrue("isRequestedSessionIdFromUrl", req
-						.isRequestedSessionIdFromURL());
-				assertFalse("isRequestedSessionIdValid", req
-						.isRequestedSessionIdValid());
+				assertEquals("getRequestSessionId", SESSION_ID,
+						req.getRequestedSessionId());
+				assertFalse("isRequestedSessionIdFromCookie",
+						req.isRequestedSessionIdFromCookie());
+				assertTrue("isRequestedSessionIdFromUrl",
+						req.isRequestedSessionIdFromURL());
+				assertFalse("isRequestedSessionIdValid",
+						req.isRequestedSessionIdValid());
 			}
 		});
 	}
@@ -1196,19 +1190,19 @@ public class HttpServletContainerTest extends OfficeFrameTestCase {
 	 */
 	public void test_req_Session_NoId() {
 		this.record_init("/test");
-		this.recordReturn(this.request, this.request.getHeaders(), this
-				.createHttpHeaders());
+		this.recordReturn(this.request, this.request.getHeaders(),
+				this.createHttpHeaders());
 		this.doTest(new MockHttpServlet() {
 			@Override
 			protected void test(HttpServletRequest req, HttpServletResponse resp)
 					throws ServletException, IOException {
 				assertNull("getRequestSessionId", req.getRequestedSessionId());
-				assertFalse("isRequestedSessionIdFromCookie", req
-						.isRequestedSessionIdFromCookie());
-				assertFalse("isRequestedSessionIdFromUrl", req
-						.isRequestedSessionIdFromURL());
-				assertFalse("isRequestedSessionIdValid", req
-						.isRequestedSessionIdValid());
+				assertFalse("isRequestedSessionIdFromCookie",
+						req.isRequestedSessionIdFromCookie());
+				assertFalse("isRequestedSessionIdFromUrl",
+						req.isRequestedSessionIdFromURL());
+				assertFalse("isRequestedSessionIdValid",
+						req.isRequestedSessionIdValid());
 			}
 		});
 	}
@@ -1241,12 +1235,12 @@ public class HttpServletContainerTest extends OfficeFrameTestCase {
 			@Override
 			protected void test(HttpServletRequest req, HttpServletResponse resp)
 					throws ServletException, IOException {
-				assertNull("getRequestDispathcer(none)", req
-						.getRequestDispatcher("/none"));
-				assertEquals("getRequestDispatcher(absolute)", dispatcher, req
-						.getRequestDispatcher("/absolute"));
-				assertEquals("getRequestDispatcher(relative)", dispatcher, req
-						.getRequestDispatcher("relative"));
+				assertNull("getRequestDispathcer(none)",
+						req.getRequestDispatcher("/none"));
+				assertEquals("getRequestDispatcher(absolute)", dispatcher,
+						req.getRequestDispatcher("/absolute"));
+				assertEquals("getRequestDispatcher(relative)", dispatcher,
+						req.getRequestDispatcher("relative"));
 			}
 		});
 	}
@@ -1280,12 +1274,12 @@ public class HttpServletContainerTest extends OfficeFrameTestCase {
 			@Override
 			protected void test(HttpServletRequest req, HttpServletResponse resp)
 					throws ServletException, IOException {
-				assertNull("getRequestDispathcer(none)", req
-						.getRequestDispatcher("/none"));
-				assertEquals("getRequestDispatcher(absolute)", dispatcher, req
-						.getRequestDispatcher("/absolute"));
-				assertEquals("getRequestDispatcher(relative)", dispatcher, req
-						.getRequestDispatcher("relative"));
+				assertNull("getRequestDispathcer(none)",
+						req.getRequestDispatcher("/none"));
+				assertEquals("getRequestDispatcher(absolute)", dispatcher,
+						req.getRequestDispatcher("/absolute"));
+				assertEquals("getRequestDispatcher(relative)", dispatcher,
+						req.getRequestDispatcher("relative"));
 			}
 		});
 	}
@@ -1320,8 +1314,9 @@ public class HttpServletContainerTest extends OfficeFrameTestCase {
 		});
 
 		// Ensure not added to attributes
-		assertNull("Should not be added to attributes", this.attributes
-				.get(ServletRequestForwarder.ATTRIBUTE_FORWARDER));
+		assertNull("Should not be added to attributes",
+				this.attributes
+						.get(ServletRequestForwarder.ATTRIBUTE_FORWARDER));
 	}
 
 	/**
@@ -1337,17 +1332,17 @@ public class HttpServletContainerTest extends OfficeFrameTestCase {
 				// TODO take Locale from Accept-Language header
 
 				// Only default locale
-				assertEquals("Default locale", Locale.getDefault(), req
-						.getLocale());
+				assertEquals("Default locale", Locale.getDefault(),
+						req.getLocale());
 
 				// Only default locale
 				Enumeration<?> enumeration = req.getLocales();
-				assertTrue("Expecting default locale", enumeration
-						.hasMoreElements());
+				assertTrue("Expecting default locale",
+						enumeration.hasMoreElements());
 				assertEquals("Should have default locale", Locale.getDefault(),
 						enumeration.nextElement());
-				assertFalse("Only expecting default locale", enumeration
-						.hasMoreElements());
+				assertFalse("Only expecting default locale",
+						enumeration.hasMoreElements());
 			}
 		});
 	}
@@ -1379,7 +1374,7 @@ public class HttpServletContainerTest extends OfficeFrameTestCase {
 		});
 
 		// Validate written data
-		byte[] writtenData = this.outputStream.toByteArray();
+		byte[] writtenData = this.outputStream.getWrittenBytes();
 		assertEquals("Incorrect number of bytes written", 1, writtenData.length);
 		assertEquals("Incorrect data written", DATA, writtenData[0]);
 	}
@@ -1411,7 +1406,7 @@ public class HttpServletContainerTest extends OfficeFrameTestCase {
 		});
 
 		// Validate written data
-		assertText(DATA, this.outputStream.toByteArray());
+		assertText(DATA, this.outputStream.getWrittenBytes());
 	}
 
 	/**
@@ -1426,8 +1421,8 @@ public class HttpServletContainerTest extends OfficeFrameTestCase {
 					throws ServletException, IOException {
 				// Ensure large buffer and not write out data
 				resp.setBufferSize(10000);
-				assertEquals("Incorrect buffer size", 10000, resp
-						.getBufferSize());
+				assertEquals("Incorrect buffer size", 10000,
+						resp.getBufferSize());
 
 				// Write small data (below buffer size)
 				PrintWriter writer = resp.getWriter();
@@ -1436,7 +1431,7 @@ public class HttpServletContainerTest extends OfficeFrameTestCase {
 				// Ensure no content written
 				assertEquals("Content should still be buffered", 0,
 						HttpServletContainerTest.this.outputStream
-								.toByteArray().length);
+								.getWrittenBytes().length);
 				assertFalse("Should not yet be committed", resp.isCommitted());
 
 				// Flush the buffer
@@ -1444,7 +1439,7 @@ public class HttpServletContainerTest extends OfficeFrameTestCase {
 				assertTrue("Committed to content", resp.isCommitted());
 				assertText("test data",
 						HttpServletContainerTest.this.outputStream
-								.toByteArray());
+								.getWrittenBytes());
 
 				// Ensure not able to change buffer size
 				try {
@@ -1476,7 +1471,7 @@ public class HttpServletContainerTest extends OfficeFrameTestCase {
 				// Ensure no content written
 				assertEquals("Content should still be buffered", 0,
 						HttpServletContainerTest.this.outputStream
-								.toByteArray().length);
+								.getWrittenBytes().length);
 				assertFalse("Should not yet be committed", resp.isCommitted());
 
 				// Reset the buffer
@@ -1488,7 +1483,7 @@ public class HttpServletContainerTest extends OfficeFrameTestCase {
 				assertTrue("Committed to content", resp.isCommitted());
 				assertText("other data",
 						HttpServletContainerTest.this.outputStream
-								.toByteArray());
+								.getWrittenBytes());
 			}
 		});
 	}
@@ -1503,13 +1498,13 @@ public class HttpServletContainerTest extends OfficeFrameTestCase {
 
 		// Record obtaining the output streams
 		this.record_init("/test");
-		this.recordReturn(this.response, this.response.addHeader("test",
-				"value"), header);
+		this.recordReturn(this.response,
+				this.response.addHeader("test", "value"), header);
 		this.recordReturn(this.response, this.response.getHeaders(),
 				new HttpHeader[] { header });
 		this.response.removeHeader(header);
-		this.recordReturn(this.response, this.response.addHeader("test",
-				"another"), header);
+		this.recordReturn(this.response,
+				this.response.addHeader("test", "another"), header);
 
 		// Test
 		this.doTest(new MockHttpServlet() {
@@ -1529,7 +1524,7 @@ public class HttpServletContainerTest extends OfficeFrameTestCase {
 				// Ensure no content written
 				assertEquals("Content should still be buffered", 0,
 						HttpServletContainerTest.this.outputStream
-								.toByteArray().length);
+								.getWrittenBytes().length);
 				assertFalse("Should not yet be committed", resp.isCommitted());
 
 				// Reset
@@ -1542,7 +1537,7 @@ public class HttpServletContainerTest extends OfficeFrameTestCase {
 				assertTrue("Committed to content", resp.isCommitted());
 				assertText("other data",
 						HttpServletContainerTest.this.outputStream
-								.toByteArray());
+								.getWrittenBytes());
 			}
 		});
 	}
@@ -1560,13 +1555,13 @@ public class HttpServletContainerTest extends OfficeFrameTestCase {
 
 		// Record specify content length
 		this.response.removeHeaders(CONTENT_LENGTH);
-		this.recordReturn(this.response, this.response.addHeader(
-				CONTENT_LENGTH, "10"), header);
+		this.recordReturn(this.response,
+				this.response.addHeader(CONTENT_LENGTH, "10"), header);
 
 		// Record specifying content type without charset
 		this.response.removeHeaders(CONTENT_TYPE);
-		this.recordReturn(this.response, this.response.addHeader(CONTENT_TYPE,
-				"text/html"), header);
+		this.recordReturn(this.response,
+				this.response.addHeader(CONTENT_TYPE, "text/html"), header);
 		this.recordReturn(this.response, this.response.getHeader(CONTENT_TYPE),
 				header);
 		this.recordReturn(header, header.getValue(), "text/html");
@@ -1595,31 +1590,30 @@ public class HttpServletContainerTest extends OfficeFrameTestCase {
 
 				// Ensure default charset not changed if not specified
 				resp.setContentType("text/html");
-				assertEquals("Incorrect Content-Type", "text/html", resp
-						.getContentType());
+				assertEquals("Incorrect Content-Type", "text/html",
+						resp.getContentType());
 
 				// Ensure default character encoding
 				assertEquals("Incorrect default character encoding",
 						"ISO-8859-1", resp.getCharacterEncoding());
 
 				// Ensure can change via content type
-				resp
-						.setContentType("text/html; charset=UTF-8; another=parameter");
+				resp.setContentType("text/html; charset=UTF-8; another=parameter");
 				assertEquals("Incorrect Content-Type",
-						"text/html; charset=UTF-8; another=parameter", resp
-								.getContentType());
+						"text/html; charset=UTF-8; another=parameter",
+						resp.getContentType());
 				assertEquals("Incorrect charset from Content-Type", "UTF-8",
 						resp.getCharacterEncoding());
 
 				// Ensure can change via character encoding
 				resp.setCharacterEncoding("UTF-16");
-				assertEquals("Incorrect specified charset", "UTF-16", resp
-						.getCharacterEncoding());
+				assertEquals("Incorrect specified charset", "UTF-16",
+						resp.getCharacterEncoding());
 
 				// Does not change charset for content type
 				assertEquals("Content-Type charset should not be overwritten",
-						"text/html; charset=UTF-8; another=parameter", resp
-								.getContentType());
+						"text/html; charset=UTF-8; another=parameter",
+						resp.getContentType());
 
 				// Write content
 				Writer writer = resp.getWriter();
@@ -1629,7 +1623,7 @@ public class HttpServletContainerTest extends OfficeFrameTestCase {
 		});
 
 		// Validate the content written
-		assertText("test data", this.outputStream.toByteArray(), "UTF-16");
+		assertText("test data", this.outputStream.getWrittenBytes(), "UTF-16");
 	}
 
 	/**
@@ -1644,14 +1638,13 @@ public class HttpServletContainerTest extends OfficeFrameTestCase {
 		this.recordReturn(this.response, this.response.getHeaders(),
 				new HttpHeader[0]);
 		this.recordReturn(this.clock, this.clock.currentTimeMillis(), TIME);
-		this
-				.recordReturn(
-						this.response,
-						this.response
-								.addHeader(
-										"set-cookie",
-										"name=\"value\"; expires=Wed, 04-Aug-2010 11:17:18 GMT; domain=.officefloor.net"),
-						header);
+		this.recordReturn(
+				this.response,
+				this.response
+						.addHeader(
+								"set-cookie",
+								"name=\"value\"; expires=Wed, 04-Aug-2010 11:17:18 GMT; domain=.officefloor.net"),
+				header);
 
 		// Test
 		this.doTest(new MockHttpServlet() {
@@ -1681,10 +1674,10 @@ public class HttpServletContainerTest extends OfficeFrameTestCase {
 			@Override
 			protected void test(HttpServletRequest req, HttpServletResponse resp)
 					throws ServletException, IOException {
-				assertTrue("Should contain 'test' header", resp
-						.containsHeader("test"));
-				assertFalse("Should not contain 'missing' header", resp
-						.containsHeader("missing"));
+				assertTrue("Should contain 'test' header",
+						resp.containsHeader("test"));
+				assertFalse("Should not contain 'missing' header",
+						resp.containsHeader("missing"));
 			}
 		});
 	}
@@ -1699,10 +1692,10 @@ public class HttpServletContainerTest extends OfficeFrameTestCase {
 			@Override
 			protected void test(HttpServletRequest req, HttpServletResponse resp)
 					throws ServletException, IOException {
-				assertEquals("Session Id always via cookie", URL, resp
-						.encodeURL(URL));
-				assertEquals("Session Id not included in redirects", URL, resp
-						.encodeRedirectURL(URL));
+				assertEquals("Session Id always via cookie", URL,
+						resp.encodeURL(URL));
+				assertEquals("Session Id not included in redirects", URL,
+						resp.encodeRedirectURL(URL));
 			}
 		});
 	}
@@ -1727,8 +1720,8 @@ public class HttpServletContainerTest extends OfficeFrameTestCase {
 		});
 
 		// Validate sent message as body
-		assertText("<html><body>test message</body></html>", this.outputStream
-				.toByteArray());
+		assertText("<html><body>test message</body></html>",
+				this.outputStream.getWrittenBytes());
 	}
 
 	/**
@@ -1758,10 +1751,11 @@ public class HttpServletContainerTest extends OfficeFrameTestCase {
 		// Record obtaining details for redirect
 		this.record_init("/test");
 		this.recordReturn(this.connection, this.connection.isSecure(), false);
-		this.recordReturn(this.officeServletContext, this.officeServletContext
-				.getContextPath(this.office), "/context");
-		this.recordReturn(this.request, this.request.getHeaders(), this
-				.createHttpHeaders("host", "officefloor.net:8080"));
+		this.recordReturn(this.officeServletContext,
+				this.officeServletContext.getContextPath(this.office),
+				"/context");
+		this.recordReturn(this.request, this.request.getHeaders(),
+				this.createHttpHeaders("host", "officefloor.net:8080"));
 		this.recordReturn(this.mapping, this.mapping.getServletPath(),
 				"/servlet");
 
@@ -1796,10 +1790,11 @@ public class HttpServletContainerTest extends OfficeFrameTestCase {
 		// Record obtaining details for redirect
 		this.record_init("/test");
 		this.recordReturn(this.connection, this.connection.isSecure(), false);
-		this.recordReturn(this.officeServletContext, this.officeServletContext
-				.getContextPath(this.office), "/context");
-		this.recordReturn(this.request, this.request.getHeaders(), this
-				.createHttpHeaders("host", "officefloor.net:8080"));
+		this.recordReturn(this.officeServletContext,
+				this.officeServletContext.getContextPath(this.office),
+				"/context");
+		this.recordReturn(this.request, this.request.getHeaders(),
+				this.createHttpHeaders("host", "officefloor.net:8080"));
 
 		// Record sending redirect
 		this.response.setStatus(307);
@@ -1829,10 +1824,11 @@ public class HttpServletContainerTest extends OfficeFrameTestCase {
 		// Record obtaining details for redirect
 		this.record_init("/test");
 		this.recordReturn(this.connection, this.connection.isSecure(), true);
-		this.recordReturn(this.officeServletContext, this.officeServletContext
-				.getContextPath(this.office), "/context");
-		this.recordReturn(this.request, this.request.getHeaders(), this
-				.createHttpHeaders("host", "officefloor.net:443"));
+		this.recordReturn(this.officeServletContext,
+				this.officeServletContext.getContextPath(this.office),
+				"/context");
+		this.recordReturn(this.request, this.request.getHeaders(),
+				this.createHttpHeaders("host", "officefloor.net:443"));
 
 		// Record sending redirect
 		this.response.setStatus(307);
@@ -1861,21 +1857,21 @@ public class HttpServletContainerTest extends OfficeFrameTestCase {
 
 		// Record specifying headers
 		this.record_init("/test");
-		this.recordReturn(this.response, this.response.addHeader("date",
-				dateText), header);
+		this.recordReturn(this.response,
+				this.response.addHeader("date", dateText), header);
 		this.response.removeHeaders("OnlyDate");
-		this.recordReturn(this.response, this.response.addHeader("OnlyDate",
-				dateText), header);
-		this.recordReturn(this.response, this.response.addHeader("header",
-				"value"), header);
+		this.recordReturn(this.response,
+				this.response.addHeader("OnlyDate", dateText), header);
+		this.recordReturn(this.response,
+				this.response.addHeader("header", "value"), header);
 		this.response.removeHeaders("OnlyHeader");
-		this.recordReturn(this.response, this.response.addHeader("OnlyHeader",
-				"value"), header);
-		this.recordReturn(this.response, this.response.addHeader("integer",
-				"10"), header);
+		this.recordReturn(this.response,
+				this.response.addHeader("OnlyHeader", "value"), header);
+		this.recordReturn(this.response,
+				this.response.addHeader("integer", "10"), header);
 		this.response.removeHeaders("OnlyInteger");
-		this.recordReturn(this.response, this.response.addHeader("OnlyInteger",
-				"5"), header);
+		this.recordReturn(this.response,
+				this.response.addHeader("OnlyInteger", "5"), header);
 
 		// Test
 		this.doTest(new MockHttpServlet() {
@@ -1919,8 +1915,8 @@ public class HttpServletContainerTest extends OfficeFrameTestCase {
 				assertEquals("Initially default locale", Locale.getDefault(),
 						resp.getLocale());
 				resp.setLocale(Locale.GERMANY);
-				assertEquals("Incorrect changed locale", Locale.GERMANY, resp
-						.getLocale());
+				assertEquals("Incorrect changed locale", Locale.GERMANY,
+						resp.getLocale());
 			}
 		});
 	}
@@ -1936,8 +1932,9 @@ public class HttpServletContainerTest extends OfficeFrameTestCase {
 				.createMock(HttpServletResponse.class);
 
 		// Record to ensure invoked
-		this.recordReturn(this.officeServletContext, this.officeServletContext
-				.getFilterChainFactory(this.office), this.filterChainFactory);
+		this.recordReturn(this.officeServletContext,
+				this.officeServletContext.getFilterChainFactory(this.office),
+				this.filterChainFactory);
 		this.recordReturn(REQUEST, REQUEST.getContextPath(), "/context/path");
 
 		// Test
@@ -1950,14 +1947,14 @@ public class HttpServletContainerTest extends OfficeFrameTestCase {
 					throws ServletException, IOException {
 				assertEquals("Incorrect request", REQUEST, req);
 				assertEquals("Incorrect response", RESPONSE, resp);
-				assertEquals("Incorrect context path", "/context/path", req
-						.getContextPath());
+				assertEquals("Incorrect context path", "/context/path",
+						req.getContextPath());
 			}
 		};
 		HttpServletContainer container = new HttpServletContainerImpl(
 				this.servletName, servlet, this.initParameters,
-				this.officeServletContext, this.office, this.clock, Locale
-						.getDefault());
+				this.officeServletContext, this.office, this.clock,
+				Locale.getDefault());
 
 		// Include
 		container.include(REQUEST, RESPONSE);
@@ -2133,8 +2130,9 @@ public class HttpServletContainerTest extends OfficeFrameTestCase {
 		};
 
 		// Record to ensure filter and then servlet for servicing
-		this.recordReturn(this.officeServletContext, this.officeServletContext
-				.getFilterChainFactory(this.office), this.filterChainFactory);
+		this.recordReturn(this.officeServletContext,
+				this.officeServletContext.getFilterChainFactory(this.office),
+				this.filterChainFactory);
 		this.recordReturn(REQUEST, REQUEST.getParameter("type"),
 				"include-mapping");
 		REQUEST.setAttribute(ATTRIBUTE_NAME, ATTRIBUTE_VALUE);
@@ -2150,14 +2148,14 @@ public class HttpServletContainerTest extends OfficeFrameTestCase {
 					throws ServletException, IOException {
 				assertEquals("Incorrect request", REQUEST, req);
 				assertEquals("Incorrect response", RESPONSE, resp);
-				assertEquals("Incorrect context path", "/context/path", req
-						.getContextPath());
+				assertEquals("Incorrect context path", "/context/path",
+						req.getContextPath());
 			}
 		};
 		HttpServletContainer container = new HttpServletContainerImpl(
 				this.servletName, servlet, this.initParameters,
-				this.officeServletContext, this.office, this.clock, Locale
-						.getDefault());
+				this.officeServletContext, this.office, this.clock,
+				Locale.getDefault());
 
 		// Include
 		container.include(REQUEST, RESPONSE);
@@ -2190,8 +2188,8 @@ public class HttpServletContainerTest extends OfficeFrameTestCase {
 	 */
 	private static void assertText(String expectedText, byte[] writtenBytes,
 			String charSetName) {
-		String writtenString = new String(writtenBytes, Charset
-				.forName(charSetName));
+		String writtenString = new String(writtenBytes,
+				Charset.forName(charSetName));
 		assertEquals("Incorrect written text", expectedText, writtenString);
 	}
 
@@ -2223,9 +2221,6 @@ public class HttpServletContainerTest extends OfficeFrameTestCase {
 	private void record_init(String requestUri) {
 		try {
 
-			final OutputBufferStream bufferStream = this
-					.createMock(OutputBufferStream.class);
-
 			// Record creating the HTTP Servlet Container
 			this.recordReturn(this.officeServletContext,
 					this.officeServletContext
@@ -2240,8 +2235,8 @@ public class HttpServletContainerTest extends OfficeFrameTestCase {
 					SESSION_ID_TOKEN_NAME);
 			this.recordReturn(this.connection,
 					this.connection.getHttpRequest(), this.request);
-			this.recordReturn(this.connection, this.connection
-					.getHttpResponse(), this.response);
+			this.recordReturn(this.connection,
+					this.connection.getHttpResponse(), this.response);
 			this.recordReturn(this.request, this.request.getRequestURI(),
 					requestUri);
 			this.recordReturn(this.officeServletContext,
@@ -2249,10 +2244,8 @@ public class HttpServletContainerTest extends OfficeFrameTestCase {
 					this.contextPath);
 			this.recordReturn(this.request, this.request.getMethod(),
 					this.httpMethod);
-			this.recordReturn(this.response, this.response.getBody(),
-					bufferStream);
-			this.recordReturn(bufferStream, bufferStream.getOutputStream(),
-					this.outputStream);
+			this.recordReturn(this.response, this.response.getEntity(),
+					this.outputStream.getByteOutputStream());
 
 		} catch (Exception ex) {
 			throw fail(ex);

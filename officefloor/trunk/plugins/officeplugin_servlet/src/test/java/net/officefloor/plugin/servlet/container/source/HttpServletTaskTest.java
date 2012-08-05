@@ -18,9 +18,7 @@
 
 package net.officefloor.plugin.servlet.container.source;
 
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.OutputStream;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
@@ -47,7 +45,7 @@ import net.officefloor.plugin.servlet.mapping.ServicerMapping;
 import net.officefloor.plugin.socket.server.http.HttpRequest;
 import net.officefloor.plugin.socket.server.http.HttpResponse;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
-import net.officefloor.plugin.stream.OutputBufferStream;
+import net.officefloor.plugin.stream.impl.MockServerOutputStream;
 import net.officefloor.plugin.web.http.security.HttpSecurity;
 import net.officefloor.plugin.web.http.session.HttpSession;
 
@@ -101,6 +99,11 @@ public class HttpServletTaskTest extends OfficeFrameTestCase {
 	 */
 	private final OfficeServletContext officeServletContext = this
 			.createMock(OfficeServletContext.class);
+
+	/**
+	 * {@link MockServerOutputStream}.
+	 */
+	private final MockServerOutputStream entity = new MockServerOutputStream();
 
 	/**
 	 * {@link FilterChainFactory}.
@@ -245,8 +248,9 @@ public class HttpServletTaskTest extends OfficeFrameTestCase {
 				.createMock(HttpServletResponse.class);
 
 		// Record servlet functionality
-		this.recordReturn(this.officeServletContext, this.officeServletContext
-				.getFilterChainFactory(this.office), this.filterChainFactory);
+		this.recordReturn(this.officeServletContext,
+				this.officeServletContext.getFilterChainFactory(this.office),
+				this.filterChainFactory);
 		this.recordReturn(request, request.getContextPath(), CONTEXT_PATH);
 		this.recordReturn(request, request.getServletPath(), SERVLET_PATH);
 
@@ -257,8 +261,8 @@ public class HttpServletTaskTest extends OfficeFrameTestCase {
 		HttpServletServicer differentiator = this.task;
 
 		// Verify details
-		assertEquals("Incorrect servlet name", SERVLET_NAME, differentiator
-				.getServletName());
+		assertEquals("Incorrect servlet name", SERVLET_NAME,
+				differentiator.getServletName());
 		String[] mappings = differentiator.getServletMappings();
 		assertList(Arrays.asList(mappings), SERVLET_MAPPINGS);
 
@@ -281,27 +285,26 @@ public class HttpServletTaskTest extends OfficeFrameTestCase {
 	private void record_service(boolean isCreateContainer) {
 		try {
 
-			final OutputBufferStream bufferStream = this
-					.createMock(OutputBufferStream.class);
-			final OutputStream outputStream = new ByteArrayOutputStream();
-
 			// Record sourcing the dependencies for servicing the request
 			this.recordReturn(this.taskContext, this.taskContext
 					.getObject(DependencyKeys.OFFICE_SERVLET_CONTEXT),
 					this.officeServletContext);
-			this
-					.recordReturn(this.taskContext, this.taskContext
-							.getObject(DependencyKeys.HTTP_CONNECTION),
-							this.connection);
+			this.recordReturn(this.taskContext,
+					this.taskContext.getObject(DependencyKeys.HTTP_CONNECTION),
+					this.connection);
 			this.recordReturn(this.taskContext, this.taskContext
 					.getObject(DependencyKeys.REQUEST_ATTRIBUTES),
 					this.attributes);
-			this.recordReturn(this.taskContext, this.taskContext
-					.getObject(DependencyKeys.HTTP_SESSION), this.session);
-			this.recordReturn(this.taskContext, this.taskContext
-					.getObject(DependencyKeys.HTTP_SECURITY), this.security);
-			this.recordReturn(this.taskContext, this.taskContext
-					.getObject(DependencyKeys.SERVICER_MAPPING), this.mapping);
+			this.recordReturn(this.taskContext,
+					this.taskContext.getObject(DependencyKeys.HTTP_SESSION),
+					this.session);
+			this.recordReturn(this.taskContext,
+					this.taskContext.getObject(DependencyKeys.HTTP_SECURITY),
+					this.security);
+			this.recordReturn(
+					this.taskContext,
+					this.taskContext.getObject(DependencyKeys.SERVICER_MAPPING),
+					this.mapping);
 
 			if (isCreateContainer) {
 				// Record obtaining filter chain factory in container creation
@@ -319,18 +322,16 @@ public class HttpServletTaskTest extends OfficeFrameTestCase {
 					"JSESSION_ID");
 			this.recordReturn(this.connection,
 					this.connection.getHttpRequest(), this.request);
-			this.recordReturn(this.connection, this.connection
-					.getHttpResponse(), this.response);
+			this.recordReturn(this.connection,
+					this.connection.getHttpResponse(), this.response);
 			this.recordReturn(this.request, this.request.getRequestURI(),
 					CONTEXT_PATH + SERVLET_PATH);
 			this.recordReturn(this.request, this.request.getMethod(), "GET");
 			this.recordReturn(this.officeServletContext,
 					this.officeServletContext.getContextPath(this.office),
 					CONTEXT_PATH);
-			this.recordReturn(this.response, this.response.getBody(),
-					bufferStream);
-			this.recordReturn(bufferStream, bufferStream.getOutputStream(),
-					outputStream);
+			this.recordReturn(this.response, this.response.getEntity(),
+					this.entity.getByteOutputStream());
 
 			// Record obtain context and servlet path in HTTP Servlet
 			this.recordReturn(this.officeServletContext,
@@ -375,12 +376,12 @@ public class HttpServletTaskTest extends OfficeFrameTestCase {
 				throws ServletException, IOException {
 
 			// Ensure correct context path
-			assertEquals("Incorrect context path", CONTEXT_PATH, req
-					.getContextPath());
+			assertEquals("Incorrect context path", CONTEXT_PATH,
+					req.getContextPath());
 
 			// Ensure correct servlet path
-			assertEquals("Incorrect Servlet path", SERVLET_PATH, req
-					.getServletPath());
+			assertEquals("Incorrect Servlet path", SERVLET_PATH,
+					req.getServletPath());
 
 			// Flag invoked
 			this.isServiceInvoked = true;

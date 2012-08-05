@@ -34,8 +34,8 @@ import net.officefloor.plugin.socket.server.http.parse.HttpRequestParser;
 import net.officefloor.plugin.socket.server.protocol.Connection;
 import net.officefloor.plugin.socket.server.protocol.HeartBeatContext;
 import net.officefloor.plugin.socket.server.protocol.ReadContext;
-import net.officefloor.plugin.stream.NioInputStream;
-import net.officefloor.plugin.stream.impl.NioInputStreamImpl;
+import net.officefloor.plugin.stream.ServerInputStream;
+import net.officefloor.plugin.stream.impl.ServerInputStreamImpl;
 
 /**
  * Tests the {@link HttpConnectionHandler}.
@@ -105,7 +105,7 @@ public class HttpConnectionHandlerTest extends OfficeFrameTestCase {
 		final String requestURI = "/path";
 		final String httpVersion = "HTTP/1.1";
 		final List<HttpHeader> headers = new LinkedList<HttpHeader>();
-		final NioInputStream entity = new NioInputStreamImpl(new Object());
+		final ServerInputStream entity = new ServerInputStreamImpl(new Object());
 		final HttpManagedObjectImpl managedObject = new HttpManagedObjectImpl(
 				null);
 

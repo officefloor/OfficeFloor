@@ -16,7 +16,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package net.officefloor.plugin.web.http.response.source;
+package net.officefloor.plugin.web.http.resource.file;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -31,45 +31,40 @@ import net.officefloor.frame.api.execute.TaskContext;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.socket.server.http.HttpResponse;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
-import net.officefloor.plugin.socket.server.http.response.source.HttpResponseWriterWork;
-import net.officefloor.plugin.stream.OutputBufferStream;
+import net.officefloor.plugin.stream.impl.MockServerOutputStream;
 import net.officefloor.plugin.web.http.resource.HttpFile;
-import net.officefloor.plugin.web.http.response.source.HttpFileWriterTaskFactory;
-import net.officefloor.plugin.web.http.response.source.HttpResponseWriterWorkSource;
-import net.officefloor.plugin.web.http.response.source.HttpFileWriterTaskFactory.HttpFileWriterTaskDependencies;
+import net.officefloor.plugin.web.http.resource.file.HttpFileWriterTask.HttpFileWriterTaskDependencies;
 
 /**
- * Tests the {@link HttpResponseWriterWorkSource}.
+ * Tests the {@link HttpFileWriterWorkSource}.
  * 
  * @author Daniel Sagenschneider
  */
-public class HttpResponseWriterWorkSourceTest extends OfficeFrameTestCase {
+public class HttpFileWriterWorkSourceTest extends OfficeFrameTestCase {
 
 	/**
 	 * Validates the specification.
 	 */
 	public void testSpecification() {
-		WorkLoaderUtil
-				.validateSpecification(HttpResponseWriterWorkSource.class);
+		WorkLoaderUtil.validateSpecification(HttpFileWriterWorkSource.class);
 	}
 
 	/**
 	 * Validates the type.
 	 */
 	public void testType() {
-		WorkTypeBuilder<HttpResponseWriterWork> work = WorkLoaderUtil
-				.createWorkTypeBuilder(new HttpResponseWriterWork(null));
+		HttpFileWriterTask factory = new HttpFileWriterTask();
+		WorkTypeBuilder<HttpFileWriterTask> work = WorkLoaderUtil
+				.createWorkTypeBuilder(factory);
 		TaskTypeBuilder<HttpFileWriterTaskDependencies, None> file = work
-				.addTaskType("WriteFileToResponse",
-						new HttpFileWriterTaskFactory(),
+				.addTaskType("WriteFileToResponse", factory,
 						HttpFileWriterTaskDependencies.class, None.class);
 		file.addObject(HttpFile.class).setKey(
 				HttpFileWriterTaskDependencies.HTTP_FILE);
 		file.addObject(ServerHttpConnection.class).setKey(
 				HttpFileWriterTaskDependencies.SERVER_HTTP_CONNECTION);
 		file.addEscalation(IOException.class);
-		WorkLoaderUtil.validateWorkType(work,
-				HttpResponseWriterWorkSource.class);
+		WorkLoaderUtil.validateWorkType(work, HttpFileWriterWorkSource.class);
 	}
 
 	/**
@@ -78,14 +73,14 @@ public class HttpResponseWriterWorkSourceTest extends OfficeFrameTestCase {
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public void testWriteHttpFile() throws Throwable {
 
-		TaskContext<HttpResponseWriterWork, HttpFileWriterTaskDependencies, None> taskContext = this
+		TaskContext<HttpFileWriterTask, HttpFileWriterTaskDependencies, None> taskContext = this
 				.createMock(TaskContext.class);
 		HttpFile httpFile = this.createMock(HttpFile.class);
 		ServerHttpConnection connection = this
 				.createMock(ServerHttpConnection.class);
 		HttpResponse response = this.createMock(HttpResponse.class);
-		ByteBuffer contents = ByteBuffer.allocate(0);
-		OutputBufferStream body = this.createMock(OutputBufferStream.class);
+		ByteBuffer contents = ByteBuffer.wrap("TEST".getBytes());
+		MockServerOutputStream entity = new MockServerOutputStream();
 
 		// Record
 		this.recordReturn(
@@ -102,15 +97,14 @@ public class HttpResponseWriterWorkSourceTest extends OfficeFrameTestCase {
 		this.recordReturn(httpFile, httpFile.getContentType(), "");
 		this.recordReturn(httpFile, httpFile.getCharset(), null);
 		this.recordReturn(httpFile, httpFile.getContents(), contents);
-		this.recordReturn(response, response.getBody(), body);
-		body.append(contents);
+		this.recordReturn(response, response.getEntity(), entity);
 
 		// Test
 		this.replayMockObjects();
 
 		// Create the task
-		WorkType<HttpResponseWriterWork> work = WorkLoaderUtil
-				.loadWorkType(HttpResponseWriterWorkSource.class);
+		WorkType<HttpFileWriterTask> work = WorkLoaderUtil
+				.loadWorkType(HttpFileWriterWorkSource.class);
 		Task task = work.getTaskTypes()[0].getTaskFactory().createTask(
 				work.getWorkFactory().createWork());
 
@@ -118,6 +112,10 @@ public class HttpResponseWriterWorkSourceTest extends OfficeFrameTestCase {
 		assertNull(task.doTask(taskContext));
 
 		this.verifyMockObjects();
+
+		// Validate the entity content
+		assertEquals("Incorrect entity content", "TEST",
+				new String(entity.getWrittenBytes()));
 	}
 
 }

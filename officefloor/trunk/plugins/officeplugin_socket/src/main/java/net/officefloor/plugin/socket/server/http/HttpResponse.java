@@ -19,8 +19,10 @@
 package net.officefloor.plugin.socket.server.http;
 
 import java.io.IOException;
+import java.nio.charset.Charset;
 
-import net.officefloor.plugin.stream.ByteOutputStream;
+import net.officefloor.plugin.stream.ServerOutputStream;
+import net.officefloor.plugin.stream.ServerWriter;
 
 /**
  * {@link HttpResponse} for the {@link ServerHttpConnection}.
@@ -116,21 +118,73 @@ public interface HttpResponse {
 	void removeHeaders(String name);
 
 	/**
+	 * Specifies the content type.
+	 * 
+	 * @param contentType
+	 *            Content type.
+	 */
+	void setContentType(String contentType);
+
+	/**
 	 * <p>
-	 * Obtains the {@link ByteOutputStream} to write the entity of the response.
+	 * Specifies the {@link Charset} for the {@link #getEntityWriter()}.
 	 * <p>
-	 * Closing the returned {@link ByteOutputStream} is similar to calling
+	 * This must be specified before calling {@link #getEntityWriter()}.
+	 * 
+	 * @param charset
+	 *            {@link Charset} name.
+	 */
+	void setContentCharset(String charset);
+
+	/**
+	 * <p>
+	 * Specifies the {@link Charset}.
+	 * <p>
+	 * Name used will be {@link Charset#name()}.
+	 * 
+	 * @param charset
+	 *            {@link Charset}.
+	 */
+	void setContentCharset(Charset charset);
+
+	/**
+	 * <p>
+	 * Obtains the {@link ServerOutputStream} to write the entity of the
+	 * response.
+	 * <p>
+	 * Only one of {@link #getEntity()} or {@link #getEntityWriter()} may be
+	 * called.
+	 * <p>
+	 * Closing the returned {@link ServerOutputStream} is similar to calling
 	 * {@link #send()}.
 	 * 
-	 * @return {@link ByteOutputStream} to write the entity of the response.
+	 * @return {@link ServerOutputStream} to write the entity of the response.
 	 * 
+	 * @see #getEntityWriter()
 	 * @see #send()
 	 */
-	ByteOutputStream getEntity();
+	ServerOutputStream getEntity();
+
+	/**
+	 * <p>
+	 * Obtains the {@link ServerWriter} to write the entity of the response.
+	 * <p>
+	 * Only one of {@link #getEntity()} or {@link #getEntityWriter()} may be
+	 * called.
+	 * <p>
+	 * Closing the returned {@link ServerOutputStream} is similar to calling
+	 * {@link #send()}.
+	 * 
+	 * @return {@link ServerWriter} to write the entity of the response.
+	 * 
+	 * @see #getEntity()
+	 * @see #send()
+	 */
+	ServerWriter getEntityWriter();
 
 	/**
 	 * Sends this {@link HttpResponse}. After calling this the
-	 * {@link ByteOutputStream} is closed.
+	 * {@link ServerOutputStream} is closed.
 	 * 
 	 * @throws IOException
 	 *             If fails to send this {@link HttpResponse}.

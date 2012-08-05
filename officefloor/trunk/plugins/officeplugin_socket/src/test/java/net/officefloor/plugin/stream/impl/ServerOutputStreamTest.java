@@ -24,21 +24,21 @@ import java.nio.channels.ClosedChannelException;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.socket.server.impl.ArrayWriteBuffer;
 import net.officefloor.plugin.socket.server.protocol.WriteBuffer;
-import net.officefloor.plugin.stream.ByteOutputStream;
+import net.officefloor.plugin.stream.ServerOutputStream;
 import net.officefloor.plugin.stream.WriteBufferReceiver;
 
 /**
- * Tests the {@link ByteOutputStream}.
+ * Tests the {@link ServerOutputStream}.
  * 
  * @author Daniel Sagenschneider
  */
-public class ByteOutputStreamTest extends OfficeFrameTestCase implements
+public class ServerOutputStreamTest extends OfficeFrameTestCase implements
 		WriteBufferReceiver {
 
 	/**
-	 * {@link ByteOutputStream} to test.
+	 * {@link ServerOutputStream} to test.
 	 */
-	private final ByteOutputStreamImpl stream = new ByteOutputStreamImpl(this,
+	private final ServerOutputStreamImpl stream = new ServerOutputStreamImpl(this,
 			1024);
 
 	/**

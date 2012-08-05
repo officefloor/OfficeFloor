@@ -19,17 +19,13 @@
 package net.officefloor.plugin.web.http.tokenise;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.nio.charset.Charset;
 import java.util.HashMap;
 import java.util.Map;
 
 import net.officefloor.plugin.socket.server.http.HttpRequest;
-import net.officefloor.plugin.stream.BufferStream;
-import net.officefloor.plugin.stream.InputBufferStream;
-import net.officefloor.plugin.web.http.tokenise.HttpRequestTokenHandler;
-import net.officefloor.plugin.web.http.tokenise.HttpRequestTokeniseException;
-import net.officefloor.plugin.web.http.tokenise.HttpRequestTokeniser;
+import net.officefloor.plugin.stream.BrowseInputStream;
+import net.officefloor.plugin.stream.ServerInputStream;
 
 /**
  * {@link HttpRequestTokeniser} implementation.
@@ -107,31 +103,31 @@ public class HttpRequestTokeniserImpl implements HttpRequestTokeniser {
 		String requestUri = request.getRequestURI();
 		this.loadTokens(requestUri, false, handler, tempBuffer);
 
-		// Only load parameters of body if a POST
+		// Only load parameters of entity if a POST
 		if ("POST".equalsIgnoreCase(request.getMethod())) {
 
-			// Obtain the content encoding of the body
+			// Obtain the content encoding of the entity
 			// TODO handle content encoding
 
-			// Obtain the content type of the body
+			// Obtain the content type of the entity
 			// TODO handle content type
 			Charset charset = Charset.forName("UTF-8"); // default for now
 
-			// Obtain the body data
-			InputBufferStream body = request.getBody();
+			// Obtain the entity data
+			ServerInputStream entity = request.getEntity();
 			byte[] data;
 			try {
 				// Create buffer for data
-				int bodySize = (int) body.available();
+				int bodySize = (int) entity.available();
 				data = new byte[bodySize < 0 ? 0 : bodySize];
-				
+
 				// Obtain the data
-				InputStream browseStream = body.getBrowseStream();
-				int index = 0;
-				for (int value = browseStream.read(); value != BufferStream.END_OF_STREAM; value = browseStream
-						.read()) {
-					data[index++] = (byte) value;
+				if (data.length > 0) {
+					BrowseInputStream browseStream = entity
+							.createBrowseInputStream();
+					browseStream.read(data);
 				}
+
 			} catch (IOException ex) {
 				// Propagate failure
 				throw new HttpRequestTokeniseException(ex);

@@ -15,29 +15,18 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+package net.officefloor.plugin.socket.server.protocol;
 
-package net.officefloor.tutorial.servletfilterwebapplication;
-
-import java.io.IOException;
-import java.io.OutputStreamWriter;
-import java.io.Writer;
-
-import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
+import java.nio.ByteBuffer;
 
 /**
- * Example class to provide functionality within web application.
+ * {@link Enum} indicating whether {@link WriteBuffer} is by
+ * <code>byte array</code> or {@link ByteBuffer}.
  * 
  * @author Daniel Sagenschneider
  */
-// START SNIPPET: example
-public class ExampleClass {
+public enum WriteBufferEnum {
 
-	public void example(ServerHttpConnection connection) throws IOException {
-		Writer writer = new OutputStreamWriter(connection.getHttpResponse()
-				.getEntity());
-		writer.write("<html><body>CLASS</body></html>");
-		writer.flush();
-	}
+	BYTE_ARRAY, BYTE_BUFFER
 
 }
-// END SNIPPET: example

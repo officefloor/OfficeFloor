@@ -18,7 +18,6 @@
 
 package net.officefloor.plugin.servlet.container.source;
 
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
@@ -45,7 +44,7 @@ import net.officefloor.plugin.servlet.mapping.ServicerMapping;
 import net.officefloor.plugin.socket.server.http.HttpRequest;
 import net.officefloor.plugin.socket.server.http.HttpResponse;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
-import net.officefloor.plugin.stream.OutputBufferStream;
+import net.officefloor.plugin.stream.impl.MockServerOutputStream;
 import net.officefloor.plugin.web.http.security.HttpSecurity;
 import net.officefloor.plugin.web.http.session.HttpSession;
 
@@ -123,8 +122,6 @@ public class HttpServletWorkSourceTest extends OfficeFrameTestCase {
 		final HttpRequest request = this.createMock(HttpRequest.class);
 		final Office office = this.createMock(Office.class);
 		final HttpResponse response = this.createMock(HttpResponse.class);
-		final OutputBufferStream body = this
-				.createMock(OutputBufferStream.class);
 		final ServicerMapping mapping = this.createMock(ServicerMapping.class);
 
 		// No filtering
@@ -141,21 +138,24 @@ public class HttpServletWorkSourceTest extends OfficeFrameTestCase {
 		MockHttpServlet.reset();
 
 		// Record servicing request
-		this.recordReturn(taskContext, taskContext
-				.getObject(DependencyKeys.OFFICE_SERVLET_CONTEXT),
+		this.recordReturn(taskContext,
+				taskContext.getObject(DependencyKeys.OFFICE_SERVLET_CONTEXT),
 				officeServletContext);
-		this.recordReturn(taskContext, taskContext
-				.getObject(DependencyKeys.HTTP_CONNECTION), connection);
-		this.recordReturn(taskContext, taskContext
-				.getObject(DependencyKeys.REQUEST_ATTRIBUTES), attributes);
-		this.recordReturn(taskContext, taskContext
-				.getObject(DependencyKeys.HTTP_SESSION), session);
-		this.recordReturn(taskContext, taskContext
-				.getObject(DependencyKeys.HTTP_SECURITY), security);
-		this.recordReturn(taskContext, taskContext
-				.getObject(DependencyKeys.SERVICER_MAPPING), mapping);
-		this.recordReturn(officeServletContext, officeServletContext
-				.getFilterChainFactory(office), filterChainFactory);
+		this.recordReturn(taskContext,
+				taskContext.getObject(DependencyKeys.HTTP_CONNECTION),
+				connection);
+		this.recordReturn(taskContext,
+				taskContext.getObject(DependencyKeys.REQUEST_ATTRIBUTES),
+				attributes);
+		this.recordReturn(taskContext,
+				taskContext.getObject(DependencyKeys.HTTP_SESSION), session);
+		this.recordReturn(taskContext,
+				taskContext.getObject(DependencyKeys.HTTP_SECURITY), security);
+		this.recordReturn(taskContext,
+				taskContext.getObject(DependencyKeys.SERVICER_MAPPING), mapping);
+		this.recordReturn(officeServletContext,
+				officeServletContext.getFilterChainFactory(office),
+				filterChainFactory);
 		attributes.get("#HttpServlet.LastAccessTime#");
 		this.control(attributes).setReturnValue(new Long(1000));
 		this.recordReturn(session, session.getTokenName(), "JSESSION_ID");
@@ -163,12 +163,11 @@ public class HttpServletWorkSourceTest extends OfficeFrameTestCase {
 		this.recordReturn(request, request.getRequestURI(),
 				"http://www.officefloor.net");
 		this.recordReturn(request, request.getMethod(), "GET");
-		this.recordReturn(officeServletContext, officeServletContext
-				.getContextPath(office), "/context");
+		this.recordReturn(officeServletContext,
+				officeServletContext.getContextPath(office), "/context");
 		this.recordReturn(connection, connection.getHttpResponse(), response);
-		this.recordReturn(response, response.getBody(), body);
-		this.recordReturn(body, body.getOutputStream(),
-				new ByteArrayOutputStream());
+		this.recordReturn(response, response.getEntity(),
+				new MockServerOutputStream().getByteOutputStream());
 		this.recordReturn(request, request.getMethod(), "GET");
 
 		// Test
@@ -231,8 +230,8 @@ public class HttpServletWorkSourceTest extends OfficeFrameTestCase {
 		@Override
 		public void init() throws ServletException {
 			// Ensure appropriate configuration
-			assertEquals("Incorrect servlet name", "ServletName", this
-					.getServletName());
+			assertEquals("Incorrect servlet name", "ServletName",
+					this.getServletName());
 			assertEquals("Expecting init parameter", "available", this
 					.getServletConfig().getInitParameter("test"));
 

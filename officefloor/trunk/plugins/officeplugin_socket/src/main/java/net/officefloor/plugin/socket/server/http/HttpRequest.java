@@ -20,7 +20,7 @@ package net.officefloor.plugin.socket.server.http;
 
 import java.util.List;
 
-import net.officefloor.plugin.stream.NioInputStream;
+import net.officefloor.plugin.stream.ServerInputStream;
 
 /**
  * HTTP request from the {@link ServerHttpConnection}.
@@ -61,10 +61,10 @@ public interface HttpRequest {
 	List<HttpHeader> getHeaders();
 
 	/**
-	 * Obtains the {@link NioInputStream} to the entity of the HTTP request.
+	 * Obtains the {@link ServerInputStream} to the entity of the HTTP request.
 	 * 
-	 * @return {@link NioInputStream} to the entity of the HTTP request.
+	 * @return {@link ServerInputStream} to the entity of the HTTP request.
 	 */
-	NioInputStream getEntity();
+	ServerInputStream getEntity();
 
 }

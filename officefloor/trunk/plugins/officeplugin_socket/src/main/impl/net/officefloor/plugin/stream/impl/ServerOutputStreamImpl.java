@@ -24,15 +24,15 @@ import java.util.LinkedList;
 import java.util.Queue;
 
 import net.officefloor.plugin.socket.server.protocol.WriteBuffer;
-import net.officefloor.plugin.stream.ByteOutputStream;
+import net.officefloor.plugin.stream.ServerOutputStream;
 import net.officefloor.plugin.stream.WriteBufferReceiver;
 
 /**
- * {@link ByteOutputStream} implementation.
+ * {@link ServerOutputStream} implementation.
  * 
  * @author Daniel Sagenschneider
  */
-public class ByteOutputStreamImpl extends ByteOutputStream {
+public class ServerOutputStreamImpl extends ServerOutputStream {
 
 	/**
 	 * {@link WriteBufferReceiver}.
@@ -40,9 +40,9 @@ public class ByteOutputStreamImpl extends ByteOutputStream {
 	private final WriteBufferReceiver receiver;
 
 	/**
-	 * Write buffer size.
+	 * Send buffer size.
 	 */
-	private final int writeBufferSize;
+	private final int sendBufferSize;
 
 	/**
 	 * Current data.
@@ -64,13 +64,12 @@ public class ByteOutputStreamImpl extends ByteOutputStream {
 	 * 
 	 * @param receiver
 	 *            {@link WriteBufferReceiver}.
-	 * @param writeBufferSize
-	 *            Write buffer size.
+	 * @param sendBufferSize
+	 *            Send buffer size.
 	 */
-	public ByteOutputStreamImpl(WriteBufferReceiver receiver,
-			int writeBufferSize) {
+	public ServerOutputStreamImpl(WriteBufferReceiver receiver, int sendBufferSize) {
 		this.receiver = receiver;
-		this.writeBufferSize = writeBufferSize;
+		this.sendBufferSize = sendBufferSize;
 	}
 
 	/**
@@ -103,9 +102,23 @@ public class ByteOutputStreamImpl extends ByteOutputStream {
 
 	@Override
 	public void write(ByteBuffer cachedBuffer) throws IOException {
-		// TODO implement ByteOutputStream.write
-		throw new UnsupportedOperationException(
-				"TODO implement ByteOutputStream.write");
+
+		synchronized (this.receiver.getLock()) {
+
+			// Move current data for writing
+			if (this.currentData != null) {
+
+				// Append the current data for writing
+				WriteBuffer buffer = this.receiver.createWriteBuffer(
+						this.currentData, this.nextCurrentDataIndex);
+				this.dataToWrite.add(buffer);
+				this.currentData = null; // now no current data
+			}
+
+			// Append the cached buffer
+			WriteBuffer buffer = this.receiver.createWriteBuffer(cachedBuffer);
+			this.dataToWrite.add(buffer);
+		}
 	}
 
 	@Override
@@ -119,7 +132,7 @@ public class ByteOutputStreamImpl extends ByteOutputStream {
 			// Ensure have current data
 			if (this.currentData == null) {
 				// Provide new data for writing
-				this.currentData = new byte[this.writeBufferSize];
+				this.currentData = new byte[this.sendBufferSize];
 
 				// Write byte immediately
 				this.currentData[0] = (byte) b;
@@ -145,8 +158,9 @@ public class ByteOutputStreamImpl extends ByteOutputStream {
 			this.ensureNotClosed();
 
 			// Determine the number of buffers to write
-			int buffersToWrite = this.dataToWrite.size()
-					+ (this.currentData == null ? 0 : 1);
+			int dataToWriteSize = this.dataToWrite.size();
+			boolean isCurrentData = (this.currentData != null);
+			int buffersToWrite = dataToWriteSize + (isCurrentData ? 1 : 0);
 
 			// Ensure there is data to write
 			if (buffersToWrite == 0) {
@@ -156,11 +170,16 @@ public class ByteOutputStreamImpl extends ByteOutputStream {
 			// Create the array of buffers to write
 			WriteBuffer[] buffers = new WriteBuffer[buffersToWrite];
 
-			// TODO provide buffers from queue
+			// Provide buffers from queue
+			for (int i = 0; i < dataToWriteSize; i++) {
+				buffers[i] = this.dataToWrite.poll();
+			}
 
-			// Provide last buffer
-			buffers[buffers.length - 1] = this.receiver.createWriteBuffer(
-					this.currentData, this.nextCurrentDataIndex);
+			// Provide current buffer
+			if (isCurrentData) {
+				buffers[buffers.length - 1] = this.receiver.createWriteBuffer(
+						this.currentData, this.nextCurrentDataIndex);
+			}
 
 			// Clear data as about to be written
 			this.currentData = null;
@@ -175,6 +194,9 @@ public class ByteOutputStreamImpl extends ByteOutputStream {
 	public void close() throws IOException {
 
 		synchronized (this.receiver.getLock()) {
+
+			// Flush any data to receiver
+			this.flush();
 
 			// Close the receiver
 			this.receiver.close();

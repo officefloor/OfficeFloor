@@ -27,7 +27,7 @@ import java.nio.ByteBuffer;
  * 
  * @author Daniel Sagenschneider
  */
-public abstract class ByteOutputStream extends OutputStream {
+public abstract class ServerOutputStream extends OutputStream {
 
 	/**
 	 * <p>

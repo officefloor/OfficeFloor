@@ -22,14 +22,17 @@ import java.io.InputStream;
 
 /**
  * <p>
- * Provides non-blocking {@link InputStream}.
+ * Enables browsing the content of the {@link ServerInputStream} without consuming
+ * bytes of the {@link ServerInputStream}.
  * <p>
- * Should an attempt be made to read more than the available bytes, a
- * {@link NoAvailableInputException} will be thrown.
+ * Please be aware that this is non-blocking and acts similar to an
+ * {@link ServerInputStream}.
  * 
  * @author Daniel Sagenschneider
+ * 
+ * @see ServerInputStream
  */
-public abstract class NioInputStream extends InputStream {
+public abstract class BrowseInputStream extends InputStream {
 
 	/*
 	 * ===================== InputStream ===========================
@@ -55,5 +58,4 @@ public abstract class NioInputStream extends InputStream {
 //	public abstract long skip(long n) throws IOException,
 //			NoAvailableInputException;
 
-	
 }

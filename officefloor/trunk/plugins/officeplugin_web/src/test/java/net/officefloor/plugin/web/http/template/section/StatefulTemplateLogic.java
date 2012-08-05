@@ -72,7 +72,7 @@ public class StatefulTemplateLogic implements Serializable {
 
 		// Indicate increment
 		Writer writer = new OutputStreamWriter(connection.getHttpResponse()
-				.getBody().getOutputStream());
+				.getEntity());
 		writer.write("increment");
 		writer.flush();
 

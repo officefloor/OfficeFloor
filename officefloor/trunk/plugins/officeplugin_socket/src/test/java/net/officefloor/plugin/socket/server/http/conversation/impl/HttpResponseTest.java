@@ -40,7 +40,7 @@ import net.officefloor.plugin.socket.server.http.protocol.HttpStatus;
 import net.officefloor.plugin.socket.server.impl.ArrayWriteBuffer;
 import net.officefloor.plugin.socket.server.protocol.Connection;
 import net.officefloor.plugin.socket.server.protocol.WriteBuffer;
-import net.officefloor.plugin.stream.impl.NioInputStreamImpl;
+import net.officefloor.plugin.stream.impl.ServerInputStreamImpl;
 
 /**
  * Tests the {@link HttpResponseImpl}.
@@ -237,8 +237,8 @@ public class HttpResponseTest extends OfficeFrameTestCase implements Connection 
 	private HttpResponse createHttpResponse() {
 
 		// Add the request
-		NioInputStreamImpl entity = new NioInputStreamImpl(new Object());
-		entity.queueData(null, 0, 0, false);
+		ServerInputStreamImpl entity = new ServerInputStreamImpl(new Object());
+		entity.inputData(null, 0, 0, false);
 		HttpManagedObject mo = this.conversation.addRequest("GET", "/mock",
 				"HTTP/1.1", new LinkedList<HttpHeader>(), entity);
 

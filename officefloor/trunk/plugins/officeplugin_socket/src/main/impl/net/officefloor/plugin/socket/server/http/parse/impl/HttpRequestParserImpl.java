@@ -28,8 +28,8 @@ import net.officefloor.plugin.socket.server.http.HttpRequest;
 import net.officefloor.plugin.socket.server.http.parse.HttpRequestParseException;
 import net.officefloor.plugin.socket.server.http.parse.HttpRequestParser;
 import net.officefloor.plugin.socket.server.http.protocol.HttpStatus;
-import net.officefloor.plugin.stream.NioInputStream;
-import net.officefloor.plugin.stream.impl.NioInputStreamImpl;
+import net.officefloor.plugin.stream.ServerInputStream;
+import net.officefloor.plugin.stream.impl.ServerInputStreamImpl;
 
 /**
  * Parser for a HTTP request.
@@ -280,7 +280,7 @@ public class HttpRequestParserImpl implements HttpRequestParser {
 	/**
 	 * Entity.
 	 */
-	private NioInputStreamImpl entity;
+	private ServerInputStreamImpl entity;
 
 	/**
 	 * Initiate.
@@ -486,7 +486,7 @@ public class HttpRequestParserImpl implements HttpRequestParser {
 		this.headers = new ArrayList<HttpHeader>(16);
 
 		// Once parsed, no further input so do not block writing by input
-		this.entity = new NioInputStreamImpl(new Object());
+		this.entity = new ServerInputStreamImpl(new Object());
 	}
 
 	@Override
@@ -769,13 +769,13 @@ public class HttpRequestParserImpl implements HttpRequestParser {
 				// Consume partial of the bytes (-1 as index not length)
 				int endIndex = this.nextByteToParseIndex
 						+ ((int) requiredBytes) - 1;
-				this.entity.queueData(data, this.nextByteToParseIndex,
+				this.entity.inputData(data, this.nextByteToParseIndex,
 						endIndex, false);
 				this.nextByteToParseIndex = endIndex + 1; // after bytes read
 
 			} else {
 				// Consume all of the bytes
-				this.entity.queueData(data, this.nextByteToParseIndex,
+				this.entity.inputData(data, this.nextByteToParseIndex,
 						(data.length - 1), !isFurtherDataRequired);
 				this.nextByteToParseIndex = -1; // all bytes consumed
 			}
@@ -785,7 +785,7 @@ public class HttpRequestParserImpl implements HttpRequestParser {
 
 		} else {
 			// No content (indicate no further data)
-			this.entity.queueData(null, 0, 0, false);
+			this.entity.inputData(null, 0, 0, false);
 
 			// Determine if consumed all bytes
 			if (this.nextByteToParseIndex == data.length) {
@@ -818,7 +818,7 @@ public class HttpRequestParserImpl implements HttpRequestParser {
 	}
 
 	@Override
-	public NioInputStream getEntity() {
+	public ServerInputStream getEntity() {
 		return this.entity;
 	}
 

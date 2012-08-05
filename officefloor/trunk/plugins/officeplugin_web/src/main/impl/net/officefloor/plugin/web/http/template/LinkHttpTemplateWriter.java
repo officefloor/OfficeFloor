@@ -20,9 +20,8 @@ package net.officefloor.plugin.web.http.template;
 
 import java.io.IOException;
 
-import net.officefloor.plugin.socket.server.http.response.HttpResponseWriter;
+import net.officefloor.plugin.stream.ServerWriter;
 import net.officefloor.plugin.web.http.location.HttpApplicationLocation;
-import net.officefloor.plugin.web.http.template.HttpTemplateWriter;
 import net.officefloor.plugin.web.http.template.parse.LinkHttpTemplateSectionContent;
 
 /**
@@ -43,24 +42,15 @@ public class LinkHttpTemplateWriter implements HttpTemplateWriter {
 	private final String linkSuffix;
 
 	/**
-	 * <code>Content-Type</code>.
-	 */
-	private final String contentType;
-
-	/**
 	 * Initiate.
 	 * 
 	 * @param content
 	 *            {@link LinkHttpTemplateSectionContent}.
-	 * @param contentType
-	 *            <code>Content-Type</code>.
 	 */
-	public LinkHttpTemplateWriter(LinkHttpTemplateSectionContent content,
-			String contentType) {
+	public LinkHttpTemplateWriter(LinkHttpTemplateSectionContent content) {
 		this.linkPrefix = "/";
 		this.linkSuffix = "-" + content.getName()
 				+ HttpTemplateWorkSource.LINK_URL_EXTENSION;
-		this.contentType = contentType;
 	}
 
 	/*
@@ -68,7 +58,7 @@ public class LinkHttpTemplateWriter implements HttpTemplateWriter {
 	 */
 
 	@Override
-	public void write(HttpResponseWriter writer, String workName, Object bean,
+	public void write(ServerWriter writer, String workName, Object bean,
 			HttpApplicationLocation location) throws IOException {
 
 		// Strip / if root work
@@ -84,7 +74,7 @@ public class LinkHttpTemplateWriter implements HttpTemplateWriter {
 				+ workName + this.linkSuffix, isSecure);
 
 		// Write the content
-		writer.write(this.contentType, linkPath);
+		writer.write(linkPath);
 	}
 
 }

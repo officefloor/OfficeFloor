@@ -20,7 +20,7 @@ package net.officefloor.plugin.stream;
 
 
 /**
- * Thrown by the {@link NioInputStream} on attempting a read past the available
+ * Thrown by the {@link ServerInputStream} on attempting a read past the available
  * data.
  * 
  * @author Daniel Sagenschneider

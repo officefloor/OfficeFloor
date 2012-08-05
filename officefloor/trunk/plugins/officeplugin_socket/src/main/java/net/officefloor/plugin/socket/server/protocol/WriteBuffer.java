@@ -27,6 +27,13 @@ import java.nio.ByteBuffer;
 public interface WriteBuffer {
 
 	/**
+	 * Obtains the type of this {@link WriteBuffer}.
+	 * 
+	 * @return Type of this {@link WriteBuffer}.
+	 */
+	WriteBufferEnum getType();
+
+	/**
 	 * Obtains the data to write.
 	 * 
 	 * @return Data to write. <code>null</code> if containing data in

@@ -53,10 +53,10 @@ public class MockTemplateLogic {
 	 *             If fails to send {@link HttpResponse}.
 	 */
 	public void inputTwo(ServerHttpConnection connection) throws IOException {
-		
+
 		// Send a response
 		HttpResponse response = connection.getHttpResponse();
-		OutputStream body = response.getBody().getOutputStream(); 
+		OutputStream body = response.getEntity();
 		body.write("SECTION".getBytes());
 		body.flush();
 		response.send();

@@ -529,8 +529,8 @@ public class HttpServletRequestImpl implements HttpServletRequest,
 
 		// Lazy create the reader
 		if (this.reader == null) {
-			this.reader = new BufferedReader(new InputStreamReader(this.request
-					.getBody().getInputStream()));
+			this.reader = new BufferedReader(new InputStreamReader(
+					this.request.getEntity()));
 		}
 
 		// Return the reader
@@ -548,8 +548,8 @@ public class HttpServletRequestImpl implements HttpServletRequest,
 
 		// Lazy create the input stream
 		if (this.inputStream == null) {
-			this.inputStream = new HttpRequestServletInputStream(this.request
-					.getBody().getInputStream());
+			this.inputStream = new HttpRequestServletInputStream(
+					this.request.getEntity());
 		}
 
 		// Return the input stream

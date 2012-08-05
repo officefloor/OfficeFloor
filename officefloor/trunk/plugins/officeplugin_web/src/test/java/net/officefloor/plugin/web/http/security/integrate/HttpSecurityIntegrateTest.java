@@ -134,8 +134,8 @@ public class HttpSecurityIntegrateTest extends AbstractOfficeConstructTestCase {
 				.constructManagedObject("ServerHttpConnection",
 						HttpServerSocketManagedObjectSource.class);
 		serverHttpConnection.addProperty(
-				HttpServerSocketManagedObjectSource.PROPERTY_PORT, String
-						.valueOf(PORT));
+				HttpServerSocketManagedObjectSource.PROPERTY_PORT,
+				String.valueOf(PORT));
 		ManagingOfficeBuilder<Indexed> connection = serverHttpConnection
 				.setManagingOffice(officeName);
 		connection.linkProcess(0, "Access", "access");
@@ -147,8 +147,8 @@ public class HttpSecurityIntegrateTest extends AbstractOfficeConstructTestCase {
 		WorkBuilder<HttpSecurityTask> accessWork = this.constructWork("Access",
 				accessWorkType.getWorkFactory());
 		TaskBuilder<HttpSecurityTask, DependencyKeys, FlowKeys> accessTask = (TaskBuilder<HttpSecurityTask, DependencyKeys, FlowKeys>) accessWork
-				.addTask("access", accessWorkType.getTaskTypes()[0]
-						.getTaskFactory());
+				.addTask("access",
+						accessWorkType.getTaskTypes()[0].getTaskFactory());
 		accessTask.linkManagedObject(DependencyKeys.HTTP_SECURITY_SERVICE,
 				"HttpSecurityService", HttpSecurityService.class);
 		accessTask.linkFlow(FlowKeys.AUTHENTICATED, "Servicer", "service",
@@ -197,8 +197,7 @@ public class HttpSecurityIntegrateTest extends AbstractOfficeConstructTestCase {
 		 */
 		public void service(ServerHttpConnection connection) throws IOException {
 			HttpResponse response = connection.getHttpResponse();
-			Writer writer = new OutputStreamWriter(response.getBody()
-					.getOutputStream());
+			Writer writer = new OutputStreamWriter(response.getEntity());
 			writer.write("Serviced");
 			writer.flush();
 			response.send();
@@ -215,8 +214,7 @@ public class HttpSecurityIntegrateTest extends AbstractOfficeConstructTestCase {
 		public void unauthorised(ServerHttpConnection connection)
 				throws IOException {
 			HttpResponse response = connection.getHttpResponse();
-			Writer writer = new OutputStreamWriter(response.getBody()
-					.getOutputStream());
+			Writer writer = new OutputStreamWriter(response.getEntity());
 			writer.write("Please try again");
 			writer.flush();
 			response.send();

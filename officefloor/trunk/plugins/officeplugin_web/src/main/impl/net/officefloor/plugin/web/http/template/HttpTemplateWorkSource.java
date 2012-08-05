@@ -41,8 +41,6 @@ import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.spi.source.SourceContext;
 import net.officefloor.frame.spi.source.SourceProperties;
-import net.officefloor.plugin.socket.server.http.response.HttpResponseWriterFactory;
-import net.officefloor.plugin.socket.server.http.response.HttpResponseWriterFactoryImpl;
 import net.officefloor.plugin.web.http.template.parse.BeanHttpTemplateSectionContent;
 import net.officefloor.plugin.web.http.template.parse.HttpTemplate;
 import net.officefloor.plugin.web.http.template.parse.HttpTemplateParserImpl;
@@ -79,7 +77,7 @@ public class HttpTemplateWorkSource extends
 	/**
 	 * Property to specify the {@link Charset} for the template.
 	 */
-	public static final String PROPERTY_CHARSET = "charset";
+	public static final String PROPERTY_CHARSET = "content.charset";
 
 	/**
 	 * Property prefix to obtain the bean for the {@link HttpTemplateSection}.
@@ -260,7 +258,7 @@ public class HttpTemplateWorkSource extends
 		// Obtain the charset
 		String charsetName = properties.getProperty(PROPERTY_CHARSET, null);
 		Charset charset = (charsetName != null ? Charset.forName(charsetName)
-				: Charset.defaultCharset());
+				: Charset.forName("ISO-8859-1"));
 
 		// Return the charset
 		return charset;
@@ -301,9 +299,6 @@ public class HttpTemplateWorkSource extends
 				"text/html");
 		Charset charset = getCharset(context);
 
-		// Create the writer factory
-		HttpResponseWriterFactory writerFactory = new HttpResponseWriterFactoryImpl();
-
 		// Define the work factory
 		workTypeBuilder.setWorkFactory(new HttpTemplateWork());
 
@@ -313,8 +308,7 @@ public class HttpTemplateWorkSource extends
 
 			// Load the task to write the section
 			String[] linkNames = HttpTemplateTask.loadTaskType(section,
-					contentType, charset, writerFactory, workTypeBuilder,
-					context);
+					charset, workTypeBuilder, context);
 
 			// Keep track of the unique set of link names
 			linkNameSet.addAll(Arrays.asList(linkNames));

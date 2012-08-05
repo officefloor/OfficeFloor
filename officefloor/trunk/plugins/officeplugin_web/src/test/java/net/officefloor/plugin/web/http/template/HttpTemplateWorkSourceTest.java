@@ -102,7 +102,7 @@ public class HttpTemplateWorkSourceTest extends OfficeFrameTestCase {
 
 		// Create the task factory
 		HttpTemplateTask httpTemplateTaskFactory = new HttpTemplateTask(null,
-				false, null);
+				false);
 		RequestHandlerTask requestHandlerTaskFactory = new RequestHandlerTask();
 
 		// 'template' task
@@ -332,7 +332,7 @@ public class HttpTemplateWorkSourceTest extends OfficeFrameTestCase {
 
 		// Obtain the output template
 		String actualOutput = UsAsciiUtil.convertToString(httpResponse
-				.getBodyContent());
+				.getEntityContent());
 
 		// Expected output (removing last end of line appended)
 		String expectedOutput = this.getFileContents(this.findFile(
@@ -408,7 +408,7 @@ public class HttpTemplateWorkSourceTest extends OfficeFrameTestCase {
 
 		// Ensure raw HTTP template content
 		String output = UsAsciiUtil.convertToString(httpResponse
-				.getBodyContent());
+				.getEntityContent());
 		assertTextEquals("Incorrect output", templateContent, output);
 	}
 
@@ -459,7 +459,7 @@ public class HttpTemplateWorkSourceTest extends OfficeFrameTestCase {
 
 		// Obtain the output template
 		String actualOutput = UsAsciiUtil.convertToString(httpResponse
-				.getBodyContent());
+				.getEntityContent());
 
 		// Expected output (removing last end of line appended)
 		String expectedOutput = this.getFileContents(this.findFile(

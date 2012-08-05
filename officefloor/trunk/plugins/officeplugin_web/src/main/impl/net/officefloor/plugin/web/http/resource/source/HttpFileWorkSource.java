@@ -155,7 +155,7 @@ public class HttpFileWorkSource extends
 			HttpResponse response = connection.getHttpResponse();
 
 			// Write the HTTP file to response
-			response.getBody().append(this.file.getContents().duplicate());
+			response.getEntity().write(this.file.getContents().duplicate());
 
 			// Nothing to return
 			return null;

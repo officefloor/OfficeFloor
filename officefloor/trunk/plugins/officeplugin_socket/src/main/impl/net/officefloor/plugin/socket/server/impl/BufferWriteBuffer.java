@@ -23,57 +23,49 @@ import net.officefloor.plugin.socket.server.protocol.WriteBuffer;
 import net.officefloor.plugin.socket.server.protocol.WriteBufferEnum;
 
 /**
- * {@link WriteBuffer} containing an array of bytes to write.
+ * {@link ByteBuffer} {@link WriteBuffer}.
  * 
  * @author Daniel Sagenschneider
  */
-public class ArrayWriteBuffer implements WriteBuffer {
+public class BufferWriteBuffer implements WriteBuffer {
 
 	/**
-	 * Data.
+	 * {@link ByteBuffer} to write.
 	 */
-	private final byte[] data;
-
-	/**
-	 * Length of data to write.
-	 */
-	private final int length;
+	private final ByteBuffer buffer;
 
 	/**
 	 * Initiate.
 	 * 
-	 * @param data
-	 *            Data.
-	 * @param length
-	 *            Length of data to write.
+	 * @param buffer
+	 *            {@link ByteBuffer} to write.
 	 */
-	public ArrayWriteBuffer(byte[] data, int length) {
-		this.data = data;
-		this.length = length;
+	public BufferWriteBuffer(ByteBuffer buffer) {
+		this.buffer = buffer;
 	}
 
 	/*
-	 * ================== WriteBuffer =======================
+	 * ===================== WriteBuffer ============================
 	 */
 
 	@Override
 	public WriteBufferEnum getType() {
-		return WriteBufferEnum.BYTE_ARRAY;
+		return WriteBufferEnum.BYTE_BUFFER;
 	}
 
 	@Override
 	public byte[] getData() {
-		return this.data;
+		return null;
 	}
 
 	@Override
 	public int length() {
-		return this.length;
+		return -1;
 	}
 
 	@Override
 	public ByteBuffer getDataBuffer() {
-		return null;
+		return this.buffer;
 	}
 
 }
