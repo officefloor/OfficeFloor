@@ -29,7 +29,7 @@ import net.officefloor.plugin.socket.server.http.conversation.HttpConversation;
 import net.officefloor.plugin.socket.server.http.conversation.HttpManagedObject;
 import net.officefloor.plugin.socket.server.http.parse.HttpRequestParseException;
 import net.officefloor.plugin.socket.server.protocol.Connection;
-import net.officefloor.plugin.stream.NioInputStream;
+import net.officefloor.plugin.stream.ServerInputStream;
 
 /**
  * Manages the HTTP conversation on a {@link Connection}.
@@ -113,7 +113,7 @@ public class HttpConversationImpl implements HttpConversation {
 
 	@Override
 	public HttpManagedObject addRequest(String method, String requestURI,
-			String httpVersion, List<HttpHeader> headers, NioInputStream entity) {
+			String httpVersion, List<HttpHeader> headers, ServerInputStream entity) {
 
 		// Create the request
 		HttpRequestImpl request = new HttpRequestImpl(method, requestURI,

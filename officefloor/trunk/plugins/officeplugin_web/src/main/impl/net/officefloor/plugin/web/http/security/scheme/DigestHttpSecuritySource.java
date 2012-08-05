@@ -383,7 +383,7 @@ public class DigestHttpSecuritySource implements
 		if ("auth-int".equalsIgnoreCase(qop)) {
 			// Calculate body digest
 			Digest bodyDigest = new Digest(algorithm);
-			InputStream body = request.getBody().getBrowseStream();
+			InputStream body = request.getEntity().createBrowseInputStream();
 			bodyDigest.append(body);
 
 			// Append the body digest

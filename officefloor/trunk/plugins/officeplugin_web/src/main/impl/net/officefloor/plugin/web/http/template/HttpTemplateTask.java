@@ -35,14 +35,13 @@ import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.execute.TaskContext;
 import net.officefloor.frame.util.AbstractSingleTask;
+import net.officefloor.plugin.socket.server.http.HttpResponse;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
-import net.officefloor.plugin.socket.server.http.response.HttpResponseWriter;
-import net.officefloor.plugin.socket.server.http.response.HttpResponseWriterFactory;
+import net.officefloor.plugin.stream.ServerWriter;
 import net.officefloor.plugin.value.retriever.ValueRetriever;
 import net.officefloor.plugin.value.retriever.ValueRetrieverSource;
 import net.officefloor.plugin.value.retriever.ValueRetrieverSourceImpl;
 import net.officefloor.plugin.web.http.location.HttpApplicationLocation;
-import net.officefloor.plugin.web.http.template.HttpTemplateWriter;
 import net.officefloor.plugin.web.http.template.parse.BeanHttpTemplateSectionContent;
 import net.officefloor.plugin.web.http.template.parse.HttpTemplate;
 import net.officefloor.plugin.web.http.template.parse.HttpTemplateSection;
@@ -69,12 +68,8 @@ public class HttpTemplateTask extends
 	 * 
 	 * @param section
 	 *            {@link HttpTemplateSection}.
-	 * @param contentType
-	 *            <code>Content-Type</code> for the result of the template.
-	 * @param charset
-	 *            {@link Charset} for the result of the template.
-	 * @param writerFactory
-	 *            {@link HttpResponseWriterFactory}.
+	 * @param serverDefaultCharset
+	 *            Default {@link Charset} for Server.
 	 * @param workTypeBuilder
 	 *            {@link WorkTypeBuilder}.
 	 * @param context
@@ -85,8 +80,7 @@ public class HttpTemplateTask extends
 	 *             If fails to prepare the template.
 	 */
 	public static String[] loadTaskType(HttpTemplateSection section,
-			String contentType, Charset charset,
-			HttpResponseWriterFactory writerFactory,
+			Charset serverDefaultCharset,
 			WorkTypeBuilder<HttpTemplateWork> workTypeBuilder,
 			WorkSourceContext context) throws Exception {
 
@@ -99,14 +93,14 @@ public class HttpTemplateTask extends
 		// Create the content writers for the section
 		SectionWriterStruct writerStruct = createHttpTemplateWriters(
 				section.getContent(), null, sectionAndTaskName, linkTaskNames,
-				contentType, charset, context);
+				serverDefaultCharset, context);
 
 		// Determine if requires bean
 		boolean isRequireBean = (writerStruct.beanClass != null);
 
 		// Create the task factory
 		HttpTemplateTask task = new HttpTemplateTask(writerStruct.writers,
-				isRequireBean, writerFactory);
+				isRequireBean);
 
 		// Define the task to write the section
 		TaskTypeBuilder<Indexed, None> taskBuilder = workTypeBuilder
@@ -166,10 +160,8 @@ public class HttpTemplateTask extends
 	 *            Section and task name.
 	 * @param linkTaskNames
 	 *            List task names.
-	 * @param contentType
-	 *            Content type.
-	 * @param charset
-	 *            Charset.
+	 * @param serverDefaultCharset
+	 *            Default {@link Charset} for the Server.
 	 * @param context
 	 *            {@link WorkSourceContext}.
 	 * @return {@link SectionWriterStruct}.
@@ -179,7 +171,7 @@ public class HttpTemplateTask extends
 	private static SectionWriterStruct createHttpTemplateWriters(
 			HttpTemplateSectionContent[] contents, Class<?> beanClass,
 			String sectionAndTaskName, Set<String> linkTaskNames,
-			String contentType, Charset charset, WorkSourceContext context)
+			Charset serverDefaultCharset, WorkSourceContext context)
 			throws Exception {
 
 		// Create the content writers for the section
@@ -192,7 +184,7 @@ public class HttpTemplateTask extends
 				// Add the static template writer
 				StaticHttpTemplateSectionContent staticContent = (StaticHttpTemplateSectionContent) content;
 				contentWriterList.add(new StaticHttpTemplateWriter(
-						staticContent, contentType, charset));
+						staticContent, serverDefaultCharset));
 
 			} else if (content instanceof BeanHttpTemplateSectionContent) {
 				// Add the bean template writer
@@ -229,7 +221,7 @@ public class HttpTemplateTask extends
 				// Obtain the writers for the bean
 				SectionWriterStruct beanStruct = createHttpTemplateWriters(
 						beanContent.getContent(), beanType, null,
-						linkTaskNames, contentType, charset, null);
+						linkTaskNames, serverDefaultCharset, null);
 
 				// Add the content writer
 				contentWriterList.add(new BeanHttpTemplateWriter(beanContent,
@@ -250,15 +242,13 @@ public class HttpTemplateTask extends
 				}
 
 				// Add the content writer
-				contentWriterList
-						.add(new PropertyHttpTemplateWriter(propertyContent,
-								valueRetriever, contentType, beanClass));
+				contentWriterList.add(new PropertyHttpTemplateWriter(
+						propertyContent, valueRetriever, beanClass));
 
 			} else if (content instanceof LinkHttpTemplateSectionContent) {
 				// Add the link template writer
 				LinkHttpTemplateSectionContent linkContent = (LinkHttpTemplateSectionContent) content;
-				contentWriterList.add(new LinkHttpTemplateWriter(linkContent,
-						contentType));
+				contentWriterList.add(new LinkHttpTemplateWriter(linkContent));
 
 				// Track the link tasks
 				linkTaskNames.add(linkContent.getName());
@@ -334,25 +324,17 @@ public class HttpTemplateTask extends
 	private final boolean isRequireBean;
 
 	/**
-	 * {@link HttpResponseWriterFactory}.
-	 */
-	private final HttpResponseWriterFactory writerFactory;
-
-	/**
 	 * Initiate.
 	 * 
 	 * @param contentWriters
 	 *            {@link HttpTemplateWriter} instances to write the content.
 	 * @param isRequireBean
 	 *            Flag indicating if a bean is required.
-	 * @param writerFactory
-	 *            {@link HttpResponseWriterFactory}.
 	 */
 	public HttpTemplateTask(HttpTemplateWriter[] contentWriters,
-			boolean isRequireBean, HttpResponseWriterFactory writerFactory) {
+			boolean isRequireBean) {
 		this.contentWriters = contentWriters;
 		this.isRequireBean = isRequireBean;
-		this.writerFactory = writerFactory;
 	}
 
 	/*
@@ -370,9 +352,9 @@ public class HttpTemplateTask extends
 				.getObject(1);
 		Object bean = (this.isRequireBean ? context.getObject(2) : null);
 
-		// Create the response writer
-		HttpResponseWriter writer = this.writerFactory
-				.createHttpResponseWriter(connection);
+		// Obtain the writer
+		HttpResponse response = connection.getHttpResponse();
+		ServerWriter writer = response.getEntityWriter();
 
 		// Obtain the work name
 		String workName = context.getWork().getWorkName();

@@ -30,7 +30,7 @@ import net.officefloor.plugin.socket.server.protocol.Connection;
 import net.officefloor.plugin.socket.server.protocol.ConnectionHandler;
 import net.officefloor.plugin.socket.server.protocol.HeartBeatContext;
 import net.officefloor.plugin.socket.server.protocol.ReadContext;
-import net.officefloor.plugin.stream.NioInputStream;
+import net.officefloor.plugin.stream.ServerInputStream;
 
 /**
  * HTTP {@link ConnectionHandler}.
@@ -123,7 +123,7 @@ public class HttpConnectionHandler implements ConnectionHandler {
 					String requestURI = this.parser.getRequestURI();
 					String httpVersion = this.parser.getHttpVersion();
 					List<HttpHeader> headers = this.parser.getHeaders();
-					NioInputStream entity = this.parser.getEntity();
+					ServerInputStream entity = this.parser.getEntity();
 					this.parser.reset(); // reset for next request
 
 					// Service the request

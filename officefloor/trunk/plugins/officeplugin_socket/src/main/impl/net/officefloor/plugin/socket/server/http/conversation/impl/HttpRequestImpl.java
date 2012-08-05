@@ -22,7 +22,7 @@ import java.util.List;
 
 import net.officefloor.plugin.socket.server.http.HttpHeader;
 import net.officefloor.plugin.socket.server.http.HttpRequest;
-import net.officefloor.plugin.stream.NioInputStream;
+import net.officefloor.plugin.stream.ServerInputStream;
 
 /**
  * {@link HttpRequest} implementation.
@@ -54,7 +54,7 @@ public class HttpRequestImpl implements HttpRequest {
 	/**
 	 * Entity.
 	 */
-	private final NioInputStream entity;
+	private final ServerInputStream entity;
 
 	/**
 	 * Initiate.
@@ -68,10 +68,10 @@ public class HttpRequestImpl implements HttpRequest {
 	 * @param headers
 	 *            {@link HttpHeader} instances.
 	 * @param entity
-	 *            {@link NioInputStream} to the entity.
+	 *            {@link ServerInputStream} to the entity.
 	 */
 	public HttpRequestImpl(String method, String requestURI,
-			String httpVersion, List<HttpHeader> headers, NioInputStream entity) {
+			String httpVersion, List<HttpHeader> headers, ServerInputStream entity) {
 		this.method = method;
 		this.requestURI = requestURI;
 		this.version = httpVersion;
@@ -104,7 +104,7 @@ public class HttpRequestImpl implements HttpRequest {
 	}
 
 	@Override
-	public NioInputStream getEntity() {
+	public ServerInputStream getEntity() {
 		return this.entity;
 	}
 

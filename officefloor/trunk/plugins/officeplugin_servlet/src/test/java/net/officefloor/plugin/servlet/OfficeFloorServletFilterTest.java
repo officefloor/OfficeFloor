@@ -445,7 +445,7 @@ public class OfficeFloorServletFilterTest extends OfficeFrameTestCase {
 	public static class MockLinkTemplate {
 		public void link(ServerHttpConnection connection) throws IOException {
 			Writer writer = new OutputStreamWriter(connection.getHttpResponse()
-					.getBody().getOutputStream());
+					.getEntity());
 			writer.write("LINK - ");
 			writer.flush();
 		}
@@ -458,7 +458,7 @@ public class OfficeFloorServletFilterTest extends OfficeFrameTestCase {
 		public void doSection(ServerHttpConnection connection)
 				throws IOException {
 			Writer writer = new OutputStreamWriter(connection.getHttpResponse()
-					.getBody().getOutputStream());
+					.getEntity());
 			writer.write("SECTION");
 			writer.flush();
 		}
@@ -475,7 +475,7 @@ public class OfficeFloorServletFilterTest extends OfficeFrameTestCase {
 		public void doEjb(MockEjb ejb, ServerHttpConnection connection)
 				throws IOException {
 			Writer writer = new OutputStreamWriter(connection.getHttpResponse()
-					.getBody().getOutputStream());
+					.getEntity());
 			writer.write(ejb.value);
 			writer.flush();
 		}
@@ -488,7 +488,7 @@ public class OfficeFloorServletFilterTest extends OfficeFrameTestCase {
 		public void task(ServerHttpConnection connection) throws Exception {
 
 			// Content should not appear as reset on resource dispatch
-			connection.getHttpResponse().getBody().getOutputStream()
+			connection.getHttpResponse().getEntity()
 					.write("ESCALTION - ".getBytes());
 
 			// Fail

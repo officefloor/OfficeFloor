@@ -20,7 +20,6 @@ package net.officefloor.plugin.web.http.resource.source;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.ByteBuffer;
 
 import net.officefloor.compile.spi.work.source.TaskTypeBuilder;
 import net.officefloor.compile.spi.work.source.WorkTypeBuilder;
@@ -32,12 +31,10 @@ import net.officefloor.frame.api.execute.TaskContext;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.socket.server.http.HttpResponse;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
-import net.officefloor.plugin.stream.OutputBufferStream;
+import net.officefloor.plugin.stream.impl.MockServerOutputStream;
 import net.officefloor.plugin.web.http.resource.HttpFile;
 import net.officefloor.plugin.web.http.resource.source.HttpFileWorkSource.ClasspathHttpFileTask;
 import net.officefloor.plugin.web.http.resource.source.HttpFileWorkSource.DependencyKeys;
-
-import org.easymock.AbstractMatcher;
 
 /**
  * Tests the {@link HttpFileWorkSource}.
@@ -65,15 +62,9 @@ public class HttpFileWorkSourceTest extends OfficeFrameTestCase {
 	private final HttpResponse response = this.createMock(HttpResponse.class);
 
 	/**
-	 * Mock {@link OutputBufferStream}.
+	 * {@link MockServerOutputStream}.
 	 */
-	private final OutputBufferStream body = this
-			.createMock(OutputBufferStream.class);
-
-	/**
-	 * Actual file sent content.
-	 */
-	private String actualFileSentContent = "";
+	private final MockServerOutputStream entity = new MockServerOutputStream();
 
 	/**
 	 * Validate specification.
@@ -138,32 +129,8 @@ public class HttpFileWorkSourceTest extends OfficeFrameTestCase {
 				this.connection);
 		this.recordReturn(this.connection, this.connection.getHttpResponse(),
 				this.response);
-		this.recordReturn(this.response, this.response.getBody(), this.body);
-
-		// Record sending HTTP file (capturing contents sent)
-		this.body.append((ByteBuffer) null);
-		this.control(this.body).setMatcher(new AbstractMatcher() {
-			@Override
-			public boolean matches(Object[] expected, Object[] actual) {
-
-				// Obtain the actual contents
-				ByteBuffer buffer = (ByteBuffer) actual[0];
-				byte[] data = new byte[buffer.limit()];
-				buffer.get(data);
-				String actualContents = new String(data);
-
-				// Ensure a direct byte buffer for faster writing
-				assertTrue("Expecting direct byte buffer", buffer.isDirect());
-				assertTrue("Expecting byte buffer to be read only",
-						buffer.isReadOnly());
-
-				// Append the file content
-				HttpFileWorkSourceTest.this.actualFileSentContent += actualContents;
-
-				// Always match
-				return true;
-			}
-		});
+		this.recordReturn(this.response, this.response.getEntity(),
+				this.entity.getByteOutputStream());
 
 		// Test
 		this.replayMockObjects();
@@ -185,8 +152,10 @@ public class HttpFileWorkSourceTest extends OfficeFrameTestCase {
 
 		// Verify
 		this.verifyMockObjects();
-		assertEquals("Incorrect file content", fileContents,
-				this.actualFileSentContent);
+
+		// Verify the file contents
+		assertEquals("Incorrect file content", fileContents, new String(
+				this.entity.getWrittenBytes()));
 	}
 
 }

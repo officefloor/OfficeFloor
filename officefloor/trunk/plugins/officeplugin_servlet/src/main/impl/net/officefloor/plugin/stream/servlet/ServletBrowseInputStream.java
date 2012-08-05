@@ -16,7 +16,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package net.officefloor.plugin.stream.inputstream;
+package net.officefloor.plugin.stream.servlet;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -26,7 +26,7 @@ import java.io.InputStream;
  * 
  * @author Daniel Sagenschneider
  */
-public class BrowsableInputStream extends InputStream {
+public class ServletBrowseInputStream extends InputStream {
 
 	/**
 	 * {@link InputStream}.
@@ -58,7 +58,7 @@ public class BrowsableInputStream extends InputStream {
 	 * @param mutex
 	 *            Mutex to synchronise on.
 	 */
-	public BrowsableInputStream(InputStream input, int dataBufferCapacity,
+	public ServletBrowseInputStream(InputStream input, int dataBufferCapacity,
 			Object mutex) {
 		this.input = input;
 		this.dataBufferCapacity = dataBufferCapacity;
@@ -125,7 +125,7 @@ public class BrowsableInputStream extends InputStream {
 		/**
 		 * Data for this {@link DataBuffer}.
 		 */
-		public final byte[] data = new byte[BrowsableInputStream.this.dataBufferCapacity];
+		public final byte[] data = new byte[ServletBrowseInputStream.this.dataBufferCapacity];
 
 		/**
 		 * Position within the data.
@@ -190,7 +190,7 @@ public class BrowsableInputStream extends InputStream {
 
 		@Override
 		public int available() throws IOException {
-			synchronized (BrowsableInputStream.this.mutex) {
+			synchronized (ServletBrowseInputStream.this.mutex) {
 
 				// Determine available
 				int available = 0;
@@ -210,7 +210,7 @@ public class BrowsableInputStream extends InputStream {
 				}
 
 				// Add remaining from input
-				available += BrowsableInputStream.this.input.available();
+				available += ServletBrowseInputStream.this.input.available();
 
 				// Return content available
 				return available;
@@ -219,7 +219,7 @@ public class BrowsableInputStream extends InputStream {
 
 		@Override
 		public int read() throws IOException {
-			synchronized (BrowsableInputStream.this.mutex) {
+			synchronized (ServletBrowseInputStream.this.mutex) {
 
 				// Determine if at end of buffer
 				if (this.data.data.length == this.readPosition) {
@@ -236,7 +236,7 @@ public class BrowsableInputStream extends InputStream {
 				}
 
 				// No data available in buffer, so must obtain from input
-				int value = BrowsableInputStream.this.input.read();
+				int value = ServletBrowseInputStream.this.input.read();
 				if (value == -1) {
 					// End of stream, no further data
 					return value;

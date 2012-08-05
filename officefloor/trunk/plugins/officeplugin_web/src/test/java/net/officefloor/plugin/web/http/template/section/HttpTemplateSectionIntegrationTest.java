@@ -537,7 +537,7 @@ public class HttpTemplateSectionIntegrationTest extends OfficeFrameTestCase {
 		templateSection.addProperty(
 				HttpTemplateSectionSource.PROPERTY_LINK_TASK_NAME_PREFIX,
 				LINK_SERVICE_TASK_NAME_PREFIX);
-		
+
 		// Load the additional properties
 		for (int i = 0; i < templatePropertyPairs.length; i += 2) {
 			String name = templatePropertyPairs[i];
@@ -584,7 +584,7 @@ public class HttpTemplateSectionIntegrationTest extends OfficeFrameTestCase {
 	private static void writeMessage(ServerHttpConnection connection,
 			String message) throws IOException {
 		Writer writer = new OutputStreamWriter(connection.getHttpResponse()
-				.getBody().getOutputStream());
+				.getEntity());
 		writer.write(message);
 		writer.flush();
 	}
@@ -597,7 +597,7 @@ public class HttpTemplateSectionIntegrationTest extends OfficeFrameTestCase {
 				ServerHttpConnection connection) throws IOException {
 			if ((parameter != null) && (parameter.length() > 0)) {
 				Writer writer = new OutputStreamWriter(connection
-						.getHttpResponse().getBody().getOutputStream());
+						.getHttpResponse().getEntity());
 				writer.write(" - finished(");
 				writer.write(parameter);
 				writer.write(")");
@@ -612,7 +612,7 @@ public class HttpTemplateSectionIntegrationTest extends OfficeFrameTestCase {
 	public static class MockLink {
 		public void linked(ServerHttpConnection connection) throws IOException {
 			Writer writer = new OutputStreamWriter(connection.getHttpResponse()
-					.getBody().getOutputStream());
+					.getEntity());
 			writer.write("LINKED");
 			writer.flush();
 		}

@@ -57,8 +57,8 @@ public class HttpSessionManagedObjectSourceTest extends MockHttpServer {
 
 		// Register the Http Session
 		ManagedObjectBuilder<Indexed> session = server.constructManagedObject(
-				"HTTP_SESSION", HttpSessionManagedObjectSource.class, this
-						.getOfficeName());
+				"HTTP_SESSION", HttpSessionManagedObjectSource.class,
+				this.getOfficeName());
 		session.setTimeout(1000);
 
 		// Register the servicer
@@ -123,13 +123,12 @@ public class HttpSessionManagedObjectSourceTest extends MockHttpServer {
 			Integer callIndex = (Integer) session.getAttribute("CALL_INDEX");
 
 			// Increment the call index and store for next call
-			callIndex = new Integer(callIndex == null ? 0 : (callIndex
-					.intValue() + 1));
+			callIndex = new Integer(callIndex == null ? 0
+					: (callIndex.intValue() + 1));
 			session.setAttribute("CALL_INDEX", callIndex);
 
 			// Return the call index
-			OutputStream response = connection.getHttpResponse().getBody()
-					.getOutputStream();
+			OutputStream response = connection.getHttpResponse().getEntity();
 			response.write(String.valueOf(callIndex.intValue()).getBytes());
 		}
 	}

@@ -29,8 +29,8 @@ import javax.servlet.http.HttpServletRequest;
 import net.officefloor.plugin.socket.server.http.HttpHeader;
 import net.officefloor.plugin.socket.server.http.HttpRequest;
 import net.officefloor.plugin.socket.server.http.parse.impl.HttpHeaderImpl;
-import net.officefloor.plugin.stream.InputBufferStream;
-import net.officefloor.plugin.stream.inputstream.InputStreamInputBufferStream;
+import net.officefloor.plugin.stream.ServerInputStream;
+import net.officefloor.plugin.stream.servlet.ServletServerInputStream;
 
 /**
  * {@link HttpRequest} wrapping a {@link HttpServletRequest}.
@@ -50,9 +50,9 @@ public class ServletHttpRequest implements HttpRequest {
 	private List<HttpHeader> headers;
 
 	/**
-	 * {@link InputBufferStream}.
+	 * {@link ServerInputStream}.
 	 */
-	private InputBufferStream body;
+	private ServerInputStream entity;
 
 	/**
 	 * Initiate.
@@ -119,10 +119,10 @@ public class ServletHttpRequest implements HttpRequest {
 	}
 
 	@Override
-	public synchronized InputBufferStream getBody() {
+	public synchronized ServerInputStream getEntity() {
 
 		// Lazy load the headers
-		if (this.body == null) {
+		if (this.entity == null) {
 
 			// Obtain the input stream
 			InputStream inputStream;
@@ -133,11 +133,11 @@ public class ServletHttpRequest implements HttpRequest {
 			}
 
 			// Create the body
-			this.body = new InputStreamInputBufferStream(inputStream);
+			this.entity = new ServletServerInputStream(inputStream);
 		}
 
-		// Return the body
-		return this.body;
+		// Return the entity
+		return this.entity;
 	}
 
 }

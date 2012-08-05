@@ -20,6 +20,7 @@ package net.officefloor.plugin.servlet.socket.server.http;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.nio.charset.Charset;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -29,8 +30,9 @@ import javax.servlet.http.HttpServletResponse;
 import net.officefloor.plugin.socket.server.http.HttpHeader;
 import net.officefloor.plugin.socket.server.http.HttpResponse;
 import net.officefloor.plugin.socket.server.http.parse.impl.HttpHeaderImpl;
-import net.officefloor.plugin.stream.OutputBufferStream;
-import net.officefloor.plugin.stream.outputstream.OutputStreamOutputBufferStream;
+import net.officefloor.plugin.stream.ServerOutputStream;
+import net.officefloor.plugin.stream.ServerWriter;
+import net.officefloor.plugin.stream.servlet.ServletServerOutputStream;
 
 /**
  * {@link HttpResponse} wrapping a {@link HttpServletResponse}.
@@ -50,9 +52,9 @@ public class ServletHttpResponse implements HttpResponse {
 	private final List<HttpHeader> headers = new LinkedList<HttpHeader>();
 
 	/**
-	 * {@link OutputBufferStream} for the body.
+	 * {@link ServerOutputStream} for the body.
 	 */
-	private OutputBufferStream body;
+	private ServerOutputStream entity;
 
 	/**
 	 * Initiate.
@@ -148,10 +150,10 @@ public class ServletHttpResponse implements HttpResponse {
 	}
 
 	@Override
-	public synchronized OutputBufferStream getBody() {
+	public synchronized ServerOutputStream getEntity() {
 
-		// Lazy load the body
-		if (this.body == null) {
+		// Lazy load the entity
+		if (this.entity == null) {
 
 			// Obtain the output stream
 			OutputStream outputStream;
@@ -162,11 +164,39 @@ public class ServletHttpResponse implements HttpResponse {
 			}
 
 			// Create the body stream
-			this.body = new OutputStreamOutputBufferStream(outputStream);
+			this.entity = new ServletServerOutputStream(outputStream);
 		}
 
-		// Return the body
-		return this.body;
+		// Return the entity
+		return this.entity;
+	}
+
+	@Override
+	public void setContentType(String contentType) {
+		// TODO implement HttpResponse.setContentType
+		throw new UnsupportedOperationException(
+				"TODO implement HttpResponse.setContentType");
+	}
+
+	@Override
+	public void setContentCharset(String charset) {
+		// TODO implement HttpResponse.setContentCharset
+		throw new UnsupportedOperationException(
+				"TODO implement HttpResponse.setContentCharset");
+	}
+
+	@Override
+	public void setContentCharset(Charset charset) {
+		// TODO implement HttpResponse.setContentCharset
+		throw new UnsupportedOperationException(
+				"TODO implement HttpResponse.setContentCharset");
+	}
+
+	@Override
+	public ServerWriter getEntityWriter() {
+		// TODO implement HttpResponse.getEntityWriter
+		throw new UnsupportedOperationException(
+				"TODO implement HttpResponse.getEntityWriter");
 	}
 
 	@Override

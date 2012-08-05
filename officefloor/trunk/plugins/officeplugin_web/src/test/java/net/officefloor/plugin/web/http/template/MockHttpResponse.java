@@ -19,6 +19,7 @@
 package net.officefloor.plugin.web.http.template;
 
 import java.io.IOException;
+import java.nio.charset.Charset;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Properties;
@@ -27,11 +28,9 @@ import junit.framework.TestCase;
 import net.officefloor.plugin.socket.server.http.HttpHeader;
 import net.officefloor.plugin.socket.server.http.HttpResponse;
 import net.officefloor.plugin.socket.server.http.parse.impl.HttpHeaderImpl;
-import net.officefloor.plugin.stream.BufferStream;
-import net.officefloor.plugin.stream.InputBufferStream;
-import net.officefloor.plugin.stream.OutputBufferStream;
-import net.officefloor.plugin.stream.impl.BufferStreamImpl;
-import net.officefloor.plugin.stream.squirtfactory.HeapByteBufferSquirtFactory;
+import net.officefloor.plugin.stream.ServerOutputStream;
+import net.officefloor.plugin.stream.ServerWriter;
+import net.officefloor.plugin.stream.impl.MockServerOutputStream;
 
 /**
  * Mock {@link HttpResponse}.
@@ -61,10 +60,9 @@ public class MockHttpResponse implements HttpResponse {
 	private Properties headers = new Properties();
 
 	/**
-	 * Body.
+	 * Entity.
 	 */
-	private BufferStream body = new BufferStreamImpl(
-			new HeapByteBufferSquirtFactory(1024));
+	private MockServerOutputStream entity = new MockServerOutputStream();
 
 	/**
 	 * Flag indicating if sent.
@@ -110,27 +108,12 @@ public class MockHttpResponse implements HttpResponse {
 	}
 
 	/**
-	 * Obtains the body content.
+	 * Obtains the entity content.
 	 * 
-	 * @return Body content.
+	 * @return Entity content.
 	 */
-	public byte[] getBodyContent() {
-		InputBufferStream input = this.body.getInputBufferStream();
-		byte[] data;
-		try {
-			// Create buffer for the data
-			int availableBytes = (int) input.available();
-			data = new byte[availableBytes];
-
-			// Ensure read all data
-			TestCase.assertEquals("Failed obtaining body content",
-					availableBytes, input.read(data));
-		} catch (IOException ex) {
-			TestCase.fail("Should not fail on reading body data: "
-					+ ex.getMessage());
-			return null; // should fail above
-		}
-		return data;
+	public byte[] getEntityContent() {
+		return this.entity.getWrittenBytes();
 	}
 
 	/**
@@ -200,8 +183,36 @@ public class MockHttpResponse implements HttpResponse {
 	}
 
 	@Override
-	public OutputBufferStream getBody() {
-		return this.body.getOutputBufferStream();
+	public ServerOutputStream getEntity() {
+		return this.entity.getByteOutputStream();
+	}
+
+	@Override
+	public void setContentType(String contentType) {
+		// TODO implement HttpResponse.setContentType
+		throw new UnsupportedOperationException(
+				"TODO implement HttpResponse.setContentType");
+	}
+
+	@Override
+	public void setContentCharset(String charset) {
+		// TODO implement HttpResponse.setContentCharset
+		throw new UnsupportedOperationException(
+				"TODO implement HttpResponse.setContentCharset");
+	}
+
+	@Override
+	public void setContentCharset(Charset charset) {
+		// TODO implement HttpResponse.setContentCharset
+		throw new UnsupportedOperationException(
+				"TODO implement HttpResponse.setContentCharset");
+	}
+
+	@Override
+	public ServerWriter getEntityWriter() {
+		// TODO implement HttpResponse.getEntityWriter
+		throw new UnsupportedOperationException(
+				"TODO implement HttpResponse.getEntityWriter");
 	}
 
 	@Override

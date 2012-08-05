@@ -42,7 +42,7 @@ import net.officefloor.plugin.socket.server.http.parse.impl.HttpHeaderImpl;
 import net.officefloor.plugin.socket.server.http.protocol.HttpStatus;
 import net.officefloor.plugin.socket.server.protocol.Connection;
 import net.officefloor.plugin.socket.server.protocol.WriteBuffer;
-import net.officefloor.plugin.stream.impl.NioInputStreamImpl;
+import net.officefloor.plugin.stream.impl.ServerInputStreamImpl;
 
 /**
  * Tests the {@link HttpConversation}.
@@ -349,10 +349,10 @@ public class HttpConversationTest extends OfficeFrameTestCase {
 		}
 
 		// Create the entity for the request
-		NioInputStreamImpl entityStream = new NioInputStreamImpl(new Object());
+		ServerInputStreamImpl entityStream = new ServerInputStreamImpl(new Object());
 		entity = ((entity == null) || (entity.length() == 0)) ? "" : entity;
 		byte[] entityData = UsAsciiUtil.convertToUsAscii(entity);
-		entityStream.queueData(entityData, 0, (entityData.length - 1), false);
+		entityStream.inputData(entityData, 0, (entityData.length - 1), false);
 
 		// Add the request
 		return this.conversation.addRequest(method, requestURI, httpVersion,

@@ -22,7 +22,7 @@ import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
-import net.officefloor.plugin.socket.server.http.response.HttpResponseWriter;
+import net.officefloor.plugin.stream.ServerWriter;
 import net.officefloor.plugin.value.retriever.ValueRetriever;
 import net.officefloor.plugin.web.http.location.HttpApplicationLocation;
 import net.officefloor.plugin.web.http.template.parse.BeanHttpTemplateSectionContent;
@@ -83,7 +83,7 @@ public class BeanHttpTemplateWriter implements HttpTemplateWriter {
 	 */
 
 	@Override
-	public void write(HttpResponseWriter writer, String workName, Object bean,
+	public void write(ServerWriter writer, String workName, Object bean,
 			HttpApplicationLocation location) throws IOException {
 
 		// If no bean, then no value to output

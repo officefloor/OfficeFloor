@@ -24,8 +24,8 @@ import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.plugin.socket.server.protocol.Connection;
-import net.officefloor.plugin.stream.ByteOutputStream;
-import net.officefloor.plugin.stream.NioInputStream;
+import net.officefloor.plugin.stream.ServerOutputStream;
+import net.officefloor.plugin.stream.ServerInputStream;
 
 /**
  * TCP connection to be handled by the {@link OfficeFloor}.
@@ -35,12 +35,12 @@ import net.officefloor.plugin.stream.NioInputStream;
 public interface ServerTcpConnection {
 
 	/**
-	 * Obtains the {@link NioInputStream} that provides access to the data sent
+	 * Obtains the {@link ServerInputStream} that provides access to the data sent
 	 * from the client.
 	 * 
-	 * @return {@link NioInputStream}.
+	 * @return {@link ServerInputStream}.
 	 */
-	NioInputStream getInputStream();
+	ServerInputStream getInputStream();
 
 	/**
 	 * <p>
@@ -49,7 +49,7 @@ public interface ServerTcpConnection {
 	 * <p>
 	 * On calling this the next time a {@link Task} is invoked using this
 	 * {@link ManagedObject}, data will be available from the
-	 * {@link NioInputStream}.
+	 * {@link ServerInputStream}.
 	 * 
 	 * @return <code>true</code> indicating if will wait on client data.
 	 *         <code>false</code> if client data is available and therefore will
@@ -61,13 +61,13 @@ public interface ServerTcpConnection {
 
 	/**
 	 * <p>
-	 * Obtains the {@link ByteOutputStream} to write data back to the client.
+	 * Obtains the {@link ServerOutputStream} to write data back to the client.
 	 * <p>
-	 * Closing the {@link ByteOutputStream} will result in closing the
+	 * Closing the {@link ServerOutputStream} will result in closing the
 	 * {@link Connection}.
 	 * 
-	 * @return {@link ByteOutputStream}.
+	 * @return {@link ServerOutputStream}.
 	 */
-	ByteOutputStream getOutputStream();
+	ServerOutputStream getOutputStream();
 
 }

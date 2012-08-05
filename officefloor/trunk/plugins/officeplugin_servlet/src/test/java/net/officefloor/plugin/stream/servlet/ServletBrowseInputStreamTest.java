@@ -16,25 +16,26 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package net.officefloor.plugin.stream.inputstream;
+package net.officefloor.plugin.stream.servlet;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 
 import net.officefloor.frame.test.OfficeFrameTestCase;
+import net.officefloor.plugin.stream.servlet.ServletBrowseInputStream;
 
 /**
- * Tests the {@link BrowsableInputStream}.
+ * Tests the {@link ServletBrowseInputStream}.
  * 
  * @author Daniel Sagenschneider
  */
-public class BrowsableInputStreamTest extends OfficeFrameTestCase {
+public class ServletBrowseInputStreamTest extends OfficeFrameTestCase {
 
 	/**
 	 * Ensure can read contents
 	 */
 	public void testReadContents() {
-		BrowsableInputStream stream = createBrowsableInputStream("TEST");
+		ServletBrowseInputStream stream = createBrowsableInputStream("TEST");
 		assertContent("TEST", stream);
 	}
 
@@ -42,7 +43,7 @@ public class BrowsableInputStreamTest extends OfficeFrameTestCase {
 	 * Ensure can browse contents.
 	 */
 	public void testBrowseContents() {
-		BrowsableInputStream stream = createBrowsableInputStream("TEST");
+		ServletBrowseInputStream stream = createBrowsableInputStream("TEST");
 
 		// Ensure can browse
 		InputStream browse = stream.createBrowser();
@@ -56,7 +57,7 @@ public class BrowsableInputStreamTest extends OfficeFrameTestCase {
 	 * Ensure can browse mid stream.
 	 */
 	public void testBrowseMidStream() {
-		BrowsableInputStream stream = createBrowsableInputStream("TEST");
+		ServletBrowseInputStream stream = createBrowsableInputStream("TEST");
 
 		// Consume some content
 		assertContent("TE", stream);
@@ -73,7 +74,7 @@ public class BrowsableInputStreamTest extends OfficeFrameTestCase {
 	 * Ensure able to consume then still able to browse.
 	 */
 	public void testConsumeThenBrowse() {
-		BrowsableInputStream stream = createBrowsableInputStream("TEST");
+		ServletBrowseInputStream stream = createBrowsableInputStream("TEST");
 
 		// Obtain browse
 		InputStream browse = stream.createBrowser();
@@ -114,13 +115,13 @@ public class BrowsableInputStreamTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Creates the {@link BrowsableInputStream}.
+	 * Creates the {@link ServletBrowseInputStream}.
 	 * 
 	 * @param contents
 	 *            Contents.
-	 * @return {@link BrowsableInputStream}.
+	 * @return {@link ServletBrowseInputStream}.
 	 */
-	private static BrowsableInputStream createBrowsableInputStream(
+	private static ServletBrowseInputStream createBrowsableInputStream(
 			String contents) {
 
 		// Create input stream to content
@@ -128,7 +129,7 @@ public class BrowsableInputStreamTest extends OfficeFrameTestCase {
 				contents.getBytes());
 
 		// Create and return the browsable input stream
-		return new BrowsableInputStream(input, 10, new Object());
+		return new ServletBrowseInputStream(input, 10, new Object());
 	}
 
 }

@@ -29,11 +29,11 @@ import net.officefloor.plugin.socket.server.protocol.HeartBeatContext;
 import net.officefloor.plugin.socket.server.protocol.ReadContext;
 import net.officefloor.plugin.socket.server.protocol.WriteBuffer;
 import net.officefloor.plugin.socket.server.tcp.ServerTcpConnection;
-import net.officefloor.plugin.stream.ByteOutputStream;
-import net.officefloor.plugin.stream.NioInputStream;
+import net.officefloor.plugin.stream.ServerOutputStream;
+import net.officefloor.plugin.stream.ServerInputStream;
 import net.officefloor.plugin.stream.WriteBufferReceiver;
-import net.officefloor.plugin.stream.impl.ByteOutputStreamImpl;
-import net.officefloor.plugin.stream.impl.NioInputStreamImpl;
+import net.officefloor.plugin.stream.impl.ServerOutputStreamImpl;
+import net.officefloor.plugin.stream.impl.ServerInputStreamImpl;
 
 /**
  * TCP {@link ConnectionHandler}.
@@ -65,14 +65,14 @@ public class TcpConnectionHandler implements ConnectionHandler,
 	private final long maxIdleTime;
 
 	/**
-	 * {@link NioInputStream}.
+	 * {@link ServerInputStream}.
 	 */
-	private final NioInputStreamImpl inputStream;
+	private final ServerInputStreamImpl inputStream;
 
 	/**
-	 * {@link ByteOutputStream}.
+	 * {@link ServerOutputStream}.
 	 */
-	private final ByteOutputStreamImpl outputStream;
+	private final ServerOutputStreamImpl outputStream;
 
 	/**
 	 * Flag indicating if process started.
@@ -104,10 +104,10 @@ public class TcpConnectionHandler implements ConnectionHandler,
 		this.maxIdleTime = maxIdleTime;
 
 		// Create the input stream
-		this.inputStream = new NioInputStreamImpl(connection.getLock());
+		this.inputStream = new ServerInputStreamImpl(connection.getLock());
 
 		// Create the output stream
-		this.outputStream = new ByteOutputStreamImpl(this, sendBufferSize);
+		this.outputStream = new ServerOutputStreamImpl(this, sendBufferSize);
 	}
 
 	/*
@@ -153,7 +153,7 @@ public class TcpConnectionHandler implements ConnectionHandler,
 
 			// Write the data
 			byte[] data = context.getData();
-			this.inputStream.queueData(data, 0, (data.length - 1), true);
+			this.inputStream.inputData(data, 0, (data.length - 1), true);
 
 			// Notify potential waiting servicing
 			if (this.asynchronousListener != null) {
@@ -250,12 +250,12 @@ public class TcpConnectionHandler implements ConnectionHandler,
 	}
 
 	@Override
-	public NioInputStream getInputStream() {
+	public ServerInputStream getInputStream() {
 		return this.inputStream;
 	}
 
 	@Override
-	public ByteOutputStream getOutputStream() {
+	public ServerOutputStream getOutputStream() {
 		return this.outputStream;
 	}
 

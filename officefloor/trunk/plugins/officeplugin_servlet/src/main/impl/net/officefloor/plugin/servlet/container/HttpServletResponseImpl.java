@@ -148,8 +148,8 @@ public class HttpServletResponseImpl implements HttpServletResponse {
 	public HttpServletResponseImpl(HttpResponse response, Clock clock,
 			HttpServletRequest request, Locale locale) {
 		this.response = response;
-		this.outputStream = new HttpResponseServletOutputStream(this.response
-				.getBody().getOutputStream());
+		this.outputStream = new HttpResponseServletOutputStream(
+				this.response.getEntity());
 		this.clock = clock;
 		this.request = request;
 		this.locale = locale;

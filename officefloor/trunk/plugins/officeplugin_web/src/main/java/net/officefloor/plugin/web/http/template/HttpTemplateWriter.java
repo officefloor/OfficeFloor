@@ -21,21 +21,21 @@ package net.officefloor.plugin.web.http.template;
 import java.io.IOException;
 
 import net.officefloor.frame.api.execute.Work;
-import net.officefloor.plugin.socket.server.http.response.HttpResponseWriter;
+import net.officefloor.plugin.stream.ServerWriter;
 import net.officefloor.plugin.web.http.location.HttpApplicationLocation;
 
 /**
- * Interface to write the template content to {@link HttpResponseWriter}.
+ * Interface to write the template content to {@link ServerWriter}.
  * 
  * @author Daniel Sagenschneider
  */
 public interface HttpTemplateWriter {
 
 	/**
-	 * Writes the template content to the {@link HttpResponseWriter}.
+	 * Writes the template content to the {@link ServerWriter}.
 	 * 
 	 * @param writer
-	 *            {@link HttpResponseWriter} to receive the template content.
+	 *            {@link ServerWriter} to receive the template content.
 	 * @param workName
 	 *            Name of the bound {@link Work} using this
 	 *            {@link HttpTemplateWriter}.
@@ -48,7 +48,7 @@ public interface HttpTemplateWriter {
 	 * @throws IOException
 	 *             If fails to write content.
 	 */
-	void write(HttpResponseWriter writer, String workName, Object bean,
+	void write(ServerWriter writer, String workName, Object bean,
 			HttpApplicationLocation location) throws IOException;
 
 }

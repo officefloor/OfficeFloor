@@ -39,7 +39,7 @@ import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
 import net.officefloor.plugin.socket.server.http.response.source.HttpResponseSendTask.HttpResponseSendTaskDependencies;
 import net.officefloor.plugin.socket.server.protocol.WriteBuffer;
 import net.officefloor.plugin.stream.WriteBufferReceiver;
-import net.officefloor.plugin.stream.impl.ByteOutputStreamImpl;
+import net.officefloor.plugin.stream.impl.ServerOutputStreamImpl;
 
 import org.easymock.AbstractMatcher;
 
@@ -147,7 +147,7 @@ public class HttpResponseSenderWorkSourceTest extends OfficeFrameTestCase {
 		this.recordReturn(connection, connection.getHttpResponse(), response);
 		response.setStatus(status);
 		this.recordReturn(response, response.getEntity(),
-				new ByteOutputStreamImpl(receiver, 1024));
+				new ServerOutputStreamImpl(receiver, 1024));
 		final ByteBuffer[] entityContent = new ByteBuffer[1];
 		this.recordReturn(receiver, receiver.createWriteBuffer(null),
 				writeBuffer, new AbstractMatcher() {

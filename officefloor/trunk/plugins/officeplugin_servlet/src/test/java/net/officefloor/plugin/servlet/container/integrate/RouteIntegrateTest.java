@@ -96,8 +96,8 @@ public class RouteIntegrateTest extends MockHttpServletServer {
 				FlowInstigationStrategyEnum.SEQUENTIAL, null);
 
 		// Construct unhandled request servicer
-		this.constructWork(new UnhandledWork(), "Unhandled", null).buildTask(
-				"service", "TEAM").buildObject(httpName);
+		this.constructWork(new UnhandledWork(), "Unhandled", null)
+				.buildTask("service", "TEAM").buildObject(httpName);
 
 		// Return the reference to the route
 		return routerRef;
@@ -177,8 +177,7 @@ public class RouteIntegrateTest extends MockHttpServletServer {
 			// Trigger request dispatch
 			HttpClient client = this.createHttpClient();
 			HttpResponse response = client.execute(new HttpGet(this
-					.getServerUrl()
-					+ path));
+					.getServerUrl() + path));
 
 			// Ensure correctly routed
 			assertHttpResponse(response, 200, expectedResponse);
@@ -207,7 +206,7 @@ public class RouteIntegrateTest extends MockHttpServletServer {
 	public static class UnhandledWork {
 		public void service(ServerHttpConnection connection) throws IOException {
 			OutputStreamWriter writer = new OutputStreamWriter(connection
-					.getHttpResponse().getBody().getOutputStream());
+					.getHttpResponse().getEntity());
 			writer.write("UNHANDLED");
 			writer.flush();
 		}

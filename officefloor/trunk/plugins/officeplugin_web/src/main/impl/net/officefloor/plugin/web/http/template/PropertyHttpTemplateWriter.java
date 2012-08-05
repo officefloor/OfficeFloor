@@ -22,13 +22,12 @@ import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
-import org.apache.commons.lang.StringEscapeUtils;
-
-import net.officefloor.plugin.socket.server.http.response.HttpResponseWriter;
+import net.officefloor.plugin.stream.ServerWriter;
 import net.officefloor.plugin.value.retriever.ValueRetriever;
 import net.officefloor.plugin.web.http.location.HttpApplicationLocation;
-import net.officefloor.plugin.web.http.template.HttpTemplateWriter;
 import net.officefloor.plugin.web.http.template.parse.PropertyHttpTemplateSectionContent;
+
+import org.apache.commons.lang.StringEscapeUtils;
 
 /**
  * {@link HttpTemplateWriter} to write a bean property.
@@ -36,11 +35,6 @@ import net.officefloor.plugin.web.http.template.parse.PropertyHttpTemplateSectio
  * @author Daniel Sagenschneider
  */
 public class PropertyHttpTemplateWriter implements HttpTemplateWriter {
-
-	/**
-	 * <code>Content-Type</code>.
-	 */
-	private final String contentType;
 
 	/**
 	 * {@link ValueRetriever}.
@@ -64,8 +58,6 @@ public class PropertyHttpTemplateWriter implements HttpTemplateWriter {
 	 *            {@link PropertyHttpTemplateSectionContent}.
 	 * @param valueRetriever
 	 *            {@link ValueRetriever}.
-	 * @param contentType
-	 *            <code>Content-Type</code>.
 	 * @param beanType
 	 *            Bean type for the property.
 	 * @throws Exception
@@ -74,9 +66,8 @@ public class PropertyHttpTemplateWriter implements HttpTemplateWriter {
 	 */
 	public PropertyHttpTemplateWriter(
 			PropertyHttpTemplateSectionContent content,
-			ValueRetriever<Object> valueRetriever, String contentType,
-			Class<?> beanType) throws Exception {
-		this.contentType = contentType;
+			ValueRetriever<Object> valueRetriever, Class<?> beanType)
+			throws Exception {
 		this.valueRetriever = valueRetriever;
 		this.propertyName = content.getPropertyName();
 
@@ -97,7 +88,7 @@ public class PropertyHttpTemplateWriter implements HttpTemplateWriter {
 	 */
 
 	@Override
-	public void write(HttpResponseWriter writer, String workName, Object bean,
+	public void write(ServerWriter writer, String workName, Object bean,
 			HttpApplicationLocation location) throws IOException {
 
 		// If no bean, then no value to output
@@ -130,7 +121,7 @@ public class PropertyHttpTemplateWriter implements HttpTemplateWriter {
 		}
 
 		// Write the text
-		writer.write(this.contentType, propertyTextValue);
+		writer.write(propertyTextValue);
 	}
 
 }

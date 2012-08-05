@@ -18,16 +18,11 @@
 
 package net.officefloor.plugin.web.http.template;
 
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.OutputStreamWriter;
-import java.io.Writer;
-import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 
-import net.officefloor.plugin.socket.server.http.response.HttpResponseWriter;
+import net.officefloor.plugin.stream.ServerWriter;
 import net.officefloor.plugin.web.http.location.HttpApplicationLocation;
-import net.officefloor.plugin.web.http.template.HttpTemplateWriter;
 import net.officefloor.plugin.web.http.template.parse.StaticHttpTemplateSectionContent;
 
 /**
@@ -38,57 +33,33 @@ import net.officefloor.plugin.web.http.template.parse.StaticHttpTemplateSectionC
 public class StaticHttpTemplateWriter implements HttpTemplateWriter {
 
 	/**
-	 * No <code>Content-Encoding</code>.
+	 * Content to write to the {@link ServerWriter}.
 	 */
-	private static final String NO_CONTENT_ENCODING = "";
+	private final String content;
 
 	/**
-	 * <code>Content-Type</code>.
+	 * Default encoded content to write to the {@link ServerWriter}.
 	 */
-	private final String contentType;
-
-	/**
-	 * {@link Charset}.
-	 */
-	private final Charset charset;
-
-	/**
-	 * Content to write to the {@link HttpResponseWriter}.
-	 */
-	private final ByteBuffer content;
+	private final byte[] defaultEncodedContent;
 
 	/**
 	 * Initiate.
 	 * 
 	 * @param staticContent
 	 *            {@link StaticHttpTemplateSectionContent} to write.
-	 * @param contentType
-	 *            <code>Content-Type</code> of the static content.
-	 * @param charset
-	 *            {@link Charset} to prepare static content.
+	 * @param serverDefaultCharset
+	 *            Default {@link Charset} for the Server.
 	 * @throws IOException
 	 *             If fails to prepare the static content.
 	 */
 	public StaticHttpTemplateWriter(
-			StaticHttpTemplateSectionContent staticContent, String contentType,
-			Charset charset) throws IOException {
-		this.contentType = contentType;
-		this.charset = charset;
+			StaticHttpTemplateSectionContent staticContent,
+			Charset serverDefaultCharset) throws IOException {
+		this.content = staticContent.getStaticContent();
 
-		// Obtain the prepared data
-		ByteArrayOutputStream dataBuffer = new ByteArrayOutputStream();
-		Writer writer = new OutputStreamWriter(dataBuffer, charset);
-		writer.write(staticContent.getStaticContent());
-		writer.flush();
-		byte[] data = dataBuffer.toByteArray();
-
-		// Load the contents
-		ByteBuffer buffer = ByteBuffer.allocateDirect(data.length);
-		buffer.put(data);
-		buffer.flip();
-
-		// Specify prepared static content
-		this.content = buffer.asReadOnlyBuffer();
+		// Pre-encode the static content for faster I/O
+		this.defaultEncodedContent = this.content
+				.getBytes(serverDefaultCharset);
 	}
 
 	/*
@@ -96,15 +67,18 @@ public class StaticHttpTemplateWriter implements HttpTemplateWriter {
 	 */
 
 	@Override
-	public void write(HttpResponseWriter writer, String workName, Object bean,
+	public void write(ServerWriter writer, String workName, Object bean,
 			HttpApplicationLocation location) throws IOException {
 
-		// Duplicate to not move original buffer position when written
-		ByteBuffer writeContent = this.content.duplicate();
+		// Determine if default server encoding
+		if (writer.isServerDefaultCharset()) {
+			// Default encoding, so provide pre-encoded content
+			writer.write(this.defaultEncodedContent);
 
-		// Write the content
-		writer.write(NO_CONTENT_ENCODING, this.contentType, this.charset,
-				writeContent);
+		} else {
+			// Provide content for encoding
+			writer.write(this.content);
+		}
 	}
 
 }

@@ -34,8 +34,6 @@ import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.socket.server.http.HttpHeader;
 import net.officefloor.plugin.socket.server.http.HttpRequest;
 import net.officefloor.plugin.socket.server.http.HttpResponse;
-import net.officefloor.plugin.stream.InputBufferStream;
-import net.officefloor.plugin.stream.OutputBufferStream;
 
 /**
  * Tests the {@link ServletServerHttpConnection}.
@@ -222,8 +220,7 @@ public class ServletServerHttpConnectionTest extends OfficeFrameTestCase {
 		// Test
 		this.replayMockObjects();
 		HttpRequest httpRequest = this.connection.getHttpRequest();
-		InputBufferStream inputBuffer = httpRequest.getBody();
-		InputStream actual = inputBuffer.getInputStream();
+		InputStream actual = httpRequest.getEntity();
 		this.verifyMockObjects();
 
 		// Ensure correct input
@@ -372,8 +369,7 @@ public class ServletServerHttpConnectionTest extends OfficeFrameTestCase {
 		// Test
 		this.replayMockObjects();
 		HttpResponse httpResponse = this.connection.getHttpResponse();
-		OutputBufferStream outputBuffer = httpResponse.getBody();
-		OutputStream actual = outputBuffer.getOutputStream();
+		OutputStream actual = httpResponse.getEntity();
 		this.verifyMockObjects();
 
 		// Ensure correct output
