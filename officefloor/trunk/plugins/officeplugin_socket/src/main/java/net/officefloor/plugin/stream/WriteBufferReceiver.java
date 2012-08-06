@@ -17,6 +17,7 @@
  */
 package net.officefloor.plugin.stream;
 
+import java.io.IOException;
 import java.nio.ByteBuffer;
 
 import net.officefloor.plugin.socket.server.protocol.Connection;
@@ -70,8 +71,11 @@ public interface WriteBufferReceiver {
 	 * Flags to close the {@link WriteBufferReceiver}.
 	 * <p>
 	 * Close occurs after all data has been written.
+	 * 
+	 * @throws IOException
+	 *             If fails to close.
 	 */
-	void close();
+	void close() throws IOException;
 
 	/**
 	 * Indicates if the {@link WriteBufferReceiver} is closed.

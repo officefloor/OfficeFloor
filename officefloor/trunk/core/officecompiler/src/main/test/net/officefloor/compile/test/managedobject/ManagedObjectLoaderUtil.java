@@ -280,6 +280,10 @@ public class ManagedObjectLoaderUtil {
 	 * This is useful for testing abstract {@link ManagedObjectSource} instances
 	 * that delegate configuration to sub classes.
 	 * 
+	 * @param dependenciesEnum
+	 *            Dependency {@link Enum}.
+	 * @param flowsEnum
+	 *            Flows {@link Enum}.
 	 * @param propertyNameValues
 	 *            Property name values for the {@link MetaDataContext}.
 	 * 
@@ -287,6 +291,7 @@ public class ManagedObjectLoaderUtil {
 	 */
 	@SuppressWarnings("unchecked")
 	public synchronized static <D extends Enum<D>, F extends Enum<F>> MetaDataContext<D, F> createMetaDataContext(
+			Class<D> dependenciesEnum, Class<F> flowsEnum,
 			String... propertyNameValues) {
 
 		// Create the meta data context

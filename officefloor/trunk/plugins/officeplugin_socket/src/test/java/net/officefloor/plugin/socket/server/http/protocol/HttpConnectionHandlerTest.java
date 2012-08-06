@@ -249,7 +249,7 @@ public class HttpConnectionHandlerTest extends OfficeFrameTestCase {
 	 * Ensure closes {@link Connection} if established and no data received for
 	 * long period of time.
 	 */
-	public void testIdleNoData() {
+	public void testIdleNoData() throws IOException {
 
 		// Record actions
 		final long START_TIME = System.currentTimeMillis();

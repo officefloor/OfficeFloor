@@ -31,7 +31,7 @@ public class SimpleClientServerTest extends SocketAccepterListenerTestCase {
 	/**
 	 * Ensure can close the {@link Connection}.
 	 */
-	public void testServerCloseConnection() {
+	public void testServerCloseConnection() throws IOException {
 		this.getServerSideConnection().close();
 		this.runServerSelect(); // Do close action
 		this.assertClientReceivedData(""); // Allow to be closed

@@ -192,6 +192,9 @@ public class HttpCommunicationProtocol implements CommunicationProtocolSource,
 				PROPERTY_MAXIMUM_TEXT_PART_LENGTH,
 				String.valueOf(DEFAULT_VALUE_MAXIMUM_TEXT_PART_LENGTH)));
 
+		// Obtain context details
+		this.sendBufferSize = protocolContext.getSendBufferSize();
+
 		// Specify types
 		configurationContext.setManagedObjectClass(HttpManagedObjectImpl.class);
 		configurationContext.setObjectClass(ServerHttpConnection.class);

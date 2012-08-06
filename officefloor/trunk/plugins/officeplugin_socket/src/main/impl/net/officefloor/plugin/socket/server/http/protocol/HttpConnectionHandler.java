@@ -20,6 +20,8 @@ package net.officefloor.plugin.socket.server.http.protocol;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import net.officefloor.plugin.socket.server.http.HttpHeader;
 import net.officefloor.plugin.socket.server.http.conversation.HttpConversation;
@@ -38,6 +40,12 @@ import net.officefloor.plugin.stream.ServerInputStream;
  * @author Daniel Sagenschneider
  */
 public class HttpConnectionHandler implements ConnectionHandler {
+
+	/**
+	 * {@link Logger}.
+	 */
+	private static final Logger LOGGER = Logger
+			.getLogger(HttpConnectionHandler.class.getName());
 
 	/**
 	 * {@link HttpCommunicationProtocol}.
@@ -113,7 +121,7 @@ public class HttpConnectionHandler implements ConnectionHandler {
 			// Loop as may have more than one request on read
 			byte[] readData = context.getData();
 			int startIndex = 0;
-			while (startIndex > 0) {
+			while (startIndex >= 0) {
 
 				// Parse the read content
 				if (this.parser.parse(readData, startIndex)) {
@@ -172,7 +180,14 @@ public class HttpConnectionHandler implements ConnectionHandler {
 
 		// Close connection if idle too long
 		if (timeIdle >= this.connectionTimout) {
-			this.conversation.closeConnection();
+			try {
+				this.conversation.closeConnection();
+			} catch (IOException ex) {
+				if (LOGGER.isLoggable(Level.FINE)) {
+					LOGGER.log(Level.FINE, "Failed closing connection on idle",
+							ex);
+				}
+			}
 		}
 	}
 

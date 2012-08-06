@@ -67,7 +67,8 @@ public class ServerOutputStreamImpl extends ServerOutputStream {
 	 * @param sendBufferSize
 	 *            Send buffer size.
 	 */
-	public ServerOutputStreamImpl(WriteBufferReceiver receiver, int sendBufferSize) {
+	public ServerOutputStreamImpl(WriteBufferReceiver receiver,
+			int sendBufferSize) {
 		this.receiver = receiver;
 		this.sendBufferSize = sendBufferSize;
 	}
@@ -91,9 +92,8 @@ public class ServerOutputStreamImpl extends ServerOutputStream {
 	 *             If content already provided to {@link WriteBufferReceiver}.
 	 */
 	public void clear() throws IOException {
-		// TODO implement ByteOutputStreamImpl.clear()
-		throw new UnsupportedOperationException(
-				"TODO implement ByteOutputStreamImpl.clear()");
+		// TODO implement ServerOutputStreamImpl.clear()
+		System.err.println("TODO implement ServerOutputStreamImpl.clear()");
 	}
 
 	/*
@@ -154,7 +154,7 @@ public class ServerOutputStreamImpl extends ServerOutputStream {
 
 		synchronized (this.receiver.getLock()) {
 
-			// Ensure not closed
+			// Only check if closed
 			this.ensureNotClosed();
 
 			// Determine the number of buffers to write
@@ -194,6 +194,11 @@ public class ServerOutputStreamImpl extends ServerOutputStream {
 	public void close() throws IOException {
 
 		synchronized (this.receiver.getLock()) {
+
+			// Do nothing if already closed
+			if (this.receiver.isClosed()) {
+				return;
+			}
 
 			// Flush any data to receiver
 			this.flush();

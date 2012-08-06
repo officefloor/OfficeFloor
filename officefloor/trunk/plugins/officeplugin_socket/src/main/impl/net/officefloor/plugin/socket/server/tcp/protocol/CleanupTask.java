@@ -18,6 +18,8 @@
 
 package net.officefloor.plugin.socket.server.tcp.protocol;
 
+import java.io.OutputStream;
+
 import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.api.execute.TaskContext;
 import net.officefloor.frame.api.execute.Work;
@@ -43,7 +45,8 @@ public class CleanupTask extends AbstractSingleTask<Work, None, None> {
 		TcpConnectionHandler connection = this
 				.getRecycleManagedObjectParameter(context,
 						TcpConnectionHandler.class).getManagedObject();
-		connection.getOutputStream().close();
+		OutputStream outputStream = connection.getOutputStream();
+		outputStream.close();
 
 		// No further processing
 		return null;

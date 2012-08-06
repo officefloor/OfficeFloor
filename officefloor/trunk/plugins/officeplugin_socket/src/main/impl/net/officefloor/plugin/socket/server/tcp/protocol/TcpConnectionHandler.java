@@ -198,7 +198,7 @@ public class TcpConnectionHandler implements ConnectionHandler,
 	}
 
 	@Override
-	public void close() {
+	public void close() throws IOException {
 		this.connection.close();
 	}
 
