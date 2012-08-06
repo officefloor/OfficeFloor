@@ -41,7 +41,7 @@ import net.officefloor.plugin.socket.server.protocol.WriteBuffer;
  * 
  * @author Daniel Sagenschneider
  */
-public class SocketAccepterListenerTestCase extends
+public abstract class SocketAccepterListenerTestCase extends
 		AbstractClientServerTestCase implements CommunicationProtocolSource,
 		CommunicationProtocol, ConnectionHandler {
 

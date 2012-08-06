@@ -91,25 +91,6 @@ public class HttpManagedObjectImpl implements HttpManagedObject,
 		this.response = completedResponse;
 	}
 
-	/**
-	 * Sends the {@link HttpResponse} if it is completed.
-	 * 
-	 * @return <code>true</code> if {@link HttpResponse} is completed and was
-	 *         added to the {@link Connection} output to be sent.
-	 * @throws IOException
-	 *             If fails to send the {@link HttpResponse}.
-	 */
-	boolean attemptSendResponse() throws IOException {
-		// Attempt to send the response
-		if (this.response.attemptSendResponse()) {
-			// Response sent
-			return true;
-		}
-
-		// Response not sent
-		return false;
-	}
-
 	/*
 	 * =============== HttpManagedObject =================================
 	 */

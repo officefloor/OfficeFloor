@@ -22,6 +22,7 @@ import java.io.IOException;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Queue;
 
 import net.officefloor.plugin.socket.server.http.HttpHeader;
 import net.officefloor.plugin.socket.server.http.HttpResponse;
@@ -44,9 +45,10 @@ public class HttpConversationImpl implements HttpConversation {
 	private final Connection connection;
 
 	/**
-	 * {@link HttpManagedObjectImpl} instances.
+	 * {@link HttpManagedObjectImpl} instances currently being processed for the
+	 * {@link Connection}.
 	 */
-	private final List<HttpManagedObjectImpl> managedObjects = new LinkedList<HttpManagedObjectImpl>();
+	private final Queue<HttpManagedObjectImpl> managedObjects = new LinkedList<HttpManagedObjectImpl>();
 
 	/**
 	 * Size of the send buffers.
@@ -82,16 +84,19 @@ public class HttpConversationImpl implements HttpConversation {
 	 *             If fails to send complete {@link HttpResponse} instances.
 	 */
 	void sendCompleteResponses() throws IOException {
+
 		// Send the complete responses in order registered
 		for (Iterator<HttpManagedObjectImpl> iterator = this.managedObjects
 				.iterator(); iterator.hasNext();) {
 			HttpManagedObjectImpl managedObject = iterator.next();
 
+			// TODO keep order to HTTP responses
+			
 			// Attempt to send response
-			if (!managedObject.attemptSendResponse()) {
-				// Response not yet complete to send
-				return; // send no further responses
-			}
+//			if (!managedObject.attemptSendResponse()) {
+//				// Response not yet complete to send
+//				return; // send no further responses
+//			}
 
 			// Response sent, so remove managed object
 			iterator.remove();
@@ -113,15 +118,16 @@ public class HttpConversationImpl implements HttpConversation {
 
 	@Override
 	public HttpManagedObject addRequest(String method, String requestURI,
-			String httpVersion, List<HttpHeader> headers, ServerInputStream entity) {
+			String httpVersion, List<HttpHeader> headers,
+			ServerInputStream entity) {
 
 		// Create the request
 		HttpRequestImpl request = new HttpRequestImpl(method, requestURI,
 				httpVersion, headers, entity);
 
-		// Create the corresponding response (keeping connection open)
+		// Create the corresponding response
 		HttpResponseImpl response = new HttpResponseImpl(this, this.connection,
-				httpVersion, this.sendBufferSize, false);
+				httpVersion, this.sendBufferSize);
 
 		// Create the HTTP managed object
 		HttpManagedObjectImpl managedObject = new HttpManagedObjectImpl(
@@ -140,7 +146,7 @@ public class HttpConversationImpl implements HttpConversation {
 
 		// Create response for parse failure
 		HttpResponseImpl response = new HttpResponseImpl(this, this.connection,
-				"HTTP/1.0", this.sendBufferSize, isCloseConnection);
+				"HTTP/1.0", this.sendBufferSize);
 
 		// Create the HTTP managed object
 		HttpManagedObjectImpl managedObject = new HttpManagedObjectImpl(
@@ -154,7 +160,7 @@ public class HttpConversationImpl implements HttpConversation {
 	}
 
 	@Override
-	public void closeConnection() {
+	public void closeConnection() throws IOException {
 		// Close the connection
 		this.connection.close();
 	}

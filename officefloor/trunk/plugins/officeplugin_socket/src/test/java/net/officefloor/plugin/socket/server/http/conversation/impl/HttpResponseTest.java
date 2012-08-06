@@ -343,8 +343,7 @@ public class HttpResponseTest extends OfficeFrameTestCase implements Connection 
 
 	@Override
 	public Object getLock() {
-		fail("Should not be invoked");
-		return null;
+		return this;
 	}
 
 	@Override

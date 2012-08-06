@@ -51,7 +51,8 @@ public interface HttpConversation {
 	 * @return {@link HttpManagedObject} to process the {@link HttpRequest}.
 	 */
 	HttpManagedObject addRequest(String method, String requestURI,
-			String httpVersion, List<HttpHeader> headers, ServerInputStream entity);
+			String httpVersion, List<HttpHeader> headers,
+			ServerInputStream entity);
 
 	/**
 	 * Handles a failure in parsing a {@link HttpRequest}.
@@ -70,7 +71,10 @@ public interface HttpConversation {
 
 	/**
 	 * Closes the {@link Connection}.
+	 * 
+	 * @throws IOException
+	 *             If fails to close the {@link Connection}.
 	 */
-	void closeConnection();
+	void closeConnection() throws IOException;
 
 }

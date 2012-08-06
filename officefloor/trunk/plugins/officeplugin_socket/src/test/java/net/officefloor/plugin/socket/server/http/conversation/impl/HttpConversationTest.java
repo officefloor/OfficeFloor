@@ -40,8 +40,11 @@ import net.officefloor.plugin.socket.server.http.parse.HttpRequestParseException
 import net.officefloor.plugin.socket.server.http.parse.UsAsciiUtil;
 import net.officefloor.plugin.socket.server.http.parse.impl.HttpHeaderImpl;
 import net.officefloor.plugin.socket.server.http.protocol.HttpStatus;
+import net.officefloor.plugin.socket.server.impl.ArrayWriteBuffer;
+import net.officefloor.plugin.socket.server.impl.BufferWriteBuffer;
 import net.officefloor.plugin.socket.server.protocol.Connection;
 import net.officefloor.plugin.socket.server.protocol.WriteBuffer;
+import net.officefloor.plugin.socket.server.protocol.WriteBufferEnum;
 import net.officefloor.plugin.stream.impl.ServerInputStreamImpl;
 
 /**
@@ -271,7 +274,7 @@ public class HttpConversationTest extends OfficeFrameTestCase {
 	/**
 	 * Ensure closes the {@link Connection}.
 	 */
-	public void testCloseConnection() {
+	public void testCloseConnection() throws IOException {
 
 		// Close the connection
 		this.conversation.closeConnection();
@@ -349,7 +352,8 @@ public class HttpConversationTest extends OfficeFrameTestCase {
 		}
 
 		// Create the entity for the request
-		ServerInputStreamImpl entityStream = new ServerInputStreamImpl(new Object());
+		ServerInputStreamImpl entityStream = new ServerInputStreamImpl(
+				new Object());
 		entity = ((entity == null) || (entity.length() == 0)) ? "" : entity;
 		byte[] entityData = UsAsciiUtil.convertToUsAscii(entity);
 		entityStream.inputData(entityData, 0, (entityData.length - 1), false);
@@ -398,23 +402,39 @@ public class HttpConversationTest extends OfficeFrameTestCase {
 
 		@Override
 		public WriteBuffer createWriteBuffer(byte[] data, int length) {
-			// TODO implement WriteBufferReceiver.createWriteBuffer
-			throw new UnsupportedOperationException(
-					"TODO implement WriteBufferReceiver.createWriteBuffer");
+			return new ArrayWriteBuffer(data, length);
 		}
 
 		@Override
 		public WriteBuffer createWriteBuffer(ByteBuffer buffer) {
-			// TODO implement WriteBufferReceiver.createWriteBuffer
-			throw new UnsupportedOperationException(
-					"TODO implement WriteBufferReceiver.createWriteBuffer");
+			return new BufferWriteBuffer(buffer);
 		}
 
 		@Override
 		public void writeData(WriteBuffer[] data) {
-			// TODO implement WriteBufferReceiver.writeData
-			throw new UnsupportedOperationException(
-					"TODO implement WriteBufferReceiver.writeData");
+
+			// Write out the data
+			for (WriteBuffer buffer : data) {
+				WriteBufferEnum type = buffer.getType();
+				switch (type) {
+
+				case BYTE_ARRAY:
+					HttpConversationTest.this.wire.write(buffer.getData(), 0,
+							buffer.length());
+					break;
+
+				case BYTE_BUFFER:
+					ByteBuffer byteBuffer = buffer.getDataBuffer();
+					byte[] writeData = new byte[byteBuffer.remaining()];
+					byteBuffer.get(writeData);
+					HttpConversationTest.this.wire.write(writeData, 0,
+							writeData.length);
+					break;
+
+				default:
+					fail("Unknown type: " + type);
+				}
+			}
 		}
 
 		@Override

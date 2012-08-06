@@ -132,7 +132,7 @@ public abstract class AbstractClientServerTestCase extends OfficeFrameTestCase
 
 			// Create the managed object source context
 			MetaDataContext<None, Indexed> configurationContext = ManagedObjectLoaderUtil
-					.createMetaDataContext();
+					.createMetaDataContext(None.class, Indexed.class);
 
 			// Obtain the socket buffer send size
 			Socket socket = new Socket();
@@ -238,10 +238,20 @@ public abstract class AbstractClientServerTestCase extends OfficeFrameTestCase
 	 *            Data to write to the server.
 	 */
 	protected void writeDataFromClientToServer(String data) {
+		this.writeDataFromClientToServer(data.getBytes());
+	}
+
+	/**
+	 * Writes data to the server.
+	 * 
+	 * @param data
+	 *            Data to write to the server.
+	 */
+	protected void writeDataFromClientToServer(byte[] data) {
 		try {
 
 			// Write the data to the socket
-			this.clientChannel.write(ByteBuffer.wrap(data.getBytes()));
+			this.clientChannel.write(ByteBuffer.wrap(data));
 
 		} catch (Exception ex) {
 			fail(ex);
@@ -277,13 +287,22 @@ public abstract class AbstractClientServerTestCase extends OfficeFrameTestCase
 	}
 
 	/**
-	 * Runs client select to receive data from server.
+	 * Runs client select to receive data from server and validate it.
 	 * 
 	 * @param expectedData
 	 *            Expected data to be received from the server.
 	 */
 	protected void assertClientReceivedData(String expectedData) {
-		byte[] expectedBytes = expectedData.getBytes();
+		this.assertClientReceivedData(expectedData.getBytes());
+	}
+
+	/**
+	 * Runs client select to receive data from server and validate it.
+	 * 
+	 * @param expectedBytes
+	 *            Expected data to be received from the server.
+	 */
+	protected void assertClientReceivedData(byte[] expectedBytes) {
 		ByteBuffer buffer = ByteBuffer.allocate(expectedBytes.length);
 		byte[] actualData;
 		try {
@@ -303,8 +322,8 @@ public abstract class AbstractClientServerTestCase extends OfficeFrameTestCase
 		// Ensure correct data received
 		buffer.flip();
 		buffer.get(actualData);
-		assertEquals("Incorrect data received", expectedData, new String(
-				actualData));
+		assertEquals("Incorrect data received", new String(expectedBytes),
+				new String(actualData));
 	}
 
 	/*
