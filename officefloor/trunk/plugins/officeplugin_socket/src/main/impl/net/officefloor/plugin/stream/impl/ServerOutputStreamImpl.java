@@ -92,8 +92,14 @@ public class ServerOutputStreamImpl extends ServerOutputStream {
 	 *             If content already provided to {@link WriteBufferReceiver}.
 	 */
 	public void clear() throws IOException {
-		// TODO implement ServerOutputStreamImpl.clear()
-		System.err.println("TODO implement ServerOutputStreamImpl.clear()");
+
+		synchronized (this.receiver.getLock()) {
+
+			// Clear the data
+			this.currentData = null;
+			this.dataToWrite.clear();
+
+		}
 	}
 
 	/*
@@ -129,23 +135,34 @@ public class ServerOutputStreamImpl extends ServerOutputStream {
 			// Ensure not closed
 			this.ensureNotClosed();
 
-			// Ensure have current data
-			if (this.currentData == null) {
-				// Provide new data for writing
-				this.currentData = new byte[this.sendBufferSize];
+			for (;;) {
 
-				// Write byte immediately
-				this.currentData[0] = (byte) b;
-				this.nextCurrentDataIndex = 1; // after first byte
+				// Ensure have current data
+				if (this.currentData == null) {
+					// Provide new data for writing
+					this.currentData = new byte[this.sendBufferSize];
 
-				// Data written
-				return;
+					// Write byte immediately
+					this.currentData[0] = (byte) b;
+					this.nextCurrentDataIndex = 1; // after first byte
+
+					// Data written
+					return;
+				}
+
+				// Determine if space in current buffer
+				if (this.nextCurrentDataIndex < this.currentData.length) {
+					// Write to next index of current buffer
+					this.currentData[this.nextCurrentDataIndex++] = (byte) b;
+					return; // data written
+				}
+
+				// Write data to new buffer
+				this.dataToWrite.add(this.receiver.createWriteBuffer(
+						this.currentData, this.currentData.length));
+				this.currentData = null; // clear to have new current data
+
 			}
-
-			// TODO handle current data full
-
-			// Write to next index
-			this.currentData[this.nextCurrentDataIndex++] = (byte) b;
 		}
 	}
 

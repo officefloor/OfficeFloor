@@ -23,6 +23,7 @@ import java.nio.channels.ClosedChannelException;
 
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.socket.server.impl.ArrayWriteBuffer;
+import net.officefloor.plugin.socket.server.impl.BufferWriteBuffer;
 import net.officefloor.plugin.socket.server.protocol.WriteBuffer;
 import net.officefloor.plugin.stream.ServerOutputStream;
 import net.officefloor.plugin.stream.WriteBufferReceiver;
@@ -36,10 +37,15 @@ public class ServerOutputStreamTest extends OfficeFrameTestCase implements
 		WriteBufferReceiver {
 
 	/**
+	 * Send buffer size.
+	 */
+	private final int sendBufferSize = 1024;
+
+	/**
 	 * {@link ServerOutputStream} to test.
 	 */
-	private final ServerOutputStreamImpl stream = new ServerOutputStreamImpl(this,
-			1024);
+	private final ServerOutputStreamImpl stream = new ServerOutputStreamImpl(
+			this, this.sendBufferSize);
 
 	/**
 	 * Written {@link WriteBuffer} instances.
@@ -71,6 +77,105 @@ public class ServerOutputStreamTest extends OfficeFrameTestCase implements
 		WriteBuffer buffer = this.writtenData[0];
 		assertEquals("Should just be one byte written", 1, buffer.length());
 		assertEquals("Incorrect written byte", 10, buffer.getData()[0]);
+	}
+
+	/**
+	 * Ensure able to write more data than the send buffer size.
+	 */
+	public void testMoreWrittenDataThanSendBufferSize() throws IOException {
+
+		final int numberOfBuffers = 10;
+
+		// Provide send data
+		byte[] data = new byte[this.sendBufferSize * numberOfBuffers];
+		for (int i = 0; i < data.length; i++) {
+			data[i] = (byte) (i / this.sendBufferSize);
+		}
+
+		// Write the data
+		this.stream.write(data);
+		this.stream.flush();
+
+		// Validate that data written
+		assertNotNull("Data should be written", this.writtenData);
+		assertEquals("Incorrect number of write buffers", numberOfBuffers,
+				this.writtenData.length);
+
+		// Validate the data is correct
+		for (int i = 0; i < this.writtenData.length; i++) {
+			byte[] writeData = this.writtenData[i].getData();
+
+			// Ensure data is correct
+			for (int j = 0; j < writeData.length; j++) {
+				assertEquals("Incorrect value for write buffer " + i
+						+ " (index " + j + ")", i, writeData[j]);
+			}
+		}
+	}
+
+	/**
+	 * Ensure can clear content.
+	 */
+	public void testClear() throws IOException {
+
+		// Write some data (spanning multiple write buffers)
+		byte[] data = new byte[this.sendBufferSize * 10];
+		this.stream.write(data);
+
+		// Clear the data
+		this.stream.clear();
+
+		// No data should be written
+		assertNull("No data should be written", this.writtenData);
+
+		// Write other data and flush
+		this.stream.write("TEST".getBytes());
+		this.stream.flush();
+
+		// Confirm only the other data written
+		assertNotNull("Data should be written", this.writtenData);
+		assertEquals("Should only be the one write buffer", 1,
+				this.writtenData.length);
+		WriteBuffer buffer = this.writtenData[0];
+		assertEquals("Only uncleared data should be written", "TEST",
+				new String(buffer.getData(), 0, buffer.length()));
+	}
+
+	/**
+	 * Ensure able to write the cached {@link ByteBuffer}.
+	 */
+	public void testWriteCachedByteBuffer() throws IOException {
+
+		// Write some text
+		this.stream.write("ONE".getBytes());
+
+		// Write cached buffer
+		final ByteBuffer two = ByteBuffer.allocateDirect(20);
+		this.stream.write(two);
+
+		// Write another cached buffer
+		final ByteBuffer three = ByteBuffer.allocateDirect(30);
+		this.stream.write(three);
+
+		// Write some further text
+		this.stream.write("FOUR".getBytes());
+
+		// Should be no data received so far
+		assertNull("Should be no data received", this.writtenData);
+
+		// Flush data and confirm as expected
+		this.stream.flush();
+		assertNotNull("Should have received data", this.writtenData);
+		assertEquals("Incorrect number of received buffers", 4,
+				this.writtenData.length);
+		assertEquals("Incorrect first write buffer", "ONE", new String(
+				this.writtenData[0].getData(), 0, this.writtenData[0].length()));
+		assertSame("Incorrect second write buffer", two,
+				this.writtenData[1].getDataBuffer());
+		assertSame("Incorrect third write buffer", three,
+				this.writtenData[2].getDataBuffer());
+		assertEquals("Incorrect fourth write buffer", "FOUR", new String(
+				this.writtenData[3].getData(), 0, this.writtenData[3].length()));
 	}
 
 	/**
@@ -107,9 +212,7 @@ public class ServerOutputStreamTest extends OfficeFrameTestCase implements
 
 	@Override
 	public WriteBuffer createWriteBuffer(ByteBuffer buffer) {
-		// TODO implement WriteBufferReceiver.createWriteBuffer
-		throw new UnsupportedOperationException(
-				"TODO implement WriteBufferReceiver.createWriteBuffer");
+		return new BufferWriteBuffer(buffer);
 	}
 
 	@Override

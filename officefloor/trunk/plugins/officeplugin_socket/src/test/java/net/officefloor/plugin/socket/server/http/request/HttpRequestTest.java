@@ -48,14 +48,12 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.entity.StringEntity;
-import org.junit.Ignore;
 
 /**
  * Runs requests against a started instance based on XML configuration.
  * 
  * @author Daniel Sagenschneider
  */
-@Ignore("TODO get working for multiple requests")
 public class HttpRequestTest extends AbstractOfficeConstructTestCase {
 
 	/**
@@ -242,6 +240,11 @@ public class HttpRequestTest extends AbstractOfficeConstructTestCase {
 
 	@Override
 	protected void runTest() throws Throwable {
+		
+		// TODO remove
+		if (this.isSecure) {
+			fail("TODO remove once SSL tests passing");
+		}
 
 		// Start the server
 		this.server.startup(this.httpServicerBuilder);

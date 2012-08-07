@@ -97,7 +97,7 @@ public class HttpResponseImpl implements HttpResponse {
 	/**
 	 * {@link HttpResponseWriteBufferReceiver}.
 	 */
-	private final WriteBufferReceiver receiver = new HttpResponseWriteBufferReceiver();
+	private final HttpResponseWriteBufferReceiver receiver = new HttpResponseWriteBufferReceiver();
 
 	/**
 	 * Version.
@@ -156,6 +156,17 @@ public class HttpResponseImpl implements HttpResponse {
 	}
 
 	/**
+	 * <p>
+	 * Queues the {@link HttpResponse} for sending if it is complete.
+	 * 
+	 * @return <code>true</code> should the {@link HttpResponse} be queued for
+	 *         sending.
+	 */
+	boolean queueHttpResponseIfComplete() {
+		return this.receiver.queueHttpResponseIfComplete();
+	}
+
+	/**
 	 * Flags failure in processing the {@link HttpRequest}.
 	 * 
 	 * @param failure
@@ -202,8 +213,11 @@ public class HttpResponseImpl implements HttpResponse {
 				stackTraceWriter.flush();
 			}
 
-			// Complete the response (triggers sending the failure)
+			// Send the response containing the failure
 			this.send();
+
+			// Close the connection
+			this.connection.close();
 		}
 	}
 
@@ -221,14 +235,12 @@ public class HttpResponseImpl implements HttpResponse {
 		ServerOutputStream header = new ServerOutputStreamImpl(this.receiver,
 				this.sendBufferSize);
 
-		// Handle the content length
-		if (contentLength > 0) {
-			// Provide content length HTTP header
-			this.headers.add(new HttpHeaderImpl(HEADER_NAME_CONTENT_LENGTH,
-					String.valueOf(contentLength)));
+		// Provide content length HTTP header
+		this.headers.add(new HttpHeaderImpl(HEADER_NAME_CONTENT_LENGTH, String
+				.valueOf(contentLength)));
 
-		} else if ((contentLength == 0) && (this.status == HttpStatus.SC_OK)) {
-			// Ensure appropriate successful status for no content
+		// Ensure appropriate successful status for no content
+		if ((contentLength == 0) && (this.status == HttpStatus.SC_OK)) {
 			this.setStatus(HttpStatus.SC_NO_CONTENT);
 		}
 
@@ -238,8 +250,10 @@ public class HttpResponseImpl implements HttpResponse {
 
 		// Write the headers
 		for (HttpHeader httpHeader : this.headers) {
-			writeUsAscii(httpHeader.getName() + ": " + httpHeader.getValue()
-					+ EOL, header);
+			String name = httpHeader.getName();
+			String value = httpHeader.getValue();
+			writeUsAscii(name + ": " + (value == null ? "" : value) + EOL,
+					header);
 		}
 		writeUsAscii(EOL, header);
 
@@ -424,6 +438,36 @@ public class HttpResponseImpl implements HttpResponse {
 		 */
 		private final List<WriteBuffer> entityBuffers = new LinkedList<WriteBuffer>();
 
+		/**
+		 * Queues the {@link HttpResponse} for sending if complete.
+		 * 
+		 * @return <code>true</code> if queued for sending.
+		 */
+		public boolean queueHttpResponseIfComplete() {
+
+			// Ensure is closed (ie complete ready for sending)
+			if (!this.isClosed()) {
+				return false;
+			}
+
+			// Write the data for the response
+			WriteBuffer[] responseData = new WriteBuffer[this.headerBuffers.length
+					+ this.entityBuffers.size()];
+			int index = 0;
+			for (WriteBuffer buffer : this.headerBuffers) {
+				responseData[index++] = buffer;
+			}
+			for (WriteBuffer buffer : this.entityBuffers) {
+				responseData[index++] = buffer;
+			}
+
+			// Queue the HTTP response for sending
+			HttpResponseImpl.this.connection.writeData(responseData);
+
+			// Queued for sending
+			return true;
+		}
+
 		/*
 		 * ==================== WriteBufferReceiver =================
 		 */
@@ -491,19 +535,8 @@ public class HttpResponseImpl implements HttpResponse {
 			// Flag now closed
 			HttpResponseImpl.this.isClosed = true;
 
-			// Write the data for the response
-			WriteBuffer[] responseData = new WriteBuffer[this.headerBuffers.length
-					+ this.entityBuffers.size()];
-			int index = 0;
-			for (WriteBuffer buffer : this.headerBuffers) {
-				responseData[index++] = buffer;
-			}
-			for (WriteBuffer buffer : this.entityBuffers) {
-				responseData[index++] = buffer;
-			}
-
-			// Send the HTTP response
-			HttpResponseImpl.this.connection.writeData(responseData);
+			// Attempt to queue the HTTP response for sending
+			HttpResponseImpl.this.conversation.queueCompleteResponses();
 		}
 
 		@Override

@@ -33,6 +33,7 @@ import net.officefloor.plugin.socket.server.http.request.config.CommunicationCon
 import net.officefloor.plugin.socket.server.http.request.config.HeaderConfig;
 import net.officefloor.plugin.socket.server.http.request.config.ProcessConfig;
 import net.officefloor.plugin.socket.server.http.request.config.RequestConfig;
+import net.officefloor.plugin.stream.ServerOutputStream;
 
 /**
  * Services the HTTP requests for the {@link HttpRequestTest}.
@@ -133,14 +134,15 @@ public class RequestWork {
 
 		// Provide the response
 		HttpResponse response = connection.getHttpResponse();
+		ServerOutputStream entity = response.getEntity();
 		if (process.body != null) {
-			Writer writer = new OutputStreamWriter(response.getEntity());
+			Writer writer = new OutputStreamWriter(entity);
 			writer.write(process.body);
 			writer.flush();
 		}
 
 		// Send the response
-		connection.getHttpResponse().getEntity().close();
+		connection.getHttpResponse().send();
 	}
 
 }

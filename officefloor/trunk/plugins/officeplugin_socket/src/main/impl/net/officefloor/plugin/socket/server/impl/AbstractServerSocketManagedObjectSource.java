@@ -126,8 +126,8 @@ public abstract class AbstractServerSocketManagedObjectSource extends
 		if (singletonConnectionManager == null) {
 
 			// Spread load if have multiple processors
-			int numberOfSocketListeners = Runtime.getRuntime()
-					.availableProcessors();
+			int numberOfSocketListeners = Math.max(1, ((Runtime.getRuntime()
+					.availableProcessors() + 3) / 4));
 
 			// Create the socket listeners
 			SocketListener[] socketListeners = new SocketListener[numberOfSocketListeners];

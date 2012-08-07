@@ -18,7 +18,6 @@
 
 package net.officefloor.plugin.socket.server.http.protocol;
 
-import java.io.IOException;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -95,6 +94,12 @@ public class HttpConnectionHandlerTest extends OfficeFrameTestCase {
 			this.communicationProtocol, this.conversation, this.parser,
 			CONNECTION_TIMEOUT);
 
+	@Override
+	protected void setUp() throws Exception {
+		this.communicationProtocol
+				.setManagedObjectExecuteContext(this.executeContext);
+	}
+
 	/**
 	 * Ensures successful read of {@link HttpRequest}.
 	 */
@@ -126,8 +131,10 @@ public class HttpConnectionHandlerTest extends OfficeFrameTestCase {
 		this.recordReturn(this.conversation, this.conversation.addRequest(
 				method, requestURI, httpVersion, headers, entity),
 				managedObject);
-		this.executeContext.invokeProcess(0, managedObject, managedObject, 0,
-				managedObject);
+		this.recordReturn(this.executeContext, this.executeContext
+				.invokeProcess(0, managedObject, managedObject, 0,
+						managedObject), null);
+		this.recordReturn(this.parser, this.parser.nextByteToParseIndex(), -1);
 
 		// Replay mocks
 		this.replayMockObjects();
@@ -170,10 +177,15 @@ public class HttpConnectionHandlerTest extends OfficeFrameTestCase {
 	/**
 	 * Ensures checks idle time.
 	 */
-	public void testIdleByRead() throws IOException {
+	public void testIdleByRead() throws Exception {
+
+		final byte[] data = new byte[0];
 
 		// Record actions
 		this.recordReturn(this.readContext, this.readContext.getTime(), 1000);
+		this.recordReturn(this.readContext, this.readContext.getData(), data);
+		this.recordReturn(this.parser, this.parser.parse(data, 0), false);
+		this.recordReturn(this.parser, this.parser.nextByteToParseIndex(), -1);
 		this.recordReturn(this.idleContext, this.idleContext.getTime(), 1000);
 
 		// Replay mocks
@@ -190,33 +202,12 @@ public class HttpConnectionHandlerTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensures checks idle time.
-	 */
-	public void testIdleByWrite() {
-
-		// Record actions
-		// TODO record writing
-		fail("TODO record writing");
-		this.recordReturn(this.idleContext, this.idleContext.getTime(), 1000);
-
-		// Replay mocks
-		this.replayMockObjects();
-
-		// Invoke write to set last interaction time
-		// TODO undertake write
-
-		// Handle the idle (not timing out)
-		this.handler.handleHeartbeat(this.idleContext);
-
-		// Verify mocks
-		this.verifyMockObjects();
-	}
-
-	/**
 	 * Ensures closes {@link Connection} on {@link Connection} being too long
 	 * idle.
 	 */
-	public void testIdleTooLong() throws IOException {
+	public void testIdleTooLong() throws Exception {
+
+		final byte[] data = new byte[0];
 
 		// Record actions
 		final long START_TIME = System.currentTimeMillis();
@@ -224,6 +215,9 @@ public class HttpConnectionHandlerTest extends OfficeFrameTestCase {
 		final long SECOND_IDLE_TIME = START_TIME + CONNECTION_TIMEOUT;
 		this.recordReturn(this.readContext, this.readContext.getTime(),
 				START_TIME);
+		this.recordReturn(this.readContext, this.readContext.getData(), data);
+		this.recordReturn(this.parser, this.parser.parse(data, 0), false);
+		this.recordReturn(this.parser, this.parser.nextByteToParseIndex(), -1);
 		this.recordReturn(this.idleContext, this.idleContext.getTime(),
 				FIRST_IDLE_TIME);
 		this.recordReturn(this.idleContext, this.idleContext, SECOND_IDLE_TIME);
@@ -249,7 +243,7 @@ public class HttpConnectionHandlerTest extends OfficeFrameTestCase {
 	 * Ensure closes {@link Connection} if established and no data received for
 	 * long period of time.
 	 */
-	public void testIdleNoData() throws IOException {
+	public void testIdleNoData() throws Exception {
 
 		// Record actions
 		final long START_TIME = System.currentTimeMillis();

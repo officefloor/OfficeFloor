@@ -91,6 +91,17 @@ public class HttpManagedObjectImpl implements HttpManagedObject,
 		this.response = completedResponse;
 	}
 
+	/**
+	 * <p>
+	 * Queues the {@link HttpResponse} for sending if it is complete.
+	 * 
+	 * @return <code>true</code> should the {@link HttpResponse} be queued for
+	 *         sending.
+	 */
+	boolean queueHttpResponseIfComplete() {
+		return this.response.queueHttpResponseIfComplete();
+	}
+
 	/*
 	 * =============== HttpManagedObject =================================
 	 */

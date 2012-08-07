@@ -148,6 +148,7 @@ public class HttpResponseSenderWorkSourceTest extends OfficeFrameTestCase {
 		response.setStatus(status);
 		this.recordReturn(response, response.getEntity(),
 				new ServerOutputStreamImpl(receiver, 1024));
+		this.recordReturn(receiver, receiver.getLock(), new Object());
 		final ByteBuffer[] entityContent = new ByteBuffer[1];
 		this.recordReturn(receiver, receiver.createWriteBuffer(null),
 				writeBuffer, new AbstractMatcher() {
@@ -157,17 +158,6 @@ public class HttpResponseSenderWorkSourceTest extends OfficeFrameTestCase {
 						return true;
 					}
 				});
-		receiver.writeData(null);
-		this.control(receiver).setMatcher(new AbstractMatcher() {
-			@Override
-			public boolean matches(Object[] expected, Object[] actual) {
-				WriteBuffer[] buffers = (WriteBuffer[]) actual;
-				assertEquals("Incorrect number of write buffers", 1,
-						buffers.length);
-				assertEquals("Incorrect write buffer", writeBuffer, buffers[0]);
-				return true;
-			}
-		});
 		response.send();
 
 		// Test

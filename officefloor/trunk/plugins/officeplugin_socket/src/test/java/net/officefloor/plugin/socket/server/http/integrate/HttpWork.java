@@ -94,9 +94,18 @@ public class HttpWork {
 		HttpRequest request = connection.getHttpRequest();
 
 		// Detail request being serviced
+		String requestUri = request.getRequestURI();
 		System.out.println(this.getClass().getSimpleName()
-				+ " serving request: " + request.getMethod() + " "
-				+ request.getRequestURI() + " " + request.getVersion());
+				+ " serving request: " + request.getMethod() + " " + requestUri
+				+ " " + request.getVersion());
+
+		// Determine if invalid cause failure
+		final String failUri = "/fail";
+		if (failUri.equals(requestUri)) {
+			// Fail
+			throw new Exception("Testing triggered failure due to request uri "
+					+ failUri);
+		}
 
 		// Obtain response for the request
 		HttpResponse response = connection.getHttpResponse();
