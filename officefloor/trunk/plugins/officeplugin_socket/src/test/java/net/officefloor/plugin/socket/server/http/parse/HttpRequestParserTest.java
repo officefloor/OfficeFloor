@@ -849,6 +849,13 @@ public class HttpRequestParserTest extends OfficeFrameTestCase {
 			// Validate if complete
 			assertEquals("Incorrect completion", expectedIsComplete, isComplete);
 
+			// Ensure no further content for entity if complete
+			if (isComplete) {
+				// Note, validate above should have consumed the entire entity
+				assertEquals("Should be no further content for entity", -1,
+						this.httpRequestParser.getEntity().read());
+			}
+
 			// Ensure correctly indicates the next byte to parse index
 			assertEquals("Incorrect next byte to parse index",
 					expectedNextByteToParseIndex,

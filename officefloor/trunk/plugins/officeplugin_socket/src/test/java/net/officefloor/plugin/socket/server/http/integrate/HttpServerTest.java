@@ -21,6 +21,7 @@ package net.officefloor.plugin.socket.server.http.integrate;
 import net.officefloor.frame.impl.spi.team.OnePersonTeam;
 import net.officefloor.frame.test.ReflectiveWorkBuilder;
 import net.officefloor.frame.test.ReflectiveWorkBuilder.ReflectiveTaskBuilder;
+import net.officefloor.plugin.socket.server.http.protocol.HttpStatus;
 import net.officefloor.plugin.socket.server.http.server.HttpServicerTask;
 import net.officefloor.plugin.socket.server.http.server.MockHttpServer;
 import net.officefloor.plugin.socket.server.http.source.HttpServerSocketManagedObjectSource;
@@ -30,14 +31,12 @@ import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpUriRequest;
-import org.junit.Ignore;
 
 /**
  * Tests the {@link HttpServerSocketManagedObjectSource}.
  * 
  * @author Daniel Sagenschneider
  */
-@Ignore("TODO get working for multiple requests")
 public class HttpServerTest extends MockHttpServer {
 
 	/*
@@ -52,8 +51,8 @@ public class HttpServerTest extends MockHttpServer {
 		server.constructTeam("WORKER", new OnePersonTeam("WORKER", 100));
 
 		// Register the work to process messages
-		HttpWork work = new HttpWork(this.getLocalAddress(), this
-				.isServerSecure());
+		HttpWork work = new HttpWork(this.getLocalAddress(),
+				this.isServerSecure());
 		ReflectiveWorkBuilder workBuilder = server.constructWork(work,
 				"servicer", "service");
 		ReflectiveTaskBuilder taskBuilder = workBuilder.buildTask("service",
@@ -94,6 +93,7 @@ public class HttpServerTest extends MockHttpServer {
 
 		// Validate multiple tests
 		for (int i = 0; i < 100; i++) {
+
 			// Execute the particular request
 			HttpUriRequest request = new HttpGet(this.getServerUrl() + "/path");
 			assertEquals("Incorrect response body for request " + i,
@@ -115,6 +115,24 @@ public class HttpServerTest extends MockHttpServer {
 
 		// Output the response entity
 		System.out.println("POST response body: " + responseBody);
+	}
+
+	/**
+	 * Ensure can handle an request causing internal server error.
+	 */
+	public void testInternalServerRequest() throws Exception {
+
+		// Create the request
+		HttpUriRequest request = new HttpGet(this.getServerUrl() + "/fail");
+
+		// Send the request
+		HttpClient client = this.createHttpClient();
+		HttpResponse response = client.execute(request);
+
+		// Ensure indicate server failure
+		assertEquals("Should be server failure",
+				HttpStatus.SC_INTERNAL_SERVER_ERROR, response.getStatusLine()
+						.getStatusCode());
 	}
 
 	/**

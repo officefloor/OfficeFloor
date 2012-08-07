@@ -84,5 +84,12 @@ public class SimpleClientServerTest extends SocketAccepterListenerTestCase {
 		this.runServerSelect();
 		this.assertClientReceivedData("TEST");
 	}
+	
+	/**
+	 * Read content from server larger than socket buffer size.
+	 */
+	public void testReadLargerThanBufferSizeFromServer() {
+		fail("TODO implement");
+	}
 
 }

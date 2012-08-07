@@ -257,7 +257,7 @@ public class HttpConversationTest extends OfficeFrameTestCase {
 		HttpManagedObject mo = this.addRequest("POST", "/path", "HTTP/1.1",
 				"REQUEST BODY");
 
-		// Provide some content on response
+		// Provide some content on response (should be cleared)
 		HttpResponse response = mo.getServerHttpConnection().getHttpResponse();
 		response.addHeader("SuccessfulHeader", "SuccessfulValue");
 		response.getEntity().write("SUCCESSFUL CONTENT".getBytes());
@@ -322,6 +322,9 @@ public class HttpConversationTest extends OfficeFrameTestCase {
 
 		// Assert that the wire data
 		assertEquals("Invalid data on the wire", expectedWireData, wireData);
+
+		// Clear wire data for next assertion
+		this.wire.reset();
 	}
 
 	/**

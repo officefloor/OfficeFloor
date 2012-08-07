@@ -24,11 +24,9 @@ import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
 import net.officefloor.plugin.socket.server.http.protocol.HttpCommunicationProtocol;
-import net.officefloor.plugin.socket.server.http.protocol.HttpConnectionHandler;
 import net.officefloor.plugin.socket.server.impl.AbstractServerSocketManagedObjectSource;
 import net.officefloor.plugin.socket.server.protocol.CommunicationProtocolSource;
 import net.officefloor.plugin.socket.server.ssl.protocol.SslCommunicationProtocol;
-import net.officefloor.plugin.socket.server.ssl.protocol.SslConnectionHandler;
 
 /**
  * {@link ManagedObjectSource} for a secure {@link ServerHttpConnection}.

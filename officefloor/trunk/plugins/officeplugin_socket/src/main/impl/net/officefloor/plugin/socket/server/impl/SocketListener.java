@@ -245,6 +245,9 @@ public class SocketListener extends
 			if (currentBuffer.remaining() > length) {
 				// Buffer will fit all data
 				currentBuffer.put(data, 0, length);
+
+			} else {
+				System.out.println("Need another buffer");
 			}
 		}
 
@@ -254,7 +257,10 @@ public class SocketListener extends
 
 		// Provide empty buffers for remaining entries in array
 		for (int i = bufferIndex; i < buffers.length; i++) {
-			buffers[i] = this.getWriteBufferFromPool();
+			// Provide empty buffer
+			ByteBuffer buffer = this.getWriteBufferFromPool();
+			buffer.flip();
+			buffers[i] = buffer;
 		}
 
 		// Return the write buffers
@@ -331,13 +337,20 @@ public class SocketListener extends
 
 					// Write the data
 					SocketChannel socketChannel = connection.getSocketChannel();
-					socketChannel.write(buffers);
+					boolean isFailure = false;
+					try {
+						socketChannel.write(buffers);
+					} catch (IOException ex) {
+						// Connection failed
+						connection.terminate();
+						isFailure = true;
+					}
 
 					// Return written buffers to the pool
 					int returnedBuffers = 0;
 					while ((returnedBuffers < buffers.length)
-							&& (buffers[returnedBuffers].remaining() == 0)) {
-						// Buffer written, so return to pool
+							&& (((buffers[returnedBuffers].remaining() == 0)) || isFailure)) {
+						// Buffer written or connection failure, return to pool
 						this.returnWriteBufferToPool(buffers[returnedBuffers]);
 						returnedBuffers++;
 					}

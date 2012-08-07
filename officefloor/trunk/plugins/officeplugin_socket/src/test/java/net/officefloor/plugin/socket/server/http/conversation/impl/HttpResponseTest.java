@@ -38,8 +38,11 @@ import net.officefloor.plugin.socket.server.http.parse.HttpRequestParseException
 import net.officefloor.plugin.socket.server.http.parse.UsAsciiUtil;
 import net.officefloor.plugin.socket.server.http.protocol.HttpStatus;
 import net.officefloor.plugin.socket.server.impl.ArrayWriteBuffer;
+import net.officefloor.plugin.socket.server.impl.BufferWriteBuffer;
 import net.officefloor.plugin.socket.server.protocol.Connection;
 import net.officefloor.plugin.socket.server.protocol.WriteBuffer;
+import net.officefloor.plugin.socket.server.protocol.WriteBufferEnum;
+import net.officefloor.plugin.stream.ServerOutputStream;
 import net.officefloor.plugin.stream.impl.ServerInputStreamImpl;
 
 /**
@@ -70,6 +73,11 @@ public class HttpResponseTest extends OfficeFrameTestCase implements Connection 
 	private HttpConversation conversation = this.createHttpConversation(false);
 
 	/**
+	 * Indicates if the {@link Connection} is closed.
+	 */
+	private boolean isConnectionClosed = false;
+
+	/**
 	 * Ensure can send a simple response.
 	 */
 	public void testSimpleResponse() throws IOException {
@@ -77,6 +85,19 @@ public class HttpResponseTest extends OfficeFrameTestCase implements Connection 
 		this.writeBody(response, "TEST");
 		response.getEntity().close();
 		this.assertWireContent("HTTP/1.1 200 OK\nContent-Length: 4\n\nTEST");
+		assertFalse("Connection should not be closed", this.isConnectionClosed);
+	}
+
+	/**
+	 * Ensure appropriately provides header to cached {@link ByteBuffer}.
+	 */
+	public void testSendCachedByteBuffer() throws IOException {
+		HttpResponse response = this.createHttpResponse();
+		ServerOutputStream entity = response.getEntity();
+		entity.write(ByteBuffer.wrap(UsAsciiUtil.convertToUsAscii("TEST")));
+		entity.close();
+		this.assertWireContent("HTTP/1.1 200 OK\nContent-Length: 4\n\nTEST");
+		assertFalse("Connection should not be closed", this.isConnectionClosed);
 	}
 
 	/**
@@ -86,6 +107,7 @@ public class HttpResponseTest extends OfficeFrameTestCase implements Connection 
 		HttpResponse response = this.createHttpResponse();
 		response.getEntity().close();
 		this.assertWireContent("HTTP/1.1 204 No Content\nContent-Length: 0\n\n");
+		assertFalse("Connection should not be closed", this.isConnectionClosed);
 	}
 
 	/**
@@ -97,6 +119,7 @@ public class HttpResponseTest extends OfficeFrameTestCase implements Connection 
 		response.send();
 		this.assertWireContent("HTTP/1.1 204 No Content\n" + "null: \n"
 				+ "Content-Length: 0\n\n");
+		assertFalse("Connection should not be closed", this.isConnectionClosed);
 	}
 
 	/**
@@ -152,6 +175,7 @@ public class HttpResponseTest extends OfficeFrameTestCase implements Connection 
 		this.assertWireContent("HTTP/1.1 400 Bad Request\n"
 				+ "Content-Type: text/html; charset=UTF-8\n"
 				+ "Content-Length: 15\n\n" + "Fail Parse Test");
+		assertTrue("Connection should be closed", this.isConnectionClosed);
 	}
 
 	/**
@@ -165,6 +189,7 @@ public class HttpResponseTest extends OfficeFrameTestCase implements Connection 
 		this.assertWireContent("HTTP/1.1 500 Internal Server Error\n"
 				+ "Content-Type: text/html; charset=UTF-8\n"
 				+ "Content-Length: 12\n\n" + "Failure Test");
+		assertTrue("Connection should be closed", this.isConnectionClosed);
 	}
 
 	/**
@@ -178,6 +203,7 @@ public class HttpResponseTest extends OfficeFrameTestCase implements Connection 
 		this.assertWireContent("HTTP/1.1 500 Internal Server Error\n"
 				+ "Content-Type: text/html; charset=UTF-8\n"
 				+ "Content-Length: 9\n\n" + Exception.class.getSimpleName());
+		assertTrue("Connection should be closed", this.isConnectionClosed);
 	}
 
 	/**
@@ -205,13 +231,7 @@ public class HttpResponseTest extends OfficeFrameTestCase implements Connection 
 		this.assertWireContent("HTTP/1.1 500 Internal Server Error\n"
 				+ "Content-Type: text/html; charset=UTF-8\n"
 				+ "Content-Length: " + contentLength + "\n\n" + content);
-	}
-
-	/**
-	 * Ensure appropriately provides header to cached {@link ByteBuffer}.
-	 */
-	public void testSendCachedByteBuffer() {
-		fail("TODO implement sending for cached ByteBuffer");
+		assertTrue("Connection should be closed", this.isConnectionClosed);
 	}
 
 	/*
@@ -328,16 +348,27 @@ public class HttpResponseTest extends OfficeFrameTestCase implements Connection 
 
 	@Override
 	public WriteBuffer createWriteBuffer(ByteBuffer buffer) {
-		// TODO implement WriteBufferReceiver.createWriteBuffer
-		throw new UnsupportedOperationException(
-				"TODO implement WriteBufferReceiver.createWriteBuffer");
+		return new BufferWriteBuffer(buffer);
 	}
 
 	@Override
 	public void writeData(WriteBuffer[] data) {
 		// Write the data to the wire
 		for (WriteBuffer buffer : data) {
-			this.wire.write(buffer.getData(), 0, buffer.length());
+			WriteBufferEnum type = buffer.getType();
+			switch (type) {
+			case BYTE_ARRAY:
+				this.wire.write(buffer.getData(), 0, buffer.length());
+				break;
+			case BYTE_BUFFER:
+				ByteBuffer dataBuffer = buffer.getDataBuffer();
+				byte[] bytes = new byte[dataBuffer.remaining()];
+				dataBuffer.get(bytes);
+				this.wire.write(bytes, 0, bytes.length);
+				break;
+			default:
+				fail("Unknown type: " + type);
+			}
 		}
 	}
 
@@ -354,13 +385,12 @@ public class HttpResponseTest extends OfficeFrameTestCase implements Connection 
 
 	@Override
 	public void close() {
-		fail("Should not be invoked");
+		this.isConnectionClosed = true;
 	}
 
 	@Override
 	public boolean isClosed() {
-		fail("Should not be invoked");
-		return false;
+		return this.isConnectionClosed;
 	}
 
 	@Override

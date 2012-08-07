@@ -776,7 +776,7 @@ public class HttpRequestParserImpl implements HttpRequestParser {
 			} else {
 				// Consume all of the bytes
 				this.entity.inputData(data, this.nextByteToParseIndex,
-						(data.length - 1), !isFurtherDataRequired);
+						(data.length - 1), isFurtherDataRequired);
 				this.nextByteToParseIndex = -1; // all bytes consumed
 			}
 

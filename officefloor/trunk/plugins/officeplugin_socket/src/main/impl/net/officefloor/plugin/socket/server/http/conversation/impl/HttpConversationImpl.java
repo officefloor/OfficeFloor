@@ -78,25 +78,23 @@ public class HttpConversationImpl implements HttpConversation {
 	}
 
 	/**
-	 * Sends complete {@link HttpResponse} instances.
+	 * Queues complete {@link HttpResponse} instances for sending.
 	 * 
 	 * @throws IOException
 	 *             If fails to send complete {@link HttpResponse} instances.
 	 */
-	void sendCompleteResponses() throws IOException {
+	void queueCompleteResponses() throws IOException {
 
 		// Send the complete responses in order registered
 		for (Iterator<HttpManagedObjectImpl> iterator = this.managedObjects
 				.iterator(); iterator.hasNext();) {
 			HttpManagedObjectImpl managedObject = iterator.next();
 
-			// TODO keep order to HTTP responses
-			
-			// Attempt to send response
-//			if (!managedObject.attemptSendResponse()) {
-//				// Response not yet complete to send
-//				return; // send no further responses
-//			}
+			// Attempt to queue response for sending
+			if (!managedObject.queueHttpResponseIfComplete()) {
+				// Response not yet complete to send
+				return; // send no further responses
+			}
 
 			// Response sent, so remove managed object
 			iterator.remove();
