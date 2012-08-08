@@ -17,7 +17,9 @@
  */
 package net.officefloor.plugin.socket.server.impl;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.nio.ByteBuffer;
 
 import net.officefloor.plugin.socket.server.protocol.Connection;
 
@@ -34,7 +36,7 @@ public class SimpleClientServerTest extends SocketAccepterListenerTestCase {
 	public void testServerCloseConnection() throws IOException {
 		this.getServerSideConnection().close();
 		this.runServerSelect(); // Do close action
-		this.assertClientReceivedData(""); // Allow to be closed
+		this.assertClientReceivedData((byte[]) null); // Allow to be closed
 		assertFalse("Client output should be shutdown", this.getClientChannel()
 				.socket().isOutputShutdown());
 		assertFalse("Client input should be shutdown", this.getClientChannel()
@@ -70,6 +72,16 @@ public class SimpleClientServerTest extends SocketAccepterListenerTestCase {
 	}
 
 	/**
+	 * Ensure can read cached {@link ByteBuffer} from server.
+	 */
+	public void testReadDirectBufferFromServer() {
+		ByteBuffer buffer = ByteBuffer.wrap("TEST".getBytes());
+		this.writeDataFromServerToClient(buffer);
+		this.runServerSelect();
+		this.assertClientReceivedData("TEST");
+	}
+
+	/**
 	 * Ensure server can echo data sent by the client back to the client.
 	 */
 	public void testEcho() {
@@ -84,12 +96,86 @@ public class SimpleClientServerTest extends SocketAccepterListenerTestCase {
 		this.runServerSelect();
 		this.assertClientReceivedData("TEST");
 	}
-	
+
 	/**
 	 * Read content from server larger than socket buffer size.
 	 */
-	public void testReadLargerThanBufferSizeFromServer() {
-		fail("TODO implement");
+	public void testReadLargerThanBufferSizeFromServer() throws Exception {
+		this.doReadLargerThanBufferSizeTest(false);
+	}
+
+	/**
+	 * Read content from server larger than socket buffer size which is followed
+	 * immediately by a server close of the connection.
+	 */
+	public void testReadLargerThanBufferSizeFromServerFollowedByClose()
+			throws Exception {
+		this.doReadLargerThanBufferSizeTest(true);
+	}
+
+	/**
+	 * Undertakes the read larger than buffer size test.
+	 * 
+	 * @param isCloseConnection
+	 *            If should close {@link Connection} after sending the data.
+	 */
+	private void doReadLargerThanBufferSizeTest(boolean isCloseConnection)
+			throws Exception {
+
+		// Provide more data than available socket buffer size
+		int sendBufferSize = this.getSendBufferSize();
+		byte[] data = new byte[sendBufferSize];
+		for (int i = 0; i < data.length; i++) {
+			data[i] = 1;
+		}
+		int writtenDataSize = 0;
+		for (int i = 0; i < sendBufferSize; i++) {
+			this.writeDataFromServerToClient(data);
+			writtenDataSize += data.length;
+		}
+
+		// Close connection immediately
+		if (isCloseConnection) {
+			this.getServerSideConnection().close();
+		}
+
+		// Send and receive all the data
+		ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+		long startTime = System.currentTimeMillis();
+		while (outputStream.size() < writtenDataSize) {
+
+			// Attempt to read data
+			int currentSize = outputStream.size();
+			this.writeClientReceivedData(outputStream);
+			if (currentSize == outputStream.size()) {
+				// Need to run server select to send further data
+				this.runServerSelect();
+			}
+
+			// Ensure has not taken too long
+			if ((System.currentTimeMillis() - startTime) > 30000) {
+				fail("Receive should not take more than 30 seconds");
+			}
+		}
+
+		// Ensure all data is correct
+		byte[] receivedData = outputStream.toByteArray();
+		assertEquals("Incorrect amount of received data",
+				(sendBufferSize * sendBufferSize), receivedData.length);
+		for (int i = 0; i < receivedData.length; i++) {
+			assertEquals("Incorrect data value for index " + i, 1,
+					receivedData[i]);
+		}
+
+		// Run select to close connection
+		if (isCloseConnection) {
+			// Ensure end of stream for channel
+			this.assertClientReceivedData((byte[]) null);
+
+		} else {
+			// Should still be open channel
+			this.assertClientReceivedData(new byte[0]);
+		}
 	}
 
 }

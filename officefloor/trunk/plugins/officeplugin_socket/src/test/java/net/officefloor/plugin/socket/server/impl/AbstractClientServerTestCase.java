@@ -17,6 +17,7 @@
  */
 package net.officefloor.plugin.socket.server.impl;
 
+import java.io.OutputStream;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.nio.ByteBuffer;
@@ -68,7 +69,7 @@ public abstract class AbstractClientServerTestCase extends OfficeFrameTestCase
 	/**
 	 * {@link ConnectionManager}.
 	 */
-	private ConnectionManager connectionManager;
+	private ConnectionManagerImpl connectionManager;
 
 	/**
 	 * {@link ServerSocketAccepter}.
@@ -96,6 +97,11 @@ public abstract class AbstractClientServerTestCase extends OfficeFrameTestCase
 	private SelectionKey clientKey;
 
 	/**
+	 * Read {@link ByteBuffer}.
+	 */
+	private ByteBuffer readBuffer;
+
+	/**
 	 * Obtains the {@link CommunicationProtocolSource}.
 	 * 
 	 * @return {@link CommunicationProtocolSource}.
@@ -120,11 +126,22 @@ public abstract class AbstractClientServerTestCase extends OfficeFrameTestCase
 			// Obtain port
 			this.port = MockHttpServer.getAvailablePort();
 
+			// Obtain the socket buffer send size
+			Socket socket = new Socket();
+			this.sendBufferSize = socket.getSendBufferSize();
+			int receiveBufferSize = socket.getReceiveBufferSize();
+			socket.close();
+
+			// Create the read buffer
+			this.readBuffer = ByteBuffer.allocate(receiveBufferSize);
+
 			// Create the server listener
-			this.listener = new SocketListener(2048, 2048);
+			this.listener = new SocketListener(this.sendBufferSize,
+					receiveBufferSize);
 
 			// Create the connection manager
-			this.connectionManager = new ConnectionManagerImpl(this.listener);
+			this.connectionManager = new ConnectionManagerImpl(3000,
+					this.listener);
 
 			// Obtain the communication protocol source
 			CommunicationProtocolSource source = this
@@ -133,11 +150,6 @@ public abstract class AbstractClientServerTestCase extends OfficeFrameTestCase
 			// Create the managed object source context
 			MetaDataContext<None, Indexed> configurationContext = ManagedObjectLoaderUtil
 					.createMetaDataContext(None.class, Indexed.class);
-
-			// Obtain the socket buffer send size
-			Socket socket = new Socket();
-			this.sendBufferSize = socket.getSendBufferSize();
-			socket.close();
 
 			// Create the communication protocol
 			CommunicationProtocol protocol = source
@@ -287,6 +299,34 @@ public abstract class AbstractClientServerTestCase extends OfficeFrameTestCase
 	}
 
 	/**
+	 * Runs select now for the client.
+	 */
+	protected void runClientSelectNow() {
+
+		// Run select for the client
+		try {
+			this.clientKey.interestOps(SelectionKey.OP_READ);
+			this.clientSelector.selectNow();
+			this.clientKey.interestOps(0);
+		} catch (Throwable ex) {
+			fail(ex);
+		}
+	}
+
+	/**
+	 * Runs the heart beat for the {@link SocketListener}.
+	 */
+	protected void runServerHeartBeat() {
+
+		// Execute the connection manager for the heart beat
+		try {
+			this.taskContext.execute(this.connectionManager);
+		} catch (Throwable ex) {
+			fail(ex);
+		}
+	}
+
+	/**
 	 * Runs client select to receive data from server and validate it.
 	 * 
 	 * @param expectedData
@@ -303,7 +343,11 @@ public abstract class AbstractClientServerTestCase extends OfficeFrameTestCase
 	 *            Expected data to be received from the server.
 	 */
 	protected void assertClientReceivedData(byte[] expectedBytes) {
-		ByteBuffer buffer = ByteBuffer.allocate(expectedBytes.length);
+
+		// Reset the read buffer
+		this.readBuffer.position(0);
+		this.readBuffer.limit(this.readBuffer.capacity());
+
 		byte[] actualData;
 		try {
 
@@ -311,8 +355,12 @@ public abstract class AbstractClientServerTestCase extends OfficeFrameTestCase
 			this.runClientSelect();
 
 			// Read the data
-			assertEquals("Incorrect number of bytes", expectedBytes.length,
-					this.clientChannel.read(buffer));
+			assertEquals("Incorrect number of bytes",
+					(expectedBytes == null ? -1 : expectedBytes.length),
+					this.clientChannel.read(this.readBuffer));
+			if (expectedBytes == null) {
+				return; // no data expected to be received
+			}
 			actualData = new byte[expectedBytes.length];
 
 		} catch (Throwable ex) {
@@ -320,10 +368,46 @@ public abstract class AbstractClientServerTestCase extends OfficeFrameTestCase
 		}
 
 		// Ensure correct data received
-		buffer.flip();
-		buffer.get(actualData);
+		this.readBuffer.flip();
+		this.readBuffer.get(actualData);
 		assertEquals("Incorrect data received", new String(expectedBytes),
 				new String(actualData));
+		assertEquals("Should be no further data received", 0,
+				this.readBuffer.remaining());
+	}
+
+	/**
+	 * Writes the client received data to the {@link OutputStream}.
+	 * 
+	 * @param outputStream
+	 *            {@link OutputStream} to receive the client data.
+	 */
+	protected void writeClientReceivedData(OutputStream outputStream) {
+
+		// Run client select now
+		this.runClientSelectNow();
+
+		// Reset the read buffer
+		this.readBuffer.position(0);
+		this.readBuffer.limit(this.readBuffer.capacity());
+
+		try {
+
+			// Read the data from the server
+			this.runClientSelect();
+
+			// Read the data
+			this.clientChannel.read(this.readBuffer);
+			this.readBuffer.flip();
+			byte[] data = new byte[this.readBuffer.remaining()];
+			this.readBuffer.get(data);
+
+			// Write the data to the output stream
+			outputStream.write(data);
+
+		} catch (Throwable ex) {
+			throw fail(ex);
+		}
 	}
 
 	/*

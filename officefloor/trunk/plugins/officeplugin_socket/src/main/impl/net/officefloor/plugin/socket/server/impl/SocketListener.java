@@ -21,6 +21,7 @@ package net.officefloor.plugin.socket.server.impl;
 import java.io.IOException;
 import java.net.Socket;
 import java.nio.ByteBuffer;
+import java.nio.channels.CancelledKeyException;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.channels.SocketChannel;
@@ -39,6 +40,7 @@ import net.officefloor.frame.spi.team.Team;
 import net.officefloor.frame.util.AbstractSingleTask;
 import net.officefloor.plugin.socket.server.ConnectionAction;
 import net.officefloor.plugin.socket.server.ConnectionActionEnum;
+import net.officefloor.plugin.socket.server.ConnectionManager;
 import net.officefloor.plugin.socket.server.EstablishedConnection;
 import net.officefloor.plugin.socket.server.ManagedConnection;
 import net.officefloor.plugin.socket.server.WriteDataAction;
@@ -46,7 +48,6 @@ import net.officefloor.plugin.socket.server.protocol.Connection;
 import net.officefloor.plugin.socket.server.protocol.ConnectionHandlerContext;
 import net.officefloor.plugin.socket.server.protocol.HeartBeatContext;
 import net.officefloor.plugin.socket.server.protocol.ReadContext;
-import net.officefloor.plugin.socket.server.protocol.WriteBuffer;
 
 /**
  * Listens to {@link Socket} instances.
@@ -176,14 +177,35 @@ public class SocketListener extends
 	}
 
 	/**
-	 * Obtains the {@link ManagedConnection} for the {@link SelectionKey}.
-	 * 
-	 * @param selectionKey
-	 *            {@link SelectionKey}.
-	 * @return {@link ManagedConnection}.
+	 * Undertakes a heart beat for this {@link ConnectionManager}.
 	 */
-	private ManagedConnection getManagedConnection(SelectionKey selectionKey) {
-		return (ManagedConnection) selectionKey.attachment();
+	void doHeartBeat() {
+
+		synchronized (this) {
+
+			// Reset time (for optimising obtaining time in heart beats)
+			this.currentTime = -1;
+
+			// Provide heart beat to all connections
+			if (this.selector.isOpen()) {
+				for (SelectionKey selectionKey : this.selector.keys()) {
+
+					// Obtain the connection
+					ManagedConnection connection = this
+							.getManagedConnection(selectionKey);
+
+					// Undertake the heart beat
+					try {
+						connection.getConnectionHandler().handleHeartbeat(this);
+					} catch (IOException ex) {
+						if (LOGGER.isLoggable(Level.FINE)) {
+							LOGGER.log(Level.FINE,
+									"Failed heart beat for connection", ex);
+						}
+					}
+				}
+			}
+		}
 	}
 
 	/**
@@ -191,7 +213,7 @@ public class SocketListener extends
 	 * 
 	 * @return {@link ByteBuffer} for writing.
 	 */
-	private ByteBuffer getWriteBufferFromPool() {
+	ByteBuffer getWriteBufferFromPool() {
 
 		// Determine if one in pool
 		ByteBuffer buffer = this.writeBufferPool.poll();
@@ -208,7 +230,7 @@ public class SocketListener extends
 	/**
 	 * Returns the {@link ByteBuffer} to the pool.
 	 */
-	private void returnWriteBufferToPool(ByteBuffer buffer) {
+	void returnWriteBufferToPool(ByteBuffer buffer) {
 
 		// Reset buffer
 		buffer.position(0);
@@ -219,52 +241,14 @@ public class SocketListener extends
 	}
 
 	/**
-	 * Fills {@link ByteBuffer} instances with the data to write.
+	 * Obtains the {@link ManagedConnection} for the {@link SelectionKey}.
 	 * 
-	 * @param action
-	 *            {@link WriteDataAction} containing the data to write.
-	 * @return {@link ByteBuffer} instances containing the data to write.
+	 * @param selectionKey
+	 *            {@link SelectionKey}.
+	 * @return {@link ManagedConnection}.
 	 */
-	private ByteBuffer[] fillWriteBuffers(WriteDataAction action) {
-
-		// Obtain the data to write
-		WriteBuffer[] writeBuffers = action.getData();
-
-		// Create array of byte buffers to write (assume max size)
-		ByteBuffer[] buffers = new ByteBuffer[writeBuffers.length];
-		ByteBuffer currentBuffer = this.getWriteBufferFromPool();
-		int bufferIndex = 0;
-		for (int i = 0; i < writeBuffers.length; i++) {
-			WriteBuffer writeBuffer = writeBuffers[i];
-
-			// Write the data into the buffer
-			byte[] data = writeBuffer.getData();
-			int length = writeBuffer.length();
-
-			// Determine if will fill buffer
-			if (currentBuffer.remaining() > length) {
-				// Buffer will fit all data
-				currentBuffer.put(data, 0, length);
-
-			} else {
-				System.out.println("Need another buffer");
-			}
-		}
-
-		// Load in the current buffer for writing
-		currentBuffer.flip();
-		buffers[bufferIndex++] = currentBuffer;
-
-		// Provide empty buffers for remaining entries in array
-		for (int i = bufferIndex; i < buffers.length; i++) {
-			// Provide empty buffer
-			ByteBuffer buffer = this.getWriteBufferFromPool();
-			buffer.flip();
-			buffers[i] = buffer;
-		}
-
-		// Return the write buffers
-		return buffers;
+	private ManagedConnection getManagedConnection(SelectionKey selectionKey) {
+		return (ManagedConnection) selectionKey.attachment();
 	}
 
 	/*
@@ -316,57 +300,31 @@ public class SocketListener extends
 				// Obtain the connection details
 				ManagedConnection connection = action.getConnection();
 
-				// TODO provide check that not pending action on connection
-
-				// Handle the action
+				// Queue the action on the connection
 				ConnectionActionEnum actionType = action.getType();
 				switch (actionType) {
 
 				case CLOSE_CONNECTION:
-					// Close the connection
-					connection.terminate();
+					// Queue closing the connection
+					connection.queueClose();
 					break;
 
 				case WRITE_DATA:
-					// Undertake writing the data
+					// Queue writing the data
 					WriteDataAction writeDataAction = (WriteDataAction) action;
-
-					// Fill write buffers with content
-					ByteBuffer[] buffers = this
-							.fillWriteBuffers(writeDataAction);
-
-					// Write the data
-					SocketChannel socketChannel = connection.getSocketChannel();
-					boolean isFailure = false;
-					try {
-						socketChannel.write(buffers);
-					} catch (IOException ex) {
-						// Connection failed
-						connection.terminate();
-						isFailure = true;
-					}
-
-					// Return written buffers to the pool
-					int returnedBuffers = 0;
-					while ((returnedBuffers < buffers.length)
-							&& (((buffers[returnedBuffers].remaining() == 0)) || isFailure)) {
-						// Buffer written or connection failure, return to pool
-						this.returnWriteBufferToPool(buffers[returnedBuffers]);
-						returnedBuffers++;
-					}
-
-					// Determine if filled socket buffer
-					if (returnedBuffers < buffers.length) {
-						// TODO queue data on connection for writing
-						throw new UnsupportedOperationException(
-								"TODO queue data on connection for writing");
-					}
-
+					connection.queueWrite(writeDataAction);
 					break;
 
 				default:
 					throw new IllegalStateException("Unknown action type: "
 							+ actionType);
+				}
+
+				// Undertake queued actions on connection
+				if (!(connection.processWriteQueue())) {
+					// Take interest in write (socket buffer clearing)
+					connection.getSelectionKey().interestOps(
+							SelectionKey.OP_READ | SelectionKey.OP_WRITE);
 				}
 			}
 
@@ -454,7 +412,20 @@ public class SocketListener extends
 							isFurtherDataToRead = false; // all data read
 						}
 					}
+				}
 
+				// Determine if send data consumed for further write
+				if (selectedKey.isWritable()) {
+
+					// Process the write queue for the connection
+					if (connection.processWriteQueue()) {
+						// All data written, just listen
+						try {
+							selectedKey.interestOps(SelectionKey.OP_READ);
+						} catch (CancelledKeyException ex) {
+							// Ignore as connection is closed
+						}
+					}
 				}
 			}
 
