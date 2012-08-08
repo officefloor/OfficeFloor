@@ -18,6 +18,7 @@
 package net.officefloor.plugin.socket.server.impl;
 
 import java.io.IOException;
+import java.nio.ByteBuffer;
 
 import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.build.None;
@@ -62,14 +63,34 @@ public abstract class SocketAccepterListenerTestCase extends
 	 *            Data to write to the client.
 	 */
 	protected void writeDataFromServerToClient(String data) {
+		this.writeDataFromServerToClient(data.getBytes());
+	}
 
-		// Obtain the content
-		byte[] bytes = data.getBytes();
+	/**
+	 * Writes data to the client.
+	 * 
+	 * @param data
+	 *            Data to write to the client.
+	 */
+	protected void writeDataFromServerToClient(byte[] data) {
 
 		// Write the data
-		WriteBuffer buffer = this.connection.createWriteBuffer(bytes,
-				data.length());
+		WriteBuffer buffer = this.connection.createWriteBuffer(data,
+				data.length);
 		this.connection.writeData(new WriteBuffer[] { buffer });
+	}
+
+	/**
+	 * Writes data to the client.
+	 * 
+	 * @param buffer
+	 *            Data to write to the client.
+	 */
+	protected void writeDataFromServerToClient(ByteBuffer buffer) {
+
+		// Write the data
+		WriteBuffer writeBuffer = this.connection.createWriteBuffer(buffer);
+		this.connection.writeData(new WriteBuffer[] { writeBuffer });
 	}
 
 	/**

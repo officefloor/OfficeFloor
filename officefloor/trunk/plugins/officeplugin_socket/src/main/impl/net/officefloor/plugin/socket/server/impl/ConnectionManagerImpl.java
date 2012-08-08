@@ -20,6 +20,9 @@ package net.officefloor.plugin.socket.server.impl;
 
 import java.io.IOException;
 
+import net.officefloor.frame.api.build.None;
+import net.officefloor.frame.api.execute.TaskContext;
+import net.officefloor.frame.util.AbstractSingleTask;
 import net.officefloor.plugin.socket.server.ConnectionManager;
 import net.officefloor.plugin.socket.server.EstablishedConnection;
 import net.officefloor.plugin.socket.server.protocol.Connection;
@@ -31,7 +34,14 @@ import net.officefloor.plugin.socket.server.protocol.Connection;
  * 
  * @author Daniel Sagenschneider
  */
-public class ConnectionManagerImpl implements ConnectionManager {
+public class ConnectionManagerImpl extends
+		AbstractSingleTask<ConnectionManagerImpl, None, None> implements
+		ConnectionManager {
+
+	/**
+	 * Heart beat interval in milliseconds.
+	 */
+	private final long heartbeatInterval;
 
 	/**
 	 * Listing of {@link SocketListener} instances.
@@ -44,12 +54,21 @@ public class ConnectionManagerImpl implements ConnectionManager {
 	private int nextSocketListener = 0;
 
 	/**
+	 * Indicates if closed.
+	 */
+	private volatile boolean isClosed = false;
+
+	/**
 	 * Initiate.
 	 * 
+	 * @param heartbeatInterval
+	 *            Heart beat interval in milliseconds.
 	 * @param socketListeners
 	 *            Available {@link SocketListener} instances.
 	 */
-	public ConnectionManagerImpl(SocketListener... socketListeners) {
+	public ConnectionManagerImpl(long heartbeatInterval,
+			SocketListener... socketListeners) {
+		this.heartbeatInterval = heartbeatInterval;
 		this.socketListeners = socketListeners;
 	}
 
@@ -83,9 +102,37 @@ public class ConnectionManagerImpl implements ConnectionManager {
 
 	@Override
 	public void closeSocketSelectors() throws IOException {
+
+		// Flag to close connection manager
+		this.isClosed = true;
+
+		// Stop the socket listeners
 		for (SocketListener socketListener : this.socketListeners) {
 			socketListener.closeSelector();
 		}
+	}
+
+	/*
+	 * ====================== Task ===========================
+	 */
+
+	@Override
+	public Object doTask(TaskContext<ConnectionManagerImpl, None, None> context)
+			throws Throwable {
+
+		// Continue execution until closed
+		context.setComplete(this.isClosed);
+
+		// Wait period of time to provide heart beat
+		Thread.sleep(this.heartbeatInterval);
+
+		// Trigger a heart beat for the socket listeners
+		for (SocketListener socketListener : this.socketListeners) {
+			socketListener.doHeartBeat();
+		}
+
+		// Should be no further tasks
+		return null;
 	}
 
 }

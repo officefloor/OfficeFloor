@@ -93,6 +93,8 @@ public abstract class AbstractServerSocketManagedObjectSource extends
 	 *            Instance of the
 	 *            {@link AbstractServerSocketManagedObjectSource} using the
 	 *            {@link ConnectionManager}.
+	 * @param heartBeatInterval
+	 *            Heart beat interval in milliseconds.
 	 * @param sendBufferSize
 	 *            Send buffer size.
 	 * @param receiveBufferSize
@@ -103,9 +105,11 @@ public abstract class AbstractServerSocketManagedObjectSource extends
 	private static synchronized ConnectionManager getConnectionManager(
 			ManagedObjectSourceContext<Indexed> mosContext,
 			AbstractServerSocketManagedObjectSource instance,
-			int sendBufferSize, int receiveBufferSize) {
+			long heartBeatInterval, int sendBufferSize, int receiveBufferSize) {
 
-		// Provide dummy task for consistency across all server sockets
+		final String listenerTeamName = "listener";
+
+		// Provide dummy task for consistency of teams across all server sockets
 		AbstractSingleTask<Work, None, None> dummy = new AbstractSingleTask<Work, None, None>() {
 			@Override
 			public Object doTask(TaskContext<Work, None, None> context)
@@ -115,7 +119,8 @@ public abstract class AbstractServerSocketManagedObjectSource extends
 			}
 		};
 		mosContext.addWork("SetupAutoWireListener", dummy)
-				.addTask("SetupAutoWireListener", dummy).setTeam("listener");
+				.addTask("SetupAutoWireListener", dummy)
+				.setTeam(listenerTeamName);
 
 		// Do nothing if just loading type
 		if (mosContext.isLoadingType()) {
@@ -145,15 +150,27 @@ public abstract class AbstractServerSocketManagedObjectSource extends
 				ManagedObjectTaskBuilder listenerTask = mosContext.addWork(
 						listenerName, socketListener).addTask(listenerName,
 						socketListener);
-				listenerTask.setTeam("listener");
+				listenerTask.setTeam(listenerTeamName);
 
 				// Flag to start listener on server start up
 				mosContext.addStartupTask(listenerName, listenerName);
 			}
 
 			// Create the connection manager
-			singletonConnectionManager = new ConnectionManagerImpl(
-					socketListeners);
+			ConnectionManagerImpl connectionManager = new ConnectionManagerImpl(
+					heartBeatInterval, socketListeners);
+			singletonConnectionManager = connectionManager;
+
+			// Configure the connection manager for heart beat
+			String heartBeatName = "heartbeat";
+			ManagedObjectTaskBuilder heartBeatTask = mosContext.addWork(
+					heartBeatName, connectionManager).addTask(heartBeatName,
+					connectionManager);
+			heartBeatTask.setTeam(listenerTeamName);
+
+			// Flag to start heart beat on server start up
+			mosContext.addStartupTask(heartBeatName, heartBeatName);
+
 		}
 
 		// Register the instance for use of the connection manager
@@ -312,9 +329,12 @@ public abstract class AbstractServerSocketManagedObjectSource extends
 		// Obtain the server socket backlog
 		int serverSocketBackLog = 25000; // TODO make configurable
 
+		// Obtain the heart beat interval
+		long heartBeatInterval = 3000; // TODO make configurable
+
 		// Obtain the connection manager
 		ConnectionManager connectionManager = getConnectionManager(mosContext,
-				this, this.sendBufferSize, receiveBufferSize);
+				this, heartBeatInterval, this.sendBufferSize, receiveBufferSize);
 
 		// Create the communication protocol
 		this.communicationProtocol = this.communicationProtocolSource

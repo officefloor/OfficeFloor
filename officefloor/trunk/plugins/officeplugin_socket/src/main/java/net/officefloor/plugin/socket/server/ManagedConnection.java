@@ -53,7 +53,32 @@ public interface ManagedConnection {
 	ConnectionHandler getConnectionHandler();
 
 	/**
-	 * Terminates this {@link Connection}.
+	 * Queues the {@link WriteDataAction}.
+	 * 
+	 * @param action
+	 *            {@link WriteDataAction}.
+	 */
+	void queueWrite(WriteDataAction action);
+
+	/**
+	 * Queues closing the {@link Connection} after the last queued
+	 * {@link WriteDataAction} is written to the client.
+	 */
+	void queueClose();
+
+	/**
+	 * Undertakes the queued writes and possible {@link Connection} close.
+	 * 
+	 * @return <code>true</code> if all data written. <code>false</code>
+	 *         indicating not able to write all data, requiring waiting for
+	 *         client to consume data (clear space in socket buffer).
+	 * @throws IOException
+	 *             If fails to process the queued writes.
+	 */
+	boolean processWriteQueue() throws IOException;
+
+	/**
+	 * Terminates this {@link Connection} immediately.
 	 * 
 	 * @throws IOException
 	 *             If fails to terminate the {@link Connection}.
