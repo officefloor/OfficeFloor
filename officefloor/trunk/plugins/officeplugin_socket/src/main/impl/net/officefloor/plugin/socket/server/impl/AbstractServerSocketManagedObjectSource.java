@@ -23,6 +23,7 @@ import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.nio.channels.Selector;
 import java.nio.channels.ServerSocketChannel;
+import java.nio.charset.Charset;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.logging.Level;
@@ -73,6 +74,11 @@ public abstract class AbstractServerSocketManagedObjectSource extends
 	 * Name of property to obtain the receive buffer size.
 	 */
 	public static final String PROPERTY_RECEIVE_BUFFER_SIZE = "receive.buffer.size";
+
+	/**
+	 * Name of property to obtain the default {@link Charset}.
+	 */
+	public static final String PROPERTY_DEFAULT_CHARSET = "default.charset";
 
 	/**
 	 * Singleton {@link ConnectionManager} for all {@link Connection} instances.
@@ -261,6 +267,11 @@ public abstract class AbstractServerSocketManagedObjectSource extends
 	private int sendBufferSize;
 
 	/**
+	 * Default {@link Charset}.
+	 */
+	private Charset defaultCharset;
+
+	/**
 	 * {@link CommunicationProtocol}.
 	 */
 	private CommunicationProtocol communicationProtocol;
@@ -289,6 +300,11 @@ public abstract class AbstractServerSocketManagedObjectSource extends
 	@Override
 	public int getSendBufferSize() {
 		return this.sendBufferSize;
+	}
+
+	@Override
+	public Charset getDefaultCharset() {
+		return this.defaultCharset;
 	}
 
 	/*
@@ -325,6 +341,11 @@ public abstract class AbstractServerSocketManagedObjectSource extends
 		int receiveBufferSize = Integer.parseInt(mosContext.getProperty(
 				PROPERTY_RECEIVE_BUFFER_SIZE,
 				String.valueOf(osReceiveBufferSize)));
+
+		// Obtain the default charset
+		String defaultCharsetName = mosContext.getProperty(
+				PROPERTY_DEFAULT_CHARSET, "ISO-8859-1");
+		this.defaultCharset = Charset.forName(defaultCharsetName);
 
 		// Obtain the server socket backlog
 		int serverSocketBackLog = 25000; // TODO make configurable

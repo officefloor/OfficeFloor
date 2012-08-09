@@ -57,7 +57,7 @@ public class HttpConversationTest extends OfficeFrameTestCase {
 	/**
 	 * {@link Charset}.
 	 */
-	private static final Charset US_ASCII = Charset.forName("US-ASCII");
+	private static final Charset US_ASCII = UsAsciiUtil.US_ASCII;
 
 	/**
 	 * {@link MockConnection}.
@@ -68,7 +68,7 @@ public class HttpConversationTest extends OfficeFrameTestCase {
 	 * {@link HttpConversation} to test.
 	 */
 	private final HttpConversation conversation = new HttpConversationImpl(
-			this.connection, 1024, false);
+			this.connection, 1024, US_ASCII, false);
 
 	/**
 	 * {@link ByteArrayOutputStream} containing the data output to the wire.
@@ -205,9 +205,13 @@ public class HttpConversationTest extends OfficeFrameTestCase {
 		final HttpRequestParseException failure = new HttpRequestParseException(
 				HttpStatus.SC_BAD_REQUEST, "Body of parse failure response");
 		this.conversation.parseFailure(failure, true);
-		String message = failure.getMessage();
-		this.assertWireData("HTTP/1.0 400 Bad Request\nContent-Type: text/html; charset=UTF-8\nContent-Length: "
-				+ message.length() + "\n\n" + message);
+		String message = failure.getClass().getSimpleName() + ": "
+				+ failure.getMessage();
+		this.assertWireData("HTTP/1.0 400 Bad Request\nContent-Type: text/html; charset="
+				+ US_ASCII.name()
+				+ "\nContent-Length: "
+				+ message.length()
+				+ "\n\n" + message);
 
 		// Ensure the connection is closed
 		assertTrue("Connection should be closed", this.connection.isClosed());
@@ -238,10 +242,12 @@ public class HttpConversationTest extends OfficeFrameTestCase {
 		entity.close();
 
 		// Both request and parse failure responses should be sent
-		String message = failure.getMessage();
+		String message = failure.getClass().getSimpleName() + ": "
+				+ failure.getMessage();
 		this.assertWireData("HTTP/1.1 200 OK\nContent-Length: 4\n\nTEST"
-				+ "HTTP/1.0 414 Request-URI Too Large\nContent-Type: text/html; charset=UTF-8\nContent-Length: "
-				+ message.length() + "\n\n" + message);
+				+ "HTTP/1.0 414 Request-URI Too Large\nContent-Type: text/html; charset="
+				+ US_ASCII.name() + "\nContent-Length: " + message.length()
+				+ "\n\n" + message);
 
 		// Ensure the connection is closed
 		assertTrue("Connection should be closed", this.connection.isClosed());
@@ -266,9 +272,11 @@ public class HttpConversationTest extends OfficeFrameTestCase {
 		mo.getEscalationHandler().handleEscalation(failure);
 
 		// Ensure failure written as response
-		String message = failure.getMessage();
-		this.assertWireData("HTTP/1.1 500 Internal Server Error\nContent-Type: text/html; charset=UTF-8\nContent-Length: "
-				+ message.length() + "\n\n" + message);
+		String message = failure.getClass().getSimpleName() + ": "
+				+ failure.getMessage();
+		this.assertWireData("HTTP/1.1 500 Internal Server Error"
+				+ "\nContent-Type: text/html; charset=" + US_ASCII.name()
+				+ "\nContent-Length: " + message.length() + "\n\n" + message);
 	}
 
 	/**

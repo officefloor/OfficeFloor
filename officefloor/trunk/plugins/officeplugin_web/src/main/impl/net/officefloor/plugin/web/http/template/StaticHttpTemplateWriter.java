@@ -73,6 +73,7 @@ public class StaticHttpTemplateWriter implements HttpTemplateWriter {
 		// Determine if default server encoding
 		if (writer.isServerDefaultCharset()) {
 			// Default encoding, so provide pre-encoded content
+			writer.flush(); // Ensure previous content flushed
 			writer.write(this.defaultEncodedContent);
 
 		} else {

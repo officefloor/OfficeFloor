@@ -97,7 +97,8 @@ public class HttpFileWriterWorkSourceTest extends OfficeFrameTestCase {
 		this.recordReturn(httpFile, httpFile.getContentType(), "");
 		this.recordReturn(httpFile, httpFile.getCharset(), null);
 		this.recordReturn(httpFile, httpFile.getContents(), contents);
-		this.recordReturn(response, response.getEntity(), entity);
+		this.recordReturn(response, response.getEntity(),
+				entity.getByteOutputStream());
 
 		// Test
 		this.replayMockObjects();

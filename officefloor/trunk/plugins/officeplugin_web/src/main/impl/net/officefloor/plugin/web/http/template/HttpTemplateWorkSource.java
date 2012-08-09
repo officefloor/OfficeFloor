@@ -70,11 +70,6 @@ public class HttpTemplateWorkSource extends
 	public static final String PROPERTY_TEMPLATE_CONTENT = "template.content";
 
 	/**
-	 * Property to specify the <code>Content-Type</code> for the template.
-	 */
-	public static final String PROPERTY_CONTENT_TYPE = "content.type";
-
-	/**
 	 * Property to specify the {@link Charset} for the template.
 	 */
 	public static final String PROPERTY_CHARSET = "content.charset";
@@ -295,8 +290,6 @@ public class HttpTemplateWorkSource extends
 		HttpTemplate template = getHttpTemplate(context);
 
 		// Obtain the details of the template
-		String contentType = context.getProperty(PROPERTY_CONTENT_TYPE,
-				"text/html");
 		Charset charset = getCharset(context);
 
 		// Define the work factory

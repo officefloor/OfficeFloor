@@ -18,6 +18,7 @@
 package net.officefloor.plugin.socket.server.protocol;
 
 import java.nio.ByteBuffer;
+import java.nio.charset.Charset;
 
 /**
  * Context for the {@link CommunicationProtocolSource}.
@@ -37,5 +38,12 @@ public interface CommunicationProtocolContext {
 	 * @return Size of the write buffers for sending data.
 	 */
 	int getSendBufferSize();
+
+	/**
+	 * Obtains the default {@link Charset} for the server.
+	 * 
+	 * @return Default {@link Charset} for the server.
+	 */
+	Charset getDefaultCharset();
 
 }

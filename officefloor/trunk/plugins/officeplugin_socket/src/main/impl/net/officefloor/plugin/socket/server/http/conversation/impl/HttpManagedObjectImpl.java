@@ -123,8 +123,8 @@ public class HttpManagedObjectImpl implements HttpManagedObject,
 
 	@Override
 	public void cleanup() throws IOException {
-		// Close the response to trigger sending it
-		this.response.getEntity().close();
+		// Ensure response is triggered for sending
+		this.response.send();
 	}
 
 	/*

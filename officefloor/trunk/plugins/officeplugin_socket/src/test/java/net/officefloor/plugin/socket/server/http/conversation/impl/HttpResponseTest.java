@@ -20,14 +20,13 @@ package net.officefloor.plugin.socket.server.http.conversation.impl;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.io.StringWriter;
-import java.io.Writer;
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 import java.util.LinkedList;
+import java.util.Map;
 
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.socket.server.http.HttpHeader;
@@ -43,6 +42,7 @@ import net.officefloor.plugin.socket.server.protocol.Connection;
 import net.officefloor.plugin.socket.server.protocol.WriteBuffer;
 import net.officefloor.plugin.socket.server.protocol.WriteBufferEnum;
 import net.officefloor.plugin.stream.ServerOutputStream;
+import net.officefloor.plugin.stream.ServerWriter;
 import net.officefloor.plugin.stream.impl.ServerInputStreamImpl;
 
 /**
@@ -53,14 +53,9 @@ import net.officefloor.plugin.stream.impl.ServerInputStreamImpl;
 public class HttpResponseTest extends OfficeFrameTestCase implements Connection {
 
 	/**
-	 * End of line token.
+	 * Default {@link Charset} for testing.
 	 */
-	private static final String EOLN_TOKEN = "${EOLN}";
-
-	/**
-	 * US-ASCII {@link Charset}.
-	 */
-	private static final Charset US_ASCII = Charset.forName("US-ASCII");
+	private static final Charset DEFAULT_CHARSET = UsAsciiUtil.US_ASCII;
 
 	/**
 	 * Contains the content written on the wire.
@@ -82,9 +77,11 @@ public class HttpResponseTest extends OfficeFrameTestCase implements Connection 
 	 */
 	public void testSimpleResponse() throws IOException {
 		HttpResponse response = this.createHttpResponse();
-		this.writeBody(response, "TEST");
+		ServerOutputStream entity = response.getEntity();
+		entity.write("TEST".getBytes(DEFAULT_CHARSET));
 		response.getEntity().close();
-		this.assertWireContent("HTTP/1.1 200 OK\nContent-Length: 4\n\nTEST");
+		this.assertWireContent("HTTP/1.1 200 OK\nContent-Length: 4", "TEST",
+				DEFAULT_CHARSET);
 		assertFalse("Connection should not be closed", this.isConnectionClosed);
 	}
 
@@ -94,9 +91,10 @@ public class HttpResponseTest extends OfficeFrameTestCase implements Connection 
 	public void testSendCachedByteBuffer() throws IOException {
 		HttpResponse response = this.createHttpResponse();
 		ServerOutputStream entity = response.getEntity();
-		entity.write(ByteBuffer.wrap(UsAsciiUtil.convertToUsAscii("TEST")));
+		entity.write(ByteBuffer.wrap("TEST".getBytes(DEFAULT_CHARSET)));
 		entity.close();
-		this.assertWireContent("HTTP/1.1 200 OK\nContent-Length: 4\n\nTEST");
+		this.assertWireContent("HTTP/1.1 200 OK\nContent-Length: 4", "TEST",
+				DEFAULT_CHARSET);
 		assertFalse("Connection should not be closed", this.isConnectionClosed);
 	}
 
@@ -106,7 +104,8 @@ public class HttpResponseTest extends OfficeFrameTestCase implements Connection 
 	public void testNoContent() throws IOException {
 		HttpResponse response = this.createHttpResponse();
 		response.getEntity().close();
-		this.assertWireContent("HTTP/1.1 204 No Content\nContent-Length: 0\n\n");
+		this.assertWireContent("HTTP/1.1 204 No Content\nContent-Length: 0",
+				null, null);
 		assertFalse("Connection should not be closed", this.isConnectionClosed);
 	}
 
@@ -118,7 +117,7 @@ public class HttpResponseTest extends OfficeFrameTestCase implements Connection 
 		response.addHeader("null", null);
 		response.send();
 		this.assertWireContent("HTTP/1.1 204 No Content\n" + "null: \n"
-				+ "Content-Length: 0\n\n");
+				+ "Content-Length: 0", null, null);
 		assertFalse("Connection should not be closed", this.isConnectionClosed);
 	}
 
@@ -173,8 +172,9 @@ public class HttpResponseTest extends OfficeFrameTestCase implements Connection 
 
 		this.sendFailure(FAILURE);
 		this.assertWireContent("HTTP/1.1 400 Bad Request\n"
-				+ "Content-Type: text/html; charset=UTF-8\n"
-				+ "Content-Length: 15\n\n" + "Fail Parse Test");
+				+ "Content-Type: text/html; charset=" + DEFAULT_CHARSET.name()
+				+ "\nContent-Length: 42", FAILURE.getClass().getSimpleName()
+				+ ": Fail Parse Test", DEFAULT_CHARSET);
 		assertTrue("Connection should be closed", this.isConnectionClosed);
 	}
 
@@ -187,8 +187,9 @@ public class HttpResponseTest extends OfficeFrameTestCase implements Connection 
 
 		this.sendFailure(FAILURE);
 		this.assertWireContent("HTTP/1.1 500 Internal Server Error\n"
-				+ "Content-Type: text/html; charset=UTF-8\n"
-				+ "Content-Length: 12\n\n" + "Failure Test");
+				+ "Content-Type: text/html; charset=" + DEFAULT_CHARSET.name()
+				+ "\nContent-Length: 23", FAILURE.getClass().getSimpleName()
+				+ ": Failure Test", DEFAULT_CHARSET);
 		assertTrue("Connection should be closed", this.isConnectionClosed);
 	}
 
@@ -201,8 +202,9 @@ public class HttpResponseTest extends OfficeFrameTestCase implements Connection 
 
 		this.sendFailure(FAILURE);
 		this.assertWireContent("HTTP/1.1 500 Internal Server Error\n"
-				+ "Content-Type: text/html; charset=UTF-8\n"
-				+ "Content-Length: 9\n\n" + Exception.class.getSimpleName());
+				+ "Content-Type: text/html; charset=" + DEFAULT_CHARSET.name()
+				+ "\nContent-Length: 15", Exception.class.getSimpleName()
+				+ ": null", DEFAULT_CHARSET);
 		assertTrue("Connection should be closed", this.isConnectionClosed);
 	}
 
@@ -219,9 +221,9 @@ public class HttpResponseTest extends OfficeFrameTestCase implements Connection 
 		String stackTrace = buffer.toString();
 
 		// Determine the expected content and its length
-		String content = "Test\n\n" + stackTrace;
-		int contentLength = content.length();
-		content = content.replace("\n", EOLN_TOKEN);
+		String content = FAILURE.getClass().getSimpleName() + ": Test\n\n"
+				+ stackTrace;
+		int contentLength = content.getBytes(DEFAULT_CHARSET).length;
 
 		// Create conversation to send stack trace on failure
 		this.conversation = this.createHttpConversation(true);
@@ -229,9 +231,181 @@ public class HttpResponseTest extends OfficeFrameTestCase implements Connection 
 		// Run test
 		this.sendFailure(FAILURE);
 		this.assertWireContent("HTTP/1.1 500 Internal Server Error\n"
-				+ "Content-Type: text/html; charset=UTF-8\n"
-				+ "Content-Length: " + contentLength + "\n\n" + content);
+				+ "Content-Type: text/html; charset=" + DEFAULT_CHARSET.name()
+				+ "\nContent-Length: " + contentLength, content,
+				DEFAULT_CHARSET);
 		assertTrue("Connection should be closed", this.isConnectionClosed);
+	}
+
+	/**
+	 * Ensures able to provide failure {@link HttpResponse} after having already
+	 * written content to the {@link ServerOutputStream}.
+	 */
+	public void testSendFailureAfterEntityContent() throws IOException {
+
+		// Write some content
+		HttpResponse response = this.createHttpResponse();
+		ServerOutputStream entity = response.getEntity();
+		entity.write("TEST".getBytes());
+		entity.flush();
+
+		// Send failure
+		final Throwable FAILURE = new Exception("Failure Test");
+		((HttpResponseImpl) response).sendFailure(FAILURE);
+		this.assertWireContent("HTTP/1.1 500 Internal Server Error\n"
+				+ "Content-Type: text/html; charset=" + DEFAULT_CHARSET.name()
+				+ "\nContent-Length: 23", FAILURE.getClass().getSimpleName()
+				+ ": Failure Test", DEFAULT_CHARSET);
+	}
+
+	/**
+	 * Ensures able to provide failure {@link HttpResponse} after having already
+	 * written content to the {@link ServerWriter}.
+	 */
+	public void testSendFailureAfterEntityWriterContent() throws IOException {
+
+		final Charset charset = Charset.forName("UTF-8");
+
+		// Write some content
+		HttpResponse response = this.createHttpResponse();
+		response.setContentCharset(charset, charset.name());
+		ServerWriter entityWriter = response.getEntityWriter();
+		entityWriter.write("TEST");
+		entityWriter.flush();
+
+		// Send failure
+		final Throwable FAILURE = new Exception("Failure Test");
+		((HttpResponseImpl) response).sendFailure(FAILURE);
+		this.assertWireContent("HTTP/1.1 500 Internal Server Error\n"
+				+ "Content-Type: text/html; charset=UTF-8\n"
+				+ "Content-Length: 23", FAILURE.getClass().getSimpleName()
+				+ ": Failure Test", charset);
+	}
+
+	/**
+	 * Ensure on obtaining the {@link ServerOutputStream} that can not obtain
+	 * {@link ServerWriter}.
+	 */
+	public void testOnlyEntityOutputStream() throws IOException {
+		HttpResponse response = this.createHttpResponse();
+		assertNotNull("Should obtain server outputstream", response.getEntity());
+		try {
+			response.getEntityWriter();
+			fail("Should not be successful");
+		} catch (IOException ex) {
+			assertEquals("Incorrect cause",
+					"getEntity() has already been invoked", ex.getMessage());
+		}
+		assertNotNull(
+				"Should continue to be able to obtain server outputstream",
+				response.getEntity());
+	}
+
+	/**
+	 * Ensure on obtaining the {@link ServerWriter} that can not obtain
+	 * {@link ServerOutputStream}.
+	 */
+	public void testOnlyEntityWriter() throws IOException {
+		HttpResponse response = this.createHttpResponse();
+		assertNotNull("Should obtain server writer", response.getEntityWriter());
+		try {
+			response.getEntity();
+			fail("Should not be successful");
+		} catch (IOException ex) {
+			assertEquals("Incorrect cause",
+					"getEntityWriter() has already been invoked",
+					ex.getMessage());
+		}
+		assertNotNull("Should continue to be able to obtain server writer",
+				response.getEntityWriter());
+	}
+
+	/**
+	 * Ensure can use {@link ServerWriter} for the entity.
+	 */
+	public void testEntityWriter() throws IOException {
+		HttpResponse response = this.createHttpResponse();
+		ServerWriter entity = response.getEntityWriter();
+		entity.write("TEST");
+		entity.close();
+		this.assertWireContent("HTTP/1.1 200 OK\n"
+				+ "Content-Type: text/html; charset=" + DEFAULT_CHARSET.name()
+				+ "\nContent-Length: 4", "TEST", DEFAULT_CHARSET);
+		assertFalse("Connection should not be closed", this.isConnectionClosed);
+	}
+
+	/**
+	 * Ensure can specify alternate Content-Type.
+	 */
+	public void testEntityWriterWithAlternateContentType() throws IOException {
+		HttpResponse response = this.createHttpResponse();
+		response.setContentType("text/plain");
+		ServerWriter entity = response.getEntityWriter();
+		entity.write("TEST");
+		entity.close();
+		this.assertWireContent("HTTP/1.1 200 OK\n"
+				+ "Content-Type: text/plain; charset=" + DEFAULT_CHARSET.name()
+				+ "\nContent-Length: 4", "TEST", DEFAULT_CHARSET);
+		assertFalse("Connection should not be closed", this.isConnectionClosed);
+	}
+
+	/**
+	 * Ensure can use {@link ServerWriter} with alternate {@link Charset} for
+	 * the entity.
+	 */
+	public void testEntityWriterWithAlternateCharsets() throws IOException {
+
+		Map<String, Charset> charsets = Charset.availableCharsets();
+		for (Charset charset : charsets.values()) {
+
+			// Indicate the charset being tested
+			System.out.print("Charset: " + charset.name());
+
+			// Determine if can use
+			boolean canUse = true;
+			try {
+				charset.newEncoder();
+			} catch (UnsupportedOperationException ex) {
+				canUse = false; // can not use
+			}
+			System.out.println(canUse ? "" : " (no encoder)");
+
+			// Test with the charset if can use
+			if (canUse) {
+				HttpResponse response = this.createHttpResponse();
+				response.setContentCharset(charset, charset.name());
+				ServerWriter entity = response.getEntityWriter();
+				entity.write("TEST");
+				entity.close();
+				this.assertWireContent(
+						"HTTP/1.1 200 OK\nContent-Type: text/html; charset="
+								+ charset.name() + "\nContent-Length: "
+								+ ("TEST".getBytes(charset).length), "TEST",
+						charset);
+				assertFalse("Connection should not be closed",
+						this.isConnectionClosed);
+			}
+		}
+	}
+
+	/**
+	 * Ensure can not change the {@link Charset} for the {@link ServerWriter}.
+	 */
+	public void testNotChangeContentCharsetForEntityWriter() throws IOException {
+
+		// Obtain the entity writer
+		HttpResponse response = this.createHttpResponse();
+		response.getEntityWriter();
+
+		// Should now not be able to change charset
+		try {
+			response.setContentCharset(UsAsciiUtil.US_ASCII, null);
+			fail("Should not be able to change the charset");
+		} catch (IOException ex) {
+			assertEquals("Incorrect cause",
+					"getEntityWriter() has already been invoked",
+					ex.getMessage());
+		}
 	}
 
 	/*
@@ -246,7 +420,8 @@ public class HttpResponseTest extends OfficeFrameTestCase implements Connection 
 	 */
 	private HttpConversation createHttpConversation(
 			boolean isSendStackTraceOnFailure) {
-		return new HttpConversationImpl(this, 1024, isSendStackTraceOnFailure);
+		return new HttpConversationImpl(this, 1024, DEFAULT_CHARSET,
+				isSendStackTraceOnFailure);
 	}
 
 	/**
@@ -267,29 +442,6 @@ public class HttpResponseTest extends OfficeFrameTestCase implements Connection 
 	}
 
 	/**
-	 * Writes the content to the body.
-	 * 
-	 * @param response
-	 *            {@link HttpResponse}.
-	 * @param bodyContent
-	 *            Content to be written to the body.
-	 */
-	private void writeBody(HttpResponse response, String content) {
-
-		// Create the writer for the body
-		Writer writer = new OutputStreamWriter(response.getEntity(), US_ASCII);
-
-		// Write the body content
-		try {
-			writer.write(content);
-			writer.flush();
-		} catch (IOException ex) {
-			fail("Should not fail on writing content to body: "
-					+ ex.getMessage());
-		}
-	}
-
-	/**
 	 * Sends the failure.
 	 * 
 	 * @param failure
@@ -306,19 +458,57 @@ public class HttpResponseTest extends OfficeFrameTestCase implements Connection 
 	/**
 	 * Asserts the content on the wire is as expected.
 	 * 
-	 * @param expectedContent
-	 *            Expected content on the wire.
+	 * @param expectedHeader
+	 *            Expected header content on the wire.
+	 * @param expectedEntity
+	 *            Expected entity content on the wire.
+	 * @param entityCharset
+	 *            Entity {@link Charset}.
 	 */
-	private void assertWireContent(String expectedContent) {
+	private void assertWireContent(String expectedHeader,
+			String expectedEntity, Charset entityCharset) {
 
-		// Transform expected content to wire format
-		String expectedHttpContent = UsAsciiUtil.convertToString(UsAsciiUtil
-				.convertToHttp(expectedContent));
-		expectedHttpContent = expectedHttpContent.replace(EOLN_TOKEN, "\n");
+		// Obtain the wire bytes
+		byte[] wireBytes = this.wire.toByteArray();
 
-		// Validate the response on the wire
-		String wireText = UsAsciiUtil.convertToString(this.wire.toByteArray());
-		assertEquals("Incorrect wire content", expectedHttpContent, wireText);
+		// Transform expected header to bytes
+		expectedHeader = expectedHeader + "\n\n";
+		byte[] expectedHeaderBytes = UsAsciiUtil.convertToHttp(expectedHeader);
+
+		// Transform expected entity to bytes
+		byte[] expectedEntityBytes = (expectedEntity == null ? new byte[0]
+				: expectedEntity.getBytes(entityCharset));
+
+		// Ensure correct number of bytes on wire
+		assertEquals("Incorrect number of bytes on the wire:\nEXPECTED: "
+				+ expectedHeader
+				+ (expectedEntity == null ? "" : expectedEntity) + "\nACTUAL: "
+				+ UsAsciiUtil.convertToString(wireBytes),
+				(expectedHeaderBytes.length + expectedEntityBytes.length),
+				wireBytes.length);
+
+		// Obtain the actual header data
+		byte[] actualHeaderBytes = new byte[expectedHeaderBytes.length];
+		System.arraycopy(wireBytes, 0, actualHeaderBytes, 0,
+				actualHeaderBytes.length);
+		String actualHeader = UsAsciiUtil.convertToString(actualHeaderBytes);
+
+		// Obtain the actual entity data
+		byte[] actualEntityBytes = new byte[expectedEntityBytes.length];
+		System.arraycopy(wireBytes, expectedHeaderBytes.length,
+				actualEntityBytes, 0, actualEntityBytes.length);
+		String actualEntity = new String(actualEntityBytes,
+				entityCharset == null ? DEFAULT_CHARSET : entityCharset);
+
+		// Validate header and entity content
+		assertEquals("Incorrect response on the wire",
+				UsAsciiUtil.convertToString(expectedHeaderBytes)
+						+ (expectedEntity == null ? "" : new String(
+								expectedEntityBytes, entityCharset)),
+				actualHeader + actualEntity);
+
+		// Clear the wire content
+		this.wire.reset();
 	}
 
 	/**

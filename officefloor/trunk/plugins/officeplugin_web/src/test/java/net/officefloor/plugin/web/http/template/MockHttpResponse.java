@@ -27,6 +27,7 @@ import java.util.Properties;
 import junit.framework.TestCase;
 import net.officefloor.plugin.socket.server.http.HttpHeader;
 import net.officefloor.plugin.socket.server.http.HttpResponse;
+import net.officefloor.plugin.socket.server.http.parse.UsAsciiUtil;
 import net.officefloor.plugin.socket.server.http.parse.impl.HttpHeaderImpl;
 import net.officefloor.plugin.stream.ServerOutputStream;
 import net.officefloor.plugin.stream.ServerWriter;
@@ -63,6 +64,12 @@ public class MockHttpResponse implements HttpResponse {
 	 * Entity.
 	 */
 	private MockServerOutputStream entity = new MockServerOutputStream();
+
+	/**
+	 * Entity writer.
+	 */
+	private ServerWriter entityWriter = new ServerWriter(
+			this.entity.getByteOutputStream(), UsAsciiUtil.US_ASCII, true, this);
 
 	/**
 	 * Flag indicating if sent.
@@ -195,14 +202,7 @@ public class MockHttpResponse implements HttpResponse {
 	}
 
 	@Override
-	public void setContentCharset(String charset) {
-		// TODO implement HttpResponse.setContentCharset
-		throw new UnsupportedOperationException(
-				"TODO implement HttpResponse.setContentCharset");
-	}
-
-	@Override
-	public void setContentCharset(Charset charset) {
+	public void setContentCharset(Charset charset, String charsetName) {
 		// TODO implement HttpResponse.setContentCharset
 		throw new UnsupportedOperationException(
 				"TODO implement HttpResponse.setContentCharset");
@@ -210,9 +210,7 @@ public class MockHttpResponse implements HttpResponse {
 
 	@Override
 	public ServerWriter getEntityWriter() {
-		// TODO implement HttpResponse.getEntityWriter
-		throw new UnsupportedOperationException(
-				"TODO implement HttpResponse.getEntityWriter");
+		return this.entityWriter;
 	}
 
 	@Override

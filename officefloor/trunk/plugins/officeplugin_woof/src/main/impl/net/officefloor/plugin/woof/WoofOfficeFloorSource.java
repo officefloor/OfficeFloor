@@ -135,8 +135,11 @@ public class WoofOfficeFloorSource extends HttpServerAutoWireOfficeFloorSource {
 
 	/**
 	 * Stops the {@link WoofOfficeFloorSource} for unit testing.
+	 * 
+	 * @throws Exception
+	 *             If fails to stop.
 	 */
-	public static void stop() {
+	public static void stop() throws Exception {
 		// Stop all existing OfficeFloor instances
 		AutoWireManagement.closeAllOfficeFloors();
 	}
