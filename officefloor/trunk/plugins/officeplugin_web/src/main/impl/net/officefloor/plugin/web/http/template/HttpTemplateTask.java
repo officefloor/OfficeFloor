@@ -363,6 +363,9 @@ public class HttpTemplateTask extends
 		for (HttpTemplateWriter contentWriter : this.contentWriters) {
 			contentWriter.write(writer, workName, bean, location);
 		}
+		
+		// Flush contents
+		writer.flush();
 
 		// Template written, nothing to return
 		return null;

@@ -19,6 +19,7 @@
 package net.officefloor.plugin.socket.server.http.conversation.impl;
 
 import java.io.IOException;
+import java.nio.charset.Charset;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -56,6 +57,11 @@ public class HttpConversationImpl implements HttpConversation {
 	private final int sendBufferSize;
 
 	/**
+	 * Default {@link Charset} for the {@link HttpResponse} entity.
+	 */
+	private final Charset defaultCharset;
+
+	/**
 	 * Flags whether to send the stack trace on failure.
 	 */
 	private final boolean isSendStackTraceOnFailure;
@@ -67,13 +73,16 @@ public class HttpConversationImpl implements HttpConversation {
 	 *            {@link Connection}.
 	 * @param sendBufferSize
 	 *            Size of the send buffers.
+	 * @param defaultCharset
+	 *            Default {@link Charset} for the {@link HttpResponse} entity.
 	 * @param isSendStackTraceOnFailure
 	 *            Flags whether to send the stack trace on failure.
 	 */
 	public HttpConversationImpl(Connection connection, int sendBufferSize,
-			boolean isSendStackTraceOnFailure) {
+			Charset defaultCharset, boolean isSendStackTraceOnFailure) {
 		this.connection = connection;
 		this.sendBufferSize = sendBufferSize;
+		this.defaultCharset = defaultCharset;
 		this.isSendStackTraceOnFailure = isSendStackTraceOnFailure;
 	}
 
@@ -125,7 +134,7 @@ public class HttpConversationImpl implements HttpConversation {
 
 		// Create the corresponding response
 		HttpResponseImpl response = new HttpResponseImpl(this, this.connection,
-				httpVersion, this.sendBufferSize);
+				httpVersion, this.sendBufferSize, this.defaultCharset);
 
 		// Create the HTTP managed object
 		HttpManagedObjectImpl managedObject = new HttpManagedObjectImpl(
@@ -144,7 +153,7 @@ public class HttpConversationImpl implements HttpConversation {
 
 		// Create response for parse failure
 		HttpResponseImpl response = new HttpResponseImpl(this, this.connection,
-				"HTTP/1.0", this.sendBufferSize);
+				"HTTP/1.0", this.sendBufferSize, this.defaultCharset);
 
 		// Create the HTTP managed object
 		HttpManagedObjectImpl managedObject = new HttpManagedObjectImpl(

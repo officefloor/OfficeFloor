@@ -19,7 +19,6 @@
 package net.officefloor.plugin.socket.server.http.conversation.impl;
 
 import java.io.IOException;
-import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
@@ -50,29 +49,14 @@ import net.officefloor.plugin.stream.impl.ServerOutputStreamImpl;
 public class HttpResponseImpl implements HttpResponse {
 
 	/**
-	 * {@link Charset} name for {@link HttpRequestParseException}
-	 * {@link HttpResponse}.
-	 */
-	private static final String PARSE_FAILURE_CONTENT_CHARSET_NAME = "UTF-8";
-
-	/**
-	 * <code>Content-Type</code> for the {@link HttpRequestParseException}
-	 * {@link HttpResponse}.
-	 */
-	private static final String PARSE_FAILURE_CONTENT_TYPE = "text/html; charset="
-			+ PARSE_FAILURE_CONTENT_CHARSET_NAME;
-
-	/**
-	 * {@link Charset} for {@link HttpRequestParseException}
-	 * {@link HttpResponse}.
-	 */
-	private static final Charset PARSE_FAILURE_CONTENT_ENCODING_CHARSET = Charset
-			.forName(PARSE_FAILURE_CONTENT_CHARSET_NAME);
-
-	/**
 	 * HTTP end of line sequence (CR, LF).
 	 */
 	private static final String EOL = "\r\n";
+
+	/**
+	 * Name of the header Content-Type.
+	 */
+	private static final String HEADER_NAME_CONTENT_TYPE = "Content-Type";
 
 	/**
 	 * Name of the header Content-Length.
@@ -125,6 +109,38 @@ public class HttpResponseImpl implements HttpResponse {
 	private final ServerOutputStreamImpl entity;
 
 	/**
+	 * Indicates if requested the {@link ServerOutputStream}. In other words,
+	 * may not use {@link ServerWriter}.
+	 */
+	private boolean isOutputStream = false;
+
+	/**
+	 * Content-Type.
+	 */
+	private String contentType = null;
+
+	/**
+	 * {@link Charset} for the {@link ServerWriter}.
+	 */
+	private Charset charset;
+
+	/**
+	 * Name of the {@link Charset} to use in the {@link HttpResponse}.
+	 */
+	private String charsetName;
+
+	/**
+	 * Indicates if the default {@link Charset}.
+	 */
+	private boolean isDefaultCharset = true;
+
+	/**
+	 * Cache the {@link ServerWriter}. Also indicates if using the
+	 * {@link ServerWriter}.
+	 */
+	private ServerWriter entityWriter = null;
+
+	/**
 	 * Indicates if closed.
 	 */
 	private boolean isClosed = false;
@@ -140,12 +156,17 @@ public class HttpResponseImpl implements HttpResponse {
 	 *            HTTP version.
 	 * @param sendBufferSize
 	 *            Send buffer size.
+	 * @param defaultCharset
+	 *            Default {@link Charset} for the {@link ServerWriter}.
 	 */
 	public HttpResponseImpl(HttpConversationImpl conversation,
-			Connection connection, String httpVersion, int sendBufferSize) {
+			Connection connection, String httpVersion, int sendBufferSize,
+			Charset defaultCharset) {
 		this.conversation = conversation;
 		this.connection = connection;
 		this.sendBufferSize = sendBufferSize;
+		this.charset = defaultCharset;
+		this.charsetName = this.charset.name();
 
 		// Specify initial values
 		this.version = httpVersion;
@@ -182,6 +203,9 @@ public class HttpResponseImpl implements HttpResponse {
 			// Clear the response to write the failure
 			this.headers.clear();
 			this.entity.clear();
+			this.receiver.entityBuffers.clear();
+			this.isOutputStream = false;
+			this.entityWriter = null;
 
 			// Write the failure header details
 			if (failure instanceof HttpRequestParseException) {
@@ -192,23 +216,16 @@ public class HttpResponseImpl implements HttpResponse {
 				// Handling request failure
 				this.setStatus(HttpStatus.SC_INTERNAL_SERVER_ERROR);
 			}
-			this.addHeader("Content-Type", PARSE_FAILURE_CONTENT_TYPE);
 
 			// Write the failure response
-			String failMessage = failure.getMessage();
-			if (failMessage == null) {
-				// No message so provide type of error
-				failMessage = failure.getClass().getSimpleName();
-			}
-			this.entity.write(failMessage
-					.getBytes(PARSE_FAILURE_CONTENT_ENCODING_CHARSET));
+			ServerWriter writer = this.getEntityWriter();
+			String failMessage = failure.getClass().getSimpleName() + ": "
+					+ failure.getMessage();
+			writer.write(failMessage);
 			if (this.conversation.isSendStackTraceOnFailure()) {
 				// Provide the stack trace
-				this.entity.write("\n\n"
-						.getBytes(PARSE_FAILURE_CONTENT_ENCODING_CHARSET));
-				PrintWriter stackTraceWriter = new PrintWriter(
-						new OutputStreamWriter(this.entity,
-								PARSE_FAILURE_CONTENT_ENCODING_CHARSET));
+				writer.write("\n\n");
+				PrintWriter stackTraceWriter = new PrintWriter(writer);
 				failure.printStackTrace(stackTraceWriter);
 				stackTraceWriter.flush();
 			}
@@ -235,7 +252,14 @@ public class HttpResponseImpl implements HttpResponse {
 		ServerOutputStream header = new ServerOutputStreamImpl(this.receiver,
 				this.sendBufferSize);
 
-		// Provide content length HTTP header
+		// Provide the Content-Type HTTP header
+		if (this.contentType != null) {
+			this.addHeader(HEADER_NAME_CONTENT_TYPE, this.contentType
+					+ (this.charsetName == null ? "" : "; charset="
+							+ this.charsetName));
+		}
+
+		// Provide Content-Length HTTP header
 		this.headers.add(new HttpHeaderImpl(HEADER_NAME_CONTENT_LENGTH, String
 				.valueOf(contentLength)));
 
@@ -282,7 +306,10 @@ public class HttpResponseImpl implements HttpResponse {
 
 	@Override
 	public void setVersion(String version) {
+
 		synchronized (this.connection.getLock()) {
+
+			// Specify the version
 			this.version = version;
 		}
 	}
@@ -299,7 +326,10 @@ public class HttpResponseImpl implements HttpResponse {
 
 	@Override
 	public void setStatus(int status, String statusMessage) {
+
 		synchronized (this.connection.getLock()) {
+
+			// Specify the status
 			this.status = status;
 			this.statusMessage = statusMessage;
 		}
@@ -328,8 +358,9 @@ public class HttpResponseImpl implements HttpResponse {
 	@Override
 	public HttpHeader getHeader(String name) {
 
-		// Search for the first header by the name
 		synchronized (this.connection.getLock()) {
+
+			// Search for the first header by the name
 			for (HttpHeader header : this.headers) {
 				if (name.equalsIgnoreCase(header.getName())) {
 					// Found first header so return it
@@ -345,28 +376,35 @@ public class HttpResponseImpl implements HttpResponse {
 	@Override
 	public HttpHeader[] getHeaders() {
 
-		// Create the array of headers
-		HttpHeader[] headers;
 		synchronized (this.connection.getLock()) {
-			headers = this.headers.toArray(new HttpHeader[0]);
-		}
 
-		// Return the headers
-		return headers;
+			// Create the array of headers
+			HttpHeader[] headers;
+			synchronized (this.connection.getLock()) {
+				headers = this.headers.toArray(new HttpHeader[0]);
+			}
+
+			// Return the headers
+			return headers;
+		}
 	}
 
 	@Override
 	public void removeHeader(HttpHeader header) {
-		// Remove the header
+
 		synchronized (this.connection.getLock()) {
+
+			// Remove the header
 			this.headers.remove(header);
 		}
 	}
 
 	@Override
 	public void removeHeaders(String name) {
-		// Remove all headers by name
+
 		synchronized (this.connection.getLock()) {
+
+			// Remove all headers by name
 			for (Iterator<HttpHeader> iterator = this.headers.iterator(); iterator
 					.hasNext();) {
 				HttpHeader header = iterator.next();
@@ -379,42 +417,88 @@ public class HttpResponseImpl implements HttpResponse {
 	}
 
 	@Override
-	public ServerOutputStream getEntity() {
-		return this.entity;
+	public ServerOutputStream getEntity() throws IOException {
+
+		synchronized (this.receiver.getLock()) {
+
+			// Ensure not using writer
+			if (this.entityWriter != null) {
+				throw new IOException(
+						"getEntityWriter() has already been invoked");
+			}
+
+			// Flag using the output stream
+			this.isOutputStream = true;
+
+			// Return the entity
+			return this.entity;
+		}
 	}
 
 	@Override
 	public void setContentType(String contentType) {
-		// TODO implement HttpResponse.setContentType
-		throw new UnsupportedOperationException(
-				"TODO implement HttpResponse.setContentType");
+
+		synchronized (this.receiver.getLock()) {
+
+			// Specify the content type
+			this.contentType = contentType;
+		}
 	}
 
 	@Override
-	public void setContentCharset(Charset charset) {
-		// TODO implement HttpResponse.setContentCharset
-		throw new UnsupportedOperationException(
-				"TODO implement HttpResponse.setContentCharset");
+	public void setContentCharset(Charset charset, String charsetName)
+			throws IOException {
+
+		synchronized (this.receiver.getLock()) {
+
+			// Ensure not using entity writer
+			if (this.entityWriter != null) {
+				throw new IOException(
+						"getEntityWriter() has already been invoked");
+			}
+
+			// Specify the charset
+			this.charset = charset;
+			this.charsetName = charsetName;
+			this.isDefaultCharset = false;
+		}
 	}
 
 	@Override
-	public void setContentCharset(String charset) {
-		// TODO implement HttpResponse.setContentCharset
-		throw new UnsupportedOperationException(
-				"TODO implement HttpResponse.setContentCharset");
-	}
+	public ServerWriter getEntityWriter() throws IOException {
 
-	@Override
-	public ServerWriter getEntityWriter() {
-		// TODO implement HttpResponse.getEntityWriter
-		throw new UnsupportedOperationException(
-				"TODO implement HttpResponse.getEntityWriter");
+		synchronized (this.receiver.getLock()) {
+
+			// Ensure not using output stream
+			if (this.isOutputStream) {
+				throw new IOException("getEntity() has already been invoked");
+			}
+
+			// Provide the default content type
+			if (this.contentType == null) {
+				this.contentType = "text/html";
+			}
+
+			// Create and return the entity writer
+			this.entityWriter = new ServerWriter(this.entity, this.charset,
+					this.isDefaultCharset, this.receiver.getLock());
+			return this.entityWriter;
+
+		}
 	}
 
 	@Override
 	public void send() throws IOException {
-		// Close the entity which triggers sending response
-		this.getEntity().close();
+
+		synchronized (this.receiver.getLock()) {
+
+			// Close the entity which triggers sending response
+			if (this.entityWriter != null) {
+				this.entityWriter.close();
+			} else {
+				this.entity.close();
+			}
+		}
 	}
 
 	/**
@@ -470,6 +554,8 @@ public class HttpResponseImpl implements HttpResponse {
 
 		/*
 		 * ==================== WriteBufferReceiver =================
+		 * 
+		 * Thread safe as called within lock of ServerOutputStream
 		 */
 
 		@Override

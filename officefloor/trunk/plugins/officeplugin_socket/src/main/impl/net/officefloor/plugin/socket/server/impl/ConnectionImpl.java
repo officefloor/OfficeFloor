@@ -198,8 +198,8 @@ public class ConnectionImpl implements Connection, ManagedConnection,
 		if (this.isTerminateAfterWrites) {
 
 			// Should not be writing data after terminating connection
-			if (LOGGER.isLoggable(Level.WARNING)) {
-				LOGGER.log(Level.WARNING,
+			if (LOGGER.isLoggable(Level.FINE)) {
+				LOGGER.log(Level.FINE,
 						"Attempting to write data after closing connection");
 			}
 

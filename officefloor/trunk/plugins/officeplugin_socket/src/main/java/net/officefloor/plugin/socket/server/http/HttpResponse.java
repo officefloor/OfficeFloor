@@ -132,20 +132,16 @@ public interface HttpResponse {
 	 * This must be specified before calling {@link #getEntityWriter()}.
 	 * 
 	 * @param charset
-	 *            {@link Charset} name.
+	 *            {@link Charset} for the {@link #getEntityWriter()}.
+	 * @param charsetName
+	 *            Name used in the {@link HttpHeader}. <code>null</code> will
+	 *            result in no <code>charset</code> being provided.
+	 * @throws IOException
+	 *             If attempting to specify after calling
+	 *             {@link #getEntityWriter()}.
 	 */
-	void setContentCharset(String charset);
-
-	/**
-	 * <p>
-	 * Specifies the {@link Charset}.
-	 * <p>
-	 * Name used will be {@link Charset#name()}.
-	 * 
-	 * @param charset
-	 *            {@link Charset}.
-	 */
-	void setContentCharset(Charset charset);
+	void setContentCharset(Charset charset, String charsetName)
+			throws IOException;
 
 	/**
 	 * <p>
@@ -159,11 +155,13 @@ public interface HttpResponse {
 	 * {@link #send()}.
 	 * 
 	 * @return {@link ServerOutputStream} to write the entity of the response.
+	 * @throws IOException
+	 *             Should {@link #getEntityWriter()} already be provided.
 	 * 
 	 * @see #getEntityWriter()
 	 * @see #send()
 	 */
-	ServerOutputStream getEntity();
+	ServerOutputStream getEntity() throws IOException;
 
 	/**
 	 * <p>
@@ -176,15 +174,17 @@ public interface HttpResponse {
 	 * {@link #send()}.
 	 * 
 	 * @return {@link ServerWriter} to write the entity of the response.
+	 * @throws IOException
+	 *             Should {@link #getEntity()} already be provided.
 	 * 
 	 * @see #getEntity()
 	 * @see #send()
 	 */
-	ServerWriter getEntityWriter();
+	ServerWriter getEntityWriter() throws IOException;
 
 	/**
 	 * Sends this {@link HttpResponse}. After calling this the
-	 * {@link ServerOutputStream} is closed.
+	 * {@link ServerOutputStream} or {@link ServerWriter} is closed.
 	 * 
 	 * @throws IOException
 	 *             If fails to send this {@link HttpResponse}.

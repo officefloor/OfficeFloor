@@ -18,6 +18,8 @@
 
 package net.officefloor.plugin.socket.server.http.protocol;
 
+import java.nio.charset.Charset;
+
 import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectExecuteContext;
@@ -132,6 +134,11 @@ public class HttpCommunicationProtocol implements CommunicationProtocolSource,
 	private int sendBufferSize;
 
 	/**
+	 * Default {@link Charset}.
+	 */
+	private Charset defaultCharset;
+
+	/**
 	 * Flow index to handle processing {@link HttpRequest}.
 	 */
 	private int requestHandlingFlowIndex;
@@ -194,6 +201,7 @@ public class HttpCommunicationProtocol implements CommunicationProtocolSource,
 
 		// Obtain context details
 		this.sendBufferSize = protocolContext.getSendBufferSize();
+		this.defaultCharset = protocolContext.getDefaultCharset();
 
 		// Specify types
 		configurationContext.setManagedObjectClass(HttpManagedObjectImpl.class);
@@ -224,7 +232,8 @@ public class HttpCommunicationProtocol implements CommunicationProtocolSource,
 	@Override
 	public HttpConnectionHandler createConnectionHandler(Connection connection) {
 		HttpConversation conversation = new HttpConversationImpl(connection,
-				this.sendBufferSize, this.isSendStackTraceOnFailure);
+				this.sendBufferSize, this.defaultCharset,
+				this.isSendStackTraceOnFailure);
 		HttpRequestParser parser = new HttpRequestParserImpl(
 				this.maximumHttpRequestHeaders, this.maxTextPartLength,
 				this.maximumRequestBodyLength);

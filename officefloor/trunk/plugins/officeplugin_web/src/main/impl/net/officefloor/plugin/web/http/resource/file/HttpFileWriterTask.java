@@ -76,7 +76,7 @@ public class HttpFileWriterTask
 			response.setContentType(contentType);
 		}
 		if (charset != null) {
-			response.setContentCharset(charset);
+			response.setContentCharset(charset, charset.name());
 		}
 
 		// Write the file
