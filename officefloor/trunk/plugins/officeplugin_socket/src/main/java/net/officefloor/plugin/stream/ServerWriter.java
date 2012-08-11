@@ -20,6 +20,7 @@ package net.officefloor.plugin.stream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
+import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 
 /**
@@ -35,64 +36,63 @@ public class ServerWriter extends OutputStreamWriter {
 	private final ServerOutputStream outputStream;
 
 	/**
-	 * Indicates if using the default {@link Charset} for the Server.
-	 */
-	private final boolean isServerDefaultCharset;
-
-	/**
 	 * Initiate.
 	 * 
 	 * @param outputStream
 	 *            {@link ServerOutputStream}.
 	 * @param charset
 	 *            {@link Charset}.
-	 * @param isServerDefaultCharset
-	 *            Indicates if using the default {@link Charset} for the Server.
 	 * @param lock
 	 *            Lock for <code>synchronize</code>.
 	 */
 	public ServerWriter(ServerOutputStream outputStream, Charset charset,
-			boolean isServerDefaultCharset, Object lock) {
+			Object lock) {
 		super(outputStream, charset);
 		this.lock = lock;
 		this.outputStream = outputStream;
-		this.isServerDefaultCharset = isServerDefaultCharset;
-	}
-
-	/**
-	 * Indicates if using the default {@link Charset} for the Server.
-	 * 
-	 * @return <code>true</code> if encoding with default {@link Charset} for
-	 *         the Server.
-	 * 
-	 * @see #write(byte[])
-	 */
-	public final boolean isServerDefaultCharset() {
-		return this.isServerDefaultCharset;
 	}
 
 	/**
 	 * <p>
 	 * Enables writing encoded bytes.
 	 * <p>
-	 * This is only to be used if writing with the default server
-	 * {@link Charset}.
-	 * <p>
 	 * Caution should also be taken to ensure that previous written content is
 	 * not waiting for further surrogate characters.
 	 * 
 	 * @param encodedBytes
 	 *            Encoded bytes.
+	 * @throws IOException
+	 *             If fails to write the bytes.
 	 * 
 	 * @see #isDefaultServerCharset
 	 */
 	public final void write(byte[] encodedBytes) throws IOException {
 
-		// Ensure server default charset
-		if (!this.isServerDefaultCharset) {
-			throw new IOException(
-					"May only write encoded bytes if default charset");
-		}
+		// Flush any content before directly writing bytes
+		this.flush();
+
+		// Write the encoded bytes
+		this.outputStream.write(encodedBytes);
+	}
+
+	/**
+	 * <p>
+	 * Enables writing encoded bytes.
+	 * <p>
+	 * Caution should also be taken to ensure that previous written content is
+	 * not waiting for further surrogate characters.
+	 * 
+	 * @param encodedBytes
+	 *            {@link ByteBuffer} containing the encoded bytes.
+	 * @throws IOException
+	 *             If fails to write the bytes.
+	 * 
+	 * @see #isDefaultServerCharset
+	 */
+	public final void write(ByteBuffer encodedBytes) throws IOException {
+
+		// Flush any content before directly writing bytes
+		this.flush();
 
 		// Write the encoded bytes
 		this.outputStream.write(encodedBytes);

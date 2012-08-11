@@ -19,7 +19,6 @@
 package net.officefloor.plugin.web.http.template.section;
 
 import java.io.IOException;
-import java.io.OutputStreamWriter;
 import java.io.Serializable;
 import java.io.Writer;
 
@@ -71,8 +70,7 @@ public class StatefulTemplateLogic implements Serializable {
 	public String increment(ServerHttpConnection connection) throws IOException {
 
 		// Indicate increment
-		Writer writer = new OutputStreamWriter(connection.getHttpResponse()
-				.getEntity());
+		Writer writer = connection.getHttpResponse().getEntityWriter();
 		writer.write("increment");
 		writer.flush();
 

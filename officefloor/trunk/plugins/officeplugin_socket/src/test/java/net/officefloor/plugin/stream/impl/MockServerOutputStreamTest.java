@@ -22,6 +22,7 @@ import java.nio.ByteBuffer;
 
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.stream.ServerOutputStream;
+import net.officefloor.plugin.stream.ServerWriter;
 
 /**
  * Tests the {@link MockServerOutputStream}.
@@ -38,7 +39,12 @@ public class MockServerOutputStreamTest extends OfficeFrameTestCase {
 	/**
 	 * {@link ServerOutputStream}.
 	 */
-	private final ServerOutputStream output = mock.getByteOutputStream();
+	private final ServerOutputStream output = this.mock.getServerOutputStream();
+
+	/**
+	 * {@link ServerWriter}.
+	 */
+	private final ServerWriter writer = this.mock.getServerWriter();
 
 	/**
 	 * Ensure able to write the data and obtain.
@@ -71,6 +77,20 @@ public class MockServerOutputStreamTest extends OfficeFrameTestCase {
 		byte[] writtenBytes = this.mock.getWrittenBytes();
 		assertEquals("Incorrect written bytes", "TEST",
 				new String(writtenBytes));
+	}
+
+	/**
+	 * Ensure able to write text and obtain.
+	 */
+	public void testWriteText() throws IOException {
+
+		// Write the text
+		this.writer.write("TEST");
+
+		// Validate otuput
+		this.mock.flush();
+		assertEquals("Incorrect written text", "TEST",
+				new String(this.mock.getWrittenBytes()));
 	}
 
 }

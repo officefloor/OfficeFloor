@@ -19,8 +19,6 @@
 package net.officefloor.plugin.web.http.resource.file;
 
 import java.io.IOException;
-import java.nio.ByteBuffer;
-import java.nio.charset.Charset;
 
 import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.api.build.TaskFactory;
@@ -28,6 +26,7 @@ import net.officefloor.frame.api.execute.TaskContext;
 import net.officefloor.frame.util.AbstractSingleTask;
 import net.officefloor.plugin.socket.server.http.HttpResponse;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
+import net.officefloor.plugin.web.http.resource.AbstractHttpFile;
 import net.officefloor.plugin.web.http.resource.HttpFile;
 
 /**
@@ -61,26 +60,8 @@ public class HttpFileWriterTask
 		ServerHttpConnection connection = (ServerHttpConnection) context
 				.getObject(HttpFileWriterTaskDependencies.SERVER_HTTP_CONNECTION);
 
-		// Obtain the details of the file
-		String contentEncoding = httpFile.getContentEncoding();
-		String contentType = httpFile.getContentType();
-		Charset charset = httpFile.getCharset();
-		ByteBuffer contents = httpFile.getContents();
-
-		// Specify the details of the file
-		HttpResponse response = connection.getHttpResponse();
-		if (contentEncoding != null) {
-			response.addHeader("Content-Encoding", contentEncoding);
-		}
-		if (contentType != null) {
-			response.setContentType(contentType);
-		}
-		if (charset != null) {
-			response.setContentCharset(charset, charset.name());
-		}
-
 		// Write the file
-		response.getEntity().write(contents);
+		AbstractHttpFile.writeHttpFile(httpFile, connection.getHttpResponse());
 
 		// Return nothing as file written to response
 		return null;

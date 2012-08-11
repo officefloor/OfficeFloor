@@ -19,7 +19,6 @@
 package net.officefloor.plugin.web.http.template.section;
 
 import java.io.IOException;
-import java.io.OutputStreamWriter;
 import java.io.Writer;
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -156,8 +155,7 @@ public class TemplateLogic {
 	public String nextTask(ServerHttpConnection connection) throws IOException {
 
 		// Indicate next task
-		Writer writer = new OutputStreamWriter(connection.getHttpResponse()
-				.getEntity());
+		Writer writer = connection.getHttpResponse().getEntityWriter();
 		writer.write("nextTask");
 		writer.flush();
 
@@ -181,8 +179,7 @@ public class TemplateLogic {
 			throws SQLException, IOException {
 
 		// Indicate submit
-		Writer writer = new OutputStreamWriter(connection.getHttpResponse()
-				.getEntity());
+		Writer writer = connection.getHttpResponse().getEntityWriter();
 		writer.write("<submit />");
 		writer.flush();
 
@@ -237,8 +234,7 @@ public class TemplateLogic {
 			throws IOException {
 
 		// Indicate internal flow with its parameter
-		Writer writer = new OutputStreamWriter(httpConnection.getHttpResponse()
-				.getEntity());
+		Writer writer = httpConnection.getHttpResponse().getEntityWriter();
 		writer.write(" - doInternalFlow[");
 		writer.write(String.valueOf(parameter.intValue()));
 		writer.write("]");
@@ -314,7 +310,7 @@ public class TemplateLogic {
 		}
 
 		/**
-		 * Obtains the name.
+		 * Obtains the name.o
 		 * 
 		 * @return Name.
 		 */

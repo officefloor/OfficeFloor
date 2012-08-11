@@ -32,10 +32,10 @@ import net.officefloor.frame.api.execute.TaskContext;
 import net.officefloor.plugin.socket.server.http.HttpResponse;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
 import net.officefloor.plugin.socket.server.http.protocol.HttpStatus;
-import net.officefloor.plugin.stream.ServerOutputStream;
 import net.officefloor.plugin.web.http.location.HttpApplicationLocation;
 import net.officefloor.plugin.web.http.location.HttpApplicationLocationMangedObject;
 import net.officefloor.plugin.web.http.location.InvalidHttpRequestUriException;
+import net.officefloor.plugin.web.http.resource.AbstractHttpFile;
 import net.officefloor.plugin.web.http.resource.FileExtensionHttpFileDescriber;
 import net.officefloor.plugin.web.http.resource.HttpFile;
 import net.officefloor.plugin.web.http.resource.HttpResource;
@@ -164,7 +164,6 @@ public class HttpFileSenderWorkSource extends
 
 				// Obtain the response to write
 				HttpResponse response = connection.getHttpResponse();
-				ServerOutputStream entity = response.getEntity();
 
 				// Determine if HTTP file exists
 				if ((httpResource.isExist())
@@ -172,14 +171,15 @@ public class HttpFileSenderWorkSource extends
 					HttpFile httpFile = (HttpFile) httpResource;
 
 					// Send the HTTP File
-					entity.write(httpFile.getContents().duplicate());
+					AbstractHttpFile.writeHttpFile(httpFile, response);
 
 					// Specify found status
 					response.setStatus(HttpStatus.SC_OK);
 
 				} else {
 					// File not found so write file not found content
-					entity.write(fileNotFoundContent.getContents().duplicate());
+					AbstractHttpFile.writeHttpFile(fileNotFoundContent,
+							response);
 
 					// Specify not found status
 					response.setStatus(HttpStatus.SC_NOT_FOUND);

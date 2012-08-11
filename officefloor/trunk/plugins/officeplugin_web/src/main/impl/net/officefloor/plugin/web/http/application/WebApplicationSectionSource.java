@@ -26,8 +26,6 @@ import net.officefloor.autowire.AutoWireSection;
 import net.officefloor.compile.properties.Property;
 import net.officefloor.compile.spi.section.SectionDesigner;
 import net.officefloor.compile.spi.section.SectionInput;
-import net.officefloor.compile.spi.section.SectionManagedObject;
-import net.officefloor.compile.spi.section.SectionManagedObjectSource;
 import net.officefloor.compile.spi.section.SectionObject;
 import net.officefloor.compile.spi.section.SectionOutput;
 import net.officefloor.compile.spi.section.SectionTask;
@@ -41,7 +39,6 @@ import net.officefloor.frame.api.manage.InvalidParameterTypeException;
 import net.officefloor.frame.api.manage.UnknownTaskException;
 import net.officefloor.frame.api.manage.UnknownWorkException;
 import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
-import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.plugin.socket.server.http.HttpRequest;
 import net.officefloor.plugin.socket.server.http.HttpResponse;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
@@ -275,17 +272,6 @@ public class WebApplicationSectionSource extends AbstractSectionSource {
 		final Map<Class<?>, SectionObject> objects = new HashMap<Class<?>, SectionObject>();
 		final Map<Class<?>, SectionOutput> escalations = new HashMap<Class<?>, SectionOutput>();
 
-		// Provide the HTTP request handler marker object
-		String requestHandlerMarkerName = HttpTemplateRouteDependencies.HTTP_REQUEST_HANDLER_MARKER
-				.name();
-		SectionManagedObjectSource handlerMarkerManagedObjectSource = designer
-				.addSectionManagedObjectSource(requestHandlerMarkerName,
-						HttpRequestHandlerMarkerManagedObjectSource.class
-								.getName());
-		SectionManagedObject handlerMarkerManagedObject = handlerMarkerManagedObjectSource
-				.addSectionManagedObject(requestHandlerMarkerName,
-						ManagedObjectScope.PROCESS);
-
 		// Add the Link route task
 		SectionWork routeLinkWork = designer.addSectionWork("LINK_ROUTE",
 				HttpTemplateRouteWorkSource.class.getName());
@@ -301,10 +287,6 @@ public class WebApplicationSectionSource extends AbstractSectionSource {
 		linkObject(routeLinkTask,
 				HttpTemplateRouteDependencies.HTTP_APPLICATION_LOCATION.name(),
 				HttpApplicationLocation.class, designer, objects);
-		designer.link(
-				routeLinkTask
-						.getTaskObject(HttpTemplateRouteDependencies.HTTP_REQUEST_HANDLER_MARKER
-								.name()), handlerMarkerManagedObject);
 		linkEscalation(routeLinkTask, InvalidHttpRequestUriException.class,
 				designer, escalations);
 		linkEscalation(routeLinkTask, UnknownWorkException.class, designer,

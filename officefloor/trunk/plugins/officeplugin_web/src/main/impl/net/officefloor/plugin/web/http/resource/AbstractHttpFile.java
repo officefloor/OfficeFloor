@@ -23,6 +23,8 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.nio.charset.Charset;
 
+import net.officefloor.plugin.socket.server.http.HttpResponse;
+
 /**
  * Abstract {@link HttpFile} implementation.
  * 
@@ -30,6 +32,40 @@ import java.nio.charset.Charset;
  */
 public abstract class AbstractHttpFile extends AbstractHttpResource implements
 		HttpFile {
+
+	/**
+	 * Writes the {@link HttpFile} to the {@link HttpResponse}.
+	 * 
+	 * @param file
+	 *            {@link HttpFile} to write to the {@link HttpResponse}.
+	 * @param response
+	 *            {@link HttpResponse}
+	 * @throws IOException
+	 *             If fails to write the {@link HttpFile}.
+	 */
+	public static void writeHttpFile(HttpFile file, HttpResponse response)
+			throws IOException {
+
+		// Reset the HTTP response for writing the file
+		response.reset();
+
+		// Provide the details of the file
+		String contentEncoding = file.getContentEncoding();
+		if ((contentEncoding != null) && (contentEncoding.length() > 0)) {
+			response.addHeader("Content-Encoding", contentEncoding);
+		}
+		String contentType = file.getContentType();
+		if ((contentType != null) && (contentType.length() > 0)) {
+			response.setContentType(contentType);
+		}
+		Charset charset = file.getCharset();
+		if (charset != null) {
+			response.setContentCharset(charset, charset.name());
+		}
+
+		// Write the HTTP file content to response
+		response.getEntityWriter().write(file.getContents().duplicate());
+	}
 
 	/**
 	 * <code>Content-Encoding</code>.
@@ -165,21 +201,7 @@ public abstract class AbstractHttpFile extends AbstractHttpResource implements
 		stream.writeObject(this.contentType);
 		String charsetName = (this.charset == null ? null : this.charset.name());
 		stream.writeObject(charsetName);
-
-//		// Write state of implementation
-//		this.writeImplementingObject(stream);
 	}
-
-//	/**
-//	 * Writes the implementing object state.
-//	 * 
-//	 * @param stream
-//	 *            {@link ObjectOutputStream}.
-//	 * @throws IOException
-//	 *             {@link IOException}.
-//	 */
-//	protected abstract void writeImplementingObject(ObjectOutputStream stream)
-//			throws IOException;
 
 	/**
 	 * Due to the {@link Charset} must manually handle serialising this
@@ -202,22 +224,6 @@ public abstract class AbstractHttpFile extends AbstractHttpResource implements
 		String charsetName = (String) stream.readObject();
 		this.charset = (charsetName == null ? null : Charset
 				.forName(charsetName));
-
-//		// Read state of implementation
-//		this.readImplementingObject(stream);
 	}
-
-//	/**
-//	 * Reads the implementing object state.
-//	 * 
-//	 * @param stream
-//	 *            {@link ObjectInputStream}.
-//	 * @throws IOException
-//	 *             {@link IOException}.
-//	 * @throws ClassNotFoundException
-//	 *             {@link ClassNotFoundException}.
-//	 */
-//	protected abstract void readImplementingObject(ObjectInputStream stream)
-//			throws IOException, ClassNotFoundException;
 
 }

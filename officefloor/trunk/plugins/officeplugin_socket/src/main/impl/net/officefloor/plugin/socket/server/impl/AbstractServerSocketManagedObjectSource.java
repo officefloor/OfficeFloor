@@ -399,7 +399,15 @@ public abstract class AbstractServerSocketManagedObjectSource extends
 	public void stop() {
 
 		// Unbind acceptor socket to listen for new connections
-		this.serverSocketAccepter.unbindFromSocket();
+		try {
+			this.serverSocketAccepter.unbindFromSocket();
+
+		} catch (IOException ex) {
+			// Shutting down so just log issue
+			if (LOGGER.isLoggable(Level.INFO)) {
+				LOGGER.log(Level.INFO, "Failed to unbind from Socket", ex);
+			}
+		}
 
 		// Release connection manager (closes socket listeners when appropriate)
 		try {

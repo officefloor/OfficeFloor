@@ -389,11 +389,11 @@ public class HttpServerAutoWireOfficeFloorSourceTest extends
 	 *            URL to send the HTTP request.
 	 * @param expectedResponseStatus
 	 *            Expected response status.
-	 * @param expectedResponseBody
-	 *            Expected response body.
+	 * @param expectedResponseEntity
+	 *            Expected response entity.
 	 */
 	private void assertHttpRequest(String url, int expectedResponseStatus,
-			String expectedResponseBody) {
+			String expectedResponseEntity) {
 		try {
 
 			HttpResponse response;
@@ -416,14 +416,18 @@ public class HttpServerAutoWireOfficeFloorSourceTest extends
 				throw ex;
 			}
 
+			// Obtain the actual entity
+			String actualResponseEntity = MockHttpServer
+					.getEntityBody(response);
+
 			// Ensure correct response status
-			assertEquals("Should be successful", expectedResponseStatus,
-					response.getStatusLine().getStatusCode());
+			assertEquals("Should be successful [" + actualResponseEntity + "]",
+					expectedResponseStatus, response.getStatusLine()
+							.getStatusCode());
 
 			// Ensure obtained as expected
-			String actualResponseBody = MockHttpServer.getEntityBody(response);
 			assertEquals("Incorrect response for URL '" + url + "'",
-					expectedResponseBody, actualResponseBody);
+					expectedResponseEntity, actualResponseEntity);
 
 		} catch (Exception ex) {
 			throw fail(ex);

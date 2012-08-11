@@ -20,6 +20,7 @@ package net.officefloor.plugin.web.http.resource.source;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.charset.Charset;
 
 import net.officefloor.compile.spi.work.source.TaskTypeBuilder;
 import net.officefloor.compile.spi.work.source.WorkTypeBuilder;
@@ -33,8 +34,8 @@ import net.officefloor.plugin.socket.server.http.HttpResponse;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
 import net.officefloor.plugin.stream.impl.MockServerOutputStream;
 import net.officefloor.plugin.web.http.resource.HttpFile;
-import net.officefloor.plugin.web.http.resource.source.HttpFileWorkSource.ClasspathHttpFileTask;
 import net.officefloor.plugin.web.http.resource.source.HttpFileWorkSource.DependencyKeys;
+import net.officefloor.plugin.web.http.resource.source.HttpFileWorkSource.SendHttpFileTask;
 
 /**
  * Tests the {@link HttpFileWorkSource}.
@@ -80,9 +81,9 @@ public class HttpFileWorkSourceTest extends OfficeFrameTestCase {
 	public void testType() {
 
 		// Create expected type
-		WorkTypeBuilder<ClasspathHttpFileTask> type = WorkLoaderUtil
+		WorkTypeBuilder<SendHttpFileTask> type = WorkLoaderUtil
 				.createWorkTypeBuilder(null);
-		ClasspathHttpFileTask factory = new ClasspathHttpFileTask(null);
+		SendHttpFileTask factory = new SendHttpFileTask(null);
 		type.setWorkFactory(factory);
 		TaskTypeBuilder<DependencyKeys, None> task = type.addTaskType(
 				HttpFileWorkSource.TASK_HTTP_FILE, factory,
@@ -129,14 +130,18 @@ public class HttpFileWorkSourceTest extends OfficeFrameTestCase {
 				this.connection);
 		this.recordReturn(this.connection, this.connection.getHttpResponse(),
 				this.response);
-		this.recordReturn(this.response, this.response.getEntity(),
-				this.entity.getByteOutputStream());
+		this.response.reset();
+		this.response.setContentType("text/html");
+		Charset charset = Charset.defaultCharset();
+		this.response.setContentCharset(charset, charset.name());
+		this.recordReturn(this.response, this.response.getEntityWriter(),
+				this.entity.getServerWriter());
 
 		// Test
 		this.replayMockObjects();
 
 		// Load the work type
-		WorkType<ClasspathHttpFileTask> workType = WorkLoaderUtil.loadWorkType(
+		WorkType<SendHttpFileTask> workType = WorkLoaderUtil.loadWorkType(
 				HttpFileWorkSource.class,
 				SourceHttpResourceFactory.PROPERTY_CLASS_PATH_PREFIX, this
 						.getClass().getPackage().getName(),
@@ -154,6 +159,7 @@ public class HttpFileWorkSourceTest extends OfficeFrameTestCase {
 		this.verifyMockObjects();
 
 		// Verify the file contents
+		this.entity.getServerOutputStream().flush();
 		assertEquals("Incorrect file content", fileContents, new String(
 				this.entity.getWrittenBytes()));
 	}

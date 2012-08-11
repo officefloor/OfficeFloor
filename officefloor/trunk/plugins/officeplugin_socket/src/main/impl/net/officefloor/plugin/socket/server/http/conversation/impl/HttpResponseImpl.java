@@ -130,11 +130,6 @@ public class HttpResponseImpl implements HttpResponse {
 	private String charsetName;
 
 	/**
-	 * Indicates if the default {@link Charset}.
-	 */
-	private boolean isDefaultCharset = true;
-
-	/**
 	 * Cache the {@link ServerWriter}. Also indicates if using the
 	 * {@link ServerWriter}.
 	 */
@@ -201,11 +196,7 @@ public class HttpResponseImpl implements HttpResponse {
 		synchronized (this.connection.getLock()) {
 
 			// Clear the response to write the failure
-			this.headers.clear();
-			this.entity.clear();
-			this.receiver.entityBuffers.clear();
-			this.isOutputStream = false;
-			this.entityWriter = null;
+			this.resetUnsafe();
 
 			// Write the failure header details
 			if (failure instanceof HttpRequestParseException) {
@@ -300,6 +291,22 @@ public class HttpResponseImpl implements HttpResponse {
 		outputStream.write(value.getBytes(HttpRequestParserImpl.US_ASCII));
 	}
 
+	/**
+	 * Resets the {@link HttpResponse} without lock.
+	 * 
+	 * @throws IOException
+	 *             If fails to reset.
+	 */
+	private void resetUnsafe() throws IOException {
+
+		// Clear the response to write the failure
+		this.headers.clear();
+		this.entity.clear();
+		this.receiver.entityBuffers.clear();
+		this.isOutputStream = false;
+		this.entityWriter = null;
+	}
+
 	/*
 	 * ================ HttpResponse =======================================
 	 */
@@ -332,6 +339,16 @@ public class HttpResponseImpl implements HttpResponse {
 			// Specify the status
 			this.status = status;
 			this.statusMessage = statusMessage;
+		}
+	}
+
+	@Override
+	public void reset() throws IOException {
+
+		synchronized (this.connection.getLock()) {
+
+			// Reset the response
+			this.resetUnsafe();
 		}
 	}
 
@@ -460,7 +477,6 @@ public class HttpResponseImpl implements HttpResponse {
 			// Specify the charset
 			this.charset = charset;
 			this.charsetName = charsetName;
-			this.isDefaultCharset = false;
 		}
 	}
 
@@ -481,7 +497,7 @@ public class HttpResponseImpl implements HttpResponse {
 
 			// Create and return the entity writer
 			this.entityWriter = new ServerWriter(this.entity, this.charset,
-					this.isDefaultCharset, this.receiver.getLock());
+					this.receiver.getLock());
 			return this.entityWriter;
 
 		}

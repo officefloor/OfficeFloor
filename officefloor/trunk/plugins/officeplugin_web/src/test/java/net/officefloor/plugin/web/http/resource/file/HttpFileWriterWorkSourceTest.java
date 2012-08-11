@@ -20,6 +20,7 @@ package net.officefloor.plugin.web.http.resource.file;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.nio.charset.Charset;
 
 import net.officefloor.compile.spi.work.source.TaskTypeBuilder;
 import net.officefloor.compile.spi.work.source.WorkTypeBuilder;
@@ -29,8 +30,10 @@ import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.execute.TaskContext;
 import net.officefloor.frame.test.OfficeFrameTestCase;
+import net.officefloor.plugin.socket.server.http.HttpHeader;
 import net.officefloor.plugin.socket.server.http.HttpResponse;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
+import net.officefloor.plugin.socket.server.http.parse.UsAsciiUtil;
 import net.officefloor.plugin.stream.impl.MockServerOutputStream;
 import net.officefloor.plugin.web.http.resource.HttpFile;
 import net.officefloor.plugin.web.http.resource.file.HttpFileWriterTask.HttpFileWriterTaskDependencies;
@@ -73,12 +76,17 @@ public class HttpFileWriterWorkSourceTest extends OfficeFrameTestCase {
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public void testWriteHttpFile() throws Throwable {
 
+		final String contentEncoding = "gzip";
+		final String contentType = "text/plain";
+		final Charset charset = UsAsciiUtil.US_ASCII;
+
 		TaskContext<HttpFileWriterTask, HttpFileWriterTaskDependencies, None> taskContext = this
 				.createMock(TaskContext.class);
 		HttpFile httpFile = this.createMock(HttpFile.class);
 		ServerHttpConnection connection = this
 				.createMock(ServerHttpConnection.class);
 		HttpResponse response = this.createMock(HttpResponse.class);
+		HttpHeader header = this.createMock(HttpHeader.class);
 		ByteBuffer contents = ByteBuffer.wrap("TEST".getBytes());
 		MockServerOutputStream entity = new MockServerOutputStream();
 
@@ -93,12 +101,18 @@ public class HttpFileWriterWorkSourceTest extends OfficeFrameTestCase {
 						.getObject(HttpFileWriterTaskDependencies.SERVER_HTTP_CONNECTION),
 				connection);
 		this.recordReturn(connection, connection.getHttpResponse(), response);
-		this.recordReturn(httpFile, httpFile.getContentEncoding(), "");
-		this.recordReturn(httpFile, httpFile.getContentType(), "");
-		this.recordReturn(httpFile, httpFile.getCharset(), null);
+		response.reset();
+		this.recordReturn(httpFile, httpFile.getContentEncoding(),
+				contentEncoding);
+		this.recordReturn(response,
+				response.addHeader("Content-Encoding", contentEncoding), header);
+		this.recordReturn(httpFile, httpFile.getContentType(), contentType);
+		response.setContentType(contentType);
+		this.recordReturn(httpFile, httpFile.getCharset(), charset);
+		response.setContentCharset(charset, charset.name());
 		this.recordReturn(httpFile, httpFile.getContents(), contents);
-		this.recordReturn(response, response.getEntity(),
-				entity.getByteOutputStream());
+		this.recordReturn(response, response.getEntityWriter(),
+				entity.getServerWriter());
 
 		// Test
 		this.replayMockObjects();
@@ -115,6 +129,7 @@ public class HttpFileWriterWorkSourceTest extends OfficeFrameTestCase {
 		this.verifyMockObjects();
 
 		// Validate the entity content
+		entity.flush();
 		assertEquals("Incorrect entity content", "TEST",
 				new String(entity.getWrittenBytes()));
 	}

@@ -21,7 +21,6 @@ package net.officefloor.plugin.web.http.application;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.io.OutputStreamWriter;
 import java.io.Serializable;
 import java.io.Writer;
 import java.sql.SQLException;
@@ -400,8 +399,8 @@ public class WebApplicationAutoWireOfficeFloorSourceTest extends
 		this.source.linkToResource(section, "resource", "resource.html");
 		this.source.openOfficeFloor();
 
-		// Ensure link to the HTTP template
-		this.assertHttpRequest("/test", 200, "LINK to RESOURCE");
+		// Ensure provide the resource
+		this.assertHttpRequest("/test", 200, "RESOURCE");
 	}
 
 	/**
@@ -462,7 +461,7 @@ public class WebApplicationAutoWireOfficeFloorSourceTest extends
 		this.source.openOfficeFloor();
 
 		// Ensure link escalation to resource
-		this.assertHttpRequest("/test", 200, "Escalated to RESOURCE");
+		this.assertHttpRequest("/test", 200, "RESOURCE");
 	}
 
 	/**
@@ -1018,8 +1017,7 @@ public class WebApplicationAutoWireOfficeFloorSourceTest extends
 	 */
 	private static void writeResponse(String response,
 			ServerHttpConnection connection) throws IOException {
-		Writer writer = new OutputStreamWriter(connection.getHttpResponse()
-				.getEntity());
+		Writer writer = connection.getHttpResponse().getEntityWriter();
 		writer.append(response);
 		writer.flush();
 	}
