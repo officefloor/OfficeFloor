@@ -33,14 +33,9 @@ import net.officefloor.plugin.web.http.template.parse.StaticHttpTemplateSectionC
 public class StaticHttpTemplateWriter implements HttpTemplateWriter {
 
 	/**
-	 * Content to write to the {@link ServerWriter}.
+	 * Encoded content to write to the {@link ServerWriter}.
 	 */
-	private final String content;
-
-	/**
-	 * Default encoded content to write to the {@link ServerWriter}.
-	 */
-	private final byte[] defaultEncodedContent;
+	private final byte[] encodedContent;
 
 	/**
 	 * Initiate.
@@ -55,11 +50,10 @@ public class StaticHttpTemplateWriter implements HttpTemplateWriter {
 	public StaticHttpTemplateWriter(
 			StaticHttpTemplateSectionContent staticContent,
 			Charset serverDefaultCharset) throws IOException {
-		this.content = staticContent.getStaticContent();
+		String content = staticContent.getStaticContent();
 
 		// Pre-encode the static content for faster I/O
-		this.defaultEncodedContent = this.content
-				.getBytes(serverDefaultCharset);
+		this.encodedContent = content.getBytes(serverDefaultCharset);
 	}
 
 	/*
@@ -70,16 +64,8 @@ public class StaticHttpTemplateWriter implements HttpTemplateWriter {
 	public void write(ServerWriter writer, String workName, Object bean,
 			HttpApplicationLocation location) throws IOException {
 
-		// Determine if default server encoding
-		if (writer.isServerDefaultCharset()) {
-			// Default encoding, so provide pre-encoded content
-			writer.flush(); // Ensure previous content flushed
-			writer.write(this.defaultEncodedContent);
-
-		} else {
-			// Provide content for encoding
-			writer.write(this.content);
-		}
+		// Provide pre-encoded content
+		writer.write(this.encodedContent);
 	}
 
 }

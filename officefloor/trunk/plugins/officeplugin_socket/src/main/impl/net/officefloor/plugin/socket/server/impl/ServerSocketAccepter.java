@@ -125,15 +125,29 @@ public class ServerSocketAccepter extends
 
 	/**
 	 * Unbinds from the {@link ServerSocketChannel}.
+	 * 
+	 * @throws IOException
+	 *             If fails to unbind from the {@link Socket}.
 	 */
-	void unbindFromSocket() {
+	void unbindFromSocket() throws IOException {
 
 		// Flag to complete processing
 		this.isComplete = true;
 
-		// Process accepting connections
+		// Wake up selector immediately to allow stopping
 		if (this.selector != null) {
 			this.selector.wakeup();
+		}
+
+		// Ensure stop accepting immediately
+		synchronized (this) {
+			try {
+				// Close the selector
+				this.selector.close();
+			} finally {
+				// Unbind the socket
+				this.channel.socket().close();
+			}
 		}
 	}
 
@@ -152,15 +166,8 @@ public class ServerSocketAccepter extends
 			boolean isComplete = this.isComplete;
 			context.setComplete(isComplete);
 
-			// Unbind socket if complete
+			// Do nothing if complete
 			if (isComplete) {
-				// Close the selector
-				this.selector.close();
-
-				// Unbind the socket
-				this.channel.socket().close();
-
-				// Complete
 				return null;
 			}
 

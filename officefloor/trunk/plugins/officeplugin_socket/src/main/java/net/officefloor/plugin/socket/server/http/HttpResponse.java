@@ -67,6 +67,15 @@ public interface HttpResponse {
 	void setStatus(int status, String statusMessage);
 
 	/**
+	 * Resets the {@link HttpResponse} by clearing {@link HttpHeader} instances
+	 * and the entity.
+	 * 
+	 * @throws IOException
+	 *             If committed to send the {@link HttpResponse}.
+	 */
+	void reset() throws IOException;
+
+	/**
 	 * <p>
 	 * Adds a {@link HttpHeader} for the response.
 	 * <p>

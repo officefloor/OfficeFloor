@@ -20,6 +20,7 @@ package net.officefloor.plugin.stream.impl;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.nio.charset.Charset;
 
 import junit.framework.TestCase;
 import net.officefloor.plugin.socket.server.impl.ArrayWriteBuffer;
@@ -27,6 +28,7 @@ import net.officefloor.plugin.socket.server.impl.BufferWriteBuffer;
 import net.officefloor.plugin.socket.server.protocol.WriteBuffer;
 import net.officefloor.plugin.socket.server.protocol.WriteBufferEnum;
 import net.officefloor.plugin.stream.ServerOutputStream;
+import net.officefloor.plugin.stream.ServerWriter;
 import net.officefloor.plugin.stream.WriteBufferReceiver;
 
 /**
@@ -37,9 +39,19 @@ import net.officefloor.plugin.stream.WriteBufferReceiver;
 public class MockServerOutputStream implements WriteBufferReceiver {
 
 	/**
+	 * Default send buffer size.
+	 */
+	private static final int SEND_BUFFER_SIZE = 1024;
+
+	/**
 	 * {@link ServerOutputStream}.
 	 */
-	private final ServerOutputStream byteOutputStream;
+	private final ServerOutputStream serverOutputStream;
+
+	/**
+	 * {@link ServerWriter}.
+	 */
+	private final ServerWriter serverWriter;
 
 	/**
 	 * {@link ByteArrayOutputStream} containing the written bytes.
@@ -55,7 +67,7 @@ public class MockServerOutputStream implements WriteBufferReceiver {
 	 * Initiate.
 	 */
 	public MockServerOutputStream() {
-		this(1024);
+		this(SEND_BUFFER_SIZE);
 	}
 
 	/**
@@ -65,7 +77,32 @@ public class MockServerOutputStream implements WriteBufferReceiver {
 	 *            Send buffer size.
 	 */
 	public MockServerOutputStream(int sendBufferSize) {
-		this.byteOutputStream = new ServerOutputStreamImpl(this, sendBufferSize);
+		this(sendBufferSize, Charset.defaultCharset());
+	}
+
+	/**
+	 * Initiate.
+	 * 
+	 * @param charset
+	 *            {@link Charset}.
+	 */
+	public MockServerOutputStream(Charset charset) {
+		this(SEND_BUFFER_SIZE, charset);
+	}
+
+	/**
+	 * Initiate.
+	 * 
+	 * @param sendBufferSize
+	 *            Send buffer size.
+	 * @param charset
+	 *            {@link Charset}.
+	 */
+	public MockServerOutputStream(int sendBufferSize, Charset charset) {
+		this.serverOutputStream = new ServerOutputStreamImpl(this,
+				sendBufferSize);
+		this.serverWriter = new ServerWriter(this.serverOutputStream, charset,
+				this);
 		this.writtenBytes = new ByteArrayOutputStream(sendBufferSize);
 	}
 
@@ -74,8 +111,28 @@ public class MockServerOutputStream implements WriteBufferReceiver {
 	 * 
 	 * @return {@link ServerOutputStream}.
 	 */
-	public ServerOutputStream getByteOutputStream() {
-		return this.byteOutputStream;
+	public ServerOutputStream getServerOutputStream() {
+		return this.serverOutputStream;
+	}
+
+	/**
+	 * Obtains the {@link ServerWriter}.
+	 * 
+	 * @return {@link ServerWriter}.
+	 */
+	public ServerWriter getServerWriter() {
+		return this.serverWriter;
+	}
+
+	/**
+	 * Flushes all content.
+	 * 
+	 * @throws IOException
+	 *             If fails to flush content.
+	 */
+	public void flush() throws IOException {
+		this.serverWriter.flush();
+		this.serverOutputStream.flush();
 	}
 
 	/**

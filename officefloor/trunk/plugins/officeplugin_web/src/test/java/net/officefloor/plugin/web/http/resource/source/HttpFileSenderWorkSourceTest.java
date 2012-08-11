@@ -20,6 +20,7 @@ package net.officefloor.plugin.web.http.resource.source;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -287,8 +288,12 @@ public class HttpFileSenderWorkSourceTest extends OfficeFrameTestCase {
 				this.location.transformToApplicationCanonicalPath(uri), uri);
 		this.recordReturn(this.connection, this.connection.getHttpResponse(),
 				this.response);
-		this.recordReturn(this.response, this.response.getEntity(),
-				this.entity.getByteOutputStream());
+		this.response.reset();
+		this.response.setContentType("text/html");
+		Charset charset = Charset.defaultCharset();
+		this.response.setContentCharset(charset, charset.name());
+		this.recordReturn(this.response, this.response.getEntityWriter(),
+				this.entity.getServerWriter());
 		this.response.setStatus(status);
 		this.response.send();
 	}
@@ -298,6 +303,9 @@ public class HttpFileSenderWorkSourceTest extends OfficeFrameTestCase {
 	 */
 	private void verifyFileSent(String fileName) throws IOException {
 		this.verifyMockObjects();
+
+		// Flush contents, that otherwise would happen on response send
+		this.entity.flush();
 
 		// Validate the file content
 		File file = this.findFile(this.getClass(), fileName);

@@ -33,6 +33,7 @@ import net.officefloor.frame.util.AbstractSingleTask;
 import net.officefloor.plugin.socket.server.http.HttpResponse;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
 import net.officefloor.plugin.web.http.location.HttpApplicationLocationMangedObject;
+import net.officefloor.plugin.web.http.resource.AbstractHttpFile;
 import net.officefloor.plugin.web.http.resource.FileExtensionHttpFileDescriber;
 import net.officefloor.plugin.web.http.resource.HttpFile;
 import net.officefloor.plugin.web.http.resource.HttpResource;
@@ -44,7 +45,7 @@ import net.officefloor.plugin.web.http.resource.HttpResourceFactory;
  * @author Daniel Sagenschneider
  */
 public class HttpFileWorkSource extends
-		AbstractWorkSource<HttpFileWorkSource.ClasspathHttpFileTask> {
+		AbstractWorkSource<HttpFileWorkSource.SendHttpFileTask> {
 
 	/**
 	 * Dependency keys for the {@link ClasspathHttpFileTask}.
@@ -73,8 +74,7 @@ public class HttpFileWorkSource extends
 	}
 
 	@Override
-	public void sourceWork(
-			WorkTypeBuilder<ClasspathHttpFileTask> workTypeBuilder,
+	public void sourceWork(WorkTypeBuilder<SendHttpFileTask> workTypeBuilder,
 			WorkSourceContext context) throws Exception {
 
 		// Obtain the properties
@@ -107,7 +107,7 @@ public class HttpFileWorkSource extends
 		HttpFile file = (HttpFile) resource;
 
 		// Create the factory for the task
-		ClasspathHttpFileTask factory = new ClasspathHttpFileTask(file);
+		SendHttpFileTask factory = new SendHttpFileTask(file);
 
 		// Register the task information
 		workTypeBuilder.setWorkFactory(factory);
@@ -122,8 +122,8 @@ public class HttpFileWorkSource extends
 	/**
 	 * {@link Task} to send the {@link HttpFile}.
 	 */
-	public static class ClasspathHttpFileTask extends
-			AbstractSingleTask<ClasspathHttpFileTask, DependencyKeys, None> {
+	public static class SendHttpFileTask extends
+			AbstractSingleTask<SendHttpFileTask, DependencyKeys, None> {
 
 		/**
 		 * {@link HttpFile}.
@@ -136,7 +136,7 @@ public class HttpFileWorkSource extends
 		 * @param file
 		 *            {@link HttpFile}.
 		 */
-		public ClasspathHttpFileTask(HttpFile file) {
+		public SendHttpFileTask(HttpFile file) {
 			this.file = file;
 		}
 
@@ -146,7 +146,7 @@ public class HttpFileWorkSource extends
 
 		@Override
 		public Object doTask(
-				TaskContext<ClasspathHttpFileTask, DependencyKeys, None> context)
+				TaskContext<SendHttpFileTask, DependencyKeys, None> context)
 				throws IOException {
 
 			// Obtain the response
@@ -154,8 +154,8 @@ public class HttpFileWorkSource extends
 					.getObject(DependencyKeys.SERVER_HTTP_CONNECTION);
 			HttpResponse response = connection.getHttpResponse();
 
-			// Write the HTTP file to response
-			response.getEntity().write(this.file.getContents().duplicate());
+			// Write the HTTP file
+			AbstractHttpFile.writeHttpFile(this.file, response);
 
 			// Nothing to return
 			return null;

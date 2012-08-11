@@ -63,13 +63,8 @@ public class MockHttpResponse implements HttpResponse {
 	/**
 	 * Entity.
 	 */
-	private MockServerOutputStream entity = new MockServerOutputStream();
-
-	/**
-	 * Entity writer.
-	 */
-	private ServerWriter entityWriter = new ServerWriter(
-			this.entity.getByteOutputStream(), UsAsciiUtil.US_ASCII, true, this);
+	private MockServerOutputStream entity = new MockServerOutputStream(
+			UsAsciiUtil.US_ASCII);
 
 	/**
 	 * Flag indicating if sent.
@@ -153,6 +148,13 @@ public class MockHttpResponse implements HttpResponse {
 	}
 
 	@Override
+	public void reset() throws IOException {
+		// TODO implement HttpResponse.reset
+		throw new UnsupportedOperationException(
+				"TODO implement HttpResponse.reset");
+	}
+
+	@Override
 	public HttpHeader addHeader(String name, String value) {
 		TestCase.assertFalse("Response already contains header '" + name + "'",
 				this.headers.containsKey(name));
@@ -191,7 +193,7 @@ public class MockHttpResponse implements HttpResponse {
 
 	@Override
 	public ServerOutputStream getEntity() {
-		return this.entity.getByteOutputStream();
+		return this.entity.getServerOutputStream();
 	}
 
 	@Override
@@ -210,7 +212,7 @@ public class MockHttpResponse implements HttpResponse {
 
 	@Override
 	public ServerWriter getEntityWriter() {
-		return this.entityWriter;
+		return this.entity.getServerWriter();
 	}
 
 	@Override

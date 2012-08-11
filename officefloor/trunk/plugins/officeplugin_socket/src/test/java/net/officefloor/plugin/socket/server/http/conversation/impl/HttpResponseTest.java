@@ -299,6 +299,11 @@ public class HttpResponseTest extends OfficeFrameTestCase implements Connection 
 		assertNotNull(
 				"Should continue to be able to obtain server outputstream",
 				response.getEntity());
+
+		// Ensure can obtain after reset
+		response.reset();
+		assertNotNull("Should be able to obtain writer after reset",
+				response.getEntityWriter());
 	}
 
 	/**
@@ -318,6 +323,11 @@ public class HttpResponseTest extends OfficeFrameTestCase implements Connection 
 		}
 		assertNotNull("Should continue to be able to obtain server writer",
 				response.getEntityWriter());
+
+		// Ensure can obtain after reset
+		response.reset();
+		assertNotNull("Should be able to obtain outputstream after reset",
+				response.getEntity());
 	}
 
 	/**
@@ -406,6 +416,34 @@ public class HttpResponseTest extends OfficeFrameTestCase implements Connection 
 					"getEntityWriter() has already been invoked",
 					ex.getMessage());
 		}
+
+		// Ensure can change after reset
+		response.reset();
+		response.setContentCharset(UsAsciiUtil.US_ASCII, null);
+	}
+
+	/**
+	 * Ensure can reset the {@link HttpResponse}.
+	 */
+	public void testResetHttpResponse() throws IOException {
+
+		// Obtain the entity writer
+		HttpResponse response = this.createHttpResponse();
+
+		// Provide details (to be reset)
+		response.addHeader("RESET", "ME");
+		ServerWriter writer = response.getEntityWriter();
+		writer.write("TEST");
+		writer.flush();
+
+		// Reset the response
+		response.reset();
+
+		// Validate reset content
+		response.send();
+		this.assertWireContent(
+				"HTTP/1.1 204 No Content\nContent-Type: text/html; charset=US-ASCII\nContent-Length: 0",
+				null, null);
 	}
 
 	/*

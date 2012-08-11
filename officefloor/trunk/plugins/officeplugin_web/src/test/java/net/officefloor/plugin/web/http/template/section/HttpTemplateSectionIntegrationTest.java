@@ -19,7 +19,6 @@
 package net.officefloor.plugin.web.http.template.section;
 
 import java.io.IOException;
-import java.io.OutputStreamWriter;
 import java.io.Writer;
 import java.sql.Connection;
 
@@ -583,8 +582,7 @@ public class HttpTemplateSectionIntegrationTest extends OfficeFrameTestCase {
 	 */
 	private static void writeMessage(ServerHttpConnection connection,
 			String message) throws IOException {
-		Writer writer = new OutputStreamWriter(connection.getHttpResponse()
-				.getEntity());
+		Writer writer = connection.getHttpResponse().getEntityWriter();
 		writer.write(message);
 		writer.flush();
 	}
@@ -596,8 +594,7 @@ public class HttpTemplateSectionIntegrationTest extends OfficeFrameTestCase {
 		public void finished(@Parameter String parameter,
 				ServerHttpConnection connection) throws IOException {
 			if ((parameter != null) && (parameter.length() > 0)) {
-				Writer writer = new OutputStreamWriter(connection
-						.getHttpResponse().getEntity());
+				Writer writer = connection.getHttpResponse().getEntityWriter();
 				writer.write(" - finished(");
 				writer.write(parameter);
 				writer.write(")");
@@ -611,8 +608,7 @@ public class HttpTemplateSectionIntegrationTest extends OfficeFrameTestCase {
 	 */
 	public static class MockLink {
 		public void linked(ServerHttpConnection connection) throws IOException {
-			Writer writer = new OutputStreamWriter(connection.getHttpResponse()
-					.getEntity());
+			Writer writer = connection.getHttpResponse().getEntityWriter();
 			writer.write("LINKED");
 			writer.flush();
 		}
