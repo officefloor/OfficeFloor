@@ -72,9 +72,6 @@ public class PassiveTeam implements Team, JobContext {
 				return;
 			}
 
-			// Allow other processing to take place
-			Thread.yield();
-
 		} while (this.continueWorking);
 	}
 
