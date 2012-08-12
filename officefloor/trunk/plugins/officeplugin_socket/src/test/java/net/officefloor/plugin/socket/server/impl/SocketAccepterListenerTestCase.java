@@ -133,8 +133,8 @@ public abstract class SocketAccepterListenerTestCase extends
 	}
 
 	@Override
-	protected void handleInvokeProcess(ManagedObject managedObject,
-			EscalationHandler escalationHandler) {
+	protected void handleInvokeProcess(Object parameter,
+			ManagedObject managedObject, EscalationHandler escalationHandler) {
 		fail("Process should not be invoked");
 	}
 

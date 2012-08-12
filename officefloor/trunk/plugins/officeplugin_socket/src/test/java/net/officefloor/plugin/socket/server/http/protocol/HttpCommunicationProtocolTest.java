@@ -55,8 +55,8 @@ public class HttpCommunicationProtocolTest extends AbstractClientServerTestCase 
 	}
 
 	@Override
-	protected void handleInvokeProcess(ManagedObject managedObject,
-			EscalationHandler escalationHandler) {
+	protected void handleInvokeProcess(Object parameter,
+			ManagedObject managedObject, EscalationHandler escalationHandler) {
 		try {
 			this.serverHttpConnection = (ServerHttpConnection) managedObject
 					.getObject();
