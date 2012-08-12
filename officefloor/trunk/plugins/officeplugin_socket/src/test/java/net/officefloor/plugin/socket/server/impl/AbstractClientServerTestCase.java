@@ -17,6 +17,8 @@
  */
 package net.officefloor.plugin.socket.server.impl;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.io.OutputStream;
 import java.net.InetSocketAddress;
 import java.net.Socket;
@@ -113,17 +115,22 @@ public abstract class AbstractClientServerTestCase extends OfficeFrameTestCase
 	/**
 	 * Allows the test to be notified of {@link ProcessState} invocation.
 	 * 
+	 * @param parameter
+	 *            Parameter.
 	 * @param managedObject
 	 *            {@link ManagedObject}.
 	 * @param escalationHandler
 	 *            {@link EscalationHandler}.
 	 */
-	protected abstract void handleInvokeProcess(ManagedObject managedObject,
-			EscalationHandler escalationHandler);
+	protected abstract void handleInvokeProcess(Object parameter,
+			ManagedObject managedObject, EscalationHandler escalationHandler);
 
 	@Override
 	protected void setUp() throws Exception {
 		try {
+
+			// TODO remove
+			System.out.println("======= TEST: " + this.getName() + " =======");
 
 			// Obtain port
 			this.port = MockHttpServer.getAvailablePort();
@@ -246,6 +253,13 @@ public abstract class AbstractClientServerTestCase extends OfficeFrameTestCase
 	}
 
 	/**
+	 * Closes the client.
+	 */
+	protected void closeClient() throws IOException {
+		this.getClientChannel().close();
+	}
+
+	/**
 	 * Writes data to the server.
 	 * 
 	 * @param data
@@ -265,7 +279,9 @@ public abstract class AbstractClientServerTestCase extends OfficeFrameTestCase
 		try {
 
 			// Write the data to the socket
-			this.clientChannel.write(ByteBuffer.wrap(data));
+			int bytesWritten = this.clientChannel.write(ByteBuffer.wrap(data));
+			assertEquals("Not all bytes written from client to server",
+					data.length, bytesWritten);
 
 		} catch (Exception ex) {
 			fail(ex);
@@ -346,36 +362,15 @@ public abstract class AbstractClientServerTestCase extends OfficeFrameTestCase
 	 */
 	protected void assertClientReceivedData(byte[] expectedBytes) {
 
-		// Reset the read buffer
-		this.readBuffer.position(0);
-		this.readBuffer.limit(this.readBuffer.capacity());
-
-		byte[] actualData;
-		try {
-
-			// Read the data from the server
-			this.runClientSelect();
-
-			// Read the data
-			assertEquals("Incorrect number of bytes",
-					(expectedBytes == null ? -1 : expectedBytes.length),
-					this.clientChannel.read(this.readBuffer));
-			if (expectedBytes == null) {
-				return; // no data expected to be received
-			}
-			actualData = new byte[expectedBytes.length];
-
-		} catch (Throwable ex) {
-			throw fail(ex);
-		}
+		// Receive the bytes from the server
+		ByteArrayOutputStream bytes = new ByteArrayOutputStream();
+		assertEquals("Incorrect number of bytes", (expectedBytes == null ? -1
+				: expectedBytes.length), this.writeClientReceivedData(bytes));
 
 		// Ensure correct data received
-		this.readBuffer.flip();
-		this.readBuffer.get(actualData);
-		assertEquals("Incorrect data received", new String(expectedBytes),
-				new String(actualData));
-		assertEquals("Should be no further data received", 0,
-				this.readBuffer.remaining());
+		assertEquals("Incorrect data received", new String(
+				expectedBytes == null ? new byte[0] : expectedBytes),
+				new String(bytes.toByteArray()));
 	}
 
 	/**
@@ -383,11 +378,9 @@ public abstract class AbstractClientServerTestCase extends OfficeFrameTestCase
 	 * 
 	 * @param outputStream
 	 *            {@link OutputStream} to receive the client data.
+	 * @return Number of bytes read or <code>-1</code> if end of stream.
 	 */
-	protected void writeClientReceivedData(OutputStream outputStream) {
-
-		// Run client select now
-		this.runClientSelectNow();
+	protected int writeClientReceivedData(OutputStream outputStream) {
 
 		// Reset the read buffer
 		this.readBuffer.position(0);
@@ -395,17 +388,20 @@ public abstract class AbstractClientServerTestCase extends OfficeFrameTestCase
 
 		try {
 
-			// Read the data from the server
-			this.runClientSelect();
+			// Run client select now
+			this.runClientSelectNow();
 
 			// Read the data
-			this.clientChannel.read(this.readBuffer);
+			int bytesRead = this.clientChannel.read(this.readBuffer);
 			this.readBuffer.flip();
 			byte[] data = new byte[this.readBuffer.remaining()];
 			this.readBuffer.get(data);
 
 			// Write the data to the output stream
 			outputStream.write(data);
+
+			// Indicate the number of bytes read
+			return bytesRead;
 
 		} catch (Throwable ex) {
 			throw fail(ex);
@@ -433,14 +429,14 @@ public abstract class AbstractClientServerTestCase extends OfficeFrameTestCase
 	@Override
 	public ProcessFuture invokeProcess(Indexed key, Object parameter,
 			ManagedObject managedObject, long delay) {
-		this.handleInvokeProcess(managedObject, null);
+		this.handleInvokeProcess(parameter, managedObject, null);
 		return null;
 	}
 
 	@Override
 	public ProcessFuture invokeProcess(int flowIndex, Object parameter,
 			ManagedObject managedObject, long delay) {
-		this.handleInvokeProcess(managedObject, null);
+		this.handleInvokeProcess(parameter, managedObject, null);
 		return null;
 	}
 
@@ -448,7 +444,7 @@ public abstract class AbstractClientServerTestCase extends OfficeFrameTestCase
 	public ProcessFuture invokeProcess(Indexed key, Object parameter,
 			ManagedObject managedObject, long delay,
 			EscalationHandler escalationHandler) {
-		this.handleInvokeProcess(managedObject, escalationHandler);
+		this.handleInvokeProcess(parameter, managedObject, escalationHandler);
 		return null;
 	}
 
@@ -456,7 +452,7 @@ public abstract class AbstractClientServerTestCase extends OfficeFrameTestCase
 	public ProcessFuture invokeProcess(int flowIndex, Object parameter,
 			ManagedObject managedObject, long delay,
 			EscalationHandler escalationHandler) {
-		this.handleInvokeProcess(managedObject, escalationHandler);
+		this.handleInvokeProcess(parameter, managedObject, escalationHandler);
 		return null;
 	}
 

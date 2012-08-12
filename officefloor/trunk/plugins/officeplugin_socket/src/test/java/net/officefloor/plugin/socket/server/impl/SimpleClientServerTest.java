@@ -47,7 +47,7 @@ public class SimpleClientServerTest extends SocketAccepterListenerTestCase {
 	 * Ensure appropriately detects client closed {@link Connection}.
 	 */
 	public void testClientCloseConnection() throws IOException {
-		this.getClientChannel().close();
+		this.closeClient();
 		this.runServerSelect();
 		assertTrue("Server connection should be closed", this
 				.getServerSideConnection().isClosed());
@@ -122,6 +122,8 @@ public class SimpleClientServerTest extends SocketAccepterListenerTestCase {
 	private void doReadLargerThanBufferSizeTest(boolean isCloseConnection)
 			throws Exception {
 
+		final int ITERATION_COUNT = 100;
+
 		// Provide more data than available socket buffer size
 		int sendBufferSize = this.getSendBufferSize();
 		byte[] data = new byte[sendBufferSize];
@@ -129,7 +131,7 @@ public class SimpleClientServerTest extends SocketAccepterListenerTestCase {
 			data[i] = 1;
 		}
 		int writtenDataSize = 0;
-		for (int i = 0; i < sendBufferSize; i++) {
+		for (int i = 0; i < ITERATION_COUNT; i++) {
 			this.writeDataFromServerToClient(data);
 			writtenDataSize += data.length;
 		}
@@ -161,7 +163,7 @@ public class SimpleClientServerTest extends SocketAccepterListenerTestCase {
 		// Ensure all data is correct
 		byte[] receivedData = outputStream.toByteArray();
 		assertEquals("Incorrect amount of received data",
-				(sendBufferSize * sendBufferSize), receivedData.length);
+				(sendBufferSize * ITERATION_COUNT), receivedData.length);
 		for (int i = 0; i < receivedData.length; i++) {
 			assertEquals("Incorrect data value for index " + i, 1,
 					receivedData[i]);

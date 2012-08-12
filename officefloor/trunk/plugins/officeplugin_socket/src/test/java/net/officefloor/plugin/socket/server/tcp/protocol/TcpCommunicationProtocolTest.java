@@ -82,8 +82,8 @@ public class TcpCommunicationProtocolTest extends AbstractClientServerTestCase
 	}
 
 	@Override
-	protected void handleInvokeProcess(ManagedObject managedObject,
-			EscalationHandler escalationHandler) {
+	protected void handleInvokeProcess(Object parameter,
+			ManagedObject managedObject, EscalationHandler escalationHandler) {
 		assertSame("Incorrect managed object", this.serverTcpConnection,
 				managedObject);
 		this.isProcessInvoked = true;

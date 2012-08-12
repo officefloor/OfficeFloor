@@ -26,8 +26,6 @@ import javax.net.ssl.SSLEngine;
 import javax.net.ssl.SSLSocket;
 import javax.net.ssl.SSLSocketFactory;
 
-import org.junit.Ignore;
-
 import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.build.ManagedObjectBuilder;
 import net.officefloor.frame.api.build.ManagingOfficeBuilder;
@@ -44,10 +42,9 @@ import net.officefloor.plugin.socket.server.tcp.protocol.TcpCommunicationProtoco
  * Anonymous ciphers are used in testing to not require installing certificates
  * (making tests portable). <b>Anonymous ciphers should however never be used
  * for production servers!</b>
- *
+ * 
  * @author Daniel Sagenschneider
  */
-@Ignore("TODO fix up after HTTP")
 public class SecureTcpServerTest extends AbstractTcpServerTestCase {
 
 	/*
@@ -66,11 +63,11 @@ public class SecureTcpServerTest extends AbstractTcpServerTestCase {
 				.constructManagedObject(managedObjectName,
 						SecureTcpServerSocketManagedObjectSource.class);
 		serverSocketBuilder.addProperty(
-				TcpServerSocketManagedObjectSource.PROPERTY_PORT, String
-						.valueOf(port));
+				TcpServerSocketManagedObjectSource.PROPERTY_PORT,
+				String.valueOf(port));
 		serverSocketBuilder.addProperty(
-				TcpCommunicationProtocol.PROPERTY_MAXIMUM_IDLE_TIME, String
-						.valueOf(10000));
+				TcpCommunicationProtocol.PROPERTY_MAXIMUM_IDLE_TIME,
+				String.valueOf(10000));
 		serverSocketBuilder.addProperty(
 				SslCommunicationProtocol.PROPERTY_SSL_ENGINE_CONFIGURATOR,
 				MockSslEngineConfigurator.class.getName());

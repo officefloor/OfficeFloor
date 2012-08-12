@@ -241,11 +241,6 @@ public class HttpRequestTest extends AbstractOfficeConstructTestCase {
 	@Override
 	protected void runTest() throws Throwable {
 		
-		// TODO remove
-		if (this.isSecure) {
-			fail("TODO remove once SSL tests passing");
-		}
-
 		// Start the server
 		this.server.startup(this.httpServicerBuilder);
 		assertEquals("Incorrect secureness for server", this.isSecure,

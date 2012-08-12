@@ -85,6 +85,11 @@ public class SslCommunicationProtocol implements CommunicationProtocolSource,
 	private SslEngineConfigurator sslEngineConfigurator;
 
 	/**
+	 * Send buffer size.
+	 */
+	private int sendBufferSize;
+
+	/**
 	 * {@link ManagedObjectExecuteContext}.
 	 */
 	private ManagedObjectExecuteContext<Indexed> executeContext;
@@ -122,6 +127,9 @@ public class SslCommunicationProtocol implements CommunicationProtocolSource,
 			CommunicationProtocolContext protocolContext) throws Exception {
 		ManagedObjectSourceContext<Indexed> mosContext = configurationContext
 				.getManagedObjectSourceContext();
+
+		// Obtain the send buffer size
+		this.sendBufferSize = protocolContext.getSendBufferSize();
 
 		// Create the communication protocol to wrap
 		this.wrappedCommunicationProtocol = this.wrappedCommunicationProtocolSource
@@ -211,7 +219,8 @@ public class SslCommunicationProtocol implements CommunicationProtocolSource,
 
 		// Create the SSL connection wrapping the connection
 		SslConnectionHandler connectionHandler = new SslConnectionHandler(
-				connection, engine, this, this.wrappedCommunicationProtocol);
+				connection, engine, this, this.sendBufferSize,
+				this.wrappedCommunicationProtocol);
 
 		// Return the SSL connection handler
 		return connectionHandler;

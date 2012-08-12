@@ -18,14 +18,11 @@
 
 package net.officefloor.plugin.socket.server.http.integrate;
 
-import org.junit.Ignore;
-
 /**
  * Provides HTTPS testing.
  * 
  * @author Daniel Sagenschneider
  */
-@Ignore("TODO reactivate once SSL communication protocol is working")
 public class HttpsServerTest extends HttpServerTest {
 
 	@Override

@@ -102,7 +102,8 @@ public class SslConnectionImpl implements Connection {
 
 	@Override
 	public boolean isClosed() {
-		return this.connectionHandler.isClosing();
+		return (this.connectionHandler.isClosing())
+				|| (this.wrappedConnection.isClosed());
 	}
 
 }
