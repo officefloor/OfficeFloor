@@ -372,7 +372,8 @@ public class CometHttpTemplateSectionExtensionTest extends OfficeFrameTestCase {
 			publisher.sendEvent("SERVER");
 
 			// Provide response
-			connection.getHttpResponse().getEntity().write(1);
+			connection.getHttpResponse().getEntityWriter()
+					.write(new byte[] { 1 });
 		}
 	}
 
