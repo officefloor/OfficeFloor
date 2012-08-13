@@ -48,6 +48,7 @@ import org.eclipse.jetty.servlet.FilterHolder;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
 import org.eclipse.jetty.util.resource.Resource;
+import org.junit.Ignore;
 
 /**
  * Ensure able to integrate to provide objects for JSP rendering by Servlet
@@ -55,6 +56,7 @@ import org.eclipse.jetty.util.resource.Resource;
  * 
  * @author Daniel Sagenschneider
  */
+@Ignore("TODO tidy up for working with Servlet 3.0 - i.e. take advantage of asynchronous requests")
 public class OfficeFloorServletFilterIntegrationToContainerTest extends
 		OfficeFrameTestCase {
 

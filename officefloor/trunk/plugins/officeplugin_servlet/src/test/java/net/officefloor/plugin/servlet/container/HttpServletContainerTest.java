@@ -2245,7 +2245,7 @@ public class HttpServletContainerTest extends OfficeFrameTestCase {
 			this.recordReturn(this.request, this.request.getMethod(),
 					this.httpMethod);
 			this.recordReturn(this.response, this.response.getEntity(),
-					this.outputStream.getByteOutputStream());
+					this.outputStream.getServerOutputStream());
 
 		} catch (Exception ex) {
 			throw fail(ex);

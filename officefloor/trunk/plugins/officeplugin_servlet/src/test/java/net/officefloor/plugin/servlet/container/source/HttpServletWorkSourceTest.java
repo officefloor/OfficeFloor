@@ -167,7 +167,7 @@ public class HttpServletWorkSourceTest extends OfficeFrameTestCase {
 				officeServletContext.getContextPath(office), "/context");
 		this.recordReturn(connection, connection.getHttpResponse(), response);
 		this.recordReturn(response, response.getEntity(),
-				new MockServerOutputStream().getByteOutputStream());
+				new MockServerOutputStream().getServerOutputStream());
 		this.recordReturn(request, request.getMethod(), "GET");
 
 		// Test
