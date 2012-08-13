@@ -179,14 +179,8 @@ public class ServletHttpResponse implements HttpResponse {
 	}
 
 	@Override
-	public void setContentCharset(String charset) {
-		// TODO implement HttpResponse.setContentCharset
-		throw new UnsupportedOperationException(
-				"TODO implement HttpResponse.setContentCharset");
-	}
-
-	@Override
-	public void setContentCharset(Charset charset) {
+	public void setContentCharset(Charset charset, String charsetName)
+			throws IOException {
 		// TODO implement HttpResponse.setContentCharset
 		throw new UnsupportedOperationException(
 				"TODO implement HttpResponse.setContentCharset");
@@ -202,6 +196,13 @@ public class ServletHttpResponse implements HttpResponse {
 	@Override
 	public synchronized void send() throws IOException {
 		this.servletResponse.flushBuffer();
+	}
+
+	@Override
+	public void reset() throws IOException {
+		// TODO implement HttpResponse.reset
+		throw new UnsupportedOperationException(
+				"TODO implement HttpResponse.reset");
 	}
 
 }

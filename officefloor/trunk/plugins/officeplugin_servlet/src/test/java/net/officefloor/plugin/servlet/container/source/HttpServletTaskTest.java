@@ -331,7 +331,7 @@ public class HttpServletTaskTest extends OfficeFrameTestCase {
 					this.officeServletContext.getContextPath(this.office),
 					CONTEXT_PATH);
 			this.recordReturn(this.response, this.response.getEntity(),
-					this.entity.getByteOutputStream());
+					this.entity.getServerOutputStream());
 
 			// Record obtain context and servlet path in HTTP Servlet
 			this.recordReturn(this.officeServletContext,

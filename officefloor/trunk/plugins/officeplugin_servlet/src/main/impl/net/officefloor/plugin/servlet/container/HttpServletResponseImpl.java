@@ -144,9 +144,11 @@ public class HttpServletResponseImpl implements HttpServletResponse {
 	 *            {@link HttpServletRequest}.
 	 * @param locale
 	 *            {@link Locale} for the {@link HttpResponse}.
+	 * @throws IOException
+	 *             If fails to create.
 	 */
 	public HttpServletResponseImpl(HttpResponse response, Clock clock,
-			HttpServletRequest request, Locale locale) {
+			HttpServletRequest request, Locale locale) throws IOException {
 		this.response = response;
 		this.outputStream = new HttpResponseServletOutputStream(
 				this.response.getEntity());

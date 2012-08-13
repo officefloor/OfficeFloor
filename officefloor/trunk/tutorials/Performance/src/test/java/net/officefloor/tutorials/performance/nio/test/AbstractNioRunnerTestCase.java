@@ -58,7 +58,7 @@ public abstract class AbstractNioRunnerTestCase extends TestCase {
 	 * Tests performance with the same load between CPU and Database.
 	 */
 	public void testPerformance_SameLoad() throws Throwable {
-		this.doPerformanceTest(100, 100);
+		this.doPerformanceTest(1, 1);
 	}
 
 	/**
