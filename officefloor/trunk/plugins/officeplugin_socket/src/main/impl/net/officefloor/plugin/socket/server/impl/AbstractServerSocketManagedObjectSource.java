@@ -351,7 +351,7 @@ public abstract class AbstractServerSocketManagedObjectSource extends
 		int serverSocketBackLog = 25000; // TODO make configurable
 
 		// Obtain the heart beat interval
-		long heartBeatInterval = 3000; // TODO make configurable
+		long heartBeatInterval = 10000; // TODO make configurable
 
 		// Obtain the connection manager
 		ConnectionManager connectionManager = getConnectionManager(mosContext,

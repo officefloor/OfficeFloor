@@ -63,14 +63,14 @@ public class TcpServerSocketManagedObjectSourceExtension
 		SourceExtensionUtil.createPropertyText("Port",
 				TcpServerSocketManagedObjectSource.PROPERTY_PORT, "80", page,
 				context, null);
-		SourceExtensionUtil.createPropertyText("Buffer size",
-				TcpServerSocketManagedObjectSource.PROPERTY_BUFFER_SIZE,
-				"1024", page, context, null);
+		SourceExtensionUtil.createPropertyText("Send buffer size",
+				TcpServerSocketManagedObjectSource.PROPERTY_SEND_BUFFER_SIZE,
+				"8192", page, context, null);
 		SourceExtensionUtil
 				.createPropertyText(
-						"Maximum connections per listener",
-						TcpServerSocketManagedObjectSource.PROPERTY_MAXIMUM_CONNECTIONS_PER_LISTENER,
-						"-1", page, context, null);
+						"Receive buffer size",
+						TcpServerSocketManagedObjectSource.PROPERTY_RECEIVE_BUFFER_SIZE,
+						"8192", page, context, null);
 	}
 
 	@Override

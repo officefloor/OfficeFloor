@@ -94,19 +94,22 @@ public class HttpConversationImpl implements HttpConversation {
 	 */
 	void queueCompleteResponses() throws IOException {
 
-		// Send the complete responses in order registered
-		for (Iterator<HttpManagedObjectImpl> iterator = this.managedObjects
-				.iterator(); iterator.hasNext();) {
-			HttpManagedObjectImpl managedObject = iterator.next();
+		synchronized (this) {
+			
+			// Send the complete responses in order registered
+			for (Iterator<HttpManagedObjectImpl> iterator = this.managedObjects
+					.iterator(); iterator.hasNext();) {
+				HttpManagedObjectImpl managedObject = iterator.next();
 
-			// Attempt to queue response for sending
-			if (!managedObject.queueHttpResponseIfComplete()) {
-				// Response not yet complete to send
-				return; // send no further responses
+				// Attempt to queue response for sending
+				if (!managedObject.queueHttpResponseIfComplete()) {
+					// Response not yet complete to send
+					return; // send no further responses
+				}
+
+				// Response sent, so remove managed object
+				iterator.remove();
 			}
-
-			// Response sent, so remove managed object
-			iterator.remove();
 		}
 	}
 
@@ -141,7 +144,9 @@ public class HttpConversationImpl implements HttpConversation {
 				this.connection, request, response);
 
 		// Register the HTTP managed object
-		this.managedObjects.add(managedObject);
+		synchronized (this) {
+			this.managedObjects.add(managedObject);
+		}
 
 		// Return the managed object
 		return managedObject;
@@ -160,7 +165,9 @@ public class HttpConversationImpl implements HttpConversation {
 				response);
 
 		// Register the HTTP managed object
-		this.managedObjects.add(managedObject);
+		synchronized (this) {
+			this.managedObjects.add(managedObject);
+		}
 
 		// Send the failure
 		response.sendFailure(failure);
