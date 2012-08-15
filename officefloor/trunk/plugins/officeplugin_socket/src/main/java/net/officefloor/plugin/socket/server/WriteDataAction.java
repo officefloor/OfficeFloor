@@ -19,20 +19,19 @@ package net.officefloor.plugin.socket.server;
 
 import java.nio.channels.SocketChannel;
 
-import net.officefloor.plugin.socket.server.protocol.WriteBuffer;
-
 /**
- * Data to be written to a {@link SocketChannel}.
+ * Action to write further data to the {@link SocketChannel} when the
+ * {@link SocketChannel} has been emptied.
  * 
  * @author Daniel Sagenschneider
  */
-public interface WriteDataAction extends ConnectionAction {
+public interface WriteDataAction {
 
 	/**
-	 * Obtains the data to write.
+	 * Obtains the {@link ManagedConnection} for the {@link WriteDataAction}.
 	 * 
-	 * @return Data to write.
+	 * @return {@link ManagedConnection} for the {@link WriteDataAction}.
 	 */
-	WriteBuffer[] getData();
+	ManagedConnection getConnection();
 
 }

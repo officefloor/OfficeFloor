@@ -30,8 +30,6 @@ import java.util.Queue;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import net.officefloor.plugin.socket.server.CloseConnectionAction;
-import net.officefloor.plugin.socket.server.ConnectionActionEnum;
 import net.officefloor.plugin.socket.server.ManagedConnection;
 import net.officefloor.plugin.socket.server.WriteDataAction;
 import net.officefloor.plugin.socket.server.protocol.CommunicationProtocol;
@@ -46,7 +44,7 @@ import net.officefloor.plugin.socket.server.protocol.WriteBufferEnum;
  * @author Daniel Sagenschneider
  */
 public class ConnectionImpl implements Connection, ManagedConnection,
-		CloseConnectionAction {
+		WriteDataAction {
 
 	/**
 	 * {@link Logger}.
@@ -80,9 +78,14 @@ public class ConnectionImpl implements Connection, ManagedConnection,
 	private final Queue<WriteAction> writeActions = new LinkedList<WriteAction>();
 
 	/**
+	 * Indicates if registered for write.
+	 */
+	private boolean isRegisteredForWrite = false;
+
+	/**
 	 * Flags whether to terminate after {@link WriteAction} instances.
 	 */
-	private boolean isTerminateAfterWrites = false;
+	private volatile boolean isTerminateAfterWrites = false;
 
 	/**
 	 * Flags if this {@link Connection} has been closed.
@@ -140,9 +143,29 @@ public class ConnectionImpl implements Connection, ManagedConnection,
 	}
 
 	@Override
-	public void writeData(WriteBuffer[] data) {
-		this.socketListener.doConnectionAction(new WriteDataActionImpl(this,
-				data));
+	public void writeData(WriteBuffer[] data) throws IOException {
+
+		synchronized (this.getLock()) {
+
+			// Ignore write action if terminating
+			if (this.isTerminateAfterWrites) {
+
+				// Should not be writing data after terminating connection
+				if (LOGGER.isLoggable(Level.FINE)) {
+					LOGGER.log(Level.FINE,
+							"Attempting to write data after closing connection");
+				}
+
+				// Terminating so no further writes
+				return;
+			}
+
+			// Queue the write action
+			this.writeActions.add(new WriteAction(data));
+
+			// Flush the write actions
+			this.flushWrites();
+		}
 	}
 
 	@Override
@@ -159,15 +182,47 @@ public class ConnectionImpl implements Connection, ManagedConnection,
 	}
 
 	@Override
-	public void close() {
-		// Close and trigger for closing (after all data written)
-		this.isClosed = true;
-		this.socketListener.doConnectionAction(this);
+	public void close() throws IOException {
+
+		synchronized (this.getLock()) {
+
+			// Indicate closed
+			this.isClosed = true;
+
+			// Flag to terminate after last write
+			this.isTerminateAfterWrites = true;
+
+			// Flush the writes
+			this.flushWrites();
+		}
 	}
 
 	@Override
 	public boolean isClosed() {
 		return this.isClosed;
+	}
+
+	/**
+	 * Flushes the writes and indicates if need to register as
+	 * {@link WriteDataAction}.
+	 * 
+	 * @return <code>true</code> if to register as {@link WriteDataAction}.
+	 * @throws IOException
+	 *             If fails to flush the data.
+	 */
+	private void flushWrites() throws IOException {
+
+		// Only process write queue if not queued for write action
+		if (!this.isRegisteredForWrite) {
+
+			// Process the write data queue
+			if (!(this.processWriteQueue())) {
+
+				// Socket buffer full, register write action
+				this.isRegisteredForWrite = true;
+				this.socketListener.registerWriteDataAction(this);
+			}
+		}
 	}
 
 	/*
@@ -192,82 +247,60 @@ public class ConnectionImpl implements Connection, ManagedConnection,
 	}
 
 	@Override
-	public void queueWrite(WriteDataAction action) {
-
-		// Ignore write action if terminating
-		if (this.isTerminateAfterWrites) {
-
-			// Should not be writing data after terminating connection
-			if (LOGGER.isLoggable(Level.FINE)) {
-				LOGGER.log(Level.FINE,
-						"Attempting to write data after closing connection");
-			}
-
-			// Terminating so no further writes
-			return;
-		}
-
-		// Queue the write action
-		this.writeActions.add(new WriteAction(action));
-	}
-
-	@Override
-	public void queueClose() {
-		// Flag to terminate after last write
-		this.isTerminateAfterWrites = true;
-	}
-
-	@Override
 	public boolean processWriteQueue() throws IOException {
 
-		// Write the data for each queued write action
-		for (Iterator<WriteAction> iterator = this.writeActions.iterator(); iterator
-				.hasNext();) {
+		synchronized (this.getLock()) {
 
-			// Undertake the current write action
-			WriteAction action = iterator.next();
-			if (!(action.writeData())) {
-				return false; // further writes required
+			// No longer registered for write
+			this.isRegisteredForWrite = false;
+
+			// Write the data for each queued write action
+			for (Iterator<WriteAction> iterator = this.writeActions.iterator(); iterator
+					.hasNext();) {
+
+				// Undertake the current write action
+				WriteAction action = iterator.next();
+				if (!(action.writeData())) {
+					return false; // further writes required
+				}
+
+				// Action written, so remove
+				iterator.remove();
 			}
 
-			// Action written, so remove
-			iterator.remove();
-		}
+			// All writes undertaken, determine if terminate
+			if (this.isTerminateAfterWrites) {
+				this.terminate();
+			}
 
-		// All writes undertaken, determine if terminate
-		if (this.isTerminateAfterWrites) {
-			this.terminate();
+			// All actions undertaken
+			return true;
 		}
-
-		// All actions undertaken
-		return true;
 	}
 
 	@Override
 	public void terminate() throws IOException {
 
-		// Ensure flagged as closed and terminated
-		this.isClosed = true;
-		this.isTerminateAfterWrites = true;
+		synchronized (this.getLock()) {
 
-		// Terminate connection
-		this.socketChannel.close();
-		this.selectionKey.cancel();
+			// Ensure flagged as closed and terminated
+			this.isClosed = true;
+			this.isTerminateAfterWrites = true;
 
-		// Return all buffers to pool
-		for (WriteAction action : this.writeActions) {
-			action.cleanup();
+			// Terminate connection
+			this.socketChannel.close();
+			this.selectionKey.cancel();
+
+			// Return all buffers to pool
+			for (WriteAction action : this.writeActions) {
+				action.cleanup();
+			}
 		}
 	}
 
 	/*
-	 * ================= CloseConnectionAction ===========================
+	 * ================= WriteDataAction ===========================
 	 */
-
-	@Override
-	public ConnectionActionEnum getType() {
-		return ConnectionActionEnum.CLOSE_CONNECTION;
-	}
 
 	@Override
 	public ManagedConnection getConnection() {
@@ -302,13 +335,10 @@ public class ConnectionImpl implements Connection, ManagedConnection,
 		/**
 		 * Initiate.
 		 * 
-		 * @param action
-		 *            {@link WriteDataAction} providing the data to write.
+		 * @param writeBuffers
+		 *            {@link WriteBuffer} providing the data to write.
 		 */
-		public WriteAction(WriteDataAction action) {
-
-			// Obtain the data to write
-			WriteBuffer[] writeBuffers = action.getData();
+		public WriteAction(WriteBuffer[] writeBuffers) {
 
 			/*
 			 * Create the filled buffers. As the array data length should not

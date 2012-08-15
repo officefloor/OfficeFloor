@@ -53,20 +53,6 @@ public interface ManagedConnection {
 	ConnectionHandler getConnectionHandler();
 
 	/**
-	 * Queues the {@link WriteDataAction}.
-	 * 
-	 * @param action
-	 *            {@link WriteDataAction}.
-	 */
-	void queueWrite(WriteDataAction action);
-
-	/**
-	 * Queues closing the {@link Connection} after the last queued
-	 * {@link WriteDataAction} is written to the client.
-	 */
-	void queueClose();
-
-	/**
 	 * Undertakes the queued writes and possible {@link Connection} close.
 	 * 
 	 * @return <code>true</code> if all data written. <code>false</code>

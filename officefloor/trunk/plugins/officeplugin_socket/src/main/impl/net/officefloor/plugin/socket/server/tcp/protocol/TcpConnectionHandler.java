@@ -188,7 +188,7 @@ public class TcpConnectionHandler implements ConnectionHandler,
 	}
 
 	@Override
-	public void writeData(WriteBuffer[] data) {
+	public void writeData(WriteBuffer[] data) throws IOException {
 
 		// Connection not idle
 		this.idleSinceTimestamp = NON_IDLE_SINCE_TIMESTAMP;
