@@ -33,7 +33,12 @@ import java.util.logging.Logger;
 
 import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.build.None;
+import net.officefloor.frame.api.execute.FlowFuture;
+import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.execute.TaskContext;
+import net.officefloor.frame.api.manage.InvalidParameterTypeException;
+import net.officefloor.frame.api.manage.UnknownTaskException;
+import net.officefloor.frame.api.manage.UnknownWorkException;
 import net.officefloor.frame.spi.team.Team;
 import net.officefloor.frame.util.AbstractSingleTask;
 import net.officefloor.plugin.socket.server.ConnectionManager;
@@ -137,6 +142,18 @@ public class SocketListener extends
 
 		// Wake up the selector (to close out)
 		this.selector.wakeup();
+
+		// Run task until complete (which closes connections and selector)
+		try {
+			CloseSelectorTaskContext context = new CloseSelectorTaskContext();
+			while (!(context.isComplete())) {
+				this.doTask(context);
+			}
+		} catch (Exception ex) {
+			if (LOGGER.isLoggable(Level.WARNING)) {
+				LOGGER.log(Level.WARNING, "Failed to close Selector", ex);
+			}
+		}
 	}
 
 	/**
@@ -310,6 +327,13 @@ public class SocketListener extends
 			// Determine if stop listening
 			if (this.isStopListening) {
 
+				// Determine if selector closed by another thread
+				if (!this.selector.isOpen()) {
+					// Selector already closed, so ready for shutdown
+					context.setComplete(true);
+					return null; // shutdown
+				}
+
 				// Terminate all connections
 				Set<SelectionKey> allKeys = this.selector.keys();
 
@@ -327,7 +351,7 @@ public class SocketListener extends
 
 					// May complete as no further connections
 					context.setComplete(true);
-					return null; // shut
+					return null; // shutdown
 
 				} else {
 					// Force remaining connections to close
@@ -464,5 +488,87 @@ public class SocketListener extends
 	 */
 
 	// No specific methods for HeartbeatContext.
+
+	/**
+	 * <p>
+	 * Close {@link Selector} {@link TaskContext}.
+	 * <p>
+	 * Enables running this {@link Task} until the {@link Selector} is closed.
+	 */
+	private class CloseSelectorTaskContext implements
+			TaskContext<SocketListener, None, Indexed> {
+
+		/**
+		 * Indicates if complete, which means {@link Selector} is closed.
+		 */
+		private boolean isComplete = false;
+
+		/**
+		 * Indicates if complete.
+		 * 
+		 * @return <code>true</code> if complete.
+		 */
+		public boolean isComplete() {
+			return this.isComplete;
+		}
+
+		/*
+		 * =================== TaskContext =========================
+		 */
+
+		@Override
+		public SocketListener getWork() {
+			return SocketListener.this;
+		}
+
+		@Override
+		public Object getProcessLock() {
+			return this;
+		}
+
+		@Override
+		public Object getObject(None key) {
+			throw new IllegalStateException(
+					"No dependency should be required for close Selector");
+		}
+
+		@Override
+		public Object getObject(int dependencyIndex) {
+			throw new IllegalStateException(
+					"No dependency should be required for close Selector");
+		}
+
+		@Override
+		public FlowFuture doFlow(Indexed key, Object parameter) {
+			throw new IllegalStateException(
+					"No flow should be required for close Selector");
+		}
+
+		@Override
+		public FlowFuture doFlow(int flowIndex, Object parameter) {
+			throw new IllegalStateException(
+					"No flow should be required for close Selector");
+		}
+
+		@Override
+		public void doFlow(String workName, String taskName, Object parameter)
+				throws UnknownWorkException, UnknownTaskException,
+				InvalidParameterTypeException {
+			throw new IllegalStateException(
+					"No flow should be required for close Selector");
+		}
+
+		@Override
+		public void join(FlowFuture flowFuture, long timeout, Object token)
+				throws IllegalArgumentException {
+			throw new IllegalStateException(
+					"Join should be required for close Selector");
+		}
+
+		@Override
+		public void setComplete(boolean isComplete) {
+			this.isComplete = isComplete;
+		}
+	}
 
 }

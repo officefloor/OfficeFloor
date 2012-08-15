@@ -291,10 +291,12 @@ public class ConnectionImpl implements Connection, ManagedConnection,
 			this.socketChannel.close();
 			this.selectionKey.cancel();
 
-			// Return all buffers to pool
+			// Return all buffers to pool and clear any writes
 			for (WriteAction action : this.writeActions) {
 				action.cleanup();
 			}
+			this.writeActions.clear();
+			
 		}
 	}
 

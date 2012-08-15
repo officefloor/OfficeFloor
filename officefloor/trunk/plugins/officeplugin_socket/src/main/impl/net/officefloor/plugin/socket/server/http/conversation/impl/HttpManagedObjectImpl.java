@@ -175,6 +175,13 @@ public class HttpManagedObjectImpl implements HttpManagedObject,
 				LOGGER.log(Level.FINE,
 						"Failed sending escalation over closed connection", ex);
 			}
+
+		} catch (IOException ex) {
+			// Failed to send failure
+			if (LOGGER.isLoggable(Level.INFO)) {
+				LOGGER.log(Level.INFO, "Unable to send HTTP failure message",
+						ex);
+			}
 		}
 	}
 
