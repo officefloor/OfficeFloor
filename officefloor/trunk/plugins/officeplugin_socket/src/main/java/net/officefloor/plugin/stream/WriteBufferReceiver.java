@@ -63,8 +63,10 @@ public interface WriteBufferReceiver {
 	 * 
 	 * @param data
 	 *            Data to be written.
+	 * @throws IOException
+	 *             If fails to write data.
 	 */
-	void writeData(WriteBuffer[] data);
+	void writeData(WriteBuffer[] data) throws IOException;
 
 	/**
 	 * <p>

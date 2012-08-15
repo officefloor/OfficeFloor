@@ -25,8 +25,6 @@ import java.nio.channels.CancelledKeyException;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.channels.SocketChannel;
-import java.util.ArrayDeque;
-import java.util.Deque;
 import java.util.Queue;
 import java.util.Set;
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -38,8 +36,6 @@ import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.api.execute.TaskContext;
 import net.officefloor.frame.spi.team.Team;
 import net.officefloor.frame.util.AbstractSingleTask;
-import net.officefloor.plugin.socket.server.ConnectionAction;
-import net.officefloor.plugin.socket.server.ConnectionActionEnum;
 import net.officefloor.plugin.socket.server.ConnectionManager;
 import net.officefloor.plugin.socket.server.EstablishedConnection;
 import net.officefloor.plugin.socket.server.ManagedConnection;
@@ -70,12 +66,6 @@ public class SocketListener extends
 	private final Queue<EstablishedConnection> establishedConnections = new ConcurrentLinkedQueue<EstablishedConnection>();
 
 	/**
-	 * {@link Queue} of {@link ConnectionAction} instances to be undertaken on
-	 * their respective {@link Connection}.
-	 */
-	private final Queue<ConnectionAction> connectionActions = new ConcurrentLinkedQueue<ConnectionAction>();
-
-	/**
 	 * {@link ByteBuffer} to use for reading content.
 	 */
 	private final ByteBuffer readBuffer;
@@ -86,9 +76,16 @@ public class SocketListener extends
 	private final int sendBufferSize;
 
 	/**
+	 * {@link Queue} of {@link WriteDataAction} instances to be undertaken on
+	 * their respective {@link Connection} when their {@link SocketChannel}
+	 * empties.
+	 */
+	private final Queue<WriteDataAction> writeActions = new ConcurrentLinkedQueue<WriteDataAction>();
+
+	/**
 	 * Pool of {@link ByteBuffer} instances.
 	 */
-	private final Deque<ByteBuffer> writeBufferPool = new ArrayDeque<ByteBuffer>();
+	private final Queue<ByteBuffer> writeBufferPool = new ConcurrentLinkedQueue<ByteBuffer>();
 
 	/**
 	 * <p>
@@ -161,16 +158,16 @@ public class SocketListener extends
 	}
 
 	/**
-	 * Registers the {@link ConnectionAction} to be undertaken on its respective
+	 * Registers the {@link WriteDataAction} to be undertaken on its respective
 	 * {@link Connection}.
 	 * 
-	 * @param connectionAction
-	 *            {@link ConnectionAction} to be undertaken.
+	 * @param writeDataAction
+	 *            {@link WriteDataAction} to be undertaken.
 	 */
-	void doConnectionAction(ConnectionAction connectionAction) {
+	void registerWriteDataAction(WriteDataAction writeDataAction) {
 
 		// Add to the queue
-		this.connectionActions.add(connectionAction);
+		this.writeActions.add(writeDataAction);
 
 		// Wake up selector to start writing data
 		this.selector.wakeup();
@@ -182,6 +179,8 @@ public class SocketListener extends
 	void doHeartBeat() {
 
 		synchronized (this) {
+
+			// TODO register this as an action?
 
 			// Reset time (for optimising obtaining time in heart beats)
 			this.currentTime = -1;
@@ -217,8 +216,12 @@ public class SocketListener extends
 
 		// Determine if one in pool
 		ByteBuffer buffer = this.writeBufferPool.poll();
-		if (buffer == null) {
+		if (buffer != null) {
 
+			// Clear pooled buffer for use
+			buffer.clear();
+
+		} else {
 			// No buffers in pool so create a new one
 			buffer = ByteBuffer.allocateDirect(this.sendBufferSize);
 		}
@@ -232,12 +235,8 @@ public class SocketListener extends
 	 */
 	void returnWriteBufferToPool(ByteBuffer buffer) {
 
-		// Reset buffer
-		buffer.position(0);
-		buffer.limit(buffer.capacity());
-
 		// Return buffer to pool
-		this.writeBufferPool.push(buffer);
+		this.writeBufferPool.add(buffer);
 	}
 
 	/**
@@ -292,35 +291,15 @@ public class SocketListener extends
 
 			// Undertake the the connection actions.
 			// Use size to only do currently added.
-			int actionCount = this.connectionActions.size();
-			ConnectionAction action;
+			int actionCount = this.writeActions.size();
+			WriteDataAction action;
 			while ((actionCount-- > 0)
-					&& ((action = this.connectionActions.poll()) != null)) {
+					&& ((action = this.writeActions.poll()) != null)) {
 
-				// Obtain the connection details
+				// Obtain the connection
 				ManagedConnection connection = action.getConnection();
 
-				// Queue the action on the connection
-				ConnectionActionEnum actionType = action.getType();
-				switch (actionType) {
-
-				case CLOSE_CONNECTION:
-					// Queue closing the connection
-					connection.queueClose();
-					break;
-
-				case WRITE_DATA:
-					// Queue writing the data
-					WriteDataAction writeDataAction = (WriteDataAction) action;
-					connection.queueWrite(writeDataAction);
-					break;
-
-				default:
-					throw new IllegalStateException("Unknown action type: "
-							+ actionType);
-				}
-
-				// Undertake queued actions on connection
+				// Undertake queued writes on connection
 				if (!(connection.processWriteQueue())) {
 					// Take interest in write (socket buffer clearing)
 					connection.getSelectionKey().interestOps(
@@ -375,57 +354,60 @@ public class SocketListener extends
 						.getManagedConnection(selectedKey);
 				SocketChannel socketChannel = connection.getSocketChannel();
 
-				// Determine if read content
-				if (selectedKey.isReadable()) {
+				try {
 
-					// Keep reading data until empty socket buffer
-					boolean isFurtherDataToRead = true;
-					while (isFurtherDataToRead) {
+					// Determine if read content
+					if (selectedKey.isReadable()) {
 
-						// Obtain the buffer
-						ByteBuffer buffer = this.readBuffer.duplicate();
+						// Keep reading data until empty socket buffer
+						boolean isFurtherDataToRead = true;
+						while (isFurtherDataToRead) {
 
-						// Read content from channel
-						int bytesRead;
-						try {
-							bytesRead = socketChannel.read(buffer);
-						} catch (IOException ex) {
-							// Connection failed
-							connection.terminate();
-							continue NEXT_KEY;
-						}
+							// Obtain the buffer
+							ByteBuffer buffer = this.readBuffer.duplicate();
 
-						// Determine if closed connection
-						if (bytesRead < 0) {
-							connection.terminate();
-							continue NEXT_KEY;
-						}
+							// Read content from channel
+							int bytesRead;
+							try {
+								bytesRead = socketChannel.read(buffer);
+							} catch (IOException ex) {
+								// Connection failed
+								connection.terminate();
+								continue NEXT_KEY;
+							}
 
-						// Obtain the data and handle
-						buffer.flip();
-						this.readData = new byte[bytesRead];
-						buffer.get(this.readData);
-						connection.getConnectionHandler().handleRead(this);
+							// Determine if closed connection
+							if (bytesRead < 0) {
+								connection.terminate();
+								continue NEXT_KEY;
+							}
 
-						// Determine if further data
-						if (bytesRead < this.readBuffer.limit()) {
-							isFurtherDataToRead = false; // all data read
+							// Obtain the data and handle
+							buffer.flip();
+							this.readData = new byte[bytesRead];
+							buffer.get(this.readData);
+							connection.getConnectionHandler().handleRead(this);
+
+							// Determine if further data
+							if (bytesRead < this.readBuffer.limit()) {
+								isFurtherDataToRead = false; // all data read
+							}
 						}
 					}
-				}
 
-				// Determine if send data consumed for further write
-				if (selectedKey.isWritable()) {
+					// Determine if send data consumed for further write
+					if (selectedKey.isWritable()) {
 
-					// Process the write queue for the connection
-					if (connection.processWriteQueue()) {
-						// All data written, just listen
-						try {
+						// Process the write queue for the connection
+						if (connection.processWriteQueue()) {
+							// All data written, just listen
 							selectedKey.interestOps(SelectionKey.OP_READ);
-						} catch (CancelledKeyException ex) {
-							// Ignore as connection is closed
 						}
 					}
+
+				} catch (CancelledKeyException ex) {
+					// Key cancelled, ensure connection closed
+					connection.terminate();
 				}
 			}
 

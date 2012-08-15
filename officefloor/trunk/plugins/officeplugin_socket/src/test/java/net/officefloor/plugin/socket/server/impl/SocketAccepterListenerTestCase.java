@@ -62,7 +62,7 @@ public abstract class SocketAccepterListenerTestCase extends
 	 * @param data
 	 *            Data to write to the client.
 	 */
-	protected void writeDataFromServerToClient(String data) {
+	protected void writeDataFromServerToClient(String data) throws IOException {
 		this.writeDataFromServerToClient(data.getBytes());
 	}
 
@@ -72,7 +72,7 @@ public abstract class SocketAccepterListenerTestCase extends
 	 * @param data
 	 *            Data to write to the client.
 	 */
-	protected void writeDataFromServerToClient(byte[] data) {
+	protected void writeDataFromServerToClient(byte[] data) throws IOException {
 
 		// Write the data
 		WriteBuffer buffer = this.connection.createWriteBuffer(data,
@@ -86,7 +86,8 @@ public abstract class SocketAccepterListenerTestCase extends
 	 * @param buffer
 	 *            Data to write to the client.
 	 */
-	protected void writeDataFromServerToClient(ByteBuffer buffer) {
+	protected void writeDataFromServerToClient(ByteBuffer buffer)
+			throws IOException {
 
 		// Write the data
 		WriteBuffer writeBuffer = this.connection.createWriteBuffer(buffer);

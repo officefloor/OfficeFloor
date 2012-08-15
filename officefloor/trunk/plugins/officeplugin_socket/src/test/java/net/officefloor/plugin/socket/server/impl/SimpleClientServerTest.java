@@ -65,7 +65,7 @@ public class SimpleClientServerTest extends SocketAccepterListenerTestCase {
 	/**
 	 * Ensure can read data from the server.
 	 */
-	public void testReadFromServer() {
+	public void testReadFromServer() throws IOException {
 		this.writeDataFromServerToClient("TEST");
 		this.runServerSelect();
 		this.assertClientReceivedData("TEST");
@@ -74,7 +74,7 @@ public class SimpleClientServerTest extends SocketAccepterListenerTestCase {
 	/**
 	 * Ensure can read cached {@link ByteBuffer} from server.
 	 */
-	public void testReadDirectBufferFromServer() {
+	public void testReadDirectBufferFromServer() throws IOException {
 		ByteBuffer buffer = ByteBuffer.wrap("TEST".getBytes());
 		this.writeDataFromServerToClient(buffer);
 		this.runServerSelect();
@@ -84,7 +84,7 @@ public class SimpleClientServerTest extends SocketAccepterListenerTestCase {
 	/**
 	 * Ensure server can echo data sent by the client back to the client.
 	 */
-	public void testEcho() {
+	public void testEcho() throws IOException {
 
 		// Send to server
 		this.writeDataFromClientToServer("TEST");

@@ -97,8 +97,10 @@ public class HttpManagedObjectImpl implements HttpManagedObject,
 	 * 
 	 * @return <code>true</code> should the {@link HttpResponse} be queued for
 	 *         sending.
+	 * @throws IOException
+	 *             If fails writing {@link HttpResponse} if no need to queue.
 	 */
-	boolean queueHttpResponseIfComplete() {
+	boolean queueHttpResponseIfComplete() throws IOException {
 		return this.response.queueHttpResponseIfComplete();
 	}
 
