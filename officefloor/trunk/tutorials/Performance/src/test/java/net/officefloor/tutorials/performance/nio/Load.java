@@ -19,9 +19,14 @@ package net.officefloor.tutorials.performance.nio;
 
 import java.io.IOException;
 import java.io.PrintStream;
+import java.nio.channels.SelectionKey;
+import java.nio.channels.Selector;
+import java.nio.channels.SocketChannel;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import net.officefloor.plugin.socket.server.protocol.CommunicationProtocol;
 
@@ -47,6 +52,16 @@ public class Load {
 	 * Containing {@link Runner}.
 	 */
 	private final Runner runner;
+
+	/**
+	 * {@link Selector}.
+	 */
+	private final Selector selector;
+
+	/**
+	 * Unique failures.
+	 */
+	private final Set<String> uniqueFailures = new HashSet<String>();
 
 	/**
 	 * Indicates if to disconnect after the {@link Request} sequence is sent.
@@ -75,68 +90,31 @@ public class Load {
 	 *            {@link Request} instances are serviced.
 	 * @param requests
 	 *            Sequence of {@link Request} instances.
+	 * @throws IOException
+	 *             If fails to create load.
 	 */
 	Load(String description, Runner runner, boolean isDisconnectAfterSequence,
-			Request[] requests) {
+			Request[] requests) throws IOException {
 		this.description = description;
 		this.runner = runner;
 		this.isDisconnectAfterSequence = isDisconnectAfterSequence;
 		this.requests = requests;
+
+		// Create the selector
+		this.selector = Selector.open();
 	}
 
 	/**
-	 * Adds multiple {@link Connection} instances.
-	 * 
-	 * @param numberOfConnections
-	 *            Number of {@link Connection} instances to add.
-	 * @throws IOException
-	 *             If fails to add the connections.
+	 * Wakes up the {@link Selector}.
 	 */
-	public void addConnections(int numberOfConnections) throws IOException {
-		for (int i = 0; i < numberOfConnections; i++) {
-			this.addConnection();
-
-			// Determine if need to start establishing connections
-			if (((i + 1) % 500) == 0) {
-				String message = "Establshing up to " + i + " connections for "
-						+ this.description + " (to avoid SYNC attack)";
-				System.out.println(message);
-				this.runner.runInterval(message, -1, null, false, null, true);
-			}
-		}
-
-		// Connect remaining connections
-		String message = "Establishing all " + this.getConnectionCount()
-				+ " connections for " + this.description
-				+ " (to avoid SYNC attack)";
-		System.out.println(message);
-		this.runner.runInterval(message, -1, null, false, null, true);
-	}
-
-	/**
-	 * Obtains the number of {@link Connection} instances.
-	 * 
-	 * @return Number of {@link Connection} instances.
-	 */
-	public int getConnectionCount() {
-		return this.connections.size();
-	}
-
-	/**
-	 * Adds a new {@link Connection} for this {@link Load}.
-	 * 
-	 * @throws IOException
-	 *             If fails to add {@link Connection}.
-	 */
-	void addConnection() throws IOException {
-		// Add the connection
-		this.connections.add(new Connection(this));
+	void wakeupSelector() {
+		this.selector.wakeup();
 	}
 
 	/**
 	 * Reset for the next run interval.
 	 */
-	void reset() {
+	synchronized void reset() {
 
 		// Reset the connection details
 		for (Connection connection : this.connections) {
@@ -150,9 +128,193 @@ public class Load {
 	}
 
 	/**
+	 * Runs a single select and processes the {@link SelectionKey} instances.
+	 * 
+	 * @param listener
+	 *            {@link RunListener}.
+	 * @param isJustEstablishConnections
+	 *            Indicates whether to just establish connections.
+	 * @return <code>true</code> if should do another select.
+	 * @throws IOException
+	 *             If failed.
+	 */
+	synchronized boolean runSelect(RunListener listener,
+			boolean isJustEstablishConnections) throws IOException {
+
+		// Select next keys
+		this.selector.select(1000);
+
+		// Obtain the load coordinator
+		LoadCoordinator coordinator = this.runner.getLoadCoordinator();
+
+		// Indicate if stopped
+		if (coordinator.isStopping()) {
+			if (this.selector.keys().size() == 0) {
+				// No more keys (all connections closed), so stopped
+				this.selector.close();
+				return false;
+			}
+
+			// Close all connections
+			for (SelectionKey key : this.selector.keys()) {
+				((SocketChannel) key.channel()).close();
+				key.cancel();
+			}
+
+			// Another selection necessary to clean up
+			return true;
+		}
+
+		// Process selected keys
+		NEXT_KEY: for (SelectionKey key : this.selector.selectedKeys()) {
+
+			// For testing should always stay valid
+			if (!key.isValid()) {
+				throw new IOException("All clients to stay connected!");
+			}
+
+			// Obtain the connection
+			Connection connection = (Connection) key.attachment();
+			try {
+
+				// Determine if connected
+				if (key.isConnectable()) {
+					// Connected, so send first request
+					if (!(connection.finishConnect())) {
+						throw new IOException("Failed to establish connection");
+					}
+					key.interestOps(SelectionKey.OP_WRITE);
+					continue NEXT_KEY;
+				}
+
+				// Determine if sending requests (may just be connecting)
+				if (!isJustEstablishConnections) {
+
+					// Determine if writable
+					if (key.isWritable()) {
+						if (connection.writeRequest()) {
+							key.interestOps(SelectionKey.OP_READ);
+
+							// Indicate request sent
+							if (listener != null) {
+								listener.requestSent();
+							}
+						}
+
+						// Determine if just closed connection
+						if (!(key.isValid())) {
+							continue NEXT_KEY;
+						}
+					}
+
+					// Determine if received response
+					if (key.isReadable()) {
+						if (connection.readResponse()) {
+							key.interestOps(SelectionKey.OP_WRITE);
+
+							// Indicate response received
+							if (listener != null) {
+								listener.responseReceived();
+							}
+						}
+					}
+				}
+
+			} catch (IOException ex) {
+
+				// Provide each unique exception
+				String exceptionIdentifier = ex.getClass().getSimpleName()
+						+ " - " + ex.getMessage();
+				if (!(this.uniqueFailures.contains(exceptionIdentifier))) {
+					this.uniqueFailures.add(exceptionIdentifier);
+
+					// Provide the exception
+					ex.printStackTrace(System.out);
+				}
+
+				// Clean up connection
+				connection.connectionFailed();
+				key.channel().close();
+				key.cancel();
+
+				// Attempt to re-establish connection (if testing)
+				if (!(coordinator.isStopping())) {
+					connection.establishNewConnection();
+				}
+			}
+		}
+
+		// Clear selected keys for next selection
+		this.selector.selectedKeys().clear();
+
+		// As here, need another select
+		return true;
+	}
+
+	/**
+	 * Adds multiple {@link Connection} instances.
+	 * 
+	 * @param numberOfConnections
+	 *            Number of {@link Connection} instances to add.
+	 * @throws IOException
+	 *             If fails to add the connections.
+	 */
+	public synchronized void addConnections(int numberOfConnections)
+			throws IOException {
+		for (int i = 0; i < numberOfConnections; i++) {
+
+			// Add the connection
+			this.connections.add(new Connection(this));
+
+			// Determine if need to start establishing connections
+			if (((i + 1) % 500) == 0) {
+				String message = "Establshing up to " + i + " connections for "
+						+ this.description + " (to avoid SYNC attack)";
+				System.out.println(message);
+				this.runSelect(null, true);
+			}
+		}
+
+		// Connect remaining connections
+		String message = "Establishing all " + this.getConnectionCount()
+				+ " connections for " + this.description
+				+ " (to avoid SYNC attack) ... ";
+		System.out.print(message);
+		System.out.flush();
+
+		// Ensure all connected
+		boolean isAllConnected = false;
+		while (!isAllConnected) {
+
+			// Determine if all is connected
+			isAllConnected = true;
+			for (Connection connection : this.connections) {
+				if (!(connection.isConnected())) {
+					isAllConnected = false;
+				}
+			}
+
+			// Run select again to allow establishing all connections
+			if (!isAllConnected) {
+				this.runSelect(null, true);
+			}
+		}
+		System.out.println(" all connected");
+	}
+
+	/**
+	 * Obtains the number of {@link Connection} instances.
+	 * 
+	 * @return Number of {@link Connection} instances.
+	 */
+	public synchronized int getConnectionCount() {
+		return this.connections.size();
+	}
+
+	/**
 	 * Stops all {@link Connection} instances.
 	 */
-	void stop() {
+	synchronized void stop() {
 		// Stop all connections
 		for (Connection connection : this.connections) {
 			connection.stop();
@@ -169,36 +331,12 @@ public class Load {
 	}
 
 	/**
-	 * Indicates if all connected.
+	 * Obtains the {@link Selector}.
 	 * 
-	 * @return <code>true</code> if all {@link Connection} instances connected.
+	 * @return {@link Selector}.
 	 */
-	boolean isAllConnected() {
-
-		// Determine if all connected
-		for (Connection connection : this.connections) {
-			if (!(connection.isConnected())) {
-				return false; // not all connected
-			}
-		}
-
-		// As here, all connected
-		return true;
-	}
-
-	/**
-	 * Obtains the number of failed {@link Connection} instances.
-	 * 
-	 * @return Number of failed {@link Connection} instances.
-	 */
-	int getFailedConnectionCount() {
-		int failed = 0;
-		for (Connection connection : this.connections) {
-			if (connection.isFailed()) {
-				failed++;
-			}
-		}
-		return failed;
+	Selector getSelector() {
+		return this.selector;
 	}
 
 	/**
@@ -221,6 +359,42 @@ public class Load {
 	}
 
 	/**
+	 * Total run time for the last interval in milliseconds.
+	 */
+	private long lastTotalRunTime;
+
+	/**
+	 * Offset of this {@link Load} from the last run interval start time in
+	 * milliseconds.
+	 */
+	private long lastStartOffset;
+
+	/**
+	 * Offset of this {@link Load} from the last run interval end time in
+	 * milliseconds.
+	 */
+	private long lastEndOffset;
+
+	/**
+	 * Registers the times of the last interval.
+	 * 
+	 * @param totalRunTime
+	 *            Total run time for the last interval in milliseconds.
+	 * @param startOffset
+	 *            Offset of this {@link Load} from the last run interval start
+	 *            time in milliseconds.
+	 * @param endOffset
+	 *            Offset of this {@link Load} from the last run interval end
+	 *            time in milliseconds.
+	 */
+	synchronized void registerLastRunIntervalTime(long totalRunTime,
+			long startOffset, long endOffset) {
+		this.lastTotalRunTime = totalRunTime;
+		this.lastStartOffset = startOffset;
+		this.lastEndOffset = endOffset;
+	}
+
+	/**
 	 * Reports on the results of the last interval.
 	 * 
 	 * @param description
@@ -231,7 +405,7 @@ public class Load {
 	 *            {@link PrintStream} to write the results.
 	 * @return {@link LoadSummary}.
 	 */
-	LoadSummary reportLastIntervalResults(String description,
+	synchronized LoadSummary reportLastIntervalResults(String description,
 			int timeIntervalSeconds, PrintStream out) {
 
 		// Count the number of requests and reconnects
@@ -252,17 +426,26 @@ public class Load {
 		}
 		int averageRequestCount = (requestsCount / this.connections.size());
 
+		// Determine the number of failed connections
+		int failedConnections = 0;
+		for (Connection connection : this.connections) {
+			if (connection.isFailed()) {
+				failedConnections++;
+			}
+		}
+
 		// Provide throughput summary
 		out.println("LOAD: " + this.description + " ["
 				+ this.getConnectionCount() + " connections / "
-				+ this.getFailedConnectionCount() + " failed / "
-				+ reconnectCount + " reconnects / requests min="
-				+ minRequestsCount + " avg=" + averageRequestCount + " max="
-				+ maxRequestsCount + "]");
+				+ failedConnections + " failed / " + reconnectCount
+				+ " reconnects / requests min=" + minRequestsCount + " avg="
+				+ averageRequestCount + " max=" + maxRequestsCount + "] [time "
+				+ this.lastTotalRunTime + " / start " + this.lastStartOffset
+				+ " / end " + this.lastEndOffset + "]");
 
 		// Create the load summary
 		LoadSummary loadSummary = new LoadSummary(this.description,
-				this.getConnectionCount(), this.getFailedConnectionCount());
+				this.getConnectionCount(), failedConnections);
 
 		// Provide summary of interval
 		for (Request request : this.requests) {
