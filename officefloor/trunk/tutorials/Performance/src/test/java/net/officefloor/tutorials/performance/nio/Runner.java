@@ -20,13 +20,9 @@ package net.officefloor.tutorials.performance.nio;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.net.InetAddress;
-import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
-import java.nio.channels.SocketChannel;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 import junit.framework.TestCase;
 import net.officefloor.tutorials.performance.Servicer;
@@ -59,24 +55,9 @@ public class Runner extends TestCase {
 	private final double[] percentileServiceTimes;
 
 	/**
-	 * {@link Selector}.
+	 * {@link LoadCoordinator}.
 	 */
-	private final Selector selector;
-
-	/**
-	 * Unique failures.
-	 */
-	private final Set<String> uniqueFailures = new HashSet<String>();
-
-	/**
-	 * Indicates stopping.
-	 */
-	private boolean isStopping = false;
-
-	/**
-	 * Indicates when stopped.
-	 */
-	private boolean isStopped = false;
+	private final LoadCoordinator coordinator = new LoadCoordinator();
 
 	/**
 	 * Initiate.
@@ -94,7 +75,6 @@ public class Runner extends TestCase {
 			throws IOException {
 		this.port = port;
 		this.percentileServiceTimes = percentileServiceTimes;
-		this.selector = Selector.open();
 
 		// Determine the Inet Address
 		this.targetAddress = InetAddress.getByName(host);
@@ -111,16 +91,19 @@ public class Runner extends TestCase {
 	 * @param requests
 	 *            {@link Request} instances for the load.
 	 * @return {@link Load} added.
-	 * @throws IOException
+	 * @throws Exception
 	 *             If fails to add {@link Load}.
 	 */
 	public Load addLoad(String description, boolean isDisconnectAfterSequence,
-			Request... requests) throws IOException {
+			Request... requests) throws Exception {
 
 		// Create and add the load
 		Load load = new Load(description, this, isDisconnectAfterSequence,
 				requests);
 		this.loads.add(load);
+
+		// Register with the load coordinator
+		this.coordinator.registerLoad(load);
 
 		// Return the load
 		return load;
@@ -136,41 +119,14 @@ public class Runner extends TestCase {
 	 * @param listener
 	 *            {@link RunListener}. May be <code>null</code>.
 	 * @return {@link LoadSummary} instances for run interval.
-	 * @throws IOException
+	 * @throws Exception
 	 *             If a request fails.
 	 */
 	public LoadSummary[] runInterval(String description,
-			int timeIntervalSeconds, RunListener listener) throws IOException {
-		return this.runInterval(description, timeIntervalSeconds, listener,
-				true, System.out, false);
-	}
+			int timeIntervalSeconds, RunListener listener) throws Exception {
 
-	/**
-	 * Runs for the specified period of time.
-	 * 
-	 * @param description
-	 *            Description of the interval.
-	 * @param timeIntervalSeconds
-	 *            Time interval in seconds.
-	 * @param listener
-	 *            {@link RunListener}. May be <code>null</code>.
-	 * @param isReport
-	 *            Indicates whether to report.
-	 * @param out
-	 *            {@link PrintStream}.
-	 * @param isJustEstablishConnections
-	 *            Indicates whether to just establish connections.
-	 * @return {@link LoadSummary} instances.
-	 * @throws IOException
-	 *             If a request fails.
-	 */
-	synchronized LoadSummary[] runInterval(String description,
-			int timeIntervalSeconds, RunListener listener, boolean isReport,
-			PrintStream out, boolean isJustEstablishConnections)
-			throws IOException {
-
-		// Ensure do not run after stopped
-		if (this.isStopped) {
+		// Ensure do not run after flagged to stop
+		if (this.coordinator.isStopping()) {
 			throw new IOException(this.getClass().getSimpleName() + " stopped");
 		}
 
@@ -180,209 +136,28 @@ public class Runner extends TestCase {
 		}
 
 		// Indicate running
-		if (isReport) {
-			out.println("---------------------- " + description + " ["
-					+ timeIntervalSeconds + " secs] "
-					+ " ----------------------");
-		}
+		System.out.println("---------------------- " + description + " ["
+				+ timeIntervalSeconds + " secs] " + " ----------------------");
 
-		// Convert time interval to milliseconds
-		long timeIntervalMilliseconds = (timeIntervalSeconds * 1000);
-		long startTime = System.currentTimeMillis();
-		long nextConnectionCheckTime = startTime + 1000;
-		do {
-		} while (this.runSelect(description, startTime,
-				timeIntervalMilliseconds, listener, nextConnectionCheckTime,
-				isJustEstablishConnections));
+		// Run the interval
+		this.coordinator.runInterval(timeIntervalSeconds, listener, false);
 
 		// Report results of interval
-		LoadSummary[] loadSummary = null;
-		if (isReport) {
-			loadSummary = this.reportLastIntervalResults(description,
-					(int) (timeIntervalMilliseconds / 1000), out);
-		}
+		LoadSummary[] loadSummary = this.reportLastIntervalResults(description,
+				timeIntervalSeconds, System.out);
 
 		// Return the load summary
 		return loadSummary;
 	}
 
 	/**
-	 * Runs a single select and processes the {@link SelectionKey} instances.
-	 * 
-	 * @return <code>true</code> if should do another select.
-	 * @throws IOException
-	 *             If failed.
-	 */
-	private boolean runSelect(String description, long startTime,
-			long timeIntervalMilliseconds, RunListener listener,
-			long nextConnectionCheckTime, boolean isJustEstablishConnections)
-			throws IOException {
-
-		// Select next keys
-		this.selector.select(1000);
-
-		// Indicate if stopped
-		if (this.isStopping) {
-			if (this.selector.keys().size() == 0) {
-				// No more keys (all connections closed), so stopped
-				this.isStopped = true;
-				return false;
-			}
-
-			// Close all connections
-			for (SelectionKey key : this.selector.keys()) {
-				((SocketChannel) key.channel()).close();
-				key.cancel();
-			}
-
-			// Another selection necessary to clean up
-			return true;
-		}
-
-		// Determine if just connecting or sending request
-		if (isJustEstablishConnections) {
-			// Wait until all connections are established
-			if (System.currentTimeMillis() > nextConnectionCheckTime) {
-
-				// Determine if all connections established
-				boolean isAllConnected = true;
-				for (Load load : this.loads) {
-					if (!(load.isAllConnected())) {
-						isAllConnected = false;
-					}
-				}
-				if (isAllConnected) {
-					return false; // all connected no more selects required
-				}
-
-				// Setup for next check
-				nextConnectionCheckTime = System.currentTimeMillis() + 1000;
-			}
-
-		} else {
-			// Determine if time is up
-			if ((System.currentTimeMillis() - startTime) > timeIntervalMilliseconds) {
-				// Time is up (do no process any further results)
-				return false;
-			}
-		}
-
-		// Process selected keys
-		NEXT_KEY: for (SelectionKey key : this.selector.selectedKeys()) {
-
-			// For testing should always stay valid
-			if (!key.isValid()) {
-				throw new IOException("All clients to stay connected!");
-			}
-
-			// Obtain the connection
-			Connection connection = (Connection) key.attachment();
-			try {
-
-				// Determine if connected
-				if (key.isConnectable()) {
-					// Connected, so send first request
-					if (!(connection.finishConnect())) {
-						throw new IOException("Failed to establish connection");
-					}
-					key.interestOps(SelectionKey.OP_WRITE);
-					continue NEXT_KEY;
-				}
-
-				// Determine if sending requests (may just be connecting)
-				if (!isJustEstablishConnections) {
-
-					// Determine if writable
-					if (key.isWritable()) {
-						if (connection.writeRequest()) {
-							key.interestOps(SelectionKey.OP_READ);
-
-							// Indicate request sent
-							if (listener != null) {
-								listener.requestSent();
-							}
-						}
-
-						// Determine if just closed connection
-						if (!(key.isValid())) {
-							continue NEXT_KEY;
-						}
-					}
-
-					// Determine if received response
-					if (key.isReadable()) {
-						if (connection.readResponse()) {
-							key.interestOps(SelectionKey.OP_WRITE);
-
-							// Indicate response received
-							if (listener != null) {
-								listener.responseReceived();
-							}
-						}
-					}
-				}
-
-			} catch (IOException ex) {
-
-				// Provide each unique exception
-				String exceptionIdentifier = ex.getClass().getSimpleName()
-						+ " - " + ex.getMessage();
-				if (!(this.uniqueFailures.contains(exceptionIdentifier))) {
-					this.uniqueFailures.add(exceptionIdentifier);
-
-					// Provide the exception
-					ex.printStackTrace(System.out);
-				}
-
-				// Clean up connection
-				connection.connectionFailed();
-				key.channel().close();
-				key.cancel();
-
-				// Attempt to re-establish connection (if testing)
-				if (!this.isStopping) {
-					connection.establishNewConnection();
-				}
-			}
-		}
-
-		// Clear selected keys for next selection
-		this.selector.selectedKeys().clear();
-
-		// As here, need another select
-		return true;
-	}
-
-	/**
 	 * Stops the runner and closes all {@link Connection} instances.
 	 * 
-	 * @throws IOException
+	 * @throws Exception
 	 *             If fails to stop.
 	 */
-	public synchronized void stop() throws IOException {
-
-		// Flag that stopping
-		this.isStopping = true;
-
-		// Flag all connections to stop
-		for (Load load : this.loads) {
-			load.stop();
-		}
-
-		// Keep looping until stopped
-		System.out.print("STOPPING");
-		System.out.flush();
-		do {
-			long startTime = System.currentTimeMillis();
-			long timeIntervalMilliseconds = 1 * 1000; // 1 second
-			do {
-			} while (this.runSelect("STOPPING", startTime,
-					timeIntervalMilliseconds, null, timeIntervalMilliseconds,
-					false));
-			System.out.print(".");
-			System.out.flush();
-		} while (!this.isStopped);
-		System.out.println("STOPPED");
+	public synchronized void stop() throws Exception {
+		this.coordinator.stop();
 	}
 
 	/**
@@ -431,12 +206,12 @@ public class Runner extends TestCase {
 	}
 
 	/**
-	 * Obtains the {@link Selector}.
+	 * Obtains the {@link LoadCoordinator}.
 	 * 
-	 * @return {@link Selector}.
+	 * @return {@link LoadCoordinator}.
 	 */
-	Selector getSelector() {
-		return this.selector;
+	LoadCoordinator getLoadCoordinator() {
+		return this.coordinator;
 	}
 
 	/**

@@ -145,9 +145,8 @@ public class Connection {
 				.getTargetAddress(), this.load.getRunner().getPort()));
 
 		// Register connection with selector to start requesting
-		this.seletionKey = channel.register(
-				this.load.getRunner().getSelector(), SelectionKey.OP_CONNECT,
-				this);
+		this.seletionKey = channel.register(this.load.getSelector(),
+				SelectionKey.OP_CONNECT, this);
 	}
 
 	/**

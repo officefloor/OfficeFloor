@@ -145,8 +145,12 @@ public class Request {
 		if (this.serviceTimes.size() == 0) {
 			return -1;
 		} else {
-			return this.serviceTimes
-					.get((int) (this.serviceTimes.size() * percentage));
+			// Determine the index of service time
+			int serviceTimeIndex = (int) (this.serviceTimes.size() * percentage);
+			if (serviceTimeIndex >= this.serviceTimes.size()) {
+				serviceTimeIndex = (serviceTimeIndex - 1); // last index
+			}
+			return this.serviceTimes.get(serviceTimeIndex);
 		}
 	}
 
