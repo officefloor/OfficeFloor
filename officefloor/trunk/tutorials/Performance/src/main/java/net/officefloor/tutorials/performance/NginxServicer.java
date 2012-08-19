@@ -23,15 +23,15 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.DefaultHttpClient;
 
 /**
- * Apache {@link Servicer}.
+ * Nginx {@link Servicer}.
  * 
  * @author Daniel Sagenschneider
  */
-public class ApacheServicer implements Servicer {
+public class NginxServicer implements Servicer {
 
 	@Override
 	public int getPort() {
-		return 80;
+		return 81;
 	}
 
 	@Override
@@ -42,13 +42,13 @@ public class ApacheServicer implements Servicer {
 	@Override
 	public void start() throws Exception {
 
-		// Ensure Apache running
+		// Ensure Nginx running
 		HttpClient client = new DefaultHttpClient();
 		try {
 			HttpResponse response = client.execute(new HttpGet(
 					"http://localhost:" + this.getPort() + "/test.php"));
 			if (response.getStatusLine().getStatusCode() != 200) {
-				throw new Exception("Apache seems to not be running");
+				throw new Exception("Nginx seems to not be running");
 			}
 		} finally {
 			client.getConnectionManager().shutdown();

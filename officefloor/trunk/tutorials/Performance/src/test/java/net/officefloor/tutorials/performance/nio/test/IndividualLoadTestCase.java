@@ -27,6 +27,7 @@ import junit.framework.TestCase;
 import net.officefloor.tutorials.performance.ApacheServicer;
 import net.officefloor.tutorials.performance.GrizzlyServicer;
 import net.officefloor.tutorials.performance.JettyServicer;
+import net.officefloor.tutorials.performance.NginxServicer;
 import net.officefloor.tutorials.performance.Servicer;
 import net.officefloor.tutorials.performance.TomcatServicer;
 import net.officefloor.tutorials.performance.WoofServicer;
@@ -42,13 +43,6 @@ import net.officefloor.tutorials.performance.nio.Runner;
 public class IndividualLoadTestCase extends TestCase {
 
 	/**
-	 * Tests Jetty.
-	 */
-	public void testJetty() throws Exception {
-		this.doPerformanceTest(new JettyServicer());
-	}
-
-	/**
 	 * Tests WoOF.
 	 */
 	public void testWoOF() throws Exception {
@@ -56,10 +50,10 @@ public class IndividualLoadTestCase extends TestCase {
 	}
 
 	/**
-	 * Tests Apache.
+	 * Tests Jetty.
 	 */
-	public void _testApache() throws Exception {
-		this.doPerformanceTest(new ApacheServicer());
+	public void testJetty() throws Exception {
+		this.doPerformanceTest(new JettyServicer());
 	}
 
 	/**
@@ -74,6 +68,20 @@ public class IndividualLoadTestCase extends TestCase {
 	 */
 	public void testTomcat() throws Exception {
 		this.doPerformanceTest(new TomcatServicer());
+	}
+
+	/**
+	 * Tests Apache.
+	 */
+	public void testApache() throws Exception {
+		this.doPerformanceTest(new ApacheServicer());
+	}
+
+	/**
+	 * Tests Nginx.
+	 */
+	public void testNginx() throws Exception {
+		this.doPerformanceTest(new NginxServicer());
 	}
 
 	/**

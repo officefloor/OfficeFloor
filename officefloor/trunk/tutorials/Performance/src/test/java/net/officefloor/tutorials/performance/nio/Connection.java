@@ -244,8 +244,13 @@ public class Connection {
 				.read(buffer);
 		buffer.flip();
 		if (numberBytesRead > 0) {
-			buffer.get(this.responseData, this.availableResponseData,
-					numberBytesRead);
+
+			try {
+				buffer.get(this.responseData, this.availableResponseData,
+						numberBytesRead);
+			} catch (IndexOutOfBoundsException ex) {
+				throw new IOException("Failed reading response", ex);
+			}
 			this.availableResponseData += numberBytesRead;
 
 			// Transform into String
@@ -259,15 +264,18 @@ public class Connection {
 				throw new IOException("Failed response: " + response);
 			}
 
-			// Determine if completed response
+			// Determine if completed response (with content-length or chunked)
 			String separater = "\r\n\r\n";
 			if (response.contains(separater)
-					&& (!(response.endsWith(separater)))) {
+					&& ((!(response.endsWith(separater))))
+					|| (response.endsWith("0\r\n\r\n"))) {
 
 				// Determine if failed
 				String expectedResponseContent = request
 						.getExpectedResponseContent();
-				if (!(response.endsWith(expectedResponseContent))) {
+				if ((!(response.endsWith(expectedResponseContent)))
+						&& (!(response.endsWith(expectedResponseContent
+								+ "\r\n0\r\n\r\n")))) {
 					throw new IOException("Failed response: " + response + " ["
 							+ expectedResponseContent + "]");
 				}

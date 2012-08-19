@@ -220,7 +220,7 @@ public class Load {
 					}
 				}
 
-			} catch (IOException ex) {
+			} catch (Exception ex) {
 
 				// Provide each unique exception
 				String exceptionIdentifier = ex.getClass().getSimpleName()

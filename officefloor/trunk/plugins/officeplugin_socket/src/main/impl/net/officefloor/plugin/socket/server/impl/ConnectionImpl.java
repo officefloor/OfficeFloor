@@ -254,18 +254,31 @@ public class ConnectionImpl implements Connection, ManagedConnection,
 			// No longer registered for write
 			this.isRegisteredForWrite = false;
 
-			// Write the data for each queued write action
-			for (Iterator<WriteAction> iterator = this.writeActions.iterator(); iterator
-					.hasNext();) {
+			try {
 
-				// Undertake the current write action
-				WriteAction action = iterator.next();
-				if (!(action.writeData())) {
-					return false; // further writes required
+				// Write the data for each queued write action
+				for (Iterator<WriteAction> iterator = this.writeActions
+						.iterator(); iterator.hasNext();) {
+
+					// Undertake the current write action
+					WriteAction action = iterator.next();
+					if (!(action.writeData())) {
+						return false; // further writes required
+					}
+
+					// Action written, so remove
+					iterator.remove();
 				}
 
-				// Action written, so remove
-				iterator.remove();
+			} catch (IOException ex) {
+
+				// Indicate failure to write the data
+				if (LOGGER.isLoggable(Level.FINE)) {
+					LOGGER.log(Level.FINE, "Failed to write data", ex);
+				}
+
+				// Terminate connection immediately
+				this.terminate();
 			}
 
 			// All writes undertaken, determine if terminate
@@ -296,7 +309,6 @@ public class ConnectionImpl implements Connection, ManagedConnection,
 				action.cleanup();
 			}
 			this.writeActions.clear();
-			
 		}
 	}
 
@@ -440,19 +452,17 @@ public class ConnectionImpl implements Connection, ManagedConnection,
 			// Write the data
 			SocketChannel socketChannel = ConnectionImpl.this
 					.getSocketChannel();
-			boolean isFailure = false;
+			IOException failure = null;
 			try {
 				socketChannel.write(this.buffers, this.startIndex,
 						(this.nextIndex - this.startIndex));
 			} catch (IOException ex) {
-				// Connection failed (terminate immediately)
-				ConnectionImpl.this.terminate();
-				isFailure = true;
+				failure = ex;
 			}
 
-			// Return written buffers to the pool
+			// Return written buffers to the pool (or all if failure)
 			while ((this.startIndex < this.nextIndex)
-					&& (((this.buffers[this.startIndex].remaining() == 0)) || isFailure)) {
+					&& (((this.buffers[this.startIndex].remaining() == 0)) || (failure != null))) {
 
 				// Buffer written or connection failure, return to pool
 				if (this.isPooled[this.startIndex]) {
@@ -462,6 +472,11 @@ public class ConnectionImpl implements Connection, ManagedConnection,
 
 				// Start writing from next buffer
 				this.startIndex++;
+			}
+
+			// Propagate the failure
+			if (failure != null) {
+				throw failure;
 			}
 
 			// All data written if no remaining buffers to write
