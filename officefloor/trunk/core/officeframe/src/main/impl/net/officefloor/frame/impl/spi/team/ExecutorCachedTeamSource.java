@@ -19,6 +19,7 @@ package net.officefloor.frame.impl.spi.team;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadFactory;
 
 import net.officefloor.frame.spi.team.source.TeamSource;
 import net.officefloor.frame.spi.team.source.TeamSourceContext;
@@ -28,8 +29,7 @@ import net.officefloor.frame.spi.team.source.TeamSourceContext;
  * 
  * @author Daniel Sagenschneider
  */
-public class ExecutorCachedTeamSource extends AbstractExecutorTeamSource
-		implements AbstractExecutorTeamSource.ExecutorServiceFactory {
+public class ExecutorCachedTeamSource extends AbstractExecutorTeamSource {
 
 	/*
 	 * ===================== AbstractExecutorTeamSource =====================
@@ -37,17 +37,16 @@ public class ExecutorCachedTeamSource extends AbstractExecutorTeamSource
 
 	@Override
 	protected ExecutorServiceFactory createExecutorServiceFactory(
-			TeamSourceContext context) throws Exception {
-		return this;
-	}
+			TeamSourceContext context, final ThreadFactory threadFactory)
+			throws Exception {
 
-	/*
-	 * ========================= ExecutorServiceFactory ====================
-	 */
-
-	@Override
-	public ExecutorService createExecutorService() {
-		return Executors.newCachedThreadPool();
+		// Create and return the factory
+		return new ExecutorServiceFactory() {
+			@Override
+			public ExecutorService createExecutorService() {
+				return Executors.newCachedThreadPool(threadFactory);
+			}
+		};
 	}
 
 }
