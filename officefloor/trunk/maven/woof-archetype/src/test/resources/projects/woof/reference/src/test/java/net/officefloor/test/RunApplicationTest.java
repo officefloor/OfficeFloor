@@ -41,7 +41,7 @@ public class RunApplicationTest {
 	}
 
 	@After
-	public void stopApplication() {
+	public void stopApplication() throws Exception {
 		// Stop the application
 		WoofOfficeFloorSource.stop();
 	}

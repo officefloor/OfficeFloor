@@ -19,6 +19,7 @@ package net.officefloor.frame.impl.spi.team;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadFactory;
 
 import net.officefloor.frame.spi.team.source.TeamSource;
 import net.officefloor.frame.spi.team.source.TeamSourceContext;
@@ -31,7 +32,7 @@ import net.officefloor.frame.spi.team.source.TeamSourceContext;
 public class ExecutorFixedTeamSource extends AbstractExecutorTeamSource {
 
 	/**
-	 * Indicates maximum number of {@link Thread} instances.
+	 * Name of property to specify maximum number of {@link Thread} instances.
 	 */
 	public static final String PROPERTY_TEAM_SIZE = "team.size";
 
@@ -41,9 +42,10 @@ public class ExecutorFixedTeamSource extends AbstractExecutorTeamSource {
 
 	@Override
 	protected ExecutorServiceFactory createExecutorServiceFactory(
-			TeamSourceContext context) throws Exception {
+			TeamSourceContext context, final ThreadFactory threadFactory)
+			throws Exception {
 
-		// Obtain the team size
+		// Obtain the team details
 		final int teamSize = Integer.valueOf(context
 				.getProperty(PROPERTY_TEAM_SIZE));
 
@@ -51,7 +53,7 @@ public class ExecutorFixedTeamSource extends AbstractExecutorTeamSource {
 		return new ExecutorServiceFactory() {
 			@Override
 			public ExecutorService createExecutorService() {
-				return Executors.newFixedThreadPool(teamSize);
+				return Executors.newFixedThreadPool(teamSize, threadFactory);
 			}
 		};
 	}

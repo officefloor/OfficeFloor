@@ -21,6 +21,7 @@ package net.officefloor.plugin.servlet.socket.server.http;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.Writer;
 import java.net.InetSocketAddress;
 import java.util.Enumeration;
 import java.util.List;
@@ -358,6 +359,35 @@ public class ServletServerHttpConnectionTest extends OfficeFrameTestCase {
 	 * Ensure able to obtain the {@link OutputStream}.
 	 */
 	public void test_getHttpResponse_getOutputStream() throws Exception {
+		final byte[] data = new byte[1];
+		data[0] = 0;
+		OutputStream expected = new ServletOutputStream() {
+			@Override
+			public void write(int b) throws IOException {
+				data[0] = (byte) b;
+			}
+		};
+		this.recordReturn(this.response, this.response.getOutputStream(),
+				expected);
+
+		// Test
+		this.replayMockObjects();
+		HttpResponse httpResponse = this.connection.getHttpResponse();
+		OutputStream actual = httpResponse.getEntity();
+		this.verifyMockObjects();
+
+		// Ensure correct output
+		actual.write(1);
+		assertEquals("Incorrect output stream", 1, data[0]);
+	}
+
+	/**
+	 * Ensure able to obtain the {@link Writer}.
+	 */
+	public void test_getHttpResponse_getWriter() throws Exception {
+		
+		fail("TODO implement as Writer test");
+		
 		final byte[] data = new byte[1];
 		data[0] = 0;
 		OutputStream expected = new ServletOutputStream() {

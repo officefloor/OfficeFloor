@@ -214,7 +214,7 @@ public class OptimiseWoofTest extends TestCase {
 
 		// Run requests against WoOF
 		Runner runner = new Runner("localhost", port, 0.1, 0.5, 0.9, 0.95, 0.99);
-		runner.addLoad("cpu", true, new Request("/test.php?v=N", "n", 3))
+		runner.addLoad("cpu", false, new Request("/test.php?v=N", "n", 3))
 				.addConnections(1);
 
 		// Warm up

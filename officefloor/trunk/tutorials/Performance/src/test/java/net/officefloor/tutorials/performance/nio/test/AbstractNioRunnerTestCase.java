@@ -120,9 +120,9 @@ public abstract class AbstractNioRunnerTestCase extends TestCase {
 		// Start the runner
 		Runner runner = new Runner(host, servicer.getPort(), 0.1, 0.5, 0.9,
 				0.95, 0.99);
-		Load cpuLoad = runner.addLoad("cpu", true, new Request("/test.php?v=N",
-				"n", 3));
-		Load dbLoad = runner.addLoad("db", true, new Request("/test.php?v=D",
+		Load cpuLoad = runner.addLoad("cpu", false, new Request(
+				"/test.php?v=N", "n", 3));
+		Load dbLoad = runner.addLoad("db", false, new Request("/test.php?v=D",
 				"d", 3));
 
 		try {
