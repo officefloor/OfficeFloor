@@ -17,6 +17,8 @@
  */
 package net.officefloor.tutorials.performance;
 
+import java.util.concurrent.Executors;
+
 import net.officefloor.tutorials.performance.logic.HttpServletServicer;
 
 import org.glassfish.grizzly.PortRange;
@@ -52,6 +54,8 @@ public class GrizzlyServicer implements Servicer {
 		NetworkListener listener = new NetworkListener("grizzly",
 				NetworkListener.DEFAULT_NETWORK_HOST, new PortRange(
 						this.getPort()));
+		listener.getTransport().setWorkerThreadPool(
+				Executors.newCachedThreadPool());
 		listener.getTransport().setServerConnectionBackLog(25000);
 		this.server.addListener(listener);
 		WebappContext context = new WebappContext("Grizzly");

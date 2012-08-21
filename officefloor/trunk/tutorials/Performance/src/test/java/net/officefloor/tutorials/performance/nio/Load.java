@@ -424,7 +424,8 @@ public class Load {
 			requestsCount += requestCount;
 			reconnectCount += connection.getReconnectCount();
 		}
-		int averageRequestCount = (requestsCount / this.connections.size());
+		int averageRequestCount = (requestsCount / Math.max(1,
+				this.getConnectionCount()));
 
 		// Determine the number of failed connections
 		int failedConnections = 0;

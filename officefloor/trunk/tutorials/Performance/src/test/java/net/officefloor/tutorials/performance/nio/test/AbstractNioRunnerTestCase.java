@@ -76,6 +76,20 @@ public abstract class AbstractNioRunnerTestCase extends TestCase {
 	}
 
 	/**
+	 * Tests performance with only CPU load.
+	 */
+	public void testPerformance_OnlyCpu() throws Throwable {
+		this.doPerformanceTest(1000, 0);
+	}
+
+	/**
+	 * Tests performance with only Database load.
+	 */
+	public void testPerformance_OnlyDatabase() throws Throwable {
+		this.doPerformanceTest(0, 1000);
+	}
+
+	/**
 	 * Tests the performance.
 	 */
 	public void doPerformanceTest(int cpuSeed, int dbSeed) throws Throwable {
@@ -84,6 +98,10 @@ public abstract class AbstractNioRunnerTestCase extends TestCase {
 		int timeIntervalSeconds = 60;
 		int runsPerIncrement = 3;
 		int maximumNumberOfLoadConnections = 10000;
+
+		// Disconnect after so many requests to avoid throttling
+		int requestsRepeatedInSequence = 99;
+		boolean isDisconnectAfterSequence = true;
 
 		// Provide maximum priority to runner
 		Thread.currentThread().setPriority(Thread.MAX_PRIORITY);
@@ -119,11 +137,11 @@ public abstract class AbstractNioRunnerTestCase extends TestCase {
 
 		// Start the runner
 		Runner runner = new Runner(host, servicer.getPort(), 0.1, 0.5, 0.9,
-				0.95, 0.99);
-		Load cpuLoad = runner.addLoad("cpu", false, new Request(
-				"/test.php?v=N", "n", 3));
-		Load dbLoad = runner.addLoad("db", false, new Request("/test.php?v=D",
-				"d", 3));
+				0.95, 0.99, 1.0);
+		Load cpuLoad = runner.addLoad("cpu", isDisconnectAfterSequence,
+				new Request("/test.php?v=N", "n", requestsRepeatedInSequence));
+		Load dbLoad = runner.addLoad("db", isDisconnectAfterSequence,
+				new Request("/test.php?v=D", "d", requestsRepeatedInSequence));
 
 		try {
 
