@@ -127,12 +127,12 @@
 % *** GRAPHICS RELATED PACKAGES ***
 %
 \ifCLASSINFOpdf
-  % \usepackage[pdftex]{graphicx}
+   \usepackage[pdftex]{graphicx}
   % declare the path(s) where your graphic files are
-  % \graphicspath{{../pdf/}{../jpeg/}}
+   \graphicspath{{./pdf/}}
   % and their extensions so you won't have to specify these with
   % every instance of \includegraphics
-  % \DeclareGraphicsExtensions{.pdf,.jpeg,.png}
+   \DeclareGraphicsExtensions{.pdf}
 \else
   % or other class option (dvipsone, dvipdf, if not using dvips). graphicx
   % will default to the driver specified in the system graphics.cfg if no
@@ -849,6 +849,48 @@ architecture at high loads.
 
 \section{Performance Results}
 Show duration time to process all requests for 10, 100, 1000, 10000 clients.
+
+%\begin{figure}[!t]
+%\centering
+%\includegraphics[width=2.5in]{myfigure}
+% where an .eps filename suffix will be assumed under latex, 
+% and a .pdf suffix will be assumed for pdflatex; or what has been declared
+% via \DeclareGraphicsExtensions.
+%\caption{Simulation Results}
+%\label{fig_sim}
+%\end{figure}
+ 
+
+\begin{figure}[!t]
+\centering 
+\includegraphics[width=2.5in]{LowConcurrencyThroughput}
+% where an .eps filename suffix will be assumed under latex, 
+% and a .pdf suffix will be assumed for pdflatex; or what has been declared
+% via \DeclareGraphicsExtensions.
+\caption{Low Concurrency Throughput}
+\label{fig:low_concurrency_throughput}
+\end{figure}
+
+
+\begin{figure}[!t]
+\centering 
+\includegraphics[width=2.5in]{MediumConcurrencyThroughput}
+% where an .eps filename suffix will be assumed under latex, 
+% and a .pdf suffix will be assumed for pdflatex; or what has been declared
+% via \DeclareGraphicsExtensions.
+\caption{Medium Concurrency Throughput}
+\label{fig:medium_concurrency_throughput}
+\end{figure}
+
+\begin{figure}[!t]
+\centering 
+\includegraphics[width=2.5in]{HighConcurrencyThroughput}
+% where an .eps filename suffix will be assumed under latex, 
+% and a .pdf suffix will be assumed for pdflatex; or what has been declared
+% via \DeclareGraphicsExtensions.
+\caption{High Concurrency Throughput}
+\label{fig:high_concurrency_throughput}
+\end{figure}
   
 Show latency time for for 10, 100, 1000, 10000 clients for:
         - HTTP request not passing validation
@@ -1195,18 +1237,6 @@ sounding board to many of my ideas.
 \bibliographystyle{ieee/IEEEtran}
 % argument is your BibTeX string definitions and bibliography database(s)
 \bibliography{jba}
-
-
-% <OR> manually copy in the resultant .bbl file
-% set second argument of \begin to the number of references
-% (used to reserve space for the reference number labels box)
-%\begin{thebibliography}{1}
-%\bibitem{IEEEhowto:kopka}
-%H.~Kopka and P.~W. Daly, \emph{A Guide to \LaTeX}, 3rd~ed.\hskip 1em plus
-%  0.5em minus 0.4em\relax Harlow, England: Addison-Wesley, 1999.
-%\end{thebibliography}
-
-
 
 
 % that's all folks
