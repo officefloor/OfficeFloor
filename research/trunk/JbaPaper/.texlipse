@@ -1,0 +1,14 @@
+#TeXlipse project settings
+#Fri Aug 24 19:43:01 WST 2012
+markTmpDer=true
+builderNum=2
+outputDir=target/
+makeIndSty=
+bibrefDir=
+outputFormat=pdf
+tempDir=tmp
+mainTexFile=jba.tex
+outputFile=jba.pdf
+langSpell=en
+markDer=true
+srcDir=src/
