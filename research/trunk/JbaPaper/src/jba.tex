@@ -1,0 +1,1215 @@
+
+%% bare_conf.tex
+%% V1.3
+%% 2007/01/11
+%% by Michael Shell
+%% See:
+%% http://www.michaelshell.org/
+%% for current contact information.
+%%
+%% This is a skeleton file demonstrating the use of IEEEtran.cls
+%% (requires IEEEtran.cls version 1.7 or later) with an IEEE conference paper.
+%%
+%% Support sites:
+%% http://www.michaelshell.org/tex/ieeetran/
+%% http://www.ctan.org/tex-archive/macros/latex/contrib/IEEEtran/
+%% and
+%% http://www.ieee.org/
+
+%%*************************************************************************
+%% Legal Notice:
+%% This code is offered as-is without any warranty either expressed or
+%% implied; without even the implied warranty of MERCHANTABILITY or
+%% FITNESS FOR A PARTICULAR PURPOSE! 
+%% User assumes all risk.
+%% In no event shall IEEE or any contributor to this code be liable for
+%% any damages or losses, including, but not limited to, incidental,
+%% consequential, or any other damages, resulting from the use or misuse
+%% of any information contained here.
+%%
+%% All comments are the opinions of their respective authors and are not
+%% necessarily endorsed by the IEEE.
+%%
+%% This work is distributed under the LaTeX Project Public License (LPPL)
+%% ( http://www.latex-project.org/ ) version 1.3, and may be freely used,
+%% distributed and modified. A copy of the LPPL, version 1.3, is included
+%% in the base LaTeX documentation of all distributions of LaTeX released
+%% 2003/12/01 or later.
+%% Retain all contribution notices and credits.
+%% ** Modified files should be clearly indicated as such, including  **
+%% ** renaming them and changing author support contact information. **
+%%
+%% File list of work: IEEEtran.cls, IEEEtran_HOWTO.pdf, bare_adv.tex,
+%%                    bare_conf.tex, bare_jrnl.tex, bare_jrnl_compsoc.tex
+%%*************************************************************************
+
+% *** Authors should verify (and, if needed, correct) their LaTeX system  ***
+% *** with the testflow diagnostic prior to trusting their LaTeX platform ***
+% *** with production work. IEEE's font choices can trigger bugs that do  ***
+% *** not appear when using other class files.                            ***
+% The testflow support page is at:
+% http://www.michaelshell.org/tex/testflow/
+
+
+
+% Note that the a4paper option is mainly intended so that authors in
+% countries using A4 can easily print to A4 and see how their papers will
+% look in print - the typesetting of the document will not typically be
+% affected with changes in paper size (but the bottom and side margins will).
+% Use the testflow package mentioned above to verify correct handling of
+% both paper sizes by the user's LaTeX system.
+%
+% Also note that the "draftcls" or "draftclsnofoot", not "draft", option
+% should be used if it is desired that the figures are to be displayed in
+% draft mode.
+%
+\documentclass[conference]{ieee/IEEEtran}
+% Add the compsoc option for Computer Society conferences.
+%
+% If IEEEtran.cls has not been installed into the LaTeX system files,
+% manually specify the path to it like:
+% \documentclass[conference]{../sty/IEEEtran}
+
+ 
+
+
+
+% Some very useful LaTeX packages include:
+% (uncomment the ones you want to load)
+
+
+% *** MISC UTILITY PACKAGES ***
+%
+%\usepackage{ifpdf}
+% Heiko Oberdiek's ifpdf.sty is very useful if you need conditional
+% compilation based on whether the output is pdf or dvi.
+% usage:
+% \ifpdf
+%   % pdf code
+% \else
+%   % dvi code
+% \fi
+% The latest version of ifpdf.sty can be obtained from:
+% http://www.ctan.org/tex-archive/macros/latex/contrib/oberdiek/
+% Also, note that IEEEtran.cls V1.7 and later provides a builtin
+% \ifCLASSINFOpdf conditional that works the same way.
+% When switching from latex to pdflatex and vice-versa, the compiler may
+% have to be run twice to clear warning/error messages.
+
+
+
+
+
+
+% *** CITATION PACKAGES ***
+%
+\usepackage{cite}
+% cite.sty was written by Donald Arseneau
+% V1.6 and later of IEEEtran pre-defines the format of the cite.sty package
+% \cite{} output to follow that of IEEE. Loading the cite package will
+% result in citation numbers being automatically sorted and properly
+% "compressed/ranged". e.g., [1], [9], [2], [7], [5], [6] without using
+% cite.sty will become [1], [2], [5]--[7], [9] using cite.sty. cite.sty's
+% \cite will automatically add leading space, if needed. Use cite.sty's
+% noadjust option (cite.sty V3.8 and later) if you want to turn this off.
+% cite.sty is already installed on most LaTeX systems. Be sure and use
+% version 4.0 (2003-05-27) and later if using hyperref.sty. cite.sty does
+% not currently provide for hyperlinked citations.
+% The latest version can be obtained at:
+% http://www.ctan.org/tex-archive/macros/latex/contrib/cite/
+% The documentation is contained in the cite.sty file itself.
+
+
+
+
+
+
+% *** GRAPHICS RELATED PACKAGES ***
+%
+\ifCLASSINFOpdf
+  % \usepackage[pdftex]{graphicx}
+  % declare the path(s) where your graphic files are
+  % \graphicspath{{../pdf/}{../jpeg/}}
+  % and their extensions so you won't have to specify these with
+  % every instance of \includegraphics
+  % \DeclareGraphicsExtensions{.pdf,.jpeg,.png}
+\else
+  % or other class option (dvipsone, dvipdf, if not using dvips). graphicx
+  % will default to the driver specified in the system graphics.cfg if no
+  % driver is specified.
+  % \usepackage[dvips]{graphicx}
+  % declare the path(s) where your graphic files are
+  % \graphicspath{{../eps/}}
+  % and their extensions so you won't have to specify these with
+  % every instance of \includegraphics
+  % \DeclareGraphicsExtensions{.eps}
+\fi
+% graphicx was written by David Carlisle and Sebastian Rahtz. It is
+% required if you want graphics, photos, etc. graphicx.sty is already
+% installed on most LaTeX systems. The latest version and documentation can
+% be obtained at: 
+% http://www.ctan.org/tex-archive/macros/latex/required/graphics/
+% Another good source of documentation is "Using Imported Graphics in
+% LaTeX2e" by Keith Reckdahl which can be found as epslatex.ps or
+% epslatex.pdf at: http://www.ctan.org/tex-archive/info/
+%
+% latex, and pdflatex in dvi mode, support graphics in encapsulated
+% postscript (.eps) format. pdflatex in pdf mode supports graphics
+% in .pdf, .jpeg, .png and .mps (metapost) formats. Users should ensure
+% that all non-photo figures use a vector format (.eps, .pdf, .mps) and
+% not a bitmapped formats (.jpeg, .png). IEEE frowns on bitmapped formats
+% which can result in "jaggedy"/blurry rendering of lines and letters as
+% well as large increases in file sizes.
+%
+% You can find documentation about the pdfTeX application at:
+% http://www.tug.org/applications/pdftex
+
+
+
+
+
+% *** MATH PACKAGES ***
+%
+%\usepackage[cmex10]{amsmath}
+% A popular package from the American Mathematical Society that provides
+% many useful and powerful commands for dealing with mathematics. If using
+% it, be sure to load this package with the cmex10 option to ensure that
+% only type 1 fonts will utilized at all point sizes. Without this option,
+% it is possible that some math symbols, particularly those within
+% footnotes, will be rendered in bitmap form which will result in a
+% document that can not be IEEE Xplore compliant!
+%
+% Also, note that the amsmath package sets \interdisplaylinepenalty to 10000
+% thus preventing page breaks from occurring within multiline equations. Use:
+%\interdisplaylinepenalty=2500
+% after loading amsmath to restore such page breaks as IEEEtran.cls normally
+% does. amsmath.sty is already installed on most LaTeX systems. The latest
+% version and documentation can be obtained at:
+% http://www.ctan.org/tex-archive/macros/latex/required/amslatex/math/
+
+
+
+
+
+% *** SPECIALIZED LIST PACKAGES ***
+%
+%\usepackage{algorithmic}
+% algorithmic.sty was written by Peter Williams and Rogerio Brito.
+% This package provides an algorithmic environment fo describing algorithms.
+% You can use the algorithmic environment in-text or within a figure
+% environment to provide for a floating algorithm. Do NOT use the algorithm
+% floating environment provided by algorithm.sty (by the same authors) or
+% algorithm2e.sty (by Christophe Fiorio) as IEEE does not use dedicated
+% algorithm float types and packages that provide these will not provide
+% correct IEEE style captions. The latest version and documentation of
+% algorithmic.sty can be obtained at:
+% http://www.ctan.org/tex-archive/macros/latex/contrib/algorithms/
+% There is also a support site at:
+% http://algorithms.berlios.de/index.html
+% Also of interest may be the (relatively newer and more customizable)
+% algorithmicx.sty package by Szasz Janos:
+% http://www.ctan.org/tex-archive/macros/latex/contrib/algorithmicx/
+
+
+
+
+% *** ALIGNMENT PACKAGES ***
+%
+\usepackage{array}
+% Frank Mittelbach's and David Carlisle's array.sty patches and improves
+% the standard LaTeX2e array and tabular environments to provide better
+% appearance and additional user controls. As the default LaTeX2e table
+% generation code is lacking to the point of almost being broken with
+% respect to the quality of the end results, all users are strongly
+% advised to use an enhanced (at the very least that provided by array.sty)
+% set of table tools. array.sty is already installed on most systems. The
+% latest version and documentation can be obtained at:
+% http://www.ctan.org/tex-archive/macros/latex/required/tools/
+
+
+%\usepackage{mdwmath}
+%\usepackage{mdwtab}
+% Also highly recommended is Mark Wooding's extremely powerful MDW tools,
+% especially mdwmath.sty and mdwtab.sty which are used to format equations
+% and tables, respectively. The MDWtools set is already installed on most
+% LaTeX systems. The lastest version and documentation is available at:
+% http://www.ctan.org/tex-archive/macros/latex/contrib/mdwtools/
+
+
+% IEEEtran contains the IEEEeqnarray family of commands that can be used to
+% generate multiline equations as well as matrices, tables, etc., of high
+% quality.
+
+
+%\usepackage{eqparbox}
+% Also of notable interest is Scott Pakin's eqparbox package for creating
+% (automatically sized) equal width boxes - aka "natural width parboxes".
+% Available at:
+% http://www.ctan.org/tex-archive/macros/latex/contrib/eqparbox/
+
+
+
+
+
+% *** SUBFIGURE PACKAGES ***
+%\usepackage[tight,footnotesize]{subfigure}
+% subfigure.sty was written by Steven Douglas Cochran. This package makes it
+% easy to put subfigures in your figures. e.g., "Figure 1a and 1b". For IEEE
+% work, it is a good idea to load it with the tight package option to reduce
+% the amount of white space around the subfigures. subfigure.sty is already
+% installed on most LaTeX systems. The latest version and documentation can
+% be obtained at:
+% http://www.ctan.org/tex-archive/obsolete/macros/latex/contrib/subfigure/
+% subfigure.sty has been superceeded by subfig.sty.
+
+
+
+%\usepackage[caption=false]{caption}
+%\usepackage[font=footnotesize]{subfig}
+% subfig.sty, also written by Steven Douglas Cochran, is the modern
+% replacement for subfigure.sty. However, subfig.sty requires and
+% automatically loads Axel Sommerfeldt's caption.sty which will override
+% IEEEtran.cls handling of captions and this will result in nonIEEE style
+% figure/table captions. To prevent this problem, be sure and preload
+% caption.sty with its "caption=false" package option. This is will preserve
+% IEEEtran.cls handing of captions. Version 1.3 (2005/06/28) and later 
+% (recommended due to many improvements over 1.2) of subfig.sty supports
+% the caption=false option directly:
+%\usepackage[caption=false,font=footnotesize]{subfig}
+%
+% The latest version and documentation can be obtained at:
+% http://www.ctan.org/tex-archive/macros/latex/contrib/subfig/
+% The latest version and documentation of caption.sty can be obtained at:
+% http://www.ctan.org/tex-archive/macros/latex/contrib/caption/
+
+
+
+
+% *** FLOAT PACKAGES ***
+%
+%\usepackage{fixltx2e}
+% fixltx2e, the successor to the earlier fix2col.sty, was written by
+% Frank Mittelbach and David Carlisle. This package corrects a few problems
+% in the LaTeX2e kernel, the most notable of which is that in current
+% LaTeX2e releases, the ordering of single and double column floats is not
+% guaranteed to be preserved. Thus, an unpatched LaTeX2e can allow a
+% single column figure to be placed prior to an earlier double column
+% figure. The latest version and documentation can be found at:
+% http://www.ctan.org/tex-archive/macros/latex/base/
+
+
+
+%\usepackage{stfloats}
+% stfloats.sty was written by Sigitas Tolusis. This package gives LaTeX2e
+% the ability to do double column floats at the bottom of the page as well
+% as the top. (e.g., "\begin{figure*}[!b]" is not normally possible in
+% LaTeX2e). It also provides a command:
+%\fnbelowfloat
+% to enable the placement of footnotes below bottom floats (the standard
+% LaTeX2e kernel puts them above bottom floats). This is an invasive package
+% which rewrites many portions of the LaTeX2e float routines. It may not work
+% with other packages that modify the LaTeX2e float routines. The latest
+% version and documentation can be obtained at:
+% http://www.ctan.org/tex-archive/macros/latex/contrib/sttools/
+% Documentation is contained in the stfloats.sty comments as well as in the
+% presfull.pdf file. Do not use the stfloats baselinefloat ability as IEEE
+% does not allow \baselineskip to stretch. Authors submitting work to the
+% IEEE should note that IEEE rarely uses double column equations and
+% that authors should try to avoid such use. Do not be tempted to use the
+% cuted.sty or midfloat.sty packages (also by Sigitas Tolusis) as IEEE does
+% not format its papers in such ways.
+
+
+
+
+
+% *** PDF, URL AND HYPERLINK PACKAGES ***
+%
+%\usepackage{url}
+% url.sty was written by Donald Arseneau. It provides better support for
+% handling and breaking URLs. url.sty is already installed on most LaTeX
+% systems. The latest version can be obtained at:
+% http://www.ctan.org/tex-archive/macros/latex/contrib/misc/
+% Read the url.sty source comments for usage information. Basically,
+% \url{my_url_here}.
+
+
+
+
+
+% *** Do not adjust lengths that control margins, column widths, etc. ***
+% *** Do not use packages that alter fonts (such as pslatex).         ***
+% There should be no need to do such things with IEEEtran.cls V1.6 and later.
+% (Unless specifically asked to do so by the journal or conference you plan
+% to submit to, of course. )
+
+
+% correct bad hyphenation here
+\hyphenation{op-tical net-works semi-conduc-tor}
+
+
+\begin{document}
+%
+% paper title
+% can use linebreaks \\ within to get better formatting as desired
+\title{Job Based Architecture: isolating bottlenecks by \\
+awareness of task characteristics via dependencies}
+
+
+% author names and affiliations
+% use a multiple column layout for up to three different
+% affiliations
+\author{\IEEEauthorblockN{Daniel Sagenschneider}
+\IEEEauthorblockA{Email: daniel@officefloor.net}}
+
+% conference papers do not typically use \thanks and this command
+% is locked out in conference mode. If really needed, such as for
+% the acknowledgment of grants, issue a \IEEEoverridecommandlockouts
+% after \documentclass
+
+% for over three affiliations, or if they all won't fit within the width
+% of the page, use this alternative format:
+% 
+%\author{\IEEEauthorblockN{Michael Shell\IEEEauthorrefmark{1},
+%Homer Simpson\IEEEauthorrefmark{2},
+%James Kirk\IEEEauthorrefmark{3}, 
+%Montgomery Scott\IEEEauthorrefmark{3} and
+%Eldon Tyrell\IEEEauthorrefmark{4}}
+%\IEEEauthorblockA{\IEEEauthorrefmark{1}School of Electrical and Computer Engineering\\
+%Georgia Institute of Technology,
+%Atlanta, Georgia 30332--0250\\ Email: see http://www.michaelshell.org/contact.html}
+%\IEEEauthorblockA{\IEEEauthorrefmark{2}Twentieth Century Fox, Springfield, USA\\
+%Email: homer@thesimpsons.com}
+%\IEEEauthorblockA{\IEEEauthorrefmark{3}Starfleet Academy, San Francisco, California 96678-2391\\
+%Telephone: (800) 555--1212, Fax: (888) 555--1212}
+%\IEEEauthorblockA{\IEEEauthorrefmark{4}Tyrell Inc., 123 Replicant Street, Los Angeles, California 90210--4321}}
+
+
+
+
+% use for special paper notices
+%\IEEEspecialpapernotice{(Invited Paper)}
+
+
+
+
+% make the title area
+\maketitle
+
+
+\begin{abstract}
+By making a thread a parameter to the function, with the thread determined as a
+transitive dependency of the function's dependencies, it enables isolating
+perfomance bottlenecks of a function to not consume all threads and
+subsequently starve other unrelated functions of a thread.  This paper provides
+discussion and findings on an initial exploration of this concept with the
+derived Job Based Architecture and tests the feasibility by comparison of the
+OfficeFloor implementation against other popular Web Servers.  The findings
+demonstrate that overheads involved of making a thread a parameter to a
+function do not significantly detriment performance and at a high number of
+concurrent requests provides more consistent performance over
+thread-per-request Web Servers for servicing differing characteristics of
+dynamic HTTP requests.
+\end{abstract}
+
+
+
+
+% For peer review papers, you can put extra information on the cover
+% page as needed:
+% \ifCLASSOPTIONpeerreview
+% \begin{center} \bfseries EDICS Category: 3-BBND \end{center}
+% \fi
+%
+% For peerreview papers, this IEEEtran command inserts a page break and
+% creates the second title. It will be ignored for other modes.
+\IEEEpeerreviewmaketitle
+
+
+
+\section{Introduction}
+
+TODO no longer need such focus on pipeline The Pipeline \cite{pipeline} is a
+well understood pattern for architecting high performing Web Servers
+\cite{multithread-pipeline,knot-userver-watpipe,seda}, however in many
+architectures \cite{multithread-pipeline,flux,aspen} the concurrency model for
+the processing of tasks within each stage are configured based on task type
+leaving concurrency complexities of a Web Server in processing dynamic HTTP
+requests (e.g. rendering a dynamic HTML page from data retrieved from a
+database) to the developers of the application.
+
+TODO focus more on:
+Tuning of server is important \cite{tuning-important} and further work
+identified that low footprint is also important \cite{knot-userver-watpipe}.
+
+Arguments:
+\begin{itemize}
+  \item Thread is a parameter to the function
+  \item Isolate performance bottlenecks rather than trying to tune to avoid
+  them.
+  \item agree concurrency model should be decoupled from application logic
+\end{itemize}
+
+
+This paper presents OfficeFloor and its underlying Job Based Architecture and
+demonstrates, through OfficeFloor's ability to provide a thread as dependency
+to a task, isolating the affects of bottlenecks in processing high loads of
+dynamic HTTP requests and subsequently reduce the need for developers to handle
+concurrency complexities.  More consistent performance in both throughput and
+latency is achieved by assigning the execution of the tasks in the servicing of
+a dynamic HTTP request to an appropriate thread pool based on the task's
+dependencies rather than the task type.  As the service handling is identified
+as the most time consuming stage of servicing HTTP requests and is difficult to
+decompose [Le], through the Job Based Architecture I will demonstrate how the
+Job Based Architecture can decompose the service handling of dynamic HTTP
+requests and subsequently provide more consistent performance at high loads
+over popular Web Servers that rely on thread-per-request models for servicing
+dynamic HTTP requests.
+
+\section{Job Based Architecture}
+The Job Based Architecture builds on the concepts of the Pipeline
+Pattern~\cite{pipeline}, Continuations~\cite{continuations}, Reactor
+Pattern~\cite{reactor}, Inversion of Control Pattern~\cite{ioc}, Combine
+Pattern~\cite{pipeline} and Wrap Pattern~\cite{pipeline} to enable utilising multiple thread
+pools to isolate processing of certain tasks based on their characteristics.
+
+Within a Job Based Architecture the application functionality is decomposed
+into jobs that are executed sequentially (Pipeline pattern~\cite{pipeline}).  The
+construction of the sequence of jobs is dynamic and particular to the HTTP
+request being serviced.  An example sequence of jobs to service a HTTP request
+to dynamically retrieve data in a database would be as table~\ref{tab:example_request_jobs}. 
+
+\begin{table}[!t]
+\renewcommand{\arraystretch}{1.3}
+\caption{Example jobs to service a dynamic HTTP request}
+\label{tab:example_request_jobs}
+\centering
+\begin{tabular}{l||l}
+\hline
+\bfseries Job & \bfseries Dependency \\
+\hline
+\hline
+Read data from Socket & Selector, Socket \\
+\hline
+Parse HTTP Request & Data read \\
+\hline
+Dispatch HTTP Request & HTTP request \\
+\hline
+Validate client data & HTTP request \\
+\hline
+Retrieve Data from database & Client data, Database connection \\
+\hline
+Render HTTP Response & Database data \\
+\hline
+Write HTTP Response & HTTP Response, Socket \\
+\hline
+\end{tabular}
+\end{table}
+
+A job provides additional meta-data regarding its processing characteristics
+over a pipelined task by specifying its required dependencies and through
+continuations allows dynamic construction of the job sequence.  Each job is
+constructed via the Inversion of Control pattern and through extrinsic
+dependency management \cite{ioc} the job defines its required dependencies (e.g.
+Database Connection).  Based on the dependencies required of the job, the job
+will be dispatched (Reactor Pattern~\cite{reactor}) to a particular thread pool
+(Combine Pattern~\cite{pipeline}) for execution.
+Handling bursts in HTTP requests is achieved by utilising the Wrap
+Pattern~\cite{pipeline} within the thread pools.  The dynamic construction of
+the sequence of jobs is achieved by providing each job a list of possible
+continuations \cite{continuations} that encapsulate the construction and
+dispatching of the possible next jobs in the sequence.
+Managing state between jobs for the application is contained within the
+dependencies.  For the sequence of jobs in table~\ref{tab:example_request_jobs},
+thread pools are configured as table~\ref{tab:example_request_thread_pools} to
+execute the jobs.
+
+\begin{table}[!t]
+\renewcommand{\arraystretch}{1.3}
+\caption{Example dependency groupings for dynamic HTTP request jobs}
+\label{tab:example_request_thread_pools}
+\centering
+\begin{tabular}{l||l}
+\hline
+\bfseries Dependency & \bfseries Jobs \\
+\hline
+\hline
+Selector & Read data from Socket \\
+\hline
+Database Connection & Retrieve Data \\
+\hline
+\textit{No dependency} & Parse HTTP Request, \\
+& Dispatch HTTP Request, \\
+& Validate client data, \\ 
+& Render HTTP Response, \\
+& Write HTTP Response to Socket \\
+\hline
+\end{tabular}
+\end{table}
+
+Thread context switching and memory management overheads due to queuing tasks
+is reduced in the Job Based Architecture over a pipeline architecture, as the
+job dispatching to thread pools is able to utilise the dependencies to
+determine if the next job may be executed by the current thread.  In
+table~\ref{tab:example_request_thread_pools}, the "No Dependency Jobs" does not
+actually contain threads but executes its jobs by re-using the thread of the previous job.  In other words, the Parse
+HTTP Request, Dispatch HTTP Request and Validate client data jobs are executed
+by the thread from the Network Jobs Thread Pool and the Render HTTP Response
+and Write HTTP Response is executed by the thread from the Database Jobs thread
+pool.  Write HTTP Response may, however, be completed by the "Network Jobs
+Thread Pool" if the send socket buffer is full.
+
+The ability to re-use the thread from the previous job (pipeline stage) reduces
+overheads of jobs waiting in queues and being passed between potentially
+context switching threads for each pipeline stage.  This is intentional so that
+a job is only queued for another thread to isolate a performance bottleneck
+from the current thread.  Should there be no performance bottlenecks to isolate
+(e.g. database data is cached) the execution of the HTTP request may be
+executed in entirity by one thread, allowing the Job Based Architecture to
+behave like an event-based architecture in this case.
+
+The resulting intention of the Job Based Architecture is that bottlenecks in
+servicing a particular stage of the dynamic HTTP request (e.g. blocking network
+I/O) is assigned to a particular thread pool and does not affect other stages of
+processing the dynamic HTTP requests not subject to the bottleneck (e.g.
+blocking disk I/O).  The result is that throughput is maintained for requests
+not subject to a particular performance bottleneck, as the Web Server disallows
+a performance bottleneck to consume all available threads and subsequently
+starve these other requests of a thread.  Furthermore, the cost of isolating
+performance bottlenecks is reduced as the overheads of pipelining tasks is
+minimised by re-using the previous job's thread and therefore removes much of
+the thread context switching and memory management overheads.
+
+Further to isolating bottlenecks the Job Based Architecture improves on
+statically/dynamically combining tasks onto a thread pool by the developer, as
+the Job Based Architecture is able to use job dependencies to determine the
+appropriate thread pool for executing each job (task).  This reduces arrising
+bottlenecks from human configuration/coding errors and jobs potentially
+changing their dependencies (and subsequent processing characteristics) over
+the evolution of the application.
+
+TODO: mention that this can all be determined at compile time and structures
+created to optimise this.  Plus can provide the developer compile time warnings
+of tasks that potentially require decomposing due to having dependencies that
+relate to two different thread pools for isolation.
+
+
+\section{Thread is a Parameter to the Function}
+While the previous section discusses the mechanisms of how a Job Based
+Architecture is achieved, I am finding more fundamentally that a thread should
+actually be a parameter to the function much like a continuation.  The function
+has a dependency on a thread to be executed.  The thread "passed" to the
+function is determined as a transitive dependency [TODO determine if can
+reference definition] of the function's dependencies.  Should the thread not be
+derived as a transitive dependency, the implicit thread of re-using the
+previous job's thread is passed (similar to an implicit continutation that
+executes the next operation after a function returns).  And therefore, a thread
+is a dependency for the function and as such a parameter.
+
+Furthermore, providing continuations and a thread as parameters of a function
+provides a more complete inversion of control.  The function is provided
+dependencies as inputs, with one being the thread to use, and continuations for
+where execution is to continue (possibly by another thread) with the outputs of
+the function.
+
+The resulting inversion of control for the function is not too unlike a
+pipeline of work managed within an office where people are assigned to
+undertake a particular function.  The office process is formed by connecting
+tasks together with continuations (e.g. "outboxes" which feed as input to the
+next possible tasks in the process).  The tasks are grouped based on similarity
+(e.g. dependency on particular skill or resource) and based on that similarity
+have a particular team (thread pool) assigned; one team is typically not
+responsible for undertaking all tasks of a process.  Teams may take on smaller
+tasks in the process before handing off to another Team for improved
+efficiency.  Differing teams can then be scaled up and down based on the load
+of tasks for only the groupings they are responsible and therefore the model
+disallows one function to consume all the people (threads).  This is the
+original inspiration behind OfficeFloor and where I derived its name.
+
+\section{Performance Evaluation}
+While there is various profiles of Web Server traffic [Yang, Padiag], the
+performance evalution deliberately put the Web Servers under overloaded
+workloads where a bottleneck will affect the performance of one of the dynamic
+HTTP request types.
+
+TODO identify with supporting papers that three types of requests: read cached,
+read blocked on write, and read/write  (include SPEC, Trade6, etc standards for
+traffic profiles).  Make note that this is artificial workload but designed to
+accentuate the performance bottleneck.  It will however be part of further work
+to assess the Job Based Architecture against defined profile traffic [TODO
+SPEC, Trade6, etc].
+
+In the tests, each connection to the Web Server repeatedly sent one of the
+following bursts of traffic:
+\begin{itemize}
+\item AJAX: Sequence of 99 requests that each required communication with a
+database before disconnecting (e.g. traffic profile of making AJAX calls to
+retrieve/update data in a database).
+\item BROWSE: Sequence of 99 requests for resources generated from cached
+content before disconnecting (e.g. traffic profile of browsing the latest news
+feeds).
+\end{itemize}
+
+In both cases a valid response was required before sending the next request or
+disconnecting.  A mix of request types was not used on the same connection, as
+it was found the database bottleneck resulted in the single thread aysnchronous
+I/O client waiting for AJAX responses before sending the other BROWSE requests.
+A single threaded client was utilised to write prebuilt request message buffers
+to the Server without incurring threading overheads and is able to accurately
+capture start and end times of intervals.  The closing and re-establishing of
+the connection was to prevent the Web Servers throttling throughput on a
+connection.  The number of requests sent by each connection of a request type
+were also compared to ensure a similar number of requests and therefore similar
+number of re-connections (i.e. did not diverge by more than 2% from the average
+% - TODO NO).
+
+The tests were run on hardware (TODO provide) client and server connected by
+ethernet cat-6 cross-over cable.  Provide configuration changes to default
+linux install (ConfigureLinux.sh) plus increase in open files by the user to
+200,000.
+
+To focus performance analysis on the processing of the dynamic HTTP request:
+\begin{itemize}
+  \item network bandwidth was monitored to not exceed capability (TODO what is
+max out - does this happen?) * a 5 minute warm up was undertake of the web server
+and the client before result capture started
+  \item HTTP requests had 0 content length and HTTP response entities were of
+ one character to reduce network overheads.
+  \item simulation of a blocking database network I/O was achieved by having the
+  servicing thread obtain a connection from a pool of 50, sleep for one
+  millisecond and return the connection to the pool.
+  \item system was monitored to confirm no use of swap space by both the client
+  and server.
+  \item each test was run 10 times to average the results.
+\end{itemize}
+ 
+Results were recorded in the client by Java's nanoTime function which:
+\begin{itemize}
+  \item measured throughput as total time to service all requests which was
+  identified as the difference between the start time of the earliest sent HTTP
+  request by a client and completion time of the latest recieved HTTP response
+  by a client.
+  \item measured latency by finding the difference in time immediately before
+  sending an individual request and immediately after receiving its
+  corresponding HTTP response, and then ordering all times ascending.  The time
+  at the integer index identified by the total number of requests times 0.9 to
+  determine the maximum latency for servicing 90% of the HTTP requests.  As
+  % each HTTP request had differing dynamic characteristics they are reported
+  % separately from each other.
+\end{itemize}
+
+\subsection{OfficeFloor}
+The OfficeFloor project [OfficeFloor] provides a Java implementation of the Job
+Based Architecture.
+
+Within the OfficeFloor application for this performance evaluation, a thread
+pool will handle all jobs with a DataSource dependency.  OfficeFloor's web
+components also implicitly constructs a thread pool for handling the accepting
+of connections and reading and possibly completing writing to sockets.  The
+code is as follows:
+
+\begin{verbatim}
+public class ServiceLogic {
+
+ @FlowInterface
+ private static interface Continuations {
+  void database(char value);
+ }
+
+ public void news(
+   ServerHttpConnection connection, 
+   Continuations continuations) 
+   throws IOException { 
+  String requestUri = connection
+   .getHttpRequest().getRequestURI(); 
+  char value = requestUri
+   .charAt(requestUri.length() - 1); 
+  if (value == 'N') {
+   connection.getHttpResponse()
+    .getEntity().write((byte) 'n');
+   return;
+  }
+  continuations.database(value);
+ }
+
+ public void database(
+   @Parameter char value, 
+   ServerHttpConnection conn,
+   PooledDataSource dataSource) 
+   throws Exception {
+  Connection connection = dataSource
+   .getConnection();
+  try {
+   Thread.sleep(100);
+  } finally {
+   connection.close();
+  }
+  conn.getHttpResponse().getEntity()
+   .write((byte) 'd');
+ }
+}
+\end{verbatim}
+   
+OfficeFloor executes each method as a separate job with the parameters to the
+method defining the dependencies.  As there is no Database Connection for the
+first method, it is therefore not assigned to the database thread pool and by
+default is executed by the previous stage's thread pool (i.e. thread pool
+responsible for reading/writing to the socket and therefore does not incur a
+thread context switch to be serviced).
+
+
+\subsection{Servlet: Jetty, Grizzly, Tomcat}
+To not draw comparison between implementations of the Servlet specification
+[TODO reference], various open source implementations were used and the best
+result for each scenario identified by throughput is reported in the results
+for comparison against OfficeFloor.  The code is written as a Java HttpServlet
+and is as follows:
+
+\begin{verbatim}   
+public class HttpServletServicer 
+  extends HttpServlet {
+ @Override
+ protected void doGet(
+  HttpServletRequest req, 
+  HttpServletResponse resp)
+  throws ServletException, IOException {
+		
+  String queryString = req
+   .getQueryString();
+  char value = queryString
+   .charAt(queryString.length() - 1);
+  if (value == 'N') {
+   resp.getWriter().write('n');
+  } else {
+   try {
+    Connection connection = null;
+    try {
+     connection = PoolSingleton
+      .getPooledDataSource()
+      .getConnection();
+     Thread.sleep(100);
+    } finally {
+     if (connection != null) {
+      connection.close();
+     }
+    }
+   } catch (Exception ex) {
+    throw new ServletException(ex);
+   }
+   resp.getWriter().write('d');
+  }
+ }
+}
+\end{verbatim}
+   
+The only change to default configuration of each implementation is that the
+socket back log was increased to 25000 to enable coping with the high number of
+concurrent dynamic HTTP requests.
+
+\subsection{PHP: Apache HTTP Server, Nginx}
+Again to not draw comparision between PHP hosting servers, various open source
+implementations were used and only the best result for each scenario identified
+by throughput is included.  The code of the handler was written in a PHP code
+snippet and is as follows:
+
+\begin{verbatim}
+<?php
+$val = substr($_SERVER[REQUEST_URI]
+    , 12, 1);
+if ( $val == "N" ) {
+  echo 'n';
+} else {
+  usleep(100000);
+  echo 'd';
+}
+?>
+\end{verbatim}
+
+As PHP has a share nothing architecture making connection pooling
+implementations difficult, the maximum clients for each server was configured
+at 150.  While there is opportunity to increase the number to improve
+performance, this evaluation is based on utilising the concurrency optimisation
+of the Web Server without requiring the developer to optimise performance
+tuning settings.  The "ServerBackLog" setting was however increased to 25000 to
+cope with the high number of dynamic HTTP requests and the "ramp up clients"
+was set to X to allow establishing the large number of connections.
+
+
+\subsection{IIS}
+TODO (consider whether to do this experiment)
+
+An ??aspx?? implementation was also evaluated with results found to be similar
+to the Servlet specification.  These results have therefore been excluded from
+being reported as there is only one implementation and my intention is not not
+to draw comparisons between Web Server implementations but rather demonstrate
+the improvements of a Job Based Architecture over a thread-per-request
+architecture at high loads.
+   
+   
+
+\section{Performance Results}
+Show duration time to process all requests for 10, 100, 1000, 10000 clients.
+  
+Show latency time for for 10, 100, 1000, 10000 clients for:
+        - HTTP request not passing validation
+        - HTTP request passing validation and inserting a value in the database
+       
+In all cases, the database request throughput is constant due to the database
+bottleneck limiting the throughput.  In the low loads (100 database requests),
+the constant is lower as network latency (approximately 1ms) reduces
+throughput.  As the higher number of database requests occur (i.e. 1000 and
+above), the network latency becomes less important due to the requests
+streaming one after another.  As the increasing number of concurrent database
+requests occur, they queue on the database bottleneck increasing the request's
+latency.
+   
+At one request, OfficeFloor only requires 2 threads while thread-per-request
+requires 3.  This demonostrates the overheads of context switching on latency
+and subsequently throughput.  TODO explain more.
+       
+At low loads (100 database requests), there is sufficient threads to service
+both types of traffic.  The result is that the overheads in determining the
+thread for each job does increase latency and therefore reduce overall
+throughput, as the thread-per-request model need not queue any request for a
+thread.
+   
+As the number of concurrent requests increase above the available threads, the
+queuing of requests occurs within the thread-per-request Web Servers and the
+affects of the bottleneck spread to the news based request.  This is especially
+noticable when there are more database related requests (i.e. 100n/1000d and
+1000n/10000d), as the thread-per-request Web Server has all threads spend a
+significant proportion of their time waiting on a database and therefore can
+not spend time servicing the news requests.
+   
+TODO: To validate isolating the bottleneck was the significant contributor to
+the cause of the differences, the database latency was increased to 10 seconds
+and tests were re-run.  In all cases for high loads (above available threads)
+the number of news request for thread-per-request Web Servers dropped
+significantly (below X number) with latency increasing significantly (in some
+cases over X seconds), while OfficeFloor was able to maintain the news requests
+at the throughput and latencies as above.  The results have been excluded from
+this paper, as this was only to validate the isolating of the bottleneck and
+comparision of handling outages, I expect being the cause bottlenecks of this
+size, is an item for future research.
+
+
+\section{Related Work}
+OfficeFloor and its Job Based Architecture is to the best of my knowledge the
+first time that the patterns of pipeline, continuations and inversion of
+control have been used together along with the concept of a thread as a
+dependency to achieve a concurrency model.  There however have been various
+similarities in aspects of this solution in previous work.
+
+SEDA provided an implementation of the Pipeline Pattern [Welsh]. Focus on
+handling scale.
+
+\cite{multithread-pipeline} demonstrated a multi-threaded pipelined web server
+architecture provided better performance than multi-process, multi-thread,
+single process event-driven and asynchronous multi-process event-driven as the
+number of processor units increased.
+
+\cite{knot-userver-watpipe} identified pipeline outperformed
+thread-per-connection on a uniprocessor for disk I/O intensive operations. The
+steps within the Pipeline Pattern are fixed specific to the problem of serving
+static resources.  Identified that high throughput is achieved by high memory
+and small memory footprints to allow caching static content.  For the results
+provided, OfficeFloor had the least number of threads.  Drives at the need for
+adequate performance of all parts of the system, otherwise impacts overall
+throughput.  OfficeFloor however does necessitate this due to isolating the
+bottleneck.
+
+JAWS provides construction of a Web Server through a pipeline of flexible
+components \cite{jaws}.
+
+While these solutions provide similar architectures of the Pipeline Pattern
+they only provide the flexible components and guidelines for connecting them
+together leaving responsibility of concurrency complexity to the developers to
+design and configure.
+
+Flux \cite{flux} decomposed the requests into a pipeline of tasks and does
+provide some extrinsic dependency information through the declaration of inputs and
+outputs.  It however looks at using this information to avoid deadlocks and
+does not isolate processing bottlenecks of one request from affecting execution
+of other requests.
+   
+Aspen \cite{aspen} provides adaptive thread allocation to modules which combine
+execution of particular tasks specified by the developer.  While the Aspen
+runtime does adapt the number threads in stages to work loads, the Apsen runtime
+does not have the extrinsic dependency information available on each task and
+therefore lacks the ability to Combine tasks of similar charactersitics into the
+same module.  (TODO MAYBE) Furthermore, the architecture in attempting to
+achieve parallelism is likely to incurr overheads in excessive numbers of
+threads at high loads, identified in the attempt to further pipeline the Apache
+HTTP Server [Le].
+   
+Saburo abstracts the concurrency model from the business code \cite{saburo}.
+It relies on a concurrency model chosen and configured statically against the
+task by the developer.  Should however the processing characteristics of the
+code change in the evolution of the application then the developer is required
+to identify this and change the concurrency model.
+
+Capriccio provides resource-aware scheduling around blocking points
+\cite{capriccio} that can be considered one type of performance bottleneck and
+attempts to tune rather than isolate performance bottlenecks.  Capriccio
+therefore can continue to suffer starvation as is indicated in the difficulty in
+attempting to determine when thrashing may occur \cite{capriccio}. Furthermore,
+as Capriccio's proposed solution to managing application level resources (e.g.
+database connection) is via exposing an API \cite{capriccio}, it requires
+involving the developer to code the application concurrency.
+   
+Hop provides late binding to the executing concurrency model via a pipeline
+scheduler that is demonostrated to be fast enough to not impact on performance
+obtained from static compile time defined pipelines \cite{hop}.  Hop,
+while providing dynamic decisions of the concurrency model used at runtime it places
+the responsibility on the developer to provide the code to make these runtime
+decisions.
+   
+The Monadic Thread \cite{monadic-thread} is similar in nature to Job Based Architecture
+constructing a sequence of jobs to process the dynamic HTTP request where the
+available possible next jobs in the sequence is invoked via a continuation. 
+The difference is that the Job Based Architecture utilises the Reactor pattern
+within the continuation to determine via the next job's extinsic dependency
+management information whether to execute the next job by the current thread or
+queue the job with another thread pool for execution.  This enables the Job
+Based Architecture to utilise a mix of thread pools to handle both asynchronous
+and synchronous dependencies and not depend on driving the underlying operating
+system to provide only asynchronous dependencies to gain performance
+improvements.
+   
+TODO Actors (e.g. within Scalar) and how might these relate?  Actors do isolate
+functionality and in doing so potentially bottlenecks, however the developer is
+intrisically involved in developing this model...   [TODO need paper and more
+to explain]
+   
+The web handling implemented in OfficeFloor is similar in using continuations
+as handlers to further the progress of user interation with the web application
+to handle sliced execution \cite{url-continuation}.  The work focuses on utilising
+continuations as an easier mechanism for developers to code Web applications in
+direct style and does not focus on web server performance.  This technique is
+adopted in the OfficeFloor implementation to handle servicing of HTTP request
+by mapping the URL to an initial job via a continuation that enables the
+construction of the remaining jobs to service the HTTP request.
+
+While only sequential construction of jobs have been analysed in this paper, the
+OfficeFloor implementation enables use of Process Continuations
+\cite{process-continuation} to provide parallel processing.  As the state
+of the application is maintained within the dependencies, multiple instances of
+the same job may be constructed and managed as a tree of execution to enable
+parallel processing.  While the performance evaluation in this paper did not
+necessitate parallel processing, I expect it will be potentially useful to
+address performance bottleneck problems of interacting with multiple downstream
+systems, such as the reverse 10K problem \cite{reverse-ten-k-problem}.
+   
+
+\section{Limitations}
+Throughput does decrease and latency does increase for the Job Based
+Architecture when the throughput and latency of the dependencies is above the
+ability of the threads in the pool to process the jobs (e.g. having more
+Database Connections available than Threads).  While I'm not aware of any
+empirical evidence indicating ratio of Threads to instances of dependencies, my
+experience is that other factors (e.g. sharing the back-end service, licensing)
+provide limiting factors on dependencies to be below that of available threads
+especially on multi-core servers.
+
+Developers should avoid creating additional thread pools for dependencies
+involving processing at similar latency to a thread context switch (e.g. a
+local in memory cache dependency would likely not warrant related tasks to be
+processed in their own thread pool).  This can result in excessive threads and
+thread overheads diminishing the performance gains.
+
+Bottlenecks must encapsulated into dependencies that are not intrinsically
+provided to jobs (e.g. job using disk I/O must declare the file system as a
+dependency).  I, however, do not see this a difficult for developers to adopt
+especially with success of frameworks such as Spring, EJB3, CDI that utilise
+dependency injection.
+
+
+
+% An example of a floating figure using the graphicx package.
+% Note that \label must occur AFTER (or within) \caption.
+% For figures, \caption should occur after the \includegraphics.
+% Note that IEEEtran v1.7 and later has special internal code that
+% is designed to preserve the operation of \label within \caption
+% even when the captionsoff option is in effect. However, because
+% of issues like this, it may be the safest practice to put all your
+% \label just after \caption rather than within \caption{}.
+%
+% Reminder: the "draftcls" or "draftclsnofoot", not "draft", class
+% option should be used if it is desired that the figures are to be
+% displayed while in draft mode.
+%
+%\begin{figure}[!t]
+%\centering
+%\includegraphics[width=2.5in]{myfigure}
+% where an .eps filename suffix will be assumed under latex, 
+% and a .pdf suffix will be assumed for pdflatex; or what has been declared
+% via \DeclareGraphicsExtensions.
+%\caption{Simulation Results}
+%\label{fig_sim}
+%\end{figure}
+
+% Note that IEEE typically puts floats only at the top, even when this
+% results in a large percentage of a column being occupied by floats.
+
+
+% An example of a double column floating figure using two subfigures.
+% (The subfig.sty package must be loaded for this to work.)
+% The subfigure \label commands are set within each subfloat command, the
+% \label for the overall figure must come after \caption.
+% \hfil must be used as a separator to get equal spacing.
+% The subfigure.sty package works much the same way, except \subfigure is
+% used instead of \subfloat.
+%
+%\begin{figure*}[!t]
+%\centerline{\subfloat[Case I]\includegraphics[width=2.5in]{subfigcase1}%
+%\label{fig_first_case}}
+%\hfil
+%\subfloat[Case II]{\includegraphics[width=2.5in]{subfigcase2}%
+%\label{fig_second_case}}}
+%\caption{Simulation results}
+%\label{fig_sim}
+%\end{figure*}
+%
+% Note that often IEEE papers with subfigures do not employ subfigure
+% captions (using the optional argument to \subfloat), but instead will
+% reference/describe all of them (a), (b), etc., within the main caption.
+
+
+% An example of a floating table. Note that, for IEEE style tables, the 
+% \caption command should come BEFORE the table. Table text will default to
+% \footnotesize as IEEE normally uses this smaller font for tables.
+% The \label must come after \caption as always.
+%
+%\begin{table}[!t]
+%% increase table row spacing, adjust to taste
+%\renewcommand{\arraystretch}{1.3}
+% if using array.sty, it might be a good idea to tweak the value of
+% \extrarowheight as needed to properly center the text within the cells
+%\caption{An Example of a Table}
+%\label{table_example}
+%\centering
+%% Some packages, such as MDW tools, offer better commands for making tables
+%% than the plain LaTeX2e tabular which is used here.
+%\begin{tabular}{|c||c|}
+%\hline
+%One & Two\\
+%\hline
+%Three & Four\\
+%\hline
+%\end{tabular}
+%\end{table}
+
+
+% Note that IEEE does not put floats in the very first column - or typically
+% anywhere on the first page for that matter. Also, in-text middle ("here")
+% positioning is not used. Most IEEE journals/conferences use top floats
+% exclusively. Note that, LaTeX2e, unlike IEEE journals/conferences, places
+% footnotes above bottom floats. This can be corrected via the \fnbelowfloat
+% command of the stfloats package.
+
+
+
+\section{Conclusion}
+TODO: Job Based Architecture was able to isolate bottlenecks and continue to
+make use of the CPU to service requests not incurring the bottleneck.
+
+TODO: Findings therefore suggest that this is an area of research that is
+showing to provide improvements to Web Server performance, especially at high
+loads, and therefore is being announced in this paper for awareness by a wider
+audience.
+
+The Job Based Architecture improves on these architectures by dynamically
+creating the sequence of jobs executed in the Pipeline Pattern and utilising
+information from extrinsic dependency injection to automatically undertake the
+Combine Pattern for the jobs to be executed by an appropriate thread pool and
+in some cases the same thread from a previous stage to avoid thread context
+switching and memory management overheads.  Having the separate thread pools
+allows isolating processing bottlenecks and enables the Web Server to contine
+to service other dynamic HTTP requests improving overall throughput and
+reducing latency.
+
+
+
+
+\section{Future Work}
+Providing comparison with more complex processing requirements (e.g. having
+multiple back-end services of differing quality of service involved in
+processing the HTTP request).
+
+Also potentially look to see if the awareness of cached static data and no need
+to context switch may incur improved performance for static content over
+existing Web Server architectures.
+
+Providing callbacks to dependencies and having jobs not executed until their
+dependencies are in a ready state enables the Job Based Architecture to follow
+an Event-Based pattern.  While this is implemented within OfficeFloor it has
+been left for future comparisons against event-based architectures.
+
+Provide push-back by monitoring the thread pool queues to determine overload of
+a particular bottleneck.  This push back can be rejecting or redirecting
+requests requing the dependency to logs/alerts to informed of increased need
+for improving the performance of the dependency.  Either looking at rejecting
+requests on a single node or moving requests to another node if within a
+clustered solution.
+
+maybe:
+
+Provide load handling as per SEDA on both increasing thread count and
+dependency count.
+
+Providing dynamic mapping of Job via its dependency meta-data based on runtime
+metrics to thread pools as per Hop's late binding.
+
+
+
+
+% conference papers do not normally have an appendix
+
+
+% use section* for acknowledgement
+\section*{Acknowledgment}
+I thank my wife Melanie for her patience and support in my exploration of the
+Job Based Architecture through developing OfficeFloor and her assistance in
+proof reading this paper.  I also thank my friend Matthew Brown for being a
+sounding board to many of my ideas.
+
+
+
+
+
+% trigger a \newpage just before the given reference
+% number - used to balance the columns on the last page
+% adjust value as needed - may need to be readjusted if
+% the document is modified later
+%\IEEEtriggeratref{8}
+% The "triggered" command can be changed if desired:
+%\IEEEtriggercmd{\enlargethispage{-5in}}
+
+% references section
+
+% can use a bibliography generated by BibTeX as a .bbl file
+% BibTeX documentation can be easily obtained at:
+% http://www.ctan.org/tex-archive/biblio/bibtex/contrib/doc/
+% The IEEEtran BibTeX style support page is at:
+% http://www.michaelshell.org/tex/ieeetran/bibtex/
+\bibliographystyle{ieee/IEEEtran}
+% argument is your BibTeX string definitions and bibliography database(s)
+\bibliography{jba}
+
+
+% <OR> manually copy in the resultant .bbl file
+% set second argument of \begin to the number of references
+% (used to reserve space for the reference number labels box)
+%\begin{thebibliography}{1}
+%\bibitem{IEEEhowto:kopka}
+%H.~Kopka and P.~W. Daly, \emph{A Guide to \LaTeX}, 3rd~ed.\hskip 1em plus
+%  0.5em minus 0.4em\relax Harlow, England: Addison-Wesley, 1999.
+%\end{thebibliography}
+
+
+
+
+% that's all folks
+\end{document}
+
+
