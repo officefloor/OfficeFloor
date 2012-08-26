@@ -593,10 +593,10 @@ To focus evaluation on the isolation of a bottleneck, two types of requests were
 utilised with differing profiles of number of concurrent connections sending one
 of the requests:
 \begin{itemize}
-\item NEWS: Requests for resources generated from cached content (e.g. traffic
-profile of browsing the latest news feeds).
+\item NEWS: Requests for resources generated from cached content (e.g. browsing
+the latest news feeds).
 \item AJAX: Requests that each required communication with a database (e.g.
-traffic profile of making AJAX calls to retrieve/update data in a database).
+AJAX calls to retrieve/update data in a database).
 \end{itemize}
 
 The AJAX requests depend on the database which is the bottleneck in this
@@ -608,11 +608,11 @@ Response entities contained only a single byte to not incur bandwidth issues.
 To avoid connection throttling by the Web Servers, a sequence of 99 requests
 were made before disconnecting and reconnecting.
 
-The server was run on two 1.4Ghz core machine with 3GB RAM while the test client
-run on a three 2.2Ghz core machine with 6GB RAM.  Server and client were
-connected directly via cat6 cable and ran linux v2.6.32 with 1 Gb network card.
-File handles and TCP settings were increased to enable servicing 20,000
-concurrent connections.
+The server was run on a two 1.4Ghz core machine with 3GB RAM while the test
+client run on a three 2.2Ghz core machine with 6GB RAM.  Server and client were
+connected directly via cat6 cross-over cable and ran linux v2.6.32 with 1 Gb
+network card.  File handles and TCP settings were increased to enable servicing
+20,000 concurrent connections.
 
 \subsection{OfficeFloor (O)}
 OfficeFloor's web components implicitly constructs threads for servicing HTTP
@@ -667,10 +667,11 @@ the one PHP snippet / Servlet as an if statement to distinguish between
 returning immediately (NEWS) or sleeping on the pooled database connection
 (AJAX).  As PHP has a share nothing architecture, a compromise of 150 clients
 was used to balance the database bottleneck against increased concurrency.  The
-two best servers based on throughput are reported. To avoid comparison one
-server will be identified as \textit{L} (as it limited the number of threads)
-and the other as \textit{M} (as it used many threads - nearly fifty times the
-number OfficeFloor used for high concurrency).
+two best servers based on throughput are reported. To focus on evaluating
+OfficeFloor and avoid comparisons of these Web Servers, one server will be
+identified as \textit{L} (as it limited the number of threads) and the other as
+\textit{M} (as it used many threads - nearly fifty times the number OfficeFloor
+used for high concurrency).
 
 
 
@@ -705,9 +706,6 @@ continue servicing a consistent number of NEWS requests.
 \begin{figure}[!t]
 \centering 
 \includegraphics[width=2.5in]{LowConcurrencyThroughput}
-% where an .eps filename suffix will be assumed under latex, 
-% and a .pdf suffix will be assumed for pdflatex; or what has been declared
-% via \DeclareGraphicsExtensions.
 \caption{Low Concurrency Throughput}
 \label{fig:low_concurrency_throughput}
 \end{figure}
@@ -716,9 +714,6 @@ continue servicing a consistent number of NEWS requests.
 \begin{figure}[!t]
 \centering 
 \includegraphics[width=2.5in]{MediumConcurrencyThroughput}
-% where an .eps filename suffix will be assumed under latex, 
-% and a .pdf suffix will be assumed for pdflatex; or what has been declared
-% via \DeclareGraphicsExtensions.
 \caption{Medium Concurrency Throughput}
 \label{fig:medium_concurrency_throughput}
 \end{figure}
@@ -726,9 +721,6 @@ continue servicing a consistent number of NEWS requests.
 \begin{figure}[!t]
 \centering 
 \includegraphics[width=2.5in]{HighConcurrencyThroughput}
-% where an .eps filename suffix will be assumed under latex, 
-% and a .pdf suffix will be assumed for pdflatex; or what has been declared
-% via \DeclareGraphicsExtensions.
 \caption{High Concurrency Throughput}
 \label{fig:high_concurrency_throughput}
 \end{figure}
@@ -738,136 +730,80 @@ continue servicing a consistent number of NEWS requests.
 \section{Related Work}
 OfficeFloor and its Job Based Architecture is to the best of my knowledge the
 first time that the patterns of pipeline, continuations and inversion of control
-have been used together along with the concept of a thread as a transitive
-dependency to achieve a concurrency model.
+have been used together along with the abstraction of a thread as a transitive
+dependency to achieve a concurrency model that focuses on performance bottleneck
+isolation.
 
-TODO CONTINUE FROM HERE !!!
+Various work and comparison evaluations have identified the benefits of
+minimising the affects of bottlenecks.  The SEDA Architecture~\cite{seda}
+reduced the level of service and subsequently the cost of bottlenecks at higher
+loads.  Monadic threads~\cite{monadic-thread} drive the operating system to
+provide asynchronous resources to avoid blocking and starvation.  Comparison
+work with multi-threaded pipelined web server architecture demonstrated better
+performance than multi-process, multi-thread, SPED and AMPED architectures
+\cite{multithread-pipeline}.  Further comparison work identified that servers
+with smaller footprints provided more memory for caching and subsequently better
+performance \cite{low-server-footprint}.  While minimising the cost of
+performance bottlenecks is important to server performance, findings of this
+paper also identify that isolation of performance bottlenecks is important to
+overall server performance.
 
-There however have been various similarities in aspects of this solution in
-previous work. (re-using the patterns)
+Various abstractions of concurrency have been developed that typically focus on
+the task type.  JAWS provides modular and flexible concurrency components for
+developers to code tasks within \cite{jaws}.  Aspen enables the developer to
+combine tasks based on type to modules that utilise adaptive thread allocation
+\cite{aspen}.  Saburo abstracts the concurrency model via annotations on the
+tasks \cite{saburo}.  Hop enables the developer to provide code to dynamic
+decide the concurrency model for tasks at runtime \cite{hop}. \textbf{Actors
+something, get reference}.  I however propose the abstraction of the concurrency
+model should be based on the thread being a transitive dependency of the task.
 
-SEDA provided an implementation of the Pipeline Pattern [Welsh]. Focus on
-handling scale.
+Some frameworks/libraries have utilised dependencies in their models.  Spring
+implements dependency injection techniques \cite{ioc} however it relies on the
+Servlet thread-per-request concurrency model.  Capriccio utilised resource-aware
+scheduling of operating system level resources but leaves concurrency to the
+developer for application level resources via an API \cite{capriccio}.  Flux
+\cite{flux} provide extrinsic dependency management information through task
+inputs and outputs but focused on using the information for task sequencing to
+avoiding deadlocks rather than bottleneck isolation.
 
-\cite{multithread-pipeline} demonstrated a multi-threaded pipelined web server
-architecture provided better performance than multi-process, multi-thread,
-single process event-driven and asynchronous multi-process event-driven as the
-number of processor units increased.
 
-\cite{knot-userver-watpipe} identified pipeline outperformed
-thread-per-connection on a uniprocessor for disk I/O intensive operations. The
-steps within the Pipeline Pattern are fixed specific to the problem of serving
-static resources.  Identified that high throughput is achieved by high memory
-and small memory footprints to allow caching static content.  For the results
-provided, OfficeFloor had the least number of threads.  Drives at the need for
-adequate performance of all parts of the system, otherwise impacts overall
-throughput.  OfficeFloor however does necessitate this due to isolating the
-bottleneck.
 
-JAWS provides construction of a Web Server through a pipeline of flexible
-components \cite{jaws}.
+\section{Conclusion and Future Work}
+Isolating the performance bottleneck has shown to provide more consistent
+performance across differing load profiles by avoiding thread starvation than
+the thread-per-request Web Servers for servicing dynamic HTTP requests. 
+Furthermore, the overheads in the job management of the Job Based Architecture do not significantly detriment
+throughput performance.
 
-While these solutions provide similar architectures of the Pipeline Pattern
-they only provide the flexible components and guidelines for connecting them
-together leaving responsibility of concurrency complexity to the developers to
-design and configure.
+Future work will look at whether this more consistent throughput performance
+will provide improvements in servicing load profiles of real world traffic.
+Further comparisons against other web server architectures will be undertaken,
+such as event based-architectures to compare developer customisations of
+application concurrency against OfficeFloor's transitive thread dependency
+concurrency model.  Also, expanding to other Internet services other than Web
+Servers is another area for future work.
 
-Flux \cite{flux} decomposed the requests into a pipeline of tasks and does
-provide some extrinsic dependency information through the declaration of inputs and
-outputs.  It however looks at using this information to avoid deadlocks and
-does not isolate processing bottlenecks of one request from affecting execution
-of other requests.
-   
-Aspen \cite{aspen} provides adaptive thread allocation to modules which combine
-execution of particular tasks specified by the developer.  While the Aspen
-runtime does adapt the number threads in stages to work loads, the Apsen runtime
-does not have the extrinsic dependency information available on each task and
-therefore lacks the ability to Combine tasks of similar charactersitics into the
-same module.  (TODO MAYBE) Furthermore, the architecture in attempting to
-achieve parallelism is likely to incurr overheads in excessive numbers of
-threads at high loads, identified in the attempt to further pipeline the Apache
-HTTP Server [Le].
-   
-Saburo abstracts the concurrency model from the business code \cite{saburo}.
-It relies on a concurrency model chosen and configured statically against the
-task by the developer.  Should however the processing characteristics of the
-code change in the evolution of the application then the developer is required
-to identify this and change the concurrency model.
+Though not discussed in this paper OfficeFloor does implement process
+continuations \cite{process-continuation} to provide parallel processing.  I
+expect with further research this will prove useful to address performance
+bottleneck problems of interacting with multiple downstream systems, such as the
+reverse 10K problem \cite{reverse-ten-k-problem}.
 
-Capriccio provides resource-aware scheduling around blocking points
-\cite{capriccio} that can be considered one type of performance bottleneck and
-attempts to tune rather than isolate performance bottlenecks.  Capriccio
-therefore can continue to suffer starvation as is indicated in the difficulty in
-attempting to determine when thrashing may occur \cite{capriccio}. Furthermore,
-as Capriccio's proposed solution to managing application level resources (e.g.
-database connection) is via exposing an API \cite{capriccio}, it requires
-involving the developer to code the application concurrency.
-   
-Hop provides late binding to the executing concurrency model via a pipeline
-scheduler that is demonostrated to be fast enough to not impact on performance
-obtained from static compile time defined pipelines \cite{hop}.  Hop,
-while providing dynamic decisions of the concurrency model used at runtime it places
-the responsibility on the developer to provide the code to make these runtime
-decisions.
-   
-The Monadic Thread \cite{monadic-thread} is similar in nature to Job Based Architecture
-constructing a sequence of jobs to process the dynamic HTTP request where the
-available possible next jobs in the sequence is invoked via a continuation. 
-The difference is that the Job Based Architecture utilises the Reactor pattern
-within the continuation to determine via the next job's extinsic dependency
-management information whether to execute the next job by the current thread or
-queue the job with another thread pool for execution.  This enables the Job
-Based Architecture to utilise a mix of thread pools to handle both asynchronous
-and synchronous dependencies and not depend on driving the underlying operating
-system to provide only asynchronous dependencies to gain performance
-improvements.
-   
-TODO Actors (e.g. within Scalar) and how might these relate?  Actors do isolate
-functionality and in doing so potentially bottlenecks, however the developer is
-intrisically involved in developing this model...   [TODO need paper and more
-to explain]
-   
-The web handling implemented in OfficeFloor is similar in using continuations
-as handlers to further the progress of user interation with the web application
-to handle sliced execution \cite{url-continuation}.  The work focuses on utilising
-continuations as an easier mechanism for developers to code Web applications in
-direct style and does not focus on web server performance.  This technique is
-adopted in the OfficeFloor implementation to handle servicing of HTTP request
-by mapping the URL to an initial job via a continuation that enables the
-construction of the remaining jobs to service the HTTP request.
 
-While only sequential construction of jobs have been analysed in this paper, the
-OfficeFloor implementation enables use of Process Continuations
-\cite{process-continuation} to provide parallel processing.  As the state
-of the application is maintained within the dependencies, multiple instances of
-the same job may be constructed and managed as a tree of execution to enable
-parallel processing.  While the performance evaluation in this paper did not
-necessitate parallel processing, I expect it will be potentially useful to
-address performance bottleneck problems of interacting with multiple downstream
-systems, such as the reverse 10K problem \cite{reverse-ten-k-problem}.
-   
 
-\section{Limitations}
-Throughput does decrease and latency does increase for the Job Based
-Architecture when the throughput and latency of the dependencies is above the
-ability of the threads in the pool to process the jobs (e.g. having more
-Database Connections available than Threads).  While I'm not aware of any
-empirical evidence indicating ratio of Threads to instances of dependencies, my
-experience is that other factors (e.g. sharing the back-end service, licensing)
-provide limiting factors on dependencies to be below that of available threads
-especially on multi-core servers.
 
-Developers should avoid creating additional thread pools for dependencies
-involving processing at similar latency to a thread context switch (e.g. a
-local in memory cache dependency would likely not warrant related tasks to be
-processed in their own thread pool).  This can result in excessive threads and
-thread overheads diminishing the performance gains.
 
-Bottlenecks must encapsulated into dependencies that are not intrinsically
-provided to jobs (e.g. job using disk I/O must declare the file system as a
-dependency).  I, however, do not see this a difficult for developers to adopt
-especially with success of frameworks such as Spring, EJB3, CDI that utilise
-dependency injection.
+
+
+% conference papers do not normally have an appendix
+
+
+% use section* for acknowledgement
+\section*{Acknowledgment} I thank my wife Melanie for her patience and support
+in my exploration of the Job Based Architecture through developing OfficeFloor. 
+I also thank my friend Matthew Brown for being a sounding board to many of my
+ideas.
 
 
 
@@ -952,79 +888,6 @@ dependency injection.
 % exclusively. Note that, LaTeX2e, unlike IEEE journals/conferences, places
 % footnotes above bottom floats. This can be corrected via the \fnbelowfloat
 % command of the stfloats package.
-
-
-
-\section{Conclusion}
-TODO: Job Based Architecture was able to isolate bottlenecks and continue to
-make use of the CPU to service requests not incurring the bottleneck.
-
-TODO: Findings therefore suggest that this is an area of research that is
-showing to provide improvements to Web Server performance, especially at high
-loads, and therefore is being announced in this paper for awareness by a wider
-audience.
-
-The Job Based Architecture improves on these architectures by dynamically
-creating the sequence of jobs executed in the Pipeline Pattern and utilising
-information from extrinsic dependency injection to automatically undertake the
-Combine Pattern for the jobs to be executed by an appropriate thread pool and
-in some cases the same thread from a previous stage to avoid thread context
-switching and memory management overheads.  Having the separate thread pools
-allows isolating processing bottlenecks and enables the Web Server to contine
-to service other dynamic HTTP requests improving overall throughput and
-reducing latency.
-
-
-
-
-\section{Future Work}
-
-Future work:
- - realistic loads
- - Reverse 10K problem tries in service oriented architectures
- - utilise for other Internet based services
-
-
-Providing comparison with more complex processing requirements (e.g. having
-multiple back-end services of differing quality of service involved in
-processing the HTTP request).
-
-Also potentially look to see if the awareness of cached static data and no need
-to context switch may incur improved performance for static content over
-existing Web Server architectures.
-
-Providing callbacks to dependencies and having jobs not executed until their
-dependencies are in a ready state enables the Job Based Architecture to follow
-an Event-Based pattern.  While this is implemented within OfficeFloor it has
-been left for future comparisons against event-based architectures.
-
-Provide push-back by monitoring the thread pool queues to determine overload of
-a particular bottleneck.  This push back can be rejecting or redirecting
-requests requing the dependency to logs/alerts to informed of increased need
-for improving the performance of the dependency.  Either looking at rejecting
-requests on a single node or moving requests to another node if within a
-clustered solution.
-
-maybe:
-
-Provide load handling as per SEDA on both increasing thread count and
-dependency count.
-
-Providing dynamic mapping of Job via its dependency meta-data based on runtime
-metrics to thread pools as per Hop's late binding.
-
-
-
-
-% conference papers do not normally have an appendix
-
-
-% use section* for acknowledgement
-\section*{Acknowledgment} I thank my wife Melanie for her patience and support
-in my exploration of the Job Based Architecture through developing OfficeFloor. 
-I also thank my friend Matthew Brown for being a sounding board to many of my
-ideas.
-
 
 
 
