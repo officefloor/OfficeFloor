@@ -1,0 +1,868 @@
+Warning: JAVA_HOME environment variable is not set.
+[INFO] Scanning for projects...
+[INFO]                                                                         
+[INFO] ------------------------------------------------------------------------
+[INFO] Building Performance 2.4.0
+[INFO] ------------------------------------------------------------------------
+[INFO] 
+[INFO] --- maven-resources-plugin:2.4.3:copy-resources (Copy verifications file for use) @ performance ---
+[INFO] Using 'UTF-8' encoding to copy filtered resources.
+[INFO] Copying 1 resource
+[INFO] 
+[INFO] --- maven-antrun-plugin:1.6:run (Provide validation xml file with dependency versions) @ performance ---
+[INFO] Executing tasks
+
+main:
+     [copy] Copying 1 file to /home/daniel/tester/target/verifier
+[INFO] Executed tasks
+[INFO] 
+[INFO] --- maven-verifier-plugin:1.0:verify (Verify projects to ensure correct linkages) @ performance ---
+[INFO] 
+[INFO] --- maven-resources-plugin:2.4.3:resources (default-resources) @ performance ---
+[INFO] Using 'UTF-8' encoding to copy filtered resources.
+[INFO] Copying 3 resources
+[INFO] 
+[INFO] --- maven-compiler-plugin:2.3.2:compile (default-compile) @ performance ---
+[INFO] Nothing to compile - all classes are up to date
+[INFO] 
+[INFO] --- maven-resources-plugin:2.4.3:testResources (default-testResources) @ performance ---
+[INFO] Using 'UTF-8' encoding to copy filtered resources.
+[INFO] skip non existing resourceDirectory /home/daniel/tester/src/test/resources
+[INFO] 
+[INFO] --- maven-compiler-plugin:2.3.2:testCompile (default-testCompile) @ performance ---
+[INFO] Nothing to compile - all classes are up to date
+[INFO] 
+[INFO] --- maven-surefire-plugin:2.6:test (default-test) @ performance ---
+[INFO] Surefire report directory: /home/daniel/tester/target/surefire-reports
+
+-------------------------------------------------------
+ T E S T S
+-------------------------------------------------------
+Running net.officefloor.tutorials.performance.nio.test.ApacheNioTest
+
+
+
+===============================================================
+Starting ApacheNioTest.testPerformance_SameLoad with interval of 60 secs, cpu seed=1, db seed=1
+===============================================================
+START: 22/08/2012 8:08:48 PM
+Establishing all 1 connections for cpu (to avoid SYNC attack) ...  all connected
+Establishing all 1 connections for db (to avoid SYNC attack) ...  all connected
+---------------------- STARTUP [300 secs]  ----------------------
+LOAD: cpu [1 connections / 0 failed / 3798 reconnects / requests min=376066 avg=376066 max=376066] [time 300001 / start 1 / end 0]
+	/test.php?v=N: 376066 requests  10%=0.64ms 50%=0.70ms 90%=0.76ms 95%=0.84ms 99%=2.46ms 100%=92.17ms
+LOAD: db [1 connections / 0 failed / 29 reconnects / requests min=2968 avg=2968 max=2968] [time 300001 / start 1 / end 0]
+	/test.php?v=D: 2968 requests  10%=100.67ms 50%=100.80ms 90%=100.90ms 95%=101.03ms 99%=107.75ms 100%=191.51ms
+------------------------------------------------------------
+
+
+---------------------- WARM NEW THREADS (1 connection magnitude) [60 secs]  ----------------------
+LOAD: cpu [1 connections / 0 failed / 760 reconnects / requests min=75264 avg=75264 max=75264] [time 60000 / start 4 / end 0]
+	/test.php?v=N: 75264 requests  10%=0.64ms 50%=0.70ms 90%=0.75ms 95%=0.81ms 99%=2.58ms 100%=17.05ms
+LOAD: db [1 connections / 0 failed / 6 reconnects / requests min=594 avg=594 max=594] [time 60000 / start 4 / end 0]
+	/test.php?v=D: 594 requests  10%=100.72ms 50%=100.86ms 90%=100.96ms 95%=101.14ms 99%=111.00ms 100%=833.69ms
+------------------------------------------------------------
+---------------------- RUN 1 [60 secs]  ----------------------
+LOAD: cpu [1 connections / 0 failed / 766 reconnects / requests min=75754 avg=75754 max=75754] [time 60000 / start 0 / end 0]
+	/test.php?v=N: 75754 requests  10%=0.64ms 50%=0.70ms 90%=0.75ms 95%=0.81ms 99%=2.45ms 100%=72.87ms
+LOAD: db [1 connections / 0 failed / 6 reconnects / requests min=594 avg=594 max=594] [time 60000 / start 0 / end 1]
+	/test.php?v=D: 594 requests  10%=100.71ms 50%=100.85ms 90%=100.94ms 95%=101.00ms 99%=108.23ms 100%=113.41ms
+------------------------------------------------------------
+---------------------- RUN 2 [60 secs]  ----------------------
+LOAD: cpu [1 connections / 0 failed / 763 reconnects / requests min=75617 avg=75617 max=75617] [time 60000 / start 0 / end 0]
+	/test.php?v=N: 75617 requests  10%=0.64ms 50%=0.70ms 90%=0.75ms 95%=0.80ms 99%=2.48ms 100%=90.77ms
+LOAD: db [1 connections / 0 failed / 6 reconnects / requests min=594 avg=594 max=594] [time 60000 / start 0 / end 0]
+	/test.php?v=D: 594 requests  10%=100.73ms 50%=100.85ms 90%=100.96ms 95%=101.10ms 99%=109.80ms 100%=180.34ms
+------------------------------------------------------------
+---------------------- RUN 3 [60 secs]  ----------------------
+LOAD: cpu [1 connections / 0 failed / 764 reconnects / requests min=75559 avg=75559 max=75559] [time 60000 / start 0 / end 0]
+	/test.php?v=N: 75559 requests  10%=0.64ms 50%=0.70ms 90%=0.75ms 95%=0.81ms 99%=2.46ms 100%=71.86ms
+LOAD: db [1 connections / 0 failed / 6 reconnects / requests min=593 avg=593 max=593] [time 60000 / start 0 / end 0]
+	/test.php?v=D: 593 requests  10%=100.72ms 50%=100.86ms 90%=100.97ms 95%=101.28ms 99%=110.27ms 100%=134.40ms
+------------------------------------------------------------
+RUN SUMMARY: cpu 1 connections, db 1 connections
+   cpu summary: 75643 requests  10%=0.64ms 50%=0.70ms 90%=0.75ms 95%=0.81ms 99%=2.46ms 100%=78.50ms
+   db summary: 593 requests  10%=100.72ms 50%=100.85ms 90%=100.96ms 95%=101.13ms 99%=109.43ms 100%=142.72ms
+------------------------------------------------------------
+Establishing all 10 connections for cpu (to avoid SYNC attack) ...  all connected
+Establishing all 10 connections for db (to avoid SYNC attack) ...  all connected
+
+
+---------------------- WARM NEW THREADS (10 connection magnitude) [60 secs]  ----------------------
+LOAD: cpu [10 connections / 0 failed / 2247 reconnects / requests min=22103 avg=22298 max=22662] [time 60000 / start 0 / end 0]
+	/test.php?v=N: 222980 requests  10%=0.70ms 50%=2.23ms 90%=4.39ms 95%=5.83ms 99%=12.01ms 100%=2045.96ms
+LOAD: db [10 connections / 0 failed / 51 reconnects / requests min=574 avg=589 max=593] [time 60000 / start 0 / end 0]
+	/test.php?v=D: 5896 requests  10%=100.62ms 50%=100.79ms 90%=101.23ms 95%=101.71ms 99%=110.64ms 100%=2044.33ms
+------------------------------------------------------------
+---------------------- RUN 1 [60 secs]  ----------------------
+LOAD: cpu [10 connections / 0 failed / 2340 reconnects / requests min=22848 avg=23159 max=23504] [time 60000 / start 0 / end 0]
+	/test.php?v=N: 231599 requests  10%=0.71ms 50%=2.34ms 90%=4.35ms 95%=5.78ms 99%=11.88ms 100%=245.21ms
+LOAD: db [10 connections / 0 failed / 60 reconnects / requests min=593 avg=593 max=594] [time 60000 / start 0 / end 0]
+	/test.php?v=D: 5934 requests  10%=100.62ms 50%=100.80ms 90%=101.40ms 95%=102.40ms 99%=111.48ms 100%=336.59ms
+------------------------------------------------------------
+---------------------- RUN 2 [60 secs]  ----------------------
+LOAD: cpu [10 connections / 0 failed / 2334 reconnects / requests min=22617 avg=23117 max=23596] [time 60001 / start 0 / end 0]
+	/test.php?v=N: 231175 requests  10%=0.70ms 50%=2.28ms 90%=4.43ms 95%=5.87ms 99%=11.98ms 100%=269.56ms
+LOAD: db [10 connections / 0 failed / 60 reconnects / requests min=592 avg=592 max=593] [time 60001 / start 0 / end 0]
+	/test.php?v=D: 5922 requests  10%=100.62ms 50%=100.78ms 90%=101.15ms 95%=101.61ms 99%=111.89ms 100%=341.21ms
+------------------------------------------------------------
+---------------------- RUN 3 [60 secs]  ----------------------
+LOAD: cpu [10 connections / 0 failed / 2396 reconnects / requests min=22573 avg=23701 max=24641] [time 60000 / start 0 / end 0]
+	/test.php?v=N: 237015 requests  10%=0.64ms 50%=1.51ms 90%=5.00ms 95%=6.83ms 99%=12.39ms 100%=257.49ms
+LOAD: db [10 connections / 0 failed / 60 reconnects / requests min=593 avg=593 max=594] [time 60000 / start 0 / end 0]
+	/test.php?v=D: 5936 requests  10%=100.61ms 50%=100.78ms 90%=101.31ms 95%=102.50ms 99%=114.51ms 100%=352.18ms
+------------------------------------------------------------
+RUN SUMMARY: cpu 10 connections, db 10 connections
+   cpu summary: 233263 requests  10%=0.68ms 50%=2.04ms 90%=4.59ms 95%=6.16ms 99%=12.08ms 100%=257.42ms
+   db summary: 5930 requests  10%=100.62ms 50%=100.78ms 90%=101.29ms 95%=102.17ms 99%=112.63ms 100%=343.32ms
+------------------------------------------------------------
+Establishing all 100 connections for cpu (to avoid SYNC attack) ...  all connected
+Establishing all 100 connections for db (to avoid SYNC attack) ...  all connected
+
+
+---------------------- WARM NEW THREADS (100 connection magnitude) [60 secs]  ----------------------
+LOAD: cpu [100 connections / 0 failed / 1872 reconnects / requests min=1683 avg=1880 max=2030] [time 60000 / start 0 / end 0]
+	/test.php?v=N: 188070 requests  10%=3.93ms 50%=16.94ms 90%=28.24ms 95%=33.76ms 99%=750.04ms 100%=4990.68ms
+LOAD: db [100 connections / 0 failed / 456 reconnects / requests min=437 avg=491 max=529] [time 60000 / start 0 / end 0]
+	/test.php?v=D: 49156 requests  10%=100.62ms 50%=100.78ms 90%=101.25ms 95%=103.00ms 99%=1074.68ms 100%=8417.20ms
+------------------------------------------------------------
+---------------------- RUN 1 [60 secs]  ----------------------
+LOAD: cpu [100 connections / 0 failed / 1979 reconnects / requests min=1840 avg=1956 max=2098] [time 60000 / start 0 / end 0]
+	/test.php?v=N: 195650 requests  10%=10.39ms 50%=17.91ms 90%=28.91ms 95%=35.10ms 99%=848.90ms 100%=1686.06ms
+LOAD: db [100 connections / 0 failed / 544 reconnects / requests min=513 avg=527 max=538] [time 60000 / start 0 / end 0]
+	/test.php?v=D: 52789 requests  10%=100.62ms 50%=100.78ms 90%=101.42ms 95%=104.41ms 99%=981.49ms 100%=1752.21ms
+------------------------------------------------------------
+---------------------- RUN 2 [60 secs]  ----------------------
+LOAD: cpu [100 connections / 0 failed / 1964 reconnects / requests min=1820 avg=1950 max=2079] [time 60001 / start 0 / end 0]
+	/test.php?v=N: 195050 requests  10%=9.78ms 50%=17.55ms 90%=29.62ms 95%=36.24ms 99%=839.55ms 100%=1754.10ms
+LOAD: db [100 connections / 0 failed / 526 reconnects / requests min=508 avg=528 max=539] [time 60001 / start 0 / end 0]
+	/test.php?v=D: 52800 requests  10%=100.62ms 50%=100.78ms 90%=101.49ms 95%=107.17ms 99%=324.12ms 100%=1865.14ms
+------------------------------------------------------------
+---------------------- RUN 3 [60 secs]  ----------------------
+LOAD: cpu [100 connections / 0 failed / 1978 reconnects / requests min=1827 avg=1956 max=2063] [time 60000 / start 0 / end 0]
+	/test.php?v=N: 195688 requests  10%=9.87ms 50%=17.59ms 90%=30.05ms 95%=36.91ms 99%=897.41ms 100%=1581.87ms
+LOAD: db [100 connections / 0 failed / 546 reconnects / requests min=518 avg=527 max=538] [time 60000 / start 0 / end 0]
+	/test.php?v=D: 52717 requests  10%=100.62ms 50%=100.78ms 90%=101.36ms 95%=103.84ms 99%=1078.33ms 100%=1627.63ms
+------------------------------------------------------------
+RUN SUMMARY: cpu 100 connections, db 100 connections
+   cpu summary: 195462 requests  10%=10.01ms 50%=17.69ms 90%=29.53ms 95%=36.08ms 99%=861.95ms 100%=1674.01ms
+   db summary: 52768 requests  10%=100.62ms 50%=100.78ms 90%=101.42ms 95%=105.14ms 99%=794.65ms 100%=1748.33ms
+------------------------------------------------------------
+Establshing up to 499 connections for cpu (to avoid SYNC attack)
+Establishing all 1000 connections for cpu (to avoid SYNC attack) ...  all connected
+Establshing up to 499 connections for db (to avoid SYNC attack)
+Establishing all 1000 connections for db (to avoid SYNC attack) ...  all connected
+
+
+---------------------- WARM NEW THREADS (1000 connection magnitude) [60 secs]  ----------------------
+java.io.IOException: Connection reset by peer
+	at sun.nio.ch.FileDispatcher.read0(Native Method)
+	at sun.nio.ch.SocketDispatcher.read(SocketDispatcher.java:21)
+	at sun.nio.ch.IOUtil.readIntoNativeBuffer(IOUtil.java:202)
+	at sun.nio.ch.IOUtil.read(IOUtil.java:169)
+	at sun.nio.ch.SocketChannelImpl.read(SocketChannelImpl.java:243)
+	at net.officefloor.tutorials.performance.nio.Connection.readResponse(Connection.java:243)
+	at net.officefloor.tutorials.performance.nio.Load.runSelect(Load.java:212)
+	at net.officefloor.tutorials.performance.nio.LoadCoordinator$LoadRunner.run(LoadCoordinator.java:325)
+	at java.lang.Thread.run(Thread.java:662)
+java.io.IOException: Connection reset by peer
+	at sun.nio.ch.FileDispatcher.read0(Native Method)
+	at sun.nio.ch.SocketDispatcher.read(SocketDispatcher.java:21)
+	at sun.nio.ch.IOUtil.readIntoNativeBuffer(IOUtil.java:202)
+	at sun.nio.ch.IOUtil.read(IOUtil.java:169)
+	at sun.nio.ch.SocketChannelImpl.read(SocketChannelImpl.java:243)
+	at net.officefloor.tutorials.performance.nio.Connection.readResponse(Connection.java:243)
+	at net.officefloor.tutorials.performance.nio.Load.runSelect(Load.java:212)
+	at net.officefloor.tutorials.performance.nio.LoadCoordinator$LoadRunner.run(LoadCoordinator.java:325)
+	at java.lang.Thread.run(Thread.java:662)
+java.net.ConnectException: Connection timed out
+	at sun.nio.ch.SocketChannelImpl.checkConnect(Native Method)
+	at sun.nio.ch.SocketChannelImpl.finishConnect(SocketChannelImpl.java:567)
+	at net.officefloor.tutorials.performance.nio.Connection.finishConnect(Connection.java:165)
+	at net.officefloor.tutorials.performance.nio.Load.runSelect(Load.java:183)
+	at net.officefloor.tutorials.performance.nio.LoadCoordinator$LoadRunner.run(LoadCoordinator.java:325)
+	at java.lang.Thread.run(Thread.java:662)
+java.net.ConnectException: Connection timed out
+	at sun.nio.ch.SocketChannelImpl.checkConnect(Native Method)
+	at sun.nio.ch.SocketChannelImpl.finishConnect(SocketChannelImpl.java:567)
+	at net.officefloor.tutorials.performance.nio.Connection.finishConnect(Connection.java:165)
+	at net.officefloor.tutorials.performance.nio.Load.runSelect(Load.java:183)
+	at net.officefloor.tutorials.performance.nio.LoadCoordinator$LoadRunner.run(LoadCoordinator.java:325)
+	at java.lang.Thread.run(Thread.java:662)
+LOAD: cpu [1000 connections / 839 failed / 3163 reconnects / requests min=0 avg=175 max=1188] [time 60002 / start 1 / end 0]
+	/test.php?v=N: 175593 requests  10%=2.72ms 50%=13.15ms 90%=28.13ms 95%=34.82ms 99%=2605.28ms 100%=30342.79ms
+LOAD: db [1000 connections / 907 failed / 2598 reconnects / requests min=0 avg=62 max=478] [time 60002 / start 0 / end 0]
+	/test.php?v=D: 62519 requests  10%=100.65ms 50%=100.84ms 90%=102.32ms 95%=107.45ms 99%=2963.73ms 100%=30320.04ms
+------------------------------------------------------------
+---------------------- RUN 1 [60 secs]  ----------------------
+LOAD: cpu [1000 connections / 986 failed / 2769 reconnects / requests min=0 avg=133 max=990] [time 60000 / start 0 / end 0]
+	/test.php?v=N: 133441 requests  10%=0.68ms 50%=3.16ms 90%=13.56ms 95%=19.04ms 99%=2966.86ms 100%=57526.04ms
+LOAD: db [1000 connections / 958 failed / 2519 reconnects / requests min=0 avg=81 max=457] [time 60000 / start 0 / end 0]
+	/test.php?v=D: 81168 requests  10%=100.69ms 50%=100.92ms 90%=102.99ms 95%=105.66ms 99%=3219.69ms 100%=111362.14ms
+------------------------------------------------------------
+---------------------- RUN 2 [60 secs]  ----------------------
+LOAD: cpu [1000 connections / 997 failed / 2675 reconnects / requests min=0 avg=105 max=789] [time 60000 / start 0 / end 0]
+	/test.php?v=N: 105509 requests  10%=0.59ms 50%=1.84ms 90%=8.91ms 95%=14.65ms 99%=3041.95ms 100%=112595.42ms
+LOAD: db [1000 connections / 987 failed / 2177 reconnects / requests min=0 avg=84 max=445] [time 60000 / start 0 / end 1]
+	/test.php?v=D: 84519 requests  10%=100.71ms 50%=100.98ms 90%=103.53ms 95%=106.47ms 99%=3175.03ms 100%=58225.43ms
+------------------------------------------------------------
+---------------------- RUN 3 [60 secs]  ----------------------
+LOAD: cpu [1000 connections / 997 failed / 2901 reconnects / requests min=0 avg=81 max=690] [time 60002 / start 0 / end 0]
+	/test.php?v=N: 81034 requests  10%=0.56ms 50%=1.22ms 90%=6.60ms 95%=11.43ms 99%=3351.25ms 100%=58148.70ms
+LOAD: db [1000 connections / 996 failed / 2090 reconnects / requests min=0 avg=86 max=422] [time 60002 / start 0 / end 0]
+	/test.php?v=D: 86181 requests  10%=100.73ms 50%=101.00ms 90%=103.53ms 95%=106.77ms 99%=3535.32ms 100%=58886.83ms
+------------------------------------------------------------
+RUN SUMMARY: cpu 1000 connections, db 1000 connections
+   cpu summary: 106661 requests  10%=0.61ms 50%=2.07ms 90%=9.69ms 95%=15.04ms 99%=3120.02ms 100%=76090.05ms
+   db summary: 83956 requests  10%=100.71ms 50%=100.96ms 90%=103.35ms 95%=106.30ms 99%=3310.01ms 100%=76158.13ms
+------------------------------------------------------------
+Establshing up to 499 connections for cpu (to avoid SYNC attack)
+Establshing up to 999 connections for cpu (to avoid SYNC attack)
+Establshing up to 1499 connections for cpu (to avoid SYNC attack)
+Establshing up to 1999 connections for cpu (to avoid SYNC attack)
+Establshing up to 2499 connections for cpu (to avoid SYNC attack)
+Establshing up to 2999 connections for cpu (to avoid SYNC attack)
+Establshing up to 3499 connections for cpu (to avoid SYNC attack)
+Establshing up to 3999 connections for cpu (to avoid SYNC attack)
+Establshing up to 4499 connections for cpu (to avoid SYNC attack)
+Establshing up to 4999 connections for cpu (to avoid SYNC attack)
+Establshing up to 5499 connections for cpu (to avoid SYNC attack)
+Establshing up to 5999 connections for cpu (to avoid SYNC attack)
+Establshing up to 6499 connections for cpu (to avoid SYNC attack)
+Establshing up to 6999 connections for cpu (to avoid SYNC attack)
+Establshing up to 7499 connections for cpu (to avoid SYNC attack)
+Establshing up to 7999 connections for cpu (to avoid SYNC attack)
+Establshing up to 8499 connections for cpu (to avoid SYNC attack)
+Establshing up to 8999 connections for cpu (to avoid SYNC attack)
+Establishing all 10000 connections for cpu (to avoid SYNC attack) ...  all connected
+Establshing up to 499 connections for db (to avoid SYNC attack)
+Establshing up to 999 connections for db (to avoid SYNC attack)
+Establshing up to 1499 connections for db (to avoid SYNC attack)
+Establshing up to 1999 connections for db (to avoid SYNC attack)
+Establshing up to 2499 connections for db (to avoid SYNC attack)
+Establshing up to 2999 connections for db (to avoid SYNC attack)
+Establshing up to 3499 connections for db (to avoid SYNC attack)
+Establshing up to 3999 connections for db (to avoid SYNC attack)
+Establshing up to 4499 connections for db (to avoid SYNC attack)
+Establshing up to 4999 connections for db (to avoid SYNC attack)
+Establshing up to 5499 connections for db (to avoid SYNC attack)
+Establshing up to 5999 connections for db (to avoid SYNC attack)
+Establshing up to 6499 connections for db (to avoid SYNC attack)
+Establshing up to 6999 connections for db (to avoid SYNC attack)
+Establshing up to 7499 connections for db (to avoid SYNC attack)
+Establshing up to 7999 connections for db (to avoid SYNC attack)
+Establshing up to 8499 connections for db (to avoid SYNC attack)
+Establshing up to 8999 connections for db (to avoid SYNC attack)
+Establishing all 10000 connections for db (to avoid SYNC attack) ...  all connected
+
+
+---------------------- WARM NEW THREADS (10000 connection magnitude) [60 secs]  ----------------------
+LOAD: cpu [10000 connections / 9997 failed / 31721 reconnects / requests min=0 avg=10 max=792] [time 60000 / start 0 / end 0]
+	/test.php?v=N: 106033 requests  10%=1.57ms 50%=11.84ms 90%=28.78ms 95%=35.33ms 99%=2073.57ms 100%=72938.78ms
+LOAD: db [10000 connections / 9999 failed / 11204 reconnects / requests min=0 avg=6 max=437] [time 60000 / start 0 / end 0]
+	/test.php?v=D: 69272 requests  10%=101.10ms 50%=101.49ms 90%=103.55ms 95%=108.17ms 99%=2855.84ms 100%=240255.62ms
+------------------------------------------------------------
+---------------------- RUN 1 [60 secs]  ----------------------
+LOAD: cpu [10000 connections / 9997 failed / 6043 reconnects / requests min=0 avg=13 max=1010] [time 60000 / start 0 / end 0]
+	/test.php?v=N: 137907 requests  10%=1.60ms 50%=5.85ms 90%=15.53ms 95%=20.70ms 99%=2937.76ms 100%=110913.09ms
+LOAD: db [10000 connections / 9999 failed / 1696 reconnects / requests min=0 avg=7 max=421] [time 60000 / start 0 / end 0]
+	/test.php?v=D: 76335 requests  10%=101.08ms 50%=101.47ms 90%=102.74ms 95%=105.89ms 99%=3007.79ms 100%=111124.27ms
+------------------------------------------------------------
+---------------------- RUN 2 [60 secs]  ----------------------
+LOAD: cpu [10000 connections / 9997 failed / 3551 reconnects / requests min=0 avg=13 max=887] [time 60000 / start 0 / end 0]
+	/test.php?v=N: 133919 requests  10%=1.19ms 50%=4.66ms 90%=13.93ms 95%=18.54ms 99%=3231.20ms 100%=111359.41ms
+LOAD: db [10000 connections / 9999 failed / 1476 reconnects / requests min=0 avg=7 max=436] [time 60000 / start 0 / end 1]
+	/test.php?v=D: 78888 requests  10%=101.07ms 50%=101.46ms 90%=102.56ms 95%=104.83ms 99%=3331.11ms 100%=111455.09ms
+------------------------------------------------------------
+---------------------- RUN 3 [60 secs]  ----------------------
+LOAD: cpu [10000 connections / 9997 failed / 3615 reconnects / requests min=0 avg=14 max=792] [time 60017 / start 2 / end 0]
+	/test.php?v=N: 141765 requests  10%=1.73ms 50%=6.20ms 90%=15.14ms 95%=18.92ms 99%=3182.06ms 100%=218377.86ms
+LOAD: db [10000 connections / 9999 failed / 1463 reconnects / requests min=0 avg=7 max=431] [time 60017 / start 0 / end 0]
+	/test.php?v=D: 76685 requests  10%=101.06ms 50%=101.42ms 90%=102.37ms 95%=104.83ms 99%=3188.07ms 100%=218571.38ms
+------------------------------------------------------------
+RUN SUMMARY: cpu 10000 connections, db 10000 connections
+   cpu summary: 137863 requests  10%=1.50ms 50%=5.57ms 90%=14.87ms 95%=19.39ms 99%=3117.00ms 100%=146883.45ms
+   db summary: 77302 requests  10%=101.07ms 50%=101.45ms 90%=102.55ms 95%=105.18ms 99%=3175.66ms 100%=147050.25ms
+------------------------------------------------------------
+END: 22/08/2012 8:34:46 PM
+
+
+
+===============================================================
+Starting ApacheNioTest.testPerformance_MagnitudeMoreCpu with interval of 60 secs, cpu seed=1000, db seed=100
+===============================================================
+START: 22/08/2012 8:34:48 PM
+Establshing up to 499 connections for cpu (to avoid SYNC attack)
+Establshing up to 999 connections for cpu (to avoid SYNC attack)
+Establishing all 1000 connections for cpu (to avoid SYNC attack) ... java.net.ConnectException: Connection timed out
+	at sun.nio.ch.SocketChannelImpl.checkConnect(Native Method)
+	at sun.nio.ch.SocketChannelImpl.finishConnect(SocketChannelImpl.java:567)
+	at net.officefloor.tutorials.performance.nio.Connection.finishConnect(Connection.java:165)
+	at net.officefloor.tutorials.performance.nio.Load.runSelect(Load.java:183)
+	at net.officefloor.tutorials.performance.nio.Load.addConnections(Load.java:299)
+	at net.officefloor.tutorials.performance.nio.test.AbstractNioRunnerTestCase.doPerformanceTest(AbstractNioRunnerTestCase.java:149)
+	at net.officefloor.tutorials.performance.nio.test.AbstractNioRunnerTestCase.testPerformance_MagnitudeMoreCpu(AbstractNioRunnerTestCase.java:68)
+	at sun.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+	at sun.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:39)
+	at sun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:25)
+	at java.lang.reflect.Method.invoke(Method.java:597)
+	at junit.framework.TestCase.runTest(TestCase.java:168)
+	at junit.framework.TestCase.runBare(TestCase.java:134)
+	at junit.framework.TestResult$1.protect(TestResult.java:110)
+	at junit.framework.TestResult.runProtected(TestResult.java:128)
+	at junit.framework.TestResult.run(TestResult.java:113)
+	at junit.framework.TestCase.run(TestCase.java:124)
+	at junit.framework.TestSuite.runTest(TestSuite.java:243)
+	at junit.framework.TestSuite.run(TestSuite.java:238)
+	at org.junit.internal.runners.JUnit38ClassRunner.run(JUnit38ClassRunner.java:83)
+	at org.apache.maven.surefire.junit4.JUnit4TestSet.execute(JUnit4TestSet.java:59)
+	at org.apache.maven.surefire.suite.AbstractDirectoryTestSuite.executeTestSet(AbstractDirectoryTestSuite.java:120)
+	at org.apache.maven.surefire.suite.AbstractDirectoryTestSuite.execute(AbstractDirectoryTestSuite.java:103)
+	at org.apache.maven.surefire.Surefire.run(Surefire.java:169)
+	at sun.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+	at sun.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:39)
+	at sun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:25)
+	at java.lang.reflect.Method.invoke(Method.java:597)
+	at org.apache.maven.surefire.booter.SurefireBooter.runSuitesInProcess(SurefireBooter.java:350)
+	at org.apache.maven.surefire.booter.SurefireBooter.main(SurefireBooter.java:1021)
+ all connected
+Establishing all 100 connections for db (to avoid SYNC attack) ...  all connected
+
+
+---------------------- WARM NEW THREADS (1000 connection magnitude) [60 secs]  ----------------------
+java.io.IOException: Connection reset by peer
+	at sun.nio.ch.FileDispatcher.read0(Native Method)
+	at sun.nio.ch.SocketDispatcher.read(SocketDispatcher.java:21)
+	at sun.nio.ch.IOUtil.readIntoNativeBuffer(IOUtil.java:202)
+	at sun.nio.ch.IOUtil.read(IOUtil.java:169)
+	at sun.nio.ch.SocketChannelImpl.read(SocketChannelImpl.java:243)
+	at net.officefloor.tutorials.performance.nio.Connection.readResponse(Connection.java:243)
+	at net.officefloor.tutorials.performance.nio.Load.runSelect(Load.java:212)
+	at net.officefloor.tutorials.performance.nio.LoadCoordinator$LoadRunner.run(LoadCoordinator.java:325)
+	at java.lang.Thread.run(Thread.java:662)
+java.net.ConnectException: Connection timed out
+	at sun.nio.ch.SocketChannelImpl.checkConnect(Native Method)
+	at sun.nio.ch.SocketChannelImpl.finishConnect(SocketChannelImpl.java:567)
+	at net.officefloor.tutorials.performance.nio.Connection.finishConnect(Connection.java:165)
+	at net.officefloor.tutorials.performance.nio.Load.runSelect(Load.java:183)
+	at net.officefloor.tutorials.performance.nio.LoadCoordinator$LoadRunner.run(LoadCoordinator.java:325)
+	at java.lang.Thread.run(Thread.java:662)
+java.io.IOException: Connection reset by peer
+	at sun.nio.ch.FileDispatcher.read0(Native Method)
+	at sun.nio.ch.SocketDispatcher.read(SocketDispatcher.java:21)
+	at sun.nio.ch.IOUtil.readIntoNativeBuffer(IOUtil.java:202)
+	at sun.nio.ch.IOUtil.read(IOUtil.java:169)
+	at sun.nio.ch.SocketChannelImpl.read(SocketChannelImpl.java:243)
+	at net.officefloor.tutorials.performance.nio.Connection.readResponse(Connection.java:243)
+	at net.officefloor.tutorials.performance.nio.Load.runSelect(Load.java:212)
+	at net.officefloor.tutorials.performance.nio.LoadCoordinator$LoadRunner.run(LoadCoordinator.java:325)
+	at java.lang.Thread.run(Thread.java:662)
+LOAD: cpu [1000 connections / 581 failed / 2931 reconnects / requests min=0 avg=206 max=1089] [time 60000 / start 0 / end 1]
+	/test.php?v=N: 206943 requests  10%=10.84ms 50%=20.97ms 90%=33.62ms 95%=38.73ms 99%=207.70ms 100%=28722.28ms
+LOAD: db [100 connections / 8 failed / 374 reconnects / requests min=198 avg=407 max=460] [time 60000 / start 0 / end 1]
+	/test.php?v=D: 40745 requests  10%=100.62ms 50%=100.79ms 90%=101.48ms 95%=103.81ms 99%=2509.73ms 100%=5727.70ms
+------------------------------------------------------------
+---------------------- RUN 1 [60 secs]  ----------------------
+LOAD: cpu [1000 connections / 712 failed / 2745 reconnects / requests min=0 avg=213 max=990] [time 60001 / start 1 / end 0]
+	/test.php?v=N: 213116 requests  10%=15.65ms 50%=23.25ms 90%=33.34ms 95%=37.19ms 99%=2643.68ms 100%=110459.97ms
+LOAD: db [100 connections / 31 failed / 403 reconnects / requests min=74 avg=373 max=473] [time 60001 / start 1 / end 0]
+	/test.php?v=D: 37317 requests  10%=100.61ms 50%=100.77ms 90%=101.26ms 95%=103.30ms 99%=315.35ms 100%=6258.94ms
+------------------------------------------------------------
+---------------------- RUN 2 [60 secs]  ----------------------
+LOAD: cpu [1000 connections / 722 failed / 3123 reconnects / requests min=0 avg=213 max=986] [time 60000 / start 0 / end 0]
+	/test.php?v=N: 213471 requests  10%=16.12ms 50%=23.56ms 90%=33.63ms 95%=37.96ms 99%=2788.35ms 100%=110408.85ms
+LOAD: db [100 connections / 54 failed / 398 reconnects / requests min=99 avg=361 max=477] [time 60000 / start 0 / end 0]
+	/test.php?v=D: 36178 requests  10%=100.61ms 50%=100.77ms 90%=101.32ms 95%=103.47ms 99%=339.80ms 100%=6798.50ms
+------------------------------------------------------------
+---------------------- RUN 3 [60 secs]  ----------------------
+LOAD: cpu [1000 connections / 743 failed / 3049 reconnects / requests min=0 avg=216 max=862] [time 60000 / start 0 / end 0]
+	/test.php?v=N: 216148 requests  10%=16.77ms 50%=24.07ms 90%=33.78ms 95%=37.77ms 99%=2816.43ms 100%=110353.84ms
+LOAD: db [100 connections / 72 failed / 401 reconnects / requests min=0 avg=345 max=473] [time 60000 / start 0 / end 0]
+	/test.php?v=D: 34530 requests  10%=100.60ms 50%=100.76ms 90%=101.21ms 95%=102.56ms 99%=2948.31ms 100%=6195.09ms
+------------------------------------------------------------
+RUN SUMMARY: cpu 1000 connections, db 100 connections
+   cpu summary: 214245 requests  10%=16.18ms 50%=23.63ms 90%=33.58ms 95%=37.64ms 99%=2749.49ms 100%=110407.56ms
+   db summary: 36008 requests  10%=100.61ms 50%=100.77ms 90%=101.26ms 95%=103.11ms 99%=1201.15ms 100%=6417.51ms
+------------------------------------------------------------
+Establshing up to 499 connections for cpu (to avoid SYNC attack)
+Establshing up to 999 connections for cpu (to avoid SYNC attack)
+Establshing up to 1499 connections for cpu (to avoid SYNC attack)
+Establshing up to 1999 connections for cpu (to avoid SYNC attack)
+Establshing up to 2499 connections for cpu (to avoid SYNC attack)
+Establshing up to 2999 connections for cpu (to avoid SYNC attack)
+Establshing up to 3499 connections for cpu (to avoid SYNC attack)
+Establshing up to 3999 connections for cpu (to avoid SYNC attack)
+Establshing up to 4499 connections for cpu (to avoid SYNC attack)
+Establshing up to 4999 connections for cpu (to avoid SYNC attack)
+Establshing up to 5499 connections for cpu (to avoid SYNC attack)
+Establshing up to 5999 connections for cpu (to avoid SYNC attack)
+Establshing up to 6499 connections for cpu (to avoid SYNC attack)
+Establshing up to 6999 connections for cpu (to avoid SYNC attack)
+Establshing up to 7499 connections for cpu (to avoid SYNC attack)
+Establshing up to 7999 connections for cpu (to avoid SYNC attack)
+Establshing up to 8499 connections for cpu (to avoid SYNC attack)
+Establshing up to 8999 connections for cpu (to avoid SYNC attack)
+Establishing all 10000 connections for cpu (to avoid SYNC attack) ...  all connected
+Establshing up to 499 connections for db (to avoid SYNC attack)
+Establishing all 1000 connections for db (to avoid SYNC attack) ...  all connected
+
+
+---------------------- WARM NEW THREADS (10000 connection magnitude) [60 secs]  ----------------------
+LOAD: cpu [10000 connections / 9743 failed / 31213 reconnects / requests min=0 avg=20 max=891] [time 60000 / start 0 / end 0]
+	/test.php?v=N: 207564 requests  10%=13.05ms 50%=22.93ms 90%=37.02ms 95%=43.54ms 99%=2623.07ms 100%=72013.63ms
+LOAD: db [1000 connections / 698 failed / 1367 reconnects / requests min=0 avg=33 max=431] [time 60000 / start 0 / end 0]
+	/test.php?v=D: 33087 requests  10%=100.66ms 50%=100.82ms 90%=101.54ms 95%=106.86ms 99%=3094.41ms 100%=70697.51ms
+------------------------------------------------------------
+---------------------- RUN 1 [60 secs]  ----------------------
+LOAD: cpu [10000 connections / 9743 failed / 13396 reconnects / requests min=0 avg=20 max=891] [time 60000 / start 0 / end 1]
+	/test.php?v=N: 208591 requests  10%=13.96ms 50%=21.61ms 90%=33.44ms 95%=38.01ms 99%=2877.71ms 100%=110483.35ms
+LOAD: db [1000 connections / 698 failed / 995 reconnects / requests min=0 avg=38 max=460] [time 60000 / start 0 / end 0]
+	/test.php?v=D: 38333 requests  10%=100.65ms 50%=100.81ms 90%=101.25ms 95%=103.71ms 99%=2999.92ms 100%=56554.51ms
+------------------------------------------------------------
+---------------------- RUN 2 [60 secs]  ----------------------
+LOAD: cpu [10000 connections / 9743 failed / 6545 reconnects / requests min=0 avg=20 max=792] [time 60000 / start 0 / end 1]
+	/test.php?v=N: 206526 requests  10%=13.15ms 50%=21.21ms 90%=33.33ms 95%=38.00ms 99%=2880.49ms 100%=110803.43ms
+LOAD: db [1000 connections / 699 failed / 1252 reconnects / requests min=0 avg=39 max=443] [time 60000 / start 0 / end 0]
+	/test.php?v=D: 39692 requests  10%=100.65ms 50%=100.82ms 90%=101.31ms 95%=103.58ms 99%=2992.57ms 100%=56882.51ms
+------------------------------------------------------------
+---------------------- RUN 3 [60 secs]  ----------------------
+LOAD: cpu [10000 connections / 9743 failed / 5552 reconnects / requests min=0 avg=20 max=753] [time 60000 / start 0 / end 1]
+	/test.php?v=N: 201981 requests  10%=12.08ms 50%=19.62ms 90%=30.91ms 95%=35.14ms 99%=2821.57ms 100%=218011.28ms
+LOAD: db [1000 connections / 700 failed / 804 reconnects / requests min=0 avg=44 max=443] [time 60000 / start 0 / end 0]
+	/test.php?v=D: 44310 requests  10%=100.65ms 50%=100.82ms 90%=101.29ms 95%=103.02ms 99%=338.50ms 100%=217953.63ms
+------------------------------------------------------------
+RUN SUMMARY: cpu 10000 connections, db 1000 connections
+   cpu summary: 205699 requests  10%=13.06ms 50%=20.81ms 90%=32.56ms 95%=37.05ms 99%=2859.92ms 100%=146432.69ms
+   db summary: 40778 requests  10%=100.65ms 50%=100.82ms 90%=101.28ms 95%=103.44ms 99%=2110.33ms 100%=110463.55ms
+------------------------------------------------------------
+END: 22/08/2012 8:44:03 PM
+
+
+
+===============================================================
+Starting ApacheNioTest.testPerformance_MagnitudeMoreDatabase with interval of 60 secs, cpu seed=100, db seed=1000
+===============================================================
+START: 22/08/2012 8:44:04 PM
+Establishing all 100 connections for cpu (to avoid SYNC attack) ...  all connected
+Establshing up to 499 connections for db (to avoid SYNC attack)
+Establshing up to 999 connections for db (to avoid SYNC attack)
+Establishing all 1000 connections for db (to avoid SYNC attack) ... java.net.ConnectException: Connection timed out
+	at sun.nio.ch.SocketChannelImpl.checkConnect(Native Method)
+	at sun.nio.ch.SocketChannelImpl.finishConnect(SocketChannelImpl.java:567)
+	at net.officefloor.tutorials.performance.nio.Connection.finishConnect(Connection.java:165)
+	at net.officefloor.tutorials.performance.nio.Load.runSelect(Load.java:183)
+	at net.officefloor.tutorials.performance.nio.Load.addConnections(Load.java:299)
+	at net.officefloor.tutorials.performance.nio.test.AbstractNioRunnerTestCase.doPerformanceTest(AbstractNioRunnerTestCase.java:150)
+	at net.officefloor.tutorials.performance.nio.test.AbstractNioRunnerTestCase.testPerformance_MagnitudeMoreDatabase(AbstractNioRunnerTestCase.java:75)
+	at sun.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+	at sun.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:39)
+	at sun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:25)
+	at java.lang.reflect.Method.invoke(Method.java:597)
+	at junit.framework.TestCase.runTest(TestCase.java:168)
+	at junit.framework.TestCase.runBare(TestCase.java:134)
+	at junit.framework.TestResult$1.protect(TestResult.java:110)
+	at junit.framework.TestResult.runProtected(TestResult.java:128)
+	at junit.framework.TestResult.run(TestResult.java:113)
+	at junit.framework.TestCase.run(TestCase.java:124)
+	at junit.framework.TestSuite.runTest(TestSuite.java:243)
+	at junit.framework.TestSuite.run(TestSuite.java:238)
+	at org.junit.internal.runners.JUnit38ClassRunner.run(JUnit38ClassRunner.java:83)
+	at org.apache.maven.surefire.junit4.JUnit4TestSet.execute(JUnit4TestSet.java:59)
+	at org.apache.maven.surefire.suite.AbstractDirectoryTestSuite.executeTestSet(AbstractDirectoryTestSuite.java:120)
+	at org.apache.maven.surefire.suite.AbstractDirectoryTestSuite.execute(AbstractDirectoryTestSuite.java:103)
+	at org.apache.maven.surefire.Surefire.run(Surefire.java:169)
+	at sun.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+	at sun.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:39)
+	at sun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:25)
+	at java.lang.reflect.Method.invoke(Method.java:597)
+	at org.apache.maven.surefire.booter.SurefireBooter.runSuitesInProcess(SurefireBooter.java:350)
+	at org.apache.maven.surefire.booter.SurefireBooter.main(SurefireBooter.java:1021)
+ all connected
+
+
+---------------------- WARM NEW THREADS (1000 connection magnitude) [60 secs]  ----------------------
+java.io.IOException: Connection reset by peer
+	at sun.nio.ch.FileDispatcher.read0(Native Method)
+	at sun.nio.ch.SocketDispatcher.read(SocketDispatcher.java:21)
+	at sun.nio.ch.IOUtil.readIntoNativeBuffer(IOUtil.java:202)
+	at sun.nio.ch.IOUtil.read(IOUtil.java:169)
+	at sun.nio.ch.SocketChannelImpl.read(SocketChannelImpl.java:243)
+	at net.officefloor.tutorials.performance.nio.Connection.readResponse(Connection.java:243)
+	at net.officefloor.tutorials.performance.nio.Load.runSelect(Load.java:212)
+	at net.officefloor.tutorials.performance.nio.LoadCoordinator$LoadRunner.run(LoadCoordinator.java:325)
+	at java.lang.Thread.run(Thread.java:662)
+java.net.ConnectException: Connection timed out
+	at sun.nio.ch.SocketChannelImpl.checkConnect(Native Method)
+	at sun.nio.ch.SocketChannelImpl.finishConnect(SocketChannelImpl.java:567)
+	at net.officefloor.tutorials.performance.nio.Connection.finishConnect(Connection.java:165)
+	at net.officefloor.tutorials.performance.nio.Load.runSelect(Load.java:183)
+	at net.officefloor.tutorials.performance.nio.LoadCoordinator$LoadRunner.run(LoadCoordinator.java:325)
+	at java.lang.Thread.run(Thread.java:662)
+LOAD: cpu [100 connections / 47 failed / 547 reconnects / requests min=198 avg=542 max=792] [time 60000 / start 0 / end 2]
+	/test.php?v=N: 54252 requests  10%=0.72ms 50%=4.33ms 90%=21.18ms 95%=27.38ms 99%=1713.18ms 100%=17738.97ms
+LOAD: db [1000 connections / 770 failed / 2225 reconnects / requests min=0 avg=83 max=448] [time 60000 / start 0 / end 1]
+	/test.php?v=D: 83269 requests  10%=100.84ms 50%=101.06ms 90%=101.79ms 95%=102.90ms 99%=141.90ms 100%=33755.05ms
+------------------------------------------------------------
+---------------------- RUN 1 [60 secs]  ----------------------
+java.io.IOException: Connection reset by peer
+	at sun.nio.ch.FileDispatcher.read0(Native Method)
+	at sun.nio.ch.SocketDispatcher.read(SocketDispatcher.java:21)
+	at sun.nio.ch.IOUtil.readIntoNativeBuffer(IOUtil.java:202)
+	at sun.nio.ch.IOUtil.read(IOUtil.java:169)
+	at sun.nio.ch.SocketChannelImpl.read(SocketChannelImpl.java:243)
+	at net.officefloor.tutorials.performance.nio.Connection.readResponse(Connection.java:243)
+	at net.officefloor.tutorials.performance.nio.Load.runSelect(Load.java:212)
+	at net.officefloor.tutorials.performance.nio.LoadCoordinator$LoadRunner.run(LoadCoordinator.java:325)
+	at java.lang.Thread.run(Thread.java:662)
+LOAD: cpu [100 connections / 94 failed / 481 reconnects / requests min=0 avg=348 max=891] [time 60001 / start 1 / end 0]
+	/test.php?v=N: 34845 requests  10%=0.62ms 50%=1.01ms 90%=4.72ms 95%=7.96ms 99%=2962.88ms 100%=10917.51ms
+LOAD: db [1000 connections / 820 failed / 2167 reconnects / requests min=0 avg=87 max=396] [time 60001 / start 1 / end 0]
+	/test.php?v=D: 87733 requests  10%=100.85ms 50%=101.06ms 90%=101.76ms 95%=102.78ms 99%=3391.24ms 100%=33883.93ms
+------------------------------------------------------------
+---------------------- RUN 2 [60 secs]  ----------------------
+LOAD: cpu [100 connections / 99 failed / 472 reconnects / requests min=0 avg=327 max=891] [time 60000 / start 0 / end 0]
+	/test.php?v=N: 32766 requests  10%=0.61ms 50%=0.88ms 90%=2.90ms 95%=4.72ms 99%=3376.36ms 100%=13662.02ms
+LOAD: db [1000 connections / 846 failed / 2033 reconnects / requests min=0 avg=87 max=396] [time 60000 / start 0 / end 0]
+	/test.php?v=D: 87998 requests  10%=100.85ms 50%=101.07ms 90%=101.78ms 95%=102.66ms 99%=3554.86ms 100%=58281.45ms
+------------------------------------------------------------
+---------------------- RUN 3 [60 secs]  ----------------------
+LOAD: cpu [100 connections / 100 failed / 443 reconnects / requests min=0 avg=293 max=693] [time 60001 / start 1 / end 0]
+	/test.php?v=N: 29300 requests  10%=0.60ms 50%=0.86ms 90%=2.70ms 95%=4.50ms 99%=3805.93ms 100%=17156.20ms
+LOAD: db [1000 connections / 852 failed / 2197 reconnects / requests min=0 avg=87 max=369] [time 60001 / start 1 / end 0]
+	/test.php?v=D: 87996 requests  10%=100.85ms 50%=101.06ms 90%=101.74ms 95%=102.64ms 99%=4012.06ms 100%=112875.63ms
+------------------------------------------------------------
+RUN SUMMARY: cpu 100 connections, db 1000 connections
+   cpu summary: 32303 requests  10%=0.61ms 50%=0.92ms 90%=3.44ms 95%=5.73ms 99%=3381.72ms 100%=13911.91ms
+   db summary: 87909 requests  10%=100.85ms 50%=101.06ms 90%=101.76ms 95%=102.69ms 99%=3652.72ms 100%=68347.00ms
+------------------------------------------------------------
+Establshing up to 499 connections for cpu (to avoid SYNC attack)
+Establishing all 1000 connections for cpu (to avoid SYNC attack) ...  all connected
+Establshing up to 499 connections for db (to avoid SYNC attack)
+Establshing up to 999 connections for db (to avoid SYNC attack)
+Establshing up to 1499 connections for db (to avoid SYNC attack)
+Establshing up to 1999 connections for db (to avoid SYNC attack)
+Establshing up to 2499 connections for db (to avoid SYNC attack)
+Establshing up to 2999 connections for db (to avoid SYNC attack)
+Establshing up to 3499 connections for db (to avoid SYNC attack)
+Establshing up to 3999 connections for db (to avoid SYNC attack)
+Establshing up to 4499 connections for db (to avoid SYNC attack)
+Establshing up to 4999 connections for db (to avoid SYNC attack)
+Establshing up to 5499 connections for db (to avoid SYNC attack)
+Establshing up to 5999 connections for db (to avoid SYNC attack)
+Establshing up to 6499 connections for db (to avoid SYNC attack)
+Establshing up to 6999 connections for db (to avoid SYNC attack)
+Establshing up to 7499 connections for db (to avoid SYNC attack)
+Establshing up to 7999 connections for db (to avoid SYNC attack)
+Establshing up to 8499 connections for db (to avoid SYNC attack)
+Establshing up to 8999 connections for db (to avoid SYNC attack)
+Establishing all 10000 connections for db (to avoid SYNC attack) ...  all connected
+
+
+---------------------- WARM NEW THREADS (10000 connection magnitude) [60 secs]  ----------------------
+LOAD: cpu [1000 connections / 1000 failed / 3069 reconnects / requests min=0 avg=6 max=594] [time 60000 / start 0 / end 0]
+	/test.php?v=N: 6139 requests  10%=0.85ms 50%=2.40ms 90%=9.48ms 95%=14.07ms 99%=10043.18ms 100%=54658.64ms
+LOAD: db [10000 connections / 9854 failed / 19707 reconnects / requests min=0 avg=8 max=396] [time 60000 / start 0 / end 0]
+	/test.php?v=D: 83499 requests  10%=101.68ms 50%=102.34ms 90%=103.62ms 95%=106.17ms 99%=8323.65ms 100%=103288.96ms
+------------------------------------------------------------
+---------------------- RUN 1 [60 secs]  ----------------------
+LOAD: cpu [1000 connections / 1000 failed / 2387 reconnects / requests min=0 avg=19 max=692] [time 60000 / start 0 / end 0]
+	/test.php?v=N: 19133 requests  10%=0.92ms 50%=2.61ms 90%=9.80ms 95%=14.66ms 99%=1989.10ms 100%=31672.36ms
+LOAD: db [10000 connections / 9854 failed / 29121 reconnects / requests min=0 avg=8 max=360] [time 60000 / start 0 / end 1]
+	/test.php?v=D: 84788 requests  10%=101.65ms 50%=102.32ms 90%=103.70ms 95%=106.44ms 99%=1940.98ms 100%=32122.06ms
+------------------------------------------------------------
+---------------------- RUN 2 [60 secs]  ----------------------
+LOAD: cpu [1000 connections / 1000 failed / 2083 reconnects / requests min=0 avg=20 max=495] [time 60000 / start 0 / end 0]
+	/test.php?v=N: 20144 requests  10%=0.79ms 50%=1.20ms 90%=4.46ms 95%=8.07ms 99%=3294.96ms 100%=30505.48ms
+LOAD: db [10000 connections / 9854 failed / 30416 reconnects / requests min=0 avg=8 max=356] [time 60000 / start 0 / end 1]
+	/test.php?v=D: 85540 requests  10%=101.63ms 50%=102.34ms 90%=104.14ms 95%=107.30ms 99%=2611.63ms 100%=35769.37ms
+------------------------------------------------------------
+---------------------- RUN 3 [60 secs]  ----------------------
+LOAD: cpu [1000 connections / 1000 failed / 1997 reconnects / requests min=0 avg=14 max=396] [time 60001 / start 1 / end 0]
+	/test.php?v=N: 14453 requests  10%=0.79ms 50%=1.16ms 90%=3.95ms 95%=6.94ms 99%=2544.79ms 100%=62819.54ms
+LOAD: db [10000 connections / 9854 failed / 23070 reconnects / requests min=0 avg=8 max=352] [time 60001 / start 1 / end 0]
+	/test.php?v=D: 85890 requests  10%=101.60ms 50%=102.32ms 90%=103.76ms 95%=105.88ms 99%=338.10ms 100%=115013.25ms
+------------------------------------------------------------
+RUN SUMMARY: cpu 1000 connections, db 10000 connections
+   cpu summary: 17910 requests  10%=0.83ms 50%=1.66ms 90%=6.07ms 95%=9.89ms 99%=2609.62ms 100%=41665.79ms
+   db summary: 85406 requests  10%=101.63ms 50%=102.33ms 90%=103.87ms 95%=106.54ms 99%=1630.24ms 100%=60968.22ms
+------------------------------------------------------------
+END: 22/08/2012 8:53:11 PM
+
+
+
+===============================================================
+Starting ApacheNioTest.testPerformance_OnlyCpu with interval of 60 secs, cpu seed=1000, db seed=0
+===============================================================
+START: 22/08/2012 8:53:12 PM
+Establshing up to 499 connections for cpu (to avoid SYNC attack)
+Establshing up to 999 connections for cpu (to avoid SYNC attack)
+Establishing all 1000 connections for cpu (to avoid SYNC attack) ... java.net.ConnectException: Connection timed out
+	at sun.nio.ch.SocketChannelImpl.checkConnect(Native Method)
+	at sun.nio.ch.SocketChannelImpl.finishConnect(SocketChannelImpl.java:567)
+	at net.officefloor.tutorials.performance.nio.Connection.finishConnect(Connection.java:165)
+	at net.officefloor.tutorials.performance.nio.Load.runSelect(Load.java:183)
+	at net.officefloor.tutorials.performance.nio.Load.addConnections(Load.java:299)
+	at net.officefloor.tutorials.performance.nio.test.AbstractNioRunnerTestCase.doPerformanceTest(AbstractNioRunnerTestCase.java:149)
+	at net.officefloor.tutorials.performance.nio.test.AbstractNioRunnerTestCase.testPerformance_OnlyCpu(AbstractNioRunnerTestCase.java:82)
+	at sun.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+	at sun.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:39)
+	at sun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:25)
+	at java.lang.reflect.Method.invoke(Method.java:597)
+	at junit.framework.TestCase.runTest(TestCase.java:168)
+	at junit.framework.TestCase.runBare(TestCase.java:134)
+	at junit.framework.TestResult$1.protect(TestResult.java:110)
+	at junit.framework.TestResult.runProtected(TestResult.java:128)
+	at junit.framework.TestResult.run(TestResult.java:113)
+	at junit.framework.TestCase.run(TestCase.java:124)
+	at junit.framework.TestSuite.runTest(TestSuite.java:243)
+	at junit.framework.TestSuite.run(TestSuite.java:238)
+	at org.junit.internal.runners.JUnit38ClassRunner.run(JUnit38ClassRunner.java:83)
+	at org.apache.maven.surefire.junit4.JUnit4TestSet.execute(JUnit4TestSet.java:59)
+	at org.apache.maven.surefire.suite.AbstractDirectoryTestSuite.executeTestSet(AbstractDirectoryTestSuite.java:120)
+	at org.apache.maven.surefire.suite.AbstractDirectoryTestSuite.execute(AbstractDirectoryTestSuite.java:103)
+	at org.apache.maven.surefire.Surefire.run(Surefire.java:169)
+	at sun.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+	at sun.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:39)
+	at sun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:25)
+	at java.lang.reflect.Method.invoke(Method.java:597)
+	at org.apache.maven.surefire.booter.SurefireBooter.runSuitesInProcess(SurefireBooter.java:350)
+	at org.apache.maven.surefire.booter.SurefireBooter.main(SurefireBooter.java:1021)
+ all connected
+Establishing all 0 connections for db (to avoid SYNC attack) ...  all connected
+
+
+---------------------- WARM NEW THREADS (1000 connection magnitude) [60 secs]  ----------------------
+java.io.IOException: Connection reset by peer
+	at sun.nio.ch.FileDispatcher.read0(Native Method)
+	at sun.nio.ch.SocketDispatcher.read(SocketDispatcher.java:21)
+	at sun.nio.ch.IOUtil.readIntoNativeBuffer(IOUtil.java:202)
+	at sun.nio.ch.IOUtil.read(IOUtil.java:169)
+	at sun.nio.ch.SocketChannelImpl.read(SocketChannelImpl.java:243)
+	at net.officefloor.tutorials.performance.nio.Connection.readResponse(Connection.java:243)
+	at net.officefloor.tutorials.performance.nio.Load.runSelect(Load.java:212)
+	at net.officefloor.tutorials.performance.nio.LoadCoordinator$LoadRunner.run(LoadCoordinator.java:325)
+	at java.lang.Thread.run(Thread.java:662)
+LOAD: cpu [1000 connections / 693 failed / 3586 reconnects / requests min=0 avg=257 max=990] [time 60000 / start 0 / end 0]
+	/test.php?v=N: 257604 requests  10%=25.94ms 50%=31.92ms 90%=44.20ms 95%=50.15ms 99%=1351.61ms 100%=53551.22ms
+LOAD: db [0 connections / 0 failed / 0 reconnects / requests min=2147483647 avg=0 max=-1] [time 60000 / start 0 / end 0]
+	/test.php?v=D: 0 requests  10%=-0.00ms 50%=-0.00ms 90%=-0.00ms 95%=-0.00ms 99%=-0.00ms 100%=-0.00ms
+------------------------------------------------------------
+---------------------- RUN 1 [60 secs]  ----------------------
+LOAD: cpu [1000 connections / 814 failed / 3337 reconnects / requests min=0 avg=256 max=891] [time 60000 / start 0 / end 0]
+	/test.php?v=N: 256163 requests  10%=26.33ms 50%=32.91ms 90%=44.68ms 95%=51.55ms 99%=2792.17ms 100%=107306.86ms
+LOAD: db [0 connections / 0 failed / 0 reconnects / requests min=2147483647 avg=0 max=-1] [time 60000 / start 0 / end 0]
+	/test.php?v=D: 0 requests  10%=-0.00ms 50%=-0.00ms 90%=-0.00ms 95%=-0.00ms 99%=-0.00ms 100%=-0.00ms
+------------------------------------------------------------
+---------------------- RUN 2 [60 secs]  ----------------------
+LOAD: cpu [1000 connections / 847 failed / 3478 reconnects / requests min=0 avg=255 max=799] [time 60000 / start 0 / end 0]
+	/test.php?v=N: 255951 requests  10%=26.17ms 50%=33.46ms 90%=44.33ms 95%=51.43ms 99%=2750.44ms 100%=110464.97ms
+LOAD: db [0 connections / 0 failed / 0 reconnects / requests min=2147483647 avg=0 max=-1] [time 60000 / start 0 / end 0]
+	/test.php?v=D: 0 requests  10%=-0.00ms 50%=-0.00ms 90%=-0.00ms 95%=-0.00ms 99%=-0.00ms 100%=-0.00ms
+------------------------------------------------------------
+---------------------- RUN 3 [60 secs]  ----------------------
+LOAD: cpu [1000 connections / 852 failed / 3587 reconnects / requests min=0 avg=256 max=802] [time 60000 / start 0 / end 0]
+	/test.php?v=N: 256693 requests  10%=26.46ms 50%=33.41ms 90%=43.96ms 95%=51.74ms 99%=2771.84ms 100%=110487.67ms
+LOAD: db [0 connections / 0 failed / 0 reconnects / requests min=2147483647 avg=0 max=-1] [time 60000 / start 0 / end 0]
+	/test.php?v=D: 0 requests  10%=-0.00ms 50%=-0.00ms 90%=-0.00ms 95%=-0.00ms 99%=-0.00ms 100%=-0.00ms
+------------------------------------------------------------
+RUN SUMMARY: cpu 1000 connections, db 0 connections
+   cpu summary: 256269 requests  10%=26.32ms 50%=33.26ms 90%=44.32ms 95%=51.57ms 99%=2771.48ms 100%=109419.83ms
+   db summary: 0 requests  10%=-0.00ms 50%=-0.00ms 90%=-0.00ms 95%=-0.00ms 99%=-0.00ms 100%=-0.00ms
+------------------------------------------------------------
+Establshing up to 499 connections for cpu (to avoid SYNC attack)
+Establshing up to 999 connections for cpu (to avoid SYNC attack)
+Establshing up to 1499 connections for cpu (to avoid SYNC attack)
+Establshing up to 1999 connections for cpu (to avoid SYNC attack)
+Establshing up to 2499 connections for cpu (to avoid SYNC attack)
+Establshing up to 2999 connections for cpu (to avoid SYNC attack)
+Establshing up to 3499 connections for cpu (to avoid SYNC attack)
+Establshing up to 3999 connections for cpu (to avoid SYNC attack)
+Establshing up to 4499 connections for cpu (to avoid SYNC attack)
+Establshing up to 4999 connections for cpu (to avoid SYNC attack)
+Establshing up to 5499 connections for cpu (to avoid SYNC attack)
+Establshing up to 5999 connections for cpu (to avoid SYNC attack)
+Establshing up to 6499 connections for cpu (to avoid SYNC attack)
+Establshing up to 6999 connections for cpu (to avoid SYNC attack)
+Establshing up to 7499 connections for cpu (to avoid SYNC attack)
+Establshing up to 7999 connections for cpu (to avoid SYNC attack)
+Establshing up to 8499 connections for cpu (to avoid SYNC attack)
+Establshing up to 8999 connections for cpu (to avoid SYNC attack)
+Establishing all 10000 connections for cpu (to avoid SYNC attack) ...  all connected
+Establishing all 0 connections for db (to avoid SYNC attack) ...  all connected
+
+
+---------------------- WARM NEW THREADS (10000 connection magnitude) [60 secs]  ----------------------
+LOAD: cpu [10000 connections / 9853 failed / 21150 reconnects / requests min=0 avg=25 max=891] [time 60000 / start 0 / end 1]
+	/test.php?v=N: 250482 requests  10%=25.54ms 50%=32.47ms 90%=45.38ms 95%=52.16ms 99%=2830.82ms 100%=79040.28ms
+LOAD: db [0 connections / 0 failed / 0 reconnects / requests min=2147483647 avg=0 max=-1] [time 60000 / start 0 / end 0]
+	/test.php?v=D: 0 requests  10%=-0.00ms 50%=-0.00ms 90%=-0.00ms 95%=-0.00ms 99%=-0.00ms 100%=-0.00ms
+------------------------------------------------------------
+---------------------- RUN 1 [60 secs]  ----------------------
+LOAD: cpu [10000 connections / 9853 failed / 14590 reconnects / requests min=0 avg=25 max=838] [time 60010 / start 0 / end 0]
+	/test.php?v=N: 253470 requests  10%=25.48ms 50%=32.20ms 90%=46.32ms 95%=53.17ms 99%=2737.90ms 100%=110500.81ms
+LOAD: db [0 connections / 0 failed / 0 reconnects / requests min=2147483647 avg=0 max=-1] [time 60010 / start 0 / end 0]
+	/test.php?v=D: 0 requests  10%=-0.00ms 50%=-0.00ms 90%=-0.00ms 95%=-0.00ms 99%=-0.00ms 100%=-0.00ms
+------------------------------------------------------------
+---------------------- RUN 2 [60 secs]  ----------------------
+LOAD: cpu [10000 connections / 9853 failed / 7308 reconnects / requests min=0 avg=25 max=792] [time 60000 / start 0 / end 0]
+	/test.php?v=N: 253316 requests  10%=25.54ms 50%=32.49ms 90%=46.08ms 95%=52.73ms 99%=2822.21ms 100%=110527.85ms
+LOAD: db [0 connections / 0 failed / 0 reconnects / requests min=2147483647 avg=0 max=-1] [time 60000 / start 0 / end 0]
+	/test.php?v=D: 0 requests  10%=-0.00ms 50%=-0.00ms 90%=-0.00ms 95%=-0.00ms 99%=-0.00ms 100%=-0.00ms
+------------------------------------------------------------
+---------------------- RUN 3 [60 secs]  ----------------------
+LOAD: cpu [10000 connections / 9853 failed / 6240 reconnects / requests min=0 avg=25 max=791] [time 60000 / start 0 / end 1]
+	/test.php?v=N: 255219 requests  10%=25.66ms 50%=32.62ms 90%=45.21ms 95%=50.99ms 99%=2798.29ms 100%=217739.94ms
+LOAD: db [0 connections / 0 failed / 0 reconnects / requests min=2147483647 avg=0 max=-1] [time 60000 / start 0 / end 0]
+	/test.php?v=D: 0 requests  10%=-0.00ms 50%=-0.00ms 90%=-0.00ms 95%=-0.00ms 99%=-0.00ms 100%=-0.00ms
+------------------------------------------------------------
+RUN SUMMARY: cpu 10000 connections, db 0 connections
+   cpu summary: 254001 requests  10%=25.56ms 50%=32.44ms 90%=45.87ms 95%=52.30ms 99%=2786.13ms 100%=146256.20ms
+   db summary: 0 requests  10%=-0.00ms 50%=-0.00ms 90%=-0.00ms 95%=-0.00ms 99%=-0.00ms 100%=-0.00ms
+------------------------------------------------------------
+END: 22/08/2012 9:01:58 PM
+
+
+
+===============================================================
+Starting ApacheNioTest.testPerformance_OnlyDatabase with interval of 60 secs, cpu seed=0, db seed=1000
+===============================================================
+START: 22/08/2012 9:01:59 PM
+Establishing all 0 connections for cpu (to avoid SYNC attack) ...  all connected
+Establshing up to 499 connections for db (to avoid SYNC attack)
+Establshing up to 999 connections for db (to avoid SYNC attack)
+Establishing all 1000 connections for db (to avoid SYNC attack) ... java.net.ConnectException: Connection timed out
+	at sun.nio.ch.SocketChannelImpl.checkConnect(Native Method)
+	at sun.nio.ch.SocketChannelImpl.finishConnect(SocketChannelImpl.java:567)
+	at net.officefloor.tutorials.performance.nio.Connection.finishConnect(Connection.java:165)
+	at net.officefloor.tutorials.performance.nio.Load.runSelect(Load.java:183)
+	at net.officefloor.tutorials.performance.nio.Load.addConnections(Load.java:299)
+	at net.officefloor.tutorials.performance.nio.test.AbstractNioRunnerTestCase.doPerformanceTest(AbstractNioRunnerTestCase.java:150)
+	at net.officefloor.tutorials.performance.nio.test.AbstractNioRunnerTestCase.testPerformance_OnlyDatabase(AbstractNioRunnerTestCase.java:89)
+	at sun.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+	at sun.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:39)
+	at sun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:25)
+	at java.lang.reflect.Method.invoke(Method.java:597)
+	at junit.framework.TestCase.runTest(TestCase.java:168)
+	at junit.framework.TestCase.runBare(TestCase.java:134)
+	at junit.framework.TestResult$1.protect(TestResult.java:110)
+	at junit.framework.TestResult.runProtected(TestResult.java:128)
+	at junit.framework.TestResult.run(TestResult.java:113)
+	at junit.framework.TestCase.run(TestCase.java:124)
+	at junit.framework.TestSuite.runTest(TestSuite.java:243)
+	at junit.framework.TestSuite.run(TestSuite.java:238)
+	at org.junit.internal.runners.JUnit38ClassRunner.run(JUnit38ClassRunner.java:83)
+	at org.apache.maven.surefire.junit4.JUnit4TestSet.execute(JUnit4TestSet.java:59)
+	at org.apache.maven.surefire.suite.AbstractDirectoryTestSuite.executeTestSet(AbstractDirectoryTestSuite.java:120)
+	at org.apache.maven.surefire.suite.AbstractDirectoryTestSuite.execute(AbstractDirectoryTestSuite.java:103)
+	at org.apache.maven.surefire.Surefire.run(Surefire.java:169)
+	at sun.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+	at sun.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:39)
+	at sun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:25)
+	at java.lang.reflect.Method.invoke(Method.java:597)
+	at org.apache.maven.surefire.booter.SurefireBooter.runSuitesInProcess(SurefireBooter.java:350)
+	at org.apache.maven.surefire.booter.SurefireBooter.main(SurefireBooter.java:1021)
+ all connected
+
+
+---------------------- WARM NEW THREADS (1000 connection magnitude) [60 secs]  ----------------------
+java.io.IOException: Connection reset by peer
+	at sun.nio.ch.FileDispatcher.read0(Native Method)
+	at sun.nio.ch.SocketDispatcher.read(SocketDispatcher.java:21)
+	at sun.nio.ch.IOUtil.readIntoNativeBuffer(IOUtil.java:202)
+	at sun.nio.ch.IOUtil.read(IOUtil.java:169)
+	at sun.nio.ch.SocketChannelImpl.read(SocketChannelImpl.java:243)
+	at net.officefloor.tutorials.performance.nio.Connection.readResponse(Connection.java:243)
+	at net.officefloor.tutorials.performance.nio.Load.runSelect(Load.java:212)
+	at net.officefloor.tutorials.performance.nio.LoadCoordinator$LoadRunner.run(LoadCoordinator.java:325)
+	at java.lang.Thread.run(Thread.java:662)
+LOAD: cpu [0 connections / 0 failed / 0 reconnects / requests min=2147483647 avg=0 max=-1] [time 60000 / start 0 / end 0]
+	/test.php?v=N: 0 requests  10%=-0.00ms 50%=-0.00ms 90%=-0.00ms 95%=-0.00ms 99%=-0.00ms 100%=-0.00ms
+LOAD: db [1000 connections / 623 failed / 1620 reconnects / requests min=0 avg=87 max=392] [time 60000 / start 0 / end 0]
+	/test.php?v=D: 87753 requests  10%=100.89ms 50%=101.10ms 90%=101.75ms 95%=102.51ms 99%=115.65ms 100%=35386.71ms
+------------------------------------------------------------
+---------------------- RUN 1 [60 secs]  ----------------------
+LOAD: cpu [0 connections / 0 failed / 0 reconnects / requests min=2147483647 avg=0 max=-1] [time 60000 / start 0 / end 0]
+	/test.php?v=N: 0 requests  10%=-0.00ms 50%=-0.00ms 90%=-0.00ms 95%=-0.00ms 99%=-0.00ms 100%=-0.00ms
+LOAD: db [1000 connections / 666 failed / 2270 reconnects / requests min=0 avg=88 max=389] [time 60000 / start 0 / end 0]
+	/test.php?v=D: 88641 requests  10%=100.89ms 50%=101.10ms 90%=101.80ms 95%=102.72ms 99%=2235.04ms 100%=32345.59ms
+------------------------------------------------------------
+---------------------- RUN 2 [60 secs]  ----------------------
+LOAD: cpu [0 connections / 0 failed / 0 reconnects / requests min=2147483647 avg=0 max=-1] [time 60001 / start 1 / end 0]
+	/test.php?v=N: 0 requests  10%=-0.00ms 50%=-0.00ms 90%=-0.00ms 95%=-0.00ms 99%=-0.00ms 100%=-0.00ms
+LOAD: db [1000 connections / 707 failed / 2074 reconnects / requests min=0 avg=88 max=387] [time 60001 / start 1 / end 0]
+	/test.php?v=D: 88616 requests  10%=100.89ms 50%=101.10ms 90%=101.80ms 95%=102.73ms 99%=2360.84ms 100%=31879.30ms
+------------------------------------------------------------
+---------------------- RUN 3 [60 secs]  ----------------------
+LOAD: cpu [0 connections / 0 failed / 0 reconnects / requests min=2147483647 avg=0 max=-1] [time 60000 / start 0 / end 0]
+	/test.php?v=N: 0 requests  10%=-0.00ms 50%=-0.00ms 90%=-0.00ms 95%=-0.00ms 99%=-0.00ms 100%=-0.00ms
+LOAD: db [1000 connections / 801 failed / 2047 reconnects / requests min=0 avg=88 max=383] [time 60000 / start 0 / end 0]
+	/test.php?v=D: 88583 requests  10%=100.89ms 50%=101.10ms 90%=101.74ms 95%=102.59ms 99%=2492.09ms 100%=30123.70ms
+------------------------------------------------------------
+RUN SUMMARY: cpu 0 connections, db 1000 connections
+   cpu summary: 0 requests  10%=-0.00ms 50%=-0.00ms 90%=-0.00ms 95%=-0.00ms 99%=-0.00ms 100%=-0.00ms
+   db summary: 88613 requests  10%=100.89ms 50%=101.10ms 90%=101.78ms 95%=102.68ms 99%=2362.66ms 100%=31449.53ms
+------------------------------------------------------------
+Establishing all 0 connections for cpu (to avoid SYNC attack) ...  all connected
+Establshing up to 499 connections for db (to avoid SYNC attack)
+Establshing up to 999 connections for db (to avoid SYNC attack)
+Establshing up to 1499 connections for db (to avoid SYNC attack)
+Establshing up to 1999 connections for db (to avoid SYNC attack)
+Establshing up to 2499 connections for db (to avoid SYNC attack)
+Establshing up to 2999 connections for db (to avoid SYNC attack)
+Establshing up to 3499 connections for db (to avoid SYNC attack)
+Establshing up to 3999 connections for db (to avoid SYNC attack)
+Establshing up to 4499 connections for db (to avoid SYNC attack)
+Establshing up to 4999 connections for db (to avoid SYNC attack)
+Establshing up to 5499 connections for db (to avoid SYNC attack)
+Establshing up to 5999 connections for db (to avoid SYNC attack)
+Establshing up to 6499 connections for db (to avoid SYNC attack)
+Establshing up to 6999 connections for db (to avoid SYNC attack)
+Establshing up to 7499 connections for db (to avoid SYNC attack)
+Establshing up to 7999 connections for db (to avoid SYNC attack)
+Establshing up to 8499 connections for db (to avoid SYNC attack)
+Establshing up to 8999 connections for db (to avoid SYNC attack)
+Establishing all 10000 connections for db (to avoid SYNC attack) ...  all connected
+
+
+---------------------- WARM NEW THREADS (10000 connection magnitude) [60 secs]  ----------------------
+LOAD: cpu [0 connections / 0 failed / 0 reconnects / requests min=2147483647 avg=0 max=-1] [time 60000 / start 0 / end 1]
+	/test.php?v=N: 0 requests  10%=-0.00ms 50%=-0.00ms 90%=-0.00ms 95%=-0.00ms 99%=-0.00ms 100%=-0.00ms
+LOAD: db [10000 connections / 9815 failed / 24405 reconnects / requests min=0 avg=8 max=376] [time 60000 / start 0 / end 0]
+	/test.php?v=D: 86074 requests  10%=101.37ms 50%=101.87ms 90%=103.49ms 95%=107.68ms 99%=10075.05ms 100%=59317.41ms
+------------------------------------------------------------
+---------------------- RUN 1 [60 secs]  ----------------------
+LOAD: cpu [0 connections / 0 failed / 0 reconnects / requests min=2147483647 avg=0 max=-1] [time 60001 / start 0 / end 6]
+	/test.php?v=N: 0 requests  10%=-0.00ms 50%=-0.00ms 90%=-0.00ms 95%=-0.00ms 99%=-0.00ms 100%=-0.00ms
+LOAD: db [10000 connections / 9831 failed / 25247 reconnects / requests min=0 avg=8 max=363] [time 60001 / start 0 / end 8]
+	/test.php?v=D: 86649 requests  10%=101.35ms 50%=101.87ms 90%=103.34ms 95%=106.87ms 99%=1165.33ms 100%=32082.97ms
+------------------------------------------------------------
+---------------------- RUN 2 [60 secs]  ----------------------
+LOAD: cpu [0 connections / 0 failed / 0 reconnects / requests min=2147483647 avg=0 max=-1] [time 60000 / start 1 / end 1]
+	/test.php?v=N: 0 requests  10%=-0.00ms 50%=-0.00ms 90%=-0.00ms 95%=-0.00ms 99%=-0.00ms 100%=-0.00ms
+LOAD: db [10000 connections / 9836 failed / 26908 reconnects / requests min=0 avg=8 max=351] [time 60000 / start 0 / end 1]
+	/test.php?v=D: 87123 requests  10%=101.35ms 50%=101.86ms 90%=103.24ms 95%=105.96ms 99%=1307.61ms 100%=29007.20ms
+------------------------------------------------------------
+---------------------- RUN 3 [60 secs]  ----------------------
+LOAD: cpu [0 connections / 0 failed / 0 reconnects / requests min=2147483647 avg=0 max=-1] [time 60001 / start 0 / end 0]
+	/test.php?v=N: 0 requests  10%=-0.00ms 50%=-0.00ms 90%=-0.00ms 95%=-0.00ms 99%=-0.00ms 100%=-0.00ms
+LOAD: db [10000 connections / 9837 failed / 21204 reconnects / requests min=0 avg=8 max=333] [time 60001 / start 0 / end 0]
+	/test.php?v=D: 86841 requests  10%=101.34ms 50%=101.84ms 90%=103.09ms 95%=105.28ms 99%=1704.03ms 100%=62005.07ms
+------------------------------------------------------------
+RUN SUMMARY: cpu 0 connections, db 10000 connections
+   cpu summary: 0 requests  10%=-0.00ms 50%=-0.00ms 90%=-0.00ms 95%=-0.00ms 99%=-0.00ms 100%=-0.00ms
+   db summary: 86871 requests  10%=101.35ms 50%=101.86ms 90%=103.22ms 95%=106.04ms 99%=1392.33ms 100%=41031.75ms
+------------------------------------------------------------
+END: 22/08/2012 9:10:42 PM
+Tests run: 5, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 3,715.355 sec
+
+Results :
+
+Tests run: 5, Failures: 0, Errors: 0, Skipped: 0
+
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD SUCCESS
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time: 1:02:02.759s
+[INFO] Finished at: Wed Aug 22 21:10:43 WST 2012
+[INFO] Final Memory: 20M/2944M
+[INFO] ------------------------------------------------------------------------

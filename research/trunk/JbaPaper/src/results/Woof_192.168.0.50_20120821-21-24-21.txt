@@ -1,0 +1,636 @@
+Warning: JAVA_HOME environment variable is not set.
+[INFO] Scanning for projects...
+[INFO]                                                                         
+[INFO] ------------------------------------------------------------------------
+[INFO] Building Performance 2.4.0
+[INFO] ------------------------------------------------------------------------
+[INFO] 
+[INFO] --- maven-resources-plugin:2.4.3:copy-resources (Copy verifications file for use) @ performance ---
+[INFO] Using 'UTF-8' encoding to copy filtered resources.
+[INFO] Copying 1 resource
+[INFO] 
+[INFO] --- maven-antrun-plugin:1.6:run (Provide validation xml file with dependency versions) @ performance ---
+[INFO] Executing tasks
+
+main:
+     [copy] Copying 1 file to /home/daniel/tester/target/verifier
+[INFO] Executed tasks
+[INFO] 
+[INFO] --- maven-verifier-plugin:1.0:verify (Verify projects to ensure correct linkages) @ performance ---
+[INFO] 
+[INFO] --- maven-resources-plugin:2.4.3:resources (default-resources) @ performance ---
+[INFO] Using 'UTF-8' encoding to copy filtered resources.
+[INFO] Copying 3 resources
+[INFO] 
+[INFO] --- maven-compiler-plugin:2.3.2:compile (default-compile) @ performance ---
+[INFO] Nothing to compile - all classes are up to date
+[INFO] 
+[INFO] --- maven-resources-plugin:2.4.3:testResources (default-testResources) @ performance ---
+[INFO] Using 'UTF-8' encoding to copy filtered resources.
+[INFO] skip non existing resourceDirectory /home/daniel/tester/src/test/resources
+[INFO] 
+[INFO] --- maven-compiler-plugin:2.3.2:testCompile (default-testCompile) @ performance ---
+[INFO] Nothing to compile - all classes are up to date
+[INFO] 
+[INFO] --- maven-surefire-plugin:2.6:test (default-test) @ performance ---
+[INFO] Surefire report directory: /home/daniel/tester/target/surefire-reports
+
+-------------------------------------------------------
+ T E S T S
+-------------------------------------------------------
+Running net.officefloor.tutorials.performance.nio.test.WoofNioTest
+
+
+
+===============================================================
+Starting WoofNioTest.testPerformance_SameLoad with interval of 60 secs, cpu seed=1, db seed=1
+===============================================================
+START: 21/08/2012 9:24:27 PM
+Establishing all 1 connections for cpu (to avoid SYNC attack) ...  all connected
+Establishing all 1 connections for db (to avoid SYNC attack) ...  all connected
+---------------------- STARTUP [300 secs]  ----------------------
+LOAD: cpu [1 connections / 0 failed / 15178 reconnects / requests min=1502718 avg=1502718 max=1502718] [time 300000 / start 0 / end 0]
+	/test.php?v=N: 1502718 requests  10%=0.14ms 50%=0.15ms 90%=0.17ms 95%=0.22ms 99%=0.65ms 100%=1023.95ms
+LOAD: db [1 connections / 0 failed / 29 reconnects / requests min=2951 avg=2951 max=2951] [time 300000 / start 0 / end 0]
+	/test.php?v=D: 2951 requests  10%=100.43ms 50%=100.52ms 90%=101.17ms 95%=104.13ms 99%=117.33ms 100%=1155.32ms
+------------------------------------------------------------
+
+
+---------------------- WARM NEW THREADS (1 connection magnitude) [60 secs]  ----------------------
+LOAD: cpu [1 connections / 0 failed / 3118 reconnects / requests min=308615 avg=308615 max=308615] [time 60000 / start 0 / end 0]
+	/test.php?v=N: 308615 requests  10%=0.14ms 50%=0.15ms 90%=0.17ms 95%=0.21ms 99%=0.42ms 100%=33.80ms
+LOAD: db [1 connections / 0 failed / 6 reconnects / requests min=593 avg=593 max=593] [time 60000 / start 0 / end 0]
+	/test.php?v=D: 593 requests  10%=100.42ms 50%=100.51ms 90%=101.06ms 95%=102.15ms 99%=125.76ms 100%=2516.37ms
+------------------------------------------------------------
+---------------------- RUN 1 [60 secs]  ----------------------
+LOAD: cpu [1 connections / 0 failed / 3135 reconnects / requests min=310385 avg=310385 max=310385] [time 60000 / start 0 / end 0]
+	/test.php?v=N: 310385 requests  10%=0.14ms 50%=0.15ms 90%=0.17ms 95%=0.21ms 99%=0.38ms 100%=31.16ms
+LOAD: db [1 connections / 0 failed / 6 reconnects / requests min=593 avg=593 max=593] [time 60000 / start 0 / end 0]
+	/test.php?v=D: 593 requests  10%=100.43ms 50%=100.52ms 90%=101.10ms 95%=103.44ms 99%=126.98ms 100%=474.39ms
+------------------------------------------------------------
+---------------------- RUN 2 [60 secs]  ----------------------
+LOAD: cpu [1 connections / 0 failed / 3152 reconnects / requests min=312011 avg=312011 max=312011] [time 60001 / start 1 / end 0]
+	/test.php?v=N: 312011 requests  10%=0.14ms 50%=0.15ms 90%=0.17ms 95%=0.21ms 99%=0.38ms 100%=83.84ms
+LOAD: db [1 connections / 0 failed / 6 reconnects / requests min=594 avg=594 max=594] [time 60001 / start 1 / end 0]
+	/test.php?v=D: 594 requests  10%=100.43ms 50%=100.52ms 90%=101.02ms 95%=101.71ms 99%=119.62ms 100%=403.77ms
+------------------------------------------------------------
+---------------------- RUN 3 [60 secs]  ----------------------
+LOAD: cpu [1 connections / 0 failed / 3146 reconnects / requests min=311465 avg=311465 max=311465] [time 60000 / start 0 / end 2]
+	/test.php?v=N: 311465 requests  10%=0.14ms 50%=0.15ms 90%=0.17ms 95%=0.21ms 99%=0.39ms 100%=366.85ms
+LOAD: db [1 connections / 0 failed / 6 reconnects / requests min=594 avg=594 max=594] [time 60000 / start 0 / end 0]
+	/test.php?v=D: 594 requests  10%=100.44ms 50%=100.52ms 90%=100.92ms 95%=102.18ms 99%=121.25ms 100%=391.76ms
+------------------------------------------------------------
+RUN SUMMARY: cpu 1 connections, db 1 connections
+   cpu summary: 311287 requests  10%=0.14ms 50%=0.15ms 90%=0.17ms 95%=0.21ms 99%=0.38ms 100%=160.62ms
+   db summary: 593 requests  10%=100.43ms 50%=100.52ms 90%=101.01ms 95%=102.44ms 99%=122.62ms 100%=423.31ms
+------------------------------------------------------------
+Establishing all 10 connections for cpu (to avoid SYNC attack) ...  all connected
+Establishing all 10 connections for db (to avoid SYNC attack) ...  all connected
+
+
+---------------------- WARM NEW THREADS (10 connection magnitude) [60 secs]  ----------------------
+LOAD: cpu [10 connections / 0 failed / 7799 reconnects / requests min=73091 avg=77259 max=80982] [time 60000 / start 0 / end 0]
+	/test.php?v=N: 772596 requests  10%=0.18ms 50%=0.46ms 90%=1.17ms 95%=1.82ms 99%=8.32ms 100%=378.28ms
+LOAD: db [10 connections / 0 failed / 51 reconnects / requests min=581 avg=582 max=584] [time 60000 / start 0 / end 0]
+	/test.php?v=D: 5823 requests  10%=100.59ms 50%=101.26ms 90%=107.25ms 95%=110.09ms 99%=122.18ms 100%=380.11ms
+------------------------------------------------------------
+---------------------- RUN 1 [60 secs]  ----------------------
+LOAD: cpu [10 connections / 0 failed / 7810 reconnects / requests min=75287 avg=77321 max=79461] [time 60001 / start 1 / end 0]
+	/test.php?v=N: 773217 requests  10%=0.18ms 50%=0.47ms 90%=1.18ms 95%=1.81ms 99%=7.93ms 100%=1006.49ms
+LOAD: db [10 connections / 0 failed / 60 reconnects / requests min=583 avg=583 max=585] [time 60001 / start 0 / end 0]
+	/test.php?v=D: 5839 requests  10%=100.61ms 50%=101.30ms 90%=106.89ms 95%=109.96ms 99%=123.18ms 100%=1084.06ms
+------------------------------------------------------------
+---------------------- RUN 2 [60 secs]  ----------------------
+LOAD: cpu [10 connections / 0 failed / 7747 reconnects / requests min=74696 avg=76689 max=79589] [time 60001 / start 3 / end 0]
+	/test.php?v=N: 766890 requests  10%=0.19ms 50%=0.47ms 90%=1.15ms 95%=1.81ms 99%=8.60ms 100%=1009.49ms
+LOAD: db [10 connections / 0 failed / 60 reconnects / requests min=585 avg=585 max=587] [time 60001 / start 3 / end 0]
+	/test.php?v=D: 5858 requests  10%=100.57ms 50%=101.16ms 90%=106.61ms 95%=109.67ms 99%=115.75ms 100%=1109.84ms
+------------------------------------------------------------
+---------------------- RUN 3 [60 secs]  ----------------------
+LOAD: cpu [10 connections / 0 failed / 7639 reconnects / requests min=74174 avg=75612 max=77914] [time 60000 / start 0 / end 0]
+	/test.php?v=N: 756122 requests  10%=0.18ms 50%=0.47ms 90%=1.18ms 95%=1.88ms 99%=8.91ms 100%=1015.95ms
+LOAD: db [10 connections / 0 failed / 60 reconnects / requests min=583 avg=584 max=587] [time 60000 / start 0 / end 0]
+	/test.php?v=D: 5843 requests  10%=100.54ms 50%=101.17ms 90%=107.50ms 95%=110.01ms 99%=123.21ms 100%=1073.54ms
+------------------------------------------------------------
+RUN SUMMARY: cpu 10 connections, db 10 connections
+   cpu summary: 765409 requests  10%=0.19ms 50%=0.47ms 90%=1.17ms 95%=1.83ms 99%=8.48ms 100%=1010.64ms
+   db summary: 5846 requests  10%=100.57ms 50%=101.21ms 90%=107.00ms 95%=109.88ms 99%=120.71ms 100%=1089.15ms
+------------------------------------------------------------
+Establishing all 100 connections for cpu (to avoid SYNC attack) ...  all connected
+Establishing all 100 connections for db (to avoid SYNC attack) ...  all connected
+
+
+---------------------- WARM NEW THREADS (100 connection magnitude) [60 secs]  ----------------------
+LOAD: cpu [100 connections / 0 failed / 7129 reconnects / requests min=6131 avg=7103 max=8203] [time 60000 / start 0 / end 0]
+	/test.php?v=N: 710363 requests  10%=1.23ms 50%=6.14ms 90%=16.82ms 95%=21.09ms 99%=35.59ms 100%=1009.90ms
+LOAD: db [100 connections / 0 failed / 506 reconnects / requests min=518 avg=538 max=556] [time 60000 / start 0 / end 0]
+	/test.php?v=D: 53802 requests  10%=101.77ms 50%=108.43ms 90%=123.56ms 95%=131.67ms 99%=155.26ms 100%=1107.28ms
+------------------------------------------------------------
+---------------------- RUN 1 [60 secs]  ----------------------
+LOAD: cpu [100 connections / 0 failed / 7165 reconnects / requests min=6004 avg=7090 max=8679] [time 60001 / start 1 / end 0]
+	/test.php?v=N: 709008 requests  10%=1.99ms 50%=6.47ms 90%=16.25ms 95%=20.67ms 99%=36.98ms 100%=792.88ms
+LOAD: db [100 connections / 0 failed / 510 reconnects / requests min=522 avg=538 max=553] [time 60001 / start 0 / end 0]
+	/test.php?v=D: 53820 requests  10%=102.05ms 50%=108.55ms 90%=123.51ms 95%=132.46ms 99%=158.30ms 100%=892.50ms
+------------------------------------------------------------
+---------------------- RUN 2 [60 secs]  ----------------------
+LOAD: cpu [100 connections / 0 failed / 7361 reconnects / requests min=6168 avg=7288 max=8476] [time 60001 / start 0 / end 0]
+	/test.php?v=N: 728887 requests  10%=1.63ms 50%=6.02ms 90%=16.42ms 95%=21.46ms 99%=37.50ms 100%=817.36ms
+LOAD: db [100 connections / 0 failed / 584 reconnects / requests min=527 avg=538 max=552] [time 60001 / start 2 / end 0]
+	/test.php?v=D: 53814 requests  10%=102.10ms 50%=108.46ms 90%=124.52ms 95%=133.83ms 99%=157.00ms 100%=904.41ms
+------------------------------------------------------------
+---------------------- RUN 3 [60 secs]  ----------------------
+LOAD: cpu [100 connections / 0 failed / 7440 reconnects / requests min=6267 avg=7367 max=8850] [time 60000 / start 0 / end 0]
+	/test.php?v=N: 736757 requests  10%=1.37ms 50%=5.89ms 90%=16.11ms 95%=20.26ms 99%=35.24ms 100%=816.73ms
+LOAD: db [100 connections / 0 failed / 512 reconnects / requests min=517 avg=538 max=559] [time 60000 / start 0 / end 0]
+	/test.php?v=D: 53876 requests  10%=102.02ms 50%=108.56ms 90%=124.06ms 95%=131.47ms 99%=154.14ms 100%=925.90ms
+------------------------------------------------------------
+RUN SUMMARY: cpu 100 connections, db 100 connections
+   cpu summary: 724884 requests  10%=1.67ms 50%=6.13ms 90%=16.26ms 95%=20.80ms 99%=36.57ms 100%=808.99ms
+   db summary: 53836 requests  10%=102.06ms 50%=108.52ms 90%=124.03ms 95%=132.59ms 99%=156.48ms 100%=907.60ms
+------------------------------------------------------------
+Establshing up to 499 connections for cpu (to avoid SYNC attack)
+Establishing all 1000 connections for cpu (to avoid SYNC attack) ...  all connected
+Establshing up to 499 connections for db (to avoid SYNC attack)
+Establishing all 1000 connections for db (to avoid SYNC attack) ...  all connected
+
+
+---------------------- WARM NEW THREADS (1000 connection magnitude) [60 secs]  ----------------------
+LOAD: cpu [1000 connections / 0 failed / 6759 reconnects / requests min=497 avg=706 max=1417] [time 60000 / start 0 / end 0]
+	/test.php?v=N: 706599 requests  10%=21.25ms 50%=71.88ms 90%=155.41ms 95%=198.84ms 99%=368.78ms 100%=1157.97ms
+LOAD: db [1000 connections / 0 failed / 97 reconnects / requests min=76 avg=83 max=91] [time 60000 / start 0 / end 0]
+	/test.php?v=D: 83295 requests  10%=594.73ms 50%=705.71ms 90%=845.14ms 95%=920.26ms 99%=1126.09ms 100%=1631.95ms
+------------------------------------------------------------
+---------------------- RUN 1 [60 secs]  ----------------------
+LOAD: cpu [1000 connections / 0 failed / 6791 reconnects / requests min=448 avg=681 max=1545] [time 60000 / start 0 / end 0]
+	/test.php?v=N: 681048 requests  10%=8.94ms 50%=66.47ms 90%=193.84ms 95%=238.04ms 99%=398.54ms 100%=952.41ms
+LOAD: db [1000 connections / 0 failed / 1322 reconnects / requests min=87 avg=109 max=129] [time 60000 / start 0 / end 0]
+	/test.php?v=D: 109338 requests  10%=420.55ms 50%=528.97ms 90%=717.24ms 95%=797.13ms 99%=993.44ms 100%=1438.82ms
+------------------------------------------------------------
+---------------------- RUN 2 [60 secs]  ----------------------
+LOAD: cpu [1000 connections / 0 failed / 7002 reconnects / requests min=422 avg=681 max=1874] [time 60000 / start 0 / end 1]
+	/test.php?v=N: 681879 requests  10%=8.58ms 50%=70.10ms 90%=212.43ms 95%=261.52ms 99%=356.36ms 100%=970.23ms
+LOAD: db [1000 connections / 0 failed / 1262 reconnects / requests min=90 avg=110 max=132] [time 60000 / start 0 / end 1]
+	/test.php?v=D: 110409 requests  10%=414.30ms 50%=527.82ms 90%=704.92ms 95%=776.55ms 99%=1029.95ms 100%=1477.70ms
+------------------------------------------------------------
+---------------------- RUN 3 [60 secs]  ----------------------
+LOAD: cpu [1000 connections / 0 failed / 6868 reconnects / requests min=479 avg=688 max=1355] [time 60000 / start 0 / end 1]
+	/test.php?v=N: 688401 requests  10%=14.73ms 50%=69.16ms 90%=187.27ms 95%=228.02ms 99%=350.66ms 100%=906.72ms
+LOAD: db [1000 connections / 0 failed / 1199 reconnects / requests min=92 avg=110 max=127] [time 60000 / start 0 / end 0]
+	/test.php?v=D: 110765 requests  10%=433.51ms 50%=524.89ms 90%=690.32ms 95%=751.34ms 99%=935.08ms 100%=1283.69ms
+------------------------------------------------------------
+RUN SUMMARY: cpu 1000 connections, db 1000 connections
+   cpu summary: 683776 requests  10%=10.75ms 50%=68.58ms 90%=197.85ms 95%=242.53ms 99%=368.52ms 100%=943.12ms
+   db summary: 110170 requests  10%=422.79ms 50%=527.23ms 90%=704.16ms 95%=775.01ms 99%=986.16ms 100%=1400.07ms
+------------------------------------------------------------
+Establshing up to 499 connections for cpu (to avoid SYNC attack)
+Establshing up to 999 connections for cpu (to avoid SYNC attack)
+Establshing up to 1499 connections for cpu (to avoid SYNC attack)
+Establshing up to 1999 connections for cpu (to avoid SYNC attack)
+Establshing up to 2499 connections for cpu (to avoid SYNC attack)
+Establshing up to 2999 connections for cpu (to avoid SYNC attack)
+Establshing up to 3499 connections for cpu (to avoid SYNC attack)
+Establshing up to 3999 connections for cpu (to avoid SYNC attack)
+Establshing up to 4499 connections for cpu (to avoid SYNC attack)
+Establshing up to 4999 connections for cpu (to avoid SYNC attack)
+Establshing up to 5499 connections for cpu (to avoid SYNC attack)
+Establshing up to 5999 connections for cpu (to avoid SYNC attack)
+Establshing up to 6499 connections for cpu (to avoid SYNC attack)
+Establshing up to 6999 connections for cpu (to avoid SYNC attack)
+Establshing up to 7499 connections for cpu (to avoid SYNC attack)
+Establshing up to 7999 connections for cpu (to avoid SYNC attack)
+Establshing up to 8499 connections for cpu (to avoid SYNC attack)
+Establshing up to 8999 connections for cpu (to avoid SYNC attack)
+Establishing all 10000 connections for cpu (to avoid SYNC attack) ...  all connected
+Establshing up to 499 connections for db (to avoid SYNC attack)
+Establshing up to 999 connections for db (to avoid SYNC attack)
+Establshing up to 1499 connections for db (to avoid SYNC attack)
+Establshing up to 1999 connections for db (to avoid SYNC attack)
+Establshing up to 2499 connections for db (to avoid SYNC attack)
+Establshing up to 2999 connections for db (to avoid SYNC attack)
+Establshing up to 3499 connections for db (to avoid SYNC attack)
+Establshing up to 3999 connections for db (to avoid SYNC attack)
+Establshing up to 4499 connections for db (to avoid SYNC attack)
+Establshing up to 4999 connections for db (to avoid SYNC attack)
+Establshing up to 5499 connections for db (to avoid SYNC attack)
+Establshing up to 5999 connections for db (to avoid SYNC attack)
+Establshing up to 6499 connections for db (to avoid SYNC attack)
+Establshing up to 6999 connections for db (to avoid SYNC attack)
+Establshing up to 7499 connections for db (to avoid SYNC attack)
+Establshing up to 7999 connections for db (to avoid SYNC attack)
+Establshing up to 8499 connections for db (to avoid SYNC attack)
+Establshing up to 8999 connections for db (to avoid SYNC attack)
+Establishing all 10000 connections for db (to avoid SYNC attack) ...  all connected
+
+
+---------------------- WARM NEW THREADS (10000 connection magnitude) [60 secs]  ----------------------
+LOAD: cpu [10000 connections / 0 failed / 556 reconnects / requests min=51 avg=56 max=63] [time 60000 / start 0 / end 0]
+	/test.php?v=N: 565802 requests  10%=490.86ms 50%=932.50ms 90%=1748.49ms 95%=2036.78ms 99%=2717.89ms 100%=3958.57ms
+LOAD: db [10000 connections / 0 failed / 127 reconnects / requests min=7 avg=9 max=12] [time 60000 / start 2 / end 0]
+	/test.php?v=D: 91487 requests  10%=5100.76ms 50%=6332.02ms 90%=7585.14ms 95%=7938.75ms 99%=9261.50ms 100%=10007.26ms
+------------------------------------------------------------
+---------------------- RUN 1 [60 secs]  ----------------------
+LOAD: cpu [10000 connections / 0 failed / 9623 reconnects / requests min=52 avg=56 max=62] [time 60000 / start 1 / end 1]
+	/test.php?v=N: 568320 requests  10%=598.93ms 50%=942.63ms 90%=1702.55ms 95%=1931.70ms 99%=2439.89ms 100%=4526.57ms
+LOAD: db [10000 connections / 0 failed / 43 reconnects / requests min=8 avg=9 max=11] [time 60000 / start 0 / end 1]
+	/test.php?v=D: 94991 requests  10%=5624.80ms 50%=6336.66ms 90%=7150.37ms 95%=7475.28ms 99%=8075.68ms 100%=8579.80ms
+------------------------------------------------------------
+---------------------- RUN 2 [60 secs]  ----------------------
+LOAD: cpu [10000 connections / 0 failed / 513 reconnects / requests min=48 avg=54 max=61] [time 60009 / start 0 / end 0]
+	/test.php?v=N: 548875 requests  10%=608.25ms 50%=1039.32ms 90%=1675.23ms 95%=1859.06ms 99%=2184.95ms 100%=3389.18ms
+LOAD: db [10000 connections / 0 failed / 20 reconnects / requests min=8 avg=9 max=11] [time 60009 / start 0 / end 0]
+	/test.php?v=D: 95719 requests  10%=5552.99ms 50%=6289.80ms 90%=7231.70ms 95%=7501.44ms 99%=8244.36ms 100%=8729.63ms
+------------------------------------------------------------
+---------------------- RUN 3 [60 secs]  ----------------------
+LOAD: cpu [10000 connections / 0 failed / 9557 reconnects / requests min=40 avg=53 max=65] [time 60000 / start 0 / end 0]
+	/test.php?v=N: 536408 requests  10%=524.86ms 50%=967.22ms 90%=1885.90ms 95%=2248.73ms 99%=2902.05ms 100%=6235.34ms
+LOAD: db [10000 connections / 0 failed / 15 reconnects / requests min=8 avg=9 max=11] [time 60000 / start 0 / end 0]
+	/test.php?v=D: 94065 requests  10%=5500.55ms 50%=6348.74ms 90%=7483.40ms 95%=7763.08ms 99%=9120.43ms 100%=9434.72ms
+------------------------------------------------------------
+RUN SUMMARY: cpu 10000 connections, db 10000 connections
+   cpu summary: 551201 requests  10%=577.34ms 50%=983.05ms 90%=1754.56ms 95%=2013.16ms 99%=2508.96ms 100%=4717.03ms
+   db summary: 94925 requests  10%=5559.45ms 50%=6325.07ms 90%=7288.49ms 95%=7579.94ms 99%=8480.15ms 100%=8914.72ms
+------------------------------------------------------------
+END: 21/08/2012 9:49:44 PM
+
+
+
+===============================================================
+Starting WoofNioTest.testPerformance_MagnitudeMoreCpu with interval of 60 secs, cpu seed=1000, db seed=100
+===============================================================
+START: 21/08/2012 9:49:45 PM
+Establshing up to 499 connections for cpu (to avoid SYNC attack)
+Establshing up to 999 connections for cpu (to avoid SYNC attack)
+Establishing all 1000 connections for cpu (to avoid SYNC attack) ...  all connected
+Establishing all 100 connections for db (to avoid SYNC attack) ...  all connected
+
+
+---------------------- WARM NEW THREADS (1000 connection magnitude) [60 secs]  ----------------------
+LOAD: cpu [1000 connections / 0 failed / 7118 reconnects / requests min=567 avg=749 max=1103] [time 60000 / start 0 / end 0]
+	/test.php?v=N: 749087 requests  10%=28.01ms 50%=63.39ms 90%=138.51ms 95%=179.13ms 99%=378.14ms 100%=794.20ms
+LOAD: db [100 connections / 0 failed / 261 reconnects / requests min=245 avg=305 max=391] [time 60000 / start 0 / end 0]
+	/test.php?v=D: 30594 requests  10%=120.36ms 50%=170.10ms 90%=283.46ms 95%=358.76ms 99%=595.29ms 100%=995.88ms
+------------------------------------------------------------
+---------------------- RUN 1 [60 secs]  ----------------------
+LOAD: cpu [1000 connections / 0 failed / 7638 reconnects / requests min=571 avg=758 max=1222] [time 60001 / start 1 / end 0]
+	/test.php?v=N: 758810 requests  10%=29.63ms 50%=69.59ms 90%=133.48ms 95%=168.82ms 99%=283.45ms 100%=998.26ms
+LOAD: db [100 connections / 0 failed / 317 reconnects / requests min=255 avg=319 max=403] [time 60001 / start 1 / end 0]
+	/test.php?v=D: 31975 requests  10%=120.76ms 50%=174.08ms 90%=263.38ms 95%=315.12ms 99%=518.28ms 100%=1128.12ms
+------------------------------------------------------------
+---------------------- RUN 2 [60 secs]  ----------------------
+LOAD: cpu [1000 connections / 0 failed / 7784 reconnects / requests min=489 avg=779 max=1515] [time 60002 / start 0 / end 0]
+	/test.php?v=N: 779937 requests  10%=9.80ms 50%=66.44ms 90%=149.62ms 95%=190.44ms 99%=391.03ms 100%=1086.37ms
+LOAD: db [100 connections / 0 failed / 339 reconnects / requests min=229 avg=330 max=471] [time 60002 / start 0 / end 0]
+	/test.php?v=D: 33037 requests  10%=109.38ms 50%=157.85ms 90%=273.67ms 95%=332.60ms 99%=609.84ms 100%=1117.62ms
+------------------------------------------------------------
+---------------------- RUN 3 [60 secs]  ----------------------
+LOAD: cpu [1000 connections / 0 failed / 7754 reconnects / requests min=597 avg=748 max=930] [time 60000 / start 0 / end 1]
+	/test.php?v=N: 748788 requests  10%=35.56ms 50%=67.09ms 90%=128.10ms 95%=157.05ms 99%=357.71ms 100%=1025.28ms
+LOAD: db [100 connections / 0 failed / 317 reconnects / requests min=269 avg=317 max=387] [time 60000 / start 0 / end 0]
+	/test.php?v=D: 31729 requests  10%=124.86ms 50%=172.01ms 90%=264.26ms 95%=313.79ms 99%=548.53ms 100%=1347.90ms
+------------------------------------------------------------
+RUN SUMMARY: cpu 1000 connections, db 100 connections
+   cpu summary: 762511 requests  10%=25.00ms 50%=67.70ms 90%=137.07ms 95%=172.11ms 99%=344.06ms 100%=1036.64ms
+   db summary: 32247 requests  10%=118.33ms 50%=167.98ms 90%=267.10ms 95%=320.50ms 99%=558.88ms 100%=1197.88ms
+------------------------------------------------------------
+Establshing up to 499 connections for cpu (to avoid SYNC attack)
+Establshing up to 999 connections for cpu (to avoid SYNC attack)
+Establshing up to 1499 connections for cpu (to avoid SYNC attack)
+Establshing up to 1999 connections for cpu (to avoid SYNC attack)
+Establshing up to 2499 connections for cpu (to avoid SYNC attack)
+Establshing up to 2999 connections for cpu (to avoid SYNC attack)
+Establshing up to 3499 connections for cpu (to avoid SYNC attack)
+Establshing up to 3999 connections for cpu (to avoid SYNC attack)
+Establshing up to 4499 connections for cpu (to avoid SYNC attack)
+Establshing up to 4999 connections for cpu (to avoid SYNC attack)
+Establshing up to 5499 connections for cpu (to avoid SYNC attack)
+Establshing up to 5999 connections for cpu (to avoid SYNC attack)
+Establshing up to 6499 connections for cpu (to avoid SYNC attack)
+Establshing up to 6999 connections for cpu (to avoid SYNC attack)
+Establshing up to 7499 connections for cpu (to avoid SYNC attack)
+Establshing up to 7999 connections for cpu (to avoid SYNC attack)
+Establshing up to 8499 connections for cpu (to avoid SYNC attack)
+Establshing up to 8999 connections for cpu (to avoid SYNC attack)
+Establishing all 10000 connections for cpu (to avoid SYNC attack) ...  all connected
+Establshing up to 499 connections for db (to avoid SYNC attack)
+Establishing all 1000 connections for db (to avoid SYNC attack) ...  all connected
+
+
+---------------------- WARM NEW THREADS (10000 connection magnitude) [60 secs]  ----------------------
+LOAD: cpu [10000 connections / 0 failed / 537 reconnects / requests min=61 avg=66 max=73] [time 60000 / start 0 / end 0]
+	/test.php?v=N: 661007 requests  10%=538.06ms 50%=855.34ms 90%=1290.64ms 95%=1455.89ms 99%=2109.31ms 100%=4232.66ms
+LOAD: db [1000 connections / 0 failed / 63 reconnects / requests min=31 avg=59 max=72] [time 60000 / start 0 / end 0]
+	/test.php?v=D: 59675 requests  10%=567.63ms 50%=895.91ms 90%=1546.05ms 95%=1875.62ms 99%=2456.33ms 100%=4271.24ms
+------------------------------------------------------------
+---------------------- RUN 1 [60 secs]  ----------------------
+LOAD: cpu [10000 connections / 0 failed / 9665 reconnects / requests min=56 avg=63 max=69] [time 60010 / start 0 / end 0]
+	/test.php?v=N: 634139 requests  10%=610.84ms 50%=925.50ms 90%=1264.70ms 95%=1384.81ms 99%=1795.79ms 100%=3909.27ms
+LOAD: db [1000 connections / 0 failed / 810 reconnects / requests min=30 avg=57 max=69] [time 60010 / start 0 / end 0]
+	/test.php?v=D: 57384 requests  10%=631.71ms 50%=972.55ms 90%=1545.08ms 95%=1958.38ms 99%=2544.85ms 100%=4111.87ms
+------------------------------------------------------------
+---------------------- RUN 2 [60 secs]  ----------------------
+LOAD: cpu [10000 connections / 0 failed / 5209 reconnects / requests min=53 avg=67 max=84] [time 60011 / start 0 / end 0]
+	/test.php?v=N: 678546 requests  10%=486.93ms 50%=768.86ms 90%=1471.42ms 95%=1803.53ms 99%=2354.84ms 100%=3853.99ms
+LOAD: db [1000 connections / 0 failed / 443 reconnects / requests min=31 avg=59 max=81] [time 60011 / start 0 / end 0]
+	/test.php?v=D: 59964 requests  10%=493.73ms 50%=886.79ms 90%=1759.21ms 95%=2092.71ms 99%=2650.13ms 100%=4577.16ms
+------------------------------------------------------------
+---------------------- RUN 3 [60 secs]  ----------------------
+LOAD: cpu [10000 connections / 0 failed / 5202 reconnects / requests min=56 avg=68 max=84] [time 60000 / start 0 / end 0]
+	/test.php?v=N: 686075 requests  10%=481.66ms 50%=747.46ms 90%=1470.03ms 95%=1849.28ms 99%=2343.77ms 100%=4116.37ms
+LOAD: db [1000 connections / 0 failed / 559 reconnects / requests min=33 avg=61 max=84] [time 60000 / start 0 / end 0]
+	/test.php?v=D: 61115 requests  10%=493.72ms 50%=808.99ms 90%=1738.55ms 95%=2105.42ms 99%=2606.51ms 100%=4360.14ms
+------------------------------------------------------------
+RUN SUMMARY: cpu 10000 connections, db 1000 connections
+   cpu summary: 666253 requests  10%=526.48ms 50%=813.94ms 90%=1402.05ms 95%=1679.21ms 99%=2164.80ms 100%=3959.88ms
+   db summary: 59487 requests  10%=539.72ms 50%=889.44ms 90%=1680.95ms 95%=2052.17ms 99%=2600.50ms 100%=4349.72ms
+------------------------------------------------------------
+END: 21/08/2012 9:57:57 PM
+
+
+
+===============================================================
+Starting WoofNioTest.testPerformance_MagnitudeMoreDatabase with interval of 60 secs, cpu seed=100, db seed=1000
+===============================================================
+START: 21/08/2012 9:57:58 PM
+Establishing all 100 connections for cpu (to avoid SYNC attack) ...  all connected
+Establshing up to 499 connections for db (to avoid SYNC attack)
+Establshing up to 999 connections for db (to avoid SYNC attack)
+Establishing all 1000 connections for db (to avoid SYNC attack) ...  all connected
+
+
+---------------------- WARM NEW THREADS (1000 connection magnitude) [60 secs]  ----------------------
+LOAD: cpu [100 connections / 0 failed / 6451 reconnects / requests min=4973 avg=6436 max=7572] [time 60000 / start 0 / end 0]
+	/test.php?v=N: 643676 requests  10%=0.86ms 50%=5.93ms 90%=20.00ms 95%=25.68ms 99%=56.85ms 100%=210.62ms
+LOAD: db [1000 connections / 0 failed / 862 reconnects / requests min=97 avg=99 max=104] [time 60000 / start 0 / end 0]
+	/test.php?v=D: 99984 requests  10%=520.12ms 50%=600.74ms 90%=672.13ms 95%=701.80ms 99%=780.01ms 100%=886.40ms
+------------------------------------------------------------
+---------------------- RUN 1 [60 secs]  ----------------------
+LOAD: cpu [100 connections / 0 failed / 6440 reconnects / requests min=5047 avg=6378 max=7936] [time 60001 / start 0 / end 0]
+	/test.php?v=N: 637888 requests  10%=0.87ms 50%=6.06ms 90%=20.21ms 95%=26.76ms 99%=57.13ms 100%=729.58ms
+LOAD: db [1000 connections / 0 failed / 958 reconnects / requests min=96 avg=99 max=103] [time 60001 / start 0 / end 0]
+	/test.php?v=D: 99360 requests  10%=516.21ms 50%=601.42ms 90%=733.39ms 95%=774.45ms 99%=837.43ms 100%=1253.18ms
+------------------------------------------------------------
+---------------------- RUN 2 [60 secs]  ----------------------
+LOAD: cpu [100 connections / 0 failed / 6496 reconnects / requests min=4932 avg=6435 max=7991] [time 60000 / start 0 / end 1]
+	/test.php?v=N: 643569 requests  10%=0.88ms 50%=6.02ms 90%=18.43ms 95%=25.03ms 99%=66.28ms 100%=1022.07ms
+LOAD: db [1000 connections / 0 failed / 1180 reconnects / requests min=105 avg=108 max=112] [time 60000 / start 0 / end 1]
+	/test.php?v=D: 108522 requests  10%=505.33ms 50%=531.94ms 90%=609.82ms 95%=705.65ms 99%=1222.03ms 100%=1545.35ms
+------------------------------------------------------------
+---------------------- RUN 3 [60 secs]  ----------------------
+LOAD: cpu [100 connections / 0 failed / 6687 reconnects / requests min=5390 avg=6610 max=8399] [time 60001 / start 1 / end 0]
+	/test.php?v=N: 661052 requests  10%=1.29ms 50%=6.06ms 90%=18.53ms 95%=24.54ms 99%=54.73ms 100%=731.38ms
+LOAD: db [1000 connections / 0 failed / 1000 reconnects / requests min=111 avg=114 max=117] [time 60001 / start 1 / end 0]
+	/test.php?v=D: 114323 requests  10%=503.62ms 50%=522.86ms 90%=566.35ms 95%=580.24ms 99%=648.16ms 100%=1267.32ms
+------------------------------------------------------------
+RUN SUMMARY: cpu 100 connections, db 1000 connections
+   cpu summary: 647503 requests  10%=1.01ms 50%=6.05ms 90%=19.06ms 95%=25.44ms 99%=59.38ms 100%=827.68ms
+   db summary: 107401 requests  10%=508.39ms 50%=552.07ms 90%=636.52ms 95%=686.78ms 99%=902.54ms 100%=1355.28ms
+------------------------------------------------------------
+Establshing up to 499 connections for cpu (to avoid SYNC attack)
+Establishing all 1000 connections for cpu (to avoid SYNC attack) ...  all connected
+Establshing up to 499 connections for db (to avoid SYNC attack)
+Establshing up to 999 connections for db (to avoid SYNC attack)
+Establshing up to 1499 connections for db (to avoid SYNC attack)
+Establshing up to 1999 connections for db (to avoid SYNC attack)
+Establshing up to 2499 connections for db (to avoid SYNC attack)
+Establshing up to 2999 connections for db (to avoid SYNC attack)
+Establshing up to 3499 connections for db (to avoid SYNC attack)
+Establshing up to 3999 connections for db (to avoid SYNC attack)
+Establshing up to 4499 connections for db (to avoid SYNC attack)
+Establshing up to 4999 connections for db (to avoid SYNC attack)
+Establshing up to 5499 connections for db (to avoid SYNC attack)
+Establshing up to 5999 connections for db (to avoid SYNC attack)
+Establshing up to 6499 connections for db (to avoid SYNC attack)
+Establshing up to 6999 connections for db (to avoid SYNC attack)
+Establshing up to 7499 connections for db (to avoid SYNC attack)
+Establshing up to 7999 connections for db (to avoid SYNC attack)
+Establshing up to 8499 connections for db (to avoid SYNC attack)
+Establshing up to 8999 connections for db (to avoid SYNC attack)
+Establishing all 10000 connections for db (to avoid SYNC attack) ...  all connected
+
+
+---------------------- WARM NEW THREADS (10000 connection magnitude) [60 secs]  ----------------------
+LOAD: cpu [1000 connections / 0 failed / 5171 reconnects / requests min=415 avg=563 max=1018] [time 60000 / start 0 / end 0]
+	/test.php?v=N: 563366 requests  10%=21.31ms 50%=75.15ms 90%=225.46ms 95%=284.58ms 99%=685.88ms 100%=4092.35ms
+LOAD: db [10000 connections / 0 failed / 0 reconnects / requests min=9 avg=9 max=11] [time 60000 / start 0 / end 0]
+	/test.php?v=D: 97836 requests  10%=5433.48ms 50%=6046.61ms 90%=6610.50ms 95%=6682.56ms 99%=6829.06ms 100%=7167.42ms
+------------------------------------------------------------
+---------------------- RUN 1 [60 secs]  ----------------------
+LOAD: cpu [1000 connections / 0 failed / 5648 reconnects / requests min=302 avg=555 max=1499] [time 60000 / start 0 / end 0]
+	/test.php?v=N: 555917 requests  10%=3.15ms 50%=65.38ms 90%=271.29ms 95%=339.07ms 99%=730.76ms 100%=1513.59ms
+LOAD: db [10000 connections / 0 failed / 0 reconnects / requests min=9 avg=9 max=11] [time 60000 / start 0 / end 0]
+	/test.php?v=D: 99452 requests  10%=5762.95ms 50%=5962.17ms 90%=6599.02ms 95%=6710.29ms 99%=6850.38ms 100%=7152.55ms
+------------------------------------------------------------
+---------------------- RUN 2 [60 secs]  ----------------------
+LOAD: cpu [1000 connections / 0 failed / 5770 reconnects / requests min=379 avg=574 max=1065] [time 60000 / start 0 / end 1]
+	/test.php?v=N: 574406 requests  10%=23.25ms 50%=63.00ms 90%=246.40ms 95%=320.32ms 99%=590.19ms 100%=1473.00ms
+LOAD: db [10000 connections / 0 failed / 0 reconnects / requests min=9 avg=9 max=11] [time 60000 / start 0 / end 1]
+	/test.php?v=D: 99339 requests  10%=5766.58ms 50%=5980.54ms 90%=6520.14ms 95%=6587.51ms 99%=6740.85ms 100%=7026.73ms
+------------------------------------------------------------
+---------------------- RUN 3 [60 secs]  ----------------------
+LOAD: cpu [1000 connections / 0 failed / 5630 reconnects / requests min=357 avg=549 max=1028] [time 60000 / start 0 / end 1]
+	/test.php?v=N: 549112 requests  10%=25.48ms 50%=63.69ms 90%=240.16ms 95%=321.93ms 99%=635.06ms 100%=1154.83ms
+LOAD: db [10000 connections / 0 failed / 0 reconnects / requests min=9 avg=9 max=11] [time 60000 / start 0 / end 1]
+	/test.php?v=D: 98673 requests  10%=5755.72ms 50%=6044.25ms 90%=6643.46ms 95%=6736.31ms 99%=6862.47ms 100%=7117.38ms
+------------------------------------------------------------
+RUN SUMMARY: cpu 1000 connections, db 10000 connections
+   cpu summary: 559811 requests  10%=17.29ms 50%=64.02ms 90%=252.62ms 95%=327.11ms 99%=652.00ms 100%=1380.47ms
+   db summary: 99154 requests  10%=5761.75ms 50%=5995.65ms 90%=6587.54ms 95%=6678.04ms 99%=6817.90ms 100%=7098.89ms
+------------------------------------------------------------
+END: 21/08/2012 10:06:07 PM
+
+
+
+===============================================================
+Starting WoofNioTest.testPerformance_OnlyCpu with interval of 60 secs, cpu seed=1000, db seed=0
+===============================================================
+START: 21/08/2012 10:06:08 PM
+Establshing up to 499 connections for cpu (to avoid SYNC attack)
+Establshing up to 999 connections for cpu (to avoid SYNC attack)
+Establishing all 1000 connections for cpu (to avoid SYNC attack) ...  all connected
+Establishing all 0 connections for db (to avoid SYNC attack) ...  all connected
+
+
+---------------------- WARM NEW THREADS (1000 connection magnitude) [60 secs]  ----------------------
+LOAD: cpu [1000 connections / 0 failed / 7514 reconnects / requests min=532 avg=797 max=1630] [time 60001 / start 1 / end 0]
+	/test.php?v=N: 797736 requests  10%=16.31ms 50%=56.74ms 90%=158.23ms 95%=184.79ms 99%=350.96ms 100%=1069.60ms
+LOAD: db [0 connections / 0 failed / 0 reconnects / requests min=2147483647 avg=0 max=-1] [time 60001 / start 1 / end 0]
+	/test.php?v=D: 0 requests  10%=-0.00ms 50%=-0.00ms 90%=-0.00ms 95%=-0.00ms 99%=-0.00ms 100%=-0.00ms
+------------------------------------------------------------
+---------------------- RUN 1 [60 secs]  ----------------------
+LOAD: cpu [1000 connections / 0 failed / 8724 reconnects / requests min=553 avg=854 max=1815] [time 60000 / start 0 / end 1]
+	/test.php?v=N: 854737 requests  10%=9.91ms 50%=56.28ms 90%=147.68ms 95%=193.86ms 99%=330.07ms 100%=1362.08ms
+LOAD: db [0 connections / 0 failed / 0 reconnects / requests min=2147483647 avg=0 max=-1] [time 60000 / start 0 / end 1]
+	/test.php?v=D: 0 requests  10%=-0.00ms 50%=-0.00ms 90%=-0.00ms 95%=-0.00ms 99%=-0.00ms 100%=-0.00ms
+------------------------------------------------------------
+---------------------- RUN 2 [60 secs]  ----------------------
+LOAD: cpu [1000 connections / 0 failed / 8422 reconnects / requests min=541 avg=837 max=1855] [time 60000 / start 0 / end 0]
+	/test.php?v=N: 837323 requests  10%=7.79ms 50%=57.56ms 90%=159.05ms 95%=192.88ms 99%=319.68ms 100%=936.84ms
+LOAD: db [0 connections / 0 failed / 0 reconnects / requests min=2147483647 avg=0 max=-1] [time 60000 / start 0 / end 0]
+	/test.php?v=D: 0 requests  10%=-0.00ms 50%=-0.00ms 90%=-0.00ms 95%=-0.00ms 99%=-0.00ms 100%=-0.00ms
+------------------------------------------------------------
+---------------------- RUN 3 [60 secs]  ----------------------
+LOAD: cpu [1000 connections / 0 failed / 8448 reconnects / requests min=689 avg=836 max=1088] [time 60000 / start 0 / end 0]
+	/test.php?v=N: 836868 requests  10%=29.70ms 50%=59.63ms 90%=130.01ms 95%=153.13ms 99%=285.73ms 100%=923.35ms
+LOAD: db [0 connections / 0 failed / 0 reconnects / requests min=2147483647 avg=0 max=-1] [time 60000 / start 0 / end 0]
+	/test.php?v=D: 0 requests  10%=-0.00ms 50%=-0.00ms 90%=-0.00ms 95%=-0.00ms 99%=-0.00ms 100%=-0.00ms
+------------------------------------------------------------
+RUN SUMMARY: cpu 1000 connections, db 0 connections
+   cpu summary: 842976 requests  10%=15.80ms 50%=57.82ms 90%=145.58ms 95%=179.95ms 99%=311.83ms 100%=1074.09ms
+   db summary: 0 requests  10%=-0.00ms 50%=-0.00ms 90%=-0.00ms 95%=-0.00ms 99%=-0.00ms 100%=-0.00ms
+------------------------------------------------------------
+Establshing up to 499 connections for cpu (to avoid SYNC attack)
+Establshing up to 999 connections for cpu (to avoid SYNC attack)
+Establshing up to 1499 connections for cpu (to avoid SYNC attack)
+Establshing up to 1999 connections for cpu (to avoid SYNC attack)
+Establshing up to 2499 connections for cpu (to avoid SYNC attack)
+Establshing up to 2999 connections for cpu (to avoid SYNC attack)
+Establshing up to 3499 connections for cpu (to avoid SYNC attack)
+Establshing up to 3999 connections for cpu (to avoid SYNC attack)
+Establshing up to 4499 connections for cpu (to avoid SYNC attack)
+Establshing up to 4999 connections for cpu (to avoid SYNC attack)
+Establshing up to 5499 connections for cpu (to avoid SYNC attack)
+Establshing up to 5999 connections for cpu (to avoid SYNC attack)
+Establshing up to 6499 connections for cpu (to avoid SYNC attack)
+Establshing up to 6999 connections for cpu (to avoid SYNC attack)
+Establshing up to 7499 connections for cpu (to avoid SYNC attack)
+Establshing up to 7999 connections for cpu (to avoid SYNC attack)
+Establshing up to 8499 connections for cpu (to avoid SYNC attack)
+Establshing up to 8999 connections for cpu (to avoid SYNC attack)
+Establishing all 10000 connections for cpu (to avoid SYNC attack) ...  all connected
+Establishing all 0 connections for db (to avoid SYNC attack) ...  all connected
+
+
+---------------------- WARM NEW THREADS (10000 connection magnitude) [60 secs]  ----------------------
+LOAD: cpu [10000 connections / 0 failed / 817 reconnects / requests min=74 avg=83 max=94] [time 60000 / start 0 / end 0]
+	/test.php?v=N: 833024 requests  10%=376.31ms 50%=579.67ms 90%=1247.12ms 95%=1406.94ms 99%=1912.75ms 100%=3475.75ms
+LOAD: db [0 connections / 0 failed / 0 reconnects / requests min=2147483647 avg=0 max=-1] [time 60000 / start 0 / end 1]
+	/test.php?v=D: 0 requests  10%=-0.00ms 50%=-0.00ms 90%=-0.00ms 95%=-0.00ms 99%=-0.00ms 100%=-0.00ms
+------------------------------------------------------------
+---------------------- RUN 1 [60 secs]  ----------------------
+LOAD: cpu [10000 connections / 0 failed / 12190 reconnects / requests min=59 avg=83 max=131] [time 60000 / start 0 / end 0]
+	/test.php?v=N: 838935 requests  10%=276.54ms 50%=580.42ms 90%=1379.58ms 95%=1609.84ms 99%=2199.46ms 100%=3655.35ms
+LOAD: db [0 connections / 0 failed / 0 reconnects / requests min=2147483647 avg=0 max=-1] [time 60000 / start 0 / end 0]
+	/test.php?v=D: 0 requests  10%=-0.00ms 50%=-0.00ms 90%=-0.00ms 95%=-0.00ms 99%=-0.00ms 100%=-0.00ms
+------------------------------------------------------------
+---------------------- RUN 2 [60 secs]  ----------------------
+LOAD: cpu [10000 connections / 0 failed / 7523 reconnects / requests min=57 avg=78 max=131] [time 60000 / start 0 / end 0]
+	/test.php?v=N: 781094 requests  10%=296.50ms 50%=669.27ms 90%=1433.89ms 95%=1590.56ms 99%=2087.73ms 100%=3898.12ms
+LOAD: db [0 connections / 0 failed / 0 reconnects / requests min=2147483647 avg=0 max=-1] [time 60000 / start 0 / end 0]
+	/test.php?v=D: 0 requests  10%=-0.00ms 50%=-0.00ms 90%=-0.00ms 95%=-0.00ms 99%=-0.00ms 100%=-0.00ms
+------------------------------------------------------------
+---------------------- RUN 3 [60 secs]  ----------------------
+LOAD: cpu [10000 connections / 0 failed / 7547 reconnects / requests min=55 avg=79 max=117] [time 60000 / start 0 / end 0]
+	/test.php?v=N: 793532 requests  10%=304.81ms 50%=701.59ms 90%=1377.13ms 95%=1498.59ms 99%=1831.32ms 100%=3054.89ms
+LOAD: db [0 connections / 0 failed / 0 reconnects / requests min=2147483647 avg=0 max=-1] [time 60000 / start 0 / end 0]
+	/test.php?v=D: 0 requests  10%=-0.00ms 50%=-0.00ms 90%=-0.00ms 95%=-0.00ms 99%=-0.00ms 100%=-0.00ms
+------------------------------------------------------------
+RUN SUMMARY: cpu 10000 connections, db 0 connections
+   cpu summary: 804520 requests  10%=292.62ms 50%=650.42ms 90%=1396.86ms 95%=1566.33ms 99%=2039.50ms 100%=3536.12ms
+   db summary: 0 requests  10%=-0.00ms 50%=-0.00ms 90%=-0.00ms 95%=-0.00ms 99%=-0.00ms 100%=-0.00ms
+------------------------------------------------------------
+END: 21/08/2012 10:14:14 PM
+
+
+
+===============================================================
+Starting WoofNioTest.testPerformance_OnlyDatabase with interval of 60 secs, cpu seed=0, db seed=1000
+===============================================================
+START: 21/08/2012 10:14:15 PM
+Establishing all 0 connections for cpu (to avoid SYNC attack) ...  all connected
+Establshing up to 499 connections for db (to avoid SYNC attack)
+Establshing up to 999 connections for db (to avoid SYNC attack)
+Establishing all 1000 connections for db (to avoid SYNC attack) ...  all connected
+
+
+---------------------- WARM NEW THREADS (1000 connection magnitude) [60 secs]  ----------------------
+LOAD: cpu [0 connections / 0 failed / 0 reconnects / requests min=2147483647 avg=0 max=-1] [time 60000 / start 0 / end 1]
+	/test.php?v=N: 0 requests  10%=-0.00ms 50%=-0.00ms 90%=-0.00ms 95%=-0.00ms 99%=-0.00ms 100%=-0.00ms
+LOAD: db [1000 connections / 0 failed / 1000 reconnects / requests min=109 avg=110 max=111] [time 60000 / start 0 / end 1]
+	/test.php?v=D: 110287 requests  10%=503.96ms 50%=512.69ms 90%=609.05ms 95%=640.37ms 99%=693.23ms 100%=1284.06ms
+------------------------------------------------------------
+---------------------- RUN 1 [60 secs]  ----------------------
+LOAD: cpu [0 connections / 0 failed / 0 reconnects / requests min=2147483647 avg=0 max=-1] [time 60000 / start 0 / end 0]
+	/test.php?v=N: 0 requests  10%=-0.00ms 50%=-0.00ms 90%=-0.00ms 95%=-0.00ms 99%=-0.00ms 100%=-0.00ms
+LOAD: db [1000 connections / 0 failed / 1000 reconnects / requests min=116 avg=117 max=118] [time 60000 / start 0 / end 0]
+	/test.php?v=D: 117373 requests  10%=503.65ms 50%=505.79ms 90%=532.85ms 95%=554.89ms 99%=579.07ms 100%=649.87ms
+------------------------------------------------------------
+---------------------- RUN 2 [60 secs]  ----------------------
+LOAD: cpu [0 connections / 0 failed / 0 reconnects / requests min=2147483647 avg=0 max=-1] [time 60000 / start 0 / end 0]
+	/test.php?v=N: 0 requests  10%=-0.00ms 50%=-0.00ms 90%=-0.00ms 95%=-0.00ms 99%=-0.00ms 100%=-0.00ms
+LOAD: db [1000 connections / 0 failed / 1000 reconnects / requests min=117 avg=117 max=118] [time 60000 / start 0 / end 0]
+	/test.php?v=D: 117711 requests  10%=503.70ms 50%=505.60ms 90%=537.29ms 95%=547.04ms 99%=552.45ms 100%=621.28ms
+------------------------------------------------------------
+---------------------- RUN 3 [60 secs]  ----------------------
+LOAD: cpu [0 connections / 0 failed / 0 reconnects / requests min=2147483647 avg=0 max=-1] [time 60002 / start 1 / end 0]
+	/test.php?v=N: 0 requests  10%=-0.00ms 50%=-0.00ms 90%=-0.00ms 95%=-0.00ms 99%=-0.00ms 100%=-0.00ms
+LOAD: db [1000 connections / 0 failed / 1000 reconnects / requests min=117 avg=117 max=119] [time 60002 / start 0 / end 0]
+	/test.php?v=D: 117988 requests  10%=502.91ms 50%=504.65ms 90%=526.39ms 95%=544.45ms 99%=560.30ms 100%=657.03ms
+------------------------------------------------------------
+RUN SUMMARY: cpu 0 connections, db 1000 connections
+   cpu summary: 0 requests  10%=-0.00ms 50%=-0.00ms 90%=-0.00ms 95%=-0.00ms 99%=-0.00ms 100%=-0.00ms
+   db summary: 117690 requests  10%=503.42ms 50%=505.34ms 90%=532.18ms 95%=548.79ms 99%=563.94ms 100%=642.73ms
+------------------------------------------------------------
+Establishing all 0 connections for cpu (to avoid SYNC attack) ...  all connected
+Establshing up to 499 connections for db (to avoid SYNC attack)
+Establshing up to 999 connections for db (to avoid SYNC attack)
+Establshing up to 1499 connections for db (to avoid SYNC attack)
+Establshing up to 1999 connections for db (to avoid SYNC attack)
+Establshing up to 2499 connections for db (to avoid SYNC attack)
+Establshing up to 2999 connections for db (to avoid SYNC attack)
+Establshing up to 3499 connections for db (to avoid SYNC attack)
+Establshing up to 3999 connections for db (to avoid SYNC attack)
+Establshing up to 4499 connections for db (to avoid SYNC attack)
+Establshing up to 4999 connections for db (to avoid SYNC attack)
+Establshing up to 5499 connections for db (to avoid SYNC attack)
+Establshing up to 5999 connections for db (to avoid SYNC attack)
+Establshing up to 6499 connections for db (to avoid SYNC attack)
+Establshing up to 6999 connections for db (to avoid SYNC attack)
+Establshing up to 7499 connections for db (to avoid SYNC attack)
+Establshing up to 7999 connections for db (to avoid SYNC attack)
+Establshing up to 8499 connections for db (to avoid SYNC attack)
+Establshing up to 8999 connections for db (to avoid SYNC attack)
+Establishing all 10000 connections for db (to avoid SYNC attack) ...  all connected
+
+
+---------------------- WARM NEW THREADS (10000 connection magnitude) [60 secs]  ----------------------
+LOAD: cpu [0 connections / 0 failed / 0 reconnects / requests min=2147483647 avg=0 max=-1] [time 60001 / start 0 / end 0]
+	/test.php?v=N: 0 requests  10%=-0.00ms 50%=-0.00ms 90%=-0.00ms 95%=-0.00ms 99%=-0.00ms 100%=-0.00ms
+LOAD: db [10000 connections / 0 failed / 0 reconnects / requests min=10 avg=10 max=11] [time 60001 / start 0 / end 0]
+	/test.php?v=D: 102845 requests  10%=5030.25ms 50%=5718.46ms 90%=6382.75ms 95%=6487.59ms 99%=6674.34ms 100%=6701.33ms
+------------------------------------------------------------
+---------------------- RUN 1 [60 secs]  ----------------------
+LOAD: cpu [0 connections / 0 failed / 0 reconnects / requests min=2147483647 avg=0 max=-1] [time 60000 / start 0 / end 0]
+	/test.php?v=N: 0 requests  10%=-0.00ms 50%=-0.00ms 90%=-0.00ms 95%=-0.00ms 99%=-0.00ms 100%=-0.00ms
+LOAD: db [10000 connections / 0 failed / 0 reconnects / requests min=9 avg=9 max=10] [time 60000 / start 0 / end 0]
+	/test.php?v=D: 99691 requests  10%=5693.86ms 50%=5944.16ms 90%=6514.94ms 95%=6664.60ms 99%=6813.43ms 100%=6909.33ms
+------------------------------------------------------------
+---------------------- RUN 2 [60 secs]  ----------------------
+LOAD: cpu [0 connections / 0 failed / 0 reconnects / requests min=2147483647 avg=0 max=-1] [time 60008 / start 0 / end 0]
+	/test.php?v=N: 0 requests  10%=-0.00ms 50%=-0.00ms 90%=-0.00ms 95%=-0.00ms 99%=-0.00ms 100%=-0.00ms
+LOAD: db [10000 connections / 0 failed / 381 reconnects / requests min=10 avg=10 max=11] [time 60008 / start 0 / end 0]
+	/test.php?v=D: 101540 requests  10%=5648.11ms 50%=5834.71ms 90%=6450.14ms 95%=6579.75ms 99%=6776.71ms 100%=6833.80ms
+------------------------------------------------------------
+---------------------- RUN 3 [60 secs]  ----------------------
+LOAD: cpu [0 connections / 0 failed / 0 reconnects / requests min=2147483647 avg=0 max=-1] [time 60001 / start 1 / end 0]
+	/test.php?v=N: 0 requests  10%=-0.00ms 50%=-0.00ms 90%=-0.00ms 95%=-0.00ms 99%=-0.00ms 100%=-0.00ms
+LOAD: db [10000 connections / 0 failed / 619 reconnects / requests min=9 avg=9 max=10] [time 60001 / start 0 / end 0]
+	/test.php?v=D: 99705 requests  10%=5751.61ms 50%=5839.44ms 90%=6457.55ms 95%=6609.19ms 99%=6783.36ms 100%=6850.03ms
+------------------------------------------------------------
+RUN SUMMARY: cpu 0 connections, db 10000 connections
+   cpu summary: 0 requests  10%=-0.00ms 50%=-0.00ms 90%=-0.00ms 95%=-0.00ms 99%=-0.00ms 100%=-0.00ms
+   db summary: 100312 requests  10%=5697.86ms 50%=5872.77ms 90%=6474.21ms 95%=6617.85ms 99%=6791.17ms 100%=6864.39ms
+------------------------------------------------------------
+END: 21/08/2012 10:22:19 PM
+Tests run: 5, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 3,473.432 sec
+
+Results :
+
+Tests run: 5, Failures: 0, Errors: 0, Skipped: 0
+
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD SUCCESS
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time: 57:57.696s
+[INFO] Finished at: Tue Aug 21 22:22:20 WST 2012
+[INFO] Final Memory: 20M/2944M
+[INFO] ------------------------------------------------------------------------
