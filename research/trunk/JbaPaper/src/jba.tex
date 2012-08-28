@@ -675,7 +675,7 @@ times the number OfficeFloor used for high concurrency).
 For the low concurrency where threads are not exhausted
 (figure~\ref{fig:low_concurrency_throughput}), throughput is reasonably similar.
 OfficeFloor~(\textit{O}) does have higher throughput on 1 NEWS (\textit{n}) and
-1 AJAX (\textit{d}) connection as it only requires two threads to service, while
+1 AJAX (\textit{a}) connection as it only requires two threads to service, while
 the other servers requires three (i.e. one selector thread and two servicing
 threads).  As the number of concurrent connections increase, OfficeFloor
 requires more threads and as \textit{L} does not incur the job management
