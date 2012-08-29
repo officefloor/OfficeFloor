@@ -7,9 +7,7 @@ if ( $val == "N" ) {
     
 } else {
     // Simulate database connect, interaction, close
-    usleep(5000);
-    usleep(10000);
-    usleep(5000); 
+    usleep(100000);
     echo 'd';
 }
 ?>
