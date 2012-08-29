@@ -434,7 +434,7 @@ both developing and tuning Web based applications (e.g. increasing number of
 threads for increased concurrency but then reduce number of threads for smaller
 server footprint).  Rather than trying to optimise the tuning of the Web Server
 I propose that isolating performance bottlenecks to better decouple their
-affects will provide more consistent performance.  Furthermore, through the
+effects will provide more consistent performance.  Furthermore, through the
 explanation of the Job Based Architecture I will demonstrate how a thread can be
 a parameter to a function.
 
@@ -458,10 +458,10 @@ data from a database would be as table~\ref{tab:example_request_jobs}.
 \caption{Example jobs and their dependencies}
 \label{tab:example_request_jobs}
 \centering
-\begin{tabular}{|l|l|}
+\begin{tabular}{l||l}
 \hline
 \bfseries Job & \bfseries Dependencies \\
-\hline
+\hline\hline
 Read data from Socket & Selector, Socket \\
 \hline
 Parse HTTP Request & Data read \\
@@ -501,10 +501,10 @@ table~\ref{tab:example_request_thread_pools} to execute the jobs.
 \caption{Example assigning of thread pool to jobs by dependency}
 \label{tab:example_request_thread_pools}
 \centering
-\begin{tabular}{|l|l|l|}
+\begin{tabular}{l||l||l}
 \hline
 \bfseries Thread Pool & \bfseries Dependency & \bfseries Jobs \\
-\hline
+\hline\hline
 Network & Selector & Read data from Socket \\
 \hline
 Database & Database Connection & Retrieve Data from database \\
@@ -669,31 +669,30 @@ times the number OfficeFloor used for high concurrency).
 \section{Performance Results}
 For the low concurrency where threads are not exhausted
 (Fig.~\ref{fig:low_concurrency_throughput}), throughput is reasonably similar.
-OfficeFloor~(\textit{O}) does have higher throughput on 1 NEWS (\textit{n}) and
-1 AJAX (\textit{a}) connection as it only requires two threads to service, while
+OfficeFloor~(\textit{O}) does have higher throughput on one NEWS and one AJAX
+connection (\textit{1n/1a}) as it only requires two threads to service, while
 the other servers requires three (i.e. one selector thread and two servicing
 threads).  As the number of concurrent connections increase, OfficeFloor
 requires more threads and as \textit{L} does not incur the job management
 overheads of the Job Based Architecture it has lower latency and subsequently
 more throughput.
 
-As the concurrency increases beyond the number of threads
-(Fig.~\ref{fig:medium_concurrency_throughput}), server \textit{L} shows its
-limitations.  With its lower latency it favours a load profile of servicing
-requests quickly.  However, as the database bottleneck becomes the majority of
-the load its limited number of threads become blocked servicing the AJAX
-requests starving the NEWS requests.  Server \textit{M} continues to service
-requests by creating a substantial number of threads, while OfficeFloor isolates
-the bottleneck of the AJAX requests to the Database thread pool leaving the
-Network threads to service the NEWS requests.
+As the concurrency increases (Fig.~\ref{fig:medium_concurrency_throughput}),
+server \textit{L} shows its limitations.  With its lower latency it favours a
+load profile of servicing requests quickly.  However, as the database bottleneck
+becomes the majority of the load its limited number of threads become blocked
+servicing the AJAX requests starving the NEWS requests.  Server \textit{M}
+continues to service requests by creating a substantial number of threads, while
+OfficeFloor isolates the bottleneck of the AJAX requests to the Database thread
+pool leaving the Network threads to service the NEWS requests.
 
 Increasing concurrency by another maginitude
 (Fig.~\ref{fig:high_concurrency_throughput}) causes server \textit{M} to create
 a significant number of threads that adversely affects its performance.
 While all servers favour throughput of the NEWS requests, only OfficeFloor by
 isolating the database performance bottleneck and not creating a significant
-number of threads was able to continue servicing a consistent throughput of both
-NEWS and AJAX requests when the profile favoured AJAX requests.
+number of threads is able to continue servicing a consistent throughput of both
+NEWS and AJAX requests when the profile does not favour the NEWS requests.
 
 \begin{figure}[!t]
 \centering 
@@ -738,13 +737,12 @@ paper also identify that isolation of performance bottlenecks is important to
 overall server performance.
 
 Various abstractions of concurrency have been developed that focus on the task
-type.  JAWS provides flexible concurrency components for developers to code
-within~\cite{jaws}.  Aspen enables the developer to combine tasks into
-modules~\cite{aspen}.  Saburo abstracts the concurrency model via annotations on
-the tasks~\cite{saburo}.  Hop enables the developer to provide code to dynamic
-decide the concurrency model for tasks at runtime~\cite{hop}.  I however propose
-the abstraction of the concurrency model should be based on the thread being a
-transitive dependency of the task.
+type.  JAWS provides flexible concurrency components~\cite{jaws}.  Aspen
+combines tasks into modules~\cite{aspen}.  Saburo abstracts the concurrency
+model via annotations on the tasks~\cite{saburo}.  Hop enables the developer to
+provide code to dynamic decide the concurrency model for tasks at
+runtime~\cite{hop}.  I however propose the abstraction of the concurrency model
+should be based on the thread being a transitive dependency of the task.
 
 Frameworks/libraries have utilised dependencies in their models.  Spring
 implements dependency injection~\cite{ioc} however it relies on the Servlet
