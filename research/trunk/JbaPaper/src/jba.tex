@@ -398,14 +398,14 @@ through their dependencies}
 \begin{abstract}
 By making a thread a parameter to the function, with the thread determined as a
 transitive dependency of the function's dependencies, it enables isolating
-perfomance bottlenecks of a function to not consume all threads and
+performance bottlenecks of a function to not consume all threads and
 subsequently not starve other unrelated functions of a thread.  This paper
 provides discussion and findings on an initial exploration of this concept with the
 derived Job Based Architecture and tests the feasibility by a request throughput
 comparison of the OfficeFloor implementation against other popular Web Servers.
 The findings demonstrate more consistent throughput performance, and in many
-load profiles increased throughput, than thread-per-request Web Servers for the
-differing characteristics of servicing requests for dynamic content.
+load profiles increased throughput, than thread-per-request Web Servers for
+servicing requests for differing characteristics of dynamic content.
 \end{abstract}
 
 
@@ -426,17 +426,17 @@ differing characteristics of servicing requests for dynamic content.
 \section{Introduction}
 This paper presents OfficeFloor and its underlying Job Based Architecture to
 enable isolating performance bottlenecks rather than relying on server tuning to
-achieve more consistent performance. As performance tuning is necessary for
-existing Web Server architectures~\cite{tuning-important} along with maintaining
-a small server footprint~\cite{low-server-footprint}, I find there are
-performance trade-offs that require significant involvement by developers in
-both developing and tuning Web based applications (e.g. increasing number of
-threads for increased concurrency but then reduce number of threads for smaller
-server footprint).  Rather than trying to optimise the tuning of the Web Server
-I propose that isolating performance bottlenecks to better decouple their
-effects will provide more consistent performance.  Furthermore, through the
-explanation of the Job Based Architecture I will demonstrate how a thread can be
-a parameter to a function.
+achieve more consistent performance. As performance tuning is critical for
+performance of Web Servers~\cite{tuning-important,tuning-os-important} along
+with maintaining a small server footprint~\cite{low-server-footprint}, I find
+there are performance trade-offs that require significant involvement by
+developers in both developing and tuning Internet based applications (e.g.
+increasing number of threads for increased concurrency but then reduce number of
+threads for smaller server footprint).  Rather than trying to optimise the
+tuning of the web server I propose that isolating performance bottlenecks to
+better decouple their effects will provide more consistent performance.
+Furthermore, through the explanation of the Job Based Architecture I will
+demonstrate how a thread can be a parameter to a function.
 
 
 \section{Job Based Architecture}
@@ -532,36 +532,36 @@ send socket buffer is full.
 
 The resulting intention of the Job Based Architecture is that bottlenecks in
 servicing a particular stage of a request for dynamic content (e.g. blocking
-network I/O) is assigned to a particular thread pool and does not affect other
-requests not subject to the bottleneck (e.g. blocking disk I/O). Furthermore,
-should there be no performance bottlenecks to isolate (e.g. database data is
-cached) the servicing of the request may be executed in entirity by one thread
-allowing the Job Based Architecture to behave like an event-based architecture
-in this case.
+network I/O to a database) is assigned to a particular thread pool and does not
+affect other requests not subject to the bottleneck. Furthermore, should there
+be no performance bottlenecks to isolate (e.g. database data is cached) the
+servicing of the request may be executed by one thread allowing the Job Based
+Architecture to behave like an event-based architecture in this case.
 
 Also as extrinsic dependency management is available at compile time regarding
 the jobs, compile time optimisations may be utilised to reduce overheads.  This
-also enables providing development tools to aid developers and reduces arrising
+also enables providing development tools to aid developers and reduces arising
 bottlenecks from human configuration/coding errors based on job type especially
 as jobs may change their dependencies and subsequently processing
 characteristics over the evolution of the application.
 
 
 \section{Thread is a Parameter to the Function}
-I am finding more fundamentally that a thread should be a parameter to the
-function much like a continuation.  The function has a dependency on a thread
-to be executed and the thread \textit{passed} to the function is determined as
-a transitive dependency of the function's dependencies.  Should the thread not
-be derived as a transitive dependency, the implicit thread of re-using the
-previous job's thread is passed (similar to an implicit continutation that
-executes the next operation after a function returns).  And therefore a thread
-is a dependency of the function and as such a parameter.
+While the previous section explains the mechanism, I propose more fundamentally
+that a thread should be a parameter to the function much like a continuation. 
+The function has a dependency on a thread to be executed and the thread
+\textit{passed} to the function is determined as a transitive dependency of the
+function's dependencies.  Should the thread not be derived as a transitive
+dependency, the implicit thread of re-using the previous job's thread is passed
+(similar to an implicit continuation that executes the next operation after a
+function returns).  And therefore a thread is a dependency of the function and
+as such a parameter.
 
-Furthermore providing continuations and a thread as parameters of a function
-provides a more complete inversion of control.  The function is provided
-dependencies as inputs, with one being the thread to use, and continuations for
-where execution is to continue (possibly by another thread) with the outputs of
-the function.
+Furthermore I propose providing continuations and a thread as parameters of a
+function provides a more complete inversion of control.  The function is
+provided dependencies as inputs, with one being the thread to use, and
+continuations for where execution is to continue (possibly by another thread)
+with the outputs of the function.
 
 The resulting concurrency model is similar to a pipeline of work managed within
 an office where people are assigned to undertake a particular function.
@@ -584,7 +584,7 @@ continuously sent with differing load profile combinations:
 \begin{itemize}
 \item NEWS: Requests for resources generated from cached content (e.g. browsing
 the latest news feeds).
-\item AJAX: Requests that each required communication with a database (e.g.
+\item AJAX: Requests that each requires communication with a database (e.g.
 AJAX calls to retrieve/update data in a database).
 \end{itemize}
 
@@ -592,15 +592,16 @@ The AJAX requests depend on the database which is the bottleneck in this
 evaluation; connection pool of 100 connections with a 100 millisecond sleep in
 the servicing code to simulate the database interaction.
 
-Each run was for 60 seconds with each result obtained from averaging 10 runs
-after a 5 minute warm up.  Response entities contained only a single byte to not
-incur bandwidth issues.  To avoid connection throttling by the Web Servers, a
-sequence of 99 requests were made before disconnecting and reconnecting.
+Each test run was for 60 seconds with each result obtained from averaging 10
+runs after a 5 minute warm up.  Response entities contained only a single byte
+to not incur bandwidth issues.  To avoid connection throttling by the Web
+Servers, a sequence of 99 requests were made before disconnecting and
+reconnecting.
 
 The server was run on a two 1.4Ghz core machine with 3GB RAM while the test
 client run on a three 2.2Ghz core machine with 6GB RAM.  Server and client were
 connected directly via a cat6 cross-over cable and ran linux v2.6.32 with 1 Gb
-network card.  File handles and TCP settings were increased to enable servicing
+network cards.  File handles and TCP settings were increased to enable servicing
 20,000 concurrent connections.
 
 \subsection{OfficeFloor (O)}
@@ -657,9 +658,9 @@ v7.0.29) were used for comparison.  IIS was excluded as it required a different
 operating system.  The code was contained in the one PHP snippet / Servlet as an
 if statement to distinguish between returning immediately (NEWS) or sleeping on
 the pooled database connection (AJAX).  As PHP has a share nothing architecture,
-a compromise of 150 clients was used to balance the database bottleneck against
+a compromise of 150 clients is used to balance the database bottleneck against
 increased concurrency.  The two best servers based on throughput are reported.
-To focus on evaluating OfficeFloor and avoid comparisons of these Web Servers,
+To focus on evaluating OfficeFloor and avoid comparisons of these web servers,
 one of the servers will be identified as \textit{L} (as it limited the number of
 threads) and the other as \textit{M} (as it used many threads - nearly fifty
 times the number OfficeFloor used for high concurrency).
@@ -671,7 +672,7 @@ For the low concurrency where threads are not exhausted
 (Fig.~\ref{fig:low_concurrency_throughput}), throughput is reasonably similar.
 OfficeFloor~(\textit{O}) does have higher throughput on one NEWS and one AJAX
 connection (\textit{1n/1a}) as it only requires two threads to service, while
-the other servers requires three (i.e. one selector thread and two servicing
+the other servers require three (i.e. one selector thread and two servicing
 threads).  As the number of concurrent connections increase, OfficeFloor
 requires more threads and as \textit{L} does not incur the job management
 overheads of the Job Based Architecture it has lower latency and subsequently
@@ -686,13 +687,14 @@ continues to service requests by creating a substantial number of threads, while
 OfficeFloor isolates the bottleneck of the AJAX requests to the Database thread
 pool leaving the Network threads to service the NEWS requests.
 
-Increasing concurrency by another maginitude
+Increasing concurrency by another magnitude
 (Fig.~\ref{fig:high_concurrency_throughput}) causes server \textit{M} to create
 a significant number of threads that adversely affects its performance.
 While all servers favour throughput of the NEWS requests, only OfficeFloor by
 isolating the database performance bottleneck and not creating a significant
 number of threads is able to continue servicing a consistent throughput of both
-NEWS and AJAX requests when the profile does not favour the NEWS requests.
+NEWS and AJAX requests when the profile does not favour the \textit{easier} NEWS
+requests.
 
 \begin{figure}[!t]
 \centering 
@@ -725,7 +727,7 @@ have been used together along with the abstraction of a thread as a transitive
 dependency to achieve a concurrency model that focuses on performance bottleneck
 isolation.
 
-Mimimising the cost of bottlenecks is one means to improve server performance.
+Minimising the cost of bottlenecks is one means to improve server performance.
 The SEDA Architecture~\cite{seda} reduced the level of service and subsequently
 the cost of bottlenecks at higher loads.  Monadic threads~\cite{monadic-thread}
 drive the operating system to provide asynchronous resources to avoid blocking
@@ -755,10 +757,10 @@ Architecture.  Flux~\cite{flux} provides extrinsic dependency management
 information through task inputs and outputs but focuses on using the information
 for task sequencing to avoiding deadlocks rather than bottleneck isolation.
 
-Actors do provide the mechanism to isolate bottlenecks however its decoupling of
-message from sender~\cite{actors}, while scalable across distributed nodes, is
-not gaining local efficiencies by roles (actors) working across organisational
-(iOrg) boundaries for the \textit{smaller} tasks.
+Actors do provide the mechanism to isolate bottlenecks however their decoupling
+of message from sender~\cite{actors}, while scalable across distributed nodes,
+is not gaining local efficiencies by roles (actors) working across
+organisational (iOrg) boundaries for the \textit{smaller} tasks.
 
 
 \section{Conclusion and Future Work}
@@ -766,15 +768,15 @@ Isolation of performance bottlenecks has shown to provide more consistent
 performance across differing load profiles by both avoiding creating a
 significant number of threads and avoiding thread starvation than
 thread-per-request Web Servers.  Furthermore, in many load profiles isolating
-the bottlneck provides improved throughput performance.
+the bottleneck provides improved throughput performance.
 
 Future work will look at whether the more consistent throughput performance will
 provide improvements in servicing load profiles of real world traffic.
 Further comparisons against other web server architectures will be undertaken,
 such as event based-architectures to compare developer customisations of
 application concurrency against OfficeFloor's transitive thread dependency
-concurrency model.  Also, expanding to other Internet services other than Web
-Servers is another area for future work.
+concurrency model.  Also, expanding to other Internet services other than web
+servers is another area for future work.
 
 Though not discussed in this paper OfficeFloor implements process
 continuations~\cite{process-continuation} to provide parallel processing.  I
