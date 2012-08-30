@@ -1,3 +1,42 @@
+
+@inproceedings{tuning-important,
+ author = {Pariag, David and Brecht, Tim and Harji, Ashif and Buhr, Peter and Shukla, Amol and Cheriton, David R.},
+ title = {Comparing the performance of web server architectures},
+ booktitle = {Proceedings of the 2nd ACM SIGOPS/EuroSys European Conference on Computer Systems 2007},
+ series = {EuroSys '07},
+ year = {2007},
+ isbn = {978-1-59593-636-3},
+ location = {Lisbon, Portugal},
+ pages = {231--243},
+ numpages = {13},
+ doi = {10.1145/1272996.1273021},
+ acmid = {1273021},
+ publisher = {ACM},
+ address = {New York, NY, USA},
+ keywords = {events, performance, scalability, threads, web servers},
+}
+
+@techreport{tuning-os-important,
+    hal_id = {hal-00674475},
+    url = {http://hal.inria.fr/hal-00674475},
+    title = {{An Analysis of Web Servers Architectures Performances on Commodity Multicores}},
+    author = {Genev{\`e}s, Sylvain},
+    abstract = {{We study the impact of concurrent programming models on multicore performances of Web servers. More precisely, we consider three implementations of servers, each being representative of a particular model: Knot (thread-based), Userver (event-driven), Watpipe (stage-based). Our experiments show that memory access costs increase with the number of cores. We also show that at 8 cores we reach a point where the memory is fully saturated, leading to all Web server implementations having the same performance. Using fine-grain profiling, we are able to pinpoint the cause of this issue as a hardware bottleneck: the saturation of the address bus. Further memory benchmarking on a 24-cores machine show that a memory-related scalability issue is still present beyond this point.}},
+    language = {Anglais},
+    affiliation = {SARDES - INRIA Grenoble Rh{\^o}ne-Alpes / LIG Laboratoire d'Informatique de Grenoble},
+    type = {Rapport de recherche},
+    year = {2012},
+    month = {Febuary},
+    pdf = {http://hal.inria.fr/hal-00674475/PDF/paper.pdf},
+}
+
+@PhdThesis{low-server-footprint,
+  author = 	 {Harji, Ashif},
+  title = 	 {Performance Comparison of Uniprocessor and Multiprocessor Web Server Architectures},
+  school = 	 {University of Waterloo},
+  year = 	 {2010}
+}
+
 @techreport{pipeline,
     Author = {Welsh, Matt and Gribble, Steven D. and Brewer, Eric A. and Culler, David},
     Title = {A Design Framework for Highly Concurrent Systems},
@@ -6,6 +45,25 @@
     Number = {UCB/CSD-00-1108},
     Abstract = {Building highly concurrent systems, such as large-scale Internet services, requires managing many information flows at once and maintaining peak throughput when demand exceeds resource availability. In addition, any platform supporting Internet services must provide high availability and be able to cope with burstiness of load. Many approaches to building concurrent systems have been proposed, which generally fall into the two categories of threaded and event-driven programming. We propose that threads and events are actually on the ends of a design spectrum, and that the best implementation strategy for these applications is somewhere in between. <p>We present a general-purpose design framework for building highly concurrent systems, based on three design components -- tasks, queues, and thread pools -- which encapsulate the concurrency, performance, fault isolation, and software engineering benefits of both threads and events. We present a set of design patterns that can be applied to map an application onto an implementation using these components. In addition, we provide an analysis of several systems (including an Internet services platform and a highly available, distributed, persistent data store) constructed using our framework, demonstrating its benefit for building and reasoning about concurrent applications.}
 }
+
+@article{continuations,
+ author = {Reynolds, John C.},
+ title = {The discoveries of continuations},
+ journal = {Lisp Symb. Comput.},
+ issue_date = {Nov. 1993},
+ volume = {6},
+ number = {3-4},
+ month = nov,
+ year = {1993},
+ issn = {0892-4635},
+ pages = {233--248},
+ numpages = {16},
+ doi = {10.1007/BF01019459},
+ acmid = {198114},
+ publisher = {Kluwer Academic Publishers},
+ address = {Hingham, MA, USA},
+ keywords = {continuation, continuation-passing style, semantics},
+} 
 
 @misc{reactor,
     author = {Douglas C. Schmidt},
@@ -27,12 +85,6 @@
     booktitle = {In Domain-Specific Application Frameworks: Frameworks Experience by Industry},
     year = {1999},
     publisher = {Wiley \& Sons}
-}
-
-@MISC{multithread-pipeline,
-    author = {Gyu Sang Choi and Jin-ha Kim and Deniz Ersoz and Chita R. Das},
-    title = {A Multi-Threaded PIPELINED Web Server Architecture for SMP/SoC Machines},
-    year = {2005}
 }
 
 @inproceedings{hop,
@@ -68,13 +120,6 @@
  keywords = {Java toolkit, automatic generation, formal model, internet server, software engineering},
 }
 
-@PhdThesis{low-server-footprint,
-  author = 	 {Harji, Ashif},
-  title = 	 {Performance Comparison of Uniprocessor and Multiprocessor Web Server Architectures},
-  school = 	 {University of Waterloo},
-  year = 	 {2010},
-  OPTnote = 	 {Having memory for caching is most important},
-}
 
 @inproceedings{flux,
  author = {Burns, Brendan and Grimaldi, Kevin and Kostadinov, Alexander and Berger, Emery D. and Corner, Mark D.},
@@ -107,23 +152,6 @@
  keywords = {network servers, parallel programming, programming languages, resource management},
 } 
 
-@inproceedings{tuning-important,
- author = {Pariag, David and Brecht, Tim and Harji, Ashif and Buhr, Peter and Shukla, Amol and Cheriton, David R.},
- title = {Comparing the performance of web server architectures},
- booktitle = {Proceedings of the 2nd ACM SIGOPS/EuroSys European Conference on Computer Systems 2007},
- series = {EuroSys '07},
- year = {2007},
- isbn = {978-1-59593-636-3},
- location = {Lisbon, Portugal},
- pages = {231--243},
- numpages = {13},
- doi = {10.1145/1272996.1273021},
- acmid = {1273021},
- publisher = {ACM},
- address = {New York, NY, USA},
- keywords = {events, performance, scalability, threads, web servers},
-} 
-
 @inproceedings{monadic-thread,
  author = {Li, Peng and Zdancewic, Steve},
  title = {Combining events and threads for scalable network services implementation and evaluation of monadic, application-level concurrency primitives},
@@ -140,25 +168,6 @@
  address = {New York, NY, USA},
  keywords = {concurrency, event, haskell, implementation, monad, networking, programming, scalability, thread},
 }
-
-@article{continuations,
- author = {Reynolds, John C.},
- title = {The discoveries of continuations},
- journal = {Lisp Symb. Comput.},
- issue_date = {Nov. 1993},
- volume = {6},
- number = {3-4},
- month = nov,
- year = {1993},
- issn = {0892-4635},
- pages = {233--248},
- numpages = {16},
- doi = {10.1007/BF01019459},
- acmid = {198114},
- publisher = {Kluwer Academic Publishers},
- address = {Hingham, MA, USA},
- keywords = {continuation, continuation-passing style, semantics},
-} 
 
 @article{url-continuation,
  author = {Queinnec, Christian},
