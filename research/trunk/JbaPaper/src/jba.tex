@@ -436,7 +436,8 @@ threads for smaller server footprint).  Rather than trying to optimise the
 tuning of the web server I propose that isolating performance bottlenecks to
 better decouple their effects will provide more consistent performance.
 Furthermore, through the explanation of the Job Based Architecture I will
-demonstrate how a thread can be a parameter to a function.
+demonstrate how a thread can be a parameter to a function for isolating
+performance bottlenecks.
 
 
 \section{Job Based Architecture}
@@ -462,19 +463,19 @@ data from a database would be as table~\ref{tab:example_request_jobs}.
 \hline
 \bfseries Job & \bfseries Dependencies \\
 \hline\hline
-Read data from Socket & Selector, Socket \\
+Read data from socket & Selector, Socket \\
 \hline
-Parse HTTP Request & Data read \\
+Parse HTTP request & Data read \\
 \hline
-Dispatch HTTP Request & HTTP request \\
+Dispatch HTTP request & HTTP request \\
 \hline
 Validate client data & HTTP request \\
 \hline
-Retrieve Data from database & Client data, Database connection \\
+Retrieve data from database & Client data, Database connection \\
 \hline
-Render HTTP Response & Database data \\
+Render HTTP response & Database data \\
 \hline
-Write HTTP Response & HTTP Response, Socket \\
+Write HTTP response & HTTP response, Socket \\
 \hline
 \end{tabular}
 \end{table}
@@ -505,30 +506,31 @@ table~\ref{tab:example_request_thread_pools} to execute the jobs.
 \hline
 \bfseries Thread Pool & \bfseries Dependency & \bfseries Jobs \\
 \hline\hline
-Network & Selector & Read data from Socket \\
+Network & Selector & Read data from socket \\
 \hline
-Database & Database Connection & Retrieve Data from database \\
+Database & Database connection & Retrieve data from database \\
 \hline
-Default & - & Parse HTTP Request, \\
-& & Dispatch HTTP Request, \\
+Default & - & Parse HTTP request, \\
+& & Dispatch HTTP request, \\
 & & Validate client data, \\ 
-& & Render HTTP Response, \\
-& & Write HTTP Response \\
+& & Render HTTP response, \\
+& & Write HTTP response \\
 \hline
 \end{tabular}
 \end{table}
 
 Thread context switching and memory management overheads due to queuing jobs is
 reduced in the Job Based Architecture, as the job dispatching to thread pools
-uses the dependencies to determine if the next job may be executed by the
-current thread.  In table~\ref{tab:example_request_thread_pools}, the
-\textit{Default} thread pool does not actually contain threads but executes its
-jobs by re-using the thread of the previous job.  In other words, the Parse HTTP
-Request, Dispatch HTTP Request and Validate client data jobs are executed by the
-thread from the Network thread pool and the Render HTTP Response and Write HTTP
-Response are executed by the thread from the Database thread pool.  The Write
-HTTP Response job may however be completed by the Network thread pool if the
-send socket buffer is full.
+uses the dependency information of the next job to determine if the next job may
+be executed by the current thread.  In
+table~\ref{tab:example_request_thread_pools}, the \textit{Default} thread pool
+does not actually contain threads but executes its jobs by re-using the thread
+of the previous job.  In other words, the Parse HTTP request, Dispatch HTTP
+request and Validate client data jobs are executed by the thread from the
+Network thread pool and the Render HTTP response and Write HTTP response are
+executed by the thread from the Database thread pool.  The Write HTTP response
+job may however be completed by the Network thread pool if the send socket
+buffer is full.
 
 The resulting intention of the Job Based Architecture is that bottlenecks in
 servicing a particular stage of a request for dynamic content (e.g. blocking
@@ -540,10 +542,11 @@ Architecture to behave like an event-based architecture in this case.
 
 Also as extrinsic dependency management is available at compile time regarding
 the jobs, compile time optimisations may be utilised to reduce overheads.  This
-also enables providing development tools to aid developers and reduces arising
-bottlenecks from human configuration/coding errors based on job type especially
-as jobs may change their dependencies and subsequently processing
-characteristics over the evolution of the application.
+also enables providing tools to aid developers (such as OfficeFloor's graphical
+configuration editors) and reduces arising bottlenecks from human
+configuration/coding errors based on job type especially as jobs may change
+their dependencies and subsequently processing characteristics over the
+evolution of the application.
 
 
 \section{Thread is a Parameter to the Function}
@@ -728,39 +731,40 @@ dependency to achieve a concurrency model that focuses on performance bottleneck
 isolation.
 
 Minimising the cost of bottlenecks is one means to improve server performance.
-The SEDA Architecture~\cite{seda} reduced the level of service and subsequently
-the cost of bottlenecks at higher loads.  Monadic threads~\cite{monadic-thread}
-drive the operating system to provide asynchronous resources to avoid blocking
-and starvation.  Comparison work identified that servers with smaller footprints
-provide more memory for caching and subsequently better
-performance~\cite{low-server-footprint}.  While minimising the cost of
-performance bottlenecks is important to server performance, findings of this
-paper also identify that isolation of performance bottlenecks is important to
-overall server performance.
+ Monadic threads~\cite{monadic-thread} drive the operating system to provide
+asynchronous resources to avoid blocking and starvation.  Comparison work
+identified that servers with smaller footprints provide more memory for caching
+and subsequently better performance~\cite{low-server-footprint}.  While
+minimising the cost of bottlenecks is important to server performance, findings
+of this paper also identify that isolation of performance bottlenecks is
+important to overall server performance.
 
 Various abstractions of concurrency have been developed that focus on the task
-type.  JAWS provides flexible concurrency components~\cite{jaws}.  Aspen
-combines tasks into modules~\cite{aspen}.  Saburo abstracts the concurrency
-model via annotations on the tasks~\cite{saburo}.  Hop enables the developer to
-provide code to dynamic decide the concurrency model for tasks at
-runtime~\cite{hop}.  I however propose the abstraction of the concurrency model
-should be based on the thread being a transitive dependency of the task.
+type.  JAWS provides flexible concurrency components to code tasks
+within~\cite{jaws}.  Aspen combines tasks into modules~\cite{aspen}.  Saburo
+abstracts the concurrency model via annotations on the tasks~\cite{saburo}.  Hop
+enables the developer to provide code to dynamic decide the concurrency model
+for tasks at runtime~\cite{hop}.  I however propose the abstraction of the
+concurrency model should be based on the thread being a transitive dependency of
+the task.
 
-Frameworks/libraries have utilised dependencies in their models.  Spring
-implements dependency injection~\cite{ioc} however it relies on the Servlet
-thread-per-request concurrency model.  Capriccio utilises resource-aware
-scheduling of operating system level resources and only suggests scheduling of
-application level resources via an API~\cite{capriccio}.  Dependency capsules
-focus on isolation for better availability however they do incur thread context
-switching overheads~\cite{dependency-capsules} avoided by the Job Based
-Architecture.  Flux~\cite{flux} provides extrinsic dependency management
-information through task inputs and outputs but focuses on using the information
-for task sequencing to avoiding deadlocks rather than bottleneck isolation.
+Dependencies have been previously used in various models.  The SEDA architecture
+uses resource controllers to adapt resource usage of stages for handling
+scale~\cite{seda}.  Spring implements dependency injection~\cite{ioc} however it
+relies on the Servlet thread-per-request concurrency model.  Capriccio utilises
+resource-aware scheduling of operating system level resources and only suggests
+scheduling of application level resources via an API~\cite{capriccio}. 
+Dependency capsules focus on isolation for better availability however they do
+incur thread context switching overheads~\cite{dependency-capsules} avoided by
+the Job Based Architecture.  Flux~\cite{flux} provides extrinsic dependency
+management information through task inputs and outputs but focuses on using the
+information for task sequencing to avoiding deadlocks rather than bottleneck
+isolation.
 
 Actors do provide the mechanism to isolate bottlenecks however their decoupling
 of message from sender~\cite{actors}, while scalable across distributed nodes,
-is not gaining local efficiencies by roles (actors) working across
-organisational (iOrg) boundaries for the \textit{smaller} tasks.
+is not gaining local efficiencies by working across organisational (iOrg)
+boundaries for the \textit{smaller} tasks.
 
 
 \section{Conclusion and Future Work}
