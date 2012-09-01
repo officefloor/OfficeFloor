@@ -358,7 +358,7 @@ concurrency model}
 % use a multiple column layout for up to three different
 % affiliations
 \author{\IEEEauthorblockN{Daniel Sagenschneider}
-\IEEEauthorblockA{daniel@officefloor.net}}
+\IEEEauthorblockA{http://officefloor.net}}
 
 % conference papers do not typically use \thanks and this command
 % is locked out in conference mode. If really needed, such as for
@@ -446,10 +446,10 @@ Pattern~\cite{pipeline}, Continuations~\cite{continuations}, Reactor
 Pattern~\cite{reactor}, Inversion of Control Pattern~\cite{ioc}, Combine
 Pattern~\cite{pipeline} and Wrap Pattern~\cite{pipeline} to use multiple thread
 pools to isolate processing of certain pipelined tasks based on their
-characteristics.
+dependencies.
 
 Within a Job Based Architecture the application functionality is decomposed into
-jobs that are executed sequentially (Pipeline pattern~\cite{pipeline}).  The
+jobs that are executed sequentially (Pipeline Pattern~\cite{pipeline}).  The
 construction of the sequence of jobs is dynamic and particular to the request
 being serviced.  An example sequence of jobs to service a request to retrieve
 data from a database would be as Table~\ref{tab:example_request_jobs}.
@@ -482,7 +482,7 @@ Write HTTP response & HTTP response, Socket \\
 
 A job provides additional meta-data over a pipelined task by specifying its
 required dependencies and through continuations allows dynamic construction of
-the job sequence.  Each job is constructed via the Inversion of Control pattern
+the job sequence.  Each job is constructed via the Inversion of Control Pattern
 and through extrinsic dependency management~\cite{ioc} the job defines its
 required dependencies (e.g. Database Connection).  Based on the dependencies
 required of the job, the job will be dispatched (Reactor Pattern~\cite{reactor})
@@ -551,14 +551,14 @@ can be better identified through task dependencies than task type.
 
 \section{Thread is a Parameter to the Function}
 While the previous section explains the mechanism, I propose more fundamentally
-that a thread should be a parameter to the function much like a continuation. 
+that a thread should be a parameter to the function much like a continuation.
 The function has a dependency on a thread to be executed and the thread
 \textit{passed} to the function is determined as a transitive dependency of the
 function's dependencies.  Should the thread not be derived as a transitive
-dependency, the implicit thread of re-using the previous job's thread is passed
-(similar to an implicit continuation that executes the next operation after a
-function returns).  And therefore a thread is a dependency of the function and
-as such a parameter.
+dependency, the implicit thread of re-using the previous function's thread is
+passed (similar to an implicit continuation that executes the next operation
+after a function returns).  And therefore a thread is a dependency of the
+function and as such a parameter.
 
 Furthermore I propose providing continuations and a thread as parameters of a
 function provides a more complete inversion of control.  The function is
@@ -585,7 +585,7 @@ where I derived its name.
 To focus evaluation on the isolation of a bottleneck connections sending only
 one of the following requests were established with the load profile of
 connections varied:
-\begin{IEEEitemize} 
+\begin{IEEEitemize}
 \item NEWS: requests resources generated from cached content (e.g. browsing the
 latest news feeds).
 \item AJAX: requests requiring communication with a database (e.g. AJAX calls to
@@ -596,17 +596,16 @@ The AJAX requests depend on the database which is the bottleneck in this
 evaluation; connection pool of 100 connections with a 100 millisecond sleep in
 the servicing code to simulate the database interaction.
 
-Each test run was for 60 seconds with each result obtained from averaging 10
-runs after a 5 minute warm up.  Response entities contained only a single byte
-to not incur bandwidth issues.  To avoid connection throttling by the web
-servers, a sequence of 99 requests were made before disconnecting and
-reconnecting.
+Each test run is for 60 seconds with each result obtained by averaging 10 runs
+after a 5 minute warm up.  Response entities contain only a single byte to not
+incur bandwidth issues.  To avoid connection throttling by the web servers, a
+sequence of 99 requests are made before disconnecting and reconnecting.
 
-The server was run on a two 1.4Ghz core machine with 3GB RAM while the test
-client run on a three 2.2Ghz core machine with 6GB RAM.  Server and client were
-connected directly via a cat6 cross-over cable and ran linux v2.6.32 with 1 Gb
-network cards.  File handles and TCP settings were increased to enable servicing
-20,000 concurrent connections.
+The server is run on a two 1.4GHz core machine with 3GB RAM while the test
+client run on a three 2.2GHz core machine with 6GB RAM.  Server and client are
+connected directly via a Cat 6 cross-over cable and run linux v2.6.32 with full
+duplex 1 Gb/s network cards.  File handles and TCP settings were increased to
+enable servicing 20,000 concurrent connections.
 
 \subsection{OfficeFloor (O)}
 OfficeFloor's web components implicitly constructs threads for servicing
