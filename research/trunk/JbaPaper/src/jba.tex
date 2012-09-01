@@ -442,8 +442,8 @@ bottlenecks in servicing dynamic content.
 
 \section{Job Based Architecture}
 The Job Based Architecture builds on the concepts of the Pipeline
-Pattern~\cite{pipeline}, Continuations~\cite{continuations}, Reactor
-Pattern~\cite{reactor}, Inversion of Control Pattern~\cite{ioc}, Combine
+Pattern~\cite{pipeline}, Continuations~\cite{continuations}, Inversion of
+Control Pattern~\cite{ioc}, Reactor Pattern~\cite{reactor}, Combine
 Pattern~\cite{pipeline} and Wrap Pattern~\cite{pipeline} to use multiple thread
 pools to isolate processing of certain pipelined tasks based on their
 dependencies.
@@ -540,7 +540,7 @@ cached) the servicing of the request behaves like a thread-per-request web
 server by being executed by one thread.
 
 As extrinsic dependency management is available at compile time regarding the
-jobs, compile time optimisations may be utilised to reduce thread decision
+jobs, compile time optimisations may be used to reduce thread decision
 overheads.  This also enables providing tools to aid developers (such as
 OfficeFloor's graphical configuration editors).  Furthermore, it can reduce
 arising bottlenecks from human configuration/coding errors based on task type
@@ -582,7 +582,7 @@ where I derived its name.
 
 
 \section{Performance Evaluation}
-To focus evaluation on the isolation of a bottleneck connections sending only
+To focus evaluation on the isolation of a bottleneck, connections sending only
 one of the following requests were established with the load profile of
 connections varied:
 \begin{IEEEitemize}
@@ -674,7 +674,7 @@ uses for high concurrency).
 
 \section{Performance Results}
 For the low concurrency where threads are not exhausted
-(Fig.~\ref{fig:low_concurrency_throughput}), throughput is reasonably similar.
+(Fig.~\ref{fig:low_concurrency_throughput}) throughput is reasonably similar.
 OfficeFloor~(\textit{O}) does have higher throughput on one NEWS and one AJAX
 connection (\textit{1n/1a}) as it only requires two threads to service, while
 the other servers require three (i.e. one selector thread and two servicing
@@ -727,8 +727,8 @@ requests.
 
 \section{Related Work}
 OfficeFloor and its Job Based Architecture is to the best of my knowledge the
-first time that the patterns of pipeline, continuations, reactor and inversion
-of control have been used with the abstraction of a thread as a transitive
+first time that the patterns of pipeline, continuations, inversion of control
+and reactor have been used with the abstraction of a thread as a transitive
 dependency to achieve a low thread context switching pipeline concurrency model
 that focuses on application level performance bottleneck isolation.
 
