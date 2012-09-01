@@ -397,15 +397,15 @@ concurrency model}
 
 \begin{abstract}
 By making a thread a parameter to the function, with the thread determined as a
-transitive dependency of the function's dependencies, it enables isolating
-functions containing application level performance bottlenecks to not consume
-all threads and subsequently not starve other unrelated functions of a thread.
+transitive dependency of the function's dependencies, it enables
+optimising the isolation of functions containing application level performance
+bottlenecks to not consume all threads and subsequently not starve other unrelated functions of a thread.
 Findings and discussion are presented on an initial exploration of this concept
 with the derived Job Based Architecture and the performance is tested by a
-request throughput comparison of the OfficeFloor implementation against other
+request throughput comparison of the OfficeFloor implementation against
 popular web servers.  The findings demonstrate more consistent throughput
 performance, and in many load profiles increased throughput, than
-thread-per-request web servers for servicing requests for differing
+popular web servers for servicing requests for differing
 characteristics of dynamic content.
 \end{abstract}
 
@@ -425,19 +425,19 @@ characteristics of dynamic content.
 
 
 \section{Introduction}
-\textbf{TODO change for title} This paper presents OfficeFloor and its
-underlying Job Based Architecture to enable isolating application level performance bottlenecks rather than relying
-on server tuning to achieve more consistent performance for servicing dynamic
+This paper presents OfficeFloor and its underlying Job Based Architecture to
+enable isolating application level performance bottlenecks for servicing dynamic
 content. As tuning is critical for performance of web
-servers~\cite{tuning-important,tuning-os-important}, I find there are trade-offs
-in both developing and tuning Internet based applications (e.g. pipelining
-incuring high thread context switching or thread-per-request incuring large
-server footprint).  Rather than trying to optimise the choice and tuning of the
-web server I propose that isolating application level performance bottlenecks to
-better decouple their effects will provide more consistent performance.
-Furthermore, I will demonstrate how a thread can be a parameter to a function
-for isolating functions containing performance bottlenecks in servicing dynamic
-content.
+servers~\cite{tuning-important,tuning-os-important}, which I expect is also
+important for dynamic content, I find there are trade-offs in both developing
+and tuning Internet based applications (e.g. pipelining incuring high thread
+context switching or thread-per-request incuring large server footprint).
+Rather than trying to optimise the choice and tuning of web server architecture
+I propose improving the pipeline architecture by reducing its thread context
+switching and in some cases have it behave like a thread-per-request web server
+in servicing a request.  Furthermore, I will demonstrate how a thread can be a
+parameter to a function for isolating functions containing performance
+bottlenecks in servicing dynamic content.
 
 
 \section{Job Based Architecture}
@@ -536,17 +536,17 @@ bottlenecks (identified through a job's dependencies) in servicing a particular
 stage (e.g. blocking database call) is assigned to a particular thread pool and
 does not affect other requests not subject to the bottleneck.  Furthermore,
 should there be no performance bottlenecks to isolate (e.g. database data is
-cached) the servicing of the request may be executed completely by one thread
-and not incur a thread context switch.
+cached) the servicing of the request behaves like a thread-per-request web
+server by being executed by one thread.
 
-Also as extrinsic dependency management is available at compile time regarding
-the jobs, compile time optimisations may be utilised to reduce overheads.  This
-also enables providing tools to aid developers (such as OfficeFloor's graphical
-configuration editors).  Furthermore, it can reduce arising bottlenecks from
-human configuration/coding errors based on task type especially as tasks may
-change their processing characteristics over the evolution of the application
-and I expect their changing performance bottlenecks can be better identified
-through task dependencies than task type.
+As extrinsic dependency management is available at compile time regarding the
+jobs, compile time optimisations may be utilised to reduce thread decision
+overheads.  This also enables providing tools to aid developers (such as
+OfficeFloor's graphical configuration editors).  Furthermore, it can reduce
+arising bottlenecks from human configuration/coding errors based on task type
+especially as tasks may change their processing characteristics over the
+evolution of the application and I expect their changing performance bottlenecks
+can be better identified through task dependencies than task type.
 
 
 \section{Thread is a Parameter to the Function}
@@ -657,18 +657,19 @@ annotations enable distinguishing dependencies of the same type.}
 
 
 \subsection{Compared Web Severs (L \& M)}
-Web servers servicing requests for dynamic content through PHP v5.3.2 (Apache
-v2.2.14, Nginx v1.2.3) and Servlets (Jetty v8.1.4, Grizzly v2.2.11, Tomcat
-v7.0.29) were used for comparison.  IIS was excluded as it required a different
-operating system.  The code was contained in the one PHP snippet / Servlet as an
-if statement to distinguish between returning immediately (NEWS) or sleeping on
-the pooled database connection (AJAX).  As PHP has a share nothing architecture,
-a compromise of 150 clients is used to balance the database bottleneck against
-increased concurrency.  The two best servers based on throughput are reported.
-To focus on evaluating OfficeFloor and avoid comparisons of these web servers,
-one of the servers will be identified as \textit{L} (as it limited the number of
-threads) and the other as \textit{M} (as it used many threads - nearly fifty
-times the number OfficeFloor used for high concurrency).
+Popular web servers, identified from the Netcraft August 2012 survey, for
+servicing requests for dynamic content through PHP~v5.3.2 (Apache~v2.2.14,
+Nginx~v1.2.3) and Servlets (Jetty~v8.1.4, Grizzly~v2.2.11, Tomcat~v7.0.29) are
+used for comparison.  IIS is excluded due to requiring a different operating
+system.  The code is contained in one PHP snippet / Servlet as an if statement
+to return immediately (NEWS) or sleep on the pooled database connection (AJAX).
+As PHP has a share nothing architecture, a compromise of 150 clients is used to
+balance the database bottleneck against increased concurrency.  The two best
+servers based on throughput are reported.  To focus on evaluating OfficeFloor
+and avoid comparisons of these web servers, one of the servers will be
+identified as \textit{L} (as it limits the number of threads) and the other as
+\textit{M} (as it uses many threads - nearly fifty times the number OfficeFloor
+uses for high concurrency).
 
 
 
@@ -678,8 +679,8 @@ For the low concurrency where threads are not exhausted
 OfficeFloor~(\textit{O}) does have higher throughput on one NEWS and one AJAX
 connection (\textit{1n/1a}) as it only requires two threads to service, while
 the other servers require three (i.e. one selector thread and two servicing
-threads).  As the number of concurrent connections increase, OfficeFloor
-requires more threads and as \textit{L} does not incur the job management
+threads).  As the number of concurrent connections increase, the effects of the
+network latency is reduced and as \textit{L} does not incur the job management
 overheads of the Job Based Architecture it has lower latency and subsequently
 more throughput.
 
@@ -769,19 +770,19 @@ boundaries for the \textit{smaller} tasks.
 
 
 \section{Conclusion and Future Work}
-Isolating application level performance bottlenecks by the thread being a
-transitive dependency of the task has shown to provide more consistent
-performance across differing load profiles by avoiding creating excessive
-threads, avoiding thread starvation and avoiding excessive thread context
-switching than thread-per-request web servers for dynamic content.  Furthermore,
+Lowering the thread context switching of the pipeline architecture by the thread
+being a transitive dependency of the task is shown to provide more consistent
+performance across differing load profiles than popular web servers for
+servicing dynamic content by avoiding creating excessive threads, avoiding
+thread starvation and avoiding excessive thread context switching.  Furthermore,
 in many load profiles it provides improved throughput performance.
 
 Future work will look at whether the more consistent throughput performance will
 improve servicing load profiles of real world traffic.  Ease of development will
 be explored along with confirming a relationship between dependency and
-performance bottleneck.  Comparisons against other web server architectures,
-such as event-based architectures to compare developer customisations of
-application concurrency against OfficeFloor's transitive thread dependency
+performance bottleneck.  Comparisons against other architectures will be
+undertaken, such as event-based architectures to compare developer
+customisations of concurrency against OfficeFloor's transitive thread dependency
 concurrency model.  Expanding to other Internet services is another future area.
 
 Though not discussed in this paper OfficeFloor implements process
