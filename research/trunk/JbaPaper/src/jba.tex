@@ -433,10 +433,10 @@ important for dynamic content, I find there are trade-offs in both developing
 and tuning Internet based applications (e.g. pipelining incuring high thread
 context switching or thread-per-request incuring large server footprint).
 Rather than trying to optimise the choice and tuning of web server architecture
-I propose improving the pipeline architecture by reducing its thread context
-switching and in some cases have it behave like a thread-per-request web server
-in servicing a request.  Furthermore, I will demonstrate how a thread can be a
-parameter to a function for isolating functions containing performance
+I propose a mechanism for improving the pipeline architecture by reducing its
+thread context switching and in appropriate cases have it behave like a
+thread-per-request web server.  Furthermore, I will demonstrate how a thread can
+be a parameter to a function for isolating functions containing performance
 bottlenecks in servicing dynamic content.
 
 
@@ -452,7 +452,7 @@ Within a Job Based Architecture the application functionality is decomposed into
 jobs that are executed sequentially (Pipeline Pattern~\cite{pipeline}).  The
 construction of the sequence of jobs is particular to the request being
 serviced.  An example sequence of jobs to service a request to retrieve data
-from a database would be as Table~\ref{tab:example_request_jobs}.
+from a database is in Table~\ref{tab:example_request_jobs}.
 
 \begin{table}[!t]
 \renewcommand{\arraystretch}{1.3}
@@ -484,9 +484,9 @@ A job provides additional meta-data over a pipelined task by specifying its
 required dependencies and through continuations allows dynamic construction of
 the job sequence.  Each job is constructed via the Inversion of Control Pattern
 and through extrinsic dependency management~\cite{ioc} the job defines its
-required dependencies (e.g. Database Connection).  Based on the dependencies
+required dependencies (e.g. database connection).  Based on the dependencies
 required of the job, the job will be dispatched (Reactor Pattern~\cite{reactor})
-to a particular thread pool (Combine Pattern~\cite{pipeline}) for execution. 
+to a particular thread pool (Combine Pattern~\cite{pipeline}) for execution.
 The Wrap Pattern~\cite{pipeline} is used within the thread pools to handle
 bursts of requests.  The dynamic construction of the sequence of jobs is
 achieved by providing each job a list of possible
@@ -494,7 +494,7 @@ continuations~\cite{continuations} that encapsulate the construction and
 dispatching of the possible next jobs in the sequence. Managing state between
 jobs for the application is contained within the dependencies.  For the sequence
 of jobs in Table~\ref{tab:example_request_jobs}, thread pools are configured as
-Table~\ref{tab:example_request_thread_pools} to execute the jobs.
+per Table~\ref{tab:example_request_thread_pools} to execute the jobs.
 
 \begin{table}[!t]
 \renewcommand{\arraystretch}{1.3}
@@ -583,7 +583,7 @@ where I derived its name.
 
 \section{Performance Evaluation}
 To focus evaluation on the isolation of a bottleneck, connections sending only
-one of the following requests a established with the load profile of
+one of the following requests is established with the load profile of
 connections varied:
 \begin{IEEEitemize}
 \item NEWS: requests resources generated from cached content (e.g. browsing the
@@ -601,10 +601,10 @@ after a 5 minute warm up.  Response entities contain only a single byte to not
 incur bandwidth issues.  To avoid connection throttling by the web servers, a
 sequence of 99 requests are made before disconnecting and reconnecting.
 
-The servers a run on a two 1.4GHz core machine with 3GB RAM while the test
-client run on are three 2.2GHz core machine with 6GB RAM.  Server and client are
+The servers are run on a two 1.4GHz core machine with 3GB RAM while the test
+client run on a three 2.2GHz core machine with 6GB RAM.  Server and client are
 connected directly via a Cat 6 cross-over cable and run linux v2.6.32 with full
-duplex 1 Gb/s network cards.  File handles and TCP settings were increased to
+duplex 1 Gb/s network cards.  File handles and TCP settings are increased to
 enable servicing 20,000 concurrent connections.
 
 \subsection{OfficeFloor (O)}
