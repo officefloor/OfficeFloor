@@ -23,7 +23,6 @@
 		<module>GwtService</module>
 		<module>InteractiveHttpServer</module>
 		<module>NavigateHttpServer</module>
-		<!-- Performance not run as part of build, as requires special setup -->
 		<module>Presentation</module>
 		<module>PrototypeHttpServer</module>
 		<module>RawHttpServer</module>
