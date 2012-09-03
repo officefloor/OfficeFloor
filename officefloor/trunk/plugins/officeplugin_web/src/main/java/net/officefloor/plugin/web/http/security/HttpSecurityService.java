@@ -18,6 +18,8 @@
 
 package net.officefloor.plugin.web.http.security;
 
+import java.io.IOException;
+
 import net.officefloor.plugin.socket.server.http.HttpResponse;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
 import net.officefloor.plugin.web.http.security.scheme.AuthenticationException;
@@ -37,10 +39,12 @@ public interface HttpSecurityService {
 	 * being processed.
 	 * 
 	 * @return {@link HttpSecurity} or <code>null</code> if not authenticated.
+	 * @throws IOException
+	 *             If fails to read the authentication information.
 	 * @throws AuthenticationException
 	 *             If failure in authentication.
 	 */
-	HttpSecurity authenticate() throws AuthenticationException;
+	HttpSecurity authenticate() throws IOException, AuthenticationException;
 
 	/**
 	 * Loads the unauthorised information to the {@link HttpResponse}.

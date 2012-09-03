@@ -18,6 +18,8 @@
 
 package net.officefloor.plugin.web.http.security;
 
+import java.io.IOException;
+
 import net.officefloor.frame.spi.managedobject.AsynchronousListener;
 import net.officefloor.frame.spi.managedobject.AsynchronousManagedObject;
 import net.officefloor.frame.spi.managedobject.CoordinatingManagedObject;
@@ -70,10 +72,12 @@ public class HttpSecurityManagedObject implements
 	 * Invoked by the {@link HttpSecurityManagedObjectSource} to undertake the
 	 * authentication.
 	 * 
+	 * @throws IOException
+	 *             If fails to read authentication information.
 	 * @throws AuthenticationException
 	 *             If fails to authenticate.
 	 */
-	public void authenticate() throws AuthenticationException {
+	public void authenticate() throws IOException, AuthenticationException {
 		try {
 
 			// Attempt to authenticate
@@ -96,7 +100,7 @@ public class HttpSecurityManagedObject implements
 
 	@Override
 	public void registerAsynchronousCompletionListener(
-			AsynchronousListener listener) {		
+			AsynchronousListener listener) {
 		this.listener = listener;
 	}
 

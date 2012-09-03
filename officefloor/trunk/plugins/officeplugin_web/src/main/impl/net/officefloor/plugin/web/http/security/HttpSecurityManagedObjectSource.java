@@ -18,6 +18,8 @@
 
 package net.officefloor.plugin.web.http.security;
 
+import java.io.IOException;
+
 import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.api.build.TaskFactory;
 import net.officefloor.frame.api.build.WorkFactory;
@@ -171,7 +173,7 @@ public class HttpSecurityManagedObjectSource
 	@Override
 	public Object doTask(
 			TaskContext<HttpSecurityManagedObjectSource, AuthenticateTaskDependencyKeys, None> context)
-			throws AuthenticationException {
+			throws IOException, AuthenticationException {
 
 		// Obtain the HTTP Security Managed Object
 		HttpSecurityManagedObject managedObject = (HttpSecurityManagedObject) context

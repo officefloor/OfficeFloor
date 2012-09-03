@@ -23,6 +23,8 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.Writer;
 import java.net.InetSocketAddress;
+import java.nio.ByteBuffer;
+import java.nio.charset.Charset;
 import java.util.Enumeration;
 import java.util.List;
 
@@ -31,19 +33,18 @@ import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.junit.Ignore;
-
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.socket.server.http.HttpHeader;
 import net.officefloor.plugin.socket.server.http.HttpRequest;
 import net.officefloor.plugin.socket.server.http.HttpResponse;
+import net.officefloor.plugin.stream.ServerOutputStream;
+import net.officefloor.plugin.stream.ServerWriter;
 
 /**
  * Tests the {@link ServletServerHttpConnection}.
  * 
  * @author Daniel Sagenschneider
  */
-@Ignore("TODO tidy up for working with Servlet 3.0 - i.e. take advantage of asynchronous requests")
 public class ServletServerHttpConnectionTest extends OfficeFrameTestCase {
 
 	/**
@@ -61,7 +62,7 @@ public class ServletServerHttpConnectionTest extends OfficeFrameTestCase {
 	/**
 	 * {@link ServletServerHttpConnection} to test.
 	 */
-	private final ServletServerHttpConnection connection = new ServletServerHttpConnection(
+	private ServletServerHttpConnection connection = new ServletServerHttpConnection(
 			this.request, this.response);
 
 	/**
@@ -213,6 +214,11 @@ public class ServletServerHttpConnectionTest extends OfficeFrameTestCase {
 	 * Ensure able to obtain the {@link InputStream}.
 	 */
 	public void test_getHttpRequest_getInputStream() throws Exception {
+
+		// Record indicating size
+		this.recordReturn(this.request, this.request.getContentLength(), 1);
+
+		// Record loading the data
 		InputStream expected = new ServletInputStream() {
 			@Override
 			public int read() throws IOException {
@@ -356,9 +362,12 @@ public class ServletServerHttpConnectionTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensure able to obtain the {@link OutputStream}.
+	 * Ensure able to obtain the {@link OutputStream} and write data.
 	 */
-	public void test_getHttpResponse_getOutputStream() throws Exception {
+	public void test_getHttpResponse_getOutputStream_writeData()
+			throws Exception {
+
+		// Capture the written data
 		final byte[] data = new byte[1];
 		data[0] = 0;
 		OutputStream expected = new ServletOutputStream() {
@@ -374,10 +383,41 @@ public class ServletServerHttpConnectionTest extends OfficeFrameTestCase {
 		this.replayMockObjects();
 		HttpResponse httpResponse = this.connection.getHttpResponse();
 		OutputStream actual = httpResponse.getEntity();
+		actual.write(1);
+		actual.flush();
 		this.verifyMockObjects();
 
 		// Ensure correct output
-		actual.write(1);
+		assertEquals("Incorrect output stream", 1, data[0]);
+	}
+
+	/**
+	 * Ensure able to obtain the {@link OutputStream} write {@link ByteBuffer}.
+	 */
+	public void test_getHttpResponse_getOutputStream_writeBuffer()
+			throws Exception {
+
+		// Capture the written data
+		final byte[] data = new byte[1];
+		data[0] = 0;
+		OutputStream expected = new ServletOutputStream() {
+			@Override
+			public void write(int b) throws IOException {
+				data[0] = (byte) b;
+			}
+		};
+		this.recordReturn(this.response, this.response.getOutputStream(),
+				expected);
+
+		// Test
+		this.replayMockObjects();
+		HttpResponse httpResponse = this.connection.getHttpResponse();
+		ServerOutputStream actual = httpResponse.getEntity();
+		actual.write(ByteBuffer.wrap(new byte[] { 1 }));
+		actual.flush();
+		this.verifyMockObjects();
+
+		// Ensure correct output
 		assertEquals("Incorrect output stream", 1, data[0]);
 	}
 
@@ -385,9 +425,12 @@ public class ServletServerHttpConnectionTest extends OfficeFrameTestCase {
 	 * Ensure able to obtain the {@link Writer}.
 	 */
 	public void test_getHttpResponse_getWriter() throws Exception {
-		
-		fail("TODO implement as Writer test");
-		
+
+		// Record obtaining the character encoding
+		this.recordReturn(this.response, this.response.getCharacterEncoding(),
+				Charset.defaultCharset().name());
+
+		// Capture the written data
 		final byte[] data = new byte[1];
 		data[0] = 0;
 		OutputStream expected = new ServletOutputStream() {
@@ -402,12 +445,13 @@ public class ServletServerHttpConnectionTest extends OfficeFrameTestCase {
 		// Test
 		this.replayMockObjects();
 		HttpResponse httpResponse = this.connection.getHttpResponse();
-		OutputStream actual = httpResponse.getEntity();
+		ServerWriter actual = httpResponse.getEntityWriter();
+		actual.write('a');
+		actual.flush();
 		this.verifyMockObjects();
 
 		// Ensure correct output
-		actual.write(1);
-		assertEquals("Incorrect output stream", 1, data[0]);
+		assertEquals("Incorrect writer", 'a', ((char) data[0]));
 	}
 
 }

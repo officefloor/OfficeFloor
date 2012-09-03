@@ -18,6 +18,7 @@
 
 package net.officefloor.plugin.web.http.security;
 
+import java.io.IOException;
 import java.util.Map;
 
 import net.officefloor.plugin.socket.server.http.HttpHeader;
@@ -83,7 +84,8 @@ public class HttpSecurityServiceImpl<D extends Enum<D>> implements
 	 */
 
 	@Override
-	public HttpSecurity authenticate() throws AuthenticationException {
+	public HttpSecurity authenticate() throws IOException,
+			AuthenticationException {
 
 		final String ATTRIBUTE_HTTP_SECURITY = "#HttpSecurity#";
 

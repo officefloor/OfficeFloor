@@ -18,6 +18,8 @@
 
 package net.officefloor.plugin.web.http.tokenise;
 
+import java.io.IOException;
+
 import net.officefloor.plugin.socket.server.http.HttpRequest;
 import net.officefloor.plugin.web.http.parameters.HttpParametersException;
 
@@ -41,12 +43,14 @@ public interface HttpRequestTokeniser {
 	 * @param handler
 	 *            {@link HttpRequestTokenHandler} to handle the
 	 *            {@link HttpRequest} tokens.
+	 * @throws IOException
+	 *             If fails to read data from {@link HttpRequest}.
 	 * @throws HttpParametersException
 	 *             If fails to tokenise the {@link HttpRequest}.
 	 */
 	void tokeniseHttpRequest(HttpRequest request,
-			HttpRequestTokenHandler handler)
-			throws HttpRequestTokeniseException;
+			HttpRequestTokenHandler handler) throws IOException,
+			HttpRequestTokeniseException;
 
 	/**
 	 * Tokenises the request URI for the path, parameters and fragment.

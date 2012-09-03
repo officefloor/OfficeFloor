@@ -43,12 +43,14 @@ public class HttpRequestTokeniserImpl implements HttpRequestTokeniser {
 	 * 
 	 * @param request
 	 *            {@link HttpRequest}.
+	 * @throws IOException
+	 *             If fails to read data from {@link HttpRequest}.
 	 * @return Parameter name values.
 	 * @throws HttpRequestTokeniseException
 	 *             If fails to extract the parameters.
 	 */
 	public static Map<String, String> extractParameters(HttpRequest request)
-			throws HttpRequestTokeniseException {
+			throws IOException, HttpRequestTokeniseException {
 
 		// Extract the parameters
 		final Map<String, String> parameters = new HashMap<String, String>();
@@ -93,8 +95,8 @@ public class HttpRequestTokeniserImpl implements HttpRequestTokeniser {
 
 	@Override
 	public void tokeniseHttpRequest(HttpRequest request,
-			HttpRequestTokenHandler handler)
-			throws HttpRequestTokeniseException {
+			HttpRequestTokenHandler handler) throws IOException,
+			HttpRequestTokeniseException {
 
 		// Create the temporary buffer (aids reducing object creation)
 		TempBuffer tempBuffer = new TempBuffer();

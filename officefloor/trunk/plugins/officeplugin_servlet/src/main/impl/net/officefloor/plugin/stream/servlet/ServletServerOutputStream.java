@@ -18,10 +18,14 @@
 
 package net.officefloor.plugin.stream.servlet;
 
+import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.ByteBuffer;
 
+import net.officefloor.plugin.socket.server.impl.ArrayWriteBuffer;
+import net.officefloor.plugin.socket.server.impl.BufferWriteBuffer;
 import net.officefloor.plugin.socket.server.protocol.WriteBuffer;
+import net.officefloor.plugin.socket.server.protocol.WriteBufferEnum;
 import net.officefloor.plugin.stream.ServerOutputStream;
 import net.officefloor.plugin.stream.WriteBufferReceiver;
 import net.officefloor.plugin.stream.impl.ServerOutputStreamImpl;
@@ -55,6 +59,11 @@ public class ServletServerOutputStream extends ServerOutputStreamImpl {
 		private final OutputStream outputStream;
 
 		/**
+		 * Indicates if closed.
+		 */
+		private volatile boolean isClosed = false;
+
+		/**
 		 * Initiate.
 		 * 
 		 * @param outputStream
@@ -70,44 +79,57 @@ public class ServletServerOutputStream extends ServerOutputStreamImpl {
 
 		@Override
 		public Object getLock() {
-			// TODO implement WriteBufferReceiver.getLock
-			throw new UnsupportedOperationException(
-					"TODO implement WriteBufferReceiver.getLock");
+			return this.outputStream;
 		}
 
 		@Override
 		public WriteBuffer createWriteBuffer(byte[] data, int length) {
-			// TODO implement WriteBufferReceiver.createWriteBuffer
-			throw new UnsupportedOperationException(
-					"TODO implement WriteBufferReceiver.createWriteBuffer");
+			return new ArrayWriteBuffer(data, length);
 		}
 
 		@Override
 		public WriteBuffer createWriteBuffer(ByteBuffer buffer) {
-			// TODO implement WriteBufferReceiver.createWriteBuffer
-			throw new UnsupportedOperationException(
-					"TODO implement WriteBufferReceiver.createWriteBuffer");
+			return new BufferWriteBuffer(buffer);
 		}
 
 		@Override
-		public void writeData(WriteBuffer[] data) {
-			// TODO implement WriteBufferReceiver.writeData
-			throw new UnsupportedOperationException(
-					"TODO implement WriteBufferReceiver.writeData");
+		public void writeData(WriteBuffer[] data) throws IOException {
+
+			// Write the data to the output stream
+			for (WriteBuffer buffer : data) {
+				WriteBufferEnum type = buffer.getType();
+				switch (type) {
+
+				case BYTE_ARRAY:
+					// Write the data
+					this.outputStream.write(buffer.getData(), 0,
+							buffer.length());
+					break;
+
+				case BYTE_BUFFER:
+					// Write the data
+					ByteBuffer byteBuffer = buffer.getDataBuffer();
+					byte[] writeData = new byte[byteBuffer.remaining()];
+					byteBuffer.get(writeData);
+					this.outputStream.write(writeData);
+					break;
+
+				default:
+					throw new IllegalStateException("Unknown buffer type: "
+							+ type);
+				}
+			}
 		}
 
 		@Override
-		public void close() {
-			// TODO implement WriteBufferReceiver.close
-			throw new UnsupportedOperationException(
-					"TODO implement WriteBufferReceiver.close");
+		public void close() throws IOException {
+			this.isClosed = true;
+			this.outputStream.close();
 		}
 
 		@Override
 		public boolean isClosed() {
-			// TODO implement WriteBufferReceiver.isClosed
-			throw new UnsupportedOperationException(
-					"TODO implement WriteBufferReceiver.isClosed");
+			return this.isClosed;
 		}
 	}
 
