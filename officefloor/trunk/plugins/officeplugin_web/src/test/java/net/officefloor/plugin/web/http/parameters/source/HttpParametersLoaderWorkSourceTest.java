@@ -18,6 +18,8 @@
 
 package net.officefloor.plugin.web.http.parameters.source;
 
+import java.io.IOException;
+
 import net.officefloor.compile.spi.work.source.TaskTypeBuilder;
 import net.officefloor.compile.spi.work.source.WorkTypeBuilder;
 import net.officefloor.compile.test.work.WorkLoaderUtil;
@@ -67,6 +69,7 @@ public class HttpParametersLoaderWorkSourceTest extends OfficeFrameTestCase {
 		taskBuilder.addObject(MockType.class).setKey(
 				HttpParametersLoaderDependencies.OBJECT);
 		taskBuilder.setReturnType(MockType.class);
+		taskBuilder.addEscalation(IOException.class);
 		taskBuilder.addEscalation(HttpParametersException.class);
 		WorkLoaderUtil.validateWorkType(workBuilder,
 				HttpParametersLoaderWorkSource.class,
