@@ -18,6 +18,7 @@
 
 package net.officefloor.plugin.web.http.parameters.source;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -127,6 +128,7 @@ public class HttpParametersLoaderWorkSource
 		taskBuilder.addObject(type).setKey(
 				HttpParametersLoaderDependencies.OBJECT);
 		taskBuilder.setReturnType(type);
+		taskBuilder.addEscalation(IOException.class);
 		taskBuilder.addEscalation(HttpParametersException.class);
 	}
 
@@ -146,7 +148,7 @@ public class HttpParametersLoaderWorkSource
 		@SuppressWarnings("unchecked")
 		public Object doTask(
 				TaskContext<HttpParametersLoaderTask, HttpParametersLoaderDependencies, None> context)
-				throws HttpParametersException {
+				throws IOException, HttpParametersException {
 
 			// Obtain the dependencies
 			ServerHttpConnection connection = (ServerHttpConnection) context

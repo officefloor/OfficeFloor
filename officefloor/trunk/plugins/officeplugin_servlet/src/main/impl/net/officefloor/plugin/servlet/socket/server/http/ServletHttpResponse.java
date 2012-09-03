@@ -52,9 +52,19 @@ public class ServletHttpResponse implements HttpResponse {
 	private final List<HttpHeader> headers = new LinkedList<HttpHeader>();
 
 	/**
-	 * {@link ServerOutputStream} for the body.
+	 * {@link Charset} for the {@link ServerWriter}.
+	 */
+	private Charset charset = null;
+
+	/**
+	 * {@link ServerOutputStream} for the entity.
 	 */
 	private ServerOutputStream entity;
+
+	/**
+	 * {@link ServerWriter} for the entity.
+	 */
+	private ServerWriter entityWriter;
 
 	/**
 	 * Initiate.
@@ -150,18 +160,13 @@ public class ServletHttpResponse implements HttpResponse {
 	}
 
 	@Override
-	public synchronized ServerOutputStream getEntity() {
+	public synchronized ServerOutputStream getEntity() throws IOException {
 
 		// Lazy load the entity
 		if (this.entity == null) {
 
 			// Obtain the output stream
-			OutputStream outputStream;
-			try {
-				outputStream = this.servletResponse.getOutputStream();
-			} catch (IOException ex) {
-				outputStream = null; // should not occur
-			}
+			OutputStream outputStream = this.servletResponse.getOutputStream();
 
 			// Create the body stream
 			this.entity = new ServletServerOutputStream(outputStream);
@@ -173,24 +178,36 @@ public class ServletHttpResponse implements HttpResponse {
 
 	@Override
 	public void setContentType(String contentType) {
-		// TODO implement HttpResponse.setContentType
-		throw new UnsupportedOperationException(
-				"TODO implement HttpResponse.setContentType");
+		this.servletResponse.setContentType(contentType);
 	}
 
 	@Override
-	public void setContentCharset(Charset charset, String charsetName)
-			throws IOException {
-		// TODO implement HttpResponse.setContentCharset
-		throw new UnsupportedOperationException(
-				"TODO implement HttpResponse.setContentCharset");
+	public synchronized void setContentCharset(Charset charset,
+			String charsetName) {
+		this.charset = charset;
+		this.servletResponse.setCharacterEncoding(charsetName == null ? charset
+				.name() : charsetName);
 	}
 
 	@Override
-	public ServerWriter getEntityWriter() {
-		// TODO implement HttpResponse.getEntityWriter
-		throw new UnsupportedOperationException(
-				"TODO implement HttpResponse.getEntityWriter");
+	public synchronized ServerWriter getEntityWriter() throws IOException {
+
+		// Lazy load the entity writer
+		if (this.entityWriter == null) {
+
+			// Obtain the charset
+			Charset charset = (this.charset != null ? this.charset : Charset
+					.forName(this.servletResponse.getCharacterEncoding()));
+
+			// Obtain the entity
+			ServerOutputStream entity = this.getEntity();
+
+			// Create the entity writer
+			this.entityWriter = new ServerWriter(entity, charset, this);
+		}
+
+		// Return the entity writer
+		return this.entityWriter;
 	}
 
 	@Override
@@ -200,9 +217,7 @@ public class ServletHttpResponse implements HttpResponse {
 
 	@Override
 	public void reset() throws IOException {
-		// TODO implement HttpResponse.reset
-		throw new UnsupportedOperationException(
-				"TODO implement HttpResponse.reset");
+		this.servletResponse.reset();
 	}
 
 }

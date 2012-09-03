@@ -18,6 +18,8 @@
 
 package net.officefloor.plugin.web.http.security;
 
+import java.io.IOException;
+
 import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.execute.TaskContext;
 import net.officefloor.frame.util.AbstractSingleTask;
@@ -56,7 +58,7 @@ public class HttpSecurityTask
 	@Override
 	public Object doTask(
 			TaskContext<HttpSecurityTask, DependencyKeys, FlowKeys> context)
-			throws AuthenticationException {
+			throws IOException, AuthenticationException {
 
 		// Obtain the HTTP Security Service
 		HttpSecurityService service = (HttpSecurityService) context

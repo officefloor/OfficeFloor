@@ -18,6 +18,7 @@
 
 package net.officefloor.plugin.web.http.parameters;
 
+import java.io.IOException;
 import java.util.Map;
 
 import net.officefloor.plugin.socket.server.http.HttpRequest;
@@ -69,11 +70,13 @@ public interface HttpParametersLoader<T> {
 	 *            {@link HttpRequest} to extract the parameters.
 	 * @param object
 	 *            Object to be loaded with the parameters.
+	 * @throws IOException
+	 *             If fails to read data from the {@link HttpRequest}.
 	 * @throws HttpParametersException
 	 *             If fails to load the {@link HttpRequest} parameters to the
 	 *             Object.
 	 */
 	<O extends T> void loadParameters(HttpRequest httpRequest, O object)
-			throws HttpParametersException;
+			throws IOException, HttpParametersException;
 
 }

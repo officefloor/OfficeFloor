@@ -18,6 +18,7 @@
 
 package net.officefloor.plugin.web.http.parameters;
 
+import java.io.IOException;
 import java.lang.reflect.Method;
 import java.util.Collections;
 import java.util.HashMap;
@@ -126,7 +127,7 @@ public class HttpParametersLoaderImpl<T> implements HttpParametersLoader<T> {
 	@Override
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public <O extends T> void loadParameters(HttpRequest httpRequest,
-			final O object) throws HttpParametersException {
+			final O object) throws IOException, HttpParametersException {
 
 		// Obtain the value loader
 		ValueLoaderFactory factory = this.getValueLoaderFactory(object

@@ -58,14 +58,12 @@ import org.eclipse.jetty.server.session.SessionHandler;
 import org.eclipse.jetty.servlet.FilterHolder;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
-import org.junit.Ignore;
 
 /**
  * Tests the {@link OfficeFloorServletFilter}.
  * 
  * @author Daniel Sagenschneider
  */
-@Ignore("TODO tidy up for working with Servlet 3.0 - i.e. take advantage of asynchronous requests")
 public class OfficeFloorServletFilterTest extends OfficeFrameTestCase {
 
 	/**

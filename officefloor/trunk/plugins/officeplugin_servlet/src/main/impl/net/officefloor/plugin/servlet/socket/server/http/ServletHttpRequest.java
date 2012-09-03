@@ -30,7 +30,7 @@ import net.officefloor.plugin.socket.server.http.HttpHeader;
 import net.officefloor.plugin.socket.server.http.HttpRequest;
 import net.officefloor.plugin.socket.server.http.parse.impl.HttpHeaderImpl;
 import net.officefloor.plugin.stream.ServerInputStream;
-import net.officefloor.plugin.stream.servlet.ServletServerInputStream;
+import net.officefloor.plugin.stream.impl.ServerInputStreamImpl;
 
 /**
  * {@link HttpRequest} wrapping a {@link HttpServletRequest}.
@@ -47,12 +47,12 @@ public class ServletHttpRequest implements HttpRequest {
 	/**
 	 * {@link HttpHeader} instances.
 	 */
-	private List<HttpHeader> headers;
+	private List<HttpHeader> headers = null;
 
 	/**
 	 * {@link ServerInputStream}.
 	 */
-	private ServerInputStream entity;
+	private ServerInputStream entity = null;
 
 	/**
 	 * Initiate.
@@ -119,21 +119,31 @@ public class ServletHttpRequest implements HttpRequest {
 	}
 
 	@Override
-	public synchronized ServerInputStream getEntity() {
+	public synchronized ServerInputStream getEntity() throws IOException {
 
-		// Lazy load the headers
+		// Lazy obtain the entity
 		if (this.entity == null) {
+			
+			/*
+			 * Potential for lot of requests to be sent that do not provide all
+			 * data causing OOM. This however is true on processing the requests
+			 * and therefore expected to be handled by the Servlet Container.
+			 */
 
-			// Obtain the input stream
-			InputStream inputStream;
-			try {
-				inputStream = this.servletRequest.getInputStream();
-			} catch (IOException ex) {
-				inputStream = null; // Should never occur
+			// Read the contents of the entity
+			int contentLength = servletRequest.getContentLength();
+			byte[] data = new byte[contentLength];
+			InputStream inputStream = this.servletRequest.getInputStream();
+			int bytesRead = inputStream.read(data);
+			if (bytesRead < 0) {
+				bytesRead = 0; // no data, and end of stream
 			}
 
-			// Create the body
-			this.entity = new ServletServerInputStream(inputStream);
+			// Create the server input entity
+			ServerInputStreamImpl requestEntity = new ServerInputStreamImpl(
+					this.servletRequest);
+			requestEntity.inputData(data, 0, bytesRead, false);
+			this.entity = requestEntity;
 		}
 
 		// Return the entity

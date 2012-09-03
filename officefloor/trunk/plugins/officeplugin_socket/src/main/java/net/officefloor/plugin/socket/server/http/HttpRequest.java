@@ -18,6 +18,7 @@
 
 package net.officefloor.plugin.socket.server.http;
 
+import java.io.IOException;
 import java.util.List;
 
 import net.officefloor.plugin.stream.ServerInputStream;
@@ -64,7 +65,9 @@ public interface HttpRequest {
 	 * Obtains the {@link ServerInputStream} to the entity of the HTTP request.
 	 * 
 	 * @return {@link ServerInputStream} to the entity of the HTTP request.
+	 * @throws IOException
+	 *             If failure in reading the entity.
 	 */
-	ServerInputStream getEntity();
+	ServerInputStream getEntity() throws IOException;
 
 }

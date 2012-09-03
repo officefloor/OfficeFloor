@@ -228,6 +228,8 @@ public class HttpServletRequestImpl implements HttpServletRequest,
 	 *            Default {@link Locale} if not specified.
 	 * @param taskContext
 	 *            {@link TaskContext}.
+	 * @throws IOException
+	 *             If fails to read data from the {@link HttpRequest}.
 	 * @throws HttpRequestTokeniseException
 	 *             If fails to tokenise the {@link HttpRequest}.
 	 */
@@ -235,8 +237,8 @@ public class HttpServletRequestImpl implements HttpServletRequest,
 			Map<String, Object> requestAttributes, HttpSecurity security,
 			String sessionIdIdentifierName, HttpSession session,
 			ServletContext servletContext, Locale defaultLocale,
-			TaskContext<?, ?, ?> taskContext)
-			throws HttpRequestTokeniseException {
+			TaskContext<?, ?, ?> taskContext) throws IOException,
+			HttpRequestTokeniseException {
 
 		// Initiate state
 		this.connection = connection;

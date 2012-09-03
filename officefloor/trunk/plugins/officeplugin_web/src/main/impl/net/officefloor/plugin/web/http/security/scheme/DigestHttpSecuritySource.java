@@ -285,8 +285,8 @@ public class DigestHttpSecuritySource implements
 	@Override
 	public HttpSecurity authenticate(String parameters,
 			ServerHttpConnection connection, HttpSession session,
-			Map<Dependencies, Object> dependencies)
-			throws AuthenticationException {
+			Map<Dependencies, Object> dependencies) throws IOException,
+			AuthenticationException {
 
 		// Authenticate Digest as per RFC2617
 

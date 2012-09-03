@@ -778,7 +778,7 @@ public class HttpServletContainerTest extends OfficeFrameTestCase {
 	/**
 	 * Ensure able to obtain details of body.
 	 */
-	public void test_req_ServletInputStream() {
+	public void test_req_ServletInputStream() throws IOException {
 
 		// Provide stream with data
 		final ServerInputStreamImpl inputStream = new ServerInputStreamImpl(
@@ -816,7 +816,7 @@ public class HttpServletContainerTest extends OfficeFrameTestCase {
 	/**
 	 * Ensure able to obtain details of body.
 	 */
-	public void test_req_Reader() {
+	public void test_req_Reader() throws IOException {
 
 		// Provide stream with data
 		final ServerInputStreamImpl inputStream = new ServerInputStreamImpl(

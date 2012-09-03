@@ -18,6 +18,7 @@
 
 package net.officefloor.plugin.web.http.security.scheme;
 
+import java.io.IOException;
 import java.util.Map;
 
 import net.officefloor.plugin.socket.server.http.HttpHeader;
@@ -70,12 +71,15 @@ public interface HttpSecuritySource<D extends Enum<D>> {
 	 *            Dependencies for authentication as specified in initialisation
 	 *            on the {@link HttpSecuritySourceContext}.
 	 * @return {@link HttpSecurity} or <code>null</code> if not authenticated.
+	 * @throws IOException
+	 *             If failure reading authentication information.
 	 * @throws AuthenticationException
 	 *             If failure in authentication.
 	 */
 	HttpSecurity authenticate(String parameters,
 			ServerHttpConnection connection, HttpSession session,
-			Map<D, Object> dependencies) throws AuthenticationException;
+			Map<D, Object> dependencies) throws IOException,
+			AuthenticationException;
 
 	/**
 	 * Loads the unauthorised information to the {@link HttpResponse}.
