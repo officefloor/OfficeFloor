@@ -399,14 +399,13 @@ concurrency model}
 By making a thread a parameter to the function, it reduces the thread context
 switching of the pipeline concurrency model.  This is accomplished by enabling
 the pipeline architecture to behave like a thread-per-request architecture when
-there are no performance bottlenecks to isolate.  Findings and discussion are
-presented on an initial exploration of this concept with the derived Job Based
-Architecture.  The performance of the OfficeFloor implementation of the Job
-Based Architecture is also tested by a request throughput comparison against
-popular web servers.  The findings demonstrate OfficeFloor has more consistent
-throughput performance, and in many load profiles increased throughput, than
-popular web servers for servicing requests for differing characteristics of
-dynamic content.
+there are no performance bottlenecks to isolate.  Discussion is presented on an
+initial exploration of this concept with the derived Job Based Architecture. 
+The performance of the OfficeFloor implementation of the Job Based Architecture
+is also tested by a request throughput comparison against popular web servers. 
+The findings demonstrate OfficeFloor has more consistent throughput
+performance, and in many load profiles increased throughput, than popular web
+servers for servicing requests for differing characteristics of dynamic content.
 \end{abstract}
 
 
@@ -430,14 +429,14 @@ implementation for reducing the thread context switching of the pipeline
 architecture in servicing dynamic content.  As tuning is critical for
 performance of web servers~\cite{tuning-important,tuning-os-important}, which I
 believe is also important for dynamic content, I find there are trade-offs in
-both developing and tuning Internet based applications (e.g. pipelining incuring
-high thread context switching or thread-per-request incuring a large server
-footprint).  Rather than trying to optimise the choice and tuning of web server
-architecture I propose a mechanism for improving the pipeline architecture by
-reducing its thread context switching and in appropriate cases have it behave
-like a thread-per-request web server.  Furthermore, I will demonstrate how a
-thread can be a parameter to a function for isolating functions containing
-performance bottlenecks in servicing dynamic content.
+both developing and tuning Internet based applications (e.g. pipelining
+incurring high thread context switching or thread-per-request incurring a large
+server footprint).  Rather than trying to optimise the choice and tuning of web
+server architecture I propose a mechanism for improving the pipeline
+architecture by reducing its thread context switching and in appropriate cases
+have it behave like a thread-per-request web server.  Furthermore, I will
+demonstrate how a thread can be a parameter to a function for isolating
+functions containing performance bottlenecks in servicing dynamic content.
 
 
 \section{Job Based Architecture}
@@ -482,8 +481,8 @@ Network thread pool, and the Render HTTP response and Write HTTP response jobs
 are executed by the thread from the Database thread pool.
 
 The intention of the Job Based Architecture is to re-use the current thread to
-execute the next job in the pipeline if it does not have a performance
-bottleneck to isolate.  The resulting behaviour when there is no performance
+execute the next job in the pipeline if the next job does not have a performance
+bottleneck to isolate.  The resulting behaviour when there are no performance
 bottlenecks is similar to a thread-per-request architecture by servicing the
 request with one thread.  This reduces the thread context switching typically
 incurred between stages of the pipeline architecture.
@@ -550,9 +549,9 @@ The function has a dependency on a thread to be executed and the thread used by
 the function is determined as a transitive dependency of the function's
 dependencies.  Should the thread not be derived as a transitive dependency, the
 previous function's thread becomes the implicit thread to use.  This is similar
-to an implicit continuation~\cite{continuations} that executes the next
-operation after a function returns.  Therefore, a thread is a dependency of
-the function and as such a parameter.
+to an implicit continuation~\cite{continuations} that executes the next function
+after a function returns.  Therefore, a thread is a dependency of the function
+and as such a parameter.
 
 Furthermore, I propose a more complete inversion of control solution is achieved
 by making the executing thread and the possible continuations of the function be
@@ -597,7 +596,7 @@ sequence of 99 requests are made before disconnecting and reconnecting.
 
 The servers are run on a two 1.4GHz core machine with 3GB RAM while the test
 client run on a three 2.2GHz core machine with 6GB RAM.  Server and client are
-connected directly via a Cat 6 cross-over cable and run linux 2.6.32 with full
+connected directly via a Cat 6 cross-over cable and run Linux 2.6.32 with full
 duplex 1 Gb/s network cards.  File handles and TCP settings are increased to
 enable servicing 20,000 concurrent connections.
 
@@ -622,8 +621,8 @@ balance the database bottleneck against increased concurrency.  The two best
 servers based on throughput are reported.  To focus on evaluating OfficeFloor
 and avoid comparisons of these web servers, one of the servers is identified as
 \textit{L} (as it limits the number of threads) and the other as \textit{M} (as
-it uses many threads - nearly fifty times the number OfficeFloor uses for high
-concurrency).
+it uses many threads - nearly fifty times the number OfficeFloor uses for
+the high concurrency loads).
 
 
 
@@ -632,11 +631,11 @@ For the low concurrency where threads are not exhausted
 (Fig.~\ref{fig:low_concurrency_throughput}) throughput is reasonably similar.
 OfficeFloor~(\textit{O}) does have higher throughput on one NEWS and one AJAX
 connection (\textit{1n/1a}) as it only requires two threads to service, while
-the other servers require three (i.e. one selector thread and two servicing
-threads).  As the number of concurrent connections increase, the latency effects
-of the network and thread context switching is reduced for all servers.  As
-\textit{L} does not have job management overheads it has lower servicing latency
-and subsequently more throughput.
+the other servers require at least three (e.g. one selector thread and two
+servicing threads).  As the number of concurrent connections increase, the
+latency effects of the network and thread context switching is reduced for all
+servers.  As \textit{L} does not have job management overheads it has lower
+servicing latency and subsequently more throughput.
 
 \begin{figure}[!t]
 \begin{verbatim}
@@ -754,8 +753,8 @@ Dependency capsules focus on isolation for better availability, however, they
 incur thread context switching overheads~\cite{dependency-capsules} avoided by
 the Job Based Architecture.  Flux~\cite{flux} provides extrinsic dependency
 management information through task inputs and outputs to focus on avoiding
-deadlocks by task sequencing and it would be interesting to apply this to
-OfficeFloor.
+deadlocks by task sequencing and it would likely be beneficial to incorporate
+this to OfficeFloor in future work.
 
 The Actor Model provides the mechanism to isolate bottlenecks, however, the
 decoupling of message from sender~\cite{actors} allowing it to be scalable
@@ -773,8 +772,9 @@ it provides improved throughput performance.
 Future work will look at whether the more consistent throughput performance will
 improve servicing load profiles of real world traffic.  Ease of development will
 be explored along with confirming a relationship between dependency and
-performance bottleneck.  Comparisons against other architectures will be
-undertaken, such as event-based architectures to compare developer
+performance bottleneck.  Admission controls that are tailored to the dependency
+of the bottleneck will be incorporated.  Comparisons against other architectures
+will be undertaken, such as event-based architectures to compare developer
 customisations of concurrency against OfficeFloor's transitive thread dependency
 concurrency model.  Expanding to other Internet services is another future area.
 
