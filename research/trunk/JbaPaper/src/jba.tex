@@ -401,11 +401,11 @@ switching of the pipeline concurrency model.  This is accomplished by enabling
 the pipeline architecture to behave like a thread-per-request architecture when
 there are no performance bottlenecks to isolate.  Discussion is presented on an
 initial exploration of this concept with the derived Job Based Architecture. 
-The performance of the OfficeFloor implementation of the Job Based Architecture
-is also tested by a request throughput comparison against popular web servers. 
-The findings demonstrate OfficeFloor has more consistent throughput
-performance, and in many load profiles increased throughput, than popular web
-servers for servicing requests for differing characteristics of dynamic content.
+The OfficeFloor implementation of the Job Based Architecture is also performance
+tested by a request throughput comparison against popular web servers.  The
+findings demonstrate OfficeFloor has more consistent throughput performance,
+and in many load profiles increased throughput, than popular web servers for
+servicing requests for differing characteristics of dynamic content.
 \end{abstract}
 
 
@@ -754,7 +754,7 @@ incur thread context switching overheads~\cite{dependency-capsules} avoided by
 the Job Based Architecture.  Flux~\cite{flux} provides extrinsic dependency
 management information through task inputs and outputs to focus on avoiding
 deadlocks by task sequencing and it would likely be beneficial to incorporate
-this to OfficeFloor in future work.
+this into OfficeFloor in future work.
 
 The Actor Model provides the mechanism to isolate bottlenecks, however, the
 decoupling of message from sender~\cite{actors} allowing it to be scalable
