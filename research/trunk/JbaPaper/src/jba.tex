@@ -350,7 +350,7 @@
 
 \begin{document}
 %  paper title can use linebreaks \\ within to get better formatting as desired
-\title{Job Based Architecture: a low thread context switching pipeline
+\title{Job Based Architecture: a reduced thread context switching pipeline
 concurrency model}
 
 
@@ -358,7 +358,7 @@ concurrency model}
 % use a multiple column layout for up to three different
 % affiliations
 \author{\IEEEauthorblockN{Daniel Sagenschneider}
-\IEEEauthorblockA{http://officefloor.net}}
+\IEEEauthorblockA{daniel@officefloor.net}}
 
 % conference papers do not typically use \thanks and this command
 % is locked out in conference mode. If really needed, such as for
@@ -396,17 +396,17 @@ concurrency model}
 
 
 \begin{abstract}
-By making a thread a parameter to the function, with the thread determined as a
-transitive dependency of the function's dependencies, it enables
-optimising the isolation of functions containing application level performance
-bottlenecks to not consume all threads and subsequently not starve other unrelated functions of a thread.
-Findings and discussion are presented on an initial exploration of this concept
-with the derived Job Based Architecture and the performance is tested by a
-request throughput comparison of the OfficeFloor implementation against
-popular web servers.  The findings demonstrate more consistent throughput
-performance, and in many load profiles increased throughput, than
-popular web servers for servicing requests for differing
-characteristics of dynamic content.
+By making a thread a parameter to the function, it reduces the thread context
+switching of the pipeline concurrency model.  This is accomplished by enabling
+the pipeline architecture to behave like a thread-per-request architecture when
+there are no performance bottlenecks to isolate.  Findings and discussion are
+presented on an initial exploration of this concept with the derived Job Based
+Architecture.  The performance of the OfficeFloor implementation of the Job
+Based Architecture is also tested by a request throughput comparison against
+popular web servers.  The findings demonstrate OfficeFloor has more consistent
+throughput performance, and in many load profiles increased throughput, than
+popular web servers for servicing requests for differing characteristics of
+dynamic content.
 \end{abstract}
 
 
@@ -425,19 +425,19 @@ characteristics of dynamic content.
 
 
 \section{Introduction}
-This paper presents OfficeFloor and its underlying Job Based Architecture to
-enable isolating application level performance bottlenecks for servicing dynamic
-content. As tuning is critical for performance of web
-servers~\cite{tuning-important,tuning-os-important}, which I expect is also
-important for dynamic content, I find there are trade-offs in both developing
-and tuning Internet based applications (e.g. pipelining incuring high thread
-context switching or thread-per-request incuring large server footprint).
-Rather than trying to optimise the choice and tuning of web server architecture
-I propose a mechanism for improving the pipeline architecture by reducing its
-thread context switching and in appropriate cases have it behave like a
-thread-per-request web server.  Furthermore, I will demonstrate how a thread can
-be a parameter to a function for isolating functions containing performance
-bottlenecks in servicing dynamic content.
+This paper presents the Job Based Architecture and its OfficeFloor
+implementation for reducing the thread context switching of the pipeline
+architecture in servicing dynamic content.  As tuning is critical for
+performance of web servers~\cite{tuning-important,tuning-os-important}, which I
+believe is also important for dynamic content, I find there are trade-offs in
+both developing and tuning Internet based applications (e.g. pipelining incuring
+high thread context switching or thread-per-request incuring a large server
+footprint).  Rather than trying to optimise the choice and tuning of web server
+architecture I propose a mechanism for improving the pipeline architecture by
+reducing its thread context switching and in appropriate cases have it behave
+like a thread-per-request web server.  Furthermore, I will demonstrate how a
+thread can be a parameter to a function for isolating functions containing
+performance bottlenecks in servicing dynamic content.
 
 
 \section{Job Based Architecture}
@@ -445,7 +445,7 @@ The Job Based Architecture builds on the concepts of the Pipeline
 Pattern~\cite{pipeline}, Continuations~\cite{continuations}, Inversion of
 Control Pattern~\cite{ioc}, Reactor Pattern~\cite{reactor}, Combine
 Pattern~\cite{pipeline} and Wrap Pattern~\cite{pipeline} to use multiple thread
-pools to isolate processing of certain pipelined tasks based on their
+pools to isolate the execution of certain pipelined tasks based on their
 dependencies.
 
 Within a Job Based Architecture the application functionality is decomposed into
@@ -453,6 +453,47 @@ jobs that are executed sequentially (Pipeline Pattern~\cite{pipeline}).  The
 construction of the sequence of jobs is particular to the request being
 serviced.  An example sequence of jobs to service a request to retrieve data
 from a database is in Table~\ref{tab:example_request_jobs}.
+
+A job is a pipelined task that provides additional meta-data by specifying its
+required dependencies and through continuations allows dynamic construction of
+the pipeline.  Each job is constructed via the Inversion of Control Pattern and
+through extrinsic dependency management~\cite{ioc} the job defines its required
+dependencies (e.g. database connection).  Based on the dependencies required of
+the job, the job will be dispatched (Reactor Pattern~\cite{reactor}) to a
+particular thread pool (Combine Pattern~\cite{pipeline}) for execution.
+The Wrap Pattern~\cite{pipeline} is used within the thread pools to handle
+bursts of requests.  The dynamic construction of the sequence of jobs is
+achieved by providing each job with a list of possible
+continuations~\cite{continuations} that encapsulate the construction and
+dispatching of the next possible jobs in the sequence. Managing state between
+jobs for the application is contained within the dependencies.  For the sequence
+of jobs in Table~\ref{tab:example_request_jobs}, thread pools are configured as
+per Table~\ref{tab:example_request_thread_pools} to execute the jobs.
+
+Thread context switching is reduced in the Job Based Architecture over more
+conventional pipeline architectures.  As the job dispatching to thread pools has
+the dependency information of the next job, it can determine if the current
+thread may execute the next job and subsequently reduce the thread context
+switching.  In Table~\ref{tab:example_request_thread_pools}, the Default thread
+pool does not contain threads but executes its jobs by re-using the thread of
+the previous job.  The result is that the Parse HTTP request, Dispatch HTTP
+request and Validate client data jobs are executed by the thread from the
+Network thread pool, and the Render HTTP response and Write HTTP response jobs
+are executed by the thread from the Database thread pool.
+
+The intention of the Job Based Architecture is to re-use the current thread to
+execute the next job in the pipeline if it does not have a performance
+bottleneck to isolate.  The resulting behaviour when there is no performance
+bottlenecks is similar to a thread-per-request architecture by servicing the
+request with one thread.  This reduces the thread context switching typically
+incurred between stages of the pipeline architecture.
+
+As extrinsic dependency management is available at compile time regarding the
+jobs, compile time optimisations may be used to reduce thread decision
+overheads.  This also enables providing tools to aid developers such as
+OfficeFloor's graphical configuration editors.  Furthermore,  I expect over the
+evolution of the application the changing performance bottlenecks within tasks
+can be better identified through task dependencies than task type.
 
 \begin{table}[!t]
 \renewcommand{\arraystretch}{1.3}
@@ -480,22 +521,6 @@ Write HTTP response & HTTP response, Socket \\
 \end{tabular}
 \end{table}
 
-A job provides additional meta-data over a pipelined task by specifying its
-required dependencies and through continuations allows dynamic construction of
-the job sequence.  Each job is constructed via the Inversion of Control Pattern
-and through extrinsic dependency management~\cite{ioc} the job defines its
-required dependencies (e.g. database connection).  Based on the dependencies
-required of the job, the job will be dispatched (Reactor Pattern~\cite{reactor})
-to a particular thread pool (Combine Pattern~\cite{pipeline}) for execution.
-The Wrap Pattern~\cite{pipeline} is used within the thread pools to handle
-bursts of requests.  The dynamic construction of the sequence of jobs is
-achieved by providing each job a list of possible
-continuations~\cite{continuations} that encapsulate the construction and
-dispatching of the possible next jobs in the sequence. Managing state between
-jobs for the application is contained within the dependencies.  For the sequence
-of jobs in Table~\ref{tab:example_request_jobs}, thread pools are configured as
-per Table~\ref{tab:example_request_thread_pools} to execute the jobs.
-
 \begin{table}[!t]
 \renewcommand{\arraystretch}{1.3}
 \caption{Example assigning of thread pool to jobs by dependency}
@@ -518,92 +543,61 @@ Default & - & Parse HTTP request, \\
 \end{tabular}
 \end{table}
 
-Thread context switching is reduced in the Job Based Architecture over more
-conventional pipeline architectures, as the job dispatching to thread pools uses
-the dependency information of the next job to determine if the next job may be
-executed by the current thread.  In
-Table~\ref{tab:example_request_thread_pools}, the \textit{Default} thread pool
-does not actually contain threads but executes its jobs by re-using the thread
-of the previous job.  In other words, the Parse HTTP request, Dispatch HTTP
-request and Validate client data jobs are executed by the thread from the
-Network thread pool and the Render HTTP response and Write HTTP response jobs
-are executed by the thread from the Database thread pool.  The Write HTTP
-response job may however be completed by the Network thread pool if the send
-socket buffer is full.
-
-The intention of the Job Based Architecture is that application level
-bottlenecks (identified through a job's dependencies) in servicing a particular
-stage (e.g. blocking database call) is assigned to a particular thread pool and
-does not affect other requests not subject to the bottleneck.  Furthermore,
-should there be no performance bottlenecks to isolate (e.g. database data is
-cached) the servicing of the request behaves like a thread-per-request web
-server by being executed by one thread.
-
-As extrinsic dependency management is available at compile time regarding the
-jobs, compile time optimisations may be used to reduce thread decision
-overheads.  This also enables providing tools to aid developers (such as
-OfficeFloor's graphical configuration editors).  Furthermore, it can reduce
-arising bottlenecks from human configuration/coding errors based on task type
-especially as tasks may change their processing characteristics over the
-evolution of the application and I expect their changing performance bottlenecks
-can be better identified through task dependencies than task type.
-
-
 \section{Thread is a Parameter to the Function}
 While the previous section explains the mechanism, I propose more fundamentally
 that a thread should be a parameter to the function much like a continuation.
-The function has a dependency on a thread to be executed and the thread
-\textit{passed} to the function is determined as a transitive dependency of the
-function's dependencies.  Should the thread not be derived as a transitive
-dependency, the implicit thread of re-using the previous function's thread is
-passed (similar to an implicit continuation that executes the next operation
-after a function returns).  And therefore a thread is a dependency of the
-function and as such a parameter.
+The function has a dependency on a thread to be executed and the thread used by
+the function is determined as a transitive dependency of the function's
+dependencies.  Should the thread not be derived as a transitive dependency, the
+previous function's thread becomes the implicit thread to use.  This is similar
+to an implicit continuation~\cite{continuations} that executes the next
+operation after a function returns.  Therefore, a thread is a dependency of
+the function and as such a parameter.
 
-Furthermore I propose providing continuations and a thread as parameters of a
-function provides a more complete inversion of control.  The function is
-provided dependencies as inputs, with one being the thread to use, and
-continuations for where execution is to continue (possibly by another thread)
-with the outputs of the function.
+Furthermore, I propose a more complete inversion of control solution is achieved
+by making the executing thread and the possible continuations of the function be
+parameters of the function.  The function has dependencies as inputs (with one
+being the thread to use) and continuations for where execution is to continue
+(possibly by another thread) with the outputs of the function.
 
 The resulting concurrency model is similar to a pipeline of work managed within
 an office where people are assigned to undertake a particular function.
 The office process is formed by connecting tasks together with continuations
-(e.g. \textit{outboxes} which feed as input to the next possible tasks in the
-process).  The tasks are grouped based on similarity (e.g. dependency on
-particular skill or resource) and based on that similarity have a particular
-team (thread pool) assigned.  Teams may take on smaller tasks in the process
-before handing off to another team for improved efficiency.  Differing teams can
-then be scaled up and down based on the load of tasks for only the groupings
-they are responsible.  The resulting model disallows one function to consume all
-the people (threads).  This is the original inspiration behind OfficeFloor and
-where I derived its name.
+(e.g. outboxes which feed as input to the next possible tasks in the process).
+The tasks are grouped based on similarity (e.g. dependency on particular skill
+or resource) and based on that similarity have a particular team (thread pool)
+assigned.  Teams may take on smaller tasks in the process before handing off to
+another team for improved efficiency.  Differing teams can then be scaled up and
+down based on the load of tasks in the groupings for which they are responsible.
+The resulting model ensures one function does not consume all the people
+(threads).  This is the original inspiration behind OfficeFloor and where I
+derived its name.
 
 
 
 \section{Performance Evaluation}
-To focus evaluation on the isolation of a bottleneck, connections sending only
-one of the following requests is established with the load profile of
-connections varied:
+To focus evaluation on servicing requests with and without bottlenecks,
+connections sending only one of the following requests is established with the
+load profile of connections varied:
 \begin{IEEEitemize}
 \item NEWS: requests resources generated from cached content (e.g. browsing the
-latest news feeds).
+latest news feeds); and
 \item AJAX: requests requiring communication with a database (e.g. AJAX calls to
 retrieve/update data in a database).
 \end{IEEEitemize}
 
 The AJAX requests depend on the database which is the bottleneck in this
-evaluation; connection pool of 100 connections with a 100 millisecond sleep in
-the servicing code to simulate the database interaction.
+evaluation.  A connection pool of 100 connections is used with a 100 millisecond
+sleep in the servicing code to simulate the database interaction.
 
 Each test run is for 60 seconds with each result obtained by averaging 10 runs
-after a 5 minute warm up.  Response entities contain only a single byte to not
-incur bandwidth issues.  To avoid connection throttling by the web servers, a
+after a 5 minute warm up.  Response entities contain only a single byte so there
+are no bandwidth issues.  To avoid connection throttling by the web servers, a
 sequence of 99 requests are made before disconnecting and reconnecting.
 
 The servers are run on a two 1.4GHz core machine with 3GB RAM while the test
 client run on a three 2.2GHz core machine with 6GB RAM.  Server and client are
-connected directly via a Cat 6 cross-over cable and run linux v2.6.32 with full
+connected directly via a Cat 6 cross-over cable and run linux 2.6.32 with full
 duplex 1 Gb/s network cards.  File handles and TCP settings are increased to
 enable servicing 20,000 concurrent connections.
 
@@ -614,6 +608,35 @@ requests and an additional thread pool is configured for jobs with a
 application code and \textit{O} identifies the OfficeFloor results.  All
 requests are mapped to the \textit{service} method via URL
 continuations~\cite{url-continuation}.
+
+
+\subsection{Compared Web Severs (L \& M)}
+Popular web servers, identified from the Netcraft August 2012 survey, for
+servicing requests for dynamic content through PHP~5.3.2 (Apache~2.2.14, Nginx
+1.2.3) and Java~1.6.0\_26 (Jetty~8.1.4, Grizzly~2.2.11, Tomcat~7.0.29) are used
+for comparison.  IIS is excluded due to requiring a different operating system.
+The code is contained in one PHP snippet / Servlet as an \textit{if} statement
+to return immediately (NEWS) or sleep on the pooled database connection (AJAX).
+As PHP has a share nothing architecture, a compromise of 150 clients is used to
+balance the database bottleneck against increased concurrency.  The two best
+servers based on throughput are reported.  To focus on evaluating OfficeFloor
+and avoid comparisons of these web servers, one of the servers is identified as
+\textit{L} (as it limits the number of threads) and the other as \textit{M} (as
+it uses many threads - nearly fifty times the number OfficeFloor uses for high
+concurrency).
+
+
+
+\section{Performance Results}
+For the low concurrency where threads are not exhausted
+(Fig.~\ref{fig:low_concurrency_throughput}) throughput is reasonably similar.
+OfficeFloor~(\textit{O}) does have higher throughput on one NEWS and one AJAX
+connection (\textit{1n/1a}) as it only requires two threads to service, while
+the other servers require three (i.e. one selector thread and two servicing
+threads).  As the number of concurrent connections increase, the latency effects
+of the network and thread context switching is reduced for all servers.  As
+\textit{L} does not have job management overheads it has lower servicing latency
+and subsequently more throughput.
 
 \begin{figure}[!t]
 \begin{verbatim}
@@ -649,39 +672,12 @@ public class ServiceLogic {
  }
 }
 \end{verbatim}
-\caption{OfficeFloor application code. Though not used, qualifying
-annotations enable distinguishing dependencies of the same type.}
+\caption[Caption for Code]{OfficeFloor application code.\footnotemark }
 \label{fig:officefloor_code}
 \end{figure}
 
-
-\subsection{Compared Web Severs (L \& M)}
-Popular web servers, identified from the Netcraft August 2012 survey, for
-servicing requests for dynamic content through PHP~v5.3.2 (Apache~v2.2.14,
-Nginx~v1.2.3) and Servlets (Jetty~v8.1.4, Grizzly~v2.2.11, Tomcat~v7.0.29) are
-used for comparison.  IIS is excluded due to requiring a different operating
-system.  The code is contained in one PHP snippet / Servlet as an if statement
-to return immediately (NEWS) or sleep on the pooled database connection (AJAX).
-As PHP has a share nothing architecture, a compromise of 150 clients is used to
-balance the database bottleneck against increased concurrency.  The two best
-servers based on throughput are reported.  To focus on evaluating OfficeFloor
-and avoid comparisons of these web servers, one of the servers is identified as
-\textit{L} (as it limits the number of threads) and the other as \textit{M} (as
-it uses many threads - nearly fifty times the number OfficeFloor uses for high
-concurrency).
-
-
-
-\section{Performance Results}
-For the low concurrency where threads are not exhausted
-(Fig.~\ref{fig:low_concurrency_throughput}) throughput is reasonably similar.
-OfficeFloor~(\textit{O}) does have higher throughput on one NEWS and one AJAX
-connection (\textit{1n/1a}) as it only requires two threads to service, while
-the other servers require three (i.e. one selector thread and two servicing
-threads).  As the number of concurrent connections increase, the effects of the
-network latency is reduced and as \textit{L} does not incur the job management
-overheads of the Job Based Architecture it has lower servicing latency and
-subsequently more throughput.
+\footnotetext{Dependencies of the same type are distinguished by qualifying
+annotations.}
 
 As the concurrency increases (Fig.~\ref{fig:medium_concurrency_throughput}),
 server \textit{L} shows its limitations.  With its lower latency it favours a
@@ -690,16 +686,16 @@ becomes the majority of the load its limited number of threads become blocked
 servicing the AJAX requests starving the NEWS requests.  Server \textit{M}
 continues to service requests by creating a substantial number of threads, while
 OfficeFloor isolates the bottleneck of the AJAX requests to the Database thread
-pool leaving the Network threads to service the NEWS requests.
+pool leaving the Network threads to service a consistent number of the NEWS
+requests.
 
 Increasing concurrency by another magnitude
 (Fig.~\ref{fig:high_concurrency_throughput}) causes server \textit{M} to create
-a significant number of threads that adversely affects its performance.
-While all servers favour throughput of the NEWS requests, only OfficeFloor by
-isolating the database performance bottleneck and not creating a significant
-number of threads is able to continue servicing a consistent throughput of both
-NEWS and AJAX requests when the load profile does not favour the \textit{easier}
-NEWS requests.
+a significant number of threads that adversely affects its performance.  While
+all servers favour throughput of the quick to service NEWS requests, only
+OfficeFloor is able to continue servicing a consistent throughput of both NEWS
+and AJAX requests by acting as a pipeline architecture to isolate the database
+performance bottleneck of the AJAX request.
 
 \begin{figure}[!t]
 \centering 
@@ -728,53 +724,51 @@ NEWS requests.
 \section{Related Work}
 OfficeFloor and its Job Based Architecture is to the best of my knowledge the
 first time that the patterns of pipeline, continuations, inversion of control
-and reactor have been used with the abstraction of a thread as a transitive
-dependency to achieve a low thread context switching pipeline concurrency model
-that focuses on application level performance bottleneck isolation.
+and reactor have been used together with the abstraction of a thread as a
+transitive dependency to achieve a reduced thread context switching pipeline
+concurrency model.
 
-Minimising the cost of bottlenecks is one means to improve server performance.
+Minimising the cost of bottlenecks is one means of improving server performance.
  Monadic threads~\cite{monadic-thread} drive the operating system to provide
 asynchronous resources to avoid blocking and starvation.  Comparison work
 identified that servers with smaller footprints provide more memory for caching
 and subsequently better performance~\cite{low-server-footprint}.  While
 minimising the cost of bottlenecks is important to server performance, findings
 of this paper also identify that isolation of performance bottlenecks is
-important to more consistent server performance.
+important for more consistent server performance.
 
-Various abstractions of concurrency have been developed that focus on the task
-type.  JAWS provides flexible concurrency components to code tasks
-within~\cite{jaws}.  Aspen combines tasks into modules~\cite{aspen}.  Saburo
-abstracts the concurrency model via annotations on the tasks~\cite{saburo}.  Hop
-enables the developer to provide code to dynamic decide the concurrency model
-for tasks at runtime~\cite{hop}.  I however propose the abstraction of the
-concurrency model should be based on the thread being a transitive dependency of
-the task.
+Various concurrency models have been developed that focus on the task type.
+JAWS provides flexible concurrency components to code tasks within~\cite{jaws}.
+Aspen combines tasks into modules~\cite{aspen}.  Saburo abstracts the
+concurrency model via annotations on the tasks~\cite{saburo}.  Hop enables the
+developer to provide code to dynamic decide the concurrency model for tasks at
+runtime~\cite{hop}.  I, however, propose the concurrency model should be based
+on the thread being a transitive dependency of the task.
 
 Dependencies have been previously used in various models.  The SEDA architecture
 uses resource controllers to adapt resource usage of stages for handling
-scale~\cite{seda}.  Spring implements dependency injection~\cite{ioc} however it
+scale~\cite{seda}.  Spring implements dependency injection~\cite{ioc} but it
 relies on the Servlet thread-per-request concurrency model.  Capriccio utilises
 resource-aware scheduling of operating system level resources~\cite{capriccio}.
-Dependency capsules focus on isolation for better availability however they
+Dependency capsules focus on isolation for better availability, however, they
 incur thread context switching overheads~\cite{dependency-capsules} avoided by
 the Job Based Architecture.  Flux~\cite{flux} provides extrinsic dependency
-management information through task inputs and outputs but focuses on using the
-information for task sequencing to avoiding deadlocks rather than isolating
-bottlenecks.
+management information through task inputs and outputs to focus on avoiding
+deadlocks by task sequencing and it would be interesting to apply this to
+OfficeFloor.
 
-Actors do provide the mechanism to isolate bottlenecks however their decoupling
-of message from sender~\cite{actors}, while scalable across distributed nodes,
-is not gaining local efficiencies by working across organisational (iOrg)
-boundaries for the \textit{smaller} tasks.
+The Actor Model provides the mechanism to isolate bottlenecks, however, the
+decoupling of message from sender~\cite{actors} allowing it to be scalable
+across distributed nodes is losing local efficiencies by not working across
+organisational (iOrg) boundaries for the smaller tasks.
 
 
 \section{Conclusion and Future Work}
-Lowering the thread context switching of the pipeline architecture by the thread
-being a transitive dependency of the task is shown to provide more consistent
-performance across differing load profiles than popular web servers for
-servicing dynamic content by avoiding creating excessive threads, avoiding
-thread starvation and avoiding excessive thread context switching.  Furthermore,
-in many load profiles it provides improved throughput performance.
+Reducing the thread context switching of the pipeline architecture is achieved
+by the thread being a transitive dependency of the task.  This is shown to
+provide more consistent performance across differing load profiles than popular
+web servers for servicing dynamic content.  Furthermore, in many load profiles
+it provides improved throughput performance.
 
 Future work will look at whether the more consistent throughput performance will
 improve servicing load profiles of real world traffic.  Ease of development will
@@ -784,9 +778,9 @@ undertaken, such as event-based architectures to compare developer
 customisations of concurrency against OfficeFloor's transitive thread dependency
 concurrency model.  Expanding to other Internet services is another future area.
 
-Though not discussed in this paper OfficeFloor implements process
+Though not discussed in this paper, OfficeFloor implements process
 continuations~\cite{process-continuation} to provide parallel processing.  I
-expect with further research this will prove useful to address performance
+predict with further research this will prove useful to address performance
 bottleneck problems of interacting with multiple downstream systems, such as the
 reverse 10K problem~\cite{reverse-ten-k-problem}.
 
