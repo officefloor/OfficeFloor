@@ -25,6 +25,7 @@ import net.officefloor.frame.api.execute.TaskContext;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.api.manage.WorkManager;
+import net.officefloor.frame.impl.spi.team.MockTeamIdentifier;
 import net.officefloor.frame.impl.spi.team.OnePersonTeam;
 import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
 import net.officefloor.frame.internal.structure.ProcessState;
@@ -34,7 +35,7 @@ import net.officefloor.frame.test.AbstractOfficeConstructTestCase;
 /**
  * Tests the {@link ProcessState} is appropriately passed between {@link Work}
  * instances of the Office.
- *
+ * 
  * @author Daniel Sagenschneider
  */
 public class OfficeProcessStateTest extends AbstractOfficeConstructTestCase {
@@ -51,7 +52,8 @@ public class OfficeProcessStateTest extends AbstractOfficeConstructTestCase {
 		final Object parameter = new Object();
 
 		// Add the team
-		this.constructTeam("TEAM", new OnePersonTeam("TEAM", 10));
+		this.constructTeam("TEAM", new OnePersonTeam("TEAM",
+				new MockTeamIdentifier(), 10));
 
 		// Add the Managed Object
 		this.constructManagedObject(new ManagedObjectOne(), "MANAGED_OBJECT",
@@ -119,7 +121,7 @@ public class OfficeProcessStateTest extends AbstractOfficeConstructTestCase {
 
 		/**
 		 * Initiate.
-		 *
+		 * 
 		 * @param parameter
 		 *            Parameter to invoke delegate work with.
 		 */
@@ -175,7 +177,7 @@ public class OfficeProcessStateTest extends AbstractOfficeConstructTestCase {
 
 		/**
 		 * Obtains the received parameter;
-		 *
+		 * 
 		 * @return Received parameter;
 		 */
 		public Object getParameter() {
@@ -227,7 +229,7 @@ public class OfficeProcessStateTest extends AbstractOfficeConstructTestCase {
 
 		/**
 		 * Specifies the parameter.
-		 *
+		 * 
 		 * @param parameter
 		 *            Parameter.
 		 */
@@ -237,7 +239,7 @@ public class OfficeProcessStateTest extends AbstractOfficeConstructTestCase {
 
 		/**
 		 * Obtains the parameter.
-		 *
+		 * 
 		 * @return Parameter.
 		 */
 		public Object getParameter() {

@@ -40,7 +40,7 @@ public class PassiveTeamSource extends AbstractTeamSource {
 	}
 
 	@Override
-	protected Team createTeam(TeamSourceContext context) throws Exception {
+	public Team createTeam(TeamSourceContext context) throws Exception {
 		return new PassiveTeam();
 	}
 

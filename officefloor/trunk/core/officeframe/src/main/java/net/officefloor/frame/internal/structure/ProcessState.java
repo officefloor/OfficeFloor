@@ -28,6 +28,8 @@ import net.officefloor.frame.api.manage.UnknownTaskException;
 import net.officefloor.frame.api.manage.UnknownWorkException;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
+import net.officefloor.frame.spi.team.Team;
+import net.officefloor.frame.spi.team.TeamIdentifier;
 
 /**
  * <p>
@@ -118,8 +120,12 @@ public interface ProcessState {
 	 *            {@link ManagedObject} instances bound to this
 	 *            {@link ProcessState} requiring unloading (rather than relying
 	 *            on the {@link OfficeManager}).
+	 * @param currentTeam
+	 *            {@link TeamIdentifier} of the current {@link Team} completing
+	 *            the {@link ThreadState}.
 	 */
-	void threadComplete(ThreadState thread, JobNodeActivateSet activeSet);
+	void threadComplete(ThreadState thread, JobNodeActivateSet activeSet,
+			TeamIdentifier currentTeam);
 
 	/**
 	 * Obtains the {@link ManagedObjectContainer} for the input index.

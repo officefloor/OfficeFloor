@@ -18,6 +18,7 @@
 
 package net.officefloor.frame.impl.spi.team.stress;
 
+import net.officefloor.frame.impl.spi.team.MockTeamIdentifier;
 import net.officefloor.frame.spi.team.Job;
 import net.officefloor.frame.spi.team.Team;
 import net.officefloor.frame.spi.team.source.TeamSource;
@@ -132,7 +133,7 @@ public abstract class AbstractTeamStressTest extends OfficeFrameTestCase {
 			}
 
 			// Assign again (as new job)
-			this.getTeam().assignJob(this.clone());
+			this.getTeam().assignJob(this.clone(), new MockTeamIdentifier());
 			return true;
 		}
 	}
@@ -201,7 +202,7 @@ public abstract class AbstractTeamStressTest extends OfficeFrameTestCase {
 
 		// Run the jobs
 		for (int i = 0; i < jobs.length; i++) {
-			this.team.assignJob(jobs[i]);
+			this.team.assignJob(jobs[i], new MockTeamIdentifier());
 		}
 
 		// Capture start time for timing out

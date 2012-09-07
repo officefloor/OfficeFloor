@@ -26,6 +26,7 @@ import net.officefloor.frame.internal.structure.JobNodeActivateSet;
 import net.officefloor.frame.internal.structure.JobNode;
 import net.officefloor.frame.internal.structure.LinkedListSet;
 import net.officefloor.frame.internal.structure.ThreadState;
+import net.officefloor.frame.spi.team.TeamIdentifier;
 
 /**
  * Implementation of {@link JobNodeActivateSet}.
@@ -45,7 +46,7 @@ public class JobNodeActivatableSetImpl implements JobNodeActivatableSet {
 	};
 
 	/*
-	 * ========================= JobActivatableSet ============================
+	 * ========================= JobNodeActivatableSet =======================
 	 */
 
 	@Override
@@ -59,7 +60,7 @@ public class JobNodeActivatableSetImpl implements JobNodeActivatableSet {
 	}
 
 	@Override
-	public void activateJobNodes() {
+	public void activateJobNodes(TeamIdentifier currentTeam) {
 
 		// Iterate over the jobs activating them
 		ActivatedJobNode notifiedJobNode = this.jobNodes.getHead();
@@ -76,7 +77,7 @@ public class JobNodeActivatableSetImpl implements JobNodeActivatableSet {
 				}
 
 				// Activate the job
-				notifiedJobNode.jobNode.activateJob();
+				notifiedJobNode.jobNode.activateJob(currentTeam);
 			}
 
 			// Move to next job for activating

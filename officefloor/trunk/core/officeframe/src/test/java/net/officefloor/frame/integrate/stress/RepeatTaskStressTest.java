@@ -21,14 +21,16 @@ package net.officefloor.frame.integrate.stress;
 import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.execute.TaskContext;
 import net.officefloor.frame.api.execute.Work;
+import net.officefloor.frame.impl.spi.team.ExecutorFixedTeamSource;
 import net.officefloor.frame.impl.spi.team.LeaderFollowerTeam;
+import net.officefloor.frame.impl.spi.team.MockTeamIdentifier;
 import net.officefloor.frame.impl.spi.team.OnePersonTeam;
 import net.officefloor.frame.spi.team.Team;
 import net.officefloor.frame.test.AbstractOfficeConstructTestCase;
 
 /**
  * Tests running the same {@link Task} many times.
- *
+ * 
  * @author Daniel Sagenschneider
  */
 public class RepeatTaskStressTest extends AbstractOfficeConstructTestCase {
@@ -39,7 +41,7 @@ public class RepeatTaskStressTest extends AbstractOfficeConstructTestCase {
 	 */
 	@StressTest
 	public void test_StressRepeat_OnePersonTeam() throws Exception {
-		this.doTest(new OnePersonTeam("TEST", 100));
+		this.doTest(new OnePersonTeam("TEST", new MockTeamIdentifier(), 100));
 	}
 
 	/**
@@ -48,12 +50,23 @@ public class RepeatTaskStressTest extends AbstractOfficeConstructTestCase {
 	 */
 	@StressTest
 	public void test_StressRepeat_LeaderFollowerTeam() throws Exception {
-		this.doTest(new LeaderFollowerTeam("TEST", 5, 100));
+		this.doTest(new LeaderFollowerTeam("TEST", new MockTeamIdentifier(), 5,
+				100));
+	}
+
+	/**
+	 * Ensures no issues arising in stress repeating a {@link Task} with a
+	 * {@link ExecutorFixedTeamSource}.
+	 */
+	@StressTest
+	public void test_StressRepeat_ExecutorFixedTeam() throws Exception {
+		this.doTest(ExecutorFixedTeamSource.createTeam("TEST",
+				new MockTeamIdentifier(), 5));
 	}
 
 	/**
 	 * Does the repeat stress test.
-	 *
+	 * 
 	 * @param team
 	 *            {@link Team} to use to run the {@link Task} instances.
 	 */
@@ -75,8 +88,8 @@ public class RepeatTaskStressTest extends AbstractOfficeConstructTestCase {
 		this.invokeWork("work", null, MAX_RUN_TIME);
 
 		// Ensure correct number of repeats
-		assertEquals("Incorrect number of repeats", REPEAT_COUNT, repeat
-				.getRepeatCount());
+		assertEquals("Incorrect number of repeats", REPEAT_COUNT,
+				repeat.getRepeatCount());
 	}
 
 	/**
@@ -96,7 +109,7 @@ public class RepeatTaskStressTest extends AbstractOfficeConstructTestCase {
 
 		/**
 		 * Initiate.
-		 *
+		 * 
 		 * @param maxRepeatCalls
 		 *            Number of times to repeat.
 		 */
@@ -113,7 +126,7 @@ public class RepeatTaskStressTest extends AbstractOfficeConstructTestCase {
 
 		/**
 		 * Repeating task.
-		 *
+		 * 
 		 * @param context
 		 *            {@link TaskContext}.
 		 */

@@ -54,6 +54,7 @@ import net.officefloor.frame.spi.governance.Governance;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.spi.team.Team;
+import net.officefloor.frame.spi.team.TeamIdentifier;
 import net.officefloor.frame.spi.team.source.ProcessContextListener;
 
 /**
@@ -315,7 +316,7 @@ public class ProcessStateImpl implements ProcessState {
 
 	@Override
 	public void threadComplete(ThreadState thread,
-			JobNodeActivateSet activateSet) {
+			JobNodeActivateSet activateSet, TeamIdentifier currentTeam) {
 
 		// Removing completed thread so must obtain process lock
 		boolean isProcessComplete = false;
@@ -333,7 +334,7 @@ public class ProcessStateImpl implements ProcessState {
 				for (int i = 0; i < this.managedObjectContainers.length; i++) {
 					ManagedObjectContainer container = this.managedObjectContainers[i];
 					if (container != null) {
-						container.unloadManagedObject(activateSet);
+						container.unloadManagedObject(activateSet, currentTeam);
 					}
 				}
 
@@ -341,7 +342,7 @@ public class ProcessStateImpl implements ProcessState {
 				for (ProcessContextListener listener : this.processContextListeners) {
 					listener.processCompleted(this.processIdentifier);
 				}
-				
+
 				// Flag to profile that process complete
 				if (this.processProfiler != null) {
 					this.processProfiler.processCompleted();

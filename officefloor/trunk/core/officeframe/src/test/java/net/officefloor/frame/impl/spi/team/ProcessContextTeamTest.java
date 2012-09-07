@@ -61,7 +61,7 @@ public class ProcessContextTeamTest extends OfficeFrameTestCase {
 	public void testPassiveExecuteJob() {
 
 		// Create the team
-		Team team = new ProcessContextTeam();
+		Team team = new ProcessContextTeam(new MockTeamIdentifier());
 
 		// Create the mock task (completes immediately)
 		MockTaskContainer task = new MockTaskContainer();
@@ -69,7 +69,7 @@ public class ProcessContextTeamTest extends OfficeFrameTestCase {
 
 		// Run team and execute a task
 		team.startWorking();
-		team.assignJob(task);
+		team.assignJob(task, new MockTeamIdentifier());
 		team.stopWorking();
 
 		// Ensure the task executed
@@ -84,7 +84,8 @@ public class ProcessContextTeamTest extends OfficeFrameTestCase {
 	public void testExecuteJobWithContextThread() throws Exception {
 
 		// Create the team
-		final ProcessContextTeam team = new ProcessContextTeam();
+		final ProcessContextTeam team = new ProcessContextTeam(
+				new MockTeamIdentifier());
 
 		// Mocks
 		final WorkManager workManager = this
@@ -207,7 +208,7 @@ public class ProcessContextTeamTest extends OfficeFrameTestCase {
 			public void setNextJob(Job job) {
 				this.nextJob = job;
 			}
-		});
+		}, new MockTeamIdentifier());
 
 		// Ensure Job to be executed
 		synchronized (isJobExecuted) {

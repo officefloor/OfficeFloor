@@ -117,13 +117,22 @@ public class RawTeamMetaDataImpl implements RawTeamMetaDataFactory,
 			return null; // can not carry one
 		}
 
+		Team team;
 		ProcessContextListener[] processContextListeners;
 		try {
-			// Initialise the team source
+			// Create the team source context
 			SourceProperties properties = configuration.getProperties();
 			TeamSourceContextImpl context = new TeamSourceContextImpl(false,
 					teamName, properties, sourceContext);
-			teamSource.init(context);
+
+			// Create the team
+			team = teamSource.createTeam(context);
+			if (team == null) {
+				// Indicate failed to provide team
+				issues.addIssue(AssetType.TEAM, teamName,
+						"TeamSource failed to provide Team");
+				return null; // can not carry on
+			}
 
 			// Obtain the Process Context Listeners
 			processContextListeners = context
@@ -152,27 +161,9 @@ public class RawTeamMetaDataImpl implements RawTeamMetaDataFactory,
 
 		} catch (Throwable ex) {
 			// Indicate failure to initialise
-			issues.addIssue(AssetType.TEAM, teamName,
-					"Failed to initialise TeamSource", ex);
-			return null; // can not carry on
-		}
-
-		Team team;
-		try {
-			// Create the team
-			team = teamSource.createTeam();
-			if (team == null) {
-				// Indicate failed to provide team
-				issues.addIssue(AssetType.TEAM, teamName,
-						"TeamSource failed to provide Team");
-				return null; // can not carry on
-			}
-
-		} catch (Throwable ex) {
-			// Indicate failed to create team
 			issues.addIssue(AssetType.TEAM, teamName, "Failed to create Team",
 					ex);
-			return null; // Can not carry on
+			return null; // can not carry on
 		}
 
 		// Return the raw meta-data

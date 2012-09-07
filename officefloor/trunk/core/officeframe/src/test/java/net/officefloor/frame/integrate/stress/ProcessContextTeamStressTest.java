@@ -22,6 +22,7 @@ import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.api.manage.WorkManager;
+import net.officefloor.frame.impl.spi.team.MockTeamIdentifier;
 import net.officefloor.frame.impl.spi.team.OnePersonTeam;
 import net.officefloor.frame.impl.spi.team.ProcessContextTeam;
 import net.officefloor.frame.impl.spi.team.ProcessContextTeamSource;
@@ -57,9 +58,8 @@ public class ProcessContextTeamStressTest extends
 
 		// Provide the teams
 		this.constructTeam("CONTEXT_TEAM", ProcessContextTeamSource.class);
-		this
-				.constructTeam("STATIC_TEAM", new OnePersonTeam("STATIC_TEAM",
-						100));
+		this.constructTeam("STATIC_TEAM", new OnePersonTeam("STATIC_TEAM",
+				new MockTeamIdentifier(), 100));
 
 		// Create the context parameters
 		ContextParameter[] contextParameters = new ContextParameter[CONTEXT_WORK_COUNT];

@@ -22,6 +22,8 @@ import net.officefloor.frame.spi.governance.Governance;
 import net.officefloor.frame.spi.governance.GovernanceContext;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.frame.spi.team.JobContext;
+import net.officefloor.frame.spi.team.Team;
+import net.officefloor.frame.spi.team.TeamIdentifier;
 
 /**
  * Provides control over the {@link Governance}.
@@ -93,6 +95,9 @@ public interface GovernanceControl<I, F extends Enum<F>> {
 	 *            {@link JobNode}.
 	 * @param activateSet
 	 *            {@link JobNodeActivateSet}.
+	 * @param currentTeam
+	 *            {@link TeamIdentifier} of the current {@link Team} enforcing
+	 *            the {@link Governance}.
 	 * @param context
 	 *            ContainerContext.
 	 * @return <code>true</code> if the {@link Governance} was enforced.
@@ -101,8 +106,8 @@ public interface GovernanceControl<I, F extends Enum<F>> {
 	 */
 	boolean enforceGovernance(GovernanceContext<F> governanceContext,
 			JobContext jobContext, JobNode jobNode,
-			JobNodeActivateSet activateSet, ContainerContext context)
-			throws Throwable;
+			JobNodeActivateSet activateSet, TeamIdentifier currentTeam,
+			ContainerContext context) throws Throwable;
 
 	/**
 	 * Disregards the {@link Governance}.
@@ -115,6 +120,9 @@ public interface GovernanceControl<I, F extends Enum<F>> {
 	 *            {@link JobNode}.
 	 * @param activateSet
 	 *            {@link JobNodeActivateSet}.
+	 * @param currentTeam
+	 *            {@link TeamIdentifier} of the current {@link Team}
+	 *            disregarding the {@link Governance}.
 	 * @param context
 	 *            ContainerContext.
 	 * @return <code>true</code> if the {@link Governance} was disregarded.
@@ -123,7 +131,7 @@ public interface GovernanceControl<I, F extends Enum<F>> {
 	 */
 	boolean disregardGovernance(GovernanceContext<F> governanceContext,
 			JobContext jobContext, JobNode jobNode,
-			JobNodeActivateSet activateSet, ContainerContext context)
-			throws Throwable;
+			JobNodeActivateSet activateSet, TeamIdentifier currentTeam,
+			ContainerContext context) throws Throwable;
 
 }

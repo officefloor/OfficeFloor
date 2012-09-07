@@ -38,6 +38,7 @@ import net.officefloor.frame.internal.structure.ThreadState;
 import net.officefloor.frame.internal.structure.WorkContainer;
 import net.officefloor.frame.internal.structure.WorkMetaData;
 import net.officefloor.frame.spi.team.Job;
+import net.officefloor.frame.spi.team.TeamIdentifier;
 
 /**
  * Implementation of the {@link JobSequence}.
@@ -271,12 +272,14 @@ public class JobSequenceImpl extends
 	}
 
 	@Override
-	public void jobNodeComplete(JobNode jobNode, JobNodeActivateSet activateSet) {
+	public void jobNodeComplete(JobNode jobNode,
+			JobNodeActivateSet activateSet, TeamIdentifier currentTeam) {
 		// Remove JobNode from active JobNode listing
 		if (this.activeJobNodes.removeEntry(jobNode)) {
 			// Last active JobNode so flow is now complete
 			this.isFlowComplete = true;
-			this.threadState.jobSequenceComplete(this, activateSet);
+			this.threadState
+					.jobSequenceComplete(this, activateSet, currentTeam);
 		}
 	}
 

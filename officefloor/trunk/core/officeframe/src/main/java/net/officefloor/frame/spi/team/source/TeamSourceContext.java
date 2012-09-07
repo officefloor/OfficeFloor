@@ -20,6 +20,7 @@ package net.officefloor.frame.spi.team.source;
 
 import net.officefloor.frame.spi.source.SourceContext;
 import net.officefloor.frame.spi.team.Team;
+import net.officefloor.frame.spi.team.TeamIdentifier;
 
 /**
  * Context for the {@link TeamSource}.
@@ -36,6 +37,15 @@ public interface TeamSourceContext extends SourceContext {
 	 *         {@link TeamSource}.
 	 */
 	String getTeamName();
+
+	/**
+	 * Obtains the {@link TeamIdentifier} for the {@link Team} to be created
+	 * from the {@link TeamSource}.
+	 * 
+	 * @return {@link TeamIdentifier} for the {@link Team} to be created from
+	 *         the {@link TeamSource}.
+	 */
+	TeamIdentifier getTeamIdentifier();
 
 	/**
 	 * Registers a {@link ProcessContextListener}.

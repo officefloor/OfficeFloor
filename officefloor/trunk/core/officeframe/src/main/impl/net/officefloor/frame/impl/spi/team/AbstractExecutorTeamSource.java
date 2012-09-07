@@ -25,6 +25,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import net.officefloor.frame.spi.team.Job;
 import net.officefloor.frame.spi.team.JobContext;
 import net.officefloor.frame.spi.team.Team;
+import net.officefloor.frame.spi.team.TeamIdentifier;
 import net.officefloor.frame.spi.team.source.TeamSource;
 import net.officefloor.frame.spi.team.source.TeamSourceContext;
 import net.officefloor.frame.spi.team.source.impl.AbstractTeamSource;
@@ -69,6 +70,23 @@ public abstract class AbstractExecutorTeamSource extends AbstractTeamSource {
 
 	}
 
+	/**
+	 * Creates the {@link Team}.
+	 * 
+	 * @param executorServiceFactory
+	 *            {@link ExecutorServiceFactory}.
+	 * @param teamIdentifier
+	 *            {@link TeamIdentifier}.
+	 * @return {@link Team}.
+	 */
+	protected static Team createTeam(
+			ExecutorServiceFactory executorServiceFactory,
+			TeamIdentifier teamIdentifier) {
+
+		// Create and return the executor team
+		return new ExecutorTeam(executorServiceFactory, teamIdentifier);
+	}
+
 	/*
 	 * ======================= TeamSource ==================
 	 */
@@ -79,23 +97,25 @@ public abstract class AbstractExecutorTeamSource extends AbstractTeamSource {
 	}
 
 	@Override
-	protected Team createTeam(TeamSourceContext context) throws Exception {
+	public Team createTeam(TeamSourceContext context) throws Exception {
 
 		// Obtain the details of the team
 		String teamName = context.getTeamName();
+		TeamIdentifier teamIdentifier = context.getTeamIdentifier();
 		final int threadPriority = Integer
 				.valueOf(context.getProperty(PROPERTY_THREAD_PRIORITY,
 						String.valueOf(Thread.NORM_PRIORITY)));
 
 		// Create and return the executor team
 		return new ExecutorTeam(this.createExecutorServiceFactory(context,
-				new TeamThreadFactory(teamName, threadPriority)));
+				new TeamThreadFactory(teamName, threadPriority)),
+				teamIdentifier);
 	}
 
 	/**
 	 * {@link ThreadFactory} for the {@link Team}.
 	 */
-	private static class TeamThreadFactory implements ThreadFactory {
+	protected static class TeamThreadFactory implements ThreadFactory {
 
 		/**
 		 * {@link ThreadGroup}.
@@ -125,7 +145,7 @@ public abstract class AbstractExecutorTeamSource extends AbstractTeamSource {
 		 * @param threadPriority
 		 *            {@link Thread} priority.
 		 */
-		private TeamThreadFactory(String teamName, int threadPriority) {
+		protected TeamThreadFactory(String teamName, int threadPriority) {
 			SecurityManager s = System.getSecurityManager();
 			this.group = (s != null) ? s.getThreadGroup() : Thread
 					.currentThread().getThreadGroup();
@@ -166,6 +186,11 @@ public abstract class AbstractExecutorTeamSource extends AbstractTeamSource {
 		private final ExecutorServiceFactory factory;
 
 		/**
+		 * {@link TeamIdentifier} of this {@link Team}.
+		 */
+		private final TeamIdentifier teamIdentifier;
+
+		/**
 		 * {@link ExecutorService}.
 		 */
 		private ExecutorService servicer;
@@ -176,8 +201,10 @@ public abstract class AbstractExecutorTeamSource extends AbstractTeamSource {
 		 * @param factory
 		 *            {@link ExecutorServiceFactory}.
 		 */
-		public ExecutorTeam(ExecutorServiceFactory factory) {
+		public ExecutorTeam(ExecutorServiceFactory factory,
+				TeamIdentifier teamIdentifier) {
 			this.factory = factory;
+			this.teamIdentifier = teamIdentifier;
 		}
 
 		/*
@@ -190,8 +217,8 @@ public abstract class AbstractExecutorTeamSource extends AbstractTeamSource {
 		}
 
 		@Override
-		public void assignJob(Job job) {
-			this.servicer.execute(new JobRunnable(job));
+		public void assignJob(Job job, TeamIdentifier assignerTeam) {
+			this.servicer.execute(new JobRunnable(job, this.teamIdentifier));
 		}
 
 		@Override
@@ -212,6 +239,11 @@ public abstract class AbstractExecutorTeamSource extends AbstractTeamSource {
 		private final Job job;
 
 		/**
+		 * {@link TeamIdentifier} of the containing {@link Team}.
+		 */
+		private final TeamIdentifier teamIdentifier;
+
+		/**
 		 * Time optimisation.
 		 */
 		private long time = -1;
@@ -221,9 +253,12 @@ public abstract class AbstractExecutorTeamSource extends AbstractTeamSource {
 		 * 
 		 * @param job
 		 *            {@link Job} to execute.
+		 * @param teamIdentifier
+		 *            {@link TeamIdentifier} of the containing {@link Team}.
 		 */
-		public JobRunnable(Job job) {
+		public JobRunnable(Job job, TeamIdentifier teamIdentifier) {
 			this.job = job;
+			this.teamIdentifier = teamIdentifier;
 		}
 
 		/*
@@ -245,6 +280,11 @@ public abstract class AbstractExecutorTeamSource extends AbstractTeamSource {
 				time = System.currentTimeMillis();
 			}
 			return time;
+		}
+
+		@Override
+		public TeamIdentifier getCurrentTeam() {
+			return this.teamIdentifier;
 		}
 
 		@Override

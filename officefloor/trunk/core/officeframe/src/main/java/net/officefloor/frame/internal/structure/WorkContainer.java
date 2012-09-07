@@ -22,6 +22,8 @@ import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.spi.governance.Governance;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.frame.spi.team.JobContext;
+import net.officefloor.frame.spi.team.Team;
+import net.officefloor.frame.spi.team.TeamIdentifier;
 
 /**
  * Container managing the {@link Work}.
@@ -53,12 +55,16 @@ public interface WorkContainer<W extends Work> {
 	 * @param activateSet
 	 *            {@link JobNodeActivateSet} to add {@link JobNode} instances to
 	 *            activate.
+	 * @param currentTeam
+	 *            {@link TeamIdentifier} of the current {@link Team} loading the
+	 *            {@link ManagedObject} instances.
 	 * @param context
 	 *            {@link ContainerContext}.
 	 */
 	void loadManagedObjects(ManagedObjectIndex[] managedObjectIndexes,
 			JobContext jobContext, JobNode jobNode,
-			JobNodeActivateSet activateSet, ContainerContext context);
+			JobNodeActivateSet activateSet, TeamIdentifier currentTeam,
+			ContainerContext context);
 
 	/**
 	 * Governs the {@link ManagedObject} instances.
@@ -163,7 +169,10 @@ public interface WorkContainer<W extends Work> {
 	 * @param activateSet
 	 *            {@link JobNodeActivateSet} to add {@link JobNode} instances to
 	 *            activate.
+	 * @param currentTeam
+	 *            {@link TeamIdentifier} of the current {@link Team} unloading
+	 *            the {@link Work}.
 	 */
-	void unloadWork(JobNodeActivateSet activateSet);
+	void unloadWork(JobNodeActivateSet activateSet, TeamIdentifier currentTeam);
 
 }

@@ -28,6 +28,7 @@ import net.officefloor.frame.internal.structure.TaskDutyAssociation;
 import net.officefloor.frame.internal.structure.ThreadState;
 import net.officefloor.frame.internal.structure.WorkContainer;
 import net.officefloor.frame.spi.team.JobContext;
+import net.officefloor.frame.spi.team.TeamIdentifier;
 
 /**
  * Proxy for the {@link WorkContainer}.
@@ -72,9 +73,10 @@ public class WorkContainerProxy<W extends Work> implements WorkContainer<W> {
 	@Override
 	public void loadManagedObjects(ManagedObjectIndex[] managedObjectIndexes,
 			JobContext executionContext, JobNode jobNode,
-			JobNodeActivateSet notifySet, ContainerContext context) {
+			JobNodeActivateSet notifySet, TeamIdentifier currentTeam,
+			ContainerContext context) {
 		this.delegate.loadManagedObjects(managedObjectIndexes,
-				executionContext, jobNode, notifySet, context);
+				executionContext, jobNode, notifySet, currentTeam, context);
 	}
 
 	@Override
@@ -108,7 +110,8 @@ public class WorkContainerProxy<W extends Work> implements WorkContainer<W> {
 	}
 
 	@Override
-	public void unloadWork(JobNodeActivateSet activateSet) {
+	public void unloadWork(JobNodeActivateSet activateSet,
+			TeamIdentifier currentTeam) {
 		// Not the last job for the work, so do not unload
 	}
 

@@ -40,18 +40,6 @@ public class TeamSourceStandAlone {
 	private final SourcePropertiesImpl properties = new SourcePropertiesImpl();
 
 	/**
-	 * Adds a property for initialising the {@link TeamSource}.
-	 * 
-	 * @param name
-	 *            Name of property.
-	 * @param value
-	 *            Value of property.
-	 */
-	public void addProperty(String name, String value) {
-		this.properties.addProperty(name, value);
-	}
-
-	/**
 	 * Initialises and returns the {@link TeamSource} instance.
 	 * 
 	 * @param teamSourceClass
@@ -64,19 +52,23 @@ public class TeamSourceStandAlone {
 	public <TS extends TeamSource> TS loadTeamSource(Class<TS> teamSourceClass)
 			throws Exception {
 
+		// Create the team source
 		TS teamSource = teamSourceClass.newInstance();
 
-		// Create default source context
-		SourceContext sourceContext = new SourceContextImpl(false, Thread
-				.currentThread().getContextClassLoader());
-
-		// Initialise the team source
-		TeamSourceContext context = new TeamSourceContextImpl(false,
-				teamSourceClass.getSimpleName(), this.properties, sourceContext);
-		teamSource.init(context);
-
-		// Return the initialised team source
+		// Return the team source
 		return teamSource;
+	}
+
+	/**
+	 * Adds a property for initialising the {@link Team}.
+	 * 
+	 * @param name
+	 *            Name of property.
+	 * @param value
+	 *            Value of property.
+	 */
+	public void addProperty(String name, String value) {
+		this.properties.addProperty(name, value);
 	}
 
 	/**
@@ -95,8 +87,14 @@ public class TeamSourceStandAlone {
 		// Load the team source
 		TS teamSource = this.loadTeamSource(teamSourceClass);
 
+		// Create team source context
+		SourceContext sourceContext = new SourceContextImpl(false, Thread
+				.currentThread().getContextClassLoader());
+		TeamSourceContext context = new TeamSourceContextImpl(false,
+				teamSourceClass.getSimpleName(), this.properties, sourceContext);
+
 		// Return the created team
-		return teamSource.createTeam();
+		return teamSource.createTeam(context);
 	}
 
 }

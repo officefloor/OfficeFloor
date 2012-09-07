@@ -23,6 +23,7 @@ import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.api.execute.TaskContext;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.api.manage.OfficeFloor;
+import net.officefloor.frame.impl.spi.team.MockTeamIdentifier;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.frame.spi.TestSource;
 import net.officefloor.frame.spi.managedobject.AsynchronousListener;
@@ -34,13 +35,14 @@ import net.officefloor.frame.spi.managedobject.source.impl.AbstractAsyncManagedO
 import net.officefloor.frame.spi.team.Job;
 import net.officefloor.frame.spi.team.JobContext;
 import net.officefloor.frame.spi.team.Team;
+import net.officefloor.frame.spi.team.TeamIdentifier;
 import net.officefloor.frame.test.AbstractOfficeConstructTestCase;
 import net.officefloor.frame.test.ReflectiveWorkBuilder;
 import net.officefloor.frame.test.ReflectiveWorkBuilder.ReflectiveTaskBuilder;
 
 /**
  * Tests loading the {@link ManagedObject} asynchronously.
- *
+ * 
  * @author Daniel Sagenschneider
  */
 public class AsyncManagedObjectTest extends AbstractOfficeConstructTestCase {
@@ -83,8 +85,8 @@ public class AsyncManagedObjectTest extends AbstractOfficeConstructTestCase {
 		// Open the Office Floor and invoke work
 		OfficeFloor officeFloor = this.constructOfficeFloor();
 		officeFloor.openOfficeFloor();
-		officeFloor.getOffice(officeName).getWorkManager("WORK").invokeWork(
-				null);
+		officeFloor.getOffice(officeName).getWorkManager("WORK")
+				.invokeWork(null);
 	}
 
 	/**
@@ -156,7 +158,7 @@ public class AsyncManagedObjectTest extends AbstractOfficeConstructTestCase {
 
 		/**
 		 * Executes the {@link Job}.
-		 *
+		 * 
 		 * @param isExpectExecute
 		 *            Flag indicating whether the {@link TestWork} should be
 		 *            executed.
@@ -172,14 +174,22 @@ public class AsyncManagedObjectTest extends AbstractOfficeConstructTestCase {
 
 			// Execute the job
 			boolean isComplete = this.job.doJob(new JobContext() {
-				@Override
-				public boolean continueExecution() {
-					return true;
-				}
+
+				private final TeamIdentifier teamIdentifier = new MockTeamIdentifier();
 
 				@Override
 				public long getTime() {
 					return System.currentTimeMillis();
+				}
+
+				@Override
+				public TeamIdentifier getCurrentTeam() {
+					return this.teamIdentifier;
+				}
+
+				@Override
+				public boolean continueExecution() {
+					return true;
 				}
 			});
 
@@ -194,7 +204,7 @@ public class AsyncManagedObjectTest extends AbstractOfficeConstructTestCase {
 		 */
 
 		@Override
-		public synchronized void assignJob(Job job) {
+		public synchronized void assignJob(Job job, TeamIdentifier assignerTeam) {
 
 			// Determine if invoke Work assignment
 			if (this.job == null) {
@@ -243,7 +253,7 @@ public class AsyncManagedObjectTest extends AbstractOfficeConstructTestCase {
 
 		/**
 		 * {@link Job} for execution.
-		 *
+		 * 
 		 * @param object
 		 *            Object from the {@link ManagedObject}.
 		 * @param taskContext
@@ -286,7 +296,7 @@ public class AsyncManagedObjectTest extends AbstractOfficeConstructTestCase {
 
 		/**
 		 * Loads the {@link ManagedObject}.
-		 *
+		 * 
 		 * @param managedObject
 		 *            {@link ManagedObject}.
 		 */

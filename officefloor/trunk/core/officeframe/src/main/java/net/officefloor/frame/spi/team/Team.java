@@ -35,8 +35,11 @@ public interface Team {
 	 * 
 	 * @param job
 	 *            {@link Job}.
+	 * @param assignerTeam
+	 *            {@link TeamIdentifier} of the {@link Team} assigning the
+	 *            {@link Job} to this {@link Team}.
 	 */
-	void assignJob(Job job);
+	void assignJob(Job job, TeamIdentifier assignerTeam);
 
 	/**
 	 * <p>

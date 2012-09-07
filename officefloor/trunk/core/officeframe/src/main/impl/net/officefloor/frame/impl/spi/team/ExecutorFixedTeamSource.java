@@ -21,6 +21,8 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
 
+import net.officefloor.frame.spi.team.Team;
+import net.officefloor.frame.spi.team.TeamIdentifier;
 import net.officefloor.frame.spi.team.source.TeamSource;
 import net.officefloor.frame.spi.team.source.TeamSourceContext;
 
@@ -30,6 +32,27 @@ import net.officefloor.frame.spi.team.source.TeamSourceContext;
  * @author Daniel Sagenschneider
  */
 public class ExecutorFixedTeamSource extends AbstractExecutorTeamSource {
+
+	/**
+	 * <p>
+	 * Convenience method to create a {@link Team}.
+	 * <p>
+	 * This is intended only for use in testing.
+	 * 
+	 * @param teamName
+	 *            Name of the {@link Team}.
+	 * @param teamIdentifier
+	 *            {@link TeamIdentifier}.
+	 * @param teamSize
+	 *            Size of the {@link Team}.
+	 * @return {@link Team}.
+	 */
+	public static Team createTeam(String teamName, TeamIdentifier teamIdentifier,
+			int teamSize) {
+		return createTeam(new FixedExecutorServiceFactory(teamSize,
+				new TeamThreadFactory(teamName, Thread.NORM_PRIORITY)),
+				teamIdentifier);
+	}
 
 	/**
 	 * Name of property to specify maximum number of {@link Thread} instances.
@@ -50,12 +73,48 @@ public class ExecutorFixedTeamSource extends AbstractExecutorTeamSource {
 				.getProperty(PROPERTY_TEAM_SIZE));
 
 		// Create and return the factory
-		return new ExecutorServiceFactory() {
-			@Override
-			public ExecutorService createExecutorService() {
-				return Executors.newFixedThreadPool(teamSize, threadFactory);
-			}
-		};
+		return new FixedExecutorServiceFactory(teamSize, threadFactory);
+	}
+
+	/**
+	 * {@link ExecutorServiceFactory} for a fixed size.
+	 */
+	private static class FixedExecutorServiceFactory implements
+			ExecutorServiceFactory {
+
+		/**
+		 * Size of the {@link Team}.
+		 */
+		private final int teamSize;
+
+		/**
+		 * {@link ThreadFactory}.
+		 */
+		private final ThreadFactory threadFactory;
+
+		/**
+		 * Initiate.
+		 * 
+		 * @param teamSize
+		 *            Size of the {@link Team}.
+		 * @param threadFactory
+		 *            {@link ThreadFactory}.
+		 */
+		public FixedExecutorServiceFactory(int teamSize,
+				ThreadFactory threadFactory) {
+			this.teamSize = teamSize;
+			this.threadFactory = threadFactory;
+		}
+
+		/*
+		 * ================== ExecutorServiceFactory ========================
+		 */
+
+		@Override
+		public ExecutorService createExecutorService() {
+			return Executors.newFixedThreadPool(this.teamSize,
+					this.threadFactory);
+		}
 	}
 
 }

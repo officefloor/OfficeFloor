@@ -53,6 +53,7 @@ import net.officefloor.frame.internal.structure.ThreadState;
 import net.officefloor.frame.internal.structure.WorkMetaData;
 import net.officefloor.frame.spi.governance.Governance;
 import net.officefloor.frame.spi.team.Team;
+import net.officefloor.frame.spi.team.TeamIdentifier;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.frame.test.match.TypeMatcher;
 import net.officefloor.frame.util.MetaDataTestInstanceFactory;
@@ -213,7 +214,8 @@ public class ThreadStateTest extends OfficeFrameTestCase {
 		this.replayMockObjects();
 		ThreadState thread = this.createThreadState();
 		JobSequence jobSequence = thread.createJobSequence();
-		thread.jobSequenceComplete(jobSequence, this.activateSet);
+		thread.jobSequenceComplete(jobSequence, this.activateSet,
+				this.currentTeam);
 		this.verifyMockObjects();
 
 		// Thread should be complete
@@ -283,9 +285,9 @@ public class ThreadStateTest extends OfficeFrameTestCase {
 		});
 		this.recordReturn(activity, activity.getGovernanceMetaData(),
 				governanceMetaData);
-		governanceTeam.assignJob(null);
+		governanceTeam.assignJob(null, null);
 		this.control(governanceTeam).setMatcher(
-				new TypeMatcher(GovernanceJob.class));
+				new TypeMatcher(GovernanceJob.class, TeamIdentifier.class));
 
 		// Test
 		this.replayMockObjects();
@@ -293,7 +295,8 @@ public class ThreadStateTest extends OfficeFrameTestCase {
 		GovernanceContainer<?, ?> actualGovernance = thread
 				.getGovernanceContainer(GOVERNANCE_INDEX);
 		JobSequence jobSequence = thread.createJobSequence();
-		thread.jobSequenceComplete(jobSequence, this.activateSet);
+		thread.jobSequenceComplete(jobSequence, this.activateSet,
+				this.currentTeam);
 		this.verifyMockObjects();
 
 		// Ensure correct governance container
@@ -322,13 +325,13 @@ public class ThreadStateTest extends OfficeFrameTestCase {
 		// Not completes while escalating
 		JobSequence flowOne = thread.createJobSequence();
 		thread.escalationStart(jobNode, this.activateSet);
-		thread.jobSequenceComplete(flowOne, this.activateSet);
+		thread.jobSequenceComplete(flowOne, this.activateSet, this.currentTeam);
 		assertFalse("Should not complete while escalating", thread.isComplete());
 
 		// Completes after escalating
 		thread.escalationComplete(jobNode, this.activateSet);
 		JobSequence flowTwo = thread.createJobSequence();
-		thread.jobSequenceComplete(flowTwo, this.activateSet);
+		thread.jobSequenceComplete(flowTwo, this.activateSet, this.currentTeam);
 		assertTrue("Thread should be complete", thread.isComplete());
 
 		this.verifyMockObjects();
@@ -350,7 +353,8 @@ public class ThreadStateTest extends OfficeFrameTestCase {
 		// Test
 		this.replayMockObjects();
 		ThreadStateImpl thread = this.createThreadState();
-		thread.jobSequenceComplete(thread.createJobSequence(), this.activateSet);
+		thread.jobSequenceComplete(thread.createJobSequence(),
+				this.activateSet, this.currentTeam);
 		thread.waitOnFlow(jobNode, 1000, "TOKEN", this.activateSet);
 		this.verifyMockObjects();
 	}
@@ -410,7 +414,8 @@ public class ThreadStateTest extends OfficeFrameTestCase {
 		this.replayMockObjects();
 		ThreadStateImpl thread = this.createThreadState();
 		thread.waitOnFlow(jobNode, 1000, "TOKEN", this.activateSet);
-		thread.jobSequenceComplete(thread.createJobSequence(), this.activateSet);
+		thread.jobSequenceComplete(thread.createJobSequence(),
+				this.activateSet, this.currentTeam);
 		this.verifyMockObjects();
 	}
 
@@ -512,7 +517,8 @@ public class ThreadStateTest extends OfficeFrameTestCase {
 		thread.waitOnFlow(activatedJobNode, NOT_TIME_OUT, activatedToken,
 				this.activateSet);
 		this.joinedAssets.get(0).checkOnAsset(context);
-		thread.jobSequenceComplete(thread.createJobSequence(), this.activateSet);
+		thread.jobSequenceComplete(thread.createJobSequence(),
+				this.activateSet, this.currentTeam);
 		this.verifyMockObjects();
 	}
 
@@ -550,6 +556,12 @@ public class ThreadStateTest extends OfficeFrameTestCase {
 	 */
 	private final JobNodeActivateSet activateSet = this
 			.createMock(JobNodeActivateSet.class);
+
+	/**
+	 * {@link TeamIdentifier} of current {@link Team}.
+	 */
+	private final TeamIdentifier currentTeam = this
+			.createMock(TeamIdentifier.class);
 
 	/**
 	 * {@link ProcessProfiler}.
@@ -670,7 +682,8 @@ public class ThreadStateTest extends OfficeFrameTestCase {
 		this.recordReturn(this.threadMetaData,
 				this.threadMetaData.getGovernanceDeactivationStrategy(),
 				GovernanceDeactivationStrategy.DISREGARD);
-		this.processState.threadComplete(null, this.activateSet);
+		this.processState.threadComplete(null, this.activateSet,
+				this.currentTeam);
 		this.control(this.processState).setMatcher(new AbstractMatcher() {
 			@Override
 			public boolean matches(Object[] expected, Object[] actual) {

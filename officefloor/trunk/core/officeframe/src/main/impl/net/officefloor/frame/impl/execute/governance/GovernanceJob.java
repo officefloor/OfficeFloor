@@ -34,6 +34,7 @@ import net.officefloor.frame.spi.governance.GovernanceContext;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.frame.spi.team.Job;
 import net.officefloor.frame.spi.team.JobContext;
+import net.officefloor.frame.spi.team.TeamIdentifier;
 
 /**
  * {@link Governance} {@link Job}.
@@ -96,9 +97,13 @@ public class GovernanceJob<I, F extends Enum<F>, W extends Work> extends
 			JobContext jobContext, JobNodeActivateSet activateSet)
 			throws Throwable {
 
+		// Obtain the current team
+		TeamIdentifier currentTeam = jobContext.getCurrentTeam();
+
 		// Execute the governance activity
 		boolean isComplete = this.governanceActivity.doActivity(
-				this.governanceContext, jobContext, this, activateSet, this);
+				this.governanceContext, jobContext, this, activateSet,
+				currentTeam, this);
 
 		// Flag whether activity is complete
 		this.setJobComplete(isComplete);

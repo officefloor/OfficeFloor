@@ -20,7 +20,9 @@ package net.officefloor.frame.integrate.stress;
 
 import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.execute.Work;
+import net.officefloor.frame.impl.spi.team.ExecutorFixedTeamSource;
 import net.officefloor.frame.impl.spi.team.LeaderFollowerTeam;
+import net.officefloor.frame.impl.spi.team.MockTeamIdentifier;
 import net.officefloor.frame.impl.spi.team.OnePersonTeam;
 import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
 import net.officefloor.frame.spi.team.Team;
@@ -31,7 +33,7 @@ import net.officefloor.frame.test.ReflectiveWorkBuilder.ReflectiveTaskBuilder;
 
 /**
  * Stress tests invoking a next {@link Task}.
- *
+ * 
  * @author Daniel Sagenschneider
  */
 public class NextTaskStressTest extends AbstractOfficeConstructTestCase {
@@ -42,7 +44,7 @@ public class NextTaskStressTest extends AbstractOfficeConstructTestCase {
 	 */
 	@StressTest
 	public void test_StressNextTask_OnePersonTeam() throws Exception {
-		this.doTest(new OnePersonTeam("TEST", 100));
+		this.doTest(new OnePersonTeam("TEST", new MockTeamIdentifier(), 100));
 	}
 
 	/**
@@ -51,12 +53,23 @@ public class NextTaskStressTest extends AbstractOfficeConstructTestCase {
 	 */
 	@StressTest
 	public void test_StressNextTask_LeaderFollowerTeam() throws Exception {
-		this.doTest(new LeaderFollowerTeam("TEST", 5, 100));
+		this.doTest(new LeaderFollowerTeam("TEST", new MockTeamIdentifier(), 5,
+				100));
+	}
+
+	/**
+	 * Ensures no issues arising in stress next {@link Task} with a
+	 * {@link ExecutorFixedTeamSource}.
+	 */
+	@StressTest
+	public void test_StressNextTask_ExecutorFixedTeam() throws Exception {
+		this.doTest(ExecutorFixedTeamSource.createTeam("TEST",
+				new MockTeamIdentifier(), 5));
 	}
 
 	/**
 	 * Does the parallel stress test.
-	 *
+	 * 
 	 * @param team
 	 *            {@link Team} to use to run the {@link Task} instances.
 	 */
@@ -108,7 +121,7 @@ public class NextTaskStressTest extends AbstractOfficeConstructTestCase {
 
 		/**
 		 * Initiate.
-		 *
+		 * 
 		 * @param maxNextTasks
 		 *            Maximum number of parallel calls.
 		 */
@@ -118,7 +131,7 @@ public class NextTaskStressTest extends AbstractOfficeConstructTestCase {
 
 		/**
 		 * Allows for moving onto the next {@link Task}.
-		 *
+		 * 
 		 * @param count
 		 *            Count to pass to next {@link Task}.
 		 */
@@ -128,7 +141,7 @@ public class NextTaskStressTest extends AbstractOfficeConstructTestCase {
 
 		/**
 		 * Next {@link Task}.
-		 *
+		 * 
 		 * @param callCount
 		 *            Number of next {@link Task} instances invoked so far.
 		 * @param flow

@@ -22,7 +22,7 @@ import net.officefloor.frame.spi.team.Team;
 
 /**
  * Source to obtain {@link Team} instances.
- *
+ * 
  * @author Daniel Sagenschneider
  */
 public interface TeamSource {
@@ -34,26 +34,20 @@ public interface TeamSource {
 	 * This will be called before any other methods, therefore this method must
 	 * be able to return the specification immediately after a default
 	 * constructor instantiation.
-	 *
+	 * 
 	 * @return Specification of this.
 	 */
 	TeamSourceSpecification getSpecification();
 
 	/**
-	 * Initialises and configures the {@link TeamSource}.
-	 *
+	 * Creates the {@link Team}.
+	 * 
 	 * @param context
 	 *            {@link TeamSourceContext}.
+	 * @return {@link Team}.
 	 * @throws Exception
 	 *             If fails to configure the {@link TeamSource}.
 	 */
-	void init(TeamSourceContext context) throws Exception;
-
-	/**
-	 * Creates the {@link Team}.
-	 *
-	 * @return {@link Team}.
-	 */
-	Team createTeam();
+	Team createTeam(TeamSourceContext context) throws Exception;
 
 }

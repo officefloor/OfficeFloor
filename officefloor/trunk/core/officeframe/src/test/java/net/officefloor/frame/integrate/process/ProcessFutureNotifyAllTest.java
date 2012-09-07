@@ -23,6 +23,7 @@ import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.api.manage.ProcessFuture;
 import net.officefloor.frame.api.manage.WorkManager;
+import net.officefloor.frame.impl.spi.team.MockTeamIdentifier;
 import net.officefloor.frame.impl.spi.team.OnePersonTeam;
 import net.officefloor.frame.internal.structure.ProcessState;
 import net.officefloor.frame.test.AbstractOfficeConstructTestCase;
@@ -55,7 +56,8 @@ public class ProcessFutureNotifyAllTest extends AbstractOfficeConstructTestCase 
 		workBuilder.buildTask("task", "TEAM");
 
 		// Register the team (threaded to allow notify of completed process)
-		this.constructTeam("TEAM", new OnePersonTeam("TEST", 100));
+		this.constructTeam("TEAM", new OnePersonTeam("TEST",
+				new MockTeamIdentifier(), 100));
 
 		// Construct and open the OfficeFloor
 		OfficeFloor officeFloor = this.constructOfficeFloor();
@@ -73,8 +75,8 @@ public class ProcessFutureNotifyAllTest extends AbstractOfficeConstructTestCase 
 		final long MAX_WAIT_TIME = 60000; // one minute
 		long startTime = System.currentTimeMillis();
 		synchronized (processFuture) {
-			assertFalse("Process should not yet be complete", processFuture
-					.isComplete());
+			assertFalse("Process should not yet be complete",
+					processFuture.isComplete());
 			processFuture.wait(MAX_WAIT_TIME);
 		}
 

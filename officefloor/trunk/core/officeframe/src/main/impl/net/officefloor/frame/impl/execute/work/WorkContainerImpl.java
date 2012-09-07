@@ -42,6 +42,7 @@ import net.officefloor.frame.internal.structure.WorkMetaData;
 import net.officefloor.frame.spi.administration.Administrator;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.frame.spi.team.JobContext;
+import net.officefloor.frame.spi.team.TeamIdentifier;
 
 /**
  * Container of a {@link Work} instance.
@@ -111,7 +112,8 @@ public class WorkContainerImpl<W extends Work> implements WorkContainer<W> {
 	@Override
 	public void loadManagedObjects(ManagedObjectIndex[] managedObjectIndexes,
 			JobContext jobContext, JobNode jobNode,
-			JobNodeActivateSet notifySet, ContainerContext context) {
+			JobNodeActivateSet notifySet, TeamIdentifier currentTeam,
+			ContainerContext context) {
 
 		// Access Point: Job
 		// Locks: ThreadState -> ProcessState
@@ -155,8 +157,8 @@ public class WorkContainerImpl<W extends Work> implements WorkContainer<W> {
 			}
 
 			// Trigger loading the managed object
-			container
-					.loadManagedObject(jobContext, jobNode, notifySet, context);
+			container.loadManagedObject(jobContext, jobNode, notifySet,
+					currentTeam, context);
 		}
 	}
 
@@ -444,7 +446,8 @@ public class WorkContainerImpl<W extends Work> implements WorkContainer<W> {
 	}
 
 	@Override
-	public void unloadWork(JobNodeActivateSet activateSet) {
+	public void unloadWork(JobNodeActivateSet activateSet,
+			TeamIdentifier currentTeam) {
 
 		// Access Point: Job
 		// Locks: ThreadState -> ProcessState
@@ -452,7 +455,7 @@ public class WorkContainerImpl<W extends Work> implements WorkContainer<W> {
 		// Unload the work bound managed objects
 		for (ManagedObjectContainer container : this.managedObjects) {
 			if (container != null) {
-				container.unloadManagedObject(activateSet);
+				container.unloadManagedObject(activateSet, currentTeam);
 			}
 		}
 	}

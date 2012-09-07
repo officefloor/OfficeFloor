@@ -26,7 +26,9 @@ import net.officefloor.frame.api.build.WorkFactory;
 import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.execute.TaskContext;
 import net.officefloor.frame.api.execute.Work;
+import net.officefloor.frame.impl.spi.team.ExecutorFixedTeamSource;
 import net.officefloor.frame.impl.spi.team.LeaderFollowerTeam;
+import net.officefloor.frame.impl.spi.team.MockTeamIdentifier;
 import net.officefloor.frame.impl.spi.team.OnePersonTeam;
 import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
 import net.officefloor.frame.spi.managedobject.AsynchronousListener;
@@ -59,7 +61,7 @@ public class CoordinateStressTest extends AbstractOfficeConstructTestCase {
 	 */
 	@StressTest
 	public void test_StressCoordination_OnePersonTeam() throws Exception {
-		this.doTest(new OnePersonTeam("TEST", 100));
+		this.doTest(new OnePersonTeam("TEST", new MockTeamIdentifier(), 100));
 	}
 
 	/**
@@ -68,7 +70,18 @@ public class CoordinateStressTest extends AbstractOfficeConstructTestCase {
 	 */
 	@StressTest
 	public void test_StressCoordination_LeaderFollowerTeam() throws Exception {
-		this.doTest(new LeaderFollowerTeam("TEST", 3, 100));
+		this.doTest(new LeaderFollowerTeam("TEST", new MockTeamIdentifier(), 3,
+				100));
+	}
+
+	/**
+	 * Ensures no issues arising in stress coordination with a
+	 * {@link ExecutorFixedTeamSource}.
+	 */
+	@StressTest
+	public void test_StressCoordination_ExecutorFixedTeam() throws Exception {
+		this.doTest(ExecutorFixedTeamSource.createTeam("TEST",
+				new MockTeamIdentifier(), 3));
 	}
 
 	/**
@@ -105,7 +118,7 @@ public class CoordinateStressTest extends AbstractOfficeConstructTestCase {
 				.setInputManagedObjectName("PROCESS_BOUND");
 		dependencyBuilder.setTimeout(MANAGED_OBJECT_WAIT_TIME);
 		this.constructTeam("of-DEPENDENCY.MO_TEAM", new OnePersonTeam(
-				"MO_TEAM", 100));
+				"MO_TEAM", new MockTeamIdentifier(), 100));
 
 		// Construct the work
 		CoordinateWork work = new CoordinateWork(TASK_INVOKE_COUNT);

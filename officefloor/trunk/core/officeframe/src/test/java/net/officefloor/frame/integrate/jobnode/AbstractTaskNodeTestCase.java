@@ -36,6 +36,7 @@ import net.officefloor.frame.impl.execute.process.ProcessStateImpl;
 import net.officefloor.frame.impl.execute.profile.ProcessProfilerImpl;
 import net.officefloor.frame.impl.execute.thread.ThreadMetaDataImpl;
 import net.officefloor.frame.impl.execute.work.WorkMetaDataImpl;
+import net.officefloor.frame.impl.spi.team.MockTeamIdentifier;
 import net.officefloor.frame.internal.structure.AdministratorMetaData;
 import net.officefloor.frame.internal.structure.AssetManager;
 import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
@@ -58,6 +59,7 @@ import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.spi.team.Job;
 import net.officefloor.frame.spi.team.JobContext;
 import net.officefloor.frame.spi.team.Team;
+import net.officefloor.frame.spi.team.TeamIdentifier;
 import net.officefloor.frame.spi.team.source.ProcessContextListener;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 
@@ -68,6 +70,11 @@ import net.officefloor.frame.test.OfficeFrameTestCase;
  */
 public abstract class AbstractTaskNodeTestCase<W extends Work> extends
 		OfficeFrameTestCase implements Team {
+
+	/**
+	 * {@link TeamIdentifier} for this {@link JobContext}.
+	 */
+	private final TeamIdentifier teamIdentifier = new MockTeamIdentifier();
 
 	/**
 	 * Initial {@link ExecutionNode}.
@@ -491,7 +498,7 @@ public abstract class AbstractTaskNodeTestCase<W extends Work> extends
 	}
 
 	@Override
-	public void assignJob(Job task) {
+	public void assignJob(Job task, TeamIdentifier assignerTeam) {
 		// Passively execute
 		while (!task.doJob(new MockExecutionContext()))
 			;
@@ -512,6 +519,10 @@ public abstract class AbstractTaskNodeTestCase<W extends Work> extends
 		 */
 		private long time = 0;
 
+		/*
+		 * =================== JobContext ========================
+		 */
+
 		@Override
 		public long getTime() {
 			// Lazy obtain the time
@@ -521,6 +532,11 @@ public abstract class AbstractTaskNodeTestCase<W extends Work> extends
 
 			// Return the time
 			return this.time;
+		}
+
+		@Override
+		public TeamIdentifier getCurrentTeam() {
+			return AbstractTaskNodeTestCase.this.teamIdentifier;
 		}
 
 		@Override

@@ -23,6 +23,7 @@ import java.util.concurrent.atomic.AtomicLong;
 import net.officefloor.frame.spi.team.Job;
 import net.officefloor.frame.spi.team.JobContext;
 import net.officefloor.frame.spi.team.Team;
+import net.officefloor.frame.spi.team.TeamIdentifier;
 
 /**
  * {@link Team} that uses a specific new worker dedicated to each new
@@ -31,6 +32,11 @@ import net.officefloor.frame.spi.team.Team;
  * @author Daniel Sagenschneider
  */
 public class WorkerPerTaskTeam extends ThreadGroup implements Team {
+
+	/**
+	 * {@link TeamIdentifier} of this {@link Team}.
+	 */
+	private final TeamIdentifier teamIdentifier;
 
 	/**
 	 * Priority for the worker {@link Thread} instances.
@@ -54,9 +60,13 @@ public class WorkerPerTaskTeam extends ThreadGroup implements Team {
 	 *            Name of this team.
 	 * @param threadPriority
 	 *            Priority for the worker {@link Thread} instances.
+	 * @param teamIdentifier
+	 *            {@link TeamIdentifier} of this {@link Team}.
 	 */
-	public WorkerPerTaskTeam(String teamName, int threadPriority) {
+	public WorkerPerTaskTeam(String teamName, TeamIdentifier teamIdentifier,
+			int threadPriority) {
 		super(teamName);
+		this.teamIdentifier = teamIdentifier;
 		this.threadPriority = threadPriority;
 	}
 
@@ -65,9 +75,11 @@ public class WorkerPerTaskTeam extends ThreadGroup implements Team {
 	 * 
 	 * @param teamName
 	 *            Name of this team.
+	 * @param teamIdentifier
+	 *            {@link TeamIdentifier} of this {@link Team}.
 	 */
-	public WorkerPerTaskTeam(String teamName) {
-		this(teamName, Thread.NORM_PRIORITY);
+	public WorkerPerTaskTeam(String teamName, TeamIdentifier teamIdentifier) {
+		this(teamName, teamIdentifier, Thread.NORM_PRIORITY);
 	}
 
 	/*
@@ -80,7 +92,7 @@ public class WorkerPerTaskTeam extends ThreadGroup implements Team {
 	}
 
 	@Override
-	public void assignJob(Job task) {
+	public void assignJob(Job task, TeamIdentifier assignerTeam) {
 		// Hire worker to execute the task
 		long threadIndex = this.threadIndex.getAndIncrement();
 		String threadName = this.getClass().getSimpleName() + "_"
@@ -166,6 +178,11 @@ public class WorkerPerTaskTeam extends ThreadGroup implements Team {
 
 			// Return the time
 			return this.time;
+		}
+
+		@Override
+		public TeamIdentifier getCurrentTeam() {
+			return WorkerPerTaskTeam.this.teamIdentifier;
 		}
 
 		@Override

@@ -19,6 +19,7 @@
 package net.officefloor.frame.impl.spi.team;
 
 import net.officefloor.frame.spi.team.Team;
+import net.officefloor.frame.spi.team.TeamIdentifier;
 import net.officefloor.frame.spi.team.source.TeamSource;
 import net.officefloor.frame.spi.team.source.TeamSourceContext;
 import net.officefloor.frame.spi.team.source.impl.AbstractTeamSource;
@@ -50,10 +51,11 @@ public class WorkerPerTaskTeamSource extends AbstractTeamSource {
 	}
 
 	@Override
-	protected Team createTeam(TeamSourceContext context) throws Exception {
+	public Team createTeam(TeamSourceContext context) throws Exception {
 
-		// Obtain the team name
+		// Obtain the team name and identifier
 		String teamName = context.getTeamName();
+		TeamIdentifier teamIdentifier = context.getTeamIdentifier();
 
 		// Obtain the thread priority
 		int priority = Integer.valueOf(context.getProperty(
@@ -61,7 +63,7 @@ public class WorkerPerTaskTeamSource extends AbstractTeamSource {
 				String.valueOf(DEFAULT_THREAD_PRIORITY)));
 
 		// Create and return the team
-		return new WorkerPerTaskTeam(teamName, priority);
+		return new WorkerPerTaskTeam(teamName, teamIdentifier, priority);
 	}
 
 }

@@ -21,6 +21,8 @@ package net.officefloor.frame.internal.structure;
 import net.officefloor.frame.api.execute.FlowFuture;
 import net.officefloor.frame.spi.governance.Governance;
 import net.officefloor.frame.spi.team.Job;
+import net.officefloor.frame.spi.team.Team;
+import net.officefloor.frame.spi.team.TeamIdentifier;
 
 /**
  * <p>
@@ -80,9 +82,12 @@ public interface ThreadState extends FlowAsset, FlowFuture,
 	 *            {@link JobNodeActivateSet} to add {@link JobNode} instances
 	 *            waiting on this {@link ThreadState} if all {@link JobSequence}
 	 *            instances of this {@link ThreadState} are complete.
+	 * @param currentTeam
+	 *            {@link TeamIdentifier} of the current {@link Team} completing
+	 *            the {@link JobSequence}.
 	 */
 	void jobSequenceComplete(JobSequence jobSequence,
-			JobNodeActivateSet activateSet);
+			JobNodeActivateSet activateSet, TeamIdentifier currentTeam);
 
 	/**
 	 * Obtains the {@link ProcessState} of the process containing this

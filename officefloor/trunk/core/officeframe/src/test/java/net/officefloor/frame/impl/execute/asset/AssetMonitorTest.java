@@ -310,8 +310,10 @@ public class AssetMonitorTest extends OfficeFrameTestCase {
 		this.control(this.officeManager).setMatcher(new AbstractMatcher() {
 			@Override
 			public boolean matches(Object[] expected, Object[] actual) {
+				// Invoke to verify within set
 				JobNodeActivatableSet activatableSet = (JobNodeActivatableSet) actual[0];
-				activatableSet.activateJobNodes(); // verify in set
+				activatableSet
+						.activateJobNodes(OfficeManagerImpl.MANAGE_OFFICE_TEAM);
 				return true;
 			}
 		});
@@ -320,7 +322,8 @@ public class AssetMonitorTest extends OfficeFrameTestCase {
 				threadState);
 		this.recordReturn(threadState, threadState.getThreadLock(),
 				"THREAD LOCK");
-		job.activateJob(); // triggered to indicate in set
+		// Triggered to indicate in set
+		job.activateJob(OfficeManagerImpl.MANAGE_OFFICE_TEAM);
 
 		// Add job and activate with no activate set
 		this.replayMockObjects();

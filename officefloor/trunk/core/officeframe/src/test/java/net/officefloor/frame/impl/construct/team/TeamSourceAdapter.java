@@ -18,8 +18,11 @@
 
 package net.officefloor.frame.impl.construct.team;
 
+import junit.framework.TestCase;
 import net.officefloor.frame.spi.TestSource;
+import net.officefloor.frame.spi.team.Job;
 import net.officefloor.frame.spi.team.Team;
+import net.officefloor.frame.spi.team.TeamIdentifier;
 import net.officefloor.frame.spi.team.source.TeamSource;
 import net.officefloor.frame.spi.team.source.TeamSourceContext;
 import net.officefloor.frame.spi.team.source.TeamSourceSpecification;
@@ -30,7 +33,7 @@ import net.officefloor.frame.spi.team.source.TeamSourceSpecification;
  * @author Daniel Sagenschneider
  */
 @TestSource
-public class TeamSourceAdapter implements TeamSource {
+public class TeamSourceAdapter implements TeamSource, Team {
 
 	/*
 	 * ==================== TeamSource ==================================
@@ -42,13 +45,27 @@ public class TeamSourceAdapter implements TeamSource {
 	}
 
 	@Override
-	public void init(TeamSourceContext context) throws Exception {
-		// Do nothing
+	public Team createTeam(TeamSourceContext context) throws Exception {
+		return this;
+	}
+
+	/*
+	 * ==================== TeamSource ==================================
+	 */
+
+	@Override
+	public void startWorking() {
+		TestCase.fail("Should not be invoked");
 	}
 
 	@Override
-	public Team createTeam() {
-		return null;
+	public void assignJob(Job job, TeamIdentifier assignerTeam) {
+		TestCase.fail("Should not be invoked");
+	}
+
+	@Override
+	public void stopWorking() {
+		TestCase.fail("Should not be invoked");
 	}
 
 }
