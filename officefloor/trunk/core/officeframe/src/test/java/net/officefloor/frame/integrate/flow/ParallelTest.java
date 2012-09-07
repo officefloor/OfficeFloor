@@ -18,6 +18,7 @@
 
 package net.officefloor.frame.integrate.flow;
 
+import net.officefloor.frame.impl.spi.team.MockTeamIdentifier;
 import net.officefloor.frame.impl.spi.team.OnePersonTeam;
 import net.officefloor.frame.impl.spi.team.PassiveTeam;
 import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
@@ -30,7 +31,7 @@ import net.officefloor.frame.test.ReflectiveWorkBuilder.ReflectiveTaskBuilder;
 
 /**
  * Tests parallel invocations.
- *
+ * 
  * @author Daniel Sagenschneider
  */
 public class ParallelTest extends AbstractOfficeConstructTestCase {
@@ -53,7 +54,7 @@ public class ParallelTest extends AbstractOfficeConstructTestCase {
 	 * Ensures invokes parallel task with active team.
 	 */
 	public void testParallelWithActiveTeam() throws Exception {
-		this.doTest(new OnePersonTeam("PARALLEL", 100));
+		this.doTest(new OnePersonTeam("PARALLEL", new MockTeamIdentifier(), 100));
 	}
 
 	/**
@@ -62,7 +63,7 @@ public class ParallelTest extends AbstractOfficeConstructTestCase {
 	 * <p>
 	 * Given any type of team, the order of {@link JobNode} execution should be
 	 * the same.
-	 *
+	 * 
 	 * @param team
 	 *            {@link Team}.
 	 */

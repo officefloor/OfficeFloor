@@ -19,6 +19,8 @@
 package net.officefloor.frame.internal.structure;
 
 import net.officefloor.frame.spi.team.Job;
+import net.officefloor.frame.spi.team.Team;
+import net.officefloor.frame.spi.team.TeamIdentifier;
 
 /**
  * <p>
@@ -33,8 +35,13 @@ public interface JobNode extends LinkedListSetEntry<JobNode, JobSequence> {
 
 	/**
 	 * Activates the {@link Job} for this {@link JobNode}.
+	 * 
+	 * @param currentTeam
+	 *            Current {@link TeamIdentifier} that is activating the
+	 *            {@link JobNode}. This enables continuing execution with the
+	 *            current {@link Thread} should it be the same {@link Team}.
 	 */
-	void activateJob();
+	void activateJob(TeamIdentifier currentTeam);
 
 	/**
 	 * Indicates if this {@link JobNode} is completed.
@@ -119,7 +126,10 @@ public interface JobNode extends LinkedListSetEntry<JobNode, JobSequence> {
 	 * 
 	 * @param activateSet
 	 *            {@link JobNodeActivateSet}.
+	 * @param currentTeam
+	 *            {@link TeamIdentifier} of the current {@link Team} clearing
+	 *            the {@link JobNode} instances.
 	 */
-	void clearNodes(JobNodeActivateSet activateSet);
+	void clearNodes(JobNodeActivateSet activateSet, TeamIdentifier currentTeam);
 
 }

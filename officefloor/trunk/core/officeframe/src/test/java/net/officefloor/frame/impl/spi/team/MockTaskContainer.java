@@ -79,7 +79,7 @@ class MockTaskContainer implements Job {
 			this.team = team;
 
 			// Assign job to team
-			this.team.assignJob(this);
+			this.team.assignJob(this, new MockTeamIdentifier());
 
 			// Wait on processing to start
 			try {

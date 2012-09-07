@@ -77,7 +77,8 @@ public class LeaderFollowerTeamTest extends OfficeFrameTestCase {
 	private void leaderFollowerTest(int teamMemberCount, int taskCount) {
 
 		// Create the team and start it working
-		this.team = new LeaderFollowerTeam("Test", teamMemberCount, 10);
+		this.team = new LeaderFollowerTeam("Test", new MockTeamIdentifier(),
+				teamMemberCount, 10);
 		this.team.startWorking();
 
 		// Wait some time before assigning tasks

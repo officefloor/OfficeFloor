@@ -19,13 +19,14 @@
 package net.officefloor.frame.impl.spi.team;
 
 import net.officefloor.frame.spi.team.Team;
+import net.officefloor.frame.spi.team.TeamIdentifier;
 import net.officefloor.frame.spi.team.source.TeamSource;
 import net.officefloor.frame.spi.team.source.TeamSourceContext;
 import net.officefloor.frame.spi.team.source.impl.AbstractTeamSource;
 
 /**
  * {@link TeamSource} for a {@link LeaderFollowerTeam}.
- *
+ * 
  * @author Daniel Sagenschneider
  */
 public class LeaderFollowerTeamSource extends AbstractTeamSource {
@@ -46,10 +47,11 @@ public class LeaderFollowerTeamSource extends AbstractTeamSource {
 	}
 
 	@Override
-	protected Team createTeam(TeamSourceContext context) throws Exception {
+	public Team createTeam(TeamSourceContext context) throws Exception {
 
 		// Obtain the required configuration
 		String teamName = context.getTeamName();
+		TeamIdentifier teamIdentifier = context.getTeamIdentifier();
 		int teamSize = Integer.parseInt(context
 				.getProperty(TEAM_SIZE_PROPERTY_NAME));
 
@@ -57,7 +59,8 @@ public class LeaderFollowerTeamSource extends AbstractTeamSource {
 		long waitTime = Long.parseLong(context.getProperty("wait.time", "100"));
 
 		// Create and return the team
-		return new LeaderFollowerTeam(teamName, teamSize, waitTime);
+		return new LeaderFollowerTeam(teamName, teamIdentifier, teamSize,
+				waitTime);
 	}
 
 }

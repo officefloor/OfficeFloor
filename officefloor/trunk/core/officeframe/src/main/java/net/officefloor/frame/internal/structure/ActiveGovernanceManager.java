@@ -21,6 +21,8 @@ package net.officefloor.frame.internal.structure;
 import net.officefloor.frame.spi.governance.Governance;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.frame.spi.team.JobContext;
+import net.officefloor.frame.spi.team.Team;
+import net.officefloor.frame.spi.team.TeamIdentifier;
 
 /**
  * Provides management functions to the {@link ActiveGovernance}.
@@ -57,7 +59,11 @@ public interface ActiveGovernanceManager<I, F extends Enum<F>> {
 	 * 
 	 * @param activateSet
 	 *            {@link JobNodeActivateSet}.
+	 * @param currentTeam
+	 *            {@link TeamIdentifier} of the current {@link Team}
+	 *            unregistering the {@link ManagedObject}.
 	 */
-	void unregisterManagedObject(JobNodeActivateSet activateSet);
+	void unregisterManagedObject(JobNodeActivateSet activateSet,
+			TeamIdentifier currentTeam);
 
 }

@@ -21,10 +21,12 @@ package net.officefloor.frame.integrate.stress;
 import net.officefloor.frame.api.execute.FlowFuture;
 import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.execute.TaskContext;
+import net.officefloor.frame.impl.spi.team.ExecutorFixedTeamSource;
 import net.officefloor.frame.impl.spi.team.LeaderFollowerTeam;
+import net.officefloor.frame.impl.spi.team.MockTeamIdentifier;
 import net.officefloor.frame.impl.spi.team.OnePersonTeam;
-import net.officefloor.frame.internal.structure.JobSequence;
 import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
+import net.officefloor.frame.internal.structure.JobSequence;
 import net.officefloor.frame.spi.team.Team;
 import net.officefloor.frame.test.AbstractOfficeConstructTestCase;
 import net.officefloor.frame.test.ReflectiveFlow;
@@ -45,7 +47,7 @@ public class AsynchronousJoinStressTest extends AbstractOfficeConstructTestCase 
 	 */
 	@StressTest
 	public void test_StressAsynchronousJoin_OnePersonTeam() throws Exception {
-		this.doTest(new OnePersonTeam("TEST", 100));
+		this.doTest(new OnePersonTeam("TEST", new MockTeamIdentifier(), 100));
 	}
 
 	/**
@@ -55,7 +57,19 @@ public class AsynchronousJoinStressTest extends AbstractOfficeConstructTestCase 
 	@StressTest
 	public void test_StressAsynchronousJoin_LeaderFollowerTeam()
 			throws Exception {
-		this.doTest(new LeaderFollowerTeam("TEST", 5, 100));
+		this.doTest(new LeaderFollowerTeam("TEST", new MockTeamIdentifier(), 5,
+				100));
+	}
+
+	/**
+	 * Ensures no issues arising in stress asynchronous joins with a
+	 * {@link ExecutorFixedTeamSource}.
+	 */
+	@StressTest
+	public void test_StressAsynchronousJoin_ExecutorFixedTeam()
+			throws Exception {
+		this.doTest(ExecutorFixedTeamSource.createTeam("TEST",
+				new MockTeamIdentifier(), 5));
 	}
 
 	/**
@@ -107,8 +121,8 @@ public class AsynchronousJoinStressTest extends AbstractOfficeConstructTestCase 
 	public class Tasks {
 
 		/**
-		 * Number of asynchronous {@link JobSequence} instances to invoke and join on
-		 * per iteration.
+		 * Number of asynchronous {@link JobSequence} instances to invoke and
+		 * join on per iteration.
 		 */
 		private final int maxAsynchronousFlows;
 
@@ -146,8 +160,8 @@ public class AsynchronousJoinStressTest extends AbstractOfficeConstructTestCase 
 		 * Initiate.
 		 * 
 		 * @param maxAsynchronousFlows
-		 *            Number of asynchronous {@link JobSequence} instances to invoke
-		 *            and join on per iteration.
+		 *            Number of asynchronous {@link JobSequence} instances to
+		 *            invoke and join on per iteration.
 		 * @param joinTimeout
 		 *            Timeout of the joins.
 		 * @param maxIterations

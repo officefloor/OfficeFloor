@@ -21,6 +21,7 @@ package net.officefloor.frame.impl.spi.team;
 import net.officefloor.frame.spi.team.JobContext;
 import net.officefloor.frame.spi.team.Job;
 import net.officefloor.frame.spi.team.Team;
+import net.officefloor.frame.spi.team.TeamIdentifier;
 
 /**
  * <p>
@@ -29,20 +30,10 @@ import net.officefloor.frame.spi.team.Team;
  * <p>
  * Note that using this team will block the invoking {@link Thread} until the
  * {@link Job} is complete.
- *
+ * 
  * @author Daniel Sagenschneider
  */
-public class PassiveTeam implements Team, JobContext {
-
-	/**
-	 * Value indicating the time is not specified.
-	 */
-	private static final long TIME_NOT_SET = -1;
-
-	/**
-	 * Current time for execution.
-	 */
-	private long time = TIME_NOT_SET;
+public class PassiveTeam implements Team {
 
 	/**
 	 * Indicates if should continue working.
@@ -59,15 +50,13 @@ public class PassiveTeam implements Team, JobContext {
 	}
 
 	@Override
-	public void assignJob(Job task) {
+	public void assignJob(Job task, TeamIdentifier assignerTeam) {
 		// Loop executing the Job until it is complete or stop working
 		do {
 
-			// Reset the time for next run
-			this.time = TIME_NOT_SET;
-
-			// Attempt to complete the Task
-			if (task.doJob(this)) {
+			// Attempt to complete the Job.
+			// (mimic assigner team as re-using its thread)
+			if (task.doJob(new PassiveJobContext(assignerTeam))) {
 				// Task complete
 				return;
 			}
@@ -81,25 +70,61 @@ public class PassiveTeam implements Team, JobContext {
 		this.continueWorking = false;
 	}
 
-	/*
-	 * ==================== JobContext ====================================
+	/**
+	 * Passive {@link JobContext}.
 	 */
+	private class PassiveJobContext implements JobContext {
 
-	@Override
-	public long getTime() {
+		/**
+		 * Value indicating the time is not specified.
+		 */
+		private static final long TIME_NOT_SET = -1;
 
-		// Ensure the time is specified
-		if (this.time == TIME_NOT_SET) {
-			this.time = System.currentTimeMillis();
+		/**
+		 * {@link TeamIdentifier}.
+		 */
+		private final TeamIdentifier teamIdentifier;
+
+		/**
+		 * Current time for execution.
+		 */
+		private long time = TIME_NOT_SET;
+
+		/**
+		 * Initiate.
+		 * 
+		 * @param teamIdentifier
+		 *            {@link TeamIdentifier}.
+		 */
+		public PassiveJobContext(TeamIdentifier teamIdentifier) {
+			this.teamIdentifier = teamIdentifier;
 		}
 
-		// Return the time
-		return this.time;
-	}
+		/*
+		 * ================= JobContext ====================
+		 */
 
-	@Override
-	public boolean continueExecution() {
-		return this.continueWorking;
+		@Override
+		public long getTime() {
+
+			// Ensure the time is specified
+			if (this.time == TIME_NOT_SET) {
+				this.time = System.currentTimeMillis();
+			}
+
+			// Return the time
+			return this.time;
+		}
+
+		@Override
+		public TeamIdentifier getCurrentTeam() {
+			return this.teamIdentifier;
+		}
+
+		@Override
+		public boolean continueExecution() {
+			return PassiveTeam.this.continueWorking;
+		}
 	}
 
 }

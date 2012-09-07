@@ -49,6 +49,8 @@ import net.officefloor.frame.spi.governance.Governance;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.frame.spi.team.Job;
 import net.officefloor.frame.spi.team.JobContext;
+import net.officefloor.frame.spi.team.Team;
+import net.officefloor.frame.spi.team.TeamIdentifier;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 
 import org.easymock.AbstractMatcher;
@@ -66,6 +68,12 @@ public abstract class AbstractJobContainerTest extends OfficeFrameTestCase {
 	 */
 	private final JobNodeActivatableSet jobActivatableSet = this
 			.createMock(JobNodeActivatableSet.class);
+
+	/**
+	 * {@link TeamIdentifier} of the current {@link Team}.
+	 */
+	private final TeamIdentifier currentTeam = this
+			.createMock(TeamIdentifier.class);
 
 	/**
 	 * {@link ProcessState}.
@@ -325,7 +333,8 @@ public abstract class AbstractJobContainerTest extends OfficeFrameTestCase {
 		final FunctionalityJob functionalityJob = (FunctionalityJob) job;
 		this.workContainer.loadManagedObjects(
 				functionalityJob.requiredManagedObjectIndexes, this.jobContext,
-				functionalityJob, this.jobActivatableSet, functionalityJob);
+				functionalityJob, this.jobActivatableSet, this.currentTeam,
+				functionalityJob);
 	}
 
 	/**
@@ -509,7 +518,7 @@ public abstract class AbstractJobContainerTest extends OfficeFrameTestCase {
 						GovernanceDeactivationStrategy.ENFORCE),
 				this.sequentialJob);
 		if (isActivateFlow) {
-			this.sequentialJob.activateJob();
+			this.sequentialJob.activateJob(this.currentTeam);
 		}
 	}
 
@@ -584,7 +593,7 @@ public abstract class AbstractJobContainerTest extends OfficeFrameTestCase {
 	protected void record_parallelJob_activateJob(Job currentJob,
 			final boolean isComplete) {
 		final FunctionalityJob functionalityJob = (FunctionalityJob) currentJob;
-		this.parallelJob.activateJob();
+		this.parallelJob.activateJob(this.currentTeam);
 		this.control(this.parallelJob).setMatcher(new AlwaysMatcher() {
 			@Override
 			public boolean matches(Object[] expected, Object[] actual) {
@@ -633,7 +642,8 @@ public abstract class AbstractJobContainerTest extends OfficeFrameTestCase {
 						asynchronousFlowParameter,
 						GovernanceDeactivationStrategy.ENFORCE),
 				this.asynchronousJob);
-		this.asynchronousJob.activateJob();
+		this.asynchronousJob
+				.activateJob(AbstractJobContainer.ASYNCHRONOUS_FLOW_TEAM_IDENTIFIER);
 		this.recordReturn(this.asynchronousFlow,
 				this.asynchronousFlow.getThreadState(),
 				this.asynchronousThreadState);
@@ -694,7 +704,7 @@ public abstract class AbstractJobContainerTest extends OfficeFrameTestCase {
 		this.threadState.escalationComplete(functionalityJob,
 				this.jobActivatableSet);
 		if (isHandled) {
-			this.escalationJob.activateJob();
+			this.escalationJob.activateJob(this.currentTeam);
 		}
 	}
 
@@ -723,7 +733,7 @@ public abstract class AbstractJobContainerTest extends OfficeFrameTestCase {
 					this.escalation);
 			this.threadState.setEscalationLevel(EscalationLevel.OFFICE);
 			this.record_JobContainer_createEscalationJob(failure, null);
-			this.escalationJob.activateJob();
+			this.escalationJob.activateJob(this.currentTeam);
 			return;
 		}
 		this.recordReturn(this.escalationProcedure,
@@ -737,7 +747,7 @@ public abstract class AbstractJobContainerTest extends OfficeFrameTestCase {
 			this.threadState
 					.setEscalationLevel(EscalationLevel.MANAGED_OBJECT_SOURCE_HANDLER);
 			this.record_JobContainer_createEscalationJob(failure, null);
-			this.escalationJob.activateJob();
+			this.escalationJob.activateJob(this.currentTeam);
 			return;
 		}
 		this.recordReturn(this.processState,
@@ -748,7 +758,7 @@ public abstract class AbstractJobContainerTest extends OfficeFrameTestCase {
 				this.processState.getOfficeFloorEscalation(), this.escalation);
 		this.threadState.setEscalationLevel(EscalationLevel.OFFICE_FLOOR);
 		this.record_JobContainer_createEscalationJob(failure, null);
-		this.escalationJob.activateJob();
+		this.escalationJob.activateJob(this.currentTeam);
 	}
 
 	/**
@@ -838,7 +848,7 @@ public abstract class AbstractJobContainerTest extends OfficeFrameTestCase {
 	 * Records activating the next {@link Job}.
 	 */
 	protected void record_nextJob_activateJob() {
-		this.nextJob.activateJob();
+		this.nextJob.activateJob(this.currentTeam);
 	}
 
 	/**
@@ -846,7 +856,7 @@ public abstract class AbstractJobContainerTest extends OfficeFrameTestCase {
 	 */
 	protected void record_ParallelOwner_unlinkAndActivate() {
 		this.parallelOwnerJob.setParallelNode(null);
-		this.parallelOwnerJob.activateJob();
+		this.parallelOwnerJob.activateJob(this.currentTeam);
 	}
 
 	/**
@@ -908,15 +918,16 @@ public abstract class AbstractJobContainerTest extends OfficeFrameTestCase {
 	protected void record_completeJob(Job job) {
 		FunctionalityJob functionalityJob = (FunctionalityJob) job;
 		// Clean up job
-		this.workContainer.unloadWork(this.jobActivatableSet);
-		this.flow.jobNodeComplete(functionalityJob, this.jobActivatableSet);
+		this.workContainer.unloadWork(this.jobActivatableSet, this.currentTeam);
+		this.flow.jobNodeComplete(functionalityJob, this.jobActivatableSet,
+				this.currentTeam);
 	}
 
 	/**
 	 * Records activating the {@link JobNodeActivatableSet}.
 	 */
 	protected void record_JobActivatableSet_activateJobs() {
-		this.jobActivatableSet.activateJobNodes();
+		this.jobActivatableSet.activateJobNodes(this.currentTeam);
 	}
 
 	/**

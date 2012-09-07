@@ -189,9 +189,10 @@ public class RawTeamMetaDataTest extends OfficeFrameTestCase {
 		public static final String PROPERTY_VALUE = "property.value";
 
 		@Override
-		public void init(TeamSourceContext context) throws Exception {
+		public Team createTeam(TeamSourceContext context) throws Exception {
 			String property = context.getProperty(PROPERTY_NAME);
 			assertEquals("Incorrect property value", PROPERTY_VALUE, property);
+			return super.createTeam(context);
 		}
 	}
 
@@ -234,8 +235,9 @@ public class RawTeamMetaDataTest extends OfficeFrameTestCase {
 		public static final String CLASS_NAME = "REQUIRED CLASS";
 
 		@Override
-		public void init(TeamSourceContext context) throws Exception {
+		public Team createTeam(TeamSourceContext context) throws Exception {
 			context.loadClass(CLASS_NAME);
+			return super.createTeam(context);
 		}
 	}
 
@@ -278,50 +280,9 @@ public class RawTeamMetaDataTest extends OfficeFrameTestCase {
 		public static final String RESOURCE_LOCATION = "REQUIRED RESOURCE";
 
 		@Override
-		public void init(TeamSourceContext context) throws Exception {
+		public Team createTeam(TeamSourceContext context) throws Exception {
 			context.getResource(RESOURCE_LOCATION);
-		}
-	}
-
-	/**
-	 * Ensures issue if failure in init the {@link Team}.
-	 */
-	public void testTeamInitFailure() {
-
-		final Exception failure = new Exception("init failure");
-
-		// Record team source that fails to initialise
-		this.recordReturn(this.configuration, this.configuration.getTeamName(),
-				TEAM_NAME);
-		this.recordReturn(this.configuration,
-				this.configuration.getTeamSourceClass(),
-				FailInitTeamSource.class);
-		this.recordReturn(this.configuration,
-				this.configuration.getProperties(), new SourcePropertiesImpl());
-		this.issues.addIssue(AssetType.TEAM, TEAM_NAME,
-				"Failed to initialise TeamSource", failure);
-
-		// Attempt to construct team
-		this.replayMockObjects();
-		FailInitTeamSource.initFailure = failure;
-		this.constructRawTeamMetaData(false);
-		this.verifyMockObjects();
-	}
-
-	/**
-	 * {@link TeamSource} that fails to initialise.
-	 */
-	@TestSource
-	public static class FailInitTeamSource extends TeamSourceAdapter {
-
-		/**
-		 * {@link Exception} to be thrown on init.
-		 */
-		public static Exception initFailure;
-
-		@Override
-		public void init(TeamSourceContext context) throws Exception {
-			throw initFailure;
+			return super.createTeam(context);
 		}
 	}
 
@@ -362,7 +323,7 @@ public class RawTeamMetaDataTest extends OfficeFrameTestCase {
 		public static RuntimeException createFailure;
 
 		@Override
-		public Team createTeam() {
+		public Team createTeam(TeamSourceContext context) throws Exception {
 			throw createFailure;
 		}
 	}
@@ -442,15 +403,19 @@ public class RawTeamMetaDataTest extends OfficeFrameTestCase {
 		public static Team team;
 
 		@Override
-		public void init(TeamSourceContext context) throws Exception {
+		public Team createTeam(TeamSourceContext context) throws Exception {
 			assertFalse("Should only be initialised once", isInitialised);
 			isInitialised = true;
+
+			// Validate the team
 			assertEquals("Incorrect team name", expectedTeamName,
 					context.getTeamName());
-		}
 
-		@Override
-		public Team createTeam() {
+			// Ensure have team identifier
+			assertNotNull("Must have team identifier",
+					context.getTeamIdentifier());
+
+			// Return the team
 			return team;
 		}
 	}
@@ -496,7 +461,7 @@ public class RawTeamMetaDataTest extends OfficeFrameTestCase {
 		public static Team team;
 
 		@Override
-		public Team createTeam() {
+		public Team createTeam(TeamSourceContext context) throws Exception {
 			return team;
 		}
 	}
@@ -548,12 +513,12 @@ public class RawTeamMetaDataTest extends OfficeFrameTestCase {
 		public static ProcessContextListener listener;
 
 		@Override
-		public void init(TeamSourceContext context) throws Exception {
+		public Team createTeam(TeamSourceContext context) throws Exception {
 			// Register the listener
 			context.registerProcessContextListener(listener);
 
-			// Do super functions
-			super.init(context);
+			// Create and return the team
+			return super.createTeam(context);
 		}
 	}
 

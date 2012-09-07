@@ -43,6 +43,15 @@ public interface JobContext {
 	long getTime();
 
 	/**
+	 * Obtains the {@link TeamIdentifier} of the current {@link Team} executing
+	 * the {@link Job}.
+	 * 
+	 * @return {@link TeamIdentifier} of the current {@link Team} executing the
+	 *         {@link Job}.
+	 */
+	TeamIdentifier getCurrentTeam();
+
+	/**
 	 * Indicates whether to continue execution. This provides a hint to allow a
 	 * {@link Job} to be more responsive in shutting down.
 	 * 

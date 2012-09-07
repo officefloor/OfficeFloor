@@ -27,6 +27,7 @@ import net.officefloor.frame.internal.structure.JobNodeActivatableSet;
 import net.officefloor.frame.internal.structure.JobNodeActivateSet;
 import net.officefloor.frame.internal.structure.OfficeManager;
 import net.officefloor.frame.internal.structure.ThreadState;
+import net.officefloor.frame.spi.team.TeamIdentifier;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.frame.test.match.TypeMatcher;
 
@@ -87,11 +88,11 @@ public class OfficeManagerTest extends OfficeFrameTestCase {
 				.createMock(AssetManager.class);
 
 		// Record registering the AssetManagers
-		this.recordReturn(assetManagerOne, assetManagerOne
-				.getLinkedListSetOwner(), this.officeManager);
+		this.recordReturn(assetManagerOne,
+				assetManagerOne.getLinkedListSetOwner(), this.officeManager);
 		this.recordReturn(assetManagerOne, assetManagerOne.getPrev(), null);
-		this.recordReturn(assetManagerTwo, assetManagerTwo
-				.getLinkedListSetOwner(), this.officeManager);
+		this.recordReturn(assetManagerTwo,
+				assetManagerTwo.getLinkedListSetOwner(), this.officeManager);
 		this.recordReturn(assetManagerTwo, assetManagerTwo.getPrev(), null);
 		assetManagerOne.setNext(assetManagerTwo);
 		assetManagerTwo.setPrev(assetManagerOne);
@@ -199,7 +200,7 @@ public class OfficeManagerTest extends OfficeFrameTestCase {
 		 */
 
 		@Override
-		public synchronized void activateJob() {
+		public synchronized void activateJob(TeamIdentifier currentTeam) {
 			// Flag active and notify test that activated
 			this.isActivated = true;
 			this.notify();

@@ -15,40 +15,26 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
-package net.officefloor.frame.impl.spi.team;
+package net.officefloor.frame.impl.execute.job;
 
 import net.officefloor.frame.spi.team.Job;
 import net.officefloor.frame.spi.team.Team;
-import net.officefloor.frame.test.OfficeFrameTestCase;
 
 /**
- * Tests the {@link PassiveTeam}.
+ * Tests the continuing of the current {@link Team} {@link Thread} when the same
+ * {@link Team}.
  * 
  * @author Daniel Sagenschneider
  */
-public class PassiveTeamTest extends OfficeFrameTestCase {
+public class ContinueTeamThreadJobContainerTest extends
+		AbstractJobContainerTest {
 
 	/**
-	 * Ensures that passively executes the {@link Job}.
+	 * Ensure able to continue the current {@link Thread} for the next
+	 * {@link Job} if same {@link Team}.
 	 */
-	public void testPassiveExecute() {
-
-		// Create the team
-		Team team = new PassiveTeam();
-
-		// Create the mock task (completes immediately)
-		MockTaskContainer task = new MockTaskContainer();
-		task.stopProcessing = true;
-
-		// Run team and execute a task
-		team.startWorking();
-		team.assignJob(task, new MockTeamIdentifier());
-		team.stopWorking();
-
-		// Ensure the task executed
-		assertEquals("Task should be executed once", 1,
-				task.doTaskInvocationCount);
+	public void testContinueTeamThread() {
+		fail("TODO implement");
 	}
 
 }

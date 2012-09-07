@@ -31,7 +31,8 @@ public class WorkerPerTaskTeamTest extends OfficeFrameTestCase {
 	/**
 	 * {@link WorkerPerTaskTeam} to test.
 	 */
-	private WorkerPerTaskTeam team = new WorkerPerTaskTeam("test");
+	private WorkerPerTaskTeam team = new WorkerPerTaskTeam("test",
+			new MockTeamIdentifier());
 
 	/**
 	 * Ensures runs the tasks.

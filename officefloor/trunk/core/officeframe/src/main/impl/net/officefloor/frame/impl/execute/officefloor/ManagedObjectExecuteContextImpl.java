@@ -32,6 +32,7 @@ import net.officefloor.frame.internal.structure.ProcessTicker;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectExecuteContext;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
+import net.officefloor.frame.spi.team.TeamIdentifier;
 
 /**
  * {@link ManagedObjectExecuteContext} implementation.
@@ -40,6 +41,12 @@ import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
  */
 public class ManagedObjectExecuteContextImpl<F extends Enum<F>> implements
 		ManagedObjectExecuteContext<F> {
+
+	/**
+	 * {@link TeamIdentifier} for invoking a {@link ProcessState}.
+	 */
+	public static final TeamIdentifier INVOKE_PROCESS_TEAM = new TeamIdentifier() {
+	};
 
 	/**
 	 * {@link ManagedObjectMetaData} of the {@link ManagedObject}.
@@ -165,13 +172,13 @@ public class ManagedObjectExecuteContextImpl<F extends Enum<F>> implements
 			this.timer.schedule(new TimerTask() {
 				@Override
 				public void run() {
-					jobNode.activateJob();
+					jobNode.activateJob(INVOKE_PROCESS_TEAM);
 				}
 			}, delay);
 
 		} else {
 			// Activate Job immediately
-			jobNode.activateJob();
+			jobNode.activateJob(INVOKE_PROCESS_TEAM);
 		}
 
 		// Return the Process Future

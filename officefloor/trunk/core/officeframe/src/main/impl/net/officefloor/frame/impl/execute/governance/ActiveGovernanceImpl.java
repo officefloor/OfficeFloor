@@ -32,6 +32,7 @@ import net.officefloor.frame.internal.structure.ManagedObjectContainer;
 import net.officefloor.frame.internal.structure.WorkContainer;
 import net.officefloor.frame.spi.governance.GovernanceContext;
 import net.officefloor.frame.spi.team.JobContext;
+import net.officefloor.frame.spi.team.TeamIdentifier;
 
 /**
  * {@link ActiveGovernance} implementation.
@@ -125,9 +126,10 @@ public class ActiveGovernanceImpl<I, F extends Enum<F>> implements
 	}
 
 	@Override
-	public void unregisterManagedObject(JobNodeActivateSet activateSet) {
+	public void unregisterManagedObject(JobNodeActivateSet activateSet,
+			TeamIdentifier currentTeam) {
 		this.managedObject.unregisterManagedObjectFromGovernance(this,
-				activateSet);
+				activateSet, currentTeam);
 	}
 
 	/*

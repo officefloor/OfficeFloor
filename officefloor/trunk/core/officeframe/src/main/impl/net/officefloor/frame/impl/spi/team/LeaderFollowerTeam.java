@@ -21,6 +21,7 @@ package net.officefloor.frame.impl.spi.team;
 import net.officefloor.frame.spi.team.Job;
 import net.officefloor.frame.spi.team.JobContext;
 import net.officefloor.frame.spi.team.Team;
+import net.officefloor.frame.spi.team.TeamIdentifier;
 
 /**
  * {@link Team} implementation of many {@link Thread} instances that follow the
@@ -29,6 +30,11 @@ import net.officefloor.frame.spi.team.Team;
  * @author Daniel Sagenschneider
  */
 public class LeaderFollowerTeam extends ThreadGroup implements Team {
+
+	/**
+	 * {@link TeamIdentifier} of this {@link Team}.
+	 */
+	private final TeamIdentifier teamIdentifier;
 
 	/**
 	 * {@link TeamMember} instances.
@@ -55,15 +61,18 @@ public class LeaderFollowerTeam extends ThreadGroup implements Team {
 	 * 
 	 * @param teamName
 	 *            Name of team.
+	 * @param teamIdentifier
+	 *            {@link TeamIdentifier} of this {@link Team}.
 	 * @param teamMemberCount
 	 *            Number of {@link TeamMember} instances within this
 	 *            {@link LeaderFollowerTeam}.
 	 * @param waitTime
 	 *            Time to wait in milliseconds for a {@link Job}.
 	 */
-	public LeaderFollowerTeam(String teamName, int teamMemberCount,
-			long waitTime) {
+	public LeaderFollowerTeam(String teamName, TeamIdentifier teamIdentifier,
+			int teamMemberCount, long waitTime) {
 		super(teamName);
+		this.teamIdentifier = teamIdentifier;
 
 		// Create the Team Member stack (indicating number of Team Members)
 		this.teamMemberStack = new TeamMemberStack(teamMemberCount);
@@ -98,8 +107,8 @@ public class LeaderFollowerTeam extends ThreadGroup implements Team {
 	}
 
 	@Override
-	public void assignJob(Job task) {
-		this.taskQueue.enqueue(task);
+	public void assignJob(Job job, TeamIdentifier assignerTeam) {
+		this.taskQueue.enqueue(job);
 	}
 
 	@Override
@@ -248,6 +257,11 @@ public class LeaderFollowerTeam extends ThreadGroup implements Team {
 
 			// Return the time
 			return this.time;
+		}
+
+		@Override
+		public TeamIdentifier getCurrentTeam() {
+			return LeaderFollowerTeam.this.teamIdentifier;
 		}
 
 		@Override

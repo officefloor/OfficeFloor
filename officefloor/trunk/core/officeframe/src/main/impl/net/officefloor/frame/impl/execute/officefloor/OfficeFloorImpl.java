@@ -28,6 +28,7 @@ import java.util.logging.Logger;
 import net.officefloor.frame.api.build.NameAwareWorkFactory;
 import net.officefloor.frame.api.build.OfficeAwareWorkFactory;
 import net.officefloor.frame.api.build.WorkFactory;
+import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.api.manage.UnknownOfficeException;
@@ -43,6 +44,7 @@ import net.officefloor.frame.spi.managedobject.pool.ManagedObjectPool;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectExecuteContext;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.spi.team.Team;
+import net.officefloor.frame.spi.team.TeamIdentifier;
 
 /**
  * Implementation of {@link OfficeFloor}.
@@ -90,6 +92,12 @@ public class OfficeFloorImpl implements OfficeFloor {
 	/*
 	 * ====================== OfficeFloor ================================
 	 */
+
+	/**
+	 * {@link TeamIdentifier} for the startup {@link Task} instances.
+	 */
+	public static final TeamIdentifier STARTUP_TEAM = new TeamIdentifier() {
+	};
 
 	@Override
 	public synchronized void openOfficeFloor() throws Exception {
@@ -183,11 +191,11 @@ public class OfficeFloorImpl implements OfficeFloor {
 					continue; // failure in configuring startup task
 				}
 
-				// Create and active the startup task
+				// Create and activate the startup task
 				JobNode startupTask = officeMetaData.createProcess(
 						officeStartupTask.getFlowMetaData(),
 						officeStartupTask.getParameter());
-				startupTask.activateJob();
+				startupTask.activateJob(STARTUP_TEAM);
 			}
 		}
 	}

@@ -39,6 +39,8 @@ import net.officefloor.frame.spi.governance.Governance;
 import net.officefloor.frame.spi.governance.GovernanceContext;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.frame.spi.team.JobContext;
+import net.officefloor.frame.spi.team.Team;
+import net.officefloor.frame.spi.team.TeamIdentifier;
 
 /**
  * {@link GovernanceContainer} implementation.
@@ -97,12 +99,16 @@ public class GovernanceContainerImpl<I, F extends Enum<F>> implements
 	 * 
 	 * @param activateSet
 	 *            {@link JobNodeActivateSet}.
+	 * @param currentTeam
+	 *            {@link TeamIdentifier} of the current {@link Team}
+	 *            unregistering the {@link Governance}.
 	 */
-	private void unregisterGovernance(JobNodeActivateSet activateSet) {
+	private void unregisterGovernance(JobNodeActivateSet activateSet,
+			TeamIdentifier currentTeam) {
 
 		// Unregister managed objects from governance
 		for (ActiveGovernanceManager<I, F> activeGovernance : this.activeGovernances) {
-			activeGovernance.unregisterManagedObject(activateSet);
+			activeGovernance.unregisterManagedObject(activateSet, currentTeam);
 		}
 
 		// Unregister the Governance from Process
@@ -241,8 +247,8 @@ public class GovernanceContainerImpl<I, F extends Enum<F>> implements
 	@Override
 	public boolean enforceGovernance(GovernanceContext<F> governanceContext,
 			JobContext jobContext, JobNode jobNode,
-			JobNodeActivateSet activateSet, ContainerContext context)
-			throws Throwable {
+			JobNodeActivateSet activateSet, TeamIdentifier currentTeam,
+			ContainerContext context) throws Throwable {
 
 		// Access Point: Job
 		// Locks: ThreadState
@@ -271,7 +277,7 @@ public class GovernanceContainerImpl<I, F extends Enum<F>> implements
 
 			} finally {
 				// Governance enforced (as best), so now unregister
-				this.unregisterGovernance(activateSet);
+				this.unregisterGovernance(activateSet, currentTeam);
 			}
 		}
 
@@ -282,8 +288,8 @@ public class GovernanceContainerImpl<I, F extends Enum<F>> implements
 	@Override
 	public boolean disregardGovernance(GovernanceContext<F> governanceContext,
 			JobContext jobContext, JobNode jobNode,
-			JobNodeActivateSet activateSet, ContainerContext context)
-			throws Throwable {
+			JobNodeActivateSet activateSet, TeamIdentifier currentTeam,
+			ContainerContext context) throws Throwable {
 
 		// Access Point: Job
 		// Locks: ThreadState
@@ -312,7 +318,7 @@ public class GovernanceContainerImpl<I, F extends Enum<F>> implements
 
 			} finally {
 				// Governance disregarded (as best), so now unregister
-				this.unregisterGovernance(activateSet);
+				this.unregisterGovernance(activateSet, currentTeam);
 			}
 		}
 

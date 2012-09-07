@@ -22,6 +22,8 @@ import net.officefloor.frame.spi.governance.Governance;
 import net.officefloor.frame.spi.governance.GovernanceContext;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.frame.spi.team.JobContext;
+import net.officefloor.frame.spi.team.Team;
+import net.officefloor.frame.spi.team.TeamIdentifier;
 
 /**
  * Activity regarding the {@link Governance}.
@@ -49,6 +51,9 @@ public interface GovernanceActivity<I, F extends Enum<F>> {
 	 *            {@link JobNode}.
 	 * @param activateSet
 	 *            {@link JobNodeActivateSet}.
+	 * @param currentTeam
+	 *            {@link TeamIdentifier} of the current {@link Team} undertaking
+	 *            the activity.
 	 * @param containerContext
 	 *            {@link ContainerContext}.
 	 * @return <code>true</code> should activity be successfully trigger. In
@@ -59,7 +64,7 @@ public interface GovernanceActivity<I, F extends Enum<F>> {
 	 */
 	boolean doActivity(GovernanceContext<F> governanceContext,
 			JobContext jobContext, JobNode jobNode,
-			JobNodeActivateSet activateSet, ContainerContext containerContext)
-			throws Throwable;
+			JobNodeActivateSet activateSet, TeamIdentifier currentTeam,
+			ContainerContext containerContext) throws Throwable;
 
 }

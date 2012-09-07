@@ -48,6 +48,7 @@ import net.officefloor.frame.internal.structure.TaskMetaData;
 import net.officefloor.frame.internal.structure.WorkMetaData;
 import net.officefloor.frame.spi.governance.Governance;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
+import net.officefloor.frame.spi.team.TeamIdentifier;
 import net.officefloor.frame.spi.team.source.ProcessContextListener;
 
 /**
@@ -56,6 +57,12 @@ import net.officefloor.frame.spi.team.source.ProcessContextListener;
  * @author Daniel Sagenschneider
  */
 public class OfficeMetaDataImpl implements OfficeMetaData {
+
+	/**
+	 * {@link TeamIdentifier} for invoking the {@link ProcessState}.
+	 */
+	public static final TeamIdentifier INVOKE_PROCESS_TEAM = new TeamIdentifier() {
+	};
 
 	/**
 	 * <p>
@@ -111,7 +118,7 @@ public class OfficeMetaDataImpl implements OfficeMetaData {
 		}
 
 		// Assign the job node to the Team
-		jobNode.activateJob();
+		jobNode.activateJob(INVOKE_PROCESS_TEAM);
 
 		// Indicate when process of work complete
 		return processState.getProcessFuture();

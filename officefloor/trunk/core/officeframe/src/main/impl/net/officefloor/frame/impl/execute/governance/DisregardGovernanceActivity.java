@@ -27,6 +27,7 @@ import net.officefloor.frame.internal.structure.JobNodeActivateSet;
 import net.officefloor.frame.spi.governance.Governance;
 import net.officefloor.frame.spi.governance.GovernanceContext;
 import net.officefloor.frame.spi.team.JobContext;
+import net.officefloor.frame.spi.team.TeamIdentifier;
 
 /**
  * {@link Task} to disregard the {@link Governance}.
@@ -56,12 +57,13 @@ public class DisregardGovernanceActivity<I, F extends Enum<F>> extends
 	@Override
 	public boolean doActivity(GovernanceContext<F> governanceContext,
 			JobContext jobContext, JobNode jobNode,
-			JobNodeActivateSet activateSet, ContainerContext containerContext)
-			throws Throwable {
+			JobNodeActivateSet activateSet, TeamIdentifier currentTeam,
+			ContainerContext containerContext) throws Throwable {
 
 		// Disregard the governance
-		return this.governanceControl.disregardGovernance(governanceContext,
-				jobContext, jobNode, activateSet, containerContext);
+		return this.governanceControl
+				.disregardGovernance(governanceContext, jobContext, jobNode,
+						activateSet, currentTeam, containerContext);
 	}
 
 }

@@ -51,6 +51,8 @@ import net.officefloor.frame.internal.structure.WorkMetaData;
 import net.officefloor.frame.spi.administration.Administrator;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.frame.spi.team.JobContext;
+import net.officefloor.frame.spi.team.Team;
+import net.officefloor.frame.spi.team.TeamIdentifier;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.frame.test.match.TypeMatcher;
 
@@ -294,6 +296,12 @@ public abstract class AbstractWorkContainerTest extends OfficeFrameTestCase {
 			.createMock(JobNodeActivateSet.class);
 
 	/**
+	 * {@link TeamIdentifier} for the current {@link Team}.
+	 */
+	private final TeamIdentifier currentTeam = this
+			.createMock(TeamIdentifier.class);
+
+	/**
 	 * {@link TaskDutyAssociation}.
 	 */
 	private final TaskDutyAssociation<?> taskDutyAssociation = this
@@ -358,7 +366,8 @@ public abstract class AbstractWorkContainerTest extends OfficeFrameTestCase {
 
 			// Record loading the managed object
 			managedObjectContainer.loadManagedObject(this.jobContext,
-					this.jobNode, this.jobActivateSet, this.containerContext);
+					this.jobNode, this.jobActivateSet, this.currentTeam,
+					this.containerContext);
 		}
 	}
 
@@ -613,7 +622,7 @@ public abstract class AbstractWorkContainerTest extends OfficeFrameTestCase {
 		for (int i = 0; i < this.isManagedObjectAvailable.length; i++) {
 			if (this.isManagedObjectAvailable[i]) {
 				this.workManagedObjectContainers.get(i).unloadManagedObject(
-						this.jobActivateSet);
+						this.jobActivateSet, this.currentTeam);
 			}
 		}
 	}
@@ -707,7 +716,8 @@ public abstract class AbstractWorkContainerTest extends OfficeFrameTestCase {
 	protected void loadManagedObjects(WorkContainer<?> workContainer,
 			ManagedObjectIndex... managedObjectIndexes) {
 		workContainer.loadManagedObjects(managedObjectIndexes, this.jobContext,
-				this.jobNode, this.jobActivateSet, this.containerContext);
+				this.jobNode, this.jobActivateSet, this.currentTeam,
+				this.containerContext);
 	}
 
 	/**
@@ -785,7 +795,7 @@ public abstract class AbstractWorkContainerTest extends OfficeFrameTestCase {
 	 *            {@link WorkContainer}.
 	 */
 	protected void unloadWork(WorkContainer<?> work) {
-		work.unloadWork(this.jobActivateSet);
+		work.unloadWork(this.jobActivateSet, this.currentTeam);
 	}
 
 }

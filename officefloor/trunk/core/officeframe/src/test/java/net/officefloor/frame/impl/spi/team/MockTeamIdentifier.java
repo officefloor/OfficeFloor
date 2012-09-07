@@ -15,40 +15,14 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
 package net.officefloor.frame.impl.spi.team;
 
-import net.officefloor.frame.spi.team.Job;
-import net.officefloor.frame.spi.team.Team;
-import net.officefloor.frame.test.OfficeFrameTestCase;
+import net.officefloor.frame.spi.team.TeamIdentifier;
 
 /**
- * Tests the {@link PassiveTeam}.
+ * Mock {@link TeamIdentifier}.
  * 
  * @author Daniel Sagenschneider
  */
-public class PassiveTeamTest extends OfficeFrameTestCase {
-
-	/**
-	 * Ensures that passively executes the {@link Job}.
-	 */
-	public void testPassiveExecute() {
-
-		// Create the team
-		Team team = new PassiveTeam();
-
-		// Create the mock task (completes immediately)
-		MockTaskContainer task = new MockTaskContainer();
-		task.stopProcessing = true;
-
-		// Run team and execute a task
-		team.startWorking();
-		team.assignJob(task, new MockTeamIdentifier());
-		team.stopWorking();
-
-		// Ensure the task executed
-		assertEquals("Task should be executed once", 1,
-				task.doTaskInvocationCount);
-	}
-
+public class MockTeamIdentifier implements TeamIdentifier {
 }

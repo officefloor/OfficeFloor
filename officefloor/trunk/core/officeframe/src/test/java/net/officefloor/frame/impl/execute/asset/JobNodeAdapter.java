@@ -24,20 +24,21 @@ import net.officefloor.frame.internal.structure.EscalationProcedure;
 import net.officefloor.frame.internal.structure.JobSequence;
 import net.officefloor.frame.internal.structure.JobNode;
 import net.officefloor.frame.internal.structure.JobNodeActivateSet;
+import net.officefloor.frame.spi.team.TeamIdentifier;
 
 /**
  * Provides default methods for the {@link JobNode}.
  * 
  * @author Daniel Sagenschneider
  */
-public class JobNodeAdapter extends AbstractLinkedListSetEntry<JobNode, JobSequence>
-		implements JobNode {
+public class JobNodeAdapter extends
+		AbstractLinkedListSetEntry<JobNode, JobSequence> implements JobNode {
 
 	/**
 	 * {@link JobSequence}.
 	 */
 	private final JobSequence flow;
-	
+
 	/**
 	 * Initiate.
 	 * 
@@ -62,7 +63,7 @@ public class JobNodeAdapter extends AbstractLinkedListSetEntry<JobNode, JobSeque
 	 */
 
 	@Override
-	public void activateJob() {
+	public void activateJob(TeamIdentifier currentTeam) {
 		// Do nothing
 	}
 
@@ -73,7 +74,8 @@ public class JobNodeAdapter extends AbstractLinkedListSetEntry<JobNode, JobSeque
 	}
 
 	@Override
-	public void clearNodes(JobNodeActivateSet notifySet) {
+	public void clearNodes(JobNodeActivateSet notifySet,
+			TeamIdentifier currentTeam) {
 		// Do nothing
 	}
 

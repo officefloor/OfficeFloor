@@ -23,6 +23,7 @@ import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.internal.structure.ProcessState;
 import net.officefloor.frame.spi.team.Job;
 import net.officefloor.frame.spi.team.Team;
+import net.officefloor.frame.spi.team.TeamIdentifier;
 import net.officefloor.frame.spi.team.source.ProcessContextListener;
 import net.officefloor.frame.spi.team.source.TeamSource;
 import net.officefloor.frame.spi.team.source.TeamSourceContext;
@@ -117,7 +118,7 @@ public class TeamProcessContextTest extends AbstractOfficeConstructTestCase {
 		}
 
 		@Override
-		protected Team createTeam(TeamSourceContext context) throws Exception {
+		public Team createTeam(TeamSourceContext context) throws Exception {
 
 			// Register as Process Context Listener
 			context.registerProcessContextListener(this);
@@ -167,7 +168,7 @@ public class TeamProcessContextTest extends AbstractOfficeConstructTestCase {
 		}
 
 		@Override
-		public void assignJob(Job job) {
+		public void assignJob(Job job, TeamIdentifier assignerTeam) {
 			assertEquals("Incorrect step", ProcessingStep.PROCESS_CREATED,
 					currentStep);
 			assertNotNull("Must have Process Identifier at this point",

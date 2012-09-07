@@ -51,6 +51,8 @@ import net.officefloor.frame.internal.structure.TaskMetaData;
 import net.officefloor.frame.internal.structure.ThreadMetaData;
 import net.officefloor.frame.internal.structure.ThreadProfiler;
 import net.officefloor.frame.internal.structure.ThreadState;
+import net.officefloor.frame.spi.team.Team;
+import net.officefloor.frame.spi.team.TeamIdentifier;
 
 /**
  * Implementation of the {@link ThreadState}.
@@ -84,48 +86,6 @@ public class ThreadStateImpl extends
 		@Override
 		protected boolean isEqual(JoinedJobNode entryA, JoinedJobNode entryB) {
 			return (entryA.jobNode == entryB.jobNode);
-		}
-	};
-
-	/**
-	 * {@link ContainerContext}.
-	 */
-	private final ContainerContext containerContext = new ContainerContext() {
-
-		@Override
-		public void flagJobToWait() {
-			// Ignore, as not waiting for tidy up
-		}
-
-		@Override
-		public void addSetupTask(TaskMetaData<?, ?, ?> taskMetaData,
-				Object parameter) {
-
-			// Create the flow to run setup task
-			JobSequence jobSequence = ThreadStateImpl.this.createJobSequence();
-
-			// Create and activate the task
-			JobNode taskNode = jobSequence.createTaskNode(taskMetaData, null,
-					parameter, GovernanceDeactivationStrategy.ENFORCE);
-			taskNode.activateJob();
-
-			// Flag triggered setup task
-			ThreadStateImpl.this.isTriggerTaskOrActivity = true;
-		}
-
-		@Override
-		public void addGovernanceActivity(GovernanceActivity<?, ?> activity) {
-
-			// Create the flow to run the activity
-			JobSequence jobSequence = ThreadStateImpl.this.createJobSequence();
-
-			// Create and activate the activity
-			JobNode activityNode = jobSequence.createGovernanceNode(activity,
-					null);
-			activityNode.activateJob();
-
-			// Flag triggered governance activity
-			ThreadStateImpl.this.isTriggerTaskOrActivity = true;
 		}
 	};
 
@@ -281,7 +241,8 @@ public class ThreadStateImpl extends
 
 	@Override
 	public void jobSequenceComplete(JobSequence jobSequence,
-			JobNodeActivateSet activateSet) {
+			JobNodeActivateSet activateSet, TeamIdentifier currentTeam) {
+
 		// Remove Job Sequence from active Job Sequence listing
 		if (this.activeJobSequences.removeEntry(jobSequence)) {
 
@@ -293,6 +254,10 @@ public class ThreadStateImpl extends
 			// Reset trigger for disregard governance
 			this.isTriggerTaskOrActivity = false;
 
+			// Create the container context for job sequence completion
+			ContainerContext containerContext = new JobSequenceCompleteContainerContext(
+					currentTeam);
+
 			// Deactivate governance
 			GovernanceDeactivationStrategy deactivationStrategy = this.threadMetaData
 					.getGovernanceDeactivationStrategy();
@@ -302,7 +267,7 @@ public class ThreadStateImpl extends
 				for (int i = 0; i < this.governanceContainers.length; i++) {
 					GovernanceContainer<?, ?> container = this.governanceContainers[i];
 					if (container != null) {
-						container.enforceGovernance(this.containerContext);
+						container.enforceGovernance(containerContext);
 					}
 				}
 				break;
@@ -312,7 +277,7 @@ public class ThreadStateImpl extends
 				for (int i = 0; i < this.governanceContainers.length; i++) {
 					GovernanceContainer<?, ?> container = this.governanceContainers[i];
 					if (container != null) {
-						container.disregardGovernance(this.containerContext);
+						container.disregardGovernance(containerContext);
 					}
 				}
 				break;
@@ -336,7 +301,7 @@ public class ThreadStateImpl extends
 			for (int i = 0; i < this.managedObjectContainers.length; i++) {
 				ManagedObjectContainer container = this.managedObjectContainers[i];
 				if (container != null) {
-					container.unloadManagedObject(activateSet);
+					container.unloadManagedObject(activateSet, currentTeam);
 				}
 			}
 
@@ -348,7 +313,7 @@ public class ThreadStateImpl extends
 			}
 
 			// Thread complete
-			this.processState.threadComplete(this, activateSet);
+			this.processState.threadComplete(this, activateSet, currentTeam);
 		}
 	}
 
@@ -448,6 +413,70 @@ public class ThreadStateImpl extends
 		// Profile the job execution
 		this.profiler.profileJob(jobMetaData);
 	}
+
+	/**
+	 * {@link ContainerContext} for completing the {@link JobSequence}.
+	 */
+	private class JobSequenceCompleteContainerContext implements
+			ContainerContext {
+
+		/**
+		 * {@link TeamIdentifier} of current {@link Team} completing the
+		 * {@link JobSequence}.
+		 */
+		private final TeamIdentifier currentTeam;
+
+		/**
+		 * Initiate.
+		 * 
+		 * @param currentTeam
+		 *            {@link TeamIdentifier} of current {@link Team} completing
+		 *            the {@link JobSequence}.
+		 */
+		public JobSequenceCompleteContainerContext(TeamIdentifier currentTeam) {
+			this.currentTeam = currentTeam;
+		}
+
+		/*
+		 * ==================== ContainerContext ======================
+		 */
+
+		@Override
+		public void flagJobToWait() {
+			// Ignore, as not waiting for tidy up
+		}
+
+		@Override
+		public void addSetupTask(TaskMetaData<?, ?, ?> taskMetaData,
+				Object parameter) {
+
+			// Create the flow to run setup task
+			JobSequence jobSequence = ThreadStateImpl.this.createJobSequence();
+
+			// Create and activate the task
+			JobNode taskNode = jobSequence.createTaskNode(taskMetaData, null,
+					parameter, GovernanceDeactivationStrategy.ENFORCE);
+			taskNode.activateJob(this.currentTeam);
+
+			// Flag triggered setup task
+			ThreadStateImpl.this.isTriggerTaskOrActivity = true;
+		}
+
+		@Override
+		public void addGovernanceActivity(GovernanceActivity<?, ?> activity) {
+
+			// Create the flow to run the activity
+			JobSequence jobSequence = ThreadStateImpl.this.createJobSequence();
+
+			// Create and activate the activity
+			JobNode activityNode = jobSequence.createGovernanceNode(activity,
+					null);
+			activityNode.activateJob(this.currentTeam);
+
+			// Flag triggered governance activity
+			ThreadStateImpl.this.isTriggerTaskOrActivity = true;
+		}
+	};
 
 	/*
 	 * ====================== FlowFuture ==================================

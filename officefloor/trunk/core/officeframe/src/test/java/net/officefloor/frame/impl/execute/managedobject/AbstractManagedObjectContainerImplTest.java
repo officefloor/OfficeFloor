@@ -58,6 +58,8 @@ import net.officefloor.frame.spi.managedobject.pool.ManagedObjectPool;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectUser;
 import net.officefloor.frame.spi.team.JobContext;
+import net.officefloor.frame.spi.team.Team;
+import net.officefloor.frame.spi.team.TeamIdentifier;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.frame.test.match.TypeMatcher;
 
@@ -269,6 +271,12 @@ public abstract class AbstractManagedObjectContainerImplTest extends
 	 */
 	private final JobNodeActivateSet jobActivateSet = this
 			.createMock(JobNodeActivatableSet.class);
+
+	/**
+	 * {@link TeamIdentifier} of the current {@link Team}.
+	 */
+	private final TeamIdentifier currentTeam = this
+			.createMock(TeamIdentifier.class);
 
 	/**
 	 * {@link ContainerContext}.
@@ -621,7 +629,7 @@ public abstract class AbstractManagedObjectContainerImplTest extends
 				(this.isRecycled ? this.recycleJobNode : null));
 
 		// Record unloading the managed object
-		this.record_unloadManagedObject();
+		this.record_unloadManagedObject(ManagedObjectContainerImpl.MANAGED_OBJECT_LOAD_TEAM);
 	}
 
 	/**
@@ -1061,7 +1069,7 @@ public abstract class AbstractManagedObjectContainerImplTest extends
 
 		// Record unloading managed object (if loaded)
 		if (isUnLoad) {
-			this.record_unloadManagedObject();
+			this.record_unloadManagedObject(this.currentTeam);
 		}
 
 		// Permanently notify managed object unloaded
@@ -1074,11 +1082,14 @@ public abstract class AbstractManagedObjectContainerImplTest extends
 
 	/**
 	 * Records unloading the {@link ManagedObject}.
+	 * 
+	 * @param currentTeam
+	 *            {@link TeamIdentifier} of current {@link Team}.
 	 */
-	private void record_unloadManagedObject() {
+	private void record_unloadManagedObject(TeamIdentifier currentTeam) {
 		if (this.isRecycled) {
 			// Recycle managed object
-			this.recycleJobNode.activateJob();
+			this.recycleJobNode.activateJob(currentTeam);
 
 		} else {
 			// Return whether pooled
@@ -1110,7 +1121,7 @@ public abstract class AbstractManagedObjectContainerImplTest extends
 	 */
 	protected void loadManagedObject(ManagedObjectContainer mo) {
 		mo.loadManagedObject(this.jobContext, this.jobNode,
-				this.jobActivateSet, this.containerContext);
+				this.jobActivateSet, this.currentTeam, this.containerContext);
 	}
 
 	/**
@@ -1169,7 +1180,7 @@ public abstract class AbstractManagedObjectContainerImplTest extends
 	 *            {@link ManagedObjectContainer}.
 	 */
 	protected void unloadManagedObject(ManagedObjectContainer mo) {
-		mo.unloadManagedObject(this.jobActivateSet);
+		mo.unloadManagedObject(this.jobActivateSet, this.currentTeam);
 	}
 
 	/**
@@ -1248,7 +1259,7 @@ public abstract class AbstractManagedObjectContainerImplTest extends
 
 			// Unregistering the active governance
 			mo.unregisterManagedObjectFromGovernance(activeGovernance,
-					this.activeGovernanceActivateSets[i]);
+					this.activeGovernanceActivateSets[i], this.currentTeam);
 		}
 	}
 

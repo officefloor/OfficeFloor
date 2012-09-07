@@ -56,6 +56,7 @@ import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.frame.spi.team.Job;
 import net.officefloor.frame.spi.team.JobContext;
 import net.officefloor.frame.spi.team.Team;
+import net.officefloor.frame.spi.team.TeamIdentifier;
 
 /**
  * Abstract implementation of the {@link Job} that provides the additional
@@ -325,6 +326,9 @@ public abstract class AbstractJobContainer<W extends Work, N extends JobMetaData
 		// Setup job to be activated
 		JobNode setupJob = null;
 
+		// Obtain the current team (as used throughout method)
+		TeamIdentifier currentTeam = jobContext.getCurrentTeam();
+
 		// Ensure activate and wait on flow
 		JobNodeActivatableSet activateSet = this.nodeMetaData
 				.createJobActivableSet();
@@ -437,11 +441,10 @@ public abstract class AbstractJobContainer<W extends Work, N extends JobMetaData
 								switch (this.jobState) {
 								case LOAD_MANAGED_OBJECTS:
 									// Load the managed objects
-									this.workContainer
-											.loadManagedObjects(
-													this.requiredManagedObjects,
-													jobContext, this,
-													activateSet, this);
+									this.workContainer.loadManagedObjects(
+											this.requiredManagedObjects,
+											jobContext, this, activateSet,
+											currentTeam, this);
 
 									// Flag Managed Objects now to be governed
 									this.jobState = JobState.GOVERN_MANAGED_OBJECTS;
@@ -577,7 +580,7 @@ public abstract class AbstractJobContainer<W extends Work, N extends JobMetaData
 										.getParallelJobNodeToExecute();
 								if (parallelJob != null) {
 									// Execute the parallel job (on same thread)
-									parallelJob.activateJob();
+									parallelJob.activateJob(currentTeam);
 									if (this.isParallelJobsNotComplete()) {
 										// Parallel job wakes up when complete
 										return true;
@@ -623,7 +626,7 @@ public abstract class AbstractJobContainer<W extends Work, N extends JobMetaData
 									.getParallelJobNodeToExecute();
 							if (parallelJob != null) {
 								// Execute the parallel job (on same thread)
-								parallelJob.activateJob();
+								parallelJob.activateJob(currentTeam);
 								if (this.isParallelJobsNotComplete()) {
 									// Parallel job wakes up when complete
 									return true;
@@ -633,11 +636,11 @@ public abstract class AbstractJobContainer<W extends Work, N extends JobMetaData
 							// Assign next job to team (same thread)
 							JobNode job = this.getNextJobNodeToExecute();
 							if (job != null) {
-								job.activateJob();
+								job.activateJob(currentTeam);
 							}
 
 							// Complete this job (flags state complete)
-							this.completeJob(activateSet);
+							this.completeJob(activateSet, currentTeam);
 
 						case COMPLETED:
 							// Already complete, thus return immediately
@@ -710,7 +713,7 @@ public abstract class AbstractJobContainer<W extends Work, N extends JobMetaData
 						threadState.escalationStart(this, activateSet);
 						try {
 							// Escalation from this node, so nothing further
-							this.clearNodes(activateSet);
+							this.clearNodes(activateSet, currentTeam);
 
 							// Search upwards for an escalation handler
 							JobNode node = this;
@@ -722,7 +725,7 @@ public abstract class AbstractJobContainer<W extends Work, N extends JobMetaData
 										.getEscalation(escalationCause);
 								if (escalation == null) {
 									// Clear node as not handles escalation
-									node.clearNodes(activateSet);
+									node.clearNodes(activateSet, currentTeam);
 								} else {
 									// Create the node for the escalation
 									escalationNode = this
@@ -810,7 +813,7 @@ public abstract class AbstractJobContainer<W extends Work, N extends JobMetaData
 						}
 
 						// Activate escalation node
-						escalationNode.activateJob();
+						escalationNode.activateJob(currentTeam);
 
 					} catch (Throwable ex) {
 						// Should not receive failure here.
@@ -824,7 +827,7 @@ public abstract class AbstractJobContainer<W extends Work, N extends JobMetaData
 					}
 
 					// Now complete
-					this.completeJob(activateSet);
+					this.completeJob(activateSet, currentTeam);
 					return true;
 
 				} finally {
@@ -851,11 +854,11 @@ public abstract class AbstractJobContainer<W extends Work, N extends JobMetaData
 			}
 
 			// Ensure activate the necessary jobs
-			activateSet.activateJobNodes();
+			activateSet.activateJobNodes(currentTeam);
 
 			// Activate setup job
 			if (setupJob != null) {
-				setupJob.activateJob();
+				setupJob.activateJob(currentTeam);
 			}
 		}
 	}
@@ -865,8 +868,12 @@ public abstract class AbstractJobContainer<W extends Work, N extends JobMetaData
 	 * 
 	 * @param activateSet
 	 *            {@link JobNodeActivateSet}.
+	 * @param currentTeam
+	 *            {@link TeamIdentifier} of the current {@link Team} completing
+	 *            the {@link Job}.
 	 */
-	private void completeJob(JobNodeActivateSet activateSet) {
+	private void completeJob(JobNodeActivateSet activateSet,
+			TeamIdentifier currentTeam) {
 
 		// Do nothing if already complete
 		if (this.jobState == JobState.COMPLETED) {
@@ -877,8 +884,8 @@ public abstract class AbstractJobContainer<W extends Work, N extends JobMetaData
 		this.jobState = JobState.COMPLETED;
 
 		// Clean up state
-		this.workContainer.unloadWork(activateSet);
-		this.flow.jobNodeComplete(this, activateSet);
+		this.workContainer.unloadWork(activateSet, currentTeam);
+		this.flow.jobNodeComplete(this, activateSet, currentTeam);
 	}
 
 	/**
@@ -1011,6 +1018,18 @@ public abstract class AbstractJobContainer<W extends Work, N extends JobMetaData
 	 * coordination between themselves as executing a task is single threaded.
 	 */
 
+	/**
+	 * <p>
+	 * {@link TeamIdentifier} for decoupling current {@link Team} from invoking
+	 * the asynchronous flow.
+	 * <p>
+	 * Note that asynchronous flows should be queued and not executed
+	 * immediately by the current {@link Team}. Should execution be required
+	 * immediately please use parallel flow.
+	 */
+	public static TeamIdentifier ASYNCHRONOUS_FLOW_TEAM_IDENTIFIER = new TeamIdentifier() {
+	};
+
 	@Override
 	public final void setJobComplete(boolean isComplete) {
 		this.isComplete = isComplete;
@@ -1125,7 +1144,7 @@ public abstract class AbstractJobContainer<W extends Work, N extends JobMetaData
 				parameter, GovernanceDeactivationStrategy.ENFORCE);
 
 		// Asynchronously instigate the job node
-		asyncJobNode.activateJob();
+		asyncJobNode.activateJob(ASYNCHRONOUS_FLOW_TEAM_IDENTIFIER);
 
 		// Specify the thread flow future
 		return asyncFlow.getThreadState();
@@ -1274,7 +1293,7 @@ public abstract class AbstractJobContainer<W extends Work, N extends JobMetaData
 	private boolean isActive = false;
 
 	@Override
-	public final void activateJob() {
+	public final void activateJob(TeamIdentifier currentTeam) {
 
 		// Access Point: JobContainer (outside ThreadState lock), OfficeManager
 		// Locks: None (must be the case to avoid dead-lock)
@@ -1301,7 +1320,7 @@ public abstract class AbstractJobContainer<W extends Work, N extends JobMetaData
 		}
 
 		// Activate this Job (outside thread lock)
-		this.nodeMetaData.getTeam().assignJob(this);
+		this.nodeMetaData.getTeam().assignJob(this, currentTeam);
 	}
 
 	@Override
@@ -1351,23 +1370,24 @@ public abstract class AbstractJobContainer<W extends Work, N extends JobMetaData
 	}
 
 	@Override
-	public final void clearNodes(JobNodeActivateSet activateSet) {
+	public final void clearNodes(JobNodeActivateSet activateSet,
+			TeamIdentifier currentTeam) {
 
 		// Complete this job
-		this.completeJob(activateSet);
+		this.completeJob(activateSet, currentTeam);
 
 		// Clear all the parallel jobs from this node
 		JobNode parallel = this.getParallelNode();
 		this.setParallelNode(null);
 		if (parallel != null) {
-			parallel.clearNodes(activateSet);
+			parallel.clearNodes(activateSet, currentTeam);
 		}
 
 		// Clear all the sequential jobs from this node
 		JobNode sequential = this.getNextNode();
 		this.setNextNode(null);
 		if (sequential != null) {
-			sequential.clearNodes(activateSet);
+			sequential.clearNodes(activateSet, currentTeam);
 		}
 	}
 

@@ -73,44 +73,25 @@ public class MockTeamSource implements TeamSource {
 		return teamBuilder;
 	}
 
-	/**
-	 * {@link Team} to be returned.
-	 */
-	private Team team;
-
 	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.frame.spi.team.source.TeamSource#getSpecification()
+	 * ======================= TeamSource ===================================
 	 */
+
 	@Override
 	public TeamSourceSpecification getSpecification() {
 		// No specification
 		return null;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * net.officefloor.frame.spi.team.TeamSource#init(net.officefloor.frame.
-	 * spi.team.TeamSourceContext)
-	 */
 	@Override
-	public void init(TeamSourceContext context) throws Exception {
+	public Team createTeam(TeamSourceContext context) throws Exception {
+
 		// Obtain the team
 		String teamName = context.getProperty(TEAM_PROPERTY);
-		this.team = REGISTRY.get(teamName);
-	}
+		Team team = REGISTRY.get(teamName);
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.frame.spi.team.TeamSource#createTeam()
-	 */
-	@Override
-	public Team createTeam() {
-		return this.team;
+		// Return the team
+		return team;
 	}
 
 }

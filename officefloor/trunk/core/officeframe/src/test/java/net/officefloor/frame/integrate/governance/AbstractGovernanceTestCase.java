@@ -25,6 +25,7 @@ import junit.framework.TestCase;
 import junit.framework.TestSuite;
 import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.impl.execute.managedobject.AbstractManagedObjectContainerImplTest;
+import net.officefloor.frame.impl.spi.team.MockTeamIdentifier;
 import net.officefloor.frame.impl.spi.team.OnePersonTeam;
 import net.officefloor.frame.impl.spi.team.PassiveTeam;
 import net.officefloor.frame.integrate.stress.AdministratorStressTest.Administration;
@@ -163,11 +164,12 @@ public abstract class AbstractGovernanceTestCase extends
 		// Create the teams
 		Team passiveTeam = new PassiveTeam();
 		Team taskTeam = (this.isMultiThreadedTask ? new OnePersonTeam(
-				"TASK_TEAM", 100) : passiveTeam);
+				"TASK_TEAM", new MockTeamIdentifier(), 100) : passiveTeam);
 		Team governanceTeam = (this.isMultiThreadedTask ? new OnePersonTeam(
-				"GOVERNANCE_TEAM", 100) : passiveTeam);
+				"GOVERNANCE_TEAM", new MockTeamIdentifier(), 100) : passiveTeam);
 		Team administrationTeam = (this.isMultiThreadedTask ? new OnePersonTeam(
-				"ADMINISTRATOR_TEAM", 100) : passiveTeam);
+				"ADMINISTRATOR_TEAM", new MockTeamIdentifier(), 100)
+				: passiveTeam);
 
 		// Construct the teams
 		this.constructTeam(TEAM_TASK, taskTeam);

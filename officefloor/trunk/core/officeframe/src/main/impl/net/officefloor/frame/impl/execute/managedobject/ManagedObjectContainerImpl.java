@@ -53,6 +53,8 @@ import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectUser;
 import net.officefloor.frame.spi.team.Job;
 import net.officefloor.frame.spi.team.JobContext;
+import net.officefloor.frame.spi.team.Team;
+import net.officefloor.frame.spi.team.TeamIdentifier;
 
 /**
  * Container of a {@link ManagedObject}.
@@ -135,6 +137,13 @@ public class ManagedObjectContainerImpl implements ManagedObjectContainer,
 	 * immediately.
 	 */
 	private JobNodeActivateSet assetActivateSet = null;
+
+	/**
+	 * {@link TeamIdentifier} of the current {@link Team} loading the
+	 * {@link ManagedObject} should the {@link ManagedObjectSource} provide the
+	 * {@link ManagedObject} immediately.
+	 */
+	private TeamIdentifier currentTeam = null;
 
 	/**
 	 * Initiate the container.
@@ -220,9 +229,12 @@ public class ManagedObjectContainerImpl implements ManagedObjectContainer,
 	 *            {@link ManagedObject} to be unloaded.
 	 * @param recycleJob
 	 *            {@link JobNode} to recycle the {@link ManagedObject}.
+	 * @param currentTeam
+	 *            {@link TeamIdentifier} of the current {@link Team} unloading
+	 *            the {@link ManagedObject}.
 	 */
 	protected void unloadManagedObject(ManagedObject managedObject,
-			JobNode recycleJob) {
+			JobNode recycleJob, TeamIdentifier currentTeam) {
 
 		// Ensure have managed object to unload
 		if (managedObject == null) {
@@ -232,7 +244,7 @@ public class ManagedObjectContainerImpl implements ManagedObjectContainer,
 		// Job unload action
 		if (recycleJob != null) {
 			// Recycle the managed object
-			recycleJob.activateJob();
+			recycleJob.activateJob(currentTeam);
 
 		} else {
 			// Return directly to pool (if pooled)
@@ -252,7 +264,8 @@ public class ManagedObjectContainerImpl implements ManagedObjectContainer,
 
 	@Override
 	public void loadManagedObject(JobContext executionContext, JobNode jobNode,
-			JobNodeActivateSet activateSet, ContainerContext context) {
+			JobNodeActivateSet activateSet, TeamIdentifier currentTeam,
+			ContainerContext context) {
 
 		// Access Point: JobContainer via WorkContainer
 		// Locks: ThreadState -> ProcessState
@@ -270,8 +283,9 @@ public class ManagedObjectContainerImpl implements ManagedObjectContainer,
 			this.containerState = ManagedObjectContainerState.LOADING;
 
 			try {
-				// Ensure activate set available if loaded immediately
+				// Ensure activate set and team available if loaded immediately
 				this.assetActivateSet = activateSet;
+				this.currentTeam = currentTeam;
 
 				// Not loaded therefore source the managed object
 				ManagedObjectPool pool = this.metaData.getManagedObjectPool();
@@ -290,8 +304,9 @@ public class ManagedObjectContainerImpl implements ManagedObjectContainer,
 				this.setFailedState(new FailedToSourceManagedObjectEscalation(
 						this.metaData.getObjectType(), ex), activateSet);
 			} finally {
-				// Ensure clear activate set
+				// Ensure clear activate set and team
 				this.assetActivateSet = null;
+				this.currentTeam = null;
 			}
 
 			// Propagate any failure in loading to the JobContainer
@@ -775,7 +790,8 @@ public class ManagedObjectContainerImpl implements ManagedObjectContainer,
 
 	@Override
 	public void unregisterManagedObjectFromGovernance(
-			ActiveGovernance<?, ?> governance, JobNodeActivateSet activateSet) {
+			ActiveGovernance<?, ?> governance, JobNodeActivateSet activateSet,
+			TeamIdentifier currentTeam) {
 
 		// Access Point: GovernanceContainer
 		// Locks: ThreadState -> ProcessState
@@ -787,12 +803,13 @@ public class ManagedObjectContainerImpl implements ManagedObjectContainer,
 		// Determine if managed object waiting on governance to unload
 		if (this.containerState == ManagedObjectContainerState.UNLOAD_WAITING_GOVERNANCE) {
 			// Attempt to unload the managed object
-			this.unloadManagedObject(activateSet);
+			this.unloadManagedObject(activateSet, currentTeam);
 		}
 	}
 
 	@Override
-	public void unloadManagedObject(JobNodeActivateSet activateSet) {
+	public void unloadManagedObject(JobNodeActivateSet activateSet,
+			TeamIdentifier currentTeam) {
 
 		// Access Point: JobContainer, GovernanceContainer (unregister)
 		// Locks: ThreadState -> ProcessState
@@ -821,7 +838,8 @@ public class ManagedObjectContainerImpl implements ManagedObjectContainer,
 		}
 
 		// Unload the managed object
-		this.unloadManagedObject(this.managedObject, this.recycleJobNode);
+		this.unloadManagedObject(this.managedObject, this.recycleJobNode,
+				currentTeam);
 
 		// Release reference to managed object to not unload again
 		this.managedObject = null;
@@ -882,6 +900,13 @@ public class ManagedObjectContainerImpl implements ManagedObjectContainer,
 	 * ================== ManagedObjectUser ===============================
 	 */
 
+	/**
+	 * {@link TeamIdentifier} for {@link ManagedObjectSource} to unload the
+	 * {@link ManagedObject}.
+	 */
+	public static final TeamIdentifier MANAGED_OBJECT_LOAD_TEAM = new TeamIdentifier() {
+	};
+
 	@Override
 	public void setManagedObject(ManagedObject managedObject) {
 
@@ -892,11 +917,18 @@ public class ManagedObjectContainerImpl implements ManagedObjectContainer,
 		// (may be invoked by another thread from the Managed Object Source)
 		synchronized (this.lock) {
 
+			// Obtain the current team
+			TeamIdentifier team = this.currentTeam;
+			if (team == null) {
+				// Invoked by thread of managed object source
+				team = MANAGED_OBJECT_LOAD_TEAM;
+			}
+
 			// Determine if container in failed state
 			if (this.failure != null) {
 				// Discard the managed object and no further processing
 				this.unloadManagedObject(managedObject,
-						this.metaData.createRecycleJobNode(managedObject));
+						this.metaData.createRecycleJobNode(managedObject), team);
 				return;
 			}
 
@@ -909,7 +941,7 @@ public class ManagedObjectContainerImpl implements ManagedObjectContainer,
 			case NOT_LOADED:
 				// Discard the managed object
 				this.unloadManagedObject(managedObject,
-						this.metaData.createRecycleJobNode(managedObject));
+						this.metaData.createRecycleJobNode(managedObject), team);
 
 				// Should never be called before loadManagedObject
 				throw new IllegalStateException(
@@ -920,7 +952,8 @@ public class ManagedObjectContainerImpl implements ManagedObjectContainer,
 				if (this.managedObject != null) {
 					// Discard managed object as already loaded
 					this.unloadManagedObject(managedObject,
-							this.metaData.createRecycleJobNode(managedObject));
+							this.metaData.createRecycleJobNode(managedObject),
+							team);
 					return; // discarded, nothing further
 				}
 
@@ -981,7 +1014,7 @@ public class ManagedObjectContainerImpl implements ManagedObjectContainer,
 			case OBJECT_AVAILABLE:
 				// Discard the managed object as already have a Managed Object
 				this.unloadManagedObject(managedObject,
-						this.metaData.createRecycleJobNode(managedObject));
+						this.metaData.createRecycleJobNode(managedObject), team);
 				break;
 
 			case UNLOAD_WAITING_GOVERNANCE:
@@ -989,7 +1022,7 @@ public class ManagedObjectContainerImpl implements ManagedObjectContainer,
 				// Discard as managed object already flagged for unloading
 				// (if unloading nothing should be waiting on it)
 				this.unloadManagedObject(managedObject,
-						this.metaData.createRecycleJobNode(managedObject));
+						this.metaData.createRecycleJobNode(managedObject), team);
 				break;
 
 			default:

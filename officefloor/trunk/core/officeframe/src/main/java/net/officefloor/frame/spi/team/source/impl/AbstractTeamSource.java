@@ -21,9 +21,7 @@ package net.officefloor.frame.spi.team.source.impl;
 import java.util.LinkedList;
 import java.util.List;
 
-import net.officefloor.frame.spi.team.Team;
 import net.officefloor.frame.spi.team.source.TeamSource;
-import net.officefloor.frame.spi.team.source.TeamSourceContext;
 import net.officefloor.frame.spi.team.source.TeamSourceProperty;
 import net.officefloor.frame.spi.team.source.TeamSourceSpecification;
 
@@ -126,35 +124,6 @@ public abstract class AbstractTeamSource implements TeamSource {
 		public TeamSourceProperty[] getProperties() {
 			return this.properties.toArray(new TeamSourceProperty[0]);
 		}
-	}
-
-	/**
-	 * {@link Team}.
-	 */
-	private Team team;
-
-	@Override
-	public void init(TeamSourceContext context) throws Exception {
-		// Create the team
-		this.team = this.createTeam(context);
-	}
-
-	/**
-	 * Creates the {@link Team}.
-	 * 
-	 * @param context
-	 *            {@link TeamSourceContext}.
-	 * @return {@link Team}.
-	 * @throws Exception
-	 *             If fails to create the {@link Team}.
-	 */
-	protected abstract Team createTeam(TeamSourceContext context)
-			throws Exception;
-
-	@Override
-	public Team createTeam() {
-		// Return the team as should be used to only source one team
-		return this.team;
 	}
 
 }

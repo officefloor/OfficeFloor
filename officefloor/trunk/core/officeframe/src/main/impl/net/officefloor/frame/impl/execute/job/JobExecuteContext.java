@@ -19,8 +19,8 @@
 package net.officefloor.frame.impl.execute.job;
 
 import net.officefloor.frame.api.execute.FlowFuture;
-import net.officefloor.frame.internal.structure.JobSequence;
 import net.officefloor.frame.internal.structure.FlowMetaData;
+import net.officefloor.frame.internal.structure.JobSequence;
 import net.officefloor.frame.spi.team.Job;
 
 /**

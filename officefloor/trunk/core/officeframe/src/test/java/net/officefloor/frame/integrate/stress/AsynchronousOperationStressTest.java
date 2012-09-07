@@ -22,7 +22,9 @@ import net.officefloor.frame.api.build.OfficeBuilder;
 import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.execute.TaskContext;
 import net.officefloor.frame.api.execute.Work;
+import net.officefloor.frame.impl.spi.team.ExecutorFixedTeamSource;
 import net.officefloor.frame.impl.spi.team.LeaderFollowerTeam;
+import net.officefloor.frame.impl.spi.team.MockTeamIdentifier;
 import net.officefloor.frame.impl.spi.team.OnePersonTeam;
 import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
 import net.officefloor.frame.spi.managedobject.AsynchronousListener;
@@ -35,7 +37,7 @@ import net.officefloor.frame.test.ReflectiveWorkBuilder.ReflectiveTaskBuilder;
 /**
  * Stress tests asynchronous operations by {@link AsynchronousManagedObject}
  * instances.
- *
+ * 
  * @author Daniel Sagenschneider
  */
 public class AsynchronousOperationStressTest extends
@@ -48,7 +50,7 @@ public class AsynchronousOperationStressTest extends
 	@StressTest
 	public void test_StressAsynchronousOperation_OnePersonTeam()
 			throws Exception {
-		this.doTest(new OnePersonTeam("TEST", 100));
+		this.doTest(new OnePersonTeam("TEST", new MockTeamIdentifier(), 100));
 	}
 
 	/**
@@ -58,12 +60,24 @@ public class AsynchronousOperationStressTest extends
 	@StressTest
 	public void test_StressAsynchronousOperation_LeaderFollowerTeam()
 			throws Exception {
-		this.doTest(new LeaderFollowerTeam("TEST", 2, 100));
+		this.doTest(new LeaderFollowerTeam("TEST", new MockTeamIdentifier(), 2,
+				100));
+	}
+
+	/**
+	 * Ensures no issues arising in stress asynchronous operations with a
+	 * {@link ExecutorFixedTeamSource}.
+	 */
+	@StressTest
+	public void test_StressAsynchronousOperation_ExecutorFixedTeam()
+			throws Exception {
+		this.doTest(ExecutorFixedTeamSource.createTeam("TEST",
+				new MockTeamIdentifier(), 2));
 	}
 
 	/**
 	 * Does the asynchronous operation stress test.
-	 *
+	 * 
 	 * @param team
 	 *            {@link Team} to use to run the {@link Task} instances.
 	 */
@@ -146,7 +160,7 @@ public class AsynchronousOperationStressTest extends
 
 		/**
 		 * {@link Task}.
-		 *
+		 * 
 		 * @param taskOne
 		 *            {@link Task} one.
 		 * @param taskTwo
@@ -214,7 +228,7 @@ public class AsynchronousOperationStressTest extends
 
 		/**
 		 * Initiate.
-		 *
+		 * 
 		 * @param otherTaskManagedObject
 		 *            {@link MockManagedObject} for the other {@link Task}.
 		 * @param maxRepeats
@@ -234,7 +248,7 @@ public class AsynchronousOperationStressTest extends
 
 		/**
 		 * {@link Task}.
-		 *
+		 * 
 		 * @param ownManagedObject
 		 *            {@link MockManagedObject} instance for this {@link Task}.
 		 * @param taskContext

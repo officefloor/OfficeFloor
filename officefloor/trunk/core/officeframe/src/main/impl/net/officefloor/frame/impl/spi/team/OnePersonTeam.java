@@ -21,6 +21,7 @@ package net.officefloor.frame.impl.spi.team;
 import net.officefloor.frame.spi.team.JobContext;
 import net.officefloor.frame.spi.team.Job;
 import net.officefloor.frame.spi.team.Team;
+import net.officefloor.frame.spi.team.TeamIdentifier;
 
 /**
  * Team having only one {@link Thread}.
@@ -33,6 +34,11 @@ public class OnePersonTeam implements Team {
 	 * Name of this {@link Team}.
 	 */
 	private final String teamName;
+
+	/**
+	 * {@link TeamIdentifier} of the {@link Team}.
+	 */
+	private final TeamIdentifier teamIdentifier;
 
 	/**
 	 * Time to wait in milliseconds for a {@link Job}.
@@ -54,11 +60,15 @@ public class OnePersonTeam implements Team {
 	 * 
 	 * @param teamName
 	 *            Name of this {@link Team}.
+	 * @param teamIdentifier
+	 *            {@link TeamIdentifier} of this {@link Team}.
 	 * @param waitTime
 	 *            Time to wait in milliseconds for a {@link Job}.
 	 */
-	public OnePersonTeam(String teamName, long waitTime) {
+	public OnePersonTeam(String teamName, TeamIdentifier teamIdentifier,
+			long waitTime) {
 		this.teamName = teamName;
+		this.teamIdentifier = teamIdentifier;
 		this.waitTime = waitTime;
 	}
 
@@ -85,8 +95,8 @@ public class OnePersonTeam implements Team {
 	}
 
 	@Override
-	public void assignJob(Job task) {
-		this.taskQueue.enqueue(task);
+	public void assignJob(Job job, TeamIdentifier assignerTeam) {
+		this.taskQueue.enqueue(job);
 	}
 
 	@Override
@@ -114,7 +124,7 @@ public class OnePersonTeam implements Team {
 	/**
 	 * The individual comprising the {@link Team}.
 	 */
-	public static class OnePerson implements Runnable, JobContext {
+	public class OnePerson implements Runnable, JobContext {
 
 		/**
 		 * Indicates no time is set.
@@ -201,6 +211,11 @@ public class OnePersonTeam implements Team {
 
 			// Return the time
 			return this.time;
+		}
+
+		@Override
+		public TeamIdentifier getCurrentTeam() {
+			return OnePersonTeam.this.teamIdentifier;
 		}
 
 		@Override

@@ -25,6 +25,7 @@ import net.officefloor.frame.impl.construct.source.SourceContextImpl;
 import net.officefloor.frame.spi.source.SourceContext;
 import net.officefloor.frame.spi.source.SourceProperties;
 import net.officefloor.frame.spi.team.Team;
+import net.officefloor.frame.spi.team.TeamIdentifier;
 import net.officefloor.frame.spi.team.source.ProcessContextListener;
 import net.officefloor.frame.spi.team.source.TeamSource;
 import net.officefloor.frame.spi.team.source.TeamSourceContext;
@@ -98,6 +99,13 @@ public class TeamSourceContextImpl extends SourceContextImpl implements
 	@Override
 	public String getTeamName() {
 		return this.teamName;
+	}
+
+	@Override
+	public TeamIdentifier getTeamIdentifier() {
+		// TODO implement TeamSourceContext.getTeamIdentifier
+		throw new UnsupportedOperationException(
+				"TODO implement TeamSourceContext.getTeamIdentifier");
 	}
 
 	@Override

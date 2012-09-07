@@ -28,7 +28,9 @@ import net.officefloor.frame.api.build.OfficeFloorBuilder;
 import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.execute.TaskContext;
 import net.officefloor.frame.api.execute.Work;
+import net.officefloor.frame.impl.spi.team.ExecutorFixedTeamSource;
 import net.officefloor.frame.impl.spi.team.LeaderFollowerTeam;
+import net.officefloor.frame.impl.spi.team.MockTeamIdentifier;
 import net.officefloor.frame.impl.spi.team.OnePersonTeam;
 import net.officefloor.frame.spi.TestSource;
 import net.officefloor.frame.spi.managedobject.CoordinatingManagedObject;
@@ -67,7 +69,7 @@ public class InputManagedObjectStressTest extends
 	 */
 	@StressTest
 	public void test_StressInputManagedObject_OnePersonTeam() throws Exception {
-		this.doTest(new OnePersonTeam("TEST", 100));
+		this.doTest(new OnePersonTeam("TEST", new MockTeamIdentifier(), 100));
 	}
 
 	/**
@@ -77,7 +79,19 @@ public class InputManagedObjectStressTest extends
 	@StressTest
 	public void test_StressInputManagedObject_LeaderFollowerTeam()
 			throws Exception {
-		this.doTest(new LeaderFollowerTeam("TEST", 2, 100));
+		this.doTest(new LeaderFollowerTeam("TEST", new MockTeamIdentifier(), 2,
+				100));
+	}
+
+	/**
+	 * Ensures no issues arising in stress input {@link ManagedObject} with a
+	 * {@link ExecutorFixedTeamSource}.
+	 */
+	@StressTest
+	public void test_StressInputManagedObject_ExecutorFixedTeam()
+			throws Exception {
+		this.doTest(ExecutorFixedTeamSource.createTeam("TEST",
+				new MockTeamIdentifier(), 2));
 	}
 
 	/**

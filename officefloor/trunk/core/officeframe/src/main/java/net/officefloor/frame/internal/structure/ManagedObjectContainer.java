@@ -23,6 +23,8 @@ import net.officefloor.frame.spi.governance.Governance;
 import net.officefloor.frame.spi.managedobject.AsynchronousManagedObject;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.frame.spi.team.JobContext;
+import net.officefloor.frame.spi.team.Team;
+import net.officefloor.frame.spi.team.TeamIdentifier;
 
 /**
  * Container managing a {@link ManagedObject}.
@@ -42,11 +44,15 @@ public interface ManagedObjectContainer {
 	 * @param activateSet
 	 *            {@link JobNodeActivateSet} to add {@link JobNode} instances to
 	 *            activate.
+	 * @param currentTeam
+	 *            {@link TeamIdentifier} of the current {@link Team} loading the
+	 *            {@link ManagedObject}.
 	 * @param context
 	 *            {@link ContainerContext}.
 	 */
 	void loadManagedObject(JobContext jobContext, JobNode jobNode,
-			JobNodeActivateSet activateSet, ContainerContext context);
+			JobNodeActivateSet activateSet, TeamIdentifier currentTeam,
+			ContainerContext context);
 
 	/**
 	 * Provides any active {@link Governance} over the {@link ManagedObject}.
@@ -158,9 +164,14 @@ public interface ManagedObjectContainer {
 	 *            {@link ActiveGovernance}.
 	 * @param activateSet
 	 *            {@link JobNodeActivateSet}.
+	 * @param currentTeam
+	 *            {@link TeamIdentifier} of the current {@link Team}
+	 *            unregistering the {@link ManagedObject} from
+	 *            {@link Governance}.
 	 */
 	void unregisterManagedObjectFromGovernance(
-			ActiveGovernance<?, ?> governance, JobNodeActivateSet activateSet);
+			ActiveGovernance<?, ?> governance, JobNodeActivateSet activateSet,
+			TeamIdentifier currentTeam);
 
 	/**
 	 * Unloads the {@link ManagedObject}.
@@ -168,7 +179,11 @@ public interface ManagedObjectContainer {
 	 * @param activateSet
 	 *            {@link JobNodeActivateSet} to add {@link JobNode} instances to
 	 *            activate.
+	 * @param currentTeam
+	 *            {@link TeamIdentifier} of the current {@link Team} unloading
+	 *            the {@link ManagedObject}.
 	 */
-	void unloadManagedObject(JobNodeActivateSet activateSet);
+	void unloadManagedObject(JobNodeActivateSet activateSet,
+			TeamIdentifier currentTeam);
 
 }

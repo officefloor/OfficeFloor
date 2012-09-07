@@ -21,7 +21,9 @@ package net.officefloor.frame.integrate.stress;
 import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.execute.TaskContext;
 import net.officefloor.frame.api.execute.Work;
+import net.officefloor.frame.impl.spi.team.ExecutorFixedTeamSource;
 import net.officefloor.frame.impl.spi.team.LeaderFollowerTeam;
+import net.officefloor.frame.impl.spi.team.MockTeamIdentifier;
 import net.officefloor.frame.impl.spi.team.OnePersonTeam;
 import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
 import net.officefloor.frame.spi.team.Team;
@@ -32,7 +34,7 @@ import net.officefloor.frame.test.ReflectiveWorkBuilder.ReflectiveTaskBuilder;
 
 /**
  * Stress tests invoking a parallel {@link Task}.
- *
+ * 
  * @author Daniel Sagenschneider
  */
 public class ParallelTaskStressTest extends AbstractOfficeConstructTestCase {
@@ -43,7 +45,7 @@ public class ParallelTaskStressTest extends AbstractOfficeConstructTestCase {
 	 */
 	@StressTest
 	public void test_StressParallel_OnePersonTeam() throws Exception {
-		this.doTest(new OnePersonTeam("TEST", 100));
+		this.doTest(new OnePersonTeam("TEST", new MockTeamIdentifier(), 100));
 	}
 
 	/**
@@ -52,12 +54,23 @@ public class ParallelTaskStressTest extends AbstractOfficeConstructTestCase {
 	 */
 	@StressTest
 	public void test_StressParallel_LeaderFollowerTeam() throws Exception {
-		this.doTest(new LeaderFollowerTeam("TEST", 5, 100));
+		this.doTest(new LeaderFollowerTeam("TEST", new MockTeamIdentifier(), 5,
+				100));
+	}
+
+	/**
+	 * Ensures no issues arising in stress parallel calls with a
+	 * {@link ExecutorFixedTeamSource}.
+	 */
+	@StressTest
+	public void test_StressParallel_ExecutorFixedTeam() throws Exception {
+		this.doTest(ExecutorFixedTeamSource.createTeam("TEST",
+				new MockTeamIdentifier(), 5));
 	}
 
 	/**
 	 * Does the parallel stress test.
-	 *
+	 * 
 	 * @param team
 	 *            {@link Team} to use to run the {@link Task} instances.
 	 */
@@ -123,7 +136,7 @@ public class ParallelTaskStressTest extends AbstractOfficeConstructTestCase {
 
 		/**
 		 * Initiate.
-		 *
+		 * 
 		 * @param maxParallelCalls
 		 *            Maximum number of parallel calls.
 		 * @param maxTriggers
@@ -137,7 +150,7 @@ public class ParallelTaskStressTest extends AbstractOfficeConstructTestCase {
 
 		/**
 		 * Triggers the parallel flow and repeats so many times.
-		 *
+		 * 
 		 * @param taskContext
 		 *            {@link TaskContext}.
 		 * @param flow
@@ -158,7 +171,7 @@ public class ParallelTaskStressTest extends AbstractOfficeConstructTestCase {
 
 		/**
 		 * Parallel {@link Task}.
-		 *
+		 * 
 		 * @param callCount
 		 *            Number of parallel calls so far.
 		 * @param flow

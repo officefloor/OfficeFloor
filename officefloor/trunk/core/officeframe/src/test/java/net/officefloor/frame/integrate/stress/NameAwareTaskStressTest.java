@@ -22,7 +22,9 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.api.execute.Work;
+import net.officefloor.frame.impl.spi.team.ExecutorFixedTeamSource;
 import net.officefloor.frame.impl.spi.team.LeaderFollowerTeam;
+import net.officefloor.frame.impl.spi.team.MockTeamIdentifier;
 import net.officefloor.frame.impl.spi.team.OnePersonTeam;
 import net.officefloor.frame.internal.structure.JobSequence;
 import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
@@ -39,7 +41,7 @@ import net.officefloor.frame.test.ReflectiveWorkBuilder.ReflectiveTaskBuilder;
 
 /**
  * Stress tests the {@link NameAwareManagedObject}.
- *
+ * 
  * @author Daniel Sagenschneider
  */
 public class NameAwareTaskStressTest extends AbstractOfficeConstructTestCase {
@@ -49,20 +51,30 @@ public class NameAwareTaskStressTest extends AbstractOfficeConstructTestCase {
 	 */
 	@StressTest
 	public void test_StressNameAware_OnePersonTeam() throws Exception {
-		this.doTest(new OnePersonTeam("TEST", 100));
+		this.doTest(new OnePersonTeam("TEST", new MockTeamIdentifier(), 100));
 	}
 
 	/**
-	 * Stress tests with the {@link OnePersonTeam}.
+	 * Stress tests with the {@link LeaderFollowerTeam}.
 	 */
 	@StressTest
 	public void test_StressNameAware_LeaderFollowerTeam() throws Exception {
-		this.doTest(new LeaderFollowerTeam("TEST", 5, 100));
+		this.doTest(new LeaderFollowerTeam("TEST", new MockTeamIdentifier(), 5,
+				100));
+	}
+
+	/**
+	 * Stress tests with the {@link ExecutorFixedTeamSource}.
+	 */
+	@StressTest
+	public void test_StressNameAware_ExecutorFixedTeam() throws Exception {
+		this.doTest(ExecutorFixedTeamSource.createTeam("TEST",
+				new MockTeamIdentifier(), 5));
 	}
 
 	/**
 	 * Does the name aware stress test with the {@link Team}.
-	 *
+	 * 
 	 * @param team
 	 *            {@link Team}.
 	 */
@@ -122,7 +134,7 @@ public class NameAwareTaskStressTest extends AbstractOfficeConstructTestCase {
 
 		/**
 		 * Initiate.
-		 *
+		 * 
 		 * @param maxSequentialCalls
 		 *            Number of times to make a sequential call.
 		 * @param expectedBoundName
@@ -136,7 +148,7 @@ public class NameAwareTaskStressTest extends AbstractOfficeConstructTestCase {
 
 		/**
 		 * Task to test the name aware managed object.
-		 *
+		 * 
 		 * @param callCount
 		 *            Number of sequential calls so far.
 		 * @param flow
@@ -189,7 +201,7 @@ public class NameAwareTaskStressTest extends AbstractOfficeConstructTestCase {
 
 		/**
 		 * Obtains the bound name.
-		 *
+		 * 
 		 * @return Bound name.
 		 */
 		public String getBoundName() {

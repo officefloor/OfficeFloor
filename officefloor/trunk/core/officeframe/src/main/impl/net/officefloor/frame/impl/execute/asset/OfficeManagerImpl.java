@@ -19,6 +19,8 @@
 package net.officefloor.frame.impl.execute.asset;
 
 import java.util.Timer;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.impl.execute.job.JobNodeActivatableSetImpl;
@@ -31,13 +33,20 @@ import net.officefloor.frame.internal.structure.JobNodeActivatableSet;
 import net.officefloor.frame.internal.structure.LinkedListSet;
 import net.officefloor.frame.internal.structure.LinkedListSetEntry;
 import net.officefloor.frame.internal.structure.OfficeManager;
+import net.officefloor.frame.spi.team.TeamIdentifier;
 
 /**
  * Implementation of the {@link OfficeManager}.
- *
+ * 
  * @author Daniel Sagenschneider
  */
 public class OfficeManagerImpl implements OfficeManager {
+
+	/**
+	 * {@link Logger}.
+	 */
+	private static final Logger LOGGER = Logger
+			.getLogger(OfficeManagerImpl.class.getName());
 
 	/**
 	 * Name of the {@link Office} being managed.
@@ -77,7 +86,7 @@ public class OfficeManagerImpl implements OfficeManager {
 
 	/**
 	 * Initiate.
-	 *
+	 * 
 	 * @param officeName
 	 *            Name of the {@link Office} being managed.
 	 * @param monitorInterval
@@ -170,6 +179,12 @@ public class OfficeManagerImpl implements OfficeManager {
 	}
 
 	/**
+	 * {@link TeamIdentifier} for the {@link ManageOfficeThread}.
+	 */
+	public static final TeamIdentifier MANAGE_OFFICE_TEAM = new TeamIdentifier() {
+	};
+
+	/**
 	 * <p>
 	 * Using a dedicated {@link Thread} rather than {@link Timer} to not require
 	 * creating possible additional {@link Thread} instances. This ensures only
@@ -236,7 +251,8 @@ public class OfficeManagerImpl implements OfficeManager {
 
 				// First thing, activate jobs to progress office processing
 				while (activateJobNodes != null) {
-					activateJobNodes.activatableSet.activateJobNodes();
+					activateJobNodes.activatableSet
+							.activateJobNodes(MANAGE_OFFICE_TEAM);
 					activateJobNodes = activateJobNodes.getNext();
 				}
 			}
@@ -259,22 +275,19 @@ public class OfficeManagerImpl implements OfficeManager {
 					try {
 						assetManager.checkOnAssets(activatableSet);
 					} catch (Throwable ex) {
-						/*
-						 * TODO OfficeFloor EscalationHandler for Asset failures
-						 *
-						 * DETAIL: consider whether another approach other than
-						 * writing to stderr.
-						 */
-						System.err.println("Failed managing asset: "
-								+ ex.getMessage() + " ["
-								+ ex.getClass().getName() + "]");
+						// Warn of failure
+						if (LOGGER.isLoggable(Level.WARNING)) {
+							LOGGER.log(Level.WARNING, "Failed managing asset: "
+									+ ex.getMessage() + " ["
+									+ ex.getClass().getName() + "]", ex);
+						}
 					}
 					assetManager = assetManager.getNext();
 				}
 
 			} finally {
 				// Ensure the job nodes are activated
-				activatableSet.activateJobNodes();
+				activatableSet.activateJobNodes(MANAGE_OFFICE_TEAM);
 			}
 		}
 	}
@@ -293,7 +306,7 @@ public class OfficeManagerImpl implements OfficeManager {
 
 		/**
 		 * Initialise.
-		 *
+		 * 
 		 * @param activatableSet
 		 *            {@link JobNodeActivatableSet} to activate.
 		 */

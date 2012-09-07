@@ -26,6 +26,7 @@ import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.manage.ProcessFuture;
 import net.officefloor.frame.impl.execute.managedobject.ManagedObjectMetaDataImpl;
+import net.officefloor.frame.impl.execute.officefloor.ManagedObjectExecuteContextImpl;
 import net.officefloor.frame.internal.configuration.InputManagedObjectConfiguration;
 import net.officefloor.frame.internal.configuration.ManagedObjectFlowConfiguration;
 import net.officefloor.frame.internal.configuration.ManagingOfficeConfiguration;
@@ -737,7 +738,7 @@ public class RawManagingOfficeMetaDataTest extends OfficeFrameTestCase {
 		this.recordReturn(thread, thread.getProcessState(), process);
 
 		// Record activating job (without notifying process ticker)
-		jobNode.activateJob();
+		jobNode.activateJob(ManagedObjectExecuteContextImpl.INVOKE_PROCESS_TEAM);
 
 		// Record providing the process future
 		this.recordReturn(process, process.getProcessFuture(), future);
@@ -853,7 +854,7 @@ public class RawManagingOfficeMetaDataTest extends OfficeFrameTestCase {
 		// Record activating job (and subsequently process)
 		processTicker.processStarted();
 		process.registerProcessCompletionListener(processTicker);
-		jobNode.activateJob();
+		jobNode.activateJob(ManagedObjectExecuteContextImpl.INVOKE_PROCESS_TEAM);
 
 		// Record providing the process future
 		this.recordReturn(process, process.getProcessFuture(), future);

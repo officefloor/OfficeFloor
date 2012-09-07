@@ -36,6 +36,8 @@ import net.officefloor.frame.spi.governance.Governance;
 import net.officefloor.frame.spi.governance.GovernanceContext;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.frame.spi.team.JobContext;
+import net.officefloor.frame.spi.team.Team;
+import net.officefloor.frame.spi.team.TeamIdentifier;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 
 /**
@@ -58,6 +60,12 @@ public class GovernanceContainerTest extends OfficeFrameTestCase {
 	@SuppressWarnings("unchecked")
 	private final Governance<MockExtensionInterface, Indexed> governance = this
 			.createMock(Governance.class);
+
+	/**
+	 * {@link TeamIdentifier} of current {@link Team}.
+	 */
+	private final TeamIdentifier currentTeam = this
+			.createMock(TeamIdentifier.class);
 
 	/**
 	 * {@link ProcessState}.
@@ -191,7 +199,7 @@ public class GovernanceContainerTest extends OfficeFrameTestCase {
 		// Undertake the enforcing
 		this.container.enforceGovernance(this.governanceContext,
 				this.jobContext, this.jobNode, this.activateSet,
-				this.containerContext);
+				this.currentTeam, this.containerContext);
 		assertFalse("Ensure no longer active", this.container.isActive());
 
 		this.verifyMockObjects();
@@ -244,7 +252,7 @@ public class GovernanceContainerTest extends OfficeFrameTestCase {
 		// Undertake the enforcing
 		this.container.enforceGovernance(this.governanceContext,
 				this.jobContext, this.jobNode, this.activateSet,
-				this.containerContext);
+				this.currentTeam, this.containerContext);
 		assertTrue("Ensure governance still active", this.container.isActive());
 		assertTrue("Ensure active governance still active",
 				activeGovernance.isActive());
@@ -281,7 +289,7 @@ public class GovernanceContainerTest extends OfficeFrameTestCase {
 		this.governance.enforceGovernance(this.governanceContext);
 
 		// Record unregistering managed object
-		manager.unregisterManagedObject(this.activateSet);
+		manager.unregisterManagedObject(this.activateSet, this.currentTeam);
 		this.threadState.governanceComplete(this.container);
 
 		// Test
@@ -304,7 +312,7 @@ public class GovernanceContainerTest extends OfficeFrameTestCase {
 		// Undertake the enforcing
 		this.container.enforceGovernance(this.governanceContext,
 				this.jobContext, this.jobNode, this.activateSet,
-				this.containerContext);
+				this.currentTeam, this.containerContext);
 		assertFalse("Ensure governance no longer active",
 				this.container.isActive());
 		assertFalse("Ensure active governance no longer active",
@@ -347,7 +355,7 @@ public class GovernanceContainerTest extends OfficeFrameTestCase {
 		// Undertake the disregard
 		this.container.disregardGovernance(this.governanceContext,
 				this.jobContext, this.jobNode, this.activateSet,
-				this.containerContext);
+				this.currentTeam, this.containerContext);
 		assertFalse("Ensure no longer active", this.container.isActive());
 
 		this.verifyMockObjects();
@@ -401,7 +409,7 @@ public class GovernanceContainerTest extends OfficeFrameTestCase {
 		// Undertake the disregarding
 		this.container.disregardGovernance(this.governanceContext,
 				this.jobContext, this.jobNode, this.activateSet,
-				this.containerContext);
+				this.currentTeam, this.containerContext);
 		assertTrue("Ensure governance still active", this.container.isActive());
 		assertTrue("Ensure active governance still active",
 				activeGovernance.isActive());
@@ -438,7 +446,7 @@ public class GovernanceContainerTest extends OfficeFrameTestCase {
 		this.governance.disregardGovernance(this.governanceContext);
 
 		// Record unregistering managed object
-		manager.unregisterManagedObject(this.activateSet);
+		manager.unregisterManagedObject(this.activateSet, this.currentTeam);
 		this.threadState.governanceComplete(this.container);
 
 		// Test
@@ -461,7 +469,7 @@ public class GovernanceContainerTest extends OfficeFrameTestCase {
 		// Undertake the disregarding
 		this.container.disregardGovernance(this.governanceContext,
 				this.jobContext, this.jobNode, this.activateSet,
-				this.containerContext);
+				this.currentTeam, this.containerContext);
 		assertFalse("Ensure governance no longer active",
 				this.container.isActive());
 		assertFalse("Ensure active governance no longer active",
@@ -538,7 +546,8 @@ public class GovernanceContainerTest extends OfficeFrameTestCase {
 
 		// Record unregistering managed object
 		for (int i = 0; i < managers.length; i++) {
-			managers[i].unregisterManagedObject(this.activateSet);
+			managers[i].unregisterManagedObject(this.activateSet,
+					this.currentTeam);
 		}
 		this.threadState.governanceComplete(this.container);
 
@@ -564,7 +573,7 @@ public class GovernanceContainerTest extends OfficeFrameTestCase {
 		// Undertake the enforcing
 		this.container.enforceGovernance(this.governanceContext,
 				this.jobContext, this.jobNode, this.activateSet,
-				this.containerContext);
+				this.currentTeam, this.containerContext);
 		assertFalse("Ensure no longer active", this.container.isActive());
 
 		this.verifyMockObjects();

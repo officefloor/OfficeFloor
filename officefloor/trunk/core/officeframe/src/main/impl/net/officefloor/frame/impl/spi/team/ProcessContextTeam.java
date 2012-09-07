@@ -36,6 +36,7 @@ import net.officefloor.frame.spi.managedobject.source.ManagedObjectExecuteContex
 import net.officefloor.frame.spi.team.Job;
 import net.officefloor.frame.spi.team.JobContext;
 import net.officefloor.frame.spi.team.Team;
+import net.officefloor.frame.spi.team.TeamIdentifier;
 import net.officefloor.frame.spi.team.source.ProcessContextListener;
 
 /**
@@ -289,10 +290,10 @@ public class ProcessContextTeam implements Team, ProcessContextListener {
 					JobExecutor completionExecutor = new JobExecutor(
 							executor.instance);
 					while (job != null) {
-						
+
 						// Complete the Job
 						completionExecutor.doJob(job);
-						
+
 						// Obtain potential next Job to complete
 						job = executor.jobQueue.dequeue();
 					}
@@ -302,8 +303,14 @@ public class ProcessContextTeam implements Team, ProcessContextListener {
 	}
 
 	/**
+	 * {@link TeamIdentifier} of this {@link Team}.
+	 */
+	private final TeamIdentifier teamIdentifier;
+
+	/**
 	 * {@link JobExecutor} to be used if no context {@link Thread} available.
 	 */
+	// TODO as passive, should pass previous team
 	private final JobExecutor passiveJobExecutor = new JobExecutor(this);
 
 	/**
@@ -317,6 +324,16 @@ public class ProcessContextTeam implements Team, ProcessContextListener {
 	 */
 	private volatile boolean isContinueExecution = true;
 
+	/**
+	 * Initiate.
+	 * 
+	 * @param teamIdentifier
+	 *            {@link TeamIdentifier} of this {@link Team}.
+	 */
+	public ProcessContextTeam(TeamIdentifier teamIdentifier) {
+		this.teamIdentifier = teamIdentifier;
+	}
+
 	/*
 	 * ========================== Team ====================================
 	 */
@@ -327,7 +344,7 @@ public class ProcessContextTeam implements Team, ProcessContextListener {
 	}
 
 	@Override
-	public void assignJob(Job job) {
+	public void assignJob(Job job, TeamIdentifier assignerTeam) {
 
 		// Obtain the process identifier
 		Object processIdentifier = job.getProcessIdentifier();
@@ -570,6 +587,11 @@ public class ProcessContextTeam implements Team, ProcessContextListener {
 
 			// Return the time
 			return this.time;
+		}
+
+		@Override
+		public TeamIdentifier getCurrentTeam() {
+			return this.instance.teamIdentifier;
 		}
 
 		@Override
