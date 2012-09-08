@@ -20,7 +20,6 @@ package net.officefloor.frame.internal.structure;
 
 import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.spi.team.Job;
-import net.officefloor.frame.spi.team.Team;
 
 /**
  * Meta-data for a {@link Job}.
@@ -44,11 +43,13 @@ public interface JobMetaData {
 	JobNodeActivatableSet createJobActivableSet();
 
 	/**
-	 * Obtains the {@link Team} responsible for completing the {@link Job}.
+	 * Obtains the {@link TeamManagement} responsible for completion of the
+	 * {@link Job}.
 	 * 
-	 * @return {@link Team} responsible for completing the {@link Job}.
+	 * @return {@link TeamManagement} responsible for completion of the
+	 *         {@link Job}.
 	 */
-	Team getTeam();
+	TeamManagement getResponsibleTeam();
 
 	/**
 	 * Obtains the {@link TaskMetaData} of the next {@link Task} within

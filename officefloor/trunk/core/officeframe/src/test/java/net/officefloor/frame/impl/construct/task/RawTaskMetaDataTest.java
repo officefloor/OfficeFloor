@@ -61,6 +61,7 @@ import net.officefloor.frame.internal.structure.ManagedObjectIndex;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.frame.internal.structure.TaskDutyAssociation;
 import net.officefloor.frame.internal.structure.TaskMetaData;
+import net.officefloor.frame.internal.structure.TeamManagement;
 import net.officefloor.frame.internal.structure.WorkMetaData;
 import net.officefloor.frame.spi.administration.Administrator;
 import net.officefloor.frame.spi.administration.Duty;
@@ -121,9 +122,9 @@ public class RawTaskMetaDataTest<W extends Work, D extends Enum<D>, F extends En
 			.createMock(RawOfficeMetaData.class);
 
 	/**
-	 * {@link Team}.
+	 * {@link TeamManagement}.
 	 */
-	private final Team team = this.createMock(Team.class);
+	private final TeamManagement team = this.createMock(TeamManagement.class);
 
 	/**
 	 * {@link WorkMetaData}.
@@ -209,7 +210,7 @@ public class RawTaskMetaDataTest<W extends Work, D extends Enum<D>, F extends En
 		this.recordReturn(this.rawWorkMetaData,
 				this.rawWorkMetaData.getRawOfficeMetaData(),
 				this.rawOfficeMetaData);
-		Map<String, Team> teams = new HashMap<String, Team>();
+		Map<String, TeamManagement> teams = new HashMap<String, TeamManagement>();
 		teams.put("TEAM", this.team);
 		this.recordReturn(this.rawOfficeMetaData,
 				this.rawOfficeMetaData.getTeams(), teams);
@@ -330,7 +331,8 @@ public class RawTaskMetaDataTest<W extends Work, D extends Enum<D>, F extends En
 		assertEquals("Incorect task factory", this.taskFactory,
 				taskMetaData.getTaskFactory());
 		assertNull("No differentiator", taskMetaData.getDifferentiator());
-		assertEquals("Incorrect team", this.team, taskMetaData.getTeam());
+		assertEquals("Incorrect team", this.team,
+				taskMetaData.getResponsibleTeam());
 	}
 
 	/**
@@ -1980,7 +1982,7 @@ public class RawTaskMetaDataTest<W extends Work, D extends Enum<D>, F extends En
 		this.recordReturn(this.rawWorkMetaData,
 				this.rawWorkMetaData.getRawOfficeMetaData(),
 				this.rawOfficeMetaData);
-		Map<String, Team> teams = new HashMap<String, Team>();
+		Map<String, TeamManagement> teams = new HashMap<String, TeamManagement>();
 		teams.put("TEAM", this.team);
 		this.recordReturn(this.rawOfficeMetaData,
 				this.rawOfficeMetaData.getTeams(), teams);

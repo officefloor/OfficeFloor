@@ -45,15 +45,16 @@ import net.officefloor.frame.internal.structure.AdministratorScope;
 import net.officefloor.frame.internal.structure.Asset;
 import net.officefloor.frame.internal.structure.DutyMetaData;
 import net.officefloor.frame.internal.structure.ExtensionInterfaceMetaData;
-import net.officefloor.frame.internal.structure.JobSequence;
 import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
 import net.officefloor.frame.internal.structure.FlowMetaData;
 import net.officefloor.frame.internal.structure.GovernanceMetaData;
+import net.officefloor.frame.internal.structure.JobSequence;
 import net.officefloor.frame.internal.structure.ManagedObjectIndex;
 import net.officefloor.frame.internal.structure.ManagedObjectMetaData;
 import net.officefloor.frame.internal.structure.OfficeMetaData;
 import net.officefloor.frame.internal.structure.ProcessMetaData;
 import net.officefloor.frame.internal.structure.TaskMetaData;
+import net.officefloor.frame.internal.structure.TeamManagement;
 import net.officefloor.frame.internal.structure.ThreadMetaData;
 import net.officefloor.frame.spi.TestSource;
 import net.officefloor.frame.spi.administration.Administrator;
@@ -115,14 +116,15 @@ public class RawBoundAdministratorMetaDataTest extends OfficeFrameTestCase {
 	private final String assetName = "OFFICE";
 
 	/**
-	 * {@link Team} instances by their {@link Office} registered names.
+	 * {@link TeamManagement} instances by their {@link Office} registered
+	 * names.
 	 */
-	private final Map<String, Team> officeTeams = new HashMap<String, Team>();
+	private final Map<String, TeamManagement> officeTeams = new HashMap<String, TeamManagement>();
 
 	/**
-	 * {@link Team}.
+	 * {@link TeamManagement}.
 	 */
-	private final Team team = this.createMock(Team.class);
+	private final TeamManagement team = this.createMock(TeamManagement.class);
 
 	/**
 	 * Scope bound {@link RawBoundManagedObjectMetaData} instances by their
@@ -720,7 +722,8 @@ public class RawBoundAdministratorMetaDataTest extends OfficeFrameTestCase {
 		// Verify remaining administrator meta-data
 		assertNotNull("Must have admin source",
 				adminMetaData.getAdministratorSource());
-		assertEquals("Incorrect team", this.team, adminMetaData.getTeam());
+		assertEquals("Incorrect team", this.team,
+				adminMetaData.getResponsibleTeam());
 		assertEquals("Incorrect administered managed object",
 				this.managedObjectIndex, moEiMetaData.getManagedObjectIndex());
 

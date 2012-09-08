@@ -31,6 +31,7 @@ import net.officefloor.frame.internal.structure.JobNodeActivatableSet;
 import net.officefloor.frame.internal.structure.ManagedObjectIndex;
 import net.officefloor.frame.internal.structure.TaskDutyAssociation;
 import net.officefloor.frame.internal.structure.TaskMetaData;
+import net.officefloor.frame.internal.structure.TeamManagement;
 import net.officefloor.frame.internal.structure.WorkContainer;
 import net.officefloor.frame.internal.structure.WorkMetaData;
 import net.officefloor.frame.spi.administration.Duty;
@@ -74,9 +75,10 @@ public class TaskMetaDataImpl<W extends Work, D extends Enum<D>, F extends Enum<
 	private final Class<?> parameterType;
 
 	/**
-	 * {@link Team} responsible for executing this {@link Task}.
+	 * {@link TeamManagement} of the {@link Team} responsible for executing this
+	 * {@link Task}.
 	 */
-	private final Team team;
+	private final TeamManagement responsibleTeam;
 
 	/**
 	 * {@link ManagedObjectIndex} instances identifying the
@@ -154,8 +156,9 @@ public class TaskMetaDataImpl<W extends Work, D extends Enum<D>, F extends Enum<
 	 *            Differentiator. May be <code>null</code>.
 	 * @param parameterType
 	 *            Parameter type of this {@link Task}.
-	 * @param team
-	 *            {@link Team} responsible for executing this {@link Task}.
+	 * @param responsibleTeam
+	 *            {@link TeamManagement} of the {@link Team} responsible for
+	 *            executing this {@link Task}.
 	 * @param requiredManagedObjects
 	 *            {@link ManagedObjectIndex} instances identifying the
 	 *            {@link ManagedObject} instances that must be loaded before the
@@ -174,7 +177,7 @@ public class TaskMetaDataImpl<W extends Work, D extends Enum<D>, F extends Enum<
 	 */
 	public TaskMetaDataImpl(String jobName, String taskName,
 			TaskFactory<W, D, F> taskFactory, Object differentiator,
-			Class<?> parameterType, Team team,
+			Class<?> parameterType, TeamManagement responsibleTeam,
 			ManagedObjectIndex[] requiredManagedObjects,
 			ManagedObjectIndex[] taskToWorkMoTranslations,
 			boolean[] requiredGovernance,
@@ -185,7 +188,7 @@ public class TaskMetaDataImpl<W extends Work, D extends Enum<D>, F extends Enum<
 		this.taskFactory = taskFactory;
 		this.differentiator = differentiator;
 		this.parameterType = parameterType;
-		this.team = team;
+		this.responsibleTeam = responsibleTeam;
 		this.requiredManagedObjects = requiredManagedObjects;
 		this.taskToWorkMoTranslations = taskToWorkMoTranslations;
 		this.requiredGovernance = requiredGovernance;
@@ -253,8 +256,8 @@ public class TaskMetaDataImpl<W extends Work, D extends Enum<D>, F extends Enum<
 	}
 
 	@Override
-	public Team getTeam() {
-		return this.team;
+	public TeamManagement getResponsibleTeam() {
+		return this.responsibleTeam;
 	}
 
 	@Override

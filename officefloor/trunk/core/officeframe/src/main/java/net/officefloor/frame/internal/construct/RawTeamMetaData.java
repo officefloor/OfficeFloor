@@ -18,6 +18,7 @@
 
 package net.officefloor.frame.internal.construct;
 
+import net.officefloor.frame.internal.structure.TeamManagement;
 import net.officefloor.frame.spi.team.Team;
 import net.officefloor.frame.spi.team.source.ProcessContextListener;
 
@@ -36,11 +37,11 @@ public interface RawTeamMetaData {
 	String getTeamName();
 
 	/**
-	 * Obtains the {@link Team}.
+	 * Obtains the {@link TeamManagement} of the {@link Team}.
 	 * 
-	 * @return {@link Team}.
+	 * @return {@link TeamManagement} of the {@link Team}.
 	 */
-	Team getTeam();
+	TeamManagement getTeamManagement();
 
 	/**
 	 * Obtains the {@link ProcessContextListener} instances for the

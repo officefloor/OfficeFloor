@@ -52,11 +52,11 @@ import net.officefloor.frame.internal.structure.FlowMetaData;
 import net.officefloor.frame.internal.structure.ManagedObjectMetaData;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.frame.internal.structure.TaskMetaData;
+import net.officefloor.frame.internal.structure.TeamManagement;
 import net.officefloor.frame.internal.structure.WorkMetaData;
 import net.officefloor.frame.spi.administration.Administrator;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.frame.spi.source.SourceContext;
-import net.officefloor.frame.spi.team.Team;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 
 import org.easymock.AbstractMatcher;
@@ -688,7 +688,8 @@ public class RawWorkMetaDataTest<W extends Work> extends OfficeFrameTestCase {
 				this.configuration.getAdministratorConfiguration(),
 				adminConfiguration);
 		if (adminConfiguration.length > 0) {
-			Map<String, Team> officeTeams = new HashMap<String, Team>(0);
+			Map<String, TeamManagement> officeTeams = new HashMap<String, TeamManagement>(
+					0);
 			this.recordReturn(this.rawOfficeMetaData,
 					this.rawOfficeMetaData.getTeams(), officeTeams);
 			this.recordReturn(this.rawBoundAdministratorFactory,

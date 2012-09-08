@@ -22,6 +22,7 @@ import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.internal.structure.ProcessState;
 import net.officefloor.frame.spi.team.Job;
+import net.officefloor.frame.spi.team.JobContext;
 import net.officefloor.frame.spi.team.Team;
 import net.officefloor.frame.spi.team.TeamIdentifier;
 import net.officefloor.frame.spi.team.source.ProcessContextListener;
@@ -101,7 +102,7 @@ public class TeamProcessContextTest extends AbstractOfficeConstructTestCase {
 	 * Mock {@link TeamSource} for testing the {@link ProcessContextListener}.
 	 */
 	public static class MockTeamSource extends AbstractTeamSource implements
-			ProcessContextListener, Team {
+			ProcessContextListener, Team, JobContext, TeamIdentifier {
 
 		/**
 		 * {@link ProcessContextListener}.
@@ -183,12 +184,33 @@ public class TeamProcessContextTest extends AbstractOfficeConstructTestCase {
 			currentStep = ProcessingStep.ASSIGN_JOB;
 
 			// Execute the Job
-			job.doJob(null);
+			job.doJob(this);
 		}
 
 		@Override
 		public void stopWorking() {
 			// Only validating process identifier
+		}
+
+		/*
+		 * ========================== JobContext ==============================
+		 */
+
+		@Override
+		public long getTime() {
+			fail("Should not require time");
+			return -1;
+		}
+
+		@Override
+		public TeamIdentifier getCurrentTeam() {
+			return this;
+		}
+
+		@Override
+		public boolean continueExecution() {
+			fail("Should not need to determine if continue");
+			return false;
 		}
 	}
 

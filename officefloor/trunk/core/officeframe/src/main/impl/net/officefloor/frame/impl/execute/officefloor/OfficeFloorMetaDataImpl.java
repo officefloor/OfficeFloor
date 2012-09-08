@@ -23,7 +23,7 @@ import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.internal.structure.ManagedObjectSourceInstance;
 import net.officefloor.frame.internal.structure.OfficeFloorMetaData;
 import net.officefloor.frame.internal.structure.OfficeMetaData;
-import net.officefloor.frame.spi.team.Team;
+import net.officefloor.frame.internal.structure.TeamManagement;
 
 /**
  * {@link OfficeFloorMetaData} implementation.
@@ -33,9 +33,9 @@ import net.officefloor.frame.spi.team.Team;
 public class OfficeFloorMetaDataImpl implements OfficeFloorMetaData {
 
 	/**
-	 * Listing of {@link Team} instances.
+	 * Listing of {@link TeamManagement} instances.
 	 */
-	private final Team[] teams;
+	private final TeamManagement[] teams;
 
 	/**
 	 * Listing of {@link ManagedObjectSourceInstance} instances.
@@ -52,14 +52,14 @@ public class OfficeFloorMetaDataImpl implements OfficeFloorMetaData {
 	 * Initiate.
 	 * 
 	 * @param teams
-	 *            Listing of {@link Team} instances.
+	 *            Listing of {@link TeamManagement} instances.
 	 * @param managedObjectSourceInstances
 	 *            Listing of {@link ManagedObjectSourceInstance} instances.
 	 * @param officeMetaData
 	 *            {@link OfficeMetaData} for the {@link Office} instances within
 	 *            the {@link OfficeFloor}.
 	 */
-	public OfficeFloorMetaDataImpl(Team[] teams,
+	public OfficeFloorMetaDataImpl(TeamManagement[] teams,
 			ManagedObjectSourceInstance<?>[] managedObjectSourceInstances,
 			OfficeMetaData[] officeMetaData) {
 		this.teams = teams;
@@ -72,7 +72,7 @@ public class OfficeFloorMetaDataImpl implements OfficeFloorMetaData {
 	 */
 
 	@Override
-	public Team[] getTeams() {
+	public TeamManagement[] getTeams() {
 		return this.teams;
 	}
 

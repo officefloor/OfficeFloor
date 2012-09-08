@@ -77,6 +77,7 @@ import net.officefloor.frame.internal.structure.OfficeStartupTask;
 import net.officefloor.frame.internal.structure.ProcessMetaData;
 import net.officefloor.frame.internal.structure.ProcessState;
 import net.officefloor.frame.internal.structure.TaskMetaData;
+import net.officefloor.frame.internal.structure.TeamManagement;
 import net.officefloor.frame.internal.structure.ThreadMetaData;
 import net.officefloor.frame.internal.structure.ThreadState;
 import net.officefloor.frame.internal.structure.WorkMetaData;
@@ -206,9 +207,9 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 	private final Map<String, RawGovernanceMetaData<?, ?>> rawGovernanceMetaDatas = new HashMap<String, RawGovernanceMetaData<?, ?>>();
 
 	/**
-	 * {@link Team} instances by their {@link Office} names.
+	 * {@link TeamManagement} instances by their {@link Office} names.
 	 */
-	private Map<String, Team> officeTeams;
+	private Map<String, TeamManagement> officeTeams;
 
 	/**
 	 * Ensure issue if no {@link Office} name.
@@ -827,7 +828,7 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 
 		// Record creating a thread bound managed object
 		this.record_enhanceOffice();
-		Map<String, Team> teams = this.record_teams();
+		Map<String, TeamManagement> teams = this.record_teams();
 		this.record_governance();
 		Map<String, RawManagedObjectMetaData<?, ?>> registeredManagedObjectSources = this
 				.record_registerManagedObjectSources("MO");
@@ -862,7 +863,7 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 
 		// Record creating a thread bound managed object
 		this.record_enhanceOffice();
-		Map<String, Team> teams = this.record_teams();
+		Map<String, TeamManagement> teams = this.record_teams();
 		this.record_governance();
 		Map<String, RawManagedObjectMetaData<?, ?>> registeredManagedObjectSources = this
 				.record_registerManagedObjectSources("MO");
@@ -902,7 +903,7 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 
 		// Record creating a thread bound managed object
 		this.record_enhanceOffice();
-		Map<String, Team> teams = this.record_teams();
+		Map<String, TeamManagement> teams = this.record_teams();
 
 		// Record management of governance
 		this.recordReturn(this.configuration,
@@ -966,7 +967,7 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 
 		// Record manual management of governance
 		this.record_enhanceOffice();
-		Map<String, Team> teams = this.record_teams();
+		Map<String, TeamManagement> teams = this.record_teams();
 		this.record_governance(true);
 		Map<String, RawManagedObjectMetaData<?, ?>> registeredManagedObjectSources = this
 				.record_registerManagedObjectSources();
@@ -1013,7 +1014,7 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 
 		// Record creating a thread bound managed object
 		this.record_enhanceOffice();
-		Map<String, Team> teams = this.record_teams();
+		Map<String, TeamManagement> teams = this.record_teams();
 		GovernanceMetaData<?, ?>[] expectedGovernances = this
 				.record_governance("GOVERNANCE_ONE", "GOVERNANCE_TWO");
 		Map<String, RawManagedObjectMetaData<?, ?>> registeredManagedObjectSources = this
@@ -1080,7 +1081,7 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 
 		// Record creating a process bound administrator
 		this.record_enhanceOffice();
-		Map<String, Team> teams = this.record_teams("TEAM");
+		Map<String, TeamManagement> teams = this.record_teams("TEAM");
 		this.record_governance();
 		Map<String, RawManagedObjectMetaData<?, ?>> registeredManagedObjectSources = this
 				.record_registerManagedObjectSources("MO");
@@ -1119,7 +1120,7 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 
 		// Record creating a process bound administrator
 		this.record_enhanceOffice();
-		Map<String, Team> teams = this.record_teams("TEAM");
+		Map<String, TeamManagement> teams = this.record_teams("TEAM");
 		this.record_governance();
 		Map<String, RawManagedObjectMetaData<?, ?>> registeredManagedObjectSources = this
 				.record_registerManagedObjectSources("MO");
@@ -1621,10 +1622,10 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 	 * @param teamNames
 	 *            Names of the {@link Team} instances bound to the
 	 *            {@link Office}.
-	 * @return Mapping of {@link Team} instances by their {@link Office} bound
-	 *         names.
+	 * @return Mapping of {@link TeamManagement} instances by their
+	 *         {@link Office} bound names.
 	 */
-	private Map<String, Team> record_teams(String... teamNames) {
+	private Map<String, TeamManagement> record_teams(String... teamNames) {
 
 		// Create configuration for each team name
 		LinkedTeamConfiguration[] teamConfigurations = new LinkedTeamConfiguration[teamNames.length];
@@ -1634,7 +1635,7 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 		}
 
 		// Record registering the teams
-		this.officeTeams = new HashMap<String, Team>();
+		this.officeTeams = new HashMap<String, TeamManagement>();
 		this.recordReturn(this.configuration,
 				this.configuration.getRegisteredTeams(), teamConfigurations);
 		for (int i = 0; i < teamNames.length; i++) {
@@ -1642,7 +1643,7 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 			String teamName = teamNames[i];
 			String officeFloorTeamName = teamName + "-officefloor";
 			RawTeamMetaData rawTeam = this.createMock(RawTeamMetaData.class);
-			Team team = this.createMock(Team.class);
+			TeamManagement team = this.createMock(TeamManagement.class);
 
 			// Record registering the team
 			this.recordReturn(teamConfiguration,
@@ -1653,7 +1654,7 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 			this.recordReturn(this.rawOfficeFloorMetaData,
 					this.rawOfficeFloorMetaData
 							.getRawTeamMetaData(officeFloorTeamName), rawTeam);
-			this.recordReturn(rawTeam, rawTeam.getTeam(), team);
+			this.recordReturn(rawTeam, rawTeam.getTeamManagement(), team);
 
 			// Register the team for return
 			this.officeTeams.put(teamName, team);
@@ -1988,7 +1989,8 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 	 * instances.
 	 * 
 	 * @param teams
-	 *            {@link Team} instances by their {@link Office} bound names.
+	 *            {@link TeamManagement} instances by their {@link Office} bound
+	 *            names.
 	 * @param processManagedObjects
 	 *            {@link RawBoundManagedObjectMetaData} instances by their
 	 *            {@link ProcessState} bound names.
@@ -1998,7 +2000,7 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 	 *         name.
 	 */
 	private Map<String, RawBoundAdministratorMetaData<?, ?>> record_processBoundAdministrators(
-			Map<String, Team> teams,
+			Map<String, TeamManagement> teams,
 			Map<String, RawBoundManagedObjectMetaData> processManagedObjects,
 			String... processBoundNames) {
 
@@ -2045,7 +2047,8 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 	 * instances.
 	 * 
 	 * @param teams
-	 *            {@link Team} instances by their {@link Office} bound names.
+	 *            {@link TeamManagement} instances by their {@link Office} bound
+	 *            names.
 	 * @param scopeManagedObjects
 	 *            {@link RawBoundManagedObjectMetaData} instances by their
 	 *            {@link ProcessState} or {@link ThreadState} bound names.
@@ -2055,7 +2058,7 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 	 *         name.
 	 */
 	private Map<String, RawBoundAdministratorMetaData<?, ?>> record_threadBoundAdministrators(
-			Map<String, Team> teams,
+			Map<String, TeamManagement> teams,
 			Map<String, RawBoundManagedObjectMetaData> scopeManagedObjects,
 			String... threadBoundNames) {
 

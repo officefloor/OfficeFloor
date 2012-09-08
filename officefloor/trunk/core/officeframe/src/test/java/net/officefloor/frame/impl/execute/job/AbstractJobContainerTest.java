@@ -241,6 +241,8 @@ public abstract class AbstractJobContainerTest extends OfficeFrameTestCase {
 	protected void record_JobContainer_initialSteps(Job job,
 			Throwable threadFailure) {
 		final FunctionalityJob functionalityJob = (FunctionalityJob) job;
+		this.recordReturn(this.jobContext, this.jobContext.getCurrentTeam(),
+				this.currentTeam);
 		this.recordReturn(this.jobMetaData,
 				this.jobMetaData.createJobActivableSet(),
 				this.jobActivatableSet);

@@ -80,12 +80,12 @@ import net.officefloor.frame.internal.structure.OfficeStartupTask;
 import net.officefloor.frame.internal.structure.ProcessMetaData;
 import net.officefloor.frame.internal.structure.ProcessState;
 import net.officefloor.frame.internal.structure.TaskMetaData;
+import net.officefloor.frame.internal.structure.TeamManagement;
 import net.officefloor.frame.internal.structure.ThreadMetaData;
 import net.officefloor.frame.internal.structure.ThreadState;
 import net.officefloor.frame.internal.structure.WorkMetaData;
 import net.officefloor.frame.spi.governance.Governance;
 import net.officefloor.frame.spi.source.SourceContext;
-import net.officefloor.frame.spi.team.Team;
 import net.officefloor.frame.spi.team.source.ProcessContextListener;
 
 /**
@@ -117,9 +117,10 @@ public class RawOfficeMetaDataImpl implements RawOfficeMetaDataFactory,
 	private final RawOfficeFloorMetaData rawOfficeFloorMetaData;
 
 	/**
-	 * {@link Team} instances by their {@link Office} registered names.
+	 * {@link TeamManagement} instances by their {@link Office} registered
+	 * names.
 	 */
-	private final Map<String, Team> teams;
+	private final Map<String, TeamManagement> teams;
 
 	/**
 	 * {@link RawManagedObjectMetaData} instances by their {@link Office}
@@ -183,8 +184,8 @@ public class RawOfficeMetaDataImpl implements RawOfficeMetaDataFactory,
 	 * @param rawOfficeFloorMetaData
 	 *            {@link RawOfficeFloorMetaData} containing this {@link Office}.
 	 * @param teams
-	 *            {@link Team} instances by their {@link Office} registered
-	 *            names.
+	 *            {@link TeamManagement} instances by their {@link Office}
+	 *            registered names.
 	 * @param managedObjectMetaData
 	 *            {@link RawManagedObjectMetaData} instances by their
 	 *            {@link Office} registered names.
@@ -216,7 +217,7 @@ public class RawOfficeMetaDataImpl implements RawOfficeMetaDataFactory,
 	 */
 	private RawOfficeMetaDataImpl(String officeName,
 			RawOfficeFloorMetaData rawOfficeFloorMetaData,
-			Map<String, Team> teams,
+			Map<String, TeamManagement> teams,
 			Map<String, RawManagedObjectMetaData<?, ?>> managedObjectMetaData,
 			RawBoundManagedObjectMetaData[] processBoundManagedObjects,
 			RawBoundManagedObjectMetaData[] threadBoundManagedObjects,
@@ -284,7 +285,7 @@ public class RawOfficeMetaDataImpl implements RawOfficeMetaDataFactory,
 				issues);
 
 		// Register the teams to office
-		Map<String, Team> officeTeams = new HashMap<String, Team>();
+		Map<String, TeamManagement> officeTeams = new HashMap<String, TeamManagement>();
 		for (LinkedTeamConfiguration teamConfig : configuration
 				.getRegisteredTeams()) {
 
@@ -316,7 +317,8 @@ public class RawOfficeMetaDataImpl implements RawOfficeMetaDataFactory,
 			}
 
 			// Register the team
-			officeTeams.put(officeTeamName, rawTeamMetaData.getTeam());
+			officeTeams
+					.put(officeTeamName, rawTeamMetaData.getTeamManagement());
 		}
 
 		// Determine if manually manage governance (and deactivation strategy)
@@ -767,7 +769,7 @@ public class RawOfficeMetaDataImpl implements RawOfficeMetaDataFactory,
 	}
 
 	@Override
-	public Map<String, Team> getTeams() {
+	public Map<String, TeamManagement> getTeams() {
 		return this.teams;
 	}
 

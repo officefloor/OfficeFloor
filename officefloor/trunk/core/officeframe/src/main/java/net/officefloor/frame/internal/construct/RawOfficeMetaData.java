@@ -23,9 +23,9 @@ import java.util.Map;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.internal.structure.OfficeMetaData;
 import net.officefloor.frame.internal.structure.ProcessState;
+import net.officefloor.frame.internal.structure.TeamManagement;
 import net.officefloor.frame.internal.structure.ThreadState;
 import net.officefloor.frame.spi.governance.Governance;
-import net.officefloor.frame.spi.team.Team;
 
 /**
  * Raw meta-data of the {@link Office}.
@@ -47,12 +47,13 @@ public interface RawOfficeMetaData {
 	RawOfficeFloorMetaData getRawOfficeFloorMetaData();
 
 	/**
-	 * Obtains the {@link Team} instances by their {@link Office} registered
-	 * names.
+	 * Obtains the {@link TeamManagement} instances by their {@link Office}
+	 * registered names.
 	 * 
-	 * @return {@link Team} instances by their {@link Office} registered names.
+	 * @return {@link TeamManagement} instances by their {@link Office}
+	 *         registered names.
 	 */
-	Map<String, Team> getTeams();
+	Map<String, TeamManagement> getTeams();
 
 	/**
 	 * Indicates whether the {@link Governance} is going to be manually managed.

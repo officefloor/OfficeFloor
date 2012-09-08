@@ -45,13 +45,13 @@ import net.officefloor.frame.internal.structure.ManagedObjectIndex;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.frame.internal.structure.TaskDutyAssociation;
 import net.officefloor.frame.internal.structure.TaskMetaData;
+import net.officefloor.frame.internal.structure.TeamManagement;
 import net.officefloor.frame.internal.structure.WorkContainer;
 import net.officefloor.frame.internal.structure.WorkMetaData;
 import net.officefloor.frame.spi.managedobject.AsynchronousManagedObject;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectUser;
-import net.officefloor.frame.spi.team.Team;
 
 import org.easymock.internal.AlwaysMatcher;
 
@@ -282,7 +282,7 @@ public class ExecutionNode<W extends Work> implements
 	}
 
 	@Override
-	public Team getTeam() {
+	public TeamManagement getResponsibleTeam() {
 		return this.testCase;
 	}
 

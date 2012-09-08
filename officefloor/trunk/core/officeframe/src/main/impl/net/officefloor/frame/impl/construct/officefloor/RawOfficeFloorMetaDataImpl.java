@@ -34,6 +34,7 @@ import net.officefloor.frame.impl.execute.officefloor.DefaultOfficeFloorEscalati
 import net.officefloor.frame.impl.execute.officefloor.ManagedObjectSourceInstanceImpl;
 import net.officefloor.frame.impl.execute.officefloor.OfficeFloorMetaDataImpl;
 import net.officefloor.frame.impl.execute.process.EscalationHandlerEscalation;
+import net.officefloor.frame.impl.execute.team.TeamManagementImpl;
 import net.officefloor.frame.impl.spi.team.PassiveTeam;
 import net.officefloor.frame.internal.configuration.ManagedObjectSourceConfiguration;
 import net.officefloor.frame.internal.configuration.OfficeConfiguration;
@@ -58,6 +59,7 @@ import net.officefloor.frame.internal.structure.EscalationProcedure;
 import net.officefloor.frame.internal.structure.ManagedObjectSourceInstance;
 import net.officefloor.frame.internal.structure.OfficeFloorMetaData;
 import net.officefloor.frame.internal.structure.OfficeMetaData;
+import net.officefloor.frame.internal.structure.TeamManagement;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.spi.source.SourceContext;
 import net.officefloor.frame.spi.team.Team;
@@ -172,7 +174,7 @@ public class RawOfficeFloorMetaDataImpl implements RawOfficeFloorMetaData,
 		// Construct the teams
 		Map<String, RawTeamMetaData> teamRegistry = new HashMap<String, RawTeamMetaData>();
 		List<ProcessContextListener> processContextListeners = new LinkedList<ProcessContextListener>();
-		List<Team> teamListing = new LinkedList<Team>();
+		List<TeamManagement> teamListing = new LinkedList<TeamManagement>();
 		for (TeamConfiguration<?> teamConfiguration : configuration
 				.getTeamConfiguration()) {
 
@@ -194,7 +196,7 @@ public class RawOfficeFloorMetaDataImpl implements RawOfficeFloorMetaData,
 			}
 
 			// Obtain the team
-			Team team = rawTeamMetaData.getTeam();
+			TeamManagement team = rawTeamMetaData.getTeamManagement();
 
 			// Register the team
 			teamRegistry.put(teamName, rawTeamMetaData);
@@ -271,7 +273,8 @@ public class RawOfficeFloorMetaDataImpl implements RawOfficeFloorMetaData,
 			officeFloorEscalationHandler = new DefaultOfficeFloorEscalationHandler();
 		}
 		EscalationFlow officeFloorEscalation = new EscalationHandlerEscalation(
-				officeFloorEscalationHandler, new PassiveTeam(), null);
+				officeFloorEscalationHandler, new TeamManagementImpl(
+						new PassiveTeam()), null);
 
 		// Create the raw office floor meta-data
 		RawOfficeFloorMetaDataImpl rawMetaData = new RawOfficeFloorMetaDataImpl(
@@ -348,7 +351,7 @@ public class RawOfficeFloorMetaDataImpl implements RawOfficeFloorMetaData,
 
 		// Create the office floor meta-data
 		rawMetaData.officeFloorMetaData = new OfficeFloorMetaDataImpl(
-				teamListing.toArray(new Team[0]),
+				teamListing.toArray(new TeamManagement[0]),
 				mosInstances.toArray(new ManagedObjectSourceInstance[0]),
 				officeMetaDatas.toArray(new OfficeMetaData[0]));
 

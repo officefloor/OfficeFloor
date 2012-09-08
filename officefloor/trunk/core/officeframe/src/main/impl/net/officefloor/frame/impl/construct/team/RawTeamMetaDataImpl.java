@@ -22,15 +22,18 @@ import net.officefloor.frame.api.build.OfficeFloorIssues;
 import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.impl.construct.util.ConstructUtil;
+import net.officefloor.frame.impl.execute.team.TeamManagementImpl;
 import net.officefloor.frame.internal.configuration.TeamConfiguration;
 import net.officefloor.frame.internal.construct.RawTeamMetaData;
 import net.officefloor.frame.internal.construct.RawTeamMetaDataFactory;
+import net.officefloor.frame.internal.structure.TeamManagement;
 import net.officefloor.frame.spi.source.SourceContext;
 import net.officefloor.frame.spi.source.SourceProperties;
 import net.officefloor.frame.spi.source.UnknownClassError;
 import net.officefloor.frame.spi.source.UnknownPropertyError;
 import net.officefloor.frame.spi.source.UnknownResourceError;
 import net.officefloor.frame.spi.team.Team;
+import net.officefloor.frame.spi.team.TeamIdentifier;
 import net.officefloor.frame.spi.team.source.ProcessContextListener;
 import net.officefloor.frame.spi.team.source.TeamSource;
 
@@ -57,9 +60,9 @@ public class RawTeamMetaDataImpl implements RawTeamMetaDataFactory,
 	private final String teamName;
 
 	/**
-	 * {@link Team}.
+	 * {@link TeamManagement}.
 	 */
-	private final Team team;
+	private final TeamManagement team;
 
 	/**
 	 * {@link ProcessContextListener} instances for the {@link Team}.
@@ -72,11 +75,11 @@ public class RawTeamMetaDataImpl implements RawTeamMetaDataFactory,
 	 * @param teamName
 	 *            Name of {@link Team}.
 	 * @param team
-	 *            {@link Team}.
+	 *            {@link TeamManagement}.
 	 * @param processContextListeners
 	 *            {@link ProcessContextListener} instances for the {@link Team}.
 	 */
-	private RawTeamMetaDataImpl(String teamName, Team team,
+	private RawTeamMetaDataImpl(String teamName, TeamManagement team,
 			ProcessContextListener[] processContextListeners) {
 		this.teamName = teamName;
 		this.team = team;
@@ -88,7 +91,7 @@ public class RawTeamMetaDataImpl implements RawTeamMetaDataFactory,
 	 */
 
 	@Override
-	public <TS extends TeamSource> RawTeamMetaDataImpl constructRawTeamMetaData(
+	public <TS extends TeamSource> RawTeamMetaData constructRawTeamMetaData(
 			TeamConfiguration<TS> configuration, SourceContext sourceContext,
 			OfficeFloorIssues issues) {
 
@@ -117,13 +120,17 @@ public class RawTeamMetaDataImpl implements RawTeamMetaDataFactory,
 			return null; // can not carry one
 		}
 
+		// Create the team identifier
+		TeamIdentifier teamIdentifier = TeamManagementImpl
+				.createTeamIdentifier();
+
 		Team team;
 		ProcessContextListener[] processContextListeners;
 		try {
 			// Create the team source context
 			SourceProperties properties = configuration.getProperties();
 			TeamSourceContextImpl context = new TeamSourceContextImpl(false,
-					teamName, properties, sourceContext);
+					teamName, teamIdentifier, properties, sourceContext);
 
 			// Create the team
 			team = teamSource.createTeam(context);
@@ -166,8 +173,13 @@ public class RawTeamMetaDataImpl implements RawTeamMetaDataFactory,
 			return null; // can not carry on
 		}
 
+		// Create the management for the team
+		TeamManagement teamManagement = new TeamManagementImpl(teamIdentifier,
+				team);
+
 		// Return the raw meta-data
-		return new RawTeamMetaDataImpl(teamName, team, processContextListeners);
+		return new RawTeamMetaDataImpl(teamName, teamManagement,
+				processContextListeners);
 	}
 
 	/*
@@ -180,7 +192,7 @@ public class RawTeamMetaDataImpl implements RawTeamMetaDataFactory,
 	}
 
 	@Override
-	public Team getTeam() {
+	public TeamManagement getTeamManagement() {
 		return this.team;
 	}
 

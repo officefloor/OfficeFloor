@@ -27,11 +27,13 @@ import net.officefloor.frame.internal.structure.AdministratorMetaData;
 import net.officefloor.frame.internal.structure.DutyMetaData;
 import net.officefloor.frame.internal.structure.EscalationProcedure;
 import net.officefloor.frame.internal.structure.ExtensionInterfaceMetaData;
+import net.officefloor.frame.internal.structure.GovernanceActivity;
 import net.officefloor.frame.internal.structure.JobNode;
 import net.officefloor.frame.internal.structure.JobNodeActivatableSet;
 import net.officefloor.frame.internal.structure.JobSequence;
 import net.officefloor.frame.internal.structure.TaskDutyAssociation;
 import net.officefloor.frame.internal.structure.TaskMetaData;
+import net.officefloor.frame.internal.structure.TeamManagement;
 import net.officefloor.frame.internal.structure.WorkContainer;
 import net.officefloor.frame.spi.administration.Administrator;
 import net.officefloor.frame.spi.administration.DutyKey;
@@ -57,9 +59,10 @@ public class AdministratorMetaDataImpl<I extends Object, A extends Enum<A>>
 	private final ExtensionInterfaceMetaData<I>[] eiMetaData;
 
 	/**
-	 * {@link Team}.
+	 * {@link TeamManagement} of {@link Team} responsible for the
+	 * {@link GovernanceActivity}.
 	 */
-	private final Team team;
+	private final TeamManagement responsibleTeam;
 
 	/**
 	 * {@link EscalationProcedure}.
@@ -82,18 +85,20 @@ public class AdministratorMetaDataImpl<I extends Object, A extends Enum<A>>
 	 *            {@link AdministratorSource}.
 	 * @param eiMetaData
 	 *            {@link ExtensionInterfaceMetaData}.
-	 * @param team
-	 *            {@link Team}.
+	 * @param responsibleTeam
+	 *            {@link TeamManagement} of {@link Team} responsible for the
+	 *            {@link GovernanceActivity}.
 	 * @param escalationProcedure
 	 *            {@link EscalationProcedure}.
 	 */
 	public AdministratorMetaDataImpl(
 			AdministratorSource<I, A> administratorSource,
-			ExtensionInterfaceMetaData<I>[] eiMetaData, Team team,
+			ExtensionInterfaceMetaData<I>[] eiMetaData,
+			TeamManagement responsibleTeam,
 			EscalationProcedure escalationProcedure) {
 		this.eiMetaData = eiMetaData;
 		this.administratorSource = administratorSource;
-		this.team = team;
+		this.responsibleTeam = responsibleTeam;
 		this.escalationProcedure = escalationProcedure;
 	}
 
@@ -145,8 +150,8 @@ public class AdministratorMetaDataImpl<I extends Object, A extends Enum<A>>
 	}
 
 	@Override
-	public Team getTeam() {
-		return this.team;
+	public TeamManagement getResponsibleTeam() {
+		return this.responsibleTeam;
 	}
 
 	@Override

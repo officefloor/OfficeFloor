@@ -44,6 +44,12 @@ public class TeamSourceContextImpl extends SourceContextImpl implements
 	private final String teamName;
 
 	/**
+	 * {@link TeamIdentifier} of the {@link Team} to be created from the
+	 * {@link TeamSource}.
+	 */
+	private final TeamIdentifier teamIdentifier;
+
+	/**
 	 * <p>
 	 * Registered {@link ProcessContextListener} instances.
 	 * <p>
@@ -60,15 +66,20 @@ public class TeamSourceContextImpl extends SourceContextImpl implements
 	 * @param teamName
 	 *            Name of the {@link Team} to be created from the
 	 *            {@link TeamSource}.
+	 * @param teamIdentifier
+	 *            {@link TeamIdentifier} of the {@link Team} to be created from
+	 *            the {@link TeamSource}.
 	 * @param properties
 	 *            {@link SourceProperties} to initialise the {@link TeamSource}.
 	 * @param sourceContext
 	 *            {@link SourceContext}.
 	 */
 	public TeamSourceContextImpl(boolean isLoadingType, String teamName,
-			SourceProperties properties, SourceContext sourceContext) {
+			TeamIdentifier teamIdentifier, SourceProperties properties,
+			SourceContext sourceContext) {
 		super(isLoadingType, sourceContext, properties);
 		this.teamName = teamName;
+		this.teamIdentifier = teamIdentifier;
 	}
 
 	/**
@@ -103,9 +114,7 @@ public class TeamSourceContextImpl extends SourceContextImpl implements
 
 	@Override
 	public TeamIdentifier getTeamIdentifier() {
-		// TODO implement TeamSourceContext.getTeamIdentifier
-		throw new UnsupportedOperationException(
-				"TODO implement TeamSourceContext.getTeamIdentifier");
+		return this.teamIdentifier;
 	}
 
 	@Override

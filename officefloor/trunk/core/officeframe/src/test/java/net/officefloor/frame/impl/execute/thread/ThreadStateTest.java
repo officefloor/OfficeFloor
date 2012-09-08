@@ -47,6 +47,7 @@ import net.officefloor.frame.internal.structure.ManagedObjectMetaData;
 import net.officefloor.frame.internal.structure.ProcessProfiler;
 import net.officefloor.frame.internal.structure.ProcessState;
 import net.officefloor.frame.internal.structure.TaskMetaData;
+import net.officefloor.frame.internal.structure.TeamManagement;
 import net.officefloor.frame.internal.structure.ThreadMetaData;
 import net.officefloor.frame.internal.structure.ThreadProfiler;
 import net.officefloor.frame.internal.structure.ThreadState;
@@ -252,9 +253,12 @@ public class ThreadStateTest extends OfficeFrameTestCase {
 
 		final GovernanceActivity<?, ?> activity = this
 				.createMock(GovernanceActivity.class);
+		final TeamManagement governanceTeamManagement = this
+				.createMock(TeamManagement.class);
 		final Team governanceTeam = this.createMock(Team.class);
+
 		final GovernanceMetaData<?, ?> governanceMetaData = new GovernanceMetaDataImpl(
-				"GOVERNANCE", null, governanceTeam);
+				"GOVERNANCE", null, governanceTeamManagement);
 
 		// Record not complete thread due to governance
 		this.record_ThreadState_init(0, GOVERNANCE_SIZE, 0);
@@ -285,6 +289,8 @@ public class ThreadStateTest extends OfficeFrameTestCase {
 		});
 		this.recordReturn(activity, activity.getGovernanceMetaData(),
 				governanceMetaData);
+		this.recordReturn(governanceTeamManagement,
+				governanceTeamManagement.getTeam(), governanceTeam);
 		governanceTeam.assignJob(null, null);
 		this.control(governanceTeam).setMatcher(
 				new TypeMatcher(GovernanceJob.class, TeamIdentifier.class));
