@@ -33,6 +33,7 @@ import net.officefloor.frame.spi.source.UnknownClassError;
 import net.officefloor.frame.spi.source.UnknownPropertyError;
 import net.officefloor.frame.spi.source.UnknownResourceError;
 import net.officefloor.frame.spi.team.Team;
+import net.officefloor.frame.spi.team.TeamIdentifier;
 import net.officefloor.frame.spi.team.source.TeamSource;
 import net.officefloor.frame.spi.team.source.TeamSourceProperty;
 import net.officefloor.frame.spi.team.source.TeamSourceSpecification;
@@ -43,6 +44,12 @@ import net.officefloor.frame.spi.team.source.TeamSourceSpecification;
  * @author Daniel Sagenschneider
  */
 public class TeamLoaderImpl implements TeamLoader {
+
+	/**
+	 * {@link TeamIdentifier} for the {@link TeamType}.
+	 */
+	private static final TeamIdentifier TYPE_TEAM = new TeamIdentifier() {
+	};
 
 	/**
 	 * Location.
@@ -210,11 +217,13 @@ public class TeamLoaderImpl implements TeamLoader {
 			return null; // failed to instantiate
 		}
 
-		// Attempt to initialise the team
+		// Attempt to create the team
 		try {
-			teamSource.init(new TeamSourceContextImpl(true, this.teamName,
-					new PropertyListSourceProperties(propertyList),
-					this.nodeContext.getSourceContext()));
+			teamSource
+					.createTeam(new TeamSourceContextImpl(true, this.teamName,
+							TYPE_TEAM, new PropertyListSourceProperties(
+									propertyList), this.nodeContext
+									.getSourceContext()));
 
 		} catch (UnknownPropertyError ex) {
 			this.nodeContext.getCompilerIssues().addIssue(

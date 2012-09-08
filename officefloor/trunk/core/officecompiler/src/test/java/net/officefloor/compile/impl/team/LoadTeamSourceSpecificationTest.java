@@ -385,12 +385,7 @@ public class LoadTeamSourceSpecificationTest extends OfficeFrameTestCase {
 		}
 
 		@Override
-		public void init(TeamSourceContext context) throws Exception {
-			fail("Should not be invoked for obtaining specification");
-		}
-
-		@Override
-		public Team createTeam() {
+		public Team createTeam(TeamSourceContext context) throws Exception {
 			fail("Should not be invoked for obtaining specification");
 			return null;
 		}

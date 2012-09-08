@@ -18,7 +18,6 @@
 
 package net.officefloor.compile.team;
 
-import net.officefloor.frame.spi.team.Job;
 import net.officefloor.frame.spi.team.Team;
 
 /**
@@ -27,12 +26,8 @@ import net.officefloor.frame.spi.team.Team;
  * <p>
  * All {@link Team} instances implement the same interface. They however differ
  * in their characteristics which is internal to the {@link Team}.
- * <p>
- * TODO Need to consider if necessary to provide criteria on a {@link Job} to
- * differentiate which {@link Team} may be responsible for the {@link Job}.
  * 
  * @author Daniel Sagenschneider
  */
 public interface TeamType {
-
 }

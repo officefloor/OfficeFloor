@@ -99,7 +99,9 @@ import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.spi.managedobject.source.impl.AbstractAsyncManagedObjectSource.MetaDataContext;
 import net.officefloor.frame.spi.managedobject.source.impl.AbstractManagedObjectSource;
 import net.officefloor.frame.spi.source.ResourceSource;
+import net.officefloor.frame.spi.team.Job;
 import net.officefloor.frame.spi.team.Team;
+import net.officefloor.frame.spi.team.TeamIdentifier;
 import net.officefloor.frame.spi.team.source.TeamSource;
 import net.officefloor.frame.spi.team.source.TeamSourceContext;
 import net.officefloor.frame.spi.team.source.TeamSourceSpecification;
@@ -1876,7 +1878,8 @@ public abstract class AbstractStructureTestCase extends OfficeFrameTestCase {
 	 * Maker {@link TeamSource}.
 	 */
 	@TestSource
-	public static class MakerTeamSource implements TeamSource, TeamMakerContext {
+	public static class MakerTeamSource implements TeamSource,
+			TeamMakerContext, Team {
 
 		/**
 		 * Property name to obtain the {@link TeamMaker} identifier.
@@ -1934,7 +1937,7 @@ public abstract class AbstractStructureTestCase extends OfficeFrameTestCase {
 		}
 
 		@Override
-		public void init(TeamSourceContext context) throws Exception {
+		public Team createTeam(TeamSourceContext context) throws Exception {
 
 			// Obtain the team maker
 			String identifier = context
@@ -1943,12 +1946,28 @@ public abstract class AbstractStructureTestCase extends OfficeFrameTestCase {
 
 			// Make the team
 			teamMaker.make(this);
+
+			// Return the team
+			return this;
+		}
+
+		/*
+		 * ======================== Team ===================================
+		 */
+
+		@Override
+		public void startWorking() {
+			fail("Should not require the Team");
 		}
 
 		@Override
-		public Team createTeam() {
-			fail("Should not require creating a team");
-			return null;
+		public void assignJob(Job job, TeamIdentifier assignerTeam) {
+			fail("Should not require the Team");
+		}
+
+		@Override
+		public void stopWorking() {
+			fail("Should not require the Team");
 		}
 	}
 

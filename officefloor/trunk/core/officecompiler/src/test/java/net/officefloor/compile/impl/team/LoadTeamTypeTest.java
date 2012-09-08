@@ -28,7 +28,9 @@ import net.officefloor.compile.team.TeamLoader;
 import net.officefloor.compile.team.TeamType;
 import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
 import net.officefloor.frame.spi.TestSource;
+import net.officefloor.frame.spi.team.Job;
 import net.officefloor.frame.spi.team.Team;
+import net.officefloor.frame.spi.team.TeamIdentifier;
 import net.officefloor.frame.spi.team.source.TeamSource;
 import net.officefloor.frame.spi.team.source.TeamSourceContext;
 import net.officefloor.frame.spi.team.source.TeamSourceSpecification;
@@ -176,7 +178,7 @@ public class LoadTeamTypeTest extends OfficeFrameTestCase {
 	 * Mock {@link TeamSource} for testing.
 	 */
 	@TestSource
-	public static class MockTeamSource implements TeamSource {
+	public static class MockTeamSource implements TeamSource, Team {
 
 		/**
 		 * {@link Loader} to load the {@link TeamType}.
@@ -216,14 +218,28 @@ public class LoadTeamTypeTest extends OfficeFrameTestCase {
 		}
 
 		@Override
-		public void init(TeamSourceContext context) throws Exception {
+		public Team createTeam(TeamSourceContext context) throws Exception {
 			loader.sourceTeam(context);
+			return this;
+		}
+
+		/*
+		 * ======================== Team =======================================
+		 */
+
+		@Override
+		public void startWorking() {
+			fail("Should not be invoked in obtaining team type");
 		}
 
 		@Override
-		public Team createTeam() {
+		public void assignJob(Job job, TeamIdentifier assignerTeam) {
 			fail("Should not be invoked in obtaining team type");
-			return null;
+		}
+
+		@Override
+		public void stopWorking() {
+			fail("Should not be invoked in obtaining team type");
 		}
 	}
 
