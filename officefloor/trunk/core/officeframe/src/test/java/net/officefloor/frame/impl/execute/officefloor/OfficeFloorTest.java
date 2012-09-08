@@ -32,6 +32,7 @@ import net.officefloor.frame.internal.structure.OfficeFloorMetaData;
 import net.officefloor.frame.internal.structure.OfficeManager;
 import net.officefloor.frame.internal.structure.OfficeMetaData;
 import net.officefloor.frame.internal.structure.OfficeStartupTask;
+import net.officefloor.frame.internal.structure.TeamManagement;
 import net.officefloor.frame.internal.structure.WorkMetaData;
 import net.officefloor.frame.spi.managedobject.pool.ManagedObjectPool;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectExecuteContext;
@@ -152,6 +153,8 @@ public class OfficeFloorTest extends OfficeFrameTestCase {
 				.createMock(ManagedObjectExecuteContext.class);
 		final ManagedObjectPool managedObjectPool = this
 				.createMock(ManagedObjectPool.class);
+		final TeamManagement teamManagement = this
+				.createMock(TeamManagement.class);
 		final OfficeStartupTask startupTask = this
 				.createMock(OfficeStartupTask.class);
 		final FlowMetaData<?> flowMetaData = this
@@ -194,7 +197,9 @@ public class OfficeFloorTest extends OfficeFrameTestCase {
 				this.officeMetaData.getOfficeManager(), this.officeManager);
 		this.officeManager.startManaging();
 		this.recordReturn(this.officeFloorMetaData,
-				this.officeFloorMetaData.getTeams(), new Team[] { this.team });
+				this.officeFloorMetaData.getTeams(),
+				new TeamManagement[] { teamManagement });
+		this.recordReturn(teamManagement, teamManagement.getTeam(), this.team);
 		this.team.startWorking();
 		this.recordReturn(this.officeMetaData,
 				this.officeMetaData.getStartupTasks(),

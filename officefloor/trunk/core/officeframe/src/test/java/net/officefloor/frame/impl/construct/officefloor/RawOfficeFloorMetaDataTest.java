@@ -50,6 +50,7 @@ import net.officefloor.frame.internal.structure.EscalationProcedure;
 import net.officefloor.frame.internal.structure.ManagedObjectExecuteContextFactory;
 import net.officefloor.frame.internal.structure.ManagedObjectSourceInstance;
 import net.officefloor.frame.internal.structure.OfficeMetaData;
+import net.officefloor.frame.internal.structure.TeamManagement;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.spi.source.SourceContext;
@@ -226,7 +227,7 @@ public class RawOfficeFloorMetaDataTest extends OfficeFrameTestCase {
 				.createMock(TeamConfiguration.class);
 		final RawTeamMetaData rawTeamOne = this
 				.createMock(RawTeamMetaData.class);
-		final Team teamOne = this.createMock(Team.class);
+		final TeamManagement teamOne = this.createMock(TeamManagement.class);
 
 		final TeamConfiguration<?> teamConfigurationTwo = this
 				.createMock(TeamConfiguration.class);
@@ -244,7 +245,7 @@ public class RawOfficeFloorMetaDataTest extends OfficeFrameTestCase {
 						this.sourceContext, this.issues), rawTeamOne);
 		this.recordReturn(rawTeamOne, rawTeamOne.getTeamName(),
 				DUPLICATE_TEAM_NAME);
-		this.recordReturn(rawTeamOne, rawTeamOne.getTeam(), teamOne);
+		this.recordReturn(rawTeamOne, rawTeamOne.getTeamManagement(), teamOne);
 		this.recordReturn(rawTeamOne, rawTeamOne.getProcessContextListeners(),
 				new ProcessContextListener[0]);
 		this.recordReturn(this.rawTeamFactory, this.rawTeamFactory
@@ -276,8 +277,8 @@ public class RawOfficeFloorMetaDataTest extends OfficeFrameTestCase {
 
 		// Record constructing teams
 		this.record_officeFloorName();
-		Team[] expectedTeams = this
-				.record_constructTeams("ONE", "TWO", "THREE");
+		TeamManagement[] expectedTeams = this.record_constructTeams("ONE",
+				"TWO", "THREE");
 		this.record_constructManagedObjectSources("OFFICE");
 		this.record_constructEscalation();
 		this.record_constructOffices();
@@ -286,7 +287,8 @@ public class RawOfficeFloorMetaDataTest extends OfficeFrameTestCase {
 		this.replayMockObjects();
 		RawOfficeFloorMetaData metaData = this
 				.constructRawOfficeFloorMetaData();
-		Team[] actualTeams = metaData.getOfficeFloorMetaData().getTeams();
+		TeamManagement[] actualTeams = metaData.getOfficeFloorMetaData()
+				.getTeams();
 		this.verifyMockObjects();
 
 		// Ensure teams registered
@@ -320,7 +322,7 @@ public class RawOfficeFloorMetaDataTest extends OfficeFrameTestCase {
 		final RawTeamMetaData rawTeamMetaData = this
 				.createMock(RawTeamMetaData.class);
 		final String TEAM_NAME = "TEAM";
-		final Team team = this.createMock(Team.class);
+		final TeamManagement team = this.createMock(TeamManagement.class);
 
 		// Record constructing team registering Process Context Listener
 		this.record_officeFloorName();
@@ -332,7 +334,8 @@ public class RawOfficeFloorMetaDataTest extends OfficeFrameTestCase {
 						this.sourceContext, this.issues), rawTeamMetaData);
 		this.recordReturn(rawTeamMetaData, rawTeamMetaData.getTeamName(),
 				TEAM_NAME);
-		this.recordReturn(rawTeamMetaData, rawTeamMetaData.getTeam(), team);
+		this.recordReturn(rawTeamMetaData, rawTeamMetaData.getTeamManagement(),
+				team);
 		this.recordReturn(rawTeamMetaData,
 				rawTeamMetaData.getProcessContextListeners(),
 				new ProcessContextListener[] { listener });
@@ -688,18 +691,18 @@ public class RawOfficeFloorMetaDataTest extends OfficeFrameTestCase {
 	 * 
 	 * @param teamNames
 	 *            Names of the {@link Team} instances to construct.
-	 * @return {@link Team} instances.
+	 * @return {@link TeamManagement} instances.
 	 */
-	private Team[] record_constructTeams(String... teamNames) {
+	private TeamManagement[] record_constructTeams(String... teamNames) {
 
 		// Create the mock objects
 		TeamConfiguration<?>[] teamConfigurations = new TeamConfiguration[teamNames.length];
 		RawTeamMetaData[] rawTeamMetaDatas = new RawTeamMetaData[teamNames.length];
-		Team[] teams = new Team[teamNames.length];
+		TeamManagement[] teams = new TeamManagement[teamNames.length];
 		for (int i = 0; i < teamNames.length; i++) {
 			teamConfigurations[i] = this.createMock(TeamConfiguration.class);
 			rawTeamMetaDatas[i] = this.createMock(RawTeamMetaData.class);
-			teams[i] = this.createMock(Team.class);
+			teams[i] = this.createMock(TeamManagement.class);
 		}
 
 		// Record obtaining the team configuration
@@ -711,7 +714,7 @@ public class RawOfficeFloorMetaDataTest extends OfficeFrameTestCase {
 			TeamConfiguration<?> teamConfiguration = teamConfigurations[i];
 			String teamName = teamNames[i];
 			RawTeamMetaData rawTeamMetaData = rawTeamMetaDatas[i];
-			Team team = teams[i];
+			TeamManagement team = teams[i];
 
 			// Record constructing the team
 			this.recordReturn(this.rawTeamFactory, this.rawTeamFactory
@@ -719,7 +722,8 @@ public class RawOfficeFloorMetaDataTest extends OfficeFrameTestCase {
 							this.sourceContext, this.issues), rawTeamMetaData);
 			this.recordReturn(rawTeamMetaData, rawTeamMetaData.getTeamName(),
 					teamName);
-			this.recordReturn(rawTeamMetaData, rawTeamMetaData.getTeam(), team);
+			this.recordReturn(rawTeamMetaData,
+					rawTeamMetaData.getTeamManagement(), team);
 			this.recordReturn(rawTeamMetaData,
 					rawTeamMetaData.getProcessContextListeners(),
 					new ProcessContextListener[0]);

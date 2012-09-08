@@ -444,7 +444,8 @@ public class RawTeamMetaDataTest extends OfficeFrameTestCase {
 
 		// Ensure meta-data is correct
 		assertEquals("Incorrect team name", TEAM_NAME, metaData.getTeamName());
-		assertEquals("Incorrect team", team, metaData.getTeam());
+		assertEquals("Incorrect team", team, metaData.getTeamManagement()
+				.getTeam());
 		assertEquals("Should be no listeners", 0,
 				metaData.getProcessContextListeners().length);
 	}
@@ -493,7 +494,8 @@ public class RawTeamMetaDataTest extends OfficeFrameTestCase {
 
 		// Ensure meta-data is correct
 		assertEquals("Incorrect team name", TEAM_NAME, metaData.getTeamName());
-		assertEquals("Incorrect team", team, metaData.getTeam());
+		assertEquals("Incorrect team", team, metaData.getTeamManagement()
+				.getTeam());
 		ProcessContextListener[] listeners = metaData
 				.getProcessContextListeners();
 		assertEquals("Should be a listener", 1, listeners.length);

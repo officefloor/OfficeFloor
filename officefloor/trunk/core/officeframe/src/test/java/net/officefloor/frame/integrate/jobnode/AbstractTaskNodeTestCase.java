@@ -51,6 +51,7 @@ import net.officefloor.frame.internal.structure.ProcessMetaData;
 import net.officefloor.frame.internal.structure.ProcessProfiler;
 import net.officefloor.frame.internal.structure.ProcessState;
 import net.officefloor.frame.internal.structure.TaskMetaData;
+import net.officefloor.frame.internal.structure.TeamManagement;
 import net.officefloor.frame.internal.structure.ThreadMetaData;
 import net.officefloor.frame.internal.structure.ThreadState;
 import net.officefloor.frame.internal.structure.WorkMetaData;
@@ -69,7 +70,7 @@ import net.officefloor.frame.test.OfficeFrameTestCase;
  * @author Daniel Sagenschneider
  */
 public abstract class AbstractTaskNodeTestCase<W extends Work> extends
-		OfficeFrameTestCase implements Team {
+		OfficeFrameTestCase implements TeamManagement, TeamIdentifier, Team {
 
 	/**
 	 * {@link TeamIdentifier} for this {@link JobContext}.
@@ -486,6 +487,20 @@ public abstract class AbstractTaskNodeTestCase<W extends Work> extends
 	 */
 	private int nextExecutionNodeId() {
 		return ++this.currentExecutionNodeId;
+	}
+
+	/*
+	 * ===================== TeamManagement ===================================
+	 */
+
+	@Override
+	public TeamIdentifier getIdentifier() {
+		return this;
+	}
+
+	@Override
+	public Team getTeam() {
+		return this;
 	}
 
 	/*

@@ -49,6 +49,7 @@ import net.officefloor.frame.internal.structure.LinkedListSetEntry;
 import net.officefloor.frame.internal.structure.ManagedObjectIndex;
 import net.officefloor.frame.internal.structure.ProcessState;
 import net.officefloor.frame.internal.structure.TaskMetaData;
+import net.officefloor.frame.internal.structure.TeamManagement;
 import net.officefloor.frame.internal.structure.ThreadState;
 import net.officefloor.frame.internal.structure.WorkContainer;
 import net.officefloor.frame.spi.governance.Governance;
@@ -1320,7 +1321,8 @@ public abstract class AbstractJobContainer<W extends Work, N extends JobMetaData
 		}
 
 		// Activate this Job (outside thread lock)
-		this.nodeMetaData.getTeam().assignJob(this, currentTeam);
+		TeamManagement responsible = this.nodeMetaData.getResponsibleTeam();
+		responsible.getTeam().assignJob(this, currentTeam);
 	}
 
 	@Override

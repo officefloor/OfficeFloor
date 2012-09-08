@@ -30,6 +30,7 @@ import net.officefloor.frame.api.manage.UnknownTaskException;
 import net.officefloor.frame.api.manage.UnknownWorkException;
 import net.officefloor.frame.impl.execute.linkedlistset.StrictLinkedListSet;
 import net.officefloor.frame.impl.execute.managedobject.ManagedObjectContainerImpl;
+import net.officefloor.frame.impl.execute.team.TeamManagementImpl;
 import net.officefloor.frame.impl.execute.thread.ThreadStateImpl;
 import net.officefloor.frame.impl.spi.team.PassiveTeam;
 import net.officefloor.frame.internal.structure.AdministratorContainer;
@@ -53,7 +54,6 @@ import net.officefloor.frame.internal.structure.WorkMetaData;
 import net.officefloor.frame.spi.governance.Governance;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
-import net.officefloor.frame.spi.team.Team;
 import net.officefloor.frame.spi.team.TeamIdentifier;
 import net.officefloor.frame.spi.team.source.ProcessContextListener;
 
@@ -238,13 +238,12 @@ public class ProcessStateImpl implements ProcessState {
 				.getAdministratorMetaData();
 		this.administratorContainers = new AdministratorContainer[administratorMetaData.length];
 
-		// TODO allow configuring the team responsible for MO handling
-		Team team = new PassiveTeam();
-
 		// Escalation handled by managed object source
+		// (TODO allow configuring the team responsible for MO handling)
 		this.managedObjectSourceEscalation = (inputManagedObjectEscalationHandler == null ? null
 				: new EscalationHandlerEscalation(
-						inputManagedObjectEscalationHandler, team,
+						inputManagedObjectEscalationHandler,
+						new TeamManagementImpl(new PassiveTeam()),
 						escalationHandlerRequiredGovernance));
 	}
 

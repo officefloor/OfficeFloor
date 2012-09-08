@@ -58,6 +58,7 @@ import net.officefloor.frame.internal.structure.FlowMetaData;
 import net.officefloor.frame.internal.structure.GovernanceMetaData;
 import net.officefloor.frame.internal.structure.ManagedObjectIndex;
 import net.officefloor.frame.internal.structure.TaskMetaData;
+import net.officefloor.frame.internal.structure.TeamManagement;
 import net.officefloor.frame.spi.administration.Administrator;
 import net.officefloor.frame.spi.administration.Duty;
 import net.officefloor.frame.spi.administration.DutyKey;
@@ -72,7 +73,6 @@ import net.officefloor.frame.spi.source.SourceProperties;
 import net.officefloor.frame.spi.source.UnknownClassError;
 import net.officefloor.frame.spi.source.UnknownPropertyError;
 import net.officefloor.frame.spi.source.UnknownResourceError;
-import net.officefloor.frame.spi.team.Team;
 
 /**
  * Raw meta-data for the bound {@link Administrator}.
@@ -180,7 +180,7 @@ public class RawBoundAdministratorMetaDataImpl<I, A extends Enum<A>> implements
 			AdministratorSourceConfiguration<?, ?>[] configuration,
 			SourceContext sourceContext, OfficeFloorIssues issues,
 			AdministratorScope administratorScope, AssetType assetType,
-			String assetName, Map<String, Team> officeTeams,
+			String assetName, Map<String, TeamManagement> officeTeams,
 			Map<String, RawBoundManagedObjectMetaData> scopeMo) {
 
 		// Register the bound administrators
@@ -224,8 +224,8 @@ public class RawBoundAdministratorMetaDataImpl<I, A extends Enum<A>> implements
 	 *            Name of {@link Asset} constructing {@link Administrator}
 	 *            instances.
 	 * @param officeTeams
-	 *            {@link Team} instances by their {@link Office} registered
-	 *            names.
+	 *            {@link TeamManagement} instances by their {@link Office}
+	 *            registered names.
 	 * @param scopeMo
 	 *            {@link RawBoundManagedObjectMetaData} by their scope names.
 	 * @return Constructed {@link RawBoundAdministratorMetaData}.
@@ -235,7 +235,7 @@ public class RawBoundAdministratorMetaDataImpl<I, A extends Enum<A>> implements
 			AdministratorSourceConfiguration<a, AS> configuration,
 			SourceContext sourceContext, OfficeFloorIssues issues,
 			AdministratorIndex administratorIndex, AssetType assetType,
-			String assetName, Map<String, Team> officeTeams,
+			String assetName, Map<String, TeamManagement> officeTeams,
 			Map<String, RawBoundManagedObjectMetaData> scopeMo) {
 
 		// Obtain the administrator name
@@ -315,7 +315,7 @@ public class RawBoundAdministratorMetaDataImpl<I, A extends Enum<A>> implements
 					+ " must specify team responsible for duties");
 			return null; // must have team specified
 		}
-		Team team = officeTeams.get(teamName);
+		TeamManagement team = officeTeams.get(teamName);
 		if (team == null) {
 			issues.addIssue(assetType, assetName, "Administrator " + adminName
 					+ " team '" + teamName + "' can not be found");

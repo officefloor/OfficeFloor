@@ -24,6 +24,7 @@ import net.officefloor.frame.impl.construct.team.TeamSourceContextImpl;
 import net.officefloor.frame.spi.source.SourceContext;
 import net.officefloor.frame.spi.source.SourceProperties;
 import net.officefloor.frame.spi.team.Team;
+import net.officefloor.frame.spi.team.TeamIdentifier;
 import net.officefloor.frame.spi.team.source.TeamSource;
 import net.officefloor.frame.spi.team.source.TeamSourceContext;
 
@@ -87,11 +88,16 @@ public class TeamSourceStandAlone {
 		// Load the team source
 		TS teamSource = this.loadTeamSource(teamSourceClass);
 
+		// Create identifier for team
+		TeamIdentifier teamIdentifier = new TeamIdentifier() {
+		};
+
 		// Create team source context
 		SourceContext sourceContext = new SourceContextImpl(false, Thread
 				.currentThread().getContextClassLoader());
 		TeamSourceContext context = new TeamSourceContextImpl(false,
-				teamSourceClass.getSimpleName(), this.properties, sourceContext);
+				teamSourceClass.getSimpleName(), teamIdentifier,
+				this.properties, sourceContext);
 
 		// Return the created team
 		return teamSource.createTeam(context);

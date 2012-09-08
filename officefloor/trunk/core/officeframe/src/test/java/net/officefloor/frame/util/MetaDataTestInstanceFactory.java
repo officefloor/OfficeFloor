@@ -24,6 +24,7 @@ import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.impl.execute.escalation.EscalationProcedureImpl;
 import net.officefloor.frame.impl.execute.task.TaskMetaDataImpl;
+import net.officefloor.frame.impl.execute.team.TeamManagementImpl;
 import net.officefloor.frame.impl.execute.work.WorkMetaDataImpl;
 import net.officefloor.frame.impl.spi.team.PassiveTeam;
 import net.officefloor.frame.internal.structure.AdministratorMetaData;
@@ -97,9 +98,10 @@ public class MetaDataTestInstanceFactory {
 		// Create and initialise the meta-data
 		TaskMetaDataImpl<W, D, F> metaData = new TaskMetaDataImpl<W, D, F>(
 				jobName, taskName, taskFactory, "TEST_DIFFERENTIATOR",
-				Object.class, new PassiveTeam(), new ManagedObjectIndex[0],
-				new ManagedObjectIndex[0], new boolean[0],
-				new TaskDutyAssociation<?>[0], new TaskDutyAssociation<?>[0]);
+				Object.class, new TeamManagementImpl(new PassiveTeam()),
+				new ManagedObjectIndex[0], new ManagedObjectIndex[0],
+				new boolean[0], new TaskDutyAssociation<?>[0],
+				new TaskDutyAssociation<?>[0]);
 		metaData.loadRemainingState((WorkMetaData<W>) workMetaData,
 				new FlowMetaData<?>[0], null, new EscalationProcedureImpl());
 

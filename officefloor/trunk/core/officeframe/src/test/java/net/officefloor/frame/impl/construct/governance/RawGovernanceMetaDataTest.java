@@ -53,6 +53,7 @@ import net.officefloor.frame.internal.structure.GovernanceMetaData;
 import net.officefloor.frame.internal.structure.JobSequence;
 import net.officefloor.frame.internal.structure.ProcessState;
 import net.officefloor.frame.internal.structure.TaskMetaData;
+import net.officefloor.frame.internal.structure.TeamManagement;
 import net.officefloor.frame.spi.governance.Governance;
 import net.officefloor.frame.spi.source.SourceContext;
 import net.officefloor.frame.spi.team.Team;
@@ -104,9 +105,10 @@ public class RawGovernanceMetaDataTest extends OfficeFrameTestCase {
 	private final String TEAM_NAME = "TEAM";
 
 	/**
-	 * {@link Team}. May be set to <code>null</code> to not be available.
+	 * {@link TeamManagement}. May be set to <code>null</code> to not be
+	 * available.
 	 */
-	private Team team = this.createMock(Team.class);
+	private TeamManagement team = this.createMock(TeamManagement.class);
 
 	/**
 	 * {@link OfficeMetaDataLocator}.
@@ -928,7 +930,7 @@ public class RawGovernanceMetaDataTest extends OfficeFrameTestCase {
 			boolean isCreated) {
 
 		// Create the map of office teams
-		Map<String, Team> officeTeams = new HashMap<String, Team>();
+		Map<String, TeamManagement> officeTeams = new HashMap<String, TeamManagement>();
 		if (this.team != null) {
 			officeTeams.put(TEAM_NAME, this.team);
 		}

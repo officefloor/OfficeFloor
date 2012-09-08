@@ -41,6 +41,7 @@ import net.officefloor.frame.internal.structure.ManagedObjectIndex;
 import net.officefloor.frame.internal.structure.ManagedObjectMetaData;
 import net.officefloor.frame.internal.structure.TaskDutyAssociation;
 import net.officefloor.frame.internal.structure.TaskMetaData;
+import net.officefloor.frame.internal.structure.TeamManagement;
 import net.officefloor.frame.internal.structure.WorkContainer;
 import net.officefloor.frame.internal.structure.WorkMetaData;
 import net.officefloor.frame.spi.governance.Governance;
@@ -110,9 +111,10 @@ public class EscalationHandlerEscalation implements EscalationFlow {
 	private final EscalationHandler escalationHandler;
 
 	/**
-	 * {@link Team}.
+	 * {@link TeamManagement} responsible to undertake the
+	 * {@link EscalationFlow}.
 	 */
-	private final Team team;
+	private final TeamManagement team;
 
 	/**
 	 * {@link TaskMetaData} for the {@link EscalationHandler} {@link Task}.
@@ -125,13 +127,13 @@ public class EscalationHandlerEscalation implements EscalationFlow {
 	 * @param escalationHandler
 	 *            {@link EscalationHandler}.
 	 * @param team
-	 *            {@link Team} responsible to undertake the
+	 *            {@link TeamManagement} responsible to undertake the
 	 *            {@link EscalationFlow}.
 	 * @param requiredGovernance
 	 *            Required {@link Governance}.
 	 */
 	public EscalationHandlerEscalation(EscalationHandler escalationHandler,
-			Team team, boolean[] requiredGovernance) {
+			TeamManagement team, boolean[] requiredGovernance) {
 		this.escalationHandler = escalationHandler;
 		this.team = team;
 
@@ -260,7 +262,7 @@ public class EscalationHandlerEscalation implements EscalationFlow {
 		 */
 		public EscalationTaskMetaData(
 				TaskFactory<EscalationHandlerTask, EscalationKey, None> taskFactory,
-				Team team, boolean[] requiredGovernance) {
+				TeamManagement team, boolean[] requiredGovernance) {
 			super("Escalation Handler Task", "Escalation Handler Task",
 					taskFactory, null, Throwable.class, team,
 					REQUIRED_MANAGED_OBJECTS, MANGED_OBJECT_DEPENDENCIES,
@@ -290,7 +292,8 @@ public class EscalationHandlerEscalation implements EscalationFlow {
 
 			// Create task meta-data for escalation
 			EscalationTaskMetaData taskMetaData = new EscalationTaskMetaData(
-					this.getTaskFactory(), this.getTeam(), requiredGovernance);
+					this.getTaskFactory(), this.getResponsibleTeam(),
+					requiredGovernance);
 
 			// Create and return the job node
 			return new TaskJob<EscalationHandlerTask, EscalationKey, None>(

@@ -46,10 +46,12 @@ public interface OfficeFloorMetaData {
 	ManagedObjectSourceInstance<?>[] getManagedObjectSourceInstances();
 
 	/**
-	 * Obtains the {@link Team} instances of the {@link OfficeFloor}.
+	 * Obtains the {@link TeamManagement} over the {@link Team} instances of the
+	 * {@link OfficeFloor}.
 	 * 
-	 * @return {@link Team} instances of the {@link OfficeFloor}.
+	 * @return {@link TeamManagement} over the {@link Team} instances of the
+	 *         {@link OfficeFloor}.
 	 */
-	Team[] getTeams();
+	TeamManagement[] getTeams();
 
 }

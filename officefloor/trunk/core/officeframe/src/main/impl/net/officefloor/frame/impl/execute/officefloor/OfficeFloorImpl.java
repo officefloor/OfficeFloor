@@ -39,11 +39,11 @@ import net.officefloor.frame.internal.structure.OfficeFloorMetaData;
 import net.officefloor.frame.internal.structure.OfficeMetaData;
 import net.officefloor.frame.internal.structure.OfficeStartupTask;
 import net.officefloor.frame.internal.structure.ProcessTicker;
+import net.officefloor.frame.internal.structure.TeamManagement;
 import net.officefloor.frame.internal.structure.WorkMetaData;
 import net.officefloor.frame.spi.managedobject.pool.ManagedObjectPool;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectExecuteContext;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
-import net.officefloor.frame.spi.team.Team;
 import net.officefloor.frame.spi.team.TeamIdentifier;
 
 /**
@@ -177,8 +177,9 @@ public class OfficeFloorImpl implements OfficeFloor {
 		}
 
 		// Start the teams working within the offices
-		for (Team team : this.officeFloorMetaData.getTeams()) {
-			team.startWorking();
+		for (TeamManagement teamManagement : this.officeFloorMetaData
+				.getTeams()) {
+			teamManagement.getTeam().startWorking();
 		}
 
 		// Invoke the startup tasks for each office
@@ -269,8 +270,9 @@ public class OfficeFloorImpl implements OfficeFloor {
 			this.timer.cancel();
 
 			// Stop the teams working as closing
-			for (Team team : this.officeFloorMetaData.getTeams()) {
-				team.stopWorking();
+			for (TeamManagement teamManagement : this.officeFloorMetaData
+					.getTeams()) {
+				teamManagement.getTeam().stopWorking();
 			}
 
 			// Stop the office managers

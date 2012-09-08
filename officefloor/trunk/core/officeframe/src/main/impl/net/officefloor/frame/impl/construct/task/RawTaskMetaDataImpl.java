@@ -65,11 +65,11 @@ import net.officefloor.frame.internal.structure.FlowMetaData;
 import net.officefloor.frame.internal.structure.ManagedObjectIndex;
 import net.officefloor.frame.internal.structure.TaskDutyAssociation;
 import net.officefloor.frame.internal.structure.TaskMetaData;
+import net.officefloor.frame.internal.structure.TeamManagement;
 import net.officefloor.frame.internal.structure.WorkMetaData;
 import net.officefloor.frame.spi.administration.DutyKey;
 import net.officefloor.frame.spi.governance.Governance;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
-import net.officefloor.frame.spi.team.Team;
 
 /**
  * Raw meta-data for a {@link Task}.
@@ -171,7 +171,7 @@ public class RawTaskMetaDataImpl<W extends Work, D extends Enum<D>, F extends En
 		}
 		RawOfficeMetaData rawOfficeMetaData = rawWorkMetaData
 				.getRawOfficeMetaData();
-		Team team = rawOfficeMetaData.getTeams().get(officeTeamName);
+		TeamManagement team = rawOfficeMetaData.getTeams().get(officeTeamName);
 		if (team == null) {
 			issues.addIssue(AssetType.TASK, taskName, "Unknown team '"
 					+ officeTeamName + "' responsible for task");

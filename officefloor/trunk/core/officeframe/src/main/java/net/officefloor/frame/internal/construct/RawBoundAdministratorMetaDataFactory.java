@@ -26,9 +26,9 @@ import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.internal.configuration.AdministratorSourceConfiguration;
 import net.officefloor.frame.internal.structure.AdministratorScope;
 import net.officefloor.frame.internal.structure.Asset;
+import net.officefloor.frame.internal.structure.TeamManagement;
 import net.officefloor.frame.spi.administration.Administrator;
 import net.officefloor.frame.spi.source.SourceContext;
-import net.officefloor.frame.spi.team.Team;
 
 /**
  * Factory to create {@link RawBoundAdministratorMetaData}.
@@ -56,8 +56,8 @@ public interface RawBoundAdministratorMetaDataFactory {
 	 *            Name of {@link Asset} constructing {@link Administrator}
 	 *            instances.
 	 * @param officeTeams
-	 *            {@link Team} instances by their {@link Office} registered
-	 *            names.
+	 *            {@link TeamManagement} instances by their {@link Office}
+	 *            registered names.
 	 * @param scopeMo
 	 *            {@link RawBoundManagedObjectMetaData} by their scope names.
 	 * @return Constructed {@link RawBoundAdministratorMetaData} instances.
@@ -66,7 +66,7 @@ public interface RawBoundAdministratorMetaDataFactory {
 			AdministratorSourceConfiguration<?, ?>[] configuration,
 			SourceContext sourceContext, OfficeFloorIssues issues,
 			AdministratorScope administratorScope, AssetType assetType,
-			String assetName, Map<String, Team> officeTeams,
+			String assetName, Map<String, TeamManagement> officeTeams,
 			Map<String, RawBoundManagedObjectMetaData> scopeMo);
 
 }

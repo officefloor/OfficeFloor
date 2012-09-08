@@ -42,6 +42,7 @@ import net.officefloor.frame.internal.structure.FlowMetaData;
 import net.officefloor.frame.internal.structure.GovernanceMetaData;
 import net.officefloor.frame.internal.structure.ProcessState;
 import net.officefloor.frame.internal.structure.TaskMetaData;
+import net.officefloor.frame.internal.structure.TeamManagement;
 import net.officefloor.frame.spi.governance.Governance;
 import net.officefloor.frame.spi.source.SourceContext;
 import net.officefloor.frame.spi.team.Team;
@@ -123,8 +124,9 @@ public class RawGovernanceMetaDataImpl<I, F extends Enum<F>> implements
 	@Override
 	public <i, f extends Enum<f>> RawGovernanceMetaData<i, f> createRawGovernanceMetaData(
 			GovernanceConfiguration<i, f> configuration, int governanceIndex,
-			SourceContext sourceContext, Map<String, Team> officeTeams,
-			String officeName, OfficeFloorIssues issues) {
+			SourceContext sourceContext,
+			Map<String, TeamManagement> officeTeams, String officeName,
+			OfficeFloorIssues issues) {
 
 		// Obtain the governance name
 		String governanceName = configuration.getGovernanceName();
@@ -164,7 +166,7 @@ public class RawGovernanceMetaDataImpl<I, F extends Enum<F>> implements
 		}
 
 		// Obtain the team
-		Team team = officeTeams.get(teamName);
+		TeamManagement team = officeTeams.get(teamName);
 		if (team == null) {
 			issues.addIssue(AssetType.GOVERNANCE, governanceName,
 					"Can not find " + Team.class.getSimpleName() + " by name '"

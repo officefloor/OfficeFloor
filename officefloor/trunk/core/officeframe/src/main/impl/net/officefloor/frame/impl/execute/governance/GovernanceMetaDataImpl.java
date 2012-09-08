@@ -35,6 +35,7 @@ import net.officefloor.frame.internal.structure.JobSequence;
 import net.officefloor.frame.internal.structure.ManagedObjectContainer;
 import net.officefloor.frame.internal.structure.ProcessState;
 import net.officefloor.frame.internal.structure.TaskMetaData;
+import net.officefloor.frame.internal.structure.TeamManagement;
 import net.officefloor.frame.internal.structure.ThreadState;
 import net.officefloor.frame.internal.structure.WorkContainer;
 import net.officefloor.frame.internal.structure.WorkMetaData;
@@ -65,9 +66,10 @@ public class GovernanceMetaDataImpl<I, F extends Enum<F>> implements
 	private final GovernanceFactory<? super I, F> governanceFactory;
 
 	/**
-	 * {@link Team} responsible for the {@link GovernanceActivity} instances.
+	 * {@link TeamManagement} of {@link Team} responsible for the
+	 * {@link GovernanceActivity} instances.
 	 */
-	private final Team team;
+	private final TeamManagement responsibleTeam;
 
 	/**
 	 * {@link FlowMetaData} instances.
@@ -86,15 +88,16 @@ public class GovernanceMetaDataImpl<I, F extends Enum<F>> implements
 	 *            Name of the {@link Governance}.
 	 * @param governanceFactory
 	 *            {@link GovernanceFactory}.
-	 * @param team
-	 *            {@link Team} responsible for the {@link GovernanceActivity}
-	 *            instances.
+	 * @param responsibleTeam
+	 *            {@link TeamManagement} of {@link Team} responsible for the
+	 *            {@link GovernanceActivity} instances.
 	 */
 	public GovernanceMetaDataImpl(String governanceName,
-			GovernanceFactory<? super I, F> governanceFactory, Team team) {
+			GovernanceFactory<? super I, F> governanceFactory,
+			TeamManagement responsibleTeam) {
 		this.governanceName = governanceName;
 		this.governanceFactory = governanceFactory;
-		this.team = team;
+		this.responsibleTeam = responsibleTeam;
 	}
 
 	/**
@@ -121,8 +124,8 @@ public class GovernanceMetaDataImpl<I, F extends Enum<F>> implements
 	}
 
 	@Override
-	public Team getTeam() {
-		return this.team;
+	public TeamManagement getResponsibleTeam() {
+		return this.responsibleTeam;
 	}
 
 	@Override
