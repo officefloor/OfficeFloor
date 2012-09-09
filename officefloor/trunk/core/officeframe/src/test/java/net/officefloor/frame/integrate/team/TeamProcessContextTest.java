@@ -71,7 +71,7 @@ public class TeamProcessContextTest extends AbstractOfficeConstructTestCase {
 		workBuilder.buildTask("task", "TEAM");
 
 		// Register the team
-		this.constructTeam("TEAM", MockTeamSource.class);
+		this.constructTeam("TEAM", MockListenerTeamSource.class);
 
 		// Invoke the work
 		this.invokeWork(WORK_NAME, null);
@@ -101,8 +101,8 @@ public class TeamProcessContextTest extends AbstractOfficeConstructTestCase {
 	/**
 	 * Mock {@link TeamSource} for testing the {@link ProcessContextListener}.
 	 */
-	public static class MockTeamSource extends AbstractTeamSource implements
-			ProcessContextListener, Team, JobContext, TeamIdentifier {
+	public static class MockListenerTeamSource extends AbstractTeamSource
+			implements ProcessContextListener, Team, JobContext, TeamIdentifier {
 
 		/**
 		 * {@link ProcessContextListener}.

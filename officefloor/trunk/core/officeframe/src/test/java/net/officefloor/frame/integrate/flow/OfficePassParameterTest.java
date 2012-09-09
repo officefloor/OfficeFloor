@@ -25,10 +25,10 @@ import net.officefloor.frame.api.execute.TaskContext;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.api.manage.WorkManager;
-import net.officefloor.frame.impl.spi.team.MockTeamIdentifier;
 import net.officefloor.frame.impl.spi.team.OnePersonTeam;
 import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
 import net.officefloor.frame.test.AbstractOfficeConstructTestCase;
+import net.officefloor.frame.test.MockTeamSource;
 
 /**
  * Validates passing a parameter between two {@link Work} instances of a office.
@@ -47,8 +47,9 @@ public class OfficePassParameterTest extends AbstractOfficeConstructTestCase {
 		final Object parameter = new Object();
 
 		// Add the team
-		this.constructTeam("TEAM", new OnePersonTeam("TEAM",
-				new MockTeamIdentifier(), 10));
+		this.constructTeam("TEAM",
+				new OnePersonTeam("TEAM",
+						MockTeamSource.createTeamIdentifier(), 10));
 
 		// Add the first work
 		WorkOne workOne = new WorkOne(parameter);

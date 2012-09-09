@@ -36,7 +36,6 @@ import net.officefloor.frame.impl.execute.process.ProcessStateImpl;
 import net.officefloor.frame.impl.execute.profile.ProcessProfilerImpl;
 import net.officefloor.frame.impl.execute.thread.ThreadMetaDataImpl;
 import net.officefloor.frame.impl.execute.work.WorkMetaDataImpl;
-import net.officefloor.frame.impl.spi.team.MockTeamIdentifier;
 import net.officefloor.frame.internal.structure.AdministratorMetaData;
 import net.officefloor.frame.internal.structure.AssetManager;
 import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
@@ -62,6 +61,7 @@ import net.officefloor.frame.spi.team.JobContext;
 import net.officefloor.frame.spi.team.Team;
 import net.officefloor.frame.spi.team.TeamIdentifier;
 import net.officefloor.frame.spi.team.source.ProcessContextListener;
+import net.officefloor.frame.test.MockTeamSource;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 
 /**
@@ -75,7 +75,8 @@ public abstract class AbstractTaskNodeTestCase<W extends Work> extends
 	/**
 	 * {@link TeamIdentifier} for this {@link JobContext}.
 	 */
-	private final TeamIdentifier teamIdentifier = new MockTeamIdentifier();
+	private final TeamIdentifier teamIdentifier = MockTeamSource
+			.createTeamIdentifier();
 
 	/**
 	 * Initial {@link ExecutionNode}.

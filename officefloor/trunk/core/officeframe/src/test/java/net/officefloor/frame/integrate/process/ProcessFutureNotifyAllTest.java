@@ -23,10 +23,10 @@ import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.api.manage.ProcessFuture;
 import net.officefloor.frame.api.manage.WorkManager;
-import net.officefloor.frame.impl.spi.team.MockTeamIdentifier;
 import net.officefloor.frame.impl.spi.team.OnePersonTeam;
 import net.officefloor.frame.internal.structure.ProcessState;
 import net.officefloor.frame.test.AbstractOfficeConstructTestCase;
+import net.officefloor.frame.test.MockTeamSource;
 import net.officefloor.frame.test.ReflectiveWorkBuilder;
 
 /**
@@ -56,8 +56,9 @@ public class ProcessFutureNotifyAllTest extends AbstractOfficeConstructTestCase 
 		workBuilder.buildTask("task", "TEAM");
 
 		// Register the team (threaded to allow notify of completed process)
-		this.constructTeam("TEAM", new OnePersonTeam("TEST",
-				new MockTeamIdentifier(), 100));
+		this.constructTeam("TEAM",
+				new OnePersonTeam("TEST",
+						MockTeamSource.createTeamIdentifier(), 100));
 
 		// Construct and open the OfficeFloor
 		OfficeFloor officeFloor = this.constructOfficeFloor();

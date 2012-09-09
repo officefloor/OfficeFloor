@@ -20,6 +20,7 @@ package net.officefloor.frame.impl.spi.team;
 
 import net.officefloor.frame.spi.team.Job;
 import net.officefloor.frame.spi.team.Team;
+import net.officefloor.frame.test.MockTeamSource;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 
 /**
@@ -43,7 +44,7 @@ public class PassiveTeamTest extends OfficeFrameTestCase {
 
 		// Run team and execute a task
 		team.startWorking();
-		team.assignJob(task, new MockTeamIdentifier());
+		team.assignJob(task, MockTeamSource.createTeamIdentifier());
 		team.stopWorking();
 
 		// Ensure the task executed

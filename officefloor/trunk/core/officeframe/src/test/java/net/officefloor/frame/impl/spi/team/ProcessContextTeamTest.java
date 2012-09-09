@@ -26,6 +26,7 @@ import net.officefloor.frame.internal.structure.ProcessState;
 import net.officefloor.frame.spi.team.Job;
 import net.officefloor.frame.spi.team.JobContext;
 import net.officefloor.frame.spi.team.Team;
+import net.officefloor.frame.test.MockTeamSource;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 
 /**
@@ -61,7 +62,8 @@ public class ProcessContextTeamTest extends OfficeFrameTestCase {
 	public void testPassiveExecuteJob() {
 
 		// Create the team
-		Team team = new ProcessContextTeam(new MockTeamIdentifier());
+		Team team = new ProcessContextTeam(
+				MockTeamSource.createTeamIdentifier());
 
 		// Create the mock task (completes immediately)
 		MockTaskContainer task = new MockTaskContainer();
@@ -69,7 +71,7 @@ public class ProcessContextTeamTest extends OfficeFrameTestCase {
 
 		// Run team and execute a task
 		team.startWorking();
-		team.assignJob(task, new MockTeamIdentifier());
+		team.assignJob(task, MockTeamSource.createTeamIdentifier());
 		team.stopWorking();
 
 		// Ensure the task executed
@@ -85,7 +87,7 @@ public class ProcessContextTeamTest extends OfficeFrameTestCase {
 
 		// Create the team
 		final ProcessContextTeam team = new ProcessContextTeam(
-				new MockTeamIdentifier());
+				MockTeamSource.createTeamIdentifier());
 
 		// Mocks
 		final WorkManager workManager = this
@@ -208,7 +210,7 @@ public class ProcessContextTeamTest extends OfficeFrameTestCase {
 			public void setNextJob(Job job) {
 				this.nextJob = job;
 			}
-		}, new MockTeamIdentifier());
+		}, MockTeamSource.createTeamIdentifier());
 
 		// Ensure Job to be executed
 		synchronized (isJobExecuted) {

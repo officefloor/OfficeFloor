@@ -25,13 +25,12 @@ import java.net.Socket;
 import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.build.ManagedObjectBuilder;
 import net.officefloor.frame.api.build.ManagingOfficeBuilder;
-import net.officefloor.frame.impl.spi.team.OnePersonTeam;
-import net.officefloor.frame.impl.spi.team.WorkerPerTaskTeam;
+import net.officefloor.frame.test.MockTeamSource;
 import net.officefloor.plugin.socket.server.tcp.protocol.TcpCommunicationProtocol;
 
 /**
  * Tests the {@link TcpServerSocketManagedObjectSource}.
- *
+ * 
  * @author Daniel Sagenschneider
  */
 public class TcpServerTest extends AbstractTcpServerTestCase {
@@ -52,20 +51,20 @@ public class TcpServerTest extends AbstractTcpServerTestCase {
 				.constructManagedObject(managedObjectName,
 						TcpServerSocketManagedObjectSource.class);
 		serverSocketBuilder.addProperty(
-				TcpServerSocketManagedObjectSource.PROPERTY_PORT, String
-						.valueOf(port));
+				TcpServerSocketManagedObjectSource.PROPERTY_PORT,
+				String.valueOf(port));
 		serverSocketBuilder.addProperty(
-				TcpCommunicationProtocol.PROPERTY_MAXIMUM_IDLE_TIME, String
-						.valueOf(1000));
+				TcpCommunicationProtocol.PROPERTY_MAXIMUM_IDLE_TIME,
+				String.valueOf(1000));
 		serverSocketBuilder.setTimeout(3000);
 
 		// Register the necessary teams for socket listening
 		this.constructManagedObjectSourceTeam(managedObjectName, "accepter",
-				new OnePersonTeam("accepter", 100));
+				MockTeamSource.createOnePersonTeam("accepter"));
 		this.constructManagedObjectSourceTeam(managedObjectName, "listener",
-				new WorkerPerTaskTeam("Listener"));
+				MockTeamSource.createWorkerPerTaskTeam("listener"));
 		this.constructManagedObjectSourceTeam(managedObjectName, "cleanup",
-				new OnePersonTeam("cleanup", 100));
+				MockTeamSource.createOnePersonTeam("cleanup"));
 
 		// Have server socket managed by office
 		ManagingOfficeBuilder<Indexed> managingOfficeBuilder = serverSocketBuilder

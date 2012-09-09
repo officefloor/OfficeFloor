@@ -22,6 +22,7 @@ import junit.framework.Assert;
 import net.officefloor.frame.spi.team.Job;
 import net.officefloor.frame.spi.team.JobContext;
 import net.officefloor.frame.spi.team.Team;
+import net.officefloor.frame.test.MockTeamSource;
 
 /**
  * Mock implementation of the {@link Job} for testing.
@@ -79,7 +80,7 @@ class MockTaskContainer implements Job {
 			this.team = team;
 
 			// Assign job to team
-			this.team.assignJob(this, new MockTeamIdentifier());
+			this.team.assignJob(this, MockTeamSource.createTeamIdentifier());
 
 			// Wait on processing to start
 			try {

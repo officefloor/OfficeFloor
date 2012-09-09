@@ -18,13 +18,13 @@
 
 package net.officefloor.frame.integrate.flow;
 
-import net.officefloor.frame.impl.spi.team.MockTeamIdentifier;
 import net.officefloor.frame.impl.spi.team.OnePersonTeam;
 import net.officefloor.frame.impl.spi.team.PassiveTeam;
 import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
 import net.officefloor.frame.internal.structure.JobNode;
 import net.officefloor.frame.spi.team.Team;
 import net.officefloor.frame.test.AbstractOfficeConstructTestCase;
+import net.officefloor.frame.test.MockTeamSource;
 import net.officefloor.frame.test.ReflectiveFlow;
 import net.officefloor.frame.test.ReflectiveWorkBuilder;
 import net.officefloor.frame.test.ReflectiveWorkBuilder.ReflectiveTaskBuilder;
@@ -54,7 +54,8 @@ public class ParallelTest extends AbstractOfficeConstructTestCase {
 	 * Ensures invokes parallel task with active team.
 	 */
 	public void testParallelWithActiveTeam() throws Exception {
-		this.doTest(new OnePersonTeam("PARALLEL", new MockTeamIdentifier(), 100));
+		this.doTest(new OnePersonTeam("PARALLEL", MockTeamSource
+				.createTeamIdentifier(), 100));
 	}
 
 	/**

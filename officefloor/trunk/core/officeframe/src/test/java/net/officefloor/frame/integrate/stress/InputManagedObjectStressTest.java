@@ -30,7 +30,6 @@ import net.officefloor.frame.api.execute.TaskContext;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.impl.spi.team.ExecutorFixedTeamSource;
 import net.officefloor.frame.impl.spi.team.LeaderFollowerTeam;
-import net.officefloor.frame.impl.spi.team.MockTeamIdentifier;
 import net.officefloor.frame.impl.spi.team.OnePersonTeam;
 import net.officefloor.frame.spi.TestSource;
 import net.officefloor.frame.spi.managedobject.CoordinatingManagedObject;
@@ -42,6 +41,7 @@ import net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceContext
 import net.officefloor.frame.spi.managedobject.source.impl.AbstractManagedObjectSource;
 import net.officefloor.frame.spi.team.Team;
 import net.officefloor.frame.test.AbstractOfficeConstructTestCase;
+import net.officefloor.frame.test.MockTeamSource;
 import net.officefloor.frame.test.ReflectiveWorkBuilder;
 import net.officefloor.frame.test.ReflectiveWorkBuilder.ReflectiveTaskBuilder;
 
@@ -69,7 +69,8 @@ public class InputManagedObjectStressTest extends
 	 */
 	@StressTest
 	public void test_StressInputManagedObject_OnePersonTeam() throws Exception {
-		this.doTest(new OnePersonTeam("TEST", new MockTeamIdentifier(), 100));
+		this.doTest(new OnePersonTeam("TEST", MockTeamSource
+				.createTeamIdentifier(), 100));
 	}
 
 	/**
@@ -79,8 +80,8 @@ public class InputManagedObjectStressTest extends
 	@StressTest
 	public void test_StressInputManagedObject_LeaderFollowerTeam()
 			throws Exception {
-		this.doTest(new LeaderFollowerTeam("TEST", new MockTeamIdentifier(), 2,
-				100));
+		this.doTest(new LeaderFollowerTeam("TEST", MockTeamSource
+				.createTeamIdentifier(), 2, 100));
 	}
 
 	/**
@@ -91,7 +92,7 @@ public class InputManagedObjectStressTest extends
 	public void test_StressInputManagedObject_ExecutorFixedTeam()
 			throws Exception {
 		this.doTest(ExecutorFixedTeamSource.createTeam("TEST",
-				new MockTeamIdentifier(), 2));
+				MockTeamSource.createTeamIdentifier(), 2));
 	}
 
 	/**

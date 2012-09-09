@@ -140,8 +140,8 @@ public class LoadTeamTypeTest extends OfficeFrameTestCase {
 				.newOfficeFloorCompiler(null);
 		compiler.setCompilerIssues(this.issues);
 		TeamLoader teamLoader = compiler.getTeamLoader();
-		MockTeamSource.loader = loader;
-		TeamType teamType = teamLoader.loadTeamType(MockTeamSource.class,
+		MockLoadTeamSource.loader = loader;
+		TeamType teamType = teamLoader.loadTeamType(MockLoadTeamSource.class,
 				propertyList);
 
 		// Verify the mock objects
@@ -178,7 +178,7 @@ public class LoadTeamTypeTest extends OfficeFrameTestCase {
 	 * Mock {@link TeamSource} for testing.
 	 */
 	@TestSource
-	public static class MockTeamSource implements TeamSource, Team {
+	public static class MockLoadTeamSource implements TeamSource, Team {
 
 		/**
 		 * {@link Loader} to load the {@link TeamType}.
@@ -201,7 +201,7 @@ public class LoadTeamTypeTest extends OfficeFrameTestCase {
 		/**
 		 * Default constructor.
 		 */
-		public MockTeamSource() {
+		public MockLoadTeamSource() {
 			if (instantiateFailure != null) {
 				throw instantiateFailure;
 			}

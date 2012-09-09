@@ -20,9 +20,9 @@ package net.officefloor.frame.integrate.stress;
 
 import net.officefloor.frame.impl.spi.team.ExecutorFixedTeamSource;
 import net.officefloor.frame.impl.spi.team.LeaderFollowerTeam;
-import net.officefloor.frame.impl.spi.team.MockTeamIdentifier;
 import net.officefloor.frame.impl.spi.team.OnePersonTeam;
 import net.officefloor.frame.spi.governance.Governance;
+import net.officefloor.frame.test.MockTeamSource;
 import net.officefloor.frame.test.ReflectiveWorkBuilder.ReflectiveTaskBuilder;
 
 /**
@@ -39,7 +39,8 @@ public class ManagedGovernanceStressTest extends
 	 */
 	@StressTest
 	public void test_StressGovernance_OnePersonTeam() throws Throwable {
-		this.doTest(new OnePersonTeam("TEST", new MockTeamIdentifier(), 100));
+		this.doTest(new OnePersonTeam("TEST", MockTeamSource
+				.createTeamIdentifier(), 100));
 	}
 
 	/**
@@ -48,8 +49,8 @@ public class ManagedGovernanceStressTest extends
 	 */
 	@StressTest
 	public void test_StressGovernance_LeaderFollowerTeam() throws Throwable {
-		this.doTest(new LeaderFollowerTeam("TEST", new MockTeamIdentifier(), 3,
-				100));
+		this.doTest(new LeaderFollowerTeam("TEST", MockTeamSource
+				.createTeamIdentifier(), 3, 100));
 	}
 
 	/**
@@ -59,7 +60,7 @@ public class ManagedGovernanceStressTest extends
 	@StressTest
 	public void test_StressGovernance_ExecutorFixedTeam() throws Throwable {
 		this.doTest(ExecutorFixedTeamSource.createTeam("TEST",
-				new MockTeamIdentifier(), 3));
+				MockTeamSource.createTeamIdentifier(), 3));
 	}
 
 	@Override

@@ -28,11 +28,11 @@ import java.text.DecimalFormat;
 import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.api.manage.OfficeFloor;
-import net.officefloor.frame.impl.spi.team.OnePersonTeam;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.spi.team.Team;
 import net.officefloor.frame.test.AbstractOfficeConstructTestCase;
+import net.officefloor.frame.test.MockTeamSource;
 import net.officefloor.frame.test.ReflectiveWorkBuilder;
 import net.officefloor.frame.test.ReflectiveWorkBuilder.ReflectiveTaskBuilder;
 import net.officefloor.plugin.socket.server.http.server.MockHttpServer;
@@ -133,7 +133,8 @@ public abstract class AbstractTcpServerTestCase extends
 				"WORKER");
 		taskBuilder.buildObject(MO_NAME);
 		taskBuilder.buildTaskContext();
-		this.constructTeam("WORKER", new OnePersonTeam("WORKER", 100));
+		this.constructTeam("WORKER",
+				MockTeamSource.createOnePersonTeam("WORKER"));
 
 		// Register the managed object source to handle TCP connection
 		this.registerManagedObjectSource(PORT, MO_NAME, WORK_NAME, TASK_NAME);

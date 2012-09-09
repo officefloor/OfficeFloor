@@ -25,13 +25,13 @@ import junit.framework.TestCase;
 import junit.framework.TestSuite;
 import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.impl.execute.managedobject.AbstractManagedObjectContainerImplTest;
-import net.officefloor.frame.impl.spi.team.MockTeamIdentifier;
 import net.officefloor.frame.impl.spi.team.OnePersonTeam;
 import net.officefloor.frame.impl.spi.team.PassiveTeam;
 import net.officefloor.frame.integrate.stress.AdministratorStressTest.Administration;
 import net.officefloor.frame.spi.governance.Governance;
 import net.officefloor.frame.spi.team.Team;
 import net.officefloor.frame.test.AbstractOfficeConstructTestCase;
+import net.officefloor.frame.test.MockTeamSource;
 
 /**
  * Abstract {@link Governance} testing to test various multi-threaded
@@ -164,12 +164,14 @@ public abstract class AbstractGovernanceTestCase extends
 		// Create the teams
 		Team passiveTeam = new PassiveTeam();
 		Team taskTeam = (this.isMultiThreadedTask ? new OnePersonTeam(
-				"TASK_TEAM", new MockTeamIdentifier(), 100) : passiveTeam);
-		Team governanceTeam = (this.isMultiThreadedTask ? new OnePersonTeam(
-				"GOVERNANCE_TEAM", new MockTeamIdentifier(), 100) : passiveTeam);
-		Team administrationTeam = (this.isMultiThreadedTask ? new OnePersonTeam(
-				"ADMINISTRATOR_TEAM", new MockTeamIdentifier(), 100)
+				"TASK_TEAM", MockTeamSource.createTeamIdentifier(), 100)
 				: passiveTeam);
+		Team governanceTeam = (this.isMultiThreadedTask ? new OnePersonTeam(
+				"GOVERNANCE_TEAM", MockTeamSource.createTeamIdentifier(), 100)
+				: passiveTeam);
+		Team administrationTeam = (this.isMultiThreadedTask ? new OnePersonTeam(
+				"ADMINISTRATOR_TEAM", MockTeamSource.createTeamIdentifier(),
+				100) : passiveTeam);
 
 		// Construct the teams
 		this.constructTeam(TEAM_TASK, taskTeam);

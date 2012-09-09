@@ -29,8 +29,7 @@ import javax.net.ssl.SSLSocketFactory;
 import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.build.ManagedObjectBuilder;
 import net.officefloor.frame.api.build.ManagingOfficeBuilder;
-import net.officefloor.frame.impl.spi.team.OnePersonTeam;
-import net.officefloor.frame.impl.spi.team.WorkerPerTaskTeam;
+import net.officefloor.frame.test.MockTeamSource;
 import net.officefloor.plugin.socket.server.ssl.SslEngineConfigurator;
 import net.officefloor.plugin.socket.server.ssl.protocol.SslCommunicationProtocol;
 import net.officefloor.plugin.socket.server.tcp.protocol.TcpCommunicationProtocol;
@@ -75,13 +74,13 @@ public class SecureTcpServerTest extends AbstractTcpServerTestCase {
 
 		// Register the necessary teams for socket listening
 		this.constructManagedObjectSourceTeam(managedObjectName, "accepter",
-				new OnePersonTeam("accepter", 100));
+				MockTeamSource.createOnePersonTeam("accepter"));
 		this.constructManagedObjectSourceTeam(managedObjectName, "listener",
-				new WorkerPerTaskTeam("Listener"));
+				MockTeamSource.createWorkerPerTaskTeam("listener"));
 		this.constructManagedObjectSourceTeam(managedObjectName, "cleanup",
-				new OnePersonTeam("cleanup", 100));
+				MockTeamSource.createOnePersonTeam("cleanup"));
 		this.constructManagedObjectSourceTeam(managedObjectName, "SSL_TASKS",
-				new OnePersonTeam("SSL_TASKS", 100));
+				MockTeamSource.createOnePersonTeam("SSL_TASKS"));
 
 		// Have server socket managed by office
 		ManagingOfficeBuilder<Indexed> managingOfficeBuilder = serverSocketBuilder

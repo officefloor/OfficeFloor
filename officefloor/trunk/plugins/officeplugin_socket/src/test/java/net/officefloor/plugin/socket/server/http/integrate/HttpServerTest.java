@@ -18,7 +18,7 @@
 
 package net.officefloor.plugin.socket.server.http.integrate;
 
-import net.officefloor.frame.impl.spi.team.OnePersonTeam;
+import net.officefloor.frame.test.MockTeamSource;
 import net.officefloor.frame.test.ReflectiveWorkBuilder;
 import net.officefloor.frame.test.ReflectiveWorkBuilder.ReflectiveTaskBuilder;
 import net.officefloor.plugin.socket.server.http.protocol.HttpStatus;
@@ -48,7 +48,8 @@ public class HttpServerTest extends MockHttpServer {
 			MockHttpServer server) throws Exception {
 
 		// Register team to do the work
-		server.constructTeam("WORKER", new OnePersonTeam("WORKER", 100));
+		server.constructTeam("WORKER",
+				MockTeamSource.createOnePersonTeam("WORKER"));
 
 		// Register the work to process messages
 		HttpWork work = new HttpWork(this.getLocalAddress(),
