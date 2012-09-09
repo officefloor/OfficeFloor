@@ -40,13 +40,12 @@ import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.build.ManagedObjectBuilder;
 import net.officefloor.frame.api.build.ManagingOfficeBuilder;
 import net.officefloor.frame.api.manage.OfficeFloor;
-import net.officefloor.frame.impl.spi.team.OnePersonTeam;
 import net.officefloor.frame.impl.spi.team.PassiveTeam;
-import net.officefloor.frame.impl.spi.team.WorkerPerTaskTeam;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.spi.team.Team;
 import net.officefloor.frame.test.AbstractOfficeConstructTestCase;
+import net.officefloor.frame.test.MockTeamSource;
 import net.officefloor.plugin.socket.server.http.source.HttpServerSocketManagedObjectSource;
 import net.officefloor.plugin.socket.server.http.source.HttpsServerSocketManagedObjectSource;
 import net.officefloor.plugin.socket.server.impl.AbstractServerSocketManagedObjectSource;
@@ -191,7 +190,7 @@ public abstract class MockHttpServer extends AbstractOfficeConstructTestCase
 			serverSocketBuilder = this.constructManagedObject(MO_NAME,
 					HttpsServerSocketManagedObjectSource.class);
 			this.constructManagedObjectSourceTeam(MO_NAME, "SSL_TASKS",
-					new OnePersonTeam("SSL_TASKS", 100));
+					MockTeamSource.createOnePersonTeam("SSL_TASKS"));
 			serverSocketBuilder.addProperty(
 					SslCommunicationProtocol.PROPERTY_SSL_ENGINE_CONFIGURATOR,
 					TestSslEngineConfigurator.class.getName());
@@ -215,9 +214,9 @@ public abstract class MockHttpServer extends AbstractOfficeConstructTestCase
 
 		// Register the necessary teams for socket listening
 		this.constructManagedObjectSourceTeam(MO_NAME, "accepter",
-				new WorkerPerTaskTeam("accepter"));
+				MockTeamSource.createWorkerPerTaskTeam("accepter"));
 		this.constructManagedObjectSourceTeam(MO_NAME, "listener",
-				new WorkerPerTaskTeam("listener"));
+				MockTeamSource.createWorkerPerTaskTeam("listener"));
 		this.constructManagedObjectSourceTeam(MO_NAME, "cleanup",
 				new PassiveTeam());
 

@@ -23,7 +23,6 @@ import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.api.execute.TaskContext;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.api.manage.OfficeFloor;
-import net.officefloor.frame.impl.spi.team.MockTeamIdentifier;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.frame.spi.TestSource;
 import net.officefloor.frame.spi.managedobject.AsynchronousListener;
@@ -37,6 +36,7 @@ import net.officefloor.frame.spi.team.JobContext;
 import net.officefloor.frame.spi.team.Team;
 import net.officefloor.frame.spi.team.TeamIdentifier;
 import net.officefloor.frame.test.AbstractOfficeConstructTestCase;
+import net.officefloor.frame.test.MockTeamSource;
 import net.officefloor.frame.test.ReflectiveWorkBuilder;
 import net.officefloor.frame.test.ReflectiveWorkBuilder.ReflectiveTaskBuilder;
 
@@ -175,7 +175,8 @@ public class AsyncManagedObjectTest extends AbstractOfficeConstructTestCase {
 			// Execute the job
 			boolean isComplete = this.job.doJob(new JobContext() {
 
-				private final TeamIdentifier teamIdentifier = new MockTeamIdentifier();
+				private final TeamIdentifier teamIdentifier = MockTeamSource
+						.createTeamIdentifier();
 
 				@Override
 				public long getTime() {

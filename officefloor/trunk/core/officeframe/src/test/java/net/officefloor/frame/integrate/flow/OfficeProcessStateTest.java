@@ -25,12 +25,12 @@ import net.officefloor.frame.api.execute.TaskContext;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.api.manage.WorkManager;
-import net.officefloor.frame.impl.spi.team.MockTeamIdentifier;
 import net.officefloor.frame.impl.spi.team.OnePersonTeam;
 import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
 import net.officefloor.frame.internal.structure.ProcessState;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.frame.test.AbstractOfficeConstructTestCase;
+import net.officefloor.frame.test.MockTeamSource;
 
 /**
  * Tests the {@link ProcessState} is appropriately passed between {@link Work}
@@ -53,7 +53,7 @@ public class OfficeProcessStateTest extends AbstractOfficeConstructTestCase {
 
 		// Add the team
 		this.constructTeam("TEAM", new OnePersonTeam("TEAM",
-				new MockTeamIdentifier(), 10));
+				MockTeamSource.createTeamIdentifier(), 10));
 
 		// Add the Managed Object
 		this.constructManagedObject(new ManagedObjectOne(), "MANAGED_OBJECT",

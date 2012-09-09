@@ -19,6 +19,7 @@
 package net.officefloor.frame.impl.spi.team;
 
 import net.officefloor.frame.impl.spi.team.WorkerPerTaskTeam;
+import net.officefloor.frame.test.MockTeamSource;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 
 /**
@@ -32,7 +33,7 @@ public class WorkerPerTaskTeamTest extends OfficeFrameTestCase {
 	 * {@link WorkerPerTaskTeam} to test.
 	 */
 	private WorkerPerTaskTeam team = new WorkerPerTaskTeam("test",
-			new MockTeamIdentifier());
+			MockTeamSource.createTeamIdentifier());
 
 	/**
 	 * Ensures runs the tasks.

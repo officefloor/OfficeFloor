@@ -23,8 +23,11 @@ import java.util.Map;
 
 import net.officefloor.frame.api.build.OfficeFloorBuilder;
 import net.officefloor.frame.api.build.TeamBuilder;
+import net.officefloor.frame.impl.spi.team.OnePersonTeam;
+import net.officefloor.frame.impl.spi.team.WorkerPerTaskTeam;
 import net.officefloor.frame.spi.TestSource;
 import net.officefloor.frame.spi.team.Team;
+import net.officefloor.frame.spi.team.TeamIdentifier;
 import net.officefloor.frame.spi.team.source.TeamSource;
 import net.officefloor.frame.spi.team.source.TeamSourceContext;
 import net.officefloor.frame.spi.team.source.TeamSourceSpecification;
@@ -36,6 +39,40 @@ import net.officefloor.frame.spi.team.source.TeamSourceSpecification;
  */
 @TestSource
 public class MockTeamSource implements TeamSource {
+
+	/**
+	 * Creates a {@link TeamIdentifier} for testing.
+	 * 
+	 * @return {@link TeamIdentifier} for testing.
+	 */
+	public static TeamIdentifier createTeamIdentifier() {
+		return new TeamIdentifier() {
+		};
+	}
+
+	/**
+	 * Convenience method to create a {@link OnePersonTeam}.
+	 * 
+	 * @param teamName
+	 *            Name of the {@link Team}.
+	 * @return {@link OnePersonTeam}.
+	 */
+	public static OnePersonTeam createOnePersonTeam(String teamName) {
+		return new OnePersonTeam(teamName,
+				MockTeamSource.createTeamIdentifier(), 100);
+	}
+
+	/**
+	 * Convenience method to create a {@link WorkerPerTaskTeam}.
+	 * 
+	 * @param teamName
+	 *            Name of the {@link Team}.
+	 * @return {@link WorkerPerTaskTeam}
+	 */
+	public static WorkerPerTaskTeam createWorkerPerTaskTeam(String teamName) {
+		return new WorkerPerTaskTeam(teamName,
+				MockTeamSource.createTeamIdentifier());
+	}
 
 	/**
 	 * Property name to source the {@link Team}.

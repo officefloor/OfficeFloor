@@ -24,8 +24,8 @@ import java.io.OutputStream;
 import net.officefloor.frame.api.build.DependencyMappingBuilder;
 import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.build.ManagedObjectBuilder;
-import net.officefloor.frame.impl.spi.team.OnePersonTeam;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
+import net.officefloor.frame.test.MockTeamSource;
 import net.officefloor.frame.test.ReflectiveWorkBuilder;
 import net.officefloor.frame.test.ReflectiveWorkBuilder.ReflectiveTaskBuilder;
 import net.officefloor.plugin.socket.server.http.HttpRequest;
@@ -33,7 +33,6 @@ import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
 import net.officefloor.plugin.socket.server.http.server.HttpServicerTask;
 import net.officefloor.plugin.socket.server.http.server.MockHttpServer;
 import net.officefloor.plugin.web.http.session.HttpSession;
-import net.officefloor.plugin.web.http.session.source.HttpSessionManagedObjectSource;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
@@ -71,7 +70,8 @@ public class HttpSessionManagedObjectSourceTest extends MockHttpServer {
 		sessionDependencies.mapDependency(0, managedObjectName);
 
 		// Register team for servicer
-		server.constructTeam("SERVICER", new OnePersonTeam("SERVICER", 100));
+		server.constructTeam("SERVICER",
+				MockTeamSource.createOnePersonTeam("SERVICER"));
 
 		// Return the servicer task
 		return new HttpServicerTask("Servicer", "service");

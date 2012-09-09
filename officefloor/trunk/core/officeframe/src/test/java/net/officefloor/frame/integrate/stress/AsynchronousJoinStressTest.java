@@ -23,12 +23,12 @@ import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.execute.TaskContext;
 import net.officefloor.frame.impl.spi.team.ExecutorFixedTeamSource;
 import net.officefloor.frame.impl.spi.team.LeaderFollowerTeam;
-import net.officefloor.frame.impl.spi.team.MockTeamIdentifier;
 import net.officefloor.frame.impl.spi.team.OnePersonTeam;
 import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
 import net.officefloor.frame.internal.structure.JobSequence;
 import net.officefloor.frame.spi.team.Team;
 import net.officefloor.frame.test.AbstractOfficeConstructTestCase;
+import net.officefloor.frame.test.MockTeamSource;
 import net.officefloor.frame.test.ReflectiveFlow;
 import net.officefloor.frame.test.ReflectiveWorkBuilder;
 import net.officefloor.frame.test.ReflectiveWorkBuilder.ReflectiveTaskBuilder;
@@ -47,7 +47,8 @@ public class AsynchronousJoinStressTest extends AbstractOfficeConstructTestCase 
 	 */
 	@StressTest
 	public void test_StressAsynchronousJoin_OnePersonTeam() throws Exception {
-		this.doTest(new OnePersonTeam("TEST", new MockTeamIdentifier(), 100));
+		this.doTest(new OnePersonTeam("TEST", MockTeamSource
+				.createTeamIdentifier(), 100));
 	}
 
 	/**
@@ -57,8 +58,8 @@ public class AsynchronousJoinStressTest extends AbstractOfficeConstructTestCase 
 	@StressTest
 	public void test_StressAsynchronousJoin_LeaderFollowerTeam()
 			throws Exception {
-		this.doTest(new LeaderFollowerTeam("TEST", new MockTeamIdentifier(), 5,
-				100));
+		this.doTest(new LeaderFollowerTeam("TEST", MockTeamSource
+				.createTeamIdentifier(), 5, 100));
 	}
 
 	/**
@@ -69,7 +70,7 @@ public class AsynchronousJoinStressTest extends AbstractOfficeConstructTestCase 
 	public void test_StressAsynchronousJoin_ExecutorFixedTeam()
 			throws Exception {
 		this.doTest(ExecutorFixedTeamSource.createTeam("TEST",
-				new MockTeamIdentifier(), 5));
+				MockTeamSource.createTeamIdentifier(), 5));
 	}
 
 	/**

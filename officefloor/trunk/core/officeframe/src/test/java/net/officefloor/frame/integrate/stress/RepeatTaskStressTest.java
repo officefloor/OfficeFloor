@@ -23,10 +23,10 @@ import net.officefloor.frame.api.execute.TaskContext;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.impl.spi.team.ExecutorFixedTeamSource;
 import net.officefloor.frame.impl.spi.team.LeaderFollowerTeam;
-import net.officefloor.frame.impl.spi.team.MockTeamIdentifier;
 import net.officefloor.frame.impl.spi.team.OnePersonTeam;
 import net.officefloor.frame.spi.team.Team;
 import net.officefloor.frame.test.AbstractOfficeConstructTestCase;
+import net.officefloor.frame.test.MockTeamSource;
 
 /**
  * Tests running the same {@link Task} many times.
@@ -41,7 +41,7 @@ public class RepeatTaskStressTest extends AbstractOfficeConstructTestCase {
 	 */
 	@StressTest
 	public void test_StressRepeat_OnePersonTeam() throws Exception {
-		this.doTest(new OnePersonTeam("TEST", new MockTeamIdentifier(), 100));
+		this.doTest(new OnePersonTeam("TEST", MockTeamSource.createTeamIdentifier(), 100));
 	}
 
 	/**
@@ -50,7 +50,7 @@ public class RepeatTaskStressTest extends AbstractOfficeConstructTestCase {
 	 */
 	@StressTest
 	public void test_StressRepeat_LeaderFollowerTeam() throws Exception {
-		this.doTest(new LeaderFollowerTeam("TEST", new MockTeamIdentifier(), 5,
+		this.doTest(new LeaderFollowerTeam("TEST", MockTeamSource.createTeamIdentifier(), 5,
 				100));
 	}
 
@@ -61,7 +61,7 @@ public class RepeatTaskStressTest extends AbstractOfficeConstructTestCase {
 	@StressTest
 	public void test_StressRepeat_ExecutorFixedTeam() throws Exception {
 		this.doTest(ExecutorFixedTeamSource.createTeam("TEST",
-				new MockTeamIdentifier(), 5));
+				MockTeamSource.createTeamIdentifier(), 5));
 	}
 
 	/**

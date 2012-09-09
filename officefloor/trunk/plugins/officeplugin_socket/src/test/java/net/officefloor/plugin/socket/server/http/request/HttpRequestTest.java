@@ -24,8 +24,8 @@ import java.io.FileInputStream;
 import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
-import net.officefloor.frame.impl.spi.team.OnePersonTeam;
 import net.officefloor.frame.test.AbstractOfficeConstructTestCase;
+import net.officefloor.frame.test.MockTeamSource;
 import net.officefloor.frame.test.ReflectiveWorkBuilder;
 import net.officefloor.frame.test.ReflectiveWorkBuilder.ReflectiveTaskBuilder;
 import net.officefloor.plugin.socket.server.http.request.config.CommunicationConfig;
@@ -86,8 +86,8 @@ public class HttpRequestTest extends AbstractOfficeConstructTestCase {
 				public HttpServicerTask buildServicer(String managedObjectName,
 						MockHttpServer server) throws Exception {
 					// Register team to do the work
-					server.constructTeam("WORKER", new OnePersonTeam("WORKER",
-							100));
+					server.constructTeam("WORKER",
+							MockTeamSource.createOnePersonTeam("WORKER"));
 
 					// Register the work to process messages
 					ReflectiveWorkBuilder workBuilder = server.constructWork(
@@ -240,7 +240,7 @@ public class HttpRequestTest extends AbstractOfficeConstructTestCase {
 
 	@Override
 	protected void runTest() throws Throwable {
-		
+
 		// Start the server
 		this.server.startup(this.httpServicerBuilder);
 		assertEquals("Incorrect secureness for server", this.isSecure,

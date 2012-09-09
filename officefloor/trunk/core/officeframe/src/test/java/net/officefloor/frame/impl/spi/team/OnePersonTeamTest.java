@@ -19,6 +19,7 @@
 package net.officefloor.frame.impl.spi.team;
 
 import net.officefloor.frame.impl.spi.team.OnePersonTeam.OnePerson;
+import net.officefloor.frame.test.MockTeamSource;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 
 /**
@@ -32,7 +33,7 @@ public class OnePersonTeamTest extends OfficeFrameTestCase {
 	 * {@link OnePersonTeam} to test.
 	 */
 	protected OnePersonTeam team = new OnePersonTeam("TEST",
-			new MockTeamIdentifier(), 100);
+			MockTeamSource.createTeamIdentifier(), 100);
 
 	/**
 	 * Ensures runs the tasks.
