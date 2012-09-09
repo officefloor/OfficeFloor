@@ -196,6 +196,11 @@ public abstract class AbstractExecutorTeamSource extends AbstractTeamSource {
 		private ExecutorService servicer;
 
 		/**
+		 * Indicates if to continue working.
+		 */
+		private volatile boolean isContinueWorking = true;
+
+		/**
 		 * Initiate.
 		 * 
 		 * @param factory
@@ -218,11 +223,16 @@ public abstract class AbstractExecutorTeamSource extends AbstractTeamSource {
 
 		@Override
 		public void assignJob(Job job, TeamIdentifier assignerTeam) {
-			this.servicer.execute(new JobRunnable(job, this.teamIdentifier));
+			this.servicer.execute(new JobRunnable(job, this));
 		}
 
 		@Override
 		public synchronized void stopWorking() {
+
+			// Flag to stop working
+			this.isContinueWorking = false;
+
+			// Shutdown servicer
 			this.servicer.shutdown();
 			this.servicer = null;
 		}
@@ -239,9 +249,9 @@ public abstract class AbstractExecutorTeamSource extends AbstractTeamSource {
 		private final Job job;
 
 		/**
-		 * {@link TeamIdentifier} of the containing {@link Team}.
+		 * {@link ExecutorTeam} responsible for the {@link Job} completion.
 		 */
-		private final TeamIdentifier teamIdentifier;
+		private final ExecutorTeam team;
 
 		/**
 		 * Time optimisation.
@@ -253,12 +263,13 @@ public abstract class AbstractExecutorTeamSource extends AbstractTeamSource {
 		 * 
 		 * @param job
 		 *            {@link Job} to execute.
-		 * @param teamIdentifier
-		 *            {@link TeamIdentifier} of the containing {@link Team}.
+		 * @param team
+		 *            {@link ExecutorTeam} responsible for the {@link Job}
+		 *            completion.
 		 */
-		public JobRunnable(Job job, TeamIdentifier teamIdentifier) {
+		public JobRunnable(Job job, ExecutorTeam team) {
 			this.job = job;
-			this.teamIdentifier = teamIdentifier;
+			this.team = team;
 		}
 
 		/*
@@ -267,7 +278,15 @@ public abstract class AbstractExecutorTeamSource extends AbstractTeamSource {
 
 		@Override
 		public void run() {
-			this.job.doJob(this);
+			do {
+
+				// Attempt to complete the Job.
+				if (this.job.doJob(this)) {
+					// Job complete
+					return;
+				}
+
+			} while (this.team.isContinueWorking);
 		}
 
 		/*
@@ -284,7 +303,7 @@ public abstract class AbstractExecutorTeamSource extends AbstractTeamSource {
 
 		@Override
 		public TeamIdentifier getCurrentTeam() {
-			return this.teamIdentifier;
+			return this.team.teamIdentifier;
 		}
 
 		@Override
