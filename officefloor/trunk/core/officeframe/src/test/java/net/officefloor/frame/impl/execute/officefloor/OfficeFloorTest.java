@@ -101,6 +101,8 @@ public class OfficeFloorTest extends OfficeFrameTestCase {
 				.createMock(ManagedObjectSourceInstance.class);
 		final ManagedObjectSource<?, ?> mos = this
 				.createMock(ManagedObjectSource.class);
+		final TeamManagement teamManagement = this
+				.createMock(TeamManagement.class);
 
 		// Record open (to ensure in appropriate state for close)
 		this.recordOpeningOfficeFloor();
@@ -117,7 +119,9 @@ public class OfficeFloorTest extends OfficeFrameTestCase {
 
 		// Record closing
 		this.recordReturn(this.officeFloorMetaData,
-				this.officeFloorMetaData.getTeams(), new Team[] { this.team });
+				this.officeFloorMetaData.getTeams(),
+				new TeamManagement[] { teamManagement });
+		this.recordReturn(teamManagement, teamManagement.getTeam(), this.team);
 		this.team.stopWorking();
 		this.recordReturn(this.officeFloorMetaData,
 				this.officeFloorMetaData.getOfficeMetaData(),
