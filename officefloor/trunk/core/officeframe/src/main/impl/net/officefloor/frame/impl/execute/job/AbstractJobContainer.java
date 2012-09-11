@@ -1322,7 +1322,14 @@ public abstract class AbstractJobContainer<W extends Work, N extends JobMetaData
 
 		// Activate this Job (outside thread lock)
 		TeamManagement responsible = this.nodeMetaData.getResponsibleTeam();
-		responsible.getTeam().assignJob(this, currentTeam);
+		if (currentTeam == responsible.getIdentifier()) {
+			// Same team, so let worker (thread) continue execution
+			this.nodeMetaData.getContinueTeam().assignJob(this, currentTeam);
+
+		} else {
+			// Different team, so assign to team to undertake
+			responsible.getTeam().assignJob(this, currentTeam);
+		}
 	}
 
 	@Override

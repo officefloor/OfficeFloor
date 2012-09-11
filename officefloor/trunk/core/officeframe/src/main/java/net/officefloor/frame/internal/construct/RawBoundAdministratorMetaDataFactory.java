@@ -29,6 +29,8 @@ import net.officefloor.frame.internal.structure.Asset;
 import net.officefloor.frame.internal.structure.TeamManagement;
 import net.officefloor.frame.spi.administration.Administrator;
 import net.officefloor.frame.spi.source.SourceContext;
+import net.officefloor.frame.spi.team.Job;
+import net.officefloor.frame.spi.team.Team;
 
 /**
  * Factory to create {@link RawBoundAdministratorMetaData}.
@@ -58,6 +60,10 @@ public interface RawBoundAdministratorMetaDataFactory {
 	 * @param officeTeams
 	 *            {@link TeamManagement} instances by their {@link Office}
 	 *            registered names.
+	 * @param continueTeam
+	 *            {@link Team} to enable the worker ({@link Thread}) of the
+	 *            responsible {@link Team} to continue on to execute the next
+	 *            {@link Job}.
 	 * @param scopeMo
 	 *            {@link RawBoundManagedObjectMetaData} by their scope names.
 	 * @return Constructed {@link RawBoundAdministratorMetaData} instances.
@@ -67,6 +73,7 @@ public interface RawBoundAdministratorMetaDataFactory {
 			SourceContext sourceContext, OfficeFloorIssues issues,
 			AdministratorScope administratorScope, AssetType assetType,
 			String assetName, Map<String, TeamManagement> officeTeams,
+			Team continueTeam,
 			Map<String, RawBoundManagedObjectMetaData> scopeMo);
 
 }

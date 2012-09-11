@@ -28,6 +28,8 @@ import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.impl.execute.officefloor.DefaultOfficeFloorEscalationHandler;
 import net.officefloor.frame.impl.execute.process.EscalationHandlerEscalation;
+import net.officefloor.frame.impl.execute.team.TeamManagementImpl;
+import net.officefloor.frame.impl.spi.team.PassiveTeam;
 import net.officefloor.frame.internal.configuration.ManagedObjectSourceConfiguration;
 import net.officefloor.frame.internal.configuration.OfficeConfiguration;
 import net.officefloor.frame.internal.configuration.OfficeFloorConfiguration;
@@ -301,9 +303,11 @@ public class RawOfficeFloorMetaDataTest extends OfficeFrameTestCase {
 				metaData.getProcessContextListeners().length);
 
 		// Validate the teams
-		assertEquals("Incorrect number of teams", 3, actualTeams.length);
-		for (int i = 0; i < 3; i++) {
-			assertEquals("Incorrect team " + i, expectedTeams[i],
+		assertEquals("Incorrect number of teams", 4, actualTeams.length);
+		assertTrue("Incorrect continue team",
+				actualTeams[0].getTeam() instanceof PassiveTeam);
+		for (int i = 1; i < 4; i++) {
+			assertEquals("Incorrect team " + i, expectedTeams[i - 1],
 					actualTeams[i]);
 		}
 	}
@@ -621,6 +625,10 @@ public class RawOfficeFloorMetaDataTest extends OfficeFrameTestCase {
 		final OfficeConfiguration officeConfiguration = this
 				.createMock(OfficeConfiguration.class);
 
+		// Continue team (not this instance as created)
+		final TeamManagement continueTeam = new TeamManagementImpl(
+				new PassiveTeam());
+
 		// Record have escalation procedure
 		this.record_officeFloorName();
 		this.record_constructTeams();
@@ -636,7 +644,8 @@ public class RawOfficeFloorMetaDataTest extends OfficeFrameTestCase {
 						this.sourceContext, this.issues, null, null,
 						this.rawBoundMoFactory, null,
 						this.rawBoundAdminFactory, this.rawWorkMetaDataFactory,
-						this.rawTaskMetaDataFactory), null, new AlwaysMatcher());
+						this.rawTaskMetaDataFactory, continueTeam), null,
+				new AlwaysMatcher());
 
 		// Attempt to construct office floor
 		this.replayMockObjects();
@@ -834,6 +843,10 @@ public class RawOfficeFloorMetaDataTest extends OfficeFrameTestCase {
 			officeMetaDatas[i] = this.createMock(OfficeMetaData.class);
 		}
 
+		// Continue team (not this instance as created)
+		final TeamManagement continueTeam = new TeamManagementImpl(
+				new PassiveTeam());
+
 		// Record the construction of the offices
 		this.recordReturn(this.configuration,
 				this.configuration.getOfficeConfiguration(),
@@ -856,8 +869,8 @@ public class RawOfficeFloorMetaDataTest extends OfficeFrameTestCase {
 							this.rawBoundMoFactory, this.rawGovernanceFactory,
 							this.rawBoundAdminFactory,
 							this.rawWorkMetaDataFactory,
-							this.rawTaskMetaDataFactory), rawOfficeMetaData,
-					new AbstractMatcher() {
+							this.rawTaskMetaDataFactory, continueTeam),
+					rawOfficeMetaData, new AbstractMatcher() {
 						@Override
 						public boolean matches(Object[] e, Object[] a) {
 							assertEquals("Incorrect office configuration",
@@ -888,6 +901,10 @@ public class RawOfficeFloorMetaDataTest extends OfficeFrameTestCase {
 									"Incorrect task factory",
 									RawOfficeFloorMetaDataTest.this.rawTaskMetaDataFactory,
 									a[9]);
+							TeamManagement continueTeamManagement = (TeamManagement) a[10];
+							assertTrue(
+									"Incorrect continue team type",
+									continueTeamManagement.getTeam() instanceof Team);
 
 							// Validate the managed objects
 							assertEquals("Incorrect number of managed objects",

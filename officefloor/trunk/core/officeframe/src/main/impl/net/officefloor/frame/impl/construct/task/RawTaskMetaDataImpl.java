@@ -70,6 +70,7 @@ import net.officefloor.frame.internal.structure.WorkMetaData;
 import net.officefloor.frame.spi.administration.DutyKey;
 import net.officefloor.frame.spi.governance.Governance;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
+import net.officefloor.frame.spi.team.Team;
 
 /**
  * Raw meta-data for a {@link Task}.
@@ -171,12 +172,16 @@ public class RawTaskMetaDataImpl<W extends Work, D extends Enum<D>, F extends En
 		}
 		RawOfficeMetaData rawOfficeMetaData = rawWorkMetaData
 				.getRawOfficeMetaData();
-		TeamManagement team = rawOfficeMetaData.getTeams().get(officeTeamName);
-		if (team == null) {
+		TeamManagement responsibleTeam = rawOfficeMetaData.getTeams().get(
+				officeTeamName);
+		if (responsibleTeam == null) {
 			issues.addIssue(AssetType.TASK, taskName, "Unknown team '"
 					+ officeTeamName + "' responsible for task");
 			return null; // no team
 		}
+
+		// Obtain the continue team
+		Team continueTeam = rawOfficeMetaData.getContinueTeam();
 
 		// Keep track of all the required managed objects
 		final Map<ManagedObjectIndex, RawBoundManagedObjectMetaData> requiredManagedObjects = new HashMap<ManagedObjectIndex, RawBoundManagedObjectMetaData>();
@@ -375,8 +380,9 @@ public class RawTaskMetaDataImpl<W extends Work, D extends Enum<D>, F extends En
 		// Create the task meta-data
 		TaskMetaDataImpl<w, d, f> taskMetaData = new TaskMetaDataImpl<w, d, f>(
 				jobName, taskName, taskFactory, differentiator, parameterType,
-				team, requiredManagedObjectIndexes, taskToWorkMoTranslations,
-				requiredGovernance, preTaskDuties, postTaskDuties);
+				responsibleTeam, continueTeam, requiredManagedObjectIndexes,
+				taskToWorkMoTranslations, requiredGovernance, preTaskDuties,
+				postTaskDuties);
 
 		// Return the raw task meta-data
 		return new RawTaskMetaDataImpl<w, d, f>(taskName, configuration,

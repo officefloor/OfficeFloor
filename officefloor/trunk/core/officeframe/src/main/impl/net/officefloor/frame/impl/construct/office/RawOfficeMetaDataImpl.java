@@ -86,6 +86,8 @@ import net.officefloor.frame.internal.structure.ThreadState;
 import net.officefloor.frame.internal.structure.WorkMetaData;
 import net.officefloor.frame.spi.governance.Governance;
 import net.officefloor.frame.spi.source.SourceContext;
+import net.officefloor.frame.spi.team.Job;
+import net.officefloor.frame.spi.team.Team;
 import net.officefloor.frame.spi.team.source.ProcessContextListener;
 
 /**
@@ -103,7 +105,7 @@ public class RawOfficeMetaDataImpl implements RawOfficeMetaDataFactory,
 	 */
 	public static RawOfficeMetaDataFactory getFactory() {
 		return new RawOfficeMetaDataImpl(null, null, null, null, null, null,
-				null, false, null, null, null, null);
+				null, null, false, null, null, null, null);
 	}
 
 	/**
@@ -121,6 +123,12 @@ public class RawOfficeMetaDataImpl implements RawOfficeMetaDataFactory,
 	 * names.
 	 */
 	private final Map<String, TeamManagement> teams;
+
+	/**
+	 * {@link Team} to enable the worker ({@link Thread}) of the responsible
+	 * {@link Team} to continue on to execute the next {@link Job}.
+	 */
+	private final Team continueTeam;
 
 	/**
 	 * {@link RawManagedObjectMetaData} instances by their {@link Office}
@@ -186,6 +194,10 @@ public class RawOfficeMetaDataImpl implements RawOfficeMetaDataFactory,
 	 * @param teams
 	 *            {@link TeamManagement} instances by their {@link Office}
 	 *            registered names.
+	 * @param continueTeam
+	 *            {@link Team} to enable the worker ({@link Thread}) of the
+	 *            responsible {@link Team} to continue on to execute the next
+	 *            {@link Job}.
 	 * @param managedObjectMetaData
 	 *            {@link RawManagedObjectMetaData} instances by their
 	 *            {@link Office} registered names.
@@ -217,7 +229,7 @@ public class RawOfficeMetaDataImpl implements RawOfficeMetaDataFactory,
 	 */
 	private RawOfficeMetaDataImpl(String officeName,
 			RawOfficeFloorMetaData rawOfficeFloorMetaData,
-			Map<String, TeamManagement> teams,
+			Map<String, TeamManagement> teams, Team continueTeam,
 			Map<String, RawManagedObjectMetaData<?, ?>> managedObjectMetaData,
 			RawBoundManagedObjectMetaData[] processBoundManagedObjects,
 			RawBoundManagedObjectMetaData[] threadBoundManagedObjects,
@@ -230,6 +242,7 @@ public class RawOfficeMetaDataImpl implements RawOfficeMetaDataFactory,
 		this.officeName = officeName;
 		this.rawOfficeFloorMetaData = rawOfficeFloorMetaData;
 		this.teams = teams;
+		this.continueTeam = continueTeam;
 		this.managedObjectMetaData = managedObjectMetaData;
 		this.processBoundManagedObjects = processBoundManagedObjects;
 		this.threadBoundManagedObjects = threadBoundManagedObjects;
@@ -255,7 +268,8 @@ public class RawOfficeMetaDataImpl implements RawOfficeMetaDataFactory,
 			RawGovernanceMetaDataFactory rawGovernanceMetaDataFactory,
 			RawBoundAdministratorMetaDataFactory rawBoundAdministratorFactory,
 			RawWorkMetaDataFactory rawWorkFactory,
-			RawTaskMetaDataFactory rawTaskFactory) {
+			RawTaskMetaDataFactory rawTaskFactory,
+			TeamManagement continueTeamManagement) {
 
 		// Obtain the name of the office
 		String officeName = configuration.getOfficeName();
@@ -283,6 +297,9 @@ public class RawOfficeMetaDataImpl implements RawOfficeMetaDataFactory,
 		// Enhance the office
 		OfficeEnhancerContextImpl.enhanceOffice(officeName, configuration,
 				issues);
+
+		// Obtain the continue team
+		Team continueTeam = continueTeamManagement.getTeam();
 
 		// Register the teams to office
 		Map<String, TeamManagement> officeTeams = new HashMap<String, TeamManagement>();
@@ -339,7 +356,8 @@ public class RawOfficeMetaDataImpl implements RawOfficeMetaDataFactory,
 			// Create the raw governance
 			RawGovernanceMetaData<?, ?> rawGovernance = rawGovernanceMetaDataFactory
 					.createRawGovernanceMetaData(governanceConfiguration, i,
-							sourceContext, officeTeams, officeName, issues);
+							sourceContext, officeTeams, continueTeam,
+							officeName, issues);
 			if (rawGovernance == null) {
 				// Not able to create governance
 				issues.addIssue(AssetType.OFFICE, officeName,
@@ -470,7 +488,8 @@ public class RawOfficeMetaDataImpl implements RawOfficeMetaDataFactory,
 					.constructRawBoundAdministratorMetaData(
 							processAdministratorConfiguration, sourceContext,
 							issues, AdministratorScope.PROCESS,
-							AssetType.OFFICE, officeName, officeTeams, scopeMo);
+							AssetType.OFFICE, officeName, officeTeams,
+							continueTeam, scopeMo);
 		}
 
 		// Create the map of process bound administrators by name
@@ -513,7 +532,8 @@ public class RawOfficeMetaDataImpl implements RawOfficeMetaDataFactory,
 					.constructRawBoundAdministratorMetaData(
 							threadAdministratorConfiguration, sourceContext,
 							issues, AdministratorScope.THREAD,
-							AssetType.OFFICE, officeName, officeTeams, scopeMo);
+							AssetType.OFFICE, officeName, officeTeams,
+							continueTeam, scopeMo);
 		}
 
 		// Load the thread bound administrators to scope administrators
@@ -523,11 +543,11 @@ public class RawOfficeMetaDataImpl implements RawOfficeMetaDataFactory,
 
 		// Create the raw office meta-data
 		RawOfficeMetaDataImpl rawOfficeMetaData = new RawOfficeMetaDataImpl(
-				officeName, rawOfficeFloorMetaData, officeTeams, registeredMo,
-				processBoundManagedObjects, threadBoundManagedObjects, scopeMo,
-				isManuallyManageGovernance, rawGovernanceMetaData,
-				processBoundAdministrators, threadBoundAdministrators,
-				scopeAdmins);
+				officeName, rawOfficeFloorMetaData, officeTeams, continueTeam,
+				registeredMo, processBoundManagedObjects,
+				threadBoundManagedObjects, scopeMo, isManuallyManageGovernance,
+				rawGovernanceMetaData, processBoundAdministrators,
+				threadBoundAdministrators, scopeAdmins);
 
 		// Construct the meta-data of the work carried out within the office
 		List<RawWorkMetaData<?>> rawWorkMetaDatas = new LinkedList<RawWorkMetaData<?>>();
@@ -675,8 +695,8 @@ public class RawOfficeMetaDataImpl implements RawOfficeMetaDataFactory,
 		// Have the managed objects managed by the office
 		for (RawManagingOfficeMetaData<?> officeManagingManagedObject : officeManagingManagedObjects) {
 			officeManagingManagedObject.manageByOffice(
-					processBoundManagedObjects, metaDataLocator,
-					officeAssetManagerFactory, issues);
+					processBoundManagedObjects, metaDataLocator, officeTeams,
+					continueTeamManagement, officeAssetManagerFactory, issues);
 		}
 
 		// Return the raw office meta-data
@@ -771,6 +791,11 @@ public class RawOfficeMetaDataImpl implements RawOfficeMetaDataFactory,
 	@Override
 	public Map<String, TeamManagement> getTeams() {
 		return this.teams;
+	}
+
+	@Override
+	public Team getContinueTeam() {
+		return this.continueTeam;
 	}
 
 	@Override

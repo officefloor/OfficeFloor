@@ -33,6 +33,7 @@ import net.officefloor.frame.impl.execute.escalation.EscalationProcedureImpl;
 import net.officefloor.frame.impl.execute.job.JobNodeActivatableSetImpl;
 import net.officefloor.frame.impl.execute.managedobject.ManagedObjectIndexImpl;
 import net.officefloor.frame.impl.execute.task.TaskJob;
+import net.officefloor.frame.impl.spi.team.PassiveTeam;
 import net.officefloor.frame.internal.structure.AssetManager;
 import net.officefloor.frame.internal.structure.EscalationProcedure;
 import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
@@ -52,6 +53,7 @@ import net.officefloor.frame.spi.managedobject.AsynchronousManagedObject;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectUser;
+import net.officefloor.frame.spi.team.Team;
 
 import org.easymock.internal.AlwaysMatcher;
 
@@ -63,6 +65,11 @@ import org.easymock.internal.AlwaysMatcher;
 public class ExecutionNode<W extends Work> implements
 		TaskMetaData<W, Indexed, Indexed>, TaskFactory<W, Indexed, Indexed>,
 		Task<W, Indexed, Indexed> {
+
+	/**
+	 * Continue {@link Team}.
+	 */
+	private static final Team CONTINUE_TEAM = new PassiveTeam();
 
 	/**
 	 * Test case utilising this {@link ExecutionNode} to test execution of a
@@ -284,6 +291,11 @@ public class ExecutionNode<W extends Work> implements
 	@Override
 	public TeamManagement getResponsibleTeam() {
 		return this.testCase;
+	}
+
+	@Override
+	public Team getContinueTeam() {
+		return CONTINUE_TEAM;
 	}
 
 	@Override

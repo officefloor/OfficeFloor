@@ -125,8 +125,8 @@ public class RawGovernanceMetaDataImpl<I, F extends Enum<F>> implements
 	public <i, f extends Enum<f>> RawGovernanceMetaData<i, f> createRawGovernanceMetaData(
 			GovernanceConfiguration<i, f> configuration, int governanceIndex,
 			SourceContext sourceContext,
-			Map<String, TeamManagement> officeTeams, String officeName,
-			OfficeFloorIssues issues) {
+			Map<String, TeamManagement> officeTeams, Team continueTeam,
+			String officeName, OfficeFloorIssues issues) {
 
 		// Obtain the governance name
 		String governanceName = configuration.getGovernanceName();
@@ -166,8 +166,8 @@ public class RawGovernanceMetaDataImpl<I, F extends Enum<F>> implements
 		}
 
 		// Obtain the team
-		TeamManagement team = officeTeams.get(teamName);
-		if (team == null) {
+		TeamManagement responsibleTeam = officeTeams.get(teamName);
+		if (responsibleTeam == null) {
 			issues.addIssue(AssetType.GOVERNANCE, governanceName,
 					"Can not find " + Team.class.getSimpleName() + " by name '"
 							+ teamName + "'");
@@ -176,7 +176,8 @@ public class RawGovernanceMetaDataImpl<I, F extends Enum<F>> implements
 
 		// Create the Governance Meta-Data
 		GovernanceMetaDataImpl<i, f> governanceMetaData = new GovernanceMetaDataImpl<i, f>(
-				governanceName, governanceFactory, team);
+				governanceName, governanceFactory, responsibleTeam,
+				continueTeam);
 
 		// Create the raw Governance meta-data
 		RawGovernanceMetaData<i, f> rawGovernanceMetaData = new RawGovernanceMetaDataImpl<i, f>(

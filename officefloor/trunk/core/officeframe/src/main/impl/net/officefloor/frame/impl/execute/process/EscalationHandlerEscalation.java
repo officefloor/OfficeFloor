@@ -46,6 +46,7 @@ import net.officefloor.frame.internal.structure.WorkContainer;
 import net.officefloor.frame.internal.structure.WorkMetaData;
 import net.officefloor.frame.spi.governance.Governance;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
+import net.officefloor.frame.spi.team.Job;
 import net.officefloor.frame.spi.team.Team;
 import net.officefloor.frame.util.AbstractSingleTask;
 
@@ -114,7 +115,13 @@ public class EscalationHandlerEscalation implements EscalationFlow {
 	 * {@link TeamManagement} responsible to undertake the
 	 * {@link EscalationFlow}.
 	 */
-	private final TeamManagement team;
+	private final TeamManagement responsibleTeam;
+
+	/**
+	 * {@link Team} to enable the worker ({@link Thread}) of the responsible
+	 * {@link Team} to continue on to execute the next {@link Job}.
+	 */
+	private final Team continueTeam;
 
 	/**
 	 * {@link TaskMetaData} for the {@link EscalationHandler} {@link Task}.
@@ -126,16 +133,22 @@ public class EscalationHandlerEscalation implements EscalationFlow {
 	 * 
 	 * @param escalationHandler
 	 *            {@link EscalationHandler}.
-	 * @param team
+	 * @param responsibleTeam
 	 *            {@link TeamManagement} responsible to undertake the
 	 *            {@link EscalationFlow}.
+	 * @param continueTeam
+	 *            {@link Team} to enable the worker ({@link Thread}) of the
+	 *            responsible {@link Team} to continue on to execute the next
+	 *            {@link Job}.
 	 * @param requiredGovernance
 	 *            Required {@link Governance}.
 	 */
 	public EscalationHandlerEscalation(EscalationHandler escalationHandler,
-			TeamManagement team, boolean[] requiredGovernance) {
+			TeamManagement responsibleTeam, Team continueTeam,
+			boolean[] requiredGovernance) {
 		this.escalationHandler = escalationHandler;
-		this.team = team;
+		this.responsibleTeam = responsibleTeam;
+		this.continueTeam = continueTeam;
 
 		// Specify the basic escalation task meta-data
 		this.taskMetaData = this.createTaskMetaData(null);
@@ -169,7 +182,7 @@ public class EscalationHandlerEscalation implements EscalationFlow {
 
 		// Create the escalation task meta-data
 		EscalationTaskMetaData taskMetaData = new EscalationTaskMetaData(task,
-				this.team, requiredGovernance);
+				this.responsibleTeam, this.continueTeam, requiredGovernance);
 
 		// Return the task meta-data
 		return taskMetaData;
@@ -255,19 +268,25 @@ public class EscalationHandlerEscalation implements EscalationFlow {
 		 * 
 		 * @param taskFactory
 		 *            {@link TaskFactory}.
-		 * @param team
-		 *            {@link Team}.
+		 * @param responsibleTeam
+		 *            {@link TeamManagement} of {@link Team} responsible for the
+		 *            {@link Escalation} {@link Task}.
+		 * @param continueTeam
+		 *            {@link Team} to enable the worker ({@link Thread}) of the
+		 *            responsible {@link Team} to continue on to execute the
+		 *            next {@link Job}.
 		 * @param requiredGovernance
 		 *            Required {@link Governance}.
 		 */
 		public EscalationTaskMetaData(
 				TaskFactory<EscalationHandlerTask, EscalationKey, None> taskFactory,
-				TeamManagement team, boolean[] requiredGovernance) {
+				TeamManagement responsibleTeam, Team continueTeam,
+				boolean[] requiredGovernance) {
 			super("Escalation Handler Task", "Escalation Handler Task",
-					taskFactory, null, Throwable.class, team,
-					REQUIRED_MANAGED_OBJECTS, MANGED_OBJECT_DEPENDENCIES,
-					requiredGovernance, TASK_DUTY_ASSOCIATIONS,
-					TASK_DUTY_ASSOCIATIONS);
+					taskFactory, null, Throwable.class, responsibleTeam,
+					continueTeam, REQUIRED_MANAGED_OBJECTS,
+					MANGED_OBJECT_DEPENDENCIES, requiredGovernance,
+					TASK_DUTY_ASSOCIATIONS, TASK_DUTY_ASSOCIATIONS);
 			this.loadRemainingState(WORK_META_DATA, FLOW_META_DATA, null,
 					FURTHER_ESCALATION_PROCEDURE);
 		}
@@ -293,7 +312,7 @@ public class EscalationHandlerEscalation implements EscalationFlow {
 			// Create task meta-data for escalation
 			EscalationTaskMetaData taskMetaData = new EscalationTaskMetaData(
 					this.getTaskFactory(), this.getResponsibleTeam(),
-					requiredGovernance);
+					this.getContinueTeam(), requiredGovernance);
 
 			// Create and return the job node
 			return new TaskJob<EscalationHandlerTask, EscalationKey, None>(

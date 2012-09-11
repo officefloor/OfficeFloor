@@ -79,9 +79,7 @@ public class TeamManagementImpl implements TeamManagement {
 
 	@Override
 	public TeamIdentifier getIdentifier() {
-		// TODO implement TeamManagement.getIdentifier
-		throw new UnsupportedOperationException(
-				"TODO implement TeamManagement.getIdentifier");
+		return this.teamIdentifier;
 	}
 
 	@Override

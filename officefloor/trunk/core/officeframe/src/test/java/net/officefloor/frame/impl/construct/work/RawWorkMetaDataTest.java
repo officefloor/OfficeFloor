@@ -57,6 +57,7 @@ import net.officefloor.frame.internal.structure.WorkMetaData;
 import net.officefloor.frame.spi.administration.Administrator;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.frame.spi.source.SourceContext;
+import net.officefloor.frame.spi.team.Team;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 
 import org.easymock.AbstractMatcher;
@@ -140,6 +141,11 @@ public class RawWorkMetaDataTest<W extends Work> extends OfficeFrameTestCase {
 	 */
 	private final RawTaskMetaDataFactory rawTaskMetaDataFactory = this
 			.createMock(RawTaskMetaDataFactory.class);
+
+	/**
+	 * Continue {@link Team}.
+	 */
+	private final Team continueTeam = this.createMock(Team.class);
 
 	/**
 	 * Ensure issue if no {@link Work} name.
@@ -692,13 +698,15 @@ public class RawWorkMetaDataTest<W extends Work> extends OfficeFrameTestCase {
 					0);
 			this.recordReturn(this.rawOfficeMetaData,
 					this.rawOfficeMetaData.getTeams(), officeTeams);
+			this.recordReturn(this.rawOfficeMetaData,
+					this.rawOfficeMetaData.getContinueTeam(), this.continueTeam);
 			this.recordReturn(this.rawBoundAdministratorFactory,
 					this.rawBoundAdministratorFactory
 							.constructRawBoundAdministratorMetaData(
 									adminConfiguration, this.sourceContext,
 									this.issues, AdministratorScope.WORK,
 									AssetType.WORK, WORK_NAME, officeTeams,
-									null), workBoundAdmins,
+									this.continueTeam, null), workBoundAdmins,
 					new AbstractMatcher() {
 						@Override
 						public boolean matches(Object[] expected,

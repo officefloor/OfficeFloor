@@ -18,6 +18,8 @@
 
 package net.officefloor.frame.impl.construct.managedobjectsource;
 
+import java.util.Map;
+
 import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.api.build.OfficeFloorIssues;
 import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
@@ -47,6 +49,7 @@ import net.officefloor.frame.internal.structure.OfficeMetaData;
 import net.officefloor.frame.internal.structure.ProcessState;
 import net.officefloor.frame.internal.structure.ProcessTicker;
 import net.officefloor.frame.internal.structure.TaskMetaData;
+import net.officefloor.frame.internal.structure.TeamManagement;
 import net.officefloor.frame.internal.structure.ThreadState;
 import net.officefloor.frame.internal.structure.WorkMetaData;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
@@ -54,6 +57,7 @@ import net.officefloor.frame.spi.managedobject.recycle.RecycleManagedObjectParam
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectExecuteContext;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectFlowMetaData;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
+import net.officefloor.frame.spi.team.Team;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 
 import org.easymock.AbstractMatcher;
@@ -113,6 +117,24 @@ public class RawManagingOfficeMetaDataTest extends OfficeFrameTestCase {
 			.createMock(OfficeMetaDataLocator.class);
 
 	/**
+	 * {@link Office} {@link TeamManagement} instances.
+	 */
+	@SuppressWarnings("unchecked")
+	private final Map<String, TeamManagement> officeTeams = this
+			.createMock(Map.class);
+
+	/**
+	 * Continue {@link TeamManagement}.
+	 */
+	private final TeamManagement continueTeamManagement = this
+			.createMock(TeamManagement.class);
+
+	/**
+	 * Continue {@link Team}.
+	 */
+	private final Team continueTeam = this.createMock(Team.class);
+
+	/**
 	 * {@link OfficeMetaData}.
 	 */
 	private final OfficeMetaData officeMetaData = this
@@ -141,6 +163,8 @@ public class RawManagingOfficeMetaDataTest extends OfficeFrameTestCase {
 		this.record_managedObjectSourceName();
 		this.recordReturn(this.metaDataLocator,
 				this.metaDataLocator.getOfficeMetaData(), this.officeMetaData);
+		this.recordReturn(this.continueTeamManagement,
+				this.continueTeamManagement.getTeam(), continueTeam);
 		this.recordReturn(this.metaDataLocator,
 				this.metaDataLocator.getWorkMetaData("RECYCLE_WORK"), null);
 		this.record_issue("Recycle work 'RECYCLE_WORK' not found");
@@ -165,6 +189,8 @@ public class RawManagingOfficeMetaDataTest extends OfficeFrameTestCase {
 		this.record_managedObjectSourceName();
 		this.recordReturn(this.metaDataLocator,
 				this.metaDataLocator.getOfficeMetaData(), this.officeMetaData);
+		this.recordReturn(this.continueTeamManagement,
+				this.continueTeamManagement.getTeam(), continueTeam);
 		this.recordReturn(this.metaDataLocator,
 				this.metaDataLocator.getWorkMetaData("RECYCLE_WORK"),
 				workMetaData);
@@ -196,6 +222,8 @@ public class RawManagingOfficeMetaDataTest extends OfficeFrameTestCase {
 		this.record_managedObjectSourceName();
 		this.recordReturn(this.metaDataLocator,
 				this.metaDataLocator.getOfficeMetaData(), this.officeMetaData);
+		this.recordReturn(this.continueTeamManagement,
+				this.continueTeamManagement.getTeam(), continueTeam);
 		this.recordReturn(this.metaDataLocator,
 				this.metaDataLocator.getWorkMetaData("RECYCLE_WORK"),
 				workMetaData);
@@ -239,6 +267,8 @@ public class RawManagingOfficeMetaDataTest extends OfficeFrameTestCase {
 		this.record_managedObjectSourceName();
 		this.recordReturn(this.metaDataLocator,
 				this.metaDataLocator.getOfficeMetaData(), this.officeMetaData);
+		this.recordReturn(this.continueTeamManagement,
+				this.continueTeamManagement.getTeam(), continueTeam);
 		this.recordReturn(this.metaDataLocator,
 				this.metaDataLocator.getWorkMetaData("RECYCLE_WORK"),
 				workMetaData);
@@ -263,8 +293,9 @@ public class RawManagingOfficeMetaDataTest extends OfficeFrameTestCase {
 		// This would be the possible case that used by same office.
 		rawOffice.manageManagedObject(moMetaData);
 
-		rawOffice.manageByOffice(null, this.metaDataLocator,
-				this.assetManagerFactory, this.issues);
+		rawOffice.manageByOffice(null, this.metaDataLocator, this.officeTeams,
+				this.continueTeamManagement, this.assetManagerFactory,
+				this.issues);
 		JobNode jobNode = moMetaData.createRecycleJobNode(managedObject);
 		this.verifyMockObjects();
 
@@ -293,6 +324,8 @@ public class RawManagingOfficeMetaDataTest extends OfficeFrameTestCase {
 		this.record_managedObjectSourceName();
 		this.recordReturn(this.metaDataLocator,
 				this.metaDataLocator.getOfficeMetaData(), this.officeMetaData);
+		this.recordReturn(this.continueTeamManagement,
+				this.continueTeamManagement.getTeam(), continueTeam);
 		this.recordReturn(this.metaDataLocator,
 				this.metaDataLocator.getWorkMetaData("RECYCLE_WORK"),
 				workMetaData);
@@ -311,8 +344,9 @@ public class RawManagingOfficeMetaDataTest extends OfficeFrameTestCase {
 		this.replayMockObjects();
 		RawManagingOfficeMetaDataImpl<?> rawOffice = this
 				.createRawManagingOffice(RECYCLE_WORK_NAME);
-		rawOffice.manageByOffice(null, this.metaDataLocator,
-				this.assetManagerFactory, this.issues);
+		rawOffice.manageByOffice(null, this.metaDataLocator, this.officeTeams,
+				this.continueTeamManagement, this.assetManagerFactory,
+				this.issues);
 
 		// Have managed after managed by office.
 		// This would the be case when used by another office.
@@ -674,6 +708,9 @@ public class RawManagingOfficeMetaDataTest extends OfficeFrameTestCase {
 		final ProcessState process = this.createMock(ProcessState.class);
 		final ProcessFuture future = this.createMock(ProcessFuture.class);
 
+		// TODO test configuring the escalation responsible team
+		final TeamManagement escalationResponsibleTeam = this.continueTeamManagement;
+
 		// Record construct flow
 		this.record_managedObjectSourceName();
 		this.record_noRecycleTask();
@@ -705,32 +742,41 @@ public class RawManagingOfficeMetaDataTest extends OfficeFrameTestCase {
 		// Record invoking the flow
 		this.recordReturn(this.officeMetaData, this.officeMetaData
 				.createProcess(null, parameter, managedObject, this.moMetaData,
-						0, null), jobNode, new AbstractMatcher() {
-			@Override
-			public boolean matches(Object[] expected, Object[] actual) {
-				FlowMetaData<?> flowMetaData = (FlowMetaData<?>) actual[0];
-				assertEquals("Incorrect parameter", parameter, actual[1]);
-				assertEquals("Incorrect managed object", managedObject,
-						actual[2]);
-				assertEquals("Incorrect managed object meta-data",
-						RawManagingOfficeMetaDataTest.this.moMetaData,
-						actual[3]);
-				assertEquals("Incorrect process index", 0, actual[4]);
-				assertNull("Should not have escalation handler", actual[5]);
+						0, null, escalationResponsibleTeam, this.continueTeam),
+				jobNode, new AbstractMatcher() {
+					@Override
+					public boolean matches(Object[] expected, Object[] actual) {
+						FlowMetaData<?> flowMetaData = (FlowMetaData<?>) actual[0];
+						assertEquals("Incorrect parameter", parameter,
+								actual[1]);
+						assertEquals("Incorrect managed object", managedObject,
+								actual[2]);
+						assertEquals("Incorrect managed object meta-data",
+								RawManagingOfficeMetaDataTest.this.moMetaData,
+								actual[3]);
+						assertEquals("Incorrect process index", 0, actual[4]);
+						assertNull("Should not have escalation handler",
+								actual[5]);
+						assertEquals("Incorrect escalation responsible team",
+								escalationResponsibleTeam, actual[6]);
+						assertEquals(
+								"Incorrect escalation continue team",
+								RawManagingOfficeMetaDataTest.this.continueTeam,
+								actual[7]);
 
-				// Validate flow meta-data
-				assertEquals("Incorrect task meta-data", taskMetaData,
-						flowMetaData.getInitialTaskMetaData());
-				assertEquals("Always instigated asynchronously",
-						FlowInstigationStrategyEnum.ASYNCHRONOUS,
-						flowMetaData.getInstigationStrategy());
-				assertEquals("Incorrect asset manager", assetManager,
-						flowMetaData.getFlowManager());
+						// Validate flow meta-data
+						assertEquals("Incorrect task meta-data", taskMetaData,
+								flowMetaData.getInitialTaskMetaData());
+						assertEquals("Always instigated asynchronously",
+								FlowInstigationStrategyEnum.ASYNCHRONOUS,
+								flowMetaData.getInstigationStrategy());
+						assertEquals("Incorrect asset manager", assetManager,
+								flowMetaData.getFlowManager());
 
-				// Matches if at this point
-				return true;
-			}
-		});
+						// Matches if at this point
+						return true;
+					}
+				});
 
 		// Record obtaining the process state
 		this.recordReturn(jobNode, jobNode.getJobSequence(), jobSequence);
@@ -786,6 +832,9 @@ public class RawManagingOfficeMetaDataTest extends OfficeFrameTestCase {
 		final ProcessState process = this.createMock(ProcessState.class);
 		final ProcessFuture future = this.createMock(ProcessFuture.class);
 
+		// TODO test configuring the escalation responsible team
+		final TeamManagement escalationResponsibleTeam = this.continueTeamManagement;
+
 		// Record construct flow
 		this.record_managedObjectSourceName();
 		this.record_noRecycleTask();
@@ -818,7 +867,8 @@ public class RawManagingOfficeMetaDataTest extends OfficeFrameTestCase {
 		// Record invoking the flow
 		this.recordReturn(this.officeMetaData, this.officeMetaData
 				.createProcess(null, parameter, managedObject, this.moMetaData,
-						processMoIndex, null), jobNode, new AbstractMatcher() {
+						processMoIndex, null, escalationResponsibleTeam,
+						this.continueTeam), jobNode, new AbstractMatcher() {
 			@Override
 			public boolean matches(Object[] expected, Object[] actual) {
 				FlowMetaData<?> flowMetaData = (FlowMetaData<?>) actual[0];
@@ -831,6 +881,11 @@ public class RawManagingOfficeMetaDataTest extends OfficeFrameTestCase {
 				assertEquals("Incorrect process index", processMoIndex,
 						actual[4]);
 				assertNull("Should not have escalation handler", actual[5]);
+				assertEquals("Incorrect escalation responsible team",
+						escalationResponsibleTeam, actual[6]);
+				assertEquals("Incorrect escalation continue team",
+						RawManagingOfficeMetaDataTest.this.continueTeam,
+						actual[7]);
 
 				// Validate flow meta-data
 				assertEquals("Incorrect task meta-data", taskMetaData,
@@ -895,6 +950,8 @@ public class RawManagingOfficeMetaDataTest extends OfficeFrameTestCase {
 	private void record_noRecycleTask() {
 		this.recordReturn(this.metaDataLocator,
 				this.metaDataLocator.getOfficeMetaData(), this.officeMetaData);
+		this.recordReturn(this.continueTeamManagement,
+				this.continueTeamManagement.getTeam(), continueTeam);
 	}
 
 	/**
@@ -1088,6 +1145,7 @@ public class RawManagingOfficeMetaDataTest extends OfficeFrameTestCase {
 		RawManagingOfficeMetaDataImpl<?> rawOffice = this
 				.createRawManagingOffice(recycleWorkName, flowMetaData);
 		rawOffice.manageByOffice(processBoundMetaData, this.metaDataLocator,
+				this.officeTeams, this.continueTeamManagement,
 				this.assetManagerFactory, this.issues);
 
 		// Validate creation of execute context

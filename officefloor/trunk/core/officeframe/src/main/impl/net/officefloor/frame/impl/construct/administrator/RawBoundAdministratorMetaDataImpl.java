@@ -73,6 +73,8 @@ import net.officefloor.frame.spi.source.SourceProperties;
 import net.officefloor.frame.spi.source.UnknownClassError;
 import net.officefloor.frame.spi.source.UnknownPropertyError;
 import net.officefloor.frame.spi.source.UnknownResourceError;
+import net.officefloor.frame.spi.team.Job;
+import net.officefloor.frame.spi.team.Team;
 
 /**
  * Raw meta-data for the bound {@link Administrator}.
@@ -181,6 +183,7 @@ public class RawBoundAdministratorMetaDataImpl<I, A extends Enum<A>> implements
 			SourceContext sourceContext, OfficeFloorIssues issues,
 			AdministratorScope administratorScope, AssetType assetType,
 			String assetName, Map<String, TeamManagement> officeTeams,
+			Team continueTeam,
 			Map<String, RawBoundManagedObjectMetaData> scopeMo) {
 
 		// Register the bound administrators
@@ -195,7 +198,7 @@ public class RawBoundAdministratorMetaDataImpl<I, A extends Enum<A>> implements
 			// Construct the bound administrator
 			RawBoundAdministratorMetaData<?, ?> rawMetaData = constructRawBoundAdministratorMetaData(
 					config, sourceContext, issues, adminIndex, assetType,
-					assetName, officeTeams, scopeMo);
+					assetName, officeTeams, continueTeam, scopeMo);
 			if (rawMetaData != null) {
 				boundAdministrators.add(rawMetaData);
 			}
@@ -226,6 +229,10 @@ public class RawBoundAdministratorMetaDataImpl<I, A extends Enum<A>> implements
 	 * @param officeTeams
 	 *            {@link TeamManagement} instances by their {@link Office}
 	 *            registered names.
+	 * @param continueTeam
+	 *            {@link Team} to enable the worker ({@link Thread}) of the
+	 *            responsible {@link Team} to continue on to execute the next
+	 *            {@link Job}.
 	 * @param scopeMo
 	 *            {@link RawBoundManagedObjectMetaData} by their scope names.
 	 * @return Constructed {@link RawBoundAdministratorMetaData}.
@@ -236,6 +243,7 @@ public class RawBoundAdministratorMetaDataImpl<I, A extends Enum<A>> implements
 			SourceContext sourceContext, OfficeFloorIssues issues,
 			AdministratorIndex administratorIndex, AssetType assetType,
 			String assetName, Map<String, TeamManagement> officeTeams,
+			Team continueTeam,
 			Map<String, RawBoundManagedObjectMetaData> scopeMo) {
 
 		// Obtain the administrator name
@@ -315,8 +323,8 @@ public class RawBoundAdministratorMetaDataImpl<I, A extends Enum<A>> implements
 					+ " must specify team responsible for duties");
 			return null; // must have team specified
 		}
-		TeamManagement team = officeTeams.get(teamName);
-		if (team == null) {
+		TeamManagement responsibleTeam = officeTeams.get(teamName);
+		if (responsibleTeam == null) {
 			issues.addIssue(assetType, assetName, "Administrator " + adminName
 					+ " team '" + teamName + "' can not be found");
 			return null; // unknown team
@@ -528,8 +536,8 @@ public class RawBoundAdministratorMetaDataImpl<I, A extends Enum<A>> implements
 		// Create the administrator meta-data
 		AdministratorMetaDataImpl<i, a> adminMetaData = new AdministratorMetaDataImpl<i, a>(
 				adminSource, ConstructUtil.toArray(eiMetaDatas,
-						new ExtensionInterfaceMetaData[0]), team,
-				escalationProcedure);
+						new ExtensionInterfaceMetaData[0]), responsibleTeam,
+				continueTeam, escalationProcedure);
 
 		// Create the raw bound administrator meta-data
 		RawBoundAdministratorMetaData<i, a> rawBoundAdminMetaData = new RawBoundAdministratorMetaDataImpl<i, a>(

@@ -196,6 +196,17 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 			.createMock(RawTaskMetaDataFactory.class);
 
 	/**
+	 * Continue {@link TeamManagement}.
+	 */
+	private final TeamManagement continueTeamManagement = this
+			.createMock(TeamManagement.class);
+
+	/**
+	 * Continue {@link Team}.
+	 */
+	private final Team continueTeam = this.createMock(Team.class);
+
+	/**
 	 * {@link OfficeFloor} {@link EscalationFlow}.
 	 */
 	private final EscalationFlow officeFloorEscalation = this
@@ -431,6 +442,8 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 
 		// Record attempting to register team without name
 		this.record_enhanceOffice();
+		this.recordReturn(this.continueTeamManagement,
+				this.continueTeamManagement.getTeam(), this.continueTeam);
 		this.recordReturn(this.configuration,
 				this.configuration.getRegisteredTeams(),
 				new LinkedTeamConfiguration[] { this.linkedTeamConfiguration });
@@ -458,6 +471,8 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 
 		// Record attempting to register team without name
 		this.record_enhanceOffice();
+		this.recordReturn(this.continueTeamManagement,
+				this.continueTeamManagement.getTeam(), this.continueTeam);
 		this.recordReturn(this.configuration,
 				this.configuration.getRegisteredTeams(),
 				new LinkedTeamConfiguration[] { this.linkedTeamConfiguration });
@@ -487,6 +502,8 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 
 		// Record attempting to register unknown team
 		this.record_enhanceOffice();
+		this.recordReturn(this.continueTeamManagement,
+				this.continueTeamManagement.getTeam(), this.continueTeam);
 		this.recordReturn(this.configuration,
 				this.configuration.getRegisteredTeams(),
 				new LinkedTeamConfiguration[] { this.linkedTeamConfiguration });
@@ -790,7 +807,8 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 		this.record_noOfficeEscalationHandler();
 		this.record_constructManagedObjectMetaData(processManagedObjects,
 				"OFFICE_MO_0");
-		inputManagedObject.manageByOffice(null, null, null, this.issues);
+		inputManagedObject.manageByOffice(null, null, null, null, null,
+				this.issues);
 		this.control(inputManagedObject).setMatcher(new AbstractMatcher() {
 			@Override
 			public boolean matches(Object[] expected, Object[] actual) {
@@ -804,10 +822,15 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 				OfficeMetaDataLocator metaDataLocator = (OfficeMetaDataLocator) actual[1];
 				assertEquals("Incorrect meta-data locator", OFFICE_NAME,
 						metaDataLocator.getOfficeMetaData().getOfficeName());
+				assertEquals("Incorrect responsible teams",
+						RawOfficeMetaDataTest.this.officeTeams, actual[2]);
+				assertEquals("Incorrect continue team",
+						RawOfficeMetaDataTest.this.continueTeamManagement,
+						actual[3]);
 				assertTrue("Should be asset manager factory",
-						actual[2] instanceof AssetManagerFactory);
+						actual[4] instanceof AssetManagerFactory);
 				assertEquals("Incorrect issues",
-						RawOfficeMetaDataTest.this.issues, actual[3]);
+						RawOfficeMetaDataTest.this.issues, actual[5]);
 				return true;
 			}
 		});
@@ -915,8 +938,8 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 				new GovernanceConfiguration[] { governanceConfiguration });
 		this.recordReturn(this.rawGovernanceFactory, this.rawGovernanceFactory
 				.createRawGovernanceMetaData(governanceConfiguration, 0,
-						this.sourceContext, teams, OFFICE_NAME, this.issues),
-				null);
+						this.sourceContext, teams, this.continueTeam,
+						OFFICE_NAME, this.issues), null);
 		this.recordReturn(governanceConfiguration,
 				governanceConfiguration.getGovernanceName(), "GOVERNANCE");
 		this.record_issue("Unable to configure governance 'GOVERNANCE'");
@@ -1627,6 +1650,10 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 	 */
 	private Map<String, TeamManagement> record_teams(String... teamNames) {
 
+		// Record obtaining the continue team
+		this.recordReturn(this.continueTeamManagement,
+				this.continueTeamManagement.getTeam(), this.continueTeam);
+
 		// Create configuration for each team name
 		LinkedTeamConfiguration[] teamConfigurations = new LinkedTeamConfiguration[teamNames.length];
 		for (int i = 0; i < teamConfigurations.length; i++) {
@@ -1713,8 +1740,8 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 			this.recordReturn(this.rawGovernanceFactory,
 					this.rawGovernanceFactory.createRawGovernanceMetaData(
 							governanceConfiguration, i, this.sourceContext,
-							this.officeTeams, OFFICE_NAME, this.issues),
-					rawGovernanceMetaData);
+							this.officeTeams, this.continueTeam, OFFICE_NAME,
+							this.issues), rawGovernanceMetaData);
 			this.recordReturn(rawGovernanceMetaData,
 					rawGovernanceMetaData.getGovernanceName(), governanceName);
 			this.recordReturn(rawGovernanceMetaData,
@@ -2029,7 +2056,7 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 									adminConfigurations, this.sourceContext,
 									this.issues, AdministratorScope.PROCESS,
 									AssetType.OFFICE, OFFICE_NAME, teams,
-									processManagedObjects),
+									this.continueTeam, processManagedObjects),
 					rawBoundAdminMetaDatas);
 		}
 		for (int i = 0; i < processBoundNames.length; i++) {
@@ -2086,7 +2113,7 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 									adminConfigurations, this.sourceContext,
 									this.issues, AdministratorScope.THREAD,
 									AssetType.OFFICE, OFFICE_NAME, teams,
-									scopeManagedObjects),
+									this.continueTeam, scopeManagedObjects),
 					rawBoundAdminMetaDatas);
 		}
 		for (int i = 0; i < threadBoundNames.length; i++) {
@@ -2377,7 +2404,8 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 						this.rawGovernanceFactory,
 						this.rawBoundAdministratorFactory,
 						this.rawWorkMetaDataFactory,
-						this.rawTaskMetaDataFactory);
+						this.rawTaskMetaDataFactory,
+						this.continueTeamManagement);
 		if (isExpectConstruct) {
 			assertNotNull("Meta-data should be constructed", metaData);
 		} else {

@@ -20,7 +20,10 @@ package net.officefloor.frame.internal.construct;
 
 import net.officefloor.frame.api.build.OfficeFloorIssues;
 import net.officefloor.frame.internal.configuration.OfficeConfiguration;
+import net.officefloor.frame.internal.structure.TeamManagement;
 import net.officefloor.frame.spi.source.SourceContext;
+import net.officefloor.frame.spi.team.Job;
+import net.officefloor.frame.spi.team.Team;
 
 /**
  * Factory for creating the {@link RawOfficeMetaData}.
@@ -52,6 +55,10 @@ public interface RawOfficeMetaDataFactory {
 	 *            {@link RawWorkMetaDataFactory}.
 	 * @param rawTaskFactory
 	 *            {@link RawTaskMetaDataFactory}.
+	 * @param continueTeam
+	 *            {@link TeamManagement} of the {@link Team} to enable the
+	 *            worker ({@link Thread}) of the responsible {@link Team} to
+	 *            continue on to execute the next {@link Job}.
 	 * @return {@link RawOfficeMetaData}.
 	 */
 	RawOfficeMetaData constructRawOfficeMetaData(
@@ -63,6 +70,6 @@ public interface RawOfficeMetaDataFactory {
 			RawGovernanceMetaDataFactory rawGovernanceMetaDataFactory,
 			RawBoundAdministratorMetaDataFactory rawBoundAdministratorFactory,
 			RawWorkMetaDataFactory rawWorkFactory,
-			RawTaskMetaDataFactory rawTaskFactory);
+			RawTaskMetaDataFactory rawTaskFactory, TeamManagement continueTeam);
 
 }

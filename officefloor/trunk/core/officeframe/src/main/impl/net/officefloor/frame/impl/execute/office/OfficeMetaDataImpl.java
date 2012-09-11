@@ -45,9 +45,11 @@ import net.officefloor.frame.internal.structure.ProcessProfiler;
 import net.officefloor.frame.internal.structure.ProcessState;
 import net.officefloor.frame.internal.structure.ProcessTicker;
 import net.officefloor.frame.internal.structure.TaskMetaData;
+import net.officefloor.frame.internal.structure.TeamManagement;
 import net.officefloor.frame.internal.structure.WorkMetaData;
 import net.officefloor.frame.spi.governance.Governance;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
+import net.officefloor.frame.spi.team.Team;
 import net.officefloor.frame.spi.team.TeamIdentifier;
 import net.officefloor.frame.spi.team.source.ProcessContextListener;
 
@@ -263,8 +265,8 @@ public class OfficeMetaDataImpl implements OfficeMetaData {
 	@Override
 	public <W extends Work> JobNode createProcess(FlowMetaData<W> flowMetaData,
 			Object parameter) {
-		return this
-				.createProcess(flowMetaData, parameter, null, null, -1, null);
+		return this.createProcess(flowMetaData, parameter, null, null, -1,
+				null, null, null);
 	}
 
 	@Override
@@ -272,7 +274,9 @@ public class OfficeMetaDataImpl implements OfficeMetaData {
 			Object parameter, ManagedObject inputManagedObject,
 			ManagedObjectMetaData<?> inputManagedObjectMetaData,
 			int processBoundIndexForInputManagedObject,
-			EscalationHandler inputManagedObjectEscalationHandler) {
+			EscalationHandler inputManagedObjectEscalationHandler,
+			TeamManagement escalationResponsibleTeam,
+			Team escalationContinueTeam) {
 
 		// Create the process profiler (if profiling)
 		ProcessProfiler processProfiler = (this.profiler == null ? null
@@ -294,6 +298,7 @@ public class OfficeMetaDataImpl implements OfficeMetaData {
 					inputManagedObject, inputManagedObjectMetaData,
 					processBoundIndexForInputManagedObject,
 					inputManagedObjectEscalationHandler,
+					escalationResponsibleTeam, escalationContinueTeam,
 					this.inputManagedObjectEscalationRequiredGovernance);
 		}
 
