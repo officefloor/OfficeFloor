@@ -18,14 +18,19 @@
 
 package net.officefloor.frame.internal.construct;
 
+import java.util.Map;
+
 import net.officefloor.frame.api.build.OfficeFloorIssues;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.internal.configuration.InputManagedObjectConfiguration;
 import net.officefloor.frame.internal.structure.JobSequence;
 import net.officefloor.frame.internal.structure.ManagedObjectExecuteContextFactory;
 import net.officefloor.frame.internal.structure.ProcessState;
+import net.officefloor.frame.internal.structure.TeamManagement;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
+import net.officefloor.frame.spi.team.Job;
+import net.officefloor.frame.spi.team.Team;
 
 /**
  * Meta-data of a {@link ManagedObject} that is managed by the {@link Office}.
@@ -93,6 +98,12 @@ public interface RawManagingOfficeMetaData<F extends Enum<F>> {
 	 * @param metaDataLocator
 	 *            {@link OfficeMetaDataLocator} for the {@link Office} managing
 	 *            the {@link ManagedObjectSource}.
+	 * @param officeTeams
+	 *            {@link TeamManagement} instances by their {@link Office}
+	 *            names.
+	 * @param continueTeamManagement
+	 *            {@link TeamManagement} for the {@link Team} to let the worker
+	 *            ({@link Thread}) continue on to execute the next {@link Job}.
 	 * @param assetManagerFactory
 	 *            {@link AssetManagerFactory}.
 	 * @param issues
@@ -101,6 +112,8 @@ public interface RawManagingOfficeMetaData<F extends Enum<F>> {
 	void manageByOffice(
 			RawBoundManagedObjectMetaData[] processBoundManagedObjectMetaData,
 			OfficeMetaDataLocator metaDataLocator,
+			Map<String, TeamManagement> officeTeams,
+			TeamManagement continueTeamManagement,
 			AssetManagerFactory assetManagerFactory, OfficeFloorIssues issues);
 
 	/**

@@ -49,12 +49,14 @@ import net.officefloor.frame.internal.structure.ManagedObjectMetaData;
 import net.officefloor.frame.internal.structure.OfficeMetaData;
 import net.officefloor.frame.internal.structure.ProcessState;
 import net.officefloor.frame.internal.structure.TaskMetaData;
+import net.officefloor.frame.internal.structure.TeamManagement;
 import net.officefloor.frame.internal.structure.WorkMetaData;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.frame.spi.managedobject.recycle.RecycleManagedObjectParameter;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectFlowMetaData;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceMetaData;
+import net.officefloor.frame.spi.team.Team;
 
 /**
  * {@link RawManagingOfficeMetaData} implementation.
@@ -65,8 +67,8 @@ public class RawManagingOfficeMetaDataImpl<F extends Enum<F>> implements
 		RawManagingOfficeMetaData<F> {
 
 	/**
-	 * Determines if the {@link ManagedObjectSource} instigates {@link JobSequence}
-	 * instances.
+	 * Determines if the {@link ManagedObjectSource} instigates
+	 * {@link JobSequence} instances.
 	 * 
 	 * @param flowMetaData
 	 *            {@link ManagedObjectFlowMetaData} instances of the
@@ -222,6 +224,8 @@ public class RawManagingOfficeMetaDataImpl<F extends Enum<F>> implements
 	public synchronized void manageByOffice(
 			RawBoundManagedObjectMetaData[] processBoundManagedObjectMetaData,
 			OfficeMetaDataLocator metaDataLocator,
+			Map<String, TeamManagement> officeTeams,
+			TeamManagement continueTeamManagement,
 			AssetManagerFactory assetManagerFactory, OfficeFloorIssues issues) {
 
 		// Obtain the name of the managed object source
@@ -234,6 +238,13 @@ public class RawManagingOfficeMetaDataImpl<F extends Enum<F>> implements
 
 		// Obtain the office meta-data
 		OfficeMetaData officeMetaData = metaDataLocator.getOfficeMetaData();
+
+		// Obtain the team responsible for managed object source escalation
+		// TODO allow configuring the escalation team
+		TeamManagement escalationResponsibleTeam = continueTeamManagement;
+
+		// Obtain the continue team
+		Team continueTeam = continueTeamManagement.getTeam();
 
 		// Obtain the recycle task meta-data
 		FlowMetaData<?> recycleFlowMetaData = null;
@@ -313,7 +324,8 @@ public class RawManagingOfficeMetaDataImpl<F extends Enum<F>> implements
 
 			// No flows, so provide empty execution context
 			this.managedObjectExecuteContextFactory = new ManagedObjectExecuteContextFactoryImpl<F>(
-					null, -1, null, officeMetaData);
+					null, -1, null, officeMetaData, escalationResponsibleTeam,
+					continueTeam);
 			return;
 		}
 
@@ -447,7 +459,8 @@ public class RawManagingOfficeMetaDataImpl<F extends Enum<F>> implements
 
 		// Specify the managed object execute context
 		this.managedObjectExecuteContextFactory = new ManagedObjectExecuteContextFactoryImpl<F>(
-				managedObjectMetaData, processBoundIndex, flows, officeMetaData);
+				managedObjectMetaData, processBoundIndex, flows,
+				officeMetaData, escalationResponsibleTeam, continueTeam);
 	}
 
 	@Override

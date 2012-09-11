@@ -38,6 +38,7 @@ import net.officefloor.frame.internal.structure.WorkContainer;
 import net.officefloor.frame.spi.administration.Administrator;
 import net.officefloor.frame.spi.administration.DutyKey;
 import net.officefloor.frame.spi.administration.source.AdministratorSource;
+import net.officefloor.frame.spi.team.Job;
 import net.officefloor.frame.spi.team.Team;
 
 /**
@@ -65,6 +66,12 @@ public class AdministratorMetaDataImpl<I extends Object, A extends Enum<A>>
 	private final TeamManagement responsibleTeam;
 
 	/**
+	 * {@link Team} to enable the worker ({@link Thread}) of the responsible
+	 * {@link Team} to continue on to execute the next {@link Job}.
+	 */
+	private final Team continueTeam;
+
+	/**
 	 * {@link EscalationProcedure}.
 	 */
 	private final EscalationProcedure escalationProcedure;
@@ -88,17 +95,22 @@ public class AdministratorMetaDataImpl<I extends Object, A extends Enum<A>>
 	 * @param responsibleTeam
 	 *            {@link TeamManagement} of {@link Team} responsible for the
 	 *            {@link GovernanceActivity}.
+	 * @param continueTeam
+	 *            {@link Team} to enable the worker ({@link Thread}) of the
+	 *            responsible {@link Team} to continue on to execute the next
+	 *            {@link Job}.
 	 * @param escalationProcedure
 	 *            {@link EscalationProcedure}.
 	 */
 	public AdministratorMetaDataImpl(
 			AdministratorSource<I, A> administratorSource,
 			ExtensionInterfaceMetaData<I>[] eiMetaData,
-			TeamManagement responsibleTeam,
+			TeamManagement responsibleTeam, Team continueTeam,
 			EscalationProcedure escalationProcedure) {
 		this.eiMetaData = eiMetaData;
 		this.administratorSource = administratorSource;
 		this.responsibleTeam = responsibleTeam;
+		this.continueTeam = continueTeam;
 		this.escalationProcedure = escalationProcedure;
 	}
 
@@ -152,6 +164,11 @@ public class AdministratorMetaDataImpl<I extends Object, A extends Enum<A>>
 	@Override
 	public TeamManagement getResponsibleTeam() {
 		return this.responsibleTeam;
+	}
+
+	@Override
+	public Team getContinueTeam() {
+		return this.continueTeam;
 	}
 
 	@Override

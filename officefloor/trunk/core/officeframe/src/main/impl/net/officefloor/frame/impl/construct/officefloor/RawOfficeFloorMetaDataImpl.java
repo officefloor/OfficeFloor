@@ -175,6 +175,14 @@ public class RawOfficeFloorMetaDataImpl implements RawOfficeFloorMetaData,
 		Map<String, RawTeamMetaData> teamRegistry = new HashMap<String, RawTeamMetaData>();
 		List<ProcessContextListener> processContextListeners = new LinkedList<ProcessContextListener>();
 		List<TeamManagement> teamListing = new LinkedList<TeamManagement>();
+
+		// Construct the continue team
+		Team continueTeam = new PassiveTeam();
+		TeamManagement continueTeamManagement = new TeamManagementImpl(
+				continueTeam);
+		teamListing.add(continueTeamManagement);
+
+		// Construct the configured teams
 		for (TeamConfiguration<?> teamConfiguration : configuration
 				.getTeamConfiguration()) {
 
@@ -273,8 +281,8 @@ public class RawOfficeFloorMetaDataImpl implements RawOfficeFloorMetaData,
 			officeFloorEscalationHandler = new DefaultOfficeFloorEscalationHandler();
 		}
 		EscalationFlow officeFloorEscalation = new EscalationHandlerEscalation(
-				officeFloorEscalationHandler, new TeamManagementImpl(
-						new PassiveTeam()), null);
+				officeFloorEscalationHandler, continueTeamManagement,
+				continueTeam, null);
 
 		// Create the raw office floor meta-data
 		RawOfficeFloorMetaDataImpl rawMetaData = new RawOfficeFloorMetaDataImpl(
@@ -312,7 +320,7 @@ public class RawOfficeFloorMetaDataImpl implements RawOfficeFloorMetaData,
 							officeManagingManagedObjects, rawMetaData,
 							rawBoundMoFactory, rawGovernanceFactory,
 							rawBoundAdminFactory, rawWorkFactory,
-							rawTaskFactory);
+							rawTaskFactory, continueTeamManagement);
 			if (rawOfficeMetaData == null) {
 				continue; // issue with office
 			}

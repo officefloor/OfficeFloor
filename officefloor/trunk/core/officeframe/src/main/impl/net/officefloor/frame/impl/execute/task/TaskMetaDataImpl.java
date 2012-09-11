@@ -81,6 +81,12 @@ public class TaskMetaDataImpl<W extends Work, D extends Enum<D>, F extends Enum<
 	private final TeamManagement responsibleTeam;
 
 	/**
+	 * {@link Team} to enable the worker ({@link Thread}) of the responsible
+	 * {@link Team} to continue on to execute the next {@link Job}.
+	 */
+	private final Team continueTeam;
+
+	/**
 	 * {@link ManagedObjectIndex} instances identifying the
 	 * {@link ManagedObject} instances that must be loaded before the
 	 * {@link Task} may be executed.
@@ -159,6 +165,10 @@ public class TaskMetaDataImpl<W extends Work, D extends Enum<D>, F extends Enum<
 	 * @param responsibleTeam
 	 *            {@link TeamManagement} of the {@link Team} responsible for
 	 *            executing this {@link Task}.
+	 * @param continueTeam
+	 *            {@link Team} to enable the worker ({@link Thread}) of the
+	 *            responsible {@link Team} to continue on to execute the next
+	 *            {@link Job}.
 	 * @param requiredManagedObjects
 	 *            {@link ManagedObjectIndex} instances identifying the
 	 *            {@link ManagedObject} instances that must be loaded before the
@@ -178,7 +188,7 @@ public class TaskMetaDataImpl<W extends Work, D extends Enum<D>, F extends Enum<
 	public TaskMetaDataImpl(String jobName, String taskName,
 			TaskFactory<W, D, F> taskFactory, Object differentiator,
 			Class<?> parameterType, TeamManagement responsibleTeam,
-			ManagedObjectIndex[] requiredManagedObjects,
+			Team continueTeam, ManagedObjectIndex[] requiredManagedObjects,
 			ManagedObjectIndex[] taskToWorkMoTranslations,
 			boolean[] requiredGovernance,
 			TaskDutyAssociation<?>[] preTaskDuties,
@@ -189,6 +199,7 @@ public class TaskMetaDataImpl<W extends Work, D extends Enum<D>, F extends Enum<
 		this.differentiator = differentiator;
 		this.parameterType = parameterType;
 		this.responsibleTeam = responsibleTeam;
+		this.continueTeam = continueTeam;
 		this.requiredManagedObjects = requiredManagedObjects;
 		this.taskToWorkMoTranslations = taskToWorkMoTranslations;
 		this.requiredGovernance = requiredGovernance;
@@ -258,6 +269,11 @@ public class TaskMetaDataImpl<W extends Work, D extends Enum<D>, F extends Enum<
 	@Override
 	public TeamManagement getResponsibleTeam() {
 		return this.responsibleTeam;
+	}
+
+	@Override
+	public Team getContinueTeam() {
+		return this.continueTeam;
 	}
 
 	@Override

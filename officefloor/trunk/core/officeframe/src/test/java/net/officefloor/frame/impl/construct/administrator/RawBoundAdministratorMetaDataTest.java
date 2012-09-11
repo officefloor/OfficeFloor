@@ -122,9 +122,15 @@ public class RawBoundAdministratorMetaDataTest extends OfficeFrameTestCase {
 	private final Map<String, TeamManagement> officeTeams = new HashMap<String, TeamManagement>();
 
 	/**
-	 * {@link TeamManagement}.
+	 * Responsible {@link TeamManagement}.
 	 */
-	private final TeamManagement team = this.createMock(TeamManagement.class);
+	private final TeamManagement responsibleTeam = this
+			.createMock(TeamManagement.class);
+
+	/**
+	 * Continue {@link Team}.
+	 */
+	private final Team continueTeam = this.createMock(Team.class);
 
 	/**
 	 * Scope bound {@link RawBoundManagedObjectMetaData} instances by their
@@ -722,8 +728,10 @@ public class RawBoundAdministratorMetaDataTest extends OfficeFrameTestCase {
 		// Verify remaining administrator meta-data
 		assertNotNull("Must have admin source",
 				adminMetaData.getAdministratorSource());
-		assertEquals("Incorrect team", this.team,
+		assertEquals("Incorrect responsible team", this.responsibleTeam,
 				adminMetaData.getResponsibleTeam());
+		assertEquals("Incorrect continue team", this.continueTeam,
+				adminMetaData.getContinueTeam());
 		assertEquals("Incorrect administered managed object",
 				this.managedObjectIndex, moEiMetaData.getManagedObjectIndex());
 
@@ -1271,7 +1279,7 @@ public class RawBoundAdministratorMetaDataTest extends OfficeFrameTestCase {
 		final String TEAM_NAME = "TEAM";
 		this.recordReturn(this.configuration,
 				this.configuration.getOfficeTeamName(), TEAM_NAME);
-		this.officeTeams.put(TEAM_NAME, this.team);
+		this.officeTeams.put(TEAM_NAME, this.responsibleTeam);
 	}
 
 	/**
@@ -1456,7 +1464,8 @@ public class RawBoundAdministratorMetaDataTest extends OfficeFrameTestCase {
 				.getFactory().constructRawBoundAdministratorMetaData(
 						configuration, this.sourceContext, this.issues,
 						this.administratorScope, this.assetType,
-						this.assetName, this.officeTeams, this.scopeMo);
+						this.assetName, this.officeTeams, this.continueTeam,
+						this.scopeMo);
 
 		// Ensure correct number created
 		assertEquals("Incorrect number of created meta-data",

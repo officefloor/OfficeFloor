@@ -108,7 +108,13 @@ public class RawGovernanceMetaDataTest extends OfficeFrameTestCase {
 	 * {@link TeamManagement}. May be set to <code>null</code> to not be
 	 * available.
 	 */
-	private TeamManagement team = this.createMock(TeamManagement.class);
+	private TeamManagement responsibleTeam = this
+			.createMock(TeamManagement.class);
+
+	/**
+	 * Continue {@link Team}.
+	 */
+	private Team continueTeam = this.createMock(Team.class);
 
 	/**
 	 * {@link OfficeMetaDataLocator}.
@@ -213,7 +219,7 @@ public class RawGovernanceMetaDataTest extends OfficeFrameTestCase {
 	public void testNoTeam() {
 
 		// No team
-		this.team = null;
+		this.responsibleTeam = null;
 
 		// Record no team name
 		this.recordReturn(this.configuration,
@@ -931,8 +937,8 @@ public class RawGovernanceMetaDataTest extends OfficeFrameTestCase {
 
 		// Create the map of office teams
 		Map<String, TeamManagement> officeTeams = new HashMap<String, TeamManagement>();
-		if (this.team != null) {
-			officeTeams.put(TEAM_NAME, this.team);
+		if (this.responsibleTeam != null) {
+			officeTeams.put(TEAM_NAME, this.responsibleTeam);
 		}
 
 		// Create the raw governance meta-data
@@ -940,7 +946,7 @@ public class RawGovernanceMetaDataTest extends OfficeFrameTestCase {
 				.getFactory().createRawGovernanceMetaData(
 						(GovernanceConfiguration) this.configuration,
 						GOVERNANCE_INDEX, this.sourceContext, officeTeams,
-						OFFICE_NAME, this.issues);
+						this.continueTeam, OFFICE_NAME, this.issues);
 		if (!isCreated) {
 			// Ensure not created
 			assertNull("Should not create the Raw Governance Meta-Data",

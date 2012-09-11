@@ -20,6 +20,7 @@ package net.officefloor.frame.internal.structure;
 
 import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.spi.team.Job;
+import net.officefloor.frame.spi.team.Team;
 
 /**
  * Meta-data for a {@link Job}.
@@ -50,6 +51,15 @@ public interface JobMetaData {
 	 *         {@link Job}.
 	 */
 	TeamManagement getResponsibleTeam();
+
+	/**
+	 * Obtains the {@link Team} to enable the worker ({@link Thread}) of the
+	 * responsible {@link Team} to continue on to execute the next {@link Job}.
+	 * 
+	 * @return {@link Team} to continue execution to complete the next
+	 *         {@link Job}.
+	 */
+	Team getContinueTeam();
 
 	/**
 	 * Obtains the {@link TaskMetaData} of the next {@link Task} within

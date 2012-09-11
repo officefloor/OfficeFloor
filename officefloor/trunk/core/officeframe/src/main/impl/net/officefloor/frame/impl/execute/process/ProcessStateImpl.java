@@ -20,6 +20,7 @@ package net.officefloor.frame.impl.execute.process;
 
 import java.util.List;
 
+import net.officefloor.frame.api.escalate.Escalation;
 import net.officefloor.frame.api.escalate.EscalationHandler;
 import net.officefloor.frame.api.execute.FlowFuture;
 import net.officefloor.frame.api.execute.Task;
@@ -30,9 +31,7 @@ import net.officefloor.frame.api.manage.UnknownTaskException;
 import net.officefloor.frame.api.manage.UnknownWorkException;
 import net.officefloor.frame.impl.execute.linkedlistset.StrictLinkedListSet;
 import net.officefloor.frame.impl.execute.managedobject.ManagedObjectContainerImpl;
-import net.officefloor.frame.impl.execute.team.TeamManagementImpl;
 import net.officefloor.frame.impl.execute.thread.ThreadStateImpl;
-import net.officefloor.frame.impl.spi.team.PassiveTeam;
 import net.officefloor.frame.internal.structure.AdministratorContainer;
 import net.officefloor.frame.internal.structure.AdministratorMetaData;
 import net.officefloor.frame.internal.structure.AssetManager;
@@ -49,11 +48,13 @@ import net.officefloor.frame.internal.structure.ProcessMetaData;
 import net.officefloor.frame.internal.structure.ProcessProfiler;
 import net.officefloor.frame.internal.structure.ProcessState;
 import net.officefloor.frame.internal.structure.TaskMetaData;
+import net.officefloor.frame.internal.structure.TeamManagement;
 import net.officefloor.frame.internal.structure.ThreadState;
 import net.officefloor.frame.internal.structure.WorkMetaData;
 import net.officefloor.frame.spi.governance.Governance;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
+import net.officefloor.frame.spi.team.Team;
 import net.officefloor.frame.spi.team.TeamIdentifier;
 import net.officefloor.frame.spi.team.source.ProcessContextListener;
 
@@ -175,7 +176,7 @@ public class ProcessStateImpl implements ProcessState {
 			ProcessProfiler processProfiler) {
 		this(processMetaData, processContextListeners, officeMetaData,
 				officeFloorEscalation, processProfiler, null, null, -1, null,
-				null);
+				null, null, null);
 	}
 
 	/**
@@ -204,6 +205,13 @@ public class ProcessStateImpl implements ProcessState {
 	 * @param inputManagedObjectEscalationHandler
 	 *            {@link EscalationHandler} provided by the
 	 *            {@link ManagedObject} that invoked this {@link ProcessState}.
+	 * @param escalationResponsibleTeam
+	 *            {@link TeamManagement} of {@link Team} responsible for
+	 *            handling {@link Escalation} from the {@link ManagedObject}.
+	 * @param escalationContinueTeam
+	 *            {@link Team} to enable worker ({@link Thread}) of responsible
+	 *            {@link Team} to continue on to handle {@link Escalation} of
+	 *            {@link ManagedObject}.
 	 * @param escalationRequiredGovernance
 	 *            {@link EscalationHandler} required {@link Governance}.
 	 */
@@ -215,6 +223,8 @@ public class ProcessStateImpl implements ProcessState {
 			ManagedObjectMetaData<?> inputManagedObjectMetaData,
 			int inputManagedObjectIndex,
 			EscalationHandler inputManagedObjectEscalationHandler,
+			TeamManagement escalationResponsibleTeam,
+			Team escalationContinueTeam,
 			boolean[] escalationHandlerRequiredGovernance) {
 		this.processMetaData = processMetaData;
 		this.processContextListeners = processContextListeners;
@@ -239,11 +249,10 @@ public class ProcessStateImpl implements ProcessState {
 		this.administratorContainers = new AdministratorContainer[administratorMetaData.length];
 
 		// Escalation handled by managed object source
-		// (TODO allow configuring the team responsible for MO handling)
 		this.managedObjectSourceEscalation = (inputManagedObjectEscalationHandler == null ? null
 				: new EscalationHandlerEscalation(
 						inputManagedObjectEscalationHandler,
-						new TeamManagementImpl(new PassiveTeam()),
+						escalationResponsibleTeam, escalationContinueTeam,
 						escalationHandlerRequiredGovernance));
 	}
 

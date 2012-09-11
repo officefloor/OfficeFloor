@@ -122,9 +122,15 @@ public class RawTaskMetaDataTest<W extends Work, D extends Enum<D>, F extends En
 			.createMock(RawOfficeMetaData.class);
 
 	/**
-	 * {@link TeamManagement}.
+	 * Responsible {@link TeamManagement}.
 	 */
-	private final TeamManagement team = this.createMock(TeamManagement.class);
+	private final TeamManagement responsibleTeam = this
+			.createMock(TeamManagement.class);
+
+	/**
+	 * Continue {@link Team}.
+	 */
+	private final Team continueTeam = this.createMock(Team.class);
 
 	/**
 	 * {@link WorkMetaData}.
@@ -211,9 +217,11 @@ public class RawTaskMetaDataTest<W extends Work, D extends Enum<D>, F extends En
 				this.rawWorkMetaData.getRawOfficeMetaData(),
 				this.rawOfficeMetaData);
 		Map<String, TeamManagement> teams = new HashMap<String, TeamManagement>();
-		teams.put("TEAM", this.team);
+		teams.put("TEAM", this.responsibleTeam);
 		this.recordReturn(this.rawOfficeMetaData,
 				this.rawOfficeMetaData.getTeams(), teams);
+		this.recordReturn(this.rawOfficeMetaData,
+				this.rawOfficeMetaData.getContinueTeam(), this.continueTeam);
 		this.record_NoManagedObjects();
 		this.record_NoAdministration();
 		this.record_NoGovernance();
@@ -331,7 +339,7 @@ public class RawTaskMetaDataTest<W extends Work, D extends Enum<D>, F extends En
 		assertEquals("Incorect task factory", this.taskFactory,
 				taskMetaData.getTaskFactory());
 		assertNull("No differentiator", taskMetaData.getDifferentiator());
-		assertEquals("Incorrect team", this.team,
+		assertEquals("Incorrect team", this.responsibleTeam,
 				taskMetaData.getResponsibleTeam());
 	}
 
@@ -1983,9 +1991,11 @@ public class RawTaskMetaDataTest<W extends Work, D extends Enum<D>, F extends En
 				this.rawWorkMetaData.getRawOfficeMetaData(),
 				this.rawOfficeMetaData);
 		Map<String, TeamManagement> teams = new HashMap<String, TeamManagement>();
-		teams.put("TEAM", this.team);
+		teams.put("TEAM", this.responsibleTeam);
 		this.recordReturn(this.rawOfficeMetaData,
 				this.rawOfficeMetaData.getTeams(), teams);
+		this.recordReturn(this.rawOfficeMetaData,
+				this.rawOfficeMetaData.getContinueTeam(), this.continueTeam);
 	}
 
 	/**

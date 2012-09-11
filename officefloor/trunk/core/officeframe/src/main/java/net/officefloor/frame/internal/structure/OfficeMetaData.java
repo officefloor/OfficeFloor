@@ -18,28 +18,30 @@
 
 package net.officefloor.frame.internal.structure;
 
+import net.officefloor.frame.api.escalate.Escalation;
 import net.officefloor.frame.api.escalate.EscalationHandler;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
+import net.officefloor.frame.spi.team.Team;
 
 /**
  * Meta-data for the {@link Office}.
- *
+ * 
  * @author Daniel Sagenschneider
  */
 public interface OfficeMetaData {
 
 	/**
 	 * Obtains the name of the {@link Office}.
-	 *
+	 * 
 	 * @return Name of the {@link Office}.
 	 */
 	String getOfficeName();
 
 	/**
 	 * Obtains the {@link OfficeManager} of the {@link Office}.
-	 *
+	 * 
 	 * @return {@link OfficeManager} of the {@link Office}.
 	 */
 	OfficeManager getOfficeManager();
@@ -47,7 +49,7 @@ public interface OfficeMetaData {
 	/**
 	 * Obtains the {@link ProcessMetaData} for processes within this
 	 * {@link Office}.
-	 *
+	 * 
 	 * @return {@link ProcessMetaData} for processes within this {@link Office}.
 	 */
 	ProcessMetaData getProcessMetaData();
@@ -55,23 +57,23 @@ public interface OfficeMetaData {
 	/**
 	 * Obtains the {@link WorkMetaData} of the {@link Work} that may be done
 	 * within this {@link Office}.
-	 *
+	 * 
 	 * @return {@link WorkMetaData} instances of this {@link Office}.
 	 */
 	WorkMetaData<?>[] getWorkMetaData();
 
 	/**
 	 * Obtains the {@link EscalationProcedure} for this {@link Office}. This is
-	 * used when the {@link EscalationProcedure} instances on the {@link JobSequence}
-	 * does not handle the escalation.
-	 *
+	 * used when the {@link EscalationProcedure} instances on the
+	 * {@link JobSequence} does not handle the escalation.
+	 * 
 	 * @return {@link EscalationProcedure} for this {@link Office}.
 	 */
 	EscalationProcedure getEscalationProcedure();
 
 	/**
 	 * Obtains the {@link OfficeStartupTask} instances for this {@link Office}.
-	 *
+	 * 
 	 * @return {@link OfficeStartupTask} instances for this {@link Office}.
 	 */
 	OfficeStartupTask[] getStartupTasks();
@@ -79,7 +81,7 @@ public interface OfficeMetaData {
 	/**
 	 * Creates a new {@link ProcessState} within the {@link Office} returning
 	 * the starting {@link JobNode} to be executed.
-	 *
+	 * 
 	 * @param flowMetaData
 	 *            {@link FlowMetaData} of the starting {@link JobNode} for the
 	 *            {@link ProcessState}.
@@ -104,18 +106,26 @@ public interface OfficeMetaData {
 	 *            the default {@link Office} {@link EscalationProcedure}.
 	 *            Ignored if {@link ManagedObject} passed in is
 	 *            <code>null</code>.
+	 * @param escalationResponsibleTeam
+	 *            {@link TeamManagement} of {@link Team} responsible for the
+	 *            {@link ManagedObject} {@link Escalation} handling.
+	 * @param escalationContinueTeam
+	 *            {@link Team} to let the worker ({@link Thread}) continue on to
+	 *            execute the {@link EscalationHandler}.
 	 * @return {@link JobNode} to start processing the {@link ProcessState}.
 	 */
 	<W extends Work> JobNode createProcess(FlowMetaData<W> flowMetaData,
 			Object parameter, ManagedObject inputManagedObject,
 			ManagedObjectMetaData<?> inputManagedObjectMetaData,
 			int processBoundIndexForInputManagedObject,
-			EscalationHandler inputManagedObjectEscalationHandler);
+			EscalationHandler inputManagedObjectEscalationHandler,
+			TeamManagement escalationResponsibleTeam,
+			Team escalationContinueTeam);
 
 	/**
 	 * Creates a new {@link ProcessState} that is not triggered by a
 	 * {@link ManagedObject}.
-	 *
+	 * 
 	 * @param flowMetaData
 	 *            {@link FlowMetaData} of the starting {@link JobNode} for the
 	 *            {@link ProcessState}.

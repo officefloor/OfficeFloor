@@ -21,6 +21,7 @@ package net.officefloor.frame.impl.execute.officefloor;
 import java.util.Timer;
 import java.util.TimerTask;
 
+import net.officefloor.frame.api.escalate.Escalation;
 import net.officefloor.frame.api.escalate.EscalationHandler;
 import net.officefloor.frame.api.manage.ProcessFuture;
 import net.officefloor.frame.internal.structure.FlowMetaData;
@@ -29,9 +30,11 @@ import net.officefloor.frame.internal.structure.ManagedObjectMetaData;
 import net.officefloor.frame.internal.structure.OfficeMetaData;
 import net.officefloor.frame.internal.structure.ProcessState;
 import net.officefloor.frame.internal.structure.ProcessTicker;
+import net.officefloor.frame.internal.structure.TeamManagement;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectExecuteContext;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
+import net.officefloor.frame.spi.team.Team;
 import net.officefloor.frame.spi.team.TeamIdentifier;
 
 /**
@@ -69,6 +72,18 @@ public class ManagedObjectExecuteContextImpl<F extends Enum<F>> implements
 	private final OfficeMetaData officeMetaData;
 
 	/**
+	 * {@link TeamManagement} of the {@link Team} responsible for the
+	 * {@link ManagedObjectSource} {@link Escalation} handling.
+	 */
+	private final TeamManagement escalationResponsibleTeam;
+
+	/**
+	 * {@link Team} to let the worker ({@link Thread}) continue on to execute
+	 * the {@link ManagedObjectSource} {@link EscalationHandler}.
+	 */
+	private final Team escalationContinueTeam;
+
+	/**
 	 * {@link ProcessTicker}.
 	 */
 	private final ProcessTicker processTicker;
@@ -92,6 +107,13 @@ public class ManagedObjectExecuteContextImpl<F extends Enum<F>> implements
 	 * @param officeMetaData
 	 *            {@link OfficeMetaData} to create {@link ProcessState}
 	 *            instances.
+	 * @param escalationResponsibleTeam
+	 *            {@link TeamManagement} of the {@link Team} responsible for the
+	 *            {@link ManagedObjectSource} {@link Escalation} handling.
+	 * @param escalationContinueTeam
+	 *            {@link Team} to let the worker ({@link Thread}) continue on to
+	 *            execute the {@link ManagedObjectSource}
+	 *            {@link EscalationHandler}.
 	 * @param processTicker
 	 *            {@link ProcessTicker}.
 	 * @param timer
@@ -100,11 +122,15 @@ public class ManagedObjectExecuteContextImpl<F extends Enum<F>> implements
 	public ManagedObjectExecuteContextImpl(
 			ManagedObjectMetaData<?> managedObjectMetaData, int processMoIndex,
 			FlowMetaData<?>[] processLinks, OfficeMetaData officeMetaData,
-			ProcessTicker processTicker, Timer timer) {
+			TeamManagement escalationResponsibleTeam,
+			Team escalationContinueTeam, ProcessTicker processTicker,
+			Timer timer) {
 		this.managedObjectMetaData = managedObjectMetaData;
 		this.processMoIndex = processMoIndex;
 		this.processLinks = processLinks;
 		this.officeMetaData = officeMetaData;
+		this.escalationResponsibleTeam = escalationResponsibleTeam;
+		this.escalationContinueTeam = escalationContinueTeam;
 		this.processTicker = processTicker;
 		this.timer = timer;
 	}
@@ -153,7 +179,8 @@ public class ManagedObjectExecuteContextImpl<F extends Enum<F>> implements
 		// Create the job in a new process
 		final JobNode jobNode = this.officeMetaData.createProcess(flowMetaData,
 				parameter, managedObject, this.managedObjectMetaData,
-				this.processMoIndex, escalationHandler);
+				this.processMoIndex, escalationHandler,
+				this.escalationResponsibleTeam, this.escalationContinueTeam);
 
 		// Obtain the process state
 		ProcessState processState = jobNode.getJobSequence().getThreadState()

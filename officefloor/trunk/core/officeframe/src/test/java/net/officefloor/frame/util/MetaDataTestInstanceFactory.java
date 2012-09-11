@@ -33,6 +33,7 @@ import net.officefloor.frame.internal.structure.ManagedObjectIndex;
 import net.officefloor.frame.internal.structure.ManagedObjectMetaData;
 import net.officefloor.frame.internal.structure.TaskDutyAssociation;
 import net.officefloor.frame.internal.structure.TaskMetaData;
+import net.officefloor.frame.internal.structure.TeamManagement;
 import net.officefloor.frame.internal.structure.WorkMetaData;
 
 /**
@@ -95,10 +96,14 @@ public class MetaDataTestInstanceFactory {
 		String taskName = "TEST_TASK";
 		String jobName = workMetaData.getWorkName() + "." + taskName;
 
+		// Create the team
+		TeamManagement teamManagement = new TeamManagementImpl(
+				new PassiveTeam());
+
 		// Create and initialise the meta-data
 		TaskMetaDataImpl<W, D, F> metaData = new TaskMetaDataImpl<W, D, F>(
 				jobName, taskName, taskFactory, "TEST_DIFFERENTIATOR",
-				Object.class, new TeamManagementImpl(new PassiveTeam()),
+				Object.class, teamManagement, teamManagement.getTeam(),
 				new ManagedObjectIndex[0], new ManagedObjectIndex[0],
 				new boolean[0], new TaskDutyAssociation<?>[0],
 				new TaskDutyAssociation<?>[0]);

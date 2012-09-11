@@ -225,7 +225,8 @@ public class RawWorkMetaDataImpl<W extends Work> implements
 					.constructRawBoundAdministratorMetaData(adminConfiguration,
 							sourceContext, issues, AdministratorScope.WORK,
 							AssetType.WORK, workName,
-							rawOfficeMetaData.getTeams(), workScopeMo);
+							rawOfficeMetaData.getTeams(),
+							rawOfficeMetaData.getContinueTeam(), workScopeMo);
 		}
 
 		// Create the work scope administrators available to tasks

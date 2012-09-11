@@ -40,6 +40,7 @@ import net.officefloor.frame.internal.structure.ThreadState;
 import net.officefloor.frame.internal.structure.WorkContainer;
 import net.officefloor.frame.internal.structure.WorkMetaData;
 import net.officefloor.frame.spi.governance.Governance;
+import net.officefloor.frame.spi.team.Job;
 import net.officefloor.frame.spi.team.Team;
 
 /**
@@ -72,6 +73,12 @@ public class GovernanceMetaDataImpl<I, F extends Enum<F>> implements
 	private final TeamManagement responsibleTeam;
 
 	/**
+	 * {@link Team} to enable the worker ({@link Thread}) of the responsible
+	 * {@link Team} to continue on to execute the next {@link Job}.
+	 */
+	private final Team continueTeam;
+
+	/**
 	 * {@link FlowMetaData} instances.
 	 */
 	private FlowMetaData<?>[] flowMetaData;
@@ -91,13 +98,18 @@ public class GovernanceMetaDataImpl<I, F extends Enum<F>> implements
 	 * @param responsibleTeam
 	 *            {@link TeamManagement} of {@link Team} responsible for the
 	 *            {@link GovernanceActivity} instances.
+	 * @param continueTeam
+	 *            {@link Team} to enable the worker ({@link Thread}) of the
+	 *            responsible {@link Team} to continue on to execute the next
+	 *            {@link Job}.
 	 */
 	public GovernanceMetaDataImpl(String governanceName,
 			GovernanceFactory<? super I, F> governanceFactory,
-			TeamManagement responsibleTeam) {
+			TeamManagement responsibleTeam, Team continueTeam) {
 		this.governanceName = governanceName;
 		this.governanceFactory = governanceFactory;
 		this.responsibleTeam = responsibleTeam;
+		this.continueTeam = continueTeam;
 	}
 
 	/**
@@ -126,6 +138,13 @@ public class GovernanceMetaDataImpl<I, F extends Enum<F>> implements
 	@Override
 	public TeamManagement getResponsibleTeam() {
 		return this.responsibleTeam;
+	}
+
+	@Override
+	public Team getContinueTeam() {
+		// TODO implement JobMetaData.getContinueTeam
+		throw new UnsupportedOperationException(
+				"TODO implement JobMetaData.getContinueTeam");
 	}
 
 	@Override
