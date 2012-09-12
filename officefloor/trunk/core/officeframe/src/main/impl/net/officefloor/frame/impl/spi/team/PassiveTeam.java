@@ -73,7 +73,7 @@ public class PassiveTeam implements Team {
 	/**
 	 * Passive {@link JobContext}.
 	 */
-	private class PassiveJobContext implements JobContext {
+	protected class PassiveJobContext implements JobContext {
 
 		/**
 		 * Value indicating the time is not specified.

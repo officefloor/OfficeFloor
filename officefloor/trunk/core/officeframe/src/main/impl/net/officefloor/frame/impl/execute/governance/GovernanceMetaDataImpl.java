@@ -142,9 +142,7 @@ public class GovernanceMetaDataImpl<I, F extends Enum<F>> implements
 
 	@Override
 	public Team getContinueTeam() {
-		// TODO implement JobMetaData.getContinueTeam
-		throw new UnsupportedOperationException(
-				"TODO implement JobMetaData.getContinueTeam");
+		return this.continueTeam;
 	}
 
 	@Override

@@ -28,9 +28,11 @@ import net.officefloor.frame.api.execute.FlowFuture;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.api.profile.Profiler;
 import net.officefloor.frame.impl.execute.asset.AssetManagerImpl;
+import net.officefloor.frame.impl.execute.escalation.EscalationProcedureImpl;
 import net.officefloor.frame.impl.execute.flow.FlowMetaDataImpl;
 import net.officefloor.frame.impl.execute.job.AbstractJobContainer;
 import net.officefloor.frame.impl.execute.managedobject.ManagedObjectMetaDataImpl;
+import net.officefloor.frame.impl.execute.office.OfficeMetaDataImpl;
 import net.officefloor.frame.impl.execute.process.ProcessMetaDataImpl;
 import net.officefloor.frame.impl.execute.process.ProcessStateImpl;
 import net.officefloor.frame.impl.execute.profile.ProcessProfilerImpl;
@@ -46,6 +48,8 @@ import net.officefloor.frame.internal.structure.JobNode;
 import net.officefloor.frame.internal.structure.JobSequence;
 import net.officefloor.frame.internal.structure.ManagedObjectGovernanceMetaData;
 import net.officefloor.frame.internal.structure.ManagedObjectMetaData;
+import net.officefloor.frame.internal.structure.OfficeMetaData;
+import net.officefloor.frame.internal.structure.OfficeStartupTask;
 import net.officefloor.frame.internal.structure.ProcessMetaData;
 import net.officefloor.frame.internal.structure.ProcessProfiler;
 import net.officefloor.frame.internal.structure.ProcessState;
@@ -57,9 +61,7 @@ import net.officefloor.frame.internal.structure.WorkMetaData;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.spi.team.Job;
-import net.officefloor.frame.spi.team.JobContext;
 import net.officefloor.frame.spi.team.Team;
-import net.officefloor.frame.spi.team.TeamIdentifier;
 import net.officefloor.frame.spi.team.source.ProcessContextListener;
 import net.officefloor.frame.test.MockTeamSource;
 import net.officefloor.frame.test.OfficeFrameTestCase;
@@ -70,18 +72,22 @@ import net.officefloor.frame.test.OfficeFrameTestCase;
  * @author Daniel Sagenschneider
  */
 public abstract class AbstractTaskNodeTestCase<W extends Work> extends
-		OfficeFrameTestCase implements TeamManagement, TeamIdentifier, Team {
-
-	/**
-	 * {@link TeamIdentifier} for this {@link JobContext}.
-	 */
-	private final TeamIdentifier teamIdentifier = MockTeamSource
-			.createTeamIdentifier();
+		OfficeFrameTestCase {
 
 	/**
 	 * Initial {@link ExecutionNode}.
 	 */
 	private ExecutionNode<W> initialNode;
+
+	/**
+	 * {@link ExecutionTeam} responsible for the initial {@link ExecutionNode}.
+	 */
+	private final ExecutionTeam initialTeam = new ExecutionTeam();
+
+	/**
+	 * Continue {@link Team}.
+	 */
+	private final ExecutionTeam continueTeam = new ExecutionTeam();
 
 	/**
 	 * {@link ManagedObjectSource} for the {@link ManagedObject} of the
@@ -148,7 +154,8 @@ public abstract class AbstractTaskNodeTestCase<W extends Work> extends
 
 		// Initial node
 		this.initialNode = new ExecutionNode(this.nextExecutionNodeId(), this,
-				workMetaData);
+				this.initialTeam, this.continueTeam, workMetaData,
+				this.initialTeam);
 	}
 
 	/**
@@ -158,6 +165,35 @@ public abstract class AbstractTaskNodeTestCase<W extends Work> extends
 	 */
 	protected ExecutionNode<W> getInitialNode() {
 		return this.initialNode;
+	}
+
+	/**
+	 * Obtains the {@link ExecutionTeam} responsible for the initial
+	 * {@link ExecutionNode}.
+	 * 
+	 * @return {@link ExecutionTeam} responsible for the initial
+	 *         {@link ExecutionNode}.
+	 */
+	protected ExecutionTeam getInitialTeam() {
+		return this.initialTeam;
+	}
+
+	/**
+	 * Obtain the continue {@link ExecutionTeam}.
+	 * 
+	 * @return Continue {@link ExecutionTeam}.
+	 */
+	protected ExecutionTeam getContinueTeam() {
+		return this.continueTeam;
+	}
+
+	/**
+	 * Creates an {@link ExecutionTeam}.
+	 * 
+	 * @return {@link ExecutionTeam}.
+	 */
+	protected ExecutionTeam createExecutionTeam() {
+		return new ExecutionTeam();
 	}
 
 	/**
@@ -203,10 +239,17 @@ public abstract class AbstractTaskNodeTestCase<W extends Work> extends
 	 * 
 	 * @param currentNode
 	 *            {@link ExecutionNode}.
+	 * @param responsibleTeam
+	 *            {@link TeamManagement} of {@link Team} responsible to execute
+	 *            the next {@link Job}.
+	 * @param expectedExecutionTeam
+	 *            Expected {@link ExecutionTeam} that will execute the next
+	 *            {@link Job}.
 	 * @return Next {@link ExecutionNode} to be executed after the input
 	 *         {@link ExecutionNode}.
 	 */
-	protected ExecutionNode<?> bindNextNode(ExecutionNode<W> currentNode) {
+	protected ExecutionNode<?> bindNextNode(ExecutionNode<W> currentNode,
+			TeamManagement responsibleTeam, ExecutionTeam expectedExecutionTeam) {
 
 		// Ensure next node not already bound
 		if (currentNode.getNextTaskInFlow() != null) {
@@ -215,7 +258,9 @@ public abstract class AbstractTaskNodeTestCase<W extends Work> extends
 
 		// Create the next execution node
 		ExecutionNode<W> nextNode = new ExecutionNode<W>(
-				this.nextExecutionNodeId(), this, currentNode.getWorkMetaData());
+				this.nextExecutionNodeId(), this, responsibleTeam,
+				this.continueTeam, currentNode.getWorkMetaData(),
+				expectedExecutionTeam);
 
 		// Bind as next execution node
 		currentNode.setNextTask(nextNode);
@@ -230,12 +275,19 @@ public abstract class AbstractTaskNodeTestCase<W extends Work> extends
 	 * 
 	 * @param currentNode
 	 *            {@link ExecutionNode}.
+	 * @param responsibleTeam
+	 *            {@link TeamManagement} of {@link Team} responsible to execute
+	 *            the {@link Job}.
+	 * @param expectedExecutionTeam
+	 *            Expected {@link ExecutionTeam} that will execute the
+	 *            {@link Job}.
 	 * @return {@link ExecutionNode} to be sequentially executed after the input
 	 *         {@link ExecutionNode}.
 	 */
-	protected ExecutionNode<W> bindSequentialNode(ExecutionNode<W> currentNode) {
+	protected ExecutionNode<W> bindSequentialNode(ExecutionNode<W> currentNode,
+			TeamManagement responsibleTeam, ExecutionTeam expectedExecutionTeam) {
 		return this.bindFlow(FlowInstigationStrategyEnum.SEQUENTIAL,
-				currentNode);
+				currentNode, responsibleTeam, expectedExecutionTeam);
 	}
 
 	/**
@@ -244,11 +296,19 @@ public abstract class AbstractTaskNodeTestCase<W extends Work> extends
 	 * 
 	 * @param currentNode
 	 *            {@link ExecutionNode}.
+	 * @param responsibleTeam
+	 *            {@link TeamManagement} of {@link Team} responsible to execute
+	 *            the {@link Job}.
+	 * @param expectedExecutionTeam
+	 *            Expected {@link ExecutionTeam} that will execute the
+	 *            {@link Job}.
 	 * @return {@link ExecutionNode} to be executed in parallel to the input
 	 *         {@link ExecutionNode}.
 	 */
-	protected ExecutionNode<W> bindParallelNode(ExecutionNode<W> currentNode) {
-		return this.bindFlow(FlowInstigationStrategyEnum.PARALLEL, currentNode);
+	protected ExecutionNode<W> bindParallelNode(ExecutionNode<W> currentNode,
+			TeamManagement responsibleTeam, ExecutionTeam expectedExecutionTeam) {
+		return this.bindFlow(FlowInstigationStrategyEnum.PARALLEL, currentNode,
+				responsibleTeam, expectedExecutionTeam);
 	}
 
 	/**
@@ -257,12 +317,16 @@ public abstract class AbstractTaskNodeTestCase<W extends Work> extends
 	 * 
 	 * @param currentNode
 	 *            {@link ExecutionNode}.
+	 * @param responsibleTeam
+	 *            {@link ExecutionTeam} responsible to execute the {@link Job}.
+	 *            No continue {@link Team} as asynchronous can not continue.
 	 * @return {@link ExecutionNode} to be executed asynchronously to the input
 	 *         {@link ExecutionNode}.
 	 */
-	protected ExecutionNode<W> bindAsynchronousNode(ExecutionNode<W> currentNode) {
+	protected ExecutionNode<W> bindAsynchronousNode(
+			ExecutionNode<W> currentNode, ExecutionTeam responsibleTeam) {
 		return this.bindFlow(FlowInstigationStrategyEnum.ASYNCHRONOUS,
-				currentNode);
+				currentNode, responsibleTeam, responsibleTeam);
 	}
 
 	/**
@@ -272,15 +336,24 @@ public abstract class AbstractTaskNodeTestCase<W extends Work> extends
 	 *            {@link FlowInstigationStrategyEnum}.
 	 * @param currentNode
 	 *            {@link ExecutionNode}.
+	 * @param responsibleTeam
+	 *            {@link TeamManagement} of {@link Team} responsible to execute
+	 *            the {@link Job}.
+	 * @param expectedExecutionTeam
+	 *            Expected {@link ExecutionTeam} that will execute the
+	 *            {@link Job}.
 	 * @return Flow {@link ExecutionNode}.
 	 */
 	private ExecutionNode<W> bindFlow(
 			FlowInstigationStrategyEnum instigationStrategy,
-			ExecutionNode<W> currentNode) {
+			ExecutionNode<W> currentNode, TeamManagement responsibleTeam,
+			ExecutionTeam expectedExecutionTeam) {
 
 		// Create the flow node
 		ExecutionNode<W> flowNode = new ExecutionNode<W>(
-				this.nextExecutionNodeId(), this, currentNode.getWorkMetaData());
+				this.nextExecutionNodeId(), this, responsibleTeam,
+				this.continueTeam, currentNode.getWorkMetaData(),
+				expectedExecutionTeam);
 
 		// Bind as flow node
 		currentNode.addFlow(instigationStrategy, flowNode);
@@ -338,9 +411,16 @@ public abstract class AbstractTaskNodeTestCase<W extends Work> extends
 		ProcessProfiler processProfiler = (this.profiler == null ? null
 				: new ProcessProfilerImpl(this.profiler, System.nanoTime()));
 
+		// Create the office meta-data
+		OfficeMetaData officeMetaData = new OfficeMetaDataImpl("TEST", null,
+				null, processMetaData, new ProcessContextListener[0],
+				new OfficeStartupTask[0], new EscalationProcedureImpl(), null,
+				this.profiler);
+
 		// Create Flow for executing
 		ProcessState processState = new ProcessStateImpl(processMetaData,
-				new ProcessContextListener[0], null, null, processProfiler);
+				new ProcessContextListener[0], officeMetaData, null,
+				processProfiler);
 		WorkMetaData<W> workMetaData = this.getInitialNode().getWorkMetaData();
 		FlowMetaData<?> flowMetaData = workMetaData.getInitialFlowMetaData();
 		AssetManager flowAssetManager = flowMetaData.getFlowManager();
@@ -352,11 +432,8 @@ public abstract class AbstractTaskNodeTestCase<W extends Work> extends
 		Job initialJob = (Job) initialJobNode;
 
 		// Execute the task tree (until complete)
-		boolean isComplete;
-		do {
-			JobContext context = new MockExecutionContext();
-			isComplete = initialJob.doJob(context);
-		} while (!isComplete);
+		this.getInitialTeam().assignJob(initialJob,
+				MockTeamSource.createTeamIdentifier());
 
 		// Verify functionality on mock objects
 		this.verifyMockObjects();
@@ -488,78 +565,6 @@ public abstract class AbstractTaskNodeTestCase<W extends Work> extends
 	 */
 	private int nextExecutionNodeId() {
 		return ++this.currentExecutionNodeId;
-	}
-
-	/*
-	 * ===================== TeamManagement ===================================
-	 */
-
-	@Override
-	public TeamIdentifier getIdentifier() {
-		return this;
-	}
-
-	@Override
-	public Team getTeam() {
-		return this;
-	}
-
-	/*
-	 * ===================== Team =============================================
-	 */
-
-	@Override
-	public void startWorking() {
-		// Do nothing
-	}
-
-	@Override
-	public void assignJob(Job task, TeamIdentifier assignerTeam) {
-		// Passively execute
-		while (!task.doJob(new MockExecutionContext()))
-			;
-	}
-
-	@Override
-	public void stopWorking() {
-		// Do nothing
-	}
-
-	/**
-	 * Mock {@link JobContext}.
-	 */
-	private class MockExecutionContext implements JobContext {
-
-		/**
-		 * Time.
-		 */
-		private long time = 0;
-
-		/*
-		 * =================== JobContext ========================
-		 */
-
-		@Override
-		public long getTime() {
-			// Lazy obtain the time
-			if (this.time == 0) {
-				this.time = System.currentTimeMillis();
-			}
-
-			// Return the time
-			return this.time;
-		}
-
-		@Override
-		public TeamIdentifier getCurrentTeam() {
-			return AbstractTaskNodeTestCase.this.teamIdentifier;
-		}
-
-		@Override
-		public boolean continueExecution() {
-			// Continue
-			return true;
-		}
 	}
 
 }

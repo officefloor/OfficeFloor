@@ -34,14 +34,17 @@ public class JoinExecutionTest extends AbstractTaskNodeTestCase<Work> {
 	 */
 	public void testJoinAsynchronous() {
 
-		ExecutionNode<Work> asyncNode = this.bindAsynchronousNode(this
-				.getInitialNode());
+		// Execute the asynchronous node before re-execution
+		ExecutionNode<Work> asyncNode = this.bindAsynchronousNode(
+				this.getInitialNode(), this.createExecutionTeam());
 		this.joinNode(this.getInitialNode(), asyncNode);
 
+		// Execute job
 		this.execute();
 
-		this.validateExecutionOrder(this.getInitialNode(), asyncNode, this
-				.getInitialNode());
+		// Validate the execution order
+		this.validateExecutionOrder(this.getInitialNode(), asyncNode,
+				this.getInitialNode());
 	}
 
 }
