@@ -23,8 +23,8 @@ import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
 import net.officefloor.frame.spi.team.Job;
 
 /**
- * Tests the {@link AbstractJobContainer} invoking sequential {@link JobSequence}
- * instances.
+ * Tests the {@link AbstractJobContainer} invoking sequential
+ * {@link JobSequence} instances.
  * 
  * @author Daniel Sagenschneider
  */

@@ -21,11 +21,15 @@ package net.officefloor.frame.integrate.jobnode.execute;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.integrate.jobnode.AbstractTaskNodeTestCase;
 import net.officefloor.frame.integrate.jobnode.ExecutionNode;
+import net.officefloor.frame.integrate.jobnode.ExecutionTeam;
 import net.officefloor.frame.integrate.jobnode.ManagedObjectProcesser;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.frame.internal.structure.ProcessState;
+import net.officefloor.frame.internal.structure.TeamManagement;
 import net.officefloor.frame.internal.structure.ThreadState;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
+import net.officefloor.frame.spi.team.Job;
+import net.officefloor.frame.spi.team.Team;
 
 /**
  * Validates simple execution trees.
@@ -119,12 +123,34 @@ public class SimpleExecutionTest extends AbstractTaskNodeTestCase<Work> {
 	}
 
 	/**
-	 * Ensure next node will executed.
+	 * Ensure next node executed by the responsible {@link Team}.
 	 */
-	public void testNext() {
+	public void testNextJobByResponsibleTeam() {
+		ExecutionTeam responsibleTeam = this.createExecutionTeam();
+		this.doNextTest(responsibleTeam, responsibleTeam);
+	}
+
+	/**
+	 * Ensure can continue {@link Team} to execute the next node.
+	 */
+	public void testNextJobByContinueTeam() {
+		this.doNextTest(this.getInitialTeam(), this.getContinueTeam());
+	}
+
+	/**
+	 * Ensure next node will executed.
+	 * 
+	 * @param responsibleTeam
+	 *            {@link Team} responsible for next {@link Job}.
+	 * @param expectedExecutionTeam
+	 *            {@link Team} expected to execute the next {@link Job}.
+	 */
+	private void doNextTest(TeamManagement responsibleTeam,
+			ExecutionTeam expectedExecutionTeam) {
 
 		// Add next node to execute
-		ExecutionNode<?> nextNode = this.bindNextNode(this.getInitialNode());
+		ExecutionNode<?> nextNode = this.bindNextNode(this.getInitialNode(),
+				responsibleTeam, expectedExecutionTeam);
 
 		// Execute the nodes
 		this.execute();
@@ -133,13 +159,34 @@ public class SimpleExecutionTest extends AbstractTaskNodeTestCase<Work> {
 	}
 
 	/**
-	 * Ensure node will be executed sequentially.
+	 * Ensure sequential node executed by the responsible {@link Team}.
 	 */
-	public void testSequential() {
+	public void testSequentialJobByResponsibleTeam() {
+		ExecutionTeam responsibleTeam = this.createExecutionTeam();
+		this.doSequentialTest(responsibleTeam, responsibleTeam);
+	}
+
+	/**
+	 * Ensure can continue {@link Team} to execute the sequential node.
+	 */
+	public void testSequentialJobByContinueTeam() {
+		this.doSequentialTest(this.getInitialTeam(), this.getContinueTeam());
+	}
+
+	/**
+	 * Ensure node will be executed sequentially.
+	 * 
+	 * @param responsibleTeam
+	 *            {@link Team} responsible for sequential {@link Job}.
+	 * @param expectedExecutionTeam
+	 *            {@link Team} expected to execute the sequential {@link Job}.
+	 */
+	private void doSequentialTest(TeamManagement responsibleTeam,
+			ExecutionTeam expectedExecutionTeam) {
 
 		// Add sequential node to execute
-		ExecutionNode<?> sequentialNode = this.bindSequentialNode(this
-				.getInitialNode());
+		ExecutionNode<?> sequentialNode = this.bindSequentialNode(
+				this.getInitialNode(), responsibleTeam, expectedExecutionTeam);
 
 		// Execute the nodes
 		this.execute();
@@ -148,36 +195,78 @@ public class SimpleExecutionTest extends AbstractTaskNodeTestCase<Work> {
 	}
 
 	/**
-	 * Ensure node will be executed in parallel.
+	 * Ensure parallel node executed by the responsible {@link Team}.
 	 */
-	public void testParallel() {
+	public void testParallelJobByResponsibleTeam() {
+		ExecutionTeam responsibleTeam = this.createExecutionTeam();
+		this.doParallelTest(responsibleTeam, responsibleTeam);
+	}
+
+	/**
+	 * Ensure can continue {@link Team} to execute the parallel node.
+	 */
+	public void testParallelJobByContinueTeam() {
+		this.doParallelTest(this.getInitialTeam(), this.getContinueTeam());
+	}
+
+	/**
+	 * Ensure node will be executed in parallel.
+	 * 
+	 * @param responsibleTeam
+	 *            {@link Team} responsible for parallel {@link Job}.
+	 * @param expectedExecutionTeam
+	 *            {@link Team} expected to execute the parallel {@link Job}.
+	 */
+	private void doParallelTest(TeamManagement responsibleTeam,
+			ExecutionTeam expectedExecutionTeam) {
 
 		// Add parallel node to execute
-		ExecutionNode<?> parallelNode = this.bindParallelNode(this
-				.getInitialNode());
+		ExecutionNode<?> parallelNode = this.bindParallelNode(
+				this.getInitialNode(), responsibleTeam, expectedExecutionTeam);
 
 		// Execute the nodes
 		this.execute();
 
-		this.validateExecutionOrder(this.getInitialNode(), parallelNode, this
-				.getInitialNode());
+		this.validateExecutionOrder(this.getInitialNode(), parallelNode,
+				this.getInitialNode());
+	}
+
+	/**
+	 * Ensure asynchronous node executed by the responsible {@link Team}.
+	 */
+	public void testAsynchronousJobByResponsibleTeam() {
+		ExecutionTeam responsibleTeam = this.createExecutionTeam();
+		this.doAsynchronousTest(responsibleTeam);
+	}
+
+	/**
+	 * Ensure for asynchronous {@link Job} that does not continue with same
+	 * {@link Team} {@link Thread}.
+	 */
+	public void testAsynchronousJobByContinueTeam() {
+		this.doAsynchronousTest(this.getInitialTeam());
 	}
 
 	/**
 	 * Ensure node will be executed asynchronously.
+	 * 
+	 * @param responsibleTeam
+	 *            {@link Team} responsible for asynchronous {@link Job}.
 	 */
-	public void testAsynchronous() {
+	private void doAsynchronousTest(ExecutionTeam responsibleTeam) {
 
 		// Add asynchronous node to execute
-		ExecutionNode<?> asyncNode = this.bindAsynchronousNode(this
-				.getInitialNode());
+		ExecutionNode<?> asyncNode = this.bindAsynchronousNode(
+				this.getInitialNode(), responsibleTeam);
 
 		// Add next node to ensure order
-		ExecutionNode<?> nextNode = this.bindNextNode(this.getInitialNode());
+		ExecutionNode<?> nextNode = this.bindNextNode(this.getInitialNode(),
+				this.getInitialTeam(), this.getContinueTeam());
 
 		// Execute the nodes
 		this.execute();
 
+		// As all teams are passive, order is followed
 		this.validateExecutionOrder(this.getInitialNode(), asyncNode, nextNode);
 	}
 

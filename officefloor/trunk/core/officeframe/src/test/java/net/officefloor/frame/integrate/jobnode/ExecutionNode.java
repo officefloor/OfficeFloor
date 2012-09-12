@@ -22,6 +22,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 import junit.framework.Assert;
+import junit.framework.TestCase;
 import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.build.TaskFactory;
 import net.officefloor.frame.api.execute.FlowFuture;
@@ -33,7 +34,6 @@ import net.officefloor.frame.impl.execute.escalation.EscalationProcedureImpl;
 import net.officefloor.frame.impl.execute.job.JobNodeActivatableSetImpl;
 import net.officefloor.frame.impl.execute.managedobject.ManagedObjectIndexImpl;
 import net.officefloor.frame.impl.execute.task.TaskJob;
-import net.officefloor.frame.impl.spi.team.PassiveTeam;
 import net.officefloor.frame.internal.structure.AssetManager;
 import net.officefloor.frame.internal.structure.EscalationProcedure;
 import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
@@ -53,6 +53,7 @@ import net.officefloor.frame.spi.managedobject.AsynchronousManagedObject;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectUser;
+import net.officefloor.frame.spi.team.Job;
 import net.officefloor.frame.spi.team.Team;
 
 import org.easymock.internal.AlwaysMatcher;
@@ -67,15 +68,25 @@ public class ExecutionNode<W extends Work> implements
 		Task<W, Indexed, Indexed> {
 
 	/**
-	 * Continue {@link Team}.
-	 */
-	private static final Team CONTINUE_TEAM = new PassiveTeam();
-
-	/**
 	 * Test case utilising this {@link ExecutionNode} to test execution of a
 	 * {@link Task} tree.
 	 */
 	protected final AbstractTaskNodeTestCase<W> testCase;
+
+	/**
+	 * Responsible {@link TeamManagement} for this {@link Job}.
+	 */
+	private final TeamManagement responsibleTeam;
+
+	/**
+	 * Continue {@link Team}.
+	 */
+	private final Team continueTeam;
+
+	/**
+	 * {@link Team} expected to execute this {@link Task}.
+	 */
+	private final ExecutionTeam expectedExecutionTeam;
 
 	/**
 	 * Listing of the {@link TaskProcessItem}.
@@ -109,14 +120,25 @@ public class ExecutionNode<W extends Work> implements
 	 *            Unique Id of this {@link ExecutionNode}.
 	 * @param testCase
 	 *            {@link AbstractTaskNodeTestCase}.
+	 * @param responsibleTeam
+	 *            Responsible {@link TeamManagement}.
+	 * @param continueTeam
+	 *            Continue {@link Team}.
 	 * @param workMetaData
 	 *            {@link WorkMetaData}.
+	 * @param expectedExecutionTeam
+	 *            {@link Team} expected to execute this {@link Task}.
 	 */
 	public ExecutionNode(int executionNodeId,
-			AbstractTaskNodeTestCase<W> testCase, WorkMetaData<W> workMetaData) {
+			AbstractTaskNodeTestCase<W> testCase,
+			TeamManagement responsibleTeam, Team continueTeam,
+			WorkMetaData<W> workMetaData, ExecutionTeam expectedExecutionTeam) {
 		this.executionNodeId = executionNodeId;
 		this.testCase = testCase;
+		this.responsibleTeam = responsibleTeam;
+		this.continueTeam = continueTeam;
 		this.workMetaData = workMetaData;
+		this.expectedExecutionTeam = expectedExecutionTeam;
 	}
 
 	/**
@@ -290,12 +312,12 @@ public class ExecutionNode<W extends Work> implements
 
 	@Override
 	public TeamManagement getResponsibleTeam() {
-		return this.testCase;
+		return this.responsibleTeam;
 	}
 
 	@Override
 	public Team getContinueTeam() {
-		return CONTINUE_TEAM;
+		return this.continueTeam;
 	}
 
 	@Override
@@ -398,6 +420,11 @@ public class ExecutionNode<W extends Work> implements
 
 		// Process items only on first execution
 		if (!this.isTaskProcessed) {
+
+			// Ensure being executed by the correct team
+			ExecutionTeam executingTeam = ExecutionTeam.threadTeam.get();
+			TestCase.assertEquals("Incorrect execution team",
+					this.expectedExecutionTeam, executingTeam);
 
 			// Execute the task item processors
 			boolean isComplete = true;

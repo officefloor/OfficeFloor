@@ -50,7 +50,8 @@ public class OfficeFrameProfileTest extends AbstractTaskNodeTestCase<Work> {
 	public void testMultipleJobsProfile() {
 
 		// Set up execution of jobs
-		this.bindNextNode(this.getInitialNode());
+		this.bindNextNode(this.getInitialNode(), this.getInitialTeam(),
+				this.getContinueTeam());
 
 		// Ensure execute both jobs
 		ValidateProfiler profiler = new ValidateProfiler("1", "2");
