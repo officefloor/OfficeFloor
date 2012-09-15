@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<model>
+    <field type="String" name="section name" />
+    <field type="String" name="section input name" />
+    <field type="String" name="parameter type" />
+    <list type="OfficeFloorManagedObjectSourceFlowToDeployedOfficeInputModel"
+        name="office floor managed object source flow" />
+</model>

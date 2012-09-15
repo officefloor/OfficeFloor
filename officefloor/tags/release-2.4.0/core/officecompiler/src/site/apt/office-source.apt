@@ -1,0 +1,36 @@
+                                         --------------------
+                                             OfficeSource
+                                         --------------------
+                                         Daniel Sagenschneider
+                                         --------------------
+
+  Within OfficeFloor an application is called an Office and subsequently the OfficeSource provides application assembly.  The OfficeSource configures together the top level Sections of the application to specify the functionality of the application.  Along with specifying the Sections of the Office it also configures in the Administrators and logical Teams.
+
+  The OfficeSource is more technical in nature than a SectionSource.  Where the SectionSource focuses on configuring application functionality, the OfficeSource focuses on the technical Administration of the Tasks and on assigning responsibility of the Tasks to logical Teams (with the actual Teams specified later in deployment by the OfficeFloorSource).
+
+  As the OfficeSource is more technical in nature it is typically configured by the technical lead or architect and allows them overview of the application.  As the OfficeSource configures together all the top level Sections it provides an ideal place for technical leads and architects to provide high level reviews of the functionality of the application.  From these high level views they can then add in the administration Duties for such aspects as transaction management, authentication, authorisation, logging and so forth.  Once the administration Duties are configured in they then assign logical Teams responsible for the Tasks and Duties of the application.  These logical Teams provide the ability for the application to be tuned to the hardware by specifying the actual Teams during deployment.
+
+
+
+Writing your own OfficeSource implementation
+
+  Before writing your own implementation please have a quick check as there may be an implementation already existing that suits your requirements.  This is especially the case as along with your OfficeSource implementation you will likely be asked to provide a graphical editor for you implementation.
+
+  If however, you have found nothing that meets your requirements you can write your own implementation. The following table provides starting points for writing your own implementation.
+
+*---------------------------------------------------------------------+------------------------------------------------------------------+
+|| Class                                                              || Description                                                     |
+*---------------------------------------------------------------------+------------------------------------------------------------------+
+| {{{/apidocs/net/officefloor/compile/spi/office/source/OfficeSource.html}net.officefloor.compile.spi.office.source.OfficeSource}}              | This is the interface that all OfficeSource implementations must implement |
+*---------------------------------------------------------------------+------------------------------------------------------------------+
+| {{{/apidocs/net/officefloor/compile/spi/office/source/impl/AbstractOfficeSource.html}net.officefloor.compile.spi.office.source.impl.AbstractOfficeSource}} | Provides abstract functionality to simplify implementing a OfficeSource |
+*---------------------------------------------------------------------+------------------------------------------------------------------+
+| {{{/apidocs/net/officefloor/compile/test/office/OfficeLoaderUtil.html}net.officefloor.compile.test.office.OfficeLoaderUtil}}                | Provides utility methods to test your OfficeSource implementation |
+*---------------------------------------------------------------------+------------------------------------------------------------------+
+| {{{/apidocs/net/officefloor/compile/OfficeSourceService.html}net.officefloor.compile.OfficeSourceService}}                         | Allows using the ServiceLoader functionality to provide additional meta-data about your OfficeSource. Providing this is optional. | 
+*---------------------------------------------------------------------+------------------------------------------------------------------+
+| {{{/apidocs/net/officefloor/model/impl/office/OfficeModelOfficeSource.html}net.officefloor.model.impl.office.OfficeModelOfficeSource}}           | Implementation of the OfficeSource.  See the IDE for more details |
+*---------------------------------------------------------------------+------------------------------------------------------------------+
+
+  Please note that in writing you own implementation you are expected to provide a graphical editor to configure your implementation.
+
