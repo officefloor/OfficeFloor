@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<module rename-to="NoGwt">
+	<inherits name="com.google.gwt.user.User" />
+
+	<!-- No configuration as No GWT -->
+
+</module>

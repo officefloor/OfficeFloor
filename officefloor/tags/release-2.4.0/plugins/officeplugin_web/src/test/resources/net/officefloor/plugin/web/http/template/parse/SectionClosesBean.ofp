@@ -1,0 +1,5 @@
+<html>
+<body>
+${bean open <!-- {close} --> ${new root bean $}
+</body>
+</html>

@@ -1,0 +1,12 @@
+<woof>
+
+	<governances>
+		<governance name="ADD" source="net.example.AddGovernanceSource">
+			<property name="name.a" value="value.a" />
+			<property name="name.b" value="value.b" />
+			<property name="name.c" value="value.c" />
+			<property name="name.d" value="value.d" />
+		</governance>
+	</governances>
+
+</woof>

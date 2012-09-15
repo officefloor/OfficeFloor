@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<model>
+    <field type="String" name="office managed object name" />
+    <field type="OfficeSectionObjectModel" name="office section object"
+        end-field="office managed object" />
+    <field type="OfficeManagedObjectModel" name="office managed object"
+        end-list="office section object" />
+</model>
