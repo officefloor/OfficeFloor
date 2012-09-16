@@ -587,10 +587,12 @@ public abstract class AbstractJobContainer<W extends Work, N extends JobMetaData
 										return true;
 									} else {
 										// Parallel job completed, re-run this
+										this.isQueuedWithTeam = true;
 										return false;
 									}
 								} else {
-									// Job logic not complete
+									// Job logic not complete (still with team)
+									this.isQueuedWithTeam = true;
 									return false;
 								}
 							}
@@ -848,9 +850,12 @@ public abstract class AbstractJobContainer<W extends Work, N extends JobMetaData
 
 			// Join to any required flow assets
 			while (headJoinOnFlowAsset != null) {
-				headJoinOnFlowAsset.flowAsset.waitOnFlow(this,
+				if (!(headJoinOnFlowAsset.flowAsset.waitOnFlow(this,
 						headJoinOnFlowAsset.timeout, headJoinOnFlowAsset.token,
-						activateSet);
+						activateSet))) {
+					// Activate as not waiting on flow
+					activateSet.addJobNode(this);
+				}
 				headJoinOnFlowAsset = headJoinOnFlowAsset.getNext();
 			}
 

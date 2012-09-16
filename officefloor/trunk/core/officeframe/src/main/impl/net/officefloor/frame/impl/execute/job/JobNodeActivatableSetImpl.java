@@ -66,19 +66,18 @@ public class JobNodeActivatableSetImpl implements JobNodeActivatableSet {
 		ActivatedJobNode notifiedJobNode = this.jobNodes.getHead();
 		while (notifiedJobNode != null) {
 
-			// Synchronise on thread of job to ensure safe activation
-			ThreadState threadState = notifiedJobNode.jobNode.getJobSequence()
-					.getThreadState();
-			synchronized (threadState.getThreadLock()) {
-
-				// Flag the failure (if one)
-				if (notifiedJobNode.failure != null) {
+			// Flag the failure (if one)
+			if (notifiedJobNode.failure != null) {
+				// Synchronise on thread of job to ensure specifying failure
+				ThreadState threadState = notifiedJobNode.jobNode
+						.getJobSequence().getThreadState();
+				synchronized (threadState.getThreadLock()) {
 					threadState.setFailure(notifiedJobNode.failure);
 				}
-
-				// Activate the job
-				notifiedJobNode.jobNode.activateJob(currentTeam);
 			}
+
+			// Activate the job (should be outside thread lock)
+			notifiedJobNode.jobNode.activateJob(currentTeam);
 
 			// Move to next job for activating
 			notifiedJobNode = notifiedJobNode.getNext();
