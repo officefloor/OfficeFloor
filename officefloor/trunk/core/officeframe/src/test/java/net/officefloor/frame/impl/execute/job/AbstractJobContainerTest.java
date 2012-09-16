@@ -828,6 +828,11 @@ public abstract class AbstractJobContainerTest extends OfficeFrameTestCase {
 		this.recordReturn(instigatedFlowAsset, instigatedFlowAsset.waitOnFlow(
 				functionalityJob, timeout, token, this.jobActivatableSet),
 				isWaitingOnFlow);
+
+		// Determine if activate immediately as not waiting
+		if (!isWaitingOnFlow) {
+			this.jobActivatableSet.addJobNode(functionalityJob);
+		}
 	}
 
 	/**

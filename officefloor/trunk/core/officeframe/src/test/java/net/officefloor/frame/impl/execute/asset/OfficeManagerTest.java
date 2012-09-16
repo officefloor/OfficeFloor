@@ -21,12 +21,11 @@ package net.officefloor.frame.impl.execute.asset;
 import net.officefloor.frame.impl.execute.job.JobNodeActivatableSetImpl;
 import net.officefloor.frame.internal.structure.Asset;
 import net.officefloor.frame.internal.structure.AssetManager;
-import net.officefloor.frame.internal.structure.JobSequence;
 import net.officefloor.frame.internal.structure.JobNode;
 import net.officefloor.frame.internal.structure.JobNodeActivatableSet;
 import net.officefloor.frame.internal.structure.JobNodeActivateSet;
+import net.officefloor.frame.internal.structure.JobSequence;
 import net.officefloor.frame.internal.structure.OfficeManager;
-import net.officefloor.frame.internal.structure.ThreadState;
 import net.officefloor.frame.spi.team.TeamIdentifier;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.frame.test.match.TypeMatcher;
@@ -127,18 +126,6 @@ public class OfficeManagerTest extends OfficeFrameTestCase {
 	public void testActivateJobNodes() throws Exception {
 
 		final JobSequence flow = this.createSynchronizedMock(JobSequence.class);
-		final ThreadState threadState = this
-				.createSynchronizedMock(ThreadState.class);
-
-		// Record obtaining the thread lock (for first activation)
-		this.recordReturn(flow, flow.getThreadState(), threadState);
-		this.recordReturn(threadState, threadState.getThreadLock(),
-				"THREAD LOCK");
-
-		// Record obtaining the thread lock (for second activation)
-		this.recordReturn(flow, flow.getThreadState(), threadState);
-		this.recordReturn(threadState, threadState.getThreadLock(),
-				"THREAD LOCK");
 
 		// Create the Job Node to be activated
 		MockJobNode job = new MockJobNode(flow);
