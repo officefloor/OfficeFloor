@@ -20,6 +20,7 @@ package net.officefloor.frame.impl.execute.job;
 
 import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.spi.team.Job;
+import net.officefloor.frame.test.MockTeamSource;
 
 /**
  * Tests the {@link AbstractJobContainer} executing a {@link Job}.
@@ -63,7 +64,7 @@ public class ExecuteJobContainerTest extends AbstractJobContainerTest {
 		// Create job that completes when specified
 		final boolean[] isComplete = new boolean[1];
 		isComplete[0] = false;
-		Job job = this.createJob(false, new JobFunctionality() {
+		FunctionalityJob job = this.createJob(false, new JobFunctionality() {
 			@Override
 			public Object executeFunctionality(JobFunctionalityContext context)
 					throws Throwable {
@@ -82,6 +83,9 @@ public class ExecuteJobContainerTest extends AbstractJobContainerTest {
 		this.record_JobContainer_initialSteps(job, null);
 		this.record_JobActivatableSet_activateJobs();
 
+		// Record attempting to activate Job (but already active with Team)
+		this.record_JobContainer_notActivateJob();
+
 		// Record actions for third execution of job that completes
 		this.record_JobContainer_initialSteps(job, null);
 		this.record_JobMetaData_getNextTaskInFlow(false);
@@ -95,6 +99,9 @@ public class ExecuteJobContainerTest extends AbstractJobContainerTest {
 		this.doJob(job, false);
 		assertJobExecuted(job); // should be executed on first attempt
 		this.doJob(job, false);
+
+		// Should not be able to assign Job to Team as Team still to complete
+		job.activateJob(MockTeamSource.createTeamIdentifier());
 
 		// Execute job third time which completes
 		isComplete[0] = true;

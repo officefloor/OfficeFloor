@@ -831,6 +831,17 @@ public abstract class AbstractJobContainerTest extends OfficeFrameTestCase {
 	}
 
 	/**
+	 * Records not activating the {@link JobNode} when attempted.
+	 */
+	protected void record_JobContainer_notActivateJob() {
+		// Record not activating the job node
+		this.recordReturn(this.flow, this.flow.getThreadState(),
+				this.threadState);
+		this.recordReturn(this.threadState, this.threadState.getThreadLock(),
+				new Object());
+	}
+
+	/**
 	 * Records creating a {@link Job}.
 	 * 
 	 * @param currentJob

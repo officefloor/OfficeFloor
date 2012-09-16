@@ -188,82 +188,99 @@ public class AsynchronousJoinStressTest extends AbstractOfficeConstructTestCase 
 		 */
 		public void invokeAndJoin(TaskContext<?, ?, ?> taskContext,
 				ReflectiveFlow flow) {
+			try {
 
-			// Determine the number of flow futures complete
-			int flowFuturesComplete = 0;
-			if (this.flowFutures == null) {
-				// First iteration, so flag to go to iterating
-				flowFuturesComplete = this.maxAsynchronousFlows;
-			} else {
-				for (int i = 0; i < this.flowFutures.length; i++) {
-					if (this.flowFutures[i].isComplete()) {
-						flowFuturesComplete++;
+				// Determine the number of flow futures complete
+				int flowFuturesComplete = 0;
+				if (this.flowFutures == null) {
+					// First iteration, so flag to go to iterating
+					flowFuturesComplete = this.maxAsynchronousFlows;
+				} else {
+					for (int i = 0; i < this.flowFutures.length; i++) {
+						if (this.flowFutures[i].isComplete()) {
+							flowFuturesComplete++;
+						}
 					}
 				}
-			}
 
-			// Fail if less complete than last time this task was run
-			// Note: it is possible to be the same as completion of the thread
-			// occurs before activation of jobs. Steps would be:
-			// 1) Thread A invoked and joined on
-			// 2) Thread B invoked and joined on
-			// 3) Threads A and B complete (isComplete returns true for both)
-			// 4) Thread A activates this task as it is complete
-			// 5) This task runs and counts both Thread A and B complete
-			// 6) Thread B activates this task as it is also complete
-			// 7) This task runs and again counts both Thread A and B complete
-			assertTrue("No less flows expected to be complete (previous="
-					+ this.previousFlowFuturesComplete + ", current="
-					+ flowFuturesComplete + ")",
-					(flowFuturesComplete >= this.previousFlowFuturesComplete));
+				// Fail if less complete than last time this task was run
+				// Note: it is possible to be the same as completion of the
+				// thread
+				// occurs before activation of jobs. Steps would be:
+				// 1) Thread A invoked and joined on
+				// 2) Thread B invoked and joined on
+				// 3) Threads A and B complete (isComplete returns true for
+				// both)
+				// 4) Thread A activates this task as it is complete
+				// 5) This task runs and counts both Thread A and B complete
+				// 6) Thread B activates this task as it is also complete
+				// 7) This task runs and again counts both Thread A and B
+				// complete
+				assertTrue(
+						"No less flows expected to be complete (previous="
+								+ this.previousFlowFuturesComplete
+								+ ", current=" + flowFuturesComplete + ")",
+						(flowFuturesComplete >= this.previousFlowFuturesComplete));
 
-			// Do not continue if all flows not yet complete
-			if (flowFuturesComplete < this.maxAsynchronousFlows) {
-				// Set 'new' previous flows complete and repeat this task
-				this.previousFlowFuturesComplete = flowFuturesComplete;
-				taskContext.setComplete(false);
-				return;
-			}
+				// Do not continue if all flows not yet complete
+				if (flowFuturesComplete < this.maxAsynchronousFlows) {
+					// Set 'new' previous flows complete and repeat this task
+					this.previousFlowFuturesComplete = flowFuturesComplete;
+					taskContext.setComplete(false);
+					return;
+				}
 
-			// Safe as all threads are of same process
-			synchronized (taskContext.getProcessLock()) {
-				// Ensure all asynchronous tasks run
-				assertEquals(
-						"Incorrect number of asynchronous tasks run before re-run of job",
-						this.maxAsynchronousFlows,
-						this.asynchronousTasksRunCount);
+				// Safe as all threads are of same process
+				synchronized (taskContext.getProcessLock()) {
+					// Ensure all asynchronous tasks run
+					assertEquals(
+							"Incorrect number of asynchronous tasks run before re-run of job",
+							this.maxAsynchronousFlows,
+							this.asynchronousTasksRunCount);
 
-				// Reset run count
-				this.asynchronousTasksRunCount = 0;
-			}
+					// Reset run count
+					this.asynchronousTasksRunCount = 0;
+				}
 
-			// Increment the number of iterations
-			this.iterationCount++;
+				// Increment the number of iterations
+				this.iterationCount++;
 
-			// Invoke the flows and join on them (no previous flows complete)
-			this.previousFlowFuturesComplete = -1;
-			this.flowFutures = new FlowFuture[this.maxAsynchronousFlows];
-			for (int i = 0; i < this.flowFutures.length; i++) {
-				this.flowFutures[i] = flow.doFlow(null);
-				taskContext.join(this.flowFutures[i], this.joinTimeout, null);
-			}
+				// Invoke the flows and join on them (no previous flows
+				// complete)
+				this.previousFlowFuturesComplete = -1;
+				this.flowFutures = new FlowFuture[this.maxAsynchronousFlows];
+				for (int i = 0; i < this.flowFutures.length; i++) {
+					this.flowFutures[i] = flow.doFlow(null);
+					taskContext.join(this.flowFutures[i], this.joinTimeout,
+							null);
+				}
 
-			// Provide progress on number of iterations
-			long asynchronousTasksRun = (this.iterationCount * this.maxAsynchronousFlows);
-			if ((asynchronousTasksRun % (this.maxIterations / 10)) == 0) {
-				AsynchronousJoinStressTest.this.printMessage("Iterations="
-						+ this.iterationCount + " (asynchronous tasks="
-						+ asynchronousTasksRun + ")");
-			}
+				// Provide progress on number of iterations
+				long asynchronousTasksRun = (this.iterationCount * this.maxAsynchronousFlows);
+				if ((asynchronousTasksRun % (this.maxIterations / 10)) == 0) {
+					AsynchronousJoinStressTest.this.printMessage("Iterations="
+							+ this.iterationCount + " (asynchronous tasks="
+							+ asynchronousTasksRun + ")");
+				}
 
-			// Determine if to stop iterating
-			if (this.iterationCount < this.maxIterations) {
-				// Continue as more iterations
-				taskContext.setComplete(false);
-			} else {
-				// Provide indication that iterations complete
-				AsynchronousJoinStressTest.this
-						.printMessage("Iterations complete");
+				// Determine if to stop iterating
+				if (this.iterationCount < this.maxIterations) {
+					// Continue as more iterations
+					taskContext.setComplete(false);
+				} else {
+					// Provide indication that iterations complete
+					AsynchronousJoinStressTest.this
+							.printMessage("Iterations complete");
+				}
+
+			} catch (Throwable ex) {
+				// Report the failure in the test
+				System.err.println("FAILURE in test: "
+						+ AsynchronousJoinStressTest.this.getName());
+				ex.printStackTrace();
+
+				// Propagate the failure
+				fail(ex);
 			}
 		}
 
