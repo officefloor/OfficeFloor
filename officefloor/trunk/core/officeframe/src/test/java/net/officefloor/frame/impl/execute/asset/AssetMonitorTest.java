@@ -21,12 +21,10 @@ package net.officefloor.frame.impl.execute.asset;
 import net.officefloor.frame.internal.structure.Asset;
 import net.officefloor.frame.internal.structure.AssetManager;
 import net.officefloor.frame.internal.structure.AssetMonitor;
-import net.officefloor.frame.internal.structure.JobSequence;
 import net.officefloor.frame.internal.structure.JobNode;
 import net.officefloor.frame.internal.structure.JobNodeActivatableSet;
 import net.officefloor.frame.internal.structure.JobNodeActivateSet;
 import net.officefloor.frame.internal.structure.OfficeManager;
-import net.officefloor.frame.internal.structure.ThreadState;
 import net.officefloor.frame.spi.team.Job;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 
@@ -298,8 +296,6 @@ public class AssetMonitorTest extends OfficeFrameTestCase {
 	public void testActivateByOfficeManager() {
 
 		final JobNode job = this.createMock(JobNode.class);
-		final JobSequence jobSequence = this.createMock(JobSequence.class);
-		final ThreadState threadState = this.createMock(ThreadState.class);
 
 		// Record
 		this.assetManager.registerAssetMonitor(this.assetMonitor);
@@ -317,11 +313,6 @@ public class AssetMonitorTest extends OfficeFrameTestCase {
 				return true;
 			}
 		});
-		this.recordReturn(job, job.getJobSequence(), jobSequence);
-		this.recordReturn(jobSequence, jobSequence.getThreadState(),
-				threadState);
-		this.recordReturn(threadState, threadState.getThreadLock(),
-				"THREAD LOCK");
 		// Triggered to indicate in set
 		job.activateJob(OfficeManagerImpl.MANAGE_OFFICE_TEAM);
 
