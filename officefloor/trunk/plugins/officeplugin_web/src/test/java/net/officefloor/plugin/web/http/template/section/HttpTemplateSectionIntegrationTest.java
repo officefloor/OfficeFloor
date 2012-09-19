@@ -85,6 +85,11 @@ public class HttpTemplateSectionIntegrationTest extends OfficeFrameTestCase {
 	private boolean isNonMethodLink = false;
 
 	/**
+	 * Indicates if service-method link is provided.
+	 */
+	private boolean isServiceMethodLink = false;
+
+	/**
 	 * {@link AutoWireOfficeFloor}.
 	 */
 	private AutoWireOfficeFloor officeFloor;
@@ -325,6 +330,9 @@ public class HttpTemplateSectionIntegrationTest extends OfficeFrameTestCase {
 	 */
 	public void testTemplateSectionExtension() throws Exception {
 
+		// Flag to provide service method link
+		this.isServiceMethodLink = true;
+
 		// Start the server (with extension)
 		this.startHttpServer("ExtensionTemplate.ofp",
 				MockExtensionTemplateLogic.class, "extension.1",
@@ -337,7 +345,12 @@ public class HttpTemplateSectionIntegrationTest extends OfficeFrameTestCase {
 				"section.value");
 
 		// Ensure change with extension
-		this.assertHttpRequest("", "Overridden template with overridden class");
+		this.assertHttpRequest("",
+				"Overridden template with overridden class and /SECTION.links-serviceLink.task");
+
+		// Ensure service method not render template
+		this.assertHttpRequest("/SECTION.links-serviceLink.task",
+				"SERVICE_METHOD");
 	}
 
 	/**
@@ -354,7 +367,7 @@ public class HttpTemplateSectionIntegrationTest extends OfficeFrameTestCase {
 		public void extendTemplate(HttpTemplateSectionExtensionContext context)
 				throws Exception {
 
-			final String TEMPLATE_CONTENT = "Overridden template with ${property}";
+			final String TEMPLATE_CONTENT = "Overridden template with ${property} and #{serviceLink}";
 
 			// Obtain the particular extension index
 			int extensionIndex = Integer.parseInt(context
@@ -408,6 +421,9 @@ public class HttpTemplateSectionIntegrationTest extends OfficeFrameTestCase {
 
 			// Extend the template (via overriding)
 			context.setTemplateContent(TEMPLATE_CONTENT);
+
+			// Flag a service method
+			context.flagAsNonRenderTemplateMethod("serviceMethod");
 		}
 	}
 
@@ -439,6 +455,19 @@ public class HttpTemplateSectionIntegrationTest extends OfficeFrameTestCase {
 		 */
 		@NextTask("doExternalFlow")
 		public void submit() {
+		}
+
+		/**
+		 * Service method that should not render template on completion.
+		 * 
+		 * @param connection
+		 *            {@link ServerHttpConnection}.
+		 */
+		public void serviceMethod(ServerHttpConnection connection)
+				throws IOException {
+			Writer entity = connection.getHttpResponse().getEntityWriter();
+			entity.write("SERVICE_METHOD");
+			entity.flush();
 		}
 	}
 
@@ -515,10 +544,10 @@ public class HttpTemplateSectionIntegrationTest extends OfficeFrameTestCase {
 		final String LINK_SERVICE_TASK_NAME_PREFIX = "LINK_";
 
 		// Provide HTTP template router for testing
-		AutoWireSection routeSection = source.addSection("ROUTE",
+		AutoWireSection templateRouteSection = source.addSection("ROUTE",
 				WorkSectionSource.class.getName(),
 				HttpTemplateRouteWorkSource.class.getName());
-		routeSection.addProperty(
+		templateRouteSection.addProperty(
 				HttpTemplateRouteWorkSource.PROPERTY_TASK_NAME_PREFIX,
 				LINK_SERVICE_TASK_NAME_PREFIX);
 
@@ -551,8 +580,8 @@ public class HttpTemplateSectionIntegrationTest extends OfficeFrameTestCase {
 						MockSection.class.getName());
 
 		// Link flow outputs
-		source.link(routeSection, "NON_MATCHED_REQUEST", templateSection,
-				"renderTemplate");
+		source.link(templateRouteSection, "NON_MATCHED_REQUEST",
+				templateSection, "renderTemplate");
 		source.link(templateSection, "output", handleOutputSection, "finished");
 		source.link(templateSection, "doExternalFlow", handleOutputSection,
 				"finished");
@@ -564,6 +593,12 @@ public class HttpTemplateSectionIntegrationTest extends OfficeFrameTestCase {
 					MockLink.class.getName());
 			source.link(templateSection, "nonMethodLink", handleOutputLink,
 					"linked");
+		}
+
+		// Link service method link
+		if (this.isServiceMethodLink) {
+			source.link(templateSection, "serviceLink", templateSection,
+					"serviceMethod");
 		}
 
 		// Open the OfficeFloor

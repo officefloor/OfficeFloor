@@ -123,7 +123,7 @@ public class ServletHttpRequest implements HttpRequest {
 
 		// Lazy obtain the entity
 		if (this.entity == null) {
-			
+
 			/*
 			 * Potential for lot of requests to be sent that do not provide all
 			 * data causing OOM. This however is true on processing the requests
@@ -139,10 +139,10 @@ public class ServletHttpRequest implements HttpRequest {
 				bytesRead = 0; // no data, and end of stream
 			}
 
-			// Create the server input entity
+			// Create the server input entity (end index is length -1)
 			ServerInputStreamImpl requestEntity = new ServerInputStreamImpl(
 					this.servletRequest);
-			requestEntity.inputData(data, 0, bytesRead, false);
+			requestEntity.inputData(data, 0, (bytesRead - 1), false);
 			this.entity = requestEntity;
 		}
 

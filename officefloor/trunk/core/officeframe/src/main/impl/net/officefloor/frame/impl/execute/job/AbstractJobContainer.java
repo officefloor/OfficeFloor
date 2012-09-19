@@ -706,7 +706,9 @@ public abstract class AbstractJobContainer<W extends Work, N extends JobMetaData
 						 * flows are invoked and the first flow throws an
 						 * Escalation that is handled by this Node. Require
 						 * 'real world' example to model tests for this
-						 * scenario.
+						 * scenario. Note that in majority of cases that
+						 * exception handling is undertaken by input
+						 * ManagedObjectSource or at Office/OfficeFloor level.
 						 */
 
 						// Obtain the node to handle the escalation

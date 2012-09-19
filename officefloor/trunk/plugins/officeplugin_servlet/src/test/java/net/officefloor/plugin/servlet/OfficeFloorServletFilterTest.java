@@ -31,6 +31,7 @@ import javax.servlet.Filter;
 import javax.servlet.FilterChain;
 import javax.servlet.FilterConfig;
 import javax.servlet.Servlet;
+import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
@@ -147,11 +148,11 @@ public class OfficeFloorServletFilterTest extends OfficeFrameTestCase {
 
 		// Send request for filter
 		assertEquals("Incorrect filter handling", "FILTER",
-				this.doGetBody("?type=filter"));
+				this.doGetEntity("?type=filter"));
 
 		// Send request for servlet
 		assertEquals("Incorrect servlet handling", "SERVLET",
-				this.doGetBody(""));
+				this.doGetEntity(""));
 	}
 
 	/**
@@ -159,7 +160,7 @@ public class OfficeFloorServletFilterTest extends OfficeFrameTestCase {
 	 */
 	public void testNotHandle() throws Exception {
 		assertEquals("Should pass onto servlet", "SERVLET",
-				this.doGetBody("/unhandled"));
+				this.doGetEntity("/unhandled"));
 	}
 
 	/**
@@ -167,7 +168,7 @@ public class OfficeFloorServletFilterTest extends OfficeFrameTestCase {
 	 */
 	public void testNonHandledTask() throws Exception {
 		assertEquals("Should pass onto servlet", "SERVLET",
-				this.doGetBody("/unhandled.links/unhandled.task"));
+				this.doGetEntity("/unhandled.links/unhandled.task"));
 	}
 
 	/**
@@ -175,16 +176,42 @@ public class OfficeFloorServletFilterTest extends OfficeFrameTestCase {
 	 */
 	public void testPublicTemplate() throws Exception {
 		assertEquals("Should be handled by template", "TEMPLATE",
-				this.doGetBody("/test"));
+				this.doGetEntity("/test"));
+	}
+
+	/**
+	 * Ensures the context path is handled for the request URI.
+	 */
+	public void testServiceWithinContext() throws Exception {
+		this.contextPath = "/path";
+		assertEquals("Should be handled by template", "TEMPLATE",
+				this.doGetEntity("/path/test"));
 	}
 
 	/**
 	 * Ensure remembers state within the {@link HttpSession}.
 	 */
 	public void testSessionTemplate() throws Exception {
-		this.doGetBody("/session?name=value");
-		String value = this.doGetBody("/session");
+		this.doGetEntity("/session?name=value");
+		String value = this.doGetEntity("/session");
 		assertEquals("Should maintain state between requests", "value", value);
+	}
+
+	/**
+	 * Ensure renders link.
+	 */
+	public void testLinkRendering() throws Exception {
+		assertEquals("Incorrect rendered link", "/link.links-link.task",
+				this.doGetEntity("/link"));
+	}
+
+	/**
+	 * Ensure renders link with context path.
+	 */
+	public void testLinkRenderingWithinContext() throws Exception {
+		this.contextPath = "/path";
+		assertEquals("Incorrect rendered link with context path",
+				"/path/link.links-link.task", this.doGetEntity("/path/link"));
 	}
 
 	/**
@@ -192,7 +219,17 @@ public class OfficeFloorServletFilterTest extends OfficeFrameTestCase {
 	 */
 	public void testlink() throws Exception {
 		assertEquals("Should handle link", "LINK - /link.links-link.task",
-				this.doGetBody("/link.links-link.task"));
+				this.doGetEntity("/link.links-link.task"));
+	}
+
+	/**
+	 * Ensure can invoke link with a {@link ServletContext} path.
+	 */
+	public void testLinkWithinContext() throws Exception {
+		this.contextPath = "/path";
+		String entity = this.doGetEntity("/path/link.links-link.task");
+		assertEquals("Should handle link with context path",
+				"LINK - /path/link.links-link.task", entity);
 	}
 
 	/**
@@ -200,7 +237,16 @@ public class OfficeFloorServletFilterTest extends OfficeFrameTestCase {
 	 */
 	public void testLinkUriToSection() throws Exception {
 		assertEquals("Should be handled by section", "SECTION",
-				this.doGetBody("/section"));
+				this.doGetEntity("/section"));
+	}
+
+	/**
+	 * Ensure can link to section within a {@link ServletContext} path.
+	 */
+	public void testLinkUriToSectionWithinContext() throws Exception {
+		this.contextPath = "/path";
+		assertEquals("Should be handled by section", "SECTION",
+				this.doGetEntity("/path/section"));
 	}
 
 	/**
@@ -208,7 +254,7 @@ public class OfficeFloorServletFilterTest extends OfficeFrameTestCase {
 	 */
 	public void testResourceHandlingEscalation() throws Exception {
 		assertEquals("Should escalate and be handled by resource",
-				"SERVLET_RESOURCE", this.doGetBody("/fail"));
+				"SERVLET_RESOURCE", this.doGetEntity("/fail"));
 	}
 
 	/**
@@ -216,7 +262,17 @@ public class OfficeFloorServletFilterTest extends OfficeFrameTestCase {
 	 */
 	public void testLinkToResource() throws Exception {
 		assertEquals("Should provide servlet resource", "SERVLET_RESOURCE",
-				this.doGetBody("/servlet-resource"));
+				this.doGetEntity("/servlet-resource"));
+	}
+
+	/**
+	 * Ensure can link to {@link Servlet} resource within {@link ServletContext}
+	 * path.
+	 */
+	public void testLinkToResourceWithinContext() throws Exception {
+		this.contextPath = "/path";
+		assertEquals("Should provide servlet resource", "SERVLET_RESOURCE",
+				this.doGetEntity("/path/servlet-resource"));
 	}
 
 	/**
@@ -224,27 +280,19 @@ public class OfficeFloorServletFilterTest extends OfficeFrameTestCase {
 	 */
 	public void testObject() throws Exception {
 		this.filter.ejb.value = "TEST";
-		assertEquals("Should obtain EJB value", "TEST", this.doGetBody("/ejb"));
-	}
-
-	/**
-	 * Ensures the context path is handled for the request URI.
-	 */
-	public void testServiceWithContextPath() throws Exception {
-		this.contextPath = "/path";
-		assertEquals("Should be handled by template", "TEMPLATE",
-				this.doGetBody("/path/test"));
+		assertEquals("Should obtain EJB value", "TEST",
+				this.doGetEntity("/ejb"));
 	}
 
 	/**
 	 * Executes the {@link HttpGet} for the URI returning the text content of
-	 * the body.
+	 * the entity.
 	 * 
 	 * @param uri
 	 *            URI.
-	 * @return Text content of the body.
+	 * @return Text content of the entity.
 	 */
-	private String doGetBody(String uri) throws Exception {
+	private String doGetEntity(String uri) throws Exception {
 		HttpResponse response = this.doGet(uri);
 		ByteArrayOutputStream buffer = new ByteArrayOutputStream();
 		response.getEntity().writeTo(buffer);

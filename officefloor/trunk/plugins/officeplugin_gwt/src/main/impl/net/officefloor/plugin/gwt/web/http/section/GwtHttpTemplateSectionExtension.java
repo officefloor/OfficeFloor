@@ -409,6 +409,9 @@ public class GwtHttpTemplateSectionExtension implements
 																.getName());
 									}
 
+									// GWT service method not render template
+									context.flagAsNonRenderTemplateMethod(methodName);
+
 									// Link handling of GWT method
 									designer.link(
 											flow,

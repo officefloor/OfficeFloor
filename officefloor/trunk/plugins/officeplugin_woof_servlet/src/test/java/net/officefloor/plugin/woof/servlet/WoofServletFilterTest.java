@@ -19,14 +19,17 @@
 package net.officefloor.plugin.woof.servlet;
 
 import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.util.EnumSet;
 
 import javax.servlet.DispatcherType;
+import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServlet;
 
 import net.officefloor.autowire.AutoWire;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.socket.server.http.server.MockHttpServer;
+import net.officefloor.plugin.woof.servlet.client.MockGwtService;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
@@ -36,6 +39,8 @@ import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.session.SessionHandler;
 import org.eclipse.jetty.servlet.FilterHolder;
 import org.eclipse.jetty.servlet.ServletContextHandler;
+
+import com.gdevelop.gwt.syncrpc.SyncProxy;
 
 /**
  * Tests the {@link WoofServletFilter}.
@@ -54,16 +59,159 @@ public class WoofServletFilterTest extends OfficeFrameTestCase {
 	 */
 	private Server server;
 
+	/**
+	 * {@link HttpClient}.
+	 */
+	private final HttpClient client = new DefaultHttpClient();
+
+	/**
+	 * Ensure {@link WoofServletFilter} configures itself to service a request.
+	 */
+	public void testServiceRequest() throws Exception {
+		this.doServiceRequestTest("");
+	}
+
+	/**
+	 * Ensure {@link WoofServletFilter} respects the {@link ServletContext}.
+	 */
+	public void testServiceRequestWithinContext() throws Exception {
+		this.doServiceRequestTest("/path");
+	}
+
+	/**
+	 * Ensure can service a HTTP request.
+	 * 
+	 * @param contextPath
+	 *            Context path.
+	 */
+	private void doServiceRequestTest(String contextPath) throws Exception {
+
+		// Start Server (with context path)
+		this.startServer(contextPath);
+
+		// Validate appropriate response from HTTP template
+		String responseText = this.doGetEntity(contextPath + "/test");
+		assertEquals(
+				"Incorrect template content",
+				"TEMPLATE TEST OnePersonTeam_"
+						+ new AutoWire(MockDependency.class).getQualifiedType(),
+				responseText);
+	}
+
+	/**
+	 * Ensure can invoke GWT AJAX service.
+	 */
+	public void testServiceGwtAjax() throws Exception {
+		this.doServiceGwtAjaxTest("");
+	}
+
+	/**
+	 * Ensure can invoke GWT AJAX service respecting the {@link ServletContext}.
+	 */
+	public void testServiceGwtAjaxWithinContext() throws Exception {
+		this.doServiceGwtAjaxTest("/path");
+	}
+
+	/**
+	 * Undertakes testing the servicing of GWT AJAX servicing.
+	 * 
+	 * @param contextPath
+	 *            Context path.
+	 */
+	private void doServiceGwtAjaxTest(String contextPath) throws Exception {
+
+		// Start Server
+		this.startServer(contextPath);
+
+		// Create the proxy for GWT
+		MockGwtService service = (MockGwtService) SyncProxy.newProxyInstance(
+				MockGwtService.class, "http://localhost:" + this.port
+						+ contextPath + "/gwt/", "service");
+
+		// Invoke the GWT service
+		String result = service.gwtService("TEST");
+		assertEquals("Incorrect response", "AJAX-TEST", result);
+	}
+
+	/**
+	 * Ensure can invoke Comet service.
+	 */
+	public void _testServiceComet() throws Exception {
+		fail("TODO implement");
+	}
+
+	/**
+	 * Ensure can invoke Comet service respecting the {@link ServletContext}.
+	 */
+	public void _testServiceCometWithinContext() throws Exception {
+		fail("TODO implement");
+	}
+
+	/*
+	 * =================== Setup/Teardown/Helper ==========================
+	 */
+
+	/**
+	 * Executes a {@link HttpGet} against the URI.
+	 * 
+	 * @param uri
+	 *            URI for the {@link HttpGet} request.
+	 * @return Entity of response as text.
+	 */
+	private String doGetEntity(String uri) throws Exception {
+
+		// Ensure serviced by HTTP template from WoOF configuration
+		HttpGet request = new HttpGet("http://localhost:" + this.port + uri);
+		HttpResponse response = this.client.execute(request);
+		assertEquals("Must be successful", 200, response.getStatusLine()
+				.getStatusCode());
+
+		// Obtain the response entity as text
+		ByteArrayOutputStream buffer = new ByteArrayOutputStream();
+		response.getEntity().writeTo(buffer);
+		String responseText = new String(buffer.toByteArray());
+
+		// Return the response entity
+		return responseText;
+	}
+
 	@Override
 	protected void setUp() throws Exception {
-
 		// Obtain the port for the application
 		this.port = MockHttpServer.getAvailablePort();
+	}
+
+	@Override
+	protected void tearDown() throws Exception {
+		try {
+			// Stop the client
+			this.client.getConnectionManager().shutdown();
+
+		} finally {
+			// Stop the server
+			if (this.server != null) {
+				this.server.stop();
+			}
+		}
+	}
+
+	/**
+	 * Starts the {@link Server}.
+	 * 
+	 * @param contextPath
+	 *            Context path running within.
+	 */
+	private void startServer(String contextPath) throws Exception {
+
+		// Find the base directory for resources
+		File baseDirectory = new File(".", "src/test/webapp");
+		assertTrue("Base directory should exist", baseDirectory.isDirectory());
 
 		// Start servlet container with filter
 		this.server = new Server(this.port);
 		ServletContextHandler context = new ServletContextHandler();
-		context.setContextPath("/");
+		context.setContextPath("".equals(contextPath) ? "/" : contextPath);
+		context.setResourceBase(baseDirectory.getAbsolutePath());
 		context.setSessionHandler(new SessionHandler());
 		this.server.setHandler(context);
 
@@ -76,64 +224,6 @@ public class WoofServletFilterTest extends OfficeFrameTestCase {
 
 		// Start the server
 		this.server.start();
-	}
-
-	@Override
-	protected void tearDown() throws Exception {
-		// Stop the server
-		if (this.server != null) {
-			this.server.stop();
-		}
-	}
-
-	/**
-	 * Ensure {@link WoofServletFilter} configures itself.
-	 */
-	public void testWoofInitiated() throws Exception {
-
-		// Ensure serviced by HTTP template from WoOF configuration
-		HttpClient client = new DefaultHttpClient();
-		HttpGet request = new HttpGet("http://localhost:" + this.port + "/test");
-		HttpResponse response = client.execute(request);
-		assertEquals("Must be successful", 200, response.getStatusLine()
-				.getStatusCode());
-
-		// Validate appropriate response from HTTP template
-		ByteArrayOutputStream buffer = new ByteArrayOutputStream();
-		response.getEntity().writeTo(buffer);
-		String responseText = new String(buffer.toByteArray());
-		assertEquals(
-				"Incorrect template content",
-				"TEMPLATE TEST OnePersonTeam_"
-						+ new AutoWire(MockDependency.class).getQualifiedType(),
-				responseText);
-	}
-
-	/**
-	 * Mock template logic class.
-	 */
-	public static class MockTemplate {
-		public MockContent getTemplate(MockDependency dependency) {
-			Thread thread = Thread.currentThread();
-			return new MockContent(dependency.getMessage() + " "
-					+ thread.getName());
-		}
-	}
-
-	/**
-	 * Mock content for the template.
-	 */
-	public static class MockContent {
-
-		private String text;
-
-		public MockContent(String text) {
-			this.text = text;
-		}
-
-		public String getText() {
-			return this.text;
-		}
 	}
 
 	/**
