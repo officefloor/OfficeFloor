@@ -81,6 +81,18 @@ public class HttpTemplateSectionSource extends ClassSectionSource {
 	public static final String PROPERTY_CLASS_NAME = ClassManagedObjectSource.CLASS_NAME_PROPERTY_NAME;
 
 	/**
+	 * Creates the {@link Task} key from the {@link Task} name.
+	 * 
+	 * @param taskName
+	 *            Name of the {@link Task}.
+	 * @return Key for the {@link Task}.
+	 */
+	private static String createTaskKey(String taskName) {
+		// Provide name in upper case to avoid case sensitivity
+		return taskName.toUpperCase();
+	}
+
+	/**
 	 * <p>
 	 * Class to use if no class specified.
 	 * <p>
@@ -174,6 +186,9 @@ public class HttpTemplateSectionSource extends ClassSectionSource {
 		}
 		String templateContent = templateContentBuffer.toString();
 
+		// Keep track of tasks that do not render template on their completion
+		Set<String> nonRenderTemplateTaskKeys = new HashSet<String>();
+
 		// Extend the template content as necessary
 		final String EXTENSION_PREFIX = "extension.";
 		int extensionIndex = 1;
@@ -189,7 +204,8 @@ public class HttpTemplateSectionSource extends ClassSectionSource {
 			String extensionPropertyPrefix = EXTENSION_PREFIX + extensionIndex
 					+ ".";
 			HttpTemplateSectionExtensionContext extensionContext = new HttpTemplateSectionExtensionContextImpl(
-					templateContent, extensionPropertyPrefix);
+					templateContent, extensionPropertyPrefix,
+					nonRenderTemplateTaskKeys);
 			extension.extendTemplate(extensionContext);
 
 			// Override template details
@@ -235,9 +251,6 @@ public class HttpTemplateSectionSource extends ClassSectionSource {
 			templateTasks.put(templateTaskName, templateTask);
 		}
 
-		// Keep track of template bean task keys
-		Set<String> templateBeanTaskKeys = new HashSet<String>();
-
 		// Load the HTTP template tasks
 		Map<String, SectionTask> contentTasksByName = new HashMap<String, SectionTask>();
 		SectionTask firstTemplateTask = null;
@@ -249,8 +262,8 @@ public class HttpTemplateSectionSource extends ClassSectionSource {
 			SectionTask templateTask = templateTasks.get(templateTaskName);
 
 			// Keep track of task for later flow linking
-			contentTasksByName
-					.put(templateTaskName.toUpperCase(), templateTask);
+			contentTasksByName.put(createTaskKey(templateTaskName),
+					templateTask);
 
 			// Determine if template section requires a bean
 			boolean isRequireBean = HttpTemplateWorkSource
@@ -283,8 +296,8 @@ public class HttpTemplateSectionSource extends ClassSectionSource {
 					ioEscalation, FlowInstigationStrategyEnum.SEQUENTIAL);
 
 			// Obtain the bean task method
-			String beanTaskName = "get" + templateTaskName;
-			String beanTaskKey = beanTaskName.toUpperCase();
+			String beanMethodName = "get" + templateTaskName;
+			String beanTaskKey = createTaskKey(beanMethodName);
 			TemplateClassTask beanTask = this.sectionClassMethodTasksByName
 					.get(beanTaskKey);
 			if (beanTask == null) {
@@ -309,15 +322,15 @@ public class HttpTemplateSectionSource extends ClassSectionSource {
 				}
 			}
 
-			// Keep track of bean task keys
-			templateBeanTaskKeys.add(beanTaskKey);
+			// Bean task to not render template on completion
+			nonRenderTemplateTaskKeys.add(beanTaskKey);
 
 			// Ensure correct configuration, if template section requires bean
 			if (isRequireBean) {
 
 				// Must have template bean task
 				if (beanTask == null) {
-					designer.addIssue("Missing method '" + beanTaskName
+					designer.addIssue("Missing method '" + beanMethodName
 							+ "' on class " + this.sectionClass.getName()
 							+ " to provide bean for template "
 							+ templateLocation, AssetType.WORK,
@@ -327,9 +340,9 @@ public class HttpTemplateSectionSource extends ClassSectionSource {
 					// Ensure bean task does not have a parameter
 					if (beanTask.parameter != null) {
 						designer.addIssue("Template bean method '"
-								+ beanTaskName + "' must not have a "
+								+ beanMethodName + "' must not have a "
 								+ Parameter.class.getSimpleName()
-								+ " annotation", AssetType.TASK, beanTaskName);
+								+ " annotation", AssetType.TASK, beanMethodName);
 					}
 
 					// Obtain the argument type for the template
@@ -337,9 +350,9 @@ public class HttpTemplateSectionSource extends ClassSectionSource {
 					if ((argumentType == null)
 							|| (Void.class.equals(argumentType))) {
 						// Must provide argument from bean task
-						designer.addIssue("Bean method '" + beanTaskName
+						designer.addIssue("Bean method '" + beanMethodName
 								+ "' must have return value", AssetType.TASK,
-								beanTaskName);
+								beanMethodName);
 
 					} else {
 						// Determine bean type and whether an array
@@ -431,8 +444,8 @@ public class HttpTemplateSectionSource extends ClassSectionSource {
 			String flowName = taskFlow.getTaskFlowName();
 
 			// Determine if linking to content task
-			SectionTask contentTask = contentTasksByName.get(flowName
-					.toUpperCase());
+			SectionTask contentTask = contentTasksByName
+					.get(createTaskKey(flowName));
 			if (contentTask != null) {
 				// Link to content task
 				designer.link(taskFlow, contentTask,
@@ -461,7 +474,7 @@ public class HttpTemplateSectionSource extends ClassSectionSource {
 					linkServiceTaskName, linkTaskName);
 
 			// Obtain the link method task
-			String linkMethodTaskKey = linkTaskName.toUpperCase();
+			String linkMethodTaskKey = createTaskKey(linkTaskName);
 			TemplateClassTask methodTask = this.sectionClassMethodTasksByName
 					.get(linkMethodTaskKey);
 			if (methodTask == null) {
@@ -482,10 +495,10 @@ public class HttpTemplateSectionSource extends ClassSectionSource {
 		Collections.sort(sectionClassMethodTaskNames);
 		for (String beanTaskKey : sectionClassMethodTaskNames) {
 
-			// Determine if method not providing bean to template
-			if (!(templateBeanTaskKeys.contains(beanTaskKey))) {
+			// Determine if render template on completion
+			if (!(nonRenderTemplateTaskKeys.contains(beanTaskKey))) {
 
-				// Obtain the class method
+				// Potentially rendering so obtain the class method
 				TemplateClassTask methodTask = this.sectionClassMethodTasksByName
 						.get(beanTaskKey);
 				Method method = methodTask.method;
@@ -625,24 +638,29 @@ public class HttpTemplateSectionSource extends ClassSectionSource {
 		private final String extensionPropertyPrefix;
 
 		/**
+		 * {@link Set} to be populated with keys to {@link Task} instances that
+		 * are not to have the template rendered on their completion.
+		 */
+		private final Set<String> nonRenderTemplateTaskKeys;
+
+		/**
 		 * Initiate.
 		 * 
 		 * @param templateContent
 		 *            Raw {@link HttpTemplate} content.
 		 * @param extensionPropertyPrefix
 		 *            Prefix for a property of this extension.
-		 * @param sectionDesigner
-		 *            {@link SectionDesigner}.
-		 * @param sectionSourceContext
-		 *            {@link SectionSourceContext}.
-		 * @param templateLogicObject
-		 *            {@link SectionManagedObject} for the template logic
-		 *            object.
+		 * @param nonRenderTemplateTaskKeys
+		 *            {@link Set} to be populated with keys to {@link Task}
+		 *            instances that are not to have the template rendered on
+		 *            their completion.
 		 */
 		public HttpTemplateSectionExtensionContextImpl(String templateContent,
-				String extensionPropertyPrefix) {
+				String extensionPropertyPrefix,
+				Set<String> nonRenderTemplateTaskKeys) {
 			this.templateContent = templateContent;
 			this.extensionPropertyPrefix = extensionPropertyPrefix;
+			this.nonRenderTemplateTaskKeys = nonRenderTemplateTaskKeys;
 		}
 
 		/*
@@ -662,6 +680,12 @@ public class HttpTemplateSectionSource extends ClassSectionSource {
 		@Override
 		public Class<?> getTemplateClass() {
 			return HttpTemplateSectionSource.this.sectionClass;
+		}
+
+		@Override
+		public void flagAsNonRenderTemplateMethod(String templateClassMethodName) {
+			this.nonRenderTemplateTaskKeys
+					.add(createTaskKey(templateClassMethodName));
 		}
 
 		@Override
@@ -882,7 +906,7 @@ public class HttpTemplateSectionSource extends ClassSectionSource {
 		}
 
 		// Keep track of the tasks to allow linking by case-insensitive names
-		String taskKey = task.getSectionTaskName().toUpperCase();
+		String taskKey = createTaskKey(task.getSectionTaskName());
 		this.sectionClassMethodTasksByName.put(taskKey, new TemplateClassTask(
 				task, taskType, method, parameterType));
 

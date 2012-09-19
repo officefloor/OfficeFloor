@@ -235,6 +235,7 @@ public class ServletServerHttpConnectionTest extends OfficeFrameTestCase {
 
 		// Ensure correct input
 		assertEquals("Incorrect input stream", 1, actual.read());
+		assertEquals("Should be EOF", -1, actual.read());
 	}
 
 	/**

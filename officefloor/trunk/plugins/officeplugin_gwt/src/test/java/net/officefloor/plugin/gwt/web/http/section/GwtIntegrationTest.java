@@ -21,6 +21,8 @@ package net.officefloor.plugin.gwt.web.http.section;
 import java.io.ByteArrayOutputStream;
 
 import net.officefloor.autowire.AutoWireManagement;
+import net.officefloor.frame.api.escalate.Escalation;
+import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.impl.construct.source.SourcePropertiesImpl;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.gwt.service.MockGwtServiceInterface;
@@ -59,6 +61,11 @@ public class GwtIntegrationTest extends OfficeFrameTestCase {
 	 * HTTP Client.
 	 */
 	private final HttpClient client = new DefaultHttpClient();
+
+	/**
+	 * {@link Escalation} from the {@link OfficeFloor}.
+	 */
+	private static volatile Throwable escalation = null;
 
 	@Override
 	protected void setUp() throws Exception {
@@ -196,6 +203,9 @@ public class GwtIntegrationTest extends OfficeFrameTestCase {
 		GwtHttpTemplateSectionExtension.extendTemplate(section, this.source,
 				properties, Thread.currentThread().getContextClassLoader());
 
+		// Capture any exceptions
+		this.source.linkEscalation(Throwable.class, section, "handleEscalation");
+
 		// Start Server
 		this.source.openOfficeFloor();
 
@@ -212,8 +222,16 @@ public class GwtIntegrationTest extends OfficeFrameTestCase {
 	@Override
 	protected void tearDown() throws Exception {
 		// Shutdown
-		AutoWireManagement.closeAllOfficeFloors();
-		this.client.getConnectionManager().shutdown();
+		try {
+			AutoWireManagement.closeAllOfficeFloors();
+		} finally {
+			this.client.getConnectionManager().shutdown();
+		}
+
+		// Ensure no escalation failure
+		if (escalation != null) {
+			fail(escalation);
+		}
 	}
 
 	/**
@@ -223,6 +241,10 @@ public class GwtIntegrationTest extends OfficeFrameTestCase {
 		public void service(@Parameter Integer parameter,
 				AsyncCallback<String> callback) {
 			callback.onSuccess(String.valueOf(parameter.intValue()));
+		}
+
+		public void handleEscalation(@Parameter Throwable escalation) {
+			GwtIntegrationTest.escalation = escalation;
 		}
 	}
 

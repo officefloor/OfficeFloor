@@ -244,6 +244,9 @@ public class GwtServiceHandleConfigurationTest extends OfficeFrameTestCase {
 						flowTask);
 				this.designer.link(flow, flowTask,
 						FlowInstigationStrategyEnum.SEQUENTIAL);
+
+				// Record not render template for GWT service method
+				this.context.flagAsNonRenderTemplateMethod(flowName);
 			}
 		}
 	}

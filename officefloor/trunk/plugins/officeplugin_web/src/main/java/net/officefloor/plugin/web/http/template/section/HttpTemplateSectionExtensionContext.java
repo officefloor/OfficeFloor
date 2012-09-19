@@ -25,6 +25,7 @@ import net.officefloor.compile.spi.section.SectionOutput;
 import net.officefloor.compile.spi.section.SectionTask;
 import net.officefloor.compile.spi.section.source.SectionSourceContext;
 import net.officefloor.frame.spi.source.SourceProperties;
+import net.officefloor.plugin.socket.server.http.HttpResponse;
 
 /**
  * Context for the {@link HttpTemplateSectionExtension}.
@@ -58,6 +59,16 @@ public interface HttpTemplateSectionExtensionContext extends SourceProperties {
 	 * @return Logic class for the template.
 	 */
 	Class<?> getTemplateClass();
+
+	/**
+	 * Flags that the method on the template class should not have the template
+	 * rendered to the {@link HttpResponse} by default on its completion.
+	 * 
+	 * @param templateClassMethodName
+	 *            Name of the method on the template class to be flagged to not
+	 *            have template rendered on its completion.
+	 */
+	void flagAsNonRenderTemplateMethod(String templateClassMethodName);
 
 	/**
 	 * <p>

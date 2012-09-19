@@ -212,6 +212,15 @@ public class ServletHttpResponse implements HttpResponse {
 
 	@Override
 	public synchronized void send() throws IOException {
+		
+		// Close the output/writer
+		if (this.entity != null) {
+			this.entity.close();
+		} else if (this.entityWriter != null) {
+			this.entityWriter.close();
+		}
+		
+		// Ensure flush response to client
 		this.servletResponse.flushBuffer();
 	}
 
