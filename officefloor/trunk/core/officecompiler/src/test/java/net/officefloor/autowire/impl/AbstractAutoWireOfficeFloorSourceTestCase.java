@@ -71,7 +71,7 @@ import net.officefloor.compile.spi.section.ManagedObjectDependency;
 import net.officefloor.compile.spi.section.ManagedObjectFlow;
 import net.officefloor.compile.test.supplier.SupplierLoaderUtil;
 import net.officefloor.frame.api.manage.OfficeFloor;
-import net.officefloor.frame.impl.spi.team.ProcessContextTeamSource;
+import net.officefloor.frame.impl.spi.team.PassiveTeamSource;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.frame.spi.TestSource;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
@@ -661,7 +661,7 @@ public abstract class AbstractAutoWireOfficeFloorSourceTestCase extends
 	 * Convenience method to record the default {@link OfficeFloorTeam}.
 	 */
 	protected OfficeFloorTeam recordDefaultTeam() {
-		return this.recordTeam(ProcessContextTeamSource.class, DEFAULT_TEAM);
+		return this.recordTeam(PassiveTeamSource.class, DEFAULT_TEAM);
 	}
 
 	/**
