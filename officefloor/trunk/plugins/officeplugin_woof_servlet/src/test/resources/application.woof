@@ -3,6 +3,8 @@
     <template name="gwt" uri="gwt" path="gwt.ofp" class="net.officefloor.plugin.woof.servlet.MockLogic" x="142" y="39">
       <output name="output" argument-type="">
       </output>
+      <extension class="COMET">
+      </extension>
       <extension class="GWT">
         <property name="gwt.module.path" value="net/officefloor/plugin/woof/servlet/gwt.gwt.xml"/>
         <property name="gwt.async.service.interfaces" value="net.officefloor.plugin.woof.servlet.client.MockGwtServiceAsync"/>

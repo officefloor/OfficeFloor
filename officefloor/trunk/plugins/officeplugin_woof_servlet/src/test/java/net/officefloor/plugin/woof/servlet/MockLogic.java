@@ -17,6 +17,8 @@
  */
 package net.officefloor.plugin.woof.servlet;
 
+import net.officefloor.plugin.comet.CometPublisherInterface;
+import net.officefloor.plugin.comet.api.CometSubscriber;
 import net.officefloor.plugin.section.clazz.Parameter;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
@@ -67,6 +69,31 @@ public class MockLogic {
 	public void gwtService(@Parameter String text,
 			AsyncCallback<String> callback) {
 		callback.onSuccess("AJAX-" + text);
+	}
+
+	/**
+	 * Comet event trigger.
+	 */
+	@CometPublisherInterface
+	public static interface CometTrigger extends CometSubscriber {
+
+		void trigger(String event);
+	}
+
+	/**
+	 * Triggers the comet event.
+	 * 
+	 * @param trigger
+	 *            {@link CometTrigger}.
+	 * @param text
+	 *            Text for the event.
+	 * @param callback
+	 *            {@link AsyncCallback}.
+	 */
+	public void cometTrigger(CometTrigger trigger, @Parameter String text,
+			AsyncCallback<Void> callback) {
+		trigger.trigger(text);
+		callback.onSuccess(null);
 	}
 
 }

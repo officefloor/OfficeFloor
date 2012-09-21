@@ -20,6 +20,7 @@ package net.officefloor.plugin.servlet.bridge.spi;
 
 import java.io.IOException;
 
+import javax.servlet.AsyncContext;
 import javax.servlet.Servlet;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
@@ -42,6 +43,13 @@ public interface ServletServiceBridger<S> {
 	 * @return Instance identifier for this {@link ServletServiceBridger}.
 	 */
 	String getInstanceIdentifier();
+
+	/**
+	 * Indicates whether to use the {@link AsyncContext}.
+	 * 
+	 * @return <code>true</code> to use the {@link AsyncContext}.
+	 */
+	boolean isUseAsyncContext();
 
 	/**
 	 * Obtains the object types for the {@link Servlet}.
