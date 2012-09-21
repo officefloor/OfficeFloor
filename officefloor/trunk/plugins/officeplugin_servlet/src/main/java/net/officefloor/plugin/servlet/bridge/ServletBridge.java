@@ -18,6 +18,8 @@
 
 package net.officefloor.plugin.servlet.bridge;
 
+import javax.servlet.AsyncContext;
+import javax.servlet.Filter;
 import javax.servlet.Servlet;
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
@@ -53,11 +55,19 @@ public interface ServletBridge {
 	ServletContext getServletContext();
 
 	/**
+	 * Obtains the {@link AsyncContext}.
+	 * 
+	 * @return {@link AsyncContext}. May be <code>null</code> if not being
+	 *         executed asynchronously.
+	 */
+	AsyncContext getAsyncContext();
+
+	/**
 	 * <p>
-	 * Obtains the object by type from the {@link Servlet}.
+	 * Obtains the object by type from the {@link Servlet} / {@link Filter}.
 	 * <p>
 	 * This allows access to the dependency injected objects for the
-	 * {@link Servlet}.
+	 * {@link Servlet} / {@link Filter}.
 	 * 
 	 * @param objectType
 	 *            Type of the {@link Object}.

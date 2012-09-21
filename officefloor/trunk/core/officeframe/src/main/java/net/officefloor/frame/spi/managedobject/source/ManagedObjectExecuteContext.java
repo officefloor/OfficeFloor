@@ -41,7 +41,7 @@ import net.officefloor.frame.spi.managedobject.ManagedObject;
  * The {@link ManagedObject} passed to the invocation will go through a full
  * life-cycle so be careful passing in an existing initialised
  * {@link ManagedObject}. For example the {@link AsynchronousListener} instance
- * will be overwritten which will likely cause dead-lock as the
+ * will be overwritten which will likely cause live-lock as the
  * {@link AsynchronousListener#notifyComplete()} will notify on the wrong
  * {@link ManagedObjectContainer}.</li>
  * </ol>
@@ -56,13 +56,14 @@ public interface ManagedObjectExecuteContext<F extends Enum<F>> {
 	 * @param key
 	 *            Key identifying the {@link JobSequence} to instigate.
 	 * @param parameter
-	 *            Parameter to the first {@link Task} of the {@link JobSequence}.
+	 *            Parameter to first {@link Task} of the {@link JobSequence}.
 	 * @param managedObject
 	 *            {@link ManagedObject} for the {@link ProcessState} of the
 	 *            {@link JobSequence}.
 	 * @param delay
-	 *            Delay in milliseconds before the {@link JobSequence} is invoked. A 0
-	 *            or negative value invokes the {@link JobSequence} immediately.
+	 *            Delay in milliseconds before the {@link JobSequence} is
+	 *            invoked. A 0 or negative value invokes the {@link JobSequence}
+	 *            immediately.
 	 * @return {@link ProcessFuture}.
 	 * 
 	 * @see ManagedObjectExecuteContext
@@ -76,13 +77,15 @@ public interface ManagedObjectExecuteContext<F extends Enum<F>> {
 	 * @param flowIndex
 	 *            Index identifying the {@link JobSequence} to instigate.
 	 * @param parameter
-	 *            Parameter that to the first {@link Task} of the {@link JobSequence}.
+	 *            Parameter that to the first {@link Task} of the
+	 *            {@link JobSequence}.
 	 * @param managedObject
 	 *            {@link ManagedObject} for the {@link ProcessState} of the
 	 *            {@link JobSequence}.
 	 * @param delay
-	 *            Delay in milliseconds before the {@link JobSequence} is invoked. A 0
-	 *            or negative value invokes the {@link JobSequence} immediately.
+	 *            Delay in milliseconds before the {@link JobSequence} is
+	 *            invoked. A 0 or negative value invokes the {@link JobSequence}
+	 *            immediately.
 	 * @return {@link ProcessFuture}
 	 * 
 	 * @see ManagedObjectExecuteContext
@@ -92,8 +95,8 @@ public interface ManagedObjectExecuteContext<F extends Enum<F>> {
 
 	/**
 	 * <p>
-	 * Instigates a {@link JobSequence} providing an {@link EscalationHandler} to
-	 * handle {@link EscalationFlow} from the {@link JobSequence}.
+	 * Instigates a {@link JobSequence} providing an {@link EscalationHandler}
+	 * to handle {@link EscalationFlow} from the {@link JobSequence}.
 	 * <p>
 	 * An example of using this would be a HTTP server socket that sends status
 	 * 500 on {@link EscalationFlow} from {@link JobSequence}.
@@ -101,13 +104,15 @@ public interface ManagedObjectExecuteContext<F extends Enum<F>> {
 	 * @param key
 	 *            Key identifying the {@link JobSequence} to instigate.
 	 * @param parameter
-	 *            Parameter to the first {@link Task} of the {@link JobSequence}.
+	 *            Parameter to the first {@link Task} of the {@link JobSequence}
+	 *            .
 	 * @param managedObject
 	 *            {@link ManagedObject} for the {@link ProcessState} of the
 	 *            {@link JobSequence}.
 	 * @param delay
-	 *            Delay in milliseconds before the {@link JobSequence} is invoked. A 0
-	 *            or negative value invokes the {@link JobSequence} immediately.
+	 *            Delay in milliseconds before the {@link JobSequence} is
+	 *            invoked. A 0 or negative value invokes the {@link JobSequence}
+	 *            immediately.
 	 * @param escalationHandler
 	 *            {@link EscalationHandler}.
 	 * @return {@link ProcessFuture}.
@@ -120,8 +125,8 @@ public interface ManagedObjectExecuteContext<F extends Enum<F>> {
 
 	/**
 	 * <p>
-	 * Instigates a {@link JobSequence} providing an {@link EscalationHandler} to
-	 * handle {@link EscalationFlow} from the {@link JobSequence}.
+	 * Instigates a {@link JobSequence} providing an {@link EscalationHandler}
+	 * to handle {@link EscalationFlow} from the {@link JobSequence}.
 	 * <p>
 	 * An example of using this would be a HTTP server socket that sends status
 	 * 500 on {@link EscalationFlow} from {@link JobSequence}.
@@ -129,13 +134,14 @@ public interface ManagedObjectExecuteContext<F extends Enum<F>> {
 	 * @param flowIndex
 	 *            Index identifying the {@link JobSequence} to instigate.
 	 * @param parameter
-	 *            Parameter to the first {@link Task} of the {@link JobSequence}.
+	 *            Parameter to first {@link Task} of the {@link JobSequence}.
 	 * @param managedObject
 	 *            {@link ManagedObject} for the {@link ProcessState} of the
 	 *            {@link JobSequence}.
 	 * @param delay
-	 *            Delay in milliseconds before the {@link JobSequence} is invoked. A 0
-	 *            or negative value invokes the {@link JobSequence} immediately.
+	 *            Delay in milliseconds before the {@link JobSequence} is
+	 *            invoked. A 0 or negative value invokes the {@link JobSequence}
+	 *            immediately.
 	 * @param escalationHandler
 	 *            {@link EscalationHandler}.
 	 * @return {@link ProcessFuture}.

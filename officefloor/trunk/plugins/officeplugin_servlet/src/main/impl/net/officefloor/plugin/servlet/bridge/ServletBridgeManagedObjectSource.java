@@ -25,6 +25,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
+import javax.servlet.AsyncContext;
 import javax.servlet.Servlet;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
@@ -38,15 +39,22 @@ import net.officefloor.autowire.ManagedObjectSourceWirerContext;
 import net.officefloor.autowire.impl.AutoWireOfficeFloorSource;
 import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.api.escalate.EscalationHandler;
+import net.officefloor.frame.api.execute.Task;
+import net.officefloor.frame.api.execute.TaskContext;
 import net.officefloor.frame.api.manage.OfficeFloor;
+import net.officefloor.frame.impl.spi.team.PassiveTeamSource;
 import net.officefloor.frame.impl.spi.team.ProcessContextTeam;
+import net.officefloor.frame.impl.spi.team.ProcessContextTeamSource;
 import net.officefloor.frame.internal.structure.ProcessState;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
+import net.officefloor.frame.spi.managedobject.recycle.RecycleManagedObjectParameter;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectExecuteContext;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceContext;
 import net.officefloor.frame.spi.managedobject.source.impl.AbstractManagedObjectSource;
+import net.officefloor.frame.util.AbstractSingleTask;
 import net.officefloor.plugin.servlet.bridge.spi.ServletServiceBridger;
+import net.officefloor.plugin.socket.server.http.protocol.HttpStatus;
 
 /**
  * {@link ManagedObjectSource} to trigger a {@link ProcessState} to service a
@@ -84,6 +92,12 @@ public class ServletBridgeManagedObjectSource
 	private static int nextInstanceIdentifier = 1;
 
 	/**
+	 * Name of property identifying whether to use {@link AsyncContext}
+	 * servicing.
+	 */
+	public static final String PROPERTY_USE_ASYNC = "use.async";
+
+	/**
 	 * {@link ServletBridgeManagedObjectSource} by instance identifier.
 	 */
 	private static Map<String, ServletBridgeManagedObjectSource> instances = new HashMap<String, ServletBridgeManagedObjectSource>();
@@ -115,6 +129,9 @@ public class ServletBridgeManagedObjectSource
 		ServletServiceBridger<S> bridger = ServletBridgeManagedObjectSource
 				.createServletServiceBridger(servletClass);
 
+		// Determine if handling asynchronously
+		final boolean isUseAsync = bridger.isUseAsyncContext();
+
 		// Configure the Servlet Bridger
 		AutoWireObject bridge = source.addManagedObject(
 				ServletBridgeManagedObjectSource.class.getName(),
@@ -123,11 +140,24 @@ public class ServletBridgeManagedObjectSource
 					public void wire(ManagedObjectSourceWirerContext context) {
 						context.mapFlow(FlowKeys.SERVICE.name(),
 								handlerSectionName, handlerInputName);
+
+						// Configure team for recycle task
+						if (isUseAsync) {
+							context.mapTeam("COMPLETE",
+									PassiveTeamSource.class.getName());
+						}
 					}
 				}, new AutoWire(ServletBridge.class));
 		bridge.addProperty(
 				ServletBridgeManagedObjectSource.PROPERTY_INSTANCE_IDENTIFIER,
 				bridger.getInstanceIdentifier());
+		bridge.addProperty(ServletBridgeManagedObjectSource.PROPERTY_USE_ASYNC,
+				String.valueOf(isUseAsync));
+
+		// Ensure use process context team if not asynchronous
+		if (!isUseAsync) {
+			source.assignDefaultTeam(ProcessContextTeamSource.class.getName());
+		}
 
 		// Return the Servlet Bridger
 		return bridger;
@@ -206,6 +236,7 @@ public class ServletBridgeManagedObjectSource
 	@Override
 	protected void loadSpecification(SpecificationContext context) {
 		context.addProperty(PROPERTY_INSTANCE_IDENTIFIER, "Instance");
+		context.addProperty(PROPERTY_USE_ASYNC, "Async");
 	}
 
 	@Override
@@ -226,6 +257,15 @@ public class ServletBridgeManagedObjectSource
 		// Specify the meta-data
 		context.setObjectClass(ServletBridge.class);
 		context.addFlow(FlowKeys.SERVICE, null);
+
+		// Determine if using async
+		boolean isUseAsync = Boolean.parseBoolean(mosContext.getProperty(
+				PROPERTY_USE_ASYNC, String.valueOf(Boolean.FALSE)));
+		if (isUseAsync) {
+			// Register recycle task to complete the async context
+			CompleteAsyncContextTask recycleTask = new CompleteAsyncContextTask();
+			recycleTask.registerAsRecycleTask(mosContext, "COMPLETE");
+		}
 	}
 
 	@Override
@@ -311,6 +351,12 @@ public class ServletBridgeManagedObjectSource
 		}
 
 		@Override
+		public boolean isUseAsyncContext() {
+			// May only use AsyncContext if no JEE container dependencies used
+			return (this.injectedDependencies.size() == 0);
+		}
+
+		@Override
 		public Class<?>[] getObjectTypes() {
 			Set<Class<?>> types = this.injectedDependencies.keySet();
 			return types.toArray(new Class[types.size()]);
@@ -330,22 +376,38 @@ public class ServletBridgeManagedObjectSource
 						+ OfficeFloor.class.getSimpleName());
 			}
 
-			// Create the managed object
-			ServletBridgeManagedObject managedObject = new ServletBridgeManagedObject(
-					this, servlet, request, response, context);
+			// Determine if service asynchronously
+			if (this.isUseAsyncContext()) {
+				// Service asynchronously so start async context
+				AsyncContext asyncContext = request.startAsync();
 
-			try {
-				// Service the request (blocking re-using this thread)
-				ProcessContextTeam.doProcess(instance.context,
-						FlowKeys.SERVICE, null, managedObject, managedObject);
+				// Create the managed object to asynchronously service
+				ServletBridgeManagedObject managedObject = new ServletBridgeManagedObject(
+						this, servlet, request, response, context, asyncContext);
 
-			} catch (InterruptedException ex) {
-				// Propagate failure
-				throw new ServletException(ex);
+				// Trigger asynchronous servicing
+				instance.context.invokeProcess(FlowKeys.SERVICE, null,
+						managedObject, 0, managedObject);
+
+			} else {
+				// Create the managed object to synchronously service
+				ServletBridgeManagedObject managedObject = new ServletBridgeManagedObject(
+						this, servlet, request, response, context, null);
+
+				try {
+					// Service the request (blocking re-using this thread)
+					ProcessContextTeam.doProcess(instance.context,
+							FlowKeys.SERVICE, null, managedObject,
+							managedObject);
+
+				} catch (InterruptedException ex) {
+					// Propagate failure
+					throw new ServletException(ex);
+				}
+
+				// Propagate any exception
+				managedObject.propagateException();
 			}
-
-			// Propagate any exception
-			managedObject.propagateException();
 		}
 	}
 
@@ -381,6 +443,11 @@ public class ServletBridgeManagedObjectSource
 		private final ServletContext servletContext;
 
 		/**
+		 * {@link AsyncContext}.
+		 */
+		private final AsyncContext asyncContext;
+
+		/**
 		 * Escalation.
 		 */
 		private volatile Throwable escalation = null;
@@ -398,15 +465,19 @@ public class ServletBridgeManagedObjectSource
 		 *            {@link HttpServletResponse}.
 		 * @param servletContext
 		 *            {@link ServletContext}.
+		 * @param asyncContext
+		 *            {@link AsyncContext}.
 		 */
 		public ServletBridgeManagedObject(ServletServiceBridgerImpl<?> bridger,
 				Object servlet, HttpServletRequest request,
-				HttpServletResponse response, ServletContext servletContext) {
+				HttpServletResponse response, ServletContext servletContext,
+				AsyncContext asyncContext) {
 			this.bridger = bridger;
 			this.servlet = servlet;
 			this.request = request;
 			this.response = response;
 			this.servletContext = servletContext;
+			this.asyncContext = asyncContext;
 		}
 
 		/**
@@ -458,6 +529,11 @@ public class ServletBridgeManagedObjectSource
 		}
 
 		@Override
+		public AsyncContext getAsyncContext() {
+			return this.asyncContext;
+		}
+
+		@Override
 		@SuppressWarnings("unchecked")
 		public <O> O getObject(Class<? extends O> objectType) throws Exception {
 			return (O) this.bridger.getObject(this.servlet, objectType);
@@ -479,6 +555,45 @@ public class ServletBridgeManagedObjectSource
 		@Override
 		public void handleEscalation(Throwable escalation) throws Throwable {
 			this.escalation = escalation;
+
+			// Handle failure if asynchronous
+			if (this.asyncContext != null) {
+				try {
+					// Flag to send error
+					this.response.sendError(
+							HttpStatus.SC_INTERNAL_SERVER_ERROR,
+							escalation.getMessage() + "["
+									+ escalation.getClass().getSimpleName()
+									+ "]");
+
+				} finally {
+					// Ensure complete async context
+					this.asyncContext.complete();
+				}
+			}
+		}
+	}
+
+	/**
+	 * {@link Task} to complete the {@link AsyncContext}.
+	 */
+	public static class CompleteAsyncContextTask extends
+			AbstractSingleTask<CompleteAsyncContextTask, None, None> {
+
+		@Override
+		public Object doTask(
+				TaskContext<CompleteAsyncContextTask, None, None> context) {
+
+			// Obtain the recycle parameter
+			RecycleManagedObjectParameter<ServletBridgeManagedObject> parameter = this
+					.getRecycleManagedObjectParameter(context,
+							ServletBridgeManagedObject.class);
+
+			// Complete the async context
+			parameter.getManagedObject().getAsyncContext().complete();
+
+			// No further functionality
+			return null;
 		}
 	}
 

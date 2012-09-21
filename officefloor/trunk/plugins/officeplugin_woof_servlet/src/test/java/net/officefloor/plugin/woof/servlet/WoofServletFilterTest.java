@@ -28,7 +28,13 @@ import javax.servlet.http.HttpServlet;
 
 import net.officefloor.autowire.AutoWire;
 import net.officefloor.frame.test.OfficeFrameTestCase;
+import net.officefloor.plugin.comet.internal.CometEvent;
+import net.officefloor.plugin.comet.internal.CometInterest;
+import net.officefloor.plugin.comet.internal.CometRequest;
+import net.officefloor.plugin.comet.internal.CometResponse;
+import net.officefloor.plugin.comet.internal.CometSubscriptionService;
 import net.officefloor.plugin.socket.server.http.server.MockHttpServer;
+import net.officefloor.plugin.woof.servlet.MockLogic.CometTrigger;
 import net.officefloor.plugin.woof.servlet.client.MockGwtService;
 
 import org.apache.http.HttpResponse;
@@ -136,15 +142,52 @@ public class WoofServletFilterTest extends OfficeFrameTestCase {
 	/**
 	 * Ensure can invoke Comet service.
 	 */
-	public void _testServiceComet() throws Exception {
-		fail("TODO implement");
+	public void testServiceComet() throws Exception {
+		this.doServiceCometTest("");
 	}
 
 	/**
 	 * Ensure can invoke Comet service respecting the {@link ServletContext}.
 	 */
-	public void _testServiceCometWithinContext() throws Exception {
-		fail("TODO implement");
+	public void testServiceCometWithinContext() throws Exception {
+		this.doServiceCometTest("/path");
+	}
+
+	/**
+	 * Undertakes testing the servicing of a comet request.
+	 * 
+	 * @param contextPath
+	 *            Context path.
+	 */
+	private void doServiceCometTest(String contextPath) throws Exception {
+
+		final String eventData = "TEST";
+
+		// Start Server
+		this.startServer(contextPath);
+
+		// Create the proxy for GWT and trigger comet event
+		MockGwtService service = (MockGwtService) SyncProxy.newProxyInstance(
+				MockGwtService.class, "http://localhost:" + this.port
+						+ contextPath + "/gwt/", "service");
+		service.cometTrigger(eventData); // event will be waiting
+
+		// Create the proxy for Comet and subscribe to event
+		CometSubscriptionService caller = (CometSubscriptionService) SyncProxy
+				.newProxyInstance(
+						CometSubscriptionService.class,
+						"http://localhost:" + this.port + contextPath + "/gwt/",
+						"comet-subscribe");
+		CometResponse response = caller.subscribe(new CometRequest(
+				CometRequest.FIRST_REQUEST_SEQUENCE_NUMBER, new CometInterest(
+						CometTrigger.class.getName(), null)));
+		CometEvent[] events = response.getEvents();
+		assertEquals("Incorrect number of events", 1, events.length);
+		CometEvent event = events[0];
+
+		// Ensure correct event
+		String data = (String) event.getData();
+		assertEquals("Incorrect event", eventData, data);
 	}
 
 	/*

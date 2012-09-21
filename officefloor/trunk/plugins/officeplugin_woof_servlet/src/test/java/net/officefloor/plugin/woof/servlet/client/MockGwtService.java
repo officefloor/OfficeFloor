@@ -32,9 +32,17 @@ public interface MockGwtService extends RemoteService {
 	 * GWT service.
 	 * 
 	 * @param text
-	 *            Text send from client.
+	 *            Text sent from client.
 	 * @return Result of service.
 	 */
 	String gwtService(String text);
+
+	/**
+	 * Triggers a Comet event.
+	 * 
+	 * @param text
+	 *            Text for event.
+	 */
+	void cometTrigger(String text);
 
 }

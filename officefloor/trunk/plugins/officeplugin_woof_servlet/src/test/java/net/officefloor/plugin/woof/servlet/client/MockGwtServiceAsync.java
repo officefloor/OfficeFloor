@@ -30,11 +30,20 @@ public interface MockGwtServiceAsync {
 	 * GWT service.
 	 * 
 	 * @param text
-	 *            Text send from client.
+	 *            Text sent from client.
 	 * @param callback
 	 *            {@link AsyncCallback}.
-	 * @return Result of service.
 	 */
 	void gwtService(String text, AsyncCallback<String> callback);
+
+	/**
+	 * Triggers a Comet event.
+	 * 
+	 * @param text
+	 *            Text for event.
+	 * @param callback
+	 *            {@link AsyncCallback}.
+	 */
+	void cometTrigger(String text, AsyncCallback<Void> callback);
 
 }

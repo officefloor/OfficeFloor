@@ -82,7 +82,7 @@ import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.api.profile.Profiler;
-import net.officefloor.frame.impl.spi.team.ProcessContextTeamSource;
+import net.officefloor.frame.impl.spi.team.PassiveTeamSource;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
@@ -579,15 +579,10 @@ public class AutoWireOfficeFloorSource extends AbstractOfficeFloorSource
 					this.defaultTeam);
 
 		} else {
-			/*
-			 * Create the default Team by default to always use invoking thread.
-			 * This is to allow use within an application server, as use within
-			 * other contexts should specify an appropriate default Team if
-			 * requiring different default behaviour.
-			 */
+			// Unspecified default Team to use implicit thread
 			defaultAutoWireTeamInstance = new AutoWireTeamInstance(
 					new AutoWireTeamImpl(this.compiler, "team",
-							ProcessContextTeamSource.class.getName(),
+							PassiveTeamSource.class.getName(),
 							this.compiler.createPropertyList()));
 		}
 
