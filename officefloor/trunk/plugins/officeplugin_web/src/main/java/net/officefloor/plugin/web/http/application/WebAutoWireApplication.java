@@ -50,7 +50,8 @@ public interface WebAutoWireApplication extends AutoWireApplication {
 	static String HANDLER_INPUT_NAME = "HANDLE_HTTP_INPUT";
 
 	/**
-	 * Prefix to append to web resources to locate them on the class path.
+	 * Prefix directory path for public web resources to locate them on the
+	 * class path.
 	 */
 	static final String WEB_PUBLIC_RESOURCES_CLASS_PATH_PREFIX = "PUBLIC";
 
@@ -254,14 +255,28 @@ public interface WebAutoWireApplication extends AutoWireApplication {
 	void linkToSendResponse(AutoWireSection section, String outputName);
 
 	/**
-	 * Specifies the {@link OfficeSectionInput} to handle if unable to route
-	 * {@link HttpRequest}.
+	 * <p>
+	 * Chains a {@link OfficeSectionInput} to the end of the servicing chain to
+	 * handle a {@link HttpRequest}.
+	 * <p>
+	 * The {@link WebAutoWireApplication} functionality is always the first in
+	 * the chain to attempt to service the {@link HttpRequest}.
+	 * <p>
+	 * Typically the last in the chain is servicing the {@link HttpRequest} by
+	 * sending a static resource by matching URI to resource name - and if no
+	 * resource found, a not found error.
 	 * 
 	 * @param section
 	 *            {@link AutoWireSection}.
 	 * @param inputName
 	 *            Name of the {@link OfficeSectionInput}.
+	 * @param notHandledOutputName
+	 *            Name of the {@link OfficeSectionOutput} should this servicer
+	 *            not handle the {@link HttpRequest}. May be <code>null</code>
+	 *            if handles all {@link HttpRequest} instances (any services
+	 *            chained after this will therefore not be used).
 	 */
-	void setNonHandledServicer(AutoWireSection section, String inputName);
+	void chainServicer(AutoWireSection section, String inputName,
+			String notHandledOutputName);
 
 }

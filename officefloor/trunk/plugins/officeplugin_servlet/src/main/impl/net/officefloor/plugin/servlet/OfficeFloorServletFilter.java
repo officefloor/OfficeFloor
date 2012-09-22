@@ -194,13 +194,6 @@ public abstract class OfficeFloorServletFilter extends
 				ServletHttpRequestStateManagedObjectSource.class.getName(),
 				null, new AutoWire(HttpRequestState.class));
 
-		// Configure the Servlet container resource section
-		AutoWireSection servletContainerResource = this.addSection(
-				"SERVLET_CONTAINER_RESOURCE",
-				ServletContainerResourceSectionSource.class.getName(),
-				"NOT_HANDLED");
-		this.setNonHandledServicer(servletContainerResource, "NOT_HANDLED");
-
 		// Provide dependencies of Servlet
 		Class<?>[] dependencyTypes = this.bridger.getObjectTypes();
 		for (Class<?> dependencyType : dependencyTypes) {
@@ -253,6 +246,13 @@ public abstract class OfficeFloorServletFilter extends
 			}
 			this.handledURIs.add(uri);
 		}
+
+		// Configure the Servlet container resource section
+		AutoWireSection servletContainerResource = this.addSection(
+				"SERVLET_CONTAINER_RESOURCE",
+				ServletContainerResourceSectionSource.class.getName(),
+				"NOT_HANDLED");
+		this.chainServicer(servletContainerResource, "NOT_HANDLED", null);
 
 		// Link the Servlet Resources
 		for (ServletResourceLink link : this.servletResourceLinks) {
