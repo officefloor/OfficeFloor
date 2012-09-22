@@ -103,10 +103,9 @@ public class WebApplicationAutoWireOfficeFloorSource extends
 	private final List<SendLink> sendLinks = new LinkedList<SendLink>();
 
 	/**
-	 * Allows for overriding the {@link NonHandledServicer}. <code>null</code>
-	 * indicates to use default.
+	 * {@link ChainedServicer} instances.
 	 */
-	private NonHandledServicer nonHandledServicer = null;
+	private final List<ChainedServicer> chainedServicers = new LinkedList<ChainedServicer>();
 
 	/*
 	 * ======================== WebAutoWireApplication =========================
@@ -369,8 +368,10 @@ public class WebApplicationAutoWireOfficeFloorSource extends
 	}
 
 	@Override
-	public void setNonHandledServicer(AutoWireSection section, String inputName) {
-		this.nonHandledServicer = new NonHandledServicer(section, inputName);
+	public void chainServicer(AutoWireSection section, String inputName,
+			String notHandledOutputName) {
+		this.chainedServicers.add(new ChainedServicer(section, inputName,
+				notHandledOutputName));
 	}
 
 	@Override
@@ -420,27 +421,38 @@ public class WebApplicationAutoWireOfficeFloorSource extends
 					location);
 		}
 
-		// Provide the non-handled servicer
-		if (this.nonHandledServicer != null) {
-			// Use overridden servicer
-			this.link(httpSection,
-					WebApplicationSectionSource.UNHANDLED_REQUEST_OUTPUT_NAME,
-					this.nonHandledServicer.section,
-					this.nonHandledServicer.inputName);
+		// Chain the servicers
+		AutoWireSection previousChainedSection = httpSection;
+		String previousChainedOutput = WebApplicationSectionSource.UNHANDLED_REQUEST_OUTPUT_NAME;
+		for (ChainedServicer chainedServicer : this.chainedServicers) {
 
-		} else {
-			// Use default non-handled servicer (file sending)
+			// Link the chained servicer (if previous chained output)
+			if (previousChainedOutput != null) {
+				this.link(previousChainedSection, previousChainedOutput,
+						chainedServicer.section, chainedServicer.inputName);
+			}
+
+			// Configure for next in chain
+			previousChainedSection = chainedServicer.section;
+			previousChainedOutput = chainedServicer.notHandledOutputName;
+		}
+
+		// End chain with file sender servicer (if previous chained output)
+		if (previousChainedOutput != null) {
+			
+			// Create the filer sender servicer
 			AutoWireSection nonHandledServicer = this.addSection(
 					"NON_HANDLED_SERVICER",
 					HttpFileSenderSectionSource.class.getName(), null);
 			SourceHttpResourceFactory.copyProperties(context,
 					nonHandledServicer);
-			this.link(httpSection,
-					WebApplicationSectionSource.UNHANDLED_REQUEST_OUTPUT_NAME,
-					nonHandledServicer,
-					HttpFileSenderSectionSource.SERVICE_INPUT_NAME);
 			this.linkToSendResponse(nonHandledServicer,
 					HttpFileSenderSectionSource.FILE_SENT_OUTPUT_NAME);
+			
+			// Link into the chain
+			this.link(previousChainedSection, previousChainedOutput,
+					nonHandledServicer,
+					HttpFileSenderSectionSource.SERVICE_INPUT_NAME);
 		}
 
 		// Link URI's
@@ -639,9 +651,9 @@ public class WebApplicationAutoWireOfficeFloorSource extends
 	}
 
 	/**
-	 * Non-handled servicer.
+	 * Chained servicer.
 	 */
-	private static class NonHandledServicer {
+	private static class ChainedServicer {
 
 		/**
 		 * {@link AutoWireSection}.
@@ -654,16 +666,26 @@ public class WebApplicationAutoWireOfficeFloorSource extends
 		public final String inputName;
 
 		/**
+		 * Name of the {@link SectionOutput}.
+		 */
+		public final String notHandledOutputName;
+
+		/**
 		 * Initiate.
 		 * 
 		 * @param section
 		 *            {@link AutoWireSection}.
 		 * @param inputName
 		 *            Name of the {@link SectionInput}.
+		 * @param notHandledOutputName
+		 *            Name of the {@link SectionOutput}. May be
+		 *            <code>null</code>.
 		 */
-		public NonHandledServicer(AutoWireSection section, String inputName) {
+		public ChainedServicer(AutoWireSection section, String inputName,
+				String notHandledOutputName) {
 			this.section = section;
 			this.inputName = inputName;
+			this.notHandledOutputName = notHandledOutputName;
 		}
 	}
 

@@ -107,7 +107,7 @@ public class WoofLoaderImpl implements WoofLoader {
 		ClassLoader classLoader = application.getOfficeFloorCompiler()
 				.getClassLoader();
 
-		// Load the extension services
+		// Load the template extension services
 		Map<String, WoofTemplateExtensionService> extensionServices = new HashMap<String, WoofTemplateExtensionService>();
 		ServiceLoader<WoofTemplateExtensionService> extensionServiceLoader = ServiceLoader
 				.load(WoofTemplateExtensionService.class, classLoader);

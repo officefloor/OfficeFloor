@@ -7,7 +7,7 @@
 	<office-floor>
 		<teams>
 			<team name="SERVLET_TEAM" source="ONE_PERSON" />
-			<team name="ACCEPTER_TEAM" source="ONE_PERSON" />
+			<team name="ACCEPTER_TEAM" source="WORKER_PER_TASK" />
 			<team name="LISTENER_TEAM" source="WORKER_PER_TASK" />
 		</teams>
 		<managed-object-sources>

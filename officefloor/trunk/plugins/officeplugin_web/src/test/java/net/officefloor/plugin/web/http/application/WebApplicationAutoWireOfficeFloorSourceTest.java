@@ -46,6 +46,7 @@ import net.officefloor.plugin.web.http.template.parse.HttpTemplate;
 import net.officefloor.plugin.web.http.template.section.HttpTemplateSectionExtension;
 import net.officefloor.plugin.web.http.template.section.HttpTemplateSectionExtensionContext;
 import net.officefloor.plugin.web.http.template.section.HttpTemplateSectionSource;
+import net.officefloor.plugin.work.clazz.FlowInterface;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
@@ -840,37 +841,6 @@ public class WebApplicationAutoWireOfficeFloorSourceTest extends
 	}
 
 	/**
-	 * Ensure able to override the non-routed servicing.
-	 */
-	public void testOverrideNonHandledServicing() throws Exception {
-
-		// Add section to override servicing
-		AutoWireSection section = this.source.addSection("SECTION",
-				ClassSectionSource.class.getName(),
-				MockNonRoutedServicer.class.getName());
-		this.source.setNonHandledServicer(section, "service");
-		this.source.linkToSendResponse(section, "send");
-
-		// Start the HTTP Server
-		this.source.openOfficeFloor();
-
-		// Ensure override non-routed servicing
-		this.assertHttpRequest("/unhandled", 200, "NON_ROUTED - /unhandled");
-	}
-
-	/**
-	 * Provides mock functionality of non-routed servicing.
-	 */
-	public static class MockNonRoutedServicer {
-		@NextTask("send")
-		public void service(ServerHttpConnection connection) throws IOException {
-			String uri = connection.getHttpRequest().getRequestURI();
-			WebApplicationAutoWireOfficeFloorSourceTest.writeResponse(
-					"NON_ROUTED - " + uri, connection);
-		}
-	}
-
-	/**
 	 * Ensure able to obtain resources.
 	 */
 	public void testObtainResources() throws Exception {
@@ -944,6 +914,104 @@ public class WebApplicationAutoWireOfficeFloorSourceTest extends
 		// Ensure as not keeping in direct memory that pick up changes
 		this.assertHttpRequest("/test.html", 200, "CHANGED");
 		this.assertHttpRequest("/", 200, "CHANGED");
+	}
+
+	/**
+	 * Ensure able to chain a servicer.
+	 */
+	public void testChainServicer() throws Exception {
+
+		// Add section to override servicing
+		AutoWireSection section = this.source.addSection("SECTION",
+				ClassSectionSource.class.getName(),
+				MockChainedServicer.class.getName());
+		this.source.chainServicer(section, "service", "notHandled");
+
+		// Start the HTTP Server
+		this.source.openOfficeFloor();
+
+		// Ensure chained servicer services request
+		MockChainedServicer.isServiced = false;
+		this.assertHttpRequest("/chain", 200, "CHAIN SERVICED - /chain");
+		assertTrue("Should be chained", MockChainedServicer.isServiced);
+
+		// Ensure default end of chain servicing
+		MockChainedServicer.isServiced = true;
+		this.assertHttpRequest("/resource.html", 200, "RESOURCE");
+		assertTrue("Should be chained", MockChainedServicer.isServiced);
+	}
+
+	/**
+	 * Provides mock functionality of chained servicer.
+	 */
+	public static class MockChainedServicer {
+
+		public volatile static boolean isServiced = false;
+
+		@FlowInterface
+		public static interface Flows {
+			void notHandled();
+		}
+
+		public void service(ServerHttpConnection connection, Flows flows)
+				throws IOException {
+
+			// Flag that serviced
+			isServiced = true;
+
+			// Service
+			String uri = connection.getHttpRequest().getRequestURI();
+			if ("/chain".equals(uri)) {
+				// Service the request
+				WebApplicationAutoWireOfficeFloorSourceTest.writeResponse(
+						"CHAIN SERVICED - " + uri, connection);
+			} else {
+				// Write some content to indicate chained
+				WebApplicationAutoWireOfficeFloorSourceTest.writeResponse(
+						"CHAIN - ", connection);
+
+				// Hand off to next in chain
+				flows.notHandled();
+			}
+		}
+	}
+
+	/**
+	 * Ensure able to specify as the last chain servicer.
+	 */
+	public void testChainLastServicer() throws Exception {
+
+		// Add section to override servicing
+		AutoWireSection section = this.source.addSection("SECTION",
+				ClassSectionSource.class.getName(),
+				MockLastChainServicer.class.getName());
+		this.source.chainServicer(section, "service", null);
+
+		// Add another in chain (which should be ignored with log warning)
+		AutoWireSection ignore = this.source.addSection("ANOTHER",
+				ClassSectionSource.class.getName(),
+				MockChainedServicer.class.getName());
+		this.source.chainServicer(ignore, "service", "notHandled");
+
+		// Start the HTTP Server
+		this.source.openOfficeFloor();
+
+		// Ensure override non-routed servicing
+		MockChainedServicer.isServiced = false;
+		this.assertHttpRequest("/unhandled", 200, "CHAIN END - /unhandled");
+		assertFalse("Should not be part of chain",
+				MockChainedServicer.isServiced);
+	}
+
+	/**
+	 * Provides mock functionality of last chain servicing.
+	 */
+	public static class MockLastChainServicer {
+		public void service(ServerHttpConnection connection) throws IOException {
+			String uri = connection.getHttpRequest().getRequestURI();
+			WebApplicationAutoWireOfficeFloorSourceTest.writeResponse(
+					"CHAIN END - " + uri, connection);
+		}
 	}
 
 	/**
