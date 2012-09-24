@@ -21,6 +21,7 @@ package net.officefloor.plugin.woof;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
+import java.util.logging.LogRecord;
 
 import net.officefloor.autowire.AutoWire;
 import net.officefloor.autowire.AutoWireSection;
@@ -31,6 +32,7 @@ import net.officefloor.model.woof.WoofModel;
 import net.officefloor.plugin.section.clazz.ClassSectionSource;
 import net.officefloor.plugin.section.clazz.NextTask;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
+import net.officefloor.plugin.web.http.application.WebAutoWireApplication;
 import net.officefloor.plugin.web.http.location.HttpApplicationLocationManagedObjectSource;
 import net.officefloor.plugin.web.http.server.HttpServerAutoWireOfficeFloorSource;
 
@@ -52,17 +54,46 @@ public class WoofOfficeFloorSourceTest extends OfficeFrameTestCase {
 	 */
 	private final HttpClient client = new DefaultHttpClient();
 
+	/**
+	 * {@link LoggerAssertion} for the {@link WoofLoader}.
+	 */
+	private LoggerAssertion loaderLoggerAssertion;
+
+	/**
+	 * {@link LoggerAssertion} for the {@link WoofOfficeFloorSource}.
+	 */
+	private LoggerAssertion sourceLoggerAssertion;
+
 	@Override
 	protected void setUp() throws Exception {
-		WoofLoaderTest.ignoreExtensionServiceFailures();
+
+		// Provide chain servicer extension property
+		System.setProperty("CHAIN.TEST", "VALUE");
+
+		// Create the logger assertions
+		this.loaderLoggerAssertion = LoggerAssertion
+				.setupLoggerAssertion(WoofLoaderImpl.class.getName());
+		this.sourceLoggerAssertion = LoggerAssertion
+				.setupLoggerAssertion(WoofOfficeFloorSource.class.getName());
 	}
 
 	@Override
 	protected void tearDown() throws Exception {
+
+		// Clear property
+		System.clearProperty("CHAIN.TEST");
+
+		// Shutdown
 		try {
-			this.client.getConnectionManager().shutdown();
+			try {
+				this.client.getConnectionManager().shutdown();
+			} finally {
+				WoofOfficeFloorSource.stop();
+			}
 		} finally {
-			WoofOfficeFloorSource.stop();
+			// Disconnect from loggers
+			this.sourceLoggerAssertion.disconnectFromLogger();
+			this.loaderLoggerAssertion.disconnectFromLogger();
 		}
 	}
 
@@ -97,6 +128,30 @@ public class WoofOfficeFloorSourceTest extends OfficeFrameTestCase {
 
 		// Test
 		this.doTestRequest("/test");
+	}
+
+	/**
+	 * Ensure can extend the {@link WebAutoWireApplication}.
+	 */
+	public void testWebApplicationExtension() throws Exception {
+
+		// Run the application (extended by MockWoofApplicationExtensionService)
+		WoofOfficeFloorSource.start();
+
+		// Test that loaded servicer
+		String response = this.doRequest("/chain");
+		assertEquals("Should be serviced by chained servicer", "CHAINED",
+				response);
+
+		// Validate log not loading unknown extension
+		LogRecord[] records = this.sourceLoggerAssertion.getLogRecords();
+		assertEquals("Incorrect number of records", 1, records.length);
+		LogRecord record = records[0];
+		assertEquals(
+				"Incorrect unknown extension log record",
+				WoofApplicationExtensionService.class.getName()
+						+ ": Provider woof.application.extension.not.available.Service not found",
+				record.getMessage());
 	}
 
 	/**
@@ -325,7 +380,9 @@ public class WoofOfficeFloorSourceTest extends OfficeFrameTestCase {
 		 *            Command line arguments.
 		 */
 		public static void main(String... args) throws Exception {
-			run(new MockWoofMain());
+			MockWoofMain main = new MockWoofMain();
+			main.getOfficeFloorCompiler().addSystemProperties();
+			run(main);
 		}
 
 		/*

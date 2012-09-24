@@ -19,11 +19,7 @@
 package net.officefloor.plugin.woof;
 
 import java.sql.SQLException;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.logging.Handler;
 import java.util.logging.LogRecord;
-import java.util.logging.Logger;
 
 import net.officefloor.autowire.AutoWire;
 import net.officefloor.autowire.AutoWireGovernance;
@@ -56,13 +52,6 @@ import net.officefloor.plugin.web.http.application.WebAutoWireApplication;
 public class WoofLoaderTest extends OfficeFrameTestCase {
 
 	/**
-	 * Ignores failures to load {@link WoofTemplateExtensionService} instances.
-	 */
-	public static void ignoreExtensionServiceFailures() {
-		new WoofLoaderTest().setUp();
-	}
-
-	/**
 	 * {@link OfficeFloorCompiler}.
 	 */
 	private final OfficeFloorCompiler compiler = OfficeFloorCompiler
@@ -81,77 +70,30 @@ public class WoofLoaderTest extends OfficeFrameTestCase {
 			.createMock(WebAutoWireApplication.class);
 
 	/**
-	 * {@link Logger}.
+	 * {@link LoggerAssertion}.
 	 */
-	private final Logger logger = Logger.getLogger(WoofLoaderImpl.class
-			.getName());
-
-	/**
-	 * {@link LogRecord} instances.
-	 */
-	private final List<LogRecord> logRecords = new LinkedList<LogRecord>();
-
-	/**
-	 * {@link Handler} instances.
-	 */
-	private final List<Handler> logHandlers = new LinkedList<Handler>();
+	private LoggerAssertion loggerAssertion;
 
 	@Override
-	protected void setUp() {
-
-		// Set up to intercept all logging
-		this.logger.setUseParentHandlers(false);
-
-		// Remove the existing handlers
-		for (Handler handler : logger.getHandlers()) {
-			logger.removeHandler(handler);
-			this.logHandlers.add(handler);
-		}
-
-		// Add handler to intercept message
-		this.logger.addHandler(new Handler() {
-			@Override
-			public void publish(LogRecord record) {
-				synchronized (WoofLoaderTest.this.logRecords) {
-					WoofLoaderTest.this.logRecords.add(record);
-				}
-			}
-
-			@Override
-			public void flush() {
-				// Do nothing
-			}
-
-			@Override
-			public void close() throws SecurityException {
-				// Do nothing
-			}
-		});
+	protected void setUp() throws Exception {
+		this.loggerAssertion = LoggerAssertion
+				.setupLoggerAssertion(WoofLoaderImpl.class.getName());
 	}
 
 	@Override
 	protected void tearDown() throws Exception {
 
-		// Reinstate handlers and logger state
-		this.logger.setUseParentHandlers(true);
-		for (Handler handler : this.logger.getHandlers()) {
-			this.logger.removeHandler(handler);
-		}
-		for (Handler handler : this.logHandlers) {
-			this.logger.addHandler(handler);
-		}
+		// Obtain the log records
+		LogRecord[] records = this.loggerAssertion.disconnectFromLogger();
 
 		// Validate warned failed to load unknown service
-		synchronized (this.logRecords) {
-			assertEquals("Should warn of service failure", 1,
-					this.logRecords.size());
-			LogRecord record = this.logRecords.get(0);
-			assertEquals(
-					"Incorrect cause message",
-					WoofTemplateExtensionService.class.getName()
-							+ ": Provider woof.template.extension.not.available.Service not found",
-					record.getThrown().getMessage());
-		}
+		assertEquals("Should warn of service failure", 1, records.length);
+		LogRecord record = records[0];
+		assertEquals(
+				"Incorrect cause message",
+				WoofTemplateExtensionService.class.getName()
+						+ ": Provider woof.template.extension.not.available.Service not found",
+				record.getThrown().getMessage());
 	}
 
 	/**

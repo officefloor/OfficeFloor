@@ -22,6 +22,10 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Iterator;
+import java.util.ServiceConfigurationError;
+import java.util.ServiceLoader;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import net.officefloor.autowire.AutoWireApplication;
@@ -32,7 +36,9 @@ import net.officefloor.compile.spi.officefloor.OfficeFloorDeployer;
 import net.officefloor.compile.spi.officefloor.source.OfficeFloorSourceContext;
 import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
 import net.officefloor.frame.api.manage.OfficeFloor;
+import net.officefloor.frame.impl.construct.source.SourcePropertiesImpl;
 import net.officefloor.frame.spi.source.ResourceSource;
+import net.officefloor.frame.spi.source.SourceProperties;
 import net.officefloor.model.impl.repository.ModelRepositoryImpl;
 import net.officefloor.model.impl.repository.classloader.ClassLoaderConfigurationContext;
 import net.officefloor.model.objects.AutoWireObjectsRepositoryImpl;
@@ -45,6 +51,7 @@ import net.officefloor.plugin.objects.AutoWireObjectsLoader;
 import net.officefloor.plugin.objects.AutoWireObjectsLoaderImpl;
 import net.officefloor.plugin.teams.AutoWireTeamsLoader;
 import net.officefloor.plugin.teams.AutoWireTeamsLoaderImpl;
+import net.officefloor.plugin.web.http.application.WebAutoWireApplication;
 import net.officefloor.plugin.web.http.location.HttpApplicationLocationManagedObjectSource;
 import net.officefloor.plugin.web.http.resource.source.SourceHttpResourceFactory;
 import net.officefloor.plugin.web.http.server.HttpServerAutoWireApplication;
@@ -289,6 +296,60 @@ public class WoofOfficeFloorSource extends HttpServerAutoWireOfficeFloorSource {
 	}
 
 	/**
+	 * Loads extension functionality from the
+	 * {@link WoofApplicationExtensionService} instances.
+	 * 
+	 * @param application
+	 *            {@link WebAutoWireApplication}.
+	 * @param properties
+	 *            {@link SourceProperties}.
+	 * @param classLoader
+	 *            {@link ClassLoader}.
+	 * @throws Exception
+	 *             If fails to load the extension functionality.
+	 */
+	public static void loadWebApplicationExtensions(
+			WebAutoWireApplication application, SourceProperties properties,
+			ClassLoader classLoader) throws Exception {
+
+		// Load the application extensions
+		ServiceLoader<WoofApplicationExtensionService> extensionServiceLoader = ServiceLoader
+				.load(WoofApplicationExtensionService.class, classLoader);
+		Iterator<WoofApplicationExtensionService> extensionIterator = extensionServiceLoader
+				.iterator();
+		while (extensionIterator.hasNext()) {
+			try {
+
+				// Obtain the next extension service
+				WoofApplicationExtensionService extensionService = extensionIterator
+						.next();
+
+				// Extend the application
+				extensionService
+						.extendApplication(new WoofApplicationExtensionServiceContextImpl(
+								application, properties, classLoader));
+
+			} catch (ServiceConfigurationError ex) {
+				// Warn that issue loading service
+				if (LOGGER.isLoggable(Level.WARNING)) {
+					LOGGER.log(Level.WARNING, ex.getMessage(), ex);
+				}
+
+			} catch (Throwable ex) {
+				// Warn that issue with service
+				if (LOGGER.isLoggable(Level.WARNING)) {
+					LOGGER.log(
+							Level.WARNING,
+							WoofApplicationExtensionService.class
+									.getSimpleName()
+									+ " configuration failure: "
+									+ ex.getMessage(), ex);
+				}
+			}
+		}
+	}
+
+	/**
 	 * Loads the optional configuration.
 	 * 
 	 * @param application
@@ -384,8 +445,61 @@ public class WoofOfficeFloorSource extends HttpServerAutoWireOfficeFloorSource {
 		// Providing additional configuration
 		this.configure(this);
 
+		// Load extensions after configured WoOF
+		loadWebApplicationExtensions(this, context, classLoader);
+
 		// Initialise parent
 		super.initOfficeFloor(deployer, context);
+	}
+
+	/**
+	 * {@link WoofApplicationExtensionServiceContext} implementation.
+	 */
+	private static class WoofApplicationExtensionServiceContextImpl extends
+			SourcePropertiesImpl implements
+			WoofApplicationExtensionServiceContext {
+
+		/**
+		 * {@link WebAutoWireApplication}.
+		 */
+		private final WebAutoWireApplication application;
+
+		/**
+		 * {@link ClassLoader}.
+		 */
+		private final ClassLoader classLoader;
+
+		/**
+		 * Initiate.
+		 * 
+		 * @param application
+		 *            {@link WebAutoWireApplication}.
+		 * @param properties
+		 *            {@link SourceProperties}.
+		 * @param classLoader
+		 *            {@link ClassLoader}.
+		 */
+		public WoofApplicationExtensionServiceContextImpl(
+				WebAutoWireApplication application,
+				SourceProperties properties, ClassLoader classLoader) {
+			super(properties);
+			this.application = application;
+			this.classLoader = classLoader;
+		}
+
+		/*
+		 * ============ WoofApplicationExtensionServiceContext =================
+		 */
+
+		@Override
+		public WebAutoWireApplication getWebApplication() {
+			return this.application;
+		}
+
+		@Override
+		public ClassLoader getClassLoader() {
+			return this.classLoader;
+		}
 	}
 
 }

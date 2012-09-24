@@ -19,10 +19,14 @@
 package net.officefloor.plugin.woof.servlet;
 
 import java.io.FileNotFoundException;
+import java.util.Enumeration;
 import java.util.logging.Filter;
 
+import javax.servlet.FilterConfig;
 import javax.servlet.Servlet;
+import javax.servlet.ServletContext;
 
+import net.officefloor.frame.impl.construct.source.SourcePropertiesImpl;
 import net.officefloor.model.impl.repository.ModelRepositoryImpl;
 import net.officefloor.model.impl.repository.classloader.ClassLoaderConfigurationContext;
 import net.officefloor.model.repository.ConfigurationContext;
@@ -108,6 +112,27 @@ public class WoofServletFilter extends OfficeFloorServletFilter {
 				DEFAULT_TEAMS_CONFIGURATION_LOCATION);
 		WoofOfficeFloorSource.loadOptionalConfiguration(this, objectsLocation,
 				teamsLocation, configurationContext);
+
+		// Create the source properties
+		SourcePropertiesImpl properties = new SourcePropertiesImpl();
+		FilterConfig filterConfig = this.getFilterConfig();
+		for (Enumeration<String> enumeration = filterConfig
+				.getInitParameterNames(); enumeration.hasMoreElements();) {
+			String name = enumeration.nextElement();
+			String value = filterConfig.getInitParameter(name);
+			properties.addProperty(name, value);
+		}
+		ServletContext servletContext = filterConfig.getServletContext();
+		for (Enumeration<String> enumeration = servletContext
+				.getInitParameterNames(); enumeration.hasMoreElements();) {
+			String name = enumeration.nextElement();
+			String value = servletContext.getInitParameter(name);
+			properties.addProperty(name, value);
+		}
+
+		// Load woof application extensions
+		WoofOfficeFloorSource.loadWebApplicationExtensions(this, properties,
+				classLoader);
 	}
 
 	/**
