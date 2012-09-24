@@ -34,6 +34,7 @@ import net.officefloor.plugin.comet.internal.CometRequest;
 import net.officefloor.plugin.comet.internal.CometResponse;
 import net.officefloor.plugin.comet.internal.CometSubscriptionService;
 import net.officefloor.plugin.socket.server.http.server.MockHttpServer;
+import net.officefloor.plugin.woof.WoofApplicationExtensionService;
 import net.officefloor.plugin.woof.servlet.MockLogic.CometTrigger;
 import net.officefloor.plugin.woof.servlet.client.MockGwtService;
 
@@ -190,6 +191,20 @@ public class WoofServletFilterTest extends OfficeFrameTestCase {
 		assertEquals("Incorrect event", eventData, data);
 	}
 
+	/**
+	 * Ensure load {@link WoofApplicationExtensionService}.
+	 */
+	public void testWoofApplicationExtension() throws Exception {
+
+		// Start Server
+		this.startServer("");
+
+		// Validate extension servicer
+		String responseText = this.doGetEntity("/chain.task");
+		assertEquals("Incorrect response from chained entry", "CHAINED",
+				responseText);
+	}
+
 	/*
 	 * =================== Setup/Teardown/Helper ==========================
 	 */
@@ -261,6 +276,7 @@ public class WoofServletFilterTest extends OfficeFrameTestCase {
 		// Add the WoOF Servlet Filter
 		FilterHolder filter = new FilterHolder(new WoofServletFilter());
 		context.addFilter(filter, "/*", EnumSet.of(DispatcherType.REQUEST));
+		filter.setInitParameter("INIT_NAME", "INIT_VALUE");
 
 		// Add Servlet for being filtered
 		context.addServlet(MockHttpServlet.class, "/");
