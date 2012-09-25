@@ -17,7 +17,9 @@
  */
 package net.officefloor.plugin.woof;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.Writer;
 
 import junit.framework.TestCase;
@@ -50,6 +52,17 @@ public class MockWoofApplicationExtensionService implements
 		// Validate class loader
 		TestCase.assertNotNull("Must have class loader",
 				context.getClassLoader());
+
+		// Validate resource
+		InputStream resource = context
+				.getResource("ApplicationExtension.woof.config");
+		ByteArrayOutputStream buffer = new ByteArrayOutputStream();
+		for (int value = resource.read(); value != -1; value = resource.read()) {
+			buffer.write(value);
+		}
+		String resourceText = new String(buffer.toByteArray());
+		TestCase.assertEquals("Incorrect resource text", "EXTENSION",
+				resourceText);
 
 		// Configure the servicer
 		WebAutoWireApplication app = context.getWebApplication();

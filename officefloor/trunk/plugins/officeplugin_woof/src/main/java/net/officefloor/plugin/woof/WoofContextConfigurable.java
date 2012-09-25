@@ -17,21 +17,22 @@
  */
 package net.officefloor.plugin.woof;
 
-import net.officefloor.frame.spi.source.SourceContext;
-import net.officefloor.plugin.web.http.application.WebAutoWireApplication;
+import net.officefloor.compile.properties.PropertyConfigurable;
+import net.officefloor.frame.spi.source.ResourceSource;
 
 /**
- * Context for the {@link WoofApplicationExtensionService}.
+ * WoOF item that is configurable with context details.
  * 
  * @author Daniel Sagenschneider
  */
-public interface WoofApplicationExtensionServiceContext extends SourceContext {
+public interface WoofContextConfigurable extends PropertyConfigurable {
 
 	/**
-	 * Obtains the {@link WebAutoWireApplication} to extend.
+	 * Adds a {@link ResourceSource}.
 	 * 
-	 * @return {@link WebAutoWireApplication} to extend.
+	 * @param resourceSource
+	 *            {@link ResourceSource}.
 	 */
-	WebAutoWireApplication getWebApplication();
+	void addResources(ResourceSource resourceSource);
 
 }

@@ -16,7 +16,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package net.officefloor.plugin.woof.servlet;
+package net.officefloor.plugin.woof.servlet.filter;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -35,7 +35,9 @@ import net.officefloor.plugin.comet.internal.CometResponse;
 import net.officefloor.plugin.comet.internal.CometSubscriptionService;
 import net.officefloor.plugin.socket.server.http.server.MockHttpServer;
 import net.officefloor.plugin.woof.WoofApplicationExtensionService;
+import net.officefloor.plugin.woof.servlet.MockDependency;
 import net.officefloor.plugin.woof.servlet.MockLogic.CometTrigger;
+import net.officefloor.plugin.woof.servlet.WoofServletFilter;
 import net.officefloor.plugin.woof.servlet.client.MockGwtService;
 
 import org.apache.http.HttpResponse;

@@ -15,23 +15,26 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.plugin.woof;
+package net.officefloor.plugin.woof.servlet.container;
 
-import net.officefloor.frame.spi.source.SourceContext;
-import net.officefloor.plugin.web.http.application.WebAutoWireApplication;
+import java.io.IOException;
+
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 /**
- * Context for the {@link WoofApplicationExtensionService}.
+ * Mock {@link HttpServlet}.
  * 
  * @author Daniel Sagenschneider
  */
-public interface WoofApplicationExtensionServiceContext extends SourceContext {
+public class MockHttpServlet extends HttpServlet {
 
-	/**
-	 * Obtains the {@link WebAutoWireApplication} to extend.
-	 * 
-	 * @return {@link WebAutoWireApplication} to extend.
-	 */
-	WebAutoWireApplication getWebApplication();
+	@Override
+	protected void doGet(HttpServletRequest req, HttpServletResponse resp)
+			throws ServletException, IOException {
+		resp.getWriter().write("HTTP_SERVLET");
+	}
 
 }
