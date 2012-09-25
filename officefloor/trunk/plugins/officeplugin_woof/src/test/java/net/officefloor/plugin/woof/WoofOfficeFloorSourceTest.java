@@ -138,11 +138,6 @@ public class WoofOfficeFloorSourceTest extends OfficeFrameTestCase {
 		// Run the application (extended by MockWoofApplicationExtensionService)
 		WoofOfficeFloorSource.start();
 
-		// Test that loaded servicer
-		String response = this.doRequest("/chain");
-		assertEquals("Should be serviced by chained servicer", "CHAINED",
-				response);
-
 		// Validate log not loading unknown extension
 		LogRecord[] records = this.sourceLoggerAssertion.getLogRecords();
 		assertEquals("Incorrect number of records", 1, records.length);
@@ -152,6 +147,11 @@ public class WoofOfficeFloorSourceTest extends OfficeFrameTestCase {
 				WoofApplicationExtensionService.class.getName()
 						+ ": Provider woof.application.extension.not.available.Service not found",
 				record.getMessage());
+		
+		// Test that loaded servicer
+		String response = this.doRequest("/chain");
+		assertEquals("Should be serviced by chained servicer", "CHAINED",
+				response);
 	}
 
 	/**

@@ -23,6 +23,8 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.ServiceConfigurationError;
 import java.util.ServiceLoader;
 import java.util.logging.Level;
@@ -36,8 +38,9 @@ import net.officefloor.compile.spi.officefloor.OfficeFloorDeployer;
 import net.officefloor.compile.spi.officefloor.source.OfficeFloorSourceContext;
 import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
 import net.officefloor.frame.api.manage.OfficeFloor;
-import net.officefloor.frame.impl.construct.source.SourcePropertiesImpl;
+import net.officefloor.frame.impl.construct.source.SourceContextImpl;
 import net.officefloor.frame.spi.source.ResourceSource;
+import net.officefloor.frame.spi.source.SourceContext;
 import net.officefloor.frame.spi.source.SourceProperties;
 import net.officefloor.model.impl.repository.ModelRepositoryImpl;
 import net.officefloor.model.impl.repository.classloader.ClassLoaderConfigurationContext;
@@ -63,7 +66,8 @@ import net.officefloor.plugin.web.http.server.HttpServerAutoWireOfficeFloorSourc
  * 
  * @author Daniel Sagenschneider
  */
-public class WoofOfficeFloorSource extends HttpServerAutoWireOfficeFloorSource {
+public class WoofOfficeFloorSource extends HttpServerAutoWireOfficeFloorSource
+		implements WoofContextConfigurable {
 
 	/**
 	 * {@link Logger}.
@@ -103,7 +107,13 @@ public class WoofOfficeFloorSource extends HttpServerAutoWireOfficeFloorSource {
 	public static final String DEFAULT_TEAMS_CONFIGURATION_LOCATION = "application.teams";
 
 	/**
-	 * Path within Maven project to the <code>webapp</code> directory.
+	 * Property to override the default location of the <code>webapp</code>
+	 * directory within a Maven project.
+	 */
+	public static final String PROPERTY_WEBAPP_LOCATION = "webapp.location";
+
+	/**
+	 * Default path within a Maven project to the <code>webapp</code> directory.
 	 */
 	public static final String WEBAPP_PATH = "src/main/webapp";
 
@@ -204,8 +214,7 @@ public class WoofOfficeFloorSource extends HttpServerAutoWireOfficeFloorSource {
 		File projectDir = new File(".");
 
 		// Load the WoOF resources
-		loadWebResourcesFromMavenProject(application.getOfficeFloorCompiler(),
-				projectDir);
+		loadWebResourcesFromMavenProject(application, projectDir);
 
 		// Start the application
 		application.openOfficeFloor();
@@ -214,41 +223,62 @@ public class WoofOfficeFloorSource extends HttpServerAutoWireOfficeFloorSource {
 	/**
 	 * Loads the web application resources for WoOF within a Maven project.
 	 * 
-	 * @param compiler
-	 *            {@link OfficeFloorCompiler}.
+	 * @param contextConfigurable
+	 *            {@link WoofContextConfigurable}.
 	 * @param projectDirectory
 	 *            Maven project directory.
 	 */
 	public static void loadWebResourcesFromMavenProject(
-			OfficeFloorCompiler compiler, File projectDirectory) {
+			WoofContextConfigurable contextConfigurable, File projectDirectory) {
 
 		// Determine if running within maven project
 		if (!(new File(projectDirectory, "pom.xml").exists())) {
-			LOGGER.warning("Not a Maven project as can not find pom.xml in "
-					+ projectDirectory.getAbsolutePath());
+			if (LOGGER.isLoggable(Level.WARNING)) {
+				LOGGER.warning("Not a Maven project as can not find pom.xml in "
+						+ projectDirectory.getAbsolutePath());
+			}
 			return; // must be a maven project
 		}
 
+		// Obtain the web app directory
+		File webAppDir;
+		String webAppLocation = System.getProperty(PROPERTY_WEBAPP_LOCATION);
+		if (webAppLocation != null) {
+			// Specified by system property
+			webAppDir = new File(webAppLocation);
+
+		} else {
+			// Not configured so derive from default location
+			webAppDir = new File(projectDirectory, WEBAPP_PATH);
+		}
+
 		// Within maven project, so include webapp WoOF resources
-		final File webAppDir = new File(projectDirectory, WEBAPP_PATH);
 		if (!(webAppDir.exists())) {
-			LOGGER.info(WEBAPP_PATH
-					+ " not found and therefore not including. Typically should exist in project for web content.");
+			if (LOGGER.isLoggable(Level.INFO)) {
+				LOGGER.info(webAppDir.getAbsolutePath()
+						+ " not found and therefore not including. Typically should exist in project for web content.");
+			}
 			return; // not include
 		}
 
 		// Load the web resources
-		loadWebResources(compiler, webAppDir, new File[] { webAppDir });
+		loadWebResources(contextConfigurable, webAppDir,
+				new File[] { webAppDir });
 	}
 
 	/**
 	 * Loads the web application resources for WoOF within a Maven project.
 	 * 
-	 * @param compiler
-	 *            {@link OfficeFloorCompiler}.
+	 * @param contextConfigurable
+	 *            {@link WoofContextConfigurable}.
+	 * @param webAppDir
+	 *            <code>webapp</code> directory.
+	 * @param resourceDirectories
+	 *            Directories to source public resources.
 	 */
-	public static void loadWebResources(final OfficeFloorCompiler compiler,
-			final File webAppDir, File[] resourceDirectories) {
+	public static void loadWebResources(
+			final WoofContextConfigurable contextConfigurable,
+			final File webAppDir, File... resourceDirectories) {
 
 		// Ensure have web app directory
 		if (webAppDir == null) {
@@ -258,7 +288,7 @@ public class WoofOfficeFloorSource extends HttpServerAutoWireOfficeFloorSource {
 
 		// Ensure the WEB-INF/web.xml file exists
 		if (!(new File(webAppDir, WEBXML_FILE_PATH).exists())) {
-			LOGGER.warning("Not including " + WEBAPP_PATH + " content as "
+			LOGGER.warning("Not including webapp content as "
 					+ WEBXML_FILE_PATH + " not found within "
 					+ webAppDir.getAbsolutePath());
 			return; // not include
@@ -266,10 +296,10 @@ public class WoofOfficeFloorSource extends HttpServerAutoWireOfficeFloorSource {
 
 		// Configure resource directories
 		SourceHttpResourceFactory.loadProperties(null, resourceDirectories,
-				null, Boolean.FALSE, compiler);
+				null, Boolean.FALSE, contextConfigurable);
 
 		// Make WoOF resources available
-		compiler.addResources(new ResourceSource() {
+		contextConfigurable.addResources(new ResourceSource() {
 			@Override
 			public InputStream sourceResource(String location) {
 
@@ -305,12 +335,21 @@ public class WoofOfficeFloorSource extends HttpServerAutoWireOfficeFloorSource {
 	 *            {@link SourceProperties}.
 	 * @param classLoader
 	 *            {@link ClassLoader}.
+	 * @param resourceSources
+	 *            {@link ResourceSource} instances.
 	 * @throws Exception
 	 *             If fails to load the extension functionality.
 	 */
 	public static void loadWebApplicationExtensions(
 			WebAutoWireApplication application, SourceProperties properties,
-			ClassLoader classLoader) throws Exception {
+			ClassLoader classLoader, ResourceSource... resourceSources)
+			throws Exception {
+
+		// Create the WoOF application extension context
+		SourceContext sourceContext = new SourceContextImpl(false, classLoader,
+				resourceSources);
+		WoofApplicationExtensionServiceContext extensionContext = new WoofApplicationExtensionServiceContextImpl(
+				application, sourceContext, properties);
 
 		// Load the application extensions
 		ServiceLoader<WoofApplicationExtensionService> extensionServiceLoader = ServiceLoader
@@ -325,9 +364,7 @@ public class WoofOfficeFloorSource extends HttpServerAutoWireOfficeFloorSource {
 						.next();
 
 				// Extend the application
-				extensionService
-						.extendApplication(new WoofApplicationExtensionServiceContextImpl(
-								application, properties, classLoader));
+				extensionService.extendApplication(extensionContext);
 
 			} catch (ServiceConfigurationError ex) {
 				// Warn that issue loading service
@@ -392,6 +429,11 @@ public class WoofOfficeFloorSource extends HttpServerAutoWireOfficeFloorSource {
 	}
 
 	/**
+	 * WoOF application {@link ResourceSource} instances.
+	 */
+	private final List<ResourceSource> applicationResourceSources = new LinkedList<ResourceSource>();
+
+	/**
 	 * Allows overriding to provide additional configuration.
 	 * 
 	 * @param application
@@ -399,6 +441,25 @@ public class WoofOfficeFloorSource extends HttpServerAutoWireOfficeFloorSource {
 	 */
 	protected void configure(HttpServerAutoWireOfficeFloorSource application) {
 		// No additional configuration by default
+	}
+
+	/*
+	 * ======================= WoofContextConfigurable =========================
+	 */
+
+	@Override
+	public void addProperty(String name, String value) {
+		this.getOfficeFloorCompiler().addProperty(name, value);
+	}
+
+	@Override
+	public void addResources(ResourceSource resourceSource) {
+
+		// Configure into compiler
+		this.getOfficeFloorCompiler().addResources(resourceSource);
+
+		// Include for application extensions
+		this.applicationResourceSources.add(resourceSource);
 	}
 
 	/*
@@ -446,7 +507,11 @@ public class WoofOfficeFloorSource extends HttpServerAutoWireOfficeFloorSource {
 		this.configure(this);
 
 		// Load extensions after configured WoOF
-		loadWebApplicationExtensions(this, context, classLoader);
+		ResourceSource[] resourceSources = this.applicationResourceSources
+				.toArray(new ResourceSource[this.applicationResourceSources
+						.size()]);
+		loadWebApplicationExtensions(this, context, classLoader,
+				resourceSources);
 
 		// Initialise parent
 		super.initOfficeFloor(deployer, context);
@@ -456,8 +521,7 @@ public class WoofOfficeFloorSource extends HttpServerAutoWireOfficeFloorSource {
 	 * {@link WoofApplicationExtensionServiceContext} implementation.
 	 */
 	private static class WoofApplicationExtensionServiceContextImpl extends
-			SourcePropertiesImpl implements
-			WoofApplicationExtensionServiceContext {
+			SourceContextImpl implements WoofApplicationExtensionServiceContext {
 
 		/**
 		 * {@link WebAutoWireApplication}.
@@ -465,26 +529,20 @@ public class WoofOfficeFloorSource extends HttpServerAutoWireOfficeFloorSource {
 		private final WebAutoWireApplication application;
 
 		/**
-		 * {@link ClassLoader}.
-		 */
-		private final ClassLoader classLoader;
-
-		/**
 		 * Initiate.
 		 * 
 		 * @param application
 		 *            {@link WebAutoWireApplication}.
+		 * @param sourceContext
+		 *            {@link SourceContext}.
 		 * @param properties
 		 *            {@link SourceProperties}.
-		 * @param classLoader
-		 *            {@link ClassLoader}.
 		 */
 		public WoofApplicationExtensionServiceContextImpl(
 				WebAutoWireApplication application,
-				SourceProperties properties, ClassLoader classLoader) {
-			super(properties);
+				SourceContext sourceContext, SourceProperties properties) {
+			super(false, sourceContext, properties);
 			this.application = application;
-			this.classLoader = classLoader;
 		}
 
 		/*
@@ -494,11 +552,6 @@ public class WoofOfficeFloorSource extends HttpServerAutoWireOfficeFloorSource {
 		@Override
 		public WebAutoWireApplication getWebApplication() {
 			return this.application;
-		}
-
-		@Override
-		public ClassLoader getClassLoader() {
-			return this.classLoader;
 		}
 	}
 
