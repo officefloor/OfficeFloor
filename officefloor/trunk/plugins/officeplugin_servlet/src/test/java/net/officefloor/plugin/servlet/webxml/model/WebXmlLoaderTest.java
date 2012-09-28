@@ -20,6 +20,7 @@ package net.officefloor.plugin.servlet.webxml.model;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.InputStream;
 
 import javax.servlet.Filter;
 import javax.servlet.Servlet;
@@ -58,7 +59,9 @@ public class WebXmlLoaderTest extends OfficeFrameTestCase {
 		// Load the configuration
 		this.replayMockObjects();
 		WebXmlLoader loader = new WebXmlLoader();
-		WebAppModel webApp = loader.loadConfiguration("WEB-INF/web.xml",
+		InputStream webXmlConfiguration = context
+				.getResource("WEB-INF/web.xml");
+		WebAppModel webApp = loader.loadConfiguration(webXmlConfiguration,
 				context);
 		this.verifyMockObjects();
 

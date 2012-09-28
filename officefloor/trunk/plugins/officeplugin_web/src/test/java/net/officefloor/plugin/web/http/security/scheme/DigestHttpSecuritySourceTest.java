@@ -41,7 +41,7 @@ import org.easymock.AbstractMatcher;
  * @author Daniel Sagenschneider
  */
 public class DigestHttpSecuritySourceTest extends
-		AbstractHttpSecuritySourceTest<Dependencies> {
+		AbstractHttpSecuritySourceTestCase<Dependencies> {
 
 	/**
 	 * Realm.

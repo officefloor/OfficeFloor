@@ -43,6 +43,7 @@ import net.officefloor.plugin.servlet.mapping.MappingType;
 import net.officefloor.plugin.servlet.mapping.ServicerMapping;
 import net.officefloor.plugin.servlet.time.Clock;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
+import net.officefloor.plugin.web.http.application.HttpRequestState;
 import net.officefloor.plugin.web.http.security.HttpSecurity;
 import net.officefloor.plugin.web.http.session.HttpSession;
 import net.officefloor.plugin.web.http.tokenise.HttpRequestTokeniseException;
@@ -172,12 +173,13 @@ public class HttpServletContainerImpl implements HttpServletContainer,
 
 	@Override
 	public void service(ServerHttpConnection connection,
-			Map<String, Object> attributes, HttpSession session,
+			HttpRequestState attributes, HttpSession session,
 			HttpSecurity security, TaskContext<?, ?, ?> taskContext,
 			ServicerMapping mapping) throws ServletException, IOException {
 
 		// Obtain the last access time
-		Long lastAccessTime = (Long) attributes.get(ATTRIBUTE_LAST_ACCESS_TIME);
+		Long lastAccessTime = (Long) attributes
+				.getAttribute(ATTRIBUTE_LAST_ACCESS_TIME);
 		if (lastAccessTime == null) {
 			// Not available for request, so use last request time
 			lastAccessTime = (Long) session
@@ -190,7 +192,7 @@ public class HttpServletContainerImpl implements HttpServletContainer,
 
 			// Update request with time so only the one time per request.
 			// Above get will return value for further request servicing.
-			attributes.put(ATTRIBUTE_LAST_ACCESS_TIME, lastAccessTime);
+			attributes.setAttribute(ATTRIBUTE_LAST_ACCESS_TIME, lastAccessTime);
 
 			// Update session for next request (with time of this request)
 			session.setAttribute(ATTRIBUTE_LAST_ACCESS_TIME, new Long(

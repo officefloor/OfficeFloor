@@ -17,10 +17,22 @@
  */
 package net.officefloor.plugin.woof.servlet;
 
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.Reader;
+import java.io.StringWriter;
+
 import javax.servlet.Servlet;
 
+import net.officefloor.autowire.AutoWire;
+import net.officefloor.autowire.AutoWireSection;
+import net.officefloor.plugin.servlet.webxml.WebXmlSectionSource;
+import net.officefloor.plugin.web.http.application.WebAutoWireApplication;
+import net.officefloor.plugin.web.http.security.HttpSecurity;
+import net.officefloor.plugin.web.http.security.HttpSecurityManagedObjectSource;
 import net.officefloor.plugin.woof.WoofApplicationExtensionService;
 import net.officefloor.plugin.woof.WoofApplicationExtensionServiceContext;
+import net.officefloor.plugin.woof.WoofOfficeFloorSource;
 
 /**
  * {@link WoofApplicationExtensionService} to chain in a {@link Servlet}
@@ -38,9 +50,41 @@ public class ServletContainerWoofApplicationExtensionService implements
 	@Override
 	public void extendApplication(WoofApplicationExtensionServiceContext context)
 			throws Exception {
-		// TODO implement WoofApplicationExtensionService.extendApplication
-		throw new UnsupportedOperationException(
-				"TODO implement WoofApplicationExtensionService.extendApplication");
-	}
 
+		// Obtain the web application
+		WebAutoWireApplication application = context.getWebApplication();
+
+		// Obtain the web.xml configuration
+		InputStream webXmlConfiguration = context
+				.getOptionalResource(WoofOfficeFloorSource.WEBXML_FILE_PATH);
+		if (webXmlConfiguration == null) {
+			return; // No web.xml file so no extension
+		}
+
+		// Obtain content of web.xml file
+		Reader webXmlReader = new InputStreamReader(webXmlConfiguration);
+		StringWriter webXmlContent = new StringWriter();
+		for (int value = webXmlReader.read(); value != -1; value = webXmlReader
+				.read()) {
+			webXmlContent.write(value);
+		}
+		webXmlReader.close();
+		webXmlConfiguration.close();
+
+		// Configure in the Servlet web.xml functionality
+		AutoWireSection section = application.addSection("SERVLET",
+				WebXmlSectionSource.class.getName(), null);
+		section.addProperty(WebXmlSectionSource.PROPERTY_WEB_XML_CONFIGURATION,
+				webXmlContent.toString());
+
+		// Ensure there is security
+		final AutoWire httpSecurity = new AutoWire(HttpSecurity.class);
+		if (!(application.isObjectAvailable(httpSecurity))) {
+			// Configure the HTTP Security
+			application.addManagedObject(
+					HttpSecurityManagedObjectSource.class.getName(), null,
+					httpSecurity);
+		}
+
+	}
 }

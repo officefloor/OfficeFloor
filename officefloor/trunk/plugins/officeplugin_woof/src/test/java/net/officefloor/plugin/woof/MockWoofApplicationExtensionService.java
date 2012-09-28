@@ -54,15 +54,13 @@ public class MockWoofApplicationExtensionService implements
 				context.getClassLoader());
 
 		// Validate resource
-		InputStream resource = context
-				.getResource("ApplicationExtension.woof.config");
-		ByteArrayOutputStream buffer = new ByteArrayOutputStream();
-		for (int value = resource.read(); value != -1; value = resource.read()) {
-			buffer.write(value);
-		}
-		String resourceText = new String(buffer.toByteArray());
 		TestCase.assertEquals("Incorrect resource text", "EXTENSION",
-				resourceText);
+				this.getResourceContent(context,
+						"ApplicationExtension.woof.config"));
+
+		// Validate the webapp directory
+		TestCase.assertEquals("Incorrect webapp access", "<web-app />",
+				this.getResourceContent(context, "WEB-INF/web.xml"));
 
 		// Configure the servicer
 		WebAutoWireApplication app = context.getWebApplication();
@@ -72,6 +70,31 @@ public class MockWoofApplicationExtensionService implements
 
 		// Chain in the servicer
 		app.chainServicer(servicer, "service", "notHandled");
+	}
+
+	/**
+	 * Obtains the content of the resource.
+	 * 
+	 * @param context
+	 *            {@link WoofApplicationExtensionServiceContext}.
+	 * @param resourcePath
+	 *            Path to the resource.
+	 * @return Content of the resource.
+	 */
+	private String getResourceContent(
+			WoofApplicationExtensionServiceContext context, String resourcePath)
+			throws IOException {
+
+		// Obtain the resource content
+		InputStream resource = context.getResource(resourcePath);
+		ByteArrayOutputStream buffer = new ByteArrayOutputStream();
+		for (int value = resource.read(); value != -1; value = resource.read()) {
+			buffer.write(value);
+		}
+		String resourceText = new String(buffer.toByteArray());
+
+		// Return the resource content
+		return resourceText;
 	}
 
 	/**

@@ -47,6 +47,7 @@ import net.officefloor.plugin.servlet.mapping.ServicerMapping;
 import net.officefloor.plugin.servlet.time.Clock;
 import net.officefloor.plugin.socket.server.http.HttpRequest;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
+import net.officefloor.plugin.web.http.application.HttpRequestState;
 import net.officefloor.plugin.web.http.security.HttpSecurity;
 import net.officefloor.plugin.web.http.session.HttpSession;
 
@@ -142,7 +143,8 @@ public class HttpServletTask
 				DependencyKeys.OFFICE_SERVLET_CONTEXT);
 		task.addObject(ServerHttpConnection.class).setKey(
 				DependencyKeys.HTTP_CONNECTION);
-		task.addObject(Map.class).setKey(DependencyKeys.REQUEST_ATTRIBUTES);
+		task.addObject(HttpRequestState.class).setKey(
+				DependencyKeys.REQUEST_ATTRIBUTES);
 		task.addObject(HttpSession.class).setKey(DependencyKeys.HTTP_SESSION);
 		task.addObject(HttpSecurity.class).setKey(DependencyKeys.HTTP_SECURITY);
 		task.addEscalation(ServletException.class);
@@ -253,7 +255,6 @@ public class HttpServletTask
 	 */
 
 	@Override
-	@SuppressWarnings("unchecked")
 	public Object doTask(
 			TaskContext<HttpServletTask, DependencyKeys, None> context)
 			throws ServletException, IOException {
@@ -267,7 +268,7 @@ public class HttpServletTask
 		// Obtain the parameters for servicing the request
 		ServerHttpConnection connection = (ServerHttpConnection) context
 				.getObject(DependencyKeys.HTTP_CONNECTION);
-		Map<String, Object> attributes = (Map<String, Object>) context
+		HttpRequestState attributes = (HttpRequestState) context
 				.getObject(DependencyKeys.REQUEST_ATTRIBUTES);
 		HttpSession session = (HttpSession) context
 				.getObject(DependencyKeys.HTTP_SESSION);

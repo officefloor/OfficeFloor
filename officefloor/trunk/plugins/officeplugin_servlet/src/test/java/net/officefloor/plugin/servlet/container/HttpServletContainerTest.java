@@ -64,6 +64,7 @@ import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
 import net.officefloor.plugin.socket.server.http.parse.impl.HttpHeaderImpl;
 import net.officefloor.plugin.stream.impl.MockServerOutputStream;
 import net.officefloor.plugin.stream.impl.ServerInputStreamImpl;
+import net.officefloor.plugin.web.http.application.HttpRequestState;
 import net.officefloor.plugin.web.http.security.HttpSecurity;
 import net.officefloor.plugin.web.http.session.HttpSession;
 
@@ -160,9 +161,10 @@ public class HttpServletContainerTest extends OfficeFrameTestCase {
 	private final Map<String, String> initParameters = new HashMap<String, String>();
 
 	/**
-	 * Attributes.
+	 * {@link HttpRequestState}.
 	 */
-	private final Map<String, Object> attributes = new HashMap<String, Object>();
+	private final HttpRequestState attributes = this
+			.createMock(HttpRequestState.class);
 
 	/**
 	 * Context path.
@@ -856,26 +858,33 @@ public class HttpServletContainerTest extends OfficeFrameTestCase {
 	 * Validates the use of attributes.
 	 */
 	public void test_req_Attributes() {
+
+		final Object attribute = new Object();
+
+		// Record initialising Servlet container
 		this.record_init("/test");
+
+		// Record request attributes
+		this.attributes.setAttribute("attribute", attribute);
+		this.recordReturn(this.attributes,
+				this.attributes.getAttribute("attribute"), attribute);
+		this.recordReturn(this.attributes, this.attributes.getAttributeNames(),
+				Arrays.asList("attribute").iterator());
+		this.attributes.removeAttribute("attribute");
+
 		this.doTest(new MockHttpServlet() {
 			@Override
 			protected void test(HttpServletRequest req, HttpServletResponse resp)
 					throws ServletException, IOException {
 
-				// Remove the last access time attribute for below testing
-				req.removeAttribute(ATTRIBUTE_LAST_ACCESS_TIME);
-
-				// Ensure initially no attributes
-				assertFalse("Should be no attributes initially", req
-						.getAttributeNames().hasMoreElements());
-
 				// Load the attribute
-				final Object attribute = new Object();
 				req.setAttribute("attribute", attribute);
 
-				// Validate the loaded attribute
+				// Obtain the attribute
 				assertEquals("Incorrect attribute", attribute,
 						req.getAttribute("attribute"));
+
+				// Validate attribute names
 				Enumeration<String> names = req.getAttributeNames();
 				assertTrue("Expect an attribute loaded",
 						names.hasMoreElements());
@@ -886,8 +895,6 @@ public class HttpServletContainerTest extends OfficeFrameTestCase {
 
 				// Remove the attribute
 				req.removeAttribute("attribute");
-				assertFalse("Attribute should be removed", req
-						.getAttributeNames().hasMoreElements());
 			}
 		});
 	}
@@ -1041,11 +1048,7 @@ public class HttpServletContainerTest extends OfficeFrameTestCase {
 		final Long LAST_ACCESS_TIME = new Long(1000);
 
 		// Obtain from request attributes
-		this.record_init("/test");
-
-		// Last access time from request
-		this.attributes.put(ATTRIBUTE_LAST_ACCESS_TIME, LAST_ACCESS_TIME);
-
+		this.record_init("/test", LAST_ACCESS_TIME);
 		this.doTest(new MockHttpServlet() {
 			@Override
 			protected void test(HttpServletRequest req, HttpServletResponse resp)
@@ -1066,18 +1069,19 @@ public class HttpServletContainerTest extends OfficeFrameTestCase {
 		final long CURRENT_TIME = 3000;
 
 		// Last access time from session
+		this.recordReturn(this.attributes,
+				this.attributes.getAttribute(ATTRIBUTE_LAST_ACCESS_TIME), null);
 		this.session.getAttribute(ATTRIBUTE_LAST_ACCESS_TIME);
 		this.control(this.session).setReturnValue(LAST_ACCESS_TIME);
 		this.recordReturn(this.clock, this.clock.currentTimeMillis(),
 				CURRENT_TIME);
+		this.attributes.setAttribute(ATTRIBUTE_LAST_ACCESS_TIME,
+				LAST_ACCESS_TIME);
 		this.session.setAttribute(ATTRIBUTE_LAST_ACCESS_TIME, new Long(
 				CURRENT_TIME));
 
 		// Record remaining
-		this.record_init("/test");
-
-		// Remove after initialising (to obtain from session)
-		this.attributes.remove(ATTRIBUTE_LAST_ACCESS_TIME);
+		this.record_init("/test", null);
 
 		// Test
 		this.doTest(new MockHttpServlet() {
@@ -1090,10 +1094,6 @@ public class HttpServletContainerTest extends OfficeFrameTestCase {
 						httpSession.getLastAccessedTime());
 			}
 		});
-
-		// Ensure last access time in request attributes
-		assertEquals("Incorrect last access time", LAST_ACCESS_TIME,
-				this.attributes.get(ATTRIBUTE_LAST_ACCESS_TIME));
 	}
 
 	/**
@@ -1103,18 +1103,18 @@ public class HttpServletContainerTest extends OfficeFrameTestCase {
 		final long CURRENT_TIME = 5000;
 
 		// Record using current time (no previous request)
+		this.recordReturn(this.attributes,
+				this.attributes.getAttribute(ATTRIBUTE_LAST_ACCESS_TIME), null);
 		this.recordReturn(this.session,
 				this.session.getAttribute(ATTRIBUTE_LAST_ACCESS_TIME), null);
 		this.recordReturn(this.clock, this.clock.currentTimeMillis(),
 				CURRENT_TIME);
+		this.attributes.setAttribute(ATTRIBUTE_LAST_ACCESS_TIME, CURRENT_TIME);
 		this.session.setAttribute(ATTRIBUTE_LAST_ACCESS_TIME, new Long(
 				CURRENT_TIME));
 
 		// Record remaining
-		this.record_init("/test");
-
-		// Remove after initialising (to use current time)
-		this.attributes.remove(ATTRIBUTE_LAST_ACCESS_TIME);
+		this.record_init("/test", null);
 
 		this.doTest(new MockHttpServlet() {
 			@Override
@@ -1125,10 +1125,6 @@ public class HttpServletContainerTest extends OfficeFrameTestCase {
 						httpSession.getLastAccessedTime());
 			}
 		});
-
-		// Ensure last access time in request attributes
-		assertEquals("Incorrect last access time", new Long(CURRENT_TIME),
-				this.attributes.get(ATTRIBUTE_LAST_ACCESS_TIME));
 	}
 
 	/**
@@ -1312,11 +1308,6 @@ public class HttpServletContainerTest extends OfficeFrameTestCase {
 				forwarder.forward(WORK_NAME, TASK_NAME, PARAMETER);
 			}
 		});
-
-		// Ensure not added to attributes
-		assertNull("Should not be added to attributes",
-				this.attributes
-						.get(ServletRequestForwarder.ATTRIBUTE_FORWARDER));
 	}
 
 	/**
@@ -2010,6 +2001,11 @@ public class HttpServletContainerTest extends OfficeFrameTestCase {
 		// Record
 		this.record_init("/test?type=request-mapping");
 
+		// Record filter attributes
+		this.attributes.setAttribute(ATTRIBUTE_NAME, ATTRIBUTE_VALUE);
+		this.recordReturn(this.attributes,
+				this.attributes.getAttribute(ATTRIBUTE_NAME), ATTRIBUTE_VALUE);
+
 		// Test
 		this.doTest(new MockHttpServlet() {
 			@Override
@@ -2068,6 +2064,11 @@ public class HttpServletContainerTest extends OfficeFrameTestCase {
 		this.record_init("/test?type=REQUEST");
 		this.recordReturn(this.mapping, this.mapping.getParameter("type"),
 				"forward-mapping");
+
+		// Record filter attributes
+		this.attributes.setAttribute(ATTRIBUTE_NAME, ATTRIBUTE_VALUE);
+		this.recordReturn(this.attributes,
+				this.attributes.getAttribute(ATTRIBUTE_NAME), ATTRIBUTE_VALUE);
 
 		// Test
 		this.doTest(new MockHttpServlet() {
@@ -2215,10 +2216,20 @@ public class HttpServletContainerTest extends OfficeFrameTestCase {
 	 * 
 	 * @param requestUri
 	 *            Request URI.
-	 * @param contextPath
-	 *            Context path.
 	 */
 	private void record_init(String requestUri) {
+		this.record_init(requestUri, new Long(10));
+	}
+
+	/**
+	 * Records initialising the {@link HttpServletContainer}.
+	 * 
+	 * @param requestUri
+	 *            Request URI.
+	 * @param lastAccessTime
+	 *            Last access time.
+	 */
+	private void record_init(String requestUri, Long lastAccessTime) {
 		try {
 
 			// Record creating the HTTP Servlet Container
@@ -2227,8 +2238,11 @@ public class HttpServletContainerTest extends OfficeFrameTestCase {
 							.getFilterChainFactory(this.office),
 					this.filterChainFactory);
 
-			// Load last access time
-			this.attributes.put(ATTRIBUTE_LAST_ACCESS_TIME, new Long(10));
+			// Record last access time (if last access time)
+			if (lastAccessTime != null) {
+				this.attributes.getAttribute(ATTRIBUTE_LAST_ACCESS_TIME);
+				this.control(this.attributes).setReturnValue(lastAccessTime);
+			}
 
 			// Record obtaining the request and response for servicing
 			this.recordReturn(this.session, this.session.getTokenName(),

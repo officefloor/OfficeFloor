@@ -178,17 +178,22 @@ public class ServletConfirmer extends HttpServlet {
 
 			// Send request to the server
 			HttpClient client = new DefaultHttpClient();
-			uri = (uri == null ? "" : uri);
-			uri = (uri.startsWith("/") ? uri : "/" + uri);
-			HttpPost request = new HttpPost("http://localhost:" + PORT + uri);
-			for (int i = 0; i < headerNameValues.length; i += 2) {
-				String name = headerNameValues[i];
-				String value = headerNameValues[i + 1];
-				request.addHeader(name, value);
+			try {
+				uri = (uri == null ? "" : uri);
+				uri = (uri.startsWith("/") ? uri : "/" + uri);
+				HttpPost request = new HttpPost("http://localhost:" + PORT
+						+ uri);
+				for (int i = 0; i < headerNameValues.length; i += 2) {
+					String name = headerNameValues[i];
+					String value = headerNameValues[i + 1];
+					request.addHeader(name, value);
+				}
+				HttpResponse response = client.execute(request);
+				TestCase.assertEquals("Expecting response to be successful",
+						200, response.getStatusLine().getStatusCode());
+			} finally {
+				client.getConnectionManager().shutdown();
 			}
-			HttpResponse response = client.execute(request);
-			TestCase.assertEquals("Expecting response to be successful", 200,
-					response.getStatusLine().getStatusCode());
 
 			// Return the last result
 			synchronized (this) {

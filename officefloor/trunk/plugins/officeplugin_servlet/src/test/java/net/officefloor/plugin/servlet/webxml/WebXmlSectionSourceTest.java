@@ -19,13 +19,13 @@
 package net.officefloor.plugin.servlet.webxml;
 
 import java.io.IOException;
-import java.util.Map;
 
 import javax.servlet.Filter;
 import javax.servlet.Servlet;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 
+import net.officefloor.compile.properties.Property;
 import net.officefloor.compile.spi.section.SectionDesigner;
 import net.officefloor.compile.test.section.SectionLoaderUtil;
 import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
@@ -34,6 +34,7 @@ import net.officefloor.plugin.servlet.filter.configuration.FilterMappings;
 import net.officefloor.plugin.servlet.host.ServletServer;
 import net.officefloor.plugin.servlet.mapping.MappingType;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
+import net.officefloor.plugin.web.http.application.HttpRequestState;
 import net.officefloor.plugin.web.http.security.HttpSecurity;
 import net.officefloor.plugin.web.http.session.HttpSession;
 
@@ -52,9 +53,46 @@ public class WebXmlSectionSourceTest extends AbstractWebXmlTestCase {
 	}
 
 	/**
-	 * Validate type.
+	 * Validate type via loading from section location.
 	 */
-	public void testType() throws Exception {
+	public void testTypeViaSectionLocation() throws Exception {
+
+		// Create the expected type
+		SectionDesigner type = this.createExpectedType();
+
+		// Validate type
+		String webXmlLocation = this.getPackageRelativePath(this.getClass())
+				+ "/Type.xml";
+		SectionLoaderUtil.validateSectionType(type, WebXmlSectionSource.class,
+				webXmlLocation,
+				WebXmlSectionSource.PROPERTY_WEB_XML_CONFIGURATION,
+				"This should be ignored");
+	}
+
+	/**
+	 * Validate type via loading from {@link Property}.
+	 */
+	public void testTypeViaProperty() throws Exception {
+
+		// Create the expected type
+		SectionDesigner type = this.createExpectedType();
+
+		// Load the configuration
+		String configuration = this.getFileContents(this.findFile(
+				this.getClass(), "Type.xml"));
+
+		// Validate type
+		SectionLoaderUtil.validateSectionType(type, WebXmlSectionSource.class,
+				null, WebXmlSectionSource.PROPERTY_WEB_XML_CONFIGURATION,
+				configuration);
+	}
+
+	/**
+	 * Creates the expected type.
+	 * 
+	 * @return Expected type.
+	 */
+	private SectionDesigner createExpectedType() throws Exception {
 
 		// Create the expected type
 		SectionDesigner type = SectionLoaderUtil
@@ -66,17 +104,15 @@ public class WebXmlSectionSourceTest extends AbstractWebXmlTestCase {
 		type.addSectionOutput(IOException.class.getSimpleName(),
 				IOException.class.getName(), true);
 		type.addSectionObject("SERVLET_SERVER", ServletServer.class.getName());
-		type.addSectionObject("HTTP_CONNECTION", ServerHttpConnection.class
-				.getName());
-		type.addSectionObject("REQUEST_ATTRIBUTES", Map.class.getName());
+		type.addSectionObject("HTTP_CONNECTION",
+				ServerHttpConnection.class.getName());
+		type.addSectionObject("REQUEST_ATTRIBUTES",
+				HttpRequestState.class.getName());
 		type.addSectionObject("HTTP_SESSION", HttpSession.class.getName());
 		type.addSectionObject("HTTP_SECURITY", HttpSecurity.class.getName());
 
-		// Validate type
-		String webXmlLocation = this.getPackageRelativePath(this.getClass())
-				+ "/Type.xml";
-		SectionLoaderUtil.validateSectionType(type, WebXmlSectionSource.class,
-				webXmlLocation);
+		// Return the expected type
+		return type;
 	}
 
 	/**
@@ -108,10 +144,9 @@ public class WebXmlSectionSourceTest extends AbstractWebXmlTestCase {
 				this.recordInit();
 				this.recordOfficeServletContext();
 				this.recordRouteService();
-				designer
-						.addIssue(
-								"At least one <servlet-mapping/> element must be configured",
-								AssetType.WORK, "servlet-mapping");
+				designer.addIssue(
+						"At least one <servlet-mapping/> element must be configured",
+						AssetType.WORK, "servlet-mapping");
 				this.recordHttpServlet("Test", null);
 			}
 		});

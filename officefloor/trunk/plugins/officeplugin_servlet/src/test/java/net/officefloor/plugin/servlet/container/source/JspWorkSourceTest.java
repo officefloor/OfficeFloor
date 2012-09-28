@@ -20,7 +20,6 @@ package net.officefloor.plugin.servlet.container.source;
 
 import java.io.IOException;
 import java.util.HashMap;
-import java.util.Map;
 
 import javax.servlet.ServletException;
 
@@ -35,6 +34,7 @@ import net.officefloor.plugin.servlet.container.source.HttpServletTask.Dependenc
 import net.officefloor.plugin.servlet.context.OfficeServletContext;
 import net.officefloor.plugin.servlet.mapping.ServicerMapping;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
+import net.officefloor.plugin.web.http.application.HttpRequestState;
 import net.officefloor.plugin.web.http.security.HttpSecurity;
 import net.officefloor.plugin.web.http.session.HttpSession;
 
@@ -75,7 +75,8 @@ public class JspWorkSourceTest extends OfficeFrameTestCase {
 				DependencyKeys.OFFICE_SERVLET_CONTEXT);
 		task.addObject(ServerHttpConnection.class).setKey(
 				DependencyKeys.HTTP_CONNECTION);
-		task.addObject(Map.class).setKey(DependencyKeys.REQUEST_ATTRIBUTES);
+		task.addObject(HttpRequestState.class).setKey(
+				DependencyKeys.REQUEST_ATTRIBUTES);
 		task.addObject(HttpSession.class).setKey(DependencyKeys.HTTP_SESSION);
 		task.addObject(HttpSecurity.class).setKey(DependencyKeys.HTTP_SECURITY);
 		task.addEscalation(ServletException.class);

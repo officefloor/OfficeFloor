@@ -18,7 +18,9 @@
 
 package net.officefloor.plugin.servlet.webxml;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -59,6 +61,7 @@ import net.officefloor.plugin.servlet.webxml.model.ServletModel;
 import net.officefloor.plugin.servlet.webxml.model.WebAppModel;
 import net.officefloor.plugin.servlet.webxml.model.WebXmlLoader;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
+import net.officefloor.plugin.web.http.application.HttpRequestState;
 import net.officefloor.plugin.web.http.security.HttpSecurity;
 import net.officefloor.plugin.web.http.session.HttpSession;
 
@@ -69,6 +72,12 @@ import net.officefloor.plugin.web.http.session.HttpSession;
  * @author Daniel Sagenschneider
  */
 public class WebXmlSectionSource extends AbstractSectionSource {
+
+	/**
+	 * Name of property optionally containing the <code>web.xml</code>
+	 * configuration (should a section location not be provided).
+	 */
+	public static final String PROPERTY_WEB_XML_CONFIGURATION = "web.xml.configuration";
 
 	/*
 	 * ===================== SectionSource ============================
@@ -83,10 +92,24 @@ public class WebXmlSectionSource extends AbstractSectionSource {
 	public void sourceSection(SectionDesigner designer,
 			SectionSourceContext context) throws Exception {
 
-		// Load the web.xml configuration
+		// Obtain the web.xml configuration
 		String webXmlLocation = context.getSectionLocation();
+		InputStream webXmlConfiguration;
+		if (webXmlLocation != null) {
+			// Obtain configuration at location
+			webXmlConfiguration = context.getResource(webXmlLocation);
+
+		} else {
+			// Obtain configuration from property
+			String webXmlContent = context
+					.getProperty(PROPERTY_WEB_XML_CONFIGURATION);
+			webXmlConfiguration = new ByteArrayInputStream(
+					webXmlContent.getBytes());
+		}
+
+		// Load the web application configuration
 		WebAppModel webApp = new WebXmlLoader().loadConfiguration(
-				webXmlLocation, context);
+				webXmlConfiguration, context);
 
 		// Configure the input flow
 		SectionInput serviceInput = designer.addSectionInput("service", null);
@@ -97,8 +120,8 @@ public class WebXmlSectionSource extends AbstractSectionSource {
 
 		// Configure the exception flows
 		SectionOutput servletExceptionOutput = designer.addSectionOutput(
-				ServletException.class.getSimpleName(), ServletException.class
-						.getName(), true);
+				ServletException.class.getSimpleName(),
+				ServletException.class.getName(), true);
 		SectionOutput ioExceptionOutput = designer.addSectionOutput(
 				IOException.class.getSimpleName(), IOException.class.getName(),
 				true);
@@ -109,7 +132,7 @@ public class WebXmlSectionSource extends AbstractSectionSource {
 		SectionObject httpConnectionMo = designer.addSectionObject(
 				"HTTP_CONNECTION", ServerHttpConnection.class.getName());
 		SectionObject requestAttributesMo = designer.addSectionObject(
-				"REQUEST_ATTRIBUTES", Map.class.getName());
+				"REQUEST_ATTRIBUTES", HttpRequestState.class.getName());
 		SectionObject httpSessionMo = designer.addSectionObject("HTTP_SESSION",
 				HttpSession.class.getName());
 		SectionObject httpSecurityMo = designer.addSectionObject(
@@ -131,8 +154,8 @@ public class WebXmlSectionSource extends AbstractSectionSource {
 			officeServletContextMos
 					.addProperty(
 							OfficeServletContextManagedObjectSource.PROPERTY_PREFIX_INIT_PARAMETER
-									+ contextParam.getName(), contextParam
-									.getValue());
+									+ contextParam.getName(),
+							contextParam.getValue());
 		}
 		SectionManagedObject officeServletContextMo = officeServletContextMos
 				.addSectionManagedObject("OfficeServletContext",
@@ -146,8 +169,8 @@ public class WebXmlSectionSource extends AbstractSectionSource {
 			officeServletContextMos
 					.addProperty(
 							OfficeServletContextManagedObjectSource.PROPERTY_PREFIX_FILE_EXTENSION_TO_MIME_TYPE
-									+ mimeMapping.getExtension(), mimeMapping
-									.getMimeType());
+									+ mimeMapping.getExtension(),
+							mimeMapping.getMimeType());
 		}
 
 		// Configure the filters
@@ -164,8 +187,8 @@ public class WebXmlSectionSource extends AbstractSectionSource {
 								OfficeServletContextManagedObjectSource.PROPERTY_FILTER_INSTANCE_INIT_PREFIX
 										+ filterName
 										+ "."
-										+ initParam.getName(), initParam
-										.getValue());
+										+ initParam.getName(),
+								initParam.getValue());
 			}
 		}
 
@@ -228,16 +251,14 @@ public class WebXmlSectionSource extends AbstractSectionSource {
 		designer.link(serviceInput, routeTask);
 		designer.link(routeTask.getTaskFlow(FlowKeys.UNHANDLED.name()),
 				unhandledOutput, FlowInstigationStrategyEnum.SEQUENTIAL);
-		designer
-				.link(
-						routeTask
-								.getTaskObject(net.officefloor.plugin.servlet.route.ServletRouteTask.DependencyKeys.HTTP_CONNECTION
-										.name()), httpConnectionMo);
-		designer
-				.link(
-						routeTask
-								.getTaskObject(net.officefloor.plugin.servlet.route.ServletRouteTask.DependencyKeys.OFFICE_SERVLET_CONTEXT
-										.name()), officeServletContextMo);
+		designer.link(
+				routeTask
+						.getTaskObject(net.officefloor.plugin.servlet.route.ServletRouteTask.DependencyKeys.HTTP_CONNECTION
+								.name()), httpConnectionMo);
+		designer.link(
+				routeTask
+						.getTaskObject(net.officefloor.plugin.servlet.route.ServletRouteTask.DependencyKeys.OFFICE_SERVLET_CONTEXT
+								.name()), officeServletContextMo);
 
 		// Create the listing of servlet mappings
 		Map<String, String> servletMappings = new HashMap<String, String>();
@@ -245,10 +266,9 @@ public class WebXmlSectionSource extends AbstractSectionSource {
 				.getServletMappings();
 		if (servletMappingModels.size() == 0) {
 			// Must have at least one servlet-mapping
-			designer
-					.addIssue(
-							"At least one <servlet-mapping/> element must be configured",
-							AssetType.WORK, "servlet-mapping");
+			designer.addIssue(
+					"At least one <servlet-mapping/> element must be configured",
+					AssetType.WORK, "servlet-mapping");
 		}
 		for (ServletMappingModel mappingModel : servletMappingModels) {
 			String servletName = mappingModel.getServletName();
@@ -301,11 +321,10 @@ public class WebXmlSectionSource extends AbstractSectionSource {
 					.flagAsParameter();
 
 			// Configure servlet dependencies
-			designer
-					.link(
-							servletTask
-									.getTaskObject(DependencyKeys.OFFICE_SERVLET_CONTEXT
-											.name()), officeServletContextMo);
+			designer.link(
+					servletTask
+							.getTaskObject(DependencyKeys.OFFICE_SERVLET_CONTEXT
+									.name()), officeServletContextMo);
 			designer.link(servletTask
 					.getTaskObject(DependencyKeys.HTTP_CONNECTION.name()),
 					httpConnectionMo);
@@ -323,9 +342,9 @@ public class WebXmlSectionSource extends AbstractSectionSource {
 			designer.link(servletTask.getTaskEscalation(ServletException.class
 					.getName()), servletExceptionOutput,
 					FlowInstigationStrategyEnum.SEQUENTIAL);
-			designer.link(servletTask.getTaskEscalation(IOException.class
-					.getName()), ioExceptionOutput,
-					FlowInstigationStrategyEnum.SEQUENTIAL);
+			designer.link(
+					servletTask.getTaskEscalation(IOException.class.getName()),
+					ioExceptionOutput, FlowInstigationStrategyEnum.SEQUENTIAL);
 		}
 	}
 

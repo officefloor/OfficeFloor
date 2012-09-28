@@ -46,6 +46,7 @@ import net.officefloor.plugin.socket.server.http.HttpRequest;
 import net.officefloor.plugin.socket.server.http.HttpResponse;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
 import net.officefloor.plugin.stream.impl.MockServerOutputStream;
+import net.officefloor.plugin.web.http.application.HttpRequestState;
 import net.officefloor.plugin.web.http.security.HttpSecurity;
 import net.officefloor.plugin.web.http.session.HttpSession;
 
@@ -129,9 +130,10 @@ public class HttpServletTaskTest extends OfficeFrameTestCase {
 			.createMock(ServerHttpConnection.class);
 
 	/**
-	 * {@link HttpRequest} attributes.
+	 * {@link HttpRequestState}.
 	 */
-	private final Map<String, Object> attributes = new HashMap<String, Object>();
+	private final HttpRequestState attributes = this
+			.createMock(HttpRequestState.class);
 
 	/**
 	 * {@link HttpSecurity}.
@@ -314,8 +316,9 @@ public class HttpServletTaskTest extends OfficeFrameTestCase {
 						this.filterChainFactory);
 			}
 
-			// Load last access time
-			this.attributes.put("#HttpServlet.LastAccessTime#", new Long(10));
+			// Record last access time
+			this.attributes.getAttribute("#HttpServlet.LastAccessTime#");
+			this.control(this.attributes).setReturnValue(new Long(10));
 
 			// Record obtaining the request and responses for servicing
 			this.recordReturn(this.session, this.session.getTokenName(),

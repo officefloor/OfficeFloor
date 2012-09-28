@@ -20,7 +20,6 @@ package net.officefloor.plugin.servlet.container.source;
 
 import java.io.IOException;
 import java.util.HashMap;
-import java.util.Map;
 
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
@@ -45,6 +44,7 @@ import net.officefloor.plugin.socket.server.http.HttpRequest;
 import net.officefloor.plugin.socket.server.http.HttpResponse;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
 import net.officefloor.plugin.stream.impl.MockServerOutputStream;
+import net.officefloor.plugin.web.http.application.HttpRequestState;
 import net.officefloor.plugin.web.http.security.HttpSecurity;
 import net.officefloor.plugin.web.http.session.HttpSession;
 
@@ -88,7 +88,8 @@ public class HttpServletWorkSourceTest extends OfficeFrameTestCase {
 				DependencyKeys.OFFICE_SERVLET_CONTEXT);
 		task.addObject(ServerHttpConnection.class).setKey(
 				DependencyKeys.HTTP_CONNECTION);
-		task.addObject(Map.class).setKey(DependencyKeys.REQUEST_ATTRIBUTES);
+		task.addObject(HttpRequestState.class).setKey(
+				DependencyKeys.REQUEST_ATTRIBUTES);
 		task.addObject(HttpSession.class).setKey(DependencyKeys.HTTP_SESSION);
 		task.addObject(HttpSecurity.class).setKey(DependencyKeys.HTTP_SECURITY);
 		task.addEscalation(ServletException.class);
@@ -116,7 +117,8 @@ public class HttpServletWorkSourceTest extends OfficeFrameTestCase {
 				.createMock(OfficeServletContext.class);
 		final ServerHttpConnection connection = this
 				.createMock(ServerHttpConnection.class);
-		final Map<String, Object> attributes = this.createMock(Map.class);
+		final HttpRequestState attributes = this
+				.createMock(HttpRequestState.class);
 		final HttpSession session = this.createMock(HttpSession.class);
 		final HttpSecurity security = this.createMock(HttpSecurity.class);
 		final HttpRequest request = this.createMock(HttpRequest.class);
@@ -156,7 +158,7 @@ public class HttpServletWorkSourceTest extends OfficeFrameTestCase {
 		this.recordReturn(officeServletContext,
 				officeServletContext.getFilterChainFactory(office),
 				filterChainFactory);
-		attributes.get("#HttpServlet.LastAccessTime#");
+		attributes.getAttribute("#HttpServlet.LastAccessTime#");
 		this.control(attributes).setReturnValue(new Long(1000));
 		this.recordReturn(session, session.getTokenName(), "JSESSION_ID");
 		this.recordReturn(connection, connection.getHttpRequest(), request);

@@ -19,7 +19,6 @@
 package net.officefloor.plugin.servlet.container.integrate;
 
 import java.io.File;
-import java.util.Map;
 
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServlet;
@@ -47,15 +46,16 @@ import net.officefloor.plugin.servlet.context.source.OfficeServletContextManaged
 import net.officefloor.plugin.servlet.host.ServletServer;
 import net.officefloor.plugin.servlet.host.source.ServletServerManagedObjectSource;
 import net.officefloor.plugin.servlet.mapping.ServicerMapping;
-import net.officefloor.plugin.servlet.requestattributes.source.RequestAttributesManagedObjectSource;
 import net.officefloor.plugin.socket.server.http.HttpRequest;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
 import net.officefloor.plugin.socket.server.http.server.HttpServicerTask;
 import net.officefloor.plugin.socket.server.http.server.MockHttpServer;
+import net.officefloor.plugin.web.http.application.HttpRequestState;
+import net.officefloor.plugin.web.http.application.HttpRequestStateManagedObjectSource;
 import net.officefloor.plugin.web.http.security.HttpSecurity;
 import net.officefloor.plugin.web.http.security.HttpSecurityManagedObjectSource;
-import net.officefloor.plugin.web.http.security.HttpSecurityServiceManagedObjectSource;
 import net.officefloor.plugin.web.http.security.HttpSecurityManagedObjectSource.FlowKeys;
+import net.officefloor.plugin.web.http.security.HttpSecurityServiceManagedObjectSource;
 import net.officefloor.plugin.web.http.security.scheme.BasicHttpSecuritySource;
 import net.officefloor.plugin.web.http.security.store.PasswordFileManagedObjectSource;
 import net.officefloor.plugin.web.http.session.HttpSession;
@@ -198,11 +198,10 @@ public abstract class MockHttpServletServer extends MockHttpServer {
 				workSourceClass, properties);
 		this.constructWork(reference.workName, servlet.getWorkFactory());
 		TaskBuilder<HttpServletTask, DependencyKeys, None> service = (TaskBuilder<HttpServletTask, DependencyKeys, None>) this
-				.constructTask(reference.taskName, servlet.getTaskTypes()[0]
-						.getTaskFactory(), SERVICER_NAME);
-		service
-				.setDifferentiator(servlet.getTaskTypes()[0]
-						.getDifferentiator());
+				.constructTask(reference.taskName,
+						servlet.getTaskTypes()[0].getTaskFactory(),
+						SERVICER_NAME);
+		service.setDifferentiator(servlet.getTaskTypes()[0].getDifferentiator());
 		service.linkParameter(DependencyKeys.SERVICER_MAPPING,
 				ServicerMapping.class);
 		service.linkManagedObject(DependencyKeys.OFFICE_SERVLET_CONTEXT,
@@ -210,7 +209,7 @@ public abstract class MockHttpServletServer extends MockHttpServer {
 		service.linkManagedObject(DependencyKeys.HTTP_CONNECTION, httpName,
 				ServerHttpConnection.class);
 		service.linkManagedObject(DependencyKeys.REQUEST_ATTRIBUTES,
-				requestAttributesName, Map.class);
+				requestAttributesName, HttpRequestState.class);
 		service.linkManagedObject(DependencyKeys.HTTP_SESSION, sessionName,
 				HttpSession.class);
 		service.linkManagedObject(DependencyKeys.HTTP_SECURITY, securityName,
@@ -277,7 +276,7 @@ public abstract class MockHttpServletServer extends MockHttpServer {
 		final String REQUEST_ATTRIBUTES_NAME = "RequestAttributes";
 		ManagedObjectBuilder<None> requestAttributes = this
 				.constructManagedObject(REQUEST_ATTRIBUTES_NAME,
-						RequestAttributesManagedObjectSource.class);
+						HttpRequestStateManagedObjectSource.class);
 		requestAttributes.setManagingOffice(officeName);
 		this.getOfficeBuilder().addProcessManagedObject(
 				REQUEST_ATTRIBUTES_NAME, REQUEST_ATTRIBUTES_NAME);
@@ -356,9 +355,10 @@ public abstract class MockHttpServletServer extends MockHttpServer {
 
 		// Construct the invoker (due to parameter/argument difference)
 		HttpServicerTask invoker = new HttpServicerTask("INVOKER", "invoke");
-		this.constructWork(new Invoker(), invoker.workName, null).buildTask(
-				invoker.taskName, TEAM_NAME).buildFlow(task.workName,
-				task.taskName, FlowInstigationStrategyEnum.SEQUENTIAL, null);
+		this.constructWork(new Invoker(), invoker.workName, null)
+				.buildTask(invoker.taskName, TEAM_NAME)
+				.buildFlow(task.workName, task.taskName,
+						FlowInstigationStrategyEnum.SEQUENTIAL, null);
 
 		// Return Invoker to invoke the HTTP Servlet
 		return invoker;

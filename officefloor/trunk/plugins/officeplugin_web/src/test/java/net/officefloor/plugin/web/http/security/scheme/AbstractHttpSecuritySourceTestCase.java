@@ -36,8 +36,8 @@ import net.officefloor.plugin.web.http.session.HttpSession;
  * 
  * @author Daniel Sagenschneider
  */
-public abstract class AbstractHttpSecuritySourceTest<D extends Enum<D>> extends
-		OfficeFrameTestCase {
+public abstract class AbstractHttpSecuritySourceTestCase<D extends Enum<D>>
+		extends OfficeFrameTestCase {
 
 	/**
 	 * Assets the content of the {@link HttpSecurity}.
@@ -51,13 +51,13 @@ public abstract class AbstractHttpSecuritySourceTest<D extends Enum<D>> extends
 	 */
 	protected static void assertHttpSecurity(HttpSecurity actual,
 			String expectedUserName, String... expectedRoles) {
-		assertEquals("Incorrect remote user name", expectedUserName, actual
-				.getRemoteUser());
+		assertEquals("Incorrect remote user name", expectedUserName,
+				actual.getRemoteUser());
 		assertEquals("Incorrect principle user name", expectedUserName, actual
 				.getUserPrincipal().getName());
 		for (String expectedRole : expectedRoles) {
-			assertTrue("Should be in role '" + expectedRole + "'", actual
-					.isUserInRole(expectedRole));
+			assertTrue("Should be in role '" + expectedRole + "'",
+					actual.isUserInRole(expectedRole));
 		}
 	}
 
@@ -102,7 +102,7 @@ public abstract class AbstractHttpSecuritySourceTest<D extends Enum<D>> extends
 	 * @param expectedAuthenticationScheme
 	 *            Expected authentication scheme.
 	 */
-	protected AbstractHttpSecuritySourceTest(
+	protected AbstractHttpSecuritySourceTestCase(
 			Class<? extends HttpSecuritySource<D>> sourceClass,
 			String expectedAuthenticationScheme) {
 		try {
@@ -141,8 +141,8 @@ public abstract class AbstractHttpSecuritySourceTest<D extends Enum<D>> extends
 
 			// Ensure correct authentication scheme
 			assertEquals("Incorrect authentication scheme",
-					this.expectedAuthenticationScheme, this.source
-							.getAuthenticationScheme());
+					this.expectedAuthenticationScheme,
+					this.source.getAuthenticationScheme());
 
 			// Authenticate
 			HttpSecurity security = this.source.authenticate(parameters,
@@ -151,8 +151,8 @@ public abstract class AbstractHttpSecuritySourceTest<D extends Enum<D>> extends
 			// Ensure correct authentication scheme if authenticated
 			if (security != null) {
 				assertEquals("Security authentication scheme mismatch",
-						this.expectedAuthenticationScheme, security
-								.getAuthenticationScheme());
+						this.expectedAuthenticationScheme,
+						security.getAuthenticationScheme());
 			}
 
 			this.verifyMockObjects();
@@ -200,13 +200,17 @@ public abstract class AbstractHttpSecuritySourceTest<D extends Enum<D>> extends
 			final HttpResponse response = this.createMock(HttpResponse.class);
 			final HttpHeader header = this.createMock(HttpHeader.class);
 
-			// Record loading the challenge
-			this.recordReturn(this.connection, this.connection
-					.getHttpResponse(), response);
-			response.setStatus(HttpStatus.SC_UNAUTHORIZED);
-			this.recordReturn(response, response.addHeader("WWW-Authenticate",
-					this.expectedAuthenticationScheme + " " + parameters),
-					header);
+			// Determine if send challenge
+			if (parameters != null) {
+
+				// Record loading the challenge
+				this.recordReturn(this.connection,
+						this.connection.getHttpResponse(), response);
+				response.setStatus(HttpStatus.SC_UNAUTHORIZED);
+				this.recordReturn(response, response.addHeader(
+						"WWW-Authenticate", this.expectedAuthenticationScheme
+								+ " " + parameters), header);
+			}
 
 			// Test
 			this.replayMockObjects();

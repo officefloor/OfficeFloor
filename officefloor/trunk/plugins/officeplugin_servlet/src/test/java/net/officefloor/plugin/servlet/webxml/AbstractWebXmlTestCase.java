@@ -24,7 +24,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 
 import javax.servlet.Servlet;
 import javax.servlet.ServletException;
@@ -65,6 +64,7 @@ import net.officefloor.plugin.servlet.route.source.ServletRouteWorkSource;
 import net.officefloor.plugin.servlet.webxml.model.WebAppModel;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
 import net.officefloor.plugin.socket.server.http.server.MockHttpServer;
+import net.officefloor.plugin.web.http.application.HttpRequestState;
 import net.officefloor.plugin.web.http.security.HttpSecurity;
 import net.officefloor.plugin.web.http.session.HttpSession;
 
@@ -340,7 +340,7 @@ public abstract class AbstractWebXmlTestCase extends OfficeFrameTestCase {
 					"HTTP_CONNECTION", ServerHttpConnection.class.getName()),
 					HTTP_CONNECTION_OBJECT);
 			recordReturn(this.designer, this.designer.addSectionObject(
-					"REQUEST_ATTRIBUTES", Map.class.getName()),
+					"REQUEST_ATTRIBUTES", HttpRequestState.class.getName()),
 					REQUEST_ATTRIBUTES_OBJECT);
 			recordReturn(this.designer, this.designer.addSectionObject(
 					"HTTP_SESSION", HttpSession.class.getName()),

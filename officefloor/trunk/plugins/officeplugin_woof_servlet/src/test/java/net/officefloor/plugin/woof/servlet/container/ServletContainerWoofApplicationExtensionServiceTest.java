@@ -68,7 +68,7 @@ public class ServletContainerWoofApplicationExtensionServiceTest extends
 	/**
 	 * Ensure able to service from the {@link Servlet} container.
 	 */
-	public void _testServiceFromServletContainer() throws Exception {
+	public void testServiceFromServletContainer() throws Exception {
 		String responseText = this.doGetEntity("/servlet");
 		assertEquals("Incorrect servlet response", "HTTP_SERVLET", responseText);
 	}
@@ -111,7 +111,7 @@ public class ServletContainerWoofApplicationExtensionServiceTest extends
 		// Start WoOF (should load servlet container as servicer)
 		WoofOfficeFloorSource.start(
 				HttpApplicationLocationManagedObjectSource.PROPERTY_HTTP_PORT,
-				String.valueOf(this.port));
+				String.valueOf(this.port), "INIT_NAME", "INIT_VALUE");
 	}
 
 	@Override
