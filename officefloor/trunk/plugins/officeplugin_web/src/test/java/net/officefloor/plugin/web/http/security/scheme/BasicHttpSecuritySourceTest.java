@@ -36,7 +36,7 @@ import net.officefloor.plugin.web.http.security.store.CredentialStore;
  * @author Daniel Sagenschneider
  */
 public class BasicHttpSecuritySourceTest extends
-		AbstractHttpSecuritySourceTest<Dependencies> {
+		AbstractHttpSecuritySourceTestCase<Dependencies> {
 
 	/**
 	 * Realm for testing.

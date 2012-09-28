@@ -1,9 +1,7 @@
 <context>
-	<!--
-		Provides surrounding configuration for a web.xml file to enable it to
-		be run within OfficeFloor. This is provided to test the web.xml
-		SectionSource implementation.
-	-->
+	<!-- Provides surrounding configuration for a web.xml file to enable it 
+		to be run within OfficeFloor. This is provided to test the web.xml SectionSource 
+		implementation. -->
 	<office-floor>
 		<teams>
 			<team name="SERVLET_TEAM" source="ONE_PERSON" />
@@ -87,8 +85,8 @@
 		</external-managed-objects>
 		<managed-object-sources>
 			<managed-object-source name="REQUEST_ATTRIBUTES"
-				source="net.officefloor.plugin.servlet.requestattributes.source.RequestAttributesManagedObjectSource"
-				object-type="java.util.Map" />
+				source="net.officefloor.plugin.web.http.application.HttpRequestStateManagedObjectSource"
+				object-type="net.officefloor.plugin.web.http.application.HttpRequestState" />
 			<managed-object-source name="HTTP_SESSION"
 				source="net.officefloor.plugin.web.http.session.source.HttpSessionManagedObjectSource"
 				object-type="net.officefloor.plugin.web.http.session.HttpSession"
@@ -174,7 +172,8 @@
 					object-type="net.officefloor.plugin.socket.server.http.ServerHttpConnection">
 					<external-managed-object name="HTTP_CONNECTION" />
 				</object>
-				<object name="REQUEST_ATTRIBUTES" object-type="java.util.Map">
+				<object name="REQUEST_ATTRIBUTES"
+					object-type="net.officefloor.plugin.web.http.application.HttpRequestState">
 					<managed-object name="REQUEST_ATTRIBUTES" />
 				</object>
 				<object name="HTTP_SESSION"

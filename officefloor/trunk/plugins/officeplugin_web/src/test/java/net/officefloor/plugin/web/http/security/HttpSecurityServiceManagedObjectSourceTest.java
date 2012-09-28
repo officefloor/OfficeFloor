@@ -78,6 +78,23 @@ public class HttpSecurityServiceManagedObjectSourceTest extends
 	}
 
 	/**
+	 * Ensure correct type for <code>None</code> authentication.
+	 */
+	public void testNoneType() {
+
+		// Create the expected type
+		ManagedObjectTypeBuilder type = this.createCoreType();
+
+		// Validate type
+		ManagedObjectLoaderUtil
+				.validateManagedObjectType(
+						type,
+						HttpSecurityServiceManagedObjectSource.class,
+						HttpSecurityServiceManagedObjectSource.PROPERTY_AUTHENTICATION_SCHEME,
+						HttpSecurityServiceManagedObjectSource.NONE_AUTHENTICATION_SCHEME);
+	}
+
+	/**
 	 * Ensure correct type for <code>Basic</code> authentication.
 	 */
 	public void testBasicType() {

@@ -35,19 +35,16 @@ public class WebXmlLoader {
 	/**
 	 * Loads the {@link WebAppModel}.
 	 * 
-	 * @param webXmlLocation
-	 *            Location of the <code>web.xml</code>.
+	 * @param webXmlConfiguration
+	 *            {@link InputStream} to the <code>web.xml</code> content.
 	 * @param context
 	 *            {@link ConfigurationContext}.
 	 * @return {@link WebAppModel}.
 	 * @throws Exception
 	 *             If fails to load configuration.
 	 */
-	public WebAppModel loadConfiguration(String webXmlLocation,
+	public WebAppModel loadConfiguration(InputStream webXmlConfiguration,
 			SectionSourceContext context) throws Exception {
-
-		// Obtain the web.xml configuration
-		InputStream webXmlConfiguration = context.getResource(webXmlLocation);
 
 		// Obtain the unmarshaller for the web.xml configuration
 		WebAppModel webApp = new WebAppModel();

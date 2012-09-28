@@ -60,6 +60,7 @@ import net.officefloor.frame.api.manage.UnknownWorkException;
 import net.officefloor.plugin.socket.server.http.HttpHeader;
 import net.officefloor.plugin.socket.server.http.HttpRequest;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
+import net.officefloor.plugin.web.http.application.HttpRequestState;
 import net.officefloor.plugin.web.http.cookie.HttpCookie;
 import net.officefloor.plugin.web.http.cookie.HttpCookieUtil;
 import net.officefloor.plugin.web.http.security.HttpSecurity;
@@ -179,9 +180,9 @@ public class HttpServletRequestImpl implements HttpServletRequest,
 	private final List<HttpParameter> httpParameters = new LinkedList<HttpParameter>();
 
 	/**
-	 * Attributes for the {@link HttpRequest}.
+	 * {@link HttpRequestState}.
 	 */
-	private final Map<String, Object> attributes;
+	private final HttpRequestState attributes;
 
 	/**
 	 * Query string.
@@ -214,7 +215,7 @@ public class HttpServletRequestImpl implements HttpServletRequest,
 	 * @param connection
 	 *            {@link ServerHttpConnection}.
 	 * @param requestAttributes
-	 *            Attributes for the {@link HttpRequest}.
+	 *            {@link HttpRequestState}.
 	 * @param security
 	 *            {@link HttpSecurity}.
 	 * @param sessionIdIdentifierName
@@ -234,7 +235,7 @@ public class HttpServletRequestImpl implements HttpServletRequest,
 	 *             If fails to tokenise the {@link HttpRequest}.
 	 */
 	public HttpServletRequestImpl(ServerHttpConnection connection,
-			Map<String, Object> requestAttributes, HttpSecurity security,
+			HttpRequestState requestAttributes, HttpSecurity security,
 			String sessionIdIdentifierName, HttpSession session,
 			ServletContext servletContext, Locale defaultLocale,
 			TaskContext<?, ?, ?> taskContext) throws IOException,
@@ -864,24 +865,24 @@ public class HttpServletRequestImpl implements HttpServletRequest,
 		}
 
 		// Obtain the request attribute
-		return this.attributes.get(name);
+		return this.attributes.getAttribute(name);
 	}
 
 	@Override
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public Enumeration getAttributeNames() {
-		return new IteratorEnumeration<String>(this.attributes.keySet()
-				.iterator());
+		return new IteratorEnumeration<String>(
+				this.attributes.getAttributeNames());
 	}
 
 	@Override
 	public void removeAttribute(String name) {
-		this.attributes.remove(name);
+		this.attributes.removeAttribute(name);
 	}
 
 	@Override
 	public void setAttribute(String name, Object object) {
-		this.attributes.put(name, object);
+		this.attributes.setAttribute(name, object);
 	}
 
 	/*

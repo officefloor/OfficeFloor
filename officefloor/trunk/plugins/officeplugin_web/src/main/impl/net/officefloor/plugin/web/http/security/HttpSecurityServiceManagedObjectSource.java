@@ -35,6 +35,7 @@ import net.officefloor.plugin.web.http.security.scheme.BasicHttpSecuritySource;
 import net.officefloor.plugin.web.http.security.scheme.DigestHttpSecuritySource;
 import net.officefloor.plugin.web.http.security.scheme.HttpSecuritySource;
 import net.officefloor.plugin.web.http.security.scheme.HttpSecuritySourceContext;
+import net.officefloor.plugin.web.http.security.scheme.NoneHttpSecuritySource;
 import net.officefloor.plugin.web.http.session.HttpSession;
 
 /**
@@ -49,6 +50,16 @@ public class HttpSecurityServiceManagedObjectSource extends
 	 * Name of property specifying the authentication scheme.
 	 */
 	public static final String PROPERTY_AUTHENTICATION_SCHEME = "http.security.service.authentication.scheme";
+
+	/**
+	 * Authentication scheme <code>None</code>.
+	 */
+	public static final String NONE_AUTHENTICATION_SCHEME = "None";
+
+	/**
+	 * {@link NoneHttpSecuritySource} class.
+	 */
+	private static final Class<NoneHttpSecuritySource> NONE_HTTP_SECURITY_SOURCE = NoneHttpSecuritySource.class;
 
 	/**
 	 * Authentication scheme <code>Basic</code>.
@@ -110,7 +121,10 @@ public class HttpSecurityServiceManagedObjectSource extends
 
 		// Obtain the security source
 		Class<?> httpSecuritySourceClass;
-		if (BASIC_AUTHENTICATION_SCHEME.equalsIgnoreCase(authenticationScheme)) {
+		if (NONE_AUTHENTICATION_SCHEME.equalsIgnoreCase(authenticationScheme)) {
+			httpSecuritySourceClass = NONE_HTTP_SECURITY_SOURCE;
+		} else if (BASIC_AUTHENTICATION_SCHEME
+				.equalsIgnoreCase(authenticationScheme)) {
 			httpSecuritySourceClass = BASIC_HTTP_SECURITY_SOURCE;
 		} else if (DIGEST_AUTHENTICATION_SCHEME
 				.equalsIgnoreCase(authenticationScheme)) {
@@ -119,8 +133,8 @@ public class HttpSecurityServiceManagedObjectSource extends
 			// Custom authentication scheme
 			String httpSecuritySourceClassName = mosContext
 					.getProperty(PROPERTY_HTTP_SECURITY_SOURCE_CLASS_NAME);
-			httpSecuritySourceClass = mosContext.loadClass(
-					httpSecuritySourceClassName);
+			httpSecuritySourceClass = mosContext
+					.loadClass(httpSecuritySourceClassName);
 		}
 
 		// Instantiate the security source

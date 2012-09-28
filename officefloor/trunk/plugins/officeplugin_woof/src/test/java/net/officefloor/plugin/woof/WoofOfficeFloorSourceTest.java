@@ -140,14 +140,19 @@ public class WoofOfficeFloorSourceTest extends OfficeFrameTestCase {
 
 		// Validate log not loading unknown extension
 		LogRecord[] records = this.sourceLoggerAssertion.getLogRecords();
-		assertEquals("Incorrect number of records", 1, records.length);
+		StringBuilder messages = new StringBuilder();
+		for (LogRecord record : records) {
+			messages.append("\t" + record.getMessage() + "\n");
+		}
+		assertEquals("Incorrect number of records:\n" + messages.toString(), 1,
+				records.length);
 		LogRecord record = records[0];
 		assertEquals(
 				"Incorrect unknown extension log record",
 				WoofApplicationExtensionService.class.getName()
 						+ ": Provider woof.application.extension.not.available.Service not found",
 				record.getMessage());
-		
+
 		// Test that loaded servicer
 		String response = this.doRequest("/chain");
 		assertEquals("Should be serviced by chained servicer", "CHAINED",

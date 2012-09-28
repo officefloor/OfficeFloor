@@ -19,7 +19,6 @@
 package net.officefloor.plugin.servlet.container;
 
 import java.io.IOException;
-import java.util.Map;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -31,6 +30,7 @@ import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.plugin.servlet.mapping.ServicerMapping;
 import net.officefloor.plugin.socket.server.http.HttpRequest;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
+import net.officefloor.plugin.web.http.application.HttpRequestState;
 import net.officefloor.plugin.web.http.security.HttpSecurity;
 import net.officefloor.plugin.web.http.session.HttpSession;
 
@@ -48,7 +48,7 @@ public interface HttpServletContainer {
 	 *            {@link ServerHttpConnection} containing the
 	 *            {@link HttpRequest} to service.
 	 * @param attributes
-	 *            Attributes in {@link HttpRequest} context.
+	 *            {@link HttpRequestState}.
 	 * @param session
 	 *            {@link HttpSession} for the {@link HttpRequest}.
 	 * @param security
@@ -66,10 +66,10 @@ public interface HttpServletContainer {
 	 * @throws IOException
 	 *             As per {@link HttpServlet} API.
 	 */
-	void service(ServerHttpConnection connection,
-			Map<String, Object> attributes, HttpSession session,
-			HttpSecurity security, TaskContext<?, ?, ?> taskContext,
-			ServicerMapping mapping) throws ServletException, IOException;
+	void service(ServerHttpConnection connection, HttpRequestState attributes,
+			HttpSession session, HttpSecurity security,
+			TaskContext<?, ?, ?> taskContext, ServicerMapping mapping)
+			throws ServletException, IOException;
 
 	/**
 	 * Includes the servicing of contained {@link HttpServlet} on the inputs.

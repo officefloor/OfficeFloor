@@ -294,6 +294,9 @@ public class WoofOfficeFloorSource extends HttpServerAutoWireOfficeFloorSource
 			return; // not include
 		}
 
+		// Configure the webapp directory
+		contextConfigurable.setWebAppDirectory(webAppDir);
+
 		// Configure resource directories
 		SourceHttpResourceFactory.loadProperties(null, resourceDirectories,
 				null, Boolean.FALSE, contextConfigurable);
@@ -357,20 +360,24 @@ public class WoofOfficeFloorSource extends HttpServerAutoWireOfficeFloorSource
 		Iterator<WoofApplicationExtensionService> extensionIterator = extensionServiceLoader
 				.iterator();
 		while (extensionIterator.hasNext()) {
+
+			// Obtain the next extension service
+			WoofApplicationExtensionService extensionService;
 			try {
-
-				// Obtain the next extension service
-				WoofApplicationExtensionService extensionService = extensionIterator
-						.next();
-
-				// Extend the application
-				extensionService.extendApplication(extensionContext);
-
+				extensionService = extensionIterator.next();
 			} catch (ServiceConfigurationError ex) {
 				// Warn that issue loading service
 				if (LOGGER.isLoggable(Level.WARNING)) {
 					LOGGER.log(Level.WARNING, ex.getMessage(), ex);
 				}
+
+				// Not loaded, so continue onto next
+				continue;
+			}
+
+			// Extend the application
+			try {
+				extensionService.extendApplication(extensionContext);
 
 			} catch (Throwable ex) {
 				// Warn that issue with service
@@ -379,10 +386,13 @@ public class WoofOfficeFloorSource extends HttpServerAutoWireOfficeFloorSource
 							Level.WARNING,
 							WoofApplicationExtensionService.class
 									.getSimpleName()
+									+ " "
+									+ extensionService.getClass().getName()
 									+ " configuration failure: "
 									+ ex.getMessage(), ex);
 				}
 			}
+
 		}
 	}
 
@@ -453,12 +463,46 @@ public class WoofOfficeFloorSource extends HttpServerAutoWireOfficeFloorSource
 	}
 
 	@Override
+	public void setWebAppDirectory(final File webappDirectory) {
+
+		// Include all webapp directory resources for application extension
+		this.applicationResourceSources.add(new ResourceSource() {
+			@Override
+			public InputStream sourceResource(String location) {
+
+				// Determine if resource exists
+				File resource = new File(webappDirectory, location);
+				if (!(resource.exists())) {
+					return null; // resource not exist
+				}
+
+				// Return content of resource
+				try {
+					return new FileInputStream(resource);
+
+				} catch (IOException ex) {
+
+					// Log failure to source resource
+					if (LOGGER.isLoggable(Level.WARNING)) {
+						LOGGER.log(Level.WARNING, "Failed to source resource "
+								+ location + " from webapp directory "
+								+ webappDirectory.getAbsolutePath(), ex);
+					}
+
+					// Failed to obtain content so no resource
+					return null;
+				}
+			}
+		});
+	}
+
+	@Override
 	public void addResources(ResourceSource resourceSource) {
 
-		// Configure into compiler
+		// Configure application resources into compiler
 		this.getOfficeFloorCompiler().addResources(resourceSource);
 
-		// Include for application extensions
+		// Include application resources for application extensions
 		this.applicationResourceSources.add(resourceSource);
 	}
 

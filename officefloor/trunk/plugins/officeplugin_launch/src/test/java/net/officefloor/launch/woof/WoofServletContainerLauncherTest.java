@@ -29,7 +29,6 @@ import net.officefloor.compile.OfficeFloorCompiler;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.socket.server.http.server.MockHttpServer;
-import net.officefloor.plugin.web.http.application.WebAutoWireApplication;
 import net.officefloor.plugin.woof.WoofOfficeFloorSource;
 
 import org.apache.http.HttpResponse;
@@ -216,7 +215,7 @@ public class WoofServletContainerLauncherTest extends OfficeFrameTestCase {
 					MockHttpServer.getAvailablePort(), this.webappDirectory,
 					new File[0], OfficeFloorCompiler.newPropertyList()) {
 				@Override
-				protected WebAutoWireApplication createWebAutoWireApplication() {
+				protected WoofOfficeFloorSource createWoofOfficeFloorSource() {
 
 					// Create WoOF configured with invalid configuration
 					WoofOfficeFloorSource source = new WoofOfficeFloorSource();

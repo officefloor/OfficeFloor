@@ -17,6 +17,8 @@
  */
 package net.officefloor.plugin.woof;
 
+import java.io.File;
+
 import net.officefloor.compile.properties.PropertyConfigurable;
 import net.officefloor.frame.spi.source.ResourceSource;
 
@@ -26,6 +28,18 @@ import net.officefloor.frame.spi.source.ResourceSource;
  * @author Daniel Sagenschneider
  */
 public interface WoofContextConfigurable extends PropertyConfigurable {
+
+	/**
+	 * <p>
+	 * Provides location of the <code>webapp</code> directory.
+	 * <p>
+	 * Note that this may not be called if the <code>webapp</code> directory is
+	 * not available.
+	 * 
+	 * @param webappDirectory
+	 *            Location of the <code>webapp</code> directory.
+	 */
+	void setWebAppDirectory(File webappDirectory);
 
 	/**
 	 * Adds a {@link ResourceSource}.

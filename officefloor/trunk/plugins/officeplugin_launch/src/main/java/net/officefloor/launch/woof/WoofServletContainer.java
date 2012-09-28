@@ -111,13 +111,13 @@ public class WoofServletContainer extends ServletContainer {
 
 	/**
 	 * <p>
-	 * Creates the {@link WebAutoWireApplication}.
+	 * Creates the {@link WoofOfficeFloorSource}.
 	 * <p>
 	 * Allows overriding to provide alternate implementation.
 	 * 
 	 * @return {@link WebAutoWireApplication}.
 	 */
-	protected WebAutoWireApplication createWebAutoWireApplication() {
+	protected WoofOfficeFloorSource createWoofOfficeFloorSource() {
 		return new WoofOfficeFloorSource();
 	}
 
@@ -129,7 +129,7 @@ public class WoofServletContainer extends ServletContainer {
 	public boolean start() {
 
 		// Create WoOF
-		WebAutoWireApplication source = this.createWebAutoWireApplication();
+		WoofOfficeFloorSource source = this.createWoofOfficeFloorSource();
 		final OfficeFloorCompiler compiler = source.getOfficeFloorCompiler();
 
 		// Configure port
@@ -137,7 +137,7 @@ public class WoofServletContainer extends ServletContainer {
 				String.valueOf(this.port));
 
 		// Configure access to web resources
-		WoofOfficeFloorSource.loadWebResources(compiler, this.webAppDirectory,
+		WoofOfficeFloorSource.loadWebResources(source, this.webAppDirectory,
 				this.resourceDirectories);
 
 		// Load the additional properties
