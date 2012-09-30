@@ -44,7 +44,8 @@ import net.officefloor.plugin.servlet.container.source.HttpServletTask.Dependenc
 import net.officefloor.plugin.servlet.context.OfficeServletContext;
 import net.officefloor.plugin.servlet.context.source.OfficeServletContextManagedObjectSource;
 import net.officefloor.plugin.servlet.host.ServletServer;
-import net.officefloor.plugin.servlet.host.source.ServletServerManagedObjectSource;
+import net.officefloor.plugin.servlet.host.ServletServerManagedObjectSource;
+import net.officefloor.plugin.servlet.host.ServletServerManagedObjectSource.Dependencies;
 import net.officefloor.plugin.servlet.mapping.ServicerMapping;
 import net.officefloor.plugin.socket.server.http.HttpRequest;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
@@ -52,6 +53,7 @@ import net.officefloor.plugin.socket.server.http.server.HttpServicerTask;
 import net.officefloor.plugin.socket.server.http.server.MockHttpServer;
 import net.officefloor.plugin.web.http.application.HttpRequestState;
 import net.officefloor.plugin.web.http.application.HttpRequestStateManagedObjectSource;
+import net.officefloor.plugin.web.http.location.HttpApplicationLocationManagedObjectSource;
 import net.officefloor.plugin.web.http.security.HttpSecurity;
 import net.officefloor.plugin.web.http.security.HttpSecurityManagedObjectSource;
 import net.officefloor.plugin.web.http.security.HttpSecurityManagedObjectSource.FlowKeys;
@@ -237,6 +239,19 @@ public abstract class MockHttpServletServer extends MockHttpServer {
 		// Obtain Office Name
 		String officeName = this.getOfficeName();
 
+		// HttpApplicationLocation
+		ManagedObjectBuilder<None> httpApplicationLocation = this
+				.constructManagedObject("HttpApplicationLocation",
+						HttpApplicationLocationManagedObjectSource.class);
+		httpApplicationLocation.setManagingOffice(officeName);
+		DependencyMappingBuilder httpApplicationLocationDepedendencies = this
+				.getOfficeBuilder().addProcessManagedObject(
+						"HttpApplicationLocation", "HttpApplicationLocation");
+		httpApplicationLocationDepedendencies
+				.mapDependency(
+						net.officefloor.plugin.web.http.location.HttpApplicationLocationManagedObjectSource.Dependencies.SERVER_HTTP_CONNECTION,
+						managedObjectName);
+
 		// ServletServer
 		ManagedObjectBuilder<None> servletServer = this.constructManagedObject(
 				SERVLET_SERVER_NAME, ServletServerManagedObjectSource.class);
@@ -244,15 +259,15 @@ public abstract class MockHttpServletServer extends MockHttpServer {
 				ServletServerManagedObjectSource.PROPERTY_SERVER_NAME,
 				"localhost");
 		servletServer.addProperty(
-				ServletServerManagedObjectSource.PROPERTY_SERVER_PORT, "80");
-		servletServer.addProperty(
-				ServletServerManagedObjectSource.PROPERTY_CONTEXT_PATH, "/");
-		servletServer.addProperty(
 				ServletServerManagedObjectSource.PROPERTY_CLASS_PATH_PREFIX,
 				this.getClass().getPackage().getName());
 		servletServer.setManagingOffice(officeName);
-		this.getOfficeBuilder().addProcessManagedObject(SERVLET_SERVER_NAME,
-				SERVLET_SERVER_NAME);
+		DependencyMappingBuilder servletServerDepedendencies = this
+				.getOfficeBuilder().addProcessManagedObject(
+						SERVLET_SERVER_NAME, SERVLET_SERVER_NAME);
+		servletServerDepedendencies.mapDependency(
+				Dependencies.HTTP_APPLICATION_LOCATION,
+				"HttpApplicationLocation");
 
 		// OfficeServletContext
 		final String SERVLET_CONTEXT_NAME = "ServletContext";

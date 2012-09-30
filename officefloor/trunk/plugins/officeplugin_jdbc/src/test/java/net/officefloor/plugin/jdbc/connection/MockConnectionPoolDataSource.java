@@ -21,6 +21,8 @@ package net.officefloor.plugin.jdbc.connection;
 import java.io.PrintWriter;
 import java.sql.Driver;
 import java.sql.SQLException;
+import java.sql.SQLFeatureNotSupportedException;
+import java.util.logging.Logger;
 
 import javax.sql.ConnectionPoolDataSource;
 import javax.sql.PooledConnection;
@@ -177,64 +179,38 @@ public class MockConnectionPoolDataSource implements ConnectionPoolDataSource {
 	 * ================= ConnectionPoolDataSource =======================
 	 */
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see javax.sql.ConnectionPoolDataSource#getPooledConnection()
-	 */
 	@Override
 	public PooledConnection getPooledConnection() throws SQLException {
 		return pooledConnection;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * javax.sql.ConnectionPoolDataSource#getPooledConnection(java.lang.String,
-	 * java.lang.String)
-	 */
 	@Override
 	public PooledConnection getPooledConnection(String user, String password)
 			throws SQLException {
 		return pooledConnection;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see javax.sql.CommonDataSource#getLogWriter()
-	 */
+	@Override
+	public Logger getParentLogger() throws SQLFeatureNotSupportedException {
+		throw new SQLFeatureNotSupportedException(
+				"Should not be required for testing");
+	}
+
 	@Override
 	public PrintWriter getLogWriter() throws SQLException {
 		return this.logWriter;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see javax.sql.CommonDataSource#setLogWriter(java.io.PrintWriter)
-	 */
 	@Override
 	public void setLogWriter(PrintWriter out) throws SQLException {
 		this.logWriter = out;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see javax.sql.CommonDataSource#getLoginTimeout()
-	 */
 	@Override
 	public int getLoginTimeout() throws SQLException {
 		return this.loginTimeout;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see javax.sql.CommonDataSource#setLoginTimeout(int)
-	 */
 	@Override
 	public void setLoginTimeout(int seconds) throws SQLException {
 		this.loginTimeout = seconds;

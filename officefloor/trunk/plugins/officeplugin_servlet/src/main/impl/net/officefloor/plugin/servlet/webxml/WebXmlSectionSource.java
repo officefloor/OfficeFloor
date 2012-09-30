@@ -60,6 +60,7 @@ import net.officefloor.plugin.servlet.webxml.model.ServletMappingModel;
 import net.officefloor.plugin.servlet.webxml.model.ServletModel;
 import net.officefloor.plugin.servlet.webxml.model.WebAppModel;
 import net.officefloor.plugin.servlet.webxml.model.WebXmlLoader;
+import net.officefloor.plugin.socket.server.http.HttpRequest;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
 import net.officefloor.plugin.web.http.application.HttpRequestState;
 import net.officefloor.plugin.web.http.security.HttpSecurity;
@@ -78,6 +79,17 @@ public class WebXmlSectionSource extends AbstractSectionSource {
 	 * configuration (should a section location not be provided).
 	 */
 	public static final String PROPERTY_WEB_XML_CONFIGURATION = "web.xml.configuration";
+
+	/**
+	 * Name of the {@link SectionInput} that services the {@link HttpRequest}.
+	 */
+	public static final String SERVICE_INPUT = "service";
+
+	/**
+	 * Name of the {@link SectionOutput} should the {@link HttpRequest} not be
+	 * handled.
+	 */
+	public static final String UNHANDLED_OUTPUT = "unhandled";
 
 	/*
 	 * ===================== SectionSource ============================
@@ -112,11 +124,12 @@ public class WebXmlSectionSource extends AbstractSectionSource {
 				webXmlConfiguration, context);
 
 		// Configure the input flow
-		SectionInput serviceInput = designer.addSectionInput("service", null);
+		SectionInput serviceInput = designer.addSectionInput(SERVICE_INPUT,
+				null);
 
 		// Configure the output flows
-		SectionOutput unhandledOutput = designer.addSectionOutput("unhandled",
-				null, false);
+		SectionOutput unhandledOutput = designer.addSectionOutput(
+				UNHANDLED_OUTPUT, null, false);
 
 		// Configure the exception flows
 		SectionOutput servletExceptionOutput = designer.addSectionOutput(

@@ -16,7 +16,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package net.officefloor.plugin.servlet.host.source;
+package net.officefloor.plugin.servlet.host;
 
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
@@ -28,6 +28,9 @@ import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.frame.util.ManagedObjectSourceStandAlone;
 import net.officefloor.frame.util.ManagedObjectUserStandAlone;
 import net.officefloor.plugin.servlet.host.ServletServer;
+import net.officefloor.plugin.servlet.host.ServletServerManagedObjectSource;
+import net.officefloor.plugin.servlet.host.ServletServerManagedObjectSource.Dependencies;
+import net.officefloor.plugin.web.http.location.HttpApplicationLocation;
 
 /**
  * Tests the {@link ServletServerManagedObjectSource}.
@@ -43,11 +46,7 @@ public class ServletServerManagedObjectSourceTest extends OfficeFrameTestCase {
 		ManagedObjectLoaderUtil.validateSpecification(
 				ServletServerManagedObjectSource.class,
 				ServletServerManagedObjectSource.PROPERTY_SERVER_NAME,
-				"Server Name",
-				ServletServerManagedObjectSource.PROPERTY_SERVER_PORT,
-				"Server Port",
-				ServletServerManagedObjectSource.PROPERTY_CONTEXT_PATH,
-				"Context Path");
+				"Server Name");
 	}
 
 	/**
@@ -59,15 +58,14 @@ public class ServletServerManagedObjectSourceTest extends OfficeFrameTestCase {
 		ManagedObjectTypeBuilder type = ManagedObjectLoaderUtil
 				.createManagedObjectTypeBuilder();
 		type.setObjectClass(ServletServer.class);
+		type.addDependency(Dependencies.HTTP_APPLICATION_LOCATION,
+				HttpApplicationLocation.class, null);
 
 		// Validate type
 		ManagedObjectLoaderUtil.validateManagedObjectType(type,
 				ServletServerManagedObjectSource.class,
 				ServletServerManagedObjectSource.PROPERTY_SERVER_NAME,
-				"officefloor.net",
-				ServletServerManagedObjectSource.PROPERTY_SERVER_PORT, "80",
-				ServletServerManagedObjectSource.PROPERTY_CONTEXT_PATH,
-				"/context");
+				"officefloor.net");
 	}
 
 	/**
@@ -79,20 +77,27 @@ public class ServletServerManagedObjectSourceTest extends OfficeFrameTestCase {
 		final int SERVER_PORT = 80;
 		final String CONTEXT_PATH = "/context";
 
+		final HttpApplicationLocation location = this
+				.createMock(HttpApplicationLocation.class);
+
 		// Obtain resource path root
 		final String RESOURCE_NAME = "resource.txt";
+
+		// Record obtaining location details
+		this.recordReturn(location, location.getHttpPort(), SERVER_PORT);
+		this.recordReturn(location, location.getContextPath(), CONTEXT_PATH);
+
+		// Record to default context path
+		this.recordReturn(location, location.getContextPath(), null);
+
+		// Test
+		this.replayMockObjects();
 
 		// Load the source
 		ManagedObjectSourceStandAlone loader = new ManagedObjectSourceStandAlone();
 		loader.addProperty(
 				ServletServerManagedObjectSource.PROPERTY_SERVER_NAME,
 				SERVER_NAME);
-		loader.addProperty(
-				ServletServerManagedObjectSource.PROPERTY_SERVER_PORT, String
-						.valueOf(SERVER_PORT));
-		loader.addProperty(
-				ServletServerManagedObjectSource.PROPERTY_CONTEXT_PATH,
-				CONTEXT_PATH);
 		loader.addProperty(
 				ServletServerManagedObjectSource.PROPERTY_CLASS_PATH_PREFIX,
 				this.getClass().getPackage().getName());
@@ -101,6 +106,7 @@ public class ServletServerManagedObjectSourceTest extends OfficeFrameTestCase {
 
 		// Obtain the managed object
 		ManagedObjectUserStandAlone user = new ManagedObjectUserStandAlone();
+		user.mapDependency(Dependencies.HTTP_APPLICATION_LOCATION, location);
 		ManagedObject managedObject = user.sourceManagedObject(source);
 		assertNotNull("Ensure have managed object", managedObject);
 
@@ -111,14 +117,18 @@ public class ServletServerManagedObjectSourceTest extends OfficeFrameTestCase {
 		ServletServer server = (ServletServer) object;
 
 		// Validate loaded correctly
-		assertEquals("Incorrect server name", SERVER_NAME, server
-				.getServerName());
-		assertEquals("Incorrect server port", SERVER_PORT, server
-				.getServerPort());
-		assertEquals("Incorrect context path", CONTEXT_PATH, server
-				.getContextPath());
+		assertEquals("Incorrect server name", SERVER_NAME,
+				server.getServerName());
+		assertEquals("Incorrect server port", SERVER_PORT,
+				server.getServerPort());
+		assertEquals("Incorrect context path", CONTEXT_PATH,
+				server.getContextPath());
 		assertNotNull("Resource locator not configured correctly", server
 				.getResourceLocator().getResource(RESOURCE_NAME));
+
+		// Validate default no context path
+		assertEquals("Incorrect defaulted context path", "/",
+				server.getContextPath());
 
 		// Validate the logging
 		PrintStream stdOut = System.out;
@@ -130,6 +140,9 @@ public class ServletServerManagedObjectSourceTest extends OfficeFrameTestCase {
 		} finally {
 			System.setOut(stdOut);
 		}
+
+		// Verify
+		this.verifyMockObjects();
 	}
 
 }

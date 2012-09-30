@@ -33,6 +33,7 @@ import net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceContext
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectTaskBuilder;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectWorkBuilder;
 import net.officefloor.frame.spi.managedobject.source.impl.AbstractManagedObjectSource;
+import net.officefloor.frame.spi.team.Team;
 import net.officefloor.plugin.socket.server.http.HttpRequest;
 import net.officefloor.plugin.web.http.security.HttpSecurity;
 import net.officefloor.plugin.web.http.security.HttpSecurityService;
@@ -55,6 +56,11 @@ public class HttpSecurityManagedObjectSource
 		Work,
 		TaskFactory<HttpSecurityManagedObjectSource, HttpSecurityManagedObjectSource.AuthenticateTaskDependencyKeys, None>,
 		Task<HttpSecurityManagedObjectSource, HttpSecurityManagedObjectSource.AuthenticateTaskDependencyKeys, None> {
+
+	/**
+	 * Name of the {@link Team} for authentication.
+	 */
+	public static final String TEAM_AUTHENTICATOR = "AUTHENTICATOR";
 
 	/**
 	 * Dependency keys for the {@link HttpSecurityManagedObjectSource}.
@@ -126,7 +132,7 @@ public class HttpSecurityManagedObjectSource
 		task.linkParameter(
 				AuthenticateTaskDependencyKeys.HTTP_SECURITY_MANAGED_OBJECT,
 				HttpSecurityManagedObject.class);
-		task.setTeam("AUTHENTICATOR");
+		task.setTeam(TEAM_AUTHENTICATOR);
 
 		// Allow triggering the authentication task
 		mosContext.linkProcess(FlowKeys.AUTHENTICATE, WORK_NAME, TASK_NAME);

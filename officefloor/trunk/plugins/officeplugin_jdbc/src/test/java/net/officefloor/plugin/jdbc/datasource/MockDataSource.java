@@ -22,6 +22,8 @@ import java.io.PrintWriter;
 import java.sql.Connection;
 import java.sql.Driver;
 import java.sql.SQLException;
+import java.sql.SQLFeatureNotSupportedException;
+import java.util.logging.Logger;
 
 import javax.sql.DataSource;
 
@@ -177,6 +179,12 @@ public class MockDataSource implements DataSource {
 	@Override
 	public Connection getConnection(String username, String password)
 			throws SQLException {
+		TestCase.fail("Should not be invoked");
+		return null;
+	}
+
+	@Override
+	public Logger getParentLogger() throws SQLFeatureNotSupportedException {
 		TestCase.fail("Should not be invoked");
 		return null;
 	}

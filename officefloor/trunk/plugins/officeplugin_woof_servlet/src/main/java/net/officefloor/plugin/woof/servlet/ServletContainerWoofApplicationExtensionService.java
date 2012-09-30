@@ -25,11 +25,19 @@ import java.io.StringWriter;
 import javax.servlet.Servlet;
 
 import net.officefloor.autowire.AutoWire;
+import net.officefloor.autowire.AutoWireObject;
 import net.officefloor.autowire.AutoWireSection;
+import net.officefloor.autowire.ManagedObjectSourceWirer;
+import net.officefloor.autowire.ManagedObjectSourceWirerContext;
+import net.officefloor.frame.impl.spi.team.PassiveTeamSource;
+import net.officefloor.plugin.servlet.host.ServletServer;
+import net.officefloor.plugin.servlet.host.ServletServerManagedObjectSource;
 import net.officefloor.plugin.servlet.webxml.WebXmlSectionSource;
 import net.officefloor.plugin.web.http.application.WebAutoWireApplication;
 import net.officefloor.plugin.web.http.security.HttpSecurity;
 import net.officefloor.plugin.web.http.security.HttpSecurityManagedObjectSource;
+import net.officefloor.plugin.web.http.security.HttpSecurityService;
+import net.officefloor.plugin.web.http.security.HttpSecurityServiceManagedObjectSource;
 import net.officefloor.plugin.woof.WoofApplicationExtensionService;
 import net.officefloor.plugin.woof.WoofApplicationExtensionServiceContext;
 import net.officefloor.plugin.woof.WoofOfficeFloorSource;
@@ -77,14 +85,53 @@ public class ServletContainerWoofApplicationExtensionService implements
 		section.addProperty(WebXmlSectionSource.PROPERTY_WEB_XML_CONFIGURATION,
 				webXmlContent.toString());
 
-		// Ensure there is security
+		// Ensure Servlet Server is available
+		final AutoWire servletServer = new AutoWire(ServletServer.class);
+		if (!(application.isObjectAvailable(servletServer))) {
+			// Configure the Servlet Server
+			AutoWireObject servletServerObject = application.addManagedObject(
+					ServletServerManagedObjectSource.class.getName(), null,
+					servletServer);
+			servletServerObject.addProperty(
+					ServletServerManagedObjectSource.PROPERTY_SERVER_NAME,
+					"Embedded Servlet Container within WoOF");
+		}
+
+		// Ensure Security is available
 		final AutoWire httpSecurity = new AutoWire(HttpSecurity.class);
 		if (!(application.isObjectAvailable(httpSecurity))) {
 			// Configure the HTTP Security
-			application.addManagedObject(
-					HttpSecurityManagedObjectSource.class.getName(), null,
-					httpSecurity);
+			AutoWireObject httpSecurityObject = application.addManagedObject(
+					HttpSecurityManagedObjectSource.class.getName(),
+					new ManagedObjectSourceWirer() {
+						@Override
+						public void wire(ManagedObjectSourceWirerContext context) {
+							context.mapTeam(
+									HttpSecurityManagedObjectSource.TEAM_AUTHENTICATOR,
+									PassiveTeamSource.class.getName());
+						}
+					}, httpSecurity);
+			httpSecurityObject.setTimeout(1000); // should not time out as none
+
+			// Ensure Security Service is available
+			final AutoWire httpSecurityService = new AutoWire(
+					HttpSecurityService.class);
+			if (!(application.isObjectAvailable(httpSecurityService))) {
+				// Configure the HTTP Security Service
+				AutoWireObject httpSecurityServiceObject = application
+						.addManagedObject(
+								HttpSecurityServiceManagedObjectSource.class
+										.getName(), null, httpSecurityService);
+				httpSecurityServiceObject
+						.addProperty(
+								HttpSecurityServiceManagedObjectSource.PROPERTY_AUTHENTICATION_SCHEME,
+								HttpSecurityServiceManagedObjectSource.NONE_AUTHENTICATION_SCHEME);
+			}
 		}
 
+		// Chain in the Servlet Container as a servicer
+		application.chainServicer(section, WebXmlSectionSource.SERVICE_INPUT,
+				WebXmlSectionSource.UNHANDLED_OUTPUT);
 	}
+
 }

@@ -45,8 +45,10 @@ import net.officefloor.eclipse.extension.sectionsource.SectionSourceExtensionCon
 import net.officefloor.eclipse.util.EclipseUtil;
 import net.officefloor.eclipse.web.HttpTemplateSectionSourceExtension;
 import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
+import net.officefloor.frame.spi.source.ResourceSource;
 import net.officefloor.plugin.web.http.template.parse.HttpTemplate;
 import net.officefloor.plugin.web.http.template.section.HttpTemplateSectionSource;
+import net.officefloor.plugin.woof.WoofContextConfigurable;
 import net.officefloor.plugin.woof.WoofOfficeFloorSource;
 
 import org.eclipse.core.resources.IFile;
@@ -189,9 +191,29 @@ public class HttpTemplateWizardPage extends WizardPage implements
 				.newOfficeFloorCompiler(this.classLoader);
 		this.compiler.setCompilerIssues(this);
 
+		// Provide configuration of WoOF context
+		WoofContextConfigurable configurable = new WoofContextConfigurable() {
+
+			@Override
+			public void addProperty(String name, String value) {
+				HttpTemplateWizardPage.this.compiler.addProperty(name, value);
+			}
+
+			@Override
+			public void setWebAppDirectory(File webAppDir) {
+				// Do nothing
+			}
+
+			@Override
+			public void addResources(ResourceSource resourceSource) {
+				HttpTemplateWizardPage.this.compiler
+						.addResources(resourceSource);
+			}
+		};
+
 		// Load access to web resources
 		File projectDir = project.getLocation().toFile();
-		WoofOfficeFloorSource.loadWebResourcesFromMavenProject(this.compiler,
+		WoofOfficeFloorSource.loadWebResourcesFromMavenProject(configurable,
 				projectDir);
 
 		// Obtain the section loader
