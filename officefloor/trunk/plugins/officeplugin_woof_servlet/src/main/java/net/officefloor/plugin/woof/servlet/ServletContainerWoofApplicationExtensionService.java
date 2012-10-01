@@ -89,12 +89,9 @@ public class ServletContainerWoofApplicationExtensionService implements
 		final AutoWire servletServer = new AutoWire(ServletServer.class);
 		if (!(application.isObjectAvailable(servletServer))) {
 			// Configure the Servlet Server
-			AutoWireObject servletServerObject = application.addManagedObject(
+			application.addManagedObject(
 					ServletServerManagedObjectSource.class.getName(), null,
 					servletServer);
-			servletServerObject.addProperty(
-					ServletServerManagedObjectSource.PROPERTY_SERVER_NAME,
-					"Embedded Servlet Container within WoOF");
 		}
 
 		// Ensure Security is available

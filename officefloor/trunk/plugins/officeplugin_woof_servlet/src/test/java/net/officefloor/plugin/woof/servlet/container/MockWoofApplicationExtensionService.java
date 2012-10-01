@@ -15,7 +15,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.plugin.woof.servlet;
+package net.officefloor.plugin.woof.servlet.container;
 
 import java.io.IOException;
 import java.io.Writer;
@@ -72,7 +72,7 @@ public class MockWoofApplicationExtensionService implements
 
 		public void service(ServerHttpConnection connection, Flows flows)
 				throws IOException {
-			if ("/chain.task".equals(connection.getHttpRequest().getRequestURI())) {
+			if ("/chain.html".equals(connection.getHttpRequest().getRequestURI())) {
 				// Provide chained response
 				Writer writer = connection.getHttpResponse().getEntityWriter();
 				writer.write("CHAINED");

@@ -183,7 +183,7 @@ public class MockDataSource implements DataSource {
 		return null;
 	}
 
-	@Override
+	// New to Java 7 (not override to allow compatibility with Java 6)
 	public Logger getParentLogger() throws SQLFeatureNotSupportedException {
 		TestCase.fail("Should not be invoked");
 		return null;

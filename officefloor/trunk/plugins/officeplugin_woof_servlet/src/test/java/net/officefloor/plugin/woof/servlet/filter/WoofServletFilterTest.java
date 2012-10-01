@@ -47,7 +47,7 @@ import org.apache.http.impl.client.DefaultHttpClient;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.session.SessionHandler;
 import org.eclipse.jetty.servlet.FilterHolder;
-import org.eclipse.jetty.servlet.ServletContextHandler;
+import org.eclipse.jetty.webapp.WebAppContext;
 
 import com.gdevelop.gwt.syncrpc.SyncProxy;
 
@@ -194,17 +194,19 @@ public class WoofServletFilterTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensure load {@link WoofApplicationExtensionService}.
+	 * Ensure {@link WoofApplicationExtensionService} instances are not loaded
+	 * by the {@link WoofServletFilter}.
 	 */
-	public void testWoofApplicationExtension() throws Exception {
+	public void testNoWoofApplicationExtension() throws Exception {
 
 		// Start Server
 		this.startServer("");
 
-		// Validate extension servicer
-		String responseText = this.doGetEntity("/chain.task");
-		assertEquals("Incorrect response from chained entry", "CHAINED",
-				responseText);
+		// Ensure not load WoOF Application Extensions for Filter
+		String responseText = this.doGetEntity("/chain.html");
+		assertEquals(
+				"Should obtain resource and not be serviced by chain servicer",
+				"NOT CHAINED", responseText);
 	}
 
 	/*
@@ -269,7 +271,7 @@ public class WoofServletFilterTest extends OfficeFrameTestCase {
 
 		// Start servlet container with filter
 		this.server = new Server(this.port);
-		ServletContextHandler context = new ServletContextHandler();
+		WebAppContext context = new WebAppContext();
 		context.setContextPath("".equals(contextPath) ? "/" : contextPath);
 		context.setResourceBase(baseDirectory.getAbsolutePath());
 		context.setSessionHandler(new SessionHandler());
