@@ -28,9 +28,13 @@ import net.officefloor.building.command.parameters.RemoteRepositoryUrlsOfficeFlo
 import net.officefloor.building.manager.OfficeBuildingManager;
 import net.officefloor.building.manager.OfficeBuildingManagerMBean;
 import net.officefloor.building.manager.OpenOfficeFloorConfiguration;
+import net.officefloor.compile.spi.officefloor.source.OfficeFloorSource;
+import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.socket.server.http.HttpRequest;
 import net.officefloor.plugin.socket.server.http.server.MockHttpServer;
+import net.officefloor.plugin.web.http.location.HttpApplicationLocationManagedObjectSource;
+import net.officefloor.plugin.woof.WoofOfficeFloorSource;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
@@ -45,11 +49,36 @@ import org.apache.http.impl.client.DefaultHttpClient;
 public class WarIntegrateTest extends OfficeFrameTestCase {
 
 	/**
-	 * Ensure can start the WAR and have it service a {@link HttpRequest}.
+	 * Ensure can integrate with raw {@link OfficeFloor} configuration.
 	 */
-	public void testWarStartAndService() throws Throwable {
+	public void testViaOfficeFloorRawConfiguration() throws Throwable {
+		this.doWarStartAndService(null,
+				"net/officefloor/plugin/war/integrate/WarOfficeFloor.officefloor");
+	}
+
+	/**
+	 * Ensure can integrate with {@link WoofOfficeFloorSource}.
+	 */
+	public void testViaWoOF() throws Throwable {
+		this.doWarStartAndService(WoofOfficeFloorSource.class, "WoOF");
+	}
+
+	/**
+	 * Ensure can start the WAR and have it service a {@link HttpRequest}.
+	 * 
+	 * @param officeFloorClass
+	 *            {@link OfficeFloorSource} {@link Class}.
+	 * @param officeFloorLocation
+	 *            Location of the {@link OfficeFloor} configuration to use.
+	 */
+	public void doWarStartAndService(
+			Class<? extends OfficeFloorSource> officeFloorSourceClass,
+			String officeFloorLocation) throws Throwable {
 
 		final int PORT = MockHttpServer.getAvailablePort();
+
+		// Ensure clean system properties
+		System.clearProperty(HttpApplicationLocationManagedObjectSource.PROPERTY_HTTP_PORT);
 
 		// Obtain location of war directory
 		File warDir = new File(".", "target/test-classes");
@@ -77,20 +106,31 @@ public class WarIntegrateTest extends OfficeFrameTestCase {
 						true,
 						RemoteRepositoryUrlsOfficeFloorCommandParameterImpl.DEFAULT_REMOTE_REPOSITORY_URLS);
 
+		HttpClient client = null;
 		try {
 
 			// Open the WAR by decoration of OfficeFloor
 			OpenOfficeFloorConfiguration configuration = new OpenOfficeFloorConfiguration(
-					"net/officefloor/plugin/war/integrate/WarOfficeFloor.officefloor");
+					officeFloorLocation);
+			if (officeFloorSourceClass != null) {
+				configuration
+						.setOfficeFloorSourceClassName(officeFloorSourceClass
+								.getName());
+			}
 			configuration.addClassPathEntry(warDir.getAbsolutePath());
-			configuration.addOfficeFloorProperty("http.port",
-					String.valueOf(PORT));
+			configuration
+					.addOfficeFloorProperty(
+							HttpApplicationLocationManagedObjectSource.PROPERTY_HTTP_PORT,
+							String.valueOf(PORT));
 			configuration.addOfficeFloorProperty("password.file.location",
 					passwordFile.getAbsolutePath());
 			officeBuildingManager.openOfficeFloor(configuration);
+			
+			// Allow some time to start
+			Thread.sleep(1000);
 
 			// Request data from servlet
-			HttpClient client = new DefaultHttpClient();
+			client = new DefaultHttpClient();
 			HttpGet request = new HttpGet("http://localhost:" + PORT);
 			HttpResponse response = client.execute(request);
 
@@ -101,8 +141,11 @@ public class WarIntegrateTest extends OfficeFrameTestCase {
 			assertEquals("Incorrect response body", "WAR", body);
 
 		} finally {
-			// Ensure clean up system properties
-			System.clearProperty("http.port");
+
+			// Ensure stop client
+			if (client != null) {
+				client.getConnectionManager().shutdown();
+			}
 
 			// Ensure stop the OfficeBuilding (and subsequently OfficeFloor)
 			officeBuildingManager.stopOfficeBuilding(10000);
