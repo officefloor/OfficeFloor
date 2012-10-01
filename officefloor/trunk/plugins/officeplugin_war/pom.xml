@@ -24,7 +24,7 @@
 		</dependency>
 		<dependency>
 			<groupId>${project.groupId}</groupId>
-			<artifactId>officeplugin_servlet</artifactId>
+			<artifactId>officeplugin_woof_servlet</artifactId>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
