@@ -18,18 +18,17 @@
 
 package net.officefloor.plugin.servlet.host;
 
-import java.io.ByteArrayOutputStream;
-import java.io.PrintStream;
+import java.util.logging.LogRecord;
 
 import net.officefloor.compile.test.managedobject.ManagedObjectLoaderUtil;
 import net.officefloor.compile.test.managedobject.ManagedObjectTypeBuilder;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
+import net.officefloor.frame.test.LoggerAssertion;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.frame.util.ManagedObjectSourceStandAlone;
 import net.officefloor.frame.util.ManagedObjectUserStandAlone;
-import net.officefloor.plugin.servlet.host.ServletServer;
-import net.officefloor.plugin.servlet.host.ServletServerManagedObjectSource;
 import net.officefloor.plugin.servlet.host.ServletServerManagedObjectSource.Dependencies;
+import net.officefloor.plugin.servlet.log.Logger;
 import net.officefloor.plugin.web.http.location.HttpApplicationLocation;
 
 /**
@@ -40,13 +39,27 @@ import net.officefloor.plugin.web.http.location.HttpApplicationLocation;
 public class ServletServerManagedObjectSourceTest extends OfficeFrameTestCase {
 
 	/**
+	 * {@link LoggerAssertion}.
+	 */
+	private LoggerAssertion loggerAssertion;
+
+	@Override
+	protected void setUp() throws Exception {
+		this.loggerAssertion = LoggerAssertion
+				.setupLoggerAssertion(ServletServer.class.getName());
+	}
+
+	@Override
+	protected void tearDown() throws Exception {
+		this.loggerAssertion.disconnectFromLogger();
+	}
+
+	/**
 	 * Ensure correct specification.
 	 */
 	public void testSpecification() {
-		ManagedObjectLoaderUtil.validateSpecification(
-				ServletServerManagedObjectSource.class,
-				ServletServerManagedObjectSource.PROPERTY_SERVER_NAME,
-				"Server Name");
+		ManagedObjectLoaderUtil
+				.validateSpecification(ServletServerManagedObjectSource.class);
 	}
 
 	/**
@@ -63,9 +76,7 @@ public class ServletServerManagedObjectSourceTest extends OfficeFrameTestCase {
 
 		// Validate type
 		ManagedObjectLoaderUtil.validateManagedObjectType(type,
-				ServletServerManagedObjectSource.class,
-				ServletServerManagedObjectSource.PROPERTY_SERVER_NAME,
-				"officefloor.net");
+				ServletServerManagedObjectSource.class);
 	}
 
 	/**
@@ -76,6 +87,7 @@ public class ServletServerManagedObjectSourceTest extends OfficeFrameTestCase {
 		final String SERVER_NAME = "officefloor.net";
 		final int SERVER_PORT = 80;
 		final String CONTEXT_PATH = "/context";
+		final Exception logException = new Exception("LOG TEST");
 
 		final HttpApplicationLocation location = this
 				.createMock(HttpApplicationLocation.class);
@@ -84,6 +96,7 @@ public class ServletServerManagedObjectSourceTest extends OfficeFrameTestCase {
 		final String RESOURCE_NAME = "resource.txt";
 
 		// Record obtaining location details
+		this.recordReturn(location, location.getDomain(), SERVER_NAME);
 		this.recordReturn(location, location.getHttpPort(), SERVER_PORT);
 		this.recordReturn(location, location.getContextPath(), CONTEXT_PATH);
 
@@ -95,9 +108,6 @@ public class ServletServerManagedObjectSourceTest extends OfficeFrameTestCase {
 
 		// Load the source
 		ManagedObjectSourceStandAlone loader = new ManagedObjectSourceStandAlone();
-		loader.addProperty(
-				ServletServerManagedObjectSource.PROPERTY_SERVER_NAME,
-				SERVER_NAME);
 		loader.addProperty(
 				ServletServerManagedObjectSource.PROPERTY_CLASS_PATH_PREFIX,
 				this.getClass().getPackage().getName());
@@ -131,18 +141,19 @@ public class ServletServerManagedObjectSourceTest extends OfficeFrameTestCase {
 				server.getContextPath());
 
 		// Validate the logging
-		PrintStream stdOut = System.out;
-		ByteArrayOutputStream output = new ByteArrayOutputStream();
-		try {
-			System.setOut(new PrintStream(output));
-			server.getLogger().log("test");
-			assertTextEquals("log(test)", "test\n", output.toString());
-		} finally {
-			System.setOut(stdOut);
-		}
+		Logger logger = server.getLogger();
+		logger.log("TEST");
+		logger.log("FAILURE", logException);
+		LogRecord[] records = this.loggerAssertion.getLogRecords();
+		assertEquals("Incorrect number of log records", 2, records.length);
+		assertEquals("Incorrect log message", "TEST", records[0].getMessage());
+		LogRecord failureRecord = records[1];
+		assertEquals("Incorrect failure message", "FAILURE",
+				failureRecord.getMessage());
+		assertSame("Incorrect failure exception", logException,
+				failureRecord.getThrown());
 
 		// Verify
 		this.verifyMockObjects();
 	}
-
 }

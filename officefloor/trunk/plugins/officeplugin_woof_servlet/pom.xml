@@ -24,7 +24,7 @@
 		</dependency>
 		<dependency>
 			<groupId>org.eclipse.jetty</groupId>
-			<artifactId>jetty-servlet</artifactId>
+			<artifactId>jetty-webapp</artifactId>
 			<scope>provided</scope>
 		</dependency>
 		<dependency>

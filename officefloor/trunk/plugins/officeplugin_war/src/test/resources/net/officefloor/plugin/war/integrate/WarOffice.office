@@ -21,8 +21,8 @@
 	</external-managed-objects>
 	<managed-object-sources>
 		<managed-object-source name="REQUEST_ATTRIBUTES"
-			source="net.officefloor.plugin.servlet.requestattributes.source.RequestAttributesManagedObjectSource"
-			object-type="java.util.Map" />
+			source="net.officefloor.plugin.web.http.application.HttpRequestStateManagedObjectSource"
+			object-type="net.officefloor.plugin.web.http.application.HttpRequestState" />
 	</managed-object-sources>
 	<managed-objects>
 		<managed-object name="REQUEST_ATTRIBUTES" scope="PROCESS">
@@ -53,7 +53,7 @@
 				object-type="net.officefloor.plugin.web.http.security.HttpSecurity">
 				<external-managed-object name="HTTP_SECURITY" />
 			</object>
-			<object name="REQUEST_ATTRIBUTES" object-type="java.util.Map">
+			<object name="REQUEST_ATTRIBUTES" object-type="net.officefloor.plugin.web.http.application.HttpRequestState">
 				<managed-object name="REQUEST_ATTRIBUTES" />
 			</object>
 			<responsibility name="RESPONSIBILITY">

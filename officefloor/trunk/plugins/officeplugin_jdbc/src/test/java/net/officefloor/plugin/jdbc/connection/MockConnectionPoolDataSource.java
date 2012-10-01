@@ -190,7 +190,7 @@ public class MockConnectionPoolDataSource implements ConnectionPoolDataSource {
 		return pooledConnection;
 	}
 
-	@Override
+	// New to Java 7 (not override to allow compatibility with Java 6)
 	public Logger getParentLogger() throws SQLFeatureNotSupportedException {
 		throw new SQLFeatureNotSupportedException(
 				"Should not be required for testing");

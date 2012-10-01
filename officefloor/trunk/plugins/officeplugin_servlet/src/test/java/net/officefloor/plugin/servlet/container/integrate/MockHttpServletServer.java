@@ -256,9 +256,6 @@ public abstract class MockHttpServletServer extends MockHttpServer {
 		ManagedObjectBuilder<None> servletServer = this.constructManagedObject(
 				SERVLET_SERVER_NAME, ServletServerManagedObjectSource.class);
 		servletServer.addProperty(
-				ServletServerManagedObjectSource.PROPERTY_SERVER_NAME,
-				"localhost");
-		servletServer.addProperty(
 				ServletServerManagedObjectSource.PROPERTY_CLASS_PATH_PREFIX,
 				this.getClass().getPackage().getName());
 		servletServer.setManagingOffice(officeName);

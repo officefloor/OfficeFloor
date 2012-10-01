@@ -26,6 +26,7 @@ import net.officefloor.autowire.AutoWire;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.socket.server.http.server.MockHttpServer;
 import net.officefloor.plugin.web.http.location.HttpApplicationLocationManagedObjectSource;
+import net.officefloor.plugin.woof.WoofApplicationExtensionService;
 import net.officefloor.plugin.woof.WoofOfficeFloorSource;
 import net.officefloor.plugin.woof.servlet.MockDependency;
 
@@ -71,6 +72,14 @@ public class ServletContainerWoofApplicationExtensionServiceTest extends
 	public void testServiceFromServletContainer() throws Exception {
 		String responseText = this.doGetEntity("/servlet");
 		assertEquals("Incorrect servlet response", "HTTP_SERVLET", responseText);
+	}
+
+	/**
+	 * Ensure able to service from {@link WoofApplicationExtensionService}.
+	 */
+	public void testServiceFromExtension() throws Exception {
+		String responseText = this.doGetEntity("/chain.html");
+		assertEquals("Incorrect chained response", "CHAINED", responseText);
 	}
 
 	/**

@@ -18,6 +18,8 @@
 
 package net.officefloor.plugin.servlet.host;
 
+import java.util.logging.Level;
+
 import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.spi.managedobject.CoordinatingManagedObject;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
@@ -25,9 +27,7 @@ import net.officefloor.frame.spi.managedobject.ObjectRegistry;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceContext;
 import net.officefloor.frame.spi.managedobject.source.impl.AbstractManagedObjectSource;
-import net.officefloor.plugin.servlet.host.ServletServer;
 import net.officefloor.plugin.servlet.log.Logger;
-import net.officefloor.plugin.servlet.log.StdoutLogger;
 import net.officefloor.plugin.servlet.resource.ClassPathResourceLocator;
 import net.officefloor.plugin.servlet.resource.ResourceLocator;
 import net.officefloor.plugin.web.http.application.WebAutoWireApplication;
@@ -40,7 +40,8 @@ import net.officefloor.plugin.web.http.location.HttpApplicationLocation;
  */
 public class ServletServerManagedObjectSource
 		extends
-		AbstractManagedObjectSource<ServletServerManagedObjectSource.Dependencies, None> {
+		AbstractManagedObjectSource<ServletServerManagedObjectSource.Dependencies, None>
+		implements Logger {
 
 	/**
 	 * Dependencies.
@@ -50,9 +51,10 @@ public class ServletServerManagedObjectSource
 	}
 
 	/**
-	 * Property name to specify the server name.
+	 * {@link java.util.logging.Logger}.
 	 */
-	public static final String PROPERTY_SERVER_NAME = "server.name";
+	private static final java.util.logging.Logger LOGGER = java.util.logging.Logger
+			.getLogger(ServletServer.class.getName());
 
 	/**
 	 * Property name to specify the class path prefix for locating resources.
@@ -60,19 +62,27 @@ public class ServletServerManagedObjectSource
 	public static final String PROPERTY_CLASS_PATH_PREFIX = "class.path.prefix";
 
 	/**
-	 * Server name.
-	 */
-	private String serverName;
-
-	/**
 	 * {@link ResourceLocator}.
 	 */
 	private ResourceLocator resourceLocator;
 
-	/**
-	 * {@link Logger}.
+	/*
+	 * ======================= Logger ======================================
 	 */
-	private Logger logger;
+
+	@Override
+	public void log(String message) {
+		if (LOGGER.isLoggable(Level.INFO)) {
+			LOGGER.log(Level.INFO, message);
+		}
+	}
+
+	@Override
+	public void log(String message, Throwable failure) {
+		if (LOGGER.isLoggable(Level.INFO)) {
+			LOGGER.log(Level.INFO, message, failure);
+		}
+	}
 
 	/*
 	 * =========================== ManagedObjectSource =======================
@@ -80,7 +90,7 @@ public class ServletServerManagedObjectSource
 
 	@Override
 	protected void loadSpecification(SpecificationContext context) {
-		context.addProperty(PROPERTY_SERVER_NAME, "Server Name");
+		// No properties
 	}
 
 	@Override
@@ -89,9 +99,6 @@ public class ServletServerManagedObjectSource
 		ManagedObjectSourceContext<None> mosContext = context
 				.getManagedObjectSourceContext();
 
-		// Obtain servlet server configuration
-		this.serverName = mosContext.getProperty(PROPERTY_SERVER_NAME);
-
 		// Create the resource locator
 		String classPathPrefix = mosContext.getProperty(
 				PROPERTY_CLASS_PATH_PREFIX,
@@ -99,9 +106,6 @@ public class ServletServerManagedObjectSource
 		ClassLoader classLoader = mosContext.getClassLoader();
 		this.resourceLocator = new ClassPathResourceLocator(classPathPrefix,
 				classLoader);
-
-		// Create the logger
-		this.logger = new StdoutLogger();
 
 		// Specify meta-data
 		context.setObjectClass(ServletServer.class);
@@ -118,8 +122,7 @@ public class ServletServerManagedObjectSource
 
 	@Override
 	protected ManagedObject getManagedObject() throws Throwable {
-		return new ServletServerManagedObject(this.serverName,
-				this.resourceLocator, this.logger);
+		return new ServletServerManagedObject(this.resourceLocator, this);
 	}
 
 	/**
@@ -127,11 +130,6 @@ public class ServletServerManagedObjectSource
 	 */
 	private static class ServletServerManagedObject implements
 			CoordinatingManagedObject<Dependencies>, ServletServer {
-
-		/**
-		 * Server name.
-		 */
-		private final String serverName;
 
 		/**
 		 * {@link ResourceLocator}.
@@ -151,16 +149,13 @@ public class ServletServerManagedObjectSource
 		/**
 		 * Initiate.
 		 * 
-		 * @param serverName
-		 *            Server name.
 		 * @param resourceLocator
 		 *            {@link ResourceLocator}.
 		 * @param logger
 		 *            {@link Logger}.
 		 */
-		public ServletServerManagedObject(String serverName,
-				ResourceLocator resourceLocator, Logger logger) {
-			this.serverName = serverName;
+		public ServletServerManagedObject(ResourceLocator resourceLocator,
+				Logger logger) {
 			this.resourceLocator = resourceLocator;
 			this.logger = logger;
 		}
@@ -187,7 +182,7 @@ public class ServletServerManagedObjectSource
 
 		@Override
 		public String getServerName() {
-			return this.serverName;
+			return this.location.getDomain();
 		}
 
 		@Override
@@ -197,13 +192,13 @@ public class ServletServerManagedObjectSource
 
 		@Override
 		public String getContextPath() {
-			
+
 			// Obtain the context path
 			String contextPath = this.location.getContextPath();
 			if (contextPath == null) {
 				contextPath = "/";
 			}
-			
+
 			// Return the context path
 			return contextPath;
 		}

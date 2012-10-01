@@ -27,6 +27,7 @@ import net.officefloor.autowire.AutoWire;
 import net.officefloor.autowire.AutoWireSection;
 import net.officefloor.compile.impl.issues.FailCompilerIssues;
 import net.officefloor.frame.spi.source.UnknownResourceError;
+import net.officefloor.frame.test.LoggerAssertion;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.model.woof.WoofModel;
 import net.officefloor.plugin.section.clazz.ClassSectionSource;
