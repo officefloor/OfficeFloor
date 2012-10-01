@@ -17,10 +17,13 @@
  */
 package net.officefloor.plugin.woof.servlet;
 
+import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.io.StringWriter;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.servlet.Servlet;
 
@@ -32,6 +35,7 @@ import net.officefloor.autowire.ManagedObjectSourceWirerContext;
 import net.officefloor.frame.impl.spi.team.PassiveTeamSource;
 import net.officefloor.plugin.servlet.host.ServletServer;
 import net.officefloor.plugin.servlet.host.ServletServerManagedObjectSource;
+import net.officefloor.plugin.servlet.webxml.InvalidServletConfigurationException;
 import net.officefloor.plugin.servlet.webxml.WebXmlSectionSource;
 import net.officefloor.plugin.web.http.application.WebAutoWireApplication;
 import net.officefloor.plugin.web.http.security.HttpSecurity;
@@ -50,6 +54,13 @@ import net.officefloor.plugin.woof.WoofOfficeFloorSource;
  */
 public class ServletContainerWoofApplicationExtensionService implements
 		WoofApplicationExtensionService {
+
+	/**
+	 * {@link Logger}.
+	 */
+	private static final Logger LOGGER = Logger
+			.getLogger(ServletContainerWoofApplicationExtensionService.class
+					.getName());
 
 	/*
 	 * ==================== WoofApplicationExtensionService ==================
@@ -78,12 +89,29 @@ public class ServletContainerWoofApplicationExtensionService implements
 		}
 		webXmlReader.close();
 		webXmlConfiguration.close();
+		String webXml = webXmlContent.toString();
+
+		// Validate that web.xml content is valid
+		try {
+			WebXmlSectionSource.validateWebXmlConfiguration(
+					new ByteArrayInputStream(webXml.getBytes()), context);
+		} catch (InvalidServletConfigurationException ex) {
+			// Log invalid and not load servlet container
+			if (LOGGER.isLoggable(Level.WARNING)) {
+				LOGGER.log(
+						Level.WARNING,
+						"Invalid " + WoofOfficeFloorSource.WEBXML_FILE_PATH
+								+ " so not loading Servlet servicers: "
+								+ ex.getMessage(), ex);
+			}
+			return;
+		}
 
 		// Configure in the Servlet web.xml functionality
 		AutoWireSection section = application.addSection("SERVLET",
 				WebXmlSectionSource.class.getName(), null);
 		section.addProperty(WebXmlSectionSource.PROPERTY_WEB_XML_CONFIGURATION,
-				webXmlContent.toString());
+				webXml);
 
 		// Ensure Servlet Server is available
 		final AutoWire servletServer = new AutoWire(ServletServer.class);
@@ -130,5 +158,4 @@ public class ServletContainerWoofApplicationExtensionService implements
 		application.chainServicer(section, WebXmlSectionSource.SERVICE_INPUT,
 				WebXmlSectionSource.UNHANDLED_OUTPUT);
 	}
-
 }

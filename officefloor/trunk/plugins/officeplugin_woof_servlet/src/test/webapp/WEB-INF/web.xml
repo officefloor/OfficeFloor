@@ -7,7 +7,7 @@
 	</servlet>
 	<servlet-mapping>
 		<servlet-name>Mock</servlet-name>
-		<url-pattern>/servlet</url-pattern>
+		<url-pattern>/servlet.html</url-pattern>
 	</servlet-mapping>
 
 </web-app>

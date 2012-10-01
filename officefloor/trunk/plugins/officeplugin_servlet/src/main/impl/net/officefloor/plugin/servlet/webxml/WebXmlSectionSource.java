@@ -44,9 +44,10 @@ import net.officefloor.compile.spi.section.source.impl.AbstractSectionSource;
 import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
 import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
+import net.officefloor.frame.spi.source.SourceContext;
 import net.officefloor.plugin.servlet.container.source.HttpServletTask;
-import net.officefloor.plugin.servlet.container.source.HttpServletWorkSource;
 import net.officefloor.plugin.servlet.container.source.HttpServletTask.DependencyKeys;
+import net.officefloor.plugin.servlet.container.source.HttpServletWorkSource;
 import net.officefloor.plugin.servlet.context.source.OfficeServletContextManagedObjectSource;
 import net.officefloor.plugin.servlet.host.ServletServer;
 import net.officefloor.plugin.servlet.route.ServletRouteTask.FlowKeys;
@@ -90,6 +91,44 @@ public class WebXmlSectionSource extends AbstractSectionSource {
 	 * handled.
 	 */
 	public static final String UNHANDLED_OUTPUT = "unhandled";
+
+	/**
+	 * Validates the <code>web.xml</code> configuration.
+	 * 
+	 * @param webXmlContents
+	 *            Contents of the <code>web.xml</code>.
+	 * @param context
+	 *            {@link SourceContext}.
+	 * @throws InvalidServletConfigurationException
+	 *             Should the <code>web.xml</code> not be valid.
+	 */
+	public static void validateWebXmlConfiguration(InputStream webXmlContents,
+			SourceContext context) throws InvalidServletConfigurationException {
+
+		// Load the web app model
+		WebAppModel webApp;
+		try {
+			webApp = new WebXmlLoader().loadConfiguration(webXmlContents,
+					context);
+		} catch (Exception ex) {
+			throw new InvalidServletConfigurationException(
+					"Invalid web.xml configuration ["
+							+ ex.getClass().getSimpleName() + "]: "
+							+ ex.getMessage());
+		}
+
+		// Ensure has a servlet configured
+		if (webApp.getServlets().size() == 0) {
+			throw new InvalidServletConfigurationException(
+					"Must have at least one servlet configured");
+		}
+
+		// Ensure has a servlet-mapping configured
+		if (webApp.getServletMappings().size() == 0) {
+			throw new InvalidServletConfigurationException(
+					"Must have at least one servlet-mapping configured");
+		}
+	}
 
 	/*
 	 * ===================== SectionSource ============================
