@@ -18,6 +18,7 @@
 
 package net.officefloor.plugin.servlet.webxml;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 
 import javax.servlet.Filter;
@@ -29,6 +30,8 @@ import net.officefloor.compile.properties.Property;
 import net.officefloor.compile.spi.section.SectionDesigner;
 import net.officefloor.compile.test.section.SectionLoaderUtil;
 import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
+import net.officefloor.frame.impl.construct.source.SourceContextImpl;
+import net.officefloor.frame.spi.source.SourceContext;
 import net.officefloor.plugin.servlet.filter.configuration.FilterInstance;
 import net.officefloor.plugin.servlet.filter.configuration.FilterMappings;
 import net.officefloor.plugin.servlet.host.ServletServer;
@@ -37,6 +40,7 @@ import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
 import net.officefloor.plugin.web.http.application.HttpRequestState;
 import net.officefloor.plugin.web.http.security.HttpSecurity;
 import net.officefloor.plugin.web.http.session.HttpSession;
+import net.officefloor.plugin.xml.XmlMarshallException;
 
 /**
  * Tests the {@link WebXmlSectionSource}.
@@ -113,6 +117,59 @@ public class WebXmlSectionSourceTest extends AbstractWebXmlTestCase {
 
 		// Return the expected type
 		return type;
+	}
+
+	/**
+	 * Ensure can determine if valid XML configuration.
+	 */
+	public void testValidWebXmlConfiguration() throws Exception {
+
+		// Create the source context
+		SourceContext context = new SourceContextImpl(false, Thread
+				.currentThread().getContextClassLoader());
+
+		// Validate marker file
+		this.undertakeInvalidWebXmlCheck(
+				"Marker file",
+				"Invalid web.xml configuration ["
+						+ XmlMarshallException.class.getSimpleName()
+						+ "]: Content is not allowed in prolog.", context);
+
+		// Validate must have servlet
+		this.undertakeInvalidWebXmlCheck("<web-app />",
+				"Must have at least one servlet configured", context);
+
+		// Validate must have servlet mapping
+		this.undertakeInvalidWebXmlCheck("<web-app><servlet /></web-app>",
+				"Must have at least one servlet-mapping configured", context);
+
+		// Validate that reports valid with minimal configuration
+		WebXmlSectionSource.validateWebXmlConfiguration(
+				new ByteArrayInputStream(
+						"<web-app><servlet /><servlet-mapping /></web-app>"
+								.getBytes()), context);
+	}
+
+	/**
+	 * Initiate.
+	 * 
+	 * @param webXmlContents
+	 *            Contents of the <code>web.xml</code>.
+	 * @param expectedReason
+	 *            Expected reason for being invalid.
+	 * @param context
+	 *            {@link SourceContext}.
+	 */
+	private void undertakeInvalidWebXmlCheck(String webXmlContents,
+			String expectedReason, SourceContext context) {
+		try {
+			WebXmlSectionSource.validateWebXmlConfiguration(
+					new ByteArrayInputStream(webXmlContents.getBytes()),
+					context);
+			fail("Should not be successful");
+		} catch (InvalidServletConfigurationException ex) {
+			assertEquals("Incorrect reason", expectedReason, ex.getMessage());
+		}
 	}
 
 	/**

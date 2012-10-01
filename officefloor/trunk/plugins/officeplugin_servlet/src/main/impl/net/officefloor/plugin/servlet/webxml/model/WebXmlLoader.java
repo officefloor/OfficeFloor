@@ -20,8 +20,7 @@ package net.officefloor.plugin.servlet.webxml.model;
 
 import java.io.InputStream;
 
-import net.officefloor.compile.spi.section.source.SectionSourceContext;
-import net.officefloor.model.repository.ConfigurationContext;
+import net.officefloor.frame.spi.source.SourceContext;
 import net.officefloor.plugin.xml.XmlUnmarshaller;
 import net.officefloor.plugin.xml.unmarshall.tree.TreeXmlUnmarshallerFactory;
 
@@ -38,13 +37,13 @@ public class WebXmlLoader {
 	 * @param webXmlConfiguration
 	 *            {@link InputStream} to the <code>web.xml</code> content.
 	 * @param context
-	 *            {@link ConfigurationContext}.
+	 *            {@link SourceContext}.
 	 * @return {@link WebAppModel}.
 	 * @throws Exception
 	 *             If fails to load configuration.
 	 */
 	public WebAppModel loadConfiguration(InputStream webXmlConfiguration,
-			SectionSourceContext context) throws Exception {
+			SourceContext context) throws Exception {
 
 		// Obtain the unmarshaller for the web.xml configuration
 		WebAppModel webApp = new WebAppModel();

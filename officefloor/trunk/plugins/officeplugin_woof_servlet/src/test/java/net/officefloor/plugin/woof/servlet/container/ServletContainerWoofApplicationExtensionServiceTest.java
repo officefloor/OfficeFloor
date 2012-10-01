@@ -19,16 +19,19 @@ package net.officefloor.plugin.woof.servlet.container;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.util.logging.LogRecord;
 
 import javax.servlet.Servlet;
 
 import net.officefloor.autowire.AutoWire;
+import net.officefloor.frame.test.LoggerAssertion;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.socket.server.http.server.MockHttpServer;
 import net.officefloor.plugin.web.http.location.HttpApplicationLocationManagedObjectSource;
 import net.officefloor.plugin.woof.WoofApplicationExtensionService;
 import net.officefloor.plugin.woof.WoofOfficeFloorSource;
 import net.officefloor.plugin.woof.servlet.MockDependency;
+import net.officefloor.plugin.woof.servlet.ServletContainerWoofApplicationExtensionService;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
@@ -58,6 +61,7 @@ public class ServletContainerWoofApplicationExtensionServiceTest extends
 	 * Ensure can service from WoOF.
 	 */
 	public void testServiceViaWoOF() throws Exception {
+		this.startServer(null, null);
 		String responseText = this.doGetEntity("/test");
 		assertEquals(
 				"Incorrect template content",
@@ -70,14 +74,50 @@ public class ServletContainerWoofApplicationExtensionServiceTest extends
 	 * Ensure able to service from the {@link Servlet} container.
 	 */
 	public void testServiceFromServletContainer() throws Exception {
-		String responseText = this.doGetEntity("/servlet");
+		this.startServer(null, null);
+		String responseText = this.doGetEntity("/servlet.html");
 		assertEquals("Incorrect servlet response", "HTTP_SERVLET", responseText);
+	}
+
+	/**
+	 * Ensure {@link Servlet} container is not loaded for marker
+	 * <code>web.xml</code>.
+	 */
+	public void testNotLoadServletContainerForMarkerFile() throws Exception {
+
+		// Ensure log invalid web.xml
+		LoggerAssertion log = LoggerAssertion
+				.setupLoggerAssertion(ServletContainerWoofApplicationExtensionService.class
+						.getName());
+		try {
+
+			// Test
+			this.startServer("src/test/invalid-webapp",
+					"invalid-application.woof");
+			String responseText = this.doGetEntity("/servlet.html");
+			assertEquals(
+					"Should be resource as servlet container not loaded for marker web.xml",
+					"NOT HTTP_SERVLET", responseText);
+
+		} finally {
+			// Validate log records
+			LogRecord[] records = log.disconnectFromLogger();
+			assertEquals("Incorrect number of log reords", 1, records.length);
+			LogRecord record = records[0];
+			String cause = "Invalid web.xml configuration [XmlMarshallException]: Content is not allowed in prolog.";
+			assertEquals("Incorrect log message",
+					"Invalid WEB-INF/web.xml so not loading Servlet servicers: "
+							+ cause, record.getMessage());
+			assertEquals("Incorrect log cause", cause, record.getThrown()
+					.getMessage());
+		}
 	}
 
 	/**
 	 * Ensure able to service from {@link WoofApplicationExtensionService}.
 	 */
 	public void testServiceFromExtension() throws Exception {
+		this.startServer(null, null);
 		String responseText = this.doGetEntity("/chain.html");
 		assertEquals("Incorrect chained response", "CHAINED", responseText);
 	}
@@ -106,11 +146,23 @@ public class ServletContainerWoofApplicationExtensionServiceTest extends
 		return responseText;
 	}
 
-	@Override
-	protected void setUp() throws Exception {
+	/**
+	 * Starts the server.
+	 * 
+	 * @param webAppPath
+	 *            Web app path relative from project directory. May be
+	 *            <code>null</code> to use test webapp directory.
+	 * @param applicationWoofPath
+	 *            Path to the <code>application.woof</code> relative to the
+	 *            project directory. May be <code>null</code> to use default
+	 *            location.
+	 */
+	private void startServer(String webAppPath, String applicationWoofPath)
+			throws Exception {
 
 		// Configure the location of the web app directory
-		File webAppDir = new File(".", "src/test/webapp");
+		File webAppDir = new File(".", (webAppPath == null ? "src/test/webapp"
+				: webAppPath));
 		System.setProperty(WoofOfficeFloorSource.PROPERTY_WEBAPP_LOCATION,
 				webAppDir.getAbsolutePath());
 
@@ -118,9 +170,12 @@ public class ServletContainerWoofApplicationExtensionServiceTest extends
 		this.port = MockHttpServer.getAvailablePort();
 
 		// Start WoOF (should load servlet container as servicer)
-		WoofOfficeFloorSource.start(
-				HttpApplicationLocationManagedObjectSource.PROPERTY_HTTP_PORT,
-				String.valueOf(this.port), "INIT_NAME", "INIT_VALUE");
+		WoofOfficeFloorSource
+				.start(WoofOfficeFloorSource.PROPERTY_WOOF_CONFIGURATION_LOCATION,
+						(applicationWoofPath == null ? WoofOfficeFloorSource.DEFAULT_WOOF_CONFIGUARTION_LOCATION
+								: applicationWoofPath),
+						HttpApplicationLocationManagedObjectSource.PROPERTY_HTTP_PORT,
+						String.valueOf(this.port), "INIT_NAME", "INIT_VALUE");
 	}
 
 	@Override
