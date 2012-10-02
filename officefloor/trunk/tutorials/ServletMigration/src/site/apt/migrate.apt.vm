@@ -1,0 +1,28 @@
+                                               -----------------------
+                                   Migrating JEE Servlet Application to OfficeFloor 
+                                               -----------------------
+					        Daniel Sagenschneider
+                                               -----------------------
+
+  <<Migrating JEE Servlet Application to OfficeFloor>>
+
+  This page describes the steps for migrating an existing JEE Servlet Application to run within OfficeFloor.
+      
+  TODO talk about JEE Servlet being thread-per-request and relies heavily on ThreadLocal while OfficeFloor is thread-per-funtion and may utilise many threads to service a request and therefore does not rely on ThreadLocal for access to dependencies.  The migration to take advantage of OfficeFloor's thread injection (link to tutorial) relies on migrating management of dependencies from JEE Container management to OfficeFloor management.
+
+  [[1]] Introduce WoofServletFilter to the application to start using WoOF functionality (link to intro tutorial).  Result: WoOF templates are introduced and start visual configuration of the web application.
+  
+  [[1]] Likely need to re-use EJB dependenies and therefore must integrate the WoOF functionality with the JEE Servlets to use dependenies (link to ejb tutorial).  Result: EJB's are access via WoOF templates.  Note: in this mode OfficeFloor behaves like a thread-per-request to enable use of ThreadLocal to access JEE Servlet dependencies.
+  
+  [[1]] Start migrating JEE Servlet dependency management to OfficeFloor and let JEE Servlet components rely on OfficeFloor for dependencies (link to integration tutorial). This includes JNDI lookups. Result: no EJB's managed by JEE Container and JEE functionality is driven off beans within the various web states populated by OfficeFloor managed dependencies.
+  
+  [[1]] Once OfficeFloor managing dependencies may now host the application within OfficeFloor as OfficeFloor provides Servlet container for Servlet functionality not rewritten as WoOF functionality. (this tutorial) Result: running application in OfficeFloor with ability to not need to port all functionality to WoOF.  Note: the non-migrated Servlet functionality will still operate in a thread-per-request manner.
+  
+  [[1]] Migrate remaining Servlet functionality to WoOF.  Result: free of Servlet thread-per-request constraints and able to use full features of WoOF (and OfficeFloor)
+  
+
+
+Next
+
+  Please see {{{../index.html}other tutorials}} for further functionality.
+

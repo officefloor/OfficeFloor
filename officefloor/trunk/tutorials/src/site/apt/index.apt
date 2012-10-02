@@ -78,6 +78,10 @@ WoOF running within a JEE Servlet Container
 *----------------------------------------------------------+-----------------------------------------------------------+------------------------------+
 | {{{./ServletFilterDependencyInjection/index.html}Utilising dependency injection of the Servlet Container}}  | Use of Servlet container dependency injection (e.g. making use of EJBs). | @EJB
 *----------------------------------------------------------+-----------------------------------------------------------+------------------------------+
+| {{{./ServletMigration/index.html}Embedding Servlet Container within WoOF}}  | Embedding Servlet functionality within WoOF. | ServletContainerWoofApplicationExtensionService
+*----------------------------------------------------------+-----------------------------------------------------------+------------------------------+
+| {{{./ServletMigration/migrate.html}Migrate JEE Servlet Application to run in OfficeFloor}}  | Migrating an exsting JEE Servlet Application to run within OfficeFloor as a WoOF Application. |
+*----------------------------------------------------------+-----------------------------------------------------------+------------------------------+
 
 
 

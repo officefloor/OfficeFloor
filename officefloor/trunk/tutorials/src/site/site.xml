@@ -29,6 +29,8 @@
 			<item name="Servlet" href="./ServletFilterWebApplication/index.html" />
 			<item name="JSP" href="./ServletFilterJspIntegration/index.html" />
 			<item name="EJB" href="./ServletFilterDependencyInjection/index.html" />
+			<item name="Embed" href="./ServletMigration/index.html" />
+			<item name="Migrate" href="./ServletMigration/migrate.html" />
 		</menu>
 		<menu name="DI Tutorials">
 			<item name="Dependency Injection" href="./DatabaseHttpServer/index.html" />

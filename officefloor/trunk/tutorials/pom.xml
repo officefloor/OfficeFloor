@@ -30,6 +30,7 @@
 		<module>ServletFilterDependencyInjection</module>
 		<module>ServletFilterJspIntegration</module>
 		<module>ServletFilterWebApplication</module>
+		<module>ServletMigration</module>
 		<module>SessionHttpServer</module>
 		<module>TeamHttpServer</module>
 		<module>TransactionHttpServer</module>
