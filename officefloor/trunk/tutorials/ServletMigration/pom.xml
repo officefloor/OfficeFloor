@@ -17,15 +17,16 @@
 		<projectVersion>${project.version}</projectVersion>
 	</properties>
 	<dependencies>
+		<!-- START SNIPPET: tutorial -->
 		<dependency>
 			<groupId>net.officefloor.plugin</groupId>
 			<artifactId>officeplugin_woof_servlet</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>javax</groupId>
-			<artifactId>javaee-api</artifactId>
-			<scope>provided</scope>
+			<groupId>org.eclipse.jetty.orbit</groupId>
+			<artifactId>javax.servlet</artifactId>
 		</dependency>
+		<!-- END SNIPPET: tutorial -->
 		<dependency>
 			<groupId>org.apache.httpcomponents</groupId>
 			<artifactId>httpclient</artifactId>
