@@ -58,5 +58,5 @@ Unit Test
 
 Next
 
-  The {{{../migration.html}next tutorial}} looks at migrating an existing JEE Servlet Application to run within OfficeFloor as a WoOF Application.
+  The {{{../migrate.html}next tutorial}} looks at migrating an existing JEE Servlet Application to run within OfficeFloor as a WoOF Application.
 

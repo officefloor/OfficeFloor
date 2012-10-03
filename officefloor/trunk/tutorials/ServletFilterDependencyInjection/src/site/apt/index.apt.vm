@@ -75,4 +75,5 @@ Unit Test
 
 Next
 
-  Please see {{{../index.html}further tutorials}} for further features of OfficeFloor.
+  The {{{../ServletMigration/index.html}next tutorial}} looks at embedding Servlet functionality within a WoOF Application.
+
