@@ -351,6 +351,13 @@
 				<version>6.0</version>
 			</dependency>
 			<dependency>
+				<!-- JEE spec dependencies are only interfaces -->
+				<groupId>org.eclipse.jetty.orbit</groupId>
+				<artifactId>javax.servlet</artifactId>
+				<version>3.0.0.v201112011016</version>
+			</dependency>
+			<dependency>
+				<!-- JEE spec dependencies are only interfaces -->
 				<groupId>org.apache.geronimo.specs</groupId>
 				<artifactId>geronimo-jpa_2.0_spec</artifactId>
 				<version>1.1</version>
