@@ -17,7 +17,7 @@ Extending WoOF application for Servlet functionality
   
   This occurs automatically by the inclusion of the following dependency on the class path:
   
-%{code-snippet|brush-autodetect=1|id=officeplugin_woof_servlet|file=${basedir}/pom.xml}
+%{code-snippet|brush-autodetect=1|id=tutorial|file=${basedir}/pom.xml}
 
   The result is that any unhandled HTTP request by the WoOF functionality is sent to this servicer.  This servicer attempts to service the HTTP request with the <<<web.xml>>> configured Servlet functionality.
   
@@ -43,7 +43,7 @@ Servlet functionality
 
   The configured Servlet is as follows:
 
-%{code-snippet|brush-autodetect=1|file=${basedir}/src/main/java/net/officefloor/tutorial/servletmigration/ExampleHttpServlet.java}
+%{code-snippet|brush-autodetect=1|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/servletmigration/ExampleHttpServlet.java}
 
   
 
