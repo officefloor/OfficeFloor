@@ -34,7 +34,10 @@ import net.officefloor.plugin.woof.WoofLoaderImpl;
 import net.officefloor.plugin.woof.WoofOfficeFloorSource;
 
 /**
+ * <p>
  * WoOF (Web on OfficeFloor) {@link Servlet} {@link Filter}.
+ * <p>
+ * This {@link Filter} enables embedding WoOF functionality within a JEE Servlet Application.
  * 
  * @author Daniel Sagenschneider
  */

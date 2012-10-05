@@ -18,7 +18,7 @@ Basics
 *--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
 | {{{../maven/woof-archetype/index.html}My first WoOF application}} | Walks through the simple steps to create and run a WoOF application. | {{{http://maven.apache.org}Maven}} and {{{http://eclipse.org}Eclipse}} plug-ins |
 *--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
-| {{{./PrototypeHttpServer/index.html}Wireframe Prototyping}}  | Build working web prototypes and then later extend into a working web application.  | #\{link\}
+| {{{./PrototypeHttpServer/index.html}Wireframe prototyping}}  | Build working web prototypes and then later extend into a working web application.  | #\{link\}
 *--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
 | {{{./DynamicHttpServer/index.html}Dynamic web page}}         | Rendering of dynamic content.                              | $\{bean ... $\} , $\{property\}
 *--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
@@ -65,9 +65,9 @@ AJAX push (reverse AJAX, Comet)
 
 
 
-WoOF running within a JEE Servlet Container
+WoOF and a JEE Servlet Container
 
-  Explans how to make use of WoOF within a JEE Servlet Container.
+  Explans how to make use of WoOF within a JEE Servlet Container and how to migrate a Servlet application to run within OfficeFloor.
 
 *----------------------------------------------------------+-----------------------------------------------------------+------------------------------+
 || Tutorial                                                || Description                                              || Covered
@@ -80,7 +80,7 @@ WoOF running within a JEE Servlet Container
 *----------------------------------------------------------+-----------------------------------------------------------+------------------------------+
 | {{{./ServletMigration/index.html}Embedding Servlet Container within WoOF}}  | Embedding Servlet functionality within WoOF. | ServletContainerWoofApplicationExtensionService
 *----------------------------------------------------------+-----------------------------------------------------------+------------------------------+
-| {{{./ServletMigration/migrate.html}Migrate JEE Servlet Application to run in OfficeFloor}}  | Migrating an exsting JEE Servlet Application to run within OfficeFloor as a WoOF Application. |
+| {{{./ServletMigration/migrate.html}Migrate JEE Servlet application to run in OfficeFloor}}  | Migrating an exsting JEE Servlet application to run within OfficeFloor as a WoOF application. |
 *----------------------------------------------------------+-----------------------------------------------------------+------------------------------+
 
 
@@ -104,7 +104,7 @@ Context
 *----------------------------------------------------------+-----------------------------------------------------------+
 || Tutorial                                                || Description                                             
 *----------------------------------------------------------+-----------------------------------------------------------+
-| {{{./TransactionHttpServer/index.html}Transaction Management}}  | Managing transactions of an OfficeFloor web application.
+| {{{./TransactionHttpServer/index.html}Transaction management}}  | Managing transactions of an OfficeFloor web application.
 *----------------------------------------------------------+-----------------------------------------------------------+
 
 
@@ -116,6 +116,6 @@ Thread Injection
 *----------------------------------------------------------+-----------------------------------------------------------+
 || Tutorial                                                || Description
 *----------------------------------------------------------+-----------------------------------------------------------+
-| {{{./TeamHttpServer/index.html}Thread Injection}}        | WoOF with thread injection.
+| {{{./TeamHttpServer/index.html}Thread injection}}        | WoOF with thread injection.
 *----------------------------------------------------------+-----------------------------------------------------------+
 
