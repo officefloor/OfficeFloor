@@ -13,9 +13,9 @@
 
 Extending WoOF application for Servlet functionality
 
-  The {{{/apidocs/net/officefloor/plugin/woof/servlet/ServletContainerWoofApplicationExtensionService.html}ServletContainerWoofApplicationExtensionService}} provides extension to a WoOF application by detecting the presence of a <<<web.xml>>> file and loading a chained servicer containing the configured Servlet functionality.
+  The {{{/apidocs/net/officefloor/plugin/woof/servlet/ServletContainerWoofApplicationExtensionService.html}ServletContainerWoofApplicationExtensionService}} provides extension to a WoOF application by detecting the presence of a <<<web.xml>>> file following standard Maven <<<war>>> project structure or standard JEE Servlet <<<*.war>>> packaging.  On detecting this file, it will load a chained servicer containing the configured Servlet functionality.
   
-  This occurs automatically by the inclusion of the following dependency on the class path:
+  This occurs automatically by the inclusion of the following dependencies on the class path:
   
 %{code-snippet|brush-autodetect=1|id=tutorial|file=${basedir}/pom.xml}
 
@@ -39,7 +39,7 @@ Servlet functionality
       
    * MIME mappings
    
-  Note that the intention is not to rebuild another JEE Server.  The intention is provide enough Servlet container functionality to embed existing JEE Servlet Applications within WoOF so that they do not need to be fully migrated to WoOF functionality.
+  Note that the intention is not to rebuild another JEE Server.  The intention is provide enough Servlet Container functionality to embed existing JEE Servlet Applications within WoOF so that they do not need to be fully migrated to WoOF functionality.
 
   The configured Servlet is as follows:
 
@@ -58,5 +58,5 @@ Unit Test
 
 Next
 
-  The {{{../migrate.html}next tutorial}} looks at migrating an existing JEE Servlet Application to run within OfficeFloor as a WoOF Application.
+  The {{{./migrate.html}next tutorial}} looks at migrating an existing JEE Servlet Application to run within OfficeFloor as a WoOF Application.
 
