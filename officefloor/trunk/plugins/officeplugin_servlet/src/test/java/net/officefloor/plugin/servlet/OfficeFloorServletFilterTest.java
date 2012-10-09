@@ -148,18 +148,18 @@ public class OfficeFloorServletFilterTest extends OfficeFrameTestCase {
 
 		// Send request for filter
 		assertEquals("Incorrect filter handling", "FILTER",
-				this.doGetEntity("?type=filter"));
+				this.doGetEntity("/unhandled?type=filter"));
 
 		// Send request for servlet
-		assertEquals("Incorrect servlet handling", "SERVLET",
-				this.doGetEntity(""));
+		assertEquals("Incorrect servlet handling", "UNHANDLED",
+				this.doGetEntity("/unhandled"));
 	}
 
 	/**
 	 * Ensure pass onto {@link Servlet} if not handled.
 	 */
 	public void testNotHandle() throws Exception {
-		assertEquals("Should pass onto servlet", "SERVLET",
+		assertEquals("Should pass onto servlet", "UNHANDLED",
 				this.doGetEntity("/unhandled"));
 	}
 
@@ -167,7 +167,7 @@ public class OfficeFloorServletFilterTest extends OfficeFrameTestCase {
 	 * Ensure pass onto {@link Servlet} for unhandled task.
 	 */
 	public void testNonHandledTask() throws Exception {
-		assertEquals("Should pass onto servlet", "SERVLET",
+		assertEquals("Should pass onto servlet", "UNHANDLED_TASK",
 				this.doGetEntity("/unhandled.links/unhandled.task"));
 	}
 
@@ -367,9 +367,11 @@ public class OfficeFloorServletFilterTest extends OfficeFrameTestCase {
 		context.addServlet(new ServletHolder(new MockHttpServlet(
 				"SERVLET_RESOURCE")), "/Template.jsp");
 
-		// Add the servlet for testing
-		context.addServlet(new ServletHolder(new MockHttpServlet("SERVLET")),
-				"/");
+		// Add the servlets for testing
+		context.addServlet(new ServletHolder(new MockHttpServlet("UNHANDLED")),
+				"/unhandled");
+		context.addServlet(new ServletHolder(new MockHttpServlet(
+				"UNHANDLED_TASK")), "/unhandled.links/unhandled.task");
 
 		// Start the server
 		this.server.start();

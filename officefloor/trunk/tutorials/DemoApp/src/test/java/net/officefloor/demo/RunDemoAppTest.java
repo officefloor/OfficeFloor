@@ -17,7 +17,6 @@
  */
 package net.officefloor.demo;
 
-import net.officefloor.autowire.AutoWireManagement;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.woof.WoofOfficeFloorSource;
 
@@ -29,28 +28,44 @@ import net.officefloor.plugin.woof.WoofOfficeFloorSource;
 public class RunDemoAppTest extends OfficeFrameTestCase {
 
 	/**
-	 * Runs the application.
+	 * Runs the application for manual testing.
+	 * 
+	 * @param args
+	 *            Command line arguments.
 	 */
-	public void testRun() throws Exception {
+	public static void main(String[] args) throws Exception {
 
-		// Stop all other offices
-		AutoWireManagement.closeAllOfficeFloors();
+		// Run from appropriate webapp directory
+		System.setProperty(WoofOfficeFloorSource.PROPERTY_WEBAPP_LOCATION,
+				ServletHostDemoAppTest.findWebApDirectory().getAbsolutePath());
 
-		// Start
-		WoofOfficeFloorSource.main();
+		// Run
+		WoofOfficeFloorSource.start(args);
 
-		// Wait to stop
-		if ("wait".equals(System.getProperty("block.test"))) {
+		try {
+			// Wait to stop
 			System.out.print("Press enter to finish");
 			System.out.flush();
 			System.in.read();
+
+		} finally {
+			// Stop
+			WoofOfficeFloorSource.stop();
 		}
+	}
+
+	/**
+	 * Runs the application.
+	 */
+	public void testRun() throws Exception {
+		// Start (always from default webapp directory)
+		WoofOfficeFloorSource.start();
 	}
 
 	@Override
 	protected void tearDown() throws Exception {
-		// Stop the office
-		AutoWireManagement.closeAllOfficeFloors();
+		// Stop
+		WoofOfficeFloorSource.stop();
 	}
 
 }

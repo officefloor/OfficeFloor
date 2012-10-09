@@ -15,16 +15,19 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
 package net.officefloor.plugin.woof.servlet.filter;
 
 import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.util.EnumSet;
 
-import javax.servlet.DispatcherType;
 import javax.servlet.ServletContext;
-import javax.servlet.http.HttpServlet;
+
+import org.apache.http.HttpResponse;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.impl.client.DefaultHttpClient;
+import org.eclipse.jetty.server.Server;
+
+import com.gdevelop.gwt.syncrpc.SyncProxy;
 
 import net.officefloor.autowire.AutoWire;
 import net.officefloor.frame.test.OfficeFrameTestCase;
@@ -33,30 +36,23 @@ import net.officefloor.plugin.comet.internal.CometInterest;
 import net.officefloor.plugin.comet.internal.CometRequest;
 import net.officefloor.plugin.comet.internal.CometResponse;
 import net.officefloor.plugin.comet.internal.CometSubscriptionService;
-import net.officefloor.plugin.socket.server.http.server.MockHttpServer;
 import net.officefloor.plugin.woof.WoofApplicationExtensionService;
 import net.officefloor.plugin.woof.servlet.MockDependency;
-import net.officefloor.plugin.woof.servlet.MockLogic.CometTrigger;
 import net.officefloor.plugin.woof.servlet.WoofServletFilter;
+import net.officefloor.plugin.woof.servlet.MockLogic.CometTrigger;
 import net.officefloor.plugin.woof.servlet.client.MockGwtService;
 
-import org.apache.http.HttpResponse;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.DefaultHttpClient;
-import org.eclipse.jetty.server.Server;
-import org.eclipse.jetty.server.session.SessionHandler;
-import org.eclipse.jetty.servlet.FilterHolder;
-import org.eclipse.jetty.webapp.WebAppContext;
-
-import com.gdevelop.gwt.syncrpc.SyncProxy;
-
 /**
- * Tests the {@link WoofServletFilter}.
+ * <p>
+ * Abstract tests for the {@link WoofServletFilter}.
+ * <p>
+ * This allows testing the {@link WoofServletFilter} within different JEE
+ * Servlet Container implementations.
  * 
  * @author Daniel Sagenschneider
  */
-public class WoofServletFilterTest extends OfficeFrameTestCase {
+public abstract class AbstractWoofServletFilterTestCase extends
+		OfficeFrameTestCase {
 
 	/**
 	 * Port {@link Server} is listening on.
@@ -64,14 +60,23 @@ public class WoofServletFilterTest extends OfficeFrameTestCase {
 	private int port;
 
 	/**
-	 * {@link Server}.
-	 */
-	private Server server;
-
-	/**
 	 * {@link HttpClient}.
 	 */
 	private final HttpClient client = new DefaultHttpClient();
+
+	/**
+	 * Starts the server.
+	 * 
+	 * @param contextPath
+	 *            Context path.
+	 * @return Port the server is running on.
+	 */
+	protected abstract int startServer(String contextPath) throws Exception;
+
+	/**
+	 * Stops the server.
+	 */
+	protected abstract void stopServer() throws Exception;
 
 	/**
 	 * Ensure {@link WoofServletFilter} configures itself to service a request.
@@ -96,10 +101,10 @@ public class WoofServletFilterTest extends OfficeFrameTestCase {
 	private void doServiceRequestTest(String contextPath) throws Exception {
 
 		// Start Server (with context path)
-		this.startServer(contextPath);
+		this.port = this.startServer(contextPath);
 
 		// Validate appropriate response from HTTP template
-		String responseText = this.doGetEntity(contextPath + "/test");
+		String responseText = this.doGetEntity(contextPath, "/test");
 		assertEquals(
 				"Incorrect template content",
 				"TEMPLATE TEST OnePersonTeam_"
@@ -130,7 +135,7 @@ public class WoofServletFilterTest extends OfficeFrameTestCase {
 	private void doServiceGwtAjaxTest(String contextPath) throws Exception {
 
 		// Start Server
-		this.startServer(contextPath);
+		this.port = this.startServer(contextPath);
 
 		// Create the proxy for GWT
 		MockGwtService service = (MockGwtService) SyncProxy.newProxyInstance(
@@ -167,7 +172,7 @@ public class WoofServletFilterTest extends OfficeFrameTestCase {
 		final String eventData = "TEST";
 
 		// Start Server
-		this.startServer(contextPath);
+		this.port = this.startServer(contextPath);
 
 		// Create the proxy for GWT and trigger comet event
 		MockGwtService service = (MockGwtService) SyncProxy.newProxyInstance(
@@ -200,10 +205,10 @@ public class WoofServletFilterTest extends OfficeFrameTestCase {
 	public void testNoWoofApplicationExtension() throws Exception {
 
 		// Start Server
-		this.startServer("");
+		this.port = this.startServer("");
 
 		// Ensure not load WoOF Application Extensions for Filter
-		String responseText = this.doGetEntity("/chain.html");
+		String responseText = this.doGetEntity("", "/chain.html");
 		assertEquals(
 				"Should obtain resource and not be serviced by chain servicer",
 				"NOT CHAINED", responseText);
@@ -216,14 +221,17 @@ public class WoofServletFilterTest extends OfficeFrameTestCase {
 	/**
 	 * Executes a {@link HttpGet} against the URI.
 	 * 
+	 * @param contextPath
+	 *            Context path.
 	 * @param uri
 	 *            URI for the {@link HttpGet} request.
 	 * @return Entity of response as text.
 	 */
-	private String doGetEntity(String uri) throws Exception {
+	private String doGetEntity(String contextPath, String uri) throws Exception {
 
 		// Ensure serviced by HTTP template from WoOF configuration
-		HttpGet request = new HttpGet("http://localhost:" + this.port + uri);
+		HttpGet request = new HttpGet("http://localhost:" + this.port
+				+ contextPath + uri);
 		HttpResponse response = this.client.execute(request);
 		assertEquals("Must be successful", 200, response.getStatusLine()
 				.getStatusCode());
@@ -238,12 +246,6 @@ public class WoofServletFilterTest extends OfficeFrameTestCase {
 	}
 
 	@Override
-	protected void setUp() throws Exception {
-		// Obtain the port for the application
-		this.port = MockHttpServer.getAvailablePort();
-	}
-
-	@Override
 	protected void tearDown() throws Exception {
 		try {
 			// Stop the client
@@ -251,48 +253,8 @@ public class WoofServletFilterTest extends OfficeFrameTestCase {
 
 		} finally {
 			// Stop the server
-			if (this.server != null) {
-				this.server.stop();
-			}
+			this.stopServer();
 		}
-	}
-
-	/**
-	 * Starts the {@link Server}.
-	 * 
-	 * @param contextPath
-	 *            Context path running within.
-	 */
-	private void startServer(String contextPath) throws Exception {
-
-		// Find the base directory for resources
-		File baseDirectory = new File(".", "src/test/webapp");
-		assertTrue("Base directory should exist", baseDirectory.isDirectory());
-
-		// Start servlet container with filter
-		this.server = new Server(this.port);
-		WebAppContext context = new WebAppContext();
-		context.setContextPath("".equals(contextPath) ? "/" : contextPath);
-		context.setResourceBase(baseDirectory.getAbsolutePath());
-		context.setSessionHandler(new SessionHandler());
-		this.server.setHandler(context);
-
-		// Add the WoOF Servlet Filter
-		FilterHolder filter = new FilterHolder(new WoofServletFilter());
-		context.addFilter(filter, "/*", EnumSet.of(DispatcherType.REQUEST));
-		filter.setInitParameter("INIT_NAME", "INIT_VALUE");
-
-		// Add Servlet for being filtered
-		context.addServlet(MockHttpServlet.class, "/");
-
-		// Start the server
-		this.server.start();
-	}
-
-	/**
-	 * Mock {@link HttpServlet}.
-	 */
-	public static class MockHttpServlet extends HttpServlet {
 	}
 
 }

@@ -15,10 +15,10 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
-package net.officefloor.tutorial.servletfilterwebapplication;
+package net.officefloor.demo.servlet;
 
 import java.io.IOException;
+import java.io.PrintWriter;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -26,18 +26,22 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 /**
- * Mock {@link HttpServlet}.
+ * Mock {@link HttpServlet} to be filtered with WoOF functionality.
  * 
  * @author Daniel Sagenschneider
  */
-// START SNIPPET: example
 public class MockHttpServlet extends HttpServlet {
 
+	/*
+	 * ===================== HttpServlet ===============================
+	 */
+
 	@Override
-	protected void service(HttpServletRequest request,
-			HttpServletResponse response) throws ServletException, IOException {
-		response.getWriter().write("SERVLET");
+	protected void doGet(HttpServletRequest req, HttpServletResponse resp)
+			throws ServletException, IOException {
+		PrintWriter writer = resp.getWriter();
+		writer.write("<html><body>Serviced by HTTP SERVLET</body></html>");
+		writer.flush();
 	}
 
 }
-// END SNIPPET: example

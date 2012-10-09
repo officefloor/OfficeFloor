@@ -30,9 +30,12 @@ import javax.servlet.FilterChain;
 import javax.servlet.FilterConfig;
 import javax.servlet.RequestDispatcher;
 import javax.servlet.Servlet;
+import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
+import javax.servlet.ServletRegistration.Dynamic;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
+import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -222,7 +225,8 @@ public abstract class OfficeFloorServletFilter extends
 		}
 
 		// Configure the context path
-		String contextPath = config.getServletContext().getContextPath();
+		ServletContext servletContext = config.getServletContext();
+		String contextPath = servletContext.getContextPath();
 		compiler.addProperty(
 				HttpApplicationLocationManagedObjectSource.PROPERTY_CONTEXT_PATH,
 				contextPath);
@@ -239,13 +243,45 @@ public abstract class OfficeFloorServletFilter extends
 		}
 
 		// Load the handled URIs (being absolute to domain)
-		for (String uri : this.getURIs()) {
+		String[] rawUris = this.getURIs();
+		String[] mappedUris = new String[rawUris.length + 1];
+		for (int i = 0; i < rawUris.length; i++) {
+
+			// Obtain the URI
+			String uri = rawUris[i];
 			uri = (uri.startsWith("/") ? uri : "/" + uri);
+
+			// Provide mapping of URIs
+			mappedUris[i] = uri;
+
+			// Prefix with context for handling
 			if ((contextPath != null) && (!("/".equals(contextPath)))) {
 				uri = contextPath + uri;
 			}
+
+			// Register the URI as handled
 			this.handledURIs.add(uri);
 		}
+
+		// Include link mapping
+		mappedUris[mappedUris.length - 1] = "*.task";
+
+		// Provide Servlet for URIs to ensure filter triggered
+		Dynamic dynamic = servletContext.addServlet("WoOF-Servlet",
+				new HttpServlet() {
+					@Override
+					protected void service(HttpServletRequest request,
+							HttpServletResponse response)
+							throws ServletException, IOException {
+						throw new ServletException(
+								"Illegal state: "
+										+ OfficeFloorServletFilter.class
+												.getSimpleName()
+										+ " implementation should intercept and handle this request ("
+										+ request.getRequestURI() + ")");
+					}
+				});
+		dynamic.addMapping(mappedUris);
 
 		// Configure the Servlet container resource section
 		AutoWireSection servletContainerResource = this.addSection(
