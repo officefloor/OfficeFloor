@@ -38,8 +38,9 @@ public class ExampleIT extends TestCase {
 
 	private final HttpClient client = new DefaultHttpClient();
 
-	public void testUnhandled() throws IOException {
-		this.assertRequest("/unhandled", "SERVLET");
+	public void testStaticResource() throws IOException {
+		this.assertRequest("/resource.html",
+				"<html><body>RESOURCE</body></html>");
 	}
 
 	public void testHttpTemplateAndLinkToJsp() throws IOException {

@@ -35,7 +35,7 @@ Servlet functionality
   
    * Filters
 
-   * Servlets (except Async functionality)
+   * Servlets
       
    * MIME mappings
    

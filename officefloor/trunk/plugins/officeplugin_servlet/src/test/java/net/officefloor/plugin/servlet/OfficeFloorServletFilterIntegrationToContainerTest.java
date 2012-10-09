@@ -23,8 +23,8 @@ import java.util.EnumSet;
 
 import javax.servlet.DispatcherType;
 import javax.servlet.ServletContext;
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServlet;
+import javax.servlet.ServletContextEvent;
+import javax.servlet.ServletContextListener;
 
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.section.clazz.NextTask;
@@ -123,10 +123,22 @@ public class OfficeFloorServletFilterIntegrationToContainerTest extends
 		// Add the JSP
 		this.context.addServlet(new ServletHolder(JspServlet.class), "*.jsp");
 
-		// Add the servlet for testing (should initialise application object)
-		ServletHolder servlet = new ServletHolder(MockHttpServlet.class);
-		servlet.setInitOrder(1);
-		this.context.addServlet(servlet, "/");
+		// Add listener to initialise application object
+		this.context.addEventListener(new ServletContextListener() {
+			@Override
+			public void contextInitialized(ServletContextEvent event) {
+				// Load the application object
+				MockApplicationObject object = new MockApplicationObject();
+				object.text = "INIT";
+				event.getServletContext().setAttribute("ApplicationBean",
+						object);
+			}
+
+			@Override
+			public void contextDestroyed(ServletContextEvent event) {
+				// Do nothing
+			}
+		});
 
 		// Start the server
 		this.server.start();
@@ -210,18 +222,6 @@ public class OfficeFloorServletFilterIntegrationToContainerTest extends
 	}
 
 	/**
-	 * Mock {@link HttpServlet} to initiate an application object.
-	 */
-	public static class MockHttpServlet extends HttpServlet {
-		@Override
-		public void init() throws ServletException {
-			MockApplicationObject object = new MockApplicationObject();
-			object.text = "INIT";
-			this.getServletContext().setAttribute("ApplicationBean", object);
-		}
-	}
-
-	/**
 	 * Ensure able to retrieve HTTP template content from the
 	 * {@link ServletContext}.
 	 */
@@ -231,9 +231,6 @@ public class OfficeFloorServletFilterIntegrationToContainerTest extends
 		this.context.addFilter(new FilterHolder(
 				MockServletContextResourceFilter.class), "/*", EnumSet
 				.of(DispatcherType.REQUEST));
-
-		// Add the servlet to be filtered
-		this.context.addServlet(new ServletHolder(MockHttpServlet.class), "/");
 
 		// Start the server
 		this.server.start();

@@ -37,11 +37,23 @@ import net.officefloor.plugin.woof.WoofOfficeFloorSource;
  * <p>
  * WoOF (Web on OfficeFloor) {@link Servlet} {@link Filter}.
  * <p>
- * This {@link Filter} enables embedding WoOF functionality within a JEE Servlet Application.
+ * This {@link Filter} enables embedding WoOF functionality within a JEE Servlet
+ * Application.
  * 
  * @author Daniel Sagenschneider
  */
 public class WoofServletFilter extends OfficeFloorServletFilter {
+
+	/**
+	 * <p>
+	 * Name that this {@link WoofServletFilter} should be registered.
+	 * <p>
+	 * This enables <code>web-fragment</code> functionality (such as the
+	 * {@link WoofServletContextListener}) to determine if an implementation of
+	 * the {@link WoofServletFilter} has been configured or whether one should
+	 * be automatically configured.
+	 */
+	public static final String FILTER_NAME = "WoOF";
 
 	/**
 	 * Default WoOF configuration location.
