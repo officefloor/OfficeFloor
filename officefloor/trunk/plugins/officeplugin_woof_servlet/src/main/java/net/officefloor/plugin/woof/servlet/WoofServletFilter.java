@@ -146,7 +146,8 @@ public class WoofServletFilter extends OfficeFloorServletFilter {
 	 * @return Init parameter value or the default value.
 	 */
 	private String getInitParamValue(String propertyName, String defaultValue) {
-		String value = this.getFilterConfig().getInitParameter(propertyName);
+		String value = this.getOfficeFloorServletFilterConfiguration()
+				.getInitParameter(propertyName);
 		if ((value == null) || (value.trim().length() == 0)) {
 			value = defaultValue;
 		}

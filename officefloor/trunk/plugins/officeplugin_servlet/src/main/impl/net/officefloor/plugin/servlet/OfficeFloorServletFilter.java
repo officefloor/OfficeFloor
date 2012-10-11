@@ -28,11 +28,12 @@ import java.util.Set;
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
 import javax.servlet.FilterConfig;
+import javax.servlet.FilterRegistration.Dynamic;
 import javax.servlet.RequestDispatcher;
 import javax.servlet.Servlet;
 import javax.servlet.ServletContext;
+import javax.servlet.ServletContextListener;
 import javax.servlet.ServletException;
-import javax.servlet.ServletRegistration.Dynamic;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServlet;
@@ -73,9 +74,9 @@ public abstract class OfficeFloorServletFilter extends
 		WebAutoWireApplication {
 
 	/**
-	 * {@link FilterConfig}.
+	 * {@link OfficeFloorServletFilterConfiguration}.
 	 */
-	private FilterConfig filterConfig;
+	private OfficeFloorServletFilterConfiguration filterConfig;
 
 	/**
 	 * {@link ServletServiceBridger}.
@@ -104,11 +105,11 @@ public abstract class OfficeFloorServletFilter extends
 	private final Set<String> handledURIs = new HashSet<String>();
 
 	/**
-	 * Obtains the {@link FilterConfig}.
+	 * Obtains the {@link OfficeFloorServletFilterConfiguration}.
 	 * 
-	 * @return {@link FilterConfig}.
+	 * @return {@link OfficeFloorServletFilterConfiguration}.
 	 */
-	protected FilterConfig getFilterConfig() {
+	protected OfficeFloorServletFilterConfiguration getOfficeFloorServletFilterConfiguration() {
 		return this.filterConfig;
 	}
 
@@ -121,42 +122,72 @@ public abstract class OfficeFloorServletFilter extends
 	 */
 	protected abstract void configure() throws Exception;
 
-	/*
-	 * ======================= WebAutoWireApplication =====================
+	/**
+	 * <p>
+	 * Add this instance as a {@link Filter} to the {@link ServletContext}.
+	 * <p>
+	 * This method should be used by {@link ServletContextListener}
+	 * implementations to ensure the {@link OfficeFloorServletFilter}
+	 * implementation is appropriately configured to the {@link ServletContext}.
+	 * 
+	 * @param filterName
+	 *            Name to register the {@link OfficeFloorServletFilter} within
+	 *            the {@link ServletContext}.
+	 * @param servletContext
+	 *            {@link ServletContext}.
+	 * @throws ServletException
+	 *             If fails to initialise and add the
+	 *             {@link OfficeFloorServletFilter}.
 	 */
+	public void addFilter(String filterName, final ServletContext servletContext)
+			throws ServletException {
 
-	@Override
-	public void linkToResource(AutoWireSection section, String outputName,
-			String requestDispatcherPath) {
+		// Use the servlet context to configure the filter
+		this.filterConfig = new OfficeFloorServletFilterConfiguration() {
+			@Override
+			public String getInitParameter(String name) {
+				return servletContext.getInitParameter(name);
+			}
 
-		// Override to use Servlet Container resource
-		this.servletResourceLinks.add(new ServletResourceLink(section,
-				outputName, requestDispatcherPath));
+			@Override
+			public ServletContext getServletContext() {
+				return servletContext;
+			}
+		};
+
+		// Ensure initialised
+		this.initialise();
+
+		// Configure the filter
+		Dynamic dynamic = servletContext.addFilter(filterName, this);
+		dynamic.addMappingForUrlPatterns(null, false, "/*");
 	}
 
-	@Override
-	public void linkEscalation(Class<? extends Throwable> escalation,
-			String resourcePath) {
-
-		// Override to use Servlet Container resource
-		this.servletResourceEscalations.add(new ServletResourceEscalation(
-				escalation, resourcePath));
-	}
-
-	/*
-	 * ===================== Filter =========================
+	/**
+	 * <p>
+	 * Initialise.
+	 * <p>
+	 * The {@link OfficeFloorServletFilterConfiguration} must be available
+	 * before this is invoked.
+	 * 
+	 * @throws ServletException
+	 *             If fails to initialise.
 	 */
+	private void initialise() throws ServletException {
 
-	@Override
-	public void init(FilterConfig config) throws ServletException {
-
-		// Maintain reference to the filter configuration
-		this.filterConfig = config;
+		// Determine if already initialised
+		if (this.bridger != null) {
+			return; // already initialised
+		}
 
 		// Create the bridger for the Servlet container
 		this.bridger = ServletBridgeManagedObjectSource
 				.createServletServiceBridger(this.getClass(), this,
 						HANDLER_SECTION_NAME, HANDLER_INPUT_NAME);
+
+		// Obtain the servlet context
+		ServletContext servletContext = this
+				.getOfficeFloorServletFilterConfiguration().getServletContext();
 
 		// Allow loading template content from ServletContext.
 		// (Allows integration into the WAR structure)
@@ -171,8 +202,8 @@ public abstract class OfficeFloorServletFilter extends
 
 				// Attempt to obtain resource
 				InputStream resource = OfficeFloorServletFilter.this
-						.getFilterConfig().getServletContext()
-						.getResourceAsStream(location);
+						.getOfficeFloorServletFilterConfiguration()
+						.getServletContext().getResourceAsStream(location);
 
 				// Return resource (if obtained)
 				return resource;
@@ -225,7 +256,6 @@ public abstract class OfficeFloorServletFilter extends
 		}
 
 		// Configure the context path
-		ServletContext servletContext = config.getServletContext();
 		String contextPath = servletContext.getContextPath();
 		compiler.addProperty(
 				HttpApplicationLocationManagedObjectSource.PROPERTY_CONTEXT_PATH,
@@ -267,20 +297,8 @@ public abstract class OfficeFloorServletFilter extends
 		mappedUris[mappedUris.length - 1] = "*.task";
 
 		// Provide Servlet for URIs to ensure filter triggered
-		Dynamic dynamic = servletContext.addServlet("WoOF-Servlet",
-				new HttpServlet() {
-					@Override
-					protected void service(HttpServletRequest request,
-							HttpServletResponse response)
-							throws ServletException, IOException {
-						throw new ServletException(
-								"Illegal state: "
-										+ OfficeFloorServletFilter.class
-												.getSimpleName()
-										+ " implementation should intercept and handle this request ("
-										+ request.getRequestURI() + ")");
-					}
-				});
+		javax.servlet.ServletRegistration.Dynamic dynamic = servletContext
+				.addServlet("OfficeFloorFilteredServlet", FilteredServlet.class);
 		dynamic.addMapping(mappedUris);
 
 		// Configure the Servlet container resource section
@@ -315,6 +333,52 @@ public abstract class OfficeFloorServletFilter extends
 		}
 	}
 
+	/*
+	 * ======================= WebAutoWireApplication =====================
+	 */
+
+	@Override
+	public void linkToResource(AutoWireSection section, String outputName,
+			String requestDispatcherPath) {
+
+		// Override to use Servlet Container resource
+		this.servletResourceLinks.add(new ServletResourceLink(section,
+				outputName, requestDispatcherPath));
+	}
+
+	@Override
+	public void linkEscalation(Class<? extends Throwable> escalation,
+			String resourcePath) {
+
+		// Override to use Servlet Container resource
+		this.servletResourceEscalations.add(new ServletResourceEscalation(
+				escalation, resourcePath));
+	}
+
+	/*
+	 * ===================== Filter =========================
+	 */
+
+	@Override
+	public void init(final FilterConfig config) throws ServletException {
+
+		// Always keep track of configuration specific to filter
+		this.filterConfig = new OfficeFloorServletFilterConfiguration() {
+			@Override
+			public String getInitParameter(String name) {
+				return config.getInitParameter(name);
+			}
+
+			@Override
+			public ServletContext getServletContext() {
+				return config.getServletContext();
+			}
+		};
+
+		// Ensure initialised
+		this.initialise();
+	}
+
 	@Override
 	@SuppressWarnings("unchecked")
 	public void doFilter(ServletRequest request, ServletResponse response,
@@ -332,7 +396,8 @@ public abstract class OfficeFloorServletFilter extends
 
 			// Handle by OfficeFloor
 			this.bridger.service(this, httpRequest, httpResponse, this
-					.getFilterConfig().getServletContext());
+					.getOfficeFloorServletFilterConfiguration()
+					.getServletContext());
 
 			// Determine if handled
 			if (ServletContainerResourceSectionSource.completeServletService(
@@ -351,6 +416,31 @@ public abstract class OfficeFloorServletFilter extends
 		if (this.officeFloor != null) {
 			this.officeFloor.closeOfficeFloor();
 		}
+	}
+
+	/**
+	 * Provides access to the configuration for this
+	 * {@link OfficeFloorServletFilter}.
+	 */
+	protected interface OfficeFloorServletFilterConfiguration {
+
+		/**
+		 * Obtains the value for the initialise parameter.
+		 * 
+		 * @param name
+		 *            Name of the initialise parameter.
+		 * @return Value for initialise parameter or <code>null</code> if not
+		 *         configured.
+		 */
+		String getInitParameter(String name);
+
+		/**
+		 * Obtains the {@link ServletContext}.
+		 * 
+		 * @return {@link ServletContext}.
+		 */
+		ServletContext getServletContext();
+
 	}
 
 	/**
