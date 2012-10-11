@@ -16,21 +16,29 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package net.officefloor.tutorial.servletfilterwebapplication;
+package net.officefloor.plugin.servlet;
 
-import net.officefloor.plugin.section.clazz.NextTask;
+import java.util.EnumSet;
+
+import javax.servlet.DispatcherType;
+import javax.servlet.Filter;
+
+import org.eclipse.jetty.servlet.FilterHolder;
+import org.eclipse.jetty.servlet.ServletContextHandler;
 
 /**
- * Example template logic class.
+ * Tests the {@link OfficeFloorServletFilter} allowing it to self configure.
  * 
  * @author Daniel Sagenschneider
  */
-// START SNIPPET: example
-public class ExampleTemplateLogic {
+public class SelfConfigureOfficeFloorServletFilterTest extends
+		AbstractOfficeFloorServletFilterTestCase {
 
-	@NextTask("LINK")
-	public void link() {
+	@Override
+	protected void configureFilter(Filter filter, ServletContextHandler context) {
+		// Add the filter for handling requests
+		context.addFilter(new FilterHolder(filter), "/*",
+				EnumSet.of(DispatcherType.REQUEST));
 	}
 
 }
-// END SNIPPET: example

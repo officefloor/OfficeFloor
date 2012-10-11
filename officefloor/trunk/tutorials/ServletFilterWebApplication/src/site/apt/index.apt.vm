@@ -32,13 +32,17 @@ WoofServletFilter
   Within a JEE Servlet Container WoOF defers to the JEE Servlet Container to provide the resources.  The ability to link to Servlet container resources (e.g. JSPs, Servlets, static pages, etc) is provided to allow introducing WoOF into JEE web applications without having to rewrite the web applications.  WoOF will also happily co-exist with other frameworks within a Servlet container.
 
 
-web.xml
+Configuring the WoofServletFilter
 
-  The following highlighted configuration adds the {{{/apidocs/net/officefloor/plugin/woof/servlet/WoofServletFilter.html}WoofServletFilter}} to the <<<web.xml>>> for running WoOF within the Servlet container.
+  To configure the {{{/apidocs/net/officefloor/plugin/woof/servlet/WoofServletFilter.html}WoofServletFilter}} into an application add the following dependency to the project.  The JAR for the dependency contains a <<<web-fragment.xml>>> which will automatically configure the necessary components to run WoOF within the JEE Servlet Container. 
+  
+%{code-snippet|brush-autodetect=1|id=tutorial|file=${basedir}/pom.xml}
 
-%{code-snippet|sh-params=highlight:[4,5,6,7,8,9,10,11]|brush-autodetect=1|file=${basedir}/src/main/webapp/WEB-INF/web.xml}
+  The resulting <<<web.xml>>> for the example of this tutorial is therefore:
 
-  WoOF's filter mapping should be <<</*>>> so that it can intercept each request.  WoOF will however only service the requests it is configured to handle and let the Servlet application handle the rest.
+%{code-snippet|brush-autodetect=1|file=${basedir}/src/main/webapp/WEB-INF/web.xml}
+
+  However should there be a need to configure the {{{/apidocs/net/officefloor/plugin/woof/servlet/WoofServletFilter.html}WoofServletFilter}} manually, please ensure the filter mapping is "<<</*>>>" so that each request may be intercepted.  WoOF will only service the requests it is configured to handle and lets the Servlet application handle the rest.
 
 
   
@@ -56,29 +60,17 @@ Remaining Code
 
   For completeness of this tutorial the remaining code is included below.
   
-* Template.woof.html
+*Template.woof.html
 
-  Has the <<< #\{link\} >>> for handling by <<<ExampleTemplateLogic>>>.
+  Has the <<< #\{LINK\} >>> for handling by the JSP.
 
 %{code-snippet|brush=xml|file=${basedir}/src/main/webapp/Template.woof.html}
 
-* ExampleTemplateLogic
+*Template.jsp
 
-  Identifies that the <<<link>>> in the above template should be handled by the <<<LINK>>> output.  The above configuration maps this to a JSP for the response.
-
-%{code-snippet|brush-autodetect=1|id=example|file=${basedir}/src/main/java/net/officefloor/tutorial/servletfilterwebapplication/ExampleTemplateLogic.java}
-
-* Template.jsp
-
-  JSP run by Servlet Container.  WoOF navigates to this JSP in the above configuration.
+  JSP run by Servlet Container.  WoOF navigates to this JSP based on the configuration above.
 
 %{code-snippet|brush=xml|file=${basedir}/src/main/webapp/Template.jsp}
-
-* MockHttpServlet
-
-  This is included to know when a request is being serviced by the Servlet container (and not OfficeFloor).
-
-%{code-snippet|brush-autodetect=1|id=example|file=${basedir}/src/main/java/net/officefloor/tutorial/servletfilterwebapplication/MockHttpServlet.java}
 
 
 

@@ -18,19 +18,24 @@
 package net.officefloor.plugin.woof.servlet.listener;
 
 import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
 import java.io.InputStream;
+import java.util.HashSet;
 
 import javax.servlet.FilterRegistration;
 import javax.servlet.FilterRegistration.Dynamic;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletContextEvent;
 
-import org.easymock.AbstractMatcher;
-
 import net.officefloor.frame.test.OfficeFrameTestCase;
+import net.officefloor.plugin.servlet.FilteredServlet;
 import net.officefloor.plugin.woof.WoofOfficeFloorSource;
 import net.officefloor.plugin.woof.servlet.WoofServletContextListener;
 import net.officefloor.plugin.woof.servlet.WoofServletFilter;
+
+import org.easymock.AbstractMatcher;
 
 /**
  * <p>
@@ -142,19 +147,93 @@ public class WoofServletContextListenerTest extends OfficeFrameTestCase {
 	 * Ensure automatically register the {@link WoofServletFilter} if not yet
 	 * registered and there is an <code>application.woof</code> file.
 	 */
-	public void testAutomaticallyRegisterFilter() {
+	public void testAutomaticallyRegisterFilter() throws IOException {
 
-		final Dynamic dynamic = this.createMock(Dynamic.class);
+		final javax.servlet.ServletRegistration.Dynamic servletDynamic = this
+				.createMock(javax.servlet.ServletRegistration.Dynamic.class);
+		final Dynamic filterDynamic = this.createMock(Dynamic.class);
 
-		// Record registering the WoOF Servlet Filter
+		// Obtain the WoOF template configurations
+		File gwtFile = this.findFile("src/test/webapp/gwt.woof.ofp");
+		File templateFile = this.findFile("src/test/webapp/Template.woof.ofp");
+
+		// Reinstate class loader (to enable loading WoOF configuration)
+		Thread.currentThread().setContextClassLoader(
+				this.threadContextClassLoader);
+
+		// Record determining that WoOF Servlet Filter not registered
 		this.recordInitParameter(null);
 		this.recordReturn(this.context, this.context
 				.getFilterRegistration(WoofServletFilter.FILTER_NAME), null);
+
+		// Record initialising the WoOF Servlet Filter
+		this.recordReturn(this.context, this.context.getContextPath(), "/");
+		this.recordReturn(
+				this.context,
+				this.context
+						.getInitParameter(WoofOfficeFloorSource.PROPERTY_WOOF_CONFIGURATION_LOCATION),
+				null);
+		this.recordReturn(
+				this.context,
+				this.context
+						.getInitParameter(WoofOfficeFloorSource.PROPERTY_OBJECTS_CONFIGURATION_LOCATION),
+				null);
+		this.recordReturn(
+				this.context,
+				this.context
+						.getInitParameter(WoofOfficeFloorSource.PROPERTY_TEAMS_CONFIGURATION_LOCATION),
+				null);
+		this.recordReturn(this.context, this.context.addServlet(
+				"OfficeFloorFilteredServlet", FilteredServlet.class),
+				servletDynamic);
+		this.recordReturn(servletDynamic, servletDynamic.addMapping(
+				"/gwt/comet-subscribe", "/test", "/gwt/comet-publish", "/gwt",
+				"/gwt/service", "*.task"), new HashSet<String>(),
+				new AbstractMatcher() {
+					@Override
+					public boolean matches(Object[] expected, Object[] actual) {
+						String[] expectedUrls = (String[]) expected[0];
+						String[] actualUrls = (String[]) actual[0];
+						assertEquals("Incorrect number of URLs",
+								expectedUrls.length, actualUrls.length);
+						for (int i = 0; i < expectedUrls.length; i++) {
+							assertEquals("Incorret URL " + i, expectedUrls[i],
+									actualUrls[i]);
+						}
+						return true;
+					}
+				});
+		// Load type
+		this.recordReturn(this.context,
+				this.context.getResourceAsStream("/gwt.woof.ofp"),
+				new FileInputStream(gwtFile));
+		this.recordReturn(this.context,
+				this.context.getResourceAsStream("/Template.woof.ofp"),
+				new FileInputStream(templateFile));
+		// Load for use
+		this.recordReturn(this.context,
+				this.context.getResourceAsStream("/gwt.woof.ofp"),
+				new FileInputStream(gwtFile));
+		this.recordReturn(this.context,
+				this.context.getResourceAsStream("/Template.woof.ofp"),
+				new FileInputStream(templateFile));
+
+		// Record adding the WoOF Servlet Filter
 		this.recordReturn(this.context, this.context.addFilter(
-				WoofServletFilter.FILTER_NAME, WoofServletFilter.class),
-				dynamic);
-		dynamic.addMappingForUrlPatterns(null, false, "/*");
-		this.control(dynamic).setMatcher(new AbstractMatcher() {
+				WoofServletFilter.FILTER_NAME, new WoofServletFilter()),
+				filterDynamic, new AbstractMatcher() {
+					@Override
+					public boolean matches(Object[] expected, Object[] actual) {
+						assertEquals("Incorrect filer name", expected[0],
+								actual[0]);
+						assertTrue("Must be WoofServletFilter instance",
+								(actual[1].getClass()
+										.equals(WoofServletFilter.class)));
+						return true;
+					}
+				});
+		filterDynamic.addMappingForUrlPatterns(null, false, "/*");
+		this.control(filterDynamic).setMatcher(new AbstractMatcher() {
 			@Override
 			public boolean matches(Object[] expected, Object[] actual) {
 				assertNull("Incorrect dispatch types", actual[0]);
@@ -164,7 +243,7 @@ public class WoofServletContextListenerTest extends OfficeFrameTestCase {
 				String[] actualUrls = (String[]) actual[2];
 				assertEquals("Incorrect number of URLs", expectedUrls.length,
 						actualUrls.length);
-				assertEquals("Incorret URL", expectedUrls[0], actualUrls[0]);
+				assertEquals("Incorrect URL", expectedUrls[0], actualUrls[0]);
 				return true;
 			}
 		});

@@ -18,12 +18,14 @@
 package net.officefloor.plugin.woof.servlet;
 
 import java.io.InputStream;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.servlet.FilterRegistration;
-import javax.servlet.FilterRegistration.Dynamic;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
+import javax.servlet.ServletException;
 
 /**
  * {@link ServletContextListener} to configure WoOF functionality.
@@ -31,6 +33,12 @@ import javax.servlet.ServletContextListener;
  * @author Daniel Sagenschneider
  */
 public class WoofServletContextListener implements ServletContextListener {
+
+	/**
+	 * {@link Logger}.
+	 */
+	private static final Logger LOGGER = Logger
+			.getLogger(WoofServletContextListener.class.getName());
 
 	/*
 	 * ======================= ServletContextListener =========================
@@ -66,10 +74,20 @@ public class WoofServletContextListener implements ServletContextListener {
 			return;
 		}
 
-		// Automatically configure the WoOF Servlet Filter
-		Dynamic filterDynamic = context.addFilter(
-				WoofServletFilter.FILTER_NAME, WoofServletFilter.class);
-		filterDynamic.addMappingForUrlPatterns(null, false, "/*");
+		// Add the WoOF Servlet Filter
+		try {
+			new WoofServletFilter().addFilter(WoofServletFilter.FILTER_NAME,
+					context);
+		} catch (ServletException ex) {
+			if (LOGGER.isLoggable(Level.SEVERE)) {
+				LOGGER.log(
+						Level.SEVERE,
+						"Failed to automatically configure the "
+								+ WoofServletFilter.class.getSimpleName()
+								+ ". WoOF functionality will not be available.",
+						ex);
+			}
+		}
 	}
 
 	@Override

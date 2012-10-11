@@ -15,7 +15,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
 package net.officefloor.plugin.servlet;
 
 import java.io.ByteArrayOutputStream;
@@ -23,10 +22,8 @@ import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.Serializable;
 import java.io.Writer;
-import java.util.EnumSet;
 
 import javax.ejb.EJB;
-import javax.servlet.DispatcherType;
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
 import javax.servlet.FilterConfig;
@@ -56,16 +53,16 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.session.SessionHandler;
-import org.eclipse.jetty.servlet.FilterHolder;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
 
 /**
- * Tests the {@link OfficeFloorServletFilter}.
+ * Abstract tests for the {@link OfficeFloorServletFilter}.
  * 
  * @author Daniel Sagenschneider
  */
-public class OfficeFloorServletFilterTest extends OfficeFrameTestCase {
+public abstract class AbstractOfficeFloorServletFilterTestCase extends
+		OfficeFrameTestCase {
 
 	/**
 	 * Port.
@@ -91,6 +88,17 @@ public class OfficeFloorServletFilterTest extends OfficeFrameTestCase {
 	 * {@link OfficeFloorServletFilter} to be tested.
 	 */
 	private MockOfficeFloorServletFilter filter;
+
+	/**
+	 * Configures the {@link Filter} within the {@link ServletContextHandler}.
+	 * 
+	 * @param filter
+	 *            {@link Filter}.
+	 * @param context
+	 *            {@link ServletContextHandler}.
+	 */
+	protected abstract void configureFilter(Filter filter,
+			ServletContextHandler context);
 
 	@Override
 	protected void setUp() throws Exception {
@@ -359,9 +367,8 @@ public class OfficeFloorServletFilterTest extends OfficeFrameTestCase {
 		context.setSessionHandler(new SessionHandler());
 		this.server.setHandler(context);
 
-		// Add the filter for handling requests
-		context.addFilter(new FilterHolder(filter), "/*",
-				EnumSet.of(DispatcherType.REQUEST));
+		// Configure the filter for handling requests
+		this.configureFilter(filter, context);
 
 		// Add the linked Servlet Resource
 		context.addServlet(new ServletHolder(new MockHttpServlet(
