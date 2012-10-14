@@ -15,7 +15,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.plugin.woof.servlet.filter;
+package net.officefloor.plugin.woof.servlet.integrate;
 
 import java.io.ByteArrayOutputStream;
 
@@ -38,20 +38,20 @@ import net.officefloor.plugin.comet.internal.CometResponse;
 import net.officefloor.plugin.comet.internal.CometSubscriptionService;
 import net.officefloor.plugin.woof.WoofApplicationExtensionService;
 import net.officefloor.plugin.woof.servlet.MockDependency;
-import net.officefloor.plugin.woof.servlet.WoofServletFilter;
+import net.officefloor.plugin.woof.servlet.WoofServlet;
 import net.officefloor.plugin.woof.servlet.MockLogic.CometTrigger;
 import net.officefloor.plugin.woof.servlet.client.MockGwtService;
 
 /**
  * <p>
- * Abstract tests for the {@link WoofServletFilter}.
+ * Abstract tests for the {@link WoofServlet}.
  * <p>
- * This allows testing the {@link WoofServletFilter} within different JEE
+ * This allows testing the {@link WoofServlet} within different JEE
  * Servlet Container implementations.
  * 
  * @author Daniel Sagenschneider
  */
-public abstract class AbstractWoofServletFilterTestCase extends
+public abstract class AbstractWoofServletTestCase extends
 		OfficeFrameTestCase {
 
 	/**
@@ -79,14 +79,14 @@ public abstract class AbstractWoofServletFilterTestCase extends
 	protected abstract void stopServer() throws Exception;
 
 	/**
-	 * Ensure {@link WoofServletFilter} configures itself to service a request.
+	 * Ensure {@link WoofServlet} configures itself to service a request.
 	 */
 	public void testServiceRequest() throws Exception {
 		this.doServiceRequestTest("");
 	}
 
 	/**
-	 * Ensure {@link WoofServletFilter} respects the {@link ServletContext}.
+	 * Ensure {@link WoofServlet} respects the {@link ServletContext}.
 	 */
 	public void testServiceRequestWithinContext() throws Exception {
 		this.doServiceRequestTest("/path");
@@ -200,7 +200,7 @@ public abstract class AbstractWoofServletFilterTestCase extends
 
 	/**
 	 * Ensure {@link WoofApplicationExtensionService} instances are not loaded
-	 * by the {@link WoofServletFilter}.
+	 * by the {@link WoofServlet}.
 	 */
 	public void testNoWoofApplicationExtension() throws Exception {
 

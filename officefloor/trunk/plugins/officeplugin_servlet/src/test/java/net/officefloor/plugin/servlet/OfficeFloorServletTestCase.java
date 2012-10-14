@@ -315,7 +315,7 @@ public class OfficeFloorServletTestCase extends OfficeFrameTestCase {
 		// Obtain the port for the application
 		this.port = MockHttpServer.getAvailablePort();
 
-		// Start servlet container with filter
+		// Start servlet container with servlet
 		this.server = new Server(this.port);
 		ServletContextHandler context = new ServletContextHandler();
 		context.setContextPath(this.contextPath);
@@ -407,7 +407,7 @@ public class OfficeFloorServletTestCase extends OfficeFrameTestCase {
 					"doServletResource");
 			application.linkToResource(section, "resource", "Template.jsp");
 
-			// Enable access to EJB of filter
+			// Enable access to EJB of servlet
 			AutoWireSection ejb = application.addSection("EJB",
 					ClassSectionSource.class.getName(),
 					MockEjbSection.class.getName());

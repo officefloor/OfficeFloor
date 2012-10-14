@@ -18,42 +18,44 @@
 
 package net.officefloor.plugin.woof.servlet;
 
-import java.io.FileNotFoundException;
-import java.util.logging.Filter;
-
 import javax.servlet.Servlet;
+import javax.servlet.ServletContext;
+import javax.servlet.ServletContextListener;
+import javax.servlet.http.HttpServletRequest;
 
 import net.officefloor.model.impl.repository.ModelRepositoryImpl;
 import net.officefloor.model.impl.repository.classloader.ClassLoaderConfigurationContext;
 import net.officefloor.model.repository.ConfigurationContext;
 import net.officefloor.model.repository.ConfigurationItem;
 import net.officefloor.model.woof.WoofRepositoryImpl;
-import net.officefloor.plugin.servlet.OfficeFloorServletFilter;
+import net.officefloor.plugin.servlet.OfficeFloorServlet;
+import net.officefloor.plugin.web.http.application.WebAutoWireApplication;
 import net.officefloor.plugin.woof.WoofLoader;
 import net.officefloor.plugin.woof.WoofLoaderImpl;
 import net.officefloor.plugin.woof.WoofOfficeFloorSource;
 
 /**
  * <p>
- * WoOF (Web on OfficeFloor) {@link Servlet} {@link Filter}.
+ * WoOF (Web on OfficeFloor) {@link Servlet}.
  * <p>
- * This {@link Filter} enables embedding WoOF functionality within a JEE Servlet
- * Application.
+ * This {@link Servlet} enables embedding WoOF functionality within a JEE
+ * Servlet Application. To enable handling the appropriate
+ * {@link HttpServletRequest} instances this should be configured as a
+ * {@link ServletContextListener}.
  * 
  * @author Daniel Sagenschneider
  */
-public class WoofServletFilter extends OfficeFloorServletFilter {
+public class WoofServlet extends OfficeFloorServlet {
 
 	/**
 	 * <p>
-	 * Name that this {@link WoofServletFilter} should be registered.
+	 * Name that this {@link WoofServlet} should be registered.
 	 * <p>
-	 * This enables <code>web-fragment</code> functionality (such as the
-	 * {@link WoofServletContextListener}) to determine if an implementation of
-	 * the {@link WoofServletFilter} has been configured or whether one should
-	 * be automatically configured.
+	 * This enables <code>web-fragment</code> functionality to determine if an
+	 * implementation of the {@link WoofServlet} has been configured or whether
+	 * one should be automatically configured.
 	 */
-	public static final String FILTER_NAME = "WoOF";
+	public static final String SERVLET_NAME = "WoOF";
 
 	/**
 	 * Default WoOF configuration location.
@@ -86,68 +88,82 @@ public class WoofServletFilter extends OfficeFloorServletFilter {
 	public static final String PROPERTY_TEAMS_CONFIGURATION_LOCATION = WoofOfficeFloorSource.PROPERTY_TEAMS_CONFIGURATION_LOCATION;
 
 	/*
-	 * ======================= OfficeFloorServletFilter ====================
+	 * ======================= OfficeFloorServlet ====================
 	 */
 
 	@Override
-	protected void configure() throws Exception {
+	public String getServletName() {
+		return SERVLET_NAME;
+	}
+
+	@Override
+	public boolean configure(WebAutoWireApplication application,
+			ServletContext servletContext) throws Exception {
 
 		// Create the configuration context
-		ClassLoader classLoader = this.getOfficeFloorCompiler()
+		ClassLoader classLoader = application.getOfficeFloorCompiler()
 				.getClassLoader();
 		ConfigurationContext configurationContext = new ClassLoaderConfigurationContext(
 				classLoader);
 
 		// Obtain the woof configuration (ensuring exists)
-		String woofLocation = this.getInitParamValue(
+		String woofLocation = this.getInitParamValue(servletContext,
 				PROPERTY_WOOF_CONFIGURATION_LOCATION,
 				DEFAULT_WOOF_CONFIGUARTION_LOCATION);
 		ConfigurationItem woofConfiguration = configurationContext
 				.getConfigurationItem(woofLocation);
 		if (woofConfiguration == null) {
-			throw new FileNotFoundException(
-					"Can not find WoOF configuration at " + woofLocation);
+			// No configuration file so not configure Servlet
+			servletContext.log("No WoOF configuration file at location "
+					+ woofLocation
+					+ ". WoOF functionality will not be configured.");
+			return false; // do not configure
 		}
 
 		// Configure this filter with WoOF functionality
 		WoofLoader woofLoader = new WoofLoaderImpl(new WoofRepositoryImpl(
 				new ModelRepositoryImpl()));
-		woofLoader.loadWoofConfiguration(woofConfiguration, this);
+		woofLoader.loadWoofConfiguration(woofConfiguration, application);
 
 		// Load the optional configuration
-		String objectsLocation = this.getInitParamValue(
+		String objectsLocation = this.getInitParamValue(servletContext,
 				PROPERTY_OBJECTS_CONFIGURATION_LOCATION,
 				DEFAULT_OBJECTS_CONFIGURATION_LOCATION);
-		String teamsLocation = this.getInitParamValue(
+		String teamsLocation = this.getInitParamValue(servletContext,
 				PROPERTY_TEAMS_CONFIGURATION_LOCATION,
 				DEFAULT_TEAMS_CONFIGURATION_LOCATION);
-		WoofOfficeFloorSource.loadOptionalConfiguration(this, objectsLocation,
-				teamsLocation, configurationContext);
+		WoofOfficeFloorSource.loadOptionalConfiguration(application,
+				objectsLocation, teamsLocation, configurationContext);
 
 		/*
 		 * Note: WoOF Application extensions are not available within JEE
 		 * container.
 		 * 
-		 * Focus of this Filter is only to providing WoOF functionality within a
-		 * JEE container. If extension functionality is required then the
+		 * Focus of this Servlet is only to providing WoOF functionality within
+		 * a JEE container. If extension functionality is required then the
 		 * application should migrated to using OfficeFloor. This is especially
 		 * the case as the WoOF application extension is typically only used to
 		 * embed a Servlet Container within WoOF.
 		 */
+
+		// Configure
+		return true;
 	}
 
 	/**
 	 * Obtains the init parameter value.
 	 * 
+	 * @param servletContext
+	 *            {@link ServletContext}.
 	 * @param propertyName
 	 *            Name of property.
 	 * @param defaultValue
 	 *            Default value.
 	 * @return Init parameter value or the default value.
 	 */
-	private String getInitParamValue(String propertyName, String defaultValue) {
-		String value = this.getOfficeFloorServletFilterConfiguration()
-				.getInitParameter(propertyName);
+	private String getInitParamValue(ServletContext servletContext,
+			String propertyName, String defaultValue) {
+		String value = servletContext.getInitParameter(propertyName);
 		if ((value == null) || (value.trim().length() == 0)) {
 			value = defaultValue;
 		}
