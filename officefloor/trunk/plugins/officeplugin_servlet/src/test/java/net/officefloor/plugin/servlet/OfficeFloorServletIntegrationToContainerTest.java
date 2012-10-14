@@ -19,9 +19,7 @@
 package net.officefloor.plugin.servlet;
 
 import java.io.ByteArrayOutputStream;
-import java.util.EnumSet;
 
-import javax.servlet.DispatcherType;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
@@ -35,6 +33,7 @@ import net.officefloor.plugin.web.http.application.HttpRequestState;
 import net.officefloor.plugin.web.http.application.HttpRequestStateful;
 import net.officefloor.plugin.web.http.application.HttpSessionStateful;
 import net.officefloor.plugin.web.http.application.HttpTemplateAutoWireSection;
+import net.officefloor.plugin.web.http.application.WebAutoWireApplication;
 import net.officefloor.plugin.web.http.session.HttpSession;
 
 import org.apache.http.HttpResponse;
@@ -44,7 +43,6 @@ import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.jasper.servlet.JspServlet;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.session.SessionHandler;
-import org.eclipse.jetty.servlet.FilterHolder;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
 import org.eclipse.jetty.util.resource.Resource;
@@ -55,7 +53,7 @@ import org.eclipse.jetty.util.resource.Resource;
  * 
  * @author Daniel Sagenschneider
  */
-public class OfficeFloorServletFilterIntegrationToContainerTest extends
+public class OfficeFloorServletIntegrationToContainerTest extends
 		OfficeFrameTestCase {
 
 	/**
@@ -116,9 +114,8 @@ public class OfficeFloorServletFilterIntegrationToContainerTest extends
 	 */
 	public void testJspStateIntegration() throws Exception {
 
-		// Add the filter for handling requests
-		this.context.addFilter(new FilterHolder(MockJspIntergateFilter.class),
-				"/*", EnumSet.of(DispatcherType.REQUEST));
+		// Add the servlet for handling requests
+		this.context.addEventListener(new MockJspIntergateServlet());
 
 		// Add the JSP
 		this.context.addServlet(new ServletHolder(JspServlet.class), "*.jsp");
@@ -152,17 +149,25 @@ public class OfficeFloorServletFilterIntegrationToContainerTest extends
 	}
 
 	/**
-	 * {@link OfficeFloorServletFilter} for testing JSP HTTP state integration.
+	 * {@link OfficeFloorServlet} for testing JSP HTTP state integration.
 	 */
-	public static class MockJspIntergateFilter extends OfficeFloorServletFilter {
+	public static class MockJspIntergateServlet extends OfficeFloorServlet {
+
 		@Override
-		protected void configure() throws Exception {
+		public String getServletName() {
+			return "MockJspIntegrate";
+		}
+
+		@Override
+		public boolean configure(WebAutoWireApplication application,
+				ServletContext servletContext) throws Exception {
 			String templatePath = this.getClass().getPackage().getName()
 					.replace('.', '/')
 					+ "/jsp/SubmitTemplate.ofp";
-			HttpTemplateAutoWireSection template = this.addHttpTemplate(
+			HttpTemplateAutoWireSection template = application.addHttpTemplate(
 					templatePath, MockTemplateLogic.class, "template");
-			this.linkToResource(template, "jsp", "Template.jsp");
+			application.linkToResource(template, "jsp", "Template.jsp");
+			return true;
 		}
 	}
 
@@ -227,10 +232,8 @@ public class OfficeFloorServletFilterIntegrationToContainerTest extends
 	 */
 	public void testServletContextResourceIntegration() throws Exception {
 
-		// Add the filter for handling requests
-		this.context.addFilter(new FilterHolder(
-				MockServletContextResourceFilter.class), "/*", EnumSet
-				.of(DispatcherType.REQUEST));
+		// Add the servlet for handling requests
+		this.context.addEventListener(new MockServletContextResourceServlet());
 
 		// Start the server
 		this.server.start();
@@ -240,20 +243,30 @@ public class OfficeFloorServletFilterIntegrationToContainerTest extends
 	}
 
 	/**
-	 * {@link OfficeFloorServletFilter} for testing {@link ServletContext}
-	 * resource for template content.
+	 * {@link OfficeFloorServlet} for testing {@link ServletContext} resource
+	 * for template content.
 	 */
-	public static class MockServletContextResourceFilter extends
-			OfficeFloorServletFilter {
+	public static class MockServletContextResourceServlet extends
+			OfficeFloorServlet {
+
 		@Override
-		protected void configure() throws Exception {
+		public String getServletName() {
+			return "MockResourceIntegrate";
+		}
+
+		@Override
+		public boolean configure(WebAutoWireApplication application,
+				ServletContext servletContext) throws Exception {
 
 			// Should obtain template content from ServletContext
 			final String templatePath = "ServletContextResourceTemplate.ofp";
 
 			// Add the template
-			this.addHttpTemplate(templatePath,
+			application.addHttpTemplate(templatePath,
 					MockServletContextResourceTemplate.class, "template");
+
+			// Configure
+			return true;
 		}
 	}
 

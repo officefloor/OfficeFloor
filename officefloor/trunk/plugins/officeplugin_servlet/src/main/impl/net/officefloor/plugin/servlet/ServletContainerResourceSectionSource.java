@@ -72,7 +72,7 @@ public class ServletContainerResourceSectionSource extends
 
 	/**
 	 * Completes the servicing after {@link OfficeFloor} functionality for the
-	 * {@link OfficeFloorServletFilter}.
+	 * {@link OfficeFloorServlet}.
 	 * 
 	 * @param request
 	 *            {@link HttpServletRequest}.
