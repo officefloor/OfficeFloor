@@ -82,7 +82,7 @@ public class OfficeFloorServletIntegrationToContainerTest extends
 		// Obtain the port for the application
 		this.port = MockHttpServer.getAvailablePort();
 
-		// Start servlet container with filter
+		// Start servlet container with servlet
 		this.server = new Server(this.port);
 		this.context = new ServletContextHandler();
 		this.context.setBaseResource(Resource.newClassPathResource(this

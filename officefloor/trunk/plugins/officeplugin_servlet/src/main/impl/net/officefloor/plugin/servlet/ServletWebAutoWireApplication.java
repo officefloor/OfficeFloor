@@ -67,6 +67,23 @@ public class ServletWebAutoWireApplication<S extends OfficeFloorServlet>
 		WebAutoWireApplication {
 
 	/**
+	 * <p>
+	 * Resets the registered {@link ServletWebAutoWireApplication} instances.
+	 * <p>
+	 * This should NOT be called in Production and is only to reset for testing.
+	 */
+	public static void reset() {
+		synchronized (registeredApplications) {
+
+			// Clear the registered applications
+			registeredApplications.clear();
+
+			// Reset the application index
+			nextApplicationIndex = 1;
+		}
+	}
+
+	/**
 	 * Registered {@link ServletWebAutoWireApplication} instances by their
 	 * lookup index.
 	 */

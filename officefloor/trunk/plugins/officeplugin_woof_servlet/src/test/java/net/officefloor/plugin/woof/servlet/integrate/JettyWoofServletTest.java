@@ -16,24 +16,24 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package net.officefloor.plugin.woof.servlet.filter;
+package net.officefloor.plugin.woof.servlet.integrate;
 
 import java.io.File;
 
 import net.officefloor.plugin.socket.server.http.server.MockHttpServer;
-import net.officefloor.plugin.woof.servlet.WoofServletContextListener;
-import net.officefloor.plugin.woof.servlet.WoofServletFilter;
+import net.officefloor.plugin.woof.servlet.WoofServlet;
 
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.session.SessionHandler;
 import org.eclipse.jetty.webapp.WebAppContext;
 
 /**
- * Tests the {@link WoofServletFilter} within Jetty.
+ * Tests the {@link WoofServlet} within Jetty.
  * 
  * @author Daniel Sagenschneider
  */
-public class JettyWoofServletFilterTest extends AbstractWoofServletFilterTestCase {
+public class JettyWoofServletTest extends
+		AbstractWoofServletTestCase {
 
 	/**
 	 * {@link Server}.
@@ -61,8 +61,8 @@ public class JettyWoofServletFilterTest extends AbstractWoofServletFilterTestCas
 		context.setResourceBase(baseDirectory.getAbsolutePath());
 		context.setSessionHandler(new SessionHandler());
 
-		// Add the WoOF Servlet Context Listener
-		context.addEventListener(new WoofServletContextListener());
+		// Add WoOF
+		context.addEventListener(new WoofServlet());
 
 		// Start the server
 		this.server.setHandler(context);
