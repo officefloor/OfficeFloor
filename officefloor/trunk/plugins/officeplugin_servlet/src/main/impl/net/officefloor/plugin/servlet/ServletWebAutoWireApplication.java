@@ -15,28 +15,22 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
 package net.officefloor.plugin.servlet;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.HashSet;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Set;
+import java.util.Map;
 
-import javax.servlet.Filter;
-import javax.servlet.FilterChain;
-import javax.servlet.FilterConfig;
-import javax.servlet.FilterRegistration.Dynamic;
 import javax.servlet.RequestDispatcher;
 import javax.servlet.Servlet;
+import javax.servlet.ServletConfig;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletContextListener;
 import javax.servlet.ServletException;
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletResponse;
-import javax.servlet.http.HttpServlet;
+import javax.servlet.ServletRegistration.Dynamic;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -47,7 +41,6 @@ import net.officefloor.autowire.AutoWireSection;
 import net.officefloor.compile.OfficeFloorCompiler;
 import net.officefloor.compile.spi.office.OfficeSectionOutput;
 import net.officefloor.frame.api.escalate.Escalation;
-import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.impl.spi.team.ProcessContextTeamSource;
 import net.officefloor.frame.spi.source.ResourceSource;
 import net.officefloor.plugin.servlet.bridge.ServletBridgeManagedObjectSource;
@@ -65,29 +58,36 @@ import net.officefloor.plugin.web.http.location.HttpApplicationLocationManagedOb
 import net.officefloor.plugin.web.http.session.HttpSession;
 
 /**
- * {@link Filter} to invoke processing within an {@link OfficeFloor}.
+ * {@link Servlet} {@link WebAutoWireApplication}.
  * 
  * @author Daniel Sagenschneider
  */
-public abstract class OfficeFloorServletFilter extends
-		WebApplicationAutoWireOfficeFloorSource implements Filter,
+public class ServletWebAutoWireApplication<S extends OfficeFloorServlet>
+		extends WebApplicationAutoWireOfficeFloorSource implements
 		WebAutoWireApplication {
 
 	/**
-	 * {@link OfficeFloorServletFilterConfiguration}.
+	 * Registered {@link ServletWebAutoWireApplication} instances by their
+	 * lookup index.
 	 */
-	private OfficeFloorServletFilterConfiguration filterConfig;
+	private static Map<Integer, ServletWebAutoWireApplication<?>> registeredApplications = new HashMap<Integer, ServletWebAutoWireApplication<?>>();
+
+	/**
+	 * Next {@link ServletWebAutoWireApplication} index.
+	 */
+	private static int nextApplicationIndex = 1;
+
+	/**
+	 * Init property for the {@link OfficeFloorServlet} implementation that
+	 * contains the index to the registered
+	 * {@link ServletWebAutoWireApplication}.
+	 */
+	private static final String INIT_PROPERTY_APPLICATION_INDEX = "officefloorservlet.application.index";
 
 	/**
 	 * {@link ServletServiceBridger}.
 	 */
-	@SuppressWarnings("rawtypes")
-	private ServletServiceBridger bridger;
-
-	/**
-	 * {@link AutoWireOfficeFloor}.
-	 */
-	private AutoWireOfficeFloor officeFloor;
+	private ServletServiceBridger<S> bridger;
 
 	/**
 	 * {@link ServletResourceLink} instances.
@@ -100,98 +100,60 @@ public abstract class OfficeFloorServletFilter extends
 	private final List<ServletResourceEscalation> servletResourceEscalations = new LinkedList<ServletResourceEscalation>();
 
 	/**
-	 * Handled URIs.
+	 * {@link AutoWireOfficeFloor}.
 	 */
-	private final Set<String> handledURIs = new HashSet<String>();
-
-	/**
-	 * Obtains the {@link OfficeFloorServletFilterConfiguration}.
-	 * 
-	 * @return {@link OfficeFloorServletFilterConfiguration}.
-	 */
-	protected OfficeFloorServletFilterConfiguration getOfficeFloorServletFilterConfiguration() {
-		return this.filterConfig;
-	}
-
-	/**
-	 * Provides configuration of this as a
-	 * {@link WebApplicationAutoWireOfficeFloorSource}.
-	 * 
-	 * @throws Exception
-	 *             If fails to configure.
-	 */
-	protected abstract void configure() throws Exception;
+	private AutoWireOfficeFloor officeFloor;
 
 	/**
 	 * <p>
-	 * Add this instance as a {@link Filter} to the {@link ServletContext}.
+	 * Configures the {@link OfficeFloorServlet} implementation into the
+	 * {@link ServletContext}.
 	 * <p>
-	 * This method should be used by {@link ServletContextListener}
-	 * implementations to ensure the {@link OfficeFloorServletFilter}
-	 * implementation is appropriately configured to the {@link ServletContext}.
+	 * This is expected to be called from a {@link ServletContextListener} as it
+	 * will configure an instance of the {@link OfficeFloorServlet} with
+	 * appropriate URI mapping.
 	 * 
-	 * @param filterName
-	 *            Name to register the {@link OfficeFloorServletFilter} within
-	 *            the {@link ServletContext}.
+	 * @param servletInitiateInstance
+	 *            Implementing instance of the {@link OfficeFloorServlet}. This
+	 *            instance is only used used for registration and configuration.
+	 *            Its {@link Class} however is registered so that a new instance
+	 *            is instantiated and allows injection of necessary resources to
+	 *            occur.
 	 * @param servletContext
 	 *            {@link ServletContext}.
-	 * @throws ServletException
-	 *             If fails to initialise and add the
-	 *             {@link OfficeFloorServletFilter}.
 	 */
-	public void addFilter(String filterName, final ServletContext servletContext)
-			throws ServletException {
+	@SuppressWarnings({ "rawtypes", "unchecked" })
+	public static void configure(OfficeFloorServlet servletInitiateInstance,
+			final ServletContext servletContext) {
 
-		// Use the servlet context to configure the filter
-		this.filterConfig = new OfficeFloorServletFilterConfiguration() {
-			@Override
-			public String getInitParameter(String name) {
-				return servletContext.getInitParameter(name);
-			}
+		// Obtain the Servlet name
+		String servletName = servletInitiateInstance.getServletName();
 
-			@Override
-			public ServletContext getServletContext() {
-				return servletContext;
-			}
-		};
+		// Obtain the implementing class of the OfficeFloorServlet
+		Class servletClass = servletInitiateInstance.getClass();
 
-		// Ensure initialised
-		this.initialise();
-
-		// Configure the filter
-		Dynamic dynamic = servletContext.addFilter(filterName, this);
-		dynamic.addMappingForUrlPatterns(null, false, "/*");
-	}
-
-	/**
-	 * <p>
-	 * Initialise.
-	 * <p>
-	 * The {@link OfficeFloorServletFilterConfiguration} must be available
-	 * before this is invoked.
-	 * 
-	 * @throws ServletException
-	 *             If fails to initialise.
-	 */
-	private void initialise() throws ServletException {
-
-		// Determine if already initialised
-		if (this.bridger != null) {
-			return; // already initialised
+		// Determine if Servlet already registered for name
+		if (servletContext.getServletRegistration(servletName) != null) {
+			// Not register as already registered
+			servletContext.log("Not registering "
+					+ OfficeFloorServlet.class.getSimpleName() + " "
+					+ servletName + " (" + servletClass.getName() + ") as "
+					+ Servlet.class.getSimpleName()
+					+ " already registered under name");
+			return;
 		}
 
-		// Create the bridger for the Servlet container
-		this.bridger = ServletBridgeManagedObjectSource
-				.createServletServiceBridger(this.getClass(), this,
-						HANDLER_SECTION_NAME, HANDLER_INPUT_NAME);
+		// Create the instance of the application
+		ServletWebAutoWireApplication<?> source = new ServletWebAutoWireApplication();
 
-		// Obtain the servlet context
-		ServletContext servletContext = this
-				.getOfficeFloorServletFilterConfiguration().getServletContext();
+		// Create the bridger for the Servlet container
+		source.bridger = ServletBridgeManagedObjectSource
+				.createServletServiceBridger(servletClass, source,
+						HANDLER_SECTION_NAME, HANDLER_INPUT_NAME);
 
 		// Allow loading template content from ServletContext.
 		// (Allows integration into the WAR structure)
-		OfficeFloorCompiler compiler = this.getOfficeFloorCompiler();
+		OfficeFloorCompiler compiler = source.getOfficeFloorCompiler();
 		compiler.addResources(new ResourceSource() {
 			@Override
 			public InputStream sourceResource(String location) {
@@ -201,9 +163,8 @@ public abstract class OfficeFloorServletFilter extends
 						+ location);
 
 				// Attempt to obtain resource
-				InputStream resource = OfficeFloorServletFilter.this
-						.getOfficeFloorServletFilterConfiguration()
-						.getServletContext().getResourceAsStream(location);
+				InputStream resource = servletContext
+						.getResourceAsStream(location);
 
 				// Return resource (if obtained)
 				return resource;
@@ -211,28 +172,28 @@ public abstract class OfficeFloorServletFilter extends
 		});
 
 		// Configure Server HTTP connection
-		this.addManagedObject(
+		source.addManagedObject(
 				ServletServerHttpConnectionManagedObjectSource.class.getName(),
 				null, new AutoWire(ServerHttpConnection.class));
 
 		// Configure the HTTP session
-		this.addManagedObject(
+		source.addManagedObject(
 				ServletHttpSessionManagedObjectSource.class.getName(), null,
 				new AutoWire(HttpSession.class));
 
 		// Configure the HTTP Application and Request State
-		this.addManagedObject(
+		source.addManagedObject(
 				ServletHttpApplicationStateManagedObjectSource.class.getName(),
 				null, new AutoWire(HttpApplicationState.class));
-		this.addManagedObject(
+		source.addManagedObject(
 				ServletHttpRequestStateManagedObjectSource.class.getName(),
 				null, new AutoWire(HttpRequestState.class));
 
 		// Provide dependencies of Servlet
-		Class<?>[] dependencyTypes = this.bridger.getObjectTypes();
+		Class<?>[] dependencyTypes = source.bridger.getObjectTypes();
 		for (Class<?> dependencyType : dependencyTypes) {
 			// Add Servlet dependency for dependency injection
-			AutoWireObject dependency = this.addManagedObject(
+			AutoWireObject dependency = source.addManagedObject(
 					ServletDependencyManagedObjectSource.class.getName(), null,
 					new AutoWire(dependencyType));
 			dependency.addProperty(
@@ -251,7 +212,7 @@ public abstract class OfficeFloorServletFilter extends
 			}
 
 			// Assign the team
-			this.assignTeam(ProcessContextTeamSource.class.getName(),
+			source.assignTeam(ProcessContextTeamSource.class.getName(),
 					autoWiring);
 		}
 
@@ -263,17 +224,58 @@ public abstract class OfficeFloorServletFilter extends
 
 		// Configure the web application
 		try {
-			this.configure();
-		} catch (Exception ex) {
-			// Propagate failure to configure
-			if (ex instanceof ServletException) {
-				throw (ServletException) ex;
+			boolean isConfigure = servletInitiateInstance.configure(source,
+					servletContext);
+			if (!isConfigure) {
+				// Flagged not to configure
+				return;
 			}
-			throw new ServletException(ex);
+		} catch (Exception ex) {
+			// Indicate failure and not configured
+			servletContext.log("Failed to configure " + servletClass.getName()
+					+ ". It will not be available.", ex);
+			return; // not configure
+		}
+
+		// Configure the Servlet container resource section
+		AutoWireSection servletContainerResource = source.addSection(
+				"SERVLET_CONTAINER_RESOURCE",
+				ServletContainerResourceSectionSource.class.getName(),
+				"NOT_HANDLED");
+		source.chainServicer(servletContainerResource, "NOT_HANDLED", null);
+
+		// Link the Servlet Resources
+		for (ServletResourceLink link : source.servletResourceLinks) {
+			servletContainerResource.addProperty(link.requestDispatcherPath,
+					link.requestDispatcherPath);
+			source.link(link.section, link.outputName,
+					servletContainerResource, link.requestDispatcherPath);
+		}
+
+		// Link the escalation handling by Servlet Resources
+		for (ServletResourceEscalation handling : source.servletResourceEscalations) {
+			servletContainerResource.addProperty(
+					handling.requestDispatcherPath,
+					handling.requestDispatcherPath);
+			source.linkEscalation(handling.escalationType,
+					servletContainerResource, handling.requestDispatcherPath);
+		}
+
+		// Register the source (for initiation into an application)
+		int applicationIndex;
+		synchronized (registeredApplications) {
+
+			// Obtain the index for the application
+			applicationIndex = nextApplicationIndex++;
+
+			// Register the application
+			registeredApplications.put(Integer.valueOf(applicationIndex),
+					source);
 		}
 
 		// Load the handled URIs (being absolute to domain)
-		String[] rawUris = this.getURIs();
+		// (+1 to handle link mappings)
+		String[] rawUris = source.getURIs();
 		String[] mappedUris = new String[rawUris.length + 1];
 		for (int i = 0; i < rawUris.length; i++) {
 
@@ -288,49 +290,120 @@ public abstract class OfficeFloorServletFilter extends
 			if ((contextPath != null) && (!("/".equals(contextPath)))) {
 				uri = contextPath + uri;
 			}
-
-			// Register the URI as handled
-			this.handledURIs.add(uri);
 		}
 
 		// Include link mapping
 		mappedUris[mappedUris.length - 1] = "*.task";
 
-		// Provide Servlet for URIs to ensure filter triggered
-		javax.servlet.ServletRegistration.Dynamic dynamic = servletContext
-				.addServlet("OfficeFloorFilteredServlet", FilteredServlet.class);
+		// Provide Servlet and its configuration
+		Dynamic dynamic = servletContext.addServlet(servletName, servletClass);
+		dynamic.setInitParameter(INIT_PROPERTY_APPLICATION_INDEX,
+				String.valueOf(applicationIndex));
 		dynamic.addMapping(mappedUris);
+		dynamic.setLoadOnStartup(1);
+	}
 
-		// Configure the Servlet container resource section
-		AutoWireSection servletContainerResource = this.addSection(
-				"SERVLET_CONTAINER_RESOURCE",
-				ServletContainerResourceSectionSource.class.getName(),
-				"NOT_HANDLED");
-		this.chainServicer(servletContainerResource, "NOT_HANDLED", null);
+	/**
+	 * <p>
+	 * Initiates and returns the {@link ServletWebAutoWireApplication} for the
+	 * {@link OfficeFloorServlet} instance.
+	 * <p>
+	 * This is expected to be called from the
+	 * {@link Servlet#init(ServletConfig)} so that the
+	 * {@link ServletConfig#getInitParameter(String)} is available.
+	 * 
+	 * @param servletInstance
+	 *            {@link OfficeFloorServlet} instance.
+	 * @return {@link ServletWebAutoWireApplication} for the
+	 *         {@link OfficeFloorServlet} instance after it has been initiated.
+	 * @throws ServletException
+	 *             If fails to initiate.
+	 */
+	@SuppressWarnings("unchecked")
+	public static <I extends OfficeFloorServlet> ServletWebAutoWireApplication<I> initiate(
+			I servletInstance) throws ServletException {
 
-		// Link the Servlet Resources
-		for (ServletResourceLink link : this.servletResourceLinks) {
-			servletContainerResource.addProperty(link.requestDispatcherPath,
-					link.requestDispatcherPath);
-			this.link(link.section, link.outputName, servletContainerResource,
-					link.requestDispatcherPath);
+		// Obtain the application for the Servlet instance
+		String applicationIndex = servletInstance
+				.getInitParameter(INIT_PROPERTY_APPLICATION_INDEX);
+		if (applicationIndex == null) {
+			throw new ServletException(
+					servletInstance.getClass().getName()
+							+ " is not configured correctly as it has no corresponding "
+							+ ServletWebAutoWireApplication.class
+									.getSimpleName());
 		}
 
-		// Link the escalation handling by Servlet Resources
-		for (ServletResourceEscalation handling : this.servletResourceEscalations) {
-			servletContainerResource.addProperty(
-					handling.requestDispatcherPath,
-					handling.requestDispatcherPath);
-			this.linkEscalation(handling.escalationType,
-					servletContainerResource, handling.requestDispatcherPath);
+		// Obtain the application
+		ServletWebAutoWireApplication<I> application;
+		synchronized (registeredApplications) {
+			application = (ServletWebAutoWireApplication<I>) registeredApplications
+					.get(Integer.valueOf(applicationIndex));
+		}
+		if (application == null) {
+			throw new ServletException(
+					servletInstance.getClass().getName()
+							+ " is not configured correctly as it has no corresponding "
+							+ ServletWebAutoWireApplication.class
+									.getSimpleName());
 		}
 
 		// Open the OfficeFloor
 		try {
-			this.officeFloor = this.openOfficeFloor();
+			application.officeFloor = application.openOfficeFloor();
 		} catch (Exception ex) {
 			throw new ServletException(ex);
 		}
+
+		// Return the application
+		return application;
+	}
+
+	/**
+	 * Services the {@link HttpServletRequest}.
+	 * 
+	 * @param servletInstance
+	 *            {@link OfficeFloorServlet} instance.
+	 * @param request
+	 *            {@link HttpServletRequest}.
+	 * @param response
+	 *            {@link HttpServletResponse}.
+	 * @return <code>true</code> if serviced or <code>false</code> indicating
+	 *         not handled.
+	 * @throws ServletException
+	 *             If fails to service {@link HttpServletRequest}.
+	 * @throws IOException
+	 *             If I/O failure in servicing the {@link HttpServletRequest}.
+	 */
+	public boolean service(S servletInstance, HttpServletRequest request,
+			HttpServletResponse response) throws ServletException, IOException {
+
+		// Handle by OfficeFloor
+		this.bridger.service(servletInstance, request, response,
+				request.getServletContext());
+
+		// Determine if handled
+		boolean isHandled = ServletContainerResourceSectionSource
+				.completeServletService(request, response);
+
+		// Return whether handled
+		return isHandled;
+	}
+
+	/**
+	 * Destroys this {@link ServletWebAutoWireApplication}.
+	 */
+	public void destroy() {
+		// Ensure close OfficeFloor
+		if (this.officeFloor != null) {
+			this.officeFloor.closeOfficeFloor();
+		}
+	}
+
+	/**
+	 * May only initiate via static methods. Ensures correct construction.
+	 */
+	private ServletWebAutoWireApplication() {
 	}
 
 	/*
@@ -353,94 +426,6 @@ public abstract class OfficeFloorServletFilter extends
 		// Override to use Servlet Container resource
 		this.servletResourceEscalations.add(new ServletResourceEscalation(
 				escalation, resourcePath));
-	}
-
-	/*
-	 * ===================== Filter =========================
-	 */
-
-	@Override
-	public void init(final FilterConfig config) throws ServletException {
-
-		// Always keep track of configuration specific to filter
-		this.filterConfig = new OfficeFloorServletFilterConfiguration() {
-			@Override
-			public String getInitParameter(String name) {
-				return config.getInitParameter(name);
-			}
-
-			@Override
-			public ServletContext getServletContext() {
-				return config.getServletContext();
-			}
-		};
-
-		// Ensure initialised
-		this.initialise();
-	}
-
-	@Override
-	@SuppressWarnings("unchecked")
-	public void doFilter(ServletRequest request, ServletResponse response,
-			FilterChain chain) throws IOException, ServletException {
-
-		// Obtain the HTTP request and response
-		HttpServletRequest httpRequest = (HttpServletRequest) request;
-		HttpServletResponse httpResponse = (HttpServletResponse) response;
-
-		// Obtain the URI
-		String uri = httpRequest.getRequestURI();
-
-		// Determine handling request (quick cache look-up to save invoking)
-		if (this.handledURIs.contains(uri) || (uri.endsWith(".task"))) {
-
-			// Handle by OfficeFloor
-			this.bridger.service(this, httpRequest, httpResponse, this
-					.getOfficeFloorServletFilterConfiguration()
-					.getServletContext());
-
-			// Determine if handled
-			if (ServletContainerResourceSectionSource.completeServletService(
-					httpRequest, httpResponse)) {
-				return; // serviced
-			}
-		}
-
-		// Not handled so continue on for Servlet container to handle
-		chain.doFilter(request, response);
-	}
-
-	@Override
-	public void destroy() {
-		// Ensure close OfficeFloor
-		if (this.officeFloor != null) {
-			this.officeFloor.closeOfficeFloor();
-		}
-	}
-
-	/**
-	 * Provides access to the configuration for this
-	 * {@link OfficeFloorServletFilter}.
-	 */
-	protected interface OfficeFloorServletFilterConfiguration {
-
-		/**
-		 * Obtains the value for the initialise parameter.
-		 * 
-		 * @param name
-		 *            Name of the initialise parameter.
-		 * @return Value for initialise parameter or <code>null</code> if not
-		 *         configured.
-		 */
-		String getInitParameter(String name);
-
-		/**
-		 * Obtains the {@link ServletContext}.
-		 * 
-		 * @return {@link ServletContext}.
-		 */
-		ServletContext getServletContext();
-
 	}
 
 	/**

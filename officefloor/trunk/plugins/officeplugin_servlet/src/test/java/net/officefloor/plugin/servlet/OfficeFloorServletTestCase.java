@@ -24,14 +24,10 @@ import java.io.Serializable;
 import java.io.Writer;
 
 import javax.ejb.EJB;
-import javax.servlet.Filter;
-import javax.servlet.FilterChain;
-import javax.servlet.FilterConfig;
 import javax.servlet.Servlet;
 import javax.servlet.ServletContext;
+import javax.servlet.ServletContextListener;
 import javax.servlet.ServletException;
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -45,6 +41,7 @@ import net.officefloor.plugin.section.clazz.NextTask;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
 import net.officefloor.plugin.socket.server.http.server.MockHttpServer;
 import net.officefloor.plugin.web.http.application.HttpSessionStateful;
+import net.officefloor.plugin.web.http.application.WebAutoWireApplication;
 import net.officefloor.plugin.web.http.tokenise.HttpRequestTokeniserImpl;
 
 import org.apache.http.HttpResponse;
@@ -57,12 +54,11 @@ import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
 
 /**
- * Abstract tests for the {@link OfficeFloorServletFilter}.
+ * Tests for the {@link OfficeFloorServlet}.
  * 
  * @author Daniel Sagenschneider
  */
-public abstract class AbstractOfficeFloorServletFilterTestCase extends
-		OfficeFrameTestCase {
+public class OfficeFloorServletTestCase extends OfficeFrameTestCase {
 
 	/**
 	 * Port.
@@ -85,33 +81,38 @@ public abstract class AbstractOfficeFloorServletFilterTestCase extends
 	private HttpClient client;
 
 	/**
-	 * {@link OfficeFloorServletFilter} to be tested.
+	 * {@link OfficeFloorServlet} as {@link ServletContextListener}.
 	 */
-	private MockOfficeFloorServletFilter filter;
+	private MockOfficeFloorServlet listener;
 
 	/**
-	 * Configures the {@link Filter} within the {@link ServletContextHandler}.
-	 * 
-	 * @param filter
-	 *            {@link Filter}.
-	 * @param context
-	 *            {@link ServletContextHandler}.
+	 * Directory containing the templates.
 	 */
-	protected abstract void configureFilter(Filter filter,
-			ServletContextHandler context);
+	private static String templateDirectory;
+
+	/**
+	 * {@link MockEjb} to inject.
+	 */
+	private static MockEjb ejb;
+
+	/**
+	 * {@link OfficeFloorServlet} as instance servicing
+	 * {@link HttpServletRequest}.
+	 */
+	private static MockOfficeFloorServlet servlet;
 
 	@Override
 	protected void setUp() throws Exception {
 
 		// Obtain location of template path
-		final String templateDirectory = this.getClass().getPackage().getName()
+		templateDirectory = this.getClass().getPackage().getName()
 				.replace('.', '/');
 
-		// Create the Filter to test
-		this.filter = new MockOfficeFloorServletFilter(templateDirectory);
+		// Create the listener to configure the Servlet
+		this.listener = new MockOfficeFloorServlet();
 
-		// Inject the EJB
-		this.filter.ejb = new MockEjb();
+		// Configure the EJB to inject
+		ejb = new MockEjb();
 	}
 
 	@Override
@@ -125,45 +126,6 @@ public abstract class AbstractOfficeFloorServletFilterTestCase extends
 	}
 
 	/**
-	 * Ensure can call {@link Filter} and {@link Servlet}.
-	 */
-	public void testCallServlet() throws Exception {
-
-		// Start mock filter to ensure invoking container is valid
-		this.startServer(new Filter() {
-			@Override
-			public void init(FilterConfig arg0) throws ServletException {
-			}
-
-			@Override
-			public void doFilter(ServletRequest request,
-					ServletResponse response, FilterChain chain)
-					throws IOException, ServletException {
-				// Determine if filter request
-				if ("filter".equals(request.getParameter("type"))) {
-					response.getWriter().write("FILTER");
-					return;
-				}
-
-				// Handle by servlet
-				chain.doFilter(request, response);
-			}
-
-			@Override
-			public void destroy() {
-			}
-		});
-
-		// Send request for filter
-		assertEquals("Incorrect filter handling", "FILTER",
-				this.doGetEntity("/unhandled?type=filter"));
-
-		// Send request for servlet
-		assertEquals("Incorrect servlet handling", "UNHANDLED",
-				this.doGetEntity("/unhandled"));
-	}
-
-	/**
 	 * Ensure pass onto {@link Servlet} if not handled.
 	 */
 	public void testNotHandle() throws Exception {
@@ -172,7 +134,7 @@ public abstract class AbstractOfficeFloorServletFilterTestCase extends
 	}
 
 	/**
-	 * Ensure pass onto {@link Servlet} for unhandled task.
+	 * Ensure more specific link URI is handled by configured {@link Servlet}.
 	 */
 	public void testNonHandledTask() throws Exception {
 		assertEquals("Should pass onto servlet", "UNHANDLED_TASK",
@@ -287,7 +249,7 @@ public abstract class AbstractOfficeFloorServletFilterTestCase extends
 	 * Ensure can utilise the object (such as EJB).
 	 */
 	public void testObject() throws Exception {
-		this.filter.ejb.value = "TEST";
+		ejb.value = "TEST";
 		assertEquals("Should obtain EJB value", "TEST",
 				this.doGetEntity("/ejb"));
 	}
@@ -346,16 +308,9 @@ public abstract class AbstractOfficeFloorServletFilterTestCase extends
 	 * Starts the {@link Server}.
 	 */
 	protected void startSever() throws Exception {
-		this.startServer(this.filter);
-	}
 
-	/**
-	 * Starts the {@link Server} for the {@link Filter}.
-	 * 
-	 * @param filter
-	 *            {@link Filter}.
-	 */
-	protected void startServer(Filter filter) throws Exception {
+		// Clear the Servlet instance
+		servlet = null;
 
 		// Obtain the port for the application
 		this.port = MockHttpServer.getAvailablePort();
@@ -367,9 +322,6 @@ public abstract class AbstractOfficeFloorServletFilterTestCase extends
 		context.setSessionHandler(new SessionHandler());
 		this.server.setHandler(context);
 
-		// Configure the filter for handling requests
-		this.configureFilter(filter, context);
-
 		// Add the linked Servlet Resource
 		context.addServlet(new ServletHolder(new MockHttpServlet(
 				"SERVLET_RESOURCE")), "/Template.jsp");
@@ -380,8 +332,20 @@ public abstract class AbstractOfficeFloorServletFilterTestCase extends
 		context.addServlet(new ServletHolder(new MockHttpServlet(
 				"UNHANDLED_TASK")), "/unhandled.links/unhandled.task");
 
+		// Configure the Servlet
+		context.addEventListener(this.listener);
+
 		// Start the server
 		this.server.start();
+
+		// Ensure different Servlet instance
+		assertNotNull("Should have initiated Servlet instance", servlet);
+		assertNotSame(
+				"Servlet instance should be different to listener instance",
+				this.listener, servlet);
+
+		// Ensure EJB injected (for valid tests)
+		assertNotNull("EJB should be injected", servlet.ejb);
 	}
 
 	/**
@@ -392,15 +356,9 @@ public abstract class AbstractOfficeFloorServletFilterTestCase extends
 	}
 
 	/**
-	 * Mock {@link OfficeFloorServletFilter} for testing.
+	 * Mock {@link OfficeFloorServlet} for testing.
 	 */
-	public static class MockOfficeFloorServletFilter extends
-			OfficeFloorServletFilter {
-
-		/**
-		 * Template directory.
-		 */
-		private final String templateDirectory;
+	public static class MockOfficeFloorServlet extends OfficeFloorServlet {
 
 		/**
 		 * Dependency injected EJB.
@@ -408,58 +366,75 @@ public abstract class AbstractOfficeFloorServletFilterTestCase extends
 		@EJB
 		private MockEjb ejb;
 
-		/**
-		 * Initiate.
-		 * 
-		 * @param templateDirectory
-		 *            Template directory.
-		 */
-		public MockOfficeFloorServletFilter(String templateDirectory) {
-			this.templateDirectory = templateDirectory;
-		}
-
 		/*
-		 * ================= OfficeFloorServletFilter =====================
+		 * ================= OfficeFloorServlet =====================
 		 */
 
 		@Override
-		protected void configure() {
+		public String getServletName() {
+			return "Mock";
+		}
+
+		@Override
+		public boolean configure(WebAutoWireApplication application,
+				ServletContext servletContext) throws Exception {
+
+			// Obtain the template directory
+			String templateDirectory = OfficeFloorServletTestCase.templateDirectory;
 
 			// HTTP template
-			this.addHttpTemplate(this.templateDirectory + "/Template.ofp",
+			application.addHttpTemplate(templateDirectory + "/Template.ofp",
 					MockTemplate.class, "test");
 
 			// Session stateful template
-			this.addHttpTemplate(this.templateDirectory
+			application.addHttpTemplate(templateDirectory
 					+ "/SessionTemplate.ofp", MockSessionTemplate.class,
 					"session");
 
 			// Link template
-			this.addHttpTemplate(this.templateDirectory + "/LinkTemplate.ofp",
+			application.addHttpTemplate(
+					templateDirectory + "/LinkTemplate.ofp",
 					MockLinkTemplate.class, "link");
 
 			// Link to section
-			AutoWireSection section = this.addSection("SECTION",
+			AutoWireSection section = application.addSection("SECTION",
 					ClassSectionSource.class.getName(),
 					MockSection.class.getName());
-			this.linkUri("section", section, "doSection");
+			application.linkUri("section", section, "doSection");
 
 			// Link to Servlet resource
-			this.linkUri("servlet-resource", section, "doServletResource");
-			this.linkToResource(section, "resource", "Template.jsp");
+			application.linkUri("servlet-resource", section,
+					"doServletResource");
+			application.linkToResource(section, "resource", "Template.jsp");
 
 			// Enable access to EJB of filter
-			AutoWireSection ejb = this.addSection("EJB",
+			AutoWireSection ejb = application.addSection("EJB",
 					ClassSectionSource.class.getName(),
 					MockEjbSection.class.getName());
-			this.linkUri("ejb", ejb, "doEjb");
+			application.linkUri("ejb", ejb, "doEjb");
 
 			// Enable escalation handling to resource
-			AutoWireSection failSection = this.addSection("FAILURE",
+			AutoWireSection failSection = application.addSection("FAILURE",
 					ClassSectionSource.class.getName(),
 					MockFailureSection.class.getName());
-			this.linkUri("fail", failSection, "task");
-			this.linkEscalation(IOException.class, "Template.jsp");
+			application.linkUri("fail", failSection, "task");
+			application.linkEscalation(IOException.class, "Template.jsp");
+
+			// Configure
+			return true;
+		}
+
+		@Override
+		public void init() throws ServletException {
+
+			// Initialise
+			super.init();
+
+			// Flag the instance being used
+			OfficeFloorServletTestCase.servlet = this;
+
+			// Mimick EJB injection (will be done by JEE container)
+			this.ejb = OfficeFloorServletTestCase.ejb;
 		}
 	}
 
