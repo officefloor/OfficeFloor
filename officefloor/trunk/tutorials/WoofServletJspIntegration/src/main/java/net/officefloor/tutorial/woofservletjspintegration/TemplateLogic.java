@@ -39,7 +39,7 @@ public class TemplateLogic {
 	}
 
 	public ApplicationBean getApplication(ApplicationBean bean) {
-		// Value set by MockHttpServlet init()
+		// Value set by SetupListener
 		return bean;
 	}
 

@@ -19,8 +19,8 @@
 package net.officefloor.tutorial.woofservletjspintegration;
 
 import javax.servlet.ServletContext;
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServlet;
+import javax.servlet.ServletContextEvent;
+import javax.servlet.ServletContextListener;
 
 /**
  * Loads the {@link ServletContext} attribute.
@@ -28,16 +28,22 @@ import javax.servlet.http.HttpServlet;
  * @author Daniel Sagenschneider
  */
 // START SNIPPET: tutorial
-public class MockHttpServlet extends HttpServlet {
+public class SetupListener implements ServletContextListener {
 
 	@Override
-	public void init() throws ServletException {
+	public void contextInitialized(ServletContextEvent event) {
+		
 		// Create the application bean
 		ApplicationBean bean = new ApplicationBean();
 		bean.setText("APPLICATION");
 
 		// Bind to ServletContext as attribute
-		this.getServletContext().setAttribute("ApplicationBean", bean);
+		event.getServletContext().setAttribute("ApplicationBean", bean);
+	}
+
+	@Override
+	public void contextDestroyed(ServletContextEvent event) {
+		// Nothing to clean up
 	}
 }
 // END SNIPPET: tutorial
