@@ -102,7 +102,7 @@ public class ServletContainerWoofApplicationExtensionService implements
 						Level.WARNING,
 						"Invalid " + WoofOfficeFloorSource.WEBXML_FILE_PATH
 								+ " so not loading Servlet servicers: "
-								+ ex.getMessage(), ex);
+								+ ex.getMessage());
 			}
 			return;
 		}

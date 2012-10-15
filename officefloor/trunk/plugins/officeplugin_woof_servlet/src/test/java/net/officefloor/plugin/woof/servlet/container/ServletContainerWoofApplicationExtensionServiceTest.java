@@ -108,8 +108,8 @@ public class ServletContainerWoofApplicationExtensionServiceTest extends
 			assertEquals("Incorrect log message",
 					"Invalid WEB-INF/web.xml so not loading Servlet servicers: "
 							+ cause, record.getMessage());
-			assertEquals("Incorrect log cause", cause, record.getThrown()
-					.getMessage());
+			assertNull("Should not be cause as contained in message",
+					record.getThrown());
 		}
 	}
 
