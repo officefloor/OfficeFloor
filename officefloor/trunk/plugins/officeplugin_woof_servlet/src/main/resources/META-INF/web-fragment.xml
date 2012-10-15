@@ -6,11 +6,14 @@
 	<listener>
 		<listener-class>net.officefloor.plugin.woof.servlet.WoofServlet</listener-class>
 	</listener>
-	
+
+	<!-- Following should be implied.
+	     Waiting on fix to bug to uncomment: http://bugs.eclipse.org/bugs/show_bug.cgi?id=391877
 	<ordering>
 		<after>
 			<others />
 		</after>
 	</ordering>
+ 	-->
 
 </web-fragment>
