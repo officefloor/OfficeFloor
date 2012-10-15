@@ -34,19 +34,19 @@ Objects
 
   The following bean is registered in the <<<HttpServletRequest>>>.
 
-%{code-snippet|brush-autodetect=1|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/servletfilterjspintegration/RequestBean.java}
+%{code-snippet|brush-autodetect=1|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/woofservletjspintegration/RequestBean.java}
 
 * SessionBean
 
   The following bean is registered in the <<<HttpSession>>>.
 
-%{code-snippet|brush-autodetect=1|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/servletfilterjspintegration/SessionBean.java}
+%{code-snippet|brush-autodetect=1|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/woofservletjspintegration/SessionBean.java}
 
 * ApplicationBean
 
   The following bean is registered in the <<<ServletContext>>>.
 
-%{code-snippet|brush-autodetect=1|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/servletfilterjspintegration/ApplicationBean.java}
+%{code-snippet|brush-autodetect=1|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/woofservletjspintegration/ApplicationBean.java}
 
 
 
@@ -64,7 +64,7 @@ Templates
   
   The following is the template logic class for the above WoOF template.
   
-%{code-snippet|brush-autodetect=1|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/servletfilterjspintegration/TemplateLogic.java}
+%{code-snippet|brush-autodetect=1|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/woofservletjspintegration/TemplateLogic.java}
 
 
   The configuration of WoOF occurs graphically and is as follows.
@@ -82,18 +82,18 @@ Integration
 *-------------------+---------------------------------+---------------------------------------------+---------------------------------------------------------------------+
 || Bean             || Context Access                                      || WoOF access                                                       || JSP access 
 *-------------------+---------------------------------+---------------------------------------------+---------------------------------------------------------------------+
-| RequestBean       | <<<HttpServletRequest.getAttribute("RequestBean")>>> | Method parameter annotated with @HttpRequestStateful("RequestBean") | Used directly in web page via <<< <jsp:useBean id="RequestBean" scope="request" class="net.officefloor.tutorial.servletfilterjspintegration.RequestBean" /> >>> and then <<< <jsp:property name="RequestBean" property="text" /> >>> 
+| RequestBean       | <<<HttpServletRequest.getAttribute("RequestBean")>>> | Method parameter annotated with @HttpRequestStateful("RequestBean") | Used directly in web page via <<< <jsp:useBean id="RequestBean" scope="request" class="net.officefloor.tutorial.woofservletjspintegration.RequestBean" /> >>> and then <<< <jsp:property name="RequestBean" property="text" /> >>> 
 *-------------------+---------------------------------+---------------------------------------------+---------------------------------------------------------------------+
-| SessionBean       | <<<HttpSession.getAttribute("SessionBean")>>>        | Method parameter annotated with @HttpSessionStateful("SessionBean") | Used directly in web page via <<< <jsp:useBean id="SessionBean" scope="session" class="net.officefloor.tutorial.servletfilterjspintegration.SessionBean" /> >>> and then <<< <jsp:property name="SessionBean" property="text" /> >>>
+| SessionBean       | <<<HttpSession.getAttribute("SessionBean")>>>        | Method parameter annotated with @HttpSessionStateful("SessionBean") | Used directly in web page via <<< <jsp:useBean id="SessionBean" scope="session" class="net.officefloor.tutorial.woofservletjspintegration.SessionBean" /> >>> and then <<< <jsp:property name="SessionBean" property="text" /> >>>
 *-------------------+---------------------------------+---------------------------------------------+---------------------------------------------------------------------+
-| ApplicationBean   | <<<ServletContext.getAttribute("ApplicationBean")>>> | Method parameter annotated with @HttpApplicationStateful("ApplicationBean") | Used directly in web page via <<< <jsp:useBean id="ApplicationBean" scope="application" class="net.officefloor.tutorial.servletfilterjspintegration.ApplicationBean" /> >>> and then <<< <jsp:property name="ApplicationBean" property="text" /> >>>
+| ApplicationBean   | <<<ServletContext.getAttribute("ApplicationBean")>>> | Method parameter annotated with @HttpApplicationStateful("ApplicationBean") | Used directly in web page via <<< <jsp:useBean id="ApplicationBean" scope="application" class="net.officefloor.tutorial.woofservletjspintegration.ApplicationBean" /> >>> and then <<< <jsp:property name="ApplicationBean" property="text" /> >>>
 *-------------------+---------------------------------+---------------------------------------------+---------------------------------------------------------------------+
 
-  The integration works both ways also.  The <<<ApplicationBean>>> does not have its value set by the WoOF template logic object.  The value is specified by the following <<<HttpServlet>>> on start-up.
+  The integration works both ways also.  The <<<ApplicationBean>>> does not have its value set by the WoOF template logic object.  The value is specified by the following <<<ServletContextListener>>> on start-up.
 
-%{code-snippet|brush-autodetect=1|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/servletfilterjspintegration/MockHttpServlet.java}
+%{code-snippet|brush-autodetect=1|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/woofservletjspintegration/SetupListener.java}
 
-  As the above <<<HttpServlet>>> registers the <<<ApplicationBean>>> within the <<<ServletContext>>>, WoOF will obtain this object in rendering the web page and therefore have the <<<text>>> property already specified.
+  As the above <<<ServletContextListener>>> registers the <<<ApplicationBean>>> within the <<<ServletContext>>>, WoOF will obtain this object in rendering the web page and therefore have the <<<text>>> property already specified.
 
 
 
@@ -113,7 +113,7 @@ Unit Test
   
    * JSP
 
-%{code-snippet|brush-autodetect=1|id=tutorial|file=${basedir}/src/test/java/net/officefloor/tutorial/servletfilterjspintegration/JspIT.java}
+%{code-snippet|brush-autodetect=1|id=tutorial|file=${basedir}/src/test/java/net/officefloor/tutorial/woofservletjspintegration/JspIT.java}
 
 
 Next
