@@ -34,7 +34,7 @@ WoofServletFilter
 
 Configuring the WoofServletFilter
 
-  To configure the {{{/apidocs/net/officefloor/plugin/woof/servlet/WoofServletFilter.html}WoofServletFilter}} into an application add the following dependency to the project.  The JAR for the dependency contains a <<<web-fragment.xml>>> which will automatically configure the necessary components to run WoOF within the JEE Servlet Container. 
+  To configure the {{{/apidocs/net/officefloor/plugin/woof/servlet/WoofServlet.html}WoofServlet}} into an application add the following dependency to the project.  The JAR for the dependency contains a <<<web-fragment.xml>>> which will automatically configure the necessary components to run WoOF within the JEE Servlet Container. 
   
 %{code-snippet|brush-autodetect=1|id=tutorial|file=${basedir}/pom.xml}
 
@@ -42,7 +42,7 @@ Configuring the WoofServletFilter
 
 %{code-snippet|brush-autodetect=1|file=${basedir}/src/main/webapp/WEB-INF/web.xml}
 
-  However should there be a need to configure the {{{/apidocs/net/officefloor/plugin/woof/servlet/WoofServletFilter.html}WoofServletFilter}} manually, please ensure the filter mapping is "<<</*>>>" so that each request may be intercepted.  WoOF will only service the requests it is configured to handle and lets the Servlet application handle the rest.
+  However should there be a need to configure the {{{/apidocs/net/officefloor/plugin/woof/servlet/WoofServlet.html}WoofServlet}} manually, please ensure it is configured as a <<<ServletContextListener>>> to allow it to configure itself.  WoOF will only service the requests it is configured to handle and lets the Servlet application handle the rest.
 
 
   
@@ -50,7 +50,7 @@ ExampleClass
 
   As per the above configuration, the following class directly handles a web request.
 
-%{code-snippet|brush-autodetect=1|id=example|file=${basedir}/src/main/java/net/officefloor/tutorial/servletfilterwebapplication/ExampleClass.java}
+%{code-snippet|brush-autodetect=1|id=example|file=${basedir}/src/main/java/net/officefloor/tutorial/woofservletwebapplication/ExampleClass.java}
 
   Running within a JEE Servlet container the {{{/apidocs/net/officefloor/plugin/socket/server/http/ServerHttpConnection.html}ServerHttpConnection}} implementation wraps the <<<ServletRequest>>> and <<<ServletResponse>>> so that existing stand-alone WoOF applications can be run.  It is the re-implementing of the base WoOF objects ( {{{/apidocs/net/officefloor/plugin/socket/server/http/ServerHttpConnection.html}ServerHttpConnection}} , {{{/apidocs/net/officefloor/plugin/web/http/session/HttpSession.html}HttpSession}} ) to use the JEE Servlet Container APIs that the JEE Servlet integration is achieved.
 
@@ -86,10 +86,10 @@ Unit Test
    
    * Request being serviced by a class
 
-%{code-snippet|brush-autodetect=1|id=example|file=${basedir}/src/test/java/net/officefloor/tutorial/servletfilterwebapplication/ExampleIT.java}
+%{code-snippet|brush-autodetect=1|id=example|file=${basedir}/src/test/java/net/officefloor/tutorial/woofservletwebapplication/ExampleIT.java}
 
 
 Next
 
-  The {{{../ServletFilterJspIntegration/index.html}next tutorial}} looks at making use of existing Java Server Pages (JSP).
+  The {{{../WoofServletJspIntegration/index.html}next tutorial}} looks at making use of existing Java Server Pages (JSP).
 
