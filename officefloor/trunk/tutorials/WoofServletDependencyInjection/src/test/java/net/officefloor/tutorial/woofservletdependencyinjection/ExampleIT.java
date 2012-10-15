@@ -35,34 +35,30 @@ import org.apache.http.impl.client.DefaultHttpClient;
  * 
  * @author Daniel Sagenschneider
  */
-// START SNIPPET: example
 public class ExampleIT extends TestCase {
 
 	private final HttpClient client = new DefaultHttpClient();
 
-	public void testUnhandled() throws IOException {
-		this.assertRequest("/unhandled", "<html><body>SERVLET</body></html>");
+	@Override
+	protected void tearDown() throws Exception {
+		this.client.getConnectionManager().shutdown();
 	}
 
+	// START SNIPPET: example
 	public void testTemplate() throws IOException {
-		this.assertRequest("/template", "<html><body>MESSAGE</body></html>");
-	}
-
-	private void assertRequest(String uri, String expectedContent)
-			throws IOException {
 
 		// Undertake the request
-		HttpGet request = new HttpGet("http://localhost:18181/test" + uri);
+		HttpGet request = new HttpGet("http://localhost:18181/test/template");
 		HttpResponse response = this.client.execute(request);
-		assertEquals("Request should be successful: " + uri, 200, response
+		assertEquals("Request should be successful", 200, response
 				.getStatusLine().getStatusCode());
 
 		// Ensure content is as expected
 		ByteArrayOutputStream buffer = new ByteArrayOutputStream();
 		response.getEntity().writeTo(buffer);
-		assertEquals("Incorrect response entity", expectedContent,
-				buffer.toString());
+		assertEquals("Incorrect response entity",
+				"<html><body>MESSAGE</body></html>", buffer.toString());
 	}
+	// END SNIPPET: example
 
 }
-// END SNIPPET: example
