@@ -27,13 +27,13 @@
 		<module>PrototypeHttpServer</module>
 		<module>RawHttpServer</module>
 		<module>SectionHttpServer</module>
-		<module>ServletFilterDependencyInjection</module>
-		<module>ServletFilterJspIntegration</module>
-		<module>ServletFilterWebApplication</module>
-		<module>ServletMigration</module>
 		<module>SessionHttpServer</module>
 		<module>TeamHttpServer</module>
 		<module>TransactionHttpServer</module>
+		<module>WoofServletDependencyInjection</module>
+		<module>WoofServletJspIntegration</module>
+		<module>WoofServletMigration</module>
+		<module>WoofServletWebApplication</module>
 	</modules>
 	<build>
 		<plugins>
