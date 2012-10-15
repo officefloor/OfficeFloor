@@ -8,7 +8,7 @@
 
   This tutorial demonstrates using the dependency injected objects (e.g. EJBs) from the Servlet container within WoOF.
   
-  {{{http://sourceforge.net/projects/officefloor/files/maven/maven2/net/officefloor/tutorial/ServletFilterDependencyInjection/${projectVersion}/ServletFilterDependencyInjection-${projectVersion}-project.zip/download}Download Tutorial Source}}
+  {{{http://sourceforge.net/projects/officefloor/files/maven/maven2/net/officefloor/tutorial/WoofServletDependencyInjection/${projectVersion}/WoofServletDependencyInjection-${projectVersion}-project.zip/download}Download Tutorial Source}}
   
 EJB
 

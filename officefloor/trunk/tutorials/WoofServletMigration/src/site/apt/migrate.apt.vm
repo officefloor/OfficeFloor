@@ -29,11 +29,11 @@ Difference between JEE and OfficeFloor
 
 Steps
 
-*Step 1: WoofServletFilter
+*Step 1: WoofServlet
 
-  Introduce the {{{/apidocs/net/officefloor/plugin/woof/servlet/WoofServletFilter.html}WoofServletFilter}} into the JEE Servlet application to start using WoOF functionality.
+  Introduce the {{{/apidocs/net/officefloor/plugin/woof/servlet/WoofServlet.html}WoofServlet}} into the JEE Servlet application to start using WoOF functionality.
   
-  The {{{../ServletFilterWebApplication/index.html}WoofServletFilter tutorial}} provides further details. 
+  The {{{../WoofServletWebApplication/index.html}WoofServlet tutorial}} provides further details. 
   
   <Benefit> : Able to use WoOF templates along with the Eclipse plug-in for visual configuration.
   
@@ -44,7 +44,7 @@ Steps
   
   However it is also likely not feasible to migrate the EJB functionality in one step.
   
-  To allow an incremental migration and refactoring, the WoofServletFilter is able to access and use EJB dependencies.  See the {{{../ServletFilterDependencyInjection/index.html}Servlet Filter Dependency Injection tutorial}} for further details.
+  To allow an incremental migration and refactoring, the {{{/apidocs/net/officefloor/plugin/woof/servlet/WoofServlet.html}WoofServlet}} is able to access and use EJB dependencies.  See the {{{../WoofServletDependencyInjection/index.html}WoofServlet Dependency Injection tutorial}} for further details.
   
   <Benefit> : Able to use existing Servlet / EJB functionality without change to build out WoOF templates.
   

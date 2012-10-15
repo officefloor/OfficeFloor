@@ -8,7 +8,7 @@
 
   This tutorial demonstrates running JEE Servlet functionality within a WoOF web application.
     
-  {{{http://sourceforge.net/projects/officefloor/files/maven/maven2/net/officefloor/tutorial/ServletMigration/${projectVersion}/ServletMigration-${projectVersion}-project.zip/download}Download Tutorial Source}}
+  {{{http://sourceforge.net/projects/officefloor/files/maven/maven2/net/officefloor/tutorial/WoofServletMigration/${projectVersion}/WoofServletMigration-${projectVersion}-project.zip/download}Download Tutorial Source}}
 
 
 Extending WoOF application for Servlet functionality
