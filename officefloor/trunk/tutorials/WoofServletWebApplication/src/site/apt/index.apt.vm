@@ -8,12 +8,12 @@
 
   This tutorial demonstrates running a WoOF web application within a JEE Servlet container.
     
-  {{{http://sourceforge.net/projects/officefloor/files/maven/maven2/net/officefloor/tutorial/ServletFilterWebApplication/${projectVersion}/ServletFilterWebApplication-${projectVersion}-project.zip/download}Download Tutorial Source}}
+  {{{http://sourceforge.net/projects/officefloor/files/maven/maven2/net/officefloor/tutorial/WoofServletWebApplication/${projectVersion}/WoofServletWebApplication-${projectVersion}-project.zip/download}Download Tutorial Source}}
 
 
-WoofServletFilter
+WoofServlet
 
-  The {{{/apidocs/net/officefloor/plugin/woof/servlet/WoofServletFilter.html}WoofServletFilter}} is a Servlet Filter which provides the necessary hooks for running WoOF within a JEE Servlet container.
+  The {{{/apidocs/net/officefloor/plugin/woof/servlet/WoofServlet.html}WoofServlet}} is a Servlet which provides the necessary hooks for running WoOF within a JEE Servlet container.
   
   The following is the configuration for this tutorial.
 
@@ -21,7 +21,7 @@ WoofServletFilter
 
   The above configuration provides the following:
   
-   * OfficeFloor dynamic web template
+   * WoOF dynamic web template
    
    * Rendering of a JSP (by the Servlet container) as a navigation link from the above web template
    
@@ -29,10 +29,10 @@ WoofServletFilter
    
   For further explanation of the above WoOF configuration see the previous tutorials.
   
-  Within a JEE Servlet Container WoOF defers to the JEE Servlet Container to provide the resources.  The ability to link to Servlet container resources (e.g. JSPs, Servlets, static pages, etc) is provided to allow introducing WoOF into JEE web applications without having to rewrite the web applications.  WoOF will also happily co-exist with other frameworks within a Servlet container.
+  Within a JEE Servlet Container WoOF defers to the JEE Servlet Container to provide the resources.  The ability to link to Servlet container resources (e.g. JSPs, Servlets, static pages, etc) is provided to allow introducing WoOF into JEE web applications without having to rewrite the web application.  WoOF will also happily co-exist with other frameworks within a Servlet container.
 
 
-Configuring the WoofServletFilter
+Configuring the WoofServlet
 
   To configure the {{{/apidocs/net/officefloor/plugin/woof/servlet/WoofServlet.html}WoofServlet}} into an application add the following dependency to the project.  The JAR for the dependency contains a <<<web-fragment.xml>>> which will automatically configure the necessary components to run WoOF within the JEE Servlet Container. 
   

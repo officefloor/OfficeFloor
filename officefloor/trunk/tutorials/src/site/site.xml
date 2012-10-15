@@ -1,8 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project>
 	<bannerLeft>
-		<src>./images/OfficeFloorBannerImage.png
-		</src>
+		<src>./images/OfficeFloorBannerImage.png</src>
 		<href>http://www.officefloor.net/</href>
 	</bannerLeft>
 	<body>
@@ -26,11 +25,11 @@
 			<item name="Server Events" href="./CometManualApp/index.html" />
 		</menu>
 		<menu name="JEE Tutorials">
-			<item name="Servlet" href="./ServletFilterWebApplication/index.html" />
-			<item name="JSP" href="./ServletFilterJspIntegration/index.html" />
-			<item name="EJB" href="./ServletFilterDependencyInjection/index.html" />
-			<item name="Embed" href="./ServletMigration/index.html" />
-			<item name="Migrate" href="./ServletMigration/migrate.html" />
+			<item name="Servlet" href="./WoofServletWebApplication/index.html" />
+			<item name="JSP" href="./WoofServletJspIntegration/index.html" />
+			<item name="EJB" href="./WoofServletDependencyInjection/index.html" />
+			<item name="Embed" href="./WoofServletMigration/index.html" />
+			<item name="Migrate" href="./WoofServletMigration/migrate.html" />
 		</menu>
 		<menu name="DI Tutorials">
 			<item name="Dependency Injection" href="./DatabaseHttpServer/index.html" />
