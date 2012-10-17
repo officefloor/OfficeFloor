@@ -318,6 +318,20 @@ public class ServletWebAutoWireApplication<S extends OfficeFloorServlet>
 				String.valueOf(applicationIndex));
 		dynamic.addMapping(mappedUris);
 		dynamic.setLoadOnStartup(1);
+
+		// Log that configured so that know if occurred
+		StringBuilder logMessage = new StringBuilder();
+		logMessage.append(servletName + " (" + servletClass.getName()
+				+ ") loaded to service ");
+		boolean isFirst = true;
+		for (String mappedUri : mappedUris) {
+			if (!isFirst) {
+				logMessage.append(", ");
+			}
+			isFirst = false;
+			logMessage.append(mappedUri);
+		}
+		servletContext.log(logMessage.toString());
 	}
 
 	/**
