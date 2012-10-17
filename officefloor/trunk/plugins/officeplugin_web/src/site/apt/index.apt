@@ -17,7 +17,7 @@
 *---------------------------------------------------------------------------+--------------------------------------------------------------+
 |  {{{/apidocs/net/officefloor/plugin/web/http/resource/source/HttpFileSenderWorkSource.html}net.officefloor.plugin.socket.server.http.resource.source.HttpFileSenderWorkSource}} | Writes content of files from the class path to HTTP response |
 *---------------------------------------------------------------------------+--------------------------------------------------------------+
-| {{{/apidocs/net/officefloor/plugin/web/http/response/source/HttpResponseWriterWorkSource.html}net.officefloor.plugin.socket.server.http.response.source.HttpResponseWriterWorkSource}} | Writes a {{{/apidocs/net/officefloor/plugin/web/http/resource/HttpFile.html}net.officefloor.plugin.socket.server.http.resource.HttpFile}} as the HTTP response |
+| {{{/apidocs/net/officefloor/plugin/web/http/resource/file/HttpFileWriterWorkSource.html}net.officefloor.plugin.web.http.resource.file.HttpFileWriterWorkSource}} | Writes a {{{/apidocs/net/officefloor/plugin/web/http/resource/HttpFile.html}net.officefloor.plugin.socket.server.http.resource.HttpFile}} as the HTTP response |
 *---------------------------------------------------------------------------+--------------------------------------------------------------+
 |  {{{/apidocs/net/officefloor/plugin/web/http/route/source/HttpRouteWorkSource.html}net.officefloor.plugin.socket.server.http.route.source.HttpRouteWorkSource}} | Provides ability to route HTTP request to a Task based on URL pattern |
 *---------------------------------------------------------------------------+--------------------------------------------------------------+
