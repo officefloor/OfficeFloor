@@ -140,6 +140,13 @@ public class WoofServletConfigureTest extends OfficeFrameTestCase {
 				});
 		servletDynamic.setLoadOnStartup(1);
 
+		// Log configuration
+		this.context
+				.log("WoOF ("
+						+ WoofServlet.class.getName()
+						+ ") loaded to service "
+						+ "/gwt/comet-subscribe, /test, /gwt/comet-publish, /gwt, /gwt/service, *.task");
+
 		// Test
 		this.doTest();
 	}
