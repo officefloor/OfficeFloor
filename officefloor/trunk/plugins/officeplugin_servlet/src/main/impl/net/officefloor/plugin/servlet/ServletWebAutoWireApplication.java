@@ -140,7 +140,8 @@ public class ServletWebAutoWireApplication<S extends OfficeFloorServlet>
 	 *            {@link ServletContext}.
 	 */
 	@SuppressWarnings({ "rawtypes", "unchecked" })
-	public static void configure(OfficeFloorServlet servletInitiateInstance,
+	public static synchronized void configure(
+			OfficeFloorServlet servletInitiateInstance,
 			final ServletContext servletContext) {
 
 		// Obtain the Servlet name
@@ -319,10 +320,17 @@ public class ServletWebAutoWireApplication<S extends OfficeFloorServlet>
 		dynamic.addMapping(mappedUris);
 		dynamic.setLoadOnStartup(1);
 
+		// Provide Filter to override DefaultServlet of Server
+		javax.servlet.FilterRegistration.Dynamic filter = servletContext
+				.addFilter(servletName, servletClass);
+		filter.setInitParameter(INIT_PROPERTY_APPLICATION_INDEX,
+				String.valueOf(applicationIndex));
+		filter.addMappingForUrlPatterns(null, false, mappedUris);
+
 		// Log that configured so that know if occurred
 		StringBuilder logMessage = new StringBuilder();
-		logMessage.append(servletName + " (" + servletClass.getName()
-				+ ") loaded to service ");
+		logMessage.append(servletName + " Servlet/Filter ("
+				+ servletClass.getName() + ") loaded to service ");
 		boolean isFirst = true;
 		for (String mappedUri : mappedUris) {
 			if (!isFirst) {
@@ -351,7 +359,7 @@ public class ServletWebAutoWireApplication<S extends OfficeFloorServlet>
 	 *             If fails to initiate.
 	 */
 	@SuppressWarnings("unchecked")
-	public static <I extends OfficeFloorServlet> ServletWebAutoWireApplication<I> initiate(
+	public static synchronized <I extends OfficeFloorServlet> ServletWebAutoWireApplication<I> initiate(
 			I servletInstance) throws ServletException {
 
 		// Obtain the application for the Servlet instance
@@ -379,11 +387,14 @@ public class ServletWebAutoWireApplication<S extends OfficeFloorServlet>
 									.getSimpleName());
 		}
 
-		// Open the OfficeFloor
-		try {
-			application.officeFloor = application.openOfficeFloor();
-		} catch (Exception ex) {
-			throw new ServletException(ex);
+		// Only open the OfficeFloor once for the application
+		// (called twice by filter instance and servlet instance)
+		if (application.officeFloor == null) {
+			try {
+				application.officeFloor = application.openOfficeFloor();
+			} catch (Exception ex) {
+				throw new ServletException(ex);
+			}
 		}
 
 		// Return the application
@@ -425,9 +436,17 @@ public class ServletWebAutoWireApplication<S extends OfficeFloorServlet>
 	 * Destroys this {@link ServletWebAutoWireApplication}.
 	 */
 	public void destroy() {
-		// Ensure close OfficeFloor
-		if (this.officeFloor != null) {
-			this.officeFloor.closeOfficeFloor();
+		synchronized (ServletWebAutoWireApplication.class) {
+
+			// Ensure close OfficeFloor
+			if (this.officeFloor != null) {
+
+				// Close OfficeFloor
+				this.officeFloor.closeOfficeFloor();
+
+				// Release reference
+				this.officeFloor = null;
+			}
 		}
 	}
 

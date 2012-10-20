@@ -99,6 +99,8 @@ public class WoofServletConfigureTest extends OfficeFrameTestCase {
 	public void testAutomaticallyRegisterServlet() throws IOException {
 
 		final Dynamic servletDynamic = this.createMock(Dynamic.class);
+		final javax.servlet.FilterRegistration.Dynamic filterDynamic = this
+				.createMock(javax.servlet.FilterRegistration.Dynamic.class);
 
 		// Record determining that WoOF Servlet not registered
 		this.recordNotAlreadyRegistered();
@@ -140,9 +142,35 @@ public class WoofServletConfigureTest extends OfficeFrameTestCase {
 				});
 		servletDynamic.setLoadOnStartup(1);
 
+		// Configure the Filter
+		this.recordReturn(this.context, this.context.addFilter(
+				WoofServlet.SERVLET_NAME, WoofServlet.class), filterDynamic);
+		this.recordReturn(filterDynamic, filterDynamic.setInitParameter(
+				"officefloorservlet.application.index", "1"), true);
+		filterDynamic.addMappingForUrlPatterns(null, false,
+				"/gwt/comet-subscribe", "/test", "/gwt/comet-publish", "/gwt",
+				"/gwt/service", "*.task");
+		this.control(filterDynamic).setMatcher(new AbstractMatcher() {
+			@Override
+			public boolean matches(Object[] expected, Object[] actual) {
+				assertNull("Should be default dispatching", actual[0]);
+				assertFalse("Should be loaded before other filters",
+						(Boolean) actual[1]);
+				String[] expectedUrls = (String[]) expected[2];
+				String[] actualUrls = (String[]) actual[2];
+				assertEquals("Incorrect number of URLs", expectedUrls.length,
+						actualUrls.length);
+				for (int i = 0; i < expectedUrls.length; i++) {
+					assertEquals("Incorret URL " + i, expectedUrls[i],
+							actualUrls[i]);
+				}
+				return true;
+			}
+		});
+
 		// Log configuration
 		this.context
-				.log("WoOF ("
+				.log("WoOF Servlet/Filter ("
 						+ WoofServlet.class.getName()
 						+ ") loaded to service "
 						+ "/gwt/comet-subscribe, /test, /gwt/comet-publish, /gwt, /gwt/service, *.task");

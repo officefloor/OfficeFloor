@@ -17,7 +17,7 @@
  */
 package net.officefloor.demo;
 
-import net.officefloor.frame.test.OfficeFrameTestCase;
+import net.officefloor.plugin.web.http.location.HttpApplicationLocationManagedObjectSource;
 import net.officefloor.plugin.woof.WoofOfficeFloorSource;
 
 /**
@@ -25,7 +25,7 @@ import net.officefloor.plugin.woof.WoofOfficeFloorSource;
  * 
  * @author Daniel Sagenschneider
  */
-public class RunDemoAppTest extends OfficeFrameTestCase {
+public class RunDemoAppTest extends AbstractDemoAppTestCase {
 
 	/**
 	 * Runs the application for manual testing.
@@ -37,7 +37,7 @@ public class RunDemoAppTest extends OfficeFrameTestCase {
 
 		// Run from appropriate webapp directory
 		System.setProperty(WoofOfficeFloorSource.PROPERTY_WEBAPP_LOCATION,
-				ServletHostDemoAppTest.findWebApDirectory().getAbsolutePath());
+				findWebApDirectory().getAbsolutePath());
 
 		// Run
 		WoofOfficeFloorSource.start(args);
@@ -54,17 +54,18 @@ public class RunDemoAppTest extends OfficeFrameTestCase {
 		}
 	}
 
-	/**
-	 * Runs the application.
-	 */
-	public void testRun() throws Exception {
+	@Override
+	protected int startServer() throws Exception {
 		// Start (always from default webapp directory)
 		WoofOfficeFloorSource.start();
+
+		// Running on default port
+		return HttpApplicationLocationManagedObjectSource.DEFAULT_HTTP_PORT;
 	}
 
 	@Override
-	protected void tearDown() throws Exception {
-		// Stop
+	protected void stopServer() throws Exception {
+		// Stop server
 		WoofOfficeFloorSource.stop();
 	}
 
