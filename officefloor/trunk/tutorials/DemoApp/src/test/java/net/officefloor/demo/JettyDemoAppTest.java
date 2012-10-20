@@ -22,6 +22,7 @@ import java.io.File;
 import javax.servlet.Servlet;
 
 import net.officefloor.plugin.socket.server.http.server.MockHttpServer;
+import net.officefloor.plugin.woof.servlet.WoofServlet;
 
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.session.SessionHandler;
@@ -55,6 +56,9 @@ public class JettyDemoAppTest extends AbstractDemoAppTestCase {
 		context.setResourceBase(webAppDir.getAbsolutePath());
 		context.setSessionHandler(new SessionHandler());
 		server.setHandler(context);
+		
+		// If running from clean, WoOF Servlet webfragment not available
+		context.addEventListener(new WoofServlet());
 
 		// Start the server
 		server.start();
