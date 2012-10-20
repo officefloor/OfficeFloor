@@ -21,66 +21,18 @@ import java.io.File;
 
 import javax.servlet.Servlet;
 
+import net.officefloor.plugin.socket.server.http.server.MockHttpServer;
+
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.session.SessionHandler;
 import org.eclipse.jetty.webapp.WebAppContext;
-
-import net.officefloor.frame.test.OfficeFrameTestCase;
-import net.officefloor.plugin.woof.WoofOfficeFloorSource;
 
 /**
  * Tests within a JEE {@link Servlet} container.
  * 
  * @author Daniel Sagenschneider
  */
-public class ServletHostDemoAppTest extends OfficeFrameTestCase {
-
-	/**
-	 * <p>
-	 * Finds the <code>webapp</code> directory.
-	 * <p>
-	 * It first attempts to look for a target directory containing the compiled
-	 * GWT content and if not available falls back to the
-	 * <code>src/main/webapp</code>.
-	 * 
-	 * @return {@link File} location of the <code>webapp</code> directory.
-	 */
-	public static File findWebApDirectory() {
-
-		// Find target directory (as has incrementing version)
-		File targetDir = new File(".", "target");
-		File webAppDir = null;
-		if (targetDir.exists()) {
-			for (File dir : targetDir.listFiles()) {
-
-				// Ignore if not directory (ignores packaged content)
-				if (!(dir.isDirectory())) {
-					continue;
-				}
-
-				// Determine if webap directory
-				if (dir.getName().startsWith("DemoApp-")) {
-					// Found the webapp directory
-					webAppDir = dir;
-				}
-			}
-		}
-
-		// Determine if target webapp directory is suitable to use
-		if ((webAppDir != null)
-				&& (webAppDir.exists())
-				&& (new File(webAppDir, WoofOfficeFloorSource.WEBXML_FILE_PATH)
-						.exists())) {
-			// Use target compiled directory
-			return webAppDir;
-		}
-
-		// Use source webapp directory
-		System.err.println("WARNING: using "
-				+ WoofOfficeFloorSource.WEBAPP_PATH
-				+ " so GWT functionality will NOT be available");
-		return new File(".", WoofOfficeFloorSource.WEBAPP_PATH);
-	}
+public class JettyDemoAppTest extends AbstractDemoAppTestCase {
 
 	/**
 	 * Starts the {@link Server}.
@@ -139,16 +91,21 @@ public class ServletHostDemoAppTest extends OfficeFrameTestCase {
 	 */
 	private Server server = null;
 
-	/**
-	 * Runs the application.
-	 */
-	public void testRun() throws Exception {
+	@Override
+	protected int startServer() throws Exception {
+
+		// Obtain port for running
+		int port = MockHttpServer.getAvailablePort();
+
 		// Start the server
-		this.server = startServer("", 7979, findWebApDirectory());
+		this.server = startServer("", port, findWebApDirectory());
+
+		// Return the port
+		return port;
 	}
 
 	@Override
-	protected void tearDown() throws Exception {
+	protected void stopServer() throws Exception {
 		// Stop the server
 		this.server.stop();
 	}

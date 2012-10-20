@@ -20,11 +20,16 @@ package net.officefloor.plugin.servlet;
 
 import java.io.IOException;
 
+import javax.servlet.Filter;
+import javax.servlet.FilterChain;
+import javax.servlet.FilterConfig;
 import javax.servlet.Servlet;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
 import javax.servlet.ServletException;
+import javax.servlet.ServletRequest;
+import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -52,11 +57,17 @@ import net.officefloor.plugin.web.http.application.WebAutoWireApplication;
  * {@link HttpServlet}. This is necessary as a new instance of the
  * {@link OfficeFloorServlet} implementation is created by the {@link Servlet}
  * container to allow it to manage dependency injection of resources.
+ * <p>
+ * This also implements {@link Filter} because many JEE {@link Servlet}
+ * implementations register their default {@link Servlet} to service resources
+ * before the {@link ServletContextListener} configuration of this
+ * {@link OfficeFloorServlet}. By also being a {@link Filter} servicing the same
+ * mappings it overcomes this issue.
  * 
  * @author Daniel Sagenschneider
  */
 public abstract class OfficeFloorServlet extends HttpServlet implements
-		ServletContextListener {
+		ServletContextListener, Filter {
 
 	/**
 	 * Obtains the name to register this {@link Servlet}.
@@ -88,6 +99,11 @@ public abstract class OfficeFloorServlet extends HttpServlet implements
 	@SuppressWarnings("rawtypes")
 	private ServletWebAutoWireApplication application;
 
+	/**
+	 * {@link FilterConfig}.
+	 */
+	private FilterConfig filterConfig = null;
+
 	/*
 	 * ================== ServletContextListener =====================
 	 */
@@ -117,8 +133,20 @@ public abstract class OfficeFloorServlet extends HttpServlet implements
 
 	@Override
 	public void init() throws ServletException {
-		// Initialise and obtain the source for this Servlet
+		// Initialise and obtain the application for this Servlet
 		this.application = ServletWebAutoWireApplication.initiate(this);
+	}
+
+	@Override
+	public String getInitParameter(String name) {
+
+		// Provide from filter configuration
+		if (this.filterConfig != null) {
+			return this.filterConfig.getInitParameter(name);
+		}
+
+		// Provide from HTTP Servlet configuration
+		return super.getInitParameter(name);
 	}
 
 	@Override
@@ -143,6 +171,36 @@ public abstract class OfficeFloorServlet extends HttpServlet implements
 		// Destroy the source
 		if (this.application != null) {
 			this.application.destroy();
+		}
+	}
+
+	/*
+	 * ===================== Filter ===================================
+	 */
+
+	@Override
+	public void init(FilterConfig filterConfig) throws ServletException {
+		// Maintain access to configuration
+		this.filterConfig = filterConfig;
+
+		// Initialise
+		this.init();
+	}
+
+	@Override
+	@SuppressWarnings("unchecked")
+	public void doFilter(ServletRequest request, ServletResponse response,
+			FilterChain chain) throws IOException, ServletException {
+
+		// Service the request
+		HttpServletRequest httpRequest = (HttpServletRequest) request;
+		HttpServletResponse httpResponse = (HttpServletResponse) response;
+		boolean isServiced = this.application.service(this, httpRequest,
+				httpResponse);
+
+		// Chain if not serviced
+		if (!isServiced) {
+			chain.doFilter(request, response);
 		}
 	}
 
