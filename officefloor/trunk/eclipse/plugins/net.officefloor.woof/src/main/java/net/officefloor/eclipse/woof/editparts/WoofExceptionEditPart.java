@@ -22,10 +22,16 @@ import java.beans.PropertyChangeEvent;
 import java.util.List;
 
 import net.officefloor.eclipse.WoofPlugin;
+import net.officefloor.eclipse.common.action.OperationUtil;
 import net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart;
+import net.officefloor.eclipse.common.editpolicies.open.OfficeFloorOpenEditPolicy;
+import net.officefloor.eclipse.common.editpolicies.open.OpenHandler;
+import net.officefloor.eclipse.common.editpolicies.open.OpenHandlerContext;
 import net.officefloor.eclipse.skin.woof.ExceptionFigure;
 import net.officefloor.eclipse.skin.woof.ExceptionFigureContext;
 import net.officefloor.eclipse.util.EclipseUtil;
+import net.officefloor.eclipse.woof.operations.RefactorExceptionOperation;
+import net.officefloor.model.woof.WoofChanges;
 import net.officefloor.model.woof.WoofExceptionModel;
 import net.officefloor.model.woof.WoofExceptionModel.WoofExceptionEvent;
 
@@ -53,6 +59,25 @@ public class WoofExceptionEditPart
 		EclipseUtil.addToList(models, this.getCastedModel()
 				.getWoofSectionInput());
 		EclipseUtil.addToList(models, this.getCastedModel().getWoofResource());
+	}
+
+	@Override
+	protected void populateOfficeFloorOpenEditPolicy(
+			OfficeFloorOpenEditPolicy<WoofExceptionModel> policy) {
+		policy.allowOpening(new OpenHandler<WoofExceptionModel>() {
+			@Override
+			public void doOpen(OpenHandlerContext<WoofExceptionModel> context) {
+
+				// Obtain the changes
+				WoofChanges changes = (WoofChanges) WoofExceptionEditPart.this
+						.getEditor().getModelChanges();
+
+				// Refactor exception
+				WoofExceptionModel model = context.getModel();
+				OperationUtil.execute(new RefactorExceptionOperation(changes),
+						model.getX(), model.getY(), context.getEditPart());
+			}
+		});
 	}
 
 	@Override
