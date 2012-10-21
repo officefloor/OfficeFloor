@@ -22,9 +22,15 @@ import java.beans.PropertyChangeEvent;
 import java.util.List;
 
 import net.officefloor.eclipse.WoofPlugin;
+import net.officefloor.eclipse.common.action.OperationUtil;
 import net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart;
+import net.officefloor.eclipse.common.editpolicies.open.OfficeFloorOpenEditPolicy;
+import net.officefloor.eclipse.common.editpolicies.open.OpenHandler;
+import net.officefloor.eclipse.common.editpolicies.open.OpenHandlerContext;
 import net.officefloor.eclipse.skin.woof.SectionFigure;
 import net.officefloor.eclipse.skin.woof.SectionFigureContext;
+import net.officefloor.eclipse.woof.operations.RefactorSectionOperation;
+import net.officefloor.model.woof.WoofChanges;
 import net.officefloor.model.woof.WoofSectionModel;
 import net.officefloor.model.woof.WoofSectionModel.WoofSectionEvent;
 
@@ -50,6 +56,25 @@ public class WoofSectionEditPart
 	protected void populateModelChildren(List<Object> childModels) {
 		childModels.addAll(this.getCastedModel().getInputs());
 		childModels.addAll(this.getCastedModel().getOutputs());
+	}
+
+	@Override
+	protected void populateOfficeFloorOpenEditPolicy(
+			OfficeFloorOpenEditPolicy<WoofSectionModel> policy) {
+		policy.allowOpening(new OpenHandler<WoofSectionModel>() {
+			@Override
+			public void doOpen(OpenHandlerContext<WoofSectionModel> context) {
+
+				// Obtain the changes
+				WoofChanges changes = (WoofChanges) WoofSectionEditPart.this
+						.getEditor().getModelChanges();
+
+				// Refactor section
+				WoofSectionModel model = context.getModel();
+				OperationUtil.execute(new RefactorSectionOperation(changes),
+						model.getX(), model.getY(), context.getEditPart());
+			}
+		});
 	}
 
 	@Override

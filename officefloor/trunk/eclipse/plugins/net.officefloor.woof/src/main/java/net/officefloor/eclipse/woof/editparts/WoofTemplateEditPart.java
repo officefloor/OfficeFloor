@@ -22,11 +22,16 @@ import java.beans.PropertyChangeEvent;
 import java.util.List;
 
 import net.officefloor.eclipse.WoofPlugin;
+import net.officefloor.eclipse.common.action.OperationUtil;
 import net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart;
 import net.officefloor.eclipse.common.editpolicies.directedit.DirectEditAdapter;
 import net.officefloor.eclipse.common.editpolicies.directedit.OfficeFloorDirectEditPolicy;
+import net.officefloor.eclipse.common.editpolicies.open.OfficeFloorOpenEditPolicy;
+import net.officefloor.eclipse.common.editpolicies.open.OpenHandler;
+import net.officefloor.eclipse.common.editpolicies.open.OpenHandlerContext;
 import net.officefloor.eclipse.skin.woof.TemplateFigure;
 import net.officefloor.eclipse.skin.woof.TemplateFigureContext;
+import net.officefloor.eclipse.woof.operations.RefactorTemplateOperation;
 import net.officefloor.model.change.Change;
 import net.officefloor.model.woof.WoofChanges;
 import net.officefloor.model.woof.WoofTemplateModel;
@@ -61,6 +66,25 @@ public class WoofTemplateEditPart
 		models.addAll(this.getCastedModel().getWoofTemplateOutputs());
 		models.addAll(this.getCastedModel().getWoofSectionOutputs());
 		models.addAll(this.getCastedModel().getWoofExceptions());
+	}
+
+	@Override
+	protected void populateOfficeFloorOpenEditPolicy(
+			OfficeFloorOpenEditPolicy<WoofTemplateModel> policy) {
+		policy.allowOpening(new OpenHandler<WoofTemplateModel>() {
+			@Override
+			public void doOpen(OpenHandlerContext<WoofTemplateModel> context) {
+
+				// Obtain the changes
+				WoofChanges changes = (WoofChanges) WoofTemplateEditPart.this
+						.getEditor().getModelChanges();
+
+				// Refactor template
+				WoofTemplateModel model = context.getModel();
+				OperationUtil.execute(new RefactorTemplateOperation(changes),
+						model.getX(), model.getY(), context.getEditPart());
+			}
+		});
 	}
 
 	@Override
