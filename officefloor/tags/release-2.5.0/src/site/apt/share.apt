@@ -1,0 +1,11 @@
+				       ------------------
+				    True Inversion of Control
+				       ------------------
+				      Daniel Sagenschneider
+				       ------------------
+
+[./images/OfficeFloorLogo.png] 
+
+ OfficeFloor is a true inversion of control container making it a simple yet powerful framework for building Java web applications that is a build once run anywhere solution – even with Cloud Computing.
+ 
+ More information at {{http://officefloor.net}}.

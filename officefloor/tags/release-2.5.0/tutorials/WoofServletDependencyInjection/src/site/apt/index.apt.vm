@@ -1,0 +1,67 @@
+                                               -----------------------
+                                     WoofServlet Dependency Injection Tutorial 
+                                               -----------------------
+					        Daniel Sagenschneider
+                                               -----------------------
+
+  <<WoofServlet Dependency Injection Tutorial>>
+
+  This tutorial demonstrates using the dependency injected objects (e.g. EJBs) from the Servlet container within WoOF.
+  
+  {{{http://sourceforge.net/projects/officefloor/files/maven/maven2/net/officefloor/tutorial/WoofServletDependencyInjection/${projectVersion}/WoofServletDependencyInjection-${projectVersion}-project.zip/download}Download Tutorial Source}}
+  
+EJB
+
+  To illustrate using the Servlet container dependency injection the following simple EJB will be used
+  
+%{code-snippet|brush-autodetect=1|id=example|file=${basedir}/src/main/java/net/officefloor/tutorial/woofservletdependencyinjection/ExampleDependency.java}
+  
+  with a local interface as follows
+
+%{code-snippet|brush-autodetect=1|id=example|file=${basedir}/src/main/java/net/officefloor/tutorial/woofservletdependencyinjection/ExampleDependencyLocal.java}
+
+  and a returned object as follows.
+  
+%{code-snippet|brush-autodetect=1|id=example|file=${basedir}/src/main/java/net/officefloor/tutorial/woofservletdependencyinjection/Message.java}
+
+
+Making use of an EJB within the WoofServlet
+
+  To use an EJB extend {{{/apidocs/net/officefloor/plugin/woof/servlet/WoofServlet.html}WoofServlet}} and add the necessary EJB fields as follows.
+
+%{code-snippet|brush-autodetect=1|id=example|file=${basedir}/src/main/java/net/officefloor/tutorial/woofservletdependencyinjection/ExampleServlet.java}
+
+  The extended Servlet is then configured into the <<<web.xml>>> as follows.  It is configured as a <<<ServletContextListener>>> as it will configure itself appropriately based on the URIs to be serviced.
+
+%{code-snippet|brush-autodetect=1|file=${basedir}/src/main/webapp/WEB-INF/web.xml}
+
+  On start up the {{{/apidocs/net/officefloor/plugin/woof/servlet/WoofServlet.html}WoofServlet}} will interrogate itself (implementing class) for JEE Servlet container dependency injected objects.  WoOF will make these Servlet dependency injected objects available for dependency injection into the template logic methods.
+  
+  The template logic shows the use of the Servlet dependency injected object.
+  
+%{code-snippet|brush-autodetect=1|id=example|file=${basedir}/src/main/java/net/officefloor/tutorial/woofservletdependencyinjection/ExampleTemplateLogic.java}
+
+  The template is as follows.
+  
+%{code-snippet|brush=xml|file=${basedir}/src/main/webapp/Template.woof.html}
+  
+  WoOF will use the JEE container thread to execute all methods using a dependency from the JEE container.  This is necessary to allow EJBs to pick up the appropriate context (via <<<ThreadLocal>>>) for executing correctly.  WoOF will however allow multi-threading all other methods that do not use dependencies from the JEE container.
+
+
+
+Unit Test
+
+  The following unit test illustrates the ease in which to test the template logic class as a POJO.
+  
+%{code-snippet|brush-autodetect=1|id=test|file=${basedir}/src/test/java/net/officefloor/tutorial/woofservletdependencyinjection/ExampleTest.java}
+
+  The following unit tests show servicing of a request by the WoOF template utilising the dependency injected EJB.
+
+%{code-snippet|brush-autodetect=1|id=example|file=${basedir}/src/test/java/net/officefloor/tutorial/woofservletdependencyinjection/ExampleIT.java}
+
+
+
+Next
+
+  The {{{../WoofServletMigration/index.html}next tutorial}} looks at embedding Servlet functionality within a WoOF Application.
+

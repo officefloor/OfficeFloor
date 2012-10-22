@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<template xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:noNamespaceSchemaLocation="Test.xsd">
+	<section name="template">
+		<static>
+			<content><![CDATA[<html>
+<body>
+Link One: ]]></content>
+		</static>
+		<link name="one" />
+		<static>
+			<content><![CDATA[, Link Two: ]]></content>
+		</static>
+		<link name="two" />
+		<static>
+			<content><![CDATA[, Link Three: ]]></content>
+		</static>
+		<link name="three" />
+		<static>
+			<content><![CDATA[.
+</body>
+</html>]]></content>
+		</static>
+	</section>
+</template>

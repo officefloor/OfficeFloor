@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<model>
+	<field type="String" name="woof template output name" />
+	<field type="String" name="argument type" />
+	<field type="WoofTemplateOutputToWoofSectionInputModel" name="woof section input" />
+	<field type="WoofTemplateOutputToWoofTemplateModel" name="woof template" />
+	<field type="WoofTemplateOutputToWoofResourceModel" name="woof resource" />
+</model>

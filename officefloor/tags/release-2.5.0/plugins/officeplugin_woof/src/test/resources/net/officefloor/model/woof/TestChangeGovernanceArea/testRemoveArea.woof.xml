@@ -1,0 +1,7 @@
+<woof>
+
+	<governances>
+		<governance name="GOVERNANCE" source="net.example.ExampleGovernanceSource" />
+	</governances>
+
+</woof>

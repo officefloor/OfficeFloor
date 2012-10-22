@@ -1,0 +1,6 @@
+<web-app>
+	<servlet-mapping>
+		<servlet-name>Test</servlet-name>
+		<url-pattern>/</url-pattern>
+	</servlet-mapping>
+</web-app>

@@ -1,0 +1,3 @@
+%{code-snippet|sh-params=first-line:21|brush-autodetect=1|id=test|file=${basedir}/src/snippets/specific.txt}
+
+%{code-snippet|brush=plain|file=${basedir}/src/snippets/all.txt}
