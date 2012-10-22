@@ -1,0 +1,7 @@
+<html>
+<body>
+<p>${message}</p>
+<!-- {section} -->
+<p>${description}</p>
+</body>
+</html>
