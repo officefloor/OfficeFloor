@@ -19,6 +19,7 @@
 package net.officefloor.plugin.web.http.application;
 
 import net.officefloor.autowire.AutoWireSection;
+import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
 import net.officefloor.plugin.web.http.template.parse.HttpTemplate;
 import net.officefloor.plugin.web.http.template.section.HttpTemplateSectionExtension;
 
@@ -51,6 +52,39 @@ public interface HttpTemplateAutoWireSection extends AutoWireSection {
 	 *         exposed template.
 	 */
 	String getTemplateUri();
+
+	/**
+	 * <p>
+	 * Indicate whether a secure {@link ServerHttpConnection} is required for
+	 * the template. This applies to:
+	 * <ul>
+	 * <li>all links for the {@link HttpTemplateAutoWireSection}</li>
+	 * <li>rendering of the {@link HttpTemplateAutoWireSection} response (a
+	 * redirect will be triggered if not appropriately secure)</li>
+	 * </ul>
+	 * 
+	 * @param isSecure
+	 *            <code>true</code> should the {@link AutoWireSection} require a
+	 *            secure {@link ServerHttpConnection}.
+	 */
+	void setTemplateSecure(boolean isSecure);
+
+	/**
+	 * <p>
+	 * Indicate whether a secure {@link ServerHttpConnection} is required for
+	 * the link. This overrides the default template secure setting for the
+	 * link.
+	 * <p>
+	 * Example use could be the landing page may be insecure but the login form
+	 * submission link on the page is to be secure.
+	 * 
+	 * @param linkeName
+	 *            Name of link to secure.
+	 * @param isSecure
+	 *            <code>true</code> should the link require a secure
+	 *            {@link ServerHttpConnection}.
+	 */
+	void setLinkSecure(String linkName, boolean isSecure);
 
 	/**
 	 * Adds an {@link HttpTemplateSectionExtension} to this
