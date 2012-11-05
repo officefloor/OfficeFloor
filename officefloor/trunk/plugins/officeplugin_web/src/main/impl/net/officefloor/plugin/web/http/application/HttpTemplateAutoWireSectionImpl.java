@@ -96,6 +96,20 @@ public class HttpTemplateAutoWireSectionImpl extends AutoWireSectionImpl
 	}
 
 	@Override
+	public void setTemplateSecure(boolean isSecure) {
+		// TODO implement HttpTemplateAutoWireSection.setTemplateSecure
+		throw new UnsupportedOperationException(
+				"TODO implement HttpTemplateAutoWireSection.setTemplateSecure");
+	}
+
+	@Override
+	public void setLinkSecure(String linkName, boolean isSecure) {
+		// TODO implement HttpTemplateAutoWireSection.setLinkSecure
+		throw new UnsupportedOperationException(
+				"TODO implement HttpTemplateAutoWireSection.setLinkSecure");
+	}
+
+	@Override
 	public HttpTemplateAutoWireSectionExtension addTemplateExtension(
 			Class<? extends HttpTemplateSectionExtension> extensionClass) {
 		return new HttpTemplateAutoWireSectionExtensionImpl(

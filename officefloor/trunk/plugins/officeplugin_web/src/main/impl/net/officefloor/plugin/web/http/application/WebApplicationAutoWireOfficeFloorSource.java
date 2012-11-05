@@ -330,8 +330,15 @@ public class WebApplicationAutoWireOfficeFloorSource extends
 	}
 
 	@Override
-	public void linkUri(String uri, AutoWireSection section, String inputName) {
-		this.uriLinks.add(new UriLink(uri, section, inputName));
+	public HttpUriLink linkUri(String uri, AutoWireSection section,
+			String inputName) {
+
+		// Create and register the link
+		UriLink link = new UriLink(uri, section, inputName);
+		this.uriLinks.add(link);
+
+		// Return the link for further configuration
+		return link;
 	}
 
 	@Override
@@ -439,7 +446,7 @@ public class WebApplicationAutoWireOfficeFloorSource extends
 
 		// End chain with file sender servicer (if previous chained output)
 		if (previousChainedOutput != null) {
-			
+
 			// Create the filer sender servicer
 			AutoWireSection nonHandledServicer = this.addSection(
 					"NON_HANDLED_SERVICER",
@@ -448,7 +455,7 @@ public class WebApplicationAutoWireOfficeFloorSource extends
 					nonHandledServicer);
 			this.linkToSendResponse(nonHandledServicer,
 					HttpFileSenderSectionSource.FILE_SENT_OUTPUT_NAME);
-			
+
 			// Link into the chain
 			this.link(previousChainedSection, previousChainedOutput,
 					nonHandledServicer,
@@ -519,7 +526,7 @@ public class WebApplicationAutoWireOfficeFloorSource extends
 	/**
 	 * URI link.
 	 */
-	private static class UriLink {
+	private static class UriLink implements HttpUriLink {
 
 		/**
 		 * URI.
@@ -550,6 +557,38 @@ public class WebApplicationAutoWireOfficeFloorSource extends
 			this.uri = uri;
 			this.section = section;
 			this.inputName = inputName;
+		}
+
+		/*
+		 * ===================== HttpUriLink ===========================
+		 */
+
+		@Override
+		public String getUri() {
+			// TODO implement HttpUriLink.getUri
+			throw new UnsupportedOperationException(
+					"TODO implement HttpUriLink.getUri");
+		}
+
+		@Override
+		public AutoWireSection getAutoWireSection() {
+			// TODO implement HttpUriLink.getAutoWireSection
+			throw new UnsupportedOperationException(
+					"TODO implement HttpUriLink.getAutoWireSection");
+		}
+
+		@Override
+		public String getAutoWireSectionInputName() {
+			// TODO implement HttpUriLink.getAutoWireSectionInputName
+			throw new UnsupportedOperationException(
+					"TODO implement HttpUriLink.getAutoWireSectionInputName");
+		}
+
+		@Override
+		public void setUriSecure(boolean isSecure) {
+			// TODO implement HttpUriLink.setUriSecure
+			throw new UnsupportedOperationException(
+					"TODO implement HttpUriLink.setUriSecure");
 		}
 	}
 

@@ -182,8 +182,9 @@ public interface WebAutoWireApplication extends AutoWireApplication {
 	 *            {@link AutoWireSection} servicing the URI.
 	 * @param inputName
 	 *            Name of the {@link OfficeSectionInput} servicing the URI.
+	 * @return {@link HttpUriLink} to configure handling the URI.
 	 */
-	void linkUri(String uri, AutoWireSection section, String inputName);
+	HttpUriLink linkUri(String uri, AutoWireSection section, String inputName);
 
 	/**
 	 * Obtains the registered URIs.
