@@ -43,6 +43,7 @@ import net.officefloor.plugin.gwt.web.http.section.GwtHttpTemplateSectionExtensi
 import net.officefloor.plugin.section.clazz.ClassSectionSource;
 import net.officefloor.plugin.web.http.application.HttpTemplateAutoWireSection;
 import net.officefloor.plugin.web.http.application.HttpTemplateAutoWireSectionExtension;
+import net.officefloor.plugin.web.http.application.HttpUriLink;
 import net.officefloor.plugin.web.http.application.WebAutoWireApplication;
 
 /**
@@ -107,6 +108,7 @@ public class WoofLoaderTest extends OfficeFrameTestCase {
 		final HttpTemplateAutoWireSection templateB = this
 				.createMock(HttpTemplateAutoWireSection.class);
 		final AutoWireSection sectionA = this.createMock(AutoWireSection.class);
+		final HttpUriLink link = this.createMock(HttpUriLink.class);
 		final AutoWireSection sectionB = this.createMock(AutoWireSection.class);
 		final AutoWireGovernance governanceA = this
 				.createMock(AutoWireGovernance.class);
@@ -132,7 +134,8 @@ public class WoofLoaderTest extends OfficeFrameTestCase {
 						Section.class.getName()), sectionA);
 		sectionA.addProperty("name.one", "value.one");
 		sectionA.addProperty("name.two", "value.two");
-		this.app.linkUri("example", sectionA, "INPUT_B");
+		this.recordReturn(app,
+				this.app.linkUri("example", sectionA, "INPUT_B"), link);
 		this.recordReturn(
 				this.app,
 				this.app.addSection("SECTION_B", "CLASS",
@@ -217,6 +220,7 @@ public class WoofLoaderTest extends OfficeFrameTestCase {
 
 		final AutoWireSection cometSection = this
 				.createMock(AutoWireSection.class);
+		final HttpUriLink link = this.createMock(HttpUriLink.class);
 		final HttpTemplateAutoWireSection template = this
 				.createMock(HttpTemplateAutoWireSection.class);
 		final HttpTemplateAutoWireSectionExtension extension = this
@@ -241,10 +245,10 @@ public class WoofLoaderTest extends OfficeFrameTestCase {
 				true);
 		this.recordReturn(this.app, this.app.getSection("COMET"), cometSection);
 		this.recordReturn(template, template.getTemplateUri(), "example");
-		this.app.linkUri("example/comet-subscribe", cometSection,
-				CometSectionSource.SUBSCRIBE_INPUT_NAME);
-		this.app.linkUri("example/comet-publish", cometSection,
-				CometSectionSource.PUBLISH_INPUT_NAME);
+		this.recordReturn(this.app, this.app.linkUri("example/comet-subscribe",
+				cometSection, CometSectionSource.SUBSCRIBE_INPUT_NAME), link);
+		this.recordReturn(this.app, this.app.linkUri("example/comet-publish",
+				cometSection, CometSectionSource.PUBLISH_INPUT_NAME), link);
 		this.recordReturn(template, template.getTemplateLogicClass(),
 				Template.class);
 		this.recordReturn(template, template
