@@ -28,6 +28,7 @@ import net.officefloor.plugin.gwt.service.ServerGwtRpcConnection;
 import net.officefloor.plugin.gwt.service.ServerGwtRpcConnectionManagedObjectSource;
 import net.officefloor.plugin.web.http.application.HttpTemplateAutoWireSection;
 import net.officefloor.plugin.web.http.application.HttpTemplateAutoWireSectionExtension;
+import net.officefloor.plugin.web.http.application.HttpUriLink;
 import net.officefloor.plugin.web.http.application.WebAutoWireApplication;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
@@ -65,6 +66,11 @@ public class GwtServiceRouteConfigurationTest extends OfficeFrameTestCase {
 			.getContextClassLoader();
 
 	/**
+	 * {@link HttpUriLink}.
+	 */
+	private final HttpUriLink link = this.createMock(HttpUriLink.class);
+
+	/**
 	 * Ensure no extension of configuration if no GWT services.
 	 */
 	public void testNoGwtService() throws Exception {
@@ -86,8 +92,9 @@ public class GwtServiceRouteConfigurationTest extends OfficeFrameTestCase {
 
 		// Record configuring a GWT Service
 		this.recordInit("template", GwtServiceInterfaceAsync.class.getName());
-		this.application.linkUri("template/GwtServicePath", this.template,
-				"GWT_GwtServicePath");
+		this.recordReturn(this.application,
+				this.application.linkUri("template/GwtServicePath",
+						this.template, "GWT_GwtServicePath"), this.link);
 
 		// Test configuration
 		this.replayMockObjects();
@@ -104,8 +111,9 @@ public class GwtServiceRouteConfigurationTest extends OfficeFrameTestCase {
 
 		// Record configuring a GWT Service
 		this.recordInit("/", GwtServiceInterfaceAsync.class.getName());
-		this.application.linkUri("root/GwtServicePath", this.template,
-				"GWT_GwtServicePath");
+		this.recordReturn(this.application, this.application.linkUri(
+				"root/GwtServicePath", this.template, "GWT_GwtServicePath"),
+				this.link);
 
 		// Test configuration
 		this.replayMockObjects();
@@ -122,10 +130,11 @@ public class GwtServiceRouteConfigurationTest extends OfficeFrameTestCase {
 		// Record configuring multiple GWT services
 		this.recordInit("template", GwtServiceInterfaceAsync.class.getName()
 				+ "," + GwtServiceAnotherAsync.class.getName());
-		this.application.linkUri("template/GwtServicePath", this.template,
-				"GWT_GwtServicePath");
-		this.application.linkUri("template/Another", this.template,
-				"GWT_Another");
+		this.recordReturn(this.application,
+				this.application.linkUri("template/GwtServicePath",
+						this.template, "GWT_GwtServicePath"), this.link);
+		this.recordReturn(this.application, this.application.linkUri(
+				"template/Another", this.template, "GWT_Another"), this.link);
 
 		// Test configuration
 		this.replayMockObjects();
