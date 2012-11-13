@@ -39,11 +39,27 @@ public class HttpRequestTokeniserTest extends OfficeFrameTestCase {
 			.createMock(HttpRequestTokenHandler.class);
 
 	/**
+	 * Ensure can load domain.
+	 */
+	public void testDomain() throws Exception {
+		this.handler.handlePath("http://wwww.officefloor.net");
+		this.doTest("GET", "http://wwww.officefloor.net", null);
+	}
+
+	/**
+	 * Ensure can load domain directory.
+	 */
+	public void testDomainDirectory() throws Exception {
+		this.handler.handlePath("http://wwww.officefloor.net/");
+		this.doTest("GET", "http://wwww.officefloor.net/", null);
+	}
+
+	/**
 	 * Ensure can load GET request with no parameters.
 	 */
 	public void testGetWithNoParameters() throws Exception {
-		this.handler.handlePath("http://wwww.officefloor.net");
-		this.doTest("GET", "http://wwww.officefloor.net", null);
+		this.handler.handlePath("/path");
+		this.doTest("GET", "/path", null);
 	}
 
 	/**
@@ -99,11 +115,8 @@ public class HttpRequestTokeniserTest extends OfficeFrameTestCase {
 		this.handler
 				.handleQueryString("FirstName=Daniel&LastName=Sagenschneider");
 		this.handler.handleFragment("fragment");
-		this
-				.doTest(
-						"GET",
-						"/path?FirstName=Daniel&LastName=Sagenschneider#fragment",
-						null);
+		this.doTest("GET",
+				"/path?FirstName=Daniel&LastName=Sagenschneider#fragment", null);
 	}
 
 	/**
@@ -150,9 +163,7 @@ public class HttpRequestTokeniserTest extends OfficeFrameTestCase {
 		this.handler.handlePath("/path");
 		this.handler.handleHttpParameter("FirstName", "Daniel");
 		this.handler.handleHttpParameter("LastName", "Sagenschneider");
-		this
-				.doTest("POST", "/path",
-						"FirstName=Daniel&LastName=Sagenschneider");
+		this.doTest("POST", "/path", "FirstName=Daniel&LastName=Sagenschneider");
 	}
 
 	/**
@@ -163,9 +174,7 @@ public class HttpRequestTokeniserTest extends OfficeFrameTestCase {
 		this.handler.handleHttpParameter("FirstName", "Daniel");
 		this.handler.handleQueryString("FirstName=Daniel");
 		this.handler.handleHttpParameter("LastName", "Sagenschneider");
-		this
-				.doTest("POST", "/path?FirstName=Daniel",
-						"LastName=Sagenschneider");
+		this.doTest("POST", "/path?FirstName=Daniel", "LastName=Sagenschneider");
 	}
 
 	/**
