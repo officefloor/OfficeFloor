@@ -17,10 +17,20 @@
  */
 package net.officefloor.plugin.web.http.secure;
 
+import java.util.Set;
+
 import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.execute.TaskContext;
 import net.officefloor.frame.util.AbstractSingleTask;
+import net.officefloor.plugin.socket.server.http.HttpRequest;
+import net.officefloor.plugin.socket.server.http.HttpResponse;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
+import net.officefloor.plugin.socket.server.http.protocol.HttpStatus;
+import net.officefloor.plugin.web.http.location.HttpApplicationLocation;
+import net.officefloor.plugin.web.http.session.HttpSession;
+import net.officefloor.plugin.web.http.tokenise.HttpRequestTokenAdapter;
+import net.officefloor.plugin.web.http.tokenise.HttpRequestTokeniseException;
+import net.officefloor.plugin.web.http.tokenise.HttpRequestTokeniserImpl;
 
 /**
  * {@link Task} for ensuring appropriately secure {@link ServerHttpConnection}.
@@ -45,6 +55,21 @@ public class HttpSecureTask
 		SERVICE
 	}
 
+	/**
+	 * Secure paths.
+	 */
+	private final Set<String> securePaths;
+
+	/**
+	 * Initiate.
+	 * 
+	 * @param securePaths
+	 *            Secure paths.
+	 */
+	public HttpSecureTask(Set<String> securePaths) {
+		this.securePaths = securePaths;
+	}
+
 	/*
 	 * ======================== Task ==============================
 	 */
@@ -53,10 +78,66 @@ public class HttpSecureTask
 	public Object doTask(
 			TaskContext<HttpSecureTask, HttpSecureTaskDependencies, HttpSecureTaskFlows> context)
 			throws Throwable {
-		// TODO implement
-		// Task<HttpSecureTask,HttpSecureTaskDependencies,HttpSecureFlows>.doTask
-		throw new UnsupportedOperationException(
-				"TODO implement Task<HttpSecureTask,HttpSecureTaskDependencies,HttpSecureFlows>.doTask");
+
+		// Obtain the dependencies
+		ServerHttpConnection connection = (ServerHttpConnection) context
+				.getObject(HttpSecureTaskDependencies.SERVER_HTTP_CONNECTION);
+		HttpApplicationLocation location = (HttpApplicationLocation) context
+				.getObject(HttpSecureTaskDependencies.HTTP_APPLICATION_LOCATION);
+		HttpSession session = (HttpSession) context
+				.getObject(HttpSecureTaskDependencies.HTTP_SESSION);
+
+		// Obtain the canonical path from request
+		String path = connection.getHttpRequest().getRequestURI();
+		path = location.transformToApplicationCanonicalPath(path);
+
+		// Obtain the uri path only
+		RequestPathHandler handler = new RequestPathHandler();
+		new HttpRequestTokeniserImpl().tokeniseRequestURI(path, handler);
+		path = handler.path;
+
+		// Determine if required to be secure connection
+		boolean isRequireSecure = this.securePaths.contains(path);
+
+		// Determine if secure connection
+		boolean isConnectionSecure = connection.isSecure();
+
+		// Determine if may service request
+		if (isRequireSecure == isConnectionSecure) {
+			// Appropriately secure so service
+			context.doFlow(HttpSecureTaskFlows.SERVICE, null);
+			return null;
+		}
+
+		// Determine the redirect URL
+		String redirectUrl = location.transformToClientPath(path,
+				isRequireSecure);
+
+		// Send redirect for making secure
+		HttpResponse response = connection.getHttpResponse();
+		response.setStatus(HttpStatus.SC_SEE_OTHER);
+		response.addHeader("Location", redirectUrl);
+		return null;
+	}
+
+	/**
+	 * {@link HttpRequestTokenAdapter} to obtain the {@link HttpRequest} path.
+	 */
+	private static class RequestPathHandler extends HttpRequestTokenAdapter {
+
+		/**
+		 * {@link HttpRequest} path.
+		 */
+		public String path = null;
+
+		/*
+		 * ===================== HttpRequestTokenAdapter =================
+		 */
+
+		@Override
+		public void handlePath(String path) throws HttpRequestTokeniseException {
+			this.path = path;
+		}
 	}
 
 }

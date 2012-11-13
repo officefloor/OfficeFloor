@@ -17,8 +17,6 @@
  */
 package net.officefloor.plugin.web.http.secure;
 
-import org.junit.Ignore;
-
 import net.officefloor.compile.spi.work.source.TaskTypeBuilder;
 import net.officefloor.compile.spi.work.source.WorkTypeBuilder;
 import net.officefloor.compile.test.work.WorkLoaderUtil;
@@ -34,7 +32,6 @@ import net.officefloor.plugin.web.http.session.HttpSession;
  * 
  * @author Daniel Sagenschneider
  */
-@Ignore("TODO implement functionality")
 public class HttpSecureWorkSourceTest extends OfficeFrameTestCase {
 
 	/**
@@ -50,7 +47,7 @@ public class HttpSecureWorkSourceTest extends OfficeFrameTestCase {
 	public void testType() {
 
 		// Create the expected type
-		HttpSecureTask factory = new HttpSecureTask();
+		HttpSecureTask factory = new HttpSecureTask(null);
 		WorkTypeBuilder<HttpSecureTask> type = WorkLoaderUtil
 				.createWorkTypeBuilder(factory);
 		TaskTypeBuilder<HttpSecureTaskDependencies, HttpSecureTaskFlows> task = type

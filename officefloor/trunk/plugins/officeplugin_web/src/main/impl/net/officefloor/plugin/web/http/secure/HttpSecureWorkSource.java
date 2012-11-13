@@ -17,11 +17,20 @@
  */
 package net.officefloor.plugin.web.http.secure;
 
+import java.util.HashSet;
+import java.util.Set;
+
+import net.officefloor.compile.properties.Property;
+import net.officefloor.compile.spi.work.source.TaskTypeBuilder;
 import net.officefloor.compile.spi.work.source.WorkSource;
 import net.officefloor.compile.spi.work.source.WorkSourceContext;
 import net.officefloor.compile.spi.work.source.WorkTypeBuilder;
 import net.officefloor.compile.spi.work.source.impl.AbstractWorkSource;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
+import net.officefloor.plugin.web.http.location.HttpApplicationLocation;
+import net.officefloor.plugin.web.http.secure.HttpSecureTask.HttpSecureTaskDependencies;
+import net.officefloor.plugin.web.http.secure.HttpSecureTask.HttpSecureTaskFlows;
+import net.officefloor.plugin.web.http.session.HttpSession;
 
 /**
  * {@link WorkSource} to provide appropriately secure
@@ -31,23 +40,50 @@ import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
  */
 public class HttpSecureWorkSource extends AbstractWorkSource<HttpSecureTask> {
 
+	/**
+	 * Prefix name of the {@link Property} instances for the secure paths.
+	 */
+	public static final String PROPERTY_PREFIX_SECURE_PATH = "http.secure.path.";
+
 	/*
 	 * ==================== WorkSource ==========================
 	 */
 
 	@Override
 	protected void loadSpecification(SpecificationContext context) {
-		// TODO implement AbstractWorkSource<HttpSecureTask>.loadSpecification
-		throw new UnsupportedOperationException(
-				"TODO implement AbstractWorkSource<HttpSecureTask>.loadSpecification");
+		// No required properties
 	}
 
 	@Override
 	public void sourceWork(WorkTypeBuilder<HttpSecureTask> workTypeBuilder,
 			WorkSourceContext context) throws Exception {
-		// TODO implement WorkSource<HttpSecureTask>.sourceWork
-		throw new UnsupportedOperationException(
-				"TODO implement WorkSource<HttpSecureTask>.sourceWork");
+
+		// Obtain the secure paths
+		Set<String> securePaths = new HashSet<String>();
+		int pathIndex = 0;
+		String path;
+		while ((path = context.getProperty(PROPERTY_PREFIX_SECURE_PATH
+				+ pathIndex, null)) != null) {
+			securePaths.add(path);
+			pathIndex++;
+		}
+
+		// Configure the work factory
+		HttpSecureTask factory = new HttpSecureTask(securePaths);
+		workTypeBuilder.setWorkFactory(factory);
+
+		// Configure the task
+		TaskTypeBuilder<HttpSecureTaskDependencies, HttpSecureTaskFlows> task = workTypeBuilder
+				.addTaskType("secure", factory,
+						HttpSecureTaskDependencies.class,
+						HttpSecureTaskFlows.class);
+		task.addObject(ServerHttpConnection.class).setKey(
+				HttpSecureTaskDependencies.SERVER_HTTP_CONNECTION);
+		task.addObject(HttpApplicationLocation.class).setKey(
+				HttpSecureTaskDependencies.HTTP_APPLICATION_LOCATION);
+		task.addObject(HttpSession.class).setKey(
+				HttpSecureTaskDependencies.HTTP_SESSION);
+		task.addFlow().setKey(HttpSecureTaskFlows.SERVICE);
 	}
 
 }

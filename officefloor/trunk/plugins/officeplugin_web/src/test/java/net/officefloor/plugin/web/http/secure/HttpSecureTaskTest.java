@@ -17,15 +17,15 @@
  */
 package net.officefloor.plugin.web.http.secure;
 
-import org.junit.Ignore;
-
 import net.officefloor.compile.properties.Property;
 import net.officefloor.compile.test.work.WorkLoaderUtil;
 import net.officefloor.compile.work.TaskType;
 import net.officefloor.compile.work.WorkType;
+import net.officefloor.frame.api.execute.FlowFuture;
 import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.execute.TaskContext;
 import net.officefloor.frame.test.OfficeFrameTestCase;
+import net.officefloor.plugin.socket.server.http.HttpHeader;
 import net.officefloor.plugin.socket.server.http.HttpRequest;
 import net.officefloor.plugin.socket.server.http.HttpResponse;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
@@ -39,7 +39,6 @@ import net.officefloor.plugin.web.http.session.HttpSession;
  * 
  * @author Daniel Sagenschneider
  */
-@Ignore("TODO complete tests and implement functionality")
 public class HttpSecureTaskTest extends OfficeFrameTestCase {
 
 	/**
@@ -85,26 +84,34 @@ public class HttpSecureTaskTest extends OfficeFrameTestCase {
 		final String REQUEST_URL = "/test";
 		final String REDIRECT_URL = "https://officefloor.net:7979/test";
 
+		final HttpHeader header = this.createMock(HttpHeader.class);
+
 		// Record
 		this.recordDependencyAccess();
-		this.recordReturn(this.connection, this.connection.isSecure(), false);
 		this.recordReturn(this.connection, this.connection.getHttpRequest(),
 				this.request);
 		this.recordReturn(this.request, this.request.getRequestURI(),
 				REQUEST_URL);
 		this.recordReturn(this.location,
+				this.location.transformToApplicationCanonicalPath(REQUEST_URL),
+				REQUEST_URL);
+		this.recordReturn(this.connection, this.connection.isSecure(), false);
+		this.recordReturn(this.location,
 				this.location.transformToClientPath(REQUEST_URL, true),
 				REDIRECT_URL);
 		this.recordReturn(this.connection, this.connection.getHttpResponse(),
 				this.response);
-		this.response.setStatus(301);
-		this.response.addHeader("Location", REDIRECT_URL);
+		this.response.setStatus(303);
+		this.recordReturn(this.response,
+				this.response.addHeader("Location", REDIRECT_URL), header);
 
 		// Test
-		HttpSecureTask task = this.createHttpSecureTask("http.secure.uri[0]",
-				"/first", "http.secure.uri[1]", "/second",
-				"http.secure.uri[2]", "/test");
+		this.replayMockObjects();
+		HttpSecureTask task = this.createHttpSecureTask("http.secure.path.0",
+				"/first", "http.secure.path.1", "/second",
+				"http.secure.path.2", "/test");
 		task.doTask(this.context);
+		this.verifyMockObjects();
 	}
 
 	/**
@@ -115,19 +122,27 @@ public class HttpSecureTaskTest extends OfficeFrameTestCase {
 
 		final String REQUEST_URL = "/test";
 
+		final FlowFuture future = this.createMock(FlowFuture.class);
+
 		// Record
 		this.recordDependencyAccess();
-		this.recordReturn(this.connection, this.connection.isSecure(), false);
 		this.recordReturn(this.connection, this.connection.getHttpRequest(),
 				this.request);
 		this.recordReturn(this.request, this.request.getRequestURI(),
 				REQUEST_URL);
-		this.context.doFlow(HttpSecureTaskFlows.SERVICE, null);
+		this.recordReturn(this.location,
+				this.location.transformToApplicationCanonicalPath(REQUEST_URL),
+				REQUEST_URL);
+		this.recordReturn(this.connection, this.connection.isSecure(), false);
+		this.recordReturn(this.context,
+				this.context.doFlow(HttpSecureTaskFlows.SERVICE, null), future);
 
 		// Test
-		HttpSecureTask task = this.createHttpSecureTask("http.secure.uri[0]",
+		this.replayMockObjects();
+		HttpSecureTask task = this.createHttpSecureTask("http.secure.path.0",
 				"/not-secure");
 		task.doTask(this.context);
+		this.verifyMockObjects();
 	}
 
 	/**
