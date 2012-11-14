@@ -59,12 +59,14 @@ public class AutoWireHttpSocketTest extends OfficeFrameTestCase {
 		HttpServerSocketManagedObjectSource.autoWire(autoWire, PORT, "TEST",
 				"handleRequest");
 
+		// Create the client
+		HttpClient client = new DefaultHttpClient();
+
 		// Open the OfficeFloor
 		AutoWireOfficeFloor officeFloor = autoWire.openOfficeFloor();
 		try {
 
 			// Send request
-			HttpClient client = new DefaultHttpClient();
 			HttpGet request = new HttpGet("http://localhost:" + PORT);
 			org.apache.http.HttpResponse response = client.execute(request);
 
@@ -77,9 +79,15 @@ public class AutoWireHttpSocketTest extends OfficeFrameTestCase {
 					MockHttpServer.getEntityBody(response));
 
 		} finally {
-			// Ensure OfficeFloor is closed
-			if (officeFloor != null) {
-				officeFloor.closeOfficeFloor();
+			try {
+				// Ensure stop client
+				client.getConnectionManager().shutdown();
+
+			} finally {
+				// Ensure OfficeFloor is closed
+				if (officeFloor != null) {
+					officeFloor.closeOfficeFloor();
+				}
 			}
 		}
 	}

@@ -472,6 +472,10 @@ public class WebApplicationAutoWireOfficeFloorSource extends
 		// Link template rendering
 		for (HttpTemplateAutoWireSection section : this.httpTemplates) {
 
+			// Secure the HTTP template (if necessary)
+			WebApplicationSectionSource.secureHttpTemplate(section,
+					httpSection, this);
+
 			// Register the HTTP template for routing
 			WebApplicationSectionSource.linkRouteToHttpTemplate(section,
 					httpSection, this);

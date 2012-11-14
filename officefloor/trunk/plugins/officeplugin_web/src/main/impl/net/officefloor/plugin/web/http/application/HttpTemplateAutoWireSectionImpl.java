@@ -50,6 +50,11 @@ public class HttpTemplateAutoWireSectionImpl extends AutoWireSectionImpl
 	private final OfficeFloorCompiler compiler;
 
 	/**
+	 * Indicates if the template is to be secure.
+	 */
+	private boolean isTemplateSecure = false;
+
+	/**
 	 * Index of the next extension.
 	 */
 	private int nextExtensionIndex = 1;
@@ -97,9 +102,12 @@ public class HttpTemplateAutoWireSectionImpl extends AutoWireSectionImpl
 
 	@Override
 	public void setTemplateSecure(boolean isSecure) {
-		// TODO implement HttpTemplateAutoWireSection.setTemplateSecure
-		throw new UnsupportedOperationException(
-				"TODO implement HttpTemplateAutoWireSection.setTemplateSecure");
+		this.isTemplateSecure = isSecure;
+	}
+
+	@Override
+	public boolean isTemplateSecure() {
+		return this.isTemplateSecure;
 	}
 
 	@Override

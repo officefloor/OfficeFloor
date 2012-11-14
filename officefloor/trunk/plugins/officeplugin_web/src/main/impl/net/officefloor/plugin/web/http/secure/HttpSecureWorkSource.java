@@ -60,12 +60,11 @@ public class HttpSecureWorkSource extends AbstractWorkSource<HttpSecureTask> {
 
 		// Obtain the secure paths
 		Set<String> securePaths = new HashSet<String>();
-		int pathIndex = 0;
-		String path;
-		while ((path = context.getProperty(PROPERTY_PREFIX_SECURE_PATH
-				+ pathIndex, null)) != null) {
-			securePaths.add(path);
-			pathIndex++;
+		for (String propertyName : context.getPropertyNames()) {
+			if (propertyName.startsWith(PROPERTY_PREFIX_SECURE_PATH)) {
+				String securePath = context.getProperty(propertyName);
+				securePaths.add(securePath);
+			}
 		}
 
 		// Configure the work factory

@@ -470,10 +470,7 @@ public class ManagedObjectLoaderImpl implements ManagedObjectLoader {
 
 			// Ensure have linked flow configuration
 			if (linkedFlow == null) {
-				this.addIssue("Null "
-						+ ManagedObjectFlowConfiguration.class.getSimpleName()
-						+ " for flow index " + i);
-				return null; // must have configuration
+				continue; // flow index may not be mapped
 			}
 
 			// Obtain the link details
