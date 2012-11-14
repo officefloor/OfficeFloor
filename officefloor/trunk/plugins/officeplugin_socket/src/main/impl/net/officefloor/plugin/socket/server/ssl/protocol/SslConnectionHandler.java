@@ -442,6 +442,12 @@ public class SslConnectionHandler implements ConnectionHandler, ReadContext,
 		} catch (IOException ex) {
 			// Record failure of processing to fail further interaction
 			this.failure = ex;
+
+			// Failure, so close connection
+			try {
+				this.connection.close();
+			} catch (IOException ignore) {
+			}
 		}
 	}
 

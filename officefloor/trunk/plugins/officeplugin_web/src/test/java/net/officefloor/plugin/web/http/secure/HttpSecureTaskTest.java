@@ -107,9 +107,10 @@ public class HttpSecureTaskTest extends OfficeFrameTestCase {
 
 		// Test
 		this.replayMockObjects();
-		HttpSecureTask task = this.createHttpSecureTask("http.secure.path.0",
-				"/first", "http.secure.path.1", "/second",
-				"http.secure.path.2", "/test");
+		HttpSecureTask task = this.createHttpSecureTask(
+				"http.secure.path./first", "/first",
+				"http.secure.path./second", "/second",
+				"http.secure.path./test", "/test");
 		task.doTask(this.context);
 		this.verifyMockObjects();
 	}
@@ -139,8 +140,8 @@ public class HttpSecureTaskTest extends OfficeFrameTestCase {
 
 		// Test
 		this.replayMockObjects();
-		HttpSecureTask task = this.createHttpSecureTask("http.secure.path.0",
-				"/not-secure");
+		HttpSecureTask task = this.createHttpSecureTask(
+				"http.secure.path./not-secure", "/not-secure");
 		task.doTask(this.context);
 		this.verifyMockObjects();
 	}

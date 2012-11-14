@@ -48,7 +48,11 @@ import net.officefloor.plugin.web.http.location.HttpApplicationLocation;
 import net.officefloor.plugin.web.http.location.InvalidHttpRequestUriException;
 import net.officefloor.plugin.web.http.route.source.HttpRouteTask.HttpRouteTaskDependencies;
 import net.officefloor.plugin.web.http.route.source.HttpRouteWorkSource;
+import net.officefloor.plugin.web.http.secure.HttpSecureTask.HttpSecureTaskDependencies;
+import net.officefloor.plugin.web.http.secure.HttpSecureTask.HttpSecureTaskFlows;
+import net.officefloor.plugin.web.http.secure.HttpSecureWorkSource;
 import net.officefloor.plugin.web.http.server.HttpServerAutoWireOfficeFloorSource;
+import net.officefloor.plugin.web.http.session.HttpSession;
 import net.officefloor.plugin.web.http.template.route.HttpTemplateRouteTask.HttpTemplateRouteDependencies;
 import net.officefloor.plugin.web.http.template.route.HttpTemplateRouteTask.HttpTemplateRouteTaskFlows;
 import net.officefloor.plugin.web.http.template.route.HttpTemplateRouteWorkSource;
@@ -112,6 +116,34 @@ public class WebApplicationSectionSource extends AbstractSectionSource {
 
 		// Link routing to HTTP template
 		source.link(httpSection, sectionOutputName, section, inputName);
+	}
+
+	/**
+	 * Secures the {@link HttpTemplateAutoWireSection}.
+	 * 
+	 * @param httpTemplate
+	 *            {@link HttpTemplateAutoWireSection}.
+	 * @param httpSection
+	 *            {@link AutoWireSection} for this
+	 *            {@link WebApplicationSectionSource}.
+	 * @param source
+	 *            {@link WebApplicationAutoWireOfficeFloorSource}.
+	 */
+	public static void secureHttpTemplate(
+			HttpTemplateAutoWireSection httpTemplate,
+			AutoWireSection httpSection,
+			WebApplicationAutoWireOfficeFloorSource source) {
+
+		// Determine if secure
+		if (httpTemplate.isTemplateSecure()) {
+
+			// Secure the template
+			String uri = httpTemplate.getTemplateUri();
+			httpSection
+					.addProperty(
+							HttpSecureWorkSource.PROPERTY_PREFIX_SECURE_PATH
+									+ uri, uri);
+		}
 	}
 
 	/**
@@ -256,6 +288,17 @@ public class WebApplicationSectionSource extends AbstractSectionSource {
 		httpSection.addProperty(PROPERTY_IS_REQUIRE_ROUTING, TRUE);
 	}
 
+	/**
+	 * Transforms the template URI for use.
+	 * 
+	 * @param templateUri
+	 *            Template URI.
+	 * @return Transformed template URI.
+	 */
+	private static String transformTemplateUri(String templateUri) {
+		return templateUri.startsWith("/") ? templateUri : "/" + templateUri;
+	}
+
 	/*
 	 * ======================= SectionSource =========================
 	 */
@@ -271,6 +314,37 @@ public class WebApplicationSectionSource extends AbstractSectionSource {
 
 		final Map<Class<?>, SectionObject> objects = new HashMap<Class<?>, SectionObject>();
 		final Map<Class<?>, SectionOutput> escalations = new HashMap<Class<?>, SectionOutput>();
+
+		// Add the Secure task
+		SectionWork secureWork = designer.addSectionWork("SECURE",
+				HttpSecureWorkSource.class.getName());
+		for (String propertyName : context.getPropertyNames()) {
+			if (propertyName
+					.startsWith(HttpSecureWorkSource.PROPERTY_PREFIX_SECURE_PATH)) {
+				// Configure the secure path
+				String securePath = context.getProperty(propertyName);
+				securePath = transformTemplateUri(securePath);
+				secureWork.addProperty(propertyName, securePath);
+			}
+		}
+		SectionTask secureTask = secureWork.addSectionTask("SECURE", "secure");
+		linkObject(secureTask,
+				HttpSecureTaskDependencies.SERVER_HTTP_CONNECTION.name(),
+				ServerHttpConnection.class, designer, objects);
+		linkObject(secureTask,
+				HttpSecureTaskDependencies.HTTP_APPLICATION_LOCATION.name(),
+				HttpApplicationLocation.class, designer, objects);
+		linkObject(secureTask, HttpSecureTaskDependencies.HTTP_SESSION.name(),
+				HttpSession.class, designer, objects);
+
+		// Link handling input to secure task
+		SectionInput input = designer.addSectionInput(
+				HttpServerAutoWireOfficeFloorSource.HANDLER_INPUT_NAME, null);
+		designer.link(input, secureTask);
+
+		// Create the flow for servicing appropriately secure request
+		TaskFlow secureServiceFlow = secureTask
+				.getTaskFlow(HttpSecureTaskFlows.SERVICE.name());
 
 		// Add the Link route task
 		SectionWork routeLinkWork = designer.addSectionWork("LINK_ROUTE",
@@ -296,10 +370,9 @@ public class WebApplicationSectionSource extends AbstractSectionSource {
 		linkEscalation(routeLinkTask, InvalidParameterTypeException.class,
 				designer, escalations);
 
-		// Link handling input to route link task
-		SectionInput input = designer.addSectionInput(
-				HttpServerAutoWireOfficeFloorSource.HANDLER_INPUT_NAME, null);
-		designer.link(input, routeLinkTask);
+		// Link secure servicing to link route task
+		designer.link(secureServiceFlow, routeLinkTask,
+				FlowInstigationStrategyEnum.SEQUENTIAL);
 
 		// Create the flow for not matching of link route task
 		TaskFlow notLinkRouteFlow = routeLinkTask
@@ -338,8 +411,7 @@ public class WebApplicationSectionSource extends AbstractSectionSource {
 
 					// Configure the route
 					String templateUri = context.getProperty(propertyName);
-					String templateRoutePattern = (templateUri.startsWith("/") ? templateUri
-							: "/" + templateUri);
+					String templateRoutePattern = transformTemplateUri(templateUri);
 					routeUriWork
 							.addProperty(propertyName, templateRoutePattern);
 

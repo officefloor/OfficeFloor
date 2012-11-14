@@ -137,6 +137,29 @@ public abstract class MockHttpServer extends AbstractOfficeConstructTestCase
 	}
 
 	/**
+	 * Configures the {@link HttpClient} with anonymous HTTPS {@link Scheme}.
+	 * 
+	 * @param client
+	 *            {@link HttpClient}.
+	 * @param port
+	 *            Port running on.
+	 */
+	public static void configureAnonymousHttps(HttpClient client, int port) {
+		SocketFactory socketFactory = new AnonymousSocketFactory();
+		Scheme scheme = new Scheme("https", socketFactory, port);
+		client.getConnectionManager().getSchemeRegistry().register(scheme);
+	}
+
+	/**
+	 * Obtains the {@link SslEngineConfigurator} for anonymous HTTPS.
+	 * 
+	 * @return {@link SslEngineConfigurator} for anonymous HTTPS.
+	 */
+	public static Class<? extends SslEngineConfigurator> getAnonymousSslEngineConfiguratorClass() {
+		return AnonymousSslEngineConfigurator.class;
+	}
+
+	/**
 	 * Port number to use for testing.
 	 */
 	private int port;
@@ -278,9 +301,7 @@ public abstract class MockHttpServer extends AbstractOfficeConstructTestCase
 		HttpClient client = new DefaultHttpClient();
 		if (this.isServerSecure()) {
 			// Configure to be secure client
-			SocketFactory socketFactory = new MockSocketFactory();
-			Scheme scheme = new Scheme("https", socketFactory, this.port);
-			client.getConnectionManager().getSchemeRegistry().register(scheme);
+			configureAnonymousHttps(client, this.port);
 		}
 
 		// Register the HTTP client for cleanup
@@ -369,10 +390,28 @@ public abstract class MockHttpServer extends AbstractOfficeConstructTestCase
 	}
 
 	/**
+	 * Anonymous {@link SslEngineConfigurator}.
+	 */
+	public static class AnonymousSslEngineConfigurator implements
+			SslEngineConfigurator {
+
+		@Override
+		public void init(SSLContext context) throws Exception {
+			// Nothing to initialise for context
+		}
+
+		@Override
+		public void configureSslEngine(SSLEngine engine) {
+			// Allow anonymous connection
+			engine.setEnabledCipherSuites(engine.getSupportedCipherSuites());
+		}
+	}
+
+	/**
 	 * {@link LayeredSocketFactory} to connect to the {@link MockHttpServer}
 	 * over secure connection.
 	 */
-	private class MockSocketFactory implements LayeredSocketFactory {
+	private static class AnonymousSocketFactory implements LayeredSocketFactory {
 
 		/*
 		 * ============== LayeredSocketFactory ======================

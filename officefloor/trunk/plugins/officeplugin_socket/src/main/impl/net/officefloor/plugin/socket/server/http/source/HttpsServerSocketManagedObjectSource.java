@@ -18,14 +18,26 @@
 
 package net.officefloor.plugin.socket.server.http.source;
 
+import net.officefloor.autowire.AutoWire;
+import net.officefloor.autowire.AutoWireApplication;
+import net.officefloor.autowire.AutoWireObject;
+import net.officefloor.autowire.AutoWireSection;
+import net.officefloor.autowire.ManagedObjectSourceWirer;
+import net.officefloor.autowire.ManagedObjectSourceWirerContext;
 import net.officefloor.compile.ManagedObjectSourceService;
+import net.officefloor.compile.spi.section.SectionInput;
 import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.build.None;
+import net.officefloor.frame.impl.spi.team.OnePersonTeamSource;
+import net.officefloor.frame.impl.spi.team.PassiveTeamSource;
+import net.officefloor.frame.impl.spi.team.WorkerPerTaskTeamSource;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
+import net.officefloor.plugin.socket.server.http.HttpRequest;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
 import net.officefloor.plugin.socket.server.http.protocol.HttpCommunicationProtocol;
 import net.officefloor.plugin.socket.server.impl.AbstractServerSocketManagedObjectSource;
 import net.officefloor.plugin.socket.server.protocol.CommunicationProtocolSource;
+import net.officefloor.plugin.socket.server.ssl.SslEngineConfigurator;
 import net.officefloor.plugin.socket.server.ssl.protocol.SslCommunicationProtocol;
 
 /**
@@ -37,6 +49,85 @@ public class HttpsServerSocketManagedObjectSource extends
 		AbstractServerSocketManagedObjectSource
 		implements
 		ManagedObjectSourceService<None, Indexed, HttpsServerSocketManagedObjectSource> {
+
+	/**
+	 * Convenience method to create the {@link ManagedObjectSourceWirer} for
+	 * wiring in the {@link HttpsServerSocketManagedObjectSource}.
+	 * 
+	 * @param sectionName
+	 *            Name of the section handling the {@link HttpRequest}.
+	 * @param sectionInputName
+	 *            Name of the {@link SectionInput} handling the
+	 *            {@link HttpRequest}.
+	 * @return {@link ManagedObjectSourceWirer} for wiring in the
+	 *         {@link HttpsServerSocketManagedObjectSource}.
+	 */
+	public static ManagedObjectSourceWirer createManagedObjectSourceWirer(
+			final String sectionName, final String sectionInputName) {
+		return new ManagedObjectSourceWirer() {
+			@Override
+			public void wire(ManagedObjectSourceWirerContext context) {
+
+				// Provide thread per each accepter and listener
+				context.mapTeam("accepter",
+						WorkerPerTaskTeamSource.class.getName());
+				context.mapTeam("listener",
+						WorkerPerTaskTeamSource.class.getName());
+
+				// Clean up (without thread context switch)
+				context.mapTeam("cleanup", PassiveTeamSource.class.getName());
+
+				// Service SSL tasks within own thread
+				context.mapTeam("SSL_TASKS",
+						OnePersonTeamSource.class.getName());
+
+				// Map request handler
+				context.mapFlow("HANDLE_HTTP_REQUEST", sectionName,
+						sectionInputName);
+			}
+		};
+	}
+
+	/**
+	 * Convenience method to auto-wire in a
+	 * {@link HttpsServerSocketManagedObjectSource} into an
+	 * {@link AutoWireApplication}.
+	 * 
+	 * @param source
+	 *            {@link WebAutoWireApplication}.
+	 * @param port
+	 *            Port to listen for HTTPS requests.
+	 * @param configuratorClass
+	 *            {@link SslEngineConfigurator} class. May be <code>null</code>.
+	 * @param sectionName
+	 *            Name of the {@link AutoWireSection} servicing the requests.
+	 * @param sectionInputName
+	 *            Name of the {@link SectionInput} on the
+	 *            {@link AutoWireSection} servicing the requests.
+	 * @return {@link AutoWireObject}.
+	 */
+	public static AutoWireObject autoWire(AutoWireApplication source, int port,
+			Class<? extends SslEngineConfigurator> configuratorClass,
+			String sectionName, String sectionInputName) {
+
+		// Create the wirer
+		ManagedObjectSourceWirer wirer = createManagedObjectSourceWirer(
+				sectionName, sectionInputName);
+
+		// Add this managed object source
+		AutoWireObject object = source.addManagedObject(
+				HttpsServerSocketManagedObjectSource.class.getName(), wirer,
+				new AutoWire(ServerHttpConnection.class));
+		object.addProperty(PROPERTY_PORT, String.valueOf(port));
+		if (configuratorClass != null) {
+			object.addProperty(
+					SslCommunicationProtocol.PROPERTY_SSL_ENGINE_CONFIGURATOR,
+					configuratorClass.getName());
+		}
+
+		// Return the object
+		return object;
+	}
 
 	/*
 	 * ==================== ManagedObjectSourceService ====================

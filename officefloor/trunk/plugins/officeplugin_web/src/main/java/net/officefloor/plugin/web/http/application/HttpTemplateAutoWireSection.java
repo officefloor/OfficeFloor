@@ -70,6 +70,15 @@ public interface HttpTemplateAutoWireSection extends AutoWireSection {
 	void setTemplateSecure(boolean isSecure);
 
 	/**
+	 * Indicates whether a secure {@link ServerHttpConnection} is required for
+	 * the template.
+	 * 
+	 * @return <code>true</code> if a secure {@link ServerHttpConnection} is
+	 *         required for the template.
+	 */
+	boolean isTemplateSecure();
+
+	/**
 	 * <p>
 	 * Indicate whether a secure {@link ServerHttpConnection} is required for
 	 * the link. This overrides the default template secure setting for the

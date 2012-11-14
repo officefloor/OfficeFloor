@@ -38,6 +38,8 @@ import net.officefloor.plugin.section.clazz.NextTask;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
 import net.officefloor.plugin.socket.server.http.server.MockHttpServer;
 import net.officefloor.plugin.socket.server.http.source.HttpServerSocketManagedObjectSource;
+import net.officefloor.plugin.socket.server.http.source.HttpsServerSocketManagedObjectSource;
+import net.officefloor.plugin.web.http.location.HttpApplicationLocationManagedObjectSource;
 import net.officefloor.plugin.web.http.resource.source.HttpFileSenderWorkSource;
 import net.officefloor.plugin.web.http.resource.source.SourceHttpResourceFactory;
 import net.officefloor.plugin.web.http.session.HttpSession;
@@ -62,7 +64,7 @@ import org.junit.Ignore;
  * 
  * @author Daniel Sagenschneider
  */
-@Ignore("TODO get HttpSecureWorkSource working then integrate for these tests")
+@Ignore("TODO fix secure template Link rendering")
 public class WebApplicationAutoWireOfficeFloorSourceTest extends
 		OfficeFrameTestCase {
 
@@ -94,18 +96,38 @@ public class WebApplicationAutoWireOfficeFloorSourceTest extends
 	@Override
 	protected void setUp() throws Exception {
 
-		// Configure the HTTP Server Socket
+		// Configure the port
 		this.port = MockHttpServer.getAvailablePort();
-		this.securePort = MockHttpServer.getAvailablePort();
+		this.source.getOfficeFloorCompiler().addProperty(
+				HttpApplicationLocationManagedObjectSource.PROPERTY_HTTP_PORT,
+				String.valueOf(this.port));
 		HttpServerSocketManagedObjectSource.autoWire(this.source, this.port,
 				WebApplicationAutoWireOfficeFloorSource.HANDLER_SECTION_NAME,
 				WebApplicationAutoWireOfficeFloorSource.HANDLER_INPUT_NAME);
-		// TODO configure the secure port
+
+		// Configure the secure port
+		this.securePort = MockHttpServer.getAvailablePort();
+		this.source.getOfficeFloorCompiler().addProperty(
+				HttpApplicationLocationManagedObjectSource.PROPERTY_HTTPS_PORT,
+				String.valueOf(this.securePort));
+		HttpsServerSocketManagedObjectSource.autoWire(this.source,
+				this.securePort,
+				MockHttpServer.getAnonymousSslEngineConfiguratorClass(),
+				WebApplicationAutoWireOfficeFloorSource.HANDLER_SECTION_NAME,
+				WebApplicationAutoWireOfficeFloorSource.HANDLER_INPUT_NAME);
+
+		// Configure the HTTP Session
+		this.source.addManagedObject(
+				HttpSessionManagedObjectSource.class.getName(), null,
+				new AutoWire(HttpSession.class)).setTimeout(60 * 1000);
 
 		// Configure the client (to not redirect)
 		HttpParams params = new BasicHttpParams();
 		params.setBooleanParameter(ClientPNames.HANDLE_REDIRECTS, false);
 		this.client = new DefaultHttpClient(params);
+
+		// Configure anonymous HTTPS for client
+		MockHttpServer.configureAnonymousHttps(this.client, this.securePort);
 	}
 
 	@Override
@@ -247,7 +269,7 @@ public class WebApplicationAutoWireOfficeFloorSourceTest extends
 		assertEquals("Incorrect template URI", "/", section.getTemplateUri());
 
 		// Ensure template available at default root
-		this.assertHttpRequest("", isSecure, 200, SUBMIT_URI);
+		this.assertHttpRequest("/", isSecure, 200, SUBMIT_URI);
 
 		// Ensure root link works
 		this.assertHttpRequest(SUBMIT_URI, isSecure, 200, "submitted"
@@ -1176,10 +1198,13 @@ public class WebApplicationAutoWireOfficeFloorSourceTest extends
 			// Determine if redirect
 			if (isRedirect) {
 				// Ensure appropriate redirect
-				assertEquals("Should be redirect", 301, response
+				assertEquals("Should be redirect", 303, response
 						.getStatusLine().getStatusCode());
-				assertEquals("Incorrect redirect URL", redirectUrl,
-						response.getHeaders("Location"));
+				assertEquals("Incorrect redirect URL", redirectUrl, response
+						.getFirstHeader("Location").getValue());
+
+				// Consume response to allow sending next request
+				response.getEntity().consumeContent();
 
 				// Send the redirect for response
 				response = this.client.execute(new HttpGet(redirectUrl));
