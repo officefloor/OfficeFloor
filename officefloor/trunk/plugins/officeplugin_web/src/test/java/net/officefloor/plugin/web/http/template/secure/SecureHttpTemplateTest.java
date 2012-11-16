@@ -25,6 +25,7 @@ import net.officefloor.autowire.AutoWireSection;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.section.clazz.ClassSectionSource;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
+import net.officefloor.plugin.socket.server.http.server.MockHttpServer;
 import net.officefloor.plugin.web.http.application.HttpParameters;
 import net.officefloor.plugin.web.http.application.HttpTemplateAutoWireSection;
 import net.officefloor.plugin.web.http.application.HttpUriLink;
@@ -47,7 +48,7 @@ import org.junit.Ignore;
  * 
  * @author Daniel Sagenschneider
  */
-@Ignore("End goal test to stop ignoring once secure functionality built")
+@Ignore("TODO fix code to have working")
 public class SecureHttpTemplateTest extends OfficeFrameTestCase {
 
 	/**
@@ -71,6 +72,9 @@ public class SecureHttpTemplateTest extends OfficeFrameTestCase {
 		HttpParams params = new BasicHttpParams();
 		params.setBooleanParameter(ClientPNames.HANDLE_REDIRECTS, false);
 		this.client = new DefaultHttpClient(params);
+
+		// Configure the client for anonymous HTTPS
+		MockHttpServer.configureAnonymousHttps(this.client, 7979);
 	}
 
 	@Override
@@ -197,10 +201,13 @@ public class SecureHttpTemplateTest extends OfficeFrameTestCase {
 		// Determine if redirecting
 		if (redirectUrl != null) {
 			// Ensure redirect to appropriately secure URL
-			assertEquals("Should be redirect", 301, response.getStatusLine()
+			assertEquals("Should be redirect", 303, response.getStatusLine()
 					.getStatusCode());
-			assertEquals("Incorrect redirect URL", redirectUrl,
-					response.getHeaders("Location"));
+			assertEquals("Incorrect redirect URL", redirectUrl, response
+					.getFirstHeader("Location").getValue());
+
+			// Complete request to do next request
+			response.getEntity().consumeContent();
 
 			// Undertake redirect to ensure parameters and entity are maintained
 			response = this.client.execute(new HttpGet(redirectUrl));

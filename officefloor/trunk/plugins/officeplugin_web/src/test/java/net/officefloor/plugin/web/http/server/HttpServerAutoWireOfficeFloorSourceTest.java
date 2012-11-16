@@ -32,6 +32,7 @@ import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.section.clazz.ClassSectionSource;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
 import net.officefloor.plugin.socket.server.http.server.MockHttpServer;
+import net.officefloor.plugin.socket.server.ssl.protocol.SslCommunicationProtocol;
 import net.officefloor.plugin.web.http.application.HttpApplicationState;
 import net.officefloor.plugin.web.http.application.HttpApplicationStateful;
 import net.officefloor.plugin.web.http.application.HttpRequestState;
@@ -76,6 +77,12 @@ public class HttpServerAutoWireOfficeFloorSourceTest extends
 	private final HttpClient client = new DefaultHttpClient();
 
 	@Override
+	protected void setUp() throws Exception {
+		// Configure the client
+		MockHttpServer.configureAnonymousHttps(this.client, 7979);
+	}
+
+	@Override
 	protected void tearDown() throws Exception {
 		try {
 			// Stop the client
@@ -102,12 +109,17 @@ public class HttpServerAutoWireOfficeFloorSourceTest extends
 		// Ensure services request for direct file
 		this.assertHttpRequest("http://localhost:7878/index.html", 200,
 				expected);
+		this.assertHttpRequest("https://localhost:7979/index.html", 200,
+				expected);
 
 		// Ensure services request for default file
 		this.assertHttpRequest("http://localhost:7878", 200, expected);
+		this.assertHttpRequest("https://localhost:7979", 200, expected);
 
 		// Ensure handles unknown resource
 		this.assertHttpRequest("http://localhost:7878/unknown", 404,
+				fileNotFound);
+		this.assertHttpRequest("https://localhost:7979/unknown", 404,
 				fileNotFound);
 	}
 
@@ -130,6 +142,28 @@ public class HttpServerAutoWireOfficeFloorSourceTest extends
 	}
 
 	/**
+	 * Ensure able to construct specifying HTTPS port.
+	 */
+	public void testInitiateHttpsPort() throws Exception {
+
+		final int PORT = MockHttpServer.getAvailablePort();
+		final int SECURE_PORT = MockHttpServer.getAvailablePort();
+
+		// Construct HTTP instance with specified port
+		this.source = new HttpServerAutoWireOfficeFloorSource(PORT,
+				SECURE_PORT,
+				MockHttpServer.getAnonymousSslEngineConfiguratorClass());
+		this.source.openOfficeFloor();
+
+		// Obtain the expected content
+		String expected = this.getFileContents("PUBLIC/index.html");
+
+		// Ensure able to service by initiated HTTPS port
+		this.assertHttpRequest("https://localhost:" + SECURE_PORT, 200,
+				expected);
+	}
+
+	/**
 	 * Ensure specify HTTP port.
 	 */
 	public void testAddHttpSocket() throws Exception {
@@ -145,6 +179,25 @@ public class HttpServerAutoWireOfficeFloorSourceTest extends
 
 		// Ensure able to service by added HTTP port
 		this.assertHttpRequest("http://localhost:" + PORT, 200, expected);
+	}
+
+	/**
+	 * Ensure specify HTTPS port.
+	 */
+	public void testAddHttpsSocket() throws Exception {
+
+		final int PORT = MockHttpServer.getAvailablePort();
+
+		// Specify the HTTPS port
+		this.source.addHttpsServerSocket(PORT,
+				MockHttpServer.getAnonymousSslEngineConfiguratorClass());
+		this.source.openOfficeFloor();
+
+		// Obtain the expected content
+		String expected = this.getFileContents("PUBLIC/index.html");
+
+		// Ensure able to service by added HTTP port
+		this.assertHttpRequest("https://localhost:" + PORT, 200, expected);
 	}
 
 	/**
@@ -168,6 +221,28 @@ public class HttpServerAutoWireOfficeFloorSourceTest extends
 	}
 
 	/**
+	 * Ensure same {@link AutoWireObject} should HTTPS port be added twice.
+	 */
+	public void testAddSameHttpsSocketTwice() throws Exception {
+
+		final int PORT = MockHttpServer.getAvailablePort();
+
+		// Add the port twice
+		AutoWireObject one = this.source.addHttpsServerSocket(PORT,
+				MockHttpServer.getAnonymousSslEngineConfiguratorClass());
+		AutoWireObject two = this.source.addHttpsServerSocket(PORT,
+				MockHttpServer.getAnonymousSslEngineConfiguratorClass());
+		assertSame("Ensure same object for same port", one, two);
+		this.source.openOfficeFloor();
+
+		// Obtain the expected content
+		String expected = this.getFileContents("PUBLIC/index.html");
+
+		// Ensure able to service by added HTTP port
+		this.assertHttpRequest("https://localhost:" + PORT, 200, expected);
+	}
+
+	/**
 	 * Ensure can provide {@link OfficeFloor} property to configure the HTTP
 	 * port.
 	 */
@@ -186,6 +261,32 @@ public class HttpServerAutoWireOfficeFloorSourceTest extends
 
 		// Ensure able to service by configured HTTP port
 		this.assertHttpRequest("http://localhost:" + PORT, 200, expected);
+	}
+
+	/**
+	 * Ensure can provide {@link OfficeFloor} property to configure the HTTPS
+	 * port.
+	 */
+	public void testConfigureHttpsPort() throws Exception {
+
+		final int PORT = MockHttpServer.getAvailablePort();
+
+		// Open on alternate port (via OfficeFloor configuration)
+		OfficeFloorCompiler compiler = this.source.getOfficeFloorCompiler();
+		compiler.addProperty(
+				HttpApplicationLocationManagedObjectSource.PROPERTY_HTTPS_PORT,
+				String.valueOf(PORT));
+		compiler.addProperty(
+				SslCommunicationProtocol.PROPERTY_SSL_ENGINE_CONFIGURATOR,
+				MockHttpServer.getAnonymousSslEngineConfiguratorClass()
+						.getName());
+		this.source.openOfficeFloor();
+
+		// Obtain the expected content
+		String expected = this.getFileContents("PUBLIC/index.html");
+
+		// Ensure able to service by configured HTTPS port
+		this.assertHttpRequest("https://localhost:" + PORT, 200, expected);
 	}
 
 	/**
@@ -214,9 +315,38 @@ public class HttpServerAutoWireOfficeFloorSourceTest extends
 	}
 
 	/**
-	 * Ensure can listen on multiple ports.
+	 * Ensure can provide {@link OfficeFloor} property to configure the HTTPS
+	 * port.
 	 */
-	public void testListenOnMultiplePorts() throws Exception {
+	public void testConfigureClusterHttpsPort() throws Exception {
+
+		final int PORT = MockHttpServer.getAvailablePort();
+
+		// Open on alternate port (via OfficeFloor configuration)
+		OfficeFloorCompiler compiler = this.source.getOfficeFloorCompiler();
+		compiler.addProperty(
+				HttpApplicationLocationManagedObjectSource.PROPERTY_HTTPS_PORT,
+				String.valueOf(-1)); // should not be used as cluster HTTPS port
+		compiler.addProperty(
+				HttpApplicationLocationManagedObjectSource.PROPERTY_CLUSTER_HTTPS_PORT,
+				String.valueOf(PORT));
+		compiler.addProperty(
+				SslCommunicationProtocol.PROPERTY_SSL_ENGINE_CONFIGURATOR,
+				MockHttpServer.getAnonymousSslEngineConfiguratorClass()
+						.getName());
+		this.source.openOfficeFloor();
+
+		// Obtain the expected content
+		String expected = this.getFileContents("PUBLIC/index.html");
+
+		// Ensure able to service by configured HTTPS port
+		this.assertHttpRequest("https://localhost:" + PORT, 200, expected);
+	}
+
+	/**
+	 * Ensure can listen on multiple HTTP ports.
+	 */
+	public void testListenOnMultipleHttpPorts() throws Exception {
 
 		final int EXTRA_PORT_ONE = MockHttpServer.getAvailablePort();
 		final int EXTRA_PORT_TWO = MockHttpServer.getAvailablePort();
@@ -237,6 +367,37 @@ public class HttpServerAutoWireOfficeFloorSourceTest extends
 		this.assertHttpRequest("http://localhost:" + EXTRA_PORT_TWO, 200,
 				expected);
 		this.assertHttpRequest("http://localhost:" + DEFAULT_PORT, 200,
+				expected);
+	}
+
+	/**
+	 * Ensure can listen on multiple HTTPS ports.
+	 */
+	public void testListenOnMultipleHttpsPorts() throws Exception {
+
+		final int EXTRA_PORT_ONE = MockHttpServer.getAvailablePort();
+		final int EXTRA_PORT_TWO = MockHttpServer.getAvailablePort();
+		final int DEFAULT_PORT = 7979; // listen on default port as well
+
+		// Listen on multiple HTTPS Server socket
+		this.source = new HttpServerAutoWireOfficeFloorSource(7878,
+				EXTRA_PORT_ONE,
+				MockHttpServer.getAnonymousSslEngineConfiguratorClass());
+		this.source.addHttpsServerSocket(EXTRA_PORT_TWO,
+				MockHttpServer.getAnonymousSslEngineConfiguratorClass());
+		this.source.addHttpsServerSocket(DEFAULT_PORT,
+				MockHttpServer.getAnonymousSslEngineConfiguratorClass());
+		this.source.openOfficeFloor();
+
+		// Obtain the expected content
+		String expected = this.getFileContents("PUBLIC/index.html");
+
+		// Ensure listening on both ports
+		this.assertHttpRequest("https://localhost:" + EXTRA_PORT_ONE, 200,
+				expected);
+		this.assertHttpRequest("https://localhost:" + EXTRA_PORT_TWO, 200,
+				expected);
+		this.assertHttpRequest("https://localhost:" + DEFAULT_PORT, 200,
 				expected);
 	}
 

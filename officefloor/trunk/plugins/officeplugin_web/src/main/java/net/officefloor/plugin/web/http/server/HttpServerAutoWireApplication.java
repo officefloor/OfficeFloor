@@ -19,6 +19,7 @@
 package net.officefloor.plugin.web.http.server;
 
 import net.officefloor.autowire.AutoWireObject;
+import net.officefloor.plugin.socket.server.ssl.SslEngineConfigurator;
 import net.officefloor.plugin.web.http.application.WebAutoWireApplication;
 import net.officefloor.plugin.web.http.session.HttpSession;
 import net.officefloor.plugin.web.http.session.source.HttpSessionManagedObjectSource;
@@ -44,9 +45,12 @@ public interface HttpServerAutoWireApplication extends WebAutoWireApplication {
 	 * 
 	 * @param port
 	 *            Port to listen on.
+	 * @param sslEngineConfiguratorClass
+	 *            {@link SslEngineConfigurator} class. May be <code>null</code>.
 	 * @return {@link AutoWireObject} of the added HTTPS server socket.
 	 */
-	AutoWireObject addHttpsServerSocket(int port);
+	AutoWireObject addHttpsServerSocket(int port,
+			Class<? extends SslEngineConfigurator> sslEngineConfiguratorClass);
 
 	/**
 	 * <p>

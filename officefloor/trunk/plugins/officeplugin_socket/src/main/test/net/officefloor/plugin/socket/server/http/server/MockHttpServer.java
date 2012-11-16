@@ -49,6 +49,7 @@ import net.officefloor.frame.test.MockTeamSource;
 import net.officefloor.plugin.socket.server.http.source.HttpServerSocketManagedObjectSource;
 import net.officefloor.plugin.socket.server.http.source.HttpsServerSocketManagedObjectSource;
 import net.officefloor.plugin.socket.server.impl.AbstractServerSocketManagedObjectSource;
+import net.officefloor.plugin.socket.server.ssl.AnonymousSslEngineConfigurator;
 import net.officefloor.plugin.socket.server.ssl.SslEngineConfigurator;
 import net.officefloor.plugin.socket.server.ssl.protocol.SslCommunicationProtocol;
 
@@ -385,24 +386,6 @@ public abstract class MockHttpServer extends AbstractOfficeConstructTestCase
 		@Override
 		public void configureSslEngine(SSLEngine engine) {
 			// Setup for anonymous ciphers
-			engine.setEnabledCipherSuites(engine.getSupportedCipherSuites());
-		}
-	}
-
-	/**
-	 * Anonymous {@link SslEngineConfigurator}.
-	 */
-	public static class AnonymousSslEngineConfigurator implements
-			SslEngineConfigurator {
-
-		@Override
-		public void init(SSLContext context) throws Exception {
-			// Nothing to initialise for context
-		}
-
-		@Override
-		public void configureSslEngine(SSLEngine engine) {
-			// Allow anonymous connection
 			engine.setEnabledCipherSuites(engine.getSupportedCipherSuites());
 		}
 	}

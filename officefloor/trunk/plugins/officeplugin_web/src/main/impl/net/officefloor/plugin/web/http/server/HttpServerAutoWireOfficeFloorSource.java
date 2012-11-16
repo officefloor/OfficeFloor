@@ -23,12 +23,17 @@ import java.util.Map;
 
 import net.officefloor.autowire.AutoWire;
 import net.officefloor.autowire.AutoWireObject;
+import net.officefloor.compile.OfficeFloorCompiler;
 import net.officefloor.compile.properties.Property;
 import net.officefloor.compile.spi.officefloor.OfficeFloorDeployer;
 import net.officefloor.compile.spi.officefloor.source.OfficeFloorSource;
 import net.officefloor.compile.spi.officefloor.source.OfficeFloorSourceContext;
 import net.officefloor.frame.impl.spi.team.PassiveTeamSource;
 import net.officefloor.plugin.socket.server.http.source.HttpServerSocketManagedObjectSource;
+import net.officefloor.plugin.socket.server.http.source.HttpsServerSocketManagedObjectSource;
+import net.officefloor.plugin.socket.server.ssl.AnonymousSslEngineConfigurator;
+import net.officefloor.plugin.socket.server.ssl.SslEngineConfigurator;
+import net.officefloor.plugin.socket.server.ssl.protocol.SslCommunicationProtocol;
 import net.officefloor.plugin.web.http.application.HttpApplicationState;
 import net.officefloor.plugin.web.http.application.HttpApplicationStateManagedObjectSource;
 import net.officefloor.plugin.web.http.application.HttpRequestState;
@@ -59,7 +64,14 @@ public class HttpServerAutoWireOfficeFloorSource extends
 	 * {@link Property} configuration.
 	 */
 	private final Map<Integer, AutoWireObject> addedHttpPorts = new HashMap<Integer, AutoWireObject>(
-			0);
+			1);
+
+	/**
+	 * Added HTTPS ports. Typically HTTPS ports will be added through
+	 * {@link Property} configuration.
+	 */
+	private final Map<Integer, AutoWireObject> addedHttpsPorts = new HashMap<Integer, AutoWireObject>(
+			1);
 
 	/**
 	 * Initiate.
@@ -75,13 +87,42 @@ public class HttpServerAutoWireOfficeFloorSource extends
 	 *            HTTP port.
 	 */
 	public HttpServerAutoWireOfficeFloorSource(int httpPort) {
+		this(httpPort, -1, null);
+	}
+
+	/**
+	 * Initiate to use the specified HTTP port.
+	 * 
+	 * @param httpPort
+	 *            HTTP port.
+	 * @param httpsPort
+	 *            HTTPS port.
+	 * @param sslEngineConfiguratorClass
+	 *            {@link SslEngineConfigurator} class. May be <code>null</code>.
+	 */
+	public HttpServerAutoWireOfficeFloorSource(int httpPort, int httpsPort,
+			Class<? extends SslEngineConfigurator> sslEngineConfiguratorClass) {
+
+		// Obtain the OfficeFloor compiler
+		OfficeFloorCompiler compiler = this.getOfficeFloorCompiler();
 
 		// Configure to use the HTTP port
 		if (httpPort > 0) {
-			this.getOfficeFloorCompiler()
-					.addProperty(
-							HttpApplicationLocationManagedObjectSource.PROPERTY_HTTP_PORT,
-							String.valueOf(httpPort));
+			compiler.addProperty(
+					HttpApplicationLocationManagedObjectSource.PROPERTY_HTTP_PORT,
+					String.valueOf(httpPort));
+		}
+
+		// Configure to use the HTTPS port
+		if (httpsPort > 0) {
+			compiler.addProperty(
+					HttpApplicationLocationManagedObjectSource.PROPERTY_CLUSTER_HTTPS_PORT,
+					String.valueOf(httpsPort));
+			if (sslEngineConfiguratorClass != null) {
+				compiler.addProperty(
+						SslCommunicationProtocol.PROPERTY_SSL_ENGINE_CONFIGURATOR,
+						sslEngineConfiguratorClass.getName());
+			}
 		}
 
 		// Use passive team by default (saves on context switching)
@@ -119,7 +160,7 @@ public class HttpServerAutoWireOfficeFloorSource extends
 					HANDLER_SECTION_NAME, HANDLER_INPUT_NAME);
 
 			// Register adding the HTTP port
-			this.addedHttpPorts.put(Integer.valueOf(port), object);
+			this.addedHttpPorts.put(portInteger, object);
 		}
 
 		// Return the HTTP Server Socket
@@ -127,10 +168,25 @@ public class HttpServerAutoWireOfficeFloorSource extends
 	}
 
 	@Override
-	public AutoWireObject addHttpsServerSocket(int port) {
-		// TODO implement HttpServerAutoWireApplication.addHttpsSocket
-		throw new UnsupportedOperationException(
-				"TODO implement HttpServerAutoWireApplication.addHttpsSocket");
+	public AutoWireObject addHttpsServerSocket(int port,
+			Class<? extends SslEngineConfigurator> sslEngineConfiguratorClass) {
+
+		// Lazy create the HTTPS Server Socket on the port
+		Integer portInteger = Integer.valueOf(port);
+		AutoWireObject object = this.addedHttpsPorts.get(portInteger);
+		if (object == null) {
+
+			// Create the HTTPS Server Socket on the port
+			object = HttpsServerSocketManagedObjectSource.autoWire(this, port,
+					sslEngineConfiguratorClass, HANDLER_SECTION_NAME,
+					HANDLER_INPUT_NAME);
+
+			// Register adding the HTTPS port
+			this.addedHttpsPorts.put(portInteger, object);
+		}
+
+		// Return the HTTPS Server Socket
+		return object;
 	}
 
 	@Override
@@ -143,6 +199,7 @@ public class HttpServerAutoWireOfficeFloorSource extends
 	 */
 
 	@Override
+	@SuppressWarnings("unchecked")
 	protected void initOfficeFloor(OfficeFloorDeployer deployer,
 			OfficeFloorSourceContext context) throws Exception {
 
@@ -163,6 +220,35 @@ public class HttpServerAutoWireOfficeFloorSource extends
 		} else if (this.addedHttpPorts.size() == 0) {
 			// Provide default HTTP port
 			this.addHttpServerSocket(HttpApplicationLocationManagedObjectSource.DEFAULT_HTTP_PORT);
+		}
+
+		// Add the configured HTTPS port
+		String httpsPort = context
+				.getProperty(
+						HttpApplicationLocationManagedObjectSource.PROPERTY_CLUSTER_HTTPS_PORT,
+						context.getProperty(
+								HttpApplicationLocationManagedObjectSource.PROPERTY_HTTPS_PORT,
+								null));
+		if (httpsPort != null) {
+			// Determine if SSL Engine Configurator configured
+			String sslEngineConfiguratorClassName = context.getProperty(
+					SslCommunicationProtocol.PROPERTY_SSL_ENGINE_CONFIGURATOR,
+					null);
+			Class<? extends SslEngineConfigurator> sslEngineConfiguratorClass = null;
+			if (sslEngineConfiguratorClassName != null) {
+				sslEngineConfiguratorClass = (Class<? extends SslEngineConfigurator>) context
+						.loadClass(sslEngineConfiguratorClassName);
+			}
+
+			// Add the configured HTTPS port
+			this.addHttpsServerSocket(Integer.parseInt(httpsPort),
+					sslEngineConfiguratorClass);
+
+		} else if (this.addedHttpsPorts.size() == 0) {
+			// Provide default HTTPS port (focus on ease of development)
+			this.addHttpsServerSocket(
+					HttpApplicationLocationManagedObjectSource.DEFAULT_HTTPS_PORT,
+					AnonymousSslEngineConfigurator.class);
 		}
 	}
 
