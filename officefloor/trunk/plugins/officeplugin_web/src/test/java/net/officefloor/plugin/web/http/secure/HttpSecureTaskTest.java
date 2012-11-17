@@ -76,13 +76,29 @@ public class HttpSecureTaskTest extends OfficeFrameTestCase {
 	private final HttpResponse response = this.createMock(HttpResponse.class);
 
 	/**
-	 * Ensure redirect {@link HttpRequest} if not appropriately secure
+	 * Ensure redirect {@link HttpRequest} if requires secure
 	 * {@link ServerHttpConnection}.
 	 */
-	public void testRedirect() throws Throwable {
+	public void testRedirectAsNotSecure() throws Throwable {
+		this.doRedirectTest(true, false, "https://officefloor.net:7979");
+	}
+
+	/**
+	 * Ensure redirect {@link HttpRequest} if not to be secure
+	 * {@link ServerHttpConnection}.
+	 */
+	public void testRedirectAsSecure() throws Throwable {
+		this.doRedirectTest(true, false, "http://officefloor.net:7878");
+	}
+
+	/**
+	 * Undertakes the redirect test.
+	 */
+	private void doRedirectTest(boolean isConnectionSecure,
+			boolean isRequireSecure, String redirectUrlPrefix) throws Throwable {
 
 		final String REQUEST_URL = "/test";
-		final String REDIRECT_URL = "https://officefloor.net:7979/test";
+		final String REDIRECT_URL = redirectUrlPrefix + "/test";
 
 		final HttpHeader header = this.createMock(HttpHeader.class);
 
@@ -95,10 +111,10 @@ public class HttpSecureTaskTest extends OfficeFrameTestCase {
 		this.recordReturn(this.location,
 				this.location.transformToApplicationCanonicalPath(REQUEST_URL),
 				REQUEST_URL);
-		this.recordReturn(this.connection, this.connection.isSecure(), false);
-		this.recordReturn(this.location,
-				this.location.transformToClientPath(REQUEST_URL, true),
-				REDIRECT_URL);
+		this.recordReturn(this.connection, this.connection.isSecure(),
+				isConnectionSecure);
+		this.recordReturn(this.location, this.location.transformToClientPath(
+				REQUEST_URL, isRequireSecure), REDIRECT_URL);
 		this.recordReturn(this.connection, this.connection.getHttpResponse(),
 				this.response);
 		this.response.setStatus(303);
@@ -108,18 +124,45 @@ public class HttpSecureTaskTest extends OfficeFrameTestCase {
 		// Test
 		this.replayMockObjects();
 		HttpSecureTask task = this.createHttpSecureTask(
-				"http.secure.path./first", "/first",
-				"http.secure.path./second", "/second",
-				"http.secure.path./test", "/test");
+				"http.secure.path./first", String.valueOf(false),
+				"http.secure.path./second", String.valueOf(true),
+				"http.secure.path./test", String.valueOf(isRequireSecure));
 		task.doTask(this.context);
 		this.verifyMockObjects();
+	}
+
+	/**
+	 * Ensure service {@link HttpRequest} as a secure
+	 * {@link ServerHttpConnection}.
+	 */
+	public void testServiceAsSecure() throws Throwable {
+		this.doServiceTest(Boolean.TRUE, "http.secure.path./test",
+				String.valueOf(true));
+	}
+
+	/**
+	 * Ensure service {@link HttpRequest} as not secure
+	 * {@link ServerHttpConnection}.
+	 */
+	public void testServiceAsNotSecure() throws Throwable {
+		this.doServiceTest(Boolean.FALSE, "http.secure.path./test",
+				String.valueOf(false));
+	}
+
+	/**
+	 * Ensure service {@link HttpRequest} as no secure configuration specified.
+	 * This will typically be to service resources.
+	 */
+	public void testServiceAsNotSpecified() throws Throwable {
+		this.doServiceTest(Boolean.TRUE);
 	}
 
 	/**
 	 * Ensure service {@link HttpRequest} if appropriately secure
 	 * {@link ServerHttpConnection}.
 	 */
-	public void testService() throws Throwable {
+	private void doServiceTest(Boolean isSecure, String... propertyNameValues)
+			throws Throwable {
 
 		final String REQUEST_URL = "/test";
 
@@ -134,14 +177,14 @@ public class HttpSecureTaskTest extends OfficeFrameTestCase {
 		this.recordReturn(this.location,
 				this.location.transformToApplicationCanonicalPath(REQUEST_URL),
 				REQUEST_URL);
-		this.recordReturn(this.connection, this.connection.isSecure(), false);
+		this.recordReturn(this.connection, this.connection.isSecure(),
+				(isSecure == null ? true : isSecure.booleanValue()));
 		this.recordReturn(this.context,
 				this.context.doFlow(HttpSecureTaskFlows.SERVICE, null), future);
 
 		// Test
 		this.replayMockObjects();
-		HttpSecureTask task = this.createHttpSecureTask(
-				"http.secure.path./not-secure", "/not-secure");
+		HttpSecureTask task = this.createHttpSecureTask(propertyNameValues);
 		task.doTask(this.context);
 		this.verifyMockObjects();
 	}

@@ -17,7 +17,7 @@
  */
 package net.officefloor.plugin.web.http.secure;
 
-import java.util.Set;
+import java.util.Map;
 
 import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.execute.TaskContext;
@@ -58,15 +58,18 @@ public class HttpSecureTask
 	/**
 	 * Secure paths.
 	 */
-	private final Set<String> securePaths;
+	private final Map<String, Boolean> securePaths;
 
 	/**
 	 * Initiate.
 	 * 
 	 * @param securePaths
-	 *            Secure paths.
+	 *            Secure paths. Value of <code>true</code> indicates the path
+	 *            requires a secure {@link ServerHttpConnection}.
+	 *            <code>false</code> indicates not secure. No value for path
+	 *            indicates to just service.
 	 */
-	public HttpSecureTask(Set<String> securePaths) {
+	public HttpSecureTask(Map<String, Boolean> securePaths) {
 		this.securePaths = securePaths;
 	}
 
@@ -96,14 +99,13 @@ public class HttpSecureTask
 		new HttpRequestTokeniserImpl().tokeniseRequestURI(path, handler);
 		path = handler.path;
 
-		// Determine if required to be secure connection
-		boolean isRequireSecure = this.securePaths.contains(path);
-
 		// Determine if secure connection
 		boolean isConnectionSecure = connection.isSecure();
 
-		// Determine if may service request
-		if (isRequireSecure == isConnectionSecure) {
+		// Determine if required to be secure connection
+		Boolean isRequireSecure = this.securePaths.get(path);
+		if ((isRequireSecure == null)
+				|| (isRequireSecure.booleanValue() == isConnectionSecure)) {
 			// Appropriately secure so service
 			context.doFlow(HttpSecureTaskFlows.SERVICE, null);
 			return null;
@@ -111,7 +113,7 @@ public class HttpSecureTask
 
 		// Determine the redirect URL
 		String redirectUrl = location.transformToClientPath(path,
-				isRequireSecure);
+				isRequireSecure.booleanValue());
 
 		// Send redirect for making secure
 		HttpResponse response = connection.getHttpResponse();

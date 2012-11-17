@@ -53,6 +53,7 @@ import net.officefloor.plugin.web.http.secure.HttpSecureTask.HttpSecureTaskFlows
 import net.officefloor.plugin.web.http.secure.HttpSecureWorkSource;
 import net.officefloor.plugin.web.http.server.HttpServerAutoWireOfficeFloorSource;
 import net.officefloor.plugin.web.http.session.HttpSession;
+import net.officefloor.plugin.web.http.template.HttpTemplateWorkSource;
 import net.officefloor.plugin.web.http.template.route.HttpTemplateRouteTask.HttpTemplateRouteDependencies;
 import net.officefloor.plugin.web.http.template.route.HttpTemplateRouteTask.HttpTemplateRouteTaskFlows;
 import net.officefloor.plugin.web.http.template.route.HttpTemplateRouteWorkSource;
@@ -135,15 +136,16 @@ public class WebApplicationSectionSource extends AbstractSectionSource {
 			WebApplicationAutoWireOfficeFloorSource source) {
 
 		// Determine if secure
-		if (httpTemplate.isTemplateSecure()) {
+		boolean isTemplateSecure = httpTemplate.isTemplateSecure();
+		String uri = httpTemplate.getTemplateUri();
 
-			// Secure the template
-			String uri = httpTemplate.getTemplateUri();
-			httpSection
-					.addProperty(
-							HttpSecureWorkSource.PROPERTY_PREFIX_SECURE_PATH
-									+ uri, uri);
-		}
+		// Secure the template
+		httpTemplate.addProperty(
+				HttpTemplateWorkSource.PROPERTY_TEMPLATE_SECURE,
+				String.valueOf(isTemplateSecure));
+		httpSection.addProperty(
+				HttpSecureWorkSource.PROPERTY_PREFIX_SECURE_PATH + uri,
+				String.valueOf(isTemplateSecure));
 	}
 
 	/**

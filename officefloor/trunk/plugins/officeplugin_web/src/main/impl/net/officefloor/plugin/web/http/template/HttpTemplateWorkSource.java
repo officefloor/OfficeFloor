@@ -41,6 +41,7 @@ import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.spi.source.SourceContext;
 import net.officefloor.frame.spi.source.SourceProperties;
+import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
 import net.officefloor.plugin.web.http.template.parse.BeanHttpTemplateSectionContent;
 import net.officefloor.plugin.web.http.template.parse.HttpTemplate;
 import net.officefloor.plugin.web.http.template.parse.HttpTemplateParserImpl;
@@ -68,6 +69,12 @@ public class HttpTemplateWorkSource extends
 	 * there is no template path.
 	 */
 	public static final String PROPERTY_TEMPLATE_CONTENT = "template.content";
+
+	/**
+	 * Property to indicate if the {@link HttpTemplate} requires a secure
+	 * {@link ServerHttpConnection}.
+	 */
+	public static final String PROPERTY_TEMPLATE_SECURE = "template.secure";
 
 	/**
 	 * Property to specify the {@link Charset} for the template.
@@ -292,6 +299,10 @@ public class HttpTemplateWorkSource extends
 		// Obtain the details of the template
 		Charset charset = getCharset(context);
 
+		// Obtain whether the template is secure
+		boolean isTemplateSecure = Boolean.valueOf(context.getProperty(
+				PROPERTY_TEMPLATE_SECURE, String.valueOf(false)));
+
 		// Define the work factory
 		workTypeBuilder.setWorkFactory(new HttpTemplateWork());
 
@@ -301,7 +312,7 @@ public class HttpTemplateWorkSource extends
 
 			// Load the task to write the section
 			String[] linkNames = HttpTemplateTask.loadTaskType(section,
-					charset, workTypeBuilder, context);
+					charset, isTemplateSecure, workTypeBuilder, context);
 
 			// Keep track of the unique set of link names
 			linkNameSet.addAll(Arrays.asList(linkNames));

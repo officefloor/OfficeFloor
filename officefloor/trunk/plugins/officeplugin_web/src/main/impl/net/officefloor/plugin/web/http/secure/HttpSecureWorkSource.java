@@ -17,8 +17,8 @@
  */
 package net.officefloor.plugin.web.http.secure;
 
-import java.util.HashSet;
-import java.util.Set;
+import java.util.HashMap;
+import java.util.Map;
 
 import net.officefloor.compile.properties.Property;
 import net.officefloor.compile.spi.work.source.TaskTypeBuilder;
@@ -59,11 +59,20 @@ public class HttpSecureWorkSource extends AbstractWorkSource<HttpSecureTask> {
 			WorkSourceContext context) throws Exception {
 
 		// Obtain the secure paths
-		Set<String> securePaths = new HashSet<String>();
+		Map<String, Boolean> securePaths = new HashMap<String, Boolean>();
 		for (String propertyName : context.getPropertyNames()) {
 			if (propertyName.startsWith(PROPERTY_PREFIX_SECURE_PATH)) {
-				String securePath = context.getProperty(propertyName);
-				securePaths.add(securePath);
+
+				// Determine if the path is secure
+				Boolean isPathSecure = Boolean.valueOf(context
+						.getProperty(propertyName));
+
+				// Obtain the path
+				String path = propertyName
+						.substring(PROPERTY_PREFIX_SECURE_PATH.length());
+
+				// Register the path for secure
+				securePaths.put(path, isPathSecure);
 			}
 		}
 

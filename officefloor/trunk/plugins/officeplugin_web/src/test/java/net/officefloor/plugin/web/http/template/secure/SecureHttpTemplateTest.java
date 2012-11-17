@@ -48,7 +48,7 @@ import org.junit.Ignore;
  * 
  * @author Daniel Sagenschneider
  */
-@Ignore("TODO fix code to have working")
+@Ignore("TODO provide secure configuration")
 public class SecureHttpTemplateTest extends OfficeFrameTestCase {
 
 	/**
