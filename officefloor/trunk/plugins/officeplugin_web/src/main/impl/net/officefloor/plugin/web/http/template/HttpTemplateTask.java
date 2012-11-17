@@ -64,12 +64,19 @@ public class HttpTemplateTask extends
 	public static final String PROPERTY_BEAN_PREFIX = "bean.";
 
 	/**
+	 * Property prefix to obtain whether the link is to be secure.
+	 */
+	public static final String PROPERTY_SECURE_LINK_PREFIX = "secure.link.";
+
+	/**
 	 * Loads the {@link TaskType} for to write the {@link HttpTemplateSection}.
 	 * 
 	 * @param section
 	 *            {@link HttpTemplateSection}.
 	 * @param serverDefaultCharset
 	 *            Default {@link Charset} for Server.
+	 * @param isTemplateSecure
+	 *            Indicates if the template is to be secure.
 	 * @param workTypeBuilder
 	 *            {@link WorkTypeBuilder}.
 	 * @param context
@@ -80,7 +87,7 @@ public class HttpTemplateTask extends
 	 *             If fails to prepare the template.
 	 */
 	public static String[] loadTaskType(HttpTemplateSection section,
-			Charset serverDefaultCharset,
+			Charset serverDefaultCharset, boolean isTemplateSecure,
 			WorkTypeBuilder<HttpTemplateWork> workTypeBuilder,
 			WorkSourceContext context) throws Exception {
 
@@ -93,7 +100,7 @@ public class HttpTemplateTask extends
 		// Create the content writers for the section
 		SectionWriterStruct writerStruct = createHttpTemplateWriters(
 				section.getContent(), null, sectionAndTaskName, linkTaskNames,
-				serverDefaultCharset, context);
+				serverDefaultCharset, isTemplateSecure, context);
 
 		// Determine if requires bean
 		boolean isRequireBean = (writerStruct.beanClass != null);
@@ -162,6 +169,8 @@ public class HttpTemplateTask extends
 	 *            List task names.
 	 * @param serverDefaultCharset
 	 *            Default {@link Charset} for the Server.
+	 * @param isTemplateSecure
+	 *            Indicates if the template is to be secure.
 	 * @param context
 	 *            {@link WorkSourceContext}.
 	 * @return {@link SectionWriterStruct}.
@@ -171,8 +180,8 @@ public class HttpTemplateTask extends
 	private static SectionWriterStruct createHttpTemplateWriters(
 			HttpTemplateSectionContent[] contents, Class<?> beanClass,
 			String sectionAndTaskName, Set<String> linkTaskNames,
-			Charset serverDefaultCharset, WorkSourceContext context)
-			throws Exception {
+			Charset serverDefaultCharset, boolean isTemplateSecure,
+			WorkSourceContext context) throws Exception {
 
 		// Create the content writers for the section
 		List<HttpTemplateWriter> contentWriterList = new LinkedList<HttpTemplateWriter>();
@@ -221,7 +230,8 @@ public class HttpTemplateTask extends
 				// Obtain the writers for the bean
 				SectionWriterStruct beanStruct = createHttpTemplateWriters(
 						beanContent.getContent(), beanType, null,
-						linkTaskNames, serverDefaultCharset, null);
+						linkTaskNames, serverDefaultCharset, isTemplateSecure,
+						null);
 
 				// Add the content writer
 				contentWriterList.add(new BeanHttpTemplateWriter(beanContent,
@@ -248,10 +258,19 @@ public class HttpTemplateTask extends
 			} else if (content instanceof LinkHttpTemplateSectionContent) {
 				// Add the link template writer
 				LinkHttpTemplateSectionContent linkContent = (LinkHttpTemplateSectionContent) content;
-				contentWriterList.add(new LinkHttpTemplateWriter(linkContent));
+
+				// Determine if the link is to be secure
+				String linkName = linkContent.getName();
+				boolean isLinkSecure = Boolean.parseBoolean(context
+						.getProperty(PROPERTY_SECURE_LINK_PREFIX + linkName,
+								String.valueOf(isTemplateSecure)));
+
+				// Add the content writer
+				contentWriterList.add(new LinkHttpTemplateWriter(linkContent,
+						isLinkSecure));
 
 				// Track the link tasks
-				linkTaskNames.add(linkContent.getName());
+				linkTaskNames.add(linkName);
 
 			} else {
 				// Unknown content
@@ -363,7 +382,7 @@ public class HttpTemplateTask extends
 		for (HttpTemplateWriter contentWriter : this.contentWriters) {
 			contentWriter.write(writer, workName, bean, location);
 		}
-		
+
 		// Flush contents
 		writer.flush();
 

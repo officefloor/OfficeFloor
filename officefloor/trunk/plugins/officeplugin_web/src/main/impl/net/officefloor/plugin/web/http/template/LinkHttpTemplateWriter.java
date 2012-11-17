@@ -20,6 +20,7 @@ package net.officefloor.plugin.web.http.template;
 
 import java.io.IOException;
 
+import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
 import net.officefloor.plugin.stream.ServerWriter;
 import net.officefloor.plugin.web.http.location.HttpApplicationLocation;
 import net.officefloor.plugin.web.http.template.parse.LinkHttpTemplateSectionContent;
@@ -42,15 +43,26 @@ public class LinkHttpTemplateWriter implements HttpTemplateWriter {
 	private final String linkSuffix;
 
 	/**
+	 * Indicates if the link is to be submitted over a secure
+	 * {@link ServerHttpConnection}.
+	 */
+	private final boolean isLinkSecure;
+
+	/**
 	 * Initiate.
 	 * 
 	 * @param content
 	 *            {@link LinkHttpTemplateSectionContent}.
+	 * @param isLinkSecure
+	 *            Indicates if the link is to be submitted over a secure
+	 *            {@link ServerHttpConnection}.
 	 */
-	public LinkHttpTemplateWriter(LinkHttpTemplateSectionContent content) {
+	public LinkHttpTemplateWriter(LinkHttpTemplateSectionContent content,
+			boolean isLinkSecure) {
 		this.linkPrefix = "/";
 		this.linkSuffix = "-" + content.getName()
 				+ HttpTemplateWorkSource.LINK_URL_EXTENSION;
+		this.isLinkSecure = isLinkSecure;
 	}
 
 	/*
@@ -66,15 +78,13 @@ public class LinkHttpTemplateWriter implements HttpTemplateWriter {
 			workName = workName.substring("/".length());
 		}
 
-		// TODO allow configuring if link should be secure
-		boolean isSecure = false;
-
 		// Obtain the link path
-		String linkPath = location.transformToClientPath(this.linkPrefix
-				+ workName + this.linkSuffix, isSecure);
+		String applicationLinkPath = this.linkPrefix + workName
+				+ this.linkSuffix;
+		String clientLinkPath = location.transformToClientPath(
+				applicationLinkPath, this.isLinkSecure);
 
 		// Write the content
-		writer.write(linkPath);
+		writer.write(clientLinkPath);
 	}
-
 }
