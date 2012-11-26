@@ -66,7 +66,7 @@ public class HttpTemplateTask extends
 	/**
 	 * Property prefix to obtain whether the link is to be secure.
 	 */
-	public static final String PROPERTY_SECURE_LINK_PREFIX = "secure.link.";
+	public static final String PROPERTY_LINK_SECURE_PREFIX = "link.secure.";
 
 	/**
 	 * Loads the {@link TaskType} for to write the {@link HttpTemplateSection}.
@@ -75,6 +75,8 @@ public class HttpTemplateTask extends
 	 *            {@link HttpTemplateSection}.
 	 * @param serverDefaultCharset
 	 *            Default {@link Charset} for Server.
+	 * @param templateUriPath
+	 *            URI path for the {@link HttpTemplate}.
 	 * @param isTemplateSecure
 	 *            Indicates if the template is to be secure.
 	 * @param workTypeBuilder
@@ -87,7 +89,8 @@ public class HttpTemplateTask extends
 	 *             If fails to prepare the template.
 	 */
 	public static String[] loadTaskType(HttpTemplateSection section,
-			Charset serverDefaultCharset, boolean isTemplateSecure,
+			Charset serverDefaultCharset, String templateUriPath,
+			boolean isTemplateSecure,
 			WorkTypeBuilder<HttpTemplateWork> workTypeBuilder,
 			WorkSourceContext context) throws Exception {
 
@@ -100,7 +103,8 @@ public class HttpTemplateTask extends
 		// Create the content writers for the section
 		SectionWriterStruct writerStruct = createHttpTemplateWriters(
 				section.getContent(), null, sectionAndTaskName, linkTaskNames,
-				serverDefaultCharset, isTemplateSecure, context);
+				serverDefaultCharset, templateUriPath, isTemplateSecure,
+				context);
 
 		// Determine if requires bean
 		boolean isRequireBean = (writerStruct.beanClass != null);
@@ -169,6 +173,8 @@ public class HttpTemplateTask extends
 	 *            List task names.
 	 * @param serverDefaultCharset
 	 *            Default {@link Charset} for the Server.
+	 * @param templateUriPath
+	 *            URI path for the {@link HttpTemplate}.
 	 * @param isTemplateSecure
 	 *            Indicates if the template is to be secure.
 	 * @param context
@@ -180,8 +186,9 @@ public class HttpTemplateTask extends
 	private static SectionWriterStruct createHttpTemplateWriters(
 			HttpTemplateSectionContent[] contents, Class<?> beanClass,
 			String sectionAndTaskName, Set<String> linkTaskNames,
-			Charset serverDefaultCharset, boolean isTemplateSecure,
-			WorkSourceContext context) throws Exception {
+			Charset serverDefaultCharset, String templateUriPath,
+			boolean isTemplateSecure, WorkSourceContext context)
+			throws Exception {
 
 		// Create the content writers for the section
 		List<HttpTemplateWriter> contentWriterList = new LinkedList<HttpTemplateWriter>();
@@ -230,8 +237,8 @@ public class HttpTemplateTask extends
 				// Obtain the writers for the bean
 				SectionWriterStruct beanStruct = createHttpTemplateWriters(
 						beanContent.getContent(), beanType, null,
-						linkTaskNames, serverDefaultCharset, isTemplateSecure,
-						null);
+						linkTaskNames, serverDefaultCharset, templateUriPath,
+						isTemplateSecure, null);
 
 				// Add the content writer
 				contentWriterList.add(new BeanHttpTemplateWriter(beanContent,
@@ -262,12 +269,12 @@ public class HttpTemplateTask extends
 				// Determine if the link is to be secure
 				String linkName = linkContent.getName();
 				boolean isLinkSecure = Boolean.parseBoolean(context
-						.getProperty(PROPERTY_SECURE_LINK_PREFIX + linkName,
+						.getProperty(PROPERTY_LINK_SECURE_PREFIX + linkName,
 								String.valueOf(isTemplateSecure)));
 
 				// Add the content writer
 				contentWriterList.add(new LinkHttpTemplateWriter(linkContent,
-						isLinkSecure));
+						templateUriPath, isLinkSecure));
 
 				// Track the link tasks
 				linkTaskNames.add(linkName);
@@ -375,12 +382,9 @@ public class HttpTemplateTask extends
 		HttpResponse response = connection.getHttpResponse();
 		ServerWriter writer = response.getEntityWriter();
 
-		// Obtain the work name
-		String workName = context.getWork().getWorkName();
-
 		// Write the contents
 		for (HttpTemplateWriter contentWriter : this.contentWriters) {
-			contentWriter.write(writer, workName, bean, location);
+			contentWriter.write(writer, bean, location);
 		}
 
 		// Flush contents

@@ -30,10 +30,14 @@ import java.util.Map;
 import javax.sql.DataSource;
 import javax.transaction.xa.XAResource;
 
+import org.easymock.AbstractMatcher;
+
 import net.officefloor.autowire.AutoWire;
 import net.officefloor.autowire.AutoWireGovernance;
 import net.officefloor.autowire.AutoWireSection;
 import net.officefloor.autowire.AutoWireSectionFactory;
+import net.officefloor.autowire.AutoWireSectionTransformer;
+import net.officefloor.autowire.AutoWireSectionTransformerContext;
 import net.officefloor.compile.governance.GovernanceType;
 import net.officefloor.compile.impl.structure.OfficeObjectNodeImpl;
 import net.officefloor.compile.internal.structure.OfficeObjectNode;
@@ -171,6 +175,98 @@ public class AutoWireOfficeSourceTest extends OfficeFrameTestCase {
 		// Create and configure the source
 		AutoWireOfficeSource source = new AutoWireOfficeSource();
 		this.addSection(source, SECTION, factory);
+
+		// Source the Office
+		source.sourceOffice(this.architect, context);
+		this.verifyMockObjects();
+	}
+
+	/**
+	 * Ensure can transform the {@link AutoWireSection}.
+	 */
+	public void testTransformSection() throws Exception {
+
+		final String SECTION = "Section";
+		final PropertyList properties = this.createMock(PropertyList.class);
+		final String SECTION_LOCATION = "SectionLocation";
+		final OfficeSection officeSection = this
+				.createMock(OfficeSection.class);
+
+		// Transformers
+		final AutoWireSectionTransformer transformerOne = this
+				.createMock(AutoWireSectionTransformer.class);
+		final AutoWireSectionTransformer transformerTwo = this
+				.createMock(AutoWireSectionTransformer.class);
+
+		// Transformed sections
+		final AutoWireSection firstTransformed = this
+				.createMock(AutoWireSection.class);
+		final AutoWireSection secondTransformed = this
+				.createMock(AutoWireSection.class);
+
+		// Create and configure the source
+		AutoWireOfficeSource source = new AutoWireOfficeSource();
+		final AutoWireSection original = this.addSection(source, SECTION);
+
+		// Record transforming the section
+		AbstractMatcher matcher = new AbstractMatcher() {
+
+			private boolean isOriginal = true;
+
+			@Override
+			public boolean matches(Object[] expected, Object[] actual) {
+				AutoWireSectionTransformerContext context = (AutoWireSectionTransformerContext) actual[0];
+				if (this.isOriginal) {
+					assertSame("Should be original", original,
+							context.getSection());
+					this.isOriginal = false;
+				} else {
+					assertSame("Should be first transformed", firstTransformed,
+							context.getSection());
+				}
+				return true;
+			}
+		};
+		this.recordReturn(transformerOne,
+				transformerOne.transformAutoWireSection(null),
+				firstTransformed, matcher);
+		this.recordReturn(transformerTwo,
+				transformerTwo.transformAutoWireSection(null),
+				secondTransformed, matcher);
+
+		// Record creating the transformed section
+		this.recordReturn(secondTransformed,
+				secondTransformed.getSectionName(), SECTION);
+		this.recordReturn(secondTransformed,
+				secondTransformed.getSectionSourceClassName(),
+				SectionSource.class.getName());
+		this.recordReturn(secondTransformed,
+				secondTransformed.getSectionLocation(), SECTION_LOCATION);
+		this.recordReturn(secondTransformed, secondTransformed.getProperties(),
+				properties);
+		this.recordReturn(this.architect, this.architect.addOfficeSection(
+				SECTION, SectionSource.class.getName(), SECTION_LOCATION,
+				properties), officeSection);
+		this.recordReturn(officeSection,
+				officeSection.getOfficeSectionObjects(),
+				new OfficeSectionObject[0]);
+		this.recordReturn(officeSection,
+				officeSection.getOfficeSectionInputs(),
+				new OfficeSectionInput[0]);
+		this.recordReturn(officeSection,
+				officeSection.getOfficeSectionOutputs(),
+				new OfficeSectionOutput[0]);
+		this.recordReturn(officeSection, officeSection.getOfficeTasks(),
+				new OfficeTask[0]);
+		this.recordReturn(officeSection, officeSection.getOfficeSubSections(),
+				new OfficeSubSection[0]);
+
+		// Test
+		this.replayMockObjects();
+
+		// Add the section transformers
+		source.addSectionTransformer(transformerOne);
+		source.addSectionTransformer(transformerTwo);
 
 		// Source the Office
 		source.sourceOffice(this.architect, context);

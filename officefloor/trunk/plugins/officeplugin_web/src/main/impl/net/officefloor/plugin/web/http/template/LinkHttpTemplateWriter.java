@@ -23,6 +23,9 @@ import java.io.IOException;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
 import net.officefloor.plugin.stream.ServerWriter;
 import net.officefloor.plugin.web.http.location.HttpApplicationLocation;
+import net.officefloor.plugin.web.http.location.HttpApplicationLocationMangedObject;
+import net.officefloor.plugin.web.http.location.InvalidHttpRequestUriException;
+import net.officefloor.plugin.web.http.template.parse.HttpTemplate;
 import net.officefloor.plugin.web.http.template.parse.LinkHttpTemplateSectionContent;
 
 /**
@@ -33,14 +36,9 @@ import net.officefloor.plugin.web.http.template.parse.LinkHttpTemplateSectionCon
 public class LinkHttpTemplateWriter implements HttpTemplateWriter {
 
 	/**
-	 * Prefix for the link.
+	 * Link URI path.
 	 */
-	private final String linkPrefix;
-
-	/**
-	 * Suffix for the link.
-	 */
-	private final String linkSuffix;
+	private final String linkUriPath;
 
 	/**
 	 * Indicates if the link is to be submitted over a secure
@@ -53,16 +51,25 @@ public class LinkHttpTemplateWriter implements HttpTemplateWriter {
 	 * 
 	 * @param content
 	 *            {@link LinkHttpTemplateSectionContent}.
+	 * @param templateUriPath
+	 *            {@link HttpTemplate} URI path.
 	 * @param isLinkSecure
 	 *            Indicates if the link is to be submitted over a secure
 	 *            {@link ServerHttpConnection}.
+	 * @throws InvalidHttpRequestUriException
+	 *             If the link URI path is invalid.
 	 */
 	public LinkHttpTemplateWriter(LinkHttpTemplateSectionContent content,
-			boolean isLinkSecure) {
-		this.linkPrefix = "/";
-		this.linkSuffix = "-" + content.getName()
-				+ HttpTemplateWorkSource.LINK_URL_EXTENSION;
+			String templateUriPath, boolean isLinkSecure)
+			throws InvalidHttpRequestUriException {
 		this.isLinkSecure = isLinkSecure;
+
+		// Create the link URI path
+		String linkUriPath = templateUriPath + "-" + content.getName();
+		linkUriPath = (linkUriPath.startsWith("/") ? linkUriPath : "/"
+				+ linkUriPath);
+		this.linkUriPath = HttpApplicationLocationMangedObject
+				.transformToCanonicalPath(linkUriPath);
 	}
 
 	/*
@@ -70,21 +77,15 @@ public class LinkHttpTemplateWriter implements HttpTemplateWriter {
 	 */
 
 	@Override
-	public void write(ServerWriter writer, String workName, Object bean,
+	public void write(ServerWriter writer, Object bean,
 			HttpApplicationLocation location) throws IOException {
 
-		// Strip / if root work
-		if (workName.startsWith("/")) {
-			workName = workName.substring("/".length());
-		}
-
 		// Obtain the link path
-		String applicationLinkPath = this.linkPrefix + workName
-				+ this.linkSuffix;
 		String clientLinkPath = location.transformToClientPath(
-				applicationLinkPath, this.isLinkSecure);
+				this.linkUriPath, this.isLinkSecure);
 
 		// Write the content
 		writer.write(clientLinkPath);
 	}
+
 }

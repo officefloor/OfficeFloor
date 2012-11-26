@@ -30,6 +30,7 @@ import net.officefloor.autowire.AutoWire;
 import net.officefloor.autowire.AutoWireObject;
 import net.officefloor.autowire.AutoWireSection;
 import net.officefloor.autowire.AutoWireSectionFactory;
+import net.officefloor.autowire.AutoWireSectionTransformer;
 import net.officefloor.autowire.impl.AutoWireOfficeFloorSource;
 import net.officefloor.compile.spi.officefloor.OfficeFloorDeployer;
 import net.officefloor.compile.spi.officefloor.source.OfficeFloorSourceContext;
@@ -37,11 +38,13 @@ import net.officefloor.compile.spi.section.SectionInput;
 import net.officefloor.compile.spi.section.SectionOutput;
 import net.officefloor.frame.api.escalate.Escalation;
 import net.officefloor.frame.api.execute.Task;
+import net.officefloor.plugin.web.http.continuation.HttpUrlContinuationSectionSource;
 import net.officefloor.plugin.web.http.location.HttpApplicationLocation;
 import net.officefloor.plugin.web.http.location.HttpApplicationLocationManagedObjectSource;
 import net.officefloor.plugin.web.http.parameters.source.HttpParametersObjectManagedObjectSource;
 import net.officefloor.plugin.web.http.resource.source.SourceHttpResourceFactory;
 import net.officefloor.plugin.web.http.session.clazz.source.HttpSessionClassManagedObjectSource;
+import net.officefloor.plugin.web.http.template.HttpTemplateWorkSource;
 import net.officefloor.plugin.web.http.template.section.HttpTemplateSectionSource;
 
 /**
@@ -61,6 +64,12 @@ public class WebApplicationAutoWireOfficeFloorSource extends
 	 * {@link HttpTemplateAutoWireSection} instances.
 	 */
 	private final List<HttpTemplateAutoWireSection> httpTemplates = new LinkedList<HttpTemplateAutoWireSection>();
+
+	/**
+	 * {@link HttpUrlContinuationSectionSource} to provide the
+	 * {@link AutoWireSectionTransformer} for the configured URL continuations.
+	 */
+	private final HttpUrlContinuationSectionSource urlContinuations = new HttpUrlContinuationSectionSource();
 
 	/**
 	 * Registry of HTTP Application Object class to its {@link AutoWireObject}.
@@ -83,11 +92,6 @@ public class WebApplicationAutoWireOfficeFloorSource extends
 	private final Map<Class<?>, AutoWireObject> httpParametersObjects = new HashMap<Class<?>, AutoWireObject>();
 
 	/**
-	 * {@link UriLink} instances.
-	 */
-	private final List<UriLink> uriLinks = new LinkedList<UriLink>();
-
-	/**
 	 * {@link ResourceLink} instances.
 	 */
 	private final List<ResourceLink> resourceLinks = new LinkedList<ResourceLink>();
@@ -106,6 +110,14 @@ public class WebApplicationAutoWireOfficeFloorSource extends
 	 * {@link ChainedServicer} instances.
 	 */
 	private final List<ChainedServicer> chainedServicers = new LinkedList<ChainedServicer>();
+
+	/**
+	 * Initiate.
+	 */
+	public WebApplicationAutoWireOfficeFloorSource() {
+		// Configure in the auto wire section transformer for URL continuations
+		this.addSectionTransformer(this.urlContinuations);
+	}
 
 	/*
 	 * ======================== WebAutoWireApplication =========================
@@ -154,9 +166,6 @@ public class WebApplicationAutoWireOfficeFloorSource extends
 			template.addProperty(HttpTemplateSectionSource.PROPERTY_CLASS_NAME,
 					templateLogicClass.getName());
 		}
-		template.addProperty(
-				HttpTemplateSectionSource.PROPERTY_LINK_TASK_NAME_PREFIX,
-				LINK_SERVICE_TASK_NAME_PREFIX);
 
 		// Register the HTTP template
 		this.httpTemplates.add(template);
@@ -332,13 +341,7 @@ public class WebApplicationAutoWireOfficeFloorSource extends
 	@Override
 	public HttpUriLink linkUri(String uri, AutoWireSection section,
 			String inputName) {
-
-		// Create and register the link
-		UriLink link = new UriLink(uri, section, inputName);
-		this.uriLinks.add(link);
-
-		// Return the link for further configuration
-		return link;
+		return this.urlContinuations.linkUri(uri, section, inputName);
 	}
 
 	@Override
@@ -389,12 +392,16 @@ public class WebApplicationAutoWireOfficeFloorSource extends
 
 		// Add HTTP template URIs
 		for (HttpTemplateAutoWireSection httpTemplate : this.httpTemplates) {
-			uris.add(httpTemplate.getTemplateUri());
+			String templateUri = httpTemplate.getTemplateUri();
+			if (templateUri != null) {
+				uris.add(templateUri);
+			}
 		}
 
-		// Add link URIs
-		for (UriLink link : this.uriLinks) {
-			uris.add(link.uri);
+		// Add the linked URIs
+		for (HttpUriLink link : this.urlContinuations
+				.getRegisteredHttpUriLinks()) {
+			uris.add(link.getApplicationUriPath());
 		}
 
 		// Return the URIs
@@ -462,29 +469,50 @@ public class WebApplicationAutoWireOfficeFloorSource extends
 					HttpFileSenderSectionSource.SERVICE_INPUT_NAME);
 		}
 
-		// Link URI's
-		for (UriLink link : this.uriLinks) {
-			// Register the URI link
-			WebApplicationSectionSource.linkRouteToSection(link.uri,
-					link.section, link.inputName, httpSection, this);
-		}
-
 		// Link template rendering
-		for (HttpTemplateAutoWireSection section : this.httpTemplates) {
+		for (HttpTemplateAutoWireSection httpTemplate : this.httpTemplates) {
 
-			// Secure the HTTP template (if necessary)
-			WebApplicationSectionSource.secureHttpTemplate(section,
-					httpSection, this);
+			// Determine if template is secure
+			boolean isTemplateSecure = httpTemplate.isTemplateSecure();
 
-			// Register the HTTP template for routing
-			WebApplicationSectionSource.linkRouteToHttpTemplate(section,
-					httpSection, this);
+			// Provide the template URI (and potential URL continuation)
+			String templateUri = httpTemplate.getTemplateUri();
+			if (templateUri != null) {
+				// Provide URL continuation
+				HttpUriLink link = this.urlContinuations.linkUri(templateUri,
+						httpTemplate,
+						HttpTemplateSectionSource.RENDER_TEMPLATE_INPUT_NAME);
+				link.setUriSecure(isTemplateSecure);
+
+			} else {
+				// Use section name and keep private (no URL continuation)
+				templateUri = httpTemplate.getSectionName();
+			}
+			httpTemplate.addProperty(
+					HttpTemplateSectionSource.PROPERTY_TEMPLATE_URI,
+					templateUri);
+
+			// Secure the template
+			httpTemplate.addProperty(
+					HttpTemplateWorkSource.PROPERTY_TEMPLATE_SECURE,
+					String.valueOf(isTemplateSecure));
+
+			// Secure the specific template links
+			Map<String, Boolean> secureLinks = httpTemplate.getSecureLinks();
+			for (String link : secureLinks.keySet()) {
+				Boolean isLinkSecure = secureLinks.get(link);
+
+				// Configure the link secure for the template
+				httpTemplate.addProperty(
+						HttpTemplateWorkSource.PROPERTY_LINK_SECURE_PREFIX
+								+ link, String.valueOf(isLinkSecure));
+			}
 
 			// Link completion of template rendering (if not already linked)
-			if (!this.isLinked(section,
+			if (!this.isLinked(httpTemplate,
 					HttpTemplateSectionSource.ON_COMPLETION_OUTPUT_NAME)) {
 				// Not linked, so link to sending HTTP response
-				this.linkToSendResponse(section,
+				this.linkToSendResponse(httpTemplate,
 						HttpTemplateSectionSource.ON_COMPLETION_OUTPUT_NAME);
 			}
 		}
@@ -524,75 +552,6 @@ public class WebApplicationAutoWireOfficeFloorSource extends
 		for (SendLink link : this.sendLinks) {
 			this.link(link.section, link.outputName, httpSection,
 					WebApplicationSectionSource.SEND_RESPONSE_INPUT_NAME);
-		}
-	}
-
-	/**
-	 * URI link.
-	 */
-	private static class UriLink implements HttpUriLink {
-
-		/**
-		 * URI.
-		 */
-		public final String uri;
-
-		/**
-		 * {@link AutoWireSection} to handle the URI.
-		 */
-		public final AutoWireSection section;
-
-		/**
-		 * Name {@link SectionInput} to handle the URI.
-		 */
-		public final String inputName;
-
-		/**
-		 * Initiate.
-		 * 
-		 * @param uri
-		 *            URI.
-		 * @param section
-		 *            {@link AutoWireSection} to handle the URI.
-		 * @param inputName
-		 *            Name {@link SectionInput} to handle the URI.
-		 */
-		public UriLink(String uri, AutoWireSection section, String inputName) {
-			this.uri = uri;
-			this.section = section;
-			this.inputName = inputName;
-		}
-
-		/*
-		 * ===================== HttpUriLink ===========================
-		 */
-
-		@Override
-		public String getUri() {
-			// TODO implement HttpUriLink.getUri
-			throw new UnsupportedOperationException(
-					"TODO implement HttpUriLink.getUri");
-		}
-
-		@Override
-		public AutoWireSection getAutoWireSection() {
-			// TODO implement HttpUriLink.getAutoWireSection
-			throw new UnsupportedOperationException(
-					"TODO implement HttpUriLink.getAutoWireSection");
-		}
-
-		@Override
-		public String getAutoWireSectionInputName() {
-			// TODO implement HttpUriLink.getAutoWireSectionInputName
-			throw new UnsupportedOperationException(
-					"TODO implement HttpUriLink.getAutoWireSectionInputName");
-		}
-
-		@Override
-		public void setUriSecure(boolean isSecure) {
-			// TODO implement HttpUriLink.setUriSecure
-			throw new UnsupportedOperationException(
-					"TODO implement HttpUriLink.setUriSecure");
 		}
 	}
 

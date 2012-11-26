@@ -38,6 +38,7 @@ import net.officefloor.plugin.section.clazz.ClassSectionSource;
 import net.officefloor.plugin.section.clazz.NextTask;
 import net.officefloor.plugin.section.clazz.SectionClassManagedObjectSource;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
+import net.officefloor.plugin.web.http.continuation.HttpUrlContinuationWorkSource;
 import net.officefloor.plugin.web.http.location.HttpApplicationLocation;
 import net.officefloor.plugin.web.http.session.HttpSession;
 import net.officefloor.plugin.web.http.template.HttpTemplateWorkSource;
@@ -57,8 +58,7 @@ public class HttpTemplateSectionSourceTest extends OfficeFrameTestCase {
 	public void testSpecification() {
 		SectionLoaderUtil.validateSpecification(
 				HttpTemplateSectionSource.class,
-				HttpTemplateSectionSource.PROPERTY_LINK_TASK_NAME_PREFIX,
-				"Link service Task name prefix");
+				HttpTemplateSectionSource.PROPERTY_TEMPLATE_URI, "URI Path");
 	}
 
 	/**
@@ -149,8 +149,13 @@ public class HttpTemplateSectionSourceTest extends OfficeFrameTestCase {
 		tail.getTaskObject("SERVER_HTTP_CONNECTION");
 		tail.getTaskObject("HTTP_APPLICATION_LOCATION");
 
-		// Route nextTask link
-		templateWork.addSectionTask("LINK_nextTask", "nextTask");
+		// nextTask link URL continuation
+		SectionWork nextTaskContinuationWork = expected.addSectionWork(
+				"HTTP_URL_CONTINUATION_nextTask",
+				HttpUrlContinuationWorkSource.class.getName());
+		nextTaskContinuationWork.addSectionTask(
+				"HTTP_URL_CONTINUATION_nextTask",
+				HttpUrlContinuationWorkSource.TASK_NAME);
 
 		// Handle nextTask task
 		SectionTask nextTaskMethod = classWork.addSectionTask("nextTask",
@@ -158,8 +163,12 @@ public class HttpTemplateSectionSourceTest extends OfficeFrameTestCase {
 		nextTaskMethod.getTaskObject("OBJECT");
 		nextTaskMethod.getTaskObject(ServerHttpConnection.class.getName());
 
-		// Route submit link
-		templateWork.addSectionTask("LINK_submit", "submit");
+		// submit link URL continuation
+		SectionWork submitContinuationWork = expected.addSectionWork(
+				"HTTP_URL_CONTINUATION_submit",
+				HttpUrlContinuationWorkSource.class.getName());
+		submitContinuationWork.addSectionTask("HTTP_URL_CONTINUATION_submit",
+				HttpUrlContinuationWorkSource.TASK_NAME);
 
 		// Handle submit task
 		SectionTask submitMethod = classWork.addSectionTask("submit", "submit");
@@ -167,7 +176,12 @@ public class HttpTemplateSectionSourceTest extends OfficeFrameTestCase {
 		submitMethod.getTaskObject(ServerHttpConnection.class.getName());
 
 		// Route non-method link
-		templateWork.addSectionTask("LINK_nonMethodLink", "nonMethodLink");
+		SectionWork nonMethodContinuationWork = expected.addSectionWork(
+				"HTTP_URL_CONTINUATION_nonMethodLink",
+				HttpUrlContinuationWorkSource.class.getName());
+		nonMethodContinuationWork.addSectionTask(
+				"HTTP_URL_CONTINUATION_nonMethodLink",
+				HttpUrlContinuationWorkSource.TASK_NAME);
 
 		// Extra task
 		SectionTask doInternalFlow = classWork.addSectionTask("doInternalFlow",
@@ -192,8 +206,7 @@ public class HttpTemplateSectionSourceTest extends OfficeFrameTestCase {
 				HttpTemplateSectionSource.class, this.getClass(),
 				"Template.ofp", HttpTemplateSectionSource.PROPERTY_CLASS_NAME,
 				TemplateLogic.class.getName(),
-				HttpTemplateSectionSource.PROPERTY_LINK_TASK_NAME_PREFIX,
-				"LINK_");
+				HttpTemplateSectionSource.PROPERTY_TEMPLATE_URI, "uri");
 	}
 
 	/**
@@ -279,8 +292,7 @@ public class HttpTemplateSectionSourceTest extends OfficeFrameTestCase {
 				"TemplateData.ofp",
 				HttpTemplateSectionSource.PROPERTY_CLASS_NAME,
 				TemplateDataLogic.class.getName(),
-				HttpTemplateSectionSource.PROPERTY_LINK_TASK_NAME_PREFIX,
-				"LINK_");
+				HttpTemplateSectionSource.PROPERTY_TEMPLATE_URI, "uri");
 	}
 
 	/**
@@ -324,9 +336,21 @@ public class HttpTemplateSectionSourceTest extends OfficeFrameTestCase {
 		section.getTaskObject("SERVER_HTTP_CONNECTION");
 		section.getTaskObject("HTTP_APPLICATION_LOCATION");
 
-		// Links
-		templateWork.addSectionTask("LINK_nonMethodLink", "nonMethodLink");
-		templateWork.addSectionTask("LINK_doExternalFlow", "doExternalFlow");
+		// nonMethodLink URL continuation
+		SectionWork nonMethodContinuationWork = expected.addSectionWork(
+				"HTTP_URL_CONTINUATION_nonMethodLink",
+				HttpUrlContinuationWorkSource.class.getName());
+		nonMethodContinuationWork.addSectionTask(
+				"HTTP_URL_CONTINUATION_nonMethodLink",
+				HttpUrlContinuationWorkSource.TASK_NAME);
+
+		// doExternalFlow URL continuation
+		SectionWork doExternalFlowContinuationWork = expected.addSectionWork(
+				"HTTP_URL_CONTINUATION_doExternalFlow",
+				HttpUrlContinuationWorkSource.class.getName());
+		doExternalFlowContinuationWork.addSectionTask(
+				"HTTP_URL_CONTINUATION_doExternalFlow",
+				HttpUrlContinuationWorkSource.TASK_NAME);
 
 		// Managed Object Sources
 		expected.addSectionManagedObjectSource("OBJECT",
@@ -338,8 +362,7 @@ public class HttpTemplateSectionSourceTest extends OfficeFrameTestCase {
 		SectionLoaderUtil.validateSection(expected,
 				HttpTemplateSectionSource.class, this.getClass(),
 				"NoLogicTemplate.ofp",
-				HttpTemplateSectionSource.PROPERTY_LINK_TASK_NAME_PREFIX,
-				"LINK_");
+				HttpTemplateSectionSource.PROPERTY_TEMPLATE_URI, "uri");
 	}
 
 	/**
@@ -368,9 +391,8 @@ public class HttpTemplateSectionSourceTest extends OfficeFrameTestCase {
 		PropertyList properties = compiler.createPropertyList();
 		properties.addProperty(HttpTemplateSectionSource.PROPERTY_CLASS_NAME)
 				.setValue(NextTaskErrorLogic.class.getName());
-		properties.addProperty(
-				HttpTemplateSectionSource.PROPERTY_LINK_TASK_NAME_PREFIX)
-				.setValue("LINK_");
+		properties.addProperty(HttpTemplateSectionSource.PROPERTY_TEMPLATE_URI)
+				.setValue("uri");
 
 		// Test
 		this.replayMockObjects();

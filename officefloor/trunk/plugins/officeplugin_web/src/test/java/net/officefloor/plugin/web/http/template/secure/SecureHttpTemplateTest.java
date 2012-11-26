@@ -20,6 +20,7 @@ package net.officefloor.plugin.web.http.template.secure;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 
+import net.officefloor.autowire.AutoWire;
 import net.officefloor.autowire.AutoWireOfficeFloor;
 import net.officefloor.autowire.AutoWireSection;
 import net.officefloor.frame.test.OfficeFrameTestCase;
@@ -29,6 +30,7 @@ import net.officefloor.plugin.socket.server.http.server.MockHttpServer;
 import net.officefloor.plugin.web.http.application.HttpParameters;
 import net.officefloor.plugin.web.http.application.HttpTemplateAutoWireSection;
 import net.officefloor.plugin.web.http.application.HttpUriLink;
+import net.officefloor.plugin.web.http.parameters.source.HttpParametersObjectManagedObjectSource;
 import net.officefloor.plugin.web.http.server.HttpServerAutoWireOfficeFloorSource;
 import net.officefloor.plugin.web.http.template.parse.HttpTemplate;
 
@@ -41,14 +43,12 @@ import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.params.BasicHttpParams;
 import org.apache.http.params.HttpParams;
-import org.junit.Ignore;
 
 /**
  * Ensures secure functionality of {@link HttpTemplate}.
  * 
  * @author Daniel Sagenschneider
  */
-@Ignore("TODO provide secure configuration")
 public class SecureHttpTemplateTest extends OfficeFrameTestCase {
 
 	/**
@@ -131,8 +131,8 @@ public class SecureHttpTemplateTest extends OfficeFrameTestCase {
 	 */
 	public void testSecureLinkRedirect() throws Exception {
 		this.doSecureTemplateTest(false, true,
-				"http://localhost:7878/template.links-LINK.task",
-				"https://localhost:7979/template.links-LINK.task");
+				"http://localhost:7878/template-LINK",
+				"https://localhost:7979/template-LINK");
 	}
 
 	/**
@@ -140,7 +140,7 @@ public class SecureHttpTemplateTest extends OfficeFrameTestCase {
 	 */
 	public void testSecureLinkService() throws Exception {
 		this.doSecureTemplateTest(false, true,
-				"https://localhost:7979/template.links-LINK.task", null);
+				"https://localhost:7979/template-LINK", null);
 	}
 
 	/**
@@ -148,8 +148,8 @@ public class SecureHttpTemplateTest extends OfficeFrameTestCase {
 	 */
 	public void testInsecureLinkRedirect() throws Exception {
 		this.doSecureTemplateTest(true, false,
-				"https://localhost:7979/template.links-LINK.task",
-				"http://localhost:7878/template.links-LINK.task");
+				"https://localhost:7979/template-LINK",
+				"http://localhost:7878/template-LINK");
 	}
 
 	/**
@@ -157,7 +157,7 @@ public class SecureHttpTemplateTest extends OfficeFrameTestCase {
 	 */
 	public void testInsecureLinkService() throws Exception {
 		this.doSecureTemplateTest(true, false,
-				"http://localhost:7878/template.links-LINK.task", null);
+				"http://localhost:7878/template-LINK", null);
 	}
 
 	/**
@@ -189,7 +189,7 @@ public class SecureHttpTemplateTest extends OfficeFrameTestCase {
 		HttpResponse response = this.client.execute(post);
 
 		// Determine the expected entity of serviced request
-		String linkUri = "/template.links-LINK.task";
+		String linkUri = "/template-LINK";
 		if ((isLinkSecure != null)
 				&& (isLinkSecure.booleanValue() != isTemplateSecure)) {
 			// Fully qualified URL as differently secure
@@ -279,6 +279,13 @@ public class SecureHttpTemplateTest extends OfficeFrameTestCase {
 				ClassSectionSource.class.getName(), UriLogic.class.getName());
 		HttpUriLink uriLink = this.source.linkUri("uri", section, "service");
 		uriLink.setUriSecure(isUriSecure);
+
+		// Add HTTP parameters (as not loaded by template)
+		this.source.addManagedObject(
+				HttpParametersObjectManagedObjectSource.class.getName(), null,
+				new AutoWire(Parameters.class)).addProperty(
+				HttpParametersObjectManagedObjectSource.PROPERTY_CLASS_NAME,
+				Parameters.class.getName());
 
 		// Start the server
 		this.officeFloor = this.source.openOfficeFloor();

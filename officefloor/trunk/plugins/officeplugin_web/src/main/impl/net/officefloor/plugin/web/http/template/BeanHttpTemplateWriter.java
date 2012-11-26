@@ -83,7 +83,7 @@ public class BeanHttpTemplateWriter implements HttpTemplateWriter {
 	 */
 
 	@Override
-	public void write(ServerWriter writer, String workName, Object bean,
+	public void write(ServerWriter writer, Object bean,
 			HttpApplicationLocation location) throws IOException {
 
 		// If no bean, then no value to output
@@ -118,14 +118,14 @@ public class BeanHttpTemplateWriter implements HttpTemplateWriter {
 			Object[] arrayBeans = (Object[]) writerBean;
 			for (Object arrayBean : arrayBeans) {
 				for (HttpTemplateWriter beanWriter : this.beanWriters) {
-					beanWriter.write(writer, workName, arrayBean, location);
+					beanWriter.write(writer, arrayBean, location);
 				}
 			}
 
 		} else {
 			// Write the content for the bean
 			for (HttpTemplateWriter beanWriter : this.beanWriters) {
-				beanWriter.write(writer, workName, writerBean, location);
+				beanWriter.write(writer, writerBean, location);
 			}
 		}
 	}

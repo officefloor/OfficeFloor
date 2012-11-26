@@ -61,7 +61,7 @@ public class StaticHttpTemplateWriter implements HttpTemplateWriter {
 	 */
 
 	@Override
-	public void write(ServerWriter writer, String workName, Object bean,
+	public void write(ServerWriter writer, Object bean,
 			HttpApplicationLocation location) throws IOException {
 
 		// Provide pre-encoded content

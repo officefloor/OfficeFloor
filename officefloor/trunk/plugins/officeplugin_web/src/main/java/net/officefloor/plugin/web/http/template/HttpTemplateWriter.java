@@ -20,7 +20,6 @@ package net.officefloor.plugin.web.http.template;
 
 import java.io.IOException;
 
-import net.officefloor.frame.api.execute.Work;
 import net.officefloor.plugin.stream.ServerWriter;
 import net.officefloor.plugin.web.http.location.HttpApplicationLocation;
 
@@ -36,9 +35,6 @@ public interface HttpTemplateWriter {
 	 * 
 	 * @param writer
 	 *            {@link ServerWriter} to receive the template content.
-	 * @param workName
-	 *            Name of the bound {@link Work} using this
-	 *            {@link HttpTemplateWriter}.
 	 * @param bean
 	 *            Bean to potentially obtain data. May be <code>null</code> if
 	 *            template contents does not require a bean.
@@ -48,7 +44,7 @@ public interface HttpTemplateWriter {
 	 * @throws IOException
 	 *             If fails to write content.
 	 */
-	void write(ServerWriter writer, String workName, Object bean,
+	void write(ServerWriter writer, Object bean,
 			HttpApplicationLocation location) throws IOException;
 
 }

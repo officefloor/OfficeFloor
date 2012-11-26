@@ -38,6 +38,7 @@ import net.officefloor.autowire.AutoWireObject;
 import net.officefloor.autowire.AutoWireOfficeFloor;
 import net.officefloor.autowire.AutoWireSection;
 import net.officefloor.autowire.AutoWireSectionFactory;
+import net.officefloor.autowire.AutoWireSectionTransformer;
 import net.officefloor.autowire.AutoWireSupplier;
 import net.officefloor.autowire.AutoWireTeam;
 import net.officefloor.autowire.ManagedObjectSourceWirer;
@@ -97,8 +98,8 @@ import net.officefloor.model.impl.officefloor.OfficeFloorModelOfficeFloorSource;
  * <p>
  * To allow auto-wiring this implementation provides facades over the
  * complexities of more advanced {@link OfficeFloor} configuration to allow
- * simpler configuration. It is anticipated in majority of cases that this will
- * be adequate for most applications. Should however more flexibility be
+ * simpler configuration. It is anticipated in the majority of cases that this
+ * will be adequate for most applications. Should however more flexibility be
  * required then please use the {@link OfficeFloorModelOfficeFloorSource}.
  * 
  * @author Daniel Sagenschneider
@@ -272,6 +273,11 @@ public class AutoWireOfficeFloorSource extends AbstractOfficeFloorSource
 	@Override
 	public AutoWireSection getSection(String sectionName) {
 		return this.officeSource.getSection(sectionName);
+	}
+
+	@Override
+	public void addSectionTransformer(AutoWireSectionTransformer transformer) {
+		this.officeSource.addSectionTransformer(transformer);
 	}
 
 	@Override
