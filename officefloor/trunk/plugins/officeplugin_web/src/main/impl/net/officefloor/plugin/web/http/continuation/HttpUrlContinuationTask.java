@@ -15,36 +15,30 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+package net.officefloor.plugin.web.http.continuation;
 
-package net.officefloor.plugin.web.http.template;
-
-import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.execute.TaskContext;
 import net.officefloor.frame.util.AbstractSingleTask;
-import net.officefloor.plugin.web.http.template.parse.HttpTemplate;
 
 /**
- * <p>
- * {@link Task} to handle request from {@link HttpTemplate}.
- * <p>
- * This {@link Task} does not actually do anything but is a place holder
- * {@link Task} to link processing of a request from the {@link HttpTemplate}.
+ * HTTP URL continuation {@link Task}.
  * 
  * @author Daniel Sagenschneider
  */
-public class RequestHandlerTask extends
-		AbstractSingleTask<HttpTemplateWork, Indexed, None> {
+public class HttpUrlContinuationTask extends
+		AbstractSingleTask<HttpUrlContinuationTask, None, None> {
 
 	/*
-	 * ================== Task =============================
+	 * ==================== Task ========================
 	 */
 
 	@Override
-	public Object doTask(TaskContext<HttpTemplateWork, Indexed, None> context)
+	public Object doTask(
+			TaskContext<HttpUrlContinuationTask, None, None> context)
 			throws Throwable {
-		// Only a place holder task to start processing so do nothing
+		// Does nothing as next task will service URL continuation
 		return null;
 	}
 

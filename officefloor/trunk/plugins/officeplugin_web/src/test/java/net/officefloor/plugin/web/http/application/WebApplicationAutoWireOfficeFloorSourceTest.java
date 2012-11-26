@@ -57,14 +57,12 @@ import org.apache.http.client.params.ClientPNames;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.params.BasicHttpParams;
 import org.apache.http.params.HttpParams;
-import org.junit.Ignore;
 
 /**
  * Tests the {@link WebApplicationAutoWireOfficeFloorSource}.
  * 
  * @author Daniel Sagenschneider
  */
-@Ignore("TODO fix secure template Link rendering")
 public class WebApplicationAutoWireOfficeFloorSourceTest extends
 		OfficeFrameTestCase {
 
@@ -171,12 +169,10 @@ public class WebApplicationAutoWireOfficeFloorSourceTest extends
 		this.source.openOfficeFloor();
 
 		// Ensure template available
-		this.assertHttpRequest("/template", isSecure, 200,
-				"/template.links-link.task");
+		this.assertHttpRequest("/template", isSecure, 200, "/template-link");
 
 		// Ensure link connected to resource
-		this.assertHttpRequest("/template.links-link.task", isSecure, 200,
-				"RESOURCE");
+		this.assertHttpRequest("/template-link", isSecure, 200, "RESOURCE");
 	}
 
 	/**
@@ -199,19 +195,18 @@ public class WebApplicationAutoWireOfficeFloorSourceTest extends
 	 */
 	public void doTemplateWithUriTest(boolean isSecure) throws Exception {
 
-		final String SUBMIT_URI = "/uri.ofp.links-submit.task";
+		final String SUBMIT_URI = "/uri-submit";
 
 		final String templatePath = this.getClassPath("template.ofp");
 
 		// Add HTTP template (with URL)
 		HttpTemplateAutoWireSection section = this.source.addHttpTemplate(
-				templatePath, MockTemplateLogic.class, "uri.ofp");
+				templatePath, MockTemplateLogic.class, "uri");
 		section.setTemplateSecure(isSecure);
 		this.source.openOfficeFloor();
 
 		// Ensure correct section details
-		assertEquals("Incorrect section name", "uri.ofp",
-				section.getSectionName());
+		assertEquals("Incorrect section name", "uri", section.getSectionName());
 		assertEquals("Incorrect section source",
 				HttpTemplateSectionSource.class.getName(),
 				section.getSectionSourceClassName());
@@ -219,11 +214,10 @@ public class WebApplicationAutoWireOfficeFloorSourceTest extends
 				this.getClassPath("template.ofp"), templatePath);
 		assertEquals("Incorrect template path", templatePath,
 				section.getTemplatePath());
-		assertEquals("Incorrect template URI", "uri.ofp",
-				section.getTemplateUri());
+		assertEquals("Incorrect template URI", "uri", section.getTemplateUri());
 
 		// Ensure template available
-		this.assertHttpRequest("/uri.ofp", isSecure, 200, SUBMIT_URI);
+		this.assertHttpRequest("/uri", isSecure, 200, SUBMIT_URI);
 	}
 
 	/**
@@ -247,7 +241,7 @@ public class WebApplicationAutoWireOfficeFloorSourceTest extends
 	 */
 	public void doRootTemplateTest(boolean isSecure) throws Exception {
 
-		final String SUBMIT_URI = "/.links-submit.task";
+		final String SUBMIT_URI = "/-submit";
 
 		final String templatePath = this.getClassPath("template.ofp");
 
@@ -373,11 +367,11 @@ public class WebApplicationAutoWireOfficeFloorSourceTest extends
 	 */
 	public void doTemplateLinkWithUriTest(boolean isSecure) throws Exception {
 
-		final String SUBMIT_URI = "/uri.ofp.links-submit.task";
+		final String SUBMIT_URI = "/uri-submit";
 
 		// Add HTTP template
 		this.source.addHttpTemplate(this.getClassPath("template.ofp"),
-				MockTemplateLogic.class, "uri.ofp").setTemplateSecure(isSecure);
+				MockTemplateLogic.class, "uri").setTemplateSecure(isSecure);
 		this.source.openOfficeFloor();
 
 		// Ensure submit on task for template is correct
@@ -405,7 +399,7 @@ public class WebApplicationAutoWireOfficeFloorSourceTest extends
 	 */
 	public void doTemplateLinkWithoutUriTest(boolean isSecure) throws Exception {
 
-		final String SUBMIT_URI = "/resource0.links-submit.task";
+		final String SUBMIT_URI = "/resource0-submit";
 
 		// Add HTTP template
 		this.source.addHttpTemplate(this.getClassPath("template.ofp"),
@@ -512,8 +506,7 @@ public class WebApplicationAutoWireOfficeFloorSourceTest extends
 		this.source.openOfficeFloor();
 
 		// Ensure link to the HTTP template
-		this.assertHttpRequest("/test", 200,
-				"LINK to /resource0.links-submit.task");
+		this.assertHttpRequest("/test", 200, "LINK to /resource0-submit");
 	}
 
 	/**
@@ -573,8 +566,7 @@ public class WebApplicationAutoWireOfficeFloorSourceTest extends
 		this.source.openOfficeFloor();
 
 		// Ensure link escalation to template
-		this.assertHttpRequest("/test", 200,
-				"Escalated to /handler.links-submit.task");
+		this.assertHttpRequest("/test", 200, "Escalated to /handler-submit");
 	}
 
 	/**
@@ -862,7 +854,7 @@ public class WebApplicationAutoWireOfficeFloorSourceTest extends
 	 */
 	public void testHttpRequestObject() throws Exception {
 
-		final String URI = "/template.links-submit.task";
+		final String URI = "/template-submit";
 
 		// Provide HTTP Request State
 		this.source.addManagedObject(
@@ -923,7 +915,7 @@ public class WebApplicationAutoWireOfficeFloorSourceTest extends
 	 */
 	public void testHttpApplicationObject() throws Exception {
 
-		final String URI = "/template.links-submit.task";
+		final String URI = "/template-submit";
 
 		// Provide HTTP Application State
 		this.source.addManagedObject(

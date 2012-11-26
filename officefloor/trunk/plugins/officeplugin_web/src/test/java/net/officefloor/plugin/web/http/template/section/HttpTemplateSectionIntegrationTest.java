@@ -40,9 +40,10 @@ import net.officefloor.plugin.socket.server.http.server.MockHttpServer;
 import net.officefloor.plugin.socket.server.http.source.HttpServerSocketManagedObjectSource;
 import net.officefloor.plugin.web.http.location.HttpApplicationLocation;
 import net.officefloor.plugin.web.http.location.HttpApplicationLocationManagedObjectSource;
+import net.officefloor.plugin.web.http.route.HttpRouteWorkSource;
 import net.officefloor.plugin.web.http.session.HttpSession;
 import net.officefloor.plugin.web.http.session.source.HttpSessionManagedObjectSource;
-import net.officefloor.plugin.web.http.template.route.HttpTemplateRouteWorkSource;
+import net.officefloor.plugin.web.http.template.HttpTemplateWorkSource;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
@@ -64,9 +65,9 @@ public class HttpTemplateSectionIntegrationTest extends OfficeFrameTestCase {
 			+ "<p>Bean with property bean-property  0 1 2 3 4 5 6 7 8 9</p><table>"
 			+ "<tr><td>Name</td><td>Description</td></tr>"
 			+ "<tr><td>row</td><td>test row</td></tr></table>"
-			+ "<form action=\"/SECTION.links-nextTask.task\"><input type=\"submit\"/></form>"
-			+ "<form action=\"/SECTION.links-submit.task\"><input type=\"submit\"/></form>"
-			+ "<a href=\"/SECTION.links-nonMethodLink.task\">Non-method link</a></body></html>";
+			+ "<form action=\"${LINK_nextTask_QUALIFICATION}/uri-nextTask\"><input type=\"submit\"/></form>"
+			+ "<form action=\"${LINK_submit_QUALIFICATION}/uri-submit\"><input type=\"submit\"/></form>"
+			+ "<a href=\"${LINK_nonMethodLink_QUALIFICATION}/uri-nonMethodLink\">Non-method link</a></body></html>";
 
 	/**
 	 * Mock {@link Connection}.
@@ -122,7 +123,57 @@ public class HttpTemplateSectionIntegrationTest extends OfficeFrameTestCase {
 
 		// Ensure correct rendering of template
 		String rendering = this.doHttpRequest("");
-		assertXmlEquals("Incorrect rendering", RENDERED_TEMPLATE_XML, rendering);
+		assertRenderedResponse("", false, false, false, rendering);
+	}
+
+	/**
+	 * Ensure can render template with a particular secure link.
+	 */
+	public void testRenderTemplateWithSecureLink() throws Exception {
+
+		// Start the server
+		this.isNonMethodLink = true;
+		this.startHttpServer("Template.ofp", TemplateLogic.class,
+				HttpTemplateWorkSource.PROPERTY_LINK_SECURE_PREFIX + "submit",
+				String.valueOf(true));
+
+		// Ensure correct rendering of template
+		String rendering = this.doHttpRequest("");
+		assertRenderedResponse("", false, true, false, rendering);
+	}
+
+	/**
+	 * Ensure can render the template with secure links.
+	 */
+	public void testRenderSecureTemplate() throws Exception {
+
+		// Start the server
+		this.isNonMethodLink = true;
+		this.startHttpServer("Template.ofp", TemplateLogic.class,
+				HttpTemplateWorkSource.PROPERTY_TEMPLATE_SECURE,
+				String.valueOf(true));
+
+		// Ensure correct rendering of template
+		String rendering = this.doHttpRequest("");
+		assertRenderedResponse("", true, true, true, rendering);
+	}
+
+	/**
+	 * Ensure can render a secure template with a non-secure link.
+	 */
+	public void testRenderSecureTemplateWithNonSecureLink() throws Exception {
+
+		// Start the server
+		this.isNonMethodLink = true;
+		this.startHttpServer("Template.ofp", TemplateLogic.class,
+				HttpTemplateWorkSource.PROPERTY_TEMPLATE_SECURE,
+				String.valueOf(true),
+				HttpTemplateWorkSource.PROPERTY_LINK_SECURE_PREFIX
+						+ "nonMethodLink", String.valueOf(false));
+
+		// Ensure correct rendering of template
+		String rendering = this.doHttpRequest("");
+		assertRenderedResponse("", true, true, false, rendering);
 	}
 
 	/**
@@ -138,7 +189,7 @@ public class HttpTemplateSectionIntegrationTest extends OfficeFrameTestCase {
 		final String RESPONSE = "nextTask - finished(NextTask)";
 
 		// Ensure correctly renders template on submit
-		this.assertHttpRequest("/SECTION.links-nextTask.task", RESPONSE);
+		this.assertHttpRequest("/uri-nextTask", RESPONSE);
 	}
 
 	/**
@@ -151,11 +202,9 @@ public class HttpTemplateSectionIntegrationTest extends OfficeFrameTestCase {
 		this.isNonMethodLink = true;
 		this.startHttpServer("Template.ofp", TemplateLogic.class);
 
-		final String RESPONSE = "<submit />" + RENDERED_TEMPLATE_XML;
-
 		// Ensure correctly renders template on submit not invoking flow
-		String response = this.doHttpRequest("/SECTION.links-submit.task");
-		assertXmlEquals("Incorrect rendering", RESPONSE, response);
+		String response = this.doHttpRequest("/uri-submit");
+		assertRenderedResponse("<submit />", false, false, false, response);
 	}
 
 	/**
@@ -171,8 +220,7 @@ public class HttpTemplateSectionIntegrationTest extends OfficeFrameTestCase {
 		final String RESPONSE = "<submit /> - doInternalFlow[1] - finished(Parameter for External Flow)";
 
 		// Ensure correctly renders template on submit when invoking flow
-		this.assertHttpRequest("/SECTION.links-submit.task?doFlow=true",
-				RESPONSE);
+		this.assertHttpRequest("/uri-submit?doFlow=true", RESPONSE);
 	}
 
 	/**
@@ -187,7 +235,7 @@ public class HttpTemplateSectionIntegrationTest extends OfficeFrameTestCase {
 		final String RESPONSE = "LINKED";
 
 		// Ensure links out from template
-		this.assertHttpRequest("/SECTION.links-nonMethodLink.task", RESPONSE);
+		this.assertHttpRequest("/uri-nonMethodLink", RESPONSE);
 	}
 
 	/**
@@ -216,11 +264,10 @@ public class HttpTemplateSectionIntegrationTest extends OfficeFrameTestCase {
 		this.startHttpServer("NoLogicTemplate.ofp", null);
 
 		// Ensure template is correct
-		this.assertHttpRequest("",
-				" /SECTION.links-nonMethodLink.task /SECTION.links-doExternalFlow.task");
+		this.assertHttpRequest("", " /uri-nonMethodLink /uri-doExternalFlow");
 
 		// Ensure links out from template
-		this.assertHttpRequest("/SECTION.links-nonMethodLink.task", "LINKED");
+		this.assertHttpRequest("/uri-nonMethodLink", "LINKED");
 	}
 
 	/**
@@ -237,9 +284,8 @@ public class HttpTemplateSectionIntegrationTest extends OfficeFrameTestCase {
 				"context");
 
 		// Ensure template has context path for links
-		this.assertHttpRequest(
-				"",
-				" /context/SECTION.links-nonMethodLink.task /context/SECTION.links-doExternalFlow.task");
+		this.assertHttpRequest("/context",
+				" /context/uri-nonMethodLink /context/uri-doExternalFlow");
 	}
 
 	/**
@@ -275,16 +321,11 @@ public class HttpTemplateSectionIntegrationTest extends OfficeFrameTestCase {
 				StatefulTemplateLogic.class);
 
 		// Ensure retains state across HTTP requests (by incrementing counter)
-		this.assertHttpRequest("",
-				"<a href='/SECTION.links-increment.task'>1</a>");
-		this.assertHttpRequest("/SECTION.links-increment.task",
-				"increment - finished(2)");
-		this.assertHttpRequest("",
-				"<a href='/SECTION.links-increment.task'>2</a>");
-		this.assertHttpRequest("/SECTION.links-increment.task",
-				"increment - finished(3)");
-		this.assertHttpRequest("",
-				"<a href='/SECTION.links-increment.task'>3</a>");
+		this.assertHttpRequest("", "<a href='/uri-increment'>1</a>");
+		this.assertHttpRequest("/uri-increment", "increment - finished(2)");
+		this.assertHttpRequest("", "<a href='/uri-increment'>2</a>");
+		this.assertHttpRequest("/uri-increment", "increment - finished(3)");
+		this.assertHttpRequest("", "<a href='/uri-increment'>3</a>");
 	}
 
 	/**
@@ -299,8 +340,8 @@ public class HttpTemplateSectionIntegrationTest extends OfficeFrameTestCase {
 				RenderByDefaultTemplateLogic.class);
 
 		// Ensure render template again by default on link submit
-		this.assertHttpRequest("/SECTION.links-submit.task",
-				"Submit-RenderByDefault-/SECTION.links-submit.task");
+		this.assertHttpRequest("/uri-submit",
+				"Submit-RenderByDefault-/uri-submit");
 	}
 
 	/**
@@ -346,11 +387,10 @@ public class HttpTemplateSectionIntegrationTest extends OfficeFrameTestCase {
 
 		// Ensure change with extension
 		this.assertHttpRequest("",
-				"Overridden template with overridden class and /SECTION.links-serviceLink.task");
+				"Overridden template with overridden class and /uri-serviceLink");
 
 		// Ensure service method not render template
-		this.assertHttpRequest("/SECTION.links-serviceLink.task",
-				"SERVICE_METHOD");
+		this.assertHttpRequest("/uri-serviceLink", "SERVICE_METHOD");
 	}
 
 	/**
@@ -512,6 +552,45 @@ public class HttpTemplateSectionIntegrationTest extends OfficeFrameTestCase {
 	}
 
 	/**
+	 * Asserts the rendered response.
+	 * 
+	 * @param expectedResponsePrefix
+	 *            Prefix on the expected response. Typically for testing
+	 *            pre-processing before response.
+	 * @param isNextTaskQualified
+	 *            <code>true</code> if <code>nextTask</code> link is qualified.
+	 * @param isSubmitQualified
+	 *            <code>true</code> if <code>submit</code> link is qualified.
+	 * @param isNonMethodLinkQualified
+	 *            <code>true</code> if <code>nonMethodLink</code> link is
+	 *            qualified.
+	 * @param actualResponse
+	 *            Actual rendered response
+	 */
+	private static void assertRenderedResponse(String expectedResponsePrefix,
+			boolean isNextTaskQualified, boolean isSubmitQualified,
+			boolean isNonMethodLinkQualified, String actualResponse) {
+
+		final String LINK_QUALIFICATION = "https://localhost:7979";
+
+		// Transform expected response for link qualifications
+		String expectedResponse = expectedResponsePrefix
+				+ RENDERED_TEMPLATE_XML;
+		expectedResponse = expectedResponse.replace(
+				"${LINK_nextTask_QUALIFICATION}",
+				isNextTaskQualified ? LINK_QUALIFICATION : "");
+		expectedResponse = expectedResponse.replace(
+				"${LINK_submit_QUALIFICATION}",
+				isSubmitQualified ? LINK_QUALIFICATION : "");
+		expectedResponse = expectedResponse.replace(
+				"${LINK_nonMethodLink_QUALIFICATION}",
+				isNonMethodLinkQualified ? LINK_QUALIFICATION : "");
+
+		// Validate the rendered response
+		assertXmlEquals("Incorrect rendering", expectedResponse, actualResponse);
+	}
+
+	/**
 	 * Starts the HTTP server for testing.
 	 * 
 	 * @param templateName
@@ -540,16 +619,10 @@ public class HttpTemplateSectionIntegrationTest extends OfficeFrameTestCase {
 				HttpApplicationLocationManagedObjectSource.class.getName(),
 				null, new AutoWire(HttpApplicationLocation.class));
 
-		// Link service Task name prefix
-		final String LINK_SERVICE_TASK_NAME_PREFIX = "LINK_";
-
-		// Provide HTTP template router for testing
+		// Provide HTTP router for testing
 		AutoWireSection templateRouteSection = source.addSection("ROUTE",
 				WorkSectionSource.class.getName(),
-				HttpTemplateRouteWorkSource.class.getName());
-		templateRouteSection.addProperty(
-				HttpTemplateRouteWorkSource.PROPERTY_TASK_NAME_PREFIX,
-				LINK_SERVICE_TASK_NAME_PREFIX);
+				HttpRouteWorkSource.class.getName());
 
 		// Load the template section
 		final String templateLocation = this.getClass().getPackage().getName()
@@ -563,8 +636,7 @@ public class HttpTemplateSectionIntegrationTest extends OfficeFrameTestCase {
 					logicClass.getName());
 		}
 		templateSection.addProperty(
-				HttpTemplateSectionSource.PROPERTY_LINK_TASK_NAME_PREFIX,
-				LINK_SERVICE_TASK_NAME_PREFIX);
+				HttpTemplateSectionSource.PROPERTY_TEMPLATE_URI, "uri");
 
 		// Load the additional properties
 		for (int i = 0; i < templatePropertyPairs.length; i += 2) {
@@ -580,8 +652,8 @@ public class HttpTemplateSectionIntegrationTest extends OfficeFrameTestCase {
 						MockSection.class.getName());
 
 		// Link flow outputs
-		source.link(templateRouteSection, "NON_MATCHED_REQUEST",
-				templateSection, "renderTemplate");
+		source.link(templateRouteSection, "NOT_HANDLED", templateSection,
+				"renderTemplate");
 		source.link(templateSection, "output", handleOutputSection, "finished");
 		source.link(templateSection, "doExternalFlow", handleOutputSection,
 				"finished");

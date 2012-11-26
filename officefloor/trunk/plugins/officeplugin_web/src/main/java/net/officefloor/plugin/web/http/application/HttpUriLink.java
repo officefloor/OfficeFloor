@@ -28,11 +28,11 @@ import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
 public interface HttpUriLink {
 
 	/**
-	 * Obtains the URI.
+	 * Obtains the application URI path.
 	 * 
-	 * @return URI.
+	 * @return application URI path.
 	 */
-	String getUri();
+	String getApplicationUriPath();
 
 	/**
 	 * Obtains the {@link AutoWireSection} handling the URI.

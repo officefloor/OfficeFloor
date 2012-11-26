@@ -102,6 +102,14 @@ public interface AutoWireApplication {
 	AutoWireSection getSection(String sectionName);
 
 	/**
+	 * Adds a {@link AutoWireSectionTransformer}.
+	 * 
+	 * @param transformer
+	 *            {@link AutoWireSectionTransformer}.
+	 */
+	void addSectionTransformer(AutoWireSectionTransformer transformer);
+
+	/**
 	 * Links the source {@link SectionOutput} to a target {@link SectionInput}.
 	 * 
 	 * @param sourceSection

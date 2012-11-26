@@ -32,13 +32,10 @@ import java.util.Properties;
 import java.util.Set;
 
 import net.officefloor.compile.WorkSourceService;
-import net.officefloor.compile.spi.work.source.TaskTypeBuilder;
 import net.officefloor.compile.spi.work.source.WorkSource;
 import net.officefloor.compile.spi.work.source.WorkSourceContext;
 import net.officefloor.compile.spi.work.source.WorkTypeBuilder;
 import net.officefloor.compile.spi.work.source.impl.AbstractWorkSource;
-import net.officefloor.frame.api.build.Indexed;
-import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.spi.source.SourceContext;
 import net.officefloor.frame.spi.source.SourceProperties;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
@@ -71,10 +68,21 @@ public class HttpTemplateWorkSource extends
 	public static final String PROPERTY_TEMPLATE_CONTENT = "template.content";
 
 	/**
+	 * Property to obtain the {@link HttpTemplate} URI path.
+	 */
+	public static final String PROPERTY_TEMPLATE_URI = "template.uri";
+
+	/**
 	 * Property to indicate if the {@link HttpTemplate} requires a secure
 	 * {@link ServerHttpConnection}.
 	 */
 	public static final String PROPERTY_TEMPLATE_SECURE = "template.secure";
+
+	/**
+	 * Property prefix to obtain whether a specific link requires a secure
+	 * {@link ServerHttpConnection}.
+	 */
+	public static final String PROPERTY_LINK_SECURE_PREFIX = HttpTemplateTask.PROPERTY_LINK_SECURE_PREFIX;
 
 	/**
 	 * Property to specify the {@link Charset} for the template.
@@ -85,11 +93,6 @@ public class HttpTemplateWorkSource extends
 	 * Property prefix to obtain the bean for the {@link HttpTemplateSection}.
 	 */
 	public static final String PROPERTY_BEAN_PREFIX = HttpTemplateTask.PROPERTY_BEAN_PREFIX;
-
-	/**
-	 * Extension on a link URL.
-	 */
-	public static final String LINK_URL_EXTENSION = ".task";
 
 	/**
 	 * Obtains the {@link HttpTemplate}.
@@ -286,7 +289,8 @@ public class HttpTemplateWorkSource extends
 
 	@Override
 	protected void loadSpecification(SpecificationContext context) {
-		context.addProperty(PROPERTY_TEMPLATE_FILE, "template");
+		context.addProperty(PROPERTY_TEMPLATE_FILE, "Template");
+		context.addProperty(PROPERTY_TEMPLATE_URI, "URI Path");
 	}
 
 	@Override
@@ -298,6 +302,9 @@ public class HttpTemplateWorkSource extends
 
 		// Obtain the details of the template
 		Charset charset = getCharset(context);
+
+		// Obtain the URI path for the template
+		String templateUriPath = context.getProperty(PROPERTY_TEMPLATE_URI);
 
 		// Obtain whether the template is secure
 		boolean isTemplateSecure = Boolean.valueOf(context.getProperty(
@@ -312,24 +319,11 @@ public class HttpTemplateWorkSource extends
 
 			// Load the task to write the section
 			String[] linkNames = HttpTemplateTask.loadTaskType(section,
-					charset, isTemplateSecure, workTypeBuilder, context);
+					charset, templateUriPath, isTemplateSecure,
+					workTypeBuilder, context);
 
 			// Keep track of the unique set of link names
 			linkNameSet.addAll(Arrays.asList(linkNames));
-		}
-
-		// Add the request handler tasks in order
-		String[] requestHandlerTaskNames = linkNameSet.toArray(new String[0]);
-		Arrays.sort(requestHandlerTaskNames);
-		for (String requestHandlerTaskName : requestHandlerTaskNames) {
-
-			// Add request handler task
-			TaskTypeBuilder<Indexed, None> task = workTypeBuilder.addTaskType(
-					requestHandlerTaskName, new RequestHandlerTask(),
-					Indexed.class, None.class);
-
-			// Specify differentiator to enable finding this task
-			task.setDifferentiator(new HttpTemplateRequestHandlerDifferentiator());
 		}
 	}
 

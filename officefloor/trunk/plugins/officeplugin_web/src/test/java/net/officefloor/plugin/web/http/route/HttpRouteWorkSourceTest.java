@@ -15,8 +15,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
-package net.officefloor.plugin.web.http.template.route;
+package net.officefloor.plugin.web.http.route;
 
 import net.officefloor.compile.spi.work.source.TaskTypeBuilder;
 import net.officefloor.compile.spi.work.source.WorkTypeBuilder;
@@ -27,52 +26,56 @@ import net.officefloor.frame.api.manage.UnknownWorkException;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
 import net.officefloor.plugin.web.http.location.HttpApplicationLocation;
+import net.officefloor.plugin.web.http.location.IncorrectHttpRequestContextPathException;
 import net.officefloor.plugin.web.http.location.InvalidHttpRequestUriException;
-import net.officefloor.plugin.web.http.template.route.HttpTemplateRouteTask;
-import net.officefloor.plugin.web.http.template.route.HttpTemplateRouteWorkSource;
-import net.officefloor.plugin.web.http.template.route.HttpTemplateRouteTask.HttpTemplateRouteDependencies;
-import net.officefloor.plugin.web.http.template.route.HttpTemplateRouteTask.HttpTemplateRouteTaskFlows;
+import net.officefloor.plugin.web.http.route.HttpRouteTask.HttpRouteTaskDependencies;
+import net.officefloor.plugin.web.http.route.HttpRouteTask.HttpRouteTaskFlows;
+import net.officefloor.plugin.web.http.session.HttpSession;
+import net.officefloor.plugin.web.http.tokenise.HttpRequestTokeniseException;
 
 /**
- * Tests the {@link HttpTemplateRouteWorkSource}.
+ * Tests the {@link HttpRouteWorkSource}.
  * 
  * @author Daniel Sagenschneider
  */
-public class HttpTemplateRouteWorkSourceTest extends OfficeFrameTestCase {
+public class HttpRouteWorkSourceTest extends OfficeFrameTestCase {
 
 	/**
-	 * Verifies the specification.
+	 * Ensure correct specification.
 	 */
 	public void testSpecification() {
-		WorkLoaderUtil.validateSpecification(HttpTemplateRouteWorkSource.class);
+		WorkLoaderUtil.validateSpecification(HttpRouteWorkSource.class);
 	}
 
 	/**
-	 * Ensures correct type.
+	 * Ensure correct type.
 	 */
 	public void testType() {
 
-		// Create the type
-		HttpTemplateRouteTask taskFactory = new HttpTemplateRouteTask(null);
-		WorkTypeBuilder<HttpTemplateRouteTask> work = WorkLoaderUtil
-				.createWorkTypeBuilder(taskFactory);
-		TaskTypeBuilder<HttpTemplateRouteDependencies, HttpTemplateRouteTaskFlows> task = work
-				.addTaskType("route", taskFactory,
-						HttpTemplateRouteDependencies.class,
-						HttpTemplateRouteTaskFlows.class);
+		// Create the expected type
+		HttpRouteTask factory = new HttpRouteTask();
+		WorkTypeBuilder<HttpRouteTask> type = WorkLoaderUtil
+				.createWorkTypeBuilder(factory);
+		TaskTypeBuilder<HttpRouteTaskDependencies, HttpRouteTaskFlows> task = type
+				.addTaskType(HttpRouteWorkSource.TASK_NAME, factory,
+						HttpRouteTaskDependencies.class,
+						HttpRouteTaskFlows.class);
 		task.addObject(ServerHttpConnection.class).setKey(
-				HttpTemplateRouteDependencies.SERVER_HTTP_CONNECTION);
+				HttpRouteTaskDependencies.SERVER_HTTP_CONNECTION);
 		task.addObject(HttpApplicationLocation.class).setKey(
-				HttpTemplateRouteDependencies.HTTP_APPLICATION_LOCATION);
-		task.addFlow().setKey(HttpTemplateRouteTaskFlows.NON_MATCHED_REQUEST);
+				HttpRouteTaskDependencies.HTTP_APPLICATION_LOCATION);
+		task.addObject(HttpSession.class).setKey(
+				HttpRouteTaskDependencies.HTTP_SESSION);
+		task.addFlow().setKey(HttpRouteTaskFlows.NOT_HANDLED);
 		task.addEscalation(InvalidHttpRequestUriException.class);
+		task.addEscalation(IncorrectHttpRequestContextPathException.class);
+		task.addEscalation(HttpRequestTokeniseException.class);
 		task.addEscalation(UnknownWorkException.class);
 		task.addEscalation(UnknownTaskException.class);
 		task.addEscalation(InvalidParameterTypeException.class);
 
-		// Verify type
-		WorkLoaderUtil
-				.validateWorkType(work, HttpTemplateRouteWorkSource.class);
+		// Validate the expected type
+		WorkLoaderUtil.validateWorkType(type, HttpRouteWorkSource.class);
 	}
 
 }

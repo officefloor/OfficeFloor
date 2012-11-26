@@ -18,7 +18,7 @@
 
 package net.officefloor.plugin.web.http.template;
 
-import net.officefloor.frame.api.build.NameAwareWorkFactory;
+import net.officefloor.frame.api.build.WorkFactory;
 import net.officefloor.frame.api.execute.Work;
 
 /**
@@ -26,31 +26,11 @@ import net.officefloor.frame.api.execute.Work;
  * 
  * @author Daniel Sagenschneider
  */
-public class HttpTemplateWork implements Work,
-		NameAwareWorkFactory<HttpTemplateWork> {
-
-	/**
-	 * Bound {@link Work} name.
-	 */
-	private String workName;
-
-	/**
-	 * Obtains the bound {@link Work} name.
-	 * 
-	 * @return {@link Work} name.
-	 */
-	public String getWorkName() {
-		return this.workName;
-	}
+public class HttpTemplateWork implements WorkFactory<HttpTemplateWork>, Work {
 
 	/*
-	 * ================ NameAwareWorkFactory ======================
+	 * ================ Work ======================
 	 */
-
-	@Override
-	public void setBoundWorkName(String boundWorkName) {
-		this.workName = boundWorkName;
-	}
 
 	@Override
 	public HttpTemplateWork createWork() {

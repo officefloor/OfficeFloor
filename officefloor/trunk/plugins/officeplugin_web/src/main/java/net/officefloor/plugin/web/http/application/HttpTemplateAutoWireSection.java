@@ -18,6 +18,8 @@
 
 package net.officefloor.plugin.web.http.application;
 
+import java.util.Map;
+
 import net.officefloor.autowire.AutoWireSection;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
 import net.officefloor.plugin.web.http.template.parse.HttpTemplate;
@@ -94,6 +96,19 @@ public interface HttpTemplateAutoWireSection extends AutoWireSection {
 	 *            {@link ServerHttpConnection}.
 	 */
 	void setLinkSecure(String linkName, boolean isSecure);
+
+	/**
+	 * <p>
+	 * Obtains an immutable {@link Map} providing the overriding configuration
+	 * of whether a link requires a secure {@link ServerHttpConnection}.
+	 * <p>
+	 * Links not contained in the returned {@link Map} will default secure to
+	 * that of the template.
+	 * 
+	 * @return Immutable {@link Map} of link to whether if requires a secure
+	 *         {@link ServerHttpConnection}.
+	 */
+	Map<String, Boolean> getSecureLinks();
 
 	/**
 	 * Adds an {@link HttpTemplateSectionExtension} to this

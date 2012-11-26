@@ -27,7 +27,6 @@ import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.plugin.web.http.template.HttpTemplateWorkSource;
 import net.officefloor.plugin.web.http.template.parse.HttpTemplate;
-import net.officefloor.plugin.web.http.template.route.HttpTemplateRouteWorkSource;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
@@ -41,6 +40,11 @@ import org.apache.http.impl.client.DefaultHttpClient;
  * @author Daniel Sagenschneider
  */
 public class TemplateAndRouteIntegrationTest extends TestCase {
+
+	/**
+	 * {@link HttpClient}.
+	 */
+	private final HttpClient client = new DefaultHttpClient();
 
 	/**
 	 * {@link OfficeFloor}.
@@ -68,8 +72,14 @@ public class TemplateAndRouteIntegrationTest extends TestCase {
 
 	@Override
 	protected void tearDown() throws Exception {
-		if (this.officeFloor != null) {
-			this.officeFloor.closeOfficeFloor();
+		try {
+			// Stop client
+			this.client.getConnectionManager().shutdown();
+		} finally {
+			// Stop server
+			if (this.officeFloor != null) {
+				this.officeFloor.closeOfficeFloor();
+			}
 		}
 	}
 
@@ -79,24 +89,21 @@ public class TemplateAndRouteIntegrationTest extends TestCase {
 	 */
 	public void testRoute() throws Exception {
 
-		// Create HTTP Client
-		HttpClient client = new DefaultHttpClient();
-
 		// Request the initial page (PageOne)
 		Properties initialPage = this.doRequest(
-				"/PageTwo.HttpTemplate-PageTwo.ofp-link.task", client);
+				"/PageTwo.HttpTemplate-PageTwo.ofp-link.task", this.client);
 		assertEquals("Incorrect initial page", "One",
 				initialPage.getProperty("page"));
 
 		// Follow link to get second page
 		String secondPageLink = initialPage.getProperty("link");
-		Properties secondPage = this.doRequest(secondPageLink, client);
+		Properties secondPage = this.doRequest(secondPageLink, this.client);
 		assertEquals("Incorrect second page", "Two",
 				secondPage.getProperty("page"));
 
 		// Follow link to get first page
 		String firstPageLink = secondPage.getProperty("link");
-		Properties firstPage = this.doRequest(firstPageLink, client);
+		Properties firstPage = this.doRequest(firstPageLink, this.client);
 		assertEquals("Incorrect first page", "One",
 				firstPage.getProperty("page"));
 	}
@@ -107,11 +114,9 @@ public class TemplateAndRouteIntegrationTest extends TestCase {
 	 */
 	public void testRouteRoot() throws Exception {
 
-		// Create HTTP Client
-		HttpClient client = new DefaultHttpClient();
-
 		// Root page link
-		Properties linkedPage = this.doRequest("/.links-link.task", client);
+		Properties linkedPage = this
+				.doRequest("/.links-link.task", this.client);
 		assertEquals("Incorrect root page link", "One",
 				linkedPage.getProperty("page"));
 	}
@@ -121,14 +126,11 @@ public class TemplateAndRouteIntegrationTest extends TestCase {
 	 */
 	public void testRouteCanonicalPath() throws Exception {
 
-		// Create HTTP Client
-		HttpClient client = new DefaultHttpClient();
-
 		// Request the initial page with non-canonical path
 		Properties initialPage = this
 				.doRequest(
 						"/non-canonical-path/../PageTwo.HttpTemplate-PageTwo.ofp-link.task/",
-						client);
+						this.client);
 		assertEquals("Incorrect page", "One", initialPage.getProperty("page"));
 	}
 

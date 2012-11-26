@@ -33,6 +33,7 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 
+import net.officefloor.compile.impl.properties.PropertiesUtil;
 import net.officefloor.compile.impl.util.CompileUtil;
 import net.officefloor.compile.spi.section.SectionDesigner;
 import net.officefloor.compile.spi.section.SectionInput;
@@ -61,6 +62,7 @@ import net.officefloor.plugin.section.clazz.NextTask;
 import net.officefloor.plugin.section.clazz.Parameter;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
 import net.officefloor.plugin.web.http.application.HttpSessionStateful;
+import net.officefloor.plugin.web.http.continuation.HttpUrlContinuationWorkSource;
 import net.officefloor.plugin.web.http.location.HttpApplicationLocation;
 import net.officefloor.plugin.web.http.session.clazz.source.HttpSessionClassManagedObjectSource;
 import net.officefloor.plugin.web.http.template.HttpTemplateWorkSource;
@@ -73,6 +75,11 @@ import net.officefloor.plugin.web.http.template.parse.HttpTemplateSection;
  * @author Daniel Sagenschneider
  */
 public class HttpTemplateSectionSource extends ClassSectionSource {
+
+	/**
+	 * Property name for the {@link HttpTemplate} URI path.
+	 */
+	public static final String PROPERTY_TEMPLATE_URI = HttpTemplateWorkSource.PROPERTY_TEMPLATE_URI;
 
 	/**
 	 * Property name for the {@link Class} providing the backing logic to the
@@ -102,12 +109,6 @@ public class HttpTemplateSectionSource extends ClassSectionSource {
 		public void notIncludedInput() {
 		}
 	}
-
-	/**
-	 * Name of property for the prefix on the {@link HttpTemplateWorkSource}
-	 * link {@link Task} instances.
-	 */
-	public static final String PROPERTY_LINK_TASK_NAME_PREFIX = "link.task.name.prefix";
 
 	/**
 	 * Name of the {@link SectionInput} for rendering this {@link HttpTemplate}.
@@ -148,8 +149,7 @@ public class HttpTemplateSectionSource extends ClassSectionSource {
 
 	@Override
 	protected void loadSpecification(SpecificationContext context) {
-		context.addProperty(PROPERTY_LINK_TASK_NAME_PREFIX,
-				"Link service Task name prefix");
+		context.addProperty(PROPERTY_TEMPLATE_URI, "URI Path");
 	}
 
 	@Override
@@ -185,6 +185,9 @@ public class HttpTemplateSectionSource extends ClassSectionSource {
 			templateContentBuffer.append((char) character);
 		}
 		String templateContent = templateContentBuffer.toString();
+
+		// Obtain the template URI path
+		String templateUriPath = context.getProperty(PROPERTY_TEMPLATE_URI);
 
 		// Keep track of tasks that do not render template on their completion
 		Set<String> nonRenderTemplateTaskKeys = new HashSet<String>();
@@ -225,16 +228,21 @@ public class HttpTemplateSectionSource extends ClassSectionSource {
 		SectionInput sectionInput = designer.addSectionInput(
 				RENDER_TEMPLATE_INPUT_NAME, null);
 
-		// Name of work is exposed on URL for links.
-		// Result is: /<section>.links-<link>.task
-		final String TEMPLATE_WORK_NANE = "links";
-
 		// Load the HTTP template
+		final String TEMPLATE_WORK_NANE = "TEMPLATE";
 		SectionWork templateWork = designer.addSectionWork(TEMPLATE_WORK_NANE,
 				HttpTemplateWorkSource.class.getName());
 		templateWork.addProperty(
 				HttpTemplateWorkSource.PROPERTY_TEMPLATE_CONTENT,
 				templateContent);
+
+		// Copy the template configuration
+		PropertiesUtil.copyProperties(context, templateWork,
+				HttpTemplateWorkSource.PROPERTY_TEMPLATE_URI,
+				HttpTemplateWorkSource.PROPERTY_TEMPLATE_SECURE);
+		PropertiesUtil.copyPrefixedProperties(context,
+				HttpTemplateWorkSource.PROPERTY_LINK_SECURE_PREFIX,
+				templateWork);
 
 		// Create the template tasks and ensure registered for logic flows
 		Map<String, SectionTask> templateTasks = new HashMap<String, SectionTask>();
@@ -459,19 +467,22 @@ public class HttpTemplateSectionSource extends ClassSectionSource {
 			}
 		}
 
-		// Obtain the link task name prefix
-		String linkTaskNamePrefix = context
-				.getProperty(PROPERTY_LINK_TASK_NAME_PREFIX);
-
-		// Register the #{link} tasks
+		// Register the #{link} URL continuation tasks
 		String[] linkNames = HttpTemplateWorkSource
 				.getHttpTemplateLinkNames(template);
+		final String linkUrlContinuationPrefix = "HTTP_URL_CONTINUATION_";
 		for (String linkTaskName : linkNames) {
 
-			// Add the task for handling the link
-			String linkServiceTaskName = linkTaskNamePrefix + linkTaskName;
-			SectionTask linkTask = templateWork.addSectionTask(
-					linkServiceTaskName, linkTaskName);
+			// Create HTTP URL continuation
+			SectionWork urlContinuationWork = designer.addSectionWork(
+					linkUrlContinuationPrefix + linkTaskName,
+					HttpUrlContinuationWorkSource.class.getName());
+			urlContinuationWork.addProperty(
+					HttpUrlContinuationWorkSource.PROPERTY_URI_PATH,
+					templateUriPath + "-" + linkTaskName);
+			SectionTask urlContinuationTask = urlContinuationWork
+					.addSectionTask(linkUrlContinuationPrefix + linkTaskName,
+							HttpUrlContinuationWorkSource.TASK_NAME);
 
 			// Obtain the link method task
 			String linkMethodTaskKey = createTaskKey(linkTaskName);
@@ -481,12 +492,12 @@ public class HttpTemplateSectionSource extends ClassSectionSource {
 				// No backing method, so output flow from template
 				SectionOutput sectionOutput = this.getOrCreateOutput(
 						linkTaskName, null, false);
-				designer.link(linkTask, sectionOutput);
+				designer.link(urlContinuationTask, sectionOutput);
 				continue; // linked
 			}
 
-			// Link handling of request to method
-			designer.link(linkTask, methodTask.task);
+			// Link servicing of request to the method
+			designer.link(urlContinuationTask, methodTask.task);
 		}
 
 		// Link bean tasks to re-render template by default

@@ -134,4 +134,34 @@ public class PropertiesUtilTest extends OfficeFrameTestCase {
 		}
 	}
 
+	/**
+	 * Ensure can copy prefixed {@link Property} instances.
+	 */
+	public void testCopyPrefixedProperties() {
+
+		// Record the property names
+		this.recordReturn(this.source, this.source.getPropertyNames(),
+				new String[] { "ignore.one", "prefix.", "prefix.one",
+						"ignore.prefix", "prefix.two", "ignore.again",
+						"prefix.null" });
+		this.recordReturn(this.source, this.source.getProperty("prefix."),
+				"empty");
+		this.target.addProperty("prefix.", "empty");
+		this.recordReturn(this.source, this.source.getProperty("prefix.one"),
+				"1");
+		this.target.addProperty("prefix.one", "1");
+		this.recordReturn(this.source, this.source.getProperty("prefix.two"),
+				"2");
+		this.target.addProperty("prefix.two", "2");
+		this.recordReturn(this.source, this.source.getProperty("prefix.null"),
+				null);
+		this.target.addProperty("prefix.null", null);
+
+		// Test
+		this.replayMockObjects();
+		PropertiesUtil.copyPrefixedProperties(this.source, "prefix.",
+				this.target);
+		this.verifyMockObjects();
+	}
+
 }

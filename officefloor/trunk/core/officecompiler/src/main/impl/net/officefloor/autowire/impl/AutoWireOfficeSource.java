@@ -30,6 +30,8 @@ import net.officefloor.autowire.AutoWire;
 import net.officefloor.autowire.AutoWireGovernance;
 import net.officefloor.autowire.AutoWireSection;
 import net.officefloor.autowire.AutoWireSectionFactory;
+import net.officefloor.autowire.AutoWireSectionTransformer;
+import net.officefloor.autowire.AutoWireSectionTransformerContext;
 import net.officefloor.compile.OfficeFloorCompiler;
 import net.officefloor.compile.governance.GovernanceType;
 import net.officefloor.compile.properties.Property;
@@ -83,6 +85,11 @@ public class AutoWireOfficeSource extends AbstractOfficeSource {
 	 * {@link AutoWireSection} instances.
 	 */
 	private final List<AutoWireSection> sections = new LinkedList<AutoWireSection>();
+
+	/**
+	 * {@link AutoWireSectionTransformer} instances.
+	 */
+	private final List<AutoWireSectionTransformer> sectionTransformers = new LinkedList<AutoWireSectionTransformer>();
 
 	/**
 	 * {@link Link} instances.
@@ -154,13 +161,9 @@ public class AutoWireOfficeSource extends AbstractOfficeSource {
 			String sectionName, String sectionSourceClassName,
 			String sectionLocation, AutoWireSectionFactory<A> sectionFactory) {
 
-		// Create the properties
-		PropertyList properties = this.compiler.createPropertyList();
-
-		// Create and add the section
-		AutoWireSection section = new AutoWireSectionImpl(this.compiler,
-				sectionName, sectionSourceClassName, sectionLocation,
-				properties);
+		// Create the section
+		AutoWireSection section = this.createSection(sectionName,
+				sectionSourceClassName, sectionLocation);
 
 		// Determine if override the section
 		if (sectionFactory != null) {
@@ -215,6 +218,17 @@ public class AutoWireOfficeSource extends AbstractOfficeSource {
 
 		// As here, did not find section
 		return null;
+	}
+
+	/**
+	 * Adds a {@link AutoWireSectionTransformer} to enable transforming all
+	 * {@link AutoWireSection} instances before configuring them for compiling.
+	 * 
+	 * @param transformer
+	 *            {@link AutoWireSectionTransformer}.
+	 */
+	public void addSectionTransformer(AutoWireSectionTransformer transformer) {
+		this.sectionTransformers.add(transformer);
 	}
 
 	/**
@@ -377,6 +391,32 @@ public class AutoWireOfficeSource extends AbstractOfficeSource {
 		this.availableTeamAutoWiring.add(autoWire);
 	}
 
+	/**
+	 * Creates the {@link AutoWireSection}.
+	 * 
+	 * @param sectionName
+	 *            Name of the {@link AutoWireSection}.
+	 * @param sectionSourceClassName
+	 *            {@link SectionSource} {@link Class} name.
+	 * @param sectionLocation
+	 *            {@link SectionSource} location.
+	 * @return Created {@link AutoWireSection}.
+	 */
+	private AutoWireSection createSection(String sectionName,
+			String sectionSourceClassName, String sectionLocation) {
+
+		// Create the properties
+		PropertyList properties = this.compiler.createPropertyList();
+
+		// Create section
+		AutoWireSection section = new AutoWireSectionImpl(this.compiler,
+				sectionName, sectionSourceClassName, sectionLocation,
+				properties);
+
+		// Return the section
+		return section;
+	}
+
 	/*
 	 * ===================== OfficeSource =========================
 	 */
@@ -407,6 +447,29 @@ public class AutoWireOfficeSource extends AbstractOfficeSource {
 		Map<String, Map<String, OfficeSectionOutput>> outputs = new HashMap<String, Map<String, OfficeSectionOutput>>();
 		Map<AutoWire, OfficeObject> objects = new HashMap<AutoWire, OfficeObject>();
 		for (AutoWireSection section : this.sections) {
+
+			// Apply all AutoWireSectionTransformers
+			for (AutoWireSectionTransformer transformer : this.sectionTransformers) {
+				final AutoWireSection currentSection = section;
+				section = transformer
+						.transformAutoWireSection(new AutoWireSectionTransformerContext() {
+
+							@Override
+							public AutoWireSection getSection() {
+								return currentSection;
+							}
+
+							@Override
+							public AutoWireSection createSection(
+									String sectionName,
+									String sectionSourceClassName,
+									String sectionLocation) {
+								return AutoWireOfficeSource.this.createSection(
+										sectionName, sectionSourceClassName,
+										sectionLocation);
+							}
+						});
+			}
 
 			// Obtain the section name
 			String sectionName = section.getSectionName();

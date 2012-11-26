@@ -88,7 +88,7 @@ public class PropertyHttpTemplateWriter implements HttpTemplateWriter {
 	 */
 
 	@Override
-	public void write(ServerWriter writer, String workName, Object bean,
+	public void write(ServerWriter writer, Object bean,
 			HttpApplicationLocation location) throws IOException {
 
 		// If no bean, then no value to output

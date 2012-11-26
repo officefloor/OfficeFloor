@@ -18,6 +18,10 @@
 
 package net.officefloor.plugin.web.http.application;
 
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+
 import net.officefloor.autowire.AutoWireSection;
 import net.officefloor.autowire.impl.AutoWirePropertiesImpl;
 import net.officefloor.autowire.impl.AutoWireSectionImpl;
@@ -53,6 +57,12 @@ public class HttpTemplateAutoWireSectionImpl extends AutoWireSectionImpl
 	 * Indicates if the template is to be secure.
 	 */
 	private boolean isTemplateSecure = false;
+
+	/**
+	 * Specific configuration of whether links are to be secure. This overrides
+	 * {@link #isTemplateSecure}.
+	 */
+	private final Map<String, Boolean> secureLinks = new HashMap<String, Boolean>();
 
 	/**
 	 * Index of the next extension.
@@ -112,9 +122,12 @@ public class HttpTemplateAutoWireSectionImpl extends AutoWireSectionImpl
 
 	@Override
 	public void setLinkSecure(String linkName, boolean isSecure) {
-		// TODO implement HttpTemplateAutoWireSection.setLinkSecure
-		throw new UnsupportedOperationException(
-				"TODO implement HttpTemplateAutoWireSection.setLinkSecure");
+		this.secureLinks.put(linkName, Boolean.valueOf(isSecure));
+	}
+
+	@Override
+	public Map<String, Boolean> getSecureLinks() {
+		return Collections.unmodifiableMap(this.secureLinks);
 	}
 
 	@Override

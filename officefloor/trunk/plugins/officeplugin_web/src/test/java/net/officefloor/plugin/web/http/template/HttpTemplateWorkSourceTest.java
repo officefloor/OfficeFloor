@@ -21,10 +21,14 @@ package net.officefloor.plugin.web.http.template;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Arrays;
+import java.util.LinkedList;
+import java.util.List;
 
 import net.officefloor.compile.OfficeFloorCompiler;
 import net.officefloor.compile.issues.CompilerIssues;
 import net.officefloor.compile.issues.CompilerIssues.LocationType;
+import net.officefloor.compile.properties.Property;
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.spi.work.source.TaskTypeBuilder;
 import net.officefloor.compile.spi.work.source.WorkTypeBuilder;
@@ -87,11 +91,12 @@ public class HttpTemplateWorkSourceTest extends OfficeFrameTestCase {
 	 */
 	public void testSpecification() {
 		WorkLoaderUtil.validateSpecification(HttpTemplateWorkSource.class,
-				HttpTemplateWorkSource.PROPERTY_TEMPLATE_FILE, "template");
+				HttpTemplateWorkSource.PROPERTY_TEMPLATE_FILE, "Template",
+				HttpTemplateWorkSource.PROPERTY_TEMPLATE_URI, "URI Path");
 	}
 
 	/**
-	 * Validate type.
+	 * Validate the type.
 	 */
 	public void testType() throws Exception {
 
@@ -103,7 +108,6 @@ public class HttpTemplateWorkSourceTest extends OfficeFrameTestCase {
 		// Create the task factory
 		HttpTemplateTask httpTemplateTaskFactory = new HttpTemplateTask(null,
 				false);
-		RequestHandlerTask requestHandlerTaskFactory = new RequestHandlerTask();
 
 		// 'template' task
 		TaskTypeBuilder<Indexed, None> template = work.addTaskType("template",
@@ -154,19 +158,9 @@ public class HttpTemplateWorkSourceTest extends OfficeFrameTestCase {
 				"HTTP_APPLICATION_LOCATION");
 		tail.addEscalation(IOException.class);
 
-		// Handle link 'beans' task
-		TaskTypeBuilder<Indexed, None> beans = work.addTaskType("beans",
-				requestHandlerTaskFactory, Indexed.class, None.class);
-		beans.setDifferentiator(new HttpTemplateRequestHandlerDifferentiator());
-
-		// Handle link 'submit' task
-		TaskTypeBuilder<Indexed, None> submit = work.addTaskType("submit",
-				requestHandlerTaskFactory, Indexed.class, None.class);
-		submit.setDifferentiator(new HttpTemplateRequestHandlerDifferentiator());
-
 		// Verify the work type
 		WorkLoaderUtil.validateWorkType(work, HttpTemplateWorkSource.class,
-				this.getProperties(this.templatePath));
+				this.getProperties(this.templatePath, "uri"));
 	}
 
 	/**
@@ -190,6 +184,8 @@ public class HttpTemplateWorkSourceTest extends OfficeFrameTestCase {
 		PropertyList propertyList = OfficeFloorCompiler.newPropertyList();
 		propertyList.addProperty(HttpTemplateWorkSource.PROPERTY_TEMPLATE_FILE)
 				.setValue(this.missingTemplateFilePath);
+		propertyList.addProperty(HttpTemplateWorkSource.PROPERTY_TEMPLATE_URI)
+				.setValue("uri");
 
 		// Test loading ensuring indicates failure
 		this.replayMockObjects();
@@ -236,6 +232,8 @@ public class HttpTemplateWorkSourceTest extends OfficeFrameTestCase {
 		PropertyList propertyList = OfficeFloorCompiler.newPropertyList();
 		propertyList.addProperty(HttpTemplateWorkSource.PROPERTY_TEMPLATE_FILE)
 				.setValue(this.missingTemplateFilePath);
+		propertyList.addProperty(HttpTemplateWorkSource.PROPERTY_TEMPLATE_URI)
+				.setValue("uri");
 		propertyList.addProperty("bean.template").setValue(
 				Object.class.getName());
 
@@ -247,10 +245,24 @@ public class HttpTemplateWorkSourceTest extends OfficeFrameTestCase {
 	}
 
 	/**
+	 * Tests generating secure template response.
+	 */
+	public void testSecureTemplate() throws Throwable {
+		this.doTemplateTest(true);
+	}
+
+	/**
+	 * Tests generating non-secure template response.
+	 */
+	public void testNonSecureTemplate() throws Throwable {
+		this.doTemplateTest(false);
+	}
+
+	/**
 	 * Tests running the template to generate response.
 	 */
 	@SuppressWarnings({ "unchecked", "rawtypes" })
-	public void testTemplate() throws Throwable {
+	public void doTemplateTest(boolean isTemplateSecure) throws Throwable {
 
 		// Create the mock objects
 		TaskContext taskContext = this.createMock(TaskContext.class);
@@ -262,14 +274,29 @@ public class HttpTemplateWorkSourceTest extends OfficeFrameTestCase {
 		// Create the HTTP response to record output
 		MockHttpResponse httpResponse = new MockHttpResponse();
 
+		// Create the additional properties
+		String[] additionalProperties;
+		if (isTemplateSecure) {
+			// Secure template with non-secure link
+			additionalProperties = new String[] {
+					HttpTemplateWorkSource.PROPERTY_TEMPLATE_SECURE,
+					String.valueOf(true),
+					HttpTemplateWorkSource.PROPERTY_LINK_SECURE_PREFIX
+							+ "beans", String.valueOf(false) };
+		} else {
+			// Default non-secure template with secure link
+			additionalProperties = new String[] {
+					HttpTemplateWorkSource.PROPERTY_LINK_SECURE_PREFIX
+							+ "submit", String.valueOf(true) };
+		}
+
 		// Load the work type
 		WorkType<HttpTemplateWork> workType = WorkLoaderUtil.loadWorkType(
-				HttpTemplateWorkSource.class,
-				this.getProperties(this.templatePath));
+				HttpTemplateWorkSource.class, this.getProperties(
+						this.templatePath, "uri", additionalProperties));
 
 		// Create the work and provide name
 		HttpTemplateWork work = workType.getWorkFactory().createWork();
-		work.setBoundWorkName("WORK");
 
 		// Record actions for each task:
 		// - 'template'
@@ -294,19 +321,20 @@ public class HttpTemplateWorkSourceTest extends OfficeFrameTestCase {
 				this.recordReturn(taskContext, taskContext.getObject(2),
 						beans[i]);
 			}
-			this.recordReturn(taskContext, taskContext.getWork(), work);
 
 			// Provide link recording
 			switch (i) {
 			case 1:
 				// #{beans} of NullBean section
-				this.recordReturn(location, location.transformToClientPath(
-						"/WORK-beans.task", false), "/WORK-beans.task");
+				this.recordReturn(location,
+						location.transformToClientPath("/uri-beans", false),
+						"/uri-beans");
 				break;
 			case 4:
 				// #{submit} of Tail section
-				this.recordReturn(location, location.transformToClientPath(
-						"/WORK-submit.task", false), "/WORK-submit.task");
+				this.recordReturn(location,
+						location.transformToClientPath("/uri-submit", true),
+						"/uri-submit");
 				break;
 			}
 		}
@@ -388,18 +416,16 @@ public class HttpTemplateWorkSourceTest extends OfficeFrameTestCase {
 		// Load the work type
 		WorkType<HttpTemplateWork> workType = WorkLoaderUtil.loadWorkType(
 				HttpTemplateWorkSource.class, compiler,
-				this.getProperties(this.templatePath));
+				this.getProperties(this.templatePath, "uri"));
 
 		// Create the work and provide name
 		HttpTemplateWork work = workType.getWorkFactory().createWork();
-		work.setBoundWorkName("WORK");
 
 		// Record undertaking task to use raw content
 		this.recordReturn(taskContext, taskContext.getObject(0), httpConnection);
 		this.recordReturn(httpConnection, httpConnection.getHttpResponse(),
 				httpResponse);
 		this.recordReturn(taskContext, taskContext.getObject(1), location);
-		this.recordReturn(taskContext, taskContext.getWork(), work);
 
 		// Test
 		this.replayMockObjects();
@@ -431,22 +457,19 @@ public class HttpTemplateWorkSourceTest extends OfficeFrameTestCase {
 		// Load the work type
 		WorkType<HttpTemplateWork> workType = WorkLoaderUtil.loadWorkType(
 				HttpTemplateWorkSource.class,
-				this.getProperties(this.rootTemplatePath));
+				this.getProperties(this.rootTemplatePath, "/"));
 
 		// Create as root template
 		HttpTemplateWork work = workType.getWorkFactory().createWork();
-		work.setBoundWorkName("/.links");
 
 		// Record
 		this.recordReturn(taskContext, taskContext.getObject(0), httpConnection);
 		this.recordReturn(httpConnection, httpConnection.getHttpResponse(),
 				httpResponse);
 		this.recordReturn(taskContext, taskContext.getObject(1), location);
-		this.recordReturn(taskContext, taskContext.getWork(), work);
-		this.recordReturn(
-				location,
-				location.transformToClientPath("/.links-something.task", false),
-				"/.links-something.task");
+		this.recordReturn(location,
+				location.transformToClientPath("/-something", false),
+				"/-something");
 
 		// Test
 		this.replayMockObjects();
@@ -592,26 +615,49 @@ public class HttpTemplateWorkSourceTest extends OfficeFrameTestCase {
 	/**
 	 * Obtain the properties.
 	 * 
+	 * @param templatePath
+	 *            Path to the {@link HttpTemplate} file.
+	 * @param templateUri
+	 *            {@link HttpTemplate} URI path.
+	 * @param additionalPropertyNameValuePairs
+	 *            Additional {@link Property} name value pairs.
 	 * @return Properties.
 	 */
-	public String[] getProperties(String templatePath) {
+	public String[] getProperties(String templatePath, String templateUri,
+			String... additionalPropertyNameValuePairs) {
+
 		// Create the properties
-		String[] properties = new String[10];
-		properties[0] = HttpTemplateWorkSource.PROPERTY_TEMPLATE_FILE;
-		properties[1] = templatePath;
-		properties[2] = HttpTemplateWorkSource.PROPERTY_BEAN_PREFIX
-				+ "template";
-		properties[3] = TemplateBean.class.getName();
-		properties[4] = HttpTemplateWorkSource.PROPERTY_BEAN_PREFIX
-				+ "NullBean";
-		properties[5] = TemplateBean.class.getName();
-		properties[6] = HttpTemplateWorkSource.PROPERTY_BEAN_PREFIX + "List";
-		properties[7] = TableRowBean.class.getName();
-		properties[8] = HttpTemplateWorkSource.PROPERTY_BEAN_PREFIX
-				+ "BeanTree";
-		properties[9] = BeanTreeBean.class.getName();
+		List<String> properties = new LinkedList<String>();
+
+		// Provide the template details
+		properties.addAll(Arrays.asList(
+				HttpTemplateWorkSource.PROPERTY_TEMPLATE_FILE, templatePath));
+		properties.addAll(Arrays.asList(
+				HttpTemplateWorkSource.PROPERTY_TEMPLATE_URI, templateUri));
+
+		// Provide the beans
+		properties.addAll(Arrays.asList(
+				HttpTemplateWorkSource.PROPERTY_BEAN_PREFIX + "template",
+				TemplateBean.class.getName()));
+		properties.addAll(Arrays.asList(
+				HttpTemplateWorkSource.PROPERTY_BEAN_PREFIX + "NullBean",
+				TemplateBean.class.getName()));
+		properties.addAll(Arrays.asList(
+				HttpTemplateWorkSource.PROPERTY_BEAN_PREFIX + "List",
+				TableRowBean.class.getName()));
+		properties.addAll(Arrays.asList(
+				HttpTemplateWorkSource.PROPERTY_BEAN_PREFIX + "BeanTree",
+				BeanTreeBean.class.getName()));
+
+		// Provide the additional property values
+		for (int i = 0; i < additionalPropertyNameValuePairs.length; i += 2) {
+			String name = additionalPropertyNameValuePairs[i];
+			String value = additionalPropertyNameValuePairs[i + 1];
+			properties.addAll(Arrays.asList(name, value));
+		}
 
 		// Return the properties
-		return properties;
+		return properties.toArray(new String[properties.size()]);
 	}
+
 }

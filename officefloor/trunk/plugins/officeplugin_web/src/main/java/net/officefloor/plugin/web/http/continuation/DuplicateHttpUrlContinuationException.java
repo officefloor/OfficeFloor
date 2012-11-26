@@ -15,13 +15,24 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
-package net.officefloor.plugin.web.http.template;
+package net.officefloor.plugin.web.http.continuation;
 
 /**
- * {@link HttpTemplateTask} differentiator.
+ * Indicates two or more {@link HttpUrlContinuationDifferentiator} instances
+ * exist with the same application URI path.
  * 
  * @author Daniel Sagenschneider
  */
-public class HttpTemplateRequestHandlerDifferentiator {
+public class DuplicateHttpUrlContinuationException extends Exception {
+
+	/**
+	 * Initiate.
+	 * 
+	 * @param message
+	 *            Message.
+	 */
+	public DuplicateHttpUrlContinuationException(String message) {
+		super(message);
+	}
+
 }
