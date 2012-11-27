@@ -36,7 +36,6 @@ import net.officefloor.eclipse.extension.util.SourceExtensionUtil;
 import net.officefloor.eclipse.extension.worksource.TaskDocumentationContext;
 import net.officefloor.eclipse.extension.worksource.WorkSourceExtension;
 import net.officefloor.eclipse.extension.worksource.WorkSourceExtensionContext;
-import net.officefloor.eclipse.socket.HttpRouteWorkSourceExtension.RoutingEntry;
 import net.officefloor.eclipse.util.EclipseUtil;
 import net.officefloor.frame.impl.construct.source.SourceContextImpl;
 import net.officefloor.frame.spi.source.SourceContext;
@@ -112,18 +111,19 @@ public class HttpTemplateWorkSourceExtension
 				});
 
 		// Add control to alter properties
-		new InputHandler<List<RoutingEntry>>(page, input, new InputListener() {
-			@Override
-			public void notifyValueChanged(Object value) {
-				// Notify of change
-				context.notifyPropertiesChanged();
-			}
+		new InputHandler<List<SectionToBeanTypeMapping>>(page, input,
+				new InputListener() {
+					@Override
+					public void notifyValueChanged(Object value) {
+						// Notify of change
+						context.notifyPropertiesChanged();
+					}
 
-			@Override
-			public void notifyValueInvalid(String message) {
-				context.setErrorMessage(message);
-			}
-		});
+					@Override
+					public void notifyValueInvalid(String message) {
+						context.setErrorMessage(message);
+					}
+				});
 	}
 
 	/**

@@ -43,7 +43,6 @@ import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
 import net.officefloor.plugin.socket.server.http.response.source.HttpResponseSendTask.HttpResponseSendTaskDependencies;
 import net.officefloor.plugin.socket.server.http.response.source.HttpResponseSenderWorkSource;
 import net.officefloor.plugin.web.http.location.HttpApplicationLocation;
-import net.officefloor.plugin.web.http.location.IncorrectHttpRequestContextPathException;
 import net.officefloor.plugin.web.http.location.InvalidHttpRequestUriException;
 import net.officefloor.plugin.web.http.route.HttpRouteTask.HttpRouteTaskDependencies;
 import net.officefloor.plugin.web.http.route.HttpRouteTask.HttpRouteTaskFlows;
@@ -173,9 +172,6 @@ public class WebApplicationSectionSource extends AbstractSectionSource {
 				HttpSession.class, designer, objects);
 		linkEscalation(routeTask, InvalidHttpRequestUriException.class,
 				designer, escalations);
-		linkEscalation(routeTask,
-				IncorrectHttpRequestContextPathException.class, designer,
-				escalations);
 		linkEscalation(routeTask, HttpRequestTokeniseException.class, designer,
 				escalations);
 		linkEscalation(routeTask, UnknownWorkException.class, designer,

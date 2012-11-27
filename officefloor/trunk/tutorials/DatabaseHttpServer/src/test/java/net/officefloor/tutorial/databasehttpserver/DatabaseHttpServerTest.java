@@ -107,10 +107,10 @@ public class DatabaseHttpServerTest extends TestCase {
 		this.doRequest("http://localhost:7878/example");
 
 		// Add row (will pick up parameter values from URL)
-		this.doRequest("http://localhost:7878/example.links-addRow.task?name=Daniel&description=Founder");
+		this.doRequest("http://localhost:7878/example-addRow?name=Daniel&description=Founder");
 
 		// Delete row
-		this.doRequest("http://localhost:7878/example.links-deleteRow.task?id=1");
+		this.doRequest("http://localhost:7878/example-deleteRow?id=1");
 	}
 
 	private void doRequest(String url) throws Exception {

@@ -157,10 +157,10 @@ public class TransactionHttpServerTest extends TestCase {
 		this.doRequest("http://localhost:7878/users");
 
 		// Create user with all details
-		this.doRequest("http://localhost:7878/users.links-create.task?username=melanie&fullname=Melanie+Sagenschneider");
+		this.doRequest("http://localhost:7878/users-create?username=melanie&fullname=Melanie+Sagenschneider");
 
 		// Attempt to create user that will fail database constraints
-		this.doRequest("http://localhost:7878/users.links-create.task?username=joe");
+		this.doRequest("http://localhost:7878/users-create?username=joe");
 
 		// Validate melanie added
 		EntityManager manager = Persistence.createEntityManagerFactory(

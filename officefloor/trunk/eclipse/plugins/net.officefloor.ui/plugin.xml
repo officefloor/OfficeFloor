@@ -99,11 +99,6 @@
 			class="net.officefloor.eclipse.extension.worksource.clazz.ClassWorkSourceExtension">
 		</worksource>
 	</extension>
-	<extension point="net.officefloor.ui.worksources">
-		<worksource
-			class="net.officefloor.eclipse.extension.worksource.clazz.DesignWorkSourceExtension">
-		</worksource>
-	</extension>
 	<extension point="net.officefloor.ui.managedobjectsources">
 		<managedobjectsource
 			class="net.officefloor.eclipse.extension.managedobjectsource.clazz.ClassManagedObjectSourceExtension" />

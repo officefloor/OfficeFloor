@@ -142,7 +142,6 @@ public class HttpRouteTask
 	public Object doTask(
 			TaskContext<HttpRouteTask, HttpRouteTaskDependencies, HttpRouteTaskFlows> context)
 			throws InvalidHttpRequestUriException,
-			IncorrectHttpRequestContextPathException,
 			HttpRequestTokeniseException, UnknownWorkException,
 			UnknownTaskException, InvalidParameterTypeException {
 
@@ -156,7 +155,13 @@ public class HttpRouteTask
 
 		// Obtain the canonical path from request
 		String path = connection.getHttpRequest().getRequestURI();
-		path = location.transformToApplicationCanonicalPath(path);
+		try {
+			path = location.transformToApplicationCanonicalPath(path);
+		} catch (IncorrectHttpRequestContextPathException ex) {
+			// Missing context path, so not handled
+			context.doFlow(HttpRouteTaskFlows.NOT_HANDLED, null);
+			return null;
+		}
 
 		// Obtain the uri path only
 		RequestPathHandler handler = new RequestPathHandler();

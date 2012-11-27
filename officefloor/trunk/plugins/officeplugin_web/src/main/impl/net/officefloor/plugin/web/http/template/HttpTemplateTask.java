@@ -34,6 +34,7 @@ import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.execute.TaskContext;
+import net.officefloor.frame.spi.source.SourceProperties;
 import net.officefloor.frame.util.AbstractSingleTask;
 import net.officefloor.plugin.socket.server.http.HttpResponse;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
@@ -128,6 +129,29 @@ public class HttpTemplateTask extends
 
 		// Return the link task names
 		return linkTaskNames.toArray(new String[0]);
+	}
+
+	/**
+	 * Determines if the link should be secure.
+	 * 
+	 * @param linkName
+	 *            Name of link.
+	 * @param isTemplateSecure
+	 *            Indicates whether the {@link HttpTemplate} is secure.
+	 * @param properties
+	 *            {@link SourceProperties}.
+	 * @return <code>true</code> should the link be secure.
+	 */
+	public static boolean isLinkSecure(String linkName,
+			boolean isTemplateSecure, SourceProperties properties) {
+
+		// Determine if the link should be secure
+		boolean isLinkSecure = Boolean.parseBoolean(properties.getProperty(
+				PROPERTY_LINK_SECURE_PREFIX + linkName,
+				String.valueOf(isTemplateSecure)));
+
+		// Return whether secure
+		return isLinkSecure;
 	}
 
 	/**
@@ -268,9 +292,8 @@ public class HttpTemplateTask extends
 
 				// Determine if the link is to be secure
 				String linkName = linkContent.getName();
-				boolean isLinkSecure = Boolean.parseBoolean(context
-						.getProperty(PROPERTY_LINK_SECURE_PREFIX + linkName,
-								String.valueOf(isTemplateSecure)));
+				boolean isLinkSecure = isLinkSecure(linkName, isTemplateSecure,
+						context);
 
 				// Add the content writer
 				contentWriterList.add(new LinkHttpTemplateWriter(linkContent,

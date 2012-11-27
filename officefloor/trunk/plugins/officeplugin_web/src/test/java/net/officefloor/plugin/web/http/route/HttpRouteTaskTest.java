@@ -34,9 +34,11 @@ import net.officefloor.plugin.socket.server.http.HttpHeader;
 import net.officefloor.plugin.socket.server.http.HttpRequest;
 import net.officefloor.plugin.socket.server.http.HttpResponse;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
+import net.officefloor.plugin.socket.server.http.protocol.HttpStatus;
 import net.officefloor.plugin.web.http.continuation.DuplicateHttpUrlContinuationException;
 import net.officefloor.plugin.web.http.continuation.HttpUrlContinuationDifferentiator;
 import net.officefloor.plugin.web.http.location.HttpApplicationLocation;
+import net.officefloor.plugin.web.http.location.IncorrectHttpRequestContextPathException;
 import net.officefloor.plugin.web.http.route.HttpRouteTask.HttpRouteTaskDependencies;
 import net.officefloor.plugin.web.http.route.HttpRouteTask.HttpRouteTaskFlows;
 import net.officefloor.plugin.web.http.session.HttpSession;
@@ -98,7 +100,25 @@ public class HttpRouteTaskTest extends OfficeFrameTestCase {
 	 * Ensure not handled if missing required context path.
 	 */
 	public void testNotHandledIfMissingContextPath() throws Exception {
-		fail("TODO implement test");
+
+		// Record missing context path
+		this.recordUrlContinuations("ONE", "/path", null);
+		this.recordDependencies();
+		this.recordReturn(this.connection, this.connection.getHttpRequest(),
+				this.request);
+		this.recordReturn(this.request, this.request.getRequestURI(), "/path");
+		this.location.transformToApplicationCanonicalPath("/path");
+		this.control(this.location).setThrowable(
+				new IncorrectHttpRequestContextPathException(
+						HttpStatus.SC_NOT_FOUND, "Must have context path"));
+		this.recordReturn(this.context,
+				this.context.doFlow(HttpRouteTaskFlows.NOT_HANDLED, null), null);
+
+		// Test
+		this.replayMockObjects();
+		HttpRouteTask task = this.createHttpRouteTask();
+		task.doTask(this.context);
+		this.verifyMockObjects();
 	}
 
 	/**
@@ -319,6 +339,23 @@ public class HttpRouteTaskTest extends OfficeFrameTestCase {
 	}
 
 	/**
+	 * Records obtaining the dependencies.
+	 */
+	private void recordDependencies() {
+		this.recordReturn(this.context, this.context
+				.getObject(HttpRouteTaskDependencies.SERVER_HTTP_CONNECTION),
+				this.connection);
+		this.recordReturn(
+				this.context,
+				this.context
+						.getObject(HttpRouteTaskDependencies.HTTP_APPLICATION_LOCATION),
+				this.location);
+		this.recordReturn(this.context,
+				this.context.getObject(HttpRouteTaskDependencies.HTTP_SESSION),
+				this.session);
+	}
+
+	/**
 	 * Record the initial servicing of the {@link HttpRequest}.
 	 * 
 	 * @param uriPath
@@ -332,17 +369,7 @@ public class HttpRouteTaskTest extends OfficeFrameTestCase {
 		final String requestUri = "/context" + uriPath;
 
 		// Record dependencies
-		this.recordReturn(this.context, this.context
-				.getObject(HttpRouteTaskDependencies.SERVER_HTTP_CONNECTION),
-				this.connection);
-		this.recordReturn(
-				this.context,
-				this.context
-						.getObject(HttpRouteTaskDependencies.HTTP_APPLICATION_LOCATION),
-				this.location);
-		this.recordReturn(this.context,
-				this.context.getObject(HttpRouteTaskDependencies.HTTP_SESSION),
-				this.session);
+		this.recordDependencies();
 
 		// Record servicing request
 		this.recordReturn(this.connection, this.connection.getHttpRequest(),

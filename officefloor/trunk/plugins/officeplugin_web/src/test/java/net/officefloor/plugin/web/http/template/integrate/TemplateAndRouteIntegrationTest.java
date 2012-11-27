@@ -32,6 +32,7 @@ import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.DefaultHttpClient;
+import org.junit.Ignore;
 
 /**
  * Ensure integration of {@link HttpTemplateWorkSource} and
@@ -39,6 +40,7 @@ import org.apache.http.impl.client.DefaultHttpClient;
  * 
  * @author Daniel Sagenschneider
  */
+@Ignore("TODO tidy up configuration with Eclipse plug-in")
 public class TemplateAndRouteIntegrationTest extends TestCase {
 
 	/**

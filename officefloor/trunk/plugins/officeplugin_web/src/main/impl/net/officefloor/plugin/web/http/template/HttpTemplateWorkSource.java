@@ -197,6 +197,23 @@ public class HttpTemplateWorkSource extends
 	}
 
 	/**
+	 * Determines if the {@link HttpTemplate} is secure.
+	 * 
+	 * @param properties
+	 *            {@link SourceProperties}.
+	 * @return <code>true</code> should the {@link HttpTemplate} be secure.
+	 */
+	public static boolean isHttpTemplateSecure(SourceProperties properties) {
+
+		// Determine if template is secure
+		boolean isTemplateSecure = Boolean.valueOf(properties.getProperty(
+				PROPERTY_TEMPLATE_SECURE, String.valueOf(false)));
+
+		// Return whether secure
+		return isTemplateSecure;
+	}
+
+	/**
 	 * Obtains the link names for the {@link HttpTemplate}.
 	 * 
 	 * @param template
@@ -307,8 +324,7 @@ public class HttpTemplateWorkSource extends
 		String templateUriPath = context.getProperty(PROPERTY_TEMPLATE_URI);
 
 		// Obtain whether the template is secure
-		boolean isTemplateSecure = Boolean.valueOf(context.getProperty(
-				PROPERTY_TEMPLATE_SECURE, String.valueOf(false)));
+		boolean isTemplateSecure = isHttpTemplateSecure(context);
 
 		// Define the work factory
 		workTypeBuilder.setWorkFactory(new HttpTemplateWork());
