@@ -65,7 +65,7 @@ public class SessionHttpServerTest extends TestCase {
 		this.doRequest("http://localhost:7878/post");
 
 		// Add a post
-		this.doRequest("http://localhost:7878/post.links-post.task?text=TEST");
+		this.doRequest("http://localhost:7878/post-post?text=TEST");
 	}
 
 	private void doRequest(String url) throws Exception {

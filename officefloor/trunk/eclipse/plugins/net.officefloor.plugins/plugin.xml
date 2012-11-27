@@ -47,16 +47,7 @@
 	</extension>
 	<extension point="net.officefloor.ui.worksources">
 		<worksource
-			class="net.officefloor.eclipse.socket.HttpTemplateRouteWorkSourceExtension" />
-	</extension>
-	<extension point="net.officefloor.ui.worksources">
-		<worksource
 			class="net.officefloor.eclipse.socket.HttpResponseSenderWorkSourceExtension">
-		</worksource>
-	</extension>
-	<extension point="net.officefloor.ui.worksources">
-		<worksource
-			class="net.officefloor.eclipse.socket.HttpResponseWriterWorkSourceExtension">
 		</worksource>
 	</extension>
 	<extension point="net.officefloor.ui.managedobjectsources">

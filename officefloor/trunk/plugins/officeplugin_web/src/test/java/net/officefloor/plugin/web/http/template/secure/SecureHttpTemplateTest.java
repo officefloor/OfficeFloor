@@ -43,12 +43,14 @@ import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.params.BasicHttpParams;
 import org.apache.http.params.HttpParams;
+import org.junit.Ignore;
 
 /**
  * Ensures secure functionality of {@link HttpTemplate}.
  * 
  * @author Daniel Sagenschneider
  */
+@Ignore("TODO build HttpRequest momento to provide required functionality for tests")
 public class SecureHttpTemplateTest extends OfficeFrameTestCase {
 
 	/**

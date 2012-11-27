@@ -30,7 +30,6 @@ import net.officefloor.frame.api.manage.UnknownWorkException;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
 import net.officefloor.plugin.web.http.continuation.HttpUrlContinuationDifferentiator;
 import net.officefloor.plugin.web.http.location.HttpApplicationLocation;
-import net.officefloor.plugin.web.http.location.IncorrectHttpRequestContextPathException;
 import net.officefloor.plugin.web.http.location.InvalidHttpRequestUriException;
 import net.officefloor.plugin.web.http.route.HttpRouteTask.HttpRouteTaskDependencies;
 import net.officefloor.plugin.web.http.route.HttpRouteTask.HttpRouteTaskFlows;
@@ -85,7 +84,6 @@ public class HttpRouteWorkSource extends AbstractWorkSource<HttpRouteTask> {
 				HttpRouteTaskDependencies.HTTP_SESSION);
 		task.addFlow().setKey(HttpRouteTaskFlows.NOT_HANDLED);
 		task.addEscalation(InvalidHttpRequestUriException.class);
-		task.addEscalation(IncorrectHttpRequestContextPathException.class);
 		task.addEscalation(HttpRequestTokeniseException.class);
 		task.addEscalation(UnknownWorkException.class);
 		task.addEscalation(UnknownTaskException.class);

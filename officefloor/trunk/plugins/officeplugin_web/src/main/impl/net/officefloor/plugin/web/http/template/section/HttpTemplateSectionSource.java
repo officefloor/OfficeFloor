@@ -65,6 +65,7 @@ import net.officefloor.plugin.web.http.application.HttpSessionStateful;
 import net.officefloor.plugin.web.http.continuation.HttpUrlContinuationWorkSource;
 import net.officefloor.plugin.web.http.location.HttpApplicationLocation;
 import net.officefloor.plugin.web.http.session.clazz.source.HttpSessionClassManagedObjectSource;
+import net.officefloor.plugin.web.http.template.HttpTemplateTask;
 import net.officefloor.plugin.web.http.template.HttpTemplateWorkSource;
 import net.officefloor.plugin.web.http.template.parse.HttpTemplate;
 import net.officefloor.plugin.web.http.template.parse.HttpTemplateSection;
@@ -467,11 +468,19 @@ public class HttpTemplateSectionSource extends ClassSectionSource {
 			}
 		}
 
+		// Determine if the template is secure
+		boolean isTemplateSecure = HttpTemplateWorkSource
+				.isHttpTemplateSecure(context);
+
 		// Register the #{link} URL continuation tasks
 		String[] linkNames = HttpTemplateWorkSource
 				.getHttpTemplateLinkNames(template);
 		final String linkUrlContinuationPrefix = "HTTP_URL_CONTINUATION_";
 		for (String linkTaskName : linkNames) {
+
+			// Determine if link is to be secure
+			boolean isLinkSecure = HttpTemplateTask.isLinkSecure(linkTaskName,
+					isTemplateSecure, context);
 
 			// Create HTTP URL continuation
 			SectionWork urlContinuationWork = designer.addSectionWork(
@@ -480,6 +489,9 @@ public class HttpTemplateSectionSource extends ClassSectionSource {
 			urlContinuationWork.addProperty(
 					HttpUrlContinuationWorkSource.PROPERTY_URI_PATH,
 					templateUriPath + "-" + linkTaskName);
+			urlContinuationWork.addProperty(
+					HttpUrlContinuationWorkSource.PROPERTY_SECURE,
+					String.valueOf(isLinkSecure));
 			SectionTask urlContinuationTask = urlContinuationWork
 					.addSectionTask(linkUrlContinuationPrefix + linkTaskName,
 							HttpUrlContinuationWorkSource.TASK_NAME);

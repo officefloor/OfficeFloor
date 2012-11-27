@@ -45,7 +45,7 @@ public class PageFlowHttpServerTest extends TestCase {
 		this.doRequest("http://localhost:7878/example");
 
 		// Send form submission
-		this.doRequest("http://localhost:7878/example.links-handleSubmission.task?name=Daniel&description=founder");
+		this.doRequest("http://localhost:7878/example-handleSubmission?name=Daniel&description=founder");
 	}
 
 	private void doRequest(String url) throws Exception {

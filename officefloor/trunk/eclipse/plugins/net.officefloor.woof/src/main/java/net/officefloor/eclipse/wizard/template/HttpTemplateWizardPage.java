@@ -566,11 +566,6 @@ public class HttpTemplateWizardPage extends WizardPage implements
 		Class sectionSourceClass = this.templateExtension
 				.getSectionSourceClass();
 
-		// Ensure additional properties provided for loading type
-		this.properties.getOrAddProperty(
-				HttpTemplateSectionSource.PROPERTY_LINK_TASK_NAME_PREFIX)
-				.setValue("LINK_");
-
 		// Load the Section Type
 		this.sectionType = this.sectionLoader.loadSectionType(
 				sectionSourceClass, this.templatePath, this.properties);

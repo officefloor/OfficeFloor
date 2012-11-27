@@ -5,8 +5,6 @@
     <managed-object-source name="HTTP" source="net.officefloor.plugin.socket.server.http.source.HttpServerSocketManagedObjectSource" object-type="net.officefloor.plugin.socket.server.http.ServerHttpConnection" timeout="0" x="649" y="275">
       <properties>
         <property name="port" value="10101"/>
-        <property name="buffer.size" value="1024"/>
-        <property name="max.connections.per.listener" value="-1"/>
       </properties>
       <managing-office name="Application"/>
       <input-managed-object name="HTTP"/>

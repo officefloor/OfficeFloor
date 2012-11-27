@@ -255,7 +255,7 @@ public class CometHttpTemplateSectionExtensionTest extends OfficeFrameTestCase {
 		HttpClient client = new DefaultHttpClient();
 		HttpResponse httpResponse = client.execute(new HttpGet(
 				"http://localhost:" + port + "/" + linkUri
-						+ ".links-triggerServerEvent.task"));
+						+ "-triggerServerEvent"));
 		assertEquals("Ensure successful", 200, httpResponse.getStatusLine()
 				.getStatusCode());
 		assertTrue("Should have a response entity", httpResponse.getEntity()

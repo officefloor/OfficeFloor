@@ -26,7 +26,6 @@ import java.util.logging.LogRecord;
 import net.officefloor.autowire.AutoWire;
 import net.officefloor.autowire.AutoWireSection;
 import net.officefloor.compile.impl.issues.FailCompilerIssues;
-import net.officefloor.frame.spi.source.UnknownResourceError;
 import net.officefloor.frame.test.LoggerAssertion;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.model.woof.WoofModel;
@@ -36,6 +35,7 @@ import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
 import net.officefloor.plugin.web.http.application.WebAutoWireApplication;
 import net.officefloor.plugin.web.http.location.HttpApplicationLocationManagedObjectSource;
 import net.officefloor.plugin.web.http.server.HttpServerAutoWireOfficeFloorSource;
+import net.officefloor.plugin.web.http.template.section.HttpTemplateSectionSource;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
@@ -365,11 +365,11 @@ public class WoofOfficeFloorSourceTest extends OfficeFrameTestCase {
 
 		} catch (FailCompilerIssues ex) {
 			// Should not start due to unknown resource
-			Throwable cause = ex.getCause();
-			assertTrue("Incorrect cause",
-					(cause instanceof UnknownResourceError));
-			assertEquals("Incorrect reason", "Unknown resource 'NonWoof.html'",
-					cause.getMessage());
+			assertEquals(
+					"Incorrect cause",
+					"null null: Can not obtain resource at location 'NonWoof.html' for SectionSource "
+							+ HttpTemplateSectionSource.class.getName(),
+					ex.getMessage());
 		}
 	}
 
