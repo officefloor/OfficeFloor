@@ -1179,9 +1179,14 @@ public class WebApplicationAutoWireOfficeFloorSourceTest extends
 			int expectedResponseStatus, String expectedResponseEntity) {
 		try {
 
+			// Obtain the host name
+			String hostName = HttpApplicationLocationManagedObjectSource
+					.getDefaultHostName();
+
 			// Create the URLs
-			String url = "http://localhost:" + this.port + uri;
-			String redirectUrl = "https://localhost:" + this.securePort + uri;
+			String url = "http://" + hostName + ":" + this.port + uri;
+			String redirectUrl = "https://" + hostName + ":" + this.securePort
+					+ uri;
 
 			// Send the request
 			HttpGet request = new HttpGet(url);

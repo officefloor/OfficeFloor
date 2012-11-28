@@ -185,9 +185,13 @@ public class HttpUrlContinuationSectionSourceTest extends OfficeFrameTestCase {
 		HttpClient client = new DefaultHttpClient(params);
 		MockHttpServer.configureAnonymousHttps(client, 7979);
 
+		// Obtain the host name
+		String hostName = HttpApplicationLocationManagedObjectSource
+				.getDefaultHostName();
+
 		// Obtain the URLs
-		final String SECURE_URL = "https://localhost:7979/uri";
-		final String NON_SECURE_URL = "http://localhost:7878/uri";
+		final String SECURE_URL = "https://" + hostName + ":7979/uri";
+		final String NON_SECURE_URL = "http://" + hostName + ":7878/uri";
 		String urlTest;
 		String urlRedirect;
 		if (isSecure) {

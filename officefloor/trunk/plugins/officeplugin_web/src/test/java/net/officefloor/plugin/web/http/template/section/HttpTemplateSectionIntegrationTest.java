@@ -70,6 +70,12 @@ public class HttpTemplateSectionIntegrationTest extends OfficeFrameTestCase {
 			+ "<a href=\"${LINK_nonMethodLink_QUALIFICATION}/uri-nonMethodLink\">Non-method link</a></body></html>";
 
 	/**
+	 * Host name.
+	 */
+	private static final String HOST_NAME = HttpApplicationLocationManagedObjectSource
+			.getDefaultHostName();
+
+	/**
 	 * Mock {@link Connection}.
 	 */
 	private final Connection connection = this
@@ -521,7 +527,8 @@ public class HttpTemplateSectionIntegrationTest extends OfficeFrameTestCase {
 	private String doHttpRequest(String uri) throws Exception {
 
 		// Send the request to obtain results of rending template
-		HttpGet request = new HttpGet("http://localhost:" + this.port + uri);
+		HttpGet request = new HttpGet("http://" + HOST_NAME + ":" + this.port
+				+ uri);
 		HttpResponse response = this.client.execute(request);
 
 		// Ensure successful
@@ -571,7 +578,7 @@ public class HttpTemplateSectionIntegrationTest extends OfficeFrameTestCase {
 			boolean isNextTaskQualified, boolean isSubmitQualified,
 			boolean isNonMethodLinkQualified, String actualResponse) {
 
-		final String LINK_QUALIFICATION = "https://localhost:7979";
+		final String LINK_QUALIFICATION = "https://" + HOST_NAME + ":7979";
 
 		// Transform expected response for link qualifications
 		String expectedResponse = expectedResponsePrefix
