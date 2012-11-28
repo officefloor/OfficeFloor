@@ -18,6 +18,7 @@
 package net.officefloor.plugin.web.http.location;
 
 import java.net.InetAddress;
+import java.net.UnknownHostException;
 
 import net.officefloor.compile.impl.properties.PropertiesUtil;
 import net.officefloor.compile.properties.Property;
@@ -53,6 +54,22 @@ public class HttpApplicationLocationManagedObjectSource
 				PROPERTY_HTTP_PORT, PROPERTY_HTTPS_PORT, PROPERTY_CONTEXT_PATH,
 				PROPERTY_CLUSTER_HOST, PROPERTY_CLUSTER_HTTP_PORT,
 				PROPERTY_CLUSTER_HTTPS_PORT);
+	}
+
+	/**
+	 * <p>
+	 * Obtains the default host name.
+	 * <p>
+	 * Configuration may override this.
+	 * 
+	 * @return Default Host name.
+	 */
+	public static String getDefaultHostName() {
+		try {
+			return InetAddress.getLocalHost().getCanonicalHostName();
+		} catch (UnknownHostException ex) {
+			return "localhost";
+		}
 	}
 
 	/**
@@ -174,8 +191,7 @@ public class HttpApplicationLocationManagedObjectSource
 
 		// Ensure have cluster host
 		if (this.clusterHostName == null) {
-			this.clusterHostName = InetAddress.getLocalHost()
-					.getCanonicalHostName();
+			this.clusterHostName = getDefaultHostName();
 		}
 
 		// Ensure have domain
