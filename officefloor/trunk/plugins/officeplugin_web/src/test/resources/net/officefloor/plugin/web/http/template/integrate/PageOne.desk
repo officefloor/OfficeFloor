@@ -8,19 +8,16 @@
   <managed-objects>
   </managed-objects>
   <external-flows>
-    <external-flow name="Exception" argument-type="java.io.IOException" x="719" y="180"/>
-    <external-flow name="Link" argument-type="java.lang.Void" x="733" y="135"/>
+    <external-flow name="Exception" argument-type="java.io.IOException" x="723" y="99"/>
+    <external-flow name="Link" argument-type="java.lang.Void" x="734" y="172"/>
     <external-flow name="TemplateComplete" argument-type="java.lang.Void" x="722" y="67"/>
   </external-flows>
   <works>
     <work name="HttpTemplate-PageOne.ofp" source="net.officefloor.plugin.web.http.template.HttpTemplateWorkSource" x="223" y="272">
       <properties>
         <property name="template.path" value="net/officefloor/plugin/web/http/template/integrate/PageOne.ofp"/>
+        <property name="template.uri" value="/PageOne"/>
       </properties>
-      <work-task name="link">
-        <task-object name="0" key="" object-type="net.officefloor.plugin.web.http.template.RequestHandlerTask$RequestHandlerIdentifier" parameter="true">
-        </task-object>
-      </work-task>
       <work-task name="template">
         <task-object name="SERVER_HTTP_CONNECTION" key="" object-type="net.officefloor.plugin.socket.server.http.ServerHttpConnection" parameter="false">
           <external-managed-object name="HTTP"/>
@@ -30,10 +27,27 @@
         </task-object>
       </work-task>
     </work>
+    <work name="Page_Continuation" source="net.officefloor.plugin.web.http.continuation.HttpUrlContinuationWorkSource" x="44" y="220">
+      <properties>
+        <property name="http.continuation.uri.path" value="/PageOne"/>
+      </properties>
+      <work-task name="CONTINUATION">
+      </work-task>
+    </work>
+    <work name="link_Continuation" source="net.officefloor.plugin.web.http.continuation.HttpUrlContinuationWorkSource" x="478" y="264">
+      <properties>
+        <property name="http.continuation.uri.path" value="/PageOne-link"/>
+      </properties>
+      <work-task name="CONTINUATION">
+      </work-task>
+    </work>
   </works>
   <tasks>
-    <task name="link" public="false" work="HttpTemplate-PageOne.ofp" task="link" return-type="" x="332" y="110">
+    <task name="LinkContinuation" public="false" work="link_Continuation" task="CONTINUATION" return-type="" x="488" y="176">
       <next-external-flow name="Link"/>
+    </task>
+    <task name="PageContinuation" public="false" work="Page_Continuation" task="CONTINUATION" return-type="" x="22" y="142">
+      <next-task name="template"/>
     </task>
     <task name="template" public="true" work="HttpTemplate-PageOne.ofp" task="template" return-type="" x="154" y="103">
       <next-external-flow name="TemplateComplete"/>

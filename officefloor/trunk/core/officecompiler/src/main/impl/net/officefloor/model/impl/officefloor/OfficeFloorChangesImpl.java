@@ -55,6 +55,7 @@ import net.officefloor.model.officefloor.OfficeFloorChanges;
 import net.officefloor.model.officefloor.OfficeFloorInputManagedObjectModel;
 import net.officefloor.model.officefloor.OfficeFloorInputManagedObjectToBoundOfficeFloorManagedObjectSourceModel;
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectDependencyModel;
+import net.officefloor.model.officefloor.OfficeFloorManagedObjectDependencyToOfficeFloorInputManagedObjectModel;
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectDependencyToOfficeFloorManagedObjectModel;
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectModel;
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceFlowModel;
@@ -71,7 +72,7 @@ import net.officefloor.model.officefloor.PropertyModel;
 
 /**
  * {@link OfficeFloorChanges} implementation.
- *
+ * 
  * @author Daniel Sagenschneider
  */
 public class OfficeFloorChangesImpl implements OfficeFloorChanges {
@@ -83,7 +84,7 @@ public class OfficeFloorChangesImpl implements OfficeFloorChanges {
 
 	/**
 	 * Initiate.
-	 *
+	 * 
 	 * @param officeFloor
 	 *            {@link OfficeFloorModel}.
 	 */
@@ -93,7 +94,7 @@ public class OfficeFloorChangesImpl implements OfficeFloorChanges {
 
 	/**
 	 * Obtains the text name identifying the {@link ManagedObjectScope}.
-	 *
+	 * 
 	 * @param scope
 	 *            {@link ManagedObjectScope}.
 	 * @return Text name for the {@link ManagedObjectScope}.
@@ -649,7 +650,7 @@ public class OfficeFloorChangesImpl implements OfficeFloorChanges {
 
 	/**
 	 * Obtains the existing item for the target name.
-	 *
+	 * 
 	 * @param targetItemName
 	 *            Target item name.
 	 * @param targetToExistingName
@@ -817,8 +818,8 @@ public class OfficeFloorChangesImpl implements OfficeFloorChanges {
 		// Create the managed object source
 		final OfficeFloorManagedObjectSourceModel managedObjectSource = new OfficeFloorManagedObjectSourceModel(
 				managedObjectSourceName, managedObjectSourceClassName,
-				managedObjectType.getObjectClass().getName(), String
-						.valueOf(timeout));
+				managedObjectType.getObjectClass().getName(),
+				String.valueOf(timeout));
 		for (Property property : properties) {
 			managedObjectSource.addProperty(new PropertyModel(property
 					.getName(), property.getValue()));
@@ -1141,8 +1142,7 @@ public class OfficeFloorChangesImpl implements OfficeFloorChanges {
 
 		// Create the connection
 		final OfficeFloorManagedObjectDependencyToOfficeFloorManagedObjectModel conn = new OfficeFloorManagedObjectDependencyToOfficeFloorManagedObjectModel();
-		conn
-				.setOfficeFloorManagedObjectDependency(officeFloorManagedObjectDependency);
+		conn.setOfficeFloorManagedObjectDependency(officeFloorManagedObjectDependency);
 		conn.setOfficeFloorManagedObject(officeFloorManagedObject);
 
 		// Return change to add the connection
@@ -1185,6 +1185,57 @@ public class OfficeFloorChangesImpl implements OfficeFloorChanges {
 	}
 
 	@Override
+	public Change<OfficeFloorManagedObjectDependencyToOfficeFloorInputManagedObjectModel> linkOfficeFloorManagedObjectDependencyToOfficeFloorInputManagedObject(
+			OfficeFloorManagedObjectDependencyModel officeFloorManagedObjectDependency,
+			OfficeFloorInputManagedObjectModel officeFloorInputManagedObject) {
+
+		// TODO test (linkOfficeFloorManagedObjectDependencyToOffice...)
+
+		// Create the connection
+		final OfficeFloorManagedObjectDependencyToOfficeFloorInputManagedObjectModel conn = new OfficeFloorManagedObjectDependencyToOfficeFloorInputManagedObjectModel();
+		conn.setOfficeFloorManagedObjectDependency(officeFloorManagedObjectDependency);
+		conn.setOfficeFloorInputManagedObject(officeFloorInputManagedObject);
+
+		// Return change to add the connection
+		return new AbstractChange<OfficeFloorManagedObjectDependencyToOfficeFloorInputManagedObjectModel>(
+				conn, "Connect") {
+			@Override
+			public void apply() {
+				conn.connect();
+			}
+
+			@Override
+			public void revert() {
+				conn.remove();
+			}
+		};
+	}
+
+	@Override
+	public Change<OfficeFloorManagedObjectDependencyToOfficeFloorInputManagedObjectModel> removeOfficeFloorManagedObjectDependencyToOfficeFloorInputManagedObject(
+			final OfficeFloorManagedObjectDependencyToOfficeFloorInputManagedObjectModel officeFloorManagedObjectDependencyToOfficeFloorInputManagedObject) {
+
+		// TODO test (removeOfficeFloorManagedObjectDependencyToOffice...)
+
+		// Return change to remove the connection
+		return new AbstractChange<OfficeFloorManagedObjectDependencyToOfficeFloorInputManagedObjectModel>(
+				officeFloorManagedObjectDependencyToOfficeFloorInputManagedObject,
+				"Remove") {
+			@Override
+			public void apply() {
+				officeFloorManagedObjectDependencyToOfficeFloorInputManagedObject
+						.remove();
+			}
+
+			@Override
+			public void revert() {
+				officeFloorManagedObjectDependencyToOfficeFloorInputManagedObject
+						.connect();
+			}
+		};
+	}
+
+	@Override
 	public Change<OfficeFloorManagedObjectSourceFlowToDeployedOfficeInputModel> linkOfficeFloorManagedObjectSourceFlowToDeployedOfficeInput(
 			OfficeFloorManagedObjectSourceFlowModel officeFloorManagedObjectSourceFlow,
 			DeployedOfficeInputModel deployedOfficeInput) {
@@ -1193,8 +1244,7 @@ public class OfficeFloorChangesImpl implements OfficeFloorChanges {
 
 		// Create the connection
 		final OfficeFloorManagedObjectSourceFlowToDeployedOfficeInputModel conn = new OfficeFloorManagedObjectSourceFlowToDeployedOfficeInputModel();
-		conn
-				.setOfficeFloorManagedObjectSoruceFlow(officeFloorManagedObjectSourceFlow);
+		conn.setOfficeFloorManagedObjectSoruceFlow(officeFloorManagedObjectSourceFlow);
 		conn.setDeployedOfficeInput(deployedOfficeInput);
 
 		// Return the change to remove the connection
@@ -1245,8 +1295,7 @@ public class OfficeFloorChangesImpl implements OfficeFloorChanges {
 
 		// Create the connection
 		final OfficeFloorManagedObjectSourceTeamToOfficeFloorTeamModel conn = new OfficeFloorManagedObjectSourceTeamToOfficeFloorTeamModel();
-		conn
-				.setOfficeFloorManagedObjectSourceTeam(officeFloorManagedObjectSourceTeam);
+		conn.setOfficeFloorManagedObjectSourceTeam(officeFloorManagedObjectSourceTeam);
 		conn.setOfficeFloorTeam(officeFloorTeam);
 
 		// Return change to add the connection

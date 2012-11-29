@@ -38,7 +38,7 @@ import org.eclipse.gef.EditPart;
 
 /**
  * {@link EditPart} for the {@link OfficeFloorInputManagedObjectModel}.
- *
+ * 
  * @author Daniel Sagenschneider
  */
 public class OfficeFloorInputManagedObjectEditPart
@@ -70,12 +70,12 @@ public class OfficeFloorInputManagedObjectEditPart
 					this.getCastedModel()
 							.getOfficeFloorInputManagedObjectName());
 			break;
-		case ADD_OFFICE_FLOOR_MANAGED_OBJECT_SOURCE:
-		case REMOVE_OFFICE_FLOOR_MANAGED_OBJECT_SOURCE:
-			this.refreshTargetConnections();
-			break;
 		case ADD_DEPLOYED_OFFICE_OBJECT:
 		case REMOVE_DEPLOYED_OFFICE_OBJECT:
+		case ADD_OFFICE_FLOOR_MANAGED_OBJECT_SOURCE:
+		case REMOVE_OFFICE_FLOOR_MANAGED_OBJECT_SOURCE:
+		case ADD_DEPENDENT_OFFICE_FLOOR_MANAGED_OBJECT:
+		case REMOVE_DEPENDENT_OFFICE_FLOOR_MANAGED_OBJECT:
 			this.refreshTargetConnections();
 			break;
 		case CHANGE_BOUND_OFFICE_FLOOR_MANAGED_OBJECT_SOURCE:
@@ -95,36 +95,36 @@ public class OfficeFloorInputManagedObjectEditPart
 		models.addAll(this.getCastedModel()
 				.getOfficeFloorManagedObjectSources());
 		models.addAll(this.getCastedModel().getDeployedOfficeObjects());
+		models.addAll(this.getCastedModel()
+				.getDependentOfficeFloorManagedObjects());
 	}
 
 	@Override
 	protected void populateOfficeFloorDirectEditPolicy(
 			OfficeFloorDirectEditPolicy<OfficeFloorInputManagedObjectModel> policy) {
-		policy
-				.allowDirectEdit(new DirectEditAdapter<OfficeFloorChanges, OfficeFloorInputManagedObjectModel>() {
-					@Override
-					public String getInitialValue() {
-						return OfficeFloorInputManagedObjectEditPart.this
-								.getCastedModel()
-								.getOfficeFloorInputManagedObjectName();
-					}
+		policy.allowDirectEdit(new DirectEditAdapter<OfficeFloorChanges, OfficeFloorInputManagedObjectModel>() {
+			@Override
+			public String getInitialValue() {
+				return OfficeFloorInputManagedObjectEditPart.this
+						.getCastedModel()
+						.getOfficeFloorInputManagedObjectName();
+			}
 
-					@Override
-					public IFigure getLocationFigure() {
-						return OfficeFloorInputManagedObjectEditPart.this
-								.getOfficeFloorFigure()
-								.getOfficeFloorInputManagedObjectNameFigure();
-					}
+			@Override
+			public IFigure getLocationFigure() {
+				return OfficeFloorInputManagedObjectEditPart.this
+						.getOfficeFloorFigure()
+						.getOfficeFloorInputManagedObjectNameFigure();
+			}
 
-					@Override
-					public Change<OfficeFloorInputManagedObjectModel> createChange(
-							OfficeFloorChanges changes,
-							OfficeFloorInputManagedObjectModel target,
-							String newValue) {
-						return changes.renameOfficeFloorInputManagedObject(
-								target, newValue);
-					}
-				});
+			@Override
+			public Change<OfficeFloorInputManagedObjectModel> createChange(
+					OfficeFloorChanges changes,
+					OfficeFloorInputManagedObjectModel target, String newValue) {
+				return changes.renameOfficeFloorInputManagedObject(target,
+						newValue);
+			}
+		});
 	}
 
 	/*

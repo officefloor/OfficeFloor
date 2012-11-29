@@ -22,15 +22,16 @@ import net.officefloor.eclipse.skin.officefloor.OfficeFloorManagedObjectDependen
 import net.officefloor.eclipse.skin.officefloor.OfficeFloorManagedObjectDependencyFigureContext;
 import net.officefloor.eclipse.skin.standard.AbstractOfficeFloorFigure;
 import net.officefloor.eclipse.skin.standard.StandardOfficeFloorColours;
-import net.officefloor.eclipse.skin.standard.figure.LabelConnectorFigure;
 import net.officefloor.eclipse.skin.standard.figure.ConnectorFigure.ConnectorDirection;
+import net.officefloor.eclipse.skin.standard.figure.LabelConnectorFigure;
+import net.officefloor.model.officefloor.OfficeFloorManagedObjectDependencyToOfficeFloorInputManagedObjectModel;
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectDependencyToOfficeFloorManagedObjectModel;
 
 import org.eclipse.draw2d.ConnectionAnchor;
 
 /**
  * Standard {@link OfficeFloorManagedObjectDependencyFigure}.
- *
+ * 
  * @author Daniel Sagenschneider
  */
 public class StandardOfficeFloorManagedObjectDependencyFigure extends
@@ -39,22 +40,24 @@ public class StandardOfficeFloorManagedObjectDependencyFigure extends
 
 	/**
 	 * Initiate.
-	 *
+	 * 
 	 * @param context
 	 *            {@link OfficeFloorManagedObjectDependencyFigureContext}.
 	 */
 	public StandardOfficeFloorManagedObjectDependencyFigure(
 			OfficeFloorManagedObjectDependencyFigureContext context) {
-		LabelConnectorFigure figure = new LabelConnectorFigure(context
-				.getOfficeFloorManagedObjectDependencyName(),
+		LabelConnectorFigure figure = new LabelConnectorFigure(
+				context.getOfficeFloorManagedObjectDependencyName(),
 				ConnectorDirection.EAST, StandardOfficeFloorColours.BLACK());
 
 		// Register connections
 		ConnectionAnchor anchor = figure.getConnectionAnchor();
-		this
-				.registerConnectionAnchor(
-						OfficeFloorManagedObjectDependencyToOfficeFloorManagedObjectModel.class,
-						anchor);
+		this.registerConnectionAnchor(
+				OfficeFloorManagedObjectDependencyToOfficeFloorManagedObjectModel.class,
+				anchor);
+		this.registerConnectionAnchor(
+				OfficeFloorManagedObjectDependencyToOfficeFloorInputManagedObjectModel.class,
+				anchor);
 
 		this.setFigure(figure);
 	}
