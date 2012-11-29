@@ -110,6 +110,11 @@ public class HttpTemplateWorkSourceExtension
 					}
 				});
 
+		// Provide means to specify template URI
+		SourceExtensionUtil.createPropertyText("URI Path",
+				HttpTemplateWorkSource.PROPERTY_TEMPLATE_URI, null, template,
+				context, null);
+
 		// Add control to alter properties
 		new InputHandler<List<SectionToBeanTypeMapping>>(page, input,
 				new InputListener() {

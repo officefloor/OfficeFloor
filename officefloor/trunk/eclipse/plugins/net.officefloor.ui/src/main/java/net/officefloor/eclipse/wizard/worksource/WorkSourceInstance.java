@@ -259,8 +259,19 @@ public class WorkSourceInstance implements WorkSourceExtensionContext,
 		}
 
 		// Obtain specification properties for work source
-		this.properties = this.workLoader
-				.loadSpecification(this.workSourceClass);
+		try {
+			this.properties = this.workLoader
+					.loadSpecification(this.workSourceClass);
+		} catch (Throwable ex) {
+			// Failed to find/instantiate the class with project class loader
+			page.setLayout(new GridLayout());
+			Label label = new Label(page, SWT.NONE);
+			label.setForeground(ColorConstants.red);
+			label.setText("Could not find class "
+					+ this.workSourceClass.getName() + "\n\n"
+					+ ex.getClass().getSimpleName() + ": " + ex.getMessage());
+			return;
+		}
 
 		// Load work instance properties if available
 		if (this.workInstance != null) {

@@ -38,6 +38,7 @@ import net.officefloor.eclipse.officefloor.editparts.OfficeFloorEditPart;
 import net.officefloor.eclipse.officefloor.editparts.OfficeFloorInputManagedObjectEditPart;
 import net.officefloor.eclipse.officefloor.editparts.OfficeFloorInputManagedObjectToBoundOfficeFloorManagedObjectSourceEditPart;
 import net.officefloor.eclipse.officefloor.editparts.OfficeFloorManagedObjectDependencyEditPart;
+import net.officefloor.eclipse.officefloor.editparts.OfficeFloorManagedObjectDependencyToOfficeFloorInputManagedObjectEditPart;
 import net.officefloor.eclipse.officefloor.editparts.OfficeFloorManagedObjectDependencyToOfficeFloorManagedObjectEditPart;
 import net.officefloor.eclipse.officefloor.editparts.OfficeFloorManagedObjectEditPart;
 import net.officefloor.eclipse.officefloor.editparts.OfficeFloorManagedObjectSourceEditPart;
@@ -71,6 +72,7 @@ import net.officefloor.model.officefloor.OfficeFloorChanges;
 import net.officefloor.model.officefloor.OfficeFloorInputManagedObjectModel;
 import net.officefloor.model.officefloor.OfficeFloorInputManagedObjectToBoundOfficeFloorManagedObjectSourceModel;
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectDependencyModel;
+import net.officefloor.model.officefloor.OfficeFloorManagedObjectDependencyToOfficeFloorInputManagedObjectModel;
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectDependencyToOfficeFloorManagedObjectModel;
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectModel;
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceFlowModel;
@@ -158,6 +160,8 @@ public class OfficeFloorEditor extends
 				OfficeFloorManagedObjectToOfficeFloorManagedObjectSourceEditPart.class);
 		map.put(OfficeFloorManagedObjectDependencyToOfficeFloorManagedObjectModel.class,
 				OfficeFloorManagedObjectDependencyToOfficeFloorManagedObjectEditPart.class);
+		map.put(OfficeFloorManagedObjectDependencyToOfficeFloorInputManagedObjectModel.class,
+				OfficeFloorManagedObjectDependencyToOfficeFloorInputManagedObjectEditPart.class);
 		map.put(OfficeFloorManagedObjectSourceToDeployedOfficeModel.class,
 				OfficeFloorManagedObjectSourceToDeployedOfficeEditPart.class);
 		map.put(OfficeFloorManagedObjectSourceToOfficeFloorInputManagedObjectModel.class,
@@ -279,6 +283,20 @@ public class OfficeFloorEditor extends
 						return OfficeFloorEditor.this
 								.getModelChanges()
 								.removeOfficeFloorManagedObjectDependencyToOfficeFloorManagedObject(
+										target);
+					}
+				});
+
+		// Allow deleting managed object dependency to input managed object
+		policy.addDelete(
+				OfficeFloorManagedObjectDependencyToOfficeFloorInputManagedObjectModel.class,
+				new DeleteChangeFactory<OfficeFloorManagedObjectDependencyToOfficeFloorInputManagedObjectModel>() {
+					@Override
+					public Change<OfficeFloorManagedObjectDependencyToOfficeFloorInputManagedObjectModel> createChange(
+							OfficeFloorManagedObjectDependencyToOfficeFloorInputManagedObjectModel target) {
+						return OfficeFloorEditor.this
+								.getModelChanges()
+								.removeOfficeFloorManagedObjectDependencyToOfficeFloorInputManagedObject(
 										target);
 					}
 				});
@@ -421,6 +439,23 @@ public class OfficeFloorEditor extends
 						return OfficeFloorEditor.this
 								.getModelChanges()
 								.linkOfficeFloorManagedObjectDependencyToOfficeFloorManagedObject(
+										source, target);
+					}
+				});
+
+		// Connect managed object dependency to input managed object
+		policy.addConnection(
+				OfficeFloorManagedObjectDependencyModel.class,
+				OfficeFloorInputManagedObjectModel.class,
+				new ConnectionChangeFactory<OfficeFloorManagedObjectDependencyModel, OfficeFloorInputManagedObjectModel>() {
+					@Override
+					public Change<?> createChange(
+							OfficeFloorManagedObjectDependencyModel source,
+							OfficeFloorInputManagedObjectModel target,
+							CreateConnectionRequest request) {
+						return OfficeFloorEditor.this
+								.getModelChanges()
+								.linkOfficeFloorManagedObjectDependencyToOfficeFloorInputManagedObject(
 										source, target);
 					}
 				});

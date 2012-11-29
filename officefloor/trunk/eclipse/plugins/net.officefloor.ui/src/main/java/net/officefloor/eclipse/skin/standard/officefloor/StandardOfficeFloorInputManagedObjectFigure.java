@@ -27,6 +27,7 @@ import net.officefloor.eclipse.skin.standard.figure.NoSpacingGridLayout;
 import net.officefloor.eclipse.skin.standard.figure.ConnectorFigure.ConnectorDirection;
 import net.officefloor.model.officefloor.DeployedOfficeObjectToOfficeFloorInputManagedObjectModel;
 import net.officefloor.model.officefloor.OfficeFloorInputManagedObjectToBoundOfficeFloorManagedObjectSourceModel;
+import net.officefloor.model.officefloor.OfficeFloorManagedObjectDependencyToOfficeFloorInputManagedObjectModel;
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceToOfficeFloorInputManagedObjectModel;
 
 import org.eclipse.draw2d.Figure;
@@ -39,7 +40,7 @@ import org.eclipse.swt.SWT;
 
 /**
  * Standard {@link OfficeFloorInputManagedObjectFigure}.
- *
+ * 
  * @author Daniel Sagenschneider
  */
 public class StandardOfficeFloorInputManagedObjectFigure extends
@@ -53,7 +54,7 @@ public class StandardOfficeFloorInputManagedObjectFigure extends
 
 	/**
 	 * Initiate.
-	 *
+	 * 
 	 * @param context
 	 *            {@link OfficeFloorInputManagedObjectFigureContext}.
 	 */
@@ -84,6 +85,9 @@ public class StandardOfficeFloorInputManagedObjectFigure extends
 		this.registerConnectionAnchor(
 				DeployedOfficeObjectToOfficeFloorInputManagedObjectModel.class,
 				dependency.getConnectionAnchor());
+		this.registerConnectionAnchor(
+				OfficeFloorManagedObjectDependencyToOfficeFloorInputManagedObjectModel.class,
+				dependency.getConnectionAnchor());
 
 		// Add the container for input managed object name
 		RectangleFigure container = new RectangleFigure();
@@ -104,10 +108,9 @@ public class StandardOfficeFloorInputManagedObjectFigure extends
 		objectContainerMos.add(mos);
 
 		// Register connection to managed object source
-		this
-				.registerConnectionAnchor(
-						OfficeFloorManagedObjectSourceToOfficeFloorInputManagedObjectModel.class,
-						mos.getConnectionAnchor());
+		this.registerConnectionAnchor(
+				OfficeFloorManagedObjectSourceToOfficeFloorInputManagedObjectModel.class,
+				mos.getConnectionAnchor());
 
 		// Add the bound managed object source anchor
 		ConnectorFigure boundMos = new ConnectorFigure(
@@ -117,10 +120,9 @@ public class StandardOfficeFloorInputManagedObjectFigure extends
 		figure.add(boundMos);
 
 		// Register connection to bound managed object source
-		this
-				.registerConnectionAnchor(
-						OfficeFloorInputManagedObjectToBoundOfficeFloorManagedObjectSourceModel.class,
-						boundMos.getConnectionAnchor());
+		this.registerConnectionAnchor(
+				OfficeFloorInputManagedObjectToBoundOfficeFloorManagedObjectSourceModel.class,
+				boundMos.getConnectionAnchor());
 
 		// Specify the figures
 		this.setFigure(figure);

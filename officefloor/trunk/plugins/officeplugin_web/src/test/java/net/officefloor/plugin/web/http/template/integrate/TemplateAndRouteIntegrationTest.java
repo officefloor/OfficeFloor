@@ -32,7 +32,6 @@ import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.DefaultHttpClient;
-import org.junit.Ignore;
 
 /**
  * Ensure integration of {@link HttpTemplateWorkSource} and
@@ -40,7 +39,6 @@ import org.junit.Ignore;
  * 
  * @author Daniel Sagenschneider
  */
-@Ignore("TODO tidy up configuration with Eclipse plug-in")
 public class TemplateAndRouteIntegrationTest extends TestCase {
 
 	/**
@@ -92,8 +90,7 @@ public class TemplateAndRouteIntegrationTest extends TestCase {
 	public void testRoute() throws Exception {
 
 		// Request the initial page (PageOne)
-		Properties initialPage = this.doRequest(
-				"/PageTwo.HttpTemplate-PageTwo.ofp-link.task", this.client);
+		Properties initialPage = this.doRequest("/PageTwo-link", this.client);
 		assertEquals("Incorrect initial page", "One",
 				initialPage.getProperty("page"));
 
@@ -117,8 +114,7 @@ public class TemplateAndRouteIntegrationTest extends TestCase {
 	public void testRouteRoot() throws Exception {
 
 		// Root page link
-		Properties linkedPage = this
-				.doRequest("/.links-link.task", this.client);
+		Properties linkedPage = this.doRequest("/-link", this.client);
 		assertEquals("Incorrect root page link", "One",
 				linkedPage.getProperty("page"));
 	}
@@ -129,10 +125,8 @@ public class TemplateAndRouteIntegrationTest extends TestCase {
 	public void testRouteCanonicalPath() throws Exception {
 
 		// Request the initial page with non-canonical path
-		Properties initialPage = this
-				.doRequest(
-						"/non-canonical-path/../PageTwo.HttpTemplate-PageTwo.ofp-link.task/",
-						this.client);
+		Properties initialPage = this.doRequest(
+				"/non-canonical-path/../PageTwo-link/", this.client);
 		assertEquals("Incorrect page", "One", initialPage.getProperty("page"));
 	}
 
