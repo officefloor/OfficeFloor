@@ -5,7 +5,7 @@ Template Test
 
 Should be no template name  available.
 <br />
-with a listing of <a href="/uri-beans">beans</a>:
+with a listing of <a href="/uri-beans${URI_SUFFIX}">beans</a>:
 <br />
 <table>
     <tr>
@@ -30,7 +30,7 @@ with a listing of <a href="/uri-beans">beans</a>:
     </tr>
     
 </table>
-<form action="/uri-submit">
+<form action="/uri-submit${URI_SUFFIX}">
     <input type="submit" />
 </form>
 </body>

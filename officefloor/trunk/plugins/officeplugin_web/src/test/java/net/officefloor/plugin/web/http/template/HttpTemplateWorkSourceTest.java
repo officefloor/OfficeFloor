@@ -248,21 +248,36 @@ public class HttpTemplateWorkSourceTest extends OfficeFrameTestCase {
 	 * Tests generating secure template response.
 	 */
 	public void testSecureTemplate() throws Throwable {
-		this.doTemplateTest(true);
+		this.doTemplateTest(true, null);
+	}
+
+	/**
+	 * Tests generating secure template response with a template URI suffix.
+	 */
+	public void testSecureTemplateWithUriSuffix() throws Throwable {
+		this.doTemplateTest(true, ".suffix");
 	}
 
 	/**
 	 * Tests generating non-secure template response.
 	 */
 	public void testNonSecureTemplate() throws Throwable {
-		this.doTemplateTest(false);
+		this.doTemplateTest(false, null);
+	}
+
+	/**
+	 * Tests generating non-secure template response with a template URI suffix.
+	 */
+	public void testNonSecureTemplateWithUriSuffix() throws Throwable {
+		this.doTemplateTest(false, ".suffix");
 	}
 
 	/**
 	 * Tests running the template to generate response.
 	 */
 	@SuppressWarnings({ "unchecked", "rawtypes" })
-	public void doTemplateTest(boolean isTemplateSecure) throws Throwable {
+	public void doTemplateTest(boolean isTemplateSecure,
+			String templateUriSuffix) throws Throwable {
 
 		// Create the mock objects
 		TaskContext taskContext = this.createMock(TaskContext.class);
@@ -275,25 +290,43 @@ public class HttpTemplateWorkSourceTest extends OfficeFrameTestCase {
 		MockHttpResponse httpResponse = new MockHttpResponse();
 
 		// Create the additional properties
-		String[] additionalProperties;
+		List<String> additionalProperties = new LinkedList<String>();
 		if (isTemplateSecure) {
 			// Secure template with non-secure link
-			additionalProperties = new String[] {
+			additionalProperties.addAll(Arrays.asList(
 					HttpTemplateWorkSource.PROPERTY_TEMPLATE_SECURE,
-					String.valueOf(true),
+					String.valueOf(true)));
+			additionalProperties.addAll(Arrays.asList(
 					HttpTemplateWorkSource.PROPERTY_LINK_SECURE_PREFIX
-							+ "beans", String.valueOf(false) };
+							+ "beans", String.valueOf(false)));
 		} else {
 			// Default non-secure template with secure link
-			additionalProperties = new String[] {
+			additionalProperties.addAll(Arrays.asList(
 					HttpTemplateWorkSource.PROPERTY_LINK_SECURE_PREFIX
-							+ "submit", String.valueOf(true) };
+							+ "submit", String.valueOf(true)));
+		}
+
+		// Specify the template URI suffix
+		if (templateUriSuffix == null) {
+			// Provide empty string to not have "null" appended
+			templateUriSuffix = "";
+		} else {
+			// Provide property for template URI suffix
+			additionalProperties.addAll(Arrays.asList(
+					HttpTemplateWorkSource.PROPERTY_TEMPLATE_URI_SUFFIX,
+					templateUriSuffix));
 		}
 
 		// Load the work type
-		WorkType<HttpTemplateWork> workType = WorkLoaderUtil.loadWorkType(
-				HttpTemplateWorkSource.class, this.getProperties(
-						this.templatePath, "uri", additionalProperties));
+		WorkType<HttpTemplateWork> workType = WorkLoaderUtil
+				.loadWorkType(
+						HttpTemplateWorkSource.class,
+						this.getProperties(
+								this.templatePath,
+								"uri",
+								additionalProperties
+										.toArray(new String[additionalProperties
+												.size()])));
 
 		// Create the work and provide name
 		HttpTemplateWork work = workType.getWorkFactory().createWork();
@@ -326,15 +359,17 @@ public class HttpTemplateWorkSourceTest extends OfficeFrameTestCase {
 			switch (i) {
 			case 1:
 				// #{beans} of NullBean section
+				String beansUriPath = "/uri-beans" + templateUriSuffix;
 				this.recordReturn(location,
-						location.transformToClientPath("/uri-beans", false),
-						"/uri-beans");
+						location.transformToClientPath(beansUriPath, false),
+						beansUriPath);
 				break;
 			case 4:
 				// #{submit} of Tail section
+				String submitUriPath = "/uri-submit" + templateUriSuffix;
 				this.recordReturn(location,
-						location.transformToClientPath("/uri-submit", true),
-						"/uri-submit");
+						location.transformToClientPath(submitUriPath, true),
+						submitUriPath);
 				break;
 			}
 		}
@@ -365,6 +400,8 @@ public class HttpTemplateWorkSourceTest extends OfficeFrameTestCase {
 		// Expected output (removing last end of line appended)
 		String expectedOutput = this.getFileContents(this.findFile(
 				this.getClass(), "Template.expected"));
+		expectedOutput = expectedOutput.replace("${URI_SUFFIX}",
+				templateUriSuffix);
 
 		// Validate output
 		assertTextEquals("Incorrect output", expectedOutput, actualOutput);

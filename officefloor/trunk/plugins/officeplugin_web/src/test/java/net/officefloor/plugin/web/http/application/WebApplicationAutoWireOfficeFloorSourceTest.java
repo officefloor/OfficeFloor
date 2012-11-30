@@ -412,6 +412,29 @@ public class WebApplicationAutoWireOfficeFloorSourceTest extends
 	}
 
 	/**
+	 * Ensure template URI suffix appended to template URI and link URIs.
+	 */
+	public void testTemplateUriSuffix() throws Exception {
+
+		final String SUFFIX = ".suffix";
+		final String TEMPLATE_URI = "/uri" + SUFFIX;
+		final String LINK_URI = "/uri-submit" + SUFFIX;
+
+		// Add HTTP template
+		HttpTemplateAutoWireSection template = this.source.addHttpTemplate(
+				this.getClassPath("template.ofp"), MockTemplateLogic.class,
+				"uri");
+		template.setTemplateUriSuffix(SUFFIX);
+		this.source.openOfficeFloor();
+
+		// Ensure service template URI with suffix
+		this.assertHttpRequest(TEMPLATE_URI, 200, LINK_URI);
+
+		// Ensure service template link URI with suffix
+		this.assertHttpRequest(LINK_URI, 200, "submitted" + LINK_URI);
+	}
+
+	/**
 	 * Ensure able to provide {@link HttpTemplateSectionExtension}.
 	 */
 	public void testTemplateExtension() throws Exception {

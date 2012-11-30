@@ -67,6 +67,7 @@ import net.officefloor.plugin.web.http.location.HttpApplicationLocation;
 import net.officefloor.plugin.web.http.session.clazz.source.HttpSessionClassManagedObjectSource;
 import net.officefloor.plugin.web.http.template.HttpTemplateTask;
 import net.officefloor.plugin.web.http.template.HttpTemplateWorkSource;
+import net.officefloor.plugin.web.http.template.LinkHttpTemplateWriter;
 import net.officefloor.plugin.web.http.template.parse.HttpTemplate;
 import net.officefloor.plugin.web.http.template.parse.HttpTemplateSection;
 
@@ -240,6 +241,7 @@ public class HttpTemplateSectionSource extends ClassSectionSource {
 		// Copy the template configuration
 		PropertiesUtil.copyProperties(context, templateWork,
 				HttpTemplateWorkSource.PROPERTY_TEMPLATE_URI,
+				HttpTemplateWorkSource.PROPERTY_TEMPLATE_URI_SUFFIX,
 				HttpTemplateWorkSource.PROPERTY_TEMPLATE_SECURE);
 		PropertiesUtil.copyPrefixedProperties(context,
 				HttpTemplateWorkSource.PROPERTY_LINK_SECURE_PREFIX,
@@ -472,6 +474,10 @@ public class HttpTemplateSectionSource extends ClassSectionSource {
 		boolean isTemplateSecure = HttpTemplateWorkSource
 				.isHttpTemplateSecure(context);
 
+		// Obtain the template URI suffix
+		String templateUriSuffix = context.getProperty(
+				HttpTemplateWorkSource.PROPERTY_TEMPLATE_URI_SUFFIX, null);
+
 		// Register the #{link} URL continuation tasks
 		String[] linkNames = HttpTemplateWorkSource
 				.getHttpTemplateLinkNames(template);
@@ -482,13 +488,17 @@ public class HttpTemplateSectionSource extends ClassSectionSource {
 			boolean isLinkSecure = HttpTemplateTask.isLinkSecure(linkTaskName,
 					isTemplateSecure, context);
 
+			// Obtain the link URI path
+			String linkUriPath = LinkHttpTemplateWriter.getTemplateLinkUriPath(
+					templateUriPath, linkTaskName, templateUriSuffix);
+
 			// Create HTTP URL continuation
 			SectionWork urlContinuationWork = designer.addSectionWork(
 					linkUrlContinuationPrefix + linkTaskName,
 					HttpUrlContinuationWorkSource.class.getName());
 			urlContinuationWork.addProperty(
 					HttpUrlContinuationWorkSource.PROPERTY_URI_PATH,
-					templateUriPath + "-" + linkTaskName);
+					linkUriPath);
 			urlContinuationWork.addProperty(
 					HttpUrlContinuationWorkSource.PROPERTY_SECURE,
 					String.valueOf(isLinkSecure));

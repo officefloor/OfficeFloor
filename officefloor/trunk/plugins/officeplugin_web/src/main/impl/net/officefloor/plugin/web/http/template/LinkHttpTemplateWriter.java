@@ -36,6 +36,36 @@ import net.officefloor.plugin.web.http.template.parse.LinkHttpTemplateSectionCon
 public class LinkHttpTemplateWriter implements HttpTemplateWriter {
 
 	/**
+	 * Obtains the {@link HttpTemplate} link URI path.
+	 * 
+	 * @param templateUriPath
+	 *            {@link HttpTemplate} URI path.
+	 * @param linkName
+	 *            Name of the link.
+	 * @param templateUriSuffix
+	 *            {@link HttpTemplate} URI suffix. May be <code>null</code> for
+	 *            no suffix.
+	 * @return {@link HttpTemplate} link URI path.
+	 * @throws InvalidHttpRequestUriException
+	 *             Should the resulting URI be invalid.
+	 */
+	public static String getTemplateLinkUriPath(String templateUriPath,
+			String linkName, String templateUriSuffix)
+			throws InvalidHttpRequestUriException {
+
+		// Create the link URI path
+		String linkUriPath = templateUriPath + "-" + linkName
+				+ (templateUriSuffix == null ? "" : templateUriSuffix);
+		linkUriPath = (linkUriPath.startsWith("/") ? linkUriPath : "/"
+				+ linkUriPath);
+		linkUriPath = HttpApplicationLocationMangedObject
+				.transformToCanonicalPath(linkUriPath);
+
+		// Return the link URI path
+		return linkUriPath;
+	}
+
+	/**
 	 * Link URI path.
 	 */
 	private final String linkUriPath;
@@ -53,6 +83,9 @@ public class LinkHttpTemplateWriter implements HttpTemplateWriter {
 	 *            {@link LinkHttpTemplateSectionContent}.
 	 * @param templateUriPath
 	 *            {@link HttpTemplate} URI path.
+	 * @param templateUriSuffix
+	 *            {@link HttpTemplate} URI suffix. May be <code>null</code> for
+	 *            no suffix.
 	 * @param isLinkSecure
 	 *            Indicates if the link is to be submitted over a secure
 	 *            {@link ServerHttpConnection}.
@@ -60,16 +93,13 @@ public class LinkHttpTemplateWriter implements HttpTemplateWriter {
 	 *             If the link URI path is invalid.
 	 */
 	public LinkHttpTemplateWriter(LinkHttpTemplateSectionContent content,
-			String templateUriPath, boolean isLinkSecure)
-			throws InvalidHttpRequestUriException {
+			String templateUriPath, String templateUriSuffix,
+			boolean isLinkSecure) throws InvalidHttpRequestUriException {
 		this.isLinkSecure = isLinkSecure;
 
 		// Create the link URI path
-		String linkUriPath = templateUriPath + "-" + content.getName();
-		linkUriPath = (linkUriPath.startsWith("/") ? linkUriPath : "/"
-				+ linkUriPath);
-		this.linkUriPath = HttpApplicationLocationMangedObject
-				.transformToCanonicalPath(linkUriPath);
+		this.linkUriPath = getTemplateLinkUriPath(templateUriPath,
+				content.getName(), templateUriSuffix);
 	}
 
 	/*

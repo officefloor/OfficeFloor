@@ -78,6 +78,9 @@ public class HttpTemplateTask extends
 	 *            Default {@link Charset} for Server.
 	 * @param templateUriPath
 	 *            URI path for the {@link HttpTemplate}.
+	 * @param templateUriSuffix
+	 *            URI suffix for the {@link HttpTemplate} link URI paths. May be
+	 *            <code>null</code> for no suffix.
 	 * @param isTemplateSecure
 	 *            Indicates if the template is to be secure.
 	 * @param workTypeBuilder
@@ -91,7 +94,7 @@ public class HttpTemplateTask extends
 	 */
 	public static String[] loadTaskType(HttpTemplateSection section,
 			Charset serverDefaultCharset, String templateUriPath,
-			boolean isTemplateSecure,
+			String templateUriSuffix, boolean isTemplateSecure,
 			WorkTypeBuilder<HttpTemplateWork> workTypeBuilder,
 			WorkSourceContext context) throws Exception {
 
@@ -104,8 +107,8 @@ public class HttpTemplateTask extends
 		// Create the content writers for the section
 		SectionWriterStruct writerStruct = createHttpTemplateWriters(
 				section.getContent(), null, sectionAndTaskName, linkTaskNames,
-				serverDefaultCharset, templateUriPath, isTemplateSecure,
-				context);
+				serverDefaultCharset, templateUriPath, templateUriSuffix,
+				isTemplateSecure, context);
 
 		// Determine if requires bean
 		boolean isRequireBean = (writerStruct.beanClass != null);
@@ -199,6 +202,9 @@ public class HttpTemplateTask extends
 	 *            Default {@link Charset} for the Server.
 	 * @param templateUriPath
 	 *            URI path for the {@link HttpTemplate}.
+	 * @param templateUriSuffix
+	 *            URI suffix for the {@link HttpTemplate} link URI paths. May be
+	 *            <code>null</code> for no suffix.
 	 * @param isTemplateSecure
 	 *            Indicates if the template is to be secure.
 	 * @param context
@@ -211,8 +217,8 @@ public class HttpTemplateTask extends
 			HttpTemplateSectionContent[] contents, Class<?> beanClass,
 			String sectionAndTaskName, Set<String> linkTaskNames,
 			Charset serverDefaultCharset, String templateUriPath,
-			boolean isTemplateSecure, WorkSourceContext context)
-			throws Exception {
+			String templateUriSuffix, boolean isTemplateSecure,
+			WorkSourceContext context) throws Exception {
 
 		// Create the content writers for the section
 		List<HttpTemplateWriter> contentWriterList = new LinkedList<HttpTemplateWriter>();
@@ -262,7 +268,7 @@ public class HttpTemplateTask extends
 				SectionWriterStruct beanStruct = createHttpTemplateWriters(
 						beanContent.getContent(), beanType, null,
 						linkTaskNames, serverDefaultCharset, templateUriPath,
-						isTemplateSecure, null);
+						templateUriSuffix, isTemplateSecure, null);
 
 				// Add the content writer
 				contentWriterList.add(new BeanHttpTemplateWriter(beanContent,
@@ -297,7 +303,7 @@ public class HttpTemplateTask extends
 
 				// Add the content writer
 				contentWriterList.add(new LinkHttpTemplateWriter(linkContent,
-						templateUriPath, isLinkSecure));
+						templateUriPath, templateUriSuffix, isLinkSecure));
 
 				// Track the link tasks
 				linkTaskNames.add(linkName);
