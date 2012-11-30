@@ -73,6 +73,12 @@ public class HttpTemplateWorkSource extends
 	public static final String PROPERTY_TEMPLATE_URI = "template.uri";
 
 	/**
+	 * Property to obtain the {@link HttpTemplate} URI suffix on the template
+	 * URI path and various link URI paths.
+	 */
+	public static final String PROPERTY_TEMPLATE_URI_SUFFIX = "template.uri.suffix";
+
+	/**
 	 * Property to indicate if the {@link HttpTemplate} requires a secure
 	 * {@link ServerHttpConnection}.
 	 */
@@ -320,8 +326,10 @@ public class HttpTemplateWorkSource extends
 		// Obtain the details of the template
 		Charset charset = getCharset(context);
 
-		// Obtain the URI path for the template
+		// Obtain the URI path and URI suffix for the template
 		String templateUriPath = context.getProperty(PROPERTY_TEMPLATE_URI);
+		String templateUriSuffix = context.getProperty(
+				PROPERTY_TEMPLATE_URI_SUFFIX, null);
 
 		// Obtain whether the template is secure
 		boolean isTemplateSecure = isHttpTemplateSecure(context);
@@ -335,8 +343,8 @@ public class HttpTemplateWorkSource extends
 
 			// Load the task to write the section
 			String[] linkNames = HttpTemplateTask.loadTaskType(section,
-					charset, templateUriPath, isTemplateSecure,
-					workTypeBuilder, context);
+					charset, templateUriPath, templateUriSuffix,
+					isTemplateSecure, workTypeBuilder, context);
 
 			// Keep track of the unique set of link names
 			linkNameSet.addAll(Arrays.asList(linkNames));

@@ -475,12 +475,17 @@ public class WebApplicationAutoWireOfficeFloorSource extends
 			// Determine if template is secure
 			boolean isTemplateSecure = httpTemplate.isTemplateSecure();
 
+			// Obtain the template URI Suffix
+			String templateUriSuffix = httpTemplate.getTemplateUriSuffix();
+
 			// Provide the template URI (and potential URL continuation)
 			String templateUri = httpTemplate.getTemplateUri();
 			if (templateUri != null) {
 				// Provide URL continuation
-				HttpUriLink link = this.urlContinuations.linkUri(templateUri,
-						httpTemplate,
+				String templateUriPath = templateUri
+						+ (templateUriSuffix == null ? "" : templateUriSuffix);
+				HttpUriLink link = this.urlContinuations.linkUri(
+						templateUriPath, httpTemplate,
 						HttpTemplateSectionSource.RENDER_TEMPLATE_INPUT_NAME);
 				link.setUriSecure(isTemplateSecure);
 
@@ -491,6 +496,11 @@ public class WebApplicationAutoWireOfficeFloorSource extends
 			httpTemplate.addProperty(
 					HttpTemplateSectionSource.PROPERTY_TEMPLATE_URI,
 					templateUri);
+			if (templateUriSuffix != null) {
+				httpTemplate.addProperty(
+						HttpTemplateWorkSource.PROPERTY_TEMPLATE_URI_SUFFIX,
+						templateUriSuffix);
+			}
 
 			// Secure the template
 			httpTemplate.addProperty(

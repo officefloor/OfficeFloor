@@ -54,6 +54,11 @@ public class HttpTemplateAutoWireSectionImpl extends AutoWireSectionImpl
 	private final OfficeFloorCompiler compiler;
 
 	/**
+	 * URI suffix for the template.
+	 */
+	private String templateUriSuffix = null;
+
+	/**
 	 * Indicates if the template is to be secure.
 	 */
 	private boolean isTemplateSecure = false;
@@ -108,6 +113,16 @@ public class HttpTemplateAutoWireSectionImpl extends AutoWireSectionImpl
 	@Override
 	public String getTemplateUri() {
 		return this.templateUri;
+	}
+
+	@Override
+	public void setTemplateUriSuffix(String uriSuffix) {
+		this.templateUriSuffix = uriSuffix;
+	}
+
+	@Override
+	public String getTemplateUriSuffix() {
+		return this.templateUriSuffix;
 	}
 
 	@Override

@@ -57,6 +57,27 @@ public interface HttpTemplateAutoWireSection extends AutoWireSection {
 
 	/**
 	 * <p>
+	 * Specifies the template URI suffix.
+	 * <p>
+	 * This is appended to the template URI and link URIs. It is useful to
+	 * provide a &quot;.extension&quot; to the template URIs.
+	 * 
+	 * @param uriSuffix
+	 *            Template URI suffix. May be <code>null</code> to not have a
+	 *            URI suffix.
+	 */
+	void setTemplateUriSuffix(String uriSuffix);
+
+	/**
+	 * Obtains the template URI suffix.
+	 * 
+	 * @return Template URI suffix. May be <code>null</code> to not have a URI
+	 *         suffix.
+	 */
+	String getTemplateUriSuffix();
+
+	/**
+	 * <p>
 	 * Indicate whether a secure {@link ServerHttpConnection} is required for
 	 * the template. This applies to:
 	 * <ul>

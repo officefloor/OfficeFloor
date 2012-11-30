@@ -65,9 +65,9 @@ public class HttpTemplateSectionIntegrationTest extends OfficeFrameTestCase {
 			+ "<p>Bean with property bean-property  0 1 2 3 4 5 6 7 8 9</p><table>"
 			+ "<tr><td>Name</td><td>Description</td></tr>"
 			+ "<tr><td>row</td><td>test row</td></tr></table>"
-			+ "<form action=\"${LINK_nextTask_QUALIFICATION}/uri-nextTask\"><input type=\"submit\"/></form>"
-			+ "<form action=\"${LINK_submit_QUALIFICATION}/uri-submit\"><input type=\"submit\"/></form>"
-			+ "<a href=\"${LINK_nonMethodLink_QUALIFICATION}/uri-nonMethodLink\">Non-method link</a></body></html>";
+			+ "<form action=\"${LINK_nextTask_QUALIFICATION}/uri-nextTask${LINK_SUFFIX}\"><input type=\"submit\"/></form>"
+			+ "<form action=\"${LINK_submit_QUALIFICATION}/uri-submit${LINK_SUFFIX}\"><input type=\"submit\"/></form>"
+			+ "<a href=\"${LINK_nonMethodLink_QUALIFICATION}/uri-nonMethodLink${LINK_SUFFIX}\">Non-method link</a></body></html>";
 
 	/**
 	 * Host name.
@@ -129,7 +129,22 @@ public class HttpTemplateSectionIntegrationTest extends OfficeFrameTestCase {
 
 		// Ensure correct rendering of template
 		String rendering = this.doHttpRequest("");
-		assertRenderedResponse("", false, false, false, rendering);
+		assertRenderedResponse("", false, false, false, null, rendering);
+	}
+
+	/**
+	 * Ensure can render template with a URI suffix.
+	 */
+	public void testRenderTemplateWithUriSuffix() throws Exception {
+
+		// Start the server
+		this.isNonMethodLink = true;
+		this.startHttpServer("Template.ofp", TemplateLogic.class,
+				HttpTemplateWorkSource.PROPERTY_TEMPLATE_URI_SUFFIX, ".suffix");
+
+		// Ensure correct rendering of template
+		String rendering = this.doHttpRequest("");
+		assertRenderedResponse("", false, false, false, ".suffix", rendering);
 	}
 
 	/**
@@ -145,7 +160,7 @@ public class HttpTemplateSectionIntegrationTest extends OfficeFrameTestCase {
 
 		// Ensure correct rendering of template
 		String rendering = this.doHttpRequest("");
-		assertRenderedResponse("", false, true, false, rendering);
+		assertRenderedResponse("", false, true, false, null, rendering);
 	}
 
 	/**
@@ -161,7 +176,7 @@ public class HttpTemplateSectionIntegrationTest extends OfficeFrameTestCase {
 
 		// Ensure correct rendering of template
 		String rendering = this.doHttpRequest("");
-		assertRenderedResponse("", true, true, true, rendering);
+		assertRenderedResponse("", true, true, true, null, rendering);
 	}
 
 	/**
@@ -179,7 +194,7 @@ public class HttpTemplateSectionIntegrationTest extends OfficeFrameTestCase {
 
 		// Ensure correct rendering of template
 		String rendering = this.doHttpRequest("");
-		assertRenderedResponse("", true, true, false, rendering);
+		assertRenderedResponse("", true, true, false, null, rendering);
 	}
 
 	/**
@@ -210,7 +225,25 @@ public class HttpTemplateSectionIntegrationTest extends OfficeFrameTestCase {
 
 		// Ensure correctly renders template on submit not invoking flow
 		String response = this.doHttpRequest("/uri-submit");
-		assertRenderedResponse("<submit />", false, false, false, response);
+		assertRenderedResponse("<submit />", false, false, false, null,
+				response);
+	}
+
+	/**
+	 * Ensure default behaviour of #{link} method without a {@link NextTask}
+	 * annotation is to render the template.
+	 */
+	public void testSubmitWithoutNextTaskHavingUriSuffix() throws Exception {
+
+		// Start the server
+		this.isNonMethodLink = true;
+		this.startHttpServer("Template.ofp", TemplateLogic.class,
+				HttpTemplateWorkSource.PROPERTY_TEMPLATE_URI_SUFFIX, ".suffix");
+
+		// Ensure correctly renders template on submit not invoking flow
+		String response = this.doHttpRequest("/uri-submit.suffix");
+		assertRenderedResponse("<submit />", false, false, false, ".suffix",
+				response);
 	}
 
 	/**
@@ -571,12 +604,15 @@ public class HttpTemplateSectionIntegrationTest extends OfficeFrameTestCase {
 	 * @param isNonMethodLinkQualified
 	 *            <code>true</code> if <code>nonMethodLink</code> link is
 	 *            qualified.
+	 * @param linkUriSuffix
+	 *            Link URI suffix. May be <code>null</code> for no suffix.
 	 * @param actualResponse
 	 *            Actual rendered response
 	 */
 	private static void assertRenderedResponse(String expectedResponsePrefix,
 			boolean isNextTaskQualified, boolean isSubmitQualified,
-			boolean isNonMethodLinkQualified, String actualResponse) {
+			boolean isNonMethodLinkQualified, String linkUriSuffix,
+			String actualResponse) {
 
 		final String LINK_QUALIFICATION = "https://" + HOST_NAME + ":7979";
 
@@ -592,6 +628,8 @@ public class HttpTemplateSectionIntegrationTest extends OfficeFrameTestCase {
 		expectedResponse = expectedResponse.replace(
 				"${LINK_nonMethodLink_QUALIFICATION}",
 				isNonMethodLinkQualified ? LINK_QUALIFICATION : "");
+		expectedResponse = expectedResponse.replace("${LINK_SUFFIX}",
+				(linkUriSuffix == null ? "" : linkUriSuffix));
 
 		// Validate the rendered response
 		assertXmlEquals("Incorrect rendering", expectedResponse, actualResponse);
