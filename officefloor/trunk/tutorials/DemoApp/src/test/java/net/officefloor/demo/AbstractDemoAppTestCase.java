@@ -117,7 +117,7 @@ public abstract class AbstractDemoAppTestCase extends OfficeFrameTestCase {
 	 * Ensure WoOF services for URI (rather than DefaultServlet).
 	 */
 	public void testWoOF() {
-		String response = this.doRequest("/chat");
+		String response = this.doRequest("/chat.woof");
 		assertTrue("Should be serviced by WoOF",
 				response.contains("<h2>Chat Example</h2>"));
 	}

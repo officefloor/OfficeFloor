@@ -28,7 +28,6 @@ import net.officefloor.autowire.AutoWireSection;
 import net.officefloor.compile.impl.issues.FailCompilerIssues;
 import net.officefloor.frame.test.LoggerAssertion;
 import net.officefloor.frame.test.OfficeFrameTestCase;
-import net.officefloor.model.woof.WoofModel;
 import net.officefloor.plugin.section.clazz.ClassSectionSource;
 import net.officefloor.plugin.section.clazz.NextTask;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
@@ -105,18 +104,6 @@ public class WoofOfficeFloorSourceTest extends OfficeFrameTestCase {
 		assertEquals("Incorrect convenience HTTP port property name",
 				HttpApplicationLocationManagedObjectSource.PROPERTY_HTTP_PORT,
 				WoofOfficeFloorSource.PROPERTY_HTTP_PORT);
-	}
-
-	/**
-	 * Ensure can load and run {@link WoofModel}.
-	 */
-	public void testLoadsAndRuns() throws Exception {
-
-		// Run the application
-		WoofOfficeFloorSource.start();
-
-		// Test
-		this.doTestRequest("/test");
 	}
 
 	/**
@@ -211,9 +198,9 @@ public class WoofOfficeFloorSourceTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensure can render template.
+	 * Ensure can service template.
 	 */
-	public void testTemplateNoLogic() throws Exception {
+	public void testTemplate() throws Exception {
 
 		// Obtain no logic template WoOF configuration
 		String noLogicTemplateConfigurationLocation = this
@@ -226,7 +213,7 @@ public class WoofOfficeFloorSourceTest extends OfficeFrameTestCase {
 				noLogicTemplateConfigurationLocation);
 
 		// Test
-		String response = this.doRequest("/template");
+		String response = this.doRequest("/template.woof");
 		assertEquals("Incorrect response", "NO LOGIC TEMPLATE", response);
 	}
 
@@ -286,7 +273,7 @@ public class WoofOfficeFloorSourceTest extends OfficeFrameTestCase {
 				alternateConfigurationLocation);
 
 		// Test
-		String response = this.doRequest("/woofResource");
+		String response = this.doRequest("/woofResource.woof");
 		assertEquals(
 				"Incorrect response",
 				"This is only for testing and should not be included in built jar for project",

@@ -42,10 +42,10 @@ public class PageFlowHttpServerTest extends TestCase {
 		WoofOfficeFloorSource.start();
 
 		// Request the initial blank template
-		this.doRequest("http://localhost:7878/example");
+		this.doRequest("http://localhost:7878/example.woof");
 
 		// Send form submission
-		this.doRequest("http://localhost:7878/example-handleSubmission?name=Daniel&description=founder");
+		this.doRequest("http://localhost:7878/example-handleSubmission.woof?name=Daniel&description=founder");
 	}
 
 	private void doRequest(String url) throws Exception {

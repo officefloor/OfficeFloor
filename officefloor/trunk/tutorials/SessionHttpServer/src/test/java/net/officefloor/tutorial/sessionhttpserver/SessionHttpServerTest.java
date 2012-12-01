@@ -62,10 +62,10 @@ public class SessionHttpServerTest extends TestCase {
 		WoofOfficeFloorSource.start();
 
 		// Send request for empty session
-		this.doRequest("http://localhost:7878/post");
+		this.doRequest("http://localhost:7878/post.woof");
 
 		// Add a post
-		this.doRequest("http://localhost:7878/post-post?text=TEST");
+		this.doRequest("http://localhost:7878/post-post.woof?text=TEST");
 	}
 
 	private void doRequest(String url) throws Exception {

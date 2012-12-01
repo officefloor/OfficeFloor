@@ -42,13 +42,13 @@ public class NavigateHttpServerTest extends TestCase {
 		WoofOfficeFloorSource.start();
 
 		// Request template one
-		this.doRequest("http://localhost:7878/one");
+		this.doRequest("http://localhost:7878/one.woof");
 
 		// Click on link on template one
-		this.doRequest("http://localhost:7878/one-navigate");
+		this.doRequest("http://localhost:7878/one-navigate.woof");
 
 		// Submit on template two
-		this.doRequest("http://localhost:7878/two-process");
+		this.doRequest("http://localhost:7878/two-process.woof");
 	}
 
 	private void doRequest(String url) throws Exception {

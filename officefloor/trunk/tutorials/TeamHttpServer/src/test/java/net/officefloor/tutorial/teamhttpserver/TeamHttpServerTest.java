@@ -81,7 +81,7 @@ public class TeamHttpServerTest extends TestCase {
 	public void testConnection() throws Exception {
 
 		// Request page to allow time for database setup
-		this.doRequest("http://localhost:7878/example");
+		this.doRequest("http://localhost:7878/example.woof");
 
 		// Obtain connection via DataSource
 		jdbcDataSource dataSource = new jdbcDataSource();
@@ -106,13 +106,13 @@ public class TeamHttpServerTest extends TestCase {
 	public void testRetrieveEncryptions() throws Exception {
 
 		// Request page to allow time for database setup
-		this.doRequest("http://localhost:7878/example");
+		this.doRequest("http://localhost:7878/example.woof");
 
 		// Retrieving from database
-		this.doRequest("http://localhost:7878/example-encrypt?letter=A");
+		this.doRequest("http://localhost:7878/example-encrypt.woof?letter=A");
 
 		// Looking up within cache
-		this.doRequest("http://localhost:7878/example-encrypt?letter=A");
+		this.doRequest("http://localhost:7878/example-encrypt.woof?letter=A");
 	}
 
 	private void doRequest(String url) throws Exception {

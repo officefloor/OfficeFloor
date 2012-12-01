@@ -46,14 +46,13 @@ public class ExceptionHttpServerTest extends TestCase {
 		WoofOfficeFloorSource.start();
 
 		// Submit to trigger the exception
-		this.client
-				.execute(new HttpGet("http://localhost:7878/template-submit"));
+		this.client.execute(new HttpGet(
+				"http://localhost:7878/template-submit.woof"));
 
 		// Ensure handling by logging the failure
 		String log = new String(error.toByteArray()).trim();
 		assertEquals("Should log error", "Test", log);
 	}
-
 	// END SNIPPET: handle
 
 	private PrintStream stderr;

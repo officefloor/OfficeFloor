@@ -44,7 +44,7 @@ public class RawHttpServerTest extends TestCase {
 
 		// Send request for dynamic page
 		HttpResponse response = new DefaultHttpClient().execute(new HttpGet(
-				"http://localhost:7878/example"));
+				"http://localhost:7878/example.woof"));
 
 		// Ensure request is successful
 		assertEquals("Request should be successful", 200, response
