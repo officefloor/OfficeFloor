@@ -88,6 +88,15 @@ public interface WebAutoWireApplication extends AutoWireApplication {
 			Class<?> templateLogicClass);
 
 	/**
+	 * Specifies the default URI suffix for the {@link HttpTemplate} URI path
+	 * and link URI paths.
+	 * 
+	 * @param uriSuffix
+	 *            Default {@link HttpTemplate} URI suffix.
+	 */
+	void setDefaultHttpTemplateUriSuffix(String uriSuffix);
+
+	/**
 	 * Adds an object to be lazily created and stored within the
 	 * {@link HttpApplicationState}.
 	 * 

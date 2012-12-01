@@ -52,14 +52,12 @@ import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.session.SessionHandler;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
-import org.junit.Ignore;
 
 /**
  * Tests for the {@link OfficeFloorServlet}.
  * 
  * @author Daniel Sagenschneider
  */
-@Ignore("TODO provide link suffix for HttpTemplateSectionSource to allow Servlet mapping")
 public class OfficeFloorServletTestCase extends OfficeFrameTestCase {
 
 	/**
@@ -148,7 +146,7 @@ public class OfficeFloorServletTestCase extends OfficeFrameTestCase {
 	 */
 	public void testPublicTemplate() throws Exception {
 		assertEquals("Should be handled by template", "TEMPLATE",
-				this.doGetEntity("/test"));
+				this.doGetEntity("/test.suffix"));
 	}
 
 	/**
@@ -157,15 +155,15 @@ public class OfficeFloorServletTestCase extends OfficeFrameTestCase {
 	public void testServiceWithinContext() throws Exception {
 		this.contextPath = "/path";
 		assertEquals("Should be handled by template", "TEMPLATE",
-				this.doGetEntity("/path/test"));
+				this.doGetEntity("/path/test.suffix"));
 	}
 
 	/**
 	 * Ensure remembers state within the {@link HttpSession}.
 	 */
 	public void testSessionTemplate() throws Exception {
-		this.doGetEntity("/session?name=value");
-		String value = this.doGetEntity("/session");
+		this.doGetEntity("/session.suffix?name=value");
+		String value = this.doGetEntity("/session.suffix");
 		assertEquals("Should maintain state between requests", "value", value);
 	}
 
@@ -173,8 +171,8 @@ public class OfficeFloorServletTestCase extends OfficeFrameTestCase {
 	 * Ensure renders link.
 	 */
 	public void testLinkRendering() throws Exception {
-		assertEquals("Incorrect rendered link", "/link.links-link.task",
-				this.doGetEntity("/link"));
+		assertEquals("Incorrect rendered link", "/link-link.suffix",
+				this.doGetEntity("/link.suffix"));
 	}
 
 	/**
@@ -183,15 +181,15 @@ public class OfficeFloorServletTestCase extends OfficeFrameTestCase {
 	public void testLinkRenderingWithinContext() throws Exception {
 		this.contextPath = "/path";
 		assertEquals("Incorrect rendered link with context path",
-				"/path/link.links-link.task", this.doGetEntity("/path/link"));
+				"/path/link-link.suffix", this.doGetEntity("/path/link.suffix"));
 	}
 
 	/**
 	 * Ensure can invoke a link.
 	 */
 	public void testlink() throws Exception {
-		assertEquals("Should handle link", "LINK - /link.links-link.task",
-				this.doGetEntity("/link.links-link.task"));
+		assertEquals("Should handle link", "LINK - /link-link.suffix",
+				this.doGetEntity("/link-link.suffix"));
 	}
 
 	/**
@@ -199,9 +197,9 @@ public class OfficeFloorServletTestCase extends OfficeFrameTestCase {
 	 */
 	public void testLinkWithinContext() throws Exception {
 		this.contextPath = "/path";
-		String entity = this.doGetEntity("/path/link.links-link.task");
+		String entity = this.doGetEntity("/path/link-link.suffix");
 		assertEquals("Should handle link with context path",
-				"LINK - /path/link.links-link.task", entity);
+				"LINK - /path/link-link.suffix", entity);
 	}
 
 	/**
@@ -375,6 +373,11 @@ public class OfficeFloorServletTestCase extends OfficeFrameTestCase {
 		@Override
 		public String getServletName() {
 			return "Mock";
+		}
+
+		@Override
+		public String getTemplateUriSuffix() {
+			return "suffix";
 		}
 
 		@Override
