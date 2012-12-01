@@ -104,7 +104,7 @@ public abstract class AbstractWoofServletTestCase extends
 		this.port = this.startServer(contextPath);
 
 		// Validate appropriate response from HTTP template
-		String responseText = this.doGetEntity(contextPath, "/test");
+		String responseText = this.doGetEntity(contextPath, "/test.woof");
 		assertEquals(
 				"Incorrect template content",
 				"TEMPLATE TEST OnePersonTeam_"

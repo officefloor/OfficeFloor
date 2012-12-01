@@ -35,6 +35,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import net.officefloor.plugin.web.http.application.WebAutoWireApplication;
+import net.officefloor.plugin.web.http.template.parse.HttpTemplate;
 
 /**
  * <p>
@@ -75,6 +76,17 @@ public abstract class OfficeFloorServlet extends HttpServlet implements
 	 * @return Name to register this {@link Servlet}.
 	 */
 	public abstract String getServletName();
+
+	/**
+	 * <p>
+	 * Obtains the {@link HttpTemplate} URI suffix.
+	 * <p>
+	 * Must provide a URI suffix to enable {@link Servlet} mapping for link URL
+	 * continuations.
+	 * 
+	 * @return {@link HttpTemplate} URI suffix.
+	 */
+	public abstract String getTemplateUriSuffix();
 
 	/**
 	 * Provides configuration of the {@link WebAutoWireApplication} for this

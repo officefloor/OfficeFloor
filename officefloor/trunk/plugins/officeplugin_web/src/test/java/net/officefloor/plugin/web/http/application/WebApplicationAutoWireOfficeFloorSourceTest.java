@@ -412,6 +412,49 @@ public class WebApplicationAutoWireOfficeFloorSourceTest extends
 	}
 
 	/**
+	 * Ensure default template URI suffix is applied.
+	 */
+	public void testDefaultTemplateUriSuffix() throws Exception {
+
+		final String SUFFIX = ".suffix";
+		final String TEMPLATE_URI = "/uri" + SUFFIX;
+		final String LINK_URI = "/uri-submit" + SUFFIX;
+
+		// Add HTTP template with default template URI suffix
+		this.source.addHttpTemplate(this.getClassPath("template.ofp"),
+				MockTemplateLogic.class, "uri");
+		this.source.setDefaultHttpTemplateUriSuffix(SUFFIX);
+		this.source.openOfficeFloor();
+
+		// Ensure service template URI with suffix
+		this.assertHttpRequest(TEMPLATE_URI, 200, LINK_URI);
+
+		// Ensure service template link URI with suffix
+		this.assertHttpRequest(LINK_URI, 200, "submitted" + LINK_URI);
+	}
+
+	/**
+	 * Ensure can specify no default template URI suffix is applied.
+	 */
+	public void testNoDefaultTemplateUriSuffix() throws Exception {
+
+		final String TEMPLATE_URI = "/uri";
+		final String LINK_URI = "/uri-submit";
+
+		// Add HTTP template with default template URI suffix
+		this.source.addHttpTemplate(this.getClassPath("template.ofp"),
+				MockTemplateLogic.class, "uri");
+		this.source.setDefaultHttpTemplateUriSuffix(null);
+		this.source.openOfficeFloor();
+
+		// Ensure service template URI with suffix
+		this.assertHttpRequest(TEMPLATE_URI, 200, LINK_URI);
+
+		// Ensure service template link URI with suffix
+		this.assertHttpRequest(LINK_URI, 200, "submitted" + LINK_URI);
+	}
+
+	/**
 	 * Ensure template URI suffix appended to template URI and link URIs.
 	 */
 	public void testTemplateUriSuffix() throws Exception {
@@ -432,6 +475,77 @@ public class WebApplicationAutoWireOfficeFloorSourceTest extends
 
 		// Ensure service template link URI with suffix
 		this.assertHttpRequest(LINK_URI, 200, "submitted" + LINK_URI);
+	}
+
+	/**
+	 * Ensure able to override default template URI suffix.
+	 */
+	public void testOverrideTemplateUriSuffix() throws Exception {
+
+		final String TEMPLATE_URI = "/uri.override";
+		final String LINK_URI = "/uri-submit.override";
+
+		// Provide default template URI suffix
+		this.source.setDefaultHttpTemplateUriSuffix(".suffix");
+
+		// Add HTTP template
+		HttpTemplateAutoWireSection template = this.source.addHttpTemplate(
+				this.getClassPath("template.ofp"), MockTemplateLogic.class,
+				"uri");
+		template.setTemplateUriSuffix(".override");
+		this.source.openOfficeFloor();
+
+		// Ensure service template URI with suffix
+		this.assertHttpRequest(TEMPLATE_URI, 200, LINK_URI);
+
+		// Ensure service template link URI with suffix
+		this.assertHttpRequest(LINK_URI, 200, "submitted" + LINK_URI);
+	}
+
+	/**
+	 * Ensure appropriate registered URIs.
+	 */
+	public void testRegisteredUris() {
+
+		// Add HTTP template
+		HttpTemplateAutoWireSection template = this.source.addHttpTemplate(
+				this.getClassPath("template.ofp"), MockTemplateLogic.class,
+				"template");
+
+		// Add private HTTP template (should not be included)
+		this.source.addHttpTemplate(this.getClassPath("template.ofp"),
+				MockTemplateLogic.class);
+
+		// Provide URI link
+		this.source.linkUri("uri", template,
+				HttpTemplateSectionSource.RENDER_TEMPLATE_INPUT_NAME);
+
+		// Validate URIs
+		assertUris(this.source.getURIs(), "/template", "/uri");
+
+		// Validate with default template suffix
+		this.source.setDefaultHttpTemplateUriSuffix(".default");
+		assertUris(this.source.getURIs(), "/template.default", "/uri");
+
+		// Validate with template suffix
+		template.setTemplateUriSuffix(".suffix");
+		assertUris(this.source.getURIs(), "/template.suffix", "/uri");
+	}
+
+	/**
+	 * Asserts the URIs are correct.
+	 * 
+	 * @param actualUris
+	 *            Actual URIs.
+	 * @param expectedUris
+	 *            Expected URIs.
+	 */
+	private static void assertUris(String[] actualUris, String... expectedUris) {
+		assertEquals("Incorrect number of URIs", expectedUris.length,
+				actualUris.length);
+		for (int i = 0; i < expectedUris.length; i++) {
+			assertEquals("Incorrect URI " + i, expectedUris[i], actualUris[i]);
+		}
 	}
 
 	/**

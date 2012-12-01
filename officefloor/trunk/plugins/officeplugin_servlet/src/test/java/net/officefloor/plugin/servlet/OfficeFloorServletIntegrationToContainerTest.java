@@ -46,7 +46,6 @@ import org.eclipse.jetty.server.session.SessionHandler;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
 import org.eclipse.jetty.util.resource.Resource;
-import org.junit.Ignore;
 
 /**
  * Ensure able to integrate to provide objects for JSP rendering by Servlet
@@ -54,7 +53,6 @@ import org.junit.Ignore;
  * 
  * @author Daniel Sagenschneider
  */
-@Ignore("TODO provide link suffix for HttpTemplateSectionSource to allow Servlet mapping")
 public class OfficeFloorServletIntegrationToContainerTest extends
 		OfficeFrameTestCase {
 
@@ -146,7 +144,7 @@ public class OfficeFloorServletIntegrationToContainerTest extends
 		this.assertHttpRequest("/Template.jsp", "INIT null null");
 
 		// Invoke to use template submit to create state for JSP
-		this.assertHttpRequest("/template.links-submit.task",
+		this.assertHttpRequest("/template-submit.integrate",
 				"application session request");
 	}
 
@@ -158,6 +156,11 @@ public class OfficeFloorServletIntegrationToContainerTest extends
 		@Override
 		public String getServletName() {
 			return "MockJspIntegrate";
+		}
+
+		@Override
+		public String getTemplateUriSuffix() {
+			return ".integrate";
 		}
 
 		@Override
@@ -241,7 +244,7 @@ public class OfficeFloorServletIntegrationToContainerTest extends
 		this.server.start();
 
 		// Ensure can obtain template content from ServletContext
-		this.assertHttpRequest("/template", "ServletContext Resource");
+		this.assertHttpRequest("/template.resource", "ServletContext Resource");
 	}
 
 	/**
@@ -254,6 +257,11 @@ public class OfficeFloorServletIntegrationToContainerTest extends
 		@Override
 		public String getServletName() {
 			return "MockResourceIntegrate";
+		}
+
+		@Override
+		public String getTemplateUriSuffix() {
+			return "resource";
 		}
 
 		@Override

@@ -169,6 +169,21 @@ public class ServletWebAutoWireApplication<S extends OfficeFloorServlet>
 				.createServletServiceBridger(servletClass, source,
 						HANDLER_SECTION_NAME, HANDLER_INPUT_NAME);
 
+		// Provide default suffix for link mapping
+		String templateUriSuffix = servletInitiateInstance
+				.getTemplateUriSuffix();
+		if (templateUriSuffix == null) {
+			servletContext
+					.log("Failed to configure "
+							+ servletClass.getName()
+							+ " as it does not provide a template URI suffix. It will not be available.");
+			return;
+		}
+		if (!(templateUriSuffix.startsWith("."))) {
+			templateUriSuffix = "." + templateUriSuffix;
+		}
+		source.setDefaultHttpTemplateUriSuffix(templateUriSuffix);
+
 		// Allow loading template content from ServletContext.
 		// (Allows integration into the WAR structure)
 		OfficeFloorCompiler compiler = source.getOfficeFloorCompiler();
@@ -311,7 +326,7 @@ public class ServletWebAutoWireApplication<S extends OfficeFloorServlet>
 		}
 
 		// Include link mapping
-		mappedUris[mappedUris.length - 1] = "*.task";
+		mappedUris[mappedUris.length - 1] = "*" + templateUriSuffix;
 
 		// Provide Servlet and its configuration
 		Dynamic dynamic = servletContext.addServlet(servletName, servletClass);

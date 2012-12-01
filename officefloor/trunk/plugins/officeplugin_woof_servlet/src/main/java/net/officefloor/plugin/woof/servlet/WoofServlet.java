@@ -97,6 +97,11 @@ public class WoofServlet extends OfficeFloorServlet {
 	}
 
 	@Override
+	public String getTemplateUriSuffix() {
+		return ".woof";
+	}
+
+	@Override
 	public boolean configure(WebAutoWireApplication application,
 			ServletContext servletContext) throws Exception {
 

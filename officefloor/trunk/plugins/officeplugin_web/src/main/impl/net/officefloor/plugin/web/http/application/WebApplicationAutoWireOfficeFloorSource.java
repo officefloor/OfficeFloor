@@ -20,11 +20,9 @@ package net.officefloor.plugin.web.http.application;
 
 import java.lang.reflect.Method;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import net.officefloor.autowire.AutoWire;
 import net.officefloor.autowire.AutoWireObject;
@@ -41,10 +39,13 @@ import net.officefloor.frame.api.execute.Task;
 import net.officefloor.plugin.web.http.continuation.HttpUrlContinuationSectionSource;
 import net.officefloor.plugin.web.http.location.HttpApplicationLocation;
 import net.officefloor.plugin.web.http.location.HttpApplicationLocationManagedObjectSource;
+import net.officefloor.plugin.web.http.location.HttpApplicationLocationMangedObject;
+import net.officefloor.plugin.web.http.location.InvalidHttpRequestUriException;
 import net.officefloor.plugin.web.http.parameters.source.HttpParametersObjectManagedObjectSource;
 import net.officefloor.plugin.web.http.resource.source.SourceHttpResourceFactory;
 import net.officefloor.plugin.web.http.session.clazz.source.HttpSessionClassManagedObjectSource;
 import net.officefloor.plugin.web.http.template.HttpTemplateWorkSource;
+import net.officefloor.plugin.web.http.template.parse.HttpTemplate;
 import net.officefloor.plugin.web.http.template.section.HttpTemplateSectionSource;
 
 /**
@@ -64,6 +65,11 @@ public class WebApplicationAutoWireOfficeFloorSource extends
 	 * {@link HttpTemplateAutoWireSection} instances.
 	 */
 	private final List<HttpTemplateAutoWireSection> httpTemplates = new LinkedList<HttpTemplateAutoWireSection>();
+
+	/**
+	 * Default {@link HttpTemplate} URI suffix.
+	 */
+	private String defaultTemplateUriSuffix = null;
 
 	/**
 	 * {@link HttpUrlContinuationSectionSource} to provide the
@@ -117,6 +123,67 @@ public class WebApplicationAutoWireOfficeFloorSource extends
 	public WebApplicationAutoWireOfficeFloorSource() {
 		// Configure in the auto wire section transformer for URL continuations
 		this.addSectionTransformer(this.urlContinuations);
+	}
+
+	/**
+	 * Obtains the {@link HttpTemplate} URI suffix.
+	 * 
+	 * @param template
+	 *            {@link HttpTemplateAutoWireSection}.
+	 * @return {@link HttpTemplate} URI suffix.
+	 */
+	private String getTemplateUriSuffix(HttpTemplateAutoWireSection template) {
+
+		// Obtain the template URI Suffix
+		String templateUriSuffix = template.getTemplateUriSuffix();
+		if (templateUriSuffix == null) {
+			templateUriSuffix = (this.defaultTemplateUriSuffix == null ? ""
+					: this.defaultTemplateUriSuffix);
+		}
+
+		// Return the URI suffix
+		return templateUriSuffix;
+	}
+
+	/**
+	 * Obtains the {@link HttpTemplate} URI path.
+	 * 
+	 * @param templateUri
+	 *            {@link HttpTemplate} URI.
+	 * @param templateUriSuffix
+	 *            {@link HttpTemplate} URI suffix.
+	 * @return {@link HttpTemplate} URI path
+	 */
+	private String getTemplateUriPath(String templateUri,
+			String templateUriSuffix) {
+
+		// Return the template URI path
+		return this.getUriPath(templateUri + templateUriSuffix);
+	}
+
+	/**
+	 * Obtains the URI path.
+	 * 
+	 * @param configuredUri
+	 *            Configured URI.
+	 * @return URI path.
+	 */
+	private String getUriPath(String configuredUri) {
+
+		// Determine the URI path
+		String uriPath = configuredUri;
+		if (!(uriPath.startsWith("/"))) {
+			uriPath = "/" + uriPath;
+		}
+		try {
+			uriPath = HttpApplicationLocationMangedObject
+					.transformToCanonicalPath(uriPath);
+		} catch (InvalidHttpRequestUriException ex) {
+			// Do nothing and keep URI path as is
+		}
+
+		// Return the URI path
+		return uriPath;
 	}
 
 	/*
@@ -215,6 +282,11 @@ public class WebApplicationAutoWireOfficeFloorSource extends
 	public HttpTemplateAutoWireSection addHttpTemplate(String templatePath,
 			Class<?> templateLogicClass) {
 		return this.addHttpTemplate(templatePath, templateLogicClass, null);
+	}
+
+	@Override
+	public void setDefaultHttpTemplateUriSuffix(String uriSuffix) {
+		this.defaultTemplateUriSuffix = uriSuffix;
 	}
 
 	@Override
@@ -387,21 +459,39 @@ public class WebApplicationAutoWireOfficeFloorSource extends
 	@Override
 	public String[] getURIs() {
 
-		// Create the set of URIs
-		Set<String> uris = new HashSet<String>();
+		// Create the URIs
+		List<String> uris = new LinkedList<String>();
 
 		// Add HTTP template URIs
 		for (HttpTemplateAutoWireSection httpTemplate : this.httpTemplates) {
+
+			// Obtain the template URI
 			String templateUri = httpTemplate.getTemplateUri();
-			if (templateUri != null) {
-				uris.add(templateUri);
+
+			// Ignore private templates
+			if (templateUri == null) {
+				continue;
 			}
+
+			// Obtain the template URI path
+			String templateUriSuffix = this.getTemplateUriSuffix(httpTemplate);
+			String templateUriPath = this.getTemplateUriPath(templateUri,
+					templateUriSuffix);
+
+			// Add the template URI path
+			uris.add(templateUriPath);
 		}
 
 		// Add the linked URIs
 		for (HttpUriLink link : this.urlContinuations
 				.getRegisteredHttpUriLinks()) {
-			uris.add(link.getApplicationUriPath());
+
+			// Obtain the URI path
+			String uriPath = link.getApplicationUriPath();
+			uriPath = this.getUriPath(uriPath);
+
+			// Add the URI path
+			uris.add(uriPath);
 		}
 
 		// Return the URIs
@@ -476,14 +566,14 @@ public class WebApplicationAutoWireOfficeFloorSource extends
 			boolean isTemplateSecure = httpTemplate.isTemplateSecure();
 
 			// Obtain the template URI Suffix
-			String templateUriSuffix = httpTemplate.getTemplateUriSuffix();
+			String templateUriSuffix = this.getTemplateUriSuffix(httpTemplate);
 
 			// Provide the template URI (and potential URL continuation)
 			String templateUri = httpTemplate.getTemplateUri();
 			if (templateUri != null) {
 				// Provide URL continuation
-				String templateUriPath = templateUri
-						+ (templateUriSuffix == null ? "" : templateUriSuffix);
+				String templateUriPath = this.getTemplateUriPath(templateUri,
+						templateUriSuffix);
 				HttpUriLink link = this.urlContinuations.linkUri(
 						templateUriPath, httpTemplate,
 						HttpTemplateSectionSource.RENDER_TEMPLATE_INPUT_NAME);
