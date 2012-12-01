@@ -48,7 +48,7 @@ public class ExampleIT extends TestCase {
 	public void testTemplate() throws IOException {
 
 		// Undertake the request
-		HttpGet request = new HttpGet("http://localhost:18181/test/template");
+		HttpGet request = new HttpGet("http://localhost:18181/test/template.woof");
 		HttpResponse response = this.client.execute(request);
 		assertEquals("Request should be successful", 200, response
 				.getStatusLine().getStatusCode());

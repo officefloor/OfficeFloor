@@ -98,7 +98,7 @@ public class WoofServlet extends OfficeFloorServlet {
 
 	@Override
 	public String getTemplateUriSuffix() {
-		return ".woof";
+		return WoofOfficeFloorSource.WOOF_TEMPLATE_URI_SUFFIX;
 	}
 
 	@Override

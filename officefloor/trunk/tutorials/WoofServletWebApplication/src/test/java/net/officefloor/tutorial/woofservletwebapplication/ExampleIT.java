@@ -21,13 +21,12 @@ package net.officefloor.tutorial.woofservletwebapplication;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 
+import junit.framework.TestCase;
+
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.DefaultHttpClient;
-import org.junit.Ignore;
-
-import junit.framework.TestCase;
 
 /**
  * Tests the {@link ExampleFilter}.
@@ -35,7 +34,6 @@ import junit.framework.TestCase;
  * @author Daniel Sagenschneider
  */
 // START SNIPPET: example
-@Ignore("TODO provide link suffix functionality to HttpTemplateSectionSource for Servlet mapping")
 public class ExampleIT extends TestCase {
 
 	private final HttpClient client = new DefaultHttpClient();
@@ -46,12 +44,12 @@ public class ExampleIT extends TestCase {
 	}
 
 	public void testHttpTemplateAndLinkToJsp() throws IOException {
-		this.assertRequest("/template",
-				"<html><body><a href=\"/template-LINK\">TEMPLATE</a></body></html>");
+		this.assertRequest("/template.woof",
+				"<html><body><a href=\"/template-LINK.woof\">TEMPLATE</a></body></html>");
 	}
 
 	public void testLinkToJsp() throws IOException {
-		this.assertRequest("/template-LINK",
+		this.assertRequest("/template-LINK.woof",
 				"<html><body>Linked to JSP</body></html>");
 	}
 

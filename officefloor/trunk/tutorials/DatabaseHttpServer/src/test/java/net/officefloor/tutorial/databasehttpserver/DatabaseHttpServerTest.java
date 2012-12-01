@@ -76,7 +76,7 @@ public class DatabaseHttpServerTest extends TestCase {
 	public void testConnection() throws Exception {
 
 		// Undertake request to allow set-up
-		this.doRequest("http://localhost:7878/example");
+		this.doRequest("http://localhost:7878/example.woof");
 
 		// Obtain connection via DataSource
 		jdbcDataSource dataSource = new jdbcDataSource();
@@ -104,13 +104,13 @@ public class DatabaseHttpServerTest extends TestCase {
 	public void testInteraction() throws Exception {
 
 		// Request page
-		this.doRequest("http://localhost:7878/example");
+		this.doRequest("http://localhost:7878/example.woof");
 
 		// Add row (will pick up parameter values from URL)
-		this.doRequest("http://localhost:7878/example-addRow?name=Daniel&description=Founder");
+		this.doRequest("http://localhost:7878/example-addRow.woof?name=Daniel&description=Founder");
 
 		// Delete row
-		this.doRequest("http://localhost:7878/example-deleteRow?id=1");
+		this.doRequest("http://localhost:7878/example-deleteRow.woof?id=1");
 	}
 
 	private void doRequest(String url) throws Exception {

@@ -59,6 +59,7 @@ import net.officefloor.plugin.web.http.location.HttpApplicationLocationManagedOb
 import net.officefloor.plugin.web.http.resource.source.SourceHttpResourceFactory;
 import net.officefloor.plugin.web.http.server.HttpServerAutoWireApplication;
 import net.officefloor.plugin.web.http.server.HttpServerAutoWireOfficeFloorSource;
+import net.officefloor.plugin.web.http.template.parse.HttpTemplate;
 
 /**
  * <code>main</code> class to run a {@link WoofModel} on a
@@ -126,6 +127,11 @@ public class WoofOfficeFloorSource extends HttpServerAutoWireOfficeFloorSource
 	 * Property to specify the HTTP port.
 	 */
 	public static final String PROPERTY_HTTP_PORT = HttpApplicationLocationManagedObjectSource.PROPERTY_HTTP_PORT;
+
+	/**
+	 * WoOF {@link HttpTemplate} URI suffix.
+	 */
+	public static final String WOOF_TEMPLATE_URI_SUFFIX = ".woof";
 
 	/**
 	 * <p>
@@ -442,6 +448,14 @@ public class WoofOfficeFloorSource extends HttpServerAutoWireOfficeFloorSource
 	 * WoOF application {@link ResourceSource} instances.
 	 */
 	private final List<ResourceSource> applicationResourceSources = new LinkedList<ResourceSource>();
+
+	/**
+	 * Initiate.
+	 */
+	public WoofOfficeFloorSource() {
+		// Provide default WoOF template suffix
+		this.setDefaultHttpTemplateUriSuffix(WOOF_TEMPLATE_URI_SUFFIX);
+	}
 
 	/**
 	 * Allows overriding to provide additional configuration.

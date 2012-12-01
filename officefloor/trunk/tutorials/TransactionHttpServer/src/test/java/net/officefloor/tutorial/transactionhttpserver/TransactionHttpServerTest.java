@@ -86,7 +86,7 @@ public class TransactionHttpServerTest extends TestCase {
 	public void testSetupDatabase() throws Exception {
 
 		// Request page to allow time for database setup
-		this.doRequest("http://localhost:7878/users");
+		this.doRequest("http://localhost:7878/users.woof");
 
 		// Obtain connection via DataSource
 		jdbcDataSource dataSource = new jdbcDataSource();
@@ -110,7 +110,7 @@ public class TransactionHttpServerTest extends TestCase {
 	public void testJpa() throws Exception {
 
 		// Request page to allow time for database setup
-		this.doRequest("http://localhost:7878/users");
+		this.doRequest("http://localhost:7878/users.woof");
 
 		// Obtain entity manager
 		EntityManagerFactory factory = Persistence
@@ -154,13 +154,13 @@ public class TransactionHttpServerTest extends TestCase {
 	public void testCreateUser() throws Exception {
 
 		// Request page
-		this.doRequest("http://localhost:7878/users");
+		this.doRequest("http://localhost:7878/users.woof");
 
 		// Create user with all details
-		this.doRequest("http://localhost:7878/users-create?username=melanie&fullname=Melanie+Sagenschneider");
+		this.doRequest("http://localhost:7878/users-create.woof?username=melanie&fullname=Melanie+Sagenschneider");
 
 		// Attempt to create user that will fail database constraints
-		this.doRequest("http://localhost:7878/users-create?username=joe");
+		this.doRequest("http://localhost:7878/users-create.woof?username=joe");
 
 		// Validate melanie added
 		EntityManager manager = Persistence.createEntityManagerFactory(

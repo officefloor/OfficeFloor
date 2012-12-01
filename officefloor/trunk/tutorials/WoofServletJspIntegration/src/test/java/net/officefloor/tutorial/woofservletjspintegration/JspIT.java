@@ -27,7 +27,6 @@ import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.DefaultHttpClient;
-import org.junit.Ignore;
 
 /**
  * Ensure obtains the response from integration of WoOF with JSP.
@@ -35,18 +34,17 @@ import org.junit.Ignore;
  * @author Daniel Sagenschneider
  */
 // START SNIPPET: tutorial
-@Ignore("TODO provide link suffix functionality to HttpTemplateSectionSource to enable Servlet mapping for link")
 public class JspIT extends TestCase {
 
 	public void testTemplate() throws IOException {
 		this.assertRequest(
-				"/template",
+				"/template.woof",
 				"<html> <body> REQUEST SESSION APPLICATION <a href='/template-link'>JSP</a> </body> </html>");
 	}
 
 	public void testLinkToJsp() throws IOException {
 		this.assertRequest(
-				"/template-link",
+				"/template-link.woof",
 				"<html> <body> REQUEST SESSION application <a href='/template'>WoOF</a> </body> </html>");
 	}
 

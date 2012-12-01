@@ -62,7 +62,7 @@ public class ServletContainerWoofApplicationExtensionServiceTest extends
 	 */
 	public void testServiceViaWoOF() throws Exception {
 		this.startServer(null, null);
-		String responseText = this.doGetEntity("/test");
+		String responseText = this.doGetEntity("/test.woof");
 		assertEquals(
 				"Incorrect template content",
 				"TEMPLATE TEST OnePersonTeam_"
