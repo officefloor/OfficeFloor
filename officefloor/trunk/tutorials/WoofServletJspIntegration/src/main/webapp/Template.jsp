@@ -9,6 +9,6 @@
         <jsp:getProperty name="RequestBean" property="text" />
         <jsp:getProperty name="SessionBean" property="text" />
         <jsp:getProperty name="ApplicationBean" property="text" />
-        <a href='/template'>WoOF</a>
+        <a href='/template.woof'>WoOF</a>
     </body>
 </html>

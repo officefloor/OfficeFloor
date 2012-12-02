@@ -39,13 +39,13 @@ public class JspIT extends TestCase {
 	public void testTemplate() throws IOException {
 		this.assertRequest(
 				"/template.woof",
-				"<html> <body> REQUEST SESSION APPLICATION <a href='/template-link'>JSP</a> </body> </html>");
+				"<html> <body> REQUEST SESSION APPLICATION <a href='/template-link.woof'>JSP</a> </body> </html>");
 	}
 
 	public void testLinkToJsp() throws IOException {
 		this.assertRequest(
 				"/template-link.woof",
-				"<html> <body> REQUEST SESSION application <a href='/template'>WoOF</a> </body> </html>");
+				"<html> <body> REQUEST SESSION application <a href='/template.woof'>WoOF</a> </body> </html>");
 	}
 
 	private void assertRequest(String uri, String expectedContent)
