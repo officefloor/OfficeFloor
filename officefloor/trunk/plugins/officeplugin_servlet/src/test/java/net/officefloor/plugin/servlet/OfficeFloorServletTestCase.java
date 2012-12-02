@@ -137,8 +137,8 @@ public class OfficeFloorServletTestCase extends OfficeFrameTestCase {
 	 * Ensure more specific link URI is handled by configured {@link Servlet}.
 	 */
 	public void testNonHandledTask() throws Exception {
-		assertEquals("Should pass onto servlet", "UNHANDLED_TASK",
-				this.doGetEntity("/unhandled.links/unhandled.task"));
+		assertEquals("Should pass onto servlet", "UNHANDLED_LINK",
+				this.doGetEntity("/unhandled-link.woof"));
 	}
 
 	/**
@@ -330,7 +330,7 @@ public class OfficeFloorServletTestCase extends OfficeFrameTestCase {
 		context.addServlet(new ServletHolder(new MockHttpServlet("UNHANDLED")),
 				"/unhandled");
 		context.addServlet(new ServletHolder(new MockHttpServlet(
-				"UNHANDLED_TASK")), "/unhandled.links/unhandled.task");
+				"UNHANDLED_LINK")), "/unhandled-link.woof");
 
 		// Configure the Servlet
 		context.addEventListener(this.listener);
