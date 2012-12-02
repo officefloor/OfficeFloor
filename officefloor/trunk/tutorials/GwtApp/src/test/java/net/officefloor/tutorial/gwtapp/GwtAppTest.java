@@ -46,7 +46,7 @@ public class GwtAppTest extends TestCase {
 
 			// Send request for page
 			HttpResponse response = client.execute(new HttpGet(
-					"http://localhost:7878/template"));
+					"http://localhost:7878/template.woof"));
 
 			// Ensure request is successful
 			assertEquals("Request should be successful", 200, response

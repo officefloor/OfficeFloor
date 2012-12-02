@@ -434,6 +434,28 @@ public class WebApplicationAutoWireOfficeFloorSourceTest extends
 	}
 
 	/**
+	 * Ensure root template does not apply suffix for template, only links.
+	 */
+	public void testRootTemplateUriSuffix() throws Exception {
+
+		final String SUFFIX = ".suffix";
+		final String TEMPLATE_URI = "/";
+		final String LINK_URI = "/-submit" + SUFFIX;
+
+		// Add root HTTP template with default template URI suffix
+		this.source.addHttpTemplate(this.getClassPath("template.ofp"),
+				MockTemplateLogic.class, "/");
+		this.source.setDefaultHttpTemplateUriSuffix(SUFFIX);
+		this.source.openOfficeFloor();
+
+		// Ensure service template URI with suffix
+		this.assertHttpRequest(TEMPLATE_URI, 200, LINK_URI);
+
+		// Ensure service template link URI with suffix
+		this.assertHttpRequest(LINK_URI, 200, "submitted" + LINK_URI);
+	}
+
+	/**
 	 * Ensure can specify no default template URI suffix is applied.
 	 */
 	public void testNoDefaultTemplateUriSuffix() throws Exception {

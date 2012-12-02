@@ -156,6 +156,13 @@ public class WebApplicationAutoWireOfficeFloorSource extends
 	 */
 	private String getTemplateUriPath(String templateUri,
 			String templateUriSuffix) {
+		
+		// Obtain the canonical template URI path
+		String canonicalTemplateUri = this.getUriPath(templateUri);
+		if ("/".equals(canonicalTemplateUri)) {
+			// Root template, so do not include suffix
+			return canonicalTemplateUri;
+		}
 
 		// Return the template URI path
 		return this.getUriPath(templateUri + templateUriSuffix);
