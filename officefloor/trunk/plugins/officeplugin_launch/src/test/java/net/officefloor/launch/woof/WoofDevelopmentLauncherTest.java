@@ -196,7 +196,7 @@ public class WoofDevelopmentLauncherTest extends OfficeFrameTestCase implements
 			WoofOfficeFloorSource.start();
 
 			// Ensure template available
-			this.doHttpRequest(7878, "template", "TEMPLATE");
+			this.doHttpRequest(7878, "template.woof", "TEMPLATE");
 
 			// Ensure section available
 			this.doHttpRequest(7878, "section", "SECTION");
@@ -217,7 +217,7 @@ public class WoofDevelopmentLauncherTest extends OfficeFrameTestCase implements
 				"/template", "/section");
 
 		// Ensure template available
-		this.doHttpRequest(8888, "template", "TEMPLATE");
+		this.doHttpRequest(8888, "template.woof", "TEMPLATE");
 
 		// Ensure section available
 		this.doHttpRequest(8888, "section", "SECTION");
@@ -237,7 +237,7 @@ public class WoofDevelopmentLauncherTest extends OfficeFrameTestCase implements
 					"noGwt.woof");
 
 			// Ensure template available
-			this.doHttpRequest(7878, "noGwt", "TEMPLATE");
+			this.doHttpRequest(7878, "noGwt.woof", "TEMPLATE");
 
 		} finally {
 			// Ensure clean up and stop
@@ -256,7 +256,7 @@ public class WoofDevelopmentLauncherTest extends OfficeFrameTestCase implements
 				"/noGwt");
 
 		// Ensure start alternate configuration
-		this.doHttpRequest(8888, "noGwt", "TEMPLATE");
+		this.doHttpRequest(8888, "noGwt.woof", "TEMPLATE");
 	}
 
 	/**

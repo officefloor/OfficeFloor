@@ -27,7 +27,7 @@ public class RunApplicationTest {
 	public void ensureApplicationAvailable() throws Exception {
 
 		// Connect to application and obtain page
-		URL url = new URL("http://localhost:7878/static");
+		URL url = new URL("http://localhost:7878/static.woof");
 		Reader response = new InputStreamReader(url.openStream());
 		StringWriter content = new StringWriter();
 		for (int character = response.read(); character != -1; character = response

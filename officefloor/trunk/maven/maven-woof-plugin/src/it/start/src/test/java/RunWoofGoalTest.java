@@ -49,7 +49,7 @@ public class RunWoofGoalTest extends TestCase {
 	 * Ensure appropriately handles WoOF resources.
 	 */
 	public void testWoofResource() throws Exception {
-		this.doTest("/woof", "<html><body>WOOF RESOURCE</body></html>");
+		this.doTest("/woof.woof", "<html><body>WOOF RESOURCE</body></html>");
 	}
 
 	/**
