@@ -28,8 +28,10 @@ import net.officefloor.eclipse.extension.governancesource.GovernanceSourceExtens
 import net.officefloor.eclipse.extension.governancesource.GovernanceSourceExtensionContext;
 import net.officefloor.eclipse.extension.managedobjectsource.ManagedObjectSourceExtension;
 import net.officefloor.eclipse.extension.managedobjectsource.ManagedObjectSourceExtensionContext;
+import net.officefloor.eclipse.extension.sectionsource.SectionSourceExtensionContext;
 import net.officefloor.eclipse.extension.worksource.WorkSourceExtension;
 import net.officefloor.eclipse.extension.worksource.WorkSourceExtensionContext;
+import net.officefloor.eclipse.util.EclipseUtil;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.swt.SWT;
@@ -138,6 +140,28 @@ public class SourceExtensionUtil {
 			PropertyValueChangeListener listener) {
 		return createPropertyClass(label, name, container,
 				new GovernanceGeneric(context), listener);
+	}
+
+	/**
+	 * Creates the display for the input {@link Property}.
+	 * 
+	 * @param label
+	 *            Label for the {@link Property}.
+	 * @param name
+	 *            Name of the {@link Property}.
+	 * @param container
+	 *            {@link Composite} to add display {@link Control} instances.
+	 * @param context
+	 *            {@link SectionSourceExtensionContext}.
+	 * @param listener
+	 *            {@link PropertyValueChangeListener}. May be <code>null</code>.
+	 * @return {@link Property} for the {@link Text}.
+	 */
+	public static Property createPropertyClass(String label, String name,
+			Composite container, SectionSourceExtensionContext context,
+			PropertyValueChangeListener listener) {
+		return createPropertyClass(label, name, container, new SectionGeneric(
+				context), listener);
 	}
 
 	/**
@@ -360,6 +384,31 @@ public class SourceExtensionUtil {
 	 * @param container
 	 *            {@link Composite} to add display {@link Control} instances.
 	 * @param context
+	 *            {@link SectionSourceExtensionContext}.
+	 * @param listener
+	 *            {@link PropertyValueChangeListener}. May be <code>null</code>.
+	 * @return {@link Property} for the {@link Text}.
+	 */
+	public static Property createPropertyText(String label, String name,
+			String defaultValue, Composite container,
+			SectionSourceExtensionContext context,
+			PropertyValueChangeListener listener) {
+		return createPropertyText(label, name, defaultValue, container,
+				new SectionGeneric(context), listener);
+	}
+
+	/**
+	 * Creates the display for the input {@link Property}.
+	 * 
+	 * @param label
+	 *            Label for the {@link Property}.
+	 * @param name
+	 *            Name of the {@link Property}.
+	 * @param defaultValue
+	 *            Default value for the {@link Property}.
+	 * @param container
+	 *            {@link Composite} to add display {@link Control} instances.
+	 * @param context
 	 *            {@link GenericSourceExtensionContext}.
 	 * @param listener
 	 *            {@link PropertyValueChangeListener}. May be <code>null</code>.
@@ -390,7 +439,16 @@ public class SourceExtensionUtil {
 		text.addModifyListener(new ModifyListener() {
 			@Override
 			public void modifyText(ModifyEvent e) {
-				property.setValue(text.getText());
+
+				// Determine if have property value
+				String propertyValue = text.getText();
+				if (EclipseUtil.isBlank(propertyValue)) {
+					// Set to null if blank
+					propertyValue = null;
+				}
+
+				// Load the property value
+				property.setValue(propertyValue);
 				if (listener != null) {
 					listener.propertyValueChanged(new PropertyValueChangeEventImpl(
 							property));
@@ -649,6 +707,48 @@ public class SourceExtensionUtil {
 		 *            {@link ManagedObjectSourceExtensionContext}.
 		 */
 		public ManagedObjectGeneric(ManagedObjectSourceExtensionContext context) {
+			this.context = context;
+		}
+
+		/*
+		 * =============== GenericSourceExtensionContext ====================
+		 */
+
+		@Override
+		public IProject getProject() {
+			return this.context.getProject();
+		}
+
+		@Override
+		public PropertyList getPropertyList() {
+			return this.context.getPropertyList();
+		}
+
+		@Override
+		public void notifyPropertiesChanged() {
+			this.context.notifyPropertiesChanged();
+		}
+	}
+
+	/**
+	 * {@link SectionSourceExtensionContext}
+	 * {@link GenericSourceExtensionContext}.
+	 */
+	private static class SectionGeneric implements
+			GenericSourceExtensionContext {
+
+		/**
+		 * {@link SectionSourceExtensionContext}.
+		 */
+		private final SectionSourceExtensionContext context;
+
+		/**
+		 * Initiate.
+		 * 
+		 * @param context
+		 *            {@link SectionSourceExtensionContext}.
+		 */
+		public SectionGeneric(SectionSourceExtensionContext context) {
 			this.context = context;
 		}
 

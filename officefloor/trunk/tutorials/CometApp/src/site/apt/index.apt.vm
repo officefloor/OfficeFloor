@@ -20,7 +20,7 @@
 
 Template.woof.html
 
-  The below is the HTML page.
+  The below is the HTML for the page.
 
 %{code-snippet|brush=xml|file=${basedir}/src/main/webapp/Template.woof.html}
   
@@ -28,7 +28,9 @@ Template.woof.html
 
 ConversationSubscription Class
 
-  As a web browser typically will allow only two connections back to the server, a connection can not be used for each Comet subscription.  OfficeFloor handles the Comet subscriptions by multiplexing them over one of the connections leaving the other connection available for servicing the other web page requests.  To distinguish between subscriptions each subscription is identified by an interface.  For this tutorial the interface is as follows.
+  As a web browser typically will allow only two connections back to the server, a connection can not be used for each Comet subscription.
+  
+  OfficeFloor handles the Comet subscriptions by multiplexing them over one of the connections leaving the other connection available for servicing the other web page requests.  To distinguish between subscriptions each subscription is identified by an interface.  For this tutorial the interface is as follows.
 
 %{code-snippet|brush-autodetect=1|id=example|file=${basedir}/src/main/java/net/officefloor/tutorial/cometapp/client/ConversationSubscription.java}
 
@@ -76,7 +78,7 @@ Server Side
   
 [./images/CometApp-add-template-dialog.png] CometApp Add template dialog screenshot.
   
-  After checking to enable comet, there is no additional configuration or coding necessary to support a single server providing Comet functionality.
+  After checking the checkbox to enable comet, there is no additional configuration or coding necessary to support a single server providing Comet functionality.
 
 
 

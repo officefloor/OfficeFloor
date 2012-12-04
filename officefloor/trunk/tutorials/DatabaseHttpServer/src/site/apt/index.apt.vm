@@ -68,7 +68,7 @@ Dependency Injection
 
   As the method is matched to the template by name, OfficeFloor uses the method's parameters to identify the necessary dependencies to be injected.  In this case the only dependency is the <<<DataSource>>> which was configured above.
   
-  WoOF auto-wires dependency injection based on type.  Auto-wiring dependencies based on type is adequate (and much easier) for the majority of applications.  WoOF's underlying OfficeFloor framework does provide manual dependency configuration, however this is seldom used as OfficeFloor allows qualifying dependencies.  See the {{{../index.html}other tutorials}} for more details.
+  WoOF auto-wires dependency injection based on type.  Auto-wiring dependencies based on type is adequate (and much easier) for the majority of applications.  WoOF's underlying OfficeFloor framework does provide manual dependency configuration, however this is seldom used as OfficeFloor allows qualifying dependencies for auto-wiring.
   
   The handling of <<< #\{addRow\} >>> submission is via the following method.
 

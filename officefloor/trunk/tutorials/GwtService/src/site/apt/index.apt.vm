@@ -46,7 +46,7 @@ Template.woof.html
 
 %{code-snippet|brush=xml|file=${basedir}/src/main/webapp/Template.woof.html}
 
-  This simple HTML contains the <<<id>>> attribute for the GWT hook and the WoOF <<<%\{newGame\}>>> link to start a new game.
+  This simple HTML contains the <<<id>>> attribute for the GWT hook and the WoOF <<<#\{newGame\}>>> link to start a new game.
 
   Notice that there is mix between HTML and GWT to provide the functionality.  Not all functionality on the web page will typically require RIA capabilities and GWT has done a great job in respecting this.
 
@@ -86,9 +86,9 @@ Server side logic
   
   The <<<@Parameter>>> annotation is required to distinguish which parameter receives the value sent from the client.
   
-  The reason for using the <<<AsyncCallback>>> interface in the server code is that it does not mix techniques.  In other words, on the client is a GWT Async Interface call back while on the server is a GWT Service Interface synchronous method.  Keeping the server code as a call back is felt to make the coding more intuitive.
+  The reason for using the <<<AsyncCallback>>> interface in the server code is that it does not mix techniques.  In other words, in more conventional GWT applications the client is a GWT Async Interface call back while on the server it is a GWT Service Interface synchronous method.  WoOF in keeping the server code as a call back is felt to make the coding more consistent and intuitive.
 
-  The implementation of the GWT service method is reasonably self explainatory (determines whether correct, too many tries, higher or lower).  As the template object is stored within the HTTP Session, the state of game play is maintained across GWT RPC calls.
+  The implementation of the GWT service method is reasonably self explainatory (determines whether correct, higher, lower or too many tries).  As the template object is stored within the HTTP Session, the state of game play is maintained across GWT RPC calls.
   
   
 

@@ -54,7 +54,7 @@ Running the WoOF project from Maven
     mvn woof:run
 +-----------------------------------------+
 
-  The application will now be available at: <<<http://localhost:7878/static>>>  (and look as follows)
+  The application will now be available at: <<<http://localhost:7878/static.woof>>>  (and look as follows)
   
 [./images/woof-archetype-static-screenshot.png] WoOF Archetype Static Page Screen Shot
   
@@ -78,7 +78,7 @@ Running the WoOF project within a JEE container
     mvn org.mortbay.jetty:jetty-maven-plugin:run
 +-----------------------------------------+
 
-  After running the above command, the WoOF application will be available at: <<<http://localhost:18080/static>>>
+  After running the above command, the WoOF application will be available at: <<<http://localhost:18080/static.woof>>>
 
 
 
@@ -112,7 +112,7 @@ Importing the WoOF project into Eclipse
 *-------------+-------------+
 | Configuration of the WoOF application is via the <<<application.woof>>> file | WoOF uses graphical configuration. See below. | 
 *-------------+-------------+
-| Web resources of the naming convention <<<[name].woof.[extension]>>> are WoOF template files | WoOF provides non-obtrusive instrumentation of the templates so that the raw template HTML files can be displayed in a browser.  This allows WYSIWYG web development tools to develop the web pages and fast turn around times by rendering the raw HTML file within a web browser.  Placing these files with the web resources directory allows relative paths to pick up CSS, images, etc when opened within a web browser. |
+| Web resources for a WoOF template following the naming convention <<<[name].woof.[extension]>>> | WoOF provides non-obtrusive instrumentation of the templates so that the raw template HTML files can be displayed in a browser.  This allows WYSIWYG web development tools to develop the web pages and fast turn around times by rendering the raw HTML file within a web browser.  Placing these files with the web resources directory allows relative paths to pick up CSS, images, etc when opened within a web browser. |
 *-------------+-------------+
 
 
@@ -133,7 +133,7 @@ WoOF graphical configuration
 
 [./images/woof-archetype-configuration.png] WoOF archetype project configuration.
 
-  The configuration shows three web pages with sequential navigation.
+  The very simple configuration shows three web pages with sequential navigation.
   
     * <<<static>>> : example static HTML page (useful for static content and wireframing a prototype web application)
     
@@ -141,7 +141,7 @@ WoOF graphical configuration
     
     * <<<ria>>> : example Rich Internet Application functionality that makes a simple AJAX call to the server
     
-  There are various other configuration items that can be added by right clicking within the WoOF editor.  Please see the {{{../../tutorials/index.html}tutorials}} for further details.
+  There are various other configuration items that can be added by right clicking within the WoOF editor.  Please see the {{{../../tutorials/index.html}other tutorials}} for further details.
 
   
 
@@ -161,7 +161,7 @@ HTML templating and Java server logic
 
   Beyond a few annotations the logic class is straight forward Java.
   
-  Please see the {{{../../tutorials/index.html}tutorials}} for explanation of the code and further features available.
+  Please see the {{{../../tutorials/index.html}other tutorials}} for explanation of the code and the further features available.
 
 
 
@@ -177,5 +177,5 @@ Congratulations
 
   Congratulations you have just created and run your first WoOF web application.
   
-  Please see the {{{../../tutorials/index.html}tutorials}} for adding further functionality to your WoOF web application.
+  Please see the {{{../../tutorials/index.html}other tutorials}} for adding further functionality to your WoOF web application.
 

@@ -59,7 +59,7 @@ Configuration
   
   WoOF uses the method's dependencies to determine the type of functionality being undertaken by the method.  The method's dependencies give an indicator of what the method is likely to be doing.  In this case if the method requires a <<<DataSource>>> it is very likely that it will be doing blocking database I/O calls.  This means of classifying methods allows OfficeFloor to automagically use the appropriate thread pool to execute the method.  It is what OfficeFloor considers thread injection.
 
-  All other methods are executed by the default <<<Team>>>.  Running stand-alone this would be the {{{/apidocs/net/officefloor/frame/impl/spi/team/OnePersonTeamSource.html}OnePersonTeamSource}} which is a single threaded team.
+  All other methods are executed by the default <<<Team>>>.  Running stand-alone this would be the socket listener thread.
   
   Adding thread pools is optional and therefore the inclusion of the <<<application.teams>>> file is optional.  It is anticipated that threading will be configured closely to the dependencies available within an environment.  In many cases this will be handled by the environment deployment.  The file however is supported for extending WoOF web applications by customising the thread pools.
 

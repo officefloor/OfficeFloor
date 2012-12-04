@@ -57,13 +57,10 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.draw2d.ColorConstants;
 import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.ModifyEvent;
-import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
-import org.eclipse.swt.widgets.Text;
 
 /**
  * Wizard page providing the details of the {@link HttpTemplate}.
@@ -126,9 +123,9 @@ public class HttpTemplateWizardPage extends WizardPage implements
 	private String logicClassName;
 
 	/**
-	 * URI for the {@link HttpTemplate}.
+	 * URI path for the {@link HttpTemplate}.
 	 */
-	private Text uri;
+	private String uriPath;
 
 	/**
 	 * GWT EntryPoint class name.
@@ -226,6 +223,9 @@ public class HttpTemplateWizardPage extends WizardPage implements
 			this.properties.addProperty(
 					HttpTemplateSectionSource.PROPERTY_CLASS_NAME).setValue(
 					this.templateInstance.getLogicClassName());
+			this.properties.addProperty(
+					HttpTemplateSectionSource.PROPERTY_TEMPLATE_URI).setValue(
+					this.templateInstance.getUri());
 		}
 
 		// Specify the title
@@ -260,13 +260,12 @@ public class HttpTemplateWizardPage extends WizardPage implements
 	}
 
 	/**
-	 * Obtains the URI.
+	 * Obtains the URI path.
 	 * 
-	 * @return URI.
+	 * @return URI path.
 	 */
-	public String getUri() {
-		String uriValue = this.uri.getText();
-		return (EclipseUtil.isBlank(uriValue) ? null : uriValue.trim());
+	public String getUriPath() {
+		return (EclipseUtil.isBlank(this.uriPath) ? null : this.uriPath.trim());
 	}
 
 	/**
@@ -351,7 +350,7 @@ public class HttpTemplateWizardPage extends WizardPage implements
 		// Obtain initial values
 		String initialTemplatePath = "";
 		String initialLogicClassName = "";
-		String initialUri = "";
+		// URI path already set in properties
 		String initialGwtEntryPoint = "";
 		String[] initialGwtAsyncInterfaces = new String[0];
 		boolean initiallyEnableComet = false;
@@ -361,7 +360,6 @@ public class HttpTemplateWizardPage extends WizardPage implements
 					.getTemplatePath());
 			initialLogicClassName = getTextValue(this.templateInstance
 					.getLogicClassName());
-			initialUri = getTextValue(this.templateInstance.getUri());
 			initialGwtEntryPoint = getTextValue(this.templateInstance
 					.getGwtEntryPointClassName());
 			initialGwtAsyncInterfaces = this.templateInstance
@@ -409,20 +407,6 @@ public class HttpTemplateWizardPage extends WizardPage implements
 				});
 		path.getControl().setLayoutData(
 				new GridData(SWT.FILL, SWT.BEGINNING, true, false));
-
-		// Add means to specify URI
-		new Label(page, SWT.NONE).setText("URI: ");
-		this.uri = new Text(page, SWT.BORDER);
-		this.uri.setLayoutData(new GridData(SWT.FILL, SWT.BEGINNING, true,
-				false));
-		this.uri.setText(initialUri);
-		this.uri.addModifyListener(new ModifyListener() {
-			@Override
-			public void modifyText(ModifyEvent e) {
-				// Flag the uri changed
-				HttpTemplateWizardPage.this.handleChange();
-			}
-		});
 
 		// Provide means to configure the properties
 		this.templateExtension.createControl(page, this);
@@ -566,6 +550,17 @@ public class HttpTemplateWizardPage extends WizardPage implements
 		Class sectionSourceClass = this.templateExtension
 				.getSectionSourceClass();
 
+		// Obtain the URI
+		Property propertyUriPath = this.properties
+				.getOrAddProperty(HttpTemplateSectionSource.PROPERTY_TEMPLATE_URI);
+		String propertyUriPathValue = propertyUriPath.getValue();
+		this.uriPath = (EclipseUtil.isBlank(propertyUriPathValue) ? null
+				: propertyUriPathValue);
+		if (this.uriPath == null) {
+			// URI path optional, so provide dummy value
+			propertyUriPath.setValue("DUMMY");
+		}
+
 		// Load the Section Type
 		this.sectionType = this.sectionLoader.loadSectionType(
 				sectionSourceClass, this.templatePath, this.properties);
@@ -575,12 +570,14 @@ public class HttpTemplateWizardPage extends WizardPage implements
 			return;
 		}
 
-		// Obtain the URI
-		String uriValue = this.getUri();
+		// Clear URI path property if dummy value
+		if (this.uriPath == null) {
+			propertyUriPath.setValue(null);
+		}
 
 		// Ensure have URI if have GWT Entry Point Class
 		String gwtEntryPoint = this.getGwtEntryPointClassName();
-		if ((gwtEntryPoint != null) && (uriValue == null)) {
+		if ((gwtEntryPoint != null) && (this.uriPath == null)) {
 			// Must have URI if using GWT
 			this.setErrorMessage("Must provide URI if using GWT");
 			this.setPageComplete(false);

@@ -18,19 +18,12 @@
 
 package net.officefloor.eclipse.web;
 
-import net.officefloor.compile.properties.Property;
-import net.officefloor.eclipse.common.dialog.input.InputHandler;
-import net.officefloor.eclipse.common.dialog.input.InputListener;
-import net.officefloor.eclipse.common.dialog.input.impl.ClasspathClassInput;
 import net.officefloor.eclipse.extension.sectionsource.SectionSourceExtension;
 import net.officefloor.eclipse.extension.sectionsource.SectionSourceExtensionContext;
 import net.officefloor.eclipse.extension.util.SourceExtensionUtil;
 import net.officefloor.plugin.web.http.template.section.HttpTemplateSectionSource;
 
-import org.eclipse.swt.SWT;
-import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Label;
 
 /**
  * {@link SectionSourceExtension} for the {@link HttpTemplateSectionSource}.
@@ -64,33 +57,15 @@ public class HttpTemplateSectionSourceExtension implements
 			SourceExtensionUtil.loadPropertyLayout(page);
 		}
 
-		// Obtain the logic class property
-		final Property propertyLogicClass = context
-				.getPropertyList()
-				.getOrAddProperty(HttpTemplateSectionSource.PROPERTY_CLASS_NAME);
-		String initialLogicClassName = propertyLogicClass.getValue();
-
 		// Provide means to specify logic class
-		new Label(page, SWT.NONE).setText("Logic class: ");
-		InputHandler<String> logicClass = new InputHandler<String>(page,
-				new ClasspathClassInput(context.getProject(), page.getShell()),
-				initialLogicClassName, new InputListener() {
-					@Override
-					public void notifyValueChanged(Object value) {
-						// Specify the logic class name
-						String logicClassName = (value == null ? ""
-								: value.toString());
-						propertyLogicClass.setValue(logicClassName);
-						context.notifyPropertiesChanged();
-					}
-
-					@Override
-					public void notifyValueInvalid(String message) {
-						context.setErrorMessage(message);
-					}
-				});
-		logicClass.getControl().setLayoutData(
-				new GridData(SWT.FILL, SWT.BEGINNING, true, false));
+		SourceExtensionUtil.createPropertyClass("Logic class: ",
+				HttpTemplateSectionSource.PROPERTY_CLASS_NAME, page, context,
+				null);
+		
+		// Provide means to specify URI path
+		SourceExtensionUtil.createPropertyText("URI path: ",
+				HttpTemplateSectionSource.PROPERTY_TEMPLATE_URI, null, page,
+				context, null);
 	}
 
 }
