@@ -78,7 +78,7 @@ application.woof
   
 [./images/dynamic-woof.png] application.woof configuration.
 
-  This is the only configuration necessary for this web application as the template will be made available at <<<http://localhost:7878/example>>> .  Later tutorials will look at linking page flows and dynamic behaviour however is beyond the scope of this tutorial.
+  This is the only configuration necessary for this web application as the template will be made available at <<<http://localhost:7878/example.woof>>> .  Later tutorials will look at linking page flows and dynamic behaviour however is beyond the scope of this tutorial.
    
 
 

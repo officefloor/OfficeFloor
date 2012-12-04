@@ -38,7 +38,7 @@ EntryPoint Class
    
     * GWT generated JavaScript will dynamically add the necessary HTML for displaying the components
    
-  This very quick overview was provided to help (should you not be familiar with GWT) to understand the following Java code.  The result of the code is that it indicates the time in seconds since page load:
+  The following is the GWT Java code for this tutorial that indicates the time in seconds since page load:
 
 %{code-snippet|brush-autodetect=1|id=example|file=${basedir}/src/main/java/net/officefloor/tutorial/gwtapp/client/GwtAppEntryPoint.java}
 
@@ -56,7 +56,7 @@ application.woof
 
   Normally with GWT applications a <<<Module.gwt.xml>>> configuration file is required to be written.  The file indicates to GWT how to compile and create the JavaScript for the web page.
   
-  WoOF makes the GWT integration simpler by generating the configuration file for you.  All that is necessary to provide GWT functionality onto the page is specifying the <<<EntryPoint>>> class when adding the template.  The following demonstrates the simplified GWT configuration for this tutorial.
+  WoOF makes the GWT integration simpler by generating the configuration file for you.  All that is necessary to provide GWT functionality onto the page is specifying the <<<EntryPoint>>> class when adding the template.  The following demonstrates the GWT configuration for this tutorial.
   
 [./images/GwtApp-add-template-dialog.png] GwtApp Add template dialog screenshot.
 

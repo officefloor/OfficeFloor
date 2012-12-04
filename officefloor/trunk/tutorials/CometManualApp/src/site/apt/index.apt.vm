@@ -26,7 +26,7 @@
 
 Template.woof.html
 
-  The below is the HTML page.
+  The below is the HTML for the page.
 
 %{code-snippet|brush=xml|file=${basedir}/src/main/webapp/Template.woof.html}
 

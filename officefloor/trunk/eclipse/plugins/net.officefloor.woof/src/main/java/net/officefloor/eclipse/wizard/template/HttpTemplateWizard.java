@@ -183,7 +183,7 @@ public class HttpTemplateWizard extends Wizard {
 		String templatePath = this.templatePage.getTemplatePath();
 		String logicClassName = this.templatePage.getLogicClassName();
 		SectionType sectionType = this.templatePage.getSectionType();
-		String uri = this.templatePage.getUri();
+		String uriPath = this.templatePage.getUriPath();
 		String gwtEntryPointClassName = this.templatePage
 				.getGwtEntryPointClassName();
 		String[] gwtServerAsyncInterfaceNames = this.templatePage
@@ -200,7 +200,7 @@ public class HttpTemplateWizard extends Wizard {
 
 		// Create HTTP Template Instance
 		this.httpTemplateInstance = new HttpTemplateInstance(templatePath,
-				logicClassName, sectionType, uri, gwtEntryPointClassName,
+				logicClassName, sectionType, uriPath, gwtEntryPointClassName,
 				gwtServerAsyncInterfaceNames, isEnableComet,
 				cometManualPublishMethodName, outputNameMapping);
 

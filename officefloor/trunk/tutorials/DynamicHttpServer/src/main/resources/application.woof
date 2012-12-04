@@ -7,8 +7,12 @@
   </templates>
   <sections>
   </sections>
+  <governances>
+  </governances>
   <resources>
   </resources>
   <exceptions>
   </exceptions>
+  <starting>
+  </starting>
 </woof>

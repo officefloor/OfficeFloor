@@ -25,7 +25,7 @@ WoofServlet
    
    * Rendering of a JSP (by the Servlet container) as a navigation link from the above web template
    
-   * Utilising a class method <<<example(...)>>> to service the uri <<</class>>>
+   * Utilising a class method <<<example(...)>>> to service the URI path <<</class>>>
    
   For further explanation of the above WoOF configuration see the previous tutorials.
   
