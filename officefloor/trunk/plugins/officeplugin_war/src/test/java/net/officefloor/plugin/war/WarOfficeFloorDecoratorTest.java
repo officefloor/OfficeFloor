@@ -274,7 +274,7 @@ public class WarOfficeFloorDecoratorTest extends OfficeFrameTestCase {
 	 * @param jarFile
 	 *            JAR file to validate.
 	 */
-	private static void assertJar(File expectedDirectory, File jarFile)
+	public static void assertJar(File expectedDirectory, File jarFile)
 			throws IOException {
 
 		// Obtain the expected entries

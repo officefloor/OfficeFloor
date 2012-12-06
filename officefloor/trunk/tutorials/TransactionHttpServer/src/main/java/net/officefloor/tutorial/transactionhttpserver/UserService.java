@@ -35,12 +35,15 @@ public class UserService {
 	public void createUser(@Parameter UserProperties properties,
 			EntityManager entityManager) {
 		User user = new User();
-		user.setUserName(properties.getUserName());
+		user.setUserName(nullBlankString(properties.getUserName()));
 		Person person = new Person();
-		person.setFullName(properties.getFullName());
+		person.setFullName(nullBlankString(properties.getFullName()));
 		person.setUser(user);
 		entityManager.persist(person);
 	}
 
+	private static String nullBlankString(String value) {
+		return ((value == null) || (value.trim().length() == 0)) ? null : value;
+	}
 }
 // END SNIPPET: tutorial

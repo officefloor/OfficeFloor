@@ -145,7 +145,7 @@ public class RunWoofGoal extends AbstractMojo {
 
 		/*
 		 * Include resulting pre-WAR directory. This allows inclusion of GWT
-		 * content.
+		 * generated content.
 		 */
 		Build build = this.project.getBuild();
 		String assemblePath = build.getDirectory() + "/" + build.getFinalName();
@@ -155,7 +155,22 @@ public class RunWoofGoal extends AbstractMojo {
 					.warn("No GWT functionality will be available.  Please package project to create content in "
 							+ assembleDir.getAbsolutePath());
 		}
-		openGoal.addClassPathEntry(assembleDir.getAbsolutePath());
+		try {
+			File assembleContent = WarOfficeFloorDecorator
+					.generateJarMinusMetaAndWebInf(assembleDir);
+			if (assembleContent == null) {
+				this.getLog()
+						.warn("No GWT functionality will be available.  Packaged content is not in a WAR structure");
+
+			} else {
+				// Include the assemble content (GWT content)
+				openGoal.addClassPathEntry(assembleContent.getAbsolutePath());
+			}
+		} catch (Exception ex) {
+			this.getLog()
+					.warn("No GWT functionality will be available.  Failed to generate package JAR content",
+							ex);
+		}
 
 		// Indicate WoOF application running
 		this.getLog().info("Starting WoOF application");

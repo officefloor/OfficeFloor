@@ -53,30 +53,156 @@ public class WarOfficeFloorDecorator implements OfficeFloorDecorator {
 	public static final String PLUGIN_WAR_ARTIFACT_ID = "officeplugin_war";
 
 	/**
-	 * WEB-INF directory name.
+	 * <code>META-INF</code> directory name.
 	 */
-	public static final String WEB_INF = "WEB-INF/";
+	public static final String META_INF = "META-INF";
+
+	/**
+	 * <code>WEB-INF</code> directory name.
+	 */
+	public static final String WEB_INF = "WEB-INF";
 
 	/**
 	 * Directory within the Web Archive containing classes for the class path.
 	 */
-	public static final String WEB_INF_CLASSES = WEB_INF + "classes/";
+	public static final String WEB_INF_CLASSES = WEB_INF + "/classes/";
 
 	/**
 	 * Directory within the Web Archive containing additional archives for the
 	 * class path.
 	 */
-	public static final String WEB_INF_LIB = WEB_INF + "lib/";
+	public static final String WEB_INF_LIB = WEB_INF + "/lib/";
 
 	/**
 	 * <code>web.xml</code> location within the Web Archive.
 	 */
-	public static final String WEB_INF_WEB_XML = WEB_INF + "web.xml";
+	public static final String WEB_INF_WEB_XML = WEB_INF + "/web.xml";
 
 	/**
 	 * Directory to contain the public web content.
 	 */
 	public static final String WEB_PUBLIC = "PUBLIC/";
+
+	/**
+	 * <p>
+	 * Generates a JAR {@link File} decorated ready for use from the input JAR
+	 * or directory {@link File}.
+	 * <p>
+	 * The <code>META-INF</code> and <code>WEB-INF</code> contents are not
+	 * included in the JAR. The reason is that this is used by Maven goals that
+	 * have already included the content on the class path. The Maven goals use
+	 * this as they wish to obtain generated web content from the Maven package
+	 * directory but not re-include the code.
+	 * 
+	 * @param warOrDirectory
+	 *            WAR or directory.
+	 * @return Generated JAR minus <code>META-INF</code> and
+	 *         <code>WEB-INF</code> directories.
+	 * @throws Exception
+	 *             If fails to generate the JAR.
+	 */
+	public static File generateJarMinusMetaAndWebInf(File warOrDirectory)
+			throws Exception {
+
+		// Create the OfficeFloor decorator context
+		NoInfOfficeFloorDecoratorContext context = new NoInfOfficeFloorDecoratorContext(
+				warOrDirectory);
+
+		// Run decoration to not include the INF directories
+		new WarOfficeFloorDecorator(false).decorate(context);
+
+		// Return the generated JAR
+		return context.getGeneratedJar();
+	}
+
+	/**
+	 * Flag indicating whether to include the <code>META-INF</code> or
+	 * <code>WEB-INF</code> directories in decoration.
+	 */
+	private final boolean isIncludeMetaInfAndWebInfDirectories;
+
+	/**
+	 * Default constructor necessary to act as {@link OfficeFloorDecorator}.
+	 */
+	public WarOfficeFloorDecorator() {
+		this(true);
+	}
+
+	private WarOfficeFloorDecorator(boolean isIncludeMetaInfAndWebInfDirectories) {
+		this.isIncludeMetaInfAndWebInfDirectories = isIncludeMetaInfAndWebInfDirectories;
+	}
+
+	/**
+	 * {@link OfficeFloorDecoratorContext} for generating JAR minus
+	 * <code>META-INF</code> and <code>WEB-INF</code> directories.
+	 */
+	private static class NoInfOfficeFloorDecoratorContext implements
+			OfficeFloorDecoratorContext {
+
+		/**
+		 * WAR or directory to decorate.
+		 */
+		private final File warOrDirectory;
+
+		/**
+		 * Generate JAR file.
+		 */
+		private File jar = null;
+
+		/**
+		 * Initiate.
+		 * 
+		 * @param warOrDirectory
+		 *            WAR or directory to decorate.
+		 */
+		public NoInfOfficeFloorDecoratorContext(File warOrDirectory) {
+			this.warOrDirectory = warOrDirectory;
+		}
+
+		/**
+		 * Obtains the generated JAR.
+		 * 
+		 * @return Genrate JAR. May be <code>null<code> if no web content.
+		 */
+		public File getGeneratedJar() {
+			return this.jar;
+		}
+
+		/*
+		 * ==================== OfficeFloorDecoratorContext =================
+		 */
+
+		@Override
+		public String getRawClassPathEntry() {
+			return this.warOrDirectory.getAbsolutePath();
+		}
+
+		@Override
+		public void includeResolvedClassPathEntry(String classpathEntry) {
+			// Ignore as should be the file created
+		}
+
+		@Override
+		public File createWorkspaceFile(String identifier, String extension) {
+
+			// Should only create the one JAR file
+			if (this.jar != null) {
+				throw new IllegalStateException(
+						"Should only create one file being the JAR");
+			}
+
+			// Create and return the file
+			try {
+				this.jar = File.createTempFile(identifier, "." + extension);
+				return this.jar;
+
+			} catch (IOException ex) {
+				// Should always be able to create the file
+				throw new IllegalStateException(
+						"Should always be able to create the JAR file", ex);
+			}
+		}
+	}
 
 	/*
 	 * ==================== OfficeFloorDecorator ========================
@@ -157,6 +283,14 @@ public class WarOfficeFloorDecorator implements OfficeFloorDecorator {
 			}
 			byte[] data = buffer.toByteArray();
 
+			// Determine if ignore INF directories
+			if (!isIncludeMetaInfAndWebInfDirectories) {
+				if ((entryName.startsWith(WEB_INF))
+						|| (entryName.startsWith(META_INF))) {
+					continue; // not include
+				}
+			}
+
 			// Transform the name
 			String outputName;
 			if (entryName.startsWith(WEB_INF_CLASSES)) {
@@ -194,6 +328,10 @@ public class WarOfficeFloorDecorator implements OfficeFloorDecorator {
 				outputName = "";
 
 			} else if (entryName.startsWith(WEB_INF)) {
+				// Leave in current location
+				outputName = entryName;
+
+			} else if (entryName.startsWith(META_INF)) {
 				// Leave in current location
 				outputName = entryName;
 
@@ -362,6 +500,14 @@ public class WarOfficeFloorDecorator implements OfficeFloorDecorator {
 	private void outputEntry(String rawEntryName, byte[] entryData,
 			JarOutputStream output) throws IOException {
 
+		// Determine if ignore INF directories
+		if (!isIncludeMetaInfAndWebInfDirectories) {
+			if ((rawEntryName.startsWith(WEB_INF))
+					|| (rawEntryName.startsWith(META_INF))) {
+				return; // not include
+			}
+		}
+
 		// Transform the name
 		String outputName;
 		if (rawEntryName.startsWith(WEB_INF_CLASSES)) {
@@ -373,6 +519,10 @@ public class WarOfficeFloorDecorator implements OfficeFloorDecorator {
 			return;
 
 		} else if (rawEntryName.startsWith(WEB_INF)) {
+			// Leave in current location
+			outputName = rawEntryName;
+
+		} else if (rawEntryName.startsWith(META_INF)) {
 			// Leave in current location
 			outputName = rawEntryName;
 

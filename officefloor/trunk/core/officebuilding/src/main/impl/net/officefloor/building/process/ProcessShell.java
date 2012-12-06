@@ -161,6 +161,7 @@ public class ProcessShell implements ManagedProcessContext, ProcessShellMBean {
 		// Attempt to run managed process
 		JMXConnectorServer connectorServer = null;
 		ObjectOutputStream toParentPipe = null;
+		boolean isInitilised = false;
 		try {
 			try {
 
@@ -253,6 +254,7 @@ public class ProcessShell implements ManagedProcessContext, ProcessShellMBean {
 
 				// Initialise the managed process
 				managedProcess.init(context);
+				isInitilised = true;
 
 				// Initialised so register the process shell MBean
 				context.registerMBean(context, PROCESS_SHELL_OBJECT_NAME);
@@ -264,25 +266,28 @@ public class ProcessShell implements ManagedProcessContext, ProcessShellMBean {
 				managedProcess.main();
 
 			} catch (Throwable ex) {
+
+				// Log the failure
+				if (LOGGER.isLoggable(Level.WARNING)) {
+					String message = (isInitilised ? "Process failure"
+							: "Failed to initialise process");
+					LOGGER.log(Level.WARNING, message, ex);
+				}
+
 				// Notify Process Manager of failure
 				if (toParentPipe != null) {
 					try {
 						toParentPipe.writeObject(ex);
 						toParentPipe.flush();
 					} catch (Throwable notifyEx) {
-						// Indicate failure to notify.
+						// Indicate failure to notify
 						if (LOGGER.isLoggable(Level.WARNING)) {
 							LOGGER.log(Level.WARNING, "Failed to notify "
 									+ ProcessManager.class.getSimpleName()
 									+ " of failure", notifyEx);
 						}
-
-						// Carry on to propagate actual failure
 					}
 				}
-
-				// Propagate the failure
-				throw ex;
 
 			} finally {
 				// Ensure shut down JMX connector server
