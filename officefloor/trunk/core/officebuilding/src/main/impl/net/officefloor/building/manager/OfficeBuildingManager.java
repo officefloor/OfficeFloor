@@ -1037,8 +1037,7 @@ public class OfficeBuildingManager implements OfficeBuildingManagerMBean {
 						synchronized (OfficeBuildingManager.this) {
 							synchronized (processManager) {
 								if (!processManager.isProcessComplete()) {
-									// Register the manager for the running
-									// process
+									// Register manager for the running process
 									OfficeBuildingManager.this.processManagers
 											.add(processManager);
 								}

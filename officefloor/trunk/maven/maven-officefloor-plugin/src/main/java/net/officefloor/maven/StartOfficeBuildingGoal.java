@@ -19,7 +19,9 @@
 package net.officefloor.maven;
 
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
@@ -36,6 +38,7 @@ import net.officefloor.building.command.parameters.UsernameOfficeFloorCommandPar
 import net.officefloor.building.decorate.OfficeFloorDecorator;
 import net.officefloor.building.manager.OfficeBuildingManager;
 import net.officefloor.building.process.ProcessConfiguration;
+import net.officefloor.building.process.ProcessOutputStreamFactory;
 import net.officefloor.console.OfficeBuilding;
 
 import org.apache.maven.artifact.Artifact;
@@ -238,9 +241,21 @@ public class StartOfficeBuildingGoal extends AbstractGoal {
 				"Port not configured for the "
 						+ OfficeBuilding.class.getSimpleName(), this.port);
 
+		// Indicate the configuration
+		final Log log = this.getLog();
+		log.debug(OfficeBuilding.class.getSimpleName() + " configuration:");
+		log.debug("\tPort = " + this.port);
+
 		// Create the environment properties
 		Properties environment = new Properties();
 		environment.putAll(this.project.getProperties());
+
+		// Log the properties
+		log.debug("\tProperties:");
+		for (String propertyName : environment.stringPropertyNames()) {
+			log.debug("\t\t" + propertyName + " = "
+					+ environment.getProperty(propertyName));
+		}
 
 		// Obtain the plugin dependency inclusions
 		List<Artifact> artifactInclusions = new ArrayList<Artifact>(
@@ -291,6 +306,9 @@ public class StartOfficeBuildingGoal extends AbstractGoal {
 			RepositorySystem repoSystem = locator
 					.getService(RepositorySystem.class);
 
+			// Indicate the remote repositories
+			log.debug("\tRemote repositories:");
+
 			// Obtain remote repositories and load to class path factory
 			List<RemoteRepository> remoteRepositories = new LinkedList<RemoteRepository>();
 			List<String> urls = new LinkedList<String>();
@@ -300,6 +318,9 @@ public class StartOfficeBuildingGoal extends AbstractGoal {
 				remoteRepositories.add(new RemoteRepository(repository.getId(),
 						repository.getLayout().getId(), remoteRepositoryUrl));
 				urls.add(remoteRepositoryUrl);
+
+				// Indicate the remote repository
+				log.debug("\t\t" + remoteRepositoryUrl);
 			}
 			remoteRepositoryURLs = urls.toArray(new String[urls.size()]);
 
@@ -311,6 +332,9 @@ public class StartOfficeBuildingGoal extends AbstractGoal {
 					remoteRepositories
 							.toArray(new RemoteRepository[remoteRepositories
 									.size()]));
+
+			// Indicate the class path
+			log.debug("\tClass path:");
 
 			// Obtain the class path entries for each included artifact
 			List<String> classPathEntries = new LinkedList<String>();
@@ -328,6 +352,9 @@ public class StartOfficeBuildingGoal extends AbstractGoal {
 						continue; // ignore as already included
 					}
 					classPathEntries.add(entry);
+
+					// Indicate class path entry
+					log.debug("\t\t" + entry);
 				}
 			}
 
@@ -335,9 +362,6 @@ public class StartOfficeBuildingGoal extends AbstractGoal {
 			classPath = ClassPathFactoryImpl
 					.transformClassPathEntriesToClassPath(classPathEntries
 							.toArray(new String[classPathEntries.size()]));
-
-			// Indicate the class path
-			this.getLog().debug("OfficeBuilding class path: " + classPath);
 
 		} catch (Exception ex) {
 			throw newMojoExecutionException(
@@ -348,6 +372,72 @@ public class StartOfficeBuildingGoal extends AbstractGoal {
 		// Create the process configuration
 		ProcessConfiguration configuration = new ProcessConfiguration();
 		configuration.setAdditionalClassPath(classPath);
+
+		// Write output to file
+		configuration
+				.setProcessOutputStreamFactory(new ProcessOutputStreamFactory() {
+
+					@Override
+					public OutputStream createStandardProcessOutputStream(
+							String processNamespace, String[] command)
+							throws IOException {
+
+						// Log the command
+						StringBuilder commandLine = new StringBuilder();
+						commandLine.append(OfficeBuilding.class.getSimpleName()
+								+ " command line:");
+						for (String commandItem : command) {
+							commandLine.append(" ");
+							commandLine.append(commandItem);
+						}
+						log.debug(commandLine);
+
+						// Return the output stream
+						return this.getOutputStream(processNamespace);
+					}
+
+					@Override
+					public OutputStream createErrorProcessOutputStream(
+							String processNamespace) throws IOException {
+						return this.getOutputStream(processNamespace);
+					}
+
+					/**
+					 * Lazy instantiated {@link OutputStream}.
+					 */
+					private OutputStream outputStream = null;
+
+					/**
+					 * Obtains the {@link OutputStream}.
+					 * 
+					 * @param processNamespace
+					 *            Process name space.
+					 * @return {@link OutputStream}.
+					 * @throws IOException
+					 *             If fails to obtain the {@link OutputStream}.
+					 */
+					private synchronized OutputStream getOutputStream(
+							String processNamespace) throws IOException {
+
+						// Lazy instantiate the output stream
+						if (this.outputStream == null) {
+
+							// Create the output file
+							File file = File.createTempFile(processNamespace,
+									".log");
+							this.outputStream = new FileOutputStream(file);
+
+							// Log that outputting to file
+							log.info("Logging "
+									+ OfficeBuilding.class.getSimpleName()
+									+ " output to file "
+									+ file.getAbsolutePath());
+						}
+
+						// Return the output stream
+						return this.outputStream;
+					}
+				});
 
 		// Start the OfficeBuilding
 		try {

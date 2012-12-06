@@ -20,10 +20,13 @@ package net.officefloor.maven;
 
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Properties;
 
+import net.officefloor.building.manager.ArtifactReference;
 import net.officefloor.building.manager.OfficeBuildingManager;
 import net.officefloor.building.manager.OfficeBuildingManagerMBean;
 import net.officefloor.building.manager.OpenOfficeFloorConfiguration;
+import net.officefloor.building.manager.UploadArtifact;
 import net.officefloor.compile.spi.officefloor.source.OfficeFloorSource;
 import net.officefloor.console.OfficeBuilding;
 import net.officefloor.frame.api.manage.OfficeFloor;
@@ -251,6 +254,52 @@ public class OpenOfficeFloorGoal extends AbstractGoal {
 		for (String classPathEntry : this.classPathEntries) {
 			configuration.addClassPathEntry(classPathEntry);
 		}
+
+		// Indicate the configuration
+		Log log = this.getLog();
+		log.debug(OfficeFloorSource.class.getSimpleName() + " configuration:");
+		log.debug("\tProcess name = " + configuration.getProcessName());
+		log.debug("\t" + OfficeFloorSource.class.getSimpleName() + " class = "
+				+ configuration.getOfficeFloorSourceClassName());
+		log.debug("\t" + OfficeFloorSource.class.getSimpleName()
+				+ " location = " + configuration.getOfficeFloorLocation());
+		log.debug("\tProperties:");
+		Properties configurationOfficeFloorProperties = configuration
+				.getOfficeFloorProperties();
+		for (String propertyName : configurationOfficeFloorProperties
+				.stringPropertyNames()) {
+			log.debug("\t\t"
+					+ propertyName
+					+ " = "
+					+ configurationOfficeFloorProperties
+							.getProperty(propertyName));
+		}
+		log.debug("\tClass path entries:");
+		for (String classPathEntry : configuration.getClassPathEntries()) {
+			log.debug("\t\t" + classPathEntry);
+		}
+		log.debug("\tUpload Artifacts:");
+		for (UploadArtifact uploadArtifact : configuration.getUploadArtifacts()) {
+			log.debug("\t\t" + uploadArtifact.getName());
+		}
+		log.debug("\tArtifact References:");
+		for (ArtifactReference artifactReference : configuration
+				.getArtifactReferences()) {
+			log.debug("\t\t" + artifactReference.getId());
+		}
+		log.debug("\tRemote repository URLs:");
+		for (String remoteRepositoryUrl : configuration
+				.getRemoteRepositoryUrls()) {
+			log.debug("\t\t" + remoteRepositoryUrl);
+		}
+		log.debug("\tJVM options:");
+		for (String jvmOption : configuration.getJvmOptions()) {
+			log.debug("\t\t" + jvmOption);
+		}
+		log.debug("\tInitial task = " + configuration.getOfficeName() + " "
+				+ configuration.getWorkName() + "."
+				+ configuration.getTaskName() + "("
+				+ configuration.getParameter() + ")");
 
 		// Open the OfficeFloor
 		String processNameSpace;

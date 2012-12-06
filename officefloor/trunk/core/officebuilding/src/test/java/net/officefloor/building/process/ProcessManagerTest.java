@@ -18,11 +18,16 @@
 
 package net.officefloor.building.process;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.FileWriter;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.PrintStream;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.io.Writer;
 import java.lang.management.ManagementFactory;
 
@@ -216,12 +221,130 @@ public class ProcessManagerTest extends OfficeFrameTestCase {
 	}
 
 	/**
+	 * Ensure able to configure logger.
+	 */
+	public void test_start_ProcessOutput() throws Exception {
+
+		final String STDOUT_CONTENT = "STDOUT";
+		final String STDERR_CONTENT = "STDERR";
+
+		// Output stream factory
+		MockProcessOutputStreamFactory factory = new MockProcessOutputStreamFactory();
+
+		// Create process configuration
+		ProcessConfiguration configuration = new ProcessConfiguration();
+		configuration.setProcessOutputStreamFactory(factory);
+
+		// Start the process
+		this.manager = ProcessManager.startProcess(new OutputProcess(
+				STDOUT_CONTENT, STDERR_CONTENT), configuration);
+
+		// Wait until process writes content to file
+		OfficeBuildingTestUtil.waitUntilProcessComplete(this.manager, null);
+
+		// Validate the output content
+		assertEquals("Incorrect stdout content", STDOUT_CONTENT, factory
+				.getOutContent().trim());
+		assertEquals("Incorrect stderr content", STDERR_CONTENT, factory
+				.getErrContent().trim());
+	}
+
+	/**
+	 * Ensure able to configure default logger.
+	 */
+	public void test_start_DefaultProcessOutput() throws Exception {
+
+		// Obtain the standard streams
+		PrintStream defaultOut = System.out;
+		PrintStream defaultErr = System.err;
+
+		try {
+
+			final String STDOUT_CONTENT = "STDOUT";
+			final String STDERR_CONTENT = "STDERR";
+
+			// Override the standard streams
+			ByteArrayOutputStream bufferOut = new ByteArrayOutputStream();
+			System.setOut(new PrintStream(bufferOut, true));
+			ByteArrayOutputStream bufferErr = new ByteArrayOutputStream();
+			System.setErr(new PrintStream(bufferErr, true));
+
+			// Start the process
+			this.manager = ProcessManager.startProcess(new OutputProcess(
+					STDOUT_CONTENT, STDERR_CONTENT), null);
+
+			// Wait until process writes content to file
+			OfficeBuildingTestUtil.waitUntilProcessComplete(this.manager, null);
+
+			// Validate the output content
+			assertEquals("Incorrect stdout content", STDOUT_CONTENT,
+					new String(bufferOut.toByteArray()).trim());
+			assertEquals("Incorrect stderr content", STDERR_CONTENT,
+					new String(bufferErr.toByteArray()).trim());
+
+		} finally {
+			// Re-instate the defaults
+			System.setOut(defaultOut);
+			System.setErr(defaultErr);
+		}
+	}
+
+	/**
+	 * {@link ManagedProcess} to output content.
+	 */
+	public static class OutputProcess implements ManagedProcess {
+
+		/**
+		 * <code>stdout</code> content.
+		 */
+		private final String stdoutContent;
+
+		/**
+		 * <code>stderr</code> content.
+		 */
+		private final String stderrContent;
+
+		/**
+		 * Initiate.
+		 * 
+		 * @param stdoutContent
+		 *            <code>stdout</code> content.
+		 * @param stderrContent
+		 *            <code>stderr</code> content.
+		 */
+		public OutputProcess(String stdoutContent, String stderrContent) {
+			this.stdoutContent = stdoutContent;
+			this.stderrContent = stderrContent;
+		}
+
+		/*
+		 * =================== ManagedProcess ==============================
+		 */
+
+		@Override
+		public void init(ManagedProcessContext context) throws Throwable {
+			// Nothing to initialise
+		}
+
+		@Override
+		public void main() throws Throwable {
+
+			// Output the stdout content
+			System.out.println(this.stdoutContent);
+
+			// Output the stderr content
+			System.err.println(this.stderrContent);
+		}
+	}
+
+	/**
 	 * Ensure able to configure the class path.
 	 */
 	public void test_start_Classpath() throws Exception {
 
 		// Obtain the file on class path
-		final String CLASS_PATH_FILE_PATH = "classpath/Test.txt";
+		final String CLASS_PATH_FILE_NAME = "Test.txt";
+		final String CLASS_PATH_FILE_PATH = "classpath/" + CLASS_PATH_FILE_NAME;
 		File classpathFile = this.findFile(this.getClass(),
 				CLASS_PATH_FILE_PATH);
 		String testContent = this.getFileContents(classpathFile).trim();
@@ -231,14 +354,13 @@ public class ProcessManagerTest extends OfficeFrameTestCase {
 
 		// Create process configuration
 		ProcessConfiguration configuration = new ProcessConfiguration();
-		File additionalClasspathDir = classpathFile.getParentFile()
-				.getParentFile();
+		File additionalClasspathDir = classpathFile.getParentFile();
 		configuration.setAdditionalClassPath(additionalClasspathDir
 				.getAbsolutePath());
 
 		// Start the process
 		this.manager = ProcessManager.startProcess(new ClassPathProcess(
-				CLASS_PATH_FILE_PATH, file.getAbsolutePath()), null);
+				CLASS_PATH_FILE_NAME, file.getAbsolutePath()), configuration);
 
 		// Wait until process writes content to file
 		OfficeBuildingTestUtil.waitUntilProcessComplete(this.manager, null);
@@ -254,7 +376,8 @@ public class ProcessManagerTest extends OfficeFrameTestCase {
 	public void test_run_Classpath() throws Exception {
 
 		// Obtain the file on class path
-		final String CLASS_PATH_FILE_PATH = "classpath/Test.txt";
+		final String CLASS_PATH_FILE_NAME = "Test.txt";
+		final String CLASS_PATH_FILE_PATH = "classpath/" + CLASS_PATH_FILE_NAME;
 		File classpathFile = this.findFile(this.getClass(),
 				CLASS_PATH_FILE_PATH);
 		String testContent = this.getFileContents(classpathFile).trim();
@@ -264,14 +387,13 @@ public class ProcessManagerTest extends OfficeFrameTestCase {
 
 		// Create process configuration
 		ProcessConfiguration configuration = new ProcessConfiguration();
-		File additionalClasspathDir = classpathFile.getParentFile()
-				.getParentFile();
+		File additionalClasspathDir = classpathFile.getParentFile();
 		configuration.setAdditionalClassPath(additionalClasspathDir
 				.getAbsolutePath());
 
 		// Run local process
-		ProcessManager.runProcess(new ClassPathProcess(CLASS_PATH_FILE_PATH,
-				file.getAbsolutePath()), null);
+		ProcessManager.runProcess(new ClassPathProcess(CLASS_PATH_FILE_NAME,
+				file.getAbsolutePath()), configuration);
 
 		// Ensure content in file
 		OfficeBuildingTestUtil.validateFileContent("Content should be in file",
@@ -319,9 +441,11 @@ public class ProcessManagerTest extends OfficeFrameTestCase {
 		public void main() throws Throwable {
 
 			// Obtain the file content via class path
-			InputStream fileContent = this.getClass().getResourceAsStream(
-					this.classpathFilePath);
-			assertNotNull("Should find file on class path", fileContent);
+			InputStream fileContent = Thread.currentThread()
+					.getContextClassLoader()
+					.getResourceAsStream(this.classpathFilePath);
+			assertNotNull("Should find file on class path (file="
+					+ this.classpathFilePath + ")", fileContent);
 
 			// Obtain the file
 			File file = new File(this.targetFilePath);
@@ -406,10 +530,15 @@ public class ProcessManagerTest extends OfficeFrameTestCase {
 		final String FAILURE_MESSAGE = "TEST FAILURE";
 		final Throwable failure = new Throwable(FAILURE_MESSAGE);
 
+		// Should log the failure
+		MockProcessOutputStreamFactory factory = new MockProcessOutputStreamFactory();
+		ProcessConfiguration configuration = new ProcessConfiguration();
+		configuration.setProcessOutputStreamFactory(factory);
+
 		// Should fail to start
 		ManagedProcess managedProcess = new FailInitProcess(failure);
 		try {
-			ProcessManager.startProcess(managedProcess, null);
+			ProcessManager.startProcess(managedProcess, configuration);
 			fail("Should fail to start");
 		} catch (ProcessException ex) {
 			// Ensure correct message
@@ -423,6 +552,19 @@ public class ProcessManagerTest extends OfficeFrameTestCase {
 			assertEquals("Incorrect exception", FAILURE_MESSAGE,
 					cause.getMessage());
 		}
+
+		// Create the expected end of the log message
+		StringWriter expectedLogMessage = new StringWriter();
+		expectedLogMessage.append("WARNING: Failed to initialise process\n");
+		failure.printStackTrace(new PrintWriter(expectedLogMessage, true));
+
+		// Obtain the log message
+		String actualLogMessage = factory.getErrContent();
+
+		// Ensure log failure to initialise
+		assertTrue("Should log failure to initialise, but was:\n"
+				+ actualLogMessage,
+				factory.getErrContent().endsWith(expectedLogMessage.toString()));
 	}
 
 	/**
@@ -898,6 +1040,57 @@ public class ProcessManagerTest extends OfficeFrameTestCase {
 				}
 				Thread.sleep(10);
 			}
+		}
+	}
+
+	/**
+	 * Mock {@link ProcessOutputStreamFactory}.
+	 */
+	private static class MockProcessOutputStreamFactory implements
+			ProcessOutputStreamFactory {
+
+		/**
+		 * Standard out.
+		 */
+		private final ByteArrayOutputStream out = new ByteArrayOutputStream();
+
+		/**
+		 * Standard error.
+		 */
+		private final ByteArrayOutputStream err = new ByteArrayOutputStream();
+
+		/**
+		 * Obtains the content written to standard out.
+		 * 
+		 * @return Content written to standard out.
+		 */
+		public String getOutContent() {
+			return new String(this.out.toByteArray());
+		}
+
+		/**
+		 * Obtains the content written to standard err.
+		 * 
+		 * @return Content written to standard err.
+		 */
+		public String getErrContent() {
+			return new String(this.err.toByteArray());
+		}
+
+		/*
+		 * ==================== ProcessOutputStreamFactory ===============
+		 */
+
+		@Override
+		public OutputStream createStandardProcessOutputStream(
+				String processNamespace, String[] command) throws IOException {
+			return this.out;
+		}
+
+		@Override
+		public OutputStream createErrorProcessOutputStream(
+				String processNamespace) throws IOException {
+			return this.err;
 		}
 	}
 

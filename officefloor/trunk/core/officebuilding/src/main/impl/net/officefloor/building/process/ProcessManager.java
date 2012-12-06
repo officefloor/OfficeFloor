@@ -25,6 +25,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.io.OutputStream;
 import java.lang.management.ManagementFactory;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -358,6 +359,17 @@ public class ProcessManager implements ProcessManagerMBean {
 			mbeanServer = ManagementFactory.getPlatformMBeanServer();
 		}
 
+		// Obtain the process output stream factory
+		ProcessOutputStreamFactory outputStreamFactory = configuration
+				.getProcessOutputStreamFactory();
+		if (outputStreamFactory == null) {
+			outputStreamFactory = new StdProcessOutputStreamFactory();
+		}
+
+		// Obtain the process completion listener
+		ProcessCompletionListener completionListener = configuration
+				.getProcessCompletionListener();
+
 		// Obtain the unique MBean name space
 		String mbeanNamespace = processName;
 		synchronized (activeMBeanNamespaces) {
@@ -371,37 +383,60 @@ public class ProcessManager implements ProcessManagerMBean {
 			activeMBeanNamespaces.add(mbeanNamespace);
 		}
 
+		// Start the process
 		ProcessManager processManager;
 		Process process = null;
+		ObjectOutputStream toProcessPipe;
+		ProcessNotificationHandler notificationHandler;
 		try {
 
-			// Obtain the process completion listener
-			ProcessCompletionListener completionListener = configuration
-					.getProcessCompletionListener();
+			// Create the process streams
+			OutputStream outStream = outputStreamFactory
+					.createStandardProcessOutputStream(mbeanNamespace,
+							command.toArray(new String[command.size()]));
+			OutputStream errStream = outputStreamFactory
+					.createErrorProcessOutputStream(mbeanNamespace);
 
 			// Start the process (first as Process required by Manager)
 			ProcessBuilder builder = new ProcessBuilder(command);
 			process = builder.start();
+			
+			// Gobble the stdout and stderr of the process
+			new StreamGobbler(mbeanNamespace, process.getInputStream(),
+					outStream).start();
+			new StreamGobbler(mbeanNamespace, process.getErrorStream(),
+					errStream).start();
+			Thread.yield(); // give chance to start
 
 			// Create the process manager for the process
 			processManager = new ProcessManager(processName, mbeanNamespace,
 					process, completionListener, mbeanServer);
 
 			// Obtain pipe to process
-			ObjectOutputStream toProcessPipe = new ObjectOutputStream(
-					process.getOutputStream());
+			toProcessPipe = new ObjectOutputStream(process.getOutputStream());
 
-			// Handle process responses
-			ProcessNotificationHandler notificationHandler = new ProcessNotificationHandler(
+			// Create process response handler
+			notificationHandler = new ProcessNotificationHandler(
 					processManager, toProcessPipe);
-			int fromProcessPort = notificationHandler.getFromProcessPort();
+
+		} catch (Exception ex) {
+			// Release process name space
+			releaseMBeanNamespace(mbeanNamespace);
+
+			// Propagate the failure
+			throw newProcessException(process, ex.getMessage(), ex);
+		}
+
+		// Start the handling of the process.
+		// (handler will release MBean name space)
+		try {
+
+			// Start handling process responses
 			notificationHandler.start();
 			Thread.yield(); // give chance to start
 
-			// Gobble the stdout and stderr
-			new StreamGobbler(process.getInputStream()).start();
-			new StreamGobbler(process.getErrorStream()).start();
-			Thread.yield(); // give change to start
+			// Obtain the from Process port
+			int fromProcessPort = notificationHandler.getFromProcessPort();
 
 			// Send managed process and response port to process
 			toProcessPipe.writeObject(mbeanNamespace);
@@ -498,6 +533,20 @@ public class ProcessManager implements ProcessManagerMBean {
 
 		// Return the class path
 		return classPath;
+	}
+
+	/**
+	 * Releases the MBean name space from active list.
+	 * 
+	 * @param mbeanNamespace
+	 *            MBean name space to remove from active list.
+	 */
+	private static void releaseMBeanNamespace(String mbeanNamespace) {
+
+		// Remove MBean name space from being active
+		synchronized (activeMBeanNamespaces) {
+			activeMBeanNamespaces.remove(mbeanNamespace);
+		}
 	}
 
 	/**
@@ -762,9 +811,7 @@ public class ProcessManager implements ProcessManagerMBean {
 		}
 
 		// Release process name space
-		synchronized (activeMBeanNamespaces) {
-			activeMBeanNamespaces.remove(this.mbeanNamespace);
-		}
+		releaseMBeanNamespace(this.mbeanNamespace);
 
 		// Notify process complete
 		if (listener != null) {
@@ -1032,7 +1079,7 @@ public class ProcessManager implements ProcessManagerMBean {
 						if (currentCause instanceof EOFException) {
 							return; // EOF cause as process assumed complete
 						}
-						
+
 						// Setup for next iteration
 						previousCause = currentCause;
 						currentCause = currentCause.getCause();
@@ -1067,21 +1114,39 @@ public class ProcessManager implements ProcessManagerMBean {
 	private static class StreamGobbler extends Thread {
 
 		/**
+		 * Name space of the {@link ManagedProcess} that gobbling content.
+		 */
+		private final String processNamespace;
+
+		/**
 		 * {@link InputStream} to gobble.
 		 */
-		private final InputStream stream;
+		private final InputStream input;
+
+		/**
+		 * {@link OutputStream} to send gobbled content.
+		 */
+		private final OutputStream output;
 
 		/**
 		 * Initiate.
 		 * 
-		 * @param stream
+		 * @param processNamespace
+		 *            Name space of the {@link ManagedProcess} that gobbling
+		 *            content.
+		 * @param input
 		 *            {@link InputStream} to gobble.
+		 * @param output
+		 *            {@link OutputStream} to send gobbled content.
 		 */
-		public StreamGobbler(InputStream stream) {
+		public StreamGobbler(String processNamespace, InputStream input,
+				OutputStream output) {
 
 			// Must synchronize as used by another Thread
 			synchronized (this) {
-				this.stream = stream;
+				this.processNamespace = processNamespace;
+				this.input = input;
+				this.output = output;
 			}
 
 			// Flag as deamon (should not stop process finishing)
@@ -1096,14 +1161,31 @@ public class ProcessManager implements ProcessManagerMBean {
 		public synchronized void run() {
 			try {
 				// Consume from stream until EOF
-				for (int value = this.stream.read(); value != -1; value = this.stream
+				for (int value = this.input.read(); value != -1; value = this.input
 						.read()) {
-					System.out.write(value);
+					this.output.write(value);
 				}
+
 			} catch (Throwable ex) {
 				// Provide stack trace and exit
-				LOGGER.log(Level.WARNING, StreamGobbler.class.getSimpleName()
-						+ " error", ex);
+				LOGGER.log(Level.WARNING, this.processNamespace + " "
+						+ StreamGobbler.class.getSimpleName() + " error", ex);
+
+			} finally {
+				// Do not close System out/err
+				if ((System.out == this.output) || (System.err == this.output)) {
+					return;
+				}
+
+				// Ensure close output stream
+				try {
+					this.output.close();
+				} catch (Throwable ex) {
+					// Provide stack trace and exit
+					LOGGER.log(Level.WARNING, this.processNamespace + " "
+							+ StreamGobbler.class.getSimpleName()
+							+ " failed closing stream", ex);
+				}
 			}
 		}
 	}

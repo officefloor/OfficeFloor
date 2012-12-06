@@ -60,6 +60,11 @@ public final class ProcessConfiguration {
 	private ProcessCompletionListener completionListener = null;
 
 	/**
+	 * {@link ProcessOutputStreamFactory}.
+	 */
+	private ProcessOutputStreamFactory outputStreamFactory = null;
+
+	/**
 	 * {@link MBeanServer}.
 	 */
 	private MBeanServer mbeanServer = null;
@@ -158,6 +163,26 @@ public final class ProcessConfiguration {
 	public void setProcessCompletionListener(
 			ProcessCompletionListener completionListener) {
 		this.completionListener = completionListener;
+	}
+
+	/**
+	 * Obtains the {@link ProcessOutputStreamFactory}.
+	 * 
+	 * @return {@link ProcessOutputStreamFactory}.
+	 */
+	public ProcessOutputStreamFactory getProcessOutputStreamFactory() {
+		return this.outputStreamFactory;
+	}
+
+	/**
+	 * Specifies the {@link ProcessOutputStreamFactory}.
+	 * 
+	 * @param outputStreamFactory
+	 *            {@link ProcessOutputStreamFactory}.
+	 */
+	public void setProcessOutputStreamFactory(
+			ProcessOutputStreamFactory outputStreamFactory) {
+		this.outputStreamFactory = outputStreamFactory;
 	}
 
 	/**
