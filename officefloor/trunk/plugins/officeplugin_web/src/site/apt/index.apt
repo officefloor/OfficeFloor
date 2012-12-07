@@ -19,13 +19,11 @@
 *---------------------------------------------------------------------------+--------------------------------------------------------------+
 | {{{/apidocs/net/officefloor/plugin/web/http/resource/file/HttpFileWriterWorkSource.html}net.officefloor.plugin.web.http.resource.file.HttpFileWriterWorkSource}} | Writes a {{{/apidocs/net/officefloor/plugin/web/http/resource/HttpFile.html}net.officefloor.plugin.socket.server.http.resource.HttpFile}} as the HTTP response |
 *---------------------------------------------------------------------------+--------------------------------------------------------------+
-|  {{{/apidocs/net/officefloor/plugin/web/http/route/source/HttpRouteWorkSource.html}net.officefloor.plugin.socket.server.http.route.source.HttpRouteWorkSource}} | Provides ability to route HTTP request to a Task based on URL pattern |
+|  {{{/apidocs/net/officefloor/plugin/web/http/route/HttpRouteWorkSource.html}net.officefloor.plugin.socket.server.http.route.HttpRouteWorkSource}} | Provides ability to route HTTP request to a Task based on HTTP URL continuation |
 *---------------------------------------------------------------------------+--------------------------------------------------------------+
 |  {{{/apidocs/net/officefloor/plugin/web/http/security/HttpSecurityWorkSource.html}net.officefloor.plugin.socket.server.http.security.HttpSecurityWorkSource}} | Provides challenge HTTP response to the client to ensure have {{{/apidocs/net/officefloor/plugin/web/http/security/HttpSecurity.html}net.officefloor.plugin.socket.server.http.security.HttpSecurity}}. A challenge will not be sent if client is already authenticated. |
 *---------------------------------------------------------------------------+--------------------------------------------------------------+
 |  {{{/apidocs/net/officefloor/plugin/web/http/template/HttpTemplateWorkSource.html}net.officefloor.plugin.socket.server.http.template.HttpTemplateWorkSource}} | Provides dynamic web page content.  This allows breaking the rending of HTML into Tasks that have <<<$\{properties\}>>> replaced from bean properties (POJO get methods).  This is similar to Velocity Template Engine except that the scripting tags are not required as the template is broken into Tasks which can have other Tasks weaved in between to control rendering. |
-*---------------------------------------------------------------------------+--------------------------------------------------------------+
-|  {{{/apidocs/net/officefloor/plugin/web/http/template/route/HttpTemplateRouteWorkSource.html}net.officefloor.plugin.socket.server.http.template.route.HttpTemplateRouteWorkSource}} | Provides the routing of the HTTP request to the appropriate Task based on the HTML templating <<<#\{task}>>> entries. |
 *---------------------------------------------------------------------------+--------------------------------------------------------------+
 
 
