@@ -1,0 +1,24 @@
+                                       ------------------
+				             Core
+				       ------------------
+				      Daniel Sagenschneider
+				       ------------------
+  
+  <<Core>>
+  
+  This provides the core functionality for OfficeFloor.
+  
+  Typically in building an application you do not use these modules directly but rather use these indirectly via the OfficeFloor Eclipse features/plug-ins.  This allows you to be abstracted away from the details of the OfficeFloor framework and focus on configuring your application graphically via Eclipse.
+  
+  The core modules of OfficeFloor are:
+
+   * {{{./officeframe/index.html}OfficeFrame}} is the run time engine.
+
+   * {{{./officexml/index.html}OfficeXml}} loads the configuration.
+    
+   * {{{./officecompiler/index.html}OfficeCompiler}} compiles the configuration into the OfficeFrame for execution.  Also provides the necessary information to allow building the Eclipse plug-ins/features.
+  
+   * {{{./officebuilding/index.html}OfficeBuilding}} provides controls (both command line and JMX) for running OfficeFloor instances.
+
+  The {{{./officemodelgen/index.html}Model Generator}} is a code generator for the configuration objects.  This only produces boiler plate configuration code to reduce manual coding.
+

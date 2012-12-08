@@ -1,0 +1,26 @@
+<html>
+<body>
+<p>Template ${TemplateName}</p>
+<p>${EscapedHtml} ${UnescapedHtml}</p>
+<p>${nullBean not to be displayed $} <!-- ${bean --> Bean with property ${beanProperty} <!-- $} --> ${beanArray ${count}  $}</p>
+<table>
+    <tr>
+        <td>Name</td>
+        <td>Description</td>
+    </tr>
+    <!-- {List} -->
+    <tr>
+        <td>${Name}</td>
+        <td>${description}</td>
+    </tr>
+    <!-- {Tail} -->
+</table>
+<form action="#{nextTask}">
+	<input type="submit" />
+</form>
+<form action="#{submit}">
+    <input type="submit" />
+</form>
+<a href="#{nonMethodLink}">Non-method link</a>
+</body>
+</html>

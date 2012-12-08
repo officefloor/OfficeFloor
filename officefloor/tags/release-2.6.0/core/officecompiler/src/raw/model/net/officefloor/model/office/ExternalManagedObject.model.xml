@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<model>
+	<field type="String" name="external managed object name" />
+	<field type="String" name="object type" />
+	<list type="OfficeSectionObjectToExternalManagedObjectModel" name="office section object" />
+	<list type="OfficeManagedObjectDependencyToExternalManagedObjectModel"
+		name="dependent office managed object" />
+	<list type="OfficeInputManagedObjectDependencyToExternalManagedObjectModel"
+		name="dependent office input managed object" />
+	<list type="ExternalManagedObjectToAdministratorModel" name="administrator" />
+	<list type="ExternalManagedObjectToOfficeGovernanceModel" name="office governance" />
+</model>

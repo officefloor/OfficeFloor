@@ -1,0 +1,43 @@
+<desk>
+	
+	<external-managed-objects>
+		<external-managed-object name="HTTP_CONNECTION"
+			object-type="net.officefloor.plugin.socket.server.http.ServerHttpConnection" />
+		<external-managed-object name="HTTP_LOCATION"
+			object-type="net.officefloor.plugin.web.http.location.HttpApplicationLocation" />
+	</external-managed-objects>
+
+	<external-flows>
+		<external-flow name="escalation" argument-type="java.lang.Exception" />
+	</external-flows>
+
+	<works>
+		<work name="sender" source="net.officefloor.plugin.web.http.resource.source.HttpFileSenderWorkSource">
+			<properties>
+				<property name="http.classpath.prefix" value="WEB-PUBLIC" />
+				<property name="file.not.found.content.path" value="FileNotFound.html" />
+			</properties>
+			<work-task name="SendFile">
+				<task-object name="SERVER_HTTP_CONNECTION" key="SERVER_HTTP_CONNECTION" object-type="net.officefloor.plugin.socket.server.http.ServerHttpConnection">
+					<external-managed-object name="HTTP_CONNECTION" />
+				</task-object>
+				<task-object name="HTTP_APPLICATION_LOCATION" key="HTTP_APPLICATION_LOCATION" object-type="net.officefloor.plugin.web.http.location.HttpApplicationLocation">
+					<external-managed-object name="HTTP_LOCATION" />
+				</task-object>
+			</work-task>
+		</work>
+	</works>
+
+	<tasks>
+		<task name="unhandled" public="true" work="sender" task="SendFile"
+			return-type="net.officefloor.plugin.web.http.resource.HttpResource">
+			<task-escalation escalation-type="java.io.IOException">
+				<external-flow name="escalation" />
+			</task-escalation>
+			<task-escalation escalation-type="net.officefloor.plugin.web.http.location.InvalidHttpRequestUriException">
+				<external-flow name="escalation" />
+			</task-escalation>
+		</task>
+	</tasks>
+
+</desk>

@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project>
+	<bannerLeft>
+		<src>./images/OfficeFloorBannerImage.png</src>
+		<href>http://www.officefloor.net/</href>
+	</bannerLeft>
+	<poweredBy>
+		<logo name="Maven" href="http://maven.apache.org/"
+			img="http://maven.apache.org/images/logos/maven-feather.png" />
+		<logo name="Eclipse" href="http://marketplace.eclipse.org/content/officefloor"
+			img="http://www.eclipse.org/artwork/eclipseready/images/rea_eclipse_pos_logo_fc_sm.jpg"
+			width="90" height="90" />
+		<logo name="SourceForge" href="http://sourceforge.net/"
+			img="http://sflogo.sourceforge.net/sflogo.php?group_id=156349&amp;type=1" />
+		<logo name="Donate"
+			href="http://sourceforge.net/donate/index.php?group_id=156349" img="http://images.sourceforge.net/images/project-support.jpg" />
+	</poweredBy>
+	<publishDate position="right" />
+	<version position="right" />
+	<skin>
+		<groupId>net.officefloor.maven</groupId>
+		<artifactId>maven-officefloor-skin</artifactId>
+		<version>${officefloor.skin.version}</version>
+	</skin>
+	<body>
+		<head>
+			<!-- shortcut icon -->
+			<link rel="shortcut icon" href="./favicon.ico" />
+			<!-- Syntax Highlighter -->
+			<link type="text/css" rel="stylesheet" href="./css/shCore.css" />
+			<link type="text/css" rel="stylesheet" href="./css/shThemeDefault.css" />
+			<script type="text/javascript" src="./scripts/shCore.js"></script>
+			<script type="text/javascript" src="./scripts/shAutoloader.js"></script>
+			<script type="text/javascript" src="./scripts/shBrushJava.js"></script>
+			<script type="text/javascript" src="./scripts/shBrushXml.js"></script>
+			<script type="text/javascript" src="./scripts/shBrushPlain.js"></script>
+			<script type="text/javascript">
+				SyntaxHighlighter.defaults['toolbar'] = false;
+				SyntaxHighlighter.all();
+            </script>
+			<!-- Google Analytics -->
+			<script type="text/javascript">
+				var _gaq = _gaq || [];
+				_gaq.push(['_setAccount',
+				'UA-23477455-1']);
+				_gaq.push(['_trackPageview']);
+
+				(function() {
+				var ga
+				= document.createElement('script'); ga.type = 'text/javascript';
+				ga.async = true;
+				ga.src = ('https:' == document.location.protocol ?
+				'https://ssl' :
+				'http://www') + '.google-analytics.com/ga.js';
+				var s =
+				document.getElementsByTagName('script')[0];
+				s.parentNode.insertBefore(ga, s);
+				})();
+  			</script>
+			<!-- Woopra -->
+			<script>
+				var woo_settings = {idle_timeout:'300000',
+				domain:'officefloor.net'};
+				(function(){
+				var wsc =
+				document.createElement('script');
+				wsc.src =
+				document.location.protocol+'//static.woopra.com/js/woopra.js';
+				wsc.type = 'text/javascript';
+				wsc.async = true;
+				var ssc =
+				document.getElementsByTagName('script')[0];
+				ssc.parentNode.insertBefore(wsc, ssc);
+				})();
+			</script>
+			<!-- Facebook administration -->
+			<meta property="fb:admins" content="sagenschneider"/>
+			<meta property="fb:app_id" content="336336786442645"/>
+		</head>
+		<menu name="${project.name}">
+			<item name="Welcome" href="./index.html" />
+		</menu>
+		<menu name="Getting Started">
+			<item name="Tutorials" href="./tutorials/index.html" />
+			<item name="Eclipse Plug-in" href="./eclipse/index.html" />
+			<item name="Download / Maven" href="./download.html" />
+		</menu>
+		<menu name="Help">
+			<item name="Getting Help" href="./getting-help.html" />
+			<item name="Site as PDF" href="./OfficeFloor.pdf" />
+			<item name="Issue Tracking" href="./issue-tracking.html" />
+		</menu>
+		<menu name="Technical">
+			<item name="Releases" href="./changes-report.html" />
+			<item name="Architecture" href="./architecture.html" />
+			<item name="Source Repository" href="./source-repository.html" />
+		</menu>
+		<menu ref="modules" />
+	</body>
+</project>

@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<model>
+	<field type="String" name="external flow name" />
+	<field type="String" name="argument type" />
+	<list type="SubSectionOutputToExternalFlowModel" name="sub section output" />
+	<list type="SectionManagedObjectSourceFlowToExternalFlowModel"
+		name="section managed object source flow" />
+</model>
