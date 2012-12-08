@@ -1,0 +1,26 @@
+<woof>
+
+	<templates>
+		<template name="TEMPLATE" path="example/Template.ofp" class="net.example.LogicClass" />
+	</templates>
+
+	<sections>
+		<section name="SECTION" source="net.example.ExampleSectionSource"
+			location="SECTION_LOCATION" />
+	</sections>
+
+	<governances>
+		<governance name="GOVERNANCE" source="net.example.ExampleGovernanceSource" />
+	</governances>
+
+	<resources />
+
+	<exceptions>
+		<exception class="java.lang.Exception" />
+	</exceptions>
+	
+	<starting>
+		<start />
+	</starting>
+
+</woof>

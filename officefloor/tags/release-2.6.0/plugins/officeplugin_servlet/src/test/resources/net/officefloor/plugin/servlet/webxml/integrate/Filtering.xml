@@ -1,0 +1,35 @@
+<web-app>
+	<filter-mapping>
+		<filter-name>Filter</filter-name>
+		<url-pattern>/*</url-pattern>
+		<dispatcher>REQUEST</dispatcher>
+		<dispatcher>FORWARD</dispatcher>
+	</filter-mapping>
+	<filter>
+		<filter-name>Filter</filter-name>
+		<filter-class>net.officefloor.plugin.servlet.webxml.MockFilter
+		</filter-class>
+	</filter>
+	<servlet-mapping>
+		<servlet-name>Dispatch</servlet-name>
+		<url-pattern>/path/*</url-pattern>
+	</servlet-mapping>
+	<servlet-mapping>
+		<servlet-name>Handle</servlet-name>
+		<url-pattern>/dispatch/*</url-pattern>
+	</servlet-mapping>
+	<servlet>
+		<servlet-name>Dispatch</servlet-name>
+		<servlet-class>net.officefloor.plugin.servlet.webxml.integrate.MockDispatchHttpServlet
+		</servlet-class>
+		<init-param>
+			<param-name>path</param-name>
+			<param-value>/dispatch</param-value>
+		</init-param>
+	</servlet>
+	<servlet>
+		<servlet-name>Handle</servlet-name>
+		<servlet-class>net.officefloor.plugin.servlet.webxml.MockHttpServlet
+		</servlet-class>
+	</servlet>
+</web-app>

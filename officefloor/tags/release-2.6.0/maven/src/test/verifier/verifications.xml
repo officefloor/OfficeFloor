@@ -1,0 +1,31 @@
+<verifications>
+	<files>
+		<!-- Ensure using latest version -->
+		<file>
+			<location>${basedir}/../pom.xml</location>
+			<contains><![CDATA[<dependencyManagement>[^;]*<artifactId>${project.artifactId}</artifactId>[^;]*</dependencyManagement>]]></contains>
+		</file>
+		
+		<!-- Ensure all the modules inheriting latest -->
+		<file>
+			<location>maven-officefloor-plugin/pom.xml</location>
+			<contains><![CDATA[<version>${pom.version}</version>(\s*)</parent>]]></contains>
+		</file>
+		<file>
+			<location>maven-officefloor-skin/pom.xml</location>
+			<contains><![CDATA[<version>${pom.version}</version>(\s*)</parent>]]></contains>
+		</file>
+		<file>
+			<location>maven-site-aggregate-plugin/pom.xml</location>
+			<contains><![CDATA[<version>${pom.version}</version>(\s*)</parent>]]></contains>
+		</file>
+		<file>
+			<location>maven-woof-plugin/pom.xml</location>
+			<contains><![CDATA[<version>${pom.version}</version>(\s*)</parent>]]></contains>
+		</file>
+		<file>
+			<location>woof-archetype/pom.xml</location>
+			<contains><![CDATA[<version>${pom.version}</version>(\s*)</parent>]]></contains>
+		</file>
+	</files>
+</verifications>
