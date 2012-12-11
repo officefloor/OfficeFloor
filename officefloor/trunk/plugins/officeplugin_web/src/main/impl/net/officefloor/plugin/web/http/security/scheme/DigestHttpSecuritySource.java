@@ -140,7 +140,7 @@ public class DigestHttpSecuritySource implements
 
 			// Handle next character
 			char character = text.charAt(i);
-			switch (character) {
+			NEXT_CHARACTER: switch (character) {
 
 			case ',':
 				// Handle parameter separator
@@ -156,9 +156,12 @@ public class DigestHttpSecuritySource implements
 
 					// Reset for next parameter
 					state = ParameterState.INIT;
-					break;
+					break NEXT_CHARACTER;
+
+				default:
+					// Include comma
+					break NEXT_CHARACTER;
 				}
-				break;
 
 			case '=':
 				// Handle assignment
@@ -169,9 +172,12 @@ public class DigestHttpSecuritySource implements
 					name = text.substring(start, end);
 					name = name.trim(); // ignore spacing
 					state = ParameterState.NAME_VALUE_SEPARATION;
-					break;
+					break NEXT_CHARACTER;
+
+				default:
+					// Include equals
+					break NEXT_CHARACTER;
 				}
-				break;
 
 			case '"':
 				// Handle quote
@@ -180,7 +186,7 @@ public class DigestHttpSecuritySource implements
 					// Quoted value
 					start = i + 1; // ignore quote
 					state = ParameterState.QUOTED_VALUE;
-					break;
+					break NEXT_CHARACTER;
 
 				case QUOTED_VALUE:
 					// End of quoted value
@@ -192,17 +198,24 @@ public class DigestHttpSecuritySource implements
 
 					// Reset for next parameter
 					state = ParameterState.INIT;
-					break;
+					break NEXT_CHARACTER;
+
+				default:
+					// Include quote
+					break NEXT_CHARACTER;
 				}
-				break;
 
 			case ' ':
 				// Handle space
 				switch (state) {
 				case INIT:
-					break; // ignore leading space
+					// Ignore leading space
+					break NEXT_CHARACTER;
+
+				default:
+					// Include space
+					break NEXT_CHARACTER;
 				}
-				break;
 
 			default:
 				// Handle value
@@ -211,31 +224,33 @@ public class DigestHttpSecuritySource implements
 					// Start processing the name
 					start = i;
 					state = ParameterState.NAME;
-					break;
+					break NEXT_CHARACTER;
 
 				case NAME:
-					break; // Letter of name
+					// Letter of name
+					break NEXT_CHARACTER;
 
 				case NAME_VALUE_SEPARATION:
 					// Non quoted value
 					start = i;
 					state = ParameterState.VALUE;
-					break;
+					break NEXT_CHARACTER;
+
+				default:
+					// Include other characters
+					break NEXT_CHARACTER;
 				}
-				break;
 			}
 		}
 
 		// Provide final value
-		switch (state) {
-		case VALUE:
+		if (ParameterState.VALUE.equals(state)) {
 			// Remaining content is value
 			String value = text.substring(start);
 			value = value.trim(); // ignore spacing
 
 			// Load parameter
 			parameters.setProperty(name.toLowerCase(), value);
-			break;
 		}
 
 		// Return the parameters

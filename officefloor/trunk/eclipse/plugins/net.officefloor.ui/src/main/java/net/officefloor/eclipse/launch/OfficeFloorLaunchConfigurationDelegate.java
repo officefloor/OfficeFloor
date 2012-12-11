@@ -62,7 +62,7 @@ public class OfficeFloorLaunchConfigurationDelegate extends
 
 		// Obtain the main type name
 		String mainTypeName = OpenOfficeFloor.class.getName();
-		
+
 		// Create class path
 		String[] classpath = this.getClasspath(configuration);
 
@@ -91,7 +91,7 @@ public class OfficeFloorLaunchConfigurationDelegate extends
 				.getAbsolutePath());
 
 		// Obtain the VM specific attributes
-		Map<?, ?> vmAttributesMap = this
+		Map<String, Object> vmAttributesMap = this
 				.getVMSpecificAttributesMap(configuration);
 
 		// Obtain the boot path

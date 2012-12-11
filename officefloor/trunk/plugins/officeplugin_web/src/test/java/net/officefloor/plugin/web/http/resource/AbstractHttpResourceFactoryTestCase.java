@@ -432,12 +432,17 @@ public abstract class AbstractHttpResourceFactoryTestCase extends
 						AbstractHttpResourceFactoryTestCase.class,
 						fileNameForExpectedContent);
 				InputStream inputStream = new FileInputStream(expectedFile);
-				ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-				for (int value = inputStream.read(); value != -1; value = inputStream
-						.read()) {
-					outputStream.write(value);
+				try {
+					ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+					for (int value = inputStream.read(); value != -1; value = inputStream
+							.read()) {
+						outputStream.write(value);
+					}
+					expectedContents = outputStream.toByteArray();
+				} finally {
+					// Ensure close input stream
+					inputStream.close();
 				}
-				expectedContents = outputStream.toByteArray();
 			}
 
 			// Ensure buffer contains expected content

@@ -721,6 +721,10 @@ public class ManagedObjectContainerImpl implements ManagedObjectContainer,
 				case UNLOAD_WAITING_GOVERNANCE:
 					// Ready for enforce/disregard governance
 					return true;
+
+				default:
+					// Continue on to be not expected state
+					break;
 				}
 
 				// Fail as not expected state
@@ -752,8 +756,8 @@ public class ManagedObjectContainerImpl implements ManagedObjectContainer,
 		// Locks: Unknown (though should have synchronise before call)
 
 		// Only return Object if in valid state
-		switch (this.containerState) {
-		case OBJECT_AVAILABLE:
+		if (ManagedObjectContainerState.OBJECT_AVAILABLE
+				.equals(this.containerState)) {
 			// Return the Object
 			return this.object;
 		}

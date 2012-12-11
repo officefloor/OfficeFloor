@@ -719,57 +719,63 @@ public class AggregateGoal extends AbstractMojo {
 
 				// Obtain the appropriate snippet
 				String id = parameters.get("id");
-				BufferedReader snippetReader = new BufferedReader(
-						new FileReader(snippetFile));
 				StringWriter snippet = new StringWriter();
 				PrintWriter snippetWriter = new PrintWriter(snippet);
-				if (id == null) {
-					// Use full contents of file
-					String snippetLine;
-					while ((snippetLine = snippetReader.readLine()) != null) {
-						snippetWriter.println(snippetLine);
-					}
-				} else {
-					// Parse out the snippet
-					String snippetLine;
-					boolean isStarted = false;
-					while ((!isStarted)
-							&& ((snippetLine = snippetReader.readLine()) != null)) {
-						// Remove extra spacing from line
-						while (snippetLine.contains("  ")) {
-							snippetLine = snippetLine.replace("  ", " ");
-						}
-						if (snippetLine.contains("START SNIPPET: " + id)) {
-							isStarted = true; // found start of snippet
-						}
-					}
-					if (!isStarted) {
-						throw new IOException("Did not find snippet '" + id
-								+ "' in file " + snippetFile.getAbsolutePath());
-					}
-
-					// Found start of snippet so now include the snippet
-					boolean isFinished = false;
-					while ((!isFinished)
-							&& ((snippetLine = snippetReader.readLine()) != null)) {
-
-						// Determine if end of snippet
-						String checkLine = snippetLine;
-						while (checkLine.contains("  ")) {
-							checkLine = checkLine.replace("  ", " ");
-						}
-						if (checkLine.contains("END SNIPPET: " + id)) {
-							isFinished = true; // found end of snippet
-						}
-
-						// Include line if not finished
-						if (!isFinished) {
+				BufferedReader snippetReader = new BufferedReader(
+						new FileReader(snippetFile));
+				try {
+					if (id == null) {
+						// Use full contents of file
+						String snippetLine;
+						while ((snippetLine = snippetReader.readLine()) != null) {
 							snippetWriter.println(snippetLine);
 						}
-					}
+					} else {
+						// Parse out the snippet
+						String snippetLine;
+						boolean isStarted = false;
+						while ((!isStarted)
+								&& ((snippetLine = snippetReader.readLine()) != null)) {
+							// Remove extra spacing from line
+							while (snippetLine.contains("  ")) {
+								snippetLine = snippetLine.replace("  ", " ");
+							}
+							if (snippetLine.contains("START SNIPPET: " + id)) {
+								isStarted = true; // found start of snippet
+							}
+						}
+						if (!isStarted) {
+							throw new IOException("Did not find snippet '" + id
+									+ "' in file "
+									+ snippetFile.getAbsolutePath());
+						}
 
+						// Found start of snippet so now include the snippet
+						boolean isFinished = false;
+						while ((!isFinished)
+								&& ((snippetLine = snippetReader.readLine()) != null)) {
+
+							// Determine if end of snippet
+							String checkLine = snippetLine;
+							while (checkLine.contains("  ")) {
+								checkLine = checkLine.replace("  ", " ");
+							}
+							if (checkLine.contains("END SNIPPET: " + id)) {
+								isFinished = true; // found end of snippet
+							}
+
+							// Include line if not finished
+							if (!isFinished) {
+								snippetWriter.println(snippetLine);
+							}
+						}
+					}
+					snippetWriter.flush();
+					
+				} finally {
+					// Ensure close the snippet reader
+					snippetReader.close();
 				}
-				snippetWriter.flush();
 
 				// Write the code-snippet
 				writer.println("+-----+");
