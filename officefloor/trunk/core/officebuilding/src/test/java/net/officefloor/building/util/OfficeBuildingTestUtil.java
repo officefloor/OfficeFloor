@@ -256,6 +256,7 @@ public class OfficeBuildingTestUtil {
 		for (int value = reader.read(); value != -1; value = reader.read()) {
 			content.append((char) value);
 		}
+		reader.close();
 
 		// Ensure content in file
 		TestCase.assertEquals("Content should be in file", expectedContent,

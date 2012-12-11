@@ -77,68 +77,74 @@ public class PasswordFileCredentialStore implements CredentialStore {
 		// Password file
 		PasswordFile file = null;
 
-		// Populate the password file
-		for (String line = reader.readLine(); line != null; line = reader
-				.readLine()) {
+		try {
+			// Populate the password file
+			for (String line = reader.readLine(); line != null; line = reader
+					.readLine()) {
 
-			// Trim the line for parsing
-			line = line.trim();
+				// Trim the line for parsing
+				line = line.trim();
 
-			// Ignore blank line
-			if (line.length() == 0) {
-				continue;
-			}
-
-			// Ignore comments
-			if (line.startsWith("#")) {
-				continue;
-			}
-
-			// First data line is expected to be algorithm line
-			if (file == null) {
-				// Obtain algorithm from first data line
-				String[] details = line.split("=");
-				if (details.length != 2) {
-					throw new IOException(
-							"Must provide algorithm definition first");
+				// Ignore blank line
+				if (line.length() == 0) {
+					continue;
 				}
-				String propertyName = details[0].trim();
-				if (!"algorithm".equalsIgnoreCase(propertyName)) {
-					throw new IOException(
-							"Must provide algorithm definition first");
+
+				// Ignore comments
+				if (line.startsWith("#")) {
+					continue;
 				}
-				String algorithm = details[1].trim();
 
-				// Algorithm obtained, instantiate password file to be populated
-				file = new PasswordFile(algorithm);
+				// First data line is expected to be algorithm line
+				if (file == null) {
+					// Obtain algorithm from first data line
+					String[] details = line.split("=");
+					if (details.length != 2) {
+						throw new IOException(
+								"Must provide algorithm definition first");
+					}
+					String propertyName = details[0].trim();
+					if (!"algorithm".equalsIgnoreCase(propertyName)) {
+						throw new IOException(
+								"Must provide algorithm definition first");
+					}
+					String algorithm = details[1].trim();
 
-				// Algorithm specified
-				continue;
-			}
+					// Algorithm obtained, instantiate password file to be
+					// populated
+					file = new PasswordFile(algorithm);
 
-			// Parse out the entry details
-			String[] details = line.split(":");
-			if (details.length < 2) {
-				continue; // ignore line with not enough details
-			}
-			String userId = details[0].trim();
-			String credentials = details[1].trim();
-			Set<String> roles = new HashSet<String>();
-			if (details.length > 2) {
-				for (String role : details[2].split(",")) {
-					role = role.trim();
-					roles.add(role);
+					// Algorithm specified
+					continue;
 				}
-			}
 
-			// Decode the credentials
-			byte[] credentialData = Base64.decodeBase64(credentials);
-			if ((credentialData == null) || (credentialData.length == 0)) {
-				continue; // ignore invalid entry
-			}
+				// Parse out the entry details
+				String[] details = line.split(":");
+				if (details.length < 2) {
+					continue; // ignore line with not enough details
+				}
+				String userId = details[0].trim();
+				String credentials = details[1].trim();
+				Set<String> roles = new HashSet<String>();
+				if (details.length > 2) {
+					for (String role : details[2].split(",")) {
+						role = role.trim();
+						roles.add(role);
+					}
+				}
 
-			// Add the password entry
-			file.addEntry(userId, credentialData, roles);
+				// Decode the credentials
+				byte[] credentialData = Base64.decodeBase64(credentials);
+				if ((credentialData == null) || (credentialData.length == 0)) {
+					continue; // ignore invalid entry
+				}
+
+				// Add the password entry
+				file.addEntry(userId, credentialData, roles);
+			}
+		} finally {
+			// Ensure close reader
+			reader.close();
 		}
 
 		// Must have at least specified the algorithm

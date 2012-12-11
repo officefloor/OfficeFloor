@@ -129,8 +129,8 @@ public class XmlContext {
 			String id = focusMetaData.getId();
 
 			// Load reference meta-data if reference
-			switch (mappingType) {
-			case REFERENCE:
+			if (XmlMappingType.REFERENCE.equals(mappingType)) {
+
 				// Use the referenced meta-data of the recursive mapping
 				focusMetaData = referencedRegistry.getXmlMappingMetaData(id);
 				if (focusMetaData == null) {
@@ -213,11 +213,13 @@ public class XmlContext {
 					}
 
 					// Obtain Value/Object XML mapping
-					switch (focusMetaData.getType()) {
+					XmlMappingType focusMetaDataType = focusMetaData.getType();
+					switch (focusMetaDataType) {
 					case VALUE:
 						// Create the dynamic value loader xml mapping
-						xmlMapping = new ValueXmlMapping(valueLoaderFactory
-								.createDynamicValueLoader(loadMethodName));
+						xmlMapping = new ValueXmlMapping(
+								valueLoaderFactory
+										.createDynamicValueLoader(loadMethodName));
 						break;
 
 					case OBJECT:
@@ -247,8 +249,8 @@ public class XmlContext {
 
 						// Create the new xml context for the loaded object
 						XmlContext loadObjectXmlContext = new XmlContext(
-								loadedObjectType, focusMetaData
-										.getLoadObjectConfiguration(),
+								loadedObjectType,
+								focusMetaData.getLoadObjectConfiguration(),
 								translatorRegistry, elementName, this,
 								referencedRegistry);
 
@@ -260,7 +262,14 @@ public class XmlContext {
 
 						// Set for adding
 						xmlMapping = objectXmlMapping;
+						break;
 
+					default:
+						// Should not be of this type
+						throw new IllegalStateException("Illegal "
+								+ XmlMappingType.class.getSimpleName() + " "
+								+ focusMetaDataType.name()
+								+ " for value/object XML mapping");
 					}
 
 					// Register Value/Object XML mapping

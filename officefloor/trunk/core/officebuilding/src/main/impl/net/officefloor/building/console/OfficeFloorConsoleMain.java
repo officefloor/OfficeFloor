@@ -20,6 +20,7 @@ package net.officefloor.building.console;
 
 import java.io.File;
 import java.io.FileReader;
+import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.io.StringReader;
@@ -130,9 +131,20 @@ public final class OfficeFloorConsoleMain {
 			// Load the properties to environment
 			StringWriter propertiesFileContent = new StringWriter();
 			Reader propertiesFileReader = new FileReader(propertiesFile);
-			for (int character = propertiesFileReader.read(); character >= 0; character = propertiesFileReader
-					.read()) {
-				propertiesFileContent.write(character);
+			try {
+				for (int character = propertiesFileReader.read(); character >= 0; character = propertiesFileReader
+						.read()) {
+					propertiesFileContent.write(character);
+				}
+			} finally {
+				// Close the reader
+				try {
+					propertiesFileReader.close();
+				} catch (IOException ex) {
+					// Warn failed to close but carry on
+					System.err
+							.println("WARNING: Failed to close properties file.");
+				}
 			}
 
 			// Replace tags in properties (e.g. allows OFFICE_FLOOR_HOME use)

@@ -175,7 +175,6 @@ public class WoofLaunchConfigurationDelegate extends
 	 */
 
 	@Override
-	@SuppressWarnings("unchecked")
 	public void launch(ILaunchConfiguration configuration, String mode,
 			ILaunch launch, IProgressMonitor monitor) throws CoreException {
 
@@ -301,7 +300,7 @@ public class WoofLaunchConfigurationDelegate extends
 			}
 
 			// Obtain the VM specific attributes
-			Map<String, String[]> vmAttributes = this
+			Map<String, Object> vmAttributes = this
 					.getVMSpecificAttributesMap(configuration);
 
 			// Obtain the boot path

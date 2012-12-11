@@ -39,6 +39,7 @@ import net.officefloor.plugin.gwt.service.GwtServiceTask.Dependencies;
 import net.officefloor.plugin.gwt.service.GwtServiceWorkSource;
 import net.officefloor.plugin.gwt.service.ServerGwtRpcConnection;
 import net.officefloor.plugin.gwt.service.ServerGwtRpcConnectionManagedObjectSource;
+import net.officefloor.plugin.gwt.template.tranform.HtmlTagType;
 import net.officefloor.plugin.gwt.template.tranform.HtmlTemplateTransformation;
 import net.officefloor.plugin.gwt.template.tranform.HtmlTemplateTransformationContext;
 import net.officefloor.plugin.gwt.template.tranform.HtmlTemplateTransformer;
@@ -568,11 +569,10 @@ public class GwtHttpTemplateSectionExtension implements
 						} else {
 							// Append after the HEAD
 							if ("head".equalsIgnoreCase(context.getTagName())) {
-								switch (context.getTagType()) {
-								case OPEN_CLOSE:
-								case CLOSE:
+								HtmlTagType tagType = context.getTagType();
+								if ((HtmlTagType.OPEN_CLOSE.equals(tagType))
+										|| (HtmlTagType.CLOSE.equals(tagType))) {
 									isAppend = true;
-									break;
 								}
 							}
 						}
