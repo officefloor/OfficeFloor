@@ -126,11 +126,8 @@ public class LogUtil {
 	private static void log(LogLevel level, String message, Throwable cause) {
 
 		// Determine if log debug messages
-		switch (level) {
-		case DEBUG:
-			if (!isLogDebug) {
-				return; // do not log debug
-			}
+		if ((!isLogDebug) && (LogLevel.DEBUG.equals(level))) {
+			return; // do not log debug
 		}
 
 		// Obtain the message

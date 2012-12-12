@@ -33,7 +33,7 @@ import org.eclipse.gef.EditPart;
 
 /**
  * {@link EditPart} for the {@link SubSectionInputModel}.
- *
+ * 
  * @author Daniel Sagenschneider
  */
 public class SubSectionInputEditPart
@@ -63,17 +63,28 @@ public class SubSectionInputEditPart
 	protected void handlePropertyChange(SubSectionInputEvent property,
 			PropertyChangeEvent evt) {
 		switch (property) {
+		case CHANGE_SUB_SECTION_INPUT_NAME:
+			this.getOfficeFloorFigure().setSubSectionInputName(
+					this.getSubSectionInputName());
+			break;
+
 		case CHANGE_IS_PUBLIC:
-			SubSectionInputEditPart.this.getOfficeFloorFigure()
+			this.getOfficeFloorFigure()
 					.setIsPublic(
 							SubSectionInputEditPart.this.getCastedModel()
 									.getIsPublic());
 			break;
+
 		case ADD_SUB_SECTION_OUTPUT:
 		case REMOVE_SUB_SECTION_OUTPUT:
 		case ADD_SECTION_MANAGED_OBJECT_SOURCE_FLOW:
 		case REMOVE_SECTION_MANAGED_OBJECT_SOURCE_FLOW:
-			SubSectionInputEditPart.this.refreshTargetConnections();
+			this.refreshTargetConnections();
+			break;
+
+		case CHANGE_PARAMETER_TYPE:
+		case CHANGE_PUBLIC_INPUT_NAME:
+			// Non visual changes
 			break;
 		}
 	}

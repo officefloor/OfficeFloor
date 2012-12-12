@@ -96,9 +96,11 @@ public class WoofSectionInputEditPart
 			this.getOfficeFloorFigure().setSectionInputName(
 					this.getCastedModel().getWoofSectionInputName());
 			break;
+
 		case CHANGE_URI:
 			this.getOfficeFloorFigure().setUri(this.getCastedModel().getUri());
 			break;
+
 		case ADD_WOOF_TEMPLATE_OUTPUT:
 		case REMOVE_WOOF_TEMPLATE_OUTPUT:
 		case ADD_WOOF_SECTION_OUTPUT:
@@ -108,6 +110,10 @@ public class WoofSectionInputEditPart
 		case ADD_WOOF_START:
 		case REMOVE_WOOF_START:
 			this.refreshTargetConnections();
+			break;
+
+		case CHANGE_PARAMETER_TYPE:
+			// No visual change
 			break;
 		}
 	}

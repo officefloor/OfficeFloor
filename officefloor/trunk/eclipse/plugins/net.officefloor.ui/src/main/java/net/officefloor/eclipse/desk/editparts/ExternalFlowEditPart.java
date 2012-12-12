@@ -37,7 +37,7 @@ import org.eclipse.gef.EditPart;
 
 /**
  * {@link EditPart} for the {@link ExternalFlowModel}.
- *
+ * 
  * @author Daniel Sagenschneider
  */
 public class ExternalFlowEditPart
@@ -62,27 +62,25 @@ public class ExternalFlowEditPart
 	@Override
 	protected void populateOfficeFloorDirectEditPolicy(
 			OfficeFloorDirectEditPolicy<ExternalFlowModel> policy) {
-		policy
-				.allowDirectEdit(new DirectEditAdapter<DeskChanges, ExternalFlowModel>() {
-					@Override
-					public String getInitialValue() {
-						return ExternalFlowEditPart.this.getCastedModel()
-								.getExternalFlowName();
-					}
+		policy.allowDirectEdit(new DirectEditAdapter<DeskChanges, ExternalFlowModel>() {
+			@Override
+			public String getInitialValue() {
+				return ExternalFlowEditPart.this.getCastedModel()
+						.getExternalFlowName();
+			}
 
-					@Override
-					public IFigure getLocationFigure() {
-						return ExternalFlowEditPart.this.getOfficeFloorFigure()
-								.getExternalFlowNameFigure();
-					}
+			@Override
+			public IFigure getLocationFigure() {
+				return ExternalFlowEditPart.this.getOfficeFloorFigure()
+						.getExternalFlowNameFigure();
+			}
 
-					@Override
-					public Change<ExternalFlowModel> createChange(
-							DeskChanges changes, ExternalFlowModel target,
-							String newValue) {
-						return changes.renameExternalFlow(target, newValue);
-					}
-				});
+			@Override
+			public Change<ExternalFlowModel> createChange(DeskChanges changes,
+					ExternalFlowModel target, String newValue) {
+				return changes.renameExternalFlow(target, newValue);
+			}
+		});
 	}
 
 	@Override
@@ -98,6 +96,7 @@ public class ExternalFlowEditPart
 			this.getOfficeFloorFigure().setExternalFlowName(
 					this.getCastedModel().getExternalFlowName());
 			break;
+
 		case ADD_TASK_FLOW:
 		case REMOVE_TASK_FLOW:
 		case ADD_TASK_ESCALATION:
@@ -107,6 +106,10 @@ public class ExternalFlowEditPart
 		case ADD_DESK_MANAGED_OBJECT_SOURCE_FLOW:
 		case REMOVE_DESK_MANAGED_OBJECT_SOURCE_FLOW:
 			this.refreshTargetConnections();
+			break;
+
+		case CHANGE_ARGUMENT_TYPE:
+			// Non visual change
 			break;
 		}
 	}

@@ -67,6 +67,10 @@ public class WoofGovernanceAreaEditPart
 					area.getHeight());
 			this.refresh();
 			break;
+
+		case CHANGE_GOVERNANCE_CONNECTION:
+			// Should not be able to change owning Governance
+			break;
 		}
 	}
 

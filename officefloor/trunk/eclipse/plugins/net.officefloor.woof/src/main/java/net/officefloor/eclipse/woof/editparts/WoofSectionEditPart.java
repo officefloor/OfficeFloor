@@ -89,11 +89,19 @@ public class WoofSectionEditPart
 		case CHANGE_WOOF_SECTION_NAME:
 			this.getOfficeFloorFigure().setSectionName(this.getSectionName());
 			break;
+
 		case ADD_INPUT:
 		case REMOVE_INPUT:
 		case ADD_OUTPUT:
 		case REMOVE_OUTPUT:
 			this.refreshChildren();
+			break;
+
+		case CHANGE_SECTION_SOURCE_CLASS_NAME:
+		case CHANGE_SECTION_LOCATION:
+		case ADD_PROPERTY:
+		case REMOVE_PROPERTY:
+			// No visual change
 			break;
 		}
 	}

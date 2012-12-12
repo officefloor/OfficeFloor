@@ -27,4 +27,13 @@ import net.officefloor.model.desk.WorkTaskModel;
  * @author Daniel Sagenschneider
  */
 public interface WorkTaskFigure extends OfficeFloorFigure {
+
+	/**
+	 * Specifies the {@link WorkTaskModel} name to display.
+	 * 
+	 * @param workTaskName
+	 *            {@link WorkTaskModel} name to display.
+	 */
+	void setWorkTaskName(String workTaskName);
+
 }

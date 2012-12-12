@@ -207,15 +207,18 @@ public class TaskEditPart extends
 			this.getOfficeFloorFigure().setTaskName(
 					this.getCastedModel().getTaskName());
 			break;
+
 		case CHANGE_IS_PUBLIC:
 			// Ensure display is public
 			this.getOfficeFloorFigure().setIsPublic(
 					this.getCastedModel().getIsPublic());
 			break;
+
 		case CHANGE_NEXT_TASK:
 		case CHANGE_NEXT_EXTERNAL_FLOW:
 			this.refreshSourceConnections();
 			break;
+
 		case CHANGE_INITIAL_TASK_FOR_WORK:
 		case CHANGE_WORK_TASK:
 		case ADD_TASK_FLOW_INPUT:
@@ -228,11 +231,18 @@ public class TaskEditPart extends
 		case REMOVE_DESK_MANAGED_OBJECT_SOURCE_FLOW:
 			this.refreshTargetConnections();
 			break;
+
 		case ADD_TASK_FLOW:
 		case REMOVE_TASK_FLOW:
 		case ADD_TASK_ESCALATION:
 		case REMOVE_TASK_ESCALATION:
 			this.refreshChildren();
+			break;
+
+		case CHANGE_RETURN_TYPE:
+		case CHANGE_WORK_NAME:
+		case CHANGE_WORK_TASK_NAME:
+			// Non visual change
 			break;
 		}
 	}

@@ -99,6 +99,17 @@ public class WoofGovernanceEditPart
 			// Refresh connections to areas
 			this.refreshSourceConnections();
 			break;
+
+		case ADD_GOVERNANCE_AREA_CONNECTION:
+		case REMOVE_GOVERNANCE_AREA_CONNECTION:
+			// Handled in adding area
+			break;
+			
+		case CHANGE_GOVERNANCE_SOURCE_CLASS_NAME:
+		case ADD_PROPERTY:
+		case REMOVE_PROPERTY:
+			// No visual change
+			break;
 		}
 	}
 

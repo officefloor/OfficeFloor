@@ -440,13 +440,11 @@ public class SectionSourceListingWizardPage extends WizardPage implements
 		this.selectedInstance.setSectionNameAndLocation(name, location);
 
 		// No properties for ClassSectionSource, so validate it now
-		switch (this.choice) {
-		case CLASS:
+		if (Choice.CLASS.equals(this.choice)) {
 			if (!this.selectedInstance.loadSectionType(this)) {
 				this.setPageComplete(false);
 				return;
 			}
-			break;
 		}
 
 		// No issue

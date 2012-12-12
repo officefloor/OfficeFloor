@@ -24,8 +24,19 @@ import net.officefloor.model.section.SectionManagedObjectDependencyModel;
 /**
  * {@link OfficeFloorFigure} for the {@link SectionManagedObjectDependencyModel}
  * .
- *
+ * 
  * @author Daniel Sagenschneider
  */
 public interface SectionManagedObjectDependencyFigure extends OfficeFloorFigure {
+
+	/**
+	 * Specifies the {@link SectionManagedObjectDependencyModel} name to
+	 * display.
+	 * 
+	 * @param sectionManagedObjectDependencyName
+	 *            Name to display.
+	 */
+	void setSectionManagedObjectDependencyName(
+			String sectionManagedObjectDependencyName);
+
 }

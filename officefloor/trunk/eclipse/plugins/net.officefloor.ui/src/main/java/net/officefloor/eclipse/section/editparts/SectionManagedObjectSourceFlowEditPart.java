@@ -23,7 +23,7 @@ import java.util.List;
 
 import net.officefloor.eclipse.OfficeFloorPlugin;
 import net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart;
-import net.officefloor.eclipse.skin.OfficeFloorFigure;
+import net.officefloor.eclipse.skin.section.SectionManagedObjectSourceFlowFigure;
 import net.officefloor.eclipse.skin.section.SectionManagedObjectSourceFlowFigureContext;
 import net.officefloor.eclipse.util.EclipseUtil;
 import net.officefloor.model.section.SectionManagedObjectSourceFlowModel;
@@ -33,16 +33,16 @@ import org.eclipse.gef.EditPart;
 
 /**
  * {@link EditPart} for the {@link SectionManagedObjectSourceFlowModel}.
- *
+ * 
  * @author Daniel Sagenschneider
  */
 public class SectionManagedObjectSourceFlowEditPart
 		extends
-		AbstractOfficeFloorEditPart<SectionManagedObjectSourceFlowModel, SectionManagedObjectSourceFlowEvent, OfficeFloorFigure>
+		AbstractOfficeFloorEditPart<SectionManagedObjectSourceFlowModel, SectionManagedObjectSourceFlowEvent, SectionManagedObjectSourceFlowFigure>
 		implements SectionManagedObjectSourceFlowFigureContext {
 
 	@Override
-	protected OfficeFloorFigure createOfficeFloorFigure() {
+	protected SectionManagedObjectSourceFlowFigure createOfficeFloorFigure() {
 		return OfficeFloorPlugin.getSkin().getSectionFigureFactory()
 				.createSectionManagedObjectSourceFlowFigure(this);
 	}
@@ -64,10 +64,19 @@ public class SectionManagedObjectSourceFlowEditPart
 			SectionManagedObjectSourceFlowEvent property,
 			PropertyChangeEvent evt) {
 		switch (property) {
+		case CHANGE_SECTION_MANAGED_OBJECT_SOURCE_FLOW_NAME:
+			this.getOfficeFloorFigure().setSectionManagedObjectSourceFlowName(
+					this.getSectionManagedObjectSourceFlowName());
+			break;
+
 		case CHANGE_SUB_SECTION_INPUT:
 		case CHANGE_EXTERNAL_FLOW:
 			SectionManagedObjectSourceFlowEditPart.this
 					.refreshSourceConnections();
+			break;
+
+		case CHANGE_ARGUMENT_TYPE:
+			// Non visual change
 			break;
 		}
 	}

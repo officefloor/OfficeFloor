@@ -61,27 +61,25 @@ public class SubSectionEditPart
 	@Override
 	protected void populateOfficeFloorDirectEditPolicy(
 			OfficeFloorDirectEditPolicy<SubSectionModel> policy) {
-		policy
-				.allowDirectEdit(new DirectEditAdapter<SectionChanges, SubSectionModel>() {
-					@Override
-					public String getInitialValue() {
-						return SubSectionEditPart.this.getCastedModel()
-								.getSubSectionName();
-					}
+		policy.allowDirectEdit(new DirectEditAdapter<SectionChanges, SubSectionModel>() {
+			@Override
+			public String getInitialValue() {
+				return SubSectionEditPart.this.getCastedModel()
+						.getSubSectionName();
+			}
 
-					@Override
-					public IFigure getLocationFigure() {
-						return SubSectionEditPart.this.getOfficeFloorFigure()
-								.getSubSectionNameFigure();
-					}
+			@Override
+			public IFigure getLocationFigure() {
+				return SubSectionEditPart.this.getOfficeFloorFigure()
+						.getSubSectionNameFigure();
+			}
 
-					@Override
-					public Change<SubSectionModel> createChange(
-							SectionChanges changes, SubSectionModel target,
-							String newValue) {
-						return changes.renameSubSection(target, newValue);
-					}
-				});
+			@Override
+			public Change<SubSectionModel> createChange(SectionChanges changes,
+					SubSectionModel target, String newValue) {
+				return changes.renameSubSection(target, newValue);
+			}
+		});
 	}
 
 	@Override
@@ -97,6 +95,7 @@ public class SubSectionEditPart
 			this.getOfficeFloorFigure().setSubSectionName(
 					this.getCastedModel().getSubSectionName());
 			break;
+
 		case ADD_SUB_SECTION_INPUT:
 		case REMOVE_SUB_SECTION_INPUT:
 		case ADD_SUB_SECTION_OUTPUT:
@@ -104,6 +103,13 @@ public class SubSectionEditPart
 		case ADD_SUB_SECTION_OBJECT:
 		case REMOVE_SUB_SECTION_OBJECT:
 			this.refreshChildren();
+			break;
+
+		case CHANGE_SECTION_SOURCE_CLASS_NAME:
+		case CHANGE_SECTION_LOCATION:
+		case ADD_PROPERTY:
+		case REMOVE_PROPERTY:
+			// Non visual change
 			break;
 		}
 	}

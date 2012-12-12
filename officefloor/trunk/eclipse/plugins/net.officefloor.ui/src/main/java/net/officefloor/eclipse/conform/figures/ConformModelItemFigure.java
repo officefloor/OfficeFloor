@@ -19,6 +19,7 @@
 package net.officefloor.eclipse.conform.figures;
 
 import org.eclipse.draw2d.ColorConstants;
+import org.eclipse.draw2d.Label;
 
 import net.officefloor.eclipse.skin.OfficeFloorFigure;
 import net.officefloor.eclipse.skin.standard.AbstractOfficeFloorFigure;
@@ -37,6 +38,11 @@ import net.officefloor.model.conform.TargetItemModel;
 public class ConformModelItemFigure extends AbstractOfficeFloorFigure {
 
 	/**
+	 * {@link Label} displaying the item name.
+	 */
+	private final Label itemName;
+
+	/**
 	 * Initiate.
 	 * 
 	 * @param itemName
@@ -51,6 +57,7 @@ public class ConformModelItemFigure extends AbstractOfficeFloorFigure {
 		LabelConnectorFigure figure = new LabelConnectorFigure(itemName,
 				(isExistingNotTarget ? ConnectorDirection.EAST
 						: ConnectorDirection.WEST), ColorConstants.black);
+		this.itemName = figure.getLabel();
 
 		// Register the anchor for the connection
 		this.registerConnectionAnchor(ExistingItemToTargetItemModel.class,
@@ -59,4 +66,15 @@ public class ConformModelItemFigure extends AbstractOfficeFloorFigure {
 		// Specify the figure
 		this.setFigure(figure);
 	}
+
+	/**
+	 * Specifies the new item name to display.
+	 * 
+	 * @param itemName
+	 *            New item name to display.
+	 */
+	public void setItemName(String itemName) {
+		this.itemName.setText(itemName);
+	}
+
 }

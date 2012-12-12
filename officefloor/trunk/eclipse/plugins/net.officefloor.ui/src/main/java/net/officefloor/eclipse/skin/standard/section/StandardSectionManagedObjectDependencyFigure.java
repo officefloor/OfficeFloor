@@ -24,14 +24,16 @@ import net.officefloor.eclipse.skin.standard.AbstractOfficeFloorFigure;
 import net.officefloor.eclipse.skin.standard.StandardOfficeFloorColours;
 import net.officefloor.eclipse.skin.standard.figure.LabelConnectorFigure;
 import net.officefloor.eclipse.skin.standard.figure.ConnectorFigure.ConnectorDirection;
+import net.officefloor.model.section.SectionManagedObjectDependencyModel;
 import net.officefloor.model.section.SectionManagedObjectDependencyToExternalManagedObjectModel;
 import net.officefloor.model.section.SectionManagedObjectDependencyToSectionManagedObjectModel;
 
 import org.eclipse.draw2d.ConnectionAnchor;
+import org.eclipse.draw2d.Label;
 
 /**
  * Standard {@link SectionManagedObjectDependencyFigure}.
- *
+ * 
  * @author Daniel Sagenschneider
  */
 public class StandardSectionManagedObjectDependencyFigure extends
@@ -39,28 +41,43 @@ public class StandardSectionManagedObjectDependencyFigure extends
 		SectionManagedObjectDependencyFigure {
 
 	/**
+	 * {@link SectionManagedObjectDependencyModel} name.
+	 */
+	private final Label dependencyName;
+
+	/**
 	 * Initiate.
-	 *
+	 * 
 	 * @param context
 	 *            {@link SectionManagedObjectDependencyFigureContext}.
 	 */
 	public StandardSectionManagedObjectDependencyFigure(
 			SectionManagedObjectDependencyFigureContext context) {
-		LabelConnectorFigure figure = new LabelConnectorFigure(context
-				.getSectionManagedObjectDependencyName(),
+		LabelConnectorFigure figure = new LabelConnectorFigure(
+				context.getSectionManagedObjectDependencyName(),
 				ConnectorDirection.EAST, StandardOfficeFloorColours.BLACK());
+		this.dependencyName = figure.getLabel();
 
 		// Register connections
 		ConnectionAnchor anchor = figure.getConnectionAnchor();
 		this.registerConnectionAnchor(
 				SectionManagedObjectDependencyToSectionManagedObjectModel.class,
 				anchor);
-		this
-				.registerConnectionAnchor(
-						SectionManagedObjectDependencyToExternalManagedObjectModel.class,
-						anchor);
+		this.registerConnectionAnchor(
+				SectionManagedObjectDependencyToExternalManagedObjectModel.class,
+				anchor);
 
 		this.setFigure(figure);
+	}
+
+	/*
+	 * ==================== SectionManagedObjectDependencyFigure ===============
+	 */
+
+	@Override
+	public void setSectionManagedObjectDependencyName(
+			String sectionManagedObjectDependencyName) {
+		this.dependencyName.setText(sectionManagedObjectDependencyName);
 	}
 
 }

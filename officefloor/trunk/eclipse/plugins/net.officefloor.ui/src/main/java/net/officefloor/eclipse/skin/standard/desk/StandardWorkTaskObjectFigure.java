@@ -22,8 +22,8 @@ import net.officefloor.eclipse.skin.desk.WorkTaskObjectFigure;
 import net.officefloor.eclipse.skin.desk.WorkTaskObjectFigureContext;
 import net.officefloor.eclipse.skin.standard.AbstractOfficeFloorFigure;
 import net.officefloor.eclipse.skin.standard.StandardOfficeFloorColours;
-import net.officefloor.eclipse.skin.standard.figure.LabelConnectorFigure;
 import net.officefloor.eclipse.skin.standard.figure.ConnectorFigure.ConnectorDirection;
+import net.officefloor.eclipse.skin.standard.figure.LabelConnectorFigure;
 import net.officefloor.model.desk.WorkTaskObjectToDeskManagedObjectModel;
 import net.officefloor.model.desk.WorkTaskObjectToExternalManagedObjectModel;
 
@@ -32,7 +32,7 @@ import org.eclipse.draw2d.Figure;
 
 /**
  * {@link WorkTaskObjectFigure} implementation.
- *
+ * 
  * @author Daniel Sagenschneider
  */
 public class StandardWorkTaskObjectFigure extends AbstractOfficeFloorFigure
@@ -45,18 +45,17 @@ public class StandardWorkTaskObjectFigure extends AbstractOfficeFloorFigure
 
 	/**
 	 * Initiate.
-	 *
+	 * 
 	 * @param context
 	 *            {@link WorkTaskObjectFigureContext}.
 	 */
 	public StandardWorkTaskObjectFigure(WorkTaskObjectFigureContext context) {
 
-		// Obtain the short name
-		String shortObjectTypeName = this.getShortTypeName(context
-				.getObjectType());
+		// Obtain the name
+		String objectName = this.getWorkTaskObjectName(context);
 
 		// Create the figure
-		this.parameterFigure = new LabelConnectorFigure(shortObjectTypeName,
+		this.parameterFigure = new LabelConnectorFigure(objectName,
 				ConnectorDirection.EAST, StandardOfficeFloorColours.BLACK());
 		ConnectionAnchor anchor = this.parameterFigure.getConnectionAnchor();
 		this.registerConnectionAnchor(
@@ -71,24 +70,28 @@ public class StandardWorkTaskObjectFigure extends AbstractOfficeFloorFigure
 		this.setFigure(this.parameterFigure);
 	}
 
-	/*
-	 * ===================== WorkTaskObjectFigure =======================
-	 */
-
-	@Override
-	public void setIsParameter(boolean isParameter) {
-		this.parameterFigure.setConnectorVisible(!isParameter);
-	}
-
 	/**
 	 * Obtains the short type name from the input type.
-	 *
+	 * 
 	 * @param typeName
 	 *            Type name.
 	 * @return Short type name.
 	 */
-	private String getShortTypeName(String typeName) {
+	private String getWorkTaskObjectName(WorkTaskObjectFigureContext context) {
+
+		// Determine if have name (not a number)
+		String name = context.getWorkTaskObjectName();
+		if ((name != null) && (name.trim().length() > 0)) {
+			try {
+				Integer.parseInt(name);
+			} catch (NumberFormatException ex) {
+				// Use the name as not a number
+				return name;
+			}
+		}
+
 		// Obtain index of '.'
+		String typeName = context.getObjectType();
 		int dotIndex = typeName.lastIndexOf('.');
 		if (dotIndex < 0) {
 			// Already short name
@@ -97,6 +100,21 @@ public class StandardWorkTaskObjectFigure extends AbstractOfficeFloorFigure
 			// Return calculated short name (+1 to ignore '.')
 			return typeName.substring((dotIndex + 1));
 		}
+	}
+
+	/*
+	 * ===================== WorkTaskObjectFigure =======================
+	 */
+
+	@Override
+	public void setWorkTaskObjectName(WorkTaskObjectFigureContext context) {
+		String objectName = this.getWorkTaskObjectName(context);
+		this.parameterFigure.getLabel().setText(objectName);
+	}
+
+	@Override
+	public void setIsParameter(boolean isParameter) {
+		this.parameterFigure.setConnectorVisible(!isParameter);
 	}
 
 }

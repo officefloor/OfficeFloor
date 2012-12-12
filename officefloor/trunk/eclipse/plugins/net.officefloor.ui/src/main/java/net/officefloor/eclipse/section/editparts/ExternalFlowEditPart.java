@@ -37,7 +37,7 @@ import org.eclipse.gef.EditPart;
 
 /**
  * {@link EditPart} for the {@link ExternalFlowModel}.
- *
+ * 
  * @author Daniel Sagenschneider
  */
 public class ExternalFlowEditPart
@@ -61,27 +61,26 @@ public class ExternalFlowEditPart
 	@Override
 	protected void populateOfficeFloorDirectEditPolicy(
 			OfficeFloorDirectEditPolicy<ExternalFlowModel> policy) {
-		policy
-				.allowDirectEdit(new DirectEditAdapter<SectionChanges, ExternalFlowModel>() {
-					@Override
-					public String getInitialValue() {
-						return ExternalFlowEditPart.this.getCastedModel()
-								.getExternalFlowName();
-					}
+		policy.allowDirectEdit(new DirectEditAdapter<SectionChanges, ExternalFlowModel>() {
+			@Override
+			public String getInitialValue() {
+				return ExternalFlowEditPart.this.getCastedModel()
+						.getExternalFlowName();
+			}
 
-					@Override
-					public IFigure getLocationFigure() {
-						return ExternalFlowEditPart.this.getOfficeFloorFigure()
-								.getExternalFlowNameFigure();
-					}
+			@Override
+			public IFigure getLocationFigure() {
+				return ExternalFlowEditPart.this.getOfficeFloorFigure()
+						.getExternalFlowNameFigure();
+			}
 
-					@Override
-					public Change<ExternalFlowModel> createChange(
-							SectionChanges changes, ExternalFlowModel target,
-							String newValue) {
-						return changes.renameExternalFlow(target, newValue);
-					}
-				});
+			@Override
+			public Change<ExternalFlowModel> createChange(
+					SectionChanges changes, ExternalFlowModel target,
+					String newValue) {
+				return changes.renameExternalFlow(target, newValue);
+			}
+		});
 	}
 
 	@Override
@@ -97,11 +96,16 @@ public class ExternalFlowEditPart
 			this.getOfficeFloorFigure().setExternalFlowName(
 					this.getCastedModel().getExternalFlowName());
 			break;
+
 		case ADD_SUB_SECTION_OUTPUT:
 		case REMOVE_SUB_SECTION_OUTPUT:
 		case ADD_SECTION_MANAGED_OBJECT_SOURCE_FLOW:
 		case REMOVE_SECTION_MANAGED_OBJECT_SOURCE_FLOW:
 			this.refreshTargetConnections();
+			break;
+
+		case CHANGE_ARGUMENT_TYPE:
+			// Non visual change
 			break;
 		}
 	}

@@ -123,10 +123,12 @@ public class WoofTemplateEditPart
 		case CHANGE_URI:
 			this.getOfficeFloorFigure().setUri(this.getCastedModel().getUri());
 			break;
+
 		case ADD_OUTPUT:
 		case REMOVE_OUTPUT:
 			this.refreshChildren();
 			break;
+
 		case ADD_WOOF_TEMPLATE_OUTPUT:
 		case REMOVE_WOOF_TEMPLATE_OUTPUT:
 		case ADD_WOOF_SECTION_OUTPUT:
@@ -134,6 +136,13 @@ public class WoofTemplateEditPart
 		case ADD_WOOF_EXCEPTION:
 		case REMOVE_WOOF_EXCEPTION:
 			this.refreshTargetConnections();
+			break;
+
+		case CHANGE_TEMPLATE_CLASS_NAME:
+		case CHANGE_TEMPLATE_PATH:
+		case ADD_EXTENSION:
+		case REMOVE_EXTENSION:
+			// No visual change
 			break;
 		}
 	}

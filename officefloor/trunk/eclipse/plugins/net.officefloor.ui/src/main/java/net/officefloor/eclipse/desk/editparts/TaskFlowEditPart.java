@@ -23,7 +23,7 @@ import java.util.List;
 
 import net.officefloor.eclipse.OfficeFloorPlugin;
 import net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart;
-import net.officefloor.eclipse.skin.OfficeFloorFigure;
+import net.officefloor.eclipse.skin.desk.TaskFlowFigure;
 import net.officefloor.eclipse.skin.desk.TaskFlowFigureContext;
 import net.officefloor.eclipse.util.EclipseUtil;
 import net.officefloor.model.desk.TaskFlowModel;
@@ -38,11 +38,11 @@ import org.eclipse.gef.EditPart;
  */
 public class TaskFlowEditPart
 		extends
-		AbstractOfficeFloorEditPart<TaskFlowModel, TaskFlowEvent, OfficeFloorFigure>
+		AbstractOfficeFloorEditPart<TaskFlowModel, TaskFlowEvent, TaskFlowFigure>
 		implements TaskFlowFigureContext {
 
 	@Override
-	protected OfficeFloorFigure createOfficeFloorFigure() {
+	protected TaskFlowFigure createOfficeFloorFigure() {
 		return OfficeFloorPlugin.getSkin().getDeskFigureFactory()
 				.createTaskFlowFigure(this);
 	}
@@ -65,6 +65,15 @@ public class TaskFlowEditPart
 		case CHANGE_TASK:
 		case CHANGE_EXTERNAL_FLOW:
 			TaskFlowEditPart.this.refreshSourceConnections();
+			break;
+
+		case CHANGE_FLOW_NAME:
+			this.getOfficeFloorFigure().setTaskFlowName(this.getTaskFlowName());
+			break;
+
+		case CHANGE_ARGUMENT_TYPE:
+		case CHANGE_KEY:
+			// Non visual change
 			break;
 		}
 	}

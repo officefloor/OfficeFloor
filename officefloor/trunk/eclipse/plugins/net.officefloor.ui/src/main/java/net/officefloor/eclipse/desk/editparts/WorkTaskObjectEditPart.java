@@ -34,7 +34,7 @@ import org.eclipse.gef.EditPart;
 
 /**
  * {@link EditPart} for the {@link WorkTaskObjectModel}.
- *
+ * 
  * @author Daniel Sagenschneider
  */
 public class WorkTaskObjectEditPart
@@ -71,16 +71,31 @@ public class WorkTaskObjectEditPart
 					WorkTaskObjectEditPart.this.getCastedModel()
 							.getIsParameter());
 			break;
+
+		case CHANGE_OBJECT_NAME:
+		case CHANGE_OBJECT_TYPE:
+			this.getOfficeFloorFigure().setWorkTaskObjectName(this);
+			break;
+
 		case CHANGE_EXTERNAL_MANAGED_OBJECT:
 		case CHANGE_DESK_MANAGED_OBJECT:
 			WorkTaskObjectEditPart.this.refreshSourceConnections();
+			break;
+
+		case CHANGE_KEY:
+			// Non visual change
 			break;
 		}
 	}
 
 	/*
-	 * =================== DeskTaskObjectFigureContext ========================
+	 * =================== WorkTaskObjectFigureContext ========================
 	 */
+
+	@Override
+	public String getWorkTaskObjectName() {
+		return this.getCastedModel().getObjectName();
+	}
 
 	@Override
 	public String getObjectType() {

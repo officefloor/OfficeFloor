@@ -19,6 +19,7 @@
 package net.officefloor.eclipse.skin.standard.section;
 
 import org.eclipse.draw2d.ConnectionAnchor;
+import org.eclipse.draw2d.Label;
 
 import net.officefloor.eclipse.skin.section.SectionManagedObjectSourceFlowFigure;
 import net.officefloor.eclipse.skin.section.SectionManagedObjectSourceFlowFigureContext;
@@ -31,7 +32,7 @@ import net.officefloor.model.section.SectionManagedObjectSourceFlowToSubSectionI
 
 /**
  * Standard {@link SectionManagedObjectSourceFlowFigure}.
- *
+ * 
  * @author Daniel Sagenschneider
  */
 public class StandardSectionManagedObjectSourceFlowFigure extends
@@ -39,29 +40,43 @@ public class StandardSectionManagedObjectSourceFlowFigure extends
 		SectionManagedObjectSourceFlowFigure {
 
 	/**
+	 * Flow name.
+	 */
+	private final Label flowName;
+
+	/**
 	 * Initiate.
-	 *
+	 * 
 	 * @param context
 	 *            {@link SectionManagedObjectSourceFlowFigureContext}.
 	 */
 	public StandardSectionManagedObjectSourceFlowFigure(
 			SectionManagedObjectSourceFlowFigureContext context) {
-		LabelConnectorFigure figure = new LabelConnectorFigure(context
-				.getSectionManagedObjectSourceFlowName(),
+		LabelConnectorFigure figure = new LabelConnectorFigure(
+				context.getSectionManagedObjectSourceFlowName(),
 				ConnectorDirection.EAST, StandardOfficeFloorColours.BLACK());
+		this.flowName = figure.getLabel();
 
 		// Register the anchors
 		ConnectionAnchor anchor = figure.getConnectionAnchor();
 		this.registerConnectionAnchor(
 				SectionManagedObjectSourceFlowToSubSectionInputModel.class,
 				anchor);
-		this
-				.registerConnectionAnchor(
-						SectionManagedObjectSourceFlowToExternalFlowModel.class,
-						anchor);
+		this.registerConnectionAnchor(
+				SectionManagedObjectSourceFlowToExternalFlowModel.class, anchor);
 
 		// Specify the figure
 		this.setFigure(figure);
+	}
+
+	/*
+	 * =================== SectionManagedObjectSourceFlowFigure ===============
+	 */
+
+	@Override
+	public void setSectionManagedObjectSourceFlowName(
+			String sectionManagedObjectSourceFlowName) {
+		this.flowName.setText(sectionManagedObjectSourceFlowName);
 	}
 
 }
