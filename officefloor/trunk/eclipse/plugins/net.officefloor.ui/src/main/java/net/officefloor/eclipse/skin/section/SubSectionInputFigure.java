@@ -29,6 +29,14 @@ import net.officefloor.model.section.SubSectionInputModel;
 public interface SubSectionInputFigure extends OfficeFloorFigure {
 
 	/**
+	 * Specifies the {@link SubSectionInputModel} name to display.
+	 * 
+	 * @param subSectionInputName
+	 *            Name to display.
+	 */
+	void setSubSectionInputName(String subSectionInputName);
+
+	/**
 	 * Specifies on display whether is public.
 	 * 
 	 * @param isPublic

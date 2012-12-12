@@ -23,7 +23,7 @@ import java.util.List;
 
 import net.officefloor.eclipse.OfficeFloorPlugin;
 import net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart;
-import net.officefloor.eclipse.skin.OfficeFloorFigure;
+import net.officefloor.eclipse.skin.desk.DeskManagedObjectSourceFlowFigure;
 import net.officefloor.eclipse.skin.desk.DeskManagedObjectSourceFlowFigureContext;
 import net.officefloor.eclipse.util.EclipseUtil;
 import net.officefloor.model.desk.DeskManagedObjectSourceFlowModel;
@@ -33,16 +33,16 @@ import org.eclipse.gef.EditPart;
 
 /**
  * {@link EditPart} for the {@link DeskManagedObjectSourceFlowModel}.
- *
+ * 
  * @author Daniel Sagenschneider
  */
 public class DeskManagedObjectSourceFlowEditPart
 		extends
-		AbstractOfficeFloorEditPart<DeskManagedObjectSourceFlowModel, DeskManagedObjectSourceFlowEvent, OfficeFloorFigure>
+		AbstractOfficeFloorEditPart<DeskManagedObjectSourceFlowModel, DeskManagedObjectSourceFlowEvent, DeskManagedObjectSourceFlowFigure>
 		implements DeskManagedObjectSourceFlowFigureContext {
 
 	@Override
-	protected OfficeFloorFigure createOfficeFloorFigure() {
+	protected DeskManagedObjectSourceFlowFigure createOfficeFloorFigure() {
 		return OfficeFloorPlugin.getSkin().getDeskFigureFactory()
 				.createDeskManagedObjectSourceFlowFigure(this);
 	}
@@ -65,6 +65,15 @@ public class DeskManagedObjectSourceFlowEditPart
 		case CHANGE_TASK:
 		case CHANGE_EXTERNAL_FLOW:
 			DeskManagedObjectSourceFlowEditPart.this.refreshSourceConnections();
+			break;
+
+		case CHANGE_DESK_MANAGED_OBJECT_SOURCE_FLOW_NAME:
+			this.getOfficeFloorFigure().setDeskManagedObjectSourceFlowName(
+					this.getCastedModel().getDeskManagedObjectSourceFlowName());
+			break;
+
+		case CHANGE_ARGUMENT_TYPE:
+			// Non visual change
 			break;
 		}
 	}

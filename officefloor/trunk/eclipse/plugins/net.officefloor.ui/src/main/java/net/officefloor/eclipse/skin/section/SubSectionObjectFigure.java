@@ -27,4 +27,13 @@ import net.officefloor.model.section.SubSectionObjectModel;
  * @author Daniel Sagenschneider
  */
 public interface SubSectionObjectFigure extends OfficeFloorFigure {
+
+	/**
+	 * Specifies the {@link SubSectionObjectModel} name to display.
+	 * 
+	 * @param subSectionObjectName
+	 *            Name to display.
+	 */
+	void setSubSectionObjectName(String subSectionObjectName);
+
 }

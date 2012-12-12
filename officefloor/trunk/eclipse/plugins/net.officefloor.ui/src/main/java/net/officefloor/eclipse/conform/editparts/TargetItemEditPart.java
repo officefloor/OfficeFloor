@@ -23,7 +23,6 @@ import java.util.List;
 
 import net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart;
 import net.officefloor.eclipse.conform.figures.ConformModelItemFigure;
-import net.officefloor.eclipse.skin.OfficeFloorFigure;
 import net.officefloor.eclipse.util.EclipseUtil;
 import net.officefloor.model.conform.TargetItemModel;
 import net.officefloor.model.conform.TargetItemModel.TargetItemEvent;
@@ -37,14 +36,14 @@ import org.eclipse.gef.EditPart;
  */
 public class TargetItemEditPart
 		extends
-		AbstractOfficeFloorEditPart<TargetItemModel, TargetItemEvent, OfficeFloorFigure> {
+		AbstractOfficeFloorEditPart<TargetItemModel, TargetItemEvent, ConformModelItemFigure> {
 
 	/*
 	 * ================== AbstractOfficeFloorEditPart ======================
 	 */
 
 	@Override
-	protected OfficeFloorFigure createOfficeFloorFigure() {
+	protected ConformModelItemFigure createOfficeFloorFigure() {
 		return new ConformModelItemFigure(this.getCastedModel()
 				.getTargetItemName(), false);
 	}
@@ -65,6 +64,12 @@ public class TargetItemEditPart
 		switch (property) {
 		case CHANGE_EXISTING_ITEM:
 			this.refreshTargetConnections();
+			break;
+			
+		case CHANGE_TARGET_ITEM_NAME:
+			// Name should not change, but reflect if does
+			this.getOfficeFloorFigure().setItemName(
+					this.getCastedModel().getTargetItemName());
 			break;
 		}
 	}

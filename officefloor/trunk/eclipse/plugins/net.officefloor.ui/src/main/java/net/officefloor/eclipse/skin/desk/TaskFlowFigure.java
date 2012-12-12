@@ -27,4 +27,13 @@ import net.officefloor.model.desk.TaskFlowModel;
  * @author Daniel Sagenschneider
  */
 public interface TaskFlowFigure extends OfficeFloorFigure {
+
+	/**
+	 * Specifies the {@link TaskFlowModel} name to display.
+	 * 
+	 * @param taskFlowName
+	 *            {@link TaskFlowModel} name to display.
+	 */
+	void setTaskFlowName(String taskFlowName);
+
 }

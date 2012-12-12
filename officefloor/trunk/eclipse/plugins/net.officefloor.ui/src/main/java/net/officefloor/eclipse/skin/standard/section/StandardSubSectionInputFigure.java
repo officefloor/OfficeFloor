@@ -32,7 +32,7 @@ import org.eclipse.draw2d.Figure;
 
 /**
  * Standard {@link SubSectionInputFigure}.
- *
+ * 
  * @author Daniel Sagenschneider
  */
 public class StandardSubSectionInputFigure extends AbstractOfficeFloorFigure
@@ -45,7 +45,7 @@ public class StandardSubSectionInputFigure extends AbstractOfficeFloorFigure
 
 	/**
 	 * Initiate.
-	 *
+	 * 
 	 * @param context
 	 *            {@link SubSectionInputFigureContext}.
 	 */
@@ -62,8 +62,18 @@ public class StandardSubSectionInputFigure extends AbstractOfficeFloorFigure
 		this.setFigure(figure);
 	}
 
+	/*
+	 * =================== SubSectionInputFigure ======================
+	 */
+
+	@Override
+	public void setSubSectionInputName(String subSectionInputName) {
+		this.figure.setItemName(subSectionInputName);
+	}
+
 	@Override
 	public void setIsPublic(boolean isPublic) {
 		this.figure.setIsPublic(isPublic);
 	}
+
 }

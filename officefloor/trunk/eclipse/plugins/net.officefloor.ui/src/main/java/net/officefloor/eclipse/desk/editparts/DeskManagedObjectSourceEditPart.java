@@ -97,30 +97,27 @@ public class DeskManagedObjectSourceEditPart
 	@Override
 	protected void populateOfficeFloorDirectEditPolicy(
 			OfficeFloorDirectEditPolicy<DeskManagedObjectSourceModel> policy) {
-		policy
-				.allowDirectEdit(new DirectEditAdapter<DeskChanges, DeskManagedObjectSourceModel>() {
-					@Override
-					public String getInitialValue() {
-						return DeskManagedObjectSourceEditPart.this
-								.getCastedModel()
-								.getDeskManagedObjectSourceName();
-					}
+		policy.allowDirectEdit(new DirectEditAdapter<DeskChanges, DeskManagedObjectSourceModel>() {
+			@Override
+			public String getInitialValue() {
+				return DeskManagedObjectSourceEditPart.this.getCastedModel()
+						.getDeskManagedObjectSourceName();
+			}
 
-					@Override
-					public IFigure getLocationFigure() {
-						return DeskManagedObjectSourceEditPart.this
-								.getOfficeFloorFigure()
-								.getDeskManagedObjectSourceNameFigure();
-					}
+			@Override
+			public IFigure getLocationFigure() {
+				return DeskManagedObjectSourceEditPart.this
+						.getOfficeFloorFigure()
+						.getDeskManagedObjectSourceNameFigure();
+			}
 
-					@Override
-					public Change<DeskManagedObjectSourceModel> createChange(
-							DeskChanges changes,
-							DeskManagedObjectSourceModel target, String newValue) {
-						return changes.renameDeskManagedObjectSource(target,
-								newValue);
-					}
-				});
+			@Override
+			public Change<DeskManagedObjectSourceModel> createChange(
+					DeskChanges changes, DeskManagedObjectSourceModel target,
+					String newValue) {
+				return changes.renameDeskManagedObjectSource(target, newValue);
+			}
+		});
 	}
 
 	@Override
@@ -148,13 +145,23 @@ public class DeskManagedObjectSourceEditPart
 			this.getOfficeFloorFigure().setDeskManagedObjectName(
 					this.getCastedModel().getDeskManagedObjectSourceName());
 			break;
+
 		case ADD_DESK_MANAGED_OBJECT:
 		case REMOVE_DESK_MANAGED_OBJECT:
 			this.refreshTargetConnections();
 			break;
+
 		case ADD_DESK_MANAGED_OBJECT_SOURCE_FLOW:
 		case REMOVE_DESK_MANAGED_OBJECT_SOURCE_FLOW:
 			this.refreshChildren();
+			break;
+
+		case CHANGE_MANAGED_OBJECT_SOURCE_CLASS_NAME:
+		case ADD_PROPERTY:
+		case REMOVE_PROPERTY:
+		case CHANGE_TIMEOUT:
+		case CHANGE_OBJECT_TYPE:
+			// Non visual change
 			break;
 		}
 	}

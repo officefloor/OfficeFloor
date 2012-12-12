@@ -23,8 +23,17 @@ import net.officefloor.model.desk.DeskManagedObjectSourceFlowModel;
 
 /**
  * {@link OfficeFloorFigure} for the {@link DeskManagedObjectSourceFlowModel}.
- *
+ * 
  * @author Daniel Sagenschneider
  */
 public interface DeskManagedObjectSourceFlowFigure extends OfficeFloorFigure {
+
+	/**
+	 * Specifies the {@link DeskManagedObjectSourceFlowModel} name to display.
+	 * 
+	 * @param deskManagedObjectSourceFlowName
+	 *            {@link DeskManagedObjectSourceFlowModel} name to display.
+	 */
+	void setDeskManagedObjectSourceFlowName(
+			String deskManagedObjectSourceFlowName);
 }

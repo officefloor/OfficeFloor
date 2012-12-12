@@ -23,12 +23,12 @@ import java.util.List;
 
 import net.officefloor.eclipse.OfficeFloorPlugin;
 import net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart;
-import net.officefloor.eclipse.skin.OfficeFloorFigure;
+import net.officefloor.eclipse.skin.section.SubSectionOutputFigure;
 import net.officefloor.eclipse.skin.section.SubSectionOutputFigureContext;
 import net.officefloor.model.section.SubSectionOutputModel;
+import net.officefloor.model.section.SubSectionOutputModel.SubSectionOutputEvent;
 import net.officefloor.model.section.SubSectionOutputToExternalFlowModel;
 import net.officefloor.model.section.SubSectionOutputToSubSectionInputModel;
-import net.officefloor.model.section.SubSectionOutputModel.SubSectionOutputEvent;
 
 import org.eclipse.gef.EditPart;
 
@@ -39,11 +39,11 @@ import org.eclipse.gef.EditPart;
  */
 public class SubSectionOutputEditPart
 		extends
-		AbstractOfficeFloorEditPart<SubSectionOutputModel, SubSectionOutputEvent, OfficeFloorFigure>
+		AbstractOfficeFloorEditPart<SubSectionOutputModel, SubSectionOutputEvent, SubSectionOutputFigure>
 		implements SubSectionOutputFigureContext {
 
 	@Override
-	protected OfficeFloorFigure createOfficeFloorFigure() {
+	protected SubSectionOutputFigure createOfficeFloorFigure() {
 		return OfficeFloorPlugin.getSkin().getSectionFigureFactory()
 				.createSubSectionOutputFigure(this);
 	}
@@ -71,9 +71,19 @@ public class SubSectionOutputEditPart
 	protected void handlePropertyChange(SubSectionOutputEvent property,
 			PropertyChangeEvent evt) {
 		switch (property) {
+		case CHANGE_SUB_SECTION_OUTPUT_NAME:
+			this.getOfficeFloorFigure().setSubSectionOutputName(
+					this.getSubSectionOutputName());
+			break;
+
 		case CHANGE_EXTERNAL_FLOW:
 		case CHANGE_SUB_SECTION_INPUT:
-			SubSectionOutputEditPart.this.refreshSourceConnections();
+			this.refreshSourceConnections();
+			break;
+
+		case CHANGE_ARGUMENT_TYPE:
+		case CHANGE_ESCALATION_ONLY:
+			// Non visual change
 			break;
 		}
 	}

@@ -77,6 +77,10 @@ public class TaskEscalationEditPart
 		case CHANGE_EXTERNAL_FLOW:
 			TaskEscalationEditPart.this.refreshSourceConnections();
 			break;
+
+		case CHANGE_ESCALATION_TYPE:
+			// Non visual change
+			break;
 		}
 	}
 

@@ -37,8 +37,8 @@ import net.officefloor.model.change.Change;
 import net.officefloor.model.desk.DeskChanges;
 import net.officefloor.model.desk.PropertyModel;
 import net.officefloor.model.desk.WorkModel;
-import net.officefloor.model.desk.WorkToInitialTaskModel;
 import net.officefloor.model.desk.WorkModel.WorkEvent;
+import net.officefloor.model.desk.WorkToInitialTaskModel;
 
 import org.eclipse.draw2d.IFigure;
 import org.eclipse.gef.EditPart;
@@ -143,12 +143,20 @@ public class WorkEditPart extends
 			this.getOfficeFloorFigure().setWorkName(
 					this.getCastedModel().getWorkName());
 			break;
+
 		case CHANGE_INITIAL_TASK:
 			WorkEditPart.this.refreshSourceConnections();
 			break;
+
 		case ADD_WORK_TASK:
 		case REMOVE_WORK_TASK:
 			WorkEditPart.this.refreshChildren();
+			break;
+
+		case CHANGE_WORK_SOURCE_CLASS_NAME:
+		case ADD_PROPERTY:
+		case REMOVE_PROPERTY:
+			// Non visual change
 			break;
 		}
 	}

@@ -37,7 +37,7 @@ import org.eclipse.gef.EditPart;
 
 /**
  * {@link EditPart} for the {@link SectionManagedObjectSourceModel}.
- *
+ * 
  * @author Daniel Sagenschneider
  */
 public class SectionManagedObjectSourceEditPart
@@ -65,31 +65,28 @@ public class SectionManagedObjectSourceEditPart
 	@Override
 	protected void populateOfficeFloorDirectEditPolicy(
 			OfficeFloorDirectEditPolicy<SectionManagedObjectSourceModel> policy) {
-		policy
-				.allowDirectEdit(new DirectEditAdapter<SectionChanges, SectionManagedObjectSourceModel>() {
-					@Override
-					public String getInitialValue() {
-						return SectionManagedObjectSourceEditPart.this
-								.getCastedModel()
-								.getSectionManagedObjectSourceName();
-					}
+		policy.allowDirectEdit(new DirectEditAdapter<SectionChanges, SectionManagedObjectSourceModel>() {
+			@Override
+			public String getInitialValue() {
+				return SectionManagedObjectSourceEditPart.this.getCastedModel()
+						.getSectionManagedObjectSourceName();
+			}
 
-					@Override
-					public IFigure getLocationFigure() {
-						return SectionManagedObjectSourceEditPart.this
-								.getOfficeFloorFigure()
-								.getSectionManagedObjectSourceNameFigure();
-					}
+			@Override
+			public IFigure getLocationFigure() {
+				return SectionManagedObjectSourceEditPart.this
+						.getOfficeFloorFigure()
+						.getSectionManagedObjectSourceNameFigure();
+			}
 
-					@Override
-					public Change<SectionManagedObjectSourceModel> createChange(
-							SectionChanges changes,
-							SectionManagedObjectSourceModel target,
-							String newValue) {
-						return changes.renameSectionManagedObjectSource(target,
-								newValue);
-					}
-				});
+			@Override
+			public Change<SectionManagedObjectSourceModel> createChange(
+					SectionChanges changes,
+					SectionManagedObjectSourceModel target, String newValue) {
+				return changes.renameSectionManagedObjectSource(target,
+						newValue);
+			}
+		});
 	}
 
 	@Override
@@ -105,13 +102,23 @@ public class SectionManagedObjectSourceEditPart
 			this.getOfficeFloorFigure().setSectionManagedObjectName(
 					this.getCastedModel().getSectionManagedObjectSourceName());
 			break;
+
 		case ADD_SECTION_MANAGED_OBJECT:
 		case REMOVE_SECTION_MANAGED_OBJECT:
 			this.refreshTargetConnections();
 			break;
+
 		case ADD_SECTION_MANAGED_OBJECT_SOURCE_FLOW:
 		case REMOVE_SECTION_MANAGED_OBJECT_SOURCE_FLOW:
 			this.refreshChildren();
+			break;
+
+		case CHANGE_MANAGED_OBJECT_SOURCE_CLASS_NAME:
+		case ADD_PROPERTY:
+		case REMOVE_PROPERTY:
+		case CHANGE_TIMEOUT:
+		case CHANGE_OBJECT_TYPE:
+			// Non visual changes
 			break;
 		}
 	}

@@ -69,10 +69,15 @@ public class WoofTemplateOutputEditPart
 			this.getOfficeFloorFigure().setTemplateOutputName(
 					this.getTemplateOutputName());
 			break;
+
 		case CHANGE_WOOF_TEMPLATE:
 		case CHANGE_WOOF_SECTION_INPUT:
 		case CHANGE_WOOF_RESOURCE:
 			this.refreshSourceConnections();
+			break;
+
+		case CHANGE_ARGUMENT_TYPE:
+			// No visual change
 			break;
 		}
 	}

@@ -31,28 +31,42 @@ import org.eclipse.draw2d.ConnectionAnchor;
 
 /**
  * Standard {@link SubSectionObjectFigure}.
- *
+ * 
  * @author Daniel Sagenschneider
  */
 public class StandardSubSectionObjectFigure extends AbstractOfficeFloorFigure
 		implements SubSectionObjectFigure {
 
 	/**
+	 * {@link SubSectionItemFigure}.
+	 */
+	private final SubSectionItemFigure figure;
+
+	/**
 	 * Initiate.
-	 *
+	 * 
 	 * @param context
 	 *            {@link SubSectionObjectFigureContext}.
 	 */
 	public StandardSubSectionObjectFigure(SubSectionObjectFigureContext context) {
-		SubSectionItemFigure figure = new SubSectionItemFigure(context
-				.getSubSectionObjectName(), false, ConnectorDirection.EAST,
-				StandardOfficeFloorColours.BLACK());
-		ConnectionAnchor anchor = figure.getConnectionAnchor();
+		this.figure = new SubSectionItemFigure(
+				context.getSubSectionObjectName(), false,
+				ConnectorDirection.EAST, StandardOfficeFloorColours.BLACK());
+		ConnectionAnchor anchor = this.figure.getConnectionAnchor();
 		this.registerConnectionAnchor(
 				SubSectionObjectToExternalManagedObjectModel.class, anchor);
 		this.registerConnectionAnchor(
 				SubSectionObjectToSectionManagedObjectModel.class, anchor);
-		this.setFigure(figure);
+		this.setFigure(this.figure);
+	}
+
+	/*
+	 * ==================== SubSectionObjectFigure ====================
+	 */
+
+	@Override
+	public void setSubSectionObjectName(String subSectionObjectName) {
+		this.figure.setItemName(subSectionObjectName);
 	}
 
 }

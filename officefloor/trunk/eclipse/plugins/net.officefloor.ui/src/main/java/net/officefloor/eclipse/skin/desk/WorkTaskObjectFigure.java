@@ -19,6 +19,7 @@
 package net.officefloor.eclipse.skin.desk;
 
 import net.officefloor.eclipse.skin.OfficeFloorFigure;
+import net.officefloor.model.desk.WorkTaskObjectModel;
 
 /**
  * {@link OfficeFloorFigure} for the {@link WorkTaskObjectFigure}.
@@ -26,6 +27,15 @@ import net.officefloor.eclipse.skin.OfficeFloorFigure;
  * @author Daniel Sagenschneider
  */
 public interface WorkTaskObjectFigure extends OfficeFloorFigure {
+
+	/**
+	 * Specifies the {@link WorkTaskObjectModel} name to display.
+	 * 
+	 * @param context
+	 *            {@link WorkTaskObjectFigureContext} to determine name to
+	 *            display.
+	 */
+	void setWorkTaskObjectName(WorkTaskObjectFigureContext context);
 
 	/**
 	 * Flags to display whether a parameter.

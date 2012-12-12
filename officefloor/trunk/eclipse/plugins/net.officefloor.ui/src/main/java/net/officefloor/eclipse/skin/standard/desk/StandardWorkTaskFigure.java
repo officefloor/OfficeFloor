@@ -25,23 +25,30 @@ import net.officefloor.eclipse.skin.standard.StandardOfficeFloorColours;
 import net.officefloor.eclipse.skin.standard.figure.LabelConnectorFigure;
 import net.officefloor.eclipse.skin.standard.figure.NoSpacingToolbarLayout;
 import net.officefloor.eclipse.skin.standard.figure.ConnectorFigure.ConnectorDirection;
+import net.officefloor.model.desk.WorkTaskModel;
 import net.officefloor.model.desk.WorkTaskToTaskModel;
 
 import org.eclipse.draw2d.Figure;
+import org.eclipse.draw2d.Label;
 import org.eclipse.draw2d.MarginBorder;
 import org.eclipse.draw2d.geometry.Insets;
 
 /**
  * Standard {@link WorkTaskFigure}.
- *
+ * 
  * @author Daniel Sagenschneider
  */
 public class StandardWorkTaskFigure extends AbstractOfficeFloorFigure implements
 		WorkTaskFigure {
 
 	/**
+	 * Name of the {@link WorkTaskModel}.
+	 */
+	private final Label workTaskName;
+
+	/**
 	 * Initiate.
-	 *
+	 * 
 	 * @param context
 	 *            {@link WorkTaskFigureContext}.
 	 */
@@ -52,11 +59,12 @@ public class StandardWorkTaskFigure extends AbstractOfficeFloorFigure implements
 		figure.setLayoutManager(new NoSpacingToolbarLayout(false));
 
 		// Task name
-		LabelConnectorFigure nameFigure = new LabelConnectorFigure(context
-				.getWorkTaskName(), ConnectorDirection.EAST,
+		LabelConnectorFigure nameFigure = new LabelConnectorFigure(
+				context.getWorkTaskName(), ConnectorDirection.EAST,
 				StandardOfficeFloorColours.BLACK());
-		this.registerConnectionAnchor(WorkTaskToTaskModel.class, nameFigure
-				.getConnectionAnchor());
+		this.workTaskName = nameFigure.getLabel();
+		this.registerConnectionAnchor(WorkTaskToTaskModel.class,
+				nameFigure.getConnectionAnchor());
 		figure.add(nameFigure);
 
 		// Content Pane
@@ -69,4 +77,14 @@ public class StandardWorkTaskFigure extends AbstractOfficeFloorFigure implements
 		this.setFigure(figure);
 		this.setContentPane(contentPane);
 	}
+
+	/*
+	 * ==================== WorkTaskFigure ========================
+	 */
+
+	@Override
+	public void setWorkTaskName(String workTaskName) {
+		this.workTaskName.setText(workTaskName);
+	}
+
 }

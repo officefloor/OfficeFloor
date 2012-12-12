@@ -25,7 +25,7 @@ import net.officefloor.eclipse.OfficeFloorPlugin;
 import net.officefloor.eclipse.common.action.OperationUtil;
 import net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart;
 import net.officefloor.eclipse.desk.operations.CreateTaskFromWorkTaskOperation;
-import net.officefloor.eclipse.skin.OfficeFloorFigure;
+import net.officefloor.eclipse.skin.desk.WorkTaskFigure;
 import net.officefloor.eclipse.skin.desk.WorkTaskFigureContext;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.model.desk.DeskChanges;
@@ -43,7 +43,7 @@ import org.eclipse.gef.EditPart;
  */
 public class WorkTaskEditPart
 		extends
-		AbstractOfficeFloorEditPart<WorkTaskModel, WorkTaskEvent, OfficeFloorFigure>
+		AbstractOfficeFloorEditPart<WorkTaskModel, WorkTaskEvent, WorkTaskFigure>
 		implements WorkTaskFigureContext {
 
 	/**
@@ -77,7 +77,7 @@ public class WorkTaskEditPart
 	}
 
 	@Override
-	protected OfficeFloorFigure createOfficeFloorFigure() {
+	protected WorkTaskFigure createOfficeFloorFigure() {
 		return OfficeFloorPlugin.getSkin().getDeskFigureFactory()
 				.createWorkTaskFigure(this);
 	}
@@ -105,9 +105,14 @@ public class WorkTaskEditPart
 		case REMOVE_TASK:
 			WorkTaskEditPart.this.refreshSourceConnections();
 			break;
+
 		case ADD_TASK_OBJECT:
 		case REMOVE_TASK_OBJECT:
 			WorkTaskEditPart.this.refreshChildren();
+			break;
+
+		case CHANGE_WORK_TASK_NAME:
+			this.getOfficeFloorFigure().setWorkTaskName(this.getWorkTaskName());
 			break;
 		}
 	}

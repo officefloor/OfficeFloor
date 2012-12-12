@@ -30,9 +30,16 @@ import org.eclipse.draw2d.IFigure;
 public interface WorkTaskObjectFigureContext {
 
 	/**
-	 * Obtains the object type for the {@link WorkTaskObjectModel}.
+	 * Obtains the object name for the {@link WorkTaskObjectModel}.
 	 * 
-	 * @return Object type for the {@link WorkTaskObjectModel}.
+	 * @return Object name for the {@link WorkTaskObjectModel}.
+	 */
+	String getWorkTaskObjectName();
+
+	/**
+	 * Obtains the object type.
+	 * 
+	 * @return Object type.
 	 */
 	String getObjectType();
 

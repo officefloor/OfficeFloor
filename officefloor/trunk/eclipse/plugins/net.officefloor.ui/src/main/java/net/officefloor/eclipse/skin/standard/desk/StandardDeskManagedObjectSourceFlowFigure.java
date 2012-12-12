@@ -28,26 +28,33 @@ import net.officefloor.model.desk.DeskManagedObjectSourceFlowToExternalFlowModel
 import net.officefloor.model.desk.DeskManagedObjectSourceFlowToTaskModel;
 
 import org.eclipse.draw2d.ConnectionAnchor;
+import org.eclipse.draw2d.Label;
 
 /**
  * Standard {@link DeskManagedObjectSourceFlowFigure}.
- *
+ * 
  * @author Daniel Sagenschneider
  */
 public class StandardDeskManagedObjectSourceFlowFigure extends
 		AbstractOfficeFloorFigure implements DeskManagedObjectSourceFlowFigure {
 
 	/**
+	 * Name of the flow.
+	 */
+	private final Label flowName;
+
+	/**
 	 * Initiate.
-	 *
+	 * 
 	 * @param context
 	 *            {@link DeskManagedObjectSourceFlowFigureContext}.
 	 */
 	public StandardDeskManagedObjectSourceFlowFigure(
 			DeskManagedObjectSourceFlowFigureContext context) {
-		LabelConnectorFigure figure = new LabelConnectorFigure(context
-				.getDeskManagedObjectSourceFlowName(), ConnectorDirection.EAST,
-				StandardOfficeFloorColours.BLACK());
+		LabelConnectorFigure figure = new LabelConnectorFigure(
+				context.getDeskManagedObjectSourceFlowName(),
+				ConnectorDirection.EAST, StandardOfficeFloorColours.BLACK());
+		this.flowName = figure.getLabel();
 
 		// Register the anchors
 		ConnectionAnchor anchor = figure.getConnectionAnchor();
@@ -58,6 +65,16 @@ public class StandardDeskManagedObjectSourceFlowFigure extends
 
 		// Specify the figure
 		this.setFigure(figure);
+	}
+
+	/*
+	 * ===================== DeskManagedObjectSourceFlowFigure ===============
+	 */
+
+	@Override
+	public void setDeskManagedObjectSourceFlowName(
+			String deskManagedObjectSourceFlowName) {
+		this.flowName.setText(deskManagedObjectSourceFlowName);
 	}
 
 }

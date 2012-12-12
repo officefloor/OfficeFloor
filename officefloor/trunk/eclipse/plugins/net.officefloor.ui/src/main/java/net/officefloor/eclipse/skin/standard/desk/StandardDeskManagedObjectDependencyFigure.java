@@ -28,26 +28,33 @@ import net.officefloor.model.desk.DeskManagedObjectDependencyToDeskManagedObject
 import net.officefloor.model.desk.DeskManagedObjectDependencyToExternalManagedObjectModel;
 
 import org.eclipse.draw2d.ConnectionAnchor;
+import org.eclipse.draw2d.Label;
 
 /**
  * Standard {@link DeskManagedObjectDependencyFigure}.
- *
+ * 
  * @author Daniel Sagenschneider
  */
 public class StandardDeskManagedObjectDependencyFigure extends
 		AbstractOfficeFloorFigure implements DeskManagedObjectDependencyFigure {
 
 	/**
+	 * Name of the dependency.
+	 */
+	private final Label dependencyName;
+
+	/**
 	 * Initiate.
-	 *
+	 * 
 	 * @param context
 	 *            {@link DeskManagedObjectDependencyFigureContext}.
 	 */
 	public StandardDeskManagedObjectDependencyFigure(
 			DeskManagedObjectDependencyFigureContext context) {
-		LabelConnectorFigure figure = new LabelConnectorFigure(context
-				.getDeskManagedObjectDependencyName(), ConnectorDirection.EAST,
-				StandardOfficeFloorColours.BLACK());
+		LabelConnectorFigure figure = new LabelConnectorFigure(
+				context.getDeskManagedObjectDependencyName(),
+				ConnectorDirection.EAST, StandardOfficeFloorColours.BLACK());
+		this.dependencyName = figure.getLabel();
 
 		// Register connections
 		ConnectionAnchor anchor = figure.getConnectionAnchor();
@@ -59,6 +66,16 @@ public class StandardDeskManagedObjectDependencyFigure extends
 				anchor);
 
 		this.setFigure(figure);
+	}
+
+	/*
+	 * =============== DeskManagedObjectDependencyFigure ======================
+	 */
+
+	@Override
+	public void setDeskManagedObjectDependencyName(
+			String deskManagedObjectDependencyName) {
+		this.dependencyName.setText(deskManagedObjectDependencyName);
 	}
 
 }

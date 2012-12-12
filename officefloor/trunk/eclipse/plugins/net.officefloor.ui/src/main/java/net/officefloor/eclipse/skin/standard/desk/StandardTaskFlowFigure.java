@@ -24,37 +24,53 @@ import net.officefloor.eclipse.skin.standard.AbstractOfficeFloorFigure;
 import net.officefloor.eclipse.skin.standard.StandardOfficeFloorColours;
 import net.officefloor.eclipse.skin.standard.figure.LabelConnectorFigure;
 import net.officefloor.eclipse.skin.standard.figure.ConnectorFigure.ConnectorDirection;
+import net.officefloor.model.desk.TaskFlowModel;
 import net.officefloor.model.desk.TaskFlowToExternalFlowModel;
 import net.officefloor.model.desk.TaskFlowToTaskModel;
 
 import org.eclipse.draw2d.ConnectionAnchor;
+import org.eclipse.draw2d.Label;
 
 /**
  * Standard {@link TaskFlowFigure}.
- *
+ * 
  * @author Daniel Sagenschneider
  */
 public class StandardTaskFlowFigure extends AbstractOfficeFloorFigure implements
 		TaskFlowFigure {
 
 	/**
+	 * {@link TaskFlowModel} name.
+	 */
+	private final Label taskFlowName;
+
+	/**
 	 * Initiate.
-	 *
+	 * 
 	 * @param context
 	 *            {@link TaskFlowFigureContext}.
 	 */
 	public StandardTaskFlowFigure(TaskFlowFigureContext context) {
-		LabelConnectorFigure connector = new LabelConnectorFigure(context
-				.getTaskFlowName(), ConnectorDirection.EAST,
+		LabelConnectorFigure connector = new LabelConnectorFigure(
+				context.getTaskFlowName(), ConnectorDirection.EAST,
 				StandardOfficeFloorColours.BLACK());
+		this.taskFlowName = connector.getLabel();
 
 		// Register the anchors
 		ConnectionAnchor anchor = connector.getConnectionAnchor();
 		this.registerConnectionAnchor(TaskFlowToTaskModel.class, anchor);
-		this
-				.registerConnectionAnchor(TaskFlowToExternalFlowModel.class,
-						anchor);
+		this.registerConnectionAnchor(TaskFlowToExternalFlowModel.class, anchor);
 
 		this.setFigure(connector);
 	}
+
+	/*
+	 * ================= TaskFlowFigure ============================
+	 */
+
+	@Override
+	public void setTaskFlowName(String taskFlowName) {
+		this.taskFlowName.setText(taskFlowName);
+	}
+
 }
