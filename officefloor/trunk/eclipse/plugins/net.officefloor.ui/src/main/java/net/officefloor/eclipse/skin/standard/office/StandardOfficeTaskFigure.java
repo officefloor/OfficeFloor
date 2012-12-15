@@ -22,6 +22,7 @@ import net.officefloor.eclipse.skin.office.OfficeTaskFigure;
 import net.officefloor.eclipse.skin.office.OfficeTaskFigureContext;
 import net.officefloor.eclipse.skin.standard.AbstractOfficeFloorFigure;
 import net.officefloor.eclipse.skin.standard.figure.NoSpacingGridLayout;
+import net.officefloor.model.office.OfficeTaskModel;
 
 import org.eclipse.draw2d.Figure;
 import org.eclipse.draw2d.Label;
@@ -33,6 +34,11 @@ import org.eclipse.draw2d.Label;
  */
 public class StandardOfficeTaskFigure extends AbstractOfficeFloorFigure
 		implements OfficeTaskFigure {
+
+	/**
+	 * {@link OfficeTaskModel} name.
+	 */
+	private final Label taskName;
 
 	/**
 	 * Initiate.
@@ -48,8 +54,8 @@ public class StandardOfficeTaskFigure extends AbstractOfficeFloorFigure
 		figure.setLayoutManager(figureLayout);
 
 		// Create the task name
-		Label task = new Label(context.getOfficeTaskName());
-		figure.add(task);
+		this.taskName = new Label(context.getOfficeTaskName());
+		figure.add(this.taskName);
 
 		// Create the container for child connectors
 		Figure contentPane = new Figure();
@@ -61,6 +67,15 @@ public class StandardOfficeTaskFigure extends AbstractOfficeFloorFigure
 		// Specify the figure
 		this.setFigure(figure);
 		this.setContentPane(contentPane);
+	}
+
+	/*
+	 * ===================== OfficeTaskFigure ======================
+	 */
+
+	@Override
+	public void setOfficeTaskName(String officeTaskName) {
+		this.taskName.setText(officeTaskName);
 	}
 
 }

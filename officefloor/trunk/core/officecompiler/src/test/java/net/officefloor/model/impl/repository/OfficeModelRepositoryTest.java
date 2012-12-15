@@ -62,7 +62,6 @@ import net.officefloor.model.office.OfficeSectionObjectToOfficeManagedObjectMode
 import net.officefloor.model.office.OfficeSectionOutputModel;
 import net.officefloor.model.office.OfficeSectionOutputToOfficeSectionInputModel;
 import net.officefloor.model.office.OfficeSectionResponsibilityModel;
-import net.officefloor.model.office.OfficeSectionResponsibilityObjectModel;
 import net.officefloor.model.office.OfficeSectionResponsibilityToOfficeTeamModel;
 import net.officefloor.model.office.OfficeStartModel;
 import net.officefloor.model.office.OfficeStartToOfficeSectionInputModel;
@@ -355,10 +354,8 @@ public class OfficeModelRepositoryTest extends OfficeFrameTestCase {
 				.getOfficeSectionResponsibilities().get(0);
 		assertProperties(new OfficeSectionResponsibilityToOfficeTeamModel(
 				"TEAM"), responsibility.getOfficeTeam(), "getOfficeTeamName");
-		assertList(new String[] { "getOfficeSectionResponsibilityObjectName" },
-				responsibility.getOfficeSectionResponsibilityObjects(),
-				new OfficeSectionResponsibilityObjectModel(
-						"RESPONSIBILITY_OBJECT"));
+
+		// TODO make Responsibility a Source for dynamic allocation
 
 		// Sub section details for the top level office section
 		assertNotNull("Must have sub section of office section",

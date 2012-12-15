@@ -18,6 +18,8 @@
 
 package net.officefloor.eclipse.skin.standard.office;
 
+import org.eclipse.draw2d.Label;
+
 import net.officefloor.eclipse.skin.office.OfficeEscalationFigure;
 import net.officefloor.eclipse.skin.office.OfficeEscalationFigureContext;
 import net.officefloor.eclipse.skin.standard.AbstractOfficeFloorFigure;
@@ -28,28 +30,43 @@ import net.officefloor.model.office.OfficeEscalationToOfficeSectionInputModel;
 
 /**
  * {@link OfficeEscalationFigure} implementation.
- *
+ * 
  * @author Daniel Sagenschneider
  */
 public class StandardOfficeEscalationFigure extends AbstractOfficeFloorFigure
 		implements OfficeEscalationFigure {
 
 	/**
+	 * Escalation type name.
+	 */
+	private final Label escalationTypeName;
+
+	/**
 	 * Initiate.
-	 *
+	 * 
 	 * @param context
 	 *            {@link OfficeEscalationFigureContext}.
 	 */
 	public StandardOfficeEscalationFigure(OfficeEscalationFigureContext context) {
-		LabelConnectorFigure figure = new LabelConnectorFigure(context
-				.getOfficeEscalationTypeName(), ConnectorDirection.EAST,
+		LabelConnectorFigure figure = new LabelConnectorFigure(
+				context.getOfficeEscalationTypeName(), ConnectorDirection.EAST,
 				StandardOfficeFloorColours.BLACK());
+		this.escalationTypeName = figure.getLabel();
 
 		this.registerConnectionAnchor(
-				OfficeEscalationToOfficeSectionInputModel.class, figure
-						.getConnectionAnchor());
+				OfficeEscalationToOfficeSectionInputModel.class,
+				figure.getConnectionAnchor());
 
 		this.setFigure(figure);
+	}
+
+	/*
+	 * ======================= OfficeEscalationFigure ===================
+	 */
+
+	@Override
+	public void setOfficeEscalationTypeName(String officeEscalationTypeName) {
+		this.escalationTypeName.setText(officeEscalationTypeName);
 	}
 
 }

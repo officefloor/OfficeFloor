@@ -32,6 +32,10 @@ import net.officefloor.eclipse.skin.office.ExternalManagedObjectToAdministratorF
 import net.officefloor.eclipse.skin.office.OfficeEscalationFigure;
 import net.officefloor.eclipse.skin.office.OfficeEscalationFigureContext;
 import net.officefloor.eclipse.skin.office.OfficeEscalationToOfficeSectionInputFigureContext;
+import net.officefloor.eclipse.skin.office.OfficeInputManagedObjectDependencyFigure;
+import net.officefloor.eclipse.skin.office.OfficeInputManagedObjectDependencyFigureContext;
+import net.officefloor.eclipse.skin.office.OfficeInputManagedObjectDependencyToExternalManagedObjectFigureContext;
+import net.officefloor.eclipse.skin.office.OfficeInputManagedObjectDependencyToOfficeManagedObjectFigureContext;
 import net.officefloor.eclipse.skin.office.OfficeManagedObjectDependencyFigure;
 import net.officefloor.eclipse.skin.office.OfficeManagedObjectDependencyFigureContext;
 import net.officefloor.eclipse.skin.office.OfficeManagedObjectDependencyToExternalManagedObjectFigureContext;
@@ -76,7 +80,7 @@ import net.officefloor.eclipse.skin.standard.StandardOfficeFloorColours;
 
 /**
  * Standard {@link OfficeFigureFactory}.
- *
+ * 
  * @author Daniel Sagenschneider
  */
 public class StandardOfficeFigureFactory implements OfficeFigureFactory {
@@ -109,6 +113,12 @@ public class StandardOfficeFigureFactory implements OfficeFigureFactory {
 	public OfficeManagedObjectDependencyFigure createOfficeManagedObjectDependencyFigure(
 			OfficeManagedObjectDependencyFigureContext context) {
 		return new StandardOfficeManagedObjectDependencyFigure(context);
+	}
+
+	@Override
+	public OfficeInputManagedObjectDependencyFigure createOfficeInputManagedObjectDependencyFigure(
+			OfficeInputManagedObjectDependencyFigureContext context) {
+		return new StandardOfficeInputManagedObjectDependencyFigure(context);
 	}
 
 	@Override
@@ -205,6 +215,20 @@ public class StandardOfficeFigureFactory implements OfficeFigureFactory {
 	public void decorateOfficeManagedObjectDependencyToExternalManagedObjectFigure(
 			PolylineConnection figure,
 			OfficeManagedObjectDependencyToExternalManagedObjectFigureContext context) {
+		// Leave as default line
+	}
+
+	@Override
+	public void decorateOfficeInputManagedObjectDependencyToOfficeManagedObjectFigure(
+			PolylineConnection figure,
+			OfficeInputManagedObjectDependencyToOfficeManagedObjectFigureContext context) {
+		// Leave as default line
+	}
+
+	@Override
+	public void decorateOfficeInputManagedObjectDependencyToExternalManagedObjectFigure(
+			PolylineConnection figure,
+			OfficeInputManagedObjectDependencyToExternalManagedObjectFigureContext context) {
 		// Leave as default line
 	}
 

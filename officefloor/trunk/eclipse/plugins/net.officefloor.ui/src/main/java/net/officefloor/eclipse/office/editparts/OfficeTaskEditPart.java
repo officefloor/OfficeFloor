@@ -25,7 +25,7 @@ import net.officefloor.eclipse.OfficeFloorPlugin;
 import net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart;
 import net.officefloor.eclipse.office.models.PostTaskAdministrationJointPointModel;
 import net.officefloor.eclipse.office.models.PreTaskAdministrationJointPointModel;
-import net.officefloor.eclipse.skin.OfficeFloorFigure;
+import net.officefloor.eclipse.skin.office.OfficeTaskFigure;
 import net.officefloor.eclipse.skin.office.OfficeTaskFigureContext;
 import net.officefloor.model.office.OfficeTaskModel;
 import net.officefloor.model.office.OfficeTaskModel.OfficeTaskEvent;
@@ -39,7 +39,7 @@ import org.eclipse.gef.EditPart;
  */
 public class OfficeTaskEditPart
 		extends
-		AbstractOfficeFloorEditPart<OfficeTaskModel, OfficeTaskEvent, OfficeFloorFigure>
+		AbstractOfficeFloorEditPart<OfficeTaskModel, OfficeTaskEvent, OfficeTaskFigure>
 		implements OfficeTaskFigureContext {
 
 	/**
@@ -62,7 +62,7 @@ public class OfficeTaskEditPart
 	}
 
 	@Override
-	protected OfficeFloorFigure createOfficeFloorFigure() {
+	protected OfficeTaskFigure createOfficeFloorFigure() {
 		return OfficeFloorPlugin.getSkin().getOfficeFigureFactory()
 				.createOfficeTaskFigure(this);
 	}
@@ -83,10 +83,16 @@ public class OfficeTaskEditPart
 	protected void handlePropertyChange(OfficeTaskEvent property,
 			PropertyChangeEvent evt) {
 		switch (property) {
+		case CHANGE_OFFICE_TASK_NAME:
+			this.getOfficeFloorFigure().setOfficeTaskName(
+					this.getOfficeTaskName());
+			break;
+
 		case ADD_PRE_DUTY:
 		case REMOVE_PRE_DUTY:
 			this.preTaskAdministrationJoinPoint.triggerDutyChangeEvent();
 			break;
+
 		case ADD_POST_DUTY:
 		case REMOVE_POST_DUTY:
 			this.postTaskAdministrationJoinPoint.triggerDutyChangeEvent();
@@ -95,7 +101,7 @@ public class OfficeTaskEditPart
 	}
 
 	/*
-	 * =================== FlowItemFigureContext =========================
+	 * =================== OfficeTaskFigureContext =========================
 	 */
 
 	@Override

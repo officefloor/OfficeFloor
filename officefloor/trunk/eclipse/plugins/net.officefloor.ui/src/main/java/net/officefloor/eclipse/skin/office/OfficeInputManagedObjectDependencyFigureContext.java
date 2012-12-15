@@ -18,23 +18,22 @@
 
 package net.officefloor.eclipse.skin.office;
 
-import net.officefloor.eclipse.skin.OfficeFloorFigure;
-import net.officefloor.model.office.OfficeManagedObjectSourceTeamModel;
+import net.officefloor.model.office.OfficeInputManagedObjectDependencyModel;
+
+import org.eclipse.draw2d.IFigure;
 
 /**
- * {@link OfficeFloorFigure} for the {@link OfficeManagedObjectSourceTeamModel}.
- * 
+ * Context for the {@link OfficeInputManagedObjectDependencyModel} {@link IFigure}.
+ *
  * @author Daniel Sagenschneider
  */
-public interface OfficeManagedObjectSourceTeamFigure extends OfficeFloorFigure {
+public interface OfficeInputManagedObjectDependencyFigureContext {
 
 	/**
-	 * Specifies the {@link OfficeManagedObjectSourceTeamModel} name to display.
-	 * 
-	 * @param officeManagedObjectSourceTeamName
-	 *            Name to display.
+	 * Obtains the {@link OfficeInputManagedObjectDependencyModel} name.
+	 *
+	 * @return {@link OfficeInputManagedObjectDependencyModel} name.
 	 */
-	void setOfficeManagedObjectSourceTeamName(
-			String officeManagedObjectSourceTeamName);
+	String getOfficeInputManagedObjectDependencyName();
 
 }

@@ -27,4 +27,13 @@ import net.officefloor.model.office.OfficeSectionObjectModel;
  * @author Daniel Sagenschneider
  */
 public interface OfficeSectionObjectFigure extends OfficeFloorFigure {
+
+	/**
+	 * Specifies the {@link OfficeSectionObjectModel} name to display.
+	 * 
+	 * @param officeSectionObjectName
+	 *            Name to display.
+	 */
+	void setOfficeSectionObjectName(String officeSectionObjectName);
+
 }

@@ -23,7 +23,7 @@ import java.util.List;
 
 import net.officefloor.eclipse.OfficeFloorPlugin;
 import net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart;
-import net.officefloor.eclipse.skin.OfficeFloorFigure;
+import net.officefloor.eclipse.skin.office.OfficeSectionInputFigure;
 import net.officefloor.eclipse.skin.office.OfficeSectionInputFigureContext;
 import net.officefloor.model.office.OfficeSectionInputModel;
 import net.officefloor.model.office.OfficeSectionInputModel.OfficeSectionInputEvent;
@@ -32,12 +32,12 @@ import org.eclipse.gef.EditPart;
 
 /**
  * {@link EditPart} for the {@link OfficeSectionInputModel}.
- *
+ * 
  * @author Daniel Sagenschneider
  */
 public class OfficeSectionInputEditPart
 		extends
-		AbstractOfficeFloorEditPart<OfficeSectionInputModel, OfficeSectionInputEvent, OfficeFloorFigure>
+		AbstractOfficeFloorEditPart<OfficeSectionInputModel, OfficeSectionInputEvent, OfficeSectionInputFigure>
 		implements OfficeSectionInputFigureContext {
 
 	/*
@@ -45,7 +45,7 @@ public class OfficeSectionInputEditPart
 	 */
 
 	@Override
-	protected OfficeFloorFigure createOfficeFloorFigure() {
+	protected OfficeSectionInputFigure createOfficeFloorFigure() {
 		return OfficeFloorPlugin.getSkin().getOfficeFigureFactory()
 				.createOfficeSectionInputFigure(this);
 	}
@@ -53,9 +53,7 @@ public class OfficeSectionInputEditPart
 	@Override
 	protected void populateConnectionTargetModels(List<Object> models) {
 		models.addAll(this.getCastedModel().getOfficeSectionOutputs());
-		models
-				.addAll(this.getCastedModel()
-						.getOfficeManagedObjectSourceFlows());
+		models.addAll(this.getCastedModel().getOfficeManagedObjectSourceFlows());
 		models.addAll(this.getCastedModel().getOfficeEscalations());
 	}
 
@@ -68,6 +66,11 @@ public class OfficeSectionInputEditPart
 	protected void handlePropertyChange(OfficeSectionInputEvent property,
 			PropertyChangeEvent evt) {
 		switch (property) {
+		case CHANGE_OFFICE_SECTION_INPUT_NAME:
+			this.getOfficeFloorFigure().setOfficeSectionInputName(
+					this.getOfficeSectionInputName());
+			break;
+
 		case ADD_OFFICE_SECTION_OUTPUT:
 		case REMOVE_OFFICE_SECTION_OUTPUT:
 		case ADD_OFFICE_MANAGED_OBJECT_SOURCE_FLOW:
@@ -75,6 +78,10 @@ public class OfficeSectionInputEditPart
 		case ADD_OFFICE_ESCALATION:
 		case REMOVE_OFFICE_ESCALATION:
 			this.refreshTargetConnections();
+			break;
+
+		case CHANGE_PARAMETER_TYPE:
+			// Non visual change
 			break;
 		}
 	}

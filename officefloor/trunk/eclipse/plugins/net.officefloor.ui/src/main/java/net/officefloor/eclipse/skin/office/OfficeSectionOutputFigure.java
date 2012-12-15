@@ -19,6 +19,7 @@
 package net.officefloor.eclipse.skin.office;
 
 import net.officefloor.eclipse.skin.OfficeFloorFigure;
+import net.officefloor.model.office.OfficeSectionOutputModel;
 
 /**
  * {@link OfficeFloorFigure} for the {@link OfficeSectionOutputFigure}.
@@ -26,4 +27,13 @@ import net.officefloor.eclipse.skin.OfficeFloorFigure;
  * @author Daniel Sagenschneider
  */
 public interface OfficeSectionOutputFigure extends OfficeFloorFigure {
+
+	/**
+	 * Specifies the {@link OfficeSectionOutputModel} name to display.
+	 * 
+	 * @param officeSectionOutputName
+	 *            Name to display.
+	 */
+	void setOfficeSectionOutputName(String officeSectionOutputName);
+
 }

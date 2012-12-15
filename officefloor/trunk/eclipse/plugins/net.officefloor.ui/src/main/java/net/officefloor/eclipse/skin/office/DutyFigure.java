@@ -27,4 +27,13 @@ import net.officefloor.model.office.DutyModel;
  * @author Daniel Sagenschneider
  */
 public interface DutyFigure extends OfficeFloorFigure {
+
+	/**
+	 * Specifies the {@link DutyModel} name to display.
+	 * 
+	 * @param dutyName
+	 *            Name to display.
+	 */
+	void setDutyName(String dutyName);
+
 }

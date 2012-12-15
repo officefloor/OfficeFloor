@@ -27,4 +27,13 @@ import net.officefloor.model.office.OfficeTaskModel;
  * @author Daniel Sagenschneider
  */
 public interface OfficeTaskFigure extends OfficeFloorFigure {
+
+	/**
+	 * Specifies the {@link OfficeTaskModel} name to display.
+	 * 
+	 * @param officeTaskName
+	 *            Name to display.
+	 */
+	void setOfficeTaskName(String officeTaskName);
+
 }

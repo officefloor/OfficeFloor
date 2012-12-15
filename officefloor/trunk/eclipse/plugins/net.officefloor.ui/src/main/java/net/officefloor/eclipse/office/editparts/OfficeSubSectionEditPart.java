@@ -23,10 +23,12 @@ import java.util.List;
 
 import net.officefloor.eclipse.OfficeFloorPlugin;
 import net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart;
-import net.officefloor.eclipse.skin.OfficeFloorFigure;
+import net.officefloor.eclipse.skin.office.OfficeSubSectionFigure;
 import net.officefloor.eclipse.skin.office.OfficeSubSectionFigureContext;
 import net.officefloor.model.office.OfficeSubSectionModel;
 import net.officefloor.model.office.OfficeSubSectionModel.OfficeSubSectionEvent;
+
+import org.eclipse.gef.EditPart;
 
 /**
  * {@link EditPart} for the {@link OfficeSubSectionModel}.
@@ -35,7 +37,7 @@ import net.officefloor.model.office.OfficeSubSectionModel.OfficeSubSectionEvent;
  */
 public class OfficeSubSectionEditPart
 		extends
-		AbstractOfficeFloorEditPart<OfficeSubSectionModel, OfficeSubSectionEvent, OfficeFloorFigure>
+		AbstractOfficeFloorEditPart<OfficeSubSectionModel, OfficeSubSectionEvent, OfficeSubSectionFigure>
 		implements OfficeSubSectionFigureContext {
 
 	/*
@@ -43,7 +45,7 @@ public class OfficeSubSectionEditPart
 	 */
 
 	@Override
-	protected OfficeFloorFigure createOfficeFloorFigure() {
+	protected OfficeSubSectionFigure createOfficeFloorFigure() {
 		return OfficeFloorPlugin.getSkin().getOfficeFigureFactory()
 				.createOfficeSubSectionFigure(this);
 	}
@@ -63,6 +65,11 @@ public class OfficeSubSectionEditPart
 	protected void handlePropertyChange(OfficeSubSectionEvent property,
 			PropertyChangeEvent evt) {
 		switch (property) {
+		case CHANGE_OFFICE_SUB_SECTION_NAME:
+			this.getOfficeFloorFigure().setOfficeSubSectionName(
+					this.getOfficeSubSectionName());
+			break;
+
 		case ADD_OFFICE_TASK:
 		case REMOVE_OFFICE_TASK:
 		case ADD_OFFICE_SUB_SECTION:
@@ -70,6 +77,15 @@ public class OfficeSubSectionEditPart
 			this.refreshChildren();
 			break;
 		}
+	}
+
+	/*
+	 * ===================== OfficeSubSectionFigureContext =================
+	 */
+
+	@Override
+	public String getOfficeSubSectionName() {
+		return this.getCastedModel().getOfficeSubSectionName();
 	}
 
 }

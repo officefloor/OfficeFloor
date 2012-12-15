@@ -27,4 +27,13 @@ import net.officefloor.model.office.OfficeSectionInputModel;
  * @author Daniel Sagenschneider
  */
 public interface OfficeSectionInputFigure extends OfficeFloorFigure {
+
+	/**
+	 * Specifies the {@link OfficeSectionInputModel} name to display.
+	 * 
+	 * @param officeSectionInputName
+	 *            Name to display.
+	 */
+	void setOfficeSectionInputName(String officeSectionInputName);
+
 }

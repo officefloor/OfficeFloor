@@ -35,6 +35,9 @@ import net.officefloor.eclipse.office.editparts.ExternalManagedObjectToAdministr
 import net.officefloor.eclipse.office.editparts.OfficeEditPart;
 import net.officefloor.eclipse.office.editparts.OfficeEscalationEditPart;
 import net.officefloor.eclipse.office.editparts.OfficeEscalationToOfficeSectionInputEditPart;
+import net.officefloor.eclipse.office.editparts.OfficeInputManagedObjectDependencyEditPart;
+import net.officefloor.eclipse.office.editparts.OfficeInputManagedObjectDependencyToExternalManagedObjectEditPart;
+import net.officefloor.eclipse.office.editparts.OfficeInputManagedObjectDependencyToOfficeManagedObjectEditPart;
 import net.officefloor.eclipse.office.editparts.OfficeManagedObjectDependencyEditPart;
 import net.officefloor.eclipse.office.editparts.OfficeManagedObjectDependencyToExternalManagedObjectEditPart;
 import net.officefloor.eclipse.office.editparts.OfficeManagedObjectDependencyToOfficeManagedObjectEditPart;
@@ -86,6 +89,9 @@ import net.officefloor.model.office.ExternalManagedObjectToAdministratorModel;
 import net.officefloor.model.office.OfficeChanges;
 import net.officefloor.model.office.OfficeEscalationModel;
 import net.officefloor.model.office.OfficeEscalationToOfficeSectionInputModel;
+import net.officefloor.model.office.OfficeInputManagedObjectDependencyModel;
+import net.officefloor.model.office.OfficeInputManagedObjectDependencyToExternalManagedObjectModel;
+import net.officefloor.model.office.OfficeInputManagedObjectDependencyToOfficeManagedObjectModel;
 import net.officefloor.model.office.OfficeManagedObjectDependencyModel;
 import net.officefloor.model.office.OfficeManagedObjectDependencyToExternalManagedObjectModel;
 import net.officefloor.model.office.OfficeManagedObjectDependencyToOfficeManagedObjectModel;
@@ -182,6 +188,8 @@ public class OfficeEditor extends
 				OfficeManagedObjectSourceFlowEditPart.class);
 		map.put(OfficeManagedObjectSourceTeamModel.class,
 				OfficeManagedObjectSourceTeamEditPart.class);
+		map.put(OfficeInputManagedObjectDependencyModel.class,
+				OfficeInputManagedObjectDependencyEditPart.class);
 		map.put(OfficeManagedObjectModel.class,
 				OfficeManagedObjectEditPart.class);
 		map.put(OfficeManagedObjectDependencyModel.class,
@@ -212,6 +220,10 @@ public class OfficeEditor extends
 				OfficeManagedObjectDependencyToOfficeManagedObjectEditPart.class);
 		map.put(OfficeManagedObjectDependencyToExternalManagedObjectModel.class,
 				OfficeManagedObjectDependencyToExternalManagedObjectEditPart.class);
+		map.put(OfficeInputManagedObjectDependencyToExternalManagedObjectModel.class,
+				OfficeInputManagedObjectDependencyToExternalManagedObjectEditPart.class);
+		map.put(OfficeInputManagedObjectDependencyToOfficeManagedObjectModel.class,
+				OfficeInputManagedObjectDependencyToOfficeManagedObjectEditPart.class);
 		map.put(OfficeManagedObjectSourceFlowToOfficeSectionInputModel.class,
 				OfficeManagedObjectSourceFlowToOfficeSectionInputEditPart.class);
 		map.put(OfficeManagedObjectSourceTeamToOfficeTeamModel.class,

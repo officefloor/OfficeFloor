@@ -27,4 +27,13 @@ import net.officefloor.model.office.OfficeEscalationModel;
  * @author Daniel Sagenschneider
  */
 public interface OfficeEscalationFigure extends OfficeFloorFigure {
+
+	/**
+	 * Specifies the {@link OfficeEscalationModel} type name to display.
+	 * 
+	 * @param officeEscalationTypeName
+	 *            Type name to display.
+	 */
+	void setOfficeEscalationTypeName(String officeEscalationTypeName);
+
 }

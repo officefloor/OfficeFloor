@@ -23,8 +23,18 @@ import net.officefloor.model.office.OfficeManagedObjectDependencyModel;
 
 /**
  * {@link OfficeFloorFigure} for the {@link OfficeManagedObjectDependencyModel}.
- *
+ * 
  * @author Daniel Sagenschneider
  */
 public interface OfficeManagedObjectDependencyFigure extends OfficeFloorFigure {
+
+	/**
+	 * Specifies the {@link OfficeManagedObjectDependencyModel} name to display.
+	 * 
+	 * @param officeManagedObjectDependencyName
+	 *            Name to display.
+	 */
+	void setOfficeManagedObjectDependencyName(
+			String officeManagedObjectDependencyName);
+
 }

@@ -37,7 +37,7 @@ import org.eclipse.gef.EditPart;
 
 /**
  * {@link EditPart} for the {@link ExternalManagedObjectModel}.
- *
+ * 
  * @author Daniel Sagenschneider
  */
 public class ExternalManagedObjectEditPart
@@ -60,35 +60,34 @@ public class ExternalManagedObjectEditPart
 	protected void populateConnectionTargetModels(List<Object> models) {
 		models.addAll(this.getCastedModel().getOfficeSectionObjects());
 		models.addAll(this.getCastedModel().getDependentOfficeManagedObjects());
+		models.addAll(this.getCastedModel()
+				.getDependentOfficeInputManagedObjects());
 	}
 
 	@Override
 	protected void populateOfficeFloorDirectEditPolicy(
 			OfficeFloorDirectEditPolicy<ExternalManagedObjectModel> policy) {
-		policy
-				.allowDirectEdit(new DirectEditAdapter<OfficeChanges, ExternalManagedObjectModel>() {
-					@Override
-					public String getInitialValue() {
-						return ExternalManagedObjectEditPart.this
-								.getCastedModel()
-								.getExternalManagedObjectName();
-					}
+		policy.allowDirectEdit(new DirectEditAdapter<OfficeChanges, ExternalManagedObjectModel>() {
+			@Override
+			public String getInitialValue() {
+				return ExternalManagedObjectEditPart.this.getCastedModel()
+						.getExternalManagedObjectName();
+			}
 
-					@Override
-					public IFigure getLocationFigure() {
-						return ExternalManagedObjectEditPart.this
-								.getOfficeFloorFigure()
-								.getExternalManagedObjectNameFigure();
-					}
+			@Override
+			public IFigure getLocationFigure() {
+				return ExternalManagedObjectEditPart.this
+						.getOfficeFloorFigure()
+						.getExternalManagedObjectNameFigure();
+			}
 
-					@Override
-					public Change<ExternalManagedObjectModel> createChange(
-							OfficeChanges changes,
-							ExternalManagedObjectModel target, String newValue) {
-						return changes.renameExternalManagedObject(target,
-								newValue);
-					}
-				});
+			@Override
+			public Change<ExternalManagedObjectModel> createChange(
+					OfficeChanges changes, ExternalManagedObjectModel target,
+					String newValue) {
+				return changes.renameExternalManagedObject(target, newValue);
+			}
+		});
 	}
 
 	@Override
@@ -104,15 +103,23 @@ public class ExternalManagedObjectEditPart
 			this.getOfficeFloorFigure().setExternalManagedObjectName(
 					this.getCastedModel().getExternalManagedObjectName());
 			break;
+
 		case ADD_ADMINISTRATOR:
 		case REMOVE_ADMINISTRATOR:
 			this.refreshSourceConnections();
 			break;
+
 		case ADD_OFFICE_SECTION_OBJECT:
 		case REMOVE_OFFICE_SECTION_OBJECT:
 		case ADD_DEPENDENT_OFFICE_MANAGED_OBJECT:
 		case REMOVE_DEPENDENT_OFFICE_MANAGED_OBJECT:
+		case ADD_DEPENDENT_OFFICE_INPUT_MANAGED_OBJECT:
+		case REMOVE_DEPENDENT_OFFICE_INPUT_MANAGED_OBJECT:
 			this.refreshTargetConnections();
+			break;
+
+		case CHANGE_OBJECT_TYPE:
+			// Non visual change
 			break;
 		}
 	}

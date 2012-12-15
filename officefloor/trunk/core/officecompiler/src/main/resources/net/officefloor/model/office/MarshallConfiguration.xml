@@ -383,16 +383,6 @@
 							<attribute method="getOfficeTeamName" attribute="name" />
 						</attributes>
 					</object>
-					<collection method="getOfficeSectionResponsibilityObjects">
-						<item
-							type="net.officefloor.model.office.OfficeSectionResponsibilityObjectModel"
-							element="object">
-							<attributes>
-								<attribute method="getOfficeSectionResponsibilityObjectName"
-									attribute="name" />
-							</attributes>
-						</item>
-					</collection>
 				</item>
 			</collection>
 			<object method="getOfficeSubSection" element="sub-section">

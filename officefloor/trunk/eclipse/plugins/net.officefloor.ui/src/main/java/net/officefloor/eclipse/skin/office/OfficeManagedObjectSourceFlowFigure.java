@@ -23,8 +23,18 @@ import net.officefloor.model.office.OfficeManagedObjectSourceFlowModel;
 
 /**
  * {@link OfficeFloorFigure} for the {@link OfficeManagedObjectSourceFlowModel}.
- *
+ * 
  * @author Daniel Sagenschneider
  */
 public interface OfficeManagedObjectSourceFlowFigure extends OfficeFloorFigure {
+
+	/**
+	 * Specifies the {@link OfficeManagedObjectSourceFlowModel} name to display.
+	 * 
+	 * @param officeManagedObjectSourceFlowName
+	 *            Name to display.
+	 */
+	void setOfficeManagedObjectSourceFlowName(
+			String officeManagedObjectSourceFlowName);
+
 }

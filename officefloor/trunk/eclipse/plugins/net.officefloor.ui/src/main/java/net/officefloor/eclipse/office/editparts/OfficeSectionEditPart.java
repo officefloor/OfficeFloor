@@ -72,28 +72,26 @@ public class OfficeSectionEditPart
 	@Override
 	protected void populateOfficeFloorDirectEditPolicy(
 			OfficeFloorDirectEditPolicy<OfficeSectionModel> policy) {
-		policy
-				.allowDirectEdit(new DirectEditAdapter<OfficeChanges, OfficeSectionModel>() {
-					@Override
-					public String getInitialValue() {
-						return OfficeSectionEditPart.this.getCastedModel()
-								.getOfficeSectionName();
-					}
+		policy.allowDirectEdit(new DirectEditAdapter<OfficeChanges, OfficeSectionModel>() {
+			@Override
+			public String getInitialValue() {
+				return OfficeSectionEditPart.this.getCastedModel()
+						.getOfficeSectionName();
+			}
 
-					@Override
-					public IFigure getLocationFigure() {
-						return OfficeSectionEditPart.this
-								.getOfficeFloorFigure()
-								.getOfficeSectionNameFigure();
-					}
+			@Override
+			public IFigure getLocationFigure() {
+				return OfficeSectionEditPart.this.getOfficeFloorFigure()
+						.getOfficeSectionNameFigure();
+			}
 
-					@Override
-					public Change<OfficeSectionModel> createChange(
-							OfficeChanges changes, OfficeSectionModel target,
-							String newValue) {
-						return changes.renameOfficeSection(target, newValue);
-					}
-				});
+			@Override
+			public Change<OfficeSectionModel> createChange(
+					OfficeChanges changes, OfficeSectionModel target,
+					String newValue) {
+				return changes.renameOfficeSection(target, newValue);
+			}
+		});
 	}
 
 	@Override
@@ -133,6 +131,7 @@ public class OfficeSectionEditPart
 			this.getOfficeFloorFigure().setOfficeSectionName(
 					this.getCastedModel().getOfficeSectionName());
 			break;
+
 		case ADD_OFFICE_SECTION_INPUT:
 		case REMOVE_OFFICE_SECTION_INPUT:
 		case ADD_OFFICE_SECTION_OUTPUT:
@@ -143,6 +142,13 @@ public class OfficeSectionEditPart
 		case REMOVE_OFFICE_SECTION_RESPONSIBILITY:
 		case CHANGE_OFFICE_SUB_SECTION:
 			this.refreshChildren();
+			break;
+
+		case CHANGE_SECTION_SOURCE_CLASS_NAME:
+		case CHANGE_SECTION_LOCATION:
+		case ADD_PROPERTY:
+		case REMOVE_PROPERTY:
+			// Non visual change
 			break;
 		}
 	}
