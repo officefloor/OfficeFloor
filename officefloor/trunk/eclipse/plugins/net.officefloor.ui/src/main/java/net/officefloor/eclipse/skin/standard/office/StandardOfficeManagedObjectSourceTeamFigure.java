@@ -27,10 +27,11 @@ import net.officefloor.eclipse.skin.standard.figure.ConnectorFigure.ConnectorDir
 import net.officefloor.model.office.OfficeManagedObjectSourceTeamToOfficeTeamModel;
 
 import org.eclipse.draw2d.ConnectionAnchor;
+import org.eclipse.draw2d.Label;
 
 /**
  * Standard {@link OfficeManagedObjectSourceTeamFigure}.
- *
+ * 
  * @author Daniel Sagenschneider
  */
 public class StandardOfficeManagedObjectSourceTeamFigure extends
@@ -38,20 +39,36 @@ public class StandardOfficeManagedObjectSourceTeamFigure extends
 		OfficeManagedObjectSourceTeamFigure {
 
 	/**
+	 * Team name.
+	 */
+	private final Label teamName;
+
+	/**
 	 * Initiate.
-	 *
+	 * 
 	 * @param context
 	 *            {@link OfficeManagedObjectSourceTeamFigure}.
 	 */
 	public StandardOfficeManagedObjectSourceTeamFigure(
 			OfficeManagedObjectSourceTeamFigureContext context) {
-		LabelConnectorFigure figure = new LabelConnectorFigure(context
-				.getOfficeManagedObjectSourceTeamName(),
+		LabelConnectorFigure figure = new LabelConnectorFigure(
+				context.getOfficeManagedObjectSourceTeamName(),
 				ConnectorDirection.EAST, StandardOfficeFloorColours.BLACK());
+		this.teamName = figure.getLabel();
 		ConnectionAnchor anchor = figure.getConnectionAnchor();
 		this.registerConnectionAnchor(
 				OfficeManagedObjectSourceTeamToOfficeTeamModel.class, anchor);
 		this.setFigure(figure);
+	}
+
+	/*
+	 * ============= OfficeManagedObjectSourceTeamFigure =============
+	 */
+
+	@Override
+	public void setOfficeManagedObjectSourceTeamName(
+			String officeManagedObjectSourceTeamName) {
+		this.teamName.setText(officeManagedObjectSourceTeamName);
 	}
 
 }

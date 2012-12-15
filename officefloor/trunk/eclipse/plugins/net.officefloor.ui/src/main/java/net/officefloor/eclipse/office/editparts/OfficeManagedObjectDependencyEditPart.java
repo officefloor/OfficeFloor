@@ -33,7 +33,7 @@ import org.eclipse.gef.EditPart;
 
 /**
  * {@link EditPart} for the {@link ManagedObjectDependencyModel}.
- *
+ * 
  * @author Daniel Sagenschneider
  */
 public class OfficeManagedObjectDependencyEditPart
@@ -64,9 +64,18 @@ public class OfficeManagedObjectDependencyEditPart
 	protected void handlePropertyChange(
 			OfficeManagedObjectDependencyEvent property, PropertyChangeEvent evt) {
 		switch (property) {
+		case CHANGE_OFFICE_MANAGED_OBJECT_DEPENDENCY_NAME:
+			this.getOfficeFloorFigure().setOfficeManagedObjectDependencyName(
+					this.getOfficeManagedObjectDependencyName());
+			break;
+
 		case CHANGE_OFFICE_MANAGED_OBJECT:
 		case CHANGE_EXTERNAL_MANAGED_OBJECT:
 			this.refreshSourceConnections();
+			break;
+
+		case CHANGE_DEPENDENCY_TYPE:
+			// Non visual change
 			break;
 		}
 	}

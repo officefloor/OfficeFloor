@@ -77,28 +77,26 @@ public class AdministratorEditPart
 	@Override
 	protected void populateOfficeFloorDirectEditPolicy(
 			OfficeFloorDirectEditPolicy<AdministratorModel> policy) {
-		policy
-				.allowDirectEdit(new DirectEditAdapter<OfficeChanges, AdministratorModel>() {
-					@Override
-					public String getInitialValue() {
-						return AdministratorEditPart.this.getCastedModel()
-								.getAdministratorName();
-					}
+		policy.allowDirectEdit(new DirectEditAdapter<OfficeChanges, AdministratorModel>() {
+			@Override
+			public String getInitialValue() {
+				return AdministratorEditPart.this.getCastedModel()
+						.getAdministratorName();
+			}
 
-					@Override
-					public IFigure getLocationFigure() {
-						return AdministratorEditPart.this
-								.getOfficeFloorFigure()
-								.getAdministratorNameFigure();
-					}
+			@Override
+			public IFigure getLocationFigure() {
+				return AdministratorEditPart.this.getOfficeFloorFigure()
+						.getAdministratorNameFigure();
+			}
 
-					@Override
-					public Change<AdministratorModel> createChange(
-							OfficeChanges changes, AdministratorModel target,
-							String newValue) {
-						return changes.renameAdministrator(target, newValue);
-					}
-				});
+			@Override
+			public Change<AdministratorModel> createChange(
+					OfficeChanges changes, AdministratorModel target,
+					String newValue) {
+				return changes.renameAdministrator(target, newValue);
+			}
+		});
 	}
 
 	@Override
@@ -137,18 +135,28 @@ public class AdministratorEditPart
 			this.getOfficeFloorFigure().setAdministratorName(
 					this.getCastedModel().getAdministratorName());
 			break;
+
 		case ADD_DUTY:
 		case REMOVE_DUTY:
 			this.refreshChildren();
 			break;
+
 		case CHANGE_OFFICE_TEAM:
 			this.refreshSourceConnections();
 			break;
+
 		case ADD_EXTERNAL_MANAGED_OBJECT:
 		case REMOVE_EXTERNAL_MANAGED_OBJECT:
 		case ADD_OFFICE_MANAGED_OBJECT:
 		case REMOVE_OFFICE_MANAGED_OBJECT:
 			this.refreshTargetConnections();
+			break;
+
+		case CHANGE_ADMINISTRATOR_SOURCE_CLASS_NAME:
+		case CHANGE_ADMINISTRATOR_SCOPE:
+		case ADD_PROPERTY:
+		case REMOVE_PROPERTY:
+			// Non visual change
 			break;
 		}
 	}

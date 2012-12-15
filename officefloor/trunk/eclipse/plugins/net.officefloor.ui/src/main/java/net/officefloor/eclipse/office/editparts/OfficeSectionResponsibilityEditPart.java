@@ -104,6 +104,7 @@ public class OfficeSectionResponsibilityEditPart
 			this.getOfficeFloorFigure().setOfficeSectionResponsibilityName(
 					this.getCastedModel().getOfficeSectionResponsibilityName());
 			break;
+			
 		case CHANGE_OFFICE_TEAM:
 			this.refreshSourceConnections();
 			break;

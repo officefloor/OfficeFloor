@@ -26,29 +26,37 @@ import net.officefloor.eclipse.skin.standard.figure.LabelConnectorFigure;
 import net.officefloor.eclipse.skin.standard.figure.ConnectorFigure.ConnectorDirection;
 import net.officefloor.model.office.OfficeEscalationToOfficeSectionInputModel;
 import net.officefloor.model.office.OfficeManagedObjectSourceFlowToOfficeSectionInputModel;
+import net.officefloor.model.office.OfficeSectionInputModel;
 import net.officefloor.model.office.OfficeSectionOutputToOfficeSectionInputModel;
 
 import org.eclipse.draw2d.ConnectionAnchor;
+import org.eclipse.draw2d.Label;
 
 /**
  * {@link OfficeSectionInputFigure} implementation.
- *
+ * 
  * @author Daniel Sagenschneider
  */
 public class StandardOfficeSectionInputFigure extends AbstractOfficeFloorFigure
 		implements OfficeSectionInputFigure {
 
 	/**
+	 * {@link OfficeSectionInputModel} name.
+	 */
+	private final Label sectionInputName;
+
+	/**
 	 * Initiate.
-	 *
+	 * 
 	 * @param context
 	 *            {@link OfficeSectionInputFigureContext}.
 	 */
 	public StandardOfficeSectionInputFigure(
 			OfficeSectionInputFigureContext context) {
-		LabelConnectorFigure connector = new LabelConnectorFigure(context
-				.getOfficeSectionInputName(), ConnectorDirection.WEST,
+		LabelConnectorFigure connector = new LabelConnectorFigure(
+				context.getOfficeSectionInputName(), ConnectorDirection.WEST,
 				StandardOfficeFloorColours.BLACK());
+		this.sectionInputName = connector.getLabel();
 
 		// Register the anchors
 		ConnectionAnchor anchor = connector.getConnectionAnchor();
@@ -61,6 +69,15 @@ public class StandardOfficeSectionInputFigure extends AbstractOfficeFloorFigure
 				OfficeEscalationToOfficeSectionInputModel.class, anchor);
 
 		this.setFigure(connector);
+	}
+
+	/*
+	 * =================== OfficeSectionInputFigure ======================
+	 */
+
+	@Override
+	public void setOfficeSectionInputName(String officeSectionInputName) {
+		this.sectionInputName.setText(officeSectionInputName);
 	}
 
 }

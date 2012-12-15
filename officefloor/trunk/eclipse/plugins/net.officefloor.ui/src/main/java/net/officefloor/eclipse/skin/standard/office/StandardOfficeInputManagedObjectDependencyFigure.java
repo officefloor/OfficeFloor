@@ -18,13 +18,13 @@
 
 package net.officefloor.eclipse.skin.standard.office;
 
-import net.officefloor.eclipse.skin.office.OfficeManagedObjectDependencyFigure;
-import net.officefloor.eclipse.skin.office.OfficeManagedObjectDependencyFigureContext;
+import net.officefloor.eclipse.skin.office.OfficeInputManagedObjectDependencyFigure;
+import net.officefloor.eclipse.skin.office.OfficeInputManagedObjectDependencyFigureContext;
 import net.officefloor.eclipse.skin.standard.AbstractOfficeFloorFigure;
 import net.officefloor.eclipse.skin.standard.StandardOfficeFloorColours;
-import net.officefloor.eclipse.skin.standard.figure.LabelConnectorFigure;
 import net.officefloor.eclipse.skin.standard.figure.ConnectorFigure.ConnectorDirection;
-import net.officefloor.model.office.OfficeManagedObjectDependencyModel;
+import net.officefloor.eclipse.skin.standard.figure.LabelConnectorFigure;
+import net.officefloor.model.office.OfficeInputManagedObjectDependencyModel;
 import net.officefloor.model.office.OfficeManagedObjectDependencyToExternalManagedObjectModel;
 import net.officefloor.model.office.OfficeManagedObjectDependencyToOfficeManagedObjectModel;
 
@@ -32,16 +32,16 @@ import org.eclipse.draw2d.ConnectionAnchor;
 import org.eclipse.draw2d.Label;
 
 /**
- * Standard {@link OfficeManagedObjectDependencyFigure}.
+ * Standard {@link OfficeInputManagedObjectDependencyFigure}.
  * 
  * @author Daniel Sagenschneider
  */
-public class StandardOfficeManagedObjectDependencyFigure extends
+public class StandardOfficeInputManagedObjectDependencyFigure extends
 		AbstractOfficeFloorFigure implements
-		OfficeManagedObjectDependencyFigure {
+		OfficeInputManagedObjectDependencyFigure {
 
 	/**
-	 * {@link OfficeManagedObjectDependencyModel} name.
+	 * {@link OfficeInputManagedObjectDependencyModel} name.
 	 */
 	private final Label dependencyName;
 
@@ -49,12 +49,12 @@ public class StandardOfficeManagedObjectDependencyFigure extends
 	 * Initiate.
 	 * 
 	 * @param context
-	 *            {@link OfficeManagedObjectDependencyFigureContext}.
+	 *            {@link OfficeInputManagedObjectDependencyFigureContext}.
 	 */
-	public StandardOfficeManagedObjectDependencyFigure(
-			OfficeManagedObjectDependencyFigureContext context) {
+	public StandardOfficeInputManagedObjectDependencyFigure(
+			OfficeInputManagedObjectDependencyFigureContext context) {
 		LabelConnectorFigure figure = new LabelConnectorFigure(
-				context.getOfficeManagedObjectDependencyName(),
+				context.getOfficeInputManagedObjectDependencyName(),
 				ConnectorDirection.EAST, StandardOfficeFloorColours.BLACK());
 		this.dependencyName = figure.getLabel();
 
@@ -71,13 +71,13 @@ public class StandardOfficeManagedObjectDependencyFigure extends
 	}
 
 	/*
-	 * ================= OfficeManagedObjectDependencyFigure ===========
+	 * ================= OfficeInputManagedObjectDependencyFigure ============
 	 */
 
 	@Override
-	public void setOfficeManagedObjectDependencyName(
-			String officeManagedObjectDependencyName) {
-		this.dependencyName.setText(officeManagedObjectDependencyName);
+	public void setOfficeInputManagedObjectDependencyName(
+			String officeInputManagedObjectDependencyName) {
+		this.dependencyName.setText(officeInputManagedObjectDependencyName);
 	}
 
 }

@@ -99,6 +99,7 @@ public class OfficeTeamEditPart
 			this.getOfficeFloorFigure().setOfficeTeamName(
 					this.getCastedModel().getOfficeTeamName());
 			break;
+			
 		case ADD_OFFICE_SECTION_RESPONSIBILITY:
 		case REMOVE_OFFICE_SECTION_RESPONSIBILITY:
 		case ADD_OFFICE_MANAGED_OBJECT_SOURCE_TEAM:

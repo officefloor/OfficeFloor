@@ -23,7 +23,7 @@ import java.util.List;
 
 import net.officefloor.eclipse.OfficeFloorPlugin;
 import net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart;
-import net.officefloor.eclipse.skin.OfficeFloorFigure;
+import net.officefloor.eclipse.skin.office.OfficeSectionOutputFigure;
 import net.officefloor.eclipse.skin.office.OfficeSectionOutputFigureContext;
 import net.officefloor.eclipse.util.EclipseUtil;
 import net.officefloor.model.office.OfficeSectionOutputModel;
@@ -38,7 +38,7 @@ import org.eclipse.gef.EditPart;
  */
 public class OfficeSectionOutputEditPart
 		extends
-		AbstractOfficeFloorEditPart<OfficeSectionOutputModel, OfficeSectionOutputEvent, OfficeFloorFigure>
+		AbstractOfficeFloorEditPart<OfficeSectionOutputModel, OfficeSectionOutputEvent, OfficeSectionOutputFigure>
 		implements OfficeSectionOutputFigureContext {
 
 	/*
@@ -46,7 +46,7 @@ public class OfficeSectionOutputEditPart
 	 */
 
 	@Override
-	protected OfficeFloorFigure createOfficeFloorFigure() {
+	protected OfficeSectionOutputFigure createOfficeFloorFigure() {
 		return OfficeFloorPlugin.getSkin().getOfficeFigureFactory()
 				.createOfficeSectionOutputFigure(this);
 	}
@@ -66,8 +66,18 @@ public class OfficeSectionOutputEditPart
 	protected void handlePropertyChange(OfficeSectionOutputEvent property,
 			PropertyChangeEvent evt) {
 		switch (property) {
+		case CHANGE_OFFICE_SECTION_OUTPUT_NAME:
+			this.getOfficeFloorFigure().setOfficeSectionOutputName(
+					this.getOfficeSectionOutputName());
+			break;
+
 		case CHANGE_OFFICE_SECTION_INPUT:
 			this.refreshSourceConnections();
+			break;
+
+		case CHANGE_ARGUMENT_TYPE:
+		case CHANGE_ESCALATION_ONLY:
+			// Non visual change
 			break;
 		}
 	}

@@ -28,4 +28,12 @@ import net.officefloor.model.office.OfficeSubSectionModel;
  */
 public interface OfficeSubSectionFigure extends OfficeFloorFigure {
 
+	/**
+	 * Specifies the {@link OfficeSubSectionModel} name to display.
+	 * 
+	 * @param officeSubSectionName
+	 *            Name to display.
+	 */
+	void setOfficeSubSectionName(String officeSubSectionName);
+
 }

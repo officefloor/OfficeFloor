@@ -19,22 +19,25 @@
 package net.officefloor.eclipse.skin.office;
 
 import net.officefloor.eclipse.skin.OfficeFloorFigure;
-import net.officefloor.model.office.OfficeManagedObjectSourceTeamModel;
+import net.officefloor.model.office.OfficeInputManagedObjectDependencyModel;
 
 /**
- * {@link OfficeFloorFigure} for the {@link OfficeManagedObjectSourceTeamModel}.
+ * {@link OfficeFloorFigure} for the
+ * {@link OfficeInputManagedObjectDependencyModel}.
  * 
  * @author Daniel Sagenschneider
  */
-public interface OfficeManagedObjectSourceTeamFigure extends OfficeFloorFigure {
+public interface OfficeInputManagedObjectDependencyFigure extends
+		OfficeFloorFigure {
 
 	/**
-	 * Specifies the {@link OfficeManagedObjectSourceTeamModel} name to display.
+	 * Specifies the {@link OfficeInputManagedObjectDependencyModel} name to
+	 * display.
 	 * 
-	 * @param officeManagedObjectSourceTeamName
+	 * @param officeInputManagedObjectDependencyName
 	 *            Name to display.
 	 */
-	void setOfficeManagedObjectSourceTeamName(
-			String officeManagedObjectSourceTeamName);
+	void setOfficeInputManagedObjectDependencyName(
+			String officeInputManagedObjectDependencyName);
 
 }

@@ -79,34 +79,33 @@ public class OfficeManagedObjectEditPart
 	protected void populateConnectionTargetModels(List<Object> models) {
 		models.addAll(this.getCastedModel().getOfficeSectionObjects());
 		models.addAll(this.getCastedModel().getDependentOfficeManagedObjects());
+		models.addAll(this.getCastedModel()
+				.getDependentOfficeInputManagedObjects());
 	}
 
 	@Override
 	protected void populateOfficeFloorDirectEditPolicy(
 			OfficeFloorDirectEditPolicy<OfficeManagedObjectModel> policy) {
-		policy
-				.allowDirectEdit(new DirectEditAdapter<OfficeChanges, OfficeManagedObjectModel>() {
-					@Override
-					public String getInitialValue() {
-						return OfficeManagedObjectEditPart.this
-								.getCastedModel().getOfficeManagedObjectName();
-					}
+		policy.allowDirectEdit(new DirectEditAdapter<OfficeChanges, OfficeManagedObjectModel>() {
+			@Override
+			public String getInitialValue() {
+				return OfficeManagedObjectEditPart.this.getCastedModel()
+						.getOfficeManagedObjectName();
+			}
 
-					@Override
-					public IFigure getLocationFigure() {
-						return OfficeManagedObjectEditPart.this
-								.getOfficeFloorFigure()
-								.getOfficeManagedObjectNameFigure();
-					}
+			@Override
+			public IFigure getLocationFigure() {
+				return OfficeManagedObjectEditPart.this.getOfficeFloorFigure()
+						.getOfficeManagedObjectNameFigure();
+			}
 
-					@Override
-					public Change<OfficeManagedObjectModel> createChange(
-							OfficeChanges changes,
-							OfficeManagedObjectModel target, String newValue) {
-						return changes.renameOfficeManagedObject(target,
-								newValue);
-					}
-				});
+			@Override
+			public Change<OfficeManagedObjectModel> createChange(
+					OfficeChanges changes, OfficeManagedObjectModel target,
+					String newValue) {
+				return changes.renameOfficeManagedObject(target, newValue);
+			}
+		});
 	}
 
 	@Override
@@ -130,8 +129,7 @@ public class OfficeManagedObjectEditPart
 				}
 				if (managedObjectSource == null) {
 					// Must have connected managed object source
-					context
-							.getEditPart()
+					context.getEditPart()
 							.messageError(
 									"Can not open managed object.\n"
 											+ "\nPlease ensure the managed object is connected to a managed object source.");
@@ -158,23 +156,29 @@ public class OfficeManagedObjectEditPart
 			this.getOfficeFloorFigure().setOfficeManagedObjectName(
 					this.getCastedModel().getOfficeManagedObjectName());
 			break;
+
 		case CHANGE_MANAGED_OBJECT_SCOPE:
 			this.getOfficeFloorFigure().setManagedObjectScope(
 					this.getManagedObjectScope());
 			break;
+
 		case ADD_OFFICE_MANAGED_OBJECT_DEPENDENCY:
 		case REMOVE_OFFICE_MANAGED_OBJECT_DEPENDENCY:
 			this.refreshChildren();
 			break;
+
 		case CHANGE_OFFICE_MANAGED_OBJECT_SOURCE:
 		case ADD_ADMINISTRATOR:
 		case REMOVE_ADMINISTRATOR:
 			this.refreshSourceConnections();
 			break;
+
 		case ADD_OFFICE_SECTION_OBJECT:
 		case REMOVE_OFFICE_SECTION_OBJECT:
 		case ADD_DEPENDENT_OFFICE_MANAGED_OBJECT:
 		case REMOVE_DEPENDENT_OFFICE_MANAGED_OBJECT:
+		case ADD_DEPENDENT_OFFICE_INPUT_MANAGED_OBJECT:
+		case REMOVE_DEPENDENT_OFFICE_INPUT_MANAGED_OBJECT:
 			this.refreshTargetConnections();
 			break;
 		}

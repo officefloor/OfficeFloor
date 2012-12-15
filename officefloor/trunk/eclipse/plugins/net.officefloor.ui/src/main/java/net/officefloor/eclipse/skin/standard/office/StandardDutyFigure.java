@@ -31,18 +31,24 @@ import net.officefloor.model.office.OfficeTaskToPreDutyModel;
 
 import org.eclipse.draw2d.ConnectionAnchor;
 import org.eclipse.draw2d.Figure;
+import org.eclipse.draw2d.Label;
 
 /**
  * Standard {@link DutyFigure}.
- *
+ * 
  * @author Daniel Sagenschneider
  */
 public class StandardDutyFigure extends AbstractOfficeFloorFigure implements
 		DutyFigure {
 
 	/**
+	 * Duty name.
+	 */
+	private final Label dutyName;
+
+	/**
 	 * Initiate.
-	 *
+	 * 
 	 * @param context
 	 *            {@link DutyFigureContext}.
 	 */
@@ -53,10 +59,11 @@ public class StandardDutyFigure extends AbstractOfficeFloorFigure implements
 		figure.setLayoutManager(new NoSpacingGridLayout(1));
 
 		// Create the duty figure
-		LabelConnectorFigure duty = new LabelConnectorFigure(context
-				.getDutyName(), ConnectorDirection.WEST,
+		LabelConnectorFigure duty = new LabelConnectorFigure(
+				context.getDutyName(), ConnectorDirection.WEST,
 				StandardOfficeFloorColours.BLACK());
 		figure.add(duty);
+		this.dutyName = duty.getLabel();
 
 		// Register anchor to office tasks
 		ConnectionAnchor anchor = duty.getConnectionAnchor();
@@ -71,6 +78,15 @@ public class StandardDutyFigure extends AbstractOfficeFloorFigure implements
 		// Specify figure and content pane
 		this.setFigure(figure);
 		this.setContentPane(contentPane);
+	}
+
+	/*
+	 * ===================== DutyFigure ============================
+	 */
+
+	@Override
+	public void setDutyName(String dutyName) {
+		this.dutyName.setText(dutyName);
 	}
 
 }

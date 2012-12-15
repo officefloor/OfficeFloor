@@ -56,4 +56,13 @@ public class StandardOfficeSubSectionFigure extends AbstractOfficeFloorFigure
 		this.setContentPane(contentPane);
 	}
 
+	/*
+	 * =================== OfficeSubSectionFigure ==================
+	 */
+
+	@Override
+	public void setOfficeSubSectionName(String officeSubSectionName) {
+		// Name not displayed
+	}
+
 }

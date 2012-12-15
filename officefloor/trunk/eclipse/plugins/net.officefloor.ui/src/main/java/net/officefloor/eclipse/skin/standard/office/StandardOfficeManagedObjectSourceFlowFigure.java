@@ -18,6 +18,8 @@
 
 package net.officefloor.eclipse.skin.standard.office;
 
+import org.eclipse.draw2d.Label;
+
 import net.officefloor.eclipse.skin.office.OfficeManagedObjectSourceFlowFigure;
 import net.officefloor.eclipse.skin.office.OfficeManagedObjectSourceFlowFigureContext;
 import net.officefloor.eclipse.skin.standard.AbstractOfficeFloorFigure;
@@ -28,7 +30,7 @@ import net.officefloor.model.office.OfficeManagedObjectSourceFlowToOfficeSection
 
 /**
  * Standard {@link OfficeManagedObjectSourceFlowFigure}.
- *
+ * 
  * @author Daniel Sagenschneider
  */
 public class StandardOfficeManagedObjectSourceFlowFigure extends
@@ -36,16 +38,22 @@ public class StandardOfficeManagedObjectSourceFlowFigure extends
 		OfficeManagedObjectSourceFlowFigure {
 
 	/**
+	 * Flow name.
+	 */
+	private final Label flowName;
+
+	/**
 	 * Initiate.
-	 *
+	 * 
 	 * @param context
 	 *            {@link OfficeManagedObjectSourceFlowFigureContext}.
 	 */
 	public StandardOfficeManagedObjectSourceFlowFigure(
 			OfficeManagedObjectSourceFlowFigureContext context) {
-		LabelConnectorFigure figure = new LabelConnectorFigure(context
-				.getOfficeManagedObjectSourceFlowName(),
+		LabelConnectorFigure figure = new LabelConnectorFigure(
+				context.getOfficeManagedObjectSourceFlowName(),
 				ConnectorDirection.EAST, StandardOfficeFloorColours.BLACK());
+		this.flowName = figure.getLabel();
 
 		// Register the anchors
 		this.registerConnectionAnchor(
@@ -54,6 +62,16 @@ public class StandardOfficeManagedObjectSourceFlowFigure extends
 
 		// Specify the figure
 		this.setFigure(figure);
+	}
+
+	/*
+	 * ============== OfficeManagedObjectSourceFlowFigure =========
+	 */
+
+	@Override
+	public void setOfficeManagedObjectSourceFlowName(
+			String officeManagedObjectSourceFlowName) {
+		this.flowName.setText(officeManagedObjectSourceFlowName);
 	}
 
 }

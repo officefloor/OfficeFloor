@@ -23,7 +23,7 @@ import java.util.List;
 
 import net.officefloor.eclipse.OfficeFloorPlugin;
 import net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart;
-import net.officefloor.eclipse.skin.OfficeFloorFigure;
+import net.officefloor.eclipse.skin.office.OfficeSectionObjectFigure;
 import net.officefloor.eclipse.skin.office.OfficeSectionObjectFigureContext;
 import net.officefloor.eclipse.util.EclipseUtil;
 import net.officefloor.model.office.OfficeSectionObjectModel;
@@ -33,12 +33,12 @@ import org.eclipse.gef.EditPart;
 
 /**
  * {@link EditPart} for the {@link OfficeSectionObjectModel}.
- *
+ * 
  * @author Daniel Sagenschneider
  */
 public class OfficeSectionObjectEditPart
 		extends
-		AbstractOfficeFloorEditPart<OfficeSectionObjectModel, OfficeSectionObjectEvent, OfficeFloorFigure>
+		AbstractOfficeFloorEditPart<OfficeSectionObjectModel, OfficeSectionObjectEvent, OfficeSectionObjectFigure>
 		implements OfficeSectionObjectFigureContext {
 
 	/*
@@ -46,7 +46,7 @@ public class OfficeSectionObjectEditPart
 	 */
 
 	@Override
-	protected OfficeFloorFigure createOfficeFloorFigure() {
+	protected OfficeSectionObjectFigure createOfficeFloorFigure() {
 		return OfficeFloorPlugin.getSkin().getOfficeFigureFactory()
 				.createOfficeSectionObjectFigure(this);
 	}
@@ -68,9 +68,18 @@ public class OfficeSectionObjectEditPart
 	protected void handlePropertyChange(OfficeSectionObjectEvent property,
 			PropertyChangeEvent evt) {
 		switch (property) {
+		case CHANGE_OFFICE_SECTION_OBJECT_NAME:
+			this.getOfficeFloorFigure().setOfficeSectionObjectName(
+					this.getOfficeSectionObjectName());
+			break;
+
 		case CHANGE_EXTERNAL_MANAGED_OBJECT:
 		case CHANGE_OFFICE_MANAGED_OBJECT:
 			this.refreshSourceConnections();
+			break;
+
+		case CHANGE_OBJECT_TYPE:
+			// Non visual change
 			break;
 		}
 	}

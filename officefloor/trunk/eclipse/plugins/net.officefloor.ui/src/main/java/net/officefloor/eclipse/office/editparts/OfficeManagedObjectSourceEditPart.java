@@ -89,6 +89,8 @@ public class OfficeManagedObjectSourceEditPart
 				.getOfficeManagedObjectSourceFlows());
 		childModels.addAll(this.getCastedModel()
 				.getOfficeManagedObjectSourceTeams());
+		childModels.addAll(this.getCastedModel()
+				.getOfficeInputManagedObjectDependencies());
 	}
 
 	@Override
@@ -99,31 +101,28 @@ public class OfficeManagedObjectSourceEditPart
 	@Override
 	protected void populateOfficeFloorDirectEditPolicy(
 			OfficeFloorDirectEditPolicy<OfficeManagedObjectSourceModel> policy) {
-		policy
-				.allowDirectEdit(new DirectEditAdapter<OfficeChanges, OfficeManagedObjectSourceModel>() {
-					@Override
-					public String getInitialValue() {
-						return OfficeManagedObjectSourceEditPart.this
-								.getCastedModel()
-								.getOfficeManagedObjectSourceName();
-					}
+		policy.allowDirectEdit(new DirectEditAdapter<OfficeChanges, OfficeManagedObjectSourceModel>() {
+			@Override
+			public String getInitialValue() {
+				return OfficeManagedObjectSourceEditPart.this.getCastedModel()
+						.getOfficeManagedObjectSourceName();
+			}
 
-					@Override
-					public IFigure getLocationFigure() {
-						return OfficeManagedObjectSourceEditPart.this
-								.getOfficeFloorFigure()
-								.getOfficeManagedObjectSourceNameFigure();
-					}
+			@Override
+			public IFigure getLocationFigure() {
+				return OfficeManagedObjectSourceEditPart.this
+						.getOfficeFloorFigure()
+						.getOfficeManagedObjectSourceNameFigure();
+			}
 
-					@Override
-					public Change<OfficeManagedObjectSourceModel> createChange(
-							OfficeChanges changes,
-							OfficeManagedObjectSourceModel target,
-							String newValue) {
-						return changes.renameOfficeManagedObjectSource(target,
-								newValue);
-					}
-				});
+			@Override
+			public Change<OfficeManagedObjectSourceModel> createChange(
+					OfficeChanges changes,
+					OfficeManagedObjectSourceModel target, String newValue) {
+				return changes
+						.renameOfficeManagedObjectSource(target, newValue);
+			}
+		});
 	}
 
 	@Override
@@ -152,15 +151,27 @@ public class OfficeManagedObjectSourceEditPart
 			this.getOfficeFloorFigure().setOfficeManagedObjectName(
 					this.getCastedModel().getOfficeManagedObjectSourceName());
 			break;
+
 		case ADD_OFFICE_MANAGED_OBJECT:
 		case REMOVE_OFFICE_MANAGED_OBJECT:
 			this.refreshTargetConnections();
 			break;
+
 		case ADD_OFFICE_MANAGED_OBJECT_SOURCE_FLOW:
 		case REMOVE_OFFICE_MANAGED_OBJECT_SOURCE_FLOW:
 		case ADD_OFFICE_MANAGED_OBJECT_SOURCE_TEAM:
 		case REMOVE_OFFICE_MANAGED_OBJECT_SOURCE_TEAM:
+		case ADD_OFFICE_INPUT_MANAGED_OBJECT_DEPENDENCY:
+		case REMOVE_OFFICE_INPUT_MANAGED_OBJECT_DEPENDENCY:
 			this.refreshChildren();
+			break;
+
+		case CHANGE_MANAGED_OBJECT_SOURCE_CLASS_NAME:
+		case ADD_PROPERTY:
+		case REMOVE_PROPERTY:
+		case CHANGE_OBJECT_TYPE:
+		case CHANGE_TIMEOUT:
+			// Non visual change
 			break;
 		}
 	}

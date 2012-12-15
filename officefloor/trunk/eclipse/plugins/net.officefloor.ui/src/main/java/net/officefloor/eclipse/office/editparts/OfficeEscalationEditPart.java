@@ -23,7 +23,7 @@ import java.util.List;
 
 import net.officefloor.eclipse.OfficeFloorPlugin;
 import net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart;
-import net.officefloor.eclipse.skin.OfficeFloorFigure;
+import net.officefloor.eclipse.skin.office.OfficeEscalationFigure;
 import net.officefloor.eclipse.skin.office.OfficeEscalationFigureContext;
 import net.officefloor.eclipse.util.EclipseUtil;
 import net.officefloor.model.office.OfficeEscalationModel;
@@ -33,12 +33,12 @@ import org.eclipse.gef.EditPart;
 
 /**
  * {@link EditPart} for the {@link OfficeEscalationModel}.
- *
+ * 
  * @author Daniel Sagenschneider
  */
 public class OfficeEscalationEditPart
 		extends
-		AbstractOfficeFloorEditPart<OfficeEscalationModel, OfficeEscalationEvent, OfficeFloorFigure>
+		AbstractOfficeFloorEditPart<OfficeEscalationModel, OfficeEscalationEvent, OfficeEscalationFigure>
 		implements OfficeEscalationFigureContext {
 
 	/*
@@ -46,7 +46,7 @@ public class OfficeEscalationEditPart
 	 */
 
 	@Override
-	protected OfficeFloorFigure createOfficeFloorFigure() {
+	protected OfficeEscalationFigure createOfficeFloorFigure() {
 		return OfficeFloorPlugin.getSkin().getOfficeFigureFactory()
 				.createOfficeEscalationFigure(this);
 	}
@@ -66,6 +66,11 @@ public class OfficeEscalationEditPart
 	protected void handlePropertyChange(OfficeEscalationEvent property,
 			PropertyChangeEvent evt) {
 		switch (property) {
+		case CHANGE_ESCALATION_TYPE:
+			this.getOfficeFloorFigure().setOfficeEscalationTypeName(
+					this.getOfficeEscalationTypeName());
+			break;
+
 		case CHANGE_OFFICE_SECTION_INPUT:
 			this.refreshSourceConnections();
 			break;

@@ -24,30 +24,38 @@ import net.officefloor.eclipse.skin.standard.AbstractOfficeFloorFigure;
 import net.officefloor.eclipse.skin.standard.StandardOfficeFloorColours;
 import net.officefloor.eclipse.skin.standard.figure.LabelConnectorFigure;
 import net.officefloor.eclipse.skin.standard.figure.ConnectorFigure.ConnectorDirection;
+import net.officefloor.model.office.OfficeSectionObjectModel;
 import net.officefloor.model.office.OfficeSectionObjectToExternalManagedObjectModel;
 import net.officefloor.model.office.OfficeSectionObjectToOfficeManagedObjectModel;
 
 import org.eclipse.draw2d.ConnectionAnchor;
+import org.eclipse.draw2d.Label;
 
 /**
  * {@link OfficeSectionObjectFigure} implementation.
- *
+ * 
  * @author Daniel Sagenschneider
  */
 public class StandardOfficeSectionObjectFigure extends
 		AbstractOfficeFloorFigure implements OfficeSectionObjectFigure {
 
 	/**
+	 * {@link OfficeSectionObjectModel} name.
+	 */
+	private final Label sectionObjectName;
+
+	/**
 	 * Initiate.
-	 *
+	 * 
 	 * @param context
 	 *            {@link OfficeSectionObjectFigureContext}.
 	 */
 	public StandardOfficeSectionObjectFigure(
 			OfficeSectionObjectFigureContext context) {
-		LabelConnectorFigure connector = new LabelConnectorFigure(context
-				.getOfficeSectionObjectName(), ConnectorDirection.EAST,
+		LabelConnectorFigure connector = new LabelConnectorFigure(
+				context.getOfficeSectionObjectName(), ConnectorDirection.EAST,
 				StandardOfficeFloorColours.BLACK());
+		this.sectionObjectName = connector.getLabel();
 
 		// Register the anchors
 		ConnectionAnchor anchor = connector.getConnectionAnchor();
@@ -57,6 +65,15 @@ public class StandardOfficeSectionObjectFigure extends
 				OfficeSectionObjectToOfficeManagedObjectModel.class, anchor);
 
 		this.setFigure(connector);
+	}
+
+	/*
+	 * ================= OfficeSectionObjectFigure ===================
+	 */
+
+	@Override
+	public void setOfficeSectionObjectName(String officeSectionObjectName) {
+		this.sectionObjectName.setText(officeSectionObjectName);
 	}
 
 }

@@ -18,11 +18,20 @@
 
 package net.officefloor.eclipse.skin.office;
 
+import net.officefloor.model.office.OfficeSubSectionModel;
+
 /**
  * Context for the {@link OfficeSubSectionFigure}.
  * 
  * @author Daniel Sagenschneider
  */
 public interface OfficeSubSectionFigureContext {
+
+	/**
+	 * Obtains the {@link OfficeSubSectionModel} name to display.
+	 * 
+	 * @return Name to display.
+	 */
+	String getOfficeSubSectionName();
 
 }

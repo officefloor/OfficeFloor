@@ -23,7 +23,7 @@ import java.util.List;
 
 import net.officefloor.eclipse.OfficeFloorPlugin;
 import net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart;
-import net.officefloor.eclipse.skin.OfficeFloorFigure;
+import net.officefloor.eclipse.skin.office.DutyFigure;
 import net.officefloor.eclipse.skin.office.DutyFigureContext;
 import net.officefloor.model.office.DutyModel;
 import net.officefloor.model.office.DutyModel.DutyEvent;
@@ -36,11 +36,11 @@ import org.eclipse.gef.EditPart;
  * @author Daniel Sagenschneider
  */
 public class DutyEditPart extends
-		AbstractOfficeFloorEditPart<DutyModel, DutyEvent, OfficeFloorFigure>
+		AbstractOfficeFloorEditPart<DutyModel, DutyEvent, DutyFigure>
 		implements DutyFigureContext {
 
 	@Override
-	protected OfficeFloorFigure createOfficeFloorFigure() {
+	protected DutyFigure createOfficeFloorFigure() {
 		return OfficeFloorPlugin.getSkin().getOfficeFigureFactory()
 				.createDutyFigure(this);
 	}
@@ -60,6 +60,10 @@ public class DutyEditPart extends
 	protected void handlePropertyChange(DutyEvent property,
 			PropertyChangeEvent evt) {
 		switch (property) {
+		case CHANGE_DUTY_NAME:
+			this.getOfficeFloorFigure().setDutyName(this.getDutyName());
+			break;
+
 		case ADD_PRE_OFFICE_TASK:
 		case REMOVE_PRE_OFFICE_TASK:
 		case ADD_POST_OFFICE_TASK:

@@ -23,7 +23,7 @@ import java.util.List;
 
 import net.officefloor.eclipse.OfficeFloorPlugin;
 import net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart;
-import net.officefloor.eclipse.skin.OfficeFloorFigure;
+import net.officefloor.eclipse.skin.office.OfficeManagedObjectSourceTeamFigure;
 import net.officefloor.eclipse.skin.office.OfficeManagedObjectSourceTeamFigureContext;
 import net.officefloor.eclipse.util.EclipseUtil;
 import net.officefloor.model.office.OfficeManagedObjectSourceTeamModel;
@@ -33,16 +33,16 @@ import org.eclipse.gef.EditPart;
 
 /**
  * {@link EditPart} for the {@link OfficeManagedObjectSourceTeamEditPart}.
- *
+ * 
  * @author Daniel Sagenschneider
  */
 public class OfficeManagedObjectSourceTeamEditPart
 		extends
-		AbstractOfficeFloorEditPart<OfficeManagedObjectSourceTeamModel, OfficeManagedObjectSourceTeamEvent, OfficeFloorFigure>
+		AbstractOfficeFloorEditPart<OfficeManagedObjectSourceTeamModel, OfficeManagedObjectSourceTeamEvent, OfficeManagedObjectSourceTeamFigure>
 		implements OfficeManagedObjectSourceTeamFigureContext {
 
 	@Override
-	protected OfficeFloorFigure createOfficeFloorFigure() {
+	protected OfficeManagedObjectSourceTeamFigure createOfficeFloorFigure() {
 		return OfficeFloorPlugin.getSkin().getOfficeFigureFactory()
 				.createOfficeManagedObjectSourceTeamFigure(this);
 	}
@@ -61,9 +61,13 @@ public class OfficeManagedObjectSourceTeamEditPart
 	protected void handlePropertyChange(
 			OfficeManagedObjectSourceTeamEvent property, PropertyChangeEvent evt) {
 		switch (property) {
+		case CHANGE_OFFICE_MANAGED_OBJECT_SOURCE_TEAM_NAME:
+			this.getOfficeFloorFigure().setOfficeManagedObjectSourceTeamName(
+					this.getOfficeManagedObjectSourceTeamName());
+			break;
+
 		case CHANGE_OFFICE_TEAM:
-			OfficeManagedObjectSourceTeamEditPart.this
-					.refreshSourceConnections();
+			this.refreshSourceConnections();
 			break;
 		}
 	}
