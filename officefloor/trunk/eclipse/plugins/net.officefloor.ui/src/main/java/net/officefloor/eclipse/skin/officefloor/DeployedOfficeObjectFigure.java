@@ -27,4 +27,13 @@ import net.officefloor.model.officefloor.DeployedOfficeObjectModel;
  * @author Daniel Sagenschneider
  */
 public interface DeployedOfficeObjectFigure extends OfficeFloorFigure {
+
+	/**
+	 * Specifies the {@link DeployedOfficeObjectModel} name to display.
+	 * 
+	 * @param deployedOfficeObjectName
+	 *            Name to display.
+	 */
+	void setDeployedOfficeObjectName(String deployedOfficeObjectName);
+
 }

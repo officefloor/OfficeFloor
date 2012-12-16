@@ -64,6 +64,9 @@ import net.officefloor.eclipse.skin.office.OfficeSectionOutputToOfficeSectionInp
 import net.officefloor.eclipse.skin.office.OfficeSectionResponsibilityFigure;
 import net.officefloor.eclipse.skin.office.OfficeSectionResponsibilityFigureContext;
 import net.officefloor.eclipse.skin.office.OfficeSectionResponsibilityToOfficeTeamFigureContext;
+import net.officefloor.eclipse.skin.office.OfficeStartFigure;
+import net.officefloor.eclipse.skin.office.OfficeStartFigureContext;
+import net.officefloor.eclipse.skin.office.OfficeStartToOfficeSectionInputFigureContext;
 import net.officefloor.eclipse.skin.office.OfficeSubSectionFigure;
 import net.officefloor.eclipse.skin.office.OfficeSubSectionFigureContext;
 import net.officefloor.eclipse.skin.office.OfficeTaskToPostDutyFigureContext;
@@ -198,6 +201,12 @@ public class StandardOfficeFigureFactory implements OfficeFigureFactory {
 	}
 
 	@Override
+	public OfficeStartFigure createOfficeStartFigure(
+			OfficeStartFigureContext context) {
+		return new StandardOfficeStartFigure(context);
+	}
+
+	@Override
 	public void decorateOfficeManagedObjectToOfficeManagedObjectSourceFigure(
 			PolylineConnection figure,
 			OfficeManagedObjectToOfficeManagedObjectSourceFigureContext context) {
@@ -312,6 +321,13 @@ public class StandardOfficeFigureFactory implements OfficeFigureFactory {
 	public void decorateOfficeEscalationToOfficeSectionInputFigure(
 			PolylineConnection figure,
 			OfficeEscalationToOfficeSectionInputFigureContext context) {
+		// Leave as default line
+	}
+
+	@Override
+	public void decorateOfficeStartToOfficeSectionInputFigure(
+			PolylineConnection figure,
+			OfficeStartToOfficeSectionInputFigureContext context) {
 		// Leave as default line
 	}
 

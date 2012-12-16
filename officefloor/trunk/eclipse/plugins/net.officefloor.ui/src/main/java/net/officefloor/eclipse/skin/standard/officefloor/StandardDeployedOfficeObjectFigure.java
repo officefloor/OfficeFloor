@@ -22,40 +22,56 @@ import net.officefloor.eclipse.skin.officefloor.DeployedOfficeObjectFigure;
 import net.officefloor.eclipse.skin.officefloor.DeployedOfficeObjectFigureContext;
 import net.officefloor.eclipse.skin.standard.AbstractOfficeFloorFigure;
 import net.officefloor.eclipse.skin.standard.StandardOfficeFloorColours;
-import net.officefloor.eclipse.skin.standard.figure.OfficeItemFigure;
 import net.officefloor.eclipse.skin.standard.figure.ConnectorFigure.ConnectorDirection;
+import net.officefloor.eclipse.skin.standard.figure.OfficeItemFigure;
+import net.officefloor.model.officefloor.DeployedOfficeObjectModel;
 import net.officefloor.model.officefloor.DeployedOfficeObjectToOfficeFloorInputManagedObjectModel;
 import net.officefloor.model.officefloor.DeployedOfficeObjectToOfficeFloorManagedObjectModel;
 
 import org.eclipse.draw2d.ConnectionAnchor;
+import org.eclipse.draw2d.Figure;
 
 /**
  * Standard {@link DeployedOfficeObjectFigure}.
- *
+ * 
  * @author Daniel Sagenschneider
  */
 public class StandardDeployedOfficeObjectFigure extends
 		AbstractOfficeFloorFigure implements DeployedOfficeObjectFigure {
 
 	/**
+	 * {@link DeployedOfficeObjectModel} {@link Figure}.
+	 */
+	private final OfficeItemFigure figure;
+
+	/**
 	 * Initiate.
-	 *
+	 * 
 	 * @param context
 	 *            {@link DeployedOfficeObjectFigureContext}.
 	 */
 	public StandardDeployedOfficeObjectFigure(
 			DeployedOfficeObjectFigureContext context) {
-		OfficeItemFigure figure = new OfficeItemFigure(context
-				.getDeployedOfficeObjectName(), ConnectorDirection.EAST,
+		this.figure = new OfficeItemFigure(
+				context.getDeployedOfficeObjectName(), ConnectorDirection.EAST,
 				StandardOfficeFloorColours.BLACK());
-		ConnectionAnchor anchor = figure.getConnectionAnchor();
+		ConnectionAnchor anchor = this.figure.getConnectionAnchor();
 		this.registerConnectionAnchor(
 				DeployedOfficeObjectToOfficeFloorManagedObjectModel.class,
 				anchor);
 		this.registerConnectionAnchor(
 				DeployedOfficeObjectToOfficeFloorInputManagedObjectModel.class,
 				anchor);
-		this.setFigure(figure);
+		this.setFigure(this.figure);
+	}
+
+	/*
+	 * ===================== DeployedOfficeObjectFigure ==================
+	 */
+
+	@Override
+	public void setDeployedOfficeObjectName(String deployedOfficeObjectName) {
+		this.figure.setItemName(deployedOfficeObjectName);
 	}
 
 }

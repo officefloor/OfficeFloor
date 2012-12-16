@@ -23,7 +23,7 @@ import java.util.List;
 
 import net.officefloor.eclipse.OfficeFloorPlugin;
 import net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart;
-import net.officefloor.eclipse.skin.OfficeFloorFigure;
+import net.officefloor.eclipse.skin.officefloor.DeployedOfficeObjectFigure;
 import net.officefloor.eclipse.skin.officefloor.DeployedOfficeObjectFigureContext;
 import net.officefloor.eclipse.util.EclipseUtil;
 import net.officefloor.model.officefloor.DeployedOfficeObjectModel;
@@ -33,16 +33,16 @@ import org.eclipse.gef.EditPart;
 
 /**
  * {@link EditPart} for the {@link DeployedOfficeObjectModel}.
- *
+ * 
  * @author Daniel Sagenschneider
  */
 public class DeployedOfficeObjectEditPart
 		extends
-		AbstractOfficeFloorEditPart<DeployedOfficeObjectModel, DeployedOfficeObjectEvent, OfficeFloorFigure>
+		AbstractOfficeFloorEditPart<DeployedOfficeObjectModel, DeployedOfficeObjectEvent, DeployedOfficeObjectFigure>
 		implements DeployedOfficeObjectFigureContext {
 
 	@Override
-	protected OfficeFloorFigure createOfficeFloorFigure() {
+	protected DeployedOfficeObjectFigure createOfficeFloorFigure() {
 		return OfficeFloorPlugin.getSkin().getOfficeFloorFigureFactory()
 				.createDeployedOfficeObjectFigure(this);
 	}
@@ -64,11 +64,21 @@ public class DeployedOfficeObjectEditPart
 	protected void handlePropertyChange(DeployedOfficeObjectEvent property,
 			PropertyChangeEvent evt) {
 		switch (property) {
+		case CHANGE_DEPLOYED_OFFICE_OBJECT_NAME:
+			this.getOfficeFloorFigure().setDeployedOfficeObjectName(
+					this.getDeployedOfficeObjectName());
+			break;
+
 		case CHANGE_OFFICE_FLOOR_MANAGED_OBJECT:
 			this.refreshSourceConnections();
 			break;
+
 		case CHANGE_OFFICE_FLOOR_INPUT_MANAGED_OBJECT:
 			this.refreshSourceConnections();
+			break;
+
+		case CHANGE_OBJECT_TYPE:
+			// Non visual change
 			break;
 		}
 	}

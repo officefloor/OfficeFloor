@@ -18,26 +18,23 @@
 
 package net.officefloor.eclipse.skin.officefloor;
 
-import net.officefloor.eclipse.skin.OfficeFloorFigure;
-import net.officefloor.model.officefloor.OfficeFloorManagedObjectDependencyModel;
+import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceInputDependencyModel;
+
+import org.eclipse.draw2d.IFigure;
 
 /**
- * {@link OfficeFloorFigure} for the
- * {@link OfficeFloorManagedObjectDependencyModel}.
+ * Context for the {@link OfficeFloorManagedObjectSourceInputDependencyModel}
+ * {@link IFigure}.
  * 
  * @author Daniel Sagenschneider
  */
-public interface OfficeFloorManagedObjectDependencyFigure extends
-		OfficeFloorFigure {
+public interface OfficeFloorManagedObjectSourceInputDependencyFigureContext {
 
 	/**
-	 * Specifies the {@link OfficeFloorManagedObjectDependencyModel} name to
-	 * display.
+	 * Obtains the {@link OfficeFloorManagedObjectSourceInputDependencyModel} name.
 	 * 
-	 * @param officeFloorManagedObjectDependencyName
-	 *            Name to display.
+	 * @return {@link OfficeFloorManagedObjectSourceInputDependencyModel} name.
 	 */
-	void setOfficeFloorManagedObjectDependencyName(
-			String officeFloorManagedObjectDependencyName);
+	String getOfficeFloorManagedObjectSourceInputDependencyName();
 
 }

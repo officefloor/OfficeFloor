@@ -67,9 +67,14 @@ public class DeployedOfficeInputEditPart
 					this.getCastedModel().getSectionName(),
 					this.getCastedModel().getSectionInputName());
 			break;
+			
 		case ADD_OFFICE_FLOOR_MANAGED_OBJECT_SOURCE_FLOW:
 		case REMOVE_OFFICE_FLOOR_MANAGED_OBJECT_SOURCE_FLOW:
 			this.refreshTargetConnections();
+			break;
+			
+		case CHANGE_PARAMETER_TYPE:
+			// Non visual change
 			break;
 		}
 	}

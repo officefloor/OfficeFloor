@@ -70,6 +70,7 @@ public class OfficeFloorInputManagedObjectEditPart
 					this.getCastedModel()
 							.getOfficeFloorInputManagedObjectName());
 			break;
+
 		case ADD_DEPLOYED_OFFICE_OBJECT:
 		case REMOVE_DEPLOYED_OFFICE_OBJECT:
 		case ADD_OFFICE_FLOOR_MANAGED_OBJECT_SOURCE:
@@ -78,8 +79,13 @@ public class OfficeFloorInputManagedObjectEditPart
 		case REMOVE_DEPENDENT_OFFICE_FLOOR_MANAGED_OBJECT:
 			this.refreshTargetConnections();
 			break;
+
 		case CHANGE_BOUND_OFFICE_FLOOR_MANAGED_OBJECT_SOURCE:
 			this.refreshSourceConnections();
+			break;
+
+		case CHANGE_OBJECT_TYPE:
+			// Non visual change
 			break;
 		}
 	}

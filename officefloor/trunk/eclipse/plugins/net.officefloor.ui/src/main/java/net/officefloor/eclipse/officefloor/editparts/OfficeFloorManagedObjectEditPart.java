@@ -84,31 +84,27 @@ public class OfficeFloorManagedObjectEditPart
 	@Override
 	protected void populateOfficeFloorDirectEditPolicy(
 			OfficeFloorDirectEditPolicy<OfficeFloorManagedObjectModel> policy) {
-		policy
-				.allowDirectEdit(new DirectEditAdapter<OfficeFloorChanges, OfficeFloorManagedObjectModel>() {
-					@Override
-					public String getInitialValue() {
-						return OfficeFloorManagedObjectEditPart.this
-								.getCastedModel()
-								.getOfficeFloorManagedObjectName();
-					}
+		policy.allowDirectEdit(new DirectEditAdapter<OfficeFloorChanges, OfficeFloorManagedObjectModel>() {
+			@Override
+			public String getInitialValue() {
+				return OfficeFloorManagedObjectEditPart.this.getCastedModel()
+						.getOfficeFloorManagedObjectName();
+			}
 
-					@Override
-					public IFigure getLocationFigure() {
-						return OfficeFloorManagedObjectEditPart.this
-								.getOfficeFloorFigure()
-								.getOfficeFloorManagedObjectNameFigure();
-					}
+			@Override
+			public IFigure getLocationFigure() {
+				return OfficeFloorManagedObjectEditPart.this
+						.getOfficeFloorFigure()
+						.getOfficeFloorManagedObjectNameFigure();
+			}
 
-					@Override
-					public Change<OfficeFloorManagedObjectModel> createChange(
-							OfficeFloorChanges changes,
-							OfficeFloorManagedObjectModel target,
-							String newValue) {
-						return changes.renameOfficeFloorManagedObject(target,
-								newValue);
-					}
-				});
+			@Override
+			public Change<OfficeFloorManagedObjectModel> createChange(
+					OfficeFloorChanges changes,
+					OfficeFloorManagedObjectModel target, String newValue) {
+				return changes.renameOfficeFloorManagedObject(target, newValue);
+			}
+		});
 	}
 
 	@Override
@@ -133,8 +129,7 @@ public class OfficeFloorManagedObjectEditPart
 				}
 				if (managedObjectSource == null) {
 					// Must have connected managed object source
-					context
-							.getEditPart()
+					context.getEditPart()
 							.messageError(
 									"Can not open managed object.\n"
 											+ "\nPlease ensure the managed object is connected to a managed object source.");
@@ -161,21 +156,27 @@ public class OfficeFloorManagedObjectEditPart
 			this.getOfficeFloorFigure().setOfficeFloorManagedObjectName(
 					this.getCastedModel().getOfficeFloorManagedObjectName());
 			break;
+
 		case CHANGE_MANAGED_OBJECT_SCOPE:
 			this.getOfficeFloorFigure().setManagedObjectScope(
 					this.getManagedObjectScope());
 			break;
+
 		case ADD_OFFICE_FLOOR_MANAGED_OBJECT_DEPENDENCY:
 		case REMOVE_OFFICE_FLOOR_MANAGED_OBJECT_DEPENDENCY:
 			this.refreshChildren();
 			break;
+
 		case CHANGE_OFFICE_FLOOR_MANAGED_OBJECT_SOURCE:
 			this.refreshSourceConnections();
 			break;
+
 		case ADD_DEPLOYED_OFFICE_OBJECT:
 		case REMOVE_DEPLOYED_OFFICE_OBJECT:
 		case ADD_DEPENDENT_OFFICE_FLOOR_MANAGED_OBJECT:
 		case REMOVE_DEPENDENT_OFFICE_FLOOR_MANAGED_OBJECT:
+		case ADD_DEPENDENT_OFFICE_FLOOR_MANAGED_OBJECT_SOURCE_INPUT:
+		case REMOVE_DEPENDENT_OFFICE_FLOOR_MANAGED_OBJECT_SOURCE_INPUT:
 			this.refreshTargetConnections();
 			break;
 		}

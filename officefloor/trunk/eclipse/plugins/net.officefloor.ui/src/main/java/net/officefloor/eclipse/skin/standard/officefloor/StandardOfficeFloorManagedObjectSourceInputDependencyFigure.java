@@ -18,43 +18,43 @@
 
 package net.officefloor.eclipse.skin.standard.officefloor;
 
-import net.officefloor.eclipse.skin.officefloor.OfficeFloorManagedObjectSourceTeamFigure;
-import net.officefloor.eclipse.skin.officefloor.OfficeFloorManagedObjectSourceTeamFigureContext;
+import net.officefloor.eclipse.skin.officefloor.OfficeFloorManagedObjectSourceInputDependencyFigure;
+import net.officefloor.eclipse.skin.officefloor.OfficeFloorManagedObjectSourceInputDependencyFigureContext;
 import net.officefloor.eclipse.skin.standard.AbstractOfficeFloorFigure;
 import net.officefloor.eclipse.skin.standard.StandardOfficeFloorColours;
-import net.officefloor.eclipse.skin.standard.figure.LabelConnectorFigure;
 import net.officefloor.eclipse.skin.standard.figure.ConnectorFigure.ConnectorDirection;
+import net.officefloor.eclipse.skin.standard.figure.LabelConnectorFigure;
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceTeamToOfficeFloorTeamModel;
 
 import org.eclipse.draw2d.ConnectionAnchor;
 import org.eclipse.draw2d.Label;
 
 /**
- * Standard {@link OfficeFloorManagedObjectSourceTeamFigure}.
+ * Standard {@link OfficeFloorManagedObjectSourceInputDependencyFigure}.
  * 
  * @author Daniel Sagenschneider
  */
-public class StandardOfficeFloorManagedObjectSourceTeamFigure extends
+public class StandardOfficeFloorManagedObjectSourceInputDependencyFigure extends
 		AbstractOfficeFloorFigure implements
-		OfficeFloorManagedObjectSourceTeamFigure {
+		OfficeFloorManagedObjectSourceInputDependencyFigure {
 
 	/**
-	 * Team name.
+	 * Dependency name.
 	 */
-	private final Label teamName;
+	private final Label dependencyName;
 
 	/**
 	 * Initiate.
 	 * 
 	 * @param context
-	 *            {@link OfficeFloorManagedObjectSourceTeamFigure}.
+	 *            {@link OfficeFloorManagedObjectSourceInputDependencyFigure}.
 	 */
-	public StandardOfficeFloorManagedObjectSourceTeamFigure(
-			OfficeFloorManagedObjectSourceTeamFigureContext context) {
+	public StandardOfficeFloorManagedObjectSourceInputDependencyFigure(
+			OfficeFloorManagedObjectSourceInputDependencyFigureContext context) {
 		LabelConnectorFigure figure = new LabelConnectorFigure(
-				context.getOfficeFloorManagedObjectSourceTeamName(),
+				context.getOfficeFloorManagedObjectSourceInputDependencyName(),
 				ConnectorDirection.WEST, StandardOfficeFloorColours.BLACK());
-		this.teamName = figure.getLabel();
+		this.dependencyName = figure.getLabel();
 		ConnectionAnchor anchor = figure.getConnectionAnchor();
 		this.registerConnectionAnchor(
 				OfficeFloorManagedObjectSourceTeamToOfficeFloorTeamModel.class,
@@ -63,13 +63,14 @@ public class StandardOfficeFloorManagedObjectSourceTeamFigure extends
 	}
 
 	/*
-	 * ============= OfficeFloorManagedObjectSourceTeamFigure ============
+	 * ========= OfficeFloorManagedObjectSourceInputDependencyFigure =========
 	 */
 
 	@Override
-	public void setOfficeFloorManagedObjectSourceTeamName(
-			String officeFloorManagedObjectSourceTeamName) {
-		this.teamName.setText(officeFloorManagedObjectSourceTeamName);
+	public void setOfficeFloorManagedObjectSourceInputDependencyName(
+			String officeFloorManagedObjectSourceInputDependencyName) {
+		this.dependencyName
+				.setText(officeFloorManagedObjectSourceInputDependencyName);
 	}
 
 }

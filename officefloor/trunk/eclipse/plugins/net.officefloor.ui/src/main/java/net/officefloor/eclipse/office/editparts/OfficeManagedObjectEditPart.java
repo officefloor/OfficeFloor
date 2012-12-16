@@ -152,6 +152,11 @@ public class OfficeManagedObjectEditPart
 	protected void handlePropertyChange(OfficeManagedObjectEvent property,
 			PropertyChangeEvent evt) {
 		switch (property) {
+		case ADD_OFFICE_GOVERNANCE:
+		case REMOVE_OFFICE_GOVERNANCE:
+			// TODO add governance configuration
+			break;
+
 		case CHANGE_OFFICE_MANAGED_OBJECT_NAME:
 			this.getOfficeFloorFigure().setOfficeManagedObjectName(
 					this.getCastedModel().getOfficeManagedObjectName());

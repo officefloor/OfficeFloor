@@ -43,6 +43,9 @@ import net.officefloor.eclipse.skin.officefloor.OfficeFloorManagedObjectSourceFi
 import net.officefloor.eclipse.skin.officefloor.OfficeFloorManagedObjectSourceFlowFigure;
 import net.officefloor.eclipse.skin.officefloor.OfficeFloorManagedObjectSourceFlowFigureContext;
 import net.officefloor.eclipse.skin.officefloor.OfficeFloorManagedObjectSourceFlowToDeployedOfficeInputFigureContext;
+import net.officefloor.eclipse.skin.officefloor.OfficeFloorManagedObjectSourceInputDependencyFigure;
+import net.officefloor.eclipse.skin.officefloor.OfficeFloorManagedObjectSourceInputDependencyFigureContext;
+import net.officefloor.eclipse.skin.officefloor.OfficeFloorManagedObjectSourceInputDependencyToOfficeFloorManagedObjectFigureContext;
 import net.officefloor.eclipse.skin.officefloor.OfficeFloorManagedObjectSourceTeamFigure;
 import net.officefloor.eclipse.skin.officefloor.OfficeFloorManagedObjectSourceTeamFigureContext;
 import net.officefloor.eclipse.skin.officefloor.OfficeFloorManagedObjectSourceTeamToOfficeFloorTeamFigureContext;
@@ -58,7 +61,7 @@ import org.eclipse.draw2d.PolylineDecoration;
 
 /**
  * Standard {@link OfficeFloorFigureFactory}.
- *
+ * 
  * @author Daniel Sagenschneider
  */
 public class StandardOfficeFloorFigureFactory implements
@@ -80,6 +83,13 @@ public class StandardOfficeFloorFigureFactory implements
 	public OfficeFloorManagedObjectSourceTeamFigure createOfficeFloorManagedObjectSourceTeamFigure(
 			OfficeFloorManagedObjectSourceTeamFigureContext context) {
 		return new StandardOfficeFloorManagedObjectSourceTeamFigure(context);
+	}
+
+	@Override
+	public OfficeFloorManagedObjectSourceInputDependencyFigure createOfficeFloorManagedObjectSourceInputDependencyFigure(
+			OfficeFloorManagedObjectSourceInputDependencyFigureContext context) {
+		return new StandardOfficeFloorManagedObjectSourceInputDependencyFigure(
+				context);
 	}
 
 	@Override
@@ -205,6 +215,13 @@ public class StandardOfficeFloorFigureFactory implements
 	public void decorateOfficeFloorInputManagedObjectToBoundOfficeFloorManagedObjectSourceFigure(
 			PolylineConnection figure,
 			OfficeFloorInputManagedObjectToBoundOfficeFloorManagedObjectSourceFigureContext context) {
+		// Leave as default
+	}
+
+	@Override
+	public void decorateOfficeFloorManagedObjectSourceInputDependencyToOfficeFloorManagedObjectFigure(
+			PolylineConnection figure,
+			OfficeFloorManagedObjectSourceInputDependencyToOfficeFloorManagedObjectFigureContext context) {
 		// Leave as default
 	}
 

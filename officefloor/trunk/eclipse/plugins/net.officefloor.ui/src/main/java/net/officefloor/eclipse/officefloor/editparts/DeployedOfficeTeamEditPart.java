@@ -23,7 +23,7 @@ import java.util.List;
 
 import net.officefloor.eclipse.OfficeFloorPlugin;
 import net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart;
-import net.officefloor.eclipse.skin.OfficeFloorFigure;
+import net.officefloor.eclipse.skin.officefloor.DeployedOfficeTeamFigure;
 import net.officefloor.eclipse.skin.officefloor.DeployedOfficeTeamFigureContext;
 import net.officefloor.eclipse.util.EclipseUtil;
 import net.officefloor.model.officefloor.DeployedOfficeTeamModel;
@@ -38,11 +38,11 @@ import org.eclipse.gef.EditPart;
  */
 public class DeployedOfficeTeamEditPart
 		extends
-		AbstractOfficeFloorEditPart<DeployedOfficeTeamModel, DeployedOfficeTeamEvent, OfficeFloorFigure>
+		AbstractOfficeFloorEditPart<DeployedOfficeTeamModel, DeployedOfficeTeamEvent, DeployedOfficeTeamFigure>
 		implements DeployedOfficeTeamFigureContext {
 
 	@Override
-	protected OfficeFloorFigure createOfficeFloorFigure() {
+	protected DeployedOfficeTeamFigure createOfficeFloorFigure() {
 		return OfficeFloorPlugin.getSkin().getOfficeFloorFigureFactory()
 				.createDeployedOfficeTeamFigure(this);
 	}
@@ -62,6 +62,11 @@ public class DeployedOfficeTeamEditPart
 	protected void handlePropertyChange(DeployedOfficeTeamEvent property,
 			PropertyChangeEvent evt) {
 		switch (property) {
+		case CHANGE_DEPLOYED_OFFICE_TEAM_NAME:
+			this.getOfficeFloorFigure().setDeployedOfficeTeamName(
+					this.getDeployedOfficeTeamName());
+			break;
+
 		case CHANGE_OFFICE_FLOOR_TEAM:
 			DeployedOfficeTeamEditPart.this.refreshSourceConnections();
 			break;

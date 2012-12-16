@@ -83,6 +83,11 @@ public class OfficeTaskEditPart
 	protected void handlePropertyChange(OfficeTaskEvent property,
 			PropertyChangeEvent evt) {
 		switch (property) {
+		case ADD_OFFICE_GOVERNANCE:
+		case REMOVE_OFFICE_GOVERNANCE:
+			// TODO add governance configuration
+			break;
+
 		case CHANGE_OFFICE_TASK_NAME:
 			this.getOfficeFloorFigure().setOfficeTaskName(
 					this.getOfficeTaskName());

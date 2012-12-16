@@ -16,28 +16,15 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package net.officefloor.eclipse.skin.officefloor;
+package net.officefloor.eclipse.skin.office;
 
-import net.officefloor.eclipse.skin.OfficeFloorFigure;
-import net.officefloor.model.officefloor.OfficeFloorManagedObjectDependencyModel;
+import net.officefloor.model.office.OfficeStartToOfficeSectionInputModel;
 
 /**
- * {@link OfficeFloorFigure} for the
- * {@link OfficeFloorManagedObjectDependencyModel}.
+ * Context to decorate the {@link OfficeStartToOfficeSectionInputModel}.
+ * connection.
  * 
  * @author Daniel Sagenschneider
  */
-public interface OfficeFloorManagedObjectDependencyFigure extends
-		OfficeFloorFigure {
-
-	/**
-	 * Specifies the {@link OfficeFloorManagedObjectDependencyModel} name to
-	 * display.
-	 * 
-	 * @param officeFloorManagedObjectDependencyName
-	 *            Name to display.
-	 */
-	void setOfficeFloorManagedObjectDependencyName(
-			String officeFloorManagedObjectDependencyName);
-
+public interface OfficeStartToOfficeSectionInputFigureContext {
 }

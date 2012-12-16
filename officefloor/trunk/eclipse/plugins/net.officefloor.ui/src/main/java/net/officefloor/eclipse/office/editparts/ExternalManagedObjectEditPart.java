@@ -99,6 +99,11 @@ public class ExternalManagedObjectEditPart
 	protected void handlePropertyChange(ExternalManagedObjectEvent property,
 			PropertyChangeEvent evt) {
 		switch (property) {
+		case ADD_OFFICE_GOVERNANCE:
+		case REMOVE_OFFICE_GOVERNANCE:
+			// TODO provide governance configuration
+			break;
+
 		case CHANGE_EXTERNAL_MANAGED_OBJECT_NAME:
 			this.getOfficeFloorFigure().setExternalManagedObjectName(
 					this.getCastedModel().getExternalManagedObjectName());
