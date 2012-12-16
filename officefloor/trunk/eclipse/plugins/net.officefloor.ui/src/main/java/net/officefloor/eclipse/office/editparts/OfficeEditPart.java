@@ -27,7 +27,7 @@ import org.eclipse.gef.EditPart;
 
 /**
  * {@link EditPart} for the {@link OfficeModel}.
- *
+ * 
  * @author Daniel Sagenschneider
  */
 public class OfficeEditPart extends
@@ -43,6 +43,7 @@ public class OfficeEditPart extends
 		childModels.addAll(office.getOfficeTeams());
 		childModels.addAll(office.getOfficeAdministrators());
 		childModels.addAll(office.getOfficeEscalations());
+		childModels.addAll(office.getOfficeStarts());
 	}
 
 }

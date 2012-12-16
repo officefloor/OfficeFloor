@@ -33,7 +33,7 @@ import org.eclipse.draw2d.Label;
 
 /**
  * Standard {@link OfficeFloorManagedObjectSourceFlowFigure}.
- *
+ * 
  * @author Daniel Sagenschneider
  */
 public class StandardOfficeFloorManagedObjectSourceFlowFigure extends
@@ -57,7 +57,7 @@ public class StandardOfficeFloorManagedObjectSourceFlowFigure extends
 
 	/**
 	 * Initiate.
-	 *
+	 * 
 	 * @param context
 	 *            {@link OfficeFloorManagedObjectSourceFlowFigureContext}.
 	 */
@@ -74,10 +74,9 @@ public class StandardOfficeFloorManagedObjectSourceFlowFigure extends
 		// Create the connector
 		this.connector = new ConnectorFigure(ConnectorDirection.WEST,
 				StandardOfficeFloorColours.BLACK());
-		this
-				.registerConnectionAnchor(
-						OfficeFloorManagedObjectSourceFlowToDeployedOfficeInputModel.class,
-						this.connector.getConnectionAnchor());
+		this.registerConnectionAnchor(
+				OfficeFloorManagedObjectSourceFlowToDeployedOfficeInputModel.class,
+				this.connector.getConnectionAnchor());
 		figure.add(this.connector);
 
 		// Create the flow name
@@ -124,4 +123,15 @@ public class StandardOfficeFloorManagedObjectSourceFlowFigure extends
 			this.flowName.setText(flowName + taskName);
 		}
 	}
+
+	/*
+	 * ================== OfficeFloorManagedObjectSourceFlowFigure ============
+	 */
+
+	@Override
+	public void setOfficeFloorManagedObjectSourceFlowName(
+			String officeFloorManagedObjectSourceFlowName) {
+		this.connectionChanged();
+	}
+
 }

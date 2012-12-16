@@ -27,4 +27,12 @@ import net.officefloor.model.officefloor.DeployedOfficeTeamModel;
  * @author Daniel Sagenschneider
  */
 public interface DeployedOfficeTeamFigure extends OfficeFloorFigure {
+
+	/**
+	 * Specifies the {@link DeployedOfficeTeamModel} name to display.
+	 * 
+	 * @param deployedOfficeTeamName
+	 *            Name to display.
+	 */
+	void setDeployedOfficeTeamName(String deployedOfficeTeamName);
 }

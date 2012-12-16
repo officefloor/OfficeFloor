@@ -30,26 +30,40 @@ import org.eclipse.draw2d.ConnectionAnchor;
 
 /**
  * Standard {@link DeployedOfficeTeamFigure}.
- *
+ * 
  * @author Daniel Sagenschneider
  */
 public class StandardDeployedOfficeTeamFigure extends AbstractOfficeFloorFigure
 		implements DeployedOfficeTeamFigure {
 
 	/**
+	 * {@link OfficeItemFigure}.
+	 */
+	private final OfficeItemFigure figure;
+
+	/**
 	 * Initiate.
-	 *
+	 * 
 	 * @param context
 	 *            {@link DeployedOfficeTeamFigureContext}.
 	 */
-	public StandardDeployedOfficeTeamFigure(DeployedOfficeTeamFigureContext context) {
-		OfficeItemFigure figure = new OfficeItemFigure(context
-				.getDeployedOfficeTeamName(), ConnectorDirection.WEST,
-				StandardOfficeFloorColours.BLACK());
-		ConnectionAnchor anchor = figure.getConnectionAnchor();
+	public StandardDeployedOfficeTeamFigure(
+			DeployedOfficeTeamFigureContext context) {
+		this.figure = new OfficeItemFigure(context.getDeployedOfficeTeamName(),
+				ConnectorDirection.WEST, StandardOfficeFloorColours.BLACK());
+		ConnectionAnchor anchor = this.figure.getConnectionAnchor();
 		this.registerConnectionAnchor(
 				DeployedOfficeTeamToOfficeFloorTeamModel.class, anchor);
-		this.setFigure(figure);
+		this.setFigure(this.figure);
+	}
+
+	/*
+	 * ===================== DeployedOfficeTeamFigure ========================
+	 */
+
+	@Override
+	public void setDeployedOfficeTeamName(String deployedOfficeTeamName) {
+		this.figure.setItemName(deployedOfficeTeamName);
 	}
 
 }

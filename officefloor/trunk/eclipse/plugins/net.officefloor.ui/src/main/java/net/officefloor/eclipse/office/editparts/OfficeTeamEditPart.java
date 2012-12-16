@@ -37,7 +37,7 @@ import org.eclipse.gef.EditPart;
 
 /**
  * {@link EditPart} for the {@link OfficeTeamModel}.
- *
+ * 
  * @author Daniel Sagenschneider
  */
 public class OfficeTeamEditPart
@@ -54,36 +54,32 @@ public class OfficeTeamEditPart
 	@Override
 	protected void populateConnectionTargetModels(List<Object> models) {
 		models.addAll(this.getCastedModel().getOfficeSectionResponsibilities());
-		models
-				.addAll(this.getCastedModel()
-						.getOfficeManagedObjectSourceTeams());
+		models.addAll(this.getCastedModel().getOfficeManagedObjectSourceTeams());
 		models.addAll(this.getCastedModel().getAdministrators());
 	}
 
 	@Override
 	protected void populateOfficeFloorDirectEditPolicy(
 			OfficeFloorDirectEditPolicy<OfficeTeamModel> policy) {
-		policy
-				.allowDirectEdit(new DirectEditAdapter<OfficeChanges, OfficeTeamModel>() {
-					@Override
-					public String getInitialValue() {
-						return OfficeTeamEditPart.this.getCastedModel()
-								.getOfficeTeamName();
-					}
+		policy.allowDirectEdit(new DirectEditAdapter<OfficeChanges, OfficeTeamModel>() {
+			@Override
+			public String getInitialValue() {
+				return OfficeTeamEditPart.this.getCastedModel()
+						.getOfficeTeamName();
+			}
 
-					@Override
-					public IFigure getLocationFigure() {
-						return OfficeTeamEditPart.this.getOfficeFloorFigure()
-								.getOfficeTeamNameFigure();
-					}
+			@Override
+			public IFigure getLocationFigure() {
+				return OfficeTeamEditPart.this.getOfficeFloorFigure()
+						.getOfficeTeamNameFigure();
+			}
 
-					@Override
-					public Change<OfficeTeamModel> createChange(
-							OfficeChanges changes, OfficeTeamModel target,
-							String newValue) {
-						return changes.renameOfficeTeam(target, newValue);
-					}
-				});
+			@Override
+			public Change<OfficeTeamModel> createChange(OfficeChanges changes,
+					OfficeTeamModel target, String newValue) {
+				return changes.renameOfficeTeam(target, newValue);
+			}
+		});
 	}
 
 	@Override
@@ -95,11 +91,16 @@ public class OfficeTeamEditPart
 	protected void handlePropertyChange(OfficeTeamEvent property,
 			PropertyChangeEvent evt) {
 		switch (property) {
+		case ADD_OFFICE_GOVERNANCE:
+		case REMOVE_OFFICE_GOVERNANCE:
+			// TODO add governance configuration
+			break;
+
 		case CHANGE_OFFICE_TEAM_NAME:
 			this.getOfficeFloorFigure().setOfficeTeamName(
 					this.getCastedModel().getOfficeTeamName());
 			break;
-			
+
 		case ADD_OFFICE_SECTION_RESPONSIBILITY:
 		case REMOVE_OFFICE_SECTION_RESPONSIBILITY:
 		case ADD_OFFICE_MANAGED_OBJECT_SOURCE_TEAM:

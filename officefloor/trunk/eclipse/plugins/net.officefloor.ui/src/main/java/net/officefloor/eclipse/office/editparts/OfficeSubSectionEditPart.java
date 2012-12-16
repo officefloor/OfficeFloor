@@ -76,6 +76,13 @@ public class OfficeSubSectionEditPart
 		case REMOVE_OFFICE_SUB_SECTION:
 			this.refreshChildren();
 			break;
+
+		case ADD_OFFICE_GOVERNANCE:
+		case REMOVE_OFFICE_GOVERNANCE:
+		case ADD_OFFICE_SECTION_MANAGED_OBJECT:
+		case REMOVE_OFFICE_SECTION_MANAGED_OBJECT:
+			// TODO add governance configuration
+			break;
 		}
 	}
 

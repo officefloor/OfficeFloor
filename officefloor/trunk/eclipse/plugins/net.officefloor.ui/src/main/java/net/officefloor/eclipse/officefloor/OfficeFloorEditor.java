@@ -44,6 +44,8 @@ import net.officefloor.eclipse.officefloor.editparts.OfficeFloorManagedObjectEdi
 import net.officefloor.eclipse.officefloor.editparts.OfficeFloorManagedObjectSourceEditPart;
 import net.officefloor.eclipse.officefloor.editparts.OfficeFloorManagedObjectSourceFlowEditPart;
 import net.officefloor.eclipse.officefloor.editparts.OfficeFloorManagedObjectSourceFlowToDeployedOfficeInputEditPart;
+import net.officefloor.eclipse.officefloor.editparts.OfficeFloorManagedObjectSourceInputDependencyEditPart;
+import net.officefloor.eclipse.officefloor.editparts.OfficeFloorManagedObjectSourceInputDependencyToOfficeFloorManagedObjectEditPart;
 import net.officefloor.eclipse.officefloor.editparts.OfficeFloorManagedObjectSourceTeamEditPart;
 import net.officefloor.eclipse.officefloor.editparts.OfficeFloorManagedObjectSourceTeamToOfficeFloorTeamEditPart;
 import net.officefloor.eclipse.officefloor.editparts.OfficeFloorManagedObjectSourceToDeployedOfficeEditPart;
@@ -77,6 +79,8 @@ import net.officefloor.model.officefloor.OfficeFloorManagedObjectDependencyToOff
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectModel;
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceFlowModel;
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceFlowToDeployedOfficeInputModel;
+import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceInputDependencyModel;
+import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceInputDependencyToOfficeFloorManagedObjectModel;
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceModel;
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceTeamModel;
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceTeamToOfficeFloorTeamModel;
@@ -135,6 +139,8 @@ public class OfficeFloorEditor extends
 				OfficeFloorManagedObjectSourceFlowEditPart.class);
 		map.put(OfficeFloorManagedObjectSourceTeamModel.class,
 				OfficeFloorManagedObjectSourceTeamEditPart.class);
+		map.put(OfficeFloorManagedObjectSourceInputDependencyModel.class,
+				OfficeFloorManagedObjectSourceInputDependencyEditPart.class);
 		map.put(OfficeFloorInputManagedObjectModel.class,
 				OfficeFloorInputManagedObjectEditPart.class);
 		map.put(OfficeFloorManagedObjectModel.class,
@@ -172,6 +178,8 @@ public class OfficeFloorEditor extends
 				OfficeFloorManagedObjectSourceFlowToDeployedOfficeInputEditPart.class);
 		map.put(OfficeFloorManagedObjectSourceTeamToOfficeFloorTeamModel.class,
 				OfficeFloorManagedObjectSourceTeamToOfficeFloorTeamEditPart.class);
+		map.put(OfficeFloorManagedObjectSourceInputDependencyToOfficeFloorManagedObjectModel.class,
+				OfficeFloorManagedObjectSourceInputDependencyToOfficeFloorManagedObjectEditPart.class);
 	}
 
 	@Override

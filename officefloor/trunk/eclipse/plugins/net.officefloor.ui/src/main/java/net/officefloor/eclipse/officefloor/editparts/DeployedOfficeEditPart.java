@@ -73,28 +73,26 @@ public class DeployedOfficeEditPart
 	@Override
 	protected void populateOfficeFloorDirectEditPolicy(
 			OfficeFloorDirectEditPolicy<DeployedOfficeModel> policy) {
-		policy
-				.allowDirectEdit(new DirectEditAdapter<OfficeFloorChanges, DeployedOfficeModel>() {
-					@Override
-					public String getInitialValue() {
-						return DeployedOfficeEditPart.this.getCastedModel()
-								.getDeployedOfficeName();
-					}
+		policy.allowDirectEdit(new DirectEditAdapter<OfficeFloorChanges, DeployedOfficeModel>() {
+			@Override
+			public String getInitialValue() {
+				return DeployedOfficeEditPart.this.getCastedModel()
+						.getDeployedOfficeName();
+			}
 
-					@Override
-					public IFigure getLocationFigure() {
-						return DeployedOfficeEditPart.this
-								.getOfficeFloorFigure()
-								.getDeployedOfficeNameFigure();
-					}
+			@Override
+			public IFigure getLocationFigure() {
+				return DeployedOfficeEditPart.this.getOfficeFloorFigure()
+						.getDeployedOfficeNameFigure();
+			}
 
-					@Override
-					public Change<DeployedOfficeModel> createChange(
-							OfficeFloorChanges changes,
-							DeployedOfficeModel target, String newValue) {
-						return changes.renameDeployedOffice(target, newValue);
-					}
-				});
+			@Override
+			public Change<DeployedOfficeModel> createChange(
+					OfficeFloorChanges changes, DeployedOfficeModel target,
+					String newValue) {
+				return changes.renameDeployedOffice(target, newValue);
+			}
+		});
 	}
 
 	@Override
@@ -134,6 +132,7 @@ public class DeployedOfficeEditPart
 			this.getOfficeFloorFigure().setDeployedOfficeName(
 					this.getCastedModel().getDeployedOfficeName());
 			break;
+
 		case ADD_DEPLOYED_OFFICE_OBJECT:
 		case REMOVE_DEPLOYED_OFFICE_OBJECT:
 		case ADD_DEPLOYED_OFFICE_TEAM:
@@ -142,9 +141,17 @@ public class DeployedOfficeEditPart
 		case REMOVE_DEPLOYED_OFFICE_INPUT:
 			this.refreshChildren();
 			break;
+
 		case ADD_OFFICE_FLOOR_MANAGED_OBJECT_SOURCE:
 		case REMOVE_OFFICE_FLOOR_MANAGED_OBJECT_SOURCE:
 			this.refreshTargetConnections();
+			break;
+
+		case CHANGE_OFFICE_SOURCE_CLASS_NAME:
+		case CHANGE_OFFICE_LOCATION:
+		case ADD_PROPERTY:
+		case REMOVE_PROPERTY:
+			// Non visual change
 			break;
 		}
 	}

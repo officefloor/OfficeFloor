@@ -40,7 +40,7 @@ import net.officefloor.model.change.Change;
 
 /**
  * Changes that can be made to a {@link OfficeModel}.
- *
+ * 
  * @author Daniel Sagenschneider
  */
 public interface OfficeChanges {
@@ -83,7 +83,7 @@ public interface OfficeChanges {
 
 	/**
 	 * Adds an {@link OfficeSectionModel} to the {@link OfficeModel}.
-	 *
+	 * 
 	 * @param sectionSourceClassName
 	 *            {@link SectionSource} class name.
 	 * @param sectionLocation
@@ -100,7 +100,7 @@ public interface OfficeChanges {
 
 	/**
 	 * Removes the {@link OfficeSectionModel}.
-	 *
+	 * 
 	 * @param officeSection
 	 *            {@link OfficeSectionModel} to remove.
 	 * @return {@link Change} to remove the {@link OfficeSectionModel}.
@@ -110,7 +110,7 @@ public interface OfficeChanges {
 
 	/**
 	 * Renames the {@link OfficeSectionModel}.
-	 *
+	 * 
 	 * @param officeSection
 	 *            {@link OfficeSectionModel} to rename.
 	 * @param newOfficeSectionName
@@ -122,7 +122,7 @@ public interface OfficeChanges {
 
 	/**
 	 * Refactors the {@link OfficeSectionModel}.
-	 *
+	 * 
 	 * @param sectionModel
 	 *            {@link OfficeSectionModel} to refactor.
 	 * @param sectionName
@@ -158,7 +158,7 @@ public interface OfficeChanges {
 
 	/**
 	 * Adds an {@link OfficeTeamModel} to the {@link OfficeModel}.
-	 *
+	 * 
 	 * @param teamName
 	 *            Name of the {@link OfficeTeamModel}.
 	 * @return {@link Change} to add the {@link OfficeTeamModel}.
@@ -167,7 +167,7 @@ public interface OfficeChanges {
 
 	/**
 	 * Removes the {@link OfficeTeamModel}.
-	 *
+	 * 
 	 * @param officeTeam
 	 *            {@link OfficeTeamModel} to remove.
 	 * @return {@link Change} to remove the {@link OfficeTeamModel}.
@@ -175,8 +175,24 @@ public interface OfficeChanges {
 	Change<OfficeTeamModel> removeOfficeTeam(OfficeTeamModel officeTeam);
 
 	/**
+	 * Adds an {@link OfficeStartModel} to the {@link OfficeModel}.
+	 * 
+	 * @return {@link Change} to add the {@link OfficeStartModel}.
+	 */
+	Change<OfficeStartModel> addOfficeStart();
+
+	/**
+	 * Removes the {@link OfficeStartModel}.
+	 * 
+	 * @param officeStart
+	 *            {@link OfficeStartModel} to remove.
+	 * @return {@link Change} to remove the {@link OfficeStartModel}.
+	 */
+	Change<OfficeStartModel> removeOfficeStart(OfficeStartModel officeStart);
+
+	/**
 	 * Renames the {@link OfficeTeamModel}.
-	 *
+	 * 
 	 * @param officeTeam
 	 *            {@link OfficeTeamModel} to rename.
 	 * @param newOfficeTeamName
@@ -188,7 +204,7 @@ public interface OfficeChanges {
 
 	/**
 	 * Adds an {@link ExternalManagedObjectModel} to the {@link OfficeModel}.
-	 *
+	 * 
 	 * @param externalManagedObjectName
 	 *            Name of the {@link ExternalManagedObjectModel}.
 	 * @param objectType
@@ -200,7 +216,7 @@ public interface OfficeChanges {
 
 	/**
 	 * Removes the {@link ExternalManagedObjectModel}.
-	 *
+	 * 
 	 * @param externalManagedObject
 	 *            {@link ExternalManagedObjectModel} to remove.
 	 * @return {@link Change} to remove the {@link ExternalManagedObjectModel}.
@@ -210,7 +226,7 @@ public interface OfficeChanges {
 
 	/**
 	 * Renames the {@link ExternalManagedObjectModel}.
-	 *
+	 * 
 	 * @param externalManagedObject
 	 *            {@link ExternalManagedObjectModel} to rename.
 	 * @param newExternalManagedObjectName
@@ -223,7 +239,7 @@ public interface OfficeChanges {
 
 	/**
 	 * Adds an {@link OfficeManagedObjectSourceModel} to {@link OfficeModel}.
-	 *
+	 * 
 	 * @param managedObjectSourceName
 	 *            Name of the {@link OfficeManagedObjectSourceModel}.
 	 * @param managedObjectSourceClassName
@@ -243,7 +259,7 @@ public interface OfficeChanges {
 
 	/**
 	 * Removes the {@link OfficeManagedObjectSourceModel}.
-	 *
+	 * 
 	 * @param managedObjectSource
 	 *            {@link OfficeManagedObjectSourceModel} to remove.
 	 * @return {@link Change} to remove the
@@ -254,7 +270,7 @@ public interface OfficeChanges {
 
 	/**
 	 * Renames the {@link OfficeManagedObjectSourceModel}.
-	 *
+	 * 
 	 * @param managedObjectSource
 	 *            {@link OfficeManagedObjectSourceModel} to rename.
 	 * @param newManagedObjectSourceName
@@ -269,7 +285,7 @@ public interface OfficeChanges {
 	/**
 	 * Adds an {@link OfficeManagedObjectModel} for an
 	 * {@link OfficeManagedObjectSourceModel} to the {@link OfficeModel}.
-	 *
+	 * 
 	 * @param managedObjectName
 	 *            Name of the {@link OfficeManagedObjectModel}.
 	 * @param managedObjectScope
@@ -288,7 +304,7 @@ public interface OfficeChanges {
 
 	/**
 	 * Removes the {@link OfficeManagedObjectModel}.
-	 *
+	 * 
 	 * @param managedObject
 	 *            {@link OfficeManagedObjectModel} to remove.
 	 * @return {@link Change} to remove the {@link OfficeManagedObjectModel}.
@@ -298,7 +314,7 @@ public interface OfficeChanges {
 
 	/**
 	 * Renames the {@link OfficeManagedObjectModel}.
-	 *
+	 * 
 	 * @param managedObject
 	 *            {@link OfficeManagedObjectModel} to rename.
 	 * @param newManagedObjectName
@@ -310,7 +326,7 @@ public interface OfficeChanges {
 
 	/**
 	 * Scopes the {@link OfficeManagedObjectModel}.
-	 *
+	 * 
 	 * @param managedObject
 	 *            {@link OfficeManagedObjectModel} to scope.
 	 * @param newManagedObjectScope
@@ -324,7 +340,7 @@ public interface OfficeChanges {
 
 	/**
 	 * Adds an {@link AdministratorModel} to the {@link OfficeModel}.
-	 *
+	 * 
 	 * @param administratorName
 	 *            Name of the {@link AdministratorModel}.
 	 * @param administratorSourceClassName
@@ -344,7 +360,7 @@ public interface OfficeChanges {
 
 	/**
 	 * Removes the {@link AdministratorModel}.
-	 *
+	 * 
 	 * @param administrator
 	 *            {@link AdministratorModel} to remove.
 	 * @return {@link Change} to remove the {@link AdministratorModel}.
@@ -354,7 +370,7 @@ public interface OfficeChanges {
 
 	/**
 	 * Renames the {@link AdministratorModel}.
-	 *
+	 * 
 	 * @param administrator
 	 *            {@link AdministratorModel}.
 	 * @param newAdministratorName
@@ -366,7 +382,7 @@ public interface OfficeChanges {
 
 	/**
 	 * Adds an {@link OfficeEscalationModel} to the {@link OfficeModel}.
-	 *
+	 * 
 	 * @param escalationType
 	 *            Type of {@link Escalation}.
 	 * @return {@link Change} to add the {@link OfficeEscalationModel}.
@@ -375,7 +391,7 @@ public interface OfficeChanges {
 
 	/**
 	 * Removes the {@link OfficeEscalationModel}.
-	 *
+	 * 
 	 * @param officeEscalation
 	 *            {@link OfficeEscalationModel} to remove.
 	 * @return {@link Change} to remove the {@link OfficeEscalationModel}.
@@ -386,7 +402,7 @@ public interface OfficeChanges {
 	/**
 	 * Adds a {@link OfficeSectionResponsibilityModel} to the
 	 * {@link OfficeSectionModel}.
-	 *
+	 * 
 	 * @param section
 	 *            {@link OfficeSectionModel} to receive the added
 	 *            {@link OfficeSectionResponsibilityModel}.
@@ -400,7 +416,7 @@ public interface OfficeChanges {
 
 	/**
 	 * Removes the {@link OfficeSectionResponsibilityModel}.
-	 *
+	 * 
 	 * @param officeSectionResponsibility
 	 *            {@link OfficeSectionResponsibilityModel} to remove.
 	 * @return {@link Change} to remove the
@@ -411,7 +427,7 @@ public interface OfficeChanges {
 
 	/**
 	 * Rename the {@link OfficeSectionResponsibilityModel}.
-	 *
+	 * 
 	 * @param officeSectionResponsibility
 	 *            {@link OfficeSectionResponsibilityModel} to rename.
 	 * @param newOfficeSectionResponsibilityName
@@ -426,7 +442,7 @@ public interface OfficeChanges {
 	/**
 	 * Links the {@link OfficeSectionObjectModel} to the
 	 * {@link ExternalManagedObjectModel}.
-	 *
+	 * 
 	 * @param officeSectionObject
 	 *            {@link OfficeSectionObjectModel}.
 	 * @param externalManagedObject
@@ -440,7 +456,7 @@ public interface OfficeChanges {
 
 	/**
 	 * Removes the {@link OfficeSectionObjectToExternalManagedObjectModel}.
-	 *
+	 * 
 	 * @param officeSectionObjectToExternalManagedObject
 	 *            {@link OfficeSectionObjectToExternalManagedObjectModel} to
 	 *            remove.
@@ -453,7 +469,7 @@ public interface OfficeChanges {
 	/**
 	 * Links the {@link OfficeSectionObjectModel} to the
 	 * {@link OfficeManagedObjectModel}.
-	 *
+	 * 
 	 * @param officeSectionObject
 	 *            {@link OfficeSectionObjectModel}.
 	 * @param officeManagedObject
@@ -467,7 +483,7 @@ public interface OfficeChanges {
 
 	/**
 	 * Removes the {@link OfficeSectionObjectToOfficeManagedObjectModel}.
-	 *
+	 * 
 	 * @param officeSectionObjectToExternalManagedObject
 	 *            {@link OfficeSectionObjectToOfficeManagedObjectModel} to
 	 *            remove.
@@ -480,7 +496,7 @@ public interface OfficeChanges {
 	/**
 	 * Links the {@link OfficeManagedObjectDependencyModel} to the
 	 * {@link OfficeManagedObjectModel}.
-	 *
+	 * 
 	 * @param dependency
 	 *            {@link OfficeManagedObjectDependencyModel}.
 	 * @param managedObject
@@ -495,7 +511,7 @@ public interface OfficeChanges {
 	/**
 	 * Removes the
 	 * {@link OfficeManagedObjectDependencyToOfficeManagedObjectModel}.
-	 *
+	 * 
 	 * @param officeManagedObjectDependencyToOfficeManagedObject
 	 *            {@link OfficeManagedObjectDependencyToOfficeManagedObjectModel}
 	 *            to remove.
@@ -508,7 +524,7 @@ public interface OfficeChanges {
 	/**
 	 * Links the {@link OfficeManagedObjectDependencyModel} to the
 	 * {@link ExternalManagedObjectModel}.
-	 *
+	 * 
 	 * @param dependency
 	 *            {@link OfficeManagedObjectDependencyModel}.
 	 * @param externalManagedObject
@@ -524,7 +540,7 @@ public interface OfficeChanges {
 	/**
 	 * Removes the
 	 * {@link OfficeManagedObjectDependencyToExternalManagedObjectModel}.
-	 *
+	 * 
 	 * @param officeManagedObjectDependencyToExternalManagedObject
 	 *            {@link OfficeManagedObjectDependencyToExternalManagedObjectModel}
 	 *            to remove.
@@ -538,7 +554,7 @@ public interface OfficeChanges {
 	/**
 	 * Links the {@link OfficeManagedObjectSourceFlowModel} to the
 	 * {@link OfficeSectionInputModel}.
-	 *
+	 * 
 	 * @param managedObjectSourceFlow
 	 *            {@link OfficeManagedObjectSourceFlowModel}.
 	 * @param officeSectionInput
@@ -553,7 +569,7 @@ public interface OfficeChanges {
 	/**
 	 * Removes the the
 	 * {@link OfficeManagedObjectSourceFlowToOfficeSectionInputModel}.
-	 *
+	 * 
 	 * @param managedObjectSourceFlowToOfficeSectionInput
 	 *            {@link OfficeManagedObjectSourceFlowToOfficeSectionInputModel}
 	 *            to remove.
@@ -566,7 +582,7 @@ public interface OfficeChanges {
 	/**
 	 * Links the {@link OfficeSectionOutputModel} to the
 	 * {@link OfficeSectionInputModel}.
-	 *
+	 * 
 	 * @param officeSectionOutput
 	 *            {@link OfficeSectionOutputModel}.
 	 * @param officeSectionInput
@@ -580,7 +596,7 @@ public interface OfficeChanges {
 
 	/**
 	 * Removes the {@link OfficeSectionOutputToOfficeSectionInputModel}.
-	 *
+	 * 
 	 * @param officeSectionOutputToOfficeSectionInput
 	 *            {@link OfficeSectionOutputToOfficeSectionInputModel} to
 	 *            remove.
@@ -593,7 +609,7 @@ public interface OfficeChanges {
 	/**
 	 * Links the {@link OfficeSectionResponsibilityModel} to the
 	 * {@link OfficeTeamModel}.
-	 *
+	 * 
 	 * @param officeSectionResponsibility
 	 *            {@link OfficeSectionResponsibilityModel}.
 	 * @param officeTeam
@@ -607,7 +623,7 @@ public interface OfficeChanges {
 
 	/**
 	 * Removes the {@link OfficeSectionResponsibilityToOfficeTeamModel}.
-	 *
+	 * 
 	 * @param officeSectionResponsibilityToOfficeTeam
 	 *            {@link OfficeSectionResponsibilityToOfficeTeamModel} to
 	 *            remove.
@@ -620,7 +636,7 @@ public interface OfficeChanges {
 	/**
 	 * Links the {@link OfficeManagedObjectSourceTeamModel} to the
 	 * {@link OfficeTeamModel}.
-	 *
+	 * 
 	 * @param mosTeam
 	 *            {@link OfficeManagedObjectSourceTeamModel}.
 	 * @param officeTeam
@@ -634,7 +650,7 @@ public interface OfficeChanges {
 
 	/**
 	 * Removes the {@link OfficeManagedObjectSourceTeamToOfficeTeamModel}.
-	 *
+	 * 
 	 * @param officeManagedObjectSourceTeamToOfficeTeam
 	 *            {@link OfficeManagedObjectSourceTeamToOfficeTeamModel} to
 	 *            remove.
@@ -646,7 +662,7 @@ public interface OfficeChanges {
 
 	/**
 	 * Links the {@link AdministratorModel} to the {@link OfficeTeamModel}.
-	 *
+	 * 
 	 * @param administrator
 	 *            {@link AdministratorModel}.
 	 * @param officeTeam
@@ -658,7 +674,7 @@ public interface OfficeChanges {
 
 	/**
 	 * Removes the {@link AdministratorToOfficeTeamModel}.
-	 *
+	 * 
 	 * @param administratorToOfficeTeam
 	 *            {@link AdministratorToOfficeTeamModel} to remove.
 	 * @return {@link Change} to remove the
@@ -670,7 +686,7 @@ public interface OfficeChanges {
 	/**
 	 * Links the {@link ExternalManagedObjectModel} to the
 	 * {@link AdministratorModel}.
-	 *
+	 * 
 	 * @param externalManagedObject
 	 *            {@link ExternalManagedObjectModel}.
 	 * @param administrator
@@ -684,7 +700,7 @@ public interface OfficeChanges {
 
 	/**
 	 * Removes the {@link ExternalManagedObjectToAdministratorModel}.
-	 *
+	 * 
 	 * @param externalManagedObjectToAdministrator
 	 *            {@link ExternalManagedObjectToAdministratorModel} to remove.
 	 * @return {@link Change} to remove the
@@ -696,7 +712,7 @@ public interface OfficeChanges {
 	/**
 	 * Links the {@link OfficeManagedObjectModel} to the
 	 * {@link AdministratorModel}.
-	 *
+	 * 
 	 * @param managedObject
 	 *            {@link OfficeManagedObjectModel}.
 	 * @param administrator
@@ -710,7 +726,7 @@ public interface OfficeChanges {
 
 	/**
 	 * Removes the {@link OfficeManagedObjectToAdministratorModel}.
-	 *
+	 * 
 	 * @param managedObjectToAdministrator
 	 *            {@link OfficeManagedObjectToAdministratorModel} to remove.
 	 * @return {@link Change} to remove the
@@ -722,7 +738,7 @@ public interface OfficeChanges {
 	/**
 	 * Links the {@link OfficeTaskModel} to the {@link Duty} for
 	 * pre-administration.
-	 *
+	 * 
 	 * @param officeTask
 	 *            {@link OfficeTask} of the {@link OfficeSection} to ensure an
 	 *            {@link OfficeTaskModel} exists for it.
@@ -741,7 +757,7 @@ public interface OfficeChanges {
 
 	/**
 	 * Removes the {@link OfficeTaskToPreDutyModel}.
-	 *
+	 * 
 	 * @param officeTaskToPreDuty
 	 *            {@link OfficeTaskToPreDutyModel} to remove.
 	 * @return {@link Change} to remove the {@link OfficeTaskToPreDutyModel}.
@@ -752,7 +768,7 @@ public interface OfficeChanges {
 	/**
 	 * Links the {@link OfficeTaskModel} to the {@link Duty} for
 	 * post-administration.
-	 *
+	 * 
 	 * @param officeTask
 	 *            {@link OfficeTask} of the {@link OfficeSection} to ensure an
 	 *            {@link OfficeTaskModel} exists for it.
@@ -771,7 +787,7 @@ public interface OfficeChanges {
 
 	/**
 	 * Removes the {@link OfficeTaskToPostDutyModel}.
-	 *
+	 * 
 	 * @param officeTaskToPostDuty
 	 *            {@link OfficeTaskToPostDutyModel} to remove.
 	 * @return {@link Change} to remove the {@link OfficeTaskToPostDutyModel}.
@@ -782,7 +798,7 @@ public interface OfficeChanges {
 	/**
 	 * Links the {@link OfficeEscalationModel} to the
 	 * {@link OfficeSectionInputModel}.
-	 *
+	 * 
 	 * @param escalation
 	 *            {@link OfficeEscalationModel}.
 	 * @param sectionInput
@@ -796,7 +812,7 @@ public interface OfficeChanges {
 
 	/**
 	 * Removes the {@link OfficeEscalationToOfficeSectionInputModel}.
-	 *
+	 * 
 	 * @param escalationToSectionInput
 	 *            {@link OfficeEscalationToOfficeSectionInputModel} to remove.
 	 * @return {@link Change} to remove the
@@ -804,5 +820,29 @@ public interface OfficeChanges {
 	 */
 	Change<OfficeEscalationToOfficeSectionInputModel> removeOfficeEscalationToOfficeSectionInput(
 			OfficeEscalationToOfficeSectionInputModel escalationToSectionInput);
+
+	/**
+	 * Links the {@link OfficeStartModel} to {@link OfficeSectionInputModel}.
+	 * 
+	 * @param start
+	 *            {@link OfficeStartModel}.
+	 * @param sectionInput
+	 *            {@link OfficeSectionInputModel}.
+	 * @return {@link Change} to add the
+	 *         {@link OfficeStartToOfficeSectionInputModel}.
+	 */
+	Change<OfficeStartToOfficeSectionInputModel> linkOfficeStartToOfficeSectionInput(
+			OfficeStartModel start, OfficeSectionInputModel sectionInput);
+
+	/**
+	 * Removes the {@link OfficeStartToOfficeSectionInputModel}.
+	 * 
+	 * @param startToSectionInput
+	 *            {@link OfficeStartToOfficeSectionInputModel} to remove.
+	 * @return {@link Change} to remove the
+	 *         {@link OfficeStartToOfficeSectionInputModel}.
+	 */
+	Change<OfficeStartToOfficeSectionInputModel> removeOfficeStartToOfficeSectionInput(
+			OfficeStartToOfficeSectionInputModel startToSectionInput);
 
 }

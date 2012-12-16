@@ -67,28 +67,26 @@ public class OfficeFloorTeamEditPart
 	@Override
 	protected void populateOfficeFloorDirectEditPolicy(
 			OfficeFloorDirectEditPolicy<OfficeFloorTeamModel> policy) {
-		policy
-				.allowDirectEdit(new DirectEditAdapter<OfficeFloorChanges, OfficeFloorTeamModel>() {
-					@Override
-					public String getInitialValue() {
-						return OfficeFloorTeamEditPart.this.getCastedModel()
-								.getOfficeFloorTeamName();
-					}
+		policy.allowDirectEdit(new DirectEditAdapter<OfficeFloorChanges, OfficeFloorTeamModel>() {
+			@Override
+			public String getInitialValue() {
+				return OfficeFloorTeamEditPart.this.getCastedModel()
+						.getOfficeFloorTeamName();
+			}
 
-					@Override
-					public IFigure getLocationFigure() {
-						return OfficeFloorTeamEditPart.this
-								.getOfficeFloorFigure()
-								.getOfficeFloorTeamNameFigure();
-					}
+			@Override
+			public IFigure getLocationFigure() {
+				return OfficeFloorTeamEditPart.this.getOfficeFloorFigure()
+						.getOfficeFloorTeamNameFigure();
+			}
 
-					@Override
-					public Change<OfficeFloorTeamModel> createChange(
-							OfficeFloorChanges changes,
-							OfficeFloorTeamModel target, String newValue) {
-						return changes.renameOfficeFloorTeam(target, newValue);
-					}
-				});
+			@Override
+			public Change<OfficeFloorTeamModel> createChange(
+					OfficeFloorChanges changes, OfficeFloorTeamModel target,
+					String newValue) {
+				return changes.renameOfficeFloorTeam(target, newValue);
+			}
+		});
 	}
 
 	@Override
@@ -127,11 +125,18 @@ public class OfficeFloorTeamEditPart
 			this.getOfficeFloorFigure().setOfficeFloorTeamName(
 					this.getCastedModel().getOfficeFloorTeamName());
 			break;
+
 		case ADD_OFFICE_FLOOR_MANAGED_OBJECT_SOURCE_TEAM:
 		case REMOVE_OFFICE_FLOOR_MANAGED_OBJECT_SOURCE_TEAM:
 		case ADD_DEPLOYED_OFFICE_TEAM:
 		case REMOVE_DEPLOYED_OFFICE_TEAM:
 			this.refreshTargetConnections();
+			break;
+
+		case CHANGE_TEAM_SOURCE_CLASS_NAME:
+		case ADD_PROPERTY:
+		case REMOVE_PROPERTY:
+			// Non visual change
 			break;
 		}
 	}

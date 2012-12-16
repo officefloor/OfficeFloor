@@ -58,6 +58,7 @@ import net.officefloor.eclipse.office.editparts.OfficeSectionOutputEditPart;
 import net.officefloor.eclipse.office.editparts.OfficeSectionOutputToOfficeSectionInputEditPart;
 import net.officefloor.eclipse.office.editparts.OfficeSectionResponsibilityEditPart;
 import net.officefloor.eclipse.office.editparts.OfficeSectionResponsibilityToOfficeTeamEditPart;
+import net.officefloor.eclipse.office.editparts.OfficeStartEditPart;
 import net.officefloor.eclipse.office.editparts.OfficeSubSectionEditPart;
 import net.officefloor.eclipse.office.editparts.OfficeTaskEditPart;
 import net.officefloor.eclipse.office.editparts.OfficeTaskToPostDutyEditPart;
@@ -73,6 +74,7 @@ import net.officefloor.eclipse.office.operations.AddOfficeManagedObjectOperation
 import net.officefloor.eclipse.office.operations.AddOfficeManagedObjectSourceOperation;
 import net.officefloor.eclipse.office.operations.AddOfficeSectionOperation;
 import net.officefloor.eclipse.office.operations.AddOfficeSectionResponsibilityOperation;
+import net.officefloor.eclipse.office.operations.AddOfficeStartOperation;
 import net.officefloor.eclipse.office.operations.AddOfficeTeamOperation;
 import net.officefloor.eclipse.office.operations.RefactorOfficeSectionChangeOperation;
 import net.officefloor.eclipse.wizard.officetask.OfficeTaskInstance;
@@ -113,6 +115,8 @@ import net.officefloor.model.office.OfficeSectionOutputModel;
 import net.officefloor.model.office.OfficeSectionOutputToOfficeSectionInputModel;
 import net.officefloor.model.office.OfficeSectionResponsibilityModel;
 import net.officefloor.model.office.OfficeSectionResponsibilityToOfficeTeamModel;
+import net.officefloor.model.office.OfficeStartModel;
+import net.officefloor.model.office.OfficeStartToOfficeSectionInputModel;
 import net.officefloor.model.office.OfficeSubSectionModel;
 import net.officefloor.model.office.OfficeTaskModel;
 import net.officefloor.model.office.OfficeTaskToPostDutyModel;
@@ -168,6 +172,7 @@ public class OfficeEditor extends
 		map.put(OfficeEscalationModel.class, OfficeEscalationEditPart.class);
 		map.put(ExternalManagedObjectModel.class,
 				ExternalManagedObjectEditPart.class);
+		map.put(OfficeStartModel.class, OfficeStartEditPart.class);
 		map.put(OfficeSectionModel.class, OfficeSectionEditPart.class);
 		map.put(OfficeSectionInputModel.class, OfficeSectionInputEditPart.class);
 		map.put(OfficeSectionOutputModel.class,
@@ -254,6 +259,17 @@ public class OfficeEditor extends
 							OfficeTeamModel target) {
 						return OfficeEditor.this.getModelChanges()
 								.removeOfficeTeam(target);
+					}
+				});
+
+		// Allow deleting the office start
+		policy.addDelete(OfficeStartModel.class,
+				new DeleteChangeFactory<OfficeStartModel>() {
+					@Override
+					public Change<OfficeStartModel> createChange(
+							OfficeStartModel target) {
+						return OfficeEditor.this.getModelChanges()
+								.removeOfficeStart(target);
 					}
 				});
 
@@ -504,6 +520,18 @@ public class OfficeEditor extends
 										target);
 					}
 				});
+
+		// Allow deleting start to input
+		policy.addDelete(
+				OfficeStartToOfficeSectionInputModel.class,
+				new DeleteChangeFactory<OfficeStartToOfficeSectionInputModel>() {
+					@Override
+					public Change<OfficeStartToOfficeSectionInputModel> createChange(
+							OfficeStartToOfficeSectionInputModel target) {
+						return OfficeEditor.this.getModelChanges()
+								.removeOfficeStartToOfficeSectionInput(target);
+					}
+				});
 	}
 
 	@Override
@@ -720,7 +748,7 @@ public class OfficeEditor extends
 					}
 				});
 
-		// Connection escalation to input
+		// Connect escalation to input
 		policy.addConnection(
 				OfficeEscalationModel.class,
 				OfficeSectionInputModel.class,
@@ -732,6 +760,21 @@ public class OfficeEditor extends
 						return OfficeEditor.this.getModelChanges()
 								.linkOfficeEscalationToOfficeSectionInput(
 										source, target);
+					}
+				});
+
+		// Connect start to input
+		policy.addConnection(
+				OfficeStartModel.class,
+				OfficeSectionInputModel.class,
+				new ConnectionChangeFactory<OfficeStartModel, OfficeSectionInputModel>() {
+					@Override
+					public Change<?> createChange(OfficeStartModel source,
+							OfficeSectionInputModel target,
+							CreateConnectionRequest request) {
+						return OfficeEditor.this.getModelChanges()
+								.linkOfficeStartToOfficeSectionInput(source,
+										target);
 					}
 				});
 	}
@@ -749,6 +792,7 @@ public class OfficeEditor extends
 		list.add(new AddOfficeManagedObjectSourceOperation(officeChanges));
 		list.add(new AddAdministratorOperation(officeChanges));
 		list.add(new AddOfficeEscalationOperation(officeChanges));
+		list.add(new AddOfficeStartOperation(officeChanges));
 
 		// Add managed object from managed object source
 		list.add(new AddOfficeManagedObjectOperation(officeChanges));

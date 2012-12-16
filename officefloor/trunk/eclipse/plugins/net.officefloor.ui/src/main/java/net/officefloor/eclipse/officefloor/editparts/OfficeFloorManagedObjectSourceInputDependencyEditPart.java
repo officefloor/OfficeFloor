@@ -23,56 +23,56 @@ import java.util.List;
 
 import net.officefloor.eclipse.OfficeFloorPlugin;
 import net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart;
-import net.officefloor.eclipse.skin.officefloor.OfficeFloorManagedObjectDependencyFigure;
-import net.officefloor.eclipse.skin.officefloor.OfficeFloorManagedObjectDependencyFigureContext;
+import net.officefloor.eclipse.skin.officefloor.OfficeFloorManagedObjectSourceInputDependencyFigure;
+import net.officefloor.eclipse.skin.officefloor.OfficeFloorManagedObjectSourceInputDependencyFigureContext;
 import net.officefloor.eclipse.util.EclipseUtil;
-import net.officefloor.model.officefloor.OfficeFloorManagedObjectDependencyModel;
-import net.officefloor.model.officefloor.OfficeFloorManagedObjectDependencyModel.OfficeFloorManagedObjectDependencyEvent;
+import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceInputDependencyModel;
+import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceInputDependencyModel.OfficeFloorManagedObjectSourceInputDependencyEvent;
 
 import org.eclipse.gef.EditPart;
 
 /**
- * {@link EditPart} for the {@link ManagedObjectDependencyModel}.
+ * {@link EditPart} for the
+ * {@link OfficeFloorManagedObjectSourceInputDependencyModel}.
  * 
  * @author Daniel Sagenschneider
  */
-public class OfficeFloorManagedObjectDependencyEditPart
+public class OfficeFloorManagedObjectSourceInputDependencyEditPart
 		extends
-		AbstractOfficeFloorEditPart<OfficeFloorManagedObjectDependencyModel, OfficeFloorManagedObjectDependencyEvent, OfficeFloorManagedObjectDependencyFigure>
-		implements OfficeFloorManagedObjectDependencyFigureContext {
+		AbstractOfficeFloorEditPart<OfficeFloorManagedObjectSourceInputDependencyModel, OfficeFloorManagedObjectSourceInputDependencyEvent, OfficeFloorManagedObjectSourceInputDependencyFigure>
+		implements OfficeFloorManagedObjectSourceInputDependencyFigureContext {
 
 	@Override
-	protected OfficeFloorManagedObjectDependencyFigure createOfficeFloorFigure() {
-		return OfficeFloorPlugin.getSkin().getOfficeFloorFigureFactory()
-				.createOfficeFloorManagedObjectDependencyFigure(this);
+	protected OfficeFloorManagedObjectSourceInputDependencyFigure createOfficeFloorFigure() {
+		return OfficeFloorPlugin
+				.getSkin()
+				.getOfficeFloorFigureFactory()
+				.createOfficeFloorManagedObjectSourceInputDependencyFigure(this);
 	}
 
 	@Override
 	protected void populateConnectionSourceModels(List<Object> models) {
 		EclipseUtil.addToList(models, this.getCastedModel()
 				.getOfficeFloorManagedObject());
-		EclipseUtil.addToList(models, this.getCastedModel()
-				.getOfficeFloorInputManagedObject());
 	}
 
 	@Override
-	protected Class<OfficeFloorManagedObjectDependencyEvent> getPropertyChangeEventType() {
-		return OfficeFloorManagedObjectDependencyEvent.class;
+	protected Class<OfficeFloorManagedObjectSourceInputDependencyEvent> getPropertyChangeEventType() {
+		return OfficeFloorManagedObjectSourceInputDependencyEvent.class;
 	}
 
 	@Override
 	protected void handlePropertyChange(
-			OfficeFloorManagedObjectDependencyEvent property,
+			OfficeFloorManagedObjectSourceInputDependencyEvent property,
 			PropertyChangeEvent evt) {
 		switch (property) {
-		case CHANGE_OFFICE_FLOOR_MANAGED_OBJECT_DEPENDENCY_NAME:
+		case CHANGE_OFFICE_FLOOR_MANAGED_OBJECT_SOURCE_INPUT_DEPENDENCY_NAME:
 			this.getOfficeFloorFigure()
-					.setOfficeFloorManagedObjectDependencyName(
-							this.getOfficeFloorManagedObjectDependencyName());
+					.setOfficeFloorManagedObjectSourceInputDependencyName(
+							this.getOfficeFloorManagedObjectSourceInputDependencyName());
 			break;
 
 		case CHANGE_OFFICE_FLOOR_MANAGED_OBJECT:
-		case CHANGE_OFFICE_FLOOR_INPUT_MANAGED_OBJECT:
 			this.refreshSourceConnections();
 			break;
 
@@ -83,13 +83,13 @@ public class OfficeFloorManagedObjectDependencyEditPart
 	}
 
 	/*
-	 * ==================== ManagedObjectDependencyFigureContext ============
+	 * ===== OfficeFloorManagedObjectSourceInputDependencyFigureContext =======
 	 */
 
 	@Override
-	public String getOfficeFloorManagedObjectDependencyName() {
+	public String getOfficeFloorManagedObjectSourceInputDependencyName() {
 		return this.getCastedModel()
-				.getOfficeFloorManagedObjectDependencyName();
+				.getOfficeFloorManagedObjectSourceInputDependencyName();
 	}
 
 }

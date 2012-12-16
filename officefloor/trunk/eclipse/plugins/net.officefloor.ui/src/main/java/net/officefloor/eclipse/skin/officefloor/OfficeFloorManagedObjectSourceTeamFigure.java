@@ -22,9 +22,22 @@ import net.officefloor.eclipse.skin.OfficeFloorFigure;
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceTeamModel;
 
 /**
- * {@link OfficeFloorFigure} for the {@link OfficeFloorManagedObjectSourceTeamModel}.
+ * {@link OfficeFloorFigure} for the
+ * {@link OfficeFloorManagedObjectSourceTeamModel}.
  * 
  * @author Daniel Sagenschneider
  */
-public interface OfficeFloorManagedObjectSourceTeamFigure extends OfficeFloorFigure {
+public interface OfficeFloorManagedObjectSourceTeamFigure extends
+		OfficeFloorFigure {
+
+	/**
+	 * Specifies the {@link OfficeFloorManagedObjectSourceTeamModel} name to
+	 * display.
+	 * 
+	 * @param officeFloorManagedObjectSourceTeamName
+	 *            Name to display.
+	 */
+	void setOfficeFloorManagedObjectSourceTeamName(
+			String officeFloorManagedObjectSourceTeamName);
+
 }

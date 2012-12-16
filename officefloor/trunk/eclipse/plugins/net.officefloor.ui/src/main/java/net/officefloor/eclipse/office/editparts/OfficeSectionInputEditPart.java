@@ -55,6 +55,7 @@ public class OfficeSectionInputEditPart
 		models.addAll(this.getCastedModel().getOfficeSectionOutputs());
 		models.addAll(this.getCastedModel().getOfficeManagedObjectSourceFlows());
 		models.addAll(this.getCastedModel().getOfficeEscalations());
+		models.addAll(this.getCastedModel().getOfficeStarts());
 	}
 
 	@Override
@@ -77,6 +78,8 @@ public class OfficeSectionInputEditPart
 		case REMOVE_OFFICE_MANAGED_OBJECT_SOURCE_FLOW:
 		case ADD_OFFICE_ESCALATION:
 		case REMOVE_OFFICE_ESCALATION:
+		case ADD_OFFICE_START:
+		case REMOVE_OFFICE_START:
 			this.refreshTargetConnections();
 			break;
 

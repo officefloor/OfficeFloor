@@ -28,6 +28,7 @@ import net.officefloor.model.officefloor.OfficeFloorManagedObjectDependencyToOff
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectDependencyToOfficeFloorManagedObjectModel;
 
 import org.eclipse.draw2d.ConnectionAnchor;
+import org.eclipse.draw2d.Label;
 
 /**
  * Standard {@link OfficeFloorManagedObjectDependencyFigure}.
@@ -37,6 +38,11 @@ import org.eclipse.draw2d.ConnectionAnchor;
 public class StandardOfficeFloorManagedObjectDependencyFigure extends
 		AbstractOfficeFloorFigure implements
 		OfficeFloorManagedObjectDependencyFigure {
+
+	/**
+	 * Dependency name.
+	 */
+	private final Label dependencyName;
 
 	/**
 	 * Initiate.
@@ -49,6 +55,7 @@ public class StandardOfficeFloorManagedObjectDependencyFigure extends
 		LabelConnectorFigure figure = new LabelConnectorFigure(
 				context.getOfficeFloorManagedObjectDependencyName(),
 				ConnectorDirection.EAST, StandardOfficeFloorColours.BLACK());
+		this.dependencyName = figure.getLabel();
 
 		// Register connections
 		ConnectionAnchor anchor = figure.getConnectionAnchor();
@@ -60,6 +67,16 @@ public class StandardOfficeFloorManagedObjectDependencyFigure extends
 				anchor);
 
 		this.setFigure(figure);
+	}
+
+	/*
+	 * ================== OfficeFloorManagedObjectDependencyFigure ===========
+	 */
+
+	@Override
+	public void setOfficeFloorManagedObjectDependencyName(
+			String officeFloorManagedObjectDependencyName) {
+		this.dependencyName.setText(officeFloorManagedObjectDependencyName);
 	}
 
 }

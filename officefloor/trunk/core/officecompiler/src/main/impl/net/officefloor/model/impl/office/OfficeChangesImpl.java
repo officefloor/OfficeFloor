@@ -80,6 +80,8 @@ import net.officefloor.model.office.OfficeSectionOutputModel;
 import net.officefloor.model.office.OfficeSectionOutputToOfficeSectionInputModel;
 import net.officefloor.model.office.OfficeSectionResponsibilityModel;
 import net.officefloor.model.office.OfficeSectionResponsibilityToOfficeTeamModel;
+import net.officefloor.model.office.OfficeStartModel;
+import net.officefloor.model.office.OfficeStartToOfficeSectionInputModel;
 import net.officefloor.model.office.OfficeSubSectionModel;
 import net.officefloor.model.office.OfficeTaskModel;
 import net.officefloor.model.office.OfficeTaskToPostDutyModel;
@@ -89,7 +91,7 @@ import net.officefloor.model.office.PropertyModel;
 
 /**
  * {@link OfficeChanges} implementation.
- *
+ * 
  * @author Daniel Sagenschneider
  */
 public class OfficeChangesImpl implements OfficeChanges {
@@ -101,7 +103,7 @@ public class OfficeChangesImpl implements OfficeChanges {
 
 	/**
 	 * Initiate.
-	 *
+	 * 
 	 * @param office
 	 *            {@link OfficeModel} to change.
 	 */
@@ -111,7 +113,7 @@ public class OfficeChangesImpl implements OfficeChanges {
 
 	/**
 	 * Obtains the text name identifying the {@link ManagedObjectScope}.
-	 *
+	 * 
 	 * @param scope
 	 *            {@link ManagedObjectScope}.
 	 * @return Text name for the {@link ManagedObjectScope}.
@@ -140,7 +142,7 @@ public class OfficeChangesImpl implements OfficeChanges {
 	 * Loads the hierarchy of {@link OfficeSubSection} instances from the top
 	 * {@link OfficeSubSection} down to the {@link OfficeSubSection} containing
 	 * the {@link OfficeTask}.
-	 *
+	 * 
 	 * @param hierarchy
 	 *            Hierarchy to be loaded with the {@link OfficeSubSection}
 	 *            instances containing the {@link OfficeTask}.
@@ -194,7 +196,7 @@ public class OfficeChangesImpl implements OfficeChanges {
 	/**
 	 * Adds the {@link OfficeSubSection} hierarchy to the
 	 * {@link OfficeSectionModel}.
-	 *
+	 * 
 	 * @param hierarchy
 	 *            {@link OfficeSubSection} hierarchy.
 	 * @param section
@@ -229,7 +231,7 @@ public class OfficeChangesImpl implements OfficeChanges {
 
 	/**
 	 * Adds the hierarchy to the {@link OfficeSubSectionModel}.
-	 *
+	 * 
 	 * @param hierarchy
 	 *            Hierarchy of {@link OfficeSubSection} instances to add to the
 	 *            {@link OfficeSubSectionModel}.
@@ -285,7 +287,7 @@ public class OfficeChangesImpl implements OfficeChanges {
 	/**
 	 * Adds (or retrieves if already added) the {@link OfficeTask} to the
 	 * {@link OfficeSubSectionModel}.
-	 *
+	 * 
 	 * @param subSection
 	 *            {@link OfficeSubSectionModel} to add the {@link OfficeTask}.
 	 * @param officeTask
@@ -328,7 +330,7 @@ public class OfficeChangesImpl implements OfficeChanges {
 	/**
 	 * Cleans leaf {@link OfficeSubSectionModel} instances that do not contain
 	 * connections.
-	 *
+	 * 
 	 * @param subSection
 	 *            {@link OfficeSubSectionModel} to clean.
 	 * @param changes
@@ -407,7 +409,7 @@ public class OfficeChangesImpl implements OfficeChanges {
 	/**
 	 * Obtains the {@link OfficeSectionModel} containing the
 	 * {@link OfficeTaskModel}.
-	 *
+	 * 
 	 * @param task
 	 *            {@link OfficeTaskModel}.
 	 * @return {@link OfficeSectionModel} containing the {@link OfficeTaskModel}
@@ -432,7 +434,7 @@ public class OfficeChangesImpl implements OfficeChanges {
 	 * Determines if the {@link OfficeSubSectionModel} contains the
 	 * {@link OfficeTaskModel} on itself or any of its
 	 * {@link OfficeSubSectionModel} instances.
-	 *
+	 * 
 	 * @param subSection
 	 *            {@link OfficeSubSectionModel} to check if contains
 	 *            {@link OfficeTaskModel}.
@@ -508,9 +510,8 @@ public class OfficeChangesImpl implements OfficeChanges {
 		}
 
 		// Add a responsibility for convenience
-		section
-				.addOfficeSectionResponsibility(new OfficeSectionResponsibilityModel(
-						"Responsibility"));
+		section.addOfficeSectionResponsibility(new OfficeSectionResponsibilityModel(
+				"Responsibility"));
 
 		// Return the change to add the section
 		return new AbstractChange<OfficeSectionModel>(section, "Add section") {
@@ -1008,7 +1009,7 @@ public class OfficeChangesImpl implements OfficeChanges {
 
 	/**
 	 * Obtains the existing item for the target name.
-	 *
+	 * 
 	 * @param targetItemName
 	 *            Target item name.
 	 * @param targetToExistingName
@@ -1119,8 +1120,8 @@ public class OfficeChangesImpl implements OfficeChanges {
 		// Create the managed object source
 		final OfficeManagedObjectSourceModel managedObjectSource = new OfficeManagedObjectSourceModel(
 				managedObjectSourceName, managedObjectSourceClassName,
-				managedObjectType.getObjectClass().getName(), String
-						.valueOf(timeout));
+				managedObjectType.getObjectClass().getName(),
+				String.valueOf(timeout));
 		for (Property property : properties) {
 			managedObjectSource.addProperty(new PropertyModel(property
 					.getName(), property.getValue()));
@@ -1375,6 +1376,66 @@ public class OfficeChangesImpl implements OfficeChanges {
 	}
 
 	@Override
+	public Change<OfficeStartModel> addOfficeStart() {
+
+		// TODO test this method (addOfficeStart)
+
+		// Determine the next name for start
+		final String startPrefix = "Start";
+		int startIndex = 1;
+		String startName;
+		boolean isUnique;
+		do {
+			isUnique = true;
+
+			// Determine if start name is unique
+			startName = startPrefix + String.valueOf(startIndex++);
+			for (OfficeStartModel start : this.office.getOfficeStarts()) {
+				if (startName.equals(start.getStartName())) {
+					isUnique = false;
+				}
+			}
+
+		} while (!isUnique);
+
+		// Create the Office with the unique name
+		final OfficeStartModel start = new OfficeStartModel(startName);
+
+		// Return change to add team
+		return new AbstractChange<OfficeStartModel>(start, "Add start") {
+			@Override
+			public void apply() {
+				OfficeChangesImpl.this.office.addOfficeStart(start);
+			}
+
+			@Override
+			public void revert() {
+				OfficeChangesImpl.this.office.removeOfficeStart(start);
+			}
+		};
+	}
+
+	@Override
+	public Change<OfficeStartModel> removeOfficeStart(
+			final OfficeStartModel officeStart) {
+
+		// TODO test this method (removeOfficeStart)
+
+		// Return change to remove start
+		return new AbstractChange<OfficeStartModel>(officeStart, "Remove start") {
+			@Override
+			public void apply() {
+				OfficeChangesImpl.this.office.removeOfficeStart(officeStart);
+			}
+
+			@Override
+			public void revert() {
+				OfficeChangesImpl.this.office.addOfficeStart(officeStart);
+			}
+		};
+	}
+
+	@Override
 	public Change<OfficeTeamModel> renameOfficeTeam(
 			final OfficeTeamModel officeTeam, final String newOfficeTeamName) {
 
@@ -1605,14 +1666,12 @@ public class OfficeChangesImpl implements OfficeChanges {
 				officeSectionResponsibility, "Remove responsibility") {
 			@Override
 			public void apply() {
-				section
-						.removeOfficeSectionResponsibility(officeSectionResponsibility);
+				section.removeOfficeSectionResponsibility(officeSectionResponsibility);
 			}
 
 			@Override
 			public void revert() {
-				section
-						.addOfficeSectionResponsibility(officeSectionResponsibility);
+				section.addOfficeSectionResponsibility(officeSectionResponsibility);
 			}
 		};
 	}
@@ -2239,8 +2298,9 @@ public class OfficeChangesImpl implements OfficeChanges {
 
 				// Clean up sub section
 				this.cleanChanges = new LinkedList<Change<?>>();
-				OfficeChangesImpl.this.cleanSubSection(officeSectionModel
-						.getOfficeSubSection(), this.cleanChanges);
+				OfficeChangesImpl.this.cleanSubSection(
+						officeSectionModel.getOfficeSubSection(),
+						this.cleanChanges);
 			}
 		};
 	}
@@ -2271,8 +2331,8 @@ public class OfficeChangesImpl implements OfficeChanges {
 
 				// Clean up sub section
 				this.cleanChanges = new LinkedList<Change<?>>();
-				OfficeChangesImpl.this.cleanSubSection(officeSection
-						.getOfficeSubSection(), this.cleanChanges);
+				OfficeChangesImpl.this.cleanSubSection(
+						officeSection.getOfficeSubSection(), this.cleanChanges);
 			}
 
 			@Override
@@ -2353,8 +2413,9 @@ public class OfficeChangesImpl implements OfficeChanges {
 
 				// Clean up sub section
 				this.cleanChanges = new LinkedList<Change<?>>();
-				OfficeChangesImpl.this.cleanSubSection(officeSectionModel
-						.getOfficeSubSection(), this.cleanChanges);
+				OfficeChangesImpl.this.cleanSubSection(
+						officeSectionModel.getOfficeSubSection(),
+						this.cleanChanges);
 			}
 		};
 	}
@@ -2386,8 +2447,8 @@ public class OfficeChangesImpl implements OfficeChanges {
 
 				// Clean up sub section
 				this.cleanChanges = new LinkedList<Change<?>>();
-				OfficeChangesImpl.this.cleanSubSection(officeSection
-						.getOfficeSubSection(), this.cleanChanges);
+				OfficeChangesImpl.this.cleanSubSection(
+						officeSection.getOfficeSubSection(), this.cleanChanges);
 			}
 
 			@Override
@@ -2447,6 +2508,53 @@ public class OfficeChangesImpl implements OfficeChanges {
 			@Override
 			public void revert() {
 				escalationToSectionInput.connect();
+			}
+		};
+	}
+
+	@Override
+	public Change<OfficeStartToOfficeSectionInputModel> linkOfficeStartToOfficeSectionInput(
+			OfficeStartModel start, OfficeSectionInputModel sectionInput) {
+
+		// TODO test this method (linkOfficeStartToOfficeSectionInput)
+
+		// Create the connection
+		final OfficeStartToOfficeSectionInputModel conn = new OfficeStartToOfficeSectionInputModel();
+		conn.setOfficeStart(start);
+		conn.setOfficeSectionInput(sectionInput);
+
+		// Return change to add the connection
+		return new AbstractChange<OfficeStartToOfficeSectionInputModel>(conn,
+				"Connect") {
+			@Override
+			public void apply() {
+				conn.connect();
+			}
+
+			@Override
+			public void revert() {
+				conn.remove();
+			}
+		};
+	}
+
+	@Override
+	public Change<OfficeStartToOfficeSectionInputModel> removeOfficeStartToOfficeSectionInput(
+			final OfficeStartToOfficeSectionInputModel startToSectionInput) {
+
+		// TODO test this method (removeOfficeStartToOfficeSectionInput)
+
+		// Return change to remove the connection
+		return new AbstractChange<OfficeStartToOfficeSectionInputModel>(
+				startToSectionInput, "Remove") {
+			@Override
+			public void apply() {
+				startToSectionInput.remove();
+			}
+
+			@Override
+			public void revert() {
+				startToSectionInput.connect();
 			}
 		};
 	}

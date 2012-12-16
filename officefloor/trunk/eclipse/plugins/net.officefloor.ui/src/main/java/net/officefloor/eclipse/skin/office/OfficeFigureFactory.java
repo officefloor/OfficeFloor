@@ -49,6 +49,8 @@ import net.officefloor.model.office.OfficeSectionOutputModel;
 import net.officefloor.model.office.OfficeSectionOutputToOfficeSectionInputModel;
 import net.officefloor.model.office.OfficeSectionResponsibilityModel;
 import net.officefloor.model.office.OfficeSectionResponsibilityToOfficeTeamModel;
+import net.officefloor.model.office.OfficeStartModel;
+import net.officefloor.model.office.OfficeStartToOfficeSectionInputModel;
 import net.officefloor.model.office.OfficeSubSectionModel;
 import net.officefloor.model.office.OfficeTaskModel;
 import net.officefloor.model.office.OfficeTaskToPostDutyModel;
@@ -178,9 +180,18 @@ public interface OfficeFigureFactory {
 	 * 
 	 * @param context
 	 *            {@link OfficeTeamFigureContext}.
-	 * @return {@link OfficeFloorFigure}.
+	 * @return {@link OfficeTeamFigure}.
 	 */
 	OfficeTeamFigure createOfficeTeamFigure(OfficeTeamFigureContext context);
+
+	/**
+	 * Creates the {@link OfficeFloorFigure} for the {@link OfficeStartModel}.
+	 * 
+	 * @param context
+	 *            {@link OfficeStartFigureContext}.
+	 * @return {@link OfficeStartFigure}.
+	 */
+	OfficeStartFigure createOfficeStartFigure(OfficeStartFigureContext context);
 
 	/**
 	 * Creates the {@link OfficeFloorFigure} for the {@link OfficeSectionModel}.
@@ -477,5 +488,17 @@ public interface OfficeFigureFactory {
 	void decorateOfficeEscalationToOfficeSectionInputFigure(
 			PolylineConnection figure,
 			OfficeEscalationToOfficeSectionInputFigureContext context);
+
+	/**
+	 * Decorates the {@link OfficeStartToOfficeSectionInputModel} figure.
+	 * 
+	 * @param figure
+	 *            {@link IFigure} to decorate.
+	 * @param context
+	 *            {@link OfficeStartToOfficeSectionInputFigureContext}.
+	 */
+	void decorateOfficeStartToOfficeSectionInputFigure(
+			PolylineConnection figure,
+			OfficeStartToOfficeSectionInputFigureContext context);
 
 }

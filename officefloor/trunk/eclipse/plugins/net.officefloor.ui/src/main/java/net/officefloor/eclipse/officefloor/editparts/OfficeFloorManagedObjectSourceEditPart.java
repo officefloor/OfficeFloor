@@ -90,6 +90,8 @@ public class OfficeFloorManagedObjectSourceEditPart
 				.getOfficeFloorManagedObjectSourceFlows());
 		childModels.addAll(this.getCastedModel()
 				.getOfficeFloorManagedObjectSourceTeams());
+		childModels.addAll(this.getCastedModel()
+				.getOfficeFloorManagedObjectSourceInputDependencies());
 	}
 
 	@Override
@@ -110,46 +112,42 @@ public class OfficeFloorManagedObjectSourceEditPart
 	@Override
 	protected void populateOfficeFloorDirectEditPolicy(
 			OfficeFloorDirectEditPolicy<OfficeFloorManagedObjectSourceModel> policy) {
-		policy
-				.allowDirectEdit(new DirectEditAdapter<OfficeFloorChanges, OfficeFloorManagedObjectSourceModel>() {
-					@Override
-					public String getInitialValue() {
-						return OfficeFloorManagedObjectSourceEditPart.this
-								.getCastedModel()
-								.getOfficeFloorManagedObjectSourceName();
-					}
+		policy.allowDirectEdit(new DirectEditAdapter<OfficeFloorChanges, OfficeFloorManagedObjectSourceModel>() {
+			@Override
+			public String getInitialValue() {
+				return OfficeFloorManagedObjectSourceEditPart.this
+						.getCastedModel()
+						.getOfficeFloorManagedObjectSourceName();
+			}
 
-					@Override
-					public IFigure getLocationFigure() {
-						return OfficeFloorManagedObjectSourceEditPart.this
-								.getOfficeFloorFigure()
-								.getOfficeFloorManagedObjectSourceNameFigure();
-					}
+			@Override
+			public IFigure getLocationFigure() {
+				return OfficeFloorManagedObjectSourceEditPart.this
+						.getOfficeFloorFigure()
+						.getOfficeFloorManagedObjectSourceNameFigure();
+			}
 
-					@Override
-					public Change<OfficeFloorManagedObjectSourceModel> createChange(
-							OfficeFloorChanges changes,
-							OfficeFloorManagedObjectSourceModel target,
-							String newValue) {
-						return changes.renameOfficeFloorManagedObjectSource(
-								target, newValue);
-					}
-				});
+			@Override
+			public Change<OfficeFloorManagedObjectSourceModel> createChange(
+					OfficeFloorChanges changes,
+					OfficeFloorManagedObjectSourceModel target, String newValue) {
+				return changes.renameOfficeFloorManagedObjectSource(target,
+						newValue);
+			}
+		});
 	}
 
 	@Override
 	protected void populateOfficeFloorOpenEditPolicy(
 			OfficeFloorOpenEditPolicy<OfficeFloorManagedObjectSourceModel> policy) {
-		policy
-				.allowOpening(new OpenHandler<OfficeFloorManagedObjectSourceModel>() {
-					@Override
-					public void doOpen(
-							OpenHandlerContext<OfficeFloorManagedObjectSourceModel> context) {
-						OfficeFloorManagedObjectSourceEditPart
-								.openManagedObjectSource(context.getModel(),
-										context);
-					}
-				});
+		policy.allowOpening(new OpenHandler<OfficeFloorManagedObjectSourceModel>() {
+			@Override
+			public void doOpen(
+					OpenHandlerContext<OfficeFloorManagedObjectSourceModel> context) {
+				OfficeFloorManagedObjectSourceEditPart.openManagedObjectSource(
+						context.getModel(), context);
+			}
+		});
 	}
 
 	@Override
@@ -162,30 +160,43 @@ public class OfficeFloorManagedObjectSourceEditPart
 			OfficeFloorManagedObjectSourceEvent property,
 			PropertyChangeEvent evt) {
 		switch (property) {
+		case CHANGE_OFFICE_FLOOR_SUPPLIER:
+			// TODO add supplier configuration
+			break;
+
 		case CHANGE_OFFICE_FLOOR_MANAGED_OBJECT_SOURCE_NAME:
 			this.getOfficeFloorFigure().setOfficeFloorManagedObjectName(
 					this.getCastedModel()
 							.getOfficeFloorManagedObjectSourceName());
 			break;
+
 		case CHANGE_MANAGING_OFFICE:
-			this.refreshSourceConnections();
-			break;
 		case CHANGE_OFFICE_FLOOR_INPUT_MANAGED_OBJECT:
 			this.refreshSourceConnections();
 			break;
+
 		case ADD_OFFICE_FLOOR_MANAGED_OBJECT:
 		case REMOVE_OFFICE_FLOOR_MANAGED_OBJECT:
-			this.refreshTargetConnections();
-			break;
 		case ADD_BOUND_OFFICE_FLOOR_INPUT_MANAGED_OBJECT:
 		case REMOVE_BOUND_OFFICE_FLOOR_INPUT_MANAGED_OBJECT:
 			this.refreshTargetConnections();
 			break;
+
 		case ADD_OFFICE_FLOOR_MANAGED_OBJECT_SOURCE_FLOW:
 		case REMOVE_OFFICE_FLOOR_MANAGED_OBJECT_SOURCE_FLOW:
 		case ADD_OFFICE_FLOOR_MANAGED_OBJECT_SOURCE_TEAM:
 		case REMOVE_OFFICE_FLOOR_MANAGED_OBJECT_SOURCE_TEAM:
+		case ADD_OFFICE_FLOOR_MANAGED_OBJECT_SOURCE_INPUT_DEPENDENCY:
+		case REMOVE_OFFICE_FLOOR_MANAGED_OBJECT_SOURCE_INPUT_DEPENDENCY:
 			this.refreshChildren();
+			break;
+
+		case CHANGE_MANAGED_OBJECT_SOURCE_CLASS_NAME:
+		case CHANGE_OBJECT_TYPE:
+		case CHANGE_TIMEOUT:
+		case ADD_PROPERTY:
+		case REMOVE_PROPERTY:
+			// Non visual change
 			break;
 		}
 	}
