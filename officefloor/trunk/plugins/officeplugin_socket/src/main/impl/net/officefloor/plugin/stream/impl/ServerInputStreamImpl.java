@@ -18,6 +18,7 @@
 package net.officefloor.plugin.stream.impl;
 
 import java.io.IOException;
+import java.io.Serializable;
 
 import net.officefloor.plugin.stream.BrowseInputStream;
 import net.officefloor.plugin.stream.NoAvailableInputException;
@@ -69,10 +70,39 @@ public class ServerInputStreamImpl extends ServerInputStream {
 	 * Initiate.
 	 * 
 	 * @param lock
-	 *            Object to <code>synchronize</code> on for operaterations.
+	 *            Object to <code>synchronize</code> on for operations.
 	 */
 	public ServerInputStreamImpl(Object lock) {
 		this.lock = lock;
+	}
+
+	/**
+	 * Initiate.
+	 * 
+	 * @param lock
+	 *            Object to <code>synchronize</code> on for operations.
+	 * @param stateMomento
+	 *            Momento containing the state for this
+	 *            {@link ServerInputStream}.
+	 */
+	public ServerInputStreamImpl(Object lock, Serializable stateMomento) {
+		this(lock);
+
+		// Ensure state momento is valid
+		if (!(stateMomento instanceof StateMomento)) {
+			throw new IllegalArgumentException("Invalid momento for "
+					+ ServerInputStream.class.getSimpleName());
+		}
+		StateMomento state = (StateMomento) stateMomento;
+
+		// Load the state
+		this.headBuffer = state.headBuffer;
+		this.currentBufferIndex = state.headBufferIndex;
+		this.isFurtherData = false;
+
+		// Provide the available
+		this.available = calculateAvailable(this.headBuffer,
+				this.currentBufferIndex, this.isFurtherData);
 	}
 
 	/**
@@ -91,6 +121,12 @@ public class ServerInputStreamImpl extends ServerInputStream {
 			boolean isFurtherData) {
 
 		synchronized (this.lock) {
+
+			// Ensure not previously flagged that no further data
+			if (!this.isFurtherData) {
+				throw new IllegalStateException(
+						"May not input further data as flagged previously that no further data");
+			}
 
 			// Ensure have data
 			if (data != null) {
@@ -127,6 +163,32 @@ public class ServerInputStreamImpl extends ServerInputStream {
 
 			// Indicate if further data
 			this.isFurtherData = isFurtherData;
+		}
+	}
+
+	/**
+	 * Extracts the momento containing the current state of the
+	 * {@link ServerInputStream}.
+	 * 
+	 * @return Momento containing the current state of the
+	 *         {@link ServerInputStream}.
+	 * @throws NotAllDataAvailableException
+	 *             Should all input data not be available.
+	 */
+	public Serializable extractStateMomento()
+			throws NotAllDataAvailableException {
+
+		synchronized (this.lock) {
+
+			// Ensure state complete by no further data
+			if (this.isFurtherData) {
+				throw new NotAllDataAvailableException(
+						ServerInputStream.class.getSimpleName()
+								+ " has not finished receiving data.  Can not obtain complete state momento.");
+			}
+
+			// Return the state momento
+			return new StateMomento(this.headBuffer, this.currentBufferIndex);
 		}
 	}
 
@@ -198,9 +260,38 @@ public class ServerInputStreamImpl extends ServerInputStream {
 	}
 
 	/**
+	 * Momento for the state of this {@link ServerInputStream}.
+	 */
+	private static class StateMomento implements Serializable {
+
+		/**
+		 * Head {@link ReadBuffer}.
+		 */
+		private final ReadBuffer headBuffer;
+
+		/**
+		 * Head {@link ReadBuffer} index.
+		 */
+		private final int headBufferIndex;
+
+		/**
+		 * Initiate.
+		 * 
+		 * @param headBuffer
+		 *            Head {@link ReadBuffer}.
+		 * @param headBufferIndex
+		 *            Head {@link ReadBuffer} inde.
+		 */
+		public StateMomento(ReadBuffer headBuffer, int headBufferIndex) {
+			this.headBuffer = headBuffer;
+			this.headBufferIndex = headBufferIndex;
+		}
+	}
+
+	/**
 	 * Read buffer.
 	 */
-	private static class ReadBuffer {
+	private static class ReadBuffer implements Serializable {
 
 		/**
 		 * Data.
@@ -337,35 +428,54 @@ public class ServerInputStreamImpl extends ServerInputStream {
 
 			synchronized (ServerInputStreamImpl.this.lock) {
 
-				// Determine if data is available on current buffer
-				if ((this.currentBuffer != null)
-						&& (this.currentBufferIndex > this.currentBuffer.endIndex)) {
-					// No data available, so move to next buffer
-					this.currentBuffer = this.currentBuffer.next;
-					if (this.currentBuffer != null) {
-						this.currentBufferIndex = this.currentBuffer.startIndex;
-					}
-				}
-
-				// Calculate the available
-				int available = 0;
-				ReadBuffer buffer = this.currentBuffer;
-				while (buffer != null) {
-					// +1 for including end index
-					available += ((buffer.endIndex - buffer.startIndex) + 1);
-					buffer = buffer.next;
-				}
-
-				// Determine if further data
-				if ((!ServerInputStreamImpl.this.isFurtherData)
-						&& (available == 0)) {
-					available = -1; // no further data
-				}
-
 				// Return the available
-				return available;
+				return calculateAvailable(this.currentBuffer,
+						this.currentBufferIndex,
+						ServerInputStreamImpl.this.isFurtherData);
 			}
 		}
+	}
+
+	/**
+	 * Calculates available.
+	 * 
+	 * @param currentBuffer
+	 *            Current {@link ReadBuffer}.
+	 * @param currentBufferIndex
+	 *            Current {@link ReadBuffer} index.
+	 * @param isFurtherData
+	 *            Indicates if further data.
+	 * @return Available data.
+	 */
+	private static int calculateAvailable(ReadBuffer currentBuffer,
+			int currentBufferIndex, boolean isFurtherData) {
+
+		// Determine if data is available on current buffer
+		if ((currentBuffer != null)
+				&& (currentBufferIndex > currentBuffer.endIndex)) {
+			// No data available, so move to next buffer
+			currentBuffer = currentBuffer.next;
+			if (currentBuffer != null) {
+				currentBufferIndex = currentBuffer.startIndex;
+			}
+		}
+
+		// Calculate the available
+		int available = 0;
+		ReadBuffer buffer = currentBuffer;
+		while (buffer != null) {
+			// +1 for including end index
+			available += ((buffer.endIndex - buffer.startIndex) + 1);
+			buffer = buffer.next;
+		}
+
+		// Determine if further data
+		if ((!isFurtherData) && (available == 0)) {
+			available = -1; // no further data
+		}
+
+		// Return the available
+		return available;
 	}
 
 }
