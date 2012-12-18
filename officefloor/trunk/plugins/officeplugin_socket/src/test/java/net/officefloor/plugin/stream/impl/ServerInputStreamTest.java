@@ -17,12 +17,17 @@
  */
 package net.officefloor.plugin.stream.impl;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.Serializable;
 
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.stream.BrowseInputStream;
-import net.officefloor.plugin.stream.ServerInputStream;
 import net.officefloor.plugin.stream.NoAvailableInputException;
+import net.officefloor.plugin.stream.ServerInputStream;
 
 /**
  * Tests the {@link ServerInputStream}.
@@ -168,6 +173,172 @@ public class ServerInputStreamTest extends OfficeFrameTestCase {
 		assertEquals("Incorrect second browse", 22, this.browse.read());
 		assertEquals("No available browse data", -1, this.browse.available());
 		assertEquals("Should be browse EOF", -1, this.browse.read());
+	}
+
+	/**
+	 * Ensure that can not input data once identified no further data.
+	 */
+	public void testNoFurtherInputData() {
+		this.stream.inputData(null, 0, 0, false);
+		try {
+			this.stream.inputData(null, 0, 0, false);
+			fail("Should not be successful");
+		} catch (IllegalStateException ex) {
+			assertEquals(
+					"Incorrect cause",
+					"May not input further data as flagged previously that no further data",
+					ex.getMessage());
+		}
+	}
+
+	/**
+	 * Ensure can not obtain the state momento if the input data is not yet
+	 * finished.
+	 */
+	public void testNoStateMomentoAsInputNotFinished() {
+		try {
+			this.stream.extractStateMomento();
+			fail("Should not be successful");
+		} catch (NotAllDataAvailableException ex) {
+			assertEquals(
+					"Incorrect cause",
+					"ServerInputStream has not finished receiving data.  Can not obtain complete state momento.",
+					ex.getMessage());
+		}
+	}
+
+	/**
+	 * Ensure only allow appropriate momento.
+	 */
+	public void testInvalidMomento() {
+
+		// Ensure fails if invalid momento
+		try {
+			new ServerInputStreamImpl(this, this.createMock(Serializable.class));
+			fail("Should not be successful");
+		} catch (IllegalArgumentException ex) {
+			assertEquals("Incorrect cause",
+					"Invalid momento for ServerInputStream", ex.getMessage());
+		}
+	}
+
+	/**
+	 * Ensure can have no data for momento state.
+	 */
+	public void testNoDataStateMomento() {
+
+		// No further data
+		this.stream.inputData(null, 0, 0, false);
+
+		// Ensure no content
+		this.assertMomentoClonedStream(null);
+	}
+
+	/**
+	 * Ensure can have data for momento state.
+	 */
+	public void testSingleInputDataStateMomento() {
+
+		// Load the single input data
+		final String CONTENT = "TEST";
+		final byte[] CONTENT_BYTES = CONTENT.getBytes();
+		this.stream.inputData(CONTENT_BYTES, 0, (CONTENT_BYTES.length - 1),
+				false);
+
+		// Ensure correct content
+		this.assertMomentoClonedStream(CONTENT);
+	}
+
+	/**
+	 * Ensure can have data for momento state.
+	 */
+	public void testMultipleInputDataStateMomento() {
+
+		// Load multiple input data
+		for (String content : new String[] { "ONE_", "TWO_", "THREE_", "last" }) {
+			byte[] contentBytes = content.getBytes();
+			this.stream.inputData(contentBytes, 0, (contentBytes.length - 1),
+					(!("last".equals(content))));
+		}
+
+		// Ensure correct content
+		this.assertMomentoClonedStream("ONE_TWO_THREE_last");
+	}
+
+	/**
+	 * Ensure input data can be offset.
+	 */
+	public void testOffsetInputDataStateMomento() {
+
+		for (String content : new String[] { "ONE_", "TWO_", "THREE_", "last" }) {
+			byte[] contentBytes = content.getBytes();
+			byte[] inputBytes = new byte[contentBytes.length + 4];
+			for (int i = 0; i < contentBytes.length; i++) {
+				inputBytes[i + 2] = contentBytes[i];
+			}
+			this.stream.inputData(inputBytes, 2, (inputBytes.length - 3),
+					(!("last".equals(content))));
+		}
+
+		// Ensure correct content
+		this.assertMomentoClonedStream("ONE_TWO_THREE_last");
+	}
+
+	/**
+	 * Asserts the cloning with momento.
+	 * 
+	 * @param expectedContent
+	 *            Expected content of the cloned {@link ServerInputStream}.
+	 */
+	private void assertMomentoClonedStream(String expectedContent) {
+		try {
+
+			// Extract the state (ensuring serialises)
+			Serializable momento = this.stream.extractStateMomento();
+
+			// Serialise the momento
+			ByteArrayOutputStream outputBuffer = new ByteArrayOutputStream();
+			ObjectOutputStream output = new ObjectOutputStream(outputBuffer);
+			output.writeObject(momento);
+			output.flush();
+
+			// Unserialise the momento
+			ByteArrayInputStream inputBuffer = new ByteArrayInputStream(
+					outputBuffer.toByteArray());
+			ObjectInputStream input = new ObjectInputStream(inputBuffer);
+			Serializable unserialisedMomento = (Serializable) input
+					.readObject();
+
+			// Create new input stream from momento
+			ServerInputStream clonedStream = new ServerInputStreamImpl(this,
+					unserialisedMomento);
+
+			// Determine stream cloned correctly
+			if (expectedContent == null) {
+				// Should have no content (end of stream)
+				assertEquals("Should have no content", -1,
+						clonedStream.available());
+
+			} else {
+				// Ensure appropriate content is available
+				byte[] expectedBytes = expectedContent.getBytes();
+				assertEquals("Incorrect number of bytes available",
+						expectedBytes.length, clonedStream.available());
+				byte[] actualBytes = new byte[expectedBytes.length];
+				clonedStream.read(actualBytes);
+				assertEquals("Incorrect content", expectedContent, new String(
+						actualBytes));
+				assertEquals("Should no be end of stream", -1,
+						clonedStream.available());
+			}
+
+			// Close the cloned stream
+			clonedStream.close();
+
+		} catch (Exception ex) {
+			// Should not occur so do not impose exception on tests
+			throw fail(ex);
+		}
 	}
 
 }
