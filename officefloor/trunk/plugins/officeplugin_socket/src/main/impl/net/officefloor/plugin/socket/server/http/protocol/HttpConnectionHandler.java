@@ -25,6 +25,7 @@ import java.util.logging.Logger;
 
 import net.officefloor.plugin.socket.server.http.HttpHeader;
 import net.officefloor.plugin.socket.server.http.conversation.HttpConversation;
+import net.officefloor.plugin.socket.server.http.conversation.HttpEntity;
 import net.officefloor.plugin.socket.server.http.conversation.HttpManagedObject;
 import net.officefloor.plugin.socket.server.http.parse.HttpRequestParseException;
 import net.officefloor.plugin.socket.server.http.parse.HttpRequestParser;
@@ -32,7 +33,6 @@ import net.officefloor.plugin.socket.server.protocol.Connection;
 import net.officefloor.plugin.socket.server.protocol.ConnectionHandler;
 import net.officefloor.plugin.socket.server.protocol.HeartBeatContext;
 import net.officefloor.plugin.socket.server.protocol.ReadContext;
-import net.officefloor.plugin.stream.ServerInputStream;
 
 /**
  * HTTP {@link ConnectionHandler}.
@@ -131,7 +131,7 @@ public class HttpConnectionHandler implements ConnectionHandler {
 					String requestURI = this.parser.getRequestURI();
 					String httpVersion = this.parser.getHttpVersion();
 					List<HttpHeader> headers = this.parser.getHeaders();
-					ServerInputStream entity = this.parser.getEntity();
+					HttpEntity entity = this.parser.getEntity();
 					this.parser.reset(); // reset for next request
 
 					// Service the request

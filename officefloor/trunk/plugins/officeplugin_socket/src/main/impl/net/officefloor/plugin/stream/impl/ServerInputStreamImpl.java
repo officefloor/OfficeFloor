@@ -84,8 +84,11 @@ public class ServerInputStreamImpl extends ServerInputStream {
 	 * @param stateMomento
 	 *            Momento containing the state for this
 	 *            {@link ServerInputStream}.
+	 * @throws IllegalArgumentException
+	 *             Should the momento be invalid.
 	 */
-	public ServerInputStreamImpl(Object lock, Serializable stateMomento) {
+	public ServerInputStreamImpl(Object lock, Serializable stateMomento)
+			throws IllegalArgumentException {
 		this(lock);
 
 		// Ensure state momento is valid

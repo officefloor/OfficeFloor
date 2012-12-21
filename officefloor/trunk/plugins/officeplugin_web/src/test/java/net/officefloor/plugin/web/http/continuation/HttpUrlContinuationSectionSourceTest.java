@@ -35,6 +35,7 @@ import net.officefloor.plugin.socket.server.http.source.HttpsServerSocketManaged
 import net.officefloor.plugin.web.http.application.HttpUriLink;
 import net.officefloor.plugin.web.http.location.HttpApplicationLocation;
 import net.officefloor.plugin.web.http.location.HttpApplicationLocationManagedObjectSource;
+import net.officefloor.plugin.web.http.route.HttpRouteTask;
 import net.officefloor.plugin.web.http.route.HttpRouteWorkSource;
 import net.officefloor.plugin.web.http.session.HttpSession;
 import net.officefloor.plugin.web.http.session.source.HttpSessionManagedObjectSource;
@@ -192,14 +193,14 @@ public class HttpUrlContinuationSectionSourceTest extends OfficeFrameTestCase {
 		// Obtain the URLs
 		final String SECURE_URL = "https://" + hostName + ":7979/uri";
 		final String NON_SECURE_URL = "http://" + hostName + ":7878/uri";
-		String urlTest;
+		String urlInitial;
 		String urlRedirect;
 		if (isSecure) {
-			urlTest = SECURE_URL;
-			urlRedirect = NON_SECURE_URL;
+			urlInitial = NON_SECURE_URL;
+			urlRedirect = SECURE_URL + HttpRouteTask.REDIRECT_URI_SUFFIX;
 		} else {
-			urlTest = NON_SECURE_URL;
-			urlRedirect = SECURE_URL;
+			urlInitial = SECURE_URL;
+			urlRedirect = NON_SECURE_URL + HttpRouteTask.REDIRECT_URI_SUFFIX;
 		}
 
 		// Start application
@@ -207,15 +208,15 @@ public class HttpUrlContinuationSectionSourceTest extends OfficeFrameTestCase {
 		try {
 
 			// Ensure redirect if not appropriately secure
-			HttpResponse response = client.execute(new HttpGet(urlRedirect));
+			HttpResponse response = client.execute(new HttpGet(urlInitial));
 			assertEquals("Should be redirect", 303, response.getStatusLine()
 					.getStatusCode());
-			assertEquals("Incorrect redirect location", urlTest, response
+			assertEquals("Incorrect redirect location", urlRedirect, response
 					.getFirstHeader("Location").getValue());
 			response.getEntity().consumeContent();
 
 			// Ensure servicing request
-			response = client.execute(new HttpGet(urlTest));
+			response = client.execute(new HttpGet(urlRedirect));
 			assertEquals("Should be successful", 200, response.getStatusLine()
 					.getStatusCode());
 			assertEquals("Incorrect response", "SERVICED",

@@ -22,6 +22,8 @@ import java.nio.charset.Charset;
 import java.util.LinkedList;
 import java.util.List;
 
+import net.officefloor.plugin.socket.server.http.conversation.HttpEntity;
+import net.officefloor.plugin.socket.server.http.conversation.impl.HttpEntityImpl;
 import net.officefloor.plugin.socket.server.http.conversation.impl.HttpRequestImpl;
 import net.officefloor.plugin.socket.server.http.parse.impl.HttpHeaderImpl;
 import net.officefloor.plugin.stream.impl.ServerInputStreamImpl;
@@ -71,10 +73,11 @@ public class HttpTestUtil {
 		ServerInputStreamImpl inputStream = new ServerInputStreamImpl(
 				new Object());
 		inputStream.inputData(entityData, 0, (entityData.length - 1), false);
+		HttpEntity httpEntity = new HttpEntityImpl(inputStream);
 
 		// Return the HTTP request
 		return new HttpRequestImpl(method, requestUri, "HTTP/1.1", headers,
-				inputStream);
+				httpEntity);
 	}
 
 	/**

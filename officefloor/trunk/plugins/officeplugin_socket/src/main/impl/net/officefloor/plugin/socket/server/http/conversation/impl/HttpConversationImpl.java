@@ -28,10 +28,10 @@ import java.util.Queue;
 import net.officefloor.plugin.socket.server.http.HttpHeader;
 import net.officefloor.plugin.socket.server.http.HttpResponse;
 import net.officefloor.plugin.socket.server.http.conversation.HttpConversation;
+import net.officefloor.plugin.socket.server.http.conversation.HttpEntity;
 import net.officefloor.plugin.socket.server.http.conversation.HttpManagedObject;
 import net.officefloor.plugin.socket.server.http.parse.HttpRequestParseException;
 import net.officefloor.plugin.socket.server.protocol.Connection;
-import net.officefloor.plugin.stream.ServerInputStream;
 
 /**
  * Manages the HTTP conversation on a {@link Connection}.
@@ -95,7 +95,7 @@ public class HttpConversationImpl implements HttpConversation {
 	void queueCompleteResponses() throws IOException {
 
 		synchronized (this) {
-			
+
 			// Send the complete responses in order registered
 			for (Iterator<HttpManagedObjectImpl> iterator = this.managedObjects
 					.iterator(); iterator.hasNext();) {
@@ -128,8 +128,7 @@ public class HttpConversationImpl implements HttpConversation {
 
 	@Override
 	public HttpManagedObject addRequest(String method, String requestURI,
-			String httpVersion, List<HttpHeader> headers,
-			ServerInputStream entity) {
+			String httpVersion, List<HttpHeader> headers, HttpEntity entity) {
 
 		// Create the request
 		HttpRequestImpl request = new HttpRequestImpl(method, requestURI,

@@ -328,7 +328,7 @@ public class ServerInputStreamTest extends OfficeFrameTestCase {
 				clonedStream.read(actualBytes);
 				assertEquals("Incorrect content", expectedContent, new String(
 						actualBytes));
-				assertEquals("Should no be end of stream", -1,
+				assertEquals("Should now be end of stream", -1,
 						clonedStream.available());
 			}
 

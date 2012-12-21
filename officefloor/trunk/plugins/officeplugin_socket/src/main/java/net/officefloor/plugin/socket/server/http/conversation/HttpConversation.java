@@ -25,7 +25,6 @@ import net.officefloor.plugin.socket.server.http.HttpHeader;
 import net.officefloor.plugin.socket.server.http.HttpRequest;
 import net.officefloor.plugin.socket.server.http.parse.HttpRequestParseException;
 import net.officefloor.plugin.socket.server.protocol.Connection;
-import net.officefloor.plugin.stream.ServerInputStream;
 
 /**
  * HTTP conversation.
@@ -46,13 +45,11 @@ public interface HttpConversation {
 	 * @param headers
 	 *            {@link HttpHeader} instances.
 	 * @param entity
-	 *            {@link ServerInputStream} to the entity of the
-	 *            {@link HttpRequest}.
+	 *            {@link HttpEntity} to the entity of the {@link HttpRequest}.
 	 * @return {@link HttpManagedObject} to process the {@link HttpRequest}.
 	 */
 	HttpManagedObject addRequest(String method, String requestURI,
-			String httpVersion, List<HttpHeader> headers,
-			ServerInputStream entity);
+			String httpVersion, List<HttpHeader> headers, HttpEntity entity);
 
 	/**
 	 * Handles a failure in parsing a {@link HttpRequest}.

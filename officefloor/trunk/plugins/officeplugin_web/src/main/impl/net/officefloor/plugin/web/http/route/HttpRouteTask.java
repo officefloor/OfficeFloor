@@ -17,6 +17,7 @@
  */
 package net.officefloor.plugin.web.http.route;
 
+import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -35,6 +36,7 @@ import net.officefloor.plugin.socket.server.http.HttpRequest;
 import net.officefloor.plugin.socket.server.http.HttpResponse;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
 import net.officefloor.plugin.socket.server.http.protocol.HttpStatus;
+import net.officefloor.plugin.stream.impl.NotAllDataAvailableException;
 import net.officefloor.plugin.web.http.continuation.DuplicateHttpUrlContinuationException;
 import net.officefloor.plugin.web.http.continuation.HttpUrlContinuationDifferentiator;
 import net.officefloor.plugin.web.http.location.HttpApplicationLocation;
@@ -71,6 +73,18 @@ public class HttpRouteTask
 	public static enum HttpRouteTaskFlows {
 		NOT_HANDLED
 	}
+
+	/**
+	 * Suffix on the redirect {@link HttpRequest} URI to indicate a redirect has
+	 * occurred.
+	 */
+	public static final String REDIRECT_URI_SUFFIX = "#OFR";
+
+	/**
+	 * {@link HttpSession} attribute name to obtain the redirected
+	 * {@link HttpRequest} state momento.
+	 */
+	private static final String SESSION_REDIRECTED_REQUEST = "_OfficeFloorRedirectedRequest_";
 
 	/**
 	 * URL continuations by application URI path.
@@ -142,8 +156,9 @@ public class HttpRouteTask
 	public Object doTask(
 			TaskContext<HttpRouteTask, HttpRouteTaskDependencies, HttpRouteTaskFlows> context)
 			throws InvalidHttpRequestUriException,
-			HttpRequestTokeniseException, UnknownWorkException,
-			UnknownTaskException, InvalidParameterTypeException {
+			HttpRequestTokeniseException, NotAllDataAvailableException,
+			UnknownWorkException, UnknownTaskException,
+			InvalidParameterTypeException {
 
 		// Obtain the dependencies
 		ServerHttpConnection connection = (ServerHttpConnection) context
@@ -153,8 +168,22 @@ public class HttpRouteTask
 		HttpSession session = (HttpSession) context
 				.getObject(HttpRouteTaskDependencies.HTTP_SESSION);
 
-		// Obtain the canonical path from request
+		// Determine if redirect
 		String path = connection.getHttpRequest().getRequestURI();
+		if (path.endsWith(REDIRECT_URI_SUFFIX)) {
+			// Redirect, so load previous request (if available)
+			Serializable redirectedMomento = (Serializable) session
+					.getAttribute(SESSION_REDIRECTED_REQUEST);
+			if (redirectedMomento != null) {
+				// Import redirect state
+				connection.importState(redirectedMomento);
+
+				// Use the redirected request URI
+				path = connection.getHttpRequest().getRequestURI();
+			}
+		}
+
+		// Obtain the canonical path from request
 		try {
 			path = location.transformToApplicationCanonicalPath(path);
 		} catch (IncorrectHttpRequestContextPathException ex) {
@@ -163,7 +192,7 @@ public class HttpRouteTask
 			return null;
 		}
 
-		// Obtain the uri path only
+		// Obtain the URI path only
 		RequestPathHandler handler = new RequestPathHandler();
 		new HttpRequestTokeniserImpl().tokeniseRequestURI(path, handler);
 		path = handler.path;
@@ -188,10 +217,14 @@ public class HttpRouteTask
 			String redirectUrl = location.transformToClientPath(path,
 					isRequireSecure.booleanValue());
 
+			// Maintain state momento of redirected request
+			Serializable redirectMomento = connection.exportState();
+			session.setAttribute(SESSION_REDIRECTED_REQUEST, redirectMomento);
+
 			// Send redirect for making secure
 			HttpResponse response = connection.getHttpResponse();
 			response.setStatus(HttpStatus.SC_SEE_OTHER);
-			response.addHeader("Location", redirectUrl);
+			response.addHeader("Location", redirectUrl + REDIRECT_URI_SUFFIX);
 			return null;
 		}
 

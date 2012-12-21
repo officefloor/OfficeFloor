@@ -18,10 +18,12 @@
 
 package net.officefloor.plugin.socket.server.http;
 
+import java.io.Serializable;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 
 import net.officefloor.frame.api.manage.OfficeFloor;
+import net.officefloor.plugin.stream.impl.NotAllDataAvailableException;
 
 /**
  * HTTP connection to be handled by the {@link OfficeFloor}.
@@ -45,7 +47,8 @@ public interface ServerHttpConnection {
 	HttpResponse getHttpResponse();
 
 	/**
-	 * Indicates if the connection is over a secure channel (e.g. utilising SSL).
+	 * Indicates if the connection is over a secure channel (e.g. utilising
+	 * SSL).
 	 * 
 	 * @return <code>true</code> if connection is over a secure channel.
 	 */
@@ -66,5 +69,30 @@ public interface ServerHttpConnection {
 	 *         for this {@link ServerHttpConnection}.
 	 */
 	InetSocketAddress getRemoteAddress();
+
+	/**
+	 * <p>
+	 * Exports the state of the current {@link HttpRequest}.
+	 * <p>
+	 * This enables maintaining the state of the {@link HttpRequest} and later
+	 * reinstating it (typically after a redirect).
+	 * 
+	 * @return Momento containing the current {@link HttpRequest} state.
+	 * @throws NotAllDataAvailableException
+	 *             Should all of the {@link HttpRequest} data not yet be
+	 *             received.
+	 * @see #importState(Serializable)
+	 */
+	Serializable exportState() throws NotAllDataAvailableException;
+
+	/**
+	 * Imports and overrides the current {@link HttpRequest} with the input
+	 * momento.
+	 * 
+	 * @param momento
+	 *            Momento exported from a {@link ServerHttpConnection}.
+	 * @see #exportState()
+	 */
+	void importState(Serializable momento);
 
 }

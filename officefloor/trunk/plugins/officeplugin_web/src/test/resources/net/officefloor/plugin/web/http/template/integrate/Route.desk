@@ -54,6 +54,9 @@
       <task-escalation escalation-type="net.officefloor.plugin.web.http.tokenise.HttpRequestTokeniseException">
         <external-flow name="Exception"/>
       </task-escalation>
+      <task-escalation escalation-type="net.officefloor.plugin.stream.impl.NotAllDataAvailableException">
+        <external-flow name="Exception"/>
+      </task-escalation>
       <task-escalation escalation-type="net.officefloor.frame.api.manage.UnknownWorkException">
         <external-flow name="Exception"/>
       </task-escalation>

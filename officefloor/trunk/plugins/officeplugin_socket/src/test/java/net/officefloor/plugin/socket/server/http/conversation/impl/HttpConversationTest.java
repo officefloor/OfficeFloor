@@ -35,6 +35,7 @@ import net.officefloor.plugin.socket.server.http.HttpHeader;
 import net.officefloor.plugin.socket.server.http.HttpRequest;
 import net.officefloor.plugin.socket.server.http.HttpResponse;
 import net.officefloor.plugin.socket.server.http.conversation.HttpConversation;
+import net.officefloor.plugin.socket.server.http.conversation.HttpEntity;
 import net.officefloor.plugin.socket.server.http.conversation.HttpManagedObject;
 import net.officefloor.plugin.socket.server.http.parse.HttpRequestParseException;
 import net.officefloor.plugin.socket.server.http.parse.UsAsciiUtil;
@@ -368,10 +369,11 @@ public class HttpConversationTest extends OfficeFrameTestCase {
 		entity = ((entity == null) || (entity.length() == 0)) ? "" : entity;
 		byte[] entityData = UsAsciiUtil.convertToUsAscii(entity);
 		entityStream.inputData(entityData, 0, (entityData.length - 1), false);
+		HttpEntity httpEntity = new HttpEntityImpl(entityStream);
 
 		// Add the request
 		return this.conversation.addRequest(method, requestURI, httpVersion,
-				headers, entityStream);
+				headers, httpEntity);
 	}
 
 	/**

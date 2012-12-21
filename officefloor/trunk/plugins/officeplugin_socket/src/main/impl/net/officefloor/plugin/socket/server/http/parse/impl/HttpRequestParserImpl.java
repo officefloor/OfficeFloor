@@ -25,10 +25,11 @@ import java.util.List;
 
 import net.officefloor.plugin.socket.server.http.HttpHeader;
 import net.officefloor.plugin.socket.server.http.HttpRequest;
+import net.officefloor.plugin.socket.server.http.conversation.HttpEntity;
+import net.officefloor.plugin.socket.server.http.conversation.impl.HttpEntityImpl;
 import net.officefloor.plugin.socket.server.http.parse.HttpRequestParseException;
 import net.officefloor.plugin.socket.server.http.parse.HttpRequestParser;
 import net.officefloor.plugin.socket.server.http.protocol.HttpStatus;
-import net.officefloor.plugin.stream.ServerInputStream;
 import net.officefloor.plugin.stream.impl.ServerInputStreamImpl;
 
 /**
@@ -278,9 +279,9 @@ public class HttpRequestParserImpl implements HttpRequestParser {
 	private List<HttpHeader> headers;
 
 	/**
-	 * Entity.
+	 * {@link ServerInputStreamImpl}.
 	 */
-	private ServerInputStreamImpl entity;
+	private ServerInputStreamImpl entityStream;
 
 	/**
 	 * Initiate.
@@ -486,7 +487,7 @@ public class HttpRequestParserImpl implements HttpRequestParser {
 		this.headers = new ArrayList<HttpHeader>(16);
 
 		// Once parsed, no further input so do not block writing by input
-		this.entity = new ServerInputStreamImpl(new Object());
+		this.entityStream = new ServerInputStreamImpl(new Object());
 	}
 
 	@Override
@@ -759,7 +760,8 @@ public class HttpRequestParserImpl implements HttpRequestParser {
 			int remainingBytes = data.length - this.nextByteToParseIndex;
 
 			// Determine the number of bytes required for entity
-			long requiredBytes = this.contentLength - this.entity.available();
+			long requiredBytes = this.contentLength
+					- this.entityStream.available();
 
 			// Determine if further data required
 			boolean isFurtherDataRequired = (requiredBytes > remainingBytes);
@@ -769,13 +771,13 @@ public class HttpRequestParserImpl implements HttpRequestParser {
 				// Consume partial of the bytes (-1 as index not length)
 				int endIndex = this.nextByteToParseIndex
 						+ ((int) requiredBytes) - 1;
-				this.entity.inputData(data, this.nextByteToParseIndex,
+				this.entityStream.inputData(data, this.nextByteToParseIndex,
 						endIndex, false);
 				this.nextByteToParseIndex = endIndex + 1; // after bytes read
 
 			} else {
 				// Consume all of the bytes
-				this.entity.inputData(data, this.nextByteToParseIndex,
+				this.entityStream.inputData(data, this.nextByteToParseIndex,
 						(data.length - 1), isFurtherDataRequired);
 				this.nextByteToParseIndex = -1; // all bytes consumed
 			}
@@ -785,7 +787,7 @@ public class HttpRequestParserImpl implements HttpRequestParser {
 
 		} else {
 			// No content (indicate no further data)
-			this.entity.inputData(null, 0, 0, false);
+			this.entityStream.inputData(null, 0, 0, false);
 
 			// Determine if consumed all bytes
 			if (this.nextByteToParseIndex == data.length) {
@@ -818,8 +820,8 @@ public class HttpRequestParserImpl implements HttpRequestParser {
 	}
 
 	@Override
-	public ServerInputStream getEntity() {
-		return this.entity;
+	public HttpEntity getEntity() {
+		return new HttpEntityImpl(this.entityStream);
 	}
 
 }

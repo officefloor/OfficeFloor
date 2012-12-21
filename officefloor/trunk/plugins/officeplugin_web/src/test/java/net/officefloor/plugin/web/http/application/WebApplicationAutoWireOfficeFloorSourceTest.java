@@ -42,6 +42,7 @@ import net.officefloor.plugin.socket.server.http.source.HttpsServerSocketManaged
 import net.officefloor.plugin.web.http.location.HttpApplicationLocationManagedObjectSource;
 import net.officefloor.plugin.web.http.resource.source.HttpFileSenderWorkSource;
 import net.officefloor.plugin.web.http.resource.source.SourceHttpResourceFactory;
+import net.officefloor.plugin.web.http.route.HttpRouteTask;
 import net.officefloor.plugin.web.http.session.HttpSession;
 import net.officefloor.plugin.web.http.session.source.HttpSessionManagedObjectSource;
 import net.officefloor.plugin.web.http.template.parse.HttpTemplate;
@@ -1345,7 +1346,7 @@ public class WebApplicationAutoWireOfficeFloorSourceTest extends
 			// Create the URLs
 			String url = "http://" + hostName + ":" + this.port + uri;
 			String redirectUrl = "https://" + hostName + ":" + this.securePort
-					+ uri;
+					+ uri + HttpRouteTask.REDIRECT_URI_SUFFIX;
 
 			// Send the request
 			HttpGet request = new HttpGet(url);
