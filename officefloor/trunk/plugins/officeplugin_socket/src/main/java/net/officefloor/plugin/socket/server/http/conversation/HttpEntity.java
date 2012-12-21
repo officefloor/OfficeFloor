@@ -15,55 +15,39 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
-package net.officefloor.plugin.socket.server.http.parse.impl;
+package net.officefloor.plugin.socket.server.http.conversation;
 
 import java.io.Serializable;
 
-import net.officefloor.plugin.socket.server.http.HttpHeader;
+import net.officefloor.plugin.stream.ServerInputStream;
+import net.officefloor.plugin.stream.impl.NotAllDataAvailableException;
 
 /**
- * {@link HttpHeader} implementation.
+ * HTTP entity.
  * 
  * @author Daniel Sagenschneider
  */
-public class HttpHeaderImpl implements HttpHeader, Serializable {
+public interface HttpEntity {
 
 	/**
-	 * Name.
-	 */
-	private final String name;
-
-	/**
-	 * Value.
-	 */
-	private final String value;
-
-	/**
-	 * Initiate.
+	 * Obtains the {@link ServerInputStream} to the entity content.
 	 * 
-	 * @param name
-	 *            Name.
-	 * @param value
-	 *            Value.
+	 * @return {@link ServerInputStream} to the entity content.
 	 */
-	public HttpHeaderImpl(String name, String value) {
-		this.name = name;
-		this.value = value;
-	}
+	ServerInputStream getInputStream();
 
-	/*
-	 * =================== HttpHeader ============================
+	/**
+	 * <p>
+	 * Exports the current state of the entity.
+	 * <p>
+	 * Note that only non-consumed content will be available in the current
+	 * state.
+	 * 
+	 * @return Momento of the current state of the entity.
+	 * @throws NotAllDataAvailableException
+	 *             Should the data for the entity not be fully received from the
+	 *             client.
 	 */
-
-	@Override
-	public String getName() {
-		return this.name;
-	}
-
-	@Override
-	public String getValue() {
-		return this.value;
-	}
+	Serializable exportState() throws NotAllDataAvailableException;
 
 }

@@ -32,6 +32,7 @@ import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.socket.server.http.HttpHeader;
 import net.officefloor.plugin.socket.server.http.HttpResponse;
 import net.officefloor.plugin.socket.server.http.conversation.HttpConversation;
+import net.officefloor.plugin.socket.server.http.conversation.HttpEntity;
 import net.officefloor.plugin.socket.server.http.conversation.HttpManagedObject;
 import net.officefloor.plugin.socket.server.http.parse.HttpRequestParseException;
 import net.officefloor.plugin.socket.server.http.parse.UsAsciiUtil;
@@ -470,8 +471,9 @@ public class HttpResponseTest extends OfficeFrameTestCase implements Connection 
 	private HttpResponse createHttpResponse() {
 
 		// Add the request
-		ServerInputStreamImpl entity = new ServerInputStreamImpl(new Object());
-		entity.inputData(null, 0, 0, false);
+		ServerInputStreamImpl content = new ServerInputStreamImpl(new Object());
+		content.inputData(null, 0, 0, false);
+		HttpEntity entity = new HttpEntityImpl(content);
 		HttpManagedObject mo = this.conversation.addRequest("GET", "/mock",
 				"HTTP/1.1", new LinkedList<HttpHeader>(), entity);
 

@@ -23,7 +23,7 @@ import java.util.List;
 
 import net.officefloor.plugin.socket.server.http.HttpHeader;
 import net.officefloor.plugin.socket.server.http.HttpRequest;
-import net.officefloor.plugin.stream.ServerInputStream;
+import net.officefloor.plugin.socket.server.http.conversation.HttpEntity;
 
 /**
  * Parses a {@link HttpRequest}.
@@ -101,11 +101,10 @@ public interface HttpRequestParser {
 	List<HttpHeader> getHeaders();
 
 	/**
-	 * Obtains the {@link ServerInputStream} to the entity of the
-	 * {@link HttpRequest}.
+	 * Obtains the {@link HttpEntity} of the {@link HttpRequest}.
 	 * 
-	 * @return {@link ServerInputStream} to the entity of the {@link HttpRequest}.
+	 * @return {@link HttpEntity} of the {@link HttpRequest}.
 	 */
-	ServerInputStream getEntity();
+	HttpEntity getEntity();
 
 }

@@ -27,14 +27,13 @@ import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.socket.server.http.HttpHeader;
 import net.officefloor.plugin.socket.server.http.HttpRequest;
 import net.officefloor.plugin.socket.server.http.conversation.HttpConversation;
+import net.officefloor.plugin.socket.server.http.conversation.HttpEntity;
 import net.officefloor.plugin.socket.server.http.conversation.impl.HttpManagedObjectImpl;
 import net.officefloor.plugin.socket.server.http.parse.HttpRequestParseException;
 import net.officefloor.plugin.socket.server.http.parse.HttpRequestParser;
 import net.officefloor.plugin.socket.server.protocol.Connection;
 import net.officefloor.plugin.socket.server.protocol.HeartBeatContext;
 import net.officefloor.plugin.socket.server.protocol.ReadContext;
-import net.officefloor.plugin.stream.ServerInputStream;
-import net.officefloor.plugin.stream.impl.ServerInputStreamImpl;
 
 /**
  * Tests the {@link HttpConnectionHandler}.
@@ -110,7 +109,7 @@ public class HttpConnectionHandlerTest extends OfficeFrameTestCase {
 		final String requestURI = "/path";
 		final String httpVersion = "HTTP/1.1";
 		final List<HttpHeader> headers = new LinkedList<HttpHeader>();
-		final ServerInputStream entity = new ServerInputStreamImpl(new Object());
+		final HttpEntity entity = this.createMock(HttpEntity.class);
 		final HttpManagedObjectImpl managedObject = new HttpManagedObjectImpl(
 				null);
 

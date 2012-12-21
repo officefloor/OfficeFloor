@@ -17,6 +17,7 @@
  */
 package net.officefloor.plugin.web.http.route;
 
+import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -210,6 +211,14 @@ public class HttpRouteTaskTest extends OfficeFrameTestCase {
 				"/redirect", Boolean.FALSE);
 	}
 
+	/**
+	 * Ensure services redirected {@link HttpRequest}.
+	 */
+	public void testServiceRedirectedRequest() throws Throwable {
+		this.doRouteTest("/redirect" + HttpRouteTask.REDIRECT_URI_SUFFIX,
+				"redirect", true, "redirect", "/redirect", Boolean.TRUE);
+	}
+
 	/*
 	 * =================== Helpers ============================
 	 */
@@ -268,6 +277,7 @@ public class HttpRouteTaskTest extends OfficeFrameTestCase {
 
 		final FlowFuture flowFuture = this.createMock(FlowFuture.class);
 		final HttpHeader httpHeader = this.createMock(HttpHeader.class);
+		final Serializable state = this.createMock(Serializable.class);
 		final String redirectUrl = "http://redirect/context" + uriPath;
 
 		// Record the office URL continuations
@@ -301,10 +311,16 @@ public class HttpRouteTaskTest extends OfficeFrameTestCase {
 								urlServicer.isSecure.booleanValue()),
 						redirectUrl);
 				this.recordReturn(this.connection,
+						this.connection.exportState(), state);
+				this.session.setAttribute("_OfficeFloorRedirectedRequest_",
+						state);
+				this.recordReturn(this.connection,
 						this.connection.getHttpResponse(), this.response);
 				this.response.setStatus(303); // Status = See other
-				this.recordReturn(this.response,
-						this.response.addHeader("Location", redirectUrl),
+				this.recordReturn(
+						this.response,
+						this.response.addHeader("Location", redirectUrl
+								+ HttpRouteTask.REDIRECT_URI_SUFFIX),
 						httpHeader);
 
 				// Record initial servicing of redirect
@@ -367,6 +383,7 @@ public class HttpRouteTaskTest extends OfficeFrameTestCase {
 			boolean isConnectionSecure) throws Exception {
 
 		final String requestUri = "/context" + uriPath;
+		final Serializable state = this.createMock(Serializable.class);
 
 		// Record dependencies
 		this.recordDependencies();
@@ -376,6 +393,18 @@ public class HttpRouteTaskTest extends OfficeFrameTestCase {
 				this.request);
 		this.recordReturn(this.request, this.request.getRequestURI(),
 				requestUri);
+		if (requestUri.endsWith(HttpRouteTask.REDIRECT_URI_SUFFIX)) {
+			// Record servicing redirected request
+			this.recordReturn(
+					this.session,
+					this.session.getAttribute("_OfficeFloorRedirectedRequest_"),
+					state);
+			this.connection.importState(state);
+			this.recordReturn(this.connection, this.connection.getHttpRequest(),
+					this.request);
+			this.recordReturn(this.request, this.request.getRequestURI(),
+					requestUri);
+		}
 		this.recordReturn(this.location,
 				this.location.transformToApplicationCanonicalPath(requestUri),
 				uriPath);

@@ -19,18 +19,23 @@
 package net.officefloor.plugin.socket.server.http.conversation.impl;
 
 import java.io.IOException;
+import java.io.Serializable;
 import java.net.InetSocketAddress;
 import java.nio.channels.ClosedChannelException;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import net.officefloor.frame.api.escalate.EscalationHandler;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
+import net.officefloor.plugin.socket.server.http.HttpHeader;
 import net.officefloor.plugin.socket.server.http.HttpRequest;
 import net.officefloor.plugin.socket.server.http.HttpResponse;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
 import net.officefloor.plugin.socket.server.http.conversation.HttpManagedObject;
 import net.officefloor.plugin.socket.server.protocol.Connection;
+import net.officefloor.plugin.stream.impl.NotAllDataAvailableException;
+import net.officefloor.plugin.stream.impl.ServerInputStreamImpl;
 
 /**
  * {@link ManagedObject} for the {@link ServerHttpConnection}.
@@ -54,7 +59,7 @@ public class HttpManagedObjectImpl implements HttpManagedObject,
 	/**
 	 * {@link HttpRequest}.
 	 */
-	private final HttpRequestImpl request;
+	private volatile HttpRequestImpl request;
 
 	/**
 	 * {@link HttpResponse}.
@@ -158,6 +163,32 @@ public class HttpManagedObjectImpl implements HttpManagedObject,
 		return this.connection.getRemoteAddress();
 	}
 
+	@Override
+	public Serializable exportState() throws NotAllDataAvailableException {
+		return new StateMomento(this.request.getMethod(),
+				this.request.getRequestURI(), this.request.getHeaders(),
+				this.request.exportEntityState());
+	}
+
+	@Override
+	public void importState(Serializable momento) {
+
+		// Ensure valid momento
+		if (!(momento instanceof StateMomento)) {
+			throw new IllegalArgumentException("Invalid momento for "
+					+ ServerHttpConnection.class.getSimpleName());
+		}
+		StateMomento state = (StateMomento) momento;
+
+		// Override the request with momento state
+		ServerInputStreamImpl entityStream = new ServerInputStreamImpl(
+				new Object(), state.entityMomento);
+		HttpRequestImpl overrideRequest = new HttpRequestImpl(state.method,
+				state.requestUri, this.request.getVersion(), state.headers,
+				new HttpEntityImpl(entityStream));
+		this.request = overrideRequest;
+	}
+
 	/*
 	 * ================== EscalationHandler =============================
 	 */
@@ -182,6 +213,52 @@ public class HttpManagedObjectImpl implements HttpManagedObject,
 				LOGGER.log(Level.INFO, "Unable to send HTTP failure message",
 						ex);
 			}
+		}
+	}
+
+	/**
+	 * Momento for the state of this {@link ServerHttpConnection}.
+	 */
+	private static class StateMomento implements Serializable {
+
+		/**
+		 * HTTP method.
+		 */
+		private final String method;
+
+		/**
+		 * Request URI.
+		 */
+		private final String requestUri;
+
+		/**
+		 * {@link HttpHeader} instances.
+		 */
+		private final List<HttpHeader> headers;
+
+		/**
+		 * Momento for the state of the entity.
+		 */
+		private final Serializable entityMomento;
+
+		/**
+		 * Initiate.
+		 * 
+		 * @param method
+		 *            Method.
+		 * @param requestUri
+		 *            Request URI.
+		 * @param headers
+		 *            {@link HttpHeader} instances.
+		 * @param entityMomento
+		 *            Entity state momento.
+		 */
+		public StateMomento(String method, String requestUri,
+				List<HttpHeader> headers, Serializable entityMomento) {
+			this.method = method;
+			this.requestUri = requestUri;
+			this.headers = headers;
+			this.entityMomento = entityMomento;
 		}
 	}
 

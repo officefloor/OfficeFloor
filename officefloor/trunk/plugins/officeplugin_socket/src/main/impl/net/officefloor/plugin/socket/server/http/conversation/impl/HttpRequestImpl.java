@@ -18,11 +18,14 @@
 
 package net.officefloor.plugin.socket.server.http.conversation.impl;
 
+import java.io.Serializable;
 import java.util.List;
 
 import net.officefloor.plugin.socket.server.http.HttpHeader;
 import net.officefloor.plugin.socket.server.http.HttpRequest;
+import net.officefloor.plugin.socket.server.http.conversation.HttpEntity;
 import net.officefloor.plugin.stream.ServerInputStream;
+import net.officefloor.plugin.stream.impl.NotAllDataAvailableException;
 
 /**
  * {@link HttpRequest} implementation.
@@ -54,7 +57,7 @@ public class HttpRequestImpl implements HttpRequest {
 	/**
 	 * Entity.
 	 */
-	private final ServerInputStream entity;
+	private final HttpEntity entity;
 
 	/**
 	 * Initiate.
@@ -68,15 +71,26 @@ public class HttpRequestImpl implements HttpRequest {
 	 * @param headers
 	 *            {@link HttpHeader} instances.
 	 * @param entity
-	 *            {@link ServerInputStream} to the entity.
+	 *            {@link HttpEntity} to the entity.
 	 */
 	public HttpRequestImpl(String method, String requestURI,
-			String httpVersion, List<HttpHeader> headers, ServerInputStream entity) {
+			String httpVersion, List<HttpHeader> headers, HttpEntity entity) {
 		this.method = method;
 		this.requestURI = requestURI;
 		this.version = httpVersion;
 		this.headers = headers;
 		this.entity = entity;
+	}
+
+	/**
+	 * Exports a momento for the current state of the {@link HttpEntity}.
+	 * 
+	 * @return Momento for the current state of the {@link HttpEntity}.
+	 * @throws NotAllDataAvailableException
+	 *             Should not all data be available for the {@link HttpEntity}.
+	 */
+	public Serializable exportEntityState() throws NotAllDataAvailableException {
+		return this.entity.exportState();
 	}
 
 	/*
@@ -105,7 +119,7 @@ public class HttpRequestImpl implements HttpRequest {
 
 	@Override
 	public ServerInputStream getEntity() {
-		return this.entity;
+		return this.entity.getInputStream();
 	}
 
 }

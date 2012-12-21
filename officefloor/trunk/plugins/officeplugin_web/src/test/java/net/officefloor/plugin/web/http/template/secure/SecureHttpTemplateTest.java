@@ -27,10 +27,12 @@ import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.section.clazz.ClassSectionSource;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
 import net.officefloor.plugin.socket.server.http.server.MockHttpServer;
+import net.officefloor.plugin.stream.ServerWriter;
 import net.officefloor.plugin.web.http.application.HttpParameters;
 import net.officefloor.plugin.web.http.application.HttpTemplateAutoWireSection;
 import net.officefloor.plugin.web.http.application.HttpUriLink;
 import net.officefloor.plugin.web.http.parameters.source.HttpParametersObjectManagedObjectSource;
+import net.officefloor.plugin.web.http.route.HttpRouteTask;
 import net.officefloor.plugin.web.http.server.HttpServerAutoWireOfficeFloorSource;
 import net.officefloor.plugin.web.http.template.parse.HttpTemplate;
 
@@ -43,14 +45,12 @@ import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.params.BasicHttpParams;
 import org.apache.http.params.HttpParams;
-import org.junit.Ignore;
 
 /**
  * Ensures secure functionality of {@link HttpTemplate}.
  * 
  * @author Daniel Sagenschneider
  */
-@Ignore("TODO build HttpRequest momento to provide required functionality for tests")
 public class SecureHttpTemplateTest extends OfficeFrameTestCase {
 
 	/**
@@ -192,16 +192,14 @@ public class SecureHttpTemplateTest extends OfficeFrameTestCase {
 
 		// Determine the expected entity of serviced request
 		String linkUri = "/template-LINK";
-		if ((isLinkSecure != null)
-				&& (isLinkSecure.booleanValue() != isTemplateSecure)) {
-			// Fully qualified URL as differently secure
-			linkUri = redirectUrl;
-		}
 		String expectedEntity = (isLinkSecure != null ? "link-" : "")
 				+ "SECURE - Daniel(1) - " + linkUri;
 
 		// Determine if redirecting
 		if (redirectUrl != null) {
+			// Ensure have prefix on redirect URL
+			redirectUrl = redirectUrl + HttpRouteTask.REDIRECT_URI_SUFFIX;
+
 			// Ensure redirect to appropriately secure URL
 			assertEquals("Should be redirect", 303, response.getStatusLine()
 					.getStatusCode());
@@ -236,7 +234,10 @@ public class SecureHttpTemplateTest extends OfficeFrameTestCase {
 		}
 
 		public void LINK(ServerHttpConnection connection) throws IOException {
-			connection.getHttpResponse().getEntityWriter().write("link-");
+			ServerWriter writer = connection.getHttpResponse()
+					.getEntityWriter();
+			writer.write("link-");
+			writer.flush();
 		}
 	}
 
@@ -245,7 +246,8 @@ public class SecureHttpTemplateTest extends OfficeFrameTestCase {
 	 */
 	public void testSecureUriRedirect() throws Exception {
 		this.doSecureUriTest(true, "http://localhost:7878/uri",
-				"https://localhost:7979/uri");
+				"https://localhost:7979/uri"
+						+ HttpRouteTask.REDIRECT_URI_SUFFIX);
 	}
 
 	/**
@@ -260,7 +262,7 @@ public class SecureHttpTemplateTest extends OfficeFrameTestCase {
 	 */
 	public void testInsecureUriRedirect() throws Exception {
 		this.doSecureUriTest(false, "https://localhost:7979/uri",
-				"http://localhost:7878/uri");
+				"http://localhost:7878/uri" + HttpRouteTask.REDIRECT_URI_SUFFIX);
 	}
 
 	/**
@@ -300,10 +302,11 @@ public class SecureHttpTemplateTest extends OfficeFrameTestCase {
 		// Determine if redirecting
 		if (redirectUrl != null) {
 			// Ensure redirect to appropriately secure connection
-			assertEquals("Should be redirect", 301, response.getStatusLine()
+			assertEquals("Should be redirect", 303, response.getStatusLine()
 					.getStatusCode());
-			assertEquals("Incorrect redirect URL", redirectUrl,
-					response.getHeaders("Location"));
+			assertEquals("Incorrect redirect URL", redirectUrl, response
+					.getFirstHeader("Location").getValue());
+			response.getEntity().consumeContent();
 
 			// Undertake redirect to ensure parameters and entity are maintained
 			response = this.client.execute(new HttpGet(redirectUrl));

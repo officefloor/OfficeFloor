@@ -69,7 +69,7 @@ public class HttpRequestParserTest extends OfficeFrameTestCase {
 		assertEquals("Incorrect initial HTTP headers", 0,
 				this.httpRequestParser.getHeaders().size());
 		assertEquals("Initially should be no entity data", 0,
-				this.httpRequestParser.getEntity().available());
+				this.httpRequestParser.getEntity().getInputStream().available());
 	}
 
 	/**
@@ -760,7 +760,8 @@ public class HttpRequestParserTest extends OfficeFrameTestCase {
 		}
 
 		// Validate the entity
-		InputStream entityStream = this.httpRequestParser.getEntity();
+		InputStream entityStream = this.httpRequestParser.getEntity()
+				.getInputStream();
 		if (expectedEntity == null) {
 			// Should be no entity content available
 			assertEquals("Should be no entity content available", 0,
@@ -853,7 +854,8 @@ public class HttpRequestParserTest extends OfficeFrameTestCase {
 			if (isComplete) {
 				// Note, validate above should have consumed the entire entity
 				assertEquals("Should be no further content for entity", -1,
-						this.httpRequestParser.getEntity().read());
+						this.httpRequestParser.getEntity().getInputStream()
+								.read());
 			}
 
 			// Ensure correctly indicates the next byte to parse index
