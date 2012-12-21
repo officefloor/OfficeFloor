@@ -22,8 +22,8 @@ import java.io.IOException;
 
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
 import net.officefloor.plugin.stream.ServerWriter;
+import net.officefloor.plugin.web.http.continuation.HttpUrlContinuationWorkSource;
 import net.officefloor.plugin.web.http.location.HttpApplicationLocation;
-import net.officefloor.plugin.web.http.location.HttpApplicationLocationMangedObject;
 import net.officefloor.plugin.web.http.location.InvalidHttpRequestUriException;
 import net.officefloor.plugin.web.http.template.parse.HttpTemplate;
 import net.officefloor.plugin.web.http.template.parse.LinkHttpTemplateSectionContent;
@@ -56,10 +56,8 @@ public class LinkHttpTemplateWriter implements HttpTemplateWriter {
 		// Create the link URI path
 		String linkUriPath = templateUriPath + "-" + linkName
 				+ (templateUriSuffix == null ? "" : templateUriSuffix);
-		linkUriPath = (linkUriPath.startsWith("/") ? linkUriPath : "/"
-				+ linkUriPath);
-		linkUriPath = HttpApplicationLocationMangedObject
-				.transformToCanonicalPath(linkUriPath);
+		linkUriPath = HttpUrlContinuationWorkSource
+				.getApplicationUriPath(linkUriPath);
 
 		// Return the link URI path
 		return linkUriPath;
