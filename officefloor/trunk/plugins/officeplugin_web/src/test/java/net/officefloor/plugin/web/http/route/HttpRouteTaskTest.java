@@ -52,6 +52,51 @@ import net.officefloor.plugin.web.http.session.HttpSession;
 public class HttpRouteTaskTest extends OfficeFrameTestCase {
 
 	/**
+	 * Records undertaking a redirect.
+	 * 
+	 * @param uriPath
+	 *            URI path.
+	 * @param isSecure
+	 *            Indicates if requires secure.
+	 * @param connection
+	 *            {@link ServerHttpConnection}.
+	 * @param session
+	 *            {@link HttpSession}.
+	 * @param location
+	 *            {@link HttpApplicationLocation}.
+	 * @param test
+	 *            {@link OfficeFrameTestCase}.
+	 */
+	public static void recordDoRedirect(String uriPath, boolean isSecure,
+			ServerHttpConnection connection, HttpSession session,
+			HttpApplicationLocation location, OfficeFrameTestCase test) {
+		try {
+
+			final String redirectUrl = "http://redirect/context" + uriPath;
+			final Serializable state = test.createMock(Serializable.class);
+			final HttpResponse response = test.createMock(HttpResponse.class);
+			final HttpHeader header = test.createMock(HttpHeader.class);
+
+			// Record the redirect
+			test.recordReturn(location,
+					location.transformToClientPath(uriPath, isSecure),
+					redirectUrl);
+			test.recordReturn(connection, connection.exportState(), state);
+			session.setAttribute("_OfficeFloorRedirectedRequest_", state);
+			test.recordReturn(connection, connection.getHttpResponse(),
+					response);
+			response.setStatus(303); // Status = See other
+			test.recordReturn(
+					response,
+					response.addHeader("Location", redirectUrl
+							+ HttpRouteTask.REDIRECT_URI_SUFFIX), header);
+
+		} catch (Exception ex) {
+			throw fail(ex);
+		}
+	}
+
+	/**
 	 * Ensure issue if duplicate URI path within the {@link Office}.
 	 */
 	public void testDuplicateUri() throws Exception {
@@ -258,11 +303,6 @@ public class HttpRouteTaskTest extends OfficeFrameTestCase {
 	private final HttpRequest request = this.createMock(HttpRequest.class);
 
 	/**
-	 * {@link HttpResponse}.
-	 */
-	private final HttpResponse response = this.createMock(HttpResponse.class);
-
-	/**
 	 * {@link UrlServicer} instances by their {@link Task} name.
 	 */
 	private final Map<String, UrlServicer> urlServicers = new HashMap<String, UrlServicer>();
@@ -276,9 +316,6 @@ public class HttpRouteTaskTest extends OfficeFrameTestCase {
 			throws Throwable {
 
 		final FlowFuture flowFuture = this.createMock(FlowFuture.class);
-		final HttpHeader httpHeader = this.createMock(HttpHeader.class);
-		final Serializable state = this.createMock(Serializable.class);
-		final String redirectUrl = "http://redirect/context" + uriPath;
 
 		// Record the office URL continuations
 		this.recordUrlContinuations(taskNameThenUriPathThenIsSecureGroupings);
@@ -306,22 +343,8 @@ public class HttpRouteTaskTest extends OfficeFrameTestCase {
 				isRequireRedirect = true;
 
 				// Record the redirect
-				this.recordReturn(this.location, this.location
-						.transformToClientPath(uriPath,
-								urlServicer.isSecure.booleanValue()),
-						redirectUrl);
-				this.recordReturn(this.connection,
-						this.connection.exportState(), state);
-				this.session.setAttribute("_OfficeFloorRedirectedRequest_",
-						state);
-				this.recordReturn(this.connection,
-						this.connection.getHttpResponse(), this.response);
-				this.response.setStatus(303); // Status = See other
-				this.recordReturn(
-						this.response,
-						this.response.addHeader("Location", redirectUrl
-								+ HttpRouteTask.REDIRECT_URI_SUFFIX),
-						httpHeader);
+				recordDoRedirect(uriPath, urlServicer.isSecure.booleanValue(),
+						this.connection, this.session, this.location, this);
 
 				// Record initial servicing of redirect
 				this.recordInitialServicing(uriPath,
@@ -400,8 +423,8 @@ public class HttpRouteTaskTest extends OfficeFrameTestCase {
 					this.session.getAttribute("_OfficeFloorRedirectedRequest_"),
 					state);
 			this.connection.importState(state);
-			this.recordReturn(this.connection, this.connection.getHttpRequest(),
-					this.request);
+			this.recordReturn(this.connection,
+					this.connection.getHttpRequest(), this.request);
 			this.recordReturn(this.request, this.request.getRequestURI(),
 					requestUri);
 		}

@@ -26,6 +26,7 @@ import net.officefloor.compile.work.TaskType;
 import net.officefloor.frame.api.build.None;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
 import net.officefloor.plugin.web.http.location.HttpApplicationLocationMangedObject;
+import net.officefloor.plugin.web.http.location.InvalidHttpRequestUriException;
 
 /**
  * {@link WorkSource} for a HTTP URL continuation.
@@ -52,6 +53,30 @@ public class HttpUrlContinuationWorkSource extends
 	 */
 	public static final String TASK_NAME = "CONTINUATION";
 
+	/**
+	 * Obtains the application URI path from the configured URI path.
+	 * 
+	 * @param configuredUriPath
+	 *            Configured URI path.
+	 * @return Application URI path.
+	 * @throws InvalidHttpRequestUriException
+	 *             If configured URI path is invalid.
+	 */
+	public static String getApplicationUriPath(String configuredUriPath)
+			throws InvalidHttpRequestUriException {
+
+		// Ensure the configure URI path is absolute
+		String applicationUriPath = (configuredUriPath.startsWith("/") ? configuredUriPath
+				: "/" + configuredUriPath);
+
+		// Ensure is canonical
+		applicationUriPath = HttpApplicationLocationMangedObject
+				.transformToCanonicalPath(applicationUriPath);
+
+		// Return the Application URI path
+		return applicationUriPath;
+	}
+
 	/*
 	 * ====================== WorkSource ===========================
 	 */
@@ -68,10 +93,7 @@ public class HttpUrlContinuationWorkSource extends
 
 		// Obtain the application URI path (for use)
 		String applicationUriPath = context.getProperty(PROPERTY_URI_PATH);
-		applicationUriPath = (applicationUriPath.startsWith("/") ? applicationUriPath
-				: "/" + applicationUriPath);
-		applicationUriPath = HttpApplicationLocationMangedObject
-				.transformToCanonicalPath(applicationUriPath);
+		applicationUriPath = getApplicationUriPath(applicationUriPath);
 
 		// Determine if secure
 		String isSecureText = context.getProperty(PROPERTY_SECURE, null);

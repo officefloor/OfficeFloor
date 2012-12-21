@@ -61,6 +61,47 @@ public class HttpRouteTask
 		implements OfficeAwareWorkFactory<HttpRouteTask> {
 
 	/**
+	 * <p>
+	 * Undertakes a redirect.
+	 * <p>
+	 * This may be utilised by any {@link Task} with a
+	 * {@link HttpUrlContinuationDifferentiator} to trigger a redirect that will
+	 * have the {@link HttpRequest} state appropriately managed across the
+	 * redirect by the {@link HttpRouteTask}.
+	 * 
+	 * @param applicationUriPath
+	 *            Application URI path.
+	 * @param isSecure
+	 *            Whether a secure {@link ServerHttpConnection} is required.
+	 * @param connection
+	 *            {@link ServerHttpConnection}.
+	 * @param location
+	 *            {@link HttpApplicationLocation}.
+	 * @param session
+	 *            {@link HttpSession}.
+	 * @throws NotAllDataAvailableException
+	 *             Should all data for the {@link HttpResponse} not yet be
+	 *             received from the client.
+	 */
+	private static void doRedirect(String applicationUriPath, boolean isSecure,
+			ServerHttpConnection connection, HttpApplicationLocation location,
+			HttpSession session) throws NotAllDataAvailableException {
+
+		// Require redirect, so determine the redirect URL
+		String redirectUrl = location.transformToClientPath(applicationUriPath,
+				isSecure);
+
+		// Maintain state momento of redirected request
+		Serializable redirectMomento = connection.exportState();
+		session.setAttribute(SESSION_REDIRECTED_REQUEST, redirectMomento);
+
+		// Send redirect for making secure
+		HttpResponse response = connection.getHttpResponse();
+		response.setStatus(HttpStatus.SC_SEE_OTHER);
+		response.addHeader("Location", redirectUrl + REDIRECT_URI_SUFFIX);
+	}
+
+	/**
 	 * Dependencies for the {@link HttpRouteTask}.
 	 */
 	public static enum HttpRouteTaskDependencies {
@@ -213,18 +254,9 @@ public class HttpRouteTask
 		if ((isRequireSecure != null)
 				&& (isRequireSecure.booleanValue() != isConnectionSecure)) {
 
-			// Require redirect, so determine the redirect URL
-			String redirectUrl = location.transformToClientPath(path,
-					isRequireSecure.booleanValue());
-
-			// Maintain state momento of redirected request
-			Serializable redirectMomento = connection.exportState();
-			session.setAttribute(SESSION_REDIRECTED_REQUEST, redirectMomento);
-
-			// Send redirect for making secure
-			HttpResponse response = connection.getHttpResponse();
-			response.setStatus(HttpStatus.SC_SEE_OTHER);
-			response.addHeader("Location", redirectUrl + REDIRECT_URI_SUFFIX);
+			// Undertake the redirect
+			doRedirect(path, isRequireSecure.booleanValue(), connection,
+					location, session);
 			return null;
 		}
 
