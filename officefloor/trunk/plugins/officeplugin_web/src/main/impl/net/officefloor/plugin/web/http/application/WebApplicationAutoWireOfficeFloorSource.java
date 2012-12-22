@@ -37,9 +37,9 @@ import net.officefloor.compile.spi.section.SectionOutput;
 import net.officefloor.frame.api.escalate.Escalation;
 import net.officefloor.frame.api.execute.Task;
 import net.officefloor.plugin.web.http.continuation.HttpUrlContinuationSectionSource;
+import net.officefloor.plugin.web.http.continuation.HttpUrlContinuationWorkSource;
 import net.officefloor.plugin.web.http.location.HttpApplicationLocation;
 import net.officefloor.plugin.web.http.location.HttpApplicationLocationManagedObjectSource;
-import net.officefloor.plugin.web.http.location.HttpApplicationLocationMangedObject;
 import net.officefloor.plugin.web.http.location.InvalidHttpRequestUriException;
 import net.officefloor.plugin.web.http.parameters.source.HttpParametersObjectManagedObjectSource;
 import net.officefloor.plugin.web.http.resource.source.SourceHttpResourceFactory;
@@ -143,54 +143,6 @@ public class WebApplicationAutoWireOfficeFloorSource extends
 
 		// Return the URI suffix
 		return templateUriSuffix;
-	}
-
-	/**
-	 * Obtains the {@link HttpTemplate} URI path.
-	 * 
-	 * @param templateUri
-	 *            {@link HttpTemplate} URI.
-	 * @param templateUriSuffix
-	 *            {@link HttpTemplate} URI suffix.
-	 * @return {@link HttpTemplate} URI path
-	 */
-	private String getTemplateUriPath(String templateUri,
-			String templateUriSuffix) {
-		
-		// Obtain the canonical template URI path
-		String canonicalTemplateUri = this.getUriPath(templateUri);
-		if ("/".equals(canonicalTemplateUri)) {
-			// Root template, so do not include suffix
-			return canonicalTemplateUri;
-		}
-
-		// Return the template URI path
-		return this.getUriPath(templateUri + templateUriSuffix);
-	}
-
-	/**
-	 * Obtains the URI path.
-	 * 
-	 * @param configuredUri
-	 *            Configured URI.
-	 * @return URI path.
-	 */
-	private String getUriPath(String configuredUri) {
-
-		// Determine the URI path
-		String uriPath = configuredUri;
-		if (!(uriPath.startsWith("/"))) {
-			uriPath = "/" + uriPath;
-		}
-		try {
-			uriPath = HttpApplicationLocationMangedObject
-					.transformToCanonicalPath(uriPath);
-		} catch (InvalidHttpRequestUriException ex) {
-			// Do nothing and keep URI path as is
-		}
-
-		// Return the URI path
-		return uriPath;
 	}
 
 	/*
@@ -469,24 +421,12 @@ public class WebApplicationAutoWireOfficeFloorSource extends
 		// Create the URIs
 		List<String> uris = new LinkedList<String>();
 
-		// Add HTTP template URIs
-		for (HttpTemplateAutoWireSection httpTemplate : this.httpTemplates) {
-
-			// Obtain the template URI
-			String templateUri = httpTemplate.getTemplateUri();
-
-			// Ignore private templates
-			if (templateUri == null) {
-				continue;
+		// Determine if root template to include
+		for (HttpTemplateAutoWireSection template : this.httpTemplates) {
+			String templateUri = template.getTemplateUri();
+			if ("/".equals(templateUri)) {
+				uris.add(templateUri);
 			}
-
-			// Obtain the template URI path
-			String templateUriSuffix = this.getTemplateUriSuffix(httpTemplate);
-			String templateUriPath = this.getTemplateUriPath(templateUri,
-					templateUriSuffix);
-
-			// Add the template URI path
-			uris.add(templateUriPath);
 		}
 
 		// Add the linked URIs
@@ -495,7 +435,12 @@ public class WebApplicationAutoWireOfficeFloorSource extends
 
 			// Obtain the URI path
 			String uriPath = link.getApplicationUriPath();
-			uriPath = this.getUriPath(uriPath);
+			try {
+				uriPath = HttpUrlContinuationWorkSource
+						.getApplicationUriPath(uriPath);
+			} catch (InvalidHttpRequestUriException ex) {
+				// Do nothing and keep URI path as is
+			}
 
 			// Add the URI path
 			uris.add(uriPath);
@@ -577,16 +522,7 @@ public class WebApplicationAutoWireOfficeFloorSource extends
 
 			// Provide the template URI (and potential URL continuation)
 			String templateUri = httpTemplate.getTemplateUri();
-			if (templateUri != null) {
-				// Provide URL continuation
-				String templateUriPath = this.getTemplateUriPath(templateUri,
-						templateUriSuffix);
-				HttpUriLink link = this.urlContinuations.linkUri(
-						templateUriPath, httpTemplate,
-						HttpTemplateSectionSource.RENDER_TEMPLATE_INPUT_NAME);
-				link.setUriSecure(isTemplateSecure);
-
-			} else {
+			if (templateUri == null) {
 				// Use section name and keep private (no URL continuation)
 				templateUri = httpTemplate.getSectionName();
 			}

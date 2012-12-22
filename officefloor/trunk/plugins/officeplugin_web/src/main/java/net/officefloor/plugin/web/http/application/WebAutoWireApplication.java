@@ -84,6 +84,8 @@ public interface WebAutoWireApplication extends AutoWireApplication {
 	 *            Class providing the logic for the template.
 	 * @return {@link HttpTemplateAutoWireSection} to allow linking flows.
 	 */
+	@Deprecated
+	// URL continuations for links require a URI
 	HttpTemplateAutoWireSection addHttpTemplate(String templatePath,
 			Class<?> templateLogicClass);
 
@@ -196,9 +198,15 @@ public interface WebAutoWireApplication extends AutoWireApplication {
 	HttpUriLink linkUri(String uri, AutoWireSection section, String inputName);
 
 	/**
-	 * Obtains the registered URIs.
+	 * <p>
+	 * Obtains the linked URIs.
+	 * <p>
+	 * {@link HttpTemplateAutoWireSection} URIs are not included in this list.
+	 * To determine if the {@link HttpTemplateAutoWireSection} is serviced (e.g.
+	 * for embedding with a JEE server for Servlet mapping) use the template URI
+	 * suffix.
 	 * 
-	 * @return Registered URIs.
+	 * @return Linked URIs.
 	 */
 	String[] getURIs();
 

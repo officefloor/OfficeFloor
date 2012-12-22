@@ -22,7 +22,6 @@ import java.io.IOException;
 
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
 import net.officefloor.plugin.stream.ServerWriter;
-import net.officefloor.plugin.web.http.continuation.HttpUrlContinuationWorkSource;
 import net.officefloor.plugin.web.http.location.HttpApplicationLocation;
 import net.officefloor.plugin.web.http.location.InvalidHttpRequestUriException;
 import net.officefloor.plugin.web.http.template.parse.HttpTemplate;
@@ -34,34 +33,6 @@ import net.officefloor.plugin.web.http.template.parse.LinkHttpTemplateSectionCon
  * @author Daniel Sagenschneider
  */
 public class LinkHttpTemplateWriter implements HttpTemplateWriter {
-
-	/**
-	 * Obtains the {@link HttpTemplate} link URI path.
-	 * 
-	 * @param templateUriPath
-	 *            {@link HttpTemplate} URI path.
-	 * @param linkName
-	 *            Name of the link.
-	 * @param templateUriSuffix
-	 *            {@link HttpTemplate} URI suffix. May be <code>null</code> for
-	 *            no suffix.
-	 * @return {@link HttpTemplate} link URI path.
-	 * @throws InvalidHttpRequestUriException
-	 *             Should the resulting URI be invalid.
-	 */
-	public static String getTemplateLinkUriPath(String templateUriPath,
-			String linkName, String templateUriSuffix)
-			throws InvalidHttpRequestUriException {
-
-		// Create the link URI path
-		String linkUriPath = templateUriPath + "-" + linkName
-				+ (templateUriSuffix == null ? "" : templateUriSuffix);
-		linkUriPath = HttpUrlContinuationWorkSource
-				.getApplicationUriPath(linkUriPath);
-
-		// Return the link URI path
-		return linkUriPath;
-	}
 
 	/**
 	 * Link URI path.
@@ -96,8 +67,9 @@ public class LinkHttpTemplateWriter implements HttpTemplateWriter {
 		this.isLinkSecure = isLinkSecure;
 
 		// Create the link URI path
-		this.linkUriPath = getTemplateLinkUriPath(templateUriPath,
-				content.getName(), templateUriSuffix);
+		this.linkUriPath = HttpTemplateWorkSource
+				.getHttpTemplateLinkUrlContinuationPath(templateUriPath,
+						content.getName(), templateUriSuffix);
 	}
 
 	/*

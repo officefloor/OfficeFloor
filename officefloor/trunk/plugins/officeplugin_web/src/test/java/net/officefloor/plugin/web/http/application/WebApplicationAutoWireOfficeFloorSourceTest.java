@@ -526,33 +526,26 @@ public class WebApplicationAutoWireOfficeFloorSourceTest extends
 	}
 
 	/**
-	 * Ensure appropriate registered URIs.
+	 * Ensure appropriate linked URIs.
 	 */
-	public void testRegisteredUris() {
+	public void testLinkedUris() {
 
-		// Add HTTP template
+		// Add HTTP template (not root so should not be included)
 		HttpTemplateAutoWireSection template = this.source.addHttpTemplate(
 				this.getClassPath("template.ofp"), MockTemplateLogic.class,
 				"template");
-
-		// Add private HTTP template (should not be included)
-		this.source.addHttpTemplate(this.getClassPath("template.ofp"),
-				MockTemplateLogic.class);
 
 		// Provide URI link
 		this.source.linkUri("uri", template,
 				HttpTemplateSectionSource.RENDER_TEMPLATE_INPUT_NAME);
 
 		// Validate URIs
-		assertUris(this.source.getURIs(), "/template", "/uri");
+		assertUris(this.source.getURIs(), "/uri");
 
-		// Validate with default template suffix
-		this.source.setDefaultHttpTemplateUriSuffix(".default");
-		assertUris(this.source.getURIs(), "/template.default", "/uri");
-
-		// Validate with template suffix
-		template.setTemplateUriSuffix(".suffix");
-		assertUris(this.source.getURIs(), "/template.suffix", "/uri");
+		// Validate with root HTTP template
+		this.source.addHttpTemplate(this.getClassPath("template.ofp"),
+				MockTemplateLogic.class, "/");
+		assertUris(this.source.getURIs(), "/", "/uri");
 	}
 
 	/**

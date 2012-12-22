@@ -64,12 +64,13 @@ import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
 import net.officefloor.plugin.web.http.application.HttpSessionStateful;
 import net.officefloor.plugin.web.http.continuation.HttpUrlContinuationWorkSource;
 import net.officefloor.plugin.web.http.location.HttpApplicationLocation;
+import net.officefloor.plugin.web.http.session.HttpSession;
 import net.officefloor.plugin.web.http.session.clazz.source.HttpSessionClassManagedObjectSource;
 import net.officefloor.plugin.web.http.template.HttpTemplateTask;
 import net.officefloor.plugin.web.http.template.HttpTemplateWorkSource;
-import net.officefloor.plugin.web.http.template.LinkHttpTemplateWriter;
 import net.officefloor.plugin.web.http.template.parse.HttpTemplate;
 import net.officefloor.plugin.web.http.template.parse.HttpTemplateSection;
+import net.officefloor.plugin.web.http.template.section.HttpTemplateInitialTask.Flows;
 
 /**
  * {@link SectionSource} for the HTTP template.
@@ -226,9 +227,40 @@ public class HttpTemplateSectionSource extends ClassSectionSource {
 		HttpTemplate template = HttpTemplateWorkSource
 				.getHttpTemplate(new StringReader(templateContent));
 
-		// Create the input to the section
+		// Create the necessary dependency objects
+		SectionObject connectionObject = this.getOrCreateObject(null,
+				ServerHttpConnection.class.getName());
+		SectionObject locationObject = this.getOrCreateObject(null,
+				HttpApplicationLocation.class.getName());
+		SectionObject sessionObject = this.getOrCreateObject(null,
+				HttpSession.class.getName());
+
+		// Create the I/O escalation
+		SectionOutput ioEscalation = this.getOrCreateOutput(
+				IOException.class.getName(), IOException.class.getName(), true);
+
+		// Load the initial task
+		SectionWork initialWork = designer.addSectionWork("INITIAL",
+				HttpTemplateInitialWorkSource.class.getName());
+		PropertiesUtil.copyProperties(context, initialWork,
+				HttpTemplateWorkSource.PROPERTY_TEMPLATE_URI,
+				HttpTemplateWorkSource.PROPERTY_TEMPLATE_URI_SUFFIX,
+				HttpTemplateWorkSource.PROPERTY_TEMPLATE_SECURE);
+		SectionTask initialTask = initialWork.addSectionTask("_INITIAL_TASK_",
+				HttpTemplateInitialWorkSource.TASK_NAME);
+		designer.link(initialTask.getTaskObject("SERVER_HTTP_CONNECTION"),
+				connectionObject);
+		designer.link(initialTask.getTaskObject("HTTP_APPLICATION_LOCATION"),
+				locationObject);
+		designer.link(initialTask.getTaskObject("HTTP_SESSION"), sessionObject);
+		designer.link(
+				initialTask.getTaskEscalation(IOException.class.getName()),
+				ioEscalation, FlowInstigationStrategyEnum.SEQUENTIAL);
+
+		// Create and link rendering input to initial task
 		SectionInput sectionInput = designer.addSectionInput(
 				RENDER_TEMPLATE_INPUT_NAME, null);
+		designer.link(sectionInput, initialTask);
 
 		// Load the HTTP template
 		final String TEMPLATE_WORK_NANE = "TEMPLATE";
@@ -264,8 +296,7 @@ public class HttpTemplateSectionSource extends ClassSectionSource {
 
 		// Load the HTTP template tasks
 		Map<String, SectionTask> contentTasksByName = new HashMap<String, SectionTask>();
-		SectionTask firstTemplateTask = null;
-		SectionTask previousTemplateTask = null;
+		SectionTask previousTemplateTask = initialTask;
 		for (HttpTemplateSection templateSection : template.getSections()) {
 
 			// Obtain the template task
@@ -280,15 +311,9 @@ public class HttpTemplateSectionSource extends ClassSectionSource {
 			boolean isRequireBean = HttpTemplateWorkSource
 					.isHttpTemplateSectionRequireBean(templateSection);
 
-			// Link the Server HTTP Connection dependency
-			SectionObject connectionObject = this.getOrCreateObject(null,
-					ServerHttpConnection.class.getName());
+			// Link the dependencies
 			designer.link(templateTask.getTaskObject("SERVER_HTTP_CONNECTION"),
 					connectionObject);
-
-			// Link the HTTP Application Location dependency
-			SectionObject locationObject = this.getOrCreateObject(null,
-					HttpApplicationLocation.class.getName());
 			designer.link(
 					templateTask.getTaskObject("HTTP_APPLICATION_LOCATION"),
 					locationObject);
@@ -299,9 +324,6 @@ public class HttpTemplateSectionSource extends ClassSectionSource {
 			}
 
 			// Link the I/O escalation
-			SectionOutput ioEscalation = this.getOrCreateOutput(
-					IOException.class.getName(), IOException.class.getName(),
-					true);
 			designer.link(
 					templateTask.getTaskEscalation(IOException.class.getName()),
 					ioEscalation, FlowInstigationStrategyEnum.SEQUENTIAL);
@@ -413,26 +435,24 @@ public class HttpTemplateSectionSource extends ClassSectionSource {
 				}
 			}
 
-			// Determine if first template task
-			if (firstTemplateTask == null) {
-				// First template task so link to input
+			// Determine if linking from initial task
+			if (previousTemplateTask == initialTask) {
+				// Link as flow from initial task
+				TaskFlow renderFlow = initialTask.getTaskFlow(Flows.RENDER
+						.name());
 				if (beanTask != null) {
-					// First template task is bean task
-					firstTemplateTask = beanTask.task;
-
-					// Link input to bean then template
-					designer.link(sectionInput, beanTask.task);
+					// Link with bean task then template
+					designer.link(renderFlow, beanTask.task,
+							FlowInstigationStrategyEnum.SEQUENTIAL);
 					designer.link(beanTask.task, templateTask);
 				} else {
-					// First template task is section rendering
-					firstTemplateTask = templateTask;
-
-					// Link input to just template
-					designer.link(sectionInput, templateTask);
+					// No bean task so link to template
+					designer.link(renderFlow, templateTask,
+							FlowInstigationStrategyEnum.SEQUENTIAL);
 				}
 
 			} else {
-				// Subsequent template tasks so link to previous task
+				// Link as next from previous task
 				if (beanTask != null) {
 					// Link with bean task then template
 					designer.link(previousTemplateTask, beanTask.task);
@@ -484,13 +504,14 @@ public class HttpTemplateSectionSource extends ClassSectionSource {
 		final String linkUrlContinuationPrefix = "HTTP_URL_CONTINUATION_";
 		for (String linkTaskName : linkNames) {
 
+			// Obtain the link URI path
+			String linkUriPath = HttpTemplateWorkSource
+					.getHttpTemplateLinkUrlContinuationPath(templateUriPath,
+							linkTaskName, templateUriSuffix);
+
 			// Determine if link is to be secure
 			boolean isLinkSecure = HttpTemplateTask.isLinkSecure(linkTaskName,
 					isTemplateSecure, context);
-
-			// Obtain the link URI path
-			String linkUriPath = LinkHttpTemplateWriter.getTemplateLinkUriPath(
-					templateUriPath, linkTaskName, templateUriSuffix);
 
 			// Create HTTP URL continuation
 			SectionWork urlContinuationWork = designer.addSectionWork(
@@ -499,9 +520,16 @@ public class HttpTemplateSectionSource extends ClassSectionSource {
 			urlContinuationWork.addProperty(
 					HttpUrlContinuationWorkSource.PROPERTY_URI_PATH,
 					linkUriPath);
-			urlContinuationWork.addProperty(
-					HttpUrlContinuationWorkSource.PROPERTY_SECURE,
-					String.valueOf(isLinkSecure));
+			if (isLinkSecure) {
+				/*
+				 * Only upgrade to secure connection. For non-secure will
+				 * already have the request and no need to close the existing
+				 * secure connection and establish a new non-secure connection.
+				 */
+				urlContinuationWork.addProperty(
+						HttpUrlContinuationWorkSource.PROPERTY_SECURE,
+						String.valueOf(isLinkSecure));
+			}
 			SectionTask urlContinuationTask = urlContinuationWork
 					.addSectionTask(linkUrlContinuationPrefix + linkTaskName,
 							HttpUrlContinuationWorkSource.TASK_NAME);
@@ -539,7 +567,7 @@ public class HttpTemplateSectionSource extends ClassSectionSource {
 				// Determine if method already indicating next task
 				if (!(method.isAnnotationPresent(NextTask.class))) {
 					// Next task not linked, so link to render template
-					designer.link(methodTask.task, firstTemplateTask);
+					designer.link(methodTask.task, initialTask);
 				}
 			}
 		}

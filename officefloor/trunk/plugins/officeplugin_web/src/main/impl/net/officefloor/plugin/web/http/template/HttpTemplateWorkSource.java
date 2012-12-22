@@ -39,6 +39,8 @@ import net.officefloor.compile.spi.work.source.impl.AbstractWorkSource;
 import net.officefloor.frame.spi.source.SourceContext;
 import net.officefloor.frame.spi.source.SourceProperties;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
+import net.officefloor.plugin.web.http.continuation.HttpUrlContinuationWorkSource;
+import net.officefloor.plugin.web.http.location.InvalidHttpRequestUriException;
 import net.officefloor.plugin.web.http.template.parse.BeanHttpTemplateSectionContent;
 import net.officefloor.plugin.web.http.template.parse.HttpTemplate;
 import net.officefloor.plugin.web.http.template.parse.HttpTemplateParserImpl;
@@ -200,6 +202,61 @@ public class HttpTemplateWorkSource extends
 
 		// No reference to property/bean, so does not require bean
 		return false;
+	}
+
+	/**
+	 * Obtains the {@link HttpTemplate} URL continuation path.
+	 * 
+	 * @param properties
+	 *            {@link SourceProperties}.
+	 * @return URL continuation path for the {@link HttpTemplate}.
+	 * @throws InvalidHttpRequestUriException
+	 *             Should the configured {@link HttpTemplate} path be invalid.
+	 */
+	public static String getHttpTemplateUrlContinuationPath(
+			SourceProperties properties) throws InvalidHttpRequestUriException {
+
+		// Obtain the URI path and URI suffix for the template
+		String templateUriPath = properties.getProperty(PROPERTY_TEMPLATE_URI);
+
+		// Provide suffix only if NOT root template
+		String templateUriSuffix = "";
+		if (!("/".equals(templateUriPath))) {
+			templateUriSuffix = properties.getProperty(
+					PROPERTY_TEMPLATE_URI_SUFFIX, "");
+		}
+
+		// Return path ready for HTTP URL continuation
+		return HttpUrlContinuationWorkSource
+				.getApplicationUriPath(templateUriPath + templateUriSuffix);
+	}
+
+	/**
+	 * Obtains the {@link HttpTemplate} link URL continuation path.
+	 * 
+	 * @param templateUriPath
+	 *            {@link HttpTemplate} URI path.
+	 * @param linkName
+	 *            Name of the link.
+	 * @param templateUriSuffix
+	 *            {@link HttpTemplate} URI suffix. May be <code>null</code> for
+	 *            no suffix.
+	 * @return {@link HttpTemplate} link URI path.
+	 * @throws InvalidHttpRequestUriException
+	 *             Should the resulting URI be invalid.
+	 */
+	public static String getHttpTemplateLinkUrlContinuationPath(
+			String templateUriPath, String linkName, String templateUriSuffix)
+			throws InvalidHttpRequestUriException {
+
+		// Create the link URI path
+		String linkUriPath = templateUriPath + "-" + linkName
+				+ (templateUriSuffix == null ? "" : templateUriSuffix);
+		linkUriPath = HttpUrlContinuationWorkSource
+				.getApplicationUriPath(linkUriPath);
+
+		// Return the link URI path
+		return linkUriPath;
 	}
 
 	/**

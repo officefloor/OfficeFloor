@@ -81,6 +81,7 @@ public interface ServerHttpConnection {
 	 * @throws NotAllDataAvailableException
 	 *             Should all of the {@link HttpRequest} data not yet be
 	 *             received.
+	 * 
 	 * @see #importState(Serializable)
 	 */
 	Serializable exportState() throws NotAllDataAvailableException;
@@ -91,8 +92,26 @@ public interface ServerHttpConnection {
 	 * 
 	 * @param momento
 	 *            Momento exported from a {@link ServerHttpConnection}.
+	 * 
 	 * @see #exportState()
 	 */
 	void importState(Serializable momento);
+
+	/**
+	 * <p>
+	 * Obtains the client sent HTTP method of the {@link ServerHttpConnection}.
+	 * <p>
+	 * As the {@link HttpRequest} method is overridden, this method may be used
+	 * by logic requiring to know the actual client HTTP method. An example of
+	 * this logic is the POST/redirect/GET pattern that needs to know whether
+	 * the client sent {@link HttpRequest} method is a <code>POST</code> or
+	 * <code>GET</code> (regardless of imported state).
+	 * 
+	 * @return Client sent HTTP method.
+	 * 
+	 * @see #exportState()
+	 * @see #importState(Serializable)
+	 */
+	String getHttpMethod();
 
 }
