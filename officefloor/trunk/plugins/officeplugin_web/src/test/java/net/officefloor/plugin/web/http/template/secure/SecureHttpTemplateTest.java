@@ -31,6 +31,7 @@ import net.officefloor.plugin.stream.ServerWriter;
 import net.officefloor.plugin.web.http.application.HttpParameters;
 import net.officefloor.plugin.web.http.application.HttpTemplateAutoWireSection;
 import net.officefloor.plugin.web.http.application.HttpUriLink;
+import net.officefloor.plugin.web.http.location.HttpApplicationLocationManagedObjectSource;
 import net.officefloor.plugin.web.http.parameters.source.HttpParametersObjectManagedObjectSource;
 import net.officefloor.plugin.web.http.route.HttpRouteTask;
 import net.officefloor.plugin.web.http.server.HttpServerAutoWireOfficeFloorSource;
@@ -57,6 +58,20 @@ public class SecureHttpTemplateTest extends OfficeFrameTestCase {
 	 * {@link HttpServerAutoWireOfficeFloorSource}.
 	 */
 	private final HttpServerAutoWireOfficeFloorSource source = new HttpServerAutoWireOfficeFloorSource();
+
+	/**
+	 * Non-secure URL prefix.
+	 */
+	private final String NON_SECURE_URL_PREFIX = "http://"
+			+ HttpApplicationLocationManagedObjectSource.getDefaultHostName()
+			+ ":7878";
+
+	/**
+	 * Secure URL prefix.
+	 */
+	private final String SECURE_URL_PREFIX = "https://"
+			+ HttpApplicationLocationManagedObjectSource.getDefaultHostName()
+			+ ":7979";
 
 	/**
 	 * {@link AutoWireOfficeFloor}.
@@ -99,67 +114,64 @@ public class SecureHttpTemplateTest extends OfficeFrameTestCase {
 	 * Ensure template triggers a redirect if not secure.
 	 */
 	public void testSecureTemplateRedirect() throws Exception {
-		this.doSecureTemplateTest(true, null, "http://localhost:7878/template",
-				"https://localhost:7979/template");
+		this.doSecureTemplateTest(true, null, NON_SECURE_URL_PREFIX
+				+ "/template", SECURE_URL_PREFIX + "/template");
 	}
 
 	/**
 	 * Ensure service request if appropriately secure.
 	 */
 	public void testSecureTemplateService() throws Exception {
-		this.doSecureTemplateTest(true, null,
-				"https://localhost:7979/template", null);
+		this.doSecureTemplateTest(true, null, SECURE_URL_PREFIX + "/template",
+				null);
 	}
 
 	/**
 	 * Ensure template triggers a redirect if secure.
 	 */
 	public void testInsecureTemplateRedirect() throws Exception {
-		this.doSecureTemplateTest(false, null,
-				"https://localhost:7979/template",
-				"http://localhost:7878/template");
+		this.doSecureTemplateTest(false, null, SECURE_URL_PREFIX + "/template",
+				NON_SECURE_URL_PREFIX + "/template");
 	}
 
 	/**
 	 * Ensure service request if appropriately insecure.
 	 */
 	public void testInsecureTemplateService() throws Exception {
-		this.doSecureTemplateTest(false, null,
-				"http://localhost:7878/template", null);
+		this.doSecureTemplateTest(false, null, NON_SECURE_URL_PREFIX
+				+ "/template", null);
 	}
 
 	/**
 	 * Ensure link triggers a redirect if not secure.
 	 */
 	public void testSecureLinkRedirect() throws Exception {
-		this.doSecureTemplateTest(false, true,
-				"http://localhost:7878/template-LINK",
-				"https://localhost:7979/template-LINK");
+		this.doSecureTemplateTest(false, true, NON_SECURE_URL_PREFIX
+				+ "/template-LINK", SECURE_URL_PREFIX + "/template-LINK");
 	}
 
 	/**
 	 * Ensure service request if appropriately secure.
 	 */
 	public void testSecureLinkService() throws Exception {
-		this.doSecureTemplateTest(false, true,
-				"https://localhost:7979/template-LINK", null);
+		this.doSecureTemplateTest(false, true, SECURE_URL_PREFIX
+				+ "/template-LINK", null);
 	}
 
 	/**
 	 * Ensure link triggers a redirect if secure.
 	 */
 	public void testInsecureLinkRedirect() throws Exception {
-		this.doSecureTemplateTest(true, false,
-				"https://localhost:7979/template-LINK",
-				"http://localhost:7878/template-LINK");
+		this.doSecureTemplateTest(true, false, SECURE_URL_PREFIX
+				+ "/template-LINK", NON_SECURE_URL_PREFIX + "/template-LINK");
 	}
 
 	/**
 	 * Ensure service request if appropriately insecure.
 	 */
 	public void testInsecureLinkService() throws Exception {
-		this.doSecureTemplateTest(true, false,
-				"http://localhost:7878/template-LINK", null);
+		this.doSecureTemplateTest(true, false, NON_SECURE_URL_PREFIX
+				+ "/template-LINK", null);
 	}
 
 	/**
@@ -245,31 +257,31 @@ public class SecureHttpTemplateTest extends OfficeFrameTestCase {
 	 * Ensure URI triggers a redirect if not secure.
 	 */
 	public void testSecureUriRedirect() throws Exception {
-		this.doSecureUriTest(true, "http://localhost:7878/uri",
-				"https://localhost:7979/uri"
-						+ HttpRouteTask.REDIRECT_URI_SUFFIX);
+		this.doSecureUriTest(true, NON_SECURE_URL_PREFIX + "/uri",
+				SECURE_URL_PREFIX + "/uri" + HttpRouteTask.REDIRECT_URI_SUFFIX);
 	}
 
 	/**
 	 * Ensure service request if appropriately secure.
 	 */
 	public void testSecureUriService() throws Exception {
-		this.doSecureUriTest(true, "https://localhost:7979/uri", null);
+		this.doSecureUriTest(true, SECURE_URL_PREFIX + "/uri", null);
 	}
 
 	/**
 	 * Ensure URI triggers a redirect if secure.
 	 */
 	public void testInsecureUriRedirect() throws Exception {
-		this.doSecureUriTest(false, "https://localhost:7979/uri",
-				"http://localhost:7878/uri" + HttpRouteTask.REDIRECT_URI_SUFFIX);
+		this.doSecureUriTest(false, SECURE_URL_PREFIX + "/uri",
+				NON_SECURE_URL_PREFIX + "/uri"
+						+ HttpRouteTask.REDIRECT_URI_SUFFIX);
 	}
 
 	/**
 	 * Ensure service request if appropriately insecure.
 	 */
 	public void testInsecureUriService() throws Exception {
-		this.doSecureUriTest(false, "http://localhost:7878/uri", null);
+		this.doSecureUriTest(false, NON_SECURE_URL_PREFIX + "/uri", null);
 	}
 
 	/**
