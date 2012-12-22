@@ -67,6 +67,11 @@ public class HttpManagedObjectImpl implements HttpManagedObject,
 	private final HttpResponseImpl response;
 
 	/**
+	 * HTTP method sent by the client.
+	 */
+	private final String clientHttpMethod;
+
+	/**
 	 * Initiate to process the {@link HttpRequest} by populating the
 	 * {@link HttpResponse}.
 	 * 
@@ -82,6 +87,9 @@ public class HttpManagedObjectImpl implements HttpManagedObject,
 		this.connection = connection;
 		this.request = request;
 		this.response = response;
+
+		// Keep track of the client HTTP method
+		this.clientHttpMethod = request.getMethod();
 	}
 
 	/**
@@ -94,6 +102,7 @@ public class HttpManagedObjectImpl implements HttpManagedObject,
 		this.connection = null;
 		this.request = null;
 		this.response = completedResponse;
+		this.clientHttpMethod = null;
 	}
 
 	/**
@@ -187,6 +196,11 @@ public class HttpManagedObjectImpl implements HttpManagedObject,
 				state.requestUri, this.request.getVersion(), state.headers,
 				new HttpEntityImpl(entityStream));
 		this.request = overrideRequest;
+	}
+
+	@Override
+	public String getHttpMethod() {
+		return this.clientHttpMethod;
 	}
 
 	/*

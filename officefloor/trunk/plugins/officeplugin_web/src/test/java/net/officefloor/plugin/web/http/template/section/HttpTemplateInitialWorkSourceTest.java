@@ -18,19 +18,19 @@
 package net.officefloor.plugin.web.http.template.section;
 
 import java.io.IOException;
-
-import org.junit.Ignore;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 import net.officefloor.compile.spi.work.source.TaskTypeBuilder;
 import net.officefloor.compile.spi.work.source.WorkTypeBuilder;
 import net.officefloor.compile.test.work.WorkLoaderUtil;
 import net.officefloor.compile.work.TaskType;
 import net.officefloor.compile.work.WorkType;
-import net.officefloor.frame.api.build.None;
+import net.officefloor.frame.api.execute.FlowFuture;
 import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.execute.TaskContext;
 import net.officefloor.frame.test.OfficeFrameTestCase;
-import net.officefloor.plugin.socket.server.http.HttpRequest;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
 import net.officefloor.plugin.web.http.continuation.HttpUrlContinuationDifferentiator;
 import net.officefloor.plugin.web.http.continuation.HttpUrlContinuationDifferentiatorImpl;
@@ -39,13 +39,13 @@ import net.officefloor.plugin.web.http.route.HttpRouteTaskTest;
 import net.officefloor.plugin.web.http.session.HttpSession;
 import net.officefloor.plugin.web.http.template.HttpTemplateWorkSource;
 import net.officefloor.plugin.web.http.template.section.HttpTemplateInitialTask.Dependencies;
+import net.officefloor.plugin.web.http.template.section.HttpTemplateInitialTask.Flows;
 
 /**
  * Tests the {@link HttpTemplateInitialWorkSource}.
  * 
  * @author Daniel Sagenschneider
  */
-@Ignore("TODO implement HttpTemplateInitialWorkSource")
 public class HttpTemplateInitialWorkSourceTest extends OfficeFrameTestCase {
 
 	/**
@@ -59,17 +59,53 @@ public class HttpTemplateInitialWorkSourceTest extends OfficeFrameTestCase {
 	}
 
 	/**
+	 * Validate the non-secure type by default.
+	 */
+	public void testDefaultNonSecureType() {
+		this.doTypeTest(null, null, "/path", null, "/path");
+	}
+
+	/**
 	 * Validate the non-secure type.
 	 */
 	public void testNonSecureType() {
-		this.doTypeTest(false);
+		this.doTypeTest(Boolean.FALSE, null, "/path", null, "/path");
 	}
 
 	/**
 	 * Validate the secure type.
 	 */
 	public void testSecureType() {
-		this.doTypeTest(true);
+		this.doTypeTest(Boolean.TRUE, Boolean.TRUE, "/path", null, "/path");
+	}
+
+	/**
+	 * Validates uses canonical path for URL continuation.
+	 */
+	public void testNonCanonicalPathType() {
+		this.doTypeTest(null, null, "configured/../non/../canoncial/../path",
+				null, "/path");
+	}
+
+	/**
+	 * Validate includes URI suffix.
+	 */
+	public void testTemplateUriSuffixType() {
+		this.doTypeTest(null, null, "/path", ".suffix", "/path.suffix");
+	}
+
+	/**
+	 * Validate root template type.
+	 */
+	public void testRootTemplateType() {
+		this.doTypeTest(null, null, "/", null, "/");
+	}
+
+	/**
+	 * Validate root template does not have suffix type.
+	 */
+	public void testRootTemplateNoSuffixType() {
+		this.doTypeTest(null, null, "/", ".suffix", "/");
 	}
 
 	/**
@@ -78,45 +114,60 @@ public class HttpTemplateInitialWorkSourceTest extends OfficeFrameTestCase {
 	 * @param isSecure
 	 *            Whether template should be secure.
 	 */
-	private void doTypeTest(boolean isSecure) {
+	private void doTypeTest(Boolean isConfiguredSecure,
+			Boolean isUrlContinuationSecure, String configuredUriPath,
+			String uriSuffix, String expectedUrlContinuationPath) {
 
 		// Factory
-		HttpTemplateInitialTask factory = new HttpTemplateInitialTask();
+		HttpTemplateInitialTask factory = new HttpTemplateInitialTask(null,
+				false);
 
 		// Create the expected type
 		WorkTypeBuilder<HttpTemplateInitialTask> type = WorkLoaderUtil
 				.createWorkTypeBuilder(factory);
 
-		// Determine URL continuation secure
-		Boolean urlContinuationSecure = (isSecure ? Boolean.TRUE : null);
-
 		// Initial task
-		TaskTypeBuilder<Dependencies, None> initial = type.addTaskType("TASK",
-				factory, Dependencies.class, None.class);
+		TaskTypeBuilder<Dependencies, Flows> initial = type.addTaskType("TASK",
+				factory, Dependencies.class, Flows.class);
 		initial.addObject(ServerHttpConnection.class).setKey(
 				Dependencies.SERVER_HTTP_CONNECTION);
 		initial.addObject(HttpApplicationLocation.class).setKey(
 				Dependencies.HTTP_APPLICATION_LOCATION);
 		initial.addObject(HttpSession.class).setKey(Dependencies.HTTP_SESSION);
+		initial.addFlow().setKey(Flows.RENDER);
 		initial.addEscalation(IOException.class);
 		initial.setDifferentiator(new HttpUrlContinuationDifferentiatorImpl(
-				"/path", urlContinuationSecure));
+				expectedUrlContinuationPath, isUrlContinuationSecure));
+
+		// Create the listing of properties
+		List<String> properties = new ArrayList<String>(6);
+		properties.addAll(Arrays.asList(
+				HttpTemplateInitialWorkSource.PROPERTY_TEMPLATE_URI,
+				configuredUriPath));
+		if (isConfiguredSecure != null) {
+			properties.addAll(Arrays.asList(
+					HttpTemplateWorkSource.PROPERTY_TEMPLATE_SECURE,
+					String.valueOf(isConfiguredSecure)));
+		}
+		if (uriSuffix != null) {
+			properties.addAll(Arrays.asList(
+					HttpTemplateWorkSource.PROPERTY_TEMPLATE_URI_SUFFIX,
+					uriSuffix));
+		}
 
 		// Validate type (must also convert
 		WorkType<HttpTemplateInitialTask> work = WorkLoaderUtil
 				.validateWorkType(type, HttpTemplateInitialWorkSource.class,
-						HttpTemplateInitialWorkSource.PROPERTY_TEMPLATE_URI,
-						"configured/../non/../canoncial/../path",
-						HttpTemplateWorkSource.PROPERTY_TEMPLATE_SECURE,
-						String.valueOf(isSecure));
+						properties.toArray(new String[properties.size()]));
 
 		// Ensure correct URI path
 		TaskType<HttpTemplateInitialTask, ?, ?> task = work.getTaskTypes()[0];
 		HttpUrlContinuationDifferentiator differentiator = (HttpUrlContinuationDifferentiator) task
 				.getDifferentiator();
-		assertEquals("Incorrect URI path", "/path",
+		assertEquals("Incorrect URI path", expectedUrlContinuationPath,
 				differentiator.getApplicationUriPath());
-		assertEquals("Incorrectly indentified as secure", urlContinuationSecure);
+		assertEquals("Incorrectly indentified as secure",
+				isUrlContinuationSecure, differentiator.isSecure());
 	}
 
 	/**
@@ -177,10 +228,10 @@ public class HttpTemplateInitialWorkSourceTest extends OfficeFrameTestCase {
 			final TaskContext context = this.createMock(TaskContext.class);
 			final ServerHttpConnection connection = this
 					.createMock(ServerHttpConnection.class);
-			final HttpRequest request = this.createMock(HttpRequest.class);
 			final HttpSession session = this.createMock(HttpSession.class);
 			final HttpApplicationLocation location = this
 					.createMock(HttpApplicationLocation.class);
+			final FlowFuture flowFuture = this.createMock(FlowFuture.class);
 
 			// Create the task
 			WorkType<HttpTemplateInitialTask> work = WorkLoaderUtil
@@ -195,24 +246,37 @@ public class HttpTemplateInitialWorkSourceTest extends OfficeFrameTestCase {
 					.getTaskFactory().createTask(
 							work.getWorkFactory().createWork());
 
-			// Record determining if secure connection
+			// Record obtaining the dependencies
 			this.recordReturn(context,
 					context.getObject(Dependencies.SERVER_HTTP_CONNECTION),
 					connection);
-			this.recordReturn(connection, connection.isSecure(),
-					isConnectionSecure);
+			this.recordReturn(context,
+					context.getObject(Dependencies.HTTP_APPLICATION_LOCATION),
+					location);
+			this.recordReturn(context,
+					context.getObject(Dependencies.HTTP_SESSION), session);
+
+			// Record determining if secure connection
+			if (isRequireSecure) {
+				this.recordReturn(connection, connection.isSecure(),
+						isConnectionSecure);
+			}
 
 			// Record determining method for POST, redirect, GET pattern
 			if (method != null) {
-				this.recordReturn(connection, connection.getHttpRequest(),
-						request);
-				this.recordReturn(request, request.getMethod(), method);
+				this.recordReturn(connection, connection.getHttpMethod(),
+						method);
 			}
 
-			// Record necessary redirect
+			// Record redirect or render
 			if (redirectUriPath != null) {
-				HttpRouteTaskTest.recordDoRedirect(redirectUriPath, true,
-						connection, session, location, this);
+				// Record necessary redirect
+				HttpRouteTaskTest.recordDoRedirect(redirectUriPath,
+						isRequireSecure, connection, session, location, this);
+			} else {
+				// Record triggering the render
+				this.recordReturn(context, context.doFlow(Flows.RENDER, null),
+						flowFuture);
 			}
 
 			// Test

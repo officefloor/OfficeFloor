@@ -17,10 +17,15 @@
  */
 package net.officefloor.plugin.web.http.template.section;
 
-import net.officefloor.frame.api.build.None;
+import java.io.IOException;
+
 import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.execute.TaskContext;
 import net.officefloor.frame.util.AbstractSingleTask;
+import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
+import net.officefloor.plugin.web.http.location.HttpApplicationLocation;
+import net.officefloor.plugin.web.http.route.HttpRouteTask;
+import net.officefloor.plugin.web.http.session.HttpSession;
 import net.officefloor.plugin.web.http.template.parse.HttpTemplate;
 
 /**
@@ -31,7 +36,7 @@ import net.officefloor.plugin.web.http.template.parse.HttpTemplate;
  */
 public class HttpTemplateInitialTask
 		extends
-		AbstractSingleTask<HttpTemplateInitialTask, HttpTemplateInitialTask.Dependencies, None> {
+		AbstractSingleTask<HttpTemplateInitialTask, HttpTemplateInitialTask.Dependencies, HttpTemplateInitialTask.Flows> {
 
 	/**
 	 * Keys for the {@link HttpTemplateInitialTask} dependencies.
@@ -40,19 +45,97 @@ public class HttpTemplateInitialTask
 		SERVER_HTTP_CONNECTION, HTTP_APPLICATION_LOCATION, HTTP_SESSION
 	}
 
+	/**
+	 * Keys for the {@link HttpTemplateInitialTask} flows.
+	 */
+	public static enum Flows {
+		RENDER
+	}
+
+	/**
+	 * URI path for the {@link HttpTemplate}.
+	 */
+	private final String templateUriPath;
+
+	/**
+	 * Indicates if a secure {@link ServerHttpConnection} is required.
+	 */
+	private final boolean isRequireSecure;
+
+	/**
+	 * Initiate.
+	 * 
+	 * @param templateUriPath
+	 *            URI path for the {@link HttpTemplate}.
+	 * @param isRequireSecure
+	 *            Indicates if a secure {@link ServerHttpConnection} is
+	 *            required.
+	 */
+	public HttpTemplateInitialTask(String templateUriPath,
+			boolean isRequireSecure) {
+		this.templateUriPath = templateUriPath;
+		this.isRequireSecure = isRequireSecure;
+	}
+
 	/*
 	 * ======================= Task ===============================
 	 */
 
 	@Override
 	public Object doTask(
-			TaskContext<HttpTemplateInitialTask, Dependencies, None> context)
-			throws Throwable {
+			TaskContext<HttpTemplateInitialTask, Dependencies, Flows> context)
+			throws IOException {
 
-		// TODO implement
-		// Task<HttpTemplateWork,HttpTemplateInitialTaskDependencies,None>.doTask
-		throw new UnsupportedOperationException(
-				"TODO implement Task<HttpTemplateWork,HttpTemplateInitialTaskDependencies,None>.doTask");
+		// Obtain the dependencies
+		ServerHttpConnection connection = (ServerHttpConnection) context
+				.getObject(Dependencies.SERVER_HTTP_CONNECTION);
+		HttpApplicationLocation location = (HttpApplicationLocation) context
+				.getObject(Dependencies.HTTP_APPLICATION_LOCATION);
+		HttpSession session = (HttpSession) context
+				.getObject(Dependencies.HTTP_SESSION);
+
+		// Flag indicating if redirect is required
+		boolean isRedirectRequired = false;
+
+		// Determine if requires a secure connection
+		if (this.isRequireSecure) {
+
+			/*
+			 * Request may have come in on another URL continuation which did
+			 * not require a secure connection and is to now to render this HTTP
+			 * template. Therefore trigger redirect for a secure connection.
+			 * 
+			 * Note that do not down grade to non-secure connection as already
+			 * have the request and no need to close the existing secure
+			 * connection and establish a new non-secure connection.
+			 */
+			boolean isConnectionSecure = connection.isSecure();
+			if (!isConnectionSecure) {
+				// Flag redirect for secure connection
+				isRedirectRequired = true;
+			}
+		}
+
+		// Determine if POST/redirect/GET pattern to be applied
+		if (!isRedirectRequired) {
+			// Request likely overridden to POST, so use client HTTP method
+			String method = connection.getHttpMethod();
+			if ("POST".equalsIgnoreCase(method)) {
+				// Flag redirect for POST/redirect/GET pattern
+				isRedirectRequired = true;
+			}
+		}
+
+		// Undertake the redirect
+		if (isRedirectRequired) {
+			HttpRouteTask.doRedirect(this.templateUriPath,
+					this.isRequireSecure, connection, location, session);
+			return null; // redirected, do not render template
+		}
+
+		// Render the template
+		context.doFlow(Flows.RENDER, null);
+		return null;
 	}
 
 }

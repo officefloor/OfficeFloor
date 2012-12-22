@@ -40,6 +40,7 @@ import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
 import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.execute.TaskContext;
+import net.officefloor.frame.impl.construct.source.SourcePropertiesImpl;
 import net.officefloor.frame.spi.source.ResourceSource;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
@@ -562,6 +563,83 @@ public class HttpTemplateWorkSourceTest extends OfficeFrameTestCase {
 		assertTrue("Require bean if have bean in section",
 				HttpTemplateWorkSource
 						.isHttpTemplateSectionRequireBean(beanSection));
+	}
+
+	/**
+	 * Ensure appropriately provides {@link HttpTemplate} URL continuation path.
+	 */
+	public void testHttpTemplateUrlContinuationPath() throws Exception {
+
+		// Obtain without suffix
+		SourcePropertiesImpl properties = new SourcePropertiesImpl();
+		properties.addProperty(HttpTemplateWorkSource.PROPERTY_TEMPLATE_URI,
+				"configured/../non/../canoncial/../path");
+		assertEquals("Incorrect path without suffix", "/path",
+				HttpTemplateWorkSource
+						.getHttpTemplateUrlContinuationPath(properties));
+
+		// Obtain with suffix
+		properties.addProperty(
+				HttpTemplateWorkSource.PROPERTY_TEMPLATE_URI_SUFFIX, ".suffix");
+		assertEquals("Incorrect path with suffix", "/path.suffix",
+				HttpTemplateWorkSource
+						.getHttpTemplateUrlContinuationPath(properties));
+	}
+
+	/**
+	 * Ensure appropriately provides the root {@link HttpTemplate} URL
+	 * continuation path.
+	 */
+	public void testRootHttpTemplateUrlContinuationPath() throws Exception {
+
+		// Obtain without suffix
+		SourcePropertiesImpl properties = new SourcePropertiesImpl();
+		properties.addProperty(HttpTemplateWorkSource.PROPERTY_TEMPLATE_URI,
+				"/");
+		assertEquals("Incorrect path without suffix", "/",
+				HttpTemplateWorkSource
+						.getHttpTemplateUrlContinuationPath(properties));
+
+		// Obtain with suffix (should not include suffix)
+		properties.addProperty(
+				HttpTemplateWorkSource.PROPERTY_TEMPLATE_URI_SUFFIX, ".suffix");
+		assertEquals("Incorrect path with suffix", "/",
+				HttpTemplateWorkSource
+						.getHttpTemplateUrlContinuationPath(properties));
+	}
+
+	/**
+	 * Ensure appropriately provides the {@link HttpTemplate} link URL
+	 * continuation path.
+	 */
+	public void testHttpTemplateLinkUrlContinuationPath() throws Exception {
+
+		// Obtain without suffix
+		assertEquals("Incorrect link path without suffix", "/path-link",
+				HttpTemplateWorkSource.getHttpTemplateLinkUrlContinuationPath(
+						"configured/../non/../canonical/../path", "link", null));
+
+		// Obtain with suffix
+		assertEquals("Incorrect link path with suffix", "/path-link.suffix",
+				HttpTemplateWorkSource.getHttpTemplateLinkUrlContinuationPath(
+						"/path", "link", ".suffix"));
+	}
+
+	/**
+	 * Ensure appropriately indicates if secure.
+	 */
+	public void testHttpTemplateSecure() {
+
+		// Ensure by default not secure
+		SourcePropertiesImpl properties = new SourcePropertiesImpl();
+		assertFalse("Should default to not be secure",
+				HttpTemplateWorkSource.isHttpTemplateSecure(properties));
+
+		// Ensure secure when configured secure
+		properties.addProperty(HttpTemplateWorkSource.PROPERTY_TEMPLATE_SECURE,
+				String.valueOf(true));
+		assertTrue("Should be secure",
+				HttpTemplateWorkSource.isHttpTemplateSecure(properties));
 	}
 
 	/**

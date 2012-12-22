@@ -83,7 +83,7 @@ public class HttpRouteTask
 	 *             Should all data for the {@link HttpResponse} not yet be
 	 *             received from the client.
 	 */
-	private static void doRedirect(String applicationUriPath, boolean isSecure,
+	public static void doRedirect(String applicationUriPath, boolean isSecure,
 			ServerHttpConnection connection, HttpApplicationLocation location,
 			HttpSession session) throws NotAllDataAvailableException {
 

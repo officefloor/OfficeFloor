@@ -100,18 +100,28 @@ public class HttpTemplateSectionSourceTest extends OfficeFrameTestCase {
 		// Objects
 		expected.addSectionObject(Connection.class.getName(),
 				Connection.class.getName());
-		expected.addSectionObject(HttpSession.class.getName(),
-				HttpSession.class.getName());
 		expected.addSectionObject(ServerHttpConnection.class.getName(),
 				ServerHttpConnection.class.getName());
 		expected.addSectionObject(HttpApplicationLocation.class.getName(),
 				HttpApplicationLocation.class.getName());
+		expected.addSectionObject(HttpSession.class.getName(),
+				HttpSession.class.getName());
 
-		// Template and Class work
+		// Initial, Template and Class work
+		SectionWork initialWork = expected.addSectionWork("INITIAL",
+				HttpTemplateInitialWorkSource.class.getName());
 		SectionWork templateWork = expected.addSectionWork("TEMPLATE",
 				HttpTemplateWorkSource.class.getName());
 		SectionWork classWork = expected.addSectionWork("WORK",
 				ClassSectionSource.class.getName());
+
+		// Initial task
+		SectionTask initial = initialWork.addSectionTask("_INITIAL_TASK_",
+				HttpTemplateInitialWorkSource.TASK_NAME);
+		initial.getTaskObject("SERVER_HTTP_CONNECTION");
+		initial.getTaskObject("HTTP_APPLICATION_LOCATION");
+		initial.getTaskObject("HTTP_SESSION");
+		initial.getTaskFlow("RENDER");
 
 		// Template
 		SectionTask getTemplate = classWork.addSectionTask("getTemplate",
@@ -239,6 +249,8 @@ public class HttpTemplateSectionSourceTest extends OfficeFrameTestCase {
 				ServerHttpConnection.class.getName());
 		expected.addSectionObject(HttpApplicationLocation.class.getName(),
 				HttpApplicationLocation.class.getName());
+		expected.addSectionObject(HttpSession.class.getName(),
+				HttpSession.class.getName());
 
 		// Managed Object Sources
 		expected.addSectionManagedObjectSource("OBJECT",
@@ -246,11 +258,21 @@ public class HttpTemplateSectionSourceTest extends OfficeFrameTestCase {
 				SectionClassManagedObjectSource.CLASS_NAME_PROPERTY_NAME,
 				TemplateDataLogic.class.getName());
 
-		// Template and Class work
+		// Initial, Template and Class work
+		SectionWork initialWork = expected.addSectionWork("INITIAL",
+				HttpTemplateInitialWorkSource.class.getName());
 		SectionWork templateWork = expected.addSectionWork("TEMPLATE",
 				HttpTemplateWorkSource.class.getName());
 		SectionWork classWork = expected.addSectionWork("WORK",
 				ClassSectionSource.class.getName());
+
+		// Initial task
+		SectionTask initial = initialWork.addSectionTask("_INITIAL_TASK_",
+				HttpTemplateInitialWorkSource.TASK_NAME);
+		initial.getTaskObject("SERVER_HTTP_CONNECTION");
+		initial.getTaskObject("HTTP_APPLICATION_LOCATION");
+		initial.getTaskObject("HTTP_SESSION");
+		initial.getTaskFlow("RENDER");
 
 		// Template
 		SectionTask getTemplate = classWork.addSectionTask("getTemplateData",
@@ -319,6 +341,8 @@ public class HttpTemplateSectionSourceTest extends OfficeFrameTestCase {
 				ServerHttpConnection.class.getName());
 		expected.addSectionObject(HttpApplicationLocation.class.getName(),
 				HttpApplicationLocation.class.getName());
+		expected.addSectionObject(HttpSession.class.getName(),
+				HttpSession.class.getName());
 
 		// Add the no logic class (with internal task)
 		SectionWork classWork = expected.addSectionWork("WORK",
@@ -327,9 +351,19 @@ public class HttpTemplateSectionSourceTest extends OfficeFrameTestCase {
 				"notIncluded");
 		getTemplate.getTaskObject("OBJECT");
 
-		// Template work
+		// Initial and Template work
+		SectionWork initialWork = expected.addSectionWork("INITIAL",
+				HttpTemplateInitialWorkSource.class.getName());
 		SectionWork templateWork = expected.addSectionWork("TEMPLATE",
 				HttpTemplateWorkSource.class.getName());
+
+		// Initial task
+		SectionTask initial = initialWork.addSectionTask("_INITIAL_TASK_",
+				HttpTemplateInitialWorkSource.TASK_NAME);
+		initial.getTaskObject("SERVER_HTTP_CONNECTION");
+		initial.getTaskObject("HTTP_APPLICATION_LOCATION");
+		initial.getTaskObject("HTTP_SESSION");
+		initial.getTaskFlow("RENDER");
 
 		// Section
 		SectionTask section = templateWork.addSectionTask("Section", "Section");

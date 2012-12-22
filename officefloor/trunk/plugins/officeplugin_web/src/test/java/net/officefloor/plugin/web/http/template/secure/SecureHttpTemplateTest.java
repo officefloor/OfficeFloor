@@ -129,9 +129,9 @@ public class SecureHttpTemplateTest extends OfficeFrameTestCase {
 	/**
 	 * Ensure template triggers a redirect if secure.
 	 */
-	public void testInsecureTemplateRedirect() throws Exception {
+	public void testInsecureTemplateServiceSecureAnyway() throws Exception {
 		this.doSecureTemplateTest(false, null, SECURE_URL_PREFIX + "/template",
-				NON_SECURE_URL_PREFIX + "/template");
+				null);
 	}
 
 	/**
@@ -159,19 +159,19 @@ public class SecureHttpTemplateTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensure link triggers a redirect if secure.
+	 * Ensure services non-secure link even though on secure connection.
 	 */
-	public void testInsecureLinkRedirect() throws Exception {
+	public void testInsecureLinkServiceSecureAnyway() throws Exception {
 		this.doSecureTemplateTest(true, false, SECURE_URL_PREFIX
-				+ "/template-LINK", NON_SECURE_URL_PREFIX + "/template-LINK");
+				+ "/template-LINK", null);
 	}
 
 	/**
 	 * Ensure service request if appropriately insecure.
 	 */
-	public void testInsecureLinkService() throws Exception {
+	public void testInsecureLinkWithSecureRendering() throws Exception {
 		this.doSecureTemplateTest(true, false, NON_SECURE_URL_PREFIX
-				+ "/template-LINK", null);
+				+ "/template-LINK", SECURE_URL_PREFIX + "/template");
 	}
 
 	/**
@@ -197,13 +197,22 @@ public class SecureHttpTemplateTest extends OfficeFrameTestCase {
 		// Start the server
 		this.officeFloor = this.source.openOfficeFloor();
 
-		// Test (with parameters and entity)
-		HttpPost post = new HttpPost(requestUrl + "?name=Daniel");
-		post.setEntity(new StringEntity("id=1", "ISO-8859-1"));
-		HttpResponse response = this.client.execute(post);
+		// Test
+		HttpResponse response = this.client.execute(new HttpGet(requestUrl
+				+ "?name=Daniel&id=1"));
 
 		// Determine the expected entity of serviced request
 		String linkUri = "/template-LINK";
+		if ((!isTemplateSecure) && (isLinkSecure == null)
+				&& (requestUrl.startsWith(SECURE_URL_PREFIX))) {
+			// Prefix non-configured non-secure template links
+			linkUri = NON_SECURE_URL_PREFIX + linkUri;
+
+		} else if (isTemplateSecure
+				&& ((isLinkSecure != null) && (!isLinkSecure))) {
+			// Prefix non-secure links for secure template
+			linkUri = NON_SECURE_URL_PREFIX + linkUri;
+		}
 		String expectedEntity = (isLinkSecure != null ? "link-" : "")
 				+ "SECURE - Daniel(1) - " + linkUri;
 
