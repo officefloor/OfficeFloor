@@ -34,11 +34,13 @@ import net.officefloor.plugin.section.clazz.ClassSectionSource;
 import net.officefloor.plugin.section.clazz.NextTask;
 import net.officefloor.plugin.section.clazz.Parameter;
 import net.officefloor.plugin.section.work.WorkSectionSource;
+import net.officefloor.plugin.socket.server.http.HttpHeader;
 import net.officefloor.plugin.socket.server.http.HttpRequest;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
 import net.officefloor.plugin.socket.server.http.server.MockHttpServer;
 import net.officefloor.plugin.socket.server.http.source.HttpServerSocketManagedObjectSource;
 import net.officefloor.plugin.socket.server.http.source.HttpsServerSocketManagedObjectSource;
+import net.officefloor.plugin.web.http.application.HttpRequestState;
 import net.officefloor.plugin.web.http.location.HttpApplicationLocation;
 import net.officefloor.plugin.web.http.location.HttpApplicationLocationManagedObjectSource;
 import net.officefloor.plugin.web.http.parameters.source.HttpParametersObjectManagedObjectSource;
@@ -49,6 +51,7 @@ import net.officefloor.plugin.web.http.session.source.HttpSessionManagedObjectSo
 import net.officefloor.plugin.web.http.template.HttpTemplateWorkSource;
 import net.officefloor.plugin.web.http.template.section.PostRedirectGetLogic.Parameters;
 
+import org.apache.http.Header;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
@@ -279,9 +282,74 @@ public class HttpTemplateSectionIntegrationTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensure the POST/redirect/GET pattern works.
+	 * Ensure maintain HTTP request parameters across redirect.
 	 */
-	public void testPostRedirectGetPattern() throws Exception {
+	public void testPostRedirectGet_HttpRequestParameters() throws Exception {
+		HttpPost post = this.createHttpPost("?text=TEST");
+		this.doPostRedirectGetPatternTest(post, "TEST /uri-post");
+	}
+
+	/**
+	 * Ensure maintain HTTP entity across redirect.
+	 */
+	public void testPostRedirectGet_HttpRequestEntity() throws Exception {
+		HttpPost post = this.createHttpPost(null);
+		post.setEntity(new StringEntity("text=TEST", "ISO-8859-1"));
+		this.doPostRedirectGetPatternTest(post, "TEST /uri-post");
+	}
+
+	/**
+	 * Ensure maintain HTTP response {@link HttpHeader} across redirect.
+	 */
+	public void testPostRedirectGet_HttpResponseHeader() throws Exception {
+		HttpPost post = this.createHttpPost("?operation=HEADER");
+		HttpResponse response = this.doPostRedirectGetPatternTest(post,
+				" /uri-post");
+		Header header = response.getFirstHeader("NAME");
+		assertNotNull("Should have HTTP header", header);
+		assertEquals("Incorrect HTTP header value", "VALUE", header.getValue());
+	}
+
+	/**
+	 * Ensure maintain HTTP response entity across redirect.
+	 */
+	public void testPostRedirectGet_HttpResponseEntity() throws Exception {
+		HttpPost post = this.createHttpPost("?operation=ENTITY");
+		this.doPostRedirectGetPatternTest(post, "entity /uri-post");
+	}
+
+	/**
+	 * Ensure maintain {@link HttpRequestState} across redirect.
+	 */
+	public void testPostRedirectGet_RequestState() throws Exception {
+		HttpPost post = this.createHttpPost("?operation=REQUEST_STATE");
+		this.doPostRedirectGetPatternTest(post, "RequestState /uri-post");
+	}
+
+	/**
+	 * Creates the {@link HttpPost} for the POST/Redirect/GET tests.
+	 * 
+	 * @param requestUriSuffix
+	 *            Optional suffix to request URI. May be <code>null</code>.
+	 * @return {@link HttpPost}.
+	 */
+	private HttpPost createHttpPost(String requestUriSuffix) {
+		return new HttpPost("http://" + HOST_NAME + ":" + this.httpPort
+				+ "/uri-post"
+				+ (requestUriSuffix == null ? "" : requestUriSuffix));
+	}
+
+	/**
+	 * Undertakes the POST/redirect/GET pattern tests.
+	 * 
+	 * @param post
+	 *            {@link HttpPost}.
+	 * @param expectedResponse
+	 *            Expected rendered response after redirect.
+	 * @return {@link HttpResponse}.
+	 */
+	private HttpResponse doPostRedirectGetPatternTest(HttpPost post,
+			String expectedResponse) throws Exception {
 
 		// Start the server
 		AutoWireObject parameters = this.source.addManagedObject(
@@ -293,9 +361,6 @@ public class HttpTemplateSectionIntegrationTest extends OfficeFrameTestCase {
 		this.startHttpServer("PostRedirectGet.ofp", PostRedirectGetLogic.class);
 
 		// Execute the HTTP POST
-		HttpPost post = new HttpPost("http://" + HOST_NAME + ":"
-				+ this.httpPort + "/uri-post");
-		post.setEntity(new StringEntity("text=TEST", "ISO-8859-1"));
 		HttpResponse response = this.client.execute(post);
 
 		// Ensure is a redirect
@@ -315,7 +380,10 @@ public class HttpTemplateSectionIntegrationTest extends OfficeFrameTestCase {
 
 		// Ensure correct rendering of template
 		String rendering = MockHttpServer.getEntityBody(response);
-		assertEquals("Incorrect rendering", "TEST /uri-post", rendering);
+		assertEquals("Incorrect rendering", expectedResponse, rendering);
+
+		// Return the response
+		return response;
 	}
 
 	/**

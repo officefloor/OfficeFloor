@@ -17,7 +17,12 @@
  */
 package net.officefloor.plugin.web.http.template.section;
 
+import java.io.IOException;
+
 import net.officefloor.plugin.section.clazz.NextTask;
+import net.officefloor.plugin.socket.server.http.HttpResponse;
+import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
+import net.officefloor.plugin.stream.ServerWriter;
 
 /**
  * Logic for the POST/Redirect/GET pattern tests.
@@ -33,6 +38,8 @@ public class PostRedirectGetLogic {
 
 		private String text;
 
+		private String operation;
+
 		public String getText() {
 			return this.text;
 		}
@@ -40,12 +47,39 @@ public class PostRedirectGetLogic {
 		public void setText(String text) {
 			this.text = text;
 		}
+
+		public void setResponse(String operation) {
+			this.operation = operation;
+		}
 	}
 
 	/**
-	 * Handles the POST.
+	 * Handles the <code>POST</code>.
+	 * 
+	 * @param parmeters
+	 *            {@link Parameters}.
+	 * @param connection
+	 *            {@link ServerHttpConnection}.
+	 * @throws IOException
+	 *             If fails to write content to the {@link HttpResponse}.
 	 */
-	public void post() {
+	public void post(Parameters parameters, ServerHttpConnection connection)
+			throws IOException {
+
+		// Obtain the response
+		HttpResponse response = connection.getHttpResponse();
+
+		// Determine if provide header
+		if ("HEADER".equals(parameters.operation)) {
+			response.addHeader("NAME", "VALUE");
+
+		} else if ("ENTITY".equals(parameters.operation)) {
+			ServerWriter writer = response.getEntityWriter();
+			writer.write("entity");
+
+		} else if ("REQUEST_STATE".equals(parameters.operation)) {
+			parameters.setText("RequestState");
+		}
 	}
 
 	/**

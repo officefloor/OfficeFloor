@@ -218,9 +218,6 @@ public class HttpRouteTask
 			if (redirectedMomento != null) {
 				// Import redirect state
 				connection.importState(redirectedMomento);
-
-				// Use the redirected request URI
-				path = connection.getHttpRequest().getRequestURI();
 			}
 		}
 

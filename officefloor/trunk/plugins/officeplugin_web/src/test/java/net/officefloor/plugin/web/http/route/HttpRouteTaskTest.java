@@ -423,10 +423,6 @@ public class HttpRouteTaskTest extends OfficeFrameTestCase {
 					this.session.getAttribute("_OfficeFloorRedirectedRequest_"),
 					state);
 			this.connection.importState(state);
-			this.recordReturn(this.connection,
-					this.connection.getHttpRequest(), this.request);
-			this.recordReturn(this.request, this.request.getRequestURI(),
-					requestUri);
 		}
 		this.recordReturn(this.location,
 				this.location.transformToApplicationCanonicalPath(requestUri),
