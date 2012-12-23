@@ -41,28 +41,29 @@ import net.officefloor.plugin.socket.server.http.source.HttpServerSocketManagedO
 import net.officefloor.plugin.socket.server.http.source.HttpsServerSocketManagedObjectSource;
 import net.officefloor.plugin.web.http.location.HttpApplicationLocation;
 import net.officefloor.plugin.web.http.location.HttpApplicationLocationManagedObjectSource;
+import net.officefloor.plugin.web.http.parameters.source.HttpParametersObjectManagedObjectSource;
 import net.officefloor.plugin.web.http.route.HttpRouteTask;
 import net.officefloor.plugin.web.http.route.HttpRouteWorkSource;
 import net.officefloor.plugin.web.http.session.HttpSession;
 import net.officefloor.plugin.web.http.session.source.HttpSessionManagedObjectSource;
 import net.officefloor.plugin.web.http.template.HttpTemplateWorkSource;
+import net.officefloor.plugin.web.http.template.section.PostRedirectGetLogic.Parameters;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.params.ClientPNames;
+import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.params.BasicHttpParams;
 import org.apache.http.params.HttpParams;
-import org.junit.Ignore;
 
 /**
  * Tests the integration of the {@link HttpTemplateSectionSource}.
  * 
  * @author Daniel Sagenschneider
  */
-@Ignore("Fix up POST/redirect/GET test to provide entity body")
 public class HttpTemplateSectionIntegrationTest extends OfficeFrameTestCase {
 
 	/**
@@ -82,6 +83,11 @@ public class HttpTemplateSectionIntegrationTest extends OfficeFrameTestCase {
 	 */
 	private static final String HOST_NAME = HttpApplicationLocationManagedObjectSource
 			.getDefaultHostName();
+
+	/**
+	 * {@link AutoWireOfficeFloorSource}.
+	 */
+	private final AutoWireOfficeFloorSource source = new AutoWireOfficeFloorSource();
 
 	/**
 	 * Mock {@link Connection}.
@@ -277,15 +283,19 @@ public class HttpTemplateSectionIntegrationTest extends OfficeFrameTestCase {
 	 */
 	public void testPostRedirectGetPattern() throws Exception {
 
-		fail("TODO use own template and ensure POST entity reinstated");
-
 		// Start the server
-		this.isNonMethodLink = true;
-		this.startHttpServer("Template.ofp", TemplateLogic.class);
+		AutoWireObject parameters = this.source.addManagedObject(
+				HttpParametersObjectManagedObjectSource.class.getName(), null,
+				new AutoWire(Parameters.class));
+		parameters.addProperty(
+				HttpParametersObjectManagedObjectSource.PROPERTY_CLASS_NAME,
+				Parameters.class.getName());
+		this.startHttpServer("PostRedirectGet.ofp", PostRedirectGetLogic.class);
 
 		// Execute the HTTP POST
 		HttpPost post = new HttpPost("http://" + HOST_NAME + ":"
-				+ this.httpPort + "/uri");
+				+ this.httpPort + "/uri-post");
+		post.setEntity(new StringEntity("text=TEST", "ISO-8859-1"));
 		HttpResponse response = this.client.execute(post);
 
 		// Ensure is a redirect
@@ -305,8 +315,7 @@ public class HttpTemplateSectionIntegrationTest extends OfficeFrameTestCase {
 
 		// Ensure correct rendering of template
 		String rendering = MockHttpServer.getEntityBody(response);
-		this.assertRenderedResponse("", LinkQualify.NONE, LinkQualify.NONE,
-				LinkQualify.NONE, null, rendering);
+		assertEquals("Incorrect rendering", "TEST /uri-post", rendering);
 	}
 
 	/**
@@ -822,23 +831,22 @@ public class HttpTemplateSectionIntegrationTest extends OfficeFrameTestCase {
 	protected void startHttpServer(String templateName, Class<?> logicClass,
 			String... templatePropertyPairs) throws Exception {
 
-		// Auto-wire for testing
-		AutoWireOfficeFloorSource source = new AutoWireOfficeFloorSource();
-
 		// Add the HTTP server socket listener
-		HttpServerSocketManagedObjectSource.autoWire(source, this.httpPort,
-				"ROUTE", "route");
+		HttpServerSocketManagedObjectSource.autoWire(this.source,
+				this.httpPort, "ROUTE", "route");
 
 		// Add the HTTPS server socket listener
-		HttpsServerSocketManagedObjectSource.autoWire(source, this.httpsPort,
+		HttpsServerSocketManagedObjectSource.autoWire(this.source,
+				this.httpsPort,
 				MockHttpServer.getAnonymousSslEngineConfiguratorClass(),
 				"ROUTE", "route");
 
 		// Add dependencies
-		source.addObject(this.connection, new AutoWire(Connection.class));
-		source.addManagedObject(HttpSessionManagedObjectSource.class.getName(),
-				null, new AutoWire(HttpSession.class)).setTimeout(10 * 1000);
-		AutoWireObject location = source.addManagedObject(
+		this.source.addObject(this.connection, new AutoWire(Connection.class));
+		this.source.addManagedObject(
+				HttpSessionManagedObjectSource.class.getName(), null,
+				new AutoWire(HttpSession.class)).setTimeout(10 * 1000);
+		AutoWireObject location = this.source.addManagedObject(
 				HttpApplicationLocationManagedObjectSource.class.getName(),
 				null, new AutoWire(HttpApplicationLocation.class));
 		location.addProperty(
@@ -849,22 +857,22 @@ public class HttpTemplateSectionIntegrationTest extends OfficeFrameTestCase {
 				String.valueOf(this.httpsPort));
 
 		// Provide HTTP router for testing
-		AutoWireSection templateRouteSection = source.addSection("ROUTE",
+		AutoWireSection templateRouteSection = this.source.addSection("ROUTE",
 				WorkSectionSource.class.getName(),
 				HttpRouteWorkSource.class.getName());
 
 		// Provide unknown URL continuation for not handled requests
-		AutoWireSection unknownUrlContinuationSection = source.addSection(
+		AutoWireSection unknownUrlContinuationSection = this.source.addSection(
 				"UNKONWN_URL_CONTINUATION", ClassSectionSource.class.getName(),
 				UnknownUrlContinuationServicer.class.getName());
-		source.link(templateRouteSection, "NOT_HANDLED",
+		this.source.link(templateRouteSection, "NOT_HANDLED",
 				unknownUrlContinuationSection, "service");
 
 		// Load the template section
 		final String templateLocation = this.getClass().getPackage().getName()
 				.replace('.', '/')
 				+ "/" + templateName;
-		AutoWireSection templateSection = source.addSection("SECTION",
+		AutoWireSection templateSection = this.source.addSection("SECTION",
 				HttpTemplateSectionSource.class.getName(), templateLocation);
 		if (logicClass != null) {
 			templateSection.addProperty(
@@ -883,32 +891,33 @@ public class HttpTemplateSectionIntegrationTest extends OfficeFrameTestCase {
 		}
 
 		// Load mock section for handling outputs
-		AutoWireSection handleOutputSection = source
+		AutoWireSection handleOutputSection = this.source
 				.addSection("OUTPUT", ClassSectionSource.class.getName(),
 						MockSection.class.getName());
 
 		// Link flow outputs
-		source.link(templateSection, "output", handleOutputSection, "finished");
-		source.link(templateSection, "doExternalFlow", handleOutputSection,
+		this.source.link(templateSection, "output", handleOutputSection,
 				"finished");
+		this.source.link(templateSection, "doExternalFlow",
+				handleOutputSection, "finished");
 
 		// Link non-method link
 		if (this.isNonMethodLink) {
-			AutoWireSection handleOutputLink = source.addSection("LINK",
+			AutoWireSection handleOutputLink = this.source.addSection("LINK",
 					ClassSectionSource.class.getName(),
 					MockLink.class.getName());
-			source.link(templateSection, "nonMethodLink", handleOutputLink,
-					"linked");
+			this.source.link(templateSection, "nonMethodLink",
+					handleOutputLink, "linked");
 		}
 
 		// Link service method link
 		if (this.isServiceMethodLink) {
-			source.link(templateSection, "serviceLink", templateSection,
+			this.source.link(templateSection, "serviceLink", templateSection,
 					"serviceMethod");
 		}
 
 		// Open the OfficeFloor
-		this.officeFloor = source.openOfficeFloor();
+		this.officeFloor = this.source.openOfficeFloor();
 	}
 
 	/**
