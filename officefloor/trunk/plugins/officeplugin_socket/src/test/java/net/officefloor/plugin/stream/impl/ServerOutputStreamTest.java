@@ -17,12 +17,15 @@
  */
 package net.officefloor.plugin.stream.impl;
 
+import java.io.BufferedWriter;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.io.OutputStreamWriter;
 import java.io.Serializable;
+import java.io.Writer;
 import java.nio.ByteBuffer;
 import java.nio.channels.ClosedChannelException;
 import java.util.LinkedList;
@@ -226,7 +229,7 @@ public class ServerOutputStreamTest extends OfficeFrameTestCase implements
 
 		// Ensure can not export state after flush
 		try {
-			this.stream.exportState();
+			this.stream.exportState(null);
 			fail("Should not be successful");
 		} catch (DataWrittenException ex) {
 			assertEquals(
@@ -240,7 +243,7 @@ public class ServerOutputStreamTest extends OfficeFrameTestCase implements
 	 * Ensure can have no data for momento state.
 	 */
 	public void testNoDataStateMomento() {
-		this.assertMomentoClonedStream(null);
+		this.assertMomentoClonedStream(null, null);
 	}
 
 	/**
@@ -249,7 +252,7 @@ public class ServerOutputStreamTest extends OfficeFrameTestCase implements
 	public void testSingleBufferStateMomento() throws IOException {
 		final String CONTENT = "TEST";
 		this.stream.write(CONTENT.getBytes());
-		this.assertMomentoClonedStream(CONTENT);
+		this.assertMomentoClonedStream(null, CONTENT);
 	}
 
 	/**
@@ -262,7 +265,7 @@ public class ServerOutputStreamTest extends OfficeFrameTestCase implements
 			expectedContent.append(CONTENT);
 			this.stream.write(CONTENT.getBytes());
 		}
-		this.assertMomentoClonedStream(expectedContent.toString());
+		this.assertMomentoClonedStream(null, expectedContent.toString());
 	}
 
 	/**
@@ -273,20 +276,31 @@ public class ServerOutputStreamTest extends OfficeFrameTestCase implements
 		this.stream.write(ByteBuffer.wrap("TWO_".getBytes()));
 		this.stream.write(ByteBuffer.wrap("THREE_".getBytes()));
 		this.stream.write("FOUR".getBytes());
-		this.assertMomentoClonedStream("ONE_TWO_THREE_FOUR");
+		this.assertMomentoClonedStream(null, "ONE_TWO_THREE_FOUR");
+	}
+
+	/**
+	 * Ensure can flush contents from {@link Writer} for momento state.
+	 */
+	public void testWriterStateMomento() throws IOException {
+		Writer writer = new BufferedWriter(new OutputStreamWriter(this.stream));
+		writer.write("TEST");
+		this.assertMomentoClonedStream(writer, "TEST");
 	}
 
 	/**
 	 * Asserts the cloning with momento.
 	 * 
+	 * @param writer
+	 *            {@link Writer} to flush its content. May be <code>null</code>.
 	 * @param expectedContent
 	 *            Expected content of the cloned {@link ServerInputStream}.
 	 */
-	private void assertMomentoClonedStream(String expectedContent) {
+	private void assertMomentoClonedStream(Writer writer, String expectedContent) {
 		try {
 
 			// Export the state (ensuring serialises)
-			Serializable momento = this.stream.exportState();
+			Serializable momento = this.stream.exportState(writer);
 
 			// Serialise the momento
 			ByteArrayOutputStream outputBuffer = new ByteArrayOutputStream();

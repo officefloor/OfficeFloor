@@ -20,8 +20,10 @@ package net.officefloor.plugin.socket.server.http.conversation.impl;
 
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.io.Serializable;
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -39,6 +41,7 @@ import net.officefloor.plugin.socket.server.protocol.WriteBufferEnum;
 import net.officefloor.plugin.stream.ServerOutputStream;
 import net.officefloor.plugin.stream.ServerWriter;
 import net.officefloor.plugin.stream.WriteBufferReceiver;
+import net.officefloor.plugin.stream.impl.DataWrittenException;
 import net.officefloor.plugin.stream.impl.ServerOutputStreamImpl;
 
 /**
@@ -72,11 +75,6 @@ public class HttpResponseImpl implements HttpResponse {
 	 * {@link Connection}.
 	 */
 	private final Connection connection;
-
-	/**
-	 * Send buffer size.
-	 */
-	private final int sendBufferSize;
 
 	/**
 	 * {@link HttpResponseWriteBufferReceiver}.
@@ -149,26 +147,93 @@ public class HttpResponseImpl implements HttpResponse {
 	 *            {@link Connection}.
 	 * @param httpVersion
 	 *            HTTP version.
-	 * @param sendBufferSize
-	 *            Send buffer size.
-	 * @param defaultCharset
-	 *            Default {@link Charset} for the {@link ServerWriter}.
 	 */
 	public HttpResponseImpl(HttpConversationImpl conversation,
-			Connection connection, String httpVersion, int sendBufferSize,
-			Charset defaultCharset) {
+			Connection connection, String httpVersion) {
 		this.conversation = conversation;
 		this.connection = connection;
-		this.sendBufferSize = sendBufferSize;
-		this.charset = defaultCharset;
-		this.charsetName = this.charset.name();
 
 		// Specify initial values
 		this.version = httpVersion;
 		this.status = HttpStatus.SC_OK;
 		this.statusMessage = HttpStatus.getStatusMessage(this.status);
+		this.charset = this.conversation.getDefaultCharset();
+		this.charsetName = this.charset.name();
 		this.entity = new ServerOutputStreamImpl(this.receiver,
-				this.sendBufferSize);
+				this.conversation.getSendBufferSize());
+	}
+
+	/**
+	 * Initiate.
+	 * 
+	 * @param conversation
+	 *            {@link HttpConversationImpl}.
+	 * @param connection
+	 *            {@link Connection}.
+	 * @param httpVersion
+	 *            HTTP version.
+	 * @param momento
+	 *            Momento containing the state for this {@link HttpResponse}.
+	 */
+	public HttpResponseImpl(HttpConversationImpl conversation,
+			Connection connection, String httpVersion, Serializable momento) {
+
+		// Ensure valid momento
+		if (!(momento instanceof StateMomento)) {
+			throw new IllegalArgumentException("Invalid momento for "
+					+ HttpResponse.class.getSimpleName());
+		}
+		StateMomento state = (StateMomento) momento;
+
+		// Load state
+		this.conversation = conversation;
+		this.connection = connection;
+		this.version = httpVersion;
+		this.status = state.status;
+		this.statusMessage = state.statusMessage;
+		this.headers.addAll(state.headers);
+		this.contentType = state.contentType;
+		this.charset = Charset.forName(state.charset);
+		this.charsetName = state.charsetName;
+		this.entity = new ServerOutputStreamImpl(this.receiver,
+				this.conversation.getSendBufferSize(), state.entityState);
+	}
+
+	/**
+	 * Obtains the HTTP version.
+	 * 
+	 * @return HTTP version.
+	 */
+	String getHttpVersion() {
+		return this.version;
+	}
+
+	/**
+	 * Exports the momento for the current state of this {@link HttpResponse}.
+	 * 
+	 * @return Momento for the current state of this {@link HttpResponse}.
+	 * @throws DataWrittenException
+	 *             Should data have already been written to the
+	 *             {@link Connection}.
+	 * @throws IOException
+	 *             If fails to export state.
+	 */
+	Serializable exportState() throws DataWrittenException, IOException {
+
+		synchronized (this.connection.getLock()) {
+
+			// Prepare state for momento
+			List<HttpHeader> httpHeaders = new ArrayList<HttpHeader>(
+					this.headers);
+			String charsetSerializeName = this.charset.name();
+			Serializable entityMomento = this.entity
+					.exportState(this.entityWriter);
+
+			// Create and return the state momento
+			return new StateMomento(this.status, this.statusMessage,
+					httpHeaders, entityMomento, this.contentType,
+					charsetSerializeName, this.charsetName);
+		}
 	}
 
 	/**
@@ -243,7 +308,7 @@ public class HttpResponseImpl implements HttpResponse {
 
 		// Create output stream to write header
 		ServerOutputStream header = new ServerOutputStreamImpl(this.receiver,
-				this.sendBufferSize);
+				this.conversation.getSendBufferSize());
 
 		// Provide the Content-Type HTTP header
 		if (this.contentType != null) {
@@ -649,6 +714,78 @@ public class HttpResponseImpl implements HttpResponse {
 		@Override
 		public boolean isClosed() {
 			return HttpResponseImpl.this.isClosed;
+		}
+	}
+
+	/**
+	 * Momento for state of this {@link HttpResponse}.
+	 */
+	private static class StateMomento implements Serializable {
+
+		/**
+		 * Status code.
+		 */
+		private final int status;
+
+		/**
+		 * Status message.
+		 */
+		private final String statusMessage;
+
+		/**
+		 * Headers.
+		 */
+		private final List<HttpHeader> headers;
+
+		/**
+		 * Momento containing the {@link ServerOutputStream} state.
+		 */
+		private final Serializable entityState;
+
+		/**
+		 * Content-Type.
+		 */
+		private final String contentType;
+
+		/**
+		 * {@link Charset} for the {@link ServerWriter}.
+		 */
+		private final String charset;
+
+		/**
+		 * Name of the {@link Charset} to use in the {@link HttpResponse}.
+		 */
+		private final String charsetName;
+
+		/**
+		 * Initiate.
+		 * 
+		 * @param status
+		 *            Status code.
+		 * @param statusMessage
+		 *            Status message.
+		 * @param headers
+		 *            Headers.
+		 * @param entityState
+		 *            Momento containing the {@link ServerOutputStream} state.
+		 * @param contentType
+		 *            Content-Type.
+		 * @param charset
+		 *            {@link Charset} for the {@link ServerWriter}.
+		 * @param charsetName
+		 *            Name of the {@link Charset} to use in the
+		 *            {@link HttpResponse}.
+		 */
+		public StateMomento(int status, String statusMessage,
+				List<HttpHeader> headers, Serializable entityState,
+				String contentType, String charset, String charsetName) {
+			this.status = status;
+			this.statusMessage = statusMessage;
+			this.headers = headers;
+			this.entityState = entityState;
+			this.contentType = contentType;
+			this.charset = charset;
+			this.charsetName = charsetName;
 		}
 	}
 

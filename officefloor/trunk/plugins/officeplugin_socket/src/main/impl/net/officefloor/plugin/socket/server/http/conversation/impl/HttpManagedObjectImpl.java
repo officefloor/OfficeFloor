@@ -22,20 +22,17 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.net.InetSocketAddress;
 import java.nio.channels.ClosedChannelException;
-import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import net.officefloor.frame.api.escalate.EscalationHandler;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
-import net.officefloor.plugin.socket.server.http.HttpHeader;
 import net.officefloor.plugin.socket.server.http.HttpRequest;
 import net.officefloor.plugin.socket.server.http.HttpResponse;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
+import net.officefloor.plugin.socket.server.http.conversation.HttpConversation;
 import net.officefloor.plugin.socket.server.http.conversation.HttpManagedObject;
 import net.officefloor.plugin.socket.server.protocol.Connection;
-import net.officefloor.plugin.stream.impl.NotAllDataAvailableException;
-import net.officefloor.plugin.stream.impl.ServerInputStreamImpl;
 
 /**
  * {@link ManagedObject} for the {@link ServerHttpConnection}.
@@ -57,6 +54,11 @@ public class HttpManagedObjectImpl implements HttpManagedObject,
 	private final Connection connection;
 
 	/**
+	 * {@link HttpConversation}.
+	 */
+	private final HttpConversationImpl conversation;
+
+	/**
 	 * {@link HttpRequest}.
 	 */
 	private volatile HttpRequestImpl request;
@@ -64,7 +66,7 @@ public class HttpManagedObjectImpl implements HttpManagedObject,
 	/**
 	 * {@link HttpResponse}.
 	 */
-	private final HttpResponseImpl response;
+	private volatile HttpResponseImpl response;
 
 	/**
 	 * HTTP method sent by the client.
@@ -77,16 +79,18 @@ public class HttpManagedObjectImpl implements HttpManagedObject,
 	 * 
 	 * @param connection
 	 *            {@link Connection}.
+	 * @param conversation
+	 *            {@link HttpConversationImpl}.
 	 * @param request
 	 *            {@link HttpRequestImpl}.
-	 * @param response
-	 *            {@link HttpResponseImpl}.
 	 */
 	public HttpManagedObjectImpl(Connection connection,
-			HttpRequestImpl request, HttpResponseImpl response) {
+			HttpConversationImpl conversation, HttpRequestImpl request) {
 		this.connection = connection;
+		this.conversation = conversation;
 		this.request = request;
-		this.response = response;
+		this.response = new HttpResponseImpl(this.conversation,
+				this.connection, request.getVersion());
 
 		// Keep track of the client HTTP method
 		this.clientHttpMethod = request.getMethod();
@@ -100,6 +104,7 @@ public class HttpManagedObjectImpl implements HttpManagedObject,
 	 */
 	public HttpManagedObjectImpl(HttpResponseImpl completedResponse) {
 		this.connection = null;
+		this.conversation = null;
 		this.request = null;
 		this.response = completedResponse;
 		this.clientHttpMethod = null;
@@ -173,10 +178,14 @@ public class HttpManagedObjectImpl implements HttpManagedObject,
 	}
 
 	@Override
-	public Serializable exportState() throws NotAllDataAvailableException {
-		return new StateMomento(this.request.getMethod(),
-				this.request.getRequestURI(), this.request.getHeaders(),
-				this.request.exportEntityState());
+	public Serializable exportState() throws IOException {
+
+		// Obtain the request and response momentos
+		Serializable requestMomento = this.request.exportState();
+		Serializable responseMomento = this.response.exportState();
+
+		// Create and return the state momento
+		return new StateMomento(requestMomento, responseMomento);
 	}
 
 	@Override
@@ -190,12 +199,14 @@ public class HttpManagedObjectImpl implements HttpManagedObject,
 		StateMomento state = (StateMomento) momento;
 
 		// Override the request with momento state
-		ServerInputStreamImpl entityStream = new ServerInputStreamImpl(
-				new Object(), state.entityMomento);
-		HttpRequestImpl overrideRequest = new HttpRequestImpl(state.method,
-				state.requestUri, this.request.getVersion(), state.headers,
-				new HttpEntityImpl(entityStream));
-		this.request = overrideRequest;
+		String requestHttpVersion = this.request.getVersion();
+		this.request = new HttpRequestImpl(requestHttpVersion,
+				state.requestMomento);
+
+		// Override the response with momento state
+		String responseHttpVersion = this.response.getHttpVersion();
+		this.response = new HttpResponseImpl(this.conversation,
+				this.connection, responseHttpVersion, state.responseMomento);
 	}
 
 	@Override
@@ -236,43 +247,27 @@ public class HttpManagedObjectImpl implements HttpManagedObject,
 	private static class StateMomento implements Serializable {
 
 		/**
-		 * HTTP method.
+		 * Momento for the {@link HttpRequest}.
 		 */
-		private final String method;
+		private final Serializable requestMomento;
 
 		/**
-		 * Request URI.
+		 * Momento for the {@link HttpResponse}.
 		 */
-		private final String requestUri;
-
-		/**
-		 * {@link HttpHeader} instances.
-		 */
-		private final List<HttpHeader> headers;
-
-		/**
-		 * Momento for the state of the entity.
-		 */
-		private final Serializable entityMomento;
+		private final Serializable responseMomento;
 
 		/**
 		 * Initiate.
 		 * 
-		 * @param method
-		 *            Method.
-		 * @param requestUri
-		 *            Request URI.
-		 * @param headers
-		 *            {@link HttpHeader} instances.
-		 * @param entityMomento
-		 *            Entity state momento.
+		 * @param requestMomento
+		 *            Momento for the {@link HttpRequest}.
+		 * @param responseMomento
+		 *            Momento for the {@link HttpResponse}.
 		 */
-		public StateMomento(String method, String requestUri,
-				List<HttpHeader> headers, Serializable entityMomento) {
-			this.method = method;
-			this.requestUri = requestUri;
-			this.headers = headers;
-			this.entityMomento = entityMomento;
+		public StateMomento(Serializable requestMomento,
+				Serializable responseMomento) {
+			this.requestMomento = requestMomento;
+			this.responseMomento = responseMomento;
 		}
 	}
 

@@ -87,6 +87,24 @@ public class HttpConversationImpl implements HttpConversation {
 	}
 
 	/**
+	 * Obtains the send buffer size.
+	 * 
+	 * @return Send buffer size.
+	 */
+	int getSendBufferSize() {
+		return this.sendBufferSize;
+	}
+
+	/**
+	 * Obtains the default {@link Charset}.
+	 * 
+	 * @return Default {@link Charset}.
+	 */
+	Charset getDefaultCharset() {
+		return this.defaultCharset;
+	}
+
+	/**
 	 * Queues complete {@link HttpResponse} instances for sending.
 	 * 
 	 * @throws IOException
@@ -134,13 +152,9 @@ public class HttpConversationImpl implements HttpConversation {
 		HttpRequestImpl request = new HttpRequestImpl(method, requestURI,
 				httpVersion, headers, entity);
 
-		// Create the corresponding response
-		HttpResponseImpl response = new HttpResponseImpl(this, this.connection,
-				httpVersion, this.sendBufferSize, this.defaultCharset);
-
 		// Create the HTTP managed object
 		HttpManagedObjectImpl managedObject = new HttpManagedObjectImpl(
-				this.connection, request, response);
+				this.connection, this, request);
 
 		// Register the HTTP managed object
 		synchronized (this) {
@@ -157,7 +171,7 @@ public class HttpConversationImpl implements HttpConversation {
 
 		// Create response for parse failure
 		HttpResponseImpl response = new HttpResponseImpl(this, this.connection,
-				"HTTP/1.0", this.sendBufferSize, this.defaultCharset);
+				"HTTP/1.0");
 
 		// Create the HTTP managed object
 		HttpManagedObjectImpl managedObject = new HttpManagedObjectImpl(

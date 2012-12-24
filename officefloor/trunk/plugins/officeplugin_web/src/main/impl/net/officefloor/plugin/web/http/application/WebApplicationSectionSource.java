@@ -42,7 +42,6 @@ import net.officefloor.plugin.socket.server.http.HttpResponse;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
 import net.officefloor.plugin.socket.server.http.response.source.HttpResponseSendTask.HttpResponseSendTaskDependencies;
 import net.officefloor.plugin.socket.server.http.response.source.HttpResponseSenderWorkSource;
-import net.officefloor.plugin.stream.impl.NotAllDataAvailableException;
 import net.officefloor.plugin.web.http.location.HttpApplicationLocation;
 import net.officefloor.plugin.web.http.location.InvalidHttpRequestUriException;
 import net.officefloor.plugin.web.http.route.HttpRouteTask.HttpRouteTaskDependencies;
@@ -175,8 +174,7 @@ public class WebApplicationSectionSource extends AbstractSectionSource {
 				designer, escalations);
 		linkEscalation(routeTask, HttpRequestTokeniseException.class, designer,
 				escalations);
-		linkEscalation(routeTask, NotAllDataAvailableException.class, designer,
-				escalations);
+		linkEscalation(routeTask, IOException.class, designer, escalations);
 		linkEscalation(routeTask, UnknownWorkException.class, designer,
 				escalations);
 		linkEscalation(routeTask, UnknownTaskException.class, designer,

@@ -19,6 +19,7 @@
 package net.officefloor.plugin.socket.server.http.conversation.impl;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.List;
 
 import net.officefloor.plugin.socket.server.http.HttpHeader;
@@ -26,6 +27,7 @@ import net.officefloor.plugin.socket.server.http.HttpRequest;
 import net.officefloor.plugin.socket.server.http.conversation.HttpEntity;
 import net.officefloor.plugin.stream.ServerInputStream;
 import net.officefloor.plugin.stream.impl.NotAllDataAvailableException;
+import net.officefloor.plugin.stream.impl.ServerInputStreamImpl;
 
 /**
  * {@link HttpRequest} implementation.
@@ -83,14 +85,47 @@ public class HttpRequestImpl implements HttpRequest {
 	}
 
 	/**
-	 * Exports a momento for the current state of the {@link HttpEntity}.
+	 * Initiate.
 	 * 
-	 * @return Momento for the current state of the {@link HttpEntity}.
+	 * @param httpVersion
+	 *            HTTP version.
+	 * @param momento
+	 *            Momento containing the state.
+	 */
+	public HttpRequestImpl(String httpVersion, Serializable momento) {
+
+		// Ensure appropriate momento
+		if (!(momento instanceof StateMomento)) {
+			throw new IllegalArgumentException("Invalid momento for "
+					+ HttpRequest.class.getSimpleName());
+		}
+		StateMomento state = (StateMomento) momento;
+
+		// Load the state
+		this.method = state.method;
+		this.requestURI = state.requestURI;
+		this.version = httpVersion;
+		this.headers = state.headers;
+		this.entity = new HttpEntityImpl(new ServerInputStreamImpl(
+				new Object(), state.entityMomento));
+	}
+
+	/**
+	 * Exports a momento for the current state of this {@link HttpRequest}.
+	 * 
+	 * @return Momento for the current state of this {@link HttpRequest}.
 	 * @throws NotAllDataAvailableException
 	 *             Should not all data be available for the {@link HttpEntity}.
 	 */
-	public Serializable exportEntityState() throws NotAllDataAvailableException {
-		return this.entity.exportState();
+	Serializable exportState() throws NotAllDataAvailableException {
+
+		// Prepare state for momento
+		List<HttpHeader> httpHeaders = new ArrayList<HttpHeader>(this.headers);
+		Serializable entityMomento = this.entity.exportState();
+
+		// Create and return the momento
+		return new StateMomento(this.method, this.requestURI, httpHeaders,
+				entityMomento);
 	}
 
 	/*
@@ -120,6 +155,52 @@ public class HttpRequestImpl implements HttpRequest {
 	@Override
 	public ServerInputStream getEntity() {
 		return this.entity.getInputStream();
+	}
+
+	/**
+	 * Momento for state of this {@link HttpRequest}.
+	 */
+	private static class StateMomento implements Serializable {
+
+		/**
+		 * Method.
+		 */
+		private final String method;
+
+		/**
+		 * Request URI.
+		 */
+		private final String requestURI;
+
+		/**
+		 * Headers.
+		 */
+		private final List<HttpHeader> headers;
+
+		/**
+		 * Momento for the {@link ServerInputStream}.
+		 */
+		private final Serializable entityMomento;
+
+		/**
+		 * Initiate.
+		 * 
+		 * @param method
+		 *            Method.
+		 * @param requestURI
+		 *            Request URI.
+		 * @param headers
+		 *            {@link HttpHeader} instances.
+		 * @param entityMomento
+		 *            {@link ServerInputStream} momento.
+		 */
+		public StateMomento(String method, String requestURI,
+				List<HttpHeader> headers, Serializable entityMomento) {
+			this.method = method;
+			this.requestURI = requestURI;
+			this.headers = headers;
+			this.entityMomento = entityMomento;
+		}
 	}
 
 }

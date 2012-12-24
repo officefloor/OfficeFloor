@@ -17,6 +17,8 @@
  */
 package net.officefloor.plugin.web.http.route;
 
+import java.io.IOException;
+
 import net.officefloor.compile.spi.work.source.TaskTypeBuilder;
 import net.officefloor.compile.spi.work.source.WorkSource;
 import net.officefloor.compile.spi.work.source.WorkSourceContext;
@@ -28,7 +30,6 @@ import net.officefloor.frame.api.manage.TaskManager;
 import net.officefloor.frame.api.manage.UnknownTaskException;
 import net.officefloor.frame.api.manage.UnknownWorkException;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
-import net.officefloor.plugin.stream.impl.NotAllDataAvailableException;
 import net.officefloor.plugin.web.http.continuation.HttpUrlContinuationDifferentiator;
 import net.officefloor.plugin.web.http.location.HttpApplicationLocation;
 import net.officefloor.plugin.web.http.location.InvalidHttpRequestUriException;
@@ -86,7 +87,7 @@ public class HttpRouteWorkSource extends AbstractWorkSource<HttpRouteTask> {
 		task.addFlow().setKey(HttpRouteTaskFlows.NOT_HANDLED);
 		task.addEscalation(InvalidHttpRequestUriException.class);
 		task.addEscalation(HttpRequestTokeniseException.class);
-		task.addEscalation(NotAllDataAvailableException.class);
+		task.addEscalation(IOException.class);
 		task.addEscalation(UnknownWorkException.class);
 		task.addEscalation(UnknownTaskException.class);
 		task.addEscalation(InvalidParameterTypeException.class);
