@@ -57,7 +57,7 @@ public class HttpEntityImpl implements HttpEntity {
 
 	@Override
 	public Serializable exportState() throws NotAllDataAvailableException {
-		return this.content.extractStateMomento();
+		return this.content.exportState();
 	}
 
 }

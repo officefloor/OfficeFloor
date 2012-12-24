@@ -72,12 +72,15 @@ public interface ServerHttpConnection {
 
 	/**
 	 * <p>
-	 * Exports the state of the current {@link HttpRequest}.
+	 * Exports the state of the current {@link HttpRequest} and
+	 * {@link HttpResponse}.
 	 * <p>
-	 * This enables maintaining the state of the {@link HttpRequest} and later
-	 * reinstating it (typically after a redirect).
+	 * This enables maintaining the state of the {@link HttpRequest} /
+	 * {@link HttpResponse} and later reinstating them (typically after a
+	 * redirect).
 	 * 
-	 * @return Momento containing the current {@link HttpRequest} state.
+	 * @return Momento containing the current {@link HttpRequest} and
+	 *         {@link HttpResponse} state.
 	 * @throws NotAllDataAvailableException
 	 *             Should all of the {@link HttpRequest} data not yet be
 	 *             received.
@@ -87,8 +90,8 @@ public interface ServerHttpConnection {
 	Serializable exportState() throws NotAllDataAvailableException;
 
 	/**
-	 * Imports and overrides the current {@link HttpRequest} with the input
-	 * momento.
+	 * Imports and overrides the current {@link HttpRequest} and
+	 * {@link HttpResponse} with the input momento.
 	 * 
 	 * @param momento
 	 *            Momento exported from a {@link ServerHttpConnection}.

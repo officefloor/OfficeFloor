@@ -170,7 +170,7 @@ public class ServerInputStreamImpl extends ServerInputStream {
 	}
 
 	/**
-	 * Extracts the momento containing the current state of the
+	 * Exports the momento containing the current state of the
 	 * {@link ServerInputStream}.
 	 * 
 	 * @return Momento containing the current state of the
@@ -178,8 +178,7 @@ public class ServerInputStreamImpl extends ServerInputStream {
 	 * @throws NotAllDataAvailableException
 	 *             Should all input data not be available.
 	 */
-	public Serializable extractStateMomento()
-			throws NotAllDataAvailableException {
+	public Serializable exportState() throws NotAllDataAvailableException {
 
 		synchronized (this.lock) {
 

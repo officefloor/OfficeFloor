@@ -18,12 +18,14 @@
 package net.officefloor.plugin.stream.impl;
 
 import java.io.IOException;
+import java.io.Serializable;
 import java.nio.ByteBuffer;
 import java.nio.channels.ClosedChannelException;
 import java.util.LinkedList;
 import java.util.Queue;
 
 import net.officefloor.plugin.socket.server.protocol.WriteBuffer;
+import net.officefloor.plugin.socket.server.protocol.WriteBufferEnum;
 import net.officefloor.plugin.stream.ServerOutputStream;
 import net.officefloor.plugin.stream.WriteBufferReceiver;
 
@@ -60,6 +62,11 @@ public class ServerOutputStreamImpl extends ServerOutputStream {
 	private final Queue<WriteBuffer> dataToWrite = new LinkedList<WriteBuffer>();
 
 	/**
+	 * Indicates if the data is flushed.
+	 */
+	private boolean isDataFlushed = false;
+
+	/**
 	 * Initiate.
 	 * 
 	 * @param receiver
@@ -71,6 +78,106 @@ public class ServerOutputStreamImpl extends ServerOutputStream {
 			int sendBufferSize) {
 		this.receiver = receiver;
 		this.sendBufferSize = sendBufferSize;
+	}
+
+	/**
+	 * Initiate.
+	 * 
+	 * @param receiver
+	 *            {@link WriteBufferReceiver}.
+	 * @param sendBufferSize
+	 *            Send buffer size.
+	 * @param stateMomento
+	 *            Momento containing the state for this
+	 *            {@link ServerOutputStream}.
+	 */
+	public ServerOutputStreamImpl(WriteBufferReceiver receiver,
+			int sendBufferSize, Serializable stateMomento) {
+		this(receiver, sendBufferSize);
+
+		// Ensure valid momento
+		if (!(stateMomento instanceof StateMomento)) {
+			throw new IllegalArgumentException("Invalid momento for "
+					+ ServerOutputStream.class.getSimpleName());
+		}
+		StateMomento state = (StateMomento) stateMomento;
+
+		// Load the state
+		this.currentData = state.data;
+		this.nextCurrentDataIndex = this.currentData.length;
+	}
+
+	/**
+	 * Exports a momento for the current state of this
+	 * {@link ServerOutputStream}.
+	 * 
+	 * @return Momento for the current state of this {@link ServerOutputStream}.
+	 * @throws DataWrittenException
+	 *             Should data have already been written to the client.
+	 */
+	public Serializable exportState() throws DataWrittenException {
+
+		synchronized (this.receiver.getLock()) {
+
+			// Ensure data has not yet been flushed
+			if (this.isDataFlushed) {
+				throw new DataWrittenException(
+						ServerOutputStream.class.getSimpleName()
+								+ " has written data to client.  Can not create State momento.");
+			}
+
+			// Calculate the amount of data
+			int totalBytes = this.nextCurrentDataIndex;
+			for (WriteBuffer buffer : this.dataToWrite) {
+				WriteBufferEnum type = buffer.getType();
+				switch (type) {
+				case BYTE_ARRAY:
+					totalBytes += buffer.length();
+					break;
+				case BYTE_BUFFER:
+					totalBytes += buffer.getDataBuffer().remaining();
+					break;
+				default:
+					throw new IllegalStateException(
+							"Unknown write buffer type " + type);
+				}
+			}
+
+			// Create the data buffer for state momento
+			byte[] data = new byte[totalBytes];
+			int nextPosition = 0;
+
+			// Load the data to write
+			int length;
+			for (WriteBuffer buffer : this.dataToWrite) {
+				WriteBufferEnum type = buffer.getType();
+				switch (type) {
+				case BYTE_ARRAY:
+					length = buffer.length();
+					System.arraycopy(buffer.getData(), 0, data, nextPosition,
+							length);
+					break;
+				case BYTE_BUFFER:
+					ByteBuffer duplicate = buffer.getDataBuffer().duplicate();
+					length = duplicate.remaining();
+					duplicate.get(data, nextPosition, length);
+					break;
+				default:
+					throw new IllegalStateException(
+							"Unknown write buffer type " + type);
+				}
+				nextPosition += length;
+			}
+
+			// Load the current data (if available)
+			if ((this.currentData != null) && (this.nextCurrentDataIndex > 0)) {
+				System.arraycopy(this.currentData, 0, data, nextPosition,
+						this.nextCurrentDataIndex);
+			}
+
+			// Create and return the state momento
+			return new StateMomento(data);
+		}
 	}
 
 	/**
@@ -202,6 +309,9 @@ public class ServerOutputStreamImpl extends ServerOutputStream {
 			this.currentData = null;
 			this.dataToWrite.clear();
 
+			// Flag data is now flushed
+			this.isDataFlushed = true;
+
 			// Flush the data to the receiver
 			this.receiver.writeData(buffers);
 		}
@@ -222,6 +332,27 @@ public class ServerOutputStreamImpl extends ServerOutputStream {
 
 			// Close the receiver
 			this.receiver.close();
+		}
+	}
+
+	/**
+	 * Momento to hold current state of this {@link ServerOutputStream}.
+	 */
+	private static class StateMomento implements Serializable {
+
+		/**
+		 * Data.
+		 */
+		private final byte[] data;
+
+		/**
+		 * Initiate.
+		 * 
+		 * @param data
+		 *            Data written.
+		 */
+		public StateMomento(byte[] data) {
+			this.data = data;
 		}
 	}
 

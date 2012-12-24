@@ -17,14 +17,23 @@
  */
 package net.officefloor.plugin.stream.impl;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.Serializable;
 import java.nio.ByteBuffer;
 import java.nio.channels.ClosedChannelException;
+import java.util.LinkedList;
+import java.util.List;
 
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.socket.server.impl.ArrayWriteBuffer;
 import net.officefloor.plugin.socket.server.impl.BufferWriteBuffer;
 import net.officefloor.plugin.socket.server.protocol.WriteBuffer;
+import net.officefloor.plugin.socket.server.protocol.WriteBufferEnum;
+import net.officefloor.plugin.stream.ServerInputStream;
 import net.officefloor.plugin.stream.ServerOutputStream;
 import net.officefloor.plugin.stream.WriteBufferReceiver;
 
@@ -50,7 +59,7 @@ public class ServerOutputStreamTest extends OfficeFrameTestCase implements
 	/**
 	 * Written {@link WriteBuffer} instances.
 	 */
-	private WriteBuffer[] writtenData = null;
+	private final List<WriteBuffer> writtenData = new LinkedList<WriteBuffer>();
 
 	/**
 	 * Indicates if closed {@link WriteBufferReceiver}.
@@ -62,21 +71,19 @@ public class ServerOutputStreamTest extends OfficeFrameTestCase implements
 	 */
 	public void testFlushNoData() throws IOException {
 		this.stream.flush();
-		assertNull("Should not write data if none", this.writtenData);
+		assertEquals("Should not write data if none", 0,
+				this.writtenData.size());
 	}
 
 	/**
 	 * Tests flushing some data.
 	 */
 	public void testFlushData() throws IOException {
-		this.stream.write(10);
+		this.stream.write("TEST".getBytes());
 		this.stream.flush();
-		assertNotNull("Should have written data", this.writtenData);
 		assertEquals("Should just be the one write buffer", 1,
-				this.writtenData.length);
-		WriteBuffer buffer = this.writtenData[0];
-		assertEquals("Should just be one byte written", 1, buffer.length());
-		assertEquals("Incorrect written byte", 10, buffer.getData()[0]);
+				this.writtenData.size());
+		this.assertWrittenData("TEST");
 	}
 
 	/**
@@ -86,7 +93,7 @@ public class ServerOutputStreamTest extends OfficeFrameTestCase implements
 
 		final int numberOfBuffers = 10;
 
-		// Provide send data
+		// Provide send data (use bytes to validate buffer allocation)
 		byte[] data = new byte[this.sendBufferSize * numberOfBuffers];
 		for (int i = 0; i < data.length; i++) {
 			data[i] = (byte) (i / this.sendBufferSize);
@@ -97,13 +104,12 @@ public class ServerOutputStreamTest extends OfficeFrameTestCase implements
 		this.stream.flush();
 
 		// Validate that data written
-		assertNotNull("Data should be written", this.writtenData);
 		assertEquals("Incorrect number of write buffers", numberOfBuffers,
-				this.writtenData.length);
+				this.writtenData.size());
 
 		// Validate the data is correct
-		for (int i = 0; i < this.writtenData.length; i++) {
-			byte[] writeData = this.writtenData[i].getData();
+		for (int i = 0; i < this.writtenData.size(); i++) {
+			byte[] writeData = this.writtenData.get(i).getData();
 
 			// Ensure data is correct
 			for (int j = 0; j < writeData.length; j++) {
@@ -118,27 +124,23 @@ public class ServerOutputStreamTest extends OfficeFrameTestCase implements
 	 */
 	public void testClear() throws IOException {
 
-		// Write some data (spanning multiple write buffers)
-		byte[] data = new byte[this.sendBufferSize * 10];
-		this.stream.write(data);
+		// Write data (spanning multiple write buffers)
+		for (int i = 0; i < this.sendBufferSize; i++) {
+			this.stream.write("IGNORE".getBytes());
+		}
 
 		// Clear the data
 		this.stream.clear();
 
 		// No data should be written
-		assertNull("No data should be written", this.writtenData);
+		assertEquals("No data should be written", 0, this.writtenData.size());
 
 		// Write other data and flush
-		this.stream.write("TEST".getBytes());
+		this.stream.write("OTHER".getBytes());
 		this.stream.flush();
 
 		// Confirm only the other data written
-		assertNotNull("Data should be written", this.writtenData);
-		assertEquals("Should only be the one write buffer", 1,
-				this.writtenData.length);
-		WriteBuffer buffer = this.writtenData[0];
-		assertEquals("Only uncleared data should be written", "TEST",
-				new String(buffer.getData(), 0, buffer.length()));
+		this.assertWrittenData("OTHER");
 	}
 
 	/**
@@ -161,21 +163,22 @@ public class ServerOutputStreamTest extends OfficeFrameTestCase implements
 		this.stream.write("FOUR".getBytes());
 
 		// Should be no data received so far
-		assertNull("Should be no data received", this.writtenData);
+		assertEquals("Should be no data received", 0, this.writtenData.size());
 
 		// Flush data and confirm as expected
 		this.stream.flush();
-		assertNotNull("Should have received data", this.writtenData);
 		assertEquals("Incorrect number of received buffers", 4,
-				this.writtenData.length);
-		assertEquals("Incorrect first write buffer", "ONE", new String(
-				this.writtenData[0].getData(), 0, this.writtenData[0].length()));
-		assertSame("Incorrect second write buffer", two,
-				this.writtenData[1].getDataBuffer());
+				this.writtenData.size());
+		WriteBuffer one = this.writtenData.get(0);
+		assertEquals("Incorrect first write buffer", "ONE",
+				new String(one.getData(), 0, one.length()));
+		assertSame("Incorrect second write buffer", two, this.writtenData
+				.get(1).getDataBuffer());
 		assertSame("Incorrect third write buffer", three,
-				this.writtenData[2].getDataBuffer());
-		assertEquals("Incorrect fourth write buffer", "FOUR", new String(
-				this.writtenData[3].getData(), 0, this.writtenData[3].length()));
+				this.writtenData.get(2).getDataBuffer());
+		WriteBuffer four = this.writtenData.get(3);
+		assertEquals("Incorrect fourth write buffer", "FOUR",
+				new String(four.getData(), 0, four.length()));
 	}
 
 	/**
@@ -193,6 +196,172 @@ public class ServerOutputStreamTest extends OfficeFrameTestCase implements
 			fail("Should not successfully write");
 		} catch (ClosedChannelException ex) {
 			// Correct notified that closed
+		}
+	}
+
+	/**
+	 * Ensure only allow appropriate momento.
+	 */
+	public void testInvalidMomento() {
+
+		// Ensure fails if invalid momento
+		try {
+			new ServerOutputStreamImpl(this, this.sendBufferSize,
+					this.createMock(Serializable.class));
+			fail("Should not be successful");
+		} catch (IllegalArgumentException ex) {
+			assertEquals("Incorrect cause",
+					"Invalid momento for ServerOutputStream", ex.getMessage());
+		}
+	}
+
+	/**
+	 * Can not create state momento after flush as client now aware of state.
+	 */
+	public void testNoStateMomentoAfterFlush() throws IOException {
+
+		// Flush some data
+		this.stream.write("some data".getBytes());
+		this.stream.flush();
+
+		// Ensure can not export state after flush
+		try {
+			this.stream.exportState();
+			fail("Should not be successful");
+		} catch (DataWrittenException ex) {
+			assertEquals(
+					"Incorrect cause",
+					"ServerOutputStream has written data to client.  Can not create State momento.",
+					ex.getMessage());
+		}
+	}
+
+	/**
+	 * Ensure can have no data for momento state.
+	 */
+	public void testNoDataStateMomento() {
+		this.assertMomentoClonedStream(null);
+	}
+
+	/**
+	 * Ensure can have data for momento state.
+	 */
+	public void testSingleBufferStateMomento() throws IOException {
+		final String CONTENT = "TEST";
+		this.stream.write(CONTENT.getBytes());
+		this.assertMomentoClonedStream(CONTENT);
+	}
+
+	/**
+	 * Ensure can have data for momento state.
+	 */
+	public void testMultipleBufferStateMomento() throws IOException {
+		final String CONTENT = "TEST_";
+		StringBuilder expectedContent = new StringBuilder();
+		for (int i = 0; i < this.sendBufferSize; i++) {
+			expectedContent.append(CONTENT);
+			this.stream.write(CONTENT.getBytes());
+		}
+		this.assertMomentoClonedStream(expectedContent.toString());
+	}
+
+	/**
+	 * Ensure {@link ByteBuffer} appropriately serialized for momento state.
+	 */
+	public void testByteBufferStateMomento() throws IOException {
+		this.stream.write("ONE_".getBytes());
+		this.stream.write(ByteBuffer.wrap("TWO_".getBytes()));
+		this.stream.write(ByteBuffer.wrap("THREE_".getBytes()));
+		this.stream.write("FOUR".getBytes());
+		this.assertMomentoClonedStream("ONE_TWO_THREE_FOUR");
+	}
+
+	/**
+	 * Asserts the cloning with momento.
+	 * 
+	 * @param expectedContent
+	 *            Expected content of the cloned {@link ServerInputStream}.
+	 */
+	private void assertMomentoClonedStream(String expectedContent) {
+		try {
+
+			// Export the state (ensuring serialises)
+			Serializable momento = this.stream.exportState();
+
+			// Serialise the momento
+			ByteArrayOutputStream outputBuffer = new ByteArrayOutputStream();
+			ObjectOutputStream output = new ObjectOutputStream(outputBuffer);
+			output.writeObject(momento);
+			output.flush();
+
+			// Unserialise the momento
+			ByteArrayInputStream inputBuffer = new ByteArrayInputStream(
+					outputBuffer.toByteArray());
+			ObjectInputStream input = new ObjectInputStream(inputBuffer);
+			Serializable unserialisedMomento = (Serializable) input
+					.readObject();
+
+			// Create new output stream from momento
+			ServerOutputStream clonedStream = new ServerOutputStreamImpl(this,
+					this.sendBufferSize, unserialisedMomento);
+
+			// Ensure can continue to write further data
+			final String furtherContent = "_FURTHER_CONTENT";
+			clonedStream.write(furtherContent.getBytes());
+
+			// Flush contents and validate has expected data
+			clonedStream.flush();
+
+			// Validate expected data
+			this.assertWrittenData((expectedContent == null ? ""
+					: expectedContent) + furtherContent);
+
+			// Close the cloned stream
+			clonedStream.close();
+
+		} catch (Exception ex) {
+			// Should not occur so do not impose exception on tests
+			throw fail(ex);
+		}
+	}
+
+	/**
+	 * Ensures the written data is as expected.
+	 * 
+	 * @param expectedData
+	 *            Expected written data.
+	 */
+	private void assertWrittenData(String expectedData) throws IOException {
+
+		// Extract all the bytes written
+		ByteArrayOutputStream allData = new ByteArrayOutputStream();
+		for (WriteBuffer buffer : this.writtenData) {
+			WriteBufferEnum type = buffer.getType();
+			switch (type) {
+			case BYTE_ARRAY:
+				allData.write(buffer.getData(), 0, buffer.length());
+				break;
+			case BYTE_BUFFER:
+				ByteBuffer dataBuffer = buffer.getDataBuffer();
+				byte[] bufferData = new byte[dataBuffer.remaining()];
+				dataBuffer.get(bufferData);
+				allData.write(bufferData);
+				break;
+			default:
+				fail("Unknown buffer type " + type);
+				break;
+			}
+		}
+
+		// Determine whether should be data
+		if (expectedData == null) {
+			// Ensure no data
+			assertEquals("Should be no written data", 0, allData.size());
+
+		} else {
+			// Ensure expected written data
+			String actualData = new String(allData.toByteArray());
+			assertEquals("Incorrect written data", expectedData, actualData);
 		}
 	}
 
@@ -217,7 +386,9 @@ public class ServerOutputStreamTest extends OfficeFrameTestCase implements
 
 	@Override
 	public void writeData(WriteBuffer[] data) {
-		this.writtenData = data;
+		for (WriteBuffer buffer : data) {
+			this.writtenData.add(buffer);
+		}
 	}
 
 	@Override

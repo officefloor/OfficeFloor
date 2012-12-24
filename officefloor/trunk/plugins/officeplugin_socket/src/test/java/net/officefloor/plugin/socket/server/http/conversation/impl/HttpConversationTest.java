@@ -18,13 +18,10 @@
 
 package net.officefloor.plugin.socket.server.http.conversation.impl;
 
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
-import java.net.InetSocketAddress;
-import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 import java.util.LinkedList;
 import java.util.List;
@@ -41,11 +38,7 @@ import net.officefloor.plugin.socket.server.http.parse.HttpRequestParseException
 import net.officefloor.plugin.socket.server.http.parse.UsAsciiUtil;
 import net.officefloor.plugin.socket.server.http.parse.impl.HttpHeaderImpl;
 import net.officefloor.plugin.socket.server.http.protocol.HttpStatus;
-import net.officefloor.plugin.socket.server.impl.ArrayWriteBuffer;
-import net.officefloor.plugin.socket.server.impl.BufferWriteBuffer;
 import net.officefloor.plugin.socket.server.protocol.Connection;
-import net.officefloor.plugin.socket.server.protocol.WriteBuffer;
-import net.officefloor.plugin.socket.server.protocol.WriteBufferEnum;
 import net.officefloor.plugin.stream.impl.ServerInputStreamImpl;
 
 /**
@@ -63,18 +56,13 @@ public class HttpConversationTest extends OfficeFrameTestCase {
 	/**
 	 * {@link MockConnection}.
 	 */
-	private final Connection connection = new MockConnection();
+	private final MockConnection connection = new MockConnection();
 
 	/**
 	 * {@link HttpConversation} to test.
 	 */
 	private final HttpConversation conversation = new HttpConversationImpl(
 			this.connection, 1024, US_ASCII, false);
-
-	/**
-	 * {@link ByteArrayOutputStream} containing the data output to the wire.
-	 */
-	private final ByteArrayOutputStream wire = new ByteArrayOutputStream();
 
 	/**
 	 * Ensure no data on the wire until {@link HttpResponse} is closed.
@@ -326,14 +314,14 @@ public class HttpConversationTest extends OfficeFrameTestCase {
 				.convertToHttp(expectedData));
 
 		// Obtain the wire data
-		byte[] wireBytes = this.wire.toByteArray();
+		byte[] wireBytes = this.connection.getWrittenBytes();
 		String wireData = UsAsciiUtil.convertToString(wireBytes);
 
 		// Assert that the wire data
 		assertEquals("Invalid data on the wire", expectedWireData, wireData);
 
 		// Clear wire data for next assertion
-		this.wire.reset();
+		this.connection.consumeWrittenBytes();
 	}
 
 	/**
@@ -374,91 +362,6 @@ public class HttpConversationTest extends OfficeFrameTestCase {
 		// Add the request
 		return this.conversation.addRequest(method, requestURI, httpVersion,
 				headers, httpEntity);
-	}
-
-	/**
-	 * Mock {@link Connection}.
-	 */
-	private class MockConnection implements Connection {
-
-		/**
-		 * Indicates if closed.
-		 */
-		private boolean isClosed = false;
-
-		/*
-		 * ================== Connection =================================
-		 */
-
-		@Override
-		public Object getLock() {
-			return HttpConversationTest.this.wire;
-		}
-
-		@Override
-		public InetSocketAddress getLocalAddress() {
-			fail("Local InetSocketAddress should not be required for HTTP conversation");
-			return null;
-		}
-
-		@Override
-		public InetSocketAddress getRemoteAddress() {
-			fail("Remote InetSocketAddress should not be required for HTTP conversation");
-			return null;
-		}
-
-		@Override
-		public boolean isSecure() {
-			fail("Determine if secure should not be required for HTTP conversation");
-			return false;
-		}
-
-		@Override
-		public WriteBuffer createWriteBuffer(byte[] data, int length) {
-			return new ArrayWriteBuffer(data, length);
-		}
-
-		@Override
-		public WriteBuffer createWriteBuffer(ByteBuffer buffer) {
-			return new BufferWriteBuffer(buffer);
-		}
-
-		@Override
-		public void writeData(WriteBuffer[] data) {
-
-			// Write out the data
-			for (WriteBuffer buffer : data) {
-				WriteBufferEnum type = buffer.getType();
-				switch (type) {
-
-				case BYTE_ARRAY:
-					HttpConversationTest.this.wire.write(buffer.getData(), 0,
-							buffer.length());
-					break;
-
-				case BYTE_BUFFER:
-					ByteBuffer byteBuffer = buffer.getDataBuffer();
-					byte[] writeData = new byte[byteBuffer.remaining()];
-					byteBuffer.get(writeData);
-					HttpConversationTest.this.wire.write(writeData, 0,
-							writeData.length);
-					break;
-
-				default:
-					fail("Unknown type: " + type);
-				}
-			}
-		}
-
-		@Override
-		public void close() {
-			this.isClosed = true;
-		}
-
-		@Override
-		public boolean isClosed() {
-			return this.isClosed;
-		}
 	}
 
 }
