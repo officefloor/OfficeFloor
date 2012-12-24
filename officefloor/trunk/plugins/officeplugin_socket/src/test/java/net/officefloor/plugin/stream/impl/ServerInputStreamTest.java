@@ -197,7 +197,7 @@ public class ServerInputStreamTest extends OfficeFrameTestCase {
 	 */
 	public void testNoStateMomentoAsInputNotFinished() {
 		try {
-			this.stream.extractStateMomento();
+			this.stream.exportState();
 			fail("Should not be successful");
 		} catch (NotAllDataAvailableException ex) {
 			assertEquals(
@@ -293,8 +293,8 @@ public class ServerInputStreamTest extends OfficeFrameTestCase {
 	private void assertMomentoClonedStream(String expectedContent) {
 		try {
 
-			// Extract the state (ensuring serialises)
-			Serializable momento = this.stream.extractStateMomento();
+			// Export the state (ensuring serialises)
+			Serializable momento = this.stream.exportState();
 
 			// Serialise the momento
 			ByteArrayOutputStream outputBuffer = new ByteArrayOutputStream();

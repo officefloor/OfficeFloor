@@ -80,7 +80,7 @@ public class HttpResponseTest extends OfficeFrameTestCase implements Connection 
 		HttpResponse response = this.createHttpResponse();
 		ServerOutputStream entity = response.getEntity();
 		entity.write("TEST".getBytes(DEFAULT_CHARSET));
-		response.getEntity().close();
+		entity.close();
 		this.assertWireContent("HTTP/1.1 200 OK\nContent-Length: 4", "TEST",
 				DEFAULT_CHARSET);
 		assertFalse("Connection should not be closed", this.isConnectionClosed);
