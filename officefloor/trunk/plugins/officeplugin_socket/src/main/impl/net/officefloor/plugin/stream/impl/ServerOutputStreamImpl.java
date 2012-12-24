@@ -19,6 +19,7 @@ package net.officefloor.plugin.stream.impl;
 
 import java.io.IOException;
 import java.io.Serializable;
+import java.io.Writer;
 import java.nio.ByteBuffer;
 import java.nio.channels.ClosedChannelException;
 import java.util.LinkedList;
@@ -60,6 +61,11 @@ public class ServerOutputStreamImpl extends ServerOutputStream {
 	 * {@link Queue} of {@link WriteBuffer} instances to be written.
 	 */
 	private final Queue<WriteBuffer> dataToWrite = new LinkedList<WriteBuffer>();
+
+	/**
+	 * Indicates if flushing the {@link Writer}.
+	 */
+	private boolean isFlushingWriter = false;
 
 	/**
 	 * Indicates if the data is flushed.
@@ -111,13 +117,29 @@ public class ServerOutputStreamImpl extends ServerOutputStream {
 	 * Exports a momento for the current state of this
 	 * {@link ServerOutputStream}.
 	 * 
+	 * @param writer
+	 *            Optional {@link Writer} to flush its contents before obtaining
+	 *            the state for the momento.
 	 * @return Momento for the current state of this {@link ServerOutputStream}.
 	 * @throws DataWrittenException
 	 *             Should data have already been written to the client.
+	 * @throws IOException
+	 *             If fails to flush data of {@link Writer}.
 	 */
-	public Serializable exportState() throws DataWrittenException {
+	public Serializable exportState(Writer writer) throws DataWrittenException,
+			IOException {
 
 		synchronized (this.receiver.getLock()) {
+
+			// Flush writer data for state
+			if (writer != null) {
+				try {
+					this.isFlushingWriter = true;
+					writer.flush();
+				} finally {
+					this.isFlushingWriter = false;
+				}
+			}
 
 			// Ensure data has not yet been flushed
 			if (this.isDataFlushed) {
@@ -277,6 +299,11 @@ public class ServerOutputStreamImpl extends ServerOutputStream {
 	public void flush() throws IOException {
 
 		synchronized (this.receiver.getLock()) {
+
+			// Do nothing if flushing writer
+			if (this.isFlushingWriter) {
+				return;
+			}
 
 			// Only check if closed
 			this.ensureNotClosed();

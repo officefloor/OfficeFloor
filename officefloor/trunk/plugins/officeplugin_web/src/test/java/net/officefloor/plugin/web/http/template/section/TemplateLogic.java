@@ -155,9 +155,7 @@ public class TemplateLogic {
 	public String nextTask(ServerHttpConnection connection) throws IOException {
 
 		// Indicate next task
-		Writer writer = connection.getHttpResponse().getEntityWriter();
-		writer.write("nextTask");
-		writer.flush();
+		connection.getHttpResponse().getEntityWriter().write("nextTask");
 
 		// Return parameter
 		return "NextTask";
@@ -179,9 +177,7 @@ public class TemplateLogic {
 			throws SQLException, IOException {
 
 		// Indicate submit
-		Writer writer = connection.getHttpResponse().getEntityWriter();
-		writer.write("<submit />");
-		writer.flush();
+		connection.getHttpResponse().getEntityWriter().write("<submit />");
 
 		// Obtain whether to invoke flow
 		String doFlowValue = HttpRequestTokeniserImpl.extractParameters(
@@ -238,7 +234,6 @@ public class TemplateLogic {
 		writer.write(" - doInternalFlow[");
 		writer.write(String.valueOf(parameter.intValue()));
 		writer.write("]");
-		writer.flush();
 
 		// Return parameter for next flow
 		return "Parameter for External Flow";
@@ -310,7 +305,7 @@ public class TemplateLogic {
 		}
 
 		/**
-		 * Obtains the name.o
+		 * Obtains the name.
 		 * 
 		 * @return Name.
 		 */

@@ -19,6 +19,7 @@ package net.officefloor.plugin.socket.server.http.conversation.impl;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
@@ -60,7 +61,7 @@ public class HttpStateMomentoTest extends OfficeFrameTestCase {
 	/**
 	 * Ensure can not except an invalid momento.
 	 */
-	public void testInvalidStateMomento() {
+	public void testInvalidStateMomento() throws IOException {
 		try {
 			this.serverHttpConnection.importState(this
 					.createMock(Serializable.class));
@@ -109,8 +110,8 @@ public class HttpStateMomentoTest extends OfficeFrameTestCase {
 
 			// Create the connection (should not need connection)
 			ServerHttpConnection connection = createConnection(method,
-					requestURI, httpVersion, entityContent, null,
-					headerNameValues);
+					requestURI, httpVersion, entityContent,
+					new MockConnection(), headerNameValues);
 
 			// Extract the momento
 			Serializable momento = connection.exportState();
@@ -227,11 +228,16 @@ public class HttpStateMomentoTest extends OfficeFrameTestCase {
 		// Ensure headers available from response (with correct ordering)
 		HttpResponse clonedResponse = connection.getHttpResponse();
 		HttpHeader[] headers = clonedResponse.getHeaders();
-		assertEquals("Incorrect number of headers", 2, headers.length);
+		assertEquals("Incorrect number of headers", 4, headers.length);
 		assertEquals("Incorrect header one", "HEADER_ONE: VALUE_ONE",
 				headers[0].getName() + ": " + headers[0].getValue());
 		assertEquals("Incorrect header two", "HEADER_TWO: VALUE_TWO",
 				headers[1].getName() + ": " + headers[1].getValue());
+		assertEquals("Incorrect content-type header",
+				"Content-Type: zip; charset=ASCII", headers[2].getName() + ": "
+						+ headers[2].getValue());
+		assertEquals("Incorrect content-length header", "Content-Length: 4",
+				headers[3].getName() + ": " + headers[3].getValue());
 	}
 
 	/**
@@ -268,7 +274,7 @@ public class HttpStateMomentoTest extends OfficeFrameTestCase {
 		// Ensure not override HTTP version
 		newServerHttpConnection.getHttpResponse().send();
 		String actualContent = new String(newConnection.getWrittenBytes());
-		assertTrue("Should not override HTTP version",
+		assertTrue("Should not override HTTP version: " + actualContent,
 				actualContent.startsWith("NOT_OVERRIDE_VERSION "));
 
 		// Validate same content

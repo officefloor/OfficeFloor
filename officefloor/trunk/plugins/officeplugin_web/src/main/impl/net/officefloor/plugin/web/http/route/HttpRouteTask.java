@@ -17,6 +17,7 @@
  */
 package net.officefloor.plugin.web.http.route;
 
+import java.io.IOException;
 import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
@@ -36,7 +37,6 @@ import net.officefloor.plugin.socket.server.http.HttpRequest;
 import net.officefloor.plugin.socket.server.http.HttpResponse;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
 import net.officefloor.plugin.socket.server.http.protocol.HttpStatus;
-import net.officefloor.plugin.stream.impl.NotAllDataAvailableException;
 import net.officefloor.plugin.web.http.continuation.DuplicateHttpUrlContinuationException;
 import net.officefloor.plugin.web.http.continuation.HttpUrlContinuationDifferentiator;
 import net.officefloor.plugin.web.http.location.HttpApplicationLocation;
@@ -79,13 +79,12 @@ public class HttpRouteTask
 	 *            {@link HttpApplicationLocation}.
 	 * @param session
 	 *            {@link HttpSession}.
-	 * @throws NotAllDataAvailableException
-	 *             Should all data for the {@link HttpResponse} not yet be
-	 *             received from the client.
+	 * @throws IOException
+	 *             If unable to undertake redirect.
 	 */
 	public static void doRedirect(String applicationUriPath, boolean isSecure,
 			ServerHttpConnection connection, HttpApplicationLocation location,
-			HttpSession session) throws NotAllDataAvailableException {
+			HttpSession session) throws IOException {
 
 		// Require redirect, so determine the redirect URL
 		String redirectUrl = location.transformToClientPath(applicationUriPath,
@@ -197,9 +196,8 @@ public class HttpRouteTask
 	public Object doTask(
 			TaskContext<HttpRouteTask, HttpRouteTaskDependencies, HttpRouteTaskFlows> context)
 			throws InvalidHttpRequestUriException,
-			HttpRequestTokeniseException, NotAllDataAvailableException,
-			UnknownWorkException, UnknownTaskException,
-			InvalidParameterTypeException {
+			HttpRequestTokeniseException, IOException, UnknownWorkException,
+			UnknownTaskException, InvalidParameterTypeException {
 
 		// Obtain the dependencies
 		ServerHttpConnection connection = (ServerHttpConnection) context

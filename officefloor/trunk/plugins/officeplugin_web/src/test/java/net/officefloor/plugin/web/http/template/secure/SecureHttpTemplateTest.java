@@ -27,7 +27,6 @@ import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.section.clazz.ClassSectionSource;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
 import net.officefloor.plugin.socket.server.http.server.MockHttpServer;
-import net.officefloor.plugin.stream.ServerWriter;
 import net.officefloor.plugin.web.http.application.HttpParameters;
 import net.officefloor.plugin.web.http.application.HttpTemplateAutoWireSection;
 import net.officefloor.plugin.web.http.application.HttpUriLink;
@@ -255,10 +254,7 @@ public class SecureHttpTemplateTest extends OfficeFrameTestCase {
 		}
 
 		public void LINK(ServerHttpConnection connection) throws IOException {
-			ServerWriter writer = connection.getHttpResponse()
-					.getEntityWriter();
-			writer.write("link-");
-			writer.flush();
+			connection.getHttpResponse().getEntityWriter().write("link-");
 		}
 	}
 

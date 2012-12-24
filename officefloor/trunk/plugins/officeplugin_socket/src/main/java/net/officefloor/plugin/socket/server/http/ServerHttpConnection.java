@@ -18,12 +18,12 @@
 
 package net.officefloor.plugin.socket.server.http;
 
+import java.io.IOException;
 import java.io.Serializable;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 
 import net.officefloor.frame.api.manage.OfficeFloor;
-import net.officefloor.plugin.stream.impl.NotAllDataAvailableException;
 
 /**
  * HTTP connection to be handled by the {@link OfficeFloor}.
@@ -81,13 +81,12 @@ public interface ServerHttpConnection {
 	 * 
 	 * @return Momento containing the current {@link HttpRequest} and
 	 *         {@link HttpResponse} state.
-	 * @throws NotAllDataAvailableException
-	 *             Should all of the {@link HttpRequest} data not yet be
-	 *             received.
+	 * @throws IOException
+	 *             Should the state not be able to be exported.
 	 * 
 	 * @see #importState(Serializable)
 	 */
-	Serializable exportState() throws NotAllDataAvailableException;
+	Serializable exportState() throws IOException;
 
 	/**
 	 * Imports and overrides the current {@link HttpRequest} and
@@ -95,10 +94,15 @@ public interface ServerHttpConnection {
 	 * 
 	 * @param momento
 	 *            Momento exported from a {@link ServerHttpConnection}.
+	 * @throws IllegalArgumentException
+	 *             Should the momento be invalid.
+	 * @throws IOException
+	 *             Should the state not be able to be imported.
 	 * 
 	 * @see #exportState()
 	 */
-	void importState(Serializable momento);
+	void importState(Serializable momento) throws IllegalArgumentException,
+			IOException;
 
 	/**
 	 * <p>
