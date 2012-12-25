@@ -41,6 +41,7 @@ import net.officefloor.plugin.socket.server.http.server.MockHttpServer;
 import net.officefloor.plugin.socket.server.http.source.HttpServerSocketManagedObjectSource;
 import net.officefloor.plugin.socket.server.http.source.HttpsServerSocketManagedObjectSource;
 import net.officefloor.plugin.web.http.application.HttpRequestState;
+import net.officefloor.plugin.web.http.application.HttpRequestStateManagedObjectSource;
 import net.officefloor.plugin.web.http.location.HttpApplicationLocation;
 import net.officefloor.plugin.web.http.location.HttpApplicationLocationManagedObjectSource;
 import net.officefloor.plugin.web.http.parameters.source.HttpParametersObjectManagedObjectSource;
@@ -911,6 +912,9 @@ public class HttpTemplateSectionIntegrationTest extends OfficeFrameTestCase {
 
 		// Add dependencies
 		this.source.addObject(this.connection, new AutoWire(Connection.class));
+		this.source.addManagedObject(
+				HttpRequestStateManagedObjectSource.class.getName(), null,
+				new AutoWire(HttpRequestState.class));
 		this.source.addManagedObject(
 				HttpSessionManagedObjectSource.class.getName(), null,
 				new AutoWire(HttpSession.class)).setTimeout(10 * 1000);

@@ -32,6 +32,7 @@ import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.execute.TaskContext;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
+import net.officefloor.plugin.web.http.application.HttpRequestState;
 import net.officefloor.plugin.web.http.continuation.HttpUrlContinuationDifferentiator;
 import net.officefloor.plugin.web.http.continuation.HttpUrlContinuationDifferentiatorImpl;
 import net.officefloor.plugin.web.http.location.HttpApplicationLocation;
@@ -133,6 +134,8 @@ public class HttpTemplateInitialWorkSourceTest extends OfficeFrameTestCase {
 				Dependencies.SERVER_HTTP_CONNECTION);
 		initial.addObject(HttpApplicationLocation.class).setKey(
 				Dependencies.HTTP_APPLICATION_LOCATION);
+		initial.addObject(HttpRequestState.class).setKey(
+				Dependencies.REQUEST_STATE);
 		initial.addObject(HttpSession.class).setKey(Dependencies.HTTP_SESSION);
 		initial.addFlow().setKey(Flows.RENDER);
 		initial.addEscalation(IOException.class);
@@ -228,6 +231,8 @@ public class HttpTemplateInitialWorkSourceTest extends OfficeFrameTestCase {
 			final TaskContext context = this.createMock(TaskContext.class);
 			final ServerHttpConnection connection = this
 					.createMock(ServerHttpConnection.class);
+			final HttpRequestState requestState = this
+					.createMock(HttpRequestState.class);
 			final HttpSession session = this.createMock(HttpSession.class);
 			final HttpApplicationLocation location = this
 					.createMock(HttpApplicationLocation.class);
@@ -254,6 +259,8 @@ public class HttpTemplateInitialWorkSourceTest extends OfficeFrameTestCase {
 					context.getObject(Dependencies.HTTP_APPLICATION_LOCATION),
 					location);
 			this.recordReturn(context,
+					context.getObject(Dependencies.REQUEST_STATE), requestState);
+			this.recordReturn(context,
 					context.getObject(Dependencies.HTTP_SESSION), session);
 
 			// Record determining if secure connection
@@ -272,7 +279,8 @@ public class HttpTemplateInitialWorkSourceTest extends OfficeFrameTestCase {
 			if (redirectUriPath != null) {
 				// Record necessary redirect
 				HttpRouteTaskTest.recordDoRedirect(redirectUriPath,
-						isRequireSecure, connection, session, location, this);
+						isRequireSecure, connection, requestState, session,
+						location, this);
 			} else {
 				// Record triggering the render
 				this.recordReturn(context, context.doFlow(Flows.RENDER, null),

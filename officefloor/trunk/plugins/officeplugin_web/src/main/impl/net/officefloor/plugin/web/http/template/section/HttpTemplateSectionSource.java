@@ -61,6 +61,7 @@ import net.officefloor.plugin.section.clazz.ClassSectionSource;
 import net.officefloor.plugin.section.clazz.NextTask;
 import net.officefloor.plugin.section.clazz.Parameter;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
+import net.officefloor.plugin.web.http.application.HttpRequestState;
 import net.officefloor.plugin.web.http.application.HttpSessionStateful;
 import net.officefloor.plugin.web.http.continuation.HttpUrlContinuationWorkSource;
 import net.officefloor.plugin.web.http.location.HttpApplicationLocation;
@@ -232,6 +233,8 @@ public class HttpTemplateSectionSource extends ClassSectionSource {
 				ServerHttpConnection.class.getName());
 		SectionObject locationObject = this.getOrCreateObject(null,
 				HttpApplicationLocation.class.getName());
+		SectionObject requestStateObject = this.getOrCreateObject(null,
+				HttpRequestState.class.getName());
 		SectionObject sessionObject = this.getOrCreateObject(null,
 				HttpSession.class.getName());
 
@@ -252,6 +255,8 @@ public class HttpTemplateSectionSource extends ClassSectionSource {
 				connectionObject);
 		designer.link(initialTask.getTaskObject("HTTP_APPLICATION_LOCATION"),
 				locationObject);
+		designer.link(initialTask.getTaskObject("REQUEST_STATE"),
+				requestStateObject);
 		designer.link(initialTask.getTaskObject("HTTP_SESSION"), sessionObject);
 		designer.link(
 				initialTask.getTaskEscalation(IOException.class.getName()),
@@ -907,10 +912,11 @@ public class HttpTemplateSectionSource extends ClassSectionSource {
 			}
 
 			// Create the managed object for the stateful template logic
-			SectionManagedObjectSource managedObjectSource = this
-					.getDesigner()
-					.addSectionManagedObjectSource(objectName,
-							HttpSessionObjectManagedObjectSource.class.getName());
+			SectionManagedObjectSource managedObjectSource = this.getDesigner()
+					.addSectionManagedObjectSource(
+							objectName,
+							HttpSessionObjectManagedObjectSource.class
+									.getName());
 			managedObjectSource.addProperty(
 					HttpSessionObjectManagedObjectSource.PROPERTY_CLASS_NAME,
 					sectionClass.getName());

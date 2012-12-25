@@ -25,6 +25,7 @@ import net.officefloor.compile.spi.work.source.WorkSourceContext;
 import net.officefloor.compile.spi.work.source.WorkTypeBuilder;
 import net.officefloor.compile.spi.work.source.impl.AbstractWorkSource;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
+import net.officefloor.plugin.web.http.application.HttpRequestState;
 import net.officefloor.plugin.web.http.continuation.HttpUrlContinuationDifferentiatorImpl;
 import net.officefloor.plugin.web.http.location.HttpApplicationLocation;
 import net.officefloor.plugin.web.http.session.HttpSession;
@@ -91,6 +92,8 @@ public class HttpTemplateInitialWorkSource extends
 				Dependencies.SERVER_HTTP_CONNECTION);
 		task.addObject(HttpApplicationLocation.class).setKey(
 				Dependencies.HTTP_APPLICATION_LOCATION);
+		task.addObject(HttpRequestState.class).setKey(
+				Dependencies.REQUEST_STATE);
 		task.addObject(HttpSession.class).setKey(Dependencies.HTTP_SESSION);
 		task.addFlow().setKey(Flows.RENDER);
 		task.addEscalation(IOException.class);

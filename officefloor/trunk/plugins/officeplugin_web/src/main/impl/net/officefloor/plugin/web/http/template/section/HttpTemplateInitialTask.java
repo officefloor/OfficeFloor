@@ -23,6 +23,7 @@ import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.execute.TaskContext;
 import net.officefloor.frame.util.AbstractSingleTask;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
+import net.officefloor.plugin.web.http.application.HttpRequestState;
 import net.officefloor.plugin.web.http.location.HttpApplicationLocation;
 import net.officefloor.plugin.web.http.route.HttpRouteTask;
 import net.officefloor.plugin.web.http.session.HttpSession;
@@ -42,7 +43,7 @@ public class HttpTemplateInitialTask
 	 * Keys for the {@link HttpTemplateInitialTask} dependencies.
 	 */
 	public static enum Dependencies {
-		SERVER_HTTP_CONNECTION, HTTP_APPLICATION_LOCATION, HTTP_SESSION
+		SERVER_HTTP_CONNECTION, HTTP_APPLICATION_LOCATION, REQUEST_STATE, HTTP_SESSION
 	}
 
 	/**
@@ -91,6 +92,8 @@ public class HttpTemplateInitialTask
 				.getObject(Dependencies.SERVER_HTTP_CONNECTION);
 		HttpApplicationLocation location = (HttpApplicationLocation) context
 				.getObject(Dependencies.HTTP_APPLICATION_LOCATION);
+		HttpRequestState requestState = (HttpRequestState) context
+				.getObject(Dependencies.REQUEST_STATE);
 		HttpSession session = (HttpSession) context
 				.getObject(Dependencies.HTTP_SESSION);
 
@@ -129,7 +132,8 @@ public class HttpTemplateInitialTask
 		// Undertake the redirect
 		if (isRedirectRequired) {
 			HttpRouteTask.doRedirect(this.templateUriPath,
-					this.isRequireSecure, connection, location, session);
+					this.isRequireSecure, connection, location, requestState,
+					session);
 			return null; // redirected, do not render template
 		}
 

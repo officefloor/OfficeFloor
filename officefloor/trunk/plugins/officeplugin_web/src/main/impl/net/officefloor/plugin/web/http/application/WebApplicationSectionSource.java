@@ -168,6 +168,8 @@ public class WebApplicationSectionSource extends AbstractSectionSource {
 		linkObject(routeTask,
 				HttpRouteTaskDependencies.HTTP_APPLICATION_LOCATION.name(),
 				HttpApplicationLocation.class, designer, objects);
+		linkObject(routeTask, HttpRouteTaskDependencies.REQUEST_STATE.name(),
+				HttpRequestState.class, designer, objects);
 		linkObject(routeTask, HttpRouteTaskDependencies.HTTP_SESSION.name(),
 				HttpSession.class, designer, objects);
 		linkEscalation(routeTask, InvalidHttpRequestUriException.class,
