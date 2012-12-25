@@ -18,6 +18,7 @@
 
 package net.officefloor.plugin.web.http.session.spi;
 
+import java.io.Serializable;
 import java.util.Map;
 
 import net.officefloor.plugin.web.http.session.HttpSession;
@@ -56,7 +57,7 @@ public interface StoreHttpSessionOperation {
 	 *
 	 * @return Attributes of the {@link HttpSession}.
 	 */
-	Map<String, Object> getAttributes();
+	Map<String, Serializable> getAttributes();
 
 	/**
 	 * Flags the {@link HttpSession} was stored successfully within the

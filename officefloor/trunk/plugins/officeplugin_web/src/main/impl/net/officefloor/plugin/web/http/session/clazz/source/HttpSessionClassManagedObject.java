@@ -18,6 +18,8 @@
 
 package net.officefloor.plugin.web.http.session.clazz.source;
 
+import java.io.Serializable;
+
 import net.officefloor.frame.spi.managedobject.CoordinatingManagedObject;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.frame.spi.managedobject.NameAwareManagedObject;
@@ -58,7 +60,7 @@ public class HttpSessionClassManagedObject implements NameAwareManagedObject,
 	/**
 	 * Object.
 	 */
-	private Object object;
+	private Serializable object;
 
 	/**
 	 * Initiate.
@@ -95,7 +97,7 @@ public class HttpSessionClassManagedObject implements NameAwareManagedObject,
 		// Lazy obtain the object
 		this.object = httpSession.getAttribute(this.boundName);
 		if (this.object == null) {
-			this.object = this.objectClass.newInstance();
+			this.object = (Serializable) this.objectClass.newInstance();
 			httpSession.setAttribute(this.boundName, this.object);
 		}
 	}

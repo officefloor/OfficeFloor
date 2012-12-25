@@ -18,6 +18,7 @@
 
 package net.officefloor.plugin.web.http.session.source;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Deque;
 import java.util.HashMap;
@@ -36,7 +37,6 @@ import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
 import net.officefloor.plugin.socket.server.http.parse.impl.HttpHeaderImpl;
 import net.officefloor.plugin.web.http.cookie.HttpCookie;
 import net.officefloor.plugin.web.http.session.HttpSession;
-import net.officefloor.plugin.web.http.session.source.HttpSessionManagedObject;
 import net.officefloor.plugin.web.http.session.spi.CreateHttpSessionOperation;
 import net.officefloor.plugin.web.http.session.spi.FreshHttpSession;
 import net.officefloor.plugin.web.http.session.spi.HttpSessionIdGenerator;
@@ -47,7 +47,7 @@ import net.officefloor.plugin.web.http.session.spi.StoreHttpSessionOperation;
 
 /**
  * Tests the {@link HttpSessionManagedObject}.
- *
+ * 
  * @author Daniel Sagenschneider
  */
 public abstract class AbstractHttpSessionManagedObjectTestCase extends
@@ -125,29 +125,29 @@ public abstract class AbstractHttpSessionManagedObjectTestCase extends
 
 	/**
 	 * Creates the attributes.
-	 *
+	 * 
 	 * @return Attributes.
 	 */
-	protected static Map<String, Object> newAttributes() {
-		Map<String, Object> attributes = new HashMap<String, Object>();
+	protected static Map<String, Serializable> newAttributes() {
+		Map<String, Serializable> attributes = new HashMap<String, Serializable>();
 		attributes.put("_TEST", "_ATTRIBUTE");
 		return attributes;
 	}
 
 	/**
 	 * Asserts the correctness of the {@link HttpSession}.
-	 *
+	 * 
 	 * @param session
 	 *            Actual {@link HttpSession}.
 	 */
 	protected static void assertHttpSession(String sessionId,
 			long creationTime, boolean isNew, HttpSession session) {
 		assertEquals("Incorrect Session Id", sessionId, session.getSessionId());
-		assertEquals("Incorrect creation time", creationTime, session
-				.getCreationTime());
+		assertEquals("Incorrect creation time", creationTime,
+				session.getCreationTime());
 		assertEquals("Incorrect flagged on whether new", isNew, session.isNew());
-		assertEquals("Incorrect underlying attributes", "_ATTRIBUTE", session
-				.getAttribute("_TEST"));
+		assertEquals("Incorrect underlying attributes", "_ATTRIBUTE",
+				session.getAttribute("_TEST"));
 	}
 
 	/*
@@ -157,15 +157,16 @@ public abstract class AbstractHttpSessionManagedObjectTestCase extends
 	/**
 	 * Records obtaining the {@link HttpRequest} and subsequently the Session Id
 	 * {@link HttpCookie}.
-	 *
+	 * 
 	 * @param sessionId
 	 *            <code>null</code> indicates no Session Id {@link HttpCookie},
 	 *            while a value will have the {@link HttpCookie} available.
 	 */
 	protected void record_sessionIdCookie(String sessionId) {
 		// Record obtaining the Http Request
-		this.recordReturn(this.objectRegistry, this.objectRegistry
-				.getObject(this.serverHttpConnectionIndex), this.connection);
+		this.recordReturn(this.objectRegistry,
+				this.objectRegistry.getObject(this.serverHttpConnectionIndex),
+				this.connection);
 		this.recordReturn(this.connection, this.connection.getHttpRequest(),
 				this.request);
 
@@ -192,7 +193,7 @@ public abstract class AbstractHttpSessionManagedObjectTestCase extends
 
 	/**
 	 * Records specifying the Session Id.
-	 *
+	 * 
 	 * @param sessionId
 	 *            Session Id.
 	 */
@@ -207,7 +208,7 @@ public abstract class AbstractHttpSessionManagedObjectTestCase extends
 
 	/**
 	 * Records failing to generate the Session Id.
-	 *
+	 * 
 	 * @param cause
 	 *            Cause of the failure.
 	 */
@@ -223,7 +224,7 @@ public abstract class AbstractHttpSessionManagedObjectTestCase extends
 
 	/**
 	 * Records creating the {@link HttpSession}.
-	 *
+	 * 
 	 * @param creationTime
 	 *            Creation time.
 	 * @param expireTime
@@ -232,7 +233,7 @@ public abstract class AbstractHttpSessionManagedObjectTestCase extends
 	 *            Attributes.
 	 */
 	protected void record_create_sessionCreated(final long creationTime,
-			final long expireTime, final Map<String, Object> attributes) {
+			final long expireTime, final Map<String, Serializable> attributes) {
 		this.mockOperations.add(new MockOperation() {
 			@Override
 			public void run() {
@@ -256,7 +257,7 @@ public abstract class AbstractHttpSessionManagedObjectTestCase extends
 
 	/**
 	 * Records failing to create the {@link HttpSession}.
-	 *
+	 * 
 	 * @param cause
 	 *            Cause of the failure.
 	 */
@@ -271,7 +272,7 @@ public abstract class AbstractHttpSessionManagedObjectTestCase extends
 
 	/**
 	 * Records retrieving the {@link HttpSession}.
-	 *
+	 * 
 	 * @param creationTime
 	 *            Creation time.
 	 * @param expireTime
@@ -280,7 +281,7 @@ public abstract class AbstractHttpSessionManagedObjectTestCase extends
 	 *            Attributes.
 	 */
 	protected void record_retrieve_sessionRetrieved(final long creationTime,
-			final long expireTime, final Map<String, Object> attributes) {
+			final long expireTime, final Map<String, Serializable> attributes) {
 		this.mockOperations.add(new MockOperation() {
 			@Override
 			public void run() {
@@ -304,7 +305,7 @@ public abstract class AbstractHttpSessionManagedObjectTestCase extends
 
 	/**
 	 * Records failing to retrieve the {@link HttpSession}.
-	 *
+	 * 
 	 * @param cause
 	 *            Cause of the failure.
 	 */
@@ -331,7 +332,7 @@ public abstract class AbstractHttpSessionManagedObjectTestCase extends
 
 	/**
 	 * Records failing to store the {@link HttpSession}.
-	 *
+	 * 
 	 * @param cause
 	 *            Cause of the failure.
 	 */
@@ -358,7 +359,7 @@ public abstract class AbstractHttpSessionManagedObjectTestCase extends
 
 	/**
 	 * Records failing to invalidate the {@link HttpSession}.
-	 *
+	 * 
 	 * @param cause
 	 *            Cause of failure.
 	 */
@@ -374,7 +375,7 @@ public abstract class AbstractHttpSessionManagedObjectTestCase extends
 
 	/**
 	 * Records adding a {@link HttpCookie} to the {@link HttpResponse}.
-	 *
+	 * 
 	 * @param isExistingSessionCookie
 	 *            Is the {@link HttpCookie} already on the response.
 	 * @param sessionId
@@ -405,9 +406,11 @@ public abstract class AbstractHttpSessionManagedObjectTestCase extends
 		HttpCookie cookie = new HttpCookie(SESSION_ID_COOKIE_NAME, sessionId);
 		cookie.setExpires(expireTime);
 		cookie.setPath("/");
-		this.recordReturn(this.response, this.response.addHeader("set-cookie",
-				cookie.toHttpResponseHeaderValue()), this
-				.createMock(HttpHeader.class));
+		this.recordReturn(
+				this.response,
+				this.response.addHeader("set-cookie",
+						cookie.toHttpResponseHeaderValue()),
+				this.createMock(HttpHeader.class));
 	}
 
 	/*
@@ -416,7 +419,7 @@ public abstract class AbstractHttpSessionManagedObjectTestCase extends
 
 	/**
 	 * Creates the {@link HttpSessionManagedObject}.
-	 *
+	 * 
 	 * @return New {@link HttpSessionManagedObject}.
 	 */
 	protected HttpSessionManagedObject createHttpSessionManagedObject() {
@@ -428,7 +431,7 @@ public abstract class AbstractHttpSessionManagedObjectTestCase extends
 
 	/**
 	 * Triggers running the coordination.
-	 *
+	 * 
 	 * @param mo
 	 *            {@link HttpSessionManagedObject}.
 	 */
@@ -447,13 +450,13 @@ public abstract class AbstractHttpSessionManagedObjectTestCase extends
 	 */
 	protected void verifyOperations() {
 		this.verifyMockObjects();
-		assertEquals("Operations still outstanding", 0, this.mockOperations
-				.size());
+		assertEquals("Operations still outstanding", 0,
+				this.mockOperations.size());
 	}
 
 	/**
 	 * Runs the next {@link MockOperation}.
-	 *
+	 * 
 	 * @param session
 	 *            {@link FreshHttpSession}.
 	 * @param create

@@ -18,6 +18,7 @@
 
 package net.officefloor.plugin.web.http.session.source;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -30,7 +31,6 @@ import net.officefloor.plugin.socket.server.http.HttpRequest;
 import net.officefloor.plugin.socket.server.http.HttpResponse;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
 import net.officefloor.plugin.web.http.cookie.HttpCookie;
-import net.officefloor.plugin.web.http.session.source.HttpSessionManagedObject;
 import net.officefloor.plugin.web.http.session.spi.CreateHttpSessionOperation;
 import net.officefloor.plugin.web.http.session.spi.FreshHttpSession;
 import net.officefloor.plugin.web.http.session.spi.HttpSessionIdGenerator;
@@ -41,7 +41,7 @@ import org.easymock.AbstractMatcher;
 /**
  * Tests that {@link HttpSessionIdGenerator} and {@link HttpSessionStore} can be
  * provided via dependencies.
- *
+ * 
  * @author Daniel Sagenschneider
  */
 public class HttpSessionDependencyTest extends OfficeFrameTestCase {
@@ -126,7 +126,7 @@ public class HttpSessionDependencyTest extends OfficeFrameTestCase {
 			public boolean matches(Object[] expected, Object[] actual) {
 				CreateHttpSessionOperation operation = (CreateHttpSessionOperation) actual[0];
 				operation.sessionCreated(1000, 2000,
-						new HashMap<String, Object>(0));
+						new HashMap<String, Serializable>(0));
 				return true;
 			}
 		});
@@ -184,7 +184,7 @@ public class HttpSessionDependencyTest extends OfficeFrameTestCase {
 			public boolean matches(Object[] expected, Object[] actual) {
 				CreateHttpSessionOperation operation = (CreateHttpSessionOperation) actual[0];
 				operation.sessionCreated(1000, 2000,
-						new HashMap<String, Object>(0));
+						new HashMap<String, Serializable>(0));
 				return true;
 			}
 		});

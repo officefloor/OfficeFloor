@@ -18,6 +18,7 @@
 
 package net.officefloor.plugin.web.http.session.store;
 
+import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -45,7 +46,7 @@ import net.officefloor.plugin.web.http.session.spi.StoreHttpSessionOperation;
  * </ol>
  * <p>
  * This is useful in light load testing environments (such as unit tests).
- *
+ * 
  * @author Daniel Sagenschneider
  */
 public class MemoryHttpSessionStore implements HttpSessionStore {
@@ -68,7 +69,7 @@ public class MemoryHttpSessionStore implements HttpSessionStore {
 
 	/**
 	 * Initiate.
-	 *
+	 * 
 	 * @param maxIdleTime
 	 *            Maximum idle time in seconds before expiring the
 	 *            {@link HttpSession}.
@@ -80,7 +81,7 @@ public class MemoryHttpSessionStore implements HttpSessionStore {
 
 	/**
 	 * Expires idle {@link SessionState} instances based on current time.
-	 *
+	 * 
 	 * @param currentTime
 	 *            Current time.
 	 */
@@ -117,7 +118,8 @@ public class MemoryHttpSessionStore implements HttpSessionStore {
 		// Improves concurrency performance doing outside locks.
 		long currentTime = System.currentTimeMillis();
 		SessionState session = new SessionState(currentTime,
-				new HashMap<String, Object>(), (currentTime + this.maxIdleTime));
+				new HashMap<String, Serializable>(),
+				(currentTime + this.maxIdleTime));
 
 		// Obtain the Session Id
 		String sessionId = operation.getSessionId();
@@ -190,7 +192,7 @@ public class MemoryHttpSessionStore implements HttpSessionStore {
 		String sessionId = operation.getSessionId();
 		long creationTime = operation.getCreationTime();
 		long expireTime = operation.getExpireTime();
-		Map<String, Object> attributes = operation.getAttributes();
+		Map<String, Serializable> attributes = operation.getAttributes();
 		SessionState session = new SessionState(creationTime, attributes,
 				expireTime);
 
@@ -231,7 +233,7 @@ public class MemoryHttpSessionStore implements HttpSessionStore {
 		/**
 		 * Attributes.
 		 */
-		public final Map<String, Object> attributes;
+		public final Map<String, Serializable> attributes;
 
 		/**
 		 * Time that this {@link SessionState} will be expired.
@@ -240,7 +242,7 @@ public class MemoryHttpSessionStore implements HttpSessionStore {
 
 		/**
 		 * Initiate.
-		 *
+		 * 
 		 * @param creationTime
 		 *            Creation time.
 		 * @param attributes
@@ -248,8 +250,8 @@ public class MemoryHttpSessionStore implements HttpSessionStore {
 		 * @param expireTime
 		 *            Time that this {@link SessionState} will be expired.
 		 */
-		public SessionState(long creationTime, Map<String, Object> attributes,
-				long expireTime) {
+		public SessionState(long creationTime,
+				Map<String, Serializable> attributes, long expireTime) {
 			this.creationTime = creationTime;
 			this.attributes = attributes;
 			this.expireTime = expireTime;

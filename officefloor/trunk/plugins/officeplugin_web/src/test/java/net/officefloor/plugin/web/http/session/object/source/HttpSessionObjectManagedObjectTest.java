@@ -18,6 +18,8 @@
 
 package net.officefloor.plugin.web.http.session.object.source;
 
+import java.io.Serializable;
+
 import net.officefloor.frame.spi.managedobject.ObjectRegistry;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.web.http.session.HttpSession;
@@ -66,14 +68,14 @@ public class HttpSessionObjectManagedObjectTest extends OfficeFrameTestCase {
 		this.recordReturn(this.objectRegistry, this.objectRegistry
 				.getObject(HttpSessionObjectDependencies.HTTP_SESSION),
 				this.httpSession);
-		this.recordReturn(this.httpSession, this.httpSession
-				.getAttribute(BOUND_NAME), availableObject);
+		this.recordReturn(this.httpSession,
+				this.httpSession.getAttribute(BOUND_NAME), availableObject);
 
 		// Test
 		this.replayMockObjects();
 		this.mo.setBoundManagedObjectName(BOUND_NAME);
 		this.mo.loadObjects(this.objectRegistry);
-		HttpSessionObject<Object> sessionObject = (HttpSessionObject<Object>) this.mo
+		HttpSessionObject<Serializable> sessionObject = (HttpSessionObject<Serializable>) this.mo
 				.getObject();
 		Object object = sessionObject.getSessionObject();
 
@@ -89,28 +91,28 @@ public class HttpSessionObjectManagedObjectTest extends OfficeFrameTestCase {
 	@SuppressWarnings("unchecked")
 	public void testLoadObjectIntoHttpSession() throws Throwable {
 
-		final Object SESSION_OBJECT = "Session Object";
+		final Serializable SESSION_OBJECT = "Session Object";
 
 		// Record loading the managed object
 		this.recordReturn(this.objectRegistry, this.objectRegistry
 				.getObject(HttpSessionObjectDependencies.HTTP_SESSION),
 				this.httpSession);
-		this.recordReturn(this.httpSession, this.httpSession
-				.getAttribute(BOUND_NAME), null);
+		this.recordReturn(this.httpSession,
+				this.httpSession.getAttribute(BOUND_NAME), null);
 		this.httpSession.setAttribute(BOUND_NAME, SESSION_OBJECT);
-		this.recordReturn(this.httpSession, this.httpSession
-				.getAttribute(BOUND_NAME), SESSION_OBJECT);
+		this.recordReturn(this.httpSession,
+				this.httpSession.getAttribute(BOUND_NAME), SESSION_OBJECT);
 
 		// Test
 		this.replayMockObjects();
 		this.mo.setBoundManagedObjectName(BOUND_NAME);
 		this.mo.loadObjects(this.objectRegistry);
-		HttpSessionObject<Object> sessionObject = (HttpSessionObject<Object>) this.mo
+		HttpSessionObject<Serializable> sessionObject = (HttpSessionObject<Serializable>) this.mo
 				.getObject();
 
 		// Ensure not set in Session
-		assertNull("No object should be in session", sessionObject
-				.getSessionObject());
+		assertNull("No object should be in session",
+				sessionObject.getSessionObject());
 
 		// Ensure can load object into Session
 		sessionObject.setSessionObject(SESSION_OBJECT);
