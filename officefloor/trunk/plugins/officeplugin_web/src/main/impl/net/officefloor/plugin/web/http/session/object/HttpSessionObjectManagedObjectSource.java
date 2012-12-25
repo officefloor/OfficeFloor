@@ -18,6 +18,8 @@
 
 package net.officefloor.plugin.web.http.session.object;
 
+import java.io.Serializable;
+
 import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
@@ -74,6 +76,13 @@ public class HttpSessionObjectManagedObjectSource extends
 		// Obtain the class
 		String className = mosContext.getProperty(PROPERTY_CLASS_NAME);
 		this.objectClass = mosContext.loadClass(className);
+
+		// Object must be serializable
+		if (!(Serializable.class.isAssignableFrom(this.objectClass))) {
+			throw new Exception(HttpSession.class.getSimpleName() + " object "
+					+ this.objectClass.getName() + " must be "
+					+ Serializable.class.getSimpleName());
+		}
 
 		// Obtain the overridden bind name
 		this.bindName = mosContext.getProperty(PROPERTY_BIND_NAME, null);

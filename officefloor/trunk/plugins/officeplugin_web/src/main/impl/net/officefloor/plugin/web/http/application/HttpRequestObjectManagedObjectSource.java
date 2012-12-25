@@ -86,6 +86,13 @@ public class HttpRequestObjectManagedObjectSource
 		String className = mosContext.getProperty(PROPERTY_CLASS_NAME);
 		this.objectClass = mosContext.loadClass(className);
 
+		// Object must be serializable
+		if (!(Serializable.class.isAssignableFrom(this.objectClass))) {
+			throw new Exception(HttpRequestState.class.getSimpleName() + " object "
+					+ this.objectClass.getName() + " must be "
+					+ Serializable.class.getSimpleName());
+		}
+
 		// Obtain the overridden bind name
 		this.bindName = mosContext.getProperty(PROPERTY_BIND_NAME, null);
 

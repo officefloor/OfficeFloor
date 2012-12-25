@@ -20,8 +20,12 @@ package net.officefloor.plugin.web.http.application;
 
 import java.io.Serializable;
 
+import net.officefloor.compile.OfficeFloorCompiler;
+import net.officefloor.compile.issues.CompilerIssues;
+import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.test.managedobject.ManagedObjectLoaderUtil;
 import net.officefloor.compile.test.managedobject.ManagedObjectTypeBuilder;
+import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.frame.util.ManagedObjectSourceStandAlone;
@@ -67,6 +71,45 @@ public class HttpRequestObjectManagedObjectSourceTest extends
 				HttpRequestObjectManagedObjectSource.class,
 				HttpRequestObjectManagedObjectSource.PROPERTY_CLASS_NAME,
 				MockObject.class.getName());
+	}
+
+	/**
+	 * Ensures the object is {@link Serializable}.
+	 */
+	public void testInvalidObjectAsNotSerializable() {
+
+		final CompilerIssues issues = this.createMock(CompilerIssues.class);
+
+		// Record issue as not serializable object
+		issues.addIssue(null, null, AssetType.MANAGED_OBJECT, null,
+				"Failed to init", null);
+		this.control(issues).setMatcher(new AbstractMatcher() {
+			@Override
+			public boolean matches(Object[] expected, Object[] actual) {
+				for (int i = 0; i < (expected.length - 1); i++) {
+					assertEquals("Invalid parameter " + i, expected[i],
+							actual[i]);
+				}
+				Exception cause = (Exception) actual[expected.length - 1];
+				assertEquals("Incorrect cause", "HttpRequestState object "
+						+ MockInvalidObject.class.getName()
+						+ " must be Serializable", cause.getMessage());
+				return true;
+			}
+		});
+
+		// Test
+		this.replayMockObjects();
+		OfficeFloorCompiler compiler = OfficeFloorCompiler
+				.newOfficeFloorCompiler(null);
+		compiler.setCompilerIssues(issues);
+		PropertyList properties = compiler.createPropertyList();
+		properties.addProperty(
+				HttpRequestObjectManagedObjectSource.PROPERTY_CLASS_NAME)
+				.setValue(MockInvalidObject.class.getName());
+		compiler.getManagedObjectLoader().loadManagedObjectType(
+				HttpRequestObjectManagedObjectSource.class, properties);
+		this.verifyMockObjects();
 	}
 
 	/**
@@ -153,6 +196,12 @@ public class HttpRequestObjectManagedObjectSourceTest extends
 	 * Mock object.
 	 */
 	public static class MockObject implements Serializable {
+	}
+
+	/**
+	 * Mock invalid object.
+	 */
+	public static class MockInvalidObject {
 	}
 
 }
