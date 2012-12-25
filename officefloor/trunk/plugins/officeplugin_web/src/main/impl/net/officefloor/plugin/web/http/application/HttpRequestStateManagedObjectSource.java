@@ -18,6 +18,7 @@
 
 package net.officefloor.plugin.web.http.application;
 
+import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -67,7 +68,7 @@ public class HttpRequestStateManagedObjectSource extends
 		/**
 		 * Attributes.
 		 */
-		private final Map<String, Serializable> attributes = new HashMap<String, Serializable>();
+		private Map<String, Serializable> attributes = new HashMap<String, Serializable>();
 
 		/*
 		 * ====================== ManagedObject ===========================
@@ -102,6 +103,54 @@ public class HttpRequestStateManagedObjectSource extends
 		@Override
 		public synchronized void removeAttribute(String name) {
 			this.attributes.remove(name);
+		}
+
+		@Override
+		public synchronized Serializable exportState() throws IOException {
+
+			// Create the momento state
+			Map<String, Serializable> momentoAttributes = new HashMap<String, Serializable>(
+					this.attributes);
+
+			// Create and return the momento
+			return new StateMomento(momentoAttributes);
+		}
+
+		@Override
+		public synchronized void importState(Serializable momento)
+				throws IOException, IllegalArgumentException {
+
+			// Ensure valid state momento
+			if (!(momento instanceof StateMomento)) {
+				throw new IllegalArgumentException("Invalid momento for "
+						+ HttpRequestState.class.getSimpleName());
+			}
+			StateMomento state = (StateMomento) momento;
+
+			// Load the state
+			this.attributes = new HashMap<String, Serializable>(
+					state.attributes);
+		}
+	}
+
+	/**
+	 * State momento.
+	 */
+	private static class StateMomento implements Serializable {
+
+		/**
+		 * Attributes.
+		 */
+		private final Map<String, Serializable> attributes;
+
+		/**
+		 * Initiate.
+		 * 
+		 * @param attributes
+		 *            Attributes.
+		 */
+		public StateMomento(Map<String, Serializable> attributes) {
+			this.attributes = attributes;
 		}
 	}
 

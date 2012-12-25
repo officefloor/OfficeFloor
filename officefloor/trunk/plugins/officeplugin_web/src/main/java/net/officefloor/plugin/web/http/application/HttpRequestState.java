@@ -18,11 +18,13 @@
 
 package net.officefloor.plugin.web.http.application;
 
+import java.io.IOException;
 import java.io.Serializable;
 import java.util.Iterator;
 
 import net.officefloor.plugin.managedobject.clazz.ClassManagedObjectSource;
 import net.officefloor.plugin.socket.server.http.HttpRequest;
+import net.officefloor.plugin.web.http.session.HttpSession;
 
 /**
  * <p>
@@ -64,7 +66,9 @@ public interface HttpRequestState {
 	 * @param name
 	 *            Name.
 	 * @param object
-	 *            {@link Object}.
+	 *            {@link Object}. Must be {@link Serializable} as this
+	 *            {@link HttpRequestState} may be stored in the
+	 *            {@link HttpSession} to maintain its state across a redirect.
 	 */
 	void setAttribute(String name, Serializable object);
 
@@ -75,5 +79,27 @@ public interface HttpRequestState {
 	 *            Name of bound {@link Object} to remove.
 	 */
 	void removeAttribute(String name);
+
+	/**
+	 * Exports a momento for the current state of this {@link HttpRequestState}.
+	 * 
+	 * @return Momento for the current state of this {@link HttpRequestState}.
+	 * @throws IOException
+	 *             If fails to export state.
+	 */
+	Serializable exportState() throws IOException;
+
+	/**
+	 * Imports the state from the momento.
+	 * 
+	 * @param momento
+	 *            Momento containing the state for the {@link HttpRequestState}.
+	 * @throws IOException
+	 *             If fails to import state.
+	 * @throws IllegalArgumentException
+	 *             If invalid momento.
+	 */
+	void importState(Serializable momento) throws IOException,
+			IllegalArgumentException;
 
 }
