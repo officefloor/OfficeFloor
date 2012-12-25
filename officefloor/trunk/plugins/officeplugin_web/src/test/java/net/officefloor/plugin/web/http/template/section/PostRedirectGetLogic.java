@@ -48,7 +48,7 @@ public class PostRedirectGetLogic {
 			this.text = text;
 		}
 
-		public void setResponse(String operation) {
+		public void setOperation(String operation) {
 			this.operation = operation;
 		}
 	}
