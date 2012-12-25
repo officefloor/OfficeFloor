@@ -18,6 +18,8 @@
 
 package net.officefloor.plugin.web.http.application;
 
+import java.io.Serializable;
+
 import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.spi.managedobject.CoordinatingManagedObject;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
@@ -125,7 +127,7 @@ public class HttpRequestObjectManagedObjectSource
 		/**
 		 * Object.
 		 */
-		private Object object;
+		private Serializable object;
 
 		/**
 		 * Initiate.
@@ -164,7 +166,7 @@ public class HttpRequestObjectManagedObjectSource
 			// Lazy obtain the object
 			this.object = state.getAttribute(this.boundName);
 			if (this.object == null) {
-				this.object = this.objectClass.newInstance();
+				this.object = (Serializable) this.objectClass.newInstance();
 				state.setAttribute(this.boundName, this.object);
 			}
 		}

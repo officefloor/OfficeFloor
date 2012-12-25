@@ -18,6 +18,7 @@
 
 package net.officefloor.plugin.web.http.application;
 
+import java.io.Serializable;
 import java.util.Iterator;
 
 import net.officefloor.compile.test.managedobject.ManagedObjectLoaderUtil;
@@ -80,7 +81,7 @@ public class HttpRequestStateManagedObjectSourceTest extends
 
 		// Set, get, name attributes
 		final String NAME = "name";
-		final Object ATTRIBUTE = "ATTRIBUTE";
+		final Serializable ATTRIBUTE = "ATTRIBUTE";
 		state.setAttribute(NAME, ATTRIBUTE);
 		assertEquals("Must obtain attribute", ATTRIBUTE,
 				state.getAttribute(NAME));

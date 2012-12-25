@@ -18,6 +18,7 @@
 
 package net.officefloor.plugin.web.http.application;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -66,7 +67,7 @@ public class HttpRequestStateManagedObjectSource extends
 		/**
 		 * Attributes.
 		 */
-		private final Map<String, Object> attributes = new HashMap<String, Object>();
+		private final Map<String, Serializable> attributes = new HashMap<String, Serializable>();
 
 		/*
 		 * ====================== ManagedObject ===========================
@@ -82,7 +83,7 @@ public class HttpRequestStateManagedObjectSource extends
 		 */
 
 		@Override
-		public synchronized Object getAttribute(String name) {
+		public synchronized Serializable getAttribute(String name) {
 			return this.attributes.get(name);
 		}
 
@@ -94,7 +95,7 @@ public class HttpRequestStateManagedObjectSource extends
 		}
 
 		@Override
-		public synchronized void setAttribute(String name, Object object) {
+		public synchronized void setAttribute(String name, Serializable object) {
 			this.attributes.put(name, object);
 		}
 

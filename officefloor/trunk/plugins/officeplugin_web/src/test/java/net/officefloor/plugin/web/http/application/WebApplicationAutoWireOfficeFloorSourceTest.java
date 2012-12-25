@@ -1056,7 +1056,7 @@ public class WebApplicationAutoWireOfficeFloorSourceTest extends
 	 * Mock Http Request State Object with overridden binding name.
 	 */
 	@HttpRequestStateful("BIND")
-	public static class MockHttpRequestStateObject {
+	public static class MockHttpRequestStateObject implements Serializable {
 
 		public String text = "not specified";
 
