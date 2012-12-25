@@ -23,32 +23,30 @@ import java.io.Serializable;
 import net.officefloor.frame.spi.managedobject.ObjectRegistry;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.web.http.session.HttpSession;
-import net.officefloor.plugin.web.http.session.attribute.HttpSessionObjectManagedObject;
-import net.officefloor.plugin.web.http.session.attribute.HttpSessionObjectManagedObjectSource.HttpSessionObjectDependencies;
-import net.officefloor.plugin.web.http.session.object.HttpSessionObject;
+import net.officefloor.plugin.web.http.session.attribute.HttpSessionAttributeManagedObjectSource.HttpSessionAttributeDependencies;
 
 /**
- * Tests the {@link HttpSessionObjectManagedObject}.
+ * Tests the {@link HttpSessionAttributeManagedObject}.
  * 
  * @author Daniel Sagenschneider
  */
-public class HttpSessionObjectManagedObjectTest extends OfficeFrameTestCase {
+public class HttpSessionAttributeManagedObjectTest extends OfficeFrameTestCase {
 
 	/**
-	 * Bound name of the {@link HttpSessionObjectManagedObject}.
+	 * Bound name of the {@link HttpSessionAttributeManagedObject}.
 	 */
 	private static final String BOUND_NAME = "BOUND_NAME";
 
 	/**
-	 * {@link HttpSessionObjectManagedObject} to test.
+	 * {@link HttpSessionAttributeManagedObject} to test.
 	 */
-	private final HttpSessionObjectManagedObject mo = new HttpSessionObjectManagedObject();
+	private final HttpSessionAttributeManagedObject mo = new HttpSessionAttributeManagedObject();
 
 	/**
 	 * Mock {@link ObjectRegistry}.
 	 */
 	@SuppressWarnings("unchecked")
-	private final ObjectRegistry<HttpSessionObjectDependencies> objectRegistry = this
+	private final ObjectRegistry<HttpSessionAttributeDependencies> objectRegistry = this
 			.createMock(ObjectRegistry.class);
 
 	/**
@@ -66,7 +64,7 @@ public class HttpSessionObjectManagedObjectTest extends OfficeFrameTestCase {
 
 		// Record loading the managed object
 		this.recordReturn(this.objectRegistry, this.objectRegistry
-				.getObject(HttpSessionObjectDependencies.HTTP_SESSION),
+				.getObject(HttpSessionAttributeDependencies.HTTP_SESSION),
 				this.httpSession);
 		this.recordReturn(this.httpSession,
 				this.httpSession.getAttribute(BOUND_NAME), availableObject);
@@ -75,7 +73,7 @@ public class HttpSessionObjectManagedObjectTest extends OfficeFrameTestCase {
 		this.replayMockObjects();
 		this.mo.setBoundManagedObjectName(BOUND_NAME);
 		this.mo.loadObjects(this.objectRegistry);
-		HttpSessionObject<Serializable> sessionObject = (HttpSessionObject<Serializable>) this.mo
+		HttpSessionAttribute<Serializable> sessionObject = (HttpSessionAttribute<Serializable>) this.mo
 				.getObject();
 		Object object = sessionObject.getSessionObject();
 
@@ -95,7 +93,7 @@ public class HttpSessionObjectManagedObjectTest extends OfficeFrameTestCase {
 
 		// Record loading the managed object
 		this.recordReturn(this.objectRegistry, this.objectRegistry
-				.getObject(HttpSessionObjectDependencies.HTTP_SESSION),
+				.getObject(HttpSessionAttributeDependencies.HTTP_SESSION),
 				this.httpSession);
 		this.recordReturn(this.httpSession,
 				this.httpSession.getAttribute(BOUND_NAME), null);
@@ -107,7 +105,7 @@ public class HttpSessionObjectManagedObjectTest extends OfficeFrameTestCase {
 		this.replayMockObjects();
 		this.mo.setBoundManagedObjectName(BOUND_NAME);
 		this.mo.loadObjects(this.objectRegistry);
-		HttpSessionObject<Serializable> sessionObject = (HttpSessionObject<Serializable>) this.mo
+		HttpSessionAttribute<Serializable> sessionObject = (HttpSessionAttribute<Serializable>) this.mo
 				.getObject();
 
 		// Ensure not set in Session

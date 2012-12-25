@@ -24,7 +24,7 @@ import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceContext;
 import net.officefloor.frame.spi.managedobject.source.impl.AbstractManagedObjectSource;
 import net.officefloor.plugin.web.http.session.HttpSession;
-import net.officefloor.plugin.web.http.session.object.HttpSessionClassManagedObject.Dependencies;
+import net.officefloor.plugin.web.http.session.object.HttpSessionObjectManagedObject.Dependencies;
 
 /**
  * {@link ManagedObjectSource} to cache creation of an {@link Object} within the
@@ -32,7 +32,7 @@ import net.officefloor.plugin.web.http.session.object.HttpSessionClassManagedObj
  * 
  * @author Daniel Sagenschneider
  */
-public class HttpSessionClassManagedObjectSource extends
+public class HttpSessionObjectManagedObjectSource extends
 		AbstractManagedObjectSource<Dependencies, None> {
 
 	/**
@@ -80,13 +80,13 @@ public class HttpSessionClassManagedObjectSource extends
 
 		// Specify the meta-data
 		context.setObjectClass(this.objectClass);
-		context.setManagedObjectClass(HttpSessionClassManagedObject.class);
+		context.setManagedObjectClass(HttpSessionObjectManagedObject.class);
 		context.addDependency(Dependencies.HTTP_SESSION, HttpSession.class);
 	}
 
 	@Override
 	protected ManagedObject getManagedObject() throws Throwable {
-		return new HttpSessionClassManagedObject(this.objectClass,
+		return new HttpSessionObjectManagedObject(this.objectClass,
 				this.bindName);
 	}
 

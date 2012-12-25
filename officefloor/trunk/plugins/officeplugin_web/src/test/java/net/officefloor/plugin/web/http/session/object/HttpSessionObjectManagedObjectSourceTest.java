@@ -27,17 +27,17 @@ import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.frame.util.ManagedObjectSourceStandAlone;
 import net.officefloor.frame.util.ManagedObjectUserStandAlone;
 import net.officefloor.plugin.web.http.session.HttpSession;
-import net.officefloor.plugin.web.http.session.object.HttpSessionClassManagedObjectSource;
-import net.officefloor.plugin.web.http.session.object.HttpSessionClassManagedObject.Dependencies;
+import net.officefloor.plugin.web.http.session.object.HttpSessionObjectManagedObjectSource;
+import net.officefloor.plugin.web.http.session.object.HttpSessionObjectManagedObject.Dependencies;
 
 import org.easymock.AbstractMatcher;
 
 /**
- * Tests the {@link HttpSessionClassManagedObjectSource}.
+ * Tests the {@link HttpSessionObjectManagedObjectSource}.
  * 
  * @author Daniel Sagenschneider
  */
-public class HttpSessionClassManagedObjectSourceTest extends
+public class HttpSessionObjectManagedObjectSourceTest extends
 		OfficeFrameTestCase {
 
 	/**
@@ -45,8 +45,8 @@ public class HttpSessionClassManagedObjectSourceTest extends
 	 */
 	public void testSpecification() {
 		ManagedObjectLoaderUtil.validateSpecification(
-				HttpSessionClassManagedObjectSource.class,
-				HttpSessionClassManagedObjectSource.PROPERTY_CLASS_NAME,
+				HttpSessionObjectManagedObjectSource.class,
+				HttpSessionObjectManagedObjectSource.PROPERTY_CLASS_NAME,
 				"Class");
 	}
 
@@ -65,8 +65,8 @@ public class HttpSessionClassManagedObjectSourceTest extends
 
 		// Validate the managed object type
 		ManagedObjectLoaderUtil.validateManagedObjectType(type,
-				HttpSessionClassManagedObjectSource.class,
-				HttpSessionClassManagedObjectSource.PROPERTY_CLASS_NAME,
+				HttpSessionObjectManagedObjectSource.class,
+				HttpSessionObjectManagedObjectSource.PROPERTY_CLASS_NAME,
 				MockObject.class.getName());
 	}
 
@@ -125,15 +125,15 @@ public class HttpSessionClassManagedObjectSourceTest extends
 		// Load the managed object source
 		ManagedObjectSourceStandAlone loader = new ManagedObjectSourceStandAlone();
 		loader.addProperty(
-				HttpSessionClassManagedObjectSource.PROPERTY_CLASS_NAME,
+				HttpSessionObjectManagedObjectSource.PROPERTY_CLASS_NAME,
 				MockObject.class.getName());
 		if (boundName != null) {
 			loader.addProperty(
-					HttpSessionClassManagedObjectSource.PROPERTY_BIND_NAME,
+					HttpSessionObjectManagedObjectSource.PROPERTY_BIND_NAME,
 					boundName);
 		}
-		HttpSessionClassManagedObjectSource source = loader
-				.loadManagedObjectSource(HttpSessionClassManagedObjectSource.class);
+		HttpSessionObjectManagedObjectSource source = loader
+				.loadManagedObjectSource(HttpSessionObjectManagedObjectSource.class);
 
 		// Instantiate and cache object
 		ManagedObjectUserStandAlone user = new ManagedObjectUserStandAlone();

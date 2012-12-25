@@ -24,16 +24,16 @@ import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.frame.util.ManagedObjectSourceStandAlone;
 import net.officefloor.frame.util.ManagedObjectUserStandAlone;
-import net.officefloor.plugin.web.http.application.HttpApplicationClassManagedObjectSource.Dependencies;
+import net.officefloor.plugin.web.http.application.HttpRequestObjectManagedObjectSource.Dependencies;
 
 import org.easymock.AbstractMatcher;
 
 /**
- * Tests the {@link HttpApplicationClassManagedObjectSource}.
+ * Tests the {@link HttpRequestObjectManagedObjectSource}.
  * 
  * @author Daniel Sagenschneider
  */
-public class HttpApplicationClassManagedObjectSourceTest extends
+public class HttpRequestObjectManagedObjectSourceTest extends
 		OfficeFrameTestCase {
 
 	/**
@@ -41,8 +41,8 @@ public class HttpApplicationClassManagedObjectSourceTest extends
 	 */
 	public void testSpecification() {
 		ManagedObjectLoaderUtil.validateSpecification(
-				HttpApplicationClassManagedObjectSource.class,
-				HttpApplicationClassManagedObjectSource.PROPERTY_CLASS_NAME,
+				HttpRequestObjectManagedObjectSource.class,
+				HttpRequestObjectManagedObjectSource.PROPERTY_CLASS_NAME,
 				"Class");
 	}
 
@@ -55,15 +55,15 @@ public class HttpApplicationClassManagedObjectSourceTest extends
 		ManagedObjectTypeBuilder type = ManagedObjectLoaderUtil
 				.createManagedObjectTypeBuilder();
 		type.setObjectClass(MockObject.class);
-		type.addDependency(Dependencies.HTTP_APPLICATION_STATE.name(),
-				HttpApplicationState.class, null,
-				Dependencies.HTTP_APPLICATION_STATE.ordinal(),
-				Dependencies.HTTP_APPLICATION_STATE);
+		type.addDependency(Dependencies.HTTP_REQUEST_STATE.name(),
+				HttpRequestState.class, null,
+				Dependencies.HTTP_REQUEST_STATE.ordinal(),
+				Dependencies.HTTP_REQUEST_STATE);
 
 		// Validate the managed object type
 		ManagedObjectLoaderUtil.validateManagedObjectType(type,
-				HttpApplicationClassManagedObjectSource.class,
-				HttpApplicationClassManagedObjectSource.PROPERTY_CLASS_NAME,
+				HttpRequestObjectManagedObjectSource.class,
+				HttpRequestObjectManagedObjectSource.PROPERTY_CLASS_NAME,
 				MockObject.class.getName());
 	}
 
@@ -82,22 +82,21 @@ public class HttpApplicationClassManagedObjectSourceTest extends
 	}
 
 	/**
-	 * Undertakes the test to use the {@link HttpApplicationState}.
+	 * Undertakes the test to use the {@link HttpRequestState}.
 	 * 
 	 * @param boundName
-	 *            Name to bind object within {@link HttpApplicationState}.
+	 *            Name to bind object within {@link HttpRequestState}.
 	 *            <code>null</code> to use {@link ManagedObject} name.
 	 */
 	public void doTest(String boundName) throws Throwable {
 
-		final HttpApplicationState state = this
-				.createMock(HttpApplicationState.class);
+		final HttpRequestState state = this.createMock(HttpRequestState.class);
 
 		// Determine the managed object name
 		final String MO_NAME = "MO";
 		final String RETRIEVE_NAME = (boundName == null ? MO_NAME : boundName);
 
-		// Record instantiate and cache in application state
+		// Record instantiate and cache in request state
 		final MockObject[] instantiatedObject = new MockObject[1];
 		this.recordReturn(state, state.getAttribute(RETRIEVE_NAME), null);
 		state.setAttribute(RETRIEVE_NAME, null);
@@ -112,7 +111,7 @@ public class HttpApplicationClassManagedObjectSourceTest extends
 			}
 		});
 
-		// Record cached within application state
+		// Record cached within request state
 		final MockObject CACHED_OBJECT = new MockObject();
 		this.recordReturn(state, state.getAttribute(RETRIEVE_NAME),
 				CACHED_OBJECT);
@@ -122,20 +121,20 @@ public class HttpApplicationClassManagedObjectSourceTest extends
 		// Load the managed object source
 		ManagedObjectSourceStandAlone loader = new ManagedObjectSourceStandAlone();
 		loader.addProperty(
-				HttpApplicationClassManagedObjectSource.PROPERTY_CLASS_NAME,
+				HttpRequestObjectManagedObjectSource.PROPERTY_CLASS_NAME,
 				MockObject.class.getName());
 		if (boundName != null) {
 			loader.addProperty(
-					HttpApplicationClassManagedObjectSource.PROPERTY_BIND_NAME,
+					HttpRequestObjectManagedObjectSource.PROPERTY_BIND_NAME,
 					boundName);
 		}
-		HttpApplicationClassManagedObjectSource source = loader
-				.loadManagedObjectSource(HttpApplicationClassManagedObjectSource.class);
+		HttpRequestObjectManagedObjectSource source = loader
+				.loadManagedObjectSource(HttpRequestObjectManagedObjectSource.class);
 
 		// Instantiate and cache object
 		ManagedObjectUserStandAlone user = new ManagedObjectUserStandAlone();
 		user.setBoundManagedObjectName(MO_NAME);
-		user.mapDependency(Dependencies.HTTP_APPLICATION_STATE, state);
+		user.mapDependency(Dependencies.HTTP_REQUEST_STATE, state);
 		ManagedObject managedObject = user.sourceManagedObject(source);
 		assertEquals("Incorrect instantiated object", instantiatedObject[0],
 				managedObject.getObject());

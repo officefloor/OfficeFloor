@@ -26,18 +26,14 @@ import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.frame.spi.managedobject.ObjectRegistry;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.frame.util.ManagedObjectSourceStandAlone;
-import net.officefloor.plugin.web.http.session.attribute.HttpSessionObjectManagedObjectSource;
-import net.officefloor.plugin.web.http.session.attribute.HttpSessionObjectRetrieverManagedObject;
-import net.officefloor.plugin.web.http.session.attribute.HttpSessionObjectRetrieverManagedObjectSource;
-import net.officefloor.plugin.web.http.session.attribute.HttpSessionObjectRetrieverManagedObjectSource.HttpSessionObjectRetrieverDependencies;
-import net.officefloor.plugin.web.http.session.object.HttpSessionObject;
+import net.officefloor.plugin.web.http.session.attribute.HttpSessionAttributeRetrieverManagedObjectSource.HttpSessionAttributeRetrieverDependencies;
 
 /**
- * Tests the {@link HttpSessionObjectManagedObjectSource}.
+ * Tests the {@link HttpSessionAttributeManagedObjectSource}.
  * 
  * @author Daniel Sagenschneider
  */
-public class HttpSessionObjectRetrieverManagedObjectSourceTest extends
+public class HttpSessionAttributeRetrieverManagedObjectSourceTest extends
 		OfficeFrameTestCase {
 
 	/**
@@ -46,9 +42,9 @@ public class HttpSessionObjectRetrieverManagedObjectSourceTest extends
 	public void testSpecification() {
 		ManagedObjectLoaderUtil
 				.validateSpecification(
-						HttpSessionObjectRetrieverManagedObjectSource.class,
-						HttpSessionObjectRetrieverManagedObjectSource.PROPERTY_TYPE_NAME,
-						HttpSessionObjectRetrieverManagedObjectSource.PROPERTY_TYPE_NAME);
+						HttpSessionAttributeRetrieverManagedObjectSource.class,
+						HttpSessionAttributeRetrieverManagedObjectSource.PROPERTY_TYPE_NAME,
+						HttpSessionAttributeRetrieverManagedObjectSource.PROPERTY_TYPE_NAME);
 	}
 
 	/**
@@ -61,18 +57,18 @@ public class HttpSessionObjectRetrieverManagedObjectSourceTest extends
 				.createManagedObjectTypeBuilder();
 		type.setObjectClass(MockType.class);
 		type.addDependency(
-				HttpSessionObjectRetrieverDependencies.HTTP_SESSION_OBJECT
-						.name(), HttpSessionObject.class, null,
-				HttpSessionObjectRetrieverDependencies.HTTP_SESSION_OBJECT
+				HttpSessionAttributeRetrieverDependencies.HTTP_SESSION_OBJECT
+						.name(), HttpSessionAttribute.class, null,
+				HttpSessionAttributeRetrieverDependencies.HTTP_SESSION_OBJECT
 						.ordinal(),
-				HttpSessionObjectRetrieverDependencies.HTTP_SESSION_OBJECT);
+				HttpSessionAttributeRetrieverDependencies.HTTP_SESSION_OBJECT);
 
 		// Validate the managed object type
 		ManagedObjectLoaderUtil
 				.validateManagedObjectType(
 						type,
-						HttpSessionObjectRetrieverManagedObjectSource.class,
-						HttpSessionObjectRetrieverManagedObjectSource.PROPERTY_TYPE_NAME,
+						HttpSessionAttributeRetrieverManagedObjectSource.class,
+						HttpSessionAttributeRetrieverManagedObjectSource.PROPERTY_TYPE_NAME,
 						MockType.class.getName());
 	}
 
@@ -85,16 +81,16 @@ public class HttpSessionObjectRetrieverManagedObjectSourceTest extends
 		final MockType SESSION_OBJECT = new MockType() {
 		};
 
-		ObjectRegistry<HttpSessionObjectRetrieverDependencies> objectRegistry = this
+		ObjectRegistry<HttpSessionAttributeRetrieverDependencies> objectRegistry = this
 				.createMock(ObjectRegistry.class);
-		HttpSessionObject<?> sessionObject = this
-				.createMock(HttpSessionObject.class);
+		HttpSessionAttribute<?> sessionObject = this
+				.createMock(HttpSessionAttribute.class);
 
 		// Record
 		this.recordReturn(
 				objectRegistry,
 				objectRegistry
-						.getObject(HttpSessionObjectRetrieverDependencies.HTTP_SESSION_OBJECT),
+						.getObject(HttpSessionAttributeRetrieverDependencies.HTTP_SESSION_OBJECT),
 				sessionObject);
 		this.recordReturn(sessionObject, sessionObject.getSessionObject(),
 				SESSION_OBJECT);
@@ -104,18 +100,18 @@ public class HttpSessionObjectRetrieverManagedObjectSourceTest extends
 		// Load the managed object source
 		ManagedObjectSourceStandAlone loader = new ManagedObjectSourceStandAlone();
 		loader.addProperty(
-				HttpSessionObjectRetrieverManagedObjectSource.PROPERTY_TYPE_NAME,
+				HttpSessionAttributeRetrieverManagedObjectSource.PROPERTY_TYPE_NAME,
 				MockType.class.getName());
-		HttpSessionObjectRetrieverManagedObjectSource mos = loader
-				.loadManagedObjectSource(HttpSessionObjectRetrieverManagedObjectSource.class);
+		HttpSessionAttributeRetrieverManagedObjectSource mos = loader
+				.loadManagedObjectSource(HttpSessionAttributeRetrieverManagedObjectSource.class);
 
 		// Obtain the managed object (ensure correct)
 		ManagedObject mo = mos.getManagedObject();
 		assertTrue("Incorrect managed object type",
-				(mo instanceof HttpSessionObjectRetrieverManagedObject));
+				(mo instanceof HttpSessionAttributeRetrieverManagedObject));
 
 		// Obtain the object (to ensure correct class)
-		HttpSessionObjectRetrieverManagedObject sorMo = (HttpSessionObjectRetrieverManagedObject) mo;
+		HttpSessionAttributeRetrieverManagedObject sorMo = (HttpSessionAttributeRetrieverManagedObject) mo;
 		sorMo.loadObjects(objectRegistry);
 		Object object = mo.getObject();
 		assertEquals("Incorrect object", SESSION_OBJECT, object);

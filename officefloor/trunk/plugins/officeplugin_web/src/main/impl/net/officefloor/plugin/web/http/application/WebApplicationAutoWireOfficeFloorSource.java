@@ -43,7 +43,7 @@ import net.officefloor.plugin.web.http.location.HttpApplicationLocationManagedOb
 import net.officefloor.plugin.web.http.location.InvalidHttpRequestUriException;
 import net.officefloor.plugin.web.http.parameters.source.HttpParametersObjectManagedObjectSource;
 import net.officefloor.plugin.web.http.resource.source.SourceHttpResourceFactory;
-import net.officefloor.plugin.web.http.session.object.HttpSessionClassManagedObjectSource;
+import net.officefloor.plugin.web.http.session.object.HttpSessionObjectManagedObjectSource;
 import net.officefloor.plugin.web.http.template.HttpTemplateWorkSource;
 import net.officefloor.plugin.web.http.template.parse.HttpTemplate;
 import net.officefloor.plugin.web.http.template.section.HttpTemplateSectionSource;
@@ -260,14 +260,14 @@ public class WebApplicationAutoWireOfficeFloorSource extends
 
 		// Not registered, so register
 		object = this.addManagedObject(
-				HttpApplicationClassManagedObjectSource.class.getName(), null,
+				HttpApplicationObjectManagedObjectSource.class.getName(), null,
 				new AutoWire(objectClass));
 		object.addProperty(
-				HttpApplicationClassManagedObjectSource.PROPERTY_CLASS_NAME,
+				HttpApplicationObjectManagedObjectSource.PROPERTY_CLASS_NAME,
 				objectClass.getName());
 		if ((bindName != null) && (bindName.trim().length() > 0)) {
 			object.addProperty(
-					HttpApplicationClassManagedObjectSource.PROPERTY_BIND_NAME,
+					HttpApplicationObjectManagedObjectSource.PROPERTY_BIND_NAME,
 					bindName);
 		}
 		this.httpApplicationObjects.put(objectClass, object);
@@ -293,14 +293,14 @@ public class WebApplicationAutoWireOfficeFloorSource extends
 
 		// Not registered, so register
 		object = this.addManagedObject(
-				HttpSessionClassManagedObjectSource.class.getName(), null,
+				HttpSessionObjectManagedObjectSource.class.getName(), null,
 				new AutoWire(objectClass));
 		object.addProperty(
-				HttpSessionClassManagedObjectSource.PROPERTY_CLASS_NAME,
+				HttpSessionObjectManagedObjectSource.PROPERTY_CLASS_NAME,
 				objectClass.getName());
 		if ((bindName != null) && (bindName.trim().length() > 0)) {
 			object.addProperty(
-					HttpSessionClassManagedObjectSource.PROPERTY_BIND_NAME,
+					HttpSessionObjectManagedObjectSource.PROPERTY_BIND_NAME,
 					bindName);
 		}
 		this.httpSessionObjects.put(objectClass, object);
@@ -326,14 +326,14 @@ public class WebApplicationAutoWireOfficeFloorSource extends
 
 		// Not registered, so register
 		object = this.addManagedObject(
-				HttpRequestClassManagedObjectSource.class.getName(), null,
+				HttpRequestObjectManagedObjectSource.class.getName(), null,
 				new AutoWire(objectClass));
 		object.addProperty(
-				HttpRequestClassManagedObjectSource.PROPERTY_CLASS_NAME,
+				HttpRequestObjectManagedObjectSource.PROPERTY_CLASS_NAME,
 				objectClass.getName());
 		if ((bindName != null) && (bindName.trim().length() > 0)) {
 			object.addProperty(
-					HttpRequestClassManagedObjectSource.PROPERTY_BIND_NAME,
+					HttpRequestObjectManagedObjectSource.PROPERTY_BIND_NAME,
 					bindName);
 		}
 		this.httpRequestObjects.put(objectClass, object);

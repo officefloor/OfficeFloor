@@ -16,7 +16,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package net.officefloor.plugin.web.http.session.object;
+package net.officefloor.plugin.web.http.session.attribute;
 
 import java.io.Serializable;
 
@@ -27,7 +27,7 @@ import net.officefloor.plugin.web.http.session.HttpSession;
  * 
  * @author Daniel Sagenschneider
  */
-public interface HttpSessionObject<T extends Serializable> {
+public interface HttpSessionAttribute<T extends Serializable> {
 
 	/**
 	 * Sets the {@link Object} into the {@link HttpSession}.

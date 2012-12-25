@@ -27,17 +27,17 @@ import java.lang.annotation.Target;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.plugin.socket.server.http.HttpRequest;
 import net.officefloor.plugin.web.http.session.HttpSession;
-import net.officefloor.plugin.web.http.session.object.HttpSessionClassManagedObjectSource;
+import net.officefloor.plugin.web.http.session.object.HttpSessionObjectManagedObjectSource;
 import net.officefloor.plugin.web.http.template.parse.HttpTemplate;
 import net.officefloor.plugin.web.http.template.section.HttpTemplateSectionSource;
 
 /**
  * <p>
  * Annotated on the class of the parameters to the {@link HttpTemplate} logic
- * class to indicate it should be a {@link HttpSessionClassManagedObjectSource}.
+ * class to indicate it should be a {@link HttpSessionObjectManagedObjectSource}.
  * <p>
  * This simplifies means to specifying
- * {@link HttpSessionClassManagedObjectSource} instances by in-lining it with
+ * {@link HttpSessionObjectManagedObjectSource} instances by in-lining it with
  * the code.
  * <p>
  * It is also is used by the {@link HttpTemplateSectionSource} to indicates that

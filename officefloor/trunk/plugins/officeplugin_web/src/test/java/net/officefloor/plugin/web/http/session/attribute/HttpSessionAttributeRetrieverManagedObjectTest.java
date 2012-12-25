@@ -23,39 +23,37 @@ import java.io.Serializable;
 import net.officefloor.frame.spi.managedobject.ObjectRegistry;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.web.http.session.HttpSession;
-import net.officefloor.plugin.web.http.session.attribute.HttpSessionObjectRetrieverManagedObject;
-import net.officefloor.plugin.web.http.session.attribute.HttpSessionObjectRetrieverManagedObjectSource.HttpSessionObjectRetrieverDependencies;
-import net.officefloor.plugin.web.http.session.object.HttpSessionObject;
+import net.officefloor.plugin.web.http.session.attribute.HttpSessionAttributeRetrieverManagedObjectSource.HttpSessionAttributeRetrieverDependencies;
 
 /**
- * Tests the {@link HttpSessionObjectRetrieverManagedObject}.
+ * Tests the {@link HttpSessionAttributeRetrieverManagedObject}.
  * 
  * @author Daniel Sagenschneider
  */
-public class HttpSessionObjectRetrieverManagedObjectTest extends
+public class HttpSessionAttributeRetrieverManagedObjectTest extends
 		OfficeFrameTestCase {
 
 	/**
-	 * {@link HttpSessionObjectRetrieverManagedObject} to test.
+	 * {@link HttpSessionAttributeRetrieverManagedObject} to test.
 	 */
-	private final HttpSessionObjectRetrieverManagedObject mo = new HttpSessionObjectRetrieverManagedObject();
+	private final HttpSessionAttributeRetrieverManagedObject mo = new HttpSessionAttributeRetrieverManagedObject();
 
 	/**
 	 * Mock {@link ObjectRegistry}.
 	 */
 	@SuppressWarnings("unchecked")
-	private final ObjectRegistry<HttpSessionObjectRetrieverDependencies> objectRegistry = this
+	private final ObjectRegistry<HttpSessionAttributeRetrieverDependencies> objectRegistry = this
 			.createMock(ObjectRegistry.class);
 
 	/**
-	 * Mock {@link HttpSessionObject}.
+	 * Mock {@link HttpSessionAttribute}.
 	 */
 	@SuppressWarnings("unchecked")
-	private final HttpSessionObject<Serializable> sessionObject = this
-			.createMock(HttpSessionObject.class);
+	private final HttpSessionAttribute<Serializable> sessionObject = this
+			.createMock(HttpSessionAttribute.class);
 
 	/**
-	 * Ensure able to obtain the object from the {@link HttpSessionObject}.
+	 * Ensure able to obtain the object from the {@link HttpSessionAttribute}.
 	 */
 	public void testRetrieveObjectFromHttpSessionObject() throws Throwable {
 
@@ -65,7 +63,7 @@ public class HttpSessionObjectRetrieverManagedObjectTest extends
 		this.recordReturn(
 				this.objectRegistry,
 				this.objectRegistry
-						.getObject(HttpSessionObjectRetrieverDependencies.HTTP_SESSION_OBJECT),
+						.getObject(HttpSessionAttributeRetrieverDependencies.HTTP_SESSION_OBJECT),
 				this.sessionObject);
 		this.recordReturn(this.sessionObject,
 				this.sessionObject.getSessionObject(), availableObject);
@@ -91,7 +89,7 @@ public class HttpSessionObjectRetrieverManagedObjectTest extends
 		this.recordReturn(
 				this.objectRegistry,
 				this.objectRegistry
-						.getObject(HttpSessionObjectRetrieverDependencies.HTTP_SESSION_OBJECT),
+						.getObject(HttpSessionAttributeRetrieverDependencies.HTTP_SESSION_OBJECT),
 				this.sessionObject);
 		this.recordReturn(this.sessionObject,
 				this.sessionObject.getSessionObject(), null);
