@@ -27,7 +27,7 @@ import java.lang.annotation.Target;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.plugin.socket.server.http.HttpRequest;
 import net.officefloor.plugin.web.http.session.HttpSession;
-import net.officefloor.plugin.web.http.session.clazz.source.HttpSessionClassManagedObjectSource;
+import net.officefloor.plugin.web.http.session.object.HttpSessionClassManagedObjectSource;
 import net.officefloor.plugin.web.http.template.parse.HttpTemplate;
 import net.officefloor.plugin.web.http.template.section.HttpTemplateSectionSource;
 

@@ -43,7 +43,7 @@ import net.officefloor.plugin.web.http.location.HttpApplicationLocationManagedOb
 import net.officefloor.plugin.web.http.location.InvalidHttpRequestUriException;
 import net.officefloor.plugin.web.http.parameters.source.HttpParametersObjectManagedObjectSource;
 import net.officefloor.plugin.web.http.resource.source.SourceHttpResourceFactory;
-import net.officefloor.plugin.web.http.session.clazz.source.HttpSessionClassManagedObjectSource;
+import net.officefloor.plugin.web.http.session.object.HttpSessionClassManagedObjectSource;
 import net.officefloor.plugin.web.http.template.HttpTemplateWorkSource;
 import net.officefloor.plugin.web.http.template.parse.HttpTemplate;
 import net.officefloor.plugin.web.http.template.section.HttpTemplateSectionSource;

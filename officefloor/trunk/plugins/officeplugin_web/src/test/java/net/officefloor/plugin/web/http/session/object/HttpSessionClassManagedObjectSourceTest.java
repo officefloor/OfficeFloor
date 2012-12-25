@@ -16,7 +16,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package net.officefloor.plugin.web.http.session.clazz.source;
+package net.officefloor.plugin.web.http.session.object;
 
 import java.io.Serializable;
 
@@ -27,7 +27,8 @@ import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.frame.util.ManagedObjectSourceStandAlone;
 import net.officefloor.frame.util.ManagedObjectUserStandAlone;
 import net.officefloor.plugin.web.http.session.HttpSession;
-import net.officefloor.plugin.web.http.session.clazz.source.HttpSessionClassManagedObject.Dependencies;
+import net.officefloor.plugin.web.http.session.object.HttpSessionClassManagedObjectSource;
+import net.officefloor.plugin.web.http.session.object.HttpSessionClassManagedObject.Dependencies;
 
 import org.easymock.AbstractMatcher;
 

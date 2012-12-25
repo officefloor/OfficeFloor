@@ -16,7 +16,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package net.officefloor.plugin.web.http.session.source;
+package net.officefloor.plugin.web.http.session;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -33,6 +33,7 @@ import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
 import net.officefloor.plugin.socket.server.http.server.HttpServicerTask;
 import net.officefloor.plugin.socket.server.http.server.MockHttpServer;
 import net.officefloor.plugin.web.http.session.HttpSession;
+import net.officefloor.plugin.web.http.session.HttpSessionManagedObjectSource;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;

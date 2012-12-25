@@ -16,15 +16,16 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package net.officefloor.plugin.web.http.session.object.source;
+package net.officefloor.plugin.web.http.session.attribute;
 
 import java.io.Serializable;
 
 import net.officefloor.frame.spi.managedobject.ObjectRegistry;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.web.http.session.HttpSession;
+import net.officefloor.plugin.web.http.session.attribute.HttpSessionObjectRetrieverManagedObject;
+import net.officefloor.plugin.web.http.session.attribute.HttpSessionObjectRetrieverManagedObjectSource.HttpSessionObjectRetrieverDependencies;
 import net.officefloor.plugin.web.http.session.object.HttpSessionObject;
-import net.officefloor.plugin.web.http.session.object.source.HttpSessionObjectRetrieverManagedObjectSource.HttpSessionObjectRetrieverDependencies;
 
 /**
  * Tests the {@link HttpSessionObjectRetrieverManagedObject}.

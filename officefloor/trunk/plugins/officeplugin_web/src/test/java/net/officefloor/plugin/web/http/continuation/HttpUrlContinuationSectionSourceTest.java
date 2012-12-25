@@ -38,7 +38,7 @@ import net.officefloor.plugin.web.http.location.HttpApplicationLocationManagedOb
 import net.officefloor.plugin.web.http.route.HttpRouteTask;
 import net.officefloor.plugin.web.http.route.HttpRouteWorkSource;
 import net.officefloor.plugin.web.http.session.HttpSession;
-import net.officefloor.plugin.web.http.session.source.HttpSessionManagedObjectSource;
+import net.officefloor.plugin.web.http.session.HttpSessionManagedObjectSource;
 import net.officefloor.plugin.work.clazz.FlowInterface;
 
 import org.apache.http.HttpResponse;

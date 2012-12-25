@@ -16,7 +16,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package net.officefloor.plugin.web.http.session.source;
+package net.officefloor.plugin.web.http.session;
 
 import java.io.Serializable;
 import java.util.Iterator;
