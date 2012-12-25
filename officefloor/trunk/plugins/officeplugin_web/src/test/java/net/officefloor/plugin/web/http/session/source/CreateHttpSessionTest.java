@@ -279,8 +279,8 @@ public class CreateHttpSessionTest extends
 		// Verify new Http Session
 		HttpSession session = (HttpSession) mo.getObject();
 		assertHttpSession(SESSION_ID, CREATION_TIME, true, session);
-		assertEquals("Incorrect Token name", SESSION_ID_COOKIE_NAME, session
-				.getTokenName());
+		assertEquals("Incorrect Token name", SESSION_ID_COOKIE_NAME,
+				session.getTokenName());
 	}
 
 	/**

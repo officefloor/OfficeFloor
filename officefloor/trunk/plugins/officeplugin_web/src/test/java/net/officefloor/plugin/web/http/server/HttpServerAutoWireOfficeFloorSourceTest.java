@@ -527,7 +527,7 @@ public class HttpServerAutoWireOfficeFloorSourceTest extends
 	 * {@link HttpSession} object.
 	 */
 	@HttpSessionStateful
-	public static class MockSessionObject {
+	public static class MockSessionObject implements Serializable {
 		public String getText() {
 			return "Session";
 		}

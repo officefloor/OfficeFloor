@@ -18,6 +18,7 @@
 
 package net.officefloor.plugin.web.http.session;
 
+import java.io.Serializable;
 import java.util.Iterator;
 
 import net.officefloor.plugin.web.http.session.spi.HttpSessionStore;
@@ -105,7 +106,8 @@ public interface HttpSession {
 	 * @throws InvalidatedHttpSessionException
 	 *             Indicating the {@link HttpSession} is invalidated.
 	 */
-	Object getAttribute(String name) throws InvalidatedHttpSessionException;
+	Serializable getAttribute(String name)
+			throws InvalidatedHttpSessionException;
 
 	/**
 	 * Obtains an {@link Iterator} to the names of the bound {@link Object}
@@ -124,14 +126,17 @@ public interface HttpSession {
 	 * @param name
 	 *            Name.
 	 * @param object
-	 *            {@link Object}.
+	 *            {@link Object}. Must be {@link Serializable} as the attributes
+	 *            of this {@link HttpSession} may be serialised to larger,
+	 *            cheaper memory stores or for clustered {@link HttpSession}
+	 *            management sent over the network.
 	 * @throws StoringHttpSessionException
 	 *             Indicating the {@link HttpSession} is currently being stored
 	 *             and can not be altered.
 	 * @throws InvalidatedHttpSessionException
 	 *             Indicating the {@link HttpSession} is invalidated.
 	 */
-	void setAttribute(String name, Object object)
+	void setAttribute(String name, Serializable object)
 			throws StoringHttpSessionException, InvalidatedHttpSessionException;
 
 	/**

@@ -18,6 +18,7 @@
 
 package net.officefloor.plugin.web.http.session.source;
 
+import java.io.Serializable;
 import java.util.Iterator;
 import java.util.Map;
 
@@ -240,7 +241,7 @@ public class HttpSessionManagedObject implements
 	 *            {@link HttpSession} Attributes.
 	 */
 	private synchronized void loadSession(long creationTime, long expireTime,
-			Map<String, Object> attributes) {
+			Map<String, Serializable> attributes) {
 		this.isSessionLoaded = true;
 
 		// Load state of session
@@ -269,7 +270,8 @@ public class HttpSessionManagedObject implements
 	 *             If immediate failure in storing Session.
 	 */
 	private synchronized void storeSession(String sessionId, long creationTime,
-			long expireTime, Map<String, Object> attributes) throws Throwable {
+			long expireTime, Map<String, Serializable> attributes)
+			throws Throwable {
 
 		// Trigger storing the session
 		this.isStoring = true;
@@ -418,8 +420,8 @@ public class HttpSessionManagedObject implements
 			long expireTime) {
 		HttpCookie sessionIdCookie = new HttpCookie(this.sessionIdCookieName,
 				sessionId, expireTime, null, "/");
-		HttpCookieUtil.addHttpCookie(sessionIdCookie, this.connection
-				.getHttpResponse());
+		HttpCookieUtil.addHttpCookie(sessionIdCookie,
+				this.connection.getHttpResponse());
 	}
 
 	/*
@@ -518,7 +520,7 @@ public class HttpSessionManagedObject implements
 		/**
 		 * Attributes of the {@link HttpSession}.
 		 */
-		private Map<String, Object> attributes;
+		private Map<String, Serializable> attributes;
 
 		/**
 		 * Flag indicating if this {@link HttpSession} is invalid.
@@ -545,7 +547,7 @@ public class HttpSessionManagedObject implements
 		 *            Attributes.
 		 */
 		void loadState(String sessionId, long creationTime, long expireTime,
-				boolean isNew, Map<String, Object> attributes) {
+				boolean isNew, Map<String, Serializable> attributes) {
 			// Load state
 			this.sessionId = sessionId;
 			this.creationTime = creationTime;
@@ -654,7 +656,7 @@ public class HttpSessionManagedObject implements
 		}
 
 		@Override
-		public Object getAttribute(String name) {
+		public Serializable getAttribute(String name) {
 			synchronized (HttpSessionManagedObject.this) {
 				this.ensureValid();
 				return this.attributes.get(name);
@@ -670,7 +672,7 @@ public class HttpSessionManagedObject implements
 		}
 
 		@Override
-		public void setAttribute(String name, Object object) {
+		public void setAttribute(String name, Serializable object) {
 			synchronized (HttpSessionManagedObject.this) {
 				this.ensureValid();
 				this.ensureCanAlter();
@@ -786,7 +788,7 @@ public class HttpSessionManagedObject implements
 
 		@Override
 		public void sessionCreated(long creationTime, long expireTime,
-				Map<String, Object> attributes) {
+				Map<String, Serializable> attributes) {
 			HttpSessionManagedObject.this.loadSession(creationTime, expireTime,
 					attributes);
 		}
@@ -835,7 +837,7 @@ public class HttpSessionManagedObject implements
 
 		@Override
 		public void sessionRetrieved(long creationTime, long expireTime,
-				Map<String, Object> attributes) {
+				Map<String, Serializable> attributes) {
 			HttpSessionManagedObject.this.loadSession(creationTime, expireTime,
 					attributes);
 		}
@@ -876,7 +878,7 @@ public class HttpSessionManagedObject implements
 		/**
 		 * Attributes.
 		 */
-		private final Map<String, Object> attributes;
+		private final Map<String, Serializable> attributes;
 
 		/**
 		 * Initiate.
@@ -892,7 +894,7 @@ public class HttpSessionManagedObject implements
 		 */
 		public StoreHttpSessionOperationImpl(String sessionId,
 				long creationTime, long expireTime,
-				Map<String, Object> attributes) {
+				Map<String, Serializable> attributes) {
 			this.sessionId = sessionId;
 			this.creationTime = creationTime;
 			this.expireTime = expireTime;
@@ -919,7 +921,7 @@ public class HttpSessionManagedObject implements
 		}
 
 		@Override
-		public Map<String, Object> getAttributes() {
+		public Map<String, Serializable> getAttributes() {
 			return this.attributes;
 		}
 

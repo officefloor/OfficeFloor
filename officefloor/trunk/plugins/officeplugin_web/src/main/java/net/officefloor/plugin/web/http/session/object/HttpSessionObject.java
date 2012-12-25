@@ -18,6 +18,8 @@
 
 package net.officefloor.plugin.web.http.session.object;
 
+import java.io.Serializable;
+
 import net.officefloor.plugin.web.http.session.HttpSession;
 
 /**
@@ -25,7 +27,7 @@ import net.officefloor.plugin.web.http.session.HttpSession;
  * 
  * @author Daniel Sagenschneider
  */
-public interface HttpSessionObject<T> {
+public interface HttpSessionObject<T extends Serializable> {
 
 	/**
 	 * Sets the {@link Object} into the {@link HttpSession}.

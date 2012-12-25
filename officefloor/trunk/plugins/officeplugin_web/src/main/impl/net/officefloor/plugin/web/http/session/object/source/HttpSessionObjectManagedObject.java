@@ -18,6 +18,8 @@
 
 package net.officefloor.plugin.web.http.session.object.source;
 
+import java.io.Serializable;
+
 import net.officefloor.frame.spi.managedobject.CoordinatingManagedObject;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.frame.spi.managedobject.NameAwareManagedObject;
@@ -33,7 +35,7 @@ import net.officefloor.plugin.web.http.session.object.source.HttpSessionObjectMa
  */
 public class HttpSessionObjectManagedObject implements NameAwareManagedObject,
 		CoordinatingManagedObject<HttpSessionObjectDependencies>,
-		HttpSessionObject<Object> {
+		HttpSessionObject<Serializable> {
 
 	/**
 	 * Bound name to register the Object with the {@link HttpSession}.
@@ -78,18 +80,18 @@ public class HttpSessionObjectManagedObject implements NameAwareManagedObject,
 	}
 
 	/*
-	 * ========================= HttpSession ================================
+	 * ======================== HttpSessionObject =============================
 	 */
 
 	@Override
-	public Object getSessionObject() {
+	public Serializable getSessionObject() {
 		// Return the object from the Session.
 		// (always go to session in case may have changed by other means)
 		return this.httpSession.getAttribute(this.boundName);
 	}
 
 	@Override
-	public void setSessionObject(Object sessionObject) {
+	public void setSessionObject(Serializable sessionObject) {
 		// Load object into the session
 		this.httpSession.setAttribute(this.boundName, sessionObject);
 	}

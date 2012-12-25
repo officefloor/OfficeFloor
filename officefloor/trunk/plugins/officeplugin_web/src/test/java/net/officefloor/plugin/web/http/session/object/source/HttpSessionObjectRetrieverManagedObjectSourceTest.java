@@ -18,6 +18,8 @@
 
 package net.officefloor.plugin.web.http.session.object.source;
 
+import java.io.Serializable;
+
 import net.officefloor.compile.test.managedobject.ManagedObjectLoaderUtil;
 import net.officefloor.compile.test.managedobject.ManagedObjectTypeBuilder;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
@@ -124,7 +126,7 @@ public class HttpSessionObjectRetrieverManagedObjectSourceTest extends
 	/**
 	 * Mock type for testing.
 	 */
-	public interface MockType {
+	public interface MockType extends Serializable {
 	}
 
 }

@@ -18,6 +18,8 @@
 
 package net.officefloor.plugin.web.http.session.object.source;
 
+import java.io.Serializable;
+
 import net.officefloor.compile.test.managedobject.ManagedObjectLoaderUtil;
 import net.officefloor.compile.test.managedobject.ManagedObjectTypeBuilder;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
@@ -71,7 +73,7 @@ public class HttpSessionObjectManagedObjectSourceTest extends
 	@SuppressWarnings("unchecked")
 	public void testLoad() throws Throwable {
 
-		final Object SESSION_OBJECT = "Session Object";
+		final Serializable SESSION_OBJECT = "Session Object";
 
 		final String BOUND_NAME = "BOUND";
 		ObjectRegistry<HttpSessionObjectDependencies> objectRegistry = this
@@ -108,7 +110,7 @@ public class HttpSessionObjectManagedObjectSourceTest extends
 		assertTrue("Incorrect object type", object instanceof HttpSessionObject);
 
 		// Ensure able to interact with HTTP session
-		HttpSessionObject<Object> httpSessionObject = (HttpSessionObject<Object>) object;
+		HttpSessionObject<Serializable> httpSessionObject = (HttpSessionObject<Serializable>) object;
 		assertNull("Initially should not obtain object from session",
 				httpSessionObject.getSessionObject());
 		httpSessionObject.setSessionObject(SESSION_OBJECT);

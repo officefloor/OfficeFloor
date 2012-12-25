@@ -978,7 +978,8 @@ public class WebApplicationAutoWireOfficeFloorSourceTest extends
 	 * Provides mock template logic for validating the overriding binding name
 	 * for the {@link HttpSession} object.
 	 */
-	public static class MockAnnotatedOverriddenBindNameHttpSessionStatefulTemplate {
+	public static class MockAnnotatedOverriddenBindNameHttpSessionStatefulTemplate
+			implements Serializable {
 		public MockAnnotatedOverriddenBindNameHttpSessionStatefulObject getTemplate(
 				MockAnnotatedOverriddenBindNameHttpSessionStatefulObject object,
 				HttpSession session) {
@@ -996,7 +997,8 @@ public class WebApplicationAutoWireOfficeFloorSourceTest extends
 	 * Mock Http Session Object with overridden binding name.
 	 */
 	@HttpSessionStateful("BIND")
-	public static class MockAnnotatedOverriddenBindNameHttpSessionStatefulObject {
+	public static class MockAnnotatedOverriddenBindNameHttpSessionStatefulObject
+			implements Serializable {
 		public int getCount() {
 			return 1;
 		}

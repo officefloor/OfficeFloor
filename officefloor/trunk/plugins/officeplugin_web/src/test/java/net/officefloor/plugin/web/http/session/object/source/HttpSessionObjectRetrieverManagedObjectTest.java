@@ -18,11 +18,12 @@
 
 package net.officefloor.plugin.web.http.session.object.source;
 
+import java.io.Serializable;
+
 import net.officefloor.frame.spi.managedobject.ObjectRegistry;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.web.http.session.HttpSession;
 import net.officefloor.plugin.web.http.session.object.HttpSessionObject;
-import net.officefloor.plugin.web.http.session.object.source.HttpSessionObjectRetrieverManagedObject;
 import net.officefloor.plugin.web.http.session.object.source.HttpSessionObjectRetrieverManagedObjectSource.HttpSessionObjectRetrieverDependencies;
 
 /**
@@ -49,7 +50,7 @@ public class HttpSessionObjectRetrieverManagedObjectTest extends
 	 * Mock {@link HttpSessionObject}.
 	 */
 	@SuppressWarnings("unchecked")
-	private final HttpSessionObject<Object> sessionObject = this
+	private final HttpSessionObject<Serializable> sessionObject = this
 			.createMock(HttpSessionObject.class);
 
 	/**
@@ -60,14 +61,13 @@ public class HttpSessionObjectRetrieverManagedObjectTest extends
 		final Object availableObject = "Available Object";
 
 		// Record retrieving the managed object
-		this
-				.recordReturn(
-						this.objectRegistry,
-						this.objectRegistry
-								.getObject(HttpSessionObjectRetrieverDependencies.HTTP_SESSION_OBJECT),
-						this.sessionObject);
-		this.recordReturn(this.sessionObject, this.sessionObject
-				.getSessionObject(), availableObject);
+		this.recordReturn(
+				this.objectRegistry,
+				this.objectRegistry
+						.getObject(HttpSessionObjectRetrieverDependencies.HTTP_SESSION_OBJECT),
+				this.sessionObject);
+		this.recordReturn(this.sessionObject,
+				this.sessionObject.getSessionObject(), availableObject);
 
 		// Test
 		this.replayMockObjects();
@@ -87,14 +87,13 @@ public class HttpSessionObjectRetrieverManagedObjectTest extends
 	public void testNoObjectAvailableToRetrieve() throws Throwable {
 
 		// Record retrieving the managed object
-		this
-				.recordReturn(
-						this.objectRegistry,
-						this.objectRegistry
-								.getObject(HttpSessionObjectRetrieverDependencies.HTTP_SESSION_OBJECT),
-						this.sessionObject);
-		this.recordReturn(this.sessionObject, this.sessionObject
-				.getSessionObject(), null);
+		this.recordReturn(
+				this.objectRegistry,
+				this.objectRegistry
+						.getObject(HttpSessionObjectRetrieverDependencies.HTTP_SESSION_OBJECT),
+				this.sessionObject);
+		this.recordReturn(this.sessionObject,
+				this.sessionObject.getSessionObject(), null);
 
 		// Test
 		this.replayMockObjects();
