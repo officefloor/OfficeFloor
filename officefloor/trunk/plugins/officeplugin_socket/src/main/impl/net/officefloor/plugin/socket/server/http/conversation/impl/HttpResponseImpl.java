@@ -562,11 +562,14 @@ public class HttpResponseImpl implements HttpResponse {
 				this.contentType = "text/html";
 			}
 
-			// Create and return the entity writer
-			this.entityWriter = new ServerWriter(this.entity, this.charset,
-					this.receiver.getLock());
-			return this.entityWriter;
+			// Lazy create the entity writer
+			if (this.entityWriter == null) {
+				this.entityWriter = new ServerWriter(this.entity, this.charset,
+						this.receiver.getLock());
+			}
 
+			// Return the entity writer
+			return this.entityWriter;
 		}
 	}
 

@@ -308,6 +308,16 @@ public class HttpResponseTest extends OfficeFrameTestCase implements Connection 
 	}
 
 	/**
+	 * Ensure same {@link ServerOutputStream} on subsequent calls.
+	 */
+	public void testSameEntityOutputStream() throws IOException {
+		HttpResponse response = this.createHttpResponse();
+		ServerOutputStream entityOne = response.getEntity();
+		ServerOutputStream entityTwo = response.getEntity();
+		assertSame("Should be same entity output stream", entityOne, entityTwo);
+	}
+
+	/**
 	 * Ensure on obtaining the {@link ServerWriter} that can not obtain
 	 * {@link ServerOutputStream}.
 	 */
@@ -343,6 +353,16 @@ public class HttpResponseTest extends OfficeFrameTestCase implements Connection 
 				+ "Content-Type: text/html; charset=" + DEFAULT_CHARSET.name()
 				+ "\nContent-Length: 4", "TEST", DEFAULT_CHARSET);
 		assertFalse("Connection should not be closed", this.isConnectionClosed);
+	}
+
+	/**
+	 * Ensure same {@link ServerWriter} for the entity on subsequent calls.
+	 */
+	public void testSameEntityWriter() throws IOException {
+		HttpResponse response = this.createHttpResponse();
+		ServerWriter entityOne = response.getEntityWriter();
+		ServerWriter entityTwo = response.getEntityWriter();
+		assertSame("Should be the same writer", entityOne, entityTwo);
 	}
 
 	/**
