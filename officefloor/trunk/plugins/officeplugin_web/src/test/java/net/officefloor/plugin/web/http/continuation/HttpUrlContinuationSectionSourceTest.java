@@ -32,6 +32,8 @@ import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
 import net.officefloor.plugin.socket.server.http.server.MockHttpServer;
 import net.officefloor.plugin.socket.server.http.source.HttpServerSocketManagedObjectSource;
 import net.officefloor.plugin.socket.server.http.source.HttpsServerSocketManagedObjectSource;
+import net.officefloor.plugin.web.http.application.HttpRequestState;
+import net.officefloor.plugin.web.http.application.HttpRequestStateManagedObjectSource;
 import net.officefloor.plugin.web.http.application.HttpUriLink;
 import net.officefloor.plugin.web.http.location.HttpApplicationLocation;
 import net.officefloor.plugin.web.http.location.HttpApplicationLocationManagedObjectSource;
@@ -155,6 +157,9 @@ public class HttpUrlContinuationSectionSourceTest extends OfficeFrameTestCase {
 		source.addManagedObject(
 				HttpApplicationLocationManagedObjectSource.class.getName(),
 				null, new AutoWire(HttpApplicationLocation.class));
+		source.addManagedObject(
+				HttpRequestStateManagedObjectSource.class.getName(), null,
+				new AutoWire(HttpRequestState.class));
 		source.addManagedObject(HttpSessionManagedObjectSource.class.getName(),
 				null, new AutoWire(HttpSession.class)).setTimeout(1000);
 

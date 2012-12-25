@@ -115,7 +115,10 @@ public class WebApplicationAutoWireOfficeFloorSourceTest extends
 				WebApplicationAutoWireOfficeFloorSource.HANDLER_SECTION_NAME,
 				WebApplicationAutoWireOfficeFloorSource.HANDLER_INPUT_NAME);
 
-		// Configure the HTTP Session
+		// Configure the HTTP Request State and HTTP Session
+		this.source.addManagedObject(
+				HttpRequestStateManagedObjectSource.class.getName(), null,
+				new AutoWire(HttpRequestState.class));
 		this.source.addManagedObject(
 				HttpSessionManagedObjectSource.class.getName(), null,
 				new AutoWire(HttpSession.class)).setTimeout(60 * 1000);

@@ -38,6 +38,7 @@ import net.officefloor.plugin.section.clazz.ClassSectionSource;
 import net.officefloor.plugin.section.clazz.NextTask;
 import net.officefloor.plugin.section.clazz.SectionClassManagedObjectSource;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
+import net.officefloor.plugin.web.http.application.HttpRequestState;
 import net.officefloor.plugin.web.http.continuation.HttpUrlContinuationWorkSource;
 import net.officefloor.plugin.web.http.location.HttpApplicationLocation;
 import net.officefloor.plugin.web.http.session.HttpSession;
@@ -104,6 +105,8 @@ public class HttpTemplateSectionSourceTest extends OfficeFrameTestCase {
 				ServerHttpConnection.class.getName());
 		expected.addSectionObject(HttpApplicationLocation.class.getName(),
 				HttpApplicationLocation.class.getName());
+		expected.addSectionObject(HttpRequestState.class.getName(),
+				HttpRequestState.class.getName());
 		expected.addSectionObject(HttpSession.class.getName(),
 				HttpSession.class.getName());
 
@@ -120,6 +123,7 @@ public class HttpTemplateSectionSourceTest extends OfficeFrameTestCase {
 				HttpTemplateInitialWorkSource.TASK_NAME);
 		initial.getTaskObject("SERVER_HTTP_CONNECTION");
 		initial.getTaskObject("HTTP_APPLICATION_LOCATION");
+		initial.getTaskObject("REQUEST_STATE");
 		initial.getTaskObject("HTTP_SESSION");
 		initial.getTaskFlow("RENDER");
 
@@ -249,6 +253,8 @@ public class HttpTemplateSectionSourceTest extends OfficeFrameTestCase {
 				ServerHttpConnection.class.getName());
 		expected.addSectionObject(HttpApplicationLocation.class.getName(),
 				HttpApplicationLocation.class.getName());
+		expected.addSectionObject(HttpRequestState.class.getName(),
+				HttpRequestState.class.getName());
 		expected.addSectionObject(HttpSession.class.getName(),
 				HttpSession.class.getName());
 
@@ -271,6 +277,7 @@ public class HttpTemplateSectionSourceTest extends OfficeFrameTestCase {
 				HttpTemplateInitialWorkSource.TASK_NAME);
 		initial.getTaskObject("SERVER_HTTP_CONNECTION");
 		initial.getTaskObject("HTTP_APPLICATION_LOCATION");
+		initial.getTaskObject("REQUEST_STATE");
 		initial.getTaskObject("HTTP_SESSION");
 		initial.getTaskFlow("RENDER");
 
@@ -296,6 +303,7 @@ public class HttpTemplateSectionSourceTest extends OfficeFrameTestCase {
 		SectionTask section = templateWork.addSectionTask("section", "section");
 		section.getTaskObject("SERVER_HTTP_CONNECTION");
 		section.getTaskObject("HTTP_APPLICATION_LOCATION");
+		initial.getTaskObject("REQUEST_STATE");
 		section.getTaskObject("OBJECT");
 
 		// Description
@@ -341,6 +349,8 @@ public class HttpTemplateSectionSourceTest extends OfficeFrameTestCase {
 				ServerHttpConnection.class.getName());
 		expected.addSectionObject(HttpApplicationLocation.class.getName(),
 				HttpApplicationLocation.class.getName());
+		expected.addSectionObject(HttpRequestState.class.getName(),
+				HttpRequestState.class.getName());
 		expected.addSectionObject(HttpSession.class.getName(),
 				HttpSession.class.getName());
 
@@ -362,6 +372,7 @@ public class HttpTemplateSectionSourceTest extends OfficeFrameTestCase {
 				HttpTemplateInitialWorkSource.TASK_NAME);
 		initial.getTaskObject("SERVER_HTTP_CONNECTION");
 		initial.getTaskObject("HTTP_APPLICATION_LOCATION");
+		initial.getTaskObject("REQUEST_STATE");
 		initial.getTaskObject("HTTP_SESSION");
 		initial.getTaskFlow("RENDER");
 

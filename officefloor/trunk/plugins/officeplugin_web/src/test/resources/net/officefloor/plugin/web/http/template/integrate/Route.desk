@@ -2,7 +2,8 @@
   <external-managed-objects>
     <external-managed-object name="HTTP" object-type="net.officefloor.plugin.socket.server.http.ServerHttpConnection" x="604" y="352"/>
     <external-managed-object name="LOCATION" object-type="net.officefloor.plugin.web.http.location.HttpApplicationLocation" x="604" y="402"/>
-    <external-managed-object name="SESSION" object-type="net.officefloor.plugin.web.http.session.HttpSession" x="608" y="452"/>
+    <external-managed-object name="REQUEST_STATE" object-type="net.officefloor.plugin.web.http.application.HttpRequestState" x="598" y="448"/>
+    <external-managed-object name="SESSION" object-type="net.officefloor.plugin.web.http.session.HttpSession" x="608" y="488"/>
   </external-managed-objects>
   <managed-object-sources>
   </managed-object-sources>
@@ -36,6 +37,9 @@
         </task-object>
         <task-object name="HTTP_APPLICATION_LOCATION" key="HTTP_APPLICATION_LOCATION" object-type="net.officefloor.plugin.web.http.location.HttpApplicationLocation" parameter="false">
           <external-managed-object name="LOCATION"/>
+        </task-object>
+        <task-object name="REQUEST_STATE" key="REQUEST_STATE" object-type="net.officefloor.plugin.web.http.application.HttpRequestState" parameter="false">
+          <external-managed-object name="REQUEST_STATE"/>
         </task-object>
         <task-object name="HTTP_SESSION" key="HTTP_SESSION" object-type="net.officefloor.plugin.web.http.session.HttpSession" parameter="false">
           <external-managed-object name="SESSION"/>

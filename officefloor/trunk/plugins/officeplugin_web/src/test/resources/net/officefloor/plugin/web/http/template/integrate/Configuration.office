@@ -6,6 +6,8 @@
     </external-managed-object>
     <external-managed-object name="SESSION" object-type="net.officefloor.plugin.web.http.session.HttpSession" x="459" y="508">
     </external-managed-object>
+    <external-managed-object name="REQUEST_STATE" object-type="net.officefloor.plugin.web.http.application.HttpRequestState" x="448" y="476">
+    </external-managed-object>
   </external-managed-objects>
   <managed-object-sources>
   </managed-object-sources>
@@ -116,6 +118,9 @@
       </object>
       <object name="LOCATION" object-type="net.officefloor.plugin.web.http.location.HttpApplicationLocation">
         <external-managed-object name="LOCATION"/>
+      </object>
+      <object name="REQUEST_STATE" object-type="net.officefloor.plugin.web.http.application.HttpRequestState">
+        <external-managed-object name="REQUEST_STATE"/>
       </object>
       <object name="SESSION" object-type="net.officefloor.plugin.web.http.session.HttpSession">
         <external-managed-object name="SESSION"/>

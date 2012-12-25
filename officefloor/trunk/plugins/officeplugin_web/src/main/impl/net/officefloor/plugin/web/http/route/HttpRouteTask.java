@@ -37,6 +37,7 @@ import net.officefloor.plugin.socket.server.http.HttpRequest;
 import net.officefloor.plugin.socket.server.http.HttpResponse;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
 import net.officefloor.plugin.socket.server.http.protocol.HttpStatus;
+import net.officefloor.plugin.web.http.application.HttpRequestState;
 import net.officefloor.plugin.web.http.continuation.DuplicateHttpUrlContinuationException;
 import net.officefloor.plugin.web.http.continuation.HttpUrlContinuationDifferentiator;
 import net.officefloor.plugin.web.http.location.HttpApplicationLocation;
@@ -77,6 +78,8 @@ public class HttpRouteTask
 	 *            {@link ServerHttpConnection}.
 	 * @param location
 	 *            {@link HttpApplicationLocation}.
+	 * @param requestState
+	 *            {@link HttpRequestState}.
 	 * @param session
 	 *            {@link HttpSession}.
 	 * @throws IOException
@@ -84,17 +87,23 @@ public class HttpRouteTask
 	 */
 	public static void doRedirect(String applicationUriPath, boolean isSecure,
 			ServerHttpConnection connection, HttpApplicationLocation location,
-			HttpSession session) throws IOException {
+			HttpRequestState requestState, HttpSession session)
+			throws IOException {
 
 		// Require redirect, so determine the redirect URL
 		String redirectUrl = location.transformToClientPath(applicationUriPath,
 				isSecure);
 
+		// Obtain the redirect momento state
+		Serializable connectionMomento = connection.exportState();
+		Serializable requestStateMomento = requestState.exportState();
+		RedirectStateMomento redirectMomento = new RedirectStateMomento(
+				connectionMomento, requestStateMomento);
+
 		// Maintain state momento of redirected request
-		Serializable redirectMomento = connection.exportState();
 		session.setAttribute(SESSION_REDIRECTED_REQUEST, redirectMomento);
 
-		// Send redirect for making secure
+		// Send redirect
 		HttpResponse response = connection.getHttpResponse();
 		response.setStatus(HttpStatus.SC_SEE_OTHER);
 		response.addHeader("Location", redirectUrl + REDIRECT_URI_SUFFIX);
@@ -104,7 +113,7 @@ public class HttpRouteTask
 	 * Dependencies for the {@link HttpRouteTask}.
 	 */
 	public static enum HttpRouteTaskDependencies {
-		SERVER_HTTP_CONNECTION, HTTP_APPLICATION_LOCATION, HTTP_SESSION
+		SERVER_HTTP_CONNECTION, HTTP_APPLICATION_LOCATION, REQUEST_STATE, HTTP_SESSION
 	}
 
 	/**
@@ -204,6 +213,8 @@ public class HttpRouteTask
 				.getObject(HttpRouteTaskDependencies.SERVER_HTTP_CONNECTION);
 		HttpApplicationLocation location = (HttpApplicationLocation) context
 				.getObject(HttpRouteTaskDependencies.HTTP_APPLICATION_LOCATION);
+		HttpRequestState requestState = (HttpRequestState) context
+				.getObject(HttpRouteTaskDependencies.REQUEST_STATE);
 		HttpSession session = (HttpSession) context
 				.getObject(HttpRouteTaskDependencies.HTTP_SESSION);
 
@@ -211,11 +222,12 @@ public class HttpRouteTask
 		String path = connection.getHttpRequest().getRequestURI();
 		if (path.endsWith(REDIRECT_URI_SUFFIX)) {
 			// Redirect, so load previous request (if available)
-			Serializable redirectedMomento = (Serializable) session
+			RedirectStateMomento redirectedMomento = (RedirectStateMomento) session
 					.getAttribute(SESSION_REDIRECTED_REQUEST);
 			if (redirectedMomento != null) {
 				// Import redirect state
-				connection.importState(redirectedMomento);
+				connection.importState(redirectedMomento.connectionMomento);
+				requestState.importState(redirectedMomento.requestStateMomento);
 			}
 		}
 
@@ -251,7 +263,7 @@ public class HttpRouteTask
 
 			// Undertake the redirect
 			doRedirect(path, isRequireSecure.booleanValue(), connection,
-					location, session);
+					location, requestState, session);
 			return null;
 		}
 
@@ -317,6 +329,36 @@ public class HttpRouteTask
 			this.workName = workName;
 			this.taskName = taskName;
 			this.isSecure = isSecure;
+		}
+	}
+
+	/**
+	 * Momento containing state for servicing a redirect.
+	 */
+	private static class RedirectStateMomento implements Serializable {
+
+		/**
+		 * {@link ServerHttpConnection} momento.
+		 */
+		private final Serializable connectionMomento;
+
+		/**
+		 * {@link HttpRequestState} momento.
+		 */
+		private final Serializable requestStateMomento;
+
+		/**
+		 * Initiate.
+		 * 
+		 * @param connectionMomento
+		 *            {@link ServerHttpConnection} momento.
+		 * @param requestStateMomento
+		 *            {@link HttpRequestState} momento.
+		 */
+		public RedirectStateMomento(Serializable connectionMomento,
+				Serializable requestStateMomento) {
+			this.connectionMomento = connectionMomento;
+			this.requestStateMomento = requestStateMomento;
 		}
 	}
 
