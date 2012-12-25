@@ -22,7 +22,7 @@ import net.officefloor.autowire.AutoWireObject;
 import net.officefloor.plugin.socket.server.ssl.SslEngineConfigurator;
 import net.officefloor.plugin.web.http.application.WebAutoWireApplication;
 import net.officefloor.plugin.web.http.session.HttpSession;
-import net.officefloor.plugin.web.http.session.source.HttpSessionManagedObjectSource;
+import net.officefloor.plugin.web.http.session.HttpSessionManagedObjectSource;
 
 /**
  * Auto-wired web application that is stand-alone.

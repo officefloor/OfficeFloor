@@ -53,7 +53,7 @@ import net.officefloor.plugin.web.http.security.HttpSecurityTask.DependencyKeys;
 import net.officefloor.plugin.web.http.security.HttpSecurityTask.FlowKeys;
 import net.officefloor.plugin.web.http.security.scheme.BasicHttpSecuritySource;
 import net.officefloor.plugin.web.http.security.store.PasswordFileManagedObjectSource;
-import net.officefloor.plugin.web.http.session.source.HttpSessionManagedObjectSource;
+import net.officefloor.plugin.web.http.session.HttpSessionManagedObjectSource;
 
 import org.apache.http.auth.AuthScope;
 import org.apache.http.auth.UsernamePasswordCredentials;

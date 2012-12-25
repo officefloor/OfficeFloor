@@ -16,7 +16,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package net.officefloor.plugin.web.http.session.clazz.source;
+package net.officefloor.plugin.web.http.session.object;
 
 import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
@@ -24,7 +24,7 @@ import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceContext;
 import net.officefloor.frame.spi.managedobject.source.impl.AbstractManagedObjectSource;
 import net.officefloor.plugin.web.http.session.HttpSession;
-import net.officefloor.plugin.web.http.session.clazz.source.HttpSessionClassManagedObject.Dependencies;
+import net.officefloor.plugin.web.http.session.object.HttpSessionClassManagedObject.Dependencies;
 
 /**
  * {@link ManagedObjectSource} to cache creation of an {@link Object} within the

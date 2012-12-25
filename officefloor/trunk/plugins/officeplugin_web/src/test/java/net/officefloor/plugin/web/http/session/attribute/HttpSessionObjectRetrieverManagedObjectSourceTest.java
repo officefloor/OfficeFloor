@@ -16,7 +16,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package net.officefloor.plugin.web.http.session.object.source;
+package net.officefloor.plugin.web.http.session.attribute;
 
 import java.io.Serializable;
 
@@ -26,11 +26,11 @@ import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.frame.spi.managedobject.ObjectRegistry;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.frame.util.ManagedObjectSourceStandAlone;
+import net.officefloor.plugin.web.http.session.attribute.HttpSessionObjectManagedObjectSource;
+import net.officefloor.plugin.web.http.session.attribute.HttpSessionObjectRetrieverManagedObject;
+import net.officefloor.plugin.web.http.session.attribute.HttpSessionObjectRetrieverManagedObjectSource;
+import net.officefloor.plugin.web.http.session.attribute.HttpSessionObjectRetrieverManagedObjectSource.HttpSessionObjectRetrieverDependencies;
 import net.officefloor.plugin.web.http.session.object.HttpSessionObject;
-import net.officefloor.plugin.web.http.session.object.source.HttpSessionObjectManagedObjectSource;
-import net.officefloor.plugin.web.http.session.object.source.HttpSessionObjectRetrieverManagedObject;
-import net.officefloor.plugin.web.http.session.object.source.HttpSessionObjectRetrieverManagedObjectSource;
-import net.officefloor.plugin.web.http.session.object.source.HttpSessionObjectRetrieverManagedObjectSource.HttpSessionObjectRetrieverDependencies;
 
 /**
  * Tests the {@link HttpSessionObjectManagedObjectSource}.

@@ -16,13 +16,13 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package net.officefloor.plugin.web.http.session.object.source;
+package net.officefloor.plugin.web.http.session.attribute;
 
 import net.officefloor.frame.spi.managedobject.CoordinatingManagedObject;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.frame.spi.managedobject.ObjectRegistry;
+import net.officefloor.plugin.web.http.session.attribute.HttpSessionObjectRetrieverManagedObjectSource.HttpSessionObjectRetrieverDependencies;
 import net.officefloor.plugin.web.http.session.object.HttpSessionObject;
-import net.officefloor.plugin.web.http.session.object.source.HttpSessionObjectRetrieverManagedObjectSource.HttpSessionObjectRetrieverDependencies;
 
 /**
  * {@link ManagedObject} that retrieves the {@link Object} from the

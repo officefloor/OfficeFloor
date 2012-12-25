@@ -41,7 +41,7 @@ import net.officefloor.plugin.web.http.application.HttpRequestStateManagedObject
 import net.officefloor.plugin.web.http.application.WebApplicationAutoWireOfficeFloorSource;
 import net.officefloor.plugin.web.http.location.HttpApplicationLocationManagedObjectSource;
 import net.officefloor.plugin.web.http.session.HttpSession;
-import net.officefloor.plugin.web.http.session.source.HttpSessionManagedObjectSource;
+import net.officefloor.plugin.web.http.session.HttpSessionManagedObjectSource;
 
 /**
  * {@link OfficeFloorSource} that extends the

@@ -16,7 +16,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package net.officefloor.plugin.web.http.session.clazz.source;
+package net.officefloor.plugin.web.http.session.object;
 
 import java.io.Serializable;
 

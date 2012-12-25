@@ -16,10 +16,10 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package net.officefloor.plugin.web.http.session.source;
+package net.officefloor.plugin.web.http.session;
 
 import net.officefloor.plugin.web.http.session.HttpSession;
-import net.officefloor.plugin.web.http.session.source.HttpSessionManagedObject;
+import net.officefloor.plugin.web.http.session.HttpSessionManagedObject;
 import net.officefloor.plugin.web.http.session.spi.HttpSessionStore;
 
 /**
