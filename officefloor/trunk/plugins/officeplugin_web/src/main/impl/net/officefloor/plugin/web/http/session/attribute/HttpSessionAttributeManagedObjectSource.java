@@ -23,22 +23,22 @@ import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.spi.managedobject.source.impl.AbstractManagedObjectSource;
 import net.officefloor.plugin.web.http.session.HttpSession;
-import net.officefloor.plugin.web.http.session.object.HttpSessionObject;
+import net.officefloor.plugin.web.http.session.attribute.HttpSessionAttribute;
 
 /**
- * {@link ManagedObjectSource} to obtain an {@link HttpSessionObject} for an
+ * {@link ManagedObjectSource} to obtain an {@link HttpSessionAttribute} for an
  * Object in the {@link HttpSession}.
  * 
  * @author Daniel Sagenschneider
  */
-public class HttpSessionObjectManagedObjectSource
+public class HttpSessionAttributeManagedObjectSource
 		extends
-		AbstractManagedObjectSource<HttpSessionObjectManagedObjectSource.HttpSessionObjectDependencies, None> {
+		AbstractManagedObjectSource<HttpSessionAttributeManagedObjectSource.HttpSessionAttributeDependencies, None> {
 
 	/**
-	 * Dependency keys for the {@link HttpSessionObjectManagedObjectSource}.
+	 * Dependency keys for the {@link HttpSessionAttributeManagedObjectSource}.
 	 */
-	public static enum HttpSessionObjectDependencies {
+	public static enum HttpSessionAttributeDependencies {
 		HTTP_SESSION
 	}
 
@@ -53,19 +53,19 @@ public class HttpSessionObjectManagedObjectSource
 
 	@Override
 	protected void loadMetaData(
-			MetaDataContext<HttpSessionObjectDependencies, None> context)
+			MetaDataContext<HttpSessionAttributeDependencies, None> context)
 			throws Exception {
 
 		// Load the meta-data
-		context.setManagedObjectClass(HttpSessionObjectManagedObject.class);
-		context.setObjectClass(HttpSessionObject.class);
-		context.addDependency(HttpSessionObjectDependencies.HTTP_SESSION,
+		context.setManagedObjectClass(HttpSessionAttributeManagedObject.class);
+		context.setObjectClass(HttpSessionAttribute.class);
+		context.addDependency(HttpSessionAttributeDependencies.HTTP_SESSION,
 				HttpSession.class);
 	}
 
 	@Override
 	protected ManagedObject getManagedObject() throws Throwable {
-		return new HttpSessionObjectManagedObject();
+		return new HttpSessionAttributeManagedObject();
 	}
 
 }

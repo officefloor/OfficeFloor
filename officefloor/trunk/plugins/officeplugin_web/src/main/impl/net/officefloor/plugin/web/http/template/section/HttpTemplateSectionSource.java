@@ -65,7 +65,7 @@ import net.officefloor.plugin.web.http.application.HttpSessionStateful;
 import net.officefloor.plugin.web.http.continuation.HttpUrlContinuationWorkSource;
 import net.officefloor.plugin.web.http.location.HttpApplicationLocation;
 import net.officefloor.plugin.web.http.session.HttpSession;
-import net.officefloor.plugin.web.http.session.object.HttpSessionClassManagedObjectSource;
+import net.officefloor.plugin.web.http.session.object.HttpSessionObjectManagedObjectSource;
 import net.officefloor.plugin.web.http.template.HttpTemplateTask;
 import net.officefloor.plugin.web.http.template.HttpTemplateWorkSource;
 import net.officefloor.plugin.web.http.template.parse.HttpTemplate;
@@ -910,9 +910,9 @@ public class HttpTemplateSectionSource extends ClassSectionSource {
 			SectionManagedObjectSource managedObjectSource = this
 					.getDesigner()
 					.addSectionManagedObjectSource(objectName,
-							HttpSessionClassManagedObjectSource.class.getName());
+							HttpSessionObjectManagedObjectSource.class.getName());
 			managedObjectSource.addProperty(
-					HttpSessionClassManagedObjectSource.PROPERTY_CLASS_NAME,
+					HttpSessionObjectManagedObjectSource.PROPERTY_CLASS_NAME,
 					sectionClass.getName());
 
 			// Create the managed object

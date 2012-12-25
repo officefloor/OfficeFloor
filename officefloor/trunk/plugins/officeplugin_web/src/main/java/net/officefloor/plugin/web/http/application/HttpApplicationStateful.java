@@ -31,10 +31,10 @@ import net.officefloor.plugin.web.http.template.parse.HttpTemplate;
  * <p>
  * Annotated on the class of the parameters to the {@link HttpTemplate} logic
  * class to indicate it should be a
- * {@link HttpApplicationClassManagedObjectSource}.
+ * {@link HttpApplicationObjectManagedObjectSource}.
  * <p>
  * This simplifies means to specifying
- * {@link HttpApplicationClassManagedObjectSource} instances by in-lining it
+ * {@link HttpApplicationObjectManagedObjectSource} instances by in-lining it
  * with the code.
  * 
  * @author Daniel Sagenschneider

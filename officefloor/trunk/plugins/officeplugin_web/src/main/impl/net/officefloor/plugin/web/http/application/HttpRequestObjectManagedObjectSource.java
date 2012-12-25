@@ -29,19 +29,19 @@ import net.officefloor.frame.spi.managedobject.source.impl.AbstractManagedObject
 
 /**
  * {@link ManagedObjectSource} to cache creation of an {@link Object} within the
- * {@link HttpApplicationState}.
+ * {@link HttpRequestState}.
  * 
  * @author Daniel Sagenschneider
  */
-public class HttpApplicationClassManagedObjectSource
+public class HttpRequestObjectManagedObjectSource
 		extends
-		AbstractManagedObjectSource<HttpApplicationClassManagedObjectSource.Dependencies, None> {
+		AbstractManagedObjectSource<HttpRequestObjectManagedObjectSource.Dependencies, None> {
 
 	/**
-	 * Dependency keys for the {@link HttpApplicationClassManagedObject}.
+	 * Dependency keys for the {@link HttpRequestObjectManagedObject}.
 	 */
 	public static enum Dependencies {
-		HTTP_APPLICATION_STATE
+		HTTP_REQUEST_STATE
 	}
 
 	/**
@@ -51,7 +51,7 @@ public class HttpApplicationClassManagedObjectSource
 
 	/**
 	 * Name of property containing the name to bind the object within the
-	 * {@link HttpApplicationState}.
+	 * {@link HttpRequestState}.
 	 */
 	public static final String PROPERTY_BIND_NAME = "bind.name";
 
@@ -61,7 +61,7 @@ public class HttpApplicationClassManagedObjectSource
 	private Class<?> objectClass;
 
 	/**
-	 * Name to bind the object within the {@link HttpApplicationState}.
+	 * Name to bind the object within the {@link HttpRequestState}.
 	 */
 	private String bindName;
 
@@ -89,22 +89,22 @@ public class HttpApplicationClassManagedObjectSource
 
 		// Specify the meta-data
 		context.setObjectClass(this.objectClass);
-		context.setManagedObjectClass(HttpApplicationClassManagedObject.class);
-		context.addDependency(Dependencies.HTTP_APPLICATION_STATE,
-				HttpApplicationState.class);
+		context.setManagedObjectClass(HttpRequestObjectManagedObject.class);
+		context.addDependency(Dependencies.HTTP_REQUEST_STATE,
+				HttpRequestState.class);
 	}
 
 	@Override
 	protected ManagedObject getManagedObject() throws Throwable {
-		return new HttpApplicationClassManagedObject(this.objectClass,
+		return new HttpRequestObjectManagedObject(this.objectClass,
 				this.bindName);
 	}
 
 	/**
 	 * {@link ManagedObject} to retrieve the object from the
-	 * {@link HttpApplicationState}.
+	 * {@link HttpRequestState}.
 	 */
-	public static class HttpApplicationClassManagedObject implements
+	public static class HttpRequestObjectManagedObject implements
 			NameAwareManagedObject, CoordinatingManagedObject<Dependencies> {
 
 		/**
@@ -113,13 +113,12 @@ public class HttpApplicationClassManagedObjectSource
 		private final Class<?> objectClass;
 
 		/**
-		 * Specific name to bind the object into the
-		 * {@link HttpApplicationState}.
+		 * Specific name to bind the object into the {@link HttpRequestState}.
 		 */
 		private final String bindName;
 
 		/**
-		 * Name to bind the object to the {@link HttpApplicationState}.
+		 * Name to bind the object to the {@link HttpRequestState}.
 		 */
 		private String boundName;
 
@@ -135,9 +134,9 @@ public class HttpApplicationClassManagedObjectSource
 		 *            Class of the object.
 		 * @param bindName
 		 *            Specific name to bind the object into the
-		 *            {@link HttpApplicationState}.
+		 *            {@link HttpRequestState}.
 		 */
-		public HttpApplicationClassManagedObject(Class<?> objectClass,
+		public HttpRequestObjectManagedObject(Class<?> objectClass,
 				String bindName) {
 			this.objectClass = objectClass;
 			this.bindName = bindName;
@@ -158,9 +157,9 @@ public class HttpApplicationClassManagedObjectSource
 		public void loadObjects(ObjectRegistry<Dependencies> registry)
 				throws Throwable {
 
-			// Obtain the HTTP application state
-			HttpApplicationState state = (HttpApplicationState) registry
-					.getObject(Dependencies.HTTP_APPLICATION_STATE);
+			// Obtain the HTTP request state
+			HttpRequestState state = (HttpRequestState) registry
+					.getObject(Dependencies.HTTP_REQUEST_STATE);
 
 			// Lazy obtain the object
 			this.object = state.getAttribute(this.boundName);

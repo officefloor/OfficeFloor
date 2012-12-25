@@ -32,11 +32,11 @@ import net.officefloor.plugin.web.http.session.HttpSession;
  * 
  * @author Daniel Sagenschneider
  */
-public class HttpSessionClassManagedObject implements NameAwareManagedObject,
-		CoordinatingManagedObject<HttpSessionClassManagedObject.Dependencies> {
+public class HttpSessionObjectManagedObject implements NameAwareManagedObject,
+		CoordinatingManagedObject<HttpSessionObjectManagedObject.Dependencies> {
 
 	/**
-	 * Dependency keys for the {@link HttpSessionClassManagedObject}.
+	 * Dependency keys for the {@link HttpSessionObjectManagedObject}.
 	 */
 	public static enum Dependencies {
 		HTTP_SESSION
@@ -70,7 +70,7 @@ public class HttpSessionClassManagedObject implements NameAwareManagedObject,
 	 * @param bindName
 	 *            Specific name to bind the object into the {@link HttpSession}.
 	 */
-	public HttpSessionClassManagedObject(Class<?> objectClass, String bindName) {
+	public HttpSessionObjectManagedObject(Class<?> objectClass, String bindName) {
 		this.objectClass = objectClass;
 		this.bindName = bindName;
 	}

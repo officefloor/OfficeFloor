@@ -21,23 +21,22 @@ package net.officefloor.plugin.web.http.session.attribute;
 import net.officefloor.frame.spi.managedobject.CoordinatingManagedObject;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.frame.spi.managedobject.ObjectRegistry;
-import net.officefloor.plugin.web.http.session.attribute.HttpSessionObjectRetrieverManagedObjectSource.HttpSessionObjectRetrieverDependencies;
-import net.officefloor.plugin.web.http.session.object.HttpSessionObject;
+import net.officefloor.plugin.web.http.session.attribute.HttpSessionAttributeRetrieverManagedObjectSource.HttpSessionAttributeRetrieverDependencies;
 
 /**
  * {@link ManagedObject} that retrieves the {@link Object} from the
- * {@link HttpSessionObject}.
+ * {@link HttpSessionAttribute}.
  * 
  * @author Daniel Sagenschneider
  */
-public class HttpSessionObjectRetrieverManagedObject
+public class HttpSessionAttributeRetrieverManagedObject
 		implements
-		CoordinatingManagedObject<HttpSessionObjectRetrieverManagedObjectSource.HttpSessionObjectRetrieverDependencies> {
+		CoordinatingManagedObject<HttpSessionAttributeRetrieverManagedObjectSource.HttpSessionAttributeRetrieverDependencies> {
 
 	/**
-	 * {@link HttpSessionObject}.
+	 * {@link HttpSessionAttribute}.
 	 */
-	private HttpSessionObject<?> httpSessionObject;
+	private HttpSessionAttribute<?> httpSessionObject;
 
 	/*
 	 * ===================== CoordinatingManagedObject ===============
@@ -45,12 +44,12 @@ public class HttpSessionObjectRetrieverManagedObject
 
 	@Override
 	public void loadObjects(
-			ObjectRegistry<HttpSessionObjectRetrieverDependencies> registry)
+			ObjectRegistry<HttpSessionAttributeRetrieverDependencies> registry)
 			throws Throwable {
 
 		// Obtain the HTTP session object
-		this.httpSessionObject = (HttpSessionObject<?>) registry
-				.getObject(HttpSessionObjectRetrieverDependencies.HTTP_SESSION_OBJECT);
+		this.httpSessionObject = (HttpSessionAttribute<?>) registry
+				.getObject(HttpSessionAttributeRetrieverDependencies.HTTP_SESSION_OBJECT);
 	}
 
 	@Override
