@@ -18,6 +18,8 @@
 
 package net.officefloor.plugin.web.http.application;
 
+import java.io.Serializable;
+
 import net.officefloor.compile.test.managedobject.ManagedObjectLoaderUtil;
 import net.officefloor.compile.test.managedobject.ManagedObjectTypeBuilder;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
@@ -150,7 +152,7 @@ public class HttpRequestObjectManagedObjectSourceTest extends
 	/**
 	 * Mock object.
 	 */
-	public static class MockObject {
+	public static class MockObject implements Serializable {
 	}
 
 }

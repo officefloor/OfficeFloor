@@ -537,7 +537,7 @@ public class HttpServerAutoWireOfficeFloorSourceTest extends
 	 * {@link HttpRequestState} object.
 	 */
 	@HttpRequestStateful
-	public static class MockRequestObject {
+	public static class MockRequestObject implements Serializable {
 		public String getText() {
 			return "Request";
 		}

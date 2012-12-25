@@ -18,6 +18,7 @@
 
 package net.officefloor.plugin.web.http.application;
 
+import java.io.Serializable;
 import java.util.Iterator;
 
 import net.officefloor.plugin.managedobject.clazz.ClassManagedObjectSource;
@@ -27,10 +28,12 @@ import net.officefloor.plugin.socket.server.http.HttpRequest;
  * <p>
  * State for the {@link HttpRequest}.
  * <p>
- * A {@link ClassManagedObjectSource} would provide similar functionality for
- * each bound object, however this interface is used within the
- * {@link WebAutoWireApplication} to allow integration with a JEE Servlet
- * container.
+ * A {@link ClassManagedObjectSource} provides similar functionality for each
+ * bound object, however only objects registered with this
+ * {@link HttpRequestState} will be available across redirects.
+ * <p>
+ * Also this interface is used within the {@link WebAutoWireApplication} to
+ * allow integration with a JEE Servlet container.
  * 
  * @author Daniel Sagenschneider
  */
@@ -44,7 +47,7 @@ public interface HttpRequestState {
 	 * @return {@link Object} bound to the name or <code>null</code> if no
 	 *         {@link Object} bound by the name.
 	 */
-	Object getAttribute(String name);
+	Serializable getAttribute(String name);
 
 	/**
 	 * Obtains an {@link Iterator} to the names of the bound {@link Object}
@@ -63,7 +66,7 @@ public interface HttpRequestState {
 	 * @param object
 	 *            {@link Object}.
 	 */
-	void setAttribute(String name, Object object);
+	void setAttribute(String name, Serializable object);
 
 	/**
 	 * Removes the bound {@link Object} by the name.
