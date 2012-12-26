@@ -56,38 +56,20 @@ public interface WebAutoWireApplication extends AutoWireApplication {
 	static final String WEB_PUBLIC_RESOURCES_CLASS_PATH_PREFIX = "PUBLIC";
 
 	/**
-	 * Adds a {@link HttpTemplate} available at the specified URI.
+	 * Adds a {@link HttpTemplate} available at the specified URI path.
 	 * 
-	 * @param templatePath
-	 *            Path to the template file.
-	 * @param templateLogicClass
-	 *            Class providing the logic for the template.
 	 * @param templateUri
-	 *            URI for the template. May be <code>null</code> indicate the
-	 *            template not publicly available.
-	 * @return {@link HttpTemplateAutoWireSection} to allow linking flows.
-	 */
-	HttpTemplateAutoWireSection addHttpTemplate(String templatePath,
-			Class<?> templateLogicClass, String templateUri);
-
-	/**
-	 * <p>
-	 * Adds a private {@link HttpTemplate}.
-	 * <p>
-	 * The {@link HttpTemplate} is not directly available via URI but is linked
-	 * by flows. This allows pre-processing before the {@link HttpTemplate} is
-	 * attempted to be rendered.
-	 * 
-	 * @param templatePath
+	 *            URI path for the template.
+	 * @param templateFilePath
 	 *            Path to the template file.
 	 * @param templateLogicClass
-	 *            Class providing the logic for the template.
+	 *            Class providing the logic for the template. May be
+	 *            <code>null</code> if template does not require logic (e.g.
+	 *            static page with links).
 	 * @return {@link HttpTemplateAutoWireSection} to allow linking flows.
 	 */
-	@Deprecated
-	// URL continuations for links require a URI
-	HttpTemplateAutoWireSection addHttpTemplate(String templatePath,
-			Class<?> templateLogicClass);
+	HttpTemplateAutoWireSection addHttpTemplate(String templateUri,
+			String templateFilePath, Class<?> templateLogicClass);
 
 	/**
 	 * Specifies the default URI suffix for the {@link HttpTemplate} URI path
@@ -156,11 +138,15 @@ public interface WebAutoWireApplication extends AutoWireApplication {
 	 * 
 	 * @param objectClass
 	 *            Class of the object.
+	 * @param isLoadParameters
+	 *            Indicates whether to load the HTTP parameters to instantiated
+	 *            objects.
 	 * @param bindName
 	 *            Name to bind the object within the {@link HttpRequestState}.
 	 * @return {@link AutoWireObject}.
 	 */
-	AutoWireObject addHttpRequestObject(Class<?> objectClass, String bindName);
+	AutoWireObject addHttpRequestObject(Class<?> objectClass,
+			boolean isLoadParameters, String bindName);
 
 	/**
 	 * <p>
@@ -171,18 +157,13 @@ public interface WebAutoWireApplication extends AutoWireApplication {
 	 * 
 	 * @param objectClass
 	 *            Class of the object.
+	 * @param isLoadParameters
+	 *            Indicates whether to load the HTTP parameters to instantiated
+	 *            objects.
 	 * @return {@link AutoWireObject}.
 	 */
-	AutoWireObject addHttpRequestObject(Class<?> objectClass);
-
-	/**
-	 * Adds an object to be lazily created and loaded with the HTTP parameters.
-	 * 
-	 * @param objectClass
-	 *            Class of the object.
-	 * @return {@link AutoWireObject}.
-	 */
-	AutoWireObject addHttpParametersObject(Class<?> objectClass);
+	AutoWireObject addHttpRequestObject(Class<?> objectClass,
+			boolean isLoadParameters);
 
 	/**
 	 * Links a URI to an {@link OfficeSectionInput}.

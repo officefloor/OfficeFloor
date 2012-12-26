@@ -19,6 +19,9 @@
 package net.officefloor.plugin.web.http.application;
 
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 import net.officefloor.compile.OfficeFloorCompiler;
 import net.officefloor.compile.issues.CompilerIssues;
@@ -30,7 +33,9 @@ import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.frame.util.ManagedObjectSourceStandAlone;
 import net.officefloor.frame.util.ManagedObjectUserStandAlone;
-import net.officefloor.plugin.web.http.application.HttpRequestObjectManagedObjectSource.Dependencies;
+import net.officefloor.plugin.socket.server.http.HttpRequest;
+import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
+import net.officefloor.plugin.socket.server.http.conversation.impl.HttpRequestImpl;
 
 import org.easymock.AbstractMatcher;
 
@@ -53,24 +58,52 @@ public class HttpRequestObjectManagedObjectSourceTest extends
 	}
 
 	/**
-	 * Ensure correct type.
+	 * Ensure valid type if NOT loading parameters.
 	 */
-	public void testType() {
+	public void testTypeNotLoadingParameters() {
+		this.doTypeTest(false);
+	}
+
+	/**
+	 * Ensure valid type on loading parameters.
+	 */
+	public void testTypeLoadingParameters() {
+		this.doTypeTest(true);
+	}
+
+	/**
+	 * Ensure correct type.
+	 * 
+	 * @param isLoadParameters
+	 *            <code>true</code> to load parameters.
+	 */
+	public void doTypeTest(boolean isLoadParameters) {
 
 		// Obtain the type
 		ManagedObjectTypeBuilder type = ManagedObjectLoaderUtil
 				.createManagedObjectTypeBuilder();
 		type.setObjectClass(MockObject.class);
-		type.addDependency(Dependencies.HTTP_REQUEST_STATE.name(),
-				HttpRequestState.class, null,
-				Dependencies.HTTP_REQUEST_STATE.ordinal(),
-				Dependencies.HTTP_REQUEST_STATE);
+		type.addDependency("REQUEST_STATE", HttpRequestState.class, null, 0,
+				null);
+		if (isLoadParameters) {
+			type.addDependency("SERVER_HTTP_CONNECTION",
+					ServerHttpConnection.class, null, 1, null);
+		}
 
 		// Validate the managed object type
+		List<String> properties = new ArrayList<String>(4);
+		properties.addAll(Arrays.asList(
+				HttpRequestObjectManagedObjectSource.PROPERTY_CLASS_NAME,
+				MockObject.class.getName()));
+		if (isLoadParameters) {
+			properties
+					.addAll(Arrays
+							.asList(HttpRequestObjectManagedObjectSource.PROPERTY_IS_LOAD_HTTP_PARAMETERS,
+									String.valueOf(true)));
+		}
 		ManagedObjectLoaderUtil.validateManagedObjectType(type,
 				HttpRequestObjectManagedObjectSource.class,
-				HttpRequestObjectManagedObjectSource.PROPERTY_CLASS_NAME,
-				MockObject.class.getName());
+				properties.toArray(new String[properties.size()]));
 	}
 
 	/**
@@ -113,54 +146,142 @@ public class HttpRequestObjectManagedObjectSourceTest extends
 	}
 
 	/**
-	 * Ensure can use the {@link ManagedObject} name.
+	 * Ensure use {@link ManagedObject} name for already registered.
 	 */
-	public void testUseManagedObjectName() throws Throwable {
-		this.doTest(null);
+	public void testAlreadyRegisteredByManagedObjectName() throws Throwable {
+		this.doTest(true, null, false, "/path?value=TEST", null);
 	}
 
 	/**
-	 * Ensure can override binding name.
+	 * Ensure can override binding name for already registered.
 	 */
-	public void testOverrideBindingName() throws Throwable {
-		this.doTest("OVERRIDDEN");
+	public void testAlreadyRegisteredOverrideBindingName() throws Throwable {
+		this.doTest(true, "OVERRIDDEN", false, "/path?value=TEST", null);
+	}
+
+	/**
+	 * Ensure use {@link ManagedObject} name for instantiated object.
+	 */
+	public void testInstantiateByManagedObjectName() throws Throwable {
+		this.doTest(false, null, false, "/path?value=TEST", null);
+	}
+
+	/**
+	 * Ensure can override binding name for instantiated object.
+	 */
+	public void testInstantiateOverrideBindingName() throws Throwable {
+		this.doTest(false, "OVERRIDDEN", false, "/path?value=TEST", null);
+	}
+
+	/**
+	 * Ensure can load parameter.
+	 */
+	public void testLoadParameter() throws Throwable {
+		this.doTest(
+				false,
+				null,
+				true,
+				"/path?VALUE=TEST",
+				"TEST",
+				HttpRequestObjectManagedObjectSource.PROPERTY_IS_LOAD_HTTP_PARAMETERS,
+				String.valueOf(true));
+	}
+
+	/**
+	 * Ensure can non load case sensitive parameter.
+	 */
+	public void testNonLoadCaseSensitiveParameter() throws Throwable {
+		this.doTest(
+				false,
+				null,
+				true,
+				"/path?VALUE=TEST",
+				null,
+				HttpRequestObjectManagedObjectSource.PROPERTY_IS_LOAD_HTTP_PARAMETERS,
+				String.valueOf(true),
+				HttpRequestObjectManagedObjectSource.PROPERTY_CASE_INSENSITIVE,
+				String.valueOf(false));
+	}
+
+	/**
+	 * Ensure load parameter via alias.
+	 */
+	public void testLoadAliasParameter() throws Throwable {
+		this.doTest(
+				false,
+				null,
+				true,
+				"/path?alias=TEST",
+				"TEST",
+				HttpRequestObjectManagedObjectSource.PROPERTY_IS_LOAD_HTTP_PARAMETERS,
+				String.valueOf(true),
+				HttpRequestObjectManagedObjectSource.PROPERTY_PREFIX_ALIAS
+						+ "alias", "value");
 	}
 
 	/**
 	 * Undertakes the test to use the {@link HttpRequestState}.
 	 * 
+	 * @param isAlreadyRegistered
+	 *            Indicates if object is already registered with the
+	 *            {@link HttpRequestState}.
 	 * @param boundName
 	 *            Name to bind object within {@link HttpRequestState}.
 	 *            <code>null</code> to use {@link ManagedObject} name.
+	 * @param isLoadParameters
+	 *            Indicates if loading parameters.
+	 * @param requestUri
+	 *            Request URI.
+	 * @param expectedValue
+	 *            Expected value to be loaded.
+	 * @param propertyNameValuePairs
+	 *            Additional property name/value pairs.
 	 */
-	public void doTest(String boundName) throws Throwable {
+	public void doTest(boolean isAlreadyRegistered, String boundName,
+			boolean isLoadParameters, String requestUri, String expectedValue,
+			String... propertyNameValuePairs) throws Throwable {
 
 		final HttpRequestState state = this.createMock(HttpRequestState.class);
+		final ServerHttpConnection connection = this
+				.createMock(ServerHttpConnection.class);
 
-		// Determine the managed object name
+		// Determine the name to retrieve object from request state
 		final String MO_NAME = "MO";
 		final String RETRIEVE_NAME = (boundName == null ? MO_NAME : boundName);
 
-		// Record instantiate and cache in request state
-		final MockObject[] instantiatedObject = new MockObject[1];
-		this.recordReturn(state, state.getAttribute(RETRIEVE_NAME), null);
-		state.setAttribute(RETRIEVE_NAME, null);
-		this.control(state).setMatcher(new AbstractMatcher() {
-			@Override
-			public boolean matches(Object[] expected, Object[] actual) {
-				assertEquals("Incorrect bound name", RETRIEVE_NAME, actual[0]);
-				MockObject object = (MockObject) actual[1];
-				assertNotNull("Expecting instantiated object", object);
-				instantiatedObject[0] = object;
-				return true;
+		// Obtain the object
+		final MockObject[] object = new MockObject[1];
+		if (isAlreadyRegistered) {
+			// Record obtain registered object
+			object[0] = new MockObject();
+			this.recordReturn(state, state.getAttribute(RETRIEVE_NAME),
+					object[0]);
+
+		} else {
+			// Record instantiate and register in request state
+			this.recordReturn(state, state.getAttribute(RETRIEVE_NAME), null);
+			state.setAttribute(RETRIEVE_NAME, null);
+			this.control(state).setMatcher(new AbstractMatcher() {
+				@Override
+				public boolean matches(Object[] expected, Object[] actual) {
+					assertEquals("Incorrect bound name", RETRIEVE_NAME,
+							actual[0]);
+					object[0] = (MockObject) actual[1];
+					assertNotNull("Expecting instantiated object", object[0]);
+					return true;
+				}
+			});
+
+			// Load parameters
+			if (isLoadParameters) {
+				HttpRequest request = new HttpRequestImpl("GET", requestUri,
+						"HTTP/1.1", null, null);
+				this.recordReturn(connection, connection.getHttpRequest(),
+						request);
 			}
-		});
+		}
 
-		// Record cached within request state
-		final MockObject CACHED_OBJECT = new MockObject();
-		this.recordReturn(state, state.getAttribute(RETRIEVE_NAME),
-				CACHED_OBJECT);
-
+		// Test
 		this.replayMockObjects();
 
 		// Load the managed object source
@@ -173,29 +294,42 @@ public class HttpRequestObjectManagedObjectSourceTest extends
 					HttpRequestObjectManagedObjectSource.PROPERTY_BIND_NAME,
 					boundName);
 		}
+		for (int i = 0; i < propertyNameValuePairs.length; i += 2) {
+			String name = propertyNameValuePairs[i];
+			String value = propertyNameValuePairs[i + 1];
+			loader.addProperty(name, value);
+		}
 		HttpRequestObjectManagedObjectSource source = loader
 				.loadManagedObjectSource(HttpRequestObjectManagedObjectSource.class);
 
-		// Instantiate and cache object
+		// Instantiate and obtain the object
 		ManagedObjectUserStandAlone user = new ManagedObjectUserStandAlone();
 		user.setBoundManagedObjectName(MO_NAME);
-		user.mapDependency(Dependencies.HTTP_REQUEST_STATE, state);
+		user.mapDependency(0, state);
+		if (isLoadParameters) {
+			user.mapDependency(1, connection);
+		}
 		ManagedObject managedObject = user.sourceManagedObject(source);
-		assertEquals("Incorrect instantiated object", instantiatedObject[0],
+		assertSame("Incorrect instantiated object", object[0],
 				managedObject.getObject());
 
-		// Obtain the cached object
-		managedObject = user.sourceManagedObject(source);
-		assertEquals("Incorrect cached object", CACHED_OBJECT,
-				managedObject.getObject());
-
+		// Verify
 		this.verifyMockObjects();
+
+		// Ensure correct value
+		assertEquals("Incorrect value", expectedValue, object[0].value);
 	}
 
 	/**
 	 * Mock object.
 	 */
 	public static class MockObject implements Serializable {
+
+		private String value = null;
+
+		public void setValue(String value) {
+			this.value = value;
+		}
 	}
 
 	/**

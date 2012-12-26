@@ -40,7 +40,6 @@ import net.officefloor.plugin.socket.server.http.server.MockHttpServer;
 import net.officefloor.plugin.socket.server.http.source.HttpServerSocketManagedObjectSource;
 import net.officefloor.plugin.socket.server.http.source.HttpsServerSocketManagedObjectSource;
 import net.officefloor.plugin.web.http.location.HttpApplicationLocationManagedObjectSource;
-import net.officefloor.plugin.web.http.resource.source.HttpFileSenderWorkSource;
 import net.officefloor.plugin.web.http.resource.source.SourceHttpResourceFactory;
 import net.officefloor.plugin.web.http.route.HttpRouteTask;
 import net.officefloor.plugin.web.http.session.HttpSession;
@@ -71,11 +70,6 @@ public class WebApplicationAutoWireOfficeFloorSourceTest extends
 	 * {@link WebApplicationAutoWireOfficeFloorSource} to be tested.
 	 */
 	private final WebApplicationAutoWireOfficeFloorSource source = new WebApplicationAutoWireOfficeFloorSource();
-
-	/**
-	 * Default not found file path.
-	 */
-	private final String DEFAULT_NOT_FOUND_PATH = HttpFileSenderWorkSource.DEFAULT_NOT_FOUND_FILE_PATH;
 
 	/**
 	 * {@link HttpClient}.
@@ -167,7 +161,7 @@ public class WebApplicationAutoWireOfficeFloorSourceTest extends
 
 		// Add HTTP template with no logic class
 		HttpTemplateAutoWireSection template = this.source.addHttpTemplate(
-				templatePath, null, "template");
+				"template", templatePath, null);
 		template.setTemplateSecure(isSecure);
 		this.source.linkToResource(template, "link", "resource.html");
 		this.source.openOfficeFloor();
@@ -205,7 +199,7 @@ public class WebApplicationAutoWireOfficeFloorSourceTest extends
 
 		// Add HTTP template (with URL)
 		HttpTemplateAutoWireSection section = this.source.addHttpTemplate(
-				templatePath, MockTemplateLogic.class, "uri");
+				"uri", templatePath, MockTemplateLogic.class);
 		section.setTemplateSecure(isSecure);
 		this.source.openOfficeFloor();
 
@@ -250,13 +244,14 @@ public class WebApplicationAutoWireOfficeFloorSourceTest extends
 		final String templatePath = this.getClassPath("template.ofp");
 
 		// Add HTTP template (with URL)
-		HttpTemplateAutoWireSection section = this.source.addHttpTemplate(
-				templatePath, MockTemplateLogic.class, "/");
+		HttpTemplateAutoWireSection section = this.source.addHttpTemplate("/",
+				templatePath, MockTemplateLogic.class);
 		section.setTemplateSecure(isSecure);
 		this.source.openOfficeFloor();
 
 		// Ensure correct section details
-		assertEquals("Incorrect section name", "/", section.getSectionName());
+		assertEquals("Incorrect section name", "_root_",
+				section.getSectionName());
 		assertEquals("Incorrect section source",
 				HttpTemplateSectionSource.class.getName(),
 				section.getSectionSourceClassName());
@@ -303,52 +298,33 @@ public class WebApplicationAutoWireOfficeFloorSourceTest extends
 	 */
 	public void testMultipleTemplatesWithSameUri() throws Exception {
 
-		final String TEMPLATE_URI = "template.ofp";
+		final String TEMPLATE_URI = "template";
 
 		// Add HTTP template
-		this.source.addHttpTemplate(this.getClassPath("template.ofp"),
-				MockTemplateLogic.class, TEMPLATE_URI);
+		this.source.addHttpTemplate(TEMPLATE_URI,
+				this.getClassPath("template.ofp"), MockTemplateLogic.class);
 
 		// Ensure indicates template already registered for URI
 		try {
-			this.source.addHttpTemplate(this.getClassPath("template.ofp"),
-					MockTemplateLogic.class, TEMPLATE_URI);
+			this.source.addHttpTemplate(TEMPLATE_URI,
+					this.getClassPath("template.ofp"), MockTemplateLogic.class);
 			fail("Should not successfully add template for duplicate URI");
 		} catch (IllegalStateException ex) {
 			assertEquals("Incorrect cause",
-					"HTTP Template already added for URI '" + TEMPLATE_URI
+					"HTTP Template already added for URI '/" + TEMPLATE_URI
 							+ "'", ex.getMessage());
 		}
-	}
 
-	/**
-	 * Ensure able to add HTTP template that is NOT available via URI.
-	 */
-	public void testTemplateWithoutUri() throws Exception {
-
-		String fileNotFound = this.getFileContents(DEFAULT_NOT_FOUND_PATH);
-
-		final String templatePath = this.getClassPath("template.ofp");
-
-		// Add HTTP template (without URL)
-		HttpTemplateAutoWireSection section = this.source.addHttpTemplate(
-				templatePath, MockTemplateLogic.class);
-		this.source.openOfficeFloor();
-
-		// Ensure correct section details
-		assertEquals("Incorrect section name", "resource0",
-				section.getSectionName());
-		assertEquals("Incorrect section source",
-				HttpTemplateSectionSource.class.getName(),
-				section.getSectionSourceClassName());
-		assertEquals("Incorrect section location", templatePath,
-				section.getSectionLocation());
-		assertEquals("Incorrect template path", templatePath,
-				section.getTemplatePath());
-		assertNull("Should not have a template URI", section.getTemplateUri());
-
-		// Ensure template NOT available
-		this.assertHttpRequest("/template.ofp", 404, fileNotFound);
+		// Ensure indicates template already registered for canonical URI
+		try {
+			this.source.addHttpTemplate("/" + TEMPLATE_URI,
+					this.getClassPath("template.ofp"), MockTemplateLogic.class);
+			fail("Should not successfully add template for duplicate URI");
+		} catch (IllegalStateException ex) {
+			assertEquals("Incorrect cause",
+					"HTTP Template already added for URI '/" + TEMPLATE_URI
+							+ "'", ex.getMessage());
+		}
 	}
 
 	/**
@@ -374,39 +350,7 @@ public class WebApplicationAutoWireOfficeFloorSourceTest extends
 		final String SUBMIT_URI = "/uri-submit";
 
 		// Add HTTP template
-		this.source.addHttpTemplate(this.getClassPath("template.ofp"),
-				MockTemplateLogic.class, "uri").setTemplateSecure(isSecure);
-		this.source.openOfficeFloor();
-
-		// Ensure submit on task for template is correct
-		this.assertHttpRequest(SUBMIT_URI, isSecure, 200, "submitted"
-				+ SUBMIT_URI);
-	}
-
-	/**
-	 * Ensure able to request the template link on private template.
-	 */
-	public void testTemplateLinkWithoutUri() throws Exception {
-		this.doTemplateLinkWithoutUriTest(false);
-	}
-
-	/**
-	 * Ensure able to request the secure template link on private template.
-	 */
-	public void testSecureTemplateLinkWithoutUri() throws Exception {
-		this.doTemplateLinkWithoutUriTest(true);
-	}
-
-	/**
-	 * Undertakes test to ensure able to request the template link on private
-	 * template.
-	 */
-	public void doTemplateLinkWithoutUriTest(boolean isSecure) throws Exception {
-
-		final String SUBMIT_URI = "/resource0-submit";
-
-		// Add HTTP template
-		this.source.addHttpTemplate(this.getClassPath("template.ofp"),
+		this.source.addHttpTemplate("uri", this.getClassPath("template.ofp"),
 				MockTemplateLogic.class).setTemplateSecure(isSecure);
 		this.source.openOfficeFloor();
 
@@ -425,8 +369,8 @@ public class WebApplicationAutoWireOfficeFloorSourceTest extends
 		final String LINK_URI = "/uri-submit" + SUFFIX;
 
 		// Add HTTP template with default template URI suffix
-		this.source.addHttpTemplate(this.getClassPath("template.ofp"),
-				MockTemplateLogic.class, "uri");
+		this.source.addHttpTemplate("uri", this.getClassPath("template.ofp"),
+				MockTemplateLogic.class);
 		this.source.setDefaultHttpTemplateUriSuffix(SUFFIX);
 		this.source.openOfficeFloor();
 
@@ -447,8 +391,8 @@ public class WebApplicationAutoWireOfficeFloorSourceTest extends
 		final String LINK_URI = "/-submit" + SUFFIX;
 
 		// Add root HTTP template with default template URI suffix
-		this.source.addHttpTemplate(this.getClassPath("template.ofp"),
-				MockTemplateLogic.class, "/");
+		this.source.addHttpTemplate("/", this.getClassPath("template.ofp"),
+				MockTemplateLogic.class);
 		this.source.setDefaultHttpTemplateUriSuffix(SUFFIX);
 		this.source.openOfficeFloor();
 
@@ -468,8 +412,8 @@ public class WebApplicationAutoWireOfficeFloorSourceTest extends
 		final String LINK_URI = "/uri-submit";
 
 		// Add HTTP template with default template URI suffix
-		this.source.addHttpTemplate(this.getClassPath("template.ofp"),
-				MockTemplateLogic.class, "uri");
+		this.source.addHttpTemplate("uri", this.getClassPath("template.ofp"),
+				MockTemplateLogic.class);
 		this.source.setDefaultHttpTemplateUriSuffix(null);
 		this.source.openOfficeFloor();
 
@@ -491,8 +435,8 @@ public class WebApplicationAutoWireOfficeFloorSourceTest extends
 
 		// Add HTTP template
 		HttpTemplateAutoWireSection template = this.source.addHttpTemplate(
-				this.getClassPath("template.ofp"), MockTemplateLogic.class,
-				"uri");
+				"uri", this.getClassPath("template.ofp"),
+				MockTemplateLogic.class);
 		template.setTemplateUriSuffix(SUFFIX);
 		this.source.openOfficeFloor();
 
@@ -516,8 +460,8 @@ public class WebApplicationAutoWireOfficeFloorSourceTest extends
 
 		// Add HTTP template
 		HttpTemplateAutoWireSection template = this.source.addHttpTemplate(
-				this.getClassPath("template.ofp"), MockTemplateLogic.class,
-				"uri");
+				"uri", this.getClassPath("template.ofp"),
+				MockTemplateLogic.class);
 		template.setTemplateUriSuffix(".override");
 		this.source.openOfficeFloor();
 
@@ -535,8 +479,8 @@ public class WebApplicationAutoWireOfficeFloorSourceTest extends
 
 		// Add HTTP template (not root so should not be included)
 		HttpTemplateAutoWireSection template = this.source.addHttpTemplate(
-				this.getClassPath("template.ofp"), MockTemplateLogic.class,
-				"template");
+				"template", this.getClassPath("template.ofp"),
+				MockTemplateLogic.class);
 
 		// Provide URI link
 		this.source.linkUri("uri", template,
@@ -546,8 +490,8 @@ public class WebApplicationAutoWireOfficeFloorSourceTest extends
 		assertUris(this.source.getURIs(), "/uri");
 
 		// Validate with root HTTP template
-		this.source.addHttpTemplate(this.getClassPath("template.ofp"),
-				MockTemplateLogic.class, "/");
+		this.source.addHttpTemplate("/", this.getClassPath("template.ofp"),
+				MockTemplateLogic.class);
 		assertUris(this.source.getURIs(), "/", "/uri");
 	}
 
@@ -574,8 +518,8 @@ public class WebApplicationAutoWireOfficeFloorSourceTest extends
 
 		// Add HTTP template
 		HttpTemplateAutoWireSection template = this.source.addHttpTemplate(
-				this.getClassPath("Extension.ofp"),
-				MockExtensionTemplateLogic.class, "template");
+				"template", this.getClassPath("Extension.ofp"),
+				MockExtensionTemplateLogic.class);
 
 		// Add template extension
 		HttpTemplateAutoWireSectionExtension extension = template
@@ -657,12 +601,13 @@ public class WebApplicationAutoWireOfficeFloorSourceTest extends
 				MockLinkHttpTemplate.class.getName());
 		this.source.linkUri("test", section, "service");
 		HttpTemplateAutoWireSection template = this.source.addHttpTemplate(
-				this.getClassPath("template.ofp"), MockTemplateLogic.class);
+				"template", this.getClassPath("template.ofp"),
+				MockTemplateLogic.class);
 		this.source.linkToHttpTemplate(section, "http-template", template);
 		this.source.openOfficeFloor();
 
 		// Ensure link to the HTTP template
-		this.assertHttpRequest("/test", 200, "LINK to /resource0-submit");
+		this.assertHttpRequest("/test", 200, "LINK to /template-submit");
 	}
 
 	/**
@@ -716,8 +661,8 @@ public class WebApplicationAutoWireOfficeFloorSourceTest extends
 				FailingSection.class.getName());
 		this.source.linkUri("test", failingSection, "task");
 		HttpTemplateAutoWireSection template = this.source.addHttpTemplate(
-				this.getClassPath("template.ofp"), MockTemplateLogic.class,
-				"handler");
+				"handler", this.getClassPath("template.ofp"),
+				MockTemplateLogic.class);
 		this.source.linkEscalation(SQLException.class, template);
 		this.source.openOfficeFloor();
 
@@ -754,92 +699,6 @@ public class WebApplicationAutoWireOfficeFloorSourceTest extends
 	}
 
 	/**
-	 * Ensure able to utilise the HTTP Parameters Object.
-	 */
-	public void testHttpParametersObject() throws Exception {
-
-		// Add the template to use parameters object
-		this.source.addHttpTemplate(this.getClassPath("ParametersObject.ofp"),
-				MockHttpParametersObjectTemplate.class, "template");
-
-		// Add the HTTP Parameters Object
-		this.source.addHttpParametersObject(MockHttpParametersObject.class);
-
-		// Start the HTTP Server
-		this.source.openOfficeFloor();
-
-		// Ensure provide HTTP parameters
-		this.assertHttpRequest("/template?text=VALUE", 200, "VALUE");
-	}
-
-	/**
-	 * Provides mock template logic for the HTTP Parameters Object.
-	 */
-	public static class MockHttpParametersObjectTemplate {
-		public MockHttpParametersObject getTemplate(
-				MockHttpParametersObject object) {
-			return object;
-		}
-	}
-
-	/**
-	 * Mock HTTP Parameters Object.
-	 */
-	public static class MockHttpParametersObject {
-		private String text;
-
-		public void setText(String text) {
-			this.text = text;
-		}
-
-		public String getText() {
-			return this.text;
-		}
-	}
-
-	/**
-	 * Ensure {@link HttpParameters} is honoured for templates.
-	 */
-	public void testAnnotatedHttpParameters() throws Exception {
-
-		// Add the template to use parameters object
-		this.source.addHttpTemplate(this.getClassPath("ParametersObject.ofp"),
-				MockAnnotatedHttpParametersTemplate.class, "template");
-
-		// Start the HTTP Server
-		this.source.openOfficeFloor();
-
-		// Ensure provide HTTP parameters
-		this.assertHttpRequest("/template?text=VALUE", 200, "VALUE");
-	}
-
-	/**
-	 * Provides mock template logic for the HTTP Parameters Object.
-	 */
-	public static class MockAnnotatedHttpParametersTemplate {
-		public MockAnnotatedHttpParameters getTemplate(
-				MockAnnotatedHttpParameters object) {
-			return object;
-		}
-	}
-
-	/**
-	 * Mock HTTP Parameters Object.
-	 */
-	@HttpParameters
-	public static class MockAnnotatedHttpParameters {
-		private String text;
-
-		public void setText(String text) {
-			this.text = text;
-		}
-
-		public String getText() {
-			return this.text;
-		}
-	}
-
-	/**
 	 * Ensure able to utilise the Http Session object.
 	 */
 	public void testHttpSessionObject() throws Exception {
@@ -850,10 +709,12 @@ public class WebApplicationAutoWireOfficeFloorSourceTest extends
 				new AutoWire(HttpSession.class)).setTimeout(10 * 1000);
 
 		// Add two templates to ensure object available to both
-		this.source.addHttpTemplate(this.getClassPath("StatefulObject.ofp"),
-				MockHttpSessionObjectTemplate.class, "one");
-		this.source.addHttpTemplate(this.getClassPath("StatefulObject.ofp"),
-				MockHttpSessionObjectTemplate.class, "two");
+		this.source.addHttpTemplate("one",
+				this.getClassPath("StatefulObject.ofp"),
+				MockHttpSessionObjectTemplate.class);
+		this.source.addHttpTemplate("two",
+				this.getClassPath("StatefulObject.ofp"),
+				MockHttpSessionObjectTemplate.class);
 
 		// Add the HTTP Session object
 		this.source.addHttpSessionObject(MockHttpSessionObject.class);
@@ -904,12 +765,14 @@ public class WebApplicationAutoWireOfficeFloorSourceTest extends
 				new AutoWire(HttpSession.class)).setTimeout(10 * 1000);
 
 		// Add two templates with annotations for HttpSessionStateful
-		this.source.addHttpTemplate(this.getClassPath("StatefulObject.ofp"),
-				MockAnnotatedHttpSessionStatefulTemplate.class, "one");
-		this.source.addHttpTemplate(this.getClassPath("StatefulObject.ofp"),
-				MockAnnotatedHttpSessionStatefulTemplate.class, "two");
+		this.source.addHttpTemplate("one",
+				this.getClassPath("StatefulObject.ofp"),
+				MockAnnotatedHttpSessionStatefulTemplate.class);
+		this.source.addHttpTemplate("two",
+				this.getClassPath("StatefulObject.ofp"),
+				MockAnnotatedHttpSessionStatefulTemplate.class);
 
-		// No Http Session Object to be added as should be detected and added
+		// HTTP Session Object should be detected and added
 
 		// Start the HTTP Server
 		this.source.openOfficeFloor();
@@ -964,11 +827,11 @@ public class WebApplicationAutoWireOfficeFloorSourceTest extends
 		// Add the template
 		this.source
 				.addHttpTemplate(
+						"template",
 						this.getClassPath("StatefulObject.ofp"),
-						MockAnnotatedOverriddenBindNameHttpSessionStatefulTemplate.class,
-						"template");
+						MockAnnotatedOverriddenBindNameHttpSessionStatefulTemplate.class);
 
-		// No HTTP Session object as should be detected and added
+		// HTTP Session object should be detected and added
 
 		// Start the HTTP Server
 		this.source.openOfficeFloor();
@@ -1020,10 +883,11 @@ public class WebApplicationAutoWireOfficeFloorSourceTest extends
 				new AutoWire(HttpRequestState.class));
 
 		// Add the template
-		this.source.addHttpTemplate(this.getClassPath("HttpStateObject.ofp"),
-				MockHttpRequestStateTemplate.class, "template");
+		this.source.addHttpTemplate("template",
+				this.getClassPath("HttpStateObject.ofp"),
+				MockHttpRequestStateTemplate.class);
 
-		// No HTTP request state object as should be detected and added
+		// HTTP request object should be detected and added
 
 		// Start the HTTP Server
 		this.source.openOfficeFloor();
@@ -1069,6 +933,96 @@ public class WebApplicationAutoWireOfficeFloorSourceTest extends
 	}
 
 	/**
+	 * Ensure able to utilise the HTTP Request Object to load parameters.
+	 */
+	public void testRequestObjectLoadingParameters() throws Exception {
+
+		// Add the template to use parameters object
+		this.source.addHttpTemplate("template",
+				this.getClassPath("ParametersObject.ofp"),
+				MockHttpParametersObjectTemplate.class);
+
+		// Add the HTTP Request Object to load parameters
+		this.source.addHttpRequestObject(MockHttpParametersObject.class, true);
+
+		// Start the HTTP Server
+		this.source.openOfficeFloor();
+
+		// Ensure provide HTTP parameters
+		this.assertHttpRequest("/template?text=VALUE", 200, "VALUE");
+	}
+
+	/**
+	 * Provides mock template logic for the HTTP Parameters Object.
+	 */
+	public static class MockHttpParametersObjectTemplate {
+		public MockHttpParametersObject getTemplate(
+				MockHttpParametersObject object) {
+			return object;
+		}
+	}
+
+	/**
+	 * Mock HTTP Parameters Object.
+	 */
+	public static class MockHttpParametersObject implements Serializable {
+
+		private String text;
+
+		public void setText(String text) {
+			this.text = text;
+		}
+
+		public String getText() {
+			return this.text;
+		}
+	}
+
+	/**
+	 * Ensure {@link HttpParameters} is honoured for templates.
+	 */
+	public void testAnnotatedHttpParameters() throws Exception {
+
+		// Add the template to use parameters object
+		this.source.addHttpTemplate("template",
+				this.getClassPath("ParametersObject.ofp"),
+				MockAnnotatedHttpParametersTemplate.class);
+
+		// Start the HTTP Server
+		this.source.openOfficeFloor();
+
+		// Ensure provide HTTP parameters
+		this.assertHttpRequest("/template?text=VALUE", 200, "VALUE");
+	}
+
+	/**
+	 * Provides mock template logic for the HTTP Parameters Object.
+	 */
+	public static class MockAnnotatedHttpParametersTemplate {
+		public MockAnnotatedHttpParameters getTemplate(
+				MockAnnotatedHttpParameters object) {
+			return object;
+		}
+	}
+
+	/**
+	 * Mock HTTP Parameters Object.
+	 */
+	@HttpParameters("BIND")
+	public static class MockAnnotatedHttpParameters implements Serializable {
+
+		private String text;
+
+		public void setText(String text) {
+			this.text = text;
+		}
+
+		public String getText() {
+			return this.text;
+		}
+	}
+
+	/**
 	 * Ensure able to utilise the HTTP Application object.
 	 */
 	public void testHttpApplicationObject() throws Exception {
@@ -1081,10 +1035,11 @@ public class WebApplicationAutoWireOfficeFloorSourceTest extends
 				new AutoWire(HttpApplicationState.class));
 
 		// Add the template
-		this.source.addHttpTemplate(this.getClassPath("HttpStateObject.ofp"),
-				MockHttpApplicationStateTemplate.class, "template");
+		this.source.addHttpTemplate("template",
+				this.getClassPath("HttpStateObject.ofp"),
+				MockHttpApplicationStateTemplate.class);
 
-		// No HTTP application state object as should be detected and added
+		// HTTP application state object should be detected and added
 
 		// Start the HTTP Server
 		this.source.openOfficeFloor();
@@ -1388,21 +1343,6 @@ public class WebApplicationAutoWireOfficeFloorSourceTest extends
 	 */
 	private String getClassPath(String fileName) {
 		return this.getFileLocation(this.getClass(), fileName);
-	}
-
-	/**
-	 * Obtains the content.
-	 * 
-	 * @param path
-	 *            Path to the content.
-	 * @return Content.
-	 */
-	private String getFileContents(String path) {
-		try {
-			return this.getFileContents(this.findFile(path));
-		} catch (Exception ex) {
-			throw fail(ex);
-		}
 	}
 
 	/**

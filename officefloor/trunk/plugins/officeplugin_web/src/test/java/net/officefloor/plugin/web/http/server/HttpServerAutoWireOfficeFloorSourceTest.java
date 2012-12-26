@@ -484,8 +484,8 @@ public class HttpServerAutoWireOfficeFloorSourceTest extends
 				+ "/HttpStateTemplate.ofp";
 
 		// Add the template
-		this.source.addHttpTemplate(templatePath,
-				MockHttpStateTemplateLogic.class, "template");
+		this.source.addHttpTemplate("template", templatePath,
+				MockHttpStateTemplateLogic.class);
 
 		// Start the HTTP Server
 		this.source.openOfficeFloor();

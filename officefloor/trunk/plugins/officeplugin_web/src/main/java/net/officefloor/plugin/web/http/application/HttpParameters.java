@@ -24,18 +24,19 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-import net.officefloor.plugin.web.http.parameters.source.HttpParametersObjectManagedObjectSource;
+import net.officefloor.frame.spi.managedobject.ManagedObject;
+import net.officefloor.plugin.socket.server.http.HttpRequest;
 import net.officefloor.plugin.web.http.template.parse.HttpTemplate;
 
 /**
  * <p>
  * Annotated on the class of the parameters to the {@link HttpTemplate} logic
- * class to indicate it should be a
- * {@link HttpParametersObjectManagedObjectSource}.
+ * class to indicate it should be a {@link HttpRequestObjectManagedObjectSource}
+ * that will load the {@link HttpRequest} parameters onto the object.
  * <p>
  * This simplifies means to specifying
- * {@link HttpParametersObjectManagedObjectSource} instances by in-lining it
- * with the code.
+ * {@link HttpRequestObjectManagedObjectSource} instances by in-lining it with
+ * the code.
  * 
  * @author Daniel Sagenschneider
  */
@@ -43,4 +44,15 @@ import net.officefloor.plugin.web.http.template.parse.HttpTemplate;
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)
 public @interface HttpParameters {
+
+	/**
+	 * Allows specifying the name to bind the object into the
+	 * {@link HttpRequestState}.
+	 * 
+	 * @return Name to bind the object into the {@link HttpRequestState}. The
+	 *         blank default value indicates for the {@link ManagedObject} to
+	 *         assign its own unique value.
+	 */
+	String value() default "";
+
 }
