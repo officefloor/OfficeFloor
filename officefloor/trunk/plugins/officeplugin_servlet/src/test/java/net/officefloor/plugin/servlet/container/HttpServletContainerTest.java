@@ -21,6 +21,7 @@ package net.officefloor.plugin.servlet.container;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.io.Serializable;
 import java.io.Writer;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
@@ -859,7 +860,7 @@ public class HttpServletContainerTest extends OfficeFrameTestCase {
 	 */
 	public void test_req_Attributes() {
 
-		final Object attribute = new Object();
+		final Serializable attribute = this.createMock(Serializable.class);
 
 		// Record initialising Servlet container
 		this.record_init("/test");
@@ -1963,7 +1964,7 @@ public class HttpServletContainerTest extends OfficeFrameTestCase {
 		this.mapping = null;
 
 		final String ATTRIBUTE_NAME = "FILTER_ATTRIBUTE";
-		final Object ATTRIBUTE_VALUE = "FILTER_VALUE";
+		final Serializable ATTRIBUTE_VALUE = "FILTER_VALUE";
 		final FilterChain[] providedTarget = new FilterChain[1];
 
 		// Filtering
@@ -2024,7 +2025,7 @@ public class HttpServletContainerTest extends OfficeFrameTestCase {
 	public void test_filter_Forward() {
 
 		final String ATTRIBUTE_NAME = "FILTER_ATTRIBUTE";
-		final Object ATTRIBUTE_VALUE = "FILTER_VALUE";
+		final Serializable ATTRIBUTE_VALUE = "FILTER_VALUE";
 		final FilterChain[] providedTarget = new FilterChain[1];
 
 		// Filtering

@@ -18,6 +18,8 @@
 
 package net.officefloor.plugin.servlet.web.http.application;
 
+import java.io.IOException;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.Iterator;
@@ -107,9 +109,9 @@ public class ServletHttpRequestStateManagedObjectSource
 		 */
 
 		@Override
-		public Object getAttribute(String name) {
+		public Serializable getAttribute(String name) {
 			synchronized (this.request) {
-				return this.request.getAttribute(name);
+				return (Serializable) this.request.getAttribute(name);
 			}
 		}
 
@@ -129,7 +131,7 @@ public class ServletHttpRequestStateManagedObjectSource
 		}
 
 		@Override
-		public void setAttribute(String name, Object object) {
+		public void setAttribute(String name, Serializable object) {
 			synchronized (this.request) {
 				this.request.setAttribute(name, object);
 			}
@@ -140,6 +142,21 @@ public class ServletHttpRequestStateManagedObjectSource
 			synchronized (this.request) {
 				this.request.removeAttribute(name);
 			}
+		}
+
+		@Override
+		public Serializable exportState() throws IOException {
+			// TODO implement HttpRequestState.exportState
+			throw new UnsupportedOperationException(
+					"TODO implement HttpRequestState.exportState");
+		}
+
+		@Override
+		public void importState(Serializable momento) throws IOException,
+				IllegalArgumentException {
+			// TODO implement HttpRequestState.importState
+			throw new UnsupportedOperationException(
+					"TODO implement HttpRequestState.importState");
 		}
 	}
 

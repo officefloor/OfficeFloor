@@ -18,6 +18,7 @@
 
 package net.officefloor.plugin.servlet.web.http.application;
 
+import java.io.Serializable;
 import java.util.Enumeration;
 import java.util.Iterator;
 
@@ -40,6 +41,12 @@ import net.officefloor.plugin.web.http.application.HttpRequestState;
  */
 public class ServletHttpRequestStateManagedObjectSourceTest extends
 		OfficeFrameTestCase {
+
+	/**
+	 * {@link ServletBridge}.
+	 */
+	private final ServletBridge servletBridge = this
+			.createMock(ServletBridge.class);
 
 	/**
 	 * Validate specification.
@@ -73,12 +80,10 @@ public class ServletHttpRequestStateManagedObjectSourceTest extends
 	public void testLoad() throws Throwable {
 
 		final String NAME = "name";
-		final Object ATTRIBUTE = "attribute";
+		final Serializable ATTRIBUTE = "attribute";
 		final Enumeration<String> names = this.createMock(Enumeration.class);
 
 		// Create the mocks
-		final ServletBridge servletBridge = this
-				.createMock(ServletBridge.class);
 		final HttpServletRequest request = this
 				.createMock(HttpServletRequest.class);
 
@@ -97,18 +102,8 @@ public class ServletHttpRequestStateManagedObjectSourceTest extends
 		// Replay
 		this.replayMockObjects();
 
-		// Load source
-		ManagedObjectSourceStandAlone loader = new ManagedObjectSourceStandAlone();
-		ServletHttpRequestStateManagedObjectSource source = loader
-				.loadManagedObjectSource(ServletHttpRequestStateManagedObjectSource.class);
-
-		// Obtain managed object
-		ManagedObjectUserStandAlone user = new ManagedObjectUserStandAlone();
-		user.mapDependency(Dependencies.SERVLET_BRIDGE, servletBridge);
-		ManagedObject mo = user.sourceManagedObject(source);
-
 		// Obtain the object
-		HttpRequestState state = (HttpRequestState) mo.getObject();
+		HttpRequestState state = this.createHttpRequestState();
 
 		// Attempt to get, set, names and remove
 		state.setAttribute(NAME, ATTRIBUTE);
@@ -121,6 +116,43 @@ public class ServletHttpRequestStateManagedObjectSourceTest extends
 
 		// Verify
 		this.verifyMockObjects();
+	}
+
+	/**
+	 * Ensure able to export and import the state.
+	 */
+	public void testExportImportState() throws Throwable {
+
+		// TODO provide testing
+		HttpRequestState state = this.createHttpRequestState();
+		state.exportState();
+		state.importState(null);
+
+		fail("TODO implement test");
+	}
+
+	/**
+	 * Creates the {@link HttpRequestState}.
+	 * 
+	 * @return {@link HttpRequestState}.
+	 */
+	private HttpRequestState createHttpRequestState() throws Throwable {
+
+		// Load source
+		ManagedObjectSourceStandAlone loader = new ManagedObjectSourceStandAlone();
+		ServletHttpRequestStateManagedObjectSource source = loader
+				.loadManagedObjectSource(ServletHttpRequestStateManagedObjectSource.class);
+
+		// Obtain managed object
+		ManagedObjectUserStandAlone user = new ManagedObjectUserStandAlone();
+		user.mapDependency(Dependencies.SERVLET_BRIDGE, this.servletBridge);
+		ManagedObject mo = user.sourceManagedObject(source);
+
+		// Obtain the object
+		HttpRequestState state = (HttpRequestState) mo.getObject();
+
+		// Return the request state
+		return state;
 	}
 
 }

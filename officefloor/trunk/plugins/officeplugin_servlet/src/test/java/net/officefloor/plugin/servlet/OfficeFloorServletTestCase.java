@@ -388,18 +388,16 @@ public class OfficeFloorServletTestCase extends OfficeFrameTestCase {
 			String templateDirectory = OfficeFloorServletTestCase.templateDirectory;
 
 			// HTTP template
-			application.addHttpTemplate(templateDirectory + "/Template.ofp",
-					MockTemplate.class, "test");
+			application.addHttpTemplate("test", templateDirectory
+					+ "/Template.ofp", MockTemplate.class);
 
 			// Session stateful template
-			application.addHttpTemplate(templateDirectory
-					+ "/SessionTemplate.ofp", MockSessionTemplate.class,
-					"session");
+			application.addHttpTemplate("session", templateDirectory
+					+ "/SessionTemplate.ofp", MockSessionTemplate.class);
 
 			// Link template
-			application.addHttpTemplate(
-					templateDirectory + "/LinkTemplate.ofp",
-					MockLinkTemplate.class, "link");
+			application.addHttpTemplate("link", templateDirectory
+					+ "/LinkTemplate.ofp", MockLinkTemplate.class);
 
 			// Link to section
 			AutoWireSection section = application.addSection("SECTION",

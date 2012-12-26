@@ -111,6 +111,27 @@ public class ServletServerHttpConnectionTest extends OfficeFrameTestCase {
 	}
 
 	/**
+	 * Ensure able to obtain client method.
+	 */
+	public void test_getMethod() {
+		final String METHOD = "GET";
+		this.recordReturn(this.request, this.request.getMethod(), METHOD);
+		this.replayMockObjects();
+		assertEquals("Incorrect method", METHOD,
+				this.connection.getHttpMethod());
+		this.verifyMockObjects();
+	}
+
+	/**
+	 * Ensure able to export/import state.
+	 */
+	public void test_exportImportState() throws IOException {
+		this.connection.exportState();
+		this.connection.importState(null);
+		fail("TODO implement test");
+	}
+
+	/**
 	 * Ensure able to obtain request method.
 	 */
 	public void test_getHttpRequest_getMethod() {

@@ -61,7 +61,7 @@ import net.officefloor.plugin.web.http.security.HttpSecurityServiceManagedObject
 import net.officefloor.plugin.web.http.security.scheme.BasicHttpSecuritySource;
 import net.officefloor.plugin.web.http.security.store.PasswordFileManagedObjectSource;
 import net.officefloor.plugin.web.http.session.HttpSession;
-import net.officefloor.plugin.web.http.session.source.HttpSessionManagedObjectSource;
+import net.officefloor.plugin.web.http.session.HttpSessionManagedObjectSource;
 
 import org.apache.http.Header;
 import org.apache.http.HttpResponse;

@@ -18,6 +18,7 @@
 
 package net.officefloor.plugin.servlet.container;
 
+import java.io.Serializable;
 import java.util.Arrays;
 import java.util.Enumeration;
 
@@ -69,8 +70,8 @@ public class HttpSessionTest extends OfficeFrameTestCase {
 	public void testCreationTime() {
 		this.recordReturn(this.delegate, this.delegate.getCreationTime(), 1000);
 		this.replayMockObjects();
-		assertEquals("Incorrect creation time", 1000, this.session
-				.getCreationTime());
+		assertEquals("Incorrect creation time", 1000,
+				this.session.getCreationTime());
 		this.verifyMockObjects();
 	}
 
@@ -100,8 +101,8 @@ public class HttpSessionTest extends OfficeFrameTestCase {
 	 */
 	public void testServletContext() {
 		this.replayMockObjects();
-		assertEquals("Incorrect servlet context", this.context, this.session
-				.getServletContext());
+		assertEquals("Incorrect servlet context", this.context,
+				this.session.getServletContext());
 		this.verifyMockObjects();
 	}
 
@@ -127,8 +128,8 @@ public class HttpSessionTest extends OfficeFrameTestCase {
 
 		this.replayMockObjects();
 		this.session.setMaxInactiveInterval(100);
-		assertEquals("Incorrect max inactive interval", 100, this.session
-				.getMaxInactiveInterval());
+		assertEquals("Incorrect max inactive interval", 100,
+				this.session.getMaxInactiveInterval());
 		this.session.setMaxInactiveInterval(-1);
 		this.verifyMockObjects();
 	}
@@ -138,32 +139,32 @@ public class HttpSessionTest extends OfficeFrameTestCase {
 	 */
 	@SuppressWarnings("unchecked")
 	public void testAttributes() {
-		final Object attribute = new Object();
+		final Serializable attribute = this.createMock(Serializable.class);
 
 		// Record setting, obtaining, removing an attribute
 		this.delegate.setAttribute("attribute", attribute);
-		this.recordReturn(this.delegate, this.delegate
-				.getAttribute("attribute"), attribute);
+		this.recordReturn(this.delegate,
+				this.delegate.getAttribute("attribute"), attribute);
 		this.recordReturn(this.delegate, this.delegate.getAttributeNames(),
 				Arrays.asList("attribute").iterator());
 		this.delegate.removeAttribute("attribute");
-		this.recordReturn(this.delegate, this.delegate
-				.getAttribute("attribute"), null);
+		this.recordReturn(this.delegate,
+				this.delegate.getAttribute("attribute"), null);
 
 		// Test
 		this.replayMockObjects();
 		this.session.setAttribute("attribute", attribute);
-		assertEquals("Incorrect attribute", attribute, this.session
-				.getAttribute("attribute"));
+		assertEquals("Incorrect attribute", attribute,
+				this.session.getAttribute("attribute"));
 		Enumeration<String> enumeration = this.session.getAttributeNames();
 		assertTrue("Expecting an attribute name", enumeration.hasMoreElements());
-		assertEquals("Incorrect attribute name", "attribute", enumeration
-				.nextElement());
-		assertFalse("Expecting only one attribute name", enumeration
-				.hasMoreElements());
+		assertEquals("Incorrect attribute name", "attribute",
+				enumeration.nextElement());
+		assertFalse("Expecting only one attribute name",
+				enumeration.hasMoreElements());
 		this.session.removeAttribute("attribute");
-		assertNull("Attribute should be removed", this.session
-				.getAttribute("attribute"));
+		assertNull("Attribute should be removed",
+				this.session.getAttribute("attribute"));
 		this.verifyMockObjects();
 	}
 
@@ -173,8 +174,8 @@ public class HttpSessionTest extends OfficeFrameTestCase {
 	public void testInvalidate() throws Throwable {
 		final HttpSessionAdministration admin = this
 				.createMock(HttpSessionAdministration.class);
-		this.recordReturn(this.delegate, this.delegate
-				.getHttpSessionAdministration(), admin);
+		this.recordReturn(this.delegate,
+				this.delegate.getHttpSessionAdministration(), admin);
 		admin.invalidate(false);
 		this.replayMockObjects();
 		this.session.invalidate();
