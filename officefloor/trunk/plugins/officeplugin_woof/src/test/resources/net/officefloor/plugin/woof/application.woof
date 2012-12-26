@@ -14,7 +14,7 @@
             </output>
             <output name="OUTPUT_4"/>
         </template>
-        <template name="TEMPLATE_B" path="WOOF/TemplateB.ofp" />
+        <template name="TEMPLATE_B" uri="another" path="WOOF/TemplateB.ofp" />
     </templates>
     
     <sections>
