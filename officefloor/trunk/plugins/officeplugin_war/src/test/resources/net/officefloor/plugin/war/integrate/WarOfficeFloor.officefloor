@@ -41,7 +41,7 @@
 			<managing-office name="OFFICE" />
 		</managed-object-source>
 		<managed-object-source name="HTTP_SESSION"
-			source="net.officefloor.plugin.web.http.session.source.HttpSessionManagedObjectSource"
+			source="net.officefloor.plugin.web.http.session.HttpSessionManagedObjectSource"
 			object-type="net.officefloor.plugin.web.http.session.HttpSession"
 			timeout="10000">
 			<managing-office name="OFFICE" />
