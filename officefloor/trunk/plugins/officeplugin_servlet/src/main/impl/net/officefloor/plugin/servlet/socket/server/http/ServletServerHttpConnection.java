@@ -18,6 +18,8 @@
 
 package net.officefloor.plugin.servlet.socket.server.http;
 
+import java.io.IOException;
+import java.io.Serializable;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.UnknownHostException;
@@ -110,6 +112,26 @@ public class ServletServerHttpConnection implements ServerHttpConnection {
 	@Override
 	public HttpResponse getHttpResponse() {
 		return this.httpResponse;
+	}
+
+	@Override
+	public String getHttpMethod() {
+		return this.servletRequest.getMethod();
+	}
+
+	@Override
+	public Serializable exportState() throws IOException {
+		// TODO implement ServerHttpConnection.exportState
+		throw new UnsupportedOperationException(
+				"TODO implement ServerHttpConnection.exportState");
+	}
+
+	@Override
+	public void importState(Serializable momento)
+			throws IllegalArgumentException, IOException {
+		// TODO implement ServerHttpConnection.importState
+		throw new UnsupportedOperationException(
+				"TODO implement ServerHttpConnection.importState");
 	}
 
 }

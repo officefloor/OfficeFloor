@@ -28,7 +28,7 @@ import net.officefloor.frame.spi.managedobject.source.impl.AbstractManagedObject
 import net.officefloor.plugin.servlet.bridge.ServletBridge;
 import net.officefloor.plugin.servlet.time.Clock;
 import net.officefloor.plugin.web.http.session.HttpSession;
-import net.officefloor.plugin.web.http.session.source.HttpSessionManagedObjectSource;
+import net.officefloor.plugin.web.http.session.HttpSessionManagedObjectSource;
 
 /**
  * {@link ManagedObjectSource} providing a {@link HttpSession} implementation

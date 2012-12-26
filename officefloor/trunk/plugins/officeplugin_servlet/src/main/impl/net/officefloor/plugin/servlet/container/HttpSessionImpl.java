@@ -18,6 +18,7 @@
 
 package net.officefloor.plugin.servlet.container;
 
+import java.io.Serializable;
 import java.util.Enumeration;
 
 import javax.servlet.ServletContext;
@@ -140,7 +141,7 @@ public class HttpSessionImpl implements javax.servlet.http.HttpSession {
 
 	@Override
 	public void setAttribute(String name, Object value) {
-		this.session.setAttribute(name, value);
+		this.session.setAttribute(name, (Serializable) value);
 	}
 
 	@Override

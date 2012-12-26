@@ -18,6 +18,7 @@
 
 package net.officefloor.plugin.servlet.web.http.session;
 
+import java.io.Serializable;
 import java.util.Iterator;
 
 import javax.servlet.Servlet;
@@ -109,9 +110,9 @@ public class ServletHttpSession implements HttpSession,
 	}
 
 	@Override
-	public Object getAttribute(String name)
+	public Serializable getAttribute(String name)
 			throws InvalidatedHttpSessionException {
-		return this.session.getAttribute(name);
+		return (Serializable) this.session.getAttribute(name);
 	}
 
 	@Override
@@ -121,7 +122,7 @@ public class ServletHttpSession implements HttpSession,
 	}
 
 	@Override
-	public void setAttribute(String name, Object object)
+	public void setAttribute(String name, Serializable object)
 			throws StoringHttpSessionException, InvalidatedHttpSessionException {
 		this.session.setAttribute(name, object);
 	}

@@ -19,6 +19,7 @@
 package net.officefloor.plugin.servlet;
 
 import java.io.ByteArrayOutputStream;
+import java.io.Serializable;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletContextEvent;
@@ -170,7 +171,7 @@ public class OfficeFloorServletIntegrationToContainerTest extends
 					.replace('.', '/')
 					+ "/jsp/SubmitTemplate.ofp";
 			HttpTemplateAutoWireSection template = application.addHttpTemplate(
-					templatePath, MockTemplateLogic.class, "template");
+					"template", templatePath, MockTemplateLogic.class);
 			application.linkToResource(template, "jsp", "Template.jsp");
 			return true;
 		}
@@ -200,6 +201,7 @@ public class OfficeFloorServletIntegrationToContainerTest extends
 	 */
 	@HttpApplicationStateful("ApplicationBean")
 	public static class MockApplicationObject {
+
 		public String text;
 
 		public String getText() {
@@ -211,7 +213,8 @@ public class OfficeFloorServletIntegrationToContainerTest extends
 	 * {@link HttpSession} object.
 	 */
 	@HttpSessionStateful("SessionBean")
-	public static class MockSessionObject {
+	public static class MockSessionObject implements Serializable {
+
 		public String text;
 
 		public String getText() {
@@ -223,7 +226,8 @@ public class OfficeFloorServletIntegrationToContainerTest extends
 	 * {@link HttpRequestState} object.
 	 */
 	@HttpRequestStateful("RequestBean")
-	public static class MockRequestObject {
+	public static class MockRequestObject implements Serializable {
+
 		public String text;
 
 		public String getText() {
@@ -272,8 +276,8 @@ public class OfficeFloorServletIntegrationToContainerTest extends
 			final String templatePath = "ServletContextResourceTemplate.ofp";
 
 			// Add the template
-			application.addHttpTemplate(templatePath,
-					MockServletContextResourceTemplate.class, "template");
+			application.addHttpTemplate("template", templatePath,
+					MockServletContextResourceTemplate.class);
 
 			// Configure
 			return true;
