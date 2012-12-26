@@ -19,7 +19,10 @@
 package net.officefloor.plugin.web.http.application;
 
 import java.io.Serializable;
+import java.util.HashMap;
+import java.util.Map;
 
+import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.spi.managedobject.CoordinatingManagedObject;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
@@ -28,6 +31,10 @@ import net.officefloor.frame.spi.managedobject.ObjectRegistry;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceContext;
 import net.officefloor.frame.spi.managedobject.source.impl.AbstractManagedObjectSource;
+import net.officefloor.plugin.socket.server.http.HttpRequest;
+import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
+import net.officefloor.plugin.web.http.parameters.HttpParametersLoader;
+import net.officefloor.plugin.web.http.parameters.HttpParametersLoaderImpl;
 
 /**
  * {@link ManagedObjectSource} to cache creation of an {@link Object} within the
@@ -35,16 +42,8 @@ import net.officefloor.frame.spi.managedobject.source.impl.AbstractManagedObject
  * 
  * @author Daniel Sagenschneider
  */
-public class HttpRequestObjectManagedObjectSource
-		extends
-		AbstractManagedObjectSource<HttpRequestObjectManagedObjectSource.Dependencies, None> {
-
-	/**
-	 * Dependency keys for the {@link HttpRequestObjectManagedObject}.
-	 */
-	public static enum Dependencies {
-		HTTP_REQUEST_STATE
-	}
+public class HttpRequestObjectManagedObjectSource extends
+		AbstractManagedObjectSource<Indexed, None> {
 
 	/**
 	 * Name of property containing the class name.
@@ -58,6 +57,23 @@ public class HttpRequestObjectManagedObjectSource
 	public static final String PROPERTY_BIND_NAME = "bind.name";
 
 	/**
+	 * Name of property flagging whether to load the HTTP parameters to a new
+	 * object.
+	 */
+	public static final String PROPERTY_IS_LOAD_HTTP_PARAMETERS = "load.http.parameters";
+
+	/**
+	 * Property to obtain whether the {@link HttpParametersLoader} is case
+	 * insensitive in matching parameter names.
+	 */
+	public static final String PROPERTY_CASE_INSENSITIVE = "http.parameters.case.insensitive";
+
+	/**
+	 * Property prefix for an alias for the {@link HttpParametersLoader}.
+	 */
+	public static final String PROPERTY_PREFIX_ALIAS = "http.parameters.alias.";
+
+	/**
 	 * Class of the object.
 	 */
 	private Class<?> objectClass;
@@ -66,6 +82,12 @@ public class HttpRequestObjectManagedObjectSource
 	 * Name to bind the object within the {@link HttpRequestState}.
 	 */
 	private String bindName;
+
+	/**
+	 * {@link HttpParametersLoader}.
+	 */
+	@SuppressWarnings("rawtypes")
+	private HttpParametersLoader loader = null;
 
 	/*
 	 * ======================= ManagedObjectSource ===========================
@@ -77,7 +99,8 @@ public class HttpRequestObjectManagedObjectSource
 	}
 
 	@Override
-	protected void loadMetaData(MetaDataContext<Dependencies, None> context)
+	@SuppressWarnings("unchecked")
+	protected void loadMetaData(MetaDataContext<Indexed, None> context)
 			throws Exception {
 		ManagedObjectSourceContext<None> mosContext = context
 				.getManagedObjectSourceContext();
@@ -88,8 +111,8 @@ public class HttpRequestObjectManagedObjectSource
 
 		// Object must be serializable
 		if (!(Serializable.class.isAssignableFrom(this.objectClass))) {
-			throw new Exception(HttpRequestState.class.getSimpleName() + " object "
-					+ this.objectClass.getName() + " must be "
+			throw new Exception(HttpRequestState.class.getSimpleName()
+					+ " object " + this.objectClass.getName() + " must be "
 					+ Serializable.class.getSimpleName());
 		}
 
@@ -99,32 +122,58 @@ public class HttpRequestObjectManagedObjectSource
 		// Specify the meta-data
 		context.setObjectClass(this.objectClass);
 		context.setManagedObjectClass(HttpRequestObjectManagedObject.class);
-		context.addDependency(Dependencies.HTTP_REQUEST_STATE,
-				HttpRequestState.class);
+		context.addDependency(HttpRequestState.class).setLabel("REQUEST_STATE");
+
+		// Determine if load parameters
+		boolean isLoadParameters = Boolean.parseBoolean(mosContext.getProperty(
+				PROPERTY_IS_LOAD_HTTP_PARAMETERS, String.valueOf(false)));
+		if (isLoadParameters) {
+
+			// Provide the additional meta-data for loading parameters
+			context.addDependency(ServerHttpConnection.class).setLabel(
+					"SERVER_HTTP_CONNECTION");
+
+			// Obtain whether case insensitive (true by default)
+			boolean isCaseInsensitive = Boolean.parseBoolean(mosContext
+					.getProperty(PROPERTY_CASE_INSENSITIVE,
+							Boolean.toString(true)));
+
+			// Create the alias mappings
+			Map<String, String> aliasMappings = new HashMap<String, String>();
+			for (String name : mosContext.getProperties().stringPropertyNames()) {
+
+				// Determine if alias property
+				if (!name.startsWith(PROPERTY_PREFIX_ALIAS)) {
+					continue;
+				}
+
+				// Obtain the alias and corresponding parameter name
+				String alias = name.substring(PROPERTY_PREFIX_ALIAS.length());
+				String parameterName = mosContext.getProperty(name);
+
+				// Add the alias mapping
+				aliasMappings.put(alias, parameterName);
+			}
+
+			// Initialise the HTTP parameters loader
+			this.loader = new HttpParametersLoaderImpl<Object>();
+			this.loader.init(this.objectClass, aliasMappings,
+					isCaseInsensitive, null);
+		}
+
 	}
 
 	@Override
-	protected ManagedObject getManagedObject() throws Throwable {
-		return new HttpRequestObjectManagedObject(this.objectClass,
-				this.bindName);
+	protected ManagedObject getManagedObject() {
+		return new HttpRequestObjectManagedObject();
 	}
 
 	/**
 	 * {@link ManagedObject} to retrieve the object from the
 	 * {@link HttpRequestState}.
 	 */
-	public static class HttpRequestObjectManagedObject implements
-			NameAwareManagedObject, CoordinatingManagedObject<Dependencies> {
-
-		/**
-		 * Class of the object.
-		 */
-		private final Class<?> objectClass;
-
-		/**
-		 * Specific name to bind the object into the {@link HttpRequestState}.
-		 */
-		private final String bindName;
+	public class HttpRequestObjectManagedObject implements
+			NameAwareManagedObject, CoordinatingManagedObject<Indexed> {
 
 		/**
 		 * Name to bind the object to the {@link HttpRequestState}.
@@ -136,21 +185,6 @@ public class HttpRequestObjectManagedObjectSource
 		 */
 		private Serializable object;
 
-		/**
-		 * Initiate.
-		 * 
-		 * @param objectClass
-		 *            Class of the object.
-		 * @param bindName
-		 *            Specific name to bind the object into the
-		 *            {@link HttpRequestState}.
-		 */
-		public HttpRequestObjectManagedObject(Class<?> objectClass,
-				String bindName) {
-			this.objectClass = objectClass;
-			this.bindName = bindName;
-		}
-
 		/*
 		 * ====================== ManagedObject =============================
 		 */
@@ -158,28 +192,43 @@ public class HttpRequestObjectManagedObjectSource
 		@Override
 		public void setBoundManagedObjectName(String boundManagedObjectName) {
 			// Use bind name in preference to managed object name
-			this.boundName = (this.bindName != null ? this.bindName
+			this.boundName = (HttpRequestObjectManagedObjectSource.this.bindName != null ? HttpRequestObjectManagedObjectSource.this.bindName
 					: boundManagedObjectName);
 		}
 
 		@Override
-		public void loadObjects(ObjectRegistry<Dependencies> registry)
+		@SuppressWarnings("unchecked")
+		public void loadObjects(ObjectRegistry<Indexed> registry)
 				throws Throwable {
 
 			// Obtain the HTTP request state
-			HttpRequestState state = (HttpRequestState) registry
-					.getObject(Dependencies.HTTP_REQUEST_STATE);
+			HttpRequestState state = (HttpRequestState) registry.getObject(0);
 
 			// Lazy obtain the object
 			this.object = state.getAttribute(this.boundName);
 			if (this.object == null) {
-				this.object = (Serializable) this.objectClass.newInstance();
+				// Instantiate and register the object
+				this.object = (Serializable) HttpRequestObjectManagedObjectSource.this.objectClass
+						.newInstance();
 				state.setAttribute(this.boundName, this.object);
+
+				// Determine if load parameters
+				if (HttpRequestObjectManagedObjectSource.this.loader != null) {
+
+					// Obtain the request
+					ServerHttpConnection connection = (ServerHttpConnection) registry
+							.getObject(1);
+					HttpRequest request = connection.getHttpRequest();
+
+					// Load parameters from the request
+					HttpRequestObjectManagedObjectSource.this.loader
+							.loadParameters(request, this.object);
+				}
 			}
 		}
 
 		@Override
-		public Object getObject() throws Throwable {
+		public Object getObject() {
 			return this.object;
 		}
 	}

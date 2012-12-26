@@ -18,6 +18,7 @@
 package net.officefloor.plugin.web.http.template.section;
 
 import java.io.IOException;
+import java.io.Serializable;
 
 import net.officefloor.plugin.section.clazz.NextTask;
 import net.officefloor.plugin.socket.server.http.HttpResponse;
@@ -34,7 +35,7 @@ public class PostRedirectGetLogic {
 	/**
 	 * Parameters.
 	 */
-	public static class Parameters {
+	public static class Parameters implements Serializable {
 
 		private String text;
 

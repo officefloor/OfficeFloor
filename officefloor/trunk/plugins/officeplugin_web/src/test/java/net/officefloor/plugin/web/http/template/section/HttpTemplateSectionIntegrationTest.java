@@ -40,11 +40,11 @@ import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
 import net.officefloor.plugin.socket.server.http.server.MockHttpServer;
 import net.officefloor.plugin.socket.server.http.source.HttpServerSocketManagedObjectSource;
 import net.officefloor.plugin.socket.server.http.source.HttpsServerSocketManagedObjectSource;
+import net.officefloor.plugin.web.http.application.HttpRequestObjectManagedObjectSource;
 import net.officefloor.plugin.web.http.application.HttpRequestState;
 import net.officefloor.plugin.web.http.application.HttpRequestStateManagedObjectSource;
 import net.officefloor.plugin.web.http.location.HttpApplicationLocation;
 import net.officefloor.plugin.web.http.location.HttpApplicationLocationManagedObjectSource;
-import net.officefloor.plugin.web.http.parameters.source.HttpParametersObjectManagedObjectSource;
 import net.officefloor.plugin.web.http.route.HttpRouteTask;
 import net.officefloor.plugin.web.http.route.HttpRouteWorkSource;
 import net.officefloor.plugin.web.http.session.HttpSession;
@@ -354,11 +354,15 @@ public class HttpTemplateSectionIntegrationTest extends OfficeFrameTestCase {
 
 		// Start the server
 		AutoWireObject parameters = this.source.addManagedObject(
-				HttpParametersObjectManagedObjectSource.class.getName(), null,
+				HttpRequestObjectManagedObjectSource.class.getName(), null,
 				new AutoWire(Parameters.class));
 		parameters.addProperty(
-				HttpParametersObjectManagedObjectSource.PROPERTY_CLASS_NAME,
+				HttpRequestObjectManagedObjectSource.PROPERTY_CLASS_NAME,
 				Parameters.class.getName());
+		parameters
+				.addProperty(
+						HttpRequestObjectManagedObjectSource.PROPERTY_IS_LOAD_HTTP_PARAMETERS,
+						String.valueOf(true));
 		this.startHttpServer("PostRedirectGet.ofp", PostRedirectGetLogic.class);
 
 		// Execute the HTTP POST

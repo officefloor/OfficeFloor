@@ -19,8 +19,10 @@ package net.officefloor.plugin.web.http.template.secure;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.Serializable;
 
 import net.officefloor.autowire.AutoWire;
+import net.officefloor.autowire.AutoWireObject;
 import net.officefloor.autowire.AutoWireOfficeFloor;
 import net.officefloor.autowire.AutoWireSection;
 import net.officefloor.frame.test.OfficeFrameTestCase;
@@ -28,10 +30,10 @@ import net.officefloor.plugin.section.clazz.ClassSectionSource;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
 import net.officefloor.plugin.socket.server.http.server.MockHttpServer;
 import net.officefloor.plugin.web.http.application.HttpParameters;
+import net.officefloor.plugin.web.http.application.HttpRequestObjectManagedObjectSource;
 import net.officefloor.plugin.web.http.application.HttpTemplateAutoWireSection;
 import net.officefloor.plugin.web.http.application.HttpUriLink;
 import net.officefloor.plugin.web.http.location.HttpApplicationLocationManagedObjectSource;
-import net.officefloor.plugin.web.http.parameters.source.HttpParametersObjectManagedObjectSource;
 import net.officefloor.plugin.web.http.route.HttpRouteTask;
 import net.officefloor.plugin.web.http.server.HttpServerAutoWireOfficeFloorSource;
 import net.officefloor.plugin.web.http.template.parse.HttpTemplate;
@@ -187,7 +189,7 @@ public class SecureHttpTemplateTest extends OfficeFrameTestCase {
 
 		// Configure the template
 		HttpTemplateAutoWireSection template = this.source.addHttpTemplate(
-				templateLocation, TemplateLogic.class, "template");
+				"template", templateLocation, TemplateLogic.class);
 		template.setTemplateSecure(isTemplateSecure);
 		if (isLinkSecure != null) {
 			template.setLinkSecure("LINK", isLinkSecure.booleanValue());
@@ -302,11 +304,16 @@ public class SecureHttpTemplateTest extends OfficeFrameTestCase {
 		uriLink.setUriSecure(isUriSecure);
 
 		// Add HTTP parameters (as not loaded by template)
-		this.source.addManagedObject(
-				HttpParametersObjectManagedObjectSource.class.getName(), null,
-				new AutoWire(Parameters.class)).addProperty(
-				HttpParametersObjectManagedObjectSource.PROPERTY_CLASS_NAME,
+		AutoWireObject parameters = this.source.addManagedObject(
+				HttpRequestObjectManagedObjectSource.class.getName(), null,
+				new AutoWire(Parameters.class));
+		parameters.addProperty(
+				HttpRequestObjectManagedObjectSource.PROPERTY_CLASS_NAME,
 				Parameters.class.getName());
+		parameters
+				.addProperty(
+						HttpRequestObjectManagedObjectSource.PROPERTY_IS_LOAD_HTTP_PARAMETERS,
+						String.valueOf(true));
 
 		// Start the server
 		this.officeFloor = this.source.openOfficeFloor();
@@ -358,7 +365,7 @@ public class SecureHttpTemplateTest extends OfficeFrameTestCase {
 	 * Parameters that should continue to be available after redirect.
 	 */
 	@HttpParameters
-	public static class Parameters {
+	public static class Parameters implements Serializable {
 
 		private String id;
 

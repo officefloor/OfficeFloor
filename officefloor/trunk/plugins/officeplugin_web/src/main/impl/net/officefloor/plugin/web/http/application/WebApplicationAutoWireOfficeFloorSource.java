@@ -30,6 +30,7 @@ import net.officefloor.autowire.AutoWireSection;
 import net.officefloor.autowire.AutoWireSectionFactory;
 import net.officefloor.autowire.AutoWireSectionTransformer;
 import net.officefloor.autowire.impl.AutoWireOfficeFloorSource;
+import net.officefloor.compile.properties.Property;
 import net.officefloor.compile.spi.officefloor.OfficeFloorDeployer;
 import net.officefloor.compile.spi.officefloor.source.OfficeFloorSourceContext;
 import net.officefloor.compile.spi.section.SectionInput;
@@ -41,7 +42,6 @@ import net.officefloor.plugin.web.http.continuation.HttpUrlContinuationWorkSourc
 import net.officefloor.plugin.web.http.location.HttpApplicationLocation;
 import net.officefloor.plugin.web.http.location.HttpApplicationLocationManagedObjectSource;
 import net.officefloor.plugin.web.http.location.InvalidHttpRequestUriException;
-import net.officefloor.plugin.web.http.parameters.source.HttpParametersObjectManagedObjectSource;
 import net.officefloor.plugin.web.http.resource.source.SourceHttpResourceFactory;
 import net.officefloor.plugin.web.http.session.object.HttpSessionObjectManagedObjectSource;
 import net.officefloor.plugin.web.http.template.HttpTemplateWorkSource;
@@ -91,11 +91,6 @@ public class WebApplicationAutoWireOfficeFloorSource extends
 	 * Registry of HTTP Request Object class to its {@link AutoWireObject}.
 	 */
 	private final Map<Class<?>, AutoWireObject> httpRequestObjects = new HashMap<Class<?>, AutoWireObject>();
-
-	/**
-	 * Registry of HTTP Parameters Object class to its {@link AutoWireObject}.
-	 */
-	private final Map<Class<?>, AutoWireObject> httpParametersObjects = new HashMap<Class<?>, AutoWireObject>();
 
 	/**
 	 * {@link ResourceLink} instances.
@@ -150,33 +145,42 @@ public class WebApplicationAutoWireOfficeFloorSource extends
 	 */
 
 	@Override
-	public HttpTemplateAutoWireSection addHttpTemplate(String templatePath,
-			final Class<?> templateLogicClass, final String templateUri) {
+	public HttpTemplateAutoWireSection addHttpTemplate(String templateUri,
+			String templateFilePath, final Class<?> templateLogicClass) {
+
+		// Obtain canonical template URI path
+		try {
+			templateUri = HttpUrlContinuationWorkSource
+					.getApplicationUriPath(templateUri);
+		} catch (InvalidHttpRequestUriException ex) {
+			// Use the template URI as is
+		}
+
+		// Ensure URI is not already registered
+		for (HttpTemplateAutoWireSection template : this.httpTemplates) {
+			if (templateUri.equals(template.getTemplateUri())) {
+				throw new IllegalStateException(
+						"HTTP Template already added for URI '" + templateUri
+								+ "'");
+			}
+		}
 
 		// Determine section name
 		String sectionName;
-		if (templateUri != null) {
-
-			// Ensure URI is not already registered
-			for (HttpTemplateAutoWireSection template : this.httpTemplates) {
-				if (templateUri.equals(template.getTemplateUri())) {
-					throw new IllegalStateException(
-							"HTTP Template already added for URI '"
-									+ templateUri + "'");
-				}
-			}
-
-			// Specify section name for public template
-			sectionName = templateUri;
+		if ("/".equals(templateUri)) {
+			// Root template
+			sectionName = "_root_";
 
 		} else {
-			// Private template so provide private section name
-			sectionName = "resource" + this.httpTemplates.size();
+			// Use template URI stripping off leading '/'
+			sectionName = (templateUri.startsWith("/") ? templateUri
+					.substring("/".length()) : templateUri);
 		}
 
 		// Add the HTTP template section
+		final String uriPath = templateUri;
 		HttpTemplateAutoWireSection template = this.addSection(sectionName,
-				HttpTemplateSectionSource.class.getName(), templatePath,
+				HttpTemplateSectionSource.class.getName(), templateFilePath,
 				new AutoWireSectionFactory<HttpTemplateAutoWireSection>() {
 					@Override
 					public HttpTemplateAutoWireSection createAutoWireSection(
@@ -185,7 +189,7 @@ public class WebApplicationAutoWireOfficeFloorSource extends
 						return new HttpTemplateAutoWireSectionImpl(
 								WebApplicationAutoWireOfficeFloorSource.this
 										.getOfficeFloorCompiler(), seed,
-								templateLogicClass, templateUri);
+								templateLogicClass, uriPath);
 					}
 				});
 		if (templateLogicClass != null) {
@@ -221,13 +225,16 @@ public class WebApplicationAutoWireOfficeFloorSource extends
 					HttpRequestStateful requestAnnotation = parameterType
 							.getAnnotation(HttpRequestStateful.class);
 					if (requestAnnotation != null) {
-						this.addHttpRequestObject(parameterType,
+						this.addHttpRequestObject(parameterType, false,
 								requestAnnotation.value());
 					}
 
 					// HTTP Parameters
-					if (parameterType.isAnnotationPresent(HttpParameters.class)) {
-						this.addHttpParametersObject(parameterType);
+					HttpParameters parameters = parameterType
+							.getAnnotation(HttpParameters.class);
+					if (parameters != null) {
+						this.addHttpRequestObject(parameterType, true,
+								parameters.value());
 					}
 				}
 			}
@@ -235,12 +242,6 @@ public class WebApplicationAutoWireOfficeFloorSource extends
 
 		// Return the template
 		return template;
-	}
-
-	@Override
-	public HttpTemplateAutoWireSection addHttpTemplate(String templatePath,
-			Class<?> templateLogicClass) {
-		return this.addHttpTemplate(templatePath, templateLogicClass, null);
 	}
 
 	@Override
@@ -316,57 +317,59 @@ public class WebApplicationAutoWireOfficeFloorSource extends
 
 	@Override
 	public AutoWireObject addHttpRequestObject(Class<?> objectClass,
-			String bindName) {
+			boolean isLoadParameters, String bindName) {
 
 		// Determine if already registered the type
 		AutoWireObject object = this.httpRequestObjects.get(objectClass);
-		if (object != null) {
-			return object; // return the already registered object
-		}
+		if (object == null) {
 
-		// Not registered, so register
-		object = this.addManagedObject(
-				HttpRequestObjectManagedObjectSource.class.getName(), null,
-				new AutoWire(objectClass));
-		object.addProperty(
-				HttpRequestObjectManagedObjectSource.PROPERTY_CLASS_NAME,
-				objectClass.getName());
-		if ((bindName != null) && (bindName.trim().length() > 0)) {
+			// Not registered, so register
+			object = this.addManagedObject(
+					HttpRequestObjectManagedObjectSource.class.getName(), null,
+					new AutoWire(objectClass));
 			object.addProperty(
-					HttpRequestObjectManagedObjectSource.PROPERTY_BIND_NAME,
-					bindName);
+					HttpRequestObjectManagedObjectSource.PROPERTY_CLASS_NAME,
+					objectClass.getName());
+			if ((bindName != null) && (bindName.trim().length() > 0)) {
+				object.addProperty(
+						HttpRequestObjectManagedObjectSource.PROPERTY_BIND_NAME,
+						bindName);
+			}
+			this.httpRequestObjects.put(objectClass, object);
 		}
-		this.httpRequestObjects.put(objectClass, object);
+
+		// Determine if load HTTP parameters
+		if (isLoadParameters) {
+
+			// Obtain the load HTTP parameters property
+			Property loadParametersProperty = null;
+			for (Property property : object.getProperties()) {
+				if (HttpRequestObjectManagedObjectSource.PROPERTY_IS_LOAD_HTTP_PARAMETERS
+						.equals(property.getName())) {
+					loadParametersProperty = property;
+				}
+			}
+
+			// Flag to load parameters
+			if (loadParametersProperty == null) {
+				// Add the property to load parameters
+				object.addProperty(
+						HttpRequestObjectManagedObjectSource.PROPERTY_IS_LOAD_HTTP_PARAMETERS,
+						String.valueOf(true));
+			} else {
+				// Ensure flagged to load parameters
+				loadParametersProperty.setValue(String.valueOf(true));
+			}
+		}
 
 		// Return the object
 		return object;
 	}
 
 	@Override
-	public AutoWireObject addHttpRequestObject(Class<?> objectClass) {
-		return this.addHttpRequestObject(objectClass, null);
-	}
-
-	@Override
-	public AutoWireObject addHttpParametersObject(Class<?> objectClass) {
-
-		// Determine if already registered the type
-		AutoWireObject object = this.httpParametersObjects.get(objectClass);
-		if (object != null) {
-			return object; // return the already registered object
-		}
-
-		// Not registered, so register
-		object = this.addManagedObject(
-				HttpParametersObjectManagedObjectSource.class.getName(), null,
-				new AutoWire(objectClass));
-		object.addProperty(
-				HttpParametersObjectManagedObjectSource.PROPERTY_CLASS_NAME,
-				objectClass.getName());
-		this.httpParametersObjects.put(objectClass, object);
-
-		// Return the object
-		return object;
+	public AutoWireObject addHttpRequestObject(Class<?> objectClass,
+			boolean isLoadParameters) {
+		return this.addHttpRequestObject(objectClass, isLoadParameters, null);
 	}
 
 	@Override
