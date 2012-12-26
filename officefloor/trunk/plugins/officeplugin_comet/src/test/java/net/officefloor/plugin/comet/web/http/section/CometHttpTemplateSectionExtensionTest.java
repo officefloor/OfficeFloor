@@ -301,7 +301,7 @@ public class CometHttpTemplateSectionExtensionTest extends OfficeFrameTestCase {
 			HttpServerAutoWireOfficeFloorSource source = new HttpServerAutoWireOfficeFloorSource(
 					port);
 			HttpTemplateAutoWireSection template = source.addHttpTemplate(
-					templatePath, TemplateLogic.class, templateUri);
+					templateUri, templatePath, TemplateLogic.class);
 
 			// Extend the template for GWT
 			GwtHttpTemplateSectionExtension.extendTemplate(template, source,

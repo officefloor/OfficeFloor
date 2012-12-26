@@ -75,30 +75,6 @@ public class GwtIntegrationTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensure issue if no Template URI.
-	 */
-	public void testNoTemplateUri() throws Exception {
-
-		// Create template with no URI
-		HttpTemplateAutoWireSection section = this.source.addHttpTemplate(
-				"TEMPLATE", GwtServiceTemplateLogic.class);
-
-		try {
-			// Add the GWT Extension
-			GwtHttpTemplateSectionExtension.extendTemplate(section,
-					this.source, new SourcePropertiesImpl(), Thread
-							.currentThread().getContextClassLoader());
-			fail("Should not be successful without Template URI");
-
-		} catch (IllegalStateException ex) {
-			assertEquals(
-					"Incorrect reason",
-					"Template must have a URI for extending with GWT (Template=TEMPLATE)",
-					ex.getMessage());
-		}
-	}
-
-	/**
 	 * Ensure transforms HTML to include GWT.
 	 */
 	public void testTransformation() throws Exception {
@@ -127,8 +103,8 @@ public class GwtIntegrationTest extends OfficeFrameTestCase {
 		String templatePath = this.getFileLocation(this.getClass(),
 				"Template.html");
 		HttpTemplateAutoWireSection section = this.source
-				.addHttpTemplate(templatePath,
-						GwtTransformationTemplateLogic.class, templateUri);
+				.addHttpTemplate(templateUri, templatePath,
+						GwtTransformationTemplateLogic.class);
 
 		// Add the GWT Extension
 		GwtHttpTemplateSectionExtension.extendTemplate(section, this.source,
@@ -192,7 +168,7 @@ public class GwtIntegrationTest extends OfficeFrameTestCase {
 		String templatePath = this.getFileLocation(this.getClass(),
 				"Template.html");
 		HttpTemplateAutoWireSection section = this.source.addHttpTemplate(
-				templatePath, GwtServiceTemplateLogic.class, templateUri);
+				templateUri, templatePath, GwtServiceTemplateLogic.class);
 
 		// Add the GWT Extension
 		SourcePropertiesImpl properties = new SourcePropertiesImpl();
@@ -204,7 +180,8 @@ public class GwtIntegrationTest extends OfficeFrameTestCase {
 				properties, Thread.currentThread().getContextClassLoader());
 
 		// Capture any exceptions
-		this.source.linkEscalation(Throwable.class, section, "handleEscalation");
+		this.source
+				.linkEscalation(Throwable.class, section, "handleEscalation");
 
 		// Start Server
 		this.source.openOfficeFloor();
