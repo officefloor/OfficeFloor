@@ -148,7 +148,7 @@ public class WoofLoaderImpl implements WoofLoader {
 
 			// Configure the template
 			HttpTemplateAutoWireSection template = application.addHttpTemplate(
-					templatePath, templateLogicClass, uri);
+					uri, templatePath, templateLogicClass);
 
 			// Maintain reference to template by name
 			templates.put(templateName, template);

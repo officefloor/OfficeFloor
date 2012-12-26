@@ -120,8 +120,8 @@ public class WoofLoaderTest extends OfficeFrameTestCase {
 				this.compiler);
 
 		// Record loading templates
-		this.recordReturn(this.app, this.app.addHttpTemplate(
-				"WOOF/TemplateA.ofp", Template.class, "example"), templateA);
+		this.recordReturn(this.app, this.app.addHttpTemplate("example",
+				"WOOF/TemplateA.ofp", Template.class), templateA);
 		this.recordReturn(this.app,
 				this.app.addHttpTemplate("WOOF/TemplateB.ofp", null, null),
 				templateB);
@@ -192,8 +192,8 @@ public class WoofLoaderTest extends OfficeFrameTestCase {
 				this.compiler);
 
 		// Record loading template
-		this.recordReturn(this.app, this.app.addHttpTemplate(
-				"WOOF/Template.html", Template.class, "example"), template);
+		this.recordReturn(this.app, this.app.addHttpTemplate("example",
+				"WOOF/Template.html", Template.class), template);
 
 		// Record extending with GWT
 		this.recordReturn(this.app, this.app.isObjectAvailable(new AutoWire(
@@ -231,8 +231,8 @@ public class WoofLoaderTest extends OfficeFrameTestCase {
 				this.compiler);
 
 		// Record loading template
-		this.recordReturn(this.app, this.app.addHttpTemplate(
-				"WOOF/Template.html", Template.class, "example"), template);
+		this.recordReturn(this.app, this.app.addHttpTemplate("example",
+				"WOOF/Template.html", Template.class), template);
 
 		// Record extending with GWT
 		this.recordReturn(this.app,
@@ -275,8 +275,8 @@ public class WoofLoaderTest extends OfficeFrameTestCase {
 				this.compiler);
 
 		// Record loading template
-		this.recordReturn(this.app, this.app.addHttpTemplate(
-				"WOOF/Template.html", Template.class, "example"), template);
+		this.recordReturn(this.app, this.app.addHttpTemplate("example",
+				"WOOF/Template.html", Template.class), template);
 
 		// Should not load further as unknown template extension
 
