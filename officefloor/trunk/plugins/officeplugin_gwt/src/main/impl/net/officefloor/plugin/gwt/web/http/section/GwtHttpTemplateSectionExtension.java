@@ -70,10 +70,19 @@ public class GwtHttpTemplateSectionExtension implements
 	 */
 	public static String getGwtModuleName(String templateUri) {
 
-		// Default root ('/') to 'root;
-		String moduleName = templateUri;
-		if ("/".equals(moduleName)) {
-			moduleName = "root"; // default '/' to root
+		// Determine the module name
+		String moduleName;
+		if ("/".equals(templateUri)) {
+			// default '/' to root
+			moduleName = "root";
+
+		} else if (templateUri.startsWith("/")) {
+			// Remove leading '/' to make relative path
+			moduleName = templateUri.substring("/".length());
+
+		} else {
+			// Use template URI as is
+			moduleName = templateUri;
 		}
 
 		// return the module name

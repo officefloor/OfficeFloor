@@ -1,5 +1,6 @@
 package net.officefloor.test.form;
 
+import java.io.Serializable;
 import net.officefloor.plugin.web.http.application.HttpParameters;
 import net.officefloor.plugin.work.clazz.FlowInterface;
 
@@ -9,7 +10,7 @@ import net.officefloor.plugin.work.clazz.FlowInterface;
 public class FormLogic {
 
 	@HttpParameters
-	public static class Parameters {
+	public static class Parameters implements Serializable {
 
 		private String name;
 
