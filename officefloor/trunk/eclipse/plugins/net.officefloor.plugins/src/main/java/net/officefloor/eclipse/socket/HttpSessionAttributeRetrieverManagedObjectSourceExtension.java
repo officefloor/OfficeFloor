@@ -26,20 +26,20 @@ import net.officefloor.eclipse.extension.open.ExtensionOpenerContext;
 import net.officefloor.eclipse.extension.util.SourceExtensionUtil;
 import net.officefloor.eclipse.util.EclipseUtil;
 import net.officefloor.frame.api.build.None;
-import net.officefloor.plugin.web.http.session.object.source.HttpSessionObjectRetrieverManagedObjectSource;
-import net.officefloor.plugin.web.http.session.object.source.HttpSessionObjectRetrieverManagedObjectSource.HttpSessionObjectRetrieverDependencies;
+import net.officefloor.plugin.web.http.session.attribute.HttpSessionAttributeRetrieverManagedObjectSource;
+import net.officefloor.plugin.web.http.session.attribute.HttpSessionAttributeRetrieverManagedObjectSource.HttpSessionAttributeRetrieverDependencies;
 
 import org.eclipse.swt.widgets.Composite;
 
 /**
  * {@link ManagedObjectSourceExtension} for the
- * {@link HttpSessionObjectRetrieverManagedObjectSource}.
+ * {@link HttpSessionAttributeRetrieverManagedObjectSource}.
  * 
  * @author Daniel Sagenschneider
  */
-public class HttpSessionObjectRetrieverManagedObjectSourceExtension
+public class HttpSessionAttributeRetrieverManagedObjectSourceExtension
 		implements
-		ManagedObjectSourceExtension<HttpSessionObjectRetrieverDependencies, None, HttpSessionObjectRetrieverManagedObjectSource>,
+		ManagedObjectSourceExtension<HttpSessionAttributeRetrieverDependencies, None, HttpSessionAttributeRetrieverManagedObjectSource>,
 		ExtensionOpener {
 
 	/*
@@ -47,13 +47,13 @@ public class HttpSessionObjectRetrieverManagedObjectSourceExtension
 	 */
 
 	@Override
-	public Class<HttpSessionObjectRetrieverManagedObjectSource> getManagedObjectSourceClass() {
-		return HttpSessionObjectRetrieverManagedObjectSource.class;
+	public Class<HttpSessionAttributeRetrieverManagedObjectSource> getManagedObjectSourceClass() {
+		return HttpSessionAttributeRetrieverManagedObjectSource.class;
 	}
 
 	@Override
 	public String getManagedObjectSourceLabel() {
-		return "HTTP Session Object Retriever";
+		return "HTTP Session Attribute Retriever";
 	}
 
 	@Override
@@ -64,7 +64,7 @@ public class HttpSessionObjectRetrieverManagedObjectSourceExtension
 		SourceExtensionUtil
 				.createPropertyClass(
 						"Object type",
-						HttpSessionObjectRetrieverManagedObjectSource.PROPERTY_TYPE_NAME,
+						HttpSessionAttributeRetrieverManagedObjectSource.PROPERTY_TYPE_NAME,
 						page, context, null);
 	}
 
@@ -74,7 +74,7 @@ public class HttpSessionObjectRetrieverManagedObjectSourceExtension
 		// Obtain the object class
 		String className = properties
 				.getProperty(
-						HttpSessionObjectRetrieverManagedObjectSource.PROPERTY_TYPE_NAME)
+						HttpSessionAttributeRetrieverManagedObjectSource.PROPERTY_TYPE_NAME)
 				.getValue();
 		int simpleNameIndex = className.lastIndexOf('.');
 		if (simpleNameIndex >= 0) {
@@ -97,7 +97,7 @@ public class HttpSessionObjectRetrieverManagedObjectSourceExtension
 		String className = context
 				.getPropertyList()
 				.getPropertyValue(
-						HttpSessionObjectRetrieverManagedObjectSource.PROPERTY_TYPE_NAME,
+						HttpSessionAttributeRetrieverManagedObjectSource.PROPERTY_TYPE_NAME,
 						null);
 		if (EclipseUtil.isBlank(className)) {
 			throw new Exception("Class name not specified");

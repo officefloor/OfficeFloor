@@ -23,28 +23,28 @@ import net.officefloor.eclipse.extension.managedobjectsource.ManagedObjectSource
 import net.officefloor.eclipse.extension.managedobjectsource.ManagedObjectSourceExtensionContext;
 import net.officefloor.eclipse.extension.util.SourceExtensionUtil;
 import net.officefloor.frame.api.build.None;
-import net.officefloor.plugin.web.http.session.object.source.HttpSessionObjectManagedObjectSource;
-import net.officefloor.plugin.web.http.session.object.source.HttpSessionObjectManagedObjectSource.HttpSessionObjectDependencies;
+import net.officefloor.plugin.web.http.session.attribute.HttpSessionAttributeManagedObjectSource;
+import net.officefloor.plugin.web.http.session.attribute.HttpSessionAttributeManagedObjectSource.HttpSessionAttributeDependencies;
 
 import org.eclipse.swt.widgets.Composite;
 
 /**
  * {@link ManagedObjectSourceExtension} for the
- * {@link HttpSessionObjectManagedObjectSource}.
+ * {@link HttpSessionAttributeManagedObjectSource}.
  * 
  * @author Daniel Sagenschneider
  */
-public class HttpSessionObjectManagedObjectSourceExtension
+public class HttpSessionAttributeManagedObjectSourceExtension
 		implements
-		ManagedObjectSourceExtension<HttpSessionObjectDependencies, None, HttpSessionObjectManagedObjectSource> {
+		ManagedObjectSourceExtension<HttpSessionAttributeDependencies, None, HttpSessionAttributeManagedObjectSource> {
 
 	/*
 	 * ================== ManagedObjectSourceExtension ========================
 	 */
 
 	@Override
-	public Class<HttpSessionObjectManagedObjectSource> getManagedObjectSourceClass() {
-		return HttpSessionObjectManagedObjectSource.class;
+	public Class<HttpSessionAttributeManagedObjectSource> getManagedObjectSourceClass() {
+		return HttpSessionAttributeManagedObjectSource.class;
 	}
 
 	@Override
@@ -62,7 +62,7 @@ public class HttpSessionObjectManagedObjectSourceExtension
 	@Override
 	public String getSuggestedManagedObjectSourceName(PropertyList properties) {
 		// Return the name
-		return "HttpSessionObject";
+		return "HttpSessionAttribute";
 	}
 
 }

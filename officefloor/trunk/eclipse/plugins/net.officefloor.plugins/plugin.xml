@@ -80,12 +80,12 @@
 	</extension>
 	<extension point="net.officefloor.ui.managedobjectsources">
 		<managedobjectsource
-			class="net.officefloor.eclipse.socket.HttpSessionObjectManagedObjectSourceExtension">
+			class="net.officefloor.eclipse.socket.HttpSessionAttributeManagedObjectSourceExtension">
 		</managedobjectsource>
 	</extension>
 	<extension point="net.officefloor.ui.managedobjectsources">
 		<managedobjectsource
-			class="net.officefloor.eclipse.socket.HttpSessionObjectRetrieverManagedObjectSourceExtension">
+			class="net.officefloor.eclipse.socket.HttpSessionAttributeRetrieverManagedObjectSourceExtension">
 		</managedobjectsource>
 	</extension>
 </plugin>
