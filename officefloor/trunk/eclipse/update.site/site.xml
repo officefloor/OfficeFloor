@@ -17,10 +17,6 @@
 		id="net.officefloor.woof.feature" version="2.6.0">
 		<category name="OfficeFloor" />
 	</feature>
-	<feature url="features/net.officefloor.tools.feature_2.6.0.jar"
-		id="net.officefloor.tools.feature" version="2.6.0">
-		<category name="OfficeFloor" />
-	</feature>
 	
 	<category-def name="OfficeFloor" label="OfficeFloor">
 		<description>OfficeFloor</description>
