@@ -18,6 +18,8 @@
 
 package net.officefloor.tutorial.pageflowhttpserver;
 
+import java.io.Serializable;
+
 import lombok.Data;
 import net.officefloor.plugin.web.http.application.HttpParameters;
 
@@ -31,7 +33,7 @@ public class TemplateLogic {
 
 	@Data
 	@HttpParameters
-	public static class Parameters {
+	public static class Parameters implements Serializable {
 
 		private String name;
 
@@ -43,7 +45,7 @@ public class TemplateLogic {
 	}
 
 	@Data
-	public static class Issue {
+	public static class Issue implements Serializable {
 
 		private final String message;
 	}

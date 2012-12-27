@@ -78,7 +78,7 @@ public class GwtIntegrationTest extends OfficeFrameTestCase {
 	 * Ensure transforms HTML to include GWT.
 	 */
 	public void testTransformation() throws Exception {
-		this.doTransformationTest("template", "/template");
+		this.doTransformationTest("template", "template");
 	}
 
 	/**

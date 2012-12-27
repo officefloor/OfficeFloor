@@ -18,6 +18,8 @@
 
 package net.officefloor.tutorial.teamhttpserver;
 
+import java.io.Serializable;
+
 import net.officefloor.plugin.web.http.application.HttpParameters;
 
 /**
@@ -27,7 +29,7 @@ import net.officefloor.plugin.web.http.application.HttpParameters;
  */
 // START SNIPPET: example
 @HttpParameters
-public class EncryptLetter {
+public class EncryptLetter implements Serializable {
 
 	private char letter;
 

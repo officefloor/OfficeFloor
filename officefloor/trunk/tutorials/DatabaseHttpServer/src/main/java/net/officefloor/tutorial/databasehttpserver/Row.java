@@ -18,6 +18,8 @@
 
 package net.officefloor.tutorial.databasehttpserver;
 
+import java.io.Serializable;
+
 import net.officefloor.plugin.web.http.application.HttpParameters;
 
 /**
@@ -27,7 +29,7 @@ import net.officefloor.plugin.web.http.application.HttpParameters;
  */
 // START SNIPPET: example
 @HttpParameters
-public class Row {
+public class Row implements Serializable {
 
 	private int id;
 

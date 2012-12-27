@@ -18,6 +18,8 @@
 
 package net.officefloor.tutorial.transactionhttpserver;
 
+import java.io.Serializable;
+
 import net.officefloor.plugin.web.http.application.HttpParameters;
 
 /**
@@ -27,7 +29,7 @@ import net.officefloor.plugin.web.http.application.HttpParameters;
  */
 // START SNIPPET: tutorial
 @HttpParameters
-public class UserProperties {
+public class UserProperties implements Serializable {
 
 	private String userName;
 

@@ -18,6 +18,8 @@
 
 package net.officefloor.tutorial.woofservletjspintegration;
 
+import java.io.Serializable;
+
 import javax.servlet.http.HttpServletRequest;
 
 import net.officefloor.plugin.web.http.application.HttpRequestStateful;
@@ -29,7 +31,7 @@ import net.officefloor.plugin.web.http.application.HttpRequestStateful;
  */
 // START SNIPPET: tutorial
 @HttpRequestStateful("RequestBean")
-public class RequestBean {
+public class RequestBean implements Serializable {
 
 	private String text;
 

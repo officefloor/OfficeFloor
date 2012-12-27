@@ -18,6 +18,8 @@
 
 package net.officefloor.tutorial.woofservletjspintegration;
 
+import java.io.Serializable;
+
 import javax.servlet.http.HttpSession;
 
 import net.officefloor.plugin.web.http.application.HttpSessionStateful;
@@ -29,7 +31,7 @@ import net.officefloor.plugin.web.http.application.HttpSessionStateful;
  */
 // START SNIPPET: tutorial
 @HttpSessionStateful("SessionBean")
-public class SessionBean {
+public class SessionBean implements Serializable {
 
 	private String text;
 

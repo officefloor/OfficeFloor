@@ -34,16 +34,6 @@
 			<contains><![CDATA[<version>${project.version}</version>(\s)*</parent>]]></contains>
 		</file>
 
-		<!-- Tools eclipse modules are inheriting correct version -->
-		<file>
-			<location>plugins/net.officefloor.demo/pom.xml</location>
-			<contains><![CDATA[<version>${project.version}</version>(\s)*</parent>]]></contains>
-		</file>
-		<file>
-			<location>features/net.officefloor.tools.feature/pom.xml</location>
-			<contains><![CDATA[<version>${project.version}</version>(\s)*</parent>]]></contains>
-		</file>
-
 		<!-- Deploy update site is inheriting correct version -->
 		<file>
 			<location>update.site/pom.xml</location>
