@@ -18,6 +18,10 @@
 
 package net.officefloor.plugin.servlet.web.http.application;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.util.Enumeration;
 import java.util.Iterator;
@@ -88,7 +92,8 @@ public class ServletHttpRequestStateManagedObjectSourceTest extends
 				.createMock(HttpServletRequest.class);
 
 		// Record obtaining Servlet Context
-		this.recordReturn(servletBridge, servletBridge.getRequest(), request);
+		this.recordReturn(this.servletBridge, this.servletBridge.getRequest(),
+				request);
 
 		// Record set, get, names and remove
 		request.setAttribute(NAME, ATTRIBUTE);
@@ -121,14 +126,58 @@ public class ServletHttpRequestStateManagedObjectSourceTest extends
 	/**
 	 * Ensure able to export and import the state.
 	 */
+	@SuppressWarnings("unchecked")
 	public void testExportImportState() throws Throwable {
 
-		// TODO provide testing
-		HttpRequestState state = this.createHttpRequestState();
-		state.exportState();
-		state.importState(null);
+		final HttpServletRequest request = this
+				.createMock(HttpServletRequest.class);
+		final Enumeration<String> attributeNames = this
+				.createMock(Enumeration.class);
 
-		fail("TODO implement test");
+		// Record exporting the state
+		this.recordReturn(this.servletBridge, this.servletBridge.getRequest(),
+				request);
+		this.recordReturn(request, request.getAttributeNames(), attributeNames);
+		this.recordReturn(attributeNames, attributeNames.hasMoreElements(),
+				true);
+		this.recordReturn(attributeNames, attributeNames.nextElement(), "ONE");
+		this.recordReturn(request, request.getAttribute("ONE"), "1");
+		this.recordReturn(attributeNames, attributeNames.hasMoreElements(),
+				true);
+		this.recordReturn(attributeNames, attributeNames.nextElement(), "TWO");
+		this.recordReturn(request, request.getAttribute("TWO"), "2");
+		this.recordReturn(attributeNames, attributeNames.hasMoreElements(),
+				false);
+
+		// Record importing the state
+		request.setAttribute("ONE", "1");
+		request.setAttribute("TWO", "2");
+
+		// Test
+		this.replayMockObjects();
+		HttpRequestState state = this.createHttpRequestState();
+
+		// Export the state
+		Serializable momento = state.exportState();
+
+		// Serialise the momento
+		ByteArrayOutputStream outputBuffer = new ByteArrayOutputStream();
+		ObjectOutputStream output = new ObjectOutputStream(outputBuffer);
+		output.writeObject(momento);
+		output.flush();
+
+		// Unserialise the momento
+		ByteArrayInputStream inputBuffer = new ByteArrayInputStream(
+				outputBuffer.toByteArray());
+		ObjectInputStream input = new ObjectInputStream(inputBuffer);
+		Serializable unserialisedMomento = (Serializable) input.readObject();
+
+		// Clone the request state
+		HttpRequestState clone = this.createHttpRequestState();
+		clone.importState(unserialisedMomento);
+
+		// Verify loaded momento state
+		this.verifyMockObjects();
 	}
 
 	/**

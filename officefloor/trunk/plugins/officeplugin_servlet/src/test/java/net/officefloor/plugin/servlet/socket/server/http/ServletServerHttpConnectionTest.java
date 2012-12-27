@@ -18,9 +18,14 @@
 
 package net.officefloor.plugin.servlet.socket.server.http;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.io.OutputStream;
+import java.io.Serializable;
 import java.io.Writer;
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
@@ -37,6 +42,7 @@ import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.socket.server.http.HttpHeader;
 import net.officefloor.plugin.socket.server.http.HttpRequest;
 import net.officefloor.plugin.socket.server.http.HttpResponse;
+import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
 import net.officefloor.plugin.stream.ServerOutputStream;
 import net.officefloor.plugin.stream.ServerWriter;
 
@@ -125,10 +131,122 @@ public class ServletServerHttpConnectionTest extends OfficeFrameTestCase {
 	/**
 	 * Ensure able to export/import state.
 	 */
-	public void test_exportImportState() throws IOException {
-		this.connection.exportState();
-		this.connection.importState(null);
-		fail("TODO implement test");
+	@SuppressWarnings("unchecked")
+	public void test_exportImportState() throws Exception {
+
+		final String METHOD = "POST";
+		final String CONTEXT_PATH = "/path";
+		final String REQUEST_URI = "/test";
+		final String QUERY_STRING = "name=value";
+		Enumeration<String> headerNames = this.createMock(Enumeration.class);
+		final String HEADER_NAME = "HEADER_NAME";
+		Enumeration<String> headerValues = this.createMock(Enumeration.class);
+		final String HEADER_VALUE = "HEADER_VALUE";
+		InputStream requestEntity = new ServletInputStream() {
+			@Override
+			public int read() throws IOException {
+				return 1;
+			}
+		};
+
+		// Record initially adding response header
+		this.response.addHeader("NAME", "VALUE");
+
+		// Record export
+		this.recordReturn(this.request, this.request.getMethod(), METHOD);
+		this.recordReturn(this.request, this.request.getRequestURI(),
+				CONTEXT_PATH + REQUEST_URI);
+		this.recordReturn(this.request, this.request.getQueryString(),
+				QUERY_STRING);
+		this.recordReturn(this.request, this.request.getHeaderNames(),
+				headerNames);
+		this.recordReturn(headerNames, headerNames.hasMoreElements(), true);
+		this.recordReturn(headerNames, headerNames.nextElement(), HEADER_NAME);
+		this.recordReturn(this.request, this.request.getHeaders(HEADER_NAME),
+				headerValues);
+		this.recordReturn(headerValues, headerValues.hasMoreElements(), true);
+		this.recordReturn(headerValues, headerValues.nextElement(),
+				HEADER_VALUE);
+		this.recordReturn(headerValues, headerValues.hasMoreElements(), false);
+		this.recordReturn(headerNames, headerNames.hasMoreElements(), false);
+		this.recordReturn(this.request, this.request.getContentLength(), 1);
+		this.recordReturn(this.request, this.request.getInputStream(),
+				requestEntity);
+
+		// Record import
+		this.response.setHeader("NAME", "VALUE");
+
+		// Record continue to use Servlet values
+		this.recordReturn(this.request, this.request.getProtocol(), "HTTP/1.1");
+		this.recordReturn(this.request, this.request.getMethod(), "GET");
+
+		// Record flushing response
+		final ByteArrayOutputStream responseEntity = new ByteArrayOutputStream();
+		this.recordReturn(this.response, this.response.getOutputStream(),
+				new ServletOutputStream() {
+					@Override
+					public void write(int b) throws IOException {
+						responseEntity.write(b);
+					}
+				});
+
+		// Test
+		this.replayMockObjects();
+
+		// Provide response details that should exported
+		this.connection.getHttpResponse().addHeader("NAME", "VALUE");
+		this.connection.getHttpResponse().getEntity().write("TEST".getBytes());
+
+		// Export the state
+		Serializable momento = this.connection.exportState();
+
+		// Serialise the momento
+		ByteArrayOutputStream outputBuffer = new ByteArrayOutputStream();
+		ObjectOutputStream output = new ObjectOutputStream(outputBuffer);
+		output.writeObject(momento);
+		output.flush();
+
+		// Unserialise the momento
+		ByteArrayInputStream inputBuffer = new ByteArrayInputStream(
+				outputBuffer.toByteArray());
+		ObjectInputStream input = new ObjectInputStream(inputBuffer);
+		Serializable unserialisedMomento = (Serializable) input.readObject();
+
+		// Create a new connection
+		ServerHttpConnection clone = new ServletServerHttpConnection(
+				this.request, this.response);
+		clone.importState(unserialisedMomento);
+
+		// Ensure use request state from momento
+		HttpRequest request = clone.getHttpRequest();
+		assertEquals("Incorrect method", METHOD, request.getMethod());
+		assertEquals("Incorrect request URI", CONTEXT_PATH + REQUEST_URI
+				+ QUERY_STRING, request.getRequestURI());
+		assertEquals("Incorrect version", "HTTP/1.1", request.getVersion());
+		List<HttpHeader> headers = request.getHeaders();
+		assertEquals("Incorrect number of headers", 1, headers.size());
+		HttpHeader header = headers.get(0);
+		assertEquals("Incorrect header name", HEADER_NAME, header.getName());
+		assertEquals("Incorrect header value", HEADER_VALUE, header.getName());
+		assertEquals("Incorrect request entity byte", 1, request.getEntity()
+				.read());
+		assertEquals("Request entity to have only one byte", -1, request
+				.getEntity().available());
+
+		// Ensure use servlet request method
+		assertEquals("Incorrect client HTTP method", "GET",
+				this.connection.getHttpMethod());
+
+		// Ensure response state
+		HttpResponse response = clone.getHttpResponse();
+		assertEquals("Incorrect response header value", "VALUE",
+				response.getHeader("NAME"));
+		response.getEntity().write("_ANOTHER".getBytes());
+		response.getEntity().flush();
+		assertEquals("Incorrect response entity", "TEST_ANOTHER", new String(
+				responseEntity.toByteArray()));
+
+		this.verifyMockObjects();
 	}
 
 	/**
