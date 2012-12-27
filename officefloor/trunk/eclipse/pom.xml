@@ -26,10 +26,6 @@
 		<module>plugins/net.officefloor.plugins</module>
 		<module>features/net.officefloor.plugins.feature</module>
 
-		<!-- Tools eclipse functionality -->
-		<module>plugins/net.officefloor.demo</module>
-		<module>features/net.officefloor.tools.feature</module>
-
 		<!-- WoOF eclipse functionality -->
 		<module>plugins/net.officefloor.woof</module>
 		<module>features/net.officefloor.woof.feature</module>
