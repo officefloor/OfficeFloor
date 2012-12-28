@@ -23,6 +23,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 
 import javax.servlet.ServletContext;
@@ -146,17 +147,80 @@ public class ServletHttpRequestStateManagedObjectSource
 
 		@Override
 		public Serializable exportState() throws IOException {
-			// TODO implement HttpRequestState.exportState
-			throw new UnsupportedOperationException(
-					"TODO implement HttpRequestState.exportState");
+
+			// Extract the attributes
+			List<AttributeStateMomento> attributes = new LinkedList<AttributeStateMomento>();
+			for (Enumeration<String> names = this.request.getAttributeNames(); names
+					.hasMoreElements();) {
+				String name = names.nextElement();
+				Serializable value = (Serializable) this.request
+						.getAttribute(name);
+				attributes.add(new AttributeStateMomento(name, value));
+			}
+
+			// Create and return the momento
+			return new StateMomento(attributes);
 		}
 
 		@Override
 		public void importState(Serializable momento) throws IOException,
 				IllegalArgumentException {
-			// TODO implement HttpRequestState.importState
-			throw new UnsupportedOperationException(
-					"TODO implement HttpRequestState.importState");
+
+			// Load the state
+			StateMomento state = (StateMomento) momento;
+			for (AttributeStateMomento attribute : state.attributes) {
+				this.request.setAttribute(attribute.name, attribute.value);
+			}
+		}
+	}
+
+	/**
+	 * Momento of the state.
+	 */
+	private static class StateMomento implements Serializable {
+
+		/**
+		 * Attributes.
+		 */
+		private final List<AttributeStateMomento> attributes;
+
+		/**
+		 * Initiate.
+		 * 
+		 * @param attributes
+		 *            Attributes.
+		 */
+		public StateMomento(List<AttributeStateMomento> attributes) {
+			this.attributes = attributes;
+		}
+	}
+
+	/**
+	 * Momento for attribute state.
+	 */
+	private static class AttributeStateMomento implements Serializable {
+
+		/**
+		 * Attribute name.
+		 */
+		private final String name;
+
+		/**
+		 * Attribute value.
+		 */
+		private final Serializable value;
+
+		/**
+		 * Initiate.
+		 * 
+		 * @param name
+		 *            Attribute name.
+		 * @param value
+		 *            Attribute value.
+		 */
+		public AttributeStateMomento(String name, Serializable value) {
+			this.name = name;
+			this.value = value;
 		}
 	}
 

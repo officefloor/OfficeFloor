@@ -45,14 +45,19 @@ public class ServletServerHttpConnection implements ServerHttpConnection {
 	private final HttpServletRequest servletRequest;
 
 	/**
+	 * {@link HttpServletResponse}.
+	 */
+	private final HttpServletResponse servletResponse;
+
+	/**
 	 * {@link HttpRequest}.
 	 */
-	private final HttpRequest httpRequest;
+	private volatile ServletHttpRequest httpRequest;
 
 	/**
 	 * {@link HttpResponse}.
 	 */
-	private final HttpResponse httpResponse;
+	private volatile ServletHttpResponse httpResponse;
 
 	/**
 	 * Initiate.
@@ -65,8 +70,9 @@ public class ServletServerHttpConnection implements ServerHttpConnection {
 	public ServletServerHttpConnection(HttpServletRequest servletRequest,
 			HttpServletResponse servletResponse) {
 		this.servletRequest = servletRequest;
+		this.servletResponse = servletResponse;
 		this.httpRequest = new ServletHttpRequest(this.servletRequest);
-		this.httpResponse = new ServletHttpResponse(servletResponse);
+		this.httpResponse = new ServletHttpResponse(this.servletResponse);
 	}
 
 	/*
@@ -121,17 +127,57 @@ public class ServletServerHttpConnection implements ServerHttpConnection {
 
 	@Override
 	public Serializable exportState() throws IOException {
-		// TODO implement ServerHttpConnection.exportState
-		throw new UnsupportedOperationException(
-				"TODO implement ServerHttpConnection.exportState");
+
+		// Export the request/response state
+		Serializable requestMomento = this.httpRequest.exportState();
+		Serializable responseMomento = this.httpResponse.exportState();
+
+		// Create and return the state momento
+		return new StateMomento(requestMomento, responseMomento);
 	}
 
 	@Override
 	public void importState(Serializable momento)
 			throws IllegalArgumentException, IOException {
-		// TODO implement ServerHttpConnection.importState
-		throw new UnsupportedOperationException(
-				"TODO implement ServerHttpConnection.importState");
+
+		// Obtain the state
+		StateMomento state = (StateMomento) momento;
+
+		// Load the state
+		this.httpRequest = new ServletHttpRequest(this.servletRequest,
+				state.requestMomento);
+		this.httpResponse = new ServletHttpResponse(this.servletResponse,
+				state.responseMomento);
+	}
+
+	/**
+	 * Momento to contain the current state.
+	 */
+	private static class StateMomento implements Serializable {
+
+		/**
+		 * {@link HttpRequest} momento.
+		 */
+		private final Serializable requestMomento;
+
+		/**
+		 * {@link HttpResponse} momento.
+		 */
+		private final Serializable responseMomento;
+
+		/**
+		 * Initiate.
+		 * 
+		 * @param requestMomento
+		 *            {@link HttpRequest} momento.
+		 * @param responseMomento
+		 *            {@link HttpResponse} momento.
+		 */
+		public StateMomento(Serializable requestMomento,
+				Serializable responseMomento) {
+			this.requestMomento = requestMomento;
+			this.responseMomento = responseMomento;
+		}
 	}
 
 }

@@ -20,6 +20,7 @@ package net.officefloor.plugin.servlet.socket.server.http;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.List;
@@ -45,6 +46,16 @@ public class ServletHttpRequest implements HttpRequest {
 	private final HttpServletRequest servletRequest;
 
 	/**
+	 * HTTP method.
+	 */
+	private final String method;
+
+	/**
+	 * Request URI.
+	 */
+	private final String requestUri;
+
+	/**
 	 * {@link HttpHeader} instances.
 	 */
 	private List<HttpHeader> headers = null;
@@ -52,7 +63,7 @@ public class ServletHttpRequest implements HttpRequest {
 	/**
 	 * {@link ServerInputStream}.
 	 */
-	private ServerInputStream entity = null;
+	private ServerInputStreamImpl entity = null;
 
 	/**
 	 * Initiate.
@@ -62,6 +73,49 @@ public class ServletHttpRequest implements HttpRequest {
 	 */
 	public ServletHttpRequest(HttpServletRequest servletRequest) {
 		this.servletRequest = servletRequest;
+
+		// Load state from servlet request
+		this.method = null;
+		this.requestUri = null;
+	}
+
+	/**
+	 * Initiate.
+	 * 
+	 * @param servletRequest
+	 *            {@link HttpServletRequest}.
+	 * @param momento
+	 *            Momento for loading state.
+	 */
+	ServletHttpRequest(HttpServletRequest servletRequest, Serializable momento) {
+		this.servletRequest = servletRequest;
+
+		// Load state
+		StateMomento state = (StateMomento) momento;
+		this.method = state.method;
+		this.requestUri = state.requestUri;
+		this.headers = new ArrayList<HttpHeader>(state.headers);
+		this.entity = new ServerInputStreamImpl(this.servletRequest,
+				state.entityState);
+	}
+
+	/**
+	 * Exports the state as a momento.
+	 * 
+	 * @return Momento of the current state.
+	 * @throws IOException
+	 *             If fails to export state.
+	 */
+	Serializable exportState() throws IOException {
+
+		// Obtain the state
+		String method = this.getMethod();
+		String requestUri = this.getRequestURI();
+		List<HttpHeader> headers = new ArrayList<HttpHeader>(this.getHeaders());
+		Serializable entityState = this.getEntity().exportState();
+
+		// Create and return the state
+		return new StateMomento(method, requestUri, headers, entityState);
 	}
 
 	/*
@@ -70,11 +124,20 @@ public class ServletHttpRequest implements HttpRequest {
 
 	@Override
 	public String getMethod() {
-		return this.servletRequest.getMethod();
+		return (this.method != null ? this.method : this.servletRequest
+				.getMethod());
 	}
 
 	@Override
 	public String getRequestURI() {
+
+		// Determine if loaded request URI
+		if (this.requestUri != null) {
+			// Use loaded request URI
+			return this.requestUri;
+		}
+
+		// Provide from Servlet Request
 		String requestUri = this.servletRequest.getRequestURI();
 		String queryString = this.servletRequest.getQueryString();
 		if ((queryString == null) || (queryString.length() == 0)) {
@@ -119,7 +182,7 @@ public class ServletHttpRequest implements HttpRequest {
 	}
 
 	@Override
-	public synchronized ServerInputStream getEntity() throws IOException {
+	public synchronized ServerInputStreamImpl getEntity() throws IOException {
 
 		// Lazy obtain the entity
 		if (this.entity == null) {
@@ -148,6 +211,40 @@ public class ServletHttpRequest implements HttpRequest {
 
 		// Return the entity
 		return this.entity;
+	}
+
+	/**
+	 * Momento of the state.
+	 */
+	private static class StateMomento implements Serializable {
+
+		/**
+		 * Method.
+		 */
+		private final String method;
+
+		/**
+		 * Request URI.
+		 */
+		private final String requestUri;
+
+		/**
+		 * {@link HttpHeader} instances.
+		 */
+		private final List<HttpHeader> headers;
+
+		/**
+		 * {@link ServerInputStream} state.
+		 */
+		private final Serializable entityState;
+
+		public StateMomento(String method, String requestUri,
+				List<HttpHeader> headers, Serializable entityState) {
+			this.method = method;
+			this.requestUri = requestUri;
+			this.headers = headers;
+			this.entityState = entityState;
+		}
 	}
 
 }

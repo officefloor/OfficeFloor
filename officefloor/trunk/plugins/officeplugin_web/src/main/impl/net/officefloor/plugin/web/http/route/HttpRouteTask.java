@@ -127,7 +127,7 @@ public class HttpRouteTask
 	 * Suffix on the redirect {@link HttpRequest} URI to indicate a redirect has
 	 * occurred.
 	 */
-	public static final String REDIRECT_URI_SUFFIX = "#OFR";
+	public static final String REDIRECT_URI_SUFFIX = "?ofr";
 
 	/**
 	 * {@link HttpSession} attribute name to obtain the redirected

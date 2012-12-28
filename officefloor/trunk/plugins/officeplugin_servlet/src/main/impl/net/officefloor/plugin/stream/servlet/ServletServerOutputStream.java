@@ -20,6 +20,7 @@ package net.officefloor.plugin.stream.servlet;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.io.Serializable;
 import java.nio.ByteBuffer;
 
 import net.officefloor.plugin.socket.server.impl.ArrayWriteBuffer;
@@ -45,6 +46,19 @@ public class ServletServerOutputStream extends ServerOutputStreamImpl {
 	 */
 	public ServletServerOutputStream(OutputStream outputStream) {
 		super(new ServletWriteBufferReceiver(outputStream), 1024);
+	}
+
+	/**
+	 * Initiate.
+	 * 
+	 * @param outputStream
+	 *            Wrapped {@link OutputStream}.
+	 * @param momento
+	 *            Momento for the state.
+	 */
+	public ServletServerOutputStream(OutputStream outputStream,
+			Serializable momento) {
+		super(new ServletWriteBufferReceiver(outputStream), 1024, momento);
 	}
 
 	/**

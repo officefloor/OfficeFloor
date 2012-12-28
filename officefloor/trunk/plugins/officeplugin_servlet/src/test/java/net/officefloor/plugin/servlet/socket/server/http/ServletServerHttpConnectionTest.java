@@ -149,8 +149,15 @@ public class ServletServerHttpConnectionTest extends OfficeFrameTestCase {
 			}
 		};
 
-		// Record initially adding response header
+		// Record initially adding response header and writing content
 		this.response.addHeader("NAME", "VALUE");
+		this.recordReturn(this.response, this.response.getOutputStream(),
+				new ServletOutputStream() {
+					@Override
+					public void write(int b) throws IOException {
+						fail("Should not write out content");
+					}
+				});
 
 		// Record export
 		this.recordReturn(this.request, this.request.getMethod(), METHOD);
@@ -220,14 +227,14 @@ public class ServletServerHttpConnectionTest extends OfficeFrameTestCase {
 		// Ensure use request state from momento
 		HttpRequest request = clone.getHttpRequest();
 		assertEquals("Incorrect method", METHOD, request.getMethod());
-		assertEquals("Incorrect request URI", CONTEXT_PATH + REQUEST_URI
+		assertEquals("Incorrect request URI", CONTEXT_PATH + REQUEST_URI + "?"
 				+ QUERY_STRING, request.getRequestURI());
 		assertEquals("Incorrect version", "HTTP/1.1", request.getVersion());
 		List<HttpHeader> headers = request.getHeaders();
 		assertEquals("Incorrect number of headers", 1, headers.size());
 		HttpHeader header = headers.get(0);
 		assertEquals("Incorrect header name", HEADER_NAME, header.getName());
-		assertEquals("Incorrect header value", HEADER_VALUE, header.getName());
+		assertEquals("Incorrect header value", HEADER_VALUE, header.getValue());
 		assertEquals("Incorrect request entity byte", 1, request.getEntity()
 				.read());
 		assertEquals("Request entity to have only one byte", -1, request
@@ -239,8 +246,8 @@ public class ServletServerHttpConnectionTest extends OfficeFrameTestCase {
 
 		// Ensure response state
 		HttpResponse response = clone.getHttpResponse();
-		assertEquals("Incorrect response header value", "VALUE",
-				response.getHeader("NAME"));
+		assertEquals("Incorrect response header value", "VALUE", response
+				.getHeader("NAME").getValue());
 		response.getEntity().write("_ANOTHER".getBytes());
 		response.getEntity().flush();
 		assertEquals("Incorrect response entity", "TEST_ANOTHER", new String(

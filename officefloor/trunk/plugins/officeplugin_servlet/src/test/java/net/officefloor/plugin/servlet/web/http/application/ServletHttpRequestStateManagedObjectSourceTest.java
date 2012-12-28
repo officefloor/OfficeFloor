@@ -149,6 +149,10 @@ public class ServletHttpRequestStateManagedObjectSourceTest extends
 		this.recordReturn(attributeNames, attributeNames.hasMoreElements(),
 				false);
 
+		// Record creating cloned request state
+		this.recordReturn(this.servletBridge, this.servletBridge.getRequest(),
+				request);
+
 		// Record importing the state
 		request.setAttribute("ONE", "1");
 		request.setAttribute("TWO", "2");

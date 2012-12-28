@@ -19,6 +19,7 @@
 package net.officefloor.plugin.servlet;
 
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.io.Serializable;
 
 import javax.servlet.ServletContext;
@@ -27,9 +28,11 @@ import javax.servlet.ServletContextListener;
 
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.section.clazz.NextTask;
+import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
 import net.officefloor.plugin.socket.server.http.server.MockHttpServer;
 import net.officefloor.plugin.web.http.application.HttpApplicationState;
 import net.officefloor.plugin.web.http.application.HttpApplicationStateful;
+import net.officefloor.plugin.web.http.application.HttpParameters;
 import net.officefloor.plugin.web.http.application.HttpRequestState;
 import net.officefloor.plugin.web.http.application.HttpRequestStateful;
 import net.officefloor.plugin.web.http.application.HttpSessionStateful;
@@ -40,6 +43,7 @@ import net.officefloor.plugin.web.http.session.HttpSession;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpPost;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.jasper.servlet.JspServlet;
 import org.eclipse.jetty.server.Server;
@@ -88,7 +92,7 @@ public class OfficeFloorServletIntegrationToContainerTest extends
 		this.context = new ServletContextHandler();
 		this.context.setBaseResource(Resource.newClassPathResource(this
 				.getClass().getPackage().getName().replace('.', '/')
-				+ "/jsp"));
+				+ "/integrate"));
 		this.context.setContextPath("/");
 		this.context.setSessionHandler(new SessionHandler());
 		this.server.setHandler(this.context);
@@ -167,9 +171,10 @@ public class OfficeFloorServletIntegrationToContainerTest extends
 		@Override
 		public boolean configure(WebAutoWireApplication application,
 				ServletContext servletContext) throws Exception {
-			String templatePath = this.getClass().getPackage().getName()
-					.replace('.', '/')
-					+ "/jsp/SubmitTemplate.ofp";
+
+			// Should obtain template content from ServletContext
+			final String templatePath = "JspTemplate.ofp";
+
 			HttpTemplateAutoWireSection template = application.addHttpTemplate(
 					"template", templatePath, MockTemplateLogic.class);
 			application.linkToResource(template, "jsp", "Template.jsp");
@@ -300,6 +305,106 @@ public class OfficeFloorServletIntegrationToContainerTest extends
 	}
 
 	/**
+	 * Ensure able to undertake POST/Redirect/GET pattern.
+	 */
+	public void testPostRedirectGetPattern() throws Exception {
+
+		// Add the servlet for handling requests
+		this.context.addEventListener(new PostRedirectGetServlet());
+
+		// Start the server
+		this.server.start();
+
+		// Ensure can obtain template content from ServletContext
+		HttpResponse response = this.client.execute(new HttpPost(
+				"http://localhost:" + this.port
+						+ "/template-post.redirect?parameter=TEST"));
+		assertEquals("Should be successful", 200, response.getStatusLine()
+				.getStatusCode());
+
+		// Validate content
+		ByteArrayOutputStream buffer = new ByteArrayOutputStream();
+		response.getEntity().writeTo(buffer);
+		String body = buffer.toString();
+		assertEquals(
+				"Incorrect response",
+				"POST - parameter=TEST, state=AVAILABLE, link=/template-post.redirect",
+				body.trim());
+	}
+
+	/**
+	 * {@link OfficeFloorServlet} to test POST/Redirect/GET pattern.
+	 */
+	public static class PostRedirectGetServlet extends OfficeFloorServlet {
+
+		@Override
+		public String getServletName() {
+			return "PostRedirectGet";
+		}
+
+		@Override
+		public String getTemplateUriSuffix() {
+			return "redirect";
+		}
+
+		@Override
+		public boolean configure(WebAutoWireApplication application,
+				ServletContext servletContext) throws Exception {
+
+			// Add the template
+			application.addHttpTemplate("template", "PostRedirectGet.ofp",
+					PostRedirectGetLogic.class);
+
+			// Run
+			return true;
+		}
+	}
+
+	/**
+	 * Logic for the POST/Redirect/Get pattern.
+	 */
+	public static class PostRedirectGetLogic {
+
+		public void post(PostRedirectGetParameters parameters,
+				ServerHttpConnection connection) throws IOException {
+
+			// Provide initial content that should be saved across redirect
+			connection.getHttpResponse().getEntityWriter().write("POST - ");
+
+			// Provide value to parameters to be saved across redirect
+			parameters.state = "AVAILABLE";
+		}
+
+		public PostRedirectGetParameters getTemplateData(
+				PostRedirectGetParameters parameters) {
+			return parameters;
+		}
+	}
+
+	/**
+	 * POST/Redirect/GET parameters.
+	 */
+	@HttpParameters
+	public static class PostRedirectGetParameters implements Serializable {
+
+		private String parameter;
+
+		public void setParameter(String parameter) {
+			this.parameter = parameter;
+		}
+
+		public String getParameter() {
+			return this.parameter;
+		}
+
+		private String state;
+
+		public String getState() {
+			return this.state;
+		}
+	}
+
+	/**
 	 * Asserts the HTTP request.
 	 * 
 	 * @param uri
@@ -321,7 +426,6 @@ public class OfficeFloorServletIntegrationToContainerTest extends
 		response.getEntity().writeTo(buffer);
 		String body = buffer.toString();
 		assertEquals("Incorrect response", expectedResponse, body.trim());
-
 	}
 
 }
