@@ -33,6 +33,13 @@ import net.officefloor.plugin.web.http.template.section.HttpTemplateSectionExten
 public interface HttpTemplateAutoWireSection extends AutoWireSection {
 
 	/**
+	 * Obtains the URI to the template.
+	 * 
+	 * @return URI to the template.
+	 */
+	String getTemplateUri();
+
+	/**
 	 * Obtains path to the template file.
 	 * 
 	 * @return Path to the template file.
@@ -45,15 +52,6 @@ public interface HttpTemplateAutoWireSection extends AutoWireSection {
 	 * @return Logic class for the template.
 	 */
 	Class<?> getTemplateLogicClass();
-
-	/**
-	 * Obtains the URI to the template. May be <code>null</code> if not publicly
-	 * exposed template.
-	 * 
-	 * @return URI to the template. May be <code>null</code> if not publicly
-	 *         exposed template.
-	 */
-	String getTemplateUri();
 
 	/**
 	 * <p>
@@ -130,6 +128,26 @@ public interface HttpTemplateAutoWireSection extends AutoWireSection {
 	 *         {@link ServerHttpConnection}.
 	 */
 	Map<String, Boolean> getSecureLinks();
+
+	/**
+	 * <p>
+	 * Adds a HTTP method that will cause a redirect on rendering this
+	 * {@link HttpTemplate}.
+	 * <p>
+	 * This allows specifying the HTTP methods that will follow the
+	 * POST/redirect/GET pattern.
+	 * 
+	 * @param renderRedirectHttpMethod
+	 *            HTTP method.
+	 */
+	void addRenderRedirectHttpMethod(String renderRedirectHttpMethod);
+
+	/**
+	 * Obtains the configured render redirect HTTP methods.
+	 * 
+	 * @return Configured render redirect HTTP methods.
+	 */
+	String[] getRenderRedirectHttpMethods();
 
 	/**
 	 * Adds an {@link HttpTemplateSectionExtension} to this

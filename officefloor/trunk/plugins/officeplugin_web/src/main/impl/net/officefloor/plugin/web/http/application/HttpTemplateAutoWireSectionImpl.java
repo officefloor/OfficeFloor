@@ -20,6 +20,8 @@ package net.officefloor.plugin.web.http.application;
 
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 
 import net.officefloor.autowire.AutoWireSection;
@@ -68,6 +70,11 @@ public class HttpTemplateAutoWireSectionImpl extends AutoWireSectionImpl
 	 * {@link #isTemplateSecure}.
 	 */
 	private final Map<String, Boolean> secureLinks = new HashMap<String, Boolean>();
+
+	/**
+	 * Render redirect HTTP methods.
+	 */
+	private final List<String> renderRedirectHttpMethods = new LinkedList<String>();
 
 	/**
 	 * Index of the next extension.
@@ -143,6 +150,17 @@ public class HttpTemplateAutoWireSectionImpl extends AutoWireSectionImpl
 	@Override
 	public Map<String, Boolean> getSecureLinks() {
 		return Collections.unmodifiableMap(this.secureLinks);
+	}
+
+	@Override
+	public void addRenderRedirectHttpMethod(String renderRedirectHttpMethod) {
+		this.renderRedirectHttpMethods.add(renderRedirectHttpMethod);
+	}
+
+	@Override
+	public String[] getRenderRedirectHttpMethods() {
+		return this.renderRedirectHttpMethods
+				.toArray(new String[this.renderRedirectHttpMethods.size()]);
 	}
 
 	@Override

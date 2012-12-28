@@ -46,6 +46,7 @@ import net.officefloor.plugin.web.http.resource.source.SourceHttpResourceFactory
 import net.officefloor.plugin.web.http.session.object.HttpSessionObjectManagedObjectSource;
 import net.officefloor.plugin.web.http.template.HttpTemplateWorkSource;
 import net.officefloor.plugin.web.http.template.parse.HttpTemplate;
+import net.officefloor.plugin.web.http.template.section.HttpTemplateInitialWorkSource;
 import net.officefloor.plugin.web.http.template.section.HttpTemplateSectionSource;
 
 /**
@@ -514,7 +515,7 @@ public class WebApplicationAutoWireOfficeFloorSource extends
 					HttpFileSenderSectionSource.SERVICE_INPUT_NAME);
 		}
 
-		// Link template rendering
+		// Additional template configuration
 		for (HttpTemplateAutoWireSection httpTemplate : this.httpTemplates) {
 
 			// Determine if template is secure
@@ -552,6 +553,31 @@ public class WebApplicationAutoWireOfficeFloorSource extends
 				httpTemplate.addProperty(
 						HttpTemplateWorkSource.PROPERTY_LINK_SECURE_PREFIX
 								+ link, String.valueOf(isLinkSecure));
+			}
+
+			// Render redirect HTTP methods
+			String[] renderRedirectHttpMethods = httpTemplate
+					.getRenderRedirectHttpMethods();
+			if ((renderRedirectHttpMethods != null)
+					&& (renderRedirectHttpMethods.length > 0)) {
+
+				// Create the listing of rendering redirect HTTP methods
+				StringBuilder renderRedirectHttpMethodValue = new StringBuilder();
+				boolean isFirst = true;
+				for (String renderRedirectHttpMethod : renderRedirectHttpMethods) {
+					if (!isFirst) {
+						renderRedirectHttpMethodValue.append(", ");
+					}
+					isFirst = false;
+					renderRedirectHttpMethodValue
+							.append(renderRedirectHttpMethod);
+				}
+
+				// Configure the property for render redirect HTTP methods
+				httpTemplate
+						.addProperty(
+								HttpTemplateInitialWorkSource.PROPERTY_RENDER_REDIRECT_HTTP_METHODS,
+								renderRedirectHttpMethodValue.toString());
 			}
 
 			// Link completion of template rendering (if not already linked)

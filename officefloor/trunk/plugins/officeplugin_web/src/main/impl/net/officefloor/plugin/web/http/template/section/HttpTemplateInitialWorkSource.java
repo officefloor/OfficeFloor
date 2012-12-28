@@ -48,6 +48,12 @@ public class HttpTemplateInitialWorkSource extends
 	public static final String PROPERTY_TEMPLATE_URI = HttpTemplateWorkSource.PROPERTY_TEMPLATE_URI;
 
 	/**
+	 * Property name for a comma separated list of HTTP methods that will
+	 * trigger a redirect before rendering the {@link HttpTemplate}.
+	 */
+	public static final String PROPERTY_RENDER_REDIRECT_HTTP_METHODS = "http.template.render.redirect.methods";
+
+	/**
 	 * Name of the {@link HttpTemplateInitialTask}.
 	 */
 	public static final String TASK_NAME = "TASK";
@@ -80,9 +86,22 @@ public class HttpTemplateInitialWorkSource extends
 		 */
 		Boolean isRequireSecure = (isSecure ? Boolean.TRUE : null);
 
+		// Obtain the listing of render redirect HTTP methods
+		String[] renderRedirectHttpMethods = null;
+		String renderRedirectProperty = context.getProperty(
+				PROPERTY_RENDER_REDIRECT_HTTP_METHODS, null);
+		if (renderRedirectProperty != null) {
+			// Obtain the render redirect HTTP methods
+			renderRedirectHttpMethods = renderRedirectProperty.split(",");
+			for (int i = 0; i < renderRedirectHttpMethods.length; i++) {
+				renderRedirectHttpMethods[i] = renderRedirectHttpMethods[i]
+						.trim();
+			}
+		}
+
 		// Create the HTTP Template initial task
 		HttpTemplateInitialTask factory = new HttpTemplateInitialTask(
-				templateUriPath, isSecure);
+				templateUriPath, isSecure, renderRedirectHttpMethods);
 
 		// Configure the task
 		workTypeBuilder.setWorkFactory(factory);

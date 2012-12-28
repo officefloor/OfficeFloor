@@ -18,6 +18,8 @@
 package net.officefloor.plugin.web.http.template.section;
 
 import java.io.IOException;
+import java.util.HashSet;
+import java.util.Set;
 
 import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.execute.TaskContext;
@@ -54,6 +56,13 @@ public class HttpTemplateInitialTask
 	}
 
 	/**
+	 * Default HTTP methods to redirect before rendering the
+	 * {@link HttpTemplate}.
+	 */
+	public static final String[] DEFAULT_RENDER_REDIRECT_HTTP_METHODS = new String[] {
+			"POST", "PUT" };
+
+	/**
 	 * URI path for the {@link HttpTemplate}.
 	 */
 	private final String templateUriPath;
@@ -64,6 +73,11 @@ public class HttpTemplateInitialTask
 	private final boolean isRequireSecure;
 
 	/**
+	 * HTTP methods to redirect before rendering the {@link HttpTemplate}.
+	 */
+	private final Set<String> renderRedirectHttpMethods;
+
+	/**
 	 * Initiate.
 	 * 
 	 * @param templateUriPath
@@ -71,11 +85,22 @@ public class HttpTemplateInitialTask
 	 * @param isRequireSecure
 	 *            Indicates if a secure {@link ServerHttpConnection} is
 	 *            required.
+	 * @param renderRedirectHttpMethods
+	 *            Listing of HTTP methods that require a redirect before
+	 *            rendering the {@link HttpTemplate}.
 	 */
 	public HttpTemplateInitialTask(String templateUriPath,
-			boolean isRequireSecure) {
+			boolean isRequireSecure, String[] renderRedirectHttpMethods) {
 		this.templateUriPath = templateUriPath;
 		this.isRequireSecure = isRequireSecure;
+
+		// Add the render redirect HTTP methods
+		Set<String> methods = new HashSet<String>();
+		for (String method : (renderRedirectHttpMethods == null ? DEFAULT_RENDER_REDIRECT_HTTP_METHODS
+				: renderRedirectHttpMethods)) {
+			methods.add(method.trim().toUpperCase());
+		}
+		this.renderRedirectHttpMethods = methods;
 	}
 
 	/*
@@ -123,7 +148,7 @@ public class HttpTemplateInitialTask
 		if (!isRedirectRequired) {
 			// Request likely overridden to POST, so use client HTTP method
 			String method = connection.getHttpMethod();
-			if ("POST".equalsIgnoreCase(method)) {
+			if (this.renderRedirectHttpMethods.contains(method.toUpperCase())) {
 				// Flag redirect for POST/redirect/GET pattern
 				isRedirectRequired = true;
 			}
