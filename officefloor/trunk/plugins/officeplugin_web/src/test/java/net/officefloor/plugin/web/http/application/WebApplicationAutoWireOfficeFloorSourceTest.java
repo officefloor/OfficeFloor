@@ -23,6 +23,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.Serializable;
 import java.io.Writer;
+import java.net.URI;
 import java.sql.SQLException;
 
 import net.officefloor.autowire.AutoWire;
@@ -52,7 +53,9 @@ import net.officefloor.plugin.work.clazz.FlowInterface;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpEntityEnclosingRequestBase;
 import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.client.params.ClientPNames;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.params.BasicHttpParams;
@@ -65,6 +68,12 @@ import org.apache.http.params.HttpParams;
  */
 public class WebApplicationAutoWireOfficeFloorSourceTest extends
 		OfficeFrameTestCase {
+
+	/**
+	 * Host name for testing.
+	 */
+	private static final String HOST_NAME = HttpApplicationLocationManagedObjectSource
+			.getDefaultHostName();
 
 	/**
 	 * {@link WebApplicationAutoWireOfficeFloorSource} to be tested.
@@ -216,6 +225,90 @@ public class WebApplicationAutoWireOfficeFloorSourceTest extends
 
 		// Ensure template available
 		this.assertHttpRequest("/uri", isSecure, 200, SUBMIT_URI);
+	}
+
+	/**
+	 * Tests redirect on POST for default configuration.
+	 */
+	public void testPostDefaultRenderRedirect() throws Exception {
+		this.doRenderRedirectTest("POST");
+	}
+
+	/**
+	 * Tests redirect on configured HTTP method.
+	 */
+	public void testConfiguredRenderRedirect() throws Exception {
+		this.doRenderRedirectTest("OTHER", "POST", "PUT", "OTHER");
+	}
+
+	/**
+	 * Ensure redirect before rendering for particular HTTP methods.
+	 * 
+	 * @param method
+	 *            HTTP method to use.
+	 * @param renderRedirectHttpMethods
+	 *            Render redirect HTTP methods.
+	 */
+	public void doRenderRedirectTest(String method,
+			String... renderRedirectHttpMethods) throws Exception {
+
+		// Add the template
+		final String templatePath = this.getClassPath("template.ofp");
+		HttpTemplateAutoWireSection template = this.source.addHttpTemplate(
+				"uri", templatePath, MockTemplateLogic.class);
+
+		// Ensure able to provide appropriate render redirect HTTP methods
+		for (String renderRedirectHttpMethod : renderRedirectHttpMethods) {
+			template.addRenderRedirectHttpMethod(renderRedirectHttpMethod);
+		}
+
+		// Ensure correctly provided
+		String[] configuredMethods = template.getRenderRedirectHttpMethods();
+		assertEquals("Incorrect number of render redirect HTTP methods",
+				renderRedirectHttpMethods.length, configuredMethods.length);
+		for (int i = 0; i < renderRedirectHttpMethods.length; i++) {
+			assertEquals("Incorrect render redirect HTTP method " + i,
+					renderRedirectHttpMethods[i], configuredMethods[i]);
+		}
+
+		// Open
+		this.source.openOfficeFloor();
+
+		// Ensure appropriately redirects
+		String url = "http://" + HOST_NAME + ":" + this.port + "/uri";
+		HttpUriRequest request = new HttpConfiguredRequest(method, url);
+		String redirectUrl = "/uri" + HttpRouteTask.REDIRECT_URI_SUFFIX;
+		this.assertHttpRequest(request, redirectUrl, 200, "/uri-submit");
+	}
+
+	/**
+	 * {@link HttpUriRequest} for HTTP method <code>OTHER</code>.
+	 */
+	private static class HttpConfiguredRequest extends
+			HttpEntityEnclosingRequestBase {
+
+		/**
+		 * HTTP method.
+		 */
+		private final String method;
+
+		/**
+		 * Initiate.
+		 * 
+		 * @param method
+		 *            HTTP method.
+		 * @param uri
+		 *            URI.
+		 */
+		public HttpConfiguredRequest(String method, String uri) {
+			this.setURI(URI.create(uri));
+			this.method = method;
+		}
+
+		@Override
+		public String getMethod() {
+			return this.method;
+		}
 	}
 
 	/**
@@ -1290,23 +1383,46 @@ public class WebApplicationAutoWireOfficeFloorSourceTest extends
 	 */
 	private void assertHttpRequest(String uri, boolean isRedirect,
 			int expectedResponseStatus, String expectedResponseEntity) {
+
+		// Create the request
+		String url = "http://" + HOST_NAME + ":" + this.port + uri;
+		HttpGet request = new HttpGet(url);
+
+		// Provide redirect URL if expecting to redirect
+		String redirectUrl = null;
+		if (isRedirect) {
+			redirectUrl = "https://" + HOST_NAME + ":" + this.securePort + uri
+					+ HttpRouteTask.REDIRECT_URI_SUFFIX;
+		}
+
+		// Assert HTTP request
+		this.assertHttpRequest(request, redirectUrl, expectedResponseStatus,
+				expectedResponseEntity);
+	}
+
+	/**
+	 * Asserts the HTTP Request returns expected result after a redirect.
+	 * 
+	 * @param request
+	 *            {@link HttpUriRequest}.
+	 * @param redirectUrl
+	 *            Indicates if a redirect should occur and what is the expected
+	 *            redirect URL.
+	 * @param expectedResponseStatus
+	 *            Expected response status.
+	 * @param expectedResponseEntity
+	 *            Expected response entity.
+	 */
+	private void assertHttpRequest(HttpUriRequest request, String redirectUrl,
+			int expectedResponseStatus, String expectedResponseEntity) {
 		try {
 
-			// Obtain the host name
-			String hostName = HttpApplicationLocationManagedObjectSource
-					.getDefaultHostName();
-
-			// Create the URLs
-			String url = "http://" + hostName + ":" + this.port + uri;
-			String redirectUrl = "https://" + hostName + ":" + this.securePort
-					+ uri + HttpRouteTask.REDIRECT_URI_SUFFIX;
-
 			// Send the request
-			HttpGet request = new HttpGet(url);
 			HttpResponse response = this.client.execute(request);
 
 			// Determine if redirect
-			if (isRedirect) {
+			if (redirectUrl != null) {
+
 				// Ensure appropriate redirect
 				assertEquals("Should be redirect", 303, response
 						.getStatusLine().getStatusCode());
@@ -1316,14 +1432,20 @@ public class WebApplicationAutoWireOfficeFloorSourceTest extends
 				// Consume response to allow sending next request
 				response.getEntity().consumeContent();
 
+				// Handle server relative redirect
+				if (redirectUrl.startsWith("/")) {
+					redirectUrl = "http://" + HOST_NAME + ":" + this.port
+							+ redirectUrl;
+				}
+
 				// Send the redirect for response
 				response = this.client.execute(new HttpGet(redirectUrl));
 			}
 
 			// Ensure obtained as expected
 			String actualResponseBody = MockHttpServer.getEntityBody(response);
-			assertEquals("Incorrect response for URL '" + url + "'",
-					expectedResponseEntity, actualResponseBody);
+			assertEquals("Incorrect response", expectedResponseEntity,
+					actualResponseBody);
 
 			// Ensure correct response status
 			assertEquals("Should be successful", expectedResponseStatus,

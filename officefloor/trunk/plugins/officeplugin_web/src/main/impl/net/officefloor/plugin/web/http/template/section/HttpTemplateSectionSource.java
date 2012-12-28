@@ -245,10 +245,14 @@ public class HttpTemplateSectionSource extends ClassSectionSource {
 		// Load the initial task
 		SectionWork initialWork = designer.addSectionWork("INITIAL",
 				HttpTemplateInitialWorkSource.class.getName());
-		PropertiesUtil.copyProperties(context, initialWork,
-				HttpTemplateWorkSource.PROPERTY_TEMPLATE_URI,
-				HttpTemplateWorkSource.PROPERTY_TEMPLATE_URI_SUFFIX,
-				HttpTemplateWorkSource.PROPERTY_TEMPLATE_SECURE);
+		PropertiesUtil
+				.copyProperties(
+						context,
+						initialWork,
+						HttpTemplateWorkSource.PROPERTY_TEMPLATE_URI,
+						HttpTemplateWorkSource.PROPERTY_TEMPLATE_URI_SUFFIX,
+						HttpTemplateWorkSource.PROPERTY_TEMPLATE_SECURE,
+						HttpTemplateInitialWorkSource.PROPERTY_RENDER_REDIRECT_HTTP_METHODS);
 		SectionTask initialTask = initialWork.addSectionTask("_INITIAL_TASK_",
 				HttpTemplateInitialWorkSource.TASK_NAME);
 		designer.link(initialTask.getTaskObject("SERVER_HTTP_CONNECTION"),

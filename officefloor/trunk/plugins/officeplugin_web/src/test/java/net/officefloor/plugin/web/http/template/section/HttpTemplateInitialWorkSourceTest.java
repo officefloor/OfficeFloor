@@ -121,7 +121,7 @@ public class HttpTemplateInitialWorkSourceTest extends OfficeFrameTestCase {
 
 		// Factory
 		HttpTemplateInitialTask factory = new HttpTemplateInitialTask(null,
-				false);
+				false, null);
 
 		// Create the expected type
 		WorkTypeBuilder<HttpTemplateInitialTask> type = WorkLoaderUtil
@@ -177,7 +177,7 @@ public class HttpTemplateInitialWorkSourceTest extends OfficeFrameTestCase {
 	 * Ensure service as not required to be secure.
 	 */
 	public void testNonSecureService() {
-		this.doServiceTest(false, false, "GET", null);
+		this.doServiceTest(false, false, "GET", null, null);
 	}
 
 	/**
@@ -188,28 +188,21 @@ public class HttpTemplateInitialWorkSourceTest extends OfficeFrameTestCase {
 	 * when already received the request.
 	 */
 	public void testIgnoreSecureService() {
-		this.doServiceTest(false, false, "GET", null);
+		this.doServiceTest(false, false, "GET", null, null);
 	}
 
 	/**
 	 * Ensure service as appropriately secure.
 	 */
 	public void testSecureService() {
-		this.doServiceTest(true, true, "GET", null);
+		this.doServiceTest(true, true, "GET", null, null);
 	}
 
 	/**
 	 * Ensure redirect as not secure.
 	 */
 	public void testSecureRedirect() {
-		this.doServiceTest(true, false, null, "/redirect");
-	}
-
-	/**
-	 * Ensure follow POST/redirect/GET pattern to allow back button to work.
-	 */
-	public void testPostRedirect() {
-		this.doServiceTest(false, false, "POST", "/redirect");
+		this.doServiceTest(true, false, null, null, "/redirect");
 	}
 
 	/**
@@ -217,7 +210,44 @@ public class HttpTemplateInitialWorkSourceTest extends OfficeFrameTestCase {
 	 * allow back button to work.
 	 */
 	public void testSecurePostRedirect() {
-		this.doServiceTest(true, true, "POST", "/redirect");
+		this.doServiceTest(true, true, "POST", null, "/redirect");
+	}
+
+	/**
+	 * Ensure follow POST/redirect/GET pattern to allow back button to work.
+	 */
+	public void testPostRedirect() {
+		this.doServiceTest(false, false, "POST", null, "/redirect");
+	}
+
+	/**
+	 * Ensure follow post/redirect/GET pattern to allow back button to work.
+	 */
+	public void testPostRedirectCaseInsensitive() {
+		this.doServiceTest(false, false, "post", null, "/redirect");
+	}
+
+	/**
+	 * Ensure follow PUT/redirect/GET pattern to allow back button to work.
+	 */
+	public void testPutRedirect() {
+		this.doServiceTest(false, false, "PUT", null, "/redirect");
+	}
+
+	/**
+	 * Ensure follow ALTERNATE/redirect/GET pattern to allow back button to
+	 * work.
+	 */
+	public void testAlternateRedirect() {
+		this.doServiceTest(false, false, "OTHER", "POST, OTHER", "/redirect");
+	}
+
+	/**
+	 * Ensure follow ALTERNATE/redirect/GET pattern to allow back button to
+	 * work.
+	 */
+	public void testAlternateRedirectCaseInsensitive() {
+		this.doServiceTest(false, false, "other", "Post, Other", "/redirect");
 	}
 
 	/**
@@ -225,7 +255,8 @@ public class HttpTemplateInitialWorkSourceTest extends OfficeFrameTestCase {
 	 */
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public void doServiceTest(boolean isRequireSecure,
-			boolean isConnectionSecure, String method, String redirectUriPath) {
+			boolean isConnectionSecure, String method, String redirectMethods,
+			String redirectUriPath) {
 		try {
 
 			final TaskContext context = this.createMock(TaskContext.class);
@@ -239,14 +270,24 @@ public class HttpTemplateInitialWorkSourceTest extends OfficeFrameTestCase {
 			final FlowFuture flowFuture = this.createMock(FlowFuture.class);
 
 			// Create the task
+			List<String> properties = new ArrayList<String>(6);
+			properties.addAll(Arrays.asList(
+					HttpTemplateInitialWorkSource.PROPERTY_TEMPLATE_URI,
+					(redirectUriPath == null ? "/path" : redirectUriPath)));
+			if (isRequireSecure) {
+				properties.addAll(Arrays.asList(
+						HttpTemplateWorkSource.PROPERTY_TEMPLATE_SECURE,
+						String.valueOf(isRequireSecure)));
+			}
+			if (redirectMethods != null) {
+				properties
+						.addAll(Arrays
+								.asList(HttpTemplateInitialWorkSource.PROPERTY_RENDER_REDIRECT_HTTP_METHODS,
+										redirectMethods));
+			}
 			WorkType<HttpTemplateInitialTask> work = WorkLoaderUtil
-					.loadWorkType(
-							HttpTemplateInitialWorkSource.class,
-							HttpTemplateInitialWorkSource.PROPERTY_TEMPLATE_URI,
-							(redirectUriPath == null ? "/path"
-									: redirectUriPath),
-							HttpTemplateWorkSource.PROPERTY_TEMPLATE_SECURE,
-							String.valueOf(isRequireSecure));
+					.loadWorkType(HttpTemplateInitialWorkSource.class,
+							properties.toArray(new String[properties.size()]));
 			Task<HttpTemplateInitialTask, ?, ?> task = work.getTaskTypes()[0]
 					.getTaskFactory().createTask(
 							work.getWorkFactory().createWork());
@@ -296,5 +337,4 @@ public class HttpTemplateInitialWorkSourceTest extends OfficeFrameTestCase {
 			fail(ex);
 		}
 	}
-
 }

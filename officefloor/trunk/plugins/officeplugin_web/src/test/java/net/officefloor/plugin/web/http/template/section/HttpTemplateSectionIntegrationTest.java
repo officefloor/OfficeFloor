@@ -20,6 +20,7 @@ package net.officefloor.plugin.web.http.template.section;
 
 import java.io.IOException;
 import java.io.Writer;
+import java.net.URI;
 import java.sql.Connection;
 
 import net.officefloor.autowire.AutoWire;
@@ -55,8 +56,10 @@ import net.officefloor.plugin.web.http.template.section.PostRedirectGetLogic.Par
 import org.apache.http.Header;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpEntityEnclosingRequestBase;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
+import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.client.params.ClientPNames;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.DefaultHttpClient;
@@ -291,6 +294,49 @@ public class HttpTemplateSectionIntegrationTest extends OfficeFrameTestCase {
 	}
 
 	/**
+	 * Ensure continue to service GET method without redirect.
+	 */
+	public void testPostRedirectGet_NoRedirectAsGet() throws Exception {
+		HttpGet request = new HttpGet("http://" + HOST_NAME + ":"
+				+ this.httpPort + "/uri-post?text=TEST");
+		this.doPostRedirectGetPatternTest(request, "TEST /uri-post");
+	}
+
+	/**
+	 * Ensure maintain {@link HttpRequestState} across redirect.
+	 */
+	public void testPostRedirectGet_AlternateMethod() throws Exception {
+		HttpUriRequest request = new HttpOther("http://" + HOST_NAME + ":"
+				+ this.httpPort + "/uri-post?text=TEST");
+		this.doPostRedirectGetPatternTest(
+				request,
+				"TEST /uri-post",
+				HttpTemplateInitialWorkSource.PROPERTY_RENDER_REDIRECT_HTTP_METHODS,
+				request.getMethod());
+	}
+
+	/**
+	 * {@link HttpUriRequest} for HTTP method <code>OTHER</code>.
+	 */
+	private static class HttpOther extends HttpEntityEnclosingRequestBase {
+
+		/**
+		 * Initiate.
+		 * 
+		 * @param uri
+		 *            URI.
+		 */
+		public HttpOther(String uri) {
+			this.setURI(URI.create(uri));
+		}
+
+		@Override
+		public String getMethod() {
+			return "OTHER";
+		}
+	}
+
+	/**
 	 * Ensure maintain HTTP entity across redirect.
 	 */
 	public void testPostRedirectGet_HttpRequestEntity() throws Exception {
@@ -343,14 +389,17 @@ public class HttpTemplateSectionIntegrationTest extends OfficeFrameTestCase {
 	/**
 	 * Undertakes the POST/redirect/GET pattern tests.
 	 * 
-	 * @param post
-	 *            {@link HttpPost}.
+	 * @param request
+	 *            {@link HttpUriRequest}.
 	 * @param expectedResponse
 	 *            Expected rendered response after redirect.
+	 * @param templateProperties
+	 *            Template name/value property pairs.
 	 * @return {@link HttpResponse}.
 	 */
-	private HttpResponse doPostRedirectGetPatternTest(HttpPost post,
-			String expectedResponse) throws Exception {
+	private HttpResponse doPostRedirectGetPatternTest(HttpUriRequest request,
+			String expectedResponse, String... templatePropertyPairs)
+			throws Exception {
 
 		// Start the server
 		AutoWireObject parameters = this.source.addManagedObject(
@@ -363,25 +412,30 @@ public class HttpTemplateSectionIntegrationTest extends OfficeFrameTestCase {
 				.addProperty(
 						HttpRequestObjectManagedObjectSource.PROPERTY_IS_LOAD_HTTP_PARAMETERS,
 						String.valueOf(true));
-		this.startHttpServer("PostRedirectGet.ofp", PostRedirectGetLogic.class);
+		this.startHttpServer("PostRedirectGet.ofp", PostRedirectGetLogic.class,
+				templatePropertyPairs);
 
-		// Execute the HTTP POST
-		HttpResponse response = this.client.execute(post);
+		// Execute the HTTP request
+		HttpResponse response = this.client.execute(request);
 
-		// Ensure is a redirect
-		assertEquals("Should be redirect", 303, response.getStatusLine()
-				.getStatusCode());
-		String redirectUrl = response.getFirstHeader("Location").getValue();
-		assertEquals("Incorrect redirect URL", "/uri"
-				+ HttpRouteTask.REDIRECT_URI_SUFFIX, redirectUrl);
-		response.getEntity().consumeContent();
+		// No redirect if get
+		if (!(request instanceof HttpGet)) {
 
-		// Undertake the GET (as triggered by redirect)
-		HttpGet get = new HttpGet("http://" + HOST_NAME + ":" + this.httpPort
-				+ redirectUrl);
-		response = this.client.execute(get);
-		assertEquals("Should be successful", 200, response.getStatusLine()
-				.getStatusCode());
+			// Ensure is a redirect
+			assertEquals("Should be redirect", 303, response.getStatusLine()
+					.getStatusCode());
+			String redirectUrl = response.getFirstHeader("Location").getValue();
+			assertEquals("Incorrect redirect URL", "/uri"
+					+ HttpRouteTask.REDIRECT_URI_SUFFIX, redirectUrl);
+			response.getEntity().consumeContent();
+
+			// Undertake the GET (as triggered by redirect)
+			HttpGet get = new HttpGet("http://" + HOST_NAME + ":"
+					+ this.httpPort + redirectUrl);
+			response = this.client.execute(get);
+			assertEquals("Should be successful", 200, response.getStatusLine()
+					.getStatusCode());
+		}
 
 		// Ensure correct rendering of template
 		String rendering = MockHttpServer.getEntityBody(response);
