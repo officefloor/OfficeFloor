@@ -20,7 +20,9 @@ package net.officefloor.plugin.servlet.socket.server.http;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.io.Serializable;
 import java.nio.charset.Charset;
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -59,7 +61,7 @@ public class ServletHttpResponse implements HttpResponse {
 	/**
 	 * {@link ServerOutputStream} for the entity.
 	 */
-	private ServerOutputStream entity;
+	private ServletServerOutputStream entity;
 
 	/**
 	 * {@link ServerWriter} for the entity.
@@ -74,6 +76,48 @@ public class ServletHttpResponse implements HttpResponse {
 	 */
 	public ServletHttpResponse(HttpServletResponse servletResponse) {
 		this.servletResponse = servletResponse;
+	}
+
+	/**
+	 * Initiate.
+	 * 
+	 * @param servletResponse
+	 *            {@link HttpServletResponse}.
+	 * @param momento
+	 *            Momento containing the state.
+	 * @throws IOException
+	 *             If fails to load state.
+	 */
+	ServletHttpResponse(HttpServletResponse servletResponse,
+			Serializable momento) throws IOException {
+		this.servletResponse = servletResponse;
+
+		// Load the state
+		StateMomento state = (StateMomento) momento;
+		this.headers.addAll(state.headers);
+		for (HttpHeader header : state.headers) {
+			this.servletResponse.setHeader(header.getName(), header.getValue());
+		}
+		this.entity = new ServletServerOutputStream(
+				this.servletResponse.getOutputStream(), state.entityState);
+	}
+
+	/**
+	 * Exports the momento for the state.
+	 * 
+	 * @return Momento for the state.
+	 * @throws IOException
+	 *             If fails to export the state.
+	 */
+	synchronized Serializable exportState() throws IOException {
+
+		// Obtain the state
+		List<HttpHeader> httpHeaders = new ArrayList<HttpHeader>(this.headers);
+		Serializable entityState = this.getEntity().exportState(
+				this.entityWriter);
+
+		// Create and return the momento
+		return new StateMomento(httpHeaders, entityState);
 	}
 
 	/*
@@ -160,7 +204,8 @@ public class ServletHttpResponse implements HttpResponse {
 	}
 
 	@Override
-	public synchronized ServerOutputStream getEntity() throws IOException {
+	public synchronized ServletServerOutputStream getEntity()
+			throws IOException {
 
 		// Lazy load the entity
 		if (this.entity == null) {
@@ -212,14 +257,14 @@ public class ServletHttpResponse implements HttpResponse {
 
 	@Override
 	public synchronized void send() throws IOException {
-		
+
 		// Close the output/writer
 		if (this.entity != null) {
 			this.entity.close();
 		} else if (this.entityWriter != null) {
 			this.entityWriter.close();
 		}
-		
+
 		// Ensure flush response to client
 		this.servletResponse.flushBuffer();
 	}
@@ -227,6 +272,35 @@ public class ServletHttpResponse implements HttpResponse {
 	@Override
 	public void reset() throws IOException {
 		this.servletResponse.reset();
+	}
+
+	/**
+	 * Momento for the state.
+	 */
+	private static class StateMomento implements Serializable {
+
+		/**
+		 * {@link HttpHeader} instances.
+		 */
+		private final List<HttpHeader> headers;
+
+		/**
+		 * Entity state.
+		 */
+		private final Serializable entityState;
+
+		/**
+		 * Initiate.
+		 * 
+		 * @param headers
+		 *            {@link HttpHeader} instances.
+		 * @param entityState
+		 *            Entity state.
+		 */
+		public StateMomento(List<HttpHeader> headers, Serializable entityState) {
+			this.headers = headers;
+			this.entityState = entityState;
+		}
 	}
 
 }
