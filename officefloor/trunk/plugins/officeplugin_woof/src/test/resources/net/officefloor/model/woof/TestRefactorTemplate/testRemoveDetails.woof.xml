@@ -1,7 +1,7 @@
 <woof>
 
 	<templates>
-		<template name="Remove" path="example/Remove.html" />
+		<template name="remove" uri="remove" path="example/Remove.html" />
 		<template name="TEMPLATE_LINK" path="example/Link.html"
 			class="net.example.LinkClass" />
 	</templates>

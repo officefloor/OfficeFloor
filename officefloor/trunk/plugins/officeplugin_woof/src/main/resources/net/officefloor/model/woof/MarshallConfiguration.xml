@@ -10,6 +10,7 @@
 				<attribute method="getUri" attribute="uri" />
 				<attribute method="getTemplatePath" attribute="path" />
 				<attribute method="getTemplateClassName" attribute="class" />
+				<attribute method="getIsTemplateSecure" attribute="secure" />
 				<attribute method="getX" attribute="x" />
 				<attribute method="getY" attribute="y" />
 			</attributes>
@@ -36,6 +37,24 @@
 							<attribute method="getResourceName" attribute="name" />
 						</attributes>
 					</object>
+				</item>
+			</collection>
+			<collection method="getLinks">
+				<item type="net.officefloor.model.woof.WoofTemplateLinkModel"
+					element="link">
+					<attributes>
+						<attribute method="getWoofTemplateLinkName" attribute="name" />
+						<attribute method="getIsLinkSecure" attribute="secure" />
+					</attributes>
+				</item>
+			</collection>
+			<collection method="getRedirects">
+				<item type="net.officefloor.model.woof.WoofTemplateRedirectModel"
+					element="redirect">
+					<attributes>
+						<attribute method="getWoofTemplateRedirectHttpMethod"
+							attribute="method" />
+					</attributes>
 				</item>
 			</collection>
 			<collection method="getExtensions">
@@ -190,8 +209,7 @@
 
 	<!-- STARTS -->
 	<collection method="getWoofStarts" element="starting">
-		<item type="net.officefloor.model.woof.WoofStartModel"
-			element="start">
+		<item type="net.officefloor.model.woof.WoofStartModel" element="start">
 			<attributes>
 				<attribute method="getX" attribute="x" />
 				<attribute method="getY" attribute="y" />

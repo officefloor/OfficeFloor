@@ -2,7 +2,7 @@
 
 	<templates>
 		<template name="change" uri="change" path="example/Change.html"
-			class="net.example.ChangeClass">
+			class="net.example.ChangeClass" secure="false">
 			<output name="OUTPUT_1" argument-type="java.lang.Integer">
 				<resource name="RESOURCE" />
 			</output>
@@ -12,6 +12,9 @@
 			<output name="OUTPUT_3">
 				<template name="TEMPLATE_LINK" />
 			</output>
+			<link name="LINK_2" secure="true" />
+			<link name="LINK_3" secure="false" />
+			<redirect method="CHANGE" />
 			<extension class="COMET">
 				<property name="manual.publish.method.name" value="manualChange" />
 			</extension>

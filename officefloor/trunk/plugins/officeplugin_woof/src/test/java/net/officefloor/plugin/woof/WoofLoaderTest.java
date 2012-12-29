@@ -122,10 +122,16 @@ public class WoofLoaderTest extends OfficeFrameTestCase {
 		// Record loading templates
 		this.recordReturn(this.app, this.app.addHttpTemplate("example",
 				"WOOF/TemplateA.ofp", Template.class), templateA);
+		templateA.setTemplateSecure(true);
+		templateA.setLinkSecure("LINK_1", true);
+		templateA.setLinkSecure("LINK_2", false);
+		templateA.addRenderRedirectHttpMethod("REDIRECT_POST");
+		templateA.addRenderRedirectHttpMethod("REDIRECT_PUT");
 		this.recordReturn(
 				this.app,
 				this.app.addHttpTemplate("another", "WOOF/TemplateB.ofp", null),
 				templateB);
+		templateB.setTemplateSecure(false);
 
 		// Record loading sections
 		this.recordReturn(
@@ -135,7 +141,7 @@ public class WoofLoaderTest extends OfficeFrameTestCase {
 						Section.class.getName()), sectionA);
 		sectionA.addProperty("name.one", "value.one");
 		sectionA.addProperty("name.two", "value.two");
-		this.recordReturn(app,
+		this.recordReturn(this.app,
 				this.app.linkUri("example", sectionA, "INPUT_B"), link);
 		this.recordReturn(
 				this.app,
@@ -195,6 +201,7 @@ public class WoofLoaderTest extends OfficeFrameTestCase {
 		// Record loading template
 		this.recordReturn(this.app, this.app.addHttpTemplate("example",
 				"WOOF/Template.html", Template.class), template);
+		template.setTemplateSecure(false);
 
 		// Record extending with GWT
 		this.recordReturn(this.app, this.app.isObjectAvailable(new AutoWire(
@@ -234,6 +241,7 @@ public class WoofLoaderTest extends OfficeFrameTestCase {
 		// Record loading template
 		this.recordReturn(this.app, this.app.addHttpTemplate("example",
 				"WOOF/Template.html", Template.class), template);
+		template.setTemplateSecure(false);
 
 		// Record extending with GWT
 		this.recordReturn(this.app,
@@ -278,6 +286,7 @@ public class WoofLoaderTest extends OfficeFrameTestCase {
 		// Record loading template
 		this.recordReturn(this.app, this.app.addHttpTemplate("example",
 				"WOOF/Template.html", Template.class), template);
+		template.setTemplateSecure(false);
 
 		// Should not load further as unknown template extension
 

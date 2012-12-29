@@ -101,9 +101,13 @@ public class RefactorTemplateTest extends AbstractWoofChangesTestCase {
 		this.replayMockObjects();
 
 		// Refactor the template with same details
+		Map<String, Boolean> secureLinks = new HashMap<String, Boolean>();
+		secureLinks.put("LINK_1", Boolean.TRUE);
+		secureLinks.put("LINK_2", Boolean.FALSE);
 		Change<WoofTemplateModel> change = this.operations.refactorTemplate(
-				this.template, "example/Template.html",
-				"net.example.LogicClass", section, "template",
+				this.template, "template", "example/Template.html",
+				"net.example.LogicClass", section, true, secureLinks,
+				new String[] { "POST", "PUT", "OTHER" },
 				"net.example.client.ExampleGwtEntryPoint", new String[] {
 						"net.example.GwtServiceAsync",
 						"net.example.GwtAnotherAsync" }, true, "manualPublish",
@@ -156,9 +160,13 @@ public class RefactorTemplateTest extends AbstractWoofChangesTestCase {
 		this.replayMockObjects();
 
 		// Refactor the template with changed details
+		Map<String, Boolean> secureLinks = new HashMap<String, Boolean>();
+		secureLinks.put("LINK_2", Boolean.TRUE);
+		secureLinks.put("LINK_3", Boolean.FALSE);
 		Change<WoofTemplateModel> change = this.operations.refactorTemplate(
-				this.template, "example/Change.html",
-				"net.example.ChangeClass", section, "change",
+				this.template, "change", "example/Change.html",
+				"net.example.ChangeClass", section, false, secureLinks,
+				new String[] { "CHANGE" },
 				"net.example.client.ExampleGwtEntryPoint",
 				new String[] { "net.example.GwtChangeAsync" }, true,
 				"manualChange", this.templateOutputNameMapping);
@@ -196,8 +204,8 @@ public class RefactorTemplateTest extends AbstractWoofChangesTestCase {
 
 		// Refactor the template removing outputs and extensions
 		Change<WoofTemplateModel> change = this.operations.refactorTemplate(
-				this.template, "example/Remove.html", null, section, null,
-				null, null, false, null, null);
+				this.template, "remove", "example/Remove.html", null, section,
+				false, null, null, null, null, false, null, null);
 
 		// Validate change
 		this.assertChange(change, null, "Refactor Template", true);
@@ -245,9 +253,14 @@ public class RefactorTemplateTest extends AbstractWoofChangesTestCase {
 		this.replayMockObjects();
 
 		// Refactor the template removing outputs and extensions
+		Map<String, Boolean> secureLinks = new HashMap<String, Boolean>();
+		secureLinks.put("LINK_1", Boolean.TRUE);
+		secureLinks.put("LINK_2", Boolean.FALSE);
 		Change<WoofTemplateModel> change = this.operations.refactorTemplate(
-				this.template, "example/Add.html", "net.example.AddClass",
-				section, "add", "net.example.client.AddGwtEntryPoint",
+				this.template, "add", "example/Add.html",
+				"net.example.AddClass", section, true, secureLinks,
+				new String[] { "POST", "OTHER" },
+				"net.example.client.AddGwtEntryPoint",
 				new String[] { "net.example.GwtAddAsync" }, true, "manualAdd",
 				this.templateOutputNameMapping);
 

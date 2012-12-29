@@ -59,7 +59,7 @@ public class WoofRepositoryTest extends OfficeFrameTestCase {
 		// Create the raw WoOF to be connected
 		WoofModel woof = new WoofModel();
 		WoofTemplateModel template = new WoofTemplateModel("TEMPLATE", null,
-				null, null);
+				null, null, false);
 		woof.addWoofTemplate(template);
 		WoofTemplateOutputModel templateOutput = new WoofTemplateOutputModel(
 				"TEMPLATE_OUTPUT", null);
@@ -221,7 +221,7 @@ public class WoofRepositoryTest extends OfficeFrameTestCase {
 		// Create the WoOF (without connections)
 		WoofModel woof = new WoofModel();
 		WoofTemplateModel template = new WoofTemplateModel("TEMPLATE", null,
-				null, null);
+				null, null, false);
 		woof.addWoofTemplate(template);
 		WoofTemplateOutputModel templateOutput = new WoofTemplateOutputModel(
 				"TEMPLATE_OUTPUT", null);
@@ -339,5 +339,4 @@ public class WoofRepositoryTest extends OfficeFrameTestCase {
 		assertEquals("start - section input (input name)", "SECTION_INPUT",
 				startToSection.getInputName());
 	}
-
 }

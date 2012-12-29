@@ -65,6 +65,26 @@ public class WoofChangesImpl implements WoofChanges {
 	};
 
 	/**
+	 * {@link WoofTemplateLinkModel} {@link NameExtractor}.
+	 */
+	private static final NameExtractor<WoofTemplateLinkModel> TEMPLATE_LINK_NAME_EXTRACTOR = new NameExtractor<WoofTemplateLinkModel>() {
+		@Override
+		public String extractName(WoofTemplateLinkModel model) {
+			return model.getWoofTemplateLinkName();
+		}
+	};
+
+	/**
+	 * {@link WoofTemplateRedirectModel} {@link NameExtractor}.
+	 */
+	private static final NameExtractor<WoofTemplateRedirectModel> TEMPLATE_REDIRECT_NAME_EXTRACTOR = new NameExtractor<WoofTemplateRedirectModel>() {
+		@Override
+		public String extractName(WoofTemplateRedirectModel model) {
+			return model.getWoofTemplateRedirectHttpMethod();
+		}
+	};
+
+	/**
 	 * {@link WoofTemplateExtensionModel} {@link NameExtractor}.
 	 */
 	private static final NameExtractor<WoofTemplateExtensionModel> TEMPLATE_EXTENSION_NAME_EXTRACTOR = new NameExtractor<WoofTemplateExtensionModel>() {
@@ -301,7 +321,8 @@ public class WoofChangesImpl implements WoofChanges {
 	 * @param template
 	 *            {@link WoofTemplateModel}.
 	 */
-	private static void sortTemplateOutputsExtensions(WoofTemplateModel template) {
+	private static void sortTemplateConfiguration(WoofTemplateModel template) {
+
 		// Sort outputs keeping template render complete output last
 		Collections.sort(template.getOutputs(),
 				new Comparator<WoofTemplateOutputModel>() {
@@ -325,6 +346,12 @@ public class WoofChangesImpl implements WoofChanges {
 						}
 					}
 				});
+
+		// Sort the links
+		sortByName(template.getLinks(), TEMPLATE_LINK_NAME_EXTRACTOR);
+
+		// Sort the redirects
+		sortByName(template.getRedirects(), TEMPLATE_REDIRECT_NAME_EXTRACTOR);
 
 		// Sort the extensions
 		sortByName(template.getExtensions(), TEMPLATE_EXTENSION_NAME_EXTRACTOR);
@@ -710,9 +737,11 @@ public class WoofChangesImpl implements WoofChanges {
 	}
 
 	@Override
-	public Change<WoofTemplateModel> addTemplate(String templatePath,
-			String templateLogicClass, SectionType section, String uri,
-			String gwtEntryPointClassName,
+	public Change<WoofTemplateModel> addTemplate(String uri,
+			String templatePath, String templateLogicClass,
+			SectionType section, boolean isTemplateSecure,
+			Map<String, Boolean> linksSecure,
+			String[] renderRedirectHttpMethods, String gwtEntryPointClassName,
 			String[] gwtServiceAsyncInterfaceNames, boolean isEnableComet,
 			String cometManualPublishMethodName) {
 
@@ -722,7 +751,26 @@ public class WoofChangesImpl implements WoofChanges {
 
 		// Create the template
 		final WoofTemplateModel template = new WoofTemplateModel(templateName,
-				uri, templatePath, templateLogicClass);
+				uri, templatePath, templateLogicClass, isTemplateSecure);
+
+		// Determine if have links
+		if (linksSecure != null) {
+			// Add the links
+			for (String linkName : linksSecure.keySet()) {
+				Boolean isLinkSecure = linksSecure.get(linkName);
+				template.addLink(new WoofTemplateLinkModel(linkName,
+						isLinkSecure.booleanValue()));
+			}
+		}
+
+		// Determine if have redirects
+		if (renderRedirectHttpMethods != null) {
+			// Add the redirects
+			for (String redirectMethod : renderRedirectHttpMethods) {
+				template.addRedirect(new WoofTemplateRedirectModel(
+						redirectMethod));
+			}
+		}
 
 		// Add the outputs for the template
 		for (SectionOutputType output : section.getSectionOutputTypes()) {
@@ -817,8 +865,8 @@ public class WoofChangesImpl implements WoofChanges {
 			}
 		}
 
-		// Sort outputs and extensions
-		sortTemplateOutputsExtensions(template);
+		// Sort template configuration to ensure deterministic configuration
+		sortTemplateConfiguration(template);
 
 		// Return the change
 		return change;
@@ -826,9 +874,12 @@ public class WoofChangesImpl implements WoofChanges {
 
 	@Override
 	public Change<WoofTemplateModel> refactorTemplate(
-			final WoofTemplateModel template, final String templatePath,
-			final String templateLogicClass, SectionType sectionType,
-			final String uri, String gwtEntryPointClassName,
+			final WoofTemplateModel template, final String uri,
+			final String templatePath, final String templateLogicClass,
+			SectionType sectionType, final boolean isTemplateSecure,
+			final Map<String, Boolean> linksSecure,
+			final String[] renderRedirectHttpMethods,
+			String gwtEntryPointClassName,
 			String[] gwtServiceAsyncInterfaceNames, boolean isEnableComet,
 			final String cometManualPublishMethodName,
 			Map<String, String> templateOutputNameMapping) {
@@ -842,7 +893,7 @@ public class WoofChangesImpl implements WoofChanges {
 				template, "Sort outputs") {
 			@Override
 			public void apply() {
-				sortTemplateOutputsExtensions(template);
+				sortTemplateConfiguration(template);
 			}
 
 			@Override
@@ -859,10 +910,15 @@ public class WoofChangesImpl implements WoofChanges {
 
 		// Obtain the existing details
 		final String existingTemplateName = template.getWoofTemplateName();
+		final String existingUri = template.getUri();
 		final String existingTemplatePath = template.getTemplatePath();
 		final String existingTemplateClassName = template
 				.getTemplateClassName();
-		final String existingUri = template.getUri();
+		final boolean existingIsTemplateSecure = template.getIsTemplateSecure();
+		final List<WoofTemplateLinkModel> existingTemplateLinks = new ArrayList<WoofTemplateLinkModel>(
+				template.getLinks());
+		final List<WoofTemplateRedirectModel> existingTemplateRedirects = new ArrayList<WoofTemplateRedirectModel>(
+				template.getRedirects());
 
 		// Create change to attributes
 		Change<WoofTemplateModel> attributeChange = new AbstractChange<WoofTemplateModel>(
@@ -871,18 +927,65 @@ public class WoofChangesImpl implements WoofChanges {
 			public void apply() {
 				// Refactor details
 				template.setWoofTemplateName(newTemplateName);
+				template.setUri(uri);
 				template.setTemplatePath(templatePath);
 				template.setTemplateClassName(templateLogicClass);
-				template.setUri(uri);
+				template.setIsTemplateSecure(isTemplateSecure);
+
+				// Refactor the links
+				for (WoofTemplateLinkModel link : new ArrayList<WoofTemplateLinkModel>(
+						template.getLinks())) {
+					template.removeLink(link);
+				}
+				if (linksSecure != null) {
+					// Add the refactored links
+					for (String linkName : linksSecure.keySet()) {
+						Boolean isLinkSecure = linksSecure.get(linkName);
+						template.addLink(new WoofTemplateLinkModel(linkName,
+								isLinkSecure.booleanValue()));
+					}
+				}
+
+				// Refactor the redirects
+				for (WoofTemplateRedirectModel redirect : new ArrayList<WoofTemplateRedirectModel>(
+						template.getRedirects())) {
+					template.removeRedirect(redirect);
+				}
+				if (renderRedirectHttpMethods != null) {
+					// Add the redirects
+					for (String redirectMethod : renderRedirectHttpMethods) {
+						template.addRedirect(new WoofTemplateRedirectModel(
+								redirectMethod));
+					}
+				}
 			}
 
 			@Override
 			public void revert() {
 				// Revert attributes
 				template.setWoofTemplateName(existingTemplateName);
+				template.setUri(existingUri);
 				template.setTemplatePath(existingTemplatePath);
 				template.setTemplateClassName(existingTemplateClassName);
-				template.setUri(existingUri);
+				template.setIsTemplateSecure(existingIsTemplateSecure);
+
+				// Revert the links
+				for (WoofTemplateLinkModel link : new ArrayList<WoofTemplateLinkModel>(
+						template.getLinks())) {
+					template.removeLink(link);
+				}
+				for (WoofTemplateLinkModel link : existingTemplateLinks) {
+					template.addLink(link);
+				}
+
+				// Revert the redirects
+				for (WoofTemplateRedirectModel redirect : new ArrayList<WoofTemplateRedirectModel>(
+						template.getRedirects())) {
+					template.removeRedirect(redirect);
+				}
+				for (WoofTemplateRedirectModel redirect : existingTemplateRedirects) {
+					template.addRedirect(redirect);
+				}
 			}
 		};
 		changes.add(attributeChange);

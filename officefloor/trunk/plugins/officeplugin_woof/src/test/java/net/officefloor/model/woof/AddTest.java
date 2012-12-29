@@ -64,9 +64,9 @@ public class AddTest extends AbstractWoofChangesTestCase {
 				});
 
 		// Add the template
-		Change<WoofTemplateModel> change = this.operations.addTemplate(
+		Change<WoofTemplateModel> change = this.operations.addTemplate("uri",
 				"example/Template.ofp", "net.example.LogicClass", section,
-				"uri", null, null, false, null);
+				false, null, null, null, null, false, null);
 		change.getTarget().setX(100);
 		change.getTarget().setY(101);
 
@@ -77,6 +77,32 @@ public class AddTest extends AbstractWoofChangesTestCase {
 		change.apply();
 		WoofTemplateModel template = this.model.getWoofTemplates().get(0);
 		assertSame("Incorrect template", template, change.getTarget());
+	}
+
+	/**
+	 * Ensure able to add with links and redirect configuration.
+	 */
+	public void testAddSecureLinkRedirectConfiguredTemplate() {
+
+		// Create the section type
+		SectionType section = this
+				.constructSectionType(new SectionTypeConstructor() {
+					@Override
+					public void construct(SectionTypeContext context) {
+					}
+				});
+
+		// Add the template
+		Map<String, Boolean> secureLinks = new HashMap<String, Boolean>();
+		secureLinks.put("LINK_1", Boolean.TRUE);
+		secureLinks.put("LINK_2", Boolean.FALSE);
+		Change<WoofTemplateModel> change = this.operations.addTemplate(
+				"Template", "example/Template.ofp", "net.example.LogicClass",
+				section, true, secureLinks, new String[] { "POST", "PUT",
+						"OTHER" }, null, null, false, null);
+
+		// Validate change
+		this.assertChange(change, null, "Add Template", true);
 	}
 
 	/**
@@ -93,20 +119,14 @@ public class AddTest extends AbstractWoofChangesTestCase {
 				});
 
 		// Add the first template
-		this.operations.addTemplate("example/Template.ofp", "Class1", section,
-				"Template", null, null, false, null).apply();
+		this.operations.addTemplate("Template", "example/Template.ofp",
+				"Class1", section, false, null, null, null, null, false, null)
+				.apply();
 
 		// Add twice
-		this.operations.addTemplate("example/Template.ofp", "Class2", section,
-				"Template", null, null, false, null).apply();
-
-		// Add same name by template path
-		this.operations.addTemplate("example/Template.ofp", "Class3", section,
-				null, null, null, false, null).apply();
-
-		// Add template path resulting same name
-		this.operations.addTemplate("Template.html", "Class4", section, null,
-				null, null, false, null).apply();
+		this.operations.addTemplate("Template", "example/Template.ofp",
+				"Class2", section, false, null, null, null, null, false, null)
+				.apply();
 
 		// Ensure appropriately added templates
 		this.validateModel();
@@ -140,8 +160,8 @@ public class AddTest extends AbstractWoofChangesTestCase {
 		this.replayMockObjects();
 
 		// Add the template with GWT
-		this.operations.addTemplate("example/Template.ofp",
-				"net.example.LogicClass", section, TEMPLATE_URI,
+		this.operations.addTemplate(TEMPLATE_URI, "example/Template.ofp",
+				"net.example.LogicClass", section, false, null, null,
 				ENTRY_POINT_CLASS_NAME, SERVICE_ASYNC_INTERFACE_NAMES, false,
 				null).apply();
 
@@ -174,9 +194,9 @@ public class AddTest extends AbstractWoofChangesTestCase {
 		this.replayMockObjects();
 
 		// Add the template with Comet
-		this.operations.addTemplate("example/Template.ofp",
-				"net.example.LogicClass", section, TEMPLATE_URI, null, null,
-				true, PUBLISH_METHOD_NAME).apply();
+		this.operations.addTemplate(TEMPLATE_URI, "example/Template.ofp",
+				"net.example.LogicClass", section, false, null, null, null,
+				null, true, PUBLISH_METHOD_NAME).apply();
 
 		// Verify
 		this.verifyMockObjects();

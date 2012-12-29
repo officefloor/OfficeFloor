@@ -60,14 +60,16 @@ public class WoofModelRepositoryTest extends OfficeFrameTestCase {
 		// Validate the templates
 		// ----------------------------------------
 		assertList(new String[] { "getWoofTemplateName", "getUri",
-				"getTemplatePath", "getTemplateClassName", "getX", "getY" },
+				"getTemplatePath", "getTemplateClassName",
+				"getIsTemplateSecure", "getX", "getY" },
 				woof.getWoofTemplates(), new WoofTemplateModel("TEMPLATE_A",
 						"example", "example/TemplateA.ofp",
-						"net.example.ExampleClassA", null, null, null, null,
-						null, 300, 301), new WoofTemplateModel("TEMPLATE_B",
-						null, "example/TemplateB.ofp",
-						"net.example.ExampleClassB", null, null, null, null,
-						null, 302, 303));
+						"net.example.ExampleClassA", true, null, null, null,
+						null, null, null, null, 300, 301),
+				new WoofTemplateModel("TEMPLATE_B", "another",
+						"example/TemplateB.ofp", "net.example.ExampleClassB",
+						false, null, null, null, null, null, null, null, 302,
+						303));
 		WoofTemplateModel template = woof.getWoofTemplates().get(0);
 		assertList(new String[] { "getWoofTemplateOutputName",
 				"getArgumentType" }, template.getOutputs(),
@@ -86,6 +88,18 @@ public class WoofModelRepositoryTest extends OfficeFrameTestCase {
 		WoofTemplateOutputModel output3 = template.getOutputs().get(2);
 		assertProperties(new WoofTemplateOutputToWoofResourceModel("RESOURCE"),
 				output3.getWoofResource(), "getResourceName");
+
+		// Validate links
+		assertList(
+				new String[] { "getWoofTemplateLinkName", "getIsLinkSecure" },
+				template.getLinks(), new WoofTemplateLinkModel("LINK_1", true),
+				new WoofTemplateLinkModel("LINK_2", false));
+
+		// Validate redirect methods
+		assertList(new String[] { "getWoofTemplateRedirectHttpMethod" },
+				template.getRedirects(), new WoofTemplateRedirectModel(
+						"REDIRECT_POST"), new WoofTemplateRedirectModel(
+						"REDIRECT_PUT"));
 
 		// Validate Template extensions
 		assertList(new String[] { "getExtensionClassName" },
