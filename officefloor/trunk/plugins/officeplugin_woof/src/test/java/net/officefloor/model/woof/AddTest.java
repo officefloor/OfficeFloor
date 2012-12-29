@@ -128,6 +128,11 @@ public class AddTest extends AbstractWoofChangesTestCase {
 				"Class2", section, false, null, null, null, null, false, null)
 				.apply();
 
+		// Add again with absolute URI
+		this.operations.addTemplate("/Template", "example/Template.ofp",
+				"Class3", section, false, null, null, null, null, false, null)
+				.apply();
+
 		// Ensure appropriately added templates
 		this.validateModel();
 	}
