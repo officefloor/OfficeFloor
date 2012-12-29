@@ -444,19 +444,11 @@ public class WoofChangesImpl implements WoofChanges {
 	private static String getTemplateName(String templatePath, String uri,
 			WoofTemplateModel template, List<WoofTemplateModel> templates) {
 
-		// Obtain the base template name
+		// Name based on template URI
 		String templateName = uri;
-		if (CompileUtil.isBlank(templateName)) {
-			// Use simple name from template path
-			templateName = templatePath;
-			int index = templateName.lastIndexOf('/');
-			if (index >= 0) {
-				templateName = templateName.substring(index + "/".length());
-			}
-			index = templateName.indexOf('.');
-			if (index > 0) {
-				templateName = templateName.substring(0, index);
-			}
+		if (templateName.startsWith("/")) {
+			// Remove leading '/' for name
+			templateName = templateName.substring("/".length());
 		}
 
 		// Obtain the unique template name

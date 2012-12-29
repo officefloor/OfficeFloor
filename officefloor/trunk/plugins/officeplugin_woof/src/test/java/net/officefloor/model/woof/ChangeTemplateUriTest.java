@@ -95,23 +95,4 @@ public class ChangeTemplateUriTest extends AbstractWoofChangesTestCase {
 		this.verifyMockObjects();
 	}
 
-	/**
-	 * Ensure can clear URI.
-	 */
-	public void testClearUri() {
-
-		// Test
-		this.replayMockObjects();
-
-		// Change template to unique URI
-		Change<WoofTemplateModel> change = this.operations.changeTemplateUri(
-				this.template, null);
-
-		// Validate the change
-		this.assertChange(change, this.template, "Change Template URI", true);
-
-		// Verify
-		this.verifyMockObjects();
-	}
-
 }
