@@ -29,6 +29,7 @@ import net.officefloor.compile.spi.governance.source.GovernanceSource;
 import net.officefloor.compile.spi.section.source.SectionSource;
 import net.officefloor.model.change.Change;
 import net.officefloor.plugin.comet.internal.CometEvent;
+import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
 
 /**
  * Changes that can be made to a {@link WoofModel}.
@@ -83,15 +84,23 @@ public interface WoofChanges {
 	/**
 	 * Adds a {@link WoofTemplateModel}.
 	 * 
+	 * @param uri
+	 *            URI to the {@link WoofTemplateModel}.
 	 * @param templatePath
 	 *            Path to the template file.
 	 * @param templateLogicClass
 	 *            Name of the logic {@link Class} for the template.
 	 * @param sectionType
 	 *            {@link SectionType} for the {@link WoofTemplateModel}.
-	 * @param uri
-	 *            URI to the {@link WoofTemplateModel}. May be <code>null</code>
-	 *            if private {@link WoofTemplateModel}.
+	 * @param isTemplateSecure
+	 *            <code>true</code> for the {@link WoofTemplateModel} to require
+	 *            a secure {@link ServerHttpConnection}.
+	 * @param linksSecure
+	 *            Link secure configuration overriding {@link WoofTemplateModel}
+	 *            secure.
+	 * @param renderRedirectHttpMethods
+	 *            Listing of HTTP methods that require a redirect before
+	 *            rendering the {@link WoofTemplateModel}.
 	 * @param gwtEntryPointClassName
 	 *            GWT EntryPoint class name. May be <code>null</code> only if no
 	 *            GWT functionality is required.
@@ -105,9 +114,10 @@ public interface WoofChanges {
 	 *            handle publishing {@link CometEvent} instances.
 	 * @return {@link Change} to add the {@link WoofTemplateModel}.
 	 */
-	Change<WoofTemplateModel> addTemplate(String templatePath,
-			String templateLogicClass, SectionType sectionType, String uri,
-			String gwtEntryPointClassName,
+	Change<WoofTemplateModel> addTemplate(String uri, String templatePath,
+			String templateLogicClass, SectionType sectionType,
+			boolean isTemplateSecure, Map<String, Boolean> linksSecure,
+			String[] renderRedirectHttpMethods, String gwtEntryPointClassName,
 			String[] gwtServiceAsyncInterfaceNames, boolean isEnableComet,
 			String cometManualPublishMethodName);
 
@@ -116,6 +126,8 @@ public interface WoofChanges {
 	 * 
 	 * @param template
 	 *            {@link WoofTemplateModel} to refactor.
+	 * @param uri
+	 *            New URI for the {@link WoofTemplateModel}.
 	 * @param templatePath
 	 *            New template path for the {@link WoofTemplateModel}.
 	 * @param templateLogicClass
@@ -123,8 +135,15 @@ public interface WoofChanges {
 	 * @param sectionType
 	 *            {@link SectionType} for the refactored
 	 *            {@link WoofTemplateModel}.
-	 * @param uri
-	 *            New URI for the {@link WoofTemplateModel}.
+	 * @param isTemplateSecure
+	 *            <code>true</code> for the {@link WoofTemplateModel} to require
+	 *            a secure {@link ServerHttpConnection}.
+	 * @param linksSecure
+	 *            Link secure configuration overriding {@link WoofTemplateModel}
+	 *            secure.
+	 * @param renderRedirectHttpMethods
+	 *            Listing of HTTP methods that require a redirect before
+	 *            rendering the {@link WoofTemplateModel}.
 	 * @param gwtEntryPointClassName
 	 *            New GWT EntryPoint class name.
 	 * @param gwtServiceAsyncInterfaceNames
@@ -141,8 +160,10 @@ public interface WoofChanges {
 	 * @return {@link Change} to refactor the {@link WoofTemplateModel}.
 	 */
 	Change<WoofTemplateModel> refactorTemplate(WoofTemplateModel template,
-			String templatePath, String templateLogicClass,
-			SectionType sectionType, String uri, String gwtEntryPointClassName,
+			String uri, String templatePath, String templateLogicClass,
+			SectionType sectionType, boolean isTemplateSecure,
+			Map<String, Boolean> linksSecure,
+			String[] renderRedirectHttpMethods, String gwtEntryPointClassName,
 			String[] gwtServiceAsyncInterfaceNames, boolean isEnableComet,
 			String cometManualPublishMethodName,
 			Map<String, String> templateOutputNameMapping);

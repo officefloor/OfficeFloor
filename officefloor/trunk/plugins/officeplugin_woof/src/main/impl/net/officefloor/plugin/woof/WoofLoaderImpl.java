@@ -53,11 +53,13 @@ import net.officefloor.model.woof.WoofSectionOutputToWoofTemplateModel;
 import net.officefloor.model.woof.WoofStartModel;
 import net.officefloor.model.woof.WoofStartToWoofSectionInputModel;
 import net.officefloor.model.woof.WoofTemplateExtensionModel;
+import net.officefloor.model.woof.WoofTemplateLinkModel;
 import net.officefloor.model.woof.WoofTemplateModel;
 import net.officefloor.model.woof.WoofTemplateOutputModel;
 import net.officefloor.model.woof.WoofTemplateOutputToWoofResourceModel;
 import net.officefloor.model.woof.WoofTemplateOutputToWoofSectionInputModel;
 import net.officefloor.model.woof.WoofTemplateOutputToWoofTemplateModel;
+import net.officefloor.model.woof.WoofTemplateRedirectModel;
 import net.officefloor.plugin.web.http.application.HttpTemplateAutoWireSection;
 import net.officefloor.plugin.web.http.application.HttpTemplateAutoWireSectionExtension;
 import net.officefloor.plugin.web.http.application.WebAutoWireApplication;
@@ -149,6 +151,20 @@ public class WoofLoaderImpl implements WoofLoader {
 			// Configure the template
 			HttpTemplateAutoWireSection template = application.addHttpTemplate(
 					uri, templatePath, templateLogicClass);
+
+			// Configure secure for template
+			template.setTemplateSecure(templateModel.getIsTemplateSecure());
+			for (WoofTemplateLinkModel linkModel : templateModel.getLinks()) {
+				template.setLinkSecure(linkModel.getWoofTemplateLinkName(),
+						linkModel.getIsLinkSecure());
+			}
+
+			// Configure HTTP methods for redirect
+			for (WoofTemplateRedirectModel redirectModel : templateModel
+					.getRedirects()) {
+				template.addRenderRedirectHttpMethod(redirectModel
+						.getWoofTemplateRedirectHttpMethod());
+			}
 
 			// Maintain reference to template by name
 			templates.put(templateName, template);

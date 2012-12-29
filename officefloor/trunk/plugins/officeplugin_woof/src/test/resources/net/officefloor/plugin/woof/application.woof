@@ -2,7 +2,7 @@
     
     <templates>
         <template name="TEMPLATE_A" uri="example" path="WOOF/TemplateA.ofp"
-         class="net.officefloor.plugin.woof.WoofLoaderTest$Template" x="20" y="20">
+         class="net.officefloor.plugin.woof.WoofLoaderTest$Template" secure="true" x="20" y="20">
             <output name="OUTPUT_1" argument-type="java.lang.Integer">
                 <input section="SECTION_A" input="INPUT_A"/>
             </output>
@@ -13,6 +13,10 @@
                 <resource name="RESOURCE"/>
             </output>
             <output name="OUTPUT_4"/>
+            <link name="LINK_1" secure="true"/>
+            <link name="LINK_2" secure="false"/>
+            <redirect method="REDIRECT_POST"/>
+            <redirect method="REDIRECT_PUT"/>
         </template>
         <template name="TEMPLATE_B" uri="another" path="WOOF/TemplateB.ofp" />
     </templates>
