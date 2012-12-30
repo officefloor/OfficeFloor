@@ -36,6 +36,7 @@ import net.officefloor.eclipse.common.dialog.input.InputHandler;
 import net.officefloor.eclipse.common.dialog.input.InputListener;
 import net.officefloor.eclipse.common.dialog.input.csv.InputFactory;
 import net.officefloor.eclipse.common.dialog.input.csv.ListInput;
+import net.officefloor.eclipse.common.dialog.input.impl.BeanListInput;
 import net.officefloor.eclipse.common.dialog.input.impl.BooleanInput;
 import net.officefloor.eclipse.common.dialog.input.impl.ClassMethodInput;
 import net.officefloor.eclipse.common.dialog.input.impl.ClasspathClassInput;
@@ -43,12 +44,16 @@ import net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart;
 import net.officefloor.eclipse.dialog.input.WoofFileInput;
 import net.officefloor.eclipse.extension.ExtensionUtil;
 import net.officefloor.eclipse.extension.sectionsource.SectionSourceExtensionContext;
+import net.officefloor.eclipse.extension.util.SourceExtensionUtil;
 import net.officefloor.eclipse.util.EclipseUtil;
 import net.officefloor.eclipse.web.HttpTemplateSectionSourceExtension;
 import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
 import net.officefloor.frame.spi.source.ResourceSource;
+import net.officefloor.model.woof.WoofTemplateLinkModel;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
+import net.officefloor.plugin.web.http.template.HttpTemplateWorkSource;
 import net.officefloor.plugin.web.http.template.parse.HttpTemplate;
+import net.officefloor.plugin.web.http.template.section.HttpTemplateInitialWorkSource;
 import net.officefloor.plugin.web.http.template.section.HttpTemplateSectionSource;
 import net.officefloor.plugin.woof.WoofContextConfigurable;
 import net.officefloor.plugin.woof.WoofOfficeFloorSource;
@@ -115,6 +120,11 @@ public class HttpTemplateWizardPage extends WizardPage implements
 	private final PropertyList properties;
 
 	/**
+	 * URI path for the {@link HttpTemplate}.
+	 */
+	private final Property uriPath;
+
+	/**
 	 * Path to the {@link HttpTemplate}.
 	 */
 	private String templatePath;
@@ -122,12 +132,18 @@ public class HttpTemplateWizardPage extends WizardPage implements
 	/**
 	 * Logic class name.
 	 */
-	private String logicClassName;
+	private final Property logicClassName;
 
 	/**
-	 * URI path for the {@link HttpTemplate}.
+	 * Indicates if the template is secure.
 	 */
-	private String uriPath;
+	private final Property isTemplateSecure;
+
+	/**
+	 * HTTP methods that trigger a redirect on rendeirng the
+	 * {@link HttpTemplate}.
+	 */
+	private final Property renderRedirectHttpMethods;
 
 	/**
 	 * GWT EntryPoint class name.
@@ -220,18 +236,66 @@ public class HttpTemplateWizardPage extends WizardPage implements
 
 		// Create the property list (and load existing properties)
 		this.properties = this.compiler.createPropertyList();
+		String initialUriPath = null;
+		String initialLogicClassName = null;
+		String initialIsTemplateSecure = null;
+		String initialRenderRedirectHttpMethods = null;
 		if (this.templateInstance != null) {
-			// Add the properties from base instance
-			this.properties.addProperty(
-					HttpTemplateSectionSource.PROPERTY_TEMPLATE_URI).setValue(
-					this.templateInstance.getUri());
-			this.properties.addProperty(
-					HttpTemplateSectionSource.PROPERTY_CLASS_NAME).setValue(
-					this.templateInstance.getLogicClassName());
+			// Provide initial values from existing configuration
+			initialUriPath = this.templateInstance.getUri();
+			initialLogicClassName = this.templateInstance.getLogicClassName();
+			initialIsTemplateSecure = String.valueOf(this.templateInstance
+					.isTemplateSecure());
+
+			// Create the render redirect HTTP methods value
+			String[] initialRenderRedirectHttpMethodsList = this.templateInstance
+					.getRenderRedirectHttpMethods();
+			if (initialRenderRedirectHttpMethodsList != null) {
+				StringBuilder httpMethods = new StringBuilder();
+				boolean isFirst = true;
+				for (String httpMethod : initialRenderRedirectHttpMethodsList) {
+					if (!isFirst) {
+						httpMethods.append(", ");
+					}
+					isFirst = false;
+					httpMethods.append(httpMethod);
+				}
+				initialRenderRedirectHttpMethods = httpMethods.toString();
+			}
 		}
+
+		// Add the properties
+		this.uriPath = this
+				.addProperty(HttpTemplateSectionSource.PROPERTY_TEMPLATE_URI,
+						initialUriPath);
+		this.logicClassName = this.addProperty(
+				HttpTemplateSectionSource.PROPERTY_CLASS_NAME,
+				initialLogicClassName);
+		this.isTemplateSecure = this.addProperty(
+				HttpTemplateWorkSource.PROPERTY_TEMPLATE_SECURE,
+				initialIsTemplateSecure);
+		this.renderRedirectHttpMethods = this
+				.addProperty(
+						HttpTemplateInitialWorkSource.PROPERTY_RENDER_REDIRECT_HTTP_METHODS,
+						initialRenderRedirectHttpMethods);
 
 		// Specify the title
 		this.setTitle("Add Template");
+	}
+
+	/**
+	 * Adds a {@link Property}.
+	 * 
+	 * @param propertyName
+	 *            Name of the {@link Property}.
+	 * @param propertyValue
+	 *            Value for the {@link Property}.
+	 * @return Added {@link Property}.
+	 */
+	private Property addProperty(String propertyName, String propertyValue) {
+		Property property = this.properties.addProperty(propertyName);
+		property.setValue(propertyValue);
+		return property;
 	}
 
 	/**
@@ -240,7 +304,7 @@ public class HttpTemplateWizardPage extends WizardPage implements
 	 * @return URI path.
 	 */
 	public String getUriPath() {
-		return (EclipseUtil.isBlank(this.uriPath) ? null : this.uriPath.trim());
+		return this.uriPath.getValue();
 	}
 
 	/**
@@ -258,7 +322,8 @@ public class HttpTemplateWizardPage extends WizardPage implements
 	 * @return Logic class name.
 	 */
 	public String getLogicClassName() {
-		return this.logicClassName;
+		String className = this.logicClassName.getValue();
+		return EclipseUtil.isBlank(className) ? null : className;
 	}
 
 	/**
@@ -278,8 +343,7 @@ public class HttpTemplateWizardPage extends WizardPage implements
 	 *         secure {@link ServerHttpConnection}.
 	 */
 	public boolean isTemplateSecure() {
-		// TODO implement
-		throw new UnsupportedOperationException("TODO implement");
+		return Boolean.parseBoolean(this.isTemplateSecure.getValue());
 	}
 
 	/**
@@ -300,8 +364,15 @@ public class HttpTemplateWizardPage extends WizardPage implements
 	 *         {@link HttpTemplate}.
 	 */
 	public String[] getRenderRedirectHttpMethods() {
-		// TODO implement
-		throw new UnsupportedOperationException("TODO implement");
+		String[] httpMethods = null;
+		String httpMethodsValue = this.renderRedirectHttpMethods.getValue();
+		if (!(EclipseUtil.isBlank(httpMethodsValue))) {
+			httpMethods = httpMethodsValue.split(",");
+			for (int i = 0; i < httpMethods.length; i++) {
+				httpMethods[i] = httpMethods[i].trim();
+			}
+		}
+		return httpMethods;
 	}
 
 	/**
@@ -385,8 +456,6 @@ public class HttpTemplateWizardPage extends WizardPage implements
 
 		// Obtain initial values
 		String initialTemplatePath = "";
-		String initialLogicClassName = "";
-		// URI path already set in properties
 		String initialGwtEntryPoint = "";
 		String[] initialGwtAsyncInterfaces = new String[0];
 		boolean initiallyEnableComet = false;
@@ -394,8 +463,6 @@ public class HttpTemplateWizardPage extends WizardPage implements
 		if (this.templateInstance != null) {
 			initialTemplatePath = getTextValue(this.templateInstance
 					.getTemplatePath());
-			initialLogicClassName = getTextValue(this.templateInstance
-					.getLogicClassName());
 			initialGwtEntryPoint = getTextValue(this.templateInstance
 					.getGwtEntryPointClassName());
 			initialGwtAsyncInterfaces = this.templateInstance
@@ -422,6 +489,11 @@ public class HttpTemplateWizardPage extends WizardPage implements
 					+ WoofOfficeFloorSource.WEBXML_FILE_PATH);
 		}
 
+		// Provide means to specify URI path
+		SourceExtensionUtil.createPropertyText("URI path",
+				HttpTemplateSectionSource.PROPERTY_TEMPLATE_URI, null, page,
+				this, null);
+
 		// Provide means to specify template location
 		new Label(page, SWT.NONE).setText("Template path: ");
 		this.templatePath = initialTemplatePath;
@@ -444,8 +516,49 @@ public class HttpTemplateWizardPage extends WizardPage implements
 		path.getControl().setLayoutData(
 				new GridData(SWT.FILL, SWT.BEGINNING, true, false));
 
-		// Provide means to configure the properties
-		this.templateExtension.createControl(page, this);
+		// Provide means to specify logic class
+		SourceExtensionUtil
+				.createPropertyClass("Logic class",
+						HttpTemplateSectionSource.PROPERTY_CLASS_NAME, page,
+						this, null);
+
+		// Provide means to specify if secure
+		SourceExtensionUtil.createPropertyCheckbox("Template secure",
+				HttpTemplateWorkSource.PROPERTY_TEMPLATE_SECURE, false,
+				String.valueOf(true), String.valueOf(false), page, this, null);
+
+		// Provide means to configure the links
+		new Label(page, SWT.NONE).setText("Links secure: ");
+		BeanListInput<WoofTemplateLinkModel> linksInput = new BeanListInput<WoofTemplateLinkModel>(
+				WoofTemplateLinkModel.class, true);
+		linksInput.addProperty("WoofTemplateLinkName", 4, "Link");
+		linksInput.addProperty("IsLinkSecure", 1, "Secure");
+		InputHandler<WoofTemplateLinkModel[]> links = new InputHandler<WoofTemplateLinkModel[]>(
+				page, linksInput, null, new InputListener() {
+					@Override
+					public void notifyValueChanged(Object value) {
+						// Specify the links and indicate changed
+
+						// TODO specify links
+						page.layout();
+
+						HttpTemplateWizardPage.this.handleChange();
+					}
+
+					@Override
+					public void notifyValueInvalid(String message) {
+						HttpTemplateWizardPage.this.setErrorMessage(message);
+					}
+				});
+		links.getControl().setLayoutData(
+				new GridData(SWT.FILL, SWT.BEGINNING, true, false));
+
+		// Provide means to specify URI path
+		SourceExtensionUtil
+				.createPropertyText(
+						"Render Redirect HTTP methods",
+						HttpTemplateInitialWorkSource.PROPERTY_RENDER_REDIRECT_HTTP_METHODS,
+						null, page, this, null);
 
 		// Provide means to specify GWT extension
 		new Label(page, SWT.NONE).setText("GWT Enty Point Class: ");
@@ -519,7 +632,8 @@ public class HttpTemplateWizardPage extends WizardPage implements
 		new Label(page, SWT.NONE).setText("Comet Manual Publish Method: ");
 		this.cometManualPublishMethodInput = new ClassMethodInput(
 				this.classLoader);
-		this.cometManualPublishMethodInput.setClassName(initialLogicClassName);
+		this.cometManualPublishMethodInput.setClassName(this.logicClassName
+				.getValue());
 		this.cometManualPublishMethodName = new InputHandler<String>(page,
 				this.cometManualPublishMethodInput,
 				initialCometManualPublishMethodName, new InputListener() {
@@ -568,12 +682,7 @@ public class HttpTemplateWizardPage extends WizardPage implements
 		this.sectionType = null;
 
 		// Ensure have template URI path
-		Property propertyUriPath = this.properties
-				.getOrAddProperty(HttpTemplateSectionSource.PROPERTY_TEMPLATE_URI);
-		String propertyUriPathValue = propertyUriPath.getValue();
-		this.uriPath = (EclipseUtil.isBlank(propertyUriPathValue) ? null
-				: propertyUriPathValue);
-		if (EclipseUtil.isBlank(this.uriPath)) {
+		if (EclipseUtil.isBlank(this.uriPath.getValue())) {
 			this.setErrorMessage("Must specify URI path");
 			this.setPageComplete(false);
 			return;
@@ -586,19 +695,7 @@ public class HttpTemplateWizardPage extends WizardPage implements
 			return;
 		}
 
-		// Obtain the possible logic class
-		Property propertyLogicClass = this.properties
-				.getProperty(HttpTemplateSectionSource.PROPERTY_CLASS_NAME);
-		String propertyLogicClassName = (propertyLogicClass == null ? null
-				: propertyLogicClass.getValue());
-		this.logicClassName = (EclipseUtil.isBlank(propertyLogicClassName) ? null
-				: propertyLogicClassName);
-		
-		// TODO determine if template secure
-		
 		// TODO determine specific link secure overrides
-		
-		// TODO determine render HTTP methods 
 
 		// Obtain the HTTP Template Section Source class
 		Class sectionSourceClass = this.templateExtension

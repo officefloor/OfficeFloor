@@ -536,6 +536,35 @@ public class SourceExtensionUtil {
 	 * @param container
 	 *            {@link Composite} to add display {@link Control} instances.
 	 * @param context
+	 *            {@link SectionSourceExtensionContext}.
+	 * @param listener
+	 *            {@link PropertyValueChangeListener}. May be <code>null</code>.
+	 * @return {@link Property} for the {@link SWT#CHECK} {@link Button}.
+	 */
+	public static Property createPropertyCheckbox(String label, String name,
+			boolean defaultValue, String trueValue, String falseValue,
+			Composite container, SectionSourceExtensionContext context,
+			PropertyValueChangeListener listener) {
+		return createPropertyCheckbox(label, name, defaultValue, trueValue,
+				falseValue, container, new SectionGeneric(context), listener);
+	}
+
+	/**
+	 * Creates the display for the input {@link Property}.
+	 * 
+	 * @param label
+	 *            Label for the {@link Property}.
+	 * @param name
+	 *            Name of the {@link Property}.
+	 * @param defaultValue
+	 *            Default value for the {@link Property}.
+	 * @param trueValue
+	 *            Value should {@link Property} be checked.
+	 * @param falseValue
+	 *            Value should {@link Property} be unchecked.
+	 * @param container
+	 *            {@link Composite} to add display {@link Control} instances.
+	 * @param context
 	 *            {@link GenericSourceExtensionContext}.
 	 * @param listener
 	 *            {@link PropertyValueChangeListener}. May be <code>null</code>.

@@ -30,6 +30,7 @@ import org.eclipse.swt.widgets.Combo;
 
 import net.officefloor.eclipse.common.dialog.input.Input;
 import net.officefloor.eclipse.common.dialog.input.InputContext;
+import net.officefloor.eclipse.util.EclipseUtil;
 
 /**
  * {@link Input} to select a {@link Method} name for a {@link Class}.
@@ -73,10 +74,12 @@ public class ClassMethodInput implements Input<Combo> {
 
 		// Obtain the class (resetting to null if not able to obtain)
 		this.clazz = null;
-		try {
-			this.clazz = this.classLoader.loadClass(className);
-		} catch (ClassNotFoundException ex) {
-			// Ignore and leave no class
+		if (!(EclipseUtil.isBlank(className))) {
+			try {
+				this.clazz = this.classLoader.loadClass(className);
+			} catch (ClassNotFoundException ex) {
+				// Ignore and leave no class
+			}
 		}
 
 		// Load the methods for the class

@@ -47,6 +47,8 @@ import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Button;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.swt.widgets.TableItem;
@@ -56,7 +58,7 @@ import org.eclipse.swt.widgets.TableItem;
  * 
  * @author Daniel Sagenschneider
  */
-public class BeanListInput<B> implements Input<Table> {
+public class BeanListInput<B> implements Input<Control> {
 
 	/**
 	 * Marker to indicate a bean.
@@ -87,6 +89,11 @@ public class BeanListInput<B> implements Input<Table> {
 	 * Indicates to include the buttons.
 	 */
 	private final boolean isIncludeButtons;
+
+	/**
+	 * Parent {@link Composite}.
+	 */
+	private Composite parent;
 
 	/**
 	 * {@link Table}.
@@ -141,19 +148,35 @@ public class BeanListInput<B> implements Input<Table> {
 	 *            Weight for the width.
 	 */
 	public void addProperty(String propertyName, int weight) {
+		this.addProperty(propertyName, weight, null);
+	}
+
+	/**
+	 * <p>
+	 * Adds property to be populated on the bean.
+	 * <p>
+	 * This may NOT be called after {@link #buildControl(InputContext)}.
+	 * 
+	 * @param propertyName
+	 *            Name of the property on the bean.
+	 * @param weight
+	 *            Weight for the width.
+	 * @param label
+	 *            Label for column header of property.
+	 */
+	public void addProperty(String propertyName, int weight, String label) {
 
 		// Ensure properties are not added after building control
 		if (this.tableViewer != null) {
-			LogUtil
-					.logError("Can not add properties after building table (property: "
-							+ propertyName + ")");
+			LogUtil.logError("Can not add properties after building table (property: "
+					+ propertyName + ")");
 			return;
 		}
 
 		// Add the property
 		this.beanPropertyOrder.add(propertyName);
 		this.beanProperties.put(propertyName, new BeanProperty(propertyName,
-				weight));
+				weight, label));
 	}
 
 	/**
@@ -170,6 +193,11 @@ public class BeanListInput<B> implements Input<Table> {
 		if (this.tableViewer != null) {
 			this.tableViewer.add(bean);
 		}
+
+		// Layout change
+		if (this.parent != null) {
+			this.parent.layout();
+		}
 	}
 
 	/**
@@ -185,6 +213,11 @@ public class BeanListInput<B> implements Input<Table> {
 		// Remove from viewer
 		if (this.tableViewer != null) {
 			this.tableViewer.remove(bean);
+		}
+
+		// Layout change
+		if (this.parent != null) {
+			this.parent.layout();
 		}
 	}
 
@@ -204,8 +237,11 @@ public class BeanListInput<B> implements Input<Table> {
 	@Override
 	public Table buildControl(final InputContext context) {
 
+		// Obtain the parent for refreshing layout
+		this.parent = context.getParent();
+
 		// Create the table
-		this.table = new Table(context.getParent(),
+		this.table = new Table(this.parent,
 				(SWT.SINGLE | SWT.BORDER | SWT.H_SCROLL | SWT.V_SCROLL
 						| SWT.FULL_SELECTION | SWT.HIDE_SELECTION));
 
@@ -235,7 +271,7 @@ public class BeanListInput<B> implements Input<Table> {
 				this.layout.addColumnData(new ColumnWeightData(property
 						.getWeight()));
 				TableColumn column = new TableColumn(this.table, SWT.LEFT);
-				column.setText(propertyName);
+				column.setText(property.label);
 			}
 		}
 
@@ -243,7 +279,7 @@ public class BeanListInput<B> implements Input<Table> {
 		this.tableViewer = new TableViewer(this.table);
 		this.tableViewer.setUseHashlookup(true);
 
-		// Specify the columns (and their names)
+		// Specify the columns
 		String[] columnNames = new String[this.beanPropertyOrder.size()];
 		for (int i = 0; i < columnNames.length; i++) {
 			columnNames[i] = this.beanPropertyOrder.get(i);
@@ -328,7 +364,7 @@ public class BeanListInput<B> implements Input<Table> {
 	}
 
 	@Override
-	public List<B> getValue(Table control, InputContext context) {
+	public List<B> getValue(Control control, InputContext context) {
 		return this.beans;
 	}
 
@@ -348,6 +384,16 @@ public class BeanListInput<B> implements Input<Table> {
 		private final int weight;
 
 		/**
+		 * Label for column header of property.
+		 */
+		public final String label;
+
+		/**
+		 * Type of the property.
+		 */
+		private final Class<?> type;
+
+		/**
 		 * Access {@link Method}.
 		 */
 		private final Method accessor;
@@ -364,10 +410,13 @@ public class BeanListInput<B> implements Input<Table> {
 		 *            Property Name.
 		 * @param weight
 		 *            Weight of the column width for this property.
+		 * @param label
+		 *            Label for column header of property.
 		 */
-		public BeanProperty(String name, int weight) {
+		public BeanProperty(String name, int weight, String label) {
 			this.name = name;
 			this.weight = weight;
+			this.label = (label == null ? this.name : label);
 
 			// Transform name to method name
 			String methodName = name.replace(" ", "");
@@ -386,11 +435,15 @@ public class BeanListInput<B> implements Input<Table> {
 			}
 			this.accessor = accessMethod;
 
+			// Obtain the property type (defaults to string)
+			this.type = (this.accessor == null ? String.class : this.accessor
+					.getReturnType());
+
 			// Attempt to obtain the mutator (not necessary)
 			Method method = null;
 			try {
 				method = BeanListInput.this.beanType.getMethod("set"
-						+ methodName, new Class[] { String.class });
+						+ methodName, new Class[] { this.type });
 			} catch (Exception ex) {
 				// No mutator
 			}
@@ -413,13 +466,13 @@ public class BeanListInput<B> implements Input<Table> {
 		 *            Bean to obtain the property value.
 		 * @return Value of the bean's property.
 		 */
-		public String getValue(B bean) {
+		public Object getValue(B bean) {
 			try {
 				// Obtain the return of the bean's accessor
 				Object value = this.accessor.invoke(bean);
 
 				// Return the value
-				return (value == null ? "" : value.toString());
+				return value;
 
 			} catch (Exception ex) {
 				LogUtil.logError("Failed to get value for property "
@@ -445,7 +498,7 @@ public class BeanListInput<B> implements Input<Table> {
 		 * @param value
 		 *            Value to set on the property of the bean.
 		 */
-		public void setValue(B bean, String value) {
+		public void setValue(B bean, Object value) {
 
 			// Only set value if have mutator
 			if (this.mutator == null) {
@@ -483,12 +536,9 @@ public class BeanListInput<B> implements Input<Table> {
 		}
 
 		/*
-		 * (non-Javadoc)
-		 * 
-		 * @see
-		 * org.eclipse.jface.viewers.ICellModifier#canModify(java.lang.Object,
-		 * java.lang.String)
+		 * ============= ICellModifier ===========================
 		 */
+
 		@Override
 		public boolean canModify(Object element, String property) {
 
@@ -505,13 +555,6 @@ public class BeanListInput<B> implements Input<Table> {
 			return beanProperty.canModify();
 		}
 
-		/*
-		 * (non-Javadoc)
-		 * 
-		 * @see
-		 * org.eclipse.jface.viewers.ICellModifier#getValue(java.lang.Object,
-		 * java.lang.String)
-		 */
 		@Override
 		@SuppressWarnings("unchecked")
 		public Object getValue(Object element, String property) {
@@ -522,18 +565,12 @@ public class BeanListInput<B> implements Input<Table> {
 
 			// Obtain the property value
 			B bean = (B) element;
-			String value = beanProperty.getValue(bean);
+			Object value = beanProperty.getValue(bean);
 
 			// Return the value
 			return value;
 		}
 
-		/*
-		 * (non-Javadoc)
-		 * 
-		 * @see org.eclipse.jface.viewers.ICellModifier#modify(java.lang.Object,
-		 * java.lang.String, java.lang.Object)
-		 */
 		@Override
 		@SuppressWarnings("unchecked")
 		public void modify(Object element, String property, Object value) {
@@ -549,7 +586,7 @@ public class BeanListInput<B> implements Input<Table> {
 
 			// Set the property
 			B bean = (B) element;
-			beanProperty.setValue(bean, value.toString());
+			beanProperty.setValue(bean, value);
 
 			// Update the view with changes
 			BeanListInput.this.tableViewer.update(bean,
@@ -557,6 +594,9 @@ public class BeanListInput<B> implements Input<Table> {
 
 			// Notify change
 			this.inputContext.notifyValueChanged(BeanListInput.this.beans);
+
+			// Layout the change
+			BeanListInput.this.parent.layout();
 		}
 	}
 
@@ -567,24 +607,14 @@ public class BeanListInput<B> implements Input<Table> {
 			ITableLabelProvider {
 
 		/*
-		 * (non-Javadoc)
-		 * 
-		 * @see
-		 * org.eclipse.jface.viewers.ITableLabelProvider#getColumnImage(java
-		 * .lang.Object, int)
+		 * =============== ITableLabelProvider =======================
 		 */
+
 		@Override
 		public Image getColumnImage(Object element, int columnIndex) {
 			return null;
 		}
 
-		/*
-		 * (non-Javadoc)
-		 * 
-		 * @see
-		 * org.eclipse.jface.viewers.ITableLabelProvider#getColumnText(java.
-		 * lang.Object, int)
-		 */
 		@Override
 		@SuppressWarnings("unchecked")
 		public String getColumnText(Object element, int columnIndex) {
@@ -604,10 +634,10 @@ public class BeanListInput<B> implements Input<Table> {
 
 			// Obtain the value
 			B bean = (B) element;
-			String value = beanProperty.getValue(bean);
+			Object value = beanProperty.getValue(bean);
 
 			// Return the value
-			return value;
+			return (value == null ? "" : value.toString());
 		}
 	}
 
@@ -617,35 +647,20 @@ public class BeanListInput<B> implements Input<Table> {
 	private class PropertyContentProvider implements IStructuredContentProvider {
 
 		/*
-		 * (non-Javadoc)
-		 * 
-		 * @see
-		 * org.eclipse.jface.viewers.IStructuredContentProvider#getElements(
-		 * java.lang.Object)
+		 * ============== IStructuredContentProvider ========================
 		 */
+
 		@Override
 		public Object[] getElements(Object inputElement) {
 			// Return the beans
 			return BeanListInput.this.beans.toArray();
 		}
 
-		/*
-		 * (non-Javadoc)
-		 * 
-		 * @see org.eclipse.jface.viewers.IContentProvider#dispose()
-		 */
 		@Override
 		public void dispose() {
 			// Do nothing
 		}
 
-		/*
-		 * (non-Javadoc)
-		 * 
-		 * @see
-		 * org.eclipse.jface.viewers.IContentProvider#inputChanged(org.eclipse
-		 * .jface.viewers.Viewer, java.lang.Object, java.lang.Object)
-		 */
 		@Override
 		public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
 			// Do nothing
