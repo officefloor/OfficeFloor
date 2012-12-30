@@ -69,10 +69,14 @@ public class RefactorTemplateOperation extends
 		}
 
 		// Obtain the template details
+		String uri = instance.getUri();
 		String path = instance.getTemplatePath();
 		String logicClassName = instance.getLogicClassName();
 		SectionType type = instance.getTemplateSectionType();
-		String uri = instance.getUri();
+		boolean isTemplateSecure = instance.isTemplateSecure();
+		Map<String, Boolean> linksSecure = instance.getLinksSecure();
+		String[] renderRedirectHttpMethods = instance
+				.getRenderRedirectHttpMethods();
 		String entryPointClassName = instance.getGwtEntryPointClassName();
 		String[] serviceAsyncInterfaces = instance
 				.getGwtServerAsyncInterfaceNames();
@@ -83,7 +87,8 @@ public class RefactorTemplateOperation extends
 
 		// Create change to refactor template
 		Change<WoofTemplateModel> change = changes.refactorTemplate(template,
-				path, logicClassName, type, uri, entryPointClassName,
+				uri, path, logicClassName, type, isTemplateSecure, linksSecure,
+				renderRedirectHttpMethods, entryPointClassName,
 				serviceAsyncInterfaces, isEnableComet,
 				cometManualPublishMethodName, outputNameMapping);
 

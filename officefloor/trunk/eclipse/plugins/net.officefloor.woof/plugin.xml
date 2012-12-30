@@ -9,11 +9,11 @@
 			id="net.officefloor.eclipse.wizards.WoofNewWizard" name="WoOF">
 		</wizard>
 	</extension>
-	<extension id="net.officefloor.editors" name="Editors"
+	<extension id="net.officefloor.woof.WoofEditors" name="WoOF Editors"
 		point="org.eclipse.ui.editors">
 		<editor class="net.officefloor.eclipse.woof.WoofEditor"
 			contributorClass="net.officefloor.eclipse.common.editor.CoreEditorActionContributor"
-			default="true" extensions="woof" icon="icons/Woof.png" id="net.officefloor.editors.woof"
+			default="true" extensions="woof" icon="icons/Woof.png" id="net.officefloor.woof.WoofEditor"
 			name="WoOF Editor" />
 	</extension>
  <extension

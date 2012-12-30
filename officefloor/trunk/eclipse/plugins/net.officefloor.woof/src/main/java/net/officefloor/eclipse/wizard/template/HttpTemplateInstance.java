@@ -20,14 +20,19 @@ package net.officefloor.eclipse.wizard.template;
 
 import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
 import net.officefloor.compile.section.SectionOutputType;
 import net.officefloor.compile.section.SectionType;
 import net.officefloor.model.woof.WoofChanges;
+import net.officefloor.model.woof.WoofTemplateLinkModel;
 import net.officefloor.model.woof.WoofTemplateModel;
 import net.officefloor.model.woof.WoofTemplateOutputModel;
+import net.officefloor.model.woof.WoofTemplateRedirectModel;
+import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
 import net.officefloor.plugin.web.http.template.parse.HttpTemplate;
 
 /**
@@ -36,6 +41,11 @@ import net.officefloor.plugin.web.http.template.parse.HttpTemplate;
  * @author Daniel Sagenschneider
  */
 public class HttpTemplateInstance {
+
+	/**
+	 * URI.
+	 */
+	private final String uri;
 
 	/**
 	 * Path to the {@link HttpTemplate}.
@@ -53,9 +63,21 @@ public class HttpTemplateInstance {
 	private final SectionType sectionType;
 
 	/**
-	 * URI.
+	 * Indicates if the {@link HttpTemplate} requires a secure
+	 * {@link ServerHttpConnection}.
 	 */
-	private final String uri;
+	private final boolean isTemplateSecure;
+
+	/**
+	 * {@link HttpTemplate} links requiring specific secure configuration.
+	 */
+	private final Map<String, Boolean> linksSecure;
+
+	/**
+	 * HTTP methods that trigger a redirect on rendering the
+	 * {@link HttpTemplate}.
+	 */
+	private final String[] renderRedirectHttpMethods;
 
 	/**
 	 * GWT EntryPoint class name.
@@ -94,14 +116,23 @@ public class HttpTemplateInstance {
 	/**
 	 * Initiate.
 	 * 
+	 * @param uri
+	 *            URI.
 	 * @param templatePath
 	 *            Path to the {@link HttpTemplate}.
 	 * @param logicClassName
 	 *            Name of the logic class.
 	 * @param sectionType
 	 *            {@link SectionType}.
-	 * @param uri
-	 *            URI.
+	 * @param isTemplateSecure
+	 *            Indicates if the {@link HttpTemplate} requires a secure
+	 *            {@link ServerHttpConnection}.
+	 * @param linksSecure
+	 *            {@link HttpTemplate} links requiring specific secure
+	 *            configuration.
+	 * @param renderRedirectHttpMethods
+	 *            HTTP methods that trigger a redirect on rendering the
+	 *            {@link HttpTemplate}.
 	 * @param gwtEntryPointClassName
 	 *            GWT EntryPoint class name.
 	 * @param gwtServerAsyncInterfaceNames
@@ -113,14 +144,19 @@ public class HttpTemplateInstance {
 	 *            handle manually publishing a Comet event. May be
 	 *            <code>null</code> to automatically handle.
 	 */
-	public HttpTemplateInstance(String templatePath, String logicClassName,
-			SectionType sectionType, String uri, String gwtEntryPointClassName,
+	public HttpTemplateInstance(String uri, String templatePath,
+			String logicClassName, SectionType sectionType,
+			boolean isTemplateSecure, Map<String, Boolean> linksSecure,
+			String[] renderRedirectHttpMethods, String gwtEntryPointClassName,
 			String[] gwtServerAsyncInterfaceNames, boolean isEnableComet,
 			String cometManualPublishMethodName) {
+		this.uri = uri;
 		this.templatePath = templatePath;
 		this.logicClassName = logicClassName;
 		this.sectionType = sectionType;
-		this.uri = uri;
+		this.isTemplateSecure = isTemplateSecure;
+		this.linksSecure = linksSecure;
+		this.renderRedirectHttpMethods = renderRedirectHttpMethods;
 		this.gwtEntryPointClassName = gwtEntryPointClassName;
 		this.gwtServerAsyncInterfaceNames = gwtServerAsyncInterfaceNames;
 		this.isEnableComet = isEnableComet;
@@ -138,10 +174,26 @@ public class HttpTemplateInstance {
 	 *            {@link WoofChanges}.
 	 */
 	public HttpTemplateInstance(WoofTemplateModel template, WoofChanges changes) {
+		this.uri = template.getUri();
 		this.templatePath = template.getTemplatePath();
 		this.logicClassName = template.getTemplateClassName();
 		this.sectionType = null;
-		this.uri = template.getUri();
+		this.isTemplateSecure = template.getIsTemplateSecure();
+
+		// Load the links
+		this.linksSecure = new HashMap<String, Boolean>();
+		for (WoofTemplateLinkModel link : template.getLinks()) {
+			this.linksSecure.put(link.getWoofTemplateLinkName(),
+					link.getIsLinkSecure());
+		}
+
+		// Load the redirects
+		List<String> redirectMethods = new LinkedList<String>();
+		for (WoofTemplateRedirectModel redirect : template.getRedirects()) {
+			redirectMethods.add(redirect.getWoofTemplateRedirectHttpMethod());
+		}
+		this.renderRedirectHttpMethods = redirectMethods
+				.toArray(new String[redirectMethods.size()]);
 
 		// Obtain the extension details
 		this.gwtEntryPointClassName = changes
@@ -168,14 +220,23 @@ public class HttpTemplateInstance {
 	/**
 	 * Initiate from {@link HttpTemplateWizard}.
 	 * 
+	 * @param uri
+	 *            URI.
 	 * @param templatePath
 	 *            Path to the {@link HttpTemplate}.
 	 * @param logicClassName
 	 *            Name of the logic class.
 	 * @param sectionType
 	 *            {@link SectionType}.
-	 * @param uri
-	 *            URI.
+	 * @param isTemplateSecure
+	 *            Indicates if the {@link HttpTemplate} requires a secure
+	 *            {@link ServerHttpConnection}.
+	 * @param linksSecure
+	 *            {@link HttpTemplate} links requiring specific secure
+	 *            configuration.
+	 * @param renderRedirectHttpMethods
+	 *            HTTP methods that trigger a redirect on rendering the
+	 *            {@link HttpTemplate}.
 	 * @param gwtEntryPointClassName
 	 *            GWT EntryPoint class name.
 	 * @param gwtServerAsyncInterfaceNames
@@ -190,21 +251,35 @@ public class HttpTemplateInstance {
 	 *            Mapping of {@link SectionOutputType} name to existing
 	 *            {@link WoofTemplateOutputModel} name.
 	 */
-	HttpTemplateInstance(String templatePath, String logicClassName,
-			SectionType sectionType, String uri, String gwtEntryPointClassName,
+	HttpTemplateInstance(String uri, String templatePath,
+			String logicClassName, SectionType sectionType,
+			boolean isTemplateSecure, Map<String, Boolean> linksSecure,
+			String[] renderRedirectHttpMethods, String gwtEntryPointClassName,
 			String[] gwtServerAsyncInterfaceNames, boolean isEnableComet,
 			String cometManualPublishMethodName,
 			Map<String, String> outputNameMapping) {
+		this.uri = uri;
 		this.templatePath = templatePath;
 		this.logicClassName = logicClassName;
 		this.sectionType = sectionType;
-		this.uri = uri;
+		this.isTemplateSecure = isTemplateSecure;
+		this.linksSecure = linksSecure;
+		this.renderRedirectHttpMethods = renderRedirectHttpMethods;
 		this.gwtEntryPointClassName = gwtEntryPointClassName;
 		this.gwtServerAsyncInterfaceNames = gwtServerAsyncInterfaceNames;
 		this.isEnableComet = isEnableComet;
 		this.cometManualPublishMethodName = cometManualPublishMethodName;
 		this.outputNames = null;
 		this.ouputNameMapping = outputNameMapping;
+	}
+
+	/**
+	 * Obtains the URI.
+	 * 
+	 * @return URI.
+	 */
+	public String getUri() {
+		return this.uri;
 	}
 
 	/**
@@ -235,12 +310,34 @@ public class HttpTemplateInstance {
 	}
 
 	/**
-	 * Obtains the URI.
+	 * Obtains whether the {@link HttpTemplate} requires a secure
+	 * {@link ServerHttpConnection}.
 	 * 
-	 * @return URI.
+	 * @return <code>true</code> should the {@link HttpTemplate} require a
+	 *         secure {@link ServerHttpConnection}.
 	 */
-	public String getUri() {
-		return this.uri;
+	public boolean isTemplateSecure() {
+		return this.isTemplateSecure;
+	}
+
+	/**
+	 * Obtains the mapping of secure for {@link HttpTemplate} links.
+	 * 
+	 * @return Mapping of secure for {@link HttpTemplate} links.
+	 */
+	public Map<String, Boolean> getLinksSecure() {
+		return this.linksSecure;
+	}
+
+	/**
+	 * Obtains the HTTP methods that will trigger a redirect on rendering the
+	 * {@link HttpTemplate}.
+	 * 
+	 * @return HTTP methods that will trigger a redirect on rendering the
+	 *         {@link HttpTemplate}.
+	 */
+	public String[] getRenderRedirectHttpMethods() {
+		return this.renderRedirectHttpMethods;
 	}
 
 	/**
