@@ -140,6 +140,10 @@ public class WoofTemplateEditPart
 
 		case CHANGE_TEMPLATE_CLASS_NAME:
 		case CHANGE_TEMPLATE_PATH:
+		case ADD_LINK:
+		case REMOVE_LINK:
+		case ADD_REDIRECT:
+		case REMOVE_REDIRECT:
 		case ADD_EXTENSION:
 		case REMOVE_EXTENSION:
 			// No visual change
