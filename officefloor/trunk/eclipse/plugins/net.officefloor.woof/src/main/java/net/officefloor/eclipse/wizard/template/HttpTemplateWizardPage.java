@@ -598,7 +598,7 @@ public class HttpTemplateWizardPage extends WizardPage implements
 		
 		// TODO determine specific link secure overrides
 		
-		// TODO determine render redirect HTTP methods 
+		// TODO determine render HTTP methods 
 
 		// Obtain the HTTP Template Section Source class
 		Class sectionSourceClass = this.templateExtension
