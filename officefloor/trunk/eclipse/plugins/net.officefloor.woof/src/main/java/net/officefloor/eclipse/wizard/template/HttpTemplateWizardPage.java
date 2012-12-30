@@ -22,6 +22,7 @@ import java.io.File;
 import java.lang.reflect.Method;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
 import net.officefloor.compile.OfficeFloorCompiler;
 import net.officefloor.compile.issues.CompilerIssues;
@@ -46,6 +47,7 @@ import net.officefloor.eclipse.util.EclipseUtil;
 import net.officefloor.eclipse.web.HttpTemplateSectionSourceExtension;
 import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
 import net.officefloor.frame.spi.source.ResourceSource;
+import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
 import net.officefloor.plugin.web.http.template.parse.HttpTemplate;
 import net.officefloor.plugin.web.http.template.section.HttpTemplateSectionSource;
 import net.officefloor.plugin.woof.WoofContextConfigurable;
@@ -221,15 +223,24 @@ public class HttpTemplateWizardPage extends WizardPage implements
 		if (this.templateInstance != null) {
 			// Add the properties from base instance
 			this.properties.addProperty(
-					HttpTemplateSectionSource.PROPERTY_CLASS_NAME).setValue(
-					this.templateInstance.getLogicClassName());
-			this.properties.addProperty(
 					HttpTemplateSectionSource.PROPERTY_TEMPLATE_URI).setValue(
 					this.templateInstance.getUri());
+			this.properties.addProperty(
+					HttpTemplateSectionSource.PROPERTY_CLASS_NAME).setValue(
+					this.templateInstance.getLogicClassName());
 		}
 
 		// Specify the title
 		this.setTitle("Add Template");
+	}
+
+	/**
+	 * Obtains the URI path.
+	 * 
+	 * @return URI path.
+	 */
+	public String getUriPath() {
+		return (EclipseUtil.isBlank(this.uriPath) ? null : this.uriPath.trim());
 	}
 
 	/**
@@ -260,12 +271,37 @@ public class HttpTemplateWizardPage extends WizardPage implements
 	}
 
 	/**
-	 * Obtains the URI path.
+	 * Indicates if the {@link HttpTemplate} requires a secure
+	 * {@link ServerHttpConnection}.
 	 * 
-	 * @return URI path.
+	 * @return <code>true</code> should the {@link HttpTemplate} requires a
+	 *         secure {@link ServerHttpConnection}.
 	 */
-	public String getUriPath() {
-		return (EclipseUtil.isBlank(this.uriPath) ? null : this.uriPath.trim());
+	public boolean isTemplateSecure() {
+		// TODO implement
+		throw new UnsupportedOperationException("TODO implement");
+	}
+
+	/**
+	 * Obtains the {@link HttpTemplate} link override secure configuration.
+	 * 
+	 * @return {@link HttpTemplate} link override secure configuration.
+	 */
+	public Map<String, Boolean> getLinksSecure() {
+		// TODO implement
+		throw new UnsupportedOperationException("TODO implement");
+	}
+
+	/**
+	 * Obtains the HTTP methods that are to trigger a redirect on rendering the
+	 * {@link HttpTemplate}.
+	 * 
+	 * @return HTTP methods that are to trigger a redirect on rendering the
+	 *         {@link HttpTemplate}.
+	 */
+	public String[] getRenderRedirectHttpMethods() {
+		// TODO implement
+		throw new UnsupportedOperationException("TODO implement");
 	}
 
 	/**
@@ -531,6 +567,18 @@ public class HttpTemplateWizardPage extends WizardPage implements
 		// Clear section type (as potentially changing)
 		this.sectionType = null;
 
+		// Ensure have template URI path
+		Property propertyUriPath = this.properties
+				.getOrAddProperty(HttpTemplateSectionSource.PROPERTY_TEMPLATE_URI);
+		String propertyUriPathValue = propertyUriPath.getValue();
+		this.uriPath = (EclipseUtil.isBlank(propertyUriPathValue) ? null
+				: propertyUriPathValue);
+		if (EclipseUtil.isBlank(this.uriPath)) {
+			this.setErrorMessage("Must specify URI path");
+			this.setPageComplete(false);
+			return;
+		}
+
 		// Ensure have template path
 		if (EclipseUtil.isBlank(this.templatePath)) {
 			this.setErrorMessage("Must specify location of template");
@@ -545,21 +593,16 @@ public class HttpTemplateWizardPage extends WizardPage implements
 				: propertyLogicClass.getValue());
 		this.logicClassName = (EclipseUtil.isBlank(propertyLogicClassName) ? null
 				: propertyLogicClassName);
+		
+		// TODO determine if template secure
+		
+		// TODO determine specific link secure overrides
+		
+		// TODO determine render redirect HTTP methods 
 
 		// Obtain the HTTP Template Section Source class
 		Class sectionSourceClass = this.templateExtension
 				.getSectionSourceClass();
-
-		// Obtain the URI
-		Property propertyUriPath = this.properties
-				.getOrAddProperty(HttpTemplateSectionSource.PROPERTY_TEMPLATE_URI);
-		String propertyUriPathValue = propertyUriPath.getValue();
-		this.uriPath = (EclipseUtil.isBlank(propertyUriPathValue) ? null
-				: propertyUriPathValue);
-		if (this.uriPath == null) {
-			// URI path optional, so provide dummy value
-			propertyUriPath.setValue("DUMMY");
-		}
 
 		// Load the Section Type
 		this.sectionType = this.sectionLoader.loadSectionType(
@@ -570,19 +613,8 @@ public class HttpTemplateWizardPage extends WizardPage implements
 			return;
 		}
 
-		// Clear URI path property if dummy value
-		if (this.uriPath == null) {
-			propertyUriPath.setValue(null);
-		}
-
-		// Ensure have URI if have GWT Entry Point Class
+		// Obtain the GWT Entry Point Class
 		String gwtEntryPoint = this.getGwtEntryPointClassName();
-		if ((gwtEntryPoint != null) && (this.uriPath == null)) {
-			// Must have URI if using GWT
-			this.setErrorMessage("Must provide URI if using GWT");
-			this.setPageComplete(false);
-			return;
-		}
 
 		// Obtain the GWT Service Async Interfaces
 		String[] gwtAsyncInterfaces = this.getGwtAsyncInterfaceNames();

@@ -18,6 +18,8 @@
 
 package net.officefloor.eclipse.woof.operations;
 
+import java.util.Map;
+
 import net.officefloor.compile.section.SectionType;
 import net.officefloor.eclipse.common.action.Operation;
 import net.officefloor.eclipse.wizard.template.HttpTemplateInstance;
@@ -60,10 +62,14 @@ public class AddTemplateOperation extends
 		}
 
 		// Obtain the template details
+		String uri = instance.getUri();
 		String path = instance.getTemplatePath();
 		String logicClassName = instance.getLogicClassName();
 		SectionType type = instance.getTemplateSectionType();
-		String uri = instance.getUri();
+		boolean isTemplateSecure = instance.isTemplateSecure();
+		Map<String, Boolean> linksSecure = instance.getLinksSecure();
+		String[] renderRedirectHttpMethods = instance
+				.getRenderRedirectHttpMethods();
 		String entryPointClassName = instance.getGwtEntryPointClassName();
 		String[] serviceAsyncInterfaces = instance
 				.getGwtServerAsyncInterfaceNames();
@@ -72,8 +78,9 @@ public class AddTemplateOperation extends
 				.getCometManualPublishMethodName();
 
 		// Create change to add template
-		Change<WoofTemplateModel> change = changes.addTemplate(path,
-				logicClassName, type, uri, entryPointClassName,
+		Change<WoofTemplateModel> change = changes.addTemplate(uri, path,
+				logicClassName, type, isTemplateSecure, linksSecure,
+				renderRedirectHttpMethods, entryPointClassName,
 				serviceAsyncInterfaces, isEnableComet,
 				cometManualPublishMethodName);
 

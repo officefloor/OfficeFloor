@@ -14,24 +14,28 @@
  <extension-point id="teamsources" name="Team Source" schema="schema/teamsource.exsd"/>
  <extension-point id="extensionclasspathproviders" name="Extension Class Path Provider" schema="schema/extensionclasspathproviders.exsd"/>
  <extension-point id="governancesources" name="Governance Source" schema="schema/governancesources.exsd"/>
-	<extension id="net.officefloor.editors" name="Editors"
+	<extension id="net.officefloor.ui.OfficeFloorEditors" name="OfficeFloor Editors"
 		point="org.eclipse.ui.editors">
-		<editor class="net.officefloor.eclipse.desk.DeskEditor"
-			contributorClass="net.officefloor.eclipse.common.editor.CoreEditorActionContributor"
-			default="true" extensions="desk" icon="icons/Desk.png" id="net.officefloor.editors.desk"
-			name="Desk Editor" />
+		<editor
+        class="net.officefloor.eclipse.desk.DeskEditor"
+        contributorClass="net.officefloor.eclipse.common.editor.CoreEditorActionContributor"
+        default="true"
+        extensions="desk"
+        icon="icons/Desk.png"
+        id="net.officefloor.ui.DeskEditor"
+        name="Desk Editor"/>
 		<editor class="net.officefloor.eclipse.section.SectionEditor"
 			contributorClass="net.officefloor.eclipse.common.editor.CoreEditorActionContributor"
 			default="true" extensions="section" icon="icons/Section.png"
-			id="net.officefloor.editors.section" name="Section Editor" />
+			id="net.officefloor.ui.SectionEditor" name="Section Editor" />
 		<editor class="net.officefloor.eclipse.office.OfficeEditor"
 			contributorClass="net.officefloor.eclipse.common.editor.CoreEditorActionContributor"
 			default="true" extensions="office" icon="icons/Office.png"
-			id="net.officefloor.editors.office" name="Office Editor" />
+			id="net.officefloor.ui.OfficeEditor" name="Office Editor" />
 		<editor class="net.officefloor.eclipse.officefloor.OfficeFloorEditor"
 			contributorClass="net.officefloor.eclipse.common.editor.CoreEditorActionContributor"
 			default="true" extensions="officefloor" icon="icons/OfficeFloor.png"
-			id="net.officefloor.editors.officefloor" name="OfficeFloor Editor" />
+			id="net.officefloor.ui.OfficeFloorEditor" name="OfficeFloor Editor" />
 	</extension>
 	<extension point="org.eclipse.ui.newWizards">
 		<category id="net.officefloor.eclipse" name="OfficeFloor">
