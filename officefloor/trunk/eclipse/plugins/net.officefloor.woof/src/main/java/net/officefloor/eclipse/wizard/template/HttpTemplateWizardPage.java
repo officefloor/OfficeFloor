@@ -20,6 +20,9 @@ package net.officefloor.eclipse.wizard.template;
 
 import java.io.File;
 import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -138,6 +141,11 @@ public class HttpTemplateWizardPage extends WizardPage implements
 	 * Indicates if the template is secure.
 	 */
 	private final Property isTemplateSecure;
+
+	/**
+	 * Listing of {@link WoofTemplateLinkModel} instances.
+	 */
+	private WoofTemplateLinkModel[] linksSecure = new WoofTemplateLinkModel[0];
 
 	/**
 	 * HTTP methods that trigger a redirect on rendeirng the
@@ -262,6 +270,19 @@ public class HttpTemplateWizardPage extends WizardPage implements
 				}
 				initialRenderRedirectHttpMethods = httpMethods.toString();
 			}
+
+			// Configure the links secure (ensure consistent order)
+			Map<String, Boolean> configuredLinks = this.templateInstance
+					.getLinksSecure();
+			List<String> linkNames = new ArrayList<String>(
+					configuredLinks.keySet());
+			Collections.sort(linkNames, String.CASE_INSENSITIVE_ORDER);
+			this.linksSecure = new WoofTemplateLinkModel[linkNames.size()];
+			int linkIndex = 0;
+			for (String linkName : linkNames) {
+				this.linksSecure[linkIndex++] = new WoofTemplateLinkModel(
+						linkName, configuredLinks.get(linkName).booleanValue());
+			}
 		}
 
 		// Add the properties
@@ -352,8 +373,15 @@ public class HttpTemplateWizardPage extends WizardPage implements
 	 * @return {@link HttpTemplate} link override secure configuration.
 	 */
 	public Map<String, Boolean> getLinksSecure() {
-		// TODO implement
-		throw new UnsupportedOperationException("TODO implement");
+		Map<String, Boolean> results = new HashMap<String, Boolean>();
+		for (WoofTemplateLinkModel link : this.linksSecure) {
+			String linkName = link.getWoofTemplateLinkName();
+			if (!(EclipseUtil.isBlank(linkName))) {
+				Boolean isLinkSecure = Boolean.valueOf(link.getIsLinkSecure());
+				results.put(linkName, isLinkSecure);
+			}
+		}
+		return results;
 	}
 
 	/**
@@ -531,17 +559,20 @@ public class HttpTemplateWizardPage extends WizardPage implements
 		new Label(page, SWT.NONE).setText("Links secure: ");
 		BeanListInput<WoofTemplateLinkModel> linksInput = new BeanListInput<WoofTemplateLinkModel>(
 				WoofTemplateLinkModel.class, true);
-		linksInput.addProperty("WoofTemplateLinkName", 4, "Link");
+		linksInput.addProperty("WoofTemplateLinkName", 3, "Link");
 		linksInput.addProperty("IsLinkSecure", 1, "Secure");
+		for (WoofTemplateLinkModel link : this.linksSecure) {
+			linksInput.addBean(link);
+		}
 		InputHandler<WoofTemplateLinkModel[]> links = new InputHandler<WoofTemplateLinkModel[]>(
 				page, linksInput, null, new InputListener() {
 					@Override
+					@SuppressWarnings("unchecked")
 					public void notifyValueChanged(Object value) {
 						// Specify the links and indicate changed
-
-						// TODO specify links
-						page.layout();
-
+						List<WoofTemplateLinkModel> list = (List<WoofTemplateLinkModel>) value;
+						HttpTemplateWizardPage.this.linksSecure = list
+								.toArray(new WoofTemplateLinkModel[list.size()]);
 						HttpTemplateWizardPage.this.handleChange();
 					}
 
@@ -694,8 +725,6 @@ public class HttpTemplateWizardPage extends WizardPage implements
 			this.setPageComplete(false);
 			return;
 		}
-
-		// TODO determine specific link secure overrides
 
 		// Obtain the HTTP Template Section Source class
 		Class sectionSourceClass = this.templateExtension

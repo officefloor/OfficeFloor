@@ -29,8 +29,9 @@ import net.officefloor.eclipse.common.dialog.input.Input;
 import net.officefloor.eclipse.common.dialog.input.InputContext;
 import net.officefloor.eclipse.util.LogUtil;
 
+import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.jface.viewers.CellEditor;
-import org.eclipse.jface.viewers.ColumnPixelData;
+import org.eclipse.jface.viewers.CheckboxCellEditor;
 import org.eclipse.jface.viewers.ColumnWeightData;
 import org.eclipse.jface.viewers.ICellModifier;
 import org.eclipse.jface.viewers.IStructuredContentProvider;
@@ -44,11 +45,17 @@ import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.graphics.Color;
+import org.eclipse.swt.graphics.GC;
 import org.eclipse.swt.graphics.Image;
+import org.eclipse.swt.graphics.ImageData;
+import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.swt.widgets.TableItem;
@@ -61,9 +68,84 @@ import org.eclipse.swt.widgets.TableItem;
 public class BeanListInput<B> implements Input<Control> {
 
 	/**
-	 * Marker to indicate a bean.
+	 * Obtains the check box image.
+	 * 
+	 * @param tableViewer
+	 *            {@link TableViewer}.
+	 * @param type
+	 *            Type of image.
+	 * @return {@link Image} for the check box.
 	 */
-	private static final String BEAN_MARKER = "-";
+	private Image getCheckboxImage(TableViewer tableViewer, boolean type) {
+
+		/*
+		 * Method code derived from:
+		 * 
+		 * http://tom-eclipse-dev.blogspot.com.au/2007/01/tableviewers-and-
+		 * nativelooking.html
+		 */
+
+		// Obtain the control for the table viewer
+		Control control = tableViewer.getControl();
+
+		// Obtain the image registry key
+		String imageRegistryKey = (type ? "CHECKED" : "UNCHECKED");
+
+		// Lazy create the image
+		Image image = JFaceResources.getImageRegistry().get(imageRegistryKey);
+		if (image != null) {
+			return image;
+		}
+
+		// Colour to use for transparency
+		Color greenScreen = new Color(control.getDisplay(), 222, 223, 224);
+
+		// Create shell to screen capture the image
+		Shell shell = new Shell(control.getShell(), SWT.NO_TRIM
+				| SWT.NO_BACKGROUND);
+		shell.setBackground(greenScreen);
+		Button button = new Button(shell, SWT.CHECK);
+		button.setBackground(greenScreen);
+		button.setSelection(type);
+		Point buttonSize = button.computeSize(SWT.DEFAULT, SWT.DEFAULT);
+
+		// Stop image being stretched by width
+		buttonSize.x = Math.max(buttonSize.x - 1, buttonSize.y - 1);
+		buttonSize.y = Math.max(buttonSize.x - 1, buttonSize.y - 1);
+		button.setSize(buttonSize);
+		shell.setSize(buttonSize);
+
+		// Remove focus highlighting
+		button.setEnabled(false);
+
+		// Open shell and take the screen shot
+		shell.open();
+		button.setEnabled(true); // re-enable
+		while (shell.getDisplay().readAndDispatch()) {
+			// Ensure open and displaying for screen shot
+		}
+		GC gc = new GC(shell);
+		Image tempImage = new Image(control.getDisplay(), buttonSize.x,
+				buttonSize.y);
+		gc.copyArea(tempImage, 0, 0);
+		gc.dispose();
+		shell.close();
+
+		// Make the background of image transparent
+		ImageData imageData = tempImage.getImageData();
+		imageData.transparentPixel = imageData.palette.getPixel(greenScreen
+				.getRGB());
+
+		// Create and register the image
+		image = new Image(control.getDisplay(), imageData);
+		JFaceResources.getImageRegistry().put(imageRegistryKey, image);
+
+		// Clean up temporary image
+		tempImage.dispose();
+
+		// Return the image
+		return image;
+	}
 
 	/**
 	 * Type of the bean.
@@ -131,9 +213,6 @@ public class BeanListInput<B> implements Input<Control> {
 	public BeanListInput(Class<B> beanType, boolean isIncludeButtons) {
 		this.beanType = beanType;
 		this.isIncludeButtons = isIncludeButtons;
-
-		// Bean marker always the first column
-		this.beanPropertyOrder.add(BEAN_MARKER);
 	}
 
 	/**
@@ -235,13 +314,27 @@ public class BeanListInput<B> implements Input<Control> {
 	 */
 
 	@Override
-	public Table buildControl(final InputContext context) {
+	public Control buildControl(final InputContext context) {
 
 		// Obtain the parent for refreshing layout
 		this.parent = context.getParent();
 
+		// Determine if require panel for including buttons
+		Composite parentComposite = this.parent;
+		Composite panel = null;
+		if (this.isIncludeButtons) {
+			// Create the panel
+			panel = new Composite(this.parent, SWT.NONE);
+			panel.setLayoutData(new GridData(SWT.FILL, SWT.BEGINNING, true,
+					false));
+			panel.setLayout(new GridLayout(2, false));
+
+			// Panel to be parent for table and buttons
+			parentComposite = panel;
+		}
+
 		// Create the table
-		this.table = new Table(this.parent,
+		this.table = new Table(parentComposite,
 				(SWT.SINGLE | SWT.BORDER | SWT.H_SCROLL | SWT.V_SCROLL
 						| SWT.FULL_SELECTION | SWT.HIDE_SELECTION));
 
@@ -255,42 +348,37 @@ public class BeanListInput<B> implements Input<Control> {
 		this.table.setHeaderVisible(true);
 		this.table.setLinesVisible(true);
 
-		// Add the property columns
+		// Add the columns
+		String[] columnPropertyNames = new String[this.beanPropertyOrder.size()];
+		CellEditor[] cellEditors = new CellEditor[this.beanPropertyOrder.size()];
+		int columnIndex = 0;
 		for (String propertyName : this.beanPropertyOrder) {
 
-			// Determine if a bean marker
-			if (BEAN_MARKER.equals(propertyName)) {
-				// Add the bean marker column
-				this.layout.addColumnData(new ColumnPixelData(10));
-				new TableColumn(this.table, SWT.CENTER);
-			} else {
-				// Obtain the property
-				BeanProperty property = this.beanProperties.get(propertyName);
+			// Obtain the property
+			BeanProperty property = this.beanProperties.get(propertyName);
 
-				// Add the table column for the property
-				this.layout.addColumnData(new ColumnWeightData(property
-						.getWeight()));
-				TableColumn column = new TableColumn(this.table, SWT.LEFT);
-				column.setText(property.label);
-			}
+			// Add the table column for the property
+			this.layout
+					.addColumnData(new ColumnWeightData(property.getWeight()));
+			TableColumn column = new TableColumn(this.table, SWT.NONE);
+			column.setText(property.label);
+
+			// Specify the column property name
+			columnPropertyNames[columnIndex] = propertyName;
+
+			// Provide editor for the property
+			cellEditors[columnIndex] = property.createCellEditor(this.table);
+
+			// Increment for next column
+			columnIndex++;
 		}
 
 		// Create the Table Viewer
 		this.tableViewer = new TableViewer(this.table);
 		this.tableViewer.setUseHashlookup(true);
 
-		// Specify the columns
-		String[] columnNames = new String[this.beanPropertyOrder.size()];
-		for (int i = 0; i < columnNames.length; i++) {
-			columnNames[i] = this.beanPropertyOrder.get(i);
-		}
-		this.tableViewer.setColumnProperties(columnNames);
-
-		// Specify the column editors
-		CellEditor[] cellEditors = new CellEditor[this.beanPropertyOrder.size()];
-		for (int i = 0; i < cellEditors.length; i++) {
-			cellEditors[i] = new TextCellEditor(this.table);
-		}
+		// Specify the columns identifiers and editors
+		this.tableViewer.setColumnProperties(columnPropertyNames);
 		this.tableViewer.setCellEditors(cellEditors);
 
 		// Specify the cell modifier
@@ -305,10 +393,16 @@ public class BeanListInput<B> implements Input<Control> {
 
 		// Determine if to include the buttons
 		if (this.isIncludeButtons) {
+
+			// Provide button panel
+			Composite buttons = new Composite(parentComposite, SWT.NONE);
+			buttons.setLayoutData(new GridData(SWT.BEGINNING, SWT.BEGINNING,
+					false, false));
+			buttons.setLayout(new GridLayout(1, false));
+
 			// Provide button to add
-			Button addButton = new Button(this.table.getParent(), SWT.PUSH
-					| SWT.CENTER);
-			addButton.setText("Add");
+			Button addButton = new Button(buttons, SWT.PUSH | SWT.CENTER);
+			addButton.setText("+");
 			addButton.setLayoutData(new GridData(
 					GridData.HORIZONTAL_ALIGN_BEGINNING));
 			addButton.addSelectionListener(new SelectionAdapter() {
@@ -331,9 +425,9 @@ public class BeanListInput<B> implements Input<Control> {
 			});
 
 			// Create and configure the "Delete" button
-			Button deleteButton = new Button(this.table.getParent(), SWT.PUSH
-					| SWT.CENTER);
-			deleteButton.setText("Delete");
+			Button deleteButton = new Button(buttons, SWT.PUSH | SWT.CENTER
+					| SWT.FILL);
+			deleteButton.setText("-");
 			deleteButton.setLayoutData(new GridData(
 					GridData.HORIZONTAL_ALIGN_BEGINNING));
 			deleteButton.addSelectionListener(new SelectionAdapter() {
@@ -359,8 +453,8 @@ public class BeanListInput<B> implements Input<Control> {
 			});
 		}
 
-		// Return the table
-		return this.table;
+		// Return the control
+		return (panel == null ? this.table : panel);
 	}
 
 	@Override
@@ -460,6 +554,66 @@ public class BeanListInput<B> implements Input<Control> {
 		}
 
 		/**
+		 * Creates the {@link CellEditor} for this property.
+		 * 
+		 * @param table
+		 *            {@link Table}.
+		 * @return {@link CellEditor} for this property.
+		 */
+		public CellEditor createCellEditor(Table table) {
+			CellEditor editor;
+			if (this.type == boolean.class) {
+				// Check box editor
+				editor = new CheckboxCellEditor(table);
+			} else {
+				// By default just text
+				editor = new TextCellEditor(table);
+			}
+			return editor;
+		}
+
+		/**
+		 * Obtains text to display in the cell.
+		 * 
+		 * @param bean
+		 *            Bean to obtain the property value.
+		 * @return Text to display in the cell.
+		 */
+		public String getCellText(B bean) {
+
+			// No text if check box
+			if (this.type == boolean.class) {
+				return null;
+			}
+
+			// Provide text value
+			Object value = this.getValue(bean);
+			return (value == null ? "" : value.toString());
+		}
+
+		/**
+		 * Obtains the image to display in the cell.
+		 * 
+		 * @param bean
+		 *            Bean to obtain the property value.
+		 * @return {@link Image} to display in the cell.
+		 */
+		public Image getCellImage(B bean) {
+
+			// Provide check box image
+			if (this.type == boolean.class) {
+				Object value = this.getValue(bean);
+				boolean isChecked = (value == null ? false : ((Boolean) value)
+						.booleanValue());
+				return getCheckboxImage(BeanListInput.this.tableViewer,
+						isChecked);
+			}
+
+			// No image
+			return null;
+		}
+
+		/**
 		 * Obtains the property value from the bean.
 		 * 
 		 * @param bean
@@ -542,11 +696,6 @@ public class BeanListInput<B> implements Input<Control> {
 		@Override
 		public boolean canModify(Object element, String property) {
 
-			// Can not change if the marker
-			if (BEAN_MARKER.equals(property)) {
-				return false;
-			}
-
 			// Obtain the bean property
 			BeanProperty beanProperty = BeanListInput.this.beanProperties
 					.get(property);
@@ -594,9 +743,6 @@ public class BeanListInput<B> implements Input<Control> {
 
 			// Notify change
 			this.inputContext.notifyValueChanged(BeanListInput.this.beans);
-
-			// Layout the change
-			BeanListInput.this.parent.layout();
 		}
 	}
 
@@ -611,33 +757,48 @@ public class BeanListInput<B> implements Input<Control> {
 		 */
 
 		@Override
+		@SuppressWarnings("unchecked")
 		public Image getColumnImage(Object element, int columnIndex) {
-			return null;
+
+			// Obtain the bean property
+			BeanProperty beanProperty = this.getBeanProperty(columnIndex);
+
+			// Obtain and return the cell text
+			B bean = (B) element;
+			return beanProperty.getCellImage(bean);
 		}
 
 		@Override
 		@SuppressWarnings("unchecked")
 		public String getColumnText(Object element, int columnIndex) {
 
+			// Obtain the bean property
+			BeanProperty beanProperty = this.getBeanProperty(columnIndex);
+
+			// Obtain and return the cell text
+			B bean = (B) element;
+			return beanProperty.getCellText(bean);
+		}
+
+		/**
+		 * Obtains the {@link BeanProperty} for the column.
+		 * 
+		 * @param columnIndex
+		 *            Index of the column.
+		 * @return {@link BeanProperty} for the column.
+		 */
+		private BeanProperty getBeanProperty(int columnIndex) {
+
 			// Obtain the property name for the column
 			String propertyName = BeanListInput.this.beanPropertyOrder
 					.get(columnIndex);
-
-			// Return the marker if the marker column
-			if (BEAN_MARKER.equals(propertyName)) {
-				return BEAN_MARKER;
-			}
 
 			// Obtain the bean property
 			BeanProperty beanProperty = BeanListInput.this.beanProperties
 					.get(propertyName);
 
-			// Obtain the value
-			B bean = (B) element;
-			Object value = beanProperty.getValue(bean);
-
-			// Return the value
-			return (value == null ? "" : value.toString());
+			// Return the bean property
+			return beanProperty;
 		}
 	}
 

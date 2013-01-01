@@ -58,6 +58,32 @@ public class WebApplicationAutoWireOfficeFloorSource extends
 		AutoWireOfficeFloorSource implements WebAutoWireApplication {
 
 	/**
+	 * Obtains the {@link HttpTemplate} section name from the
+	 * {@link HttpTemplate} URI.
+	 * 
+	 * @param templateUri
+	 *            {@link HttpTemplate} URI.
+	 * @return {@link HttpTemplate} section name.
+	 */
+	public static String getTemplateSectionName(String templateUri) {
+
+		// Determine section name
+		String sectionName;
+		if ("/".equals(templateUri)) {
+			// Root template
+			sectionName = "_root_";
+
+		} else {
+			// Use template URI stripping off leading '/'
+			sectionName = (templateUri.startsWith("/") ? templateUri
+					.substring("/".length()) : templateUri);
+		}
+
+		// Return the section name
+		return sectionName;
+	}
+
+	/**
 	 * Prefix for the link service {@link Task} name.
 	 */
 	private static final String LINK_SERVICE_TASK_NAME_PREFIX = "LINK_";
@@ -166,17 +192,8 @@ public class WebApplicationAutoWireOfficeFloorSource extends
 			}
 		}
 
-		// Determine section name
-		String sectionName;
-		if ("/".equals(templateUri)) {
-			// Root template
-			sectionName = "_root_";
-
-		} else {
-			// Use template URI stripping off leading '/'
-			sectionName = (templateUri.startsWith("/") ? templateUri
-					.substring("/".length()) : templateUri);
-		}
+		// Determine section name from template URI
+		String sectionName = getTemplateSectionName(templateUri);
 
 		// Add the HTTP template section
 		final String uriPath = templateUri;

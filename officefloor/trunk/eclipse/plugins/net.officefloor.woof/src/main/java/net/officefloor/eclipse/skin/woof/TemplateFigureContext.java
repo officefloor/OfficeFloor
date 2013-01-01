@@ -31,17 +31,10 @@ import net.officefloor.plugin.web.http.template.parse.HttpTemplate;
 public interface TemplateFigureContext {
 
 	/**
-	 * Obtains the name of the {@link HttpTemplate}.
+	 * Obtains the display name of the {@link HttpTemplate}.
 	 * 
-	 * @return Name of the {@link HttpTemplate}.
+	 * @return Display name of the {@link HttpTemplate}.
 	 */
-	String getTemplateName();
-
-	/**
-	 * Obtains the URI.
-	 * 
-	 * @return URI. May be <code>null</code>.
-	 */
-	String getUri();
+	String getTemplateDisplayName();
 
 }

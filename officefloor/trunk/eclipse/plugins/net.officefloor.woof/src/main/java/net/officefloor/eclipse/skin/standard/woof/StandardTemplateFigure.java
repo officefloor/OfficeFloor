@@ -49,11 +49,6 @@ public class StandardTemplateFigure extends AbstractOfficeFloorFigure implements
 		TemplateFigure {
 
 	/**
-	 * {@link TemplateFigureContext}.
-	 */
-	private final TemplateFigureContext context;
-
-	/**
 	 * {@link IFigure} for the template name.
 	 */
 	private final Label templateNameFigure;
@@ -65,7 +60,6 @@ public class StandardTemplateFigure extends AbstractOfficeFloorFigure implements
 	 *            {@link TemplateFigureContext}.
 	 */
 	public StandardTemplateFigure(TemplateFigureContext context) {
-		this.context = context;
 
 		// Colours
 		final Color titleBarTextColor = new Color(null, 0, 0, 0);
@@ -105,8 +99,9 @@ public class StandardTemplateFigure extends AbstractOfficeFloorFigure implements
 		figure.add(window);
 
 		// Create the title bar for URI and security
-		TitleBarFigure titleBar = new TitleBarFigure(context.getTemplateName(),
-				titleBarTextColor, titleBarTopColour, titleBarBottomColour);
+		TitleBarFigure titleBar = new TitleBarFigure(
+				context.getTemplateDisplayName(), titleBarTextColor,
+				titleBarTopColour, titleBarBottomColour);
 		this.templateNameFigure = titleBar.getTitleNameFigure();
 		window.add(titleBar);
 		windowLayout.setConstraint(titleBar, new GridData(SWT.FILL, 0, true,
@@ -136,32 +131,17 @@ public class StandardTemplateFigure extends AbstractOfficeFloorFigure implements
 		this.setContentPane(contentPane);
 	}
 
-	/**
-	 * Obtains the display name.
-	 * 
-	 * @return Display name.
-	 */
-	private String getDisplayName() {
-
-		// Determine if URI
-		String templateName = this.context.getTemplateName();
-		boolean isUri = (templateName.equals(this.context.getUri()));
-
-		// Reflect whether template name or URI
-		return (isUri ? "" : "[") + templateName + (isUri ? "" : "]");
-	}
-
 	/*
 	 * ========================== TemplateFigure =============================
 	 */
 
 	@Override
-	public void setUri(String uri) {
-		this.templateNameFigure.setText(this.getDisplayName());
+	public void setTemplateDisplayName(String templateDisplayName) {
+		this.templateNameFigure.setText(templateDisplayName);
 	}
 
 	@Override
-	public IFigure getUriFigure() {
+	public IFigure getTemplateDisplayFigure() {
 		return this.templateNameFigure;
 	}
 

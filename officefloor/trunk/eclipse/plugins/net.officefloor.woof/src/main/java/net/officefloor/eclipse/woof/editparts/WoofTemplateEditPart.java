@@ -36,6 +36,7 @@ import net.officefloor.model.change.Change;
 import net.officefloor.model.woof.WoofChanges;
 import net.officefloor.model.woof.WoofTemplateModel;
 import net.officefloor.model.woof.WoofTemplateModel.WoofTemplateEvent;
+import net.officefloor.plugin.woof.WoofOfficeFloorSource;
 
 import org.eclipse.draw2d.IFigure;
 import org.eclipse.gef.EditPart;
@@ -99,7 +100,7 @@ public class WoofTemplateEditPart
 			@Override
 			public IFigure getLocationFigure() {
 				return WoofTemplateEditPart.this.getOfficeFloorFigure()
-						.getUriFigure();
+						.getTemplateDisplayFigure();
 			}
 
 			@Override
@@ -121,7 +122,8 @@ public class WoofTemplateEditPart
 		switch (property) {
 		case CHANGE_WOOF_TEMPLATE_NAME:
 		case CHANGE_URI:
-			this.getOfficeFloorFigure().setUri(this.getCastedModel().getUri());
+			this.getOfficeFloorFigure().setTemplateDisplayName(
+					this.getTemplateDisplayName());
 			break;
 
 		case ADD_OUTPUT:
@@ -140,6 +142,7 @@ public class WoofTemplateEditPart
 
 		case CHANGE_TEMPLATE_CLASS_NAME:
 		case CHANGE_TEMPLATE_PATH:
+		case CHANGE_IS_TEMPLATE_SECURE:
 		case ADD_LINK:
 		case REMOVE_LINK:
 		case ADD_REDIRECT:
@@ -147,7 +150,7 @@ public class WoofTemplateEditPart
 		case ADD_EXTENSION:
 		case REMOVE_EXTENSION:
 			// No visual change
-			break;
+			break;			
 		}
 	}
 
@@ -156,13 +159,17 @@ public class WoofTemplateEditPart
 	 */
 
 	@Override
-	public String getTemplateName() {
-		return this.getCastedModel().getWoofTemplateName();
-	}
+	public String getTemplateDisplayName() {
 
-	@Override
-	public String getUri() {
-		return this.getCastedModel().getUri();
+		// Determine if URI
+		String templateName = this.getCastedModel().getWoofTemplateName();
+		String templateUri = this.getCastedModel().getUri();
+		String nameFromUri = WoofOfficeFloorSource
+				.getTemplateSectionName(templateUri);
+		boolean isUri = (templateName.equals(nameFromUri));
+
+		// Reflect whether template name or URI
+		return (isUri ? "" : "[") + templateName + (isUri ? "" : "]");
 	}
 
 }
