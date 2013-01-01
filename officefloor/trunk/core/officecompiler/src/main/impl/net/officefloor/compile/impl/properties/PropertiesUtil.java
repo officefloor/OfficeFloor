@@ -88,7 +88,7 @@ public class PropertiesUtil {
 		for (String propertyName : propertyNames) {
 			if (propertyName.startsWith(propertyPrefix)) {
 				// Copy the property
-				String propertyValue = source.getProperty(propertyName);
+				String propertyValue = source.getProperty(propertyName, null);
 				target.addProperty(propertyName, propertyValue);
 			}
 		}

@@ -411,6 +411,42 @@ public class HttpTemplateSectionSourceTest extends OfficeFrameTestCase {
 	}
 
 	/**
+	 * Ensure that all links do exist.
+	 */
+	public void testUnknownLinkSecured() {
+
+		CompilerIssues issues = this.createMock(CompilerIssues.class);
+
+		// Obtain the template location
+		String templatePath = this.getPackageRelativePath(this.getClass())
+				+ "/NotExistLinkTemplate.ofp";
+
+		// Record errors
+		issues.addIssue(LocationType.SECTION, templatePath, null, null,
+				"Link 'LINK' does not exist on template /uri");
+
+		// Create loader
+		OfficeFloorCompiler compiler = OfficeFloorCompiler
+				.newOfficeFloorCompiler(null);
+		compiler.setCompilerIssues(issues);
+		SectionLoader loader = compiler.getSectionLoader();
+
+		// Create the properties
+		PropertyList properties = compiler.createPropertyList();
+		properties.addProperty(HttpTemplateSectionSource.PROPERTY_TEMPLATE_URI)
+				.setValue("/uri");
+		properties.addProperty(
+				HttpTemplateWorkSource.PROPERTY_LINK_SECURE_PREFIX + "LINK")
+				.setValue(String.valueOf(true));
+
+		// Test
+		this.replayMockObjects();
+		loader.loadSectionType(HttpTemplateSectionSource.class, templatePath,
+				properties);
+		this.verifyMockObjects();
+	}
+
+	/**
 	 * Section method may not be annotated with {@link NextTask}.
 	 */
 	public void testNoNextTaskAnnotationForSectionMethod() {
