@@ -24,6 +24,7 @@ import java.io.Serializable;
 import java.io.StringReader;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -507,9 +508,33 @@ public class HttpTemplateSectionSource extends ClassSectionSource {
 		String templateUriSuffix = context.getProperty(
 				HttpTemplateWorkSource.PROPERTY_TEMPLATE_URI_SUFFIX, null);
 
-		// Register the #{link} URL continuation tasks
+		// Determine if any unknown configured links
 		String[] linkNames = HttpTemplateWorkSource
 				.getHttpTemplateLinkNames(template);
+		Set<String> existingLinkNames = new HashSet<String>(
+				Arrays.asList(linkNames));
+		NEXT_PROPERTY: for (String propertyName : context.getPropertyNames()) {
+			if (propertyName
+					.startsWith(HttpTemplateWorkSource.PROPERTY_LINK_SECURE_PREFIX)) {
+
+				// Obtain the link name
+				String configuredLinkName = propertyName
+						.substring(HttpTemplateWorkSource.PROPERTY_LINK_SECURE_PREFIX
+								.length());
+
+				// Ignore if exists
+				if (existingLinkNames.contains(configuredLinkName)) {
+					continue NEXT_PROPERTY;
+				}
+
+				// Link not exist so provide issue as invalid configuration
+				designer.addIssue("Link '" + configuredLinkName
+						+ "' does not exist on template " + templateUriPath,
+						null, null);
+			}
+		}
+
+		// Register the #{link} URL continuation tasks
 		final String linkUrlContinuationPrefix = "HTTP_URL_CONTINUATION_";
 		for (String linkTaskName : linkNames) {
 
