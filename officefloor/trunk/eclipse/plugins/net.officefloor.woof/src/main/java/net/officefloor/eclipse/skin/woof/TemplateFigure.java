@@ -31,18 +31,18 @@ import net.officefloor.model.woof.WoofTemplateModel;
 public interface TemplateFigure extends OfficeFloorFigure {
 
 	/**
-	 * Specifies the URI.
+	 * Specifies the template display name.
 	 * 
-	 * @param uri
-	 *            URI.
+	 * @param templateDisplayName
+	 *            Display name for the template.
 	 */
-	void setUri(String uri);
+	void setTemplateDisplayName(String templateDisplayName);
 
 	/**
-	 * Obtains the URI {@link IFigure}.
+	 * Obtains the template display name {@link IFigure}.
 	 * 
-	 * @return URI {@link IFigure}.
+	 * @return Template display name {@link IFigure}.
 	 */
-	IFigure getUriFigure();
+	IFigure getTemplateDisplayFigure();
 
 }
