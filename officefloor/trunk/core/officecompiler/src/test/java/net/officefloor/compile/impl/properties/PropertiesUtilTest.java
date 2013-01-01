@@ -144,17 +144,17 @@ public class PropertiesUtilTest extends OfficeFrameTestCase {
 				new String[] { "ignore.one", "prefix.", "prefix.one",
 						"ignore.prefix", "prefix.two", "ignore.again",
 						"prefix.null" });
-		this.recordReturn(this.source, this.source.getProperty("prefix."),
-				"empty");
+		this.recordReturn(this.source,
+				this.source.getProperty("prefix.", null), "empty");
 		this.target.addProperty("prefix.", "empty");
-		this.recordReturn(this.source, this.source.getProperty("prefix.one"),
-				"1");
+		this.recordReturn(this.source,
+				this.source.getProperty("prefix.one", null), "1");
 		this.target.addProperty("prefix.one", "1");
-		this.recordReturn(this.source, this.source.getProperty("prefix.two"),
-				"2");
+		this.recordReturn(this.source,
+				this.source.getProperty("prefix.two", null), "2");
 		this.target.addProperty("prefix.two", "2");
-		this.recordReturn(this.source, this.source.getProperty("prefix.null"),
-				null);
+		this.recordReturn(this.source,
+				this.source.getProperty("prefix.null", null), null);
 		this.target.addProperty("prefix.null", null);
 
 		// Test
