@@ -1,0 +1,46 @@
+                                       ------------------
+				        Eclipse Plug-ins
+				       ------------------
+				      Daniel Sagenschneider
+				       ------------------
+
+Install OfficeFloor Eclipse Plug-in
+
+  The OfficeFloor Eclipse update site is:  
+  
++--------------------------------
+
+
+
+                        http://www.officefloor.net/update
+
+                        
++--------------------------------
+  
+  Please point Eclipse to the above URL to install the OfficeFloor Eclipse Plug-in.
+
+
+Using the OfficeFloor Eclipse Plug-in
+
+  OfficeFloor provides an Eclipse Plug-in to simplify developing applications by using {{{./graphical-configuration.html}Graphical Configuration}}.
+  
+  Please see the {{{../tutorials/index.html}tutorials}} for using the OfficeFloor Eclipse Plug-in. 
+  
+  The following is an example of the OfficeFloor Eclipse Plug-in's graphical configuration.
+
+[./images/eclipse-graphical-configuration.png] Example graphical configuration of OfficeFloor
+
+  
+Why Eclipse?
+
+  Eclipse was choosen as it:
+  
+   * provides {{{http://www.eclipse.org/gef/}GEF}} for building graphical editors
+   
+   * is a widely adopted integrated development environment (IDE)
+   
+   * is open source
+   
+   * is free
+   
+  OfficeFloor has been kept modular to allow integration into other IDE's.  Time and effort is the only reasons for not supporting other IDE's.  Please contribute if you would like to see OfficeFloor on alternate IDE's.

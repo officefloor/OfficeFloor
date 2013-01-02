@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<model>
+	<field type="String" name="woof template link name" />
+	<field type="boolean" name="is link secure" />
+</model>

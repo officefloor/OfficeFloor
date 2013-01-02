@@ -1,0 +1,109 @@
+                                               -----------------------
+                         Server Side Comet (AJAX push, reverse AJAX) Publish Application Tutorial 
+                                               -----------------------
+					        Daniel Sagenschneider
+                                               -----------------------
+
+  <<Server Side Comet Publish Application Tutorial>>
+
+  This tutorial demonstrates the simplicity in publishing events from the Server.
+  
+  To demonstrate the ease of using Comet (AJAX push, reverse AJAX) functionality on the Server within a WoOF web application the following simple chat application will be used for this tutorial.
+  
+[./images/CometManualApp-screenshot.png] CometManualApp screenshot.
+
+  The application will:
+  
+    [[1]] Initially request a user name that is stored in the HTTP session
+  
+    [[1]] Send and receive chat messages indicating who sent each message using the respective HTTP session
+  
+  The application in this tutorial is deliberately simple to allow focus on the Comet functionality.
+    
+  {{{http://sourceforge.net/projects/officefloor/files/maven/maven2/net/officefloor/tutorial/CometManualApp/${projectVersion}/CometManualApp-${projectVersion}-project.zip/download}Download Tutorial Source}}
+
+
+
+Template.woof.html
+
+  The below is the HTML for the page.
+
+%{code-snippet|brush=xml|file=${basedir}/src/main/webapp/Template.woof.html}
+
+
+
+TemplateLogic Class
+
+  The template logic object is as follows.
+
+%{code-snippet|brush-autodetect=1|id=example|file=${basedir}/src/main/java/net/officefloor/tutorial/cometmanualapp/TemplateLogic.java}
+
+  The above class provides two methods, that respectively:
+
+    * login the user by storing their user name within the HTTP session
+    
+    * handle sending a message which adds the user name and is published by the Server
+
+  The following demonstrates the configuration necessary to add the template.
+  
+[./images/CometManualApp-add-template-dialog.png] CometApp Add template dialog screenshot.
+
+  For manually handling the published event the method name is specified.  This allows the Server code to intercept all published events from the clients and manually handle them.  In the case of this tutorial, adding the user name to the message before publishing the event.  The parameter to this specified method is always a {{{/apidocs/net/officefloor/plugin/comet/internal/CometEvent.html}CometEvent}}.  It also follows the GWT RPC handling pattern and therefore must notify that successfully serviced the GWT RPC request via the <<<AsyncCallback>>>.
+  
+  The typical reason for manually handling the published events is to push them onto a queue for a cluster of web servers.  This enables multiple web servers to be notified of the published event and subsequently publish the event to all the Comet clients.  This is necessary as the Comet client establishes a connection to only one web server in the cluster.
+
+
+
+@CometPublisherInterface
+
+  The Comet event is published by the server via the following interface. 
+
+%{code-snippet|brush-autodetect=1|id=example|file=${basedir}/src/main/java/net/officefloor/tutorial/cometmanualapp/client/ConversationSubscription.java}
+
+  The annotation informs WoOF to dependency inject an implementation of the interface that will allow the server code to publish the {{{/apidocs/net/officefloor/plugin/comet/internal/CometEvent.html}CometEvent}}.
+  
+  An interface with this annotation must adhere to the same rules of a {{{/apidocs/net/officefloor/plugin/comet/api/CometSubscriber.html}CometSubscriber}}.
+  
+  OfficeFloor will publish the event with the following details:
+  
+   * Listener type: the interface type name
+   
+   * Data: the value of the first parameter
+   
+   * Filter Key: the value of the optional second parameter
+   
+  The reason for using the interface is to allow type safe publishing of events.
+  
+  The following POJO is the event data sent.
+  
+%{code-snippet|brush-autodetect=1|id=example|file=${basedir}/src/main/java/net/officefloor/tutorial/cometmanualapp/client/ConversationMessage.java}
+
+  
+
+User Name
+
+  The user name is stored in the HTTP session with the following object.
+
+%{code-snippet|brush-autodetect=1|id=example|file=${basedir}/src/main/java/net/officefloor/tutorial/cometmanualapp/User.java}
+
+  The following GWT RPC interfaces are used to send the user name to the server.
+
+%{code-snippet|brush-autodetect=1|id=example|file=${basedir}/src/main/java/net/officefloor/tutorial/cometmanualapp/client/UserNameService.java}
+
+%{code-snippet|brush-autodetect=1|id=example|file=${basedir}/src/main/java/net/officefloor/tutorial/cometmanualapp/client/UserNameServiceAsync.java}
+
+
+
+
+Client Side Code
+
+  The GWT client side code is included as follows for completeness of this tutorial.
+
+%{code-snippet|brush-autodetect=1|id=example|file=${basedir}/src/main/java/net/officefloor/tutorial/cometmanualapp/client/CometManualAppEntryPoint.java}
+
+
+
+Next
+
+  See the {{{../index.html}other tutorials}} for further functionality.
+

@@ -1,0 +1,17 @@
+<woof>
+  <templates>
+    <template name="template" uri="template" path="Template.woof.html" class="net.officefloor.tutorial.gwtapp.TemplateLogic" x="30" y="31">
+      <output name="output" argument-type="">
+      </output>
+      <extension class="GWT">
+        <property name="gwt.module.path" value="net/officefloor/tutorial/gwtapp/template.gwt.xml"/>
+      </extension>
+    </template>
+  </templates>
+  <sections>
+  </sections>
+  <resources>
+  </resources>
+  <exceptions>
+  </exceptions>
+</woof>
