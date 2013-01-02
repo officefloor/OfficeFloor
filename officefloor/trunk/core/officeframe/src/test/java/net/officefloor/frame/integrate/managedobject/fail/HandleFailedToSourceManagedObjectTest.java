@@ -36,17 +36,12 @@ import net.officefloor.frame.test.ReflectiveWorkBuilder.ReflectiveTaskBuilder;
 
 /**
  * Tests handling {@link FailedToSourceManagedObjectEscalation}.
- *
+ * 
  * @author Daniel Sagenschneider
  */
 public class HandleFailedToSourceManagedObjectTest extends
 		AbstractOfficeConstructTestCase {
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see net.officefloor.frame.test.AbstractOfficeConstructTestCase#setUp()
-	 */
 	@Override
 	protected void setUp() throws Exception {
 		super.setUp();
@@ -126,7 +121,7 @@ public class HandleFailedToSourceManagedObjectTest extends
 
 	/**
 	 * Does the test expecting to handle input failure.
-	 *
+	 * 
 	 * @param failure
 	 *            Cause of failing to source {@link ManagedObject}.
 	 */
@@ -239,6 +234,7 @@ public class HandleFailedToSourceManagedObjectTest extends
 			sourceSetFailure = null;
 			registerCompletionListenerFailure = null;
 			objectGetFailure = null;
+			coordinateFailure = null;
 		}
 
 		/*
