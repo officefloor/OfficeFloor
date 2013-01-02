@@ -725,7 +725,7 @@
 				<plugin>
 					<groupId>com.mycila.maven-license-plugin</groupId>
 					<artifactId>maven-license-plugin</artifactId>
-					<version>1.8.0</version>
+					<version>1.9.0</version>
 				</plugin>
 				<plugin>
 					<!-- TODO migrate to v7 -->
@@ -917,20 +917,24 @@
 					<strictCheck>true</strictCheck>
 					<aggregate>true</aggregate>
 					<properties>
-						<currentYear>2012</currentYear>
+						<currentYear>2013</currentYear>
 					</properties>
 					<excludes>
 						<!-- Directories to exclude -->
 						<exclude>**/META-INF/services/**</exclude>
 						<exclude>**/src/test/resources/**</exclude>
 						<exclude>**/src/auto/**</exclude>
+						<exclude>**/src/main/resources/archetype-resources/src/**</exclude>
 						<!-- Extensions to exclude -->
 						<exclude>**/*.xml</exclude>
 						<exclude>**/*.xsd</exclude>
 						<exclude>**/*.exsd</exclude>
 						<exclude>**/*.txt</exclude>
 						<exclude>**/*.ofp</exclude>
+						<exclude>**/*.jks</exclude>
+						<exclude>**/*.config</exclude>
 						<exclude>**/*.properties</exclude>
+						<exclude>**/*.jj</exclude>
 						<exclude>**/*.apt</exclude>
 						<exclude>**/*.vm</exclude>
 						<exclude>**/*.xcf</exclude>
@@ -956,9 +960,9 @@
 						<exclude>**/*.teams</exclude>
 						<!-- Files to exclude -->
 						<exclude>**/officebuilding</exclude>
+						<exclude>**/buildingmanager</exclude>
 						<exclude>**/officefloor</exclude>
 						<exclude>**/officeconsole</exclude>
-						<exclude>**/officedemo</exclude>
 					</excludes>
 					<headerDefinitions>
 						<headerDefinition>src/license/java-header-style.xml</headerDefinition>
