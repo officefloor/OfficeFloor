@@ -1,0 +1,36 @@
+                                               -----------------------
+                                                  Demo Applications 
+                                               -----------------------
+					        Daniel Sagenschneider
+                                               -----------------------
+
+  <<Landing page demo applications>>
+
+  The landing page demo applications for {{http://officefloor.net}} are containing within a single project available to {{{http://sourceforge.net/projects/officefloor/files/maven/maven2/net/officefloor/tutorial/DemoApp/${projectVersion}/DemoApp-${projectVersion}-project.zip/download}download here}}.
+  
+  The project can be built and run with {{{http://maven.apache.org}maven}}.  Run the following within the extracted directory of the download (directory containing the <<<pom.xml>>> file):
+
++--------------------------
+
+     mvn clean install
+     
+     mvn woof:run
+
++--------------------------
+
+  After running, the example applications will be available at:
+
++--------------------------
+     http://localhost:7878
++--------------------------
+
+  To stop the application run:
+
++--------------------------
+
+     mvn officefloor:stop
+
++--------------------------
+
+  Please see the {{{../index.html}tutorials}} for explanation of the functionality and for other examples.
+

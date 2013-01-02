@@ -1,0 +1,15 @@
+<verifications>
+	<files>
+		<file>
+			<!-- Ensure using latest version -->
+			<location>${basedir}/../../pom.xml</location>
+			<contains><![CDATA[<dependencyManagement>[^;]*<artifactId>${project.artifactId}</artifactId>[^;]*</dependencyManagement>]]></contains>
+		</file>
+		
+		<file>
+			<!-- Ensure testing with latest version -->
+			<location>${basedir}/src/test/resources/net/officefloor/building/classpath/pom.test.xml</location>
+			<contains><![CDATA[<version>${project.version}</version>(\s)*</parent>]]></contains>
+		</file>
+	</files>
+</verifications>

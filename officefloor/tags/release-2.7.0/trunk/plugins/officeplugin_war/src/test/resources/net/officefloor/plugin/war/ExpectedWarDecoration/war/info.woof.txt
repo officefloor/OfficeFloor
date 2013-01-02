@@ -1,0 +1,1 @@
+Another WoOF file to stay on class path.
