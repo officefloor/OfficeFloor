@@ -17,7 +17,6 @@
 		<module>officeplugin_comet</module>
 		<module>officeplugin_ejb</module>
 		<module>officeplugin_gwt</module>
-		<module>officeplugin_hibernate</module>
 		<module>officeplugin_jdbc</module>
 		<module>officeplugin_jms</module>
 		<module>officeplugin_jndi</module>

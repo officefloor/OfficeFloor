@@ -70,7 +70,7 @@ public class WoofDevelopmentConfigurationLoader {
 	/**
 	 * Default version for GWT Dev artifact to use.
 	 */
-	public static final String DEFAULT_GWT_DEV_VERSION = "2.4.0";
+	public static final String DEFAULT_GWT_DEV_VERSION = "2.5.0";
 
 	/**
 	 * Obtains the GWT development class path to match POM configuration. In
