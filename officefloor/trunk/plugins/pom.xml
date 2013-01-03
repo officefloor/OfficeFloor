@@ -24,7 +24,6 @@
 		<module>officeplugin_launch</module>
 		<module>officeplugin_servlet</module>
 		<module>officeplugin_socket</module>
-		<module>officeplugin_spring</module>
 		<module>officeplugin_war</module>
 		<module>officeplugin_web</module>
 		<module>officeplugin_woof</module>
