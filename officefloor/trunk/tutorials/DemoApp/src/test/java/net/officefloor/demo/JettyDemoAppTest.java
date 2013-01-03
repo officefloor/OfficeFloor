@@ -56,7 +56,7 @@ public class JettyDemoAppTest extends AbstractDemoAppTestCase {
 		context.setResourceBase(webAppDir.getAbsolutePath());
 		context.setSessionHandler(new SessionHandler());
 		server.setHandler(context);
-		
+
 		// If running from clean, WoOF Servlet webfragment not available
 		context.addEventListener(new WoofServlet());
 

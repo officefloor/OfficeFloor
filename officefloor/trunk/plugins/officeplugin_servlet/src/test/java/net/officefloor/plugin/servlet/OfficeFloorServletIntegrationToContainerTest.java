@@ -38,6 +38,7 @@ import net.officefloor.plugin.web.http.application.HttpSessionStateful;
 import net.officefloor.plugin.web.http.application.HttpTemplateAutoWireSection;
 import net.officefloor.plugin.web.http.application.WebAutoWireApplication;
 import net.officefloor.plugin.web.http.session.HttpSession;
+import net.officefloor.plugin.web.http.template.parse.HttpTemplate;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
@@ -50,6 +51,7 @@ import org.eclipse.jetty.server.session.SessionHandler;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
 import org.eclipse.jetty.util.resource.Resource;
+import org.eclipse.jetty.webapp.WebAppContext;
 
 /**
  * Ensure able to integrate to provide objects for JSP rendering by Servlet
@@ -88,7 +90,7 @@ public class OfficeFloorServletIntegrationToContainerTest extends
 
 		// Start servlet container with servlet
 		this.server = new Server(this.port);
-		this.context = new ServletContextHandler();
+		this.context = new WebAppContext();
 		this.context.setBaseResource(Resource.newClassPathResource(this
 				.getClass().getPackage().getName().replace('.', '/')
 				+ "/integrate"));
@@ -242,36 +244,93 @@ public class OfficeFloorServletIntegrationToContainerTest extends
 	}
 
 	/**
-	 * Ensure able to retrieve HTTP template content from the
-	 * {@link ServletContext}.
+	 * Ensure able to retrieve HTTP template content.
 	 */
-	public void testServletContextResourceIntegration() throws Exception {
+	public void testTemplateIntegration() throws Exception {
 
 		// Add the servlet for handling requests
-		this.context.addEventListener(new MockServletContextResourceServlet());
+		MockTemplateServlet.templateUri = "/template";
+		this.context.addEventListener(new MockTemplateServlet());
 
 		// Start the server
 		this.server.start();
 
-		// Ensure can obtain template content from ServletContext
-		this.assertHttpRequest("/template.resource", "ServletContext Resource");
+		// Ensure can obtain template content
+		this.assertHttpRequest("/template.resource", "OfficeFloor Template");
 	}
 
 	/**
-	 * {@link OfficeFloorServlet} for testing {@link ServletContext} resource
-	 * for template content.
+	 * Ensure able to retrieve resource from the {@link ServletContext}.
 	 */
-	public static class MockServletContextResourceServlet extends
-			OfficeFloorServlet {
+	public void testResourceIntegration_SameSuffix() throws Exception {
+
+		// Add the servlet for handling requests
+		MockTemplateServlet.templateUri = "/template";
+		this.context.addEventListener(new MockTemplateServlet());
+
+		// Start the server
+		this.server.start();
+
+		// Ensure can obtain resource from ServletContext
+		this.assertHttpRequest("/resource.resource",
+				"Servlet Container Resource");
+	}
+
+	/**
+	 * Ensure able to retrieve HTTP template content from the
+	 * {@link ServletContext}.
+	 */
+	public void testResourceIntegration_NonRootTemplate() throws Exception {
+
+		// Add the servlet with template servicing root
+		MockTemplateServlet.templateUri = "/non-root";
+		this.context.addEventListener(new MockTemplateServlet());
+
+		// Start the server
+		this.server.start();
+
+		// Ensure can obtain Servlet resource
+		this.assertHttpRequest("/resource.html",
+				"<html><body>Servlet Resource</body></html>");
+	}
+
+	/**
+	 * Ensure able to retrieve HTTP template content from the
+	 * {@link ServletContext}.
+	 */
+	public void testResourceIntegration_RootTemplate() throws Exception {
+
+		// Add the servlet with template servicing root
+		MockTemplateServlet.templateUri = "/";
+		this.context.addEventListener(new MockTemplateServlet());
+
+		// Start the server
+		this.server.start();
+
+		// Ensure can obtain Servlet resource
+		this.assertHttpRequest("/resource.html",
+				"<html><body>Servlet Resource</body></html>");
+	}
+
+	/**
+	 * {@link OfficeFloorServlet} for testing integration of a
+	 * {@link HttpTemplate}.
+	 */
+	public static class MockTemplateServlet extends OfficeFloorServlet {
+
+		/**
+		 * Template URI path.
+		 */
+		private static String templateUri;
 
 		@Override
 		public String getServletName() {
-			return "MockResourceIntegrate";
+			return "MockTemplateIntegrate";
 		}
 
 		@Override
 		public String getTemplateUriSuffix() {
-			return "resource";
+			return "resource"; // '.' should be provided
 		}
 
 		@Override
@@ -279,11 +338,11 @@ public class OfficeFloorServletIntegrationToContainerTest extends
 				ServletContext servletContext) throws Exception {
 
 			// Should obtain template content from ServletContext
-			final String templatePath = "ServletContextResourceTemplate.ofp";
+			final String templatePath = "ServletTemplate.ofp";
 
 			// Add the template
-			application.addHttpTemplate("template", templatePath,
-					MockServletContextResourceTemplate.class);
+			application.addHttpTemplate(templateUri, templatePath,
+					MockTemplate.class);
 
 			// Configure
 			return true;
@@ -294,14 +353,14 @@ public class OfficeFloorServletIntegrationToContainerTest extends
 	 * Template for testing obtaining template content from the
 	 * {@link ServletContext}.
 	 */
-	public static class MockServletContextResourceTemplate {
+	public static class MockTemplate {
 
-		public MockServletContextResourceTemplate getTemplate() {
+		public MockTemplate getTemplate() {
 			return this;
 		}
 
 		public String getText() {
-			return "ServletContext Resource";
+			return "OfficeFloor Template";
 		}
 	}
 
@@ -419,14 +478,17 @@ public class OfficeFloorServletIntegrationToContainerTest extends
 		// Send request
 		HttpResponse response = this.client.execute(new HttpGet(
 				"http://localhost:" + this.port + uri));
-		assertEquals("Should be successful", 200, response.getStatusLine()
-				.getStatusCode());
+		int statusCode = response.getStatusLine().getStatusCode();
 
 		// Ensure appropriately integrated state for JSP
 		ByteArrayOutputStream buffer = new ByteArrayOutputStream();
 		response.getEntity().writeTo(buffer);
 		String body = buffer.toString();
-		assertEquals("Incorrect response", expectedResponse, body.trim());
+		assertEquals("Incorrect response (response status " + statusCode
+				+ ")", expectedResponse, body.trim());
+
+		// Ensure also successful
+		assertEquals("Should be successful", 200, statusCode);
 	}
 
 }
