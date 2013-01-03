@@ -24,10 +24,6 @@
 			<contains><![CDATA[<version>${project.version}</version>(\s)*</parent>]]></contains>
 		</file>
 		<file>
-			<location>officeplugin_hibernate/pom.xml</location>
-			<contains><![CDATA[<version>${project.version}</version>(\s)*</parent>]]></contains>
-		</file>
-		<file>
 			<location>officeplugin_jdbc/pom.xml</location>
 			<contains><![CDATA[<version>${project.version}</version>(\s)*</parent>]]></contains>
 		</file>

@@ -70,8 +70,8 @@ public class ValidJpaTest extends AbstractJpaTestCase {
 		// Store the entity
 		EntityManager entityManager = this.createEntityManager();
 		entityManager.persist(entity);
-		assertNotNull("Should now have identifier", entity.getId());
 		entityManager.close();
+		assertNotNull("Should now have identifier", entity.getId());
 
 		// Ensure entry in database
 		Statement statement = this.connection.createStatement();
@@ -99,6 +99,7 @@ public class ValidJpaTest extends AbstractJpaTestCase {
 			// Store entity causing not null violation
 			EntityManager entityManager = this.createEntityManager();
 			entityManager.persist(new MockEntity(null, "Not null violation"));
+			entityManager.close();
 			fail("Should not be successful");
 
 		} catch (PersistenceException ex) {

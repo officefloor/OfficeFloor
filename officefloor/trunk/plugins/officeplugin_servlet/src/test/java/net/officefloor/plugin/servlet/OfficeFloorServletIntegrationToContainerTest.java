@@ -123,6 +123,8 @@ public class OfficeFloorServletIntegrationToContainerTest extends
 
 		// Add the JSP
 		this.context.addServlet(new ServletHolder(JspServlet.class), "*.jsp");
+		this.context.setClassLoader(Thread.currentThread()
+				.getContextClassLoader());
 
 		// Add listener to initialise application object
 		this.context.addEventListener(new ServletContextListener() {
