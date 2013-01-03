@@ -52,10 +52,6 @@
 			<contains><![CDATA[<version>${project.version}</version>(\s)*</parent>]]></contains>
 		</file>
 		<file>
-			<location>officeplugin_spring/pom.xml</location>
-			<contains><![CDATA[<version>${pom.version}</version>(\s)*</parent>]]></contains>
-		</file>
-		<file>
 			<location>officeplugin_war/pom.xml</location>
 			<contains><![CDATA[<version>${project.version}</version>(\s)*</parent>]]></contains>
 		</file>
