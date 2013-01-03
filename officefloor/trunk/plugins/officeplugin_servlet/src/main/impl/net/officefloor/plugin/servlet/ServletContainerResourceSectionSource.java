@@ -25,6 +25,7 @@ import javax.servlet.RequestDispatcher;
 import javax.servlet.Servlet;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletRequestWrapper;
 import javax.servlet.http.HttpServletResponse;
 
 import net.officefloor.compile.spi.section.SectionDesigner;
@@ -58,9 +59,9 @@ public class ServletContainerResourceSectionSource extends
 
 	/**
 	 * {@link HttpServletRequest} attribute name to indicate a {@link Servlet}
-	 * container resource.
+	 * container resource path.
 	 */
-	private static final String SERVLET_CONTAINER_RESOURCE_ATTRIBUTE_NAME = "servlet.container.resource.attribute.name";
+	private static final String ATTRIBUTE_SERVLET_RESOURCE_PATH = "officefloor.servlet.resource.path";
 
 	/**
 	 * Dependency keys for the {@link ServletContainerResourceWorkSource}.
@@ -87,26 +88,43 @@ public class ServletContainerResourceSectionSource extends
 			HttpServletResponse response) throws ServletException, IOException {
 
 		// Obtain the request attribute
-		ServletContainerResourceTask task;
+		String path;
 		synchronized (request) {
-			task = (ServletContainerResourceTask) request
-					.getAttribute(SERVLET_CONTAINER_RESOURCE_ATTRIBUTE_NAME);
+			path = (String) request
+					.getAttribute(ATTRIBUTE_SERVLET_RESOURCE_PATH);
 		}
 
 		// Determine if requires handling
-		if (task == null) {
+		if (path == null) {
 			return true; // serviced
 		}
 
-		// Determine if require dispatch
-		if (task.requestDispatcherPath != null) {
+		// Override the request path
+		final String servletPath = (path.startsWith("/") ? path : "/" + path);
+		HttpServletRequestWrapper requestWithPath = new HttpServletRequestWrapper(
+				request) {
+			@Override
+			public String getServletPath() {
+				return servletPath;
+			}
+		};
 
-			// Dispatch request to Servlet container resource
-			RequestDispatcher dispatcher = request
-					.getRequestDispatcher(task.requestDispatcherPath);
-			dispatcher.forward(request, response);
+		// Dispatch for JSP
+		if (path.toLowerCase().endsWith(".jsp")) {
+			RequestDispatcher dispatcher = request.getRequestDispatcher(path);
+			if (dispatcher != null) {
+				// Allow JSP Servlet to service
+				dispatcher.forward(requestWithPath, response);
+				return true;
+			}
+		}
 
-			// Serviced
+		// Dispatch request to Servlet container resource
+		RequestDispatcher dispatcher = request.getServletContext()
+				.getNamedDispatcher("default");
+		if (dispatcher != null) {
+			// Allow Default Servlet to service with static resource
+			dispatcher.forward(requestWithPath, response);
 			return true;
 		}
 
@@ -223,11 +241,14 @@ public class ServletContainerResourceSectionSource extends
 			ServletBridge bridge = (ServletBridge) context
 					.getObject(DependencyKeys.SERVLET_BRIDGE);
 
-			// Indicate to use Servlet container resource
+			// Determine the path
 			HttpServletRequest request = bridge.getRequest();
+			String path = (this.requestDispatcherPath != null ? this.requestDispatcherPath
+					: request.getServletPath());
+
+			// Indicate to use Servlet container resource
 			synchronized (request) {
-				request.setAttribute(SERVLET_CONTAINER_RESOURCE_ATTRIBUTE_NAME,
-						this);
+				request.setAttribute(ATTRIBUTE_SERVLET_RESOURCE_PATH, path);
 			}
 
 			// Nothing further
