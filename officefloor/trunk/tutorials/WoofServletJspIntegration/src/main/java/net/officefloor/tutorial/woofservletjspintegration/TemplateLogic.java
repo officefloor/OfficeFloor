@@ -38,7 +38,8 @@ public class TemplateLogic {
 	}
 
 	public ApplicationBean getApplication(ApplicationBean bean) {
-		// Value set by SetupListener
+		// Value set by SetupListener (show upper case for WoOF template)
+		bean.setText(bean.getText().toUpperCase());
 		return bean;
 	}
 
@@ -47,7 +48,7 @@ public class TemplateLogic {
 			ApplicationBean applicationBean) {
 		requestBean.setText("REQUEST");
 		sessionBean.setText("SESSION");
-		applicationBean.setText("application"); // show change by dropping case
+		applicationBean.setText("application"); // show lower case for JSP
 	}
 }
 // END SNIPPET: tutorial
