@@ -78,7 +78,7 @@ public class HttpServerAutoWireOfficeFloorSourceTest extends
 	@Override
 	protected void setUp() throws Exception {
 		// Configure the client
-		MockHttpServer.configureAnonymousHttps(this.client, 7979);
+		MockHttpServer.configureHttps(this.client, 7979);
 	}
 
 	@Override
@@ -150,8 +150,7 @@ public class HttpServerAutoWireOfficeFloorSourceTest extends
 
 		// Construct HTTP instance with specified port
 		this.source = new HttpServerAutoWireOfficeFloorSource(PORT,
-				SECURE_PORT,
-				MockHttpServer.getAnonymousSslEngineConfiguratorClass());
+				SECURE_PORT, MockHttpServer.getSslEngineSourceClass());
 		this.source.openOfficeFloor();
 
 		// Obtain the expected content
@@ -189,7 +188,7 @@ public class HttpServerAutoWireOfficeFloorSourceTest extends
 
 		// Specify the HTTPS port
 		this.source.addHttpsServerSocket(PORT,
-				MockHttpServer.getAnonymousSslEngineConfiguratorClass());
+				MockHttpServer.getSslEngineSourceClass());
 		this.source.openOfficeFloor();
 
 		// Obtain the expected content
@@ -228,9 +227,9 @@ public class HttpServerAutoWireOfficeFloorSourceTest extends
 
 		// Add the port twice
 		AutoWireObject one = this.source.addHttpsServerSocket(PORT,
-				MockHttpServer.getAnonymousSslEngineConfiguratorClass());
+				MockHttpServer.getSslEngineSourceClass());
 		AutoWireObject two = this.source.addHttpsServerSocket(PORT,
-				MockHttpServer.getAnonymousSslEngineConfiguratorClass());
+				MockHttpServer.getSslEngineSourceClass());
 		assertSame("Ensure same object for same port", one, two);
 		this.source.openOfficeFloor();
 
@@ -276,9 +275,8 @@ public class HttpServerAutoWireOfficeFloorSourceTest extends
 				HttpApplicationLocationManagedObjectSource.PROPERTY_HTTPS_PORT,
 				String.valueOf(PORT));
 		compiler.addProperty(
-				SslCommunicationProtocol.PROPERTY_SSL_ENGINE_CONFIGURATOR,
-				MockHttpServer.getAnonymousSslEngineConfiguratorClass()
-						.getName());
+				SslCommunicationProtocol.PROPERTY_SSL_ENGINE_SOURCE,
+				MockHttpServer.getSslEngineSourceClass().getName());
 		this.source.openOfficeFloor();
 
 		// Obtain the expected content
@@ -330,9 +328,8 @@ public class HttpServerAutoWireOfficeFloorSourceTest extends
 				HttpApplicationLocationManagedObjectSource.PROPERTY_CLUSTER_HTTPS_PORT,
 				String.valueOf(PORT));
 		compiler.addProperty(
-				SslCommunicationProtocol.PROPERTY_SSL_ENGINE_CONFIGURATOR,
-				MockHttpServer.getAnonymousSslEngineConfiguratorClass()
-						.getName());
+				SslCommunicationProtocol.PROPERTY_SSL_ENGINE_SOURCE,
+				MockHttpServer.getSslEngineSourceClass().getName());
 		this.source.openOfficeFloor();
 
 		// Obtain the expected content
@@ -380,12 +377,11 @@ public class HttpServerAutoWireOfficeFloorSourceTest extends
 
 		// Listen on multiple HTTPS Server socket
 		this.source = new HttpServerAutoWireOfficeFloorSource(7878,
-				EXTRA_PORT_ONE,
-				MockHttpServer.getAnonymousSslEngineConfiguratorClass());
+				EXTRA_PORT_ONE, MockHttpServer.getSslEngineSourceClass());
 		this.source.addHttpsServerSocket(EXTRA_PORT_TWO,
-				MockHttpServer.getAnonymousSslEngineConfiguratorClass());
+				MockHttpServer.getSslEngineSourceClass());
 		this.source.addHttpsServerSocket(DEFAULT_PORT,
-				MockHttpServer.getAnonymousSslEngineConfiguratorClass());
+				MockHttpServer.getSslEngineSourceClass());
 		this.source.openOfficeFloor();
 
 		// Obtain the expected content

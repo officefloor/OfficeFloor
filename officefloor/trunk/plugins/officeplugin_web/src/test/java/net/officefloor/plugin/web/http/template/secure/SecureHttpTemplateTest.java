@@ -92,7 +92,7 @@ public class SecureHttpTemplateTest extends OfficeFrameTestCase {
 		this.client = new DefaultHttpClient(params);
 
 		// Configure the client for anonymous HTTPS
-		MockHttpServer.configureAnonymousHttps(this.client, 7979);
+		MockHttpServer.configureHttps(this.client, 7979);
 	}
 
 	@Override

@@ -148,8 +148,8 @@ public class HttpUrlContinuationSectionSourceTest extends OfficeFrameTestCase {
 		HttpServerSocketManagedObjectSource.autoWire(source, 7878, "ROUTE",
 				HttpRouteWorkSource.TASK_NAME);
 		HttpsServerSocketManagedObjectSource.autoWire(source, 7979,
-				MockHttpServer.getAnonymousSslEngineConfiguratorClass(),
-				"ROUTE", HttpRouteWorkSource.TASK_NAME);
+				MockHttpServer.getSslEngineSourceClass(), "ROUTE",
+				HttpRouteWorkSource.TASK_NAME);
 		AutoWireSection route = source.addSection("ROUTE",
 				WorkSectionSource.class.getName(),
 				HttpRouteWorkSource.class.getName());
@@ -189,7 +189,7 @@ public class HttpUrlContinuationSectionSourceTest extends OfficeFrameTestCase {
 		HttpParams params = new BasicHttpParams();
 		params.setBooleanParameter(ClientPNames.HANDLE_REDIRECTS, false);
 		HttpClient client = new DefaultHttpClient(params);
-		MockHttpServer.configureAnonymousHttps(client, 7979);
+		MockHttpServer.configureHttps(client, 7979);
 
 		// Obtain the host name
 		String hostName = HttpApplicationLocationManagedObjectSource

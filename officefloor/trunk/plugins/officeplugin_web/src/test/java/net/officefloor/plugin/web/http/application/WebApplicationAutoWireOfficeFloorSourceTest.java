@@ -112,8 +112,7 @@ public class WebApplicationAutoWireOfficeFloorSourceTest extends
 				HttpApplicationLocationManagedObjectSource.PROPERTY_HTTPS_PORT,
 				String.valueOf(this.securePort));
 		HttpsServerSocketManagedObjectSource.autoWire(this.source,
-				this.securePort,
-				MockHttpServer.getAnonymousSslEngineConfiguratorClass(),
+				this.securePort, MockHttpServer.getSslEngineSourceClass(),
 				WebApplicationAutoWireOfficeFloorSource.HANDLER_SECTION_NAME,
 				WebApplicationAutoWireOfficeFloorSource.HANDLER_INPUT_NAME);
 
@@ -130,8 +129,8 @@ public class WebApplicationAutoWireOfficeFloorSourceTest extends
 		params.setBooleanParameter(ClientPNames.HANDLE_REDIRECTS, false);
 		this.client = new DefaultHttpClient(params);
 
-		// Configure anonymous HTTPS for client
-		MockHttpServer.configureAnonymousHttps(this.client, this.securePort);
+		// Configure HTTPS for client
+		MockHttpServer.configureHttps(this.client, this.securePort);
 	}
 
 	@Override

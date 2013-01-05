@@ -144,7 +144,7 @@ public class HttpTemplateSectionIntegrationTest extends OfficeFrameTestCase {
 		this.client = new DefaultHttpClient(params);
 
 		// Allow anonymous secure communication for testing
-		MockHttpServer.configureAnonymousHttps(this.client, this.httpsPort);
+		MockHttpServer.configureHttps(this.client, this.httpsPort);
 	}
 
 	@Override
@@ -963,8 +963,7 @@ public class HttpTemplateSectionIntegrationTest extends OfficeFrameTestCase {
 
 		// Add the HTTPS server socket listener
 		HttpsServerSocketManagedObjectSource.autoWire(this.source,
-				this.httpsPort,
-				MockHttpServer.getAnonymousSslEngineConfiguratorClass(),
+				this.httpsPort, MockHttpServer.getSslEngineSourceClass(),
 				"ROUTE", "route");
 
 		// Add dependencies
