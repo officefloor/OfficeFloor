@@ -214,7 +214,7 @@ public class WoofDevelopmentLauncherTest extends OfficeFrameTestCase implements
 
 		// Launch the application with default configuration
 		this.launchApplication(null, "net.officefloor.launch.woof.Test",
-				"/template", "/section");
+				"/template.woof", "/section");
 
 		// Ensure template available
 		this.doHttpRequest(8888, "template.woof", "TEMPLATE");
@@ -253,7 +253,7 @@ public class WoofDevelopmentLauncherTest extends OfficeFrameTestCase implements
 
 		// Launch the application with alternate configuration
 		this.launchApplication("noGwt.woof", "net.officefloor.launch.NoGwt",
-				"/noGwt");
+				"/noGwt.woof");
 
 		// Ensure start alternate configuration
 		this.doHttpRequest(8888, "noGwt.woof", "TEMPLATE");
@@ -290,7 +290,7 @@ public class WoofDevelopmentLauncherTest extends OfficeFrameTestCase implements
 
 		// Launch the application with alternate configuration
 		this.launchApplication("invalid.woof", "net.officefloor.launch.NoGwt",
-				"/invalid");
+				"/invalid.woof");
 
 	}
 

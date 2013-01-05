@@ -37,6 +37,7 @@ import net.officefloor.model.woof.WoofSectionInputModel;
 import net.officefloor.model.woof.WoofSectionModel;
 import net.officefloor.model.woof.WoofTemplateExtensionModel;
 import net.officefloor.model.woof.WoofTemplateModel;
+import net.officefloor.plugin.woof.WoofOfficeFloorSource;
 import net.officefloor.plugin.woof.gwt.GwtWoofTemplateExtensionService;
 
 import org.apache.maven.artifact.repository.ArtifactRepository;
@@ -180,7 +181,8 @@ public class WoofDevelopmentConfigurationLoader {
 			String templateUri = template.getUri();
 			if ((templateUri != null) && (templateUri.trim().length() > 0)) {
 				// Template URI provided so include
-				String startupUrl = transformUriToStartupUrl(templateUri);
+				String startupUrl = transformUriToStartupUrl(templateUri
+						+ WoofOfficeFloorSource.WOOF_TEMPLATE_URI_SUFFIX);
 				configuration.addStartupUrl(startupUrl);
 			}
 
