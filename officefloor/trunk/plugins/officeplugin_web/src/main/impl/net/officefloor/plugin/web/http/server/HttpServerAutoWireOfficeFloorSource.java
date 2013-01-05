@@ -30,8 +30,8 @@ import net.officefloor.compile.spi.officefloor.source.OfficeFloorSourceContext;
 import net.officefloor.frame.impl.spi.team.PassiveTeamSource;
 import net.officefloor.plugin.socket.server.http.source.HttpServerSocketManagedObjectSource;
 import net.officefloor.plugin.socket.server.http.source.HttpsServerSocketManagedObjectSource;
-import net.officefloor.plugin.socket.server.ssl.AnonymousSslEngineConfigurator;
-import net.officefloor.plugin.socket.server.ssl.SslEngineConfigurator;
+import net.officefloor.plugin.socket.server.ssl.OfficeFloorDefaultSslEngineSource;
+import net.officefloor.plugin.socket.server.ssl.SslEngineSource;
 import net.officefloor.plugin.socket.server.ssl.protocol.SslCommunicationProtocol;
 import net.officefloor.plugin.web.http.application.HttpApplicationState;
 import net.officefloor.plugin.web.http.application.HttpApplicationStateManagedObjectSource;
@@ -96,11 +96,11 @@ public class HttpServerAutoWireOfficeFloorSource extends
 	 *            HTTP port.
 	 * @param httpsPort
 	 *            HTTPS port.
-	 * @param sslEngineConfiguratorClass
-	 *            {@link SslEngineConfigurator} class. May be <code>null</code>.
+	 * @param sslEngineSourceClass
+	 *            {@link SslEngineSource} class. May be <code>null</code>.
 	 */
 	public HttpServerAutoWireOfficeFloorSource(int httpPort, int httpsPort,
-			Class<? extends SslEngineConfigurator> sslEngineConfiguratorClass) {
+			Class<? extends SslEngineSource> sslEngineSourceClass) {
 
 		// Obtain the OfficeFloor compiler
 		OfficeFloorCompiler compiler = this.getOfficeFloorCompiler();
@@ -117,10 +117,10 @@ public class HttpServerAutoWireOfficeFloorSource extends
 			compiler.addProperty(
 					HttpApplicationLocationManagedObjectSource.PROPERTY_CLUSTER_HTTPS_PORT,
 					String.valueOf(httpsPort));
-			if (sslEngineConfiguratorClass != null) {
+			if (sslEngineSourceClass != null) {
 				compiler.addProperty(
-						SslCommunicationProtocol.PROPERTY_SSL_ENGINE_CONFIGURATOR,
-						sslEngineConfiguratorClass.getName());
+						SslCommunicationProtocol.PROPERTY_SSL_ENGINE_SOURCE,
+						sslEngineSourceClass.getName());
 			}
 		}
 
@@ -168,7 +168,7 @@ public class HttpServerAutoWireOfficeFloorSource extends
 
 	@Override
 	public AutoWireObject addHttpsServerSocket(int port,
-			Class<? extends SslEngineConfigurator> sslEngineConfiguratorClass) {
+			Class<? extends SslEngineSource> sslEngineSourceClass) {
 
 		// Lazy create the HTTPS Server Socket on the port
 		Integer portInteger = Integer.valueOf(port);
@@ -177,7 +177,7 @@ public class HttpServerAutoWireOfficeFloorSource extends
 
 			// Create the HTTPS Server Socket on the port
 			object = HttpsServerSocketManagedObjectSource.autoWire(this, port,
-					sslEngineConfiguratorClass, HANDLER_SECTION_NAME,
+					sslEngineSourceClass, HANDLER_SECTION_NAME,
 					HANDLER_INPUT_NAME);
 
 			// Register adding the HTTPS port
@@ -231,11 +231,10 @@ public class HttpServerAutoWireOfficeFloorSource extends
 		if (httpsPort != null) {
 			// Determine if SSL Engine Configurator configured
 			String sslEngineConfiguratorClassName = context.getProperty(
-					SslCommunicationProtocol.PROPERTY_SSL_ENGINE_CONFIGURATOR,
-					null);
-			Class<? extends SslEngineConfigurator> sslEngineConfiguratorClass = null;
+					SslCommunicationProtocol.PROPERTY_SSL_ENGINE_SOURCE, null);
+			Class<? extends SslEngineSource> sslEngineConfiguratorClass = null;
 			if (sslEngineConfiguratorClassName != null) {
-				sslEngineConfiguratorClass = (Class<? extends SslEngineConfigurator>) context
+				sslEngineConfiguratorClass = (Class<? extends SslEngineSource>) context
 						.loadClass(sslEngineConfiguratorClassName);
 			}
 
@@ -247,7 +246,7 @@ public class HttpServerAutoWireOfficeFloorSource extends
 			// Provide default HTTPS port (focus on ease of development)
 			this.addHttpsServerSocket(
 					HttpApplicationLocationManagedObjectSource.DEFAULT_HTTPS_PORT,
-					AnonymousSslEngineConfigurator.class);
+					OfficeFloorDefaultSslEngineSource.class);
 		}
 	}
 
