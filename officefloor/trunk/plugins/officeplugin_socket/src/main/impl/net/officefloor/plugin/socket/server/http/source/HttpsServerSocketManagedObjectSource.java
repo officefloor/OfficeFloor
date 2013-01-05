@@ -96,7 +96,7 @@ public class HttpsServerSocketManagedObjectSource extends
 	 *            {@link WebAutoWireApplication}.
 	 * @param port
 	 *            Port to listen for HTTPS requests.
-	 * @param configuratorClass
+	 * @param sslEngineSourceClass
 	 *            {@link SslEngineSource} class. May be <code>null</code>.
 	 * @param sectionName
 	 *            Name of the {@link AutoWireSection} servicing the requests.
@@ -106,7 +106,7 @@ public class HttpsServerSocketManagedObjectSource extends
 	 * @return {@link AutoWireObject}.
 	 */
 	public static AutoWireObject autoWire(AutoWireApplication source, int port,
-			Class<? extends SslEngineSource> configuratorClass,
+			Class<? extends SslEngineSource> sslEngineSourceClass,
 			String sectionName, String sectionInputName) {
 
 		// Create the wirer
@@ -118,10 +118,10 @@ public class HttpsServerSocketManagedObjectSource extends
 				HttpsServerSocketManagedObjectSource.class.getName(), wirer,
 				new AutoWire(ServerHttpConnection.class));
 		object.addProperty(PROPERTY_PORT, String.valueOf(port));
-		if (configuratorClass != null) {
+		if (sslEngineSourceClass != null) {
 			object.addProperty(
 					SslCommunicationProtocol.PROPERTY_SSL_ENGINE_SOURCE,
-					configuratorClass.getName());
+					sslEngineSourceClass.getName());
 		}
 
 		// Return the object
