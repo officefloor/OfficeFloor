@@ -120,14 +120,14 @@ public class AutoWireHttpsSocketTest extends OfficeFrameTestCase {
 
 		// Register the managed object source
 		HttpsServerSocketManagedObjectSource.autoWire(this.autoWire, this.port,
-				MockHttpServer.getAnonymousSslEngineConfiguratorClass(),
-				"TEST", "handleRequest");
+				MockHttpServer.getSslEngineSourceClass(), "TEST",
+				"handleRequest");
 
 		// Open the OfficeFloor
 		this.officeFloor = this.autoWire.openOfficeFloor();
 
 		// Send request (with anonymous connection)
-		MockHttpServer.configureAnonymousHttps(this.client, this.port);
+		MockHttpServer.configureHttps(this.client, this.port);
 		HttpGet request = new HttpGet("https://localhost:" + this.port);
 		org.apache.http.HttpResponse response = this.client.execute(request);
 

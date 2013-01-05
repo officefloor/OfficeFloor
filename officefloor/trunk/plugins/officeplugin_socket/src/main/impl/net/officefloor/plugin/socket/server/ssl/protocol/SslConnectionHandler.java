@@ -22,6 +22,8 @@ import java.nio.ByteBuffer;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.Queue;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.net.ssl.SSLEngine;
 import javax.net.ssl.SSLEngineResult;
@@ -45,6 +47,12 @@ import net.officefloor.plugin.socket.server.ssl.SslTaskExecutor;
  */
 public class SslConnectionHandler implements ConnectionHandler, ReadContext,
 		HeartBeatContext {
+
+	/**
+	 * {@link Logger}.
+	 */
+	private static final Logger LOGGER = Logger
+			.getLogger(SslConnectionHandler.class.getName());
 
 	/**
 	 * {@link Connection}.
@@ -441,6 +449,11 @@ public class SslConnectionHandler implements ConnectionHandler, ReadContext,
 		} catch (IOException ex) {
 			// Record failure of processing to fail further interaction
 			this.failure = ex;
+
+			// Log SSL failure
+			if (LOGGER.isLoggable(Level.INFO)) {
+				LOGGER.log(Level.INFO, "Failure in connection", ex);
+			}
 
 			// Failure, so close connection
 			try {

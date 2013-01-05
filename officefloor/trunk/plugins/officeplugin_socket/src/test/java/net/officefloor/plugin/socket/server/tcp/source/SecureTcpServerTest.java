@@ -21,25 +21,18 @@ import java.net.InetAddress;
 import java.net.Socket;
 
 import javax.net.ssl.SSLContext;
-import javax.net.ssl.SSLEngine;
-import javax.net.ssl.SSLSocket;
 import javax.net.ssl.SSLSocketFactory;
 
 import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.build.ManagedObjectBuilder;
 import net.officefloor.frame.api.build.ManagingOfficeBuilder;
 import net.officefloor.frame.test.MockTeamSource;
-import net.officefloor.plugin.socket.server.ssl.SslEngineConfigurator;
+import net.officefloor.plugin.socket.server.ssl.OfficeFloorDefaultSslEngineSource;
 import net.officefloor.plugin.socket.server.ssl.protocol.SslCommunicationProtocol;
 import net.officefloor.plugin.socket.server.tcp.protocol.TcpCommunicationProtocol;
 
 /**
- * <p>
  * Tests the {@link SecureTcpServerSocketManagedObjectSource}.
- * <p>
- * Anonymous ciphers are used in testing to not require installing certificates
- * (making tests portable). <b>Anonymous ciphers should however never be used
- * for production servers!</b>
  * 
  * @author Daniel Sagenschneider
  */
@@ -67,8 +60,8 @@ public class SecureTcpServerTest extends AbstractTcpServerTestCase {
 				TcpCommunicationProtocol.PROPERTY_MAXIMUM_IDLE_TIME,
 				String.valueOf(10000));
 		serverSocketBuilder.addProperty(
-				SslCommunicationProtocol.PROPERTY_SSL_ENGINE_CONFIGURATOR,
-				MockSslEngineConfigurator.class.getName());
+				SslCommunicationProtocol.PROPERTY_SSL_ENGINE_SOURCE,
+				OfficeFloorDefaultSslEngineSource.class.getName());
 		serverSocketBuilder.setTimeout(10000);
 
 		// Register the necessary teams for socket listening
@@ -95,35 +88,13 @@ public class SecureTcpServerTest extends AbstractTcpServerTestCase {
 			throws Exception {
 
 		// Create the secure connected socket
-		SSLContext context = SSLContext.getDefault();
+		SSLContext context = OfficeFloorDefaultSslEngineSource
+				.createClientSslContext(null);
 		SSLSocketFactory socketFactory = context.getSocketFactory();
 		Socket socket = socketFactory.createSocket(address, port);
 
-		// Enable all supported to allow anonymous for testing
-		SSLSocket sslSocket = (SSLSocket) socket;
-		sslSocket.setEnabledCipherSuites(sslSocket.getSupportedCipherSuites());
-
 		// Return the connected socket
 		return socket;
-	}
-
-	/**
-	 * {@link SslEngineConfigurator} to configure the {@link SslEngine} for
-	 * testing.
-	 */
-	public static class MockSslEngineConfigurator implements
-			SslEngineConfigurator {
-
-		@Override
-		public void init(SSLContext context) throws Exception {
-			// Do nothing
-		}
-
-		@Override
-		public void configureSslEngine(SSLEngine engine) {
-			// Enable all supported to allow anonymous for testing
-			engine.setEnabledCipherSuites(engine.getSupportedCipherSuites());
-		}
 	}
 
 }
