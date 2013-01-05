@@ -26,12 +26,10 @@ import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.net.UnknownHostException;
 import java.nio.charset.Charset;
-import java.security.NoSuchAlgorithmException;
 import java.util.LinkedList;
 import java.util.List;
 
 import javax.net.ssl.SSLContext;
-import javax.net.ssl.SSLEngine;
 import javax.net.ssl.SSLSocket;
 import javax.net.ssl.SSLSocketFactory;
 
@@ -48,8 +46,8 @@ import net.officefloor.frame.test.MockTeamSource;
 import net.officefloor.plugin.socket.server.http.source.HttpServerSocketManagedObjectSource;
 import net.officefloor.plugin.socket.server.http.source.HttpsServerSocketManagedObjectSource;
 import net.officefloor.plugin.socket.server.impl.AbstractServerSocketManagedObjectSource;
-import net.officefloor.plugin.socket.server.ssl.AnonymousSslEngineConfigurator;
-import net.officefloor.plugin.socket.server.ssl.SslEngineConfigurator;
+import net.officefloor.plugin.socket.server.ssl.OfficeFloorDefaultSslEngineSource;
+import net.officefloor.plugin.socket.server.ssl.SslEngineSource;
 import net.officefloor.plugin.socket.server.ssl.protocol.SslCommunicationProtocol;
 
 import org.apache.http.HttpEntity;
@@ -137,26 +135,31 @@ public abstract class MockHttpServer extends AbstractOfficeConstructTestCase
 	}
 
 	/**
-	 * Configures the {@link HttpClient} with anonymous HTTPS {@link Scheme}.
+	 * Configures the {@link HttpClient} with HTTPS {@link Scheme}.
 	 * 
 	 * @param client
 	 *            {@link HttpClient}.
 	 * @param port
-	 *            Port running on.
+	 *            Default port for the HTTPS.
+	 * 
+	 * @see #getSslEngineSourceClass()
 	 */
-	public static void configureAnonymousHttps(HttpClient client, int port) {
-		SocketFactory socketFactory = new AnonymousSocketFactory();
+	public static void configureHttps(HttpClient client, int port) {
+		SocketFactory socketFactory = new OfficeFloorDefaultSocketFactory();
 		Scheme scheme = new Scheme("https", socketFactory, port);
 		client.getConnectionManager().getSchemeRegistry().register(scheme);
 	}
 
 	/**
-	 * Obtains the {@link SslEngineConfigurator} for anonymous HTTPS.
+	 * Obtains the {@link SslEngineSource} for the corresponding configured
+	 * HTTPS.
 	 * 
-	 * @return {@link SslEngineConfigurator} for anonymous HTTPS.
+	 * @return {@link SslEngineSource} for the corresponding configured HTTPS.
+	 * 
+	 * @see #configureHttps(HttpClient, int)
 	 */
-	public static Class<? extends SslEngineConfigurator> getAnonymousSslEngineConfiguratorClass() {
-		return AnonymousSslEngineConfigurator.class;
+	public static Class<? extends SslEngineSource> getSslEngineSourceClass() {
+		return OfficeFloorDefaultSslEngineSource.class;
 	}
 
 	/**
@@ -215,8 +218,8 @@ public abstract class MockHttpServer extends AbstractOfficeConstructTestCase
 			this.constructManagedObjectSourceTeam(MO_NAME, "SSL_TASKS",
 					MockTeamSource.createOnePersonTeam("SSL_TASKS"));
 			serverSocketBuilder.addProperty(
-					SslCommunicationProtocol.PROPERTY_SSL_ENGINE_CONFIGURATOR,
-					TestSslEngineConfigurator.class.getName());
+					SslCommunicationProtocol.PROPERTY_SSL_ENGINE_SOURCE,
+					getSslEngineSourceClass().getName());
 		} else {
 			// Setup unsecure HTTP server
 			this.isServerSecure = false;
@@ -301,7 +304,7 @@ public abstract class MockHttpServer extends AbstractOfficeConstructTestCase
 		HttpClient client = new DefaultHttpClient();
 		if (this.isServerSecure()) {
 			// Configure to be secure client
-			configureAnonymousHttps(client, this.port);
+			configureHttps(client, this.port);
 		}
 
 		// Register the HTTP client for cleanup
@@ -367,33 +370,14 @@ public abstract class MockHttpServer extends AbstractOfficeConstructTestCase
 	}
 
 	/**
-	 * {@link SslEngineConfigurator} to setup {@link MockHttpServer} to work
-	 * with {@link TestProtocolSocketFactory}.
-	 */
-	public static class TestSslEngineConfigurator implements
-			SslEngineConfigurator {
-
-		/*
-		 * ==================== SslEngineConfigurator ========================
-		 */
-
-		@Override
-		public void init(SSLContext context) throws Exception {
-			// Do nothing
-		}
-
-		@Override
-		public void configureSslEngine(SSLEngine engine) {
-			// Setup for anonymous ciphers
-			engine.setEnabledCipherSuites(engine.getSupportedCipherSuites());
-		}
-	}
-
-	/**
+	 * <p>
 	 * {@link LayeredSocketFactory} to connect to the {@link MockHttpServer}
 	 * over secure connection.
+	 * <p>
+	 * This allows working with a {@link OfficeFloorDefaultSslEngineSource}.
 	 */
-	private static class AnonymousSocketFactory implements LayeredSocketFactory {
+	private static class OfficeFloorDefaultSocketFactory implements
+			LayeredSocketFactory {
 
 		/*
 		 * ============== LayeredSocketFactory ======================
@@ -405,22 +389,21 @@ public abstract class MockHttpServer extends AbstractOfficeConstructTestCase
 			// Create the secure connected socket
 			SSLContext context;
 			try {
-				context = SSLContext.getDefault();
-			} catch (NoSuchAlgorithmException ex) {
-				throw new IOException("Failed to obtain default "
-						+ SSLContext.class.getSimpleName(), ex);
+				context = OfficeFloorDefaultSslEngineSource
+						.createClientSslContext(null);
+
+			} catch (Exception ex) {
+				// Propagate failure in configuring OfficeFloor default key
+				throw new IOException(ex);
 			}
+
+			// Create the socket
 			SSLSocketFactory socketFactory = context.getSocketFactory();
 			Socket socket = socketFactory.createSocket();
 			assertFalse("Socket should not be connected", socket.isConnected());
 
-			// Enable all supported to allow anonymous for testing
-			SSLSocket sslSocket = (SSLSocket) socket;
-			sslSocket.setEnabledCipherSuites(sslSocket
-					.getSupportedCipherSuites());
-
 			// Return the socket
-			return sslSocket;
+			return socket;
 		}
 
 		@Override

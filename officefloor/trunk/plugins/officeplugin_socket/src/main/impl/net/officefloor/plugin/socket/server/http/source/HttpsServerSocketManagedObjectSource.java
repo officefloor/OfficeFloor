@@ -36,7 +36,7 @@ import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
 import net.officefloor.plugin.socket.server.http.protocol.HttpCommunicationProtocol;
 import net.officefloor.plugin.socket.server.impl.AbstractServerSocketManagedObjectSource;
 import net.officefloor.plugin.socket.server.protocol.CommunicationProtocolSource;
-import net.officefloor.plugin.socket.server.ssl.SslEngineConfigurator;
+import net.officefloor.plugin.socket.server.ssl.SslEngineSource;
 import net.officefloor.plugin.socket.server.ssl.protocol.SslCommunicationProtocol;
 
 /**
@@ -97,7 +97,7 @@ public class HttpsServerSocketManagedObjectSource extends
 	 * @param port
 	 *            Port to listen for HTTPS requests.
 	 * @param configuratorClass
-	 *            {@link SslEngineConfigurator} class. May be <code>null</code>.
+	 *            {@link SslEngineSource} class. May be <code>null</code>.
 	 * @param sectionName
 	 *            Name of the {@link AutoWireSection} servicing the requests.
 	 * @param sectionInputName
@@ -106,7 +106,7 @@ public class HttpsServerSocketManagedObjectSource extends
 	 * @return {@link AutoWireObject}.
 	 */
 	public static AutoWireObject autoWire(AutoWireApplication source, int port,
-			Class<? extends SslEngineConfigurator> configuratorClass,
+			Class<? extends SslEngineSource> configuratorClass,
 			String sectionName, String sectionInputName) {
 
 		// Create the wirer
@@ -120,7 +120,7 @@ public class HttpsServerSocketManagedObjectSource extends
 		object.addProperty(PROPERTY_PORT, String.valueOf(port));
 		if (configuratorClass != null) {
 			object.addProperty(
-					SslCommunicationProtocol.PROPERTY_SSL_ENGINE_CONFIGURATOR,
+					SslCommunicationProtocol.PROPERTY_SSL_ENGINE_SOURCE,
 					configuratorClass.getName());
 		}
 

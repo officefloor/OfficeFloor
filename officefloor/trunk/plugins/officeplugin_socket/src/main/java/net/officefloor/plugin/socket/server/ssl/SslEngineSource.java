@@ -17,31 +17,37 @@
  */
 package net.officefloor.plugin.socket.server.ssl;
 
-import java.security.KeyStore;
-
-import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLEngine;
 
+import net.officefloor.frame.spi.source.SourceProperties;
+
 /**
- * <p>
- * Anonymous {@link SslEngineConfigurator}.
- * <p>
- * <b>This should NOT be used within production.</b> The purpose is to allow
- * testing of HTTPS communication without needing {@link KeyStore} setup.
+ * Source for {@link SSLEngine} instances.
  * 
  * @author Daniel Sagenschneider
  */
-public class AnonymousSslEngineConfigurator implements SslEngineConfigurator {
+public interface SslEngineSource {
 
-	@Override
-	public void init(SSLContext context) throws Exception {
-		// Nothing to initialise for context
-	}
+	/**
+	 * Initialise this source.
+	 * 
+	 * @param properties
+	 *            {@link SourceProperties}.
+	 * @throws Exception
+	 *             If fails to initialise (possibly because a protocol or cipher
+	 *             is not supported).
+	 */
+	void init(SourceProperties properties) throws Exception;
 
-	@Override
-	public void configureSslEngine(SSLEngine engine) {
-		// Allow anonymous connection
-		engine.setEnabledCipherSuites(engine.getSupportedCipherSuites());
-	}
+	/**
+	 * Creates a new {@link SSLEngine}.
+	 * 
+	 * @param peerHost
+	 *            Peer host.
+	 * @param peerPort
+	 *            Peer port.
+	 * @return New {@link SSLEngine} ready for use.
+	 */
+	SSLEngine createSslEngine(String peerHost, int peerPort);
 
 }

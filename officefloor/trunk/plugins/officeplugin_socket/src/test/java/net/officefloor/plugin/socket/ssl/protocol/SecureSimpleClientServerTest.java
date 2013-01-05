@@ -21,6 +21,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.ByteBuffer;
+import java.util.Properties;
 
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLEngine;
@@ -33,6 +34,7 @@ import net.officefloor.frame.api.escalate.EscalationHandler;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.plugin.socket.server.impl.SimpleClientServerTest;
 import net.officefloor.plugin.socket.server.protocol.CommunicationProtocolSource;
+import net.officefloor.plugin.socket.server.ssl.OfficeFloorDefaultSslEngineSource;
 import net.officefloor.plugin.socket.server.ssl.protocol.SslCommunicationProtocol;
 
 /**
@@ -54,11 +56,10 @@ public class SecureSimpleClientServerTest extends SimpleClientServerTest {
 		super.setUp();
 
 		// Create the client side of connection
-		this.clientEngine = SSLContext.getDefault().createSSLEngine("server",
-				443);
+		SSLContext context = OfficeFloorDefaultSslEngineSource
+				.createClientSslContext(null);
+		this.clientEngine = context.createSSLEngine("server", 443);
 		this.clientEngine.setUseClientMode(true);
-		this.clientEngine.setEnabledCipherSuites(this.clientEngine
-				.getSupportedCipherSuites());
 
 		// Undertake the handshake
 		this.clientEngine.beginHandshake();
@@ -99,12 +100,16 @@ public class SecureSimpleClientServerTest extends SimpleClientServerTest {
 
 	@Override
 	protected CommunicationProtocolSource getCommunicationProtocolSource() {
-		return new SslCommunicationProtocol(this) {
-			@Override
-			public void configureSslEngine(SSLEngine engine) {
-				engine.setEnabledCipherSuites(engine.getSupportedCipherSuites());
-			}
-		};
+		return new SslCommunicationProtocol(this);
+	}
+
+	@Override
+	protected Properties getCommunicationProtocolProperties() {
+		Properties properties = new Properties();
+		properties.setProperty(
+				SslCommunicationProtocol.PROPERTY_SSL_ENGINE_SOURCE,
+				OfficeFloorDefaultSslEngineSource.class.getName());
+		return properties;
 	}
 
 	@Override

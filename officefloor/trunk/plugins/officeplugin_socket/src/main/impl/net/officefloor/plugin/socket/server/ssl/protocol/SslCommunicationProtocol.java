@@ -30,11 +30,12 @@ import net.officefloor.frame.spi.managedobject.source.ManagedObjectTaskBuilder;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectWorkBuilder;
 import net.officefloor.frame.spi.managedobject.source.impl.AbstractAsyncManagedObjectSource.MetaDataContext;
 import net.officefloor.frame.spi.managedobject.source.impl.AbstractAsyncManagedObjectSource.SpecificationContext;
+import net.officefloor.frame.spi.source.SourceProperties;
 import net.officefloor.plugin.socket.server.protocol.CommunicationProtocol;
 import net.officefloor.plugin.socket.server.protocol.CommunicationProtocolContext;
 import net.officefloor.plugin.socket.server.protocol.CommunicationProtocolSource;
 import net.officefloor.plugin.socket.server.protocol.Connection;
-import net.officefloor.plugin.socket.server.ssl.SslEngineConfigurator;
+import net.officefloor.plugin.socket.server.ssl.SslEngineSource;
 import net.officefloor.plugin.socket.server.ssl.SslTaskExecutor;
 import net.officefloor.plugin.socket.server.ssl.protocol.SslTaskWork.SslTaskDependencies;
 
@@ -45,23 +46,13 @@ import net.officefloor.plugin.socket.server.ssl.protocol.SslTaskWork.SslTaskDepe
  * @author Daniel Sagenschneider
  */
 public class SslCommunicationProtocol implements CommunicationProtocolSource,
-		CommunicationProtocol, SslTaskExecutor, SslEngineConfigurator {
+		CommunicationProtocol, SslTaskExecutor {
 
 	/**
-	 * Property to specify the SSL protocol to use.
+	 * Property to obtain the optional {@link SslEngineSource} to provide the
+	 * {@link SSLEngine} instances.
 	 */
-	public static final String PROPERTY_SSL_PROTOCOL = "ssl.protocol";
-
-	/**
-	 * Property to specify the SSL provider to use.
-	 */
-	public static final String PROPERTY_SSL_PROVIDER = "ssl.provider";
-
-	/**
-	 * Property to obtain the optional {@link SslEngineConfigurator} to
-	 * configure the {@link SSLEngine} instances for use.
-	 */
-	public static final String PROPERTY_SSL_ENGINE_CONFIGURATOR = "ssl.engine.configurator.class";
+	public static final String PROPERTY_SSL_ENGINE_SOURCE = "ssl.engine.source";
 
 	/**
 	 * Wrapped {@link CommunicationProtocolSource}.
@@ -74,14 +65,9 @@ public class SslCommunicationProtocol implements CommunicationProtocolSource,
 	private CommunicationProtocol wrappedCommunicationProtocol;
 
 	/**
-	 * {@link SSLContext}.
+	 * {@link SslEngineSource}.
 	 */
-	private SSLContext sslContext;
-
-	/**
-	 * {@link SslEngineConfigurator}.
-	 */
-	private SslEngineConfigurator sslEngineConfigurator;
+	private SslEngineSource sslEngineSource;
 
 	/**
 	 * Send buffer size.
@@ -135,39 +121,20 @@ public class SslCommunicationProtocol implements CommunicationProtocolSource,
 				.createCommunicationProtocol(configurationContext,
 						protocolContext);
 
-		// Create the SSL context
-		String sslProtocol = mosContext
-				.getProperty(PROPERTY_SSL_PROTOCOL, null);
-		if (sslProtocol == null) {
-			// Use default SSL context
-			this.sslContext = SSLContext.getDefault();
+		// Obtain the SSL Engine Source
+		String sslEngineSourceClassName = mosContext.getProperty(
+				PROPERTY_SSL_ENGINE_SOURCE, null);
+		if (sslEngineSourceClassName == null) {
+			// Use default SSL Engine source
+			this.sslEngineSource = new DefaultSslEngineSource();
 		} else {
-			String sslProvider = mosContext.getProperty(PROPERTY_SSL_PROVIDER,
-					null);
-			if (sslProvider == null) {
-				// Use default SSL provider for protocol
-				this.sslContext = SSLContext.getInstance(sslProtocol);
-			} else {
-				// Use specific SSL protocol and provider
-				this.sslContext = SSLContext.getInstance(sslProtocol,
-						sslProvider);
-			}
+			// Instantiate specified source
+			this.sslEngineSource = (SslEngineSource) mosContext.loadClass(
+					sslEngineSourceClassName).newInstance();
 		}
 
-		// Obtain the SSL Engine Configurator
-		String sslEngineConfiguratorClassName = mosContext.getProperty(
-				PROPERTY_SSL_ENGINE_CONFIGURATOR, null);
-		if (sslEngineConfiguratorClassName == null) {
-			// Use this as default
-			this.sslEngineConfigurator = this;
-		} else {
-			// Instantiate specified
-			this.sslEngineConfigurator = (SslEngineConfigurator) mosContext
-					.loadClass(sslEngineConfiguratorClassName).newInstance();
-		}
-
-		// Initialise the SSL Engine Configurator
-		this.sslEngineConfigurator.init(this.sslContext);
+		// Initialise the SSL Engine Source
+		this.sslEngineSource.init(mosContext);
 
 		// Create the flow to execute the SSL tasks
 		this.sslTaskFlowIndex = configurationContext.addFlow(Runnable.class)
@@ -211,9 +178,8 @@ public class SslCommunicationProtocol implements CommunicationProtocolSource,
 		int remotePort = remoteAddress.getPort();
 
 		// Create the server SSL engine
-		SSLEngine engine = this.sslContext.createSSLEngine(remoteHost,
+		SSLEngine engine = this.sslEngineSource.createSslEngine(remoteHost,
 				remotePort);
-		this.sslEngineConfigurator.configureSslEngine(engine);
 		engine.setUseClientMode(false); // Always in server mode
 
 		// Create the SSL connection wrapping the connection
@@ -235,18 +201,29 @@ public class SslCommunicationProtocol implements CommunicationProtocolSource,
 		this.executeContext.invokeProcess(this.sslTaskFlowIndex, task, null, 0);
 	}
 
-	/*
-	 * ===================== SslEngineConfigurator ============================
+	/**
+	 * {@link SslEngineSource} that uses the default {@link SSLContext}.
 	 */
+	private static class DefaultSslEngineSource implements SslEngineSource {
 
-	@Override
-	public void init(SSLContext context) throws Exception {
-		// Default implementation that leaves context in default state
-	}
+		/**
+		 * {@link SSLContext}.
+		 */
+		private SSLContext sslContext;
 
-	@Override
-	public void configureSslEngine(SSLEngine engine) {
-		// Default implementation that leaves engine in default state
+		/*
+		 * ================= SslEngineSource ==========================
+		 */
+
+		@Override
+		public void init(SourceProperties properties) throws Exception {
+			this.sslContext = SSLContext.getDefault();
+		}
+
+		@Override
+		public SSLEngine createSslEngine(String peerHost, int peerPort) {
+			return this.sslContext.createSSLEngine(peerHost, peerPort);
+		}
 	}
 
 }

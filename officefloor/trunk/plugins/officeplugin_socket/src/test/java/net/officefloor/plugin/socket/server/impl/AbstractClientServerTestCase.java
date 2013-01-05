@@ -27,6 +27,7 @@ import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.channels.SocketChannel;
 import java.nio.charset.Charset;
+import java.util.Properties;
 
 import net.officefloor.compile.test.managedobject.ManagedObjectLoaderUtil;
 import net.officefloor.frame.api.build.Indexed;
@@ -38,6 +39,7 @@ import net.officefloor.frame.internal.structure.ProcessState;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectExecuteContext;
 import net.officefloor.frame.spi.managedobject.source.impl.AbstractAsyncManagedObjectSource.MetaDataContext;
+import net.officefloor.frame.spi.source.SourceProperties;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.socket.server.ConnectionManager;
 import net.officefloor.plugin.socket.server.http.parse.UsAsciiUtil;
@@ -113,6 +115,16 @@ public abstract class AbstractClientServerTestCase extends OfficeFrameTestCase
 	protected abstract CommunicationProtocolSource getCommunicationProtocolSource();
 
 	/**
+	 * Allows overriding to specify the {@link SourceProperties} for the
+	 * {@link CommunicationProtocolSource}.
+	 * 
+	 * @return Empty {@link Properties} by default.
+	 */
+	protected Properties getCommunicationProtocolProperties() {
+		return new Properties();
+	}
+
+	/**
 	 * Allows the test to be notified of {@link ProcessState} invocation.
 	 * 
 	 * @param parameter
@@ -128,10 +140,6 @@ public abstract class AbstractClientServerTestCase extends OfficeFrameTestCase
 	@Override
 	protected void setUp() throws Exception {
 		try {
-
-			// TODO remove
-			System.out.println("======= TEST: " + this.getName() + " =======");
-
 			// Obtain port
 			this.port = MockHttpServer.getAvailablePort();
 
@@ -156,9 +164,22 @@ public abstract class AbstractClientServerTestCase extends OfficeFrameTestCase
 			CommunicationProtocolSource source = this
 					.getCommunicationProtocolSource();
 
+			// Obtain the communication protocol properties
+			Properties protocolProperties = this
+					.getCommunicationProtocolProperties();
+			String[] contextProperties = new String[protocolProperties.size() * 2];
+			int contextPropertyIndex = 0;
+			for (String propertyName : protocolProperties.stringPropertyNames()) {
+				String propertyValue = protocolProperties
+						.getProperty(propertyName);
+				contextProperties[contextPropertyIndex++] = propertyName;
+				contextProperties[contextPropertyIndex++] = propertyValue;
+			}
+
 			// Create the managed object source context
 			MetaDataContext<None, Indexed> configurationContext = ManagedObjectLoaderUtil
-					.createMetaDataContext(None.class, Indexed.class);
+					.createMetaDataContext(None.class, Indexed.class,
+							contextProperties);
 
 			// Create the communication protocol
 			CommunicationProtocol protocol = source
