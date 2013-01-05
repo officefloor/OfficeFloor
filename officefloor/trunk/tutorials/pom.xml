@@ -27,6 +27,7 @@
 		<module>PrototypeHttpServer</module>
 		<module>RawHttpServer</module>
 		<module>SectionHttpServer</module>
+		<module>SecurePageHttpServer</module>
 		<module>SessionHttpServer</module>
 		<module>TeamHttpServer</module>
 		<module>TransactionHttpServer</module>
