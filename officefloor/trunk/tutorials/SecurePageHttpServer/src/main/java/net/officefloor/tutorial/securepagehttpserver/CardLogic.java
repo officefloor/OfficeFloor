@@ -29,6 +29,7 @@ import net.officefloor.plugin.web.http.application.HttpParameters;
  * 
  * @author Daniel Sagenschneider
  */
+// START SNIPPET: tutorial
 public class CardLogic {
 
 	@Data
@@ -44,6 +45,18 @@ public class CardLogic {
 		private String csc;
 	}
 
+	public CardDetails getTemplateData(CardDetails cardDetails,
+			ServerHttpConnection connection) {
+
+		// Confirm a secure connection (not needed but included for tutorial)
+		if (!connection.isSecure()) {
+			throw new IllegalStateException();
+		}
+
+		// Return the card details for rendering
+		return cardDetails;
+	}
+
 	public void save(CardDetails cardDetails, ServerHttpConnection connection) {
 
 		// Confirm a secure connection (not needed but included for tutorial)
@@ -55,3 +68,4 @@ public class CardLogic {
 	}
 
 }
+// END SNIPPET: tutorial

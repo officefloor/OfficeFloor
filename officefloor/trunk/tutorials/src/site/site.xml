@@ -24,6 +24,9 @@
 			<item name="Comet" href="./CometApp/index.html" />
 			<item name="Server Events" href="./CometManualApp/index.html" />
 		</menu>
+		<menu name="Security">
+			<item name="Secure Page" href="./SecurePageHttpServer.html" />
+		</menu>
 		<menu name="JEE Tutorials">
 			<item name="Servlet" href="./WoofServletWebApplication/index.html" />
 			<item name="JSP" href="./WoofServletJspIntegration/index.html" />
