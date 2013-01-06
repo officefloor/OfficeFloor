@@ -48,6 +48,7 @@ import org.sonatype.aether.collection.CollectResult;
 import org.sonatype.aether.graph.Dependency;
 import org.sonatype.aether.graph.DependencyNode;
 import org.sonatype.aether.repository.LocalRepository;
+import org.sonatype.aether.resolution.DependencyRequest;
 import org.sonatype.aether.util.artifact.DefaultArtifact;
 import org.sonatype.aether.util.graph.PreorderNodeListGenerator;
 
@@ -482,7 +483,8 @@ public class ClassPathFactoryImpl implements ClassPathFactory {
 				CollectResult result = this.repositorySystem
 						.collectDependencies(session, request);
 				DependencyNode node = result.getRoot();
-				this.repositorySystem.resolveDependencies(session, node, null);
+				this.repositorySystem.resolveDependencies(session,
+						new DependencyRequest(node, null));
 
 				// Generate the class path
 				PreorderNodeListGenerator generator = new PreorderNodeListGenerator();

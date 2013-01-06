@@ -43,6 +43,9 @@ public class ExceptionHttpServerTest extends TestCase {
 
 		// Start server
 		WoofOfficeFloorSource.start();
+		
+		// Clear setup log
+		error.reset();
 
 		// Submit to trigger the exception
 		this.client.execute(new HttpGet(

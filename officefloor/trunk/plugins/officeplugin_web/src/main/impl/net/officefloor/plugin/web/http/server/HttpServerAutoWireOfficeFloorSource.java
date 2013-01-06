@@ -229,18 +229,18 @@ public class HttpServerAutoWireOfficeFloorSource extends
 								HttpApplicationLocationManagedObjectSource.PROPERTY_HTTPS_PORT,
 								null));
 		if (httpsPort != null) {
-			// Determine if SSL Engine Configurator configured
-			String sslEngineConfiguratorClassName = context.getProperty(
+			// Determine if SSL Engine Source configured
+			String sslEngineSourceClassName = context.getProperty(
 					SslCommunicationProtocol.PROPERTY_SSL_ENGINE_SOURCE, null);
-			Class<? extends SslEngineSource> sslEngineConfiguratorClass = null;
-			if (sslEngineConfiguratorClassName != null) {
-				sslEngineConfiguratorClass = (Class<? extends SslEngineSource>) context
-						.loadClass(sslEngineConfiguratorClassName);
+			Class<? extends SslEngineSource> sslEngineSourceClass = null;
+			if (sslEngineSourceClassName != null) {
+				sslEngineSourceClass = (Class<? extends SslEngineSource>) context
+						.loadClass(sslEngineSourceClassName);
 			}
 
 			// Add the configured HTTPS port
 			this.addHttpsServerSocket(Integer.parseInt(httpsPort),
-					sslEngineConfiguratorClass);
+					sslEngineSourceClass);
 
 		} else if (this.addedHttpsPorts.size() == 0) {
 			// Provide default HTTPS port (focus on ease of development)

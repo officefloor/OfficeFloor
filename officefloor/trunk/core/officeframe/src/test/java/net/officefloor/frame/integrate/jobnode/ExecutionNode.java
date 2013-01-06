@@ -20,7 +20,7 @@ package net.officefloor.frame.integrate.jobnode;
 import java.util.LinkedList;
 import java.util.List;
 
-import junit.framework.Assert;
+import org.junit.Assert;
 import junit.framework.TestCase;
 import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.build.TaskFactory;

@@ -17,11 +17,12 @@
  */
 package net.officefloor.frame.impl.spi.team;
 
-import junit.framework.Assert;
 import net.officefloor.frame.spi.team.Job;
 import net.officefloor.frame.spi.team.JobContext;
 import net.officefloor.frame.spi.team.Team;
 import net.officefloor.frame.test.MockTeamSource;
+
+import org.junit.Assert;
 
 /**
  * Mock implementation of the {@link Job} for testing.

@@ -17,7 +17,7 @@
  */
 package net.officefloor.frame.test.match;
 
-import junit.framework.Assert;
+import org.junit.Assert;
 
 import org.easymock.AbstractMatcher;
 
