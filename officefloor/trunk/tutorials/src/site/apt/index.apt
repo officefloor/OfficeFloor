@@ -65,9 +65,21 @@ AJAX push (reverse AJAX, Comet)
 
 
 
+Security
+
+  Tutorials to cover securing web applications build with WoOF.
+
+*--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
+|| Tutorial                                                    || Description                                               || Covered
+*--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
+| {{{./SecurePageHttpServer/index.html}Secure Page}} | Shows the ease of securing a page | Template Secure
+*--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
+  
+
+
 WoOF and a JEE Servlet Container
 
-  Explans how to make use of WoOF within a JEE Servlet Container and how to migrate a Servlet application to run within OfficeFloor.
+  Explains how to make use of WoOF within a JEE Servlet Container and how to migrate a Servlet application to run within OfficeFloor.
 
 *----------------------------------------------------------+-----------------------------------------------------------+------------------------------+
 || Tutorial                                                || Description                                              || Covered
