@@ -46,7 +46,7 @@ import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugin.logging.Log;
 import org.apache.maven.project.MavenProject;
-import org.apache.maven.repository.internal.DefaultServiceLocator;
+import org.apache.maven.repository.internal.MavenServiceLocator;
 import org.codehaus.plexus.PlexusContainer;
 import org.sonatype.aether.RepositorySystem;
 import org.sonatype.aether.connector.wagon.WagonProvider;
@@ -298,7 +298,7 @@ public class StartOfficeBuildingGoal extends AbstractGoal {
 		try {
 
 			// Obtain the repository system
-			DefaultServiceLocator locator = new DefaultServiceLocator();
+			MavenServiceLocator locator = new MavenServiceLocator();
 			locator.setServices(WagonProvider.class, this.wagonProvider);
 			locator.addService(RepositoryConnectorFactory.class,
 					WagonRepositoryConnectorFactory.class);

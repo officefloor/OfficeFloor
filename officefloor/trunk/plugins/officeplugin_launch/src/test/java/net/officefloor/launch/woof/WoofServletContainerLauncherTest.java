@@ -35,6 +35,7 @@ import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.util.EntityUtils;
 
 import com.google.gwt.core.ext.ServletContainer;
 import com.google.gwt.core.ext.TreeLogger;
@@ -189,7 +190,7 @@ public class WoofServletContainerLauncherTest extends OfficeFrameTestCase {
 				"http://localhost:" + this.port + "/new.html"));
 		assertEquals("Should not find resource", 404, response.getStatusLine()
 				.getStatusCode());
-		response.getEntity().consumeContent();
+		EntityUtils.consume(response.getEntity());
 
 		// Provide new resource
 		this.writeFile(this.warDirectory, "new.html", "NEW");

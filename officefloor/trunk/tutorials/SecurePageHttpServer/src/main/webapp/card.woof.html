@@ -1,0 +1,12 @@
+<html>
+	<body>
+		<h1>Enter card details</h1>
+		<form action="#{save}" method="POST">
+			Card number: <input type="text" name="number" maxlength="19" size="19" /> <br />
+			Expiry date: <input type="text" name="month" maxlength="2" size="2" /> / <input type="text" name="year" maxlength="4" size="4" />
+			CSC: <input type="text" name="csc" maxlength="3" size="3" /> <br />
+			<input type="submit" value="save" />
+		</form>
+		<a href="#{main}">Back to main page</a>
+	</body>
+</html>
