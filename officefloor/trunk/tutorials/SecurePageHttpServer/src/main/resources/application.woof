@@ -6,6 +6,7 @@
       </output>
       <output name="output" argument-type="">
       </output>
+      <link name="main" secure="false" />
     </template>
     <template name="main" uri="main" path="main.woof.html" class="" secure="false" x="116" y="89">
       <output name="card" argument-type="">
