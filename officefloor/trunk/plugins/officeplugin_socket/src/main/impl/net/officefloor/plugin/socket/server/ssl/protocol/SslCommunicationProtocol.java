@@ -30,7 +30,7 @@ import net.officefloor.frame.spi.managedobject.source.ManagedObjectTaskBuilder;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectWorkBuilder;
 import net.officefloor.frame.spi.managedobject.source.impl.AbstractAsyncManagedObjectSource.MetaDataContext;
 import net.officefloor.frame.spi.managedobject.source.impl.AbstractAsyncManagedObjectSource.SpecificationContext;
-import net.officefloor.frame.spi.source.SourceProperties;
+import net.officefloor.frame.spi.source.SourceContext;
 import net.officefloor.plugin.socket.server.protocol.CommunicationProtocol;
 import net.officefloor.plugin.socket.server.protocol.CommunicationProtocolContext;
 import net.officefloor.plugin.socket.server.protocol.CommunicationProtocolSource;
@@ -216,7 +216,7 @@ public class SslCommunicationProtocol implements CommunicationProtocolSource,
 		 */
 
 		@Override
-		public void init(SourceProperties properties) throws Exception {
+		public void init(SourceContext context) throws Exception {
 			this.sslContext = SSLContext.getDefault();
 		}
 

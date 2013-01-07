@@ -22,15 +22,17 @@ Secure Page
   
 [./images/SecurePageConfiguration-screenshot.png] Secure Page configuration screenshot.
 
-  Checking the secure check box is the only configuration necessary to use a secure channel (HTTPS) for accessing the page.
+  Checking the secure check box is the only configuration necessary to ensure use of a secure channel (HTTPS) for accessing the page.
   
-  Note that by default to ease development, WoOF runs with a generic security key that is self signed.  Typically for development and testing this will require trusting the key within the browser to access the page.  This default setup should only be used for development/testing to avoid manual key setup.  A trusted third-party signed security key is recommended to be configured for Production systems.
+  To ease development, WoOF by default runs with a generic security key that is self signed.  Typically for development and testing this will require trusting the key within the browser to access the page.  This default setup should only be used for development/testing to avoid manual key setup.
+  
+  For production, a trusted third-party signed security key is recommended to be configured.
   
   Please also see the {{{/apidocs/net/officefloor/plugin/web/http/location/HttpApplicationLocationManagedObjectSource.html}HttpApplicationLocationManagedObjectSource}} for details on configuring the web application's location for generation of the link URLs.
 
 
 
-card.woof.html
+Template
 
   The page template content is as follows:
 
@@ -40,7 +42,7 @@ card.woof.html
 
 
 
-CardLogic Class
+Logic Class
 
   The logic for the page is the following:
   
@@ -68,7 +70,7 @@ Unit Test
    
    * sending card details
    
-  The exception within the page logic ensures it only renders if over a secure channel (HTTPS).
+  The exception within the page logic ensures rendering the response only occurs over a secure channel (HTTPS).
 
 %{code-snippet|brush-autodetect=1|id=tutorial|file=${basedir}/src/test/java/net/officefloor/tutorial/securepagehttpserver/SecurePageTest.java}
 

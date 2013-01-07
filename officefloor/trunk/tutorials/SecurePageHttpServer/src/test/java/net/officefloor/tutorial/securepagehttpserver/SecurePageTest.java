@@ -61,7 +61,7 @@ public class SecurePageTest extends TestCase {
 		// Ensure redirect to secure link access to page
 		this.assertHttpRequest("http://localhost:7878/main-card.woof");
 		
-		// Post the card details
+		// Send the card details
 		this.assertHttpRequest("http://localhost:7878/card-save.woof?number=123");
 	}
 

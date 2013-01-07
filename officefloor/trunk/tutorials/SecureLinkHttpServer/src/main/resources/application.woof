@@ -1,6 +1,6 @@
 <woof>
   <templates>
-    <template name="" uri="/" path="template.woof.html" class="net.officefloor.tutorial.securelinkhttpserver.TemplateLogic" secure="false" x="70" y="63">
+    <template name="_root_" uri="/" path="template.woof.html" class="net.officefloor.tutorial.securelinkhttpserver.TemplateLogic" secure="false" x="70" y="63">
       <output name="output" argument-type="">
       </output>
       <link name="login" secure="true"/>
