@@ -67,12 +67,14 @@ AJAX push (reverse AJAX, Comet)
 
 Security
 
-  Tutorials to cover securing web applications build with WoOF.
+  Tutorials to cover securing web applications built with WoOF.
 
 *--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
 || Tutorial                                                    || Description                                               || Covered
 *--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
 | {{{./SecurePageHttpServer/index.html}Secure Page}} | Shows the ease of securing a page | Template Secure
+*--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
+| {{{./SecureLinkHttpServer/index.html}Secure Page}} | Demonstrates the ease of securing a link | Link Secure
 *--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
   
 
