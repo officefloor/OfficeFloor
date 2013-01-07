@@ -1,10 +1,10 @@
                                                -----------------------
-                                            Secure Page HTTP Server Tutorial 
+                                                 Secure Page Tutorial 
                                                -----------------------
 					        Daniel Sagenschneider
                                                -----------------------
 
-  <<Secure Page HTTP Server Tutorial>>
+  <<Secure Page Tutorial>>
   
   This tutorial looks at configuring a page to only be accessed via a secure channel (HTTPS).
   

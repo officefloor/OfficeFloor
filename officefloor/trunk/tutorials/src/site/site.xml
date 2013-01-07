@@ -26,6 +26,7 @@
 		</menu>
 		<menu name="Security">
 			<item name="Secure Page" href="./SecurePageHttpServer.html" />
+			<item name="Secure Link" href="./SecureLinkHttpServer.html" />
 		</menu>
 		<menu name="JEE Tutorials">
 			<item name="Servlet" href="./WoofServletWebApplication/index.html" />
