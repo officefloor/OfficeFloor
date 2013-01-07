@@ -30,7 +30,7 @@ import javax.net.ssl.TrustManager;
 import javax.net.ssl.TrustManagerFactory;
 
 import net.officefloor.frame.api.manage.OfficeFloor;
-import net.officefloor.frame.spi.source.SourceProperties;
+import net.officefloor.frame.spi.source.SourceContext;
 
 /**
  * <p>
@@ -184,14 +184,14 @@ public class OfficeFloorDefaultSslEngineSource implements SslEngineSource {
 	private SSLContext sslContext;
 
 	/*
-	 * ============== SslEngineConfigurator ==========================
+	 * ============== SslEngineSource ==========================
 	 */
 
 	@Override
-	public void init(SourceProperties properties) throws Exception {
+	public void init(SourceContext context) throws Exception {
 
 		// Indicate loading generic OfficeFloor key store
-		if (LOGGER.isLoggable(Level.INFO)) {
+		if ((!(context.isLoadingType())) && (LOGGER.isLoggable(Level.INFO))) {
 			LOGGER.log(
 					Level.INFO,
 					"Using default OfficeFloor Key Store. "
@@ -199,8 +199,7 @@ public class OfficeFloorDefaultSslEngineSource implements SslEngineSource {
 		}
 
 		// Obtain the SSL protocol
-		String sslProtocol = properties
-				.getProperty(PROPERTY_SSL_PROTOCOL, null);
+		String sslProtocol = context.getProperty(PROPERTY_SSL_PROTOCOL, null);
 
 		// Create the SSL Context
 		this.sslContext = createServerSslContext(sslProtocol);

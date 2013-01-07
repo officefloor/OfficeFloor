@@ -19,7 +19,7 @@ package net.officefloor.plugin.socket.server.ssl;
 
 import javax.net.ssl.SSLEngine;
 
-import net.officefloor.frame.spi.source.SourceProperties;
+import net.officefloor.frame.spi.source.SourceContext;
 
 /**
  * Source for {@link SSLEngine} instances.
@@ -31,13 +31,13 @@ public interface SslEngineSource {
 	/**
 	 * Initialise this source.
 	 * 
-	 * @param properties
-	 *            {@link SourceProperties}.
+	 * @param context
+	 *            {@link SourceContext}.
 	 * @throws Exception
 	 *             If fails to initialise (possibly because a protocol or cipher
 	 *             is not supported).
 	 */
-	void init(SourceProperties properties) throws Exception;
+	void init(SourceContext context) throws Exception;
 
 	/**
 	 * Creates a new {@link SSLEngine}.

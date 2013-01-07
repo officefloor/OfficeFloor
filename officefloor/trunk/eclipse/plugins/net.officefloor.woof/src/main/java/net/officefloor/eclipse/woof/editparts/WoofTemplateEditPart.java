@@ -35,7 +35,6 @@ import net.officefloor.model.change.Change;
 import net.officefloor.model.woof.WoofChanges;
 import net.officefloor.model.woof.WoofTemplateModel;
 import net.officefloor.model.woof.WoofTemplateModel.WoofTemplateEvent;
-import net.officefloor.plugin.woof.WoofOfficeFloorSource;
 
 import org.eclipse.draw2d.IFigure;
 import org.eclipse.gef.EditPart;
@@ -149,7 +148,7 @@ public class WoofTemplateEditPart
 		case ADD_EXTENSION:
 		case REMOVE_EXTENSION:
 			// No visual change
-			break;			
+			break;
 		}
 	}
 
@@ -160,15 +159,21 @@ public class WoofTemplateEditPart
 	@Override
 	public String getTemplateDisplayName() {
 
-		// Determine if URI
-		String templateName = this.getCastedModel().getWoofTemplateName();
+		// Obtain the display name
+		String displayName;
 		String templateUri = this.getCastedModel().getUri();
-		String nameFromUri = WoofOfficeFloorSource
-				.getTemplateSectionName(templateUri);
-		boolean isUri = (templateName.equals(nameFromUri));
+		if ("/".equals(templateUri)) {
+			// Root template
+			displayName = templateUri;
 
-		// Reflect whether template name or URI
-		return (isUri ? "" : "[") + templateName + (isUri ? "" : "]");
+		} else {
+			// Use simplified URI
+			displayName = (templateUri.startsWith("/") ? templateUri
+					.substring("/".length()) : templateUri);
+		}
+
+		// Provide the display name
+		return displayName;
 	}
 
 }

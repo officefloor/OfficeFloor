@@ -79,6 +79,28 @@ public class AddTest extends AbstractWoofChangesTestCase {
 	}
 
 	/**
+	 * Ensure able to add root {@link WoofTemplateModel}.
+	 */
+	public void testAddRootTemplate() {
+
+		// Create the section type
+		SectionType section = this
+				.constructSectionType(new SectionTypeConstructor() {
+					@Override
+					public void construct(SectionTypeContext context) {
+					}
+				});
+
+		// Add the root template
+		Change<WoofTemplateModel> change = this.operations.addTemplate("/",
+				"root.ofp", null, section, false, null, null, null, null,
+				false, null);
+
+		// Validate change
+		this.assertChange(change, null, "Add Template", true);
+	}
+
+	/**
 	 * Ensure able to add with links and redirect configuration.
 	 */
 	public void testAddSecureLinkRedirectConfiguredTemplate() {

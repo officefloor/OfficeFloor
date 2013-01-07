@@ -43,6 +43,7 @@ import net.officefloor.plugin.comet.web.http.section.CometHttpTemplateSectionExt
 import net.officefloor.plugin.gwt.module.GwtChanges;
 import net.officefloor.plugin.gwt.web.http.section.GwtHttpTemplateSectionExtension;
 import net.officefloor.plugin.web.http.template.section.HttpTemplateSectionSource;
+import net.officefloor.plugin.woof.WoofOfficeFloorSource;
 import net.officefloor.plugin.woof.comet.CometWoofTemplateExtensionService;
 import net.officefloor.plugin.woof.gwt.GwtWoofTemplateExtensionService;
 
@@ -444,11 +445,7 @@ public class WoofChangesImpl implements WoofChanges {
 			WoofTemplateModel template, List<WoofTemplateModel> templates) {
 
 		// Name based on template URI
-		String templateName = uri;
-		if (templateName.startsWith("/")) {
-			// Remove leading '/' for name
-			templateName = templateName.substring("/".length());
-		}
+		String templateName = WoofOfficeFloorSource.getTemplateSectionName(uri);
 
 		// Obtain the unique template name
 		templateName = getUniqueName(templateName, template, templates,
