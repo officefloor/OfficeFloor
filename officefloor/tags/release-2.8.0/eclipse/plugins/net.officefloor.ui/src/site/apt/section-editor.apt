@@ -1,0 +1,40 @@
+                                       ---------------------------
+                                             Section Editor
+                                       ---------------------------
+                                          Daniel Sagenschneider
+                                       ---------------------------
+
+  The Section Editor gets its name from the idea that a business can have sections and sub-sections and also that a physical floor can have sections.  The focus of the Section Editor is to configure how Sections coordinate.
+
+  The configuration elements that can be added to a Section are:
+
+   * Sections (modelled as Sub-Sections within the editor)
+
+   * External flows
+
+   * External objects
+
+   * <Future enhancements will see the Section Editor also capable of adding ManagedObjects>
+
+  The resulting model configured by the Section Editor is for the SectionModelSectionSource, which is itself a SectionSource and subsequently may be added to other SectionsSources and an OfficeSource.  The Section Editor may not have Work added to it as its focus is to provide hierarchical organisation of Sections (and Sub-Sections) of an Office.
+
+
+
+Using a Section Editor
+
+  As the Section Editor is graphical in nature recorded demonstrations will be used to provide details on how to use the editor. This follows OfficeFloor's principle of performance in developer learning curves as watching short visual demonstrations is more effective and faster than long textual descriptions in gaining the necessary information to start using the editor.
+
+  <Future documentation to provide the following demonstrations:>
+
+   [[1]] Create a new section
+
+   [[1]] Add a sub-section
+
+   [[1]] Link sub-section output to sub-section input
+
+   [[1]] Add external flow and link sub-section output to it
+
+   [[1]] Flag sub-section input as public
+
+   [[1]] Add external object and link sub-section object to it
+

@@ -1,0 +1,49 @@
+                                       ---------------------------
+                                             Web Plug-in
+                                       ---------------------------
+                                          Daniel Sagenschneider
+                                       ---------------------------
+
+  <<Web Plug-in>>
+
+  This module provides both ManagedObjectSources and WorkSources for building web applications.
+
+*---------------------------------------------------------------------------+--------------------------------------------------------------+
+|| WorkSource                                                               || Description                                                 |
+*---------------------------------------------------------------------------+--------------------------------------------------------------+
+| {{{/apidocs/net/officefloor/plugin/web/http/parameters/source/HttpParametersLoaderWorkSource.html}net.officefloor.plugin.socket.server.http.parameters.source.HttpParametersLoaderWorkSource}} | Maps the HTTP property values (typically of a submitted form) onto a POJO (bean) |
+*---------------------------------------------------------------------------+--------------------------------------------------------------+
+| {{{/apidocs/net/officefloor/plugin/web/http/resource/source/HttpFileFactoryWorkSource.html}net.officefloor.plugin.socket.server.http.resource.source.HttpFileFactoryWorkSource}} | Creates a {{{/apidocs/net/officefloor/plugin/web/http/resource/HttpFile.html}net.officefloor.plugin.socket.server.http.resource.HttpFile}} and passes to next Task |
+*---------------------------------------------------------------------------+--------------------------------------------------------------+
+|  {{{/apidocs/net/officefloor/plugin/web/http/resource/source/HttpFileSenderWorkSource.html}net.officefloor.plugin.socket.server.http.resource.source.HttpFileSenderWorkSource}} | Writes content of files from the class path to HTTP response |
+*---------------------------------------------------------------------------+--------------------------------------------------------------+
+| {{{/apidocs/net/officefloor/plugin/web/http/resource/file/HttpFileWriterWorkSource.html}net.officefloor.plugin.web.http.resource.file.HttpFileWriterWorkSource}} | Writes a {{{/apidocs/net/officefloor/plugin/web/http/resource/HttpFile.html}net.officefloor.plugin.socket.server.http.resource.HttpFile}} as the HTTP response |
+*---------------------------------------------------------------------------+--------------------------------------------------------------+
+|  {{{/apidocs/net/officefloor/plugin/web/http/route/HttpRouteWorkSource.html}net.officefloor.plugin.socket.server.http.route.HttpRouteWorkSource}} | Provides ability to route HTTP request to a Task based on HTTP URL continuation |
+*---------------------------------------------------------------------------+--------------------------------------------------------------+
+|  {{{/apidocs/net/officefloor/plugin/web/http/security/HttpSecurityWorkSource.html}net.officefloor.plugin.socket.server.http.security.HttpSecurityWorkSource}} | Provides challenge HTTP response to the client to ensure have {{{/apidocs/net/officefloor/plugin/web/http/security/HttpSecurity.html}net.officefloor.plugin.socket.server.http.security.HttpSecurity}}. A challenge will not be sent if client is already authenticated. |
+*---------------------------------------------------------------------------+--------------------------------------------------------------+
+|  {{{/apidocs/net/officefloor/plugin/web/http/template/HttpTemplateWorkSource.html}net.officefloor.plugin.socket.server.http.template.HttpTemplateWorkSource}} | Provides dynamic web page content.  This allows breaking the rending of HTML into Tasks that have <<<$\{properties\}>>> replaced from bean properties (POJO get methods).  This is similar to Velocity Template Engine except that the scripting tags are not required as the template is broken into Tasks which can have other Tasks weaved in between to control rendering. |
+*---------------------------------------------------------------------------+--------------------------------------------------------------+
+
+
+*------------------------------+----------------------+-----------------------------------+
+|| ManagedObjectSource         || Interface of object || Description                      |
+*------------------------------+----------------------+-----------------------------------+
+| {{{/apidocs/net/officefloor/plugin/web/http/parameters/source/HttpParametersLoaderManagedObjectSource.html}net.officefloor.plugin.socket.server.http.parameters.source.HttpParametersLoaderManagedObjectSource}} | Bean as specified by configuration | Maps the HTTP property values (typically of a submitted form) onto a POJO (bean) | 
+*------------------------------+----------------------+-----------------------------------+
+| {{{/apidocs/net/officefloor/plugin/web/http/security/HttpSecurityManagedObjectSource.html}net.officefloor.plugin.socket.server.http.security.HttpSecurityManagedObjectSource}} |  {{{/apidocs/net/officefloor/plugin/web/http/security/HttpSecurity.html}net.officefloor.plugin.socket.server.http.security.HttpSecurity}} | Provides security based on current HTTP request.  It does not cause a challenge to the client. |
+*------------------------------+----------------------+-----------------------------------+
+|  {{{/apidocs/net/officefloor/plugin/web/http/security/HttpSecurityServiceManagedObjectSource.html}net.officefloor.plugin.socket.server.http.security.HttpSecurityServiceManagedObjectSource}} | {{{/apidocs/net/officefloor/plugin/web/http/security/HttpSecurityService.html}net.officefloor.plugin.socket.server.http.security.HttpSecurityService}} | Provides the implementing mechanism for security |
+*------------------------------+----------------------+-----------------------------------+
+|  {{{/apidocs/net/officefloor/plugin/web/http/security/store/JndiLdapManagedObjectSource.html}net.officefloor.plugin.socket.server.http.security.store.JndiLdapManagedObjectSource}} | <<<javax.naming.directory.DirContext>>> | Provides access to LDAP store for security |
+*------------------------------+----------------------+-----------------------------------+
+|  {{{/apidocs/net/officefloor/plugin/web/http/security/store/PasswordFileManagedObjectSource.html}net.officefloor.plugin.socket.server.http.security.store.PasswordFileManagedObjectSource}} | {{{/apidocs/net/officefloor/plugin/web/http/security/store/CredentialStore.html}net.officefloor.plugin.socket.server.http.security.store.CredentialStore}} | Provides credentials from a password file |
+*------------------------------+----------------------+-----------------------------------+
+|  {{{/apidocs/net/officefloor/plugin/web/http/session/attribute/HttpSessionAttributeManagedObjectSource.html}net.officefloor.plugin.socket.server.http.session.attribute.HttpSessionAttributeManagedObjectSource}} | {{{/apidocs/net/officefloor/plugin/web/http/session/attribute/HttpSessionAttribute.html}net.officefloor.plugin.socket.server.http.session.attributte.HttpSessionAttribute}} | Provides means to manipulate a particular HTTP session object |
+*------------------------------+----------------------+-----------------------------------+
+|  {{{/apidocs/net/officefloor/plugin/web/http/session/attribute/HttpSessionAttributeRetrieverManagedObjectSource.html}net.officefloor.plugin.socket.server.http.session.attribute.HttpSessionAttributeRetrieverManagedObjectSource}} | Object as per configuration | Retrieves the HTTP session object |
+*------------------------------+----------------------+-----------------------------------+
+|  {{{/apidocs/net/officefloor/plugin/web/http/session/HttpSessionManagedObjectSource.html}net.officefloor.plugin.socket.server.http.session.HttpSessionManagedObjectSource}} | {{{/apidocs/net/officefloor/plugin/web/http/session/HttpSession.html}net.officefloor.plugin.socket.server.http.session.HttpSession}} | Provides HTTP session functionality |
+*------------------------------+----------------------+-----------------------------------+
+

@@ -1,0 +1,15 @@
+<test xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:noNamespaceSchemaLocation="../Test.xsd">
+
+	<communication>
+		<request method="GET" path="/path" />
+		<process close="true">
+			<body>0123456789</body>
+		</process>
+		<response status="200" message="OK" closed="true">
+			<header name="Content-Length" value="10" />
+			<body>0123456789</body>
+		</response>
+	</communication>
+
+</test>
