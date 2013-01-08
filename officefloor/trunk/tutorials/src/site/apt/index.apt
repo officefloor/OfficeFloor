@@ -74,7 +74,7 @@ Security
 *--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
 | {{{./SecurePageHttpServer/index.html}Secure Page}} | Shows the ease of securing a page | Template Secure
 *--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
-| {{{./SecureLinkHttpServer/index.html}Secure Page}} | Demonstrates the ease of securing a link | Link Secure
+| {{{./SecureLinkHttpServer/index.html}Secure Link}} | Demonstrates the ease of securing a link | Link Secure
 *--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
   
 
