@@ -25,8 +25,8 @@
 			<item name="Server Events" href="./CometManualApp/index.html" />
 		</menu>
 		<menu name="Security">
-			<item name="Secure Page" href="./SecurePageHttpServer.html" />
-			<item name="Secure Link" href="./SecureLinkHttpServer.html" />
+			<item name="Secure Page" href="./SecurePageHttpServer/index.html" />
+			<item name="Secure Link" href="./SecureLinkHttpServer/index.html" />
 		</menu>
 		<menu name="JEE Tutorials">
 			<item name="Servlet" href="./WoofServletWebApplication/index.html" />
