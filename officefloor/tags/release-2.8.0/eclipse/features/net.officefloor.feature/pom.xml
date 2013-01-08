@@ -1,0 +1,29 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<parent>
+		<groupId>net.officefloor.eclipse</groupId>
+		<artifactId>eclipse</artifactId>
+		<relativePath>../../pom.xml</relativePath>
+		<version>2.8.0</version>
+	</parent>
+	<artifactId>net.officefloor.feature</artifactId>
+	<name>Eclipse Feature</name>
+	<description>Feature for the core plug-ins for Eclipse</description>
+	<packaging>eclipse-feature</packaging>
+	<properties>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+	</properties>
+	<dependencies>
+		<dependency>
+			<groupId>${project.groupId}</groupId>
+			<artifactId>net.officefloor.core</artifactId>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>${project.groupId}</groupId>
+			<artifactId>net.officefloor.ui</artifactId>
+			<scope>provided</scope>
+		</dependency>
+	</dependencies>
+</project>

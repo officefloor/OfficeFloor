@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<model>
+	<field type="String" name="resource name" />
+	<field type="WoofExceptionModel" name="woof exception" end-field="woof resource" />
+	<field type="WoofResourceModel" name="woof resource" end-list="woof exception" />
+</model>

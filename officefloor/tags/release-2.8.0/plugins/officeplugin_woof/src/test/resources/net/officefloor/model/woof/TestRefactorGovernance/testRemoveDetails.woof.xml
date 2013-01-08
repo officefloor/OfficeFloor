@@ -1,0 +1,7 @@
+<woof>
+
+	<governances>
+		<governance name="REMOVE" source="net.example.RemoveGovernanceSource" />
+	</governances>
+
+</woof>

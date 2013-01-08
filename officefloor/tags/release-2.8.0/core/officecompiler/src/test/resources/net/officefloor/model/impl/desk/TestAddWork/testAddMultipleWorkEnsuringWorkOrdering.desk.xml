@@ -1,0 +1,13 @@
+<desk>
+	<works>
+		<work name="WORK_A" source="net.example.ExampleWorkSource">
+			<work-task name="TASK" />
+		</work>
+		<work name="WORK_B" source="net.example.ExampleWorkSource">
+			<work-task name="TASK" />
+		</work>
+		<work name="WORK_C" source="net.example.ExampleWorkSource">
+			<work-task name="TASK" />
+		</work>
+	</works>
+</desk>

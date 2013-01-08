@@ -1,0 +1,161 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<parent>
+		<groupId>net.officefloor.maven</groupId>
+		<artifactId>maven</artifactId>
+		<version>2.8.0</version>
+	</parent>
+	<artifactId>maven-officefloor-skin</artifactId>
+	<name>Site Skin</name>
+	<description>Skin for OfficeFloor web site</description>
+	<properties>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+	</properties>
+	<build>
+		<plugins>
+			<plugin>
+				<!-- Obtain the Syntax Highlighter files -->
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-antrun-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>download-syntax-highlighter-files</id>
+						<phase>process-sources</phase>
+						<goals>
+							<goal>run</goal>
+						</goals>
+						<configuration>
+							<target>
+								<!-- Setup directories for download -->
+								<property name="target.dir" value="${project.build.outputDirectory}" />
+								<property name="script.dir" value="${target.dir}/scripts" />
+								<property name="css.dir" value="${target.dir}/css" />
+								<mkdir dir="${script.dir}" />
+								<mkdir dir="${css.dir}" />
+
+								<!-- Setup URLs for download -->
+								<property name="highlight.url"
+									value="http://alexgorbatchev.com/pub/sh/current" />
+								<property name="script.url" value="${highlight.url}/scripts" />
+								<property name="css.url" value="${highlight.url}/styles" />
+
+								<!-- Download the Syntax Highlighter files -->
+								<echo>Download Syntax Highlighter files:
+									${project.build.outputDirectory}</echo>
+								<get dest="${script.dir}" verbose="true" skipexisting="true">
+									<url url="${script.url}/shCore.js" />
+									<url url="${script.url}/shAutoloader.js" />
+									<url url="${script.url}/shBrushJava.js" />
+									<url url="${script.url}/shBrushXml.js" />
+									<url url="${script.url}/shBrushPlain.js" />
+								</get>
+								<get dest="${css.dir}" verbose="true" skipexisting="true">
+									<url url="${css.url}/shCore.css" />
+									<url url="${css.url}/shThemeDefault.css" />
+								</get>
+							</target>
+						</configuration>
+					</execution>
+					<execution>
+						<id>download-maven-css-files</id>
+						<phase>process-sources</phase>
+						<goals>
+							<goal>run</goal>
+						</goals>
+						<configuration>
+							<target>
+								<!-- Setup directories for download -->
+								<property name="target.dir" value="${project.build.outputDirectory}" />
+								<property name="css.dir" value="${target.dir}/css" />
+								<mkdir dir="${css.dir}" />
+
+								<!-- Setup URLs for download -->
+								<property name="css.url" value="http://maven.apache.org/css" />
+
+								<!-- Download the maven css files -->
+								<echo>Download maven css files: ${project.build.outputDirectory}</echo>
+								<get dest="${css.dir}" verbose="true" skipexisting="true">
+									<url url="${css.url}/maven-base.css" />
+									<url url="${css.url}/site.css" />
+									<url url="${css.url}/print.css" />
+								</get>
+							</target>
+						</configuration>
+					</execution>
+					<execution>
+						<id>download-and-setup-site-vm</id>
+						<phase>process-sources</phase>
+						<goals>
+							<goal>run</goal>
+						</goals>
+						<configuration>
+							<target>
+								<!-- Setup directories for download -->
+								<property name="target.dir" value="${project.build.outputDirectory}" />
+								<property name="metainf.dir" value="${target.dir}/META-INF/maven" />
+								<mkdir dir="${metainf.dir}" />
+
+								<!-- Setup paths and URLs for download -->
+								<property name="site.vm.file" value="${metainf.dir}/site.vm" />
+								<property name="site.vm.url"
+									value="http://svn.apache.org/repos/asf/maven/doxia/doxia-sitetools/trunk/doxia-site-renderer/src/main/resources/org/apache/maven/doxia/siterenderer/resources/default-site.vm" />
+
+								<!-- Download site.vm file -->
+								<echo>Download default site.vm: ${metainf.dir}</echo>
+								<get dest="${site.vm.file}" src="${site.vm.url}" verbose="true"
+									skipexisting="false" />
+
+								<!-- Alter default site.vm for Sharing -->
+								<replace file="${site.vm.file}">
+									<replacetoken><![CDATA[<div id="breadcrumbs">]]></replacetoken>
+									<replacevalue><![CDATA[<div id="breadcrumbs">
+
+<!-- AddThis Button BEGIN -->
+<a class="addthis_button" href="http://www.addthis.com/bookmark.php?v=250&amp;username=sagenschneider"><img src="http://s7.addthis.com/static/btn/v2/lg-share-en.gif" width="125" height="16" alt="Bookmark and Share" style="border:0"/></a>
+<script type="text/javascript">var addthis_config = {"data_track_clickback":true};</script>
+<script type="text/javascript" src="http://s7.addthis.com/js/250/addthis_widget.js#username=sagenschneider"></script>
+<!-- AddThis Button END -->
+									
+									]]></replacevalue>
+								</replace>
+								
+								<!-- Alter default site.vm for Facebook comments -->
+								<replace file="${site.vm.file}">
+									<replacetoken><![CDATA[<body class="composite">]]></replacetoken>
+									<replacevalue><![CDATA[<body class="composite">
+
+<!-- Facebook comments setup BEGIN -->
+<div id="fb-root"></div>
+<script>(function(d, s, id) {
+  var js, fjs = d.getElementsByTagName(s)[0];
+  if (d.getElementById(id)) return;
+  js = d.createElement(s); js.id = id;
+  js.src = "//connect.facebook.net/en_GB/all.js#xfbml=1&appId=336336786442645";
+  fjs.parentNode.insertBefore(js, fjs);
+}(document, 'script', 'facebook-jssdk'));</script>
+<!-- Facebook comments setup END -->
+									
+									]]></replacevalue>
+								</replace>
+								<replace file="${site.vm.file}">
+									<replacetoken><![CDATA[<div id="footer">]]></replacetoken>
+									<replacevalue><![CDATA[
+
+<div style="padding-left: 20em">
+<!-- Facebook comments box BEGIN -->
+<div class="fb-comments" data-href="$project.url$currentFileName" data-num-posts="5" data-width="500"></div>
+<!-- Facebook comments box END -->
+</div>
+
+<div id="footer">
+									]]></replacevalue>
+								</replace>
+							</target>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+		</plugins>
+	</build>
+</project>

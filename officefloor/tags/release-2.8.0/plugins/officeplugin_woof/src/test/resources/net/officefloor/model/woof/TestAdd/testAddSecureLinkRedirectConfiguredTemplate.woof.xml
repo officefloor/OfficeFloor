@@ -1,0 +1,14 @@
+<woof>
+
+	<templates>
+		<template name="Template" uri="Template" path="example/Template.ofp"
+			class="net.example.LogicClass" secure="true">
+			<link name="LINK_1" secure="true" />
+			<link name="LINK_2" secure="false" />
+			<redirect method="OTHER" />
+			<redirect method="POST" />
+			<redirect method="PUT" />
+		</template>
+	</templates>
+
+</woof>
