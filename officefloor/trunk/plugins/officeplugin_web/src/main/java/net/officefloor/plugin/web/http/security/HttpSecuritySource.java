@@ -31,7 +31,45 @@ import net.officefloor.plugin.web.http.session.HttpSession;
 public interface HttpSecuritySource<S, C, D extends Enum<D>, F extends Enum<F>> {
 
 	/**
-	 * Retrieves the cached security details.
+	 * <p>
+	 * Obtains the specification for this.
+	 * <p>
+	 * This will be called before any other methods, therefore this method must
+	 * be able to return the specification immediately after a default
+	 * constructor instantiation.
+	 * 
+	 * @return Specification of this.
+	 */
+	HttpSecuritySourceSpecification getSpecification();
+
+	/**
+	 * Called only once after the {@link HttpSecuritySource} is instantiated.
+	 * 
+	 * @param context
+	 *            {@link HttpSecuritySourceContext} to use in initialising.
+	 * @throws Exception
+	 *             Should the {@link HttpSecuritySource} fail to configure
+	 *             itself from the input properties.
+	 */
+	void init(HttpSecuritySourceContext context) throws Exception;
+
+	/**
+	 * <p>
+	 * Obtains the meta-data to describe this.
+	 * <p>
+	 * This is called after the {@link #init(HttpSecuritySourceContext)} method
+	 * and therefore may use the configuration.
+	 * <p>
+	 * This should always return non-null. If there is a problem due to
+	 * incorrect configuration, the {@link #init(HttpSecuritySourceContext)}
+	 * should indicate this via an exception.
+	 * 
+	 * @return Meta-data to describe this.
+	 */
+	HttpSecuritySourceMetaData<S, C, D, F> getMetaData();
+
+	/**
+	 * Retrieves the cached security object.
 	 * 
 	 * @param session
 	 *            {@link HttpSession}.

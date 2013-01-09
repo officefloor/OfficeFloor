@@ -15,28 +15,28 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.plugin.web.http.security.scheme;
-
-import net.officefloor.frame.spi.source.SourceProperties;
+package net.officefloor.plugin.web.http.security;
 
 /**
- * Context for the {@link HttpSecuritySource}.
+ * Individual property of the {@link HttpSecuritySourceSpecification}.
  * 
  * @author Daniel Sagenschneider
  */
-@Deprecated // TODO moving to HttpSecuritySource integrated into web application
-public interface HttpSecuritySourceContext<D extends Enum<D>> extends
-		SourceProperties {
+public interface HttpSecuritySourceProperty {
 
 	/**
-	 * Flags that the {@link HttpSecuritySource} requires a dependency.
+	 * Obtains name of property.
 	 * 
-	 * @param key
-	 *            Key allowing {@link HttpSecuritySource} to identify the
-	 *            dependency.
-	 * @param dependencyType
-	 *            Type expected for the dependency.
+	 * @return Name of property.
 	 */
-	void requireDependency(D key, Class<?> dependencyType);
+	String getName();
+
+	/**
+	 * Obtains the display name of the property. If this returns
+	 * <code>null</code> then the return value of {@link #getName()} is used.
+	 * 
+	 * @return Display name of property.
+	 */
+	String getLabel();
 
 }

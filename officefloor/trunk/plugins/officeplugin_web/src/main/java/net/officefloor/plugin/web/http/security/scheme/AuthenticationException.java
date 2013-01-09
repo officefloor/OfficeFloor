@@ -24,6 +24,7 @@ import net.officefloor.plugin.web.http.parameters.HttpParametersException;
  * 
  * @author Daniel Sagenschneider
  */
+@Deprecated // TODO moving to HttpSecuritySource integrated into web application
 public class AuthenticationException extends HttpParametersException {
 
 	/**
