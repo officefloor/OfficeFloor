@@ -2,13 +2,13 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Eclipse Woof Plug-in
 Bundle-SymbolicName: net.officefloor.woof;singleton:=true
-Bundle-Version: 2.8.0
+Bundle-Version: 2.9.0
 Bundle-Vendor: OfficeFloor
 Bundle-Activator: net.officefloor.eclipse.WoofPlugin
 Bundle-ActivationPolicy: lazy
-Require-Bundle: net.officefloor.core;bundle-version="2.8.0",
- net.officefloor.ui;bundle-version="2.8.0",
- net.officefloor.plugins;bundle-version="2.8.0"
+Require-Bundle: net.officefloor.core;bundle-version="2.9.0",
+ net.officefloor.ui;bundle-version="2.9.0",
+ net.officefloor.plugins;bundle-version="2.9.0"
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Eclipse-RegisterBuddy: net.officefloor.core, 
  net.officefloor.ui
@@ -53,18 +53,18 @@ Import-Package: org.eclipse.core.commands.common,
  org.osgi.framework
 Bundle-ClassPath: .,
  mx4j-tools-3.0.1.jar,
- officebuilding-2.8.0.jar,
- officecompiler-2.8.0.jar,
- officeframe-2.8.0.jar,
- officemodelgen-2.8.0.jar,
- officexml-2.8.0.jar,
- officeplugin_base-2.8.0.jar,
- officeplugin_comet-2.8.0.jar,
- officeplugin_gwt-2.8.0.jar,
- officeplugin_launch-2.8.0.jar,
- officeplugin_socket-2.8.0.jar,
- officeplugin_web-2.8.0.jar,
- officeplugin_woof-2.8.0.jar,
+ officebuilding-2.9.0.jar,
+ officecompiler-2.9.0.jar,
+ officeframe-2.9.0.jar,
+ officemodelgen-2.9.0.jar,
+ officexml-2.9.0.jar,
+ officeplugin_base-2.9.0.jar,
+ officeplugin_comet-2.9.0.jar,
+ officeplugin_gwt-2.9.0.jar,
+ officeplugin_launch-2.9.0.jar,
+ officeplugin_socket-2.9.0.jar,
+ officeplugin_web-2.9.0.jar,
+ officeplugin_woof-2.9.0.jar,
  maven-aether-provider-3.0.4.jar,
  maven-artifact-3.0.4.jar,
  maven-compat-3.0.4.jar,
