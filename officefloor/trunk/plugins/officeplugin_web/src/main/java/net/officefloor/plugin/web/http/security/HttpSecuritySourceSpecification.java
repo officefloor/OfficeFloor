@@ -15,28 +15,24 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.plugin.web.http.security.scheme;
-
-import net.officefloor.frame.spi.source.SourceProperties;
+package net.officefloor.plugin.web.http.security;
 
 /**
- * Context for the {@link HttpSecuritySource}.
+ * Specification of a {@link HttpSecuritySource}. This is different to the
+ * {@link HttpSecuritySourceMetaData} as it specifies how to configure the
+ * {@link HttpSecuritySource} to then obtain its
+ * {@link HttpSecuritySourceMetaData} based on the configuration.
  * 
  * @author Daniel Sagenschneider
  */
-@Deprecated // TODO moving to HttpSecuritySource integrated into web application
-public interface HttpSecuritySourceContext<D extends Enum<D>> extends
-		SourceProperties {
+public interface HttpSecuritySourceSpecification {
 
 	/**
-	 * Flags that the {@link HttpSecuritySource} requires a dependency.
+	 * Obtains the specification of the properties for the
+	 * {@link HttpSecuritySource}.
 	 * 
-	 * @param key
-	 *            Key allowing {@link HttpSecuritySource} to identify the
-	 *            dependency.
-	 * @param dependencyType
-	 *            Type expected for the dependency.
+	 * @return Property specification.
 	 */
-	void requireDependency(D key, Class<?> dependencyType);
+	HttpSecuritySourceProperty[] getProperties();
 
 }

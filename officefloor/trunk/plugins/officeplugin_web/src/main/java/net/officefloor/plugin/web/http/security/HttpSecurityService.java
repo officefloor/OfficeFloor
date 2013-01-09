@@ -31,6 +31,7 @@ import net.officefloor.plugin.web.http.security.scheme.AuthenticationException;
  * 
  * @author Daniel Sagenschneider
  */
+@Deprecated // TODO moving to HttpSecuritySource integrated into web application
 public interface HttpSecurityService {
 
 	/**
