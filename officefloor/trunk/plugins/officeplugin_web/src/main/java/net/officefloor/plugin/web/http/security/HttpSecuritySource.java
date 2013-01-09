@@ -17,44 +17,35 @@
  */
 package net.officefloor.plugin.web.http.security;
 
-import java.io.Serializable;
-import java.security.Principal;
+import net.officefloor.plugin.web.http.session.HttpSession;
 
 /**
- * Portable interface for {@link HttpSecuritySource} credentials.
+ * <p>
+ * Source for obtaining HTTP security.
+ * <p>
+ * As security is specific to applications, both the security object and
+ * credentials are specified by the application.
  * 
  * @author Daniel Sagenschneider
  */
-public interface HttpSecurity extends Serializable {
+public interface HttpSecuritySource<S, C, D extends Enum<D>, F extends Enum<F>> {
 
 	/**
-	 * Obtains the authentication scheme used.
+	 * Retrieves the cached security details.
 	 * 
-	 * @return Authentication scheme.
+	 * @param session
+	 *            {@link HttpSession}.
+	 * @return Security object. Value of <code>null</code> indicates the
+	 *         security object was not cached.
 	 */
-	String getAuthenticationScheme();
+	S retrieveCached(HttpSession session);
 
 	/**
-	 * Obtains the {@link Principal} for the user.
+	 * Undertakes authentication.
 	 * 
-	 * @return {@link Principal} for the user.
+	 * @param context
+	 *            {@link HttpAuthenticateContext}.
 	 */
-	Principal getUserPrincipal();
-
-	/**
-	 * Name of the user.
-	 * 
-	 * @return Name of the user.
-	 */
-	String getRemoteUser();
-
-	/**
-	 * Indicates if the user supports the role.
-	 * 
-	 * @param role
-	 *            Role to check if user supports.
-	 * @return <code>true</code> if the user supports the role.
-	 */
-	boolean isUserInRole(String role);
+	void authenticate(HttpAuthenticateContext<S, C, D, F> context);
 
 }

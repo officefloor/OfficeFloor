@@ -17,44 +17,25 @@
  */
 package net.officefloor.plugin.web.http.security;
 
-import java.io.Serializable;
-import java.security.Principal;
-
 /**
  * Portable interface for {@link HttpSecuritySource} credentials.
  * 
  * @author Daniel Sagenschneider
  */
-public interface HttpSecurity extends Serializable {
+public interface HttpCredentials {
 
 	/**
-	 * Obtains the authentication scheme used.
+	 * Obtains the username.
 	 * 
-	 * @return Authentication scheme.
+	 * @return Username.
 	 */
-	String getAuthenticationScheme();
+	String getUsername();
 
 	/**
-	 * Obtains the {@link Principal} for the user.
+	 * Obtains the password.
 	 * 
-	 * @return {@link Principal} for the user.
+	 * @return Password.
 	 */
-	Principal getUserPrincipal();
-
-	/**
-	 * Name of the user.
-	 * 
-	 * @return Name of the user.
-	 */
-	String getRemoteUser();
-
-	/**
-	 * Indicates if the user supports the role.
-	 * 
-	 * @param role
-	 *            Role to check if user supports.
-	 * @return <code>true</code> if the user supports the role.
-	 */
-	boolean isUserInRole(String role);
+	byte[] getPassword();
 
 }
