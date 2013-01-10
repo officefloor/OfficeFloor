@@ -267,7 +267,7 @@ public class HttpTemplateTask extends
 				SectionWriterStruct beanStruct = createHttpTemplateWriters(
 						beanContent.getContent(), beanType, null,
 						linkTaskNames, serverDefaultCharset, templateUriPath,
-						templateUriSuffix, isTemplateSecure, null);
+						templateUriSuffix, isTemplateSecure, context);
 
 				// Add the content writer
 				contentWriterList.add(new BeanHttpTemplateWriter(beanContent,

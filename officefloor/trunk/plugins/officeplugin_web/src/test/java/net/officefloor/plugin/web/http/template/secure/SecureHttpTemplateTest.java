@@ -116,7 +116,7 @@ public class SecureHttpTemplateTest extends OfficeFrameTestCase {
 	 */
 	public void testSecureTemplateRedirect() throws Exception {
 		this.doSecureTemplateTest(true, null, NON_SECURE_URL_PREFIX
-				+ "/template", SECURE_URL_PREFIX + "/template");
+				+ "/template", SECURE_URL_PREFIX + "/template", false);
 	}
 
 	/**
@@ -124,7 +124,7 @@ public class SecureHttpTemplateTest extends OfficeFrameTestCase {
 	 */
 	public void testSecureTemplateService() throws Exception {
 		this.doSecureTemplateTest(true, null, SECURE_URL_PREFIX + "/template",
-				null);
+				null, false);
 	}
 
 	/**
@@ -132,7 +132,7 @@ public class SecureHttpTemplateTest extends OfficeFrameTestCase {
 	 */
 	public void testInsecureTemplateServiceSecureAnyway() throws Exception {
 		this.doSecureTemplateTest(false, null, SECURE_URL_PREFIX + "/template",
-				null);
+				null, false);
 	}
 
 	/**
@@ -140,7 +140,7 @@ public class SecureHttpTemplateTest extends OfficeFrameTestCase {
 	 */
 	public void testInsecureTemplateService() throws Exception {
 		this.doSecureTemplateTest(false, null, NON_SECURE_URL_PREFIX
-				+ "/template", null);
+				+ "/template", null, false);
 	}
 
 	/**
@@ -148,7 +148,7 @@ public class SecureHttpTemplateTest extends OfficeFrameTestCase {
 	 */
 	public void testSecureLinkRedirect() throws Exception {
 		this.doSecureTemplateTest(false, true, NON_SECURE_URL_PREFIX
-				+ "/template-LINK", SECURE_URL_PREFIX + "/template-LINK");
+				+ "/template-LINK", SECURE_URL_PREFIX + "/template-LINK", false);
 	}
 
 	/**
@@ -156,7 +156,7 @@ public class SecureHttpTemplateTest extends OfficeFrameTestCase {
 	 */
 	public void testSecureLinkService() throws Exception {
 		this.doSecureTemplateTest(false, true, SECURE_URL_PREFIX
-				+ "/template-LINK", null);
+				+ "/template-LINK", null, false);
 	}
 
 	/**
@@ -164,7 +164,7 @@ public class SecureHttpTemplateTest extends OfficeFrameTestCase {
 	 */
 	public void testInsecureLinkServiceSecureAnyway() throws Exception {
 		this.doSecureTemplateTest(true, false, SECURE_URL_PREFIX
-				+ "/template-LINK", null);
+				+ "/template-LINK", null, false);
 	}
 
 	/**
@@ -172,7 +172,39 @@ public class SecureHttpTemplateTest extends OfficeFrameTestCase {
 	 */
 	public void testInsecureLinkWithSecureRendering() throws Exception {
 		this.doSecureTemplateTest(true, false, NON_SECURE_URL_PREFIX
-				+ "/template-LINK", SECURE_URL_PREFIX + "/template");
+				+ "/template-LINK", SECURE_URL_PREFIX + "/template", false);
+	}
+
+	/**
+	 * Ensure link triggers a redirect if not secure.
+	 */
+	public void testBeanSecureLinkRedirect() throws Exception {
+		this.doSecureTemplateTest(false, true, NON_SECURE_URL_PREFIX
+				+ "/template-LINK", SECURE_URL_PREFIX + "/template-LINK", true);
+	}
+
+	/**
+	 * Ensure service request if appropriately secure.
+	 */
+	public void testBeanSecureLinkService() throws Exception {
+		this.doSecureTemplateTest(false, true, SECURE_URL_PREFIX
+				+ "/template-LINK", null, true);
+	}
+
+	/**
+	 * Ensure services non-secure link even though on secure connection.
+	 */
+	public void testBeanInsecureLinkServiceSecureAnyway() throws Exception {
+		this.doSecureTemplateTest(true, false, SECURE_URL_PREFIX
+				+ "/template-LINK", null, true);
+	}
+
+	/**
+	 * Ensure service request if appropriately insecure.
+	 */
+	public void testBeanInsecureLinkWithSecureRendering() throws Exception {
+		this.doSecureTemplateTest(true, false, NON_SECURE_URL_PREFIX
+				+ "/template-LINK", SECURE_URL_PREFIX + "/template", true);
 	}
 
 	/**
@@ -180,16 +212,19 @@ public class SecureHttpTemplateTest extends OfficeFrameTestCase {
 	 * {@link HttpTemplateAutoWireSection}.
 	 */
 	private void doSecureTemplateTest(boolean isTemplateSecure,
-			Boolean isLinkSecure, String requestUrl, String redirectUrl)
-			throws Exception {
+			Boolean isLinkSecure, String requestUrl, String redirectUrl,
+			boolean isEncapsulateLinkWithinBean) throws Exception {
 
 		// Obtain the template location
 		String templateLocation = this.getFileLocation(this.getClass(),
-				"secure.ofp");
+				(isEncapsulateLinkWithinBean ? "SecureBeanLink.ofp"
+						: "secure.ofp"));
 
 		// Configure the template
 		HttpTemplateAutoWireSection template = this.source.addHttpTemplate(
-				"template", templateLocation, TemplateLogic.class);
+				"template", templateLocation,
+				(isEncapsulateLinkWithinBean ? BeanTemplateLogic.class
+						: TemplateLogic.class));
 		template.setTemplateSecure(isTemplateSecure);
 		if (isLinkSecure != null) {
 			template.setLinkSecure("LINK", isLinkSecure.booleanValue());
@@ -253,6 +288,27 @@ public class SecureHttpTemplateTest extends OfficeFrameTestCase {
 
 		public Parameters getTemplate(Parameters parameters) {
 			return parameters;
+		}
+
+		public void LINK(ServerHttpConnection connection) throws IOException {
+			connection.getHttpResponse().getEntityWriter().write("link-");
+		}
+	}
+
+	/**
+	 * Logic for servicing the template with bean secure link.
+	 */
+	public static class BeanTemplateLogic {
+
+		private Parameters parameters;
+
+		public BeanTemplateLogic getTemplate(Parameters parameters) {
+			this.parameters = parameters;
+			return this;
+		}
+
+		public Parameters getBean() {
+			return this.parameters;
 		}
 
 		public void LINK(ServerHttpConnection connection) throws IOException {
