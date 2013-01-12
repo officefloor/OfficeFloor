@@ -17,6 +17,7 @@
  */
 package net.officefloor.plugin.web.http.security.type;
 
+import net.officefloor.frame.internal.structure.JobSequence;
 import net.officefloor.plugin.web.http.security.HttpSecuritySource;
 
 /**
@@ -25,5 +26,40 @@ import net.officefloor.plugin.web.http.security.HttpSecuritySource;
  * @author Daniel Sagenschneider
  */
 public interface HttpSecurityType<S, C, D extends Enum<D>, F extends Enum<F>> {
+
+	/**
+	 * Obtains the type for security.
+	 * 
+	 * @return Type for security.
+	 */
+	Class<S> getSecurityClass();
+
+	/**
+	 * Obtains the type for credentials.
+	 * 
+	 * @return Type for credentials. May be <code>null</code> if no application
+	 *         specific behaviour is required to provide credentials.
+	 */
+	Class<C> getCredentialsClass();
+
+	/**
+	 * Obtains the {@link HttpSecurityDependencyType} definitions of the
+	 * required dependencies for the {@link HttpSecuritySource}.
+	 * 
+	 * @return {@link HttpSecurityDependencyType} definitions of the required
+	 *         dependencies for the {@link HttpSecuritySource}.
+	 */
+	HttpSecurityDependencyType<D>[] getDependencyTypes();
+
+	/**
+	 * Obtains the {@link HttpSecurityFlowType} definitions of the
+	 * {@link JobSequence} instances required to be linked for the
+	 * {@link HttpSecuritySource}.
+	 * 
+	 * @return {@link HttpSecurityFlowType} definitions of the
+	 *         {@link JobSequence} instances required to be linked for the
+	 *         {@link HttpSecuritySource}.
+	 */
+	HttpSecurityFlowType<?>[] getFlowTypes();
 
 }
