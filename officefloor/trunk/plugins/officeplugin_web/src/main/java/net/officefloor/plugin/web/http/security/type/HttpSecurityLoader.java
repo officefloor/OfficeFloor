@@ -19,7 +19,6 @@ package net.officefloor.plugin.web.http.security.type;
 
 import net.officefloor.compile.issues.CompilerIssues;
 import net.officefloor.compile.properties.PropertyList;
-import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 import net.officefloor.plugin.web.http.security.HttpSecuritySource;
 import net.officefloor.plugin.web.http.security.HttpSecuritySourceProperty;
 import net.officefloor.plugin.web.http.security.HttpSecuritySourceSpecification;
@@ -36,15 +35,15 @@ public interface HttpSecurityLoader {
 	 * {@link HttpSecuritySourceSpecification} for the
 	 * {@link HttpSecuritySource}.
 	 * 
-	 * @param managedObjectSourceClass
-	 *            {@link ManagedObjectSource} class.
+	 * @param httpSecuritySource
+	 *            {@link HttpSecuritySource} class.
 	 * @return {@link PropertyList} of the {@link HttpSecuritySourceProperty}
 	 *         instances of the {@link HttpSecuritySourceSpecification} or
 	 *         <code>null</code> if issue, which is reported to the
 	 *         {@link CompilerIssues}.
 	 */
 	<S, C, D extends Enum<D>, F extends Enum<F>, HS extends HttpSecuritySource<S, C, D, F>> PropertyList loadSpecification(
-			Class<HS> httpSecuritySourceClass);
+			HS httpSecuritySource);
 
 	/**
 	 * Loads and returns the {@link HttpSecurityType} for the

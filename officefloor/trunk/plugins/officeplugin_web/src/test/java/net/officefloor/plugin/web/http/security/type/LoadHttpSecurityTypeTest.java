@@ -20,49 +20,29 @@ package net.officefloor.plugin.web.http.security.type;
 import java.sql.Connection;
 import java.util.Properties;
 
-import javax.transaction.xa.XAResource;
-
 import net.officefloor.compile.OfficeFloorCompiler;
 import net.officefloor.compile.impl.properties.PropertyListImpl;
 import net.officefloor.compile.issues.CompilerIssues;
-import net.officefloor.compile.managedobject.ManagedObjectDependencyType;
-import net.officefloor.compile.managedobject.ManagedObjectFlowType;
 import net.officefloor.compile.managedobject.ManagedObjectLoader;
-import net.officefloor.compile.managedobject.ManagedObjectTeamType;
-import net.officefloor.compile.managedobject.ManagedObjectType;
 import net.officefloor.compile.properties.Property;
 import net.officefloor.compile.properties.PropertyList;
-import net.officefloor.compile.test.issues.FailTestCompilerIssues;
 import net.officefloor.compile.work.WorkType;
-import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.build.None;
-import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
-import net.officefloor.frame.api.build.TaskFactory;
-import net.officefloor.frame.api.build.WorkFactory;
-import net.officefloor.frame.api.execute.Task;
-import net.officefloor.frame.api.execute.Work;
-import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
-import net.officefloor.frame.internal.structure.ManagedObjectMetaData;
 import net.officefloor.frame.spi.TestSource;
-import net.officefloor.frame.spi.managedobject.ManagedObject;
-import net.officefloor.frame.spi.managedobject.extension.ExtensionInterfaceFactory;
-import net.officefloor.frame.spi.managedobject.source.ManagedObjectDependencyMetaData;
-import net.officefloor.frame.spi.managedobject.source.ManagedObjectExecuteContext;
-import net.officefloor.frame.spi.managedobject.source.ManagedObjectExtensionInterfaceMetaData;
-import net.officefloor.frame.spi.managedobject.source.ManagedObjectFlowMetaData;
-import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
-import net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceContext;
-import net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceMetaData;
-import net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceSpecification;
-import net.officefloor.frame.spi.managedobject.source.ManagedObjectTaskBuilder;
-import net.officefloor.frame.spi.managedobject.source.ManagedObjectUser;
-import net.officefloor.frame.spi.managedobject.source.ManagedObjectWorkBuilder;
-import net.officefloor.frame.spi.team.Team;
 import net.officefloor.frame.test.OfficeFrameTestCase;
-import net.officefloor.plugin.managedobject.clazz.ClassManagedObjectSource;
+import net.officefloor.plugin.web.http.security.HttpAuthenticateContext;
+import net.officefloor.plugin.web.http.security.HttpCredentials;
+import net.officefloor.plugin.web.http.security.HttpSecurity;
+import net.officefloor.plugin.web.http.security.HttpSecurityDependencyMetaData;
+import net.officefloor.plugin.web.http.security.HttpSecurityFlowMetaData;
+import net.officefloor.plugin.web.http.security.HttpSecuritySource;
+import net.officefloor.plugin.web.http.security.HttpSecuritySourceContext;
+import net.officefloor.plugin.web.http.security.HttpSecuritySourceMetaData;
+import net.officefloor.plugin.web.http.security.HttpSecuritySourceSpecification;
+import net.officefloor.plugin.web.http.session.HttpSession;
 
 /**
- * Tests loading the {@link ManagedObjectType}.
+ * Tests loading the {@link HttpSecurityType}.
  * 
  * @author Daniel Sagenschneider
  */
@@ -74,80 +54,18 @@ public class LoadHttpSecurityTypeTest extends OfficeFrameTestCase {
 	private final CompilerIssues issues = this.createMock(CompilerIssues.class);
 
 	/**
-	 * {@link ManagedObjectSourceMetaData}.
+	 * {@link HttpSecuritySourceMetaData}.
 	 */
-	private final ManagedObjectSourceMetaData<?, ?> metaData = this
-			.createMock(ManagedObjectSourceMetaData.class);
-
-	/**
-	 * {@link WorkFactory}.
-	 */
-	@SuppressWarnings("unchecked")
-	private final WorkFactory<Work> workFactory = this
-			.createMock(WorkFactory.class);
-
-	/**
-	 * {@link TaskFactory}.
-	 */
-	@SuppressWarnings("unchecked")
-	private final TaskFactory<Work, ?, ?> taskFactory = this
-			.createMock(TaskFactory.class);
+	private final HttpSecuritySourceMetaData<?, ?, ?, ?> metaData = this
+			.createMock(HttpSecuritySourceMetaData.class);
 
 	@Override
 	protected void setUp() throws Exception {
-		MockManagedObjectSource.reset(this.metaData, new InitUtil());
+		MockHttpSecuritySource.reset(this.metaData);
 	}
 
 	/**
-	 * Ensure can load {@link SimpleManagedObject} via
-	 * {@link ClassManagedObjectSource} {@link Class}.
-	 */
-	public void testLoadByClass() {
-
-		// Configure test
-		OfficeFloorCompiler compiler = OfficeFloorCompiler
-				.newOfficeFloorCompiler(null);
-		compiler.setCompilerIssues(new FailTestCompilerIssues());
-
-		// Configure to load simple class
-		PropertyList properties = compiler.createPropertyList();
-		properties.addProperty(
-				ClassManagedObjectSource.CLASS_NAME_PROPERTY_NAME).setValue(
-				MockLoadHttpSecurity.class.getName());
-
-		// Load the managed object type
-		ManagedObjectLoader moLoader = compiler.getManagedObjectLoader();
-		ManagedObjectType<?> moType = moLoader.loadManagedObjectType(
-				ClassManagedObjectSource.class, properties);
-		MockLoadHttpSecurity.assertManagedObjectType(moType);
-	}
-
-	/**
-	 * Ensure can load {@link SimpleManagedObject} via
-	 * {@link ClassManagedObjectSource} instance.
-	 */
-	public void testLoadByInstance() {
-
-		// Configure test
-		OfficeFloorCompiler compiler = OfficeFloorCompiler
-				.newOfficeFloorCompiler(null);
-		compiler.setCompilerIssues(new FailTestCompilerIssues());
-
-		// Configure to load simple class
-		PropertyList properties = compiler.createPropertyList();
-		properties.addProperty(
-				ClassManagedObjectSource.CLASS_NAME_PROPERTY_NAME).setValue(
-				MockLoadHttpSecurity.class.getName());
-
-		// Load the managed object type
-		ManagedObjectLoader moLoader = compiler.getManagedObjectLoader();
-		ManagedObjectType<?> moType = moLoader.loadManagedObjectType(
-				new ClassManagedObjectSource(), properties);
-		MockLoadHttpSecurity.assertManagedObjectType(moType);
-	}
-
-	/**
-	 * Ensure issue if fail to instantiate the {@link ManagedObjectSource}.
+	 * Ensure issue if fail to instantiate the {@link HttpSecuritySource}.
 	 */
 	public void testFailInstantiate() {
 
@@ -156,12 +74,12 @@ public class LoadHttpSecurityTypeTest extends OfficeFrameTestCase {
 
 		// Record failure to instantiate
 		this.record_issue("Failed to instantiate "
-				+ MockManagedObjectSource.class.getName()
+				+ MockHttpSecuritySource.class.getName()
 				+ " by default constructor", failure);
 
 		// Attempt to load
-		MockManagedObjectSource.instantiateFailure = failure;
-		this.loadManagedObjectType(false, (Init<?>) null);
+		MockHttpSecuritySource.instantiateFailure = failure;
+		this.loadHttpSecurityType(false, (Init) null);
 	}
 
 	/**
@@ -173,10 +91,9 @@ public class LoadHttpSecurityTypeTest extends OfficeFrameTestCase {
 		this.record_issue("Missing property 'missing'");
 
 		// Attempt to load
-		this.loadManagedObjectType(false, new Init<None>() {
+		this.loadHttpSecurityType(false, new Init() {
 			@Override
-			public void init(ManagedObjectSourceContext<None> context,
-					InitUtil util) {
+			public void init(HttpSecuritySourceContext context) {
 				context.getProperty("missing");
 			}
 		});
@@ -191,10 +108,9 @@ public class LoadHttpSecurityTypeTest extends OfficeFrameTestCase {
 		this.record_basicMetaData();
 
 		// Attempt to load
-		this.loadManagedObjectType(true, new Init<None>() {
+		this.loadHttpSecurityType(true, new Init() {
 			@Override
-			public void init(ManagedObjectSourceContext<None> context,
-					InitUtil util) {
+			public void init(HttpSecuritySourceContext context) {
 				assertEquals("Ensure get defaulted property", "DEFAULT",
 						context.getProperty("missing", "DEFAULT"));
 				assertEquals("Ensure get property ONE", "1",
@@ -221,10 +137,9 @@ public class LoadHttpSecurityTypeTest extends OfficeFrameTestCase {
 		this.record_issue("Can not load class 'missing'");
 
 		// Attempt to load
-		this.loadManagedObjectType(false, new Init<None>() {
+		this.loadHttpSecurityType(false, new Init() {
 			@Override
-			public void init(ManagedObjectSourceContext<None> context,
-					InitUtil util) {
+			public void init(HttpSecuritySourceContext context) {
 				context.loadClass("missing");
 			}
 		});
@@ -239,10 +154,9 @@ public class LoadHttpSecurityTypeTest extends OfficeFrameTestCase {
 		this.record_issue("Can not obtain resource at location 'missing'");
 
 		// Attempt to load
-		this.loadManagedObjectType(false, new Init<None>() {
+		this.loadHttpSecurityType(false, new Init() {
 			@Override
-			public void init(ManagedObjectSourceContext<None> context,
-					InitUtil util) {
+			public void init(HttpSecuritySourceContext context) {
 				context.getResource("missing");
 			}
 		});
@@ -261,10 +175,9 @@ public class LoadHttpSecurityTypeTest extends OfficeFrameTestCase {
 				+ ".class";
 
 		// Attempt to load
-		this.loadManagedObjectType(true, new Init<None>() {
+		this.loadHttpSecurityType(true, new Init() {
 			@Override
-			public void init(ManagedObjectSourceContext<None> context,
-					InitUtil util) {
+			public void init(HttpSecuritySourceContext context) {
 				assertEquals("Incorrect resource locator",
 						LoadHttpSecurityTypeTest.class.getClassLoader()
 								.getResource(objectPath), context
@@ -274,126 +187,88 @@ public class LoadHttpSecurityTypeTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensure issue if fails to init the {@link ManagedObjectSource}.
+	 * Ensure issue if fails to init the {@link HttpSecuritySource}.
 	 */
-	public void testFailInitManagedObjectSource() {
+	public void testFailInitHttpSecuritySource() {
 
 		final NullPointerException failure = new NullPointerException(
-				"Fail init ManagedObjectSource");
+				"Fail init HttpSecuritySource");
 
-		// Record failure to init the Managed Object Source
+		// Record failure to init the HTTP security Source
 		this.record_issue("Failed to init", failure);
 
 		// Attempt to load
-		this.loadManagedObjectType(false, new Init<None>() {
+		this.loadHttpSecurityType(false, new Init() {
 			@Override
-			public void init(ManagedObjectSourceContext<None> context,
-					InitUtil util) {
+			public void init(HttpSecuritySourceContext context) {
 				throw failure;
 			}
 		});
 	}
 
 	/**
-	 * Ensure issue if <code>null</code> {@link ManagedObjectSourceMetaData}.
+	 * Ensure issue if <code>null</code> {@link HttpSecuritySourceMetaData}.
 	 */
-	public void testNullManagedObjectSourceMetaData() {
+	public void testNullHttpSecuritySourceMetaData() {
 
-		// Record null the Managed Object Source meta-data
-		this.record_issue("Returned null ManagedObjectSourceMetaData");
+		// Record null the HTTP security Source meta-data
+		this.record_issue("Returned null HttpSecuritySourceMetaData");
 
 		// Attempt to load
-		this.loadManagedObjectType(false, new Init<None>() {
+		this.loadHttpSecurityType(false, new Init() {
 			@Override
-			public void init(ManagedObjectSourceContext<None> context,
-					InitUtil util) {
-				MockManagedObjectSource.metaData = null;
+			public void init(HttpSecuritySourceContext context) {
+				MockHttpSecuritySource.metaData = null;
 			}
 		});
 	}
 
 	/**
-	 * Ensure issue if fails to obtain the {@link ManagedObjectSourceMetaData}.
+	 * Ensure issue if fails to obtain the {@link HttpSecuritySourceMetaData}.
 	 */
-	public void testFailGetManagedObjectSourceMetaData() {
+	public void testFailGetHttpSecuritySourceMetaData() {
 
 		final Error failure = new Error("Obtain meta-data failure");
 
 		// Record failure to obtain the meta-data
-		this.record_issue("Failed to get ManagedObjectSourceMetaData", failure);
+		this.record_issue("Failed to get HttpSecuritySourceMetaData", failure);
 
 		// Attempt to load
-		this.loadManagedObjectType(false, new Init<None>() {
+		this.loadHttpSecurityType(false, new Init() {
 			@Override
-			public void init(ManagedObjectSourceContext<None> context,
-					InitUtil util) {
-				MockManagedObjectSource.metaDataFailure = failure;
+			public void init(HttpSecuritySourceContext context) {
+				MockHttpSecuritySource.metaDataFailure = failure;
 			}
 		});
 	}
 
 	/**
-	 * Ensure issue if no {@link Object} class from meta-data.
+	 * Ensure issue if no security class from meta-data.
 	 */
-	public void testNoObjectClass() {
+	public void testNoSecurityClass() {
 
 		// Record no object class
-		this.recordReturn(this.metaData, this.metaData.getObjectClass(), null);
-		this.record_issue("No Object type provided");
+		this.recordReturn(this.metaData, this.metaData.getSecurityClass(), null);
+		this.record_issue("No Security type provided");
 
 		// Attempt to load
-		this.loadManagedObjectType(false, (Init<None>) null);
+		this.loadHttpSecurityType(false, null);
 	}
 
 	/**
-	 * Ensure issue if no {@link ManagedObject} class from meta-data.
-	 */
-	public void testNoManagedObjectClass() {
-
-		// Record no managed object class
-		this.recordReturn(this.metaData, this.metaData.getObjectClass(),
-				Object.class);
-		this.recordReturn(this.metaData, this.metaData.getManagedObjectClass(),
-				null);
-		this.record_issue("No ManagedObject type provided");
-
-		// Attempt to load
-		this.loadManagedObjectType(false, (Init<None>) null);
-	}
-
-	/**
-	 * Ensure issue if no {@link ManagedObject} class does not implement
-	 * {@link ManagedObject}.
-	 */
-	public void testManagedObjectClassMustImplementManagedObject() {
-
-		// Record invalid managed object class
-		this.recordReturn(this.metaData, this.metaData.getObjectClass(),
-				Object.class);
-		this.recordReturn(this.metaData, this.metaData.getManagedObjectClass(),
-				Integer.class);
-		this.record_issue("ManagedObject class must implement "
-				+ ManagedObject.class.getName() + " (class="
-				+ Integer.class.getName() + ")");
-
-		// Attempt to load
-		this.loadManagedObjectType(false, (Init<None>) null);
-	}
-
-	/**
-	 * Ensure issue if <code>null</code> {@link ManagedObjectDependencyMetaData}
+	 * Ensure issue if <code>null</code> {@link HttpSecurityDependencyMetaData}
 	 * in array.
 	 */
 	public void testNullDependencyMetaData() {
 
 		// Record no dependency type
-		this.record_objectAndManagedObject();
+		this.record_objectAndHttpSecurity();
 		this.recordReturn(this.metaData, this.metaData.getDependencyMetaData(),
-				new ManagedObjectDependencyMetaData[] { null });
-		this.record_issue("Null ManagedObjectDependencyMetaData for dependency 0");
+				new HttpSecurityDependencyMetaData[] { null });
+		this.record_issue("Null HttpSecurityDependencyMetaData for dependency 0");
 
 		// Attempt to load
-		this.loadManagedObjectType(false, (Init<None>) null);
+		this.loadHttpSecurityType(false, null);
 	}
 
 	/**
@@ -401,20 +276,20 @@ public class LoadHttpSecurityTypeTest extends OfficeFrameTestCase {
 	 */
 	public void testNoDependencyType() {
 
-		final ManagedObjectDependencyMetaData<?> dependency = this
-				.createMock(ManagedObjectDependencyMetaData.class);
+		final HttpSecurityDependencyMetaData<?> dependency = this
+				.createMock(HttpSecurityDependencyMetaData.class);
 
 		// Record no dependency type
-		this.record_objectAndManagedObject();
+		this.record_objectAndHttpSecurity();
 		this.recordReturn(this.metaData, this.metaData.getDependencyMetaData(),
-				new ManagedObjectDependencyMetaData[] { dependency });
+				new HttpSecurityDependencyMetaData[] { dependency });
 		this.recordReturn(dependency, dependency.getLabel(), "NO TYPE");
 		this.recordReturn(dependency, dependency.getKey(), null);
 		this.recordReturn(dependency, dependency.getType(), null);
 		this.record_issue("No type for dependency 0 (key=<indexed>, label=NO TYPE)");
 
 		// Attempt to load
-		this.loadManagedObjectType(false, (Init<None>) null);
+		this.loadHttpSecurityType(false, null);
 	}
 
 	/**
@@ -422,15 +297,15 @@ public class LoadHttpSecurityTypeTest extends OfficeFrameTestCase {
 	 */
 	public void testInvalidDependencyKey() {
 
-		final ManagedObjectDependencyMetaData<?> dependencyOne = this
-				.createMock(ManagedObjectDependencyMetaData.class);
-		final ManagedObjectDependencyMetaData<?> dependencyTwo = this
-				.createMock(ManagedObjectDependencyMetaData.class);
+		final HttpSecurityDependencyMetaData<?> dependencyOne = this
+				.createMock(HttpSecurityDependencyMetaData.class);
+		final HttpSecurityDependencyMetaData<?> dependencyTwo = this
+				.createMock(HttpSecurityDependencyMetaData.class);
 
 		// Record missing dependency key
-		this.record_objectAndManagedObject();
+		this.record_objectAndHttpSecurity();
 		this.recordReturn(this.metaData, this.metaData.getDependencyMetaData(),
-				new ManagedObjectDependencyMetaData[] { dependencyOne,
+				new HttpSecurityDependencyMetaData[] { dependencyOne,
 						dependencyTwo });
 		this.recordReturn(dependencyOne, dependencyOne.getLabel(), null);
 		this.recordReturn(dependencyOne, dependencyOne.getKey(), TwoKey.ONE);
@@ -445,7 +320,7 @@ public class LoadHttpSecurityTypeTest extends OfficeFrameTestCase {
 				+ ")");
 
 		// Attempt to load
-		this.loadManagedObjectType(false, (Init<None>) null);
+		this.loadHttpSecurityType(false, null);
 	}
 
 	/**
@@ -453,15 +328,15 @@ public class LoadHttpSecurityTypeTest extends OfficeFrameTestCase {
 	 */
 	public void testDependencyMixingKeyAndIndexes() {
 
-		final ManagedObjectDependencyMetaData<?> dependencyOne = this
-				.createMock(ManagedObjectDependencyMetaData.class);
-		final ManagedObjectDependencyMetaData<?> dependencyTwo = this
-				.createMock(ManagedObjectDependencyMetaData.class);
+		final HttpSecurityDependencyMetaData<?> dependencyOne = this
+				.createMock(HttpSecurityDependencyMetaData.class);
+		final HttpSecurityDependencyMetaData<?> dependencyTwo = this
+				.createMock(HttpSecurityDependencyMetaData.class);
 
 		// Record missing dependency key
-		this.record_objectAndManagedObject();
+		this.record_objectAndHttpSecurity();
 		this.recordReturn(this.metaData, this.metaData.getDependencyMetaData(),
-				new ManagedObjectDependencyMetaData[] { dependencyOne,
+				new HttpSecurityDependencyMetaData[] { dependencyOne,
 						dependencyTwo });
 		this.recordReturn(dependencyOne, dependencyOne.getLabel(), null);
 		this.recordReturn(dependencyOne, dependencyOne.getKey(), TwoKey.ONE);
@@ -473,7 +348,7 @@ public class LoadHttpSecurityTypeTest extends OfficeFrameTestCase {
 		this.record_issue("Dependencies mixing keys and indexes");
 
 		// Attempt to load
-		this.loadManagedObjectType(false, (Init<None>) null);
+		this.loadHttpSecurityType(false, null);
 	}
 
 	/**
@@ -481,15 +356,15 @@ public class LoadHttpSecurityTypeTest extends OfficeFrameTestCase {
 	 */
 	public void testDuplicateDependencyKey() {
 
-		final ManagedObjectDependencyMetaData<?> dependencyOne = this
-				.createMock(ManagedObjectDependencyMetaData.class);
-		final ManagedObjectDependencyMetaData<?> dependencyTwo = this
-				.createMock(ManagedObjectDependencyMetaData.class);
+		final HttpSecurityDependencyMetaData<?> dependencyOne = this
+				.createMock(HttpSecurityDependencyMetaData.class);
+		final HttpSecurityDependencyMetaData<?> dependencyTwo = this
+				.createMock(HttpSecurityDependencyMetaData.class);
 
 		// Record missing dependency key
-		this.record_objectAndManagedObject();
+		this.record_objectAndHttpSecurity();
 		this.recordReturn(this.metaData, this.metaData.getDependencyMetaData(),
-				new ManagedObjectDependencyMetaData[] { dependencyOne,
+				new HttpSecurityDependencyMetaData[] { dependencyOne,
 						dependencyTwo });
 		this.recordReturn(dependencyOne, dependencyOne.getLabel(), null);
 		this.recordReturn(dependencyOne, dependencyOne.getKey(), TwoKey.ONE);
@@ -504,7 +379,7 @@ public class LoadHttpSecurityTypeTest extends OfficeFrameTestCase {
 				+ TwoKey.ONE + ")");
 
 		// Attempt to load
-		this.loadManagedObjectType(false, (Init<None>) null);
+		this.loadHttpSecurityType(false, null);
 	}
 
 	/**
@@ -512,13 +387,13 @@ public class LoadHttpSecurityTypeTest extends OfficeFrameTestCase {
 	 */
 	public void testNotAllDependencyKeys() {
 
-		final ManagedObjectDependencyMetaData<?> dependency = this
-				.createMock(ManagedObjectDependencyMetaData.class);
+		final HttpSecurityDependencyMetaData<?> dependency = this
+				.createMock(HttpSecurityDependencyMetaData.class);
 
 		// Record not all dependency keys
-		this.record_objectAndManagedObject();
+		this.record_objectAndHttpSecurity();
 		this.recordReturn(this.metaData, this.metaData.getDependencyMetaData(),
-				new ManagedObjectDependencyMetaData[] { dependency });
+				new HttpSecurityDependencyMetaData[] { dependency });
 		this.recordReturn(dependency, dependency.getLabel(), null);
 		this.recordReturn(dependency, dependency.getKey(), TwoKey.ONE);
 		this.recordReturn(dependency, dependency.getType(), Connection.class);
@@ -527,25 +402,25 @@ public class LoadHttpSecurityTypeTest extends OfficeFrameTestCase {
 				+ ")");
 
 		// Attempt to load
-		this.loadManagedObjectType(false, (Init<None>) null);
+		this.loadHttpSecurityType(false, null);
 	}
 
 	/**
-	 * Ensure issue if <code>null</code> {@link ManagedObjectFlowMetaData} in
+	 * Ensure issue if <code>null</code> {@link HttpSecurityFlowMetaData} in
 	 * array.
 	 */
 	public void testNullFlowMetaData() {
 
 		// Record no flow type
-		this.record_objectAndManagedObject();
+		this.record_objectAndHttpSecurity();
 		this.recordReturn(this.metaData, this.metaData.getDependencyMetaData(),
 				null);
 		this.recordReturn(this.metaData, this.metaData.getFlowMetaData(),
-				new ManagedObjectFlowMetaData[] { null });
-		this.record_issue("Null ManagedObjectFlowMetaData for flow 0");
+				new HttpSecurityFlowMetaData[] { null });
+		this.record_issue("Null HttpSecurityFlowMetaData for flow 0");
 
 		// Attempt to load
-		this.loadManagedObjectType(false, (Init<None>) null);
+		this.loadHttpSecurityType(false, null);
 	}
 
 	/**
@@ -553,17 +428,17 @@ public class LoadHttpSecurityTypeTest extends OfficeFrameTestCase {
 	 */
 	public void testDefaultFlowArgumentType() {
 
-		final ManagedObjectFlowMetaData<?> flowDefaulted = this
-				.createMock(ManagedObjectFlowMetaData.class);
-		final ManagedObjectFlowMetaData<?> flowProvided = this
-				.createMock(ManagedObjectFlowMetaData.class);
+		final HttpSecurityFlowMetaData<?> flowDefaulted = this
+				.createMock(HttpSecurityFlowMetaData.class);
+		final HttpSecurityFlowMetaData<?> flowProvided = this
+				.createMock(HttpSecurityFlowMetaData.class);
 
 		// Record no flow argument type
-		this.record_objectAndManagedObject();
+		this.record_objectAndHttpSecurity();
 		this.recordReturn(this.metaData, this.metaData.getDependencyMetaData(),
 				null);
 		this.recordReturn(this.metaData, this.metaData.getFlowMetaData(),
-				new ManagedObjectFlowMetaData[] { flowDefaulted, flowProvided });
+				new HttpSecurityFlowMetaData[] { flowDefaulted, flowProvided });
 		this.recordReturn(flowDefaulted, flowDefaulted.getLabel(), "DEFAULTED");
 		this.recordReturn(flowDefaulted, flowDefaulted.getKey(), null);
 		this.recordReturn(flowDefaulted, flowDefaulted.getArgumentType(), null);
@@ -571,22 +446,20 @@ public class LoadHttpSecurityTypeTest extends OfficeFrameTestCase {
 		this.recordReturn(flowProvided, flowProvided.getKey(), null);
 		this.recordReturn(flowProvided, flowProvided.getArgumentType(),
 				Connection.class);
-		this.recordReturn(this.metaData,
-				this.metaData.getExtensionInterfacesMetaData(), null);
 
 		// Attempt to load
-		ManagedObjectType<?> moType = this.loadManagedObjectType(true,
-				(Init<None>) null);
+		HttpSecurityType<?, ?, ?, ?> securityType = this.loadHttpSecurityType(
+				true, null);
 
 		// Validate argument types of flows
-		ManagedObjectFlowType<?>[] flowTypes = moType.getFlowTypes();
+		HttpSecurityFlowType<?>[] flowTypes = securityType.getFlowTypes();
 		assertEquals("Incorrect number of flows", 2, flowTypes.length);
-		ManagedObjectFlowType<?> defaulted = flowTypes[0];
+		HttpSecurityFlowType<?> defaulted = flowTypes[0];
 		assertEquals("Incorrect name for defaulted argument flow", "DEFAULTED",
 				defaulted.getFlowName());
 		assertEquals("Incorrect defaulted argument type", Void.class,
 				defaulted.getArgumentType());
-		ManagedObjectFlowType<?> provided = flowTypes[1];
+		HttpSecurityFlowType<?> provided = flowTypes[1];
 		assertEquals("Incorrect name for provided argument flow", "1",
 				provided.getFlowName());
 		assertEquals("Incorrect provided argument type", Connection.class,
@@ -598,17 +471,17 @@ public class LoadHttpSecurityTypeTest extends OfficeFrameTestCase {
 	 */
 	public void testInvalidFlowKey() {
 
-		final ManagedObjectFlowMetaData<?> flowOne = this
-				.createMock(ManagedObjectFlowMetaData.class);
-		final ManagedObjectFlowMetaData<?> flowTwo = this
-				.createMock(ManagedObjectFlowMetaData.class);
+		final HttpSecurityFlowMetaData<?> flowOne = this
+				.createMock(HttpSecurityFlowMetaData.class);
+		final HttpSecurityFlowMetaData<?> flowTwo = this
+				.createMock(HttpSecurityFlowMetaData.class);
 
 		// Record missing flow key
-		this.record_objectAndManagedObject();
+		this.record_objectAndHttpSecurity();
 		this.recordReturn(this.metaData, this.metaData.getDependencyMetaData(),
 				null);
 		this.recordReturn(this.metaData, this.metaData.getFlowMetaData(),
-				new ManagedObjectFlowMetaData[] { flowOne, flowTwo });
+				new HttpSecurityFlowMetaData[] { flowOne, flowTwo });
 		this.recordReturn(flowOne, flowOne.getLabel(), null);
 		this.recordReturn(flowOne, flowOne.getKey(), TwoKey.ONE);
 		this.recordReturn(flowOne, flowOne.getArgumentType(), Connection.class);
@@ -619,7 +492,7 @@ public class LoadHttpSecurityTypeTest extends OfficeFrameTestCase {
 				+ ")");
 
 		// Attempt to load
-		this.loadManagedObjectType(false, (Init<None>) null);
+		this.loadHttpSecurityType(false, null);
 	}
 
 	/**
@@ -627,17 +500,17 @@ public class LoadHttpSecurityTypeTest extends OfficeFrameTestCase {
 	 */
 	public void testFlowMixingKeyAndIndexes() {
 
-		final ManagedObjectFlowMetaData<?> flowOne = this
-				.createMock(ManagedObjectFlowMetaData.class);
-		final ManagedObjectFlowMetaData<?> flowTwo = this
-				.createMock(ManagedObjectFlowMetaData.class);
+		final HttpSecurityFlowMetaData<?> flowOne = this
+				.createMock(HttpSecurityFlowMetaData.class);
+		final HttpSecurityFlowMetaData<?> flowTwo = this
+				.createMock(HttpSecurityFlowMetaData.class);
 
 		// Record missing flow key
-		this.record_objectAndManagedObject();
+		this.record_objectAndHttpSecurity();
 		this.recordReturn(this.metaData, this.metaData.getDependencyMetaData(),
 				null);
 		this.recordReturn(this.metaData, this.metaData.getFlowMetaData(),
-				new ManagedObjectFlowMetaData[] { flowOne, flowTwo });
+				new HttpSecurityFlowMetaData[] { flowOne, flowTwo });
 		this.recordReturn(flowOne, flowOne.getLabel(), null);
 		this.recordReturn(flowOne, flowOne.getKey(), TwoKey.ONE);
 		this.recordReturn(flowOne, flowOne.getArgumentType(), Connection.class);
@@ -646,7 +519,7 @@ public class LoadHttpSecurityTypeTest extends OfficeFrameTestCase {
 		this.record_issue("Meta-data flows mixing keys and indexes");
 
 		// Attempt to load
-		this.loadManagedObjectType(false, (Init<None>) null);
+		this.loadHttpSecurityType(false, null);
 	}
 
 	/**
@@ -654,17 +527,17 @@ public class LoadHttpSecurityTypeTest extends OfficeFrameTestCase {
 	 */
 	public void testDuplicateFlowKey() {
 
-		final ManagedObjectFlowMetaData<?> flowOne = this
-				.createMock(ManagedObjectFlowMetaData.class);
-		final ManagedObjectFlowMetaData<?> flowTwo = this
-				.createMock(ManagedObjectFlowMetaData.class);
+		final HttpSecurityFlowMetaData<?> flowOne = this
+				.createMock(HttpSecurityFlowMetaData.class);
+		final HttpSecurityFlowMetaData<?> flowTwo = this
+				.createMock(HttpSecurityFlowMetaData.class);
 
 		// Record missing flow key
-		this.record_objectAndManagedObject();
+		this.record_objectAndHttpSecurity();
 		this.recordReturn(this.metaData, this.metaData.getDependencyMetaData(),
 				null);
 		this.recordReturn(this.metaData, this.metaData.getFlowMetaData(),
-				new ManagedObjectFlowMetaData[] { flowOne, flowTwo });
+				new HttpSecurityFlowMetaData[] { flowOne, flowTwo });
 		this.recordReturn(flowOne, flowOne.getLabel(), null);
 		this.recordReturn(flowOne, flowOne.getKey(), TwoKey.ONE);
 		this.recordReturn(flowOne, flowOne.getArgumentType(), Connection.class);
@@ -675,7 +548,7 @@ public class LoadHttpSecurityTypeTest extends OfficeFrameTestCase {
 				+ TwoKey.ONE + ")");
 
 		// Attempt to load
-		this.loadManagedObjectType(false, (Init<None>) null);
+		this.loadHttpSecurityType(false, null);
 	}
 
 	/**
@@ -683,43 +556,43 @@ public class LoadHttpSecurityTypeTest extends OfficeFrameTestCase {
 	 */
 	public void testNotAllFlowKeys() {
 
-		final ManagedObjectFlowMetaData<?> flow = this
-				.createMock(ManagedObjectFlowMetaData.class);
+		final HttpSecurityFlowMetaData<?> flow = this
+				.createMock(HttpSecurityFlowMetaData.class);
 
 		// Record not all flow keys
-		this.record_objectAndManagedObject();
+		this.record_objectAndHttpSecurity();
 		this.recordReturn(this.metaData, this.metaData.getDependencyMetaData(),
 				null);
 		this.recordReturn(this.metaData, this.metaData.getFlowMetaData(),
-				new ManagedObjectFlowMetaData[] { flow });
+				new HttpSecurityFlowMetaData[] { flow });
 		this.recordReturn(flow, flow.getLabel(), null);
 		this.recordReturn(flow, flow.getKey(), TwoKey.ONE);
 		this.recordReturn(flow, flow.getArgumentType(), Connection.class);
 		this.record_issue("Missing flow meta-data (keys=" + TwoKey.TWO + ")");
 
 		// Attempt to load
-		this.loadManagedObjectType(false, (Init<None>) null);
+		this.loadHttpSecurityType(false, null);
 	}
 
 	/**
-	 * Ensure {@link ManagedObjectType} correct with keyed dependencies and
+	 * Ensure {@link HttpSecurityType} correct with keyed dependencies and
 	 * flows.
 	 */
 	public void testKeyedDependenciesAndFlows() {
 
-		final ManagedObjectDependencyMetaData<?> dependencyOne = this
-				.createMock(ManagedObjectDependencyMetaData.class);
-		final ManagedObjectDependencyMetaData<?> dependencyTwo = this
-				.createMock(ManagedObjectDependencyMetaData.class);
-		final ManagedObjectFlowMetaData<?> flowOne = this
-				.createMock(ManagedObjectFlowMetaData.class);
-		final ManagedObjectFlowMetaData<?> flowTwo = this
-				.createMock(ManagedObjectFlowMetaData.class);
+		final HttpSecurityDependencyMetaData<?> dependencyOne = this
+				.createMock(HttpSecurityDependencyMetaData.class);
+		final HttpSecurityDependencyMetaData<?> dependencyTwo = this
+				.createMock(HttpSecurityDependencyMetaData.class);
+		final HttpSecurityFlowMetaData<?> flowOne = this
+				.createMock(HttpSecurityFlowMetaData.class);
+		final HttpSecurityFlowMetaData<?> flowTwo = this
+				.createMock(HttpSecurityFlowMetaData.class);
 
 		// Record keyed dependencies and flows
-		this.record_objectAndManagedObject();
+		this.record_objectAndHttpSecurity();
 		this.recordReturn(this.metaData, this.metaData.getDependencyMetaData(),
-				new ManagedObjectDependencyMetaData[] { dependencyOne,
+				new HttpSecurityDependencyMetaData[] { dependencyOne,
 						dependencyTwo });
 		this.recordReturn(dependencyOne, dependencyOne.getLabel(), null);
 		this.recordReturn(dependencyOne, dependencyOne.getKey(), TwoKey.TWO); // order
@@ -732,26 +605,24 @@ public class LoadHttpSecurityTypeTest extends OfficeFrameTestCase {
 				Connection.class);
 		this.recordReturn(dependencyTwo, dependencyTwo.getTypeQualifier(), null);
 		this.recordReturn(this.metaData, this.metaData.getFlowMetaData(),
-				new ManagedObjectFlowMetaData[] { flowOne, flowTwo });
+				new HttpSecurityFlowMetaData[] { flowOne, flowTwo });
 		this.recordReturn(flowOne, flowOne.getLabel(), null);
 		this.recordReturn(flowOne, flowOne.getKey(), TwoKey.TWO); // order
 		this.recordReturn(flowOne, flowOne.getArgumentType(), Long.class);
 		this.recordReturn(flowTwo, flowTwo.getLabel(), null);
 		this.recordReturn(flowTwo, flowTwo.getKey(), TwoKey.ONE); // order
 		this.recordReturn(flowTwo, flowTwo.getArgumentType(), String.class);
-		this.recordReturn(this.metaData,
-				this.metaData.getExtensionInterfacesMetaData(), null);
 
 		// Attempt to load
-		ManagedObjectType<?> moType = this.loadManagedObjectType(true,
-				(Init<None>) null);
+		HttpSecurityType<?, ?, ?, ?> securityType = this.loadHttpSecurityType(
+				true, null);
 
 		// Validate dependencies ordered and correct values
-		ManagedObjectDependencyType<?>[] dependencyTypes = moType
+		HttpSecurityDependencyType<?>[] dependencyTypes = securityType
 				.getDependencyTypes();
 		assertEquals("Incorrect number of dependencies", 2,
 				dependencyTypes.length);
-		ManagedObjectDependencyType<?> dependencyTypeOne = dependencyTypes[0];
+		HttpSecurityDependencyType<?> dependencyTypeOne = dependencyTypes[0];
 		assertEquals("Keys should be ordered", TwoKey.ONE,
 				dependencyTypeOne.getKey());
 		assertEquals("Incorrect first dependency index", TwoKey.ONE.ordinal(),
@@ -762,7 +633,7 @@ public class LoadHttpSecurityTypeTest extends OfficeFrameTestCase {
 				dependencyTypeOne.getDependencyType());
 		assertNull("First dependency type should not be qualified",
 				dependencyTypeOne.getTypeQualifier());
-		ManagedObjectDependencyType<?> dependencyTypeTwo = dependencyTypes[1];
+		HttpSecurityDependencyType<?> dependencyTypeTwo = dependencyTypes[1];
 		assertEquals("Keys should be ordered", TwoKey.TWO,
 				dependencyTypeTwo.getKey());
 		assertEquals("Incorrect second dependency index", TwoKey.TWO.ordinal(),
@@ -775,9 +646,9 @@ public class LoadHttpSecurityTypeTest extends OfficeFrameTestCase {
 				"QUALIFIED", dependencyTypeTwo.getTypeQualifier());
 
 		// Validate flows ordered and correct values
-		ManagedObjectFlowType<?>[] flowTypes = moType.getFlowTypes();
+		HttpSecurityFlowType<?>[] flowTypes = securityType.getFlowTypes();
 		assertEquals("Incorrect number of dependencies", 2, flowTypes.length);
-		ManagedObjectFlowType<?> flowTypeOne = flowTypes[0];
+		HttpSecurityFlowType<?> flowTypeOne = flowTypes[0];
 		assertEquals("Keys should be ordered", TwoKey.ONE, flowTypeOne.getKey());
 		assertEquals("Incorrect first flow index", TwoKey.ONE.ordinal(),
 				flowTypeOne.getIndex());
@@ -785,7 +656,7 @@ public class LoadHttpSecurityTypeTest extends OfficeFrameTestCase {
 				flowTypeOne.getFlowName());
 		assertEquals("Incorrect first flow argument type", String.class,
 				flowTypeOne.getArgumentType());
-		ManagedObjectFlowType<?> flowTypeTwo = flowTypes[1];
+		HttpSecurityFlowType<?> flowTypeTwo = flowTypes[1];
 		assertEquals("Keys should be ordered", TwoKey.TWO, flowTypeTwo.getKey());
 		assertEquals("Incorrect second flow index", TwoKey.TWO.ordinal(),
 				flowTypeTwo.getIndex());
@@ -796,24 +667,24 @@ public class LoadHttpSecurityTypeTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensure {@link ManagedObjectType} correct with indexed dependencies and
+	 * Ensure {@link HttpSecurityType} correct with indexed dependencies and
 	 * flows.
 	 */
 	public void testIndexedDependenciesAndFlows() {
 
-		final ManagedObjectDependencyMetaData<?> dependencyOne = this
-				.createMock(ManagedObjectDependencyMetaData.class);
-		final ManagedObjectDependencyMetaData<?> dependencyTwo = this
-				.createMock(ManagedObjectDependencyMetaData.class);
-		final ManagedObjectFlowMetaData<?> flowOne = this
-				.createMock(ManagedObjectFlowMetaData.class);
-		final ManagedObjectFlowMetaData<?> flowTwo = this
-				.createMock(ManagedObjectFlowMetaData.class);
+		final HttpSecurityDependencyMetaData<?> dependencyOne = this
+				.createMock(HttpSecurityDependencyMetaData.class);
+		final HttpSecurityDependencyMetaData<?> dependencyTwo = this
+				.createMock(HttpSecurityDependencyMetaData.class);
+		final HttpSecurityFlowMetaData<?> flowOne = this
+				.createMock(HttpSecurityFlowMetaData.class);
+		final HttpSecurityFlowMetaData<?> flowTwo = this
+				.createMock(HttpSecurityFlowMetaData.class);
 
 		// Record keyed dependencies and flows
-		this.record_objectAndManagedObject();
+		this.record_objectAndHttpSecurity();
 		this.recordReturn(this.metaData, this.metaData.getDependencyMetaData(),
-				new ManagedObjectDependencyMetaData[] { dependencyOne,
+				new HttpSecurityDependencyMetaData[] { dependencyOne,
 						dependencyTwo });
 		this.recordReturn(dependencyOne, dependencyOne.getLabel(), null);
 		this.recordReturn(dependencyOne, dependencyOne.getKey(), null);
@@ -826,26 +697,24 @@ public class LoadHttpSecurityTypeTest extends OfficeFrameTestCase {
 				Connection.class);
 		this.recordReturn(dependencyTwo, dependencyTwo.getTypeQualifier(), null);
 		this.recordReturn(this.metaData, this.metaData.getFlowMetaData(),
-				new ManagedObjectFlowMetaData[] { flowOne, flowTwo });
+				new HttpSecurityFlowMetaData[] { flowOne, flowTwo });
 		this.recordReturn(flowOne, flowOne.getLabel(), null);
 		this.recordReturn(flowOne, flowOne.getKey(), null);
 		this.recordReturn(flowOne, flowOne.getArgumentType(), Long.class);
 		this.recordReturn(flowTwo, flowTwo.getLabel(), null);
 		this.recordReturn(flowTwo, flowTwo.getKey(), null);
 		this.recordReturn(flowTwo, flowTwo.getArgumentType(), String.class);
-		this.recordReturn(this.metaData,
-				this.metaData.getExtensionInterfacesMetaData(), null);
 
 		// Attempt to load
-		ManagedObjectType<?> moType = this.loadManagedObjectType(true,
-				(Init<None>) null);
+		HttpSecurityType<?, ?, ?, ?> securityType = this.loadHttpSecurityType(
+				true, null);
 
 		// Validate dependencies
-		ManagedObjectDependencyType<?>[] dependencyTypes = moType
+		HttpSecurityDependencyType<?>[] dependencyTypes = securityType
 				.getDependencyTypes();
 		assertEquals("Incorrect number of dependencies", 2,
 				dependencyTypes.length);
-		ManagedObjectDependencyType<?> dependencyTypeOne = dependencyTypes[0];
+		HttpSecurityDependencyType<?> dependencyTypeOne = dependencyTypes[0];
 		assertEquals("Incorrect first dependency index", 0,
 				dependencyTypeOne.getIndex());
 		assertNull("Should be no dependency key", dependencyTypeOne.getKey());
@@ -856,7 +725,7 @@ public class LoadHttpSecurityTypeTest extends OfficeFrameTestCase {
 				dependencyTypeOne.getDependencyType());
 		assertEquals("Incorrect first dependency type qualification",
 				"QUALIFIED", dependencyTypeOne.getTypeQualifier());
-		ManagedObjectDependencyType<?> dependencyTypeTwo = dependencyTypes[1];
+		HttpSecurityDependencyType<?> dependencyTypeTwo = dependencyTypes[1];
 		assertEquals("Incorrect second dependency index", 1,
 				dependencyTypeTwo.getIndex());
 		assertNull("Should be no dependency key", dependencyTypeTwo.getKey());
@@ -869,29 +738,22 @@ public class LoadHttpSecurityTypeTest extends OfficeFrameTestCase {
 				dependencyTypeTwo.getTypeQualifier());
 
 		// Validate flows
-		ManagedObjectFlowType<?>[] flowTypes = moType.getFlowTypes();
+		HttpSecurityFlowType<?>[] flowTypes = securityType.getFlowTypes();
 		assertEquals("Incorrect number of dependencies", 2, flowTypes.length);
-		ManagedObjectFlowType<?> flowTypeOne = flowTypes[0];
+		HttpSecurityFlowType<?> flowTypeOne = flowTypes[0];
 		assertEquals("Incorrect first flow index", 0, flowTypeOne.getIndex());
 		assertNull("Should be no flow key", flowTypeOne.getKey());
 		assertEquals("Incorrect first flow name", "0",
 				flowTypeOne.getFlowName());
 		assertEquals("Incorrect first flow argument type", Long.class,
 				flowTypeOne.getArgumentType());
-		ManagedObjectFlowType<?> flowTypeTwo = flowTypes[1];
+		HttpSecurityFlowType<?> flowTypeTwo = flowTypes[1];
 		assertEquals("Incorrect second flow index", 1, flowTypeTwo.getIndex());
 		assertNull("Should be no dependency key", flowTypeTwo.getKey());
 		assertEquals("Incorrect second flow name", "1",
 				flowTypeTwo.getFlowName());
 		assertEquals("Incorrect second flow argument type", String.class,
 				flowTypeTwo.getArgumentType());
-	}
-
-	/**
-	 * Single key {@link Enum}.
-	 */
-	private enum OneKey {
-		KEY
 	}
 
 	/**
@@ -909,26 +771,26 @@ public class LoadHttpSecurityTypeTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Records obtaining the {@link Object} and {@link ManagedObject} class from
-	 * the {@link ManagedObjectSourceMetaData}.
+	 * Records obtaining the {@link Object} and {@link HttpSecurity} class from
+	 * the {@link HttpSecuritySourceMetaData}.
 	 */
-	private void record_objectAndManagedObject() {
-		this.recordReturn(this.metaData, this.metaData.getObjectClass(),
-				Connection.class);
-		this.recordReturn(this.metaData, this.metaData.getManagedObjectClass(),
-				ManagedObject.class);
+	private void record_objectAndHttpSecurity() {
+		this.recordReturn(this.metaData, this.metaData.getSecurityClass(),
+				HttpSecurity.class);
+		this.recordReturn(this.metaData, this.metaData.getCredentialsClass(),
+				HttpCredentials.class);
 	}
 
 	/**
 	 * Records obtaining simple meta-data from the
-	 * {@link ManagedObjectSourceMetaData}.
+	 * {@link HttpSecuritySourceMetaData}.
 	 * 
 	 * @param flowKeys
 	 *            Flow keys to be defined in meta-data. Provide
 	 *            <code>null</code> values for indexing.
 	 */
 	private <F extends Enum<?>> void record_basicMetaData(F... flowKeys) {
-		this.record_objectAndManagedObject();
+		this.record_objectAndHttpSecurity();
 
 		// Return no dependencies
 		this.recordReturn(this.metaData, this.metaData.getDependencyMetaData(),
@@ -941,17 +803,17 @@ public class LoadHttpSecurityTypeTest extends OfficeFrameTestCase {
 					null);
 		} else {
 			// Create the meta-data for each flow
-			ManagedObjectFlowMetaData<?>[] flowMetaDatas = new ManagedObjectFlowMetaData[flowKeys.length];
+			HttpSecurityFlowMetaData<?>[] flowMetaDatas = new HttpSecurityFlowMetaData[flowKeys.length];
 			for (int i = 0; i < flowMetaDatas.length; i++) {
 				flowMetaDatas[i] = this
-						.createMock(ManagedObjectFlowMetaData.class);
+						.createMock(HttpSecurityFlowMetaData.class);
 			}
 
 			// Record the flow meta-data
 			this.recordReturn(this.metaData, this.metaData.getFlowMetaData(),
 					flowMetaDatas);
 			for (int i = 0; i < flowMetaDatas.length; i++) {
-				ManagedObjectFlowMetaData<?> flowMetaData = flowMetaDatas[i];
+				HttpSecurityFlowMetaData<?> flowMetaData = flowMetaDatas[i];
 				this.recordReturn(flowMetaData, flowMetaData.getLabel(), null);
 				this.recordReturn(flowMetaData, flowMetaData.getKey(),
 						flowKeys[i]);
@@ -959,10 +821,6 @@ public class LoadHttpSecurityTypeTest extends OfficeFrameTestCase {
 						Integer.class);
 			}
 		}
-
-		// Record no supported extension interfaces
-		this.recordReturn(this.metaData,
-				this.metaData.getExtensionInterfacesMetaData(), null);
 	}
 
 	/**
@@ -972,8 +830,7 @@ public class LoadHttpSecurityTypeTest extends OfficeFrameTestCase {
 	 *            Description of the issue.
 	 */
 	private void record_issue(String issueDescription) {
-		this.issues.addIssue(null, null, AssetType.MANAGED_OBJECT, null,
-				issueDescription);
+		this.issues.addIssue(null, null, null, null, issueDescription);
 	}
 
 	/**
@@ -985,12 +842,11 @@ public class LoadHttpSecurityTypeTest extends OfficeFrameTestCase {
 	 *            Cause of the issue.
 	 */
 	private void record_issue(String issueDescription, Throwable cause) {
-		this.issues.addIssue(null, null, AssetType.MANAGED_OBJECT, null,
-				issueDescription, cause);
+		this.issues.addIssue(null, null, null, null, issueDescription, cause);
 	}
 
 	/**
-	 * Loads the {@link ManagedObjectType}.
+	 * Loads the {@link HttpSecurityType}.
 	 * 
 	 * @param isExpectedToLoad
 	 *            Flag indicating if expecting to load the {@link WorkType}.
@@ -998,10 +854,10 @@ public class LoadHttpSecurityTypeTest extends OfficeFrameTestCase {
 	 *            {@link Init}.
 	 * @param propertyNameValuePairs
 	 *            {@link Property} name value pairs.
-	 * @return Loaded {@link ManagedObjectType}.
+	 * @return Loaded {@link HttpSecurityType}.
 	 */
-	public <F extends Enum<F>> ManagedObjectType<?> loadManagedObjectType(
-			boolean isExpectedToLoad, Init<F> init,
+	public HttpSecurityType<?, ?, ?, ?> loadHttpSecurityType(
+			boolean isExpectedToLoad, Init init,
 			String... propertyNameValuePairs) {
 
 		// Replay mock objects
@@ -1015,76 +871,57 @@ public class LoadHttpSecurityTypeTest extends OfficeFrameTestCase {
 			propertyList.addProperty(name).setValue(value);
 		}
 
-		// Create the managed object loader and load the managed object type
+		// Create the HTTP security loader and load the HTTP security type
 		OfficeFloorCompiler compiler = OfficeFloorCompiler
 				.newOfficeFloorCompiler(null);
 		compiler.setCompilerIssues(this.issues);
-		ManagedObjectLoader moLoader = compiler.getManagedObjectLoader();
-		MockManagedObjectSource.init = init;
-		ManagedObjectType<?> moType = moLoader.loadManagedObjectType(
-				MockManagedObjectSource.class, propertyList);
+		ManagedObjectLoader managedObjectLoader = compiler
+				.getManagedObjectLoader();
+		HttpSecurityLoader securityLoader = new HttpSecurityLoaderImpl(
+				managedObjectLoader);
+		MockHttpSecuritySource.init = init;
+		HttpSecurityType<?, ?, ?, ?> securityType = securityLoader
+				.loadHttpSecurityType(MockHttpSecuritySource.class,
+						propertyList);
 
 		// Verify the mock objects
 		this.verifyMockObjects();
 
 		// Ensure if should be loaded
 		if (isExpectedToLoad) {
-			assertNotNull("Expected to load the managed object type", moType);
+			assertNotNull("Expected to load the HTTP security type",
+					securityType);
 		} else {
-			assertNull("Should not load the managed object type", moType);
+			assertNull("Should not load the HTTP security type", securityType);
 		}
 
-		// Return the managed object type
-		return moType;
+		// Return the HTTP security type
+		return securityType;
 	}
 
 	/**
-	 * Implement to initialise the {@link MockManagedObjectSource}.
+	 * Implement to initialise the {@link MockHttpSecuritySource}.
 	 */
-	private static interface Init<F extends Enum<F>> {
+	private static interface Init {
 
 		/**
-		 * Implemented to init the {@link ManagedObjectSource}.
+		 * Implemented to init the {@link HttpSecuritySource}.
 		 * 
 		 * @param context
-		 *            {@link ManagedObjectSourceContext}.
+		 *            {@link HttpSecuritySourceContext}.
 		 * @param util
 		 *            {@link InitUtil}.
 		 */
-		void init(ManagedObjectSourceContext<F> context, InitUtil util);
+		void init(HttpSecuritySourceContext context);
 	}
 
 	/**
-	 * Provides useful functionality for {@link Init}.
-	 */
-	private class InitUtil {
-
-		/**
-		 * Obtains the {@link WorkFactory}.
-		 * 
-		 * @return {@link WorkFactory}.
-		 */
-		public WorkFactory<Work> getWorkFactory() {
-			return LoadHttpSecurityTypeTest.this.workFactory;
-		}
-
-		/**
-		 * Obtains the {@link TaskFactory}.
-		 * 
-		 * @return {@link TaskFactory}.
-		 */
-		public TaskFactory<Work, ?, ?> getTaskFactory() {
-			return LoadHttpSecurityTypeTest.this.taskFactory;
-		}
-	}
-
-	/**
-	 * Mock {@link ManagedObjectSource}.
+	 * Mock {@link HttpSecuritySource}.
 	 */
 	@TestSource
 	@SuppressWarnings({ "unchecked", "rawtypes" })
-	public static class MockManagedObjectSource implements
-			ManagedObjectSource<None, None> {
+	public static class MockHttpSecuritySource implements
+			HttpSecuritySource<HttpSecurity, HttpCredentials, None, None> {
 
 		/**
 		 * Failure to instantiate an instance.
@@ -1092,46 +929,39 @@ public class LoadHttpSecurityTypeTest extends OfficeFrameTestCase {
 		public static RuntimeException instantiateFailure = null;
 
 		/**
-		 * {@link Init} to init the {@link ManagedObjectSource}.
+		 * {@link Init} to init the {@link HttpSecuritySource}.
 		 */
 		public static Init init = null;
 
 		/**
-		 * Failure to obtain the {@link ManagedObjectMetaData}.
+		 * Failure to obtain the {@link HttpSecurityMetaData}.
 		 */
 		public static Error metaDataFailure = null;
 
 		/**
-		 * {@link ManagedObjectSourceSpecification}.
+		 * {@link HttpSecuritySourceSpecification}.
 		 */
-		public static ManagedObjectSourceMetaData metaData;
-
-		/**
-		 * {@link InitUtil}.
-		 */
-		public static InitUtil initUtil;
+		public static HttpSecuritySourceMetaData metaData;
 
 		/**
 		 * Resets the state for next test.
 		 * 
 		 * @param metaData
-		 *            {@link ManagedObjectSourceMetaData}.
+		 *            {@link HttpSecuritySourceMetaData}.
 		 * @param initUtil
 		 *            {@link InitUtil}.
 		 */
-		public static void reset(ManagedObjectSourceMetaData<?, ?> metaData,
-				InitUtil initUtil) {
+		public static void reset(HttpSecuritySourceMetaData<?, ?, ?, ?> metaData) {
 			instantiateFailure = null;
 			init = null;
 			metaDataFailure = null;
-			MockManagedObjectSource.metaData = metaData;
-			MockManagedObjectSource.initUtil = initUtil;
+			MockHttpSecuritySource.metaData = metaData;
 		}
 
 		/**
 		 * Initiate with possible failure.
 		 */
-		public MockManagedObjectSource() {
+		public MockHttpSecuritySource() {
 			// Throw instantiate failure
 			if (instantiateFailure != null) {
 				throw instantiateFailure;
@@ -1139,25 +969,25 @@ public class LoadHttpSecurityTypeTest extends OfficeFrameTestCase {
 		}
 
 		/*
-		 * ================== ManagedObjectSource ===========================
+		 * ================== HttpSecuritySource ===========================
 		 */
 
 		@Override
-		public ManagedObjectSourceSpecification getSpecification() {
+		public HttpSecuritySourceSpecification getSpecification() {
 			fail("Should not obtain specification");
 			return null;
 		}
 
 		@Override
-		public void init(ManagedObjectSourceContext context) throws Exception {
+		public void init(HttpSecuritySourceContext context) throws Exception {
 			// Run the init if available
 			if (init != null) {
-				init.init(context, initUtil);
+				init.init(context);
 			}
 		}
 
 		@Override
-		public ManagedObjectSourceMetaData getMetaData() {
+		public HttpSecuritySourceMetaData getMetaData() {
 
 			// Throw meta-data failure
 			if (metaDataFailure != null) {
@@ -1169,18 +999,15 @@ public class LoadHttpSecurityTypeTest extends OfficeFrameTestCase {
 		}
 
 		@Override
-		public void start(ManagedObjectExecuteContext context) throws Exception {
-			fail("Should not start the ManagedObjectSource");
+		public HttpSecurity retrieveCached(HttpSession session) {
+			fail("Should not be invoked for loading type");
+			return null;
 		}
 
 		@Override
-		public void sourceManagedObject(ManagedObjectUser user) {
-			fail("Should not source ManagedObject");
-		}
-
-		@Override
-		public void stop() {
-			fail("Should not stop the ManagedObjectSource");
+		public void authenticate(
+				HttpAuthenticateContext<HttpSecurity, HttpCredentials, None, None> context) {
+			fail("Should not be invoked for loading type");
 		}
 	}
 
