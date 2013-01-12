@@ -18,6 +18,7 @@
 package net.officefloor.plugin.web.http.security.type;
 
 import net.officefloor.compile.managedobject.ManagedObjectLoader;
+import net.officefloor.compile.managedobject.ManagedObjectType;
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.plugin.web.http.security.HttpSecurityManagedObjectAdapterSource;
 import net.officefloor.plugin.web.http.security.HttpSecuritySource;
@@ -49,27 +50,82 @@ public class HttpSecurityLoaderImpl implements HttpSecurityLoader {
 	 */
 
 	@Override
-	public <S, C, D extends Enum<D>, F extends Enum<F>, HS extends HttpSecuritySource<S, C, D, F>> PropertyList loadSpecification(
-			HS httpSecuritySource) {
+	public <S, C, D extends Enum<D>, F extends Enum<F>> PropertyList loadSpecification(
+			HttpSecuritySource<S, C, D, F> httpSecuritySource) {
 		return HttpSecurityManagedObjectAdapterSource.loadSpecification(
 				httpSecuritySource, this.managedObjectLoader);
-	}
-
-	@Override
-	public <S, C, D extends Enum<D>, F extends Enum<F>, HS extends HttpSecuritySource<S, C, D, F>> HttpSecurityType<S, C, D, F> loadHttpSecurityType(
-			Class<HS> httpSecuritySourceClass, PropertyList propertyList) {
-		// TODO implement HttpSecurityLoader.loadHttpSecurityType
-		throw new UnsupportedOperationException(
-				"TODO implement HttpSecurityLoader.loadHttpSecurityType");
 	}
 
 	@Override
 	public <S, C, D extends Enum<D>, F extends Enum<F>> HttpSecurityType<S, C, D, F> loadHttpSecurityType(
 			HttpSecuritySource<S, C, D, F> httpSecuritySource,
 			PropertyList propertyList) {
-		// TODO implement HttpSecurityLoader.loadHttpSecurityType
-		throw new UnsupportedOperationException(
-				"TODO implement HttpSecurityLoader.loadHttpSecurityType");
+
+		// Load the managed object type
+		ManagedObjectType<D> moType = this.managedObjectLoader
+				.loadManagedObjectType(
+						new HttpSecurityManagedObjectAdapterSource<D>(
+								httpSecuritySource), propertyList);
+		if (moType == null) {
+			return null; // failed to obtain type
+		}
+
+		// Return the adapted type
+		return new ManagedObjectHttpSecurityType<S, C, D, F>(moType);
+	}
+
+	/**
+	 * {@link HttpSecurityType} adapted from the {@link ManagedObjectType}.
+	 * 
+	 * @author Daniel Sagenschneider
+	 */
+	private static class ManagedObjectHttpSecurityType<S, C, D extends Enum<D>, F extends Enum<F>>
+			implements HttpSecurityType<S, C, D, F> {
+
+		/**
+		 * {@link ManagedObjectType}.
+		 */
+		private final ManagedObjectType<D> moType;
+
+		/**
+		 * Initiate.
+		 * 
+		 * @param moType
+		 *            {@link ManagedObjectType}.
+		 */
+		public ManagedObjectHttpSecurityType(ManagedObjectType<D> moType) {
+			this.moType = moType;
+		}
+
+		/*
+		 * ================= HttpSecurityType =====================
+		 */
+
+		@Override
+		public Class<S> getSecurityClass() {
+			return (Class<S>) this.moType.getObjectClass();
+		}
+
+		@Override
+		public Class<C> getCredentialsClass() {
+			// TODO implement HttpSecurityType<S,C,D,F>.getCredentialsClass
+			throw new UnsupportedOperationException(
+					"TODO implement HttpSecurityType<S,C,D,F>.getCredentialsClass");
+		}
+
+		@Override
+		public HttpSecurityDependencyType<D>[] getDependencyTypes() {
+			// TODO implement HttpSecurityType<S,C,D,F>.getDependencyTypes
+			throw new UnsupportedOperationException(
+					"TODO implement HttpSecurityType<S,C,D,F>.getDependencyTypes");
+		}
+
+		@Override
+		public HttpSecurityFlowType<?>[] getFlowTypes() {
+			// TODO implement HttpSecurityType<S,C,D,F>.getFlowTypes
+			throw new UnsupportedOperationException(
+					"TODO implement HttpSecurityType<S,C,D,F>.getFlowTypes");
+		}
 	}
 
 }

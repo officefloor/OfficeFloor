@@ -20,7 +20,12 @@ package net.officefloor.plugin.web.http.security;
 import net.officefloor.compile.managedobject.ManagedObjectLoader;
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.frame.api.build.Indexed;
+import net.officefloor.frame.impl.construct.source.SourceContextImpl;
+import net.officefloor.frame.spi.managedobject.ManagedObject;
+import net.officefloor.frame.spi.managedobject.source.ManagedObjectDependencyMetaData;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectExecuteContext;
+import net.officefloor.frame.spi.managedobject.source.ManagedObjectExtensionInterfaceMetaData;
+import net.officefloor.frame.spi.managedobject.source.ManagedObjectFlowMetaData;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceContext;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceMetaData;
@@ -33,8 +38,8 @@ import net.officefloor.frame.spi.managedobject.source.ManagedObjectUser;
  * 
  * @author Daniel Sagenschneider
  */
-public class HttpSecurityManagedObjectAdapterSource implements
-		ManagedObjectSource<Indexed, Indexed> {
+public class HttpSecurityManagedObjectAdapterSource<D extends Enum<D>>
+		implements ManagedObjectSource<D, Indexed> {
 
 	/**
 	 * Obtains the {@link ManagedObjectSourceSpecification} for the
@@ -46,28 +51,67 @@ public class HttpSecurityManagedObjectAdapterSource implements
 	 *            {@link ManagedObjectLoader}.
 	 * @return {@link PropertyList} for the {@link HttpSecuritySource}.
 	 */
-	public static synchronized <S, C, D extends Enum<D>, F extends Enum<F>, HS extends HttpSecuritySource<S, C, D, F>> PropertyList loadSpecification(
-			HS httpSecuritySource, ManagedObjectLoader managedObjectLoader) {
+	@SuppressWarnings("unchecked")
+	public static <S, C, D extends Enum<D>, F extends Enum<F>> PropertyList loadSpecification(
+			HttpSecuritySource<S, C, D, F> httpSecuritySource,
+			ManagedObjectLoader managedObjectLoader) {
 
-		// Load the properties of the specification
-		PropertyList properties;
-		try {
-			specificationInstance = httpSecuritySource;
-			properties = managedObjectLoader
-					.loadSpecification(HttpSecurityManagedObjectAdapterSource.class);
-		} finally {
-			// Ensure clear instance
-			specificationInstance = null;
+		// Make safe given that using static field
+		synchronized (HttpSecurityManagedObjectAdapterSource.class) {
+
+			// Load the properties of the specification
+			PropertyList properties;
+			try {
+				specificationInstance = httpSecuritySource;
+				properties = managedObjectLoader
+						.loadSpecification(HttpSecurityManagedObjectAdapterSource.class);
+			} finally {
+				// Ensure clear instance
+				specificationInstance = null;
+			}
+
+			// Return the properties
+			return properties;
 		}
-
-		// Return the properties
-		return properties;
 	}
 
 	/**
 	 * {@link HttpSecuritySource} to provide the specification.
 	 */
 	private static HttpSecuritySource<?, ?, ?, ?> specificationInstance = null;
+
+	/**
+	 * {@link HttpSecuritySource} to provide type/functionality.
+	 */
+	private final HttpSecuritySource<?, ?, D, ?> securitySource;
+
+	/**
+	 * Should only be used for loading specification.
+	 * 
+	 * @throws IllegalStateException
+	 *             If not being loaded to obtain specification.
+	 */
+	public HttpSecurityManagedObjectAdapterSource()
+			throws IllegalStateException {
+		this.securitySource = null;
+		synchronized (HttpSecurityManagedObjectAdapterSource.class) {
+			if (specificationInstance == null) {
+				throw new IllegalStateException(
+						"May only use for loading specification");
+			}
+		}
+	}
+
+	/**
+	 * Initiate.
+	 * 
+	 * @param httpSecuritySource
+	 *            {@link HttpSecuritySource}.
+	 */
+	public HttpSecurityManagedObjectAdapterSource(
+			HttpSecuritySource<?, ?, D, ?> httpSecuritySource) {
+		this.securitySource = httpSecuritySource;
+	}
 
 	/*
 	 * ==================== ManagedObjectSource ========================
@@ -90,16 +134,23 @@ public class HttpSecurityManagedObjectAdapterSource implements
 	@Override
 	public void init(ManagedObjectSourceContext<Indexed> context)
 			throws Exception {
-		// TODO implement ManagedObjectSource<D,F>.init
-		throw new UnsupportedOperationException(
-				"TODO implement ManagedObjectSource<D,F>.init");
+		this.securitySource
+				.init(new ManagedObjectHttpSecuritySourceContext<Indexed>(true,
+						context));
 	}
 
 	@Override
-	public ManagedObjectSourceMetaData<Indexed, Indexed> getMetaData() {
-		// TODO implement ManagedObjectSource<D,F>.getMetaData
-		throw new UnsupportedOperationException(
-				"TODO implement ManagedObjectSource<D,F>.getMetaData");
+	public ManagedObjectSourceMetaData<D, Indexed> getMetaData() {
+
+		// Obtain the HTTP security meta-data
+		HttpSecuritySourceMetaData<?, ?, D, ?> metaData = this.securitySource
+				.getMetaData();
+		if (metaData == null) {
+			return null;
+		}
+
+		// Return the adapted meta-data
+		return new HttpSecurityManagedObjectSourceMetaData<D, Indexed>(metaData);
 	}
 
 	@Override
@@ -209,6 +260,85 @@ public class HttpSecurityManagedObjectAdapterSource implements
 		@Override
 		public String getLabel() {
 			return this.property.getLabel();
+		}
+	}
+
+	/**
+	 * {@link HttpSecuritySourceContext} adapting the
+	 * {@link ManagedObjectSourceContext}.
+	 */
+	private static class ManagedObjectHttpSecuritySourceContext<F extends Enum<F>>
+			extends SourceContextImpl implements HttpSecuritySourceContext {
+
+		/**
+		 * Initiate.
+		 * 
+		 * @param isLoadingType
+		 *            Indicates if loading type.
+		 * @param context
+		 *            {@link ManagedObjectSourceContext}.
+		 */
+		public ManagedObjectHttpSecuritySourceContext(boolean isLoadingType,
+				ManagedObjectSourceContext<F> context) {
+			super(isLoadingType, context, context);
+		}
+	}
+
+	/**
+	 * {@link HttpSecuritySource} {@link ManagedObjectSourceMetaData}.
+	 */
+	private static class HttpSecurityManagedObjectSourceMetaData<D extends Enum<D>, F extends Enum<F>>
+			implements ManagedObjectSourceMetaData<D, F> {
+
+		/**
+		 * {@link HttpSecuritySourceMetaData}.
+		 */
+		private final HttpSecuritySourceMetaData<?, ?, D, ?> metaData;
+
+		/**
+		 * Initiate.
+		 * 
+		 * @param metaData
+		 *            {@link HttpSecuritySourceMetaData}.
+		 */
+		public HttpSecurityManagedObjectSourceMetaData(
+				HttpSecuritySourceMetaData<?, ?, D, ?> metaData) {
+			this.metaData = metaData;
+		}
+
+		/*
+		 * ================== ManagedObjectSourceMetaData ==================
+		 */
+
+		@Override
+		public Class<? extends ManagedObject> getManagedObjectClass() {
+			return ManagedObject.class;
+		}
+
+		@Override
+		public Class<?> getObjectClass() {
+			return this.metaData.getSecurityClass();
+		}
+
+		@Override
+		public ManagedObjectDependencyMetaData<D>[] getDependencyMetaData() {
+			// TODO implement
+			// ManagedObjectSourceMetaData<D,F>.getDependencyMetaData
+			throw new UnsupportedOperationException(
+					"TODO implement ManagedObjectSourceMetaData<D,F>.getDependencyMetaData");
+		}
+
+		@Override
+		public ManagedObjectFlowMetaData<F>[] getFlowMetaData() {
+			// TODO implement ManagedObjectSourceMetaData<D,F>.getFlowMetaData
+			throw new UnsupportedOperationException(
+					"TODO implement ManagedObjectSourceMetaData<D,F>.getFlowMetaData");
+		}
+
+		@Override
+		public ManagedObjectExtensionInterfaceMetaData<?>[] getExtensionInterfacesMetaData() {
+			// No extension interfaces
+			return null;
 		}
 	}
 
