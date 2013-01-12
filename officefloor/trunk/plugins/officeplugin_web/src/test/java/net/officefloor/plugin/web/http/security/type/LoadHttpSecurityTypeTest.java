@@ -20,6 +20,8 @@ package net.officefloor.plugin.web.http.security.type;
 import java.sql.Connection;
 import java.util.Properties;
 
+import org.junit.Ignore;
+
 import net.officefloor.compile.OfficeFloorCompiler;
 import net.officefloor.compile.impl.properties.PropertyListImpl;
 import net.officefloor.compile.issues.CompilerIssues;
@@ -28,6 +30,7 @@ import net.officefloor.compile.properties.Property;
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.work.WorkType;
 import net.officefloor.frame.api.build.None;
+import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
 import net.officefloor.frame.spi.TestSource;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.web.http.security.HttpAuthenticateContext;
@@ -46,6 +49,7 @@ import net.officefloor.plugin.web.http.session.HttpSession;
  * 
  * @author Daniel Sagenschneider
  */
+@Ignore("TODO complete functionality")
 public class LoadHttpSecurityTypeTest extends OfficeFrameTestCase {
 
 	/**
@@ -249,7 +253,7 @@ public class LoadHttpSecurityTypeTest extends OfficeFrameTestCase {
 
 		// Record no object class
 		this.recordReturn(this.metaData, this.metaData.getSecurityClass(), null);
-		this.record_issue("No Security type provided");
+		this.record_issue("No Object type provided");
 
 		// Attempt to load
 		this.loadHttpSecurityType(false, null);
@@ -830,7 +834,8 @@ public class LoadHttpSecurityTypeTest extends OfficeFrameTestCase {
 	 *            Description of the issue.
 	 */
 	private void record_issue(String issueDescription) {
-		this.issues.addIssue(null, null, null, null, issueDescription);
+		this.issues.addIssue(null, null, AssetType.MANAGED_OBJECT, null,
+				issueDescription);
 	}
 
 	/**
@@ -881,7 +886,7 @@ public class LoadHttpSecurityTypeTest extends OfficeFrameTestCase {
 				managedObjectLoader);
 		MockHttpSecuritySource.init = init;
 		HttpSecurityType<?, ?, ?, ?> securityType = securityLoader
-				.loadHttpSecurityType(MockHttpSecuritySource.class,
+				.loadHttpSecurityType(new MockHttpSecuritySource(),
 						propertyList);
 
 		// Verify the mock objects

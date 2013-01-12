@@ -42,23 +42,8 @@ public interface HttpSecurityLoader {
 	 *         <code>null</code> if issue, which is reported to the
 	 *         {@link CompilerIssues}.
 	 */
-	<S, C, D extends Enum<D>, F extends Enum<F>, HS extends HttpSecuritySource<S, C, D, F>> PropertyList loadSpecification(
-			HS httpSecuritySource);
-
-	/**
-	 * Loads and returns the {@link HttpSecurityType} for the
-	 * {@link HttpSecuritySource}.
-	 * 
-	 * @param httpSecuritySourceClass
-	 *            Class of the {@link HttpSecuritySource}.
-	 * @param propertyList
-	 *            {@link PropertyList} containing the properties to source the
-	 *            {@link HttpSecurityType}.
-	 * @return {@link HttpSecurityType} or <code>null</code> if issues, which
-	 *         are reported to the {@link CompilerIssues}.
-	 */
-	<S, C, D extends Enum<D>, F extends Enum<F>, HS extends HttpSecuritySource<S, C, D, F>> HttpSecurityType<S, C, D, F> loadHttpSecurityType(
-			Class<HS> httpSecuritySourceClass, PropertyList propertyList);
+	<S, C, D extends Enum<D>, F extends Enum<F>> PropertyList loadSpecification(
+			HttpSecuritySource<S, C, D, F> httpSecuritySource);
 
 	/**
 	 * Loads and returns the {@link HttpSecurityType} for the
