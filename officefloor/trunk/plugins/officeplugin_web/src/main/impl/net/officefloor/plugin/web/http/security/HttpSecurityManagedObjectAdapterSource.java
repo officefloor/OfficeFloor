@@ -119,16 +119,17 @@ public class HttpSecurityManagedObjectAdapterSource<D extends Enum<D>>
 
 	@Override
 	public ManagedObjectSourceSpecification getSpecification() {
-
-		// Obtain the HTTP security specification
-		HttpSecuritySourceSpecification specification = specificationInstance
-				.getSpecification();
-		if (specification == null) {
-			return null;
-		}
-
-		// Return the adapted specification
-		return new HttpSecurityManagedObjectSourceSpecification(specification);
+		return AdaptFactory
+				.adaptObject(
+						specificationInstance.getSpecification(),
+						new AdaptFactory<ManagedObjectSourceSpecification, HttpSecuritySourceSpecification>() {
+							@Override
+							public ManagedObjectSourceSpecification createAdaptedObject(
+									HttpSecuritySourceSpecification delegate) {
+								return new HttpSecurityManagedObjectSourceSpecification(
+										delegate);
+							}
+						});
 	}
 
 	@Override
@@ -140,17 +141,19 @@ public class HttpSecurityManagedObjectAdapterSource<D extends Enum<D>>
 	}
 
 	@Override
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public ManagedObjectSourceMetaData<D, Indexed> getMetaData() {
-
-		// Obtain the HTTP security meta-data
-		HttpSecuritySourceMetaData<?, ?, D, ?> metaData = this.securitySource
-				.getMetaData();
-		if (metaData == null) {
-			return null;
-		}
-
-		// Return the adapted meta-data
-		return new HttpSecurityManagedObjectSourceMetaData<D, Indexed>(metaData);
+		return AdaptFactory
+				.adaptObject(
+						this.securitySource.getMetaData(),
+						new AdaptFactory<ManagedObjectSourceMetaData, HttpSecuritySourceMetaData>() {
+							@Override
+							public ManagedObjectSourceMetaData createAdaptedObject(
+									HttpSecuritySourceMetaData delegate) {
+								return new HttpSecurityManagedObjectSourceMetaData(
+										delegate);
+							}
+						});
 	}
 
 	@Override
@@ -203,26 +206,18 @@ public class HttpSecurityManagedObjectAdapterSource<D extends Enum<D>>
 
 		@Override
 		public ManagedObjectSourceProperty[] getProperties() {
-
-			// Obtain the properties
-			HttpSecuritySourceProperty[] securityProperties = this.specification
-					.getProperties();
-			if (securityProperties == null) {
-				return null;
-			}
-
-			// Adapt the properties
-			ManagedObjectSourceProperty[] moProperties = new ManagedObjectSourceProperty[securityProperties.length];
-			for (int i = 0; i < moProperties.length; i++) {
-				HttpSecuritySourceProperty property = securityProperties[i];
-				if (property != null) {
-					moProperties[i] = new HttpSecurityManagedObjectSourceProperty(
-							property);
-				}
-			}
-
-			// Return the adapted properties
-			return moProperties;
+			return AdaptFactory
+					.adaptArray(
+							this.specification.getProperties(),
+							ManagedObjectSourceProperty.class,
+							new AdaptFactory<ManagedObjectSourceProperty, HttpSecuritySourceProperty>() {
+								@Override
+								public ManagedObjectSourceProperty createAdaptedObject(
+										HttpSecuritySourceProperty delegate) {
+									return new HttpSecurityManagedObjectSourceProperty(
+											delegate);
+								}
+							});
 		}
 	}
 
@@ -321,24 +316,132 @@ public class HttpSecurityManagedObjectAdapterSource<D extends Enum<D>>
 		}
 
 		@Override
+		@SuppressWarnings({ "unchecked", "rawtypes" })
 		public ManagedObjectDependencyMetaData<D>[] getDependencyMetaData() {
-			// TODO implement
-			// ManagedObjectSourceMetaData<D,F>.getDependencyMetaData
-			throw new UnsupportedOperationException(
-					"TODO implement ManagedObjectSourceMetaData<D,F>.getDependencyMetaData");
+			return AdaptFactory
+					.adaptArray(
+							this.metaData.getDependencyMetaData(),
+							ManagedObjectDependencyMetaData.class,
+							new AdaptFactory<ManagedObjectDependencyMetaData, HttpSecurityDependencyMetaData>() {
+								@Override
+								public ManagedObjectDependencyMetaData createAdaptedObject(
+										HttpSecurityDependencyMetaData delegate) {
+									return new HttpSecurityManagedObjectDependencyMetaData<D>(
+											delegate);
+								}
+							});
 		}
 
 		@Override
+		@SuppressWarnings({ "unchecked", "rawtypes" })
 		public ManagedObjectFlowMetaData<F>[] getFlowMetaData() {
-			// TODO implement ManagedObjectSourceMetaData<D,F>.getFlowMetaData
-			throw new UnsupportedOperationException(
-					"TODO implement ManagedObjectSourceMetaData<D,F>.getFlowMetaData");
+			return AdaptFactory
+					.adaptArray(
+							this.metaData.getFlowMetaData(),
+							ManagedObjectFlowMetaData.class,
+							new AdaptFactory<ManagedObjectFlowMetaData, HttpSecurityFlowMetaData>() {
+								@Override
+								public ManagedObjectFlowMetaData<F> createAdaptedObject(
+										HttpSecurityFlowMetaData delegate) {
+									return new HttpSecurityManagedObjectFlowMetaData<F>(
+											delegate);
+								}
+							});
 		}
 
 		@Override
 		public ManagedObjectExtensionInterfaceMetaData<?>[] getExtensionInterfacesMetaData() {
 			// No extension interfaces
 			return null;
+		}
+	}
+
+	/**
+	 * {@link HttpSecuritySource} {@link ManagedObjectFlowMetaData}.
+	 */
+	private static class HttpSecurityManagedObjectFlowMetaData<F extends Enum<F>>
+			implements ManagedObjectFlowMetaData<F> {
+
+		/**
+		 * {@link HttpSecurityFlowMetaData}.
+		 */
+		private final HttpSecurityFlowMetaData<F> flow;
+
+		/**
+		 * Initiate.
+		 * 
+		 * @param flow
+		 *            {@link HttpSecurityFlowMetaData}.
+		 */
+		public HttpSecurityManagedObjectFlowMetaData(
+				HttpSecurityFlowMetaData<F> flow) {
+			this.flow = flow;
+		}
+
+		/*
+		 * ==================== ManagedObjectFlowMetaData ==================
+		 */
+
+		@Override
+		public F getKey() {
+			return this.flow.getKey();
+		}
+
+		@Override
+		public Class<?> getArgumentType() {
+			return this.flow.getArgumentType();
+		}
+
+		@Override
+		public String getLabel() {
+			return this.flow.getLabel();
+		}
+	}
+
+	/**
+	 * {@link HttpSecuritySource} {@link ManagedObjectDependencyMetaData}.
+	 */
+	private static class HttpSecurityManagedObjectDependencyMetaData<D extends Enum<D>>
+			implements ManagedObjectDependencyMetaData<D> {
+
+		/**
+		 * {@link HttpSecurityDependencyMetaData}.
+		 */
+		private final HttpSecurityDependencyMetaData<D> dependency;
+
+		/**
+		 * Initiate.
+		 * 
+		 * @param dependency
+		 *            {@link HttpSecurityDependencyMetaData}.
+		 */
+		public HttpSecurityManagedObjectDependencyMetaData(
+				HttpSecurityDependencyMetaData<D> dependency) {
+			this.dependency = dependency;
+		}
+
+		/*
+		 * =================== ManagedObjectDependencyMetaData ===============
+		 */
+
+		@Override
+		public D getKey() {
+			return this.dependency.getKey();
+		}
+
+		@Override
+		public Class<?> getType() {
+			return this.dependency.getType();
+		}
+
+		@Override
+		public String getTypeQualifier() {
+			return this.dependency.getTypeQualifier();
+		}
+
+		@Override
+		public String getLabel() {
+			return this.dependency.getLabel();
 		}
 	}
 
