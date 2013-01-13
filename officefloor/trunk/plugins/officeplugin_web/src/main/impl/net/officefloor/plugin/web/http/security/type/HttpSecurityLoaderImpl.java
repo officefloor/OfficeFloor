@@ -17,9 +17,12 @@
  */
 package net.officefloor.plugin.web.http.security.type;
 
+import net.officefloor.compile.managedobject.ManagedObjectDependencyType;
+import net.officefloor.compile.managedobject.ManagedObjectFlowType;
 import net.officefloor.compile.managedobject.ManagedObjectLoader;
 import net.officefloor.compile.managedobject.ManagedObjectType;
 import net.officefloor.compile.properties.PropertyList;
+import net.officefloor.plugin.web.http.security.AdaptFactory;
 import net.officefloor.plugin.web.http.security.HttpSecurityManagedObjectAdapterSource;
 import net.officefloor.plugin.web.http.security.HttpSecuritySource;
 
@@ -70,8 +73,13 @@ public class HttpSecurityLoaderImpl implements HttpSecurityLoader {
 			return null; // failed to obtain type
 		}
 
+		// Obtain the credentials type
+		Class<C> credentialsType = httpSecuritySource.getMetaData()
+				.getCredentialsClass();
+
 		// Return the adapted type
-		return new ManagedObjectHttpSecurityType<S, C, D, F>(moType);
+		return new ManagedObjectHttpSecurityType<S, C, D, F>(moType,
+				credentialsType);
 	}
 
 	/**
@@ -88,13 +96,22 @@ public class HttpSecurityLoaderImpl implements HttpSecurityLoader {
 		private final ManagedObjectType<D> moType;
 
 		/**
+		 * Credentials type.
+		 */
+		private final Class<C> credentialsType;
+
+		/**
 		 * Initiate.
 		 * 
 		 * @param moType
 		 *            {@link ManagedObjectType}.
+		 * @param credentialsType
+		 *            Credentials type.
 		 */
-		public ManagedObjectHttpSecurityType(ManagedObjectType<D> moType) {
+		public ManagedObjectHttpSecurityType(ManagedObjectType<D> moType,
+				Class<C> credentialsType) {
 			this.moType = moType;
+			this.credentialsType = credentialsType;
 		}
 
 		/*
@@ -102,29 +119,148 @@ public class HttpSecurityLoaderImpl implements HttpSecurityLoader {
 		 */
 
 		@Override
+		@SuppressWarnings("unchecked")
 		public Class<S> getSecurityClass() {
 			return (Class<S>) this.moType.getObjectClass();
 		}
 
 		@Override
 		public Class<C> getCredentialsClass() {
-			// TODO implement HttpSecurityType<S,C,D,F>.getCredentialsClass
-			throw new UnsupportedOperationException(
-					"TODO implement HttpSecurityType<S,C,D,F>.getCredentialsClass");
+			return this.credentialsType;
 		}
 
 		@Override
+		@SuppressWarnings({ "unchecked", "rawtypes" })
 		public HttpSecurityDependencyType<D>[] getDependencyTypes() {
-			// TODO implement HttpSecurityType<S,C,D,F>.getDependencyTypes
-			throw new UnsupportedOperationException(
-					"TODO implement HttpSecurityType<S,C,D,F>.getDependencyTypes");
+			return AdaptFactory
+					.adaptArray(
+							this.moType.getDependencyTypes(),
+							HttpSecurityDependencyType.class,
+							new AdaptFactory<HttpSecurityDependencyType, ManagedObjectDependencyType<D>>() {
+								@Override
+								public HttpSecurityDependencyType<D> createAdaptedObject(
+										ManagedObjectDependencyType<D> delegate) {
+									return new ManagedObjectHttpSecurityDependencyType<D>(
+											delegate);
+								}
+							});
 		}
 
 		@Override
+		@SuppressWarnings({ "unchecked", "rawtypes" })
 		public HttpSecurityFlowType<?>[] getFlowTypes() {
-			// TODO implement HttpSecurityType<S,C,D,F>.getFlowTypes
-			throw new UnsupportedOperationException(
-					"TODO implement HttpSecurityType<S,C,D,F>.getFlowTypes");
+			return AdaptFactory
+					.adaptArray(
+							this.moType.getFlowTypes(),
+							HttpSecurityFlowType.class,
+							new AdaptFactory<HttpSecurityFlowType, ManagedObjectFlowType>() {
+								@Override
+								public HttpSecurityFlowType createAdaptedObject(
+										ManagedObjectFlowType delegate) {
+									return new ManagedObjectHttpSecurityFlowType<F>(
+											delegate);
+								}
+							});
+		}
+	}
+
+	/**
+	 * {@link HttpSecurityDependencyType} adapted from the
+	 * {@link ManagedObjectDependencyType}.
+	 */
+	private static class ManagedObjectHttpSecurityDependencyType<D extends Enum<D>>
+			implements HttpSecurityDependencyType<D> {
+
+		/**
+		 * {@link ManagedObjectDependencyType}.
+		 */
+		private final ManagedObjectDependencyType<D> dependency;
+
+		/**
+		 * Initiate.
+		 * 
+		 * @param dependency
+		 *            {@link ManagedObjectDependencyType}.
+		 */
+		public ManagedObjectHttpSecurityDependencyType(
+				ManagedObjectDependencyType<D> dependency) {
+			this.dependency = dependency;
+		}
+
+		/*
+		 * ============= HttpSecurityDependencyType =========================
+		 */
+
+		@Override
+		public String getDependencyName() {
+			return this.dependency.getDependencyName();
+		}
+
+		@Override
+		public int getIndex() {
+			return this.dependency.getIndex();
+		}
+
+		@Override
+		public Class<?> getDependencyType() {
+			return this.dependency.getDependencyType();
+		}
+
+		@Override
+		public String getTypeQualifier() {
+			return this.dependency.getTypeQualifier();
+		}
+
+		@Override
+		public D getKey() {
+			return this.dependency.getKey();
+		}
+	}
+
+	/**
+	 * {@link HttpSecurityFlowType} adapted from the
+	 * {@link ManagedObjectFlowType}.
+	 */
+	private static class ManagedObjectHttpSecurityFlowType<F extends Enum<F>>
+			implements HttpSecurityFlowType<F> {
+
+		/**
+		 * {@link ManagedObjectFlowType}.
+		 */
+		private final ManagedObjectFlowType<F> flow;
+
+		/**
+		 * Initiate.
+		 * 
+		 * @param flow
+		 *            {@link ManagedObjectFlowType}.
+		 */
+		public ManagedObjectHttpSecurityFlowType(ManagedObjectFlowType<F> flow) {
+			this.flow = flow;
+		}
+
+		/*
+		 * ==================== HttpSecurityFlowType =======================
+		 */
+
+		@Override
+		public String getFlowName() {
+			return this.flow.getFlowName();
+		}
+
+		@Override
+		public F getKey() {
+			return this.flow.getKey();
+		}
+
+		@Override
+		public int getIndex() {
+			return this.flow.getIndex();
+		}
+
+		@Override
+		public Class<?> getArgumentType() {
+			return this.flow.getArgumentType();
 		}
 	}
 
