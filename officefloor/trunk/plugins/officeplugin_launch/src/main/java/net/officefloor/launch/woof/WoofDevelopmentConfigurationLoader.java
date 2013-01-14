@@ -181,8 +181,8 @@ public class WoofDevelopmentConfigurationLoader {
 			String templateUri = template.getUri();
 			if ((templateUri != null) && (templateUri.trim().length() > 0)) {
 				// Template URI provided so include
-				String startupUrl = transformUriToStartupUrl(templateUri
-						+ WoofOfficeFloorSource.WOOF_TEMPLATE_URI_SUFFIX);
+				String startupUrl = transformUriToStartupUrl(templateUri,
+						WoofOfficeFloorSource.WOOF_TEMPLATE_URI_SUFFIX);
 				configuration.addStartupUrl(startupUrl);
 			}
 
@@ -218,7 +218,8 @@ public class WoofDevelopmentConfigurationLoader {
 				if ((sectionInputUri != null)
 						&& (sectionInputUri.trim().length() > 0)) {
 					// Section Input URI provided so include
-					String startupUrl = transformUriToStartupUrl(sectionInputUri);
+					String startupUrl = transformUriToStartupUrl(
+							sectionInputUri, null);
 					configuration.addStartupUrl(startupUrl);
 				}
 			}
@@ -233,10 +234,20 @@ public class WoofDevelopmentConfigurationLoader {
 	 * 
 	 * @param uri
 	 *            URI to transform.
+	 * @param suffix
+	 *            Optional suffix for the URI. May be <code>null</code>.
 	 * @return Startup URL.
 	 */
-	private static String transformUriToStartupUrl(String uri) {
-		return (uri.startsWith("/") ? uri : "/" + uri);
+	private static String transformUriToStartupUrl(String uri, String suffix) {
+
+		// Determine if root URI (no suffix added)
+		if ("/".equals(uri)) {
+			return uri;
+		}
+
+		// Provide the transformed URI
+		return (uri.startsWith("/") ? uri : "/" + uri)
+				+ (suffix == null ? "" : suffix);
 	}
 
 	/**
