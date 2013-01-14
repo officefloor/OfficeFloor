@@ -28,7 +28,6 @@ import net.officefloor.compile.work.WorkType;
 import net.officefloor.frame.api.build.DependencyMappingBuilder;
 import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.build.ManagedObjectBuilder;
-import net.officefloor.frame.api.build.ManagingOfficeBuilder;
 import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.api.build.TaskBuilder;
 import net.officefloor.frame.api.execute.Task;
@@ -54,10 +53,6 @@ import net.officefloor.plugin.web.http.application.HttpRequestState;
 import net.officefloor.plugin.web.http.application.HttpRequestStateManagedObjectSource;
 import net.officefloor.plugin.web.http.location.HttpApplicationLocationManagedObjectSource;
 import net.officefloor.plugin.web.http.security.HttpSecurity;
-import net.officefloor.plugin.web.http.security.HttpSecurityManagedObjectSource;
-import net.officefloor.plugin.web.http.security.HttpSecurityManagedObjectSource.FlowKeys;
-import net.officefloor.plugin.web.http.security.HttpSecurityServiceManagedObjectSource;
-import net.officefloor.plugin.web.http.security.scheme.BasicHttpSecuritySource;
 import net.officefloor.plugin.web.http.security.store.PasswordFileManagedObjectSource;
 import net.officefloor.plugin.web.http.session.HttpSession;
 import net.officefloor.plugin.web.http.session.HttpSessionManagedObjectSource;
@@ -315,45 +310,45 @@ public abstract class MockHttpServletServer extends MockHttpServer {
 		this.getOfficeBuilder().addProcessManagedObject(CREDENTIAL_STORE_NAME,
 				CREDENTIAL_STORE_NAME);
 
-		// HTTP Security Service
-		final String HTTP_SECURITY_SERVICE_NAME = "HttpSecurityService";
-		ManagedObjectBuilder<?> httpSecurityService = this
-				.constructManagedObject(HTTP_SECURITY_SERVICE_NAME,
-						HttpSecurityServiceManagedObjectSource.class);
-		httpSecurityService
-				.addProperty(
-						HttpSecurityServiceManagedObjectSource.PROPERTY_AUTHENTICATION_SCHEME,
-						HttpSecurityServiceManagedObjectSource.BASIC_AUTHENTICATION_SCHEME);
-		httpSecurityService.addProperty(BasicHttpSecuritySource.PROPERTY_REALM,
-				REALM);
-		httpSecurityService.setManagingOffice(officeName);
-		DependencyMappingBuilder httpSecurityServiceDependencies = this
-				.getOfficeBuilder().addProcessManagedObject(
-						HTTP_SECURITY_SERVICE_NAME, HTTP_SECURITY_SERVICE_NAME);
-		httpSecurityServiceDependencies.mapDependency(0, managedObjectName);
-		httpSecurityServiceDependencies.mapDependency(1, HTTP_SESSION_NAME);
-		httpSecurityServiceDependencies.mapDependency(2, CREDENTIAL_STORE_NAME);
-
-		// HTTP Security
+		/*
+		 * // HTTP Security Service final String HTTP_SECURITY_SERVICE_NAME =
+		 * "HttpSecurityService"; ManagedObjectBuilder<?> httpSecurityService =
+		 * this .constructManagedObject(HTTP_SECURITY_SERVICE_NAME,
+		 * HttpSecurityServiceManagedObjectSource.class); httpSecurityService
+		 * .addProperty(
+		 * HttpSecurityServiceManagedObjectSource.PROPERTY_AUTHENTICATION_SCHEME
+		 * ,
+		 * HttpSecurityServiceManagedObjectSource.BASIC_AUTHENTICATION_SCHEME);
+		 * httpSecurityService
+		 * .addProperty(BasicHttpSecuritySource.PROPERTY_REALM, REALM);
+		 * httpSecurityService.setManagingOffice(officeName);
+		 * DependencyMappingBuilder httpSecurityServiceDependencies = this
+		 * .getOfficeBuilder().addProcessManagedObject(
+		 * HTTP_SECURITY_SERVICE_NAME, HTTP_SECURITY_SERVICE_NAME);
+		 * httpSecurityServiceDependencies.mapDependency(0, managedObjectName);
+		 * httpSecurityServiceDependencies.mapDependency(1, HTTP_SESSION_NAME);
+		 * httpSecurityServiceDependencies.mapDependency(2,
+		 * CREDENTIAL_STORE_NAME);
+		 * 
+		 * // HTTP Security final String HTTP_SECURITY_NAME = "HttpSecurity";
+		 * ManagedObjectBuilder<FlowKeys> httpSecurity = this
+		 * .constructManagedObject(HTTP_SECURITY_NAME,
+		 * HttpSecurityManagedObjectSource.class);
+		 * ManagingOfficeBuilder<FlowKeys> httpSecurityOffice = httpSecurity
+		 * .setManagingOffice(officeName); httpSecurity.setTimeout(TIMEOUT);
+		 * httpSecurityOffice .setInputManagedObjectName("InputHttpSecurity")
+		 * .mapDependency(
+		 * net.officefloor.plugin.web.http.security.HttpSecurityManagedObjectSource
+		 * .DependencyKeys.HTTP_SECURITY_SERVICE, HTTP_SECURITY_SERVICE_NAME);
+		 * DependencyMappingBuilder httpSecurityDependencies = this
+		 * .getOfficeBuilder().addProcessManagedObject(HTTP_SECURITY_NAME,
+		 * HTTP_SECURITY_NAME); httpSecurityDependencies .mapDependency(
+		 * net.officefloor
+		 * .plugin.web.http.security.HttpSecurityManagedObjectSource
+		 * .DependencyKeys.HTTP_SECURITY_SERVICE, HTTP_SECURITY_SERVICE_NAME);
+		 */
 		final String HTTP_SECURITY_NAME = "HttpSecurity";
-		ManagedObjectBuilder<FlowKeys> httpSecurity = this
-				.constructManagedObject(HTTP_SECURITY_NAME,
-						HttpSecurityManagedObjectSource.class);
-		ManagingOfficeBuilder<FlowKeys> httpSecurityOffice = httpSecurity
-				.setManagingOffice(officeName);
-		httpSecurity.setTimeout(TIMEOUT);
-		httpSecurityOffice
-				.setInputManagedObjectName("InputHttpSecurity")
-				.mapDependency(
-						net.officefloor.plugin.web.http.security.HttpSecurityManagedObjectSource.DependencyKeys.HTTP_SECURITY_SERVICE,
-						HTTP_SECURITY_SERVICE_NAME);
-		DependencyMappingBuilder httpSecurityDependencies = this
-				.getOfficeBuilder().addProcessManagedObject(HTTP_SECURITY_NAME,
-						HTTP_SECURITY_NAME);
-		httpSecurityDependencies
-				.mapDependency(
-						net.officefloor.plugin.web.http.security.HttpSecurityManagedObjectSource.DependencyKeys.HTTP_SECURITY_SERVICE,
-						HTTP_SECURITY_SERVICE_NAME);
+		fail("TODO provide HttpSecurity");
 
 		// Service authentication
 		final String TEAM_NAME = "of-HttpSecurity.AUTHENTICATOR";

@@ -24,10 +24,6 @@ import java.io.IOException;
 import java.util.HashSet;
 import java.util.Set;
 
-import net.officefloor.plugin.web.http.security.scheme.AuthenticationException;
-import net.officefloor.plugin.web.http.security.store.CredentialEntry;
-import net.officefloor.plugin.web.http.security.store.CredentialStore;
-
 import org.apache.commons.codec.binary.Base64;
 
 /**
@@ -180,8 +176,7 @@ public class PasswordFileCredentialStore implements CredentialStore {
 	}
 
 	@Override
-	public CredentialEntry retrieveCredentialEntry(String userId, String realm)
-			throws AuthenticationException {
+	public CredentialEntry retrieveCredentialEntry(String userId, String realm) {
 
 		// Obtain the entry
 		PasswordEntry entry = this.file.getEntry(userId);

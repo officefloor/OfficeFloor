@@ -17,34 +17,42 @@
  */
 package net.officefloor.plugin.web.http.security.scheme;
 
+import java.io.IOException;
 import java.nio.charset.Charset;
 import java.security.MessageDigest;
-import java.util.Map;
 import java.util.Set;
 
-import org.apache.commons.codec.binary.Base64;
-
+import net.officefloor.frame.api.build.None;
 import net.officefloor.plugin.socket.server.http.HttpRequest;
 import net.officefloor.plugin.socket.server.http.HttpResponse;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
 import net.officefloor.plugin.socket.server.http.parse.impl.HttpRequestParserImpl;
 import net.officefloor.plugin.socket.server.http.protocol.HttpStatus;
+import net.officefloor.plugin.web.http.security.AbstractHttpSecuritySource;
+import net.officefloor.plugin.web.http.security.HttpAuthenticateContext;
 import net.officefloor.plugin.web.http.security.HttpSecurity;
-import net.officefloor.plugin.web.http.security.scheme.AuthenticationException;
-import net.officefloor.plugin.web.http.security.scheme.HttpSecuritySource;
-import net.officefloor.plugin.web.http.security.scheme.HttpSecuritySourceContext;
+import net.officefloor.plugin.web.http.security.HttpSecuritySource;
+import net.officefloor.plugin.web.http.security.HttpSecuritySourceContext;
 import net.officefloor.plugin.web.http.security.store.CredentialEntry;
 import net.officefloor.plugin.web.http.security.store.CredentialStore;
 import net.officefloor.plugin.web.http.security.store.CredentialStoreUtil;
 import net.officefloor.plugin.web.http.session.HttpSession;
+
+import org.apache.commons.codec.binary.Base64;
 
 /**
  * {@link HttpSecuritySource} for <code>Basic</code> HTTP security.
  * 
  * @author Daniel Sagenschneider
  */
-public class BasicHttpSecuritySource implements
-		HttpSecuritySource<BasicHttpSecuritySource.Dependencies> {
+public class BasicHttpSecuritySource
+		extends
+		AbstractHttpSecuritySource<HttpSecurity, Void, BasicHttpSecuritySource.Dependencies, None> {
+
+	/**
+	 * Authentication scheme Basic.
+	 */
+	public static final String AUTHENTICATION_SCHEME_BASIC = "Basic";
 
 	/**
 	 * Name of property to retrieve the realm being secured.
@@ -73,47 +81,79 @@ public class BasicHttpSecuritySource implements
 	 */
 
 	@Override
-	public void init(HttpSecuritySourceContext<Dependencies> context)
+	protected void loadSpecification(SpecificationContext context) {
+		context.addProperty(PROPERTY_REALM, "Realm");
+	}
+
+	@Override
+	protected void loadMetaData(
+			MetaDataContext<HttpSecurity, Void, Dependencies, None> context)
 			throws Exception {
+		HttpSecuritySourceContext securityContext = context
+				.getHttpSecuritySourceContext();
 
 		// Obtain the realm
-		this.realm = context.getProperty(PROPERTY_REALM);
+		this.realm = securityContext.getProperty(PROPERTY_REALM);
 
-		// Require credential store
-		context.requireDependency(Dependencies.CREDENTIAL_STORE,
+		// Provide meta-data
+		context.setSecurityClass(HttpSecurity.class);
+		context.addDependency(Dependencies.CREDENTIAL_STORE,
 				CredentialStore.class);
 	}
 
 	@Override
-	public String getAuthenticationScheme() {
-		return "Basic";
+	public HttpSecurity retrieveCached(HttpSession session) {
+		// TODO implement
+		// HttpSecuritySource<HttpSecurity,Void,Dependencies,None>.retrieveCached
+		throw new UnsupportedOperationException(
+				"TODO implement HttpSecuritySource<HttpSecurity,Void,Dependencies,None>.retrieveCached");
 	}
 
 	@Override
-	public HttpSecurity authenticate(String parameters,
-			ServerHttpConnection connection, HttpSession session,
-			Map<Dependencies, Object> dependencies)
-			throws AuthenticationException {
+	public void authenticate(
+			HttpAuthenticateContext<HttpSecurity, Void, Dependencies, None> context)
+			throws IOException {
+
+		// Obtain the connection
+		ServerHttpConnection connection = context.getConnection();
+
+		// Obtain the authentication scheme
+		HttpAuthenticationScheme scheme = HttpAuthenticationScheme
+				.getHttpAuthenticationScheme(connection.getHttpRequest());
+		if ((scheme == null)
+				|| (AUTHENTICATION_SCHEME_BASIC.equalsIgnoreCase(scheme
+						.getAuthentiationScheme()))) {
+
+			// No/incorrect authentication scheme, so send challenge
+			HttpResponse response = connection.getHttpResponse();
+
+			// Load the challenge
+			response.setStatus(HttpStatus.SC_UNAUTHORIZED);
+			response.addHeader("WWW-Authenticate", AUTHENTICATION_SCHEME_BASIC
+					+ " realm=\"" + this.realm + "\"");
+			return;
+		}
 
 		// Decode Base64 credentials into userId:password text
-		byte[] userIdPasswordBytes = Base64.decodeBase64(parameters);
+		byte[] userIdPasswordBytes = Base64
+				.decodeBase64(scheme.getParameters());
 		String userIdPassword = new String(userIdPasswordBytes, US_ASCII);
 
 		// Split out the userId and password
 		int separatorIndex = userIdPassword.indexOf(':');
 		if (separatorIndex < 0) {
-			return null; // no user/password to authenticate
+			return; // no user/password to authenticate
 		}
 		String userId = userIdPassword.substring(0, separatorIndex);
 		String password = userIdPassword.substring(separatorIndex + 1);
 
 		// Obtain the credential entry for the connection
-		CredentialStore store = (CredentialStore) dependencies
-				.get(Dependencies.CREDENTIAL_STORE);
+		CredentialStore store = (CredentialStore) context
+				.getObject(Dependencies.CREDENTIAL_STORE);
 		CredentialEntry entry = store.retrieveCredentialEntry(userId,
 				this.realm);
 		if (entry == null) {
-			return null; // unknown user
+			return; // unknown user
 		}
 
 		// Obtain the required credentials for the connection
@@ -131,33 +171,19 @@ public class BasicHttpSecuritySource implements
 
 		// Ensure match for authentication
 		if (requiredCredentials.length != inputCredentials.length) {
-			return null; // not authenticated
+			return; // not authenticated
 		} else {
 			for (int i = 0; i < requiredCredentials.length; i++) {
 				if (requiredCredentials[i] != inputCredentials[i]) {
-					return null; // not authenticated
+					return; // not authenticated
 				}
 			}
 		}
 
-		// Authenticated, so obtain roles and return the Http Security
+		// Authenticated, so obtain roles and return the HTTP Security
 		Set<String> roles = entry.retrieveRoles();
-		return new HttpSecurityImpl(this.getAuthenticationScheme(), userId,
-				roles);
-	}
-
-	@Override
-	public void loadUnauthorised(ServerHttpConnection connection,
-			HttpSession session, Map<Dependencies, Object> depedendencies)
-			throws AuthenticationException {
-
-		// Obtain the response to load the challenge
-		HttpResponse response = connection.getHttpResponse();
-
-		// Load the challenge
-		response.setStatus(HttpStatus.SC_UNAUTHORIZED);
-		response.addHeader("WWW-Authenticate", this.getAuthenticationScheme()
-				+ " realm=\"" + this.realm + "\"");
+		context.setHttpSecurity(new HttpSecurityImpl(
+				AUTHENTICATION_SCHEME_BASIC, userId, roles));
 	}
 
 }

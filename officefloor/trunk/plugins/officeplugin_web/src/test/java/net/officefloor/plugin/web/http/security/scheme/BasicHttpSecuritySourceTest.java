@@ -17,25 +17,20 @@
  */
 package net.officefloor.plugin.web.http.security.scheme;
 
-import java.security.MessageDigest;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Map;
-
-import net.officefloor.plugin.socket.server.http.parse.impl.HttpRequestParserImpl;
+import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.web.http.security.HttpSecurity;
-import net.officefloor.plugin.web.http.security.scheme.BasicHttpSecuritySource;
 import net.officefloor.plugin.web.http.security.scheme.BasicHttpSecuritySource.Dependencies;
 import net.officefloor.plugin.web.http.security.store.CredentialEntry;
 import net.officefloor.plugin.web.http.security.store.CredentialStore;
+import net.officefloor.plugin.web.http.security.type.HttpSecurityLoaderUtil;
+import net.officefloor.plugin.web.http.security.type.HttpSecurityTypeBuilder;
 
 /**
  * Tests the {@link BasicHttpSecuritySource}.
  * 
  * @author Daniel Sagenschneider
  */
-public class BasicHttpSecuritySourceTest extends
-		AbstractHttpSecuritySourceTestCase<Dependencies> {
+public class BasicHttpSecuritySourceTest extends OfficeFrameTestCase {
 
 	/**
 	 * Realm for testing.
@@ -55,99 +50,129 @@ public class BasicHttpSecuritySourceTest extends
 			.createMock(CredentialEntry.class);
 
 	/**
-	 * Initiate.
+	 * Ensure correct specification.
 	 */
-	public BasicHttpSecuritySourceTest() {
-		super(BasicHttpSecuritySource.class, "Basic");
-
-		// Provide values for testing
-		this.recordReturn(this.context, this.context
-				.getProperty(BasicHttpSecuritySource.PROPERTY_REALM), REALM);
-		this.context.requireDependency(Dependencies.CREDENTIAL_STORE,
-				CredentialStore.class);
-	}
-
-	@Override
-	protected void loadDependencies(Map<Dependencies, Object> dependencies) {
-		dependencies.put(Dependencies.CREDENTIAL_STORE, this.store);
+	public void testSpecification() {
+		HttpSecurityLoaderUtil.validateSpecification(
+				BasicHttpSecuritySource.class,
+				BasicHttpSecuritySource.PROPERTY_REALM, "Realm");
 	}
 
 	/**
-	 * Tests creating the challenge.
+	 * Ensure correct type.
 	 */
-	public void testChallenge() throws Exception {
-		this.doChallenge("realm=\"" + REALM + "\"");
+	public void testType() {
+
+		// Create the expected type
+		HttpSecurityTypeBuilder type = HttpSecurityLoaderUtil
+				.createHttpSecurityTypeBuilder();
+		type.setSecurityClass(HttpSecurity.class);
+		type.addDependency(Dependencies.CREDENTIAL_STORE,
+				CredentialStore.class, null);
+
+		// Validate type
+		HttpSecurityLoaderUtil.validateHttpSecurityType(type,
+				BasicHttpSecuritySource.class,
+				BasicHttpSecuritySource.PROPERTY_REALM, REALM);
+	}
+	
+	public void testFunctionality() {
+		fail("TODO provide the below tests for HttpSecuritySource");
 	}
 
-	/**
-	 * Ensure can authenticate.
-	 */
-	public void testSimpleAuthenticate() throws Exception {
-		this.recordReturn(this.store, this.store.retrieveCredentialEntry(
-				"Aladdin", REALM), this.entry);
-		this.recordReturn(this.entry, this.entry.retrieveCredentials(),
-				"open sesame".getBytes(HttpRequestParserImpl.US_ASCII));
-		this.recordReturn(this.store, this.store.getAlgorithm(), null);
-		this.recordReturn(this.entry, this.entry.retrieveRoles(),
-				new HashSet<String>(Arrays.asList("prince")));
-		this
-				.doAuthenticate("QWxhZGRpbjpvcGVuIHNlc2FtZQ==", "Aladdin",
-						"prince");
-	}
-
-	/**
-	 * Ensure can authenticate with algorithm applied to credentials.
-	 */
-	public void testAlgorithmAuthenticate() throws Exception {
-
-		// Determine credentials
-		MessageDigest digest = MessageDigest.getInstance("MD5");
-		digest.update("open sesame".getBytes(HttpRequestParserImpl.US_ASCII));
-		byte[] credentials = digest.digest();
-
-		// Test
-		this.recordReturn(this.store, this.store.retrieveCredentialEntry(
-				"Aladdin", REALM), this.entry);
-		this.recordReturn(this.entry, this.entry.retrieveCredentials(),
-				credentials);
-		this.recordReturn(this.store, this.store.getAlgorithm(), "MD5");
-		this.recordReturn(this.entry, this.entry.retrieveRoles(),
-				new HashSet<String>(Arrays.asList("prince")));
-		this
-				.doAuthenticate("QWxhZGRpbjpvcGVuIHNlc2FtZQ==", "Aladdin",
-						"prince");
-	}
-
-	/**
-	 * Ensure can extra spacing.
-	 */
-	public void testExtraSpacing() throws Exception {
-		this.recordReturn(this.store, this.store.retrieveCredentialEntry(
-				"Aladdin", REALM), this.entry);
-		this.recordReturn(this.entry, this.entry.retrieveCredentials(),
-				"open sesame".getBytes(HttpRequestParserImpl.US_ASCII));
-		this.recordReturn(this.store, this.store.getAlgorithm(),
-				CredentialStore.NO_ALGORITHM);
-		this.recordReturn(this.entry, this.entry.retrieveRoles(),
-				new HashSet<String>(Arrays.asList("prince")));
-		this.doAuthenticate("    QWxhZGRpbjpvcGVuIHNlc2FtZQ==   ", "Aladdin",
-				"prince");
-	}
-
-	/**
-	 * Ensure not authenticated if not provide credentials.
-	 */
-	public void testNoCredentials() throws Exception {
-		HttpSecurity security = this.doAuthenticate("");
-		assertNull("Should not be authenticated", security);
-	}
-
-	/**
-	 * Ensure handle invalid Base64 encoding.
-	 */
-	public void testInvalidBase64() throws Exception {
-		HttpSecurity security = this.doAuthenticate("wrong");
-		assertNull("Should not be authenticated", security);
-	}
+//	/**
+//	 * Initiate.
+//	 */
+//	public BasicHttpSecuritySourceTest() {
+//		super(BasicHttpSecuritySource.class, "Basic");
+//
+//		// Provide values for testing
+//		this.recordReturn(this.context, this.context
+//				.getProperty(BasicHttpSecuritySource.PROPERTY_REALM), REALM);
+//		this.context.requireDependency(Dependencies.CREDENTIAL_STORE,
+//				CredentialStore.class);
+//	}
+//
+//	@Override
+//	protected void loadDependencies(Map<Dependencies, Object> dependencies) {
+//		dependencies.put(Dependencies.CREDENTIAL_STORE, this.store);
+//	}
+//
+//	/**
+//	 * Tests creating the challenge.
+//	 */
+//	public void testChallenge() throws Exception {
+//		this.doChallenge("realm=\"" + REALM + "\"");
+//	}
+//
+//	/**
+//	 * Ensure can authenticate.
+//	 */
+//	public void testSimpleAuthenticate() throws Exception {
+//		this.recordReturn(this.store,
+//				this.store.retrieveCredentialEntry("Aladdin", REALM),
+//				this.entry);
+//		this.recordReturn(this.entry, this.entry.retrieveCredentials(),
+//				"open sesame".getBytes(HttpRequestParserImpl.US_ASCII));
+//		this.recordReturn(this.store, this.store.getAlgorithm(), null);
+//		this.recordReturn(this.entry, this.entry.retrieveRoles(),
+//				new HashSet<String>(Arrays.asList("prince")));
+//		this.doAuthenticate("QWxhZGRpbjpvcGVuIHNlc2FtZQ==", "Aladdin", "prince");
+//	}
+//
+//	/**
+//	 * Ensure can authenticate with algorithm applied to credentials.
+//	 */
+//	public void testAlgorithmAuthenticate() throws Exception {
+//
+//		// Determine credentials
+//		MessageDigest digest = MessageDigest.getInstance("MD5");
+//		digest.update("open sesame".getBytes(HttpRequestParserImpl.US_ASCII));
+//		byte[] credentials = digest.digest();
+//
+//		// Test
+//		this.recordReturn(this.store,
+//				this.store.retrieveCredentialEntry("Aladdin", REALM),
+//				this.entry);
+//		this.recordReturn(this.entry, this.entry.retrieveCredentials(),
+//				credentials);
+//		this.recordReturn(this.store, this.store.getAlgorithm(), "MD5");
+//		this.recordReturn(this.entry, this.entry.retrieveRoles(),
+//				new HashSet<String>(Arrays.asList("prince")));
+//		this.doAuthenticate("QWxhZGRpbjpvcGVuIHNlc2FtZQ==", "Aladdin", "prince");
+//	}
+//
+//	/**
+//	 * Ensure can extra spacing.
+//	 */
+//	public void testExtraSpacing() throws Exception {
+//		this.recordReturn(this.store,
+//				this.store.retrieveCredentialEntry("Aladdin", REALM),
+//				this.entry);
+//		this.recordReturn(this.entry, this.entry.retrieveCredentials(),
+//				"open sesame".getBytes(HttpRequestParserImpl.US_ASCII));
+//		this.recordReturn(this.store, this.store.getAlgorithm(),
+//				CredentialStore.NO_ALGORITHM);
+//		this.recordReturn(this.entry, this.entry.retrieveRoles(),
+//				new HashSet<String>(Arrays.asList("prince")));
+//		this.doAuthenticate("    QWxhZGRpbjpvcGVuIHNlc2FtZQ==   ", "Aladdin",
+//				"prince");
+//	}
+//
+//	/**
+//	 * Ensure not authenticated if not provide credentials.
+//	 */
+//	public void testNoCredentials() throws Exception {
+//		HttpSecurity security = this.doAuthenticate("");
+//		assertNull("Should not be authenticated", security);
+//	}
+//
+//	/**
+//	 * Ensure handle invalid Base64 encoding.
+//	 */
+//	public void testInvalidBase64() throws Exception {
+//		HttpSecurity security = this.doAuthenticate("wrong");
+//		assertNull("Should not be authenticated", security);
+//	}
 
 }

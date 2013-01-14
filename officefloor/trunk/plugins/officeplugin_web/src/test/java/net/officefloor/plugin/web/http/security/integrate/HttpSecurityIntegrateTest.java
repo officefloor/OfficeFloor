@@ -22,19 +22,14 @@ import java.io.OutputStreamWriter;
 import java.io.Writer;
 
 import net.officefloor.compile.spi.work.source.WorkSource;
-import net.officefloor.compile.test.work.WorkLoaderUtil;
-import net.officefloor.compile.work.WorkType;
 import net.officefloor.frame.api.build.DependencyMappingBuilder;
 import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.build.ManagedObjectBuilder;
 import net.officefloor.frame.api.build.ManagingOfficeBuilder;
 import net.officefloor.frame.api.build.None;
-import net.officefloor.frame.api.build.TaskBuilder;
-import net.officefloor.frame.api.build.WorkBuilder;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.impl.spi.team.OnePersonTeamSource;
 import net.officefloor.frame.impl.spi.team.WorkerPerTaskTeamSource;
-import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.test.AbstractOfficeConstructTestCase;
 import net.officefloor.frame.test.ReflectiveWorkBuilder;
@@ -44,13 +39,6 @@ import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
 import net.officefloor.plugin.socket.server.http.server.MockHttpServer;
 import net.officefloor.plugin.socket.server.http.source.HttpServerSocketManagedObjectSource;
 import net.officefloor.plugin.web.http.security.HttpSecurity;
-import net.officefloor.plugin.web.http.security.HttpSecurityService;
-import net.officefloor.plugin.web.http.security.HttpSecurityServiceManagedObjectSource;
-import net.officefloor.plugin.web.http.security.HttpSecurityTask;
-import net.officefloor.plugin.web.http.security.HttpSecurityWorkSource;
-import net.officefloor.plugin.web.http.security.HttpSecurityTask.DependencyKeys;
-import net.officefloor.plugin.web.http.security.HttpSecurityTask.FlowKeys;
-import net.officefloor.plugin.web.http.security.scheme.BasicHttpSecuritySource;
 import net.officefloor.plugin.web.http.security.store.PasswordFileManagedObjectSource;
 import net.officefloor.plugin.web.http.session.HttpSessionManagedObjectSource;
 
@@ -79,7 +67,6 @@ public class HttpSecurityIntegrateTest extends AbstractOfficeConstructTestCase {
 	private final DefaultHttpClient client = new DefaultHttpClient();
 
 	@Override
-	@SuppressWarnings("unchecked")
 	protected void setUp() throws Exception {
 		super.setUp();
 
@@ -87,23 +74,25 @@ public class HttpSecurityIntegrateTest extends AbstractOfficeConstructTestCase {
 		String officeName = this.getOfficeName();
 
 		// HTTP Security Service
-		ManagedObjectBuilder<None> httpSecurityService = this
-				.constructManagedObject("HttpSecurityService",
-						HttpSecurityServiceManagedObjectSource.class);
-		httpSecurityService
-				.addProperty(
-						HttpSecurityServiceManagedObjectSource.PROPERTY_AUTHENTICATION_SCHEME,
-						HttpSecurityServiceManagedObjectSource.BASIC_AUTHENTICATION_SCHEME);
-		httpSecurityService.addProperty(BasicHttpSecuritySource.PROPERTY_REALM,
-				"TestRealm");
-		httpSecurityService.setManagingOffice(officeName);
-		DependencyMappingBuilder httpSecurityServiceDependencies = this
-				.getOfficeBuilder().addProcessManagedObject(
-						"HttpSecurityService", "HttpSecurityService");
-		httpSecurityServiceDependencies
-				.mapDependency(0, "ServerHttpConnection");
-		httpSecurityServiceDependencies.mapDependency(1, "HttpSession");
-		httpSecurityServiceDependencies.mapDependency(2, "CredentialStore");
+		/*
+		 * ManagedObjectBuilder<None> httpSecurityService = this
+		 * .constructManagedObject("HttpSecurityService",
+		 * HttpSecurityServiceManagedObjectSource.class); httpSecurityService
+		 * .addProperty(
+		 * HttpSecurityServiceManagedObjectSource.PROPERTY_AUTHENTICATION_SCHEME
+		 * ,
+		 * HttpSecurityServiceManagedObjectSource.BASIC_AUTHENTICATION_SCHEME);
+		 * httpSecurityService
+		 * .addProperty(BasicHttpSecuritySource.PROPERTY_REALM, "TestRealm");
+		 * httpSecurityService.setManagingOffice(officeName);
+		 * DependencyMappingBuilder httpSecurityServiceDependencies = this
+		 * .getOfficeBuilder().addProcessManagedObject( "HttpSecurityService",
+		 * "HttpSecurityService"); httpSecurityServiceDependencies
+		 * .mapDependency(0, "ServerHttpConnection");
+		 * httpSecurityServiceDependencies.mapDependency(1, "HttpSession");
+		 * httpSecurityServiceDependencies.mapDependency(2, "CredentialStore");
+		 */
+		fail("TODO provide HttpSecurity");
 
 		// Password File Credential Store
 		String passwordFilePath = this.findFile(this.getClass(),
@@ -139,23 +128,6 @@ public class HttpSecurityIntegrateTest extends AbstractOfficeConstructTestCase {
 				.setManagingOffice(officeName);
 		connection.linkProcess(0, "Access", "access");
 		connection.setInputManagedObjectName("ServerHttpConnection");
-
-		// Work to secure access to servicer
-		WorkType<HttpSecurityTask> accessWorkType = WorkLoaderUtil
-				.loadWorkType(HttpSecurityWorkSource.class);
-		WorkBuilder<HttpSecurityTask> accessWork = this.constructWork("Access",
-				accessWorkType.getWorkFactory());
-		TaskBuilder<HttpSecurityTask, DependencyKeys, FlowKeys> accessTask = (TaskBuilder<HttpSecurityTask, DependencyKeys, FlowKeys>) accessWork
-				.addTask("access",
-						accessWorkType.getTaskTypes()[0].getTaskFactory());
-		accessTask.linkManagedObject(DependencyKeys.HTTP_SECURITY_SERVICE,
-				"HttpSecurityService", HttpSecurityService.class);
-		accessTask.linkFlow(FlowKeys.AUTHENTICATED, "Servicer", "service",
-				FlowInstigationStrategyEnum.SEQUENTIAL, HttpSecurity.class);
-		accessTask.linkFlow(FlowKeys.UNAUTHENTICATED, "Servicer",
-				"unauthorised", FlowInstigationStrategyEnum.SEQUENTIAL,
-				HttpSecurity.class);
-		accessTask.setTeam("Team");
 
 		// Work to service request
 		ReflectiveWorkBuilder servicer = this.constructWork(new Servicer(),
