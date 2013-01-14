@@ -17,11 +17,9 @@
  */
 package net.officefloor.plugin.web.http.security.store;
 
+import java.io.IOException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-
-import net.officefloor.plugin.web.http.security.scheme.AuthenticationException;
-import net.officefloor.plugin.web.http.security.store.CredentialStore;
 
 /**
  * Utility functions for working with a {@link CredentialStore}.
@@ -38,11 +36,11 @@ public class CredentialStoreUtil {
 	 *            {@link CredentialStore} algorithm.
 	 * @return {@link MessageDigest} for the algorithm or <code>null</code>
 	 *         indicate credentials are in plain text.
-	 * @throws AuthenticationException
+	 * @throws IOException
 	 *             If fails to obtain {@link MessageDigest} for the algorithm.
 	 */
 	public static MessageDigest createDigest(String algorithm)
-			throws AuthenticationException {
+			throws IOException {
 
 		// Determine if have algorithm
 		if (algorithm != null) {
@@ -53,7 +51,7 @@ public class CredentialStoreUtil {
 				try {
 					return MessageDigest.getInstance(trimmedAlgorithm);
 				} catch (NoSuchAlgorithmException ex) {
-					throw new AuthenticationException(ex);
+					throw new IOException(ex);
 				}
 			}
 		}

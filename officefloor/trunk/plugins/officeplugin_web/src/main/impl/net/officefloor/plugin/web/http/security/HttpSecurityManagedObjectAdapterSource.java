@@ -17,8 +17,6 @@
  */
 package net.officefloor.plugin.web.http.security;
 
-import net.officefloor.compile.managedobject.ManagedObjectLoader;
-import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.impl.construct.source.SourceContextImpl;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
@@ -42,43 +40,36 @@ public class HttpSecurityManagedObjectAdapterSource<D extends Enum<D>>
 		implements ManagedObjectSource<D, Indexed> {
 
 	/**
-	 * Obtains the {@link ManagedObjectSourceSpecification} for the
-	 * {@link HttpSecuritySource}.
+	 * Undertakes the operation for the {@link HttpSecuritySource}.
 	 * 
 	 * @param httpSecuritySource
 	 *            {@link HttpSecuritySource}.
-	 * @param managedObjectLoader
-	 *            {@link ManagedObjectLoader}.
-	 * @return {@link PropertyList} for the {@link HttpSecuritySource}.
+	 * @param operation
+	 *            {@link Runnable} containing the operation to undertake.
 	 */
-	@SuppressWarnings("unchecked")
-	public static <S, C, D extends Enum<D>, F extends Enum<F>> PropertyList loadSpecification(
+	public static <S, C, D extends Enum<D>, F extends Enum<F>> void doOperation(
 			HttpSecuritySource<S, C, D, F> httpSecuritySource,
-			ManagedObjectLoader managedObjectLoader) {
+			Runnable operation) {
 
 		// Make safe given that using static field
 		synchronized (HttpSecurityManagedObjectAdapterSource.class) {
 
-			// Load the properties of the specification
-			PropertyList properties;
+			// Run the operation
 			try {
-				specificationInstance = httpSecuritySource;
-				properties = managedObjectLoader
-						.loadSpecification(HttpSecurityManagedObjectAdapterSource.class);
+				operationInstance = httpSecuritySource;
+				operation.run();
+
 			} finally {
 				// Ensure clear instance
-				specificationInstance = null;
+				operationInstance = null;
 			}
-
-			// Return the properties
-			return properties;
 		}
 	}
 
 	/**
-	 * {@link HttpSecuritySource} to provide the specification.
+	 * {@link HttpSecuritySource} for the operation.
 	 */
-	private static HttpSecuritySource<?, ?, ?, ?> specificationInstance = null;
+	private static HttpSecuritySource<?, ?, ?, ?> operationInstance = null;
 
 	/**
 	 * {@link HttpSecuritySource} to provide type/functionality.
@@ -86,19 +77,27 @@ public class HttpSecurityManagedObjectAdapterSource<D extends Enum<D>>
 	private final HttpSecuritySource<?, ?, D, ?> securitySource;
 
 	/**
-	 * Should only be used for loading specification.
+	 * Should only be used within
+	 * {@link #doOperation(HttpSecuritySource, Runnable)}.
 	 * 
 	 * @throws IllegalStateException
-	 *             If not being loaded to obtain specification.
+	 *             If not being loaded within operation context.
 	 */
+	@SuppressWarnings("unchecked")
 	public HttpSecurityManagedObjectAdapterSource()
 			throws IllegalStateException {
-		this.securitySource = null;
 		synchronized (HttpSecurityManagedObjectAdapterSource.class) {
-			if (specificationInstance == null) {
+
+			// Ensure with operation context
+			if (operationInstance == null) {
 				throw new IllegalStateException(
-						"May only use for loading specification");
+						"Must be within "
+								+ HttpSecurityManagedObjectAdapterSource.class
+										.getSimpleName() + " operation context");
 			}
+
+			// Specify the HTTP security source
+			this.securitySource = (HttpSecuritySource<?, ?, D, ?>) operationInstance;
 		}
 	}
 
@@ -121,7 +120,7 @@ public class HttpSecurityManagedObjectAdapterSource<D extends Enum<D>>
 	public ManagedObjectSourceSpecification getSpecification() {
 		return AdaptFactory
 				.adaptObject(
-						specificationInstance.getSpecification(),
+						this.securitySource.getSpecification(),
 						new AdaptFactory<ManagedObjectSourceSpecification, HttpSecuritySourceSpecification>() {
 							@Override
 							public ManagedObjectSourceSpecification createAdaptedObject(

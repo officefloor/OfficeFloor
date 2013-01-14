@@ -17,10 +17,11 @@
  */
 package net.officefloor.plugin.web.http.security.store;
 
+import java.io.IOException;
+
 import net.officefloor.compile.spi.work.source.WorkSource;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
-import net.officefloor.plugin.web.http.security.scheme.AuthenticationException;
-import net.officefloor.plugin.web.http.security.scheme.HttpSecuritySource;
+import net.officefloor.plugin.web.http.security.HttpSecuritySource;
 
 /**
  * <p>
@@ -78,9 +79,10 @@ public interface CredentialStore {
 	 *            <code>Basic</code> authentication).
 	 * @return {@link CredentialEntry} or <code>null</code> if no
 	 *         {@link CredentialEntry} exists for parameters.
-	 * @throws AuthenticationException
+	 * @throws IOException
+	 *             If fails to retrieve {@link CredentialEntry}.
 	 */
 	CredentialEntry retrieveCredentialEntry(String userId, String realm)
-			throws AuthenticationException;
+			throws IOException;
 
 }

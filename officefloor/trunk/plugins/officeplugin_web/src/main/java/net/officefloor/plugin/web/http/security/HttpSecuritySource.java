@@ -17,6 +17,8 @@
  */
 package net.officefloor.plugin.web.http.security;
 
+import java.io.IOException;
+
 import net.officefloor.plugin.web.http.session.HttpSession;
 
 /**
@@ -83,7 +85,10 @@ public interface HttpSecuritySource<S, C, D extends Enum<D>, F extends Enum<F>> 
 	 * 
 	 * @param context
 	 *            {@link HttpAuthenticateContext}.
+	 * @throws IOException
+	 *             If failure in communicating to necessary security services.
 	 */
-	void authenticate(HttpAuthenticateContext<S, C, D, F> context);
+	void authenticate(HttpAuthenticateContext<S, C, D, F> context)
+			throws IOException;
 
 }

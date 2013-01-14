@@ -15,28 +15,51 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.plugin.web.http.security.scheme;
-
-import net.officefloor.frame.spi.source.SourceProperties;
+package net.officefloor.plugin.web.http.security;
 
 /**
- * Context for the {@link HttpSecuritySource}.
+ * {@link HttpSecuritySourceProperty} implementation.
  * 
  * @author Daniel Sagenschneider
  */
-@Deprecated // TODO moving to HttpSecuritySource integrated into web application
-public interface HttpSecuritySourceContext<D extends Enum<D>> extends
-		SourceProperties {
+public class HttpSecuritySourcePropertyImpl implements
+		HttpSecuritySourceProperty {
 
 	/**
-	 * Flags that the {@link HttpSecuritySource} requires a dependency.
-	 * 
-	 * @param key
-	 *            Key allowing {@link HttpSecuritySource} to identify the
-	 *            dependency.
-	 * @param dependencyType
-	 *            Type expected for the dependency.
+	 * Name of property.
 	 */
-	void requireDependency(D key, Class<?> dependencyType);
+	protected final String name;
+
+	/**
+	 * Label of property.
+	 */
+	protected final String label;
+
+	/**
+	 * Initiate with name and label of property.
+	 * 
+	 * @param name
+	 *            Name of property.
+	 * @param label
+	 *            Label of property.
+	 */
+	public HttpSecuritySourcePropertyImpl(String name, String label) {
+		this.name = name;
+		this.label = label;
+	}
+
+	/*
+	 * ================== HttpSecuritySourceProperty ==============
+	 */
+
+	@Override
+	public String getName() {
+		return this.name;
+	}
+
+	@Override
+	public String getLabel() {
+		return this.label;
+	}
 
 }

@@ -55,8 +55,24 @@ public class HttpSecurityLoaderImpl implements HttpSecurityLoader {
 	@Override
 	public <S, C, D extends Enum<D>, F extends Enum<F>> PropertyList loadSpecification(
 			HttpSecuritySource<S, C, D, F> httpSecuritySource) {
-		return HttpSecurityManagedObjectAdapterSource.loadSpecification(
-				httpSecuritySource, this.managedObjectLoader);
+
+		// Obtain the specification
+		final PropertyList[] propertyList = new PropertyList[1];
+		HttpSecurityManagedObjectAdapterSource.doOperation(httpSecuritySource,
+				new Runnable() {
+					@Override
+					@SuppressWarnings("unchecked")
+					public void run() {
+
+						// Obtain the specification
+						propertyList[0] = HttpSecurityLoaderImpl.this.managedObjectLoader
+								.loadSpecification(HttpSecurityManagedObjectAdapterSource.class);
+
+					}
+				});
+
+		// Return the properties
+		return propertyList[0];
 	}
 
 	@Override

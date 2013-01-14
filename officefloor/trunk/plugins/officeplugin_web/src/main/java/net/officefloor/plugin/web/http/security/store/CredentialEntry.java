@@ -17,10 +17,9 @@
  */
 package net.officefloor.plugin.web.http.security.store;
 
+import java.io.IOException;
 import java.nio.charset.Charset;
 import java.util.Set;
-
-import net.officefloor.plugin.web.http.security.scheme.AuthenticationException;
 
 /**
  * Entry within the {@link CredentialStore}.
@@ -46,18 +45,18 @@ public interface CredentialEntry {
 	 * </ol>
 	 * 
 	 * @return Value as per above description.
-	 * @throws AuthenticationException
+	 * @throws IOException
 	 *             If fails to retrieve the credentials.
 	 */
-	byte[] retrieveCredentials() throws AuthenticationException;
+	byte[] retrieveCredentials() throws IOException;
 
 	/**
 	 * Retrieves the roles.
 	 * 
 	 * @return {@link Set} of roles.
-	 * @throws AuthenticationException
+	 * @throws IOException
 	 *             If fails to retrieve the roles.
 	 */
-	Set<String> retrieveRoles() throws AuthenticationException;
+	Set<String> retrieveRoles() throws IOException;
 
 }

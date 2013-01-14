@@ -22,21 +22,22 @@ import java.io.InputStream;
 import java.io.Serializable;
 import java.nio.charset.Charset;
 import java.security.MessageDigest;
-import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 import java.util.UUID;
 
+import net.officefloor.frame.api.build.None;
 import net.officefloor.plugin.socket.server.http.HttpHeader;
 import net.officefloor.plugin.socket.server.http.HttpRequest;
 import net.officefloor.plugin.socket.server.http.HttpResponse;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
 import net.officefloor.plugin.socket.server.http.parse.impl.HttpRequestParserImpl;
 import net.officefloor.plugin.socket.server.http.protocol.HttpStatus;
+import net.officefloor.plugin.web.http.security.AbstractHttpSecuritySource;
+import net.officefloor.plugin.web.http.security.HttpAuthenticateContext;
 import net.officefloor.plugin.web.http.security.HttpSecurity;
-import net.officefloor.plugin.web.http.security.scheme.AuthenticationException;
-import net.officefloor.plugin.web.http.security.scheme.HttpSecuritySource;
-import net.officefloor.plugin.web.http.security.scheme.HttpSecuritySourceContext;
+import net.officefloor.plugin.web.http.security.HttpSecuritySource;
+import net.officefloor.plugin.web.http.security.HttpSecuritySourceContext;
 import net.officefloor.plugin.web.http.security.store.CredentialEntry;
 import net.officefloor.plugin.web.http.security.store.CredentialStore;
 import net.officefloor.plugin.web.http.security.store.CredentialStoreUtil;
@@ -49,8 +50,14 @@ import org.apache.commons.codec.binary.Hex;
  * 
  * @author Daniel Sagenschneider
  */
-public class DigestHttpSecuritySource implements
-		HttpSecuritySource<DigestHttpSecuritySource.Dependencies> {
+public class DigestHttpSecuritySource
+		extends
+		AbstractHttpSecuritySource<HttpSecurity, Void, DigestHttpSecuritySource.Dependencies, None> {
+
+	/**
+	 * Authentication scheme Digest.
+	 */
+	public static final String AUTHENTICATION_SCHEME_DIGEST = "Digest";
 
 	/**
 	 * Name of property for the realm.
@@ -119,11 +126,10 @@ public class DigestHttpSecuritySource implements
 	 * @param text
 	 *            Text to parse out the parameters.
 	 * @return Parameters parsed from text.
-	 * @throws AuthenticationException
+	 * @throws IOException
 	 *             If fails to parse parameters.
 	 */
-	private Properties parseParameters(String text)
-			throws AuthenticationException {
+	private Properties parseParameters(String text) {
 
 		// Initiate parsing
 		ParameterState state = ParameterState.INIT;
@@ -279,28 +285,100 @@ public class DigestHttpSecuritySource implements
 	 */
 
 	@Override
-	public void init(HttpSecuritySourceContext<Dependencies> context)
+	protected void loadSpecification(SpecificationContext context) {
+		context.addProperty(PROPERTY_REALM, "Realm");
+		context.addProperty(PROPERTY_PRIVATE_KEY, "Private Key");
+	}
+
+	@Override
+	protected void loadMetaData(
+			MetaDataContext<HttpSecurity, Void, Dependencies, None> context)
 			throws Exception {
+		HttpSecuritySourceContext securityContext = context
+				.getHttpSecuritySourceContext();
 
-		// Specify the properties
-		this.realm = context.getProperty(PROPERTY_REALM);
-		this.privateKey = context.getProperty(PROPERTY_PRIVATE_KEY);
+		// Obtain the properties
+		this.realm = securityContext.getProperty(PROPERTY_REALM);
+		this.privateKey = securityContext.getProperty(PROPERTY_PRIVATE_KEY);
 
-		// Require credential store
-		context.requireDependency(Dependencies.CREDENTIAL_STORE,
+		// Provide meta-data
+		context.setSecurityClass(HttpSecurity.class);
+		context.addDependency(Dependencies.CREDENTIAL_STORE,
 				CredentialStore.class);
 	}
 
 	@Override
-	public String getAuthenticationScheme() {
-		return "Digest";
+	public HttpSecurity retrieveCached(HttpSession session) {
+		// TODO implement
+		// HttpSecuritySource<HttpSecurity,Void,Dependencies,None>.retrieveCached
+		throw new UnsupportedOperationException(
+				"TODO implement HttpSecuritySource<HttpSecurity,Void,Dependencies,None>.retrieveCached");
 	}
 
 	@Override
-	public HttpSecurity authenticate(String parameters,
-			ServerHttpConnection connection, HttpSession session,
-			Map<Dependencies, Object> dependencies) throws IOException,
-			AuthenticationException {
+	public void authenticate(
+			HttpAuthenticateContext<HttpSecurity, Void, Dependencies, None> context)
+			throws IOException {
+
+		// Obtain the dependencies
+		ServerHttpConnection connection = context.getConnection();
+		HttpSession session = context.getSession();
+		CredentialStore store = (CredentialStore) context
+				.getObject(Dependencies.CREDENTIAL_STORE);
+
+		// Obtain the authentication scheme
+		HttpAuthenticationScheme scheme = HttpAuthenticationScheme
+				.getHttpAuthenticationScheme(connection.getHttpRequest());
+		if ((scheme == null)
+				|| (AUTHENTICATION_SCHEME_DIGEST.equalsIgnoreCase(scheme
+						.getAuthentiationScheme()))) {
+
+			// No authentication scheme, so send challenge
+			String algorithm = store.getAlgorithm();
+
+			// Obtain the ETag header value (if available)
+			HttpRequest request = connection.getHttpRequest();
+			String eTag = "";
+			for (HttpHeader header : request.getHeaders()) {
+				if ("ETag".equalsIgnoreCase(header.getName())) {
+					eTag = header.getValue();
+				}
+			}
+
+			// Obtain the current time stamp
+			String timestamp = this.getTimestamp();
+
+			// Calculate the nonce
+			Digest nonceDigest = new Digest(algorithm);
+			nonceDigest.append(timestamp);
+			nonceDigest.appendColon();
+			nonceDigest.append(eTag);
+			nonceDigest.appendColon();
+			nonceDigest.append(this.privateKey);
+			byte[] nonceData = nonceDigest.getDigest();
+			String nonce = new String(nonceData, US_ASCII);
+
+			// Calculate the opaque
+			Digest opaqueDigest = new Digest(algorithm);
+			opaqueDigest.append(this.getOpaqueSeed());
+			byte[] opaqueData = opaqueDigest.getDigest();
+			String opaque = new String(opaqueData, US_ASCII);
+
+			// Construct the authentication challenge
+			String challenge = AUTHENTICATION_SCHEME_DIGEST + " realm=\""
+					+ this.realm + "\", qop=\"auth,auth-int\", nonce=\""
+					+ nonce + "\", opaque=\"" + opaque + "\", algorithm=\""
+					+ algorithm + "\"";
+
+			// Specify unauthorised
+			HttpResponse response = connection.getHttpResponse();
+			response.setStatus(HttpStatus.SC_UNAUTHORIZED);
+			response.addHeader("WWW-Authenticate", challenge);
+
+			// Record details for authentication
+			session.setAttribute(SECURITY_STATE_SESSION_KEY, new SecurityState(
+					nonce, opaque));
+		}
 
 		// Authenticate Digest as per RFC2617
 
@@ -309,12 +387,12 @@ public class DigestHttpSecuritySource implements
 				.getAttribute(SECURITY_STATE_SESSION_KEY);
 		if (securityState == null) {
 			// No challenge (i.e. no nounce), so not authenticated
-			return null;
+			return;
 		}
 		String nonce = securityState.nonce;
 
 		// Obtain the parameter values
-		Properties params = this.parseParameters(parameters);
+		Properties params = this.parseParameters(scheme.getParameters());
 		String username = params.getProperty("username");
 		String realm = params.getProperty("realm");
 		String response = params.getProperty("response");
@@ -326,7 +404,7 @@ public class DigestHttpSecuritySource implements
 
 		// Ensure correct opaque
 		if (!securityState.opaque.equals(opaque)) {
-			return null; // not authenticated
+			return; // not authenticated
 		}
 
 		// Ensure correct nonce count
@@ -340,23 +418,21 @@ public class DigestHttpSecuritySource implements
 					nonceCountValue += decodedNonceCountByte; // add byte
 				}
 				if (securityState.nonceCount != nonceCountValue) {
-					return null; // likely replay attack so do not authenticate
+					return; // likely replay attack so do not authenticate
 				}
 
 				// Increment for next authentication attempt
 				securityState.nonceCount++;
 
 			} catch (Exception ex) {
-				throw new AuthenticationException(ex);
+				throw new IOException(ex);
 			}
 		}
 
 		// Obtain the credentials entry
-		CredentialStore store = (CredentialStore) dependencies
-				.get(Dependencies.CREDENTIAL_STORE);
 		CredentialEntry entry = store.retrieveCredentialEntry(username, realm);
 		if (entry == null) {
-			return null; // unknown user in realm
+			return; // unknown user in realm
 		}
 
 		// Obtain the required credentials
@@ -437,69 +513,15 @@ public class DigestHttpSecuritySource implements
 
 		// Ensure correct response
 		if (!requiredResponse.equals(response)) {
-			return null; // not authenticated
+			return; // not authenticated
 		}
 
 		// Obtain the roles
 		Set<String> roles = entry.retrieveRoles();
 
-		// Return the HTTP security
-		return new HttpSecurityImpl(this.getAuthenticationScheme(), username,
-				roles);
-	}
-
-	@Override
-	public void loadUnauthorised(ServerHttpConnection connection,
-			HttpSession session, Map<Dependencies, Object> dependencies)
-			throws AuthenticationException {
-
-		// Obtain the algorithm
-		CredentialStore store = (CredentialStore) dependencies
-				.get(Dependencies.CREDENTIAL_STORE);
-		String algorithm = store.getAlgorithm();
-
-		// Obtain the ETag header value (if available)
-		HttpRequest request = connection.getHttpRequest();
-		String eTag = "";
-		for (HttpHeader header : request.getHeaders()) {
-			if ("ETag".equalsIgnoreCase(header.getName())) {
-				eTag = header.getValue();
-			}
-		}
-
-		// Obtain the current time stamp
-		String timestamp = this.getTimestamp();
-
-		// Calculate the nonce
-		Digest nonceDigest = new Digest(algorithm);
-		nonceDigest.append(timestamp);
-		nonceDigest.appendColon();
-		nonceDigest.append(eTag);
-		nonceDigest.appendColon();
-		nonceDigest.append(this.privateKey);
-		byte[] nonceData = nonceDigest.getDigest();
-		String nonce = new String(nonceData, US_ASCII);
-
-		// Calculate the opaque
-		Digest opaqueDigest = new Digest(algorithm);
-		opaqueDigest.append(this.getOpaqueSeed());
-		byte[] opaqueData = opaqueDigest.getDigest();
-		String opaque = new String(opaqueData, US_ASCII);
-
-		// Construct the authentication challenge
-		String challenge = this.getAuthenticationScheme() + " realm=\""
-				+ this.realm + "\", qop=\"auth,auth-int\", nonce=\"" + nonce
-				+ "\", opaque=\"" + opaque + "\", algorithm=\"" + algorithm
-				+ "\"";
-
-		// Specify unauthorised
-		HttpResponse response = connection.getHttpResponse();
-		response.setStatus(HttpStatus.SC_UNAUTHORIZED);
-		response.addHeader("WWW-Authenticate", challenge);
-
-		// Record details for authentication
-		session.setAttribute(SECURITY_STATE_SESSION_KEY, new SecurityState(
-				nonce, opaque));
+		// Authenticated, so provide the HTTP security
+		context.setHttpSecurity(new HttpSecurityImpl(
+				AUTHENTICATION_SCHEME_DIGEST, username, roles));
 	}
 
 	/**
@@ -556,10 +578,10 @@ public class DigestHttpSecuritySource implements
 		 * 
 		 * @param algorithm
 		 *            Algorithm.
-		 * @throws AuthenticationException
+		 * @throws IOException
 		 *             If fails to initiate for algorithm.
 		 */
-		public Digest(String algorithm) throws AuthenticationException {
+		public Digest(String algorithm) throws IOException {
 			this.digest = CredentialStoreUtil.createDigest(algorithm);
 		}
 
@@ -602,17 +624,12 @@ public class DigestHttpSecuritySource implements
 		 * 
 		 * @param stream
 		 *            {@link InputStream} of data to append.
-		 * @throws AuthenticationException
+		 * @throws IOException
 		 *             If fails to append the {@link InputStream} data.
 		 */
-		public void append(InputStream stream) throws AuthenticationException {
-			try {
-				for (int value = stream.read(); value != -1; value = stream
-						.read()) {
-					this.digest.update((byte) value);
-				}
-			} catch (IOException ex) {
-				throw new AuthenticationException(ex);
+		public void append(InputStream stream) throws IOException {
+			for (int value = stream.read(); value != -1; value = stream.read()) {
+				this.digest.update((byte) value);
 			}
 		}
 

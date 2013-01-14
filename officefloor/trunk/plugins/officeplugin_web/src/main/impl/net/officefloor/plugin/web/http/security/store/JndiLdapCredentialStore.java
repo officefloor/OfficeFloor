@@ -17,6 +17,7 @@
  */
 package net.officefloor.plugin.web.http.security.store;
 
+import java.io.IOException;
 import java.nio.charset.Charset;
 import java.util.HashSet;
 import java.util.Set;
@@ -29,9 +30,6 @@ import javax.naming.directory.DirContext;
 import javax.naming.directory.SearchResult;
 
 import net.officefloor.plugin.socket.server.http.parse.impl.HttpRequestParserImpl;
-import net.officefloor.plugin.web.http.security.scheme.AuthenticationException;
-import net.officefloor.plugin.web.http.security.store.CredentialEntry;
-import net.officefloor.plugin.web.http.security.store.CredentialStore;
 
 import org.apache.commons.codec.binary.Base64;
 
@@ -111,7 +109,7 @@ public class JndiLdapCredentialStore implements CredentialStore {
 
 	@Override
 	public CredentialEntry retrieveCredentialEntry(String userId, String realm)
-			throws AuthenticationException {
+			throws IOException {
 		try {
 			// Search for the credential entry
 			NamingEnumeration<SearchResult> searchResults = this.context
@@ -130,7 +128,7 @@ public class JndiLdapCredentialStore implements CredentialStore {
 			return new JndiLdapCredentialEntry(entryDn);
 
 		} catch (NamingException ex) {
-			throw new AuthenticationException(ex);
+			throw new IOException(ex);
 		}
 	}
 
@@ -159,7 +157,7 @@ public class JndiLdapCredentialStore implements CredentialStore {
 		 */
 
 		@Override
-		public byte[] retrieveCredentials() throws AuthenticationException {
+		public byte[] retrieveCredentials() throws IOException {
 			try {
 				// Obtain the entry's userPassword attribute
 				Attributes entry = JndiLdapCredentialStore.this.context
@@ -201,16 +199,16 @@ public class JndiLdapCredentialStore implements CredentialStore {
 				}
 
 				// If here, no credentials
-				throw new AuthenticationException(
-						"No authentication credentials for " + this.entryDn);
+				throw new IOException("No authentication credentials for "
+						+ this.entryDn);
 
 			} catch (NamingException ex) {
-				throw new AuthenticationException(ex);
+				throw new IOException(ex);
 			}
 		}
 
 		@Override
-		public Set<String> retrieveRoles() throws AuthenticationException {
+		public Set<String> retrieveRoles() throws IOException {
 			try {
 
 				// Search for the groups
@@ -236,7 +234,7 @@ public class JndiLdapCredentialStore implements CredentialStore {
 				return roles;
 
 			} catch (NamingException ex) {
-				throw new AuthenticationException(ex);
+				throw new IOException(ex);
 			}
 		}
 	}
