@@ -17,11 +17,14 @@
  */
 package net.officefloor.building.manager;
 
+import java.io.EOFException;
 import java.io.File;
 import java.io.IOException;
 import java.lang.management.ManagementFactory;
 import java.net.InetAddress;
 import java.rmi.ConnectException;
+import java.rmi.UnmarshalException;
+import java.rmi.server.RMIClientSocketFactory;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
@@ -32,7 +35,6 @@ import javax.management.MBeanServerConnection;
 import javax.management.remote.JMXConnector;
 import javax.management.remote.JMXConnectorFactory;
 import javax.management.remote.JMXServiceURL;
-import javax.rmi.ssl.SslRMIClientSocketFactory;
 
 import net.officefloor.building.process.ProcessManager;
 import net.officefloor.building.process.ProcessManagerMBean;
@@ -55,9 +57,14 @@ import net.officefloor.frame.test.OfficeFrameTestCase;
 public class OfficeBuildingManagerTest extends OfficeFrameTestCase {
 
 	/**
-	 * Port to run the current test.
+	 * Next port to run next current test.
 	 */
-	private static final int PORT = 13778;
+	private static int nextPort = 13778;
+
+	/**
+	 * Port to run the current test on.
+	 */
+	private int port;
 
 	/**
 	 * Key store file.
@@ -92,6 +99,9 @@ public class OfficeBuildingManagerTest extends OfficeFrameTestCase {
 	@Override
 	protected void setUp() throws Exception {
 
+		// Obtain the next port for this test
+		this.port = nextPort;
+
 		// Obtain the key store for SSL to work
 		this.keyStore = AbstractConsoleMainTestCase.getTrustStore();
 
@@ -110,7 +120,7 @@ public class OfficeBuildingManagerTest extends OfficeFrameTestCase {
 	 * @return {@link OfficeBuildingManager}.
 	 */
 	private OfficeBuildingManagerMBean startOfficeBuilding() throws Exception {
-		return OfficeBuildingManager.startOfficeBuilding(null, PORT,
+		return OfficeBuildingManager.startOfficeBuilding(null, this.port,
 				this.keyStore, KEY_STORE_PASSWORD, MOCK_USER_NAME,
 				MOCK_PASSWORD, null, false, new Properties(), this.mbeanServer,
 				new String[0], false, this.remoteRepositoryUrls);
@@ -128,22 +138,22 @@ public class OfficeBuildingManagerTest extends OfficeFrameTestCase {
 
 		// Ensure OfficeBuilding is available
 		assertTrue("OfficeBuilding should be available",
-				OfficeBuildingManager.isOfficeBuildingAvailable(null, PORT,
-						this.keyStore, KEY_STORE_PASSWORD, MOCK_USER_NAME,
-						MOCK_PASSWORD));
+				OfficeBuildingManager.isOfficeBuildingAvailable(null,
+						this.port, this.keyStore, KEY_STORE_PASSWORD,
+						MOCK_USER_NAME, MOCK_PASSWORD));
 
 		// Ensure correct JMX Service URL
 		String actualServiceUrl = manager.getOfficeBuildingJmxServiceUrl();
 		String hostName = InetAddress.getLocalHost().getHostName();
 		String expectedServiceUrl = "service:jmx:rmi://" + hostName + ":"
-				+ PORT + "/jndi/rmi://" + hostName + ":" + PORT
+				+ this.port + "/jndi/rmi://" + hostName + ":" + this.port
 				+ "/OfficeBuilding";
 		assertEquals("Incorrect service url", expectedServiceUrl,
 				actualServiceUrl);
 
 		// Obtain the Office Building Manager MBean
 		OfficeBuildingManagerMBean managerMBean = OfficeBuildingManager
-				.getOfficeBuildingManager(hostName, PORT, this.keyStore,
+				.getOfficeBuildingManager(hostName, this.port, this.keyStore,
 						KEY_STORE_PASSWORD, MOCK_USER_NAME, MOCK_PASSWORD);
 
 		// Ensure start time is accurate
@@ -162,7 +172,7 @@ public class OfficeBuildingManagerTest extends OfficeFrameTestCase {
 		assertEquals("Incorrect MBean host name", hostName,
 				mbeanReportedHostName);
 		int mbeanReportedPort = managerMBean.getOfficeBuildingPort();
-		assertEquals("Incorrect MBean port", PORT, mbeanReportedPort);
+		assertEquals("Incorrect MBean port", this.port, mbeanReportedPort);
 
 		// Ensure no processes running
 		String processNamespaces = managerMBean.listProcessNamespaces();
@@ -170,9 +180,9 @@ public class OfficeBuildingManagerTest extends OfficeFrameTestCase {
 
 		// OfficeBuilding should still be available
 		assertTrue("OfficeBuilding should still be available",
-				OfficeBuildingManager.isOfficeBuildingAvailable(null, PORT,
-						this.keyStore, KEY_STORE_PASSWORD, MOCK_USER_NAME,
-						MOCK_PASSWORD));
+				OfficeBuildingManager.isOfficeBuildingAvailable(null,
+						this.port, this.keyStore, KEY_STORE_PASSWORD,
+						MOCK_USER_NAME, MOCK_PASSWORD));
 
 		// Stop the Office Building
 		String stopDetails = managerMBean.stopOfficeBuilding(10000);
@@ -182,9 +192,9 @@ public class OfficeBuildingManagerTest extends OfficeFrameTestCase {
 		// OfficeBuilding now not be available
 		assertFalse(
 				"OfficeBuilding should be stopped and therefore unavailable",
-				OfficeBuildingManager.isOfficeBuildingAvailable(null, PORT,
-						this.keyStore, KEY_STORE_PASSWORD, MOCK_USER_NAME,
-						MOCK_PASSWORD));
+				OfficeBuildingManager.isOfficeBuildingAvailable(null,
+						this.port, this.keyStore, KEY_STORE_PASSWORD,
+						MOCK_USER_NAME, MOCK_PASSWORD));
 	}
 
 	/**
@@ -297,7 +307,7 @@ public class OfficeBuildingManagerTest extends OfficeFrameTestCase {
 
 		// Obtain the manager MBean
 		OfficeBuildingManagerMBean buildingManager = OfficeBuildingManager
-				.getOfficeBuildingManager(null, PORT, this.keyStore,
+				.getOfficeBuildingManager(null, this.port, this.keyStore,
 						KEY_STORE_PASSWORD, MOCK_USER_NAME, MOCK_PASSWORD);
 
 		// Open the OfficeFloor
@@ -312,7 +322,7 @@ public class OfficeBuildingManagerTest extends OfficeFrameTestCase {
 
 		// Ensure OfficeFloor opened (obtaining local floor manager)
 		OfficeFloorManagerMBean localFloorManager = OfficeBuildingManager
-				.getOfficeFloorManager(null, PORT, processNamespace,
+				.getOfficeFloorManager(null, this.port, processNamespace,
 						this.keyStore, KEY_STORE_PASSWORD, MOCK_USER_NAME,
 						MOCK_PASSWORD);
 		assertEquals("Incorrect OfficeFloor location", officeFloorLocation,
@@ -320,13 +330,15 @@ public class OfficeBuildingManagerTest extends OfficeFrameTestCase {
 
 		// Obtain the local Process Manager MBean
 		ProcessManagerMBean processManager = OfficeBuildingManager
-				.getProcessManager(null, PORT, processNamespace, this.keyStore,
-						KEY_STORE_PASSWORD, MOCK_USER_NAME, MOCK_PASSWORD);
+				.getProcessManager(null, this.port, processNamespace,
+						this.keyStore, KEY_STORE_PASSWORD, MOCK_USER_NAME,
+						MOCK_PASSWORD);
 
 		// Obtain the local Process Shell MBean
 		ProcessShellMBean localProcessShell = OfficeBuildingManager
-				.getProcessShell(null, PORT, processNamespace, this.keyStore,
-						KEY_STORE_PASSWORD, MOCK_USER_NAME, MOCK_PASSWORD);
+				.getProcessShell(null, this.port, processNamespace,
+						this.keyStore, KEY_STORE_PASSWORD, MOCK_USER_NAME,
+						MOCK_PASSWORD);
 
 		// Validate the process host and port
 		String remoteHostName = processManager.getProcessHostName();
@@ -339,7 +351,7 @@ public class OfficeBuildingManagerTest extends OfficeFrameTestCase {
 				remotePort);
 
 		// Ensure OfficeFloor running
-		validateRemoteProcessRunning(remoteServiceUrl);
+		this.validateRemoteProcessRunning(remoteServiceUrl);
 
 		// Ensure the tasks are available
 		StringBuilder taskListing = new StringBuilder();
@@ -371,7 +383,7 @@ public class OfficeBuildingManagerTest extends OfficeFrameTestCase {
 				stopDetails);
 
 		// Ensure the OfficeFloor process is also stopped
-		validateRemoteProcessStopped(remoteServiceUrl);
+		this.validateRemoteProcessStopped(remoteServiceUrl);
 	}
 
 	/**
@@ -384,7 +396,7 @@ public class OfficeBuildingManagerTest extends OfficeFrameTestCase {
 
 		// Obtain the manager MBean
 		OfficeBuildingManagerMBean buildingManager = OfficeBuildingManager
-				.getOfficeBuildingManager(null, PORT, this.keyStore,
+				.getOfficeBuildingManager(null, this.port, this.keyStore,
 						KEY_STORE_PASSWORD, MOCK_USER_NAME, MOCK_PASSWORD);
 
 		// Open the OfficeFloor
@@ -395,7 +407,7 @@ public class OfficeBuildingManagerTest extends OfficeFrameTestCase {
 
 		// Ensure OfficeFloor opened (obtaining local floor manager)
 		OfficeFloorManagerMBean localFloorManager = OfficeBuildingManager
-				.getOfficeFloorManager(null, PORT, processNamespace,
+				.getOfficeFloorManager(null, this.port, processNamespace,
 						this.keyStore, KEY_STORE_PASSWORD, MOCK_USER_NAME,
 						MOCK_PASSWORD);
 		assertEquals("Incorrect OfficeFloor location", officeFloorLocation,
@@ -417,7 +429,7 @@ public class OfficeBuildingManagerTest extends OfficeFrameTestCase {
 				localProcessShell.getJmxConnectorServiceUrl());
 
 		// Ensure the OfficeFloor process is running
-		validateRemoteProcessRunning(remoteServiceUrl);
+		this.validateRemoteProcessRunning(remoteServiceUrl);
 
 		// Close the OfficeFloor
 		String closeText = buildingManager.closeOfficeFloor(processNamespace,
@@ -425,7 +437,10 @@ public class OfficeBuildingManagerTest extends OfficeFrameTestCase {
 		assertEquals("Should be closed", "Closed", closeText);
 
 		// Ensure the OfficeFloor process is closed
-		validateRemoteProcessStopped(remoteServiceUrl);
+		this.validateRemoteProcessStopped(remoteServiceUrl);
+
+		// Stop the building manager
+		buildingManager.stopOfficeBuilding(10000);
 	}
 
 	/**
@@ -433,11 +448,9 @@ public class OfficeBuildingManagerTest extends OfficeFrameTestCase {
 	 */
 	public void testSpawnOfficeBuilding() throws Exception {
 
-		final int SPAWN_PORT = PORT + 1;
-
 		// Spawn the OfficeBuilding
 		ProcessManager process = OfficeBuildingManager.spawnOfficeBuilding(
-				null, SPAWN_PORT, this.keyStore, KEY_STORE_PASSWORD,
+				null, this.port, this.keyStore, KEY_STORE_PASSWORD,
 				MOCK_USER_NAME, MOCK_PASSWORD, null, false, null, null, false,
 				new String[] { OfficeBuildingTestUtil.getUserLocalRepository()
 						.getAbsolutePath() }, null);
@@ -446,19 +459,19 @@ public class OfficeBuildingManagerTest extends OfficeFrameTestCase {
 			// Ensure the OfficeBuilding is available
 			assertTrue("OfficeBuilding should be available",
 					OfficeBuildingManager.isOfficeBuildingAvailable(null,
-							SPAWN_PORT, this.keyStore, KEY_STORE_PASSWORD,
+							this.port, this.keyStore, KEY_STORE_PASSWORD,
 							MOCK_USER_NAME, MOCK_PASSWORD));
 
 			// Stop the spawned OfficeBuilding
 			OfficeBuildingManagerMBean manager = OfficeBuildingManager
-					.getOfficeBuildingManager(null, SPAWN_PORT, this.keyStore,
+					.getOfficeBuildingManager(null, this.port, this.keyStore,
 							KEY_STORE_PASSWORD, MOCK_USER_NAME, MOCK_PASSWORD);
 			manager.stopOfficeBuilding(1000);
 
 			// Ensure the OfficeBuilding stopped
 			assertFalse("OfficeBuilding should be stopped",
 					OfficeBuildingManager.isOfficeBuildingAvailable(null,
-							SPAWN_PORT, this.keyStore, KEY_STORE_PASSWORD,
+							this.port, this.keyStore, KEY_STORE_PASSWORD,
 							MOCK_USER_NAME, MOCK_PASSWORD));
 
 		} finally {
@@ -483,10 +496,10 @@ public class OfficeBuildingManagerTest extends OfficeFrameTestCase {
 	 * @param serviceUrl
 	 *            {@link JMXServiceURL} to determine if running.
 	 */
-	private static void validateRemoteProcessRunning(JMXServiceURL serviceUrl)
+	private void validateRemoteProcessRunning(JMXServiceURL serviceUrl)
 			throws IOException {
 		try {
-			connectToJmxAgent(serviceUrl, false);
+			this.connectToJmxAgent(serviceUrl, false);
 			fail("Security should prevent connection to running remote process");
 		} catch (SecurityException ex) {
 			assertEquals("Incorrect cause", "Bad credentials", ex.getMessage());
@@ -499,7 +512,7 @@ public class OfficeBuildingManagerTest extends OfficeFrameTestCase {
 	 * @param serviceUrl
 	 *            {@link JMXServiceURL} to determine if stopped.
 	 */
-	private static void validateRemoteProcessStopped(JMXServiceURL serviceUrl)
+	private void validateRemoteProcessStopped(JMXServiceURL serviceUrl)
 			throws InterruptedException {
 
 		// Allow time for process to stop (10 seconds)
@@ -507,7 +520,7 @@ public class OfficeBuildingManagerTest extends OfficeFrameTestCase {
 		while (System.currentTimeMillis() < endTime) {
 
 			try {
-				connectToJmxAgent(serviceUrl, false);
+				this.connectToJmxAgent(serviceUrl, true);
 				fail("Should not connect to stopped remote process");
 
 			} catch (ConnectException ex) {
@@ -515,8 +528,16 @@ public class OfficeBuildingManagerTest extends OfficeFrameTestCase {
 						.getCause().getMessage());
 				return; // successfully identified as closed
 
+			} catch (UnmarshalException ex) {
+				assertTrue("Incorrect cause "
+						+ ex.getCause().getClass().getName(),
+						(ex.getCause() instanceof EOFException));
+				return; // successfully identified as closed
+
 			} catch (IOException ex) {
-				// Ignore and try again as process may not be fully stopped
+				fail("Should only be ConnectionException but was "
+						+ ex.getMessage() + " [" + ex.getClass().getName()
+						+ "]");
 			}
 
 			// Allow some time for process to complete
@@ -536,16 +557,18 @@ public class OfficeBuildingManagerTest extends OfficeFrameTestCase {
 	 *            Indicates if to provide security details to connect.
 	 * @return {@link JMXConnector}.
 	 */
-	private static JMXConnector connectToJmxAgent(JMXServiceURL serviceUrl,
+	private JMXConnector connectToJmxAgent(JMXServiceURL serviceUrl,
 			boolean isSecure) throws IOException {
 		Map<String, Object> environment = new HashMap<String, Object>();
 		if (isSecure) {
-			environment.put("com.sun.jndi.rmi.factory.socket",
-					new SslRMIClientSocketFactory());
+			byte[] keyStoreContent = OfficeBuildingRmiServerSocketFactory
+					.getKeyStoreContent(this.keyStore);
+			RMIClientSocketFactory socketFactory = new OfficeBuildingRmiClientSocketFactory(
+					keyStoreContent, KEY_STORE_PASSWORD);
+			environment.put("com.sun.jndi.rmi.factory.socket", socketFactory);
 			environment.put(JMXConnector.CREDENTIALS, new String[] {
 					MOCK_USER_NAME, MOCK_PASSWORD });
 		}
 		return JMXConnectorFactory.connect(serviceUrl, environment);
 	}
-
 }

@@ -31,6 +31,7 @@ import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.rmi.server.RMIClientSocketFactory;
 import java.rmi.server.RMIServerSocketFactory;
+import java.rmi.server.UnicastRemoteObject;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -51,8 +52,6 @@ import javax.management.remote.JMXConnectorServer;
 import javax.management.remote.JMXConnectorServerFactory;
 import javax.management.remote.JMXServiceURL;
 import javax.management.remote.rmi.RMIConnectorServer;
-import javax.rmi.ssl.SslRMIClientSocketFactory;
-import javax.rmi.ssl.SslRMIServerSocketFactory;
 
 import mx4j.tools.remote.PasswordAuthenticator;
 import net.officefloor.building.classpath.ClassPathFactory;
@@ -138,23 +137,6 @@ public class OfficeBuildingManager implements OfficeBuildingManagerMBean {
 	private static final String PROPERTY_RMI_CLIENT_SOCKET_FACTORY = "com.sun.jndi.rmi.factory.socket";
 
 	/**
-	 * Sets up trusting the JMX Agent.
-	 * 
-	 * @param trustStore
-	 *            {@link File} containing the trusted keys.
-	 * @param trustStorePassword
-	 *            Password to the trusted key {@link File}.
-	 */
-	private static void trustJmxAgent(File trustStore, String trustStorePassword) {
-		System.setProperty("javax.net.ssl.trustStore",
-				trustStore.getAbsolutePath());
-		if (trustStorePassword != null) {
-			System.setProperty("javax.net.ssl.trustStorePassword",
-					trustStorePassword);
-		}
-	}
-
-	/**
 	 * Starts the {@link OfficeBuilding}.
 	 * 
 	 * @param hostName
@@ -215,20 +197,10 @@ public class OfficeBuildingManager implements OfficeBuildingManagerMBean {
 			mbeanServer = ManagementFactory.getPlatformMBeanServer();
 		}
 
-		// Specify SSL connection details
-		String keyStoreLocation = keyStore.getAbsolutePath();
-		System.setProperty("javax.net.ssl.keyStore", keyStoreLocation);
-		if (keyStorePassword != null) {
-			System.setProperty("javax.net.ssl.keyStorePassword",
-					keyStorePassword);
-		}
-		trustJmxAgent(keyStore, keyStorePassword); // trust to register JMX
-
 		// Use host name (rather than IP address) for client JMX connections
 		if (hostName == null) {
 			hostName = InetAddress.getLocalHost().getHostName();
 		}
-		System.setProperty("java.rmi.server.hostname", hostName);
 
 		// Obtain the work space location
 		if (workspace == null) {
@@ -247,8 +219,12 @@ public class OfficeBuildingManager implements OfficeBuildingManagerMBean {
 		}
 
 		// Create the socket factories
-		RMIClientSocketFactory clientSocketFactory = new SslRMIClientSocketFactory();
-		RMIServerSocketFactory serverSocketFactory = new SslRMIServerSocketFactory();
+		byte[] keyStoreContent = OfficeBuildingRmiServerSocketFactory
+				.getKeyStoreContent(keyStore);
+		RMIClientSocketFactory clientSocketFactory = new OfficeBuildingRmiClientSocketFactory(
+				keyStoreContent, keyStorePassword);
+		RMIServerSocketFactory serverSocketFactory = new OfficeBuildingRmiServerSocketFactory(
+				keyStoreContent, keyStorePassword);
 
 		// Ensure have Registry on the port
 		Registry registry = LocateRegistry.getRegistry(null, port,
@@ -302,7 +278,7 @@ public class OfficeBuildingManager implements OfficeBuildingManagerMBean {
 
 		// Create the Office Building Manager
 		OfficeBuildingManager manager = new OfficeBuildingManager(startTime,
-				serviceUrl, connectorServer, mbeanServer, workspace,
+				serviceUrl, connectorServer, registry, mbeanServer, workspace,
 				isIsolateProcesses, environment, jvmOptions,
 				isAllowClassPathEntries, remoteRepositoryUrls);
 
@@ -407,16 +383,6 @@ public class OfficeBuildingManager implements OfficeBuildingManagerMBean {
 		if (configuration == null) {
 			configuration = new ProcessConfiguration();
 		}
-
-		// Add key and trust store (as must connect to self)
-		configuration.addJvmOption("-Djavax.net.ssl.keyStore="
-				+ keyStore.getAbsolutePath());
-		configuration.addJvmOption("-Djavax.net.ssl.keyStorePassword="
-				+ password);
-		configuration.addJvmOption("-Djavax.net.ssl.trustStore="
-				+ keyStore.getAbsolutePath());
-		configuration.addJvmOption("-Djavax.net.ssl.trustStorePassword="
-				+ password);
 
 		// Spawn the OfficeBuilding
 		ProcessManager manager = ProcessManager.startProcess(managedProcess,
@@ -641,15 +607,18 @@ public class OfficeBuildingManager implements OfficeBuildingManagerMBean {
 			String password, ObjectName mbeanName, Class<I> mbeanInterface)
 			throws IOException {
 
-		// Trust the JMX Agent
-		trustJmxAgent(trustStore, trustStorePassword);
+		// Create the client socket factory
+		byte[] trustStoreContent = OfficeBuildingRmiServerSocketFactory
+				.getKeyStoreContent(trustStore);
+		RMIClientSocketFactory clientSocketFactory = new OfficeBuildingRmiClientSocketFactory(
+				trustStoreContent, trustStorePassword);
 
 		// Obtain the MBean Server connection
 		JMXServiceURL serviceUrl = getOfficeBuildingJmxServiceUrl(hostName,
 				port);
 		Map<String, Object> environment = new HashMap<String, Object>();
-		environment.put(PROPERTY_RMI_CLIENT_SOCKET_FACTORY,
-				new SslRMIClientSocketFactory());
+		environment
+				.put(PROPERTY_RMI_CLIENT_SOCKET_FACTORY, clientSocketFactory);
 		environment.put(JMXConnector.CREDENTIALS, new String[] { userName,
 				password });
 		JMXConnector connector = JMXConnectorFactory.connect(serviceUrl,
@@ -730,6 +699,11 @@ public class OfficeBuildingManager implements OfficeBuildingManagerMBean {
 	private final JMXConnectorServer connectorServer;
 
 	/**
+	 * {@link Registry} for the {@link OfficeBuilding}.
+	 */
+	private final Registry registry;
+
+	/**
 	 * {@link MBeanServer}.
 	 */
 	private final MBeanServer mbeanServer;
@@ -780,6 +754,8 @@ public class OfficeBuildingManager implements OfficeBuildingManagerMBean {
 	 *            {@link OfficeBuilding} {@link JMXServiceURL}.
 	 * @param connectorServer
 	 *            {@link JMXConnectorServer} for the {@link OfficeBuilding}.
+	 * @param registry
+	 *            {@link Registry} for the {@link OfficeBuilding}.
 	 * @param mbeanServer
 	 *            {@link MBeanServer}.
 	 * @param workspace
@@ -800,13 +776,15 @@ public class OfficeBuildingManager implements OfficeBuildingManagerMBean {
 	 */
 	private OfficeBuildingManager(Date startTime,
 			JMXServiceURL officeBuildingServiceUrl,
-			JMXConnectorServer connectorServer, MBeanServer mbeanServer,
-			File workspace, boolean isIsolateProcesses, Properties environment,
+			JMXConnectorServer connectorServer, Registry registry,
+			MBeanServer mbeanServer, File workspace,
+			boolean isIsolateProcesses, Properties environment,
 			String[] jvmOptions, boolean isAllowClassPathEntries,
 			String[] remoteRepositoryUrls) {
 		this.startTime = startTime;
 		this.officeBuildingServiceUrl = officeBuildingServiceUrl;
 		this.connectorServer = connectorServer;
+		this.registry = registry;
 		this.mbeanServer = mbeanServer;
 		this.workspace = workspace;
 		this.isIsolateProcesses = isIsolateProcesses;
@@ -1298,6 +1276,9 @@ public class OfficeBuildingManager implements OfficeBuildingManagerMBean {
 
 				// Stop the connector server
 				this.connectorServer.stop();
+
+				// Unregister the registry (closes its port)
+				UnicastRemoteObject.unexportObject(this.registry, true);
 
 				// Unregister the Office Building Manager MBean
 				this.mbeanServer
