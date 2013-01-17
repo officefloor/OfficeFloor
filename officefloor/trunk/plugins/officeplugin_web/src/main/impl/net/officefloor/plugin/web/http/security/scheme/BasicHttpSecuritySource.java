@@ -121,8 +121,8 @@ public class BasicHttpSecuritySource
 		HttpAuthenticationScheme scheme = HttpAuthenticationScheme
 				.getHttpAuthenticationScheme(connection.getHttpRequest());
 		if ((scheme == null)
-				|| (AUTHENTICATION_SCHEME_BASIC.equalsIgnoreCase(scheme
-						.getAuthentiationScheme()))) {
+				|| (!(AUTHENTICATION_SCHEME_BASIC.equalsIgnoreCase(scheme
+						.getAuthentiationScheme())))) {
 
 			// No/incorrect authentication scheme, so send challenge
 			HttpResponse response = connection.getHttpResponse();
