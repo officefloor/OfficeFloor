@@ -87,9 +87,17 @@ public class HttpSecurityLoaderUtil {
 	 * Validates the {@link HttpSecurityType} contained in the
 	 * {@link HttpSecurityTypeBuilder} against the {@link HttpSecurityType}
 	 * loaded from the {@link HttpSecuritySource}.
+	 * 
+	 * @param expectedHttpSecurityType
+	 *            {@link HttpSecurityTypeBuilder}.
+	 * @param httpSecuritySourceClass
+	 *            {@link HttpSecuritySource} class.
+	 * @param propertyNameValues
+	 *            {@link Property} name/value pairs.
+	 * @return Validated {@link HttpSecurityType}.
 	 */
 	@SuppressWarnings("unchecked")
-	public static <S, C, D extends Enum<D>, F extends Enum<F>, HS extends HttpSecuritySource<S, C, D, F>> void validateHttpSecurityType(
+	public static <S, C, D extends Enum<D>, F extends Enum<F>, HS extends HttpSecuritySource<S, C, D, F>> HttpSecurityType<S, C, D, F> validateHttpSecurityType(
 			HttpSecurityTypeBuilder expectedHttpSecurityType,
 			Class<HS> httpSecuritySourceClass,
 			final String... propertyNameValues) {
@@ -116,18 +124,37 @@ public class HttpSecurityLoaderUtil {
 				});
 
 		// Ensure correct credentials class
-		PropertyList propertyList = getOfficeFloorCompiler(null)
-				.createPropertyList();
-		for (int i = 0; i < propertyNameValues.length; i += 2) {
-			String name = propertyNameValues[i];
-			String value = propertyNameValues[i + 1];
-			propertyList.addProperty(name).setValue(value);
-		}
-		HttpSecurityLoader securityLoader = getHttpSecurityLoader(null);
-		HttpSecurityType<?, ?, ?, ?> securityType = securityLoader
-				.loadHttpSecurityType(httpSecuritySource, propertyList);
+		HttpSecurityType<S, C, D, F> securityType = loadHttpSecurityType(
+				httpSecuritySource, propertyNameValues);
 		TestCase.assertEquals("Incorrect credentials class",
 				builder.credentialsClass, securityType.getCredentialsClass());
+
+		// Return the HTTP security type
+		return securityType;
+	}
+
+	/**
+	 * Convenience method to load the {@link HttpSecuritySource} initialised
+	 * ready for testing.
+	 * 
+	 * @param httpSecuritySourceClass
+	 *            {@link HttpSecuritySource} class.
+	 * @param propertyNameValues
+	 *            {@link Property} name/value pairs to initialise the
+	 *            {@link HttpSecuritySource}.
+	 * @return Initialised {@link HttpSecuritySource}.
+	 */
+	public static <S, C, D extends Enum<D>, F extends Enum<F>, HS extends HttpSecuritySource<S, C, D, F>> HS loadHttpSecuritySource(
+			Class<HS> httpSecuritySourceClass, String... propertyNameValues) {
+
+		// Create an instance of HTTP security source
+		HS httpSecuritySource = newHttpSecuritySource(httpSecuritySourceClass);
+
+		// Load the HTTP security type to initialise the HTTP security source
+		loadHttpSecurityType(httpSecuritySource, propertyNameValues);
+
+		// Return the HTTP security source
+		return httpSecuritySource;
 	}
 
 	/**
@@ -152,6 +179,37 @@ public class HttpSecurityLoaderUtil {
 
 		// Return the instance
 		return httpSecuritySource;
+	}
+
+	/**
+	 * Loads the {@link HttpSecurityType}.
+	 * 
+	 * @param httpSecuritySource
+	 *            {@link HttpSecuritySource}.
+	 * @param propertyNameValues
+	 *            {@link Property} name/value pairs.
+	 * @return {@link HttpSecurityType}.
+	 */
+	private static <S, C, D extends Enum<D>, F extends Enum<F>> HttpSecurityType<S, C, D, F> loadHttpSecurityType(
+			HttpSecuritySource<S, C, D, F> httpSecuritySource,
+			String... propertyNameValues) {
+
+		// Create the properties
+		PropertyList propertyList = getOfficeFloorCompiler(null)
+				.createPropertyList();
+		for (int i = 0; i < propertyNameValues.length; i += 2) {
+			String name = propertyNameValues[i];
+			String value = propertyNameValues[i + 1];
+			propertyList.addProperty(name).setValue(value);
+		}
+
+		// Load the HTTP security type
+		HttpSecurityLoader securityLoader = getHttpSecurityLoader(null);
+		HttpSecurityType<S, C, D, F> securityType = securityLoader
+				.loadHttpSecurityType(httpSecuritySource, propertyList);
+
+		// Return the HTTP security type
+		return securityType;
 	}
 
 	/**

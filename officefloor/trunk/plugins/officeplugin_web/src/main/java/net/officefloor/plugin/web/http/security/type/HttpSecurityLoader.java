@@ -46,8 +46,11 @@ public interface HttpSecurityLoader {
 			HttpSecuritySource<S, C, D, F> httpSecuritySource);
 
 	/**
+	 * <p>
 	 * Loads and returns the {@link HttpSecurityType} for the
 	 * {@link HttpSecuritySource}.
+	 * <p>
+	 * This method will also initialise the {@link HttpSecuritySource}.
 	 * 
 	 * @param httpSecuritySource
 	 *            {@link HttpSecuritySource} instance to use.
