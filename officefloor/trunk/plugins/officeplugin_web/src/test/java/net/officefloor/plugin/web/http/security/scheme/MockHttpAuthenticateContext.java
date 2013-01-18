@@ -150,8 +150,9 @@ public class MockHttpAuthenticateContext<S, C, D extends Enum<D>, F extends Enum
 	 * 
 	 * @param authorizationHeaderValue
 	 *            Authorization {@link HttpHeader} value.
+	 * @return {@link HttpRequest}.
 	 */
-	public void recordAuthorizationHeader(String authorizationHeaderValue) {
+	public HttpRequest recordAuthorizationHeader(String authorizationHeaderValue) {
 
 		// Record obtaining the HTTP request
 		HttpRequest httpRequest = this.recordGetHttpRequest();
@@ -164,6 +165,9 @@ public class MockHttpAuthenticateContext<S, C, D extends Enum<D>, F extends Enum
 		}
 		this.testCase.recordReturn(httpRequest, httpRequest.getHeaders(),
 				headers);
+
+		// Return the HTTP request
+		return httpRequest;
 	}
 
 	/**

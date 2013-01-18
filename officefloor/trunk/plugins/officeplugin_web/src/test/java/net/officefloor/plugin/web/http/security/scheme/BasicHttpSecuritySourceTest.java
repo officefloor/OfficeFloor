@@ -48,7 +48,7 @@ public class BasicHttpSecuritySourceTest extends OfficeFrameTestCase {
 	/**
 	 * {@link HttpAuthenticateContext}.
 	 */
-	private final MockHttpAuthenticateContext<HttpSecurity, Void, Dependencies, None> context = new MockHttpAuthenticateContext<HttpSecurity, Void, BasicHttpSecuritySource.Dependencies, None>(
+	private final MockHttpAuthenticateContext<HttpSecurity, Void, Dependencies, None> context = new MockHttpAuthenticateContext<HttpSecurity, Void, Dependencies, None>(
 			null, this);
 
 	/**
