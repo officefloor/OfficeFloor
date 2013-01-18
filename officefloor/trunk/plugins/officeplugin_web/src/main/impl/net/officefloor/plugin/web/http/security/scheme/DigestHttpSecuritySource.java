@@ -81,22 +81,6 @@ public class DigestHttpSecuritySource
 			+ DigestHttpSecuritySource.class.getName() + "#";
 
 	/**
-	 * Process access to the mock nonce for testing.
-	 */
-	protected static final String MOCK_NONCE = "dcd98b7102dd2f0e8b11d0f600bfb0c093";
-
-	/**
-	 * Process access to the mock opaque for testing.
-	 */
-	protected static final String MOCK_OPAQUE = "5ccc069c403ebaf9f0171e9517f40e41";
-
-	/**
-	 * Provides access to a mock {@link SecurityState} for testing.
-	 */
-	protected static final Object MOCK_SECURITY_STATE = new SecurityState(
-			MOCK_NONCE, MOCK_OPAQUE);
-
-	/**
 	 * Dependency keys.
 	 */
 	public static enum Dependencies {
@@ -322,22 +306,22 @@ public class DigestHttpSecuritySource
 
 		// Obtain the dependencies
 		ServerHttpConnection connection = context.getConnection();
+		HttpRequest request = connection.getHttpRequest();
 		HttpSession session = context.getSession();
 		CredentialStore store = (CredentialStore) context
 				.getObject(Dependencies.CREDENTIAL_STORE);
 
 		// Obtain the authentication scheme
 		HttpAuthenticationScheme scheme = HttpAuthenticationScheme
-				.getHttpAuthenticationScheme(connection.getHttpRequest());
+				.getHttpAuthenticationScheme(request);
 		if ((scheme == null)
-				|| (AUTHENTICATION_SCHEME_DIGEST.equalsIgnoreCase(scheme
-						.getAuthentiationScheme()))) {
+				|| (!(AUTHENTICATION_SCHEME_DIGEST.equalsIgnoreCase(scheme
+						.getAuthentiationScheme())))) {
 
 			// No authentication scheme, so send challenge
 			String algorithm = store.getAlgorithm();
 
 			// Obtain the ETag header value (if available)
-			HttpRequest request = connection.getHttpRequest();
 			String eTag = "";
 			for (HttpHeader header : request.getHeaders()) {
 				if ("ETag".equalsIgnoreCase(header.getName())) {
@@ -378,6 +362,9 @@ public class DigestHttpSecuritySource
 			// Record details for authentication
 			session.setAttribute(SECURITY_STATE_SESSION_KEY, new SecurityState(
 					nonce, opaque));
+
+			// Challenge loaded
+			return;
 		}
 
 		// Authenticate Digest as per RFC2617
@@ -462,7 +449,6 @@ public class DigestHttpSecuritySource
 		}
 
 		// Obtain the method
-		HttpRequest request = connection.getHttpRequest();
 		String httpMethod = request.getMethod();
 
 		// Calculate A2 value
@@ -522,6 +508,28 @@ public class DigestHttpSecuritySource
 		// Authenticated, so provide the HTTP security
 		context.setHttpSecurity(new HttpSecurityImpl(
 				AUTHENTICATION_SCHEME_DIGEST, username, roles));
+	}
+
+	/**
+	 * Allows mocking {@link SecurityState} for testing.
+	 */
+	public static class Mock {
+
+		/**
+		 * Process access to the mock nonce for testing.
+		 */
+		protected static final String MOCK_NONCE = "dcd98b7102dd2f0e8b11d0f600bfb0c093";
+
+		/**
+		 * Process access to the mock opaque for testing.
+		 */
+		protected static final String MOCK_OPAQUE = "5ccc069c403ebaf9f0171e9517f40e41";
+
+		/**
+		 * Provides access to a mock {@link SecurityState} for testing.
+		 */
+		protected static final Object MOCK_SECURITY_STATE = new SecurityState(
+				MOCK_NONCE, MOCK_OPAQUE);
 	}
 
 	/**
