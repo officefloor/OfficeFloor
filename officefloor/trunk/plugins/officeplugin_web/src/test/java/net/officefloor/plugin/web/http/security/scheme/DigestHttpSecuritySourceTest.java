@@ -65,7 +65,7 @@ public class DigestHttpSecuritySourceTest extends OfficeFrameTestCase {
 	/**
 	 * {@link HttpAuthenticateContext}.
 	 */
-	private final MockHttpAuthenticateContext<HttpSecurity, Void, Dependencies, None> context = new MockHttpAuthenticateContext<HttpSecurity, Void, Dependencies, None>(
+	private final MockHttpAuthenticateContext<HttpSecurity, Void, Dependencies> authenticationContext = new MockHttpAuthenticateContext<HttpSecurity, Void, Dependencies>(
 			null, this);
 
 	/**
@@ -82,7 +82,8 @@ public class DigestHttpSecuritySourceTest extends OfficeFrameTestCase {
 
 	@Override
 	protected void setUp() throws Exception {
-		this.context.registerObject(Dependencies.CREDENTIAL_STORE, this.store);
+		this.authenticationContext.registerObject(
+				Dependencies.CREDENTIAL_STORE, this.store);
 	}
 
 	/**
@@ -119,12 +120,17 @@ public class DigestHttpSecuritySourceTest extends OfficeFrameTestCase {
 	 */
 	public void testChallenge() throws Exception {
 
+		final MockHttpChallengeContext<Dependencies, None> challengeContext = new MockHttpChallengeContext<Dependencies, None>(
+				this);
+		challengeContext.registerObject(Dependencies.CREDENTIAL_STORE,
+				this.store);
+
 		// Mock
 		final HttpHeader header = this.createMock(HttpHeader.class);
 		MockDigestHttpSecuritySource.timestamp = "Test Timestamp";
 		MockDigestHttpSecuritySource.opaqueSeed = "Test Opaque";
 		final String eTag = "Test ETag";
-		final HttpSession session = this.context.getSession();
+		final HttpSession session = challengeContext.getSession();
 
 		// Create the expected nonce
 		byte[] nonceDigest = this.createDigest(ALGORITHM,
@@ -139,7 +145,7 @@ public class DigestHttpSecuritySourceTest extends OfficeFrameTestCase {
 				HttpRequestParserImpl.US_ASCII);
 
 		// Record
-		HttpRequest request = this.context.recordAuthorizationHeader(null);
+		HttpRequest request = challengeContext.recordGetHttpRequest();
 		this.recordReturn(this.store, this.store.getAlgorithm(), ALGORITHM);
 		this.recordReturn(request, request.getHeaders(), Arrays.asList(header));
 		this.recordReturn(header, header.getName(), "ETag");
@@ -154,13 +160,63 @@ public class DigestHttpSecuritySourceTest extends OfficeFrameTestCase {
 				return true;
 			}
 		});
-		this.context.recordAuthenticateChallenge("Digest realm=\"" + REALM
+		challengeContext.recordAuthenticateChallenge("Digest realm=\"" + REALM
 				+ "\", qop=\"auth,auth-int\"," + " nonce=\"" + nonce + "\","
 				+ " opaque=\"" + opaque + "\"," + " algorithm=\"" + ALGORITHM
 				+ "\"");
 
 		// Test
-		this.doAuthenticate(this.context, null);
+		this.replayMockObjects();
+
+		// Create and initialise the source
+		DigestHttpSecuritySource source = HttpSecurityLoaderUtil
+				.loadHttpSecuritySource(MockDigestHttpSecuritySource.class,
+						DigestHttpSecuritySource.PROPERTY_REALM, REALM,
+						DigestHttpSecuritySource.PROPERTY_PRIVATE_KEY,
+						PRIVATE_KEY);
+
+		// Undertake the challenge
+		source.challenge(challengeContext);
+
+		// Verify mock objects
+		this.verifyMockObjects();
+	}
+
+	/**
+	 * Ensure not authenticated if no authorization header.
+	 */
+	public void testNoAuthorizationHeader() throws Exception {
+
+		// Record no authorization header
+		this.authenticationContext.recordAuthorizationHeader(null);
+
+		// Test
+		this.doAuthenticate(null);
+	}
+
+	/**
+	 * Ensure handle incorrect authentication scheme.
+	 */
+	public void testIncorrectAuthenticationScheme() throws Exception {
+
+		// Record authenticate
+		this.authenticationContext
+				.recordAuthorizationHeader("Incorrect parameters=\"should no be used\"");
+
+		// Test
+		this.doAuthenticate(null);
+	}
+
+	/**
+	 * Ensure handle invalid Base64 encoding.
+	 */
+	public void testInvalidAuthorizationHeader() throws Exception {
+
+		// Record authenticate
+		this.authenticationContext.recordAuthorizationHeader("Basic wrong");
+
+		// Test
+		this.doAuthenticate(null);
 	}
 
 	/**
@@ -171,10 +227,10 @@ public class DigestHttpSecuritySourceTest extends OfficeFrameTestCase {
 		// Mock values
 		final byte[] digest = this.createDigest(ALGORITHM, "Mufasa", REALM,
 				"Circle Of Life");
-		final HttpSession session = this.context.getSession();
+		final HttpSession session = this.authenticationContext.getSession();
 
 		// Record authentication
-		HttpRequest request = this.context
+		HttpRequest request = this.authenticationContext
 				.recordAuthorizationHeader("Digest username=\"Mufasa\", realm=\""
 						+ REALM
 						+ "\", nonce=\"dcd98b7102dd2f0e8b11d0f600bfb0c093\","
@@ -195,7 +251,7 @@ public class DigestHttpSecuritySourceTest extends OfficeFrameTestCase {
 				new HashSet<String>(Arrays.asList("prince")));
 
 		// Test
-		this.doAuthenticate(this.context, "Mufasa", "prince");
+		this.doAuthenticate("Mufasa", "prince");
 	}
 
 	/**
@@ -238,17 +294,14 @@ public class DigestHttpSecuritySourceTest extends OfficeFrameTestCase {
 	/**
 	 * Undertakes the authentication.
 	 * 
-	 * @param context
-	 *            {@link HttpAuthenticateContext}.
 	 * @param userName
 	 *            User name if authenticated. <code>null</code> if not
 	 *            authenticated.
 	 * @param roles
 	 *            Expected roles.
 	 */
-	private void doAuthenticate(
-			HttpAuthenticateContext<HttpSecurity, Void, Dependencies, None> context,
-			String userName, String... roles) throws IOException {
+	private void doAuthenticate(String userName, String... roles)
+			throws IOException {
 
 		// Replay mock objects
 		this.replayMockObjects();
@@ -261,13 +314,13 @@ public class DigestHttpSecuritySourceTest extends OfficeFrameTestCase {
 						PRIVATE_KEY);
 
 		// Undertake the authenticate
-		source.authenticate(context);
+		source.authenticate(this.authenticationContext);
 
 		// Verify mock objects
 		this.verifyMockObjects();
 
 		// Validate authentication
-		HttpSecurity security = this.context.getHttpSecurity();
+		HttpSecurity security = this.authenticationContext.getHttpSecurity();
 		if (userName == null) {
 			assertNull("Should not be authenticated", security);
 
@@ -280,8 +333,8 @@ public class DigestHttpSecuritySourceTest extends OfficeFrameTestCase {
 			assertEquals("Incorrect principle", userName, security
 					.getUserPrincipal().getName());
 			for (String role : roles) {
-				assertTrue("Should have role: " + role, this.context
-						.getHttpSecurity().isUserInRole(role));
+				assertTrue("Should have role: " + role,
+						security.isUserInRole(role));
 			}
 		}
 	}

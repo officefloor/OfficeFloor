@@ -22,8 +22,6 @@ import net.officefloor.compile.managedobject.ManagedObjectFlowType;
 import net.officefloor.compile.managedobject.ManagedObjectLoader;
 import net.officefloor.compile.managedobject.ManagedObjectType;
 import net.officefloor.compile.properties.PropertyList;
-import net.officefloor.plugin.web.http.security.AdaptFactory;
-import net.officefloor.plugin.web.http.security.HttpSecurityManagedObjectAdapterSource;
 import net.officefloor.plugin.web.http.security.HttpSecuritySource;
 
 /**

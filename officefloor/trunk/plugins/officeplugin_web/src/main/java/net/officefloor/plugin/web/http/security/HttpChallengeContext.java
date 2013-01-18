@@ -17,49 +17,45 @@
  */
 package net.officefloor.plugin.web.http.security;
 
+import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
+import net.officefloor.plugin.web.http.session.HttpSession;
+
 /**
- * {@link HttpSecuritySourceProperty} implementation.
+ * Context for triggering a challenge.
  * 
  * @author Daniel Sagenschneider
  */
-public class HttpSecuritySourcePropertyImpl implements
-		HttpSecuritySourceProperty {
+public interface HttpChallengeContext<D extends Enum<D>, F extends Enum<F>> {
 
 	/**
-	 * Name of property.
-	 */
-	protected final String name;
-
-	/**
-	 * Label of property.
-	 */
-	protected final String label;
-
-	/**
-	 * Initiate with name and label of property.
+	 * Obtains the {@link ServerHttpConnection} to be secured.
 	 * 
-	 * @param name
-	 *            Name of property.
-	 * @param label
-	 *            Label of property.
+	 * @return {@link ServerHttpConnection}.
 	 */
-	public HttpSecuritySourcePropertyImpl(String name, String label) {
-		this.name = name;
-		this.label = label;
-	}
+	ServerHttpConnection getConnection();
 
-	/*
-	 * ================== HttpSecuritySourceProperty ==============
+	/**
+	 * Obtains the {@link HttpSession}.
+	 * 
+	 * @return {@link HttpSession}.
 	 */
+	HttpSession getSession();
 
-	@Override
-	public String getName() {
-		return this.name;
-	}
+	/**
+	 * Obtains a dependency.
+	 * 
+	 * @param key
+	 *            Key for the dependency.
+	 * @return Dependency.
+	 */
+	Object getObject(D key);
 
-	@Override
-	public String getLabel() {
-		return this.label;
-	}
+	/**
+	 * Undertakes a flow.
+	 * 
+	 * @param key
+	 *            Key identifying the flow.
+	 */
+	void doFlow(F key);
 
 }

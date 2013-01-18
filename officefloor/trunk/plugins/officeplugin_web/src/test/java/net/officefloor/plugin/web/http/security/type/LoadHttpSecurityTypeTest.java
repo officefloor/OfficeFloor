@@ -17,6 +17,7 @@
  */
 package net.officefloor.plugin.web.http.security.type;
 
+import java.io.IOException;
 import java.sql.Connection;
 import java.util.Properties;
 
@@ -32,6 +33,7 @@ import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
 import net.officefloor.frame.spi.TestSource;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.web.http.security.HttpAuthenticateContext;
+import net.officefloor.plugin.web.http.security.HttpChallengeContext;
 import net.officefloor.plugin.web.http.security.HttpCredentials;
 import net.officefloor.plugin.web.http.security.HttpSecurity;
 import net.officefloor.plugin.web.http.security.HttpSecurityDependencyMetaData;
@@ -1037,6 +1039,12 @@ public class LoadHttpSecurityTypeTest extends OfficeFrameTestCase {
 		}
 
 		@Override
+		public void challenge(HttpChallengeContext<None, None> context)
+				throws IOException {
+			fail("Should not be invoked for loading type");
+		}
+
+		@Override
 		public HttpSecurity retrieveCached(HttpSession session) {
 			fail("Should not be invoked for loading type");
 			return null;
@@ -1044,7 +1052,7 @@ public class LoadHttpSecurityTypeTest extends OfficeFrameTestCase {
 
 		@Override
 		public void authenticate(
-				HttpAuthenticateContext<HttpSecurity, HttpCredentials, None, None> context) {
+				HttpAuthenticateContext<HttpSecurity, HttpCredentials, None> context) {
 			fail("Should not be invoked for loading type");
 		}
 	}
