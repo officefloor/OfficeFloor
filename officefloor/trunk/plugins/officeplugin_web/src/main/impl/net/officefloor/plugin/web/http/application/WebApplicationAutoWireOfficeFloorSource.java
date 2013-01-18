@@ -42,6 +42,7 @@ import net.officefloor.plugin.web.http.location.HttpApplicationLocation;
 import net.officefloor.plugin.web.http.location.HttpApplicationLocationManagedObjectSource;
 import net.officefloor.plugin.web.http.location.InvalidHttpRequestUriException;
 import net.officefloor.plugin.web.http.resource.source.SourceHttpResourceFactory;
+import net.officefloor.plugin.web.http.security.HttpSecuritySource;
 import net.officefloor.plugin.web.http.session.object.HttpSessionObjectManagedObjectSource;
 import net.officefloor.plugin.web.http.template.HttpTemplateWorkSource;
 import net.officefloor.plugin.web.http.template.parse.HttpTemplate;
@@ -264,6 +265,14 @@ public class WebApplicationAutoWireOfficeFloorSource extends
 	@Override
 	public void setDefaultHttpTemplateUriSuffix(String uriSuffix) {
 		this.defaultTemplateUriSuffix = uriSuffix;
+	}
+
+	@Override
+	public HttpSecurityAutoWireSection setHttpSecurity(
+			Class<? extends HttpSecuritySource<?, ?, ?, ?>> httpSecuritySourceClass) {
+		// TODO implement WebAutoWireApplication.setHttpSecurity
+		throw new UnsupportedOperationException(
+				"TODO implement WebAutoWireApplication.setHttpSecurity");
 	}
 
 	@Override
@@ -496,6 +505,9 @@ public class WebApplicationAutoWireOfficeFloorSource extends
 			HttpApplicationLocationManagedObjectSource.copyProperties(context,
 					location);
 		}
+
+		// Load the HTTP security
+		// TODO load security
 
 		// Chain the servicers
 		AutoWireSection previousChainedSection = httpSection;

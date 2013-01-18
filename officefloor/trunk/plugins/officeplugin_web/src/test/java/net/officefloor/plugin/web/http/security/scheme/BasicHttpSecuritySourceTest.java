@@ -48,7 +48,7 @@ public class BasicHttpSecuritySourceTest extends OfficeFrameTestCase {
 	/**
 	 * {@link HttpAuthenticateContext}.
 	 */
-	private final MockHttpAuthenticateContext<HttpSecurity, Void, Dependencies, None> context = new MockHttpAuthenticateContext<HttpSecurity, Void, Dependencies, None>(
+	private final MockHttpAuthenticateContext<HttpSecurity, Void, Dependencies> authenticationContext = new MockHttpAuthenticateContext<HttpSecurity, Void, Dependencies>(
 			null, this);
 
 	/**
@@ -65,7 +65,8 @@ public class BasicHttpSecuritySourceTest extends OfficeFrameTestCase {
 
 	@Override
 	protected void setUp() throws Exception {
-		this.context.registerObject(Dependencies.CREDENTIAL_STORE, this.store);
+		this.authenticationContext.registerObject(
+				Dependencies.CREDENTIAL_STORE, this.store);
 	}
 
 	/**
@@ -100,13 +101,65 @@ public class BasicHttpSecuritySourceTest extends OfficeFrameTestCase {
 	 */
 	public void testChallenge() throws IOException {
 
+		final MockHttpChallengeContext<Dependencies, None> challengeContext = new MockHttpChallengeContext<Dependencies, None>(
+				this);
+		challengeContext.registerObject(Dependencies.CREDENTIAL_STORE,
+				this.store);
+
 		// Record the challenge
-		this.context.recordAuthorizationHeader(null);
-		this.context.recordAuthenticateChallenge("Basic realm=\"" + REALM
+		challengeContext.recordAuthenticateChallenge("Basic realm=\"" + REALM
 				+ "\"");
 
 		// Test
-		this.doAuthenticate(this.context, null);
+		this.replayMockObjects();
+
+		// Create and initialise the source
+		BasicHttpSecuritySource source = HttpSecurityLoaderUtil
+				.loadHttpSecuritySource(BasicHttpSecuritySource.class,
+						BasicHttpSecuritySource.PROPERTY_REALM, REALM);
+
+		// Undertake the challenge
+		source.challenge(challengeContext);
+
+		// Verify mock objects
+		this.verifyMockObjects();
+	}
+
+	/**
+	 * Ensure not authenticated with no authorization header.
+	 */
+	public void testNoAuthorizationHeader() throws Exception {
+
+		// Record no authorization header
+		this.authenticationContext.recordAuthorizationHeader(null);
+
+		// Test
+		this.doAuthenticate(null);
+	}
+
+	/**
+	 * Ensure handle incorrect authentication scheme.
+	 */
+	public void testIncorrectAuthenticationScheme() throws Exception {
+
+		// Record authenticate
+		this.authenticationContext
+				.recordAuthorizationHeader("Incorrect QWxhZGRpbjpvcGVuIHNlc2FtZQ==");
+
+		// Test
+		this.doAuthenticate(null);
+	}
+
+	/**
+	 * Ensure handle invalid Base64 encoding.
+	 */
+	public void testInvalidAuthorizationHeader() throws Exception {
+
+		// Record authenticate
+		this.authenticationContext.recordAuthorizationHeader("Basic wrong");
+
+		// Test
+		this.doAuthenticate(null);
 	}
 
 	/**
@@ -115,7 +168,7 @@ public class BasicHttpSecuritySourceTest extends OfficeFrameTestCase {
 	public void testSimpleAuthenticate() throws Exception {
 
 		// Record simple authenticate
-		this.context
+		this.authenticationContext
 				.recordAuthorizationHeader("Basic QWxhZGRpbjpvcGVuIHNlc2FtZQ==");
 		this.recordReturn(this.store,
 				this.store.retrieveCredentialEntry("Aladdin", REALM),
@@ -127,7 +180,7 @@ public class BasicHttpSecuritySourceTest extends OfficeFrameTestCase {
 				new HashSet<String>(Arrays.asList("prince")));
 
 		// Test
-		this.doAuthenticate(this.context, "Aladdin", "prince");
+		this.doAuthenticate("Aladdin", "prince");
 	}
 
 	/**
@@ -141,7 +194,7 @@ public class BasicHttpSecuritySourceTest extends OfficeFrameTestCase {
 		byte[] credentials = digest.digest();
 
 		// Record authentication with algorithm
-		this.context
+		this.authenticationContext
 				.recordAuthorizationHeader("Basic QWxhZGRpbjpvcGVuIHNlc2FtZQ==");
 		this.recordReturn(this.store,
 				this.store.retrieveCredentialEntry("Aladdin", REALM),
@@ -153,7 +206,7 @@ public class BasicHttpSecuritySourceTest extends OfficeFrameTestCase {
 				new HashSet<String>(Arrays.asList("prince")));
 
 		// Test
-		this.doAuthenticate(this.context, "Aladdin", "prince");
+		this.doAuthenticate("Aladdin", "prince");
 	}
 
 	/**
@@ -162,7 +215,7 @@ public class BasicHttpSecuritySourceTest extends OfficeFrameTestCase {
 	public void testExtraSpacing() throws Exception {
 
 		// Record authenticate
-		this.context
+		this.authenticationContext
 				.recordAuthorizationHeader("  Basic    QWxhZGRpbjpvcGVuIHNlc2FtZQ==  ");
 		this.recordReturn(this.store,
 				this.store.retrieveCredentialEntry("Aladdin", REALM),
@@ -175,35 +228,20 @@ public class BasicHttpSecuritySourceTest extends OfficeFrameTestCase {
 				new HashSet<String>(Arrays.asList("prince")));
 
 		// Test
-		this.doAuthenticate(this.context, "Aladdin", "prince");
-	}
-
-	/**
-	 * Ensure handle invalid Base64 encoding.
-	 */
-	public void testInvalidBase64() throws Exception {
-
-		// Record authenticate
-		this.context.recordAuthorizationHeader("Basic wrong");
-
-		// Test
-		this.doAuthenticate(this.context, null);
+		this.doAuthenticate("Aladdin", "prince");
 	}
 
 	/**
 	 * Undertakes the authentication.
 	 * 
-	 * @param context
-	 *            {@link HttpAuthenticateContext}.
 	 * @param userName
 	 *            User name if authenticated. <code>null</code> if not
 	 *            authenticated.
 	 * @param roles
 	 *            Expected roles.
 	 */
-	private void doAuthenticate(
-			HttpAuthenticateContext<HttpSecurity, Void, Dependencies, None> context,
-			String userName, String... roles) throws IOException {
+	private void doAuthenticate(String userName, String... roles)
+			throws IOException {
 
 		// Replay mock objects
 		this.replayMockObjects();
@@ -214,13 +252,13 @@ public class BasicHttpSecuritySourceTest extends OfficeFrameTestCase {
 						BasicHttpSecuritySource.PROPERTY_REALM, REALM);
 
 		// Undertake the authenticate
-		source.authenticate(context);
+		source.authenticate(this.authenticationContext);
 
 		// Verify mock objects
 		this.verifyMockObjects();
 
 		// Validate authentication
-		HttpSecurity security = this.context.getHttpSecurity();
+		HttpSecurity security = this.authenticationContext.getHttpSecurity();
 		if (userName == null) {
 			assertNull("Should not be authenticated", security);
 
@@ -233,8 +271,8 @@ public class BasicHttpSecuritySourceTest extends OfficeFrameTestCase {
 			assertEquals("Incorrect principle", userName, security
 					.getUserPrincipal().getName());
 			for (String role : roles) {
-				assertTrue("Should have role: " + role, this.context
-						.getHttpSecurity().isUserInRole(role));
+				assertTrue("Should have role: " + role,
+						security.isUserInRole(role));
 			}
 		}
 	}

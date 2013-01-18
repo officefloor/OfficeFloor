@@ -26,6 +26,7 @@ import net.officefloor.compile.spi.office.OfficeSectionOutput;
 import net.officefloor.frame.api.escalate.Escalation;
 import net.officefloor.plugin.socket.server.http.HttpRequest;
 import net.officefloor.plugin.socket.server.http.HttpResponse;
+import net.officefloor.plugin.web.http.security.HttpSecuritySource;
 import net.officefloor.plugin.web.http.session.HttpSession;
 import net.officefloor.plugin.web.http.template.parse.HttpTemplate;
 
@@ -78,6 +79,17 @@ public interface WebAutoWireApplication extends AutoWireApplication {
 	 *            Default {@link HttpTemplate} URI suffix.
 	 */
 	void setDefaultHttpTemplateUriSuffix(String uriSuffix);
+
+	/**
+	 * Specifies the {@link HttpSecuritySource} for this
+	 * {@link WebAutoWireApplication}.
+	 * 
+	 * @param httpSecuritySourceClass
+	 *            {@link HttpSecuritySource} {@link Class}.
+	 * @return {@link HttpSecurityAutoWireSection}.
+	 */
+	HttpSecurityAutoWireSection setHttpSecurity(
+			Class<? extends HttpSecuritySource<?, ?, ?, ?>> httpSecuritySourceClass);
 
 	/**
 	 * Adds an object to be lazily created and stored within the

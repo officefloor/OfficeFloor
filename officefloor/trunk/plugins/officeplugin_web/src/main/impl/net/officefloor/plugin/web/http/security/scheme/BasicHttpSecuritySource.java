@@ -28,11 +28,12 @@ import net.officefloor.plugin.socket.server.http.HttpResponse;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
 import net.officefloor.plugin.socket.server.http.parse.impl.HttpRequestParserImpl;
 import net.officefloor.plugin.socket.server.http.protocol.HttpStatus;
-import net.officefloor.plugin.web.http.security.AbstractHttpSecuritySource;
 import net.officefloor.plugin.web.http.security.HttpAuthenticateContext;
+import net.officefloor.plugin.web.http.security.HttpChallengeContext;
 import net.officefloor.plugin.web.http.security.HttpSecurity;
 import net.officefloor.plugin.web.http.security.HttpSecuritySource;
 import net.officefloor.plugin.web.http.security.HttpSecuritySourceContext;
+import net.officefloor.plugin.web.http.security.impl.AbstractHttpSecuritySource;
 import net.officefloor.plugin.web.http.security.store.CredentialEntry;
 import net.officefloor.plugin.web.http.security.store.CredentialStore;
 import net.officefloor.plugin.web.http.security.store.CredentialStoreUtil;
@@ -102,6 +103,17 @@ public class BasicHttpSecuritySource
 	}
 
 	@Override
+	public void challenge(HttpChallengeContext<Dependencies, None> context)
+			throws IOException {
+
+		// Load the challenge
+		HttpResponse response = context.getConnection().getHttpResponse();
+		response.setStatus(HttpStatus.SC_UNAUTHORIZED);
+		response.addHeader("WWW-Authenticate", AUTHENTICATION_SCHEME_BASIC
+				+ " realm=\"" + this.realm + "\"");
+	}
+
+	@Override
 	public HttpSecurity retrieveCached(HttpSession session) {
 		// TODO implement
 		// HttpSecuritySource<HttpSecurity,Void,Dependencies,None>.retrieveCached
@@ -111,7 +123,7 @@ public class BasicHttpSecuritySource
 
 	@Override
 	public void authenticate(
-			HttpAuthenticateContext<HttpSecurity, Void, Dependencies, None> context)
+			HttpAuthenticateContext<HttpSecurity, Void, Dependencies> context)
 			throws IOException {
 
 		// Obtain the connection
@@ -123,15 +135,7 @@ public class BasicHttpSecuritySource
 		if ((scheme == null)
 				|| (!(AUTHENTICATION_SCHEME_BASIC.equalsIgnoreCase(scheme
 						.getAuthentiationScheme())))) {
-
-			// No/incorrect authentication scheme, so send challenge
-			HttpResponse response = connection.getHttpResponse();
-
-			// Load the challenge
-			response.setStatus(HttpStatus.SC_UNAUTHORIZED);
-			response.addHeader("WWW-Authenticate", AUTHENTICATION_SCHEME_BASIC
-					+ " realm=\"" + this.realm + "\"");
-			return;
+			return; // no/incorrect authentication scheme
 		}
 
 		// Decode Base64 credentials into userId:password text

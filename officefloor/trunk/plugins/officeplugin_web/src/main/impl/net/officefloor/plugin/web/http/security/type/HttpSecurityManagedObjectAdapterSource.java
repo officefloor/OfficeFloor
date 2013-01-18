@@ -15,7 +15,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.plugin.web.http.security;
+package net.officefloor.plugin.web.http.security.type;
 
 import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.impl.construct.source.SourceContextImpl;
@@ -30,6 +30,13 @@ import net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceMetaDat
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceProperty;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceSpecification;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectUser;
+import net.officefloor.plugin.web.http.security.HttpSecurityDependencyMetaData;
+import net.officefloor.plugin.web.http.security.HttpSecurityFlowMetaData;
+import net.officefloor.plugin.web.http.security.HttpSecuritySource;
+import net.officefloor.plugin.web.http.security.HttpSecuritySourceContext;
+import net.officefloor.plugin.web.http.security.HttpSecuritySourceMetaData;
+import net.officefloor.plugin.web.http.security.HttpSecuritySourceProperty;
+import net.officefloor.plugin.web.http.security.HttpSecuritySourceSpecification;
 
 /**
  * Adapts the {@link HttpSecuritySource} to be a {@link ManagedObjectSource}.
@@ -158,23 +165,23 @@ public class HttpSecurityManagedObjectAdapterSource<D extends Enum<D>>
 	@Override
 	public void start(ManagedObjectExecuteContext<Indexed> context)
 			throws Exception {
-		// TODO implement ManagedObjectSource<D,F>.start
-		throw new UnsupportedOperationException(
-				"TODO implement ManagedObjectSource<D,F>.start");
+		throw new IllegalStateException(this.getClass().getName()
+				+ " should only be used for loading the "
+				+ HttpSecurityType.class.getSimpleName());
 	}
 
 	@Override
 	public void sourceManagedObject(ManagedObjectUser user) {
-		// TODO implement ManagedObjectSource<D,F>.sourceManagedObject
-		throw new UnsupportedOperationException(
-				"TODO implement ManagedObjectSource<D,F>.sourceManagedObject");
+		throw new IllegalStateException(this.getClass().getName()
+				+ " should only be used for loading the "
+				+ HttpSecurityType.class.getSimpleName());
 	}
 
 	@Override
 	public void stop() {
-		// TODO implement ManagedObjectSource<D,F>.stop
-		throw new UnsupportedOperationException(
-				"TODO implement ManagedObjectSource<D,F>.stop");
+		throw new IllegalStateException(this.getClass().getName()
+				+ " should only be used for loading the "
+				+ HttpSecurityType.class.getSimpleName());
 	}
 
 	/**

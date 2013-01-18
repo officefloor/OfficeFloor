@@ -71,12 +71,22 @@ public interface HttpSecuritySource<S, C, D extends Enum<D>, F extends Enum<F>> 
 	HttpSecuritySourceMetaData<S, C, D, F> getMetaData();
 
 	/**
-	 * Retrieves the cached security object.
+	 * Triggers the authentication challenge to the client.
+	 * 
+	 * @param context
+	 *            {@link HttpChallengeContext}.
+	 * @throws IOException
+	 *             If failure in communicating to necessary security services.
+	 */
+	void challenge(HttpChallengeContext<D, F> context) throws IOException;
+
+	/**
+	 * Retrieves the cached HTTP security.
 	 * 
 	 * @param session
 	 *            {@link HttpSession}.
-	 * @return Security object. Value of <code>null</code> indicates the
-	 *         security object was not cached.
+	 * @return HTTP security. Value of <code>null</code> indicates the HTTP
+	 *         security was not cached.
 	 */
 	S retrieveCached(HttpSession session);
 
@@ -88,7 +98,7 @@ public interface HttpSecuritySource<S, C, D extends Enum<D>, F extends Enum<F>> 
 	 * @throws IOException
 	 *             If failure in communicating to necessary security services.
 	 */
-	void authenticate(HttpAuthenticateContext<S, C, D, F> context)
+	void authenticate(HttpAuthenticateContext<S, C, D> context)
 			throws IOException;
 
 }

@@ -15,9 +15,10 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.plugin.web.http.security;
+package net.officefloor.plugin.web.http.security.impl;
 
 import net.officefloor.frame.internal.structure.JobSequence;
+import net.officefloor.plugin.web.http.security.HttpSecurityFlowMetaData;
 
 /**
  * {@link HttpSecurityFlowMetaData} implementation.

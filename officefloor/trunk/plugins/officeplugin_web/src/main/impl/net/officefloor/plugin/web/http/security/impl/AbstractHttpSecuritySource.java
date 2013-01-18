@@ -15,7 +15,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.plugin.web.http.security;
+package net.officefloor.plugin.web.http.security.impl;
 
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -24,6 +24,13 @@ import java.util.Map;
 
 import net.officefloor.frame.impl.construct.util.ConstructUtil;
 import net.officefloor.frame.internal.structure.JobSequence;
+import net.officefloor.plugin.web.http.security.HttpSecurityDependencyMetaData;
+import net.officefloor.plugin.web.http.security.HttpSecurityFlowMetaData;
+import net.officefloor.plugin.web.http.security.HttpSecuritySource;
+import net.officefloor.plugin.web.http.security.HttpSecuritySourceContext;
+import net.officefloor.plugin.web.http.security.HttpSecuritySourceMetaData;
+import net.officefloor.plugin.web.http.security.HttpSecuritySourceProperty;
+import net.officefloor.plugin.web.http.security.HttpSecuritySourceSpecification;
 
 /**
  * Abstract {@link HttpSecuritySource}.

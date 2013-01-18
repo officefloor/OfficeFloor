@@ -25,7 +25,7 @@ import net.officefloor.plugin.web.http.session.HttpSession;
  * 
  * @author Daniel Sagenschneider
  */
-public interface HttpAuthenticateContext<S, C, D extends Enum<D>, F extends Enum<F>> {
+public interface HttpAuthenticateContext<S, C, D extends Enum<D>> {
 
 	/**
 	 * Obtains the credentials.
@@ -57,14 +57,6 @@ public interface HttpAuthenticateContext<S, C, D extends Enum<D>, F extends Enum
 	 * @return Dependency.
 	 */
 	Object getObject(D key);
-
-	/**
-	 * Undertakes a flow.
-	 * 
-	 * @param key
-	 *            Key identifying the flow.
-	 */
-	void doFlow(F key);
 
 	/**
 	 * Specifies the HTTP security.
