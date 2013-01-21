@@ -17,32 +17,13 @@
  */
 package net.officefloor.plugin.web.http.security;
 
-import java.io.IOException;
+import net.officefloor.frame.api.execute.Task;
 
 /**
- * Dependency interface allowing the application to check if the HTTP client is
- * authenticated.
+ * {@link Task} challenge context.
  * 
  * @author Daniel Sagenschneider
  */
-public interface HttpAuthentication<S, C> {
-
-	/**
-	 * Undertakes authentication.
-	 * 
-	 * @param authenticationRequest
-	 *            {@link HttpAuthenticateRequest}.
-	 */
-	void authenticate(HttpAuthenticateRequest<C> authenticationRequest);
-
-	/**
-	 * Obtains the HTTP security.
-	 * 
-	 * @return HTTP security or <code>null</code> if not authenticated.
-	 * @throws IOException
-	 *             If authentication has been attempted but there were failures
-	 *             communicating to necessary security services.
-	 */
-	S getHttpSecurity() throws IOException;
+interface TaskChallengeContext {
 
 }

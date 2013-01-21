@@ -32,13 +32,13 @@ import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.web.http.security.HttpAuthenticateContext;
 import net.officefloor.plugin.web.http.security.HttpChallengeContext;
 import net.officefloor.plugin.web.http.security.HttpCredentials;
+import net.officefloor.plugin.web.http.security.HttpRatifyContext;
 import net.officefloor.plugin.web.http.security.HttpSecurity;
 import net.officefloor.plugin.web.http.security.HttpSecuritySource;
 import net.officefloor.plugin.web.http.security.HttpSecuritySourceContext;
 import net.officefloor.plugin.web.http.security.HttpSecuritySourceMetaData;
 import net.officefloor.plugin.web.http.security.HttpSecuritySourceProperty;
 import net.officefloor.plugin.web.http.security.HttpSecuritySourceSpecification;
-import net.officefloor.plugin.web.http.session.HttpSession;
 
 /**
  * Tests the {@link HttpSecurityLoaderImpl}.
@@ -382,20 +382,21 @@ public class LoadHttpSecuritySourceSpecificationTest extends
 		}
 
 		@Override
-		public void challenge(HttpChallengeContext<None, None> context)
-				throws IOException {
+		public boolean ratify(
+				HttpRatifyContext<HttpSecurity, HttpCredentials> context) {
 			fail("Should not be invoked for obtaining specification");
-		}
-
-		@Override
-		public HttpSecurity retrieveCached(HttpSession session) {
-			fail("Should not be invoked for obtaining specification");
-			return null;
+			return false;
 		}
 
 		@Override
 		public void authenticate(
 				HttpAuthenticateContext<HttpSecurity, HttpCredentials, None> context) {
+			fail("Should not be invoked for obtaining specification");
+		}
+
+		@Override
+		public void challenge(HttpChallengeContext<None, None> context)
+				throws IOException {
 			fail("Should not be invoked for obtaining specification");
 		}
 	}

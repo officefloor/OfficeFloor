@@ -17,18 +17,37 @@
  */
 package net.officefloor.plugin.web.http.security;
 
-import net.officefloor.frame.api.build.Indexed;
+import net.officefloor.compile.properties.Property;
+import net.officefloor.frame.api.build.None;
+import net.officefloor.frame.spi.managedobject.AsynchronousListener;
+import net.officefloor.frame.spi.managedobject.AsynchronousManagedObject;
+import net.officefloor.frame.spi.managedobject.CoordinatingManagedObject;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
+import net.officefloor.frame.spi.managedobject.ObjectRegistry;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.spi.managedobject.source.impl.AbstractManagedObjectSource;
 
 /**
- * {@link ManagedObjectSource} for the {@link HttpSecuritySource}.
+ * {@link ManagedObjectSource} for the {@link HttpSecuritySource} (or its
+ * equivalent application specific interface).
  * 
  * @author Daniel Sagenschneider
  */
-public class HttpSecurityManagedObjectSource extends
-		AbstractManagedObjectSource<Indexed, Indexed> {
+public class HttpSecurityManagedObjectSource
+		extends
+		AbstractManagedObjectSource<HttpSecurityManagedObjectSource.Dependencies, None> {
+
+	/**
+	 * Name of {@link Property} for the HTTP security type.
+	 */
+	public static final String PROPERTY_HTTP_SECURITY_TYPE = "http.security.type";
+
+	/**
+	 * Dependency keys.
+	 */
+	public static enum Dependencies {
+		HTTP_AUTHENTICATION
+	}
 
 	/*
 	 * ======================= ManagedObjectSource =======================
@@ -43,7 +62,7 @@ public class HttpSecurityManagedObjectSource extends
 	}
 
 	@Override
-	protected void loadMetaData(MetaDataContext<Indexed, Indexed> context)
+	protected void loadMetaData(MetaDataContext<Dependencies, None> context)
 			throws Exception {
 		// TODO implement
 		// AbstractAsyncManagedObjectSource<Indexed,Indexed>.loadMetaData
@@ -57,6 +76,42 @@ public class HttpSecurityManagedObjectSource extends
 		// AbstractManagedObjectSource<Indexed,Indexed>.getManagedObject
 		throw new UnsupportedOperationException(
 				"TODO implement AbstractManagedObjectSource<Indexed,Indexed>.getManagedObject");
+	}
+
+	/**
+	 * {@link ManagedObject} for the HTTP security.
+	 */
+	public static class HttpSecurityManagedObject implements
+			AsynchronousManagedObject, CoordinatingManagedObject<Dependencies> {
+
+		/*
+		 * ==================== ManagedObject =========================
+		 */
+
+		@Override
+		public void registerAsynchronousCompletionListener(
+				AsynchronousListener listener) {
+			// TODO implement
+			// AsynchronousManagedObject.registerAsynchronousCompletionListener
+			throw new UnsupportedOperationException(
+					"TODO implement AsynchronousManagedObject.registerAsynchronousCompletionListener");
+		}
+
+		@Override
+		public void loadObjects(ObjectRegistry<Dependencies> registry)
+				throws Throwable {
+			// TODO implement
+			// CoordinatingManagedObject<Dependencies>.loadObjects
+			throw new UnsupportedOperationException(
+					"TODO implement CoordinatingManagedObject<Dependencies>.loadObjects");
+		}
+
+		@Override
+		public Object getObject() throws Throwable {
+			// TODO implement ManagedObject.getObject
+			throw new UnsupportedOperationException(
+					"TODO implement ManagedObject.getObject");
+		}
 	}
 
 }

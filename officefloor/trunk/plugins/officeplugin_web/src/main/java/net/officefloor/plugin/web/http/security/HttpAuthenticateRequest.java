@@ -17,32 +17,28 @@
  */
 package net.officefloor.plugin.web.http.security;
 
-import java.io.IOException;
-
 /**
- * Dependency interface allowing the application to check if the HTTP client is
- * authenticated.
+ * Request for HTTP authentication.
  * 
  * @author Daniel Sagenschneider
  */
-public interface HttpAuthentication<S, C> {
+public interface HttpAuthenticateRequest<C> {
 
 	/**
-	 * Undertakes authentication.
+	 * <p>
+	 * Obtains the credentials for authenticating.
+	 * <p>
+	 * This may return <code>null</code> should the {@link HttpSecuritySource}
+	 * not require credentials or no application specific credentials are
+	 * provided.
 	 * 
-	 * @param authenticationRequest
-	 *            {@link HttpAuthenticateRequest}.
+	 * @return Credentials. May be <code>null</code>.
 	 */
-	void authenticate(HttpAuthenticateRequest<C> authenticationRequest);
+	C getCredentials();
 
 	/**
-	 * Obtains the HTTP security.
-	 * 
-	 * @return HTTP security or <code>null</code> if not authenticated.
-	 * @throws IOException
-	 *             If authentication has been attempted but there were failures
-	 *             communicating to necessary security services.
+	 * Notifies the requester that the authentication has completed.
 	 */
-	S getHttpSecurity() throws IOException;
+	void authenticationComplete();
 
 }

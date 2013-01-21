@@ -63,10 +63,10 @@ public class ManagedObjectSourceStandAlone {
 	private final SourcePropertiesImpl properties = new SourcePropertiesImpl();
 
 	/**
-	 * {@link InvokeProcessTaskStruct} instances by their {@link ProcessState}
+	 * {@link InvokedProcessServicer} instances by their {@link ProcessState}
 	 * invocation index.
 	 */
-	private final Map<Integer, InvokeProcessTaskStruct> processes = new HashMap<Integer, InvokeProcessTaskStruct>();
+	private final Map<Integer, InvokedProcessServicer> processes = new HashMap<Integer, InvokedProcessServicer>();
 
 	/**
 	 * Adds a property for the {@link ManagedObjectSource}.
@@ -158,24 +158,6 @@ public class ManagedObjectSourceStandAlone {
 	/**
 	 * Registers the initial {@link Task} for the invoked {@link ProcessState}.
 	 * 
-	 * @param processIndex
-	 *            Index of the {@link ProcessState}.
-	 * @param task
-	 *            Initial {@link Task} for the {@link ProcessState}.
-	 * @param taskContext
-	 *            {@link TaskContext} for the {@link Task}. Allows for mocking
-	 *            the {@link TaskContext} to validate functionality for the
-	 *            {@link Task}.
-	 */
-	public void registerInvokeProcessTask(int processIndex, Task<?, ?, ?> task,
-			TaskContext<?, ?, ?> taskContext) {
-		this.processes.put(new Integer(processIndex),
-				new InvokeProcessTaskStruct(task, taskContext));
-	}
-
-	/**
-	 * Registers the initial {@link Task} for the invoked {@link ProcessState}.
-	 * 
 	 * @param processKey
 	 *            Key of the {@link ProcessState}.
 	 * @param task
@@ -191,10 +173,56 @@ public class ManagedObjectSourceStandAlone {
 	}
 
 	/**
-	 * Struct containing the details for the initial {@link Task} to be executed
-	 * for the invoked {@link ProcessState}.
+	 * Registers the initial {@link Task} for the invoked {@link ProcessState}.
+	 * 
+	 * @param processIndex
+	 *            Index of the {@link ProcessState}.
+	 * @param task
+	 *            Initial {@link Task} for the {@link ProcessState}.
+	 * @param taskContext
+	 *            {@link TaskContext} for the {@link Task}. Allows for mocking
+	 *            the {@link TaskContext} to validate functionality for the
+	 *            {@link Task}.
 	 */
-	private class InvokeProcessTaskStruct {
+	public void registerInvokeProcessTask(int processIndex, Task<?, ?, ?> task,
+			TaskContext<?, ?, ?> taskContext) {
+		this.registerInvokeProcessServicer(processIndex,
+				new TaskInvokedProcessServicer(task, taskContext));
+	}
+
+	/**
+	 * Registers an {@link InvokedProcessServicer} for the invoked
+	 * {@link ProcessState}.
+	 * 
+	 * @param processKey
+	 *            Key of the {@link ProcessState}.
+	 * @param servicer
+	 *            {@link InvokedProcessServicer}.
+	 */
+	public void registerInvokeProcessServicer(Enum<?> processKey,
+			InvokedProcessServicer servicer) {
+		this.registerInvokeProcessServicer(processKey.ordinal(), servicer);
+	}
+
+	/**
+	 * Registers an {@link InvokedProcessServicer} for the invoked
+	 * {@link ProcessState}.
+	 * 
+	 * @param processIndex
+	 *            Index of the {@link ProcessState}.
+	 * @param servicer
+	 *            {@link InvokedProcessServicer}.
+	 */
+	public void registerInvokeProcessServicer(int processIndex,
+			InvokedProcessServicer servicer) {
+		this.processes.put(new Integer(processIndex), servicer);
+	}
+
+	/**
+	 * {@link InvokedProcessServicer} containing the details for the initial
+	 * {@link Task} to be executed for the invoked {@link ProcessState}.
+	 */
+	private class TaskInvokedProcessServicer implements InvokedProcessServicer {
 
 		/**
 		 * {@link Task}.
@@ -214,10 +242,21 @@ public class ManagedObjectSourceStandAlone {
 		 * @param taskContext
 		 *            {@link TaskContext}.
 		 */
-		public InvokeProcessTaskStruct(Task<?, ?, ?> task,
+		public TaskInvokedProcessServicer(Task<?, ?, ?> task,
 				TaskContext<?, ?, ?> taskContext) {
 			this.task = task;
 			this.taskContext = taskContext;
+		}
+
+		/*
+		 * =============== InvokedProcessServicer ==================
+		 */
+
+		@Override
+		@SuppressWarnings({ "unchecked", "rawtypes" })
+		public void service(int processIndex, Object parameter,
+				ManagedObject managedObject) throws Throwable {
+			this.task.doTask((TaskContext) this.taskContext);
 		}
 	}
 
@@ -236,17 +275,22 @@ public class ManagedObjectSourceStandAlone {
 		 *            {@link EscalationHandler}. May be <code>null</code>.
 		 * @param delay
 		 *            Delay to invoke {@link ProcessState}.
+		 * @param parameter
+		 *            Parameter to initial {@link Task} of the invoked
+		 *            {@link ProcessState}.
+		 * @param managedObject
+		 *            {@link ManagedObject} for the {@link ProcessState}.
 		 */
-		@SuppressWarnings({ "unchecked", "rawtypes" })
 		private ProcessFuture process(int processIndex,
-				EscalationHandler escalationHandler, long delay) {
+				EscalationHandler escalationHandler, long delay,
+				Object parameter, ManagedObject managedObject) {
 
 			// Ignore delay and execute immediately
 
 			// Obtain the details for invoking process
-			InvokeProcessTaskStruct struct = ManagedObjectSourceStandAlone.this.processes
+			InvokedProcessServicer servicer = ManagedObjectSourceStandAlone.this.processes
 					.get(new Integer(processIndex));
-			if (struct == null) {
+			if (servicer == null) {
 				throw new UnsupportedOperationException(
 						"No task configured for process invocation index "
 								+ processIndex);
@@ -254,8 +298,8 @@ public class ManagedObjectSourceStandAlone {
 
 			try {
 				try {
-					// Invoke the task for the process
-					struct.task.doTask((TaskContext) struct.taskContext);
+					// Service the invoked process
+					servicer.service(processIndex, parameter, managedObject);
 
 				} catch (Throwable ex) {
 					// Determine if handle
@@ -288,27 +332,31 @@ public class ManagedObjectSourceStandAlone {
 		@Override
 		public ProcessFuture invokeProcess(F key, Object parameter,
 				ManagedObject managedObject, long delay) {
-			return this.process(key.ordinal(), null, delay);
+			return this.process(key.ordinal(), null, delay, parameter,
+					managedObject);
 		}
 
 		@Override
 		public ProcessFuture invokeProcess(int flowIndex, Object parameter,
 				ManagedObject managedObject, long delay) {
-			return this.process(flowIndex, null, delay);
+			return this.process(flowIndex, null, delay, parameter,
+					managedObject);
 		}
 
 		@Override
 		public ProcessFuture invokeProcess(F key, Object parameter,
 				ManagedObject managedObject, long delay,
 				EscalationHandler escalationHandler) {
-			return this.process(key.ordinal(), escalationHandler, delay);
+			return this.process(key.ordinal(), escalationHandler, delay,
+					parameter, managedObject);
 		}
 
 		@Override
 		public ProcessFuture invokeProcess(int flowIndex, Object parameter,
 				ManagedObject managedObject, long delay,
 				EscalationHandler escalationHandler) {
-			return this.process(flowIndex, escalationHandler, delay);
+			return this.process(flowIndex, escalationHandler, delay, parameter,
+					managedObject);
 		}
 
 		/*

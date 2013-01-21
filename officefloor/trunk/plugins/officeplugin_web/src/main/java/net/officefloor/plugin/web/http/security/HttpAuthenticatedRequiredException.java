@@ -17,32 +17,18 @@
  */
 package net.officefloor.plugin.web.http.security;
 
-import java.io.IOException;
+import net.officefloor.frame.api.escalate.Escalation;
+import net.officefloor.plugin.web.http.application.WebAutoWireApplication;
 
 /**
- * Dependency interface allowing the application to check if the HTTP client is
- * authenticated.
+ * <p>
+ * {@link Escalation} indicating authentication is required.
+ * <p>
+ * This may be thrown by any functionality as the {@link WebAutoWireApplication}
+ * is expected to catch this {@link Escalation} and issue a challenge to the
+ * client.
  * 
  * @author Daniel Sagenschneider
  */
-public interface HttpAuthentication<S, C> {
-
-	/**
-	 * Undertakes authentication.
-	 * 
-	 * @param authenticationRequest
-	 *            {@link HttpAuthenticateRequest}.
-	 */
-	void authenticate(HttpAuthenticateRequest<C> authenticationRequest);
-
-	/**
-	 * Obtains the HTTP security.
-	 * 
-	 * @return HTTP security or <code>null</code> if not authenticated.
-	 * @throws IOException
-	 *             If authentication has been attempted but there were failures
-	 *             communicating to necessary security services.
-	 */
-	S getHttpSecurity() throws IOException;
-
+public class HttpAuthenticatedRequiredException extends Exception {
 }

@@ -30,6 +30,7 @@ import net.officefloor.plugin.socket.server.http.parse.impl.HttpRequestParserImp
 import net.officefloor.plugin.socket.server.http.protocol.HttpStatus;
 import net.officefloor.plugin.web.http.security.HttpAuthenticateContext;
 import net.officefloor.plugin.web.http.security.HttpChallengeContext;
+import net.officefloor.plugin.web.http.security.HttpRatifyContext;
 import net.officefloor.plugin.web.http.security.HttpSecurity;
 import net.officefloor.plugin.web.http.security.HttpSecuritySource;
 import net.officefloor.plugin.web.http.security.HttpSecuritySourceContext;
@@ -37,7 +38,6 @@ import net.officefloor.plugin.web.http.security.impl.AbstractHttpSecuritySource;
 import net.officefloor.plugin.web.http.security.store.CredentialEntry;
 import net.officefloor.plugin.web.http.security.store.CredentialStore;
 import net.officefloor.plugin.web.http.security.store.CredentialStoreUtil;
-import net.officefloor.plugin.web.http.session.HttpSession;
 
 import org.apache.commons.codec.binary.Base64;
 
@@ -103,22 +103,11 @@ public class BasicHttpSecuritySource
 	}
 
 	@Override
-	public void challenge(HttpChallengeContext<Dependencies, None> context)
-			throws IOException {
-
-		// Load the challenge
-		HttpResponse response = context.getConnection().getHttpResponse();
-		response.setStatus(HttpStatus.SC_UNAUTHORIZED);
-		response.addHeader("WWW-Authenticate", AUTHENTICATION_SCHEME_BASIC
-				+ " realm=\"" + this.realm + "\"");
-	}
-
-	@Override
-	public HttpSecurity retrieveCached(HttpSession session) {
+	public boolean ratify(HttpRatifyContext<HttpSecurity, Void> context) {
 		// TODO implement
-		// HttpSecuritySource<HttpSecurity,Void,Dependencies,None>.retrieveCached
+		// HttpSecuritySource<HttpSecurity,Void,Dependencies,None>.ratify
 		throw new UnsupportedOperationException(
-				"TODO implement HttpSecuritySource<HttpSecurity,Void,Dependencies,None>.retrieveCached");
+				"TODO implement HttpSecuritySource<HttpSecurity,Void,Dependencies,None>.ratify");
 	}
 
 	@Override
@@ -188,6 +177,17 @@ public class BasicHttpSecuritySource
 		Set<String> roles = entry.retrieveRoles();
 		context.setHttpSecurity(new HttpSecurityImpl(
 				AUTHENTICATION_SCHEME_BASIC, userId, roles));
+	}
+
+	@Override
+	public void challenge(HttpChallengeContext<Dependencies, None> context)
+			throws IOException {
+
+		// Load the challenge
+		HttpResponse response = context.getConnection().getHttpResponse();
+		response.setStatus(HttpStatus.SC_UNAUTHORIZED);
+		response.addHeader("WWW-Authenticate", AUTHENTICATION_SCHEME_BASIC
+				+ " realm=\"" + this.realm + "\"");
 	}
 
 }
