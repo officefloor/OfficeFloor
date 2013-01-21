@@ -33,7 +33,7 @@ import net.officefloor.frame.spi.managedobject.source.ManagedObjectUser;
 /**
  * Implementation of a {@link ManagedObjectUser} to source an object from a
  * {@link ManagedObjectSource}.
- *
+ * 
  * @author Daniel Sagenschneider
  */
 @SuppressWarnings({ "unchecked", "rawtypes" })
@@ -83,7 +83,7 @@ public class ManagedObjectUserStandAlone implements ManagedObjectUser,
 
 	/**
 	 * Specifies the timeout to source the {@link ManagedObject}.
-	 *
+	 * 
 	 * @param sourceTimeout
 	 *            Timeout to source the {@link ManagedObject}.
 	 */
@@ -93,7 +93,7 @@ public class ManagedObjectUserStandAlone implements ManagedObjectUser,
 
 	/**
 	 * Specifies the bound name for a {@link NameAwareManagedObject}.
-	 *
+	 * 
 	 * @param boundManagedObjectName
 	 *            Bound name for a {@link NameAwareManagedObject}.
 	 */
@@ -104,7 +104,7 @@ public class ManagedObjectUserStandAlone implements ManagedObjectUser,
 	/**
 	 * Allows overriding the {@link AsynchronousListener} to initialise an
 	 * {@link AsynchronousManagedObject}.
-	 *
+	 * 
 	 * @param listener
 	 *            {@link AsynchronousListener}.
 	 */
@@ -115,7 +115,7 @@ public class ManagedObjectUserStandAlone implements ManagedObjectUser,
 	/**
 	 * Allows overriding the {@link ObjectRegistry} to initialise a
 	 * {@link CoordinatingManagedObject}.
-	 *
+	 * 
 	 * @param objectRegistry
 	 *            {@link ObjectRegistry}.
 	 */
@@ -125,7 +125,7 @@ public class ManagedObjectUserStandAlone implements ManagedObjectUser,
 
 	/**
 	 * Maps the dependency for the {@link CoordinatingManagedObject}.
-	 *
+	 * 
 	 * @param index
 	 *            Index of the dependency.
 	 * @param dependency
@@ -137,7 +137,7 @@ public class ManagedObjectUserStandAlone implements ManagedObjectUser,
 
 	/**
 	 * Maps the dependency for the {@link CoordinatingManagedObject}.
-	 *
+	 * 
 	 * @param key
 	 *            Key of the dependency.
 	 * @param dependency
@@ -149,15 +149,33 @@ public class ManagedObjectUserStandAlone implements ManagedObjectUser,
 
 	/**
 	 * Sources the {@link ManagedObject} from the {@link ManagedObjectSource}.
-	 *
+	 * 
 	 * @param source
 	 *            {@link ManagedObjectSource}.
 	 * @return {@link ManagedObject} from the {@link ManagedObjectSource}.
 	 * @throws Throwable
 	 *             If fails to source the {@link ManagedObject}.
 	 */
+	public ManagedObject sourceManagedObject(ManagedObjectSource<?, ?> source)
+			throws Throwable {
+		return sourceManagedObject(source, true);
+	}
+
+	/**
+	 * Sources the {@link ManagedObject} from the {@link ManagedObjectSource}.
+	 * 
+	 * @param source
+	 *            {@link ManagedObjectSource}.
+	 * @param isWait
+	 *            Flags to wait for {@link ManagedObjectSource} to provide the
+	 *            {@link ManagedObject}.
+	 * @return {@link ManagedObject} from the {@link ManagedObjectSource} or
+	 *         <code>null</code> if not waiting and not sourced immediately.
+	 * @throws Throwable
+	 *             If fails to source the {@link ManagedObject}.
+	 */
 	public synchronized ManagedObject sourceManagedObject(
-			ManagedObjectSource<?, ?> source) throws Throwable {
+			ManagedObjectSource<?, ?> source, boolean isWait) throws Throwable {
 
 		// Method synchronised so can only load one at time.
 		try {
@@ -183,7 +201,7 @@ public class ManagedObjectUserStandAlone implements ManagedObjectUser,
 				}
 
 				// Determine if have managed object
-				if (mo == null) {
+				if ((mo == null) && (isWait)) {
 					// Determine if timed out
 					long currentTime = System.currentTimeMillis();
 					if ((currentTime - sourceStartTime) > this.sourceTimeout) {
@@ -196,7 +214,12 @@ public class ManagedObjectUserStandAlone implements ManagedObjectUser,
 					Thread.sleep(100);
 				}
 
-			} while (mo == null);
+			} while ((mo == null) && (isWait));
+
+			// Determine if have managed object
+			if (mo == null) {
+				return null; // no managed object sourced
+			}
 
 			// Have managed object so determine if name aware
 			if (mo instanceof NameAwareManagedObject) {

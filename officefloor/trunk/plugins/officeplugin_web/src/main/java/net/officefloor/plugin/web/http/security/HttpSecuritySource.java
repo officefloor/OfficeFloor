@@ -19,6 +19,9 @@ package net.officefloor.plugin.web.http.security;
 
 import java.io.IOException;
 
+import net.officefloor.frame.spi.team.Job;
+import net.officefloor.frame.spi.team.Team;
+import net.officefloor.plugin.socket.server.http.HttpRequest;
 import net.officefloor.plugin.web.http.session.HttpSession;
 
 /**
@@ -71,24 +74,27 @@ public interface HttpSecuritySource<S, C, D extends Enum<D>, F extends Enum<F>> 
 	HttpSecuritySourceMetaData<S, C, D, F> getMetaData();
 
 	/**
-	 * Triggers the authentication challenge to the client.
+	 * <p>
+	 * Ratifies whether enough information is available to undertake
+	 * authentication.
+	 * <p>
+	 * As authentication will likely require communication with external
+	 * services (LDAP store, database, etc), this method allows checking whether
+	 * enough information is available to undertake the authentication. The
+	 * purpose is to avoid the {@link Job} depending on
+	 * {@link HttpAuthentication} and inherit the dependencies of authentication
+	 * subsequently causing execution by the authentication {@link Team} -
+	 * especially as the majority of {@link HttpRequest} servicing will have the
+	 * HTTP security cached in the {@link HttpSession} and not require the
+	 * authentication dependencies causing the swap in {@link Team}.
 	 * 
 	 * @param context
-	 *            {@link HttpChallengeContext}.
-	 * @throws IOException
-	 *             If failure in communicating to necessary security services.
+	 *            {@link HttpRatifyContext}.
+	 * @return <code>true</code> should enough information be available to
+	 *         undertake authentication. <code>false</code> if not enough
+	 *         information is available for authentication.
 	 */
-	void challenge(HttpChallengeContext<D, F> context) throws IOException;
-
-	/**
-	 * Retrieves the cached HTTP security.
-	 * 
-	 * @param session
-	 *            {@link HttpSession}.
-	 * @return HTTP security. Value of <code>null</code> indicates the HTTP
-	 *         security was not cached.
-	 */
-	S retrieveCached(HttpSession session);
+	boolean ratify(HttpRatifyContext<S, C> context);
 
 	/**
 	 * Undertakes authentication.
@@ -100,5 +106,15 @@ public interface HttpSecuritySource<S, C, D extends Enum<D>, F extends Enum<F>> 
 	 */
 	void authenticate(HttpAuthenticateContext<S, C, D> context)
 			throws IOException;
+
+	/**
+	 * Triggers the authentication challenge to the client.
+	 * 
+	 * @param context
+	 *            {@link HttpChallengeContext}.
+	 * @throws IOException
+	 *             If failure in communicating to necessary security services.
+	 */
+	void challenge(HttpChallengeContext<D, F> context) throws IOException;
 
 }

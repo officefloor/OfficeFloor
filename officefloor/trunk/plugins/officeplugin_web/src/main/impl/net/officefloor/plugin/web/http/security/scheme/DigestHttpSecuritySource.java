@@ -35,6 +35,7 @@ import net.officefloor.plugin.socket.server.http.parse.impl.HttpRequestParserImp
 import net.officefloor.plugin.socket.server.http.protocol.HttpStatus;
 import net.officefloor.plugin.web.http.security.HttpAuthenticateContext;
 import net.officefloor.plugin.web.http.security.HttpChallengeContext;
+import net.officefloor.plugin.web.http.security.HttpRatifyContext;
 import net.officefloor.plugin.web.http.security.HttpSecurity;
 import net.officefloor.plugin.web.http.security.HttpSecuritySource;
 import net.officefloor.plugin.web.http.security.HttpSecuritySourceContext;
@@ -293,68 +294,11 @@ public class DigestHttpSecuritySource
 	}
 
 	@Override
-	public void challenge(HttpChallengeContext<Dependencies, None> context)
-			throws IOException {
-
-		// Obtain the dependencies
-		ServerHttpConnection connection = context.getConnection();
-		HttpRequest request = connection.getHttpRequest();
-		HttpSession session = context.getSession();
-		CredentialStore store = (CredentialStore) context
-				.getObject(Dependencies.CREDENTIAL_STORE);
-
-		// Obtain the algorithm
-		String algorithm = store.getAlgorithm();
-
-		// Obtain the ETag header value (if available)
-		String eTag = "";
-		for (HttpHeader header : request.getHeaders()) {
-			if ("ETag".equalsIgnoreCase(header.getName())) {
-				eTag = header.getValue();
-			}
-		}
-
-		// Obtain the current time stamp
-		String timestamp = this.getTimestamp();
-
-		// Calculate the nonce
-		Digest nonceDigest = new Digest(algorithm);
-		nonceDigest.append(timestamp);
-		nonceDigest.appendColon();
-		nonceDigest.append(eTag);
-		nonceDigest.appendColon();
-		nonceDigest.append(this.privateKey);
-		byte[] nonceData = nonceDigest.getDigest();
-		String nonce = new String(nonceData, US_ASCII);
-
-		// Calculate the opaque
-		Digest opaqueDigest = new Digest(algorithm);
-		opaqueDigest.append(this.getOpaqueSeed());
-		byte[] opaqueData = opaqueDigest.getDigest();
-		String opaque = new String(opaqueData, US_ASCII);
-
-		// Construct the authentication challenge
-		String challenge = AUTHENTICATION_SCHEME_DIGEST + " realm=\""
-				+ this.realm + "\", qop=\"auth,auth-int\", nonce=\"" + nonce
-				+ "\", opaque=\"" + opaque + "\", algorithm=\"" + algorithm
-				+ "\"";
-
-		// Specify unauthorised
-		HttpResponse response = connection.getHttpResponse();
-		response.setStatus(HttpStatus.SC_UNAUTHORIZED);
-		response.addHeader("WWW-Authenticate", challenge);
-
-		// Record details for authentication
-		session.setAttribute(SECURITY_STATE_SESSION_KEY, new SecurityState(
-				nonce, opaque));
-	}
-
-	@Override
-	public HttpSecurity retrieveCached(HttpSession session) {
+	public boolean ratify(HttpRatifyContext<HttpSecurity, Void> context) {
 		// TODO implement
-		// HttpSecuritySource<HttpSecurity,Void,Dependencies,None>.retrieveCached
+		// HttpSecuritySource<HttpSecurity,Void,Dependencies,None>.ratify
 		throw new UnsupportedOperationException(
-				"TODO implement HttpSecuritySource<HttpSecurity,Void,Dependencies,None>.retrieveCached");
+				"TODO implement HttpSecuritySource<HttpSecurity,Void,Dependencies,None>.ratify");
 	}
 
 	@Override
@@ -519,6 +463,63 @@ public class DigestHttpSecuritySource
 		// Authenticated, so provide the HTTP security
 		context.setHttpSecurity(new HttpSecurityImpl(
 				AUTHENTICATION_SCHEME_DIGEST, username, roles));
+	}
+
+	@Override
+	public void challenge(HttpChallengeContext<Dependencies, None> context)
+			throws IOException {
+
+		// Obtain the dependencies
+		ServerHttpConnection connection = context.getConnection();
+		HttpRequest request = connection.getHttpRequest();
+		HttpSession session = context.getSession();
+		CredentialStore store = (CredentialStore) context
+				.getObject(Dependencies.CREDENTIAL_STORE);
+
+		// Obtain the algorithm
+		String algorithm = store.getAlgorithm();
+
+		// Obtain the ETag header value (if available)
+		String eTag = "";
+		for (HttpHeader header : request.getHeaders()) {
+			if ("ETag".equalsIgnoreCase(header.getName())) {
+				eTag = header.getValue();
+			}
+		}
+
+		// Obtain the current time stamp
+		String timestamp = this.getTimestamp();
+
+		// Calculate the nonce
+		Digest nonceDigest = new Digest(algorithm);
+		nonceDigest.append(timestamp);
+		nonceDigest.appendColon();
+		nonceDigest.append(eTag);
+		nonceDigest.appendColon();
+		nonceDigest.append(this.privateKey);
+		byte[] nonceData = nonceDigest.getDigest();
+		String nonce = new String(nonceData, US_ASCII);
+
+		// Calculate the opaque
+		Digest opaqueDigest = new Digest(algorithm);
+		opaqueDigest.append(this.getOpaqueSeed());
+		byte[] opaqueData = opaqueDigest.getDigest();
+		String opaque = new String(opaqueData, US_ASCII);
+
+		// Construct the authentication challenge
+		String challenge = AUTHENTICATION_SCHEME_DIGEST + " realm=\""
+				+ this.realm + "\", qop=\"auth,auth-int\", nonce=\"" + nonce
+				+ "\", opaque=\"" + opaque + "\", algorithm=\"" + algorithm
+				+ "\"";
+
+		// Specify unauthorised
+		HttpResponse response = connection.getHttpResponse();
+		response.setStatus(HttpStatus.SC_UNAUTHORIZED);
+		response.addHeader("WWW-Authenticate", challenge);
+
+		// Record details for authentication
+		session.setAttribute(SECURITY_STATE_SESSION_KEY, new SecurityState(
+				nonce, opaque));
 	}
 
 	/**
