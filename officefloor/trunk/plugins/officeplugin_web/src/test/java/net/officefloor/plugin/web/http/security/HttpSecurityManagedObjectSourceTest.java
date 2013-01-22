@@ -101,7 +101,7 @@ public class HttpSecurityManagedObjectSourceTest extends OfficeFrameTestCase {
 		try {
 			this.loadHttpSecurity(null, true);
 			fail("Should not be successful");
-		} catch (HttpAuthenticatedRequiredException ex) {
+		} catch (HttpAuthenticationRequiredException ex) {
 			// Should not be authenticated
 		}
 	}
