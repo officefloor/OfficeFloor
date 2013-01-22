@@ -23,16 +23,16 @@ import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.execute.TaskContext;
 
 /**
- * {@link Task} and {@link TaskFactory} for authentication.
+ * {@link Task} and {@link TaskFactory} to challenge the client.
  * 
  * @author Daniel Sagenschneider
  */
-public class HttpAuthenticateTask implements
+public class HttpChallengeTask implements
 		Task<HttpSecurityWork, Indexed, Indexed>,
 		TaskFactory<HttpSecurityWork, Indexed, Indexed> {
 
 	/*
-	 * ==================== TaskFactory ============================
+	 * =================== HttpChallengeTask ======================
 	 */
 
 	@Override
@@ -43,10 +43,6 @@ public class HttpAuthenticateTask implements
 		throw new UnsupportedOperationException(
 				"TODO implement TaskFactory<HttpSecurityWork,Indexed,Indexed>.createTask");
 	}
-
-	/*
-	 * ======================= Task ================================
-	 */
 
 	@Override
 	public Object doTask(TaskContext<HttpSecurityWork, Indexed, Indexed> context)

@@ -18,6 +18,7 @@
 package net.officefloor.plugin.web.http.security;
 
 import net.officefloor.frame.api.escalate.Escalation;
+import net.officefloor.frame.api.manage.Office;
 import net.officefloor.plugin.web.http.application.WebAutoWireApplication;
 
 /**
@@ -25,10 +26,10 @@ import net.officefloor.plugin.web.http.application.WebAutoWireApplication;
  * {@link Escalation} indicating authentication is required.
  * <p>
  * This may be thrown by any functionality as the {@link WebAutoWireApplication}
- * is expected to catch this {@link Escalation} and issue a challenge to the
- * client.
+ * is expected to catch this {@link Escalation} at the {@link Office} level and
+ * issue a challenge to the client.
  * 
  * @author Daniel Sagenschneider
  */
-public class HttpAuthenticatedRequiredException extends Exception {
+public class HttpAuthenticationRequiredException extends Exception {
 }
