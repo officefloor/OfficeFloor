@@ -98,7 +98,9 @@ public class HttpSecurityWorkSourceTest extends OfficeFrameTestCase {
 	 * Validate specification.
 	 */
 	public void testSpecification() {
-		WorkLoaderUtil.validateSpecification(HttpSecurityWorkSource.class);
+		WorkLoaderUtil.validateSpecification(HttpSecurityWorkSource.class,
+				HttpSecurityWorkSource.PROPERTY_HTTP_SECURITY_SOURCE_KEY,
+				"HTTP Security Source Key");
 	}
 
 	/**
@@ -536,8 +538,8 @@ public class HttpSecurityWorkSourceTest extends OfficeFrameTestCase {
 		@Override
 		public boolean ratify(
 				HttpRatifyContext<HttpSecurity, HttpCredentials> context) {
-			// Always enough information for authentication
-			return true;
+			fail("Should not be required for tasks");
+			return false;
 		}
 
 		@Override
