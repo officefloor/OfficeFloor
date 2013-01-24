@@ -60,6 +60,11 @@ public class MockHttpChallengeContext<D extends Enum<D>, F extends Enum<F>>
 	private final Map<D, Object> dependencies = new HashMap<D, Object>();
 
 	/**
+	 * Flows.
+	 */
+	private final MockHttpChallengeContextFlows<F> flows;
+
+	/**
 	 * {@link HttpRequest}.
 	 */
 	private HttpRequest request;
@@ -75,12 +80,14 @@ public class MockHttpChallengeContext<D extends Enum<D>, F extends Enum<F>>
 	 * @param testCase
 	 *            {@link OfficeFrameTestCase} to create necessary mock objects.
 	 */
+	@SuppressWarnings("unchecked")
 	public MockHttpChallengeContext(OfficeFrameTestCase testCase) {
 		this.testCase = testCase;
 
 		// Create the necessary mock objects
 		this.connection = testCase.createMock(ServerHttpConnection.class);
 		this.session = testCase.createMock(HttpSession.class);
+		this.flows = testCase.createMock(MockHttpChallengeContextFlows.class);
 	}
 
 	/**
@@ -138,6 +145,16 @@ public class MockHttpChallengeContext<D extends Enum<D>, F extends Enum<F>>
 				"WWW-Authenticate", authenticateHeaderValue), header);
 	}
 
+	/**
+	 * Records undertaking the flow.
+	 * 
+	 * @param key
+	 *            Key to the flow.
+	 */
+	public void recordDoFlow(F key) {
+		this.doFlow(key);
+	}
+
 	/*
 	 * =================== HttpChallengeContext =====================
 	 */
@@ -159,9 +176,21 @@ public class MockHttpChallengeContext<D extends Enum<D>, F extends Enum<F>>
 
 	@Override
 	public void doFlow(F key) {
-		// TODO implement HttpChallengeContext<D,F>.doFlow
-		throw new UnsupportedOperationException(
-				"TODO implement HttpChallengeContext<D,F>.doFlow");
+		this.flows.doFlow(key);
+	}
+
+	/**
+	 * Interface to create mock object for mocking flows.
+	 */
+	private static interface MockHttpChallengeContextFlows<F extends Enum<F>> {
+
+		/**
+		 * Undertakes the flow.
+		 * 
+		 * @param key
+		 *            Key for the flow.
+		 */
+		void doFlow(F key);
 	}
 
 }
