@@ -17,13 +17,8 @@
  */
 package net.officefloor.plugin.web.http.route;
 
-import java.io.IOException;
-import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
-
-import org.easymock.AbstractMatcher;
-import org.easymock.internal.AlwaysMatcher;
 
 import net.officefloor.compile.test.work.WorkLoaderUtil;
 import net.officefloor.compile.work.TaskType;
@@ -81,10 +76,6 @@ public class HttpRouteTaskTest extends OfficeFrameTestCase {
 		try {
 
 			final String redirectUrl = "http://redirect/context" + uriPath;
-			final Serializable connectionMomento = test
-					.createMock(Serializable.class);
-			final Serializable requestStateMomento = test
-					.createMock(Serializable.class);
 			final HttpResponse response = test.createMock(HttpResponse.class);
 			final HttpHeader header = test.createMock(HttpHeader.class);
 
@@ -92,12 +83,9 @@ public class HttpRouteTaskTest extends OfficeFrameTestCase {
 			test.recordReturn(location,
 					location.transformToClientPath(uriPath, isSecure),
 					redirectUrl);
-			test.recordReturn(connection, connection.exportState(),
-					connectionMomento);
-			test.recordReturn(requestState, requestState.exportState(),
-					requestStateMomento);
-			session.setAttribute("_OfficeFloorRedirectedRequest_", null);
-			test.control(session).setMatcher(new AlwaysMatcher());
+			HttpUrlContinuationTest.recordSaveRequest(
+					"_OfficeFloorRedirectedRequest_", connection, requestState,
+					session, test);
 			test.recordReturn(connection, connection.getHttpResponse(),
 					response);
 			response.setStatus(303); // Status = See other
@@ -108,109 +96,6 @@ public class HttpRouteTaskTest extends OfficeFrameTestCase {
 
 		} catch (Exception ex) {
 			throw fail(ex);
-		}
-	}
-
-	/**
-	 * Creates the redirect state momento.
-	 * 
-	 * @param connectionMomento
-	 *            {@link ServerHttpConnection} momento.
-	 * @param requestStateMomento
-	 *            {@link HttpRequestState} momento.
-	 * @return Redirect state momento.
-	 */
-	public static Serializable createRedirectStateMomento(
-			Serializable connectionMomento, Serializable requestStateMomento)
-			throws IOException {
-		return new RedirectStateMomentoExtractor(connectionMomento,
-				requestStateMomento).extractRedirectStateMomento();
-	}
-
-	/**
-	 * Enables obtaining the redirect state momento.
-	 */
-	private static class RedirectStateMomentoExtractor extends
-			OfficeFrameTestCase {
-
-		/**
-		 * {@link ServerHttpConnection} momento.
-		 */
-		private final Serializable connectionMomento;
-
-		/**
-		 * {@link HttpRequestState} momento.
-		 */
-		private final Serializable requestStateMomento;
-
-		/**
-		 * Initiate.
-		 * 
-		 * @param connectionMomento
-		 *            {@link ServerHttpConnection} momento.
-		 * @param requestStateMomento
-		 *            {@link HttpRequestState} momento.
-		 */
-		public RedirectStateMomentoExtractor(Serializable connectionMomento,
-				Serializable requestStateMomento) {
-			this.connectionMomento = connectionMomento;
-			this.requestStateMomento = requestStateMomento;
-		}
-
-		/**
-		 * Extracts the redirect state momento.
-		 * 
-		 * @return Redirect state momento.
-		 */
-		public Serializable extractRedirectStateMomento() throws IOException {
-
-			final HttpApplicationLocation location = this
-					.createMock(HttpApplicationLocation.class);
-			final ServerHttpConnection connection = this
-					.createMock(ServerHttpConnection.class);
-			final HttpRequestState requestState = this
-					.createMock(HttpRequestState.class);
-			final HttpSession session = this.createMock(HttpSession.class);
-			final HttpResponse response = this.createMock(HttpResponse.class);
-			final HttpHeader header = this.createMock(HttpHeader.class);
-
-			// Record undertaking redirect
-			this.recordReturn(location,
-					location.transformToClientPath("/path", false), "/redirect");
-			this.recordReturn(connection, connection.exportState(),
-					this.connectionMomento);
-			this.recordReturn(requestState, requestState.exportState(),
-					this.requestStateMomento);
-
-			// Record and capture redirect state momento
-			final Serializable[] redirectStateMomento = new Serializable[1];
-			session.setAttribute("_OfficeFloorRedirectMomento_", null);
-			this.control(session).setMatcher(new AbstractMatcher() {
-				@Override
-				public boolean matches(Object[] expected, Object[] actual) {
-					// Capture the redirect state momento
-					redirectStateMomento[0] = (Serializable) actual[1];
-					return true;
-				}
-			});
-
-			// Record remaining of redirect
-			this.recordReturn(connection, connection.getHttpResponse(),
-					response);
-			response.setStatus(HttpStatus.SC_SEE_OTHER);
-			this.recordReturn(
-					response,
-					response.addHeader("Location", "/redirect"
-							+ HttpRouteTask.REDIRECT_URI_SUFFIX), header);
-
-			// Run redirect to extract the redirect state momento
-			this.replayMockObjects();
-			HttpRouteTask.doRedirect("/path", false, connection, location,
-					requestState, session);
-			this.verifyMockObjects();
-
-			// Return the extracted redirect state momento
-			return redirectStateMomento[0];
 		}
 	}
 
@@ -535,12 +420,6 @@ public class HttpRouteTaskTest extends OfficeFrameTestCase {
 			boolean isConnectionSecure) throws Exception {
 
 		final String requestUri = "/context" + uriPath;
-		final Serializable connectionMomento = this
-				.createMock(Serializable.class);
-		final Serializable requestStateMomento = this
-				.createMock(Serializable.class);
-		final Serializable redirectStateMomento = createRedirectStateMomento(
-				connectionMomento, requestStateMomento);
 
 		// Record dependencies
 		this.recordDependencies();
@@ -552,12 +431,9 @@ public class HttpRouteTaskTest extends OfficeFrameTestCase {
 				requestUri);
 		if (requestUri.endsWith(HttpRouteTask.REDIRECT_URI_SUFFIX)) {
 			// Record servicing redirected request
-			this.recordReturn(
-					this.session,
-					this.session.getAttribute("_OfficeFloorRedirectedRequest_"),
-					redirectStateMomento);
-			this.connection.importState(connectionMomento);
-			this.requestState.importState(requestStateMomento);
+			HttpUrlContinuationTest.recordReinstateRequest(true,
+					"_OfficeFloorRedirectedRequest_", this.connection,
+					this.requestState, this.session, this);
 		}
 		this.recordReturn(this.location,
 				this.location.transformToApplicationCanonicalPath(requestUri),
