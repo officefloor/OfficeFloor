@@ -360,7 +360,9 @@ public class HttpSecurityWorkSourceTest extends OfficeFrameTestCase {
 			@Override
 			public boolean matches(Object[] expected, Object[] actual) {
 				assertEquals("Incorrect flow index", expected[0], actual[0]);
-				assertTrue("Incorrect cause", (actual[1] instanceof String));
+				assertTrue(
+						"Incorrect cause",
+						(actual[1] instanceof HttpAuthenticationContinuationException));
 				return true;
 			}
 		});
