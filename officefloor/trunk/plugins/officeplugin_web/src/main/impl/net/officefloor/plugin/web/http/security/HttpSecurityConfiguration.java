@@ -17,35 +17,38 @@
  */
 package net.officefloor.plugin.web.http.security;
 
-import net.officefloor.frame.api.build.WorkFactory;
-import net.officefloor.frame.api.execute.Work;
-import net.officefloor.plugin.web.http.session.HttpSession;
+import net.officefloor.plugin.web.http.security.type.HttpSecurityType;
 
 /**
- * {@link Work} and {@link WorkFactory} for {@link HttpSecurity}.
+ * {@link HttpSecurity} configuration.
  * 
  * @author Daniel Sagenschneider
  */
-public class HttpSecurityWork implements Work, WorkFactory<HttpSecurityWork> {
-
-	/**
-	 * {@link HttpSession} attribute for the challenge request state.
-	 */
-	public static final String ATTRIBUTE_CHALLENGE_REQUEST_MOMENTO = "CHALLENGE_REQUEST_MOMENTO";
+public class HttpSecurityConfiguration<S, C, D extends Enum<D>, F extends Enum<F>> {
 
 	/**
 	 * {@link HttpSecuritySource}.
 	 */
-	private final HttpSecuritySource<?, ?, ?, ?> httpSecuritySource;
+	private final HttpSecuritySource<S, C, D, F> httpSecuritySource;
+
+	/**
+	 * {@link HttpSecurityType}.
+	 */
+	private final HttpSecurityType<S, C, D, F> httpSecurityType;
 
 	/**
 	 * Initiate.
 	 * 
 	 * @param httpSecuritySource
 	 *            {@link HttpSecuritySource}.
+	 * @param httpSecurityType
+	 *            {@link HttpSecurityType}.
 	 */
-	public HttpSecurityWork(HttpSecuritySource<?, ?, ?, ?> httpSecuritySource) {
+	public HttpSecurityConfiguration(
+			HttpSecuritySource<S, C, D, F> httpSecuritySource,
+			HttpSecurityType<S, C, D, F> httpSecurityType) {
 		this.httpSecuritySource = httpSecuritySource;
+		this.httpSecurityType = httpSecurityType;
 	}
 
 	/**
@@ -53,17 +56,17 @@ public class HttpSecurityWork implements Work, WorkFactory<HttpSecurityWork> {
 	 * 
 	 * @return {@link HttpSecuritySource}.
 	 */
-	public HttpSecuritySource<?, ?, ?, ?> getHttpSecuritySource() {
+	public HttpSecuritySource<S, C, D, F> getHttpSecuritySource() {
 		return this.httpSecuritySource;
 	}
 
-	/*
-	 * =============== WorkFactory ==========================
+	/**
+	 * Obtains the {@link HttpSecurityType}.
+	 * 
+	 * @return {@link HttpSecurityType}.
 	 */
-
-	@Override
-	public HttpSecurityWork createWork() {
-		return this;
+	public HttpSecurityType<S, C, D, F> getHttpSecurityType() {
+		return this.httpSecurityType;
 	}
 
 }
