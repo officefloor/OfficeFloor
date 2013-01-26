@@ -23,6 +23,7 @@ import java.util.Map;
 import net.officefloor.compile.spi.section.source.SectionSource;
 import net.officefloor.compile.spi.work.source.WorkSource;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
+import net.officefloor.plugin.web.http.security.type.HttpSecurityType;
 
 /**
  * Provides means to configure the {@link HttpSecurity}
@@ -34,9 +35,9 @@ import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 public class HttpSecurityConfigurator {
 
 	/**
-	 * {@link HttpSecuritySource} instances by their key.
+	 * {@link HttpSecurityConfiguration} instances by their key.
 	 */
-	private static Map<String, HttpSecuritySource<?, ?, ?, ?>> sources = new HashMap<String, HttpSecuritySource<?, ?, ?, ?>>();
+	private static Map<String, HttpSecurityConfiguration<?, ?, ?, ?>> configurations = new HashMap<String, HttpSecurityConfiguration<?, ?, ?, ?>>();
 
 	/**
 	 * Index for the next {@link HttpSecuritySource} key.
@@ -44,36 +45,41 @@ public class HttpSecurityConfigurator {
 	private static int nextKeyIndex = 1;
 
 	/**
-	 * Registers the {@link HttpSecuritySource}.
+	 * Registers the {@link HttpSecurityConfiguration}.
 	 * 
 	 * @param httpSecuritySource
 	 *            {@link HttpSecuritySource}.
+	 * @param httpSecurityType
+	 *            {@link HttpSecurityType}.
 	 * @return Key to retrieve the {@link HttpSecuritySource}.
 	 */
-	public static synchronized String registerHttpSecuritySource(
-			HttpSecuritySource<?, ?, ?, ?> httpSecuritySource) {
+	public static synchronized <S, C, D extends Enum<D>, F extends Enum<F>> String registerHttpSecuritySource(
+			HttpSecuritySource<S, C, D, F> httpSecuritySource,
+			HttpSecurityType<S, C, D, F> httpSecurityType) {
 
 		// Obtain the key
 		String key = String.valueOf(nextKeyIndex++);
 
 		// Register the source
-		sources.put(key, httpSecuritySource);
+		configurations.put(key, new HttpSecurityConfiguration<S, C, D, F>(
+				httpSecuritySource, httpSecurityType));
 
 		// Return the key
 		return key;
 	}
 
 	/**
-	 * Obtains the registered {@link HttpSecuritySource}.
+	 * Obtains the registered {@link HttpSecurityConfiguration}.
 	 * 
 	 * @param key
-	 *            Key identifying the registered {@link HttpSecuritySource}.
-	 * @return Registered {@link HttpSecuritySource}. May be <code>null</code>
-	 *         if unknown key.
+	 *            Key identifying the registered
+	 *            {@link HttpSecurityConfiguration}.
+	 * @return Registered {@link HttpSecurityConfiguration}. May be
+	 *         <code>null</code> if unknown key.
 	 */
-	public static synchronized HttpSecuritySource<?, ?, ?, ?> getHttpSecuritySource(
+	public static synchronized HttpSecurityConfiguration<?, ?, ?, ?> getHttpSecuritySource(
 			String key) {
-		return sources.get(key);
+		return configurations.get(key);
 	}
 
 	/**

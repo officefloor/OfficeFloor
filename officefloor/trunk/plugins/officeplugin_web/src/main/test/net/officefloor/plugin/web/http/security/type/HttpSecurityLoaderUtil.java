@@ -163,7 +163,7 @@ public class HttpSecurityLoaderUtil {
 	 *            {@link HttpSecuritySource} class.
 	 * @return New {@link HttpSecuritySource} instance.
 	 */
-	private static <S, C, D extends Enum<D>, F extends Enum<F>, HS extends HttpSecuritySource<S, C, D, F>> HS newHttpSecuritySource(
+	public static <S, C, D extends Enum<D>, F extends Enum<F>, HS extends HttpSecuritySource<S, C, D, F>> HS newHttpSecuritySource(
 			Class<HS> httpSecuritySourceClass) {
 
 		// Create an instance of the HTTP security source
@@ -189,7 +189,7 @@ public class HttpSecurityLoaderUtil {
 	 *            {@link Property} name/value pairs.
 	 * @return {@link HttpSecurityType}.
 	 */
-	private static <S, C, D extends Enum<D>, F extends Enum<F>> HttpSecurityType<S, C, D, F> loadHttpSecurityType(
+	public static <S, C, D extends Enum<D>, F extends Enum<F>> HttpSecurityType<S, C, D, F> loadHttpSecurityType(
 			HttpSecuritySource<S, C, D, F> httpSecuritySource,
 			String... propertyNameValues) {
 

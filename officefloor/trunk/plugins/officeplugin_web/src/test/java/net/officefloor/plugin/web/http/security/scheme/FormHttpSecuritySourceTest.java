@@ -55,7 +55,7 @@ public class FormHttpSecuritySourceTest extends OfficeFrameTestCase {
 	/**
 	 * {@link HttpAuthenticateContext}.
 	 */
-	private final MockHttpAuthenticateContext<HttpSecurity, HttpCredentials, Dependencies> authenticationContext = new MockHttpAuthenticateContext<HttpSecurity, HttpCredentials, Dependencies>(
+	private MockHttpAuthenticateContext<HttpSecurity, HttpCredentials, Dependencies> authenticationContext = new MockHttpAuthenticateContext<HttpSecurity, HttpCredentials, Dependencies>(
 			this.credentials, this);
 
 	/**
@@ -136,8 +136,14 @@ public class FormHttpSecuritySourceTest extends OfficeFrameTestCase {
 	/**
 	 * Ensure not authenticated if no credentials provided.
 	 */
-	public void testNullCredentials() {
-		fail("TODO implement");
+	public void testNullCredentials() throws Exception {
+
+		// No credentials
+		this.authenticationContext = new MockHttpAuthenticateContext<HttpSecurity, HttpCredentials, FormHttpSecuritySource.Dependencies>(
+				null, this);
+
+		// Test
+		this.doAuthenticate(null);
 	}
 
 	/**

@@ -31,6 +31,7 @@ import net.officefloor.frame.util.ManagedObjectUserStandAlone;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
 import net.officefloor.plugin.web.http.security.HttpAuthenticationManagedObjectSource.Dependencies;
 import net.officefloor.plugin.web.http.security.HttpAuthenticationManagedObjectSource.Flows;
+import net.officefloor.plugin.web.http.security.type.HttpSecurityType;
 import net.officefloor.plugin.web.http.session.HttpSession;
 
 import org.easymock.AbstractMatcher;
@@ -51,6 +52,13 @@ public class HttpAuthenticationManagedObjectSourceTest extends
 			.createMock(HttpSecuritySource.class);
 
 	/**
+	 * {@link HttpSecurityType}.
+	 */
+	@SuppressWarnings("unchecked")
+	private final HttpSecurityType<HttpSecurity, HttpCredentials, Indexed, Indexed> securityType = this
+			.createMock(HttpSecurityType.class);
+
+	/**
 	 * {@link ServerHttpConnection}.
 	 */
 	private final ServerHttpConnection connection = this
@@ -66,13 +74,20 @@ public class HttpAuthenticationManagedObjectSourceTest extends
 	 */
 	public void testSpecification() {
 		ManagedObjectLoaderUtil
-				.validateSpecification(HttpAuthenticationManagedObjectSource.class);
+				.validateSpecification(
+						HttpAuthenticationManagedObjectSource.class,
+						HttpAuthenticationManagedObjectSource.PROPERTY_HTTP_SECURITY_SOURCE_KEY,
+						"HTTP Security Source Key");
 	}
 
 	/**
 	 * Validates the type.
 	 */
 	public void testType() {
+
+		// Register HTTP Security Source
+		String key = HttpSecurityConfigurator.registerHttpSecuritySource(
+				this.source, this.securityType);
 
 		// Create the expected type
 		ManagedObjectTypeBuilder type = ManagedObjectLoaderUtil
@@ -83,11 +98,14 @@ public class HttpAuthenticationManagedObjectSourceTest extends
 		type.addDependency(Dependencies.HTTP_SESSION, HttpSession.class, null);
 		type.addFlow(Flows.AUTHENTICATE, TaskAuthenticateContext.class, null,
 				null);
-		type.addFlow(Flows.CHALLENGE, null, null, null);
 
 		// Validate type
-		ManagedObjectLoaderUtil.validateManagedObjectType(type,
-				HttpAuthenticationManagedObjectSource.class);
+		ManagedObjectLoaderUtil
+				.validateManagedObjectType(
+						type,
+						HttpAuthenticationManagedObjectSource.class,
+						HttpAuthenticationManagedObjectSource.PROPERTY_HTTP_SECURITY_SOURCE_KEY,
+						key);
 	}
 
 	/**
@@ -173,7 +191,7 @@ public class HttpAuthenticationManagedObjectSourceTest extends
 		try {
 			authentication.getHttpSecurity();
 			fail("Should not be successful");
-		} catch (IOException ex) {
+		} catch (IllegalStateException ex) {
 			assertEquals("Incorrect exception",
 					"Authentication error: TEST (java.lang.Exception)",
 					ex.getMessage());
@@ -191,7 +209,7 @@ public class HttpAuthenticationManagedObjectSourceTest extends
 		try {
 			authentication.getHttpSecurity();
 			fail("Should not be successful");
-		} catch (IOException ex) {
+		} catch (RuntimeException ex) {
 			assertSame("Incorrect cause", failure, ex);
 		}
 	}
@@ -206,7 +224,7 @@ public class HttpAuthenticationManagedObjectSourceTest extends
 		try {
 			authentication.getHttpSecurity();
 			fail("Should not be successful");
-		} catch (IOException ex) {
+		} catch (Error ex) {
 			assertSame("Incorrect cause", error, ex);
 		}
 	}
@@ -295,7 +313,7 @@ public class HttpAuthenticationManagedObjectSourceTest extends
 		try {
 			authentication.getHttpSecurity();
 			fail("Should not be successful");
-		} catch (IOException ex) {
+		} catch (IllegalStateException ex) {
 			assertEquals("Incorrect exception",
 					"Authentication error: TEST (java.lang.Exception)",
 					ex.getMessage());
@@ -313,7 +331,7 @@ public class HttpAuthenticationManagedObjectSourceTest extends
 		try {
 			authentication.getHttpSecurity();
 			fail("Should not be successful");
-		} catch (IOException ex) {
+		} catch (RuntimeException ex) {
 			assertSame("Incorrect cause", failure, ex);
 		}
 	}
@@ -328,7 +346,7 @@ public class HttpAuthenticationManagedObjectSourceTest extends
 		try {
 			authentication.getHttpSecurity();
 			fail("Should not be successful");
-		} catch (IOException ex) {
+		} catch (Error ex) {
 			assertSame("Incorrect cause", error, ex);
 		}
 	}
@@ -377,8 +395,8 @@ public class HttpAuthenticationManagedObjectSourceTest extends
 			boolean isRatified, HttpSecurity authenticatedSecurity,
 			Throwable authenticatedFailure) throws Throwable {
 		HttpCredentials credentials = this.createMock(HttpCredentials.class);
-		return this.doAuthentication(null, null, true, null, null, credentials,
-				ratifiedSecurity, ratifiedFailure, isRatified,
+		return this.doAuthentication(null, null, false, null, null,
+				credentials, ratifiedSecurity, ratifiedFailure, isRatified,
 				authenticatedSecurity, authenticatedFailure);
 	}
 
@@ -422,9 +440,10 @@ public class HttpAuthenticationManagedObjectSourceTest extends
 								context.getSession());
 						if (expected[0] == loadRatifyContext) {
 							// Validate loading ratification
-							assertNull(
-									"Should be no application specific credentials on loading",
-									context.getCredentials());
+							if (context.getCredentials() != null) {
+								// Should be no credentials on load
+								return false;
+							}
 							if (loadRatifyFailure != null) {
 								throw loadRatifyFailure;
 							}
@@ -433,8 +452,10 @@ public class HttpAuthenticationManagedObjectSourceTest extends
 							}
 						} else {
 							// Validate manual ratification
-							assertSame("Incorrect credentials", credentials,
-									context.getCredentials());
+							if (context.getCredentials() != credentials) {
+								// Incorrect credentials
+								return false;
+							}
 							if (manualRatifyFailure != null) {
 								throw manualRatifyFailure;
 							}
@@ -546,38 +567,42 @@ public class HttpAuthenticationManagedObjectSourceTest extends
 
 		// Test
 		this.replayMockObjects();
-		try {
 
-			// Load the source
-			HttpAuthenticationManagedObjectSource source = loader
-					.loadManagedObjectSource(HttpAuthenticationManagedObjectSource.class);
+		// Register access to the HTTP Security Source
+		String key = HttpSecurityConfigurator.registerHttpSecuritySource(
+				this.source, this.securityType);
+		loader.addProperty(
+				HttpAuthenticationManagedObjectSource.PROPERTY_HTTP_SECURITY_SOURCE_KEY,
+				key);
 
-			// Source the managed object
-			ManagedObjectUserStandAlone user = new ManagedObjectUserStandAlone();
-			user.setAsynchronousListener(listener);
-			user.mapDependency(Dependencies.SERVER_HTTP_CONNECTION,
-					HttpAuthenticationManagedObjectSourceTest.this.connection);
-			user.mapDependency(Dependencies.HTTP_SESSION,
-					HttpAuthenticationManagedObjectSourceTest.this.session);
-			ManagedObject managedObject = user.sourceManagedObject(source,
-					false);
+		// Load the source
+		HttpAuthenticationManagedObjectSource source = loader
+				.loadManagedObjectSource(HttpAuthenticationManagedObjectSource.class);
 
-			// Obtain the HTTP authentication
-			HttpAuthentication<HttpSecurity, HttpCredentials> authentication = (HttpAuthentication<HttpSecurity, HttpCredentials>) managedObject
-					.getObject();
+		// Source the managed object
+		ManagedObjectUserStandAlone user = new ManagedObjectUserStandAlone();
+		user.setAsynchronousListener(listener);
+		user.mapDependency(Dependencies.SERVER_HTTP_CONNECTION,
+				HttpAuthenticationManagedObjectSourceTest.this.connection);
+		user.mapDependency(Dependencies.HTTP_SESSION,
+				HttpAuthenticationManagedObjectSourceTest.this.session);
+		ManagedObject managedObject = user.sourceManagedObject(source);
 
-			// Determine if undertake manual authentication
-			if (request != null) {
-				authentication.authenticate(request);
-			}
+		// Obtain the HTTP authentication
+		HttpAuthentication<HttpSecurity, HttpCredentials> authentication = (HttpAuthentication<HttpSecurity, HttpCredentials>) managedObject
+				.getObject();
 
-			// Return the HTTP authentication
-			return authentication;
-
-		} finally {
-			// Verify mock objects
-			this.verifyMockObjects();
+		// Determine if undertake manual authentication
+		if (request != null) {
+			authentication.authenticate(request);
 		}
+
+		// Verify mock objects
+		this.verifyMockObjects();
+
+		// Return the HTTP authentication
+		return authentication;
+
 	}
 
 }

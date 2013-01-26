@@ -25,6 +25,7 @@ import net.officefloor.plugin.web.http.security.scheme.BasicHttpSecuritySource;
 import net.officefloor.plugin.web.http.security.scheme.DigestHttpSecuritySource;
 import net.officefloor.plugin.web.http.security.scheme.FormHttpSecuritySource;
 import net.officefloor.plugin.web.http.security.type.HttpSecurityLoaderUtil;
+import net.officefloor.plugin.web.http.security.type.HttpSecurityType;
 
 /**
  * Tests the {@link HttpSecuritySectionSource}.
@@ -103,10 +104,12 @@ public class HttpSecuritySectionSourceTest extends OfficeFrameTestCase {
 	private static <S, C, D extends Enum<D>, F extends Enum<F>, HS extends HttpSecuritySource<S, C, D, F>> void validateType(
 			SectionDesigner expectedType, Class<HS> httpSecuritySourceClass,
 			String... propertyNameValuePairs) {
-		HS source = HttpSecurityLoaderUtil.loadHttpSecuritySource(
-				httpSecuritySourceClass, propertyNameValuePairs);
-		String key = HttpSecurityConfigurator
-				.registerHttpSecuritySource(source);
+		HS source = HttpSecurityLoaderUtil
+				.newHttpSecuritySource(httpSecuritySourceClass);
+		HttpSecurityType<S, C, D, F> type = HttpSecurityLoaderUtil
+				.loadHttpSecurityType(source, propertyNameValuePairs);
+		String key = HttpSecurityConfigurator.registerHttpSecuritySource(
+				source, type);
 		SectionLoaderUtil.validateSectionType(expectedType,
 				HttpSecuritySectionSource.class, key);
 	}

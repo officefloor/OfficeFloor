@@ -19,6 +19,7 @@ package net.officefloor.plugin.web.http.security;
 
 import java.io.IOException;
 
+import net.officefloor.compile.spi.work.source.TaskFlowTypeBuilder;
 import net.officefloor.compile.spi.work.source.TaskTypeBuilder;
 import net.officefloor.compile.spi.work.source.WorkTypeBuilder;
 import net.officefloor.compile.test.work.WorkLoaderUtil;
@@ -26,14 +27,18 @@ import net.officefloor.compile.work.TaskType;
 import net.officefloor.compile.work.WorkType;
 import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.build.None;
+import net.officefloor.frame.api.execute.FlowFuture;
 import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.execute.TaskContext;
 import net.officefloor.frame.test.OfficeFrameTestCase;
+import net.officefloor.frame.test.match.TypeMatcher;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
 import net.officefloor.plugin.web.http.application.HttpRequestState;
 import net.officefloor.plugin.web.http.route.HttpUrlContinuationTest;
 import net.officefloor.plugin.web.http.security.impl.AbstractHttpSecuritySource;
 import net.officefloor.plugin.web.http.security.store.CredentialStore;
+import net.officefloor.plugin.web.http.security.type.HttpSecurityLoaderUtil;
+import net.officefloor.plugin.web.http.security.type.HttpSecurityType;
 import net.officefloor.plugin.web.http.session.HttpSession;
 
 import org.easymock.AbstractMatcher;
@@ -54,9 +59,8 @@ public class HttpSecurityWorkSourceTest extends OfficeFrameTestCase {
 	/**
 	 * {@link TaskContext}.
 	 */
-	@SuppressWarnings("unchecked")
-	private final TaskContext<HttpSecurityWork, Dependencies, Flows> taskContext = this
-			.createMock(TaskContext.class);
+	@SuppressWarnings("rawtypes")
+	private final TaskContext taskContext = this.createMock(TaskContext.class);
 
 	/**
 	 * {@link TaskAuthenticateContext}.
@@ -70,6 +74,13 @@ public class HttpSecurityWorkSourceTest extends OfficeFrameTestCase {
 	 */
 	private final HttpCredentials credentials = this
 			.createMock(HttpCredentials.class);
+
+	/**
+	 * {@link HttpAuthentication}.
+	 */
+	@SuppressWarnings("unchecked")
+	private final HttpAuthentication<HttpSecurity, HttpCredentials> authentication = this
+			.createMock(HttpAuthentication.class);
 
 	/**
 	 * {@link ServerHttpConnection}.
@@ -95,6 +106,11 @@ public class HttpSecurityWorkSourceTest extends OfficeFrameTestCase {
 			.createMock(HttpRequestState.class);
 
 	/**
+	 * {@link HttpSecurity}.
+	 */
+	private final HttpSecurity security = this.createMock(HttpSecurity.class);
+
+	/**
 	 * Validate specification.
 	 */
 	public void testSpecification() {
@@ -109,8 +125,10 @@ public class HttpSecurityWorkSourceTest extends OfficeFrameTestCase {
 	public void testType() {
 
 		// Register the HTTP security source
-		String key = HttpSecurityConfigurator
-				.registerHttpSecuritySource(this.source);
+		HttpSecurityType<HttpSecurity, HttpCredentials, Dependencies, Flows> securityType = HttpSecurityLoaderUtil
+				.loadHttpSecurityType(this.source);
+		String key = HttpSecurityConfigurator.registerHttpSecuritySource(
+				this.source, securityType);
 
 		// Create the expected type
 		WorkTypeBuilder<HttpSecurityWork> type = WorkLoaderUtil
@@ -119,37 +137,77 @@ public class HttpSecurityWorkSourceTest extends OfficeFrameTestCase {
 		// Managed Object Authentication task
 		TaskTypeBuilder<Indexed, None> moAuthenticateTask = type.addTaskType(
 				"MANAGED_OBJECT_AUTHENTICATE",
-				new HttpManagedObjectAuthenticateTask(), Indexed.class,
+				new ManagedObjectHttpAuthenticateTask(), Indexed.class,
 				None.class);
-		moAuthenticateTask.addObject(TaskAuthenticateContext.class);
-		moAuthenticateTask.addObject(CredentialStore.class);
+		moAuthenticateTask.addObject(TaskAuthenticateContext.class).setLabel(
+				"TASK_AUTHENTICATE_CONTEXT");
+		moAuthenticateTask.addObject(CredentialStore.class).setLabel(
+				"DEPENDENCY_CREDENTIAL_STORE");
 
 		// Challenge task
 		TaskTypeBuilder<Indexed, Indexed> challengeTask = type.addTaskType(
 				"CHALLENGE", new HttpChallengeTask(), Indexed.class,
 				Indexed.class);
-		challengeTask.addObject(HttpAuthenticationRequiredException.class);
-		challengeTask.addObject(ServerHttpConnection.class);
-		challengeTask.addObject(HttpSession.class);
-		challengeTask.addObject(HttpRequestState.class);
-		challengeTask.addObject(CredentialStore.class);
-		challengeTask.addFlow().setLabel("FAILURE");
-		challengeTask.addFlow().setLabel("FORM_LOGIN_PAGE");
+		challengeTask.addObject(HttpAuthenticationRequiredException.class)
+				.setLabel("HTTP_AUTHENTICATION_REQUIRED_EXCEPTION");
+		challengeTask.addObject(ServerHttpConnection.class).setLabel(
+				"SERVER_HTTP_CONNECTION");
+		challengeTask.addObject(HttpSession.class).setLabel("HTTP_SESSION");
+		challengeTask.addObject(HttpRequestState.class).setLabel(
+				"HTTP_REQUEST_STATE");
+		challengeTask.addObject(CredentialStore.class).setLabel(
+				"DEPENDENCY_CREDENTIAL_STORE");
+		TaskFlowTypeBuilder<Indexed> challengeFailureFlow = challengeTask
+				.addFlow();
+		challengeFailureFlow.setArgumentType(Throwable.class);
+		challengeFailureFlow.setLabel("FAILURE");
+		TaskFlowTypeBuilder<Indexed> challengeLoginFlow = challengeTask
+				.addFlow();
+		challengeLoginFlow.setArgumentType(Void.class);
+		challengeLoginFlow.setLabel("FLOW_FORM_LOGIN_PAGE");
 
-		// Application Authentication task
-		TaskTypeBuilder<Indexed, HttpApplicationAuthenticateTask.Flows> appAuthenticationTask = type
-				.addTaskType("APPLICATION_AUTHENTICATE",
-						new HttpApplicationAuthenticateTask(), Indexed.class,
-						HttpApplicationAuthenticateTask.Flows.class);
-		appAuthenticationTask.addObject(HttpCredentials.class);
-		appAuthenticationTask.addObject(ServerHttpConnection.class);
-		appAuthenticationTask.addObject(HttpSession.class);
-		appAuthenticationTask.addObject(HttpRequestState.class);
-		appAuthenticationTask.addObject(CredentialStore.class);
-		appAuthenticationTask.addFlow().setKey(
-				HttpApplicationAuthenticateTask.Flows.ROUTE_REINSTATED_REQUEST);
-		appAuthenticationTask.addFlow().setKey(
-				HttpApplicationAuthenticateTask.Flows.FAILURE);
+		// Start Application Authentication task
+		TaskTypeBuilder<StartApplicationHttpAuthenticateTask.Dependencies, StartApplicationHttpAuthenticateTask.Flows> startTask = type
+				.addTaskType(
+						"START_APPLICATION_AUTHENTICATE",
+						new StartApplicationHttpAuthenticateTask(),
+						StartApplicationHttpAuthenticateTask.Dependencies.class,
+						StartApplicationHttpAuthenticateTask.Flows.class);
+		startTask.addObject(HttpCredentials.class).setKey(
+				StartApplicationHttpAuthenticateTask.Dependencies.CREDENTIALS);
+		startTask
+				.addObject(HttpAuthentication.class)
+				.setKey(StartApplicationHttpAuthenticateTask.Dependencies.HTTP_AUTHENTICATION);
+		TaskFlowTypeBuilder<StartApplicationHttpAuthenticateTask.Flows> startFailureFlow = startTask
+				.addFlow();
+		startFailureFlow
+				.setKey(StartApplicationHttpAuthenticateTask.Flows.FAILURE);
+		startFailureFlow.setArgumentType(Throwable.class);
+
+		// Complete Application Authentication Task
+		TaskTypeBuilder<CompleteApplicationHttpAuthenticateTask.Dependencies, CompleteApplicationHttpAuthenticateTask.Flows> completeTask = type
+				.addTaskType(
+						"COMPLETE_APPLICATION_AUTHENTICATE",
+						new CompleteApplicationHttpAuthenticateTask(),
+						CompleteApplicationHttpAuthenticateTask.Dependencies.class,
+						CompleteApplicationHttpAuthenticateTask.Flows.class);
+		completeTask
+				.addObject(HttpAuthentication.class)
+				.setKey(CompleteApplicationHttpAuthenticateTask.Dependencies.HTTP_AUTHENTICATION);
+		completeTask
+				.addObject(ServerHttpConnection.class)
+				.setKey(CompleteApplicationHttpAuthenticateTask.Dependencies.SERVER_HTTP_CONNECTION);
+		completeTask
+				.addObject(HttpSession.class)
+				.setKey(CompleteApplicationHttpAuthenticateTask.Dependencies.HTTP_SESSION);
+		completeTask
+				.addObject(HttpRequestState.class)
+				.setKey(CompleteApplicationHttpAuthenticateTask.Dependencies.REQUEST_STATE);
+		TaskFlowTypeBuilder<CompleteApplicationHttpAuthenticateTask.Flows> completeFailureFlow = completeTask
+				.addFlow();
+		completeFailureFlow
+				.setKey(CompleteApplicationHttpAuthenticateTask.Flows.FAILURE);
+		completeFailureFlow.setArgumentType(Throwable.class);
 
 		// Validate type
 		WorkType<HttpSecurityWork> work = WorkLoaderUtil.validateWorkType(type,
@@ -209,6 +267,7 @@ public class HttpSecurityWorkSourceTest extends OfficeFrameTestCase {
 	 * Undertakes authentication for the
 	 * {@link HttpAuthenticationManagedObjectSource}.
 	 */
+	@SuppressWarnings("unchecked")
 	private void doManagedObjectAuthentication() {
 		this.replayMockObjects();
 		try {
@@ -226,6 +285,8 @@ public class HttpSecurityWorkSourceTest extends OfficeFrameTestCase {
 	 * and {@link TaskContext}.
 	 */
 	private void recordManagedObjectAuthenticationDependencies() {
+		this.recordReturn(this.taskContext, this.taskContext.getWork(),
+				new HttpSecurityWork(this.source));
 		this.recordReturn(this.taskContext, this.taskContext.getObject(0),
 				this.authenticateContext);
 		this.recordReturn(this.authenticateContext,
@@ -281,30 +342,41 @@ public class HttpSecurityWorkSourceTest extends OfficeFrameTestCase {
 	 * @param exception
 	 *            {@link Exception} in undertaking challenge.
 	 */
+	@SuppressWarnings("unchecked")
 	private void doChallengeTest(boolean isInvokeFlow, Throwable exception)
 			throws Exception {
 
-		// Record saving request state
-		HttpUrlContinuationTest.recordSaveRequest("CHALLENGE_STATE",
-				this.connection, this.requestState, this.session, this);
+		final FlowFuture future = this.createMock(FlowFuture.class);
 
-		// Record challenge dependencies
+		// Record initial challenge dependencies
 		this.recordReturn(this.taskContext, this.taskContext.getObject(1),
 				this.connection);
 		this.recordReturn(this.taskContext, this.taskContext.getObject(2),
 				this.session);
 		this.recordReturn(this.taskContext, this.taskContext.getObject(3),
+				this.requestState);
+
+		// Record saving request state
+		HttpUrlContinuationTest.recordSaveRequest("CHALLENGE_REQUEST_MOMENTO",
+				this.connection, this.requestState, this.session, this);
+
+		// Record remaining challenge dependencies
+		this.recordReturn(this.taskContext, this.taskContext.getWork(),
+				new HttpSecurityWork(this.source));
+		this.recordReturn(this.taskContext, this.taskContext.getObject(4),
 				this.store);
 
 		// Determine if exception
 		if (exception != null) {
-			this.taskContext.doFlow(0, exception);
+			this.recordReturn(this.taskContext,
+					this.taskContext.doFlow(0, exception), future);
 		}
 
 		// Determine if application specific flow
 		if (isInvokeFlow) {
 			this.source.isDoChallengeFlow = true;
-			this.taskContext.doFlow(1, null);
+			this.recordReturn(this.taskContext,
+					this.taskContext.doFlow(1, null), future);
 		}
 
 		// Undertake challenge
@@ -322,105 +394,220 @@ public class HttpSecurityWorkSourceTest extends OfficeFrameTestCase {
 	/**
 	 * Ensure can undertake application authentication.
 	 */
-	public void testApplicationAuthenticate() throws Throwable {
-		final HttpSecurity security = this.createMock(HttpSecurity.class);
-		this.recordApplicationAuthenticationDependencies();
-		this.source.security = security;
-		HttpUrlContinuationTest.recordReinstateRequest(true, "CHALLENGE_STATE",
-				this.connection, this.requestState, this.session, this);
-		this.taskContext.doFlow(0, null);
-		this.doApplicationAuthentication();
+	public void testStartApplicationAuthenticate() throws Throwable {
+		this.doStartApplicationAuthentication(this.credentials, null);
+	}
+
+	/**
+	 * Ensure can undertake application authentication without credentials.
+	 */
+	public void testStartApplicationAuthenticateWithoutCredentials()
+			throws Throwable {
+		this.doStartApplicationAuthentication(null, null);
+	}
+
+	/**
+	 * Ensure can handle starting authentication failure.
+	 */
+	public void testStartApplicationAuthenticateFailure() throws Throwable {
+		this.doStartApplicationAuthentication(this.credentials,
+				new RuntimeException("TEST"));
+	}
+
+	/**
+	 * Ensure can handle starting authentication error.
+	 */
+	public void testStartApplicationAuthenticateError() throws Throwable {
+		this.doStartApplicationAuthentication(this.credentials, new Error(
+				"TEST"));
+	}
+
+	/**
+	 * Undertakes starting application authentication.
+	 */
+	@SuppressWarnings("unchecked")
+	private void doStartApplicationAuthentication(
+			final HttpCredentials credentials, Throwable failure)
+			throws Throwable {
+
+		final FlowFuture future = this.createMock(FlowFuture.class);
+
+		// Record obtaining dependencies
+		this.recordReturn(
+				this.taskContext,
+				this.taskContext
+						.getObject(StartApplicationHttpAuthenticateTask.Dependencies.CREDENTIALS),
+				credentials);
+		this.recordReturn(
+				this.taskContext,
+				this.taskContext
+						.getObject(StartApplicationHttpAuthenticateTask.Dependencies.HTTP_AUTHENTICATION),
+				this.authentication);
+
+		// Record starting authentication
+		this.authentication.authenticate(null);
+		this.control(this.authentication).setMatcher(new AbstractMatcher() {
+			@Override
+			public boolean matches(Object[] expected, Object[] actual) {
+				HttpAuthenticateRequest<HttpCredentials> request = (HttpAuthenticateRequest<HttpCredentials>) actual[0];
+				assertEquals("Incorrect credentials", credentials,
+						request.getCredentials());
+				request.authenticationComplete(); // should not do anything
+				return true;
+			}
+		});
+
+		// Determine if failure in starting authentication
+		if (failure != null) {
+			// Record failure
+			this.control(this.authentication).setThrowable(failure);
+			this.recordReturn(this.taskContext, this.taskContext
+					.doFlow(StartApplicationHttpAuthenticateTask.Flows.FAILURE,
+							failure), future);
+		}
+
+		// Test
+		this.replayMockObjects();
+		try {
+			Task<HttpSecurityWork, Dependencies, Flows> task = this
+					.createTask("START_APPLICATION_AUTHENTICATE");
+			task.doTask(this.taskContext);
+		} finally {
+			this.verifyMockObjects();
+		}
+	}
+
+	/**
+	 * Ensure reinstates request on successful authentication.
+	 */
+	public void testCompleteApplicationAuthenticated() throws Throwable {
+		this.doCompleteApplicationAuthentication(this.security, null, true);
 	}
 
 	/**
 	 * Ensure triggers challenge by throwing exception when not authenticated.
 	 */
-	public void testNotApplicationAuthenticate() throws Throwable {
-		this.recordApplicationAuthenticationDependencies();
-		try {
-			this.doApplicationAuthentication();
-			fail("Should not be successful");
-		} catch (HttpAuthenticationRequiredException ex) {
-			// Correct failure
-		}
+	public void testCompleteApplicationNotAuthenticated() throws Throwable {
+		this.doCompleteApplicationAuthentication(null, null, false);
 	}
 
 	/**
-	 * Ensure triggers failure flow if no request to reinstate after
-	 * authenticating.
+	 * Ensure triggers flow for {@link IOException}.
 	 */
-	public void testApplicationAuthenticateWithoutChallengeRequestState()
+	public void testCompleteApplicationAuthenticationIoException()
 			throws Throwable {
-		final HttpSecurity security = this.createMock(HttpSecurity.class);
-		this.recordApplicationAuthenticationDependencies();
-		this.source.security = security;
-		HttpUrlContinuationTest.recordReinstateRequest(false,
-				"CHALLENGE_STATE", this.connection, this.requestState,
-				this.session, this);
-		this.taskContext.doFlow(1, null);
-		this.control(this.taskContext).setMatcher(new AbstractMatcher() {
-			@Override
-			public boolean matches(Object[] expected, Object[] actual) {
-				assertEquals("Incorrect flow index", expected[0], actual[0]);
-				assertTrue(
-						"Incorrect cause",
-						(actual[1] instanceof HttpAuthenticationContinuationException));
-				return true;
+		this.doCompleteApplicationAuthentication(null, new IOException("TEST"),
+				false);
+	}
+
+	/**
+	 * Ensure triggers flow for failure.
+	 */
+	public void testCompleteApplicationAuthenticationFailure() throws Throwable {
+		this.doCompleteApplicationAuthentication(null, new RuntimeException(
+				"TEST"), false);
+	}
+
+	/**
+	 * Ensure triggers flow for error.
+	 */
+	public void testCompleteApplicationAuthenticationError() throws Throwable {
+		this.doCompleteApplicationAuthentication(null, new Error("TEST"), false);
+	}
+
+	/**
+	 * Ensure triggers flow for no continuation.
+	 */
+	public void testCompleteApplicationAuthenticationWithNoContinuation()
+			throws Throwable {
+		this.doCompleteApplicationAuthentication(this.security, null, false);
+	}
+
+	/**
+	 * Undertakes starting application authentication.
+	 */
+	@SuppressWarnings("unchecked")
+	private void doCompleteApplicationAuthentication(
+			final HttpSecurity security, Throwable failure,
+			boolean isRequestReinstated) throws Throwable {
+
+		final FlowFuture future = this.createMock(FlowFuture.class);
+
+		// Record obtaining dependencies
+		this.recordReturn(
+				this.taskContext,
+				this.taskContext
+						.getObject(CompleteApplicationHttpAuthenticateTask.Dependencies.HTTP_AUTHENTICATION),
+				this.authentication);
+
+		// Record obtaining security
+		if (failure != null) {
+			// Throw and handle the failure
+			this.authentication.getHttpSecurity();
+			this.control(this.authentication).setThrowable(failure);
+			this.recordReturn(this.taskContext, this.taskContext.doFlow(
+					CompleteApplicationHttpAuthenticateTask.Flows.FAILURE,
+					failure), future);
+
+		} else {
+			// Return the security
+			this.recordReturn(this.authentication,
+					this.authentication.getHttpSecurity(), security);
+
+			// Handle authenticated
+			if (security != null) {
+
+				// Reinstate request
+				this.recordReturn(
+						this.taskContext,
+						this.taskContext
+								.getObject(CompleteApplicationHttpAuthenticateTask.Dependencies.SERVER_HTTP_CONNECTION),
+						this.connection);
+				this.recordReturn(
+						this.taskContext,
+						this.taskContext
+								.getObject(CompleteApplicationHttpAuthenticateTask.Dependencies.HTTP_SESSION),
+						this.session);
+				this.recordReturn(
+						this.taskContext,
+						this.taskContext
+								.getObject(CompleteApplicationHttpAuthenticateTask.Dependencies.REQUEST_STATE),
+						this.requestState);
+				HttpUrlContinuationTest.recordReinstateRequest(
+						isRequestReinstated,
+						HttpSecurityWork.ATTRIBUTE_CHALLENGE_REQUEST_MOMENTO,
+						this.connection, this.requestState, this.session, this);
+				if (!isRequestReinstated) {
+					this.recordReturn(
+							this.taskContext,
+							this.taskContext
+									.doFlow(CompleteApplicationHttpAuthenticateTask.Flows.FAILURE,
+											null),
+							future,
+							new TypeMatcher(
+									CompleteApplicationHttpAuthenticateTask.Flows.class,
+									HttpAuthenticationContinuationException.class));
+				}
 			}
-		});
-		this.doApplicationAuthentication();
-	}
+		}
 
-	/**
-	 * Ensure triggers failure flow if {@link IOException} in authentication.
-	 */
-	public void testApplicationAuthenticateIoException() throws Throwable {
-		final IOException exception = new IOException("TEST");
-		this.recordApplicationAuthenticationDependencies();
-		this.source.ioException = exception;
-		this.taskContext.doFlow(1, exception);
-		this.doApplicationAuthentication();
-	}
-
-	/**
-	 * Ensure triggers failure flow in failure in authentication.
-	 */
-	public void testApplicationAuthenticateFailure() throws Throwable {
-		final RuntimeException exception = new RuntimeException("TEST");
-		this.recordApplicationAuthenticationDependencies();
-		this.source.failure = exception;
-		this.taskContext.doFlow(1, exception);
-		this.doApplicationAuthentication();
-	}
-
-	/**
-	 * Records obtaining dependencies from the {@link TaskContext} for
-	 * application authentication.
-	 */
-	private void recordApplicationAuthenticationDependencies() {
-		this.recordReturn(this.taskContext, this.taskContext.getObject(0),
-				this.credentials);
-		this.recordReturn(this.taskContext, this.taskContext.getObject(1),
-				this.connection);
-		this.recordReturn(this.taskContext, this.taskContext.getObject(2),
-				this.session);
-		this.recordReturn(this.taskContext, this.taskContext.getObject(3),
-				this.requestState);
-		this.recordReturn(this.taskContext, this.taskContext.getObject(4),
-				this.store);
-	}
-
-	/**
-	 * Undertakes application authentication.
-	 */
-	private void doApplicationAuthentication() throws Throwable {
+		// Test
+		HttpAuthenticationRequiredException exception = null;
 		this.replayMockObjects();
 		try {
 			Task<HttpSecurityWork, Dependencies, Flows> task = this
-					.createTask("APPLICATION_AUTHENTICATE");
+					.createTask("COMPLETE_APPLICATION_AUTHENTICATE");
 			task.doTask(this.taskContext);
+		} catch (HttpAuthenticationRequiredException ex) {
+			exception = ex;
 		} finally {
 			this.verifyMockObjects();
+		}
+
+		// Ensure propagated authentication required if no security
+		if ((security == null) && (failure == null)) {
+			assertNotNull("Should be authentication required exception",
+					exception);
 		}
 	}
 
@@ -436,8 +623,10 @@ public class HttpSecurityWorkSourceTest extends OfficeFrameTestCase {
 			String taskName) {
 
 		// Register the HTTP security source
-		String key = HttpSecurityConfigurator
-				.registerHttpSecuritySource(this.source);
+		HttpSecurityType<HttpSecurity, HttpCredentials, Dependencies, Flows> securityType = HttpSecurityLoaderUtil
+				.loadHttpSecurityType(this.source);
+		String key = HttpSecurityConfigurator.registerHttpSecuritySource(
+				this.source, securityType);
 
 		// Load the work type
 		WorkType<HttpSecurityWork> work = WorkLoaderUtil.loadWorkType(
