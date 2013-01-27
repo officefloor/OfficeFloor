@@ -7,22 +7,157 @@
 
 \begin{document}
 
-\title{Improving the Dispatcher for Thread Injection}
+\title{Thread Injection and Continuation Injection}
 \author{Daniel Sagenschneider}
 \date{}
 \maketitle
 
 \abstract{}
-Test
+
 
 \section{Introduction}
 
+The proactor pattern \cite{proactor} is used as the basis of popular modern web
+servers \footnote{TODO name servers as identified from the Netcraft 2012 survey}
+to dispatch request handling (events) asynchronously to request handlers
+(Asynchronous Operations).
+
+The disadvantage of the Proactor pattern is that the ``Asynchronous Operation
+Processor must be designed carefully to support prioritization and cancellation
+of Asynchronous Operations'' \cite{proactor}.  When not relying on the Operation
+System's asynchronous I/O, the Proactor Pattern does suggest using pooled
+threads to execute the asynchronous operations.  Performance analysis of web
+servers identifies the importance of tuning this correctly
+\cite{tuning-important,tuning-os-important,low-server-footprint}.  The Thread
+Injection Pattern presented in this paper focuses on addressing prioritization
+of Asynchronous Operations by using multiple thread pools.
+
+The Asynchronous Operation API has also become a single standard interface to
+enable servicing dynamic web page content.  The discussion of the Proactor
+Pattern focused on web servers providing static content with developers
+implementing the Proactor Initiator.  Popular modern web servers however provide
+dynamic web page content via developers implementing Asynchronous Operations to
+service a request.  To enable portable implementations the Asynchronous
+Operation interface has been standardised \footnote{CGI with for example PHP,
+.NET TODO what is this?, JEE Servlet used by servers from the Netcraft 2012
+survey}.
+
+The nature of the Proactor Pattern is to enable using many Asynchronous
+Operations in servicing a HTTP request.  For the popular Web Servers
+standardising of the Asynchronous Operation API however has focused on the
+Proactor benefit of simplification of application synchronization by allowing
+only one Asynchronous Operation to synchronously service the entire dynamic web
+page content \footnote{JEE Servlet 3.x specification is acknowledging this by
+introduction of the AsyncContext however requires the developer to be aware of
+thread synchronization complexities}.  The Continuation Injection Pattern
+presented in this paper focuses on addressing this by allowing multiple
+Asynchronous Operations to be used for dynamic web page content. It also
+provides the means for cancellation of Asynchronous Operations.
+
+\section{Dependency Injection}
+
+The naming of the Thread Injection and Continuation Injection pattern is because
+of their close association to the Dependency Injection pattern.
+
+The Dependency Injection pattern enables constructing objects using extrinsic
+dependency information to load dependencies without the need of the client
+requiring the object knowing about the dependencies \cite{ioc}.  This allows
+implementations to be swapped without syntatic changes.
+
+The Dependency Injection pattern therefore enables:
+\begin{enumerate}
+  \item A single interface for multiple implementations
+  \item Meta-data about dependencies required for the implementation
+  \item Means to provide one or more differing objects to the implementation
+\end{enumerate}
+
+These properties of the Dependency Injection pattern are important for the
+patterns described in this paper:
+\begin{itemize}
+  \item Single interface is necessary for the Asynchronous Operations.
+  \item Meta-data about dependencies provides Thread Injection the necessary information for dispatching Asynchronous Operations to the appropriate thread pool.
+  \item Continuations encapsulating the Proactor Completion Handlers and Completion Dispatchers can be provided to Asynchronous Operations.
+\end{itemize}
+
+\section{Thread Injection}
+
+The Thread Injection pattern addresses both the implementation of the
+Asynchronous Operation Processor and providing a prioritization API between the
+Asychronous Operations and the Asynchronous Operation Processor.  It's name is
+derrived from the close association with the dependency injection pattern
+\cite{ioc} and that the Asynchronous Operations have their executing thread
+chosen (injected) for them by configuration similar to dependency injection.
+
+As Asynchronous Operation Processor prioritization algorithm will rely on the
+meta-data available from the Asynchronous Operation, this will be addressed first.
+
+\subsection{Asynchronous Operation prioritization API}
+
+As already mentioned, the Proactor pattern specifies that the Asynchronous
+Operation API must be both portable and flexible.  While this applies to the API
+between the Proactor Initiator and Asynchronous Operation, it also must apply to
+API between the Asynchronous Operation and Asynchronous Operation Processor to
+decouple them.  This is especially the case to allow portable developer
+implementations of Asynchronous Operations (such as generating dynamic web page
+content).
+
+The result is a common interface for all Asynchronous Operations with multiple
+implementations.
 
 
- \cite{reactor}
+\section{Continuation Injection}
+
+The implementation of the Completion Dispatcher within this pattern is where
+Continuation Injection may occur.
+
+Break request into \cite{pipeline} of tasks that are connected together via
+continuations \cite{continuations} that encapsulate triggering an event and
+dispatching for another event handler.
+
+The continuations are also extended beyond the web server via URL continuations
+\cite{url-continuation}.
 
 
-More plain text.
+\section{Implicit Thread}
+
+When using the Thread Injection and Continuation Injection pattern together,
+implicit threads may be used to reduce thread context switching.
+
+The continuation may borrow the thread of the invoking Asynchronous Operation if
+it results in execution by the same thread pool.  The Proactor Pattern
+stipulates that Asynchronous Operations ``are performed without borrowing the
+application's thread of control'' which is the focus of the Reactor Pattern
+\cite{reactor}.  Rather than dispatching back to the same thread pool the
+continued Asynchronous Operations may safely borrow the Asynchronous Operation
+invoking thread to avoid the overhead of a thread context switch.
+
+This same idea is also extended to the default thread pool for the Thread
+Injection Pattern.  For an Asynchronous Operation not requiring any dependencies
+for dispatching to a specific thread pool, the Asynchronous Operation is deemed
+cheaper to be executed by the current Asynchronous Operation's thread than
+incurring the cost of a thread context switch.
+
+The borrowed thread is the implicit thread.  Like an implicit continuation that
+executes the next operation \cite{continuations}, the implicit thread executes
+the next operation unless a explicit thread is required.  This can result in the
+Web Server servicing the entire request without a thread context switch should
+no explicit threads be required for servicing the request (e.g. web page content
+obtained from cache).
+
+
+\section{Drawbacks}
+
+\emph{Hard to debug}: The Thread Injection and Continuation Injection Patterns
+have not resolved the Proactor issue of being hard to debug.  Furthermore,
+dependencies that are not appropriately thread safe can create very difficult to
+identify bugs.
+
+\section{Known Uses}
+
+OfficeFloor is the only known use of the Thread Injection and Continuation
+Injection pattern.  It is hoped that by providing more awareness of these
+patterns that adoption of these patterns will increase.
+
 
 \bibliographystyle{style/IEEEtran}
 \bibliography{ti}
