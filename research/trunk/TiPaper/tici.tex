@@ -85,7 +85,7 @@ the \texttt{Retrieve data from database} operation needs to be executed.  The
 remaining operations should then again be borrowing the thread to avoid thread
 context switching.
 
-\begin{table}[!t]
+\begin{table}[!h]
 \renewcommand{\arraystretch}{1.3}
 \centering
 \begin{tabular}{l||l||l}
@@ -111,9 +111,9 @@ Render HTTP response & Render HTTP response & Database data \\
 Write HTTP response & Write HTTP response & HTTP response, \\ 
  & & Socket \\
 \hline
+\end{tabular}
 \caption{Example operations for servicing a HTTP request from database and caches. The dependencies of each operation are also listed.}
 \label{tab:example_request_operations}
-\end{tabular}
 \end{table}
 
 The ability to have discrete operations and selection of executing thread based
@@ -173,7 +173,7 @@ Continuation Injection discussed later in this paper.
 The interface for the Asynchronous Operation is provided in Fig
 \ref{fig:AO_interface_AOP}.
 
-\begin{figure}[!t]
+\begin{figure}[!h]
 \begin{verbatim}
     interface DependencyInjectionFactory {
     
@@ -215,10 +215,8 @@ Operations with a particular type of dependency. Table
 \ref{tab:example_request_thread_pools} provides an example set of thread pools
 for the motivating example.
 
-\begin{table}[!t]
+\begin{table}[!h]
 \renewcommand{\arraystretch}{1.3}
-\caption{Example assigning of thread pool to Asynchronous Operations by dependency}
-\label{tab:example_request_thread_pools}
 \centering
 \begin{tabular}{l||l||l}
 \hline
@@ -236,6 +234,8 @@ Default & - & Parse HTTP request, \\
 & & Write HTTP response \\
 \hline
 \end{tabular}
+\caption{Example assigning of thread pool to Asynchronous Operations by dependency}
+\label{tab:example_request_thread_pools}
 \end{table}
 
 As the \texttt{Retrieve data from database} operation is configured to be
@@ -307,7 +307,7 @@ Asynchronous Operations (Fig
 method provides retrieval of the extrinsically defined dependencies (Dependency
 Injection).  The remaining methods are for Continuation Injection.
 
-\begin{figure}[!t]
+\begin{figure}[!h]
 \begin{verbatim}
     interface AsynchronousOperationContext {
     
@@ -348,7 +348,7 @@ illustrates an interface made available to dependencies to invoke an
 Asynchronous Operation.  This enables dependencies to effectively become Active
 Objects \cite{active-object} when necessary.
 
-\begin{figure}[!t]
+\begin{figure}[!h]
 \begin{verbatim}
     interface DependencyContinuation {
             
@@ -450,7 +450,7 @@ the \texttt{retrieveData(\ldots)} method. It will:
   \item Reflectively invokes the \texttt{retrieveData(\ldots)} with the above arguments.
 \end{enumerate}
 
-\begin{figure}[!t]
+\begin{figure}[!h]
 \begin{verbatim}
 
     interface CacheContinuations {
@@ -520,10 +520,13 @@ Control pattern.
 
 \section{Drawbacks}
 
-\emph{Hard to debug}: The Thread Injection and Continuation Injection Patterns
-have not resolved the Proactor issue of being hard to debug.  Furthermore,
-dependencies maintaining state between Asynchronous Operations that are not
-appropriately thread safe can create very difficult to identify bugs.
+The Thread Injection and Continuation Injection patterns have provided limited
+improvement on Proactor pattern being hard to debug.  While the patterns have
+not directly addressed the Proactor issue of being hard to debug, they do follow
+the trend of popular modern web servers by encapsulating developer code within
+Asynchronous Operations.  However, the introduction of dependencies maintaining
+state between Asynchronous Operations leaves the possibility for dependencies to
+be non-thread safe causing difficult to identify thread synchronization bugs.
 
 
 \section{Known Uses}
@@ -541,6 +544,6 @@ ideas.
 
 
 \bibliographystyle{style/IEEEtran}
-\bibliography{ti}
+\bibliography{tici}
 
 \end{document}
