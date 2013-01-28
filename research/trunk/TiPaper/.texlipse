@@ -1,5 +1,5 @@
 #TeXlipse project settings
-#Sun Jan 27 08:13:56 WST 2013
+#Mon Jan 28 22:14:47 WST 2013
 markTmpDer=true
 builderNum=2
 outputDir=
@@ -7,8 +7,8 @@ makeIndSty=
 bibrefDir=
 outputFormat=pdf
 tempDir=tmp
-mainTexFile=ti.tex
-outputFile=ti.pdf
+mainTexFile=tici.tex
+outputFile=tici.pdf
 langSpell=en
 markDer=true
 srcDir=
