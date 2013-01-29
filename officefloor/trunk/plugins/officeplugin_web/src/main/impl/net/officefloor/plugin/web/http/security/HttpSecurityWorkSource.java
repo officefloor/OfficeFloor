@@ -51,7 +51,14 @@ public class HttpSecurityWorkSource extends
 	 * Name of {@link Property} providing the key to the
 	 * {@link HttpSecuritySource} from the {@link HttpSecurityConfigurator}.
 	 */
-	public static final String PROPERTY_HTTP_SECURITY_SOURCE_KEY = "http.security.source.key";
+	@Deprecated
+	// should provide via constructor
+	public static final String PROPERTY_HTTP_SECURITY_SOURCE_KEY = HttpAuthenticationManagedObjectSource.PROPERTY_HTTP_SECURITY_SOURCE_KEY;
+
+	/**
+	 * Name of the {@link HttpChallengeTask}.
+	 */
+	public static final String TASK_CHALLENGE = "CHALLENGE";
 
 	/*
 	 * =================== WorkSource ===============================
@@ -126,7 +133,7 @@ public class HttpSecurityWorkSource extends
 
 		// Add the challenge task
 		TaskTypeBuilder<Indexed, Indexed> challenge = workTypeBuilder
-				.addTaskType("CHALLENGE", new HttpChallengeTask(),
+				.addTaskType(TASK_CHALLENGE, new HttpChallengeTask(),
 						Indexed.class, Indexed.class);
 		challenge.addObject(HttpAuthenticationRequiredException.class)
 				.setLabel("HTTP_AUTHENTICATION_REQUIRED_EXCEPTION");
