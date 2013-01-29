@@ -51,7 +51,10 @@ public class HttpSecuritySectionSourceTest extends OfficeFrameTestCase {
 		// Create the expected type
 		SectionDesigner type = SectionLoaderUtil
 				.createSectionDesigner(HttpSecuritySectionSource.class);
-		// TODO provide type
+		type.addSectionInput("Challenge",
+				HttpAuthenticationRequiredException.class.getName());
+		type.addSectionInput("Authenticate", HttpSecurity.class.getName());
+		type.addSectionOutput("Failure", Throwable.class.getName(), true);
 
 		// Validate type
 		validateType(type, BasicHttpSecuritySource.class,
@@ -113,5 +116,4 @@ public class HttpSecuritySectionSourceTest extends OfficeFrameTestCase {
 		SectionLoaderUtil.validateSectionType(expectedType,
 				HttpSecuritySectionSource.class, key);
 	}
-
 }
