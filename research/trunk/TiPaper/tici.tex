@@ -376,7 +376,9 @@ a key aspect of the Proactor pattern.
 Continuation Injection therefore enables stringing together multiple
 Asynchronous Operations to service the HTTP request.  This can be considered a
 form of continuation-passing style \cite{continuations} except that the
-continuation is dependency injected rather than passed as a parameter.
+continuation is dependency injected rather than passed as a parameter.  The
+added benefit of dependency injecting the continuation is that the Asynchronous
+Operation is free to dependend on as many continuations as necessary.
 
 
 \subsection{Initial Asynchronous Operation to service a HTTP request}
