@@ -16,8 +16,7 @@
 The Thread Injection and Continuation Injection patterns provide implementing
 algorithms for the participants of the Proactor pattern to enable Inversion of
 Control for executing threads and execution order of operations.  These patterns
-combined with Dependency Injection provide a complete Inversion of Control
-pattern.
+combined with Dependency Injection provide an Inversion of Control pattern.
 
 \section{Introduction}
 
@@ -33,9 +32,11 @@ of Asynchronous Operations'' \cite{proactor}.  When not relying on the Operation
 System's asynchronous I/O, the Proactor pattern does suggest using a single
 thread pool to execute the asynchronous operations.  Performance analysis of web
 servers identifies the importance of tuning this prioritization
-\cite{tuning-important,low-server-footprint,tuning-os-important}.  The Thread
-Injection pattern presented in this paper focuses on addressing prioritization
-of Asynchronous Operations by using multiple thread pools.
+\cite{tuning-important,low-server-footprint,tuning-os-important}.  Furthermore,
+the Proactor pattern does not provide algorithms for implementing its
+participants.  The Thread Injection pattern presented focuses on addressing
+prioritization algorithms of Asynchronous Operations by using multiple thread
+pools.
 
 The Asynchronous Operation API has also become a single standard interface to
 enable servicing dynamic web page content.  The discussion of the Proactor
@@ -55,8 +56,8 @@ page content \footnote{JEE Servlet 3.x AsyncContext is enabling implementing
 code for the Proactor Initiator however this requires the developer to be aware
 of thread synchronization complexities}.  The Continuation Injection pattern
 presented focuses on addressing this by allowing multiple Asynchronous
-Operations to be used for dynamic web page content. It also provides the means
-for cancellation of Asynchronous Operations.
+Operations to be used for servicing requests for dynamic web page content. It
+also provides the means for cancellation of Asynchronous Operations.
 
 
 \section{A Motivating Example}
@@ -394,7 +395,13 @@ Providing identifiers to these Asynchronous Operations is also a convenient
 means to ease maintenance of web pages.  Rather than embedding the URL in the
 web page content, the Asynchronous Operation identifier is used.  When the page
 is rendered for the client, the identifiers are replaced the with the actual
-URLs.  This allows the URLs to be changed without needing to change web pages.
+URLs.  This allows the URLs to be changed without needing to change web pages. 
+
+Substituting the Asynchronous Operation URLs at page rendering time also enables
+distributed load balancing.  For a server to balance load to a different server
+it substitutes URLs for Asynchronous Operations on the other server. The
+appropriate clients will then continue with another server and subsequently
+allow balanacing load across the distributed servers.
 
 
 \subsection{Continuation for cancelling an Asynchronous Operation}
@@ -438,6 +445,29 @@ Web Server servicing the entire request without a thread context switch should
 no explicit threads be required for servicing the request (e.g. web page content
 obtained from cache).  This also resolves the thread context switching of the
 motivating example.
+
+
+\section{Distributing Asynchronous Operations}
+
+As continuations asynchronously invoke Asynchronous Operations, the Asynchronous
+Operation need not reside on the same server.  The dependency injected
+continuation can be configured to invoke an Asynchronous Operation on another
+server.  The continuation may synchronously send the continuation arguments
+(e.g. HTTP request) or the arguments may be asynchronously communicated (e.g.
+queue).  The asynchronous communication decouples the arguments (message) from
+the sending Asynchronous Operation enabling the Asynchronous Operations to
+adhere to the principles of an Actor \cite{actors}\footnote{Invoking any number
+of dependency injected continuations enables the remaining Actor principles}.
+
+Distributing Asynchronous Operations hetrogeneously can also be undertaking by
+configuring the responsible thread pool to reside on another server.  On
+invoking the continuation, the continuation arguments are communicated to the
+server\footnote{May be cluster of servers} containing the thread pool to execute
+the Asynchronous Operation.  The dependency management context state to be
+reinstated on the other server may or may not be communicated with the
+continuation arguments depending on thread pool mapping configuration.  This is
+useful for example to co-locate certain Asynchronous Operations geographically
+or have certain Asynchronous Operations run on particular hardware.
 
 
 \section{Example implementation of an Asynchronous Operation}
