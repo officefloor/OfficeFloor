@@ -1,42 +1,83 @@
 %%This is a very basic article template.
 %%There is just one section and two subsections.
-\documentclass{article}
+\documentclass[prodmode]{style/acmlarge}
 
-%% Improve hyphenation
-\hyphenation{op-tical net-works semi-conduc-tor}
+% Metadata Information
+\acmVolume{V}
+\acmNumber{N}
+\acmArticle{A}
+\articleSeq{S}
+\acmYear{YYYY}
+\acmMonth{0}
 
-\begin{document}
+% Package to generate and customize Algorithm as per ACM style
+\usepackage[ruled]{style/algorithm2e}
+\SetAlFnt{\algofont}
+\SetAlCapFnt{\algofont}
+\SetAlCapNameFnt{\algofont}
+\SetAlCapHSkip{0pt}
+\IncMargin{-\parindent}
+\renewcommand{\algorithmcfname}{ALGORITHM}
+
+% Page heads
+\markboth{D. Sagenschneider}{Thread Injection and Continuation Injection}
+
 
 \title{Thread Injection and Continuation Injection}
-\author{Daniel Sagenschneider}
-\date{}
-\maketitle
+\author{DANIEL SAGENSCHNEIDER \affil{daniel@officefloor.net}}
 
-\abstract{}
+\begin{abstract}
 The Thread Injection and Continuation Injection patterns provide implementing
 algorithms for the participants of the Proactor pattern to enable inverting
 control for the thread executing and the ordering of operations.  These patterns
 combined with Dependency Injection provide an Inversion of Control pattern.
+\end{abstract}
+
+\category{X.Y.Z}{To}{be}[determined]
+
+\terms{Design, Performance, Standardization}
+\keywords{Continuation Injection, Thread Injection}
+
+\acmformat{Sagenschneider, D. 2012.Thread Injection and Continuation Injection.}
+
+\copyr{Copyright 2012 is held by the author}
+
+\begin{document}
+
+\begin{bottomstuff}
+This work is the result of the author's development of OfficeFloor.\\
+Author's address: D. Sagenschneider, at home; email: daniel@officefloor.net\\
+
+Permission to make digital or hard copies of all or part of this work for
+personal or classroom use is granted without fee provided that copies are not
+made or distributed for profit or commercial advantage and that copies bear this
+notice and the full citation on the first page. To copy otherwise, to republish,
+to post on servers or to redistribute to lists, requires prior specific
+permission. A preliminary version of this paper was presented in a writers'
+workshop at the 18th Conference on Pattern Languages of Programs (PLoP).
+\end{bottomstuff}
+
+\maketitle
 
 \section{Introduction}
 
 The Proactor pattern \cite{proactor} is used as the basis of popular modern web
-servers \footnote{Apache, Microsoft IIS, Nginx and JEE identified from the
+servers\footnote{Apache, Microsoft IIS, Nginx and JEE identified from the
 Netcraft November 2012 survey.  Google Web Server is also identified as
 popular.} to dispatch requests asynchronously to request handlers (Asynchronous
 Operations).
 
 The disadvantage of the Proactor pattern is that the ``Asynchronous Operation
 Processor must be designed carefully to support prioritization and cancellation
-of Asynchronous Operations'' \cite{proactor}.  When not relying on the Operation
+of Asynchronous Operations'' \cite{proactor}.  When not relying on the Operating
 System's asynchronous I/O, the Proactor pattern does suggest using a single
 thread pool to execute the asynchronous operations.  Performance analysis of web
 servers identifies the importance of tuning this prioritization
 \cite{tuning-important,low-server-footprint,tuning-os-important}.  Furthermore,
 the Proactor pattern does not provide algorithms for implementing its
-participants.  The Thread Injection pattern presented focuses on addressing
-prioritization algorithms of Asynchronous Operations by using multiple thread
-pools.
+participants.  The Thread Injection pattern presented focuses on addressing the
+prioritization algorithms of the Asynchronous Operations by using multiple
+thread pools.
 
 The Asynchronous Operation API has also become a single standard interface to
 enable servicing dynamic web page content.  The discussion of the Proactor
@@ -44,7 +85,7 @@ pattern focused on web servers providing static content with developers
 implementing the Proactor Initiator.  Popular web servers however provide
 dynamic web page content via developers implementing Asynchronous Operations to
 service a request.  To enable portable implementations the Asynchronous
-Operation interface has been standardised \footnote{CGI/FastCGI with for
+Operation interface has been standardised\footnote{CGI/FastCGI with for
 example PHP scripts, Microsoft's HTTP.sys/WAS and JEE Servlets}.
 
 The design of the Proactor pattern was to enable using many Asynchronous
@@ -52,10 +93,10 @@ Operations in servicing a HTTP request.  For the popular Web Servers
 standardising of the Asynchronous Operation interface however has focused on the
 Proactor benefit of simplification of application synchronization by allowing
 only one Asynchronous Operation to synchronously service the entire dynamic web
-page content \footnote{JEE Servlet 3.x AsyncContext is enabling implementing
-code for the Proactor Initiator however this requires the developer to be aware
-of thread synchronization complexities}.  The Continuation Injection pattern
-presented focuses on addressing this by allowing multiple Asynchronous
+page content \footnote{JEE Servlet 3.x AsyncContext is enabling developer
+implementing code for Proactor Initiator however this requires the developer to
+be aware of thread synchronization complexities}.  The Continuation Injection
+pattern presented focuses on addressing this by allowing multiple Asynchronous
 Operations to be used for servicing requests for dynamic web page content. It
 also provides the means for cancellation of Asynchronous Operations.
 
@@ -87,13 +128,12 @@ the \texttt{Retrieve data from database} operation needs to be executed.  The
 remaining operations should then again be borrowing the thread to avoid thread
 context switching.
 
-\begin{table}[!h]
-\renewcommand{\arraystretch}{1.3}
-\centering
-\begin{tabular}{l||l||l}
+\begin{table}[t]
+\tbl{Example operations for servicing a HTTP request from database and cache. The dependencies of each operation are also listed.}{%
+\begin{tabular}{|l|l|l|}
 \hline
 \bfseries Cache Miss Operations & \bfseries Cache Hit Operations & \bfseries Dependencies \\
-\hline\hline
+\hline
 Read data from socket & Read data from socket & Selector, Socket \\
 \hline
 Parse HTTP request & Parse HTTP request & Data read \\
@@ -113,8 +153,7 @@ Render HTTP response & Render HTTP response & Database data \\
 Write HTTP response & Write HTTP response & HTTP response, \\ 
  & & Socket \\
 \hline
-\end{tabular}
-\caption{Example operations for servicing a HTTP request from database and caches. The dependencies of each operation are also listed.}
+\end{tabular}}
 \label{tab:example_request_operations}
 \end{table}
 
@@ -165,17 +204,18 @@ Asynchronous Operations (such as generating dynamic web page content).
 For the Thread Injection pattern, all Asynchronous Operations are constructed
 via extrinsic dependency management \cite{ioc} to allow a standard interface.
 The construction of the Asynchronous Operation is encapsulated in the depenency
-management factory.  This enables both the interfaces to the Proactor Initiator
+injection factory.  This enables both the interfaces to the Proactor Initiator
 and Asynchronous Operation Processor to be standardised.
 
 Standardising the interface between the Proactor Initiator and Asynchronous
 Operation is not necessary for Thread Injection.  It is however necessary for
-Continuation Injection discussed later in this paper.
+Continuation Injection discussed later.
 
 The interface for the Asynchronous Operation is provided in Fig
 \ref{fig:AO_interface_AOP}.
 
-\begin{figure}[!h]
+\begin{figure}[tp]
+\centering
 \begin{verbatim}
     interface DependencyInjectionFactory {
     
@@ -193,12 +233,13 @@ The interface for the Asynchronous Operation is provided in Fig
         String[] getContinuationIds();
     }
 \end{verbatim}
-\caption[Caption for Code]{Asynchronous Operation interface}
+\caption{Asynchronous Operation interfaces\footnotemark}
 \label{fig:AO_interface_AOP}
 \end{figure}
+\footnotetext{A rudimentary example implementation of the \texttt{DependencyInjectionFactory} is wrapping Spring's \cite{spring} \texttt{DefaultListableBeanFactory} to implement \texttt{createOperation(\ldots)} by calling \texttt{getBean(\ldots)} and \texttt{getRequiredDependencyTypes(\ldots)} by recursively calling \texttt{getBeanDefinition(\ldots)}/\texttt{getDependsOn()} to create the list of types.  More functional example implementations would utilise Spring's \texttt{ApplicationContext} to manage the context for the Asynchronous Operations and their dependencies.}
 
-The \texttt{execute()} method is invoked by the thread of the chosen thread pool
-to execute the implementation of the Asynchronous Operation.  The
+The \texttt{execute(\ldots)} method is invoked by the thread from the chosen
+thread pool to execute the implementation of the Asynchronous Operation.  The
 \texttt{AsynchronousOperationContext} parameter and \texttt{getContinuationIds()}
 method provides means for Continuation Injection explained later.
 
@@ -206,11 +247,11 @@ method provides means for Continuation Injection explained later.
 \subsection{Prioritizing Asynchronous Operations}
 
 The prioritization provided by the Thread Injection pattern is achieved by using
-the \texttt{getRequiredDependencyTypes(String operationId)} method to obtain the
-extrinsic depenency management information \footnote{Dependency Injection
-frameworks using qualification to identify dependencies of the same type may
-return a type object containing both class and qualifier rather than just a
-class.}.
+the \texttt{getRequiredDependencyTypes(\ldots)} method to obtain the extrinsic
+depenency information for an Asynchronous Operation \footnote{Dependency
+Injection frameworks using qualification to identify dependencies of the same
+type may return a type object containing both class and qualifier rather than
+just a class.  The thread pool matching may then incorporate the qualifier}.
 
 The developer configures one or more thread pools responsible for Asynchronous
 Operations with a particular type of dependency \footnote{Thread pools may be
@@ -220,13 +261,12 @@ one or more of the dependency types. Table
 \ref{tab:example_request_thread_pools} provides an example set of thread pools
 for the motivating example.
 
-\begin{table}[!h]
-\renewcommand{\arraystretch}{1.3}
-\centering
-\begin{tabular}{l||l||l}
+\begin{table}[t]
+\tbl{Example assigning of thread pool to Asynchronous Operations by dependency type}{%
+\begin{tabular}{|l||l||l|}
 \hline
 \bfseries Thread Pool & \bfseries Dependency Type & \bfseries Asynchronous Operation \\
-\hline\hline
+\hline
 Network & Selector & Read data from socket \\
 \hline
 Database & Database connection & Retrieve data from database \\
@@ -238,8 +278,7 @@ Default & - & Parse HTTP request, \\
 & & Render HTTP response, \\
 & & Write HTTP response \\
 \hline
-\end{tabular}
-\caption{Example assigning of thread pool to Asynchronous Operations by dependency type}
+\end{tabular}}
 \label{tab:example_request_thread_pools}
 \end{table}
 
@@ -262,8 +301,8 @@ threads or changing the pool's thread nice values) allows prioritizing threads a
 subsequently prioritizing Asynchronous Operations.
 
 As the dependencies for each Asynchronous Operation is static, at application
-start up time the Asynchronous Operation Processor may also preprocess the
-mapping of Asynchronous Operations to Thread Pools to reduce runtime decision
+start up time the Asynchronous Operation Processor may preprocess and cache the
+mapping of Asynchronous Operations to thread pools to reduce runtime decision
 overheads.  This pre-mapping of Asynchronous Operations may also provide
 warnings where dependencies of an Asynchronous Operation may make it possible to
 be mapped to multiple thread pools.  Different conflict mapping resolutions may
@@ -287,13 +326,13 @@ The \texttt{cancel(Exception)} provides the means for the Asynchronous Operation
 Processor to cancel the Asynchronous Operation.  Once invoked, the Asynchronous
 Operation Processor may discard the Asynchronous Operation.
 
-The implementaion of the \texttt{cancel(Exception)} is the responsibility of the
-Asynchronous Operation as it will likely be specific to the operation's
+The implementaion of the \texttt{cancel(Exception)} method is the responsibility
+of the Asynchronous Operation as it will likely be specific to the operation's
 implementation.  The Continuation Injection pattern explained later provides a
 means to alleviate this from the Asynchronous Operation implementation.
 
 As each thread pool is executing Asynchronous Operations for a particular
-dependency (or set of dependencies), it allows for adaptive resource management
+dependency (or set of dependencies), this allows for adaptive resource management
 and admission control regarding the dependency \cite{seda}.  This enables both
 the number of threads and dependencies to be dynamically altered to improve
 throughput.  However when maximum throughput is reached, additional Asynchronous
@@ -311,10 +350,12 @@ The Continuation Injection relies on providing the
 \texttt{AsynchronousOperationContext} (Fig \ref{fig:AOC_interface}) to the
 Asynchronous Operations (Fig
 \ref{fig:AO_interface_AOP}).  The \texttt{getDependency(\ldots)}
-method provides retrieval of the extrinsically defined dependencies (Dependency
-Injection).  The remaining methods are for Continuation Injection.
+method provides retrieval of the extrinsically defined dependencies for the
+Asynchronous Operation (Dependency Injection).  The remaining methods are for
+Continuation Injection.
 
-\begin{figure}[!h]
+\begin{figure}[tp]
+\centering
 \begin{verbatim}
     interface AsynchronousOperationContext {
     
@@ -326,7 +367,7 @@ Injection).  The remaining methods are for Continuation Injection.
         void continueOperation();
     }
 \end{verbatim}
-\caption[Caption for Code]{Asynchronous Operation Context interface \footnotemark}
+\caption{Asynchronous Operation Context interface\footnotemark}
 \label{fig:AOC_interface}
 \end{figure}
 \footnotetext{Integer identifiers may be used for fast array lookups rather than strings}
@@ -341,13 +382,13 @@ Operation.  To ease debugging and better developer understanding of the
 application, the configuration may be graphical where Asynchronous Operations
 are nodes and continuation mappings are directed lines.
 
-As the continuation is an asynchronous operation, it may use the returned
-\texttt{Future} to determine when the sequence of triggered Asynchronous
-Operations has completed \footnote{State is managed within the dependencies so
-there is no need for a return value from the \texttt{Future}}.  This enables
-process continuations \cite{process-continuation} to be spawned by repeatly
-calling \texttt{doContinuation(\ldots)} to aid in resolving such issues as the
-reverse 10K problem \cite{reverse-ten-k-problem}.
+As the continuation asynchronously invokes the operation, it may use the
+returned \texttt{Future} to determine when the sequence of triggered
+Asynchronous Operations has completed \footnote{State is managed within the
+dependencies so there is no need for a return value from the \texttt{Future}}. 
+This enables process continuations \cite{process-continuation} to be spawned by
+repeatly calling \texttt{doContinuation(\ldots)} to aid in resolving such issues
+as the reverse 10K problem \cite{reverse-ten-k-problem}.
 
 Furthermore as continuations result in Asynchronous Operations, they need not
 only be invoked by Asynchronous Operations. Fig \ref{fig:DC_interface}
@@ -355,14 +396,14 @@ illustrates a possible interface that can be made available to dependencies to
 invoke an Asynchronous Operation.  This enables dependencies to effectively
 become Active Objects \cite{active-object} when necessary.
 
-\begin{figure}[!h]
+\begin{figure}[tp]
 \begin{verbatim}
     interface DependencyContinuation {
             
         void doContinuation(Object parameter);
     }
 \end{verbatim}
-\caption[Caption for Code]{Dependency Context interface to invoke a continuation}
+\caption{Injected interface for a dependency to invoke a continuation}
 \label{fig:DC_interface}
 \end{figure}
 
@@ -385,17 +426,17 @@ Operation is free to dependend on as many continuations as necessary.
 \subsection{Initial Asynchronous Operation to service a HTTP request}
 
 For web servers, URL continuations \cite{url-continuation} are used to invoke
-the first Asynchronous Operation in the string.  Asynchronous Operations may be
-associated to a URL by developer configuration.  This Asynchronous Operation
+the first Asynchronous Operation in the string.  A URL may be associted to an
+Asynchronous Operation by developer configuration.  This Asynchronous Operation
 then becomes the first operation to be invoked for servicing a HTTP request for
-that URL.  This configuration may be included in Continuation Injection graphical
-configuration as an attribute of the Asynchronous Operation.
+that URL.  This configuration may be included in Continuation Injection
+graphical configuration as an attribute of the Asynchronous Operation node.
 
-Providing identifiers to these Asynchronous Operations is also a convenient
-means to ease maintenance of web pages.  Rather than embedding the URL in the
-web page content, the Asynchronous Operation identifier is used.  When the page
-is rendered for the client, the identifiers are replaced the with the actual
-URLs.  This allows the URLs to be changed without needing to change web pages. 
+Providing identifiers to Asynchronous Operations is also a convenient means to
+ease maintenance of web pages.  Rather than embedding the URL in the web page
+content, the Asynchronous Operation identifier is used.  When the page is
+rendered for the client, the identifiers are replaced with the actual URLs.
+This allows the URLs to be changed without needing to change web pages.
 
 Substituting the Asynchronous Operation URLs at page rendering time also enables
 distributed load balancing.  For a server to balance load to a different server
@@ -408,15 +449,19 @@ allow balanacing load across the distributed servers.
 
 Cancelling the Asynchronous Operation by the Asynchronous Operation Processor is
 handled by the Asynchronous Operation invoking a continuation.  On the
-Asynchronous Operation Processor invoking the \texttt{cancel(Exception cause)}
-method, the Asynchronous Operation will clean up any resources and then invoke a
-continuation invoking an Asynchronous Operation for another thread pool.
+Asynchronous Operation Processor invoking the \texttt{cancel(Exception)} method,
+the Asynchronous Operation will clean up any resources and then invoke a
+continuation for an Asynchronous Operation executed in another thread
+pool\footnote{For a web server this Asynchronous Operation could send a web page
+indicating the server is temporarily busy or it may send a redirect to a less
+busy web server}.
 
 Each Asynchronous Operation may specifically specify the continuation or a
-default continuation may be configured across a set of Asynchronous Operations. 
+default continuation may be configured across a set of Asynchronous Operations.
 The default continuation will be mapped to an Asynchronous Operation that
 interrogates the \texttt{cause} and undertakes appropration further Asynchronous
-Operations specific to the required application behaviour.
+Operations specific to the required application behaviour.  This is very similar
+to a \texttt{catch} block for handling an \texttt{Exception}.
 
 
 \section{Implicit Thread}
@@ -488,7 +533,8 @@ used to reflectively invoke the \texttt{retrieveData(\ldots)} method. It will:
   \item Reflectively invokes the \texttt{retrieveData(\ldots)} with the above arguments.
 \end{enumerate}
 
-\begin{figure}[!h]
+\begin{figure}[tp]
+\centering
 \begin{verbatim}
 
     interface CacheContinuations {
@@ -510,7 +556,7 @@ used to reflectively invoke the \texttt{retrieveData(\ldots)} method. It will:
         }
     }
 \end{verbatim}
-\caption[Caption for Code]{Example method used as an implementation of an Asynchronous Operation}
+\caption{Example method used as an implementation of an Asynchronous Operation}
 \label{fig:Example_Method_Operation}
 \end{figure}
 
@@ -556,6 +602,12 @@ For a method to be executed it requires:
 And therefore all aspects may be inverted in control providing an Inversion of
 Control pattern.
 
+As control may be inverted for all aspects of the method, it has made the
+Asynchronous Operation the software equivalent of an architectual
+\textit{brick}.  The Asynchronous Operations have standard interfaces allowing
+them to used together to create the equivalent of \textit{walls},
+\textit{buildings} and further complex structures.
+
 
 \section{Drawbacks}
 
@@ -571,17 +623,23 @@ to identify thread synchronization bugs.
 
 \section{Known Uses}
 
-OfficeFloor \cite{officefloor} is the only known use of the Thread Injection and
-Continuation Injection pattern.  The author identified these patterns through
-developing OfficeFloor.
+OfficeFloor \cite{officefloor} is the only known framework implementing the
+Thread Injection and Continuation Injection pattern.  OfficeFloor identifies
+Asynchronous Operations as Jobs\footnote{Task is the adapted interface within a
+Job for application developers to implement} which originates from its original
+design to model application architecture after the way work is processed within
+an office \footnote{This is where the name is derived. The OfficeFloor houses
+the system of coordinating the execution of Jobs}.  The author identified the
+Thread Injection and Continuation Injection patterns through developing
+OfficeFloor.
 
 
 \section*{Acknowledgment} I thank my wife Melanie for her patience and support
-in me developing OfficeFloor.  I also thank my friend Matthew Brown for being a
-sounding board to many of my ideas.
+in me developing OfficeFloor on top of my day job.  I also thank my friend
+Matthew Brown for being a sounding board to many of my ideas.
 
 
-\bibliographystyle{style/IEEEtran}
+\bibliographystyle{style/acmlarge}
 \bibliography{tici}
 
 \end{document}
