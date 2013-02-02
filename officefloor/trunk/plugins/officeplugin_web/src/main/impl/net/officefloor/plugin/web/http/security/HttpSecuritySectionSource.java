@@ -24,9 +24,11 @@ import net.officefloor.compile.spi.section.SectionWork;
 import net.officefloor.compile.spi.section.source.SectionSource;
 import net.officefloor.compile.spi.section.source.SectionSourceContext;
 import net.officefloor.compile.spi.section.source.impl.AbstractSectionSource;
+import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
 import net.officefloor.plugin.web.http.application.HttpRequestState;
 import net.officefloor.plugin.web.http.security.type.HttpSecurityDependencyType;
+import net.officefloor.plugin.web.http.security.type.HttpSecurityFlowType;
 import net.officefloor.plugin.web.http.security.type.HttpSecurityType;
 import net.officefloor.plugin.web.http.session.HttpSession;
 
@@ -96,7 +98,16 @@ public class HttpSecuritySectionSource extends AbstractSectionSource {
 			designer.link(challengeTask.getTaskObject(dependency
 					.getSectionObjectName()), dependency);
 		}
-
+		for (HttpSecurityFlowType<?> flowType : securityType.getFlowTypes()) {
+			designer.link(challengeTask.getTaskFlow(flowType.getFlowName()),
+					designer.addSectionOutput(flowType.getFlowName(), flowType
+							.getArgumentType().getName(), false),
+					FlowInstigationStrategyEnum.SEQUENTIAL);
+		}
+		
+		// Configure the authentication handling
+		
+		
 	}
 
 }
