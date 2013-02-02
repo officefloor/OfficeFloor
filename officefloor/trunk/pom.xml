@@ -65,6 +65,7 @@
 		<module>package</module>
 	</modules>
 	<properties>
+		<current.year>2013</current.year>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<officefloor.skin.version>${project.version}</officefloor.skin.version>
 		<projectVersion>${project.version}</projectVersion>
@@ -892,7 +893,7 @@
 					<strictCheck>true</strictCheck>
 					<aggregate>true</aggregate>
 					<properties>
-						<currentYear>2013</currentYear>
+						<currentYear>${current.year}</currentYear>
 					</properties>
 					<excludes>
 						<!-- Directories to exclude -->
