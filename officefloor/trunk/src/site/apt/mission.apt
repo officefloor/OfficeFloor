@@ -12,7 +12,9 @@
 
   This formula has given rise to the software equivalent of an architectural brick (paper pending publication, see {{{http://europlop.anfimus.hostingkunde.de/}EuroPlop}}).  Patenting this design for profit might result in a monopoly over web server design and all constructs built on that - such as the cloud.  This goes against OfficeFloor's mission of being an open integrator of good software.
 
-  OfficeFloor's mission is to provide an open platform that enables software to be plugged together without causing lock-in by any one vendor.  To ensure this mission is achieved, OfficeFloor is free to use.  This stops the temptation for us to lock you in.  We derive our benefits indirectly from OfficeFloor molding the <software bricks> to enable open integration.
+  <<OfficeFloor's mission is to provide an open platform that enables software to be plugged together without causing lock-in by any software provider.>>
+  
+  To ensure this mission is achieved, OfficeFloor is free to use.  This stops the temptation for us to lock you in.  The OfficeFloor team derive our benefits indirectly from OfficeFloor molding the <software bricks> to enable open integration.
   
   So far we have identified the following bricks:
   
@@ -38,7 +40,7 @@
    
   That allow higher level constructs:
   
-   * {{{./apidocs/net/officefloor/compile/spi/office/OfficeSection.html}OfficeSection}}
+   * {{{./apidocs/net/officefloor/compile/spi/office/OfficeSource.html}OfficeSource}}
    
    * {{{./apidocs/net/officefloor/compile/spi/officefloor/source/OfficeFloorSource.html}OfficeFloorSource}}
   
@@ -46,5 +48,5 @@
   
   The OfficeFloor name is derived from the founder originally setting out to model in software how people coordinate in an office to make decisions to achieve certain goals.  You will notice this in the naming of many classes/interfaces.  From this we look to integrate all good software to help people make good decisions.
 
-  Note that the above formula might also be found in its shortened version: <<<IoC = DI + TI + CI>>>
+  Note that the above formula might also be found in its shortened version: <IoC = DI + TI + CI>
 

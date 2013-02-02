@@ -20,7 +20,7 @@
 	</licenses>
 	<issueManagement>
 		<system>SourceForge</system>
-		<url>http://sourceforge.net/p/officefloor/support-requests/</url>
+		<url>http://sourceforge.net/p/officefloor/support-requests</url>
 	</issueManagement>
 	<scm>
 		<connection>scm:svn:http://svn.code.sf.net/p/officefloor/code/officefloor/trunk</connection>
@@ -43,17 +43,10 @@
 		<contributor>
 			<name>Melanie Sagenschneider</name>
 			<email>melanies@users.sourceforge.net</email>
-			<roles>
-				<role>Marketing</role>
-				<role>Graphics</role>
-			</roles>
 		</contributor>
 		<contributor>
 			<name>Matthew Brown</name>
 			<email>yellowduckphoto@users.sourceforge.net</email>
-			<roles>
-				<role>Marketing</role>
-			</roles>
 		</contributor>
 	</contributors>
 	<distributionManagement>
