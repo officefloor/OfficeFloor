@@ -54,6 +54,7 @@ public class HttpSecuritySectionSourceTest extends OfficeFrameTestCase {
 		type.addSectionInput("Challenge",
 				HttpAuthenticationRequiredException.class.getName());
 		type.addSectionInput("Authenticate", HttpSecurity.class.getName());
+		type.addSectionOutput("Recontinue", null, false);
 		type.addSectionOutput("Failure", Throwable.class.getName(), true);
 
 		// Validate type
