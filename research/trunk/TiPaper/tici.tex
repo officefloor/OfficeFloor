@@ -606,7 +606,10 @@ tuning the assigning of Asynchronous Operations to particular thread pools.
 Using all three injection patterns together (dependency, thread, continuation)
 as implementing patterns to the Proactor pattern potentially forms the Inversion
 of Control pattern\footnote{Inversion of Control is not just dependency
-injection as suggested by the Inversion of Control layer \cite{ioc}}.
+injection as suggested by the Inversion of Control layer \cite{ioc}.  It is
+better described as the formula: Inversion of Control = Dependency Injection +
+Thread Injection + Continuation Injection (or its shorter form: IoC = DI + TI +
+CI)}.
 
 For a method to be executed it requires:
 \begin{itemize}
@@ -620,9 +623,11 @@ Control pattern.
 
 As control may be inverted for all aspects of the method, it has potentially
 made the Asynchronous Operation the software equivalent of an architectural
-\textit{brick}.  The Asynchronous Operations have standard interfaces allowing
-them to be used together to create the equivalent of \textit{walls},
-\textit{buildings} and further complex structures.
+\textit{brick}\footnote{The author finds software building block an over used
+term and that \textit{Software Brick} a more tangible analogy}.  The
+Asynchronous Operations have standard interfaces allowing them to be used
+together to create the equivalent of \textit{walls}, \textit{buildings} and
+further complex structures.
 
 
 \section{Drawbacks}
