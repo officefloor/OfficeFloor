@@ -22,6 +22,8 @@ import net.officefloor.compile.managedobject.ManagedObjectFlowType;
 import net.officefloor.compile.managedobject.ManagedObjectLoader;
 import net.officefloor.compile.managedobject.ManagedObjectType;
 import net.officefloor.compile.properties.PropertyList;
+import net.officefloor.compile.spi.officefloor.source.OfficeFloorSourceContext;
+import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 import net.officefloor.plugin.web.http.security.HttpSecuritySource;
 
 /**
@@ -32,9 +34,9 @@ import net.officefloor.plugin.web.http.security.HttpSecuritySource;
 public class HttpSecurityLoaderImpl implements HttpSecurityLoader {
 
 	/**
-	 * {@link ManagedObjectLoader}.
+	 * {@link Loader}.
 	 */
-	private final ManagedObjectLoader managedObjectLoader;
+	private final Loader loader;
 
 	/**
 	 * Initiate.
@@ -42,8 +44,53 @@ public class HttpSecurityLoaderImpl implements HttpSecurityLoader {
 	 * @param managedObjectLoader
 	 *            {@link ManagedObjectLoader}.
 	 */
-	public HttpSecurityLoaderImpl(ManagedObjectLoader managedObjectLoader) {
-		this.managedObjectLoader = managedObjectLoader;
+	public HttpSecurityLoaderImpl(final ManagedObjectLoader managedObjectLoader) {
+		this.loader = new Loader() {
+			@Override
+			@SuppressWarnings({ "rawtypes", "unchecked" })
+			public PropertyList loadSpecification(
+					Class<HttpSecurityManagedObjectAdapterSource> managedObjectSourceClass) {
+				return managedObjectLoader
+						.loadSpecification(managedObjectSourceClass);
+			}
+
+			@Override
+			public <D extends Enum<D>> ManagedObjectType<D> loadManagedObjectType(
+					HttpSecurityManagedObjectAdapterSource<D> source,
+					PropertyList properties) {
+				return managedObjectLoader.loadManagedObjectType(source,
+						properties);
+			}
+		};
+	}
+
+	/**
+	 * Initiate.
+	 * 
+	 * @param officeFloorSourceContext
+	 *            {@link OfficeFloorSourceContext}.
+	 */
+	public HttpSecurityLoaderImpl(
+			final OfficeFloorSourceContext officeFloorSourceContext) {
+		this.loader = new Loader() {
+			@Override
+			@SuppressWarnings("rawtypes")
+			public PropertyList loadSpecification(
+					Class<HttpSecurityManagedObjectAdapterSource> managedObjectSourceClass) {
+				throw new IllegalStateException(
+						"Should not require specification via "
+								+ OfficeFloorSourceContext.class.getName());
+			}
+
+			@Override
+			@SuppressWarnings("unchecked")
+			public <D extends Enum<D>> ManagedObjectType<D> loadManagedObjectType(
+					HttpSecurityManagedObjectAdapterSource<D> source,
+					PropertyList properties) {
+				return (ManagedObjectType<D>) officeFloorSourceContext
+						.loadManagedObjectType(source, properties);
+			}
+		};
 	}
 
 	/*
@@ -59,13 +106,10 @@ public class HttpSecurityLoaderImpl implements HttpSecurityLoader {
 		HttpSecurityManagedObjectAdapterSource.doOperation(httpSecuritySource,
 				new Runnable() {
 					@Override
-					@SuppressWarnings("unchecked")
 					public void run() {
-
 						// Obtain the specification
-						propertyList[0] = HttpSecurityLoaderImpl.this.managedObjectLoader
+						propertyList[0] = HttpSecurityLoaderImpl.this.loader
 								.loadSpecification(HttpSecurityManagedObjectAdapterSource.class);
-
 					}
 				});
 
@@ -79,10 +123,9 @@ public class HttpSecurityLoaderImpl implements HttpSecurityLoader {
 			PropertyList propertyList) {
 
 		// Load the managed object type
-		ManagedObjectType<D> moType = this.managedObjectLoader
-				.loadManagedObjectType(
-						new HttpSecurityManagedObjectAdapterSource<D>(
-								httpSecuritySource), propertyList);
+		ManagedObjectType<D> moType = this.loader.loadManagedObjectType(
+				new HttpSecurityManagedObjectAdapterSource<D>(
+						httpSecuritySource), propertyList);
 		if (moType == null) {
 			return null; // failed to obtain type
 		}
@@ -94,6 +137,36 @@ public class HttpSecurityLoaderImpl implements HttpSecurityLoader {
 		// Return the adapted type
 		return new ManagedObjectHttpSecurityType<S, C, D, F>(moType,
 				credentialsType);
+	}
+
+	/**
+	 * Loader.
+	 */
+	private static interface Loader {
+
+		/**
+		 * Loads the specification.
+		 * 
+		 * @param managedObjectSourceClass
+		 *            {@link ManagedObjectSource} {@link Class}.
+		 * @return {@link PropertyList} specification.
+		 */
+		@SuppressWarnings("rawtypes")
+		PropertyList loadSpecification(
+				Class<HttpSecurityManagedObjectAdapterSource> managedObjectSourceClass);
+
+		/**
+		 * Loads the {@link ManagedObjectType}.
+		 * 
+		 * @param source
+		 *            {@link HttpSecurityManagedObjectAdapterSource}.
+		 * @param properties
+		 *            {@link PropertyList}.
+		 * @return {@link ManagedObjectType}.
+		 */
+		<D extends Enum<D>> ManagedObjectType<D> loadManagedObjectType(
+				HttpSecurityManagedObjectAdapterSource<D> source,
+				PropertyList properties);
 	}
 
 	/**

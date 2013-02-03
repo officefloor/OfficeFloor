@@ -25,6 +25,7 @@ import net.officefloor.frame.spi.managedobject.CoordinatingManagedObject;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.frame.spi.managedobject.ObjectRegistry;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
+import net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceContext;
 import net.officefloor.frame.spi.managedobject.source.impl.AbstractManagedObjectSource;
 
 /**
@@ -55,34 +56,56 @@ public class HttpSecurityManagedObjectSource
 
 	@Override
 	protected void loadSpecification(SpecificationContext context) {
-		// TODO implement
-		// AbstractAsyncManagedObjectSource<Indexed,Indexed>.loadSpecification
-		throw new UnsupportedOperationException(
-				"TODO implement AbstractAsyncManagedObjectSource<Indexed,Indexed>.loadSpecification");
+		context.addProperty(PROPERTY_HTTP_SECURITY_TYPE, "HTTP Security Type");
 	}
 
 	@Override
 	protected void loadMetaData(MetaDataContext<Dependencies, None> context)
 			throws Exception {
-		// TODO implement
-		// AbstractAsyncManagedObjectSource<Indexed,Indexed>.loadMetaData
-		throw new UnsupportedOperationException(
-				"TODO implement AbstractAsyncManagedObjectSource<Indexed,Indexed>.loadMetaData");
+		ManagedObjectSourceContext<None> mosContext = context
+				.getManagedObjectSourceContext();
+
+		// Obtain the security type
+		String securityTypeName = mosContext
+				.getProperty(PROPERTY_HTTP_SECURITY_TYPE);
+		Class<?> securityType = mosContext.loadClass(securityTypeName);
+
+		// Specify the meta-data
+		context.setObjectClass(securityType);
+		context.setManagedObjectClass(HttpSecurityManagedObject.class);
+
+		// Add the dependency
+		context.addDependency(Dependencies.HTTP_AUTHENTICATION,
+				HttpAuthentication.class);
 	}
 
 	@Override
 	protected ManagedObject getManagedObject() throws Throwable {
-		// TODO implement
-		// AbstractManagedObjectSource<Indexed,Indexed>.getManagedObject
-		throw new UnsupportedOperationException(
-				"TODO implement AbstractManagedObjectSource<Indexed,Indexed>.getManagedObject");
+		return new HttpSecurityManagedObject<Object, Object>();
 	}
 
 	/**
 	 * {@link ManagedObject} for the HTTP security.
 	 */
-	public static class HttpSecurityManagedObject implements
+	public static class HttpSecurityManagedObject<S, C> implements
 			AsynchronousManagedObject, CoordinatingManagedObject<Dependencies> {
+
+		/**
+		 * {@link AsynchronousListener}.
+		 */
+		private AsynchronousListener listener;
+
+		/**
+		 * {@link HttpAuthentication}.
+		 */
+		private HttpAuthentication<S, C> authentication;
+
+		/**
+		 * Flags authentication complete.
+		 */
+		private synchronized void flagAuthenticationComplete() {
+			this.listener.notifyComplete();
+		}
 
 		/*
 		 * ==================== ManagedObject =========================
@@ -91,26 +114,78 @@ public class HttpSecurityManagedObjectSource
 		@Override
 		public void registerAsynchronousCompletionListener(
 				AsynchronousListener listener) {
-			// TODO implement
-			// AsynchronousManagedObject.registerAsynchronousCompletionListener
-			throw new UnsupportedOperationException(
-					"TODO implement AsynchronousManagedObject.registerAsynchronousCompletionListener");
+			this.listener = listener;
 		}
 
 		@Override
+		@SuppressWarnings("unchecked")
 		public void loadObjects(ObjectRegistry<Dependencies> registry)
 				throws Throwable {
-			// TODO implement
-			// CoordinatingManagedObject<Dependencies>.loadObjects
-			throw new UnsupportedOperationException(
-					"TODO implement CoordinatingManagedObject<Dependencies>.loadObjects");
+
+			// Obtain the HTTP authentication
+			this.authentication = (HttpAuthentication<S, C>) registry
+					.getObject(Dependencies.HTTP_AUTHENTICATION);
+
+			// Flag started authenticate
+			this.listener.notifyStarted();
+
+			// Trigger authentication
+			this.authentication
+					.authenticate(new HttpAuthenticateRequestImpl<S, C>(this));
 		}
 
 		@Override
 		public Object getObject() throws Throwable {
-			// TODO implement ManagedObject.getObject
-			throw new UnsupportedOperationException(
-					"TODO implement ManagedObject.getObject");
+
+			// Obtain the security
+			Object security = this.authentication.getHttpSecurity();
+
+			// Ensure have the security
+			if (security == null) {
+				throw new HttpAuthenticationRequiredException();
+			}
+
+			// Return the security
+			return security;
+		}
+	}
+
+	/**
+	 * {@link HttpAuthenticateRequest} implementation.
+	 */
+	private static class HttpAuthenticateRequestImpl<S, C> implements
+			HttpAuthenticateRequest<C> {
+
+		/**
+		 * {@link HttpSecurityManagedObject}.
+		 */
+		private final HttpSecurityManagedObject<S, C> managedObject;
+
+		/**
+		 * Initiate.
+		 * 
+		 * @param managedObject
+		 *            {@link HttpSecurityManagedObject}.
+		 */
+		public HttpAuthenticateRequestImpl(
+				HttpSecurityManagedObject<S, C> managedObject) {
+			this.managedObject = managedObject;
+		}
+
+		/*
+		 * ==================== HttpAuthenticateRequest ===============
+		 */
+
+		@Override
+		public C getCredentials() {
+			// Never credentials for loading
+			return null;
+		}
+
+		@Override
+		public void authenticationComplete() {
+			// Indicate authentication complete
+			this.managedObject.flagAuthenticationComplete();
 		}
 	}
 

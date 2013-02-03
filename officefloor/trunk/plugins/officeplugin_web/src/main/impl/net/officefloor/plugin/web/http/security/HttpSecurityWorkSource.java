@@ -48,6 +48,21 @@ public class HttpSecurityWorkSource extends
 		AbstractWorkSource<HttpSecurityWork> {
 
 	/**
+	 * Obtains the credentials class for the {@link HttpSecurityType}.
+	 * 
+	 * @param type
+	 *            {@link HttpSecurityType}.
+	 * @return Credentials class.
+	 */
+	public static Class<?> getCredentialsClass(HttpSecurityType<?, ?, ?, ?> type) {
+		Class<?> credentialsType = type.getCredentialsClass();
+		if (credentialsType == null) {
+			credentialsType = Void.class;
+		}
+		return credentialsType;
+	}
+
+	/**
 	 * Name of {@link Property} providing the key to the
 	 * {@link HttpSecuritySource} from the {@link HttpSecurityConfigurator}.
 	 */
@@ -59,6 +74,21 @@ public class HttpSecurityWorkSource extends
 	 * Name of the {@link HttpChallengeTask}.
 	 */
 	public static final String TASK_CHALLENGE = "CHALLENGE";
+
+	/**
+	 * Name of the {@link ManagedObjectHttpAuthenticateTask}.
+	 */
+	public static final String TASK_MANAGED_OBJECT_AUTHENTICATE = "MANAGED_OBJECT_AUTHENTICATE";
+
+	/**
+	 * Name of the {@link StartApplicationHttpAuthenticateTask}.
+	 */
+	public static final String TASK_START_APPLICATION_AUTHENTICATE = "START_APPLICATION_AUTHENTICATE";
+
+	/**
+	 * Name of the {@link CompleteApplicationHttpAuthenticateTask}.
+	 */
+	public static final String TASK_COMPLETE_APPLICATION_AUTHENTICATE = "COMPLETE_APPLICATION_AUTHENTICATE";
 
 	/*
 	 * =================== WorkSource ===============================
@@ -90,10 +120,7 @@ public class HttpSecurityWorkSource extends
 				.getHttpSecurityType();
 
 		// Obtain the credentials type
-		Class<?> credentialsType = httpSecurityType.getCredentialsClass();
-		if (credentialsType == null) {
-			credentialsType = Void.class;
-		}
+		Class<?> credentialsType = getCredentialsClass(httpSecurityType);
 
 		// Obtain the index order list of dependency types
 		List<HttpSecurityDependencyType<?>> dependencyTypes = new ArrayList<HttpSecurityDependencyType<?>>(
@@ -120,7 +147,7 @@ public class HttpSecurityWorkSource extends
 
 		// Add the managed object authentication task
 		TaskTypeBuilder<Indexed, None> moAuthenticate = workTypeBuilder
-				.addTaskType("MANAGED_OBJECT_AUTHENTICATE",
+				.addTaskType(TASK_MANAGED_OBJECT_AUTHENTICATE,
 						new ManagedObjectHttpAuthenticateTask(), Indexed.class,
 						None.class);
 		moAuthenticate.addObject(TaskAuthenticateContext.class).setLabel(
@@ -158,7 +185,7 @@ public class HttpSecurityWorkSource extends
 		// Add the start application authentication task
 		TaskTypeBuilder<StartApplicationHttpAuthenticateTask.Dependencies, StartApplicationHttpAuthenticateTask.Flows> appStart = workTypeBuilder
 				.addTaskType(
-						"START_APPLICATION_AUTHENTICATE",
+						TASK_START_APPLICATION_AUTHENTICATE,
 						new StartApplicationHttpAuthenticateTask(),
 						StartApplicationHttpAuthenticateTask.Dependencies.class,
 						StartApplicationHttpAuthenticateTask.Flows.class);
@@ -175,7 +202,7 @@ public class HttpSecurityWorkSource extends
 		// Add the complete application authentication task
 		TaskTypeBuilder<CompleteApplicationHttpAuthenticateTask.Dependencies, CompleteApplicationHttpAuthenticateTask.Flows> appComplete = workTypeBuilder
 				.addTaskType(
-						"COMPLETE_APPLICATION_AUTHENTICATE",
+						TASK_COMPLETE_APPLICATION_AUTHENTICATE,
 						new CompleteApplicationHttpAuthenticateTask(),
 						CompleteApplicationHttpAuthenticateTask.Dependencies.class,
 						CompleteApplicationHttpAuthenticateTask.Flows.class);
@@ -196,6 +223,7 @@ public class HttpSecurityWorkSource extends
 		appCompleteFailureFlow
 				.setKey(CompleteApplicationHttpAuthenticateTask.Flows.FAILURE);
 		appCompleteFailureFlow.setArgumentType(Throwable.class);
+		
 	}
 
 }

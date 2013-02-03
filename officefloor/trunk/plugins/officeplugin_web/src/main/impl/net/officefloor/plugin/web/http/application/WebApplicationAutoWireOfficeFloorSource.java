@@ -42,7 +42,16 @@ import net.officefloor.plugin.web.http.location.HttpApplicationLocation;
 import net.officefloor.plugin.web.http.location.HttpApplicationLocationManagedObjectSource;
 import net.officefloor.plugin.web.http.location.InvalidHttpRequestUriException;
 import net.officefloor.plugin.web.http.resource.source.SourceHttpResourceFactory;
+import net.officefloor.plugin.web.http.security.HttpAuthentication;
+import net.officefloor.plugin.web.http.security.HttpAuthenticationManagedObjectSource;
+import net.officefloor.plugin.web.http.security.HttpSecurityConfigurator;
+import net.officefloor.plugin.web.http.security.HttpSecurityManagedObjectSource;
+import net.officefloor.plugin.web.http.security.HttpSecuritySectionSource;
 import net.officefloor.plugin.web.http.security.HttpSecuritySource;
+import net.officefloor.plugin.web.http.security.type.HttpSecurityLoader;
+import net.officefloor.plugin.web.http.security.type.HttpSecurityLoaderImpl;
+import net.officefloor.plugin.web.http.security.type.HttpSecurityType;
+import net.officefloor.plugin.web.http.server.HttpServerAutoWireOfficeFloorSource;
 import net.officefloor.plugin.web.http.session.object.HttpSessionObjectManagedObjectSource;
 import net.officefloor.plugin.web.http.template.HttpTemplateWorkSource;
 import net.officefloor.plugin.web.http.template.parse.HttpTemplate;
@@ -97,6 +106,11 @@ public class WebApplicationAutoWireOfficeFloorSource extends
 	 * Default {@link HttpTemplate} URI suffix.
 	 */
 	private String defaultTemplateUriSuffix = null;
+
+	/**
+	 * {@link HttpSecurityAutoWireSection} instance.
+	 */
+	private HttpSecurityAutoWireSection security = null;
 
 	/**
 	 * {@link HttpUrlContinuationSectionSource} to provide the
@@ -269,10 +283,33 @@ public class WebApplicationAutoWireOfficeFloorSource extends
 
 	@Override
 	public HttpSecurityAutoWireSection setHttpSecurity(
-			Class<? extends HttpSecuritySource<?, ?, ?, ?>> httpSecuritySourceClass) {
-		// TODO implement WebAutoWireApplication.setHttpSecurity
-		throw new UnsupportedOperationException(
-				"TODO implement WebAutoWireApplication.setHttpSecurity");
+			final Class<? extends HttpSecuritySource<?, ?, ?, ?>> httpSecuritySourceClass) {
+
+		// Ensure security not already been specified
+		if (this.security != null) {
+			throw new IllegalStateException("HTTP Security already specified");
+		}
+
+		// Add the HTTP Security
+		HttpSecurityAutoWireSection security = this.addSection("SECURITY",
+				HttpSecuritySectionSource.class.getName(), null,
+				new AutoWireSectionFactory<HttpSecurityAutoWireSection>() {
+					@Override
+					public HttpSecurityAutoWireSection createAutoWireSection(
+							AutoWireSection seed) {
+						// Create and return the template
+						return new HttpSecurityAutoWireSectionImpl(
+								WebApplicationAutoWireOfficeFloorSource.this
+										.getOfficeFloorCompiler(), seed,
+								httpSecuritySourceClass);
+					}
+				});
+
+		// Specify the security
+		this.security = security;
+
+		// Return the security
+		return this.security;
 	}
 
 	@Override
@@ -507,7 +544,56 @@ public class WebApplicationAutoWireOfficeFloorSource extends
 		}
 
 		// Load the HTTP security
-		// TODO load security
+		if (this.security != null) {
+
+			// Configure the security
+			Class<? extends HttpSecuritySource<?, ?, ?, ?>> httpSecuritySourceClass = this.security
+					.getHttpSecuritySourceClass();
+
+			// Load the HTTP security source
+			HttpSecuritySource<?, ?, ?, ?> httpSecuritySource = (HttpSecuritySource<?, ?, ?, ?>) context
+					.loadClass(httpSecuritySourceClass.getName()).newInstance();
+
+			// Load the type (which also initialises the source)
+			HttpSecurityLoader securityLoader = new HttpSecurityLoaderImpl(
+					context);
+			HttpSecurityType httpSecurityType = securityLoader
+					.loadHttpSecurityType(httpSecuritySource,
+							this.security.getProperties());
+
+			// Obtain the security class
+			Class<?> securityClass = httpSecurityType.getSecurityClass();
+
+			// Register the HTTP security
+			String key = HttpSecurityConfigurator.registerHttpSecuritySource(
+					httpSecuritySource, httpSecurityType);
+			this.security
+					.addProperty(
+							HttpSecuritySectionSource.PROPERTY_HTTP_SECURITY_SOURCE_KEY,
+							key);
+
+			// Provide automated flow linking
+			this.link(this.security, "Recontinue", httpSection,
+					HANDLER_INPUT_NAME);
+
+			// Add the HTTP Authentication Managed Object
+			AutoWireObject httpAuthentication = this.addManagedObject(
+					HttpAuthenticationManagedObjectSource.class.getName(),
+					null, new AutoWire(HttpAuthentication.class));
+			httpAuthentication
+					.addProperty(
+							HttpAuthenticationManagedObjectSource.PROPERTY_HTTP_SECURITY_SOURCE_KEY,
+							key);
+
+			// Add the HTTP Security Managed Object
+			AutoWireObject httpSecurity = this.addManagedObject(
+					HttpSecurityManagedObjectSource.class.getName(), null,
+					new AutoWire(securityClass));
+			httpSecurity
+					.addProperty(
+							HttpSecurityManagedObjectSource.PROPERTY_HTTP_SECURITY_TYPE,
+							securityClass.getName());
+		}
 
 		// Chain the servicers
 		AutoWireSection previousChainedSection = httpSection;

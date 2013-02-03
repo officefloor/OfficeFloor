@@ -21,11 +21,15 @@ import net.officefloor.compile.properties.Property;
 import net.officefloor.compile.spi.section.SectionDesigner;
 import net.officefloor.compile.test.section.SectionLoaderUtil;
 import net.officefloor.frame.test.OfficeFrameTestCase;
+import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
+import net.officefloor.plugin.web.http.application.HttpRequestState;
 import net.officefloor.plugin.web.http.security.scheme.BasicHttpSecuritySource;
 import net.officefloor.plugin.web.http.security.scheme.DigestHttpSecuritySource;
 import net.officefloor.plugin.web.http.security.scheme.FormHttpSecuritySource;
+import net.officefloor.plugin.web.http.security.store.CredentialStore;
 import net.officefloor.plugin.web.http.security.type.HttpSecurityLoaderUtil;
 import net.officefloor.plugin.web.http.security.type.HttpSecurityType;
+import net.officefloor.plugin.web.http.session.HttpSession;
 
 /**
  * Tests the {@link HttpSecuritySectionSource}.
@@ -51,11 +55,28 @@ public class HttpSecuritySectionSourceTest extends OfficeFrameTestCase {
 		// Create the expected type
 		SectionDesigner type = SectionLoaderUtil
 				.createSectionDesigner(HttpSecuritySectionSource.class);
+
+		// Inputs
 		type.addSectionInput("Challenge",
 				HttpAuthenticationRequiredException.class.getName());
-		type.addSectionInput("Authenticate", HttpSecurity.class.getName());
+		type.addSectionInput("Authenticate", Void.class.getName());
+		type.addSectionInput("ManagedObjectAuthenticate",
+				TaskAuthenticateContext.class.getName());
+
+		// Outputs
 		type.addSectionOutput("Recontinue", null, false);
 		type.addSectionOutput("Failure", Throwable.class.getName(), true);
+
+		// Objects
+		type.addSectionObject("HTTP_AUTHENTICATION",
+				HttpAuthentication.class.getName());
+		type.addSectionObject("SERVER_HTTP_CONNECTION",
+				ServerHttpConnection.class.getName());
+		type.addSectionObject("HTTP_SESSION", HttpSession.class.getName());
+		type.addSectionObject("HTTP_REQUEST_STATE",
+				HttpRequestState.class.getName());
+		type.addSectionObject("DEPENDENCY_CREDENTIAL_STORE",
+				CredentialStore.class.getName());
 
 		// Validate type
 		validateType(type, BasicHttpSecuritySource.class,
@@ -71,7 +92,28 @@ public class HttpSecuritySectionSourceTest extends OfficeFrameTestCase {
 		// Create the expected type
 		SectionDesigner type = SectionLoaderUtil
 				.createSectionDesigner(HttpSecuritySectionSource.class);
-		// TODO provide type
+
+		// Inputs
+		type.addSectionInput("Challenge",
+				HttpAuthenticationRequiredException.class.getName());
+		type.addSectionInput("Authenticate", Void.class.getName());
+		type.addSectionInput("ManagedObjectAuthenticate",
+				TaskAuthenticateContext.class.getName());
+
+		// Outputs
+		type.addSectionOutput("Recontinue", null, false);
+		type.addSectionOutput("Failure", Throwable.class.getName(), true);
+
+		// Objects
+		type.addSectionObject("HTTP_AUTHENTICATION",
+				HttpAuthentication.class.getName());
+		type.addSectionObject("SERVER_HTTP_CONNECTION",
+				ServerHttpConnection.class.getName());
+		type.addSectionObject("HTTP_SESSION", HttpSession.class.getName());
+		type.addSectionObject("HTTP_REQUEST_STATE",
+				HttpRequestState.class.getName());
+		type.addSectionObject("DEPENDENCY_CREDENTIAL_STORE",
+				CredentialStore.class.getName());
 
 		// Validate type
 		validateType(type, DigestHttpSecuritySource.class,
@@ -88,7 +130,28 @@ public class HttpSecuritySectionSourceTest extends OfficeFrameTestCase {
 		// Create the expected type
 		SectionDesigner type = SectionLoaderUtil
 				.createSectionDesigner(HttpSecuritySectionSource.class);
-		// TODO provide type
+
+		// Inputs
+		type.addSectionInput("Challenge",
+				HttpAuthenticationRequiredException.class.getName());
+		type.addSectionInput("Authenticate", Void.class.getName());
+		type.addSectionInput("ManagedObjectAuthenticate",
+				TaskAuthenticateContext.class.getName());
+
+		// Outputs
+		type.addSectionOutput("Recontinue", null, false);
+		type.addSectionOutput("Failure", Throwable.class.getName(), true);
+
+		// Objects
+		type.addSectionObject("HTTP_AUTHENTICATION",
+				HttpAuthentication.class.getName());
+		type.addSectionObject("SERVER_HTTP_CONNECTION",
+				ServerHttpConnection.class.getName());
+		type.addSectionObject("HTTP_SESSION", HttpSession.class.getName());
+		type.addSectionObject("HTTP_REQUEST_STATE",
+				HttpRequestState.class.getName());
+		type.addSectionObject("DEPENDENCY_CREDENTIAL_STORE",
+				CredentialStore.class.getName());
 
 		// Validate type
 		validateType(type, FormHttpSecuritySource.class,

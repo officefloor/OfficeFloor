@@ -22,7 +22,10 @@ import java.io.IOException;
 import net.officefloor.autowire.AutoWire;
 import net.officefloor.autowire.AutoWireObject;
 import net.officefloor.autowire.AutoWireOfficeFloor;
+import net.officefloor.autowire.AutoWireSection;
 import net.officefloor.frame.test.OfficeFrameTestCase;
+import net.officefloor.plugin.section.clazz.ClassSectionSource;
+import net.officefloor.plugin.section.clazz.Parameter;
 import net.officefloor.plugin.socket.server.http.HttpRequest;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
 import net.officefloor.plugin.socket.server.http.server.MockHttpServer;
@@ -85,6 +88,11 @@ public class BasicHttpSecurityIntegrateTest extends OfficeFrameTestCase {
 				PasswordFileManagedObjectSource.PROPERTY_PASSWORD_FILE_PATH,
 				passwordFilePath);
 
+		// Add servicing methods
+		AutoWireSection section = source.addSection("SERVICE",
+				ClassSectionSource.class.getName(), Servicer.class.getName());
+		source.link(security, "Failure", section, "handleFailure");
+
 		// Start the office
 		this.officeFloor = source.openOfficeFloor();
 	}
@@ -116,6 +124,21 @@ public class BasicHttpSecurityIntegrateTest extends OfficeFrameTestCase {
 				ServerHttpConnection connection) throws IOException {
 			connection.getHttpResponse().getEntityWriter()
 					.write("Serviced for " + security.getRemoteUser());
+		}
+
+		/**
+		 * Handles failure.
+		 * 
+		 * @param failure
+		 *            Failure.
+		 * @param connection
+		 *            {@link ServerHttpConnection}.
+		 * @throws IOException
+		 *             If fails.
+		 */
+		public void handleFailure(@Parameter Throwable failure,
+				ServerHttpConnection connection) throws IOException {
+			connection.getHttpResponse().getEntityWriter().write("ERROR");
 		}
 	}
 

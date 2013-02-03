@@ -26,4 +26,12 @@ import net.officefloor.plugin.web.http.security.HttpSecuritySource;
  * @author Daniel Sagenschneider
  */
 public interface HttpSecurityAutoWireSection extends AutoWireSection {
+
+	/**
+	 * Obtains the {@link Class} of the {@link HttpSecuritySource}.
+	 * 
+	 * @return {@link Class} of the {@link HttpSecuritySource}.
+	 */
+	Class<? extends HttpSecuritySource<?, ?, ?, ?>> getHttpSecuritySourceClass();
+
 }
