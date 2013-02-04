@@ -38,6 +38,7 @@ import net.officefloor.plugin.web.http.security.impl.AbstractHttpSecuritySource;
 import net.officefloor.plugin.web.http.security.store.CredentialEntry;
 import net.officefloor.plugin.web.http.security.store.CredentialStore;
 import net.officefloor.plugin.web.http.security.store.CredentialStoreUtil;
+import net.officefloor.plugin.web.http.session.HttpSession;
 
 import org.apache.commons.codec.binary.Base64;
 
@@ -64,6 +65,12 @@ public class BasicHttpSecuritySource
 	 * {@link Charset} for {@link HttpRequest} headers.
 	 */
 	private static final Charset US_ASCII = HttpRequestParserImpl.US_ASCII;
+
+	/**
+	 * Name of attribute in the {@link HttpSession} for the {@link HttpSecurity}
+	 * .
+	 */
+	private static final String SESSION_ATTRIBUTE_HTTP_SECURITY = "http.security.source.basic.http.security";
 
 	/**
 	 * Dependency keys.
@@ -104,10 +111,28 @@ public class BasicHttpSecuritySource
 
 	@Override
 	public boolean ratify(HttpRatifyContext<HttpSecurity, Void> context) {
-		// TODO implement
-		// HttpSecuritySource<HttpSecurity,Void,Dependencies,None>.ratify
-		throw new UnsupportedOperationException(
-				"TODO implement HttpSecuritySource<HttpSecurity,Void,Dependencies,None>.ratify");
+
+		// Attempt to obtain from session
+		HttpSecurity security = (HttpSecurity) context.getSession()
+				.getAttribute(SESSION_ATTRIBUTE_HTTP_SECURITY);
+		if (security != null) {
+			// Load the security and no need to authenticate
+			context.setHttpSecurity(security);
+			return false;
+		}
+
+		// Determine if basic credentials on request
+		HttpAuthenticationScheme scheme = HttpAuthenticationScheme
+				.getHttpAuthenticationScheme(context.getConnection()
+						.getHttpRequest());
+		if ((scheme == null)
+				|| (!(AUTHENTICATION_SCHEME_BASIC.equalsIgnoreCase(scheme
+						.getAuthentiationScheme())))) {
+			return false; // must be basic authentication
+		}
+
+		// As here, then have basic authentication details
+		return true;
 	}
 
 	@Override
@@ -173,10 +198,17 @@ public class BasicHttpSecuritySource
 			}
 		}
 
-		// Authenticated, so obtain roles and return the HTTP Security
+		// Authenticated, so obtain roles and create the HTTP Security
 		Set<String> roles = entry.retrieveRoles();
-		context.setHttpSecurity(new HttpSecurityImpl(
-				AUTHENTICATION_SCHEME_BASIC, userId, roles));
+		HttpSecurity security = new HttpSecurityImpl(
+				AUTHENTICATION_SCHEME_BASIC, userId, roles);
+
+		// Remember HTTP Security for further requests
+		context.getSession().setAttribute(SESSION_ATTRIBUTE_HTTP_SECURITY,
+				security);
+
+		// Return the HTTP Security
+		context.setHttpSecurity(security);
 	}
 
 	@Override

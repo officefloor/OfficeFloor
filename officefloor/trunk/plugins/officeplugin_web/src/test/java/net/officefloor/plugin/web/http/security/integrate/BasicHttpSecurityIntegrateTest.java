@@ -70,7 +70,8 @@ public class BasicHttpSecurityIntegrateTest extends OfficeFrameTestCase {
 		super.setUp();
 
 		// Configure the application
-		WebAutoWireApplication source = new HttpServerAutoWireOfficeFloorSource();
+		WebAutoWireApplication source = new HttpServerAutoWireOfficeFloorSource(
+				PORT);
 
 		// HTTP Security
 		HttpSecurityAutoWireSection security = source
@@ -92,6 +93,7 @@ public class BasicHttpSecurityIntegrateTest extends OfficeFrameTestCase {
 		AutoWireSection section = source.addSection("SERVICE",
 				ClassSectionSource.class.getName(), Servicer.class.getName());
 		source.link(security, "Failure", section, "handleFailure");
+		source.linkUri("service", section, "service");
 
 		// Start the office
 		this.officeFloor = source.openOfficeFloor();
@@ -107,7 +109,7 @@ public class BasicHttpSecurityIntegrateTest extends OfficeFrameTestCase {
 	/**
 	 * Services the {@link HttpRequest}.
 	 */
-	public class Servicer {
+	public static class Servicer {
 
 		/**
 		 * Services the {@link HttpRequest}.
@@ -148,7 +150,7 @@ public class BasicHttpSecurityIntegrateTest extends OfficeFrameTestCase {
 	public void testIntegration() throws Exception {
 
 		// Create the request
-		HttpGet request = new HttpGet("http://localhost:" + PORT);
+		HttpGet request = new HttpGet("http://localhost:" + PORT + "/service");
 
 		// Should not authenticate (without credentials)
 		this.doRequest(request, 401, null);
@@ -180,8 +182,8 @@ public class BasicHttpSecurityIntegrateTest extends OfficeFrameTestCase {
 			String body = MockHttpServer.getEntityBody(response);
 
 			// Verify response
-			assertEquals("Should be successful", expectedStatus, status);
 			assertEquals("Incorrect response body", expectedBodyContent, body);
+			assertEquals("Should be successful", expectedStatus, status);
 
 		} catch (Exception ex) {
 			throw fail(ex);

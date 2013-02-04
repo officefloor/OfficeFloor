@@ -28,6 +28,8 @@ import net.officefloor.autowire.AutoWireObject;
 import net.officefloor.autowire.AutoWireSection;
 import net.officefloor.autowire.AutoWireSectionFactory;
 import net.officefloor.autowire.AutoWireSectionTransformer;
+import net.officefloor.autowire.ManagedObjectSourceWirer;
+import net.officefloor.autowire.ManagedObjectSourceWirerContext;
 import net.officefloor.autowire.impl.AutoWireOfficeFloorSource;
 import net.officefloor.compile.properties.Property;
 import net.officefloor.compile.spi.officefloor.OfficeFloorDeployer;
@@ -48,6 +50,7 @@ import net.officefloor.plugin.web.http.security.HttpSecurityConfigurator;
 import net.officefloor.plugin.web.http.security.HttpSecurityManagedObjectSource;
 import net.officefloor.plugin.web.http.security.HttpSecuritySectionSource;
 import net.officefloor.plugin.web.http.security.HttpSecuritySource;
+import net.officefloor.plugin.web.http.security.HttpSecurityWorkSource;
 import net.officefloor.plugin.web.http.security.type.HttpSecurityLoader;
 import net.officefloor.plugin.web.http.security.type.HttpSecurityLoaderImpl;
 import net.officefloor.plugin.web.http.security.type.HttpSecurityType;
@@ -579,7 +582,17 @@ public class WebApplicationAutoWireOfficeFloorSource extends
 			// Add the HTTP Authentication Managed Object
 			AutoWireObject httpAuthentication = this.addManagedObject(
 					HttpAuthenticationManagedObjectSource.class.getName(),
-					null, new AutoWire(HttpAuthentication.class));
+					new ManagedObjectSourceWirer() {
+						@Override
+						public void wire(ManagedObjectSourceWirerContext context) {
+							context.mapFlow(
+									"AUTHENTICATE",
+									WebApplicationAutoWireOfficeFloorSource.this.security
+											.getSectionName(),
+									"ManagedObjectAuthenticate");
+						}
+					}, new AutoWire(HttpAuthentication.class));
+			httpAuthentication.setTimeout(1000); // TODO make configurable
 			httpAuthentication
 					.addProperty(
 							HttpAuthenticationManagedObjectSource.PROPERTY_HTTP_SECURITY_SOURCE_KEY,
@@ -589,6 +602,7 @@ public class WebApplicationAutoWireOfficeFloorSource extends
 			AutoWireObject httpSecurity = this.addManagedObject(
 					HttpSecurityManagedObjectSource.class.getName(), null,
 					new AutoWire(securityClass));
+			httpSecurity.setTimeout(1000); // TODO make configurable
 			httpSecurity
 					.addProperty(
 							HttpSecurityManagedObjectSource.PROPERTY_HTTP_SECURITY_TYPE,

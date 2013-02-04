@@ -18,12 +18,7 @@
 package net.officefloor.plugin.web.http.security.scheme;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-
-import org.easymock.AbstractMatcher;
-import org.junit.Assert;
 
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.socket.server.http.HttpHeader;
@@ -31,24 +26,28 @@ import net.officefloor.plugin.socket.server.http.HttpRequest;
 import net.officefloor.plugin.socket.server.http.HttpResponse;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
 import net.officefloor.plugin.socket.server.http.parse.impl.HttpHeaderImpl;
-import net.officefloor.plugin.web.http.security.HttpAuthenticateContext;
+import net.officefloor.plugin.web.http.security.HttpRatifyContext;
 import net.officefloor.plugin.web.http.security.HttpSecurity;
 import net.officefloor.plugin.web.http.security.HttpSecuritySource;
 import net.officefloor.plugin.web.http.session.HttpSession;
 
 /**
- * Mock {@link HttpAuthenticateContext} for testing {@link HttpSecuritySource}
+ * Mock {@link HttpRatifyContext} for testing {@link HttpSecuritySource}
  * instances.
  * 
  * @author Daniel Sagenschneider
  */
-public class MockHttpAuthenticateContext<S, C, D extends Enum<D>> implements
-		HttpAuthenticateContext<S, C, D> {
+public class MockHttpRatifyContext<S, C> implements HttpRatifyContext<S, C> {
 
 	/**
 	 * Credentials.
 	 */
 	private final C credentials;
+
+	/**
+	 * {@link OfficeFrameTestCase}.
+	 */
+	private final OfficeFrameTestCase testCase;
 
 	/**
 	 * {@link ServerHttpConnection}.
@@ -61,16 +60,6 @@ public class MockHttpAuthenticateContext<S, C, D extends Enum<D>> implements
 	private final HttpSession session;
 
 	/**
-	 * {@link OfficeFrameTestCase}.
-	 */
-	private final OfficeFrameTestCase testCase;
-
-	/**
-	 * Dependencies.
-	 */
-	private final Map<D, Object> dependencies = new HashMap<D, Object>();
-
-	/**
 	 * {@link HttpRequest}.
 	 */
 	private HttpRequest request;
@@ -81,61 +70,25 @@ public class MockHttpAuthenticateContext<S, C, D extends Enum<D>> implements
 	private HttpResponse response;
 
 	/**
-	 * HTTP security.
+	 * {@link HttpSecurity}.
 	 */
-	private S httpSecurity = null;
-
-	/**
-	 * {@link HttpSecurity} registered with the {@link HttpSession}.
-	 */
-	private S sessionHttpSecurity = null;
+	private S security = null;
 
 	/**
 	 * Initiate.
 	 * 
 	 * @param credentials
-	 *            Credentials. May be <code>null</code>.
+	 *            Credentials.
 	 * @param testCase
 	 *            {@link OfficeFrameTestCase} to create necessary mock objects.
 	 */
-	public MockHttpAuthenticateContext(C credentials,
-			OfficeFrameTestCase testCase) {
+	public MockHttpRatifyContext(C credentials, OfficeFrameTestCase testCase) {
 		this.credentials = credentials;
 		this.testCase = testCase;
 
 		// Create the necessary mock objects
 		this.connection = testCase.createMock(ServerHttpConnection.class);
 		this.session = testCase.createMock(HttpSession.class);
-	}
-
-	/**
-	 * Registers and object.
-	 * 
-	 * @param key
-	 *            Key for dependency.
-	 * @param dependency
-	 *            Dependency object.
-	 */
-	public void registerObject(D key, Object dependency) {
-		this.dependencies.put(key, dependency);
-	}
-
-	/**
-	 * Obtains the registered HTTP security.
-	 * 
-	 * @return HTTP security.
-	 */
-	public S getHttpSecurity() {
-		return this.httpSecurity;
-	}
-
-	/**
-	 * Obtains the registered HTTP security with the {@link HttpSession}.
-	 * 
-	 * @return Registered HTTP security with the {@link HttpSession}.
-	 */
-	public S getRegisteredHttpSecurityWithHttpSession() {
-		return this.sessionHttpSecurity;
 	}
 
 	/**
@@ -188,29 +141,16 @@ public class MockHttpAuthenticateContext<S, C, D extends Enum<D>> implements
 	}
 
 	/**
-	 * Records registering {@link HttpSecurity} with the {@link HttpSession}.
+	 * Obtains the HTTP security.
+	 * 
+	 * @return HTTP security.
 	 */
-	public void recordRegisterHttpSecurityWithHttpSession() {
-		this.session.setAttribute("http.security.source.basic.http.security",
-				null);
-		this.testCase.control(this.session).setMatcher(new AbstractMatcher() {
-			@Override
-			@SuppressWarnings("unchecked")
-			public boolean matches(Object[] expected, Object[] actual) {
-				Assert.assertEquals(
-						"Incorrect HTTP Security session attribute name",
-						expected[0], actual[0]);
-				Assert.assertNotNull(
-						"Must have HTTP Security if registering with HTTP Session",
-						actual[0]);
-				MockHttpAuthenticateContext.this.sessionHttpSecurity = (S) actual[1];
-				return true;
-			}
-		});
+	public S getHttpSecurity() {
+		return this.security;
 	}
 
 	/*
-	 * ==================== HttpAuthenticateContext =========================
+	 * ===================== HttpRatifyContext ===============================
 	 */
 
 	@Override
@@ -229,13 +169,8 @@ public class MockHttpAuthenticateContext<S, C, D extends Enum<D>> implements
 	}
 
 	@Override
-	public Object getObject(D key) {
-		return this.dependencies.get(key);
-	}
-
-	@Override
 	public void setHttpSecurity(S security) {
-		this.httpSecurity = security;
+		this.security = security;
 	}
 
 }

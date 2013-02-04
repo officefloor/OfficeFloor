@@ -89,6 +89,7 @@ public class HttpAuthenticationManagedObjectSource
 
 		// Provide the meta-data
 		context.setObjectClass(HttpAuthentication.class);
+		context.setManagedObjectClass(HttpAuthenticationManagedObject.class);
 		context.addDependency(Dependencies.SERVER_HTTP_CONNECTION,
 				ServerHttpConnection.class);
 		context.addDependency(Dependencies.HTTP_SESSION, HttpSession.class);
