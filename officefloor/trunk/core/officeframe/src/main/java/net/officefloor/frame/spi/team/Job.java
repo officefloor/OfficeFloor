@@ -44,6 +44,14 @@ public interface Job {
 	boolean doJob(JobContext executionContext);
 
 	/**
+	 * Triggers to cancel the {@link Job}.
+	 * 
+	 * @param cause
+	 *            Cause providing reason for cancelling the {@link Job}.s
+	 */
+	void cancelJob(Exception cause);
+
+	/**
 	 * <p>
 	 * Obtains the identifier for the {@link ProcessState} containing this
 	 * {@link Job}.

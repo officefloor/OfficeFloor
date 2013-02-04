@@ -202,6 +202,17 @@ public abstract class MockStressJob implements Job {
 		}
 	}
 
+	@Override
+	public void cancelJob(Exception cause) {
+		/*
+		 * At moment, not seeing loads to require this as a priority.
+		 * 
+		 * TODO implement after HTTP Security to allow admission control
+		 * algorithms.
+		 */
+		throw new UnsupportedOperationException("TODO implement Job.cancelJob");
+	}
+
 	/**
 	 * Runs the {@link Job}.
 	 * 
