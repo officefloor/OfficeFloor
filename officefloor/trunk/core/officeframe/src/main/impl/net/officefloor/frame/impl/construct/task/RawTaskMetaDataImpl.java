@@ -25,6 +25,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import net.officefloor.frame.api.build.OfficeFloorIssues;
 import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
@@ -78,6 +80,12 @@ import net.officefloor.frame.spi.team.Team;
  */
 public class RawTaskMetaDataImpl<W extends Work, D extends Enum<D>, F extends Enum<F>>
 		implements RawTaskMetaDataFactory, RawTaskMetaData<W, D, F> {
+
+	/**
+	 * {@link Logger}.
+	 */
+	private static final Logger LOGGER = Logger
+			.getLogger(RawTaskMetaDataImpl.class.getName());
 
 	/**
 	 * Obtains the {@link RawTaskMetaDataFactory}.
@@ -376,6 +384,29 @@ public class RawTaskMetaDataImpl<W extends Work, D extends Enum<D>, F extends En
 			}
 		}
 
+		// Provide details of each Task (to aid debugging application)
+		Level logLevel = Level.FINE;
+		if (LOGGER.isLoggable(logLevel)) {
+			// Log ordering of dependencies for task
+			StringBuilder log = new StringBuilder();
+			log.append("TASK: " + rawWorkMetaData.getWorkName() + " . "
+					+ taskName + "("
+					+ (parameterType == null ? "" : parameterType.getName())
+					+ ")\n");
+			int sequence = 1;
+			log.append("  Dependency load order:\n");
+			for (ManagedObjectIndex index : requiredManagedObjectIndexes) {
+				// Obtain the managed object for index
+				RawBoundManagedObjectMetaData managedObject = requiredManagedObjects
+						.get(index);
+				log.append("   " + (sequence++) + ") "
+						+ managedObject.getBoundManagedObjectName() + " ["
+						+ index.getManagedObjectScope().name() + ","
+						+ index.getIndexOfManagedObjectWithinScope() + "]\n");
+				LOGGER.log(logLevel, log.toString());
+			}
+		}
+
 		// Create the task meta-data
 		TaskMetaDataImpl<w, d, f> taskMetaData = new TaskMetaDataImpl<w, d, f>(
 				jobName, taskName, taskFactory, differentiator, parameterType,
@@ -586,8 +617,7 @@ public class RawTaskMetaDataImpl<W extends Work, D extends Enum<D>, F extends En
 
 			// Load the dependencies
 			Map<ManagedObjectIndex, RawBoundManagedObjectMetaData> moDependencies = new HashMap<ManagedObjectIndex, RawBoundManagedObjectMetaData>();
-			RawTaskMetaDataImpl.this.loadRequiredManagedObjects(managedObject,
-					moDependencies);
+			this.loadRequiredManagedObjects(managedObject, moDependencies);
 
 			// Register the dependencies for the index
 			dependencies.put(index, new HashSet<ManagedObjectIndex>(
@@ -811,6 +841,35 @@ public class RawTaskMetaDataImpl<W extends Work, D extends Enum<D>, F extends En
 		}
 		EscalationProcedure escalationProcedure = new EscalationProcedureImpl(
 				escalations);
+
+		// Provide details of each Task (to aid debugging application)
+		Level logLevel = Level.FINE;
+		if (LOGGER.isLoggable(logLevel)) {
+			// Log ordering of dependencies for task
+			StringBuilder log = new StringBuilder();
+			log.append("TASK: " + this.taskMetaData.getJobName() + "\n");
+			int sequence = 1;
+			log.append("  Continuations:\n");
+			for (FlowMetaData<?> flow : flowMetaDatas) {
+				log.append("   " + (sequence++) + ") ");
+				if (flow == null) {
+					log.append("<none>\n");
+				} else {
+					log.append(flow.getInitialTaskMetaData().getJobName()
+							+ " [" + flow.getInstigationStrategy().name()
+							+ "]\n");
+				}
+			}
+			if (nextTaskInFlow != null) {
+				log.append("   NEXT) " + nextTaskInFlow.getJobName() + "\n");
+			}
+			sequence = 1;
+			for (EscalationFlow flow : escalations) {
+				log.append("   " + flow.getTypeOfCause().getName() + ") "
+						+ flow.getTaskMetaData().getJobName());
+			}
+			LOGGER.log(logLevel, log.toString());
+		}
 
 		// Load the remaining state for the task meta-data
 		this.taskMetaData.loadRemainingState(workMetaData, flowMetaDatas,

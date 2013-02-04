@@ -126,30 +126,43 @@ public class HttpAuthenticationManagedObject<S, C> implements
 	public synchronized void authenticate(
 			HttpAuthenticateRequest<C> authenticationRequest) {
 
-		// Obtain the credentials
-		C credentials = null;
-		if (authenticationRequest != null) {
-			credentials = authenticationRequest.getCredentials();
-		}
+		// Unless undertaking request, ensure complete request
+		boolean isCompleteRequest = true;
+		try {
 
-		// Determine if possible to authenticate
-		HttpRatifyContextImpl context = new HttpRatifyContextImpl(credentials);
-		boolean isPossibleToAuthenticate = this.httpSecuritySource
-				.ratify(context);
+			// Obtain the credentials
+			C credentials = null;
+			if (authenticationRequest != null) {
+				credentials = authenticationRequest.getCredentials();
+			}
 
-		// Determine if already authenticated
-		if (this.security != null) {
-			return;
-		}
+			// Determine if possible to authenticate
+			HttpRatifyContextImpl context = new HttpRatifyContextImpl(
+					credentials);
+			boolean isPossibleToAuthenticate = this.httpSecuritySource
+					.ratify(context);
 
-		// Determine if may authenticate
-		if (isPossibleToAuthenticate) {
+			// Determine if already authenticated
+			if (this.security != null) {
+				return;
+			}
 
-			// Attempt authentication
-			this.listener.notifyStarted();
-			this.executeContext.invokeProcess(Flows.AUTHENTICATE,
-					new TaskAuthenticateContextImpl(credentials,
-							authenticationRequest), this, 0);
+			// Determine if may authenticate
+			if (isPossibleToAuthenticate) {
+
+				// Attempt authentication
+				this.listener.notifyStarted();
+				this.executeContext.invokeProcess(Flows.AUTHENTICATE,
+						new TaskAuthenticateContextImpl(credentials,
+								authenticationRequest), this, 0);
+				isCompleteRequest = false; // context will complete
+			}
+
+		} finally {
+			// Complete authentication request (if not triggered authentication)
+			if ((isCompleteRequest) && (authenticationRequest != null)) {
+				authenticationRequest.authenticationComplete();
+			}
 		}
 	}
 
