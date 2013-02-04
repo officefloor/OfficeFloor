@@ -15,10 +15,12 @@
 %% along with this program.  If not, see <http://www.gnu.org/licenses/>.
 %%
 %% While this document is not a program, it conveys the underlying design 
-%% of OfficeFloor and as such any program derived from the contents of 
-%% this document (in particular Thread Injection, Implicit Thread and 
-%% Continuation Injection) is considered conveying (copying/modifying) 
-%% OfficeFloor and is therefore subject to the licensing of OfficeFloor. 
+%% of OfficeFloor (it is the expression of how to implement the ideas of 
+%% Thread Injection, Implicit Thread, Continuation Injection, Operation 
+%% Orchestration) and as such any program derived from the contents 
+%% (expression) of this document is considered conveying (copying/modifying) 
+%% the OfficeFloor expression and is therefore subject to the licensing 
+%% of OfficeFloor.
 
 
 %%This is a very basic article template.
@@ -59,7 +61,7 @@ combined with Dependency Injection provide an Inversion of Control pattern.
 \category{X.Y.Z}{To}{be}[determined]
 
 \terms{Design, Performance, Standardization}
-\keywords{Continuation Injection, Implicit Thread, Thread Injection}
+\keywords{Continuation Injection, Implicit Thread, Operation Orchestration, Thread Injection}
 
 \acmformat{Sagenschneider, D. 2012.Thread Injection and Continuation Injection.}
 
@@ -407,7 +409,10 @@ configuration provides the Asynchronous Operation continuation mapping to the
 respective handling Asynchronous Operation.  To ease debugging and better
 developer understanding of the application, the configuration may be graphical
 where Asynchronous Operations are nodes and continuation mappings are directed
-lines.
+lines.  Due to the similarity of configuration with service orchestration, this
+can be identified as Operation Orchestration\footnote{Operation orchestration
+may also be identified as function, procedure or method orchestration
+dependening on the implementing language}.
 
 As the continuation asynchronously invokes the operation, it may use the
 returned \texttt{Future} to determine when the sequence of triggered
@@ -459,11 +464,13 @@ indirection provided by the Continuation Injection pattern.
 \subsection{Initial Asynchronous Operation to service a HTTP request}
 
 For web servers, URL continuations \cite{url-continuation} are used to invoke
-the first Asynchronous Operation in the string.  A URL may be associated to an
-Asynchronous Operation by developer configuration.  This Asynchronous Operation
-then becomes the first operation to be invoked for servicing a HTTP request for
-that URL.  This configuration may be included in Continuation Injection
-graphical configuration as an attribute of the Asynchronous Operation node.
+the first Asynchronous Operation in the string\footnote{A similar approach may
+be taken by other User Interface types (such as a rich GUI) with the user event
+being mapped to the first Asychnronous Operation}.  A URL may be associated to
+an Asynchronous Operation by developer configuration.  This Asynchronous
+Operation then becomes the first operation to be invoked for servicing a HTTP
+request for that URL.  This configuration may be included in the Continuation
+Injection configuration as an attribute of the Asynchronous Operation node.
 
 Providing identifiers to Asynchronous Operations is also a convenient means to
 ease maintenance of web pages.  Rather than embedding the URL in the web page
