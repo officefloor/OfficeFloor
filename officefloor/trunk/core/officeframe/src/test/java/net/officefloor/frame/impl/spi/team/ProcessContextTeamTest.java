@@ -198,6 +198,18 @@ public class ProcessContextTeamTest extends OfficeFrameTestCase {
 				return true;
 			}
 
+			@Override
+			public void cancelJob(Exception cause) {
+				/*
+				 * At moment, not seeing loads to require this as a priority.
+				 * 
+				 * TODO implement after HTTP Security to allow admission control
+				 * algorithms.
+				 */
+				throw new UnsupportedOperationException(
+						"TODO implement Job.cancelJob");
+			}
+
 			private Job nextJob;
 
 			@Override
