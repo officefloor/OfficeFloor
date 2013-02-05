@@ -150,11 +150,18 @@ public class HttpAuthenticationManagedObject<S, C> implements
 			// Determine if may authenticate
 			if (isPossibleToAuthenticate) {
 
+				// New managed object (stop overwrite of asynchronous listener)
+				// (Not used for execution but need to provide an instance)
+				HttpAuthenticationManagedObject<S, C> executeManagedObject = new HttpAuthenticationManagedObject<S, C>(
+						null, null);
+
 				// Attempt authentication
 				this.listener.notifyStarted();
-				this.executeContext.invokeProcess(Flows.AUTHENTICATE,
-						new TaskAuthenticateContextImpl(credentials,
-								authenticationRequest), this, 0);
+				this.executeContext
+						.invokeProcess(Flows.AUTHENTICATE,
+								new TaskAuthenticateContextImpl(credentials,
+										authenticationRequest),
+								executeManagedObject, 0);
 				isCompleteRequest = false; // context will complete
 			}
 
