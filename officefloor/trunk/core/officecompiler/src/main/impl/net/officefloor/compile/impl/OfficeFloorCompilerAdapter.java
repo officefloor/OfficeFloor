@@ -45,6 +45,7 @@ import net.officefloor.compile.team.TeamLoader;
 import net.officefloor.compile.work.WorkLoader;
 import net.officefloor.frame.api.OfficeFrame;
 import net.officefloor.frame.api.build.None;
+import net.officefloor.frame.api.escalate.EscalationHandler;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.api.profile.Profiler;
@@ -206,6 +207,12 @@ public class OfficeFloorCompilerAdapter extends OfficeFloorCompiler {
 	public void addResources(ResourceSource resourceSource) {
 		this.invokeMethod("addResources", new Object[] { resourceSource },
 				ResourceSource.class);
+	}
+
+	@Override
+	public void setEscalationHandler(EscalationHandler escalationHandler) {
+		this.invokeMethod("setEscalationHandler",
+				new Object[] { escalationHandler }, EscalationHandler.class);
 	}
 
 	@Override
