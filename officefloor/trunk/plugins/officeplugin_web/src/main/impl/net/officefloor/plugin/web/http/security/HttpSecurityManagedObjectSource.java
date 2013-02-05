@@ -119,8 +119,8 @@ public class HttpSecurityManagedObjectSource
 
 		@Override
 		@SuppressWarnings("unchecked")
-		public void loadObjects(ObjectRegistry<Dependencies> registry)
-				throws Throwable {
+		public synchronized void loadObjects(
+				ObjectRegistry<Dependencies> registry) throws Throwable {
 
 			// Obtain the HTTP authentication
 			this.authentication = (HttpAuthentication<S, C>) registry
