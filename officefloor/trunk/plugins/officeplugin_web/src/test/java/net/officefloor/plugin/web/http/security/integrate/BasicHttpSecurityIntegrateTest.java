@@ -23,7 +23,6 @@ import net.officefloor.autowire.AutoWire;
 import net.officefloor.autowire.AutoWireObject;
 import net.officefloor.autowire.AutoWireOfficeFloor;
 import net.officefloor.autowire.AutoWireSection;
-import net.officefloor.frame.api.escalate.FailedToSourceManagedObjectEscalation;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.section.clazz.ClassSectionSource;
 import net.officefloor.plugin.section.clazz.Parameter;
@@ -32,13 +31,11 @@ import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
 import net.officefloor.plugin.socket.server.http.server.MockHttpServer;
 import net.officefloor.plugin.web.http.application.HttpSecurityAutoWireSection;
 import net.officefloor.plugin.web.http.application.WebAutoWireApplication;
-import net.officefloor.plugin.web.http.security.HttpAuthenticationRequiredException;
 import net.officefloor.plugin.web.http.security.HttpSecurity;
 import net.officefloor.plugin.web.http.security.scheme.BasicHttpSecuritySource;
 import net.officefloor.plugin.web.http.security.store.CredentialStore;
 import net.officefloor.plugin.web.http.security.store.PasswordFileManagedObjectSource;
 import net.officefloor.plugin.web.http.server.HttpServerAutoWireOfficeFloorSource;
-import net.officefloor.plugin.work.clazz.FlowInterface;
 
 import org.apache.http.auth.AuthScope;
 import org.apache.http.auth.UsernamePasswordCredentials;
@@ -98,11 +95,6 @@ public class BasicHttpSecurityIntegrateTest extends OfficeFrameTestCase {
 		source.link(security, "Failure", section, "handleFailure");
 		source.linkUri("service", section, "service");
 
-		// TODO drive off auto wire exception linking
-		source.linkEscalation(FailedToSourceManagedObjectEscalation.class,
-				section, "handleFailure");
-		source.link(section, "challenge", security, "Challenge");
-
 		// Start the office
 		this.officeFloor = source.openOfficeFloor();
 	}
@@ -112,12 +104,6 @@ public class BasicHttpSecurityIntegrateTest extends OfficeFrameTestCase {
 		if (this.officeFloor != null) {
 			this.officeFloor.closeOfficeFloor();
 		}
-	}
-
-	// TODO remove
-	@FlowInterface
-	public static interface ServicerFlows {
-		void challenge();
 	}
 
 	/**
@@ -153,18 +139,7 @@ public class BasicHttpSecurityIntegrateTest extends OfficeFrameTestCase {
 		 *             If fails.
 		 */
 		public void handleFailure(@Parameter Throwable failure,
-				ServerHttpConnection connection, ServicerFlows flows)
-				throws IOException {
-
-			// Determine if authentication required
-			// TODO remove and drive off auto wire exception linking
-			if (failure instanceof FailedToSourceManagedObjectEscalation) {
-				if (failure.getCause() instanceof HttpAuthenticationRequiredException) {
-					flows.challenge();
-					return;
-				}
-			}
-
+				ServerHttpConnection connection) throws IOException {
 			connection.getHttpResponse().getEntityWriter().write("ERROR");
 		}
 	}
@@ -179,7 +154,7 @@ public class BasicHttpSecurityIntegrateTest extends OfficeFrameTestCase {
 
 		// Should not authenticate (without credentials)
 		this.doRequest(request, 401, "");
-		
+
 		// Should authenticate with credentials
 		this.client.getCredentialsProvider().setCredentials(
 				new AuthScope(null, -1, "TestRealm"),

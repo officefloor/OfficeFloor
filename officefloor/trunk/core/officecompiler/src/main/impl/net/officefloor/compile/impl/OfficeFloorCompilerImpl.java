@@ -62,6 +62,7 @@ import net.officefloor.compile.work.WorkType;
 import net.officefloor.frame.api.OfficeFrame;
 import net.officefloor.frame.api.build.OfficeFloorBuilder;
 import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
+import net.officefloor.frame.api.escalate.EscalationHandler;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.manage.OfficeFloor;
@@ -95,6 +96,11 @@ public class OfficeFloorCompilerImpl extends OfficeFloorCompiler implements
 	 * {@link SourceContext}.
 	 */
 	private SourceContext sourceContext = null;
+
+	/**
+	 * {@link EscalationHandler}.
+	 */
+	private EscalationHandler escalationHandler = null;
 
 	/**
 	 * {@link CompilerIssues}.
@@ -227,6 +233,11 @@ public class OfficeFloorCompilerImpl extends OfficeFloorCompiler implements
 	@Override
 	public void addResources(ResourceSource resourceSource) {
 		this.resourceSources.add(resourceSource);
+	}
+
+	@Override
+	public void setEscalationHandler(EscalationHandler escalationHandler) {
+		this.escalationHandler = escalationHandler;
 	}
 
 	@Override
@@ -481,6 +492,9 @@ public class OfficeFloorCompilerImpl extends OfficeFloorCompiler implements
 		builder.setClassLoader(this.getClassLoader());
 		for (ResourceSource resourceSource : this.resourceSources) {
 			builder.addResources(resourceSource);
+		}
+		if (this.escalationHandler != null) {
+			builder.setEscalationHandler(this.escalationHandler);
 		}
 	}
 

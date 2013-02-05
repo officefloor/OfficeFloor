@@ -34,4 +34,19 @@ public interface HttpSecurityAutoWireSection extends AutoWireSection {
 	 */
 	Class<? extends HttpSecuritySource<?, ?, ?, ?>> getHttpSecuritySourceClass();
 
+	/**
+	 * Obtains the time in milliseconds before timing out authentication.
+	 * 
+	 * @return Time in milliseconds before timing out authentication.
+	 */
+	long getSecurityTimeout();
+
+	/**
+	 * Specifies the time in milliseconds before timing out authentication.
+	 * 
+	 * @param timeout
+	 *            Time in milliseconds before timing out authentication.
+	 */
+	void setSecurityTimeout(long timeout);
+
 }

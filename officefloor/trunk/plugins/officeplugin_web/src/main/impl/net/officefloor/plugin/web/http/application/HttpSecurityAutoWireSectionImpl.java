@@ -36,6 +36,11 @@ public class HttpSecurityAutoWireSectionImpl extends AutoWireSectionImpl
 	private final Class<? extends HttpSecuritySource<?, ?, ?, ?>> httpSecuritySourceClass;
 
 	/**
+	 * By default allow 10 seconds before timing out.
+	 */
+	private long securityTimeout = 10 * 1000;
+
+	/**
 	 * Initiate.
 	 * 
 	 * @param compiler
@@ -60,6 +65,16 @@ public class HttpSecurityAutoWireSectionImpl extends AutoWireSectionImpl
 	@Override
 	public Class<? extends HttpSecuritySource<?, ?, ?, ?>> getHttpSecuritySourceClass() {
 		return this.httpSecuritySourceClass;
+	}
+
+	@Override
+	public long getSecurityTimeout() {
+		return this.securityTimeout;
+	}
+
+	@Override
+	public void setSecurityTimeout(long timeout) {
+		this.securityTimeout = timeout;
 	}
 
 }

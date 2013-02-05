@@ -46,6 +46,7 @@ import net.officefloor.compile.spi.work.source.WorkSource;
 import net.officefloor.compile.team.TeamLoader;
 import net.officefloor.compile.work.WorkLoader;
 import net.officefloor.frame.api.OfficeFrame;
+import net.officefloor.frame.api.escalate.EscalationHandler;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.manage.OfficeFloor;
@@ -376,6 +377,19 @@ public abstract class OfficeFloorCompiler implements PropertyConfigurable {
 	 *            {@link ResourceSource}.
 	 */
 	public abstract void addResources(ResourceSource resourceSource);
+
+	/**
+	 * <p>
+	 * Overrides the default {@link EscalationHandler}.
+	 * <p>
+	 * This will be specified on the {@link OfficeFrame} before compiling the
+	 * {@link OfficeFloor}.
+	 * 
+	 * @param escalationHandler
+	 *            {@link EscalationHandler}.
+	 */
+	public abstract void setEscalationHandler(
+			EscalationHandler escalationHandler);
 
 	/**
 	 * <p>

@@ -619,7 +619,8 @@ public class ClassSectionSource extends AbstractSectionSource implements
 		TaskFlow taskEscalation = task.getTaskEscalation(escalationTypeName);
 
 		// Link to escalation handler (if available)
-		if (escalationHandler != null) {
+		// (Do not allow handling own escalation as potential for infinite loop)
+		if ((escalationHandler != null) && (task != escalationHandler)) {
 			// Handle escalation internally
 			this.getDesigner().link(taskEscalation, escalationHandler,
 					FlowInstigationStrategyEnum.SEQUENTIAL);

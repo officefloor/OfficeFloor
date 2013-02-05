@@ -47,6 +47,8 @@ import net.officefloor.compile.spi.section.SubSection;
 import net.officefloor.compile.test.section.SectionLoaderUtil;
 import net.officefloor.compile.work.TaskType;
 import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
+import net.officefloor.frame.api.escalate.Escalation;
+import net.officefloor.frame.api.escalate.EscalationHandler;
 import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
@@ -972,6 +974,56 @@ public class ClassSectionSourceTest extends OfficeFrameTestCase {
 		public void handleEscalation(@Parameter IOException escalation,
 				ReturnValue value) {
 			value.value = escalation.getMessage();
+		}
+	}
+
+	/**
+	 * Ensure that an escalation method can not handle its own
+	 * {@link Escalation}.
+	 */
+	public void testAvoidCyclicEscalationHandling() throws Exception {
+
+		final IOException[] escalated = new IOException[1];
+
+		// Configure to handle escalation
+		AutoWireOfficeFloorSource source = new AutoWireOfficeFloorSource();
+		source.addSection("test", ClassSectionSource.class.getName(),
+				MockAvoidCyclicEscalationHandling.class.getName());
+		source.getOfficeFloorCompiler().setEscalationHandler(
+				new EscalationHandler() {
+					@Override
+					public void handleEscalation(Throwable escalation)
+							throws Throwable {
+						escalated[0] = (IOException) escalation;
+					}
+				});
+
+		// Open OfficeFloor
+		AutoWireOfficeFloor officeFloor = source.openOfficeFloor();
+		try {
+
+			// Run triggering escalation
+			final IOException escalation = new IOException("TEST");
+			officeFloor.invokeTask("test.WORK", "handleEscalation", escalation);
+
+			// Ensure not handling itself (escalated to OfficeFloor level)
+			assertEquals("Incorrect escalation", escalation, escalated[0]);
+
+		} finally {
+			// Ensure closed
+			officeFloor.closeOfficeFloor();
+		}
+
+	}
+
+	/**
+	 * Section to ensure not handling own escalation causing cycle.
+	 */
+	public static class MockAvoidCyclicEscalationHandling {
+
+		public void handleEscalation(@Parameter IOException escalation)
+				throws IOException {
+			throw escalation;
 		}
 	}
 

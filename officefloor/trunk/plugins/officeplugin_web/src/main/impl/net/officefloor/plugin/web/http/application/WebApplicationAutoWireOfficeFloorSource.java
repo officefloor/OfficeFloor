@@ -46,15 +46,14 @@ import net.officefloor.plugin.web.http.location.InvalidHttpRequestUriException;
 import net.officefloor.plugin.web.http.resource.source.SourceHttpResourceFactory;
 import net.officefloor.plugin.web.http.security.HttpAuthentication;
 import net.officefloor.plugin.web.http.security.HttpAuthenticationManagedObjectSource;
+import net.officefloor.plugin.web.http.security.HttpAuthenticationRequiredException;
 import net.officefloor.plugin.web.http.security.HttpSecurityConfigurator;
 import net.officefloor.plugin.web.http.security.HttpSecurityManagedObjectSource;
 import net.officefloor.plugin.web.http.security.HttpSecuritySectionSource;
 import net.officefloor.plugin.web.http.security.HttpSecuritySource;
-import net.officefloor.plugin.web.http.security.HttpSecurityWorkSource;
 import net.officefloor.plugin.web.http.security.type.HttpSecurityLoader;
 import net.officefloor.plugin.web.http.security.type.HttpSecurityLoaderImpl;
 import net.officefloor.plugin.web.http.security.type.HttpSecurityType;
-import net.officefloor.plugin.web.http.server.HttpServerAutoWireOfficeFloorSource;
 import net.officefloor.plugin.web.http.session.object.HttpSessionObjectManagedObjectSource;
 import net.officefloor.plugin.web.http.template.HttpTemplateWorkSource;
 import net.officefloor.plugin.web.http.template.parse.HttpTemplate;
@@ -524,6 +523,7 @@ public class WebApplicationAutoWireOfficeFloorSource extends
 	 */
 
 	@Override
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	protected void initOfficeFloor(OfficeFloorDeployer deployer,
 			OfficeFloorSourceContext context) throws Exception {
 
@@ -552,6 +552,7 @@ public class WebApplicationAutoWireOfficeFloorSource extends
 			// Configure the security
 			Class<? extends HttpSecuritySource<?, ?, ?, ?>> httpSecuritySourceClass = this.security
 					.getHttpSecuritySourceClass();
+			long securityTimeout = this.security.getSecurityTimeout();
 
 			// Load the HTTP security source
 			HttpSecuritySource<?, ?, ?, ?> httpSecuritySource = (HttpSecuritySource<?, ?, ?, ?>) context
@@ -576,6 +577,8 @@ public class WebApplicationAutoWireOfficeFloorSource extends
 							key);
 
 			// Provide automated flow linking
+			this.linkEscalation(HttpAuthenticationRequiredException.class,
+					this.security, "Challenge");
 			this.link(this.security, "Recontinue", httpSection,
 					HANDLER_INPUT_NAME);
 
@@ -592,7 +595,7 @@ public class WebApplicationAutoWireOfficeFloorSource extends
 									"ManagedObjectAuthenticate");
 						}
 					}, new AutoWire(HttpAuthentication.class));
-			httpAuthentication.setTimeout(1000); // TODO make configurable
+			httpAuthentication.setTimeout(securityTimeout);
 			httpAuthentication
 					.addProperty(
 							HttpAuthenticationManagedObjectSource.PROPERTY_HTTP_SECURITY_SOURCE_KEY,
@@ -602,7 +605,7 @@ public class WebApplicationAutoWireOfficeFloorSource extends
 			AutoWireObject httpSecurity = this.addManagedObject(
 					HttpSecurityManagedObjectSource.class.getName(), null,
 					new AutoWire(securityClass));
-			httpSecurity.setTimeout(1000); // TODO make configurable
+			httpSecurity.setTimeout(securityTimeout);
 			httpSecurity
 					.addProperty(
 							HttpSecurityManagedObjectSource.PROPERTY_HTTP_SECURITY_TYPE,
