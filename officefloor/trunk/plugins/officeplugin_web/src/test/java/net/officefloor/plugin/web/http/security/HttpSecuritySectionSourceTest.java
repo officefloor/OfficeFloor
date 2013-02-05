@@ -178,6 +178,8 @@ public class HttpSecuritySectionSourceTest extends OfficeFrameTestCase {
 		String key = HttpSecurityConfigurator.registerHttpSecuritySource(
 				source, type);
 		SectionLoaderUtil.validateSectionType(expectedType,
-				HttpSecuritySectionSource.class, key);
+				HttpSecuritySectionSource.class, null,
+				HttpSecuritySectionSource.PROPERTY_HTTP_SECURITY_SOURCE_KEY,
+				key);
 	}
 }
