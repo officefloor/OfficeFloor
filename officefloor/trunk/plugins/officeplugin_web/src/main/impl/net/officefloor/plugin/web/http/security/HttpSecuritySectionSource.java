@@ -17,6 +17,7 @@
  */
 package net.officefloor.plugin.web.http.security;
 
+import net.officefloor.compile.impl.util.CompileUtil;
 import net.officefloor.compile.properties.Property;
 import net.officefloor.compile.spi.section.SectionDesigner;
 import net.officefloor.compile.spi.section.SectionObject;
@@ -61,7 +62,10 @@ public class HttpSecuritySectionSource extends AbstractSectionSource {
 			SectionSourceContext context) throws Exception {
 
 		// Retrieve the HTTP Security configuration
-		String key = context.getProperty(PROPERTY_HTTP_SECURITY_SOURCE_KEY);
+		String key = context.getSectionLocation();
+		if (CompileUtil.isBlank(key)) {
+			key = context.getProperty(PROPERTY_HTTP_SECURITY_SOURCE_KEY);
+		}
 		HttpSecurityConfiguration<?, ?, ?, ?> configuration = HttpSecurityConfigurator
 				.getHttpSecuritySource(key);
 

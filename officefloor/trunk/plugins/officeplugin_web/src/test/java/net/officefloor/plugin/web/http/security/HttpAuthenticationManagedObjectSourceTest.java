@@ -470,7 +470,7 @@ public class HttpAuthenticationManagedObjectSourceTest extends
 		// Trigger authentication if ratified (but no HTTP security)
 		if (isLoadRatified && (loadRatifiedSecurity == null)) {
 
-			// Trigger authentication
+			// Start authentication
 			listener.notifyStarted();
 
 			// Confirm trigger authentication
@@ -521,9 +521,14 @@ public class HttpAuthenticationManagedObjectSourceTest extends
 			this.recordReturn(this.source,
 					this.source.ratify(manualRatifyContext), isManuallyRatified);
 
-			// Trigger authentication/challenge if not ratified security
-			if (isManuallyRatified && (manualRatifiedSecurity == null)) {
+			// Determine if authentication
+			boolean isUndertakeManualAuthentication = isManuallyRatified
+					&& (manualRatifiedSecurity == null);
+			if (!isUndertakeManualAuthentication) {
+				// Not undertaking authentication, so flag request complete
+				request.authenticationComplete();
 
+			} else {
 				// Trigger authentication
 				listener.notifyStarted();
 
@@ -602,7 +607,5 @@ public class HttpAuthenticationManagedObjectSourceTest extends
 
 		// Return the HTTP authentication
 		return authentication;
-
 	}
-
 }
