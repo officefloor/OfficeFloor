@@ -277,7 +277,8 @@ public class BasicHttpSecuritySourceTest extends OfficeFrameTestCase {
 		this.recordReturn(this.store, this.store.getAlgorithm(), null);
 		this.recordReturn(this.entry, this.entry.retrieveRoles(),
 				new HashSet<String>(Arrays.asList("prince")));
-		this.authenticationContext.recordRegisterHttpSecurityWithHttpSession();
+		this.authenticationContext
+				.recordRegisterHttpSecurityWithHttpSession("http.security.source.basic.http.security");
 
 		// Test
 		this.doAuthenticate("Aladdin", "prince");
@@ -304,7 +305,8 @@ public class BasicHttpSecuritySourceTest extends OfficeFrameTestCase {
 		this.recordReturn(this.store, this.store.getAlgorithm(), "MD5");
 		this.recordReturn(this.entry, this.entry.retrieveRoles(),
 				new HashSet<String>(Arrays.asList("prince")));
-		this.authenticationContext.recordRegisterHttpSecurityWithHttpSession();
+		this.authenticationContext
+				.recordRegisterHttpSecurityWithHttpSession("http.security.source.basic.http.security");
 
 		// Test
 		this.doAuthenticate("Aladdin", "prince");
@@ -327,7 +329,8 @@ public class BasicHttpSecuritySourceTest extends OfficeFrameTestCase {
 				CredentialStore.NO_ALGORITHM);
 		this.recordReturn(this.entry, this.entry.retrieveRoles(),
 				new HashSet<String>(Arrays.asList("prince")));
-		this.authenticationContext.recordRegisterHttpSecurityWithHttpSession();
+		this.authenticationContext
+				.recordRegisterHttpSecurityWithHttpSession("http.security.source.basic.http.security");
 
 		// Test
 		this.doAuthenticate("Aladdin", "prince");

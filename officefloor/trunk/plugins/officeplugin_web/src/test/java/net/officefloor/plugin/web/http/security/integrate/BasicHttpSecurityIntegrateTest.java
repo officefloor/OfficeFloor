@@ -17,131 +17,47 @@
  */
 package net.officefloor.plugin.web.http.security.integrate;
 
-import java.io.IOException;
+import org.apache.http.auth.AuthScope;
+import org.apache.http.auth.UsernamePasswordCredentials;
 
 import net.officefloor.autowire.AutoWire;
 import net.officefloor.autowire.AutoWireObject;
-import net.officefloor.autowire.AutoWireOfficeFloor;
-import net.officefloor.autowire.AutoWireSection;
-import net.officefloor.frame.test.OfficeFrameTestCase;
-import net.officefloor.plugin.section.clazz.ClassSectionSource;
-import net.officefloor.plugin.section.clazz.Parameter;
-import net.officefloor.plugin.socket.server.http.HttpRequest;
-import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
-import net.officefloor.plugin.socket.server.http.server.MockHttpServer;
 import net.officefloor.plugin.web.http.application.HttpSecurityAutoWireSection;
 import net.officefloor.plugin.web.http.application.WebAutoWireApplication;
-import net.officefloor.plugin.web.http.security.HttpSecurity;
 import net.officefloor.plugin.web.http.security.scheme.BasicHttpSecuritySource;
 import net.officefloor.plugin.web.http.security.store.CredentialStore;
 import net.officefloor.plugin.web.http.security.store.PasswordFileManagedObjectSource;
-import net.officefloor.plugin.web.http.server.HttpServerAutoWireOfficeFloorSource;
-
-import org.apache.http.auth.AuthScope;
-import org.apache.http.auth.UsernamePasswordCredentials;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.DefaultHttpClient;
 
 /**
  * Integrate tests the {@link BasicHttpSecuritySource}.
  * 
  * @author Daniel Sagenschneider
  */
-public class BasicHttpSecurityIntegrateTest extends OfficeFrameTestCase {
-
-	/**
-	 * Port to use for testing.
-	 */
-	private final int PORT = MockHttpServer.getAvailablePort();
-
-	/**
-	 * {@link HttpClient} to use for testing.
-	 */
-	private final DefaultHttpClient client = new DefaultHttpClient();
-
-	/**
-	 * {@link AutoWireOfficeFloor}.
-	 */
-	private AutoWireOfficeFloor officeFloor;
+public class BasicHttpSecurityIntegrateTest extends
+		AbstractHttpSecurityIntegrateTestCase {
 
 	@Override
-	protected void setUp() throws Exception {
-		super.setUp();
+	protected HttpSecurityAutoWireSection configureHttpSecurity(
+			WebAutoWireApplication application) throws Exception {
 
-		// Configure the application
-		WebAutoWireApplication source = new HttpServerAutoWireOfficeFloorSource(
-				PORT);
-
-		// HTTP Security
-		HttpSecurityAutoWireSection security = source
+		// Configure the HTTP Security
+		HttpSecurityAutoWireSection security = application
 				.setHttpSecurity(BasicHttpSecuritySource.class);
 		security.addProperty(BasicHttpSecuritySource.PROPERTY_REALM,
 				"TestRealm");
 
 		// Password File Credential Store
 		String passwordFilePath = this.findFile(this.getClass(),
-				"password-file.txt").getAbsolutePath();
-		AutoWireObject passwordFile = source.addManagedObject(
+				"basic-password-file.txt").getAbsolutePath();
+		AutoWireObject passwordFile = application.addManagedObject(
 				PasswordFileManagedObjectSource.class.getName(), null,
 				new AutoWire(CredentialStore.class));
 		passwordFile.addProperty(
 				PasswordFileManagedObjectSource.PROPERTY_PASSWORD_FILE_PATH,
 				passwordFilePath);
 
-		// Add servicing methods
-		AutoWireSection section = source.addSection("SERVICE",
-				ClassSectionSource.class.getName(), Servicer.class.getName());
-		source.link(security, "Failure", section, "handleFailure");
-		source.linkUri("service", section, "service");
-
-		// Start the office
-		this.officeFloor = source.openOfficeFloor();
-	}
-
-	@Override
-	protected void tearDown() throws Exception {
-		if (this.officeFloor != null) {
-			this.officeFloor.closeOfficeFloor();
-		}
-	}
-
-	/**
-	 * Services the {@link HttpRequest}.
-	 */
-	public static class Servicer {
-
-		/**
-		 * Services the {@link HttpRequest}.
-		 * 
-		 * @param security
-		 *            {@link HttpSecurity} dependency ensures authentication
-		 *            before servicing.
-		 * @param connection
-		 *            {@link ServerHttpConnection}.
-		 * @throws IOException
-		 *             If fails.
-		 */
-		public void service(HttpSecurity security,
-				ServerHttpConnection connection) throws IOException {
-			connection.getHttpResponse().getEntityWriter()
-					.write("Serviced for " + security.getRemoteUser());
-		}
-
-		/**
-		 * Handles failure.
-		 * 
-		 * @param failure
-		 *            Failure.
-		 * @param connection
-		 *            {@link ServerHttpConnection}.
-		 * @throws IOException
-		 *             If fails.
-		 */
-		public void handleFailure(@Parameter Throwable failure,
-				ServerHttpConnection connection) throws IOException {
-			connection.getHttpResponse().getEntityWriter().write("ERROR");
-		}
+		// Return the HTTP Security
+		return security;
 	}
 
 	/**
@@ -149,45 +65,15 @@ public class BasicHttpSecurityIntegrateTest extends OfficeFrameTestCase {
 	 */
 	public void testIntegration() throws Exception {
 
-		// Create the request
-		HttpGet request = new HttpGet("http://localhost:" + PORT + "/service");
-
 		// Should not authenticate (without credentials)
-		this.doRequest(request, 401, "");
+		this.doRequest("service", 401, "");
 
 		// Should authenticate with credentials
-		this.client.getCredentialsProvider().setCredentials(
-				new AuthScope(null, -1, "TestRealm"),
-				new UsernamePasswordCredentials("daniel", "password"));
-		this.doRequest(request, 200, "Serviced for daniel");
-	}
-
-	/**
-	 * Asserts the response from the {@link HttpGet}.
-	 * 
-	 * @param request
-	 *            {@link HttpGet}.
-	 * @param expectedStatus
-	 *            Expected status.
-	 * @param expectedBodyContent
-	 *            Expected body content.
-	 */
-	private void doRequest(HttpGet request, int expectedStatus,
-			String expectedBodyContent) {
-		try {
-			// Execute the method
-			org.apache.http.HttpResponse response = this.client
-					.execute(request);
-			int status = response.getStatusLine().getStatusCode();
-			String body = MockHttpServer.getEntityBody(response);
-
-			// Verify response
-			assertEquals("Incorrect response body", expectedBodyContent, body);
-			assertEquals("Should be successful", expectedStatus, status);
-
-		} catch (Exception ex) {
-			throw fail(ex);
-		}
+		this.getHttpClient()
+				.getCredentialsProvider()
+				.setCredentials(new AuthScope(null, -1, "TestRealm"),
+						new UsernamePasswordCredentials("daniel", "password"));
+		this.doRequest("service", 200, "Serviced for daniel");
 	}
 
 }

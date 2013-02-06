@@ -116,6 +116,111 @@ public class DigestHttpSecuritySourceTest extends OfficeFrameTestCase {
 	}
 
 	/**
+	 * Ensure can ratify from cached {@link HttpSecurity}.
+	 */
+	public void testRatifyFromSession() throws IOException {
+
+		final MockHttpRatifyContext<HttpSecurity, Void> ratifyContext = new MockHttpRatifyContext<HttpSecurity, Void>(
+				null, this);
+		final HttpSecurity security = this.createMock(HttpSecurity.class);
+
+		// Record obtaining HTTP security from HTTP session
+		HttpSession session = ratifyContext.getSession();
+		this.recordReturn(session, session
+				.getAttribute("http.security.source.digest.http.security"),
+				security);
+
+		// Test
+		this.replayMockObjects();
+
+		// Create and initialise the source
+		DigestHttpSecuritySource source = HttpSecurityLoaderUtil
+				.loadHttpSecuritySource(DigestHttpSecuritySource.class,
+						DigestHttpSecuritySource.PROPERTY_REALM, REALM,
+						DigestHttpSecuritySource.PROPERTY_PRIVATE_KEY,
+						PRIVATE_KEY);
+
+		// Undertake ratify
+		assertFalse("Should not need to authenticate as cached",
+				source.ratify(ratifyContext));
+		assertSame("Incorrect security", security,
+				ratifyContext.getHttpSecurity());
+
+		// Verify
+		this.verifyMockObjects();
+	}
+
+	/**
+	 * Ensure can ratify if have authorization header.
+	 */
+	public void testRatifyWithAuthorizationHeader() throws IOException {
+
+		final MockHttpRatifyContext<HttpSecurity, Void> ratifyContext = new MockHttpRatifyContext<HttpSecurity, Void>(
+				null, this);
+
+		// Record obtaining HTTP security from HTTP session
+		HttpSession session = ratifyContext.getSession();
+		this.recordReturn(session, session
+				.getAttribute("http.security.source.digest.http.security"),
+				null);
+		ratifyContext.recordAuthorizationHeader("Digest credentials");
+
+		// Test
+		this.replayMockObjects();
+
+		// Create and initialise the source
+		DigestHttpSecuritySource source = HttpSecurityLoaderUtil
+				.loadHttpSecuritySource(DigestHttpSecuritySource.class,
+						DigestHttpSecuritySource.PROPERTY_REALM, REALM,
+						DigestHttpSecuritySource.PROPERTY_PRIVATE_KEY,
+						PRIVATE_KEY);
+
+		// Undertake ratify
+		assertTrue("Should indicate that may attempt to authenticate",
+				source.ratify(ratifyContext));
+		assertNull("Should not yet have security",
+				ratifyContext.getHttpSecurity());
+
+		// Verify
+		this.verifyMockObjects();
+	}
+
+	/**
+	 * Ensure ratify indicates no authentication credentials.
+	 */
+	public void testRatifyNoAuthentication() throws IOException {
+
+		final MockHttpRatifyContext<HttpSecurity, Void> ratifyContext = new MockHttpRatifyContext<HttpSecurity, Void>(
+				null, this);
+
+		// Record obtaining HTTP security from HTTP session
+		HttpSession session = ratifyContext.getSession();
+		this.recordReturn(session, session
+				.getAttribute("http.security.source.digest.http.security"),
+				null);
+		ratifyContext.recordAuthorizationHeader(null);
+
+		// Test
+		this.replayMockObjects();
+
+		// Create and initialise the source
+		DigestHttpSecuritySource source = HttpSecurityLoaderUtil
+				.loadHttpSecuritySource(DigestHttpSecuritySource.class,
+						DigestHttpSecuritySource.PROPERTY_REALM, REALM,
+						DigestHttpSecuritySource.PROPERTY_PRIVATE_KEY,
+						PRIVATE_KEY);
+
+		// Undertake ratify
+		assertFalse("Should not attempt authentication",
+				source.ratify(ratifyContext));
+		assertNull("Should not yet have security",
+				ratifyContext.getHttpSecurity());
+
+		// Verify
+		this.verifyMockObjects();
+	}
+
+	/**
 	 * Ensure can send challenge.
 	 */
 	public void testChallenge() throws Exception {
@@ -249,6 +354,8 @@ public class DigestHttpSecuritySourceTest extends OfficeFrameTestCase {
 		this.recordReturn(request, request.getMethod(), "GET");
 		this.recordReturn(this.entry, this.entry.retrieveRoles(),
 				new HashSet<String>(Arrays.asList("prince")));
+		this.authenticationContext
+				.recordRegisterHttpSecurityWithHttpSession("http.security.source.digest.http.security");
 
 		// Test
 		this.doAuthenticate("Mufasa", "prince");

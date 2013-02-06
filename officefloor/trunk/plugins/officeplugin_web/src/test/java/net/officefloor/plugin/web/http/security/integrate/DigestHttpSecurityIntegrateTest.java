@@ -17,18 +17,69 @@
  */
 package net.officefloor.plugin.web.http.security.integrate;
 
-import net.officefloor.frame.test.OfficeFrameTestCase;
+import net.officefloor.autowire.AutoWire;
+import net.officefloor.autowire.AutoWireObject;
+import net.officefloor.plugin.web.http.application.HttpSecurityAutoWireSection;
+import net.officefloor.plugin.web.http.application.WebAutoWireApplication;
 import net.officefloor.plugin.web.http.security.scheme.DigestHttpSecuritySource;
+import net.officefloor.plugin.web.http.security.store.CredentialStore;
+import net.officefloor.plugin.web.http.security.store.PasswordFileManagedObjectSource;
+
+import org.apache.http.auth.AuthScope;
+import org.apache.http.auth.UsernamePasswordCredentials;
 
 /**
  * Integrate the {@link DigestHttpSecuritySource}.
  * 
  * @author Daniel Sagenschneider
  */
-public class DigestHttpSecurityIntegrateTest extends OfficeFrameTestCase {
+public class DigestHttpSecurityIntegrateTest extends
+		AbstractHttpSecurityIntegrateTestCase {
 
-	public void testImplement() {
-		fail("TODO implement tests");
+	/**
+	 * Realm.
+	 */
+	private static final String REALM = "TestRealm";
+
+	@Override
+	protected HttpSecurityAutoWireSection configureHttpSecurity(
+			WebAutoWireApplication application) throws Exception {
+
+		// Configure the HTTP Security
+		HttpSecurityAutoWireSection security = application
+				.setHttpSecurity(DigestHttpSecuritySource.class);
+		security.addProperty(DigestHttpSecuritySource.PROPERTY_REALM, REALM);
+		security.addProperty(DigestHttpSecuritySource.PROPERTY_PRIVATE_KEY,
+				"PrivateKey");
+
+		// Password File Credential Store
+		String passwordFilePath = this.findFile(this.getClass(),
+				"digest-password-file.txt").getAbsolutePath();
+		AutoWireObject passwordFile = application.addManagedObject(
+				PasswordFileManagedObjectSource.class.getName(), null,
+				new AutoWire(CredentialStore.class));
+		passwordFile.addProperty(
+				PasswordFileManagedObjectSource.PROPERTY_PASSWORD_FILE_PATH,
+				passwordFilePath);
+
+		// Return the HTTP Security
+		return security;
+	}
+
+	/**
+	 * Ensure can integrate.
+	 */
+	public void testIntegration() throws Exception {
+
+		// Should not authenticate (without credentials)
+		this.doRequest("service", 401, "");
+
+		// Should authenticate with credentials
+		this.getHttpClient()
+				.getCredentialsProvider()
+				.setCredentials(new AuthScope(null, -1, REALM, "Digest"),
+						new UsernamePasswordCredentials("daniel", "password"));
+		this.doRequest("service", 200, "Serviced for daniel");
 	}
 
 }
