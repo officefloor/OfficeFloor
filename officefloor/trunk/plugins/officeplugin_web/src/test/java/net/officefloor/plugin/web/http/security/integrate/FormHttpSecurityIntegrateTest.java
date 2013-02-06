@@ -17,18 +17,108 @@
  */
 package net.officefloor.plugin.web.http.security.integrate;
 
-import net.officefloor.frame.test.OfficeFrameTestCase;
+import java.io.IOException;
+import java.io.Serializable;
+
+import net.officefloor.autowire.AutoWire;
+import net.officefloor.autowire.AutoWireObject;
+import net.officefloor.autowire.AutoWireSection;
+import net.officefloor.plugin.section.clazz.ClassSectionSource;
+import net.officefloor.plugin.section.clazz.NextTask;
+import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
+import net.officefloor.plugin.web.http.application.HttpSecurityAutoWireSection;
+import net.officefloor.plugin.web.http.application.WebAutoWireApplication;
+import net.officefloor.plugin.web.http.security.HttpCredentials;
 import net.officefloor.plugin.web.http.security.scheme.FormHttpSecuritySource;
+import net.officefloor.plugin.web.http.security.scheme.HttpCredentialsImpl;
+import net.officefloor.plugin.web.http.security.store.CredentialStore;
+import net.officefloor.plugin.web.http.security.store.PasswordFileManagedObjectSource;
 
 /**
  * Integrate the {@link FormHttpSecuritySource}.
  * 
  * @author Daniel Sagenschneider
  */
-public class FormHttpSecurityIntegrateTest extends OfficeFrameTestCase {
+public class FormHttpSecurityIntegrateTest extends
+		AbstractHttpSecurityIntegrateTestCase {
 
-	public void testImplement() {
-		fail("TODO implement tests");
+	@Override
+	protected HttpSecurityAutoWireSection configureHttpSecurity(
+			WebAutoWireApplication application) throws Exception {
+
+		// Configure the HTTP Security
+		HttpSecurityAutoWireSection security = application
+				.setHttpSecurity(FormHttpSecuritySource.class);
+		security.addProperty(FormHttpSecuritySource.PROPERTY_REALM, "TestRealm");
+
+		// Provide the form login page
+		AutoWireSection form = application.addSection("FORM",
+				ClassSectionSource.class.getName(), LoginPage.class.getName());
+		application.link(security, "FLOW_FORM_LOGIN_PAGE", form, "form");
+		application.linkUri("login", form, "login");
+		application.link(form, "authenticate", security, "Authenticate");
+
+		// Provide parameters for login form
+		application.addHttpRequestObject(LoginForm.class, true);
+
+		// Password File Credential Store
+		String passwordFilePath = this.findFile(this.getClass(),
+				"basic-password-file.txt").getAbsolutePath();
+		AutoWireObject passwordFile = application.addManagedObject(
+				PasswordFileManagedObjectSource.class.getName(), null,
+				new AutoWire(CredentialStore.class));
+		passwordFile.addProperty(
+				PasswordFileManagedObjectSource.PROPERTY_PASSWORD_FILE_PATH,
+				passwordFilePath);
+
+		// Return the HTTP Security
+		return security;
+	}
+
+	/**
+	 * Login form parameters.
+	 */
+	public static class LoginForm implements Serializable {
+
+		private String username;
+
+		private String password;
+
+		public void setUsername(String username) {
+			this.username = username;
+		}
+
+		public void setPassword(String password) {
+			this.password = password;
+		}
+	}
+
+	/**
+	 * Login page functionality for testing.
+	 */
+	public static class LoginPage {
+
+		public void form(ServerHttpConnection connection) throws IOException {
+			connection.getHttpResponse().getEntityWriter().write("LOGIN");
+		}
+
+		@NextTask("authenticate")
+		public HttpCredentials login(LoginForm form) {
+			return new HttpCredentialsImpl(form.username, form.password);
+		}
+	}
+
+	/**
+	 * Ensure can integrate.
+	 */
+	public void testIntegration() throws Exception {
+
+		// Should be returned the login page
+		this.doRequest("service", 200, "LOGIN");
+
+		// Send back login credentials and get service page
+		this.doRequest("login?username=daniel&password=password", 200,
+				"Serviced for daniel");
 	}
 
 }

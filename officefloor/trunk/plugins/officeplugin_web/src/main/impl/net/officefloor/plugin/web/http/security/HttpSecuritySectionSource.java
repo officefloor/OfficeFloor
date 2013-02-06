@@ -24,6 +24,7 @@ import net.officefloor.compile.spi.section.SectionObject;
 import net.officefloor.compile.spi.section.SectionOutput;
 import net.officefloor.compile.spi.section.SectionTask;
 import net.officefloor.compile.spi.section.SectionWork;
+import net.officefloor.compile.spi.section.TaskFlow;
 import net.officefloor.compile.spi.section.source.SectionSource;
 import net.officefloor.compile.spi.section.source.SectionSourceContext;
 import net.officefloor.compile.spi.section.source.impl.AbstractSectionSource;
@@ -126,9 +127,11 @@ public class HttpSecuritySectionSource extends AbstractSectionSource {
 		designer.link(challengeTask.getTaskFlow("FAILURE"), failureOutput,
 				FlowInstigationStrategyEnum.SEQUENTIAL);
 		for (HttpSecurityFlowType<?> flowType : securityType.getFlowTypes()) {
-			designer.link(challengeTask.getTaskFlow(flowType.getFlowName()),
-					designer.addSectionOutput(flowType.getFlowName(), flowType
-							.getArgumentType().getName(), false),
+			String flowName = "FLOW_" + flowType.getFlowName();
+			TaskFlow taskFlow = challengeTask.getTaskFlow(flowName);
+			SectionOutput sectionOutput = designer.addSectionOutput(flowName,
+					flowType.getArgumentType().getName(), false);
+			designer.link(taskFlow, sectionOutput,
 					FlowInstigationStrategyEnum.SEQUENTIAL);
 		}
 

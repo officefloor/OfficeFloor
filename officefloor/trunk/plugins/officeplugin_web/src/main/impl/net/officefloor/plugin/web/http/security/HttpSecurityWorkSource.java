@@ -66,8 +66,6 @@ public class HttpSecurityWorkSource extends
 	 * Name of {@link Property} providing the key to the
 	 * {@link HttpSecuritySource} from the {@link HttpSecurityConfigurator}.
 	 */
-	@Deprecated
-	// should provide via constructor
 	public static final String PROPERTY_HTTP_SECURITY_SOURCE_KEY = HttpAuthenticationManagedObjectSource.PROPERTY_HTTP_SECURITY_SOURCE_KEY;
 
 	/**
@@ -223,7 +221,7 @@ public class HttpSecurityWorkSource extends
 		appCompleteFailureFlow
 				.setKey(CompleteApplicationHttpAuthenticateTask.Flows.FAILURE);
 		appCompleteFailureFlow.setArgumentType(Throwable.class);
-		
+
 	}
 
 }
