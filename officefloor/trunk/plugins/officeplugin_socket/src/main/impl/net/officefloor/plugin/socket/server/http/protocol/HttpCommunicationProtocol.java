@@ -120,12 +120,12 @@ public class HttpCommunicationProtocol implements CommunicationProtocolSource,
 	/**
 	 * Default value for property {@link #PROPERTY_MAXIMUM_TEXT_PART_LENGTH}.
 	 */
-	public static final int DEFAULT_VALUE_MAXIMUM_TEXT_PART_LENGTH = 255;
+	public static final int DEFAULT_VALUE_MAXIMUM_TEXT_PART_LENGTH = 1024;
 
 	/**
 	 * Maximum length of text part for {@link HttpRequest}.
 	 */
-	private int maxTextPartLength = 255;
+	private int maxTextPartLength;
 
 	/**
 	 * Send buffer size.

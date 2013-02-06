@@ -67,8 +67,8 @@ public class BasicHttpSecuritySource
 	private static final Charset US_ASCII = HttpRequestParserImpl.US_ASCII;
 
 	/**
-	 * Name of attribute in the {@link HttpSession} for the {@link HttpSecurity}
-	 * .
+	 * Name of attribute to register the {@link HttpSecurity} within the
+	 * {@link HttpSession}.
 	 */
 	private static final String SESSION_ATTRIBUTE_HTTP_SECURITY = "http.security.source.basic.http.security";
 

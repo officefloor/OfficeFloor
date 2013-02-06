@@ -189,10 +189,13 @@ public class MockHttpAuthenticateContext<S, C, D extends Enum<D>> implements
 
 	/**
 	 * Records registering {@link HttpSecurity} with the {@link HttpSession}.
+	 * 
+	 * @param attributeName
+	 *            Name of attribute to register the {@link HttpSecurity} with
+	 *            the {@link HttpSession}.
 	 */
-	public void recordRegisterHttpSecurityWithHttpSession() {
-		this.session.setAttribute("http.security.source.basic.http.security",
-				null);
+	public void recordRegisterHttpSecurityWithHttpSession(String attributeName) {
+		this.session.setAttribute(attributeName, null);
 		this.testCase.control(this.session).setMatcher(new AbstractMatcher() {
 			@Override
 			@SuppressWarnings("unchecked")

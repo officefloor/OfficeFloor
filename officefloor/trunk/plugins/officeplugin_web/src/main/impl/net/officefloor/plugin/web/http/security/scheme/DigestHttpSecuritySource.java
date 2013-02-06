@@ -77,6 +77,12 @@ public class DigestHttpSecuritySource
 	private static final Charset US_ASCII = HttpRequestParserImpl.US_ASCII;
 
 	/**
+	 * Name of attribute to register the {@link HttpSecurity} within the
+	 * {@link HttpSession}.
+	 */
+	private static final String SESSION_ATTRIBUTE_HTTP_SECURITY = "http.security.source.digest.http.security";
+
+	/**
 	 * Key into the {@link HttpSession} for the {@link SecurityState}.
 	 */
 	protected static final String SECURITY_STATE_SESSION_KEY = "#"
@@ -295,10 +301,28 @@ public class DigestHttpSecuritySource
 
 	@Override
 	public boolean ratify(HttpRatifyContext<HttpSecurity, Void> context) {
-		// TODO implement
-		// HttpSecuritySource<HttpSecurity,Void,Dependencies,None>.ratify
-		throw new UnsupportedOperationException(
-				"TODO implement HttpSecuritySource<HttpSecurity,Void,Dependencies,None>.ratify");
+
+		// Attempt to obtain from session
+		HttpSecurity security = (HttpSecurity) context.getSession()
+				.getAttribute(SESSION_ATTRIBUTE_HTTP_SECURITY);
+		if (security != null) {
+			// Load the security and no need to authenticate
+			context.setHttpSecurity(security);
+			return false;
+		}
+
+		// Determine if digest credentials on request
+		HttpAuthenticationScheme scheme = HttpAuthenticationScheme
+				.getHttpAuthenticationScheme(context.getConnection()
+						.getHttpRequest());
+		if ((scheme == null)
+				|| (!(AUTHENTICATION_SCHEME_DIGEST.equalsIgnoreCase(scheme
+						.getAuthentiationScheme())))) {
+			return false; // no/incorrect authentication scheme
+		}
+
+		// As here, then have digest authentication details
+		return true;
 	}
 
 	@Override
@@ -457,12 +481,17 @@ public class DigestHttpSecuritySource
 			return; // not authenticated
 		}
 
-		// Obtain the roles
+		// Authenticated, so obtain roles and create the HTTP Security
 		Set<String> roles = entry.retrieveRoles();
+		HttpSecurity security = new HttpSecurityImpl(
+				AUTHENTICATION_SCHEME_DIGEST, username, roles);
 
-		// Authenticated, so provide the HTTP security
-		context.setHttpSecurity(new HttpSecurityImpl(
-				AUTHENTICATION_SCHEME_DIGEST, username, roles));
+		// Remember HTTP Security for further requests
+		context.getSession().setAttribute(SESSION_ATTRIBUTE_HTTP_SECURITY,
+				security);
+
+		// Return the HTTP Security
+		context.setHttpSecurity(security);
 	}
 
 	@Override
@@ -603,6 +632,10 @@ public class DigestHttpSecuritySource
 		 */
 		public Digest(String algorithm) throws IOException {
 			this.digest = CredentialStoreUtil.createDigest(algorithm);
+			if (this.digest == null) {
+				throw new IOException("Unable to create Digest for algorithm '"
+						+ algorithm + "'");
+			}
 		}
 
 		/**
