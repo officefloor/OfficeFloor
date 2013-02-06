@@ -19,8 +19,6 @@ package net.officefloor.plugin.web.http.security.scheme;
 
 import java.io.IOException;
 import java.nio.charset.Charset;
-import java.security.MessageDigest;
-import java.util.Set;
 
 import net.officefloor.frame.api.build.None;
 import net.officefloor.plugin.socket.server.http.HttpRequest;
@@ -35,7 +33,6 @@ import net.officefloor.plugin.web.http.security.HttpSecurity;
 import net.officefloor.plugin.web.http.security.HttpSecuritySource;
 import net.officefloor.plugin.web.http.security.HttpSecuritySourceContext;
 import net.officefloor.plugin.web.http.security.impl.AbstractHttpSecuritySource;
-import net.officefloor.plugin.web.http.security.store.CredentialEntry;
 import net.officefloor.plugin.web.http.security.store.CredentialStore;
 import net.officefloor.plugin.web.http.security.store.CredentialStoreUtil;
 import net.officefloor.plugin.web.http.session.HttpSession;
@@ -168,40 +165,14 @@ public class BasicHttpSecuritySource
 		// Obtain the credential entry for the connection
 		CredentialStore store = (CredentialStore) context
 				.getObject(Dependencies.CREDENTIAL_STORE);
-		CredentialEntry entry = store.retrieveCredentialEntry(userId,
-				this.realm);
-		if (entry == null) {
-			return; // unknown user
-		}
 
-		// Obtain the required credentials for the connection
-		byte[] requiredCredentials = entry.retrieveCredentials();
-
-		// Translate password as per algorithm
-		byte[] inputCredentials = password.getBytes(US_ASCII);
-		String algorithm = store.getAlgorithm();
-		MessageDigest digest = CredentialStoreUtil.createDigest(algorithm);
-		if (digest != null) {
-			// Translate credentials as per algorithm
-			digest.update(inputCredentials);
-			inputCredentials = digest.digest();
-		}
-
-		// Ensure match for authentication
-		if (requiredCredentials.length != inputCredentials.length) {
+		// Authenticate
+		HttpSecurity security = CredentialStoreUtil.authenticate(userId,
+				this.realm, password.getBytes(US_ASCII),
+				AUTHENTICATION_SCHEME_BASIC, store);
+		if (security == null) {
 			return; // not authenticated
-		} else {
-			for (int i = 0; i < requiredCredentials.length; i++) {
-				if (requiredCredentials[i] != inputCredentials[i]) {
-					return; // not authenticated
-				}
-			}
 		}
-
-		// Authenticated, so obtain roles and create the HTTP Security
-		Set<String> roles = entry.retrieveRoles();
-		HttpSecurity security = new HttpSecurityImpl(
-				AUTHENTICATION_SCHEME_BASIC, userId, roles);
 
 		// Remember HTTP Security for further requests
 		context.getSession().setAttribute(SESSION_ATTRIBUTE_HTTP_SECURITY,
