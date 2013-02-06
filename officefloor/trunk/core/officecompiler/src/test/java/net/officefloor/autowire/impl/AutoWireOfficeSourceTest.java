@@ -64,6 +64,7 @@ import net.officefloor.compile.spi.section.source.SectionSource;
 import net.officefloor.compile.test.section.SectionLoaderUtil;
 import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
 import net.officefloor.frame.api.escalate.Escalation;
+import net.officefloor.frame.api.escalate.FailedToSourceManagedObjectEscalation;
 import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.spi.governance.Governance;
 import net.officefloor.frame.spi.team.Team;
@@ -75,6 +76,7 @@ import net.officefloor.plugin.section.clazz.ClassSectionSource;
 import net.officefloor.plugin.section.clazz.ManagedObject;
 import net.officefloor.plugin.section.clazz.Property;
 import net.officefloor.plugin.section.clazz.TypeQualifier;
+import net.officefloor.plugin.section.work.WorkSectionSource;
 import net.officefloor.plugin.work.clazz.Qualifier;
 
 /**
@@ -464,10 +466,16 @@ public class AutoWireOfficeSourceTest extends OfficeFrameTestCase {
 	 */
 	public void testLinkEscalationToSectionInput() throws Exception {
 
+		final PropertyList propertyList = this.createMock(PropertyList.class);
+		final net.officefloor.compile.properties.Property property = this
+				.createMock(net.officefloor.compile.properties.Property.class);
+
 		// Create and configure the source
 		AutoWireOfficeSource source = new AutoWireOfficeSource();
 		AutoWireSection section = this.addSection(source, "SECTION");
 		source.linkEscalation(Exception.class, section, "INPUT");
+		source.linkEscalation(FailedToSourceManagedObjectEscalation.class,
+				section, "INPUT");
 
 		// Record linking escalation
 		this.recordOfficeSection("SECTION");
@@ -475,7 +483,29 @@ public class AutoWireOfficeSourceTest extends OfficeFrameTestCase {
 		this.recordSectionInputs("SECTION", "INPUT");
 		this.recordSectionOutputs("SECTION");
 		this.recordSubSections("SECTION");
+		this.recordReturn(this.context, this.context.createPropertyList(),
+				propertyList);
+		this.recordReturn(propertyList, propertyList
+				.addProperty(WorkSectionSource.PROPERTY_PARAMETER_PREFIX
+						+ "Handle"), property);
+		property.setValue("1");
 		this.recordEscalation(Exception.class, "SECTION", "INPUT");
+		this.recordReturn(
+				propertyList,
+				propertyList
+						.addProperty(AutoWireEscalationCauseRouteWorkSource.PROPERTY_PREFIX_ESCALATION_TYPE
+								+ "0"), property);
+		property.setValue(Exception.class.getName());
+
+		// Record manually handling failed to source
+		this.recordEscalation(FailedToSourceManagedObjectEscalation.class,
+				"SECTION", "INPUT");
+		this.recordReturn(
+				propertyList,
+				propertyList
+						.addProperty(AutoWireEscalationCauseRouteWorkSource.PROPERTY_PREFIX_ESCALATION_TYPE
+								+ "1"), property);
+		property.setValue(FailedToSourceManagedObjectEscalation.class.getName());
 
 		// Test
 		this.replayMockObjects();

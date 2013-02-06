@@ -600,106 +600,112 @@ public class AutoWireOfficeSource extends AbstractOfficeSource {
 			architect.link(sectionOutput, sectionInput);
 		}
 
-		// Properties for failed to source managed object handling
-		PropertyList failedToSourceProperties = context.createPropertyList();
-		failedToSourceProperties.addProperty(
-				WorkSectionSource.PROPERTY_PARAMETER_PREFIX + "Handle")
-				.setValue("1");
+		// Only configure if have escalations
+		// (Stops auto escalation handling if nothing handling)
+		if (this.escalations.size() > 0) {
 
-		// Link escalations to inputs
-		OfficeSectionInput[] escalationSectionInput = new OfficeSectionInput[this.escalations
-				.size()];
-		boolean isFailedToSourceManuallyConfigured = false;
-		for (int i = 0; i < this.escalations.size(); i++) {
-			EscalationLink link = this.escalations.get(i);
+			// Properties for failed to source managed object handling
+			PropertyList failedToSourceProperties = context
+					.createPropertyList();
+			failedToSourceProperties.addProperty(
+					WorkSectionSource.PROPERTY_PARAMETER_PREFIX + "Handle")
+					.setValue("1");
 
-			// Obtain the link details
-			String escalationTypeName = link.escalationType.getName();
-			String sectionName = link.targetSection.getSectionName();
-			String inputName = link.targetInputName;
+			// Link escalations to inputs
+			OfficeSectionInput[] escalationSectionInput = new OfficeSectionInput[this.escalations
+					.size()];
+			boolean isFailedToSourceManuallyConfigured = false;
+			for (int i = 0; i < this.escalations.size(); i++) {
+				EscalationLink link = this.escalations.get(i);
 
-			// Determine if manually handling failed to source escalation
-			if (FailedToSourceManagedObjectEscalation.class.getName().equals(
-					escalationTypeName)) {
-				isFailedToSourceManuallyConfigured = true;
-			}
+				// Obtain the link details
+				String escalationTypeName = link.escalationType.getName();
+				String sectionName = link.targetSection.getSectionName();
+				String inputName = link.targetInputName;
 
-			// Add the Escalation
-			OfficeEscalation escalation = architect
-					.addOfficeEscalation(escalationTypeName);
-
-			// Obtain the input
-			OfficeSectionInput sectionInput = null;
-			Map<String, OfficeSectionInput> sectionInputs = inputs
-					.get(sectionName);
-			if (sectionInputs != null) {
-				sectionInput = sectionInputs.get(inputName);
-			}
-			if (sectionInput == null) {
-				architect.addIssue("Unknown section input '" + sectionName
-						+ ":" + inputName + "' for linking escalation '"
-						+ escalationTypeName + "'", null, null);
-				continue; // no input so can not link
-			}
-
-			// Link the escalation to section input
-			architect.link(escalation, sectionInput);
-
-			// Provide property and section input for failed to source
-			failedToSourceProperties
-					.addProperty(
-							AutoWireEscalationCauseRouteWorkSource.PROPERTY_PREFIX_ESCALATION_TYPE
-									+ String.valueOf(i)).setValue(
-							escalationTypeName);
-			escalationSectionInput[i] = sectionInput;
-		}
-
-		// Determine if automatically handle failed to source cause
-		if (!isFailedToSourceManuallyConfigured) {
-
-			// Add automatically handling of failing to source managed object
-			OfficeSection failedToSourceSection = architect
-					.addOfficeSection(
-							FailedToSourceManagedObjectEscalation.class
-									.getSimpleName(), WorkSectionSource.class
-									.getName(),
-							AutoWireEscalationCauseRouteWorkSource.class
-									.getName(), failedToSourceProperties);
-			for (OfficeSectionOutput escalationOutput : failedToSourceSection
-					.getOfficeSectionOutputs()) {
-				String escalationTypeName = escalationOutput
-						.getOfficeSectionOutputName();
-
-				// Find escalation for output
-				for (int i = 0; i < this.escalations.size(); i++) {
-					EscalationLink link = this.escalations.get(i);
-					if (!(escalationTypeName.equals(link.escalationType
-							.getName()))) {
-						continue; // not match
-					}
-
-					// Ensure have the corresponding handling section input
-					OfficeSectionInput sectionInput = escalationSectionInput[i];
-					if (sectionInput == null) {
-						continue; // no section input handling escalation
-					}
-
-					// Link the escalation output to handling section input
-					architect.link(escalationOutput, sectionInput);
+				// Determine if manually handling failed to source escalation
+				if (FailedToSourceManagedObjectEscalation.class.getName()
+						.equals(escalationTypeName)) {
+					isFailedToSourceManuallyConfigured = true;
 				}
+
+				// Add the Escalation
+				OfficeEscalation escalation = architect
+						.addOfficeEscalation(escalationTypeName);
+
+				// Obtain the input
+				OfficeSectionInput sectionInput = null;
+				Map<String, OfficeSectionInput> sectionInputs = inputs
+						.get(sectionName);
+				if (sectionInputs != null) {
+					sectionInput = sectionInputs.get(inputName);
+				}
+				if (sectionInput == null) {
+					architect.addIssue("Unknown section input '" + sectionName
+							+ ":" + inputName + "' for linking escalation '"
+							+ escalationTypeName + "'", null, null);
+					continue; // no input so can not link
+				}
+
+				// Link the escalation to section input
+				architect.link(escalation, sectionInput);
+
+				// Provide property and section input for failed to source
+				failedToSourceProperties
+						.addProperty(
+								AutoWireEscalationCauseRouteWorkSource.PROPERTY_PREFIX_ESCALATION_TYPE
+										+ String.valueOf(i)).setValue(
+								escalationTypeName);
+				escalationSectionInput[i] = sectionInput;
 			}
 
-			// Provide handling of failed to source escalation
-			OfficeEscalation failedToSourceEscalation = architect
-					.addOfficeEscalation(FailedToSourceManagedObjectEscalation.class
-							.getName());
-			OfficeSectionInput failedToSourceHandler = failedToSourceSection
-					.getOfficeSectionInputs()[0];
-			architect.link(failedToSourceEscalation, failedToSourceHandler);
+			// Determine if automatically handle failed to source cause
+			if (!isFailedToSourceManuallyConfigured) {
 
-			// Link teams for failed to source tasks
-			this.linkTasksToTeams(failedToSourceSection, responsibleTeams,
-					defaultTeam, architect);
+				// Add handling of failing to source managed object
+				OfficeSection failedToSourceSection = architect
+						.addOfficeSection(
+								FailedToSourceManagedObjectEscalation.class
+										.getSimpleName(),
+								WorkSectionSource.class.getName(),
+								AutoWireEscalationCauseRouteWorkSource.class
+										.getName(), failedToSourceProperties);
+				for (OfficeSectionOutput escalationOutput : failedToSourceSection
+						.getOfficeSectionOutputs()) {
+					String escalationTypeName = escalationOutput
+							.getOfficeSectionOutputName();
+
+					// Find escalation for output
+					for (int i = 0; i < this.escalations.size(); i++) {
+						EscalationLink link = this.escalations.get(i);
+						if (!(escalationTypeName.equals(link.escalationType
+								.getName()))) {
+							continue; // not match
+						}
+
+						// Ensure have the corresponding handling section input
+						OfficeSectionInput sectionInput = escalationSectionInput[i];
+						if (sectionInput == null) {
+							continue; // no section input handling escalation
+						}
+
+						// Link the escalation output to handling section input
+						architect.link(escalationOutput, sectionInput);
+					}
+				}
+
+				// Provide handling of failed to source escalation
+				OfficeEscalation failedToSourceEscalation = architect
+						.addOfficeEscalation(FailedToSourceManagedObjectEscalation.class
+								.getName());
+				OfficeSectionInput failedToSourceHandler = failedToSourceSection
+						.getOfficeSectionInputs()[0];
+				architect.link(failedToSourceEscalation, failedToSourceHandler);
+
+				// Link teams for failed to source tasks
+				this.linkTasksToTeams(failedToSourceSection, responsibleTeams,
+						defaultTeam, architect);
+			}
 		}
 
 		// Add the governances
