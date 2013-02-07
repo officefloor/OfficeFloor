@@ -4,19 +4,23 @@
 				      Daniel Sagenschneider
 				       ------------------
 
-  The founder of OfficeFloor identified the following formula:
+  The founder of OfficeFloor identified the following:
 
 ---
         Inversion of Control = Dependency Injection + Thread Injection + Continuation Injection
 ---
 
-  This formula has given rise to the software equivalent of an architectural brick (paper pending publication, see {{{http://europlop.anfimus.hostingkunde.de/}EuroPlop}}).  Patenting this design for profit might result in a monopoly over web server design and all constructs built on that - such as the cloud.  This goes against OfficeFloor's mission of being an open integrator of good software.
+  This has given rise to the software equivalent of an architectural brick (paper pending publication, see {{{http://europlop.anfimus.hostingkunde.de/}EuroPlop}}).  Patenting this design for profit will likely result in a monopoly over web server design and all constructs built on that - such as the cloud.  This goes against OfficeFloor's mission of being an open integrator of good software.
 
-  <<OfficeFloor's mission is to provide an open platform that enables software to be plugged together without causing lock-in by any software provider.>>
+  <<OfficeFloor's mission is to provide an open platform that enables software to be plugged together without causing lock-in by any vendor.>>
   
-  To ensure this mission is achieved, OfficeFloor is free to use.  This stops the temptation for us to lock you in.  The OfficeFloor team derive our benefits indirectly from OfficeFloor molding the <software bricks> to enable open integration.
+  A key goal in this mission is to provide a Platform as a Service (PaaS) that is not bounded by any Infrastructure as a Service (IaaS) vendor.  We want to be the Cloud <operating system> that is open and free for the community - never again controlled by a corporate monopoly.
+
+  To ensure this mission is achieved, OfficeFloor is free to use.  This stops the temptation for us to lock you in and keeps us focused on building a better platform.  The OfficeFloor team derive our benefits indirectly from OfficeFloor molding the <software bricks> to enable open integration.
   
-  So far we have identified the following bricks:
+  We welcome all volunteers who want to help and possibly join the team.  Donations are always very much appreciated :)
+
+  So far the following bricks have been identified:
   
    * {{{./apidocs/net/officefloor/compile/spi/work/source/WorkSource.html}WorkSource}}
    
@@ -45,7 +49,7 @@
    * {{{./apidocs/net/officefloor/compile/spi/officefloor/source/OfficeFloorSource.html}OfficeFloorSource}}
   
   Integrating with OfficeFloor requires writing an adapter for the appropriate source(s) above for your software.  We openly welcome you integrating with OfficeFloor and help can be found {{{./getting-help.html}here}}.
-  
+
   The OfficeFloor name is derived from the founder originally setting out to model in software how people coordinate in an office to make decisions to achieve certain goals.  You will notice this in the naming of many classes/interfaces.  From this we look to integrate all good software to help people make good decisions.
 
   Note that the above formula might also be found in its shortened version: <IoC = DI + TI + CI>
