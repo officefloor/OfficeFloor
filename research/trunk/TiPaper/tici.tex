@@ -553,11 +553,26 @@ configuring the responsible thread pool to reside on another server.  On
 invoking the continuation, the continuation arguments are communicated to the
 server\footnote{May be cluster of servers} containing the thread pool to execute
 the Asynchronous Operation.  The dependency injection context state to be
-reinstated on the other server may also not be communicated with the
-continuation arguments depending on thread pool mapping configuration.  Mapping
-the responsible thread pool to another server is useful for example to co-locate
+reinstated on the other server may also be communicated with the continuation
+arguments depending on thread pool mapping configuration.  Mapping the
+responsible thread pool to another server is useful for example to co-locate
 certain Asynchronous Operations geographically or have certain Asynchronous
 Operations run on particular hardware.
+
+The Internet is an example implementation that utilises both Asynchronous
+Operation heterogeneous clustering and continuations to other servers.  The URL
+continuation, for example by a user clicking on a link, is sent to the server
+containing the thread pool (web server application).  The web server continues
+the processing by sending the HTTP response to the client web browser (another
+server\footnote{The user (client) of the web browser (server) can also be
+considered a thread pool for continuing operations with the web browser}).
+
+The evolution to Cloud Computing can also be described as a form of Asynchronous
+Operation heterogeneous clustering.  The number of servers containing a
+particular thread pool are dynamically managed based on the number of
+Asynchronous Operations to execute.  This dynamic management enables better use
+of available servers, as only the necessary number of servers are used for each
+thread pool to execute their respective current load of Asynchronous Operations.
 
 
 \section{Example implementation of an Asynchronous Operation}
@@ -631,7 +646,7 @@ explicitly specified.  Additional marker dependencies may be used to aid in
 tuning the assigning of Asynchronous Operations to particular thread pools.
 
 
-\section{Inversion of Control pattern}
+\section{Inversion of Control}
 
 Using all three injection patterns together (dependency, thread, continuation)
 as implementing patterns to the Proactor pattern potentially forms the Inversion
@@ -686,8 +701,10 @@ OfficeFloor.
 
 
 \section*{Acknowledgment} I thank my wife Melanie for her patience and support
-in me developing OfficeFloor on top of my day job.  I also thank my friend
-Matthew Brown for being a sounding board to many of my ideas.
+in me developing OfficeFloor on top of my day job.  If she was any other person,
+OfficeFloor would not have been built and this work would not have resulted from
+it.  I also thank my friend Matthew Brown for being a sounding board to many of
+my ideas.
 
 
 \bibliographystyle{style/acmlarge}
