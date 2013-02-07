@@ -562,10 +562,11 @@ Operations run on particular hardware.
 The Internet is an example implementation that utilises both Asynchronous
 Operation heterogeneous clustering and continuations to other servers.  The URL
 continuation, for example by a user clicking on a link, is sent to the server
-containing the thread pool (web server application).  The web server continues
-the processing by sending the HTTP response to the client web browser (another
-server\footnote{The user (client) of the web browser (server) can also be
-considered a thread pool for continuing operations with the web browser}).
+containing the thread pool (modern web server following Proactor pattern).  The
+web server continues the processing by sending the HTTP response to the client
+web browser (another server\footnote{The user (client) of the web browser
+(server) can also be considered a thread pool for continuing operations with the
+web browser}).
 
 The evolution to Cloud Computing can also be described as a form of Asynchronous
 Operation heterogeneous clustering.  The number of servers containing a
