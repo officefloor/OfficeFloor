@@ -643,8 +643,10 @@ operation is a single distinct method and may via choice of continuation specify
 the next operation (e.g. skipping the \texttt{Retrieve data from database}
 operation and going straight to the \texttt{Render HTTP response} operation).
 The executing thread may be borrowed (i.e. use the implicit thread) or be
-explicitly specified.  Additional marker dependencies may be used to aid in
-tuning the assigning of Asynchronous Operations to particular thread pools.
+explicitly specified.  Additional marker dependencies\footnote{The Asynchronous
+Operation identifier may also be used for very fine grained configuration} may
+be used to aid in tuning the assigning of Asynchronous Operations to particular
+thread pools.
 
 
 \section{Inversion of Control}
