@@ -21,7 +21,6 @@ import java.io.IOException;
 import java.io.Serializable;
 
 import net.officefloor.autowire.AutoWire;
-import net.officefloor.autowire.AutoWireObject;
 import net.officefloor.autowire.AutoWireSection;
 import net.officefloor.plugin.section.clazz.ClassSectionSource;
 import net.officefloor.plugin.section.clazz.NextTask;
@@ -32,7 +31,7 @@ import net.officefloor.plugin.web.http.security.HttpCredentials;
 import net.officefloor.plugin.web.http.security.scheme.FormHttpSecuritySource;
 import net.officefloor.plugin.web.http.security.scheme.HttpCredentialsImpl;
 import net.officefloor.plugin.web.http.security.store.CredentialStore;
-import net.officefloor.plugin.web.http.security.store.PasswordFileManagedObjectSource;
+import net.officefloor.plugin.web.http.security.store.MockCredentialStoreManagedObjectSource;
 
 /**
  * Integrate the {@link FormHttpSecuritySource}.
@@ -61,15 +60,10 @@ public class FormHttpSecurityIntegrateTest extends
 		// Provide parameters for login form
 		application.addHttpRequestObject(LoginForm.class, true);
 
-		// Password File Credential Store
-		String passwordFilePath = this.findFile(this.getClass(),
-				"basic-password-file.txt").getAbsolutePath();
-		AutoWireObject passwordFile = application.addManagedObject(
-				PasswordFileManagedObjectSource.class.getName(), null,
+		// Mock Credential Store
+		application.addManagedObject(
+				MockCredentialStoreManagedObjectSource.class.getName(), null,
 				new AutoWire(CredentialStore.class));
-		passwordFile.addProperty(
-				PasswordFileManagedObjectSource.PROPERTY_PASSWORD_FILE_PATH,
-				passwordFilePath);
 
 		// Return the HTTP Security
 		return security;
@@ -117,7 +111,7 @@ public class FormHttpSecurityIntegrateTest extends
 		this.doRequest("service", 200, "LOGIN");
 
 		// Send back login credentials and get service page
-		this.doRequest("login?username=daniel&password=password", 200,
+		this.doRequest("login?username=daniel&password=daniel", 200,
 				"Serviced for daniel");
 	}
 
