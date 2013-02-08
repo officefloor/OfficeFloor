@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <model>
+	<field type="WoofAccessModel" name="woof access" />
 	<list type="WoofTemplateModel" name="woof template" />
 	<list type="WoofSectionModel" name="woof section" />
 	<list type="WoofGovernanceModel" name="woof governance" />

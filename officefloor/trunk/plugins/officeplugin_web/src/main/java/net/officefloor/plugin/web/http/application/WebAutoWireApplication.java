@@ -92,6 +92,14 @@ public interface WebAutoWireApplication extends AutoWireApplication {
 			Class<? extends HttpSecuritySource<?, ?, ?, ?>> httpSecuritySourceClass);
 
 	/**
+	 * Obtains the configured {@link HttpSecurityAutoWireSection}.
+	 * 
+	 * @return Configured {@link HttpSecurityAutoWireSection} or
+	 *         <code>null</code> if no {@link HttpSecuritySource} is configured.
+	 */
+	HttpSecurityAutoWireSection getHttpSecurity();
+
+	/**
 	 * Adds an object to be lazily created and stored within the
 	 * {@link HttpApplicationState}.
 	 * 

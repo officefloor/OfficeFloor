@@ -315,6 +315,11 @@ public class WebApplicationAutoWireOfficeFloorSource extends
 	}
 
 	@Override
+	public HttpSecurityAutoWireSection getHttpSecurity() {
+		return this.security;
+	}
+
+	@Override
 	public AutoWireObject addHttpApplicationObject(Class<?> objectClass,
 			String bindName) {
 
