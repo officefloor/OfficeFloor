@@ -733,13 +733,17 @@ public class WoofChangesImpl implements WoofChanges {
 			String[] gwtServiceAsyncInterfaceNames, boolean isEnableComet,
 			String cometManualPublishMethodName) {
 
+		// TODO input whether may continue rendering
+		boolean isContinueRendering = false;
+
 		// Obtain the template name
 		String templateName = getTemplateName(templatePath, uri, null,
 				this.model.getWoofTemplates());
 
 		// Create the template
 		final WoofTemplateModel template = new WoofTemplateModel(templateName,
-				uri, templatePath, templateLogicClass, isTemplateSecure);
+				uri, templatePath, templateLogicClass, isTemplateSecure,
+				isContinueRendering);
 
 		// Determine if have links
 		if (linksSecure != null) {

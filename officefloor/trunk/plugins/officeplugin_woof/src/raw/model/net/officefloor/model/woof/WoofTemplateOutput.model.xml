@@ -4,5 +4,6 @@
 	<field type="String" name="argument type" />
 	<field type="WoofTemplateOutputToWoofSectionInputModel" name="woof section input" />
 	<field type="WoofTemplateOutputToWoofTemplateModel" name="woof template" />
+	<field type="WoofTemplateOutputToWoofAccessInputModel" name="woof access input" />
 	<field type="WoofTemplateOutputToWoofResourceModel" name="woof resource" />
 </model>

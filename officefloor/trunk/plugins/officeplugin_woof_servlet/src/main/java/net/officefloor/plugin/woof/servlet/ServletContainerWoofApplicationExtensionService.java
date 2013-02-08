@@ -33,8 +33,9 @@ import net.officefloor.plugin.servlet.host.ServletServer;
 import net.officefloor.plugin.servlet.host.ServletServerManagedObjectSource;
 import net.officefloor.plugin.servlet.webxml.InvalidServletConfigurationException;
 import net.officefloor.plugin.servlet.webxml.WebXmlSectionSource;
+import net.officefloor.plugin.web.http.application.HttpSecurityAutoWireSection;
 import net.officefloor.plugin.web.http.application.WebAutoWireApplication;
-import net.officefloor.plugin.web.http.security.HttpSecurity;
+import net.officefloor.plugin.web.http.security.scheme.MockHttpSecuritySource;
 import net.officefloor.plugin.woof.WoofApplicationExtensionService;
 import net.officefloor.plugin.woof.WoofApplicationExtensionServiceContext;
 import net.officefloor.plugin.woof.WoofOfficeFloorSource;
@@ -116,35 +117,12 @@ public class ServletContainerWoofApplicationExtensionService implements
 		}
 
 		// Ensure Security is available
-		final AutoWire httpSecurity = new AutoWire(HttpSecurity.class);
-		if (!(application.isObjectAvailable(httpSecurity))) {
+		if (application.getHttpSecurity() == null) {
 			// Configure the HTTP Security
-			/*
-			 * AutoWireObject httpSecurityObject = application.addManagedObject(
-			 * HttpSecurityManagedObjectSource.class.getName(), new
-			 * ManagedObjectSourceWirer() {
-			 * 
-			 * @Override public void wire(ManagedObjectSourceWirerContext
-			 * context) { context.mapTeam(
-			 * HttpSecurityManagedObjectSource.TEAM_AUTHENTICATOR,
-			 * PassiveTeamSource.class.getName()); } }, httpSecurity);
-			 * httpSecurityObject.setTimeout(1000); // should not time out as
-			 * none
-			 * 
-			 * // Ensure Security Service is available final AutoWire
-			 * httpSecurityService = new AutoWire( HttpSecurityService.class);
-			 * if (!(application.isObjectAvailable(httpSecurityService))) { //
-			 * Configure the HTTP Security Service AutoWireObject
-			 * httpSecurityServiceObject = application .addManagedObject(
-			 * HttpSecurityServiceManagedObjectSource.class .getName(), null,
-			 * httpSecurityService); httpSecurityServiceObject .addProperty(
-			 * HttpSecurityServiceManagedObjectSource
-			 * .PROPERTY_AUTHENTICATION_SCHEME,
-			 * HttpSecurityServiceManagedObjectSource
-			 * .NONE_AUTHENTICATION_SCHEME); }
-			 */
-			// TODO provide HttpSecurity
-			throw new UnsupportedOperationException("TODO provide HttpSecurity");
+			HttpSecurityAutoWireSection security = application
+					.setHttpSecurity(MockHttpSecuritySource.class);
+			application.link(security, "Failure", section,
+					WebXmlSectionSource.SERVICE_INPUT);
 		}
 
 		// Chain in the Servlet Container as a servicer

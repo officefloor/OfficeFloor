@@ -71,8 +71,12 @@ public abstract class AbstractHttpSecurityIntegrateTestCase extends
 				PORT);
 
 		// Configure the HTTP Security
+		assertNull("Should not have HTTP Security configured",
+				source.getHttpSecurity());
 		HttpSecurityAutoWireSection security = this
 				.configureHttpSecurity(source);
+		assertNotNull("HTTP Security should be configured",
+				source.getHttpSecurity());
 
 		// Add servicing methods
 		AutoWireSection section = source.addSection("SERVICE",

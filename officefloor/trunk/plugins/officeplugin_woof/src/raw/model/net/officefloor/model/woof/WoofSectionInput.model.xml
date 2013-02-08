@@ -5,6 +5,7 @@
 	<field type="String" name="uri" />
 	<list type="WoofTemplateOutputToWoofSectionInputModel" name="woof template output" />
 	<list type="WoofSectionOutputToWoofSectionInputModel" name="woof section output" />
+	<list type="WoofAccessOutputToWoofSectionInputModel" name="woof access output" />
 	<list type="WoofExceptionToWoofSectionInputModel" name="woof exception" />
 	<list type="WoofStartToWoofSectionInputModel" name="woof start" />
 </model>

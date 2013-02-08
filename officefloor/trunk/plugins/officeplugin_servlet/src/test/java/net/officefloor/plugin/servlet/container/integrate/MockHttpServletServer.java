@@ -18,6 +18,8 @@
 package net.officefloor.plugin.servlet.container.integrate;
 
 import java.io.File;
+import java.util.Arrays;
+import java.util.HashSet;
 
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServlet;
@@ -53,7 +55,7 @@ import net.officefloor.plugin.web.http.application.HttpRequestState;
 import net.officefloor.plugin.web.http.application.HttpRequestStateManagedObjectSource;
 import net.officefloor.plugin.web.http.location.HttpApplicationLocationManagedObjectSource;
 import net.officefloor.plugin.web.http.security.HttpSecurity;
-import net.officefloor.plugin.web.http.security.store.PasswordFileManagedObjectSource;
+import net.officefloor.plugin.web.http.security.scheme.HttpSecurityImpl;
 import net.officefloor.plugin.web.http.session.HttpSession;
 import net.officefloor.plugin.web.http.session.HttpSessionManagedObjectSource;
 
@@ -226,8 +228,7 @@ public abstract class MockHttpServletServer extends MockHttpServer {
 		final long TIMEOUT = 100000; // 100 seconds (for debugging)
 
 		// Obtain locations for testing
-		final File passwordFile = this.findFile(this.getClass(),
-				"password-file.txt");
+		final File passwordFile = this.findFile(this.getClass(), "Simple.jsp");
 		this.resourcePathRoot = passwordFile.getParentFile();
 
 		// Obtain Office Name
@@ -299,56 +300,13 @@ public abstract class MockHttpServletServer extends MockHttpServer {
 						HTTP_SESSION_NAME);
 		httpSessionDependencies.mapDependency(0, managedObjectName);
 
-		// Credential Store
-		final String CREDENTIAL_STORE_NAME = "CredentialStore";
-		ManagedObjectBuilder<?> credentialStore = this.constructManagedObject(
-				CREDENTIAL_STORE_NAME, PasswordFileManagedObjectSource.class);
-		credentialStore.addProperty(
-				PasswordFileManagedObjectSource.PROPERTY_PASSWORD_FILE_PATH,
-				passwordFile.getAbsolutePath());
-		credentialStore.setManagingOffice(officeName);
-		this.getOfficeBuilder().addProcessManagedObject(CREDENTIAL_STORE_NAME,
-				CREDENTIAL_STORE_NAME);
-
-		/*
-		 * // HTTP Security Service final String HTTP_SECURITY_SERVICE_NAME =
-		 * "HttpSecurityService"; ManagedObjectBuilder<?> httpSecurityService =
-		 * this .constructManagedObject(HTTP_SECURITY_SERVICE_NAME,
-		 * HttpSecurityServiceManagedObjectSource.class); httpSecurityService
-		 * .addProperty(
-		 * HttpSecurityServiceManagedObjectSource.PROPERTY_AUTHENTICATION_SCHEME
-		 * ,
-		 * HttpSecurityServiceManagedObjectSource.BASIC_AUTHENTICATION_SCHEME);
-		 * httpSecurityService
-		 * .addProperty(BasicHttpSecuritySource.PROPERTY_REALM, REALM);
-		 * httpSecurityService.setManagingOffice(officeName);
-		 * DependencyMappingBuilder httpSecurityServiceDependencies = this
-		 * .getOfficeBuilder().addProcessManagedObject(
-		 * HTTP_SECURITY_SERVICE_NAME, HTTP_SECURITY_SERVICE_NAME);
-		 * httpSecurityServiceDependencies.mapDependency(0, managedObjectName);
-		 * httpSecurityServiceDependencies.mapDependency(1, HTTP_SESSION_NAME);
-		 * httpSecurityServiceDependencies.mapDependency(2,
-		 * CREDENTIAL_STORE_NAME);
-		 * 
-		 * // HTTP Security final String HTTP_SECURITY_NAME = "HttpSecurity";
-		 * ManagedObjectBuilder<FlowKeys> httpSecurity = this
-		 * .constructManagedObject(HTTP_SECURITY_NAME,
-		 * HttpSecurityManagedObjectSource.class);
-		 * ManagingOfficeBuilder<FlowKeys> httpSecurityOffice = httpSecurity
-		 * .setManagingOffice(officeName); httpSecurity.setTimeout(TIMEOUT);
-		 * httpSecurityOffice .setInputManagedObjectName("InputHttpSecurity")
-		 * .mapDependency(
-		 * net.officefloor.plugin.web.http.security.HttpSecurityManagedObjectSource
-		 * .DependencyKeys.HTTP_SECURITY_SERVICE, HTTP_SECURITY_SERVICE_NAME);
-		 * DependencyMappingBuilder httpSecurityDependencies = this
-		 * .getOfficeBuilder().addProcessManagedObject(HTTP_SECURITY_NAME,
-		 * HTTP_SECURITY_NAME); httpSecurityDependencies .mapDependency(
-		 * net.officefloor
-		 * .plugin.web.http.security.HttpSecurityManagedObjectSource
-		 * .DependencyKeys.HTTP_SECURITY_SERVICE, HTTP_SECURITY_SERVICE_NAME);
-		 */
+		// Provide mock HTTP Security
 		final String HTTP_SECURITY_NAME = "HttpSecurity";
-		fail("TODO provide HttpSecurity");
+		this.constructManagedObject(new HttpSecurityImpl("Mock", "Daniel",
+				new HashSet<String>(Arrays.asList("test"))),
+				HTTP_SECURITY_NAME, officeName);
+		this.getOfficeBuilder().addProcessManagedObject(HTTP_SECURITY_NAME,
+				HTTP_SECURITY_NAME);
 
 		// Service authentication
 		final String TEAM_NAME = "of-HttpSecurity.AUTHENTICATOR";
