@@ -15,7 +15,7 @@
 		<external-managed-object name="HTTP_SESSION"
 			object-type="net.officefloor.plugin.web.http.session.HttpSession"
 			object-scope="PROCESS" />
-		<external-managed-object name="HTTP_SECURITY"
+		<external-managed-object name="HTTP_SERVLET_SECURITY"
 			object-type="net.officefloor.plugin.web.http.security.HttpSecurity"
 			object-scope="PROCESS" />
 	</external-managed-objects>
@@ -51,7 +51,7 @@
 			</object>
 			<object name="HTTP_SECURITY"
 				object-type="net.officefloor.plugin.web.http.security.HttpSecurity">
-				<external-managed-object name="HTTP_SECURITY" />
+				<external-managed-object name="HTTP_SERVLET_SECURITY" />
 			</object>
 			<object name="REQUEST_ATTRIBUTES" object-type="net.officefloor.plugin.web.http.application.HttpRequestState">
 				<managed-object name="REQUEST_ATTRIBUTES" />
