@@ -73,6 +73,15 @@ public class WoofRepositoryImpl implements WoofRepository {
 			templates.put(template.getWoofTemplateName(), template);
 		}
 
+		// Create the set of Access Inputs
+		Map<String, WoofAccessInputModel> accessInputs = new HashMap<String, WoofAccessInputModel>();
+		WoofAccessModel access = woof.getWoofAccess();
+		if (access != null) {
+			for (WoofAccessInputModel input : access.getInputs()) {
+				accessInputs.put(input.getWoofAccessInputName(), input);
+			}
+		}
+
 		// Create the set of Resources
 		Map<String, WoofResourceModel> resources = new HashMap<String, WoofResourceModel>();
 		for (WoofResourceModel resource : woof.getWoofResources()) {
@@ -107,6 +116,19 @@ public class WoofRepositoryImpl implements WoofRepository {
 						connTemplate.setWoofTemplateOutput(templateOutput);
 						connTemplate.setWoofTemplate(target);
 						connTemplate.connect();
+					}
+				}
+
+				// Connect Template Output to Access Input
+				WoofTemplateOutputToWoofAccessInputModel connAccess = templateOutput
+						.getWoofAccessInput();
+				if (connAccess != null) {
+					WoofAccessInputModel accessInput = accessInputs
+							.get(connAccess.getInputName());
+					if (accessInput != null) {
+						connAccess.setWoofTemplateOutput(templateOutput);
+						connAccess.setWoofAccessInput(accessInput);
+						connAccess.connect();
 					}
 				}
 
@@ -156,6 +178,19 @@ public class WoofRepositoryImpl implements WoofRepository {
 					}
 				}
 
+				// Connection Section Output to Access Input
+				WoofSectionOutputToWoofAccessInputModel connAccess = sectionOutput
+						.getWoofAccessInput();
+				if (connAccess != null) {
+					WoofAccessInputModel accessInput = accessInputs
+							.get(connAccess.getInputName());
+					if (accessInput != null) {
+						connAccess.setWoofSectionOutput(sectionOutput);
+						connAccess.setWoofAccessInput(accessInput);
+						connAccess.connect();
+					}
+				}
+
 				// Connect Section Output to Resource
 				WoofSectionOutputToWoofResourceModel connResource = sectionOutput
 						.getWoofResource();
@@ -164,6 +199,54 @@ public class WoofRepositoryImpl implements WoofRepository {
 							.getResourceName());
 					if (resource != null) {
 						connResource.setWoofSectionOutput(sectionOutput);
+						connResource.setWoofResource(resource);
+						connResource.connect();
+					}
+				}
+			}
+		}
+
+		// Connect access (if available)
+		if (access != null) {
+
+			// Connect the Access Outputs
+			for (WoofAccessOutputModel accessOutput : access.getOutputs()) {
+
+				// Connect Access Output to Section Input
+				WoofAccessOutputToWoofSectionInputModel connSection = accessOutput
+						.getWoofSectionInput();
+				if (connSection != null) {
+					WoofSectionInputModel sectionInput = sectionInputs.get(
+							connSection.getSectionName(),
+							connSection.getInputName());
+					if (sectionInput != null) {
+						connSection.setWoofAccessOutput(accessOutput);
+						connSection.setWoofSectionInput(sectionInput);
+						connSection.connect();
+					}
+				}
+
+				// Connect Access Output to Template
+				WoofAccessOutputToWoofTemplateModel connTemplate = accessOutput
+						.getWoofTemplate();
+				if (connTemplate != null) {
+					WoofTemplateModel template = templates.get(connTemplate
+							.getTemplateName());
+					if (template != null) {
+						connTemplate.setWoofAccessOutput(accessOutput);
+						connTemplate.setWoofTemplate(template);
+						connTemplate.connect();
+					}
+				}
+
+				// Connect Access Output to Resource
+				WoofAccessOutputToWoofResourceModel connResource = accessOutput
+						.getWoofResource();
+				if (connResource != null) {
+					WoofResourceModel resource = resources.get(connResource
+							.getResourceName());
+					if (resource != null) {
+						connResource.setWoofAccessOutput(accessOutput);
 						connResource.setWoofResource(resource);
 						connResource.connect();
 					}
@@ -259,6 +342,13 @@ public class WoofRepositoryImpl implements WoofRepository {
 					conn.setInputName(input.getWoofSectionInputName());
 				}
 
+				// Specify section inputs for access output
+				for (WoofAccessOutputToWoofSectionInputModel conn : input
+						.getWoofAccessOutputs()) {
+					conn.setSectionName(section.getWoofSectionName());
+					conn.setInputName(input.getWoofSectionInputName());
+				}
+
 				// Specify section inputs for exception
 				for (WoofExceptionToWoofSectionInputModel conn : input
 						.getWoofExceptions()) {
@@ -290,10 +380,35 @@ public class WoofRepositoryImpl implements WoofRepository {
 				conn.setTemplateName(template.getWoofTemplateName());
 			}
 
+			// Specify templates for access output
+			for (WoofAccessOutputToWoofTemplateModel conn : template
+					.getWoofAccessOutputs()) {
+				conn.setTemplateName(template.getWoofTemplateName());
+			}
+
 			// Specify templates for exception
 			for (WoofExceptionToWoofTemplateModel conn : template
 					.getWoofExceptions()) {
 				conn.setTemplateName(template.getWoofTemplateName());
+			}
+		}
+
+		// Specify access inputs (if access available)
+		WoofAccessModel access = woof.getWoofAccess();
+		if (access != null) {
+			for (WoofAccessInputModel input : access.getInputs()) {
+
+				// Specify access input for section output
+				for (WoofSectionOutputToWoofAccessInputModel conn : input
+						.getWoofSectionOutputs()) {
+					conn.setInputName(input.getWoofAccessInputName());
+				}
+
+				// Specify access input for template output
+				for (WoofTemplateOutputToWoofAccessInputModel conn : input
+						.getWoofTemplateOutputs()) {
+					conn.setInputName(input.getWoofAccessInputName());
+				}
 			}
 		}
 
@@ -309,6 +424,12 @@ public class WoofRepositoryImpl implements WoofRepository {
 			// Specify resources for template output
 			for (WoofTemplateOutputToWoofResourceModel conn : resource
 					.getWoofTemplateOutputs()) {
+				conn.setResourceName(resource.getWoofResourceName());
+			}
+
+			// Specify resources for access output
+			for (WoofAccessOutputToWoofResourceModel conn : resource
+					.getWoofAccessOutputs()) {
 				conn.setResourceName(resource.getWoofResourceName());
 			}
 

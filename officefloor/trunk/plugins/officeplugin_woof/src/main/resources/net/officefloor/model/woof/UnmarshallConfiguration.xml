@@ -9,6 +9,7 @@
 		<value method="setTemplatePath" node="template@path" />
 		<value method="setTemplateClassName" node="template@class" />
 		<value method="setIsTemplateSecure" node="template@secure" />
+		<value method="setIsContinueRendering" node="template@continue-rendering" />
 		<value method="setX" node="template@x" />
 		<value method="setY" node="template@y" />
 		<object method="addOutput" node="output"
@@ -23,6 +24,10 @@
 			<object method="setWoofTemplate" node="template"
 				class="net.officefloor.model.woof.WoofTemplateOutputToWoofTemplateModel">
 				<value method="setTemplateName" node="template@name" />
+			</object>
+			<object method="setWoofAccessInput" node="access"
+				class="net.officefloor.model.woof.WoofTemplateOutputToWoofAccessInputModel">
+				<value method="setInputName" node="access@input" />
 			</object>
 			<object method="setWoofResource" node="resource"
 				class="net.officefloor.model.woof.WoofTemplateOutputToWoofResourceModel">
@@ -81,8 +86,48 @@
 				class="net.officefloor.model.woof.WoofSectionOutputToWoofTemplateModel">
 				<value method="setTemplateName" node="template@name" />
 			</object>
+			<object method="setWoofAccessInput" node="access"
+				class="net.officefloor.model.woof.WoofSectionOutputToWoofAccessInputModel">
+				<value method="setInputName" node="access@input" />
+			</object>
 			<object method="setWoofResource" node="resource"
 				class="net.officefloor.model.woof.WoofSectionOutputToWoofResourceModel">
+				<value method="setResourceName" node="resource@name" />
+			</object>
+		</object>
+	</object>
+
+	<!-- ACCESS -->
+	<object method="setWoofAccess" node="access"
+		class="net.officefloor.model.woof.WoofAccessModel">
+		<value method="setHttpSecuritySourceClassName" node="access@source" />
+		<value method="setX" node="access@x" />
+		<value method="setY" node="access@y" />
+		<object method="addProperty" node="property"
+			class="net.officefloor.model.woof.PropertyModel">
+			<value method="setName" node="property@name" />
+			<value method="setValue" node="property@value" />
+		</object>
+		<object method="addInput" node="input"
+			class="net.officefloor.model.woof.WoofAccessInputModel">
+			<value method="setWoofAccessInputName" node="input@name" />
+			<value method="setParameterType" node="input@parameter-type" />
+		</object>
+		<object method="addOutput" node="output"
+			class="net.officefloor.model.woof.WoofAccessOutputModel">
+			<value method="setWoofAccessOutputName" node="output@name" />
+			<value method="setArgumentType" node="output@argument-type" />
+			<object method="setWoofSectionInput" node="input"
+				class="net.officefloor.model.woof.WoofAccessOutputToWoofSectionInputModel">
+				<value method="setSectionName" node="input@section" />
+				<value method="setInputName" node="input@input" />
+			</object>
+			<object method="setWoofTemplate" node="template"
+				class="net.officefloor.model.woof.WoofAccessOutputToWoofTemplateModel">
+				<value method="setTemplateName" node="template@name" />
+			</object>
+			<object method="setWoofResource" node="resource"
+				class="net.officefloor.model.woof.WoofAccessOutputToWoofResourceModel">
 				<value method="setResourceName" node="resource@name" />
 			</object>
 		</object>
