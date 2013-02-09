@@ -39,12 +39,12 @@ import net.officefloor.plugin.servlet.context.OfficeServletContext;
 import net.officefloor.plugin.servlet.filter.FilterChainFactory;
 import net.officefloor.plugin.servlet.mapping.MappingType;
 import net.officefloor.plugin.servlet.mapping.ServicerMapping;
+import net.officefloor.plugin.servlet.security.HttpServletSecurity;
 import net.officefloor.plugin.socket.server.http.HttpRequest;
 import net.officefloor.plugin.socket.server.http.HttpResponse;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
 import net.officefloor.plugin.stream.impl.MockServerOutputStream;
 import net.officefloor.plugin.web.http.application.HttpRequestState;
-import net.officefloor.plugin.web.http.security.HttpSecurity;
 import net.officefloor.plugin.web.http.session.HttpSession;
 
 /**
@@ -90,7 +90,8 @@ public class HttpServletWorkSourceTest extends OfficeFrameTestCase {
 		task.addObject(HttpRequestState.class).setKey(
 				DependencyKeys.REQUEST_ATTRIBUTES);
 		task.addObject(HttpSession.class).setKey(DependencyKeys.HTTP_SESSION);
-		task.addObject(HttpSecurity.class).setKey(DependencyKeys.HTTP_SECURITY);
+		task.addObject(HttpServletSecurity.class).setKey(
+				DependencyKeys.HTTP_SECURITY);
 		task.addEscalation(ServletException.class);
 		task.addEscalation(IOException.class);
 
@@ -119,7 +120,8 @@ public class HttpServletWorkSourceTest extends OfficeFrameTestCase {
 		final HttpRequestState attributes = this
 				.createMock(HttpRequestState.class);
 		final HttpSession session = this.createMock(HttpSession.class);
-		final HttpSecurity security = this.createMock(HttpSecurity.class);
+		final HttpServletSecurity security = this
+				.createMock(HttpServletSecurity.class);
 		final HttpRequest request = this.createMock(HttpRequest.class);
 		final Office office = this.createMock(Office.class);
 		final HttpResponse response = this.createMock(HttpResponse.class);

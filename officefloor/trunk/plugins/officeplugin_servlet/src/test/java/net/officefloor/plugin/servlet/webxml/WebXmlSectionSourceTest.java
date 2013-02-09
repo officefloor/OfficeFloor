@@ -35,9 +35,9 @@ import net.officefloor.plugin.servlet.filter.configuration.FilterInstance;
 import net.officefloor.plugin.servlet.filter.configuration.FilterMappings;
 import net.officefloor.plugin.servlet.host.ServletServer;
 import net.officefloor.plugin.servlet.mapping.MappingType;
+import net.officefloor.plugin.servlet.security.HttpServletSecurity;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
 import net.officefloor.plugin.web.http.application.HttpRequestState;
-import net.officefloor.plugin.web.http.security.HttpSecurity;
 import net.officefloor.plugin.web.http.session.HttpSession;
 import net.officefloor.plugin.xml.XmlMarshallException;
 
@@ -112,7 +112,8 @@ public class WebXmlSectionSourceTest extends AbstractWebXmlTestCase {
 		type.addSectionObject("REQUEST_ATTRIBUTES",
 				HttpRequestState.class.getName());
 		type.addSectionObject("HTTP_SESSION", HttpSession.class.getName());
-		type.addSectionObject("HTTP_SECURITY", HttpSecurity.class.getName());
+		type.addSectionObject("HTTP_SECURITY",
+				HttpServletSecurity.class.getName());
 
 		// Return the expected type
 		return type;

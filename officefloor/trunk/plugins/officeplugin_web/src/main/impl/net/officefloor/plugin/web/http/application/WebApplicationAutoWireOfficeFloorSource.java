@@ -44,6 +44,7 @@ import net.officefloor.plugin.web.http.location.HttpApplicationLocation;
 import net.officefloor.plugin.web.http.location.HttpApplicationLocationManagedObjectSource;
 import net.officefloor.plugin.web.http.location.InvalidHttpRequestUriException;
 import net.officefloor.plugin.web.http.resource.source.SourceHttpResourceFactory;
+import net.officefloor.plugin.web.http.security.AnonymousHttpAuthenticationManagedObjectSource;
 import net.officefloor.plugin.web.http.security.HttpAuthentication;
 import net.officefloor.plugin.web.http.security.HttpAuthenticationManagedObjectSource;
 import net.officefloor.plugin.web.http.security.HttpAuthenticationRequiredException;
@@ -552,8 +553,16 @@ public class WebApplicationAutoWireOfficeFloorSource extends
 		}
 
 		// Load the HTTP security
-		if (this.security != null) {
+		if (this.security == null) {
+			// Provide anonymous authentication (if not already configured)
+			AutoWire httpAuthentication = new AutoWire(HttpAuthentication.class);
+			if (!(this.isObjectAvailable(httpAuthentication))) {
+				this.addManagedObject(
+						AnonymousHttpAuthenticationManagedObjectSource.class
+								.getName(), null, httpAuthentication);
+			}
 
+		} else {
 			// Configure the security
 			Class<? extends HttpSecuritySource<?, ?, ?, ?>> httpSecuritySourceClass = this.security
 					.getHttpSecuritySourceClass();
@@ -606,15 +615,19 @@ public class WebApplicationAutoWireOfficeFloorSource extends
 							HttpAuthenticationManagedObjectSource.PROPERTY_HTTP_SECURITY_SOURCE_KEY,
 							key);
 
-			// Add the HTTP Security Managed Object
-			AutoWireObject httpSecurity = this.addManagedObject(
-					HttpSecurityManagedObjectSource.class.getName(), null,
-					new AutoWire(securityClass));
-			httpSecurity.setTimeout(securityTimeout);
-			httpSecurity
-					.addProperty(
-							HttpSecurityManagedObjectSource.PROPERTY_HTTP_SECURITY_TYPE,
-							securityClass.getName());
+			// Determine if HTTP Security already configured
+			AutoWire httpSecurityAutoWire = new AutoWire(securityClass);
+			if (!(this.isObjectAvailable(httpSecurityAutoWire))) {
+				// Add the HTTP Security Managed Object
+				AutoWireObject httpSecurity = this.addManagedObject(
+						HttpSecurityManagedObjectSource.class.getName(), null,
+						httpSecurityAutoWire);
+				httpSecurity.setTimeout(securityTimeout);
+				httpSecurity
+						.addProperty(
+								HttpSecurityManagedObjectSource.PROPERTY_HTTP_SECURITY_TYPE,
+								securityClass.getName());
+			}
 		}
 
 		// Chain the servicers

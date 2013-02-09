@@ -60,6 +60,7 @@ import net.officefloor.plugin.servlet.filter.configuration.FilterInstance;
 import net.officefloor.plugin.servlet.filter.configuration.FilterMappings;
 import net.officefloor.plugin.servlet.host.ServletServer;
 import net.officefloor.plugin.servlet.route.source.ServletRouteWorkSource;
+import net.officefloor.plugin.servlet.security.HttpServletSecurity;
 import net.officefloor.plugin.servlet.webxml.model.WebAppModel;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
 import net.officefloor.plugin.socket.server.http.server.MockHttpServer;
@@ -119,16 +120,11 @@ public abstract class AbstractWebXmlTestCase extends OfficeFrameTestCase {
 			// Obtain the port for the application
 			this.port = MockHttpServer.getAvailablePort();
 
-			// Obtain the location of password file and resource root
-			File passwordFile = this.findFile(this.getClass(), "password.txt");
-
 			// Create the configuration context
 			XmlConfigurationContext xmlContext = new XmlConfigurationContext(
 					this, "OfficeFloor.xml");
 			xmlContext.addTag("port", String.valueOf(this.port));
 			xmlContext.addTag("web.xml.file.name", webXmlFileName);
-			xmlContext.addTag("password.file.location",
-					passwordFile.getAbsolutePath());
 			ResourceSource resourceSource = new MockResourceSource(xmlContext,
 					new ClassLoaderConfigurationContext(this.getClass()
 							.getClassLoader()));
@@ -345,7 +341,7 @@ public abstract class AbstractWebXmlTestCase extends OfficeFrameTestCase {
 					"HTTP_SESSION", HttpSession.class.getName()),
 					HTTP_SESSION_OBJECT);
 			recordReturn(this.designer, this.designer.addSectionObject(
-					"HTTP_SECURITY", HttpSecurity.class.getName()),
+					"HTTP_SECURITY", HttpServletSecurity.class.getName()),
 					HTTP_SECURITY_OBJECT);
 		}
 

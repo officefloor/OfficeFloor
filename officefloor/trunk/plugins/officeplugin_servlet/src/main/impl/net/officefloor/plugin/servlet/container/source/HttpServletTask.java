@@ -43,11 +43,11 @@ import net.officefloor.plugin.servlet.container.HttpServletContainerImpl;
 import net.officefloor.plugin.servlet.container.HttpServletServicer;
 import net.officefloor.plugin.servlet.context.OfficeServletContext;
 import net.officefloor.plugin.servlet.mapping.ServicerMapping;
+import net.officefloor.plugin.servlet.security.HttpServletSecurity;
 import net.officefloor.plugin.servlet.time.Clock;
 import net.officefloor.plugin.socket.server.http.HttpRequest;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
 import net.officefloor.plugin.web.http.application.HttpRequestState;
-import net.officefloor.plugin.web.http.security.HttpSecurity;
 import net.officefloor.plugin.web.http.session.HttpSession;
 
 /**
@@ -145,7 +145,8 @@ public class HttpServletTask
 		task.addObject(HttpRequestState.class).setKey(
 				DependencyKeys.REQUEST_ATTRIBUTES);
 		task.addObject(HttpSession.class).setKey(DependencyKeys.HTTP_SESSION);
-		task.addObject(HttpSecurity.class).setKey(DependencyKeys.HTTP_SECURITY);
+		task.addObject(HttpServletSecurity.class).setKey(
+				DependencyKeys.HTTP_SECURITY);
 		task.addEscalation(ServletException.class);
 		task.addEscalation(IOException.class);
 	}
@@ -271,7 +272,7 @@ public class HttpServletTask
 				.getObject(DependencyKeys.REQUEST_ATTRIBUTES);
 		HttpSession session = (HttpSession) context
 				.getObject(DependencyKeys.HTTP_SESSION);
-		HttpSecurity security = (HttpSecurity) context
+		HttpServletSecurity security = (HttpServletSecurity) context
 				.getObject(DependencyKeys.HTTP_SECURITY);
 		ServicerMapping mapping = (ServicerMapping) context
 				.getObject(DependencyKeys.SERVICER_MAPPING);

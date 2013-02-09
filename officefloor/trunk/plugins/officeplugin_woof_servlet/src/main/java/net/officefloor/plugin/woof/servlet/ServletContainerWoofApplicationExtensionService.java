@@ -28,14 +28,17 @@ import java.util.logging.Logger;
 import javax.servlet.Servlet;
 
 import net.officefloor.autowire.AutoWire;
+import net.officefloor.autowire.AutoWireObject;
 import net.officefloor.autowire.AutoWireSection;
 import net.officefloor.plugin.servlet.host.ServletServer;
 import net.officefloor.plugin.servlet.host.ServletServerManagedObjectSource;
+import net.officefloor.plugin.servlet.security.HttpServletSecurity;
+import net.officefloor.plugin.servlet.security.HttpServletSecurityManagedObjectSource;
 import net.officefloor.plugin.servlet.webxml.InvalidServletConfigurationException;
 import net.officefloor.plugin.servlet.webxml.WebXmlSectionSource;
 import net.officefloor.plugin.web.http.application.HttpSecurityAutoWireSection;
+import net.officefloor.plugin.web.http.application.HttpSecurityAutoWireSectionImpl;
 import net.officefloor.plugin.web.http.application.WebAutoWireApplication;
-import net.officefloor.plugin.web.http.security.scheme.MockHttpSecuritySource;
 import net.officefloor.plugin.woof.WoofApplicationExtensionService;
 import net.officefloor.plugin.woof.WoofApplicationExtensionServiceContext;
 import net.officefloor.plugin.woof.WoofOfficeFloorSource;
@@ -116,13 +119,21 @@ public class ServletContainerWoofApplicationExtensionService implements
 					servletServer);
 		}
 
-		// Ensure Security is available
-		if (application.getHttpSecurity() == null) {
-			// Configure the HTTP Security
+		// Ensure HTTP Servlet Security is available
+		AutoWire httpServletSecurity = new AutoWire(HttpServletSecurity.class);
+		if (!(application.isObjectAvailable(httpServletSecurity))) {
+			// Configure the HTTP Servlet Security
+			AutoWireObject httpServletSecurityObject = application
+					.addManagedObject(
+							HttpServletSecurityManagedObjectSource.class
+									.getName(), null, httpServletSecurity);
+
+			// Provide time out
 			HttpSecurityAutoWireSection security = application
-					.setHttpSecurity(MockHttpSecuritySource.class);
-			application.link(security, "Failure", section,
-					WebXmlSectionSource.SERVICE_INPUT);
+					.getHttpSecurity();
+			long timeout = (security != null ? security.getSecurityTimeout()
+					: HttpSecurityAutoWireSectionImpl.DEFAULT_HTTP_SECURITY_TIMEOUT);
+			httpServletSecurityObject.setTimeout(timeout);
 		}
 
 		// Chain in the Servlet Container as a servicer
