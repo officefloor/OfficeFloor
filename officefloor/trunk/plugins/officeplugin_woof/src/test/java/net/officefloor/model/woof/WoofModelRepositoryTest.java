@@ -61,8 +61,8 @@ public class WoofModelRepositoryTest extends OfficeFrameTestCase {
 		assertList(
 				new String[] { "getWoofTemplateName", "getUri",
 						"getTemplatePath", "getTemplateClassName",
-						"getIsTemplateSecure", "getIsContinueRending", "getX",
-						"getY" }, woof.getWoofTemplates(),
+						"getIsTemplateSecure", "getIsContinueRendering",
+						"getX", "getY" }, woof.getWoofTemplates(),
 				new WoofTemplateModel("TEMPLATE_A", "example",
 						"example/TemplateA.ofp", "net.example.ExampleClassA",
 						true, true, null, null, null, null, null, null, null,
@@ -76,7 +76,8 @@ public class WoofModelRepositoryTest extends OfficeFrameTestCase {
 				new WoofTemplateOutputModel("OUTPUT_1", "java.lang.Integer"),
 				new WoofTemplateOutputModel("OUTPUT_2", null),
 				new WoofTemplateOutputModel("OUTPUT_3", null),
-				new WoofTemplateOutputModel("OUTPUT_4", null));
+				new WoofTemplateOutputModel("OUTPUT_4", null),
+				new WoofTemplateOutputModel("OUTPUT_5", null));
 		WoofTemplateOutputModel output1 = template.getOutputs().get(0);
 		assertProperties(new WoofTemplateOutputToWoofSectionInputModel(
 				"SECTION_A", "INPUT_A"), output1.getWoofSectionInput(),
@@ -88,6 +89,9 @@ public class WoofModelRepositoryTest extends OfficeFrameTestCase {
 		WoofTemplateOutputModel output3 = template.getOutputs().get(2);
 		assertProperties(new WoofTemplateOutputToWoofResourceModel("RESOURCE"),
 				output3.getWoofResource(), "getResourceName");
+		WoofTemplateOutputModel output4 = template.getOutputs().get(3);
+		assertProperties(new WoofTemplateOutputToWoofAccessInputModel(
+				"Authenticate"), output4.getWoofAccessInput(), "getInputName");
 
 		// Validate links
 		assertList(
@@ -138,7 +142,8 @@ public class WoofModelRepositoryTest extends OfficeFrameTestCase {
 						"java.lang.String"), new WoofSectionOutputModel(
 						"OUTPUT_B", null), new WoofSectionOutputModel(
 						"OUTPUT_C", null), new WoofSectionOutputModel(
-						"OUTPUT_D", null));
+						"OUTPUT_D", null), new WoofSectionOutputModel(
+						"OUTPUT_E", null));
 		WoofSectionOutputModel section1 = section.getOutputs().get(0);
 		assertProperties(new WoofSectionOutputToWoofSectionInputModel(
 				"SECTION_B", "INPUT_1"), section1.getWoofSectionInput(),
@@ -150,6 +155,9 @@ public class WoofModelRepositoryTest extends OfficeFrameTestCase {
 		WoofSectionOutputModel section3 = section.getOutputs().get(2);
 		assertProperties(new WoofSectionOutputToWoofResourceModel("RESOURCE"),
 				section3.getWoofResource(), "getResourceName");
+		WoofSectionOutputModel section4 = section.getOutputs().get(3);
+		assertProperties(new WoofSectionOutputToWoofAccessInputModel(
+				"Authenticate"), section4.getWoofAccessInput(), "getInputName");
 
 		// ----------------------------------------
 		// Validate the access
