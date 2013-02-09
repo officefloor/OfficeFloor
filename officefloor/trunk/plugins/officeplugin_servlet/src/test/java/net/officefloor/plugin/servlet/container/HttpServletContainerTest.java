@@ -56,6 +56,7 @@ import net.officefloor.plugin.servlet.context.OfficeServletContext;
 import net.officefloor.plugin.servlet.filter.FilterChainFactory;
 import net.officefloor.plugin.servlet.mapping.MappingType;
 import net.officefloor.plugin.servlet.mapping.ServicerMapping;
+import net.officefloor.plugin.servlet.security.HttpServletSecurity;
 import net.officefloor.plugin.servlet.time.Clock;
 import net.officefloor.plugin.socket.server.http.HttpHeader;
 import net.officefloor.plugin.socket.server.http.HttpRequest;
@@ -65,7 +66,6 @@ import net.officefloor.plugin.socket.server.http.parse.impl.HttpHeaderImpl;
 import net.officefloor.plugin.stream.impl.MockServerOutputStream;
 import net.officefloor.plugin.stream.impl.ServerInputStreamImpl;
 import net.officefloor.plugin.web.http.application.HttpRequestState;
-import net.officefloor.plugin.web.http.security.HttpSecurity;
 import net.officefloor.plugin.web.http.session.HttpSession;
 
 /**
@@ -107,9 +107,10 @@ public class HttpServletContainerTest extends OfficeFrameTestCase {
 	private final HttpSession session = this.createMock(HttpSession.class);
 
 	/**
-	 * {@link HttpSecurity}.
+	 * {@link HttpServletSecurity}.
 	 */
-	private HttpSecurity security = this.createMock(HttpSecurity.class);
+	private HttpServletSecurity security = this
+			.createMock(HttpServletSecurity.class);
 
 	/**
 	 * {@link TaskContext}.

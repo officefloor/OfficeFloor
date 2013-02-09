@@ -40,10 +40,10 @@ import net.officefloor.plugin.servlet.context.OfficeServletContext;
 import net.officefloor.plugin.servlet.filter.FilterChainFactory;
 import net.officefloor.plugin.servlet.mapping.MappingType;
 import net.officefloor.plugin.servlet.mapping.ServicerMapping;
+import net.officefloor.plugin.servlet.security.HttpServletSecurity;
 import net.officefloor.plugin.servlet.time.Clock;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
 import net.officefloor.plugin.web.http.application.HttpRequestState;
-import net.officefloor.plugin.web.http.security.HttpSecurity;
 import net.officefloor.plugin.web.http.session.HttpSession;
 import net.officefloor.plugin.web.http.tokenise.HttpRequestTokeniseException;
 
@@ -173,7 +173,7 @@ public class HttpServletContainerImpl implements HttpServletContainer,
 	@Override
 	public void service(ServerHttpConnection connection,
 			HttpRequestState attributes, HttpSession session,
-			HttpSecurity security, TaskContext<?, ?, ?> taskContext,
+			HttpServletSecurity security, TaskContext<?, ?, ?> taskContext,
 			ServicerMapping mapping) throws ServletException, IOException {
 
 		// Obtain the last access time

@@ -31,14 +31,19 @@ public class HttpSecurityAutoWireSectionImpl extends AutoWireSectionImpl
 		implements HttpSecurityAutoWireSection {
 
 	/**
+	 * Default timeout is 10 seconds.
+	 */
+	public static final long DEFAULT_HTTP_SECURITY_TIMEOUT = 10 * 1000;
+
+	/**
 	 * {@link Class} of the {@link HttpSecuritySource}.
 	 */
 	private final Class<? extends HttpSecuritySource<?, ?, ?, ?>> httpSecuritySourceClass;
 
 	/**
-	 * By default allow 10 seconds before timing out.
+	 * Initiate with default timeout.
 	 */
-	private long securityTimeout = 10 * 1000;
+	private long securityTimeout = DEFAULT_HTTP_SECURITY_TIMEOUT;
 
 	/**
 	 * Initiate.

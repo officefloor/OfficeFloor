@@ -32,9 +32,9 @@ import net.officefloor.plugin.servlet.container.HttpServletServicer;
 import net.officefloor.plugin.servlet.container.source.HttpServletTask.DependencyKeys;
 import net.officefloor.plugin.servlet.context.OfficeServletContext;
 import net.officefloor.plugin.servlet.mapping.ServicerMapping;
+import net.officefloor.plugin.servlet.security.HttpServletSecurity;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
 import net.officefloor.plugin.web.http.application.HttpRequestState;
-import net.officefloor.plugin.web.http.security.HttpSecurity;
 import net.officefloor.plugin.web.http.session.HttpSession;
 
 import org.apache.jasper.servlet.JspServlet;
@@ -77,7 +77,8 @@ public class JspWorkSourceTest extends OfficeFrameTestCase {
 		task.addObject(HttpRequestState.class).setKey(
 				DependencyKeys.REQUEST_ATTRIBUTES);
 		task.addObject(HttpSession.class).setKey(DependencyKeys.HTTP_SESSION);
-		task.addObject(HttpSecurity.class).setKey(DependencyKeys.HTTP_SECURITY);
+		task.addObject(HttpServletSecurity.class).setKey(
+				DependencyKeys.HTTP_SECURITY);
 		task.addEscalation(ServletException.class);
 		task.addEscalation(IOException.class);
 

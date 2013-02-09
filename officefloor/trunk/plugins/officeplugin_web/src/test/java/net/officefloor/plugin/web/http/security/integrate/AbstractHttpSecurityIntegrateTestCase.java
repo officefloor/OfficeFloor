@@ -75,14 +75,16 @@ public abstract class AbstractHttpSecurityIntegrateTestCase extends
 				source.getHttpSecurity());
 		HttpSecurityAutoWireSection security = this
 				.configureHttpSecurity(source);
-		assertNotNull("HTTP Security should be configured",
-				source.getHttpSecurity());
 
 		// Add servicing methods
 		AutoWireSection section = source.addSection("SERVICE",
 				ClassSectionSource.class.getName(), Servicer.class.getName());
-		source.link(security, "Failure", section, "handleFailure");
 		source.linkUri("service", section, "service");
+
+		// Determine if security configured
+		if (security != null) {
+			source.link(security, "Failure", section, "handleFailure");
+		}
 
 		// Start the office
 		this.officeFloor = source.openOfficeFloor();
@@ -171,8 +173,12 @@ public abstract class AbstractHttpSecurityIntegrateTestCase extends
 		 */
 		public void service(HttpSecurity security,
 				ServerHttpConnection connection) throws IOException {
-			connection.getHttpResponse().getEntityWriter()
-					.write("Serviced for " + security.getRemoteUser());
+			connection
+					.getHttpResponse()
+					.getEntityWriter()
+					.write("Serviced for "
+							+ (security == null ? "guest" : security
+									.getRemoteUser()));
 		}
 
 		/**

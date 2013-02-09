@@ -18,8 +18,7 @@
 package net.officefloor.plugin.servlet.container.integrate;
 
 import java.io.File;
-import java.util.Arrays;
-import java.util.HashSet;
+import java.security.Principal;
 
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServlet;
@@ -47,6 +46,7 @@ import net.officefloor.plugin.servlet.host.ServletServer;
 import net.officefloor.plugin.servlet.host.ServletServerManagedObjectSource;
 import net.officefloor.plugin.servlet.host.ServletServerManagedObjectSource.Dependencies;
 import net.officefloor.plugin.servlet.mapping.ServicerMapping;
+import net.officefloor.plugin.servlet.security.HttpServletSecurity;
 import net.officefloor.plugin.socket.server.http.HttpRequest;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
 import net.officefloor.plugin.socket.server.http.server.HttpServicerTask;
@@ -55,7 +55,6 @@ import net.officefloor.plugin.web.http.application.HttpRequestState;
 import net.officefloor.plugin.web.http.application.HttpRequestStateManagedObjectSource;
 import net.officefloor.plugin.web.http.location.HttpApplicationLocationManagedObjectSource;
 import net.officefloor.plugin.web.http.security.HttpSecurity;
-import net.officefloor.plugin.web.http.security.scheme.HttpSecurityImpl;
 import net.officefloor.plugin.web.http.session.HttpSession;
 import net.officefloor.plugin.web.http.session.HttpSessionManagedObjectSource;
 
@@ -211,7 +210,7 @@ public abstract class MockHttpServletServer extends MockHttpServer {
 		service.linkManagedObject(DependencyKeys.HTTP_SESSION, sessionName,
 				HttpSession.class);
 		service.linkManagedObject(DependencyKeys.HTTP_SECURITY, securityName,
-				HttpSecurity.class);
+				HttpServletSecurity.class);
 
 		// Return reference to Servlet
 		return reference;
@@ -302,9 +301,27 @@ public abstract class MockHttpServletServer extends MockHttpServer {
 
 		// Provide mock HTTP Security
 		final String HTTP_SECURITY_NAME = "HttpSecurity";
-		this.constructManagedObject(new HttpSecurityImpl("Mock", "Daniel",
-				new HashSet<String>(Arrays.asList("test"))),
-				HTTP_SECURITY_NAME, officeName);
+		this.constructManagedObject(new HttpServletSecurity() {
+			@Override
+			public String getAuthenticationScheme() {
+				return "Mock";
+			}
+
+			@Override
+			public Principal getUserPrincipal() {
+				return null;
+			}
+
+			@Override
+			public String getRemoteUser() {
+				return "Daniel";
+			}
+
+			@Override
+			public boolean isUserInRole(String role) {
+				return ("test".equals(role));
+			}
+		}, HTTP_SECURITY_NAME, officeName);
 		this.getOfficeBuilder().addProcessManagedObject(HTTP_SECURITY_NAME,
 				HTTP_SECURITY_NAME);
 

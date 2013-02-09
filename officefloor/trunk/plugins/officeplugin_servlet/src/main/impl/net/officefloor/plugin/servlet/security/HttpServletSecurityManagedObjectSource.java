@@ -15,9 +15,10 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.plugin.web.http.security;
+package net.officefloor.plugin.servlet.security;
 
-import net.officefloor.compile.properties.Property;
+import java.security.Principal;
+
 import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.spi.managedobject.AsynchronousListener;
 import net.officefloor.frame.spi.managedobject.AsynchronousManagedObject;
@@ -25,33 +26,19 @@ import net.officefloor.frame.spi.managedobject.CoordinatingManagedObject;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.frame.spi.managedobject.ObjectRegistry;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
-import net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceContext;
 import net.officefloor.frame.spi.managedobject.source.impl.AbstractManagedObjectSource;
+import net.officefloor.plugin.web.http.security.HttpAuthenticateRequest;
+import net.officefloor.plugin.web.http.security.HttpAuthentication;
+import net.officefloor.plugin.web.http.security.HttpSecurity;
 
 /**
- * {@link ManagedObjectSource} for the {@link HttpSecuritySource} (or its
- * equivalent application specific interface).
+ * {@link ManagedObjectSource} for the {@link HttpServletSecurity}.
  * 
  * @author Daniel Sagenschneider
  */
-public class HttpSecurityManagedObjectSource
+public class HttpServletSecurityManagedObjectSource
 		extends
-		AbstractManagedObjectSource<HttpSecurityManagedObjectSource.Dependencies, None> {
-
-	/**
-	 * Name of {@link Property} for the HTTP security type.
-	 */
-	public static final String PROPERTY_HTTP_SECURITY_TYPE = "http.security.type";
-
-	/**
-	 * <p>
-	 * Name of {@link Property} indicating whether to escalate
-	 * {@link HttpAuthenticationRequiredException} if not authenticated.
-	 * <p>
-	 * By default, it will escalate. Specifying <code>false</code> for this
-	 * property will allow a <code>null</code> HTTP Security to be provided.
-	 */
-	public static final String PROPERTY_IS_ESCALATE_AUTHENTICATION_REQUIRED = "http.security.escalate.authentication.required";
+		AbstractManagedObjectSource<HttpServletSecurityManagedObjectSource.Dependencies, None> {
 
 	/**
 	 * Dependency keys.
@@ -60,38 +47,21 @@ public class HttpSecurityManagedObjectSource
 		HTTP_AUTHENTICATION
 	}
 
-	/**
-	 * Indicates if escalate on <code>null</code> HTTP Security.
-	 */
-	private boolean isEscalateNullHttpSecurity;
-
 	/*
 	 * ======================= ManagedObjectSource =======================
 	 */
 
 	@Override
 	protected void loadSpecification(SpecificationContext context) {
-		context.addProperty(PROPERTY_HTTP_SECURITY_TYPE, "HTTP Security Type");
+		// No properties required
 	}
 
 	@Override
 	protected void loadMetaData(MetaDataContext<Dependencies, None> context)
 			throws Exception {
-		ManagedObjectSourceContext<None> mosContext = context
-				.getManagedObjectSourceContext();
-
-		// Obtain the security type
-		String securityTypeName = mosContext
-				.getProperty(PROPERTY_HTTP_SECURITY_TYPE);
-		Class<?> securityType = mosContext.loadClass(securityTypeName);
-
-		// Determine if allowing null HTTP Security
-		this.isEscalateNullHttpSecurity = Boolean.parseBoolean(mosContext
-				.getProperty(PROPERTY_IS_ESCALATE_AUTHENTICATION_REQUIRED,
-						String.valueOf(true)));
 
 		// Specify the meta-data
-		context.setObjectClass(securityType);
+		context.setObjectClass(HttpServletSecurity.class);
 		context.setManagedObjectClass(HttpSecurityManagedObject.class);
 
 		// Add the dependency
@@ -101,8 +71,7 @@ public class HttpSecurityManagedObjectSource
 
 	@Override
 	protected ManagedObject getManagedObject() throws Throwable {
-		return new HttpSecurityManagedObject<Object, Object>(
-				this.isEscalateNullHttpSecurity);
+		return new HttpSecurityManagedObject<Object, Object>();
 	}
 
 	/**
@@ -110,11 +79,6 @@ public class HttpSecurityManagedObjectSource
 	 */
 	public static class HttpSecurityManagedObject<S, C> implements
 			AsynchronousManagedObject, CoordinatingManagedObject<Dependencies> {
-
-		/**
-		 * Indicates if escalate <code>null</code> HTTP Security.
-		 */
-		private final boolean isEscalateNullHttpSecurity;
 
 		/**
 		 * {@link AsynchronousListener}.
@@ -125,16 +89,6 @@ public class HttpSecurityManagedObjectSource
 		 * {@link HttpAuthentication}.
 		 */
 		private HttpAuthentication<S, C> authentication;
-
-		/**
-		 * Initiate.
-		 * 
-		 * @param isEscalateNullHttpSecurity
-		 *            Indicates if escalate <code>null</code> HTTP Security.
-		 */
-		public HttpSecurityManagedObject(boolean isEscalateNullHttpSecurity) {
-			this.isEscalateNullHttpSecurity = isEscalateNullHttpSecurity;
-		}
 
 		/**
 		 * Flags authentication complete.
@@ -174,15 +128,14 @@ public class HttpSecurityManagedObjectSource
 		public Object getObject() throws Throwable {
 
 			// Obtain the security
-			Object security = this.authentication.getHttpSecurity();
-
-			// Ensure have the security if escalate on null HTTP Security
-			if ((security == null) && (this.isEscalateNullHttpSecurity)) {
-				throw new HttpAuthenticationRequiredException();
+			HttpSecurity security = (HttpSecurity) this.authentication
+					.getHttpSecurity();
+			if (security == null) {
+				return null; // not authenticated
 			}
 
-			// Return the security
-			return security;
+			// Wrap and return with HTTP Servlet Security
+			return new HttpServletSecurityImpl(security);
 		}
 	}
 
@@ -222,6 +175,55 @@ public class HttpSecurityManagedObjectSource
 		public void authenticationComplete() {
 			// Indicate authentication complete
 			this.managedObject.flagAuthenticationComplete();
+		}
+	}
+
+	/**
+	 * {@link HttpServletSecurity} implementation.
+	 */
+	private static class HttpServletSecurityImpl implements HttpServletSecurity {
+
+		/**
+		 * {@link HttpSecurity} delegate.
+		 */
+		private final HttpSecurity security;
+
+		/**
+		 * Initiate.
+		 * 
+		 * @param security
+		 *            {@link HttpSecurity}.
+		 */
+		public HttpServletSecurityImpl(HttpSecurity security) {
+			this.security = security;
+		}
+
+		/*
+		 * ==================== HttpServletSecurity ======================
+		 */
+
+		@Override
+		public String getAuthenticationScheme() {
+			return (this.security == null ? null : this.security
+					.getAuthenticationScheme());
+		}
+
+		@Override
+		public Principal getUserPrincipal() {
+			return (this.security == null ? null : this.security
+					.getUserPrincipal());
+		}
+
+		@Override
+		public String getRemoteUser() {
+			return (this.security == null ? null : this.security
+					.getRemoteUser());
+		}
+
+		@Override
+		public boolean isUserInRole(String role) {
+			return (this.security == null ? null : this.security
+					.isUserInRole(role));
 		}
 	}
 

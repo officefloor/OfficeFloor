@@ -27,10 +27,10 @@ import javax.servlet.http.HttpServletResponse;
 import net.officefloor.frame.api.execute.TaskContext;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.plugin.servlet.mapping.ServicerMapping;
+import net.officefloor.plugin.servlet.security.HttpServletSecurity;
 import net.officefloor.plugin.socket.server.http.HttpRequest;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
 import net.officefloor.plugin.web.http.application.HttpRequestState;
-import net.officefloor.plugin.web.http.security.HttpSecurity;
 import net.officefloor.plugin.web.http.session.HttpSession;
 
 /**
@@ -51,8 +51,8 @@ public interface HttpServletContainer {
 	 * @param session
 	 *            {@link HttpSession} for the {@link HttpRequest}.
 	 * @param security
-	 *            {@link HttpSecurity}. May be <code>null</code> if anonymous
-	 *            {@link HttpRequest}.
+	 *            {@link HttpServletSecurity}. May be <code>null</code> if
+	 *            anonymous {@link HttpRequest}.
 	 * @param taskContext
 	 *            {@link TaskContext} to allow access to {@link OfficeFloor}
 	 *            capabilities.
@@ -66,7 +66,7 @@ public interface HttpServletContainer {
 	 *             As per {@link HttpServlet} API.
 	 */
 	void service(ServerHttpConnection connection, HttpRequestState attributes,
-			HttpSession session, HttpSecurity security,
+			HttpSession session, HttpServletSecurity security,
 			TaskContext<?, ?, ?> taskContext, ServicerMapping mapping)
 			throws ServletException, IOException;
 

@@ -51,6 +51,7 @@ import net.officefloor.plugin.servlet.context.source.OfficeServletContextManaged
 import net.officefloor.plugin.servlet.host.ServletServer;
 import net.officefloor.plugin.servlet.route.ServletRouteTask.FlowKeys;
 import net.officefloor.plugin.servlet.route.source.ServletRouteWorkSource;
+import net.officefloor.plugin.servlet.security.HttpServletSecurity;
 import net.officefloor.plugin.servlet.webxml.model.ContextParamModel;
 import net.officefloor.plugin.servlet.webxml.model.FilterMappingModel;
 import net.officefloor.plugin.servlet.webxml.model.FilterModel;
@@ -63,7 +64,6 @@ import net.officefloor.plugin.servlet.webxml.model.WebXmlLoader;
 import net.officefloor.plugin.socket.server.http.HttpRequest;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
 import net.officefloor.plugin.web.http.application.HttpRequestState;
-import net.officefloor.plugin.web.http.security.HttpSecurity;
 import net.officefloor.plugin.web.http.session.HttpSession;
 
 /**
@@ -187,7 +187,7 @@ public class WebXmlSectionSource extends AbstractSectionSource {
 		SectionObject httpSessionMo = designer.addSectionObject("HTTP_SESSION",
 				HttpSession.class.getName());
 		SectionObject httpSecurityMo = designer.addSectionObject(
-				"HTTP_SECURITY", HttpSecurity.class.getName());
+				"HTTP_SECURITY", HttpServletSecurity.class.getName());
 
 		// Obtain the servlet context name
 		String servletContextName = (webApp.getDisplayName() == null ? "OfficeFloor"

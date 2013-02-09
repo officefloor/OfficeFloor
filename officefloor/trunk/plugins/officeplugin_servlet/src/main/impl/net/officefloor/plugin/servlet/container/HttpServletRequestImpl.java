@@ -57,13 +57,13 @@ import net.officefloor.frame.api.execute.TaskContext;
 import net.officefloor.frame.api.manage.InvalidParameterTypeException;
 import net.officefloor.frame.api.manage.UnknownTaskException;
 import net.officefloor.frame.api.manage.UnknownWorkException;
+import net.officefloor.plugin.servlet.security.HttpServletSecurity;
 import net.officefloor.plugin.socket.server.http.HttpHeader;
 import net.officefloor.plugin.socket.server.http.HttpRequest;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
 import net.officefloor.plugin.web.http.application.HttpRequestState;
 import net.officefloor.plugin.web.http.cookie.HttpCookie;
 import net.officefloor.plugin.web.http.cookie.HttpCookieUtil;
-import net.officefloor.plugin.web.http.security.HttpSecurity;
 import net.officefloor.plugin.web.http.tokenise.HttpRequestTokenHandler;
 import net.officefloor.plugin.web.http.tokenise.HttpRequestTokeniseException;
 import net.officefloor.plugin.web.http.tokenise.HttpRequestTokeniser;
@@ -134,9 +134,9 @@ public class HttpServletRequestImpl implements HttpServletRequest,
 	private final HttpRequest request;
 
 	/**
-	 * {@link HttpSecurity}.
+	 * {@link HttpServletSecurity}.
 	 */
-	private final HttpSecurity security;
+	private final HttpServletSecurity security;
 
 	/**
 	 * Name of identifier (e.g. cookie or parameter name) providing the session
@@ -217,7 +217,7 @@ public class HttpServletRequestImpl implements HttpServletRequest,
 	 * @param requestAttributes
 	 *            {@link HttpRequestState}.
 	 * @param security
-	 *            {@link HttpSecurity}.
+	 *            {@link HttpServletSecurity}.
 	 * @param sessionIdIdentifierName
 	 *            Name of identifier (e.g. cookie or parameter name) providing
 	 *            the session Id.
@@ -235,7 +235,7 @@ public class HttpServletRequestImpl implements HttpServletRequest,
 	 *             If fails to tokenise the {@link HttpRequest}.
 	 */
 	public HttpServletRequestImpl(ServerHttpConnection connection,
-			HttpRequestState requestAttributes, HttpSecurity security,
+			HttpRequestState requestAttributes, HttpServletSecurity security,
 			String sessionIdIdentifierName, HttpSession session,
 			ServletContext servletContext, Locale defaultLocale,
 			TaskContext<?, ?, ?> taskContext) throws IOException,
