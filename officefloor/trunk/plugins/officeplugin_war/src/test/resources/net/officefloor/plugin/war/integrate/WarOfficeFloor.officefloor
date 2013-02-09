@@ -46,35 +46,15 @@
 			timeout="10000">
 			<managing-office name="OFFICE" />
 		</managed-object-source>
-		<managed-object-source name="HTTP_SECURITY_SOURCE"
-			source="net.officefloor.plugin.web.http.security.HttpSecurityManagedObjectSource"
-			object-type="net.officefloor.plugin.web.http.security.HttpSecurity"
+		<managed-object-source name="HTTP_SERVLET_SECURITY"
+			source="net.officefloor.plugin.servlet.security.HttpServletSecurityManagedObjectSource"
+			object-type="net.officefloor.plugin.servlet.security.HttpServletSecurity"
 			timeout="10000">
 			<managing-office name="OFFICE" />
-			<input-managed-object name="INPUT_HTTP_SECURITY_SOURCE" />
-			<input-dependency name="HTTP_SECURITY_SERVICE">
-				<managed-object name="HTTP_SECURITY_SERVICE" />
-			</input-dependency>
-			<team name="AUTHENTICATOR">
-				<office-floor-team name="SERVLET_TEAM" />
-			</team>
 		</managed-object-source>
-		<managed-object-source name="HTTP_SECURITY_SERVICE"
-			source="net.officefloor.plugin.web.http.security.HttpSecurityServiceManagedObjectSource"
-			object-type="net.officefloor.plugin.web.http.security.HttpSecurityService">
-			<properties>
-				<property name="http.security.service.authentication.scheme"
-					value="BASIC" />
-				<property name="http.security.basic.realm" value="OfficeFloor" />
-			</properties>
-			<managing-office name="OFFICE" />
-		</managed-object-source>
-		<managed-object-source name="CREDENTIAL_STORE"
-			source="net.officefloor.plugin.web.http.security.store.PasswordFileManagedObjectSource"
-			object-type="net.officefloor.plugin.web.http.security.store.CredentialStore">
-			<properties>
-				<property name="password.file.path" value="${password.file.location}" />
-			</properties>
+		<managed-object-source name="HTTP_AUTHENTICATION"
+			source="net.officefloor.plugin.web.http.security.AnonymousHttpAuthenticationManagedObjectSource"
+			object-type="net.officefloor.plugin.web.http.security.HttpAuthentication">
 			<managing-office name="OFFICE" />
 		</managed-object-source>
 	</managed-object-sources>
@@ -110,30 +90,15 @@
 				<input-managed-object name="HTTP_CONNECTION" />
 			</dependency>
 		</managed-object>
-		<managed-object name="HTTP_SECURITY" scope="PROCESS">
-			<managed-object-source name="HTTP_SECURITY_SOURCE" />
-			<dependency name="HTTP_SECURITY_SERVICE"
-				object-type="net.officefloor.plugin.web.http.security.HttpSecurityService">
-				<managed-object name="HTTP_SECURITY_SERVICE" />
+		<managed-object name="HTTP_SERVLET_SECURITY" scope="PROCESS">
+			<managed-object-source name="HTTP_SERVLET_SECURITY" />
+			<dependency name="HTTP_AUTHENTICATION"
+				object-type="net.officefloor.plugin.web.http.security.HttpAuthentication">
+				<managed-object name="HTTP_AUTHENTICATION" />
 			</dependency>
 		</managed-object>
-		<managed-object name="HTTP_SECURITY_SERVICE" scope="PROCESS">
-			<managed-object-source name="HTTP_SECURITY_SERVICE" />
-			<dependency name="HTTP_CONNECTION"
-				object-type="net.officefloor.plugin.socket.server.http.ServerHttpConnection">
-				<input-managed-object name="HTTP_CONNECTION" />
-			</dependency>
-			<dependency name="HTTP_SESSION"
-				object-type="net.officefloor.plugin.web.http.session.HttpSession">
-				<managed-object name="HTTP_SESSION" />
-			</dependency>
-			<dependency name="Dependency-CREDENTIAL_STORE"
-				object-type="net.officefloor.plugin.web.http.security.store.CredentialStore">
-				<managed-object name="CREDENTIAL_STORE" />
-			</dependency>
-		</managed-object>
-		<managed-object name="CREDENTIAL_STORE" scope="PROCESS">
-			<managed-object-source name="CREDENTIAL_STORE" />
+		<managed-object name="HTTP_AUTHENTICATION" scope="PROCESS">
+			<managed-object-source name="HTTP_AUTHENTICATION" />
 		</managed-object>
 	</managed-objects>
 	<offices>
@@ -155,9 +120,9 @@
 				object-type="net.officefloor.plugin.web.http.session.HttpSession">
 				<managed-object name="HTTP_SESSION" />
 			</object>
-			<object name="HTTP_SECURITY"
+			<object name="HTTP_SERVLET_SECURITY"
 				object-type="net.officefloor.plugin.web.http.security.HttpSecurity">
-				<managed-object name="HTTP_SECURITY" />
+				<managed-object name="HTTP_SERVLET_SECURITY" />
 			</object>
 			<team name="SERVLET_TEAM">
 				<office-floor-team name="SERVLET_TEAM" />
