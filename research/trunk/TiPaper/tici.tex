@@ -63,9 +63,9 @@ combined with Dependency Injection provide an Inversion of Control pattern.
 \terms{Design, Performance, Standardization}
 \keywords{Continuation Injection, Implicit Thread, Operation Orchestration, Thread Injection}
 
-\acmformat{Sagenschneider, D. 2012.Thread Injection and Continuation Injection.}
+\acmformat{Sagenschneider, D. 2013.Thread Injection and Continuation Injection.}
 
-\copyr{Copyright 2012 is held by the author}
+\copyr{Copyright 2013 is held by the author}
 
 \begin{document}
 
@@ -528,6 +528,14 @@ the next operation unless an explicit thread is required.  This can result in
 the web server servicing the entire request without a thread context switch
 should all the Asynchronous Operations involved not require an explicit thread
 (e.g. web page content obtained from cache).
+
+An implicit thread has similarities to a monadic thread \cite{monadic-thread}.
+The Asynchronous Operations can be considered nodes in the lazy trace of the
+monadic thread.  The advantage of an implicit thread\footnote{Beyond the simpler
+operation orchestration than monad programming} is for nodes involving blocking
+I/O, the Thread Injection allows prioritizing the execution of these nodes. 
+Monadic threads can not prioritize blocking I/O nodes as they know little about
+them and therefore execute them within a single thread pool.
 
 Using implicit threads resolves the thread context switching of the motivating
 example.  Only the \texttt{Retrieve data from database} operation has an
