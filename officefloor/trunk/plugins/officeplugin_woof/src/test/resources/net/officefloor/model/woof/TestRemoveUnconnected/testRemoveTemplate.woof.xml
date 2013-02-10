@@ -7,6 +7,8 @@
 			location="SECTION_LOCATION" />
 	</sections>
 
+	<access source="net.example.HttpSecuritySource" />
+
 	<governances>
 		<governance name="GOVERNANCE" source="net.example.ExampleGovernanceSource" />
 	</governances>

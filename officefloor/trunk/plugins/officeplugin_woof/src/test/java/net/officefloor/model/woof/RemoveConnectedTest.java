@@ -58,6 +58,19 @@ public class RemoveConnectedTest extends AbstractWoofChangesTestCase {
 	}
 
 	/**
+	 * Ensure able to remove the {@link WoofAccessModel}.
+	 */
+	public void testRemoveAccess() {
+
+		// Obtain the access to remove
+		WoofAccessModel access = this.model.getWoofAccess();
+
+		// Remove the access
+		Change<WoofAccessModel> change = this.operations.removeAccess(access);
+		this.assertChange(change, access, "Remove access", true);
+	}
+
+	/**
 	 * Ensure able to remove the {@link WoofResourceModel}.
 	 */
 	public void testRemoveResource() {

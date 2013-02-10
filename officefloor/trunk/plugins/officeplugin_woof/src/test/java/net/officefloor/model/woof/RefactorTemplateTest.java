@@ -107,7 +107,7 @@ public class RefactorTemplateTest extends AbstractWoofChangesTestCase {
 		Change<WoofTemplateModel> change = this.operations.refactorTemplate(
 				this.template, "template", "example/Template.html",
 				"net.example.LogicClass", section, true, secureLinks,
-				new String[] { "POST", "PUT", "OTHER" },
+				new String[] { "POST", "PUT", "OTHER" }, true,
 				"net.example.client.ExampleGwtEntryPoint", new String[] {
 						"net.example.GwtServiceAsync",
 						"net.example.GwtAnotherAsync" }, true, "manualPublish",
@@ -166,7 +166,7 @@ public class RefactorTemplateTest extends AbstractWoofChangesTestCase {
 		Change<WoofTemplateModel> change = this.operations.refactorTemplate(
 				this.template, "change", "example/Change.html",
 				"net.example.ChangeClass", section, false, secureLinks,
-				new String[] { "CHANGE" },
+				new String[] { "CHANGE" }, false,
 				"net.example.client.ExampleGwtEntryPoint",
 				new String[] { "net.example.GwtChangeAsync" }, true,
 				"manualChange", this.templateOutputNameMapping);
@@ -205,7 +205,7 @@ public class RefactorTemplateTest extends AbstractWoofChangesTestCase {
 		// Refactor the template removing outputs and extensions
 		Change<WoofTemplateModel> change = this.operations.refactorTemplate(
 				this.template, "remove", "example/Remove.html", null, section,
-				false, null, null, null, null, false, null, null);
+				false, null, null, false, null, null, false, null, null);
 
 		// Validate change
 		this.assertChange(change, null, "Refactor Template", true);
@@ -259,7 +259,7 @@ public class RefactorTemplateTest extends AbstractWoofChangesTestCase {
 		Change<WoofTemplateModel> change = this.operations.refactorTemplate(
 				this.template, "add", "example/Add.html",
 				"net.example.AddClass", section, true, secureLinks,
-				new String[] { "POST", "OTHER" },
+				new String[] { "POST", "OTHER" }, true,
 				"net.example.client.AddGwtEntryPoint",
 				new String[] { "net.example.GwtAddAsync" }, true, "manualAdd",
 				this.templateOutputNameMapping);

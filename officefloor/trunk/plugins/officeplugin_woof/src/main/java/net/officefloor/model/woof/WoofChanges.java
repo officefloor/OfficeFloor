@@ -29,6 +29,9 @@ import net.officefloor.compile.spi.section.source.SectionSource;
 import net.officefloor.model.change.Change;
 import net.officefloor.plugin.comet.internal.CometEvent;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
+import net.officefloor.plugin.web.http.security.HttpSecuritySource;
+import net.officefloor.plugin.web.http.security.type.HttpSecurityFlowType;
+import net.officefloor.plugin.web.http.security.type.HttpSecurityType;
 
 /**
  * Changes that can be made to a {@link WoofModel}.
@@ -100,6 +103,9 @@ public interface WoofChanges {
 	 * @param renderRedirectHttpMethods
 	 *            Listing of HTTP methods that require a redirect before
 	 *            rendering the {@link WoofTemplateModel}.
+	 * @param isContinueRendering
+	 *            Indicates whether allowed to continue rendering on this
+	 *            template completion.
 	 * @param gwtEntryPointClassName
 	 *            GWT EntryPoint class name. May be <code>null</code> only if no
 	 *            GWT functionality is required.
@@ -116,7 +122,8 @@ public interface WoofChanges {
 	Change<WoofTemplateModel> addTemplate(String uri, String templatePath,
 			String templateLogicClass, SectionType sectionType,
 			boolean isTemplateSecure, Map<String, Boolean> linksSecure,
-			String[] renderRedirectHttpMethods, String gwtEntryPointClassName,
+			String[] renderRedirectHttpMethods, boolean isContinueRendering,
+			String gwtEntryPointClassName,
 			String[] gwtServiceAsyncInterfaceNames, boolean isEnableComet,
 			String cometManualPublishMethodName);
 
@@ -143,6 +150,9 @@ public interface WoofChanges {
 	 * @param renderRedirectHttpMethods
 	 *            Listing of HTTP methods that require a redirect before
 	 *            rendering the {@link WoofTemplateModel}.
+	 * @param isContinueRendering
+	 *            Indicates whether allowed to continue rendering on this
+	 *            template completion.
 	 * @param gwtEntryPointClassName
 	 *            New GWT EntryPoint class name.
 	 * @param gwtServiceAsyncInterfaceNames
@@ -162,7 +172,8 @@ public interface WoofChanges {
 			String uri, String templatePath, String templateLogicClass,
 			SectionType sectionType, boolean isTemplateSecure,
 			Map<String, Boolean> linksSecure,
-			String[] renderRedirectHttpMethods, String gwtEntryPointClassName,
+			String[] renderRedirectHttpMethods, boolean isContinueRendering,
+			String gwtEntryPointClassName,
 			String[] gwtServiceAsyncInterfaceNames, boolean isEnableComet,
 			String cometManualPublishMethodName,
 			Map<String, String> templateOutputNameMapping);
@@ -263,6 +274,57 @@ public interface WoofChanges {
 	 * @return {@link Change} to remove the {@link WoofSectionModel}.
 	 */
 	Change<WoofSectionModel> removeSection(WoofSectionModel section);
+
+	/**
+	 * Adds a {@link WoofAccessModel}.
+	 * 
+	 * @param httpSecuritySourceClassName
+	 *            {@link HttpSecuritySource} class name.
+	 * @param timeout
+	 *            Time out in authenticating.
+	 * @param properties
+	 *            {@link PropertyList}.
+	 * @param httpSecurityType
+	 *            {@link HttpSecurityType} for the {@link WoofAccessModel}.
+	 * @return {@link Change} to specify the {@link WoofAccessModel}.
+	 */
+	Change<WoofAccessModel> setAccess(String httpSecuritySourceClassName,
+			long timeout, PropertyList properties,
+			HttpSecurityType<?, ?, ?, ?> httpSecurityType);
+
+	/**
+	 * Refactors the {@link WoofAccessModel}.
+	 * 
+	 * @param access
+	 *            {@link WoofAccessModel} to refactor.
+	 * @param httpSecuritySourceClassName
+	 *            {@link HttpSecuritySource} class name.
+	 * @param timeout
+	 *            Time out in authenticating.
+	 * @param properties
+	 *            {@link PropertyList}.
+	 * @param httpSecurityType
+	 *            {@link HttpSecurityType} for the {@link WoofAccessModel}.
+	 * @param accessOutputNameMapping
+	 *            Mapping of {@link HttpSecurityFlowType} name to existing
+	 *            {@link WoofAccessOutputModel} name to allow maintaining links
+	 *            to other items within the {@link WoofModel}.
+	 * @return {@link Change} to refactor the {@link WoofAccessModel}.
+	 */
+	Change<WoofAccessModel> refactorAccess(WoofAccessModel access,
+			String httpSecuritySourceClassName, long timeout,
+			PropertyList properties,
+			HttpSecurityType<?, ?, ?, ?> httpSecurityType,
+			Map<String, String> accessOutputNameMapping);
+
+	/**
+	 * Removes the {@link WoofAccessModel}.
+	 * 
+	 * @param access
+	 *            {@link WoofAccessModel} to remove.
+	 * @return {@link Change} to remove the {@link WoofAccessModel}.
+	 */
+	Change<WoofAccessModel> removeAccess(WoofAccessModel access);
 
 	/**
 	 * Adds a {@link WoofGovernanceModel}.
@@ -473,6 +535,30 @@ public interface WoofChanges {
 
 	/**
 	 * Links the {@link WoofTemplateOutputModel} to the
+	 * {@link WoofAccessInputModel}.
+	 * 
+	 * @param templateOutput
+	 *            {@link WoofTemplateOutputModel}.
+	 * @param accessInput
+	 *            {@link WoofAccessInputModel}.
+	 * @return {@link Change} to make the link.
+	 */
+	Change<WoofTemplateOutputToWoofAccessInputModel> linkTemplateOutputToAccessInput(
+			WoofTemplateOutputModel templateOutput,
+			WoofAccessInputModel accessInput);
+
+	/**
+	 * Removes the {@link WoofTemplateOutputToWoofAccessInputModel}.
+	 * 
+	 * @param link
+	 *            {@link WoofTemplateOutputToWoofAccessInputModel}.
+	 * @return {@link Change} to remove the link.
+	 */
+	Change<WoofTemplateOutputToWoofAccessInputModel> removeTemplateOuputToAccessInput(
+			WoofTemplateOutputToWoofAccessInputModel link);
+
+	/**
+	 * Links the {@link WoofTemplateOutputModel} to the
 	 * {@link WoofResourceModel}.
 	 * 
 	 * @param templateOutput
@@ -542,6 +628,30 @@ public interface WoofChanges {
 			WoofSectionOutputToWoofSectionInputModel link);
 
 	/**
+	 * Links the {@link WoofSectionOutputModel} to the
+	 * {@link WoofAccessInputModel}.
+	 * 
+	 * @param sectionOutput
+	 *            {@link WoofAccessOutputModel}.
+	 * @param accessInput
+	 *            {@link WoofAccessInputModel}.
+	 * @return {@link Change} to make the link.
+	 */
+	Change<WoofSectionOutputToWoofAccessInputModel> linkSectionOutputToAccessInput(
+			WoofSectionOutputModel sectionOutput,
+			WoofAccessInputModel accessInput);
+
+	/**
+	 * Removes the {@link WoofSectionOutputToWoofAccessInputModel}.
+	 * 
+	 * @param link
+	 *            {@link WoofSectionOutputToWoofAccessInputModel}.
+	 * @return {@link Change} to remove the link.
+	 */
+	Change<WoofSectionOutputToWoofAccessInputModel> removeSectionOuputToAccessInput(
+			WoofSectionOutputToWoofAccessInputModel link);
+
+	/**
 	 * Links the {@link WoofSectionOutputModel} to the {@link WoofResourceModel}
 	 * .
 	 * 
@@ -563,6 +673,76 @@ public interface WoofChanges {
 	 */
 	Change<WoofSectionOutputToWoofResourceModel> removeSectionOuputToResource(
 			WoofSectionOutputToWoofResourceModel link);
+
+	/**
+	 * Links the {@link WoofAccessOutputModel} to the {@link WoofTemplateModel}
+	 * .
+	 * 
+	 * @param accessOutput
+	 *            {@link WoofAccessOutputModel}.
+	 * @param template
+	 *            {@link WoofTemplateModel}.
+	 * @return {@link Change} to make the link.
+	 */
+	Change<WoofAccessOutputToWoofTemplateModel> linkAccessOutputToTemplate(
+			WoofAccessOutputModel accessOutput, WoofTemplateModel template);
+
+	/**
+	 * Removes the {@link WoofAccessOutputToWoofTemplateModel}.
+	 * 
+	 * @param link
+	 *            {@link WoofAccessOutputToWoofTemplateModel}.
+	 * @return {@link Change} to remove the link.
+	 */
+	Change<WoofAccessOutputToWoofTemplateModel> removeAccessOuputToTemplate(
+			WoofAccessOutputToWoofTemplateModel link);
+
+	/**
+	 * Links the {@link WoofAccessOutputModel} to the
+	 * {@link WoofSectionInputModel}.
+	 * 
+	 * @param accessOutput
+	 *            {@link WoofAccessOutputModel}.
+	 * @param sectionInput
+	 *            {@link WoofSectionInputModel}.
+	 * @return {@link Change} to make the link.
+	 */
+	Change<WoofAccessOutputToWoofSectionInputModel> linkAccessOutputToSectionInput(
+			WoofAccessOutputModel accessOutput,
+			WoofSectionInputModel sectionInput);
+
+	/**
+	 * Removes the {@link WoofAccessOutputToWoofSectionInputModel}.
+	 * 
+	 * @param link
+	 *            {@link WoofAccessOutputToWoofSectionInputModel}.
+	 * @return {@link Change} to remove the link.
+	 */
+	Change<WoofAccessOutputToWoofSectionInputModel> removeAccessOuputToSectionInput(
+			WoofAccessOutputToWoofSectionInputModel link);
+
+	/**
+	 * Links the {@link WoofAccessOutputModel} to the {@link WoofResourceModel}
+	 * .
+	 * 
+	 * @param accessOutput
+	 *            {@link WoofAccessOutputModel}.
+	 * @param resource
+	 *            {@link WoofResourceModel}.
+	 * @return {@link Change} to make the link.
+	 */
+	Change<WoofAccessOutputToWoofResourceModel> linkAccessOutputToResource(
+			WoofAccessOutputModel sectionOutput, WoofResourceModel resource);
+
+	/**
+	 * Removes the {@link WoofAccessOutputToWoofResourceModel}.
+	 * 
+	 * @param link
+	 *            {@link WoofAccessOutputToWoofResourceModel}.
+	 * @return {@link Change} to remove the link.
+	 */
+	Change<WoofAccessOutputToWoofResourceModel> removeAccessOuputToResource(
+			WoofAccessOutputToWoofResourceModel link);
 
 	/**
 	 * Links the {@link WoofExceptionModel} to the {@link WoofTemplateModel} .

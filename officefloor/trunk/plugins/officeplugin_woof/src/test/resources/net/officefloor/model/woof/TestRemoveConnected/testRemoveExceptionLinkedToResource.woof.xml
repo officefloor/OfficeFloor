@@ -9,6 +9,9 @@
 				<template name="TEMPLATE_LINK" />
 			</output>
 			<output name="OUTPUT_3">
+				<access input="Authenticate" />
+			</output>
+			<output name="OUTPUT_4">
 				<resource name="RESOURCE" />
 			</output>
 		</template>
@@ -26,6 +29,9 @@
 				<template name="TEMPLATE" />
 			</output>
 			<output name="OUTPUT_C">
+				<access input="Authenticate" />
+			</output>
+			<output name="OUTPUT_D">
 				<resource name="RESOURCE" />
 			</output>
 		</section>
@@ -34,6 +40,19 @@
 			<input name="INPUT" />
 		</section>
 	</sections>
+
+	<access source="net.example.HttpSecuritySource">
+		<input name="Authenticate" />
+		<output name="OUTPUT_A1">
+			<input section="SECTION" input="INPUT" />
+		</output>
+		<output name="OUTPUT_A2">
+			<template name="TEMPLATE" />
+		</output>
+		<output name="OUTPUT_A3">
+			<resource name="RESOURCE" />
+		</output>
+	</access>
 
 	<resources>
 		<resource name="RESOURCE" path="Example.html" />
@@ -47,11 +66,11 @@
 			<input section="SECTION" input="INPUT" />
 		</exception>
 	</exceptions>
-	
+
 	<starting>
-	    <start>
-	    	<flow section="SECTION" input="INPUT" />
-	    </start>
+		<start>
+			<flow section="SECTION" input="INPUT" />
+		</start>
 	</starting>
 
 </woof>

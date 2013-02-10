@@ -1,0 +1,5 @@
+<woof>
+
+	<access source="net.example.HttpSecuritySource" timeout="4000" />
+
+</woof>
