@@ -7,6 +7,7 @@
 		<template name="B">
 			<output name="OUTPUT">
 				<input section="SECTION" input="INPUT" />
+				<access input="Authenticate" />
 				<resource name="RESOURCE" />
 			</output>
 		</template>
@@ -20,6 +21,11 @@
 			<input name="INPUT" />
 		</section>
 	</sections>
+	
+	<access>
+		<input name="Authenticate" />
+		<input name="Authenticate_LINK" />
+	</access>
 
 	<resources>
 		<resource name="RESOURCE" />

@@ -17,10 +17,16 @@
 			<output name="OUTPUT">
 				<template name="TEMPLATE" />
 				<input section="A" input="INPUT" />
+				<access input="Authenticate" />
 				<resource name="RESOURCE" />
 			</output>
 		</section>
 	</sections>
+	
+	<access>
+		<input name="Authenticate" />
+		<input name="Authenticate_LINK" />
+	</access>
 
 	<resources>
 		<resource name="RESOURCE" />

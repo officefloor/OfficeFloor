@@ -42,6 +42,7 @@ import net.officefloor.model.impl.change.NoChange;
 import net.officefloor.plugin.comet.web.http.section.CometHttpTemplateSectionExtension;
 import net.officefloor.plugin.gwt.module.GwtChanges;
 import net.officefloor.plugin.gwt.web.http.section.GwtHttpTemplateSectionExtension;
+import net.officefloor.plugin.web.http.security.type.HttpSecurityType;
 import net.officefloor.plugin.web.http.template.section.HttpTemplateSectionSource;
 import net.officefloor.plugin.woof.WoofOfficeFloorSource;
 import net.officefloor.plugin.woof.comet.CometWoofTemplateExtensionService;
@@ -729,12 +730,10 @@ public class WoofChangesImpl implements WoofChanges {
 			String templatePath, String templateLogicClass,
 			SectionType section, boolean isTemplateSecure,
 			Map<String, Boolean> linksSecure,
-			String[] renderRedirectHttpMethods, String gwtEntryPointClassName,
+			String[] renderRedirectHttpMethods, boolean isContinueRendering,
+			String gwtEntryPointClassName,
 			String[] gwtServiceAsyncInterfaceNames, boolean isEnableComet,
 			String cometManualPublishMethodName) {
-
-		// TODO input whether may continue rendering
-		boolean isContinueRendering = false;
 
 		// Obtain the template name
 		String templateName = getTemplateName(templatePath, uri, null,
@@ -871,7 +870,7 @@ public class WoofChangesImpl implements WoofChanges {
 			SectionType sectionType, final boolean isTemplateSecure,
 			final Map<String, Boolean> linksSecure,
 			final String[] renderRedirectHttpMethods,
-			String gwtEntryPointClassName,
+			boolean isContinueRendering, String gwtEntryPointClassName,
 			String[] gwtServiceAsyncInterfaceNames, boolean isEnableComet,
 			final String cometManualPublishMethodName,
 			Map<String, String> templateOutputNameMapping) {
@@ -1450,10 +1449,12 @@ public class WoofChangesImpl implements WoofChanges {
 				List<ConnectionModel> list = new LinkedList<ConnectionModel>();
 				removeConnections(template.getWoofTemplateOutputs(), list);
 				removeConnections(template.getWoofSectionOutputs(), list);
+				removeConnections(template.getWoofAccessOutputs(), list);
 				removeConnections(template.getWoofExceptions(), list);
 				for (WoofTemplateOutputModel output : template.getOutputs()) {
 					removeConnection(output.getWoofTemplate(), list);
 					removeConnection(output.getWoofSectionInput(), list);
+					removeConnection(output.getWoofAccessInput(), list);
 					removeConnection(output.getWoofResource(), list);
 				}
 				this.connections = list
@@ -1954,12 +1955,14 @@ public class WoofChangesImpl implements WoofChanges {
 				for (WoofSectionInputModel input : section.getInputs()) {
 					removeConnections(input.getWoofTemplateOutputs(), list);
 					removeConnections(input.getWoofSectionOutputs(), list);
+					removeConnections(input.getWoofAccessOutputs(), list);
 					removeConnections(input.getWoofExceptions(), list);
 					removeConnections(input.getWoofStarts(), list);
 				}
 				for (WoofSectionOutputModel output : section.getOutputs()) {
 					removeConnection(output.getWoofTemplate(), list);
 					removeConnection(output.getWoofSectionInput(), list);
+					removeConnection(output.getWoofAccessInput(), list);
 					removeConnection(output.getWoofResource(), list);
 				}
 				this.connections = list
@@ -1977,6 +1980,34 @@ public class WoofChangesImpl implements WoofChanges {
 				WoofChangesImpl.this.sortSections();
 			}
 		};
+	}
+
+	@Override
+	public Change<WoofAccessModel> setAccess(
+			String httpSecuritySourceClassName, long timeout,
+			PropertyList properties,
+			HttpSecurityType<?, ?, ?, ?> httpSecurityType) {
+		// TODO implement WoofChanges.setAccess
+		throw new UnsupportedOperationException(
+				"TODO implement WoofChanges.setAccess");
+	}
+
+	@Override
+	public Change<WoofAccessModel> refactorAccess(WoofAccessModel access,
+			String httpSecuritySourceClassName, long timeout,
+			PropertyList properties,
+			HttpSecurityType<?, ?, ?, ?> httpSecurityType,
+			Map<String, String> accessOutputNameMapping) {
+		// TODO implement WoofChanges.refactorAccess
+		throw new UnsupportedOperationException(
+				"TODO implement WoofChanges.refactorAccess");
+	}
+
+	@Override
+	public Change<WoofAccessModel> removeAccess(WoofAccessModel access) {
+		// TODO implement WoofChanges.removeAccess
+		throw new UnsupportedOperationException(
+				"TODO implement WoofChanges.removeAccess");
 	}
 
 	@Override
@@ -2311,6 +2342,7 @@ public class WoofChangesImpl implements WoofChanges {
 				List<ConnectionModel> list = new LinkedList<ConnectionModel>();
 				removeConnections(resource.getWoofTemplateOutputs(), list);
 				removeConnections(resource.getWoofSectionOutputs(), list);
+				removeConnections(resource.getWoofAccessOutputs(), list);
 				removeConnections(resource.getWoofExceptions(), list);
 				this.connections = list
 						.toArray(new ConnectionModel[list.size()]);
@@ -2546,6 +2578,7 @@ public class WoofChangesImpl implements WoofChanges {
 					WoofTemplateOutputModel source, List<ConnectionModel> list) {
 				list.add(source.getWoofTemplate());
 				list.add(source.getWoofSectionInput());
+				list.add(source.getWoofAccessInput());
 				list.add(source.getWoofResource());
 			}
 		};
@@ -2588,6 +2621,7 @@ public class WoofChangesImpl implements WoofChanges {
 					WoofTemplateOutputModel source, List<ConnectionModel> list) {
 				list.add(source.getWoofTemplate());
 				list.add(source.getWoofSectionInput());
+				list.add(source.getWoofAccessInput());
 				list.add(source.getWoofResource());
 			}
 		};
@@ -2598,6 +2632,23 @@ public class WoofChangesImpl implements WoofChanges {
 			WoofTemplateOutputToWoofSectionInputModel link) {
 		return new RemoveLinkChange<WoofTemplateOutputToWoofSectionInputModel>(
 				link, "Remove Template Output to Section Input");
+	}
+
+	@Override
+	public Change<WoofTemplateOutputToWoofAccessInputModel> linkTemplateOutputToAccessInput(
+			WoofTemplateOutputModel templateOutput,
+			WoofAccessInputModel accessInput) {
+		// TODO implement WoofChanges.linkTemplateOutputToAccessInput
+		throw new UnsupportedOperationException(
+				"TODO implement WoofChanges.linkTemplateOutputToAccessInput");
+	}
+
+	@Override
+	public Change<WoofTemplateOutputToWoofAccessInputModel> removeTemplateOuputToAccessInput(
+			WoofTemplateOutputToWoofAccessInputModel link) {
+		// TODO implement WoofChanges.removeTemplateOuputToAccessInput
+		throw new UnsupportedOperationException(
+				"TODO implement WoofChanges.removeTemplateOuputToAccessInput");
 	}
 
 	@Override
@@ -2616,6 +2667,7 @@ public class WoofChangesImpl implements WoofChanges {
 					WoofTemplateOutputModel source, List<ConnectionModel> list) {
 				list.add(source.getWoofTemplate());
 				list.add(source.getWoofSectionInput());
+				list.add(source.getWoofAccessInput());
 				list.add(source.getWoofResource());
 			}
 		};
@@ -2644,6 +2696,7 @@ public class WoofChangesImpl implements WoofChanges {
 					WoofSectionOutputModel source, List<ConnectionModel> list) {
 				list.add(source.getWoofTemplate());
 				list.add(source.getWoofSectionInput());
+				list.add(source.getWoofAccessInput());
 				list.add(source.getWoofResource());
 			}
 		};
@@ -2686,6 +2739,7 @@ public class WoofChangesImpl implements WoofChanges {
 					WoofSectionOutputModel source, List<ConnectionModel> list) {
 				list.add(source.getWoofTemplate());
 				list.add(source.getWoofSectionInput());
+				list.add(source.getWoofAccessInput());
 				list.add(source.getWoofResource());
 			}
 		};
@@ -2696,6 +2750,23 @@ public class WoofChangesImpl implements WoofChanges {
 			WoofSectionOutputToWoofSectionInputModel link) {
 		return new RemoveLinkChange<WoofSectionOutputToWoofSectionInputModel>(
 				link, "Remove Section Output to Section Input");
+	}
+
+	@Override
+	public Change<WoofSectionOutputToWoofAccessInputModel> linkSectionOutputToAccessInput(
+			WoofSectionOutputModel sectionOutput,
+			WoofAccessInputModel accessInput) {
+		// TODO implement WoofChanges.linkSectionOutputToAccessInput
+		throw new UnsupportedOperationException(
+				"TODO implement WoofChanges.linkSectionOutputToAccessInput");
+	}
+
+	@Override
+	public Change<WoofSectionOutputToWoofAccessInputModel> removeSectionOuputToAccessInput(
+			WoofSectionOutputToWoofAccessInputModel link) {
+		// TODO implement WoofChanges.removeSectionOuputToAccessInput
+		throw new UnsupportedOperationException(
+				"TODO implement WoofChanges.removeSectionOuputToAccessInput");
 	}
 
 	@Override
@@ -2714,6 +2785,7 @@ public class WoofChangesImpl implements WoofChanges {
 					WoofSectionOutputModel source, List<ConnectionModel> list) {
 				list.add(source.getWoofTemplate());
 				list.add(source.getWoofSectionInput());
+				list.add(source.getWoofAccessInput());
 				list.add(source.getWoofResource());
 			}
 		};
@@ -2724,6 +2796,55 @@ public class WoofChangesImpl implements WoofChanges {
 			WoofSectionOutputToWoofResourceModel link) {
 		return new RemoveLinkChange<WoofSectionOutputToWoofResourceModel>(link,
 				"Remove Section Output to Resource");
+	}
+
+	@Override
+	public Change<WoofAccessOutputToWoofTemplateModel> linkAccessOutputToTemplate(
+			WoofAccessOutputModel accessOutput, WoofTemplateModel template) {
+		// TODO implement WoofChanges.linkAccessOutputToTemplate
+		throw new UnsupportedOperationException(
+				"TODO implement WoofChanges.linkAccessOutputToTemplate");
+	}
+
+	@Override
+	public Change<WoofAccessOutputToWoofTemplateModel> removeAccessOuputToTemplate(
+			WoofAccessOutputToWoofTemplateModel link) {
+		// TODO implement WoofChanges.removeAccessOuputToTemplate
+		throw new UnsupportedOperationException(
+				"TODO implement WoofChanges.removeAccessOuputToTemplate");
+	}
+
+	@Override
+	public Change<WoofAccessOutputToWoofSectionInputModel> linkAccessOutputToSectionInput(
+			WoofAccessOutputModel accessOutput,
+			WoofSectionInputModel sectionInput) {
+		// TODO implement WoofChanges.linkAccessOutputToSectionInput
+		throw new UnsupportedOperationException(
+				"TODO implement WoofChanges.linkAccessOutputToSectionInput");
+	}
+
+	@Override
+	public Change<WoofAccessOutputToWoofSectionInputModel> removeAccessOuputToSectionInput(
+			WoofAccessOutputToWoofSectionInputModel link) {
+		// TODO implement WoofChanges.removeAccessOuputToSectionInput
+		throw new UnsupportedOperationException(
+				"TODO implement WoofChanges.removeAccessOuputToSectionInput");
+	}
+
+	@Override
+	public Change<WoofAccessOutputToWoofResourceModel> linkAccessOutputToResource(
+			WoofAccessOutputModel sectionOutput, WoofResourceModel resource) {
+		// TODO implement WoofChanges.linkAccessOutputToResource
+		throw new UnsupportedOperationException(
+				"TODO implement WoofChanges.linkAccessOutputToResource");
+	}
+
+	@Override
+	public Change<WoofAccessOutputToWoofResourceModel> removeAccessOuputToResource(
+			WoofAccessOutputToWoofResourceModel link) {
+		// TODO implement WoofChanges.removeAccessOuputToResource
+		throw new UnsupportedOperationException(
+				"TODO implement WoofChanges.removeAccessOuputToResource");
 	}
 
 	@Override

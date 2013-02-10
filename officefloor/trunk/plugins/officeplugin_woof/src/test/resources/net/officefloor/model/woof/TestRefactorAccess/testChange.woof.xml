@@ -1,0 +1,40 @@
+<woof>
+
+	<templates>
+		<template name="TEMPLATE" path="example/Template.ofp" class="net.example.LogicClass">
+			<output name="OUTPUT">
+				<access input="Authenticate" />
+			</output>
+		</template>
+	</templates>
+
+	<sections>
+		<section name="SECTION" source="net.example.ExampleSectionSource"
+			location="SECTION_LOCATION">
+			<input name="INPUT" />
+			<output name="OUTPUT">
+				<access input="Authenticate" />
+			</output>
+		</section>
+	</sections>
+
+	<access source="net.change.ChangeSecuritySource" timeout="5000">
+		<property name="name.1" value="value.one" />
+		<property name="name.two" value="value.2" />
+		<input name="Authenticate" parameter-type="java.lang.String" />
+		<output name="OUTPUT_A" argument-type="java.lang.Integer">
+			<resource name="RESOURCE" />
+		</output>
+		<output name="OUTPUT_B" argument-type="java.lang.String">
+			<input section="SECTION" input="INPUT" />
+		</output>
+		<output name="OUTPUT_C">
+			<template name="TEMPLATE" />
+		</output>
+	</access>
+
+	<resources>
+		<resource name="RESOURCE" path="Example.html" />
+	</resources>
+
+</woof>

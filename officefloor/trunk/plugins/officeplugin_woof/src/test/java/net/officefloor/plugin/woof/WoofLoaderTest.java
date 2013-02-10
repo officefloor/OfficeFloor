@@ -40,10 +40,12 @@ import net.officefloor.plugin.governance.clazz.ClassGovernanceSource;
 import net.officefloor.plugin.gwt.service.ServerGwtRpcConnection;
 import net.officefloor.plugin.gwt.web.http.section.GwtHttpTemplateSectionExtension;
 import net.officefloor.plugin.section.clazz.ClassSectionSource;
+import net.officefloor.plugin.web.http.application.HttpSecurityAutoWireSection;
 import net.officefloor.plugin.web.http.application.HttpTemplateAutoWireSection;
 import net.officefloor.plugin.web.http.application.HttpTemplateAutoWireSectionExtension;
 import net.officefloor.plugin.web.http.application.HttpUriLink;
 import net.officefloor.plugin.web.http.application.WebAutoWireApplication;
+import net.officefloor.plugin.web.http.security.scheme.MockHttpSecuritySource;
 
 /**
  * Tests the {@link WoofLoader}.
@@ -109,6 +111,8 @@ public class WoofLoaderTest extends OfficeFrameTestCase {
 		final AutoWireSection sectionA = this.createMock(AutoWireSection.class);
 		final HttpUriLink link = this.createMock(HttpUriLink.class);
 		final AutoWireSection sectionB = this.createMock(AutoWireSection.class);
+		final HttpSecurityAutoWireSection security = this
+				.createMock(HttpSecurityAutoWireSection.class);
 		final AutoWireGovernance governanceA = this
 				.createMock(AutoWireGovernance.class);
 		final AutoWireGovernance governanceB = this
@@ -147,15 +151,30 @@ public class WoofLoaderTest extends OfficeFrameTestCase {
 				this.app.addSection("SECTION_B", "CLASS",
 						Section.class.getName()), sectionB);
 
+		// Record loading access
+		this.recordReturn(this.app,
+				this.app.setHttpSecurity(MockHttpSecuritySource.class),
+				security);
+		security.setSecurityTimeout(2000);
+		security.addProperty("name.first", "value.first");
+		security.addProperty("name.second", "value.second");
+
 		// Record linking template outputs
 		this.app.link(templateA, "OUTPUT_1", sectionA, "INPUT_A");
 		this.app.linkToHttpTemplate(templateA, "OUTPUT_2", templateB);
-		this.app.linkToResource(templateA, "OUTPUT_3", "Example.html");
+		this.app.link(templateA, "OUTPUT_3", security, "Authenticate");
+		this.app.linkToResource(templateA, "OUTPUT_4", "Example.html");
 
 		// Record linking section outputs
 		this.app.link(sectionA, "OUTPUT_A", sectionB, "INPUT_1");
 		this.app.linkToHttpTemplate(sectionA, "OUTPUT_B", templateA);
-		this.app.linkToResource(sectionA, "OUTPUT_C", "Example.html");
+		this.app.link(sectionA, "OUTPUT_C", security, "Authenticate");
+		this.app.linkToResource(sectionA, "OUTPUT_D", "Example.html");
+
+		// Record link access outputs
+		this.app.link(security, "OUTPUT_ONE", sectionB, "INPUT_1");
+		this.app.linkToHttpTemplate(security, "OUTPUT_TWO", templateA);
+		this.app.linkToResource(security, "OUTPUT_THREE", "Example.html");
 
 		// Record linking escalations
 		this.app.linkEscalation(Exception.class, sectionA, "INPUT_A");

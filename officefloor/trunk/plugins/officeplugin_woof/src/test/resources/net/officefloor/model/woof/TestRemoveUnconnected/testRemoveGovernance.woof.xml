@@ -9,6 +9,8 @@
 			location="SECTION_LOCATION" />
 	</sections>
 
+	<access source="net.example.HttpSecuritySource" />
+
 	<governances />
 
 	<resources>

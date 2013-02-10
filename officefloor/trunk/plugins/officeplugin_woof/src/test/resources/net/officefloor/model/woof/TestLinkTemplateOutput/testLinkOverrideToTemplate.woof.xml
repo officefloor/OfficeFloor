@@ -19,6 +19,11 @@
 			<input name="INPUT" />
 		</section>
 	</sections>
+	
+	<access>
+		<input name="Authenticate" />
+		<input name="Authenticate_LINK" />
+	</access>
 
 	<resources>
 		<resource name="RESOURCE" />

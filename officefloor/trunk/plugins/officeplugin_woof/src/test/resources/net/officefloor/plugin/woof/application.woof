@@ -10,9 +10,12 @@
                 <template name="TEMPLATE_B"/>
             </output>
             <output name="OUTPUT_3">
+            	<access input="Authenticate"/>
+            </output>
+            <output name="OUTPUT_4">
                 <resource name="RESOURCE"/>
             </output>
-            <output name="OUTPUT_4"/>
+            <output name="OUTPUT_5"/>
             <link name="LINK_1" secure="true"/>
             <link name="LINK_2" secure="false"/>
             <redirect method="REDIRECT_POST"/>
@@ -35,15 +38,34 @@
                 <template name="TEMPLATE_A"/>
             </output>
             <output name="OUTPUT_C">
+                <access input="Authenticate"/>
+            </output>
+            <output name="OUTPUT_D">
                 <resource name="RESOURCE"/>
             </output>
-            <output name="OUTPUT_D"/>
+            <output name="OUTPUT_E"/>
         </section>
         <section name="SECTION_B" source="CLASS"
          location="net.officefloor.plugin.woof.WoofLoaderTest$Section">
             <input name="INPUT_1"/>
         </section>
     </sections>
+    
+    <access source="net.officefloor.plugin.web.http.security.scheme.MockHttpSecuritySource"
+     timeout="2000">
+    	<property name="name.first" value="value.first"/>
+    	<property name="name.second" value="value.second"/>
+    	<input name="Authenticate" parameter-type="net.example.HttpCredentials"/>
+    	<output name="OUTPUT_ONE">
+    		<input section="SECTION_B" input="INPUT_1"/>
+    	</output>
+    	<output name="OUTPUT_TWO">
+    		<template name="TEMPLATE_A"/>
+    	</output>
+    	<output name="OUTPUT_THREE">
+    		<resource name="RESOURCE"/>
+    	</output>
+    </access>
     
     <resources>
         <resource name="RESOURCE" path="Example.html"/>

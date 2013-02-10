@@ -1,0 +1,8 @@
+<woof>
+
+	<access source="net.other.HttpSecuritySource" timeout="3000">
+		<property name="name.a" value="value.a" />
+		<property name="name.b" value="value.b" />
+	</access>
+
+</woof>

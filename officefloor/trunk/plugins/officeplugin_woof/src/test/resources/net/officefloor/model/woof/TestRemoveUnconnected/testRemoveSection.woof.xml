@@ -10,6 +10,8 @@
 		<governance name="GOVERNANCE" source="net.example.ExampleGovernanceSource" />
 	</governances>
 
+	<access source="net.example.HttpSecuritySource" />
+
 	<resources>
 		<resource name="RESOURCE" path="Example.html" />
 	</resources>
