@@ -26,7 +26,7 @@ state "test" that does not cause "regression" of existing before/state tests is 
 The indirection of Continuation Injection allows the brain to re-wire itself for the new operations and 
 connections (possibly explaining the eureka/light bulb moment one experiences).  As more re-wiring occurs, there
 is more operations/continuations that must be stored and processed for decisions.  The increased number explains
-why older people are typically wiser and inheritance of this is why we all get smarter.  It may also explain
+why older people are typically wiser and inheritance of this is why generations get smarter.  It may also explain
 why at certain ages that problems set in with the brain due to requiring too much "brain hardware" to run existing
 operation/continuations leaving little of the "brain hardware" left for learning (possibly with it triggering
 excessive garbage collection removing necessary operations/continuations).
@@ -39,5 +39,12 @@ functions).
 
 Relating this to OfficeFloor, this would be the dynamic creation of Sections and their evolution in working together.
 
-This only reinforces my view that OfficeFloor needs to be an open project.
+It also explains that the Internet is becoming a brain.  It is currently static with developers providing the 
+learning.  Only successful applications are re-wired into the core of the brain (e.g. Google).  From a business 
+perspective, competition is ok for the learning process to find the best applications.  My concern is that 
+ownership stays with the business when the re-wiring of the application into the "brain" occurs.  As people are 
+currently the dynamic decision makers to the Internet, this could effectively allow businesses to control us 
+(we become an Asynchronous Operation that businesses invert control over).  And later when there is potential 
+for dynamic decision making, keeping us out of the decision making and effectively making them dictators.
 
+This only reinforces the view that OfficeFloor needs to be an open project.
