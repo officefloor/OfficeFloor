@@ -84,11 +84,14 @@ public class RefactorTemplateOperation extends
 				.getCometManualPublishMethodName();
 		Map<String, String> outputNameMapping = instance.getOutputNameMapping();
 
+		// TODO provide is continue rendering
+		boolean isContinueRendering = true;
+
 		// Create change to refactor template
 		Change<WoofTemplateModel> change = changes.refactorTemplate(template,
 				uri, path, logicClassName, type, isTemplateSecure, linksSecure,
-				renderRedirectHttpMethods, entryPointClassName,
-				serviceAsyncInterfaces, isEnableComet,
+				renderRedirectHttpMethods, isContinueRendering,
+				entryPointClassName, serviceAsyncInterfaces, isEnableComet,
 				cometManualPublishMethodName, outputNameMapping);
 
 		// Return the change to refactor the template

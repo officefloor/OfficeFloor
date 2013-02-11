@@ -76,11 +76,14 @@ public class AddTemplateOperation extends
 		String cometManualPublishMethodName = instance
 				.getCometManualPublishMethodName();
 
+		// TODO provide continue rendering
+		boolean isContinueRendering = true;
+
 		// Create change to add template
 		Change<WoofTemplateModel> change = changes.addTemplate(uri, path,
 				logicClassName, type, isTemplateSecure, linksSecure,
-				renderRedirectHttpMethods, entryPointClassName,
-				serviceAsyncInterfaces, isEnableComet,
+				renderRedirectHttpMethods, isContinueRendering,
+				entryPointClassName, serviceAsyncInterfaces, isEnableComet,
 				cometManualPublishMethodName);
 
 		// Position template
