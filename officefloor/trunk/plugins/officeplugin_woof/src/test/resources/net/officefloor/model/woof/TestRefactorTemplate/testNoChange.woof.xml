@@ -12,6 +12,7 @@
 			<output name="OUTPUT_3">
 				<resource name="RESOURCE" />
 			</output>
+			<output name="output" />
 			<link name="LINK_1" secure="true" />
 			<link name="LINK_2" secure="false" />
 			<redirect method="OTHER" />

@@ -81,6 +81,46 @@ public class AddTest extends AbstractWoofChangesTestCase {
 	}
 
 	/**
+	 * Ensure able to add {@link WoofTemplateModel} continuing rendering.
+	 */
+	public void testAddTemplateWithContinueRendering() {
+
+		// Create the section type
+		SectionType section = this
+				.constructSectionType(new SectionTypeConstructor() {
+					@Override
+					public void construct(SectionTypeContext context) {
+						context.addSectionInput("renderTemplate", null);
+						context.addSectionOutput(
+								HttpTemplateSectionSource.ON_COMPLETION_OUTPUT_NAME,
+								null, false);
+						context.addSectionOutput("OUTPUT_1", Integer.class,
+								false);
+						context.addSectionOutput("OUTPUT_2", null, false);
+						context.addSectionOutput("NOT_INCLUDE_ESCALTION",
+								IOException.class, true);
+						context.addSectionObject("IGNORE_OBJECT",
+								DataSource.class, null);
+					}
+				});
+
+		// Add the template
+		Change<WoofTemplateModel> change = this.operations.addTemplate("uri",
+				"example/Template.ofp", "net.example.LogicClass", section,
+				false, null, null, true, null, null, false, null);
+		change.getTarget().setX(100);
+		change.getTarget().setY(101);
+
+		// Validate change
+		this.assertChange(change, null, "Add Template", true);
+
+		// Ensure appropriately added template
+		change.apply();
+		WoofTemplateModel template = this.model.getWoofTemplates().get(0);
+		assertSame("Incorrect template", template, change.getTarget());
+	}
+
+	/**
 	 * Ensure able to add root {@link WoofTemplateModel}.
 	 */
 	public void testAddRootTemplate() {

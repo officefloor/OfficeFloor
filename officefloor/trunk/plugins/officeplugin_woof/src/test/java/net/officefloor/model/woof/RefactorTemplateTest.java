@@ -26,6 +26,7 @@ import javax.sql.DataSource;
 import net.officefloor.compile.section.SectionType;
 import net.officefloor.model.change.Change;
 import net.officefloor.model.change.Conflict;
+import net.officefloor.plugin.web.http.template.section.HttpTemplateSectionSource;
 
 /**
  * Tests refactoring the {@link WoofTemplateModel}.
@@ -85,6 +86,9 @@ public class RefactorTemplateTest extends AbstractWoofChangesTestCase {
 						context.addSectionOutput("OUTPUT_2", String.class,
 								false);
 						context.addSectionOutput("OUTPUT_3", null, false);
+						context.addSectionOutput(
+								HttpTemplateSectionSource.ON_COMPLETION_OUTPUT_NAME,
+								null, false);
 						context.addSectionOutput("NOT_INCLUDE_ESCALTION",
 								IOException.class, true);
 						context.addSectionObject("IGNORE_OBJECT",
@@ -148,6 +152,9 @@ public class RefactorTemplateTest extends AbstractWoofChangesTestCase {
 						context.addSectionOutput("OUTPUT_2", String.class,
 								false);
 						context.addSectionOutput("OUTPUT_3", null, false);
+						context.addSectionOutput(
+								HttpTemplateSectionSource.ON_COMPLETION_OUTPUT_NAME,
+								null, false);
 					}
 				});
 
