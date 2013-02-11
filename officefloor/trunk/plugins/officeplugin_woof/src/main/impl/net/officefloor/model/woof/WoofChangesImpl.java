@@ -820,9 +820,18 @@ public class WoofChangesImpl implements WoofChanges {
 				continue;
 			}
 
-			// Add the Woof Template Output
+			// Obtain the output details
 			String outputName = output.getSectionOutputName();
 			String argumentType = output.getArgumentType();
+
+			// Ignore continue rendering (if appropriate)
+			if ((!isContinueRendering)
+					&& (HttpTemplateSectionSource.ON_COMPLETION_OUTPUT_NAME
+							.equals(outputName))) {
+				continue; // ignore continue rendering
+			}
+
+			// Add the Woof Template Output
 			template.addOutput(new WoofTemplateOutputModel(outputName,
 					argumentType));
 		}
@@ -1288,14 +1297,21 @@ public class WoofChangesImpl implements WoofChanges {
 				continue;
 			}
 
-			// Obtain the mapped section output model
+			// Obtain the output details
 			final String outputName = outputType.getSectionOutputName();
+			final String argumentType = outputType.getArgumentType();
+
+			// Ignore continue rendering (if appropriate)
+			if ((!isContinueRendering)
+					&& (HttpTemplateSectionSource.ON_COMPLETION_OUTPUT_NAME
+							.equals(outputName))) {
+				continue; // ignore continue rendering
+			}
+
+			// Obtain the mapped section output model
 			String mappedOutputName = templateOutputNameMapping.get(outputName);
 			final WoofTemplateOutputModel existingOutputModel = existingOutputNameMapping
 					.remove(mappedOutputName);
-
-			// Obtain further type details
-			final String argumentType = outputType.getArgumentType();
 
 			// Determine action to take based on existing output
 			Change<WoofTemplateOutputModel> templateOutputChange;
