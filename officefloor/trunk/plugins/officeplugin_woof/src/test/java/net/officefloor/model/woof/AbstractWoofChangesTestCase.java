@@ -454,11 +454,12 @@ public abstract class AbstractWoofChangesTestCase extends
 	 *            {@link HttpSecurityTypeConstructor}.
 	 * @return {@link HttpSecurityType}.
 	 */
-	protected <C, D extends Enum<D>, F extends Enum<F>> HttpSecurityType<HttpSecurity, C, D, F> constructHttpSecurityType(
+	@SuppressWarnings({ "unchecked", "rawtypes" })
+	protected <C> HttpSecurityType<HttpSecurity, C, ?, ?> constructHttpSecurityType(
 			Class<C> credentialsType, HttpSecurityTypeConstructor constructor) {
 
 		// Construct and return the office section
-		HttpSecurityTypeContextImpl<C, D, F> context = new HttpSecurityTypeContextImpl<C, D, F>(
+		HttpSecurityTypeContextImpl<C, ?, ?> context = new HttpSecurityTypeContextImpl(
 				credentialsType);
 		constructor.construct(context);
 		return context;
@@ -495,8 +496,8 @@ public abstract class AbstractWoofChangesTestCase extends
 		 * @param key
 		 *            Dependency key.
 		 */
-		<D extends Enum<D>> void addDependency(String dependencyName,
-				Class<?> dependencyType, String typeQualifier, D key);
+		void addDependency(String dependencyName, Class<?> dependencyType,
+				String typeQualifier, Enum<?> key);
 
 		/**
 		 * Adds a {@link HttpSecurityFlowType}.
@@ -508,8 +509,7 @@ public abstract class AbstractWoofChangesTestCase extends
 		 * @param key
 		 *            Flow key.
 		 */
-		<F extends Enum<F>> void addFlow(String flowName,
-				Class<?> argumentType, F key);
+		void addFlow(String flowName, Class<?> argumentType, Enum<?> key);
 	}
 
 	/**
@@ -549,19 +549,20 @@ public abstract class AbstractWoofChangesTestCase extends
 		 */
 
 		@Override
-		public <d extends Enum<d>> void addDependency(String dependencyName,
-				Class<?> dependencyType, String typeQualifier, d key) {
+		@SuppressWarnings({ "unchecked", "rawtypes" })
+		public void addDependency(String dependencyName,
+				Class<?> dependencyType, String typeQualifier, Enum<?> key) {
 			// Create and register the dependency (using next index)
-			this.dependencies.add(new HttpSecurityTypeItem<d>(dependencyName,
+			this.dependencies.add(new HttpSecurityTypeItem(dependencyName,
 					dependencyType, typeQualifier, key, this.dependencies
 							.size()));
 		}
 
 		@Override
-		public <f extends Enum<f>> void addFlow(String flowName,
-				Class<?> argumentType, f key) {
+		@SuppressWarnings({ "unchecked", "rawtypes" })
+		public void addFlow(String flowName, Class<?> argumentType, Enum<?> key) {
 			// Create and register the flow (using next index)
-			this.flows.add(new HttpSecurityTypeItem<f>(flowName, argumentType,
+			this.flows.add(new HttpSecurityTypeItem(flowName, argumentType,
 					null, key, this.flows.size()));
 		}
 
