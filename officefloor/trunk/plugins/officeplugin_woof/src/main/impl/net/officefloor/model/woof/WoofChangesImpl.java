@@ -42,6 +42,8 @@ import net.officefloor.model.impl.change.NoChange;
 import net.officefloor.plugin.comet.web.http.section.CometHttpTemplateSectionExtension;
 import net.officefloor.plugin.gwt.module.GwtChanges;
 import net.officefloor.plugin.gwt.web.http.section.GwtHttpTemplateSectionExtension;
+import net.officefloor.plugin.web.http.security.HttpSecuritySectionSource;
+import net.officefloor.plugin.web.http.security.type.HttpSecurityFlowType;
 import net.officefloor.plugin.web.http.security.type.HttpSecurityType;
 import net.officefloor.plugin.web.http.template.section.HttpTemplateSectionSource;
 import net.officefloor.plugin.woof.WoofOfficeFloorSource;
@@ -122,6 +124,16 @@ public class WoofChangesImpl implements WoofChanges {
 		@Override
 		public String extractName(WoofSectionOutputModel model) {
 			return model.getWoofSectionOutputName();
+		}
+	};
+
+	/**
+	 * {@link WoofAccessInputModel} {@link NameExtractor}.
+	 */
+	private static final NameExtractor<WoofAccessInputModel> ACCESS_INPUT_NAME_EXTRACTOR = new NameExtractor<WoofAccessInputModel>() {
+		@Override
+		public String extractName(WoofAccessInputModel model) {
+			return model.getWoofAccessInputName();
 		}
 	};
 
@@ -368,6 +380,43 @@ public class WoofChangesImpl implements WoofChanges {
 	private static void sortSectionInputOutputs(WoofSectionModel section) {
 		sortByName(section.getInputs(), SECTION_INPUT_NAME_EXTRACTOR);
 		sortByName(section.getOutputs(), SECTION_OUTPUT_NAME_EXTRACTOR);
+	}
+
+	/**
+	 * Sorts the {@link WoofAccessInputModel} and {@link WoofAccessOutputModel}
+	 * instances of the {@link WoofAccessModel}.
+	 * 
+	 * @param access
+	 *            {@link WoofAccessModel}.
+	 */
+	private static void sortAccessInputOutputs(WoofAccessModel access) {
+
+		// Sort the inputs
+		sortByName(access.getInputs(), ACCESS_INPUT_NAME_EXTRACTOR);
+
+		// Sort outputs keeping Failure output last
+		Collections.sort(access.getOutputs(),
+				new Comparator<WoofAccessOutputModel>() {
+					@Override
+					public int compare(WoofAccessOutputModel a,
+							WoofAccessOutputModel b) {
+						String nameA = a.getWoofAccessOutputName();
+						String nameB = b.getWoofAccessOutputName();
+						if (nameA.equals(nameB)) {
+							return 0; // same
+						} else if (HttpSecuritySectionSource.OUTPUT_FAILURE
+								.equals(nameA)) {
+							return 1; // render complete output always last
+						} else if (HttpSecuritySectionSource.OUTPUT_FAILURE
+								.equals(nameB)) {
+							return -1; // render complete output always last
+						} else {
+							// Sort by name
+							return String.CASE_INSENSITIVE_ORDER.compare(nameA,
+									nameB);
+						}
+					}
+				});
 	}
 
 	/**
@@ -1660,7 +1709,8 @@ public class WoofChangesImpl implements WoofChanges {
 						existingInputModel.setParameterType(parameterType);
 
 						// Rename connections links
-						this.renameConnections(sectionName, inputName);
+						this.renameConnections(existingInputModel, sectionName,
+								inputName);
 					}
 
 					@Override
@@ -1671,48 +1721,50 @@ public class WoofChangesImpl implements WoofChanges {
 								.setParameterType(existingParameterType);
 
 						// Revert connection links
-						this.renameConnections(existingSectionName,
-								existingInputName);
+						this.renameConnections(existingInputModel,
+								existingSectionName, existingInputName);
 					}
 
 					/**
 					 * Renames the {@link WoofSectionInputModel} connection
 					 * names.
 					 * 
+					 * @param input
+					 *            {@link WoofSectionInputModel}.
 					 * @param sectionName
 					 *            {@link WoofSectionModel} name.
+					 * @param inputName
+					 *            {@link WoofSectionInputModel} name.
 					 */
-					private void renameConnections(String sectionName,
-							String inputName) {
-						for (WoofSectionInputModel input : section.getInputs()) {
+					private void renameConnections(WoofSectionInputModel input,
+							String sectionName, String inputName) {
 
-							// Rename exception connections
-							for (WoofExceptionToWoofSectionInputModel conn : input
-									.getWoofExceptions()) {
-								conn.setSectionName(sectionName);
-								conn.setInputName(inputName);
-							}
+						// Rename exception connections
+						for (WoofExceptionToWoofSectionInputModel conn : input
+								.getWoofExceptions()) {
+							conn.setSectionName(sectionName);
+							conn.setInputName(inputName);
+						}
 
-							// Rename section output connections
-							for (WoofSectionOutputToWoofSectionInputModel conn : input
-									.getWoofSectionOutputs()) {
-								conn.setSectionName(sectionName);
-								conn.setInputName(inputName);
-							}
+						// Rename section output connections
+						for (WoofSectionOutputToWoofSectionInputModel conn : input
+								.getWoofSectionOutputs()) {
+							conn.setSectionName(sectionName);
+							conn.setInputName(inputName);
+						}
 
-							// Rename start connections
-							for (WoofStartToWoofSectionInputModel conn : input
-									.getWoofStarts()) {
-								conn.setSectionName(sectionName);
-								conn.setInputName(inputName);
-							}
+						// Rename start connections
+						for (WoofStartToWoofSectionInputModel conn : input
+								.getWoofStarts()) {
+							conn.setSectionName(sectionName);
+							conn.setInputName(inputName);
+						}
 
-							// Rename template connections
-							for (WoofTemplateOutputToWoofSectionInputModel conn : input
-									.getWoofTemplateOutputs()) {
-								conn.setSectionName(sectionName);
-								conn.setInputName(inputName);
-							}
+						// Rename template connections
+						for (WoofTemplateOutputToWoofSectionInputModel conn : input
+								.getWoofTemplateOutputs()) {
+							conn.setSectionName(sectionName);
+							conn.setInputName(inputName);
 						}
 					}
 				};
@@ -1987,27 +2039,508 @@ public class WoofChangesImpl implements WoofChanges {
 			String httpSecuritySourceClassName, long timeout,
 			PropertyList properties,
 			HttpSecurityType<?, ?, ?, ?> httpSecurityType) {
-		// TODO implement WoofChanges.setAccess
-		throw new UnsupportedOperationException(
-				"TODO implement WoofChanges.setAccess");
+
+		// Create the action
+		final WoofAccessModel woofAccess = new WoofAccessModel(
+				httpSecuritySourceClassName, timeout);
+
+		// Add the properties (if available)
+		if (properties != null) {
+			for (Property property : properties) {
+				woofAccess.addProperty(new PropertyModel(property.getName(),
+						property.getValue()));
+			}
+		}
+
+		// Add the outputs
+		boolean isOutputFlow = false;
+		for (HttpSecurityFlowType<?> output : httpSecurityType.getFlowTypes()) {
+			// Add the output
+			String outputName = output.getFlowName();
+			Class<?> argumentType = output.getArgumentType();
+			woofAccess.addOutput(new WoofAccessOutputModel(outputName,
+					(argumentType == null ? null : argumentType.getName())));
+
+			// Has output flow
+			isOutputFlow = true;
+		}
+		woofAccess.addOutput(new WoofAccessOutputModel(
+				HttpSecuritySectionSource.OUTPUT_FAILURE, Throwable.class
+						.getName()));
+
+		// Add the inputs (only if have output requiring application behaviour)
+		if (isOutputFlow) {
+			Class<?> credentialsType = httpSecurityType.getCredentialsClass();
+			woofAccess
+					.addInput(new WoofAccessInputModel("Authenticate",
+							(credentialsType == null ? null : credentialsType
+									.getName())));
+		}
+
+		// Sort the inputs/outputs
+		sortAccessInputOutputs(woofAccess);
+
+		// Create change to set access
+		Change<WoofAccessModel> change = new AbstractChange<WoofAccessModel>(
+				woofAccess, "Set Access") {
+			@Override
+			public void apply() {
+				WoofChangesImpl.this.model.setWoofAccess(woofAccess);
+			}
+
+			@Override
+			public void revert() {
+				WoofChangesImpl.this.model.setWoofAccess(null);
+			}
+		};
+
+		// Remove access if already specified
+		WoofAccessModel existingAccess = this.model.getWoofAccess();
+		if (existingAccess != null) {
+			// Create change to remove access
+			Change<WoofAccessModel> removeChange = this
+					.removeAccess(existingAccess);
+
+			// Provide aggregate change to remove and set
+			change = new AggregateChange<WoofAccessModel>(woofAccess,
+					"Set Access", removeChange, change);
+		}
+
+		// Return the change
+		return change;
 	}
 
 	@Override
-	public Change<WoofAccessModel> refactorAccess(WoofAccessModel access,
-			String httpSecuritySourceClassName, long timeout,
-			PropertyList properties,
+	public Change<WoofAccessModel> refactorAccess(final WoofAccessModel access,
+			final String httpSecuritySourceClassName, final long timeout,
+			final PropertyList properties,
 			HttpSecurityType<?, ?, ?, ?> httpSecurityType,
 			Map<String, String> accessOutputNameMapping) {
-		// TODO implement WoofChanges.refactorAccess
-		throw new UnsupportedOperationException(
-				"TODO implement WoofChanges.refactorAccess");
+
+		// Ensure access to remove
+		if (access != this.model.getWoofAccess()) {
+			// Access model not in model
+			return new NoChange<WoofAccessModel>(access, "Refactor access",
+					"Access " + access.getHttpSecuritySourceClassName()
+							+ " is not in WoOF model");
+		}
+
+		// Create change to sort outputs
+		Change<WoofAccessModel> sortChange = new AbstractChange<WoofAccessModel>(
+				access, "Sort outputs") {
+			@Override
+			public void apply() {
+				sortAccessInputOutputs(access);
+			}
+
+			@Override
+			public void revert() {
+				this.apply(); // sort
+			}
+		};
+
+		// Provide list of changes to aggregate
+		List<Change<?>> changes = new LinkedList<Change<?>>();
+
+		// Sort outputs at start (so revert has right order)
+		changes.add(sortChange);
+
+		// Obtain the existing details
+		final String existingHttpSecuritySourceClassName = access
+				.getHttpSecuritySourceClassName();
+		final long existingTimeout = access.getTimeout();
+		final List<PropertyModel> existingProperties = new ArrayList<PropertyModel>(
+				access.getProperties());
+
+		// Create change to attributes and properties
+		Change<WoofAccessModel> attributeChange = new AbstractChange<WoofAccessModel>(
+				access, "Refactor attributes") {
+			@Override
+			public void apply() {
+				// Refactor details
+				access.setHttpSecuritySourceClassName(httpSecuritySourceClassName);
+				access.setTimeout(timeout);
+
+				// Refactor the properties
+				access.getProperties().clear();
+				if (properties != null) {
+					for (Property property : properties) {
+						access.addProperty(new PropertyModel(
+								property.getName(), property.getValue()));
+					}
+				}
+			}
+
+			@Override
+			public void revert() {
+				// Revert attributes
+				access.setHttpSecuritySourceClassName(existingHttpSecuritySourceClassName);
+				access.setTimeout(existingTimeout);
+
+				// Revert the properties
+				access.getProperties().clear();
+				for (PropertyModel property : existingProperties) {
+					access.addProperty(property);
+				}
+			}
+		};
+		changes.add(attributeChange);
+
+		// Create the listing of inputs of resulting refactor
+		List<ModelItemStruct> outputs = new LinkedList<ModelItemStruct>();
+		for (HttpSecurityFlowType<?> flowType : httpSecurityType.getFlowTypes()) {
+
+			// Obtain flow details
+			final String outputName = flowType.getFlowName();
+			Class<?> argumentTypeClass = flowType.getArgumentType();
+			final String argumentType = (argumentTypeClass == null ? null
+					: argumentTypeClass.getName());
+
+			// Create the output for the flow
+			outputs.add(new ModelItemStruct(outputName, argumentType));
+		}
+		outputs.add(new ModelItemStruct(
+				HttpSecuritySectionSource.OUTPUT_FAILURE, Throwable.class
+						.getName()));
+
+		// Determine if application behaviour required (except for failure)
+		List<ModelItemStruct> inputs = new LinkedList<ModelItemStruct>();
+		if (outputs.size() > 1) {
+			// Require application behaviour so allow application authentication
+			Class<?> credentialsClass = httpSecurityType.getCredentialsClass();
+			String credentialsType = (credentialsClass == null ? null
+					: credentialsClass.getName());
+			inputs.add(new ModelItemStruct(
+					HttpSecuritySectionSource.INPUT_AUTHENTICATE,
+					credentialsType));
+		}
+
+		// Obtain the mapping of existing inputs
+		Map<String, WoofAccessInputModel> existingInputNameMapping = new HashMap<String, WoofAccessInputModel>();
+		for (WoofAccessInputModel input : access.getInputs()) {
+			existingInputNameMapping.put(input.getWoofAccessInputName(), input);
+		}
+
+		// Refactor the inputs (either refactoring, adding or removing)
+		for (ModelItemStruct input : inputs) {
+
+			// Obtain the access input model details
+			final String inputName = input.name;
+			final String parameterType = input.type;
+
+			// Obtain the equivalent input on model
+			final WoofAccessInputModel existingInputModel = existingInputNameMapping
+					.remove(inputName);
+
+			// Determine action to take based on existing input
+			Change<WoofAccessInputModel> accessInputChange;
+			if (existingInputModel != null) {
+				// Create change to refactor existing input
+				final String existingInputName = existingInputModel
+						.getWoofAccessInputName();
+				final String existingParameterType = existingInputModel
+						.getParameterType();
+				accessInputChange = new AbstractChange<WoofAccessInputModel>(
+						existingInputModel, "Refactor Access Input") {
+					@Override
+					public void apply() {
+						existingInputModel.setWoofAccessInputName(inputName);
+						existingInputModel.setParameterType(parameterType);
+
+						// Rename connections links
+						this.renameConnections(existingInputModel, inputName);
+					}
+
+					@Override
+					public void revert() {
+						existingInputModel
+								.setWoofAccessInputName(existingInputName);
+						existingInputModel
+								.setParameterType(existingParameterType);
+
+						// Revert connection links
+						this.renameConnections(existingInputModel,
+								existingInputName);
+					}
+
+					/**
+					 * Renames the {@link WoofAccessInputModel} connection
+					 * names.
+					 * 
+					 * @param input
+					 *            {@link WoofAccessInputModel}.
+					 * @param inputName
+					 *            {@link WoofAccessInputModel} name.
+					 */
+					private void renameConnections(WoofAccessInputModel input,
+							String inputName) {
+
+						// Rename section output connections
+						for (WoofSectionOutputToWoofAccessInputModel conn : input
+								.getWoofSectionOutputs()) {
+							conn.setInputName(inputName);
+						}
+
+						// Rename template connections
+						for (WoofTemplateOutputToWoofAccessInputModel conn : input
+								.getWoofTemplateOutputs()) {
+							conn.setInputName(inputName);
+						}
+					}
+				};
+
+			} else {
+				// Create change to add input (with no URI)
+				final WoofAccessInputModel newInputModel = new WoofAccessInputModel(
+						inputName, parameterType);
+				accessInputChange = new AbstractChange<WoofAccessInputModel>(
+						newInputModel, "Add Access Input") {
+					@Override
+					public void apply() {
+						access.addInput(newInputModel);
+					}
+
+					@Override
+					public void revert() {
+						access.removeInput(newInputModel);
+					}
+				};
+			}
+			changes.add(accessInputChange);
+		}
+		for (final WoofAccessInputModel unmappedInputModel : existingInputNameMapping
+				.values()) {
+			// Create change to remove the unmapped input model
+			Change<WoofAccessInputModel> unmappedInputChange = new AbstractChange<WoofAccessInputModel>(
+					unmappedInputModel, "Remove Access Input") {
+
+				/**
+				 * {@link ConnectionModel} instances removed.
+				 */
+				private ConnectionModel[] connections;
+
+				@Override
+				public void apply() {
+
+					// Remove the connections
+					List<ConnectionModel> list = new LinkedList<ConnectionModel>();
+					removeConnections(
+							unmappedInputModel.getWoofSectionOutputs(), list);
+					removeConnections(
+							unmappedInputModel.getWoofTemplateOutputs(), list);
+					this.connections = list.toArray(new ConnectionModel[list
+							.size()]);
+
+					// Remove the access input
+					access.removeInput(unmappedInputModel);
+				}
+
+				@Override
+				public void revert() {
+
+					// Add input back to access
+					access.addInput(unmappedInputModel);
+
+					// Add back in connections
+					reconnectConnections(this.connections);
+				}
+			};
+			changes.add(unmappedInputChange);
+		}
+
+		// Obtain the mapping of existing outputs
+		Map<String, WoofAccessOutputModel> existingOutputNameMapping = new HashMap<String, WoofAccessOutputModel>();
+		for (WoofAccessOutputModel output : access.getOutputs()) {
+			existingOutputNameMapping.put(output.getWoofAccessOutputName(),
+					output);
+		}
+
+		// Refactor the outputs (either refactoring, adding or removing)
+		for (ModelItemStruct output : outputs) {
+
+			// Obtain the mapped access output model
+			final String outputName = output.name;
+			String mappedOutputName = (accessOutputNameMapping == null ? null
+					: accessOutputNameMapping.get(outputName));
+			final WoofAccessOutputModel existingOutputModel = existingOutputNameMapping
+					.remove(mappedOutputName);
+
+			// Obtain further type details
+			final String argumentType = output.type;
+
+			// Determine action to take based on existing output
+			Change<WoofAccessOutputModel> accessOutputChange;
+			if (existingOutputModel != null) {
+				// Create change to refactor existing output
+				final String existingOutputName = existingOutputModel
+						.getWoofAccessOutputName();
+				final String existingArgumentType = existingOutputModel
+						.getArgumentType();
+				accessOutputChange = new AbstractChange<WoofAccessOutputModel>(
+						existingOutputModel, "Refactor Access Output") {
+					@Override
+					public void apply() {
+						existingOutputModel.setWoofAccessOutputName(outputName);
+						existingOutputModel.setArgumentType(argumentType);
+					}
+
+					@Override
+					public void revert() {
+						existingOutputModel
+								.setWoofAccessOutputName(existingOutputName);
+						existingOutputModel
+								.setArgumentType(existingArgumentType);
+					}
+				};
+
+			} else {
+				// Create change to add output
+				final WoofAccessOutputModel newOutputModel = new WoofAccessOutputModel(
+						outputName, argumentType);
+				accessOutputChange = new AbstractChange<WoofAccessOutputModel>(
+						newOutputModel, "Add Access Output") {
+					@Override
+					public void apply() {
+						access.addOutput(newOutputModel);
+					}
+
+					@Override
+					public void revert() {
+						access.removeOutput(newOutputModel);
+					}
+				};
+			}
+			changes.add(accessOutputChange);
+		}
+		for (final WoofAccessOutputModel unmappedOutputModel : existingOutputNameMapping
+				.values()) {
+			// Create change to remove the unmapped output model
+			Change<WoofAccessOutputModel> unmappedOutputChange = new AbstractChange<WoofAccessOutputModel>(
+					unmappedOutputModel, "Remove Access Output") {
+
+				/**
+				 * {@link ConnectionModel} instances removed.
+				 */
+				private ConnectionModel[] connections;
+
+				@Override
+				public void apply() {
+
+					// Remove the connections
+					List<ConnectionModel> list = new LinkedList<ConnectionModel>();
+					removeConnection(unmappedOutputModel.getWoofResource(),
+							list);
+					removeConnection(unmappedOutputModel.getWoofSectionInput(),
+							list);
+					removeConnection(unmappedOutputModel.getWoofTemplate(),
+							list);
+					this.connections = list.toArray(new ConnectionModel[list
+							.size()]);
+
+					// Remove the access output
+					access.removeOutput(unmappedOutputModel);
+				}
+
+				@Override
+				public void revert() {
+
+					// Add output back to access
+					access.addOutput(unmappedOutputModel);
+
+					// Add back in connections
+					reconnectConnections(this.connections);
+				}
+			};
+			changes.add(unmappedOutputChange);
+		}
+
+		// Sort inputs/outputs at end (so apply has right order)
+		changes.add(sortChange);
+
+		// Return aggregate change for refactoring
+		return new AggregateChange<WoofAccessModel>(access, "Refactor Access",
+				changes.toArray(new Change[changes.size()]));
+	}
+
+	/**
+	 * Item of a {@link Model}.
+	 */
+	private static class ModelItemStruct {
+
+		/**
+		 * Name.
+		 */
+		public final String name;
+
+		/**
+		 * Type.
+		 */
+		public final String type;
+
+		/**
+		 * Initiate.
+		 * 
+		 * @param name
+		 *            Name.
+		 * @param type
+		 *            Type.
+		 */
+		public ModelItemStruct(String name, String type) {
+			this.name = name;
+			this.type = type;
+		}
 	}
 
 	@Override
-	public Change<WoofAccessModel> removeAccess(WoofAccessModel access) {
-		// TODO implement WoofChanges.removeAccess
-		throw new UnsupportedOperationException(
-				"TODO implement WoofChanges.removeAccess");
+	public Change<WoofAccessModel> removeAccess(final WoofAccessModel access) {
+
+		// Ensure access to remove
+		if (access != this.model.getWoofAccess()) {
+			// Access model not in model
+			return new NoChange<WoofAccessModel>(access, "Remove access "
+					+ access.getHttpSecuritySourceClassName(), "Access "
+					+ access.getHttpSecuritySourceClassName()
+					+ " is not in WoOF model");
+		}
+
+		// Return change to remove access
+		return new AbstractChange<WoofAccessModel>(access, "Remove access "
+				+ access.getHttpSecuritySourceClassName()) {
+
+			/**
+			 * {@link ConnectionModel} instances.
+			 */
+			private ConnectionModel[] connections;
+
+			@Override
+			public void apply() {
+
+				// Remove the connections
+				List<ConnectionModel> list = new LinkedList<ConnectionModel>();
+				for (WoofAccessInputModel input : access.getInputs()) {
+					removeConnections(input.getWoofTemplateOutputs(), list);
+					removeConnections(input.getWoofSectionOutputs(), list);
+				}
+				for (WoofAccessOutputModel output : access.getOutputs()) {
+					removeConnection(output.getWoofTemplate(), list);
+					removeConnection(output.getWoofSectionInput(), list);
+					removeConnection(output.getWoofResource(), list);
+				}
+				this.connections = list
+						.toArray(new ConnectionModel[list.size()]);
+
+				// Remove the access
+				WoofChangesImpl.this.model.setWoofAccess(null);
+			}
+
+			@Override
+			public void revert() {
+				// Add back the access
+				WoofChangesImpl.this.model.setWoofAccess(access);
+				reconnectConnections(this.connections);
+				sortAccessInputOutputs(access);
+			}
+		};
 	}
 
 	@Override
@@ -2638,17 +3171,32 @@ public class WoofChangesImpl implements WoofChanges {
 	public Change<WoofTemplateOutputToWoofAccessInputModel> linkTemplateOutputToAccessInput(
 			WoofTemplateOutputModel templateOutput,
 			WoofAccessInputModel accessInput) {
-		// TODO implement WoofChanges.linkTemplateOutputToAccessInput
-		throw new UnsupportedOperationException(
-				"TODO implement WoofChanges.linkTemplateOutputToAccessInput");
+
+		// Create the connection
+		final WoofTemplateOutputToWoofAccessInputModel connection = new WoofTemplateOutputToWoofAccessInputModel(
+				accessInput.getWoofAccessInputName(), templateOutput,
+				accessInput);
+
+		// Return change to add connection
+		return new AddLinkChange<WoofTemplateOutputToWoofAccessInputModel, WoofTemplateOutputModel>(
+				connection, templateOutput,
+				"Link Template Output to Access Input") {
+			@Override
+			protected void addExistingConnections(
+					WoofTemplateOutputModel source, List<ConnectionModel> list) {
+				list.add(source.getWoofTemplate());
+				list.add(source.getWoofSectionInput());
+				list.add(source.getWoofAccessInput());
+				list.add(source.getWoofResource());
+			}
+		};
 	}
 
 	@Override
 	public Change<WoofTemplateOutputToWoofAccessInputModel> removeTemplateOuputToAccessInput(
 			WoofTemplateOutputToWoofAccessInputModel link) {
-		// TODO implement WoofChanges.removeTemplateOuputToAccessInput
-		throw new UnsupportedOperationException(
-				"TODO implement WoofChanges.removeTemplateOuputToAccessInput");
+		return new RemoveLinkChange<WoofTemplateOutputToWoofAccessInputModel>(
+				link, "Remove Template Output to Access Input");
 	}
 
 	@Override
@@ -2756,17 +3304,32 @@ public class WoofChangesImpl implements WoofChanges {
 	public Change<WoofSectionOutputToWoofAccessInputModel> linkSectionOutputToAccessInput(
 			WoofSectionOutputModel sectionOutput,
 			WoofAccessInputModel accessInput) {
-		// TODO implement WoofChanges.linkSectionOutputToAccessInput
-		throw new UnsupportedOperationException(
-				"TODO implement WoofChanges.linkSectionOutputToAccessInput");
+
+		// Create the connection
+		final WoofSectionOutputToWoofAccessInputModel connection = new WoofSectionOutputToWoofAccessInputModel(
+				accessInput.getWoofAccessInputName(), sectionOutput,
+				accessInput);
+
+		// Return change to add connection
+		return new AddLinkChange<WoofSectionOutputToWoofAccessInputModel, WoofSectionOutputModel>(
+				connection, sectionOutput,
+				"Link Section Output to Access Input") {
+			@Override
+			protected void addExistingConnections(
+					WoofSectionOutputModel source, List<ConnectionModel> list) {
+				list.add(source.getWoofTemplate());
+				list.add(source.getWoofSectionInput());
+				list.add(source.getWoofAccessInput());
+				list.add(source.getWoofResource());
+			}
+		};
 	}
 
 	@Override
 	public Change<WoofSectionOutputToWoofAccessInputModel> removeSectionOuputToAccessInput(
 			WoofSectionOutputToWoofAccessInputModel link) {
-		// TODO implement WoofChanges.removeSectionOuputToAccessInput
-		throw new UnsupportedOperationException(
-				"TODO implement WoofChanges.removeSectionOuputToAccessInput");
+		return new RemoveLinkChange<WoofSectionOutputToWoofAccessInputModel>(
+				link, "Remove Section Output to Access Input");
 	}
 
 	@Override
@@ -2801,50 +3364,98 @@ public class WoofChangesImpl implements WoofChanges {
 	@Override
 	public Change<WoofAccessOutputToWoofTemplateModel> linkAccessOutputToTemplate(
 			WoofAccessOutputModel accessOutput, WoofTemplateModel template) {
-		// TODO implement WoofChanges.linkAccessOutputToTemplate
-		throw new UnsupportedOperationException(
-				"TODO implement WoofChanges.linkAccessOutputToTemplate");
+
+		// Create the connection
+		final WoofAccessOutputToWoofTemplateModel connection = new WoofAccessOutputToWoofTemplateModel(
+				template.getWoofTemplateName(), accessOutput, template);
+
+		// Return change to add connection
+		return new AddLinkChange<WoofAccessOutputToWoofTemplateModel, WoofAccessOutputModel>(
+				connection, accessOutput, "Link Access Output to Template") {
+			@Override
+			protected void addExistingConnections(WoofAccessOutputModel source,
+					List<ConnectionModel> list) {
+				list.add(source.getWoofTemplate());
+				list.add(source.getWoofSectionInput());
+				list.add(source.getWoofResource());
+			}
+		};
 	}
 
 	@Override
 	public Change<WoofAccessOutputToWoofTemplateModel> removeAccessOuputToTemplate(
 			WoofAccessOutputToWoofTemplateModel link) {
-		// TODO implement WoofChanges.removeAccessOuputToTemplate
-		throw new UnsupportedOperationException(
-				"TODO implement WoofChanges.removeAccessOuputToTemplate");
+		return new RemoveLinkChange<WoofAccessOutputToWoofTemplateModel>(link,
+				"Remove Access Output to Template");
 	}
 
 	@Override
 	public Change<WoofAccessOutputToWoofSectionInputModel> linkAccessOutputToSectionInput(
 			WoofAccessOutputModel accessOutput,
 			WoofSectionInputModel sectionInput) {
-		// TODO implement WoofChanges.linkAccessOutputToSectionInput
-		throw new UnsupportedOperationException(
-				"TODO implement WoofChanges.linkAccessOutputToSectionInput");
+
+		// Obtain the containing section
+		WoofSectionModel section = this.getSection(sectionInput);
+		if (section == null) {
+			return new NoChange<WoofAccessOutputToWoofSectionInputModel>(
+					new WoofAccessOutputToWoofSectionInputModel(),
+					"The section input '"
+							+ sectionInput.getWoofSectionInputName()
+							+ "' was not found");
+		}
+
+		// Create the connection
+		final WoofAccessOutputToWoofSectionInputModel connection = new WoofAccessOutputToWoofSectionInputModel(
+				section.getWoofSectionName(),
+				sectionInput.getWoofSectionInputName(), accessOutput,
+				sectionInput);
+
+		// Return change to add connection
+		return new AddLinkChange<WoofAccessOutputToWoofSectionInputModel, WoofAccessOutputModel>(
+				connection, accessOutput, "Link Access Output to Section Input") {
+			@Override
+			protected void addExistingConnections(WoofAccessOutputModel source,
+					List<ConnectionModel> list) {
+				list.add(source.getWoofTemplate());
+				list.add(source.getWoofSectionInput());
+				list.add(source.getWoofResource());
+			}
+		};
 	}
 
 	@Override
 	public Change<WoofAccessOutputToWoofSectionInputModel> removeAccessOuputToSectionInput(
 			WoofAccessOutputToWoofSectionInputModel link) {
-		// TODO implement WoofChanges.removeAccessOuputToSectionInput
-		throw new UnsupportedOperationException(
-				"TODO implement WoofChanges.removeAccessOuputToSectionInput");
+		return new RemoveLinkChange<WoofAccessOutputToWoofSectionInputModel>(
+				link, "Remove Access Output to Section Input");
 	}
 
 	@Override
 	public Change<WoofAccessOutputToWoofResourceModel> linkAccessOutputToResource(
-			WoofAccessOutputModel sectionOutput, WoofResourceModel resource) {
-		// TODO implement WoofChanges.linkAccessOutputToResource
-		throw new UnsupportedOperationException(
-				"TODO implement WoofChanges.linkAccessOutputToResource");
+			WoofAccessOutputModel accessOutput, WoofResourceModel resource) {
+
+		// Create the connection
+		final WoofAccessOutputToWoofResourceModel connection = new WoofAccessOutputToWoofResourceModel(
+				resource.getWoofResourceName(), accessOutput, resource);
+
+		// Return change to add connection
+		return new AddLinkChange<WoofAccessOutputToWoofResourceModel, WoofAccessOutputModel>(
+				connection, accessOutput, "Link Access Output to Resource") {
+			@Override
+			protected void addExistingConnections(WoofAccessOutputModel source,
+					List<ConnectionModel> list) {
+				list.add(source.getWoofTemplate());
+				list.add(source.getWoofSectionInput());
+				list.add(source.getWoofResource());
+			}
+		};
 	}
 
 	@Override
 	public Change<WoofAccessOutputToWoofResourceModel> removeAccessOuputToResource(
 			WoofAccessOutputToWoofResourceModel link) {
-		// TODO implement WoofChanges.removeAccessOuputToResource
-		throw new UnsupportedOperationException(
-				"TODO implement WoofChanges.removeAccessOuputToResource");
+		return new RemoveLinkChange<WoofAccessOutputToWoofResourceModel>(link,
+				"Remove Access Output to Resource");
 	}
 
 	@Override

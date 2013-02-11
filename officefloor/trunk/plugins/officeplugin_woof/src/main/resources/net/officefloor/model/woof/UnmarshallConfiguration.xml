@@ -101,6 +101,7 @@
 	<object method="setWoofAccess" node="access"
 		class="net.officefloor.model.woof.WoofAccessModel">
 		<value method="setHttpSecuritySourceClassName" node="access@source" />
+		<value method="setTimeout" node="access@timeout" />
 		<value method="setX" node="access@x" />
 		<value method="setY" node="access@y" />
 		<object method="addProperty" node="property"

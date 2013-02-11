@@ -164,8 +164,8 @@ public class WoofModelRepositoryTest extends OfficeFrameTestCase {
 		// ----------------------------------------
 		WoofAccessModel access = woof.getWoofAccess();
 		assertProperties(new WoofAccessModel("net.example.HttpSecuritySource",
-				null, null, null, 500, 501), access,
-				"getHttpSecuritySourceClassName", "getX", "getY");
+				2000, null, null, null, 500, 501), access,
+				"getHttpSecuritySourceClassName", "getTimeout", "getX", "getY");
 		assertList(new String[] { "getName", "getValue" },
 				access.getProperties(), new PropertyModel("name.first",
 						"value.first"), new PropertyModel("name.second",

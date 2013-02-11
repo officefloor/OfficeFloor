@@ -26,6 +26,7 @@ import net.officefloor.compile.OfficeFloorCompiler;
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.model.change.Change;
 import net.officefloor.plugin.web.http.security.HttpCredentials;
+import net.officefloor.plugin.web.http.security.HttpSecuritySectionSource;
 import net.officefloor.plugin.web.http.security.type.HttpSecurityType;
 
 /**
@@ -87,6 +88,9 @@ public class RefactorAccessTest extends AbstractWoofChangesTestCase {
 		this.accessOutputNameMapping.put("OUTPUT_A", "OUTPUT_A");
 		this.accessOutputNameMapping.put("OUTPUT_B", "OUTPUT_B");
 		this.accessOutputNameMapping.put("OUTPUT_C", "OUTPUT_C");
+		this.accessOutputNameMapping.put(
+				HttpSecuritySectionSource.OUTPUT_FAILURE,
+				HttpSecuritySectionSource.OUTPUT_FAILURE);
 
 		// Refactor the access with same details
 		Change<WoofAccessModel> change = this.operations.refactorAccess(

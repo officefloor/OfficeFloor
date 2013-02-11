@@ -58,7 +58,8 @@
 		</section>
 	</sections>
 
-	<access source="net.example.HttpSecuritySource" x="500" y="501">
+	<access source="net.example.HttpSecuritySource" timeout="2000"
+		x="500" y="501">
 		<property name="name.first" value="value.first" />
 		<property name="name.second" value="value.second" />
 		<input name="Authenticate" parameter-type="net.example.HttpCredentials" />

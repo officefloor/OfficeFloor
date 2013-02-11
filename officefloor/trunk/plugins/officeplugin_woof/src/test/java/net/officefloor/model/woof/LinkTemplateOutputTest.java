@@ -176,7 +176,7 @@ public class LinkTemplateOutputTest extends AbstractWoofChangesTestCase {
 		WoofTemplateOutputModel templateOutput = this.model.getWoofTemplates()
 				.get(templateIndex).getOutputs().get(0);
 		WoofAccessInputModel accessInput = this.model.getWoofAccess()
-				.getInputs().get(0);
+				.getInputs().get(1);
 
 		// Link the template output to access input
 		Change<WoofTemplateOutputToWoofAccessInputModel> change = this.operations

@@ -34,6 +34,12 @@ import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.frame.impl.construct.source.SourcePropertiesImpl;
 import net.officefloor.model.repository.ConfigurationItem;
 import net.officefloor.model.woof.PropertyModel;
+import net.officefloor.model.woof.WoofAccessInputModel;
+import net.officefloor.model.woof.WoofAccessModel;
+import net.officefloor.model.woof.WoofAccessOutputModel;
+import net.officefloor.model.woof.WoofAccessOutputToWoofResourceModel;
+import net.officefloor.model.woof.WoofAccessOutputToWoofSectionInputModel;
+import net.officefloor.model.woof.WoofAccessOutputToWoofTemplateModel;
 import net.officefloor.model.woof.WoofExceptionModel;
 import net.officefloor.model.woof.WoofExceptionToWoofResourceModel;
 import net.officefloor.model.woof.WoofExceptionToWoofSectionInputModel;
@@ -46,6 +52,7 @@ import net.officefloor.model.woof.WoofResourceModel;
 import net.officefloor.model.woof.WoofSectionInputModel;
 import net.officefloor.model.woof.WoofSectionModel;
 import net.officefloor.model.woof.WoofSectionOutputModel;
+import net.officefloor.model.woof.WoofSectionOutputToWoofAccessInputModel;
 import net.officefloor.model.woof.WoofSectionOutputToWoofResourceModel;
 import net.officefloor.model.woof.WoofSectionOutputToWoofSectionInputModel;
 import net.officefloor.model.woof.WoofSectionOutputToWoofTemplateModel;
@@ -55,13 +62,16 @@ import net.officefloor.model.woof.WoofTemplateExtensionModel;
 import net.officefloor.model.woof.WoofTemplateLinkModel;
 import net.officefloor.model.woof.WoofTemplateModel;
 import net.officefloor.model.woof.WoofTemplateOutputModel;
+import net.officefloor.model.woof.WoofTemplateOutputToWoofAccessInputModel;
 import net.officefloor.model.woof.WoofTemplateOutputToWoofResourceModel;
 import net.officefloor.model.woof.WoofTemplateOutputToWoofSectionInputModel;
 import net.officefloor.model.woof.WoofTemplateOutputToWoofTemplateModel;
 import net.officefloor.model.woof.WoofTemplateRedirectModel;
+import net.officefloor.plugin.web.http.application.HttpSecurityAutoWireSection;
 import net.officefloor.plugin.web.http.application.HttpTemplateAutoWireSection;
 import net.officefloor.plugin.web.http.application.HttpTemplateAutoWireSectionExtension;
 import net.officefloor.plugin.web.http.application.WebAutoWireApplication;
+import net.officefloor.plugin.web.http.security.HttpSecuritySource;
 import net.officefloor.plugin.web.http.template.section.HttpTemplateSectionExtension;
 
 /**
@@ -252,6 +262,28 @@ public class WoofLoaderImpl implements WoofLoader {
 			}
 		}
 
+		// Configure the Access
+		WoofAccessModel accessModel = woof.getWoofAccess();
+		HttpSecurityAutoWireSection access = null;
+		if (accessModel != null) {
+
+			// Obtain the access details
+			String httpSecuritySourceClassName = accessModel
+					.getHttpSecuritySourceClassName();
+			long timeout = accessModel.getTimeout();
+
+			// Obtain the HTTP Security Source class
+			Class<? extends HttpSecuritySource<?, ?, ?, ?>> httpSecuritySourceClass = (Class<? extends HttpSecuritySource<?, ?, ?, ?>>) classLoader
+					.loadClass(httpSecuritySourceClassName);
+
+			// Set the access
+			access = application.setHttpSecurity(httpSecuritySourceClass);
+			access.setSecurityTimeout(timeout);
+			for (PropertyModel property : accessModel.getProperties()) {
+				access.addProperty(property.getName(), property.getValue());
+			}
+		}
+
 		// Link the template outputs
 		for (WoofTemplateModel templateModel : woof.getWoofTemplates()) {
 
@@ -301,6 +333,21 @@ public class WoofLoaderImpl implements WoofLoader {
 								.get(targetTemplateModel.getWoofTemplateName());
 						application.linkToHttpTemplate(template, outputName,
 								targetTemplate);
+					}
+				}
+
+				// Link potential access input
+				if (access != null) {
+					WoofTemplateOutputToWoofAccessInputModel accessLink = outputModel
+							.getWoofAccessInput();
+					if (accessLink != null) {
+						WoofAccessInputModel targetAccessInputModel = accessLink
+								.getWoofAccessInput();
+						if (targetAccessInputModel != null) {
+							application.link(template, outputName, access,
+									targetAccessInputModel
+											.getWoofAccessInputName());
+						}
 					}
 				}
 
@@ -369,6 +416,21 @@ public class WoofLoaderImpl implements WoofLoader {
 					}
 				}
 
+				// Link potential access input
+				if (access != null) {
+					WoofSectionOutputToWoofAccessInputModel accessLink = outputModel
+							.getWoofAccessInput();
+					if (accessLink != null) {
+						WoofAccessInputModel targetAccessInputModel = accessLink
+								.getWoofAccessInput();
+						if (targetAccessInputModel != null) {
+							application.link(section, outputName, access,
+									targetAccessInputModel
+											.getWoofAccessInputName());
+						}
+					}
+				}
+
 				// Link potential resource
 				WoofSectionOutputToWoofResourceModel resourceLink = outputModel
 						.getWoofResource();
@@ -377,6 +439,67 @@ public class WoofLoaderImpl implements WoofLoader {
 							.getWoofResource();
 					if (resourceModel != null) {
 						application.linkToResource(section, outputName,
+								resourceModel.getResourcePath());
+					}
+				}
+			}
+		}
+
+		// Link the access outputs
+		if (access != null) {
+
+			// Link outputs for the access
+			for (WoofAccessOutputModel outputModel : accessModel.getOutputs()) {
+
+				// Obtain output name
+				String outputName = outputModel.getWoofAccessOutputName();
+
+				// Link potential section input
+				WoofAccessOutputToWoofSectionInputModel sectionLink = outputModel
+						.getWoofSectionInput();
+				if (sectionLink != null) {
+					WoofSectionInputModel sectionInput = sectionLink
+							.getWoofSectionInput();
+					if (sectionInput != null) {
+
+						// Obtain target input name
+						String targetInputName = sectionInput
+								.getWoofSectionInputName();
+
+						// Obtain the target section
+						WoofSectionModel targetSectionModel = inputToSection
+								.get(sectionInput);
+						AutoWireSection targetSection = sections
+								.get(targetSectionModel.getWoofSectionName());
+
+						// Link access output to section input
+						application.link(access, outputName, targetSection,
+								targetInputName);
+					}
+				}
+
+				// Link potential template
+				WoofAccessOutputToWoofTemplateModel templateLink = outputModel
+						.getWoofTemplate();
+				if (templateLink != null) {
+					WoofTemplateModel targetTemplateModel = templateLink
+							.getWoofTemplate();
+					if (targetTemplateModel != null) {
+						HttpTemplateAutoWireSection targetTemplate = templates
+								.get(targetTemplateModel.getWoofTemplateName());
+						application.linkToHttpTemplate(access, outputName,
+								targetTemplate);
+					}
+				}
+
+				// Link potential resource
+				WoofAccessOutputToWoofResourceModel resourceLink = outputModel
+						.getWoofResource();
+				if (resourceLink != null) {
+					WoofResourceModel resourceModel = resourceLink
+							.getWoofResource();
+					if (resourceModel != null) {
+						application.linkToResource(access, outputName,
 								resourceModel.getResourcePath());
 					}
 				}
