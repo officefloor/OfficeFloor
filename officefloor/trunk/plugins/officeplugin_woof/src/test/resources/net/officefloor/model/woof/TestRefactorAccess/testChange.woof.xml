@@ -31,6 +31,7 @@
 		<output name="OUTPUT_C">
 			<template name="TEMPLATE" />
 		</output>
+		<output name="Failure" argument-type="java.lang.Throwable" />
 	</access>
 
 	<resources>

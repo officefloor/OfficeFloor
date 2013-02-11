@@ -9,7 +9,7 @@
 		<section name="A">
 			<input name="INPUT" />
 			<output name="OUTPUT">
-				<access input="Authenticate" />
+				<access input="Authenticate_LINK" />
 			</output>
 		</section>
 		<section name="B">

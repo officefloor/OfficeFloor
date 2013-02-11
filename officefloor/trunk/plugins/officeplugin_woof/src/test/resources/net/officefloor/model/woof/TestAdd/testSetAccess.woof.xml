@@ -1,12 +1,14 @@
 <woof>
 
-	<access source="net.example.HttpSecuritySource" timeout="2000">
+	<access source="net.example.HttpSecuritySource" timeout="2000"
+		x="100" y="101">
 		<property name="name.one" value="value.one" />
 		<property name="name.two" value="value.two" />
 		<input name="Authenticate"
 			parameter-type="net.officefloor.plugin.web.http.security.HttpCredentials" />
 		<output name="OUTPUT_1" argument-type="java.lang.String" />
 		<output name="OUTPUT_2" />
+		<output name="Failure" argument-type="java.lang.Throwable" />
 	</access>
 
 </woof>

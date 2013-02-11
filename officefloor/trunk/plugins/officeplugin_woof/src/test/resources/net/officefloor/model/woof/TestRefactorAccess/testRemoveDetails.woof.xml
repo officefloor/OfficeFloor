@@ -14,7 +14,9 @@
 		</section>
 	</sections>
 
-	<access source="net.example.RemoveSecuritySource" timeout="4000" />
+	<access source="net.example.RemoveSecuritySource" timeout="4000">
+		<output name="Failure" argument-type="java.lang.Throwable" />
+	</access>
 
 	<resources>
 		<resource name="RESOURCE" path="Example.html" />

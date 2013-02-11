@@ -3,7 +3,7 @@
 	<templates>
 		<template name="A">
 			<output name="OUTPUT">
-				<access input="Authenticate" />
+				<access input="Authenticate_LINK" />
 			</output>
 		</template>
 		<template name="B">

@@ -324,7 +324,7 @@ public class AddTest extends AbstractWoofChangesTestCase {
 										String.class, "qualifier", null);
 
 								// Include flows
-								context.addFlow("OUTPUT_1", Integer.class, null);
+								context.addFlow("OUTPUT_1", String.class, null);
 								context.addFlow("OUTPUT_2", null, null);
 							}
 						});

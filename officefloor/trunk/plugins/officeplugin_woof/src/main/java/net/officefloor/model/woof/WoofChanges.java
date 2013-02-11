@@ -732,7 +732,7 @@ public interface WoofChanges {
 	 * @return {@link Change} to make the link.
 	 */
 	Change<WoofAccessOutputToWoofResourceModel> linkAccessOutputToResource(
-			WoofAccessOutputModel sectionOutput, WoofResourceModel resource);
+			WoofAccessOutputModel accessOutput, WoofResourceModel resource);
 
 	/**
 	 * Removes the {@link WoofAccessOutputToWoofResourceModel}.

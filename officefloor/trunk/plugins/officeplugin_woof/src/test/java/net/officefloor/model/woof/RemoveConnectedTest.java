@@ -21,6 +21,8 @@ import java.io.IOException;
 import java.sql.SQLException;
 
 import net.officefloor.model.change.Change;
+import net.officefloor.plugin.web.http.security.HttpCredentials;
+import net.officefloor.plugin.web.http.security.type.HttpSecurityType;
 
 /**
  * Tests removing from a {@link WoofModel}.
@@ -67,7 +69,33 @@ public class RemoveConnectedTest extends AbstractWoofChangesTestCase {
 
 		// Remove the access
 		Change<WoofAccessModel> change = this.operations.removeAccess(access);
-		this.assertChange(change, access, "Remove access", true);
+		this.assertChange(change, access,
+				"Remove access net.example.HttpSecuritySource", true);
+	}
+
+	/**
+	 * Ensure able to remove the existing {@link WoofAccessModel}.
+	 */
+	public void testOverwriteAccess() {
+
+		// Create the HTTP Security type
+		HttpSecurityType<?, ?, ?, ?> securityType = this
+				.constructHttpSecurityType(HttpCredentials.class,
+						new HttpSecurityTypeConstructor() {
+							@Override
+							public void construct(
+									HttpSecurityTypeContext context) {
+								// Add flow
+								context.addFlow("OUTPUT", String.class, null);
+							}
+						});
+
+		// Obtain change to overwrite the Access
+		Change<WoofAccessModel> change = this.operations.setAccess(
+				"net.overwrite.HttpSecuritySource", 1000, null, securityType);
+
+		// Remove the access
+		this.assertChange(change, null, "Set Access", true);
 	}
 
 	/**

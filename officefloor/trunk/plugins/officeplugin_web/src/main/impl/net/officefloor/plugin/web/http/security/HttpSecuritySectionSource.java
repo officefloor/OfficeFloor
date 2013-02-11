@@ -20,6 +20,7 @@ package net.officefloor.plugin.web.http.security;
 import net.officefloor.compile.impl.util.CompileUtil;
 import net.officefloor.compile.properties.Property;
 import net.officefloor.compile.spi.section.SectionDesigner;
+import net.officefloor.compile.spi.section.SectionInput;
 import net.officefloor.compile.spi.section.SectionObject;
 import net.officefloor.compile.spi.section.SectionOutput;
 import net.officefloor.compile.spi.section.SectionTask;
@@ -48,6 +49,28 @@ public class HttpSecuritySectionSource extends AbstractSectionSource {
 	 * {@link HttpSecuritySource} from the {@link HttpSecurityConfigurator}.
 	 */
 	public static final String PROPERTY_HTTP_SECURITY_SOURCE_KEY = HttpAuthenticationManagedObjectSource.PROPERTY_HTTP_SECURITY_SOURCE_KEY;
+
+	/**
+	 * Name of the {@link SectionInput} for challenging.
+	 */
+	public static final String INPUT_CHALLENGE = "Challenge";
+
+	/**
+	 * Name of the {@link SectionInput} for undertaking authentication with
+	 * application provided credentials.
+	 */
+	public static final String INPUT_AUTHENTICATE = "Authenticate";
+
+	/**
+	 * Name of the {@link SectionOutput} for handling failure.
+	 */
+	public static final String OUTPUT_FAILURE = "Failure";
+
+	/**
+	 * Name of the {@link SectionOutput} for handling re-continuing after
+	 * authentication.
+	 */
+	public static final String OUTPUT_RECONTINUE = "Recontinue";
 
 	/*
 	 * ===================== SectionSource ===============================
@@ -100,7 +123,7 @@ public class HttpSecuritySectionSource extends AbstractSectionSource {
 		}
 
 		// Create the failure flow
-		SectionOutput failureOutput = designer.addSectionOutput("Failure",
+		SectionOutput failureOutput = designer.addSectionOutput(OUTPUT_FAILURE,
 				Throwable.class.getName(), true);
 
 		// Configure the HTTP Security Work Source
@@ -193,14 +216,14 @@ public class HttpSecuritySectionSource extends AbstractSectionSource {
 
 		// Link re-continue for completed authentication
 		designer.link(completeAuthTask,
-				designer.addSectionOutput("Recontinue", null, false));
+				designer.addSectionOutput(OUTPUT_RECONTINUE, null, false));
 
 		// Link inputs
-		designer.link(designer.addSectionInput("Challenge",
+		designer.link(designer.addSectionInput(INPUT_CHALLENGE,
 				HttpAuthenticationRequiredException.class.getName()),
 				challengeTask);
 		designer.link(
-				designer.addSectionInput("Authenticate",
+				designer.addSectionInput(INPUT_AUTHENTICATE,
 						credentialsType.getName()), startAuthTask);
 		designer.link(designer.addSectionInput("ManagedObjectAuthenticate",
 				TaskAuthenticateContext.class.getName()), moAuthTask);

@@ -174,7 +174,7 @@ public class LinkSectionOutputTest extends AbstractWoofChangesTestCase {
 		WoofSectionOutputModel sectionOutput = this.model.getWoofSections()
 				.get(sectionIndex).getOutputs().get(0);
 		WoofAccessInputModel accessInput = this.model.getWoofAccess()
-				.getInputs().get(0);
+				.getInputs().get(1);
 
 		// Link the section output to access input
 		Change<WoofSectionOutputToWoofAccessInputModel> change = this.operations

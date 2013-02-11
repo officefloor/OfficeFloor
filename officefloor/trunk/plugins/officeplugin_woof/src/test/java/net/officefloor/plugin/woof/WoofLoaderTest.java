@@ -45,6 +45,7 @@ import net.officefloor.plugin.web.http.application.HttpTemplateAutoWireSection;
 import net.officefloor.plugin.web.http.application.HttpTemplateAutoWireSectionExtension;
 import net.officefloor.plugin.web.http.application.HttpUriLink;
 import net.officefloor.plugin.web.http.application.WebAutoWireApplication;
+import net.officefloor.plugin.web.http.security.HttpSecuritySectionSource;
 import net.officefloor.plugin.web.http.security.scheme.MockHttpSecuritySource;
 
 /**
@@ -162,13 +163,15 @@ public class WoofLoaderTest extends OfficeFrameTestCase {
 		// Record linking template outputs
 		this.app.link(templateA, "OUTPUT_1", sectionA, "INPUT_A");
 		this.app.linkToHttpTemplate(templateA, "OUTPUT_2", templateB);
-		this.app.link(templateA, "OUTPUT_3", security, "Authenticate");
+		this.app.link(templateA, "OUTPUT_3", security,
+				HttpSecuritySectionSource.INPUT_AUTHENTICATE);
 		this.app.linkToResource(templateA, "OUTPUT_4", "Example.html");
 
 		// Record linking section outputs
 		this.app.link(sectionA, "OUTPUT_A", sectionB, "INPUT_1");
 		this.app.linkToHttpTemplate(sectionA, "OUTPUT_B", templateA);
-		this.app.link(sectionA, "OUTPUT_C", security, "Authenticate");
+		this.app.link(sectionA, "OUTPUT_C", security,
+				HttpSecuritySectionSource.INPUT_AUTHENTICATE);
 		this.app.linkToResource(sectionA, "OUTPUT_D", "Example.html");
 
 		// Record link access outputs

@@ -149,6 +149,7 @@
 		<attributes>
 			<attribute method="getHttpSecuritySourceClassName"
 				attribute="source" />
+			<attribute method="getTimeout" attribute="timeout" />
 			<attribute method="getX" attribute="x" />
 			<attribute method="getY" attribute="y" />
 		</attributes>

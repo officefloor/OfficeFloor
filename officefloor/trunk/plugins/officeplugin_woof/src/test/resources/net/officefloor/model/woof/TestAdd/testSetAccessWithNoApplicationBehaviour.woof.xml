@@ -1,8 +1,10 @@
 <woof>
 
-	<access source="net.other.HttpSecuritySource" timeout="3000">
+	<access source="net.other.HttpSecuritySource" timeout="3000" x="100"
+		y="101">
 		<property name="name.a" value="value.a" />
 		<property name="name.b" value="value.b" />
+		<output name="Failure" argument-type="java.lang.Throwable" />
 	</access>
 
 </woof>
