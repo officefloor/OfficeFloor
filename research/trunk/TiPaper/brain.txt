@@ -1,0 +1,43 @@
+Given Software can be constructed by "bricks" that standardise the dimensions of:
+  - dependencies (or better described as state)
+  - thread (effectively identifying execution hardware)
+  - continuations (providing the connections between operations)
+  
+It potentially provides the foundation of artificial intelligence and may better explain the human brain.
+
+Areas of the brain are responsible for certain functions (operations).  This can be explained as Thread 
+Injection.  Asynchronous Operations surrounding particular dependencies/state are co-located for improved
+performance.  This effectively makes better use of "human processing hardware".
+
+The dependencies are injections of state.  The brain perceives a state before and after.  It therefore
+tries to model this state change by identifying atomic operations and linking them together with continuations to 
+transform the before state to the  after state.
+
+Learning is therefore the process of dynamically creating atomic operations and dynamically connecting them 
+together to make the before state become the after state.  The operations may be created new or re-used from 
+previous learning (explaining nurture vs nature).  
+
+The learning process is isolated from the actual brain processing.  The learning process runs multitudes of 
+combinations of operations and continuation connections to find a combination that can transform the before 
+state to after state.  Once a suitable combination is found, it is compared to existing combinations from 
+previous learning (what constitutes the current brain).  The first combination to match the new before to after 
+state "test" that does not cause "regression" of existing before/state tests is chosen.  
+
+The indirection of Continuation Injection allows the brain to re-wire itself for the new operations and 
+connections (possibly explaining the eureka/light bulb moment one experiences).  As more re-wiring occurs, there
+is more operations/continuations that must be stored and processed for decisions.  The increased number explains
+why older people are typically wiser and inheritance of this is why we all get smarter.  It may also explain
+why at certain ages that problems set in with the brain due to requiring too much "brain hardware" to run existing
+operation/continuations leaving little of the "brain hardware" left for learning (possibly with it triggering
+excessive garbage collection removing necessary operations/continuations).
+
+This separation allows the brain to function for real-time decisions and simultaneously provides means for 
+learning.  Which is why learning is an active process requiring stimulus (but not too much stimulus that it 
+overloads the learning processing hardware).  It also explains why when concentrating hard on learning, that
+awareness of the world is diminished (more "brain hardware" executing learning processes than core brain 
+functions).
+
+Relating this to OfficeFloor, this would be the dynamic creation of Sections and their evolution in working together.
+
+This only reinforces my view that OfficeFloor needs to be an open project.
+

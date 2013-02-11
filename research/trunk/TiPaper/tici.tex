@@ -660,30 +660,34 @@ thread pools.
 \section{Inversion of Control}
 
 Using all three injection patterns together (dependency, thread, continuation)
-as implementing patterns to the Proactor pattern potentially forms the Inversion
-of Control pattern\footnote{Inversion of Control is not just dependency
-injection as suggested by the Inversion of Control layer \cite{ioc}.  It is
-better described as the formula: Inversion of Control = Dependency Injection +
-Thread Injection + Continuation Injection (or its shorter form: IoC = DI + TI +
-CI)}.
+as implementing patterns to the Proactor pattern forms the Inversion of Control
+pattern\footnote{Inversion of Control is not just dependency injection as
+suggested by the Inversion of Control layer \cite{ioc}.  It is better described
+as: Inversion of Control = Dependency Injection + Thread Injection +
+Continuation Injection (or its shorter form: IoC = DI + TI + CI)}.  For a method
+to be executed it requires:
 
-For a method to be executed it requires:
 \begin{itemize}
   \item A thread to execute it which Thread Injection inverts control
   \item Arguments for its parameters which Dependency Injection inverts control
   \item Next operations to invoke which Continuation Injection inverts control
 \end{itemize}
 
-And therefore all aspects may be inverted in control providing an Inversion of
-Control pattern.
+Furthermore, Object-orientation provides the implicit dependencies to the
+method.  Explicit dependencies are injected as arguments to the method, while
+object-orientation implicitly provides the instance/class references to the
+method.  Functional programming can therefore be considered programming without
+implicit dependencies.
 
-As control may be inverted for all aspects of the method, it has potentially
-made the Asynchronous Operation the software equivalent of an architectural
-\textit{brick}\footnote{The author finds software building block an over used
-term and that \textit{Software Brick} a more tangible analogy}.  The
-Asynchronous Operations have standard interfaces allowing them to be used
-together to create the equivalent of \textit{walls}, \textit{buildings} and
-further complex structures.
+As control may be inverted for all aspects of the method, it provides an
+Inversion of Control pattern.  This has potentially made the Asynchronous
+Operation the software equivalent of a \textit{brick}\footnote{Objects do not
+define the dimensions of thread and continuations providing only part of the
+ingredients to a building block}.  The Asynchronous Operations have standard
+interfaces for all their dimensions (dependencies/state, thread, continuations)
+providing a standard mechanism for developers to weave them together to create
+the equivalent of \textit{walls}, \textit{buildings} and further complex
+structures.
 
 
 \section{Drawbacks}
@@ -705,10 +709,9 @@ Thread Injection and Continuation Injection pattern.  OfficeFloor identifies
 Asynchronous Operations as Jobs\footnote{Task is the adapted interface within a
 Job for application developers to implement} which originates from its original
 design to model application architecture after the way work is processed within
-an office\footnote{This is where the name is derived. The OfficeFloor houses
-the system of coordinating the execution of Jobs}.  The author identified the
-Thread Injection and Continuation Injection patterns through developing
-OfficeFloor.
+an office\footnote{This is where the name is derived. The OfficeFloor houses the
+system of coordinating the execution of Jobs}.  The author identified the Thread
+Injection and Continuation Injection patterns through developing OfficeFloor.
 
 
 \section*{Acknowledgment} I thank my wife Melanie for her patience and support
