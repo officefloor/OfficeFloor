@@ -69,15 +69,13 @@ public class AddTemplateOperation extends
 		Map<String, Boolean> linksSecure = instance.getLinksSecure();
 		String[] renderRedirectHttpMethods = instance
 				.getRenderRedirectHttpMethods();
+		boolean isContinueRendering = instance.isContinueRendering();
 		String entryPointClassName = instance.getGwtEntryPointClassName();
 		String[] serviceAsyncInterfaces = instance
 				.getGwtServerAsyncInterfaceNames();
 		boolean isEnableComet = instance.isEnableComet();
 		String cometManualPublishMethodName = instance
 				.getCometManualPublishMethodName();
-
-		// TODO provide continue rendering
-		boolean isContinueRendering = true;
 
 		// Create change to add template
 		Change<WoofTemplateModel> change = changes.addTemplate(uri, path,

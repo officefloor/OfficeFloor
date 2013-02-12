@@ -80,6 +80,11 @@ public class HttpTemplateWizardPage extends WizardPage implements
 		CompilerIssues, SectionSourceExtensionContext {
 
 	/**
+	 * {@link Property} indicating whether may continue rendering.
+	 */
+	private static final String PROPERTY_IS_CONTINUE_RENDERING = "is.continue.rendering";
+
+	/**
 	 * Obtains the text value.
 	 * 
 	 * @param value
@@ -151,6 +156,11 @@ public class HttpTemplateWizardPage extends WizardPage implements
 	 * {@link HttpTemplate}.
 	 */
 	private final Property renderRedirectHttpMethods;
+
+	/**
+	 * Indicates whether allow continue rendering.
+	 */
+	private final Property isContinueRendering;
 
 	/**
 	 * GWT EntryPoint class name.
@@ -247,12 +257,15 @@ public class HttpTemplateWizardPage extends WizardPage implements
 		String initialLogicClassName = null;
 		String initialIsTemplateSecure = null;
 		String initialRenderRedirectHttpMethods = null;
+		String initialIsContinueRendering = null;
 		if (this.templateInstance != null) {
 			// Provide initial values from existing configuration
 			initialUriPath = this.templateInstance.getUri();
 			initialLogicClassName = this.templateInstance.getLogicClassName();
 			initialIsTemplateSecure = String.valueOf(this.templateInstance
 					.isTemplateSecure());
+			initialIsContinueRendering = String.valueOf(this.templateInstance
+					.isContinueRendering());
 
 			// Create the render redirect HTTP methods value
 			String[] initialRenderRedirectHttpMethodsList = this.templateInstance
@@ -298,6 +311,8 @@ public class HttpTemplateWizardPage extends WizardPage implements
 				.addProperty(
 						HttpTemplateInitialWorkSource.PROPERTY_RENDER_REDIRECT_HTTP_METHODS,
 						initialRenderRedirectHttpMethods);
+		this.isContinueRendering = this.addProperty(
+				PROPERTY_IS_CONTINUE_RENDERING, initialIsContinueRendering);
 
 		// Specify the title
 		this.setTitle("Add Template");
@@ -400,6 +415,15 @@ public class HttpTemplateWizardPage extends WizardPage implements
 			}
 		}
 		return httpMethods;
+	}
+
+	/**
+	 * Indicates if allow continue rendering.
+	 * 
+	 * @return <code>true</code> to allow continue rendering.
+	 */
+	public boolean isContinueRendering() {
+		return Boolean.parseBoolean(this.isContinueRendering.getValue());
 	}
 
 	/**
@@ -589,6 +613,11 @@ public class HttpTemplateWizardPage extends WizardPage implements
 						"Render Redirect HTTP methods",
 						HttpTemplateInitialWorkSource.PROPERTY_RENDER_REDIRECT_HTTP_METHODS,
 						null, page, this, null);
+
+		// Provide means to specify if may continue rendering
+		SourceExtensionUtil.createPropertyCheckbox("Continue Rendering",
+				PROPERTY_IS_CONTINUE_RENDERING, false, String.valueOf(true),
+				String.valueOf(false), page, this, null);
 
 		// Provide means to specify GWT extension
 		new Label(page, SWT.NONE).setText("GWT Enty Point Class: ");

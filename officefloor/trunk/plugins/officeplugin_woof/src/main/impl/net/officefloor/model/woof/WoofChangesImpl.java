@@ -928,7 +928,7 @@ public class WoofChangesImpl implements WoofChanges {
 			SectionType sectionType, final boolean isTemplateSecure,
 			final Map<String, Boolean> linksSecure,
 			final String[] renderRedirectHttpMethods,
-			boolean isContinueRendering, String gwtEntryPointClassName,
+			final boolean isContinueRendering, String gwtEntryPointClassName,
 			String[] gwtServiceAsyncInterfaceNames, boolean isEnableComet,
 			final String cometManualPublishMethodName,
 			Map<String, String> templateOutputNameMapping) {
@@ -968,6 +968,8 @@ public class WoofChangesImpl implements WoofChanges {
 				template.getLinks());
 		final List<WoofTemplateRedirectModel> existingTemplateRedirects = new ArrayList<WoofTemplateRedirectModel>(
 				template.getRedirects());
+		final boolean existingIsContinueRendering = template
+				.getIsContinueRendering();
 
 		// Create change to attributes
 		Change<WoofTemplateModel> attributeChange = new AbstractChange<WoofTemplateModel>(
@@ -980,6 +982,7 @@ public class WoofChangesImpl implements WoofChanges {
 				template.setTemplatePath(templatePath);
 				template.setTemplateClassName(templateLogicClass);
 				template.setIsTemplateSecure(isTemplateSecure);
+				template.setIsContinueRendering(isContinueRendering);
 
 				// Refactor the links
 				for (WoofTemplateLinkModel link : new ArrayList<WoofTemplateLinkModel>(
@@ -1017,6 +1020,7 @@ public class WoofChangesImpl implements WoofChanges {
 				template.setTemplatePath(existingTemplatePath);
 				template.setTemplateClassName(existingTemplateClassName);
 				template.setIsTemplateSecure(existingIsTemplateSecure);
+				template.setIsContinueRendering(existingIsContinueRendering);
 
 				// Revert the links
 				for (WoofTemplateLinkModel link : new ArrayList<WoofTemplateLinkModel>(
