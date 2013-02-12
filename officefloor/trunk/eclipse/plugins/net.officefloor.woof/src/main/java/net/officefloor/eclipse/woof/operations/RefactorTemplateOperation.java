@@ -76,6 +76,7 @@ public class RefactorTemplateOperation extends
 		Map<String, Boolean> linksSecure = instance.getLinksSecure();
 		String[] renderRedirectHttpMethods = instance
 				.getRenderRedirectHttpMethods();
+		boolean isContinueRendering = instance.isContinueRendering();
 		String entryPointClassName = instance.getGwtEntryPointClassName();
 		String[] serviceAsyncInterfaces = instance
 				.getGwtServerAsyncInterfaceNames();
@@ -83,9 +84,6 @@ public class RefactorTemplateOperation extends
 		String cometManualPublishMethodName = instance
 				.getCometManualPublishMethodName();
 		Map<String, String> outputNameMapping = instance.getOutputNameMapping();
-
-		// TODO provide is continue rendering
-		boolean isContinueRendering = true;
 
 		// Create change to refactor template
 		Change<WoofTemplateModel> change = changes.refactorTemplate(template,

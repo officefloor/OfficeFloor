@@ -187,6 +187,7 @@ public class HttpTemplateWizard extends Wizard {
 		Map<String, Boolean> linksSecure = this.templatePage.getLinksSecure();
 		String[] renderRedirectHttpMethods = this.templatePage
 				.getRenderRedirectHttpMethods();
+		boolean isContinueRendering = this.templatePage.isContinueRendering();
 		String gwtEntryPointClassName = this.templatePage
 				.getGwtEntryPointClassName();
 		String[] gwtServerAsyncInterfaceNames = this.templatePage
@@ -204,9 +205,9 @@ public class HttpTemplateWizard extends Wizard {
 		// Create HTTP Template Instance
 		this.httpTemplateInstance = new HttpTemplateInstance(uriPath,
 				templatePath, logicClassName, sectionType, isTemplateSecure,
-				linksSecure, renderRedirectHttpMethods, gwtEntryPointClassName,
-				gwtServerAsyncInterfaceNames, isEnableComet,
-				cometManualPublishMethodName, outputNameMapping);
+				linksSecure, renderRedirectHttpMethods, isContinueRendering,
+				gwtEntryPointClassName, gwtServerAsyncInterfaceNames,
+				isEnableComet, cometManualPublishMethodName, outputNameMapping);
 
 		// Use the HTTP Template Instance
 		return true;

@@ -79,6 +79,14 @@ public class HttpTemplateInstance {
 	private final String[] renderRedirectHttpMethods;
 
 	/**
+	 * Indicates if allow to continue rendering. As continue rendering is
+	 * typically used very seldomly (if at all) within applications this is
+	 * <code>false</code> by default to avoid cluttering space in the WoOF
+	 * configuration.
+	 */
+	private final boolean isContinueRendering;
+
+	/**
 	 * GWT EntryPoint class name.
 	 */
 	private final String gwtEntryPointClassName;
@@ -132,6 +140,8 @@ public class HttpTemplateInstance {
 	 * @param renderRedirectHttpMethods
 	 *            HTTP methods that trigger a redirect on rendering the
 	 *            {@link HttpTemplate}.
+	 * @param iscContinueRendering
+	 *            Indicates if allow to continue rendering.
 	 * @param gwtEntryPointClassName
 	 *            GWT EntryPoint class name.
 	 * @param gwtServerAsyncInterfaceNames
@@ -146,7 +156,8 @@ public class HttpTemplateInstance {
 	public HttpTemplateInstance(String uri, String templatePath,
 			String logicClassName, SectionType sectionType,
 			boolean isTemplateSecure, Map<String, Boolean> linksSecure,
-			String[] renderRedirectHttpMethods, String gwtEntryPointClassName,
+			String[] renderRedirectHttpMethods, boolean isContinueRendering,
+			String gwtEntryPointClassName,
 			String[] gwtServerAsyncInterfaceNames, boolean isEnableComet,
 			String cometManualPublishMethodName) {
 		this.uri = uri;
@@ -156,6 +167,7 @@ public class HttpTemplateInstance {
 		this.isTemplateSecure = isTemplateSecure;
 		this.linksSecure = linksSecure;
 		this.renderRedirectHttpMethods = renderRedirectHttpMethods;
+		this.isContinueRendering = isContinueRendering;
 		this.gwtEntryPointClassName = gwtEntryPointClassName;
 		this.gwtServerAsyncInterfaceNames = gwtServerAsyncInterfaceNames;
 		this.isEnableComet = isEnableComet;
@@ -178,6 +190,7 @@ public class HttpTemplateInstance {
 		this.logicClassName = template.getTemplateClassName();
 		this.sectionType = null;
 		this.isTemplateSecure = template.getIsTemplateSecure();
+		this.isContinueRendering = template.getIsContinueRendering();
 
 		// Load the links
 		this.linksSecure = new HashMap<String, Boolean>();
@@ -236,6 +249,8 @@ public class HttpTemplateInstance {
 	 * @param renderRedirectHttpMethods
 	 *            HTTP methods that trigger a redirect on rendering the
 	 *            {@link HttpTemplate}.
+	 * @param isContinueRendering
+	 *            Indicates if allow to continue rendering.
 	 * @param gwtEntryPointClassName
 	 *            GWT EntryPoint class name.
 	 * @param gwtServerAsyncInterfaceNames
@@ -253,7 +268,8 @@ public class HttpTemplateInstance {
 	HttpTemplateInstance(String uri, String templatePath,
 			String logicClassName, SectionType sectionType,
 			boolean isTemplateSecure, Map<String, Boolean> linksSecure,
-			String[] renderRedirectHttpMethods, String gwtEntryPointClassName,
+			String[] renderRedirectHttpMethods, boolean isContinueRendering,
+			String gwtEntryPointClassName,
 			String[] gwtServerAsyncInterfaceNames, boolean isEnableComet,
 			String cometManualPublishMethodName,
 			Map<String, String> outputNameMapping) {
@@ -264,6 +280,7 @@ public class HttpTemplateInstance {
 		this.isTemplateSecure = isTemplateSecure;
 		this.linksSecure = linksSecure;
 		this.renderRedirectHttpMethods = renderRedirectHttpMethods;
+		this.isContinueRendering = isContinueRendering;
 		this.gwtEntryPointClassName = gwtEntryPointClassName;
 		this.gwtServerAsyncInterfaceNames = gwtServerAsyncInterfaceNames;
 		this.isEnableComet = isEnableComet;
@@ -337,6 +354,15 @@ public class HttpTemplateInstance {
 	 */
 	public String[] getRenderRedirectHttpMethods() {
 		return this.renderRedirectHttpMethods;
+	}
+
+	/**
+	 * Indicates if may continue rendering.
+	 * 
+	 * @return <code>true</code> to allow continue rendering.
+	 */
+	public boolean isContinueRendering() {
+		return this.isContinueRendering;
 	}
 
 	/**
