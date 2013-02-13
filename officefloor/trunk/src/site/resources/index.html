@@ -94,18 +94,7 @@ iframe {
 	font-weight: bold;
 }
 
-	</style>
-
-
-	<script type="text/javascript">
-	
-function openDownloadLinks() {
-	window.open('http://sourceforge.net/projects/officefloor/files/latest/download', '_blank', 'width=960,height=150'); 
-	return true;
-}
-
-	</script>
-	
+	</style>	
 </head>
 <body>
 
@@ -125,9 +114,8 @@ function openDownloadLinks() {
 				<tr><td><img src="./images/tick.png" /></td><td>Deploy and run anywhere</td></tr>
 				<tr><td><img src="./images/tick.png" /></td><td>Self documenting to make support easier</td></tr>
 			</table>
-			<p style="margin-top: 2em; margin-bottom: 1em">
-				<a class="linkButton" href="./download.html" onclick="openDownloadLinks()">Download</a>
-				<a class="linkButton" href="http://marketplace.eclipse.org/marketplace-client-intro?mpc_install=32712" title="Drag and drop into the Eclipse workspace to install">Eclipse <img style="vertical-align: text-bottom; margin-bottom: -1px" src="http://marketplace.eclipse.org/misc/installbutton.png"/></a>
+			<p style="margin-top: 2em; margin-bottom: 1em; text-align: center">
+				<a class="linkButton" href="./install.html">Install</a>
 				<a class="linkButton" href="./tutorials/index.html">Tutorials</a>
 			</p>
 		</td>
@@ -179,6 +167,10 @@ function openDownloadLinks() {
 	
 		<td style="vertical-align: top; width: 300px; height: 100%; padding: 5px; border-radius: 10px; border: 1px solid #c0c0c0; background-color: #FAFAFA">
 			<img style="width: 100%" src="./images/OfficeFloor_StepOne.png" alt="OfficeFloor Step One" />
+			<br/>
+			<br/>
+			<p><b>Write some HTML</b></p>
+			<br/>
 			<p>OfficeFloor dynamic web pages only require the following 3 non-obtrusive tags:</p>
 			<ul>
 				<li><b>${bean ... $}</b> , <b>${property}</b> : allows dynamic content from POJOs (plain old Java objects) to be rendered on the web page</li>
@@ -193,6 +185,10 @@ function openDownloadLinks() {
 
 		<td style="vertical-align: top; width: 300px; height: 100%; padding: 5px; border-radius: 10px; border: 1px solid #c0c0c0; background-color: #FAFAFA">
 			<img style="width: 100%" src="./images/OfficeFloor_StepTwo.png" alt="OfficeFloor Step Two." />
+			<br/>
+			<br/>
+			<p><b>Write some methods</b></p>
+			<br/>
 			<p>The application logic is written with POJOs (plain old Java objects) but with a slightly different focus to many dependency injection frameworks.  OfficeFloor injects the dependency as a parameter into the method rather than into the object.  This difference is key to OfficeFloor's simplicity yet power!</p>
 			<br/>
 			<hr/>
@@ -208,6 +204,10 @@ function openDownloadLinks() {
 
 		<td style="vertical-align: top; width: 300px; height: 100%; padding: 5px; border-radius: 10px; border: 1px solid #c0c0c0; background-color: #FAFAFA">
 			<img style="width: 100%" src="./images/OfficeFloor_StepThree.png" alt="OfficeFloor Step Three." />
+			<br/>
+			<br/>
+			<p><b>Draw some lines</b></p>
+			<br/>
 			<p>The web pages and POJO methods are connected together via OfficeFloor's <b>function orchestration</b> providing a cohesive web application.</p>
 			<br/>
 			<hr/>
@@ -223,6 +223,10 @@ function openDownloadLinks() {
 
 		<td style="vertical-align: top; width: 300px; height: 100%; padding: 5px; border-radius: 10px; border: 1px solid #c0c0c0; background-color: #FAFAFA">
 			<img style="width: 100%" src="./images/OfficeFloor_StepFour.png" alt="OfficeFloor Step Four." />
+			<br/>
+			<br/>
+			<p><b>You're ready to go</b></p>
+			<br/>
 			<p>The run anywhere flexibility provided by OfficeFloor's inversion of control fundamentals means that web applications built with OfficeFloor can be deployed anywhere, including:</p>
 			<ul>
 				<li>on the developer's workstation</li>

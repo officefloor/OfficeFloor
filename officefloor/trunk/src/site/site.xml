@@ -5,6 +5,11 @@
 		<href>http://www.officefloor.net/</href>
 	</bannerLeft>
 	<poweredBy>
+		<logo name="Install"
+			href="http://marketplace.eclipse.org/marketplace-client-intro?mpc_install=32712"
+			title="Drag and drop into a running Eclipse Indigo workspace to install OfficeFloor"
+			img="http://marketplace.eclipse.org/sites/all/modules/custom/marketplace/images/installbutton.png"
+			width="90" />
 		<logo name="Maven" href="http://maven.apache.org/"
 			img="http://maven.apache.org/images/logos/maven-feather.png" />
 		<logo name="Eclipse" href="http://marketplace.eclipse.org/content/officefloor"
@@ -37,7 +42,7 @@
 			<script type="text/javascript">
 				SyntaxHighlighter.defaults['toolbar'] = false;
 				SyntaxHighlighter.all();
-            </script>
+			</script>
 			<!-- Google Analytics -->
 			<script type="text/javascript">
 				var _gaq = _gaq || [];
@@ -56,7 +61,7 @@
 				document.getElementsByTagName('script')[0];
 				s.parentNode.insertBefore(ga, s);
 				})();
-  			</script>
+			</script>
 			<!-- Woopra -->
 			<script>
 				var woo_settings = {idle_timeout:'300000',
@@ -74,8 +79,8 @@
 				})();
 			</script>
 			<!-- Facebook administration -->
-			<meta property="fb:admins" content="sagenschneider"/>
-			<meta property="fb:app_id" content="336336786442645"/>
+			<meta property="fb:admins" content="sagenschneider" />
+			<meta property="fb:app_id" content="336336786442645" />
 		</head>
 		<menu name="${project.name}">
 			<item name="Welcome" href="./index.html" />
