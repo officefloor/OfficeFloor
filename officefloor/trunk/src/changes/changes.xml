@@ -79,8 +79,11 @@
 			<action type="add" dev="sagenschneider">Eclipse plug-ins for graphical
 				configuration</action>
 		</release>
-		<release version="0.0.1" date="2009-06-26" description="Initial release">
-			<action type="add" dev="sagenschneider">Initial release</action>
+		<release version="0.0.1" date="2009-06-26" description="Initial public release">
+			<action type="add" dev="sagenschneider">Initial public release</action>
+		</release>
+		<release version="0.0.0" date="2005-12-30" description="OfficeFloor registered on SourceForge">
+			<action type="add" dev="sagenschneider">OfficeFloor registered on SourceForge</action>
 		</release>
 	</body>
 </document>

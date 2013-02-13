@@ -4,23 +4,28 @@
 				      Daniel Sagenschneider
 				       ------------------
                
-  <<Web on OfficeFloor (WoOF) Tutorials>>
+  <<OfficeFloor Tutorials>>
   
-  The tutorials below providing working examples and explanations of the features of WoOF.
+  Once you have installed the {{{../install.html}OfficeFloor Eclipse plug-ins}} (by dragging the bottom left install icon to your Eclipse IDE) you have the tools ready for the below tutorials.
+  
+  The tutorials are ordered so that each builds on the knowledge of the previous tutorials.  It is therefore best to work though them sequentially.  Please however feel free to jump between them to get a feel for OfficeFloor.
+  
+  The acronym <<WoOF>> standards for Web on OfficeFloor.  It is a set of prefabricated plug-ins for OfficeFloor that enables OfficeFloor to work as a high performance Web Application Server.  As you become more familiar with OfficeFloor, you will realise OfficeFloor is a very light weight and versatile plugin application framework that provides {{{../mission.html}open integration of software}}.
+
 
   
 Basics
 
-  The following tutorials cover the basics for developing WoOF web applications.
+  The following tutorials cover the basics for developing OfficeFloor (WoOF) web applications.
 
 *--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
 || Tutorial                                                    || Description                                               || Covered
 *--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
-| {{{../maven/woof-archetype/index.html}My first WoOF application}} | Walks through the simple steps to create and run a WoOF application. | {{{http://maven.apache.org}Maven}} and {{{http://eclipse.org}Eclipse}} plug-ins |
+| {{{../maven/woof-archetype/index.html}My first WoOF application}} | Walks through the simple steps to create and run an OfficeFloor (WoOF) web application. | {{{http://maven.apache.org}Maven}} and {{{http://eclipse.org}Eclipse}} plug-ins |
 *--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
 | {{{./PrototypeHttpServer/index.html}Wireframe prototyping}}  | Build working web prototypes and then later extend into a working web application.  | #\{link\}
 *--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
-| {{{./DynamicHttpServer/index.html}Dynamic web page}}         | Rendering of dynamic content.                              | $\{bean ... $\} , $\{property\}
+| {{{./DynamicHttpServer/index.html}Dynamic web page}}         | Rendering dynamic content.                                 | $\{bean ... $\} , $\{property\}
 *--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
 | {{{./InteractiveHttpServer/index.html}Interactive web page}} | Handling of requests to provide interactive pages.         | #\{link\} , @HttpParameters
 *--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
@@ -40,6 +45,8 @@ Basics
 GWT integration
 
   The following tutorials cover integration of {{{http://gwt.google.com}GWT}} with WoOF to provide Rich Internet Applications (RIA).
+  
+  There is no requirement to use GWT as you can use javascript directly in the HTML pages.  If however you choose to use GWT, it is integrated into WoOF to simplify development and allow all code to be in one language for easier support.
 
 *--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
 || Tutorial                                                    || Description                                               || Covered
@@ -54,7 +61,7 @@ GWT integration
 AJAX push (reverse AJAX, Comet)
 
   OfficeFloor is a multi-threaded container allowing methods to be executed by different threads.  As OfficeFloor is not limited by the Thread-per-Request architecture, it makes implementing AJAX push applications significantly easier.  The following tutorials show the ease in which events can be pushed out to web clients in real-time.
-  
+
 *--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
 || Tutorial                                                    || Description                                               || Covered
 *--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
@@ -67,7 +74,7 @@ AJAX push (reverse AJAX, Comet)
 
 Security
 
-  Tutorials to cover securing web applications built with WoOF.
+  Securing web applications should not require <hoping> its configured correctly in some external configuration file.  The following tutorials cover the ease of securing web applications built with WoOF and demonostrates the certainty you will have in it being right.
 
 *--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
 || Tutorial                                                    || Description                                               || Covered
@@ -81,7 +88,7 @@ Security
 
 WoOF and a JEE Servlet Container
 
-  Explains how to make use of WoOF within a JEE Servlet Container and how to migrate a Servlet application to run within OfficeFloor.
+  These tutorials explain how to make use of WoOF within a JEE Servlet Container.  They also explains how to migrate a Servlet application to run within OfficeFloor for OfficeFloor's inversion of control benefits.
 
 *----------------------------------------------------------+-----------------------------------------------------------+------------------------------+
 || Tutorial                                                || Description                                              || Covered
@@ -101,7 +108,7 @@ WoOF and a JEE Servlet Container
 
 Dependency Injection
 
-  Previous tutorials have covered the built in objects for WoOF's dependency injection.  The following tutorials focus on extending the web applications functionality by adding further objects for dependency injection.
+  Previous tutorials have covered the built in dependency objects for WoOF.  The following tutorials focus on extending the web application's functionality by adding further objects for dependency injection.
   
 *----------------------------------------------------------+-----------------------------------------------------------+
 || Tutorial                                                || Description                                             
@@ -113,7 +120,7 @@ Dependency Injection
 
 Context
 
-  The following tutorials cover configuring context for a OfficeFloor web application.
+  The following tutorials cover configuring context.
 
 *----------------------------------------------------------+-----------------------------------------------------------+
 || Tutorial                                                || Description                                             
@@ -125,7 +132,7 @@ Context
 
 Thread Injection
 
-  OfficeFloor provides thread injection.  This is an advanced feature of WoOF provided by its underlying OfficeFloor technology to allow tuning the web application to the hardware it is running on. 
+  OfficeFloor provides Thread Injection.  This is an unique feature of WoOF provided by its underlying OfficeFloor technology to allow tuning the web application to the hardware it is running on.  It is also what will make your applications built with OfficeFloor faster and more scalable than other technologies.
 
 *----------------------------------------------------------+-----------------------------------------------------------+
 || Tutorial                                                || Description
