@@ -643,7 +643,7 @@ public class ExtensionUtil {
 	/**
 	 * Extracts the Source {@link Class} from the extension.
 	 */
-	private static interface SourceClassExtractor<E> {
+	protected static interface SourceClassExtractor<E> {
 
 		/**
 		 * Obtains the source {@link Class} from the extension.
@@ -694,7 +694,7 @@ public class ExtensionUtil {
 	 *            {@link SourceClassExtractor}.
 	 * @return {@link Map} of source class name to source extension.
 	 */
-	private static <E> Map<String, E> createSourceExtensionMap(
+	protected static <E> Map<String, E> createSourceExtensionMap(
 			String extensionId, Class<E> extensionType,
 			SourceClassExtractor<E> extractor) {
 
@@ -853,7 +853,7 @@ public class ExtensionUtil {
 	/**
 	 * All access via static methods.
 	 */
-	private ExtensionUtil() {
+	protected ExtensionUtil() {
 	}
 
 }
