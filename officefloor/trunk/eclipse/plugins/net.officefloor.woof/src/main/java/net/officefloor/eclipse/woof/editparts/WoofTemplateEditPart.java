@@ -138,9 +138,13 @@ public class WoofTemplateEditPart
 			this.refreshTargetConnections();
 			break;
 
+		case CHANGE_IS_TEMPLATE_SECURE:
+			this.getOfficeFloorFigure().setTemplateSecure(
+					this.isTemplateSecure());
+			break;
+
 		case CHANGE_TEMPLATE_CLASS_NAME:
 		case CHANGE_TEMPLATE_PATH:
-		case CHANGE_IS_TEMPLATE_SECURE:
 		case ADD_LINK:
 		case REMOVE_LINK:
 		case ADD_REDIRECT:
@@ -174,6 +178,11 @@ public class WoofTemplateEditPart
 
 		// Provide the display name
 		return displayName;
+	}
+
+	@Override
+	public boolean isTemplateSecure() {
+		return this.getCastedModel().getIsTemplateSecure();
 	}
 
 }

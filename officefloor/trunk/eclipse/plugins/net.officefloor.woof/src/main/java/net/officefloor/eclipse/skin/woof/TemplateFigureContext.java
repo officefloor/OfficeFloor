@@ -36,4 +36,11 @@ public interface TemplateFigureContext {
 	 */
 	String getTemplateDisplayName();
 
+	/**
+	 * Indicates if the {@link HttpTemplate} is secure.
+	 * 
+	 * @return <code>true</code> if the {@link HttpTemplate} is secure.
+	 */
+	boolean isTemplateSecure();
+
 }

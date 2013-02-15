@@ -44,4 +44,12 @@ public interface TemplateFigure extends OfficeFloorFigure {
 	 */
 	IFigure getTemplateDisplayFigure();
 
+	/**
+	 * Flags whether template is secure.
+	 * 
+	 * @param isSecure
+	 *            <code>true</code> if template is secure.
+	 */
+	void setTemplateSecure(boolean isSecure);
+
 }
