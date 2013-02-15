@@ -21,12 +21,13 @@ import net.officefloor.eclipse.skin.standard.figure.NoSpacingGridLayout;
 import net.officefloor.eclipse.skin.standard.figure.NoSpacingToolbarLayout;
 
 import org.eclipse.draw2d.Graphics;
+import org.eclipse.draw2d.GridData;
 import org.eclipse.draw2d.IFigure;
-import org.eclipse.draw2d.Label;
 import org.eclipse.draw2d.MarginBorder;
 import org.eclipse.draw2d.RoundedRectangle;
 import org.eclipse.draw2d.geometry.Dimension;
 import org.eclipse.draw2d.geometry.Rectangle;
+import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Pattern;
 
@@ -48,46 +49,38 @@ public class TitleBarFigure extends RoundedRectangle {
 	private final Color bottomColour;
 
 	/**
-	 * Title name {@link Label}.
-	 */
-	private final Label titleNameFigure;
-
-	/**
 	 * Initiate.
 	 * 
-	 * @param titleName
-	 *            Title name.
-	 * @param textColour
-	 *            Text {@link Color}.
 	 * @param topColour
 	 *            Top {@link Color} of title bar.
 	 * @param bottomColour
 	 *            Bottom {@link Color} of title bar.
+	 * @param figures
+	 *            {@link IFigure} instances to add horizontally to the title
+	 *            bar.
 	 */
-	public TitleBarFigure(String titleName, Color textColour, Color topColour,
-			Color bottomColour) {
+	public TitleBarFigure(Color topColour, Color bottomColour,
+			IFigure... figures) {
 		this.topColour = topColour;
 		this.bottomColour = bottomColour;
 
 		// Configure this figure
-		this.setLayoutManager(new NoSpacingGridLayout(1));
+		NoSpacingGridLayout layout = new NoSpacingGridLayout(figures.length);
+		this.setLayoutManager(layout);
 		this.setOutline(false);
 
-		// Specify the title name
-		this.titleNameFigure = new Label(titleName);
-		this.titleNameFigure.setLayoutManager(new NoSpacingToolbarLayout(true));
-		this.titleNameFigure.setForegroundColor(textColour);
-		this.titleNameFigure.setBorder(new MarginBorder(2, 2, 2, 2));
-		this.add(this.titleNameFigure);
-	}
+		// Load the figures
+		for (IFigure figure : figures) {
+			figure.setLayoutManager(new NoSpacingToolbarLayout(true));
+			figure.setBorder(new MarginBorder(2, 2, 2, 2));
+			this.add(figure);
+		}
 
-	/**
-	 * Obtains the title name {@link IFigure}.
-	 * 
-	 * @return Title name {@link IFigure}.
-	 */
-	public Label getTitleNameFigure() {
-		return this.titleNameFigure;
+		// First figure to grab excess horizontal space
+		if (figures.length > 0) {
+			layout.setConstraint(figures[0], new GridData(SWT.LEFT, 0, true,
+					false));
+		}
 	}
 
 	/*

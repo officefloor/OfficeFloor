@@ -17,6 +17,7 @@
  */
 package net.officefloor.eclipse.skin.standard.woof;
 
+import net.officefloor.eclipse.WoofPlugin;
 import net.officefloor.eclipse.skin.standard.AbstractOfficeFloorFigure;
 import net.officefloor.eclipse.skin.standard.figure.ConnectorFigure;
 import net.officefloor.eclipse.skin.standard.figure.ConnectorFigure.ConnectorDirection;
@@ -32,12 +33,16 @@ import org.eclipse.draw2d.ConnectionAnchor;
 import org.eclipse.draw2d.Figure;
 import org.eclipse.draw2d.GridData;
 import org.eclipse.draw2d.IFigure;
+import org.eclipse.draw2d.ImageFigure;
 import org.eclipse.draw2d.Label;
 import org.eclipse.draw2d.MarginBorder;
 import org.eclipse.draw2d.RectangleFigure;
 import org.eclipse.draw2d.RoundedRectangle;
+import org.eclipse.jface.resource.ImageDescriptor;
+import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Color;
+import org.eclipse.swt.graphics.Image;
 
 /**
  * Standard {@link TemplateFigure}.
@@ -51,6 +56,11 @@ public class StandardTemplateFigure extends AbstractOfficeFloorFigure implements
 	 * {@link IFigure} for the template name.
 	 */
 	private final Label templateNameFigure;
+
+	/**
+	 * Indicates if secure template.
+	 */
+	private final ImageFigure secureFigure;
 
 	/**
 	 * Initiate.
@@ -97,11 +107,29 @@ public class StandardTemplateFigure extends AbstractOfficeFloorFigure implements
 		window.setOutline(false);
 		figure.add(window);
 
+		// Create the label for the template name
+		this.templateNameFigure = new Label(context.getTemplateDisplayName());
+		this.templateNameFigure.setForegroundColor(titleBarTextColor);
+
+		// Create the image for identifying the template as secure
+		final String SECURE_IMAGE_KEY = WoofPlugin.PLUGIN_ID + ".secure";
+		Image secureImage = JFaceResources.getImageRegistry().get(
+				SECURE_IMAGE_KEY);
+		if (secureImage == null) {
+			// Create and register the image
+			ImageDescriptor secureImageData = WoofPlugin
+					.getImageDescriptor("icons/padlock.png");
+			secureImage = secureImageData.createImage();
+			JFaceResources.getImageRegistry()
+					.put(SECURE_IMAGE_KEY, secureImage);
+		}
+		this.secureFigure = new ImageFigure(secureImage);
+		this.secureFigure.setVisible(context.isTemplateSecure());
+
 		// Create the title bar for URI and security
-		TitleBarFigure titleBar = new TitleBarFigure(
-				context.getTemplateDisplayName(), titleBarTextColor,
-				titleBarTopColour, titleBarBottomColour);
-		this.templateNameFigure = titleBar.getTitleNameFigure();
+		TitleBarFigure titleBar = new TitleBarFigure(titleBarTopColour,
+				titleBarBottomColour, this.templateNameFigure,
+				this.secureFigure);
 		window.add(titleBar);
 		windowLayout.setConstraint(titleBar, new GridData(SWT.FILL, 0, true,
 				false));
@@ -142,6 +170,11 @@ public class StandardTemplateFigure extends AbstractOfficeFloorFigure implements
 	@Override
 	public IFigure getTemplateDisplayFigure() {
 		return this.templateNameFigure;
+	}
+
+	@Override
+	public void setTemplateSecure(boolean isSecure) {
+		this.secureFigure.setVisible(isSecure);
 	}
 
 }
