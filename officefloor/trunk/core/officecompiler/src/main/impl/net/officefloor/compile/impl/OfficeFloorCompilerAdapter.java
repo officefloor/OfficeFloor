@@ -26,6 +26,7 @@ import net.officefloor.autowire.impl.SingletonManagedObjectSource;
 import net.officefloor.autowire.spi.supplier.source.SupplierSource;
 import net.officefloor.autowire.supplier.SupplierLoader;
 import net.officefloor.compile.OfficeFloorCompiler;
+import net.officefloor.compile.OfficeFloorCompilerRunnable;
 import net.officefloor.compile.TypeLoader;
 import net.officefloor.compile.administrator.AdministratorLoader;
 import net.officefloor.compile.governance.GovernanceLoader;
@@ -202,6 +203,15 @@ public class OfficeFloorCompilerAdapter extends OfficeFloorCompiler {
 	/*
 	 * ======================== OfficeFloorCompiler ========================
 	 */
+
+	@Override
+	@SuppressWarnings("unchecked")
+	public <T> T run(
+			Class<? extends OfficeFloorCompilerRunnable<T>> runnableClass,
+			String... parameters) throws Exception {
+		return (T) this.invokeMethod("run", new Object[] { runnableClass,
+				parameters }, Class.class, String[].class);
+	}
 
 	@Override
 	public void addResources(ResourceSource resourceSource) {

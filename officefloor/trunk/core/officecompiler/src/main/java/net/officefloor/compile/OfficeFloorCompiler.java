@@ -267,6 +267,35 @@ public abstract class OfficeFloorCompiler implements PropertyConfigurable {
 
 	/**
 	 * <p>
+	 * Executes the {@link OfficeFloorCompilerRunnable} by instantiating it with
+	 * the same {@link ClassLoader} being used by this
+	 * {@link OfficeFloorCompiler}.
+	 * <p>
+	 * This is typically used by graphical editors that need to use the project
+	 * class path rather than the editor's class path.
+	 * 
+	 * @param runnableClass
+	 *            {@link OfficeFloorCompilerRunnable} class.
+	 * @param parameters
+	 *            Parameters to enable configuration of the
+	 *            {@link OfficeFloorCompilerRunnable}.
+	 * @return Value returned from the {@link OfficeFloorCompilerRunnable}.
+	 * @throws Exception
+	 *             If fails to run the {@link OfficeFloorCompilerRunnable}.
+	 */
+	public <T> T run(
+			Class<? extends OfficeFloorCompilerRunnable<T>> runnableClass,
+			String... parameters) throws Exception {
+
+		// Run the runnable
+		T result = runnableClass.newInstance().run(this, parameters);
+
+		// Return the result
+		return result;
+	}
+
+	/**
+	 * <p>
 	 * Convenience method to add all the {@link Property} instances from
 	 * {@link System#getProperties()}.
 	 * <p>

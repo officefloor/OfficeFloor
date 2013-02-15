@@ -197,6 +197,13 @@ public class TypeAdapter implements InvocationHandler {
 						// Maintain argument
 						overridingArgument = argument;
 
+					} else if ((methodParamType.isArray())
+							&& ((String.class.getName().equals(methodParamType
+									.getComponentType().getName())) || (methodParamType
+									.getComponentType().isPrimitive()))) {
+						// Maintain array argument
+						overridingArgument = argument;
+
 					} else {
 						// Ignore non-important argument
 						overridingArgument = null;
@@ -272,6 +279,12 @@ public class TypeAdapter implements InvocationHandler {
 					returnValue = array;
 				}
 
+			} else if ((returnType.isPrimitive())
+					|| (String.class.getName().equals(returnType.getName()))
+					|| (String.class.getName().equals(returnValue.getClass()
+							.getName()))) {
+				// Primitive or String value (so no need to adapt)
+
 			} else if (Object.class.getName().equals(returnType.getName())) {
 				// Non-specific return so use implementation interfaces
 				if (returnValue != null) {
@@ -307,6 +320,13 @@ public class TypeAdapter implements InvocationHandler {
 		// Do not translate if primitive
 		if (clazz.isPrimitive()) {
 			return clazz;
+		}
+
+		// Handle if an array
+		if (clazz.isArray()) {
+			Class<?> componentType = classLoader.loadClass(clazz
+					.getComponentType().getName());
+			return Array.newInstance(componentType, 0).getClass();
 		}
 
 		// Translate class

@@ -32,6 +32,7 @@ import net.officefloor.autowire.spi.supplier.source.SupplierSourceContext;
 import net.officefloor.autowire.spi.supplier.source.impl.AbstractSupplierSource;
 import net.officefloor.autowire.supplier.SupplierLoader;
 import net.officefloor.compile.OfficeFloorCompiler;
+import net.officefloor.compile.OfficeFloorCompilerRunnable;
 import net.officefloor.compile.TypeLoader;
 import net.officefloor.compile.administrator.AdministratorLoader;
 import net.officefloor.compile.governance.GovernanceLoader;
@@ -118,6 +119,72 @@ public class OfficeFloorCompilerAdapterTest extends OfficeFrameTestCase {
 	@Override
 	protected void tearDown() throws Exception {
 		AutoWireManagement.closeAllOfficeFloors();
+	}
+
+	/**
+	 * Ensure able to run {@link OfficeFloorCompilerRunnable} by non-adapted
+	 * {@link OfficeFloorCompiler}.
+	 */
+	public void testOfficeFloorCompilerRunnable() throws Exception {
+
+		// Obtain non-adapted compiler executes runnable
+		OfficeFloorCompiler nonAdaptedCompiler = OfficeFloorCompiler
+				.newOfficeFloorCompiler(null);
+		assertFalse("Should not be adapted",
+				nonAdaptedCompiler instanceof OfficeFloorCompilerAdapter);
+
+		// Ensure obtain changes in this class loader
+		MockOfficeFloorCompilerRunnable.value = "CURRENT";
+		String value = nonAdaptedCompiler.run(
+				MockOfficeFloorCompilerRunnable.class, "ONE", "TWO");
+		assertEquals("Should be value from current class loader", "CURRENT",
+				value);
+	}
+
+	/**
+	 * Ensure able to run {@link OfficeFloorCompilerRunnable} by
+	 * {@link OfficeFloorCompilerAdapter}.
+	 */
+	public void testOfficeFloorCompilerAdapterRunnable() throws Exception {
+
+		// Ensure not use current class loader values
+		MockOfficeFloorCompilerRunnable.value = "CURRENT";
+		String value = this.compiler.run(MockOfficeFloorCompilerRunnable.class,
+				"ONE", "TWO");
+		assertEquals("Should be initial value from newly loaded class",
+				"INITIAL", value);
+	}
+
+	/**
+	 * Mock {@link OfficeFloorCompilerRunnable}.
+	 */
+	public static class MockOfficeFloorCompilerRunnable implements
+			OfficeFloorCompilerRunnable<String> {
+
+		/**
+		 * Initial value for each {@link ClassLoader}.
+		 */
+		public static String value = "INITIAL";
+
+		/*
+		 * ============== OfficeFloorCompilerRunnable ============
+		 */
+
+		@Override
+		public String run(OfficeFloorCompiler compiler, String[] parameters)
+				throws Exception {
+
+			// Ensure have OfficeFloorCompiler
+			assertNotNull("Should have compiler", compiler);
+
+			// Ensure appropriate parameters
+			assertEquals("Incorrect number of parameters", 2, parameters.length);
+			assertEquals("Incorrect first parameter", "ONE", parameters[0]);
+			assertEquals("Incorrect second parameter", "TWO", parameters[1]);
+
+			// Return the value (for current class loader)
+			return value;
+		}
 	}
 
 	/**
