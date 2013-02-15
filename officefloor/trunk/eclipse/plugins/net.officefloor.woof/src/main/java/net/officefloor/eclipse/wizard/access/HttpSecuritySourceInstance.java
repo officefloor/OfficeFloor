@@ -19,7 +19,6 @@ package net.officefloor.eclipse.wizard.access;
 
 import net.officefloor.compile.OfficeFloorCompiler;
 import net.officefloor.compile.issues.CompilerIssues;
-import net.officefloor.compile.managedobject.ManagedObjectLoader;
 import net.officefloor.compile.properties.Property;
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.eclipse.common.dialog.input.InputAdapter;
@@ -30,9 +29,9 @@ import net.officefloor.eclipse.extension.access.HttpSecuritySourceExtensionConte
 import net.officefloor.eclipse.util.EclipseUtil;
 import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
 import net.officefloor.plugin.web.http.security.HttpSecuritySource;
-import net.officefloor.plugin.web.http.security.type.HttpSecurityLoader;
-import net.officefloor.plugin.web.http.security.type.HttpSecurityLoaderImpl;
+import net.officefloor.plugin.web.http.security.type.HttpSecuritySourceSpecificationRunnable;
 import net.officefloor.plugin.web.http.security.type.HttpSecurityType;
+import net.officefloor.plugin.web.http.security.type.HttpSecurityTypeRunnable;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.draw2d.ColorConstants;
@@ -60,11 +59,6 @@ public class HttpSecuritySourceInstance implements
 	 * obtained via extension point.
 	 */
 	private final HttpSecuritySourceExtension<?> httpSecuritySourceExtension;
-
-	/**
-	 * {@link HttpSecurityLoader}.
-	 */
-	private final HttpSecurityLoader httpSecurityLoader;
 
 	/**
 	 * {@link ClassLoader}.
@@ -124,9 +118,6 @@ public class HttpSecuritySourceInstance implements
 		this.classLoader = classLoader;
 		this.project = project;
 		this.context = context;
-
-		// Obtain the HTTP Security loader
-		this.httpSecurityLoader = this.createHttpSecurityLoader(this);
 	}
 
 	/**
@@ -154,7 +145,7 @@ public class HttpSecuritySourceInstance implements
 	 * Attempts to load the {@link HttpSecurityType}.
 	 */
 	public void loadHttpSecurityType() {
-		this.loadHttpSecurityType(this.httpSecurityLoader, this);
+		this.loadHttpSecurityType(this);
 	}
 
 	/**
@@ -165,32 +156,13 @@ public class HttpSecuritySourceInstance implements
 	 * @return <code>true</code> if loaded.
 	 */
 	public boolean loadHttpSecurityType(CompilerIssues issues) {
-		// Create HTTP Security Loader to use issues
-		HttpSecurityLoader httpSecurityLoader = this
-				.createHttpSecurityLoader(issues);
 
-		// Load the HTTP Security Type returning whether successful
-		return this.loadHttpSecurityType(httpSecurityLoader, issues);
-	}
-
-	/**
-	 * Attempts to load the {@link HttpSecurityType}.
-	 * 
-	 * @param loader
-	 *            {@link HttpSecurityLoader}.
-	 * @param issues
-	 *            {@link CompilerIssues}.
-	 * @return <code>true</code> if loaded.
-	 */
-	private boolean loadHttpSecurityType(HttpSecurityLoader loader,
-			CompilerIssues issues) {
-
-		// Obtain the HTTP Security source.
-		// (Always new instance to avoid caching issues)
-		HttpSecuritySource<?, ?, ?, ?> httpSecuritySource = this
-				.loadHttpSecuritySource(null, null);
-		if (httpSecuritySource == null) {
-			return false; // did not load HttpSecuritySource
+		// Obtain the HTTP Security Source class.
+		// (Always attempt to obtain to provide details on page)
+		Class<?> httpSecuritySourceClass = this.loadHttpSecuritySourceClass(
+				null, issues);
+		if (httpSecuritySourceClass == null) {
+			return false; // did not load HttpSecuritySource class
 		}
 
 		// Ensure have properties
@@ -199,8 +171,17 @@ public class HttpSecuritySourceInstance implements
 		}
 
 		// Attempt to load the HTTP Security type
-		this.httpSecurityType = loader.loadHttpSecurityType(httpSecuritySource,
-				this.properties);
+		OfficeFloorCompiler compiler = this.createOfficeFloorCompiler(issues);
+		try {
+			this.httpSecurityType = HttpSecurityTypeRunnable
+					.loadHttpSecurityType(httpSecuritySourceClass.getName(),
+							this.properties, compiler);
+		} catch (Throwable ex) {
+			// Failed to load properties
+			this.context.setErrorMessage(ex.getMessage() + " ("
+					+ ex.getClass().getSimpleName() + ")");
+			return false; // must load type
+		}
 
 		// Return indicating if loaded
 		return (this.httpSecurityType != null);
@@ -276,17 +257,26 @@ public class HttpSecuritySourceInstance implements
 	 */
 	public void createControls(Composite page) {
 
-		// Obtain the HTTP Security source.
+		// Obtain the HTTP Security Source class.
 		// (Always attempt to obtain to provide details on page)
-		HttpSecuritySource<?, ?, ?, ?> httpSecuritySource = this
-				.loadHttpSecuritySource(page, null);
-		if (httpSecuritySource == null) {
-			return; // did not load HttpSecuritySource
+		Class<?> httpSecuritySourceClass = this.loadHttpSecuritySourceClass(
+				page, null);
+		if (httpSecuritySourceClass == null) {
+			return; // did not load HttpSecuritySource class
 		}
 
 		// Obtain specification properties for HTTP Security source
-		this.properties = this.httpSecurityLoader
-				.loadSpecification(httpSecuritySource);
+		OfficeFloorCompiler compiler = this.createOfficeFloorCompiler(this);
+		try {
+			this.properties = HttpSecuritySourceSpecificationRunnable
+					.loadSpecification(httpSecuritySourceClass.getName(),
+							compiler);
+		} catch (Throwable ex) {
+			// Failed to load properties
+			this.context.setErrorMessage(ex.getMessage() + " ("
+					+ ex.getClass().getSimpleName() + ")");
+			return; // must load properties
+		}
 
 		// Load Access instance properties if available
 		if (this.accessInstance != null) {
@@ -334,11 +324,11 @@ public class HttpSecuritySourceInstance implements
 	 *            {@link Composite} to provide error if unable to load.
 	 * @param issues
 	 *            {@link CompilerIssues} to provide error if unable to load.
-	 * @return {@link HttpSecuritySource} or <code>null</code> if not able to
-	 *         load.
+	 * @return {@link HttpSecuritySource} class or <code>null</code> if not able
+	 *         to load.
 	 */
-	private HttpSecuritySource<?, ?, ?, ?> loadHttpSecuritySource(
-			Composite page, CompilerIssues issues) {
+	private Class<?> loadHttpSecuritySourceClass(Composite page,
+			CompilerIssues issues) {
 
 		// Obtain the HTTP Security source class
 		String errorMessage = null;
@@ -362,20 +352,6 @@ public class HttpSecuritySourceInstance implements
 			}
 		}
 
-		// Attempt to load HTTP Security Source instance (if no error)
-		HttpSecuritySource<?, ?, ?, ?> httpSecuritySource = null;
-		if (!EclipseUtil.isBlank(errorMessage)) {
-			try {
-				httpSecuritySource = (HttpSecuritySource<?, ?, ?, ?>) httpSecuritySourceClass
-						.newInstance();
-			} catch (Throwable ex) {
-				errorMessage = "Could not instantiate class "
-						+ this.httpSecuritySourceClassName + "\n\n"
-						+ ex.getClass().getSimpleName() + ": "
-						+ ex.getMessage();
-			}
-		}
-
 		// Handle error
 		if (!EclipseUtil.isBlank(errorMessage)) {
 			if (page != null) {
@@ -393,26 +369,22 @@ public class HttpSecuritySourceInstance implements
 			}
 		}
 
-		// Return the HTTP Security Source
-		return httpSecuritySource;
+		// Return the HTTP Security Source class
+		return httpSecuritySourceClass;
 	}
 
 	/**
-	 * Creates the {@link HttpSecurityLoader}.
+	 * Creates the {@link OfficeFloorCompiler}.
 	 * 
 	 * @param issues
 	 *            {@link CompilerIssues}.
-	 * @return {@link HttpSecurityLoader}.
+	 * @return {@link OfficeFloorCompiler}.
 	 */
-	private HttpSecurityLoader createHttpSecurityLoader(CompilerIssues issues) {
+	private OfficeFloorCompiler createOfficeFloorCompiler(CompilerIssues issues) {
 		OfficeFloorCompiler compiler = OfficeFloorCompiler
 				.newOfficeFloorCompiler(this.classLoader);
 		compiler.setCompilerIssues(issues);
-		ManagedObjectLoader managedObjectLoader = compiler
-				.getManagedObjectLoader();
-		HttpSecurityLoader httpSecurityLoader = new HttpSecurityLoaderImpl(
-				managedObjectLoader);
-		return httpSecurityLoader;
+		return compiler;
 	}
 
 	/*

@@ -70,6 +70,7 @@ import net.officefloor.eclipse.woof.operations.RefactorGovernanceOperation;
 import net.officefloor.eclipse.woof.operations.RefactorResourceOperation;
 import net.officefloor.eclipse.woof.operations.RefactorSectionOperation;
 import net.officefloor.eclipse.woof.operations.RefactorTemplateOperation;
+import net.officefloor.eclipse.woof.operations.SetAccessOperation;
 import net.officefloor.model.change.Change;
 import net.officefloor.model.impl.repository.ModelRepositoryImpl;
 import net.officefloor.model.repository.ConfigurationContext;
@@ -221,6 +222,9 @@ public class WoofEditor extends
 		list.add(new AddSectionOperation(woofChanges));
 		list.add(new RefactorSectionOperation(woofChanges));
 		list.add(new DeleteSectionOperation(woofChanges));
+
+		// Access actions
+		list.add(new SetAccessOperation(woofChanges));
 
 		// Governance actions
 		list.add(new AddGovernanceOperation(woofChanges));
