@@ -23,6 +23,7 @@ import net.officefloor.eclipse.skin.standard.figure.LabelConnectorFigure;
 import net.officefloor.eclipse.skin.woof.SectionInputFigure;
 import net.officefloor.eclipse.skin.woof.SectionInputFigureContext;
 import net.officefloor.eclipse.util.EclipseUtil;
+import net.officefloor.model.woof.WoofAccessOutputToWoofSectionInputModel;
 import net.officefloor.model.woof.WoofExceptionToWoofSectionInputModel;
 import net.officefloor.model.woof.WoofSectionOutputToWoofSectionInputModel;
 import net.officefloor.model.woof.WoofStartToWoofSectionInputModel;
@@ -71,6 +72,8 @@ public class StandardSectionInputFigure extends AbstractOfficeFloorFigure
 				WoofTemplateOutputToWoofSectionInputModel.class, anchor);
 		this.registerConnectionAnchor(
 				WoofSectionOutputToWoofSectionInputModel.class, anchor);
+		this.registerConnectionAnchor(
+				WoofAccessOutputToWoofSectionInputModel.class, anchor);
 		this.registerConnectionAnchor(
 				WoofExceptionToWoofSectionInputModel.class, anchor);
 		this.registerConnectionAnchor(WoofStartToWoofSectionInputModel.class,

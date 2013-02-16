@@ -51,6 +51,8 @@ public class WoofSectionOutputEditPart
 		EclipseUtil.addToList(models, this.getCastedModel().getWoofTemplate());
 		EclipseUtil.addToList(models, this.getCastedModel()
 				.getWoofSectionInput());
+		EclipseUtil.addToList(models, this.getCastedModel()
+				.getWoofAccessInput());
 		EclipseUtil.addToList(models, this.getCastedModel().getWoofResource());
 	}
 
@@ -70,6 +72,7 @@ public class WoofSectionOutputEditPart
 
 		case CHANGE_WOOF_TEMPLATE:
 		case CHANGE_WOOF_SECTION_INPUT:
+		case CHANGE_WOOF_ACCESS_INPUT:
 		case CHANGE_WOOF_RESOURCE:
 			this.refreshSourceConnections();
 			break;

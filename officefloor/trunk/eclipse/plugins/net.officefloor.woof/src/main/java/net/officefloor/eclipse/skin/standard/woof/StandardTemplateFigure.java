@@ -25,6 +25,7 @@ import net.officefloor.eclipse.skin.standard.figure.NoSpacingGridLayout;
 import net.officefloor.eclipse.skin.standard.figure.NoSpacingToolbarLayout;
 import net.officefloor.eclipse.skin.woof.TemplateFigure;
 import net.officefloor.eclipse.skin.woof.TemplateFigureContext;
+import net.officefloor.model.woof.WoofAccessOutputToWoofTemplateModel;
 import net.officefloor.model.woof.WoofExceptionToWoofTemplateModel;
 import net.officefloor.model.woof.WoofSectionOutputToWoofTemplateModel;
 import net.officefloor.model.woof.WoofTemplateOutputToWoofTemplateModel;
@@ -93,6 +94,8 @@ public class StandardTemplateFigure extends AbstractOfficeFloorFigure implements
 				templateInputAnchor);
 		this.registerConnectionAnchor(
 				WoofSectionOutputToWoofTemplateModel.class, templateInputAnchor);
+		this.registerConnectionAnchor(
+				WoofAccessOutputToWoofTemplateModel.class, templateInputAnchor);
 		this.registerConnectionAnchor(WoofExceptionToWoofTemplateModel.class,
 				templateInputAnchor);
 		layout.setConstraint(templateInput, new GridData(SWT.BEGINNING,

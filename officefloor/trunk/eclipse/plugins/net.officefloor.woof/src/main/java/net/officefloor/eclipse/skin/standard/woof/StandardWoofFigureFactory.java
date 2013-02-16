@@ -17,6 +17,15 @@
  */
 package net.officefloor.eclipse.skin.standard.woof;
 
+import net.officefloor.eclipse.skin.woof.AccessFigure;
+import net.officefloor.eclipse.skin.woof.AccessFigureContext;
+import net.officefloor.eclipse.skin.woof.AccessInputFigure;
+import net.officefloor.eclipse.skin.woof.AccessInputFigureContext;
+import net.officefloor.eclipse.skin.woof.AccessOutputFigure;
+import net.officefloor.eclipse.skin.woof.AccessOutputFigureContext;
+import net.officefloor.eclipse.skin.woof.AccessOutputToResourceFigureContext;
+import net.officefloor.eclipse.skin.woof.AccessOutputToSectionInputFigureContext;
+import net.officefloor.eclipse.skin.woof.AccessOutputToTemplateFigureContext;
 import net.officefloor.eclipse.skin.woof.ExceptionFigure;
 import net.officefloor.eclipse.skin.woof.ExceptionFigureContext;
 import net.officefloor.eclipse.skin.woof.ExceptionToResourceFigureContext;
@@ -35,6 +44,7 @@ import net.officefloor.eclipse.skin.woof.SectionInputFigure;
 import net.officefloor.eclipse.skin.woof.SectionInputFigureContext;
 import net.officefloor.eclipse.skin.woof.SectionOutputFigure;
 import net.officefloor.eclipse.skin.woof.SectionOutputFigureContext;
+import net.officefloor.eclipse.skin.woof.SectionOutputToAccessInputFigureContext;
 import net.officefloor.eclipse.skin.woof.SectionOutputToResourceFigureContext;
 import net.officefloor.eclipse.skin.woof.SectionOutputToSectionInputFigureContext;
 import net.officefloor.eclipse.skin.woof.SectionOutputToTemplateFigureContext;
@@ -45,6 +55,7 @@ import net.officefloor.eclipse.skin.woof.TemplateFigure;
 import net.officefloor.eclipse.skin.woof.TemplateFigureContext;
 import net.officefloor.eclipse.skin.woof.TemplateOutputFigure;
 import net.officefloor.eclipse.skin.woof.TemplateOutputFigureContext;
+import net.officefloor.eclipse.skin.woof.TemplateOutputToAccessInputFigureContext;
 import net.officefloor.eclipse.skin.woof.TemplateOutputToResourceFigureContext;
 import net.officefloor.eclipse.skin.woof.TemplateOutputToSectionInputFigureContext;
 import net.officefloor.eclipse.skin.woof.TemplateOutputToTemplateFigureContext;
@@ -114,6 +125,23 @@ public class StandardWoofFigureFactory implements WoofFigureFactory {
 	}
 
 	@Override
+	public AccessFigure createAccessFigure(AccessFigureContext context) {
+		return new StandardAccessFigure(context);
+	}
+
+	@Override
+	public AccessInputFigure createAccessInputFigure(
+			AccessInputFigureContext context) {
+		return new StandardAccessInputFigure(context);
+	}
+
+	@Override
+	public AccessOutputFigure createAccessOutputFigure(
+			AccessOutputFigureContext context) {
+		return new StandardAccessOutputFigure(context);
+	}
+
+	@Override
 	public GovernanceFigure createGovernanceFigure(
 			GovernanceFigureContext context) {
 		return new StandardGovernanceFigure(context);
@@ -155,6 +183,13 @@ public class StandardWoofFigureFactory implements WoofFigureFactory {
 	}
 
 	@Override
+	public void decorateTemplateOutputToAccessInputFigure(
+			PolylineConnection figure,
+			TemplateOutputToAccessInputFigureContext context) {
+		this.decorateConnection(figure);
+	}
+
+	@Override
 	public void decorateTemplateOutputToResourceFigure(
 			PolylineConnection figure,
 			TemplateOutputToResourceFigureContext context) {
@@ -176,9 +211,35 @@ public class StandardWoofFigureFactory implements WoofFigureFactory {
 	}
 
 	@Override
+	public void decorateSectionOutputToAccessInputFigure(
+			PolylineConnection figure,
+			SectionOutputToAccessInputFigureContext context) {
+		this.decorateConnection(figure);
+	}
+
+	@Override
 	public void decorateSectionOutputToResourceFigure(
 			PolylineConnection figure,
 			SectionOutputToResourceFigureContext context) {
+		this.decorateConnection(figure);
+	}
+
+	@Override
+	public void decorateAccessOutputToTemplateFigure(PolylineConnection figure,
+			AccessOutputToTemplateFigureContext context) {
+		this.decorateConnection(figure);
+	}
+
+	@Override
+	public void decorateAccessOutputToSectionInputFigure(
+			PolylineConnection figure,
+			AccessOutputToSectionInputFigureContext context) {
+		this.decorateConnection(figure);
+	}
+
+	@Override
+	public void decorateAccessOutputToResourceFigure(PolylineConnection figure,
+			AccessOutputToResourceFigureContext context) {
 		this.decorateConnection(figure);
 	}
 
@@ -187,7 +248,7 @@ public class StandardWoofFigureFactory implements WoofFigureFactory {
 			PolylineConnection figure,
 			GovernanceToGovernanceAreaFigureContext context) {
 		figure.setForegroundColor(CommonWoofColours.CONNECTIONS());
-		
+
 		// Match governance outline
 		figure.setAlpha(100);
 		figure.setOpaque(false);

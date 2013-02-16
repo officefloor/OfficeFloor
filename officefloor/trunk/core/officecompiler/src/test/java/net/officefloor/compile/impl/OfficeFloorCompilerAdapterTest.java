@@ -135,10 +135,10 @@ public class OfficeFloorCompilerAdapterTest extends OfficeFrameTestCase {
 
 		// Ensure obtain changes in this class loader
 		MockOfficeFloorCompilerRunnable.value = "CURRENT";
-		String value = nonAdaptedCompiler.run(
+		MockRunnableResult result = nonAdaptedCompiler.run(
 				MockOfficeFloorCompilerRunnable.class, "ONE", "TWO");
 		assertEquals("Should be value from current class loader", "CURRENT",
-				value);
+				result.getValue());
 	}
 
 	/**
@@ -149,17 +149,31 @@ public class OfficeFloorCompilerAdapterTest extends OfficeFrameTestCase {
 
 		// Ensure not use current class loader values
 		MockOfficeFloorCompilerRunnable.value = "CURRENT";
-		String value = this.compiler.run(MockOfficeFloorCompilerRunnable.class,
-				"ONE", "TWO");
+		MockRunnableResult result = this.compiler.run(
+				MockOfficeFloorCompilerRunnable.class, "ONE", "TWO");
 		assertEquals("Should be initial value from newly loaded class",
-				"INITIAL", value);
+				"INITIAL", result.getValue());
+	}
+
+	/**
+	 * Mock {@link OfficeFloorCompilerRunnable} result to ensure can adapt
+	 * result.
+	 */
+	public static interface MockRunnableResult {
+
+		/**
+		 * Obtains the value.
+		 * 
+		 * @return Value.
+		 */
+		String getValue();
 	}
 
 	/**
 	 * Mock {@link OfficeFloorCompilerRunnable}.
 	 */
 	public static class MockOfficeFloorCompilerRunnable implements
-			OfficeFloorCompilerRunnable<String> {
+			OfficeFloorCompilerRunnable<MockRunnableResult>, MockRunnableResult {
 
 		/**
 		 * Initial value for each {@link ClassLoader}.
@@ -171,8 +185,8 @@ public class OfficeFloorCompilerAdapterTest extends OfficeFrameTestCase {
 		 */
 
 		@Override
-		public String run(OfficeFloorCompiler compiler, String[] parameters)
-				throws Exception {
+		public MockRunnableResult run(OfficeFloorCompiler compiler,
+				String[] parameters) throws Exception {
 
 			// Ensure have OfficeFloorCompiler
 			assertNotNull("Should have compiler", compiler);
@@ -182,6 +196,16 @@ public class OfficeFloorCompilerAdapterTest extends OfficeFrameTestCase {
 			assertEquals("Incorrect first parameter", "ONE", parameters[0]);
 			assertEquals("Incorrect second parameter", "TWO", parameters[1]);
 
+			// Return to ensure can adapt result
+			return this;
+		}
+
+		/*
+		 * ================== MockRunnableResult =================
+		 */
+
+		@Override
+		public String getValue() {
 			// Return the value (for current class loader)
 			return value;
 		}
