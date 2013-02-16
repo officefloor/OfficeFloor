@@ -59,6 +59,7 @@ public class WoofResourceEditPart
 	protected void populateConnectionTargetModels(List<Object> models) {
 		models.addAll(this.getCastedModel().getWoofTemplateOutputs());
 		models.addAll(this.getCastedModel().getWoofSectionOutputs());
+		models.addAll(this.getCastedModel().getWoofAccessOutputs());
 		models.addAll(this.getCastedModel().getWoofExceptions());
 	}
 
@@ -123,6 +124,8 @@ public class WoofResourceEditPart
 		case REMOVE_WOOF_TEMPLATE_OUTPUT:
 		case ADD_WOOF_SECTION_OUTPUT:
 		case REMOVE_WOOF_SECTION_OUTPUT:
+		case ADD_WOOF_ACCESS_OUTPUT:
+		case REMOVE_WOOF_ACCESS_OUTPUT:
 		case ADD_WOOF_EXCEPTION:
 		case REMOVE_WOOF_EXCEPTION:
 			this.refreshTargetConnections();

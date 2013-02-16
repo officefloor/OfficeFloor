@@ -285,8 +285,8 @@ public class TypeAdapter implements InvocationHandler {
 							.getName()))) {
 				// Primitive or String value (so no need to adapt)
 
-			} else if (Object.class.getName().equals(returnType.getName())) {
-				// Non-specific return so use implementation interfaces
+			} else {
+				// Use implementation interfaces
 				if (returnValue != null) {
 					Class<?>[] interfaces = returnValue.getClass()
 							.getInterfaces();
@@ -380,7 +380,7 @@ public class TypeAdapter implements InvocationHandler {
 		// Create the proxy
 		Object proxy = Proxy.newProxyInstance(clientClassLoader,
 				interfaceTypes, new TypeAdapter(implementation,
-						clientClassLoader, implClassLoader));
+						clientClassLoader, implClassLoader, interfaceTypes));
 
 		// Return the proxy
 		return proxy;
@@ -402,7 +402,12 @@ public class TypeAdapter implements InvocationHandler {
 	private final ClassLoader implClassLoader;
 
 	/**
-	 * Initiate.
+	 * Interface types. Hold reference to make debugging easier.
+	 */
+	private final Class<?>[] interfaceTypes;
+
+	/**
+	 * Access via staic methods.
 	 * 
 	 * @param implementation
 	 *            Type implementation.
@@ -410,12 +415,30 @@ public class TypeAdapter implements InvocationHandler {
 	 *            {@link ClassLoader} of the client.
 	 * @param implClassLoader
 	 *            {@link ClassLoader} of the implementation.
+	 * @param interfaceTypes
+	 *            Interface types. Keep reference to make debugging easier.
 	 */
-	public TypeAdapter(Object implementation, ClassLoader clientClassLoader,
-			ClassLoader implClassLoader) {
+	private TypeAdapter(Object implementation, ClassLoader clientClassLoader,
+			ClassLoader implClassLoader, Class<?>[] interfaceTypes) {
 		this.implementation = implementation;
 		this.clientClassLoader = clientClassLoader;
 		this.implClassLoader = implClassLoader;
+		this.interfaceTypes = interfaceTypes;
+	}
+
+	/*
+	 * ========================== Object ===============================
+	 */
+
+	@Override
+	public String toString() {
+		StringBuilder msg = new StringBuilder();
+		msg.append(super.toString() + " [");
+		for (Class<?> interfaceType : this.interfaceTypes) {
+			msg.append(" " + interfaceType.getName());
+		}
+		msg.append(" ]");
+		return msg.toString();
 	}
 
 	/*

@@ -20,23 +20,22 @@ package net.officefloor.eclipse.skin.standard.woof;
 import net.officefloor.eclipse.skin.standard.AbstractOfficeFloorFigure;
 import net.officefloor.eclipse.skin.standard.figure.ConnectorFigure.ConnectorDirection;
 import net.officefloor.eclipse.skin.standard.figure.LabelConnectorFigure;
-import net.officefloor.eclipse.skin.woof.SectionOutputFigure;
-import net.officefloor.eclipse.skin.woof.SectionOutputFigureContext;
-import net.officefloor.model.woof.WoofSectionOutputToWoofAccessInputModel;
-import net.officefloor.model.woof.WoofSectionOutputToWoofResourceModel;
-import net.officefloor.model.woof.WoofSectionOutputToWoofSectionInputModel;
-import net.officefloor.model.woof.WoofSectionOutputToWoofTemplateModel;
+import net.officefloor.eclipse.skin.woof.AccessOutputFigure;
+import net.officefloor.eclipse.skin.woof.AccessOutputFigureContext;
+import net.officefloor.model.woof.WoofAccessOutputToWoofResourceModel;
+import net.officefloor.model.woof.WoofAccessOutputToWoofSectionInputModel;
+import net.officefloor.model.woof.WoofAccessOutputToWoofTemplateModel;
 
 import org.eclipse.draw2d.ConnectionAnchor;
 import org.eclipse.draw2d.Label;
 
 /**
- * Standard {@link SectionOutputFigure}.
+ * Standard {@link AccessOutputFigure}.
  * 
  * @author Daniel Sagenschneider
  */
-public class StandardSectionOutputFigure extends AbstractOfficeFloorFigure
-		implements SectionOutputFigure {
+public class StandardAccessOutputFigure extends AbstractOfficeFloorFigure
+		implements AccessOutputFigure {
 
 	/**
 	 * Name.
@@ -47,37 +46,35 @@ public class StandardSectionOutputFigure extends AbstractOfficeFloorFigure
 	 * Initiate.
 	 * 
 	 * @param context
-	 *            {@link SectionOutputFigureContext}.
+	 *            {@link AccessOutputFigureContext}.
 	 */
-	public StandardSectionOutputFigure(SectionOutputFigureContext context) {
+	public StandardAccessOutputFigure(AccessOutputFigureContext context) {
 
 		// Create figure
 		LabelConnectorFigure connector = new LabelConnectorFigure(
-				context.getSectionOutputName(), ConnectorDirection.EAST,
+				context.getAccessOutputName(), ConnectorDirection.EAST,
 				CommonWoofColours.CONNECTIONS());
 		this.name = connector.getLabel();
 
 		// Register the anchors
 		ConnectionAnchor anchor = connector.getConnectionAnchor();
 		this.registerConnectionAnchor(
-				WoofSectionOutputToWoofTemplateModel.class, anchor);
+				WoofAccessOutputToWoofTemplateModel.class, anchor);
 		this.registerConnectionAnchor(
-				WoofSectionOutputToWoofSectionInputModel.class, anchor);
+				WoofAccessOutputToWoofSectionInputModel.class, anchor);
 		this.registerConnectionAnchor(
-				WoofSectionOutputToWoofAccessInputModel.class, anchor);
-		this.registerConnectionAnchor(
-				WoofSectionOutputToWoofResourceModel.class, anchor);
+				WoofAccessOutputToWoofResourceModel.class, anchor);
 
 		this.setFigure(connector);
 	}
 
 	/*
-	 * ====================== SectionOutputFigure =============================
+	 * ====================== AccessOutputFigure =============================
 	 */
 
 	@Override
-	public void setSectionOutputName(String sectionOutputName) {
-		this.name.setText(sectionOutputName);
+	public void setAccessOutputName(String accessOutputName) {
+		this.name.setText(accessOutputName);
 	}
 
 }

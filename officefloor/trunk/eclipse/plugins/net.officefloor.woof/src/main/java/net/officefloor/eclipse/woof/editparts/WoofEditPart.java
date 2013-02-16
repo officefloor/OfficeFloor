@@ -20,6 +20,7 @@ package net.officefloor.eclipse.woof.editparts;
 import java.util.List;
 
 import net.officefloor.eclipse.common.editparts.AbstractOfficeFloorDiagramEditPart;
+import net.officefloor.model.woof.WoofAccessModel;
 import net.officefloor.model.woof.WoofGovernanceModel;
 import net.officefloor.model.woof.WoofModel;
 
@@ -37,7 +38,7 @@ public class WoofEditPart extends AbstractOfficeFloorDiagramEditPart<WoofModel> 
 		WoofModel woof = this.getCastedModel();
 
 		// Add the governance (and their areas).
-		// Adding first to place at back (behind z-order)
+		// Adding first to place at back (behind in z-order)
 		List<WoofGovernanceModel> governances = woof.getWoofGovernances();
 		for (WoofGovernanceModel governance : governances) {
 			childModels.addAll(governance.getGovernanceAreas());
@@ -47,6 +48,10 @@ public class WoofEditPart extends AbstractOfficeFloorDiagramEditPart<WoofModel> 
 		// Add remaining models
 		childModels.addAll(woof.getWoofTemplates());
 		childModels.addAll(woof.getWoofSections());
+		WoofAccessModel access = woof.getWoofAccess();
+		if (access != null) {
+			childModels.add(access);
+		}
 		childModels.addAll(woof.getWoofResources());
 		childModels.addAll(woof.getWoofExceptions());
 		childModels.addAll(woof.getWoofStarts());

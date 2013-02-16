@@ -22,10 +22,12 @@ import net.officefloor.model.woof.WoofExceptionToWoofSectionInputModel;
 import net.officefloor.model.woof.WoofExceptionToWoofTemplateModel;
 import net.officefloor.model.woof.WoofGovernanceToWoofGovernanceAreaModel;
 import net.officefloor.model.woof.WoofModel;
+import net.officefloor.model.woof.WoofSectionOutputToWoofAccessInputModel;
 import net.officefloor.model.woof.WoofSectionOutputToWoofResourceModel;
 import net.officefloor.model.woof.WoofSectionOutputToWoofSectionInputModel;
 import net.officefloor.model.woof.WoofSectionOutputToWoofTemplateModel;
 import net.officefloor.model.woof.WoofStartToWoofSectionInputModel;
+import net.officefloor.model.woof.WoofTemplateOutputToWoofAccessInputModel;
 import net.officefloor.model.woof.WoofTemplateOutputToWoofResourceModel;
 import net.officefloor.model.woof.WoofTemplateOutputToWoofSectionInputModel;
 import net.officefloor.model.woof.WoofTemplateOutputToWoofTemplateModel;
@@ -88,6 +90,34 @@ public interface WoofFigureFactory {
 	 */
 	SectionOutputFigure createSectionOutputFigure(
 			SectionOutputFigureContext context);
+
+	/**
+	 * Creates the {@link AccessFigure}.
+	 * 
+	 * @param context
+	 *            {@link AccessFigureContext}.
+	 * @return {@link AccessFigure}.
+	 */
+	AccessFigure createAccessFigure(AccessFigureContext context);
+
+	/**
+	 * Creates the {@link AccessInputFigure}.
+	 * 
+	 * @param context
+	 *            {@link AccessInputFigureContext}.
+	 * @return {@link AccessInputFigure}.
+	 */
+	AccessInputFigure createAccessInputFigure(AccessInputFigureContext context);
+
+	/**
+	 * Creates the {@link AccessOutputFigure}.
+	 * 
+	 * @param context
+	 *            {@link AccessOutputFigureContext}.
+	 * @return {@link AccessOutputFigure}.
+	 */
+	AccessOutputFigure createAccessOutputFigure(
+			AccessOutputFigureContext context);
 
 	/**
 	 * Creates the {@link GovernanceFigure}.
@@ -158,6 +188,17 @@ public interface WoofFigureFactory {
 			TemplateOutputToSectionInputFigureContext context);
 
 	/**
+	 * Decorates the {@link WoofTemplateOutputToWoofAccessInputModel} figure.
+	 * 
+	 * @param figure
+	 *            {@link IFigure} to decorate.
+	 * @param context
+	 *            {@link TemplateOutputToAccessInputFigureContext}
+	 */
+	void decorateTemplateOutputToAccessInputFigure(PolylineConnection figure,
+			TemplateOutputToAccessInputFigureContext context);
+
+	/**
 	 * Decorates the {@link WoofTemplateOutputToWoofResourceModel} figure.
 	 * 
 	 * @param figure
@@ -191,6 +232,17 @@ public interface WoofFigureFactory {
 			SectionOutputToSectionInputFigureContext context);
 
 	/**
+	 * Decorates the {@link WoofSectionOutputToWoofAccessInputModel} figure.
+	 * 
+	 * @param figure
+	 *            {@link IFigure} to decorate.
+	 * @param context
+	 *            {@link SectionOutputToAccessInputFigureContext}.
+	 */
+	void decorateSectionOutputToAccessInputFigure(PolylineConnection figure,
+			SectionOutputToAccessInputFigureContext context);
+
+	/**
 	 * Decorates the {@link WoofSectionOutputToWoofResourceModel} figure.
 	 * 
 	 * @param figure
@@ -200,6 +252,39 @@ public interface WoofFigureFactory {
 	 */
 	void decorateSectionOutputToResourceFigure(PolylineConnection figure,
 			SectionOutputToResourceFigureContext context);
+
+	/**
+	 * Decorates the {@link WoofAccessOutputToWoofTemplateModel} figure.
+	 * 
+	 * @param figure
+	 *            {@link IFigure} to decorate.
+	 * @param context
+	 *            {@link AccessOutputToTemplateFigureContext}
+	 */
+	void decorateAccessOutputToTemplateFigure(PolylineConnection figure,
+			AccessOutputToTemplateFigureContext context);
+
+	/**
+	 * Decorates the {@link WoofAccessOutputToWoofSectionInputModel} figure.
+	 * 
+	 * @param figure
+	 *            {@link IFigure} to decorate.
+	 * @param context
+	 *            {@link AccessOutputToSectionInputFigureContext}.
+	 */
+	void decorateAccessOutputToSectionInputFigure(PolylineConnection figure,
+			AccessOutputToSectionInputFigureContext context);
+
+	/**
+	 * Decorates the {@link WoofAccessOutputToWoofResourceModel} figure.
+	 * 
+	 * @param figure
+	 *            {@link IFigure} to decorate.
+	 * @param context
+	 *            {@link AccessOutputToResourceFigureContext}.
+	 */
+	void decorateAccessOutputToResourceFigure(PolylineConnection figure,
+			AccessOutputToResourceFigureContext context);
 
 	/**
 	 * Decorates the {@link WoofGovernanceToWoofGovernanceAreaModel} figure.

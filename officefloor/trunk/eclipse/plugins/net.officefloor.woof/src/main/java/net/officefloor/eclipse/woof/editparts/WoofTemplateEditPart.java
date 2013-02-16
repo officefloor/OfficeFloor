@@ -64,6 +64,7 @@ public class WoofTemplateEditPart
 	protected void populateConnectionTargetModels(List<Object> models) {
 		models.addAll(this.getCastedModel().getWoofTemplateOutputs());
 		models.addAll(this.getCastedModel().getWoofSectionOutputs());
+		models.addAll(this.getCastedModel().getWoofAccessOutputs());
 		models.addAll(this.getCastedModel().getWoofExceptions());
 	}
 
@@ -133,6 +134,8 @@ public class WoofTemplateEditPart
 		case REMOVE_WOOF_TEMPLATE_OUTPUT:
 		case ADD_WOOF_SECTION_OUTPUT:
 		case REMOVE_WOOF_SECTION_OUTPUT:
+		case ADD_WOOF_ACCESS_OUTPUT:
+		case REMOVE_WOOF_ACCESS_OUTPUT:
 		case ADD_WOOF_EXCEPTION:
 		case REMOVE_WOOF_EXCEPTION:
 			this.refreshTargetConnections();
@@ -149,6 +152,7 @@ public class WoofTemplateEditPart
 		case REMOVE_LINK:
 		case ADD_REDIRECT:
 		case REMOVE_REDIRECT:
+		case CHANGE_IS_CONTINUE_RENDERING:
 		case ADD_EXTENSION:
 		case REMOVE_EXTENSION:
 			// No visual change

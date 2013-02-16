@@ -22,6 +22,7 @@ import net.officefloor.eclipse.skin.standard.figure.ConnectorFigure.ConnectorDir
 import net.officefloor.eclipse.skin.standard.figure.LabelConnectorFigure;
 import net.officefloor.eclipse.skin.woof.TemplateOutputFigure;
 import net.officefloor.eclipse.skin.woof.TemplateOutputFigureContext;
+import net.officefloor.model.woof.WoofTemplateOutputToWoofAccessInputModel;
 import net.officefloor.model.woof.WoofTemplateOutputToWoofResourceModel;
 import net.officefloor.model.woof.WoofTemplateOutputToWoofSectionInputModel;
 import net.officefloor.model.woof.WoofTemplateOutputToWoofTemplateModel;
@@ -67,6 +68,8 @@ public class StandardTemplateOutputFigure extends AbstractOfficeFloorFigure
 				WoofTemplateOutputToWoofTemplateModel.class, anchor);
 		this.registerConnectionAnchor(
 				WoofTemplateOutputToWoofSectionInputModel.class, anchor);
+		this.registerConnectionAnchor(
+				WoofTemplateOutputToWoofAccessInputModel.class, anchor);
 		this.registerConnectionAnchor(
 				WoofTemplateOutputToWoofResourceModel.class, anchor);
 
