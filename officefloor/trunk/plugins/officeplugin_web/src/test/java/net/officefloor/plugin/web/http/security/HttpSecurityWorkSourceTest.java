@@ -144,6 +144,15 @@ public class HttpSecurityWorkSourceTest extends OfficeFrameTestCase {
 		moAuthenticateTask.addObject(CredentialStore.class).setLabel(
 				"DEPENDENCY_CREDENTIAL_STORE");
 
+		// Managed Object Logout task
+		TaskTypeBuilder<Indexed, None> moLogoutTask = type.addTaskType(
+				"MANAGED_OBJECT_LOGOUT", new ManagedObjectHttpLogoutTask(),
+				Indexed.class, None.class);
+		moLogoutTask.addObject(TaskLogoutContext.class).setLabel(
+				"TASK_LOGOUT_CONTEXT");
+		moLogoutTask.addObject(CredentialStore.class).setLabel(
+				"DEPENDENCY_CREDENTIAL_STORE");
+
 		// Challenge task
 		TaskTypeBuilder<Indexed, Indexed> challengeTask = type.addTaskType(
 				"CHALLENGE", new HttpChallengeTask(), Indexed.class,
@@ -304,16 +313,32 @@ public class HttpSecurityWorkSourceTest extends OfficeFrameTestCase {
 	 * functionality.
 	 */
 	public void testChallenge() throws Exception {
-		this.doChallengeTest(false, null);
+		this.doChallengeTest(true, false, null);
 	}
 
 	/**
-	 * Ensure can undertake challenge requiring applicaiton specific behaviour
+	 * Ensure can undertake another challenge for same authentication.
+	 */
+	public void testChallengeAgainForAuthentication() throws Exception {
+		this.doChallengeTest(false, false, null);
+	}
+
+	/**
+	 * Ensure can undertake challenge requiring application specific behaviour
 	 * (such as form based login).
 	 */
 	public void testChallengeWithApplicationSpecificBehaviour()
 			throws Exception {
-		this.doChallengeTest(true, null);
+		this.doChallengeTest(true, true, null);
+	}
+
+	/**
+	 * Ensure can undertake challenging again requiring application specific
+	 * behaviour (such as form based login).
+	 */
+	public void testChallengeAgainWithApplicationSpecificBehaviour()
+			throws Exception {
+		this.doChallengeTest(false, true, null);
 	}
 
 	/**
@@ -322,7 +347,7 @@ public class HttpSecurityWorkSourceTest extends OfficeFrameTestCase {
 	public void testChallengeIoException() throws Exception {
 		IOException ioException = new IOException("TEST");
 		this.source.ioException = ioException;
-		this.doChallengeTest(false, ioException);
+		this.doChallengeTest(true, false, ioException);
 	}
 
 	/**
@@ -331,24 +356,38 @@ public class HttpSecurityWorkSourceTest extends OfficeFrameTestCase {
 	public void testChallengeFailure() throws Exception {
 		RuntimeException failure = new RuntimeException("TEST");
 		this.source.failure = failure;
-		this.doChallengeTest(false, failure);
+		this.doChallengeTest(true, false, failure);
+	}
+
+	/**
+	 * Ensure handle {@link RuntimeException} on challenging again for
+	 * authentication.
+	 */
+	public void testChallengeAgainFailure() throws Exception {
+		RuntimeException failure = new RuntimeException("TEST");
+		this.source.failure = failure;
+		this.doChallengeTest(false, false, failure);
 	}
 
 	/**
 	 * Undertakes the challenge test.
 	 * 
+	 * @param isSaveRequest
+	 *            Indicates if saving request.
 	 * @param isInvokeFlow
 	 *            Indicates whether to invoke the flow.
 	 * @param exception
 	 *            {@link Exception} in undertaking challenge.
 	 */
 	@SuppressWarnings("unchecked")
-	private void doChallengeTest(boolean isInvokeFlow, Throwable exception)
-			throws Exception {
+	private void doChallengeTest(boolean isSaveRequest, boolean isInvokeFlow,
+			Throwable exception) throws Exception {
 
 		final FlowFuture future = this.createMock(FlowFuture.class);
 
 		// Record initial challenge dependencies
+		this.recordReturn(this.taskContext, this.taskContext.getObject(0),
+				new HttpAuthenticationRequiredException(isSaveRequest));
 		this.recordReturn(this.taskContext, this.taskContext.getObject(1),
 				this.connection);
 		this.recordReturn(this.taskContext, this.taskContext.getObject(2),
@@ -356,9 +395,12 @@ public class HttpSecurityWorkSourceTest extends OfficeFrameTestCase {
 		this.recordReturn(this.taskContext, this.taskContext.getObject(3),
 				this.requestState);
 
-		// Record saving request state
-		HttpUrlContinuationTest.recordSaveRequest("CHALLENGE_REQUEST_MOMENTO",
-				this.connection, this.requestState, this.session, this);
+		// Record saving request state (if saving request)
+		if (isSaveRequest) {
+			HttpUrlContinuationTest.recordSaveRequest(
+					"CHALLENGE_REQUEST_MOMENTO", this.connection,
+					this.requestState, this.session, this);
+		}
 
 		// Record remaining challenge dependencies
 		this.recordReturn(this.taskContext, this.taskContext.getWork(),
@@ -608,7 +650,103 @@ public class HttpSecurityWorkSourceTest extends OfficeFrameTestCase {
 		if ((security == null) && (failure == null)) {
 			assertNotNull("Should be authentication required exception",
 					exception);
+			assertFalse("Should not save request for further challenges",
+					exception.isSaveRequest());
 		}
+	}
+
+	/**
+	 * Ensure can log out.
+	 */
+	public void testLogout() throws Exception {
+		final HttpLogoutRequest request = this
+				.createMock(HttpLogoutRequest.class);
+		this.doLogoutTest(request, null);
+	}
+
+	/**
+	 * Ensure can log out without {@link HttpLogoutRequest}.
+	 */
+	public void testLogoutWithoutRequest() throws Exception {
+		this.doLogoutTest(null, null);
+	}
+
+	/**
+	 * Ensure handle {@link IOException} on log out.
+	 */
+	public void testLogoutIoException() throws Exception {
+		final HttpLogoutRequest request = this
+				.createMock(HttpLogoutRequest.class);
+		IOException ioException = new IOException("TEST");
+		this.source.ioException = ioException;
+		this.doLogoutTest(request, ioException);
+	}
+
+	/**
+	 * Ensure handle {@link RuntimeException} on log out.
+	 */
+	public void testLogoutFailure() throws Exception {
+		final HttpLogoutRequest request = this
+				.createMock(HttpLogoutRequest.class);
+		RuntimeException failure = new RuntimeException("TEST");
+		this.source.failure = failure;
+		this.doLogoutTest(request, failure);
+	}
+
+	/**
+	 * Ensure handle {@link RuntimeException} on log out without
+	 * {@link HttpLogoutRequest}.
+	 */
+	public void testLogoutFailureWithoutRequest() throws Exception {
+		RuntimeException failure = new RuntimeException("TEST");
+		this.source.failure = failure;
+		this.doLogoutTest(null, failure);
+	}
+
+	/**
+	 * Undertakes the logout test.
+	 * 
+	 * @param exception
+	 *            {@link Exception} in undertaking challenge.
+	 */
+	@SuppressWarnings("unchecked")
+	private void doLogoutTest(HttpLogoutRequest logoutRequest,
+			Throwable exception) throws Exception {
+
+		final TaskLogoutContext logoutContext = this
+				.createMock(TaskLogoutContext.class);
+
+		// Record initial challenge dependencies
+		this.recordReturn(this.taskContext, this.taskContext.getObject(0),
+				logoutContext);
+		this.recordReturn(logoutContext, logoutContext.getHttpLogoutRequest(),
+				logoutRequest);
+		this.recordReturn(logoutContext, logoutContext.getConnection(),
+				this.connection);
+		this.recordReturn(logoutContext, logoutContext.getSession(),
+				this.session);
+
+		// Record remaining challenge dependencies
+		this.recordReturn(this.taskContext, this.taskContext.getWork(),
+				new HttpSecurityWork(this.source));
+		this.recordReturn(this.taskContext, this.taskContext.getObject(1),
+				this.store);
+
+		// Flag logout complete (if have request)
+		if (logoutRequest != null) {
+			logoutRequest.logoutComplete(exception);
+		}
+
+		// Undertake challenge
+		this.replayMockObjects();
+		try {
+			Task<HttpSecurityWork, Dependencies, Flows> task = this
+					.createTask("MANAGED_OBJECT_LOGOUT");
+			task.doTask(this.taskContext);
+		} catch (Throwable ex) {
+			throw fail(ex);
+		}
+		this.verifyMockObjects();
 	}
 
 	/**
@@ -783,6 +921,27 @@ public class HttpSecurityWorkSourceTest extends OfficeFrameTestCase {
 			// Determine if undertake flow challenge
 			if (this.isDoChallengeFlow) {
 				context.doFlow(Flows.FORM_LOGIN_PAGE);
+			}
+		}
+
+		@Override
+		public void logout(HttpLogoutContext<Dependencies> context)
+				throws IOException {
+
+			// Ensure can obtain dependencies
+			assertSame("Incorrect connection", this.testCase.connection,
+					context.getConnection());
+			assertSame("Incorrect session", this.testCase.session,
+					context.getSession());
+			assertSame("Incorrect dependency", this.testCase.store,
+					context.getObject(Dependencies.CREDENTIAL_STORE));
+
+			// Determine if failures
+			if (this.ioException != null) {
+				throw this.ioException;
+			}
+			if (this.failure != null) {
+				throw this.failure;
 			}
 		}
 	}

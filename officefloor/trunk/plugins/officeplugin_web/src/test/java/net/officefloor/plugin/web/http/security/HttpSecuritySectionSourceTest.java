@@ -62,6 +62,8 @@ public class HttpSecuritySectionSourceTest extends OfficeFrameTestCase {
 		type.addSectionInput("Authenticate", Void.class.getName());
 		type.addSectionInput("ManagedObjectAuthenticate",
 				TaskAuthenticateContext.class.getName());
+		type.addSectionInput("ManagedObjectLogout",
+				HttpLogoutRequest.class.getName());
 
 		// Outputs
 		type.addSectionOutput("Recontinue", null, false);
@@ -99,6 +101,8 @@ public class HttpSecuritySectionSourceTest extends OfficeFrameTestCase {
 		type.addSectionInput("Authenticate", Void.class.getName());
 		type.addSectionInput("ManagedObjectAuthenticate",
 				TaskAuthenticateContext.class.getName());
+		type.addSectionInput("ManagedObjectLogout",
+				HttpLogoutRequest.class.getName());
 
 		// Outputs
 		type.addSectionOutput("Recontinue", null, false);
@@ -137,6 +141,8 @@ public class HttpSecuritySectionSourceTest extends OfficeFrameTestCase {
 		type.addSectionInput("Authenticate", HttpCredentials.class.getName());
 		type.addSectionInput("ManagedObjectAuthenticate",
 				TaskAuthenticateContext.class.getName());
+		type.addSectionInput("ManagedObjectLogout",
+				HttpLogoutRequest.class.getName());
 
 		// Outputs
 		type.addSectionOutput("Recontinue", null, false);
@@ -183,4 +189,5 @@ public class HttpSecuritySectionSourceTest extends OfficeFrameTestCase {
 				HttpSecuritySectionSource.PROPERTY_HTTP_SECURITY_SOURCE_KEY,
 				key);
 	}
+
 }

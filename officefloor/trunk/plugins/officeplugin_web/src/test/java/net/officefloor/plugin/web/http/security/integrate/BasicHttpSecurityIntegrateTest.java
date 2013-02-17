@@ -76,4 +76,48 @@ public class BasicHttpSecurityIntegrateTest extends
 		this.doRequest("service", 200, "Serviced for daniel");
 	}
 
+	/**
+	 * Ensure can go through multiple login attempts.
+	 */
+	public void testMultipleLoginAttempts() throws Exception {
+
+		// Ensure can try multiple times
+		this.doRequest("service", 401, "");
+		this.doRequest("service", 401, "");
+		this.doRequest("service", 401, "");
+		this.doRequest("service", 401, "");
+
+		// Should authenticate with credentials
+		this.getHttpClient()
+				.getCredentialsProvider()
+				.setCredentials(new AuthScope(null, -1, "TestRealm"),
+						new UsernamePasswordCredentials("daniel", "password"));
+		this.doRequest("service", 200, "Serviced for daniel");
+	}
+
+	/**
+	 * Ensure can logout.
+	 */
+	public void testLogout() throws Exception {
+
+		// Authenticate with credentials
+		this.getHttpClient()
+				.getCredentialsProvider()
+				.setCredentials(new AuthScope(null, -1, "TestRealm"),
+						new UsernamePasswordCredentials("daniel", "password"));
+		this.doRequest("service", 200, "Serviced for daniel");
+
+		// Clear login details
+		this.getHttpClient().getCredentialsProvider().clear();
+
+		// Request again to ensure stay logged in
+		this.doRequest("service", 200, "Serviced for daniel");
+
+		// Logout
+		this.doRequest("logout", 200, "LOGOUT");
+
+		// Should require to log in (after the log out)
+		this.doRequest("service", 401, "");
+	}
+
 }

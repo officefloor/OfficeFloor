@@ -46,7 +46,7 @@ public class HttpAuthenticationManagedObjectSource
 	 * Flow keys.
 	 */
 	public static enum Flows {
-		AUTHENTICATE
+		AUTHENTICATE, LOGOUT
 	}
 
 	/**
@@ -94,6 +94,7 @@ public class HttpAuthenticationManagedObjectSource
 				ServerHttpConnection.class);
 		context.addDependency(Dependencies.HTTP_SESSION, HttpSession.class);
 		context.addFlow(Flows.AUTHENTICATE, TaskAuthenticateContext.class);
+		context.addFlow(Flows.LOGOUT, TaskLogoutContext.class);
 	}
 
 	@Override

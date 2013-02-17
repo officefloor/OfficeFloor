@@ -30,6 +30,8 @@ import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
 import net.officefloor.plugin.socket.server.http.server.MockHttpServer;
 import net.officefloor.plugin.web.http.application.HttpSecurityAutoWireSection;
 import net.officefloor.plugin.web.http.application.WebAutoWireApplication;
+import net.officefloor.plugin.web.http.security.HttpAuthentication;
+import net.officefloor.plugin.web.http.security.HttpCredentials;
 import net.officefloor.plugin.web.http.security.HttpSecurity;
 import net.officefloor.plugin.web.http.security.HttpSecuritySource;
 import net.officefloor.plugin.web.http.server.HttpServerAutoWireOfficeFloorSource;
@@ -80,6 +82,7 @@ public abstract class AbstractHttpSecurityIntegrateTestCase extends
 		AutoWireSection section = source.addSection("SERVICE",
 				ClassSectionSource.class.getName(), Servicer.class.getName());
 		source.linkUri("service", section, "service");
+		source.linkUri("logout", section, "logout");
 
 		// Determine if security configured
 		if (security != null) {
@@ -179,6 +182,27 @@ public abstract class AbstractHttpSecurityIntegrateTestCase extends
 					.write("Serviced for "
 							+ (security == null ? "guest" : security
 									.getRemoteUser()));
+		}
+
+		/**
+		 * Undertakes logging out.
+		 * 
+		 * @param authentication
+		 *            {@link HttpAuthentication}.
+		 * @param connection
+		 *            {@link ServerHttpConnection}.
+		 * @throws IOException
+		 *             If fails.
+		 */
+		public void logout(
+				HttpAuthentication<HttpSecurity, HttpCredentials> authentication,
+				ServerHttpConnection connection) throws IOException {
+
+			// Log out
+			authentication.logout(null);
+
+			// Indicate logged out
+			connection.getHttpResponse().getEntityWriter().write("LOGOUT");
 		}
 
 		/**

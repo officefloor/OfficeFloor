@@ -28,6 +28,7 @@ import net.officefloor.frame.spi.TestSource;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.web.http.security.HttpAuthenticateContext;
 import net.officefloor.plugin.web.http.security.HttpChallengeContext;
+import net.officefloor.plugin.web.http.security.HttpLogoutContext;
 import net.officefloor.plugin.web.http.security.HttpRatifyContext;
 import net.officefloor.plugin.web.http.security.HttpSecurity;
 import net.officefloor.plugin.web.http.security.HttpSecuritySource;
@@ -162,6 +163,12 @@ public class HttpSecurityTypeRunnableTest extends OfficeFrameTestCase {
 
 		@Override
 		public void challenge(HttpChallengeContext<Indexed, Indexed> context)
+				throws IOException {
+			fail("Should not be invoked for loading type");
+		}
+
+		@Override
+		public void logout(HttpLogoutContext<Indexed> context)
 				throws IOException {
 			fail("Should not be invoked for loading type");
 		}

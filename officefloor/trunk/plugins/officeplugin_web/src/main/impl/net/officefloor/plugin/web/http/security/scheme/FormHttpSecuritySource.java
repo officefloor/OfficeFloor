@@ -22,6 +22,7 @@ import java.io.IOException;
 import net.officefloor.plugin.web.http.security.HttpAuthenticateContext;
 import net.officefloor.plugin.web.http.security.HttpChallengeContext;
 import net.officefloor.plugin.web.http.security.HttpCredentials;
+import net.officefloor.plugin.web.http.security.HttpLogoutContext;
 import net.officefloor.plugin.web.http.security.HttpRatifyContext;
 import net.officefloor.plugin.web.http.security.HttpSecurity;
 import net.officefloor.plugin.web.http.security.HttpSecuritySource;
@@ -191,6 +192,14 @@ public class FormHttpSecuritySource
 
 		// Trigger flow for login page
 		context.doFlow(Flows.FORM_LOGIN_PAGE);
+	}
+
+	@Override
+	public void logout(HttpLogoutContext<Dependencies> context)
+			throws IOException {
+
+		// Forget HTTP Security for further requests (requires login again)
+		context.getSession().removeAttribute(SESSION_ATTRIBUTE_HTTP_SECURITY);
 	}
 
 }

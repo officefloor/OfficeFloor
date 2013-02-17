@@ -607,6 +607,11 @@ public class WebApplicationAutoWireOfficeFloorSource extends
 									WebApplicationAutoWireOfficeFloorSource.this.security
 											.getSectionName(),
 									"ManagedObjectAuthenticate");
+							context.mapFlow(
+									"LOGOUT",
+									WebApplicationAutoWireOfficeFloorSource.this.security
+											.getSectionName(),
+									"ManagedObjectLogout");
 						}
 					}, new AutoWire(HttpAuthentication.class));
 			httpAuthentication.setTimeout(securityTimeout);

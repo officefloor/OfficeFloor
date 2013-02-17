@@ -20,6 +20,7 @@ package net.officefloor.plugin.web.http.security;
 import net.officefloor.frame.api.escalate.Escalation;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.plugin.web.http.application.WebAutoWireApplication;
+import net.officefloor.plugin.web.http.route.HttpUrlContinuation;
 
 /**
  * <p>
@@ -32,4 +33,42 @@ import net.officefloor.plugin.web.http.application.WebAutoWireApplication;
  * @author Daniel Sagenschneider
  */
 public class HttpAuthenticationRequiredException extends Exception {
+
+	/**
+	 * Indicates whether to save request for {@link HttpUrlContinuation} after
+	 * authentication completes.
+	 */
+	private final boolean isSaveRequest;
+
+	/**
+	 * Initiate.
+	 */
+	public HttpAuthenticationRequiredException() {
+		this(true);
+	}
+
+	/**
+	 * <p>
+	 * Used internally to trigger a challenge again.
+	 * <p>
+	 * Allows not saving the request so that the original request triggering
+	 * authentication is used once authentication completes.
+	 * 
+	 * @param isSaveRequest
+	 *            Indicates whether to save request for
+	 *            {@link HttpUrlContinuation} after authentication completes.
+	 */
+	HttpAuthenticationRequiredException(boolean isSaveRequest) {
+		this.isSaveRequest = isSaveRequest;
+	}
+
+	/**
+	 * Indicates whether to save the request.
+	 * 
+	 * @return <code>true</code> to save the request.
+	 */
+	public boolean isSaveRequest() {
+		return this.isSaveRequest;
+	}
+
 }

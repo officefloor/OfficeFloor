@@ -17,40 +17,36 @@
  */
 package net.officefloor.plugin.web.http.security;
 
-import java.io.IOException;
+import net.officefloor.frame.api.execute.Task;
+import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
+import net.officefloor.plugin.web.http.session.HttpSession;
 
 /**
- * Dependency interface allowing the application to check if the HTTP client is
- * authenticated.
+ * {@link Task} logout context.
  * 
  * @author Daniel Sagenschneider
  */
-public interface HttpAuthentication<S, C> {
+public interface TaskLogoutContext {
 
 	/**
-	 * Undertakes authentication.
+	 * Obtains the {@link ServerHttpConnection} to be secured.
 	 * 
-	 * @param authenticationRequest
-	 *            {@link HttpAuthenticateRequest}.
+	 * @return {@link ServerHttpConnection}.
 	 */
-	void authenticate(HttpAuthenticateRequest<C> authenticationRequest);
+	ServerHttpConnection getConnection();
 
 	/**
-	 * Obtains the HTTP security.
+	 * Obtains the {@link HttpSession}.
 	 * 
-	 * @return HTTP security or <code>null</code> if not authenticated.
-	 * @throws IOException
-	 *             If authentication has been attempted but there were failures
-	 *             communicating to necessary security services.
+	 * @return {@link HttpSession}.
 	 */
-	S getHttpSecurity() throws IOException;
+	HttpSession getSession();
 
 	/**
-	 * Undertakes logging out.
+	 * Obtains the {@link HttpLogoutRequest}.
 	 * 
-	 * @param logoutRequest
-	 *            {@link HttpLogoutRequest}.
+	 * @return {@link HttpLogoutRequest}.
 	 */
-	void logout(HttpLogoutRequest logoutRequest);
+	HttpLogoutRequest getHttpLogoutRequest();
 
 }

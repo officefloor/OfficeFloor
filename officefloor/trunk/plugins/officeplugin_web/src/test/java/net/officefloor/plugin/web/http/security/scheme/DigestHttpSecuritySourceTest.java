@@ -362,6 +362,35 @@ public class DigestHttpSecuritySourceTest extends OfficeFrameTestCase {
 	}
 
 	/**
+	 * Ensure can log out.
+	 */
+	public void testLogout() throws Exception {
+
+		final MockHttpLogoutContext<Dependencies> logoutContext = new MockHttpLogoutContext<Dependencies>(
+				this);
+
+		// Record logging out
+		HttpSession session = logoutContext.getSession();
+		session.removeAttribute("http.security.source.digest.http.security");
+
+		// Replay mock objects
+		this.replayMockObjects();
+
+		// Create and initialise the source
+		DigestHttpSecuritySource source = HttpSecurityLoaderUtil
+				.loadHttpSecuritySource(MockDigestHttpSecuritySource.class,
+						DigestHttpSecuritySource.PROPERTY_REALM, REALM,
+						DigestHttpSecuritySource.PROPERTY_PRIVATE_KEY,
+						PRIVATE_KEY);
+
+		// Logout
+		source.logout(logoutContext);
+
+		// Verify mock objects
+		this.verifyMockObjects();
+	}
+
+	/**
 	 * Creates the digest.
 	 * 
 	 * @param algorithm

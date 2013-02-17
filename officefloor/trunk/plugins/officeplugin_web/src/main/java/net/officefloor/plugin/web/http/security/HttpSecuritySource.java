@@ -117,4 +117,14 @@ public interface HttpSecuritySource<S, C, D extends Enum<D>, F extends Enum<F>> 
 	 */
 	void challenge(HttpChallengeContext<D, F> context) throws IOException;
 
+	/**
+	 * Logs out.
+	 * 
+	 * @param context
+	 *            {@link HttpLogoutContext}.
+	 * @throws IOException
+	 *             If failure in communicating to necessary security services.
+	 */
+	void logout(HttpLogoutContext<D> context) throws IOException;
+
 }

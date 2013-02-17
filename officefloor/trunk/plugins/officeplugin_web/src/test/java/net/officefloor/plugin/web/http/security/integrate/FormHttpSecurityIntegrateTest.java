@@ -115,4 +115,44 @@ public class FormHttpSecurityIntegrateTest extends
 				"Serviced for daniel");
 	}
 
+	/**
+	 * Ensure can go through multiple login attempts.
+	 */
+	public void testMultipleLoginAttempts() throws Exception {
+
+		// Initiate triggering login
+		this.doRequest("service", 200, "LOGIN");
+
+		// Should not login multiple times
+		this.doRequest("login", 200, "LOGIN");
+		this.doRequest("login?username=daniel", 200, "LOGIN");
+		this.doRequest("login?password=daniel", 200, "LOGIN");
+
+		// Now log in
+		this.doRequest("login?username=daniel&password=daniel", 200,
+				"Serviced for daniel");
+	}
+
+	/**
+	 * Ensure can logout.
+	 */
+	public void testLogout() throws Exception {
+
+		// Initiate triggering login
+		this.doRequest("service", 200, "LOGIN");
+
+		// Send back login credentials and get service page
+		this.doRequest("login?username=daniel&password=daniel", 200,
+				"Serviced for daniel");
+
+		// Request again to ensure stay logged in
+		this.doRequest("service", 200, "Serviced for daniel");
+
+		// Logout
+		this.doRequest("logout", 200, "LOGOUT");
+
+		// Should require to log in (after the log out)
+		this.doRequest("service", 200, "LOGIN");
+	}
+
 }

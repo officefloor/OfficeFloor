@@ -176,6 +176,19 @@ public class HttpSecuritySectionSource extends AbstractSectionSource {
 					dependency);
 		}
 
+		// Configure the managed object logout
+		SectionTask moLogoutTask = work.addSectionTask(
+				HttpSecurityWorkSource.TASK_MANAGED_OBJECT_LOGOUT,
+				HttpSecurityWorkSource.TASK_MANAGED_OBJECT_LOGOUT);
+		moLogoutTask.getTaskObject("TASK_LOGOUT_CONTEXT").flagAsParameter();
+		designer.link(moLogoutTask.getTaskObject("SERVER_HTTP_CONNECTION"),
+				serverHttpConnection);
+		designer.link(moLogoutTask.getTaskObject("HTTP_SESSION"), httpSession);
+		for (SectionObject dependency : dependencyObjects) {
+			designer.link(moLogoutTask.getTaskObject(dependency
+					.getSectionObjectName()), dependency);
+		}
+
 		// Configure the application authentication start
 		SectionTask startAuthTask = work.addSectionTask(
 				HttpSecurityWorkSource.TASK_START_APPLICATION_AUTHENTICATE,
@@ -234,6 +247,8 @@ public class HttpSecuritySectionSource extends AbstractSectionSource {
 						credentialsType.getName()), startAuthTask);
 		designer.link(designer.addSectionInput("ManagedObjectAuthenticate",
 				TaskAuthenticateContext.class.getName()), moAuthTask);
+		designer.link(designer.addSectionInput("ManagedObjectLogout",
+				HttpLogoutRequest.class.getName()), moLogoutTask);
 	}
 
 }
