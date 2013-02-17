@@ -17,6 +17,9 @@
  */
 package net.officefloor.tutorial.authenticationhttpserver;
 
+import net.officefloor.plugin.section.clazz.NextTask;
+import net.officefloor.plugin.web.http.security.HttpAuthentication;
+import net.officefloor.plugin.web.http.security.HttpCredentials;
 import net.officefloor.plugin.web.http.security.HttpSecurity;
 import lombok.Data;
 
@@ -25,6 +28,7 @@ import lombok.Data;
  * 
  * @author Daniel Sagenschneider
  */
+// START SNIPPET: tutorial
 public class HelloLogic {
 
 	@Data
@@ -39,4 +43,11 @@ public class HelloLogic {
 		return new TemplateData(username);
 	}
 
+	@NextTask("LoggedOut")
+	public void logout(
+			HttpAuthentication<HttpSecurity, HttpCredentials> authentication) {
+		authentication.logout(null);
+	}
+
 }
+// END SNIPPET: tutorial

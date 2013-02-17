@@ -30,6 +30,7 @@ import lombok.Data;
  * 
  * @author Daniel Sagenschneider
  */
+// START SNIPPET: tutorial
 public class LoginLogic {
 
 	@Data
@@ -53,3 +54,4 @@ public class LoginLogic {
 	}
 
 }
+// END SNIPPET: tutorial
