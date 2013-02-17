@@ -13,6 +13,7 @@
 	<name>Tutorials</name>
 	<description>Tutorials for OfficeFloor</description>
 	<modules>
+		<module>AuthenticationHttpServer</module>
 		<module>CometApp</module>
 		<module>CometManualApp</module>
 		<module>DatabaseHttpServer</module>

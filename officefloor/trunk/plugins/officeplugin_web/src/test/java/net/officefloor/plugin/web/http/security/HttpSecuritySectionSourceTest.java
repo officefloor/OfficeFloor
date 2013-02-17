@@ -141,8 +141,7 @@ public class HttpSecuritySectionSourceTest extends OfficeFrameTestCase {
 		// Outputs
 		type.addSectionOutput("Recontinue", null, false);
 		type.addSectionOutput("Failure", Throwable.class.getName(), true);
-		type.addSectionOutput("FLOW_FORM_LOGIN_PAGE", Void.class.getName(),
-				false);
+		type.addSectionOutput("FORM_LOGIN_PAGE", Void.class.getName(), false);
 
 		// Objects
 		type.addSectionObject("HTTP_AUTHENTICATION",
