@@ -53,7 +53,7 @@ public class FormHttpSecurityIntegrateTest extends
 		// Provide the form login page
 		AutoWireSection form = application.addSection("FORM",
 				ClassSectionSource.class.getName(), LoginPage.class.getName());
-		application.link(security, "FLOW_FORM_LOGIN_PAGE", form, "form");
+		application.link(security, "FORM_LOGIN_PAGE", form, "form");
 		application.linkUri("login", form, "login");
 		application.link(form, "authenticate", security, "Authenticate");
 

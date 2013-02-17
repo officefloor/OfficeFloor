@@ -150,10 +150,17 @@ public class HttpSecuritySectionSource extends AbstractSectionSource {
 		designer.link(challengeTask.getTaskFlow("FAILURE"), failureOutput,
 				FlowInstigationStrategyEnum.SEQUENTIAL);
 		for (HttpSecurityFlowType<?> flowType : securityType.getFlowTypes()) {
-			String flowName = "FLOW_" + flowType.getFlowName();
-			TaskFlow taskFlow = challengeTask.getTaskFlow(flowName);
-			SectionOutput sectionOutput = designer.addSectionOutput(flowName,
-					flowType.getArgumentType().getName(), false);
+			String flowName = flowType.getFlowName();
+			TaskFlow taskFlow = challengeTask.getTaskFlow("FLOW_" + flowName);
+			SectionOutput sectionOutput;
+			if (OUTPUT_FAILURE.equals(flowName)) {
+				// Determine if map to existing failure output
+				sectionOutput = failureOutput;
+			} else {
+				// Create output for the flow
+				sectionOutput = designer.addSectionOutput(flowName, flowType
+						.getArgumentType().getName(), false);
+			}
 			designer.link(taskFlow, sectionOutput,
 					FlowInstigationStrategyEnum.SEQUENTIAL);
 		}

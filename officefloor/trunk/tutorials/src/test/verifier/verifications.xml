@@ -2,6 +2,10 @@
 	<files>
 		<!-- Ensure all the modules inheriting latest -->
 		<file>
+			<location>AuthenticationHttpServer/pom.xml</location>
+			<contains><![CDATA[<version>${project.version}</version>(\s)*</parent>]]></contains>
+		</file>
+		<file>
 			<location>CometApp/pom.xml</location>
 			<contains><![CDATA[<version>${project.version}</version>(\s)*</parent>]]></contains>
 		</file>
