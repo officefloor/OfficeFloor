@@ -1,5 +1,5 @@
 				       ------------------
-				         WoOF Tutorials
+				      OfficeFloor Tutorials
 				       ------------------
 				      Daniel Sagenschneider
 				       ------------------
@@ -8,15 +8,15 @@
   
   Once you have installed the {{{../install.html}OfficeFloor Eclipse plug-ins}} (by dragging the bottom left install icon to your Eclipse IDE) you have the tools ready for the below tutorials.
   
-  The tutorials are ordered so that each builds on the knowledge of the previous tutorials.  It is therefore best to work though them sequentially.  Please however feel free to jump between them to get a feel for OfficeFloor.
-  
-  The acronym <<WoOF>> standards for Web on OfficeFloor.  It is a set of prefabricated plug-ins for OfficeFloor that enables OfficeFloor to work as a high performance Web Application Server.  As you become more familiar with OfficeFloor, you will realise OfficeFloor is a very light weight and versatile plugin application framework that provides {{{../mission.html}open integration of software}}.
+  The tutorials are ordered so that each builds on the knowledge of the previous tutorials.  It is therefore best to work though them in order.  Please however feel free to jump between them to get a feel for OfficeFloor.
 
 
   
-Basics
+WoOF
 
-  The following tutorials cover the basics for developing OfficeFloor (WoOF) web applications.
+  The following tutorials cover developing OfficeFloor (WoOF) web applications.
+
+  The acronym <WoOF> standards for <Web on OfficeFloor>.  It is a set of prefabricated plug-ins for OfficeFloor that enables OfficeFloor to work as a high performance Web Application Server.  As you become more familiar with OfficeFloor, you will realise OfficeFloor is a very light weight and versatile plugin application framework that provides {{{../mission.html}open integration of software}}.
 
 *--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
 || Tutorial                                                    || Description                                               || Covered
@@ -69,21 +69,25 @@ AJAX push (reverse AJAX, Comet)
 *--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
 | {{{./CometManualApp/index.html}Server events}} | Demonstrates the ease of publishing events | @Comet
 *--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
-
-
-
-Security
-
-  Securing web applications should not require <hoping> its configured correctly in some external configuration file.  The following tutorials cover the ease of securing web applications built with WoOF and demonostrates the certainty you will have in it being right.
-
-*--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
-|| Tutorial                                                    || Description                                               || Covered
-*--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
-| {{{./SecurePageHttpServer/index.html}Secure Page}} | Shows the ease of securing a page | Template Secure
-*--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
-| {{{./SecureLinkHttpServer/index.html}Secure Link}} | Demonstrates the ease of securing a link | Link Secure
-*--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
   
+
+
+Inversion of Control
+
+  The previous tutorials have covered the built in dependency objects for WoOF.  They have also covered Continuation Injection and Operation Orchestration.
+  
+  The following tutorials focus on extending the web application's functionality by using further inversion of control features of OfficeFloor.
+  
+*----------------------------------------------------------+-----------------------------------------------------------+
+|| Tutorial                                                || Description                                             
+*----------------------------------------------------------+-----------------------------------------------------------+
+| {{{./DatabaseHttpServer/index.html}Dependency Injection}}  | Dependency injecting customised objects.
+*----------------------------------------------------------+-----------------------------------------------------------+
+| {{{./TransactionHttpServer/index.html}Transaction management}}  | Managing transactions with Governance.
+*----------------------------------------------------------+-----------------------------------------------------------+
+| {{{./TeamHttpServer/index.html}Thread Injection}}        | Thread injection to performance tune the application.
+*----------------------------------------------------------+-----------------------------------------------------------+
+
 
 
 WoOF and a JEE Servlet Container
@@ -106,37 +110,18 @@ WoOF and a JEE Servlet Container
 
 
 
-Dependency Injection
+Security
 
-  Previous tutorials have covered the built in dependency objects for WoOF.  The following tutorials focus on extending the web application's functionality by adding further objects for dependency injection.
-  
-*----------------------------------------------------------+-----------------------------------------------------------+
-|| Tutorial                                                || Description                                             
-*----------------------------------------------------------+-----------------------------------------------------------+
-| {{{./DatabaseHttpServer/index.html}Dependency injection}}  | WoOF with dependency injection.
-*----------------------------------------------------------+-----------------------------------------------------------+
+  Securing web applications should not require <hoping> its configured correctly in some external configuration file.  The following tutorials cover the ease of securing web applications built with WoOF and demonostrates the certainty you will have in it being right.
 
+*--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
+|| Tutorial                                                    || Description                                               || Covered
+*--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
+| {{{./SecurePageHttpServer/index.html}Secure Page}} | Shows the ease of securing a page | Template Secure
+*--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
+| {{{./SecureLinkHttpServer/index.html}Secure Link}} | Demonstrates the ease of securing a link | Link Secure
+*--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
+| {{{./AuthenticationHttpServer/index.html}Authentication}} | Easy means to provide authentication | Authentication
+*--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
 
-
-Context
-
-  The following tutorials cover configuring context.
-
-*----------------------------------------------------------+-----------------------------------------------------------+
-|| Tutorial                                                || Description                                             
-*----------------------------------------------------------+-----------------------------------------------------------+
-| {{{./TransactionHttpServer/index.html}Transaction management}}  | Managing transactions of an OfficeFloor web application.
-*----------------------------------------------------------+-----------------------------------------------------------+
-
-
-
-Thread Injection
-
-  OfficeFloor provides Thread Injection.  This is an unique feature of WoOF provided by its underlying OfficeFloor technology to allow tuning the web application to the hardware it is running on.  It is also what will make your applications built with OfficeFloor faster and more scalable than other technologies.
-
-*----------------------------------------------------------+-----------------------------------------------------------+
-|| Tutorial                                                || Description
-*----------------------------------------------------------+-----------------------------------------------------------+
-| {{{./TeamHttpServer/index.html}Thread injection}}        | WoOF with thread injection.
-*----------------------------------------------------------+-----------------------------------------------------------+
 
