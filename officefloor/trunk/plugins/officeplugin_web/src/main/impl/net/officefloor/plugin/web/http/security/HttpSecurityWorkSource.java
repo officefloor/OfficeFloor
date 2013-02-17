@@ -79,6 +79,11 @@ public class HttpSecurityWorkSource extends
 	public static final String TASK_MANAGED_OBJECT_AUTHENTICATE = "MANAGED_OBJECT_AUTHENTICATE";
 
 	/**
+	 * Name of the {@link ManagedObjectHttpLogoutTask}.
+	 */
+	public static final String TASK_MANAGED_OBJECT_LOGOUT = "MANAGED_OBJECT_LOGOUT";
+
+	/**
 	 * Name of the {@link StartApplicationHttpAuthenticateTask}.
 	 */
 	public static final String TASK_START_APPLICATION_AUTHENTICATE = "START_APPLICATION_AUTHENTICATE";
@@ -156,6 +161,17 @@ public class HttpSecurityWorkSource extends
 							"DEPENDENCY_" + dependencyType.getDependencyName());
 		}
 
+		// Add the managed object logout task
+		TaskTypeBuilder<Indexed, None> logout = workTypeBuilder.addTaskType(
+				TASK_MANAGED_OBJECT_LOGOUT, new ManagedObjectHttpLogoutTask(),
+				Indexed.class, None.class);
+		logout.addObject(TaskLogoutContext.class).setLabel(
+				"TASK_LOGOUT_CONTEXT");
+		for (HttpSecurityDependencyType<?> dependencyType : dependencyTypes) {
+			logout.addObject(dependencyType.getDependencyType()).setLabel(
+					"DEPENDENCY_" + dependencyType.getDependencyName());
+		}
+
 		// Add the challenge task
 		TaskTypeBuilder<Indexed, Indexed> challenge = workTypeBuilder
 				.addTaskType(TASK_CHALLENGE, new HttpChallengeTask(),
@@ -221,7 +237,6 @@ public class HttpSecurityWorkSource extends
 		appCompleteFailureFlow
 				.setKey(CompleteApplicationHttpAuthenticateTask.Flows.FAILURE);
 		appCompleteFailureFlow.setArgumentType(Throwable.class);
-
 	}
 
 }

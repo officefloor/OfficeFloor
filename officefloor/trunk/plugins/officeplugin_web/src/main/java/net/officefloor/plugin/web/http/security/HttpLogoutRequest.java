@@ -17,40 +17,20 @@
  */
 package net.officefloor.plugin.web.http.security;
 
-import java.io.IOException;
-
 /**
- * Dependency interface allowing the application to check if the HTTP client is
- * authenticated.
+ * Request for logging out.
  * 
  * @author Daniel Sagenschneider
  */
-public interface HttpAuthentication<S, C> {
+public interface HttpLogoutRequest {
 
 	/**
-	 * Undertakes authentication.
+	 * Notifies the requester that the log out has completed.
 	 * 
-	 * @param authenticationRequest
-	 *            {@link HttpAuthenticateRequest}.
+	 * @param failure
+	 *            On a successful logout this will be <code>null</code>. On
+	 *            failure to logout it will be the cause of the failure.
 	 */
-	void authenticate(HttpAuthenticateRequest<C> authenticationRequest);
-
-	/**
-	 * Obtains the HTTP security.
-	 * 
-	 * @return HTTP security or <code>null</code> if not authenticated.
-	 * @throws IOException
-	 *             If authentication has been attempted but there were failures
-	 *             communicating to necessary security services.
-	 */
-	S getHttpSecurity() throws IOException;
-
-	/**
-	 * Undertakes logging out.
-	 * 
-	 * @param logoutRequest
-	 *            {@link HttpLogoutRequest}.
-	 */
-	void logout(HttpLogoutRequest logoutRequest);
+	void logoutComplete(Throwable failure);
 
 }

@@ -337,6 +337,33 @@ public class BasicHttpSecuritySourceTest extends OfficeFrameTestCase {
 	}
 
 	/**
+	 * Ensure can log out.
+	 */
+	public void testLogout() throws Exception {
+
+		final MockHttpLogoutContext<Dependencies> logoutContext = new MockHttpLogoutContext<Dependencies>(
+				this);
+
+		// Record logging out
+		HttpSession session = logoutContext.getSession();
+		session.removeAttribute("http.security.source.basic.http.security");
+
+		// Replay mock objects
+		this.replayMockObjects();
+
+		// Create and initialise the source
+		BasicHttpSecuritySource source = HttpSecurityLoaderUtil
+				.loadHttpSecuritySource(BasicHttpSecuritySource.class,
+						BasicHttpSecuritySource.PROPERTY_REALM, REALM);
+
+		// Logout
+		source.logout(logoutContext);
+
+		// Verify mock objects
+		this.verifyMockObjects();
+	}
+
+	/**
 	 * Undertakes the authentication.
 	 * 
 	 * @param userName

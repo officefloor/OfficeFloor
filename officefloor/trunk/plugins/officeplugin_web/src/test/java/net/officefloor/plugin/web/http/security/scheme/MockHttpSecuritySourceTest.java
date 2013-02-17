@@ -270,6 +270,32 @@ public class MockHttpSecuritySourceTest extends OfficeFrameTestCase {
 	}
 
 	/**
+	 * Ensure can log out.
+	 */
+	public void testLogout() throws Exception {
+
+		final MockHttpLogoutContext<None> logoutContext = new MockHttpLogoutContext<None>(
+				this);
+
+		// Record logging out
+		HttpSession session = logoutContext.getSession();
+		session.removeAttribute("http.security.source.mock.http.security");
+
+		// Replay mock objects
+		this.replayMockObjects();
+
+		// Create and initialise the source
+		MockHttpSecuritySource source = HttpSecurityLoaderUtil
+				.loadHttpSecuritySource(MockHttpSecuritySource.class);
+
+		// Logout
+		source.logout(logoutContext);
+
+		// Verify mock objects
+		this.verifyMockObjects();
+	}
+
+	/**
 	 * Undertakes the authentication.
 	 * 
 	 * @param userName

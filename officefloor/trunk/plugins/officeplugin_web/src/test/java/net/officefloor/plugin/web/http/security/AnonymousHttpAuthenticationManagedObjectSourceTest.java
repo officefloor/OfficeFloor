@@ -100,4 +100,46 @@ public class AnonymousHttpAuthenticationManagedObjectSourceTest extends
 		this.verifyMockObjects();
 	}
 
+	/**
+	 * Validate logout does nothing.
+	 */
+	@SuppressWarnings("unchecked")
+	public void testLogout() throws Throwable {
+
+		final HttpLogoutRequest request = this
+				.createMock(HttpLogoutRequest.class);
+
+		// Record request completing immediately
+		request.logoutComplete(null);
+
+		// Test
+		this.replayMockObjects();
+
+		// Load the managed object source
+		ManagedObjectSourceStandAlone loader = new ManagedObjectSourceStandAlone();
+		AnonymousHttpAuthenticationManagedObjectSource<?, ?> source = loader
+				.loadManagedObjectSource(AnonymousHttpAuthenticationManagedObjectSource.class);
+
+		// Source the managed object
+		ManagedObjectUserStandAlone user = new ManagedObjectUserStandAlone();
+		ManagedObject managedObject = user.sourceManagedObject(source);
+
+		// Obtain the authentication
+		HttpAuthentication<HttpSecurity, Void> authentication = (HttpAuthentication<HttpSecurity, Void>) managedObject
+				.getObject();
+		assertNotNull("Should have authentication", authentication);
+
+		// Trigger logout
+		authentication.logout(request);
+		assertNull("Should stay as anonymous", authentication.getHttpSecurity());
+
+		// Trigger logout again without request
+		authentication.logout(null);
+		assertNull("Should again be anonymous",
+				authentication.getHttpSecurity());
+
+		// Verify functionality
+		this.verifyMockObjects();
+	}
+
 }

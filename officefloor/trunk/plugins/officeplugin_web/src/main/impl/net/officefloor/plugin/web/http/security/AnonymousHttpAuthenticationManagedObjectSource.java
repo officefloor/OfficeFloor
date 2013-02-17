@@ -74,7 +74,7 @@ public class AnonymousHttpAuthenticationManagedObjectSource<S, C> extends
 
 	@Override
 	public void authenticate(HttpAuthenticateRequest<C> authenticationRequest) {
-		// Complete immeidately as always no security
+		// Complete immediately as always no security
 		if (authenticationRequest != null) {
 			authenticationRequest.authenticationComplete();
 		}
@@ -84,6 +84,14 @@ public class AnonymousHttpAuthenticationManagedObjectSource<S, C> extends
 	public S getHttpSecurity() throws IOException {
 		// Anonymous so no security
 		return null;
+	}
+
+	@Override
+	public void logout(HttpLogoutRequest logoutRequest) {
+		// Complete immediately as always no security
+		if (logoutRequest != null) {
+			logoutRequest.logoutComplete(null);
+		}
 	}
 
 }

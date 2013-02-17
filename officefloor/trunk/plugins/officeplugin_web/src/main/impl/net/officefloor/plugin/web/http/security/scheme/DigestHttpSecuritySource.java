@@ -35,6 +35,7 @@ import net.officefloor.plugin.socket.server.http.parse.impl.HttpRequestParserImp
 import net.officefloor.plugin.socket.server.http.protocol.HttpStatus;
 import net.officefloor.plugin.web.http.security.HttpAuthenticateContext;
 import net.officefloor.plugin.web.http.security.HttpChallengeContext;
+import net.officefloor.plugin.web.http.security.HttpLogoutContext;
 import net.officefloor.plugin.web.http.security.HttpRatifyContext;
 import net.officefloor.plugin.web.http.security.HttpSecurity;
 import net.officefloor.plugin.web.http.security.HttpSecuritySource;
@@ -549,6 +550,14 @@ public class DigestHttpSecuritySource
 		// Record details for authentication
 		session.setAttribute(SECURITY_STATE_SESSION_KEY, new SecurityState(
 				nonce, opaque));
+	}
+
+	@Override
+	public void logout(HttpLogoutContext<Dependencies> context)
+			throws IOException {
+
+		// Forget HTTP Security for further requests (requires login again)
+		context.getSession().removeAttribute(SESSION_ATTRIBUTE_HTTP_SECURITY);
 	}
 
 	/**

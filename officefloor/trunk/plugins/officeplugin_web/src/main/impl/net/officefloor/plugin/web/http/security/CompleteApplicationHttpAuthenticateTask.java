@@ -86,8 +86,9 @@ public class CompleteApplicationHttpAuthenticateTask
 
 		// Ensure have security
 		if (security == null) {
-			// Not authenticated
-			throw new HttpAuthenticationRequiredException();
+			// Not authenticated, so trigger challenge again.
+			// (Continue with old saved request)
+			throw new HttpAuthenticationRequiredException(false);
 		}
 
 		// Reinstate the request for servicing before authentication required

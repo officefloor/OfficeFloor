@@ -98,6 +98,7 @@ public class HttpAuthenticationManagedObjectSourceTest extends
 		type.addDependency(Dependencies.HTTP_SESSION, HttpSession.class, null);
 		type.addFlow(Flows.AUTHENTICATE, TaskAuthenticateContext.class, null,
 				null);
+		type.addFlow(Flows.LOGOUT, TaskLogoutContext.class, null, null);
 
 		// Validate type
 		ManagedObjectLoaderUtil
@@ -352,6 +353,36 @@ public class HttpAuthenticationManagedObjectSourceTest extends
 	}
 
 	/**
+	 * Ensure can successfully logout.
+	 */
+	public void testLogout_Successfully() throws Throwable {
+		HttpLogoutRequest request = this.createMock(HttpLogoutRequest.class);
+		this.logout(request, null);
+	}
+
+	/**
+	 * Ensure can successfully logout without {@link HttpLogoutRequest}.
+	 */
+	public void testLogout_SuccessfulWithoutRequest() throws Throwable {
+		this.logout(null, null);
+	}
+
+	/**
+	 * Ensure can report failure in logout.
+	 */
+	public void testLogout_Failure() throws Throwable {
+		HttpLogoutRequest request = this.createMock(HttpLogoutRequest.class);
+		this.logout(request, new Exception("TEST"));
+	}
+
+	/**
+	 * Ensure can ignore logout failure.
+	 */
+	public void testLogout_FailureWithoutRequest() throws Throwable {
+		this.logout(null, new Exception("TEST"));
+	}
+
+	/**
 	 * Loads authentication.
 	 * 
 	 * @param ratifiedSecurity
@@ -372,7 +403,7 @@ public class HttpAuthenticationManagedObjectSourceTest extends
 			Throwable authenticationFailure) throws Throwable {
 		return this.doAuthentication(ratifiedSecurity, ratifyFailure,
 				isRatified, authenticatedSecurity, authenticationFailure, null,
-				null, null, false, null, null);
+				null, null, false, null, null, false, null, null);
 	}
 
 	/**
@@ -397,7 +428,25 @@ public class HttpAuthenticationManagedObjectSourceTest extends
 		HttpCredentials credentials = this.createMock(HttpCredentials.class);
 		return this.doAuthentication(null, null, false, null, null,
 				credentials, ratifiedSecurity, ratifiedFailure, isRatified,
-				authenticatedSecurity, authenticatedFailure);
+				authenticatedSecurity, authenticatedFailure, false, null, null);
+	}
+
+	/**
+	 * Undertakes logout.
+	 * 
+	 * @param logoutRequest
+	 *            {@link HttpLogoutRequest}.
+	 * @param logoutFailure
+	 *            Failure in logging out.
+	 * @return {@link HttpAuthentication}.
+	 */
+	private HttpAuthentication<HttpSecurity, HttpCredentials> logout(
+			HttpLogoutRequest logoutRequest, Throwable logoutFailure)
+			throws Throwable {
+		HttpSecurity httpSecurity = this.createMock(HttpSecurity.class);
+		return this.doAuthentication(httpSecurity, null, true, null, null,
+				null, null, null, true, null, null, true, logoutRequest,
+				logoutFailure);
 	}
 
 	/**
@@ -413,7 +462,9 @@ public class HttpAuthenticationManagedObjectSourceTest extends
 			final HttpSecurity manualRatifiedSecurity,
 			final RuntimeException manualRatifyFailure,
 			boolean isManuallyRatified, final HttpSecurity manualSecurity,
-			final Throwable manualFailure) throws Throwable {
+			final Throwable manualFailure, boolean isLogout,
+			HttpLogoutRequest logoutRequest, final Throwable logoutFailure)
+			throws Throwable {
 
 		final AsynchronousListener listener = this
 				.createMock(AsynchronousListener.class);
@@ -510,12 +561,14 @@ public class HttpAuthenticationManagedObjectSourceTest extends
 		}
 
 		// Determine if trigger authentication manually
-		HttpAuthenticateRequest<HttpCredentials> request = null;
+		HttpAuthenticateRequest<HttpCredentials> authenticationRequest = null;
 		if (credentials != null) {
 
 			// Record manual authentication
-			request = this.createMock(HttpAuthenticateRequest.class);
-			this.recordReturn(request, request.getCredentials(), credentials);
+			authenticationRequest = this
+					.createMock(HttpAuthenticateRequest.class);
+			this.recordReturn(authenticationRequest,
+					authenticationRequest.getCredentials(), credentials);
 
 			// Record ratifying (matching logic is above)
 			this.recordReturn(this.source,
@@ -526,7 +579,7 @@ public class HttpAuthenticationManagedObjectSourceTest extends
 					&& (manualRatifiedSecurity == null);
 			if (!isUndertakeManualAuthentication) {
 				// Not undertaking authentication, so flag request complete
-				request.authenticationComplete();
+				authenticationRequest.authenticationComplete();
 
 			} else {
 				// Trigger authentication
@@ -566,8 +619,47 @@ public class HttpAuthenticationManagedObjectSourceTest extends
 
 				// Authentication completing
 				listener.notifyComplete();
-				request.authenticationComplete();
+				authenticationRequest.authenticationComplete();
 			}
+		}
+
+		// Determine if logout
+		if (isLogout) {
+
+			// Record logout (if provided request)
+			if (logoutRequest != null) {
+				logoutRequest.logoutComplete(logoutFailure);
+			}
+
+			// Provide servicer to handle logout
+			final HttpLogoutRequest expectedLogoutRequest = logoutRequest;
+			InvokedProcessServicer logoutServicer = new InvokedProcessServicer() {
+				@Override
+				public void service(int processIndex, Object parameter,
+						ManagedObject managedObject) throws Throwable {
+
+					// Ensure correct parameter
+					TaskLogoutContext context = (TaskLogoutContext) parameter;
+					assertSame(
+							"Incorrect connection",
+							HttpAuthenticationManagedObjectSourceTest.this.connection,
+							context.getConnection());
+					assertSame(
+							"Incorrect session",
+							HttpAuthenticationManagedObjectSourceTest.this.session,
+							context.getSession());
+					HttpLogoutRequest actualLogoutRequest = context
+							.getHttpLogoutRequest();
+					assertSame("Incorrect logout request",
+							expectedLogoutRequest, actualLogoutRequest);
+
+					// Flag logout complete (if provided logout request)
+					if (actualLogoutRequest != null) {
+						actualLogoutRequest.logoutComplete(logoutFailure);
+					}
+				}
+			};
+			loader.registerInvokeProcessServicer(Flows.LOGOUT, logoutServicer);
 		}
 
 		// Test
@@ -598,8 +690,20 @@ public class HttpAuthenticationManagedObjectSourceTest extends
 				.getObject();
 
 		// Determine if undertake manual authentication
-		if (request != null) {
-			authentication.authenticate(request);
+		if (authenticationRequest != null) {
+			authentication.authenticate(authenticationRequest);
+		}
+
+		// Determine if undertake logout
+		if (isLogout) {
+
+			// Ensure logged in
+			assertNotNull("Should be logged in",
+					authentication.getHttpSecurity());
+
+			// Log out
+			authentication.logout(logoutRequest);
+			assertNull("Should be logged out", authentication.getHttpSecurity());
 		}
 
 		// Verify mock objects
@@ -608,4 +712,5 @@ public class HttpAuthenticationManagedObjectSourceTest extends
 		// Return the HTTP authentication
 		return authentication;
 	}
+
 }

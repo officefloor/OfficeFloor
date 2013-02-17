@@ -30,6 +30,7 @@ import net.officefloor.plugin.socket.server.http.parse.impl.HttpRequestParserImp
 import net.officefloor.plugin.socket.server.http.protocol.HttpStatus;
 import net.officefloor.plugin.web.http.security.HttpAuthenticateContext;
 import net.officefloor.plugin.web.http.security.HttpChallengeContext;
+import net.officefloor.plugin.web.http.security.HttpLogoutContext;
 import net.officefloor.plugin.web.http.security.HttpRatifyContext;
 import net.officefloor.plugin.web.http.security.HttpSecurity;
 import net.officefloor.plugin.web.http.security.HttpSecuritySource;
@@ -191,6 +192,13 @@ public class MockHttpSecuritySource extends
 		response.addHeader("WWW-Authenticate",
 				IMPLEMENTING_AUTHENTICATION_SCHEME_BASIC + " realm=\"" + REALM
 						+ "\"");
+	}
+
+	@Override
+	public void logout(HttpLogoutContext<None> context) throws IOException {
+
+		// Forget HTTP Security for further requests (requires login again)
+		context.getSession().removeAttribute(SESSION_ATTRIBUTE_HTTP_SECURITY);
 	}
 
 }

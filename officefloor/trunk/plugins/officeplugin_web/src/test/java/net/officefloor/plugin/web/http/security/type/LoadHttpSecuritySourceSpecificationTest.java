@@ -32,6 +32,7 @@ import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.web.http.security.HttpAuthenticateContext;
 import net.officefloor.plugin.web.http.security.HttpChallengeContext;
 import net.officefloor.plugin.web.http.security.HttpCredentials;
+import net.officefloor.plugin.web.http.security.HttpLogoutContext;
 import net.officefloor.plugin.web.http.security.HttpRatifyContext;
 import net.officefloor.plugin.web.http.security.HttpSecurity;
 import net.officefloor.plugin.web.http.security.HttpSecuritySource;
@@ -397,6 +398,11 @@ public class LoadHttpSecuritySourceSpecificationTest extends
 		@Override
 		public void challenge(HttpChallengeContext<None, None> context)
 				throws IOException {
+			fail("Should not be invoked for obtaining specification");
+		}
+
+		@Override
+		public void logout(HttpLogoutContext<None> context) throws IOException {
 			fail("Should not be invoked for obtaining specification");
 		}
 	}

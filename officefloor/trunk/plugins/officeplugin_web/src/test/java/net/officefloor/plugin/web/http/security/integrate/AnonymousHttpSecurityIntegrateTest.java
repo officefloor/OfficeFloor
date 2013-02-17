@@ -65,4 +65,19 @@ public class AnonymousHttpSecurityIntegrateTest extends
 		this.doRequest("service", 200, "Serviced for guest");
 	}
 
+	/**
+	 * Ensure logout does nothing.
+	 */
+	public void testLogout() throws Exception {
+
+		// Should service by providing null HTTP Security
+		this.doRequest("service", 200, "Serviced for guest");
+
+		// Undertake logout
+		this.doRequest("logout", 200, "LOGOUT");
+
+		// Should again service by providing null HTTP Security
+		this.doRequest("service", 200, "Serviced for guest");
+	}
+
 }

@@ -18,65 +18,64 @@
 package net.officefloor.plugin.web.http.security;
 
 import net.officefloor.frame.api.build.Indexed;
+import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.api.build.TaskFactory;
 import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.execute.TaskContext;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
-import net.officefloor.plugin.web.http.application.HttpRequestState;
-import net.officefloor.plugin.web.http.route.HttpUrlContinuation;
 import net.officefloor.plugin.web.http.session.HttpSession;
 
 /**
- * {@link Task} and {@link TaskFactory} to challenge the client.
+ * {@link Task} and {@link TaskFactory} to log out.
  * 
  * @author Daniel Sagenschneider
  */
-public class HttpChallengeTask implements
-		Task<HttpSecurityWork, Indexed, Indexed>,
-		TaskFactory<HttpSecurityWork, Indexed, Indexed> {
+public class ManagedObjectHttpLogoutTask implements
+		Task<HttpSecurityWork, Indexed, None>,
+		TaskFactory<HttpSecurityWork, Indexed, None> {
 
 	/*
 	 * =================== HttpChallengeTask ======================
 	 */
 
 	@Override
-	public Task<HttpSecurityWork, Indexed, Indexed> createTask(
+	public Task<HttpSecurityWork, Indexed, None> createTask(
 			HttpSecurityWork work) {
 		return this;
 	}
 
 	@Override
 	@SuppressWarnings({ "rawtypes", "unchecked" })
-	public Object doTask(TaskContext<HttpSecurityWork, Indexed, Indexed> context)
+	public Object doTask(TaskContext<HttpSecurityWork, Indexed, None> context)
 			throws Throwable {
 
 		// Obtain the dependencies
-		HttpAuthenticationRequiredException exception = (HttpAuthenticationRequiredException) context
+		TaskLogoutContext logoutContext = (TaskLogoutContext) context
 				.getObject(0);
-		ServerHttpConnection connection = (ServerHttpConnection) context
-				.getObject(1);
-		HttpSession session = (HttpSession) context.getObject(2);
-		HttpRequestState requestState = (HttpRequestState) context.getObject(3);
-
-		// Save the request (if required)
-		if (exception.isSaveRequest()) {
-			HttpUrlContinuation.saveRequest(
-					HttpSecurityWork.ATTRIBUTE_CHALLENGE_REQUEST_MOMENTO,
-					connection, requestState, session);
-		}
+		HttpLogoutRequest request = logoutContext.getHttpLogoutRequest();
+		ServerHttpConnection connection = logoutContext.getConnection();
+		HttpSession session = logoutContext.getSession();
 
 		// Obtain the HTTP Security Source
 		HttpSecuritySource<?, ?, ?, ?> httpSecuritySource = context.getWork()
 				.getHttpSecuritySource();
 
-		// Undertake challenge
-		HttpChallengeContextImpl challengeContext = new HttpChallengeContextImpl(
+		// Logout
+		HttpLogoutContextImpl httpLogoutContext = new HttpLogoutContextImpl(
 				connection, session, context);
 		try {
-			httpSecuritySource.challenge(challengeContext);
+			httpSecuritySource.logout(httpLogoutContext);
+
+			// Notify of successful logout
+			if (request != null) {
+				request.logoutComplete(null);
+			}
+
 		} catch (Throwable ex) {
-			// Allow handling of the failure
-			context.doFlow(0, ex);
+			// Notify failure in logging out
+			if (request != null) {
+				request.logoutComplete(ex);
+			}
 		}
 
 		// No further tasks
@@ -84,10 +83,10 @@ public class HttpChallengeTask implements
 	}
 
 	/**
-	 * {@link HttpChallengeContext} implementation.
+	 * {@link HttpLogoutContext} implementation.
 	 */
-	private static class HttpChallengeContextImpl<D extends Enum<D>, F extends Enum<F>>
-			implements HttpChallengeContext<D, F> {
+	private static class HttpLogoutContextImpl<D extends Enum<D>> implements
+			HttpLogoutContext<D> {
 
 		/**
 		 * {@link ServerHttpConnection}.
@@ -102,7 +101,7 @@ public class HttpChallengeTask implements
 		/**
 		 * {@link TaskContext}.
 		 */
-		private final TaskContext<HttpSecurityWork, Indexed, Indexed> context;
+		private final TaskContext<HttpSecurityWork, Indexed, None> context;
 
 		/**
 		 * Initiate.
@@ -114,16 +113,16 @@ public class HttpChallengeTask implements
 		 * @param context
 		 *            {@link TaskContext}.
 		 */
-		public HttpChallengeContextImpl(ServerHttpConnection connection,
+		public HttpLogoutContextImpl(ServerHttpConnection connection,
 				HttpSession session,
-				TaskContext<HttpSecurityWork, Indexed, Indexed> context) {
+				TaskContext<HttpSecurityWork, Indexed, None> context) {
 			this.connection = connection;
 			this.session = session;
 			this.context = context;
 		}
 
 		/*
-		 * ================== HttpChallengeContext ======================
+		 * ================== HttpLogoutContext ======================
 		 */
 
 		@Override
@@ -138,16 +137,9 @@ public class HttpChallengeTask implements
 
 		@Override
 		public Object getObject(D key) {
-			// Obtain the index (offset by challenge dependencies)
-			int index = key.ordinal() + 4;
-			return this.context.getObject(index);
-		}
-
-		@Override
-		public void doFlow(F key) {
-			// Obtain the index (offset by challenge flows)
+			// Obtain the index (offset by logout dependencies)
 			int index = key.ordinal() + 1;
-			this.context.doFlow(index, null);
+			return this.context.getObject(index);
 		}
 	}
 

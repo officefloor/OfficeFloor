@@ -197,6 +197,23 @@ public class HttpAuthenticationManagedObject<S, C> implements
 		return this.security;
 	}
 
+	@Override
+	public synchronized void logout(HttpLogoutRequest logoutRequest) {
+
+		// Clear the security
+		this.security = null;
+
+		// New managed object (stop overwrite of asynchronous listener)
+		// (Not used for execution but need to provide an instance)
+		HttpAuthenticationManagedObject<S, C> executeManagedObject = new HttpAuthenticationManagedObject<S, C>(
+				null, null);
+
+		// Trigger logout
+		this.executeContext.invokeProcess(Flows.LOGOUT,
+				new TaskLogoutContextImpl(logoutRequest), executeManagedObject,
+				0);
+	}
+
 	/**
 	 * {@link HttpRatifyContext} implementation.
 	 */
@@ -327,6 +344,50 @@ public class HttpAuthenticationManagedObject<S, C> implements
 			if (this.request != null) {
 				this.request.authenticationComplete();
 			}
+		}
+	}
+
+	/**
+	 * {@link TaskLogoutContext} implementation.
+	 */
+	private class TaskLogoutContextImpl implements TaskLogoutContext {
+
+		/**
+		 * {@link HttpLogoutRequest}.
+		 */
+		private final HttpLogoutRequest request;
+
+		/**
+		 * Initiate.
+		 * 
+		 * @param request
+		 *            {@link HttpLogoutRequest}.
+		 */
+		public TaskLogoutContextImpl(HttpLogoutRequest request) {
+			this.request = request;
+		}
+
+		/*
+		 * ================== TaskLogoutContext ===================
+		 */
+
+		@Override
+		public ServerHttpConnection getConnection() {
+			synchronized (HttpAuthenticationManagedObject.this) {
+				return HttpAuthenticationManagedObject.this.connection;
+			}
+		}
+
+		@Override
+		public HttpSession getSession() {
+			synchronized (HttpAuthenticationManagedObject.this) {
+				return HttpAuthenticationManagedObject.this.session;
+			}
+		}
+
+		@Override
+		public HttpLogoutRequest getHttpLogoutRequest() {
+			return this.request;
 		}
 	}
 

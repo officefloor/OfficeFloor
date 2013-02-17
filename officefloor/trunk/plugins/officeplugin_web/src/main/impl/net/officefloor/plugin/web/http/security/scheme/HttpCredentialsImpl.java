@@ -66,7 +66,7 @@ public class HttpCredentialsImpl implements HttpCredentials {
 	 *            Password.
 	 */
 	public HttpCredentialsImpl(String username, String password) {
-		this(username, password.getBytes(US_ASCII));
+		this(username, (password == null ? null : password.getBytes(US_ASCII)));
 	}
 
 	/*
