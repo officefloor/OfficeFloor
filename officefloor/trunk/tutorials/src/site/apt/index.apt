@@ -83,7 +83,7 @@ Inversion of Control
 *----------------------------------------------------------+-----------------------------------------------------------+
 | {{{./DatabaseHttpServer/index.html}Dependency Injection}}  | Dependency injecting customised objects.
 *----------------------------------------------------------+-----------------------------------------------------------+
-| {{{./TransactionHttpServer/index.html}Transaction management}}  | Managing transactions with Governance.
+| {{{./TransactionHttpServer/index.html}Governance}}  | Managing transactions with Governance.
 *----------------------------------------------------------+-----------------------------------------------------------+
 | {{{./TeamHttpServer/index.html}Thread Injection}}        | Thread injection to performance tune the application.
 *----------------------------------------------------------+-----------------------------------------------------------+
