@@ -16,20 +16,20 @@
 			<item name="Generating HTML" href="./RawHttpServer/index.html" />
 			<item name="Sectioning" href="./SectionHttpServer/index.html" />
 		</menu>
-		<menu name="GWT Tutorials">
+		<menu name="GWT">
 			<item name="JavaScript" href="./GwtApp/index.html" />
 			<item name="AJAX" href="./GwtService/index.html" />
 		</menu>
-		<menu name="Comet Tutorials">
+		<menu name="Comet">
 			<item name="Comet" href="./CometApp/index.html" />
 			<item name="Server Events" href="./CometManualApp/index.html" />
 		</menu>
 		<menu name="Inversion of Control">
 			<item name="Dependency Injection" href="./DatabaseHttpServer/index.html" />
-			<item name="Transaction Management" href="./TransactionHttpServer/index.html" />
+			<item name="Governance" href="./TransactionHttpServer/index.html" />
 			<item name="Thread Injection" href="./TeamHttpServer/index.html" />
 		</menu>
-		<menu name="JEE Tutorials">
+		<menu name="JEE">
 			<item name="Servlet" href="./WoofServletWebApplication/index.html" />
 			<item name="JSP" href="./WoofServletJspIntegration/index.html" />
 			<item name="EJB" href="./WoofServletDependencyInjection/index.html" />

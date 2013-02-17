@@ -84,21 +84,20 @@
 		</head>
 		<menu name="${project.name}">
 			<item name="Welcome" href="./index.html" />
+			<item name="Mission" href="./mission.html" />
 		</menu>
 		<menu name="Getting Started">
+			<item name="Install" href="./install.html" />
 			<item name="Tutorials" href="./tutorials/index.html" />
-			<item name="Eclipse Plug-in" href="./eclipse/index.html" />
-			<item name="Download / Maven" href="./download.html" />
+			<item name="Read offline" href="./OfficeFloor.pdf" />
 		</menu>
 		<menu name="Help">
 			<item name="Getting Help" href="./getting-help.html" />
-			<item name="Site as PDF" href="./OfficeFloor.pdf" />
-			<item name="Issue Tracking" href="./issue-tracking.html" />
 		</menu>
 		<menu name="Technical">
-			<item name="Releases" href="./changes-report.html" />
 			<item name="Architecture" href="./architecture.html" />
 			<item name="Source Repository" href="./source-repository.html" />
+			<item name="Releases" href="./changes-report.html" />
 		</menu>
 		<menu ref="modules" />
 	</body>
