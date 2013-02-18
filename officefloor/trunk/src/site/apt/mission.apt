@@ -44,7 +44,7 @@
    
   That allow the more complex constructs:
   
-   * {{{./apidocs/net/officefloor/compile/spi/office/OfficeSource.html}OfficeSource}}
+   * {{{./apidocs/net/officefloor/compile/spi/office/source/OfficeSource.html}OfficeSource}}
    
    * {{{./apidocs/net/officefloor/compile/spi/officefloor/source/OfficeFloorSource.html}OfficeFloorSource}}
   
