@@ -10,7 +10,7 @@
         Inversion of Control = Dependency Injection + Thread Injection + Continuation Injection
 ---
 
-  Identifying these dimensions has given rise to the software equivalent of an <brick> (paper pending publication, see {{{http://europlop.anfimus.hostingkunde.de/}EuroPlop}}).  
+  Identifying these dimensions has given rise to the software equivalent of a <brick> (paper pending publication, see {{{http://europlop.anfimus.hostingkunde.de/}EuroPlop}}).  
   
   OfficeFloor therefore allows software development to be as simple as building walls from bricks.  These walls can then be used together to form buildings and more complex structures - many of which already come prefabricated for you.
 
@@ -18,7 +18,7 @@
   
   A key goal in this mission is to provide a Platform as a Service (PaaS) that is not bounded by any Infrastructure as a Service (IaaS) vendor.  We want to be the Cloud <operating system> that is open and free - encouraging open integration and putting you back in control of your choices.
 
-  To ensure this mission is achieved, OfficeFloor is free to use.  This stops the temptation for us to lock you in and keeps us focused on building a better platform.  The OfficeFloor team derive our benefits indirectly from OfficeFloor being an open platform.
+  To ensure this mission is achieved, OfficeFloor is free to use.  This keeps us focused on building you a better platform.  The OfficeFloor team derive our benefits indirectly from OfficeFloor being an open platform.
 
   So far the following bricks have been identified:
   
