@@ -193,6 +193,15 @@ public class HttpAuthenticationManagedObject<S, C> implements
 			}
 		}
 
+		// Ensure have security
+		if (this.security == null) {
+			/*
+			 * Ratify to attempt to obtain the security. Invoking ratify allows
+			 * for loading the security from HTTP session.
+			 */
+			this.httpSecuritySource.ratify(new HttpRatifyContextImpl(null));
+		}
+
 		// Return the security
 		return this.security;
 	}

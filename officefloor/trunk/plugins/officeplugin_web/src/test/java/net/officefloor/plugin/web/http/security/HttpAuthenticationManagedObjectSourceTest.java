@@ -114,20 +114,16 @@ public class HttpAuthenticationManagedObjectSourceTest extends
 	 */
 	public void testLoad_FromHttpSession() throws Throwable {
 		final HttpSecurity security = this.createMock(HttpSecurity.class);
-		HttpAuthentication<HttpSecurity, HttpCredentials> authentication = this
-				.loadAuthentication(security, null, true, null, null);
-		assertEquals("Incorrect HTTP security", security,
-				authentication.getHttpSecurity());
+		this.loadAuthentication(security, null, true, null, null, false,
+				new SameCheck(security));
 	}
 
 	/**
 	 * Ensure can load without enough credentials for authentication.
 	 */
 	public void testLoad_WithoutEnoughForAuthentication() throws Throwable {
-		HttpAuthentication<HttpSecurity, HttpCredentials> authentication = this
-				.loadAuthentication(null, null, false, null, null);
-		assertNull("Should not load HTTP security",
-				authentication.getHttpSecurity());
+		this.loadAuthentication(null, null, false, null, null, true,
+				new NullCheck());
 	}
 
 	/**
@@ -136,7 +132,8 @@ public class HttpAuthenticationManagedObjectSourceTest extends
 	public void testLoad_RatifyFailure() throws Throwable {
 		RuntimeException failure = new RuntimeException("TEST");
 		try {
-			this.loadAuthentication(null, failure, false, null, null);
+			this.loadAuthentication(null, failure, false, null, null, false,
+					null);
 			fail("Should not be successful");
 		} catch (RuntimeException ex) {
 			assertSame("Incorrect failure", failure, ex);
@@ -148,35 +145,37 @@ public class HttpAuthenticationManagedObjectSourceTest extends
 	 */
 	public void testLoad_Authenticating() throws Throwable {
 		final HttpSecurity security = this.createMock(HttpSecurity.class);
-		HttpAuthentication<HttpSecurity, HttpCredentials> authentication = this
-				.loadAuthentication(null, null, true, security, null);
-		assertSame("Incorrect HTTP security", security,
-				authentication.getHttpSecurity());
+		this.loadAuthentication(null, null, true, security, null, false,
+				new SameCheck(security));
 	}
 
 	/**
 	 * Ensure can load without authenticating.
 	 */
 	public void testLoad_NotAuthenticating() throws Throwable {
-		HttpAuthentication<HttpSecurity, HttpCredentials> authentication = this
-				.loadAuthentication(null, null, true, null, null);
-		assertNull("Should not load HTTP security",
-				authentication.getHttpSecurity());
+		this.loadAuthentication(null, null, true, null, null, true,
+				new NullCheck());
 	}
 
 	/**
 	 * Ensure can load providing an authentication {@link IOException}.
 	 */
 	public void testLoad_WithAuthenticatingIoException() throws Throwable {
-		IOException exception = new IOException("TEST");
-		HttpAuthentication<HttpSecurity, HttpCredentials> authentication = this
-				.loadAuthentication(null, null, true, null, exception);
-		try {
-			authentication.getHttpSecurity();
-			fail("Should not be successful");
-		} catch (IOException ex) {
-			assertSame("Incorrect exception", exception, ex);
-		}
+		final IOException exception = new IOException("TEST");
+		this.loadAuthentication(null, null, true, null, exception, false,
+				new Check() {
+					@Override
+					public void check(
+							HttpAuthentication<HttpSecurity, HttpCredentials> authentication)
+							throws Throwable {
+						try {
+							authentication.getHttpSecurity();
+							fail("Should not be successful");
+						} catch (IOException ex) {
+							assertSame("Incorrect exception", exception, ex);
+						}
+					}
+				});
 	}
 
 	/**
@@ -186,48 +185,68 @@ public class HttpAuthenticationManagedObjectSourceTest extends
 	 * Not likely case but API does allow for it, so ensure handle.
 	 */
 	public void testLoad_WithAuthenticatingCheckedException() throws Throwable {
-		Exception failure = new Exception("TEST");
-		HttpAuthentication<HttpSecurity, HttpCredentials> authentication = this
-				.loadAuthentication(null, null, true, null, failure);
-		try {
-			authentication.getHttpSecurity();
-			fail("Should not be successful");
-		} catch (IllegalStateException ex) {
-			assertEquals("Incorrect exception",
-					"Authentication error: TEST (java.lang.Exception)",
-					ex.getMessage());
-			assertSame("Incorrect cause", failure, ex.getCause());
-		}
+		final Exception failure = new Exception("TEST");
+		this.loadAuthentication(null, null, true, null, failure, false,
+				new Check() {
+					@Override
+					public void check(
+							HttpAuthentication<HttpSecurity, HttpCredentials> authentication)
+							throws Throwable {
+						try {
+							authentication.getHttpSecurity();
+							fail("Should not be successful");
+						} catch (IllegalStateException ex) {
+							assertEquals(
+									"Incorrect exception",
+									"Authentication error: TEST (java.lang.Exception)",
+									ex.getMessage());
+							assertSame("Incorrect cause", failure,
+									ex.getCause());
+						}
+					}
+				});
 	}
 
 	/**
 	 * Ensure can load providing an authentication failure.
 	 */
 	public void testLoad_WithAuthenticatingFailure() throws Throwable {
-		RuntimeException failure = new RuntimeException("TEST");
-		HttpAuthentication<HttpSecurity, HttpCredentials> authentication = this
-				.loadAuthentication(null, null, true, null, failure);
-		try {
-			authentication.getHttpSecurity();
-			fail("Should not be successful");
-		} catch (RuntimeException ex) {
-			assertSame("Incorrect cause", failure, ex);
-		}
+		final RuntimeException failure = new RuntimeException("TEST");
+		this.loadAuthentication(null, null, true, null, failure, false,
+				new Check() {
+					@Override
+					public void check(
+							HttpAuthentication<HttpSecurity, HttpCredentials> authentication)
+							throws Throwable {
+						try {
+							authentication.getHttpSecurity();
+							fail("Should not be successful");
+						} catch (RuntimeException ex) {
+							assertSame("Incorrect cause", failure, ex);
+						}
+					}
+				});
 	}
 
 	/**
 	 * Ensure can load providing an authentication error.
 	 */
 	public void testLoad_WithAuthenticatingError() throws Throwable {
-		Error error = new Error("TEST");
-		HttpAuthentication<HttpSecurity, HttpCredentials> authentication = this
-				.loadAuthentication(null, null, true, null, error);
-		try {
-			authentication.getHttpSecurity();
-			fail("Should not be successful");
-		} catch (Error ex) {
-			assertSame("Incorrect cause", error, ex);
-		}
+		final Error error = new Error("TEST");
+		this.loadAuthentication(null, null, true, null, error, false,
+				new Check() {
+					@Override
+					public void check(
+							HttpAuthentication<HttpSecurity, HttpCredentials> authentication)
+							throws Throwable {
+						try {
+							authentication.getHttpSecurity();
+							fail("Should not be successful");
+						} catch (Error ex) {
+							assertSame("Incorrect cause", error, ex);
+						}
+					}
+				});
 	}
 
 	/**
@@ -235,20 +254,16 @@ public class HttpAuthenticationManagedObjectSourceTest extends
 	 */
 	public void testManual_FromHttpSession() throws Throwable {
 		HttpSecurity security = this.createMock(HttpSecurity.class);
-		HttpAuthentication<HttpSecurity, HttpCredentials> authentication = this
-				.manualAuthentication(security, null, true, null, null);
-		assertSame("Incorrect security", security,
-				authentication.getHttpSecurity());
+		this.manualAuthentication(security, null, true, null, null, false,
+				new SameCheck(security));
 	}
 
 	/**
 	 * Ensure can attempt manual authentication without enough credentials.
 	 */
 	public void testManual_WithoutEnoughForAuthentication() throws Throwable {
-		HttpAuthentication<HttpSecurity, HttpCredentials> authentication = this
-				.manualAuthentication(null, null, false, null, null);
-		assertNull("Should not load HTTP security",
-				authentication.getHttpSecurity());
+		this.manualAuthentication(null, null, false, null, null, true,
+				new NullCheck());
 	}
 
 	/**
@@ -257,7 +272,8 @@ public class HttpAuthenticationManagedObjectSourceTest extends
 	public void testManual_RatifyFailure() throws Throwable {
 		RuntimeException failure = new RuntimeException("TEST");
 		try {
-			this.manualAuthentication(null, failure, false, null, null);
+			this.manualAuthentication(null, failure, false, null, null, false,
+					null);
 			fail("Should not be successful");
 		} catch (RuntimeException ex) {
 			assertSame("Incorrect failure", failure, ex);
@@ -269,35 +285,37 @@ public class HttpAuthenticationManagedObjectSourceTest extends
 	 */
 	public void testManual_Authenticating() throws Throwable {
 		final HttpSecurity security = this.createMock(HttpSecurity.class);
-		HttpAuthentication<HttpSecurity, HttpCredentials> authentication = this
-				.manualAuthentication(null, null, true, security, null);
-		assertSame("Incorrect HTTP security", security,
-				authentication.getHttpSecurity());
+		this.manualAuthentication(null, null, true, security, null, false,
+				new SameCheck(security));
 	}
 
 	/**
 	 * Ensure can attempt to manually authenticate.
 	 */
 	public void testManual_NotAuthenticating() throws Throwable {
-		HttpAuthentication<HttpSecurity, HttpCredentials> authentication = this
-				.manualAuthentication(null, null, true, null, null);
-		assertNull("Should not load HTTP security",
-				authentication.getHttpSecurity());
+		this.manualAuthentication(null, null, true, null, null, true,
+				new NullCheck());
 	}
 
 	/**
 	 * Ensure can manually attempt authentication with an {@link IOException}.
 	 */
 	public void testManual_WithAuthenticatingIoException() throws Throwable {
-		IOException exception = new IOException("TEST");
-		HttpAuthentication<HttpSecurity, HttpCredentials> authentication = this
-				.manualAuthentication(null, null, true, null, exception);
-		try {
-			authentication.getHttpSecurity();
-			fail("Should not be successful");
-		} catch (IOException ex) {
-			assertSame("Incorrect exception", exception, ex);
-		}
+		final IOException exception = new IOException("TEST");
+		this.manualAuthentication(null, null, true, null, exception, false,
+				new Check() {
+					@Override
+					public void check(
+							HttpAuthentication<HttpSecurity, HttpCredentials> authentication)
+							throws Throwable {
+						try {
+							authentication.getHttpSecurity();
+							fail("Should not be successful");
+						} catch (IOException ex) {
+							assertSame("Incorrect exception", exception, ex);
+						}
+					}
+				});
 	}
 
 	/**
@@ -308,48 +326,68 @@ public class HttpAuthenticationManagedObjectSourceTest extends
 	 */
 	public void testManual_WithAuthenticatingCheckedException()
 			throws Throwable {
-		Exception failure = new Exception("TEST");
-		HttpAuthentication<HttpSecurity, HttpCredentials> authentication = this
-				.manualAuthentication(null, null, true, null, failure);
-		try {
-			authentication.getHttpSecurity();
-			fail("Should not be successful");
-		} catch (IllegalStateException ex) {
-			assertEquals("Incorrect exception",
-					"Authentication error: TEST (java.lang.Exception)",
-					ex.getMessage());
-			assertSame("Incorrect cause", failure, ex.getCause());
-		}
+		final Exception failure = new Exception("TEST");
+		this.manualAuthentication(null, null, true, null, failure, false,
+				new Check() {
+					@Override
+					public void check(
+							HttpAuthentication<HttpSecurity, HttpCredentials> authentication)
+							throws Throwable {
+						try {
+							authentication.getHttpSecurity();
+							fail("Should not be successful");
+						} catch (IllegalStateException ex) {
+							assertEquals(
+									"Incorrect exception",
+									"Authentication error: TEST (java.lang.Exception)",
+									ex.getMessage());
+							assertSame("Incorrect cause", failure,
+									ex.getCause());
+						}
+					}
+				});
 	}
 
 	/**
 	 * Ensure can manually attempt authentication with a failure.
 	 */
 	public void testManual_WithAuthenticatingFailure() throws Throwable {
-		RuntimeException failure = new RuntimeException("TEST");
-		HttpAuthentication<HttpSecurity, HttpCredentials> authentication = this
-				.manualAuthentication(null, null, true, null, failure);
-		try {
-			authentication.getHttpSecurity();
-			fail("Should not be successful");
-		} catch (RuntimeException ex) {
-			assertSame("Incorrect cause", failure, ex);
-		}
+		final RuntimeException failure = new RuntimeException("TEST");
+		this.manualAuthentication(null, null, true, null, failure, false,
+				new Check() {
+					@Override
+					public void check(
+							HttpAuthentication<HttpSecurity, HttpCredentials> authentication)
+							throws Throwable {
+						try {
+							authentication.getHttpSecurity();
+							fail("Should not be successful");
+						} catch (RuntimeException ex) {
+							assertSame("Incorrect cause", failure, ex);
+						}
+					}
+				});
 	}
 
 	/**
 	 * Ensure can manually attempt authentication with an error.
 	 */
 	public void testManual_WithAuthenticatingError() throws Throwable {
-		Error error = new Error("TEST");
-		HttpAuthentication<HttpSecurity, HttpCredentials> authentication = this
-				.manualAuthentication(null, null, true, null, error);
-		try {
-			authentication.getHttpSecurity();
-			fail("Should not be successful");
-		} catch (Error ex) {
-			assertSame("Incorrect cause", error, ex);
-		}
+		final Error error = new Error("TEST");
+		this.manualAuthentication(null, null, true, null, error, false,
+				new Check() {
+					@Override
+					public void check(
+							HttpAuthentication<HttpSecurity, HttpCredentials> authentication)
+							throws Throwable {
+						try {
+							authentication.getHttpSecurity();
+							fail("Should not be successful");
+						} catch (Error ex) {
+							assertSame("Incorrect cause", error, ex);
+						}
+					}
+				});
 	}
 
 	/**
@@ -357,14 +395,14 @@ public class HttpAuthenticationManagedObjectSourceTest extends
 	 */
 	public void testLogout_Successfully() throws Throwable {
 		HttpLogoutRequest request = this.createMock(HttpLogoutRequest.class);
-		this.logout(request, null);
+		this.logout(request, null, true);
 	}
 
 	/**
 	 * Ensure can successfully logout without {@link HttpLogoutRequest}.
 	 */
 	public void testLogout_SuccessfulWithoutRequest() throws Throwable {
-		this.logout(null, null);
+		this.logout(null, null, true);
 	}
 
 	/**
@@ -372,14 +410,14 @@ public class HttpAuthenticationManagedObjectSourceTest extends
 	 */
 	public void testLogout_Failure() throws Throwable {
 		HttpLogoutRequest request = this.createMock(HttpLogoutRequest.class);
-		this.logout(request, new Exception("TEST"));
+		this.logout(request, new Exception("TEST"), true);
 	}
 
 	/**
 	 * Ensure can ignore logout failure.
 	 */
 	public void testLogout_FailureWithoutRequest() throws Throwable {
-		this.logout(null, new Exception("TEST"));
+		this.logout(null, new Exception("TEST"), true);
 	}
 
 	/**
@@ -395,15 +433,22 @@ public class HttpAuthenticationManagedObjectSourceTest extends
 	 *            {@link HttpSecurity} from authentication.
 	 * @param authenticationFailure
 	 *            Failure in authentication.
-	 * @return {@link HttpAuthentication}.
+	 * @param isRatifyOnObtainingHttpSecurity
+	 *            Indicates that ratify will be invoked on obtaining the
+	 *            {@link HttpSecurity}.
+	 * @param check
+	 *            {@link Check}.
 	 */
-	private HttpAuthentication<HttpSecurity, HttpCredentials> loadAuthentication(
-			HttpSecurity ratifiedSecurity, RuntimeException ratifyFailure,
-			boolean isRatified, HttpSecurity authenticatedSecurity,
-			Throwable authenticationFailure) throws Throwable {
-		return this.doAuthentication(ratifiedSecurity, ratifyFailure,
-				isRatified, authenticatedSecurity, authenticationFailure, null,
-				null, null, false, null, null, false, null, null);
+	private void loadAuthentication(HttpSecurity ratifiedSecurity,
+			RuntimeException ratifyFailure, boolean isRatified,
+			HttpSecurity authenticatedSecurity,
+			Throwable authenticationFailure,
+			boolean isRatifyOnObtainingHttpSecurity, Check check)
+			throws Throwable {
+		this.doAuthentication(ratifiedSecurity, ratifyFailure, isRatified,
+				authenticatedSecurity, authenticationFailure, null, null, null,
+				false, null, null, false, null, null,
+				isRatifyOnObtainingHttpSecurity, check);
 	}
 
 	/**
@@ -419,16 +464,22 @@ public class HttpAuthenticationManagedObjectSourceTest extends
 	 *            {@link HttpSecurity} from authentication.
 	 * @param authenticationFailure
 	 *            Failure in authentication.
-	 * @return {@link HttpAuthentication}.
+	 * @param isRatifyOnObtainingHttpSecurity
+	 *            Indicates that ratify will be invoked on obtaining the
+	 *            {@link HttpSecurity}.
+	 * @param check
+	 *            {@link Check}.
 	 */
-	private HttpAuthentication<HttpSecurity, HttpCredentials> manualAuthentication(
-			HttpSecurity ratifiedSecurity, RuntimeException ratifiedFailure,
-			boolean isRatified, HttpSecurity authenticatedSecurity,
-			Throwable authenticatedFailure) throws Throwable {
+	private void manualAuthentication(HttpSecurity ratifiedSecurity,
+			RuntimeException ratifiedFailure, boolean isRatified,
+			HttpSecurity authenticatedSecurity, Throwable authenticatedFailure,
+			boolean isRatifyOnObtainingHttpSecurity, Check check)
+			throws Throwable {
 		HttpCredentials credentials = this.createMock(HttpCredentials.class);
-		return this.doAuthentication(null, null, false, null, null,
-				credentials, ratifiedSecurity, ratifiedFailure, isRatified,
-				authenticatedSecurity, authenticatedFailure, false, null, null);
+		this.doAuthentication(null, null, false, null, null, credentials,
+				ratifiedSecurity, ratifiedFailure, isRatified,
+				authenticatedSecurity, authenticatedFailure, false, null, null,
+				isRatifyOnObtainingHttpSecurity, check);
 	}
 
 	/**
@@ -438,23 +489,86 @@ public class HttpAuthenticationManagedObjectSourceTest extends
 	 *            {@link HttpLogoutRequest}.
 	 * @param logoutFailure
 	 *            Failure in logging out.
-	 * @return {@link HttpAuthentication}.
+	 * @param isRatifyOnObtainingHttpSecurity
+	 *            Indicates that ratify will be invoked on obtaining the
+	 *            {@link HttpSecurity}.
 	 */
-	private HttpAuthentication<HttpSecurity, HttpCredentials> logout(
-			HttpLogoutRequest logoutRequest, Throwable logoutFailure)
+	private void logout(HttpLogoutRequest logoutRequest,
+			Throwable logoutFailure, boolean isRatifyOnObtainingHttpSecurity)
 			throws Throwable {
 		HttpSecurity httpSecurity = this.createMock(HttpSecurity.class);
-		return this.doAuthentication(httpSecurity, null, true, null, null,
-				null, null, null, true, null, null, true, logoutRequest,
-				logoutFailure);
+		this.doAuthentication(httpSecurity, null, true, null, null, null, null,
+				null, true, null, null, true, logoutRequest, logoutFailure,
+				isRatifyOnObtainingHttpSecurity, null);
+	}
+
+	/**
+	 * Enables undertaking a check before verifying the mock objects.
+	 */
+	private interface Check {
+
+		/**
+		 * Implement to undertake a check before verifying the mock objects.
+		 * 
+		 * @param authentication
+		 *            {@link HttpAuthentication}.
+		 */
+		void check(
+				HttpAuthentication<HttpSecurity, HttpCredentials> authentication)
+				throws Throwable;
+	}
+
+	/**
+	 * Ensures the HTTP Security is the same.
+	 */
+	private class SameCheck implements Check {
+
+		/**
+		 * {@link HttpSecurity}.
+		 */
+		private final HttpSecurity security;
+
+		/**
+		 * Initiate.
+		 * 
+		 * @param security
+		 */
+		public SameCheck(HttpSecurity security) {
+			this.security = security;
+		}
+
+		/*
+		 * =============== Check =================
+		 */
+
+		@Override
+		public void check(
+				HttpAuthentication<HttpSecurity, HttpCredentials> authentication)
+				throws Throwable {
+			assertSame("Incorrect HTTP security", this.security,
+					authentication.getHttpSecurity());
+		}
+	}
+
+	/**
+	 * Ensures the HTTP Security is <code>null</code>.
+	 */
+	private class NullCheck implements Check {
+
+		@Override
+		public void check(
+				HttpAuthentication<HttpSecurity, HttpCredentials> authentication)
+				throws Throwable {
+			assertNull("Should not load HTTP security",
+					authentication.getHttpSecurity());
+		}
 	}
 
 	/**
 	 * Undertakes the authentication.
 	 */
 	@SuppressWarnings("unchecked")
-	private HttpAuthentication<HttpSecurity, HttpCredentials> doAuthentication(
-			final HttpSecurity loadRatifiedSecurity,
+	private void doAuthentication(final HttpSecurity loadRatifiedSecurity,
 			final RuntimeException loadRatifyFailure, boolean isLoadRatified,
 			final HttpSecurity loadAuthenticatedSecurity,
 			final Throwable loadAuthenticationFailure,
@@ -463,7 +577,8 @@ public class HttpAuthenticationManagedObjectSourceTest extends
 			final RuntimeException manualRatifyFailure,
 			boolean isManuallyRatified, final HttpSecurity manualSecurity,
 			final Throwable manualFailure, boolean isLogout,
-			HttpLogoutRequest logoutRequest, final Throwable logoutFailure)
+			HttpLogoutRequest logoutRequest, final Throwable logoutFailure,
+			boolean isRatifyOnObtainingHttpSecurity, Check check)
 			throws Throwable {
 
 		final AsynchronousListener listener = this
@@ -471,122 +586,101 @@ public class HttpAuthenticationManagedObjectSourceTest extends
 
 		final ManagedObjectSourceStandAlone loader = new ManagedObjectSourceStandAlone();
 
+		// Authentication request (if manually authenticating)
+		HttpAuthenticateRequest<HttpCredentials> authenticationRequest = null;
+
 		// Record ratifying ability to authenticate
 		final HttpRatifyContext<HttpSecurity, HttpCredentials> loadRatifyContext = this
 				.createMock(HttpRatifyContext.class);
 		final HttpRatifyContext<HttpSecurity, HttpCredentials> manualRatifyContext = this
 				.createMock(HttpRatifyContext.class);
-		this.recordReturn(this.source, this.source.ratify(loadRatifyContext),
-				isLoadRatified, new AbstractMatcher() {
-					@Override
-					public boolean matches(Object[] expected, Object[] actual) {
-						HttpRatifyContext<HttpSecurity, HttpCredentials> context = (HttpRatifyContext<HttpSecurity, HttpCredentials>) actual[0];
-						assertSame(
-								"Incorrect connection",
-								HttpAuthenticationManagedObjectSourceTest.this.connection,
-								context.getConnection());
-						assertSame(
-								"Incorrect session",
-								HttpAuthenticationManagedObjectSourceTest.this.session,
-								context.getSession());
-						if (expected[0] == loadRatifyContext) {
-							// Validate loading ratification
-							if (context.getCredentials() != null) {
-								// Should be no credentials on load
-								return false;
-							}
-							if (loadRatifyFailure != null) {
-								throw loadRatifyFailure;
-							}
-							if (loadRatifiedSecurity != null) {
-								context.setHttpSecurity(loadRatifiedSecurity);
-							}
-						} else {
-							// Validate manual ratification
-							if (context.getCredentials() != credentials) {
-								// Incorrect credentials
-								return false;
-							}
-							if (manualRatifyFailure != null) {
-								throw manualRatifyFailure;
-							}
-							if (manualRatifiedSecurity != null) {
-								context.setHttpSecurity(manualRatifiedSecurity);
-							}
-						}
-						return true;
+		final HttpRatifyContext<HttpSecurity, HttpCredentials> obtainRatifyContext = this
+				.createMock(HttpRatifyContext.class);
+		AbstractMatcher ratifyMatcher = new AbstractMatcher() {
+
+			/**
+			 * Mock checks run multiple times so this flag allows only one
+			 * specifying of HTTP Security on load.
+			 */
+			private boolean isRatifyLoad = true;
+
+			/**
+			 * Mock checks run multiple times so this flag allows only one
+			 * specifying of HTTP Security on manual authenticate.
+			 */
+			private boolean isRatifyManual = true;
+
+			@Override
+			public boolean matches(Object[] expected, Object[] actual) {
+				HttpRatifyContext<HttpSecurity, HttpCredentials> context = (HttpRatifyContext<HttpSecurity, HttpCredentials>) actual[0];
+				assertSame(
+						"Incorrect connection",
+						HttpAuthenticationManagedObjectSourceTest.this.connection,
+						context.getConnection());
+				assertSame("Incorrect session",
+						HttpAuthenticationManagedObjectSourceTest.this.session,
+						context.getSession());
+				HttpRatifyContext<HttpSecurity, HttpCredentials> expectedContext = (HttpRatifyContext<HttpSecurity, HttpCredentials>) expected[0];
+				if (expectedContext == loadRatifyContext) {
+					// Validate loading ratification
+					if (context.getCredentials() != null) {
+						// Should be no credentials on load
+						return false;
 					}
-				});
 
-		// Trigger authentication if ratified (but no HTTP security)
-		if (isLoadRatified && (loadRatifiedSecurity == null)) {
-
-			// Start authentication
-			listener.notifyStarted();
-
-			// Confirm trigger authentication
-			InvokedProcessServicer loadAuthenticateServicer = new InvokedProcessServicer() {
-				@Override
-				public void service(int processIndex, Object parameter,
-						ManagedObject managedObject) throws Throwable {
-
-					// Ensure context is correct
-					TaskAuthenticateContext<HttpSecurity, HttpCredentials> context = (TaskAuthenticateContext<HttpSecurity, HttpCredentials>) parameter;
-					assertSame(
-							"Incorrect connection",
-							HttpAuthenticationManagedObjectSourceTest.this.connection,
-							context.getConnection());
-					assertSame(
-							"Incorrect session",
-							HttpAuthenticationManagedObjectSourceTest.this.session,
-							context.getSession());
-					assertNull("Should be no credentials on loading",
-							context.getCredentials());
-
-					// Determine if authentication failure
-					if (loadAuthenticationFailure != null) {
-						context.setFailure(loadAuthenticationFailure);
-
-					} else {
-						// Provide the authenticated security
-						context.setHttpSecurity(loadAuthenticatedSecurity);
+					// Only take action once
+					if ((this.isRatifyLoad) && (loadRatifiedSecurity != null)) {
+						context.setHttpSecurity(loadRatifiedSecurity);
+						this.isRatifyLoad = false;
 					}
+
+				} else if (expectedContext == manualRatifyContext) {
+					// Validate manual ratification
+					if (context.getCredentials() != credentials) {
+						// Incorrect credentials
+						return false;
+					}
+
+					// Only take action once
+					if ((this.isRatifyManual)
+							&& (manualRatifiedSecurity != null)) {
+						context.setHttpSecurity(manualRatifiedSecurity);
+						this.isRatifyManual = false;
+					}
+
+				} else if (expectedContext == obtainRatifyContext) {
+					// Validate loading ratification
+					if (context.getCredentials() != null) {
+						// No credentials on obtaining HTTP Security
+						return false;
+					}
+
+				} else {
+					fail("Unkonwn expected ratify context");
 				}
-			};
-			loader.registerInvokeProcessServicer(Flows.AUTHENTICATE,
-					loadAuthenticateServicer);
+				return true;
+			}
+		};
 
-			// Authentication completing
-			listener.notifyComplete();
-		}
+		// Undertake load ratify
+		this.source.ratify(loadRatifyContext);
+		this.control(this.source).setDefaultMatcher(ratifyMatcher);
+		if (loadRatifyFailure != null) {
+			// Failure on ratify (no further authentication)
+			this.control(this.source).setThrowable(loadRatifyFailure);
 
-		// Determine if trigger authentication manually
-		HttpAuthenticateRequest<HttpCredentials> authenticationRequest = null;
-		if (credentials != null) {
+		} else {
+			// Load ratify successful returns
+			this.control(this.source).setReturnValue(isLoadRatified);
 
-			// Record manual authentication
-			authenticationRequest = this
-					.createMock(HttpAuthenticateRequest.class);
-			this.recordReturn(authenticationRequest,
-					authenticationRequest.getCredentials(), credentials);
+			// Trigger authentication if ratified (but no HTTP security)
+			if (isLoadRatified && (loadRatifiedSecurity == null)) {
 
-			// Record ratifying (matching logic is above)
-			this.recordReturn(this.source,
-					this.source.ratify(manualRatifyContext), isManuallyRatified);
-
-			// Determine if authentication
-			boolean isUndertakeManualAuthentication = isManuallyRatified
-					&& (manualRatifiedSecurity == null);
-			if (!isUndertakeManualAuthentication) {
-				// Not undertaking authentication, so flag request complete
-				authenticationRequest.authenticationComplete();
-
-			} else {
-				// Trigger authentication
+				// Start authentication
 				listener.notifyStarted();
 
 				// Confirm trigger authentication
-				InvokedProcessServicer manualAuthenticateServicer = new InvokedProcessServicer() {
+				InvokedProcessServicer loadAuthenticateServicer = new InvokedProcessServicer() {
 					@Override
 					public void service(int processIndex, Object parameter,
 							ManagedObject managedObject) throws Throwable {
@@ -601,116 +695,202 @@ public class HttpAuthenticationManagedObjectSourceTest extends
 								"Incorrect session",
 								HttpAuthenticationManagedObjectSourceTest.this.session,
 								context.getSession());
-						assertSame("Incorrect credentials", credentials,
+						assertNull("Should be no credentials on loading",
 								context.getCredentials());
 
-						// Determine if manual failure
-						if (manualFailure != null) {
-							context.setFailure(manualFailure);
+						// Determine if authentication failure
+						if (loadAuthenticationFailure != null) {
+							context.setFailure(loadAuthenticationFailure);
 
 						} else {
 							// Provide the authenticated security
-							context.setHttpSecurity(manualSecurity);
+							context.setHttpSecurity(loadAuthenticatedSecurity);
 						}
 					}
 				};
 				loader.registerInvokeProcessServicer(Flows.AUTHENTICATE,
-						manualAuthenticateServicer);
+						loadAuthenticateServicer);
 
 				// Authentication completing
 				listener.notifyComplete();
-				authenticationRequest.authenticationComplete();
-			}
-		}
-
-		// Determine if logout
-		if (isLogout) {
-
-			// Record logout (if provided request)
-			if (logoutRequest != null) {
-				logoutRequest.logoutComplete(logoutFailure);
 			}
 
-			// Provide servicer to handle logout
-			final HttpLogoutRequest expectedLogoutRequest = logoutRequest;
-			InvokedProcessServicer logoutServicer = new InvokedProcessServicer() {
-				@Override
-				public void service(int processIndex, Object parameter,
-						ManagedObject managedObject) throws Throwable {
+			// Determine if trigger authentication manually
+			if (credentials != null) {
 
-					// Ensure correct parameter
-					TaskLogoutContext context = (TaskLogoutContext) parameter;
-					assertSame(
-							"Incorrect connection",
-							HttpAuthenticationManagedObjectSourceTest.this.connection,
-							context.getConnection());
-					assertSame(
-							"Incorrect session",
-							HttpAuthenticationManagedObjectSourceTest.this.session,
-							context.getSession());
-					HttpLogoutRequest actualLogoutRequest = context
-							.getHttpLogoutRequest();
-					assertSame("Incorrect logout request",
-							expectedLogoutRequest, actualLogoutRequest);
+				// Record manual authentication
+				authenticationRequest = this
+						.createMock(HttpAuthenticateRequest.class);
+				this.recordReturn(authenticationRequest,
+						authenticationRequest.getCredentials(), credentials);
 
-					// Flag logout complete (if provided logout request)
-					if (actualLogoutRequest != null) {
-						actualLogoutRequest.logoutComplete(logoutFailure);
+				// Record ratifying (matching logic is above)
+				this.source.ratify(manualRatifyContext);
+				if (manualRatifyFailure != null) {
+					this.control(this.source).setThrowable(manualRatifyFailure);
+
+					// Authentication completed immediately
+					authenticationRequest.authenticationComplete();
+
+				} else {
+					// Manual ratify successful returns
+					this.control(this.source)
+							.setReturnValue(isManuallyRatified);
+
+					// Determine if authentication
+					boolean isUndertakeManualAuthentication = isManuallyRatified
+							&& (manualRatifiedSecurity == null);
+					if (!isUndertakeManualAuthentication) {
+						// Not undertaking authentication, flag request complete
+						authenticationRequest.authenticationComplete();
+
+					} else {
+						// Trigger authentication
+						listener.notifyStarted();
+
+						// Confirm trigger authentication
+						InvokedProcessServicer manualAuthenticateServicer = new InvokedProcessServicer() {
+							@Override
+							public void service(int processIndex,
+									Object parameter,
+									ManagedObject managedObject)
+									throws Throwable {
+
+								// Ensure context is correct
+								TaskAuthenticateContext<HttpSecurity, HttpCredentials> context = (TaskAuthenticateContext<HttpSecurity, HttpCredentials>) parameter;
+								assertSame(
+										"Incorrect connection",
+										HttpAuthenticationManagedObjectSourceTest.this.connection,
+										context.getConnection());
+								assertSame(
+										"Incorrect session",
+										HttpAuthenticationManagedObjectSourceTest.this.session,
+										context.getSession());
+								assertSame("Incorrect credentials",
+										credentials, context.getCredentials());
+
+								// Determine if manual failure
+								if (manualFailure != null) {
+									context.setFailure(manualFailure);
+
+								} else {
+									// Provide the authenticated security
+									context.setHttpSecurity(manualSecurity);
+								}
+							}
+						};
+						loader.registerInvokeProcessServicer(
+								Flows.AUTHENTICATE, manualAuthenticateServicer);
+
+						// Authentication completing
+						listener.notifyComplete();
+						authenticationRequest.authenticationComplete();
 					}
 				}
-			};
-			loader.registerInvokeProcessServicer(Flows.LOGOUT, logoutServicer);
+			}
+
+			// Determine if logout
+			if (isLogout) {
+
+				// Record logout (if provided request)
+				if (logoutRequest != null) {
+					logoutRequest.logoutComplete(logoutFailure);
+				}
+
+				// Provide servicer to handle logout
+				final HttpLogoutRequest expectedLogoutRequest = logoutRequest;
+				InvokedProcessServicer logoutServicer = new InvokedProcessServicer() {
+					@Override
+					public void service(int processIndex, Object parameter,
+							ManagedObject managedObject) throws Throwable {
+
+						// Ensure correct parameter
+						TaskLogoutContext context = (TaskLogoutContext) parameter;
+						assertSame(
+								"Incorrect connection",
+								HttpAuthenticationManagedObjectSourceTest.this.connection,
+								context.getConnection());
+						assertSame(
+								"Incorrect session",
+								HttpAuthenticationManagedObjectSourceTest.this.session,
+								context.getSession());
+						HttpLogoutRequest actualLogoutRequest = context
+								.getHttpLogoutRequest();
+						assertSame("Incorrect logout request",
+								expectedLogoutRequest, actualLogoutRequest);
+
+						// Flag logout complete (if provided logout request)
+						if (actualLogoutRequest != null) {
+							actualLogoutRequest.logoutComplete(logoutFailure);
+						}
+					}
+				};
+				loader.registerInvokeProcessServicer(Flows.LOGOUT,
+						logoutServicer);
+			}
+
+			// Determine if ratify on obtaining HTTP Security
+			if (isRatifyOnObtainingHttpSecurity) {
+				this.recordReturn(this.source,
+						this.source.ratify(obtainRatifyContext), false);
+			}
 		}
 
 		// Test
 		this.replayMockObjects();
+		try {
 
-		// Register access to the HTTP Security Source
-		String key = HttpSecurityConfigurator.registerHttpSecuritySource(
-				this.source, this.securityType);
-		loader.addProperty(
-				HttpAuthenticationManagedObjectSource.PROPERTY_HTTP_SECURITY_SOURCE_KEY,
-				key);
+			// Register access to the HTTP Security Source
+			String key = HttpSecurityConfigurator.registerHttpSecuritySource(
+					this.source, this.securityType);
+			loader.addProperty(
+					HttpAuthenticationManagedObjectSource.PROPERTY_HTTP_SECURITY_SOURCE_KEY,
+					key);
 
-		// Load the source
-		HttpAuthenticationManagedObjectSource source = loader
-				.loadManagedObjectSource(HttpAuthenticationManagedObjectSource.class);
+			// Load the source
+			HttpAuthenticationManagedObjectSource source = loader
+					.loadManagedObjectSource(HttpAuthenticationManagedObjectSource.class);
 
-		// Source the managed object
-		ManagedObjectUserStandAlone user = new ManagedObjectUserStandAlone();
-		user.setAsynchronousListener(listener);
-		user.mapDependency(Dependencies.SERVER_HTTP_CONNECTION,
-				HttpAuthenticationManagedObjectSourceTest.this.connection);
-		user.mapDependency(Dependencies.HTTP_SESSION,
-				HttpAuthenticationManagedObjectSourceTest.this.session);
-		ManagedObject managedObject = user.sourceManagedObject(source);
+			// Source the managed object
+			ManagedObjectUserStandAlone user = new ManagedObjectUserStandAlone();
+			user.setAsynchronousListener(listener);
+			user.mapDependency(Dependencies.SERVER_HTTP_CONNECTION,
+					HttpAuthenticationManagedObjectSourceTest.this.connection);
+			user.mapDependency(Dependencies.HTTP_SESSION,
+					HttpAuthenticationManagedObjectSourceTest.this.session);
+			ManagedObject managedObject = user.sourceManagedObject(source);
 
-		// Obtain the HTTP authentication
-		HttpAuthentication<HttpSecurity, HttpCredentials> authentication = (HttpAuthentication<HttpSecurity, HttpCredentials>) managedObject
-				.getObject();
+			// Obtain the HTTP authentication
+			HttpAuthentication<HttpSecurity, HttpCredentials> authentication = (HttpAuthentication<HttpSecurity, HttpCredentials>) managedObject
+					.getObject();
 
-		// Determine if undertake manual authentication
-		if (authenticationRequest != null) {
-			authentication.authenticate(authenticationRequest);
+			// Determine if undertake manual authentication
+			if (authenticationRequest != null) {
+				authentication.authenticate(authenticationRequest);
+			}
+
+			// Determine if undertake logout
+			if (isLogout) {
+
+				// Ensure logged in
+				assertNotNull("Should be logged in",
+						authentication.getHttpSecurity());
+
+				// Log out
+				authentication.logout(logoutRequest);
+				assertNull("Should be logged out",
+						authentication.getHttpSecurity());
+			}
+
+			// Determine if check
+			if (check != null) {
+				check.check(authentication);
+			}
+
+		} finally {
+			// Verify mock objects
+			this.verifyMockObjects();
 		}
-
-		// Determine if undertake logout
-		if (isLogout) {
-
-			// Ensure logged in
-			assertNotNull("Should be logged in",
-					authentication.getHttpSecurity());
-
-			// Log out
-			authentication.logout(logoutRequest);
-			assertNull("Should be logged out", authentication.getHttpSecurity());
-		}
-
-		// Verify mock objects
-		this.verifyMockObjects();
-
-		// Return the HTTP authentication
-		return authentication;
 	}
 
 }
