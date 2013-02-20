@@ -1,0 +1,20 @@
+<woof>
+
+	<templates>
+		<template name="remove" uri="remove" path="example/Remove.html" />
+		<template name="TEMPLATE_LINK" path="example/Link.html"
+			class="net.example.LinkClass" />
+	</templates>
+
+	<sections>
+		<section name="SECTION" source="net.example.ExampleSectionSource"
+			location="SECTION_LOCATION">
+			<input name="INPUT" />
+		</section>
+	</sections>
+
+	<resources>
+		<resource name="RESOURCE" path="Example.html" />
+	</resources>
+
+</woof>

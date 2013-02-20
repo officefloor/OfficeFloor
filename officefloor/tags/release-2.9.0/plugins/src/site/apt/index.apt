@@ -1,0 +1,14 @@
+                                       ------------------
+				           Plug-ins
+				       ------------------
+				      Daniel Sagenschneider
+				       ------------------
+
+  <<Plug-ins>>
+  
+  This provides the plug-in functionality bundled with OfficeFloor.  You are free to enhance OfficeFloor with your own plug-ins.
+  
+  Typically in developing an application you would not use these plug-ins directly.  Each plug-in would typically have a corresponding Eclipse plug-in that allows easier configuring via the graphical configuration.  Creating an Eclipse plug-in for an OfficeFloor plug-in is however not mandatory as OfficeFloor can use just the raw plug-in.
+  
+  The are the plug-ins listed here are built and maintained by the OfficeFloor team.
+

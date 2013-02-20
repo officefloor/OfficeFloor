@@ -1,0 +1,8 @@
+<woof>
+
+	<resources>
+		<resource name="example/index.html" path="example/index.html" />
+		<resource name="example/index.html-2" path="example/index.html" />
+	</resources>
+
+</woof>

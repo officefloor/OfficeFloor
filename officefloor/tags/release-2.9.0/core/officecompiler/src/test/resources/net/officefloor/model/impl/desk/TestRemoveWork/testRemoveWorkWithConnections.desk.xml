@@ -1,0 +1,20 @@
+<desk>
+	<external-managed-objects>
+		<external-managed-object name="MO"
+			object-type="java.lang.Object" />
+	</external-managed-objects>
+	<external-flows>
+		<external-flow name="FLOW" argument-type="java.lang.String" />
+	</external-flows>
+	<works>
+		<work name="WORK_B" source="net.example.ExampleWorkSource">
+			<work-task name="TASK" />
+		</work>
+	</works>
+	<tasks>
+		<task name="TASK_C" work="WORK_B" task="TASK">
+			<task-flow name="FLOW" argument-type="java.lang.Object" />
+			<task-escalation escalation-type="java.lang.Exception" />
+		</task>
+	</tasks>
+</desk>

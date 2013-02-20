@@ -1,0 +1,47 @@
+<verifications>
+	<files>
+		<!-- Ensure all the modules inheriting latest -->
+		<file>
+			<location>core/pom.xml</location>
+			<contains><![CDATA[<version>${pom.version}</version>(\s)*</parent>]]></contains>
+		</file>
+		<file>
+			<location>plugins/pom.xml</location>
+			<contains><![CDATA[<version>${project.version}</version>(\s)*</parent>]]></contains>
+		</file>
+		<file>
+			<location>eclipse/pom.xml</location>
+			<contains><![CDATA[<version>${project.version}</version>(\s)*</parent>]]></contains>
+		</file>
+		<file>
+			<location>maven/pom.xml</location>
+			<contains><![CDATA[<version>${project.version}</version>(\s)*</parent>]]></contains>
+		</file>
+		<file>
+			<location>tutorials/pom.xml</location>
+			<contains><![CDATA[<version>${project.version}</version>(\s)*</parent>]]></contains>
+		</file>
+		
+		<!-- Ensure site identifying latest version and copy right-->
+		<file>
+			<location>src/site/resources/index.html</location>
+			<contains><![CDATA[class="version">v${project.version}</p>]]></contains>
+		</file>
+		<file>
+			<location>src/site/resources/index.html</location>
+			<contains><![CDATA[Copyright &#169; 2005-${current.year}. All Rights Reserved.]]></contains>
+		</file>
+		
+		<!-- Ensure pom.xml install using latest version -->
+		<file>
+			<location>src/site/resources/pom.xml</location>
+			<contains><![CDATA[<version>${project.version}</version>(\s)*<packaging>]]></contains>
+		</file>
+		
+		<!-- Ensure release notes for latest -->
+		<file>
+			<location>src/changes/changes.xml</location>
+			<contains><![CDATA[version="${project.version}"]]></contains>
+		</file>
+	</files>
+</verifications>

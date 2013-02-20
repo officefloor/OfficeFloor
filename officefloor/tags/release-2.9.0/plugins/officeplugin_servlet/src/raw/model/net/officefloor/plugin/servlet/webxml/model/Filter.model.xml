@@ -1,0 +1,5 @@
+<model>
+	<field type="String" name="filter name" />
+	<field type="String" name="filter class" />
+	<list type="InitParamModel" name="init param" />
+</model>

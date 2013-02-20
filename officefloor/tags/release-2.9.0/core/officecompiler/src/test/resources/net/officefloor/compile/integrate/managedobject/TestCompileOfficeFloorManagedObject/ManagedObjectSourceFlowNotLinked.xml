@@ -1,0 +1,22 @@
+<context>
+	<office-floor>
+		<managed-object-sources>
+			<managed-object-source name="MANAGED_OBJECT_SOURCE"
+				source="CLASS">
+				<properties>
+					<property name="class.name" value="${testcase}$ProcessManagedObject" />
+				</properties>
+				<managing-office name="OFFICE" />
+				<input-managed-object name="INPUT_MO" />
+				<flow name="doProcess" />
+			</managed-object-source>
+		</managed-object-sources>
+		<input-managed-objects>
+			<input-managed-object name="INPUT_MO" />
+		</input-managed-objects>
+		<offices>
+			<office name="OFFICE" source="OFFICE" location="office" />
+		</offices>
+	</office-floor>
+	<office />
+</context>

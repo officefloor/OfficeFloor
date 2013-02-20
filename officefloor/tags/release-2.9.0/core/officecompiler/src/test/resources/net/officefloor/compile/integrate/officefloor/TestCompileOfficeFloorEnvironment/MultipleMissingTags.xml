@@ -1,0 +1,14 @@
+<context>
+	<office-floor>
+		<offices>
+			<office name="OFFICE" source="OFFICE" location="office">
+				<properties>
+					<property name="a" value="${tag.one}" />
+					<property name="b" value="${tag.two}" />
+					<property name="c" value="${tag.two}" />
+				</properties>
+			</office>
+		</offices>
+	</office-floor>
+	<office />
+</context>

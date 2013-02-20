@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<model>
+	<field type="String" name="office governance name" />
+	<field type="String" name="governance source class name" />
+	<field type="OfficeGovernanceToOfficeTeamModel" name="office team" />
+	<list type="PropertyModel" name="property" plural="properties" />
+	<list type="OfficeGovernanceAreaModel" name="office governance area" />
+	<list type="ExternalManagedObjectToOfficeGovernanceModel" name="external managed object" />
+	<list type="OfficeManagedObjectToOfficeGovernanceModel" name="office managed object" />
+	<list type="OfficeSectionManagedObjectToOfficeGovernanceModel"
+		name="office section managed object" />
+	<list type="OfficeSubSectionToOfficeGovernanceModel" name="office sub section" />
+	<list type="OfficeTaskToOfficeGovernanceModel" name="office task" />
+</model>
