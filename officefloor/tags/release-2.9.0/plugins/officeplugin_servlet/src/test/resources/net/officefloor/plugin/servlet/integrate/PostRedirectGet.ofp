@@ -1,0 +1,1 @@
+parameter=${parameter}, state=${state}, link=#{post}

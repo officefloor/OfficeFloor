@@ -1,0 +1,4 @@
+<context item-labels="true">
+    <label-one><one name="value">first</one></label-one>
+    <label-two><two><element attribute="something">another</element></two></label-two>
+</context>

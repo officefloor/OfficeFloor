@@ -1,0 +1,99 @@
+/*
+ * License
+ */
+package net.officefloor;
+
+import javax.annotation.Generated;
+
+import net.officefloor.model.AbstractModel;
+import net.officefloor.model.ConnectionModel;
+
+@Generated("net.officefloor.model.generate.ModelGenerator")
+public class ClassModel extends AbstractModel implements ConnectionModel {
+
+    public static enum ClassEvent {
+     CHANGE_FIELD_ONE, CHANGE_FIELD_TWO
+    }
+
+    /**
+     * Default constructor.
+     */
+    public ClassModel() {
+    }
+
+    /**
+     * Convenience constructor.
+     */
+    public ClassModel(
+      String fieldOne
+    , String fieldTwo
+    ) {
+        this.fieldOne = fieldOne;
+        this.fieldTwo = fieldTwo;
+    }
+
+    /**
+     * Convenience constructor allowing XY initialising.
+     */
+    public ClassModel(
+      String fieldOne
+    , String fieldTwo
+    , int x
+    , int y
+    ) {
+        this.fieldOne = fieldOne;
+        this.fieldTwo = fieldTwo;
+        this.setX(x);
+        this.setY(y);
+    }
+
+    /**
+     * Test field one.
+     */
+    private String fieldOne;
+
+    public String getFieldOne() {
+        return this.fieldOne;
+    }
+
+    public void setFieldOne(String fieldOne) {
+        String oldValue = this.fieldOne;
+        this.fieldOne = fieldOne;
+        this.changeField(oldValue, this.fieldOne, ClassEvent.CHANGE_FIELD_ONE);
+    }
+
+    /**
+     * Test field two.
+     */
+    private String fieldTwo;
+
+    public String getFieldTwo() {
+        return this.fieldTwo;
+    }
+
+    public void setFieldTwo(String fieldTwo) {
+        String oldValue = this.fieldTwo;
+        this.fieldTwo = fieldTwo;
+        this.changeField(oldValue, this.fieldTwo, ClassEvent.CHANGE_FIELD_TWO);
+    }
+
+
+
+    /*
+     * ConnectionModel
+     */
+    public boolean isRemovable() {
+        return true;
+    }
+
+    public void connect() {
+        this.fieldOne.setLinkOne(this);
+        this.fieldTwo.addLinkTwo(this);
+    }
+
+    public void remove() {
+        this.fieldOne.setLinkOne(null);
+        this.fieldTwo.removeLinkTwo(this);
+    }
+
+}

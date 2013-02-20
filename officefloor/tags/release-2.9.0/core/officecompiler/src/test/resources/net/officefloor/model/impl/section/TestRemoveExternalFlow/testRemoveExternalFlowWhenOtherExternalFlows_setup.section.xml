@@ -1,0 +1,7 @@
+<section>
+	<external-flows>
+		<external-flow name="FLOW_A" argument-type="java.lang.Integer" />
+		<external-flow name="FLOW_B" argument-type="java.lang.String" />
+		<external-flow name="FLOW_C" argument-type="java.lang.Object" />
+	</external-flows>
+</section>

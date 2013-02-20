@@ -1,0 +1,59 @@
+<desk>
+  <external-managed-objects>
+    <external-managed-object name="HTTP" object-type="net.officefloor.plugin.socket.server.http.source.HttpServerSocketManagedObjectSource" x="704" y="415"/>
+    <external-managed-object name="LOCATION" object-type="net.officefloor.plugin.web.http.location.HttpApplicationLocation" x="704" y="515"/>
+  </external-managed-objects>
+  <managed-object-sources>
+  </managed-object-sources>
+  <managed-objects>
+  </managed-objects>
+  <external-flows>
+    <external-flow name="IOException" argument-type="java.io.IOException" x="690" y="64"/>
+    <external-flow name="Link" argument-type="java.lang.Void" x="679" y="159"/>
+    <external-flow name="TemplateComplete" argument-type="java.lang.Void" x="684" y="43"/>
+  </external-flows>
+  <works>
+    <work name="HttpTemplate-Root.ofp" source="net.officefloor.plugin.web.http.template.HttpTemplateWorkSource" x="250" y="343">
+      <properties>
+        <property name="template.path" value="net/officefloor/plugin/web/http/template/integrate/Root.ofp"/>
+        <property name="template.uri" value="/"/>
+      </properties>
+      <work-task name="template">
+        <task-object name="SERVER_HTTP_CONNECTION" key="" object-type="net.officefloor.plugin.socket.server.http.ServerHttpConnection" parameter="false">
+          <external-managed-object name="HTTP"/>
+        </task-object>
+        <task-object name="HTTP_APPLICATION_LOCATION" key="" object-type="net.officefloor.plugin.web.http.location.HttpApplicationLocation" parameter="false">
+          <external-managed-object name="LOCATION"/>
+        </task-object>
+      </work-task>
+    </work>
+    <work name="link_Continuation" source="net.officefloor.plugin.web.http.continuation.HttpUrlContinuationWorkSource" x="462" y="301">
+      <properties>
+        <property name="http.continuation.uri.path" value="/-link"/>
+      </properties>
+      <work-task name="CONTINUATION">
+      </work-task>
+    </work>
+    <work name="page_Continuation" source="net.officefloor.plugin.web.http.continuation.HttpUrlContinuationWorkSource" x="80" y="221">
+      <properties>
+        <property name="http.continuation.uri.path" value="/"/>
+      </properties>
+      <work-task name="CONTINUATION">
+      </work-task>
+    </work>
+  </works>
+  <tasks>
+    <task name="LinkContinuation" public="false" work="link_Continuation" task="CONTINUATION" return-type="" x="457" y="158">
+      <next-external-flow name="Link"/>
+    </task>
+    <task name="PageContinuation" public="false" work="page_Continuation" task="CONTINUATION" return-type="" x="87" y="117">
+      <next-task name="template"/>
+    </task>
+    <task name="template" public="true" work="HttpTemplate-Root.ofp" task="template" return-type="" x="277" y="94">
+      <next-external-flow name="TemplateComplete"/>
+      <task-escalation escalation-type="java.io.IOException">
+        <external-flow name="IOException"/>
+      </task-escalation>
+    </task>
+  </tasks>
+</desk>

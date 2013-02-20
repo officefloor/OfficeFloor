@@ -1,0 +1,1 @@
+Hello <%= System.getProperty("user.name") %>

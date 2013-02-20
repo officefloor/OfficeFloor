@@ -1,0 +1,28 @@
+<web-app>
+	<filter-mapping>
+		<filter-name>Filter</filter-name>
+		<url-pattern>/</url-pattern>
+	</filter-mapping>
+	<filter>
+		<filter-name>Filter</filter-name>
+		<filter-class>net.officefloor.plugin.servlet.webxml.MockFilter
+		</filter-class>
+		<init-param>
+			<param-name>ONE</param-name>
+			<param-value>a</param-value>
+		</init-param>
+		<init-param>
+			<param-name>TWO</param-name>
+			<param-value>b</param-value>
+		</init-param>
+	</filter>
+	<servlet-mapping>
+		<servlet-name>Servlet</servlet-name>
+		<url-pattern>/</url-pattern>
+	</servlet-mapping>
+	<servlet>
+		<servlet-name>Servlet</servlet-name>
+		<servlet-class>net.officefloor.plugin.servlet.webxml.MockHttpServlet
+		</servlet-class>
+	</servlet>
+</web-app>
