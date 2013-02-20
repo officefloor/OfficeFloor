@@ -153,9 +153,12 @@ example HTTP request.  The operations executed differ based on whether there is
 a cache hit or miss.  Ideally, as explained above, all operations up to and
 including the \texttt{Retrieve data from cache} should be borrowing the thread
 to avoid a thread context switch.  A separate thread should then only be used if
-the \texttt{Retrieve data from database} operation needs to be executed.  The
+the \texttt{Retrieve data from database} operation needs to be executed so that
+the main thread does not block causing potential for thread starvation.  The
 remaining operations should then again be borrowing the thread to avoid thread
-context switching.
+context switching.  This is similar to the isolation provided by dependency
+capsules \cite{dependency-capsules} but without the unnecessary thread context
+switch back to the main thread for the remaining operations.
 
 \begin{table}[t]
 \tbl{Example operations for servicing a HTTP request from database and cache. The dependencies of each operation are also listed.}{%
@@ -193,15 +196,15 @@ the focus of the Thread Injection and Continuation Injection patterns.
 
 \section{Dependency Injection}
 
-The naming of the Thread Injection and Continuation Injection pattern is because
+The naming of the Thread Injection and Continuation Injection patterns is because
 of their close association to the Dependency Injection pattern.
 
 The Dependency Injection pattern enables constructing objects using extrinsic
 dependency information to load dependencies without the need of the client
 object requiring awareness of the dependencies \cite{ioc}.  This allows
-implementations to be swapped without syntactic changes.
+implementations to be swapped without syntactic changes. The Dependency
+Injection pattern therefore enables:
 
-The Dependency Injection pattern therefore enables:
 \begin{enumerate}
   \item A single interface for multiple implementations.
   \item Meta-data about dependencies required for the implementation.
@@ -254,18 +257,13 @@ explained later in this paper.
 \centering
 \begin{verbatim}
     interface DependencyInjectionFactory {
-    
         Type[] getRequiredDependencyTypes(String operationId);
-        
         AsynchronousOperation createOperation(String operationId);
     }
 
     interface AsynchronousOperation {
-    
         void execute(AsynchronousOperationContext context);
-        
         void cancel(Exception cause);
-        
         String[] getContinuationIds();
     }
 \end{verbatim}
@@ -334,7 +332,7 @@ start up time the Asynchronous Operation Processor may preprocess and cache the
 mapping of Asynchronous Operations to thread pools to reduce runtime decision
 overheads.  This pre-mapping of Asynchronous Operations may also provide
 warnings where dependencies of an Asynchronous Operation make it possible to map
-the Asynchtronous Operation to multiple thread pools.  Different conflict
+the Asynchronous Operation to multiple thread pools.  Different conflict
 mapping resolutions may be employed, however ordering the thread pools and
 assigning Asynchronous Operations based on first match is a sufficiently
 adequate algorithm.
@@ -392,12 +390,8 @@ remaining methods are for Continuation Injection.
 \centering
 \begin{verbatim}
     interface AsynchronousOperationContext {
-    
         Object getDependency(String dependencyId);
-        
-        Future doContinuation(String continuationId, 
-                                Object parameter);
-        
+        Future doContinuation(String continuationId, Object parameter);
         void continueOperation();
     }
 \end{verbatim}
@@ -420,8 +414,8 @@ can be identified as Operation Orchestration\footnote{Operation orchestration
 may also be identified as function, procedure or method orchestration depending
 on the implementing language.}.
 
-As the continuation asynchronously invokes the operation, it may use the
-returned \texttt{Future} to determine when the sequence of triggered
+As the continuation asynchronously invokes the Asynchronous Operation, it may
+use the returned \texttt{Future} to determine when the sequence of triggered
 Asynchronous Operations has completed\footnote{State is managed within the
 dependencies so there is no need for a return value from the \texttt{Future}.}.
 This enables process continuations \cite{process-continuation} to be spawned by
@@ -441,7 +435,6 @@ implemented using Dependency Continuations.}.
 \begin{figure}[tp]
 \begin{verbatim}
     interface DependencyContinuation {
-
         void doContinuation(Object parameter);
     }
 \end{verbatim}
@@ -463,9 +456,10 @@ continuation-passing style \cite{continuations} except that the continuation is
 dependency injected rather than passed as a parameter.  The added benefit of
 dependency injecting the continuation is that the Asynchronous Operation is free
 to depend on as many continuations as necessary.  It also means that as the
-application evolves the Asynchronous Operation can encapsulate changes requiring
-different continuations.  The indirection provided by the Continuation Injection
-pattern allows this to be a configuration change rather than a code change.
+application evolves the Asynchronous Operation encapsulates potential changes
+requiring different continuations.  The indirection provided by the Continuation
+Injection pattern allows this to be a configuration change rather than a code
+change.
 
 
 \subsection{Initial Asynchronous Operation to service a HTTP request}
@@ -594,11 +588,12 @@ required number of servers to be allocated for each thread pool.
 
 \section{Example implementation of an Asynchronous Operation}
 
-As the Thread Injection and Continuation Injection patterns define the algorithms
-for all participants (except the Asynchronous Operation) in the Proactor
-pattern, the following is an example of an Asynchronous Operation
-implementation.  The \texttt{Retrieve data from cache} operation from the
-motivating example will be used (Table \ref{tab:example_request_operations}).
+As the Thread Injection and Continuation Injection patterns define the
+algorithms for all participants (except the application behaviour of the
+Asynchronous Operation) in the Proactor pattern, the following is an example of
+an Asynchronous Operation implementation.  The \texttt{Retrieve data from cache}
+operation from the motivating example will be used (Table
+\ref{tab:example_request_operations}).
 
 Fig \ref{fig:Example_Method_Operation} shows the example developer
 implementation code.  A generic Asynchronous Operation adapter implementation is
