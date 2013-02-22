@@ -131,6 +131,10 @@ public class JpaEntityManagerManagedObjectSource extends
 		return new JpaEntityManagerManagedObject(entityManager);
 	}
 
+	/*
+	 * ======================= ExtensionInterfaceFactory =======================
+	 */
+
 	@Override
 	public EntityTransaction createExtensionInterface(
 			ManagedObject managedObject) {
