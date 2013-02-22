@@ -2,7 +2,10 @@
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/changes/1.0.0 http://maven.apache.org/xsd/changes-1.0.0.xsd">
 	<body>
-		<release version="2.9.0" date="In SVN" description="Web Security">
+		<release version="2.10.0" date="In SVN" description="Template Re-use">
+			<action type="add" dev="sagenschneider">Web Security</action>
+		</release>
+		<release version="2.9.0" date="2013-02-20" description="Web Security">
 			<action type="add" dev="sagenschneider">Web Security</action>
 		</release>
 		<release version="2.8.0" date="2013-01-09" description="Secure channels (HTTPS)">

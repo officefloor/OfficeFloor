@@ -49,14 +49,14 @@ public class JpaEntityManagerManagedObject implements ManagedObject {
 	 * 
 	 * @return {@link EntityTransaction}.
 	 */
-	public EntityTransaction getEntityTransaction() {
+	EntityTransaction getEntityTransaction() {
 		return this.entityManager.getTransaction();
 	}
 
 	/**
 	 * Closes the {@link EntityManager}.
 	 */
-	public void closeEntityManager() {
+	void closeEntityManager() {
 		this.entityManager.close();
 	}
 
