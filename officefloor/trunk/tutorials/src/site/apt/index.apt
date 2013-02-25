@@ -100,6 +100,18 @@ Security
 
 
 
+Extend OfficeFloor
+
+  OfficeFloor is a plugin application framework that is highly extensible.  Rather than extending specific framework interfaces that dictate context constraints of your extension, OfficeFloor enables you to choose your extension interface, choose your threading and even choose to completely override how results of your extensions are processed.  The following tutorial covers an example extension for OfficeFloor.
+
+*--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
+|| Tutorial                                                    || Description                                               || Covered
+*--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
+| {{{../plugins/officeplugin_jpa/extension.html}Extend OfficeFloor}} | Shows the ease of extending OfficeFloor / WoOF with your own plugins | <Extension> Source
+*--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
+
+
+
 WoOF and a JEE Servlet Container
 
   These tutorials explain how to make use of WoOF within a JEE Servlet Container.  They also explains how to migrate a Servlet application to run within OfficeFloor for OfficeFloor's inversion of control benefits.
