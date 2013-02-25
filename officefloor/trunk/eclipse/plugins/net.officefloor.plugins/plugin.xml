@@ -25,6 +25,14 @@
             class="net.officefloor.eclipse.jndi.JndiWorkSourceExtension">
       </worksource>
    </extension>
+   <!-- START SNIPPET: tutorial -->
+   <extension
+         point="net.officefloor.ui.managedobjectsources">
+      <managedobjectsource
+            class="net.officefloor.eclipse.jpa.JpaEntityManagerManagedObjectSourceExtension">
+      </managedobjectsource>
+   </extension>
+   <!-- END SNIPPET: tutorial -->
 	<extension point="net.officefloor.ui.worksources">
 		<worksource
 			class="net.officefloor.eclipse.socket.HttpRouteWorkSourceExtension" />

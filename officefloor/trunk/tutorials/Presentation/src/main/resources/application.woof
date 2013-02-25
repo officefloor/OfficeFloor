@@ -1,31 +1,23 @@
 <woof>
   <templates>
-    <template name="error.html" uri="error.html" path="error.woof.html" class="" x="87" y="146">
+    <template name="error.html" uri="error.html" path="error.woof.html" class="" secure="false" continue-rendering="false" x="87" y="146">
       <output name="continue" argument-type="">
         <template name="shop.html"/>
       </output>
-      <output name="output" argument-type="">
-      </output>
     </template>
-    <template name="index.html" uri="index.html" path="index.woof.html" class="" x="29" y="34">
+    <template name="index.html" uri="index.html" path="index.woof.html" class="" secure="false" continue-rendering="false" x="29" y="34">
       <output name="shop" argument-type="">
         <template name="shop.html"/>
       </output>
-      <output name="output" argument-type="">
-      </output>
     </template>
-    <template name="purchased.html" uri="purchased.html" path="purchased.woof.html" class="" x="334" y="38">
+    <template name="purchased.html" uri="purchased.html" path="purchased.woof.html" class="" secure="true" continue-rendering="false" x="334" y="38">
       <output name="continue" argument-type="">
         <template name="index.html"/>
       </output>
-      <output name="output" argument-type="">
-      </output>
     </template>
-    <template name="shop.html" uri="shop.html" path="shop.woof.html" class="" x="141" y="35">
+    <template name="shop.html" uri="shop.html" path="shop.woof.html" class="" secure="true" continue-rendering="false" x="141" y="35">
       <output name="purchase" argument-type="">
         <input section="PurchasePojo" input="purchase"/>
-      </output>
-      <output name="output" argument-type="">
       </output>
     </template>
   </templates>
@@ -46,6 +38,12 @@
       <input name="startup" parameter-type="" uri=""/>
     </section>
   </sections>
+  <access source="net.officefloor.plugin.web.http.security.scheme.BasicHttpSecuritySource" timeout="3000" x="9" y="121">
+    <property name="http.security.basic.realm" value="Test"/>
+    <output name="Failure" argument-type="java.lang.Throwable">
+      <template name="error.html"/>
+    </output>
+  </access>
   <governances>
     <governance name="Transaction" source="net.officefloor.plugin.governance.clazz.ClassGovernanceSource" x="250" y="113">
       <property name="class.name" value="net.officefloor.tutorials.presentation.TransactionPojo"/>
@@ -55,7 +53,7 @@
   <resources>
   </resources>
   <exceptions>
-    <exception class="java.lang.Exception" x="7" y="151">
+    <exception class="java.lang.Exception" x="7" y="179">
       <template name="error.html"/>
     </exception>
   </exceptions>

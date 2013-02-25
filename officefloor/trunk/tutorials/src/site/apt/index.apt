@@ -107,7 +107,7 @@ Extend OfficeFloor
 *--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
 || Tutorial                                                    || Description                                               || Covered
 *--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
-| {{{../plugins/officeplugin_jpa/extension.html}Extend OfficeFloor}} | Shows the ease of extending OfficeFloor / WoOF with your own plugins | <Extension> Source
+| {{{../plugins/officeplugin_jpa/tutorial.html}Extend OfficeFloor}} | Shows the ease of extending OfficeFloor / WoOF with your own plugins | <Extension> Source
 *--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
 
 

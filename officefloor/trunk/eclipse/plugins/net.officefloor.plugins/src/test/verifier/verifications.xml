@@ -31,6 +31,14 @@
 		</file>
 		<file>
 			<location>META-INF/MANIFEST.MF</location>
+			<contains><![CDATA[Bundle-ClassPath:([^:]*)officeplugin_jpa-@{officeplugin_jpa_version}.jar]]></contains>
+		</file>
+		<file>
+			<location>META-INF/MANIFEST.MF</location>
+			<contains><![CDATA[Bundle-ClassPath:([^:]*)geronimo-jpa_2.0_spec-@{geronimo-jpa_2.0_spec_version}.jar]]></contains>
+		</file>
+		<file>
+			<location>META-INF/MANIFEST.MF</location>
 			<contains><![CDATA[Bundle-ClassPath:([^:]*)officeplugin_socket-@{officeplugin_socket_version}.jar]]></contains>
 		</file>
 		<file>
@@ -46,6 +54,14 @@
 		<file>
 			<location>build.properties</location>
 			<contains><![CDATA[bin.includes =([^=]*)officeplugin_jndi-@{officeplugin_jndi_version}.jar]]></contains>
+		</file>
+		<file>
+			<location>build.properties</location>
+			<contains><![CDATA[bin.includes =([^=]*)officeplugin_jpa-@{officeplugin_jpa_version}.jar]]></contains>
+		</file>
+		<file>
+			<location>build.properties</location>
+			<contains><![CDATA[bin.includes =([^=]*)geronimo-jpa_2.0_spec-@{geronimo-jpa_2.0_spec_version}.jar]]></contains>
 		</file>
 		<file>
 			<location>build.properties</location>

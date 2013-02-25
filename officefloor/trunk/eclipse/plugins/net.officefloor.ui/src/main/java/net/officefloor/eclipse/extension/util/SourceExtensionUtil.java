@@ -19,10 +19,12 @@ package net.officefloor.eclipse.extension.util;
 
 import net.officefloor.compile.properties.Property;
 import net.officefloor.compile.properties.PropertyList;
+import net.officefloor.eclipse.common.dialog.input.InputAdapter;
 import net.officefloor.eclipse.common.dialog.input.InputHandler;
 import net.officefloor.eclipse.common.dialog.input.InputListener;
 import net.officefloor.eclipse.common.dialog.input.impl.ClasspathClassInput;
 import net.officefloor.eclipse.common.dialog.input.impl.ClasspathFileInput;
+import net.officefloor.eclipse.common.dialog.input.impl.PropertyListInput;
 import net.officefloor.eclipse.extension.governancesource.GovernanceSourceExtension;
 import net.officefloor.eclipse.extension.governancesource.GovernanceSourceExtensionContext;
 import net.officefloor.eclipse.extension.managedobjectsource.ManagedObjectSourceExtension;
@@ -458,6 +460,97 @@ public class SourceExtensionUtil {
 
 		// Return the property
 		return property;
+	}
+
+	/**
+	 * Creates the display for the input {@link PropertyList}.
+	 * 
+	 * @param label
+	 *            Label for the {@link Property}.
+	 * @param container
+	 *            {@link Composite} to add display {@link Control} instances.
+	 * @param context
+	 *            {@link ManagedObjectSourceExtensionContext}.
+	 * @param hidePropertyNames
+	 *            {@link Property} names to hide.
+	 */
+	public static void createPropertyList(String label, Composite container,
+			final ManagedObjectSourceExtensionContext context,
+			String... hidePropertyNames) {
+		createPropertyList(label, container, new ManagedObjectGeneric(context),
+				hidePropertyNames);
+	}
+
+	/**
+	 * Creates the display for the input {@link PropertyList}.
+	 * 
+	 * @param label
+	 *            Label for the {@link Property}.
+	 * @param container
+	 *            {@link Composite} to add display {@link Control} instances.
+	 * @param context
+	 *            {@link WorkSourceExtensionContext}.
+	 * @param hidePropertyNames
+	 *            {@link Property} names to hide.
+	 */
+	public static void createPropertyList(String label, Composite container,
+			WorkSourceExtensionContext context, String... hidePropertyNames) {
+		createPropertyList(label, container, new WorkGeneric(context),
+				hidePropertyNames);
+	}
+
+	/**
+	 * Creates the display for the input {@link PropertyList}.
+	 * 
+	 * @param label
+	 *            Label for the {@link Property}.
+	 * @param container
+	 *            {@link Composite} to add display {@link Control} instances.
+	 * @param context
+	 *            {@link SectionSourceExtensionContext}.
+	 * @param hidePropertyNames
+	 *            {@link Property} names to hide.
+	 */
+	public static void createPropertyList(String label, Composite container,
+			SectionSourceExtensionContext context, String... hidePropertyNames) {
+		createPropertyList(label, container, new SectionGeneric(context),
+				hidePropertyNames);
+	}
+
+	/**
+	 * Creates the display for the input {@link PropertyList}.
+	 * 
+	 * @param label
+	 *            Label for the {@link Property}.
+	 * @param container
+	 *            {@link Composite} to add display {@link Control} instances.
+	 * @param context
+	 *            {@link GenericSourceExtensionContext}.
+	 * @param hidePropertyNames
+	 *            {@link Property} names to hide.
+	 */
+	private static void createPropertyList(String label, Composite container,
+			final GenericSourceExtensionContext context,
+			String... hidePropertyNames) {
+
+		// Obtain the property list
+		final PropertyList properties = context.getPropertyList();
+
+		// Provide the label
+		new Label(container, SWT.NONE).setText(label + ": ");
+
+		// Provide the table to load property list
+		PropertyListInput propertyListInput = new PropertyListInput(properties);
+		for (String hidePropertyName : hidePropertyNames) {
+			propertyListInput.hideProperty(hidePropertyName);
+		}
+		new InputHandler<PropertyList>(container, propertyListInput,
+				new InputAdapter() {
+					@Override
+					public void notifyValueChanged(Object value) {
+						context.notifyPropertiesChanged();
+					}
+				});
 	}
 
 	/**
