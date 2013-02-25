@@ -32,6 +32,9 @@
 			<item name="Secure Link" href="./SecureLinkHttpServer/index.html" />
 			<item name="Authentication" href="./AuthenticationHttpServer/index.html" />
 		</menu>
+		<menu name="Extend">
+			<item name="Extend OfficeFloor" href="../plugins/officeplugin_jpa/extension.html" />
+		</menu>
 		<menu name="JEE">
 			<item name="Servlet" href="./WoofServletWebApplication/index.html" />
 			<item name="JSP" href="./WoofServletJspIntegration/index.html" />
