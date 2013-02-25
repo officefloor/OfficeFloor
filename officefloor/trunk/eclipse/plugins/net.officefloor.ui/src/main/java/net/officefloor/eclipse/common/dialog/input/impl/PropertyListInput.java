@@ -32,6 +32,7 @@ import org.eclipse.jface.viewers.CellEditor;
 import org.eclipse.jface.viewers.ColumnWeightData;
 import org.eclipse.jface.viewers.ICellModifier;
 import org.eclipse.jface.viewers.IStructuredContentProvider;
+import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.ITableLabelProvider;
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.TableLayout;
@@ -39,15 +40,21 @@ import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TextCellEditor;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Button;
+import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.swt.widgets.TableItem;
+import org.eclipse.swt.widgets.Text;
 
 /**
  * {@link PropertyList} {@link Input}.
- *
+ * 
  * @author Daniel Sagenschneider
  */
 public class PropertyListInput implements Input<Table> {
@@ -89,7 +96,7 @@ public class PropertyListInput implements Input<Table> {
 
 	/**
 	 * Initiate.
-	 *
+	 * 
 	 * @param propertyList
 	 *            {@link PropertyList}.
 	 */
@@ -99,7 +106,7 @@ public class PropertyListInput implements Input<Table> {
 
 	/**
 	 * Hides the {@link Property} from being displayed.
-	 *
+	 * 
 	 * @param propertyName
 	 *            Name of {@link Property} to no display.
 	 */
@@ -120,10 +127,17 @@ public class PropertyListInput implements Input<Table> {
 	 */
 
 	@Override
-	public Table buildControl(InputContext context) {
+	public Table buildControl(final InputContext context) {
+
+		// Provide parent composite
+		final Composite parentPanel = context.getParent();
+		Composite controlPanel = new Composite(parentPanel, SWT.NONE);
+		controlPanel.setLayoutData(new GridData(SWT.FILL, SWT.BEGINNING, true,
+				false));
+		controlPanel.setLayout(new GridLayout(1, false));
 
 		// Create the table
-		this.table = new Table(context.getParent(),
+		this.table = new Table(controlPanel,
 				(SWT.SINGLE | SWT.BORDER | SWT.H_SCROLL | SWT.V_SCROLL
 						| SWT.FULL_SELECTION | SWT.HIDE_SELECTION));
 
@@ -171,7 +185,66 @@ public class PropertyListInput implements Input<Table> {
 		// Load the property list to be populated
 		this.tableViewer.setInput(this.propertyList);
 
-		// TODO provide ability to add/delete properties
+		// Provide button panel
+		Composite buttons = new Composite(controlPanel, SWT.NONE);
+		buttons.setLayoutData(new GridData(SWT.BEGINNING, SWT.BEGINNING, false,
+				false));
+		buttons.setLayout(new GridLayout(3, false));
+
+		// Provide button to add (along with specifying property name)
+		final Text propertyNameText = new Text(buttons, SWT.SINGLE | SWT.BORDER);
+		propertyNameText.setLayoutData(new GridData(SWT.FILL, SWT.BEGINNING,
+				true, false));
+		Button addButton = new Button(buttons, SWT.PUSH | SWT.CENTER);
+		addButton.setText("+");
+		addButton.setLayoutData(new GridData(
+				GridData.HORIZONTAL_ALIGN_BEGINNING));
+		addButton.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				// Add the property
+				PropertyListInput.this.propertyList
+						.addProperty(propertyNameText.getText());
+
+				// Notify properties changed
+				context.notifyValueChanged(PropertyListInput.this.propertyList);
+
+				// Refresh and layout with new property
+				PropertyListInput.this.tableViewer.refresh();
+				parentPanel.layout();
+			}
+		});
+
+		// Create and configure the "Delete" button
+		Button deleteButton = new Button(buttons, SWT.PUSH | SWT.CENTER
+				| SWT.FILL);
+		deleteButton.setText("-");
+		deleteButton.setLayoutData(new GridData(
+				GridData.HORIZONTAL_ALIGN_BEGINNING));
+		deleteButton.addSelectionListener(new SelectionAdapter() {
+
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+
+				// Obtain the first property selected
+				Property property = (Property) ((IStructuredSelection) PropertyListInput.this.tableViewer
+						.getSelection()).getFirstElement();
+				if (property == null) {
+					// Nothing selected to delete
+					return;
+				}
+
+				// Remove the property
+				PropertyListInput.this.propertyList.removeProperty(property);
+
+				// Notify changed
+				context.notifyValueChanged(PropertyListInput.this.propertyList);
+
+				// Refresh and layout with new property
+				PropertyListInput.this.tableViewer.refresh();
+				parentPanel.layout();
+			}
+		});
 
 		// Return the table
 		return this.table;
@@ -194,7 +267,7 @@ public class PropertyListInput implements Input<Table> {
 
 		/**
 		 * Initiate.
-		 *
+		 * 
 		 * @param inputContext
 		 *            {@link InputContext}.
 		 */

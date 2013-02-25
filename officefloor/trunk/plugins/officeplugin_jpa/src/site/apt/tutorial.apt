@@ -113,15 +113,15 @@ Unit Test
 
 Eclipse Extension
 
-  By default, OfficeFloor extensions are configured by a generic wizard that uses the properties specified by the <<<getSpecification()>>> method.  To provide more intuitive configuration of the <<<Extension>>>Source, an <<<Extension>>>SourceExtension may be used to provide a bespoke Wizard page for configuring the <<<Extension>>>Source.  This is optional as Source implementations can be configured in without this.  However, it is recommended by the OfficeFloor Team to provide these OfficeFloor Eclipse plug-in extensions for any Source implementations published for re-use to ensure using the published Source is easier and more intuitive.
+  By default, OfficeFloor extensions are configured by a generic wizard that uses the properties specified by the <<<getSpecification()>>> method.  To provide more intuitive configuration of the <<<Extension>>>Source, an <<<Extension>>>SourceExtension may be used to provide a bespoke Wizard page for configuring the <<<Extension>>>Source.  This is optional as Source implementations can be configured by the OfficeFloor Eclipse plug-ins without this.  However, it is recommended by the OfficeFloor Team to provide these OfficeFloor Eclipse plug-in extensions for any Source implementations published for re-use to ensure using the published Source is easier and more intuitive.
   
-  The code for the SourcExtension of {{{/apidocs/net/officefloor/plugin/jpa/JpaEntityManagerManagedObjectSource.html}JpaEntityManagerManagedObjectSource}} is as follows.
+  The code for the <<<Extension>>>SourceExtension of {{{/apidocs/net/officefloor/plugin/jpa/JpaEntityManagerManagedObjectSource.html}JpaEntityManagerManagedObjectSource}} is as follows.
   
- TODO code for JPA source extension
+%{code-snippet|brush-autodetect=1|id=tutorial|file=../../eclipse/plugins/net.officefloor.plugins/src/main/java/net/officefloor/eclipse/jpa/JpaEntityManagerManagedObjectSourceExtension.java}
  
   Making this available to the OfficeFloor Eclipse plug-ins is undertaken by wrapping the above in an Eclipse plug-in with the following extension configuration.  There are extension points following the below naming convention for all Sources within OfficeFloor.
   
- TODO code for extension point configuration
+%{code-snippet|brush-autodetect=1|id=tutorial|file=../../eclipse/plugins/net.officefloor.plugins/plugin.xml}
 
 
 Next

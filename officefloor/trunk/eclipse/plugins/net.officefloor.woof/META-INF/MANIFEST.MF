@@ -51,12 +51,6 @@ Import-Package: org.eclipse.core.commands.common,
  org.eclipse.ui.part,
  org.eclipse.ui.plugin,
  org.osgi.framework
-Bundle-ClassPath: .,
- officeplugin_base-2.10.0.jar,
- officeplugin_comet-2.10.0.jar,
- officeplugin_gwt-2.10.0.jar,
- officeplugin_launch-2.10.0.jar,
- officeplugin_woof-2.10.0.jar
 Export-Package: net.officefloor.eclipse,
  net.officefloor.eclipse.dialog.input,
  net.officefloor.eclipse.extension,
@@ -95,3 +89,9 @@ Export-Package: net.officefloor.eclipse,
  net.officefloor.plugin.woof,
  net.officefloor.plugin.woof.comet,
  net.officefloor.plugin.woof.gwt
+Bundle-ClassPath: .,
+ officeplugin_base-2.10.0.jar,
+ officeplugin_comet-2.10.0.jar,
+ officeplugin_gwt-2.10.0.jar,
+ officeplugin_launch-2.10.0.jar,
+ officeplugin_woof-2.10.0.jar

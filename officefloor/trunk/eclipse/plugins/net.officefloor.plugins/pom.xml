@@ -43,12 +43,23 @@
 		</dependency>
 		<dependency>
 			<groupId>net.officefloor.plugin</groupId>
+			<artifactId>officeplugin_jpa</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>net.officefloor.plugin</groupId>
 			<artifactId>officeplugin_socket</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>net.officefloor.plugin</groupId>
 			<artifactId>officeplugin_web</artifactId>
 		</dependency>
+
+		<!-- Necessary to load JPA EntityManager class -->
+		<dependency>
+			<groupId>org.apache.geronimo.specs</groupId>
+			<artifactId>geronimo-jpa_2.0_spec</artifactId>
+		</dependency>
+
 	</dependencies>
 	<build>
 		<plugins>

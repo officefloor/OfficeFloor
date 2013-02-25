@@ -33,7 +33,7 @@
 			<item name="Authentication" href="./AuthenticationHttpServer/index.html" />
 		</menu>
 		<menu name="Extend">
-			<item name="Extend OfficeFloor" href="../plugins/officeplugin_jpa/extension.html" />
+			<item name="Extend OfficeFloor" href="../plugins/officeplugin_jpa/tutorial.html" />
 		</menu>
 		<menu name="JEE">
 			<item name="Servlet" href="./WoofServletWebApplication/index.html" />
