@@ -44,6 +44,7 @@ import net.officefloor.plugin.section.clazz.Parameter;
  * 
  * @author Daniel Sagenschneider
  */
+// START SNIPPET: type
 public class JpaEntityManagerManagedObjectSourceTest extends
 		AbstractJpaTestCase {
 
@@ -78,6 +79,10 @@ public class JpaEntityManagerManagedObjectSourceTest extends
 						JpaEntityManagerManagedObjectSource.PROPERTY_PERSISTENCE_UNIT_NAME,
 						"test");
 	}
+	
+	// END SNIPPET: type
+	
+	// START SNIPPET: tutorial
 
 	/**
 	 * Ensure able to read entry from database.
@@ -200,3 +205,4 @@ public class JpaEntityManagerManagedObjectSourceTest extends
 	}
 
 }
+// END SNIPPET: tutorial
