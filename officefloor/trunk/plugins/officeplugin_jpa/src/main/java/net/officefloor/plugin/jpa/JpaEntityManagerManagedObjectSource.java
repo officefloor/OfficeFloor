@@ -42,6 +42,7 @@ import net.officefloor.plugin.jpa.CloseEntityManagerTask.CloseEntityManagerDepen
  * 
  * @author Daniel Sagenschneider
  */
+// START SNIPPET: type
 public class JpaEntityManagerManagedObjectSource extends
 		AbstractManagedObjectSource<None, None> implements
 		ExtensionInterfaceFactory<EntityTransaction> {
@@ -112,6 +113,9 @@ public class JpaEntityManagerManagedObjectSource extends
 		context.addManagedObjectExtensionInterface(EntityTransaction.class,
 				this);
 	}
+	// END SNIPPET: type
+
+	// START SNIPPET: tutorial
 
 	@Override
 	public void start(ManagedObjectExecuteContext<None> context)
@@ -143,3 +147,4 @@ public class JpaEntityManagerManagedObjectSource extends
 	}
 
 }
+// END SNIPPET: tutorial

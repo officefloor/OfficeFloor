@@ -30,6 +30,7 @@ import net.officefloor.frame.util.AbstractSingleTask;
  * 
  * @author Daniel Sagenschneider
  */
+// START SNIPPET: tutorial
 public class CloseEntityManagerTask
 		extends
 		AbstractSingleTask<CloseEntityManagerTask, CloseEntityManagerTask.CloseEntityManagerDependencies, None> {
@@ -67,3 +68,4 @@ public class CloseEntityManagerTask
 	}
 
 }
+// END SNIPPET: tutorial

@@ -27,6 +27,7 @@ import net.officefloor.frame.spi.managedobject.ManagedObject;
  * 
  * @author Daniel Sagenschneider
  */
+// START SNIPPET: tutorial
 public class JpaEntityManagerManagedObject implements ManagedObject {
 
 	/**
@@ -70,3 +71,4 @@ public class JpaEntityManagerManagedObject implements ManagedObject {
 	}
 
 }
+// END SNIPPET: tutorial
