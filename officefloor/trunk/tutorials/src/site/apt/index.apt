@@ -37,7 +37,23 @@ WoOF
 *--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
 | {{{./RawHttpServer/index.html}Generating HTML}}              | Render generated HTML.                                     | @UnescapedHtml
 *--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
-| {{{./SectionHttpServer/index.html}Sectioning content}}       | Sectionally rendering content.                             | \<!-- {section} --\>
+| {{{./SectionHttpServer/index.html}Sectioning content}}       | Sectionally rendering content.                             | \<!-- \{section\} --\>
+*--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
+| {{{./GwtApp/index.html}GWT}}                                 | Easy configuration of GWT to generate JavaScript within the page | EntryPoint
+*--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
+| {{{./GwtService/index.html}AJAX via GWT RPC}}                | Provides easy implementation of both AJAX functionality within the page and servicing by the server | Service Async Interface
+*--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
+| {{{./CometApp/index.html}Comet}}                             | Shows the ease of using Comet (AJAX push, reverse AJAX) with WoOF | OfficeFloorComet
+*--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
+| {{{./CometManualApp/index.html}Server events}}               | Demonstrates the ease of publishing events                 | @Comet
+*--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
+| {{{./SecurePageHttpServer/index.html}Secure Page}}           | Shows the ease of securing a page                          | Template Secure
+*--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
+| {{{./SecureLinkHttpServer/index.html}Secure Link}}           | Demonstrates the ease of securing a link                   | Link Secure
+*--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
+| {{{./AuthenticationHttpServer/index.html}Authentication}}    | Easy means to provide authentication                       | Authentication
+*--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
+| {{{./TestHttpServer/index.html}Test}}                        | Testing the application                                    | Unit/System/Integration testing
 *--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
 
 
@@ -60,54 +76,14 @@ Inversion of Control
 
 
 
-JavaScript
-
-  The following tutorials look at adding JavaScript to your web applications to provide Rich Internet Applications (RIA).
-  
-  You may use JavaScript directly in your pages (including any JavaScript framework of choice).  You may also develop your JavaScript with {{{http://gwt.google.com}GWT}} to keep all code in the one language for easier maintenance.
-
-  Also as OfficeFloor is not limited by the Thread-per-Request architecture due to having Continuation and Thread Injection, it makes implementing AJAX push applications significantly easier.  
-  
-  The following tutorials show the ease of adding JavaScript to your pages.  They also demonostrate the ease of pushing events to web clients in real-time.
-
-*--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
-|| Tutorial                                                    || Description                                               || Covered
-*--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
-| {{{./GwtApp/index.html}GWT}} | Easy configuration of GWT to generate JavaScript within the page | EntryPoint
-*--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
-| {{{./GwtService/index.html}AJAX via GWT RPC}} | Provides easy implementation of both AJAX functionality within the page and servicing by the server | Service Async Interface
-*--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
-| {{{./CometApp/index.html}Comet}} | Shows the ease of using Comet (AJAX push, reverse AJAX) with WoOF | OfficeFloorComet
-*--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
-| {{{./CometManualApp/index.html}Server events}} | Demonstrates the ease of publishing events | @Comet
-*--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
-
-
-
-Security
-
-  Securing web applications should not require <hoping> its configured correctly in some external configuration file.  The following tutorials cover the ease of securing web applications built with WoOF and demonostrates the certainty you will have in it being right.
-
-*--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
-|| Tutorial                                                    || Description                                               || Covered
-*--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
-| {{{./SecurePageHttpServer/index.html}Secure Page}} | Shows the ease of securing a page | Template Secure
-*--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
-| {{{./SecureLinkHttpServer/index.html}Secure Link}} | Demonstrates the ease of securing a link | Link Secure
-*--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
-| {{{./AuthenticationHttpServer/index.html}Authentication}} | Easy means to provide authentication | Authentication
-*--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
-
-
-
 Extend OfficeFloor
 
-  OfficeFloor is a plugin application framework that is highly extensible.  Rather than extending specific framework interfaces that dictate context constraints of your extension, OfficeFloor enables you to choose your extension interface, choose your threading and even choose to completely override how results of your extensions are processed.  The following tutorial covers an example extension for OfficeFloor.
+  OfficeFloor is a plugin application framework that is highly extensible.  For example, the WoOF functionality is provided by plugins (extensions) to OfficeFloor.  The following tutorial covers creating an example extension for OfficeFloor.
 
 *--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
 || Tutorial                                                    || Description                                               || Covered
 *--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
-| {{{../plugins/officeplugin_jpa/tutorial.html}Extend OfficeFloor}} | Shows the ease of extending OfficeFloor / WoOF with your own plugins | <Extension> Source
+| {{{../plugins/officeplugin_jpa/tutorial.html}Extend OfficeFloor}} | Shows the ease of extending OfficeFloor / WoOF with your own plugins | <<<Extension>>>Source
 *--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
 
 
