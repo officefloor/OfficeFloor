@@ -12,6 +12,7 @@
 	<description>OfficeFloor plug-in for JPA</description>
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<projectBasedir>${basedir}</projectBasedir>
 	</properties>
 	<build>
 		<plugins>
