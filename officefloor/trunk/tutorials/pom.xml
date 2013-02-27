@@ -32,6 +32,7 @@
 		<module>SecureLinkHttpServer</module>
 		<module>SessionHttpServer</module>
 		<module>TeamHttpServer</module>
+		<module>TestHttpServer</module>
 		<module>TransactionHttpServer</module>
 		<module>WoofServletDependencyInjection</module>
 		<module>WoofServletJspIntegration</module>
