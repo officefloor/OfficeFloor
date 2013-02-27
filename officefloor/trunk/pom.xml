@@ -78,6 +78,7 @@
 		<syncrpc-version>0.3</syncrpc-version>
 		<datanucleus-version>3.2.0-m2</datanucleus-version>
 		<failsafe-version>2.13</failsafe-version>
+		<ant-jsch-version>1.8.4</ant-jsch-version>
 	</properties>
 	<dependencyManagement>
 		<dependencies>
@@ -1328,10 +1329,9 @@
 			</build>
 		</profile>
 		<profile>
-			<!-- Profile on deploying to SourceForge -->
+			<!-- Profile for deploying to SourceForge -->
 			<!-- -->
-			<!-- ssh -t sagenschneider,officefloor@shell.sourceforge.net create -->
-			<!-- mvn -Dsourceforge=deploy -Dpgp.passphrase=[passphrase] deploy -->
+			<!-- mvn -Ddeploy=sourceforge -Dpgp.passphrase=[passphrase] deploy -->
 			<id>release-to-sourceforge</id>
 			<activation>
 				<property>
@@ -1349,6 +1349,7 @@
 			<build>
 				<plugins>
 					<plugin>
+						<!-- Sign the artifacts -->
 						<groupId>org.apache.maven.plugins</groupId>
 						<artifactId>maven-gpg-plugin</artifactId>
 						<executions>
@@ -1361,11 +1362,42 @@
 							</execution>
 						</executions>
 					</plugin>
+					<plugin>
+						<!-- Create SourceForge Shell -->
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-antrun-plugin</artifactId>
+						<inherited>false</inherited>
+						<executions>
+							<execution>
+								<id>Create SourceForge shell</id>
+								<phase>validate</phase>
+								<goals>
+									<goal>run</goal>
+								</goals>
+								<configuration>
+									<target>
+										<sshexec host="shell.sourceforge.net" username="${developer.svn.username},officefloor"
+											password="${developer.svn.password}" verbose="true" command="create" />
+									</target>
+								</configuration>
+							</execution>
+						</executions>
+						<dependencies>
+							<dependency>
+								<groupId>org.apache.ant</groupId>
+								<artifactId>ant-jsch</artifactId>
+								<version>${ant-jsch-version}</version>
+								<scope>runtime</scope>
+							</dependency>
+						</dependencies>
+					</plugin>
 				</plugins>
 			</build>
 		</profile>
 		<profile>
-			<!-- Profile on deploying to SonaType -->
+			<!-- Profile for deploying to SonaType -->
+			<!-- -->
+			<!-- mvn -Ddeploy=sonatype -Dpgp.passphrase=[passphrase] deploy -->
 			<id>release-to-sonatype</id>
 			<activation>
 				<property>
@@ -1383,6 +1415,7 @@
 			<build>
 				<plugins>
 					<plugin>
+						<!-- Sign the artifacts -->
 						<groupId>org.apache.maven.plugins</groupId>
 						<artifactId>maven-gpg-plugin</artifactId>
 						<executions>
@@ -1394,6 +1427,35 @@
 								</goals>
 							</execution>
 						</executions>
+					</plugin>
+					<plugin>
+						<!-- Create SourceForge Shell -->
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-antrun-plugin</artifactId>
+						<inherited>false</inherited>
+						<executions>
+							<execution>
+								<id>Create SourceForge shell</id>
+								<phase>validate</phase>
+								<goals>
+									<goal>run</goal>
+								</goals>
+								<configuration>
+									<target>
+										<sshexec host="shell.sourceforge.net" username="${developer.svn.username},officefloor"
+											password="${developer.svn.password}" verbose="true" command="create" />
+									</target>
+								</configuration>
+							</execution>
+						</executions>
+						<dependencies>
+							<dependency>
+								<groupId>org.apache.ant</groupId>
+								<artifactId>ant-jsch</artifactId>
+								<version>${ant-jsch-version}</version>
+								<scope>runtime</scope>
+							</dependency>
+						</dependencies>
 					</plugin>
 				</plugins>
 			</build>
