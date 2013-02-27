@@ -1366,11 +1366,25 @@
 						<!-- Create SourceForge Shell -->
 						<groupId>org.apache.maven.plugins</groupId>
 						<artifactId>maven-antrun-plugin</artifactId>
-						<inherited>false</inherited>
 						<executions>
 							<execution>
-								<id>Create SourceForge shell</id>
-								<phase>validate</phase>
+								<id>Create SourceForge shell for deploying artifacts</id>
+								<inherited>false</inherited>
+								<phase>verify</phase>
+								<goals>
+									<goal>run</goal>
+								</goals>
+								<configuration>
+									<target>
+										<sshexec host="shell.sourceforge.net" username="${developer.svn.username},officefloor"
+											password="${developer.svn.password}" verbose="true" command="create" />
+									</target>
+								</configuration>
+							</execution>
+							<execution>
+								<id>Create SourceForge shell for deploying site</id>
+								<inherited>false</inherited>
+								<phase>post-site</phase>
 								<goals>
 									<goal>run</goal>
 								</goals>
@@ -1429,14 +1443,14 @@
 						</executions>
 					</plugin>
 					<plugin>
-						<!-- Create SourceForge Shell -->
+						<!-- Create SourceForge Shell (necessary for Eclipse plugins releasing) -->
 						<groupId>org.apache.maven.plugins</groupId>
 						<artifactId>maven-antrun-plugin</artifactId>
-						<inherited>false</inherited>
 						<executions>
 							<execution>
-								<id>Create SourceForge shell</id>
-								<phase>validate</phase>
+								<id>Create SourceForge shell for deploying Eclipse plugins</id>
+								<inherited>false</inherited>
+								<phase>verify</phase>
 								<goals>
 									<goal>run</goal>
 								</goals>

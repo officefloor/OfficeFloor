@@ -93,11 +93,11 @@
 						<!-- Shutdown and Create SourceForge Shell (avoids timeout) -->
 						<groupId>org.apache.maven.plugins</groupId>
 						<artifactId>maven-antrun-plugin</artifactId>
-						<inherited>false</inherited>
 						<executions>
 							<execution>
 								<id>Shutdown and Create SourceForge shell</id>
-								<phase>validate</phase>
+								<inherited>false</inherited>
+								<phase>verify</phase>
 								<goals>
 									<goal>run</goal>
 								</goals>
@@ -106,11 +106,11 @@
 										<!-- Shutdown the SourceForge shell -->
 										<sshexec host="shell.sourceforge.net" username="${developer.svn.username},officefloor"
 											password="${developer.svn.password}" verbose="true" command="shutdown" />
-											
+
 										<!-- Wait 2 minutes to allow complete shutdown -->
 										<echo>Waiting 2 minutes to allow SourceForge shell shutdown</echo>
 										<sleep minutes="2" />
-											
+
 										<!-- Create new SourceForge shell -->
 										<sshexec host="shell.sourceforge.net" username="${developer.svn.username},officefloor"
 											password="${developer.svn.password}" verbose="true" command="create" />
