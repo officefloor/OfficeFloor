@@ -177,5 +177,5 @@ Congratulations
 
   Congratulations you have just created and run your first WoOF web application.
   
-  Please see the {{{../../tutorials/index.html}other tutorials}} for adding further functionality to your WoOF web application.
+  The {{{../../tutorials/PrototypeHttpServer/index.html}next tutorial}} covers prototyping a web application with WoOF.
 
