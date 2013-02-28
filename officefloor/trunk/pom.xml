@@ -1313,13 +1313,13 @@
 						</executions>
 					</plugin>
 					<plugin>
-						<!-- Generate Javadoc release jar -->
+						<!-- Generate Javadoc release jar (before signing) -->
 						<groupId>org.apache.maven.plugins</groupId>
 						<artifactId>maven-javadoc-plugin</artifactId>
 						<executions>
 							<execution>
 								<id>attach-javadoc-for-release</id>
-								<phase>verify</phase>
+								<phase>integration-test</phase>
 								<goals>
 									<goal>jar</goal>
 								</goals>
