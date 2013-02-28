@@ -1,0 +1,19 @@
+<web-app>
+	<context-param>
+		<param-name>context</param-name>
+		<param-value>available</param-value>
+	</context-param>
+	<servlet-mapping>
+		<servlet-name>Servlet</servlet-name>
+		<url-pattern>/</url-pattern>
+	</servlet-mapping>
+	<servlet>
+		<servlet-name>Servlet</servlet-name>
+		<servlet-class>net.officefloor.plugin.servlet.webxml.integrate.MockParamHttpServlet
+		</servlet-class>
+		<init-param>
+			<param-name>test</param-name>
+			<param-value>context</param-value>
+		</init-param>
+	</servlet>
+</web-app>

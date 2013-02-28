@@ -1,0 +1,15 @@
+<web-app>
+	<mime-mapping>
+		<extension>test</extension>
+		<mime-type>plain/test</mime-type>
+	</mime-mapping>
+	<servlet>
+		<servlet-name>Servlet</servlet-name>
+		<servlet-class>net.officefloor.plugin.servlet.webxml.MockHttpServlet
+		</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>Servlet</servlet-name>
+		<url-pattern>/</url-pattern>
+	</servlet-mapping>
+</web-app>

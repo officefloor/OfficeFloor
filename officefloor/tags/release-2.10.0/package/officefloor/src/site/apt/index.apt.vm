@@ -1,0 +1,11 @@
+                                               -----------------------
+                                                 OfficeFloor Package 
+                                               -----------------------
+					        Daniel Sagenschneider
+                                               -----------------------
+
+  <<Landing page demo applications>>
+
+  This module provides the package of the OfficeFloor server (OfficeBuilding) for running deployed applications.
+  
+  Details of running an OfficeFloor within the OfficeBuilding are available on the {{{../../download.html}download page}}.

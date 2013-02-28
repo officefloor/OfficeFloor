@@ -1,0 +1,17 @@
+<desk>
+	<works>
+		<work name="WORK" source="net.example.ExampleWorkSource">
+			<properties>
+				<property name="name" value="value" />
+			</properties>
+			<work-task name="TASK_ONE">
+				<task-object name="ONE" key="ONE" object-type="java.lang.String" />
+				<task-object name="TWO" key="TWO" object-type="java.lang.Integer" />
+			</work-task>
+			<work-task name="TASK_TWO">
+				<task-object name="LABEL_ONE" key="ONE" object-type="java.lang.Object" />
+				<task-object name="LABEL_TWO" key="TWO" object-type="java.sql.Connection" />
+			</work-task>
+		</work>
+	</works>
+</desk>

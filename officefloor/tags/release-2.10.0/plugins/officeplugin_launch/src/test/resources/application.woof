@@ -1,0 +1,17 @@
+<woof>
+	<templates>
+		<template name="TEMPLATE" uri="template" path="Template.html"
+			class="net.officefloor.launch.woof.MockTemplateLogic">
+			<extension class="GWT">
+				<property name="gwt.module.path"
+					value="net/officefloor/launch/woof/Test.gwt.xml" />
+			</extension>
+		</template>
+	</templates>
+	<sections>
+		<section name="SECTION" source="CLASS" location="net.officefloor.launch.woof.MockTemplateLogic">
+			<input name="inputOne" parameter-type="java.lang.Integer" />
+			<input name="inputTwo" uri="section" />
+		</section>
+	</sections>
+</woof>

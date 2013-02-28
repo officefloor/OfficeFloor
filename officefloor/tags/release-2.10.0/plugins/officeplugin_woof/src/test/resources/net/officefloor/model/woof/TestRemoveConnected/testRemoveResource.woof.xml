@@ -1,0 +1,69 @@
+<woof>
+
+	<templates>
+		<template name="TEMPLATE" path="example/Template.ofp" class="net.example.LogicClass">
+			<output name="OUTPUT_1">
+				<input section="SECTION" input="INPUT" />
+			</output>
+			<output name="OUTPUT_2">
+				<template name="TEMPLATE_LINK" />
+			</output>
+			<output name="OUTPUT_3">
+				<access input="Authenticate" />
+			</output>
+			<output name="OUTPUT_4" />
+		</template>
+		<template name="TEMPLATE_LINK" path="example/Link.ofp" class="net.example.LinkClass" />
+	</templates>
+
+	<sections>
+		<section name="SECTION" source="net.example.ExampleSectionSource"
+			location="SECTION_LOCATION">
+			<input name="INPUT" />
+			<output name="OUTPUT_A">
+				<input section="SECTION_LINK" input="INPUT" />
+			</output>
+			<output name="OUTPUT_B">
+				<template name="TEMPLATE" />
+			</output>
+			<output name="OUTPUT_C">
+				<access input="Authenticate" />
+			</output>
+			<output name="OUTPUT_D" />
+		</section>
+		<section name="SECTION_LINK" source="net.example.LinkSectionSource"
+			location="LINK_LOCATION">
+			<input name="INPUT" />
+		</section>
+	</sections>
+
+	<access source="net.example.HttpSecuritySource">
+		<input name="Authenticate" />
+		<output name="OUTPUT_A1">
+			<input section="SECTION" input="INPUT" />
+		</output>
+		<output name="OUTPUT_A2">
+			<template name="TEMPLATE" />
+		</output>
+		<output name="OUTPUT_A3" />
+	</access>
+
+	<resources />
+
+	<exceptions>
+		<exception class="java.lang.RuntimeException">
+			<template name="TEMPLATE" />
+		</exception>
+		<exception class="java.io.IOException">
+			<input section="SECTION" input="INPUT" />
+		</exception>
+		<exception class="java.sql.SQLException" />
+	</exceptions>
+
+	<starting>
+		<start>
+			<flow section="SECTION" input="INPUT" />
+		</start>
+	</starting>
+
+</woof>

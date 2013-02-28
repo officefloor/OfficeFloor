@@ -1,0 +1,2 @@
+net.officefloor.plugin.socket.server.http.source.HttpServerSocketManagedObjectSource
+net.officefloor.plugin.socket.server.http.source.HttpsServerSocketManagedObjectSource

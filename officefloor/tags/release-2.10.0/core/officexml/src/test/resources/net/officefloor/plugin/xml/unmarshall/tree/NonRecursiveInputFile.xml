@@ -1,0 +1,15 @@
+<xml-message>
+	<first-class info="first class value"/>
+	<second-class details="attribute value">
+		<value>second class value</value>
+		<third-class>
+			<value>third class value</value>
+		</third-class>
+	</second-class>
+	<fourth-class>
+		<value>forth class value</value>
+	</fourth-class>
+	<fourth-class>
+		<value>forth class repeated value</value>
+	</fourth-class>
+</xml-message>

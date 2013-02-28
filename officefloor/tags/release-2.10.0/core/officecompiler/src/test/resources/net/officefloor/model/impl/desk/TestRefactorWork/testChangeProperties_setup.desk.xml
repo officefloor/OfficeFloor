@@ -1,0 +1,9 @@
+<desk>
+    <works>
+        <work name="NAME" source="net.example.ExampleWorkSource">
+            <properties>
+                <property name="EXAMPLE_NAME" value="EXAMPLE_VALUE" />
+            </properties>
+        </work>
+    </works>
+</desk>

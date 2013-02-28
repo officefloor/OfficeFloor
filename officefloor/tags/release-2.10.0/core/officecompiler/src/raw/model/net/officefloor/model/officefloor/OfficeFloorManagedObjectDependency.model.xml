@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<model>
+    <field type="String" name="office floor managed object dependency name" />
+    <field type="String" name="dependency type" />
+    <field
+        type="OfficeFloorManagedObjectDependencyToOfficeFloorManagedObjectModel"
+        name="office floor managed object" />
+    <field
+        type="OfficeFloorManagedObjectDependencyToOfficeFloorInputManagedObjectModel"
+        name="office floor input managed object" />
+</model>
