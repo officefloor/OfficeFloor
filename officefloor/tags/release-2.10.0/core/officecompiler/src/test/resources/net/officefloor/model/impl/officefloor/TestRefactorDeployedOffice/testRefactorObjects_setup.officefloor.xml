@@ -1,0 +1,9 @@
+<office-floor>
+	<offices>
+		<office name="NAME" source="net.example.ExampleOfficeSource"
+			location="LOCATION">
+			<object name="CHANGE_DETAILS" object-type="java.lang.String" />
+			<object name="RENAME_OLD" object-type="java.lang.Object" />
+		</office>
+	</offices>
+</office-floor>

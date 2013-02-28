@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<model>
+	<field type="String" name="sub section name" />
+	<field type="String" name="section source class name" />
+	<field type="String" name="section location" />
+	<list type="PropertyModel" name="property" plural="properties" />
+	<list type="SubSectionInputModel" name="sub section input"
+		cascade-remove="true" />
+	<list type="SubSectionOutputModel" name="sub section output"
+		cascade-remove="true" />
+	<list type="SubSectionObjectModel" name="sub section object"
+		cascade-remove="true" />
+</model>

@@ -1,0 +1,41 @@
+<woof>
+  <templates>
+    <template name="error" uri="error" path="error.woof.html" class="" secure="false" continue-rendering="false" x="474" y="71">
+    </template>
+    <template name="hello" uri="hello" path="hello.woof.html" class="net.officefloor.tutorial.authenticationhttpserver.HelloLogic" secure="false" continue-rendering="false" x="35" y="74">
+      <output name="LoggedOut" argument-type="">
+        <template name="logout"/>
+      </output>
+    </template>
+    <template name="login" uri="login" path="login.woof.html" class="net.officefloor.tutorial.authenticationhttpserver.LoginLogic" secure="true" continue-rendering="false" x="344" y="144">
+      <output name="authenticate" argument-type="net.officefloor.plugin.web.http.security.HttpCredentials">
+        <access input="Authenticate"/>
+      </output>
+    </template>
+    <template name="logout" uri="logout" path="logout.woof.html" class="" secure="false" continue-rendering="false" x="148" y="73">
+      <output name="hello" argument-type="">
+        <template name="hello"/>
+      </output>
+    </template>
+  </templates>
+  <sections>
+  </sections>
+  <access source="net.officefloor.plugin.web.http.security.scheme.FormHttpSecuritySource" timeout="3000" x="341" y="36">
+    <property name="http.security.form.realm" value="TEST"/>
+    <input name="Authenticate" parameter-type="net.officefloor.plugin.web.http.security.HttpCredentials"/>
+    <output name="FORM_LOGIN_PAGE" argument-type="java.lang.Void">
+      <template name="login"/>
+    </output>
+    <output name="Failure" argument-type="java.lang.Throwable">
+      <template name="error"/>
+    </output>
+  </access>
+  <governances>
+  </governances>
+  <resources>
+  </resources>
+  <exceptions>
+  </exceptions>
+  <starting>
+  </starting>
+</woof>

@@ -1,0 +1,67 @@
+                                               -----------------------
+                                                    Test Tutorial 
+                                               -----------------------
+					        Daniel Sagenschneider
+                                               -----------------------
+
+  <<Test Tutorial>>
+
+  This tutorial looks at testing a WoOF application.
+    
+  To focus on testing, the below simple application to add two numbers will be used.
+    
+[./images/TestHttpServer-screenshot.png] TestHttpServer screenshot.
+
+  {{{http://sourceforge.net/projects/officefloor/files/maven/maven2/net/officefloor/tutorial/TestHttpServer/${projectVersion}/TestHttpServer-${projectVersion}-project.zip/download}Download Tutorial Source}}
+
+
+
+Appliction code
+
+  The application being tested has one page.
+
+%{code-snippet|brush=xml|file=${basedir}/src/main/webapp/template.woof.html}
+
+  With the backing logic class.
+  
+%{code-snippet|brush-autodetect=1|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/testhttpserver/TemplateLogic.java}
+
+  The focus of the tutorial is to test that the two numbers are added correctly.  Production quality testing would cover a lot more test scenarios for the application.  However, the additional scenarios have been excluded for brevity as they would follow a similar pattern as described by this tutorial.
+
+
+
+Unit Testing
+
+  The following demonstrates unit testing the template logic class.  As the template logic class is a POJO (Plain Old Java Object), it is unit tested like any other Java class.
+
+%{code-snippet|brush-autodetect=1|id=unit|file=${basedir}/src/test/java/net/officefloor/tutorial/testhttpserver/TemplateLogicTest.java}
+
+  This is a simple application.  More complex applications may be dependency injecting more complex objects such as a <<<javax.sql.DataSource>>> or <<<javax.persistence.EntityManager>>>.  Again as the template logic is a POJO, any mocking framwork can be used to mock these objects for use in testing.
+  
+
+System Testing
+
+  As OfficeFloor is a very light weight framework, it starts and stops fast enough to be included in the setup and teardown of unit tests.  This allows for system testing the application as follows.  Note that the starting and stopping of WoOF (OfficeFloor) can be included in setup and teardown methods to not clutter individual tests.
+
+%{code-snippet|brush-autodetect=1|id=system|file=${basedir}/src/test/java/net/officefloor/tutorial/testhttpserver/TemplateLogicTest.java}
+
+
+
+Integration Testing
+
+  OfficeFloor provides {{{http://maven.apache.org}Maven}} plugins to enable integration testing.  The following is the <<<pom.xml>>> plugins starting/stopping WoOF and running the integration tests.
+  
+%{code-snippet|brush-autodetect=1|id=tutorial|file=${basedir}/pom.xml}
+
+  The integration test is then as follows.
+  
+%{code-snippet|brush-autodetect=1|id=integration|file=${basedir}/src/test/int/net/officefloor/tutorial/testhttpserver/TemplateLogicIT.java}
+
+  Note that the above is a simple request test.  As the WoOF maven plugin runs the application with the same code that deploys it to run anywhere (e.g. Cloud Computing), this enables using more complex integration test tools (e.g. {{{http://seleniumhq.org}SeleniumHQ}}) to validate the application before deploying it.
+
+
+
+Next
+
+  Please see the {{{../index.html}other tutorials}} for further features.
+
