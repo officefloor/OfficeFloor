@@ -79,12 +79,11 @@
 	</dependencies>
 	<profiles>
 		<profile>
-			<!-- Profile for deploying to SourceForge -->
-			<id>release-to-sourceforge</id>
+			<!-- Avoid SourceForge Shell timeout by recreating the shell  -->
+			<id>shutdown-and-create-sourceforge-shell</id>
 			<activation>
 				<property>
 					<name>deploy</name>
-					<value>sourceforge</value>
 				</property>
 			</activation>
 			<build>
