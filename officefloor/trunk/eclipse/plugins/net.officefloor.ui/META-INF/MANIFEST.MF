@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Eclipse UI
 Bundle-SymbolicName: net.officefloor.ui;singleton:=true
-Bundle-Version: 2.10.0
+Bundle-Version: 2.11.0
 Bundle-Vendor: OfficeFloor
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Eclipse-BuddyPolicy: registered
@@ -63,7 +63,7 @@ Import-Package: junit.framework,
  org.eclipse.ui.plugin,
  org.eclipse.ui.views.navigator,
  org.osgi.framework
-Require-Bundle: net.officefloor.core;bundle-version="2.10.0"
+Require-Bundle: net.officefloor.core;bundle-version="2.11.0"
 Export-Package: net.officefloor.eclipse,
  net.officefloor.eclipse.bootstrap,
  net.officefloor.eclipse.classpath,
