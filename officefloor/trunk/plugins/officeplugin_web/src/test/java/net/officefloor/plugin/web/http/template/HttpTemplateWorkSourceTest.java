@@ -537,7 +537,8 @@ public class HttpTemplateWorkSourceTest extends OfficeFrameTestCase {
 
 		// Ensure not require on no properties or beans
 		HttpTemplateSection staticSection = new HttpTemplateSectionImpl(
-				"STATIC", new HttpTemplateSectionContent[] {
+				"STATIC", "STATIC CONTENT#{LINK}",
+				new HttpTemplateSectionContent[] {
 						new StaticHttpTemplateSectionContentImpl(
 								"STATIC CONTENT"),
 						new LinkHttpTemplateSectionContentImpl("LINK") });
@@ -548,6 +549,7 @@ public class HttpTemplateWorkSourceTest extends OfficeFrameTestCase {
 		// Ensure require bean on property
 		HttpTemplateSection propertySection = new HttpTemplateSectionImpl(
 				"PROPERTY",
+				"${Property}",
 				new HttpTemplateSectionContent[] { new PropertyHttpTemplateSectionContentImpl(
 						"Property") });
 		assertTrue("Require bean if have property in section",
@@ -557,6 +559,7 @@ public class HttpTemplateWorkSourceTest extends OfficeFrameTestCase {
 		// Ensure require bean on bean
 		HttpTemplateSection beanSection = new HttpTemplateSectionImpl(
 				"BEAN",
+				"${Bean $}",
 				new HttpTemplateSectionContent[] { new BeanHttpTemplateSectionContentImpl(
 						"Bean", new HttpTemplateSectionContent[0]) });
 		assertTrue("Require bean if have bean in section",
@@ -649,7 +652,8 @@ public class HttpTemplateWorkSourceTest extends OfficeFrameTestCase {
 
 		// Section with no beans but has link
 		HttpTemplateSection noBeanSection = new HttpTemplateSectionImpl(
-				"STATIC", new HttpTemplateSectionContent[] {
+				"STATIC", "#{STATIC_LINK}STATIC CONTENT#{STATIC_LINK}",
+				new HttpTemplateSectionContent[] {
 						new LinkHttpTemplateSectionContentImpl("STATIC_LINK"),
 						new StaticHttpTemplateSectionContentImpl(
 								"STATIC CONTENT"),
@@ -657,7 +661,7 @@ public class HttpTemplateWorkSourceTest extends OfficeFrameTestCase {
 
 		// Section where link is within a bean
 		HttpTemplateSection beanSection = new HttpTemplateSectionImpl(
-				"BEAN",
+				"BEAN", "${STATIC_REPEAT $}STATIC CONTENT ${DYNAMIC_BEAN #{BEAN_LINK}STATIC_CONTENT${SUB_BEAN #{SUB_BEAN_LINK}$}$}",
 				new HttpTemplateSectionContent[] {
 						new BeanHttpTemplateSectionContentImpl("STATIC_REPEAT",
 								noBeanSection.getContent()),

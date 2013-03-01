@@ -22,7 +22,7 @@ import net.officefloor.plugin.web.http.template.parse.HttpTemplateSectionContent
 
 /**
  * {@link HttpTemplateSection} implementation.
- *
+ * 
  * @author Daniel Sagenschneider
  */
 public class HttpTemplateSectionImpl implements HttpTemplateSection {
@@ -33,21 +33,29 @@ public class HttpTemplateSectionImpl implements HttpTemplateSection {
 	private final String sectionName;
 
 	/**
+	 * Raw {@link HttpTemplateSection} content.
+	 */
+	private final String rawSectionContent;
+
+	/**
 	 * {@link HttpTemplateSectionContent} instances.
 	 */
 	private final HttpTemplateSectionContent[] content;
 
 	/**
 	 * Initiate.
-	 *
+	 * 
 	 * @param sectionName
 	 *            {@link HttpTemplateSection} name.
+	 * @param rawSectionContent
+	 *            Raw {@link HttpTemplateSection} content.
 	 * @param content
 	 *            {@link HttpTemplateSectionContent} instances.
 	 */
 	public HttpTemplateSectionImpl(String sectionName,
-			HttpTemplateSectionContent[] content) {
+			String rawSectionContent, HttpTemplateSectionContent[] content) {
 		this.sectionName = sectionName;
+		this.rawSectionContent = rawSectionContent;
 		this.content = content;
 	}
 
@@ -58,6 +66,11 @@ public class HttpTemplateSectionImpl implements HttpTemplateSection {
 	@Override
 	public String getSectionName() {
 		return this.sectionName;
+	}
+
+	@Override
+	public String getRawSectionContent() {
+		return this.rawSectionContent;
 	}
 
 	@Override

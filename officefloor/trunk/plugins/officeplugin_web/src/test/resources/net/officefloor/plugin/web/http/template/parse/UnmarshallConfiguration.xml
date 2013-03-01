@@ -11,6 +11,8 @@
 			class="net.officefloor.plugin.web.http.template.parse.BeanTemplateSectionContentConfig"
 			id="BeanReference">
 			<value method="setBeanName" node="bean@name" />
+			<value method="setOpenTag" node="bean@open" />
+			<value method="setCloseTag" node="bean@close" />
 			<object method="addContent" node="static"
 				class="net.officefloor.plugin.web.http.template.parse.StaticTemplateSectionContentConfig">
 				<value method="setContent" node="content" />

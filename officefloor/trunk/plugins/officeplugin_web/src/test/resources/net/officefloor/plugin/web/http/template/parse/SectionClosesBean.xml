@@ -7,9 +7,9 @@
 <body>
 ]]></content>
 		</static>
-		<bean name="bean">
+		<bean name="bean" close="">
 			<static>
-				<content><![CDATA[open]]></content>
+				<content><![CDATA[open ]]></content>
 			</static>
 		</bean>
 	</section>
@@ -25,8 +25,7 @@
 		<static>
 			<content><![CDATA[
 </body>
-</html>
-]]></content>
+</html>]]></content>
 		</static>
 	</section>
 </template>

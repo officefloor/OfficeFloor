@@ -7,7 +7,7 @@
 <body>
 ]]></content>
 		</static>
-		<bean name="bean">
+		<bean name="bean" close="$}">
 			<static>
 				<content><![CDATA[<img src="./images/Error.png" /> ]]></content>
 			</static>

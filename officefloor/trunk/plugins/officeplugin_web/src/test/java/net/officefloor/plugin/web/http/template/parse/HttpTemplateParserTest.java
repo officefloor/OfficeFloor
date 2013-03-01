@@ -236,14 +236,43 @@ public class HttpTemplateParserTest extends OfficeFrameTestCase {
 				assertEquals("Incorrect name for section " + s,
 						expectedSection.name, section.getSectionName());
 
+				// Determine the section raw contents
+				StringBuilder rawSectionContents = new StringBuilder();
+
 				// Ensure section is as expected
 				validateSectionOrBean(expectedSection.contents,
-						section.getContent(), s, "");
+						section.getContent(), s, "", rawSectionContents);
+
+				// Determine if raw section content is as expected
+				assertEquals(
+						"Incorrect raw section content for section "
+								+ expectedSection.name
+								+ "\n== Expected =======\n"
+								+ rawSectionContents.toString()
+								+ "\n== Actual =========\n"
+								+ section.getRawSectionContent()
+								+ "\n===================\n",
+						transformContentForCompare(rawSectionContents
+								.toString()),
+						transformContentForCompare(section
+								.getRawSectionContent()));
 			}
 
 		} catch (Exception ex) {
 			throw fail(ex);
 		}
+	}
+
+	/**
+	 * Transforms the content for use in comparison.
+	 * 
+	 * @param rawContent
+	 *            Raw content to be transformed for comparing.
+	 * @return Transformed content for use in comparison.
+	 */
+	private static String transformContentForCompare(String rawContent) {
+		// Ignore carriage returns and mark line feeds
+		return rawContent.replace("\r", "").replace('\n', '|');
 	}
 
 	/**
@@ -258,11 +287,14 @@ public class HttpTemplateParserTest extends OfficeFrameTestCase {
 	 *            Index of the section being validated.
 	 * @param beanPath
 	 *            Path of the bean within the {@link HttpTemplateSection}.
+	 * @param rawSectionContents
+	 *            {@link StringBuilder} to receive the expected raw section
+	 *            contents.
 	 */
 	private static void validateSectionOrBean(
 			List<TemplateSectionContentConfig> expectedContents,
 			HttpTemplateSectionContent[] actualContents, int sectionIndex,
-			String beanPath) {
+			String beanPath, StringBuilder rawSectionContents) {
 
 		// Ensure section/bean is as expected
 		assertEquals("Incorrect number of content for section " + sectionIndex
@@ -284,10 +316,13 @@ public class HttpTemplateParserTest extends OfficeFrameTestCase {
 						content instanceof StaticHttpTemplateSectionContent);
 				StaticTemplateSectionContentConfig expectedStaticContent = (StaticTemplateSectionContentConfig) expectedContent;
 				StaticHttpTemplateSectionContent staticContent = (StaticHttpTemplateSectionContent) content;
+				String expectedStaticText = (expectedStaticContent.content == null ? " "
+						: expectedStaticContent.content);
 				assertTextEquals("Incorrect content for " + contentIdentifier,
-						(expectedStaticContent.content == null ? ""
-								: expectedStaticContent.content.trim()),
-						staticContent.getStaticContent().trim());
+						expectedStaticText, staticContent.getStaticContent());
+
+				// Include raw static content
+				rawSectionContents.append(expectedStaticText);
 
 			} else if (expectedContent instanceof BeanTemplateSectionContentConfig) {
 				// Bean content
@@ -299,10 +334,18 @@ public class HttpTemplateParserTest extends OfficeFrameTestCase {
 				assertEquals("Incorrect bean property name for "
 						+ contentIdentifier, expectedBeanContent.beanName,
 						beanPropertyName);
+
+				// Include the raw bean open tag
+				rawSectionContents.append(expectedBeanContent.getOpenTag());
+
+				// Validate the bean content
 				validateSectionOrBean(expectedBeanContent.contents,
 						beanContent.getContent(), sectionIndex,
 						beanPath + ("".equals(beanPath) ? "" : ".")
-								+ beanPropertyName);
+								+ beanPropertyName, rawSectionContents);
+
+				// Include the raw bean close tag
+				rawSectionContents.append(expectedBeanContent.getCloseTag());
 
 			} else if (expectedContent instanceof PropertyTemplateSectionContentConfig) {
 				// Property content
@@ -315,6 +358,10 @@ public class HttpTemplateParserTest extends OfficeFrameTestCase {
 						expectedPropertyContent.propertyName,
 						propertyContent.getPropertyName());
 
+				// Include the raw property
+				rawSectionContents.append("${"
+						+ expectedPropertyContent.propertyName + "}");
+
 			} else if (expectedContent instanceof LinkTemplateSectionContentConfig) {
 				// Link content
 				assertTrue(contentIdentifier + " is expected to be a link",
@@ -324,6 +371,10 @@ public class HttpTemplateParserTest extends OfficeFrameTestCase {
 				assertEquals("Incorrect link name for " + contentIdentifier,
 						expectedLinkContent.name, linkContent.getName());
 
+				// Include the raw link
+				rawSectionContents
+						.append("#{" + expectedLinkContent.name + "}");
+
 			} else {
 				// Unknown content
 				fail("Unkonwn content type "
@@ -331,5 +382,4 @@ public class HttpTemplateParserTest extends OfficeFrameTestCase {
 			}
 		}
 	}
-
 }

@@ -7,9 +7,9 @@
 <body>
 ]]></content>
 		</static>
-		<bean name="bean">
+		<bean name="bean" open="&lt;!-- ${bean --&gt;" close="&lt;!-- $} --&gt;">
 			<static>
-				<content><![CDATA[bean content]]></content>
+				<content><![CDATA[ bean content ]]></content>
 			</static>
 		</bean>
 		<static>
