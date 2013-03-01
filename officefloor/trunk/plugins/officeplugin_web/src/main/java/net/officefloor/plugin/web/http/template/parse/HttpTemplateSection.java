@@ -19,22 +19,29 @@ package net.officefloor.plugin.web.http.template.parse;
 
 /**
  * Section of a {@link HttpTemplate}.
- *
+ * 
  * @author Daniel Sagenschneider
  */
 public interface HttpTemplateSection {
 
 	/**
 	 * Obtains the name of this section.
-	 *
+	 * 
 	 * @return Name of this section.
 	 */
 	String getSectionName();
 
 	/**
+	 * Obtains the raw content for this section.
+	 * 
+	 * @return Raw content for this section.
+	 */
+	String getRawSectionContent();
+
+	/**
 	 * Obtains the {@link HttpTemplateSectionContent} instances that comprise
 	 * the content for this {@link HttpTemplateSection}.
-	 *
+	 * 
 	 * @return {@link HttpTemplateSectionContent} instances that comprise the
 	 *         content for this {@link HttpTemplateSection}.
 	 */
