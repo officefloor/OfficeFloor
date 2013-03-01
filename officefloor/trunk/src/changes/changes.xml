@@ -2,8 +2,11 @@
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/changes/1.0.0 http://maven.apache.org/xsd/changes-1.0.0.xsd">
 	<body>
-		<release version="2.10.0" date="In SVN" description="Template Re-use">
-			<action type="add" dev="sagenschneider">Web Security</action>
+		<release version="2.11.0" date="In SVN" description="Template Inheritance">
+			<action type="add" dev="sagenschneider">Template Inheritance</action>
+		</release>
+		<release version="2.10.0" date="2013-02-28" description="OfficeFloor extension / assist items">
+			<action type="add" dev="sagenschneider">OfficeFloor extension / assist items</action>
 		</release>
 		<release version="2.9.0" date="2013-02-20" description="Web Security">
 			<action type="add" dev="sagenschneider">Web Security</action>
