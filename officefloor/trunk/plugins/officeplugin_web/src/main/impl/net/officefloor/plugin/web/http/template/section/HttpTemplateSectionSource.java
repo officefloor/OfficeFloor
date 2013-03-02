@@ -70,6 +70,7 @@ import net.officefloor.plugin.web.http.session.object.HttpSessionObjectManagedOb
 import net.officefloor.plugin.web.http.template.HttpTemplateTask;
 import net.officefloor.plugin.web.http.template.HttpTemplateWorkSource;
 import net.officefloor.plugin.web.http.template.parse.HttpTemplate;
+import net.officefloor.plugin.web.http.template.parse.HttpTemplateParserImpl;
 import net.officefloor.plugin.web.http.template.parse.HttpTemplateSection;
 import net.officefloor.plugin.web.http.template.section.HttpTemplateInitialTask.Flows;
 
@@ -90,6 +91,205 @@ public class HttpTemplateSectionSource extends ClassSectionSource {
 	 * template.
 	 */
 	public static final String PROPERTY_CLASS_NAME = ClassManagedObjectSource.CLASS_NAME_PROPERTY_NAME;
+
+	/**
+	 * Prefix on a {@link HttpTemplateSection} name to indicate it is an
+	 * override section.
+	 */
+	public static final String OVERRIDE_SECTION_PREFIX = ":";
+
+	/**
+	 * Removes the comment {@link HttpTemplateSection} instances.
+	 * 
+	 * @param sections
+	 *            Listing of {@link HttpTemplateSection} instances.
+	 * @return Filtered listing of {@link HttpTemplateSection} instances.
+	 */
+	public static HttpTemplateSection[] filterCommentHttpTemplateSections(
+			HttpTemplateSection[] sections) {
+
+		// Filter comment sections
+		List<HttpTemplateSection> filteredSections = new LinkedList<HttpTemplateSection>();
+		for (HttpTemplateSection section : sections) {
+
+			// Ignore comment section
+			if ("!".equals(section.getSectionName())) {
+				continue;
+			}
+
+			// Include the section
+			filteredSections.add(section);
+		}
+
+		// Return the filtered sections
+		return filteredSections
+				.toArray(new HttpTemplateSection[filteredSections.size()]);
+	}
+
+	/**
+	 * Returns the result of inheriting the parent {@link HttpTemplateSection}
+	 * instances with the child {@link HttpTemplateSection} overrides.
+	 * 
+	 * @param parentSections
+	 *            Parent {@link HttpTemplateSection} instances to inherit.
+	 * @param childSections
+	 *            Child {@link HttpTemplateSection} instances to override.
+	 * @param designer
+	 *            {@link SectionDesigner}.
+	 * @return {@link HttpTemplateSection} instances from result of inheritance.
+	 */
+	public static HttpTemplateSection[] inheritHttpTemplateSections(
+			HttpTemplateSection[] parentSections,
+			HttpTemplateSection[] childSections, SectionDesigner designer) {
+
+		// Create the listing of sections for overriding
+		Map<String, List<HttpTemplateSection>> overrideSections = new HashMap<String, List<HttpTemplateSection>>();
+		String overrideSectionName = null;
+		List<HttpTemplateSection> overrideSectionList = new LinkedList<HttpTemplateSection>();
+		boolean isFirstSection = true;
+		for (HttpTemplateSection section : childSections) {
+
+			// Obtain the section name
+			String sectionName = section.getSectionName();
+
+			// Determine if override section
+			if (sectionName.startsWith(OVERRIDE_SECTION_PREFIX)) {
+				// New override section
+				overrideSectionName = getHttpTemplateSectionName(sectionName);
+				overrideSectionList = new LinkedList<HttpTemplateSection>();
+				overrideSections.put(overrideSectionName, overrideSectionList);
+
+			} else {
+				// Determine if invalid introduced section
+				if (overrideSectionName == null) {
+
+					// Invalid introduced if not the default first section
+					if (!((isFirstSection) && (HttpTemplateParserImpl.DEFAULT_FIRST_SECTION_NAME
+							.equals(sectionName)))) {
+						// Invalid introduced section
+						designer.addIssue(
+								"Section '"
+										+ sectionName
+										+ "' can not be introduced, as no previous override section (section prefixed with '"
+										+ OVERRIDE_SECTION_PREFIX
+										+ "') to identify where to inherit",
+								null, null);
+					}
+				}
+			}
+
+			// Include the section
+			overrideSectionList.add(section);
+			isFirstSection = false; // no longer first section
+		}
+
+		// Obtain the names of all parent sections
+		Set<String> parentSectionNames = new HashSet<String>();
+		for (HttpTemplateSection parentSection : parentSections) {
+			parentSectionNames.add(getHttpTemplateSectionName(parentSection
+					.getSectionName()));
+		}
+
+		// Create the listing sections from inheritance
+		List<HttpTemplateSection> inheritanceSections = new LinkedList<HttpTemplateSection>();
+		for (HttpTemplateSection parentSection : parentSections) {
+
+			// Obtain the parent section name
+			String parentSectionName = getHttpTemplateSectionName(parentSection
+					.getSectionName());
+
+			// Determine if overriding parent
+			List<HttpTemplateSection> overridingSections = overrideSections
+					.remove(parentSectionName);
+			if (overridingSections == null) {
+				// Parent section not overridden, so include
+				inheritanceSections.add(parentSection);
+
+			} else {
+				// Overridden, so include override and introduced sections
+				boolean isIntroducedSection = false; // first is override
+				for (HttpTemplateSection overrideSection : overridingSections) {
+
+					// Determine if introduced section already exists in parent
+					String introducedSectionName = getHttpTemplateSectionName(overrideSection
+							.getSectionName());
+					if ((isIntroducedSection)
+							&& (parentSectionNames
+									.contains(introducedSectionName))) {
+						// Must override to include the child introduced section
+						designer.addIssue(
+								"Section '"
+										+ introducedSectionName
+										+ "' already exists by inheritance and not flagged for overriding (with '"
+										+ OVERRIDE_SECTION_PREFIX + "' prefix)",
+								null, null);
+
+					} else {
+						// Include the override/introduced section
+						inheritanceSections.add(overrideSection);
+					}
+
+					// Always introducing after the first (override) section
+					isIntroducedSection = true;
+				}
+			}
+		}
+
+		// Provide issues for any child sections not overriding
+		for (String notOverrideSectionName : overrideSections.keySet()) {
+			designer.addIssue(
+					"No inherited section exists for overriding by section '"
+							+ notOverrideSectionName + "'", null, null);
+		}
+
+		// Return the sections from inheritance
+		return inheritanceSections
+				.toArray(new HttpTemplateSection[inheritanceSections.size()]);
+	}
+
+	/**
+	 * Obtains the {@link HttpTemplateSection} name (possibly removing override
+	 * prefix).
+	 * 
+	 * @param sectionName
+	 *            {@link HttpTemplateSection} raw name.
+	 * @return {@link HttpTemplateSection} name.
+	 */
+	private static String getHttpTemplateSectionName(String sectionName) {
+		return sectionName.startsWith(OVERRIDE_SECTION_PREFIX) ? sectionName
+				.substring(OVERRIDE_SECTION_PREFIX.length()) : sectionName;
+	}
+
+	/**
+	 * Reconstructs the {@link HttpTemplate} raw content from the
+	 * {@link HttpTemplateSection} instances.
+	 * 
+	 * @param sections
+	 *            {@link HttpTemplateSection} instances.
+	 * @return Raw {@link HttpTemplate} content from reconstruction from the
+	 *         {@link HttpTemplateSection} instances.
+	 */
+	public static String reconstructHttpTemplateContent(
+			HttpTemplateSection[] sections) {
+
+		// Reconstruct the raw HTTP template content
+		StringBuilder content = new StringBuilder();
+		for (HttpTemplateSection section : sections) {
+
+			// Obtain the template section name
+			String sectionName = getHttpTemplateSectionName(section
+					.getSectionName());
+
+			// Add the section tag
+			content.append("<!-- {" + sectionName + "} -->");
+
+			// Add the section content
+			content.append(section.getRawSectionContent());
+		}
+
+		// Return the reconstructed template content
+		return content.toString();
+	}
 
 	/**
 	 * Creates the {@link Task} key from the {@link Task} name.
