@@ -47,11 +47,25 @@ public class HttpTemplateParserTest extends OfficeFrameTestCase {
 	public void testSections() {
 		this.doTest();
 	}
-
+	
 	/**
 	 * Ensures able to name the first section, other than it being 'template'.
 	 */
 	public void testFirstSectionNamed() {
+		this.doTest();
+	}
+
+	/**
+	 * Ensure can load override sections.
+	 */
+	public void testOverrideSection() {
+		this.doTest();
+	}
+	
+	/**
+	 * Ensure can have comment sections.
+	 */
+	public void testCommentSection() {
 		this.doTest();
 	}
 
