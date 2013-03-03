@@ -23,9 +23,11 @@ import java.lang.reflect.Modifier;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import net.officefloor.compile.WorkSourceService;
 import net.officefloor.compile.spi.work.source.TaskFlowTypeBuilder;
@@ -185,123 +187,153 @@ public class ClassWorkSource extends AbstractWorkSource<ClassWork> implements
 		WorkFactory<ClassWork> workFactory = this.createWorkFactory(clazz);
 		workTypeBuilder.setWorkFactory(workFactory);
 
-		// Obtain the listing of tasks from the methods of the class
-		for (Method method : clazz.getMethods()) {
+		// Work up the hierarchy of classes to inherit methods by name
+		Set<String> includedMethodNames = new HashSet<String>();
+		while ((clazz != null) && (!(Object.class.equals(clazz)))) {
 
-			// Ignore non-public methods
-			if (!Modifier.isPublic(method.getModifiers())) {
-				continue;
-			}
+			// Obtain the listing of tasks from the methods of the class
+			Set<String> currentClassMethods = new HashSet<String>();
+			for (Method method : clazz.getDeclaredMethods()) {
 
-			// Ignore Object methods
-			if (Object.class.equals(method.getDeclaringClass())) {
-				continue;
-			}
-			
-			// Ignore methods annotated to not be tasks
-			if (method.isAnnotationPresent(NonTaskMethod.class)) {
-				continue;
-			}
-
-			// Obtain details of the method
-			String methodName = method.getName();
-			Class<?>[] paramTypes = method.getParameterTypes();
-
-			// Create to parameters to method to be populated
-			ParameterFactory[] parameters = new ParameterFactory[paramTypes.length];
-
-			// Determine if the method is static
-			boolean isStatic = Modifier.isStatic(method.getModifiers());
-
-			// Create the sequences for indexes to the objects and flows
-			Sequence objectSequence = new Sequence();
-			Sequence flowSequence = new Sequence();
-
-			// Create the task factory
-			TaskFactory<ClassWork, Indexed, Indexed> taskFactory = this
-					.createTaskFactory(clazz, method, isStatic, parameters);
-
-			// Include method as task in type definition
-			TaskTypeBuilder<Indexed, Indexed> taskTypeBuilder = this
-					.addTaskType(clazz, workTypeBuilder, methodName,
-							taskFactory, objectSequence, flowSequence);
-
-			// Define the return type (it not void)
-			Class<?> returnType = method.getReturnType();
-			if ((returnType != null) && (!Void.TYPE.equals(returnType))) {
-				taskTypeBuilder.setReturnType(returnType);
-			}
-
-			// Obtain the parameter annotations (for qualifying)
-			Annotation[][] methodParamAnnotations = method
-					.getParameterAnnotations();
-
-			// Define the listing of task objects and flows
-			for (int i = 0; i < paramTypes.length; i++) {
-
-				// Obtain the parameter type and its annotations
-				Class<?> paramType = paramTypes[i];
-				Annotation[] paramAnnotations = methodParamAnnotations[i];
-
-				// Obtain the parameter factory
-				ParameterFactory parameterFactory = null;
-				CREATED: for (ParameterManufacturer manufacturer : this.manufacturers) {
-					parameterFactory = manufacturer.createParameterFactory(
-							methodName, paramType, taskTypeBuilder,
-							objectSequence, flowSequence, classLoader);
-					if (parameterFactory != null) {
-						// Created parameter factory, so use
-						break CREATED;
-					}
+				// Ignore non-public methods
+				if (!Modifier.isPublic(method.getModifiers())) {
+					continue;
 				}
 
-				// Default to object if no parameter factory
-				if (parameterFactory == null) {
-					// Otherwise must be an dependency object
-					parameterFactory = new ObjectParameterFactory(
-							objectSequence.nextIndex());
-					TaskObjectTypeBuilder<Indexed> objectTypeBuilder = taskTypeBuilder
-							.addObject(paramType);
+				// Ignore methods annotated to not be tasks
+				if (method.isAnnotationPresent(NonTaskMethod.class)) {
+					continue;
+				}
 
-					// Determine type qualifier
-					String typeQualifier = null;
-					for (Annotation annotation : paramAnnotations) {
+				// Obtain details of the method
+				String methodName = method.getName();
+				Class<?>[] paramTypes = method.getParameterTypes();
 
-						// Obtain the annotation type
-						Class<?> annotationType = annotation.annotationType();
+				// Determine if method already exists on the current class
+				if (currentClassMethods.contains(methodName)) {
+					throw new IllegalStateException(
+							"Two methods by the same name '"
+									+ methodName
+									+ "' in class "
+									+ clazz.getName()
+									+ ".  Either rename one of the methods or annotate one with @"
+									+ NonTaskMethod.class.getSimpleName());
+				}
+				currentClassMethods.add(methodName);
 
-						// Determine if qualifier annotation
-						if (annotationType.isAnnotationPresent(Qualifier.class)) {
+				// Ignore if already included method
+				if (includedMethodNames.contains(methodName)) {
+					continue;
+				}
+				includedMethodNames.add(methodName);
 
-							// Allow only one qualifier
-							if (typeQualifier != null) {
-								throw new IllegalArgumentException("Method "
-										+ methodName + " parameter " + i
-										+ " has more than one "
-										+ Qualifier.class.getSimpleName());
-							}
+				// Create to parameters to method to be populated
+				ParameterFactory[] parameters = new ParameterFactory[paramTypes.length];
 
-							// Provide type qualifier
-							typeQualifier = annotationType.getName();
-							objectTypeBuilder.setTypeQualifier(typeQualifier);
+				// Determine if the method is static
+				boolean isStatic = Modifier.isStatic(method.getModifiers());
+
+				// Create the sequences for indexes to the objects and flows
+				Sequence objectSequence = new Sequence();
+				Sequence flowSequence = new Sequence();
+
+				// Create the task factory
+				TaskFactory<ClassWork, Indexed, Indexed> taskFactory = this
+						.createTaskFactory(clazz, method, isStatic, parameters);
+
+				// Include method as task in type definition
+				TaskTypeBuilder<Indexed, Indexed> taskTypeBuilder = this
+						.addTaskType(clazz, workTypeBuilder, methodName,
+								taskFactory, objectSequence, flowSequence);
+
+				// Define the return type (it not void)
+				Class<?> returnType = method.getReturnType();
+				if ((returnType != null) && (!Void.TYPE.equals(returnType))) {
+					taskTypeBuilder.setReturnType(returnType);
+				}
+
+				// Obtain the parameter annotations (for qualifying)
+				Annotation[][] methodParamAnnotations = method
+						.getParameterAnnotations();
+
+				// Define the listing of task objects and flows
+				for (int i = 0; i < paramTypes.length; i++) {
+
+					// Obtain the parameter type and its annotations
+					Class<?> paramType = paramTypes[i];
+					Annotation[] paramAnnotations = methodParamAnnotations[i];
+
+					// Obtain the parameter factory
+					ParameterFactory parameterFactory = null;
+					CREATED: for (ParameterManufacturer manufacturer : this.manufacturers) {
+						parameterFactory = manufacturer.createParameterFactory(
+								methodName, paramType, taskTypeBuilder,
+								objectSequence, flowSequence, classLoader);
+						if (parameterFactory != null) {
+							// Created parameter factory, so use
+							break CREATED;
 						}
 					}
 
-					// Specify the label
-					String label = (typeQualifier != null ? typeQualifier + "-"
-							: "") + paramType.getName();
-					objectTypeBuilder.setLabel(label);
+					// Default to object if no parameter factory
+					if (parameterFactory == null) {
+						// Otherwise must be an dependency object
+						parameterFactory = new ObjectParameterFactory(
+								objectSequence.nextIndex());
+						TaskObjectTypeBuilder<Indexed> objectTypeBuilder = taskTypeBuilder
+								.addObject(paramType);
+
+						// Determine type qualifier
+						String typeQualifier = null;
+						for (Annotation annotation : paramAnnotations) {
+
+							// Obtain the annotation type
+							Class<?> annotationType = annotation
+									.annotationType();
+
+							// Determine if qualifier annotation
+							if (annotationType
+									.isAnnotationPresent(Qualifier.class)) {
+
+								// Allow only one qualifier
+								if (typeQualifier != null) {
+									throw new IllegalArgumentException(
+											"Method "
+													+ methodName
+													+ " parameter "
+													+ i
+													+ " has more than one "
+													+ Qualifier.class
+															.getSimpleName());
+								}
+
+								// Provide type qualifier
+								typeQualifier = annotationType.getName();
+								objectTypeBuilder
+										.setTypeQualifier(typeQualifier);
+							}
+						}
+
+						// Specify the label
+						String label = (typeQualifier != null ? typeQualifier
+								+ "-" : "")
+								+ paramType.getName();
+						objectTypeBuilder.setLabel(label);
+					}
+
+					// Load the parameter factory
+					parameters[i] = parameterFactory;
 				}
 
-				// Load the parameter factory
-				parameters[i] = parameterFactory;
+				// Define the escalation listing
+				for (Class<?> escalationType : method.getExceptionTypes()) {
+					taskTypeBuilder
+							.addEscalation((Class<Throwable>) escalationType);
+				}
 			}
 
-			// Define the escalation listing
-			for (Class<?> escalationType : method.getExceptionTypes()) {
-				taskTypeBuilder
-						.addEscalation((Class<Throwable>) escalationType);
-			}
+			// Add methods from the parent class on next iteration
+			clazz = clazz.getSuperclass();
 		}
 	}
 

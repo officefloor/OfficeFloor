@@ -489,4 +489,131 @@ public class ClassWorkSourceTest extends OfficeFrameTestCase {
 		FlowFuture asynchronous(String parameter);
 	}
 
+	/**
+	 * Ensure able to inherit by method name for the {@link ClassWorkSource}.
+	 */
+	public void testWorkInheritance() throws Exception {
+
+		// Invalid test if not inheriting
+		assertTrue("Invalid test if not extending",
+				(new ChildClass()) instanceof ParentClass);
+
+		// Create the work type builder
+		WorkTypeBuilder<ClassWork> work = WorkLoaderUtil
+				.createWorkTypeBuilder(new ClassWorkFactory(ChildClass.class));
+
+		// task
+		TaskTypeBuilder<?, ?> taskMethod = work.addTaskType("task",
+				new ClassTaskFactory(null, false, null), null, null);
+		taskMethod.setReturnType(Integer.class);
+		taskMethod.addObject(Integer.class).setLabel(Integer.class.getName());
+
+		// Validate the work type
+		WorkLoaderUtil.validateWorkType(work, ClassWorkSource.class,
+				ClassWorkSource.CLASS_NAME_PROPERTY_NAME,
+				ChildClass.class.getName());
+	}
+
+	/**
+	 * Parent class.
+	 */
+	public static class ParentClass {
+
+		public String task(String parameter) {
+			return parameter;
+		}
+	}
+
+	/**
+	 * Child class.
+	 */
+	public static class ChildClass extends ParentClass {
+
+		// Overrides by method name
+		public Integer task(Integer parameter) {
+			return parameter;
+		}
+
+		// Non task method so not included in method name inheritance
+		@NonTaskMethod
+		public Character task(Character parameter) {
+			return parameter;
+		}
+	}
+
+	/**
+	 * Ensure issue if class specifies the method twice by same name.
+	 */
+	public void testDuplicateMethodName() throws Exception {
+
+		final CompilerIssues issues = this.createMock(CompilerIssues.class);
+
+		// Use compiler to record issue
+		OfficeFloorCompiler compiler = OfficeFloorCompiler
+				.newOfficeFloorCompiler(null);
+		compiler.setCompilerIssues(issues);
+
+		// Record issue
+		issues.addIssue(
+				LocationType.SECTION,
+				null,
+				AssetType.WORK,
+				null,
+				"Failed to source WorkType definition from WorkSource "
+						+ ClassWorkSource.class.getName(),
+				new IllegalStateException(
+						"Two methods by the same name 'task' in class "
+								+ GrandChildClass.class.getName()
+								+ ".  Either rename one of the methods or annotate one with @NonTaskMethod"));
+		this.control(issues).setMatcher(new AbstractMatcher() {
+			@Override
+			public boolean matches(Object[] expected, Object[] actual) {
+
+				// Match initial parameters
+				for (int i = 0; i < 5; i++) {
+					Object e = expected[i];
+					Object a = actual[i];
+					if ((e == null) && (a == null)) {
+						continue; // match on null
+					} else if ((e != null) && (e.equals(actual[i]))) {
+						continue; // match not null
+					} else {
+						return false; // not match
+					}
+				}
+
+				// Match exception
+				IllegalStateException eEx = (IllegalStateException) expected[5];
+				IllegalStateException aEx = (IllegalStateException) actual[5];
+				if (!eEx.getMessage().equals(aEx.getMessage())) {
+					return false; // not match
+				}
+
+				// As here, matches
+				return true;
+			}
+		});
+
+		// Validate the work type
+		this.replayMockObjects();
+		WorkLoaderUtil.loadWorkType(ClassWorkSource.class, compiler,
+				ClassWorkSource.CLASS_NAME_PROPERTY_NAME,
+				GrandChildClass.class.getName());
+		this.verifyMockObjects();
+	}
+
+	/**
+	 * Grand child class with duplicate method names.
+	 */
+	public static class GrandChildClass extends ChildClass {
+
+		public Integer task(Integer parameter) {
+			return parameter;
+		}
+
+		public Double task(Double parameter) {
+			return parameter;
+		}
+	}
+
 }
