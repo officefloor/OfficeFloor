@@ -19,6 +19,7 @@ package net.officefloor.plugin.web.http.template.section;
 
 import net.officefloor.compile.spi.section.SectionDesigner;
 import net.officefloor.frame.test.OfficeFrameTestCase;
+import net.officefloor.plugin.web.http.template.parse.HttpTemplateParserImpl;
 import net.officefloor.plugin.web.http.template.parse.HttpTemplateSection;
 import net.officefloor.plugin.web.http.template.parse.HttpTemplateSectionImpl;
 
@@ -187,14 +188,26 @@ public class HttpTemplateSectionInheritanceTest extends OfficeFrameTestCase {
 
 		// Construct the expected inherited template content
 		StringBuilder expectedTemplateContent = new StringBuilder();
+		boolean isFirstSection = true;
 		for (String resultingSection : resultingSections) {
 
 			// Obtain the section name
 			String sectionName = resultingSection.split(":")[1];
 
 			// Append the section details
-			expectedTemplateContent.append("<!-- {" + sectionName + "} -->"
-					+ resultingSection);
+			if ((isFirstSection)
+					&& (HttpTemplateParserImpl.DEFAULT_FIRST_SECTION_NAME
+							.equals(sectionName))) {
+				// Include only the content for default first section
+				expectedTemplateContent.append(resultingSection);
+
+			} else {
+				expectedTemplateContent.append("<!-- {" + sectionName + "} -->"
+						+ resultingSection);
+			}
+
+			// No longer first section
+			isFirstSection = false;
 		}
 
 		// Ensure the reconstructed template content is as expected

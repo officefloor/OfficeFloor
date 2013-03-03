@@ -18,7 +18,6 @@
 package net.officefloor.plugin.web.http.template.section;
 
 import java.io.IOException;
-import java.io.Reader;
 import java.io.Serializable;
 import java.io.StringReader;
 import java.lang.reflect.Method;
@@ -280,14 +279,20 @@ public class HttpTemplateSectionSource extends ClassSectionSource {
 
 		// Reconstruct the raw HTTP template content
 		StringBuilder content = new StringBuilder();
+		boolean isFirstSection = true;
 		for (HttpTemplateSection section : sections) {
 
 			// Obtain the template section name
 			String sectionName = getHttpTemplateSectionName(section
 					.getSectionName());
 
-			// Add the section tag
-			content.append("<!-- {" + sectionName + "} -->");
+			// Add the section tag (only if not first default section)
+			if (!((isFirstSection) && (HttpTemplateParserImpl.DEFAULT_FIRST_SECTION_NAME
+					.equals(sectionName)))) {
+				// Include section as not first default section
+				content.append("<!-- {" + sectionName + "} -->");
+			}
+			isFirstSection = false; // no longer first
 
 			// Add the section content
 			content.append(section.getRawSectionContent());
@@ -307,6 +312,37 @@ public class HttpTemplateSectionSource extends ClassSectionSource {
 	private static String createTaskKey(String taskName) {
 		// Provide name in upper case to avoid case sensitivity
 		return taskName.toUpperCase();
+	}
+
+	/**
+	 * Obtains the {@link HttpTemplate}.
+	 * 
+	 * @param templateLocation
+	 *            {@link HttpTemplate} location.
+	 * @param context
+	 *            {@link SourceContext}.
+	 * @return {@link HttpTemplate}.
+	 * @throws IOException
+	 *             If fails to obtain the {@link HttpTemplate}.
+	 */
+	private static HttpTemplate getHttpTemplate(String templateLocation,
+			SourceContext context) throws IOException {
+
+		// Create the context to source the HTTP template
+		SourcePropertiesImpl templateProperties = new SourcePropertiesImpl(
+				context);
+		templateProperties
+				.addProperty(HttpTemplateWorkSource.PROPERTY_TEMPLATE_FILE,
+						templateLocation);
+		SourceContext templateContext = new SourceContextImpl(
+				context.isLoadingType(), context, templateProperties);
+
+		// Obtain the HTTP template
+		HttpTemplate template = HttpTemplateWorkSource
+				.getHttpTemplate(templateContext);
+
+		// Return the HTTP template
+		return template;
 	}
 
 	/**
@@ -380,21 +416,40 @@ public class HttpTemplateSectionSource extends ClassSectionSource {
 
 		// Obtain the HTTP template content
 		String templateLocation = context.getSectionLocation();
-		SourcePropertiesImpl templateProperties = new SourcePropertiesImpl(
-				context);
-		templateProperties
-				.addProperty(HttpTemplateWorkSource.PROPERTY_TEMPLATE_FILE,
-						templateLocation);
-		SourceContext templateContext = new SourceContextImpl(
-				context.isLoadingType(), context, templateProperties);
-		Reader templateContentReader = HttpTemplateWorkSource
-				.getHttpTemplateContent(templateContext);
-		StringBuilder templateContentBuffer = new StringBuilder();
-		for (int character = templateContentReader.read(); character != -1; character = templateContentReader
-				.read()) {
-			templateContentBuffer.append((char) character);
+
+		// Calculate inheritance hierarchy of templates
+		String[] templateInheritanceHierarchy = new String[] { templateLocation };
+		String inheritedTemplatesValue = context.getProperty(
+				PROPERTY_INHERITED_TEMPLATES, null);
+		if (inheritedTemplatesValue != null) {
+			// Create the inheritance hierarchy for the template
+			String[] inheritedTemplates = inheritedTemplatesValue.split(",");
+			templateInheritanceHierarchy = new String[inheritedTemplates.length + 1];
+			for (int i = 0; i < inheritedTemplates.length; i++) {
+				templateInheritanceHierarchy[i] = inheritedTemplates[i].trim();
+			}
+			templateInheritanceHierarchy[inheritedTemplates.length] = templateLocation;
 		}
-		String templateContent = templateContentBuffer.toString();
+
+		// Undertake inheritance of the template (first does not inherit)
+		HttpTemplateSection[] sections = getHttpTemplate(
+				templateInheritanceHierarchy[0], context).getSections();
+		sections = filterCommentHttpTemplateSections(sections);
+		for (int i = 1; i < templateInheritanceHierarchy.length; i++) {
+
+			// Obtain the child sections
+			HttpTemplate childTemplate = getHttpTemplate(
+					templateInheritanceHierarchy[i], context);
+			HttpTemplateSection[] childSections = filterCommentHttpTemplateSections(childTemplate
+					.getSections());
+
+			// Obtain the sections from child inheritance
+			sections = inheritHttpTemplateSections(sections, childSections,
+					designer);
+		}
+
+		// Reconstruct the resulting inherited template content for use
+		String templateContent = reconstructHttpTemplateContent(sections);
 
 		// Obtain the template URI path
 		String templateUriPath = context.getProperty(PROPERTY_TEMPLATE_URI);
