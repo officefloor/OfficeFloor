@@ -71,7 +71,7 @@ import org.junit.Ignore;
  * 
  * @author Daniel Sagenschneider
  */
-@Ignore("Provide functionality to pass inheritance tests")
+@Ignore("Provide ClassWorkSource inheritance for grand child inheritance test to pass")
 public class HttpTemplateSectionIntegrationTest extends OfficeFrameTestCase {
 
 	/**
@@ -671,7 +671,7 @@ public class HttpTemplateSectionIntegrationTest extends OfficeFrameTestCase {
 
 		// Ensure can inherit sections
 		this.assertHttpRequest("/uri", false,
-				"Parent VALUE Introduced Two Footer");
+				"Parent VALUE Introduced Two Footer /uri-doExternalFlow");
 	}
 
 	/**
@@ -705,7 +705,7 @@ public class HttpTemplateSectionIntegrationTest extends OfficeFrameTestCase {
 
 		// Ensure can inherit sections
 		this.assertHttpRequest("/uri", false,
-				"Grand Child TEXT Override Different order Footer");
+				"Grand Child TEXT Override Different order Footer /uri-doExternalFlow");
 	}
 
 	/**
