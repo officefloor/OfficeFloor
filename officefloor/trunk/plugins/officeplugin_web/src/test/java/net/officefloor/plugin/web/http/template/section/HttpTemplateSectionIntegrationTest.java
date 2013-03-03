@@ -64,14 +64,12 @@ import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.params.BasicHttpParams;
 import org.apache.http.params.HttpParams;
-import org.junit.Ignore;
 
 /**
  * Tests the integration of the {@link HttpTemplateSectionSource}.
  * 
  * @author Daniel Sagenschneider
  */
-@Ignore("Provide ClassWorkSource inheritance for grand child inheritance test to pass")
 public class HttpTemplateSectionIntegrationTest extends OfficeFrameTestCase {
 
 	/**

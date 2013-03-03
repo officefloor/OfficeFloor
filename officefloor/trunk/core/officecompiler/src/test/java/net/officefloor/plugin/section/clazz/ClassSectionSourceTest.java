@@ -144,6 +144,44 @@ public class ClassSectionSourceTest extends OfficeFrameTestCase {
 	}
 
 	/**
+	 * Ensure inherit methods by name.
+	 */
+	public void testInheritTaskMethods() {
+
+		// Ensure inheritance
+		assertTrue("Invalid test if not extending",
+				(new MockChildSection()) instanceof MockParentSection);
+
+		// Create the expected section
+		SectionDesigner expected = this.createSectionDesigner(
+				MockChildSection.class, "task");
+		this.expectedTasks.get("task").getTaskObject(Integer.class.getName())
+				.flagAsParameter();
+		expected.addSectionInput("task", Integer.class.getName());
+
+		// Validate section
+		SectionLoaderUtil.validateSection(expected, ClassSectionSource.class,
+				MockChildSection.class.getName());
+	}
+
+	/**
+	 * Parent section.
+	 */
+	public static class MockParentSection {
+		public String task(@Parameter String parameter) {
+			return parameter;
+		}
+	}
+
+	/**
+	 * Child section.
+	 */
+	public static class MockChildSection extends MockParentSection {
+		public void task(@Parameter Integer parameter) {
+		}
+	}
+
+	/**
 	 * Ensure and provide {@link SectionOutput}.
 	 */
 	public void testOutput() {
