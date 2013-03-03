@@ -9,6 +9,7 @@
 				<attribute method="getWoofTemplateName" attribute="name" />
 				<attribute method="getUri" attribute="uri" />
 				<attribute method="getTemplatePath" attribute="path" />
+				<attribute method="getSuperTemplate" attribute="extends" />
 				<attribute method="getTemplateClassName" attribute="class" />
 				<attribute method="getIsTemplateSecure" attribute="secure" />
 				<attribute method="getIsContinueRendering" attribute="continue-rendering" />
@@ -43,6 +44,7 @@
 							<attribute method="getResourceName" attribute="name" />
 						</attributes>
 					</object>
+					<object method="getInheritTemplateOutput" element="inherit" />
 				</item>
 			</collection>
 			<collection method="getLinks">

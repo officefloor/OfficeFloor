@@ -3,6 +3,7 @@
 	<field type="String" name="woof template name" />
 	<field type="String" name="uri" />
 	<field type="String" name="template path" />
+	<field type="String" name="super template" />
 	<field type="String" name="template class name" />
 	<field type="boolean" name="is template secure" />
 	<field type="boolean" name="is continue rendering" />
