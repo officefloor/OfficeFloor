@@ -93,6 +93,12 @@ public class HttpTemplateSectionSource extends ClassSectionSource {
 	public static final String PROPERTY_CLASS_NAME = ClassManagedObjectSource.CLASS_NAME_PROPERTY_NAME;
 
 	/**
+	 * Property name for the comma separated list of inherited templates. The
+	 * order of templates listed is the order of inheritance.
+	 */
+	public static final String PROPERTY_INHERITED_TEMPLATES = "inherited.templates";
+
+	/**
 	 * Prefix on a {@link HttpTemplateSection} name to indicate it is an
 	 * override section.
 	 */
