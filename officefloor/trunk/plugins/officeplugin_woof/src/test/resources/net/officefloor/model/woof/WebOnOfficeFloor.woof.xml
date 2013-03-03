@@ -2,8 +2,8 @@
 
 	<templates>
 		<template name="TEMPLATE_A" uri="example" path="example/TemplateA.ofp"
-			class="net.example.ExampleClassA" secure="true" continue-rendering="true"
-			x="300" y="301">
+			extends="TEMPLATE_B" class="net.example.ExampleClassA" secure="true"
+			continue-rendering="true" x="300" y="301">
 			<output name="OUTPUT_1" argument-type="java.lang.Integer">
 				<input section="SECTION_A" input="INPUT_A" />
 			</output>
@@ -16,7 +16,10 @@
 			<output name="OUTPUT_4">
 				<access input="Authenticate" />
 			</output>
-			<output name="OUTPUT_5" />
+			<output name="OUTPUT_5">
+				<inherit />
+			</output>
+			<output name="OUTPUT_6" />
 			<link name="LINK_1" secure="true" />
 			<link name="LINK_2" secure="false" />
 			<redirect method="REDIRECT_POST" />
@@ -28,7 +31,7 @@
 			<extension class="net.example.Extension" />
 		</template>
 		<template name="TEMPLATE_B" uri="another" path="example/TemplateB.ofp"
-			class="net.example.ExampleClassB" x="302" y="303" />
+			x="302" y="303" />
 	</templates>
 
 	<sections>

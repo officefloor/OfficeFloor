@@ -1,7 +1,7 @@
 /*
- * 
+ * License
  */
-package graph.test;
+package net.officefloor;
 
 import javax.annotation.Generated;
 
@@ -10,22 +10,22 @@ import net.officefloor.model.ItemModel;
 import net.officefloor.model.RemoveConnectionsAction;
 
 @Generated("net.officefloor.model.generate.ModelGenerator")
-public class CascadeModel extends AbstractModel implements ItemModel<CascadeModel> {
+public class EmptyModel extends AbstractModel implements ItemModel<EmptyModel> {
 
-    public static enum CascadeEvent {
+    public static enum EmptyEvent {
     
     }
 
     /**
      * Default constructor.
      */
-    public CascadeModel() {
+    public EmptyModel() {
     }
 
     /**
      * Convenience constructor allowing XY initialising.
      */
-    public CascadeModel(
+    public EmptyModel(
       int x
     , int y
     ) {
@@ -38,8 +38,8 @@ public class CascadeModel extends AbstractModel implements ItemModel<CascadeMode
     /**
      * Remove Connections.
      */
-    public RemoveConnectionsAction<CascadeModel> removeConnections() {
-        RemoveConnectionsAction<CascadeModel> _action = new RemoveConnectionsAction<CascadeModel>(this);
+    public RemoveConnectionsAction<EmptyModel> removeConnections() {
+        RemoveConnectionsAction<EmptyModel> _action = new RemoveConnectionsAction<EmptyModel>(this);
         return _action;
     }
 }

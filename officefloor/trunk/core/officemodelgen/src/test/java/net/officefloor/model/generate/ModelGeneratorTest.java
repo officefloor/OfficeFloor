@@ -77,6 +77,39 @@ public class ModelGeneratorTest extends OfficeFrameTestCase {
 	}
 
 	/**
+	 * Ensures can create empty model (no fields or lists).
+	 */
+	public void testEmptyModelGeneration() throws Exception {
+
+		// Create the generic model
+		GraphNodeMetaData general = new GraphNodeMetaData("License", null);
+
+		// Create the model meta-data
+		ModelMetaData metaData = new ModelMetaData("Empty", "net.officefloor",
+				"", new String[0], new String[0], new FieldMetaData[0],
+				new ListMetaData[0]);
+
+		// Validate conversions
+		assertEquals("Incorrect class", "EmptyModel", metaData.getClassName());
+		assertEquals("Incorrect events", "EmptyEvent", metaData.getEventName());
+
+		// Generate the model
+		MockModelContext context = new MockModelContext();
+		ModelGenerator generator = new ModelGenerator(metaData, general);
+		ModelFile modelFile = generator.generateModel(context);
+
+		// Validate file name
+		assertEquals("Incorrect file name", "net/officefloor/EmptyModel.java",
+				modelFile.getLocation());
+
+		// Validate content
+		String content = this.getFileContents(this.findFile(this.getClass(),
+				"Model_EmptyModelExpectedContent.txt"));
+		assertContents(new StringReader(content), new StringReader(
+				context.modelText));
+	}
+
+	/**
 	 * Ensures creates the connection.
 	 */
 	public void testConnectionGeneration() throws Exception {

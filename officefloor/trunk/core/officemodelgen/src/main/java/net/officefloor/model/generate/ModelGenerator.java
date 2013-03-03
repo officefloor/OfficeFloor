@@ -98,6 +98,14 @@ public class ModelGenerator {
 	}
 
 	/**
+	 * Indicates if object has fields or list state.
+	 */
+	private boolean isStateForObject() {
+		return (this.metaData.getFields().size() > 0)
+				|| (this.metaData.getLists().size() > 0);
+	}
+
+	/**
 	 * Header.
 	 */
 	private void header() throws Exception {
@@ -173,8 +181,11 @@ public class ModelGenerator {
 		if (this.nonLinkedConstructor()) {
 			writeLine();
 		}
-		this.convenienceConstructor();
-		writeLine();
+		if (this.isStateForObject()) {
+			// Have state so provide convenience
+			this.convenienceConstructor();
+			writeLine();
+		}
 		this.convenienceXyConstructor();
 		writeLine();
 		this.fields();
@@ -380,7 +391,9 @@ public class ModelGenerator {
 		writeLine("    public " + this.metaData.getClassName() + "(");
 
 		// Parameters
-		write("      ");
+		if (this.isStateForObject()) {
+			write("      ");
+		}
 		writeListing("    , ", new WriteAction() {
 			protected void writeField(FieldMetaData field) {
 				writeLine(field.getType() + " " + field.getPropertyName());
@@ -392,7 +405,11 @@ public class ModelGenerator {
 		}, this.metaData.getFields(), this.metaData.getLists());
 
 		// X/Y parameters
-		writeLine("    , int x");
+		if (this.isStateForObject()) {
+			writeLine("    , int x");
+		} else {
+			writeLine("      int x");
+		}
 		writeLine("    , int y");
 
 		writeLine("    ) {");
