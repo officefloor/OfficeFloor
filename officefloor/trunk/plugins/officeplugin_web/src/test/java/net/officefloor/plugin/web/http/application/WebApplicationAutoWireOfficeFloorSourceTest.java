@@ -701,6 +701,36 @@ public class WebApplicationAutoWireOfficeFloorSourceTest extends
 	}
 
 	/**
+	 * Ensure can inherit link to {@link HttpTemplate}.
+	 */
+	public void testInheritLinkToHttpTemplate() throws Exception {
+
+		// Add the template
+		HttpTemplateAutoWireSection template = this.source.addHttpTemplate(
+				"template", this.getClassPath("template.ofp"),
+				MockTemplateLogic.class);
+
+		// Add parent linking to resource
+		AutoWireSection parent = this.source.addSection("PARENT",
+				ClassSectionSource.class.getName(),
+				MockLinkHttpTemplate.class.getName());
+		this.source.linkToHttpTemplate(parent, "http-template", template);
+
+		// Add child inheriting link configuration
+		AutoWireSection child = this.source.addSection("CHILD",
+				ClassSectionSource.class.getName(),
+				MockLinkHttpTemplate.class.getName());
+		this.source.linkUri("test", child, "service");
+		child.setSuperSection(parent);
+
+		// Open OfficeFloor
+		this.source.openOfficeFloor();
+
+		// Ensure link to the HTTP template
+		this.assertHttpRequest("/test", 200, "LINK to /template-submit");
+	}
+
+	/**
 	 * Provides mock functionality to link to a HTTP template.
 	 */
 	public static class MockLinkHttpTemplate {
@@ -729,17 +759,6 @@ public class WebApplicationAutoWireOfficeFloorSourceTest extends
 	}
 
 	/**
-	 * Provides mock functionality to link to a resource.
-	 */
-	public static class MockLinkResource {
-		@NextTask("resource")
-		public void service(ServerHttpConnection connection) throws IOException {
-			WebApplicationAutoWireOfficeFloorSourceTest.writeResponse(
-					"LINK to ", connection);
-		}
-	}
-
-	/**
 	 * Ensure can inherit link to resource.
 	 */
 	public void testInheritLinkToResource() throws Exception {
@@ -762,6 +781,17 @@ public class WebApplicationAutoWireOfficeFloorSourceTest extends
 
 		// Ensure provide the resource
 		this.assertHttpRequest("/test", 200, "RESOURCE");
+	}
+
+	/**
+	 * Provides mock functionality to link to a resource.
+	 */
+	public static class MockLinkResource {
+		@NextTask("resource")
+		public void service(ServerHttpConnection connection) throws IOException {
+			WebApplicationAutoWireOfficeFloorSourceTest.writeResponse(
+					"LINK to ", connection);
+		}
 	}
 
 	/**
