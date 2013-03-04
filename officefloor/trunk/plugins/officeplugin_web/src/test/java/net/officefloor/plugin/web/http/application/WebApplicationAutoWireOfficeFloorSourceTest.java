@@ -181,24 +181,23 @@ public class WebApplicationAutoWireOfficeFloorSourceTest extends
 	}
 
 	/**
-	 * Ensure able to add HTTP template that is available via URI.
+	 * Ensure able to add HTTP template.
 	 */
-	public void testTemplateWithUri() throws Exception {
-		this.doTemplateWithNoLogicClassTest(false);
+	public void testTemplate() throws Exception {
+		this.doTemplateTest(false);
 	}
 
 	/**
-	 * Ensure able to add secure HTTP template that is available via URI.
+	 * Ensure able to add secure HTTP template.
 	 */
-	public void testSecureTemplateWithUri() throws Exception {
-		this.doTemplateWithNoLogicClassTest(true);
+	public void testSecureTemplate() throws Exception {
+		this.doTemplateTest(true);
 	}
 
 	/**
-	 * Undertakes test to ensure able to add HTTP template that is available via
-	 * URI.
+	 * Undertakes test to ensure able to add HTTP template.
 	 */
-	public void doTemplateWithUriTest(boolean isSecure) throws Exception {
+	private void doTemplateTest(boolean isSecure) throws Exception {
 
 		final String SUBMIT_URI = "/uri-submit";
 
@@ -219,7 +218,7 @@ public class WebApplicationAutoWireOfficeFloorSourceTest extends
 				this.getClassPath("template.ofp"), templatePath);
 		assertEquals("Incorrect template path", templatePath,
 				section.getTemplatePath());
-		assertEquals("Incorrect template URI", "uri", section.getTemplateUri());
+		assertEquals("Incorrect template URI", "/uri", section.getTemplateUri());
 
 		// Ensure template available
 		this.assertHttpRequest("/uri", isSecure, 200, SUBMIT_URI);
@@ -421,22 +420,22 @@ public class WebApplicationAutoWireOfficeFloorSourceTest extends
 	/**
 	 * Ensure able to request the template link on public template.
 	 */
-	public void testTemplateLinkWithUri() throws Exception {
-		this.doTemplateLinkWithUriTest(false);
+	public void testTemplateLink() throws Exception {
+		this.doTemplateLinkTest(false);
 	}
 
 	/**
 	 * Ensure able to request the secure template link on public template.
 	 */
-	public void testSecureTemplateLinkWithUri() throws Exception {
-		this.doTemplateLinkWithUriTest(true);
+	public void testSecureTemplateLink() throws Exception {
+		this.doTemplateLinkTest(true);
 	}
 
 	/**
 	 * Undertakes test to ensure able to request the template link on public
 	 * template.
 	 */
-	public void doTemplateLinkWithUriTest(boolean isSecure) throws Exception {
+	public void doTemplateLinkTest(boolean isSecure) throws Exception {
 
 		final String SUBMIT_URI = "/uri-submit";
 
@@ -738,6 +737,31 @@ public class WebApplicationAutoWireOfficeFloorSourceTest extends
 			WebApplicationAutoWireOfficeFloorSourceTest.writeResponse(
 					"LINK to ", connection);
 		}
+	}
+
+	/**
+	 * Ensure can inherit link to resource.
+	 */
+	public void testInheritLinkToResource() throws Exception {
+
+		// Add parent linking to resource
+		AutoWireSection parent = this.source.addSection("PARENT",
+				ClassSectionSource.class.getName(),
+				MockLinkResource.class.getName());
+		this.source.linkToResource(parent, "resource", "resource.html");
+
+		// Add child inheriting link configuration
+		AutoWireSection child = this.source.addSection("CHILD",
+				ClassSectionSource.class.getName(),
+				MockLinkResource.class.getName());
+		this.source.linkUri("test", child, "service");
+		child.setSuperSection(parent);
+
+		// Open OfficeFloor
+		this.source.openOfficeFloor();
+
+		// Ensure provide the resource
+		this.assertHttpRequest("/test", 200, "RESOURCE");
 	}
 
 	/**
@@ -1477,7 +1501,6 @@ public class WebApplicationAutoWireOfficeFloorSourceTest extends
 			ServerHttpConnection connection) throws IOException {
 		Writer writer = connection.getHttpResponse().getEntityWriter();
 		writer.append(response);
-		writer.flush();
 	}
 
 }
