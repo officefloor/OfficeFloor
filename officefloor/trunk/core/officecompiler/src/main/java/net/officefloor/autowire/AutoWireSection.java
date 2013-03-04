@@ -50,4 +50,19 @@ public interface AutoWireSection extends AutoWireProperties {
 	 */
 	String getSectionLocation();
 
+	/**
+	 * Specifies the {@link AutoWireSection} to inherit the link configuration.
+	 * 
+	 * @param section
+	 *            {@link AutoWireSection} to inherit link configuration.
+	 */
+	void setSuperSection(AutoWireSection section);
+
+	/**
+	 * Obtains the super {@link AutoWireSection}.
+	 * 
+	 * @return Super {@link AutoWireSection}.
+	 */
+	AutoWireSection getSuperSection();
+
 }
