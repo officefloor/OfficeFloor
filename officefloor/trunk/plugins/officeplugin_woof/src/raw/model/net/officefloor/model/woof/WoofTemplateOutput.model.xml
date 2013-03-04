@@ -6,5 +6,4 @@
 	<field type="WoofTemplateOutputToWoofTemplateModel" name="woof template" />
 	<field type="WoofTemplateOutputToWoofAccessInputModel" name="woof access input" />
 	<field type="WoofTemplateOutputToWoofResourceModel" name="woof resource" />
-	<field type="InheritTemplateOutputModel" name="inherit template output" />
 </model>

@@ -31,6 +31,7 @@ import net.officefloor.model.impl.repository.classloader.ClassLoaderConfiguratio
 import net.officefloor.model.repository.ConfigurationContext;
 import net.officefloor.model.repository.ConfigurationItem;
 import net.officefloor.model.woof.WoofRepositoryImpl;
+import net.officefloor.model.woof.WoofTemplateModel;
 import net.officefloor.plugin.comet.CometPublisher;
 import net.officefloor.plugin.comet.section.CometSectionSource;
 import net.officefloor.plugin.comet.spi.CometRequestServicer;
@@ -202,6 +203,107 @@ public class WoofLoaderTest extends OfficeFrameTestCase {
 		this.replayMockObjects();
 		this.loader.loadWoofConfiguration(
 				this.getConfiguration("application.woof"), this.app);
+		this.verifyMockObjects();
+	}
+
+	/**
+	 * Ensure can load inheritance of {@link WoofTemplateModel} configuration.
+	 */
+	public void testInheritance() throws Exception {
+
+		final HttpTemplateAutoWireSection parentTemplate = this
+				.createMock(HttpTemplateAutoWireSection.class);
+		final HttpTemplateAutoWireSection childTemplate = this
+				.createMock(HttpTemplateAutoWireSection.class);
+		final HttpTemplateAutoWireSection grandChildTemplate = this
+				.createMock(HttpTemplateAutoWireSection.class);
+		final HttpTemplateAutoWireSection templateOne = this
+				.createMock(HttpTemplateAutoWireSection.class);
+		final HttpTemplateAutoWireSection templateTwo = this
+				.createMock(HttpTemplateAutoWireSection.class);
+		final HttpTemplateAutoWireSection templateThree = this
+				.createMock(HttpTemplateAutoWireSection.class);
+		final AutoWireSection section = this.createMock(AutoWireSection.class);
+		final HttpSecurityAutoWireSection security = this
+				.createMock(HttpSecurityAutoWireSection.class);
+
+		// Record obtaining compiler
+		this.recordReturn(this.app, this.app.getOfficeFloorCompiler(),
+				this.compiler);
+
+		// Record loading parent template
+		this.recordReturn(this.app,
+				this.app.addHttpTemplate("parent", "WOOF/Parent.ofp", null),
+				parentTemplate);
+		parentTemplate.setTemplateSecure(false);
+		parentTemplate.setLinkSecure("LINK_SECURE", true);
+		parentTemplate.setLinkSecure("LINK_NON_SECURE", false);
+
+		// Record loading child template (inheriting configuration)
+		this.recordReturn(this.app,
+				this.app.addHttpTemplate("child", "WOOF/Child.ofp", null),
+				childTemplate);
+		childTemplate.setTemplateSecure(false);
+		childTemplate.setLinkSecure("LINK_OTHER", true);
+
+		// Record loading grand child template (overriding configuration)
+		this.recordReturn(this.app, this.app.addHttpTemplate("grandchild",
+				"WOOF/GrandChild.ofp", null), grandChildTemplate);
+		grandChildTemplate.setTemplateSecure(false);
+		grandChildTemplate.setLinkSecure("LINK_SECURE", false);
+		grandChildTemplate.setLinkSecure("LINK_NON_SECURE", true);
+
+		// Record loading remaining templates
+		this.recordReturn(this.app,
+				this.app.addHttpTemplate("one", "WOOF/TemplateOne.ofp", null),
+				templateOne);
+		templateOne.setTemplateSecure(false);
+		this.recordReturn(this.app,
+				this.app.addHttpTemplate("two", "WOOF/TemplateTwo.ofp", null),
+				templateTwo);
+		templateTwo.setTemplateSecure(false);
+		this.recordReturn(
+				this.app,
+				this.app.addHttpTemplate("three", "WOOF/TemplateThree.ofp", null),
+				templateThree);
+		templateThree.setTemplateSecure(false);
+
+		// Record loading sections
+		this.recordReturn(this.app, this.app.addSection("SECTION", "CLASS",
+				"net.officefloor.ExampleSection"), section);
+
+		// Record loading access
+		this.recordReturn(this.app,
+				this.app.setHttpSecurity(MockHttpSecuritySource.class),
+				security);
+		security.setSecurityTimeout(2000);
+
+		// Record linking parent template outputs
+		this.app.link(parentTemplate, "OUTPUT_SECTION", section, "INPUT_1");
+		this.app.linkToHttpTemplate(parentTemplate, "OUTPUT_TEMPLATE",
+				templateOne);
+		this.app.link(parentTemplate, "OUTPUT_ACCESS", security,
+				"AUTHENTICATE_1");
+		this.app.linkToResource(parentTemplate, "OUTPUT_RESOURCE",
+				"ResourceOne.html");
+
+		// Child template inherits link configuration
+
+		// Record linking grand child template outputs (overriding)
+		this.app.link(grandChildTemplate, "OUTPUT_SECTION", section, "INPUT_2");
+		this.app.linkToHttpTemplate(grandChildTemplate, "OUTPUT_TEMPLATE",
+				templateTwo);
+		this.app.link(grandChildTemplate, "OUTPUT_ACCESS", security,
+				"AUTHENTICATE_2");
+		this.app.linkToResource(grandChildTemplate, "OUTPUT_RESOURCE",
+				"ResourceTwo.html");
+		this.app.linkToHttpTemplate(grandChildTemplate, "OUTPUT_ANOTHER",
+				templateThree);
+
+		// Test
+		this.replayMockObjects();
+		this.loader.loadWoofConfiguration(
+				this.getConfiguration("inheritance.woof"), this.app);
 		this.verifyMockObjects();
 	}
 

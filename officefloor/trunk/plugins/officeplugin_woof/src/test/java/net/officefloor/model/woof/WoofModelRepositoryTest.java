@@ -78,8 +78,7 @@ public class WoofModelRepositoryTest extends OfficeFrameTestCase {
 				new WoofTemplateOutputModel("OUTPUT_2", null),
 				new WoofTemplateOutputModel("OUTPUT_3", null),
 				new WoofTemplateOutputModel("OUTPUT_4", null),
-				new WoofTemplateOutputModel("OUTPUT_5", null),
-				new WoofTemplateOutputModel("OUTPUT_6", null));
+				new WoofTemplateOutputModel("OUTPUT_5", null));
 		WoofTemplateOutputModel output1 = template.getOutputs().get(0);
 		assertProperties(new WoofTemplateOutputToWoofSectionInputModel(
 				"SECTION_A", "INPUT_A"), output1.getWoofSectionInput(),
@@ -94,9 +93,6 @@ public class WoofModelRepositoryTest extends OfficeFrameTestCase {
 		WoofTemplateOutputModel output4 = template.getOutputs().get(3);
 		assertProperties(new WoofTemplateOutputToWoofAccessInputModel(
 				"Authenticate"), output4.getWoofAccessInput(), "getInputName");
-		WoofTemplateOutputModel output5 = template.getOutputs().get(4);
-		assertNotNull("Template output should be inherited",
-				output5.getInheritTemplateOutput());
 
 		// Validate links
 		assertList(
