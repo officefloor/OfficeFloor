@@ -33,6 +33,7 @@ import net.officefloor.autowire.AutoWireSectionTransformer;
 import net.officefloor.autowire.AutoWireSectionTransformerContext;
 import net.officefloor.compile.OfficeFloorCompiler;
 import net.officefloor.compile.governance.GovernanceType;
+import net.officefloor.compile.impl.util.DoubleKeyMap;
 import net.officefloor.compile.properties.Property;
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.spi.governance.source.GovernanceSource;
@@ -445,7 +446,6 @@ public class AutoWireOfficeSource extends AbstractOfficeSource {
 		List<OfficeSection> officeSections = new LinkedList<OfficeSection>();
 		Map<String, OfficeSection> officeSectionsByName = new HashMap<String, OfficeSection>();
 		Map<String, Map<String, OfficeSectionInput>> inputs = new HashMap<String, Map<String, OfficeSectionInput>>();
-		Map<String, Map<String, OfficeSectionOutput>> outputs = new HashMap<String, Map<String, OfficeSectionOutput>>();
 		Map<AutoWire, OfficeObject> objects = new HashMap<AutoWire, OfficeObject>();
 		for (AutoWireSection section : this.sections) {
 
@@ -534,15 +534,6 @@ public class AutoWireOfficeSource extends AbstractOfficeSource {
 				sectionInputs.put(inputName, input);
 			}
 
-			// Register the outputs
-			Map<String, OfficeSectionOutput> sectionOutputs = new HashMap<String, OfficeSectionOutput>();
-			outputs.put(sectionName, sectionOutputs);
-			for (OfficeSectionOutput output : officeSection
-					.getOfficeSectionOutputs()) {
-				String outputName = output.getOfficeSectionOutputName();
-				sectionOutputs.put(outputName, output);
-			}
-
 			// Link section tasks to team.
 			// Must be after objects to ensure linked.
 			for (OfficeTask task : officeSection.getOfficeTasks()) {
@@ -557,47 +548,97 @@ public class AutoWireOfficeSource extends AbstractOfficeSource {
 			}
 		}
 
-		// Link outputs to inputs
+		// Create the listing of links by section/output
+		DoubleKeyMap<String, String, Link> keyedLinks = new DoubleKeyMap<String, String, Link>();
+		for (Link link : this.links) {
+			keyedLinks.put(link.sourceSection.getSectionName(),
+					link.sourceOutputName, link);
+		}
+
+		// Link outputs to inputs (keeping track of used links)
+		Set<Link> usedLinks = new HashSet<Link>();
+		for (AutoWireSection section : this.sections) {
+
+			// Obtain the office section
+			String sectionName = section.getSectionName();
+			OfficeSection officeSection = officeSectionsByName.get(sectionName);
+
+			// Link the outputs
+			NEXT_OUTPUT: for (OfficeSectionOutput output : officeSection
+					.getOfficeSectionOutputs()) {
+				String outputName = output.getOfficeSectionOutputName();
+
+				// Obtain the output name (for issues)
+				String logOutputName = sectionName + ":" + outputName;
+
+				// Search inheritance hierarchy for link
+				AutoWireSection searchSection = section;
+				Link link = null;
+				do {
+					// Obtain link configuration from current section
+					link = keyedLinks.get(searchSection.getSectionName(),
+							outputName);
+
+					// Use super section in next iteration if no link
+					searchSection = searchSection.getSuperSection();
+
+				} while ((link == null) && (searchSection != null));
+				if (link == null) {
+					
+					// No link, issue only if not escalation only
+					if (output.isEscalationOnly()) {
+						continue NEXT_OUTPUT;
+					}
+					
+					// Issue as require link configuration
+					architect.addIssue("Section output '" + logOutputName
+							+ "' is not linked", AssetType.TASK, logOutputName);
+					continue NEXT_OUTPUT;
+				}
+
+				// Obtain the link details
+				String targetSectionName = link.targetSection.getSectionName();
+				String targetInputName = link.targetInputName;
+				String logInputName = targetSectionName + ":" + targetInputName;
+
+				// Indicate link used
+				usedLinks.add(link);
+
+				// Obtain the input
+				OfficeSectionInput sectionInput = null;
+				Map<String, OfficeSectionInput> sectionInputs = inputs
+						.get(targetSectionName);
+				if (sectionInputs != null) {
+					sectionInput = sectionInputs.get(targetInputName);
+				}
+				if (sectionInput == null) {
+					architect.addIssue("Unknown section input '" + logInputName
+							+ "' for linking section output '" + logOutputName
+							+ "'", AssetType.TASK, logInputName);
+					continue; // no input so can not link
+				}
+
+				// Link the output to the input
+				architect.link(output, sectionInput);
+			}
+		}
+
+		// Check for unknown output link configuration
 		for (Link link : this.links) {
 
-			// Obtain the link details
-			String sourceSectionName = link.sourceSection.getSectionName();
-			String sourceOutputName = link.sourceOutputName;
-			String outputName = sourceSectionName + ":" + sourceOutputName;
-			String targetSectionName = link.targetSection.getSectionName();
-			String targetInputName = link.targetInputName;
-			String inputName = targetSectionName + ":" + targetInputName;
-
-			// Obtain the output
-			OfficeSectionOutput sectionOutput = null;
-			Map<String, OfficeSectionOutput> sectionOutputs = outputs
-					.get(sourceSectionName);
-			if (sectionOutputs != null) {
-				sectionOutput = sectionOutputs.get(sourceOutputName);
-			}
-			if (sectionOutput == null) {
-				architect.addIssue("Unknown section output '" + outputName
-						+ "' to link to section input '" + inputName + "'",
-						AssetType.TASK, outputName);
-				continue; // no output so can not link
+			// Ignore if link is used
+			if (usedLinks.contains(link)) {
+				continue;
 			}
 
-			// Obtain the input
-			OfficeSectionInput sectionInput = null;
-			Map<String, OfficeSectionInput> sectionInputs = inputs
-					.get(targetSectionName);
-			if (sectionInputs != null) {
-				sectionInput = sectionInputs.get(targetInputName);
-			}
-			if (sectionInput == null) {
-				architect.addIssue("Unknown section input '" + inputName
-						+ "' for linking section output '" + outputName + "'",
-						AssetType.TASK, inputName);
-				continue; // no input so can not link
-			}
-
-			// Link the output to the input
-			architect.link(sectionOutput, sectionInput);
+			// Link is not used (so must be unknown output)
+			String logOutputName = link.sourceSection.getSectionName() + ":"
+					+ link.sourceOutputName;
+			String logInputName = link.targetSection.getSectionName() + ":"
+					+ link.targetInputName;
+			architect.addIssue("Unknown section output '" + logOutputName
+					+ "' to link to section input '" + logInputName + "'",
+					AssetType.TASK, logOutputName);
 		}
 
 		// Only configure if have escalations

@@ -291,6 +291,14 @@ public class WoofLoaderImpl implements WoofLoader {
 			String templateName = templateModel.getWoofTemplateName();
 			HttpTemplateAutoWireSection template = templates.get(templateName);
 
+			// Provide link configuration inheritance
+			String superTemplateName = templateModel.getSuperTemplate();
+			if (superTemplateName != null) {
+				HttpTemplateAutoWireSection superTemplate = templates
+						.get(superTemplateName);
+				template.setSuperSection(superTemplate);
+			}
+
 			// Link outputs for the template
 			for (WoofTemplateOutputModel outputModel : templateModel
 					.getOutputs()) {

@@ -46,6 +46,11 @@ public class AutoWireSectionImpl extends AutoWirePropertiesImpl implements
 	private final String location;
 
 	/**
+	 * Super {@link AutoWireSection}.
+	 */
+	private AutoWireSection superSection = null;
+
+	/**
 	 * Initiate.
 	 * 
 	 * @param compiler
@@ -100,6 +105,16 @@ public class AutoWireSectionImpl extends AutoWirePropertiesImpl implements
 	@Override
 	public String getSectionLocation() {
 		return this.location;
+	}
+
+	@Override
+	public void setSuperSection(AutoWireSection section) {
+		this.superSection = section;
+	}
+
+	@Override
+	public AutoWireSection getSuperSection() {
+		return this.superSection;
 	}
 
 }

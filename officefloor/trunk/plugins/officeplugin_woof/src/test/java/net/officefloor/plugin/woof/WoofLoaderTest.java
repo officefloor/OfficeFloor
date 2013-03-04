@@ -262,10 +262,8 @@ public class WoofLoaderTest extends OfficeFrameTestCase {
 				this.app.addHttpTemplate("two", "WOOF/TemplateTwo.ofp", null),
 				templateTwo);
 		templateTwo.setTemplateSecure(false);
-		this.recordReturn(
-				this.app,
-				this.app.addHttpTemplate("three", "WOOF/TemplateThree.ofp", null),
-				templateThree);
+		this.recordReturn(this.app, this.app.addHttpTemplate("three",
+				"WOOF/TemplateThree.ofp", null), templateThree);
 		templateThree.setTemplateSecure(false);
 
 		// Record loading sections
@@ -288,8 +286,10 @@ public class WoofLoaderTest extends OfficeFrameTestCase {
 				"ResourceOne.html");
 
 		// Child template inherits link configuration
+		childTemplate.setSuperSection(parentTemplate);
 
 		// Record linking grand child template outputs (overriding)
+		grandChildTemplate.setSuperSection(childTemplate);
 		this.app.link(grandChildTemplate, "OUTPUT_SECTION", section, "INPUT_2");
 		this.app.linkToHttpTemplate(grandChildTemplate, "OUTPUT_TEMPLATE",
 				templateTwo);
