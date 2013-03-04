@@ -16,10 +16,7 @@
 			<output name="OUTPUT_4">
 				<access input="Authenticate" />
 			</output>
-			<output name="OUTPUT_5">
-				<inherit />
-			</output>
-			<output name="OUTPUT_6" />
+			<output name="OUTPUT_5" />
 			<link name="LINK_1" secure="true" />
 			<link name="LINK_2" secure="false" />
 			<redirect method="REDIRECT_POST" />

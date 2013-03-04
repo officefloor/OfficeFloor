@@ -34,8 +34,6 @@
 				class="net.officefloor.model.woof.WoofTemplateOutputToWoofResourceModel">
 				<value method="setResourceName" node="resource@name" />
 			</object>
-			<object method="setInheritTemplateOutput" node="inherit"
-				class="net.officefloor.model.woof.InheritTemplateOutputModel" />
 		</object>
 		<object method="addLink" node="link"
 			class="net.officefloor.model.woof.WoofTemplateLinkModel">

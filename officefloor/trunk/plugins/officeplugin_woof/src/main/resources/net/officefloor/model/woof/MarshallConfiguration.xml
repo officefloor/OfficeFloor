@@ -44,7 +44,6 @@
 							<attribute method="getResourceName" attribute="name" />
 						</attributes>
 					</object>
-					<object method="getInheritTemplateOutput" element="inherit" />
 				</item>
 			</collection>
 			<collection method="getLinks">
