@@ -680,10 +680,6 @@ public class WebApplicationAutoWireOfficeFloorSource extends
 
 			// Provide the template URI (and potential URL continuation)
 			String templateUri = httpTemplate.getTemplateUri();
-			if (templateUri == null) {
-				// Use section name and keep private (no URL continuation)
-				templateUri = httpTemplate.getSectionName();
-			}
 			httpTemplate.addProperty(
 					HttpTemplateSectionSource.PROPERTY_TEMPLATE_URI,
 					templateUri);
