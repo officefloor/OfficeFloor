@@ -453,6 +453,46 @@ public class AutoWireOfficeSourceTest extends OfficeFrameTestCase {
 	}
 
 	/**
+	 * Ensure issue if section has cyclic inheritance hierarchy.
+	 */
+	public void testCyclicSectionInheritanceHierarchy() throws Exception {
+
+		final String ONE = "One";
+		final String TWO = "Two";
+		final String OUTPUT = "output";
+
+		// Create and configure the source with cyclic inheritance
+		AutoWireOfficeSource source = new AutoWireOfficeSource();
+		AutoWireSection one = this.addSection(source, ONE);
+		AutoWireSection two = this.addSection(source, TWO);
+		one.setSuperSection(two);
+		two.setSuperSection(one);
+
+		// Record creating the section
+		this.recordOfficeSection(ONE);
+		this.recordSectionObjects(ONE);
+		this.recordSectionInputs(ONE);
+		this.recordSubSections(ONE);
+		this.recordOfficeSection(TWO);
+		this.recordSectionObjects(TWO);
+		this.recordSectionInputs(TWO);
+		this.recordSubSections(TWO);
+		this.recordSectionOutputs(ONE, OUTPUT);
+		this.recordSectionOutputs(TWO);
+		this.architect
+				.addIssue(
+						"Cyclic section inheritance hierarchy ( One : Two : One : ... )",
+						null, null);
+		OfficeSectionOutput output = this.outputs.get(ONE).get(OUTPUT);
+		this.recordReturn(output, output.isEscalationOnly(), true);
+
+		// Test
+		this.replayMockObjects();
+		source.sourceOffice(this.architect, context);
+		this.verifyMockObjects();
+	}
+
+	/**
 	 * Ensure able to indicate if a flow is linked.
 	 */
 	public void testIsFlowLinked() throws Exception {
