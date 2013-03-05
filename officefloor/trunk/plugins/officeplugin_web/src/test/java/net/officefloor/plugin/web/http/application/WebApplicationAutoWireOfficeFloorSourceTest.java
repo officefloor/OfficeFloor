@@ -29,9 +29,12 @@ import net.officefloor.autowire.AutoWire;
 import net.officefloor.autowire.AutoWireManagement;
 import net.officefloor.autowire.AutoWireSection;
 import net.officefloor.compile.OfficeFloorCompiler;
+import net.officefloor.compile.issues.CompilerIssues;
+import net.officefloor.compile.issues.CompilerIssues.LocationType;
 import net.officefloor.compile.spi.office.OfficeSectionInput;
 import net.officefloor.compile.spi.office.OfficeSectionOutput;
 import net.officefloor.frame.api.escalate.Escalation;
+import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.section.clazz.ClassSectionSource;
 import net.officefloor.plugin.section.clazz.NextTask;
@@ -66,7 +69,7 @@ import org.junit.Ignore;
  * 
  * @author Daniel Sagenschneider
  */
-@Ignore("TODO provide tests for inheriting secure link configuration")
+@Ignore("TODO provide functionality for template content and link inheritance")
 public class WebApplicationAutoWireOfficeFloorSourceTest extends
 		OfficeFrameTestCase {
 
@@ -492,10 +495,114 @@ public class WebApplicationAutoWireOfficeFloorSourceTest extends
 	}
 
 	/**
+	 * Ensure can inherit template.
+	 */
+	public void testInheritTemplate() throws Exception {
+
+		// Add link target template
+		HttpTemplateAutoWireSection target = this.source.addHttpTemplate(
+				"/target", this.getClassPath("/template.ofp"),
+				MockTemplateLogic.class);
+
+		// Add parent template
+		HttpTemplateAutoWireSection parent = this.source.addHttpTemplate(
+				"/parent", this.getClassPath("Parent.ofp"), null);
+		this.source.linkToHttpTemplate(parent, "submit", target);
+
+		// Add child template (inheriting content and links)
+		HttpTemplateAutoWireSection child = this.source.addHttpTemplate(
+				"/child", this.getClassPath("Child.ofp"), null);
+		child.setSuperSection(parent);
+
+		// Open OfficeFloor
+		this.source.openOfficeFloor();
+
+		// Ensure child inherits content
+		this.assertHttpRequest("/child", 200,
+				"Parent CHILD introduced /child-submit");
+
+		// Ensure child inherits link configuration
+		this.assertHttpRequest("/child-submit", 200, "submitted/target-submit");
+	}
+
+	/**
+	 * Ensure template can inherit section link configuration.
+	 */
+	public void testTemplateInheritSectionLinkConfiguration() throws Exception {
+
+		// Add link target template
+		HttpTemplateAutoWireSection target = this.source.addHttpTemplate(
+				"/target", this.getClassPath("/template.ofp"),
+				MockTemplateLogic.class);
+
+		// Add grand parent section
+		AutoWireSection grandParent = this.source.addSection("GRAND_PARENT",
+				ClassSectionSource.class.getName(),
+				GrandParentSection.class.getName());
+		this.source.linkToHttpTemplate(grandParent, "submit", target);
+
+		// Add parent template (inheriting link configuration)
+		HttpTemplateAutoWireSection parent = this.source.addHttpTemplate(
+				"/parent", this.getClassPath("Parent.ofp"), null);
+		parent.setSuperSection(grandParent);
+
+		// Add child template (inheriting content and links)
+		HttpTemplateAutoWireSection child = this.source.addHttpTemplate(
+				"/child", this.getClassPath("Child.ofp"), null);
+		child.setSuperSection(parent);
+
+		// Open OfficeFloor
+		this.source.openOfficeFloor();
+
+		// Ensure child inherits content
+		this.assertHttpRequest("/child", 200,
+				"Parent CHILD introduced /child-submit");
+
+		// Ensure child inherits link configuration
+		this.assertHttpRequest("/child-submit", 200, "submitted/target-submit");
+	}
+
+	/**
+	 * Parent section.
+	 */
+	public static class GrandParentSection {
+		@NextTask("submit")
+		public void input() {
+		}
+	}
+
+	/**
 	 * Ensure can inherit link being secure.
 	 */
 	public void testInheritTemplateLinkSecure() throws Exception {
-		fail("TODO implement");
+
+		// Add link target template
+		HttpTemplateAutoWireSection target = this.source.addHttpTemplate(
+				"/target", this.getClassPath("/template.ofp"),
+				MockTemplateLogic.class);
+
+		// Add parent template
+		HttpTemplateAutoWireSection parent = this.source.addHttpTemplate(
+				"/parent", this.getClassPath("Parent.ofp"), null);
+		parent.setLinkSecure("submit", true);
+		this.source.linkToHttpTemplate(parent, "submit", target);
+
+		// Add child template (inheriting content and links)
+		HttpTemplateAutoWireSection child = this.source.addHttpTemplate(
+				"/child", this.getClassPath("Child.ofp"), null);
+		child.setSuperSection(parent);
+
+		// Open OfficeFloor
+		this.source.openOfficeFloor();
+
+		// Ensure child inherits link secure
+		this.assertHttpRequest("/child", 200,
+				"Parent CHILD introduced https://" + HOST_NAME + ":"
+						+ this.securePort + "/child-submit");
+
+		// Ensure child inherits link secure
+		this.assertHttpRequest("/child-submit", true, 200,
+				"submitted/target-submit");
 	}
 
 	/**
@@ -503,14 +610,85 @@ public class WebApplicationAutoWireOfficeFloorSourceTest extends
 	 * containing section overridden and no longer contains the link).
 	 */
 	public void testNotInheritMissingTemplateLinkSecure() throws Exception {
-		fail("TODO implement");
+
+		// Add link target template
+		HttpTemplateAutoWireSection target = this.source.addHttpTemplate(
+				"/target", this.getClassPath("/template.ofp"),
+				MockTemplateLogic.class);
+
+		// Add parent template
+		HttpTemplateAutoWireSection parent = this.source.addHttpTemplate(
+				"/parent", this.getClassPath("Parent.ofp"), null);
+		parent.setLinkSecure("submit", true);
+		this.source.linkToHttpTemplate(parent, "submit", target);
+
+		// Add child template (inheriting content and links)
+		HttpTemplateAutoWireSection child = this.source.addHttpTemplate(
+				"/child", this.getClassPath("Child.ofp"), null);
+		child.setSuperSection(parent);
+
+		// Add grand child template (override the link)
+		HttpTemplateAutoWireSection grandChild = this.source.addHttpTemplate(
+				"/grandchild", this.getClassPath("GrandChild.ofp"), null);
+		grandChild.setSuperSection(child);
+
+		// Open OfficeFloor
+		this.source.openOfficeFloor();
+
+		// Ensure grand child overrides section with link (no need to inherit)
+		this.assertHttpRequest("/grandchild", 200,
+				"Grandchild CHILD introduced Overridden");
 	}
 
 	/**
 	 * Ensure issue if the template inheritance hierarchy is cyclic.
 	 */
 	public void testCyclicTemplateInheritanceHierarchy() throws Exception {
-		fail("TODO implement");
+
+		// Record issue of cyclic inheritance hierarchy
+		final CompilerIssues issues = this.createMock(CompilerIssues.class);
+		this.source.getOfficeFloorCompiler().setCompilerIssues(issues);
+		issues.addIssue(
+				LocationType.SECTION,
+				"child",
+				null,
+				null,
+				"Template /child has a cyclic inheritance hierarchy ( child : parent : child : ... )");
+
+		// Test
+		this.replayMockObjects();
+
+		// Add link target template
+		HttpTemplateAutoWireSection target = this.source.addHttpTemplate(
+				"/target", this.getClassPath("/template.ofp"),
+				MockTemplateLogic.class);
+
+		// Add parent template
+		HttpTemplateAutoWireSection parent = this.source.addHttpTemplate(
+				"/parent", this.getClassPath("Parent.ofp"), null);
+		this.source.linkToHttpTemplate(parent, "submit", target);
+
+		// Add child template (inheriting content and links)
+		HttpTemplateAutoWireSection child = this.source.addHttpTemplate(
+				"/child", this.getClassPath("Child.ofp"), null);
+		child.setSuperSection(parent);
+
+		// Cyclic inheritance hierarchy
+		parent.setSuperSection(child);
+
+		// Open OfficeFloor (manually to use mock compiler issues)
+		OfficeFloor officeFloor = this.source.getOfficeFloorCompiler().compile(
+				"auto-wire");
+		officeFloor.openOfficeFloor();
+		try {
+
+			// Ensure report cyclic inheritance hierarchy
+			this.verifyMockObjects();
+
+		} finally {
+			// Ensure close
+			officeFloor.closeOfficeFloor();
+		}
 	}
 
 	/**
