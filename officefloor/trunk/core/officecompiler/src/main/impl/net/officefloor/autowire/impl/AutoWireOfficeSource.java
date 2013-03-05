@@ -18,8 +18,10 @@
 package net.officefloor.autowire.impl;
 
 import java.util.ArrayList;
+import java.util.Deque;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -572,24 +574,50 @@ public class AutoWireOfficeSource extends AbstractOfficeSource {
 				String logOutputName = sectionName + ":" + outputName;
 
 				// Search inheritance hierarchy for link
+				// (also check not cyclic inheritance hierarchy)
 				AutoWireSection searchSection = section;
 				Link link = null;
+				boolean isCyclicInheritance = false;
+				Deque<String> inheritanceHierarchy = new LinkedList<String>();
 				do {
+					// Include current inheritance hierarchy
+					String searchSectionName = searchSection.getSectionName();
+					if (inheritanceHierarchy.contains(searchSectionName)) {
+						// Cyclic inheritance (carry on include current section)
+						isCyclicInheritance = true;
+					}
+
+					// Include inheritance section and search for link
+					inheritanceHierarchy.push(searchSectionName);
+
 					// Obtain link configuration from current section
-					link = keyedLinks.get(searchSection.getSectionName(),
-							outputName);
+					link = keyedLinks.get(searchSectionName, outputName);
 
 					// Use super section in next iteration if no link
 					searchSection = searchSection.getSuperSection();
 
-				} while ((link == null) && (searchSection != null));
+				} while ((link == null) && (!isCyclicInheritance)
+						&& (searchSection != null));
+
+				// Provide issue if cyclic inheritance hierarchy
+				if (isCyclicInheritance) {
+					// Cyclic inheritance, so provide issue
+					StringBuilder hierarchyLog = new StringBuilder();
+					for (Iterator<String> iterator = inheritanceHierarchy
+							.iterator(); iterator.hasNext();) {
+						hierarchyLog.append(iterator.next() + " : ");
+					}
+					architect.addIssue("Cyclic section inheritance hierarchy ( "
+							+ hierarchyLog.toString() + "... )", null, null);
+				}
+
+				// Provide issue if no link
 				if (link == null) {
-					
 					// No link, issue only if not escalation only
 					if (output.isEscalationOnly()) {
 						continue NEXT_OUTPUT;
 					}
-					
+
 					// Issue as require link configuration
 					architect.addIssue("Section output '" + logOutputName
 							+ "' is not linked", AssetType.TASK, logOutputName);
