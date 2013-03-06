@@ -446,6 +446,51 @@ public class HttpTemplateSectionSourceTest extends OfficeFrameTestCase {
 	}
 
 	/**
+	 * Ensure that parent links (no longer in inherited template) are considered
+	 * in all links. This is to allow the link secure information to be
+	 * inherited.
+	 */
+	public void testLinkKnownInParent() {
+
+		// Obtain the template locations
+		String parentTemplatePath = this.getFileLocation(this.getClass(),
+				"LinkInParent.ofp");
+		String childTemplatePath = this.getFileLocation(this.getClass(),
+				"LinkNotInChild.ofp");
+
+		// Create the expected type
+		SectionDesigner expected = SectionLoaderUtil
+				.createSectionDesigner(HttpTemplateSectionSource.class);
+
+		// Input (for HTTP Template rending)
+		expected.addSectionInput("renderTemplate", null);
+
+		// Outputs
+		expected.addSectionOutput("output", null, false);
+		expected.addSectionOutput(IOException.class.getName(),
+				IOException.class.getName(), true);
+
+		// Objects
+		expected.addSectionObject(ServerHttpConnection.class.getName(),
+				ServerHttpConnection.class.getName());
+		expected.addSectionObject(HttpApplicationLocation.class.getName(),
+				HttpApplicationLocation.class.getName());
+		expected.addSectionObject(HttpRequestState.class.getName(),
+				HttpRequestState.class.getName());
+		expected.addSectionObject(HttpSession.class.getName(),
+				HttpSession.class.getName());
+
+		// Ensure correct type (and no link secure unknown issue)
+		SectionLoaderUtil.validateSectionType(expected,
+				HttpTemplateSectionSource.class, childTemplatePath,
+				HttpTemplateSectionSource.PROPERTY_TEMPLATE_URI, "uri",
+				HttpTemplateSectionSource.PROPERTY_INHERITED_TEMPLATES,
+				parentTemplatePath,
+				HttpTemplateWorkSource.PROPERTY_LINK_SECURE_PREFIX + "link",
+				String.valueOf(true));
+	}
+
+	/**
 	 * Section method may not be annotated with {@link NextTask}.
 	 */
 	public void testNoNextTaskAnnotationForSectionMethod() {
