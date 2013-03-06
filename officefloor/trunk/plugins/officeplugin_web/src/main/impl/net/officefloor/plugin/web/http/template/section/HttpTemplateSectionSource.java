@@ -431,9 +431,21 @@ public class HttpTemplateSectionSource extends ClassSectionSource {
 			templateInheritanceHierarchy[inheritedTemplates.length] = templateLocation;
 		}
 
+		// Obtain the template for the highest ancestor in inheritance hierarchy
+		HttpTemplate highestAncestorTemplate = getHttpTemplate(
+				templateInheritanceHierarchy[0], context);
+
+		/*
+		 * Keep track of all link names. This is to allow inherited links to be
+		 * known even if they do not end up in the resulting inherited template
+		 * (i.e. containing sections have been overridden).
+		 */
+		Set<String> knownLinkNames = new HashSet<String>();
+		knownLinkNames.addAll(Arrays.asList(HttpTemplateWorkSource
+				.getHttpTemplateLinkNames(highestAncestorTemplate)));
+
 		// Undertake inheritance of the template (first does not inherit)
-		HttpTemplateSection[] sections = getHttpTemplate(
-				templateInheritanceHierarchy[0], context).getSections();
+		HttpTemplateSection[] sections = highestAncestorTemplate.getSections();
 		sections = filterCommentHttpTemplateSections(sections);
 		for (int i = 1; i < templateInheritanceHierarchy.length; i++) {
 
@@ -442,6 +454,10 @@ public class HttpTemplateSectionSource extends ClassSectionSource {
 					templateInheritanceHierarchy[i], context);
 			HttpTemplateSection[] childSections = filterCommentHttpTemplateSections(childTemplate
 					.getSections());
+
+			// Add the child link names
+			knownLinkNames.addAll(Arrays.asList(HttpTemplateWorkSource
+					.getHttpTemplateLinkNames(childTemplate)));
 
 			// Obtain the sections from child inheritance
 			sections = inheritHttpTemplateSections(sections, childSections,
@@ -769,10 +785,6 @@ public class HttpTemplateSectionSource extends ClassSectionSource {
 				HttpTemplateWorkSource.PROPERTY_TEMPLATE_URI_SUFFIX, null);
 
 		// Determine if any unknown configured links
-		String[] linkNames = HttpTemplateWorkSource
-				.getHttpTemplateLinkNames(template);
-		Set<String> existingLinkNames = new HashSet<String>(
-				Arrays.asList(linkNames));
 		NEXT_PROPERTY: for (String propertyName : context.getPropertyNames()) {
 			if (propertyName
 					.startsWith(HttpTemplateWorkSource.PROPERTY_LINK_SECURE_PREFIX)) {
@@ -782,8 +794,8 @@ public class HttpTemplateSectionSource extends ClassSectionSource {
 						.substring(HttpTemplateWorkSource.PROPERTY_LINK_SECURE_PREFIX
 								.length());
 
-				// Ignore if exists
-				if (existingLinkNames.contains(configuredLinkName)) {
+				// Ignore if known link
+				if (knownLinkNames.contains(configuredLinkName)) {
 					continue NEXT_PROPERTY;
 				}
 
@@ -795,6 +807,8 @@ public class HttpTemplateSectionSource extends ClassSectionSource {
 		}
 
 		// Register the #{link} URL continuation tasks
+		String[] linkNames = HttpTemplateWorkSource
+				.getHttpTemplateLinkNames(template);
 		final String linkUrlContinuationPrefix = "HTTP_URL_CONTINUATION_";
 		for (String linkTaskName : linkNames) {
 

@@ -62,14 +62,12 @@ import org.apache.http.client.params.ClientPNames;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.params.BasicHttpParams;
 import org.apache.http.params.HttpParams;
-import org.junit.Ignore;
 
 /**
  * Tests the {@link WebApplicationAutoWireOfficeFloorSource}.
  * 
  * @author Daniel Sagenschneider
  */
-@Ignore("TODO provide functionality for template content and link inheritance")
 public class WebApplicationAutoWireOfficeFloorSourceTest extends
 		OfficeFrameTestCase {
 
@@ -522,7 +520,40 @@ public class WebApplicationAutoWireOfficeFloorSourceTest extends
 				"Parent CHILD introduced /child-submit");
 
 		// Ensure child inherits link configuration
-		this.assertHttpRequest("/child-submit", 200, "submitted/target-submit");
+		this.assertHttpRequest("/child-submit", 200, "/target-submit");
+	}
+
+	/**
+	 * Ensure template inheritance hierarchy is in correct order for ancestors.
+	 */
+	public void testInheritTemplateHierarchy() throws Exception {
+
+		// Add link target template
+		HttpTemplateAutoWireSection target = this.source.addHttpTemplate(
+				"/target", this.getClassPath("/template.ofp"),
+				MockTemplateLogic.class);
+
+		// Add parent template
+		HttpTemplateAutoWireSection parent = this.source.addHttpTemplate(
+				"/parent", this.getClassPath("Parent.ofp"), null);
+		this.source.linkToHttpTemplate(parent, "submit", target);
+
+		// Add child template (inheriting content and links)
+		HttpTemplateAutoWireSection child = this.source.addHttpTemplate(
+				"/child", this.getClassPath("Child.ofp"), null);
+		child.setSuperSection(parent);
+
+		// Add grand child template (override the link)
+		HttpTemplateAutoWireSection grandChild = this.source.addHttpTemplate(
+				"/grandchild", this.getClassPath("GrandChild.ofp"), null);
+		grandChild.setSuperSection(child);
+
+		// Open OfficeFloor
+		this.source.openOfficeFloor();
+
+		// Ensure grand child overrides section with link (no need to inherit)
+		this.assertHttpRequest("/grandchild", 200,
+				"Grandchild CHILD introduced Overridden");
 	}
 
 	/**
@@ -559,7 +590,7 @@ public class WebApplicationAutoWireOfficeFloorSourceTest extends
 				"Parent CHILD introduced /child-submit");
 
 		// Ensure child inherits link configuration
-		this.assertHttpRequest("/child-submit", 200, "submitted/target-submit");
+		this.assertHttpRequest("/child-submit", 200, "/target-submit");
 	}
 
 	/**
@@ -584,25 +615,31 @@ public class WebApplicationAutoWireOfficeFloorSourceTest extends
 		// Add parent template
 		HttpTemplateAutoWireSection parent = this.source.addHttpTemplate(
 				"/parent", this.getClassPath("Parent.ofp"), null);
-		parent.setLinkSecure("submit", true);
+		parent.setLinkSecure("submit", false);
 		this.source.linkToHttpTemplate(parent, "submit", target);
 
 		// Add child template (inheriting content and links)
 		HttpTemplateAutoWireSection child = this.source.addHttpTemplate(
 				"/child", this.getClassPath("Child.ofp"), null);
+		parent.setLinkSecure("submit", true); // overrides parent
 		child.setSuperSection(parent);
+
+		// Add child template (inheriting content and links)
+		HttpTemplateAutoWireSection grandChild = this.source.addHttpTemplate(
+				"/grandchild", this.getClassPath("LinkChild.ofp"), null);
+		grandChild.setSuperSection(child);
 
 		// Open OfficeFloor
 		this.source.openOfficeFloor();
 
 		// Ensure child inherits link secure
-		this.assertHttpRequest("/child", 200,
-				"Parent CHILD introduced https://" + HOST_NAME + ":"
-						+ this.securePort + "/child-submit");
+		this.assertHttpRequest("/grandchild", 200,
+				"Parent LINK_CHILD override https://" + HOST_NAME + ":"
+						+ this.securePort + "/grandchild-submit");
 
 		// Ensure child inherits link secure
-		this.assertHttpRequest("/child-submit", true, 200,
-				"submitted/target-submit");
+		this.assertHttpRequest("/grandchild-submit", true, 200, "http://"
+				+ HOST_NAME + ":" + this.port + "/target-submit");
 	}
 
 	/**
@@ -645,15 +682,27 @@ public class WebApplicationAutoWireOfficeFloorSourceTest extends
 	 */
 	public void testCyclicTemplateInheritanceHierarchy() throws Exception {
 
+		final String parentTemplatePath = this.getClassPath("Parent.ofp");
+		final Error error = new Error("TEST");
+
 		// Record issue of cyclic inheritance hierarchy
 		final CompilerIssues issues = this.createMock(CompilerIssues.class);
 		this.source.getOfficeFloorCompiler().setCompilerIssues(issues);
 		issues.addIssue(
-				LocationType.SECTION,
-				"child",
+				LocationType.OFFICE_FLOOR,
+				"auto-wire",
 				null,
 				null,
-				"Template /child has a cyclic inheritance hierarchy ( child : parent : child : ... )");
+				"Template /parent has a cyclic inheritance hierarchy ( child : parent : child : ... )");
+		this.control(issues).setThrowable(error);
+		issues.addIssue(
+				LocationType.OFFICE_FLOOR,
+				"auto-wire",
+				null,
+				null,
+				"Failed to source OfficeFloor from OfficeFloorSource (source="
+						+ WebApplicationAutoWireOfficeFloorSource.class
+								.getName() + ", location=auto-wire)", error);
 
 		// Test
 		this.replayMockObjects();
@@ -665,7 +714,7 @@ public class WebApplicationAutoWireOfficeFloorSourceTest extends
 
 		// Add parent template
 		HttpTemplateAutoWireSection parent = this.source.addHttpTemplate(
-				"/parent", this.getClassPath("Parent.ofp"), null);
+				"/parent", parentTemplatePath, null);
 		this.source.linkToHttpTemplate(parent, "submit", target);
 
 		// Add child template (inheriting content and links)
@@ -679,16 +728,10 @@ public class WebApplicationAutoWireOfficeFloorSourceTest extends
 		// Open OfficeFloor (manually to use mock compiler issues)
 		OfficeFloor officeFloor = this.source.getOfficeFloorCompiler().compile(
 				"auto-wire");
-		officeFloor.openOfficeFloor();
-		try {
+		assertNull("Should not have loaded the OfficeFloor", officeFloor);
 
-			// Ensure report cyclic inheritance hierarchy
-			this.verifyMockObjects();
-
-		} finally {
-			// Ensure close
-			officeFloor.closeOfficeFloor();
-		}
+		// Ensure report cyclic inheritance hierarchy
+		this.verifyMockObjects();
 	}
 
 	/**

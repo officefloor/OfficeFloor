@@ -18,10 +18,13 @@
 package net.officefloor.plugin.web.http.application;
 
 import java.lang.reflect.Method;
+import java.util.Deque;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import net.officefloor.autowire.AutoWire;
 import net.officefloor.autowire.AutoWireObject;
@@ -672,6 +675,64 @@ public class WebApplicationAutoWireOfficeFloorSource extends
 		// Additional template configuration
 		for (HttpTemplateAutoWireSection httpTemplate : this.httpTemplates) {
 
+			// Determine the template inheritance hierarchy
+			Deque<AutoWireSection> inheritanceHierarchy = new LinkedList<AutoWireSection>();
+			AutoWireSection parent = httpTemplate.getSuperSection();
+			boolean isCyclicInheritance = false;
+			while ((parent != null) && (!isCyclicInheritance)) {
+
+				// Determine if cyclic inheritance
+				if (inheritanceHierarchy.contains(parent)) {
+					isCyclicInheritance = true;
+				}
+
+				// Add the parent and set up for next iteration
+				inheritanceHierarchy.push(parent);
+				parent = parent.getSuperSection();
+			}
+			if (isCyclicInheritance) {
+				// Provide issue of cyclic inheritance
+				StringBuilder logCycle = new StringBuilder();
+				logCycle.append("Template " + httpTemplate.getTemplateUri()
+						+ " has a cyclic inheritance hierarchy ( ");
+				for (AutoWireSection section : inheritanceHierarchy) {
+					logCycle.append(section.getSectionName() + " : ");
+				}
+				logCycle.append("... )");
+				deployer.addIssue(logCycle.toString(), null, null);
+			}
+
+			// Obtain inheritance hierarchy of templates (including current)
+			Deque<HttpTemplateAutoWireSection> templateInheritanceHierarchy = new LinkedList<HttpTemplateAutoWireSection>();
+			StringBuilder inheritedTemplates = new StringBuilder();
+			boolean isFirstParentTemplate = true;
+			for (AutoWireSection parentSection : inheritanceHierarchy) {
+
+				// Ignore if not template
+				if (!(parentSection instanceof HttpTemplateAutoWireSection)) {
+					continue;
+				}
+				HttpTemplateAutoWireSection parentTemplate = (HttpTemplateAutoWireSection) parentSection;
+
+				// Include the template in inheritance hierarchy
+				templateInheritanceHierarchy.add(parentTemplate);
+
+				// Add the template
+				if (!isFirstParentTemplate) {
+					inheritedTemplates.append(", ");
+				}
+				isFirstParentTemplate = false;
+				inheritedTemplates.append(parentTemplate.getTemplatePath());
+			}
+			templateInheritanceHierarchy.push(httpTemplate);
+
+			// Provide inheritance hierarchy for template (must be at least 2)
+			if (templateInheritanceHierarchy.size() > 1) {
+				httpTemplate.addProperty(
+						HttpTemplateSectionSource.PROPERTY_INHERITED_TEMPLATES,
+						inheritedTemplates.toString());
+			}
+
 			// Determine if template is secure
 			boolean isTemplateSecure = httpTemplate.isTemplateSecure();
 
@@ -694,15 +755,29 @@ public class WebApplicationAutoWireOfficeFloorSource extends
 					HttpTemplateWorkSource.PROPERTY_TEMPLATE_SECURE,
 					String.valueOf(isTemplateSecure));
 
-			// Secure the specific template links
-			Map<String, Boolean> secureLinks = httpTemplate.getSecureLinks();
-			for (String link : secureLinks.keySet()) {
-				Boolean isLinkSecure = secureLinks.get(link);
+			// Secure the specific template links (following inheritance)
+			Set<String> configuredLinks = new HashSet<String>();
+			for (HttpTemplateAutoWireSection currentTemplate : templateInheritanceHierarchy) {
 
-				// Configure the link secure for the template
-				httpTemplate.addProperty(
-						HttpTemplateWorkSource.PROPERTY_LINK_SECURE_PREFIX
-								+ link, String.valueOf(isLinkSecure));
+				// Provide the links for the current template
+				Map<String, Boolean> secureLinks = currentTemplate
+						.getSecureLinks();
+				for (String link : secureLinks.keySet()) {
+
+					// Ignore if already configured link (by child)
+					if (configuredLinks.contains(link)) {
+						continue;
+					}
+					configuredLinks.add(link);
+
+					// Determine if link is secure
+					Boolean isLinkSecure = secureLinks.get(link);
+
+					// Configure the link secure for the template
+					httpTemplate.addProperty(
+							HttpTemplateWorkSource.PROPERTY_LINK_SECURE_PREFIX
+									+ link, String.valueOf(isLinkSecure));
+				}
 			}
 
 			// Render redirect HTTP methods
@@ -713,12 +788,12 @@ public class WebApplicationAutoWireOfficeFloorSource extends
 
 				// Create the listing of rendering redirect HTTP methods
 				StringBuilder renderRedirectHttpMethodValue = new StringBuilder();
-				boolean isFirst = true;
+				boolean isFirstRenderRedirectHttpMethod = true;
 				for (String renderRedirectHttpMethod : renderRedirectHttpMethods) {
-					if (!isFirst) {
+					if (!isFirstRenderRedirectHttpMethod) {
 						renderRedirectHttpMethodValue.append(", ");
 					}
-					isFirst = false;
+					isFirstRenderRedirectHttpMethod = false;
 					renderRedirectHttpMethodValue
 							.append(renderRedirectHttpMethod);
 				}
