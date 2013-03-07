@@ -2,8 +2,8 @@
 
 	<templates>
 		<template name="remove" uri="remove" path="example/Remove.html" />
-		<template name="TEMPLATE_LINK" path="example/Link.html"
-			class="net.example.LinkClass" />
+		<template name="TEMPLATE_LINK" path="example/Link.html" />
+		<template name="TEMPLATE_PARENT" path="example/Parent.html" />
 	</templates>
 
 	<sections>

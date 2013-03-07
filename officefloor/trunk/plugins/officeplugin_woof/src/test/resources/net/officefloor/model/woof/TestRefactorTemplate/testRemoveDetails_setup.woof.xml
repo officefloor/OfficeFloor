@@ -2,7 +2,7 @@
 
 	<templates>
 		<template name="template" uri="template" path="example/Template.html"
-			class="net.example.LogicClass" secure="true">
+			class="net.example.LogicClass" secure="true" extends="TEMPLATE_PARENT">
 			<output name="OUTPUT_1">
 				<input section="SECTION" input="INPUT" />
 			</output>
@@ -26,8 +26,8 @@
 					value="net.example.GwtServiceAsync,net.example.GwtAnotherAsync" />
 			</extension>
 		</template>
-		<template name="TEMPLATE_LINK" path="example/Link.html"
-			class="net.example.LinkClass" />
+		<template name="TEMPLATE_LINK" path="example/Link.html" />
+		<template name="TEMPLATE_PARENT" path="example/Parent.html" />
 	</templates>
 
 	<sections>
