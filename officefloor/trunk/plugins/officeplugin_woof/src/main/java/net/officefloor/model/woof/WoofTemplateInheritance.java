@@ -19,9 +19,8 @@ package net.officefloor.model.woof;
 
 import java.util.Set;
 
-import com.google.gwt.aria.client.Property;
-
 import net.officefloor.autowire.AutoWireSection;
+import net.officefloor.compile.properties.Property;
 import net.officefloor.plugin.web.http.template.section.HttpTemplateSectionSource;
 
 /**
