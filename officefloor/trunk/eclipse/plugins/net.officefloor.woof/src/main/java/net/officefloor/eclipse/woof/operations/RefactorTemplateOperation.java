@@ -85,9 +85,14 @@ public class RefactorTemplateOperation extends
 				.getCometManualPublishMethodName();
 		Map<String, String> outputNameMapping = instance.getOutputNameMapping();
 
+		// TODO provide inheritance information
+		WoofTemplateModel superTemplate = null;
+		String[] inheritedOutputNames = null;
+
 		// Create change to refactor template
 		Change<WoofTemplateModel> change = changes.refactorTemplate(template,
-				uri, path, logicClassName, type, isTemplateSecure, linksSecure,
+				uri, path, logicClassName, type, superTemplate,
+				inheritedOutputNames, isTemplateSecure, linksSecure,
 				renderRedirectHttpMethods, isContinueRendering,
 				entryPointClassName, serviceAsyncInterfaces, isEnableComet,
 				cometManualPublishMethodName, outputNameMapping);

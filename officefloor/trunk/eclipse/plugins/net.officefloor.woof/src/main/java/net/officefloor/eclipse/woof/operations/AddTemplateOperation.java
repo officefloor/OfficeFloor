@@ -77,10 +77,13 @@ public class AddTemplateOperation extends
 		String cometManualPublishMethodName = instance
 				.getCometManualPublishMethodName();
 
+		// TODO provide inheritance information
+		WoofTemplateModel superTemplate = null;
+
 		// Create change to add template
 		Change<WoofTemplateModel> change = changes.addTemplate(uri, path,
-				logicClassName, type, isTemplateSecure, linksSecure,
-				renderRedirectHttpMethods, isContinueRendering,
+				logicClassName, type, superTemplate, isTemplateSecure,
+				linksSecure, renderRedirectHttpMethods, isContinueRendering,
 				entryPointClassName, serviceAsyncInterfaces, isEnableComet,
 				cometManualPublishMethodName);
 
