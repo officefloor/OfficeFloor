@@ -23,6 +23,8 @@ import java.util.Map;
 
 import javax.sql.DataSource;
 
+import org.junit.Ignore;
+
 import net.officefloor.compile.section.SectionType;
 import net.officefloor.model.change.Change;
 import net.officefloor.model.change.Conflict;
@@ -33,6 +35,7 @@ import net.officefloor.plugin.web.http.template.section.HttpTemplateSectionSourc
  * 
  * @author Daniel Sagenschneider
  */
+@Ignore("TODO provide super template functionality")
 public class RefactorTemplateTest extends AbstractWoofChangesTestCase {
 
 	/**
@@ -86,6 +89,7 @@ public class RefactorTemplateTest extends AbstractWoofChangesTestCase {
 						context.addSectionOutput("OUTPUT_2", String.class,
 								false);
 						context.addSectionOutput("OUTPUT_3", null, false);
+						context.addSectionOutput("OUTPUT_INHERIT", null, false);
 						context.addSectionOutput(
 								HttpTemplateSectionSource.ON_COMPLETION_OUTPUT_NAME,
 								null, false);
@@ -101,6 +105,11 @@ public class RefactorTemplateTest extends AbstractWoofChangesTestCase {
 		this.templateOutputNameMapping.put("OUTPUT_2", "OUTPUT_2");
 		this.templateOutputNameMapping.put("OUTPUT_3", "OUTPUT_3");
 
+		// Obtain the super template
+		WoofTemplateModel superTemplate = this.model.getWoofTemplates().get(2);
+		assertEquals("Incorrect super template", "TEMPLATE_PARENT",
+				superTemplate.getWoofTemplateName());
+
 		// Test
 		this.replayMockObjects();
 
@@ -110,7 +119,8 @@ public class RefactorTemplateTest extends AbstractWoofChangesTestCase {
 		secureLinks.put("LINK_2", Boolean.FALSE);
 		Change<WoofTemplateModel> change = this.operations.refactorTemplate(
 				this.template, "template", "example/Template.html",
-				"net.example.LogicClass", section, true, secureLinks,
+				"net.example.LogicClass", section, superTemplate,
+				new String[] { "OUTPUT_INHERIT" }, true, secureLinks,
 				new String[] { "POST", "PUT", "OTHER" }, true,
 				"net.example.client.ExampleGwtEntryPoint", new String[] {
 						"net.example.GwtServiceAsync",
@@ -152,6 +162,7 @@ public class RefactorTemplateTest extends AbstractWoofChangesTestCase {
 						context.addSectionOutput("OUTPUT_2", String.class,
 								false);
 						context.addSectionOutput("OUTPUT_3", null, false);
+						context.addSectionOutput("OUTPUT_INHERIT", null, false);
 						context.addSectionOutput(
 								HttpTemplateSectionSource.ON_COMPLETION_OUTPUT_NAME,
 								null, false);
@@ -163,6 +174,11 @@ public class RefactorTemplateTest extends AbstractWoofChangesTestCase {
 		this.templateOutputNameMapping.put("OUTPUT_3", "OUTPUT_2");
 		this.templateOutputNameMapping.put("OUTPUT_1", "OUTPUT_3");
 
+		// Obtain the super template
+		WoofTemplateModel superTemplate = this.model.getWoofTemplates().get(1);
+		assertEquals("Incorrect super template", "TEMPLATE_LINK",
+				superTemplate.getWoofTemplateName());
+
 		// Test
 		this.replayMockObjects();
 
@@ -172,7 +188,8 @@ public class RefactorTemplateTest extends AbstractWoofChangesTestCase {
 		secureLinks.put("LINK_3", Boolean.FALSE);
 		Change<WoofTemplateModel> change = this.operations.refactorTemplate(
 				this.template, "change", "example/Change.html",
-				"net.example.ChangeClass", section, false, secureLinks,
+				"net.example.ChangeClass", section, superTemplate,
+				new String[] { "OUTPUT_INHERIT" }, false, secureLinks,
 				new String[] { "CHANGE" }, false,
 				"net.example.client.ExampleGwtEntryPoint",
 				new String[] { "net.example.GwtChangeAsync" }, true,
@@ -212,7 +229,8 @@ public class RefactorTemplateTest extends AbstractWoofChangesTestCase {
 		// Refactor the template removing outputs and extensions
 		Change<WoofTemplateModel> change = this.operations.refactorTemplate(
 				this.template, "remove", "example/Remove.html", null, section,
-				false, null, null, false, null, null, false, null, null);
+				null, null, false, null, null, false, null, null, false, null,
+				null);
 
 		// Validate change
 		this.assertChange(change, null, "Refactor Template", true);
@@ -249,12 +267,18 @@ public class RefactorTemplateTest extends AbstractWoofChangesTestCase {
 						context.addSectionOutput("OUTPUT_2", String.class,
 								false);
 						context.addSectionOutput("OUTPUT_3", null, false);
+						context.addSectionOutput("OUTPUT_INHERIT", null, false);
 						context.addSectionOutput("NOT_INCLUDE_ESCALTION",
 								IOException.class, true);
 						context.addSectionObject("IGNORE_OBJECT",
 								DataSource.class, null);
 					}
 				});
+
+		// Obtain the super template
+		WoofTemplateModel superTemplate = this.model.getWoofTemplates().get(1);
+		assertEquals("Incorrect super template", "TEMPLATE_PARENT",
+				superTemplate.getWoofTemplateName());
 
 		// Test
 		this.replayMockObjects();
@@ -265,7 +289,8 @@ public class RefactorTemplateTest extends AbstractWoofChangesTestCase {
 		secureLinks.put("LINK_2", Boolean.FALSE);
 		Change<WoofTemplateModel> change = this.operations.refactorTemplate(
 				this.template, "add", "example/Add.html",
-				"net.example.AddClass", section, true, secureLinks,
+				"net.example.AddClass", section, superTemplate,
+				new String[] { "OUTPUT_INHERIT" }, true, secureLinks,
 				new String[] { "POST", "OTHER" }, true,
 				"net.example.client.AddGwtEntryPoint",
 				new String[] { "net.example.GwtAddAsync" }, true, "manualAdd",

@@ -1,7 +1,10 @@
 <woof>
 
 	<templates>
-		<template name="TEMPLATE_LINK" path="example/Link.ofp" class="net.example.LinkClass" />
+		<template name="TEMPLATE_CHILD" path="example/Child.ofp" />
+		<template name="TEMPLATE_LINK" path="example/Link.ofp">
+			<output name="OUTPUT" />
+		</template>
 	</templates>
 
 	<sections>
@@ -22,6 +25,9 @@
 		<section name="SECTION_LINK" source="net.example.LinkSectionSource"
 			location="LINK_LOCATION">
 			<input name="INPUT" />
+			<output name="OUTPUT">
+				<input section="SECTION" input="INPUT" />
+			</output>
 		</section>
 	</sections>
 

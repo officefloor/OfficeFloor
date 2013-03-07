@@ -15,7 +15,13 @@
 				<resource name="RESOURCE" />
 			</output>
 		</template>
-		<template name="TEMPLATE_LINK" path="example/Link.ofp" class="net.example.LinkClass" />
+		<template name="TEMPLATE_CHILD" path="example/Child.ofp"
+			extends="TEMPLATE" />
+		<template name="TEMPLATE_LINK" path="example/Link.ofp">
+			<output name="OUTPUT">
+				<template name="TEMPLATE" />
+			</output>
+		</template>
 	</templates>
 
 	<sections>
@@ -38,6 +44,9 @@
 		<section name="SECTION_LINK" source="net.example.LinkSectionSource"
 			location="LINK_LOCATION">
 			<input name="INPUT" />
+			<output name="OUTPUT">
+				<input section="SECTION" input="INPUT" />
+			</output>
 		</section>
 	</sections>
 
@@ -66,11 +75,11 @@
 			<resource name="RESOURCE" />
 		</exception>
 	</exceptions>
-	
+
 	<starting>
-	    <start>
-	    	<flow section="SECTION" input="INPUT" />
-	    </start>
+		<start>
+			<flow section="SECTION" input="INPUT" />
+		</start>
 	</starting>
 
 </woof>

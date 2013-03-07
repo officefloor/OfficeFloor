@@ -2,7 +2,8 @@
 
 	<templates>
 		<template name="change" uri="change" path="example/Change.html"
-			class="net.example.ChangeClass" secure="false" continue-rendering="false">
+			class="net.example.ChangeClass" secure="false" continue-rendering="false"
+			extends="TEMPLATE_LINK">
 			<output name="OUTPUT_1" argument-type="java.lang.Integer">
 				<resource name="RESOURCE" />
 			</output>
@@ -23,8 +24,8 @@
 				<property name="gwt.async.service.interfaces" value="net.example.GwtChangeAsync" />
 			</extension>
 		</template>
-		<template name="TEMPLATE_LINK" path="example/Link.html"
-			class="net.example.LinkClass" />
+		<template name="TEMPLATE_LINK" path="example/Link.html" />
+		<template name="TEMPLATE_PARENT" path="example/Parent.html" />
 	</templates>
 
 	<sections>

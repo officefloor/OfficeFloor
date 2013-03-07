@@ -729,6 +729,13 @@ public class WoofChangesImpl implements WoofChanges {
 	 */
 
 	@Override
+	public Map<WoofTemplateModel, WoofTemplateInheritance> getWoofTemplateInheritances() {
+		// TODO implement WoofChanges.getWoofTemplateInheritances
+		throw new UnsupportedOperationException(
+				"TODO implement WoofChanges.getWoofTemplateInheritances");
+	}
+
+	@Override
 	public String getGwtEntryPointClassName(WoofTemplateModel template) {
 
 		// Obtain the GWT module path
@@ -777,23 +784,24 @@ public class WoofChangesImpl implements WoofChanges {
 	@Override
 	public Change<WoofTemplateModel> addTemplate(String uri,
 			String templatePath, String templateLogicClass,
-			SectionType section, boolean isTemplateSecure,
-			Map<String, Boolean> linksSecure,
+			SectionType section, WoofTemplateModel superTemplate,
+			boolean isTemplateSecure, Map<String, Boolean> linksSecure,
 			String[] renderRedirectHttpMethods, boolean isContinueRendering,
 			String gwtEntryPointClassName,
 			String[] gwtServiceAsyncInterfaceNames, boolean isEnableComet,
 			String cometManualPublishMethodName) {
 
-		// TODO obtain the super template
-		String superTemplate = null;
-
 		// Obtain the template name
 		String templateName = getTemplateName(templatePath, uri, null,
 				this.model.getWoofTemplates());
 
+		// Obtain the super template name
+		String superTemplateName = (superTemplate == null ? null
+				: superTemplate.getSuperTemplate());
+
 		// Create the template
 		final WoofTemplateModel template = new WoofTemplateModel(templateName,
-				uri, templatePath, superTemplate, templateLogicClass,
+				uri, templatePath, superTemplateName, templateLogicClass,
 				isTemplateSecure, isContinueRendering);
 
 		// Determine if have links
@@ -928,7 +936,8 @@ public class WoofChangesImpl implements WoofChanges {
 	public Change<WoofTemplateModel> refactorTemplate(
 			final WoofTemplateModel template, final String uri,
 			final String templatePath, final String templateLogicClass,
-			SectionType sectionType, final boolean isTemplateSecure,
+			SectionType sectionType, WoofTemplateModel superTemplate,
+			String[] inheritedOutputNames, final boolean isTemplateSecure,
 			final Map<String, Boolean> linksSecure,
 			final String[] renderRedirectHttpMethods,
 			final boolean isContinueRendering, String gwtEntryPointClassName,

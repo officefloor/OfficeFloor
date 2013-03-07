@@ -67,7 +67,7 @@ public class AddTest extends AbstractWoofChangesTestCase {
 		// Add the template
 		Change<WoofTemplateModel> change = this.operations.addTemplate("uri",
 				"example/Template.ofp", "net.example.LogicClass", section,
-				false, null, null, false, null, null, false, null);
+				null, false, null, null, false, null, null, false, null);
 		change.getTarget().setX(100);
 		change.getTarget().setY(101);
 
@@ -107,7 +107,7 @@ public class AddTest extends AbstractWoofChangesTestCase {
 		// Add the template
 		Change<WoofTemplateModel> change = this.operations.addTemplate("uri",
 				"example/Template.ofp", "net.example.LogicClass", section,
-				false, null, null, true, null, null, false, null);
+				null, false, null, null, true, null, null, false, null);
 		change.getTarget().setX(100);
 		change.getTarget().setY(101);
 
@@ -135,8 +135,8 @@ public class AddTest extends AbstractWoofChangesTestCase {
 
 		// Add the root template
 		Change<WoofTemplateModel> change = this.operations.addTemplate("/",
-				"root.ofp", null, section, false, null, null, false, null,
-				null, false, null);
+				"root.ofp", null, section, null, false, null, null, false,
+				null, null, false, null);
 
 		// Validate change
 		this.assertChange(change, null, "Add Template", true);
@@ -161,7 +161,7 @@ public class AddTest extends AbstractWoofChangesTestCase {
 		secureLinks.put("LINK_2", Boolean.FALSE);
 		Change<WoofTemplateModel> change = this.operations.addTemplate(
 				"Template", "example/Template.ofp", "net.example.LogicClass",
-				section, true, secureLinks, new String[] { "POST", "PUT",
+				section, null, true, secureLinks, new String[] { "POST", "PUT",
 						"OTHER" }, true, null, null, false, null);
 
 		// Validate change
@@ -183,18 +183,18 @@ public class AddTest extends AbstractWoofChangesTestCase {
 
 		// Add the first template
 		this.operations.addTemplate("Template", "example/Template.ofp",
-				"Class1", section, false, null, null, false, null, null, false,
-				null).apply();
+				"Class1", section, null, false, null, null, false, null, null,
+				false, null).apply();
 
 		// Add twice
 		this.operations.addTemplate("Template", "example/Template.ofp",
-				"Class2", section, false, null, null, false, null, null, false,
-				null).apply();
+				"Class2", section, null, false, null, null, false, null, null,
+				false, null).apply();
 
 		// Add again with absolute URI
 		this.operations.addTemplate("/Template", "example/Template.ofp",
-				"Class3", section, false, null, null, false, null, null, false,
-				null).apply();
+				"Class3", section, null, false, null, null, false, null, null,
+				false, null).apply();
 
 		// Ensure appropriately added templates
 		this.validateModel();
@@ -229,9 +229,9 @@ public class AddTest extends AbstractWoofChangesTestCase {
 
 		// Add the template with GWT
 		this.operations.addTemplate(TEMPLATE_URI, "example/Template.ofp",
-				"net.example.LogicClass", section, false, null, null, false,
-				ENTRY_POINT_CLASS_NAME, SERVICE_ASYNC_INTERFACE_NAMES, false,
-				null).apply();
+				"net.example.LogicClass", section, null, false, null, null,
+				false, ENTRY_POINT_CLASS_NAME, SERVICE_ASYNC_INTERFACE_NAMES,
+				false, null).apply();
 
 		// Verify
 		this.verifyMockObjects();
@@ -263,8 +263,8 @@ public class AddTest extends AbstractWoofChangesTestCase {
 
 		// Add the template with Comet
 		this.operations.addTemplate(TEMPLATE_URI, "example/Template.ofp",
-				"net.example.LogicClass", section, false, null, null, false,
-				null, null, true, PUBLISH_METHOD_NAME).apply();
+				"net.example.LogicClass", section, null, false, null, null,
+				false, null, null, true, PUBLISH_METHOD_NAME).apply();
 
 		// Verify
 		this.verifyMockObjects();
