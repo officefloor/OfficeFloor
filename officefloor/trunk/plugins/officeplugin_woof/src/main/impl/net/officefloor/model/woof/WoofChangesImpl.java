@@ -18,12 +18,15 @@
 package net.officefloor.model.woof;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import net.officefloor.compile.governance.GovernanceType;
 import net.officefloor.compile.impl.util.CompileUtil;
@@ -730,9 +733,67 @@ public class WoofChangesImpl implements WoofChanges {
 
 	@Override
 	public Map<WoofTemplateModel, WoofTemplateInheritance> getWoofTemplateInheritances() {
-		// TODO implement WoofChanges.getWoofTemplateInheritances
-		throw new UnsupportedOperationException(
-				"TODO implement WoofChanges.getWoofTemplateInheritances");
+
+		// Create mapping of template by its name
+		Map<String, WoofTemplateModel> templates = new HashMap<String, WoofTemplateModel>();
+		for (WoofTemplateModel template : this.model.getWoofTemplates()) {
+			String templateName = template.getWoofTemplateName();
+			templates.put(templateName, template);
+		}
+
+		// Obtain the inheritance for each template
+		Map<WoofTemplateModel, WoofTemplateInheritance> templateInheritances = new HashMap<WoofTemplateModel, WoofTemplateInheritance>();
+		for (WoofTemplateModel template : this.model.getWoofTemplates()) {
+
+			// Create the hierarchy for the template
+			List<WoofTemplateModel> hierarchyList = new LinkedList<WoofTemplateModel>();
+			WoofTemplateModel currentTemplate = template;
+			boolean isCyclicHierarchy = false;
+			while ((currentTemplate != null) && (!isCyclicHierarchy)) {
+
+				// Include current template in hierarchy
+				hierarchyList.add(currentTemplate);
+
+				// Obtain the super template for next iteration
+				String superTemplateName = currentTemplate.getSuperTemplate();
+				currentTemplate = templates.get(superTemplateName);
+				if (hierarchyList.contains(currentTemplate)) {
+					isCyclicHierarchy = true;
+				}
+			}
+			WoofTemplateModel[] hierarchy = hierarchyList
+					.toArray(new WoofTemplateModel[hierarchyList.size()]);
+
+			// Create the template path value and set of inherited output names
+			StringBuilder templatePathValue = new StringBuilder();
+			Set<String> inheritedOutputNames = new HashSet<String>();
+			boolean isFirst = true;
+			for (WoofTemplateModel superTemplate : hierarchy) {
+
+				// Include the template path
+				if (!isFirst) {
+					templatePathValue.append(", ");
+				}
+				isFirst = false;
+				templatePathValue.append(superTemplate.getTemplatePath());
+
+				// Include the inherited output names
+				for (WoofTemplateOutputModel output : superTemplate
+						.getOutputs()) {
+					String outputName = output.getWoofTemplateOutputName();
+					inheritedOutputNames.add(outputName);
+				}
+			}
+
+			// Create and include template inheritance
+			WoofTemplateInheritance inheritance = new WoofTemplateInheritanceImpl(
+					hierarchy, templatePathValue.toString(),
+					inheritedOutputNames);
+			templateInheritances.put(template, inheritance);
+		}
+
+		// Return the template inheritances
+		return templateInheritances;
 	}
 
 	@Override
@@ -797,7 +858,7 @@ public class WoofChangesImpl implements WoofChanges {
 
 		// Obtain the super template name
 		String superTemplateName = (superTemplate == null ? null
-				: superTemplate.getSuperTemplate());
+				: superTemplate.getWoofTemplateName());
 
 		// Create the template
 		final WoofTemplateModel template = new WoofTemplateModel(templateName,
@@ -823,6 +884,18 @@ public class WoofChangesImpl implements WoofChanges {
 			}
 		}
 
+		// Obtain the possible template inheritance
+		Set<String> inheritedOutputNames = null;
+		if (superTemplate != null) {
+			// Obtain the inherited template outputs
+			WoofTemplateInheritance inheritance = this
+					.getWoofTemplateInheritances().get(superTemplate);
+			if (inheritance != null) {
+				inheritedOutputNames = inheritance
+						.getInheritedWoofTemplateOutputNames();
+			}
+		}
+
 		// Add the outputs for the template
 		for (SectionOutputType output : section.getSectionOutputTypes()) {
 
@@ -834,6 +907,12 @@ public class WoofChangesImpl implements WoofChanges {
 			// Obtain the output details
 			String outputName = output.getSectionOutputName();
 			String argumentType = output.getArgumentType();
+
+			// Ignore if inherited
+			if ((inheritedOutputNames != null)
+					&& (inheritedOutputNames.contains(outputName))) {
+				continue;
+			}
 
 			// Ignore continue rendering (if appropriate)
 			if ((!isContinueRendering)
@@ -975,6 +1054,7 @@ public class WoofChangesImpl implements WoofChanges {
 		final String existingTemplatePath = template.getTemplatePath();
 		final String existingTemplateClassName = template
 				.getTemplateClassName();
+		final String existingSuperTemplateName = template.getSuperTemplate();
 		final boolean existingIsTemplateSecure = template.getIsTemplateSecure();
 		final List<WoofTemplateLinkModel> existingTemplateLinks = new ArrayList<WoofTemplateLinkModel>(
 				template.getLinks());
@@ -982,6 +1062,10 @@ public class WoofChangesImpl implements WoofChanges {
 				template.getRedirects());
 		final boolean existingIsContinueRendering = template
 				.getIsContinueRendering();
+
+		// Obtain the calculated new details
+		final String newSuperTemplateName = (superTemplate == null ? null
+				: superTemplate.getWoofTemplateName());
 
 		// Create change to attributes
 		Change<WoofTemplateModel> attributeChange = new AbstractChange<WoofTemplateModel>(
@@ -993,6 +1077,7 @@ public class WoofChangesImpl implements WoofChanges {
 				template.setUri(uri);
 				template.setTemplatePath(templatePath);
 				template.setTemplateClassName(templateLogicClass);
+				template.setSuperTemplate(newSuperTemplateName);
 				template.setIsTemplateSecure(isTemplateSecure);
 				template.setIsContinueRendering(isContinueRendering);
 
@@ -1031,6 +1116,7 @@ public class WoofChangesImpl implements WoofChanges {
 				template.setUri(existingUri);
 				template.setTemplatePath(existingTemplatePath);
 				template.setTemplateClassName(existingTemplateClassName);
+				template.setSuperTemplate(existingSuperTemplateName);
 				template.setIsTemplateSecure(existingIsTemplateSecure);
 				template.setIsContinueRendering(existingIsContinueRendering);
 
@@ -1304,6 +1390,10 @@ public class WoofChangesImpl implements WoofChanges {
 					output);
 		}
 
+		// Obtain the set of inherited output names
+		Set<String> inheritedTemplateOutputNames = (inheritedOutputNames == null ? new HashSet<String>()
+				: new HashSet<String>(Arrays.asList(inheritedOutputNames)));
+
 		// Refactor the outputs (either refactoring, adding or removing)
 		for (final SectionOutputType outputType : sectionType
 				.getSectionOutputTypes()) {
@@ -1316,6 +1406,11 @@ public class WoofChangesImpl implements WoofChanges {
 			// Obtain the output details
 			final String outputName = outputType.getSectionOutputName();
 			final String argumentType = outputType.getArgumentType();
+
+			// Ignore if inheriting the output configuration
+			if (inheritedTemplateOutputNames.contains(outputName)) {
+				continue;
+			}
 
 			// Ignore continue rendering (if appropriate)
 			if ((!isContinueRendering)
@@ -1419,10 +1514,17 @@ public class WoofChangesImpl implements WoofChanges {
 		// Sort outputs at end (so apply has right order)
 		changes.add(sortChange);
 
-		// Return aggregate change for refactoring
-		return new AggregateChange<WoofTemplateModel>(template,
-				"Refactor Template",
+		// Create the aggregate change for refactoring
+		Change<WoofTemplateModel> change = new AggregateChange<WoofTemplateModel>(
+				template, "Refactor Template",
 				changes.toArray(new Change[changes.size()]));
+
+		// Include super template name changes
+		change = this.includeSuperTemplateNameChanges(change,
+				existingTemplateName, newTemplateName);
+
+		// Return the change for refactoring
+		return change;
 	}
 
 	@Override
@@ -1492,6 +1594,10 @@ public class WoofChangesImpl implements WoofChanges {
 					change.getChangeDescription(), change, gwtChange);
 		}
 
+		// Include changes for super template name
+		change = this.includeSuperTemplateNameChanges(change,
+				originalTemplateName, newTemplateName);
+
 		// Return the change
 		return change;
 	}
@@ -1499,6 +1605,9 @@ public class WoofChangesImpl implements WoofChanges {
 	@Override
 	public Change<WoofTemplateModel> removeTemplate(
 			final WoofTemplateModel template) {
+
+		// Obtain the template name
+		String templateName = template.getWoofTemplateName();
 
 		// Ensure template available to remove
 		boolean isInModel = false;
@@ -1510,13 +1619,13 @@ public class WoofChangesImpl implements WoofChanges {
 		if (!isInModel) {
 			// Template model not in model
 			return new NoChange<WoofTemplateModel>(template, "Remove template "
-					+ template.getWoofTemplateName(), "Template "
-					+ template.getWoofTemplateName() + " is not in WoOF model");
+					+ templateName, "Template " + templateName
+					+ " is not in WoOF model");
 		}
 
-		// Return change to remove template
-		return new AbstractChange<WoofTemplateModel>(template,
-				"Remove template " + template.getWoofTemplateName()) {
+		// Create change to remove template
+		Change<WoofTemplateModel> change = new AbstractChange<WoofTemplateModel>(
+				template, "Remove template " + templateName) {
 
 			/**
 			 * {@link ConnectionModel} instances.
@@ -1553,6 +1662,67 @@ public class WoofChangesImpl implements WoofChanges {
 				WoofChangesImpl.this.sortTemplates();
 			}
 		};
+
+		// Include changes for child templates no longer inheriting
+		change = this.includeSuperTemplateNameChanges(change, templateName,
+				null);
+
+		// Return the change
+		return change;
+	}
+
+	/**
+	 * Includes the {@link Change} instances for the super template name
+	 * potentially changing.
+	 * 
+	 * @param currentChange
+	 *            Current {@link Change}.
+	 * @param originalTemplateName
+	 *            Original {@link WoofTemplateModel} name.
+	 * @param newTemplateName
+	 *            New {@link WoofTemplateModel} name.
+	 * @return {@link Change} including any potential super template name
+	 *         changes.
+	 */
+	private Change<WoofTemplateModel> includeSuperTemplateNameChanges(
+			Change<WoofTemplateModel> currentChange,
+			final String originalTemplateName, final String newTemplateName) {
+
+		// Identify the child templates
+		List<WoofTemplateModel> childTemplates = new LinkedList<WoofTemplateModel>();
+		for (WoofTemplateModel checkTemplate : this.model.getWoofTemplates()) {
+			if (originalTemplateName.equals(checkTemplate.getSuperTemplate())) {
+				childTemplates.add(checkTemplate);
+			}
+		}
+		if (childTemplates.size() == 0) {
+			// No child templates, so no additional changes
+			return currentChange;
+		}
+
+		// Create changes for child templates (+1 to include current change)
+		Change<?>[] changes = new Change[childTemplates.size() + 1];
+		changes[0] = currentChange;
+		int changeIndex = 1;
+		for (final WoofTemplateModel childTemplate : childTemplates) {
+			changes[changeIndex++] = new AbstractChange<WoofTemplateModel>(
+					childTemplate, "Change Super Template Name") {
+				@Override
+				public void apply() {
+					childTemplate.setSuperTemplate(newTemplateName);
+				}
+
+				@Override
+				public void revert() {
+					childTemplate.setSuperTemplate(originalTemplateName);
+				}
+			};
+		}
+
+		// Create and return the aggregate change
+		return new AggregateChange<WoofTemplateModel>(
+				currentChange.getTarget(),
+				currentChange.getChangeDescription(), changes);
 	}
 
 	@Override

@@ -3,7 +3,7 @@
 	<templates>
 		<template name="template" uri="template" path="example/Template.html"
 			class="net.example.LogicClass" secure="true" continue-rendering="true"
-			extnds="TEMPLATE_PARENT">
+			extends="TEMPLATE_PARENT">
 			<output name="OUTPUT_1" argument-type="java.lang.Integer">
 				<input section="SECTION" input="INPUT" />
 			</output>
