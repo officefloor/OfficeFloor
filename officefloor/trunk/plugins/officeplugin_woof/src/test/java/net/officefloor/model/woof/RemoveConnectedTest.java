@@ -20,8 +20,6 @@ package net.officefloor.model.woof;
 import java.io.IOException;
 import java.sql.SQLException;
 
-import org.junit.Ignore;
-
 import net.officefloor.model.change.Change;
 import net.officefloor.plugin.web.http.security.HttpCredentials;
 import net.officefloor.plugin.web.http.security.type.HttpSecurityType;
@@ -31,7 +29,6 @@ import net.officefloor.plugin.web.http.security.type.HttpSecurityType;
  * 
  * @author Daniel Sagenschneider
  */
-@Ignore("TODO provide super template functionality")
 public class RemoveConnectedTest extends AbstractWoofChangesTestCase {
 
 	/**

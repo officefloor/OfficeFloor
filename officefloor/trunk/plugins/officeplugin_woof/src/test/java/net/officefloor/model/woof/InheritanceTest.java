@@ -23,8 +23,6 @@ import java.util.Set;
 
 import javax.sql.DataSource;
 
-import org.junit.Ignore;
-
 import net.officefloor.compile.section.SectionType;
 import net.officefloor.model.change.Change;
 import net.officefloor.plugin.web.http.template.section.HttpTemplateSectionSource;
@@ -34,7 +32,6 @@ import net.officefloor.plugin.web.http.template.section.HttpTemplateSectionSourc
  * 
  * @author Daniel Sagenschneider
  */
-@Ignore("TODO provide super template functionality")
 public class InheritanceTest extends AbstractWoofChangesTestCase {
 
 	/**
@@ -148,12 +145,12 @@ public class InheritanceTest extends AbstractWoofChangesTestCase {
 	 * change and therefore child {@link WoofTemplateModel} to updates its
 	 * reference to parent {@link WoofTemplateModel}.
 	 */
-	public void testNotChangeUri() {
+	public void testChangeSuperTemplateUri() {
 
 		// Obtain the grand parent template
 		WoofTemplateModel grandParent = this.model.getWoofTemplates().get(0);
-		assertEquals("Incorrect grand parent template",
-				"TEMPLATE_GRAND_PARENT", grandParent.getWoofTemplateName());
+		assertEquals("Incorrect grand parent template", "GRAND_PARENT",
+				grandParent.getWoofTemplateName());
 
 		// Test
 		this.replayMockObjects();

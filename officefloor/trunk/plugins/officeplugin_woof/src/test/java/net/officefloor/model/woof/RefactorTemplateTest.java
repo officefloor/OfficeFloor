@@ -23,8 +23,6 @@ import java.util.Map;
 
 import javax.sql.DataSource;
 
-import org.junit.Ignore;
-
 import net.officefloor.compile.section.SectionType;
 import net.officefloor.model.change.Change;
 import net.officefloor.model.change.Conflict;
@@ -35,7 +33,6 @@ import net.officefloor.plugin.web.http.template.section.HttpTemplateSectionSourc
  * 
  * @author Daniel Sagenschneider
  */
-@Ignore("TODO provide super template functionality")
 public class RefactorTemplateTest extends AbstractWoofChangesTestCase {
 
 	/**
@@ -65,6 +62,9 @@ public class RefactorTemplateTest extends AbstractWoofChangesTestCase {
 	 * Ensure no change.
 	 */
 	public void testNoChange() {
+		
+		// TODO remove
+		this.setVerbose(true);
 
 		// Record GWT changes
 		this.recordGwtModulePath("net/example/template.gwt.xml");
