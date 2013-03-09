@@ -21,7 +21,7 @@ import java.beans.PropertyChangeEvent;
 import java.util.List;
 
 import net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart;
-import net.officefloor.eclipse.conform.figures.ConformModelItemFigure;
+import net.officefloor.eclipse.conform.figures.ExistingConformModelItemFigure;
 import net.officefloor.eclipse.util.EclipseUtil;
 import net.officefloor.model.conform.ExistingItemModel;
 import net.officefloor.model.conform.ExistingItemModel.ExistingItemEvent;
@@ -35,16 +35,16 @@ import org.eclipse.gef.EditPart;
  */
 public class ExistingItemEditPart
 		extends
-		AbstractOfficeFloorEditPart<ExistingItemModel, ExistingItemEvent, ConformModelItemFigure> {
+		AbstractOfficeFloorEditPart<ExistingItemModel, ExistingItemEvent, ExistingConformModelItemFigure> {
 
 	/*
 	 * ===================== AbstractOfficeFloorEditPart =======================
 	 */
 
 	@Override
-	protected ConformModelItemFigure createOfficeFloorFigure() {
-		return new ConformModelItemFigure(this.getCastedModel()
-				.getExistingItemName(), true);
+	protected ExistingConformModelItemFigure createOfficeFloorFigure() {
+		return new ExistingConformModelItemFigure(this.getCastedModel()
+				.getExistingItemName());
 	}
 
 	@Override

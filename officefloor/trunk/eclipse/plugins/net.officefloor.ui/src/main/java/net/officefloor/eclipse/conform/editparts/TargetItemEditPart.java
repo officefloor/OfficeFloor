@@ -21,11 +21,14 @@ import java.beans.PropertyChangeEvent;
 import java.util.List;
 
 import net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart;
-import net.officefloor.eclipse.conform.figures.ConformModelItemFigure;
+import net.officefloor.eclipse.conform.figures.TargetConformModelItemFigure;
+import net.officefloor.eclipse.conform.figures.TargetConformModelItemFigureContext;
 import net.officefloor.eclipse.util.EclipseUtil;
+import net.officefloor.model.conform.ExistingItemToTargetItemModel;
 import net.officefloor.model.conform.TargetItemModel;
 import net.officefloor.model.conform.TargetItemModel.TargetItemEvent;
 
+import org.eclipse.draw2d.IFigure;
 import org.eclipse.gef.EditPart;
 
 /**
@@ -35,16 +38,16 @@ import org.eclipse.gef.EditPart;
  */
 public class TargetItemEditPart
 		extends
-		AbstractOfficeFloorEditPart<TargetItemModel, TargetItemEvent, ConformModelItemFigure> {
+		AbstractOfficeFloorEditPart<TargetItemModel, TargetItemEvent, TargetConformModelItemFigure>
+		implements TargetConformModelItemFigureContext {
 
 	/*
 	 * ================== AbstractOfficeFloorEditPart ======================
 	 */
 
 	@Override
-	protected ConformModelItemFigure createOfficeFloorFigure() {
-		return new ConformModelItemFigure(this.getCastedModel()
-				.getTargetItemName(), false);
+	protected TargetConformModelItemFigure createOfficeFloorFigure() {
+		return new TargetConformModelItemFigure(this);
 	}
 
 	@Override
@@ -64,13 +67,75 @@ public class TargetItemEditPart
 		case CHANGE_EXISTING_ITEM:
 			this.refreshTargetConnections();
 			break;
-			
+
 		case CHANGE_TARGET_ITEM_NAME:
 			// Name should not change, but reflect if does
-			this.getOfficeFloorFigure().setItemName(
-					this.getCastedModel().getTargetItemName());
+			this.getOfficeFloorFigure().setItemName(this.getTargetItemName());
+			break;
+
+		case CHANGE_IS_INHERITABLE:
+			// Flag whether may inherit
+			this.getOfficeFloorFigure().setInheritable(this.isInheritable());
+			break;
+
+		case CHANGE_INHERIT:
+			// Flag whether inheriting
+			this.getOfficeFloorFigure().setInherit(this.isInherit());
 			break;
 		}
+	}
+
+	/*
+	 * =============== TargetConformModelItemFigureContext ================
+	 */
+
+	@Override
+	public String getTargetItemName() {
+		return this.getCastedModel().getTargetItemName();
+	}
+
+	@Override
+	public boolean isInheritable() {
+		return this.getCastedModel().getIsInheritable();
+	}
+
+	@Override
+	public boolean isInherit() {
+		return this.getCastedModel().getInherit();
+	}
+
+	@Override
+	public void setInherit(boolean isInherit) {
+
+		// Obtain the item
+		TargetItemModel item = this.getCastedModel();
+
+		// Determine if action is required
+		if (isInherit == item.getInherit()) {
+			return; // No change required
+		}
+
+		// Change required
+		item.setInherit(isInherit);
+		if (isInherit) {
+			// Inheriting configuration, so remove possible configuration
+			ExistingItemToTargetItemModel connection = item.getExistingItem();
+			if (connection != null) {
+				connection.remove();
+			}
+		}
+	}
+
+	@Override
+	public void setLayoutConstraint(IFigure figure, Object layoutConstraint) {
+
+		// Obtain the parent edit part
+		TargetModelEditPart parentEditPart = (TargetModelEditPart) this
+				.getParent();
+
+		// Provide constraint for the figure
+		parentEditPart.getOfficeFloorFigure().getFigure().getLayoutManager()
+				.setConstraint(figure, layoutConstraint);
 	}
 
 }
