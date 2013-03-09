@@ -17,8 +17,13 @@
  */
 package net.officefloor.eclipse.conform;
 
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import net.officefloor.eclipse.common.dialog.input.Input;
 import net.officefloor.eclipse.common.dialog.input.InputContext;
@@ -68,9 +73,13 @@ public class ConformInput implements Input<Canvas> {
 	 * @param existingItemNames
 	 *            Names for the {@link ExistingItemModel} instances.
 	 * @param targetItemNames
-	 *            Names for he {@link TargetItemModel} instances.
+	 *            Names for the {@link TargetItemModel} instances.
+	 * @param inheritableTargetItemNames
+	 *            {@link TargetItemModel} names that may inherit their
+	 *            configuration.
 	 */
-	public void setConform(String[] existingItemNames, String[] targetItemNames) {
+	public void setConform(String[] existingItemNames,
+			String[] targetItemNames, String... inheritableTargetItemNames) {
 
 		// Create the conform model for the tasks
 		ConformModel conform = new ConformModel();
@@ -82,11 +91,22 @@ public class ConformInput implements Input<Canvas> {
 			existing.addExistingItem(new ExistingItemModel(existingItemName));
 		}
 
+		// Create the set of inheritable item names
+		Set<String> inheritableItemNames = new HashSet<String>(
+				Arrays.asList(inheritableTargetItemNames));
+
 		// Add target model
 		TargetModel target = new TargetModel();
 		conform.setTargetModel(target);
 		for (String targetItemName : targetItemNames) {
-			target.addTargetItem(new TargetItemModel(targetItemName));
+
+			// Determine if target item is inheritable
+			boolean isInheritable = inheritableItemNames
+					.contains(targetItemName);
+
+			// Add the target item (inherit by default)
+			target.addTargetItem(new TargetItemModel(targetItemName,
+					isInheritable, isInheritable));
 		}
 
 		// Specify the conform model
@@ -126,6 +146,35 @@ public class ConformInput implements Input<Canvas> {
 
 		// Return the map
 		return map;
+	}
+
+	/**
+	 * Obtains the listing of {@link TargetItemModel} names that are flagged to
+	 * inherit.
+	 * 
+	 * @return Listing of {@link TargetItemModel} names that are flagged to
+	 *         inherit.
+	 */
+	public String[] getInheritedTargetItemNames() {
+
+		// Create listing of inherited target item names
+		List<String> inheritedItems = new LinkedList<String>();
+		TargetModel target = this.conform.getTargetModel();
+		for (TargetItemModel item : target.getTargetItems()) {
+
+			// Ignore item if it is not inheritable
+			if (!item.getIsInheritable()) {
+				continue;
+			}
+
+			// Only include if flagged to inherit
+			if (item.getInherit()) {
+				inheritedItems.add(item.getTargetItemName());
+			}
+		}
+
+		// Return the listing of inherited target item names
+		return inheritedItems.toArray(new String[inheritedItems.size()]);
 	}
 
 	/**
@@ -192,6 +241,9 @@ public class ConformInput implements Input<Canvas> {
 				// Connect target item to existing item
 				new ExistingItemToTargetItemModel(existingItem, targetItem)
 						.connect();
+
+				// As mapped by name, should not inherit
+				targetItem.setInherit(false);
 
 				// Remove existing item so only connect once
 				existingItems.remove(itemName);

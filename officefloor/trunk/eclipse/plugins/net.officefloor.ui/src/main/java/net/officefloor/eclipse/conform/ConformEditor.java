@@ -138,6 +138,11 @@ public class ConformEditor extends AbstractOfficeFloorEditor<Model, Object> {
 							final TargetItemModel target,
 							CreateConnectionRequest request) {
 
+						// Determine if target item is inheriting
+						if (target.getInherit()) {
+							return null; // inheriting so no configuration
+						}
+
 						// Create the connection
 						final ExistingItemToTargetItemModel conn = new ExistingItemToTargetItemModel(
 								source, target);

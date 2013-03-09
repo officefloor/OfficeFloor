@@ -34,7 +34,7 @@ import net.officefloor.model.conform.TargetItemModel;
  * 
  * @author Daniel Sagenschneider
  */
-public class ConformModelItemFigure extends AbstractOfficeFloorFigure {
+public class ExistingConformModelItemFigure extends AbstractOfficeFloorFigure {
 
 	/**
 	 * {@link Label} displaying the item name.
@@ -47,15 +47,11 @@ public class ConformModelItemFigure extends AbstractOfficeFloorFigure {
 	 * @param itemName
 	 *            Name of the {@link ExistingItemModel} or
 	 *            {@link TargetItemModel}.
-	 * @param isExistingNotTarget
-	 *            Flag indicating if {@link ExistingItemModel} rather than
-	 *            {@link TargetItemModel}.
 	 */
-	public ConformModelItemFigure(String itemName, boolean isExistingNotTarget) {
+	public ExistingConformModelItemFigure(String itemName) {
 		// Create the connector figure
 		LabelConnectorFigure figure = new LabelConnectorFigure(itemName,
-				(isExistingNotTarget ? ConnectorDirection.EAST
-						: ConnectorDirection.WEST), ColorConstants.black);
+				ConnectorDirection.EAST, ColorConstants.black);
 		this.itemName = figure.getLabel();
 
 		// Register the anchor for the connection

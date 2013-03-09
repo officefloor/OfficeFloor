@@ -94,9 +94,10 @@ public class HttpTemplateAlignSectionWizardPage extends WizardPage {
 			// Include the output
 			outputs.add(output.getSectionOutputName());
 		}
+
+		// Specify the confirm details
 		this.outputConform.setConform(this.templateOutputs,
 				outputs.toArray(new String[0]));
-
 	}
 
 	/**

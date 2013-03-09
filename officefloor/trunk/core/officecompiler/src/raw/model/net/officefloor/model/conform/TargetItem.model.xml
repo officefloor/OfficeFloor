@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <model>
     <field type="String" name="target item name" />
+    <field type="boolean" name="is inheritable" />
+    <field type="boolean" name="inherit" />
     <field type="ExistingItemToTargetItemModel" name="existing item" />
 </model>
