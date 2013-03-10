@@ -18,7 +18,9 @@
 package net.officefloor.model.woof;
 
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 
 import javax.sql.DataSource;
@@ -62,9 +64,6 @@ public class RefactorTemplateTest extends AbstractWoofChangesTestCase {
 	 * Ensure no change.
 	 */
 	public void testNoChange() {
-		
-		// TODO remove
-		this.setVerbose(true);
 
 		// Record GWT changes
 		this.recordGwtModulePath("net/example/template.gwt.xml");
@@ -120,8 +119,8 @@ public class RefactorTemplateTest extends AbstractWoofChangesTestCase {
 		Change<WoofTemplateModel> change = this.operations.refactorTemplate(
 				this.template, "template", "example/Template.html",
 				"net.example.LogicClass", section, superTemplate,
-				new String[] { "OUTPUT_INHERIT" }, true, secureLinks,
-				new String[] { "POST", "PUT", "OTHER" }, true,
+				new HashSet<String>(Arrays.asList("OUTPUT_INHERIT")), true,
+				secureLinks, new String[] { "POST", "PUT", "OTHER" }, true,
 				"net.example.client.ExampleGwtEntryPoint", new String[] {
 						"net.example.GwtServiceAsync",
 						"net.example.GwtAnotherAsync" }, true, "manualPublish",
@@ -189,8 +188,8 @@ public class RefactorTemplateTest extends AbstractWoofChangesTestCase {
 		Change<WoofTemplateModel> change = this.operations.refactorTemplate(
 				this.template, "change", "example/Change.html",
 				"net.example.ChangeClass", section, superTemplate,
-				new String[] { "OUTPUT_INHERIT" }, false, secureLinks,
-				new String[] { "CHANGE" }, false,
+				new HashSet<String>(Arrays.asList("OUTPUT_INHERIT")), false,
+				secureLinks, new String[] { "CHANGE" }, false,
 				"net.example.client.ExampleGwtEntryPoint",
 				new String[] { "net.example.GwtChangeAsync" }, true,
 				"manualChange", this.templateOutputNameMapping);
@@ -290,8 +289,8 @@ public class RefactorTemplateTest extends AbstractWoofChangesTestCase {
 		Change<WoofTemplateModel> change = this.operations.refactorTemplate(
 				this.template, "add", "example/Add.html",
 				"net.example.AddClass", section, superTemplate,
-				new String[] { "OUTPUT_INHERIT" }, true, secureLinks,
-				new String[] { "POST", "OTHER" }, true,
+				new HashSet<String>(Arrays.asList("OUTPUT_INHERIT")), true,
+				secureLinks, new String[] { "POST", "OTHER" }, true,
 				"net.example.client.AddGwtEntryPoint",
 				new String[] { "net.example.GwtAddAsync" }, true, "manualAdd",
 				this.templateOutputNameMapping);

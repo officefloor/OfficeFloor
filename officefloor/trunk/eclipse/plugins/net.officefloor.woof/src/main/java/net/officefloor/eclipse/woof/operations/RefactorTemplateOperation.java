@@ -18,6 +18,7 @@
 package net.officefloor.eclipse.woof.operations;
 
 import java.util.Map;
+import java.util.Set;
 
 import net.officefloor.compile.section.SectionType;
 import net.officefloor.eclipse.common.action.Operation;
@@ -26,6 +27,7 @@ import net.officefloor.eclipse.wizard.template.HttpTemplateWizard;
 import net.officefloor.eclipse.woof.editparts.WoofTemplateEditPart;
 import net.officefloor.model.change.Change;
 import net.officefloor.model.woof.WoofChanges;
+import net.officefloor.model.woof.WoofTemplateInheritance;
 import net.officefloor.model.woof.WoofTemplateModel;
 
 /**
@@ -60,9 +62,14 @@ public class RefactorTemplateOperation extends
 		HttpTemplateInstance existing = new HttpTemplateInstance(template,
 				changes);
 
+		// Obtain the template inheritances
+		Map<String, WoofTemplateInheritance> templateInheritances = changes
+				.getWoofTemplateInheritances();
+
 		// Obtain the template instance
 		HttpTemplateInstance instance = HttpTemplateWizard
-				.getHttpTemplateInstance(context.getEditPart(), existing);
+				.getHttpTemplateInstance(context.getEditPart(), existing,
+						templateInheritances);
 		if (instance == null) {
 			return null; // must have template
 		}
@@ -72,6 +79,9 @@ public class RefactorTemplateOperation extends
 		String path = instance.getTemplatePath();
 		String logicClassName = instance.getLogicClassName();
 		SectionType type = instance.getTemplateSectionType();
+		WoofTemplateModel superTemplate = instance.getSuperTemplate();
+		Set<String> inheritedTemplateOutputNames = instance
+				.getInheritedTemplateOutputNames();
 		boolean isTemplateSecure = instance.isTemplateSecure();
 		Map<String, Boolean> linksSecure = instance.getLinksSecure();
 		String[] renderRedirectHttpMethods = instance
@@ -85,14 +95,10 @@ public class RefactorTemplateOperation extends
 				.getCometManualPublishMethodName();
 		Map<String, String> outputNameMapping = instance.getOutputNameMapping();
 
-		// TODO provide inheritance information
-		WoofTemplateModel superTemplate = null;
-		String[] inheritedOutputNames = null;
-
 		// Create change to refactor template
 		Change<WoofTemplateModel> change = changes.refactorTemplate(template,
 				uri, path, logicClassName, type, superTemplate,
-				inheritedOutputNames, isTemplateSecure, linksSecure,
+				inheritedTemplateOutputNames, isTemplateSecure, linksSecure,
 				renderRedirectHttpMethods, isContinueRendering,
 				entryPointClassName, serviceAsyncInterfaces, isEnableComet,
 				cometManualPublishMethodName, outputNameMapping);

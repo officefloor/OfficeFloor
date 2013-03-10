@@ -27,6 +27,11 @@ import java.util.Set;
 public class WoofTemplateInheritanceImpl implements WoofTemplateInheritance {
 
 	/**
+	 * Super {@link WoofTemplateModel}.
+	 */
+	private final WoofTemplateModel superTemplate;
+
+	/**
 	 * Inheritance hierarchy.
 	 */
 	private final WoofTemplateModel[] hierarchy;
@@ -44,6 +49,8 @@ public class WoofTemplateInheritanceImpl implements WoofTemplateInheritance {
 	/**
 	 * Initiate.
 	 * 
+	 * @param superTemplate
+	 *            Super {@link WoofTemplateModel}.
 	 * @param hierarchy
 	 *            Inheritance hierarchy.
 	 * @param inheritancePropertyValue
@@ -51,8 +58,10 @@ public class WoofTemplateInheritanceImpl implements WoofTemplateInheritance {
 	 * @param inheritedOutputNames
 	 *            Inherited output names.
 	 */
-	public WoofTemplateInheritanceImpl(WoofTemplateModel[] hierarchy,
-			String inheritancePropertyValue, Set<String> inheritedOutputNames) {
+	public WoofTemplateInheritanceImpl(WoofTemplateModel superTemplate,
+			WoofTemplateModel[] hierarchy, String inheritancePropertyValue,
+			Set<String> inheritedOutputNames) {
+		this.superTemplate = superTemplate;
 		this.hierarchy = hierarchy;
 		this.inheritancePropertyValue = inheritancePropertyValue;
 		this.inheritedOutputNames = inheritedOutputNames;
@@ -61,6 +70,11 @@ public class WoofTemplateInheritanceImpl implements WoofTemplateInheritance {
 	/*
 	 * ==================== WoofTemplateInheritance =======================
 	 */
+
+	@Override
+	public WoofTemplateModel getSuperTemplate() {
+		return this.superTemplate;
+	}
 
 	@Override
 	public WoofTemplateModel[] getInheritanceHierarchy() {

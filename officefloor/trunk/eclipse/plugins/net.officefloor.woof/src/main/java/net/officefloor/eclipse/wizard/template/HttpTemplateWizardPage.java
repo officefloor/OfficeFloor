@@ -20,6 +20,7 @@ package net.officefloor.eclipse.wizard.template;
 import java.io.File;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -51,7 +52,9 @@ import net.officefloor.eclipse.util.EclipseUtil;
 import net.officefloor.eclipse.web.HttpTemplateSectionSourceExtension;
 import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
 import net.officefloor.frame.spi.source.ResourceSource;
+import net.officefloor.model.woof.WoofTemplateInheritance;
 import net.officefloor.model.woof.WoofTemplateLinkModel;
+import net.officefloor.model.woof.WoofTemplateModel;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
 import net.officefloor.plugin.web.http.template.HttpTemplateWorkSource;
 import net.officefloor.plugin.web.http.template.parse.HttpTemplate;
@@ -78,6 +81,11 @@ import org.eclipse.swt.widgets.Label;
  */
 public class HttpTemplateWizardPage extends WizardPage implements
 		CompilerIssues, SectionSourceExtensionContext {
+
+	/**
+	 * {@link Property} specifying the super {@link WoofTemplateModel} name.
+	 */
+	private static final String SUPER_TEMPLATE_NAME = "super.template.name";
 
 	/**
 	 * {@link Property} indicating whether may continue rendering.
@@ -142,6 +150,16 @@ public class HttpTemplateWizardPage extends WizardPage implements
 	private final Property logicClassName;
 
 	/**
+	 * Super {@link WoofTemplateModel} name.
+	 */
+	private final Property superTemplateName;
+
+	/**
+	 * Inherited template paths.
+	 */
+	private final Property inheritedTemplatePaths;
+
+	/**
 	 * Indicates if the template is secure.
 	 */
 	private final Property isTemplateSecure;
@@ -152,7 +170,7 @@ public class HttpTemplateWizardPage extends WizardPage implements
 	private WoofTemplateLinkModel[] linksSecure = new WoofTemplateLinkModel[0];
 
 	/**
-	 * HTTP methods that trigger a redirect on rendeirng the
+	 * HTTP methods that trigger a redirect on rendering the
 	 * {@link HttpTemplate}.
 	 */
 	private final Property renderRedirectHttpMethods;
@@ -161,6 +179,17 @@ public class HttpTemplateWizardPage extends WizardPage implements
 	 * Indicates whether allow continue rendering.
 	 */
 	private final Property isContinueRendering;
+
+	/**
+	 * {@link WoofTemplateInheritance} for the super {@link WoofTemplateModel}.
+	 */
+	private WoofTemplateInheritance superTemplateInheritance;
+
+	/**
+	 * {@link WoofTemplateInheritance} instances by their
+	 * {@link WoofTemplateModel} name.
+	 */
+	private final Map<String, WoofTemplateInheritance> templateInheritances;
 
 	/**
 	 * GWT EntryPoint class name.
@@ -207,10 +236,14 @@ public class HttpTemplateWizardPage extends WizardPage implements
 	 *            {@link AbstractOfficeFloorEditPart}.
 	 * @param templateInstance
 	 *            {@link HttpTemplateInstance}.
+	 * @param templateInheritances
+	 *            {@link WoofTemplateInheritance} instances by their
+	 *            {@link WoofTemplateModel} name.
 	 */
 	protected HttpTemplateWizardPage(final IProject project,
 			final AbstractOfficeFloorEditPart<?, ?, ?> editPart,
-			HttpTemplateInstance templateInstance) {
+			HttpTemplateInstance templateInstance,
+			Map<String, WoofTemplateInheritance> templateInheritances) {
 		super("HTTP Template");
 		this.project = project;
 		this.templateInstance = templateInstance;
@@ -251,10 +284,16 @@ public class HttpTemplateWizardPage extends WizardPage implements
 		// Obtain the section loader
 		this.sectionLoader = this.compiler.getSectionLoader();
 
+		// Obtain template inheritances copy (as may remove refactor instance)
+		this.templateInheritances = new HashMap<String, WoofTemplateInheritance>();
+		this.templateInheritances.putAll(templateInheritances);
+
 		// Create the property list (and load existing properties)
 		this.properties = this.compiler.createPropertyList();
 		String initialUriPath = null;
 		String initialLogicClassName = null;
+		String initialSuperTemplateName = null;
+		String initialInheritedTemplatePaths = null;
 		String initialIsTemplateSecure = null;
 		String initialRenderRedirectHttpMethods = null;
 		String initialIsContinueRendering = null;
@@ -266,6 +305,27 @@ public class HttpTemplateWizardPage extends WizardPage implements
 					.isTemplateSecure());
 			initialIsContinueRendering = String.valueOf(this.templateInstance
 					.isContinueRendering());
+
+			// Remove the template from inheriting itself
+			String woofTemplateName = this.templateInstance
+					.getWoofTemplateName();
+			this.templateInheritances.remove(woofTemplateName);
+
+			// Provide the initial super template (if inheriting)
+			WoofTemplateModel superTemplate = this.templateInstance
+					.getSuperTemplate();
+			if (superTemplate != null) {
+				// Specify the initial super template
+				initialSuperTemplateName = superTemplate.getWoofTemplateName();
+				this.superTemplateInheritance = this.templateInheritances
+						.get(initialSuperTemplateName);
+
+				// Specify initial inheriting template paths
+				if (this.superTemplateInheritance != null) {
+					initialInheritedTemplatePaths = this.superTemplateInheritance
+							.getInheritedTemplatePathsPropertyValue();
+				}
+			}
 
 			// Create the render redirect HTTP methods value
 			String[] initialRenderRedirectHttpMethodsList = this.templateInstance
@@ -304,6 +364,11 @@ public class HttpTemplateWizardPage extends WizardPage implements
 		this.logicClassName = this.addProperty(
 				HttpTemplateSectionSource.PROPERTY_CLASS_NAME,
 				initialLogicClassName);
+		this.superTemplateName = this.addProperty(SUPER_TEMPLATE_NAME,
+				initialSuperTemplateName);
+		this.inheritedTemplatePaths = this.addProperty(
+				HttpTemplateSectionSource.PROPERTY_INHERITED_TEMPLATES,
+				initialInheritedTemplatePaths);
 		this.isTemplateSecure = this.addProperty(
 				HttpTemplateWorkSource.PROPERTY_TEMPLATE_SECURE,
 				initialIsTemplateSecure);
@@ -368,6 +433,17 @@ public class HttpTemplateWizardPage extends WizardPage implements
 	 */
 	public SectionType getSectionType() {
 		return this.sectionType;
+	}
+
+	/**
+	 * Obtains the {@link WoofTemplateInheritance} for the super
+	 * {@link WoofTemplateModel}.
+	 * 
+	 * @return {@link WoofTemplateInheritance} for the super
+	 *         {@link WoofTemplateModel}.
+	 */
+	public WoofTemplateInheritance getSuperTemplateInheritance() {
+		return this.superTemplateInheritance;
 	}
 
 	/**
@@ -507,6 +583,7 @@ public class HttpTemplateWizardPage extends WizardPage implements
 
 		// Obtain initial values
 		String initialTemplatePath = "";
+		String initialSuperTemplateName = "";
 		String initialGwtEntryPoint = "";
 		String[] initialGwtAsyncInterfaces = new String[0];
 		boolean initiallyEnableComet = false;
@@ -514,6 +591,8 @@ public class HttpTemplateWizardPage extends WizardPage implements
 		if (this.templateInstance != null) {
 			initialTemplatePath = getTextValue(this.templateInstance
 					.getTemplatePath());
+			initialSuperTemplateName = getTextValue(this.superTemplateName
+					.getValue());
 			initialGwtEntryPoint = getTextValue(this.templateInstance
 					.getGwtEntryPointClassName());
 			initialGwtAsyncInterfaces = this.templateInstance
@@ -572,6 +651,15 @@ public class HttpTemplateWizardPage extends WizardPage implements
 				.createPropertyClass("Logic class",
 						HttpTemplateSectionSource.PROPERTY_CLASS_NAME, page,
 						this, null);
+
+		// Provide ability to specify super template
+		String[] inheritableSuperTemplateNames = this.templateInheritances
+				.keySet().toArray(new String[0]);
+		Arrays.sort(inheritableSuperTemplateNames,
+				String.CASE_INSENSITIVE_ORDER);
+		SourceExtensionUtil.createPropertyCombo("Extend template",
+				SUPER_TEMPLATE_NAME, initialSuperTemplateName,
+				inheritableSuperTemplateNames, page, this, null);
 
 		// Provide means to specify if secure
 		SourceExtensionUtil.createPropertyCheckbox("Template secure",
@@ -739,6 +827,18 @@ public class HttpTemplateWizardPage extends WizardPage implements
 
 		// Clear section type (as potentially changing)
 		this.sectionType = null;
+
+		// Ensure have appropriate super template inheritance
+		this.superTemplateInheritance = this.templateInheritances
+				.get(this.superTemplateName.getValue());
+		if (this.superTemplateInheritance == null) {
+			// No inherited template paths
+			this.inheritedTemplatePaths.setValue(null);
+		} else {
+			// Specify the inherited template paths
+			this.inheritedTemplatePaths.setValue(this.superTemplateInheritance
+					.getInheritedTemplatePathsPropertyValue());
+		}
 
 		// Ensure have template URI path
 		if (EclipseUtil.isBlank(this.uriPath.getValue())) {

@@ -43,6 +43,7 @@ import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
+import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
@@ -695,6 +696,93 @@ public class SourceExtensionUtil {
 			public void widgetSelected(SelectionEvent e) {
 				property.setValue(checkbox.getSelection() ? trueValue
 						: falseValue);
+				if (listener != null) {
+					listener.propertyValueChanged(new PropertyValueChangeEventImpl(
+							property));
+				}
+				context.notifyPropertiesChanged();
+			}
+		});
+
+		// Return the property
+		return property;
+	}
+
+	/**
+	 * Creates the display for the input {@link Property}.
+	 * 
+	 * @param label
+	 *            Label for the {@link Property}.
+	 * @param name
+	 *            Name of the {@link Property}.
+	 * @param defaultValue
+	 *            Default value for the {@link Property}.
+	 * @param values
+	 *            Values to list in the {@link Combo}.
+	 * @param container
+	 *            {@link Composite} to add display {@link Control} instances.
+	 * @param context
+	 *            {@link SectionSourceExtensionContext}.
+	 * @param listener
+	 *            {@link PropertyValueChangeListener}. May be <code>null</code>.
+	 * @return {@link Property} for the {@link SWT#CHECK} {@link Button}.
+	 */
+	public static Property createPropertyCombo(String label, String name,
+			String defaultValue, String[] values, Composite container,
+			SectionSourceExtensionContext context,
+			PropertyValueChangeListener listener) {
+		return createPropertyCombo(label, name, defaultValue, values,
+				container, new SectionGeneric(context), listener);
+	}
+
+	/**
+	 * Creates the display for the input {@link Property}.
+	 * 
+	 * @param label
+	 *            Label for the {@link Property}.
+	 * @param name
+	 *            Name of the {@link Property}.
+	 * @param defaultValue
+	 *            Default value for the {@link Property}.
+	 * @param values
+	 *            Values to list in the {@link Combo}.
+	 * @param container
+	 *            {@link Composite} to add display {@link Control} instances.
+	 * @param context
+	 *            {@link GenericSourceExtensionContext}.
+	 * @param listener
+	 *            {@link PropertyValueChangeListener}. May be <code>null</code>.
+	 * @return {@link Property} for the {@link SWT#CHECK} {@link Button}.
+	 */
+	private static Property createPropertyCombo(String label, String name,
+			String defaultValue, String[] values, Composite container,
+			final GenericSourceExtensionContext context,
+			final PropertyValueChangeListener listener) {
+
+		// Obtain the property
+		final Property property = context.getPropertyList().getOrAddProperty(
+				name);
+
+		// Default the property value if blank
+		String propertyValue = property.getValue();
+		if ((propertyValue == null) || (propertyValue.trim().length() == 0)) {
+			property.setValue(defaultValue == null ? "" : defaultValue);
+		}
+
+		// Provide the label
+		new Label(container, SWT.NONE).setText(label + ": ");
+
+		// Provide the combo box to specify value
+		final Combo combo = new Combo(container, SWT.SIMPLE);
+		combo.setLayoutData(new GridData(SWT.FILL, SWT.BEGINNING, true, false));
+		for (String value : values) {
+			combo.add(value);
+		}
+		combo.setText(property.getValue());
+		combo.addModifyListener(new ModifyListener() {
+			@Override
+			public void modifyText(ModifyEvent e) {
+				property.setValue(combo.getText());
 				if (listener != null) {
 					listener.propertyValueChanged(new PropertyValueChangeEventImpl(
 							property));
