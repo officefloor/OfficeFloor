@@ -40,7 +40,7 @@ public class InheritanceTest extends AbstractWoofChangesTestCase {
 	public void testWoofTemplateInheritance() {
 
 		// Obtain the template inheritance information
-		Map<WoofTemplateModel, WoofTemplateInheritance> superTemplates = this.operations
+		Map<String, WoofTemplateInheritance> superTemplates = this.operations
 				.getWoofTemplateInheritances();
 		assertEquals("Incorrect number of super templates", 2,
 				superTemplates.size());
@@ -57,7 +57,9 @@ public class InheritanceTest extends AbstractWoofChangesTestCase {
 
 		// Validate the grand parent inheritance
 		WoofTemplateInheritance grandParentInheritance = superTemplates
-				.get(grandParent);
+				.get(grandParent.getWoofTemplateName());
+		assertSame("Incorrect grand parent super template", grandParent,
+				grandParentInheritance.getSuperTemplate());
 		assertNotNull("Should have grand parent inheritance",
 				grandParentInheritance);
 		WoofTemplateModel[] grandParentHierarchy = grandParentInheritance
@@ -78,7 +80,10 @@ public class InheritanceTest extends AbstractWoofChangesTestCase {
 				grandParentOutputs.contains("OUTPUT_GRAND_PARENT"));
 
 		// Validate the parent inheritance
-		WoofTemplateInheritance parentInheritance = superTemplates.get(parent);
+		WoofTemplateInheritance parentInheritance = superTemplates.get(parent
+				.getWoofTemplateName());
+		assertSame("Incorrect parent super template", parent,
+				parentInheritance.getSuperTemplate());
 		assertNotNull("Should have parent inheritance", parentInheritance);
 		WoofTemplateModel[] parentHierarchy = parentInheritance
 				.getInheritanceHierarchy();

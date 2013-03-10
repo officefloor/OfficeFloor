@@ -18,7 +18,6 @@
 package net.officefloor.model.woof;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -732,7 +731,7 @@ public class WoofChangesImpl implements WoofChanges {
 	 */
 
 	@Override
-	public Map<WoofTemplateModel, WoofTemplateInheritance> getWoofTemplateInheritances() {
+	public Map<String, WoofTemplateInheritance> getWoofTemplateInheritances() {
 
 		// Create mapping of template by its name
 		Map<String, WoofTemplateModel> templates = new HashMap<String, WoofTemplateModel>();
@@ -742,7 +741,7 @@ public class WoofChangesImpl implements WoofChanges {
 		}
 
 		// Obtain the inheritance for each template
-		Map<WoofTemplateModel, WoofTemplateInheritance> templateInheritances = new HashMap<WoofTemplateModel, WoofTemplateInheritance>();
+		Map<String, WoofTemplateInheritance> templateInheritances = new HashMap<String, WoofTemplateInheritance>();
 		for (WoofTemplateModel template : this.model.getWoofTemplates()) {
 
 			// Create the hierarchy for the template
@@ -787,9 +786,10 @@ public class WoofChangesImpl implements WoofChanges {
 
 			// Create and include template inheritance
 			WoofTemplateInheritance inheritance = new WoofTemplateInheritanceImpl(
-					hierarchy, templatePathValue.toString(),
+					template, hierarchy, templatePathValue.toString(),
 					inheritedOutputNames);
-			templateInheritances.put(template, inheritance);
+			templateInheritances.put(template.getWoofTemplateName(),
+					inheritance);
 		}
 
 		// Return the template inheritances
@@ -889,7 +889,7 @@ public class WoofChangesImpl implements WoofChanges {
 		if (superTemplate != null) {
 			// Obtain the inherited template outputs
 			WoofTemplateInheritance inheritance = this
-					.getWoofTemplateInheritances().get(superTemplate);
+					.getWoofTemplateInheritances().get(superTemplateName);
 			if (inheritance != null) {
 				inheritedOutputNames = inheritance
 						.getInheritedWoofTemplateOutputNames();
@@ -1016,7 +1016,8 @@ public class WoofChangesImpl implements WoofChanges {
 			final WoofTemplateModel template, final String uri,
 			final String templatePath, final String templateLogicClass,
 			SectionType sectionType, WoofTemplateModel superTemplate,
-			String[] inheritedOutputNames, final boolean isTemplateSecure,
+			Set<String> inheritedTemplateOutputNames,
+			final boolean isTemplateSecure,
 			final Map<String, Boolean> linksSecure,
 			final String[] renderRedirectHttpMethods,
 			final boolean isContinueRendering, String gwtEntryPointClassName,
@@ -1390,10 +1391,6 @@ public class WoofChangesImpl implements WoofChanges {
 					output);
 		}
 
-		// Obtain the set of inherited output names
-		Set<String> inheritedTemplateOutputNames = (inheritedOutputNames == null ? new HashSet<String>()
-				: new HashSet<String>(Arrays.asList(inheritedOutputNames)));
-
 		// Refactor the outputs (either refactoring, adding or removing)
 		for (final SectionOutputType outputType : sectionType
 				.getSectionOutputTypes()) {
@@ -1408,7 +1405,8 @@ public class WoofChangesImpl implements WoofChanges {
 			final String argumentType = outputType.getArgumentType();
 
 			// Ignore if inheriting the output configuration
-			if (inheritedTemplateOutputNames.contains(outputName)) {
+			if ((inheritedTemplateOutputNames != null)
+					&& (inheritedTemplateOutputNames.contains(outputName))) {
 				continue;
 			}
 

@@ -23,10 +23,12 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import net.officefloor.compile.section.SectionOutputType;
 import net.officefloor.compile.section.SectionType;
 import net.officefloor.model.woof.WoofChanges;
+import net.officefloor.model.woof.WoofTemplateInheritance;
 import net.officefloor.model.woof.WoofTemplateLinkModel;
 import net.officefloor.model.woof.WoofTemplateModel;
 import net.officefloor.model.woof.WoofTemplateOutputModel;
@@ -40,6 +42,11 @@ import net.officefloor.plugin.web.http.template.parse.HttpTemplate;
  * @author Daniel Sagenschneider
  */
 public class HttpTemplateInstance {
+
+	/**
+	 * Name of the {@link WoofTemplateModel}.
+	 */
+	private final String woofTemplateName;
 
 	/**
 	 * URI.
@@ -60,6 +67,17 @@ public class HttpTemplateInstance {
 	 * {@link SectionType}.
 	 */
 	private final SectionType sectionType;
+
+	/**
+	 * Super {@link WoofTemplateModel}.
+	 */
+	private final WoofTemplateModel superTemplate;
+
+	/**
+	 * Names of the {@link WoofTemplateOutputModel} instances inheriting their
+	 * configuration.
+	 */
+	private final Set<String> inheritedTemplateOutputNames;
 
 	/**
 	 * Indicates if the {@link HttpTemplate} requires a secure
@@ -123,6 +141,8 @@ public class HttpTemplateInstance {
 	/**
 	 * Initiate.
 	 * 
+	 * @param woofTemplateName
+	 *            {@link WoofTemplateModel} name.
 	 * @param uri
 	 *            URI.
 	 * @param templatePath
@@ -131,6 +151,12 @@ public class HttpTemplateInstance {
 	 *            Name of the logic class.
 	 * @param sectionType
 	 *            {@link SectionType}.
+	 * @param superTemplate
+	 *            Super {@link WoofTemplateModel}. May be <code>null</code> if
+	 *            not inheriting.
+	 * @param inheritedTemplateOutputNames
+	 *            Names of the {@link WoofTemplateOutputModel} instances that
+	 *            are inheriting their configuration.
 	 * @param isTemplateSecure
 	 *            Indicates if the {@link HttpTemplate} requires a secure
 	 *            {@link ServerHttpConnection}.
@@ -153,17 +179,22 @@ public class HttpTemplateInstance {
 	 *            handle manually publishing a Comet event. May be
 	 *            <code>null</code> to automatically handle.
 	 */
-	public HttpTemplateInstance(String uri, String templatePath,
-			String logicClassName, SectionType sectionType,
-			boolean isTemplateSecure, Map<String, Boolean> linksSecure,
+	public HttpTemplateInstance(String woofTemplateName, String uri,
+			String templatePath, String logicClassName,
+			SectionType sectionType, WoofTemplateModel superTemplate,
+			Set<String> inheritedTemplateOutputNames, boolean isTemplateSecure,
+			Map<String, Boolean> linksSecure,
 			String[] renderRedirectHttpMethods, boolean isContinueRendering,
 			String gwtEntryPointClassName,
 			String[] gwtServerAsyncInterfaceNames, boolean isEnableComet,
 			String cometManualPublishMethodName) {
+		this.woofTemplateName = woofTemplateName;
 		this.uri = uri;
 		this.templatePath = templatePath;
 		this.logicClassName = logicClassName;
 		this.sectionType = sectionType;
+		this.superTemplate = superTemplate;
+		this.inheritedTemplateOutputNames = inheritedTemplateOutputNames;
 		this.isTemplateSecure = isTemplateSecure;
 		this.linksSecure = linksSecure;
 		this.renderRedirectHttpMethods = renderRedirectHttpMethods;
@@ -185,12 +216,33 @@ public class HttpTemplateInstance {
 	 *            {@link WoofChanges}.
 	 */
 	public HttpTemplateInstance(WoofTemplateModel template, WoofChanges changes) {
+		this.woofTemplateName = template.getWoofTemplateName();
 		this.uri = template.getUri();
 		this.templatePath = template.getTemplatePath();
 		this.logicClassName = template.getTemplateClassName();
 		this.sectionType = null;
 		this.isTemplateSecure = template.getIsTemplateSecure();
 		this.isContinueRendering = template.getIsContinueRendering();
+
+		// Obtain the inheritance configuration
+		WoofTemplateModel superTemplate = null;
+		Set<String> inheritedTemplateOutputNames = null;
+		String superTemplateName = template.getSuperTemplate();
+		if (superTemplateName != null) {
+			// Obtain the inheritance for the super template
+			Map<String, WoofTemplateInheritance> templateInheritances = changes
+					.getWoofTemplateInheritances();
+			WoofTemplateInheritance inheritance = templateInheritances
+					.get(superTemplateName);
+			if (inheritance != null) {
+				// Obtain the inheritance details
+				superTemplate = inheritance.getSuperTemplate();
+				inheritedTemplateOutputNames = inheritance
+						.getInheritedWoofTemplateOutputNames();
+			}
+		}
+		this.superTemplate = superTemplate;
+		this.inheritedTemplateOutputNames = inheritedTemplateOutputNames;
 
 		// Load the links
 		this.linksSecure = new HashMap<String, Boolean>();
@@ -226,12 +278,15 @@ public class HttpTemplateInstance {
 		this.outputNames = outputNameListing
 				.toArray(new String[outputNameListing.size()]);
 
+		// No output name mapping
 		this.ouputNameMapping = null;
 	}
 
 	/**
 	 * Initiate from {@link HttpTemplateWizard}.
 	 * 
+	 * @param woofTemplateName
+	 *            {@link WoofTemplateModel} name.
 	 * @param uri
 	 *            URI.
 	 * @param templatePath
@@ -240,6 +295,12 @@ public class HttpTemplateInstance {
 	 *            Name of the logic class.
 	 * @param sectionType
 	 *            {@link SectionType}.
+	 * @param superTemplate
+	 *            Super {@link WoofTemplateModel}. May be <code>null</code> if
+	 *            not inheriting.
+	 * @param inheritedTemplateOutputNames
+	 *            Names of the {@link WoofTemplateOutputModel} instances that
+	 *            are inheriting their configuration.
 	 * @param isTemplateSecure
 	 *            Indicates if the {@link HttpTemplate} requires a secure
 	 *            {@link ServerHttpConnection}.
@@ -265,18 +326,23 @@ public class HttpTemplateInstance {
 	 *            Mapping of {@link SectionOutputType} name to existing
 	 *            {@link WoofTemplateOutputModel} name.
 	 */
-	HttpTemplateInstance(String uri, String templatePath,
-			String logicClassName, SectionType sectionType,
-			boolean isTemplateSecure, Map<String, Boolean> linksSecure,
+	HttpTemplateInstance(String woofTemplateName, String uri,
+			String templatePath, String logicClassName,
+			SectionType sectionType, WoofTemplateModel superTemplate,
+			Set<String> inheritedTemplateOutputNames, boolean isTemplateSecure,
+			Map<String, Boolean> linksSecure,
 			String[] renderRedirectHttpMethods, boolean isContinueRendering,
 			String gwtEntryPointClassName,
 			String[] gwtServerAsyncInterfaceNames, boolean isEnableComet,
 			String cometManualPublishMethodName,
 			Map<String, String> outputNameMapping) {
+		this.woofTemplateName = woofTemplateName;
 		this.uri = uri;
 		this.templatePath = templatePath;
 		this.logicClassName = logicClassName;
 		this.sectionType = sectionType;
+		this.superTemplate = superTemplate;
+		this.inheritedTemplateOutputNames = inheritedTemplateOutputNames;
 		this.isTemplateSecure = isTemplateSecure;
 		this.linksSecure = linksSecure;
 		this.renderRedirectHttpMethods = renderRedirectHttpMethods;
@@ -287,6 +353,15 @@ public class HttpTemplateInstance {
 		this.cometManualPublishMethodName = cometManualPublishMethodName;
 		this.outputNames = null;
 		this.ouputNameMapping = outputNameMapping;
+	}
+
+	/**
+	 * Obtains the {@link WoofTemplateModel} name.
+	 * 
+	 * @return {@link WoofTemplateModel} name.
+	 */
+	public String getWoofTemplateName() {
+		return this.woofTemplateName;
 	}
 
 	/**
@@ -323,6 +398,26 @@ public class HttpTemplateInstance {
 	 */
 	public SectionType getTemplateSectionType() {
 		return this.sectionType;
+	}
+
+	/**
+	 * Obtains the super {@link WoofTemplateModel}.
+	 * 
+	 * @return Super {@link WoofTemplateModel} or <code>null</code> if not
+	 *         extending a {@link WoofTemplateModel}.
+	 */
+	public WoofTemplateModel getSuperTemplate() {
+		return this.superTemplate;
+	}
+
+	/**
+	 * Obtains the names of the {@link WoofTemplateOutputModel} instances that
+	 * are inheriting their configuration.
+	 * 
+	 * @return Inherited {@link WoofTemplateOutputModel} names.
+	 */
+	public Set<String> getInheritedTemplateOutputNames() {
+		return this.inheritedTemplateOutputNames;
 	}
 
 	/**

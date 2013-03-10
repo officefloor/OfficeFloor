@@ -18,6 +18,7 @@
 package net.officefloor.model.woof;
 
 import java.util.Map;
+import java.util.Set;
 
 import net.officefloor.compile.governance.GovernanceType;
 import net.officefloor.compile.properties.PropertyList;
@@ -47,12 +48,12 @@ public interface WoofChanges {
 
 	/**
 	 * Obtains the {@link WoofTemplateInheritance} instances by their super
-	 * {@link WoofTemplateModel} instances.
+	 * {@link WoofTemplateModel} names.
 	 * 
 	 * @return {@link WoofTemplateInheritance} instances by their super
-	 *         {@link WoofTemplateModel} instances.
+	 *         {@link WoofTemplateModel} names.
 	 */
-	Map<WoofTemplateModel, WoofTemplateInheritance> getWoofTemplateInheritances();
+	Map<String, WoofTemplateInheritance> getWoofTemplateInheritances();
 
 	/**
 	 * Obtains the GWT entry point class name for the {@link WoofTemplateModel}.
@@ -158,7 +159,7 @@ public interface WoofChanges {
 	 *            a secure {@link ServerHttpConnection}.
 	 * @param superTemplate
 	 *            Super {@link WoofTemplateModel}. May be <code>null</code>.
-	 * @param inheritedOutputNames
+	 * @param inheritedTemplateOutputNames
 	 *            Inherited {@link WoofTemplateOutputModel} configuration from
 	 *            the super {@link WoofTemplateModel} and its subsequent
 	 *            ancestors.
@@ -189,7 +190,7 @@ public interface WoofChanges {
 	Change<WoofTemplateModel> refactorTemplate(WoofTemplateModel template,
 			String uri, String templatePath, String templateLogicClass,
 			SectionType sectionType, WoofTemplateModel superTemplate,
-			String[] inheritedOutputNames, boolean isTemplateSecure,
+			Set<String> inheritedTemplateOutputNames, boolean isTemplateSecure,
 			Map<String, Boolean> linksSecure,
 			String[] renderRedirectHttpMethods, boolean isContinueRendering,
 			String gwtEntryPointClassName,

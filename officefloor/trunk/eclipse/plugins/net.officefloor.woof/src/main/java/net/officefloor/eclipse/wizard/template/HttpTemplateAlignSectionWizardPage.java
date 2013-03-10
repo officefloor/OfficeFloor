@@ -28,6 +28,7 @@ import net.officefloor.eclipse.common.dialog.input.InputHandler;
 import net.officefloor.eclipse.conform.ConformInput;
 import net.officefloor.model.conform.ConformModel;
 import net.officefloor.model.office.OfficeSectionOutputModel;
+import net.officefloor.model.woof.WoofTemplateInheritance;
 import net.officefloor.model.woof.WoofTemplateModel;
 import net.officefloor.model.woof.WoofTemplateOutputModel;
 
@@ -79,8 +80,12 @@ public class HttpTemplateAlignSectionWizardPage extends WizardPage {
 	 * @param sectionType
 	 *            {@link SectionType} for the refactored
 	 *            {@link WoofTemplateModel}.
+	 * @param superTemplateInheritance
+	 *            {@link WoofTemplateInheritance} for the super
+	 *            {@link WoofTemplateModel}.
 	 */
-	public void loadSectionType(SectionType sectionType) {
+	public void loadSectionType(SectionType sectionType,
+			WoofTemplateInheritance superTemplateInheritance) {
 
 		// Load the output conforms
 		List<String> outputs = new LinkedList<String>();
@@ -95,9 +100,17 @@ public class HttpTemplateAlignSectionWizardPage extends WizardPage {
 			outputs.add(output.getSectionOutputName());
 		}
 
+		// Create the listing of inheritable template output names
+		String[] inheritableTemplateOutputNames = new String[0];
+		if (superTemplateInheritance != null) {
+			inheritableTemplateOutputNames = superTemplateInheritance
+					.getInheritedWoofTemplateOutputNames().toArray(
+							new String[0]);
+		}
+
 		// Specify the confirm details
 		this.outputConform.setConform(this.templateOutputs,
-				outputs.toArray(new String[0]));
+				outputs.toArray(new String[0]), inheritableTemplateOutputNames);
 	}
 
 	/**

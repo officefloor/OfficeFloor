@@ -32,6 +32,15 @@ import net.officefloor.plugin.web.http.template.section.HttpTemplateSectionSourc
 public interface WoofTemplateInheritance {
 
 	/**
+	 * Obtains the super {@link WoofTemplateModel} this
+	 * {@link WoofTemplateInheritance} represents.
+	 * 
+	 * @return Super {@link WoofTemplateModel} this
+	 *         {@link WoofTemplateInheritance} represents.
+	 */
+	WoofTemplateModel getSuperTemplate();
+
+	/**
 	 * <p>
 	 * Obtains the inheritance hierarchy for the particular super
 	 * {@link WoofTemplateModel}.

@@ -18,12 +18,16 @@
 package net.officefloor.eclipse.wizard.template;
 
 import java.util.Map;
+import java.util.Set;
 
 import net.officefloor.compile.section.SectionType;
 import net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart;
 import net.officefloor.eclipse.repository.project.ProjectConfigurationContext;
 import net.officefloor.eclipse.wizard.WizardUtil;
+import net.officefloor.model.woof.WoofTemplateInheritance;
+import net.officefloor.model.woof.WoofTemplateModel;
 import net.officefloor.plugin.web.http.template.parse.HttpTemplate;
+import net.officefloor.plugin.woof.WoofOfficeFloorSource;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.jface.wizard.IWizardPage;
@@ -47,15 +51,19 @@ public class HttpTemplateWizard extends Wizard {
 	 *            {@link HttpTemplateInstance} to based decisions. May be
 	 *            <code>null</code> if creating a new
 	 *            {@link HttpTemplateInstance}.
+	 * @param templateInheritances
+	 *            {@link WoofTemplateInheritance} instances by their
+	 *            {@link WoofTemplateModel} name.
 	 * @return {@link HttpTemplateInstance} or <code>null</code> if cancelled.
 	 */
 	public static HttpTemplateInstance getHttpTemplateInstance(
 			AbstractOfficeFloorEditPart<?, ?, ?> editPart,
-			HttpTemplateInstance templateInstance) {
+			HttpTemplateInstance templateInstance,
+			Map<String, WoofTemplateInheritance> templateInheritances) {
 
 		// Create and run the wizard
 		HttpTemplateWizard wizard = new HttpTemplateWizard(editPart,
-				templateInstance);
+				templateInstance, templateInheritances);
 		if (WizardUtil.runWizard(wizard, editPart)) {
 			// Successful so return the HTTP Template instance
 			return wizard.getHttpTemplateInstance();
@@ -89,9 +97,13 @@ public class HttpTemplateWizard extends Wizard {
 	 *            {@link HttpTemplateInstance} to base decisions on. May be
 	 *            <code>null</code> for creating a new
 	 *            {@link HttpTemplateInstance}.
+	 * @param templateInheritances
+	 *            {@link WoofTemplateInheritance} instances by their
+	 *            {@link WoofTemplateModel} name.
 	 */
 	public HttpTemplateWizard(AbstractOfficeFloorEditPart<?, ?, ?> editPart,
-			HttpTemplateInstance templateInstance) {
+			HttpTemplateInstance templateInstance,
+			Map<String, WoofTemplateInheritance> templateInheritances) {
 
 		// Obtain the project
 		EditorPart editorPart = editPart.getEditor();
@@ -100,7 +112,7 @@ public class HttpTemplateWizard extends Wizard {
 
 		// Create the HTTP template wizard page
 		this.templatePage = new HttpTemplateWizardPage(project, editPart,
-				templateInstance);
+				templateInstance, templateInheritances);
 
 		// Determine if refactoring template
 		if (templateInstance != null) {
@@ -147,8 +159,9 @@ public class HttpTemplateWizard extends Wizard {
 			// Determine if refactoring
 			if (this.templateAlignPage != null) {
 				// Refactor template outputs
-				this.templateAlignPage.loadSectionType(this.templatePage
-						.getSectionType());
+				this.templateAlignPage.loadSectionType(
+						this.templatePage.getSectionType(),
+						this.templatePage.getSuperTemplateInheritance());
 				return this.templateAlignPage;
 			}
 		}
@@ -196,6 +209,21 @@ public class HttpTemplateWizard extends Wizard {
 		String cometManualPublishMethodName = this.templatePage
 				.getCometManualPublishMethodName();
 
+		// Calculate the template name
+		String woofTemplateName = WoofOfficeFloorSource
+				.getTemplateSectionName(uriPath);
+
+		// Obtain the inheritance details
+		WoofTemplateInheritance superTempateInheritance = this.templatePage
+				.getSuperTemplateInheritance();
+		WoofTemplateModel superTemplate = null;
+		Set<String> inheritedTemplateOutputNames = null;
+		if (superTempateInheritance != null) {
+			superTemplate = superTempateInheritance.getSuperTemplate();
+			inheritedTemplateOutputNames = superTempateInheritance
+					.getInheritedWoofTemplateOutputNames();
+		}
+
 		// Obtain the refactor details
 		Map<String, String> outputNameMapping = null;
 		if (this.templateAlignPage != null) {
@@ -203,8 +231,9 @@ public class HttpTemplateWizard extends Wizard {
 		}
 
 		// Create HTTP Template Instance
-		this.httpTemplateInstance = new HttpTemplateInstance(uriPath,
-				templatePath, logicClassName, sectionType, isTemplateSecure,
+		this.httpTemplateInstance = new HttpTemplateInstance(woofTemplateName,
+				uriPath, templatePath, logicClassName, sectionType,
+				superTemplate, inheritedTemplateOutputNames, isTemplateSecure,
 				linksSecure, renderRedirectHttpMethods, isContinueRendering,
 				gwtEntryPointClassName, gwtServerAsyncInterfaceNames,
 				isEnableComet, cometManualPublishMethodName, outputNameMapping);

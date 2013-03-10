@@ -26,6 +26,7 @@ import net.officefloor.eclipse.wizard.template.HttpTemplateWizard;
 import net.officefloor.eclipse.woof.editparts.WoofEditPart;
 import net.officefloor.model.change.Change;
 import net.officefloor.model.woof.WoofChanges;
+import net.officefloor.model.woof.WoofTemplateInheritance;
 import net.officefloor.model.woof.WoofTemplateModel;
 
 /**
@@ -53,9 +54,14 @@ public class AddTemplateOperation extends
 	@Override
 	protected Change<?> getChange(WoofChanges changes, Context context) {
 
+		// Obtain the template inheritances
+		Map<String, WoofTemplateInheritance> templateInheritances = changes
+				.getWoofTemplateInheritances();
+
 		// Obtain the template instance
 		HttpTemplateInstance instance = HttpTemplateWizard
-				.getHttpTemplateInstance(context.getEditPart(), null);
+				.getHttpTemplateInstance(context.getEditPart(), null,
+						templateInheritances);
 		if (instance == null) {
 			return null; // must have template
 		}
@@ -65,6 +71,7 @@ public class AddTemplateOperation extends
 		String path = instance.getTemplatePath();
 		String logicClassName = instance.getLogicClassName();
 		SectionType type = instance.getTemplateSectionType();
+		WoofTemplateModel superTemplate = instance.getSuperTemplate();
 		boolean isTemplateSecure = instance.isTemplateSecure();
 		Map<String, Boolean> linksSecure = instance.getLinksSecure();
 		String[] renderRedirectHttpMethods = instance
@@ -76,9 +83,6 @@ public class AddTemplateOperation extends
 		boolean isEnableComet = instance.isEnableComet();
 		String cometManualPublishMethodName = instance
 				.getCometManualPublishMethodName();
-
-		// TODO provide inheritance information
-		WoofTemplateModel superTemplate = null;
 
 		// Create change to add template
 		Change<WoofTemplateModel> change = changes.addTemplate(uri, path,
