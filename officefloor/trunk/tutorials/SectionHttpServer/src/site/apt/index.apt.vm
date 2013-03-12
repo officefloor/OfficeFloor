@@ -50,4 +50,4 @@ TemplateLogic Class
 
 Next
 
-  The {{{../GwtApp/index.html}next tutorial}} looks at using GWT for generating JavaScript.
+  The {{{../InheritHttpServer/index.html}next tutorial}} looks at overriding sections with template inheritance.
