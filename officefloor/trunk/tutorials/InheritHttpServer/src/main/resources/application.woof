@@ -1,0 +1,25 @@
+<woof>
+  <templates>
+    <template name="child" uri="child" path="child.woof.html" extends="parent" class="net.officefloor.tutorial.inherithttpserver.ChildLogic" secure="false" continue-rendering="false" x="54" y="124">
+    </template>
+    <template name="contact" uri="contact" path="contact.woof.html" extends="parent" class="net.officefloor.tutorial.inherithttpserver.ParentLogic" secure="false" continue-rendering="false" x="213" y="56">
+    </template>
+    <template name="grandchild" uri="grandchild" path="grandchild.woof.html" extends="child" class="net.officefloor.tutorial.inherithttpserver.GrandChildLogic" secure="false" continue-rendering="false" x="55" y="178">
+    </template>
+    <template name="parent" uri="parent" path="parent.woof.html" extends="" class="net.officefloor.tutorial.inherithttpserver.ParentLogic" secure="false" continue-rendering="false" x="50" y="44">
+      <output name="contact" argument-type="">
+        <template name="contact"/>
+      </output>
+    </template>
+  </templates>
+  <sections>
+  </sections>
+  <governances>
+  </governances>
+  <resources>
+  </resources>
+  <exceptions>
+  </exceptions>
+  <starting>
+  </starting>
+</woof>

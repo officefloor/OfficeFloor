@@ -767,7 +767,8 @@ public class WoofChangesImpl implements WoofChanges {
 			StringBuilder templatePathValue = new StringBuilder();
 			Set<String> inheritedOutputNames = new HashSet<String>();
 			boolean isFirst = true;
-			for (WoofTemplateModel superTemplate : hierarchy) {
+			for (int i = (hierarchy.length - 1); i >= 0; i--) {
+				WoofTemplateModel superTemplate = hierarchy[i];
 
 				// Include the template path
 				if (!isFirst) {

@@ -219,7 +219,10 @@ public class HttpTemplateWizard extends Wizard {
 		WoofTemplateModel superTemplate = null;
 		Set<String> inheritedTemplateOutputNames = null;
 		if (superTempateInheritance != null) {
+			// Provide the super template
 			superTemplate = superTempateInheritance.getSuperTemplate();
+
+			// Default the inherited output configuration (add template)
 			inheritedTemplateOutputNames = superTempateInheritance
 					.getInheritedWoofTemplateOutputNames();
 		}
@@ -227,7 +230,12 @@ public class HttpTemplateWizard extends Wizard {
 		// Obtain the refactor details
 		Map<String, String> outputNameMapping = null;
 		if (this.templateAlignPage != null) {
+			// Specify the output name mapping
 			outputNameMapping = this.templateAlignPage.getOutputNameMapping();
+
+			// Specify inherited output configuration (refactor template)
+			inheritedTemplateOutputNames = this.templateAlignPage
+					.getInheritedWoofTemplateOutputNames();
 		}
 
 		// Create HTTP Template Instance

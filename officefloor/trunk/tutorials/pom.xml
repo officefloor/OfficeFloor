@@ -22,6 +22,7 @@
 		<module>ExceptionHttpServer</module>
 		<module>GwtApp</module>
 		<module>GwtService</module>
+		<module>InheritHttpServer</module>
 		<module>InteractiveHttpServer</module>
 		<module>NavigateHttpServer</module>
 		<module>Presentation</module>
