@@ -17,9 +17,12 @@
  */
 package net.officefloor.eclipse.wizard.template;
 
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import net.officefloor.compile.section.SectionOutputType;
 import net.officefloor.compile.section.SectionType;
@@ -122,6 +125,19 @@ public class HttpTemplateAlignSectionWizardPage extends WizardPage {
 	 */
 	public Map<String, String> getOutputNameMapping() {
 		return this.outputConform.getTargetItemToExistingItemMapping();
+	}
+
+	/**
+	 * Obtains the names of the {@link WoofTemplateOutputModel} instances that
+	 * are to inherit their configuration.
+	 * 
+	 * @return names of the {@link WoofTemplateOutputModel} instances that are
+	 *         to inherit their configuration.
+	 */
+	public Set<String> getInheritedWoofTemplateOutputNames() {
+		String[] inheritedTemplateOutputNames = this.outputConform
+				.getInheritedTargetItemNames();
+		return new HashSet<String>(Arrays.asList(inheritedTemplateOutputNames));
 	}
 
 	/*

@@ -859,9 +859,10 @@ public class HttpTemplateWizardPage extends WizardPage implements
 				.getSectionSourceClass();
 
 		// Load the Section Type
+		this.isIssue = false; // reset to determine if issue
 		this.sectionType = this.sectionLoader.loadSectionType(
 				sectionSourceClass, this.templatePath, this.properties);
-		if (this.sectionType == null) {
+		if ((this.sectionType == null) || (this.isIssue)) {
 			// Must have section (issue reported as error message)
 			this.setPageComplete(false);
 			return;
@@ -890,11 +891,18 @@ public class HttpTemplateWizardPage extends WizardPage implements
 	 * ===================== CompilerIssues ===============================
 	 */
 
+	/**
+	 * Allows determining if an issue occurred. Reset this to <code>false</code>
+	 * before undertaking operation to determine if causes an issue.
+	 */
+	private boolean isIssue = false;
+
 	@Override
 	public void addIssue(LocationType locationType, String location,
 			AssetType assetType, String assetName, String issueDescription) {
 		// Provide as error message
 		this.setErrorMessage(issueDescription);
+		this.isIssue = true;
 	}
 
 	@Override
@@ -905,6 +913,7 @@ public class HttpTemplateWizardPage extends WizardPage implements
 		this.setErrorMessage(issueDescription + " ("
 				+ cause.getClass().getSimpleName() + ": " + cause.getMessage()
 				+ ")");
+		this.isIssue = true;
 	}
 
 	/*

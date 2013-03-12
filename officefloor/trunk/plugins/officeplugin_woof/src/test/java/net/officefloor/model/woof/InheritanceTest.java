@@ -93,7 +93,7 @@ public class InheritanceTest extends AbstractWoofChangesTestCase {
 		assertSame("Incorrect grand parent in hierarchy", grandParent,
 				parentHierarchy[1]);
 		assertEquals("Incorrect parent template inheritance property value",
-				"example/Parent.ofp, example/GrandParent.ofp",
+				"example/GrandParent.ofp, example/Parent.ofp",
 				parentInheritance.getInheritedTemplatePathsPropertyValue());
 		Set<String> parentOutputs = parentInheritance
 				.getInheritedWoofTemplateOutputNames();
