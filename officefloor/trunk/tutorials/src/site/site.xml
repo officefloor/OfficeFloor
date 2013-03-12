@@ -15,6 +15,7 @@
 			<item name="Exception handling" href="./ExceptionHttpServer/index.html" />
 			<item name="Generating HTML" href="./RawHttpServer/index.html" />
 			<item name="Sectioning" href="./SectionHttpServer/index.html" />
+			<item name="Template Inheritance" href="./InheritHttpServer/index.html" />
 			<item name="GWT" href="./GwtApp/index.html" />
 			<item name="AJAX" href="./GwtService/index.html" />
 			<item name="Comet" href="./CometApp/index.html" />
