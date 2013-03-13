@@ -114,7 +114,7 @@ Configuration Inheritance
 
   The link configuration of the template is also inherited.  The below configuration for this tutorial shows that only the parent configures the link while the other templates inherit the link configuration.  This is especially useful to reduce lines in configuration for headers and footers of a web site by including this configuration in a single parent template that all other templates inherit from.
 
-[./images/InheritHttpServer-configuration.png] InheritHttpServer configuration.
+[./images/InheritConfiguration-screenshot.png] InheritHttpServer configuration.
 
   Along with the output link configuration being inherited, the link secure configuration is also inherited.
   
