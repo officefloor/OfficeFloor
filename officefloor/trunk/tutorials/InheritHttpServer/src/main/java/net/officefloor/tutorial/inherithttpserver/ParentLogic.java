@@ -24,6 +24,7 @@ import lombok.Data;
  * 
  * @author Daniel Sagenschneider
  */
+// START SNIPPET: tutorial
 public class ParentLogic {
 
 	@Data
@@ -32,6 +33,7 @@ public class ParentLogic {
 	}
 
 	public HeaderValues getTemplateData() {
-		return new HeaderValues("PARENT");
+		return new HeaderValues("HEADER");
 	}
 }
+// END SNIPPET: tutorial

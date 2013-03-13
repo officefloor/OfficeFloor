@@ -25,6 +25,7 @@ import lombok.Data;
  * 
  * @author Daniel Sagenschneider
  */
+// START SNIPPET: tutorial
 public class GrandChildLogic extends ParentLogic {
 
 	@Data
@@ -36,3 +37,4 @@ public class GrandChildLogic extends ParentLogic {
 		return new AlternateHeaderValues("GRAND CHILD");
 	}
 }
+// END SNIPPET: tutorial
