@@ -1,6 +1,6 @@
 <woof>
   <templates>
-    <template name="child" uri="child" path="child.woof.html" extends="parent" class="net.officefloor.tutorial.inherithttpserver.ChildLogic" secure="false" continue-rendering="false" x="54" y="124">
+    <template name="child" uri="child" path="child.woof.html" extends="parent" class="net.officefloor.tutorial.inherithttpserver.ChildLogic" secure="false" continue-rendering="false" x="56" y="117">
     </template>
     <template name="contact" uri="contact" path="contact.woof.html" extends="parent" class="net.officefloor.tutorial.inherithttpserver.ParentLogic" secure="false" continue-rendering="false" x="213" y="56">
     </template>
