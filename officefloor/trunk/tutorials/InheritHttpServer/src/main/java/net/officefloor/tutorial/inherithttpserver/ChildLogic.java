@@ -24,6 +24,7 @@ import lombok.Data;
  * 
  * @author Daniel Sagenschneider
  */
+// START SNIPPET: tutorial
 public class ChildLogic extends ParentLogic {
 
 	@Data
@@ -35,3 +36,4 @@ public class ChildLogic extends ParentLogic {
 		return new IntroducedValues("CHILD");
 	}
 }
+// END SNIPPET: tutorial
