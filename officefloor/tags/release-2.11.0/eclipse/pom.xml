@@ -1,0 +1,187 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<parent>
+		<groupId>net.officefloor</groupId>
+		<artifactId>officefloor</artifactId>
+		<version>2.11.0</version>
+	</parent>
+	<groupId>net.officefloor.eclipse</groupId>
+	<artifactId>eclipse</artifactId>
+	<packaging>pom</packaging>
+	<name>Eclipse</name>
+	<description>Eclipse plugins and features for OfficeFloor</description>
+	<properties>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+	</properties>
+	<modules>
+		<!-- Core eclipse functionality -->
+		<module>plugins/net.officefloor.core</module>
+		<module>plugins/net.officefloor.ui</module>
+		<module>plugins/net.officefloor.ui.tests</module>
+		<module>features/net.officefloor.feature</module>
+
+		<!-- Plug-in eclipse functionality -->
+		<module>plugins/net.officefloor.plugins</module>
+		<module>features/net.officefloor.plugins.feature</module>
+
+		<!-- WoOF eclipse functionality -->
+		<module>plugins/net.officefloor.woof</module>
+		<module>features/net.officefloor.woof.feature</module>
+
+		<!-- Deploy to Update Site -->
+		<module>update.site</module>
+	</modules>
+	<build>
+		<plugins>
+			<plugin>
+				<!-- All projects are PDEs -->
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-eclipse-plugin</artifactId>
+				<configuration>
+					<pde>true</pde>
+				</configuration>
+			</plugin>
+			<plugin>
+				<!-- Make linked dependencies (via maven-eclipse-plugin) available -->
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-dependency-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>Provide linked dependencies for eclipse PDE projects</id>
+						<phase>process-sources</phase>
+						<goals>
+							<goal>copy-dependencies</goal>
+						</goals>
+						<configuration>
+							<excludeScope>provided</excludeScope>
+							<outputDirectory>${basedir}</outputDirectory>
+							<overWriteReleases>false</overWriteReleases>
+							<overWriteSnapshots>false</overWriteSnapshots>
+							<overWriteIfNewer>true</overWriteIfNewer>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<!-- Clean linked dependencies -->
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-clean-plugin</artifactId>
+				<configuration>
+					<filesets>
+						<fileset>
+							<directory>${basedir}</directory>
+							<includes>
+								<include>*.jar</include>
+								<include>*.zip</include>
+								<include>bin/</include>
+							</includes>
+							<followSymlinks>false</followSymlinks>
+						</fileset>
+					</filesets>
+				</configuration>
+			</plugin>
+			<plugin>
+				<!-- Use Tycho to build eclipse components -->
+				<groupId>org.sonatype.tycho</groupId>
+				<artifactId>tycho-maven-plugin</artifactId>
+				<extensions>true</extensions>
+			</plugin>
+			<plugin>
+				<groupId>org.sonatype.tycho</groupId>
+				<artifactId>target-platform-configuration</artifactId>
+				<configuration>
+					<resolver>p2</resolver>
+					<pomDependencies>consider</pomDependencies>
+					<environments>
+						<environment>
+							<os>linux</os>
+							<ws>gtk</ws>
+							<arch>x86</arch>
+						</environment>
+						<environment>
+							<os>linux</os>
+							<ws>gtk</ws>
+							<arch>x86_64</arch>
+						</environment>
+						<environment>
+							<os>win32</os>
+							<ws>win32</ws>
+							<arch>x86</arch>
+						</environment>
+						<environment>
+							<os>win32</os>
+							<ws>win32</ws>
+							<arch>x86_64</arch>
+						</environment>
+						<environment>
+							<os>macosx</os>
+							<ws>cocoa</ws>
+							<arch>x86_64</arch>
+						</environment>
+					</environments>
+				</configuration>
+			</plugin>
+			<plugin>
+				<!-- Provide eclipse classified artifacts for javadoc -->
+				<!-- This is work around to allow javadoc:aggregate to work -->
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-antrun-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>tycho-javadoc-dependency</id>
+						<phase>install</phase>
+						<goals>
+							<goal>run</goal>
+						</goals>
+						<configuration>
+							<target>
+								<!-- Obtain the group directory -->
+								<property name="groupDirFile"
+									value="${project.build.directory}/tycho-artifact/install.properties" />
+								<echo file="${groupDirFile}" message="groupDir=${project.groupId}" />
+								<replace file="${groupDirFile}" token="." value="/" />
+								<loadproperties srcFile="${groupDirFile}" />
+
+								<!-- Obtain file details to copy -->
+								<property name="tychoSourceFile"
+									value="${project.build.directory}/${project.build.finalName}.jar" />
+								<property name="tychoTargetPrefix"
+									value="${settings.localRepository}/${groupDir}/${project.artifactId}/${project.version}/${project.build.finalName}" />
+								<echo>Tycho source file: ${tychoSourceFile}</echo>
+								<echo>Tycho target prefix: ${tychoTargetPrefix}</echo>
+
+								<!-- Ensure jar exists (mainly for pom packaging) -->
+								<touch file="${tychoSourceFile}" />
+
+								<!-- Copy files (both types to keep configuration simple) -->
+								<copy file="${tychoSourceFile}" tofile="${tychoTargetPrefix}.eclipse-plugin" />
+								<copy file="${tychoSourceFile}" tofile="${tychoTargetPrefix}.eclipse-feature" />
+							</target>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+		</plugins>
+	</build>
+	<profiles>
+		<profile>
+			<!-- Profile for building -->
+			<id>build-repositories</id>
+			<activation>
+				<file>
+					<exists>${basedir}/pom.xml</exists>
+				</file>
+			</activation>
+			<repositories>
+				<repository>
+					<!-- Eclipse -->
+					<id>eclipse-juno</id>
+					<layout>p2</layout>
+					<url>http://download.eclipse.org/releases/juno</url>
+				</repository>
+			</repositories>
+		</profile>
+	</profiles>
+</project>

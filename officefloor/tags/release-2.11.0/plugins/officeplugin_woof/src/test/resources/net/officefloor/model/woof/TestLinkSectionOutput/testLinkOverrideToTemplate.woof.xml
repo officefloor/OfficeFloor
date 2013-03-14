@@ -1,0 +1,31 @@
+<woof>
+
+	<templates>
+		<template name="TEMPLATE" />
+		<template name="TEMPLATE_LINK" />
+	</templates>
+
+	<sections>
+		<section name="A">
+			<input name="INPUT" />
+			<output name="OUTPUT" />
+		</section>
+		<section name="B">
+			<input name="INPUT" />
+			<output name="OUTPUT">
+				<template name="TEMPLATE_LINK" />
+			</output>
+		</section>
+	</sections>
+	
+	<access>
+		<input name="Authenticate" />
+		<input name="Authenticate_LINK" />
+	</access>
+
+	<resources>
+		<resource name="RESOURCE" />
+		<resource name="RESOURCE_LINK" />
+	</resources>
+
+</woof>

@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<model>
+	<interface>PropertySourceModel</interface>
+    <field type="String" name="name" />
+    <field type="String" name="value" />
+</model>

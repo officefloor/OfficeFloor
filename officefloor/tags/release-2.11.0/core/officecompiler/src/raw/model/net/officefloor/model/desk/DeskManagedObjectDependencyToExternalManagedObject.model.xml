@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<model>
+	<field type="String" name="external managed object name" />
+	<field type="DeskManagedObjectDependencyModel" name="desk managed object dependency"
+		end-field="external managed object" />
+	<field type="ExternalManagedObjectModel" name="external managed object"
+		end-list="dependent desk managed object" />
+</model>

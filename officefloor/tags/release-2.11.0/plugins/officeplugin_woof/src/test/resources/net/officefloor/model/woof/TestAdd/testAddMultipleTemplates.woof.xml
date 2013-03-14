@@ -1,0 +1,15 @@
+<woof>
+
+	<templates>
+		<template name="Template" uri="Template" path="example/Template.ofp"
+			class="Class1">
+		</template>
+		<template name="Template-2" uri="Template" path="example/Template.ofp"
+			class="Class2">
+		</template>
+		<template name="Template-3" uri="/Template" path="example/Template.ofp"
+			class="Class3">
+		</template>
+	</templates>
+
+</woof>

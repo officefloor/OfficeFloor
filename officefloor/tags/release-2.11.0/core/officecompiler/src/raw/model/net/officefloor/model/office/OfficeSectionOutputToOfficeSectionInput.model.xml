@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<model>
+    <field type="String" name="office section name" />
+    <field type="String" name="office section input name" />
+    <field type="OfficeSectionOutputModel" name="office section output"
+        end-field="office section input" />
+    <field type="OfficeSectionInputModel" name="office section input"
+        end-list="office section output" />
+</model>

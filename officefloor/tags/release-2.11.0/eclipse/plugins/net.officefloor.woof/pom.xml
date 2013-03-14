@@ -1,0 +1,99 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<parent>
+		<groupId>net.officefloor.eclipse</groupId>
+		<artifactId>eclipse</artifactId>
+		<relativePath>../../pom.xml</relativePath>
+		<version>2.11.0</version>
+	</parent>
+	<artifactId>net.officefloor.woof</artifactId>
+	<name>Eclipse Woof Plug-in</name>
+	<description>WoOF user interface Eclipse plug-in</description>
+	<packaging>eclipse-plugin</packaging>
+	<properties>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+	</properties>
+	<dependencies>
+		<!-- Necessary for javadoc -->
+		<dependency>
+			<groupId>${project.groupId}</groupId>
+			<artifactId>net.officefloor.core</artifactId>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>${project.groupId}</groupId>
+			<artifactId>net.officefloor.ui</artifactId>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>${project.groupId}</groupId>
+			<artifactId>net.officefloor.plugins</artifactId>
+			<scope>provided</scope>
+		</dependency>
+
+		<!-- Required -->
+		<dependency>
+			<groupId>${project.groupId}</groupId>
+			<artifactId>net.officefloor.feature</artifactId>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>${project.groupId}</groupId>
+			<artifactId>net.officefloor.plugins.feature</artifactId>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>net.officefloor.plugin</groupId>
+			<artifactId>officeplugin_woof</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>net.officefloor.plugin</groupId>
+			<artifactId>officeplugin_launch</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>easymock</groupId>
+			<artifactId>easymock</artifactId>
+			<scope>test</scope>
+		</dependency>
+	</dependencies>
+	<build>
+		<plugins>
+			<plugin>
+				<!-- Ensure not including dependency jars provided by other Eclipse plugins. 
+					Including them causes ClassCastExceptions when adapting the OfficeFloorCompiler 
+					due to different Classes for different plugins. Running eclipse:eclipse can 
+					cause them to be included. -->
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-antrun-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>Ensure not including dependency jars provided by other other Eclipse plugins</id>
+						<phase>validate</phase>
+						<goals>
+							<goal>run</goal>
+						</goals>
+						<configuration>
+							<target>
+								<fail
+									message="Should not include net.officefloor.core dependencies (e.g. officecompiler)">
+									<condition>
+										<resourcecontains resource="build.properties"
+											substring="officecompiler" />
+									</condition>
+								</fail>
+								<fail
+									message="Should not include net.officefloor.plugins dependencies (e.g. officeplugin_web)">
+									<condition>
+										<resourcecontains resource="build.properties"
+											substring="officeplugin_web" />
+									</condition>
+								</fail>
+							</target>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+		</plugins>
+	</build>
+</project>

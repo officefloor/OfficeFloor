@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<model>
+	<field type="String" name="office managed object dependency name" />
+	<field type="String" name="dependency type" />
+	<field type="OfficeManagedObjectDependencyToOfficeManagedObjectModel"
+		name="office managed object" />
+    <field type="OfficeManagedObjectDependencyToExternalManagedObjectModel"
+        name="external managed object" />
+</model>
