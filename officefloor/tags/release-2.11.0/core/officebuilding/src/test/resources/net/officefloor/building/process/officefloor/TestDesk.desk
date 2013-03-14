@@ -1,0 +1,19 @@
+<desk>
+    
+    <works>
+        <work name="WORK" source="CLASS">
+            <properties>
+                <property name="class.name" value="net.officefloor.building.process.officefloor.MockWork"/>
+            </properties>
+            <initial-task name="writeMessage"/>
+            <work-task name="writeMessage">
+                <task-object name="java.lang.String" object-type="java.lang.String" parameter="true"/>
+            </work-task>
+        </work>
+    </works>
+    
+    <tasks>
+        <task name="writeMessage" work="WORK" task="writeMessage"/>
+    </tasks>
+    
+</desk>

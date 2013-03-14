@@ -1,0 +1,13 @@
+                                         --------------------
+                                     OfficeBuilding - Command Line
+                                         --------------------
+                                         Daniel Sagenschneider
+                                         --------------------
+
+  Within the <<<bin>>> directory are the scripts: 
+  
+   * <<<officebuilding>>> : runs the OfficeBuilding to allow management of OfficeFloor instances by further command line invocations or JMX
+   
+   * <<<officefloor>>> : runs just a single OfficeFloor instance without JMX management
+
+  More details of each script can be found from the respective script's help.

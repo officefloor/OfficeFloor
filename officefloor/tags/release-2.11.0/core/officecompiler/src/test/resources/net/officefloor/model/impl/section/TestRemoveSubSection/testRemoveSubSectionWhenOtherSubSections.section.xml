@@ -1,0 +1,8 @@
+<section>
+	<sub-sections>
+		<sub-section name="SUB_SECTION_A" source="net.example.ExampleSectionSource"
+			location="LOCATION_A" />
+		<sub-section name="SUB_SECTION_C" source="net.example.ExampleSectionSource"
+			location="LOCATION_C" />
+	</sub-sections>
+</section>

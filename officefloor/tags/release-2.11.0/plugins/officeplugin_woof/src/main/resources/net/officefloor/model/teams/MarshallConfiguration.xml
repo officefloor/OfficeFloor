@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<marshall type="net.officefloor.model.teams.AutoWireTeamsModel"
+	element="teams">
+
+	<!-- TEAMS -->
+	<collection method="getAutoWireTeams" element="teams">
+		<item type="net.officefloor.model.teams.AutoWireTeamModel"
+			element="team">
+			<attributes>
+				<attribute method="getTeamSourceClassName" attribute="source" />
+				<attribute method="getQualifier" attribute="qualifier" />
+				<attribute method="getType" attribute="type" />
+			</attributes>
+			<collection method="getPropertySources">
+				<item type="net.officefloor.model.teams.PropertyModel" element="property">
+					<attributes>
+						<attribute method="getName" attribute="name" />
+						<attribute method="getValue" attribute="value" />
+					</attributes>
+				</item>
+				<item type="net.officefloor.model.teams.PropertyFileModel"
+					element="property-file">
+					<attributes>
+						<attribute method="getPath" attribute="path" />
+					</attributes>
+				</item>
+			</collection>
+			<collection method="getAutoWiring">
+				<item type="net.officefloor.model.teams.AutoWireModel" element="auto-wire">
+					<attributes>
+						<attribute method="getQualifier" attribute="qualifier" />
+						<attribute method="getType" attribute="type" />
+					</attributes>
+				</item>
+			</collection>
+		</item>
+	</collection>
+
+</marshall>

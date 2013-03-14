@@ -1,0 +1,16 @@
+<woof>
+  <templates>
+    <template name="template" uri="template" path="template.woof.html" class="net.officefloor.tutorial.testhttpserver.TemplateLogic" secure="false" continue-rendering="false" x="14" y="25">
+    </template>
+  </templates>
+  <sections>
+  </sections>
+  <governances>
+  </governances>
+  <resources>
+  </resources>
+  <exceptions>
+  </exceptions>
+  <starting>
+  </starting>
+</woof>

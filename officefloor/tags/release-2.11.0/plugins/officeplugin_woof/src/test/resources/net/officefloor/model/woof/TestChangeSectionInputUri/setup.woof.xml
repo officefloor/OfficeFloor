@@ -1,0 +1,10 @@
+<woof>
+
+	<sections>
+		<section name="SECTION" source="Section" location="Location">
+			<input name="ONE" />
+			<input name="TWO" uri="path" />
+		</section>
+	</sections>
+
+</woof>

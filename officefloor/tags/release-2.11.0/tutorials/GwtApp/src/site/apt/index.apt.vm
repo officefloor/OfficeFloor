@@ -1,0 +1,86 @@
+                                               -----------------------
+                                               GWT Application Tutorial 
+                                               -----------------------
+					        Daniel Sagenschneider
+                                               -----------------------
+
+  <<GWT Application Tutorial>>
+
+  This tutorial demonstrates the simplicity in using {{{http://gwt.google.com}Google Web Toolkit (GWT)}} with WoOF to create Rich Internet Applications (RIA).
+  
+  The example used in this tutorial is the following simple page to show the seconds since the page load.
+  
+[./images/GwtApp-screenshot.png] GwtApp screenshot.
+    
+  {{{http://sourceforge.net/projects/officefloor/files/maven/maven2/net/officefloor/tutorial/GwtApp/${projectVersion}/GwtApp-${projectVersion}-project.zip/download}Download Tutorial Source}}
+  
+
+  
+Template.woof.html
+
+  The below is the HTML of the page.
+
+%{code-snippet|brush=xml|file=${basedir}/src/main/webapp/Template.woof.html}
+
+  Notice that the template only has the single GWT hook (id="timer").  The other GWT aspects are not present (such as the \<script\> tag to include the GWT JavaScript).  This is because WoOF will automatically add these GWT aspects on rendering the page so that only the necessary <id="xxx"> hooks are required.
+
+
+  
+EntryPoint Class
+
+  Before discussing the Java code for GWT compilation, a very quick summary of the relevant GWT capabilities is provided below.  Please see the {{{http://code.google.com/webtoolkit/overview.html}GWT Overview}} for more in depth documentation of GWT.
+  
+    * GWT compiles Java code into JavaScript
+   
+    * The <EntryPoint.onModuleLoad()> method provides the starting point for running the functionality within the web page
+   
+    * <RootPanel.get("xxx")> is a static method providing the means to obtain the panel within the HTML identified by an <id> attribute.  In this tutorial's case <<< \<p id="timer"\> >>>
+   
+    * GWT generated JavaScript will dynamically add the necessary HTML for displaying the components
+   
+  The following is the GWT Java code for this tutorial that indicates the time in seconds since page load:
+
+%{code-snippet|brush-autodetect=1|id=example|file=${basedir}/src/main/java/net/officefloor/tutorial/gwtapp/client/GwtAppEntryPoint.java}
+
+  The code provides the time in seconds since page load by:
+
+    [[1]] Obtaining the <<< \<p id="timer"\> >>> HTML element
+    
+    [[1]] Adding a label to the contents of the <<< \<p\> >>> element to indicate the number of seconds since page load
+    
+    [[1]] Starting a timer that triggers each second to increment the number displayed by the label (indicating the number of seconds since loading the page)
+    
+    
+
+application.woof
+
+  Normally with GWT applications a <<<Module.gwt.xml>>> configuration file is required to be written.  The file indicates to GWT how to compile and create the JavaScript for the web page.
+  
+  WoOF makes the GWT integration simpler by generating the configuration file for you.  All that is necessary to provide GWT functionality onto the page is specifying the <<<EntryPoint>>> class when adding the template.  The following demonstrates the GWT configuration for this tutorial.
+  
+[./images/GwtApp-add-template-dialog.png] GwtApp Add template dialog screenshot.
+
+  On creating the template, WoOF will automatically generate the <<<Module.gwt.xml>>> file for GWT compilation.  The file may be changed to provide further GWT functionality, however changes to the following attributes will be overwritten by WoOF in managing the GWT functionality.
+  
+    * rename-to attribute
+    
+    * entry-point class attribute
+
+
+
+Compiling GWT with Maven
+
+  To use GWT to compile the Java to JavaScript add the following to your <<<pom.xml>>>.
+  
+%{code-snippet|brush-autodetect=1|id=GwtPlugin|file=${basedir}/pom.xml}
+ 
+  To also make the GWT Java classes available for coding against add the following GWT dependency (with appropriate <<<version>>>).
+  
+%{code-snippet|brush-autodetect=1|id=GwtDependency|file=${basedir}/pom.xml}
+
+
+
+Next
+
+  The {{{../GwtService/index.html}next tutorial}} looks at GWT RPC (AJAX).
+

@@ -1,0 +1,3 @@
+net.officefloor.model.impl.section.SectionModelSectionSource
+net.officefloor.model.impl.desk.DeskModelSectionSource
+net.officefloor.plugin.section.clazz.ClassSectionSource

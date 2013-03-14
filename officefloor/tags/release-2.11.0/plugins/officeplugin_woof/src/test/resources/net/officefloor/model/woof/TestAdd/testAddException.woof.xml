@@ -1,0 +1,7 @@
+<woof>
+
+	<exceptions>
+		<exception class="java.lang.Exception" x="100" y="101" />
+	</exceptions>
+
+</woof>

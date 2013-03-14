@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<model>
+	<field type="String" name="input name" />
+	<field type="WoofTemplateOutputModel" name="woof template output"
+		end-field="woof access input" />
+	<field type="WoofAccessInputModel" name="woof access input"
+		end-list="woof template output" />
+</model>
