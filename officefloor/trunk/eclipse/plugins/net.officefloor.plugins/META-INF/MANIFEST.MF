@@ -2,10 +2,10 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Eclipse OfficeFloor Plug-ins
 Bundle-SymbolicName: net.officefloor.plugins;singleton:=true
-Bundle-Version: 2.11.0
+Bundle-Version: 2.12.0
 Bundle-Vendor: OfficeFloor
-Require-Bundle: net.officefloor.core;bundle-version="2.11.0",
- net.officefloor.ui;bundle-version="2.11.0",
+Require-Bundle: net.officefloor.core;bundle-version="2.12.0",
+ net.officefloor.ui;bundle-version="2.12.0",
  org.eclipse.core.resources,
  org.eclipse.jface,
  org.eclipse.ui.ide,
@@ -80,9 +80,9 @@ Export-Package: com.sun.jndi.url.mock,
  net.officefloor.plugin.web.http.template.section,
  net.officefloor.plugin.web.http.tokenise
 Bundle-ClassPath: .,
- officeplugin_jdbc-2.11.0.jar,
- officeplugin_jndi-2.11.0.jar,
- officeplugin_jpa-2.11.0.jar,
- officeplugin_socket-2.11.0.jar,
- officeplugin_web-2.11.0.jar,
+ officeplugin_jdbc-2.12.0.jar,
+ officeplugin_jndi-2.12.0.jar,
+ officeplugin_jpa-2.12.0.jar,
+ officeplugin_socket-2.12.0.jar,
+ officeplugin_web-2.12.0.jar,
  geronimo-jpa_2.0_spec-1.1.jar
