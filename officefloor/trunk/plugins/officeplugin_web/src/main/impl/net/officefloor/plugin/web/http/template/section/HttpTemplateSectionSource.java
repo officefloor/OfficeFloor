@@ -68,6 +68,7 @@ import net.officefloor.plugin.web.http.session.HttpSession;
 import net.officefloor.plugin.web.http.session.object.HttpSessionObjectManagedObjectSource;
 import net.officefloor.plugin.web.http.template.HttpTemplateTask;
 import net.officefloor.plugin.web.http.template.HttpTemplateWorkSource;
+import net.officefloor.plugin.web.http.template.NotRenderTemplateAfter;
 import net.officefloor.plugin.web.http.template.parse.HttpTemplate;
 import net.officefloor.plugin.web.http.template.parse.HttpTemplateParserImpl;
 import net.officefloor.plugin.web.http.template.parse.HttpTemplateSection;
@@ -872,11 +873,18 @@ public class HttpTemplateSectionSource extends ClassSectionSource {
 						.get(beanTaskKey);
 				Method method = methodTask.method;
 
-				// Determine if method already indicating next task
-				if (!(method.isAnnotationPresent(NextTask.class))) {
-					// Next task not linked, so link to render template
-					designer.link(methodTask.task, initialTask);
+				// Determine if not render template after
+				if (method.isAnnotationPresent(NotRenderTemplateAfter.class)) {
+					continue; // not render
 				}
+
+				// Determine if NextTask, so not render template after
+				if (method.isAnnotationPresent(NextTask.class)) {
+					continue; // not render
+				}
+
+				// Next task not linked, so link to render template
+				designer.link(methodTask.task, initialTask);
 			}
 		}
 

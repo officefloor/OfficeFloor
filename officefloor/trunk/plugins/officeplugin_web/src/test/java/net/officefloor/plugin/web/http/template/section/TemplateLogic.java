@@ -30,7 +30,9 @@ import net.officefloor.plugin.section.clazz.Parameter;
 import net.officefloor.plugin.section.clazz.Property;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
 import net.officefloor.plugin.web.http.session.HttpSession;
+import net.officefloor.plugin.web.http.template.NotRenderTemplateAfter;
 import net.officefloor.plugin.web.http.template.UnescapedHtml;
+import net.officefloor.plugin.web.http.template.parse.HttpTemplate;
 import net.officefloor.plugin.web.http.tokenise.HttpRequestTokeniserImpl;
 import net.officefloor.plugin.work.clazz.FlowInterface;
 
@@ -236,6 +238,16 @@ public class TemplateLogic {
 
 		// Return parameter for next flow
 		return "Parameter for External Flow";
+	}
+
+	/**
+	 * Flags to not render the {@link HttpTemplate} afterwards.
+	 */
+	@NotRenderTemplateAfter
+	public void notRenderTemplateAfter(ServerHttpConnection connection)
+			throws IOException {
+		connection.getHttpResponse().getEntityWriter()
+				.write("NOT_RENDER_TEMPLATE_AFTER");
 	}
 
 	/**
