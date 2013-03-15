@@ -22,5 +22,6 @@
     <input type="submit" />
 </form>
 <a href="#{nonMethodLink}">Non-method link</a>
+<a href="#{notRenderTemplateAfter}">Not render template after link</a>
 </body>
 </html>

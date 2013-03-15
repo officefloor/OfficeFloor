@@ -50,6 +50,8 @@ import net.officefloor.plugin.web.http.route.HttpRouteWorkSource;
 import net.officefloor.plugin.web.http.session.HttpSession;
 import net.officefloor.plugin.web.http.session.HttpSessionManagedObjectSource;
 import net.officefloor.plugin.web.http.template.HttpTemplateWorkSource;
+import net.officefloor.plugin.web.http.template.NotRenderTemplateAfter;
+import net.officefloor.plugin.web.http.template.parse.HttpTemplate;
 import net.officefloor.plugin.web.http.template.section.PostRedirectGetLogic.Parameters;
 
 import org.apache.http.Header;
@@ -82,7 +84,9 @@ public class HttpTemplateSectionIntegrationTest extends OfficeFrameTestCase {
 			+ "<tr><td>row</td><td>test row</td></tr></table>"
 			+ "<form action=\"${LINK_nextTask_QUALIFICATION}/uri-nextTask${LINK_SUFFIX}\"><input type=\"submit\"/></form>"
 			+ "<form action=\"${LINK_submit_QUALIFICATION}/uri-submit${LINK_SUFFIX}\"><input type=\"submit\"/></form>"
-			+ "<a href=\"${LINK_nonMethodLink_QUALIFICATION}/uri-nonMethodLink${LINK_SUFFIX}\">Non-method link</a></body></html>";
+			+ "<a href=\"${LINK_nonMethodLink_QUALIFICATION}/uri-nonMethodLink${LINK_SUFFIX}\">Non-method link</a>"
+			+ "<a href=\"${LINK_notRenderTemplateAfter_QUALIFICATION}/uri-notRenderTemplateAfter${LINK_SUFFIX}\">Not render template after link</a>"
+			+ "</body></html>";
 
 	/**
 	 * Host name.
@@ -171,7 +175,7 @@ public class HttpTemplateSectionIntegrationTest extends OfficeFrameTestCase {
 		// Ensure correct rendering of template
 		String rendering = this.doHttpRequest("/uri", false);
 		this.assertRenderedResponse("", LinkQualify.NONE, LinkQualify.NONE,
-				LinkQualify.NONE, null, rendering);
+				LinkQualify.NONE, LinkQualify.NONE, null, rendering);
 	}
 
 	/**
@@ -187,7 +191,7 @@ public class HttpTemplateSectionIntegrationTest extends OfficeFrameTestCase {
 		// Ensure correct rendering of template
 		String rendering = this.doHttpRequest("/uri.suffix", false);
 		this.assertRenderedResponse("", LinkQualify.NONE, LinkQualify.NONE,
-				LinkQualify.NONE, ".suffix", rendering);
+				LinkQualify.NONE, LinkQualify.NONE, ".suffix", rendering);
 	}
 
 	/**
@@ -228,7 +232,8 @@ public class HttpTemplateSectionIntegrationTest extends OfficeFrameTestCase {
 		// Ensure correct rendering of template
 		String rendering = this.doHttpRequest("/uri-submit", true);
 		this.assertRenderedResponse("<submit/>", LinkQualify.NON_SECURE,
-				LinkQualify.NONE, LinkQualify.NON_SECURE, null, rendering);
+				LinkQualify.NONE, LinkQualify.NON_SECURE,
+				LinkQualify.NON_SECURE, null, rendering);
 	}
 
 	/**
@@ -245,7 +250,7 @@ public class HttpTemplateSectionIntegrationTest extends OfficeFrameTestCase {
 		// Ensure correct rendering of template
 		String rendering = this.doHttpRequest("/uri", true);
 		this.assertRenderedResponse("", LinkQualify.NONE, LinkQualify.NONE,
-				LinkQualify.NONE, null, rendering);
+				LinkQualify.NONE, LinkQualify.NONE, null, rendering);
 	}
 
 	/**
@@ -262,7 +267,7 @@ public class HttpTemplateSectionIntegrationTest extends OfficeFrameTestCase {
 		// Ensure correct rendering of template
 		String rendering = this.doHttpRequest("/uri", false);
 		this.assertRenderedResponse("", LinkQualify.NONE, LinkQualify.SECURE,
-				LinkQualify.NONE, null, rendering);
+				LinkQualify.NONE, LinkQualify.NONE, null, rendering);
 	}
 
 	/**
@@ -281,7 +286,7 @@ public class HttpTemplateSectionIntegrationTest extends OfficeFrameTestCase {
 		// Ensure correct rendering of template
 		String rendering = this.doHttpRequest("/uri", true);
 		this.assertRenderedResponse("", LinkQualify.NONE, LinkQualify.NONE,
-				LinkQualify.NON_SECURE, null, rendering);
+				LinkQualify.NON_SECURE, LinkQualify.NONE, null, rendering);
 	}
 
 	/**
@@ -473,7 +478,8 @@ public class HttpTemplateSectionIntegrationTest extends OfficeFrameTestCase {
 		// Ensure correctly renders template on submit not invoking flow
 		String response = this.doHttpRequest("/uri-submit", false);
 		this.assertRenderedResponse("<submit />", LinkQualify.NONE,
-				LinkQualify.NONE, LinkQualify.NONE, null, response);
+				LinkQualify.NONE, LinkQualify.NONE, LinkQualify.NONE, null,
+				response);
 	}
 
 	/**
@@ -490,7 +496,23 @@ public class HttpTemplateSectionIntegrationTest extends OfficeFrameTestCase {
 		// Ensure correctly renders template on submit not invoking flow
 		String response = this.doHttpRequest("/uri-submit.suffix", false);
 		this.assertRenderedResponse("<submit />", LinkQualify.NONE,
-				LinkQualify.NONE, LinkQualify.NONE, ".suffix", response);
+				LinkQualify.NONE, LinkQualify.NONE, LinkQualify.NONE,
+				".suffix", response);
+	}
+
+	/**
+	 * Ensure may use {@link NotRenderTemplateAfter} annotation to avoid
+	 * rendering the template afterwards by default.
+	 */
+	public void testSubmitAndNotRenderTemplateAfter() throws Exception {
+
+		// Start the server
+		this.isNonMethodLink = true;
+		this.startHttpServer("Template.ofp", TemplateLogic.class);
+
+		// Ensure not renders template afterwards
+		this.assertHttpRequest("/uri-notRenderTemplateAfter", false,
+				"NOT_RENDER_TEMPLATE_AFTER");
 	}
 
 	/**
@@ -647,6 +669,42 @@ public class HttpTemplateSectionIntegrationTest extends OfficeFrameTestCase {
 		public void renderByDefault(ServerHttpConnection connection)
 				throws IOException {
 			writeMessage(connection, "-RenderByDefault-");
+		}
+
+		// Required for test configuration
+		@NextTask("doExternalFlow")
+		public void required() {
+		}
+	}
+
+	/**
+	 * Ensure not render {@link HttpTemplate} afterwards.
+	 */
+	public void testNotRenderTemplateAfter() throws Exception {
+
+		// Start the server
+		this.startHttpServer("SubmitTemplate.ofp",
+				NotRenderTemplateAfterLogic.class);
+
+		// Ensure not render template after on link submit
+		this.assertHttpRequest("/uri-submit", false,
+				"Submit-NotRenderTemplateAfter");
+	}
+
+	/**
+	 * Template logic for testing {@link NotRenderTemplateAfterLogic}.
+	 */
+	public static class NotRenderTemplateAfterLogic {
+
+		@NextTask("notRenderTemplateAfter")
+		public void submit(ServerHttpConnection connection) throws IOException {
+			writeMessage(connection, "Submit");
+		}
+
+		@NotRenderTemplateAfter
+		public void notRenderTemplateAfter(ServerHttpConnection connection)
+				throws IOException {
+			writeMessage(connection, "-NotRenderTemplateAfter");
 		}
 
 		// Required for test configuration
@@ -988,7 +1046,8 @@ public class HttpTemplateSectionIntegrationTest extends OfficeFrameTestCase {
 	 */
 	private void assertRenderedResponse(String expectedResponsePrefix,
 			LinkQualify nextTaskQualify, LinkQualify submitQualify,
-			LinkQualify nonMethodLinkQualify, String linkUriSuffix,
+			LinkQualify nonMethodLinkQualify,
+			LinkQualify notRenderTemplateAfter, String linkUriSuffix,
 			String actualResponse) {
 
 		// Transform expected response for link qualifications
@@ -1003,6 +1062,9 @@ public class HttpTemplateSectionIntegrationTest extends OfficeFrameTestCase {
 		expectedResponse = expectedResponse.replace(
 				"${LINK_nonMethodLink_QUALIFICATION}",
 				this.getLinkQualification(nonMethodLinkQualify));
+		expectedResponse = expectedResponse.replace(
+				"${LINK_notRenderTemplateAfter_QUALIFICATION}",
+				this.getLinkQualification(notRenderTemplateAfter));
 		expectedResponse = expectedResponse.replace("${LINK_SUFFIX}",
 				(linkUriSuffix == null ? "" : linkUriSuffix));
 
