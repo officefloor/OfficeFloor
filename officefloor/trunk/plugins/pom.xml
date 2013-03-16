@@ -21,6 +21,7 @@
 		<module>officeplugin_jms</module>
 		<module>officeplugin_jndi</module>
 		<module>officeplugin_jpa</module>
+		<module>officeplugin_json</module>
 		<module>officeplugin_launch</module>
 		<module>officeplugin_servlet</module>
 		<module>officeplugin_socket</module>
