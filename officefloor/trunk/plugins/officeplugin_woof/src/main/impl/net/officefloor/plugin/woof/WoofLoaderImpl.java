@@ -17,11 +17,14 @@
  */
 package net.officefloor.plugin.woof;
 
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.ServiceConfigurationError;
 import java.util.ServiceLoader;
+import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -120,17 +123,17 @@ public class WoofLoaderImpl implements WoofLoader {
 
 		// Load the template extension services
 		Map<String, WoofTemplateExtensionService> extensionServices = new HashMap<String, WoofTemplateExtensionService>();
+		Map<String, WoofTemplateExtensionService> implicitExtensionServices = new HashMap<String, WoofTemplateExtensionService>();
 		ServiceLoader<WoofTemplateExtensionService> extensionServiceLoader = ServiceLoader
 				.load(WoofTemplateExtensionService.class, classLoader);
 		Iterator<WoofTemplateExtensionService> extensionIterator = extensionServiceLoader
 				.iterator();
 		while (extensionIterator.hasNext()) {
+
+			// Obtain the extension service
+			WoofTemplateExtensionService extensionService;
 			try {
-				WoofTemplateExtensionService extensionService = extensionIterator
-						.next();
-				extensionServices.put(
-						extensionService.getTemplateExtensionAlias(),
-						extensionService);
+				extensionService = extensionIterator.next();
 			} catch (ServiceConfigurationError ex) {
 				// Warning that service not available
 				if (LOG.isLoggable(Level.WARNING)) {
@@ -139,6 +142,34 @@ public class WoofLoaderImpl implements WoofLoader {
 									+ " configuration failure: "
 									+ ex.getMessage(), ex);
 				}
+
+				// Carry on to next service (likely not on class path)
+				continue;
+			}
+
+			// Obtain the extension alias and whether implicit extension
+			String extensionAlias;
+			boolean isImplicitExtension;
+			try {
+				extensionAlias = extensionService.getTemplateExtensionAlias();
+				isImplicitExtension = extensionService.isImplicitExtension();
+			} catch (Throwable ex) {
+				// Warning that error with service
+				if (LOG.isLoggable(Level.WARNING)) {
+					LOG.log(Level.WARNING,
+							"Failed obtaining extension alias from "
+									+ extensionService.getClass().getName()
+									+ " : " + ex.getMessage(), ex);
+				}
+
+				// Carry on to next service
+				continue;
+			}
+
+			// Register the extension service
+			extensionServices.put(extensionAlias, extensionService);
+			if (isImplicitExtension) {
+				implicitExtensionServices.put(extensionAlias, extensionService);
 			}
 		}
 
@@ -178,6 +209,9 @@ public class WoofLoaderImpl implements WoofLoader {
 			// Maintain reference to template by name
 			templates.put(templateName, template);
 
+			// Keep track of the explicit HTTP template extensions
+			Set<String> explicitTemplateExtensions = new HashSet<String>();
+
 			// Configure the HTTP template extensions
 			for (WoofTemplateExtensionModel extensionModel : templateModel
 					.getExtensions()) {
@@ -185,6 +219,11 @@ public class WoofLoaderImpl implements WoofLoader {
 				// Obtain the extension
 				String extensionClassName = extensionModel
 						.getExtensionClassName();
+
+				// Keep track of the explicit extension
+				explicitTemplateExtensions.add(extensionClassName);
+
+				// Load the extension
 				try {
 					WoofTemplateExtensionService extensionService = extensionServices
 							.get(extensionClassName);
@@ -221,6 +260,29 @@ public class WoofLoaderImpl implements WoofLoader {
 									+ extensionClassName + ". "
 									+ ex.getMessage(), ex);
 				}
+			}
+
+			// Include implicit extensions (in deterministic order)
+			String[] implicitExtensionAliases = implicitExtensionServices
+					.keySet().toArray(new String[0]);
+			Arrays.sort(implicitExtensionAliases, String.CASE_INSENSITIVE_ORDER);
+			for (String implicitExtensionAlias : implicitExtensionAliases) {
+				WoofTemplateExtensionService implicitExtensionService = implicitExtensionServices
+						.get(implicitExtensionAlias);
+
+				// Ignore if explicitly included (by alias or class name)
+				if (explicitTemplateExtensions.contains(implicitExtensionAlias)
+						|| (explicitTemplateExtensions
+								.contains(implicitExtensionService.getClass()
+										.getName()))) {
+					continue;
+				}
+
+				// Provide the implicit extension
+				implicitExtensionService
+						.extendTemplate(new WoofTemplateExtensionServiceContextImpl(
+								template, application, OfficeFloorCompiler
+										.newPropertyList(), classLoader));
 			}
 		}
 

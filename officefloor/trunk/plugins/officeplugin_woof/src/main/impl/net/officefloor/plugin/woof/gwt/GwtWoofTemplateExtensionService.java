@@ -44,6 +44,11 @@ public class GwtWoofTemplateExtensionService implements
 	}
 
 	@Override
+	public boolean isImplicitExtension() {
+		return false;
+	}
+
+	@Override
 	public void extendTemplate(WoofTemplateExtensionServiceContext context)
 			throws Exception {
 		GwtHttpTemplateSectionExtension.extendTemplate(context.getTemplate(),

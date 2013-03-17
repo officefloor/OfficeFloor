@@ -19,6 +19,7 @@ package net.officefloor.plugin.woof;
 
 import java.util.ServiceLoader;
 
+import net.officefloor.model.woof.WoofTemplateModel;
 import net.officefloor.plugin.web.http.application.HttpTemplateAutoWireSection;
 import net.officefloor.plugin.web.http.application.HttpTemplateAutoWireSectionExtension;
 
@@ -36,6 +37,21 @@ public interface WoofTemplateExtensionService {
 	 * @return Alias for this {@link HttpTemplateAutoWireSectionExtension}.
 	 */
 	String getTemplateExtensionAlias();
+
+	/**
+	 * <p>
+	 * An implicit extension does not require explicit configuration.
+	 * <p>
+	 * Should a {@link WoofTemplateExtensionService} be implicit it will extend
+	 * every {@link WoofTemplateModel} and unless explicitly configured will
+	 * have no property values. Therefore all implicit
+	 * {@link WoofTemplateExtensionService} instances must be able configure
+	 * themselves without properties (from the
+	 * {@link WoofTemplateExtensionServiceContext} declared configuration).
+	 * 
+	 * @return <code>true</code> if implicit extension.
+	 */
+	boolean isImplicitExtension();
 
 	/**
 	 * Extends the {@link HttpTemplateAutoWireSection}.

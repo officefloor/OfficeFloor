@@ -67,6 +67,9 @@ public class JsonHttpTemplateSectionExtension implements
 
 		// Obtain the template logic class
 		Class<?> logicClass = template.getTemplateLogicClass();
+		if (logicClass == null) {
+			return; // No logic class, no JSON functionality
+		}
 
 		// Iterate over methods (in order for deterministic adding)
 		Method[] methods = logicClass.getMethods();
