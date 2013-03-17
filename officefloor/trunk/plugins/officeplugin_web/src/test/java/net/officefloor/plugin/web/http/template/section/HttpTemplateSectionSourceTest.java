@@ -86,6 +86,7 @@ public class HttpTemplateSectionSourceTest extends OfficeFrameTestCase {
 		expected.addSectionInput("nextTask", null);
 		expected.addSectionInput("submit", null);
 		expected.addSectionInput("doInternalFlow", Integer.class.getName());
+		expected.addSectionInput("notRenderTemplateAfter", null);
 
 		// Outputs
 		expected.addSectionOutput("doExternalFlow", String.class.getName(),
@@ -203,6 +204,21 @@ public class HttpTemplateSectionSourceTest extends OfficeFrameTestCase {
 		doInternalFlow.getTaskObject(Integer.class.getName());
 		doInternalFlow.getTaskObject(Connection.class.getName());
 		doInternalFlow.getTaskObject(ServerHttpConnection.class.getName());
+
+		// Not render template after link
+		SectionWork notRenderTemplateAfterWork = expected.addSectionWork(
+				"HTTP_URL_CONTINUATION_notRenderTemplateAfter",
+				HttpUrlContinuationWorkSource.class.getName());
+		notRenderTemplateAfterWork.addSectionTask(
+				"HTTP_URL_CONTINUATION_notRenderTemplateAfter",
+				HttpUrlContinuationWorkSource.TASK_NAME);
+
+		// Handle not render template after task
+		SectionTask notRenderTemplateAfterMethod = classWork.addSectionTask(
+				"notRenderTemplateAfter", "notRenderTemplateAfter");
+		notRenderTemplateAfterMethod.getTaskObject("OBJECT");
+		notRenderTemplateAfterMethod.getTaskObject(ServerHttpConnection.class
+				.getName());
 
 		// Managed Object Sources
 		expected.addSectionManagedObjectSource("OBJECT",
