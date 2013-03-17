@@ -106,6 +106,10 @@
 		</dependency>
 		<dependency>
 			<groupId>${project.groupId}</groupId>
+			<artifactId>officeplugin_json</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>${project.groupId}</groupId>
 			<artifactId>officeplugin_gwt</artifactId>
 		</dependency>
 		<dependency>

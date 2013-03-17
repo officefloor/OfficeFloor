@@ -61,6 +61,14 @@ public class JsonHttpTemplateSectionExtensionTest extends OfficeFrameTestCase {
 			.createMock(HttpTemplateSectionExtensionContext.class);
 
 	/**
+	 * Ensure not extend {@link HttpTemplateAutoWireSection} as no logic class.
+	 */
+	public void testNoLogicClass() throws Exception {
+		this.recordGetTemplateLogicClass(null);
+		this.doExtend();
+	}
+
+	/**
 	 * Ensure not extend {@link HttpTemplateAutoWireSection} if no JSON inline
 	 * configuration.
 	 */

@@ -15,50 +15,39 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.plugin.woof.comet;
+package net.officefloor.plugin.woof.json;
 
-import net.officefloor.plugin.comet.web.http.section.CometHttpTemplateSectionExtension;
+import net.officefloor.plugin.json.web.http.section.JsonHttpTemplateSectionExtension;
 import net.officefloor.plugin.woof.WoofTemplateExtensionService;
 import net.officefloor.plugin.woof.WoofTemplateExtensionServiceContext;
 
 /**
- * {@link WoofTemplateExtensionService} for Comet.
+ * {@link WoofTemplateExtensionService} for JSON.
  * 
  * @author Daniel Sagenschneider
  */
-public class CometWoofTemplateExtensionService implements
+public class JsonWoofTemplateExtensionService implements
 		WoofTemplateExtensionService {
 
-	/**
-	 * Extension alias.
-	 */
-	public static final String EXTENSION_ALIAS = "COMET";
-
 	/*
-	 * ==================== WoofTemplateExtensionService ======================
+	 * ================= WoofTemplateExtensionService ===================
 	 */
 
 	@Override
 	public String getTemplateExtensionAlias() {
-		return EXTENSION_ALIAS;
+		return "JSON";
 	}
 
 	@Override
 	public boolean isImplicitExtension() {
-		return false;
+		return true;
 	}
 
 	@Override
 	public void extendTemplate(WoofTemplateExtensionServiceContext context)
 			throws Exception {
-
-		// Extend the template
-		CometHttpTemplateSectionExtension.extendTemplate(context.getTemplate(),
-				context.getWebApplication(), context, context.getClassLoader());
-
-		// Configure in as extension to HTTP template
-		context.getTemplate().addTemplateExtension(
-				CometHttpTemplateSectionExtension.class);
+		JsonHttpTemplateSectionExtension.extendTemplate(context.getTemplate(),
+				context.getWebApplication());
 	}
 
 }
