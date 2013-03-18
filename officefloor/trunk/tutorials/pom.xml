@@ -23,6 +23,7 @@
 		<module>GwtApp</module>
 		<module>GwtService</module>
 		<module>InheritHttpServer</module>
+		<module>JavaScriptApp</module>
 		<module>InteractiveHttpServer</module>
 		<module>NavigateHttpServer</module>
 		<module>Presentation</module>
