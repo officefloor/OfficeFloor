@@ -695,7 +695,7 @@ public class HttpTemplateWizardPage extends WizardPage implements
 		links.getControl().setLayoutData(
 				new GridData(SWT.FILL, SWT.BEGINNING, true, false));
 
-		// Provide means to specify URI path
+		// Provide means to specify render redirect HTTP methods
 		SourceExtensionUtil
 				.createPropertyText(
 						"Render Redirect HTTP methods",
@@ -706,6 +706,10 @@ public class HttpTemplateWizardPage extends WizardPage implements
 		SourceExtensionUtil.createPropertyCheckbox("Continue Rendering",
 				PROPERTY_IS_CONTINUE_RENDERING, false, String.valueOf(true),
 				String.valueOf(false), page, this, null);
+
+		/*
+		 * ------------- Configuration specific to extensions -----------------
+		 */
 
 		// Provide means to specify GWT extension
 		new Label(page, SWT.NONE).setText("GWT Enty Point Class: ");
@@ -868,6 +872,10 @@ public class HttpTemplateWizardPage extends WizardPage implements
 			return;
 		}
 
+		/*
+		 * ------------- Validation specific to extensions -----------------
+		 */
+
 		// Obtain the GWT Entry Point Class
 		String gwtEntryPoint = this.getGwtEntryPointClassName();
 
@@ -877,7 +885,7 @@ public class HttpTemplateWizardPage extends WizardPage implements
 		// Ensure have GWT Entry Point Class if have GWT Services
 		if ((gwtAsyncInterfaces.length > 0) && (gwtEntryPoint == null)) {
 			// Must have GWT Entry Point Class
-			this.setErrorMessage("Must GWT Entry Point if using GWT Services");
+			this.setErrorMessage("Must provide GWT Entry Point if using GWT Services");
 			this.setPageComplete(false);
 			return;
 		}
