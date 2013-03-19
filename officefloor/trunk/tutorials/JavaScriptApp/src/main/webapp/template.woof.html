@@ -1,0 +1,49 @@
+<html>
+
+<head>
+<script type="text/javascript">
+	
+	function addition() {
+		var numberOne = document.getElementById("result").innerHTML;
+		var numberTwo = document.getElementById("value").value;
+		doAjax( { url: "#{addition}" 
+				, payload: "numberOne=" + numberOne + "&numberTwo=" + numberTwo
+				, handler: function(response) { document.getElementById("result").innerHTML = response; }
+				}); 
+	}
+
+	function subtraction() {
+		var numberOne = document.getElementById("result").innerHTML;
+		var numberTwo = document.getElementById("value").value;
+		doAjax( { url: "#{subtraction}"
+				, payload: JSON.stringify({numberOne: numberOne, numberTwo: numberTwo})
+				, handler: function(response) { 
+						document.getElementById("result").innerHTML = JSON.parse(response).result; 
+					}
+				});
+	}
+	
+	function doAjax( request ) {
+		var ajax = new XMLHttpRequest();
+		ajax.open("POST", request.url, false);
+		ajax.onreadystatechange = function() {
+			if (ajax.readyState == 4) {
+				request.handler.call( request, ajax.responseText );
+			}
+		}
+		ajax.send( request.payload );
+	}
+		
+</script>
+</head>
+
+<body>
+
+	<h1 id="result">1</h1>
+	
+	<p><input id="value" type="text" value="1" size="4" />
+		<input type="button" value="add" onclick="addition()" />
+		<input type="button" value="subtract" onclick="subtraction()" /></p>
+
+</body>
+</html>
