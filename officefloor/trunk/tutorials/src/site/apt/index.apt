@@ -41,6 +41,8 @@ WoOF
 *--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
 | {{{./InheritHttpServer/index.html}Template Inheritance}}     | Inheriting sectioned content.                              | \<!-- \{:override\} --\> , \<!-- \{!\} --\> 
 *--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
+| {{{./JavaScriptApp/index.html}JavaScript}}                   | Using JavaScript, AJAX, JSON.                              | @NotRenderTemplateAfter, @HttpJson, JsonResponseWriter 
+*--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
 | {{{./GwtApp/index.html}GWT}}                                 | Easy configuration of GWT to generate JavaScript within the page | EntryPoint
 *--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
 | {{{./GwtService/index.html}AJAX via GWT RPC}}                | Provides easy implementation of both AJAX functionality within the page and servicing by the server | Service Async Interface

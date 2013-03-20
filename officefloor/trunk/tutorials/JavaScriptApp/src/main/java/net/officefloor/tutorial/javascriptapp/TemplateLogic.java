@@ -32,6 +32,7 @@ import net.officefloor.plugin.web.http.template.NotRenderTemplateAfter;
  * 
  * @author Daniel Sagenschneider
  */
+// START SNIPPET: HttpParameters
 public class TemplateLogic {
 
 	@Data
@@ -54,6 +55,9 @@ public class TemplateLogic {
 				.write(String.valueOf(result));
 	}
 
+	// END SNIPPET: HttpParameters
+
+	// START SNIPPET: HttpJson
 	@Data
 	@HttpJson
 	public static class SubtractionRequest implements Serializable {
@@ -78,3 +82,4 @@ public class TemplateLogic {
 	}
 
 }
+// END SNIPPET: HttpJson
