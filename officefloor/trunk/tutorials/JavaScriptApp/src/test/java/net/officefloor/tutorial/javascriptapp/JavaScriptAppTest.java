@@ -67,14 +67,16 @@ public class JavaScriptAppTest extends TestCase {
 		}
 	}
 
+	// START SNIPPET: tutorial
 	public void testHttpParameters() throws IOException {
 		String response = this.doAjax("addition", "numberOne=2&numberTwo=1");
-		assertEquals("Incorret response", "3", response);
+		assertEquals("Incorrect response", "3", response);
 	}
 
 	public void testHttpJson() throws IOException {
-		String response = this.doAjax("subtraction", "{ \"numberOne\" : \"3\", \"numberTwo\" : \"1\" }");
-		assertEquals("Incorret response", "{\"result\":\"2\"}", response);
+		String response = this.doAjax("subtraction",
+				"{ \"numberOne\" : \"3\", \"numberTwo\" : \"1\" }");
+		assertEquals("Incorrect response", "{\"result\":\"2\"}", response);
 	}
 
 	private String doAjax(String link, String payload) throws IOException {
@@ -86,5 +88,6 @@ public class JavaScriptAppTest extends TestCase {
 				.getStatusCode());
 		return EntityUtils.toString(response.getEntity());
 	}
+	// END SNIPPET: tutorial
 
 }

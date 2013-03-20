@@ -16,8 +16,9 @@
 			<item name="Generating HTML" href="./RawHttpServer/index.html" />
 			<item name="Sectioning" href="./SectionHttpServer/index.html" />
 			<item name="Template Inheritance" href="./InheritHttpServer/index.html" />
+			<item name="JavaScript" href="./JavaScriptApp/index.html" />
 			<item name="GWT" href="./GwtApp/index.html" />
-			<item name="AJAX" href="./GwtService/index.html" />
+			<item name="GWT AJAX" href="./GwtService/index.html" />
 			<item name="Comet" href="./CometApp/index.html" />
 			<item name="Server Events" href="./CometManualApp/index.html" />
 			<item name="Secure Page" href="./SecurePageHttpServer/index.html" />
