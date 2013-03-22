@@ -23,12 +23,9 @@ import java.io.InputStreamReader;
 import java.io.Reader;
 import java.io.StringReader;
 import java.nio.charset.Charset;
-import java.util.Arrays;
-import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Properties;
-import java.util.Set;
 
 import net.officefloor.compile.WorkSourceService;
 import net.officefloor.compile.spi.work.source.WorkSource;
@@ -394,16 +391,12 @@ public class HttpTemplateWorkSource extends
 		workTypeBuilder.setWorkFactory(new HttpTemplateWork());
 
 		// Define the tasks
-		Set<String> linkNameSet = new HashSet<String>();
 		for (HttpTemplateSection section : template.getSections()) {
 
 			// Load the task to write the section
-			String[] linkNames = HttpTemplateTask.loadTaskType(section,
-					charset, templateUriPath, templateUriSuffix,
-					isTemplateSecure, workTypeBuilder, context);
-
-			// Keep track of the unique set of link names
-			linkNameSet.addAll(Arrays.asList(linkNames));
+			HttpTemplateTask.loadTaskType(section, charset, templateUriPath,
+					templateUriSuffix, isTemplateSecure, workTypeBuilder,
+					context);
 		}
 	}
 
