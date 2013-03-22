@@ -5,10 +5,20 @@
 		<href>http://www.officefloor.net/</href>
 	</bannerLeft>
 	<poweredBy>
-		<logo name="Install"
+		<logo name="Drag and drop the Install Icon into a running Eclipse workspace to install OfficeFloor (typically to a free space in the tool bar at the top)"
+			href="http://marketplace.eclipse.org/content/officefloor"
+			title="Drag and drop the Install Icon into a running Eclipse workspace to install OfficeFloor (typically to a free space in the tool bar at the top)"
+			img="/images/powerbyspace.png"
+			width="90" height="45" />
+		<logo name="Drag and drop into a running Eclipse workspace to install OfficeFloor (typically to a free space in the tool bar at the top)"
 			href="http://marketplace.eclipse.org/marketplace-client-intro?mpc_install=32712"
-			title="Drag and drop into a running Eclipse Indigo workspace to install OfficeFloor"
+			title="Drag and drop into a running Eclipse workspace to install OfficeFloor (typically to a free space in the tool bar at the top)"
 			img="http://marketplace.eclipse.org/sites/all/modules/custom/marketplace/images/installbutton.png"
+			width="90" />
+		<logo name="Drag and drop the Install Icon into a running Eclipse workspace to install OfficeFloor (typically to a free space in the tool bar at the top)"
+			href="http://marketplace.eclipse.org/content/officefloor"
+			title="Drag and drop the Install Icon into a running Eclipse workspace to install OfficeFloor (typically to a free space in the tool bar at the top)"
+			img="/images/install_instructions.png"
 			width="90" />
 		<logo name="Maven" href="http://maven.apache.org/"
 			img="http://maven.apache.org/images/logos/maven-feather.png" />

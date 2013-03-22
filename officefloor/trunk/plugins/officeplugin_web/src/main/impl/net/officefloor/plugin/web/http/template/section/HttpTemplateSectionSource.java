@@ -556,7 +556,7 @@ public class HttpTemplateSectionSource extends ClassSectionSource {
 		templateWork.addProperty(
 				HttpTemplateWorkSource.PROPERTY_TEMPLATE_CONTENT,
 				templateContent);
-
+		
 		// Copy the template configuration
 		PropertiesUtil.copyProperties(context, templateWork,
 				HttpTemplateWorkSource.PROPERTY_TEMPLATE_URI,

@@ -69,7 +69,7 @@ public class HttpTemplateTask extends
 	public static final String PROPERTY_LINK_SECURE_PREFIX = "link.secure.";
 
 	/**
-	 * Loads the {@link TaskType} for to write the {@link HttpTemplateSection}.
+	 * Loads the {@link TaskType} to write the {@link HttpTemplateSection}.
 	 * 
 	 * @param section
 	 *            {@link HttpTemplateSection}.
