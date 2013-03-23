@@ -136,8 +136,17 @@ public class HttpTemplateWorkSourceTest extends OfficeFrameTestCase {
 				"SERVER_HTTP_CONNECTION");
 		nullBean.addObject(HttpApplicationLocation.class).setLabel(
 				"HTTP_APPLICATION_LOCATION");
-		nullBean.addObject(TemplateBean.class).setLabel("OBJECT");
+		nullBean.addObject(Object.class).setLabel("OBJECT");
 		nullBean.addEscalation(IOException.class);
+
+		// 'NoBean' task
+		TaskTypeBuilder<Indexed, None> noBean = work.addTaskType("NoBean",
+				httpTemplateTaskFactory, Indexed.class, None.class);
+		noBean.addObject(ServerHttpConnection.class).setLabel(
+				"SERVER_HTTP_CONNECTION");
+		noBean.addObject(HttpApplicationLocation.class).setLabel(
+				"HTTP_APPLICATION_LOCATION");
+		noBean.addEscalation(IOException.class);
 
 		// 'List' task
 		TaskTypeBuilder<Indexed, None> list = work.addTaskType("List",
@@ -333,38 +342,51 @@ public class HttpTemplateWorkSourceTest extends OfficeFrameTestCase {
 
 		// Record actions for each task:
 		// - 'template'
+		// - 'BeanTree'
 		// - 'NullBean'
+		// (NoBean does not source bean)
 		// - 'List' task with table row bean
 		// - 'List' task with child row bean
 		// - 'Tail'
-		Object[] beans = new Object[5];
+		Object[] beans = new Object[7];
 		beans[0] = new TemplateBean("Test");
-		final int NULL_BEAN_INDEX = 1;
-		beans[NULL_BEAN_INDEX] = null; // 'NullBean' template
-		beans[2] = new TableRowBean("one", "Same", new PropertyBean("A"));
-		beans[3] = new ChildTableRowBean("two", "Child", null); // no property
-		beans[4] = null;
-		for (int i = 0; i < beans.length; i++) {
+		beans[1] = new BeanTreeBean();
+		final int NULL_BEAN_INDEX = 2;
+		beans[NULL_BEAN_INDEX] = null; // NullBean
+		beans[3] = null; // NoBean
+		beans[4] = new TableRowBean("one", "Same", new PropertyBean("A"));
+		beans[5] = new ChildTableRowBean("two", "Child", null); // no property
+		beans[6] = null;
+		NEXT_BEAN: for (int i = 0; i < beans.length; i++) {
+
+			// Record obtaining the bean for appropriate sections
+			Object bean = beans[i];
+			if ((bean != null) || (i == NULL_BEAN_INDEX)) {
+				this.recordReturn(taskContext, taskContext.getObject(2), bean);
+				if (i == NULL_BEAN_INDEX) {
+					continue NEXT_BEAN; // Null bean, no content
+				}
+			}
+
+			// Obtain the remaining dependencies
 			this.recordReturn(taskContext, taskContext.getObject(0),
 					httpConnection);
+			this.recordReturn(taskContext, taskContext.getObject(1), location);
+
+			// Obtain the HTTP response
 			this.recordReturn(httpConnection, httpConnection.getHttpResponse(),
 					httpResponse);
-			this.recordReturn(taskContext, taskContext.getObject(1), location);
-			if ((beans[i] != null) || (i == NULL_BEAN_INDEX)) {
-				this.recordReturn(taskContext, taskContext.getObject(2),
-						beans[i]);
-			}
 
 			// Provide link recording
 			switch (i) {
-			case 1:
+			case 3:
 				// #{beans} of NullBean section
 				String beansUriPath = "/uri-beans" + templateUriSuffix;
 				this.recordReturn(location,
 						location.transformToClientPath(beansUriPath, false),
 						beansUriPath);
 				break;
-			case 4:
+			case 5:
 				// #{submit} of Tail section
 				String submitUriPath = "/uri-submit" + templateUriSuffix;
 				this.recordReturn(location,
@@ -380,8 +402,14 @@ public class HttpTemplateWorkSourceTest extends OfficeFrameTestCase {
 		// Execute the 'template' task
 		this.doTask("template", work, workType, taskContext);
 
+		// Execute the 'BeanTree' task
+		this.doTask("BeanTree", work, workType, taskContext);
+
 		// Execute the 'NullBean' task
 		this.doTask("NullBean", work, workType, taskContext);
+
+		// Execute the 'NoBean' task
+		this.doTask("NoBean", work, workType, taskContext);
 
 		// Execute the 'List' task (for table and its child)
 		this.doTask("List", work, workType, taskContext); // table row bean
@@ -397,7 +425,7 @@ public class HttpTemplateWorkSourceTest extends OfficeFrameTestCase {
 		String actualOutput = UsAsciiUtil.convertToString(httpResponse
 				.getEntityContent());
 
-		// Expected output (removing last end of line appended)
+		// Expected output
 		String expectedOutput = this.getFileContents(this.findFile(
 				this.getClass(), "Template.expected"));
 		expectedOutput = expectedOutput.replace("${URI_SUFFIX}",
@@ -459,10 +487,12 @@ public class HttpTemplateWorkSourceTest extends OfficeFrameTestCase {
 		HttpTemplateWork work = workType.getWorkFactory().createWork();
 
 		// Record undertaking task to use raw content
+		this.recordReturn(taskContext, taskContext.getObject(2),
+				new TemplateBean("TEST"));
 		this.recordReturn(taskContext, taskContext.getObject(0), httpConnection);
+		this.recordReturn(taskContext, taskContext.getObject(1), location);
 		this.recordReturn(httpConnection, httpConnection.getHttpResponse(),
 				httpResponse);
-		this.recordReturn(taskContext, taskContext.getObject(1), location);
 
 		// Test
 		this.replayMockObjects();
@@ -500,10 +530,12 @@ public class HttpTemplateWorkSourceTest extends OfficeFrameTestCase {
 		HttpTemplateWork work = workType.getWorkFactory().createWork();
 
 		// Record
+		this.recordReturn(taskContext, taskContext.getObject(2),
+				new TemplateBean("TEST"));
 		this.recordReturn(taskContext, taskContext.getObject(0), httpConnection);
+		this.recordReturn(taskContext, taskContext.getObject(1), location);
 		this.recordReturn(httpConnection, httpConnection.getHttpResponse(),
 				httpResponse);
-		this.recordReturn(taskContext, taskContext.getObject(1), location);
 		this.recordReturn(location,
 				location.transformToClientPath("/-something", false),
 				"/-something");
@@ -661,7 +693,8 @@ public class HttpTemplateWorkSourceTest extends OfficeFrameTestCase {
 
 		// Section where link is within a bean
 		HttpTemplateSection beanSection = new HttpTemplateSectionImpl(
-				"BEAN", "${STATIC_REPEAT $}STATIC CONTENT ${DYNAMIC_BEAN #{BEAN_LINK}STATIC_CONTENT${SUB_BEAN #{SUB_BEAN_LINK}$}$}",
+				"BEAN",
+				"${STATIC_REPEAT $}STATIC CONTENT ${DYNAMIC_BEAN #{BEAN_LINK}STATIC_CONTENT${SUB_BEAN #{SUB_BEAN_LINK}$}$}",
 				new HttpTemplateSectionContent[] {
 						new BeanHttpTemplateSectionContentImpl("STATIC_REPEAT",
 								noBeanSection.getContent()),
@@ -758,14 +791,14 @@ public class HttpTemplateWorkSourceTest extends OfficeFrameTestCase {
 				HttpTemplateWorkSource.PROPERTY_BEAN_PREFIX + "template",
 				TemplateBean.class.getName()));
 		properties.addAll(Arrays.asList(
+				HttpTemplateWorkSource.PROPERTY_BEAN_PREFIX + "BeanTree",
+				BeanTreeBean.class.getName()));
+		properties.addAll(Arrays.asList(
 				HttpTemplateWorkSource.PROPERTY_BEAN_PREFIX + "NullBean",
-				TemplateBean.class.getName()));
+				Object.class.getName()));
 		properties.addAll(Arrays.asList(
 				HttpTemplateWorkSource.PROPERTY_BEAN_PREFIX + "List",
 				TableRowBean.class.getName()));
-		properties.addAll(Arrays.asList(
-				HttpTemplateWorkSource.PROPERTY_BEAN_PREFIX + "BeanTree",
-				BeanTreeBean.class.getName()));
 
 		// Provide the additional property values
 		for (int i = 0; i < additionalPropertyNameValuePairs.length; i += 2) {

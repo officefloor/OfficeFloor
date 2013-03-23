@@ -103,18 +103,21 @@ public class HttpTemplateTask extends
 		// Set of link task names
 		Set<String> linkTaskNames = new HashSet<String>();
 
+		// Optional bean class
+		Class<?> beanClass = getBeanClass(sectionAndTaskName, false, context);
+
 		// Create the content writers for the section
 		SectionWriterStruct writerStruct = createHttpTemplateWriters(
-				section.getContent(), null, sectionAndTaskName, linkTaskNames,
-				serverDefaultCharset, templateUriPath, templateUriSuffix,
-				isTemplateSecure, context);
+				section.getContent(), beanClass, sectionAndTaskName,
+				linkTaskNames, serverDefaultCharset, templateUriPath,
+				templateUriSuffix, isTemplateSecure, context);
 
-		// Determine if requires bean
-		boolean isRequireBean = (writerStruct.beanClass != null);
+		// Determine if bean
+		boolean isBean = (writerStruct.beanClass != null);
 
 		// Create the task factory
 		HttpTemplateTask task = new HttpTemplateTask(writerStruct.writers,
-				isRequireBean);
+				isBean);
 
 		// Define the task to write the section
 		TaskTypeBuilder<Indexed, None> taskBuilder = workTypeBuilder
@@ -124,7 +127,7 @@ public class HttpTemplateTask extends
 				"SERVER_HTTP_CONNECTION");
 		taskBuilder.addObject(HttpApplicationLocation.class).setLabel(
 				"HTTP_APPLICATION_LOCATION");
-		if (isRequireBean) {
+		if (isBean) {
 			taskBuilder.addObject(writerStruct.beanClass).setLabel("OBJECT");
 		}
 		taskBuilder.addEscalation(IOException.class);
@@ -237,7 +240,7 @@ public class HttpTemplateTask extends
 
 				// Ensure have bean class
 				if (beanClass == null) {
-					beanClass = getBeanClass(sectionAndTaskName, context);
+					beanClass = getBeanClass(sectionAndTaskName, true, context);
 				}
 
 				// Ensure have the value loader for the bean
@@ -279,7 +282,7 @@ public class HttpTemplateTask extends
 
 				// Ensure have bean class
 				if (beanClass == null) {
-					beanClass = getBeanClass(sectionAndTaskName, context);
+					beanClass = getBeanClass(sectionAndTaskName, true, context);
 				}
 
 				// Ensure have the value loader for the bean
@@ -330,12 +333,23 @@ public class HttpTemplateTask extends
 	 * @return Bean {@link Class}.
 	 */
 	private static Class<?> getBeanClass(String sectionAndTaskName,
-			WorkSourceContext context) {
+			boolean isRequired, WorkSourceContext context) {
 
 		// Obtain the bean class name
 		String beanClassPropertyName = PROPERTY_BEAN_PREFIX
 				+ sectionAndTaskName;
-		String beanClassName = context.getProperty(beanClassPropertyName);
+		String beanClassName;
+		if (isRequired) {
+			// Must provide bean class name
+			beanClassName = context.getProperty(beanClassPropertyName);
+
+		} else {
+			// Optionally provide bean class name
+			beanClassName = context.getProperty(beanClassPropertyName, null);
+			if (beanClassName == null) {
+				return null; // No class name, no bean
+			}
+		}
 
 		// Obtain the class
 		Class<?> beanClass = context.loadClass(beanClassName);
@@ -373,9 +387,9 @@ public class HttpTemplateTask extends
 	private final HttpTemplateWriter[] contentWriters;
 
 	/**
-	 * Flag indicating if a bean is required.
+	 * Flag indicating if a bean.
 	 */
-	private final boolean isRequireBean;
+	private final boolean isBean;
 
 	/**
 	 * Initiate.
@@ -383,12 +397,11 @@ public class HttpTemplateTask extends
 	 * @param contentWriters
 	 *            {@link HttpTemplateWriter} instances to write the content.
 	 * @param isRequireBean
-	 *            Flag indicating if a bean is required.
+	 *            Flag indicating if a bean.
 	 */
-	public HttpTemplateTask(HttpTemplateWriter[] contentWriters,
-			boolean isRequireBean) {
+	public HttpTemplateTask(HttpTemplateWriter[] contentWriters, boolean isBean) {
 		this.contentWriters = contentWriters;
-		this.isRequireBean = isRequireBean;
+		this.isBean = isBean;
 	}
 
 	/*
@@ -399,12 +412,27 @@ public class HttpTemplateTask extends
 	public Object doTask(TaskContext<HttpTemplateWork, Indexed, None> context)
 			throws IOException {
 
+		// Obtain the bean dependency
+		Object bean;
+		if (this.isBean) {
+			// Obtain the bean
+			bean = context.getObject(2);
+
+			// No bean, no content
+			if (bean == null) {
+				return null;
+			}
+
+		} else {
+			// No bean
+			bean = null;
+		}
+
 		// Obtain the dependencies
 		ServerHttpConnection connection = (ServerHttpConnection) context
 				.getObject(0);
 		HttpApplicationLocation location = (HttpApplicationLocation) context
 				.getObject(1);
-		Object bean = (this.isRequireBean ? context.getObject(2) : null);
 
 		// Obtain the writer
 		HttpResponse response = connection.getHttpResponse();
