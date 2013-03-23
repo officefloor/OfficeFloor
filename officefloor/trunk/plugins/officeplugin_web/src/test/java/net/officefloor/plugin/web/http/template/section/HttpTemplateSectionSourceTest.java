@@ -507,9 +507,80 @@ public class HttpTemplateSectionSourceTest extends OfficeFrameTestCase {
 	}
 
 	/**
+	 * Ensure have section method if section requires bean.
+	 */
+	public void testMissingSectionMethodOnTemplateLogic() {
+		this.doMissingSectionMethodTest(MissingSectionTemplateLogic.class,
+				"Missing method 'getsection' on class "
+						+ MissingSectionTemplateLogic.class.getName()
+						+ " to provide bean for template uri");
+	}
+
+	/**
+	 * Template logic with missing section data method.
+	 */
+	public static class MissingSectionTemplateLogic {
+		public void noSectionDataMethod() {
+		}
+	}
+
+	/**
+	 * Ensure provide appropriate message if no template logic class but one is
+	 * required.
+	 */
+	public void testMissingSectionMethodAsNoTemplateLogic() {
+		this.doMissingSectionMethodTest(null,
+				"Must provide template logic class for template uri");
+	}
+
+	/**
+	 * Missing section method as section requires a bean.
+	 * 
+	 * @param templateLogicClass
+	 *            Template logic {@link Class}.
+	 * @param issueDescription
+	 *            Expected issue description.
+	 */
+	private void doMissingSectionMethodTest(Class<?> templateLogicClass,
+			String issueDescription) {
+
+		CompilerIssues issues = this.createMock(CompilerIssues.class);
+
+		// Obtain the template location
+		String templatePath = this.getPackageRelativePath(this.getClass())
+				+ "/MissingSectionMethod.ofp";
+
+		// Record errors
+		issues.addIssue(LocationType.SECTION, templatePath, AssetType.WORK,
+				"TEMPLATE", issueDescription);
+
+		// Create loader
+		OfficeFloorCompiler compiler = OfficeFloorCompiler
+				.newOfficeFloorCompiler(null);
+		compiler.setCompilerIssues(issues);
+		SectionLoader loader = compiler.getSectionLoader();
+
+		// Create the properties
+		PropertyList properties = compiler.createPropertyList();
+		properties.addProperty(HttpTemplateSectionSource.PROPERTY_TEMPLATE_URI)
+				.setValue("uri");
+		if (templateLogicClass != null) {
+			properties.addProperty(
+					HttpTemplateSectionSource.PROPERTY_CLASS_NAME).setValue(
+					templateLogicClass.getName());
+		}
+
+		// Test
+		this.replayMockObjects();
+		loader.loadSectionType(HttpTemplateSectionSource.class, templatePath,
+				properties);
+		this.verifyMockObjects();
+	}
+
+	/**
 	 * Section method may not be annotated with {@link NextTask}.
 	 */
-	public void testNoNextTaskAnnotationForSectionMethod() {
+	public void testIllegalNextTaskAnnotationForSectionMethod() {
 
 		CompilerIssues issues = this.createMock(CompilerIssues.class);
 
