@@ -1285,6 +1285,8 @@
 									<!-- Common links not to check -->
 									<excludedLink>http://sourceforge.net/projects/officefloor</excludedLink>
 									<excludedLink>http://www.officefloor.net/maven2/</excludedLink>
+									<!-- TODO remove after 2.12.0 release when images available -->
+									<excludedLink>http://officefloor.net/images/</excludedLink>
 								</excludedLinks>
 							</configuration>
 						</plugin>
