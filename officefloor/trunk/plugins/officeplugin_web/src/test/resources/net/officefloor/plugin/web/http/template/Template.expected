@@ -3,8 +3,9 @@
 Template Test
 <br />
 
-Should be no template name  available.
+Provide  BEAN value=tree
 <br />
+
 with a listing of <a href="/uri-beans${URI_SUFFIX}">beans</a>:
 <br />
 <table>

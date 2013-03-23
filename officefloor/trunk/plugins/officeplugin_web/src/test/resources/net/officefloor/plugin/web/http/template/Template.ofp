@@ -3,11 +3,12 @@
 Template ${TemplateName}
 <br />
 <!-- {BeanTree} -->
-Provide ${nullBean not to be displayed $} ${bean tree ${value} $}
+Provide ${nullBean not to be displayed $} ${bean BEAN ${value} $}
 <br />
 <!-- {NullBean} -->
-Should be no template name ${TemplateName} available.
+This content not rendered as null bean provided.
 <br />
+<!-- {NoBean} -->
 with a listing of <a href="#{beans}">beans</a>:
 <br />
 <table>
