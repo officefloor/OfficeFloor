@@ -406,9 +406,11 @@ public class HttpTemplateSectionSource extends ClassSectionSource {
 		// Obtain the section class
 		String sectionClassName = context
 				.getProperty(PROPERTY_CLASS_NAME, null);
+		boolean isLogicClass = true;
 		if (CompileUtil.isBlank(sectionClassName)) {
 			// Use the no logic class
 			sectionClassName = NoLogicClass.class.getName();
+			isLogicClass = false; // No logic class
 		}
 
 		// Load the section class work and tasks
@@ -624,13 +626,24 @@ public class HttpTemplateSectionSource extends ClassSectionSource {
 			boolean isRequireBean = HttpTemplateWorkSource
 					.isHttpTemplateSectionRequireBean(templateSection);
 			if ((isRequireBean) && (beanTask == null)) {
-				designer.addIssue("Missing method '" + beanMethodName
-						+ "' on class " + this.sectionClass.getName()
-						+ " to provide bean for template " + templateLocation,
-						AssetType.WORK, TEMPLATE_WORK_NANE);
+				// Section method required, determine if just missing method
+				if (!isLogicClass) {
+					// No template logic
+					designer.addIssue(
+							"Must provide template logic class for template "
+									+ templateUriPath, AssetType.WORK,
+							TEMPLATE_WORK_NANE);
+				} else {
+					// Have template logic, so missing method
+					designer.addIssue("Missing method '" + beanMethodName
+							+ "' on class " + this.sectionClass.getName()
+							+ " to provide bean for template "
+							+ templateUriPath, AssetType.WORK,
+							TEMPLATE_WORK_NANE);
+				}
 			}
 
-			// Vaidate and include the bean task
+			// Validate and include the bean task
 			if (beanTask != null) {
 
 				// Ensure bean task does not have a @Parameter
