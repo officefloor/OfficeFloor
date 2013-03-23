@@ -556,7 +556,7 @@ public class HttpTemplateSectionSource extends ClassSectionSource {
 		templateWork.addProperty(
 				HttpTemplateWorkSource.PROPERTY_TEMPLATE_CONTENT,
 				templateContent);
-		
+
 		// Copy the template configuration
 		PropertiesUtil.copyProperties(context, templateWork,
 				HttpTemplateWorkSource.PROPERTY_TEMPLATE_URI,
@@ -590,32 +590,23 @@ public class HttpTemplateSectionSource extends ClassSectionSource {
 			String templateTaskName = templateSection.getSectionName();
 			SectionTask templateTask = templateTasks.get(templateTaskName);
 
-			// Keep track of task for later flow linking
-			contentTasksByName.put(createTaskKey(templateTaskName),
-					templateTask);
-
-			// Determine if template section requires a bean
-			boolean isRequireBean = HttpTemplateWorkSource
-					.isHttpTemplateSectionRequireBean(templateSection);
-
-			// Link the dependencies
+			// Link the dependencies (later will determine if bean dependency)
 			designer.link(templateTask.getTaskObject("SERVER_HTTP_CONNECTION"),
 					connectionObject);
 			designer.link(
 					templateTask.getTaskObject("HTTP_APPLICATION_LOCATION"),
 					locationObject);
 
-			// Flag bean as parameter if requires a bean
-			if (isRequireBean) {
-				templateTask.getTaskObject("OBJECT").flagAsParameter();
-			}
-
 			// Link the I/O escalation
 			designer.link(
 					templateTask.getTaskEscalation(IOException.class.getName()),
 					ioEscalation, FlowInstigationStrategyEnum.SEQUENTIAL);
 
-			// Obtain the bean task method
+			// Keep track of task for later flow linking
+			contentTasksByName.put(createTaskKey(templateTaskName),
+					templateTask);
+
+			// Obtain the possible bean task method for the section
 			String beanMethodName = "get" + templateTaskName;
 			String beanTaskKey = createTaskKey(beanMethodName);
 			TemplateClassTask beanTask = this.sectionClassMethodTasksByName
@@ -626,9 +617,33 @@ public class HttpTemplateSectionSource extends ClassSectionSource {
 				beanTask = this.sectionClassMethodTasksByName.get(beanTaskKey);
 			}
 
-			// Ensure that not annotated with NextTask
+			// Bean task to not render template on completion
+			nonRenderTemplateTaskKeys.add(beanTaskKey);
+
+			// Determine if template section requires a bean
+			boolean isRequireBean = HttpTemplateWorkSource
+					.isHttpTemplateSectionRequireBean(templateSection);
+			if ((isRequireBean) && (beanTask == null)) {
+				designer.addIssue("Missing method '" + beanMethodName
+						+ "' on class " + this.sectionClass.getName()
+						+ " to provide bean for template " + templateLocation,
+						AssetType.WORK, TEMPLATE_WORK_NANE);
+			}
+
+			// Vaidate and include the bean task
 			if (beanTask != null) {
-				// Method providing bean, so ensure no next task
+
+				// Ensure bean task does not have a @Parameter
+				if (beanTask.parameter != null) {
+					designer.addIssue(
+							"Template bean method '" + beanMethodName
+									+ "' must not have a "
+									+ Parameter.class.getSimpleName()
+									+ " annotation", AssetType.TASK,
+							beanMethodName);
+				}
+
+				// Ensure no next task (as must render section next)
 				Method method = beanTask.method;
 				if (method.isAnnotationPresent(NextTask.class)) {
 					designer.addIssue(
@@ -640,84 +655,63 @@ public class HttpTemplateSectionSource extends ClassSectionSource {
 					// As NextTask annotation, do not render section
 					continue;
 				}
-			}
 
-			// Bean task to not render template on completion
-			nonRenderTemplateTaskKeys.add(beanTaskKey);
-
-			// Ensure correct configuration, if template section requires bean
-			if (isRequireBean) {
-
-				// Must have template bean task
-				if (beanTask == null) {
-					designer.addIssue("Missing method '" + beanMethodName
-							+ "' on class " + this.sectionClass.getName()
-							+ " to provide bean for template "
-							+ templateLocation, AssetType.WORK,
-							TEMPLATE_WORK_NANE);
-
-				} else {
-					// Ensure bean task does not have a parameter
-					if (beanTask.parameter != null) {
-						designer.addIssue("Template bean method '"
-								+ beanMethodName + "' must not have a "
-								+ Parameter.class.getSimpleName()
-								+ " annotation", AssetType.TASK, beanMethodName);
-					}
-
-					// Obtain the argument type for the template
-					Class<?> argumentType = beanTask.type.getReturnType();
-					if ((argumentType == null)
-							|| (Void.class.equals(argumentType))) {
-						// Must provide argument from bean task
+				// Obtain the return type for the template
+				Class<?> returnType = beanTask.type.getReturnType();
+				if ((returnType == null) || (Void.class.equals(returnType))) {
+					// Must provide return if require a bean
+					if (isRequireBean) {
 						designer.addIssue("Bean method '" + beanMethodName
 								+ "' must have return value", AssetType.TASK,
 								beanMethodName);
+					}
 
-					} else {
-						// Determine bean type and whether an array
-						Class<?> beanType = argumentType;
-						boolean isArray = argumentType.isArray();
-						if (isArray) {
-							beanType = argumentType.getComponentType();
-						}
+				} else {
+					// Determine bean type and whether an array
+					Class<?> beanType = returnType;
+					boolean isArray = returnType.isArray();
+					if (isArray) {
+						beanType = returnType.getComponentType();
+					}
 
-						// Inform template of bean type
-						templateWork.addProperty(
-								HttpTemplateWorkSource.PROPERTY_BEAN_PREFIX
-										+ templateTaskName, beanType.getName());
+					// Inform template of bean type
+					templateWork.addProperty(
+							HttpTemplateWorkSource.PROPERTY_BEAN_PREFIX
+									+ templateTaskName, beanType.getName());
 
-						// Handle iterating over array of beans
-						if (isArray) {
-							// Provide iterator task if array
-							SectionWork arrayIteratorWork = designer
-									.addSectionWork(
-											templateTaskName + "ArrayIterator",
-											HttpTemplateArrayIteratorWorkSource.class
-													.getName());
-							arrayIteratorWork
-									.addProperty(
-											HttpTemplateArrayIteratorWorkSource.PROPERTY_COMPONENT_TYPE_NAME,
-											beanType.getName());
-							SectionTask arrayIteratorTask = arrayIteratorWork
-									.addSectionTask(
-											templateTaskName + "ArrayIterator",
-											HttpTemplateArrayIteratorWorkSource.TASK_NAME);
-							arrayIteratorTask
-									.getTaskObject(
-											HttpTemplateArrayIteratorWorkSource.OBJECT_NAME)
-									.flagAsParameter();
+					// Flag bean as parameter
+					templateTask.getTaskObject("OBJECT").flagAsParameter();
 
-							// Link iteration of array to rendering
-							designer.link(
-									arrayIteratorTask
-											.getTaskFlow(HttpTemplateArrayIteratorWorkSource.FLOW_NAME),
-									templateTask,
-									FlowInstigationStrategyEnum.PARALLEL);
+					// Handle iterating over array of beans
+					if (isArray) {
+						// Provide iterator task if array
+						SectionWork arrayIteratorWork = designer
+								.addSectionWork(
+										templateTaskName + "ArrayIterator",
+										HttpTemplateArrayIteratorWorkSource.class
+												.getName());
+						arrayIteratorWork
+								.addProperty(
+										HttpTemplateArrayIteratorWorkSource.PROPERTY_COMPONENT_TYPE_NAME,
+										beanType.getName());
+						SectionTask arrayIteratorTask = arrayIteratorWork
+								.addSectionTask(
+										templateTaskName + "ArrayIterator",
+										HttpTemplateArrayIteratorWorkSource.TASK_NAME);
+						arrayIteratorTask
+								.getTaskObject(
+										HttpTemplateArrayIteratorWorkSource.OBJECT_NAME)
+								.flagAsParameter();
 
-							// Iterator is now controller for template
-							templateTask = arrayIteratorTask;
-						}
+						// Link iteration of array to rendering
+						designer.link(
+								arrayIteratorTask
+										.getTaskFlow(HttpTemplateArrayIteratorWorkSource.FLOW_NAME),
+								templateTask,
+								FlowInstigationStrategyEnum.PARALLEL);
+
+						// Iterator is now controller for template
+						templateTask = arrayIteratorTask;
 					}
 				}
 			}

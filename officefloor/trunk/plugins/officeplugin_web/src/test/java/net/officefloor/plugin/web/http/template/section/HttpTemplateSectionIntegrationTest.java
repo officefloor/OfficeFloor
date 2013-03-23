@@ -714,6 +714,86 @@ public class HttpTemplateSectionIntegrationTest extends OfficeFrameTestCase {
 	}
 
 	/**
+	 * Ensure not render section if null bean.
+	 */
+	public void testNullSectionBean() throws Exception {
+
+		// Start the server
+		this.startHttpServer("NullBeanTemplate.ofp",
+				NullBeanTemplateLogic.class);
+
+		// Ensure not render section for null section bean
+		this.assertHttpRequest("/uri", false, "START  END");
+	}
+
+	/**
+	 * Null bean logic.
+	 */
+	public static class NullBeanTemplateLogic {
+
+		public Object getSection() {
+			return null;
+		}
+
+		@NextTask("doExternalFlow")
+		public void necessaryForTest() {
+		}
+	}
+
+	/**
+	 * Ensure render section if void return.
+	 */
+	public void testVoidSectionBean() throws Exception {
+
+		// Start the server
+		this.startHttpServer("NullBeanTemplate.ofp", VoidTemplateLogic.class);
+
+		// Ensure render section for void section return
+		this.assertHttpRequest("/uri", false,
+				"START  Should not be rendered on null section bean.  END");
+	}
+
+	/**
+	 * Void logic.
+	 */
+	public static class VoidTemplateLogic {
+
+		public void getSection() {
+		}
+
+		@NextTask("doExternalFlow")
+		public void necessaryForTest() {
+		}
+	}
+
+	/**
+	 * Ensure not render section if null bean.
+	 */
+	public void testNullSectionDataBean() throws Exception {
+
+		// Start the server
+		this.startHttpServer("NullBeanTemplate.ofp",
+				NullBeanDataTemplateLogic.class);
+
+		// Ensure not render section for null section bean
+		this.assertHttpRequest("/uri", false, "START  END");
+	}
+
+	/**
+	 * Null bean logic with Data suffix.
+	 */
+	public static class NullBeanDataTemplateLogic {
+
+		public Object getSectionData() {
+			return null;
+		}
+
+		@NextTask("doExternalFlow")
+		public void necessaryForTest() {
+		}
+	}
+
+	/**
 	 * Ensure can inherit child template.
 	 */
 	public void testInheritChildTemplate() throws Exception {
