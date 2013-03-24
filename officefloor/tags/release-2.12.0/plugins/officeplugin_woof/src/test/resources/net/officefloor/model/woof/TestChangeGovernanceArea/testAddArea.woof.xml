@@ -1,0 +1,10 @@
+<woof>
+
+	<governances>
+		<governance name="GOVERNANCE" source="net.example.ExampleGovernanceSource">
+			<governance-area x="10" y="11" width="20" height="21" />
+			<governance-area x="100" y="101" width="200" height="201" />
+		</governance>
+	</governances>
+
+</woof>

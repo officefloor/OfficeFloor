@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<unmarshall node="teams"
+	class="net.officefloor.model.teams.AutoWireTeamsModel">
+
+	<!-- TEAMS -->
+	<object method="addAutoWireTeam" node="team"
+		class="net.officefloor.model.teams.AutoWireTeamModel">
+		<value method="setTeamSourceClassName" node="team@source" />
+		<value method="setQualifier" node="team@qualifier" />
+		<value method="setType" node="team@type" />
+		<object method="addPropertySource" node="property"
+			class="net.officefloor.model.teams.PropertyModel">
+			<value method="setName" node="property@name" />
+			<value method="setValue" node="property@value" />
+		</object>
+		<object method="addPropertySource" node="property-file"
+			class="net.officefloor.model.teams.PropertyFileModel">
+			<value method="setPath" node="property-file@path" />
+		</object>
+		<object method="addAutoWire" node="auto-wire"
+			class="net.officefloor.model.teams.AutoWireModel">
+			<value method="setQualifier" node="auto-wire@qualifier" />
+			<value method="setType" node="auto-wire@type" />
+		</object>
+	</object>
+
+</unmarshall>

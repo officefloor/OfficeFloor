@@ -1,0 +1,4 @@
+<model>
+	<field type="String" name="servlet name" />
+	<list type="String" name="url pattern" />
+</model>

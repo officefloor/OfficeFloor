@@ -1,0 +1,8 @@
+# JSON extension (included as service as JSON plugin may not always be on the class path)
+net.officefloor.plugin.woof.json.JsonWoofTemplateExtensionService
+
+# GWT extension (included as service as GWT plugin may not always be on class path)
+net.officefloor.plugin.woof.gwt.GwtWoofTemplateExtensionService
+
+# Comet extension (included as service as Comet plugin may not always be on class path)
+net.officefloor.plugin.woof.comet.CometWoofTemplateExtensionService

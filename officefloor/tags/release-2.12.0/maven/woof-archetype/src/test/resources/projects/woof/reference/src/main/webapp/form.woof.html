@@ -1,0 +1,19 @@
+<html>
+<head>
+	<title>Page with form submission</title>
+	<link href="./css/Site.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+
+<p><img style="width: 10em" src="./images/OfficeFloorBannerImage.png" /></p>
+
+<p>Form submission HTML page with dynamic content.</p>
+
+<form action="#{processValues}" method="POST">
+	<p>Name: <input type="text" name="name" value="${name}" />${nameIssue <span class="error">${message}</span> $}</p>
+	<p>Age: <input type="text" name="age" value="${age}" />${ageIssue <span class="error">${message}</span> $}</p>
+	<p><input type="submit" value="submit" /></p>
+</form>
+
+</body>
+</html>
