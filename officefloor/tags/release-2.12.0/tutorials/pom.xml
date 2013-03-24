@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<parent>
+		<groupId>net.officefloor</groupId>
+		<artifactId>officefloor</artifactId>
+		<version>2.12.0</version>
+	</parent>
+	<groupId>net.officefloor.tutorial</groupId>
+	<artifactId>tutorials</artifactId>
+	<packaging>pom</packaging>
+	<name>Tutorials</name>
+	<description>Tutorials for OfficeFloor</description>
+	<modules>
+		<module>AuthenticationHttpServer</module>
+		<module>CometApp</module>
+		<module>CometManualApp</module>
+		<module>DatabaseHttpServer</module>
+		<module>DemoApp</module>
+		<module>DynamicHttpServer</module>
+		<module>ExceptionHttpServer</module>
+		<module>GwtApp</module>
+		<module>GwtService</module>
+		<module>InheritHttpServer</module>
+		<module>JavaScriptApp</module>
+		<module>InteractiveHttpServer</module>
+		<module>NavigateHttpServer</module>
+		<module>Presentation</module>
+		<module>PrototypeHttpServer</module>
+		<module>RawHttpServer</module>
+		<module>SectionHttpServer</module>
+		<module>SecurePageHttpServer</module>
+		<module>SecureLinkHttpServer</module>
+		<module>SessionHttpServer</module>
+		<module>TeamHttpServer</module>
+		<module>TestHttpServer</module>
+		<module>TransactionHttpServer</module>
+		<module>WoofServletDependencyInjection</module>
+		<module>WoofServletJspIntegration</module>
+		<module>WoofServletMigration</module>
+		<module>WoofServletWebApplication</module>
+	</modules>
+	<properties>
+		<ant-jsch-version>1.8.4</ant-jsch-version>
+	</properties>
+	<build>
+		<plugins>
+			<plugin>
+				<!-- Provide project source downloads for examples -->
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-assembly-plugin</artifactId>
+				<configuration>
+					<descriptorRefs>
+						<descriptorRef>project</descriptorRef>
+					</descriptorRefs>
+				</configuration>
+				<executions>
+					<execution>
+						<id>project-source-release</id>
+						<phase>package</phase>
+						<goals>
+							<goal>single</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+		</plugins>
+	</build>
+	<dependencies>
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>easymock</groupId>
+			<artifactId>easymock</artifactId>
+			<scope>test</scope>
+		</dependency>
+	</dependencies>
+	<profiles>
+		<profile>
+			<!-- Avoid SourceForge Shell timeout by recreating the shell  -->
+			<id>shutdown-and-create-sourceforge-shell</id>
+			<activation>
+				<property>
+					<name>deploy</name>
+				</property>
+			</activation>
+			<build>
+				<plugins>
+					<plugin>
+						<!-- Shutdown and Create SourceForge Shell (avoids timeout) -->
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-antrun-plugin</artifactId>
+						<executions>
+							<execution>
+								<id>Shutdown and Create SourceForge shell</id>
+								<inherited>false</inherited>
+								<phase>verify</phase>
+								<goals>
+									<goal>run</goal>
+								</goals>
+								<configuration>
+									<target>
+										<!-- Shutdown the SourceForge shell -->
+										<sshexec host="shell.sourceforge.net" username="${developer.svn.username},officefloor"
+											password="${developer.svn.password}" verbose="true" command="shutdown" />
+
+										<!-- Wait 2 minutes to allow complete shutdown -->
+										<echo>Waiting 2 minutes to allow SourceForge shell shutdown</echo>
+										<sleep minutes="2" />
+
+										<!-- Create new SourceForge shell -->
+										<sshexec host="shell.sourceforge.net" username="${developer.svn.username},officefloor"
+											password="${developer.svn.password}" verbose="true" command="create" />
+									</target>
+								</configuration>
+							</execution>
+						</executions>
+						<dependencies>
+							<dependency>
+								<groupId>org.apache.ant</groupId>
+								<artifactId>ant-jsch</artifactId>
+								<version>${ant-jsch-version}</version>
+								<scope>runtime</scope>
+							</dependency>
+						</dependencies>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+	</profiles>
+</project>

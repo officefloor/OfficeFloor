@@ -1,0 +1,13 @@
+<html>
+<body>
+<!-- {one} -->
+Name for bean one: ${name}
+<br />
+<!-- {two} -->
+Name for bean two: ${name}
+<br />
+<!--  {three} -->
+Name for bean three: ${name}
+<br />
+</body>
+</html>

@@ -1,0 +1,78 @@
+<woof>
+
+	<templates>
+		<template name="TEMPLATE" path="example/Template.ofp" class="net.example.LogicClass">
+			<output name="OUTPUT_1">
+				<input section="SECTION" input="INPUT" />
+			</output>
+			<output name="OUTPUT_2">
+				<template name="TEMPLATE_LINK" />
+			</output>
+			<output name="OUTPUT_3" />
+			<output name="OUTPUT_4">
+				<resource name="RESOURCE" />
+			</output>
+		</template>
+		<template name="TEMPLATE_CHILD" path="example/Child.ofp"
+			extends="TEMPLATE" />
+		<template name="TEMPLATE_LINK" path="example/Link.ofp">
+			<output name="OUTPUT">
+				<template name="TEMPLATE" />
+			</output>
+		</template>
+	</templates>
+
+	<sections>
+		<section name="SECTION" source="net.example.ExampleSectionSource"
+			location="SECTION_LOCATION">
+			<input name="INPUT" />
+			<output name="OUTPUT_A">
+				<input section="SECTION_LINK" input="INPUT" />
+			</output>
+			<output name="OUTPUT_B">
+				<template name="TEMPLATE" />
+			</output>
+			<output name="OUTPUT_C" />
+			<output name="OUTPUT_D">
+				<resource name="RESOURCE" />
+			</output>
+		</section>
+		<section name="SECTION_LINK" source="net.example.LinkSectionSource"
+			location="LINK_LOCATION">
+			<input name="INPUT" />
+			<output name="OUTPUT">
+				<input section="SECTION" input="INPUT" />
+			</output>
+		</section>
+	</sections>
+
+	<access source="net.overwrite.HttpSecuritySource" timeout="1000">
+		<input name="Authenticate"
+			parameter-type="net.officefloor.plugin.web.http.security.HttpCredentials" />
+		<output name="OUTPUT" argument-type="java.lang.String" />
+		<output name="Failure" argument-type="java.lang.Throwable" />
+	</access>
+
+	<resources>
+		<resource name="RESOURCE" path="Example.html" />
+	</resources>
+
+	<exceptions>
+		<exception class="java.lang.RuntimeException">
+			<template name="TEMPLATE" />
+		</exception>
+		<exception class="java.io.IOException">
+			<input section="SECTION" input="INPUT" />
+		</exception>
+		<exception class="java.sql.SQLException">
+			<resource name="RESOURCE" />
+		</exception>
+	</exceptions>
+
+	<starting>
+		<start>
+			<flow section="SECTION" input="INPUT" />
+		</start>
+	</starting>
+
+</woof>

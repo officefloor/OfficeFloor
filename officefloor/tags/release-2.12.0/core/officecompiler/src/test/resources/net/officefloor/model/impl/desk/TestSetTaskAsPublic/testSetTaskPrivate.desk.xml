@@ -1,0 +1,11 @@
+<desk>
+	<works>
+		<work name="WORK" source="net.example.ExampleWorkSource">
+			<work-task name="WORK_TASK" />
+		</work>
+	</works>
+	<tasks>
+		<task name="PUBLIC" public="false" work="WORK" task="WORK_TASK" />
+		<task name="PRIVATE" public="false" work="WORK" task="WORK_TASK" />
+	</tasks>
+</desk>

@@ -1,0 +1,181 @@
+				       ------------------
+				    My First WoOF Application
+				       ------------------
+				      Daniel Sagenschneider
+				       ------------------
+
+  <<My first WoOF application>>
+  
+  This tutorial walks you through creating and running your first Web on OfficeFloor (WoOF) application.
+  
+%{toc}
+
+Setup
+
+  The following are the pre-requisite setup before working through the tutorial:
+
+   [[1]] Install {{{http://maven.apache.org/download.html}Maven}}
+  
+   [[1]] Install {{{http://www.eclipse.org/downloads/}Eclipse}}
+   
+   [[1]] Install the {{{http://marketplace.eclipse.org/content/maven-integration-eclipse}Maven plug-in}} into Eclipse
+   
+   [[1]] Install the {{{http://marketplace.eclipse.org/content/officefloor}OfficeFloor plug-in}} into Eclipse
+
+
+
+Creating the WoOF project
+
+  The create a WoOF project use the Maven WoOF archetype.  Run the following within an empty directory:
+
++-----------------------------------------+
+    mvn archetype:generate -Dfilter=${projectGroupId}:${projectArtifactId}
++-----------------------------------------+
+
+  Select <<<${projectGroupId}:${projectArtifactId}>>> and provide the Maven configuration parameters.  The tutorial uses the following parameters:
+
+%{code-snippet|brush=text|file=${basedir}/src/test/resources/projects/woof/archetype.properties}
+  
+  Once complete there should now be a directory created by the artifact id.
+  
+  Change into the created directory and run the following to build the project:
+  
++-----------------------------------------+
+    mvn install
++-----------------------------------------+
+
+
+
+Running the WoOF project from Maven
+
+  Once the project is built, run the following within the project directory to start the application:
+
++-----------------------------------------+
+    mvn woof:run
++-----------------------------------------+
+
+  The application will now be available at: <<<http://localhost:7878/static.woof>>>  (and look as follows)
+  
+[./images/woof-archetype-static-screenshot.png] WoOF Archetype Static Page Screen Shot
+  
+  To stop the application, run:
+
++-----------------------------------------+
+    mvn woof:stop
++-----------------------------------------+
+
+  Running the above commands will actually start two processes.  The first process is the OfficeBuilding while the second is the OfficeFloor WoOF web application.  Rather than having a single process which hosts each application, OfficeFloor has a central process (OfficeBuilding) which spawns each application (OfficeFloor) to run in its own process.  This central control process, OfficeBuilding, will expose JMX beans for controlling the OfficeFloor instances on port 13778.  The above command will ensure OfficeBuilding is running and then start the WoOF web application.
+
+
+  
+Running the WoOF project within a JEE container
+
+  {{{http://wiki.eclipse.org/Jetty/Feature/Jetty_Maven_Plugin#Quick_Start:_Get_Up_and_Running}Jetty}} provides a Maven plug-in for running a WebApp project within a JEE (Servlet) container.
+  
+  Use the following command within the project directory to run:
+
++-----------------------------------------+
+    mvn org.mortbay.jetty:jetty-maven-plugin:run
++-----------------------------------------+
+
+  After running the above command, the WoOF application will be available at: <<<http://localhost:18080/static.woof>>>
+
+
+
+
+Importing the WoOF project into Eclipse
+
+  Open Eclispe and import the created directory as an existing Maven project.
+  
+  Using the above configuration the following should be the project structure within Eclipse.
+  
+[./images/woof-project-structure.png] WoOF Project Structure
+
+  For those familar with Maven web projects this should be a very familiar structure:
+  
+   * <<<src/main/java>>> : contains the java code
+   
+   * <<<src/main/resources>>> : contains resources to go on the class path
+   
+   * <<<src/test/java>>> : contains the unit test code
+   
+   * <<<src/main/webapp>>> : contains the web resources
+   
+   * <<<pom.xml>>> : provides details of the project and is packaged as a <<<war>>>
+   
+  While WoOF provides a more flexible structure it does not want to reinvent the wheel and re-uses the WAR structure.  
+  
+  There are however some minor differences to accommodate the flexibility of WoOF.
+
+*-------------+-------------+
+|| Difference || Reason ||
+*-------------+-------------+
+| Configuration of the WoOF application is via the <<<application.woof>>> file | WoOF uses graphical configuration. See below. | 
+*-------------+-------------+
+| Web resources for a WoOF template following the naming convention <<<[name].woof.[extension]>>> | WoOF provides non-obtrusive instrumentation of the templates so that the raw template HTML files can be displayed in a browser.  This allows WYSIWYG web development tools to develop the web pages and fast turn around times by rendering the raw HTML file within a web browser.  Placing these files with the web resources directory allows relative paths to pick up CSS, images, etc when opened within a web browser. |
+*-------------+-------------+
+
+
+
+Running the WoOF project from within Eclipse
+
+  To run the WoOF project from within Eclipse, right click on the <<<application.woof>>> file as <<<Run as... WoOF>>>.
+  
+  This will bring up the GWT development console and have your application running.  Use the console to open the web page to the URI of interest.
+  
+  The reason for running through the GWT development console is to allow development mode for the potential GWT code of the application.  This allows debugging of both client and server side code.
+
+
+
+WoOF graphical configuration
+
+  WoOF is configured through the <<<application.woof>>> file.  Opening this file with the OfficeFloor Eclipse Plug-in (i.e. WoOF Editor) will provide the following graphical configuration for the application.
+
+[./images/woof-archetype-configuration.png] WoOF archetype project configuration.
+
+  The very simple configuration shows three web pages with sequential navigation.
+  
+    * <<<static>>> : example static HTML page (useful for static content and wireframing a prototype web application)
+    
+    * <<<form>>> : example dynamic form to enter and validate information
+    
+    * <<<ria>>> : example Rich Internet Application functionality that makes a simple AJAX call to the server
+    
+  There are various other configuration items that can be added by right clicking within the WoOF editor.  Please see the {{{../../tutorials/index.html}other tutorials}} for further details.
+
+  
+
+HTML templating and Java server logic
+
+  The form page looks as follows:
+  
+[./images/woof-archetype-form-screenshot.png] WoOF Archetype Form Page Screen Shot
+
+  The following is the HTML for the form page.
+
+%{code-snippet|brush=xml|file=${basedir}/src/test/resources/projects/woof/reference/src/main/webapp/form.woof.html}
+
+  The instrumentation of HTML page is through the <#\{link\}>, <#\{bean ... $\}>, and <$\{property\}> tags that are mapped by name to methods on the following server POJO (plain old java object): 
+
+%{code-snippet|brush-autodetect=1|file=${basedir}/src/test/resources/projects/woof/reference/src/main/java/net/officefloor/test/form/FormLogic.java}
+
+  Beyond a few annotations the logic class is straight forward Java.
+  
+  Please see the {{{../../tutorials/index.html}other tutorials}} for explanation of the code and the further features available.
+
+
+
+Unit testing the WoOF application
+
+  The following unit test shows the ease in which to start and stop the application for unit testing.
+  
+%{code-snippet|brush-autodetect=1|file=${basedir}/src/test/resources/projects/woof/reference/src/test/java/net/officefloor/test/RunApplicationTest.java}
+  
+  
+
+Congratulations
+
+  Congratulations you have just created and run your first WoOF web application.
+  
+  The {{{../../tutorials/PrototypeHttpServer/index.html}next tutorial}} covers prototyping a web application with WoOF.
+

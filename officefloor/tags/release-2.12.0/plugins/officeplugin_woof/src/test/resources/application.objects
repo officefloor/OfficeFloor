@@ -1,0 +1,7 @@
+<objects>
+
+	<managed-object source="CLASS" type="net.officefloor.plugin.woof.MockDependency">
+		<property name="class.name" value="net.officefloor.plugin.woof.MockDependency" />
+	</managed-object>
+
+</objects>
