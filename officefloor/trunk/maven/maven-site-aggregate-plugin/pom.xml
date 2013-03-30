@@ -5,7 +5,7 @@
 		<groupId>net.officefloor</groupId>
 		<artifactId>officefloor</artifactId>
 		<relativePath>../../pom.xml</relativePath>
-		<version>2.12.0</version>
+		<version>2.13.0</version>
 	</parent>
 	<groupId>net.officefloor.maven</groupId>
 	<artifactId>maven-site-aggregate-plugin</artifactId>
