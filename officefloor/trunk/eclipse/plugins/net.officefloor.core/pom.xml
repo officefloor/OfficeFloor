@@ -5,7 +5,7 @@
 		<groupId>net.officefloor.eclipse</groupId>
 		<artifactId>eclipse</artifactId>
 		<relativePath>../../pom.xml</relativePath>
-		<version>2.12.0</version>
+		<version>2.13.0</version>
 	</parent>
 	<artifactId>net.officefloor.core</artifactId>
 	<name>Eclipse Core</name>
