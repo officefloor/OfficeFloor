@@ -34,7 +34,8 @@ import net.officefloor.compile.OfficeFloorCompiler;
 import net.officefloor.compile.impl.properties.PropertyListSourceProperties;
 import net.officefloor.compile.impl.util.CompileUtil;
 import net.officefloor.compile.properties.PropertyList;
-import net.officefloor.frame.impl.construct.source.SourcePropertiesImpl;
+import net.officefloor.frame.impl.construct.source.SourceContextImpl;
+import net.officefloor.frame.spi.source.SourceContext;
 import net.officefloor.model.repository.ConfigurationItem;
 import net.officefloor.model.woof.PropertyModel;
 import net.officefloor.model.woof.WoofAccessInputModel;
@@ -112,14 +113,14 @@ public class WoofLoaderImpl implements WoofLoader {
 	@Override
 	@SuppressWarnings("unchecked")
 	public void loadWoofConfiguration(ConfigurationItem woofConfiguration,
-			WebAutoWireApplication application) throws Exception {
+			WebAutoWireApplication application, SourceContext sourceContext)
+			throws Exception {
 
 		// Load the WoOF model
 		WoofModel woof = this.repository.retrieveWoOF(woofConfiguration);
 
 		// Obtain the class loader
-		ClassLoader classLoader = application.getOfficeFloorCompiler()
-				.getClassLoader();
+		ClassLoader classLoader = sourceContext.getClassLoader();
 
 		// Load the template extension services
 		Map<String, WoofTemplateExtensionService> extensionServices = new HashMap<String, WoofTemplateExtensionService>();
@@ -239,7 +240,7 @@ public class WoofLoaderImpl implements WoofLoader {
 						extensionService
 								.extendTemplate(new WoofTemplateExtensionServiceContextImpl(
 										template, application, properties,
-										classLoader));
+										sourceContext));
 
 					} else {
 						// Load via extension class name
@@ -282,7 +283,7 @@ public class WoofLoaderImpl implements WoofLoader {
 				implicitExtensionService
 						.extendTemplate(new WoofTemplateExtensionServiceContextImpl(
 								template, application, OfficeFloorCompiler
-										.newPropertyList(), classLoader));
+										.newPropertyList(), sourceContext));
 			}
 		}
 
@@ -748,7 +749,7 @@ public class WoofLoaderImpl implements WoofLoader {
 	 * {@link WoofTemplateExtensionServiceContext} implementation.
 	 */
 	private static class WoofTemplateExtensionServiceContextImpl extends
-			SourcePropertiesImpl implements WoofTemplateExtensionServiceContext {
+			SourceContextImpl implements WoofTemplateExtensionServiceContext {
 
 		/**
 		 * {@link HttpTemplateAutoWireSection}.
@@ -759,11 +760,6 @@ public class WoofLoaderImpl implements WoofLoader {
 		 * {@link WebAutoWireApplication}.
 		 */
 		private final WebAutoWireApplication application;
-
-		/**
-		 * {@link ClassLoader}.
-		 */
-		private final ClassLoader classLoader;
 
 		/**
 		 * Initiate.
@@ -780,12 +776,16 @@ public class WoofLoaderImpl implements WoofLoader {
 		public WoofTemplateExtensionServiceContextImpl(
 				HttpTemplateAutoWireSection template,
 				WebAutoWireApplication application, PropertyList properties,
-				ClassLoader classLoader) {
-			super(new PropertyListSourceProperties(properties));
+				SourceContext sourceContext) {
+			super(sourceContext.isLoadingType(), sourceContext,
+					new PropertyListSourceProperties(properties));
 			this.template = template;
 			this.application = application;
-			this.classLoader = classLoader;
 		}
+
+		/*
+		 * ============= WoofTemplateExtensionServiceContext ================
+		 */
 
 		@Override
 		public HttpTemplateAutoWireSection getTemplate() {
@@ -795,11 +795,6 @@ public class WoofLoaderImpl implements WoofLoader {
 		@Override
 		public WebAutoWireApplication getWebApplication() {
 			return this.application;
-		}
-
-		@Override
-		public ClassLoader getClassLoader() {
-			return this.classLoader;
 		}
 	}
 

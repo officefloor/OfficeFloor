@@ -24,6 +24,7 @@ import net.officefloor.autowire.AutoWire;
 import net.officefloor.autowire.AutoWireGovernance;
 import net.officefloor.autowire.AutoWireSection;
 import net.officefloor.compile.OfficeFloorCompiler;
+import net.officefloor.frame.spi.source.SourceContext;
 import net.officefloor.frame.test.LoggerAssertion;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.model.impl.repository.ModelRepositoryImpl;
@@ -77,6 +78,12 @@ public class WoofLoaderTest extends OfficeFrameTestCase {
 			.createMock(WebAutoWireApplication.class);
 
 	/**
+	 * Mock {@link SourceContext}.
+	 */
+	private final SourceContext sourceContext = this
+			.createMock(SourceContext.class);
+
+	/**
 	 * {@link LoggerAssertion}.
 	 */
 	private LoggerAssertion loggerAssertion;
@@ -122,9 +129,8 @@ public class WoofLoaderTest extends OfficeFrameTestCase {
 		final AutoWireGovernance governanceB = this
 				.createMock(AutoWireGovernance.class);
 
-		// Record obtaining compiler
-		this.recordReturn(this.app, this.app.getOfficeFloorCompiler(),
-				this.compiler);
+		// Record initiating from source context
+		this.recordInitateFromSourceContext();
 
 		// Record loading templates
 		this.recordReturn(this.app, this.app.addHttpTemplate("example",
@@ -206,7 +212,8 @@ public class WoofLoaderTest extends OfficeFrameTestCase {
 		// Test
 		this.replayMockObjects();
 		this.loader.loadWoofConfiguration(
-				this.getConfiguration("application.woof"), this.app);
+				this.getConfiguration("application.woof"), this.app,
+				this.sourceContext);
 		this.verifyMockObjects();
 	}
 
@@ -231,9 +238,8 @@ public class WoofLoaderTest extends OfficeFrameTestCase {
 		final HttpSecurityAutoWireSection security = this
 				.createMock(HttpSecurityAutoWireSection.class);
 
-		// Record obtaining compiler
-		this.recordReturn(this.app, this.app.getOfficeFloorCompiler(),
-				this.compiler);
+		// Record initiating from source context
+		this.recordInitateFromSourceContext();
 
 		// Record loading parent template
 		this.recordReturn(this.app,
@@ -313,7 +319,8 @@ public class WoofLoaderTest extends OfficeFrameTestCase {
 		// Test
 		this.replayMockObjects();
 		this.loader.loadWoofConfiguration(
-				this.getConfiguration("inheritance.woof"), this.app);
+				this.getConfiguration("inheritance.woof"), this.app,
+				this.sourceContext);
 		this.verifyMockObjects();
 	}
 
@@ -327,9 +334,8 @@ public class WoofLoaderTest extends OfficeFrameTestCase {
 		final HttpTemplateAutoWireSectionExtension extension = this
 				.createMock(HttpTemplateAutoWireSectionExtension.class);
 
-		// Record obtaining compiler
-		this.recordReturn(this.app, this.app.getOfficeFloorCompiler(),
-				this.compiler);
+		// Record initiating from source context
+		this.recordInitateFromSourceContext();
 
 		// Record loading template
 		this.recordReturn(this.app, this.app.addHttpTemplate("example",
@@ -337,6 +343,10 @@ public class WoofLoaderTest extends OfficeFrameTestCase {
 		template.setTemplateSecure(false);
 
 		// Record extending with GWT
+		this.recordInitiateWoofTemplateExtensionServiceContext();
+		this.recordReturn(this.sourceContext, this.sourceContext
+				.getClassLoader(), Thread.currentThread()
+				.getContextClassLoader());
 		this.recordReturn(this.app, this.app.isObjectAvailable(new AutoWire(
 				ServerGwtRpcConnection.class)), true);
 		this.recordReturn(template, template.getTemplateUri(), "example");
@@ -353,7 +363,7 @@ public class WoofLoaderTest extends OfficeFrameTestCase {
 		// Test
 		this.replayMockObjects();
 		this.loader.loadWoofConfiguration(this.getConfiguration("gwt.woof"),
-				this.app);
+				this.app, this.sourceContext);
 		this.verifyMockObjects();
 	}
 
@@ -370,9 +380,8 @@ public class WoofLoaderTest extends OfficeFrameTestCase {
 		final HttpTemplateAutoWireSectionExtension extension = this
 				.createMock(HttpTemplateAutoWireSectionExtension.class);
 
-		// Record obtaining compiler
-		this.recordReturn(this.app, this.app.getOfficeFloorCompiler(),
-				this.compiler);
+		// Record initiating from source context
+		this.recordInitateFromSourceContext();
 
 		// Record loading template
 		this.recordReturn(this.app, this.app.addHttpTemplate("example",
@@ -380,6 +389,10 @@ public class WoofLoaderTest extends OfficeFrameTestCase {
 		template.setTemplateSecure(false);
 
 		// Record extending with Comet
+		this.recordInitiateWoofTemplateExtensionServiceContext();
+		this.recordReturn(this.sourceContext, this.sourceContext
+				.getClassLoader(), Thread.currentThread()
+				.getContextClassLoader());
 		this.recordReturn(this.app,
 				this.app.isObjectAvailable(new AutoWire(CometService.class)),
 				true);
@@ -406,7 +419,7 @@ public class WoofLoaderTest extends OfficeFrameTestCase {
 		// Test
 		this.replayMockObjects();
 		this.loader.loadWoofConfiguration(this.getConfiguration("comet.woof"),
-				this.app);
+				this.app, this.sourceContext);
 		this.verifyMockObjects();
 	}
 
@@ -420,9 +433,8 @@ public class WoofLoaderTest extends OfficeFrameTestCase {
 		final HttpTemplateAutoWireSectionExtension extension = this
 				.createMock(HttpTemplateAutoWireSectionExtension.class);
 
-		// Record obtaining compiler
-		this.recordReturn(this.app, this.app.getOfficeFloorCompiler(),
-				this.compiler);
+		// Record initiating from source context
+		this.recordInitateFromSourceContext();
 
 		// Record loading template
 		this.recordReturn(this.app, this.app.addHttpTemplate("example",
@@ -430,6 +442,7 @@ public class WoofLoaderTest extends OfficeFrameTestCase {
 		template.setTemplateSecure(false);
 
 		// Record extending with JSON
+		this.recordInitiateWoofTemplateExtensionServiceContext();
 		this.recordReturn(template, template.getTemplateLogicClass(),
 				JsonTemplate.class);
 		this.recordReturn(this.app, this.app.isObjectAvailable(new AutoWire(
@@ -445,7 +458,7 @@ public class WoofLoaderTest extends OfficeFrameTestCase {
 		// Test
 		this.replayMockObjects();
 		this.loader.loadWoofConfiguration(this.getConfiguration("json.woof"),
-				this.app);
+				this.app, this.sourceContext);
 		this.verifyMockObjects();
 	}
 
@@ -457,9 +470,8 @@ public class WoofLoaderTest extends OfficeFrameTestCase {
 		final HttpTemplateAutoWireSection template = this
 				.createMock(HttpTemplateAutoWireSection.class);
 
-		// Record obtaining compiler
-		this.recordReturn(this.app, this.app.getOfficeFloorCompiler(),
-				this.compiler);
+		// Record initiating from source context
+		this.recordInitateFromSourceContext();
 
 		// Record loading template
 		this.recordReturn(this.app, this.app.addHttpTemplate("example",
@@ -473,7 +485,7 @@ public class WoofLoaderTest extends OfficeFrameTestCase {
 		try {
 			this.loader.loadWoofConfiguration(
 					this.getConfiguration("unknown-template-extension.woof"),
-					this.app);
+					this.app, this.sourceContext);
 			fail("Should not load successfully");
 		} catch (WoofTemplateExtensionException ex) {
 			assertEquals(
@@ -531,6 +543,23 @@ public class WoofLoaderTest extends OfficeFrameTestCase {
 	}
 
 	/**
+	 * Records initiating from the {@link SourceContext}.
+	 */
+	private void recordInitateFromSourceContext() {
+		this.recordReturn(this.sourceContext, this.sourceContext
+				.getClassLoader(), Thread.currentThread()
+				.getContextClassLoader());
+	}
+
+	/**
+	 * Records initiating the {@link WoofTemplateExtensionServiceContext}.
+	 */
+	private void recordInitiateWoofTemplateExtensionServiceContext() {
+		this.recordReturn(this.sourceContext,
+				this.sourceContext.isLoadingType(), false);
+	}
+
+	/**
 	 * Records implicit {@link WoofTemplateExtensionService} on the
 	 * {@link HttpTemplateAutoWireSection}.
 	 * 
@@ -541,6 +570,7 @@ public class WoofLoaderTest extends OfficeFrameTestCase {
 			HttpTemplateAutoWireSection template) {
 
 		// Record implicit JSON (no logic, no extension)
+		this.recordInitiateWoofTemplateExtensionServiceContext();
 		this.recordReturn(template, template.getTemplateLogicClass(), null);
 	}
 

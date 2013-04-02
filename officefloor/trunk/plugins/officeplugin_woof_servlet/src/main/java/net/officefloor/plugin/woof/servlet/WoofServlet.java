@@ -22,6 +22,8 @@ import javax.servlet.ServletContext;
 import javax.servlet.ServletContextListener;
 import javax.servlet.http.HttpServletRequest;
 
+import net.officefloor.frame.impl.construct.source.SourceContextImpl;
+import net.officefloor.frame.spi.source.SourceContext;
 import net.officefloor.model.impl.repository.ModelRepositoryImpl;
 import net.officefloor.model.impl.repository.classloader.ClassLoaderConfigurationContext;
 import net.officefloor.model.repository.ConfigurationContext;
@@ -124,10 +126,14 @@ public class WoofServlet extends OfficeFloorServlet {
 			return false; // do not configure
 		}
 
+		// Create the Source Context
+		SourceContext sourceContext = new SourceContextImpl(false, classLoader);
+
 		// Configure this filter with WoOF functionality
 		WoofLoader woofLoader = new WoofLoaderImpl(new WoofRepositoryImpl(
 				new ModelRepositoryImpl()));
-		woofLoader.loadWoofConfiguration(woofConfiguration, application);
+		woofLoader.loadWoofConfiguration(woofConfiguration, application,
+				sourceContext);
 
 		// Load the optional configuration
 		String objectsLocation = this.getInitParamValue(servletContext,
@@ -145,9 +151,9 @@ public class WoofServlet extends OfficeFloorServlet {
 		 * 
 		 * Focus of this Servlet is only to providing WoOF functionality within
 		 * a JEE container. If extension functionality is required then the
-		 * application should migrated to using OfficeFloor. This is especially
-		 * the case as the WoOF application extension is typically only used to
-		 * embed a Servlet Container within WoOF.
+		 * application should be migrated to using OfficeFloor. This is
+		 * especially the case as the WoOF application extension is typically
+		 * only used to embed a Servlet Container within WoOF.
 		 */
 
 		// Configure

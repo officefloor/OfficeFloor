@@ -93,5 +93,6 @@ Bundle-ClassPath: .,
  officeplugin_base-2.13.0.jar,
  officeplugin_comet-2.13.0.jar,
  officeplugin_gwt-2.13.0.jar,
+ officeplugin_json-2.13.0.jar,
  officeplugin_launch-2.13.0.jar,
  officeplugin_woof-2.13.0.jar
