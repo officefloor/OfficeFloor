@@ -17,7 +17,7 @@
  */
 package net.officefloor.plugin.woof;
 
-import net.officefloor.frame.spi.source.SourceProperties;
+import net.officefloor.frame.spi.source.SourceContext;
 import net.officefloor.plugin.web.http.application.HttpTemplateAutoWireSection;
 import net.officefloor.plugin.web.http.application.WebAutoWireApplication;
 
@@ -26,7 +26,7 @@ import net.officefloor.plugin.web.http.application.WebAutoWireApplication;
  * 
  * @author Daniel Sagenschneider
  */
-public interface WoofTemplateExtensionServiceContext extends SourceProperties {
+public interface WoofTemplateExtensionServiceContext extends SourceContext {
 
 	/**
 	 * Obtains the {@link HttpTemplateAutoWireSection} being extended.
@@ -42,12 +42,5 @@ public interface WoofTemplateExtensionServiceContext extends SourceProperties {
 	 * @return {@link WebAutoWireApplication}.
 	 */
 	WebAutoWireApplication getWebApplication();
-
-	/**
-	 * Obtains the {@link ClassLoader}.
-	 * 
-	 * @return {@link ClassLoader}.
-	 */
-	ClassLoader getClassLoader();
 
 }

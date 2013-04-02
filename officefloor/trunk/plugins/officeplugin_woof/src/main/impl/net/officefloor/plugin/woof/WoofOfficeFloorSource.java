@@ -548,7 +548,7 @@ public class WoofOfficeFloorSource extends HttpServerAutoWireOfficeFloorSource
 		// Load the WoOF configuration to the application
 		WoofLoader woofLoader = new WoofLoaderImpl(new WoofRepositoryImpl(
 				new ModelRepositoryImpl()));
-		woofLoader.loadWoofConfiguration(woofConfiguration, this);
+		woofLoader.loadWoofConfiguration(woofConfiguration, this, context);
 
 		// Load the optional configuration to the application
 		String objectsLocation = context.getProperty(
