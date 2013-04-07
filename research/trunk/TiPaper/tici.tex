@@ -211,15 +211,15 @@ they are starved of a thread.
 
 Furthermore, for requests requiring only in memory cached content, popular
 modern Web Servers continue to use a separate thread that incurs the cost of one
-or more thread context switches.  If the Web Server knew further details about
+or more thread-context switches.  If the Web Server knew further details about
 the nature of each Asynchronous Operation, it should allow the Asynchronous
-Operation to borrow the thread to reduce thread context switching.
+Operation to borrow the thread to reduce thread-context switching.
 
 Table \ref{tab:example_request_operations} lists the operations for servicing an
 example HTTP request.  The operations executed differ based on whether there is
 a cache hit or miss.  Ideally, as explained above, all operations up to and
 including the \texttt{Retrieve data from cache} should be borrowing the thread
-to avoid a thread context switch.  A separate thread should then only be used if
+to avoid a thread-context switch.  A separate thread should then only be used if
 the \texttt{Retrieve data from database} operation needs to be executed so that
 the main thread does not block causing potential for thread starvation.  The
 remaining operations should then again be borrowing the thread to avoid thread
@@ -334,8 +334,8 @@ Asynchronous Operation again.  The Asynchronous Operation Processor may be
 implemented to defer execution of an Asynchronous Operation until invoked
 continuations by the Asynchronous Operation are completed.  This for example
 allows deferring the execution of the Asynchronous Operation again until an
-Operating System asynchronous I/O operation completes - a key aspect of the
-Proactor pattern.
+invoked Operating System asynchronous I/O operation completes - a key aspect of
+the Proactor pattern.
 
 
 \subsection{Consequences}
@@ -344,9 +344,9 @@ The Continuation Injection pattern provides the algorithms implementing the
 Proactor pattern's Proactive Initiator, Completion Dispatcher and and Completion
 Handler participants.  As the continuations trigger the Proactor Initiator to
 invoke Asynchronous Operations, the respective registered Completion
-Dispatcher/Handler notify the Proactor Initiator when the Asynchronous Operation
-completes.  Using a Proactor Initiator per request to track completion of
-Asynchronous Operations allows sending the response once all Asynchronous
+Dispatcher/Handler notifies the Proactor Initiator when the Asynchronous
+Operation completes.  Using a Proactor Initiator per request to track completion
+of Asynchronous Operations allows sending the response once all Asynchronous
 Operations for the request are complete.
 
 As the continuation asynchronously invokes the Asynchronous Operation, the
@@ -385,7 +385,7 @@ To ease debugging and improve developer understanding of the application, the
 mapping configuration of \texttt{continuationId}  to \texttt{operationId} may be
 graphical.  The Asynchronous Operations are represented as nodes with the
 continuation mappings being directed lines between these nodes.  Due to the
-similarity of configuration with service orchestration, this can be identified
+similarity of configuration with service orchestration, this is identified
 as Operation Orchestration\footnote{Operation orchestration may also be
 identified as function, procedure or method orchestration depending on the
 implementing language.}.
@@ -660,17 +660,18 @@ Injection to map Asynchronous Operations by dependencies to thread pools to
 reduce configuration and mapping errors.
 
 Utilising Thread Injection in combination with Continuation Injection allows
-reducing thread context switching of the application.  As Continuation Injection
+reducing thread-context switching of the application.  As Continuation Injection
 allows Asynchronous Operations to be synchronously invoked, the thread may be
-borrowed to avoid the need for a thread context switch.
+borrowed to avoid the need for a thread-context switch.
 
 The Thread Pool pattern \cite{thread-per-request} is used to reduce overheads of
-thread management for improved efficiency in execution of its responsible
-Asynchronous Operations.  The implementation of the thread pool may be specific
-to the dependency.  For example, the thread pool may contain multiple threads
-for concurrent execution of Asynchronous Operations, a single thread for serial
-execution of Asynchronous Operations or even no threads and execute Asynchronous
-Operations by borrowing the thread to reduce thread context switching.
+thread management for improved efficiency in execution of the thread pool's
+responsible Asynchronous Operations.  To achieve further efficiencies, the
+implementation of the thread pool may be specific to the dependency.  For
+example, the thread pool may contain multiple threads for concurrent execution
+of Asynchronous Operations, a single thread for serial execution of Asynchronous
+Operations or even no threads and execute Asynchronous Operations by borrowing
+the thread to reduce thread-context switching.
 
 
 \subsection{Known Usage}
@@ -684,12 +685,12 @@ algorithms.
 The Staged Event-Driven Architecture (SEDA) \cite{seda} provides an
 implementation of the Thread Injection pattern without the use of the Dependency
 Injection pattern.  SEDA directly maps operations to a stage and subsequently a
-thread pool.  The SEDA pipeline however has increased thread context switching
+thread pool.  The SEDA pipeline however has increased thread-context switching
 as the stage boundaries are hard disallowing threads to be borrowed.
 
 Dependency capsules \cite{dependency-capsules} follows the idea of isolating
 operations requiring dependencies to specific thread pools.  It however requires
-a thread context switch back to a main thread for executing operations without
+a thread-context switch back to a main thread for executing operations without
 dependencies.
 
 OfficeFloor \cite{officefloor} implements the Thread Injection pattern and will
@@ -753,7 +754,7 @@ to \texttt{catch} blocks for handling an \texttt{Exception}.
 \subsection{Implicit Thread}
 
 When using the Thread Injection and Continuation Injection patterns together,
-implicit threads may be used to reduce thread context switching.
+implicit threads may be used to reduce thread-context switching.
 
 The continuation may borrow the thread of the invoking Asynchronous Operation if
 it results in being executed by the same thread pool.  The Proactor Pattern
@@ -761,18 +762,18 @@ stipulates that Asynchronous Operations ``must be performed without borrowing
 the application's thread of control'' \cite[p. 8]{proactor} and this is the
 focus of the Reactor Pattern \cite{reactor}.  Rather than dispatching back to
 the same thread pool, the continued Asynchronous Operation may borrow the thread
-to avoid the overhead of a thread context switch.
+to avoid the overhead of a thread-context switch.
 
 This same idea is also extended to the default thread pool for the Thread
 Injection pattern.  Asynchronous Operations mapped to the default thread pool do
 not have dependencies requiring isolation and are deemed cheaper to be executed
-by borrowing the thread rather than incurring the cost of a thread context
+by borrowing the thread rather than incurring the cost of a thread-context
 switch.
 
 The borrowed thread is the implicit thread.  Like an implicit continuation that
 executes the next operation \cite{continuations}, the implicit thread executes
 the next operation unless an explicit thread is required.  This can result in
-the Web Server servicing the entire request without a thread context switch
+the Web Server servicing the entire request without a thread-context switch
 should all the Asynchronous Operations involved not require an explicit thread
 (e.g. web page content obtained from cache).
 
