@@ -821,11 +821,138 @@ Asynchronous Operations to execute.  This dynamic management enables only the
 required number of servers to be allocated for each thread pool.
 
 
-\section{Motivating example resolved}
+
+\section{Inversion of Control}
+
+
+\subsection{Problem}
+
+\textbf{Assemble an application from discrete components.}
+
+
+\subsection{Context}
+
+Object-orientation realises an application as a graph of objects modelling the
+data.  Objects model data and are weaker at modelling the functionality of an
+application \cite{oo-behaviour}.  Using object design techniques can also make
+designing applications more difficult to less experienced developers
+\cite{oo-design}.
+
+Bridging object-orientated programming with functional programming
+\cite{bridging-function-oo} compensates for the weakness of
+objection-orientation in modelling functionality.  Example languages bridging
+object-orientation and functional programming are Scala \cite{scala} and F\#
+\cite{f-sharp}.
+
+While this evolution is making progamming languages richer in expression and
+features, it continues to interface components by method/function signatures.
+``The set of all [method] signatures defined by an object \ldots characterizes
+the complete set of requests that can be sent to the object'' \cite[p. 13]{gof}.
+ However unlike the Actor Model \cite{actors}, which decouples the sender from
+the message (request), the method/function signature tightly couples the
+components.
+
+As the method/function signature is controlled by the developer, good design is
+necessary to avoid tight coupling.  ``Tight coupling leads to monolithic
+systems, where you can't change or remove a class[/component] without
+understanding and changing other classes[/components]'' \cite[p. 24-25]{gof}.
+Having to change components negates the ability to construct an application from
+discete components.
+
+To avoid tight coupling of discrete components, the design over a component's
+interface should be removed from the component's control. ``Object[/component]
+composition requires that the objects[/components] being composed have
+well-defined interfaces \ldots which in turn requires carefully designed
+interfaces'' \cite[p. 19]{gof}.  Rather than leaving the component interface to
+good design, the interface for all components should be standardised to avoid
+the possibility of bad design and subsequently tight coupling.
+
+Having a standard interface to all components that provides loose coupling will
+enable assembly of applications from discrete components.
+
+
+\subsection{Forces}
+
+The components need to be composed within an architecture which is dictated by
+the framework.  The framework ``will define the overall structure, its
+partitioning into \ldots [components], the key responsibilities thereof, how the
+\ldots [components] collaborate, and the thread of control'' \cite[p.26]{gof}. 
+Using the components within a framework, therefore, identifies the following
+requirements of standardising the component interface:
+\begin{itemize}
+  \item components must have a key responsibility,
+  \item components must be able to collaborate with other components, and
+  \item components require a thread of control.
+\end{itemize}
+
+The collaboration of components has the following requirements:
+\begin{itemize}
+  \item invoking other components,
+  \item sharing state with the other components, and
+  \item handling exceptions from other components.
+\end{itemize}
+
+The method/function is an interface that fulfills each requirement.  The method/function:
+\begin{itemize}
+  \item has a key responsibility identified by its name,
+  \item may invoke other methods/functions,
+  \item shares state with other methods/functions by arguments and return values,
+  \item provides declaration of exceptions, and
+  \item can be executed by the thread of control\footnote{For a standard component interface, thread local variables are to be avoided to not incur affinity to a thread.}
+\end{itemize}
+
+The method/function interface is, however, subject to tight coupling.  The tight
+coupling occurs from the invoking component having to:
+\begin{itemize}
+  \item be aware of the method/function name,
+  \item provide the necessary arguments,
+  \item possibly use the return value,
+  \item handle potential exceptions, and
+  \item synchronously execute the method/function.
+\end{itemize}
+
+Providing an interface that decouples these aspects of the method/function
+signature from the invoking component will provide the required discrete
+component interface. This will enable reuse of components that leads to
+inversion of control \cite[p. 27]{gof}.
+
+
+\subsection{Solution}
+
+\textbf{Use Dependency Injection, Thread Injection and Continuation Injection to respectively manage state, execution and collaboration of the discrete components.}
+
+The \texttt{AsynchronousOperation} \ref{fig:InjectionInterfaces} is the
+interface providing the necessary decoupling.  The interface is derived from the
+interfaces necessary for Dependency Injection, Thread Injection and Continuation
+Injection patterns.
+
+Continuation Injection uses indirection to avoid coupling the name of the
+invoked component.  The mapping of \texttt{continuationId} to
+\texttt{operationId} avoids coupling the names.
+
+Dependency Injection provides sharing of state.  This is both for arguments and
+return values. \textbf{TODO: EXPAND} Dependencies maintain the state. 
+Dependencies reside in the life-cycle of Dependency Injection context along with
+the life-cycle of Asynchronous Operations.  Allows sharing state.
+
+Continuation Injection handles exceptions by invoking other Asynchronous Operations. \textbf{TODO: expand}. 
+
+Thread Injection provides selection of the thread of control for the Asynchronous Operation. \textbf{TODO: expand}.
+
+\textbf{TODO: fix up}.  Using Dependency Injection, Thread Injection and Continuation Injection patterns
+together as implementing patterns to the Proactor pattern forms the Inversion of
+Control pattern\footnote{The Inversion of Control pattern can be
+described as:  Inversion of Control = Dependency Injection + Thread Injection +
+Continuation Injection (or its shorter form: IoC = DI + TI + CI).}.
+
+
+\subsection{Example}
+
+This example demonstrates how the Inversion of Control pattern resolves the
+motivating example.
 
 The \texttt{Retrieve data from cache} operation (Table
-\ref{tab:example_request_operations}) from the motivating example will be used
-to demonstrate resolution of the motivating example.  
+\ref{tab:example_request_operations}) from the motivating example will be used.  
 
 As the Thread Injection and Continuation Injection patterns define the
 algorithms for all Proactor pattern participants (except the application
@@ -880,29 +1007,15 @@ a thread pool can be assigned to it.  The \texttt{retrieveData(\ldots)} method
 will be executed by a thread from this thread pool.
 
 This example implementation of an Asynchronous Operation demonstrates resolution
-of the issues within the motivating example.  The operation is a single distinct
+of the issues within the motivating example.  The operation is a discrete
 method.  It specifies the next operation (e.g. skipping the \texttt{Retrieve
 data from database} operation and going straight to the \texttt{Render HTTP
 response} operation) by invoking the appropriate continuation.  Thread context
-switching is reduced by using implicit threads.  An explicit thread can isolate the
-\texttt{Retrieve data from database} operation.
+switching is reduced by using implicit threads.  An explicit thread can isolate
+the \texttt{Retrieve data from database} operation.
 
 
-\section{Inversion of Control}
-
-Using all three injection patterns together (Dependency Injection, Thread
-Injection and Continuation Injection) as implementing patterns to the Proactor
-pattern forms the Inversion of Control pattern\footnote{Inversion of Control is
-not just dependency injection as suggested by the Inversion of Control layer
-\cite{ioc}.  It is better described as: Inversion of Control = Dependency
-Injection + Thread Injection + Continuation Injection (or its shorter form: IoC
-= DI + TI + CI).}.  For a method to be executed it requires:
-
-\begin{itemize}
-  \item an executing thread which Thread Injection inverts control;
-  \item arguments for its parameters which Dependency Injection inverts control; and
-  \item invoking the next operations which Continuation Injection inverts control.
-\end{itemize}
+\subsection{Consequences}
 
 Object-orientation therefore provides the implicit dependencies to the
 method.  Explicit dependencies are injected as arguments to the method, while
@@ -916,19 +1029,6 @@ data and constraining the changes in the data.  As application behaviour is
 implemented in Asynchronous Operations, the application need not be constructed
 only as a graph of objects.
 
-As control may be inverted for all aspects of the method, it provides an
-Inversion of Control pattern.  This has potentially made the Asynchronous
-Operation the software equivalent of a \textit{brick}\footnote{Objects do not
-define the dimensions of thread and continuations providing only part of the
-ingredients to a building block (brick).}.  The Asynchronous Operations have
-standard interfaces for all their dimensions (dependencies/state, thread and
-continuations) providing a standard mechanism for developers to weave the
-\textit{bricks} (Asynchronous Operations) together to create the equivalent of
-\textit{walls}, \textit{buildings} and further complex structures.
-
-
-\section{Drawbacks}
-
 The Thread Injection and Continuation Injection patterns have provided limited
 improvement regarding the Proactor pattern being hard to debug.  While the
 patterns have not directly addressed the Proactor issue of being hard to debug,
@@ -941,20 +1041,47 @@ application logic is contained in Asynchronous Operations, this enables better
 re-use of dependencies which improves their quality and subsequently reduces the
 risk of these synchronization bugs.
 
+As control may be inverted for all aspects of the method, it provides an
+Inversion of Control pattern.  This has potentially made the Asynchronous
+Operation the software equivalent of a \textit{brick}\footnote{Objects do not
+define the dimensions of thread and continuations providing only part of the
+ingredients to a building block (brick).}.  The Asynchronous Operations have
+standard interfaces for all their dimensions (dependencies/state, thread and
+continuations) providing a standard mechanism for developers to weave the
+\textit{bricks} (Asynchronous Operations) together to create the equivalent of
+\textit{walls}, \textit{buildings} and further complex structures.
 
-\section{Known Uses}
 
-OfficeFloor \cite{officefloor} is the only known framework implementing both the
-Thread Injection and Continuation Injection patterns.  OfficeFloor also
-implements the Dependency Injection pattern to provide an Inversion of Control
-implementation.  OfficeFloor identifies Asynchronous Operations as
+\subsection{Related Patterns}
+
+The Inversion of Control pattern is realised by using the Dependency Injection,
+Thread Injection and Continuation Injection patterns as implementing algorithms
+to the Proactor pattern.
+
+
+\subsection{Known Usage}
+
+OfficeFloor \cite{officefloor} identifies Asynchronous Operations as
 Jobs\footnote{Task is the adapted interface within a Job for application
-developers to implement.} which originates from OfficeFloor's modelling of
+developers to implement.}, which originates from OfficeFloor's modelling of
 application architecture after the way work is processed within an
-office\footnote{This is where the name OfficeFloor is derived. The co-ordination
-of executing Jobs occurs on the OfficeFloor.}.  Through developing OfficeFloor,
-the author identified the Thread Injection and Continuation Injection patterns
-along with the subsequent Inversion of Control pattern.
+office\footnote{OfficeFloor derived its name from being the place containing the
+co-ordination of executing Jobs.}.  Jobs are:
+\begin{itemize}
+  \item undertaken by Teams (particular thread pools via Thread Injection),
+  \item may access Managed Objects (explicit dependencies via extrinsic Dependency Injection), and
+  \item invoke flows (continuations providing interaction of Jobs via Continuation Injection).
+\end{itemize}
+
+OfficeFloor is the only known framework implementing the Inversion of Control
+pattern.  Through developing OfficeFloor, the author identified the Thread
+Injection and Continuation Injection patterns along with the subsequent
+Inversion of Control pattern.
+
+
+\section{Futher work}
+
+
 
 
 \section*{Acknowledgment} I thank my wife Melanie for her patience and support
