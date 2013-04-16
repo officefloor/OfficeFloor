@@ -88,32 +88,59 @@ workshop at the 18th European Conference on Pattern Languages of Programs
 
 \section{Introduction}
 
-The Proactor pattern \cite{proactor} is used as the basis of popular modern web
+%% TODO: use \textsc{..} for names of patterns.  Also make statement in overview about small caps.
+
+The \textsc{thread-per-request} pattern \cite{thread-per-request} (that can be
+considered a refinement of the \textsc{synchronous multi-threaded} pattern
+\cite{proactor}) is used as the basis of popular modern web
 servers\footnote{Apache, Microsoft IIS, Nginx and JEE identified from the
 Netcraft November 2012 survey.  Google Web Server is also identified as
-popular.} to dispatch requests asynchronously to request handlers (Asynchronous
-Operations).  The Proactor pattern however does not specify implementing
-algorithms for its participants leaving developers to deal with prioritization
-and cancellation of Asynchronous Operations.
+popular.} to service requests concurrently.
 
-As Web Servers evolved to handle more dynamic content following the Proactor
-pattern, the Asynchronous Operation interface became standardised to encapsulate
-the developer implementations of servicing dynamic content\footnote{CGI/FastCGI
-with for example PHP scripts, Microsoft's HTTP.sys/WAS and JEE Servlets.}.  This
-standardisation has resulted in allowing only one Asynchronous Operation to
-synchronously service the entire dynamic content of the request\footnote{JEE
-Servlet 3.x AsyncContext is enabling developer implementing code for the
-Proactor Initiator.  However, this requires the developer to be aware of thread
-synchronization complexities.} and is more commonly known as the
-thread-per-request pattern \cite{thread-per-request}.
+Many modern Web Servers improved their concurrency of servicing high loads of
+static web content by using the \textsc{proactor} pattern \cite{proactor} to
+enable use of asynchronous I/O operations.  The \textsc{thread-per-request}
+pattern requires a thread to be allocated to each request to sequentially and
+synchronously execute all operations for servicing a request.  This includes I/O
+operations that tie up thread resources on the Web Server requiring more threads
+and reducing the concurrency of the Web Server.  The \textsc{procator} pattern
+overcomes this issue by executing operations asynchronously not requiring the
+Web Server threads to block (e.g. use of Operating System asynchronous I/O
+operations).
+
+However, Web Servers continue to use the \textsc{thread-per-request}
+pattern\footnote{CGI/FastCGI with for example PHP scripts, Microsoft's
+HTTP.sys/WAS and JEE Servlets.} for servicing dynamic web content.  Using the
+\textsc{thread-per-request} pattern allows for more intuitive developer
+implementations of dynamic web content servicing at the cost of decreased
+concurrency for the Web Server.
+
+Due to demands on Web Servers to resolve such issues as the Reverse 10K problem
+\cite{reverse-ten-k-problem}, the \textsc{thread-per-request} pattern is
+requiring developers to manually manage the threading issues from requiring
+increased concurrency.  Should the developer want to use asynchronous I/O
+operations for the increased concurrency, the developer is required to block the
+request's thread of control, undertake the concurrent operations and continue
+the request's thread of control when all concurrent operations
+complete\footnote{JEE Servlet 3.x AsyncContext is allowing asynchronous
+operations but requires the developer to still be involved in thread
+synchronization complexities.}.
+
+To use the \textsc{proactor} pattern to service dynamic web content causes its
+drawback of scheduling and controlling outstanding operations \cite[p.
+8]{proactor} to require resolution.  Servicing static web content follows a
+standard sequence of operations that enables providing a bespoke solution to
+schedule and control outstanding operations.  In contrast, servicing dynamic web
+content does not follow a standard sequence of operations and therefore requires
+a more generic solution that is ``designed carefully to support prioritization
+and cancellation'' \cite[p. 8]{proactor} of the operations.
 
 The Thread Injection and Continuation Injection patterns presented in this paper
-provide implementing algorithms for prioritization and cancellation of
-Asynchronous Operations and remove the constraints imposed by the
-thread-per-request pattern.  Furthermore, using the Thread Injection and
-Continuation Injection patterns with the Dependency Injection pattern \cite{ioc}
-as implementing algorithms to the Proactor pattern provides the decoupling
-necessary for an Inversion of Control pattern.
+provide a generic solution to scheduling/controlling operations and enables use
+of asynchronous operations for increased concurrency in servicing dynamic web
+content.  Furthermore, using the Thread Injection and Continuation Injection
+patterns with the Dependency Injection pattern \cite{ioc} provides the
+decoupling necessary for an Inversion of Control pattern.
 
 
 \section{Overview}
@@ -263,59 +290,82 @@ Write HTTP response & Write HTTP response & HTTP response, \\
 
 \subsection{Problem}
 
-\textbf{Remove the thread-per-request constraint of a single Asynchronous Operation to enable using multiple Asynchronous Operations to service a request.}
+%% TODO: what is the pain point?  or change to Intent with Problem description.
+
+\textbf{How to loosely couple invoking a component?}
 
 
 \subsection{Context}
 
-The Asynchronous Operation interface has been standardised to enable servicing
-dynamic web content.  The discussion of the Proactor pattern \cite{proactor}
-focused on Web Servers providing static content with developers implementing the
-Proactor Initiator participant.  In contrast, popular Web Servers provide
-dynamic web content via developers implementing the Asynchronous Operation
-participant to service a request.  To enable portable implementations of dynamic
-web content servicing the Asynchronous Operation interface has been
-standardized\footnote{CGI/FastCGI with for example PHP scripts, Microsoft's
-HTTP.sys/WAS and JEE Servlets.}.
+Both the \textsc{thread-per-request} pattern \cite{thread-per-request} (basis of
+many mainstream Web Servers\footnote{For popular Web Servers (Netcraft November
+2012 survey) dynamic web content is serviced by CGI/FastCGI with for example PHP
+scripts, Microsoft's HTTP.sys/WAS and JEE Servlets.}) and the \textsc{proactor}
+pattern \cite{proactor} (basis of event-driven Web Servers) impose tight
+coupling on invocation of components.  The \textsc{thread-per-request} pattern
+enables invoking components by synchronous methods that is intuitive for
+developers \cite[p. 2]{proactor}.  In contrast, the \textsc{proactor} pattern
+enables asynchronously invoking a constructed component by registering it for
+execution by another thread of control (with the possibility to execute
+components concurrently).  In both patterns, they tightly couple the invocation as
+the \textsc{thread-per-request} pattern must have the invoker provide the thread
+of control and the \textsc{proactor} pattern must have the invoker construct the
+invoked component.
 
-The design of the Proactor pattern was to enable using many Asynchronous
-Operations in servicing a HTTP request.  However, Web Servers standardizing of
-the Asynchronous Operation interface has focused on the Proactor benefit of
-simplification of application synchronization \cite[p. 7]{proactor}.  This has
-resulted in only allowing one Asynchronous Operation to synchronously service
-the entire dynamic web page content and is more commonly known as the
-thread-per-request pattern \cite{thread-per-request}.
+Loosely coupling the invocation of components leads to better re-use of
+components.  ``Tight coupling leads to monolithic systems, where you can't
+change or remove a \ldots [component] without understanding and changing other
+\ldots [components]'' \cite[p. 24-25]{gof}.  Having to change components to
+invoke them negates the ability to re-use components.
+
+\textbf{TODO: when not to use the pattern?}
+
 
 
 \subsection{Forces}
 
-The thread-per-request pattern used by modern popular Web Servers imposes a
-single synchronous interface on an Asynchronous Operation that prevents
-asynchronous use\footnote{The thread of the current Asynchronous Operation must
-be blocked to use another Asynchronous Operation, otherwise there will not be a
-thread available as per the thread-per-request pattern to complete the request.}
-of other Asynchronous Operations (such as asynchronous Operating System I/O
-operations).
+The \textsc{thread-per-request} pattern imposes a synchronous interface that
+prevents asynchronous use of other components.  As the number of downstream
+systems increases from a typical single database to a variety of services (e.g.
+Reverse 10K problem \cite{reverse-ten-k-problem}), the
+\textsc{thread-per-request} pattern requires the developer to manually handle
+the multi-threading issues of concurrent communication to downstream systems to
+efficiently service a request.  It is therefore better to use the
+\textsc{proactor} pattern in this circumstance.
 
-The synchronous nature of thread-per-request constraint also imposes constraints
-in inverting the control over the order of operations.  As the sequence of
-operations via thread-per-request is typically undertaken via synchronous direct
-method calls, the thread-per-request pattern provides no indirection to invert
-the control of the order operations are executed.
+The \textsc{proactor} pattern requires increased coding by the developer to
+invoke a component.  To invoke a component, the developer must construct the
+component, register it for execution and then handle completion of the component
+which may include exceptions.  Furthermore, handling completion of multiple
+concurrently executing components may not be intuitive for many developers.
+When concurrency is not necessary synchronously invoking components, via the
+\textsc{thread-per-request} pattern, can produce less code that will likely be
+more intuitive for developers.  Therefore, invoking components should be via a
+method invocation for potentially less code and easier understanding of the
+code.
 
-Furthermore, as the number of downstream systems increases from a typical single
-database to a variety of services (reverse 10K problem
-\cite{reverse-ten-k-problem}), the thread-per-request pattern requires the
-developer to manually handle the multi-threading issues of concurrent
-communication to downstream systems to efficiently service a request.  This
-negates the Proactor pattern's benefit of simplification of application
-synchronization \cite[p. 7]{proactor} as the developer is required to spawn and
-manage threads.
+Also, the synchronous nature of \textsc{thread-per-request} pattern also imposes
+constraints in inverting the control over the order of component execution.  As
+the sequence of components executed is undertaken via synchronous direct method
+calls, the \textsc{thread-per-request} pattern provides no indirection to invert
+the control over the order components are executed.
+
+The \textsc{proactor} pattern also imposes hard-coded order over the components
+invoked, albeit they may be executed concurrently.  The invoker must construct
+the component to be asynchronously invoked and therefore this does not provide
+the indirection to control invoking a different component.
+
+Furthermore, the framework (e.g. Web Server) predefines the component's
+interface to enable invoking the components.  However, components should be able
+to invoke other components for re-use.  To enable re-use of these components the
+interface to invoke other components should be standardised.
 
 
 \subsection{Solution}
 
-\textbf{Provide a context object to the Asynchronous Operation to enable invoking other Asynchronous Operations.}
+%% TODO: useful to have some kind of visualization of the main solution in the solution part, a sequence diagram example or some other illustration
+
+\textbf{Provide a context object to the component to enable indirectly invoking other components.}
 
 The Continuation Injection pattern relies on providing the
 \texttt{AsynchronousOperationContext} (Fig \ref{fig:InjectionInterfaces}) to the
@@ -342,6 +392,10 @@ the Proactor pattern.
 
 \subsection{Consequences}
 
+%% TODO: (use sequence to show Proactor pattern participants) In consequences part it is said that Continuation Injection pattern provides the algorithms implementing Proactor pattern's Initiator, Completion Dispatcher and Completion Handler participants. From the solution, I was unable to tell that the pattern provided any algorithms. I am not expert in this domain, but at least for me this part was unclear. 
+
+%% TODO: negative consequences of the pattern?  (real negative is all collaboration is asynchronous meaning there is no return values.  This follows sequence of operations in flow of execution but may create coding problems when a return value is required.  Note Inversion of Control pattern resolves this issue by combining Continuation Injection with Dependency Injection.)
+
 The Continuation Injection pattern provides the algorithms implementing the
 Proactor pattern's Proactive Initiator, Completion Dispatcher and and Completion
 Handler participants.  As the continuations trigger the Proactor Initiator to
@@ -350,6 +404,8 @@ Dispatcher/Handler notifies the Proactor Initiator when the Asynchronous
 Operation completes.  Using a Proactor Initiator per request to track completion
 of Asynchronous Operations allows sending the response once all Asynchronous
 Operations for the request are complete.
+
+\textbf{TODO: provide sequence diagram for the above}
 
 As the continuation asynchronously invokes the Asynchronous Operation, the
 returned \texttt{Future} may be used to determine when the sequence of triggered
@@ -474,6 +530,8 @@ pattern to provide an Inversion of Control implementation.
 
 \section{Thread Injection}
 
+%% TODO: is this pattern like a refinement to Proactor pattern?  (last sentence bothered me a little bit)
+%% TODO: So at least in case of this pattern, the problem statement should be after the context part or rephrased as it is not very standalone statement as the reader doesn't know what algorithm should be provided.
 
 \subsection{Problem}
 
@@ -523,6 +581,9 @@ Operations.
 
 
 \subsection{Solution}
+
+%% TODO: problem and solution should match
+%% TODO: add an illustration of the solution
 
 \textbf{Use multiple thread pools and based on meta-data of an Asynchronous Operation assign it to a particular thread pool.}
 
@@ -620,6 +681,8 @@ serviced.
 
 \subsection{Consequences}
 
+%% TODO: negative consequences? (more intricate understanding of application as developer involved in configuring threading.  It is not defaulted to a single thread pool which is adequate for most low load servers and relieves the burdon on the developer to understand thread tuning.)
+
 Thread Injection provides the implementing algorithm for the Proactor pattern's
 Asynchronous Operation Processor participant by using multiple Thread Pools to
 prioritise and cancel Asynchronous Operations.
@@ -708,13 +771,18 @@ Injection pattern to provide an Inversion of Control implementation.
 
 \section{Inversion of Control}
 
+%% TODO: problem/solution matching?
 
 \subsection{Problem}
 
-\textbf{Enable assembling an application from discrete, reusable components.}
+\textbf{How to build a framework that loosely couples components?}
 
 
 \subsection{Context}
+
+%% TODO: Maybe the exact design situation where this pattern is needed should be mentioned in the end of the context.
+
+%% TODO: avoid abstract methods that bind the signature of the implementation and thread of control (reference Inversion of Control layer)
 
 Object-orientation realises an application as a graph of objects modelling the
 data.  Objects model data and are weaker at modelling the functionality of an
@@ -805,7 +873,9 @@ component interface.
 
 \subsection{Solution}
 
-\textbf{Use Dependency Injection, Thread Injection and Continuation Injection to manage state, execution and collaboration of the discrete, reusable components.}
+%% TODO: solution should have an illustration
+
+\textbf{Use Dependency Injection, Thread Injection and Continuation Injection to manage state, execution and collaboration of the components to subsequently provide a standard, loosely coupled interface to the components.}
 
 Continuation Injection enables invoking the other components (Asynchronous
 Operations) and uses indirection to avoid coupling the name of the invoked
