@@ -172,24 +172,26 @@ the extrinsically defined dependencies for the Asynchronous Operation.  An
 example implementation of this method would be calling Spring's \cite{spring}
 \texttt{getBean(\ldots)} method.}.
 
+%% TODO: fix up Asynchronous Operation to be component
+
 \begin{figure}[tp]
 \centering
 \begin{verbatim}
-    interface AsynchronousOperation {
-        void execute(AsynchronousOperationContext context);
+    interface Component {
+        void execute(ComponentContext context);
         void cancel(Exception cause);
         String[] getContinuationIds();
     }
 
-    interface AsynchronousOperationContext {
+    interface ComponentContext {
         Object getDependency(String dependencyId);
         Future doContinuation(String continuationId, Object parameter);
-        void continueOperation();
+        void continueComponent();
     }
     
     interface DependencyInjectionFactory {
-        Type[] getRequiredDependencyTypes(String operationId);
-        AsynchronousOperation createOperation(String operationId);
+        Type[] getRequiredDependencyTypes(String componentId);
+        Component createComponent(String componentId, Object parameter);
     }
 \end{verbatim}
 \caption{Combined Thread Injection, Continuation Injection and Dependency Injection pattern interface\footnotemark}
@@ -290,9 +292,11 @@ Write HTTP response & Write HTTP response & HTTP response, \\
 
 \subsection{Problem}
 
-%% TODO: what is the pain point?  or change to Intent with Problem description.
-
-\textbf{How to loosely couple invoking a component?}
+\textbf{How to loosely couple the collaboration of components?}  Components
+provide discrete pieces of functionality (application behaviour) that may be
+developed by different developers.  To ensure greater re-usability of a
+component, how can the invocation of that component be loosely coupled to enable
+re-use in more contexts?
 
 
 \subsection{Context}
@@ -306,10 +310,10 @@ coupling on invocation of components.  The \textsc{thread-per-request} pattern
 enables invoking components by synchronous methods that is intuitive for
 developers \cite[p. 2]{proactor}.  In contrast, the \textsc{proactor} pattern
 enables asynchronously invoking a constructed component by registering it for
-execution by another thread of control (with the possibility to execute
-components concurrently).  In both patterns, they tightly couple the invocation as
-the \textsc{thread-per-request} pattern must have the invoker provide the thread
-of control and the \textsc{proactor} pattern must have the invoker construct the
+execution by another thread of control (allowing to execute components
+concurrently).  In both patterns, they tightly couple the invocation as the
+\textsc{thread-per-request} pattern must have the invoker provide the thread of
+control and the \textsc{proactor} pattern must have the invoker construct the
 invoked component.
 
 Loosely coupling the invocation of components leads to better re-use of
@@ -317,9 +321,6 @@ components.  ``Tight coupling leads to monolithic systems, where you can't
 change or remove a \ldots [component] without understanding and changing other
 \ldots [components]'' \cite[p. 24-25]{gof}.  Having to change components to
 invoke them negates the ability to re-use components.
-
-\textbf{TODO: when not to use the pattern?}
-
 
 
 \subsection{Forces}
@@ -335,30 +336,36 @@ efficiently service a request.  It is therefore better to use the
 
 The \textsc{proactor} pattern requires increased coding by the developer to
 invoke a component.  To invoke a component, the developer must construct the
-component, register it for execution and then handle completion of the component
-which may include exceptions.  Furthermore, handling completion of multiple
-concurrently executing components may not be intuitive for many developers.
-When concurrency is not necessary synchronously invoking components, via the
-\textsc{thread-per-request} pattern, can produce less code that will likely be
+component, register it for execution and then handle completion of the
+component.  Furthermore, handling completion of multiple concurrently executing
+components may not be intuitive for many developers.  When concurrency is not
+necessary, using methods to synchronously invoke components via the
+\textsc{thread-per-request} pattern can produce less code that will likely be
 more intuitive for developers.  Therefore, invoking components should be via a
 method invocation for potentially less code and easier understanding of the
 code.
 
-Also, the synchronous nature of \textsc{thread-per-request} pattern also imposes
+The synchronous nature of the \textsc{thread-per-request} pattern also imposes
 constraints in inverting the control over the order of component execution.  As
 the sequence of components executed is undertaken via synchronous direct method
 calls, the \textsc{thread-per-request} pattern provides no indirection to invert
 the control over the order components are executed.
 
 The \textsc{proactor} pattern also imposes hard-coded order over the components
-invoked, albeit they may be executed concurrently.  The invoker must construct
-the component to be asynchronously invoked and therefore this does not provide
-the indirection to control invoking a different component.
+invoked (albeit they may end up being executed concurrently).  The invoker must
+construct the component to be asynchronously invoked and therefore this does not
+provide the indirection to control invoking a different component.
 
-Furthermore, the framework (e.g. Web Server) predefines the component's
-interface to enable invoking the components.  However, components should be able
-to invoke other components for re-use.  To enable re-use of these components the
-interface to invoke other components should be standardised.
+The \textsc{thread-per-request} pattern and \textsc{proactor} pattern further
+tightly couple invoking a component by the invoker being required to handle
+possible exceptions.  The invoker may not be appropriately responsible to handle
+a resulting exception and this should be delegated to another component.
+
+For a framework (e.g. Web Server) to extend itself by invoking components, the
+framework predefines the component's interface to enable invoking it.  However,
+components should be able to invoke other components for re-use.  To enable
+re-use of these components the interface to invoke components should be
+standardised.
 
 
 \subsection{Solution}
@@ -368,114 +375,193 @@ interface to invoke other components should be standardised.
 \textbf{Provide a context object to the component to enable indirectly invoking other components.}
 
 The Continuation Injection pattern relies on providing the
-\texttt{AsynchronousOperationContext} (Fig \ref{fig:InjectionInterfaces}) to the
-Asynchronous Operation.  The \texttt{AsynchronousOperationContext} contains a
-mapping of \texttt{continuationId} to its handling Asynchronous Operation.  As
-each mapping is in effect a continuation, this allows injecting the necessary
-continuations into the \texttt{AsynchronousOperation}.
+\texttt{ComponentContext} (Fig \ref{fig:InjectionInterfaces}) to the component.
+The \texttt{ComponentContext} contains a mapping of \texttt{continuationId} to a
+handling component.  As each mapping is in effect a continuation (''goto'' for
+executing the component), this allows injecting the necessary continuations into
+the component.
 
-The \texttt{doContinuation(\ldots)} method triggers an Asynchronous Operation.
-As the \texttt{continuationId}s are static for each Asynchronous Operation,
-developer configuration provides the Asynchronous Operation continuation mapping
-to the respective handling Asynchronous Operation.  Developer tools may use the
-\texttt{getContinuationIds()} method to obtain the list of continuations to aid
-the developer in the mapping configuration.
+The Continuation Injection pattern provides algorithms implementing the
+\textsc{proactor} pattern's Proactive Initiator, Asynchronous Operation and
+Completion Dispatcher/Handler participants.  The continuation triggers the
+Proactor Initiator to register an Asynchronous Operation containing the desired
+component for execution.  The also registered Completion Dispatcher/Handler
+notifies the Proactor Initiator when the Asynchronous Operation and subsequently
+the component completes.  Using a Proactor Initiator per request to track
+completion of Asynchronous Operations (components) allows providing a response
+once all components for the request are complete.
 
-The \texttt{continueOperation()} method enables executing the current
-Asynchronous Operation again.  The Asynchronous Operation Processor may be
-implemented to defer execution of an Asynchronous Operation until invoked
-continuations by the Asynchronous Operation are completed.  This for example
-allows deferring the execution of the Asynchronous Operation again until an
-invoked Operating System asynchronous I/O operation completes - a key aspect of
-the Proactor pattern.
+Components are constructed via extrinsic \textsc{dependency injection}
+\cite{ioc}. The \textsc{dependency injection} context, that manages the
+life-cycle of dependencies, may be aligned to the Proactor Initiator life-cycle.
+ This allows dependencies for the components to be specific to the request being
+serviced.  It also allows the state/resources within these dependencies to be
+managed within the life-cycle of servicing the request.
+
+Re-using dependencies between components allows sharing state between
+components.  For the \textsc{thread-per-request} pattern method signatures
+tightly couple sharing state by requiring particular parameters and only
+providing a single return value.  For the \textsc{proactor} pattern, the invoker
+must have all state available to construct the Asynchronous Operation and
+Completion Dispatcher/Handler which tightly couples the invocation.  Providing
+mutable state within dependencies that are re-used across components allows
+components to share state.  This is similar to a \textsc{thread-per-request} Web
+Server that shares state between components by attributes (dependencies) within
+request, session and application scopes.  The invoking component only needs the
+dependencies (state) it requires and does not need to provide the entire set of
+dependencies (state) for the invoked component\footnote{To further decouple the
+state sharing for the component, the \texttt{ComponentContext} may contain
+developer configuration to map the \texttt{dependencyId} (Fig
+\ref{fig:InjectionInterfaces}) to the context specific identifier for the
+dependency. This allows components to reference the same dependency by their own
+identifier.}.
+
+The \texttt{doContinuation(\ldots)} method (Fig \ref{fig:InjectionInterfaces})
+allows the component to invoke another component.  As the
+\texttt{continuationId}s are static for each component, developer configuration
+provides the continuation mapping to the handling component.  The method does
+allow one argument to be passed to the invoked component.  This is for more
+intuitive development by associating the invocation with passing state.  If
+multiple arguments are required, they should be encapsulated into an object for
+passing.  To maintain loose coupling, the invoked component obtains the argument
+as an injected dependency so it need not differentiate between dependencies and
+parameters.  Figure \ref{fig:DoContinuationSequenceDiagram} provides a sequence
+diagram of invoking a component via the \texttt{doContinuation(\ldots)} method.
+
+\textbf{TODO: provide sequence diagram for the above}
+
+As the \texttt{doContinuation(\ldots)} method asynchronously invokes the
+component, there is no return value from the invoked component.  Return values
+are achieved by mutating state of a dependency and having the invoking component
+re-use the dependency on completion of the continuation \texttt{Future}.  This
+further decouples the invoking component, as it may obtain multiple return
+values via multiple dependencies.
+
+Exceptions are handled by being mapped to a \texttt{continuationId}.  The
+Asynchronous Operation catches the component's exception and invokes the
+\texttt{doContinuation(\ldots)} method with the appropriate
+\texttt{continuationId} for the exception type.  The exception is used as the
+continuation argument to pass it to the handling component.  The invoking
+component is decoupled from handling exceptions from the invoked component as
+the exception is handled by another component.
+
+Developer tools may use the \texttt{getContinuationIds()} method to obtain the
+list of possible continuations from a component.  This will enable meta-data
+driven tools to aid the developer in providing the continuation mapping
+configuration.
+
+The \texttt{continueOperation()} method (Fig \ref{fig:InjectionInterfaces})
+enables executing the current component again.  Frameworks managing the
+components may be implemented to defer execution of a component again until
+invoked continuations by the component are completed.  This for example allows
+deferring the execution of the component until an invoked Operating System
+asynchronous I/O operation completes - a key aspect of the \textsc{Proactor}
+pattern for improved concurrency.
+
+The intuitiveness of sequential programming is maintained by using implicit
+continuations \cite{continuations} to sequentially chain components.  Each
+\texttt{ComponentContext} also maintains an optional implicit continuation. 
+Should no continuation be invoked (i.e. \texttt{doContination(\ldots)} method
+invoked or an exception thrown) the implicit continuation is invoked on
+completion of the component.  This allows chaining together components to be
+executed sequentially.
+
+The continuation mapping configuration may also have qualifying attributes that
+isolate components to particular \textsc{dependency injection} contexts.  The
+continuation may be configured to invoke the component (and its subsequent
+invoked components) within another \textsc{dependency injection} context to not
+share state.
+
+To share state between the isolated \textsc{dependency injection} contexts, the
+isolated contexts may be created inside a shared context.  Each dependency type
+is bound by developer configuration to be within the isolated context or the
+shared context.  The instance of a dependency bound to an isolated context may
+only be used by component instances within the same isolated context instance. 
+However, the instance of a dependency bound to the shared context is re-usable
+across all component instances\footnote{OfficeFloor \cite{officefloor} mimics
+the thread to process relationship by creating isolated ''thread'' contexts
+within a shared ''process'' context.}.  Figure
+\ref{fig:DependencyInjectionContexts} shows the scope for dependencies within
+isolated and shared context instances.
+
+\textbf{TODO: provide graph of components showing implicit, thread, exception}
+
+
+\subsection{Example}
+
+The \texttt{Retrieve data from cache} operation (Table
+\ref{tab:example_request_operations}) from the motivating example will be used
+as an example of Continuation Injection.  Figure
+\ref{fig:Example_Method_Operation} shows the example developer implementation
+code.  A generic component implementation is used to reflectively invoke the
+\texttt{retrieveData(\ldots)} method. It will:
+\begin{enumerate}
+  \item Obtain an instance of the \texttt{CacheOperation} via its context's \texttt{getDependency(\ldots)} method.
+  \item Obtain both the \texttt{key}\footnote{\texttt{key} is a continuation argument from the previous component.} and \texttt{cache} again via the \texttt{getDependency(\ldots)} method.
+  \item Instantiate a proxy implementation of the \texttt{CacheContinuation} interface that implements the \texttt{cacheMiss(\ldots)} method by invoking the \texttt{doContinuation(\ldots)} method. 
+  \item Reflectively invokes the \texttt{retrieveData(\ldots)} method with the above arguments.
+\end{enumerate}
+
+\begin{figure}[tp]
+\centering
+\begin{verbatim}
+  interface CacheContinuations {
+    void cacheMiss(String key);
+  }
+
+  class CacheOperation {    
+    public Data retrieveData(String key, Cache cache, CacheContinuations continuations) throws IOException {
+        Data data = cache.get(key);
+        if (data == null) {
+            continuations.cacheMiss(key);
+            return null; // finish operation
+        }
+        return data;
+    }
+  }
+\end{verbatim}
+\caption{Example developer implementation code for a component\footnotemark}
+\label{fig:Example_Method_Operation}
+\end{figure}
+\footnotetext{\texttt{retrieveData} may also be a function should the implementing programming language support functions.}
+
+Continuations from the \texttt{retrieveData(\ldots)} method are:
+\begin{itemize}
+  \item \texttt{cacheMiss(\ldots)} which will be mapped to \texttt{Retrieve data from database}.
+  \item Implicit continuation which is mapped to the \texttt{Render HTTP response}\footnote{The return value from the method is used as the continuation argument.}.
+  \item \texttt{IOException} that is mapped to a component providing an error message page.  It may also be mapped to \texttt{Retrieve data from database} to attempt to continue servicing the request.
+\end{itemize}
 
 
 \subsection{Consequences}
 
-%% TODO: (use sequence to show Proactor pattern participants) In consequences part it is said that Continuation Injection pattern provides the algorithms implementing Proactor pattern's Initiator, Completion Dispatcher and Completion Handler participants. From the solution, I was unable to tell that the pattern provided any algorithms. I am not expert in this domain, but at least for me this part was unclear. 
+As the continuation asynchronously invokes the component, the returned
+\texttt{Future} may be used to determine when the potential three of invoked
+components has completed.  The \texttt{Future} would utilise the Proactor
+Initiator's tracking of Asynchronous Operation completion to determine when the
+tree of Asynchronous Operations realising the continuation has completed.  This
+enables process continuations \cite{process-continuation} to be spawned by
+repeatedly calling \texttt{doContinuation(\ldots)}.  The process continuations
+aid in resolving the reverse 10K problem \cite{reverse-ten-k-problem} by
+executing multiple components concurrently.
 
-%% TODO: negative consequences of the pattern?  (real negative is all collaboration is asynchronous meaning there is no return values.  This follows sequence of operations in flow of execution but may create coding problems when a return value is required.  Note Inversion of Control pattern resolves this issue by combining Continuation Injection with Dependency Injection.)
+\textbf{TODO: combine above and below paragraph}
 
-The Continuation Injection pattern provides the algorithms implementing the
-Proactor pattern's Proactive Initiator, Completion Dispatcher and and Completion
-Handler participants.  As the continuations trigger the Proactor Initiator to
-invoke Asynchronous Operations, the respective registered Completion
-Dispatcher/Handler notifies the Proactor Initiator when the Asynchronous
-Operation completes.  Using a Proactor Initiator per request to track completion
-of Asynchronous Operations allows sending the response once all Asynchronous
-Operations for the request are complete.
+Having the components, in this isolated context, execute via implicit
+continuations is similar to spawning a thread.  The continuation results in two
+sequential chains of components being executed that do not share state.  This
+allows the intuitiveness of the \textsc{synchronous multi-threaded} pattern
+\cite{proactor} for handling concurrency.
 
-\textbf{TODO: provide sequence diagram for the above}
-
-As the continuation asynchronously invokes the Asynchronous Operation, the
-returned \texttt{Future} may be used to determine when the sequence of triggered
-Asynchronous Operations has completed\footnote{As discussed in the Inversion of
-Control pattertn, state can be shared by dependencies so there is no need for a
-return value from the \texttt{Future}.}.  The \texttt{Future} would utilise the
-Proactor Initiator's tracking of Asynchronous Operation completion to determine
-when the tree of Asynchronous Operations realising the continuation has
-completed.  This enables process continuations \cite{process-continuation} to be
-spawned by repeatedly calling \texttt{doContinuation(\ldots)}.  The process
-continuations aid in resolving the reverse 10K problem
-\cite{reverse-ten-k-problem} by executing multiple Asynchronous Operations
-concurrently.
-
-While the Proactor pattern focuses on asynchronous interaction between
-Asynchronous Operations, the \texttt{AsynchronousOperationContext} does not
-restrict the servicing of the continuation invocation from being synchronous.
-In cases where it is more efficient to synchronously invoke the Asynchronous
-Operation and avoid the thread-context switching overheads, this can be
-controlled by the developer with a flag in the continuation mapping
-configuration.  In contrast, having synchronous interaction be imposed by the
-interface (as per thread-per-request) causes overheads for developers to
-manually manage in code the use of asynchronous interaction.
-
-The mapping of \texttt{continuationId} to \texttt{operationId} (Asynchronous
-Operation) is contained within configuration.  This enables changing the
-handling Asynchronous Operation without changing code\footnote{The continuation
-parameter may be type validated against the handling Asynchronous Operation to
-reduce runtime errors and therefore may restrict some mapping changes.  An
-adapting Asynchronous Operation may however be mapped in to remove this
-restriction by transforming the parameter to the necessary type for the handling
-Asynchronous Operation.}.  Changing the handling Asynchronous Operations enables
-re-ordering the sequence of Asynchronous Operations to service a request.
-
-To ease debugging and improve developer understanding of the application, the
-mapping configuration of \texttt{continuationId}  to \texttt{operationId} may be
-graphical.  The Asynchronous Operations are represented as nodes with the
-continuation mappings being directed lines between these nodes.  Due to the
-similarity of configuration with service orchestration, this is identified
-as Operation Orchestration\footnote{Operation orchestration may also be
-identified as function, procedure or method orchestration depending on the
-implementing language.}.
-
-
-\subsection{Related Patterns}
-
-Thread Injection explained later in this paper provides a means for
-prioritization and cancellation of the Asynchronous Operations.
-
-The Dependency Injection pattern \cite{ioc} may be utilised to manage
-dependencies for the Asynchronous Operations.  The context managing the
-life-cycle of dependencies within the Dependency Injection pattern may be
-aligned to the Proactor Initiator life-cycle.  This allows dependencies for the
-Asynchronous Operations to be specific to the request being serviced.  It also
-allows the state/resources within these dependencies to be managed within the
-life-cycle of servicing the request.  The continuation mapping configuration may
-also have qualifying attributes that further scope dependency
-contexts\footnote{OfficeFloor \cite{officefloor} utilises attributes on the
-continuation mapping configuration to scope thread contexts within a request
-(process) context.}.
-
-As continuations asynchronously invoke Asynchronous Operations, they need not
-only be invoked by Asynchronous Operations. Figure \ref{fig:DC_interface}
-illustrates a possible interface that can be injected into dependencies to
-invoke an Asynchronous Operation\footnote{No \texttt{continutionId} is necessary
-as may inject multiple instances representing the different continuations.}.
-This enables dependencies to effectively become Active Objects
-\cite{active-object} when necessary\footnote{The Web Server HTTP(S) socket
-dependency would for example typically be implemented by invoking an injected
-continuation to service requests.}.
+As continuations asynchronously invoke components, they need not only be invoked
+by components. Figure \ref{fig:DC_interface} illustrates a possible interface
+that can be injected into dependencies to invoke a component\footnote{No
+\texttt{continutionId} is necessary as may inject multiple instances
+representing the different continuations.}.  This enables dependencies to
+effectively become Active Objects \cite{active-object} when
+necessary\footnote{The Web Server HTTP(S) socket dependency would for example
+typically be implemented by invoking an injected continuation to service
+requests.}.
 
 \begin{figure}[tp]
 \begin{verbatim}
@@ -487,40 +573,92 @@ continuation to service requests.}.
 \label{fig:DC_interface}
 \end{figure}
 
+While the \textsc{proactor} pattern focuses on asynchronous interaction between
+Asynchronous Operations, the \texttt{ComponentContext} does not restrict the
+servicing of the continuation invocation from being synchronous.  In cases where
+it is more efficient to synchronously invoke the component and avoid the
+thread-context switching overheads, this can be controlled by the developer with
+a flag in the continuation mapping configuration.  In contrast, having
+synchronous interaction be imposed (as per the \textsc{thread-per-request}
+pattern) causes overheads for developers to manually manage in code the use of
+asynchronous interaction.
+
+The mapping of \texttt{continuationId} to \texttt{componentId} (component) is
+contained within configuration.  This enables changing the handling component
+without changing code\footnote{The continuation argument may be type validated
+against the handling component to reduce runtime errors and therefore may
+restrict some mapping changes.  An adapting component may however be mapped in
+to remove this restriction by transforming the argument to the necessary type
+for the handling component.}.  Changing the handling components enables
+re-ordering the sequence of components to service a request.
+
+To ease debugging and improve developer understanding of the application, the
+mapping configuration of \texttt{continuationId}  to \texttt{componentId} may be
+graphical.  The components are represented as nodes with the continuation
+mappings being directed lines between these nodes.  Due to the similarity of
+configuration with service orchestration, this is identified as Operation
+Orchestration\footnote{Operation orchestration may also be identified as
+function, procedure or method orchestration depending on the implementing
+language.}.
+
+%% TODO: negative consequences of the pattern?  (real negative is all collaboration is asynchronous meaning there is no return values.  This follows sequence of operations in flow of execution but may create coding problems when a return value is required.  Note Inversion of Control pattern resolves this issue by combining Continuation Injection with Dependency Injection.)
+\textbf{TODO negative: thread of control}
+\textbf{TODO negative: indirection between components may make hard to see flow from code (Operation Orchestration resolves this)}
+\textbf{TODO negative: can not be used without framework.}
+\textbf{TODO negative: sharing state is via side effect (change dependency state).  This is however is a similar development model to web development where state is shared as attributes in request, session, and application scopes.}
+\textbf{TODO negative: hard to debug for proactor pattern. Not sequential but no handler required.}
+\textbf{TODO negative: prioritization and cancellation for proactor pattern not resolved. Part of related patterns.}
+\textbf{TODO negative: stack trace from sequential programming is not available but may compensate by keeping track of the tree of executed components.}
+
+
+\subsection{Related Patterns}
+
+The \textsc{dependency injection} pattern \cite{ioc} is necessary to enable
+managing state between components\footnote{As the components contain the
+functionality (application behaviour), the \textsc{dependency injection} pattern
+in the context of the relationship to the Continuation Injection pattern) may
+better be described as the \textsc{state injection} pattern}.
+
+The Continuation Injection pattern provides an implementing algorithm for the
+{proactor} pattern's Proactor Initiator, Asynchronous Operation, Completion
+Dispatcher/Handler participants.
+
+Thread Injection explained later in this paper provides a means for
+prioritization and cancellation of the Asynchronous Operations required for
+implementing the remaining Asynchronous Operation Process participant of the
+\textsc{proactor} pattern.
+
 
 \subsection{Known Usage}
 
 Continuation Injection is an implementation of the Actor Model \cite{actors} as
-it adheres to the principles of the Actor Model.  The Asynchronous Operation is
-the actor.  The asynchronous communication between Asynchronous Operations
-decouples the continuation argument (message) from the sending Asynchronous
-Operation (actor).  The \texttt{operationId} provides an address for an
-Asynchronous Operation (actor).  The provided \texttt{continuationId}s restricts
-the Asynchronous Operations (actors) that may be used.
+it adheres to the principles of the Actor Model.  The component is the actor.
+The asynchronous communication between components decouples the continuation
+argument (message) from the sending component (actor).  The \texttt{componentId}
+provides an address for a component (actor).  The provided
+\texttt{continuationId}s restricts the components (actors) that may be used.
 
 Systems integrated with a queuing infrastructure are heavy weight
 implementations of the Continuation Injection pattern.  The continuation is the
 queue's client interface with the queue infrastructure providing the necessary
-indirection to map the handler (Asynchronous Operation) of a message
-(continuation argument).
+indirection to map the handling component of a message (continuation argument).
 
 Continuation Injection can also be considered a form of continuation-passing
 style \cite{continuations} except that the continuation is injected rather than
 passed as a parameter.  The added benefit of injecting the continuation is that
-the Asynchronous Operation is free to depend on as many continuations as
-necessary.  It also means that as the application evolves the Asynchronous
-Operation encapsulates potential changes requiring different continuations.  The
-indirection provided by the Continuation Injection pattern allows managing these
-changes as configuration changes rather than code changes.
+the component is free to depend on as many continuations as necessary.  It also
+means that as the application evolves the component encapsulates potential
+changes requiring different continuations.  The indirection provided by the
+Continuation Injection pattern allows managing these changes as configuration
+changes rather than code changes.
 
 Subsequently event-driven architectures are an implementation of the
-Continuation Injection pattern.  An Asynchronous Operation runs in a loop
-waiting for events\footnote{The main loop Asynchronous Operation can be avoided
-by mapping events directly to handling Asynchronous Operations.}.  On receiving
-an event, the Asynchronous Operation invokes its appropriate continuations to
-have the event handled by other Asynchronous Operations.  Note that event-driven
-architectures are a more rigid implementation as Asynchronous Operations are in
-most cases only synchronously invoked.
+Continuation Injection pattern.  A component runs in a loop waiting for
+events\footnote{The main loop component can be avoided by mapping events
+directly to handling components.}.  On receiving an event, the component invokes
+its appropriate continuations to have the event handled by other components. 
+Note that event-driven architectures are a more rigid implementation as
+components are in most cases only synchronously invoked.
 
 OfficeFloor \cite{officefloor} implements the Continuation Injection pattern and
 will be discussed later in this paper as it also implements the Thread Injection
@@ -952,29 +1090,6 @@ reflectively invoke the \texttt{retrieveData(\ldots)} method. It will:
   \item Instantiate a proxy implementation of the \texttt{CacheContinuation} interface that implements the \texttt{cacheMiss(\ldots)} method by invoking the \texttt{doContinuation(\ldots)} method. 
   \item Reflectively invokes the \texttt{retrieveData(\ldots)} with the above arguments.
 \end{enumerate}
-
-\begin{figure}[tp]
-\centering
-\begin{verbatim}
-  interface CacheContinuations {
-    void cacheMiss(String key);
-  }
-
-  class CacheOperation {    
-    public Data retrieveData(String key, Cache cache, CacheContinuations continuations) throws IOException {
-        Data data = cache.get(key);
-        if (data == null) {
-            continuations.cacheMiss(key);
-            return null; // finish operation
-        }
-        return data;
-    }
-  }
-\end{verbatim}
-\caption{Example developer implementation code for an Asynchronous Operation\footnotemark}
-\label{fig:Example_Method_Operation}
-\end{figure}
-\footnotetext{\texttt{retrieveData} may also be a function should the implementing programming language support functions.}
 
 Continuations from the \texttt{retrieveData(\ldots)} method are:
 \begin{itemize}
