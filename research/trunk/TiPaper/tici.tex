@@ -172,7 +172,7 @@ the extrinsically defined dependencies for the Asynchronous Operation.  An
 example implementation of this method would be calling Spring's \cite{spring}
 \texttt{getBean(\ldots)} method.}.
 
-%% TODO: fix up Asynchronous Operation to be component
+%% TODO: todo break apart interfaces for patterns and then bring together for IOC
 
 \begin{figure}[tp]
 \centering
@@ -369,8 +369,6 @@ standardised.
 
 
 \subsection{Solution}
-
-%% TODO: useful to have some kind of visualization of the main solution in the solution part, a sequence diagram example or some other illustration
 
 \textbf{Provide a context object to the component to enable indirectly invoking other components.}
 
@@ -714,125 +712,163 @@ pattern to provide an Inversion of Control implementation.
 
 \section{Thread Injection}
 
-%% TODO: is this pattern like a refinement to Proactor pattern?  (last sentence bothered me a little bit)
-%% TODO: So at least in case of this pattern, the problem statement should be after the context part or rephrased as it is not very standalone statement as the reader doesn't know what algorithm should be provided.
 
 \subsection{Problem}
 
-\textbf{Provide an algorithm for prioritization and cancellation of Asynchronous Operations.}
+\textbf{How to loosely couple the thread of control for a component?} 
+Components provide discrete pieces of functionality (application behaviour) that
+may be developed by different developers.  The execution of these components
+requires a thread of control.  How can the component be loosely coupled to a
+thread of control to enable improving the execution of the application?
 
 
 \subsection{Context}
 
-The disadvantage of the Proactor pattern is that the ``Asynchronous Operation
-Processor must be designed carefully to support prioritization and cancellation
-of Asynchronous Operations'' \cite[p. 8]{proactor}.  Performance analysis of web
-servers identifies the importance of this prioritization tuning
-\cite{tuning-important,low-server-footprint,tuning-os-important}. The Proactor
-pattern, however, does not provide algorithms for implementing its participants
-and leaves the prioritization and cancellation of Asynchronous Operations to the
-developer.  It does suggest, when not relying on the Operating System's
-asynchronous I/O, to use a pool of threads to execute the Asynchronous
-Operations but provides no further detail on implementing the pool of threads.
+Both the \textsc{thread-per-request} pattern and the \textsc{proactor} pattern
+enable a different thread of control for the execution of a request/component.
+These patterns allow for concurrent execution by utilising many threads.  For
+efficiencies, the \textsc{Thread Pool} pattern \cite{thread-per-request} is
+commonly used to pool threads to reduce thread management overheads.
+
+As identified by the \textsc{proactor} pattern, the threading ``must be designed
+carefully to support prioritization and cancellation'' \cite[p. 8]{proactor} of
+the execution of components.  Performance analysis of web servers identifies the
+importance of this prioritization tuning
+\cite{tuning-important,low-server-footprint,tuning-os-important}.  Both the
+\textsc{thread-per-request} pattern and the \textsc{proactor} pattern do not
+define algorithms for prioritization and cancellation of components and leaves
+this to the developer.
 
 
 \subsection{Forces}
 
 Tuning the prioritization is important to the performance of a Web Server.
 Serving static web content follows a similar sequence of operations making the
-use of a single thread pool sufficient.  In contrast, servicing dynamic content
-has significantly varying operations.  Utilising a single thread pool to service
-all dynamic content operations can result in tuning trade-offs that may result
-in performance degradation of the Web Server during particular load profiles
-(e.g. high load of requests for database data that are starving requests for
-cached data of a thread).  Better isolation of operations is necessary to reduce
+use of a pool of threads sufficient.  In contrast, servicing dynamic content has
+significantly varying operations.  Utilising a pool of threads to service all
+dynamic content operations can result in tuning trade-offs that may result in
+performance degradation of the Web Server during particular load profiles (e.g.
+high load of requests for database data that are starving requests for cached
+data of a thread).  Better isolation of operations is necessary to reduce
 trade-offs in performance tuning.
 
 Having an ability to cancel operations is important to avoid overloading the Web
-Server.  As load increases on the Web Server, the resources available to the Web
+Server.  As load increases on the Server, the resources available to the Web
 Server will be exhausted causing delays in servicing requests and in some
 scenarios cause the Web Server to crash (e.g. exhausting available memory). 
-Operations must be able to be cancelled to reduce the load on the Web Server. 
+Operations must be able to be cancelled to reduce the load on the Server. 
 However, only operations causing bottlenecks should be cancelled (e.g. a request
 for cached data should not be cancelled if it is the database that is
 overloaded).
 
-Both prioritization and cancellation of operations is specific to the
-application behaviour.  To enable portable implementations of Asynchronous
-Operations, a standard interface is necessary that provides application specific
-information regarding prioritization and cancellation of Asynchronous
-Operations.
+Both prioritization and cancellation for execution of components is specific to
+the application behaviour.  To enable portable implementations of components, a
+standard interface is necessary that provides application specific information
+regarding prioritization and cancellation of the components.
 
 
 \subsection{Solution}
 
-%% TODO: problem and solution should match
-%% TODO: add an illustration of the solution
+\textbf{Use multiple thread pools and based on meta-data of the component assign it to a particular thread pool.}
 
-\textbf{Use multiple thread pools and based on meta-data of an Asynchronous Operation assign it to a particular thread pool.}
+All components are constructed via extrinsic \textsc{dependency injection}
+\cite{ioc}.  The construction of the component is encapsulated in the dependency
+injection factory and as such a standard interface can be provided for execution
+of the components by a thread of control (Fig
+\ref{fig:ThreadInjectionInterfaces}).  This enables for re-useable
+implementations of components.
 
-All Asynchronous Operations are constructed via extrinsic dependency management
-\cite{ioc}.  The construction of the Asynchronous Operation is encapsulated in
-the dependency injection factory and as such the Asynchronous Operation
-Processor is provided a standard interface for all operations (Fig
-\ref{fig:InjectionInterfaces}).  This enables for portable implementations of
-Asynchronous Operations by developers.
+\begin{figure}[tp]
+\centering
+\begin{verbatim}
+    interface ComponentExecutor {
+        void executeComponent(String componentId, Object parameter);
+    }
+
+    interface DependencyInjectionFactory {
+        Component createComponent(String componentId);
+        Type[] getRequiredDependencyTypes(String componentId);
+    }
+
+    interface Component {
+        void execute(Object parameter);
+        void cancel(Object parameter, Exception cause);
+    }    
+\end{verbatim}
+\caption{Thread Injection pattern interfaces\footnotemark}
+\label{fig:ThreadInjectionInterfaces}
+\end{figure}
+\footnotetext{\texttt{componentId} may be an integer identifier for fast array look ups rather than a string.}
+
+To invoke a component, the client code invokes the
+\texttt{executeComponent(\ldots)} method (Fig
+\ref{fig:ThreadInjectionInterfaces}) with the identifier of the desired
+component to execute along with an argument for the parameter of the component.
+Figure \ref{fig:ThreadInjectionSequenceDiagram} provides a sequence diagram of
+executing a component.  The \texttt{ComponentExecutor} uses the
+\texttt{DependencyInjectionFactory} to construct the appropriate
+\texttt{Component} and then assigns it for execution by one of the many
+developer configured thread pools based on the required dependency types of the
+component.
+
+\textbf{TODO: provide sequence diagram of invoking a component}
 
 The prioritization is achieved by the
 \texttt{getRequiredDependencyTypes(\ldots)} method providing the extrinsic
-dependency meta-data for an Asynchronous Operation\footnote{Dependency Injection
-frameworks using qualification to identify dependencies of the same type may
-return a type object containing both class and qualifier rather than just a
-class.  The thread pool matching may then incorporate the qualifier.}.
-The developer configures one or more thread pools responsible for Asynchronous
-Operations with a particular type of dependency\footnote{Thread pools may be
-associated with more than one dependency type.}.  The Asynchronous Operation is
+\textsc{dependency injection} \cite{ioc} meta-data for the
+component\footnote{Dependency Injection frameworks using qualification to
+identify dependencies of the same type may return a type object containing both
+class and qualifier rather than just a class.  The thread pool matching may then
+incorporate the qualifier.}.  The developer configures one or more thread pools
+responsible for components with a particular type of dependency\footnote{Thread
+pools may be associated with more than one dependency type.}.  The component is
 then matched by its required dependency types to a thread pool responsible for
-one or more of its dependency types\footnote{The \texttt{operationId} may also
+one or more of its dependency types\footnote{The \texttt{componentId} may also
 be used for very fine grained mapping.}.  The \texttt{execute(\ldots)} method of
-the Asynchronous Operation (Fig \ref{fig:InjectionInterfaces}) is then invoked
-by a thread from the matching thread pool to execute the implementation of the
-Asynchronous Operation.  This provides the necessary isolation of differing
-Asynchronous Operations for better tuning of the Web Server.
+the component (Fig \ref{fig:ThreadInjectionInterfaces}) is then invoked by a thread
+from the matching thread pool to execute the implementation of the component.
+This provides the necessary isolation of differing components for better tuning
+of the Server.
 
-For Asynchronous Operations not having dependencies (or dependencies of any
+For components not having dependencies (or dependencies of any
 performance significance), a default thread pool is configured by the developer
-for their execution.  This ensures all Asynchronous Operations are mapped to a
+for their execution.  This ensures all components are mapped to a
 thread pool.  It also means that thread pools need only be configured for
 dependencies requiring isolation.
 
-The \texttt{cancel(Exception)} method provides the means for the Asynchronous
-Operation Processor to cancel the Asynchronous Operation.  The Asynchronous
-Operation Processor will cancel new Asynchronous Operations for a particular
-thread pool when queuing the Asynchronous Operation for a thread will result in
-exceeding a particular threshold\footnote{A sufficient threshold would be
-ensuring the wait time, determined by a running average of execution time
-multiplied against the number of Asynchronous Operations currently in the queue,
-is below a certain time.}.  Each thread pool may have its own thresholds
-particular to its responsible dependency types.  As Asynchronous Operations are
-mapped to particular Thread Pools, this ensures only the appropriate operations
-are cancelled.
+The \texttt{cancel(Exception)} method provides the means for the
+\textsc{ComponentExecutor} to cancel the component.  The
+\textsc{ComponentExecutor} will cancel new components for a particular thread
+pool when queuing the component for a thread will result in exceeding a
+particular threshold\footnote{A sufficient threshold would be ensuring the wait
+time, determined by a running average of execution time multiplied against the
+number of components currently in the queue, is below a certain time.}.  Each
+thread pool may have its own thresholds particular to its responsible dependency
+types.  As components are mapped to particular thread pools, this ensures only
+the appropriate components are cancelled.
 
-Once cancelled, the Asynchronous Operation Processor may discard the
-Asynchronous Operation.  The implementation of the \texttt{cancel(Exception)}
-method is specific to each Asynchronous Operation.  This is to allow appropriate
-application behaviour to occur on cancelling Asynchronous Operations.
+Once cancelled, the \textsc{ComponentExecutor} may discard the component.  The
+implementation of the \texttt{cancel(Exception)} method is specific to each
+component.  This is to allow appropriate application behaviour to occur on
+cancelling components.
 
 
 \subsection{Example}
 
 Table \ref{tab:example_request_thread_pools} provides an example set of thread
-pools for the motivating example.  A thread pool is configured for Asynchronous
-Operations with a \texttt{Database connection}.  As the \texttt{Database
-connection} is only available via extrinsic Dependency Injection, all
-Asynchronous Operations requiring I/O with the database must depend on the
-\texttt{Database connection} and are subsequently mapped to be executed by a
-thread from the \texttt{Database} thread pool.  The remaining operations have
-their own thread pools allowing them to continue to be executed even if the
-database I/O is causing thread starvation within its own thread pool.
+pools for the motivating example.  Each operation in the motivating example is
+encapsulated into a component, with each component invoking the next component
+(operation) in the sequence.  A thread pool is configured for components with a
+\texttt{Database connection}.  As the \texttt{Database connection} is only
+available via extrinsic \textsc{dependency injection}, all components requiring
+I/O with the database must depend on the \texttt{Database connection} and are
+subsequently mapped to be executed by a thread from the \texttt{Database} thread
+pool.  The remaining components have their own thread pools allowing them to
+continue to be executed even if the database I/O is causing thread starvation
+within its own thread pool.
 
 \begin{table}[t]
-\tbl{Example of assigning Asynchronous Operations to thread pools by dependency type}{%
+\tbl{Example of assigning execution of components to thread pools by dependency type}{%
 \begin{tabular}{|l||l||l|}
 \hline
 \bfseries Thread Pool & \bfseries Dependency Type & \bfseries Asynchronous Operation \\
@@ -852,99 +888,118 @@ Default & - & Parse HTTP request, \\
 \label{tab:example_request_thread_pools}
 \end{table}
 
-The result for the motivating example is that the operations for servicing the
-cached request can now be prioritized.  This can occur even if the database
-driver has become non-responsive blocking all threads attempting to use a
-database connection.  Furthermore, as the application becomes more complex with
-an increasing number of downstream systems (e.g. Reverse 10K problem
-\cite{reverse-ten-k-problem}), each downstream system's performance impacts may
-be isolated by assigning it its own thread pool.  This has requests requiring a
-slow downstream system to be deprioritized, allowing other requests to be
-serviced.
-
 
 \subsection{Consequences}
 
-%% TODO: negative consequences? (more intricate understanding of application as developer involved in configuring threading.  It is not defaulted to a single thread pool which is adequate for most low load servers and relieves the burdon on the developer to understand thread tuning.)
-
-Thread Injection provides the implementing algorithm for the Proactor pattern's
-Asynchronous Operation Processor participant by using multiple Thread Pools to
-prioritise and cancel Asynchronous Operations.
-
-Improved tuning of the Web Server is possible by the isolation provided by using
+Improved tuning of the Server is possible by the isolation provided by using
 multiple thread pools.  Tuning the thread pools (such as restricting the number
 of threads or changing the pool's thread nice values) allows prioritizing
-threads and subsequently prioritizing groups of related Asynchronous Operations.
+threads and subsequently prioritizing groups of related components.
 
-As each thread pool is executing Asynchronous Operations for a particular
-dependency (or set of dependencies), this allows for adaptive resource
-management and admission control regarding the dependency \cite{seda}.  This
-enables both the number of threads and dependencies to be dynamically altered to
-improve throughput.  However, when maximum throughput is reached additional
-Asynchronous Operations above this threshold can be cancelled.
+As each thread pool is executing components for a particular dependency (or set
+of dependencies), this allows for adaptive resource management and admission
+control regarding the dependency \cite{seda}.  This enables both the number of
+threads and dependencies to be dynamically altered to improve throughput.
+However, when maximum throughput is reached additional components for execution
+above this threshold can be cancelled.
 
-To improve performance of runtime decisions, the mapping of Asynchronous
-Operation to thread pool may be cached.  As the dependencies for each
-Asynchronous Operation is static, at application start up time the Asynchronous
-Operation Processor may preprocess and cache the mapping of Asynchronous
-Operations to thread pools to reduce runtime decision overheads.  This
-pre-mapping of Asynchronous Operations may also provide warnings where
-dependencies of an Asynchronous Operation make it possible to map the
-Asynchronous Operation to multiple thread pools.  Different conflict mapping
-resolutions may be employed, however ordering the thread pools and assigning
-Asynchronous Operations based on first match is a sufficiently adequate
-algorithm.
+To improve performance of runtime decisions, the mapping of component to thread
+pool may be cached.  As the dependencies for each component is static, at
+application start up time the \texttt{ComponentExecutor} may preprocess and
+cache the mapping of \texttt{Component} to thread pools to reduce runtime
+decision overheads.  This pre-mapping of components may also provide warnings
+where dependencies of a component make it possible to map the component to
+multiple thread pools.  Different conflict mapping resolutions may be employed,
+however ordering the thread pools and assigning components based on first match
+is a sufficiently adequate algorithm.
 
-From the perspective of the Asynchronous Operation, the developer is able to
-configure which thread pool will execute each Asynchronous Operation.  This
-effectively injects the thread for execution in a similar way to injecting a
-dependency for use.
+From the perspective of the component, the developer is able to configure which
+thread pool will execute each component.  This effectively injects the thread
+for execution in a similar way to injecting a dependency for use.
+
+The \textsc{proactor} pattern's Asynchronous Operation Processor participant can
+be implemented with the Thread Injection pattern to prioritise and cancel
+Asynchronous Operations.  The Asynchronous Operation Processor is implemented by
+passing the Asynchronous Operation as the argument for the \texttt{Component}
+parameter.  Components are designed specific to Asynchronous Operations so they
+represent the necessary dependencies of the Asynchronous Operation.  On
+executing the component, the component provides the necessary dependencies to
+the Asynchronous Operation and then executes it.  Therefore, as the components
+are assigned to their appropriate thread pools, so are the Asynchronous
+Operations within those components.  This provides an Asynchronous Operation
+Processor that can provide prioritization and cancellation of Asynchronous
+Operations.
+
+For low load servers where a single thread pool is sufficient, the Thread
+Injection pattern can cause increased complexity for developer configuration.
+While the Thread Injection pattern provides the flexibility to focus the tuning
+of isolated components by tuning their mapped thread pool, it does put the
+burdon on the developer to understand thread related performance issues (e.g.
+costs related to thread stack memory and thread-context switching) and the
+performance of the dependencies (along with their related components).
+
+The Thread Injection pattern looses its ability to effectively prioritize and
+cancel components if the component dependencies are too similar.  When used with
+the \textsc{thread-per-request} pattern within a Web Server, all request
+handling for dynamic content is likely to use a database connection.  While this
+will allow isolation of requests for static content, it will not isolate
+requests for dynamic content from cached data.  This is because the request
+handler (component) will depend on the database connection to retrieve the data
+if the data is not cached.  Request handling will therefore need to be segmented
+into smaller components to reduce occurances of sets of common dependencies
+between components that groups components all onto the same thread pool.
 
 
 \subsection{Related Patterns}
 
-The Thread Injection pattern utilises information provided by the Dependency
-Injection pattern.  The Thread Injection can be used in isolation of the
-Dependency Injection pattern by mapping each Asynchronous Operation directly to
-a thread pool and using intrinsic dependencies.  This however involves increased
-configuration for the developer and may become invalid should Asynchronous
-Operations change their dependencies as the application evolves.  It is
-therefore recommended to use Thread Injection in combination with Dependency
-Injection to map Asynchronous Operations by dependencies to thread pools to
-reduce configuration and mapping errors.
+The Thread Injection pattern utilises information provided by the
+\textsc{dependency injection} pattern.  The Thread Injection pattern can be used
+in isolation of the \textsc{dependency injection} pattern by passing in the
+compoment itself (rather than the parameter) and mapping each component (by
+\texttt{componentId}) directly to a thread pool.  This however involves
+increased configuration for the developer and may become invalid should
+components change their dependencies as the application evolves.  It is
+therefore recommended to use Thread Injection in combination with
+\textsc{dependency injection} to map components by dependencies to thread pools
+to reduce configuration and mapping errors.
 
-Utilising Thread Injection in combination with Continuation Injection allows
-reducing thread-context switching of the application.  As Continuation Injection
-allows Asynchronous Operations to be synchronously invoked, the thread may be
-borrowed to avoid the need for a thread-context switch.
+Utilising Thread Injection in combination with the Continuation Injection
+pattern allows reducing the number of components with common dependencies.  The
+Continuation Injection pattern segments the request servicing into a
+collaboration of components.  As each collaborating component undertakes part of
+servicing the request, each component only needs a subset of the dependencies
+for the request.  This allows reducing the servicing of the request to smaller
+components to avoid sets of common dependencies between components that negates
+the effectiveness of the Thread Injection pattern.
 
-The Thread Pool pattern \cite{thread-per-request} is used to reduce overheads of
-thread management for improved efficiency in execution of the thread pool's
-responsible Asynchronous Operations.  To achieve further efficiencies, the
+The \textsc{thread pool} pattern \cite{thread-per-request} is used to reduce
+overheads of thread management for improved efficiency in execution of the
+thread pool's responsible components.  To achieve further efficiencies, the
 implementation of the thread pool may be specific to the dependency.  For
 example, the thread pool may contain multiple threads for concurrent execution
-of Asynchronous Operations, a single thread for serial execution of Asynchronous
-Operations or even no threads and execute Asynchronous Operations by borrowing
-the thread to reduce thread-context switching.
+of components, a single thread for serial execution of components or even no
+threads and execute components by borrowing the thread to reduce thread-context
+switching.
 
 
 \subsection{Known Usage}
 
 The Thread Injection pattern can be considered a style of cohort scheduling
-\cite{cohort} that groups operations with similar dependencies and infers from
+\cite{cohort} that groups components with similar dependencies and infers from
 that similar functionality.  However, Thread Injection works at the application
 scheduling level and allows use of any Operating System thread scheduling
 algorithms.
 
 The Staged Event-Driven Architecture (SEDA) \cite{seda} provides an
-implementation of the Thread Injection pattern without the use of the Dependency
-Injection pattern.  SEDA directly maps operations to a stage and subsequently a
-thread pool.  The SEDA pipeline however has increased thread-context switching
-as the stage boundaries are hard disallowing threads to be borrowed.
+implementation of the Thread Injection pattern without the use of the
+\textsc{dependency injection} pattern.  SEDA directly maps components to a stage
+and subsequently a thread pool.  The SEDA pipeline however has increased
+thread-context switching as the stage boundaries are hard disallowing threads to
+be borrowed.
 
 Dependency capsules \cite{dependency-capsules} follows the idea of isolating
-operations requiring dependencies to specific thread pools.  It however requires
-a thread-context switch back to a main thread for executing operations without
+components requiring dependencies to specific thread pools.  It however requires
+a thread-context switch back to a main thread for executing components without
 dependencies.
 
 OfficeFloor \cite{officefloor} implements the Thread Injection pattern and will
@@ -975,6 +1030,9 @@ Bring down thread/process contexts from CI.
 
 Use Retrieve data from cache operation as example.  It could be used within an
 application that handles queue messages.
+
+Main method for framework invoking components.  So how should the invoking of
+components be standardised to avoid framework specific implementations.
 
 
 \subsection{Context}
@@ -1216,6 +1274,17 @@ switching is reduced by borrowing the thread when no dependencies require
 isolation.  Note the \texttt{Retrieve data from database} (table
 \ref{tab:example_request_operations}) operation would be isolated to a thread
 pool by the \texttt{Database} dependency.
+
+
+The result for the motivating example is that the operations for servicing the
+cached request can now be prioritized.  This can occur even if the database
+driver has become non-responsive blocking all threads attempting to use a
+database connection.  Furthermore, as the application becomes more complex with
+an increasing number of downstream systems (e.g. Reverse 10K problem
+\cite{reverse-ten-k-problem}), each downstream system's performance impacts may
+be isolated by assigning it its own thread pool.  This has requests requiring a
+slow downstream system to be deprioritized, allowing other requests to be
+serviced.
 
 
 \subsection{Consequences}
