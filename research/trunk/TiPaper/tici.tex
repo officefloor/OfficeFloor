@@ -23,9 +23,17 @@
 %% to the licensing of OfficeFloor.
 
 
+
+
 %%This is a very basic article template.
 %%There is just one section and two subsections.
 \documentclass[prodmode]{style/acmlarge}
+
+% Graphics
+\usepackage[pdftex]{graphicx}
+\graphicspath{{./pdf/}}
+\DeclareGraphicsExtensions{.pdf}
+
 
 % Metadata Information
 \acmVolume{V}
@@ -351,6 +359,10 @@ necessary continuations into the component.
     interface DependencyInjectionFactory {
         Component createComponent(String componentId, Object parameter);
     }
+    
+    interface ContinuationInjectionFactory {
+        ComponentContext createComponentContext(String componentId);
+    }
 \end{verbatim}
 \caption{Continuation Injection interfaces\footnotemark.}
 \label{fig:ContinuationInjectionInterfaces}
@@ -412,9 +424,14 @@ differentiate between dependencies and parameters.  The invoked component may
 also ignore the continuation argument should it not depend on it.  Figure
 \ref{fig:DoContinuationSequenceDiagram} provides a sequence diagram of invoking
 a component via the \texttt{doContinuation(\ldots)} method.
-
-\textbf{TODO: provide sequence diagram for the above}
-
+  
+\begin{figure}[!t]
+\centering
+\includegraphics[width=6in]{DoContinuationSequenceDiagram}
+\caption{Sequence diagram of invoking \texttt{doContinuation(\ldots)}.}
+\label{fig:DoContinuationSequenceDiagram}
+\end{figure}
+ 
 As the \texttt{doContinuation(\ldots)} method asynchronously invokes the
 component, the returned \texttt{Future} is used to determine when the potential
 tree of invoked components has completed.  The \texttt{Future} would utilise the
@@ -806,13 +823,18 @@ To invoke a component, the client code invokes the
 \texttt{executeComponent(\ldots)} method (Fig
 \ref{fig:ThreadInjectionInterfaces}) with the identifier of the desired
 component along with an argument for the parameter of the component.
-Figure \ref{fig:ThreadInjectionSequenceDiagram} provides a sequence diagram of
+Figure \ref{fig:ExecuteComponentSequenceDiagram} provides a sequence diagram of
 executing a component.  The \texttt{ComponentExecutor} uses the
 \texttt{DependencyInjectionFactory} to construct the appropriate
 \texttt{Component} and then assigns it for execution by one of the many
 developer configured thread pools based on the meta-data of the component.
 
-\textbf{TODO: provide sequence diagram of invoking a component}
+\begin{figure}[!t]
+\centering
+\includegraphics[width=6in]{ExecuteComponentSequenceDiagram}
+\caption{Sequence diagram of invoking \texttt{executeComponent(\ldots)}.}
+\label{fig:ExecuteComponentSequenceDiagram}
+\end{figure}
 
 From the perspective of the component, the developer is able to configure which
 thread pool will execute each component.  This effectively injects the thread
