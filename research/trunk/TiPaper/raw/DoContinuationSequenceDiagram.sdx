@@ -2,7 +2,7 @@
 <diagram>
 <source><![CDATA[invoker:Invoker[a]
 componentContext:ComponentContext
-dif:DependencyInjectionFactory[a]
+dependencyContext:DependencyContext
 /component:Component[x]
 cif:ComponentContextFactory[a]
 /invokedContext:ComponentContext[x]
@@ -13,11 +13,11 @@ p:ProactorInitiator[a]
 aop:AsynchronousOperationProcessor[a]
 
 invoker:future=componentContext.doContinuation("contId", "ARG")
-componentContext:>componentContext.lookupComponentId("contId")&
-componentContext:component=dif.createComponent("compId","ARG")
-dif:>component.new("ARG", dependencies)&
-componentContext:invokedContext=cif.createComponentContext("compId")
-cif:>invokedContext.new(continuations)&
+componentContext:>componentContext.lookupComponentDependencyId("contId")&
+componentContext:component=dependencyContext.getDependency("dependencyId")
+dependencyContext:>component.new() or use cached&
+componentContext:invokedContext=cif.createComponentContext("compId", "ARG", dependencyContext)
+cif:>invokedContext.new(continuationMappings, exceptionMappings, stateMappings, dependencyContext)&
 componentContext:future=p.initiate(component,invokedContext)
 p:>future.new()&
 p:>operation.new(component,invokedContext)&
@@ -27,6 +27,9 @@ p:>aop[,0].register(operation,handler)
 invoker:stop
 aop:operation.execute()
 operation:component.execute(invokedContext)
+component:dependency=invokedContext.getState(stateId)
+invokedContext:>invokedContext.lookupDependencyId(stateId)&
+invokedContext:dependency=dependencyContext.getDependency(dependencyId)
 component:invokedContext.(invoke further continuations)
 aop:handler.complete()
 handler:p.notifyComplete(future)
