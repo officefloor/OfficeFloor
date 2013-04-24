@@ -23,7 +23,7 @@
 %% to the licensing of OfficeFloor.
 
 
-
+ 
 
 %%This is a very basic article template.
 %%There is just one section and two subsections.
@@ -106,25 +106,25 @@ servers\footnote{Apache, Microsoft IIS, Nginx and JEE identified from the
 Netcraft November 2012 survey.  Google Web Server is also identified as
 popular.} to service requests concurrently.
 
-Many modern Web Servers improve their concurrency of servicing high loads of
+Many modern web servers improve their concurrency of servicing high loads of
 static web content by using the \textsc{proactor} pattern \cite{proactor} to
 enable use of asynchronous I/O operations.  The \textsc{thread-per-request}
 pattern requires a thread to be allocated to each request to sequentially and
 synchronously execute all operations for servicing a request.  This includes I/O
-operations that tie up thread resources on the Web Server requiring more threads
-and reducing the concurrency of the Web Server.  The \textsc{procator} pattern
+operations that tie up thread resources on the web server requiring more threads
+and reducing the concurrency of the web server.  The \textsc{procator} pattern
 overcomes this issue by executing operations asynchronously not requiring the
-Web Server threads to block (e.g. use of Operating System asynchronous I/O
+web server threads to block (e.g. use of Operating System asynchronous I/O
 operations).
 
-However, Web Servers continue to use the \textsc{thread-per-request}
-pattern\footnote{CGI/FastCGI with for example PHP scripts, Microsoft's
-HTTP.sys/WAS and JEE Servlets.} for servicing dynamic web content.  Using the
+However, web servers continue to use the \textsc{thread-per-request} pattern for
+servicing dynamic web content\footnote{CGI/FastCGI with for example PHP scripts,
+Microsoft's HTTP.sys/WAS and JEE Servlets.}.  Using the
 \textsc{thread-per-request} pattern allows for more intuitive developer
 implementations of dynamic web content servicing at the cost of decreased
-concurrency for the Web Server.
+concurrency for the web server.
 
-Due to demands on Web Servers to resolve such issues as the Reverse 10K problem
+Due to demands on web servers to resolve such issues as the Reverse 10K problem
 \cite{reverse-ten-k-problem}, the \textsc{thread-per-request} pattern is
 requiring developers to manually manage the threading issues involved with
 increased concurrency.  Should the developer want to use asynchronous I/O
@@ -160,7 +160,7 @@ and Thread Injection pattern are then presented.  After presenting the patterns
 individually, the Thread Injection and Continuation Injection patterns are used
 together to realise an Inversion of Control pattern.  The Inversion of Control
 pattern provides resolution of the motivating example.  Discussion is then
-provided on using the patterns to implement a Web Server.
+provided on using the patterns to implement a web server.
 
 As the Thread Injection and Continuation Injection patterns provide implementing
 algorithms for the \textsc{proactor} pattern participants, the \textsc{proactor}
@@ -206,7 +206,7 @@ thread.
 
 Furthermore, for requests requiring only in memory cached content, the
 \textsc{thread-per-request} pattern continues to use a separate thread that
-incurs the cost of one or more thread-context switches.  If the Web Server knew
+incurs the cost of one or more thread-context switches.  If the web server knew
 further details about the nature of each request, it should allow the request to
 borrow the thread to reduce thread-context switching.
 
@@ -265,10 +265,10 @@ component, how can the invocation of that component be loosely coupled?
 \subsection{Context}
 
 Both the \textsc{thread-per-request} pattern \cite{thread-per-request} (basis of
-many mainstream Web Servers\footnote{For popular Web Servers (Netcraft November
+many mainstream web servers\footnote{For popular web servers (Netcraft November
 2012 survey) dynamic web content is serviced by CGI/FastCGI with for example PHP
 scripts, Microsoft's HTTP.sys/WAS and JEE Servlets.}) and the \textsc{proactor}
-pattern \cite{proactor} (basis of event-driven Web Servers) impose tight
+pattern \cite{proactor} (basis of event-driven web servers) impose tight
 coupling on invocation of components.  The \textsc{thread-per-request} pattern
 enables invoking components by synchronous methods that is intuitive for
 developers \cite[p. 2]{proactor}.  In contrast, the \textsc{proactor} pattern
@@ -324,7 +324,7 @@ tightly couple invoking a component by the invoker being required to handle
 possible exceptions.  The invoker may not be appropriately responsible to handle
 a resulting exception and this should be delegated to another component.
 
-For a framework (e.g. Web Server) to extend itself by invoking components, the
+For a framework (e.g. web server) to extend itself by invoking components, the
 framework pre-defines the component's interface to enable invoking it.  However,
 components should be able to invoke other components for re-use.  To enable
 re-use of these components the interface to invoke components should be
@@ -400,7 +400,7 @@ completion of Asynchronous Operations (components) allows providing a response
 once all components for the request are complete.
 
 The components are constructed via \textsc{dependency injection} \cite{ioc}.
-The \texttt{DependencyInjectionFactory} (Fig
+The \texttt{Dependency\-InjectionFactory} (Fig
 \ref{fig:ContinuationInjectionInterfaces}) centrally manages the dependency
 configuration and creates a \texttt{DependencyContext} that constructs and
 caches dependency instances for the components.  The \texttt{DependencyContext},
@@ -417,8 +417,8 @@ providing a single return value.  For the \textsc{proactor} pattern, the invoker
 must have all state available to construct the Asynchronous Operation and
 Completion Dispatcher/Handler which tightly couples the invocation.  Providing
 mutable state within dependencies that are re-used across components allows
-components to share state.  This is similar to a \textsc{thread-per-request} Web
-Server that shares state between components by attributes (dependencies) within
+components to share state.  This is similar to a \textsc{thread-per-request} web
+server that shares state between components by attributes (dependencies) within
 request, session and application scopes.  To further decouple the component from
 global dependency identifiers the \texttt{ComponentContext} contains a mapping
 of \texttt{stateId} to \texttt{dependencyId} to allow the component to obtain
@@ -430,7 +430,7 @@ component.
 
 The \texttt{doContinuation(\ldots)} method (Fig
 \ref{fig:ContinuationInjectionInterfaces}) allows a component to invoke another
-component.  As the \texttt{continuationId}s are static for each component,
+component.  As the \texttt{continu\-ationId}s are static for each component,
 developer configuration provides the continuation mapping to the handling
 component.  The method does allow one argument to be passed to the invoked
 component.  This is for more intuitive development by associating the invocation
@@ -446,7 +446,7 @@ invoking a component via the \texttt{doContinuation(\ldots)} method.
 \begin{figure}[!t]
 \centering
 \includegraphics[height=7in]{DoContinuationSequenceDiagram}
-\caption{Sequence diagram of invoking \texttt{doContinuation(\ldots)} (rotated to fit on page).}
+\caption{Sequence diagram of invoking \texttt{doContinuation(\ldots)}.}
 \label{fig:DoContinuationSequenceDiagram}
 \end{figure}
  
@@ -464,12 +464,12 @@ return value.  This further decouples the invocation, as the invoking component
 is not tightly coupling the expected return type for the invocation.
 
 Exceptions are handled by being mapped to a \texttt{continuationId}.  The
-component invokes the \texttt{handleException(\ldots)} method with the
+component invokes the \texttt{handle\-Excep\-tion(\ldots)} method with the
 exception\footnote{For easier development of components, the component's
 \texttt{execute(\ldots)} method signature may allow throwing the exception which
 is caught by a wrapping executor that calls the \texttt{handleException(\ldots)}
-method with the caught exception.}.  The \texttt{handleException(\ldots)} is
-implemented by mapping the exception type to a \texttt{continuationId} and
+method with the caught exception.}.  The \texttt{handleException(\ldots)} method
+is implemented by mapping the exception type to a \texttt{continuationId} and
 invoking \texttt{doContinuation(\ldots)} with the exception as the argument.
 Continuations for specific exception types of the component may be configured by
 the developer.  The developer will also configure ''catch all'' continuations
@@ -490,10 +490,12 @@ component again.  The Proactor Initiator may be implemented to defer execution
 of a component again until invoked continuations by the component are completed.
  The Proactor Initiator would use the same tracking of completion as the
 \texttt{Future} to determine the completion of the last Asynchronous Operation
-(component) and then register the component within an Asynchronous Operation for
-execution again.  This for example allows deferring the execution of the
-component until an invoked Operating System asynchronous I/O operation completes
-- a key aspect of the \textsc{Proactor} pattern for improved concurrency.
+(component) for the invoked continuations.  On completion of the last
+Asynchronous Operation, it then registers the component within an Asynchronous
+Operation for execution again.  This for example allows deferring the execution
+of the component until an invoked Operating System asynchronous I/O operation
+completes - a key aspect of the \textsc{Proactor} pattern for improved
+concurrency.
 
 The execution of a continuation may also be deferred until all other
 continuations from the component are complete.  The configuration of each
@@ -610,7 +612,7 @@ components.
 \begin{figure}[!t]
 \centering
 \includegraphics[width=4.5in]{ContinuationInjectionComponentOrchestration}
-\caption{Example component orchestration configuration for Motivating Example.}
+\caption{Example component orchestration configuration for the Motivating Example.}
 \label{fig:ExampleComponentOrchestration}
 \end{figure}
 
@@ -634,7 +636,7 @@ that can be injected into dependencies to invoke a component\footnote{No
 \texttt{continutionId} is necessary as may inject multiple instances
 representing the different continuations.}.  This enables dependencies to
 effectively become Active Objects \cite{active-object} when
-necessary\footnote{The Web Server HTTP(S) socket dependency would for example
+necessary\footnote{The web server HTTP(S) socket dependency would for example
 typically be implemented by invoking an injected continuation to service
 requests.}.
 
@@ -655,7 +657,7 @@ methods/functions, which can result in a large number of components needing to
 be configured together\footnote{Future work will present the patterns
 OfficeFloor \cite{officefloor} uses to encapsulate Component Orchestration
 configuration for re-use to avoid its graphical representation from becoming
-unwieldly.}.
+unwieldy.}.
 
 As components are being executed asynchronously (potentially by different
 threads of control), using debugging developer tools to step through the
@@ -733,6 +735,9 @@ Systems integrated with a queuing infrastructure are heavy weight
 implementations of the Continuation Injection pattern.  The continuation is the
 queue's client interface with the queue infrastructure providing the necessary
 indirection to map the handling component of a message (continuation argument).
+Error queues are continuations for handling exceptions.  The individual systems
+can, therefore, be considered components that have queues (continuations)
+injected into them.
 
 Continuation Injection can also be considered a form of continuation-passing
 style \cite{continuations} except that the continuation is injected rather than
@@ -790,21 +795,21 @@ this to the developer.
 
 \subsection{Forces}
 
-Tuning the prioritization is important to the performance of a Web Server.
+Tuning the prioritization is important to the performance of a web server.
 Serving static web content follows a similar sequence of operations making the
 use of a pool of threads sufficient.  In contrast, servicing dynamic content has
 significantly varying operations.  Utilising a pool of threads to service all
 dynamic content operations can result in tuning trade-offs that may result in
-performance degradation of the Web Server during particular load profiles (e.g.
+performance degradation of the web server during particular load profiles (e.g.
 high load of requests for database data that are starving requests for cached
 data of a thread).  Better isolation of operations is necessary to reduce
 trade-offs in performance tuning.
 
-Having an ability to cancel operations is important to avoid overloading the Web
-Server.  As load increases on the Server, the resources available to the Web
-Server will be exhausted causing delays in servicing requests and in some
-scenarios cause the Web Server to crash (e.g. exhausting available memory). 
-Operations must be able to be cancelled to reduce the load on the Server. 
+Having an ability to cancel operations is important to avoid overloading the web
+server.  As load increases on the server, the resources available to the web
+server will be exhausted causing delays in servicing requests and in some
+scenarios cause the web server to crash (e.g. exhausting available memory). 
+Operations must be able to be cancelled to reduce the load on the server. 
 However, only operations causing bottlenecks should be cancelled (e.g. a request
 for cached data should not be cancelled if it is the database that is
 overloaded).
@@ -891,7 +896,7 @@ be used for very fine grained mapping.}.  The \texttt{execute(\ldots)} method of
 the component (Fig \ref{fig:ThreadInjectionInterfaces}) is then invoked by a thread
 from the matching thread pool to execute the implementation of the component.
 This provides the necessary isolation of differing components for better tuning
-of the Server.
+of the server.
 
 For components not having dependencies (or dependencies of any
 performance significance), a default thread pool is configured by the developer
@@ -899,10 +904,10 @@ for their execution.  This ensures all components are mapped to a
 thread pool.  It also means that thread pools need only be configured for
 dependencies requiring isolation.
 
-The \texttt{cancel(Exception)} method provides the means for the
-\textsc{ComponentExecutor} to cancel the component.  The
-\textsc{ComponentExecutor} will cancel new components for a particular thread
-pool when queuing the component for a thread will result in exceeding a
+The \texttt{cancel(\ldots)} method (Fig \ref{fig:ThreadInjectionInterfaces})
+provides the means for the \textsc{ComponentExecutor} to cancel the component. 
+The \textsc{ComponentExecutor} will cancel new components for a particular
+thread pool when queuing the component for a thread will result in exceeding a
 particular threshold\footnote{A sufficient threshold would be ensuring the wait
 time, determined by a running average of execution time multiplied against the
 number of components currently in the queue, is below a certain time.}.  Each
@@ -911,7 +916,7 @@ types.  As components are mapped to particular thread pools, this ensures only
 the appropriate components are cancelled.
 
 Once cancelled, the \textsc{ComponentExecutor} may discard the component.  The
-implementation of the \texttt{cancel(Exception)} method is specific to each
+implementation of the \texttt{can\-cel(\ldots)} method is specific to each
 component.  This is to allow appropriate application behaviour to occur on
 cancelling components.
 
@@ -964,7 +969,7 @@ deprioritized, allowing other requests to be serviced.
 
 \subsection{Consequences}
 
-Improved tuning of the Server is possible by the isolation provided by using
+Improved tuning of the server is possible by the isolation provided by using
 multiple thread pools.  Tuning the thread pools (such as restricting the number
 of threads or changing the pool's thread nice values) allows prioritizing
 threads and subsequently prioritizing groups of related components.
@@ -1009,14 +1014,14 @@ performance of the dependencies (along with their related components).
 
 The Thread Injection pattern looses its ability to effectively prioritize and
 cancel components if the component dependencies are too similar.  When used with
-the \textsc{thread-per-request} pattern within a Web Server, all request
+the \textsc{thread-per-request} pattern within a web server, all request
 handling for dynamic content is likely to use a database connection.  While this
 will allow isolation of requests for static content, it will not isolate
 requests for dynamic content serviced from cached data rather than database
 data.  This is because the request handler (component) will depend on the
 database connection to retrieve the data if the data is not cached.  Request
 handling will therefore need to be segmented into smaller components to reduce
-occurrances of sets of common dependencies between components that results in
+occurrences of sets of common dependencies between components that results in
 grouping components all onto the same thread pool.
 
 
@@ -1235,15 +1240,15 @@ patterns together provides the necessary decoupling for components as:
 
 Therefore, the \texttt{Component} interface (Fig
 \ref{fig:IocInjectionInterfaces}) is the decoupled standard interface for a
-component.  The component is executed by the Thread Injection pattern using the
-\texttt{ComponentContext} as the argument for its execution.  The
-\texttt{cancel(\ldots)} method of the Thread Injection pattern is not required
-as it will be handled by a configured continuation with the exception as the
-continuation argument.  The \texttt{ComponentContext} (constructed by the
-\texttt{ComponentContextFactory}) provides means to retrieve state via
-\textsc{dependency injection} and invoke other components via Continuation
-Injection.  The \texttt{DependencyInjectionFactory} is passed the continuation
-argument to use in constructing the component.
+component.  The component is executed by the Thread Injection pattern's
+\texttt{ComponentExecutor}.  The cancellation exceptions of the Thread Injection
+Pattern (i.e. \texttt{cancel(\ldots)} method of figure
+\ref{fig:ThreadInjectionInterfaces}) are handled by the
+\texttt{handleException(\ldots)} method to enable application level handling of
+overload conditions.  The \texttt{ComponentContext} (constructed by the
+\texttt{ComponentContextFactory}) provides means to retrieve state via the
+\textsc{dependency injection} \texttt{Dependency\-Context} and invoke other
+components via Continuation Injection.
 
 \begin{figure}[tp]
 \centering
@@ -1293,7 +1298,7 @@ continuation may be configured to invoke the component (and its subsequent
 invoked components) within a new \texttt{DependencyContext} to not share state.
 
 Isolated \texttt{DependencyContext}s provides the isolation of threads.  To
-share state between the isolated \texttt{DependencyContext}s, the isolated
+share state between the isolated \texttt{Depend\-ency\-Context}s, the isolated
 contexts may be created inside a shared context.  Each dependency type is bound
 by developer configuration to be within the isolated context or the shared
 context.  The instance of a dependency bound to an isolated context may only be
@@ -1325,7 +1330,7 @@ switch.
 The borrowed thread is the implicit thread.  Like an implicit continuation that
 executes the next operation \cite{continuations}, the implicit thread executes
 the next component unless an explicit thread is required.  This can result in
-a Server servicing the entire request without a thread-context switch
+a server servicing the entire request without a thread-context switch
 should all the components involved not require an explicit thread
 (e.g. web page content obtained from cache).
 
@@ -1387,7 +1392,7 @@ algorithms of the \textsc{proactor} pattern participants, the Inversion of
 Control pattern has provided limited improvement regarding the \textsc{proactor}
 pattern being ``hard to debug'' \cite[p. 7]{proactor}.  While the patterns have
 not directly addressed the \textsc{proactor} issue of being hard to debug, they
-do follow the trend of \textsc{thread-per-request} Web Servers
+do follow the trend of \textsc{thread-per-request} web servers
 \cite{thread-per-request} by encapsulating developer code within sequentially
 executed components (segmented request handlers formed by chaining components
 with implicit continuations).  However, the introduction of dependencies
@@ -1441,11 +1446,11 @@ injection} enables the adapted dependency by providing a new dependency with the
 required interface that depends on (wraps) the re-used dependency.
 
 The \textsc{adaptor} pattern may also be used to adapt components not conforming
-to the \texttt{Component} instance (Fig
-\ref{fig:ContinuationInjectionInterfaces}) into an Inversion of Control pattern
-framework.  This allows the framework to re-use components not specifically
-built for it\footnote{As an example, OfficeFloor \cite{officefloor} provides an
-adapter to run a JEE Servlet as a component (Task).}.
+to the \texttt{Component} interface (Fig \ref{fig:IocInjectionInterfaces}) into
+an Inversion of Control pattern framework.  This allows the framework to re-use
+components not specifically built for it\footnote{As an example, OfficeFloor
+\cite{officefloor} provides an adapter to run a JEE Servlet as a component
+(Task).}.
 
 
 \subsection{Known Usage}
@@ -1472,12 +1477,12 @@ Inversion of Control pattern.
 \section{Web Server implementation}
 
 This section discusses using the Thread Injection, Continuation Injection and
-Inversion of Control patterns in implementing a Web Server.
+Inversion of Control patterns in implementing a web server.
 
 
 \subsection{Servicing requests and managing URLs}
 
-For Web Servers, URL continuations \cite{url-continuation} are used to invoke
+For web servers, URL continuations \cite{url-continuation} are used to invoke
 the first component for servicing the request\footnote{A similar approach may be
 taken by other User Interface types (such as a rich GUI) with the user event
 being mapped to the first Asynchronous Operation.}.  A URL may be associated to
@@ -1505,25 +1510,22 @@ across the distributed servers.
 
 \subsection{Continuation for cancelling a component}
 
-Cancelling the component is handled by the component invoking a continuation.
-On the \texttt{cancel(Exception)} method (Fig \ref{fig:IocInjectionInterfaces})
-being executed, the component will clean up any resources and then invoke a
-continuation for an component executed in another thread pool.  For a Web Server
-this component could for example send a web page indicating the server is
-temporarily busy or it may send a redirect to a less busy Web Server.
+Cancelling the component is handled by the component invoking a continuation for
+the cancellation exception.  On the \texttt{handleException(\ldots)} method (Fig
+\ref{fig:IocInjectionInterfaces}) being executed, the component will invoke a
+continuation for a component executed in another thread pool.  This allows the
+thread pool to shed load to components on another thread pool that can more
+efficiently handle the overload condition.  For a web server this component
+could for example send a web page indicating the server is temporarily busy or
+it may send a redirect to a less busy web server.
 
 Each component may individually specify the continuation or a default
 continuation may be configured across a set of components.
 The default continuation will be mapped to an component that interrogates the
 \texttt{cause} and undertakes appropriate further components specific to the
-required application behaviour.
-
-Using a default continuation by a Web Server relieves the developer of handling
-overload conditions for each component.  As the Web Server becomes overloaded,
-it can either redirect to another less busy web server or send a too busy
-response.  Using a default continuation that does the appropriate operation
-based on developer configuration will relieve the developer from handling
-overload conditions.
+required application behaviour.  Furthermore, having a different exception
+provided per Thread Injection thread pool allows different handling of overload
+conditions per each performance significant dependency.
 
 
 \subsection{Clustering/Distributing components}
@@ -1548,7 +1550,7 @@ hardware.
 The Internet is an example implementation that utilizes both component
 heterogeneous clustering and the invoking of continuations to other servers. 
 The URL continuation (e.g. by a user clicking on a link) is sent to the server
-containing the thread pool (i.e. Web Server).  The Web Server continues the
+containing the thread pool (i.e. web server).  The web server continues the
 processing by sending the HTTP response to the client web browser (server to the
 user who may trigger further continuations).
 
