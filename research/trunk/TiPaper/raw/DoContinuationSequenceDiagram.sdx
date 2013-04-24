@@ -13,16 +13,20 @@ p:ProactorInitiator[a]
 aop:AsynchronousOperationProcessor[a]
 
 invoker:future=componentContext.doContinuation("contId", "ARG")
-componentContext:>componentContext.lookupComponentDependencyId("contId")&
-componentContext:component=dependencyContext.getDependency("dependencyId")
-dependencyContext:>component.new() or use cached&
-componentContext:invokedContext=cif.createComponentContext("compId", "ARG", dependencyContext)
-cif:>invokedContext.new(continuationMappings, exceptionMappings, stateMappings, dependencyContext)&
-componentContext:future=p.initiate(component,invokedContext)
+componentContext:>componentContext.lookupDependencyId(\\n            "contId")&
+componentContext:
+componentContext:component=dependencyContext.getDependency(\\n            "dependencyId")
+dependencyContext:>component.new()\\nor use cached&
+componentContext:
+componentContext:invokedContext=cif.createComponentContext(\\n            "compId", "ARG",\\n            dependencyContext)
+cif:>invokedContext.new(continuationMappings,\\n            exceptionMappings,\\n            stateMappings,\\n            dependencyContext)&
+componentContext:
+componentContext:future=p.initiate(component,\\n            invokedContext)
 p:>future.new()&
-p:>operation.new(component,invokedContext)&
+p:>operation.new(component,\\n    invokedContext)&
 p:>handler.new(future)&
 p:>p.registerFuture(future)&
+p:
 p:>aop[,0].register(operation,handler)
 invoker:stop
 aop:operation.execute()
@@ -30,13 +34,13 @@ operation:component.execute(invokedContext)
 component:dependency=invokedContext.getState(stateId)
 invokedContext:>invokedContext.lookupDependencyId(stateId)&
 invokedContext:dependency=dependencyContext.getDependency(dependencyId)
-component:invokedContext.(invoke further continuations)
+component:
+component:invokedContext.(invoke further\\ncontinuations)
 aop:handler.complete()
 handler:p.notifyComplete(future)
 p:future.flagComplete()
-p:>p.Complete request if all registered Futures complete&
-aop:stop
-]]></source>
+p:>p.Complete request\\nif all registered\\nFutures complete&
+aop:stop]]></source>
 <configuration>
 <property name="activationBarBorderThickness" value="1"/>
 <property name="actorWidth" value="25"/>
@@ -46,7 +50,7 @@ aop:stop
 <property name="colorizeThreads" value="true"/>
 <property name="destructorWidth" value="30"/>
 <property name="explicitReturns" value="false"/>
-<property family="Dialog" name="font" size="16" style="0"/>
+<property family="Dialog" name="font" size="12" style="0"/>
 <property name="fragmentBorderThickness" value="2"/>
 <property name="fragmentEdgeColor" value="-16751616"/>
 <property name="fragmentLabelBgColor" value="-36"/>

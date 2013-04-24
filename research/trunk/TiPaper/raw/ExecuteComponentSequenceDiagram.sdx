@@ -9,11 +9,14 @@ one:ThreadPool
 two:ThreadPool
 n:ThreadPool
 
-invoker:executor.executeComponent("compId", "ARG")
+invoker:executor.executeComponent(\\n            "compId", "ARG")
 executor:component=dif.createComponent("compId")
 dif:>component.new(dependencies)&
-executor:types=dif.getRequiredDependencyTypes("compId")
+executor:
+executor:types=dif.getRequiredDependencyTypes(\\n            "compId")
+executor:
 executor:>executor.selectThreadPool(types)&
+executor:
 executor:>runnable.new(component, "ARG")&
 executor:two.register(runnable)
 two[,0]:>two.queue(runnable)
@@ -34,7 +37,7 @@ runnable:stop
 <property family="Dialog" name="font" size="12" style="0"/>
 <property name="fragmentBorderThickness" value="2"/>
 <property name="fragmentEdgeColor" value="-16751616"/>
-<property name="fragmentLabelBgColor" value="-36"/>
+<property name="fragmentLabelBgColor" value="-1"/>
 <property name="fragmentMargin" value="8"/>
 <property name="fragmentPadding" value="10"/>
 <property name="fragmentTextPadding" value="3"/>
