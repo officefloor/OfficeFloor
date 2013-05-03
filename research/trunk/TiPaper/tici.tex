@@ -1256,15 +1256,18 @@ decoupling for components as:
 Therefore, the \texttt{Component} interface (Fig
 \ref{fig:IocInjectionInterfaces}) is the decoupled standard interface for a
 component.  The component is executed by the \textsc{thread injection} pattern's
-\texttt{ComponentExecutor} that creates components via the
-\texttt{DependencyContext} to share state.  The cancellation exceptions of the
-\textsc{thread injection} pattern (i.e. \texttt{cancel(\ldots)} method of figure
-\ref{fig:ThreadInjectionInterfaces}) are handled by the
-\texttt{handleException(\ldots)} method to enable application level handling of
-overload conditions.  The \texttt{ComponentContext} (constructed by the
-\texttt{ComponentContextFactory}) provides means to retrieve state via the
-\textsc{dependency injection} \texttt{Dependency\-Context} and invoke other
-components via \textsc{continuation injection}.
+\texttt{ComponentExecutor} after creation by the \textsc{continuation injection}
+pattern's \texttt{ComponentContext}.  As \textsc{continuation injection} and
+\textsc{thread injection} share the same \texttt{DependencyInjectionFactory},
+the \textsc{thread injection}'s \texttt{ComponentExecutor} trusts the
+\textsc{continuation injection} pattern to pass the component to execute.  The
+cancellation exceptions of the \textsc{thread injection} pattern (i.e.
+\texttt{cancel(\ldots)} method of figure \ref{fig:ThreadInjectionInterfaces})
+are handled by the \texttt{handleException(\ldots)} method to enable application
+level handling of overload conditions.  The \texttt{ComponentContext}
+(constructed by the \texttt{ComponentContextFactory}) provides means to retrieve
+state via the \textsc{dependency injection} \texttt{Dependency\-Context} and
+invoke other components via \textsc{continuation injection}.
 
 \begin{figure}[tp]
 \centering
@@ -1298,8 +1301,8 @@ components via \textsc{continuation injection}.
 
     interface ComponentExecutor {
         void executeComponent(String componentId 
-                    , DependencyContext dependencyContext,
-                    , ComponentContext componentContext);
+                             , Component component
+                             , ComponentContext componentContext);
     }
 \end{verbatim}
 \caption{Combined \textsc{thread injection}, \textsc{continuation injection} and \textsc{dependency injection} pattern interfaces\footnotemark}
