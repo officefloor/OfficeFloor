@@ -1305,6 +1305,8 @@ components via \textsc{continuation injection}.
     
     interface Runnable {
         void run();
+        Component getComponent();
+        ComponentContext getComponentContext();
     }
 
     interface ComponentExecutor {
