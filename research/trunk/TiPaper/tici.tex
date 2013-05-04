@@ -1260,14 +1260,18 @@ component.  The component is executed by the \textsc{thread injection} pattern's
 pattern's \texttt{ComponentContext}.  As \textsc{continuation injection} and
 \textsc{thread injection} share the same \texttt{DependencyInjectionFactory},
 the \textsc{thread injection}'s \texttt{ComponentExecutor} trusts the
-\textsc{continuation injection} pattern to pass the component to execute.  The
-cancellation exceptions of the \textsc{thread injection} pattern (i.e.
-\texttt{cancel(\ldots)} method of figure \ref{fig:ThreadInjectionInterfaces})
-are handled by the \texttt{handleException(\ldots)} method to enable application
-level handling of overload conditions.  The \texttt{ComponentContext}
-(constructed by the \texttt{ComponentContextFactory}) provides means to retrieve
-state via the \textsc{dependency injection} \texttt{Dependency\-Context} and
-invoke other components via \textsc{continuation injection}.
+\textsc{continuation injection} pattern to pass the component within the
+\texttt{Runnable} for execution.  The \texttt{Runnable} is constructed by the
+\textsc{continuation injection} pattern and contains the Asynchronous Operation
+to execute the component and the Completion Handler/Dispatcher to flag the
+\texttt{Future} complete.  The cancellation exceptions of the \textsc{thread
+injection} pattern (i.e. \texttt{cancel(\ldots)} method of figure
+\ref{fig:ThreadInjectionInterfaces}) are handled by the
+\texttt{handleException(\ldots)} method to enable application level handling of
+overload conditions.  The \texttt{ComponentContext} (constructed by the
+\texttt{ComponentContextFactory}) provides means to retrieve state via the
+\textsc{dependency injection} \texttt{Dependency\-Context} and invoke other
+components via \textsc{continuation injection}.
 
 \begin{figure}[tp]
 \centering
@@ -1298,11 +1302,14 @@ invoke other components via \textsc{continuation injection}.
     interface DependencyContext {
         Object getDependency(String dependencyId);
     }
+    
+    interface Runnable {
+        void run();
+    }
 
     interface ComponentExecutor {
         void executeComponent(String componentId 
-                             , Component component
-                             , ComponentContext componentContext);
+                             , Runnable runnable);
     }
 \end{verbatim}
 \caption{Combined \textsc{thread injection}, \textsc{continuation injection} and \textsc{dependency injection} pattern interfaces\footnotemark}
