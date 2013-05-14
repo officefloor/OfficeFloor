@@ -73,10 +73,12 @@ import net.officefloor.model.woof.WoofTemplateOutputToWoofTemplateModel;
 import net.officefloor.model.woof.WoofTemplateRedirectModel;
 import net.officefloor.plugin.web.http.application.HttpSecurityAutoWireSection;
 import net.officefloor.plugin.web.http.application.HttpTemplateAutoWireSection;
-import net.officefloor.plugin.web.http.application.HttpTemplateAutoWireSectionExtension;
 import net.officefloor.plugin.web.http.application.WebAutoWireApplication;
 import net.officefloor.plugin.web.http.security.HttpSecuritySource;
-import net.officefloor.plugin.web.http.template.section.HttpTemplateSectionExtension;
+import net.officefloor.plugin.woof.template.WoofTemplateExtensionException;
+import net.officefloor.plugin.woof.template.WoofTemplateExtensionSource;
+import net.officefloor.plugin.woof.template.WoofTemplateExtensionSourceContext;
+import net.officefloor.plugin.woof.template.WoofTemplateExtensionSourceService;
 
 /**
  * {@link WoofLoader} implementation.
@@ -111,7 +113,7 @@ public class WoofLoaderImpl implements WoofLoader {
 	 */
 
 	@Override
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public void loadWoofConfiguration(ConfigurationItem woofConfiguration,
 			WebAutoWireApplication application, SourceContext sourceContext)
 			throws Exception {
@@ -122,24 +124,23 @@ public class WoofLoaderImpl implements WoofLoader {
 		// Obtain the class loader
 		ClassLoader classLoader = sourceContext.getClassLoader();
 
-		// Load the template extension services
-		Map<String, WoofTemplateExtensionService> extensionServices = new HashMap<String, WoofTemplateExtensionService>();
-		Map<String, WoofTemplateExtensionService> implicitExtensionServices = new HashMap<String, WoofTemplateExtensionService>();
-		ServiceLoader<WoofTemplateExtensionService> extensionServiceLoader = ServiceLoader
-				.load(WoofTemplateExtensionService.class, classLoader);
-		Iterator<WoofTemplateExtensionService> extensionIterator = extensionServiceLoader
+		// Load the implicit template extension sources
+		Map<String, WoofTemplateExtensionSource> implicitExtensionSources = new HashMap<String, WoofTemplateExtensionSource>();
+		ServiceLoader<WoofTemplateExtensionSourceService> extensionServiceLoader = ServiceLoader
+				.load(WoofTemplateExtensionSourceService.class, classLoader);
+		Iterator<WoofTemplateExtensionSourceService> extensionIterator = extensionServiceLoader
 				.iterator();
 		while (extensionIterator.hasNext()) {
 
 			// Obtain the extension service
-			WoofTemplateExtensionService extensionService;
+			WoofTemplateExtensionSourceService<?> extensionService;
 			try {
 				extensionService = extensionIterator.next();
 			} catch (ServiceConfigurationError ex) {
 				// Warning that service not available
 				if (LOG.isLoggable(Level.WARNING)) {
 					LOG.log(Level.WARNING,
-							WoofTemplateExtensionService.class.getSimpleName()
+							WoofTemplateExtensionSource.class.getSimpleName()
 									+ " configuration failure: "
 									+ ex.getMessage(), ex);
 				}
@@ -148,29 +149,35 @@ public class WoofLoaderImpl implements WoofLoader {
 				continue;
 			}
 
-			// Obtain the extension alias and whether implicit extension
-			String extensionAlias;
-			boolean isImplicitExtension;
+			// Register the extension if implicit
 			try {
-				extensionAlias = extensionService.getTemplateExtensionAlias();
-				isImplicitExtension = extensionService.isImplicitExtension();
+				// Determine if extension is implicit
+				boolean isImplicitExtension = extensionService
+						.isImplicitExtension();
+				if (!isImplicitExtension) {
+					continue; // ignore as only include implicit
+				}
+
+				// Obtain instance of the extension source
+				String extensionSourceClassName = extensionService
+						.getWoofTemplateExtensionSourceClass().getName();
+				WoofTemplateExtensionSource extensionSource = (WoofTemplateExtensionSource) sourceContext
+						.loadClass(extensionSourceClassName).newInstance();
+
+				// Register the extension source
+				implicitExtensionSources.put(extensionSourceClassName,
+						extensionSource);
+
 			} catch (Throwable ex) {
 				// Warning that error with service
 				if (LOG.isLoggable(Level.WARNING)) {
-					LOG.log(Level.WARNING,
-							"Failed obtaining extension alias from "
-									+ extensionService.getClass().getName()
-									+ " : " + ex.getMessage(), ex);
+					LOG.log(Level.WARNING, "Failed loading extension from "
+							+ extensionService.getClass().getName() + " : "
+							+ ex.getMessage(), ex);
 				}
 
 				// Carry on to next service
 				continue;
-			}
-
-			// Register the extension service
-			extensionServices.put(extensionAlias, extensionService);
-			if (isImplicitExtension) {
-				implicitExtensionServices.put(extensionAlias, extensionService);
 			}
 		}
 
@@ -217,70 +224,60 @@ public class WoofLoaderImpl implements WoofLoader {
 			for (WoofTemplateExtensionModel extensionModel : templateModel
 					.getExtensions()) {
 
-				// Obtain the extension
-				String extensionClassName = extensionModel
+				// Obtain the extension source class name
+				String extensionSourceClassName = extensionModel
 						.getExtensionClassName();
 
 				// Keep track of the explicit extension
-				explicitTemplateExtensions.add(extensionClassName);
+				explicitTemplateExtensions.add(extensionSourceClassName);
 
 				// Load the extension
 				try {
-					WoofTemplateExtensionService extensionService = extensionServices
-							.get(extensionClassName);
-					if (extensionService != null) {
-						// Load via extension service
-						PropertyList properties = OfficeFloorCompiler
-								.newPropertyList();
-						for (PropertyModel property : extensionModel
-								.getProperties()) {
-							properties.addProperty(property.getName())
-									.setValue(property.getValue());
-						}
-						extensionService
-								.extendTemplate(new WoofTemplateExtensionServiceContextImpl(
-										template, application, properties,
-										sourceContext));
 
-					} else {
-						// Load via extension class name
-						Class<? extends HttpTemplateSectionExtension> extensionClass = (Class<? extends HttpTemplateSectionExtension>) classLoader
-								.loadClass(extensionClassName);
-						HttpTemplateAutoWireSectionExtension extension = template
-								.addTemplateExtension(extensionClass);
-						for (PropertyModel property : extensionModel
-								.getProperties()) {
-							extension.addProperty(property.getName(),
-									property.getValue());
-						}
+					// Instatiate the extension source
+					WoofTemplateExtensionSource extensionSource = (WoofTemplateExtensionSource) sourceContext
+							.loadClass(extensionSourceClassName).newInstance();
+
+					// Create the context for the extension source
+					PropertyList properties = OfficeFloorCompiler
+							.newPropertyList();
+					for (PropertyModel property : extensionModel
+							.getProperties()) {
+						properties.addProperty(property.getName()).setValue(
+								property.getValue());
 					}
+					WoofTemplateExtensionSourceContext extensionSourceContext = new WoofTemplateExtensionServiceContextImpl(
+							template, application, properties, sourceContext);
+
+					// Extend the template
+					extensionSource.extendTemplate(extensionSourceContext);
+
 				} catch (Exception ex) {
 					// Indicate failure to extend template
 					throw new WoofTemplateExtensionException(
 							"Failed loading Template Extension "
-									+ extensionClassName + ". "
+									+ extensionSourceClassName + ". "
 									+ ex.getMessage(), ex);
 				}
 			}
 
 			// Include implicit extensions (in deterministic order)
-			String[] implicitExtensionAliases = implicitExtensionServices
+			String[] implicitExtensionSourceClassNames = implicitExtensionSources
 					.keySet().toArray(new String[0]);
-			Arrays.sort(implicitExtensionAliases, String.CASE_INSENSITIVE_ORDER);
-			for (String implicitExtensionAlias : implicitExtensionAliases) {
-				WoofTemplateExtensionService implicitExtensionService = implicitExtensionServices
-						.get(implicitExtensionAlias);
+			Arrays.sort(implicitExtensionSourceClassNames,
+					String.CASE_INSENSITIVE_ORDER);
+			for (String implicitExtensionSourceClassName : implicitExtensionSourceClassNames) {
 
-				// Ignore if explicitly included (by alias or class name)
-				if (explicitTemplateExtensions.contains(implicitExtensionAlias)
-						|| (explicitTemplateExtensions
-								.contains(implicitExtensionService.getClass()
-										.getName()))) {
+				// Ignore if explicitly included (by class name)
+				if (explicitTemplateExtensions
+						.contains(implicitExtensionSourceClassName)) {
 					continue;
 				}
 
 				// Provide the implicit extension
-				implicitExtensionService
+				WoofTemplateExtensionSource implicitExtensionSource = implicitExtensionSources
+						.get(implicitExtensionSourceClassName);
+				implicitExtensionSource
 						.extendTemplate(new WoofTemplateExtensionServiceContextImpl(
 								template, application, OfficeFloorCompiler
 										.newPropertyList(), sourceContext));
@@ -746,10 +743,10 @@ public class WoofLoaderImpl implements WoofLoader {
 	}
 
 	/**
-	 * {@link WoofTemplateExtensionServiceContext} implementation.
+	 * {@link WoofTemplateExtensionSourceContext} implementation.
 	 */
 	private static class WoofTemplateExtensionServiceContextImpl extends
-			SourceContextImpl implements WoofTemplateExtensionServiceContext {
+			SourceContextImpl implements WoofTemplateExtensionSourceContext {
 
 		/**
 		 * {@link HttpTemplateAutoWireSection}.

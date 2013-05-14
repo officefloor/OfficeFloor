@@ -67,7 +67,8 @@ public class AddTest extends AbstractWoofChangesTestCase {
 		// Add the template
 		Change<WoofTemplateModel> change = this.operations.addTemplate("uri",
 				"example/Template.ofp", "net.example.LogicClass", section,
-				null, false, null, null, false, null, null, false, null);
+				null, false, null, null, false, null,
+				this.getWoofTemplateChangeContext());
 		change.getTarget().setX(100);
 		change.getTarget().setY(101);
 
@@ -107,7 +108,8 @@ public class AddTest extends AbstractWoofChangesTestCase {
 		// Add the template
 		Change<WoofTemplateModel> change = this.operations.addTemplate("uri",
 				"example/Template.ofp", "net.example.LogicClass", section,
-				null, false, null, null, true, null, null, false, null);
+				null, false, null, null, true, null,
+				this.getWoofTemplateChangeContext());
 		change.getTarget().setX(100);
 		change.getTarget().setY(101);
 
@@ -136,7 +138,7 @@ public class AddTest extends AbstractWoofChangesTestCase {
 		// Add the root template
 		Change<WoofTemplateModel> change = this.operations.addTemplate("/",
 				"root.ofp", null, section, null, false, null, null, false,
-				null, null, false, null);
+				null, this.getWoofTemplateChangeContext());
 
 		// Validate change
 		this.assertChange(change, null, "Add Template", true);
@@ -162,7 +164,8 @@ public class AddTest extends AbstractWoofChangesTestCase {
 		Change<WoofTemplateModel> change = this.operations.addTemplate(
 				"Template", "example/Template.ofp", "net.example.LogicClass",
 				section, null, true, secureLinks, new String[] { "POST", "PUT",
-						"OTHER" }, true, null, null, false, null);
+						"OTHER" }, true, null,
+				this.getWoofTemplateChangeContext());
 
 		// Validate change
 		this.assertChange(change, null, "Add Template", true);
@@ -183,94 +186,84 @@ public class AddTest extends AbstractWoofChangesTestCase {
 
 		// Add the first template
 		this.operations.addTemplate("Template", "example/Template.ofp",
-				"Class1", section, null, false, null, null, false, null, null,
-				false, null).apply();
+				"Class1", section, null, false, null, null, false, null,
+				this.getWoofTemplateChangeContext()).apply();
 
 		// Add twice
 		this.operations.addTemplate("Template", "example/Template.ofp",
-				"Class2", section, null, false, null, null, false, null, null,
-				false, null).apply();
+				"Class2", section, null, false, null, null, false, null,
+				this.getWoofTemplateChangeContext()).apply();
 
 		// Add again with absolute URI
 		this.operations.addTemplate("/Template", "example/Template.ofp",
-				"Class3", section, null, false, null, null, false, null, null,
-				false, null).apply();
+				"Class3", section, null, false, null, null, false, null,
+				this.getWoofTemplateChangeContext()).apply();
 
 		// Ensure appropriately added templates
 		this.validateModel();
 	}
 
 	/**
-	 * Ensure can add a template with a GWT extension.
+	 * Ensure can add a template with an extension.
 	 */
+	public void testAddTemplateWithExtension() {
+
+		final String TEMPLATE_URI = "uri";
+
+		// Register the extension test details
+		Change<?> extensionChange = this.createMock(Change.class);
+		MockChangeWoofTemplateExtensionSource.reset(extensionChange, null,
+				null, TEMPLATE_URI, new String[] { "ONE", "A", "TWO", "B" },
+				this.getWoofTemplateChangeContext());
+
+		// Create the extensions
+		WoofTemplateExtension[] extensions = new WoofTemplateExtension[] {
+				new WoofTemplateExtensionImpl(
+						MockNoChangeWoofTemplateExtensionSource.class.getName(),
+						new WoofTemplateExtensionPropertyImpl("name", "value")),
+				new WoofTemplateExtensionImpl(
+						MockNoChangeWoofTemplateExtensionSource.class.getName()),
+				new WoofTemplateExtensionImpl(
+						MockChangeWoofTemplateExtensionSource.class.getName(),
+						new WoofTemplateExtensionPropertyImpl("ONE", "A"),
+						new WoofTemplateExtensionPropertyImpl("TWO", "B")) };
+
+		// Record the extension change
+		extensionChange.apply();
+
+		// Create the section type
+		SectionType section = this
+				.constructSectionType(new SectionTypeConstructor() {
+					@Override
+					public void construct(SectionTypeContext context) {
+					}
+				});
+
+		// Test
+		this.replayMockObjects();
+
+		// Add the template with extensions
+		Change<?> addChange = this.operations.addTemplate(TEMPLATE_URI,
+				"example/Template.ofp", "net.example.LogicClass", section,
+				null, false, null, null, false, extensions,
+				this.getWoofTemplateChangeContext());
+		addChange.apply();
+
+		// Verify
+		this.verifyMockObjects();
+
+		// Ensure appropriately added templates
+		this.validateModel();
+	}
+
+	// TODO migrate GWT extension configuration to specific test
 	public void testAddTemplateWithGwtExtension() {
-
-		final String TEMPLATE_URI = "uri";
-		final String ENTRY_POINT_CLASS_NAME = "net.example.client.ExampleGwtEntryPoint";
-		final String[] SERVICE_ASYNC_INTERFACE_NAMES = new String[] {
-				"net.example.GwtServiceAsync", "net.example.GwtAnotherAsync" };
-
-		// Record GWT changes
-		this.recordGwtModulePath("net/example/uri.gwt.xml");
-		Change<?> change = this.recordGwtUpdate(TEMPLATE_URI,
-				ENTRY_POINT_CLASS_NAME, null);
-		change.apply();
-
-		// Create the section type
-		SectionType section = this
-				.constructSectionType(new SectionTypeConstructor() {
-					@Override
-					public void construct(SectionTypeContext context) {
-					}
-				});
-
-		// Test
-		this.replayMockObjects();
-
-		// Add the template with GWT
-		this.operations.addTemplate(TEMPLATE_URI, "example/Template.ofp",
-				"net.example.LogicClass", section, null, false, null, null,
-				false, ENTRY_POINT_CLASS_NAME, SERVICE_ASYNC_INTERFACE_NAMES,
-				false, null).apply();
-
-		// Verify
-		this.verifyMockObjects();
-
-		// Ensure appropriately added templates
-		this.validateModel();
+		fail("TODO migrate configuration to GWT extension test");
 	}
 
-	/**
-	 * Ensure can add a template with a Comet extension.
-	 */
+	// TODO migrate Comet extension configuration to specific test
 	public void testAddTemplateWithCometExtension() {
-
-		final String TEMPLATE_URI = "uri";
-		final String PUBLISH_METHOD_NAME = "manualPublish";
-
-		// Record GWT changes
-
-		// Create the section type
-		SectionType section = this
-				.constructSectionType(new SectionTypeConstructor() {
-					@Override
-					public void construct(SectionTypeContext context) {
-					}
-				});
-
-		// Test
-		this.replayMockObjects();
-
-		// Add the template with Comet
-		this.operations.addTemplate(TEMPLATE_URI, "example/Template.ofp",
-				"net.example.LogicClass", section, null, false, null, null,
-				false, null, null, true, PUBLISH_METHOD_NAME).apply();
-
-		// Verify
-		this.verifyMockObjects();
-
-		// Ensure appropriately added templates
-		this.validateModel();
+		fail("TODO migrate configuration to Comet extension test");
 	}
 
 	/**

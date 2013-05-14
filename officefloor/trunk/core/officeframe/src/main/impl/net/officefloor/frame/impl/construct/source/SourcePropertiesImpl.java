@@ -50,9 +50,31 @@ public class SourcePropertiesImpl implements SourceProperties {
 	 *            {@link SourceProperties}.
 	 */
 	public SourcePropertiesImpl(SourceProperties sourceProperties) {
+
+		// Only load if provided properties
+		if (sourceProperties == null) {
+			return; // no properties
+		}
+
+		// Load the properties
 		for (String name : sourceProperties.getPropertyNames()) {
 			// Allow value to be not available
 			String value = sourceProperties.getProperty(name, null);
+			this.properties.add(new PropertyStruct(name, value));
+		}
+	}
+
+	/**
+	 * Convenience constructor for use in unit testing to instantiate a ready to
+	 * use instance.
+	 * 
+	 * @param propertyNameValuePairs
+	 *            Property name/value pairs.
+	 */
+	public SourcePropertiesImpl(String... propertyNameValuePairs) {
+		for (int i = 0; i < propertyNameValuePairs.length; i += 2) {
+			String name = propertyNameValuePairs[i];
+			String value = propertyNameValuePairs[i + 1];
 			this.properties.add(new PropertyStruct(name, value));
 		}
 	}

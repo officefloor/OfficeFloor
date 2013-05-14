@@ -51,6 +51,9 @@ import net.officefloor.plugin.web.http.application.HttpUriLink;
 import net.officefloor.plugin.web.http.application.WebAutoWireApplication;
 import net.officefloor.plugin.web.http.security.HttpSecuritySectionSource;
 import net.officefloor.plugin.web.http.security.scheme.MockHttpSecuritySource;
+import net.officefloor.plugin.woof.template.WoofTemplateExtensionException;
+import net.officefloor.plugin.woof.template.WoofTemplateExtensionSource;
+import net.officefloor.plugin.woof.template.WoofTemplateExtensionSourceContext;
 
 /**
  * Tests the {@link WoofLoader}.
@@ -105,7 +108,7 @@ public class WoofLoaderTest extends OfficeFrameTestCase {
 		LogRecord record = records[0];
 		assertEquals(
 				"Incorrect cause message",
-				WoofTemplateExtensionService.class.getName()
+				WoofTemplateExtensionSource.class.getName()
 						+ ": Provider woof.template.extension.not.available.Service not found",
 				record.getThrown().getMessage());
 	}
@@ -552,7 +555,7 @@ public class WoofLoaderTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Records initiating the {@link WoofTemplateExtensionServiceContext}.
+	 * Records initiating the {@link WoofTemplateExtensionSourceContext}.
 	 */
 	private void recordInitiateWoofTemplateExtensionServiceContext() {
 		this.recordReturn(this.sourceContext,
@@ -560,7 +563,7 @@ public class WoofLoaderTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Records implicit {@link WoofTemplateExtensionService} on the
+	 * Records implicit {@link WoofTemplateExtensionSource} on the
 	 * {@link HttpTemplateAutoWireSection}.
 	 * 
 	 * @param template

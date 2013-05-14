@@ -28,7 +28,6 @@ import net.officefloor.compile.section.SectionType;
 import net.officefloor.compile.spi.governance.source.GovernanceSource;
 import net.officefloor.compile.spi.section.source.SectionSource;
 import net.officefloor.model.change.Change;
-import net.officefloor.plugin.comet.internal.CometEvent;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
 import net.officefloor.plugin.web.http.security.HttpSecuritySource;
 import net.officefloor.plugin.web.http.security.type.HttpSecurityFlowType;
@@ -42,11 +41,6 @@ import net.officefloor.plugin.web.http.security.type.HttpSecurityType;
 public interface WoofChanges {
 
 	/**
-	 * Name of the extension property for the GWT Module path.
-	 */
-	String PROPERTY_GWT_MODULE_PATH = "gwt.module.path";
-
-	/**
 	 * Obtains the {@link WoofTemplateInheritance} instances by their super
 	 * {@link WoofTemplateModel} names.
 	 * 
@@ -54,44 +48,6 @@ public interface WoofChanges {
 	 *         {@link WoofTemplateModel} names.
 	 */
 	Map<String, WoofTemplateInheritance> getWoofTemplateInheritances();
-
-	/**
-	 * Obtains the GWT entry point class name for the {@link WoofTemplateModel}.
-	 * 
-	 * @param template
-	 *            {@link WoofTemplateModel}.
-	 * @return GWT entry point class name or <code>null</code>.
-	 */
-	String getGwtEntryPointClassName(WoofTemplateModel template);
-
-	/**
-	 * Obtains the GWT Async Service Interfaces for the
-	 * {@link WoofTemplateModel}.
-	 * 
-	 * @param template
-	 *            {@link WoofTemplateModel}.
-	 * @return GWT Async Service Interfaces.
-	 */
-	String[] getGwtAsyncServiceInterfaceNames(WoofTemplateModel template);
-
-	/**
-	 * Indicates if Comet is enabled for the {@link WoofTemplateModel}.
-	 * 
-	 * @param template
-	 *            {@link WoofTemplateModel}.
-	 * @return <code>true</code> Comet is enabled for the
-	 *         {@link WoofTemplateModel}.
-	 */
-	boolean isCometEnabled(WoofTemplateModel template);
-
-	/**
-	 * Obtains the Comet manual publish method name.
-	 * 
-	 * @param template
-	 *            {@link WoofTemplateExtensionModel}.
-	 * @return Comet manual publish method name or <code>null</code>.
-	 */
-	String getCometManualPublishMethodName(WoofTemplateModel template);
 
 	/**
 	 * Adds a {@link WoofTemplateModel}.
@@ -118,27 +74,20 @@ public interface WoofChanges {
 	 * @param isContinueRendering
 	 *            Indicates whether allowed to continue rendering on this
 	 *            template completion.
-	 * @param gwtEntryPointClassName
-	 *            GWT EntryPoint class name. May be <code>null</code> only if no
-	 *            GWT functionality is required.
-	 * @param gwtServiceAsyncInterfaceNames
-	 *            GWT Service Async Interface names. May be <code>null</code> if
-	 *            no GWT services required.
-	 * @param isEnableComet
-	 *            Flag to enable Comet functionality for the template.
-	 * @param cometManualPublishMethodName
-	 *            Name of the method on the template logic {@link Class} to
-	 *            handle publishing {@link CometEvent} instances.
-	 * @return {@link Change} to add the {@link WoofTemplateModel}.
+	 * @param extensions
+	 *            {@link WoofTemplateExtension} instances for the
+	 *            {@link WoofTemplateModel}.
+	 * @param context
+	 *            {@link WoofTemplateChangeContext}.
+	 * @return {@link Change} to add a {@link WoofTemplateModel}.
 	 */
 	Change<WoofTemplateModel> addTemplate(String uri, String templatePath,
 			String templateLogicClass, SectionType sectionType,
 			WoofTemplateModel superTemplate, boolean isTemplateSecure,
 			Map<String, Boolean> linksSecure,
 			String[] renderRedirectHttpMethods, boolean isContinueRendering,
-			String gwtEntryPointClassName,
-			String[] gwtServiceAsyncInterfaceNames, boolean isEnableComet,
-			String cometManualPublishMethodName);
+			WoofTemplateExtension[] extensions,
+			WoofTemplateChangeContext context);
 
 	/**
 	 * Refactors the {@link WoofTemplateModel}.
@@ -172,19 +121,15 @@ public interface WoofChanges {
 	 * @param isContinueRendering
 	 *            Indicates whether allowed to continue rendering on this
 	 *            template completion.
-	 * @param gwtEntryPointClassName
-	 *            New GWT EntryPoint class name.
-	 * @param gwtServiceAsyncInterfaceNames
-	 *            New GWT Service Async Interface names.
-	 * @param isEnableComet
-	 *            Flags whether refactor {@link WoofTemplateModel} is to enable
-	 *            Comet.
-	 * @param cometManualPublishMethodName
-	 *            New Comet manual publish method name.
+	 * @param extensions
+	 *            {@link WoofTemplateExtension} instances for the
+	 *            {@link WoofTemplateModel}.
 	 * @param templateOutputNameMapping
 	 *            Mapping of {@link SectionOutputType} name to existing
 	 *            {@link WoofTemplateOutputModel} name to allow maintaining
 	 *            links to other items within the {@link WoofModel}.
+	 * @param context
+	 *            {@link WoofTemplateChangeContext}.
 	 * @return {@link Change} to refactor the {@link WoofTemplateModel}.
 	 */
 	Change<WoofTemplateModel> refactorTemplate(WoofTemplateModel template,
@@ -193,10 +138,9 @@ public interface WoofChanges {
 			Set<String> inheritedTemplateOutputNames, boolean isTemplateSecure,
 			Map<String, Boolean> linksSecure,
 			String[] renderRedirectHttpMethods, boolean isContinueRendering,
-			String gwtEntryPointClassName,
-			String[] gwtServiceAsyncInterfaceNames, boolean isEnableComet,
-			String cometManualPublishMethodName,
-			Map<String, String> templateOutputNameMapping);
+			WoofTemplateExtension[] extensions,
+			Map<String, String> templateOutputNameMapping,
+			WoofTemplateChangeContext context);
 
 	/**
 	 * Changes the URI for the {@link WoofTemplateModel}.
@@ -205,19 +149,24 @@ public interface WoofChanges {
 	 *            {@link WoofTemplateModel}.
 	 * @param uri
 	 *            URI.
+	 * @param context
+	 *            {@link WoofTemplateChangeContext}.
 	 * @return {@link Change} for the URI.
 	 */
 	Change<WoofTemplateModel> changeTemplateUri(WoofTemplateModel template,
-			String uri);
+			String uri, WoofTemplateChangeContext context);
 
 	/**
 	 * Removes the {@link WoofTemplateModel}.
 	 * 
 	 * @param template
 	 *            {@link WoofTemplateModel} to remove.
+	 * @param context
+	 *            {@link WoofTemplateChangeContext}.
 	 * @return {@link Change} to remove the {@link WoofTemplateModel}.
 	 */
-	Change<WoofTemplateModel> removeTemplate(WoofTemplateModel template);
+	Change<WoofTemplateModel> removeTemplate(WoofTemplateModel template,
+			WoofTemplateChangeContext context);
 
 	/**
 	 * Adds a {@link WoofSectionModel}.

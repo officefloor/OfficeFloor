@@ -15,38 +15,27 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.plugin.woof;
-
-import net.officefloor.plugin.web.http.application.HttpTemplateAutoWireSectionExtension;
+package net.officefloor.model.woof;
 
 /**
- * Flags that the {@link HttpTemplateAutoWireSectionExtension} is unknown or
- * unable to be obtained.
+ * Property for the {@link WoofTemplateExtension}.
  * 
  * @author Daniel Sagenschneider
  */
-public class WoofTemplateExtensionException extends Exception {
+public interface WoofTemplateExtensionProperty {
 
 	/**
-	 * Initiate.
+	 * Obtains the name of the property.
 	 * 
-	 * @param message
-	 *            Reason.
-	 * @param cause
-	 *            Cause.
+	 * @return Name of the property.
 	 */
-	public WoofTemplateExtensionException(String message, Throwable cause) {
-		super(message, cause);
-	}
+	String getName();
 
 	/**
-	 * Initiate.
+	 * Obtains the value of the property.
 	 * 
-	 * @param message
-	 *            Reason.
+	 * @return Value of the property.
 	 */
-	public WoofTemplateExtensionException(String message) {
-		super(message);
-	}
+	String getValue();
 
 }

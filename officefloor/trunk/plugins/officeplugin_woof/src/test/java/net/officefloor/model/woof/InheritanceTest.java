@@ -139,7 +139,8 @@ public class InheritanceTest extends AbstractWoofChangesTestCase {
 		// Add the template
 		Change<WoofTemplateModel> change = this.operations.addTemplate(
 				"/child", "example/Child.ofp", null, section, superTemplate,
-				false, null, null, false, null, null, false, null);
+				false, null, null, false, null,
+				this.getWoofTemplateChangeContext());
 
 		// Validate change
 		this.assertChange(change, null, "Add Template", true);
@@ -162,7 +163,7 @@ public class InheritanceTest extends AbstractWoofChangesTestCase {
 
 		// Change template to unique URI
 		Change<WoofTemplateModel> change = this.operations.changeTemplateUri(
-				grandParent, "/ancestor");
+				grandParent, "/ancestor", this.getWoofTemplateChangeContext());
 
 		// Validate the change
 		this.assertChange(change, grandParent, "Change Template URI", true);

@@ -27,7 +27,6 @@ import javax.sql.DataSource;
 
 import net.officefloor.compile.section.SectionType;
 import net.officefloor.model.change.Change;
-import net.officefloor.model.change.Conflict;
 import net.officefloor.plugin.web.http.template.section.HttpTemplateSectionSource;
 
 /**
@@ -45,7 +44,7 @@ public class RefactorTemplateTest extends AbstractWoofChangesTestCase {
 	/**
 	 * {@link WoofTemplateOutputModel} name mapping.
 	 */
-	private Map<String, String> templateOutputNameMapping = new HashMap<String, String>();;
+	private Map<String, String> templateOutputNameMapping = new HashMap<String, String>();
 
 	/**
 	 * Initiate.
@@ -65,17 +64,7 @@ public class RefactorTemplateTest extends AbstractWoofChangesTestCase {
 	 */
 	public void testNoChange() {
 
-		// Record GWT changes
-		this.recordGwtModulePath("net/example/template.gwt.xml");
-		Change<?> gwtUpdateChange = this.recordGwtUpdate("template",
-				"net.example.client.ExampleGwtEntryPoint",
-				"net/example/template.gwt.xml");
-		this.recordReturn(gwtUpdateChange, gwtUpdateChange.getConflicts(),
-				new Conflict[0]);
-		gwtUpdateChange.apply();
-		gwtUpdateChange.revert();
-		gwtUpdateChange.apply();
-		gwtUpdateChange.revert();
+		final String TEMPLATE_URI = "template";
 
 		// Create the section type
 		SectionType section = this
@@ -109,6 +98,28 @@ public class RefactorTemplateTest extends AbstractWoofChangesTestCase {
 		assertEquals("Incorrect super template", "TEMPLATE_PARENT",
 				superTemplate.getWoofTemplateName());
 
+		// Register the extension test details
+		Change<?> extensionChange = this.createMock(Change.class);
+		MockChangeWoofTemplateExtensionSource.reset(extensionChange,
+				TEMPLATE_URI, new String[] { "ONE", "A", "TWO", "B" },
+				TEMPLATE_URI, new String[] { "ONE", "A", "TWO", "B" },
+				this.getWoofTemplateChangeContext());
+
+		// Record changing
+		extensionChange.apply();
+
+		// Create the extensions
+		WoofTemplateExtension[] extensions = new WoofTemplateExtension[] {
+				new WoofTemplateExtensionImpl(
+						MockNoChangeWoofTemplateExtensionSource.class.getName(),
+						new WoofTemplateExtensionPropertyImpl("name", "value")),
+				new WoofTemplateExtensionImpl(
+						MockChangeWoofTemplateExtensionSource.class.getName()),
+				new WoofTemplateExtensionImpl(
+						MockNoChangeWoofTemplateExtensionSource.class.getName(),
+						new WoofTemplateExtensionPropertyImpl("ONE", "A"),
+						new WoofTemplateExtensionPropertyImpl("TWO", "B")) };
+
 		// Test
 		this.replayMockObjects();
 
@@ -117,14 +128,12 @@ public class RefactorTemplateTest extends AbstractWoofChangesTestCase {
 		secureLinks.put("LINK_1", Boolean.TRUE);
 		secureLinks.put("LINK_2", Boolean.FALSE);
 		Change<WoofTemplateModel> change = this.operations.refactorTemplate(
-				this.template, "template", "example/Template.html",
+				this.template, TEMPLATE_URI, "example/Template.html",
 				"net.example.LogicClass", section, superTemplate,
 				new HashSet<String>(Arrays.asList("OUTPUT_INHERIT")), true,
 				secureLinks, new String[] { "POST", "PUT", "OTHER" }, true,
-				"net.example.client.ExampleGwtEntryPoint", new String[] {
-						"net.example.GwtServiceAsync",
-						"net.example.GwtAnotherAsync" }, true, "manualPublish",
-				this.templateOutputNameMapping);
+				extensions, this.templateOutputNameMapping,
+				this.getWoofTemplateChangeContext());
 
 		// Validate change
 		this.assertChange(change, null, "Refactor Template", true);
@@ -138,17 +147,7 @@ public class RefactorTemplateTest extends AbstractWoofChangesTestCase {
 	 */
 	public void testChange() {
 
-		// Record GWT changes
-		this.recordGwtModulePath("net/example/change.gwt.xml");
-		Change<?> gwtUpdateChange = this.recordGwtUpdate("change",
-				"net.example.client.ExampleGwtEntryPoint",
-				"net/example/template.gwt.xml");
-		this.recordReturn(gwtUpdateChange, gwtUpdateChange.getConflicts(),
-				new Conflict[0]);
-		gwtUpdateChange.apply();
-		gwtUpdateChange.revert();
-		gwtUpdateChange.apply();
-		gwtUpdateChange.revert();
+		final String TEMPLATE_URI = "change";
 
 		// Create the section type
 		SectionType section = this
@@ -178,6 +177,25 @@ public class RefactorTemplateTest extends AbstractWoofChangesTestCase {
 		assertEquals("Incorrect super template", "TEMPLATE_LINK",
 				superTemplate.getWoofTemplateName());
 
+		// Register the extension test details
+		Change<?> extensionChange = this.createMock(Change.class);
+		MockChangeWoofTemplateExtensionSource.reset(extensionChange, null,
+				null, TEMPLATE_URI, new String[] { "ONE", "A", "TWO", "B" },
+				this.getWoofTemplateChangeContext());
+
+		// Create the extensions
+		WoofTemplateExtension[] extensions = new WoofTemplateExtension[] {
+				new WoofTemplateExtensionImpl(
+						MockChangeWoofTemplateExtensionSource.class.getName(),
+						new WoofTemplateExtensionPropertyImpl("newName",
+								"newValue")),
+				new WoofTemplateExtensionImpl(
+						MockNoChangeWoofTemplateExtensionSource.class.getName(),
+						new WoofTemplateExtensionPropertyImpl("change", "first")) };
+
+		// Record extension change
+		extensionChange.apply();
+
 		// Test
 		this.replayMockObjects();
 
@@ -186,13 +204,12 @@ public class RefactorTemplateTest extends AbstractWoofChangesTestCase {
 		secureLinks.put("LINK_2", Boolean.TRUE);
 		secureLinks.put("LINK_3", Boolean.FALSE);
 		Change<WoofTemplateModel> change = this.operations.refactorTemplate(
-				this.template, "change", "example/Change.html",
+				this.template, TEMPLATE_URI, "example/Change.html",
 				"net.example.ChangeClass", section, superTemplate,
 				new HashSet<String>(Arrays.asList("OUTPUT_INHERIT")), false,
-				secureLinks, new String[] { "CHANGE" }, false,
-				"net.example.client.ExampleGwtEntryPoint",
-				new String[] { "net.example.GwtChangeAsync" }, true,
-				"manualChange", this.templateOutputNameMapping);
+				secureLinks, new String[] { "CHANGE" }, false, extensions,
+				this.templateOutputNameMapping,
+				this.getWoofTemplateChangeContext());
 
 		// Validate change
 		this.assertChange(change, null, "Refactor Template", true);
@@ -207,10 +224,7 @@ public class RefactorTemplateTest extends AbstractWoofChangesTestCase {
 	 */
 	public void testRemoveDetails() {
 
-		/*
-		 * Remove Woof configuration but leave GWT configuration (i.e. no GWT
-		 * changes).
-		 */
+		final String TEMPLATE_URI = "remove";
 
 		// Create the section type
 		SectionType section = this
@@ -222,14 +236,23 @@ public class RefactorTemplateTest extends AbstractWoofChangesTestCase {
 					}
 				});
 
+		// Register the extension to handle remove
+		Change<?> extensionChange = this.createMock(Change.class);
+		MockChangeWoofTemplateExtensionSource.reset(extensionChange,
+				TEMPLATE_URI, new String[] { "ONE", "A", "TWO", "B" }, null,
+				null, this.getWoofTemplateChangeContext());
+
+		// Record extension change
+		extensionChange.apply();
+
 		// Test
 		this.replayMockObjects();
 
 		// Refactor the template removing outputs and extensions
 		Change<WoofTemplateModel> change = this.operations.refactorTemplate(
-				this.template, "remove", "example/Remove.html", null, section,
-				null, null, false, null, null, false, null, null, false, null,
-				null);
+				this.template, TEMPLATE_URI, "example/Remove.html", null,
+				section, null, null, false, null, null, false, null, null,
+				this.getWoofTemplateChangeContext());
 
 		// Validate change
 		this.assertChange(change, null, "Refactor Template", true);
@@ -243,17 +266,8 @@ public class RefactorTemplateTest extends AbstractWoofChangesTestCase {
 	 * {@link WoofTemplateExtensionModel} instances.
 	 */
 	public void testAddDetails() {
-
-		// Record GWT changes
-		this.recordGwtModulePath("net/example/add.gwt.xml");
-		Change<?> gwtUpdateChange = this.recordGwtUpdate("add",
-				"net.example.client.AddGwtEntryPoint", null);
-		this.recordReturn(gwtUpdateChange, gwtUpdateChange.getConflicts(),
-				new Conflict[0]);
-		gwtUpdateChange.apply();
-		gwtUpdateChange.revert();
-		gwtUpdateChange.apply();
-		gwtUpdateChange.revert();
+		
+		final String TEMPLATE_URI = "add";
 
 		// Create the section type
 		SectionType section = this
@@ -279,6 +293,28 @@ public class RefactorTemplateTest extends AbstractWoofChangesTestCase {
 		assertEquals("Incorrect super template", "TEMPLATE_PARENT",
 				superTemplate.getWoofTemplateName());
 
+		// Register the extension test details
+		Change<?> extensionChange = this.createMock(Change.class);
+		MockChangeWoofTemplateExtensionSource.reset(extensionChange, null,
+				null, TEMPLATE_URI, new String[] { "ONE", "A", "TWO", "B" },
+				this.getWoofTemplateChangeContext());
+
+		// Create the extensions
+		WoofTemplateExtension[] extensions = new WoofTemplateExtension[] {
+				new WoofTemplateExtensionImpl(
+						MockNoChangeWoofTemplateExtensionSource.class.getName(),
+						new WoofTemplateExtensionPropertyImpl("name", "value")),
+				new WoofTemplateExtensionImpl(
+						MockNoChangeWoofTemplateExtensionSource.class.getName()),
+				new WoofTemplateExtensionImpl(
+						MockChangeWoofTemplateExtensionSource.class.getName(),
+						new WoofTemplateExtensionPropertyImpl("ONE", "A"),
+						new WoofTemplateExtensionPropertyImpl("TWO", "B")) };
+
+		// Record changing
+		MockChangeWoofTemplateExtensionSource.recordAssertChange(
+				extensionChange, this);
+
 		// Test
 		this.replayMockObjects();
 
@@ -287,13 +323,12 @@ public class RefactorTemplateTest extends AbstractWoofChangesTestCase {
 		secureLinks.put("LINK_1", Boolean.TRUE);
 		secureLinks.put("LINK_2", Boolean.FALSE);
 		Change<WoofTemplateModel> change = this.operations.refactorTemplate(
-				this.template, "add", "example/Add.html",
+				this.template, TEMPLATE_URI, "example/Add.html",
 				"net.example.AddClass", section, superTemplate,
 				new HashSet<String>(Arrays.asList("OUTPUT_INHERIT")), true,
 				secureLinks, new String[] { "POST", "OTHER" }, true,
-				"net.example.client.AddGwtEntryPoint",
-				new String[] { "net.example.GwtAddAsync" }, true, "manualAdd",
-				this.templateOutputNameMapping);
+				extensions, this.templateOutputNameMapping,
+				this.getWoofTemplateChangeContext());
 
 		// Validate change
 		this.assertChange(change, null, "Refactor Template", true);
