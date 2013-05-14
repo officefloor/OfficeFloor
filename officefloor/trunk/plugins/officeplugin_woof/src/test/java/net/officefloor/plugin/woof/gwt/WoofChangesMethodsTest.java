@@ -15,13 +15,17 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.model.woof;
+package net.officefloor.plugin.woof.gwt;
 
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.model.impl.repository.ModelRepositoryImpl;
 import net.officefloor.model.impl.repository.classloader.ClassLoaderConfigurationContext;
 import net.officefloor.model.repository.ConfigurationContext;
 import net.officefloor.model.repository.ConfigurationItem;
+import net.officefloor.model.woof.WoofChangesImpl;
+import net.officefloor.model.woof.WoofModel;
+import net.officefloor.model.woof.WoofRepositoryImpl;
+import net.officefloor.model.woof.WoofTemplateModel;
 import net.officefloor.plugin.gwt.module.GwtChanges;
 import net.officefloor.plugin.gwt.module.GwtChangesImpl;
 import net.officefloor.plugin.gwt.module.GwtModuleRepositoryImpl;
@@ -34,9 +38,9 @@ import net.officefloor.plugin.gwt.module.GwtModuleRepositoryImpl;
 public class WoofChangesMethodsTest extends OfficeFrameTestCase {
 
 	/**
-	 * {@link WoofChanges}.
+	 * {@link GwtChanges}.
 	 */
-	private WoofChanges changes;
+	private GwtChanges changes;
 
 	/**
 	 * {@link WoofTemplateModel}.
@@ -51,10 +55,9 @@ public class WoofChangesMethodsTest extends OfficeFrameTestCase {
 				.getContextClassLoader();
 		ClassLoaderConfigurationContext configurationContext = new ClassLoaderConfigurationContext(
 				classLoader);
-		GwtChanges gwtChanges = new GwtChangesImpl(new GwtModuleRepositoryImpl(
+		this.changes = new GwtChangesImpl(new GwtModuleRepositoryImpl(
 				new ModelRepositoryImpl(), classLoader, null),
 				configurationContext, null);
-		this.changes = new WoofChangesImpl(new WoofModel(), gwtChanges);
 
 		// Obtain the configuration
 		final String applicationWoofPath = this.getClass().getPackage()
@@ -80,7 +83,8 @@ public class WoofChangesMethodsTest extends OfficeFrameTestCase {
 	public void testGwtEntryPointClassName() {
 		assertEquals("Incorrect GWT EntryPoint class name",
 				"net.example.client.ExampleGwtEntryPoint",
-				this.changes.getGwtEntryPointClassName(this.template));
+				GwtWoofTemplateExtensionSource.getGwtEntryPointClassName(
+						this.template, this.changes));
 	}
 
 	/**
@@ -89,7 +93,7 @@ public class WoofChangesMethodsTest extends OfficeFrameTestCase {
 	public void testGwtAsyncServiceInterfaceNames() {
 		String[] expected = new String[] { "net.example.AsyncInterface",
 				"net.example.AnotherAsyncInterface" };
-		String[] actual = this.changes
+		String[] actual = GwtWoofTemplateExtensionSource
 				.getGwtAsyncServiceInterfaceNames(this.template);
 		assertEquals("Incorrect number of interfaces", expected.length,
 				actual.length);
@@ -104,7 +108,7 @@ public class WoofChangesMethodsTest extends OfficeFrameTestCase {
 	 */
 	public void testCometEnabled() {
 		assertTrue("Comet should be enabled",
-				this.changes.isCometEnabled(this.template));
+				GwtWoofTemplateExtensionSource.isCometEnabled(this.template));
 	}
 
 	/**
@@ -113,7 +117,8 @@ public class WoofChangesMethodsTest extends OfficeFrameTestCase {
 	public void testCometManualPublishMethodName() {
 		assertEquals("Incorrect comet manual publish method name",
 				"manualPublish",
-				this.changes.getCometManualPublishMethodName(this.template));
+				GwtWoofTemplateExtensionSource
+						.getCometManualPublishMethodName(this.template));
 	}
 
 }

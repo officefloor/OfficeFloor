@@ -18,25 +18,23 @@
 package net.officefloor.plugin.woof.json;
 
 import net.officefloor.plugin.json.web.http.section.JsonHttpTemplateSectionExtension;
-import net.officefloor.plugin.woof.WoofTemplateExtensionService;
-import net.officefloor.plugin.woof.WoofTemplateExtensionServiceContext;
+import net.officefloor.plugin.woof.template.WoofTemplateExtensionSource;
+import net.officefloor.plugin.woof.template.WoofTemplateExtensionSourceContext;
+import net.officefloor.plugin.woof.template.WoofTemplateExtensionSourceService;
+import net.officefloor.plugin.woof.template.impl.AbstractWoofTemplateExtensionSource;
 
 /**
- * {@link WoofTemplateExtensionService} for JSON.
+ * {@link WoofTemplateExtensionSource} for JSON.
  * 
  * @author Daniel Sagenschneider
  */
-public class JsonWoofTemplateExtensionService implements
-		WoofTemplateExtensionService {
+public class JsonWoofTemplateExtensionSource extends
+		AbstractWoofTemplateExtensionSource implements
+		WoofTemplateExtensionSourceService<WoofTemplateExtensionSource> {
 
 	/*
-	 * ================= WoofTemplateExtensionService ===================
+	 * ============= WoofTemplateExtensionSourceService ================
 	 */
-
-	@Override
-	public String getTemplateExtensionAlias() {
-		return "JSON";
-	}
 
 	@Override
 	public boolean isImplicitExtension() {
@@ -44,7 +42,21 @@ public class JsonWoofTemplateExtensionService implements
 	}
 
 	@Override
-	public void extendTemplate(WoofTemplateExtensionServiceContext context)
+	public Class<WoofTemplateExtensionSource> getWoofTemplateExtensionSourceClass() {
+		return WoofTemplateExtensionSource.class;
+	}
+
+	/*
+	 * ================= WoofTemplateExtensionSource ===================
+	 */
+
+	@Override
+	protected void loadSpecification(SpecificationContext context) {
+		// No properties required
+	}
+
+	@Override
+	public void extendTemplate(WoofTemplateExtensionSourceContext context)
 			throws Exception {
 		JsonHttpTemplateSectionExtension.extendTemplate(context.getTemplate(),
 				context.getWebApplication());

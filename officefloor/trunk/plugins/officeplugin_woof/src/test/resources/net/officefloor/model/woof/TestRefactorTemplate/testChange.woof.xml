@@ -16,12 +16,13 @@
 			<link name="LINK_2" secure="true" />
 			<link name="LINK_3" secure="false" />
 			<redirect method="CHANGE" />
-			<extension class="COMET">
-				<property name="manual.publish.method.name" value="manualChange" />
+			<extension
+				class="net.officefloor.model.woof.MockChangeWoofTemplateExtensionSource">
+				<property name="newName" value="newValue" />
 			</extension>
-			<extension class="GWT">
-				<property name="gwt.module.path" value="net/example/change.gwt.xml" />
-				<property name="gwt.async.service.interfaces" value="net.example.GwtChangeAsync" />
+			<extension
+				class="net.officefloor.model.woof.MockNoChangeWoofTemplateExtensionSource">
+				<property name="change" value="first" />
 			</extension>
 		</template>
 		<template name="TEMPLATE_LINK" path="example/Link.html" />

@@ -40,8 +40,8 @@ public class RemoveConnectedTest extends AbstractWoofChangesTestCase {
 		WoofTemplateModel template = this.model.getWoofTemplates().get(0);
 
 		// Remove the template
-		Change<WoofTemplateModel> change = this.operations
-				.removeTemplate(template);
+		Change<WoofTemplateModel> change = this.operations.removeTemplate(
+				template, this.getWoofTemplateChangeContext());
 		this.assertChange(change, template, "Remove template TEMPLATE", true);
 	}
 

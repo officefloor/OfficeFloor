@@ -31,12 +31,22 @@ public class RemoveUnconnectedTest extends AbstractWoofChangesTestCase {
 	 */
 	public void testRemoveTemplate() {
 
+		// Register the extension test details
+		Change<?> extensionChange = this.createMock(Change.class);
+		MockChangeWoofTemplateExtensionSource.reset(extensionChange,
+				"example/Template.ofp",
+				new String[] { "ONE", "A", "TWO", "B" }, null, null,
+				this.getWoofTemplateChangeContext());
+
+		// Record changing
+		extensionChange.apply();
+
 		// Obtain the template to remove
 		WoofTemplateModel template = this.model.getWoofTemplates().get(0);
 
 		// Remove the template
-		Change<WoofTemplateModel> change = this.operations
-				.removeTemplate(template);
+		Change<WoofTemplateModel> change = this.operations.removeTemplate(
+				template, this.getWoofTemplateChangeContext());
 		this.assertChange(change, template, "Remove template TEMPLATE", true);
 	}
 

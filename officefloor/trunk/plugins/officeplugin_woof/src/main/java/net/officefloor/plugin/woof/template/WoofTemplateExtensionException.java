@@ -15,32 +15,38 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.plugin.woof;
+package net.officefloor.plugin.woof.template;
 
-import net.officefloor.frame.spi.source.SourceContext;
-import net.officefloor.plugin.web.http.application.HttpTemplateAutoWireSection;
-import net.officefloor.plugin.web.http.application.WebAutoWireApplication;
+import net.officefloor.plugin.web.http.application.HttpTemplateAutoWireSectionExtension;
 
 /**
- * Context for the {@link WoofTemplateExtensionService}.
+ * Flags that the {@link HttpTemplateAutoWireSectionExtension} is unknown or
+ * unable to be obtained.
  * 
  * @author Daniel Sagenschneider
  */
-public interface WoofTemplateExtensionServiceContext extends SourceContext {
+public class WoofTemplateExtensionException extends Exception {
 
 	/**
-	 * Obtains the {@link HttpTemplateAutoWireSection} being extended.
+	 * Initiate.
 	 * 
-	 * @return {@link HttpTemplateAutoWireSection} being extended.
+	 * @param message
+	 *            Reason.
+	 * @param cause
+	 *            Cause.
 	 */
-	HttpTemplateAutoWireSection getTemplate();
+	public WoofTemplateExtensionException(String message, Throwable cause) {
+		super(message, cause);
+	}
 
 	/**
-	 * Obtains the {@link WebAutoWireApplication} that the
-	 * {@link HttpTemplateAutoWireSection} has been added.
+	 * Initiate.
 	 * 
-	 * @return {@link WebAutoWireApplication}.
+	 * @param message
+	 *            Reason.
 	 */
-	WebAutoWireApplication getWebApplication();
+	public WoofTemplateExtensionException(String message) {
+		super(message);
+	}
 
 }

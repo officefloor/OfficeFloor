@@ -15,21 +15,93 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.model.woof;
+package net.officefloor.plugin.woof.gwt;
+
+import org.easymock.AbstractMatcher;
+import org.easymock.internal.AlwaysMatcher;
 
 import net.officefloor.model.change.Change;
 import net.officefloor.model.change.Conflict;
 import net.officefloor.model.gwt.module.GwtModuleModel;
+import net.officefloor.model.woof.AbstractWoofChangesTestCase;
+import net.officefloor.model.woof.WoofTemplateModel;
 import net.officefloor.plugin.gwt.module.GwtChanges;
-import net.officefloor.plugin.woof.gwt.GwtWoofTemplateExtensionService;
+import net.officefloor.plugin.woof.gwt.GwtWoofTemplateExtensionSource;
 
 /**
  * Validate changing the template URI with
- * {@link GwtWoofTemplateExtensionService}.
+ * {@link GwtWoofTemplateExtensionSource}.
  * 
  * @author Daniel Sagenschneider
  */
 public class ChangeTemplateUriWithGwtTest extends AbstractWoofChangesTestCase {
+
+	/**
+	 * Mock {@link GwtChanges}.
+	 */
+	private final GwtChanges gwtChanges = this.createMock(GwtChanges.class);
+
+	/**
+	 * Obtains the {@link GwtChanges}.
+	 * 
+	 * @return {@link GwtChanges}.
+	 */
+	protected GwtChanges getGwtChanges() {
+		return this.gwtChanges;
+	}
+
+	/**
+	 * Records the GWT Module path.
+	 * 
+	 * @param gwtModulePath
+	 *            GWT Module path.
+	 */
+	protected void recordGwtModulePath(String gwtModulePath) {
+		GwtChanges changes = this.getGwtChanges();
+		this.recordReturn(changes, changes.createGwtModulePath(null),
+				gwtModulePath, new AlwaysMatcher());
+	}
+
+	/**
+	 * Record GWT update on the {@link GwtChanges}.
+	 * 
+	 * @param templateUri
+	 *            Expected template URI.
+	 * @param entryPointClassName
+	 *            Expected EntryPoint class name.
+	 * @param existingGwtModulePath
+	 *            Expected existing GWT Module path.
+	 * @return {@link Change}.
+	 */
+	@SuppressWarnings("unchecked")
+	protected Change<GwtModuleModel> recordGwtUpdate(final String templateUri,
+			final String entryPointClassName, final String existingGwtModulePath) {
+
+		// Create the change
+		final Change<GwtModuleModel> change = this.createMock(Change.class);
+
+		// Record updating GWT Module
+		GwtChanges changes = this.getGwtChanges();
+		this.recordReturn(changes,
+				changes.updateGwtModule(null, existingGwtModulePath), change,
+				new AbstractMatcher() {
+					@Override
+					public boolean matches(Object[] expected, Object[] actual) {
+						GwtModuleModel module = (GwtModuleModel) actual[0];
+						assertEquals("Incorrect rename-to", templateUri,
+								module.getRenameTo());
+						assertEquals("Incorrect EntryPoint class name",
+								entryPointClassName,
+								module.getEntryPointClassName());
+						assertEquals("Incorrect existing GWT Module Path",
+								existingGwtModulePath, actual[1]);
+						return true;
+					}
+				});
+
+		// Return the change
+		return change;
+	}
 
 	/**
 	 * {@link WoofTemplateModel}.
@@ -73,7 +145,7 @@ public class ChangeTemplateUriWithGwtTest extends AbstractWoofChangesTestCase {
 
 		// Change the template URI
 		Change<WoofTemplateModel> change = this.operations.changeTemplateUri(
-				this.template, "change");
+				this.template, "change", this.getWoofTemplateChangeContext());
 
 		// Validate the change
 		this.assertChange(change, this.template, "Change Template URI", true);

@@ -22,6 +22,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -34,23 +35,22 @@ import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.section.SectionInputType;
 import net.officefloor.compile.section.SectionOutputType;
 import net.officefloor.compile.section.SectionType;
+import net.officefloor.frame.impl.construct.source.SourcePropertiesImpl;
+import net.officefloor.frame.spi.source.SourceContext;
 import net.officefloor.model.ConnectionModel;
 import net.officefloor.model.Model;
 import net.officefloor.model.change.Change;
-import net.officefloor.model.gwt.module.GwtModuleModel;
 import net.officefloor.model.impl.change.AbstractChange;
 import net.officefloor.model.impl.change.AggregateChange;
 import net.officefloor.model.impl.change.NoChange;
-import net.officefloor.plugin.comet.web.http.section.CometHttpTemplateSectionExtension;
-import net.officefloor.plugin.gwt.module.GwtChanges;
-import net.officefloor.plugin.gwt.web.http.section.GwtHttpTemplateSectionExtension;
+import net.officefloor.model.repository.ConfigurationContext;
 import net.officefloor.plugin.web.http.security.HttpSecuritySectionSource;
 import net.officefloor.plugin.web.http.security.type.HttpSecurityFlowType;
 import net.officefloor.plugin.web.http.security.type.HttpSecurityType;
 import net.officefloor.plugin.web.http.template.section.HttpTemplateSectionSource;
 import net.officefloor.plugin.woof.WoofOfficeFloorSource;
-import net.officefloor.plugin.woof.comet.CometWoofTemplateExtensionService;
-import net.officefloor.plugin.woof.gwt.GwtWoofTemplateExtensionService;
+import net.officefloor.plugin.woof.template.WoofTemplateExtensionChangeContext;
+import net.officefloor.plugin.woof.template.WoofTemplateExtensionSource;
 
 /**
  * {@link Change} for the {@link WoofModel}.
@@ -86,16 +86,6 @@ public class WoofChangesImpl implements WoofChanges {
 		@Override
 		public String extractName(WoofTemplateRedirectModel model) {
 			return model.getWoofTemplateRedirectHttpMethod();
-		}
-	};
-
-	/**
-	 * {@link WoofTemplateExtensionModel} {@link NameExtractor}.
-	 */
-	private static final NameExtractor<WoofTemplateExtensionModel> TEMPLATE_EXTENSION_NAME_EXTRACTOR = new NameExtractor<WoofTemplateExtensionModel>() {
-		@Override
-		public String extractName(WoofTemplateExtensionModel model) {
-			return model.getExtensionClassName();
 		}
 	};
 
@@ -180,135 +170,6 @@ public class WoofChangesImpl implements WoofChanges {
 	};
 
 	/**
-	 * Obtains the {@link #PROPERTY_GWT_MODULE_PATH} {@link PropertyModel}.
-	 * 
-	 * @param extension
-	 *            GWT {@link WoofTemplateExtensionModel}.
-	 * @return {@link PropertyModel} or <code>null</code>.
-	 */
-	private static PropertyModel getGwtModulePathProperty(
-			WoofTemplateExtensionModel gwtExtension) {
-		return getTemplateExtensionProperty(gwtExtension,
-				PROPERTY_GWT_MODULE_PATH);
-	}
-
-	/**
-	 * Obtains the GWT Async Interfaces {@link PropertyModel}.
-	 * 
-	 * @param gwtExtension
-	 *            GWT {@link WoofTemplateExtensionModel}.
-	 * @return {@link PropertyModel} or <code>null</code>.
-	 */
-	private static PropertyModel getGwtAsyncInterfacesProperty(
-			WoofTemplateExtensionModel gwtExtension) {
-		return getTemplateExtensionProperty(
-				gwtExtension,
-				GwtHttpTemplateSectionExtension.PROPERTY_GWT_ASYNC_SERVICE_INTERFACES);
-	}
-
-	/**
-	 * Obtains the Comet manual publish method {@link PropertyModel}.
-	 * 
-	 * @param cometExtension
-	 *            Comet {@link WoofTemplateExtensionModel}.
-	 * @return {@link PropertyModel} or <code>null</code>.
-	 */
-	private static PropertyModel getCometManualPublishMethodProperty(
-			WoofTemplateExtensionModel cometExtension) {
-		return getTemplateExtensionProperty(
-				cometExtension,
-				CometHttpTemplateSectionExtension.PROPERTY_MANUAL_PUBLISH_METHOD_NAME);
-	}
-
-	/**
-	 * Obtains the value for the {@link PropertyModel}.
-	 * 
-	 * @param property
-	 *            {@link PropertyModel}. May be <code>null</code>.
-	 * @return {@link PropertyModel} value or <code>null</code>.
-	 */
-	private static String getPropertyValue(PropertyModel property) {
-		return (property == null ? null : property.getValue());
-	}
-
-	/**
-	 * Obtains the {@link PropertyModel}.
-	 * 
-	 * @param extension
-	 *            {@link WoofTemplateExtensionModel}.
-	 * @param propertyName
-	 *            Name of {@link PropertyModel}.
-	 * @return {@link PropertyModel} or <code>null</code>.
-	 */
-	private static PropertyModel getTemplateExtensionProperty(
-			WoofTemplateExtensionModel extension, String propertyName) {
-
-		// Must have extension
-		if (extension == null) {
-			return null;
-		}
-
-		// Obtain the extension property
-		for (PropertyModel property : extension.getProperties()) {
-			if (propertyName.equals(property.getName())) {
-				return property;
-			}
-		}
-
-		// As here, no property
-		return null;
-	}
-
-	/**
-	 * Obtains the GWT template extension.
-	 * 
-	 * @param template
-	 *            {@link WoofTemplateModel}.
-	 * @return GWT {@link WoofTemplateExtensionModel} or <code>null</code>.
-	 */
-	private static WoofTemplateExtensionModel getGwtTemplateExtension(
-			WoofTemplateModel template) {
-		return getTemplateExtension(template,
-				GwtWoofTemplateExtensionService.EXTENSION_ALIAS);
-	}
-
-	/**
-	 * Obtains the Comet template extension.
-	 * 
-	 * @param template
-	 *            {@link WoofTemplateModel}.
-	 * @return Comet {@link WoofTemplateExtensionModel} or <code>null</code>.
-	 */
-	private static WoofTemplateExtensionModel getCometTemplateExtension(
-			WoofTemplateModel template) {
-		return getTemplateExtension(template,
-				CometWoofTemplateExtensionService.EXTENSION_ALIAS);
-	}
-
-	/**
-	 * Obtains the {@link WoofTemplateExtensionModel}.
-	 * 
-	 * @param template
-	 *            {@link WoofTemplateModel}.
-	 * @param extensionClassName
-	 *            {@link WoofTemplateExtensionModel} class name.
-	 * @return {@link WoofTemplateExtensionModel} or <code>null</code>.
-	 */
-	private static WoofTemplateExtensionModel getTemplateExtension(
-			WoofTemplateModel template, String extensionClassName) {
-
-		// Search extension for appropriate extension
-		for (WoofTemplateExtensionModel extension : template.getExtensions()) {
-			if (extensionClassName.equals(extension.getExtensionClassName())) {
-				return extension;
-			}
-		}
-
-		// As here, no extension
-		return null;
-	}
-
-	/**
 	 * Sorts the models by name.
 	 * 
 	 * @param models
@@ -367,9 +228,6 @@ public class WoofChangesImpl implements WoofChanges {
 
 		// Sort the redirects
 		sortByName(template.getRedirects(), TEMPLATE_REDIRECT_NAME_EXTRACTOR);
-
-		// Sort the extensions
-		sortByName(template.getExtensions(), TEMPLATE_EXTENSION_NAME_EXTRACTOR);
 	}
 
 	/**
@@ -508,33 +366,6 @@ public class WoofChangesImpl implements WoofChanges {
 	}
 
 	/**
-	 * Obtains the property value for GWT Asynchronous Services.
-	 * 
-	 * @param gwtServiceAsyncInterfaceNames
-	 *            Listing of GWT Asynchronous Service Interface names.
-	 * @return Property value for GWT Asynchronous Services.
-	 */
-	private static String getGwtAsyncServicesPropertyValue(
-			String[] gwtServiceAsyncInterfaceNames) {
-
-		// Obtain the property value for the GWT Services
-		StringBuilder propertyValue = new StringBuilder();
-		boolean isFirst = true;
-		if (gwtServiceAsyncInterfaceNames != null) {
-			for (String gstServiceAsyncInterfaceName : gwtServiceAsyncInterfaceNames) {
-				if (!isFirst) {
-					propertyValue.append(",");
-				}
-				isFirst = false;
-				propertyValue.append(gstServiceAsyncInterfaceName);
-			}
-		}
-
-		// Return the property value
-		return propertyValue.toString();
-	}
-
-	/**
 	 * Removes the {@link ConnectionModel}.
 	 * 
 	 * @param connection
@@ -601,26 +432,237 @@ public class WoofChangesImpl implements WoofChanges {
 	}
 
 	/**
+	 * Refactors the {@link WoofTemplateExtensionModel} instances.
+	 * 
+	 * @param existingTemplate
+	 *            Existing {@link WoofTemplateModel}. May be <code>null</code>
+	 *            if adding.
+	 * @param newUri
+	 *            New URI. May be <code>null</code> if removing
+	 *            {@link WoofTemplateModel}.
+	 * @param extensions
+	 *            {@link WoofTemplateExtension} instances to refactor the
+	 *            {@link WoofTemplateModel} to have. May be <code>null</code> to
+	 *            indicate no changes to {@link WoofTemplateExtensionModel}
+	 *            instances for the {@link WoofTemplateModel}.
+	 * @param changeTemplate
+	 *            {@link WoofTemplateModel} to be changed.
+	 * @param sourceContext
+	 *            {@link SourceContext}.
+	 * @param configurationContext
+	 *            {@link ConfigurationContext}.
+	 * @return {@link Change} to refactor the {@link WoofTemplateExtensionModel}
+	 *         instances on the {@link WoofTemplateModel}.
+	 */
+	@SuppressWarnings("unchecked")
+	private static Change<WoofTemplateModel> refactorExtensions(
+			WoofTemplateModel existingTemplate, String newUri,
+			WoofTemplateExtension[] extensions,
+			final WoofTemplateModel changeTemplate,
+			SourceContext sourceContext,
+			ConfigurationContext configurationContext) {
+
+		// Create the list of existing extensions
+		final List<WoofTemplateExtensionModel> existingExtensions = new ArrayList<WoofTemplateExtensionModel>(
+				(existingTemplate == null ? Collections.EMPTY_LIST
+						: existingTemplate.getExtensions()));
+
+		// Create the list of new extensions (loaded later)
+		final List<WoofTemplateExtensionModel> newExtensions = new LinkedList<WoofTemplateExtensionModel>();
+
+		// Create change to refactor extensions
+		Change<WoofTemplateModel> change = new AbstractChange<WoofTemplateModel>(
+				changeTemplate, "Refactor extensions") {
+			@Override
+			public void apply() {
+				changeTemplate.getExtensions().clear();
+				changeTemplate.getExtensions().addAll(newExtensions);
+			}
+
+			@Override
+			public void revert() {
+				changeTemplate.getExtensions().clear();
+				changeTemplate.getExtensions().addAll(existingExtensions);
+			}
+		};
+
+		// Obtain the old URI
+		String oldUri = (existingTemplate == null ? null : existingTemplate
+				.getUri());
+
+		// Load the list of new extensions
+		List<WoofTemplateExtensionModel> availableExtensions = new LinkedList<WoofTemplateExtensionModel>();
+		availableExtensions.addAll(existingExtensions);
+		if (extensions != null) {
+
+			// Refactor to the provided extensions
+			for (WoofTemplateExtension newExtension : extensions) {
+
+				// Construct the extension model
+				WoofTemplateExtensionModel extensionModel = new WoofTemplateExtensionModel();
+				extensionModel.setExtensionClassName(newExtension
+						.getWoofTemplateExtensionSourceClassName());
+				for (WoofTemplateExtensionProperty property : newExtension
+						.getWoofTemplateExtensionProperties()) {
+					extensionModel.addProperty(new PropertyModel(property
+							.getName(), property.getValue()));
+				}
+
+				// Refactor the extension
+				Change<?> extensionChange = refactorExtension(extensionModel,
+						oldUri, newUri, availableExtensions, changeTemplate,
+						sourceContext, configurationContext);
+
+				// Include potential change into aggregate change
+				if (extensionChange != null) {
+					change = new AggregateChange<WoofTemplateModel>(
+							changeTemplate, "Refactor extensions", change,
+							extensionChange);
+				}
+
+				// Add the next extension
+				newExtensions.add(extensionModel);
+			}
+
+		} else {
+			// Refactor existing extensions (likely due to URI change)
+			for (WoofTemplateExtensionModel extensionModel : existingExtensions) {
+
+				// Refactor the extension
+				Change<?> extensionChange = refactorExtension(extensionModel,
+						oldUri, newUri, availableExtensions, changeTemplate,
+						sourceContext, configurationContext);
+
+				// Include potential change into aggregate change
+				if (extensionChange != null) {
+					change = new AggregateChange<WoofTemplateModel>(
+							changeTemplate, "Refactor extensions", change,
+							extensionChange);
+				}
+
+				// Add the next extension
+				newExtensions.add(extensionModel);
+			}
+		}
+
+		// TODO remove available that no longer match extension
+
+		// Return the change
+		return change;
+	}
+
+	/**
+	 * Refactors the {@link WoofTemplateExtension} onto the
+	 * {@link WoofTemplateModel}.
+	 * 
+	 * @param extension
+	 *            {@link WoofTemplateExtensionModel} to refactor.
+	 * @param oldUri
+	 *            Old URI. May be <code>null</code> if adding
+	 *            {@link WoofTemplateExtensionModel}.
+	 * @param newUri
+	 *            New URI. May be <code>null</code> if removing
+	 *            {@link WoofTemplateExtensionModel}.
+	 * @param existingExtensions
+	 *            Existing {@link WoofTemplateExtensionModel} instances. As
+	 *            {@link WoofTemplateExtension} instances are refactored they
+	 *            are removed from this list.
+	 * @param changeTemplate
+	 *            {@link WoofTemplateModel} being changed.
+	 * @param sourceContext
+	 *            {@link SourceContext}.
+	 * @param configurationContext
+	 *            {@link ConfigurationContext}.
+	 * @return {@link Change} to refactor the {@link WoofTemplateExtension}.
+	 */
+	private static Change<?> refactorExtension(
+			WoofTemplateExtensionModel extension, String oldUri, String newUri,
+			List<WoofTemplateExtensionModel> existingExtensions,
+			WoofTemplateModel changeTemplate, SourceContext sourceContext,
+			ConfigurationContext configurationContext) {
+
+		// Obtain the extension source class
+		String extensionSourceClassName = extension.getExtensionClassName();
+
+		// Obtain the first matching available extension
+		WoofTemplateExtensionModel matchingExtension = null;
+		FOUND_EXTENSION: for (Iterator<WoofTemplateExtensionModel> iterator = existingExtensions
+				.iterator(); iterator.hasNext();) {
+			WoofTemplateExtensionModel existingExtension = iterator.next();
+			if (extensionSourceClassName.equals(existingExtension
+					.getExtensionClassName())) {
+				// Found matching extension
+				matchingExtension = existingExtension;
+				iterator.remove(); // remove as matched
+				break FOUND_EXTENSION;
+			}
+		}
+
+		// Construct the old properties
+		SourcePropertiesImpl oldProperties = new SourcePropertiesImpl();
+		if (matchingExtension == null) {
+			// No matching extension, so indicate adding
+			oldUri = null;
+
+		} else {
+			// Load properties for existing extension
+			for (PropertyModel property : matchingExtension.getProperties()) {
+				oldProperties.addProperty(property.getName(),
+						property.getValue());
+			}
+		}
+
+		// Construct the new properties
+		SourcePropertiesImpl newProperties = new SourcePropertiesImpl();
+		for (PropertyModel property : extension.getProperties()) {
+			newProperties.addProperty(property.getName(), property.getValue());
+		}
+
+		// Construct the context
+		WoofTemplateExtensionChangeContext context = new WoofTemplateExtensionChangeContextImpl(
+				true, sourceContext, oldUri, oldProperties, newUri,
+				newProperties, configurationContext);
+
+		// Attempt to create the extension change
+		Change<?> extensionChange = null;
+		try {
+
+			// Construct the source
+			Class<?> extensionSourceClass = sourceContext
+					.loadClass(extensionSourceClassName);
+			WoofTemplateExtensionSource source = (WoofTemplateExtensionSource) extensionSourceClass
+					.newInstance();
+
+			// Create potential change to to refactor extension
+			extensionChange = source.createConfigurationChange(context);
+
+		} catch (Throwable ex) {
+			// Provide conflict indicating failure of extension
+			extensionChange = new NoChange<WoofTemplateModel>(changeTemplate,
+					"Refactor extension " + extensionSourceClassName,
+					"Extension " + extensionSourceClassName + " on template "
+							+ changeTemplate.getUri() + " prevented change as "
+							+ ex.getMessage() + " [" + ex.getClass().getName()
+							+ "]");
+		}
+
+		// Return the extension change
+		return extensionChange;
+	}
+
+	/**
 	 * {@link WoofModel}.
 	 */
 	private final WoofModel model;
-
-	/**
-	 * {@link GwtChanges}.
-	 */
-	private final GwtChanges gwtChanges;
 
 	/**
 	 * Initiate.
 	 * 
 	 * @param model
 	 *            {@link WoofModel} to change.
-	 * @param gwtChanges
-	 *            {@link GwtChanges}.
 	 */
-	public WoofChangesImpl(WoofModel model, GwtChanges gwtChanges) {
+	public WoofChangesImpl(WoofModel model) {
 		this.model = model;
-		this.gwtChanges = gwtChanges;
 	}
 
 	/**
@@ -798,60 +840,13 @@ public class WoofChangesImpl implements WoofChanges {
 	}
 
 	@Override
-	public String getGwtEntryPointClassName(WoofTemplateModel template) {
-
-		// Obtain the GWT module path
-		WoofTemplateExtensionModel gwtExtension = getGwtTemplateExtension(template);
-		PropertyModel gwtModulePathProperty = getGwtModulePathProperty(gwtExtension);
-		String gwtModulePath = getPropertyValue(gwtModulePathProperty);
-		if (gwtModulePath != null) {
-
-			// Obtain the GWT module
-			GwtModuleModel gwtModule = this.gwtChanges
-					.retrieveGwtModule(gwtModulePath);
-			if (gwtModule != null) {
-
-				// Return the EntryPoint class name
-				return gwtModule.getEntryPointClassName();
-			}
-		}
-
-		// As here, no GWT EntryPoint class name
-		return null;
-	}
-
-	@Override
-	public String[] getGwtAsyncServiceInterfaceNames(WoofTemplateModel template) {
-		WoofTemplateExtensionModel gwtExtension = getGwtTemplateExtension(template);
-		PropertyModel gwtAsyncInterfacesProperty = getGwtAsyncInterfacesProperty(gwtExtension);
-		String gwtAsyncInterfaceValue = getPropertyValue(gwtAsyncInterfacesProperty);
-		String[] gwtAsyncServiceInterfaceNames = GwtHttpTemplateSectionExtension
-				.getGwtAsyncServiceInterfaceNames(gwtAsyncInterfaceValue);
-		return gwtAsyncServiceInterfaceNames;
-	}
-
-	@Override
-	public boolean isCometEnabled(WoofTemplateModel template) {
-		WoofTemplateExtensionModel cometExtension = getCometTemplateExtension(template);
-		return (cometExtension != null);
-	}
-
-	@Override
-	public String getCometManualPublishMethodName(WoofTemplateModel template) {
-		WoofTemplateExtensionModel cometExtension = getCometTemplateExtension(template);
-		PropertyModel cometManualPublishMethodProperty = getCometManualPublishMethodProperty(cometExtension);
-		return getPropertyValue(cometManualPublishMethodProperty);
-	}
-
-	@Override
 	public Change<WoofTemplateModel> addTemplate(String uri,
 			String templatePath, String templateLogicClass,
 			SectionType section, WoofTemplateModel superTemplate,
 			boolean isTemplateSecure, Map<String, Boolean> linksSecure,
 			String[] renderRedirectHttpMethods, boolean isContinueRendering,
-			String gwtEntryPointClassName,
-			String[] gwtServiceAsyncInterfaceNames, boolean isEnableComet,
-			String cometManualPublishMethodName) {
+			WoofTemplateExtension[] extensions,
+			WoofTemplateChangeContext context) {
 
 		// Obtain the template name
 		String templateName = getTemplateName(templatePath, uri, null,
@@ -942,67 +937,13 @@ public class WoofChangesImpl implements WoofChanges {
 			}
 		};
 
-		// Determine if have GWT Extension
-		if ((gwtEntryPointClassName != null)
-				&& (gwtEntryPointClassName.trim().length() > 0)) {
-
-			// Add the GWT Extension
-			WoofTemplateExtensionModel gwtExtension = new WoofTemplateExtensionModel(
-					GwtWoofTemplateExtensionService.EXTENSION_ALIAS);
-			template.addExtension(gwtExtension);
-
-			// Create the GWT Module
-			GwtModuleModel module = new GwtModuleModel(uri,
-					gwtEntryPointClassName, null);
-
-			// Include inherits for Comet (if using)
-			if (isEnableComet) {
-				// Extend GWT Module for Comet
-				CometHttpTemplateSectionExtension.extendGwtModule(module);
-			}
-
-			// Add property for the GWT Module path
-			String gwtModulePath = this.gwtChanges.createGwtModulePath(module);
-			gwtExtension.addProperty(new PropertyModel(
-					PROPERTY_GWT_MODULE_PATH, gwtModulePath));
-
-			// Include change for adding GWT Module
-			Change<?> gwtChange = this.gwtChanges.updateGwtModule(module, null);
-
-			// Create aggregate change to include GWT changes
-			change = new AggregateChange<WoofTemplateModel>(change.getTarget(),
-					change.getChangeDescription(), change, gwtChange);
-
-			// Determine if have GWT Services
-			if ((gwtServiceAsyncInterfaceNames != null)
-					&& (gwtServiceAsyncInterfaceNames.length > 0)) {
-
-				// Obtain the property value for the GWT Services
-				String propertyValue = getGwtAsyncServicesPropertyValue(gwtServiceAsyncInterfaceNames);
-
-				// Add the property
-				gwtExtension
-						.addProperty(new PropertyModel(
-								GwtHttpTemplateSectionExtension.PROPERTY_GWT_ASYNC_SERVICE_INTERFACES,
-								propertyValue));
-			}
-		}
-
-		// Determine if extend with Comet functionality
-		if (isEnableComet) {
-
-			// Add the Comet Extension
-			WoofTemplateExtensionModel cometExtension = new WoofTemplateExtensionModel(
-					CometWoofTemplateExtensionService.EXTENSION_ALIAS);
-			template.addExtension(cometExtension);
-
-			// Determine if specify the manual publish method
-			if (cometManualPublishMethodName != null) {
-				cometExtension
-						.addProperty(new PropertyModel(
-								CometHttpTemplateSectionExtension.PROPERTY_MANUAL_PUBLISH_METHOD_NAME,
-								cometManualPublishMethodName));
-			}
+		// Include adding extensions
+		Change<WoofTemplateModel> extensionChange = refactorExtensions(null,
+				uri, extensions, template, context,
+				context.getConfigurationContext());
+		if (extensionChange != null) {
+			change = new AggregateChange<WoofTemplateModel>(template,
+					change.getChangeDescription(), change, extensionChange);
 		}
 
 		// Sort template configuration to ensure deterministic configuration
@@ -1021,10 +962,10 @@ public class WoofChangesImpl implements WoofChanges {
 			final boolean isTemplateSecure,
 			final Map<String, Boolean> linksSecure,
 			final String[] renderRedirectHttpMethods,
-			final boolean isContinueRendering, String gwtEntryPointClassName,
-			String[] gwtServiceAsyncInterfaceNames, boolean isEnableComet,
-			final String cometManualPublishMethodName,
-			Map<String, String> templateOutputNameMapping) {
+			final boolean isContinueRendering,
+			WoofTemplateExtension[] extensions,
+			Map<String, String> templateOutputNameMapping,
+			WoofTemplateChangeContext context) {
 
 		// Obtain the template name after URI change
 		final String newTemplateName = getTemplateName(templatePath, uri,
@@ -1143,246 +1084,12 @@ public class WoofChangesImpl implements WoofChanges {
 		};
 		changes.add(attributeChange);
 
-		// Obtain the GWT extension (and GWT Module Path)
-		WoofTemplateExtensionModel gwtExtension = getGwtTemplateExtension(template);
-		PropertyModel gwtModulePathProperty = getGwtModulePathProperty(gwtExtension);
-		final String existingGwtModulePath = getPropertyValue(gwtModulePathProperty);
-		PropertyModel gwtAsyncInterfacesProperty = getGwtAsyncInterfacesProperty(gwtExtension);
-		final String existingGwtAsyncInterfaces = getPropertyValue(gwtAsyncInterfacesProperty);
-
-		// Create the GWT Module and associated property values
-		GwtModuleModel gwtModule = null;
-		if (gwtEntryPointClassName != null) {
-			// Create the GWT Module and new property values
-			gwtModule = new GwtModuleModel(uri, gwtEntryPointClassName, null);
-			if (isEnableComet) {
-				// Extend potential GWT Module for Comet
-				CometHttpTemplateSectionExtension.extendGwtModule(gwtModule);
-			}
-		}
-		final String newGwtModulePath = (gwtModule == null ? null
-				: this.gwtChanges.createGwtModulePath(gwtModule));
-		final String newGwtAsyncInterfaces = getGwtAsyncServicesPropertyValue(gwtServiceAsyncInterfaceNames);
-
-		// Provide details for GWT Module refactoring
-		boolean isUpdateGwtModule = false;
-		final WoofTemplateExtensionModel finalGwtExtension = gwtExtension;
-		final boolean hasExistingGwtModulePathProperty;
-		final PropertyModel finalGwtModulePathProperty;
-		if (gwtModulePathProperty == null) {
-			// No existing GWT Module Path property
-			hasExistingGwtModulePathProperty = false;
-			finalGwtModulePathProperty = new PropertyModel(
-					PROPERTY_GWT_MODULE_PATH, newGwtModulePath);
-		} else {
-			// Has existing GWT Module Path property
-			hasExistingGwtModulePathProperty = true;
-			finalGwtModulePathProperty = gwtModulePathProperty;
-		}
-		final boolean hasExistingGwtAsyncServicesProperty;
-		final PropertyModel finalGwtAsyncServicesProperty;
-		if (gwtAsyncInterfacesProperty == null) {
-			// No existing GWT Async Services property
-			hasExistingGwtAsyncServicesProperty = false;
-			finalGwtAsyncServicesProperty = new PropertyModel(
-					GwtHttpTemplateSectionExtension.PROPERTY_GWT_ASYNC_SERVICE_INTERFACES,
-					newGwtAsyncInterfaces);
-		} else {
-			// Has existing GWT Async Services property
-			hasExistingGwtAsyncServicesProperty = true;
-			finalGwtAsyncServicesProperty = gwtAsyncInterfacesProperty;
-		}
-
-		// Refactor the GWT extension (either refactoring, adding or removing)
-		boolean isExistingEntryPointClass = (gwtExtension != null);
-		boolean isRefactoringToHaveEntryPointClass = (gwtEntryPointClassName != null)
-				&& (gwtEntryPointClassName.trim().length() > 0);
-		if (isExistingEntryPointClass) {
-			// Existing to refactor or remove
-			if (isRefactoringToHaveEntryPointClass) {
-				// Refactor the GWT extension (and set to update GWT Module)
-				isUpdateGwtModule = true;
-				Change<WoofTemplateExtensionModel> change = new AbstractChange<WoofTemplateExtensionModel>(
-						finalGwtExtension, "Refactor GWT Extension") {
-					@Override
-					public void apply() {
-
-						// Refactor GWT Module Path
-						finalGwtModulePathProperty.setValue(newGwtModulePath);
-						if (!hasExistingGwtModulePathProperty) {
-							finalGwtExtension
-									.addProperty(finalGwtModulePathProperty);
-						}
-
-						// Refactor GWT Async Services
-						finalGwtAsyncServicesProperty
-								.setValue(newGwtAsyncInterfaces);
-						if (!hasExistingGwtAsyncServicesProperty) {
-							finalGwtExtension
-									.addProperty(finalGwtAsyncServicesProperty);
-						}
-					}
-
-					@Override
-					public void revert() {
-
-						// Refactor GWT Module Path
-						finalGwtModulePathProperty
-								.setValue(existingGwtModulePath);
-						if (!hasExistingGwtModulePathProperty) {
-							finalGwtExtension
-									.removeProperty(finalGwtModulePathProperty);
-						}
-
-						// Refactor GWT Async Services
-						finalGwtAsyncServicesProperty
-								.setValue(existingGwtAsyncInterfaces);
-						if (!hasExistingGwtAsyncServicesProperty) {
-							finalGwtExtension
-									.removeProperty(finalGwtAsyncServicesProperty);
-						}
-					}
-				};
-				changes.add(change);
-
-			} else {
-				// Remove the GWT extension
-				Change<WoofTemplateExtensionModel> change = new AbstractChange<WoofTemplateExtensionModel>(
-						finalGwtExtension, "Remove GWT Extension") {
-					@Override
-					public void apply() {
-						template.removeExtension(finalGwtExtension);
-					}
-
-					@Override
-					public void revert() {
-						template.addExtension(finalGwtExtension);
-					}
-				};
-				changes.add(change);
-			}
-
-		} else if (isRefactoringToHaveEntryPointClass) {
-			// Add the GWT extension (and set to update GWT Module)
-			isUpdateGwtModule = true;
-			final WoofTemplateExtensionModel addGwtExtension = new WoofTemplateExtensionModel(
-					GwtWoofTemplateExtensionService.EXTENSION_ALIAS);
-			addGwtExtension.addProperty(finalGwtModulePathProperty);
-			addGwtExtension.addProperty(finalGwtAsyncServicesProperty);
-			Change<WoofTemplateExtensionModel> change = new AbstractChange<WoofTemplateExtensionModel>(
-					addGwtExtension, "Add GWT Extension") {
-				@Override
-				public void apply() {
-					template.addExtension(addGwtExtension);
-				}
-
-				@Override
-				public void revert() {
-					template.removeExtension(addGwtExtension);
-				}
-			};
-			changes.add(change);
-		}
-
-		// Add change to refactor the GWT Module (if required)
-		if (isUpdateGwtModule) {
-			changes.add(this.gwtChanges.updateGwtModule(gwtModule,
-					existingGwtModulePath));
-		}
-
-		// Obtain the Comet extension (and manual publish property)
-		final WoofTemplateExtensionModel cometExtension = getCometTemplateExtension(template);
-		PropertyModel cometManualPublishProperty = getCometManualPublishMethodProperty(cometExtension);
-		final String existingCometManualPublishMethodName = getPropertyValue(cometManualPublishProperty);
-
-		// Provide details for Comet refactoring
-		final boolean hasExistingCometManualPathPathProperty;
-		final PropertyModel finalCometManualPathProperty;
-		if (cometManualPublishProperty == null) {
-			// No existing Comet manual publish property
-			hasExistingCometManualPathPathProperty = false;
-			finalCometManualPathProperty = new PropertyModel(
-					CometHttpTemplateSectionExtension.PROPERTY_MANUAL_PUBLISH_METHOD_NAME,
-					cometManualPublishMethodName);
-		} else {
-			// Has existing Comet manual publish property
-			hasExistingCometManualPathPathProperty = true;
-			finalCometManualPathProperty = cometManualPublishProperty;
-		}
-
-		// Refactor the Comet extension (either refactoring, adding or removing)
-		boolean isExistingCometExtension = (cometExtension != null);
-		if (isExistingCometExtension) {
-			// Existing to refactor or remove
-			if (isEnableComet) {
-				// Refactor Comet extension
-				Change<WoofTemplateExtensionModel> change = new AbstractChange<WoofTemplateExtensionModel>(
-						cometExtension, "Refactor Comet Extension") {
-					@Override
-					public void apply() {
-						// Refactor manual publish
-						finalCometManualPathProperty
-								.setValue(cometManualPublishMethodName);
-						if (!hasExistingCometManualPathPathProperty) {
-							cometExtension
-									.addProperty(finalCometManualPathProperty);
-						}
-					}
-
-					@Override
-					public void revert() {
-						// Revert manual publish
-						finalCometManualPathProperty
-								.setValue(existingCometManualPublishMethodName);
-						if (!hasExistingCometManualPathPathProperty) {
-							cometExtension
-									.removeProperty(finalCometManualPathProperty);
-						}
-					}
-				};
-				changes.add(change);
-
-			} else {
-				// Remove Comet extension
-				Change<WoofTemplateExtensionModel> change = new AbstractChange<WoofTemplateExtensionModel>(
-						cometExtension, "Remove Comet Extension") {
-					@Override
-					public void apply() {
-						template.removeExtension(cometExtension);
-					}
-
-					@Override
-					public void revert() {
-						template.addExtension(cometExtension);
-					}
-				};
-				changes.add(change);
-			}
-
-		} else if (isEnableComet) {
-			// Create Comet extension to add
-			final WoofTemplateExtensionModel addCometExtension = new WoofTemplateExtensionModel(
-					CometWoofTemplateExtensionService.EXTENSION_ALIAS);
-			if ((cometManualPublishMethodName != null)
-					&& (cometManualPublishMethodName.trim().length() > 0)) {
-				// Add manual publish method name
-				addCometExtension.addProperty(finalCometManualPathProperty);
-			}
-
-			// Add Comet extension
-			Change<WoofTemplateExtensionModel> change = new AbstractChange<WoofTemplateExtensionModel>(
-					cometExtension, "Add Comet Extension") {
-				@Override
-				public void apply() {
-					template.addExtension(addCometExtension);
-				}
-
-				@Override
-				public void revert() {
-					template.removeExtension(addCometExtension);
-				}
-			};
-			changes.add(change);
+		// Refactor extensions
+		Change<WoofTemplateModel> extensionChange = refactorExtensions(
+				template, uri, extensions, template, context,
+				context.getConfigurationContext());
+		if (extensionChange != null) {
+			changes.add(extensionChange);
 		}
 
 		// Obtain the mapping of existing outputs
@@ -1528,7 +1235,8 @@ public class WoofChangesImpl implements WoofChanges {
 
 	@Override
 	public Change<WoofTemplateModel> changeTemplateUri(
-			final WoofTemplateModel template, final String uri) {
+			final WoofTemplateModel template, final String uri,
+			WoofTemplateChangeContext context) {
 
 		// Keep track of original values
 		final String originalTemplateName = template.getWoofTemplateName();
@@ -1539,21 +1247,6 @@ public class WoofChangesImpl implements WoofChanges {
 				template.getTemplatePath(), uri, template,
 				this.model.getWoofTemplates());
 
-		// Obtain GWT Extension and GWT Module path property
-		WoofTemplateExtensionModel gwtExtension = getGwtTemplateExtension(template);
-		final PropertyModel gwtModuleProperty = getGwtModulePathProperty(gwtExtension);
-		final String existingGwtModulePath = getPropertyValue(gwtModuleProperty);
-
-		// Retrieve the new GWT Module path (keeping existing if not found)
-		GwtModuleModel gwtModule = null;
-		if (existingGwtModulePath != null) {
-			gwtModule = this.gwtChanges
-					.retrieveGwtModule(existingGwtModulePath);
-			gwtModule.setRenameTo(uri);
-		}
-		final String newGwtModulePath = (gwtModule == null ? null
-				: this.gwtChanges.createGwtModulePath(gwtModule));
-
 		// Create change to template URI
 		Change<WoofTemplateModel> change = new AbstractChange<WoofTemplateModel>(
 				template, "Change Template URI") {
@@ -1563,11 +1256,6 @@ public class WoofChangesImpl implements WoofChanges {
 				template.setUri(uri);
 				template.setWoofTemplateName(newTemplateName);
 				WoofChangesImpl.this.sortTemplates();
-
-				// Update GWT (if able to update)
-				if ((gwtModuleProperty != null) && (newGwtModulePath != null)) {
-					gwtModuleProperty.setValue(newGwtModulePath);
-				}
 			}
 
 			@Override
@@ -1577,20 +1265,16 @@ public class WoofChangesImpl implements WoofChanges {
 				template.setUri(originalUri);
 				template.setWoofTemplateName(originalTemplateName);
 				WoofChangesImpl.this.sortTemplates();
-
-				// Revert GWT (if able to revert)
-				if (gwtModuleProperty != null) {
-					gwtModuleProperty.setValue(existingGwtModulePath);
-				}
 			}
 		};
 
-		// Include change to update GWT Module
-		if (existingGwtModulePath != null) {
-			Change<GwtModuleModel> gwtChange = this.gwtChanges.updateGwtModule(
-					gwtModule, existingGwtModulePath);
-			change = new AggregateChange<WoofTemplateModel>(change.getTarget(),
-					change.getChangeDescription(), change, gwtChange);
+		// Refactor extensions for changed URI
+		Change<WoofTemplateModel> extensionChange = refactorExtensions(
+				template, uri, null, template, context,
+				context.getConfigurationContext());
+		if (extensionChange != null) {
+			change = new AggregateChange<WoofTemplateModel>(template,
+					change.getChangeDescription(), change, extensionChange);
 		}
 
 		// Include changes for super template name
@@ -1603,7 +1287,7 @@ public class WoofChangesImpl implements WoofChanges {
 
 	@Override
 	public Change<WoofTemplateModel> removeTemplate(
-			final WoofTemplateModel template) {
+			final WoofTemplateModel template, WoofTemplateChangeContext context) {
 
 		// Obtain the template name
 		String templateName = template.getWoofTemplateName();
@@ -1661,6 +1345,8 @@ public class WoofChangesImpl implements WoofChanges {
 				WoofChangesImpl.this.sortTemplates();
 			}
 		};
+
+		// TODO include change to remove template
 
 		// Include changes for child templates no longer inheriting
 		change = this.includeSuperTemplateNameChanges(change, templateName,

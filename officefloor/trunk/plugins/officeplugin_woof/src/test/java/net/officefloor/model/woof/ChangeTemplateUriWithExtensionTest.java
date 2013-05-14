@@ -20,11 +20,13 @@ package net.officefloor.model.woof;
 import net.officefloor.model.change.Change;
 
 /**
- * Tests changing the {@link WoofTemplateModel} URI.
+ * Tests changing the {@link WoofTemplateModel} URI when has a
+ * {@link WoofTemplateExtension}.
  * 
  * @author Daniel Sagenschneider
  */
-public class ChangeTemplateUriTest extends AbstractWoofChangesTestCase {
+public class ChangeTemplateUriWithExtensionTest extends
+		AbstractWoofChangesTestCase {
 
 	/**
 	 * {@link WoofTemplateModel}.
@@ -35,6 +37,10 @@ public class ChangeTemplateUriTest extends AbstractWoofChangesTestCase {
 	protected void setUp() throws Exception {
 		super.setUp();
 		this.template = this.model.getWoofTemplates().get(0);
+
+		// Ensure have extensions
+		assertEquals("Invalid test as no extensions", 2, this.template
+				.getExtensions().size());
 	}
 
 	/**
@@ -42,12 +48,26 @@ public class ChangeTemplateUriTest extends AbstractWoofChangesTestCase {
 	 */
 	public void testNotChangeUri() {
 
+		final String TEMPLATE_URI = "path";
+
+		// Register the extension test details
+		Change<?> extensionChange = this.createMock(Change.class);
+		MockChangeWoofTemplateExtensionSource.reset(extensionChange,
+				TEMPLATE_URI, new String[] { "ONE", "A", "TWO", "B" },
+				TEMPLATE_URI, new String[] { "ONE", "A", "TWO", "B" },
+				this.getWoofTemplateChangeContext());
+
+		// Record changing
+		MockChangeWoofTemplateExtensionSource.recordAssertChange(
+				extensionChange, this);
+
 		// Test
 		this.replayMockObjects();
 
 		// Change template to unique URI
 		Change<WoofTemplateModel> change = this.operations.changeTemplateUri(
-				this.template, "path", this.getWoofTemplateChangeContext());
+				this.template, TEMPLATE_URI,
+				this.getWoofTemplateChangeContext());
 
 		// Validate the change
 		this.assertChange(change, this.template, "Change Template URI", true);
@@ -61,12 +81,25 @@ public class ChangeTemplateUriTest extends AbstractWoofChangesTestCase {
 	 */
 	public void testUniqueUri() {
 
+		final String TEMPLATE_URI = "unique/uri";
+
+		// Register the extension test details
+		Change<?> extensionChange = this.createMock(Change.class);
+		MockChangeWoofTemplateExtensionSource.reset(extensionChange, "path",
+				new String[] { "ONE", "A", "TWO", "B" }, TEMPLATE_URI,
+				new String[] { "ONE", "A", "TWO", "B" },
+				this.getWoofTemplateChangeContext());
+
+		// Record changing
+		MockChangeWoofTemplateExtensionSource.recordAssertChange(
+				extensionChange, this);
+
 		// Test
 		this.replayMockObjects();
 
 		// Change template to unique URI
 		Change<WoofTemplateModel> change = this.operations.changeTemplateUri(
-				this.template, "unique/uri",
+				this.template, TEMPLATE_URI,
 				this.getWoofTemplateChangeContext());
 
 		// Validate the change
@@ -80,13 +113,27 @@ public class ChangeTemplateUriTest extends AbstractWoofChangesTestCase {
 	 * Ensure can change to non-unique URI.
 	 */
 	public void testNonUniqueUri() {
+		
+		final String TEMPLATE_URI = "same/uri";
+
+		// Register the extension test details
+		Change<?> extensionChange = this.createMock(Change.class);
+		MockChangeWoofTemplateExtensionSource.reset(extensionChange, "path",
+				new String[] { "ONE", "A", "TWO", "B" }, TEMPLATE_URI,
+				new String[] { "ONE", "A", "TWO", "B" },
+				this.getWoofTemplateChangeContext());
+
+		// Record changing
+		MockChangeWoofTemplateExtensionSource.recordAssertChange(
+				extensionChange, this);
 
 		// Test
 		this.replayMockObjects();
 
 		// Change template to unique URI
 		Change<WoofTemplateModel> change = this.operations.changeTemplateUri(
-				this.template, "same/uri", this.getWoofTemplateChangeContext());
+				this.template, TEMPLATE_URI,
+				this.getWoofTemplateChangeContext());
 
 		// Validate the change
 		this.assertChange(change, this.template, "Change Template URI", true);

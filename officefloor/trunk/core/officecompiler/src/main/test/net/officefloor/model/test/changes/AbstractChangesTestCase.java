@@ -166,13 +166,13 @@ public abstract class AbstractChangesTestCase<M extends Model, O> extends
 		}
 		assertEquals("Incorrect change description", expectedChangeDescription,
 				change.getChangeDescription());
+		Conflict[] conflicts = change.getConflicts();
 		assertEquals("Incorrect number of conflicts",
-				expectedConflictDescriptions.length,
-				change.getConflicts().length);
+				expectedConflictDescriptions.length, conflicts.length);
 		for (int i = 0; i < expectedConflictDescriptions.length; i++) {
 			assertEquals("Incorrect description for conflict " + i,
 					expectedConflictDescriptions[i],
-					change.getConflicts()[i].getConflictDescription());
+					conflicts[i].getConflictDescription());
 		}
 
 		// Validate changes if can apply change
