@@ -234,7 +234,7 @@ public class WoofLoaderImpl implements WoofLoader {
 				// Load the extension
 				try {
 
-					// Instatiate the extension source
+					// Instantiate the extension source
 					WoofTemplateExtensionSource extensionSource = (WoofTemplateExtensionSource) sourceContext
 							.loadClass(extensionSourceClassName).newInstance();
 
@@ -252,7 +252,7 @@ public class WoofLoaderImpl implements WoofLoader {
 					// Extend the template
 					extensionSource.extendTemplate(extensionSourceContext);
 
-				} catch (Exception ex) {
+				} catch (Throwable ex) {
 					// Indicate failure to extend template
 					throw new WoofTemplateExtensionException(
 							"Failed loading Template Extension "
