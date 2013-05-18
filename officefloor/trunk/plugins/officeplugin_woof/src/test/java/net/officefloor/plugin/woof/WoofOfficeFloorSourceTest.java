@@ -74,6 +74,9 @@ public class WoofOfficeFloorSourceTest extends OfficeFrameTestCase {
 				.setupLoggerAssertion(WoofLoaderImpl.class.getName());
 		this.sourceLoggerAssertion = LoggerAssertion
 				.setupLoggerAssertion(WoofOfficeFloorSource.class.getName());
+
+		// Clear implicit template extension
+		MockImplicitWoofTemplateExtensionSourceService.reset();
 	}
 
 	@Override
@@ -201,6 +204,9 @@ public class WoofOfficeFloorSourceTest extends OfficeFrameTestCase {
 	 */
 	public void testTemplate() throws Exception {
 
+		// Configure implicit template extension
+		MockImplicitWoofTemplateExtensionSourceService.reset("/template");
+
 		// Obtain no logic template WoOF configuration
 		String noLogicTemplateConfigurationLocation = this
 				.getPackageRelativePath(this.getClass())
@@ -262,6 +268,9 @@ public class WoofOfficeFloorSourceTest extends OfficeFrameTestCase {
 	 */
 	public void testSrcMainWebappWoofResources() throws Exception {
 
+		// Configure implicit template extension
+		MockImplicitWoofTemplateExtensionSourceService.reset("/woofResource");
+
 		// Obtain webapp configuration location
 		String alternateConfigurationLocation = this
 				.getPackageRelativePath(this.getClass()) + "/webapp.woof";
@@ -286,6 +295,9 @@ public class WoofOfficeFloorSourceTest extends OfficeFrameTestCase {
 	 */
 	public void testSrcMainWebappConfiguredResource() throws Exception {
 
+		// Configure implicit template extension
+		MockImplicitWoofTemplateExtensionSourceService.reset("/woofResource");
+
 		// Obtain webapp configuration location
 		String alternateConfigurationLocation = this
 				.getPackageRelativePath(this.getClass()) + "/webapp.woof";
@@ -309,6 +321,9 @@ public class WoofOfficeFloorSourceTest extends OfficeFrameTestCase {
 	 */
 	public void testSrcMainWebappStaticResources() throws Exception {
 
+		// Configure implicit template extension
+		MockImplicitWoofTemplateExtensionSourceService.reset("/woofResource");
+
 		// Obtain webapp configuration location
 		String alternateConfigurationLocation = this
 				.getPackageRelativePath(this.getClass()) + "/webapp.woof";
@@ -331,6 +346,10 @@ public class WoofOfficeFloorSourceTest extends OfficeFrameTestCase {
 	 * <code>src/main/webapp</code> directory.
 	 */
 	public void testSrcMainWebappIgnoreOtherResources() throws Exception {
+
+		// Configure implicit template extension
+		MockImplicitWoofTemplateExtensionSourceService
+				.reset("/not/found/resource");
 
 		// Ensure the resource is available
 		File nonWoofResource = new File(".", "src/main/webapp/NonWoof.html");

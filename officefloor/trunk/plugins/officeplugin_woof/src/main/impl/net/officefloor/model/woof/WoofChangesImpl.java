@@ -545,7 +545,21 @@ public class WoofChangesImpl implements WoofChanges {
 			}
 		}
 
-		// TODO remove available that no longer match extension
+		// Remove available that no longer match extension
+		for (WoofTemplateExtensionModel extensionModel : new ArrayList<WoofTemplateExtensionModel>(
+				availableExtensions)) {
+
+			// Refactor the extension (to remove)
+			Change<?> extensionChange = refactorExtension(extensionModel,
+					oldUri, null, availableExtensions, changeTemplate,
+					sourceContext, configurationContext);
+
+			// Include potential change into aggregate change
+			if (extensionChange != null) {
+				change = new AggregateChange<WoofTemplateModel>(changeTemplate,
+						"Refactor extensions", change, extensionChange);
+			}
+		}
 
 		// Return the change
 		return change;
@@ -1084,7 +1098,9 @@ public class WoofChangesImpl implements WoofChanges {
 		};
 		changes.add(attributeChange);
 
-		// Refactor extensions
+		// Refactor extensions (ensuring have extensions)
+		extensions = (extensions == null ? new WoofTemplateExtension[0]
+				: extensions);
 		Change<WoofTemplateModel> extensionChange = refactorExtensions(
 				template, uri, extensions, template, context,
 				context.getConfigurationContext());

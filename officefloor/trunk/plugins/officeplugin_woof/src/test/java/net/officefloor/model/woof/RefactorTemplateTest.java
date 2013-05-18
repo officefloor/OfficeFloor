@@ -106,7 +106,8 @@ public class RefactorTemplateTest extends AbstractWoofChangesTestCase {
 				this.getWoofTemplateChangeContext());
 
 		// Record changing
-		extensionChange.apply();
+		MockChangeWoofTemplateExtensionSource.recordAssertChange(
+				extensionChange, this);
 
 		// Create the extensions
 		WoofTemplateExtension[] extensions = new WoofTemplateExtension[] {
@@ -114,9 +115,9 @@ public class RefactorTemplateTest extends AbstractWoofChangesTestCase {
 						MockNoChangeWoofTemplateExtensionSource.class.getName(),
 						new WoofTemplateExtensionPropertyImpl("name", "value")),
 				new WoofTemplateExtensionImpl(
-						MockChangeWoofTemplateExtensionSource.class.getName()),
+						MockNoChangeWoofTemplateExtensionSource.class.getName()),
 				new WoofTemplateExtensionImpl(
-						MockNoChangeWoofTemplateExtensionSource.class.getName(),
+						MockChangeWoofTemplateExtensionSource.class.getName(),
 						new WoofTemplateExtensionPropertyImpl("ONE", "A"),
 						new WoofTemplateExtensionPropertyImpl("TWO", "B")) };
 
@@ -179,8 +180,9 @@ public class RefactorTemplateTest extends AbstractWoofChangesTestCase {
 
 		// Register the extension test details
 		Change<?> extensionChange = this.createMock(Change.class);
-		MockChangeWoofTemplateExtensionSource.reset(extensionChange, null,
-				null, TEMPLATE_URI, new String[] { "ONE", "A", "TWO", "B" },
+		MockChangeWoofTemplateExtensionSource.reset(extensionChange,
+				"template", new String[] { "ONE", "A", "TWO", "B" },
+				TEMPLATE_URI, new String[] { "newName", "newValue" },
 				this.getWoofTemplateChangeContext());
 
 		// Create the extensions
@@ -194,7 +196,8 @@ public class RefactorTemplateTest extends AbstractWoofChangesTestCase {
 						new WoofTemplateExtensionPropertyImpl("change", "first")) };
 
 		// Record extension change
-		extensionChange.apply();
+		MockChangeWoofTemplateExtensionSource.recordAssertChange(
+				extensionChange, this);
 
 		// Test
 		this.replayMockObjects();
@@ -239,11 +242,12 @@ public class RefactorTemplateTest extends AbstractWoofChangesTestCase {
 		// Register the extension to handle remove
 		Change<?> extensionChange = this.createMock(Change.class);
 		MockChangeWoofTemplateExtensionSource.reset(extensionChange,
-				TEMPLATE_URI, new String[] { "ONE", "A", "TWO", "B" }, null,
+				"template", new String[] { "ONE", "A", "TWO", "B" }, null,
 				null, this.getWoofTemplateChangeContext());
 
 		// Record extension change
-		extensionChange.apply();
+		MockChangeWoofTemplateExtensionSource.recordAssertChange(
+				extensionChange, this);
 
 		// Test
 		this.replayMockObjects();
@@ -266,7 +270,7 @@ public class RefactorTemplateTest extends AbstractWoofChangesTestCase {
 	 * {@link WoofTemplateExtensionModel} instances.
 	 */
 	public void testAddDetails() {
-		
+
 		final String TEMPLATE_URI = "add";
 
 		// Create the section type
