@@ -49,8 +49,8 @@ import net.officefloor.plugin.web.http.security.type.HttpSecurityFlowType;
 import net.officefloor.plugin.web.http.security.type.HttpSecurityType;
 import net.officefloor.plugin.web.http.template.section.HttpTemplateSectionSource;
 import net.officefloor.plugin.woof.WoofOfficeFloorSource;
-import net.officefloor.plugin.woof.template.WoofTemplateExtensionChangeContext;
-import net.officefloor.plugin.woof.template.WoofTemplateExtensionSource;
+import net.officefloor.plugin.woof.template.WoofTemplateExtensionLoader;
+import net.officefloor.plugin.woof.template.WoofTemplateExtensionLoaderImpl;
 
 /**
  * {@link Change} for the {@link WoofModel}.
@@ -632,36 +632,14 @@ public class WoofChangesImpl implements WoofChanges {
 			newProperties.addProperty(property.getName(), property.getValue());
 		}
 
-		// Construct the context
-		WoofTemplateExtensionChangeContext context = new WoofTemplateExtensionChangeContextImpl(
-				true, sourceContext, oldUri, oldProperties, newUri,
-				newProperties, configurationContext);
+		// Create the possible change
+		WoofTemplateExtensionLoader loader = new WoofTemplateExtensionLoaderImpl();
+		Change<?> change = loader.refactorTemplateExtension(
+				extensionSourceClassName, oldUri, oldProperties, newUri,
+				newProperties, configurationContext, sourceContext);
 
-		// Attempt to create the extension change
-		Change<?> extensionChange = null;
-		try {
-
-			// Construct the source
-			Class<?> extensionSourceClass = sourceContext
-					.loadClass(extensionSourceClassName);
-			WoofTemplateExtensionSource source = (WoofTemplateExtensionSource) extensionSourceClass
-					.newInstance();
-
-			// Create potential change to to refactor extension
-			extensionChange = source.createConfigurationChange(context);
-
-		} catch (Throwable ex) {
-			// Provide conflict indicating failure of extension
-			extensionChange = new NoChange<WoofTemplateModel>(changeTemplate,
-					"Refactor extension " + extensionSourceClassName,
-					"Extension " + extensionSourceClassName + " on template "
-							+ changeTemplate.getUri() + " prevented change as "
-							+ ex.getMessage() + " [" + ex.getClass().getName()
-							+ "]");
-		}
-
-		// Return the extension change
-		return extensionChange;
+		// Return the possible change
+		return change;
 	}
 
 	/**

@@ -31,10 +31,8 @@ import java.util.logging.Logger;
 import net.officefloor.autowire.AutoWireGovernance;
 import net.officefloor.autowire.AutoWireSection;
 import net.officefloor.compile.OfficeFloorCompiler;
-import net.officefloor.compile.impl.properties.PropertyListSourceProperties;
 import net.officefloor.compile.impl.util.CompileUtil;
 import net.officefloor.compile.properties.PropertyList;
-import net.officefloor.frame.impl.construct.source.SourceContextImpl;
 import net.officefloor.frame.spi.source.SourceContext;
 import net.officefloor.model.repository.ConfigurationItem;
 import net.officefloor.model.woof.PropertyModel;
@@ -75,9 +73,9 @@ import net.officefloor.plugin.web.http.application.HttpSecurityAutoWireSection;
 import net.officefloor.plugin.web.http.application.HttpTemplateAutoWireSection;
 import net.officefloor.plugin.web.http.application.WebAutoWireApplication;
 import net.officefloor.plugin.web.http.security.HttpSecuritySource;
-import net.officefloor.plugin.woof.template.WoofTemplateExtensionException;
+import net.officefloor.plugin.woof.template.WoofTemplateExtensionLoader;
+import net.officefloor.plugin.woof.template.WoofTemplateExtensionLoaderImpl;
 import net.officefloor.plugin.woof.template.WoofTemplateExtensionSource;
-import net.officefloor.plugin.woof.template.WoofTemplateExtensionSourceContext;
 import net.officefloor.plugin.woof.template.WoofTemplateExtensionSourceService;
 
 /**
@@ -125,7 +123,7 @@ public class WoofLoaderImpl implements WoofLoader {
 		ClassLoader classLoader = sourceContext.getClassLoader();
 
 		// Load the implicit template extension sources
-		Map<String, WoofTemplateExtensionSource> implicitExtensionSources = new HashMap<String, WoofTemplateExtensionSource>();
+		Set<String> implicitExtensionSources = new HashSet<String>();
 		ServiceLoader<WoofTemplateExtensionSourceService> extensionServiceLoader = ServiceLoader
 				.load(WoofTemplateExtensionSourceService.class, classLoader);
 		Iterator<WoofTemplateExtensionSourceService> extensionIterator = extensionServiceLoader
@@ -161,12 +159,9 @@ public class WoofLoaderImpl implements WoofLoader {
 				// Obtain instance of the extension source
 				String extensionSourceClassName = extensionService
 						.getWoofTemplateExtensionSourceClass().getName();
-				WoofTemplateExtensionSource extensionSource = (WoofTemplateExtensionSource) sourceContext
-						.loadClass(extensionSourceClassName).newInstance();
 
 				// Register the extension source
-				implicitExtensionSources.put(extensionSourceClassName,
-						extensionSource);
+				implicitExtensionSources.add(extensionSourceClassName);
 
 			} catch (Throwable ex) {
 				// Warning that error with service
@@ -180,6 +175,9 @@ public class WoofLoaderImpl implements WoofLoader {
 				continue;
 			}
 		}
+
+		// Create the template extension loader
+		WoofTemplateExtensionLoader extensionLoader = new WoofTemplateExtensionLoaderImpl();
 
 		// Configure the HTTP templates
 		Map<String, HttpTemplateAutoWireSection> templates = new HashMap<String, HttpTemplateAutoWireSection>();
@@ -231,39 +229,21 @@ public class WoofLoaderImpl implements WoofLoader {
 				// Keep track of the explicit extension
 				explicitTemplateExtensions.add(extensionSourceClassName);
 
-				// Load the extension
-				try {
-
-					// Instantiate the extension source
-					WoofTemplateExtensionSource extensionSource = (WoofTemplateExtensionSource) sourceContext
-							.loadClass(extensionSourceClassName).newInstance();
-
-					// Create the context for the extension source
-					PropertyList properties = OfficeFloorCompiler
-							.newPropertyList();
-					for (PropertyModel property : extensionModel
-							.getProperties()) {
-						properties.addProperty(property.getName()).setValue(
-								property.getValue());
-					}
-					WoofTemplateExtensionSourceContext extensionSourceContext = new WoofTemplateExtensionServiceContextImpl(
-							template, application, properties, sourceContext);
-
-					// Extend the template
-					extensionSource.extendTemplate(extensionSourceContext);
-
-				} catch (Throwable ex) {
-					// Indicate failure to extend template
-					throw new WoofTemplateExtensionException(
-							"Failed loading Template Extension "
-									+ extensionSourceClassName + ". "
-									+ ex.getMessage(), ex);
+				// Create the context for the extension source
+				PropertyList properties = OfficeFloorCompiler.newPropertyList();
+				for (PropertyModel property : extensionModel.getProperties()) {
+					properties.addProperty(property.getName()).setValue(
+							property.getValue());
 				}
+
+				// Load the extension
+				extensionLoader.extendTemplate(extensionSourceClassName,
+						properties, template, application, sourceContext);
 			}
 
 			// Include implicit extensions (in deterministic order)
 			String[] implicitExtensionSourceClassNames = implicitExtensionSources
-					.keySet().toArray(new String[0]);
+					.toArray(new String[0]);
 			Arrays.sort(implicitExtensionSourceClassNames,
 					String.CASE_INSENSITIVE_ORDER);
 			for (String implicitExtensionSourceClassName : implicitExtensionSourceClassNames) {
@@ -274,13 +254,11 @@ public class WoofLoaderImpl implements WoofLoader {
 					continue;
 				}
 
-				// Provide the implicit extension
-				WoofTemplateExtensionSource implicitExtensionSource = implicitExtensionSources
-						.get(implicitExtensionSourceClassName);
-				implicitExtensionSource
-						.extendTemplate(new WoofTemplateExtensionServiceContextImpl(
-								template, application, OfficeFloorCompiler
-										.newPropertyList(), sourceContext));
+				// Extend the template with implicit extension
+				extensionLoader.extendTemplate(
+						implicitExtensionSourceClassName,
+						OfficeFloorCompiler.newPropertyList(), template,
+						application, sourceContext);
 			}
 		}
 
@@ -740,59 +718,6 @@ public class WoofLoaderImpl implements WoofLoader {
 		// Return whether position within area
 		return ((left <= posX) && (posX <= right))
 				&& ((top <= posY) && (posY <= bottom));
-	}
-
-	/**
-	 * {@link WoofTemplateExtensionSourceContext} implementation.
-	 */
-	private static class WoofTemplateExtensionServiceContextImpl extends
-			SourceContextImpl implements WoofTemplateExtensionSourceContext {
-
-		/**
-		 * {@link HttpTemplateAutoWireSection}.
-		 */
-		private final HttpTemplateAutoWireSection template;
-
-		/**
-		 * {@link WebAutoWireApplication}.
-		 */
-		private final WebAutoWireApplication application;
-
-		/**
-		 * Initiate.
-		 * 
-		 * @param template
-		 *            {@link HttpTemplateAutoWireSection}.
-		 * @param application
-		 *            {@link WebAutoWireApplication}.
-		 * @param properties
-		 *            {@link PropertyList}.
-		 * @param classLoader
-		 *            {@link ClassLoader}.
-		 */
-		public WoofTemplateExtensionServiceContextImpl(
-				HttpTemplateAutoWireSection template,
-				WebAutoWireApplication application, PropertyList properties,
-				SourceContext sourceContext) {
-			super(sourceContext.isLoadingType(), sourceContext,
-					new PropertyListSourceProperties(properties));
-			this.template = template;
-			this.application = application;
-		}
-
-		/*
-		 * ============= WoofTemplateExtensionServiceContext ================
-		 */
-
-		@Override
-		public HttpTemplateAutoWireSection getTemplate() {
-			return this.template;
-		}
-
-		@Override
-		public WebAutoWireApplication getWebApplication() {
-			return this.application;
-		}
 	}
 
 }

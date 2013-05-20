@@ -137,7 +137,8 @@ public class WoofLoaderTest extends OfficeFrameTestCase {
 
 		// Record initiating from source context
 		this.recordInitateFromSourceContext();
-		this.recordLoadImplicitTemplateExtensions("example", "another");
+		MockImplicitWoofTemplateExtensionSourceService.reset("example",
+				"another");
 
 		// Record loading templates
 		this.recordReturn(this.app, this.app.addHttpTemplate("example",
@@ -247,7 +248,7 @@ public class WoofLoaderTest extends OfficeFrameTestCase {
 
 		// Record initiating from source context
 		this.recordInitateFromSourceContext();
-		this.recordLoadImplicitTemplateExtensions("parent", "child",
+		MockImplicitWoofTemplateExtensionSourceService.reset("parent", "child",
 				"grandchild", "one", "two", "three");
 
 		// Record loading parent template
@@ -343,7 +344,7 @@ public class WoofLoaderTest extends OfficeFrameTestCase {
 
 		// Record initiating from source context
 		this.recordInitateFromSourceContext();
-		this.recordLoadImplicitTemplateExtensions("example");
+		MockImplicitWoofTemplateExtensionSourceService.reset("example");
 
 		// Record loading template
 		this.recordReturn(this.app, this.app.addHttpTemplate("example",
@@ -351,12 +352,7 @@ public class WoofLoaderTest extends OfficeFrameTestCase {
 		template.setTemplateSecure(false);
 
 		// Record extending with explicit template extension
-		this.recordReturn(this.sourceContext, this.sourceContext
-				.loadClass(MockExplicitWoofTemplateExtensionSource.class
-						.getName()),
-				MockExplicitWoofTemplateExtensionSource.class);
-		this.recordReturn(this.sourceContext,
-				this.sourceContext.isLoadingType(), false);
+		this.recordTemplateExtension(MockExplicitWoofTemplateExtensionSource.class);
 		this.recordReturn(template, template.getTemplateUri(), "URI");
 
 		// Record implicit template extensions
@@ -544,7 +540,7 @@ public class WoofLoaderTest extends OfficeFrameTestCase {
 
 		// Record initiating from source context
 		this.recordInitateFromSourceContext();
-		this.recordLoadImplicitTemplateExtensions();
+		MockImplicitWoofTemplateExtensionSourceService.reset();
 
 		// Record loading template
 		this.recordReturn(this.app, this.app.addHttpTemplate("example",
@@ -552,6 +548,8 @@ public class WoofLoaderTest extends OfficeFrameTestCase {
 		template.setTemplateSecure(false);
 
 		// Should not load further as unknown template extension
+		this.recordReturn(this.sourceContext,
+				this.sourceContext.isLoadingType(), true);
 		final UnknownClassError unknownClassError = new UnknownClassError(
 				"Unknown class", "UNKNOWN");
 		this.sourceContext.loadClass("UNKNOWN");
@@ -626,18 +624,22 @@ public class WoofLoaderTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Record loading the implicit template extensions.
+	 * Record a template extension.
+	 * 
+	 * @param extensionSourceClass
+	 *            {@link Class} of the {@link WoofTemplateExtensionSource}.
 	 */
-	private void recordLoadImplicitTemplateExtensions(String... templateUris) {
+	private void recordTemplateExtension(
+			Class<? extends WoofTemplateExtensionSource> extensionSourceClass) {
 
-		// Record loading the mock implicit template extension
-		this.recordReturn(this.sourceContext, this.sourceContext
-				.loadClass(MockImplicitWoofTemplateExtensionSourceService.class
-						.getName()),
-				MockImplicitWoofTemplateExtensionSourceService.class);
+		// Load the source context
+		this.recordReturn(this.sourceContext,
+				this.sourceContext.isLoadingType(), true);
 
-		// Record the expected templates being extended
-		MockImplicitWoofTemplateExtensionSourceService.reset(templateUris);
+		// Record loading the template extension
+		this.recordReturn(this.sourceContext,
+				this.sourceContext.loadClass(extensionSourceClass.getName()),
+				extensionSourceClass);
 	}
 
 	/**
@@ -652,9 +654,8 @@ public class WoofLoaderTest extends OfficeFrameTestCase {
 	private void recordImplicitTemplateExtensions(
 			HttpTemplateAutoWireSection template, String templateUri) {
 
-		// Load the source context
-		this.recordReturn(this.sourceContext,
-				this.sourceContext.isLoadingType(), true);
+		// Record the template extension
+		this.recordTemplateExtension(MockImplicitWoofTemplateExtensionSourceService.class);
 
 		// Record obtain the template URI (ensure implicit used)
 		this.recordReturn(template, template.getTemplateUri(), templateUri);
