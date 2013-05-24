@@ -60,6 +60,11 @@
 \author{DANIEL SAGENSCHNEIDER \affil{daniel@officefloor.net}}
 
 \begin{abstract}
+TODO better elaborate:
+  - Thread Injection allows decoupling the thread of control for a component
+  - Continuation Injection allows decoupling the collaboration of components
+  - Utilising these patterns with Dependency Injection enables an Inversion of Control pattern for building frameworks that enable bottom-up design and evolution of applications
+
 The Thread Injection and Continuation Injection patterns provide implementing
 algorithms for the participants of the Proactor pattern to enable inverting
 control for the thread executing a component and the collaboration of components.  These patterns
@@ -150,19 +155,6 @@ concurrency in servicing dynamic web content.  Furthermore, using the
 \textsc{dependency injection} pattern \cite{ioc} provides the decoupling
 necessary for an \textsc{inversion of control} pattern.
 
-
-\section{Overview}
-
-This paper first presents a motivating example for both the \textsc{thread
-injection} pattern and \textsc{continuation injection} pattern.  The
-\textsc{continuation injection} pattern and \textsc{thread injection} pattern
-are then presented.  After presenting the patterns individually, the
-\textsc{thread injection} and \textsc{continuation injection} patterns are used
-together to realise an \textsc{inversion of control} pattern.  The
-\textsc{inversion of control} pattern provides resolution of the motivating
-example.  Discussion is then provided on using the patterns to implement a web
-server.
-
 As the \textsc{thread injection} and \textsc{continuation injection} patterns provide implementing
 algorithms for the \textsc{proactor} pattern participants, the \textsc{proactor}
 pattern participants have been summarised in table
@@ -190,6 +182,16 @@ Asynchronous Operation Processor & Execution of the Asynchronous Operations. \\
 \label{tab:ProactorParticipants}
 \end{table}
 
+This paper uses the canonical form to present the \textsc{thread injection},
+\textsc{continuation injection} and \textsc{inversion of control} patterns.  The
+paper first presents a motivating example for both the \textsc{thread injection}
+pattern and \textsc{continuation injection} pattern.  The \textsc{continuation
+injection} pattern and \textsc{thread injection} pattern are then presented. 
+After presenting the patterns individually, the \textsc{thread injection} and
+\textsc{continuation injection} patterns are used together to realise an
+\textsc{inversion of control} pattern.  The \textsc{inversion of control}
+pattern provides resolution of the motivating example.  Discussion is then
+provided on using the patterns to implement a web server.
 
 
 \section{A Motivating Example}
@@ -255,14 +257,6 @@ Write HTTP response & Write HTTP response & HTTP response, \\
 \section{Continuation Injection}
 
 
-\subsection{Problem}
-
-\textbf{How to loosely couple the collaboration of components?}  Components
-provide discrete pieces of functionality (application behaviour) that may be
-developed by different developers.  To ensure greater re-usability of a
-component, how can the invocation of that component be loosely coupled?
-
-
 \subsection{Context}
 
 Both the \textsc{thread-per-request} pattern \cite{thread-per-request} (basis of
@@ -280,11 +274,13 @@ concurrently).  In both patterns, they tightly couple the invocation as the
 control and the \textsc{proactor} pattern must have the invoker construct the
 invoked component.
 
-Loosely coupling the invocation of components leads to better re-use of
-components.  ``Tight coupling leads to monolithic systems, where you can't
-change or remove a \ldots [component] without understanding and changing other
-\ldots [components]'' \cite[p. 24-25]{gof}.  Having to change components to
-invoke them restricts the ability to re-use the components.
+
+\subsection{Problem}
+
+\textbf{Components provide re-usable discrete pieces of functionality
+(application behaviour) that may be developed by different developers.  To
+ensure greater re-usability of a component, how can the collaboration of the
+components be loosely coupled?}
 
 
 \subsection{Forces}
@@ -327,6 +323,12 @@ tightly couple invoking a component by the invoker being required to handle
 possible exceptions.  The invoker may not be appropriately responsible to handle
 a resulting exception and this should be delegated to another component.
 
+Loosely coupling the invocation of components leads to better re-use of
+components.  ``Tight coupling leads to monolithic systems, where you can't
+change or remove a \ldots [component] without understanding and changing other
+\ldots [components]'' \cite[p. 24-25]{gof}.  Having to change components to
+invoke them restricts the ability to re-use the components.
+
 For a framework (e.g. web server) to extend itself by invoking components, the
 framework pre-defines the component's interface to enable invoking it.  However,
 components should be able to invoke other components for re-use of the
@@ -355,6 +357,9 @@ configuration to create dependencies.
 \begin{figure}[tp]
 \centering
 \begin{verbatim}
+
+TODO change to class diagram.
+
     interface Component {
         void execute(ComponentContext context);
         String[] getContinuationIds();
@@ -712,6 +717,22 @@ particular mutations in state.  This is necessary to avoid invalid side effects
 due to changes in configuration that results in re-ordering the execution of the
 components.
 
+Isolated \texttt{DependencyContext}s provides the isolation of threads within a
+process.  The \textsc{continuation injection} pattern continuation mapping
+configuration may have qualifying attributes that isolate components to
+particular \texttt{DependencyContext}s (Fig \ref{fig:IocInjectionInterfaces}).
+The continuation may be configured to invoke the component (and its subsequent
+invoked components) within a new \texttt{DependencyContext} to not share state. 
+To share state between the isolated \texttt{Depend\-ency\-Context}s, the
+isolated contexts may be created inside a shared context.  Each dependency type
+is bound by developer configuration to be within the isolated context or the
+shared context.  The instance of a dependency bound to an isolated context may
+only be used by component instances within the same isolated context instance. 
+However, the instance of a dependency bound to the shared context is re-usable
+across all component instances.  This replicates the concepts of a thread and a
+process by creating isolated ''thread'' contexts within a shared ''process''
+context.
+
 
 \subsection{Related Patterns}
 
@@ -775,15 +796,6 @@ implementation.
 \section{Thread Injection}
 
 
-\subsection{Problem}
-
-\textbf{How to loosely couple the thread of control for a component?} 
-Components provide discrete pieces of functionality (application behaviour) that
-may be developed by different developers.  The execution of these components
-requires a thread of control.  How can the component be loosely coupled to a
-thread of control to enable the execution of the application to be improved?
-
-
 \subsection{Context}
 
 Both the \textsc{thread-per-request} pattern \cite{thread-per-request} and the
@@ -801,6 +813,15 @@ importance of this prioritisation tuning
 \textsc{thread-per-request} pattern and the \textsc{proactor} pattern do not
 define algorithms for prioritisation and cancellation of components and leaves
 this to the developer.
+
+
+\subsection{Problem}
+
+\textbf{Components provide re-usable discrete pieces of functionality
+(application behaviour) that may be developed by different developers.  The
+execution of these components requires a thread of control.  How can the
+component be loosely coupled to a thread of control to enable the execution of
+the application to be improved?}
 
 
 \subsection{Forces}
@@ -845,6 +866,9 @@ of components.
 \begin{figure}[tp]
 \centering
 \begin{verbatim}
+
+TODO make listing (or possibly class diagram)
+
     interface ComponentExecutor {
         void executeComponent(String componentId, Object parameter);
     }
@@ -1112,12 +1136,12 @@ component's behaviour'' \cite[p. 5]{ioc}.  While various techniques, such as
 variation points the higher \textsc{layers} maintain control over what variation
 points may exist.
 
-Inverting the control by allowing the lower \textsc{layers} to define the
-variation points to be implemented by the higher \textsc{layers} will allow a
-bottom-up design.  This will allow application architecture to be evolved
-upwards rather than designed in a top down approach.  This architecture will
-better suit development methodologies, such as Agile, where architecture is
-evolved upwards.
+Inverting the control by allowing the lower \textsc{layer} components to define
+the variation points to be implemented by the higher \textsc{layer} components
+will allow a bottom-up design.  This will allow application architecture to be
+evolved upwards rather than designed in a top down approach.  This architecture
+will better suit development methodologies, such as Agile, where the
+methodologies focus on evolving the architecture upwards.
 
 
 \subsection{Problem}
@@ -1128,10 +1152,10 @@ evolved upwards.
 
 \subsection{Forces}
 
-Components provide discrete re-usable pieces of functionality (application
+Components provide re-usable discrete pieces of functionality (application
 behaviour) that may be developed by different developers.  The \textsc{explicit
-interfaces} of the components allows for exchanging components at the different
-\textsc{layers} of the architecture \cite{ioc}.
+interfaces} of the components allows for exchanging component implementations at
+the different \textsc{layers} of the architecture \cite{ioc}.
 
 The components need to be composed within an architecture that is dictated by
 the framework.  The framework ``will define the overall structure, its
@@ -1186,9 +1210,9 @@ interface}s) are controlled by the higher \textsc{layers}.  The higher
 variation point that lower \textsc{layer} components may extend through
 inheritance (\textit{abstract classes}) or collaboration (\textit{interfaces}).
 
-Within a \texsc{layers} architecture having variation points defined by
+Within a \textsc{layers} architecture having variation points defined by
 \textsc{template method}s requires refactoring of the \textsc{template method}
-to increase the variability of the lower \textsc{layers}.  Increasing the
+to increase the variability of the lower \textsc{layer} components.  Increasing the
 variability ``requires adapting the \textsc{explicit interfaces} between the
 \textsc{layers} to stipulate the types of variation parameters'' \cite[p.
 5]{ioc} to allow control over the lower \textsc{layers} by the higher
@@ -1207,15 +1231,16 @@ control over defining variation points.
 
 \textbf{Use \textsc{dependency injection}, \textsc{thread injection} and \textsc{continuation injection} to have the lower \textsc{layer} component control its required variation points.}
 
-\textsc{dependency injection} enables the lower \textsc{layer} component to
-specify the state (objects) it requires.  When \textsc{dependency injection} is
-used with \textsc{continuation injection}, the lower \textsc{layer} component
-specifies its required state (objects) via \texttt{stateId}s.  As the framework
-will provide the necessary objects (state) to the component, the lower
-\textsc{layer} component may specify as many dependencies as necessary.
-The invoking higher \textsc{layer} components need only provide the single
-optionally used argument.  This leaves the lower \textsc{layer} component to
-control which objects (dependecies/state) it may depend on.
+\textsc{dependency injection} (used within \textsc{continuation injection})
+enables the lower \textsc{layer} component to specify the state (objects) it
+requires.  When \textsc{dependency injection} is used with \textsc{continuation
+injection}, the lower \textsc{layer} component specifies its required state
+(objects) via \texttt{stateId}s.  As the framework will provide the necessary
+objects (state) to the component, the lower \textsc{layer} component may specify
+as many dependencies as necessary.  The invoking higher \textsc{layer}
+components need only provide the single optionally used argument.  This leaves
+the lower \textsc{layer} component to control which objects (dependecies/state)
+it may depend on.
 
 \textsc{thread injection} provides loose coupling of a component to a thread of
 control.  By the the lower \textsc{layer} component having control over
@@ -1271,6 +1296,9 @@ components via \textsc{continuation injection}.
 \begin{figure}[tp]
 \centering
 \begin{verbatim}
+
+TODO make class diagram
+
     interface Component {
         void execute(ComponentContext context);
         String[] getContinuationIds();
@@ -1387,27 +1415,44 @@ higher \textsc{layer} components no longer control the variation points.
 
 \subsection{Consequences}
 
-\textbf{TODO} Bottom up design and evolution of systems.  This is because all
-components are peers and not constructed into a hierarchy.
+Using an \textsc{inversion of control} framework allows bottom-up design of the
+application.  As the variation points are controlled by the lower \textsc{layer}
+components, developers may start by building the lower \textsc{layer} components
+first.  As the lower \textsc{layer} components are less abstract, the developer
+is able to focus on more concrete problems and provide only the necessary
+variation points to solve the particular problem.  This avoids over engineering
+the design of the application.  Furthermore, as the higher \textsc{layer}
+components are built last, there is less need for large initial top-down
+designs.
 
-\textbf{TODO} Components themselves define the variation points and is not
-constrained by a higher \textsc{layers}.  This puts the control of
-variation with the component rather than the framework.
+An \textsc{inversion of control} framework also allows bottom-up evolution of
+the application.  Within frameworks imposing top-down design, the
+\textsc{explicit interface} (\textsc{template method}) between \textsc{layers}
+needs to be refactored to account for required changes that increase the
+variability of lower \textsc{layer} components as the application evolves
+\cite{ioc}.  Within bottom-up \textsc{inversion of control} frameworks, the
+lower \textsc{layer} component may introduce new variation points that are
+implemented by higher \textsc{layer} dependencies and components.  As the
+\textsc{explicit interface} to invoke the lower \textsc{layer} component does
+not change, the invoking higher \textsc{layer} components do not require
+refactoring to evolve the application.
 
-Object-orientation provides the implicit state (dependencies) to a component.
-When a method is used as the implementation of a component, explicit
-dependencies are injected as arguments into the method.  Object-orientation
-implicitly provides the instance/class references to the method.  Having
-implicit references tightly couples the components and should be avoided in
-implementing components.  Therefore, functional programming can provide improved
-component implementations via functions, as functional programming can be
-considered programming without implicit dependencies.
+Within an \textsc{inversion of control} framework, object-orientation provides
+the implicit state (dependencies) to a component.  When a method is used as the
+implementation of a component, explicit dependencies are injected as arguments
+into the method.  Object-orientation implicitly provides the instance/class
+references to the method.  Having implicit references tightly couples the
+components and should be avoided in implementing components.  Therefore,
+functional programming can provide improved component implementations via
+functions, as functional programming can be considered programming without
+implicit dependencies.
 
-Furthermore, object-orientation can focus on modelling the data and having its
-methods constrain changes in state.  This is similar to databases storing data
-and constraining the changes in the data.  As application behaviour is
-implemented in components via functions, the application need not be constructed
-only as a graph of collaborating objects.
+Furthermore, within an \textsc{inversion of control} framework the use of
+object-orientation can focus objects on modelling the data and have its methods
+constrain changes in state.  This is similar to databases storing data and
+constraining the changes in the data.  As application behaviour is implemented
+in components via functions, the application need not be constructed only as a
+graph of collaborating heirarchical objects.
 
 As the \textsc{thread injection} and \textsc{continuation injection} patterns
 provide implementing algorithms of the \textsc{proactor} pattern participants,
@@ -1454,22 +1499,6 @@ re-usable composite components will be left to further work.}.
 \caption{Component collaboration demonstrating example re-use of components to service messages from a queue.}
 \label{fig:IocReuseForQueue}
 \end{figure}
-
-Isolated \texttt{DependencyContext}s provides the isolation of threads within a
-process.  The \textsc{continuation injection} pattern continuation mapping
-configuration may have qualifying attributes that isolate components to
-particular \texttt{DependencyContext}s (Fig \ref{fig:IocInjectionInterfaces}).
-The continuation may be configured to invoke the component (and its subsequent
-invoked components) within a new \texttt{DependencyContext} to not share state. 
-To share state between the isolated \texttt{Depend\-ency\-Context}s, the
-isolated contexts may be created inside a shared context.  Each dependency type
-is bound by developer configuration to be within the isolated context or the
-shared context.  The instance of a dependency bound to an isolated context may
-only be used by component instances within the same isolated context instance. 
-However, the instance of a dependency bound to the shared context is re-usable
-across all component instances.  This replicates the concepts of a thread and a
-process by creating isolated ''thread'' contexts within a shared ''process''
-context.
 
 
 \subsection{Related Patterns}
