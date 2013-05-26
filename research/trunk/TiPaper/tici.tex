@@ -171,9 +171,9 @@ concurrency in servicing dynamic web content.  Furthermore, using the
 \textsc{dependency injection} pattern \cite{ioc} provides the decoupling
 necessary for an \textsc{inversion of control} pattern.
 
-As the \textsc{thread injection} and \textsc{continuation injection} patterns provide implementing
-algorithms for the \textsc{proactor} pattern participants, the \textsc{proactor}
-pattern participants have been summarised in table
+As the \textsc{thread injection} and \textsc{continuation injection} patterns
+provide implementing algorithms for the \textsc{proactor} pattern participants,
+the \textsc{proactor} pattern participants have been summarised in table
 \ref{tab:ProactorParticipants}.
 
 \begin{table}[t]
@@ -357,24 +357,21 @@ components should be standardised.
 \textbf{Provide a context object to the component to enable indirectly invoking other components.}
 
 The \textsc{continuation injection} pattern relies on providing the
-\texttt{ComponentContext} (Fig \ref{fig:ContinuationInjectionInterfaces}) to the
+\texttt{ComponentContext} (Listing \ref{lst:ContinuationInjectionInterfaces}) to the
 component.  The \texttt{ComponentContext} contains a mapping of
 \texttt{continuationId} to a handling component.  As each mapping is a
 continuation (''goto'' for executing a component), this allows injecting the
 necessary continuations into the component.
 
 The \texttt{ComponentContext} for a component is constructed via a
-\texttt{ComponentContextFactory} (Fig \ref{fig:ContinuationInjectionInterfaces})
+\texttt{ComponentContextFactory} (Listing \ref{lst:ContinuationInjectionInterfaces})
 to keep the continuation mapping configuration centrally managed.  This is
-similar to the \texttt{DependencyInjectionFactory} (Fig
-\ref{fig:ContinuationInjectionInterfaces}) containing centrally managed
+similar to the \texttt{DependencyInjectionFactory} (Listing
+\ref{lst:ContinuationInjectionInterfaces}) containing centrally managed
 configuration to create dependencies.
 
-\begin{figure}[tp]
-\centering
-\begin{verbatim}
-
-TODO change to class diagram.
+\lstset{caption=\textsc{continuation injection} pattern interfaces\protect\footnotemark.}
+\begin{lstlisting}[float,label=lst:ContinuationInjectionInterfaces]
 
     interface Component {
         void execute(ComponentContext context);
@@ -390,7 +387,8 @@ TODO change to class diagram.
     }
     
     interface ContinuationInjectionFactory {
-        ComponentContext createComponentContext(String componentId, Object parameter
+        ComponentContext createComponentContext(String componentId
+                                               , Object parameter
                                                , DependencyContext context);
     }
     
@@ -401,10 +399,7 @@ TODO change to class diagram.
     interface DependencyContext {
         Object getDependency(String dependencyId);
     }
-\end{verbatim}
-\caption{\textsc{continuation injection} pattern interfaces\footnotemark.}
-\label{fig:ContinuationInjectionInterfaces}
-\end{figure}
+\end{lstlisting}
 \footnotetext{A rudimentary example implementation of the
 \texttt{DependencyInjectionFactory} is wrapping Spring's \cite{spring}
 \texttt{BeanFactory} to create an implementation of \texttt{DependencyContext}
@@ -424,8 +419,8 @@ Operations (components) allows a response to be provided once all components for
 the request are completed.
 
 The components are constructed via the \textsc{dependency injection} pattern
-\cite{ioc}.  The \texttt{Dependency\-InjectionFactory} (Fig
-\ref{fig:ContinuationInjectionInterfaces}) centrally manages the dependency
+\cite{ioc}.  The \texttt{Dependency\-InjectionFactory} (Listing
+\ref{lst:ContinuationInjectionInterfaces}) centrally manages the dependency
 configuration and creates a \texttt{Depend\-ency\-Context} that constructs and
 caches dependency instances for the components.  The
 \texttt{Dependency\-Context}, that manages the life-cycle of dependencies, is
@@ -447,14 +442,14 @@ request, session and application scopes.  To further decouple the component from
 global dependency identifiers the \texttt{ComponentContext} contains a mapping
 of \texttt{stateId} to \texttt{dependencyId} to allow the component to obtain
 the extrinsically defined \textsc{dependency injection} dependencies via the
-\texttt{getState(\ldots)} method (Fig
-\ref{fig:ContinuationInjectionInterfaces}).  The invoking component only needs
+\texttt{getState(\ldots)} method (Listing
+\ref{lst:ContinuationInjectionInterfaces}).  The invoking component only needs
 the dependencies (state) it requires and is not coupled to the invoked component
 by having to provide the entire set of dependencies (state) for the invoked
 component.
 
-The \texttt{doContinuation(\ldots)} method (Fig
-\ref{fig:ContinuationInjectionInterfaces}) allows a component to invoke another
+The \texttt{doContinuation(\ldots)} method (Listing
+\ref{lst:ContinuationInjectionInterfaces}) allows a component to invoke another
 component.  As the \texttt{continu\-ationId}s are static for each component,
 developer configuration provides the continuation mapping to the respective handling
 component.  The method does allow one argument to be passed to the invoked
@@ -462,7 +457,7 @@ component.  This is for more intuitive development by associating the invocation
 with passing state.  If multiple arguments are required, they should be
 encapsulated into an object for passing.  To maintain loose coupling, the
 invoked component obtains the argument as state (i.e. \texttt{getState(\ldots)}
-method in figure \ref{fig:ContinuationInjectionInterfaces}) so the invoked
+method in listing \ref{lst:ContinuationInjectionInterfaces}) so the invoked
 component need not differentiate between dependencies and parameters.  The
 invoked component may also ignore the continuation argument should it not depend
 on it.  Figure \ref{fig:DoContinuationSequenceDiagram} provides a sequence
@@ -509,8 +504,8 @@ configuration for components.  The invoking component is, therefore, decoupled
 from handling the invoked component's exceptions, as the exceptions are handled
 by other components.
 
-The \texttt{continueComponent()} method (Fig
-\ref{fig:ContinuationInjectionInterfaces}) enables re-executing the current
+The \texttt{continueComponent()} method (Listing
+\ref{lst:ContinuationInjectionInterfaces}) enables re-executing the current
 component.  The Proactor Initiator may be implemented to defer the execution of a
 component again until invoked continuations by the component are completed.
  The Proactor Initiator uses the same tracking of completion as the
@@ -561,7 +556,7 @@ when retrieving data from an in memory cache).
 To ease developer understanding of the collaboration between components, the
 mapping configuration of \texttt{continuationId}  to \texttt{componentId} may be
 graphical.  Developer tools will use the \texttt{getContinuationIds()} method
-(Fig \ref{fig:ContinuationInjectionInterfaces}) to obtain the list of possible
+(Listing \ref{lst:ContinuationInjectionInterfaces}) to obtain the list of possible
 continuations for a component.  The tools then graphically represent the
 components as nodes with the continuation mappings being directed lines between
 these nodes.  Due to the similarity of this configuration with service
@@ -571,8 +566,8 @@ function, procedure, method or operation orchestration depending on the
 implementing language.}.  The \texttt{stateId} to \texttt{dependencyId} mapping
 for a component may also be included in this configuration by dependencies
 represented as further nodes to be linked to \texttt{stateId} anchors on the
-components.  The developer tools use the \texttt{getStateIds()} method (Fig
-\ref{fig:ContinuationInjectionInterfaces}) to obtain the list of possible state
+components.  The developer tools use the \texttt{getStateIds()} method (Listing
+\ref{lst:ContinuationInjectionInterfaces}) to obtain the list of possible state
 objects required for the component\footnote{The \texttt{getContinuationIds()}
 method may be enhanced to also return the argument types that the component will
 provide on each of the continuations.  The \texttt{getStateIds()} may also be
@@ -727,12 +722,12 @@ particular mutations in state.  This is necessary to avoid invalid side effects
 due to changes in configuration that results in re-ordering the execution of the
 components.
 
-Creating isolated \texttt{DependencyContext}s provides the isolation of
-threads within a process.  The \textsc{continuation injection} pattern
-continuation mapping configuration may have qualifying attributes that isolate
-components to particular \texttt{DependencyContext}s (Fig
-\ref{fig:IocInjectionInterfaces}).  The continuation may be configured to invoke
-the component (and its subsequent invoked components) within a new
+Creating isolated \texttt{DependencyContext}s provides the isolation of threads
+within a process.  The \textsc{continuation injection} pattern continuation
+mapping configuration may have qualifying attributes that isolate components to
+particular \texttt{DependencyContext}s (Listing
+\ref{lst:ContinuationInjectionInterfaces}).  The continuation may be configured
+to invoke the component (and its subsequent invoked components) within a new
 \texttt{DependencyContext} to not share state.  To share state between the
 isolated \texttt{Depend\-ency\-Context}s, the isolated contexts may be created
 inside a shared context.  Each dependency type is bound by developer
@@ -870,15 +865,12 @@ All components are constructed via extrinsic \textsc{dependency injection}
 \cite{ioc}.  The construction of the component is encapsulated in the
 \texttt{DependencyInjectionFactory} and as a result a standard interface can be
 provided for execution of the components by a thread of control (Fig
-\ref{fig:ThreadInjectionInterfaces}).  This enables for a single
+\ref{lst:ThreadInjectionInterfaces}).  This enables for a single
 \texttt{ComponentExecutor} implementation to execute differing implementations
 of components.
 
-\begin{figure}[tp]
-\centering
-\begin{verbatim}
-
-TODO make listing (or possibly class diagram)
+\lstset{caption=\textsc{thread injection} pattern interfaces\protect\footnotemark.}
+\begin{lstlisting}[float,label=lst:ThreadInjectionInterfaces]
 
     interface ComponentExecutor {
         void executeComponent(String componentId, Object parameter);
@@ -893,21 +885,18 @@ TODO make listing (or possibly class diagram)
         void execute(Object parameter); 
         void cancel(Object parameter, Exception cause);
     }
-\end{verbatim}
-\caption{\textsc{thread injection} pattern interfaces\footnotemark}
-\label{fig:ThreadInjectionInterfaces}
-\end{figure}
+\end{lstlisting}
 \footnotetext{An example implementation of the
 \texttt{DependencyInjectionFactory} is wrapping Spring's \cite{spring}
 \texttt{DefaultListableBeanFactory} to implement
 \texttt{createComponent(\ldots)} by calling \texttt{getBean(\ldots)} and
 implement \texttt{getRequiredDependencyTypes(\ldots)} by recursively calling
-\texttt{getBeanDefinition(\ldots)}/\texttt{getDependsOn()} to create the list of
-types.}
+\texttt{getBeanDefinition(\ldots)}/\texttt{getDependsOn()} to create the 
+list of types.}
 
 To invoke a component, the client code invokes the
-\texttt{executeComponent(\ldots)} method (Fig
-\ref{fig:ThreadInjectionInterfaces}) with the identifier of the desired
+\texttt{executeComponent(\ldots)} method (Listing
+\ref{lst:ThreadInjectionInterfaces}) with the identifier of the desired
 component along with an argument for the parameter of the component.
 Figure \ref{fig:ExecuteComponentSequenceDiagram} provides a sequence diagram of
 executing a component.  The \texttt{ComponentExecutor} uses the
@@ -929,19 +918,20 @@ for execution in a similar way to injecting a dependency for use.
 The prioritisation is achieved by the
 \texttt{getRequiredDependencyTypes(\ldots)} method providing the extrinsic
 \textsc{dependency injection} \cite{ioc} meta-data for the
-component\footnote{\textsc{dependency injection} frameworks using qualification to
-identify dependencies of the same type may return a type object containing both
-class and qualifier rather than just a class.  The thread pool matching may then
-incorporate the qualifier.}.  The developer configures one or more thread pools
-responsible for components with a particular type of dependency\footnote{Thread
-pools may be associated with more than one dependency type.}.  The component is
-then matched by its required dependency types to a thread pool responsible for
-one or more of its dependency types\footnote{The \texttt{componentId} may also
-be used for very fine grained mapping.}.  The \texttt{execute(\ldots)} method of
-the component (Fig \ref{fig:ThreadInjectionInterfaces}) is then invoked by a thread
-from the matching thread pool to execute the implementation of the component.
-This provides the necessary isolation of differing components for improved tuning
-of the server.
+component\footnote{\textsc{dependency injection} frameworks using qualification
+to identify dependencies of the same type may return a type object containing
+both class and qualifier rather than just a class.  The thread pool matching may
+then incorporate the qualifier.}.  The developer configures one or more thread
+pools responsible for components with a particular type of
+dependency\footnote{Thread pools may be associated with more than one dependency
+type.}.  The component is then matched by its required dependency types to a
+thread pool responsible for one or more of its dependency types\footnote{The
+\texttt{componentId} may also be used for very fine grained mapping.}.  The
+\texttt{execute(\ldots)} method of the component (Listing
+\ref{lst:ThreadInjectionInterfaces}) is then invoked by a thread from the
+matching thread pool to execute the implementation of the component.
+This provides the necessary isolation of differing components for improved
+tuning of the server.
 
 For components not having dependencies (nor dependencies of any
 performance significance), a default thread pool is configured by the developer
@@ -949,8 +939,8 @@ for their execution.  This ensures all components are mapped to a
 thread pool.  It also means that thread pools need only be configured for
 dependencies requiring isolation.
 
-The \texttt{cancel(\ldots)} method (Fig \ref{fig:ThreadInjectionInterfaces})
-provides the means for the \texttt{ComponentExecutor} to cancel the component. 
+The \texttt{cancel(\ldots)} method (Listing \ref{lst:ThreadInjectionInterfaces})
+provides the means for the \texttt{ComponentExecutor} to cancel the component.
 The \texttt{ComponentExecutor} will cancel new components for a particular
 thread pool when queuing the component for a thread will result in exceeding a
 particular threshold\footnote{A sufficient threshold would be ensuring the wait
@@ -1274,17 +1264,17 @@ Using the \textsc{dependency injection}, \textsc{thread injection} and
 \textsc{continuation injection} patterns together provides the necessary inversion
 of control over variation points, as the lower-level layer component controls:
 \begin{itemize}
-  \item it's name (\texttt{componentId}) which is decoupled from the invoking higher \textsc{layer} component invocation (\texttt{continuationId}) by \textsc{continuation injection};
+  \item it's name (\texttt{componentId}) which is decoupled from the invoking higher \textsc{layer} component invocation (\texttt{contin\-uationId}) by \textsc{continuation injection};
   \item which invocations (\texttt{continuationId}s) are necessary via \textsc{continuation injection};
   \item what state (\texttt{stateId}s) are required by \textsc{dependency injection};
   \item the types of exceptions that may be thrown by \textsc{continuation injection}; and
   \item the thread of control by \textsc{thread injection}.
 \end{itemize}
 
-Therefore, the \texttt{Component} interface (Fig
-\ref{fig:IocInjectionInterfaces}) is the \textsc{explicit interface} for lower-level layer
-components to control the variation points of the application.  The component is
-executed by the \textsc{thread injection} pattern's
+Therefore, the \texttt{Component} interface (Listing
+\ref{lst:IocInjectionInterfaces}) is the \textsc{explicit interface} for
+lower-level layer components to control the variation points of the application.
+ The component is executed by the \textsc{thread injection} pattern's
 \texttt{ComponentExecutor} after creation by the \textsc{continuation injection}
 pattern's \texttt{ComponentContext}.  As \textsc{continuation injection} and
 \textsc{thread injection} share the same \texttt{DependencyInjectionFactory},
@@ -1294,19 +1284,16 @@ the \textsc{thread injection}'s \texttt{ComponentExecutor} trusts the
 \textsc{continuation injection} pattern and contains the Asynchronous Operation
 to execute the component and the Completion Handler/Dispatcher to flag the
 \texttt{Future} complete.  The cancellation exceptions of the \textsc{thread
-injection} pattern (i.e. \texttt{cancel(\ldots)} method of figure
-\ref{fig:ThreadInjectionInterfaces}) are handled by the
+injection} pattern (i.e. \texttt{cancel(\ldots)} method of listing
+\ref{lst:ThreadInjectionInterfaces}) are handled by the
 \texttt{handleException(\ldots)} method to enable application level handling of
 overload conditions.  The \texttt{ComponentContext} (constructed by the
 \texttt{ComponentContextFactory}) provides means to retrieve state via the
 \textsc{dependency injection} \texttt{Dependency\-Context} and invoke other
 components via \textsc{continuation injection}.
 
-\begin{figure}[tp]
-\centering
-\begin{verbatim}
-
-TODO make class diagram
+\lstset{caption={Combined \textsc{thread injection}, \textsc{continuation injection} and \textsc{dependency injection} pattern interfaces\protect\footnotemark.}}
+\begin{lstlisting}[float,label=lst:IocInjectionInterfaces]
 
     interface Component {
         void execute(ComponentContext context);
@@ -1322,7 +1309,8 @@ TODO make class diagram
     }
     
     interface ContinuationInjectionFactory {
-        ComponentContext createComponentContext(String componentId, Object parameter
+        ComponentContext createComponentContext(String componentId
+                                               , Object parameter
                                                , DependencyContext context);
     }
     
@@ -1345,10 +1333,7 @@ TODO make class diagram
         void executeComponent(String componentId 
                              , Runnable runnable);
     }
-\end{verbatim}
-\caption{Combined \textsc{thread injection}, \textsc{continuation injection} and \textsc{dependency injection} pattern interfaces\footnotemark}
-\label{fig:IocInjectionInterfaces}
-\end{figure}
+\end{lstlisting}
 \footnotetext{Integer identifiers may be used for fast array look ups rather than strings.}
 
 
@@ -1401,7 +1386,7 @@ responsible for providing the implementations (i.e. dependencies/state, thread
 of control, handling components).
 
 This configuration also demonstrates resolution of the motivating example.  Only
-\texttt{Retrieve data from database} has an explicit thread and it will only be
+\texttt{Retrieve data from data\-base} has an explicit thread and it will only be
 executed if data is required from the database.  As the remaining components are
 within the default thread pool, they are executed by an implicit thread (i.e.
 borrow the thread).  The use of implicit threads within the \textsc{inversion of
@@ -1420,13 +1405,6 @@ context. Figure \ref{fig:IocReuseForQueue} demonstrates re-using components for
 servicing a queue.  The loose coupling by the \textsc{inversion of control}
 pattern has allowed the components to be re-used between both contexts as the
 higher-level layer components no longer control the variation points.
-
-\begin{figure}[t]
-\centering
-\includegraphics[width=4in]{IocReuseForQueue}
-\caption{Component collaboration demonstrating example re-use of components to service messages from a queue.}
-\label{fig:IocReuseForQueue}
-\end{figure}
 
 
 \subsection{Consequences}
@@ -1452,6 +1430,14 @@ interface} to invoke the lower-level layer component does not change, the
 invoking higher-level layer components do not require refactoring to evolve the
 application.
 
+%% Part of Example but moved down to not be on same page
+\begin{figure}[t]
+\centering
+\includegraphics[width=4in]{IocReuseForQueue}
+\caption{Component collaboration demonstrating example re-use of components to service messages from a queue.}
+\label{fig:IocReuseForQueue}
+\end{figure}
+
 Within \textsc{inversion of control}, object-orientation provides the implicit
 state (dependencies) to a component.  When a method is used as the
 implementation of a component, explicit dependencies are injected as arguments
@@ -1467,7 +1453,7 @@ can focus objects on modelling the state within dependencies and have object's
 methods constrain changes in the state.  This is similar to databases storing
 data and constraining the changes in the data.  As application behaviour is
 implemented in components via functions, the application need not be constructed
-only as a graph of collaborating heirarchical objects.
+only as a graph of collaborating hierarchical objects.
 
 As the \textsc{thread injection} and \textsc{continuation injection} patterns
 provide implementing algorithms of the \textsc{proactor} pattern participants,
@@ -1514,7 +1500,7 @@ re-usable composite components will be left to further work.}.
 The \textsc{inversion of control} pattern is realised by using the
 \textsc{dependency injection}, \textsc{thread injection} and
 \textsc{continuation injection} patterns to invert control over the variation
-points within a heirarchical \textsc{layers} architecture to give lower-level
+points within a hierarchical \textsc{layers} architecture to give lower-level
 layer components control over their required state, execution and collaboration.
 
 The \textsc{adapter} pattern \cite{gof} adapts the interfaces of dependencies.
@@ -1526,8 +1512,8 @@ interface.  The adapted dependency is provided to the component as a new
 dependency that depends on (wraps) the re-used dependency.
 
 The \textsc{adaptor} pattern may also be used to adapt components that do not
-conform to the \texttt{Component} interface (Fig
-\ref{fig:IocInjectionInterfaces}) into an application implementing
+conform to the \texttt{Component} interface (Listing
+\ref{lst:IocInjectionInterfaces}) into an application implementing
 \textsc{inversion of control}.  This allows the \textsc{inversion of control}
 architecture of the application to re-use components not specifically built for
 it\footnote{As an example, OfficeFloor \cite{officefloor} provides an adapter to
@@ -1593,7 +1579,7 @@ load to be balanced across the distributed web servers.
 \subsection{Continuation for cancelling a component}
 
 Cancellation of the component is handled by invoking a continuation.  The
-\texttt{handle\-Exception(\ldots)} method (Fig \ref{fig:IocInjectionInterfaces})
+\texttt{handle\-Exception(\ldots)} method (Listing \ref{lst:IocInjectionInterfaces})
 handling the cancellation exception invokes a continuation for a component
 executed in another thread pool.  This allows the thread pool to shed load to
 components on another thread pool that can more efficiently handle the overload
