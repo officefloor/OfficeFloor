@@ -29,10 +29,9 @@
 %%There is just one section and two subsections.
 \documentclass[prodmode]{style/acmlarge}
 
-% Graphics
-\usepackage[pdftex]{graphicx}
-\graphicspath{{./pdf/}}
-\DeclareGraphicsExtensions{.pdf}
+% Include packages
+\usepackage{listings}
+\usepackage{caption}
 
 
 % Metadata Information
@@ -87,6 +86,17 @@ that evolve application architectures upwards.
 \copyr{Copyright 2013 is held by the author}
 
 \begin{document}
+
+% Configure Graphics package
+\graphicspath{{./pdf/}}
+\DeclareGraphicsExtensions{.pdf}
+
+% Configure Listings package
+\lstset{language=Java}
+
+% Configure Captions package (listing small font)
+\captionsetup[lstlisting]{font=footnotesize}
+
 
 \begin{bottomstuff}
 This work is the result of the author's development of OfficeFloor.\\
@@ -579,8 +589,8 @@ the handling component.}.
 
 The \texttt{Retrieve data from cache} operation (Table
 \ref{tab:example_request_operations}) from the motivating example will be used
-as an example of \textsc{continuation injection}.  Figure
-\ref{fig:Example_Method_Operation} shows the example developer implementation
+as an example of \textsc{continuation injection}.  Listing
+\ref{lst:Example_Method_Operation} shows the example developer implementation
 code.  A generic component implementation is used to reflectively invoke the
 \texttt{retrieveData(\ldots)} method. It will:
 \begin{enumerate}
@@ -590,18 +600,16 @@ code.  A generic component implementation is used to reflectively invoke the
   \item Reflectively invokes the \texttt{retrieveData(\ldots)} method with the above arguments.
 \end{enumerate}
 
-\begin{figure}[tp]
-\centering
-\begin{verbatim}
-
-TODO make listing
+\lstset{caption=Example developer implementation code for a component\protect\footnotemark}
+\begin{lstlisting}[float,label=lst:Example_Method_Operation]
 
   interface CacheContinuations {
     void cacheMiss(String key);
   }
 
   class CacheOperation {    
-    public Data retrieveData(String key, Cache cache, CacheContinuations continuations) throws IOException {
+    public Data retrieveData(String key, Cache cache
+            , CacheContinuations continuations) throws IOException {
         Data data = cache.get(key);
         if (data == null) {
             continuations.cacheMiss(key);
@@ -610,10 +618,7 @@ TODO make listing
         return data;
     }
   }
-\end{verbatim}
-\caption{Example developer implementation code for a component\footnotemark}
-\label{fig:Example_Method_Operation}
-\end{figure}
+\end{lstlisting}
 \footnotetext{\texttt{retrieveData} may also be a function should the implementing programming language support functions.}
 
 Continuations from the \texttt{retrieveData(\ldots)} method are:
@@ -653,7 +658,7 @@ intuitiveness of the \textsc{synchronous multi-threaded} pattern \cite{proactor}
 for handling concurrency.
 
 As continuations asynchronously invoke components, they need not only be invoked
-by components. Figure \ref{fig:DC_interface} illustrates a possible interface
+by components. Listing \ref{lst:DC_interface} illustrates a possible interface
 that can be injected into dependencies to invoke a component\footnote{No
 \texttt{continutionId} is necessary as may inject multiple instances
 representing the different continuations.}.  This enables dependencies to
@@ -662,18 +667,13 @@ necessary\footnote{The web server HTTP(S) socket dependency would, for example,
 typically be implemented by invoking an injected continuation to service
 requests.}.
 
-\begin{figure}[tp]
-\begin{verbatim}
-
-TODO make listing
+\lstset{caption=Injected interface for a dependency to invoke a continuation (making the dependency an Active Object)}
+\begin{lstlisting}[float,label=lst:DC_interface]
 
     interface DependencyContinuation {
         void doContinuation(Object parameter);
     }
-\end{verbatim}
-\caption{Injected interface for a dependency to invoke a continuation (making the dependency an Active Object)}
-\label{fig:DC_interface}
-\end{figure}
+\end{lstlisting}
 
 Without the graphical configuration of Component Orchestration, understanding
 the collaboration of components would become difficult due to the indirection
@@ -702,26 +702,21 @@ so that the tree can be traversed back to the root to identify the sequence of
 continuations to the component throwing the exception.  The whole tree can also
 be reported to aid the developer in debugging the cause of the issue.
 
-Integrating the \textsc{continuation injection} pattern with code not contained in
-components does not allow access to the \texttt{ComponentContext} to invoke the
-continuation for the first component.  Figure
-\ref{fig:ContinuationInjectionInterface} provides an interface that allows code
+Integrating the \textsc{continuation injection} pattern with code not contained
+in components does not allow access to the \texttt{ComponentContext} to invoke
+the continuation for the first component.  Listing
+\ref{lst:ContinuationInjectionInterface} provides an interface that allows code
 not contained in a component to invoke the first continuation.  To retrieve
 results, the \texttt{parameter} would be used as a visitor (\textsc{visitor}
 pattern \cite{gof}) and be loaded with results by the invoked components.
 
-\begin{figure}[tp]
-\begin{verbatim}
-
-TODO make listing
+\lstset{caption=Interface for code not within a component to invoke a continuation.  The component for the continuation is identified with the \texttt{componentId} parameter.}
+\begin{lstlisting}[float,label=lst:ContinuationInjectionInterface]
 
     interface ContinuationInjection {
         void doContinuation(String componentId, Object parameter);
     }
-\end{verbatim}
-\caption{Interface for code not within a component to invoke a continuation.  The component for the continuation is identified with the \texttt{componentId} parameter.}
-\label{fig:ContinuationInjectionInterface}
-\end{figure}
+\end{lstlisting}
 
 When implementing components as functions, the functions will not be pure.  As
 state is shared between components by mutable state within dependencies,
@@ -1141,19 +1136,18 @@ implementation.
 
 \subsection{Context}
 
-Frameworks built with \textsc{layers} typically imposes a top-down approach to
-designing the application.  ``The \textsc{layers} require and provide
-\textsc{explicit interfaces} from and to each other, in a top-down manner, from
-the higher to the lower \textsc{layers}'' \cite[p. 11]{ioc}.  The higher
-\textsc{layer} components define the variation points that are ``predefined
-points in the control and data flow which allow for modifying and extending a
-component's behaviour'' \cite[p. 5]{ioc}.  While various techniques, such as
-\textsc{dependency injection}, allow changing the implementation of the
-variation points the higher \textsc{layers} maintain control over what variation
-points may exist.
+Applications built with \textsc{layers} typically imposes a top-down approach to
+design.  ``The \textsc{layers} require and provide \textsc{explicit interfaces}
+from and to each other, in a top-down manner, from the higher to the lower
+\textsc{layers}'' \cite[p. 11]{ioc}.  The higher \textsc{layer} components
+define the variation points that are ``predefined points in the control and data
+flow which allow for modifying and extending a component's behaviour'' \cite[p.
+5]{ioc}.  While various techniques, such as \textsc{dependency injection}, allow
+changing the implementation of the variation points the higher-level layers
+maintain control over what variation points may exist.
 
-Inverting the control by allowing the lower \textsc{layer} components to define
-the variation points to be implemented by the higher \textsc{layer} components
+Inverting the control by allowing the lower-level layer components to define
+the variation points to be implemented by the higher-level layer components
 will allow a bottom-up design.  This will allow application architecture to be
 evolved upwards rather than designed in a top down approach.  The bottom-up
 control will better suit development methodologies, such as Agile, that evolve
@@ -1161,7 +1155,7 @@ application architectures upwards.
 
 \subsection{Problem}
 
-\textbf{How to invert control by having the lower \textsc{layer} components control the variation points of the application?}
+\textbf{How to invert control by having the lower-level layer components control the variation points of the application?}
 
 
 \subsection{Forces}
@@ -1208,7 +1202,7 @@ The method/function signature meets the requirements as it:
 \end{itemize}
 
 The method/function interface is, however, subject to tight coupling.  The tight
-coupling occurs from the higher \textsc{layer} invoking component having to:
+coupling occurs from the invoking higher-level layer component having to:
 \begin{itemize}
   \item define the method/function name;
   \item provide the necessary arguments;
@@ -1219,66 +1213,66 @@ coupling occurs from the higher \textsc{layer} invoking component having to:
 
 This tight coupling imposed by the method/function results in the hierarchical
 \textsc{layers} architecture where variation points (\textsc{explicit
-interface}s) are controlled by the higher \textsc{layers}.  The higher
-\textsc{layer} provides a \textsc{template method} \cite{gof} which is the
-variation point that lower \textsc{layer} components may extend through
-inheritance (\textit{abstract classes}) or collaboration (\textit{interfaces}).
+interfaces}) are controlled by the higher-level layers.  The higher-level layer
+provides a \textsc{template method} \cite{gof} which is the variation point that
+lower-level layer components may extend through inheritance (\textit{abstract
+classes}) or collaboration (\textit{interfaces}).
 
 Within a \textsc{layers} architecture having variation points defined by
 \textsc{template method}s requires refactoring of the \textsc{template method}
-to increase the variability of the lower \textsc{layer} components.  Increasing the
+to increase the variability of the lower-level layer components.  Increasing the
 variability ``requires adapting the \textsc{explicit interfaces} between the
 \textsc{layers} to stipulate the types of variation parameters'' \cite[p.
-5]{ioc} to allow control over the lower \textsc{layers} by the higher
-\textsc{layers}.
+5]{ioc} to allow control over the lower-level layers by the higher-level layers.
 
-Rather than try to define variation points at the higher \textsc{layers} to
-cover all possible variations of the lower \textsc{layers}, control should
-inverted and given to the lower \textsc{layers} to define the variation points. 
-However, given that \textsc{template methods} impose a top-down control over
-variation points, another form of \textsc{explicit interface} is necessary for
-lower \textsc{layer} components to provide bottom-up control over defining
-variation points.
+Rather than try to define variation points at the higher-level layers to cover
+all possible variations of the lower-level layers, control should inverted and
+given to the lower-level layers to define the variation points.  However, given
+that \textsc{template methods} impose a top-down control over variation points,
+another form of \textsc{explicit interface} is necessary for lower-level layer
+components to provide bottom-up control over defining variation points.
 
 
 \subsection{Solution}
 
-\textbf{Use \textsc{dependency injection}, \textsc{thread injection} and \textsc{continuation injection} to have the lower \textsc{layer} component control its required variation points.}
+\textbf{Use \textsc{dependency injection}, \textsc{thread injection} and \textsc{continuation injection} to have the lower-level layer component control its required variation points.}
 
 \textsc{dependency injection} \cite{ioc} (used within \textsc{continuation
-injection}) enables the lower \textsc{layer} component to specify the state
-(objects) it requires.  When \textsc{dependency injection} is used with
-\textsc{continuation injection}, the lower \textsc{layer} component specifies
-its required state (objects) via \texttt{stateId}s.  As the framework will
-provide the necessary objects (state) to the component, the lower \textsc{layer}
-component may specify as many dependencies as necessary.  The invoking higher
-\textsc{layer} components need only provide the single optionally used argument.
- This leaves the lower \textsc{layer} component to control which objects
-(dependencies/state) it may depend on.
+injection}) enables the lower-level layer component to specify the state
+(objects) it requires.  When \textsc{dependency injection} is used within
+\textsc{continuation injection}, the lower-level layer component specifies its
+required state (objects) via \texttt{stateId}s.  As the lower-level layer
+retrieves its state from \textsc{dependency injection}, the invoking
+higher-level layer components need only provide the single optionally used
+argument.  This allows the lower-level layer component to specify as many
+dependencies as necessary.  It, therefore, gives the lower-level layer component
+control over which objects (dependencies/state) it may depend on.
 
 \textsc{thread injection} provides loose coupling of a component to a thread of
-control.  By the the lower \textsc{layer} component having control over
-specifying its required dependency types, the lower \textsc{layer} component may
-specify additional dependencies to control which thread pool will be used to
-execute it.
+control.  By the the lower-level layer component having control over specifying
+its required dependency types, the lower-level layer component may specify
+additional dependencies to control which thread pool will be used to execute it.
 
-\textsc{continuation injection} enables the lower \textsc{layer} component to
-specifies its required collaboration by \texttt{componentId}s.  The component
-may specify as many continuations as are necessary for its required
-collaboration variation points.  The mapping of \texttt{continuationId} to
-\texttt{componentId} enables providing the necessary higher \textsc{layer}
-handling components for each required continuation by the lower \textsc{layer}
-component.
+\textsc{continuation injection} enables the lower-level layer component to
+specify its required collaboration by \texttt{componentId}s.  The mapping of
+\texttt{continuationId} to \texttt{componentId} enables configuring the
+higher-level layer components for handling each required continuation by the
+lower-level layer component.  As the invoking higher level-layer component does
+not need to provide references to these handling components on invoking the
+lower-level layer component, the lower-level layer component may specify as many
+continuations as are necessary for its required collaboration variation points. 
+This gives the lower-level layer component control over its collaboration
+variation points.
 
 Exceptions from components are handled by \textsc{continuation injection}.  The
 exception is mapped to a \texttt{continuationId} and subsequently mapped to a
-handling component.  As the higher \textsc{layer} invoking component is
-decoupled from having to handle the exceptions, the lower \textsc{layer}
-component is free to control throwing as many exceptions as is warranted.
+handling component.  As the  invoking higher-level layer component is decoupled
+from having to handle the exceptions, the lower-level layer component is free to
+control throwing as many exceptions as is warranted.
 
 Using the \textsc{dependency injection}, \textsc{thread injection} and
 \textsc{continuation injection} patterns together provides the necessary inversion
-of control of variation points, as the lower \textsc{layer} component controls:
+of control over variation points, as the lower-level layer component controls:
 \begin{itemize}
   \item it's name (\texttt{componentId}) which is decoupled from the invoking higher \textsc{layer} component invocation (\texttt{continuationId}) by \textsc{continuation injection};
   \item which invocations (\texttt{continuationId}s) are necessary via \textsc{continuation injection};
@@ -1288,7 +1282,7 @@ of control of variation points, as the lower \textsc{layer} component controls:
 \end{itemize}
 
 Therefore, the \texttt{Component} interface (Fig
-\ref{fig:IocInjectionInterfaces}) is the \textsc{explicit interface} for lower \textsc{layer}
+\ref{fig:IocInjectionInterfaces}) is the \textsc{explicit interface} for lower-level layer
 components to control the variation points of the application.  The component is
 executed by the \textsc{thread injection} pattern's
 \texttt{ComponentExecutor} after creation by the \textsc{continuation injection}
@@ -1401,8 +1395,8 @@ Figure \ref{fig:IocMotivatingExampleResolved} shows the Continuation
 Orchestration for the motivating example (Fig
 \ref{fig:ExampleComponentOrchestration}) overlaying the thread pools responsible
 for the components (as identified by table
-\ref{tab:example_request_thread_pools}).  The lower \textsc{layer} components
-define the required variation points which the higher \textsc{layer} is
+\ref{tab:example_request_thread_pools}).  The lower-level layer components
+define the required variation points which the higher-level layer is
 responsible for providing the implementations (i.e. dependencies/state, thread
 of control, handling components).
 
@@ -1425,31 +1419,38 @@ The \textsc{inversion of control} pattern allows components identified in figure
 context. Figure \ref{fig:IocReuseForQueue} demonstrates re-using components for
 servicing a queue.  The loose coupling by the \textsc{inversion of control}
 pattern has allowed the components to be re-used between both contexts as the
-higher \textsc{layer} components no longer control the variation points.
+higher-level layer components no longer control the variation points.
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=4in]{IocReuseForQueue}
+\caption{Component collaboration demonstrating example re-use of components to service messages from a queue.}
+\label{fig:IocReuseForQueue}
+\end{figure}
 
 
 \subsection{Consequences}
 
-Using \textsc{inversion of control} allows bottom-up design of the application. 
-As the variation points are controlled by the lower \textsc{layer} components,
-developers may start by building the lower \textsc{layer} components first.  As
-the lower \textsc{layer} components are less abstract, the developer is able to
-focus on more concrete problems and provide only the necessary variation points
-to solve the particular problem.  This avoids over engineering the design of the
-application.  Furthermore, as the higher \textsc{layer} components are built
-last, there is less need for large initial top-down designs.
+Using \textsc{inversion of control} allows bottom-up design of the application.
+As the variation points are controlled by the lower-level layer components,
+developers may start by building the lower-level layer components first.  As the
+lower-level layer components are less abstract, the developer is able to focus
+on more concrete problems and provide only the necessary variation points to
+solve the particular problem.  This avoids over engineering the design of the
+application.  Furthermore, as the higher-level layer components are built last,
+there is less need for large initial top-down designs.
 
 \textsc{inversion of control} also allows bottom-up evolution of the
 application.  Within applications imposing top-down design, the
 \textsc{explicit interface} (\textsc{template method}) between \textsc{layers}
-needs to be refactored to account for required changes that increase the
-variability of lower \textsc{layer} components as the application evolves
-\cite{ioc}.  Within bottom-up \textsc{inversion of control}, the lower
-\textsc{layer} component may introduce new variation points that are implemented
-by higher \textsc{layer} dependencies and components.  As the \textsc{explicit
-interface} to invoke the lower \textsc{layer} component does not change, the
-invoking higher \textsc{layer} components do not require refactoring to evolve
-the application.
+needs to be refactored to account for required changes to increase the
+variability of the lower-level layer components as the application evolves
+\cite{ioc}.  Within bottom-up \textsc{inversion of control}, the lower-level
+layer component may introduce new variation points that are implemented by
+higher-level layer dependencies and components.  As the \textsc{explicit
+interface} to invoke the lower-level layer component does not change, the
+invoking higher-level layer components do not require refactoring to evolve the
+application.
 
 Within \textsc{inversion of control}, object-orientation provides the implicit
 state (dependencies) to a component.  When a method is used as the
@@ -1462,11 +1463,11 @@ functions, as functional programming can be considered programming without
 implicit dependencies.
 
 Furthermore, within \textsc{inversion of control} the use of object-orientation
-can focus objects on modelling the data and have its methods constrain changes
-in state.  This is similar to databases storing data and constraining the
-changes in the data.  As application behaviour is implemented in components via
-functions, the application need not be constructed only as a graph of
-collaborating heirarchical objects.
+can focus objects on modelling the state within dependencies and have object's
+methods constrain changes in the state.  This is similar to databases storing
+data and constraining the changes in the data.  As application behaviour is
+implemented in components via functions, the application need not be constructed
+only as a graph of collaborating heirarchical objects.
 
 As the \textsc{thread injection} and \textsc{continuation injection} patterns
 provide implementing algorithms of the \textsc{proactor} pattern participants,
@@ -1507,22 +1508,14 @@ that provides a standard mechanism for developers to weave the \textit{bricks}
 patterns that OfficeFloor \cite{officefloor} uses to weave components into
 re-usable composite components will be left to further work.}.
 
-\begin{figure}[t]
-\centering
-\includegraphics[width=4in]{IocReuseForQueue}
-\caption{Component collaboration demonstrating example re-use of components to service messages from a queue.}
-\label{fig:IocReuseForQueue}
-\end{figure}
-
 
 \subsection{Related Patterns}
 
 The \textsc{inversion of control} pattern is realised by using the
 \textsc{dependency injection}, \textsc{thread injection} and
 \textsc{continuation injection} patterns to invert control over the variation
-points within a heirarchical \textsc{layer} architecture to give lower
-\textsc{layer} components control over their required state, execution and
-collaboration.
+points within a heirarchical \textsc{layers} architecture to give lower-level
+layer components control over their required state, execution and collaboration.
 
 The \textsc{adapter} pattern \cite{gof} adapts the interfaces of dependencies.
 Standardising the dependency interfaces across all components may not be
