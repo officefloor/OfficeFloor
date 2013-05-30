@@ -19,11 +19,9 @@ package net.officefloor.plugin.woof.template;
 
 import net.officefloor.compile.OfficeFloorCompiler;
 import net.officefloor.compile.issues.CompilerIssues;
-import net.officefloor.compile.issues.CompilerIssues.LocationType;
 import net.officefloor.compile.properties.Property;
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.test.properties.PropertyListUtil;
-import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
 import net.officefloor.frame.spi.TestSource;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.model.change.Change;
@@ -285,8 +283,7 @@ public class LoadWoofTemplateExtensionSpecificationTest extends
 	 *            Description of the issue.
 	 */
 	private void record_issue(String issueDescription) {
-		this.issues.addIssue(LocationType.SECTION, null, null, null,
-				issueDescription);
+		this.issues.addIssue(null, null, null, null, issueDescription);
 	}
 
 	/**
@@ -298,8 +295,7 @@ public class LoadWoofTemplateExtensionSpecificationTest extends
 	 *            Cause of the issue.
 	 */
 	private void record_issue(String issueDescription, Throwable cause) {
-		this.issues.addIssue(LocationType.SECTION, null, AssetType.WORK, null,
-				issueDescription, cause);
+		this.issues.addIssue(null, null, null, null, issueDescription, cause);
 	}
 
 	/**
@@ -319,8 +315,8 @@ public class LoadWoofTemplateExtensionSpecificationTest extends
 				.newOfficeFloorCompiler(null);
 		compiler.setCompilerIssues(this.issues);
 		WoofTemplateExtensionLoader loader = new WoofTemplateExtensionLoaderImpl();
-		PropertyList propertyList = loader
-				.loadSpecification(MockWoofTemplateExtensionSource.class);
+		PropertyList propertyList = loader.loadSpecification(
+				MockWoofTemplateExtensionSource.class, this.issues);
 
 		// Determine if expected to load
 		if (isExpectToLoad) {

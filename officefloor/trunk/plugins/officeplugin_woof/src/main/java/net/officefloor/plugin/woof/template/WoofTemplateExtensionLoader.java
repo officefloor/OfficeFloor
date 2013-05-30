@@ -41,6 +41,9 @@ public interface WoofTemplateExtensionLoader {
 	 * 
 	 * @param woofTemplateExtensionSourceClass
 	 *            {@link WoofTemplateExtensionSource} class.
+	 * @param issues
+	 *            {@link CompilerIssues} to report any issues in attempting to
+	 *            obtain the {@link PropertyList}.
 	 * @return {@link PropertyList} of the
 	 *         {@link WoofTemplateExtensionSourceProperty} instances of the
 	 *         {@link WoofTemplateExtensionSourceSpecification} or
@@ -48,7 +51,8 @@ public interface WoofTemplateExtensionLoader {
 	 *         {@link CompilerIssues}.
 	 */
 	PropertyList loadSpecification(
-			Class<? extends WoofTemplateExtensionSource> woofTemplateExtensionSourceClass);
+			Class<? extends WoofTemplateExtensionSource> woofTemplateExtensionSourceClass,
+			CompilerIssues issues);
 
 	/**
 	 * Refactors the {@link WoofTemplateExtensionSource} for the
