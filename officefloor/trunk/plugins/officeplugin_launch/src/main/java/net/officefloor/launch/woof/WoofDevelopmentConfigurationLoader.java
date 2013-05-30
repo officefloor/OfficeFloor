@@ -38,7 +38,7 @@ import net.officefloor.model.woof.WoofSectionModel;
 import net.officefloor.model.woof.WoofTemplateExtensionModel;
 import net.officefloor.model.woof.WoofTemplateModel;
 import net.officefloor.plugin.woof.WoofOfficeFloorSource;
-import net.officefloor.plugin.woof.gwt.GwtWoofTemplateExtensionService;
+import net.officefloor.plugin.woof.gwt.GwtWoofTemplateExtensionSource;
 
 import org.apache.maven.artifact.repository.ArtifactRepository;
 import org.apache.maven.model.Dependency;
@@ -192,15 +192,15 @@ public class WoofDevelopmentConfigurationLoader {
 
 				// Determine if GWT extension
 				String extensionAlias = extension.getExtensionClassName();
-				if (!(GwtWoofTemplateExtensionService.EXTENSION_ALIAS
+				if (!(GwtWoofTemplateExtensionSource.class.getName()
 						.equals(extensionAlias))) {
 					continue; // ignore non-GWT extension
 				}
 
 				// Obtain the GWT module from properties
 				for (PropertyModel property : extension.getProperties()) {
-					if (WoofChanges.PROPERTY_GWT_MODULE_PATH.equals(property
-							.getName())) {
+					if (GwtWoofTemplateExtensionSource.PROPERTY_GWT_MODULE_PATH
+							.equals(property.getName())) {
 						String gwtModuleName = transformGwtModulePathToName(property
 								.getValue());
 						configuration.addGwtModuleName(gwtModuleName);

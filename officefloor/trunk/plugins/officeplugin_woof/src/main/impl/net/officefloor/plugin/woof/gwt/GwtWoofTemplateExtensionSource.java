@@ -46,7 +46,7 @@ public class GwtWoofTemplateExtensionSource extends
 	/**
 	 * Name of the extension property for the GWT Module path.
 	 */
-	private static String PROPERTY_GWT_MODULE_PATH = "gwt.module.path";
+	public static String PROPERTY_GWT_MODULE_PATH = "gwt.module.path";
 
 	/**
 	 * Obtains the {@link #PROPERTY_GWT_MODULE_PATH} {@link PropertyModel}.
