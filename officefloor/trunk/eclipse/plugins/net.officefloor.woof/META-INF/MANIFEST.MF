@@ -87,7 +87,6 @@ Export-Package: net.officefloor.eclipse,
  net.officefloor.plugin.objects,
  net.officefloor.plugin.teams,
  net.officefloor.plugin.woof,
- net.officefloor.plugin.woof.comet,
  net.officefloor.plugin.woof.gwt
 Bundle-ClassPath: .,
  officeplugin_base-2.13.0.jar,

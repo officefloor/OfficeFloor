@@ -201,13 +201,10 @@ public class HttpTemplateWizard extends Wizard {
 		String[] renderRedirectHttpMethods = this.templatePage
 				.getRenderRedirectHttpMethods();
 		boolean isContinueRendering = this.templatePage.isContinueRendering();
-		String gwtEntryPointClassName = this.templatePage
-				.getGwtEntryPointClassName();
-		String[] gwtServerAsyncInterfaceNames = this.templatePage
-				.getGwtAsyncInterfaceNames();
-		boolean isEnableComet = this.templatePage.isEnableComet();
-		String cometManualPublishMethodName = this.templatePage
-				.getCometManualPublishMethodName();
+
+		// Obtain the Template Extensions
+		HttpTemplateExtensionInstance[] extensionInstances = this.templatePage
+				.getHttpTemplateExtensionInstances();
 
 		// Calculate the template name
 		String woofTemplateName = WoofOfficeFloorSource
@@ -243,8 +240,7 @@ public class HttpTemplateWizard extends Wizard {
 				uriPath, templatePath, logicClassName, sectionType,
 				superTemplate, inheritedTemplateOutputNames, isTemplateSecure,
 				linksSecure, renderRedirectHttpMethods, isContinueRendering,
-				gwtEntryPointClassName, gwtServerAsyncInterfaceNames,
-				isEnableComet, cometManualPublishMethodName, outputNameMapping);
+				extensionInstances, outputNameMapping);
 
 		// Use the HTTP Template Instance
 		return true;

@@ -23,9 +23,12 @@ import net.officefloor.compile.section.SectionType;
 import net.officefloor.eclipse.common.action.Operation;
 import net.officefloor.eclipse.wizard.template.HttpTemplateInstance;
 import net.officefloor.eclipse.wizard.template.HttpTemplateWizard;
+import net.officefloor.eclipse.woof.WoofEditor;
 import net.officefloor.eclipse.woof.editparts.WoofEditPart;
 import net.officefloor.model.change.Change;
 import net.officefloor.model.woof.WoofChanges;
+import net.officefloor.model.woof.WoofTemplateChangeContext;
+import net.officefloor.model.woof.WoofTemplateExtension;
 import net.officefloor.model.woof.WoofTemplateInheritance;
 import net.officefloor.model.woof.WoofTemplateModel;
 
@@ -38,13 +41,21 @@ public class AddTemplateOperation extends
 		AbstractWoofChangeOperation<WoofEditPart> {
 
 	/**
+	 * {@link WoofEditor}.
+	 */
+	private final WoofEditor editor;
+
+	/**
 	 * Initiate.
 	 * 
 	 * @param woofChanges
 	 *            {@link WoofChanges}.
+	 * @param editor
+	 *            {@link WoofEditor}.
 	 */
-	public AddTemplateOperation(WoofChanges woofChanges) {
+	public AddTemplateOperation(WoofChanges woofChanges, WoofEditor editor) {
 		super("Add template", WoofEditPart.class, woofChanges);
+		this.editor = editor;
 	}
 
 	/*
@@ -77,19 +88,20 @@ public class AddTemplateOperation extends
 		String[] renderRedirectHttpMethods = instance
 				.getRenderRedirectHttpMethods();
 		boolean isContinueRendering = instance.isContinueRendering();
-		String entryPointClassName = instance.getGwtEntryPointClassName();
-		String[] serviceAsyncInterfaces = instance
-				.getGwtServerAsyncInterfaceNames();
-		boolean isEnableComet = instance.isEnableComet();
-		String cometManualPublishMethodName = instance
-				.getCometManualPublishMethodName();
+
+		// Obtain the extensions
+		WoofTemplateExtension[] extensions = instance
+				.getWoofTemplateExtensions();
+
+		// Obtain the change context
+		WoofTemplateChangeContext changeContext = this.editor
+				.getWoofTemplateChangeContext();
 
 		// Create change to add template
 		Change<WoofTemplateModel> change = changes.addTemplate(uri, path,
 				logicClassName, type, superTemplate, isTemplateSecure,
 				linksSecure, renderRedirectHttpMethods, isContinueRendering,
-				entryPointClassName, serviceAsyncInterfaces, isEnableComet,
-				cometManualPublishMethodName);
+				extensions, changeContext);
 
 		// Position template
 		context.positionModel(change.getTarget());

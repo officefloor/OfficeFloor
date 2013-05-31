@@ -24,9 +24,12 @@ import net.officefloor.compile.section.SectionType;
 import net.officefloor.eclipse.common.action.Operation;
 import net.officefloor.eclipse.wizard.template.HttpTemplateInstance;
 import net.officefloor.eclipse.wizard.template.HttpTemplateWizard;
+import net.officefloor.eclipse.woof.WoofEditor;
 import net.officefloor.eclipse.woof.editparts.WoofTemplateEditPart;
 import net.officefloor.model.change.Change;
 import net.officefloor.model.woof.WoofChanges;
+import net.officefloor.model.woof.WoofTemplateChangeContext;
+import net.officefloor.model.woof.WoofTemplateExtension;
 import net.officefloor.model.woof.WoofTemplateInheritance;
 import net.officefloor.model.woof.WoofTemplateModel;
 
@@ -39,13 +42,21 @@ public class RefactorTemplateOperation extends
 		AbstractWoofChangeOperation<WoofTemplateEditPart> {
 
 	/**
+	 * {@link WoofEditor}.
+	 */
+	private final WoofEditor editor;
+
+	/**
 	 * Initiate.
 	 * 
 	 * @param woofChanges
 	 *            {@link WoofChanges}.
+	 * @param editor
+	 *            {@link WoofEditor}.
 	 */
-	public RefactorTemplateOperation(WoofChanges woofChanges) {
+	public RefactorTemplateOperation(WoofChanges woofChanges, WoofEditor editor) {
 		super("Refactor template", WoofTemplateEditPart.class, woofChanges);
+		this.editor = editor;
 	}
 
 	/*
@@ -87,21 +98,22 @@ public class RefactorTemplateOperation extends
 		String[] renderRedirectHttpMethods = instance
 				.getRenderRedirectHttpMethods();
 		boolean isContinueRendering = instance.isContinueRendering();
-		String entryPointClassName = instance.getGwtEntryPointClassName();
-		String[] serviceAsyncInterfaces = instance
-				.getGwtServerAsyncInterfaceNames();
-		boolean isEnableComet = instance.isEnableComet();
-		String cometManualPublishMethodName = instance
-				.getCometManualPublishMethodName();
 		Map<String, String> outputNameMapping = instance.getOutputNameMapping();
+
+		// Obtain the extensions
+		WoofTemplateExtension[] extensions = instance
+				.getWoofTemplateExtensions();
+
+		// Obtain the change context
+		WoofTemplateChangeContext changeContext = this.editor
+				.getWoofTemplateChangeContext();
 
 		// Create change to refactor template
 		Change<WoofTemplateModel> change = changes.refactorTemplate(template,
 				uri, path, logicClassName, type, superTemplate,
 				inheritedTemplateOutputNames, isTemplateSecure, linksSecure,
-				renderRedirectHttpMethods, isContinueRendering,
-				entryPointClassName, serviceAsyncInterfaces, isEnableComet,
-				cometManualPublishMethodName, outputNameMapping);
+				renderRedirectHttpMethods, isContinueRendering, extensions,
+				outputNameMapping, changeContext);
 
 		// Return the change to refactor the template
 		return change;

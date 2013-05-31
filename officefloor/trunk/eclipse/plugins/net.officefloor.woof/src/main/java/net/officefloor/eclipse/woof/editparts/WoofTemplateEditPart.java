@@ -30,9 +30,11 @@ import net.officefloor.eclipse.common.editpolicies.open.OpenHandler;
 import net.officefloor.eclipse.common.editpolicies.open.OpenHandlerContext;
 import net.officefloor.eclipse.skin.woof.TemplateFigure;
 import net.officefloor.eclipse.skin.woof.TemplateFigureContext;
+import net.officefloor.eclipse.woof.WoofEditor;
 import net.officefloor.eclipse.woof.operations.RefactorTemplateOperation;
 import net.officefloor.model.change.Change;
 import net.officefloor.model.woof.WoofChanges;
+import net.officefloor.model.woof.WoofTemplateChangeContext;
 import net.officefloor.model.woof.WoofTemplateModel;
 import net.officefloor.model.woof.WoofTemplateModel.WoofTemplateEvent;
 
@@ -75,14 +77,16 @@ public class WoofTemplateEditPart
 			@Override
 			public void doOpen(OpenHandlerContext<WoofTemplateModel> context) {
 
-				// Obtain the changes
-				WoofChanges changes = (WoofChanges) WoofTemplateEditPart.this
-						.getEditor().getModelChanges();
+				// Obtain the editor and changes
+				WoofEditor editor = (WoofEditor) WoofTemplateEditPart.this
+						.getEditor();
+				WoofChanges changes = (WoofChanges) editor.getModelChanges();
 
 				// Refactor template
 				WoofTemplateModel model = context.getModel();
-				OperationUtil.execute(new RefactorTemplateOperation(changes),
-						model.getX(), model.getY(), context.getEditPart());
+				OperationUtil.execute(new RefactorTemplateOperation(changes,
+						editor), model.getX(), model.getY(), context
+						.getEditPart());
 			}
 		});
 	}
@@ -105,7 +109,16 @@ public class WoofTemplateEditPart
 			@Override
 			public Change<WoofTemplateModel> createChange(WoofChanges changes,
 					WoofTemplateModel target, String newValue) {
-				return changes.changeTemplateUri(target, newValue);
+
+				// Obtain the editor and change context
+				WoofEditor editor = (WoofEditor) WoofTemplateEditPart.this
+						.getEditor();
+				WoofTemplateChangeContext changeContext = editor
+						.getWoofTemplateChangeContext();
+
+				// Create the change to the URI
+				return changes.changeTemplateUri(target, newValue,
+						changeContext);
 			}
 		});
 	}
