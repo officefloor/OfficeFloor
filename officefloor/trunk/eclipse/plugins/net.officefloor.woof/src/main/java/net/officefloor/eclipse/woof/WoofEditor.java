@@ -17,6 +17,8 @@
  */
 package net.officefloor.eclipse.woof;
 
+import java.io.File;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
@@ -81,9 +83,9 @@ import net.officefloor.eclipse.woof.operations.RefactorResourceOperation;
 import net.officefloor.eclipse.woof.operations.RefactorSectionOperation;
 import net.officefloor.eclipse.woof.operations.RefactorTemplateOperation;
 import net.officefloor.eclipse.woof.operations.SetAccessOperation;
+import net.officefloor.frame.spi.source.ResourceSource;
 import net.officefloor.model.change.Change;
 import net.officefloor.model.impl.repository.ModelRepositoryImpl;
-import net.officefloor.model.repository.ConfigurationContext;
 import net.officefloor.model.repository.ConfigurationItem;
 import net.officefloor.model.woof.WoofAccessInputModel;
 import net.officefloor.model.woof.WoofAccessModel;
@@ -112,16 +114,16 @@ import net.officefloor.model.woof.WoofSectionOutputToWoofSectionInputModel;
 import net.officefloor.model.woof.WoofSectionOutputToWoofTemplateModel;
 import net.officefloor.model.woof.WoofStartModel;
 import net.officefloor.model.woof.WoofStartToWoofSectionInputModel;
+import net.officefloor.model.woof.WoofTemplateChangeContext;
+import net.officefloor.model.woof.WoofTemplateChangeContextImpl;
 import net.officefloor.model.woof.WoofTemplateModel;
 import net.officefloor.model.woof.WoofTemplateOutputModel;
 import net.officefloor.model.woof.WoofTemplateOutputToWoofAccessInputModel;
 import net.officefloor.model.woof.WoofTemplateOutputToWoofResourceModel;
 import net.officefloor.model.woof.WoofTemplateOutputToWoofSectionInputModel;
 import net.officefloor.model.woof.WoofTemplateOutputToWoofTemplateModel;
-import net.officefloor.plugin.gwt.module.GwtChanges;
-import net.officefloor.plugin.gwt.module.GwtChangesImpl;
-import net.officefloor.plugin.gwt.module.GwtFailureListener;
-import net.officefloor.plugin.gwt.module.GwtModuleRepositoryImpl;
+import net.officefloor.plugin.woof.WoofContextConfigurable;
+import net.officefloor.plugin.woof.WoofOfficeFloorSource;
 
 import org.eclipse.draw2d.geometry.Rectangle;
 import org.eclipse.gef.EditPart;
@@ -142,31 +144,60 @@ public class WoofEditor extends
 	 */
 	public static final String EDITOR_ID = "net.officefloor.editors.woof";
 
+	/**
+	 * Obtains the {@link WoofTemplateChangeContext}.
+	 * 
+	 * @return {@link WoofTemplateChangeContext}.
+	 */
+	public WoofTemplateChangeContext getWoofTemplateChangeContext() {
+
+		// Create the configuration context
+		ProjectConfigurationContext configurationContext = new ProjectConfigurationContext(
+				WoofEditor.this.getEditorInput());
+
+		// Obtain the resource context
+		final List<ResourceSource> resourceSources = new LinkedList<ResourceSource>();
+		WoofContextConfigurable configurable = new WoofContextConfigurable() {
+			@Override
+			public void addProperty(String name, String value) {
+				// No properties required
+			}
+
+			@Override
+			public void setWebAppDirectory(File webAppDir) {
+				// Not required
+			}
+
+			@Override
+			public void addResources(ResourceSource resourceSource) {
+				resourceSources.add(resourceSource);
+			}
+		};
+		File projectDir = configurationContext.getProject().getLocation()
+				.toFile();
+		WoofOfficeFloorSource.loadWebResourcesFromMavenProject(configurable,
+				projectDir);
+
+		// Create the change context
+		ClassLoader classLoader = Thread.currentThread()
+				.getContextClassLoader();
+		WoofTemplateChangeContext context = new WoofTemplateChangeContextImpl(
+				true, classLoader, configurationContext,
+				resourceSources.toArray(new ResourceSource[resourceSources
+						.size()]));
+
+		// Return the change context
+		return context;
+	}
+
 	/*
 	 * ======================== Editor ================================
 	 */
 
 	@Override
 	protected WoofChanges createModelChanges(WoofModel model) {
-
-		// Create changes to update GWT Module configuration
-		ClassLoader classLoader = Thread.currentThread()
-				.getContextClassLoader();
-		ConfigurationContext configurationContext = new ProjectConfigurationContext(
-				this.getEditorInput());
-		GwtFailureListener listener = new GwtFailureListener() {
-			@Override
-			public void notifyFailure(String message, Throwable cause) {
-				// Provide error message of GWT failure
-				WoofEditor.this.messageError(message, cause);
-			}
-		};
-		GwtChanges gwtChanges = new GwtChangesImpl(new GwtModuleRepositoryImpl(
-				new ModelRepositoryImpl(), classLoader, "src/main/resources"),
-				configurationContext, listener);
-
 		// Create and return the WoOF changes
-		return new WoofChangesImpl(model, gwtChanges);
+		return new WoofChangesImpl(model);
 	}
 
 	@Override
@@ -245,9 +276,9 @@ public class WoofEditor extends
 		WoofChanges woofChanges = this.getModelChanges();
 
 		// Template actions
-		list.add(new AddTemplateOperation(woofChanges));
-		list.add(new RefactorTemplateOperation(woofChanges));
-		list.add(new DeleteTemplateOperation(woofChanges));
+		list.add(new AddTemplateOperation(woofChanges, this));
+		list.add(new RefactorTemplateOperation(woofChanges, this));
+		list.add(new DeleteTemplateOperation(woofChanges, this));
 
 		// Section actions
 		list.add(new AddSectionOperation(woofChanges));
@@ -317,8 +348,13 @@ public class WoofEditor extends
 					@Override
 					public Change<WoofTemplateModel> createChange(
 							WoofTemplateModel target) {
-						return WoofEditor.this.getModelChanges()
-								.removeTemplate(target);
+						// Return the change to remove the template
+						return WoofEditor.this
+								.getModelChanges()
+								.removeTemplate(
+										target,
+										WoofEditor.this
+												.getWoofTemplateChangeContext());
 					}
 				});
 

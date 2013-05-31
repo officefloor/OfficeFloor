@@ -17,7 +17,6 @@
  */
 package net.officefloor.eclipse.wizard.template;
 
-import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -25,9 +24,18 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import net.officefloor.compile.OfficeFloorCompiler;
+import net.officefloor.compile.properties.Property;
+import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.section.SectionOutputType;
 import net.officefloor.compile.section.SectionType;
+import net.officefloor.model.woof.PropertyModel;
 import net.officefloor.model.woof.WoofChanges;
+import net.officefloor.model.woof.WoofTemplateExtension;
+import net.officefloor.model.woof.WoofTemplateExtensionImpl;
+import net.officefloor.model.woof.WoofTemplateExtensionModel;
+import net.officefloor.model.woof.WoofTemplateExtensionProperty;
+import net.officefloor.model.woof.WoofTemplateExtensionPropertyImpl;
 import net.officefloor.model.woof.WoofTemplateInheritance;
 import net.officefloor.model.woof.WoofTemplateLinkModel;
 import net.officefloor.model.woof.WoofTemplateModel;
@@ -105,26 +113,10 @@ public class HttpTemplateInstance {
 	private final boolean isContinueRendering;
 
 	/**
-	 * GWT EntryPoint class name.
+	 * {@link HttpTemplateExtensionInstance} listing to extend the
+	 * {@link HttpTemplate}.
 	 */
-	private final String gwtEntryPointClassName;
-
-	/**
-	 * GWT Service Async Interface names.
-	 */
-	private final String[] gwtServerAsyncInterfaceNames;
-
-	/**
-	 * Flag indicating if to enable Comet for the template.
-	 */
-	private final boolean isEnableComet;
-
-	/**
-	 * {@link Method} name on the template logic {@link Class} to handle
-	 * manually publishing a Comet event. May be <code>null</code> to
-	 * automatically handle.
-	 */
-	private final String cometManualPublishMethodName;
+	private final HttpTemplateExtensionInstance[] extensionInstances;
 
 	/**
 	 * {@link WoofTemplateOutputModel} names on the {@link WoofTemplateModel}
@@ -168,16 +160,9 @@ public class HttpTemplateInstance {
 	 *            {@link HttpTemplate}.
 	 * @param iscContinueRendering
 	 *            Indicates if allow to continue rendering.
-	 * @param gwtEntryPointClassName
-	 *            GWT EntryPoint class name.
-	 * @param gwtServerAsyncInterfaceNames
-	 *            GWT Service Async Interface names.
-	 * @param isEnableComet
-	 *            Flag indicating if to enable Comet for the template.
-	 * @param cometManualPublishMethodName
-	 *            {@link Method} name on the template logic {@link Class} to
-	 *            handle manually publishing a Comet event. May be
-	 *            <code>null</code> to automatically handle.
+	 * @param extensionInstances
+	 *            {@link HttpTemplateExtensionInstance} listing to extend the
+	 *            {@link HttpTemplate}.
 	 */
 	public HttpTemplateInstance(String woofTemplateName, String uri,
 			String templatePath, String logicClassName,
@@ -185,9 +170,7 @@ public class HttpTemplateInstance {
 			Set<String> inheritedTemplateOutputNames, boolean isTemplateSecure,
 			Map<String, Boolean> linksSecure,
 			String[] renderRedirectHttpMethods, boolean isContinueRendering,
-			String gwtEntryPointClassName,
-			String[] gwtServerAsyncInterfaceNames, boolean isEnableComet,
-			String cometManualPublishMethodName) {
+			HttpTemplateExtensionInstance[] extensionInstances) {
 		this.woofTemplateName = woofTemplateName;
 		this.uri = uri;
 		this.templatePath = templatePath;
@@ -199,10 +182,7 @@ public class HttpTemplateInstance {
 		this.linksSecure = linksSecure;
 		this.renderRedirectHttpMethods = renderRedirectHttpMethods;
 		this.isContinueRendering = isContinueRendering;
-		this.gwtEntryPointClassName = gwtEntryPointClassName;
-		this.gwtServerAsyncInterfaceNames = gwtServerAsyncInterfaceNames;
-		this.isEnableComet = isEnableComet;
-		this.cometManualPublishMethodName = cometManualPublishMethodName;
+		this.extensionInstances = extensionInstances;
 		this.outputNames = null;
 		this.ouputNameMapping = null;
 	}
@@ -260,13 +240,29 @@ public class HttpTemplateInstance {
 				.toArray(new String[redirectMethods.size()]);
 
 		// Obtain the extension details
-		this.gwtEntryPointClassName = changes
-				.getGwtEntryPointClassName(template);
-		this.gwtServerAsyncInterfaceNames = changes
-				.getGwtAsyncServiceInterfaceNames(template);
-		this.isEnableComet = changes.isCometEnabled(template);
-		this.cometManualPublishMethodName = changes
-				.getCometManualPublishMethodName(template);
+		List<HttpTemplateExtensionInstance> extensionInstances = new LinkedList<HttpTemplateExtensionInstance>();
+		for (WoofTemplateExtensionModel extensionModel : template
+				.getExtensions()) {
+
+			// Create the properties
+			PropertyList properties = OfficeFloorCompiler.newPropertyList();
+			for (PropertyModel property : extensionModel.getProperties()) {
+				properties.addProperty(property.getName()).setValue(
+						property.getValue());
+			}
+
+			// Create the extension instance
+			String extensionSourceClassName = extensionModel
+					.getExtensionClassName();
+			HttpTemplateExtensionInstance extensionInstance = new HttpTemplateExtensionInstance(
+					extensionSourceClassName, properties);
+
+			// Add the extension instance
+			extensionInstances.add(extensionInstance);
+		}
+		this.extensionInstances = extensionInstances
+				.toArray(new HttpTemplateExtensionInstance[extensionInstances
+						.size()]);
 
 		// Create the listing of output names
 		List<WoofTemplateOutputModel> templateOutputs = template.getOutputs();
@@ -312,16 +308,9 @@ public class HttpTemplateInstance {
 	 *            {@link HttpTemplate}.
 	 * @param isContinueRendering
 	 *            Indicates if allow to continue rendering.
-	 * @param gwtEntryPointClassName
-	 *            GWT EntryPoint class name.
-	 * @param gwtServerAsyncInterfaceNames
-	 *            GWT Service Async Interface names.
-	 * @param isEnableComet
-	 *            Flag indicating if to enable Comet for the template.
-	 * @param cometManualPublishMethodName
-	 *            {@link Method} name on the template logic {@link Class} to
-	 *            handle manually publishing a Comet event. May be
-	 *            <code>null</code> to automatically handle.
+	 * @param extensionInstances
+	 *            {@link HttpTemplateExtensionInstance} listing to extend the
+	 *            {@link HttpTemplate}.
 	 * @param outputNameMapping
 	 *            Mapping of {@link SectionOutputType} name to existing
 	 *            {@link WoofTemplateOutputModel} name.
@@ -332,9 +321,7 @@ public class HttpTemplateInstance {
 			Set<String> inheritedTemplateOutputNames, boolean isTemplateSecure,
 			Map<String, Boolean> linksSecure,
 			String[] renderRedirectHttpMethods, boolean isContinueRendering,
-			String gwtEntryPointClassName,
-			String[] gwtServerAsyncInterfaceNames, boolean isEnableComet,
-			String cometManualPublishMethodName,
+			HttpTemplateExtensionInstance[] extensionInstances,
 			Map<String, String> outputNameMapping) {
 		this.woofTemplateName = woofTemplateName;
 		this.uri = uri;
@@ -347,10 +334,7 @@ public class HttpTemplateInstance {
 		this.linksSecure = linksSecure;
 		this.renderRedirectHttpMethods = renderRedirectHttpMethods;
 		this.isContinueRendering = isContinueRendering;
-		this.gwtEntryPointClassName = gwtEntryPointClassName;
-		this.gwtServerAsyncInterfaceNames = gwtServerAsyncInterfaceNames;
-		this.isEnableComet = isEnableComet;
-		this.cometManualPublishMethodName = cometManualPublishMethodName;
+		this.extensionInstances = extensionInstances;
 		this.outputNames = null;
 		this.ouputNameMapping = outputNameMapping;
 	}
@@ -461,41 +445,48 @@ public class HttpTemplateInstance {
 	}
 
 	/**
-	 * Obtains the GWT EntryPoint class name.
+	 * Obtains the {@link HttpTemplateExtensionInstance} listing.
 	 * 
-	 * @return GWT EntryPoint class name.
+	 * @return {@link HttpTemplateExtensionInstance} listing.
 	 */
-	public String getGwtEntryPointClassName() {
-		return this.gwtEntryPointClassName;
+	public HttpTemplateExtensionInstance[] getTemplateExtensionInstances() {
+		return this.extensionInstances;
 	}
 
 	/**
-	 * Obtains the GWT Service Async Interface names.
+	 * Obtains the {@link WoofTemplateExtension} instances.
 	 * 
-	 * @return GWT Service Async Interface names.
+	 * @return {@link WoofTemplateExtension} instances.
 	 */
-	public String[] getGwtServerAsyncInterfaceNames() {
-		return this.gwtServerAsyncInterfaceNames;
-	}
+	public WoofTemplateExtension[] getWoofTemplateExtensions() {
 
-	/**
-	 * Obtains flag indicating if to enable Comet for the template.
-	 * 
-	 * @return <code>true</code> to enable Comet for the template.
-	 */
-	public boolean isEnableComet() {
-		return this.isEnableComet;
-	}
+		// Create the extensions
+		List<WoofTemplateExtension> extensions = new LinkedList<WoofTemplateExtension>();
+		for (HttpTemplateExtensionInstance extensionInstance : this
+				.getTemplateExtensionInstances()) {
 
-	/**
-	 * Obtains the {@link Method} name on the template logic {@link Class} to
-	 * handle manually publishing a Comet event. May be <code>null</code> to
-	 * automatically handle.
-	 * 
-	 * @return Manual publish {@link Method} name.
-	 */
-	public String getCometManualPublishMethodName() {
-		return this.cometManualPublishMethodName;
+			// Obtain the properties
+			List<WoofTemplateExtensionProperty> properties = new LinkedList<WoofTemplateExtensionProperty>();
+			for (Property property : extensionInstance.getProperties()) {
+				properties.add(new WoofTemplateExtensionPropertyImpl(property
+						.getName(), property.getValue()));
+			}
+
+			// Create the woof template extension
+			String extensionSourceClassName = extensionInstance
+					.getTemplateExtensionClassName();
+			WoofTemplateExtension extension = new WoofTemplateExtensionImpl(
+					extensionSourceClassName,
+					properties
+							.toArray(new WoofTemplateExtensionProperty[properties
+									.size()]));
+
+			// Add the woof template extension
+			extensions.add(extension);
+		}
+
+		// Return the woof template extensions
+		return extensions.toArray(new WoofTemplateExtension[extensions.size()]);
 	}
 
 	/**

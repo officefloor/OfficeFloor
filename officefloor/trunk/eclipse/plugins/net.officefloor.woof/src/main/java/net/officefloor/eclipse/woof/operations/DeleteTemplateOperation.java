@@ -17,6 +17,7 @@
  */
 package net.officefloor.eclipse.woof.operations;
 
+import net.officefloor.eclipse.woof.WoofEditor;
 import net.officefloor.eclipse.woof.editparts.WoofTemplateEditPart;
 import net.officefloor.model.change.Change;
 import net.officefloor.model.woof.WoofChanges;
@@ -32,13 +33,21 @@ public class DeleteTemplateOperation extends
 		AbstractWoofChangeOperation<WoofTemplateEditPart> {
 
 	/**
+	 * {@link WoofEditor}.
+	 */
+	private final WoofEditor editor;
+
+	/**
 	 * Initiate.
 	 * 
 	 * @param woofChanges
 	 *            {@link WoofChanges}.
+	 * @param editor
+	 *            {@link WoofEditor}.
 	 */
-	public DeleteTemplateOperation(WoofChanges woofChanges) {
+	public DeleteTemplateOperation(WoofChanges woofChanges, WoofEditor editor) {
 		super("Delete template", WoofTemplateEditPart.class, woofChanges);
+		this.editor = editor;
 	}
 
 	/*
@@ -52,7 +61,8 @@ public class DeleteTemplateOperation extends
 		WoofTemplateModel template = context.getEditPart().getCastedModel();
 
 		// Create the change
-		Change<WoofTemplateModel> change = changes.removeTemplate(template);
+		Change<WoofTemplateModel> change = changes.removeTemplate(template,
+				this.editor.getWoofTemplateChangeContext());
 
 		// Return the change
 		return change;
