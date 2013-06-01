@@ -10,7 +10,7 @@
     <template name="ria" uri="ria" path="ria.woof.html" class="${package}.ria.RiaLogic" x="449" y="105">
       <output name="output" argument-type="">
       </output>
-      <extension class="GWT">
+      <extension class="net.officefloor.plugin.woof.gwt.GwtWoofTemplateExtensionSource">
         <property name="gwt.module.path" value="net/officefloor/test/ria/ria.gwt.xml"/>
         <property name="gwt.async.service.interfaces" value="${package}.ria.client.CounterServiceAsync"/>
       </extension>
