@@ -11,7 +11,7 @@
 		</file>
 		<file>
 			<location>site.xml</location>
-			<contains><![CDATA[<feature(\s)+url="features/net.officefloor.plugins.feature_@{net.officefloor.plugins.feature_version}.jar"(\s)+id="net.officefloor.plugins.feature"(\s)+version="@{net.officefloor.plugins.feature_version}">]]></contains>
+			<contains><![CDATA[<feature(\s)+url="features/net.officefloor.extras.feature_@{net.officefloor.extras.feature_version}.jar"(\s)+id="net.officefloor.extras.feature"(\s)+version="@{net.officefloor.extras.feature_version}">]]></contains>
 		</file>
 	</files>
 </verifications>
