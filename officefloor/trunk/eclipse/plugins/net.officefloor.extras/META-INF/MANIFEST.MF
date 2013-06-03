@@ -9,7 +9,8 @@ Require-Bundle: net.officefloor.core;bundle-version="2.13.0",
  net.officefloor.woof;bundle-version="2.13.0"
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Eclipse-RegisterBuddy: net.officefloor.core,
- net.officefloor.ui
+ net.officefloor.ui,
+ net.officefloor.woof
 Export-Package: com.sun.jndi.url.mock,
  com.sun.jndi.url.officefloor,
  net.officefloor.eclipse.jdbc,

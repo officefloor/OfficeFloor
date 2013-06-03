@@ -20,6 +20,7 @@ package net.officefloor.eclipse.extension.template;
 import net.officefloor.compile.properties.Property;
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.eclipse.extension.ExtensionUtil;
+import net.officefloor.eclipse.extension.WoofExtensionUtil;
 import net.officefloor.plugin.woof.template.WoofTemplateExtensionSource;
 
 import org.eclipse.swt.widgets.Composite;
@@ -35,7 +36,7 @@ public interface WoofTemplateExtensionSourceExtension<S extends WoofTemplateExte
 	/**
 	 * Extension ID.
 	 */
-	public static final String EXTENSION_ID = ExtensionUtil
+	public static final String EXTENSION_ID = WoofExtensionUtil
 			.getExtensionId("wooftemplateextensionsources");
 
 	/**
