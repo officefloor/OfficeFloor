@@ -26,6 +26,24 @@
 			<artifactId>net.officefloor.ui</artifactId>
 			<scope>provided</scope>
 		</dependency>
+		
+		<!-- Provided so not include in eclipse runtime class path -->
+		<dependency>
+			<groupId>net.officefloor.core</groupId>
+			<artifactId>officecompiler</artifactId>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>net.officefloor.plugin</groupId>
+			<artifactId>officeplugin_socket</artifactId>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>net.officefloor.plugin</groupId>
+			<artifactId>officeplugin_web</artifactId>
+			<scope>provided</scope>
+		</dependency>
+		
 
 		<!-- Required -->
 		<dependency>
@@ -47,12 +65,17 @@
 		</dependency>
 		<dependency>
 			<groupId>net.officefloor.plugin</groupId>
-			<artifactId>officeplugin_socket</artifactId>
+			<artifactId>officeplugin_comet</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>net.officefloor.plugin</groupId>
-			<artifactId>officeplugin_web</artifactId>
+			<artifactId>officeplugin_gwt</artifactId>
 		</dependency>
+		<dependency>
+			<groupId>net.officefloor.plugin</groupId>
+			<artifactId>officeplugin_json</artifactId>
+		</dependency>
+
 
 		<!-- Necessary to load JPA EntityManager class -->
 		<dependency>

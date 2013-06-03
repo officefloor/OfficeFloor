@@ -22,11 +22,6 @@
 		</dependency>
 		<dependency>
 			<groupId>${project.groupId}</groupId>
-			<artifactId>net.officefloor.plugins.feature</artifactId>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>${project.groupId}</groupId>
 			<artifactId>net.officefloor.woof</artifactId>
 			<scope>provided</scope>
 		</dependency>

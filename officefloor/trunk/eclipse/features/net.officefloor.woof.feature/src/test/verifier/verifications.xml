@@ -17,10 +17,6 @@
 		</file>
 		<file>
 			<location>feature.xml</location>
-			<contains><![CDATA[<import(\s+)feature="net.officefloor.plugins.feature"(\s+)version="@{net.officefloor.plugins.feature_version}"]]></contains>
-		</file>
-		<file>
-			<location>feature.xml</location>
 			<contains><![CDATA[id="net.officefloor.woof"(\s+)version="@{net.officefloor.woof_version}]]></contains>
 		</file>
 	</files>
