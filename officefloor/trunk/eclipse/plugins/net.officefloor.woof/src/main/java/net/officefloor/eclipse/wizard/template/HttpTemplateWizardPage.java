@@ -21,6 +21,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -38,10 +39,16 @@ import net.officefloor.eclipse.common.dialog.input.impl.BeanListInput;
 import net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart;
 import net.officefloor.eclipse.dialog.input.WoofFileInput;
 import net.officefloor.eclipse.extension.ExtensionUtil;
+import net.officefloor.eclipse.extension.WoofExtensionUtil;
 import net.officefloor.eclipse.extension.sectionsource.SectionSourceExtensionContext;
+import net.officefloor.eclipse.extension.template.WoofTemplateExtensionSourceExtension;
 import net.officefloor.eclipse.extension.util.SourceExtensionUtil;
 import net.officefloor.eclipse.util.EclipseUtil;
+import net.officefloor.eclipse.util.JavaUtil;
+import net.officefloor.eclipse.util.LogUtil;
 import net.officefloor.eclipse.web.HttpTemplateSectionSourceExtension;
+import net.officefloor.eclipse.wizard.access.HttpSecuritySourceInstanceContext;
+import net.officefloor.eclipse.wizard.access.SelectHttpTemplateExtensionSourceInstanceDialog;
 import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
 import net.officefloor.frame.spi.source.ResourceSource;
 import net.officefloor.model.woof.WoofTemplateInheritance;
@@ -54,17 +61,24 @@ import net.officefloor.plugin.web.http.template.section.HttpTemplateInitialWorkS
 import net.officefloor.plugin.web.http.template.section.HttpTemplateSectionSource;
 import net.officefloor.plugin.woof.WoofContextConfigurable;
 import net.officefloor.plugin.woof.WoofOfficeFloorSource;
+import net.officefloor.plugin.woof.template.WoofTemplateExtensionSource;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.draw2d.ColorConstants;
+import org.eclipse.jdt.core.IType;
 import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.MouseAdapter;
+import org.eclipse.swt.events.MouseEvent;
+import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.TabFolder;
+import org.eclipse.swt.widgets.TabItem;
 
 /**
  * Wizard page providing the details of the {@link HttpTemplate}.
@@ -72,7 +86,8 @@ import org.eclipse.swt.widgets.Label;
  * @author Daniel Sagenschneider
  */
 public class HttpTemplateWizardPage extends WizardPage implements
-		CompilerIssues, SectionSourceExtensionContext {
+		CompilerIssues, SectionSourceExtensionContext,
+		HttpTemplateExtensionSourceInstanceContext {
 
 	/**
 	 * {@link Property} specifying the super {@link WoofTemplateModel} name.
@@ -83,6 +98,69 @@ public class HttpTemplateWizardPage extends WizardPage implements
 	 * {@link Property} indicating whether may continue rendering.
 	 */
 	private static final String PROPERTY_IS_CONTINUE_RENDERING = "is.continue.rendering";
+
+	/**
+	 * Creates the mapping of {@link WoofTemplateExtensionSource} class name to
+	 * its {@link HttpTemplateExtensionInstance}.
+	 * 
+	 * @param classLoader
+	 *            {@link ClassLoader}.
+	 * @param project
+	 *            {@link IProject}.
+	 * @param context
+	 *            {@link HttpSecuritySourceInstanceContext}.
+	 * @return Mapping of {@link WoofTemplateExtensionSource} class name to its
+	 *         {@link HttpTemplateExtensionInstance}.
+	 */
+	public static Map<String, HttpTemplateExtensionSourceInstance> createHttpTemplateExtensionSourceInstanceMap(
+			ClassLoader classLoader, IProject project,
+			HttpTemplateExtensionSourceInstanceContext context) {
+
+		// Obtain extension source instances (by class name for unique set)
+		Map<String, HttpTemplateExtensionSourceInstance> extensionSourceInstances = new HashMap<String, HttpTemplateExtensionSourceInstance>();
+
+		// Obtain from project class path
+		try {
+			// Obtain the types on the class path
+			IType[] types = JavaUtil.getSubTypes(project,
+					WoofTemplateExtensionSource.class.getName());
+			for (IType type : types) {
+				String className = type.getFullyQualifiedName();
+				if (ExtensionUtil.isIgnoreSource(className, classLoader)) {
+					continue; // ignore source
+				}
+				extensionSourceInstances.put(className,
+						new HttpTemplateExtensionSourceInstance(className,
+								null, context));
+			}
+		} catch (Throwable ex) {
+			LogUtil.logError(
+					"Failed to obtain java types from project class path", ex);
+		}
+
+		// Obtain via extension point second to override
+		for (WoofTemplateExtensionSourceExtension<?> woofTemplateExtensionSourceExtension : WoofExtensionUtil
+				.createWoofTemplateExtensionSourceExtensionList()) {
+			try {
+				Class<?> woofTemplateExtensionSourceClass = woofTemplateExtensionSourceExtension
+						.getWoofTemplateExtensionSourceClass();
+				String woofTemplateExtensionSourceClassName = woofTemplateExtensionSourceClass
+						.getName();
+				extensionSourceInstances.put(
+						woofTemplateExtensionSourceClassName,
+						new HttpTemplateExtensionSourceInstance(
+								woofTemplateExtensionSourceClassName,
+								woofTemplateExtensionSourceExtension, context));
+			} catch (Throwable ex) {
+				LogUtil.logError("Failed to create source instance for "
+						+ woofTemplateExtensionSourceExtension.getClass()
+								.getName(), ex);
+			}
+		}
+
+		// Return HTTP template extension source instances by class name
+		return extensionSourceInstances;
+	}
 
 	/**
 	 * Obtains the text value.
@@ -192,6 +270,11 @@ public class HttpTemplateWizardPage extends WizardPage implements
 	 * {@link HttpTemplateSectionSourceExtension}.
 	 */
 	private HttpTemplateSectionSourceExtension templateExtension;
+
+	/**
+	 * Available {@link HttpTemplateExtensionSourceInstance} listing.
+	 */
+	private HttpTemplateExtensionSourceInstance[] availableHttpTemplateExtensionSourceInstances;
 
 	/**
 	 * Initiate.
@@ -344,6 +427,24 @@ public class HttpTemplateWizardPage extends WizardPage implements
 						initialRenderRedirectHttpMethods);
 		this.isContinueRendering = this.addProperty(
 				PROPERTY_IS_CONTINUE_RENDERING, initialIsContinueRendering);
+
+		// Obtain the map of HTTP template extension source instances
+		Map<String, HttpTemplateExtensionSourceInstance> httpTemplateExtensionSourceInstanceMap = createHttpTemplateExtensionSourceInstanceMap(
+				this.classLoader, project, this);
+
+		// Obtain the HTTP template extension source instances (in order)
+		this.availableHttpTemplateExtensionSourceInstances = httpTemplateExtensionSourceInstanceMap
+				.values().toArray(new HttpTemplateExtensionSourceInstance[0]);
+		Arrays.sort(this.availableHttpTemplateExtensionSourceInstances,
+				new Comparator<HttpTemplateExtensionSourceInstance>() {
+					@Override
+					public int compare(HttpTemplateExtensionSourceInstance a,
+							HttpTemplateExtensionSourceInstance b) {
+						return String.CASE_INSENSITIVE_ORDER.compare(
+								a.getWoofTemplateExtensionSourceClassName(),
+								b.getWoofTemplateExtensionSourceClassName());
+					}
+				});
 
 		// Specify the title
 		this.setTitle("Add Template");
@@ -619,102 +720,50 @@ public class HttpTemplateWizardPage extends WizardPage implements
 				PROPERTY_IS_CONTINUE_RENDERING, false, String.valueOf(true),
 				String.valueOf(false), page, this, null);
 
-		/*
-		 * ------------- Configuration specific to extensions -----------------
-		 */
+		// Configure the template extensions
+		new Label(page, SWT.NONE).setText("Extensions");
+		final TabFolder extensionTabs = new TabFolder(page, SWT.NONE);
+		extensionTabs.setLayoutData(new GridData(SWT.FILL, SWT.BEGINNING, true,
+				false));
 
-		// // Provide means to specify GWT extension
-		// new Label(page, SWT.NONE).setText("GWT Enty Point Class: ");
-		// this.gwtEntryPointClassName = initialGwtEntryPoint;
-		// InputHandler<String> gwtEntryPoint = new InputHandler<String>(page,
-		// new ClasspathClassInput(this.project, page.getShell()),
-		// this.gwtEntryPointClassName, new InputListener() {
-		// @Override
-		// public void notifyValueChanged(Object value) {
-		// // Specify the EntyPoint and indicate changed
-		// HttpTemplateWizardPage.this.gwtEntryPointClassName = (value == null ?
-		// ""
-		// : value.toString());
-		// HttpTemplateWizardPage.this.handleChange();
-		// }
-		//
-		// @Override
-		// public void notifyValueInvalid(String message) {
-		// HttpTemplateWizardPage.this.setErrorMessage(message);
-		// }
-		// });
-		// gwtEntryPoint.getControl().setLayoutData(
-		// new GridData(SWT.FILL, SWT.BEGINNING, true, false));
-		//
-		// // Provide means to specify GWT Service Async Interfaces
-		// new Label(page, SWT.NONE).setText("GWT Service Async Interfaces: ");
-		// ListInput<Composite> gwtServicesAsyncInterfacesListInput = new
-		// ListInput<Composite>(
-		// String.class, page, new InputFactory<Composite>() {
-		// @Override
-		// public Input<Composite> createInput() {
-		// return new ClasspathClassInput(
-		// HttpTemplateWizardPage.this.project,
-		// page.getShell());
-		// }
-		// });
-		// this.gwtServiceAsyncInterfaces = initialGwtAsyncInterfaces;
-		// InputHandler<String[]> gwtAsyncServices = new InputHandler<String[]>(
-		// page, gwtServicesAsyncInterfacesListInput,
-		// this.gwtServiceAsyncInterfaces, new InputListener() {
-		// @Override
-		// public void notifyValueChanged(Object value) {
-		// // Specify GWT Async Interfaces and indicate changed
-		// HttpTemplateWizardPage.this.gwtServiceAsyncInterfaces = (String[])
-		// value;
-		// HttpTemplateWizardPage.this.handleChange();
-		// }
-		//
-		// @Override
-		// public void notifyValueInvalid(String message) {
-		// HttpTemplateWizardPage.this.setErrorMessage(message);
-		// }
-		// });
-		// gwtAsyncServices.getControl().setLayoutData(
-		// new GridData(SWT.FILL, SWT.BEGINNING, true, false));
-		//
-		// // Provide means to enable Comet
-		// new Label(page, SWT.NONE).setText("Enable Comet: ");
-		// this.enableComet = new InputHandler<Boolean>(page, new
-		// BooleanInput(),
-		// Boolean.valueOf(initiallyEnableComet), new InputListener() {
-		// @Override
-		// public void notifyValueInvalid(String message) {
-		// // Should never be invalid
-		// }
-		//
-		// @Override
-		// public void notifyValueChanged(Object value) {
-		// // Handle change
-		// HttpTemplateWizardPage.this.handleChange();
-		// }
-		// });
-		//
-		// // Provide means to specify manual publish handle method name
-		// new Label(page, SWT.NONE).setText("Comet Manual Publish Method: ");
-		// this.cometManualPublishMethodInput = new ClassMethodInput(
-		// this.classLoader);
-		// this.cometManualPublishMethodInput.setClassName(this.logicClassName
-		// .getValue());
-		// this.cometManualPublishMethodName = new InputHandler<String>(page,
-		// this.cometManualPublishMethodInput,
-		// initialCometManualPublishMethodName, new InputListener() {
-		// @Override
-		// public void notifyValueInvalid(String message) {
-		// // Should never be invalid
-		// }
-		//
-		// @Override
-		// public void notifyValueChanged(Object value) {
-		// // Handle change
-		// HttpTemplateWizardPage.this.handleChange();
-		// }
-		// });
+		// Provide the extension add button
+		final TabItem addExtensionTab = new TabItem(extensionTabs, SWT.NONE);
+		addExtensionTab.setText("+");
+		Label addExtensionLabel = new Label(extensionTabs, SWT.NONE);
+		addExtensionLabel.setText("Press '+' to add an extension");
+		addExtensionTab.setControl(addExtensionLabel);
+
+		// Listen for click on add extension tab
+		extensionTabs.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseDown(MouseEvent e) {
+				TabFolder curFolder = (TabFolder) e.widget;
+				Point eventLocation = new Point(e.x, e.y);
+				TabItem clickedTab = curFolder.getItem(eventLocation);
+				if (clickedTab == addExtensionTab) {
+
+					// Provide dialog to select extension
+					SelectHttpTemplateExtensionSourceInstanceDialog dialog = new SelectHttpTemplateExtensionSourceInstanceDialog(
+							extensionTabs.getShell(),
+							HttpTemplateWizardPage.this.availableHttpTemplateExtensionSourceInstances);
+					if (dialog.open() == SelectHttpTemplateExtensionSourceInstanceDialog.OK) {
+
+						// Add a tab (as second last item)
+						int tabIndex = Math.max(0,
+								(extensionTabs.getItemCount() - 1));
+						TabItem extraTab = new TabItem(extensionTabs, SWT.NONE,
+								tabIndex);
+						extraTab.setText(String.valueOf(tabIndex));
+						Label tabLabel = new Label(extensionTabs, SWT.NONE);
+						tabLabel.setText("Added tab");
+						extraTab.setControl(tabLabel);
+
+						// Provide focus to new tab
+						extensionTabs.setSelection(tabIndex);
+					}
+				}
+			}
+		});
 
 		// Indicate initial state
 		this.handleChange();

@@ -22,7 +22,9 @@ import java.util.Map;
 
 import net.officefloor.eclipse.WoofPlugin;
 import net.officefloor.eclipse.extension.access.HttpSecuritySourceExtension;
+import net.officefloor.eclipse.extension.template.WoofTemplateExtensionSourceExtension;
 import net.officefloor.plugin.web.http.security.HttpSecuritySource;
+import net.officefloor.plugin.woof.template.WoofTemplateExtensionSource;
 
 /**
  * Utility class for working with extensions.
@@ -70,13 +72,53 @@ public class WoofExtensionUtil extends ExtensionUtil {
 	}
 
 	/**
-	 * Creates the listing of {@link SectionSourceExtension} instances.
+	 * Creates the listing of {@link HttpSecuritySourceExtension} instances.
 	 * 
-	 * @return Listing of {@link SectionSourceExtension} instances.
+	 * @return Listing of {@link HttpSecuritySourceExtension} instances.
 	 */
 	@SuppressWarnings("rawtypes")
 	public static List<HttpSecuritySourceExtension> createHttpSecuritySourceExtensionList() {
 		return createSourceExtensionList(createHttpSecuritySourceExtensionMap());
+	}
+
+	/**
+	 * {@link SourceClassExtractor} for the
+	 * {@link WoofTemplateExtensionSourceExtension}.
+	 */
+	@SuppressWarnings("rawtypes")
+	private static final SourceClassExtractor<WoofTemplateExtensionSourceExtension> WOOF_TEMPLATE_EXTENSION_SOURCE_CLASS_EXTRACTOR = new SourceClassExtractor<WoofTemplateExtensionSourceExtension>() {
+		@Override
+		public Class<?> getSourceClass(
+				WoofTemplateExtensionSourceExtension sourceExtension) {
+			return sourceExtension.getWoofTemplateExtensionSourceClass();
+		}
+	};
+
+	/**
+	 * Creates the map of {@link WoofTemplateExtensionSourceExtension} instances
+	 * by their respective {@link WoofTemplateExtensionSource} class name.
+	 * 
+	 * @return Map of {@link WoofTemplateExtensionSourceExtension} instances by
+	 *         their respective {@link WoofTemplateExtensionSource} class name.
+	 */
+	@SuppressWarnings("rawtypes")
+	public static Map<String, WoofTemplateExtensionSourceExtension> createWoofTemplateExtensionSourceExtensionMap() {
+		return ExtensionUtil.createSourceExtensionMap(
+				WoofTemplateExtensionSourceExtension.EXTENSION_ID,
+				WoofTemplateExtensionSourceExtension.class,
+				WOOF_TEMPLATE_EXTENSION_SOURCE_CLASS_EXTRACTOR);
+	}
+
+	/**
+	 * Creates the listing of {@link WoofTemplateExtensionSourceExtension}
+	 * instances.
+	 * 
+	 * @return Listing of {@link WoofTemplateExtensionSourceExtension}
+	 *         instances.
+	 */
+	@SuppressWarnings("rawtypes")
+	public static List<WoofTemplateExtensionSourceExtension> createWoofTemplateExtensionSourceExtensionList() {
+		return createSourceExtensionList(createWoofTemplateExtensionSourceExtensionMap());
 	}
 
 	/**

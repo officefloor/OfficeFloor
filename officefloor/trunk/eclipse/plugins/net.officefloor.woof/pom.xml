@@ -26,21 +26,24 @@
 			<artifactId>net.officefloor.ui</artifactId>
 			<scope>provided</scope>
 		</dependency>
+
+		<!-- Provided so not include in eclipse runtime class path -->
 		<dependency>
-			<groupId>${project.groupId}</groupId>
-			<artifactId>net.officefloor.plugins</artifactId>
+			<groupId>net.officefloor.core</groupId>
+			<artifactId>officecompiler</artifactId>
 			<scope>provided</scope>
 		</dependency>
+		<dependency>
+			<groupId>net.officefloor.core</groupId>
+			<artifactId>officebuilding</artifactId>
+			<scope>provided</scope>
+		</dependency>
+
 
 		<!-- Required -->
 		<dependency>
 			<groupId>${project.groupId}</groupId>
 			<artifactId>net.officefloor.feature</artifactId>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>${project.groupId}</groupId>
-			<artifactId>net.officefloor.plugins.feature</artifactId>
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
