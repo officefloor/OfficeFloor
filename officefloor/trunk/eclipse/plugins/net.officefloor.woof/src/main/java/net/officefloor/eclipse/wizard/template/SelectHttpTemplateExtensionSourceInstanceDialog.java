@@ -15,9 +15,8 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.eclipse.wizard.access;
+package net.officefloor.eclipse.wizard.template;
 
-import net.officefloor.eclipse.wizard.template.HttpTemplateExtensionSourceInstance;
 
 import org.eclipse.jface.viewers.IStructuredContentProvider;
 import org.eclipse.jface.viewers.LabelProvider;
@@ -49,6 +48,9 @@ public class SelectHttpTemplateExtensionSourceInstanceDialog extends ListDialog 
 		// Specify title
 		this.setTitle("Add extension");
 		this.setMessage("Select the extension to add");
+		
+		// Provide the input
+		this.setInput(instances);
 
 		// Provide the content
 		this.setContentProvider(new IStructuredContentProvider() {
