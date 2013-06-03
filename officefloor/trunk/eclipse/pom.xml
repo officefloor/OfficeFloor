@@ -22,13 +22,13 @@
 		<module>plugins/net.officefloor.ui.tests</module>
 		<module>features/net.officefloor.feature</module>
 
-		<!-- Plug-in eclipse functionality -->
-		<module>plugins/net.officefloor.plugins</module>
-		<module>features/net.officefloor.plugins.feature</module>
-
 		<!-- WoOF eclipse functionality -->
 		<module>plugins/net.officefloor.woof</module>
 		<module>features/net.officefloor.woof.feature</module>
+
+		<!-- Extras eclipse functionality -->
+		<module>plugins/net.officefloor.extras</module>
+		<module>features/net.officefloor.extras.feature</module>
 
 		<!-- Deploy to Update Site -->
 		<module>update.site</module>
