@@ -33,4 +33,10 @@
       </managedobjectsource>
    </extension>
    <!-- END SNIPPET: tutorial -->
+   <extension
+         point="net.officefloor.woof.wooftemplateextensionsources">
+      <wooftemplateextensionsource
+            class="net.officefloor.eclipse.gwt.GwtWoofTemplateExtensionSourceExtension">
+      </wooftemplateextensionsource>
+   </extension>
 </plugin>

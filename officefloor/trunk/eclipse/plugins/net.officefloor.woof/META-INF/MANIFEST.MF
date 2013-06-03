@@ -9,6 +9,7 @@ Bundle-ActivationPolicy: lazy
 Require-Bundle: net.officefloor.core;bundle-version="2.13.0",
  net.officefloor.ui;bundle-version="2.13.0"
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Eclipse-BuddyPolicy: registered
 Eclipse-RegisterBuddy: net.officefloor.core, 
  net.officefloor.ui
 Import-Package: org.eclipse.core.commands.common,

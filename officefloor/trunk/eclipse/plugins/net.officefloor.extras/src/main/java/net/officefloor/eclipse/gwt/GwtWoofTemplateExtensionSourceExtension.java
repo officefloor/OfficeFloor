@@ -17,13 +17,45 @@
  */
 package net.officefloor.eclipse.gwt;
 
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Label;
+
 import net.officefloor.eclipse.extension.template.WoofTemplateExtensionSourceExtension;
+import net.officefloor.eclipse.extension.template.WoofTemplateExtensionSourceExtensionContext;
+import net.officefloor.plugin.woof.gwt.GwtWoofTemplateExtensionSource;
 
 /**
  * GWT {@link WoofTemplateExtensionSourceExtension}.
  * 
  * @author Daniel Sagenschneider
  */
-public class GwtWoofTemplateExtensionSourceExtension {
+public class GwtWoofTemplateExtensionSourceExtension implements
+		WoofTemplateExtensionSourceExtension<GwtWoofTemplateExtensionSource> {
+
+	/*
+	 * ================ WoofTemplateExtensionSourceExtension ==================
+	 */
+
+	@Override
+	public Class<GwtWoofTemplateExtensionSource> getWoofTemplateExtensionSourceClass() {
+		return GwtWoofTemplateExtensionSource.class;
+	}
+
+	@Override
+	public String getWoofTemplateExtensionSourceLabel() {
+		return "GWT";
+	}
+
+	@Override
+	public Control createControl(Composite page,
+			WoofTemplateExtensionSourceExtensionContext context) {
+
+		// TODO provide details
+		Label todo = new Label(page, SWT.NONE);
+		todo.setText("TODO provide means to configure GWT");
+		return todo;
+	}
 
 }
