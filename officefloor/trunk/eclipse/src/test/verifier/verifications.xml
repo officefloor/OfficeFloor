@@ -26,11 +26,11 @@
 
 		<!-- Plug-in eclipse modules are inheriting correct version -->
 		<file>
-			<location>plugins/net.officefloor.plugins/pom.xml</location>
+			<location>plugins/net.officefloor.extras/pom.xml</location>
 			<contains><![CDATA[<version>${project.version}</version>(\s)*</parent>]]></contains>
 		</file>
 		<file>
-			<location>features/net.officefloor.plugins.feature/pom.xml</location>
+			<location>features/net.officefloor.extras.feature/pom.xml</location>
 			<contains><![CDATA[<version>${project.version}</version>(\s)*</parent>]]></contains>
 		</file>
 

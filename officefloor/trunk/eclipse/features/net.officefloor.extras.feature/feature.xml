@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <feature
       label="OfficeFloor Plugins Feature"
-      id="net.officefloor.plugins.feature"
+      id="net.officefloor.extras.feature"
       version="2.13.0"
       provider-name="OfficeFloor">
 
