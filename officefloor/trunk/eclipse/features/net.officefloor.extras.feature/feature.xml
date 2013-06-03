@@ -34,7 +34,7 @@
    </requires>
 
    <plugin
-         id="net.officefloor.plugins"
+         id="net.officefloor.extras"
          version="2.13.0"
          download-size="0"
          install-size="0"

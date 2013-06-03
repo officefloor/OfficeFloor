@@ -1,7 +1,7 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
-Bundle-Name: Eclipse OfficeFloor Plug-ins
-Bundle-SymbolicName: net.officefloor.plugins;singleton:=true
+Bundle-Name: Eclipse OfficeFloor Extras
+Bundle-SymbolicName: net.officefloor.extras;singleton:=true
 Bundle-Version: 2.13.0
 Bundle-Vendor: OfficeFloor
 Require-Bundle: net.officefloor.core;bundle-version="2.13.0",
