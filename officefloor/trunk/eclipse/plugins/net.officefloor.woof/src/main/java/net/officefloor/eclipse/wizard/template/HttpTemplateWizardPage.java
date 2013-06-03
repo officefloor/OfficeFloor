@@ -48,7 +48,6 @@ import net.officefloor.eclipse.util.JavaUtil;
 import net.officefloor.eclipse.util.LogUtil;
 import net.officefloor.eclipse.web.HttpTemplateSectionSourceExtension;
 import net.officefloor.eclipse.wizard.access.HttpSecuritySourceInstanceContext;
-import net.officefloor.eclipse.wizard.access.SelectHttpTemplateExtensionSourceInstanceDialog;
 import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
 import net.officefloor.frame.spi.source.ResourceSource;
 import net.officefloor.model.woof.WoofTemplateInheritance;
