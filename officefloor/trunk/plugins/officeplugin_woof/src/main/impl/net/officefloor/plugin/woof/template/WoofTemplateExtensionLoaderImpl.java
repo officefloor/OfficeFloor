@@ -17,6 +17,8 @@
  */
 package net.officefloor.plugin.woof.template;
 
+import net.officefloor.compile.OfficeFloorCompiler;
+import net.officefloor.compile.OfficeFloorCompilerRunnable;
 import net.officefloor.compile.impl.properties.PropertyListImpl;
 import net.officefloor.compile.impl.properties.PropertyListSourceProperties;
 import net.officefloor.compile.impl.util.CompileUtil;
@@ -45,172 +47,201 @@ public class WoofTemplateExtensionLoaderImpl implements
 	 * =============== WoofTemplateExtensionLoader =================
 	 */
 
+	public static class LoadSpecification implements
+			OfficeFloorCompilerRunnable<PropertyList> {
+		@Override
+		public PropertyList run(OfficeFloorCompiler compiler,
+				Object[] parameters) throws Exception {
+
+			// Obtain the parameters
+			String woofTemplateExtensionSourceClassName = (String) parameters[0];
+			CompilerIssues issues = (CompilerIssues) parameters[1];
+
+			// Instantiate the woof template extension source
+			SourceContext sourceContext = new SourceContextImpl(true,
+					compiler.getClassLoader());
+			WoofTemplateExtensionSource extensionSource = CompileUtil
+					.newInstance(woofTemplateExtensionSourceClassName,
+							WoofTemplateExtensionSource.class, null,
+							sourceContext, null, null, null, null, issues);
+			if (extensionSource == null) {
+				return null; // failed to instantiate
+			}
+
+			// Obtain the specification
+			WoofTemplateExtensionSourceSpecification specification;
+			try {
+				specification = extensionSource.getSpecification();
+			} catch (Throwable ex) {
+				issues.addIssue(
+						null,
+						null,
+						null,
+						null,
+						"Failed to obtain "
+								+ WoofTemplateExtensionSourceSpecification.class
+										.getSimpleName() + " from "
+								+ woofTemplateExtensionSourceClassName, ex);
+				return null; // failed to obtain
+			}
+
+			// Ensure have specification
+			if (specification == null) {
+				issues.addIssue(
+						null,
+						null,
+						null,
+						null,
+						"No "
+								+ WoofTemplateExtensionSourceSpecification.class
+										.getSimpleName() + " returned from "
+								+ woofTemplateExtensionSourceClassName);
+				return null; // no specification obtained
+			}
+
+			// Obtain the properties
+			WoofTemplateExtensionSourceProperty[] extensionSourceProperties;
+			try {
+				extensionSourceProperties = specification.getProperties();
+			} catch (Throwable ex) {
+				issues.addIssue(
+						null,
+						null,
+						null,
+						null,
+						"Failed to obtain "
+								+ WoofTemplateExtensionSourceProperty.class
+										.getSimpleName()
+								+ " instances from "
+								+ WoofTemplateExtensionSourceSpecification.class
+										.getSimpleName() + " for "
+								+ woofTemplateExtensionSourceClassName, ex);
+				return null; // failed to obtain properties
+			}
+
+			// Load the extension source properties into a property list
+			PropertyList propertyList = new PropertyListImpl();
+			if (extensionSourceProperties != null) {
+				for (int i = 0; i < extensionSourceProperties.length; i++) {
+					WoofTemplateExtensionSourceProperty extensionProperty = extensionSourceProperties[i];
+
+					// Ensure have the extension source property
+					if (extensionProperty == null) {
+						issues.addIssue(
+								null,
+								null,
+								null,
+								null,
+								WoofTemplateExtensionSourceProperty.class
+										.getSimpleName()
+										+ " "
+										+ i
+										+ " is null from "
+										+ WoofTemplateExtensionSourceSpecification.class
+												.getSimpleName()
+										+ " for "
+										+ woofTemplateExtensionSourceClassName);
+						return null; // must have complete property details
+					}
+
+					// Obtain the property name
+					String name;
+					try {
+						name = extensionProperty.getName();
+					} catch (Throwable ex) {
+						issues.addIssue(
+								null,
+								null,
+								null,
+								null,
+								"Failed to get name for "
+										+ WoofTemplateExtensionSourceProperty.class
+												.getSimpleName()
+										+ " "
+										+ i
+										+ " from "
+										+ WoofTemplateExtensionSourceSpecification.class
+												.getSimpleName() + " for "
+										+ woofTemplateExtensionSourceClassName,
+								ex);
+						return null; // must have complete property details
+					}
+					if (CompileUtil.isBlank(name)) {
+						issues.addIssue(
+								null,
+								null,
+								null,
+								null,
+								WoofTemplateExtensionSourceProperty.class
+										.getSimpleName()
+										+ " "
+										+ i
+										+ " provided blank name from "
+										+ WoofTemplateExtensionSourceSpecification.class
+												.getSimpleName()
+										+ " for "
+										+ woofTemplateExtensionSourceClassName);
+						return null; // must have complete property details
+					}
+
+					// Obtain the property label
+					String label;
+					try {
+						label = extensionProperty.getLabel();
+					} catch (Throwable ex) {
+						issues.addIssue(
+								null,
+								null,
+								null,
+								null,
+								"Failed to get label for "
+										+ WoofTemplateExtensionSourceProperty.class
+												.getSimpleName()
+										+ " "
+										+ i
+										+ " ("
+										+ name
+										+ ") from "
+										+ WoofTemplateExtensionSourceSpecification.class
+												.getSimpleName() + " for "
+										+ woofTemplateExtensionSourceClassName,
+								ex);
+						return null; // must have complete property details
+					}
+
+					// Add to the properties
+					propertyList.addProperty(name, label);
+				}
+			}
+
+			// Return the property list
+			return propertyList;
+		}
+	}
+
 	@Override
 	public PropertyList loadSpecification(
-			Class<? extends WoofTemplateExtensionSource> woofTemplateExtensionSourceClass,
-			CompilerIssues issues) {
+			String woofTemplateExtensionSourceClassName,
+			ClassLoader classLoader, CompilerIssues issues) {
 
-		// Instantiate the woof template extension source
-		WoofTemplateExtensionSource extensionSource = CompileUtil.newInstance(
-				woofTemplateExtensionSourceClass,
-				WoofTemplateExtensionSource.class, null, null, null, null,
-				issues);
-		if (extensionSource == null) {
-			return null; // failed to instantiate
-		}
+		// Create and configure the compiler
+		OfficeFloorCompiler compiler = OfficeFloorCompiler
+				.newOfficeFloorCompiler(classLoader);
+		compiler.setCompilerIssues(issues);
 
-		// Obtain the specification
-		WoofTemplateExtensionSourceSpecification specification;
+		// Load the specification
+		PropertyList properties = null;
 		try {
-			specification = extensionSource.getSpecification();
-		} catch (Throwable ex) {
-			issues.addIssue(
-					null,
-					null,
-					null,
-					null,
-					"Failed to obtain "
-							+ WoofTemplateExtensionSourceSpecification.class
-									.getSimpleName() + " from "
-							+ woofTemplateExtensionSourceClass.getName(), ex);
-			return null; // failed to obtain
+			properties = compiler.run(LoadSpecification.class,
+					woofTemplateExtensionSourceClassName, issues);
+
+		} catch (Exception ex) {
+			issues.addIssue(null, null, null, null,
+					"Failed to load specification", ex);
 		}
 
-		// Ensure have specification
-		if (specification == null) {
-			issues.addIssue(
-					null,
-					null,
-					null,
-					null,
-					"No "
-							+ WoofTemplateExtensionSourceSpecification.class
-									.getSimpleName() + " returned from "
-							+ woofTemplateExtensionSourceClass.getName());
-			return null; // no specification obtained
-		}
-
-		// Obtain the properties
-		WoofTemplateExtensionSourceProperty[] extensionSourceProperties;
-		try {
-			extensionSourceProperties = specification.getProperties();
-		} catch (Throwable ex) {
-			issues.addIssue(
-					null,
-					null,
-					null,
-					null,
-					"Failed to obtain "
-							+ WoofTemplateExtensionSourceProperty.class
-									.getSimpleName()
-							+ " instances from "
-							+ WoofTemplateExtensionSourceSpecification.class
-									.getSimpleName() + " for "
-							+ woofTemplateExtensionSourceClass.getName(), ex);
-			return null; // failed to obtain properties
-		}
-
-		// Load the extension source properties into a property list
-		PropertyList propertyList = new PropertyListImpl();
-		if (extensionSourceProperties != null) {
-			for (int i = 0; i < extensionSourceProperties.length; i++) {
-				WoofTemplateExtensionSourceProperty extensionProperty = extensionSourceProperties[i];
-
-				// Ensure have the extension source property
-				if (extensionProperty == null) {
-					issues.addIssue(
-							null,
-							null,
-							null,
-							null,
-							WoofTemplateExtensionSourceProperty.class
-									.getSimpleName()
-									+ " "
-									+ i
-									+ " is null from "
-									+ WoofTemplateExtensionSourceSpecification.class
-											.getSimpleName()
-									+ " for "
-									+ woofTemplateExtensionSourceClass
-											.getName());
-					return null; // must have complete property details
-				}
-
-				// Obtain the property name
-				String name;
-				try {
-					name = extensionProperty.getName();
-				} catch (Throwable ex) {
-					issues.addIssue(
-							null,
-							null,
-							null,
-							null,
-							"Failed to get name for "
-									+ WoofTemplateExtensionSourceProperty.class
-											.getSimpleName()
-									+ " "
-									+ i
-									+ " from "
-									+ WoofTemplateExtensionSourceSpecification.class
-											.getSimpleName()
-									+ " for "
-									+ woofTemplateExtensionSourceClass
-											.getName(), ex);
-					return null; // must have complete property details
-				}
-				if (CompileUtil.isBlank(name)) {
-					issues.addIssue(
-							null,
-							null,
-							null,
-							null,
-							WoofTemplateExtensionSourceProperty.class
-									.getSimpleName()
-									+ " "
-									+ i
-									+ " provided blank name from "
-									+ WoofTemplateExtensionSourceSpecification.class
-											.getSimpleName()
-									+ " for "
-									+ woofTemplateExtensionSourceClass
-											.getName());
-					return null; // must have complete property details
-				}
-
-				// Obtain the property label
-				String label;
-				try {
-					label = extensionProperty.getLabel();
-				} catch (Throwable ex) {
-					issues.addIssue(
-							null,
-							null,
-							null,
-							null,
-							"Failed to get label for "
-									+ WoofTemplateExtensionSourceProperty.class
-											.getSimpleName()
-									+ " "
-									+ i
-									+ " ("
-									+ name
-									+ ") from "
-									+ WoofTemplateExtensionSourceSpecification.class
-											.getSimpleName()
-									+ " for "
-									+ woofTemplateExtensionSourceClass
-											.getName(), ex);
-					return null; // must have complete property details
-				}
-
-				// Add to the properties
-				propertyList.addProperty(name, label);
-			}
-		}
-
-		// Return the property list
-		return propertyList;
+		// Return the properties
+		return properties;
 	}
 
 	@Override

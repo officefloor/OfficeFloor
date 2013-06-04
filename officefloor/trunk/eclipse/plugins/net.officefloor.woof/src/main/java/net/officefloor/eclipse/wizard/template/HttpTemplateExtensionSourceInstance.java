@@ -17,7 +17,22 @@
  */
 package net.officefloor.eclipse.wizard.template;
 
+import org.eclipse.core.resources.IProject;
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Label;
+
+import net.officefloor.compile.issues.CompilerIssues;
+import net.officefloor.compile.properties.PropertyList;
+import net.officefloor.eclipse.classpath.ProjectClassLoader;
 import net.officefloor.eclipse.extension.template.WoofTemplateExtensionSourceExtension;
+import net.officefloor.eclipse.extension.template.WoofTemplateExtensionSourceExtensionContext;
+import net.officefloor.eclipse.extension.util.SourceExtensionUtil;
+import net.officefloor.eclipse.repository.project.ProjectConfigurationContext;
+import net.officefloor.eclipse.util.EclipseUtil;
+import net.officefloor.plugin.woof.template.WoofTemplateExtensionLoader;
+import net.officefloor.plugin.woof.template.WoofTemplateExtensionLoaderImpl;
 import net.officefloor.plugin.woof.template.WoofTemplateExtensionSource;
 
 /**
@@ -44,6 +59,11 @@ public class HttpTemplateExtensionSourceInstance {
 	private final HttpTemplateExtensionSourceInstanceContext context;
 
 	/**
+	 * {@link IProject}.
+	 */
+	private final IProject project;
+
+	/**
 	 * Initiate.
 	 * 
 	 * @param woofTemplateExtensionSourceClassName
@@ -53,14 +73,17 @@ public class HttpTemplateExtensionSourceInstance {
 	 *            <code>null</code>.
 	 * @param context
 	 *            {@link HttpTemplateExtensionSourceInstanceContext}.
+	 * @param project
+	 *            {@link IProject}.
 	 */
 	public HttpTemplateExtensionSourceInstance(
 			String woofTemplateExtensionSourceClassName,
 			WoofTemplateExtensionSourceExtension<?> extension,
-			HttpTemplateExtensionSourceInstanceContext context) {
+			HttpTemplateExtensionSourceInstanceContext context, IProject project) {
 		this.woofTemplateExtensionSourceClassName = woofTemplateExtensionSourceClassName;
 		this.extension = extension;
 		this.context = context;
+		this.project = project;
 	}
 
 	/**
@@ -70,6 +93,78 @@ public class HttpTemplateExtensionSourceInstance {
 	 */
 	public String getWoofTemplateExtensionSourceClassName() {
 		return this.woofTemplateExtensionSourceClassName;
+	}
+
+	/**
+	 * Obtains the {@link WoofTemplateExtensionSource} label.
+	 * 
+	 * @return {@link WoofTemplateExtensionSource} label.
+	 */
+	public String getWoofTemplateExtensionLabel() {
+
+		// Determine if have extension label
+		if (this.extension != null) {
+			String label = this.extension.getWoofTemplateExtensionSourceLabel();
+			if (!(EclipseUtil.isBlank(label))) {
+				return label;
+			}
+		}
+
+		// No extension label, so determine label from class name
+		String label = this.woofTemplateExtensionSourceClassName;
+		int index = label.lastIndexOf('.');
+		if (index > 0) {
+			// Strip off package name
+			label = label.substring(index + ".".length());
+		}
+		label = label.replace(
+				WoofTemplateExtensionSource.class.getSimpleName(), "");
+		return label;
+	}
+
+	/**
+	 * Creates the {@link PropertyList} for the specification.
+	 * 
+	 * @param issues
+	 *            {@link CompilerIssues} to report issues.
+	 * @return {@link PropertyList} for the specification.
+	 */
+	public PropertyList createSpecification(CompilerIssues issues) {
+
+		// Create the class loader
+		ClassLoader classLoader = ProjectClassLoader.create(this.project);
+
+		// Load the specification
+		WoofTemplateExtensionLoader loader = new WoofTemplateExtensionLoaderImpl();
+		PropertyList properties = loader.loadSpecification(
+				this.woofTemplateExtensionSourceClassName, classLoader, issues);
+
+		// Return the specification
+		return properties;
+	}
+
+	/**
+	 * Creates the {@link Control} instances for the populating the
+	 * {@link PropertyList} for the {@link WoofTemplateExtensionSource}.
+	 * 
+	 * @param page
+	 *            {@link Composite} to add {@link Control} instances.
+	 * @param context
+	 *            {@link WoofTemplateExtensionSourceExtensionContext}.
+	 */
+	public void createControl(Composite page,
+			WoofTemplateExtensionSourceExtensionContext context) {
+
+		SourceExtensionUtil.loadPropertyLayout(page);
+
+		// TODO provide details
+		Label todo = new Label(page, SWT.NONE);
+		todo.setText("TODO provide means to configure GWT");
+
+		// TODO remove
+		for (int i = 0; i < 10; i++) {
+			new Label(page, SWT.NONE).setText("Another label " + i);
+		}
 	}
 
 }

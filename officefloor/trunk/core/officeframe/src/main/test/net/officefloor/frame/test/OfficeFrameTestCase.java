@@ -44,6 +44,9 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.Proxy;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.net.URLClassLoader;
 import java.text.NumberFormat;
 import java.util.Arrays;
 import java.util.Collection;
@@ -202,6 +205,42 @@ public abstract class OfficeFrameTestCase extends TestCase {
 			throw (Error) ex;
 		} else {
 			throw new Exception(ex);
+		}
+	}
+
+	/**
+	 * <p>
+	 * Creates a new {@link ClassLoader} from current process's java class path.
+	 * <p>
+	 * {@link Class} instances loaded via this {@link ClassLoader} will be
+	 * different to the current {@link ClassLoader}. This is to allow testing
+	 * multiple {@link ClassLoader} environments (such as Eclipse plug-ins).
+	 * 
+	 * @return New {@link ClassLoader}.
+	 */
+	public static ClassLoader createNewClassLoader() {
+
+		try {
+			// Create Class Loader for testing
+			String[] classPathEntries = System.getProperty("java.class.path")
+					.split(File.pathSeparator);
+			URL[] urls = new URL[classPathEntries.length];
+			for (int i = 0; i < urls.length; i++) {
+				String classPathEntry = classPathEntries[i];
+				classPathEntry = (classPathEntry.startsWith(File.separator) ? "file://"
+						+ classPathEntry
+						: classPathEntry);
+				classPathEntry = (classPathEntry.endsWith(".jar") ? classPathEntry
+						: classPathEntry + "/");
+				urls[i] = new URL(classPathEntry);
+			}
+			ClassLoader classLoader = new URLClassLoader(urls, null);
+
+			// Return the class loader
+			return classLoader;
+
+		} catch (MalformedURLException ex) {
+			throw fail(ex);
 		}
 	}
 

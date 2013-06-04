@@ -64,7 +64,7 @@ public class HttpSecurityTypeRunnable implements
 		// Load the HTTP Security type
 		HttpSecurityType<?, ?, ?, ?> type = compiler.run(
 				HttpSecurityTypeRunnable.class,
-				parameters.toArray(new String[parameters.size()]));
+				(Object[]) parameters.toArray(new String[parameters.size()]));
 
 		// Return the HTTP Security type
 		return type;
@@ -76,10 +76,10 @@ public class HttpSecurityTypeRunnable implements
 
 	@Override
 	public HttpSecurityType<?, ?, ?, ?> run(OfficeFloorCompiler compiler,
-			String[] parameters) throws Exception {
+			Object[] parameters) throws Exception {
 
 		// First parameter is the HTTP Security Source
-		String httpSecuritySourceClassName = parameters[0];
+		String httpSecuritySourceClassName = (String) parameters[0];
 
 		// Load the HTTP Security Loader
 		ManagedObjectLoader managedObjectLoader = compiler
@@ -96,8 +96,8 @@ public class HttpSecurityTypeRunnable implements
 		// Obtain the properties (pair values after HTTP Security Source)
 		PropertyList properties = compiler.createPropertyList();
 		for (int i = 1; i < parameters.length; i += 2) {
-			String name = parameters[i];
-			String value = parameters[i + 1];
+			String name = (String) parameters[i];
+			String value = (String) parameters[i + 1];
 			properties.addProperty(name).setValue(value);
 		}
 

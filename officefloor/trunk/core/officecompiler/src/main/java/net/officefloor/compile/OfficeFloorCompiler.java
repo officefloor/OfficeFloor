@@ -18,6 +18,7 @@
 package net.officefloor.compile;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.Proxy;
 import java.util.Map;
 import java.util.Properties;
 import java.util.ServiceLoader;
@@ -278,14 +279,17 @@ public abstract class OfficeFloorCompiler implements PropertyConfigurable {
 	 *            {@link OfficeFloorCompilerRunnable} class.
 	 * @param parameters
 	 *            Parameters to enable configuration of the
-	 *            {@link OfficeFloorCompilerRunnable}.
+	 *            {@link OfficeFloorCompilerRunnable}. As {@link Proxy}
+	 *            instances are used to bridge {@link Class} compatibility
+	 *            issues due to different {@link ClassLoader}, all parameters
+	 *            should only be access via their implementing interfaces.
 	 * @return Value returned from the {@link OfficeFloorCompilerRunnable}.
 	 * @throws Exception
 	 *             If fails to run the {@link OfficeFloorCompilerRunnable}.
 	 */
 	public <T> T run(
 			Class<? extends OfficeFloorCompilerRunnable<T>> runnableClass,
-			String... parameters) throws Exception {
+			Object... parameters) throws Exception {
 
 		// Run the runnable
 		T result = runnableClass.newInstance().run(this, parameters);

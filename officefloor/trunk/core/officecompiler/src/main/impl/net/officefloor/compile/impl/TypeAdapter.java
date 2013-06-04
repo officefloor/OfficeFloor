@@ -194,15 +194,44 @@ public class TypeAdapter implements InvocationHandler {
 							|| (String.class.getName().equals(argument
 									.getClass().getName()))
 							|| (methodParamType.isPrimitive())) {
-						// Maintain argument
+						// Maintain argument (for primitive types)
 						overridingArgument = argument;
 
 					} else if ((methodParamType.isArray())
 							&& ((String.class.getName().equals(methodParamType
 									.getComponentType().getName())) || (methodParamType
 									.getComponentType().isPrimitive()))) {
-						// Maintain array argument
+						// Maintain array argument (for primitive arrays)
 						overridingArgument = argument;
+
+					} else if (methodParamType.isArray()) {
+						// Proxy the array
+						Object[] argumentArray = (Object[]) argument;
+						Class<?> adaptedComponentType = translateClass(
+								methodParamType.getComponentType(),
+								implClassLoader);
+						Object[] adaptedArray = (Object[]) Array.newInstance(
+								adaptedComponentType, argumentArray.length);
+						for (int e = 0; e < adaptedArray.length; e++) {
+							Object argumentElement = argumentArray[e];
+
+							// Determine if need to adapt element
+							if ((String.class.getName().equals(argumentElement
+									.getClass().getName()))
+									|| (argumentElement.getClass()
+											.isPrimitive())) {
+								// Use primitive value
+								adaptedArray[e] = argumentElement;
+							} else {
+								// Adapt value via interfaces
+								Class<?>[] interfaces = argumentElement
+										.getClass().getInterfaces();
+								adaptedArray[e] = createProxy(argumentElement,
+										implClassLoader, clientClassLoader,
+										interfaces);
+							}
+						}
+						overridingArgument = adaptedArray;
 
 					} else {
 						// Ignore non-important argument
