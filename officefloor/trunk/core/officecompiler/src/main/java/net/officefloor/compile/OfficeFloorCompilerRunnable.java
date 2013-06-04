@@ -17,6 +17,8 @@
  */
 package net.officefloor.compile;
 
+import java.lang.reflect.Proxy;
+
 /**
  * <p>
  * Runnable using {@link ClassLoader} of the {@link OfficeFloorCompiler}.
@@ -36,11 +38,14 @@ public interface OfficeFloorCompilerRunnable<T> {
 	 *            {@link OfficeFloorCompiler} loaded with the
 	 *            {@link ClassLoader}.
 	 * @param parameters
-	 *            Parameters.
+	 *            Parameters. As {@link Proxy} instances are used to bridge
+	 *            {@link Class} compatibility issues of using different
+	 *            {@link ClassLoader} instances, parameters should only be
+	 *            referenced by their implementing interfaces.
 	 * @return Result from runnable.
 	 * @throws Exception
 	 *             If failure in running.
 	 */
-	T run(OfficeFloorCompiler compiler, String[] parameters) throws Exception;
+	T run(OfficeFloorCompiler compiler, Object[] parameters) throws Exception;
 
 }

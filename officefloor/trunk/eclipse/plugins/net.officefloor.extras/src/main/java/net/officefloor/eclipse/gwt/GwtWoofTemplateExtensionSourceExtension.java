@@ -17,14 +17,13 @@
  */
 package net.officefloor.eclipse.gwt;
 
-import org.eclipse.swt.SWT;
-import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Control;
-import org.eclipse.swt.widgets.Label;
-
 import net.officefloor.eclipse.extension.template.WoofTemplateExtensionSourceExtension;
 import net.officefloor.eclipse.extension.template.WoofTemplateExtensionSourceExtensionContext;
 import net.officefloor.plugin.woof.gwt.GwtWoofTemplateExtensionSource;
+
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Label;
 
 /**
  * GWT {@link WoofTemplateExtensionSourceExtension}.
@@ -49,13 +48,12 @@ public class GwtWoofTemplateExtensionSourceExtension implements
 	}
 
 	@Override
-	public Control createControl(Composite page,
+	public void createControl(Composite page,
 			WoofTemplateExtensionSourceExtensionContext context) {
 
 		// TODO provide details
 		Label todo = new Label(page, SWT.NONE);
 		todo.setText("TODO provide means to configure GWT");
-		return todo;
 	}
 
 }

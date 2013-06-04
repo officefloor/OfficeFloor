@@ -20,8 +20,6 @@ package net.officefloor.compile.impl;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.net.URL;
-import java.net.URLClassLoader;
 
 import net.officefloor.autowire.AutoWire;
 import net.officefloor.autowire.AutoWireManagement;
@@ -89,19 +87,7 @@ public class OfficeFloorCompilerAdapterTest extends OfficeFrameTestCase {
 	protected void setUp() throws Exception {
 
 		// Create Class Loader for testing
-		String[] classPathEntries = System.getProperty("java.class.path")
-				.split(File.pathSeparator);
-		URL[] urls = new URL[classPathEntries.length];
-		for (int i = 0; i < urls.length; i++) {
-			String classPathEntry = classPathEntries[i];
-			classPathEntry = (classPathEntry.startsWith(File.separator) ? "file://"
-					+ classPathEntry
-					: classPathEntry);
-			classPathEntry = (classPathEntry.endsWith(".jar") ? classPathEntry
-					: classPathEntry + "/");
-			urls[i] = new URL(classPathEntry);
-		}
-		ClassLoader classLoader = new URLClassLoader(urls, null);
+		ClassLoader classLoader = createNewClassLoader();
 
 		// Ensure adapted for testing
 		this.compiler = OfficeFloorCompiler.newOfficeFloorCompiler(classLoader);
@@ -136,7 +122,8 @@ public class OfficeFloorCompilerAdapterTest extends OfficeFrameTestCase {
 		// Ensure obtain changes in this class loader
 		MockOfficeFloorCompilerRunnable.value = "CURRENT";
 		MockRunnableResult result = nonAdaptedCompiler.run(
-				MockOfficeFloorCompilerRunnable.class, "ONE", "TWO");
+				MockOfficeFloorCompilerRunnable.class, "ONE", "TWO",
+				new MockOfficeFloorCompilerRunnable());
 		assertEquals("Should be value from current class loader", "CURRENT",
 				result.getValue());
 	}
@@ -150,7 +137,8 @@ public class OfficeFloorCompilerAdapterTest extends OfficeFrameTestCase {
 		// Ensure not use current class loader values
 		MockOfficeFloorCompilerRunnable.value = "CURRENT";
 		MockRunnableResult result = this.compiler.run(
-				MockOfficeFloorCompilerRunnable.class, "ONE", "TWO");
+				MockOfficeFloorCompilerRunnable.class, "ONE", "TWO",
+				new MockOfficeFloorCompilerRunnable());
 		assertEquals("Should be initial value from newly loaded class",
 				"INITIAL", result.getValue());
 	}
@@ -186,15 +174,20 @@ public class OfficeFloorCompilerAdapterTest extends OfficeFrameTestCase {
 
 		@Override
 		public MockRunnableResult run(OfficeFloorCompiler compiler,
-				String[] parameters) throws Exception {
+				Object[] parameters) throws Exception {
 
 			// Ensure have OfficeFloorCompiler
 			assertNotNull("Should have compiler", compiler);
 
 			// Ensure appropriate parameters
-			assertEquals("Incorrect number of parameters", 2, parameters.length);
+			assertEquals("Incorrect number of parameters", 3, parameters.length);
 			assertEquals("Incorrect first parameter", "ONE", parameters[0]);
 			assertEquals("Incorrect second parameter", "TWO", parameters[1]);
+
+			// Ensure can bridge parameter interfaces
+			MockRunnableResult parameter = (MockRunnableResult) parameters[2];
+			assertEquals("Incorrect third parameter", "CURRENT",
+					parameter.getValue());
 
 			// Return to ensure can adapt result
 			return this;

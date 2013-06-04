@@ -25,6 +25,7 @@ import net.officefloor.compile.test.properties.PropertyListUtil;
 import net.officefloor.frame.spi.TestSource;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.model.change.Change;
+import net.officefloor.plugin.woof.template.impl.AbstractWoofTemplateExtensionSource;
 
 /**
  * Tests the {@link WoofTemplateExtensionLoader}.
@@ -33,6 +34,12 @@ import net.officefloor.model.change.Change;
  */
 public class LoadWoofTemplateExtensionSpecificationTest extends
 		OfficeFrameTestCase {
+
+	/**
+	 * {@link ClassLoader}.
+	 */
+	private ClassLoader classLoader = Thread.currentThread()
+			.getContextClassLoader();
 
 	/**
 	 * {@link CompilerIssues}.
@@ -277,6 +284,33 @@ public class LoadWoofTemplateExtensionSpecificationTest extends
 	}
 
 	/**
+	 * Ensure can load the adapted specification.
+	 */
+	public void testAdaptedLoadSpecification() {
+		this.loadSpecification(
+				AdaptedWoofTemplateExtensionSource.class.getName(), true,
+				"NAME", "LABEL");
+	}
+
+	/**
+	 * Adapted {@link WoofTemplateExtensionSource}.
+	 */
+	public static class AdaptedWoofTemplateExtensionSource extends
+			AbstractWoofTemplateExtensionSource {
+
+		@Override
+		protected void loadSpecification(SpecificationContext context) {
+			context.addProperty("NAME", "LABEL");
+		}
+
+		@Override
+		public void extendTemplate(WoofTemplateExtensionSourceContext context)
+				throws Exception {
+			fail("Should not be invoked for obtaining specification");
+		}
+	}
+
+	/**
 	 * Records an issue.
 	 * 
 	 * @param issueDescription
@@ -309,6 +343,23 @@ public class LoadWoofTemplateExtensionSpecificationTest extends
 	 */
 	private void loadSpecification(boolean isExpectToLoad,
 			String... propertyNameLabelPairs) {
+		this.loadSpecification(MockWoofTemplateExtensionSource.class.getName(),
+				isExpectToLoad, propertyNameLabelPairs);
+	}
+
+	/**
+	 * Loads the {@link WoofTemplateExtensionSourceSpecification}.
+	 * 
+	 * @param woofTemplateExtensionSourceClassName
+	 *            {@link WoofTemplateExtensionSource} class name.
+	 * @param isExpectToLoad
+	 *            Flag indicating if expect to obtain the
+	 *            {@link WoofTemplateExtensionSourceSpecification}.
+	 * @param propertyNames
+	 *            Expected {@link Property} names for being returned.
+	 */
+	private void loadSpecification(String woofTemplateExtensionSourceClassName,
+			boolean isExpectToLoad, String... propertyNameLabelPairs) {
 
 		// Load the specification
 		OfficeFloorCompiler compiler = OfficeFloorCompiler
@@ -316,7 +367,8 @@ public class LoadWoofTemplateExtensionSpecificationTest extends
 		compiler.setCompilerIssues(this.issues);
 		WoofTemplateExtensionLoader loader = new WoofTemplateExtensionLoaderImpl();
 		PropertyList propertyList = loader.loadSpecification(
-				MockWoofTemplateExtensionSource.class, this.issues);
+				woofTemplateExtensionSourceClassName, this.classLoader,
+				this.issues);
 
 		// Determine if expected to load
 		if (isExpectToLoad) {

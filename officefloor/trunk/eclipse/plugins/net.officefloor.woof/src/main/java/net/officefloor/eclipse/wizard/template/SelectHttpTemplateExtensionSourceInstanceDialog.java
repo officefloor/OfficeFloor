@@ -17,7 +17,6 @@
  */
 package net.officefloor.eclipse.wizard.template;
 
-
 import org.eclipse.jface.viewers.IStructuredContentProvider;
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.Viewer;
@@ -31,6 +30,39 @@ import org.eclipse.ui.dialogs.ListDialog;
  * @author Daniel Sagenschneider
  */
 public class SelectHttpTemplateExtensionSourceInstanceDialog extends ListDialog {
+
+	/**
+	 * Obtains the {@link HttpTemplateExtensionSourceInstance}.
+	 * 
+	 * @param shell
+	 *            Parent {@link Shell}.
+	 * @param instances
+	 *            {@link HttpTemplateExtensionSourceInstance} listing to select
+	 *            from.
+	 * @return {@link HttpTemplateExtensionSourceInstance} selected, or
+	 *         <code>null</code> if none selected (cancelled).
+	 */
+	public static HttpTemplateExtensionSourceInstance getHttpTemplateExtensionSourceInstance(
+			Shell shell, HttpTemplateExtensionSourceInstance[] instances) {
+
+		// Create the dialog
+		SelectHttpTemplateExtensionSourceInstanceDialog dialog = new SelectHttpTemplateExtensionSourceInstanceDialog(
+				shell, instances);
+
+		// Obtain the selection
+		if (dialog.open() != SelectHttpTemplateExtensionSourceInstanceDialog.OK) {
+			return null; // cancelled
+		}
+
+		// Obtain the selection
+		Object[] result = dialog.getResult();
+		if ((result == null) || (result.length != 1)) {
+			return null; // only one should be selected
+		}
+
+		// Return the selected instance
+		return (HttpTemplateExtensionSourceInstance) result[0];
+	}
 
 	/**
 	 * Initiate.
@@ -48,7 +80,7 @@ public class SelectHttpTemplateExtensionSourceInstanceDialog extends ListDialog 
 		// Specify title
 		this.setTitle("Add extension");
 		this.setMessage("Select the extension to add");
-		
+
 		// Provide the input
 		this.setInput(instances);
 
@@ -77,13 +109,12 @@ public class SelectHttpTemplateExtensionSourceInstanceDialog extends ListDialog 
 			@Override
 			public String getText(Object element) {
 				HttpTemplateExtensionSourceInstance instance = (HttpTemplateExtensionSourceInstance) element;
-				return instance.getWoofTemplateExtensionSourceClassName();
+				return instance.getWoofTemplateExtensionLabel();
 			}
 		});
-		
+
 		// Ensure selection made
 		this.setBlockOnOpen(true);
 	}
 
-	
 }

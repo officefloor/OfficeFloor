@@ -56,11 +56,11 @@ public class HttpSecuritySourceSpecificationRunnable implements
 	 */
 
 	@Override
-	public PropertyList run(OfficeFloorCompiler compiler, String[] parameters)
+	public PropertyList run(OfficeFloorCompiler compiler, Object[] parameters)
 			throws Exception {
 
 		// First parameter is the HTTP Security Source
-		String httpSecuritySourceClassName = parameters[0];
+		String httpSecuritySourceClassName = (String) parameters[0];
 
 		// Load the HTTP Security Loader
 		ManagedObjectLoader managedObjectLoader = compiler

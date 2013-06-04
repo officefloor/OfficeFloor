@@ -42,6 +42,7 @@ import net.officefloor.eclipse.extension.ExtensionUtil;
 import net.officefloor.eclipse.extension.WoofExtensionUtil;
 import net.officefloor.eclipse.extension.sectionsource.SectionSourceExtensionContext;
 import net.officefloor.eclipse.extension.template.WoofTemplateExtensionSourceExtension;
+import net.officefloor.eclipse.extension.template.WoofTemplateExtensionSourceExtensionContext;
 import net.officefloor.eclipse.extension.util.SourceExtensionUtil;
 import net.officefloor.eclipse.util.EclipseUtil;
 import net.officefloor.eclipse.util.JavaUtil;
@@ -130,7 +131,7 @@ public class HttpTemplateWizardPage extends WizardPage implements
 				}
 				extensionSourceInstances.put(className,
 						new HttpTemplateExtensionSourceInstance(className,
-								null, context));
+								null, context, project));
 			}
 		} catch (Throwable ex) {
 			LogUtil.logError(
@@ -149,7 +150,8 @@ public class HttpTemplateWizardPage extends WizardPage implements
 						woofTemplateExtensionSourceClassName,
 						new HttpTemplateExtensionSourceInstance(
 								woofTemplateExtensionSourceClassName,
-								woofTemplateExtensionSourceExtension, context));
+								woofTemplateExtensionSourceExtension, context,
+								project));
 			} catch (Throwable ex) {
 				LogUtil.logError("Failed to create source instance for "
 						+ woofTemplateExtensionSourceExtension.getClass()
@@ -722,8 +724,9 @@ public class HttpTemplateWizardPage extends WizardPage implements
 		// Configure the template extensions
 		new Label(page, SWT.NONE).setText("Extensions");
 		final TabFolder extensionTabs = new TabFolder(page, SWT.NONE);
-		extensionTabs.setLayoutData(new GridData(SWT.FILL, SWT.BEGINNING, true,
-				false));
+		extensionTabs.setLayout(new GridLayout(1, false));
+		extensionTabs
+				.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 
 		// Provide the extension add button
 		final TabItem addExtensionTab = new TabItem(extensionTabs, SWT.NONE);
@@ -742,24 +745,38 @@ public class HttpTemplateWizardPage extends WizardPage implements
 				if (clickedTab == addExtensionTab) {
 
 					// Provide dialog to select extension
-					SelectHttpTemplateExtensionSourceInstanceDialog dialog = new SelectHttpTemplateExtensionSourceInstanceDialog(
+					HttpTemplateExtensionSourceInstance instance = SelectHttpTemplateExtensionSourceInstanceDialog.getHttpTemplateExtensionSourceInstance(
 							extensionTabs.getShell(),
 							HttpTemplateWizardPage.this.availableHttpTemplateExtensionSourceInstances);
-					if (dialog.open() == SelectHttpTemplateExtensionSourceInstanceDialog.OK) {
-
-						// Add a tab (as second last item)
-						int tabIndex = Math.max(0,
-								(extensionTabs.getItemCount() - 1));
-						TabItem extraTab = new TabItem(extensionTabs, SWT.NONE,
-								tabIndex);
-						extraTab.setText(String.valueOf(tabIndex));
-						Label tabLabel = new Label(extensionTabs, SWT.NONE);
-						tabLabel.setText("Added tab");
-						extraTab.setControl(tabLabel);
-
-						// Provide focus to new tab
-						extensionTabs.setSelection(tabIndex);
+					if (instance == null) {
+						return; // not add extension
 					}
+
+					// Obtain the label of the extension
+					String extensionLabel = instance
+							.getWoofTemplateExtensionLabel();
+
+					// Add a tab (as second last item)
+					int tabIndex = Math.max(0,
+							(extensionTabs.getItemCount() - 1));
+					TabItem extraTab = new TabItem(extensionTabs, SWT.NONE,
+							tabIndex);
+					extraTab.setText(extensionLabel);
+
+					// Create the context for the extension
+					PropertyList properties = instance
+							.createSpecification(HttpTemplateWizardPage.this);
+					WoofTemplateExtensionSourceExtensionContext context = new WoofTemplateExtensionSourceExtensionContextImpl();
+
+					// Load the controls to configure the extension
+					Composite panel = new Composite(extensionTabs, SWT.NONE);
+					instance.createControl(panel, context);
+					panel.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true,
+							true));
+					extraTab.setControl(panel);
+
+					// Provide focus to new tab
+					extensionTabs.setSelection(tabIndex);
 				}
 			}
 		});

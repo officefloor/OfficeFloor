@@ -208,9 +208,9 @@ public class OfficeFloorCompilerAdapter extends OfficeFloorCompiler {
 	@SuppressWarnings("unchecked")
 	public <T> T run(
 			Class<? extends OfficeFloorCompilerRunnable<T>> runnableClass,
-			String... parameters) throws Exception {
+			Object... parameters) throws Exception {
 		return (T) this.invokeMethod("run", new Object[] { runnableClass,
-				parameters }, Class.class, String[].class);
+				parameters }, Class.class, Object[].class);
 	}
 
 	@Override

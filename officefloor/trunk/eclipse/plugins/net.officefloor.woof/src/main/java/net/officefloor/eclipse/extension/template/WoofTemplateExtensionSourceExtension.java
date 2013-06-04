@@ -19,7 +19,6 @@ package net.officefloor.eclipse.extension.template;
 
 import net.officefloor.compile.properties.Property;
 import net.officefloor.compile.properties.PropertyList;
-import net.officefloor.eclipse.extension.ExtensionUtil;
 import net.officefloor.eclipse.extension.WoofExtensionUtil;
 import net.officefloor.plugin.woof.template.WoofTemplateExtensionSource;
 
@@ -68,7 +67,7 @@ public interface WoofTemplateExtensionSourceExtension<S extends WoofTemplateExte
 	 * @param context
 	 *            {@link WoofTemplateExtensionSourceExtensionContext}.
 	 */
-	Control createControl(Composite page,
+	void createControl(Composite page,
 			WoofTemplateExtensionSourceExtensionContext context);
 
 }
