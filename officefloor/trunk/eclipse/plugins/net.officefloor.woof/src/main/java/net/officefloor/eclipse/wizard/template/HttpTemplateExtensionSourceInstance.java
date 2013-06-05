@@ -17,23 +17,23 @@
  */
 package net.officefloor.eclipse.wizard.template;
 
-import org.eclipse.core.resources.IProject;
-import org.eclipse.swt.SWT;
-import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Control;
-import org.eclipse.swt.widgets.Label;
-
 import net.officefloor.compile.issues.CompilerIssues;
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.eclipse.classpath.ProjectClassLoader;
+import net.officefloor.eclipse.common.dialog.input.InputAdapter;
+import net.officefloor.eclipse.common.dialog.input.InputHandler;
+import net.officefloor.eclipse.common.dialog.input.impl.PropertyListInput;
 import net.officefloor.eclipse.extension.template.WoofTemplateExtensionSourceExtension;
 import net.officefloor.eclipse.extension.template.WoofTemplateExtensionSourceExtensionContext;
-import net.officefloor.eclipse.extension.util.SourceExtensionUtil;
-import net.officefloor.eclipse.repository.project.ProjectConfigurationContext;
 import net.officefloor.eclipse.util.EclipseUtil;
 import net.officefloor.plugin.woof.template.WoofTemplateExtensionLoader;
 import net.officefloor.plugin.woof.template.WoofTemplateExtensionLoaderImpl;
 import net.officefloor.plugin.woof.template.WoofTemplateExtensionSource;
+
+import org.eclipse.core.resources.IProject;
+import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
 
 /**
  * Instance of the {@link WoofTemplateExtensionSource}.
@@ -132,7 +132,8 @@ public class HttpTemplateExtensionSourceInstance {
 	public PropertyList createSpecification(CompilerIssues issues) {
 
 		// Create the class loader
-		ClassLoader classLoader = ProjectClassLoader.create(this.project);
+		ClassLoader classLoader = ProjectClassLoader.create(this.project,
+				Thread.currentThread().getContextClassLoader());
 
 		// Load the specification
 		WoofTemplateExtensionLoader loader = new WoofTemplateExtensionLoaderImpl();
@@ -153,17 +154,24 @@ public class HttpTemplateExtensionSourceInstance {
 	 *            {@link WoofTemplateExtensionSourceExtensionContext}.
 	 */
 	public void createControl(Composite page,
-			WoofTemplateExtensionSourceExtensionContext context) {
+			final WoofTemplateExtensionSourceExtensionContext context) {
 
-		SourceExtensionUtil.loadPropertyLayout(page);
+		// Determine if have extension
+		if (this.extension != null) {
+			// Load configuration via extension
+			this.extension.createControl(page, context);
 
-		// TODO provide details
-		Label todo = new Label(page, SWT.NONE);
-		todo.setText("TODO provide means to configure GWT");
-
-		// TODO remove
-		for (int i = 0; i < 10; i++) {
-			new Label(page, SWT.NONE).setText("Another label " + i);
+		} else {
+			// Provide default editing of the extension properties
+			page.setLayout(new GridLayout());
+			PropertyListInput input = new PropertyListInput(
+					context.getPropertyList());
+			new InputHandler<PropertyList>(page, input, new InputAdapter() {
+				@Override
+				public void notifyValueChanged(Object value) {
+					context.notifyPropertiesChanged();
+				}
+			});
 		}
 	}
 

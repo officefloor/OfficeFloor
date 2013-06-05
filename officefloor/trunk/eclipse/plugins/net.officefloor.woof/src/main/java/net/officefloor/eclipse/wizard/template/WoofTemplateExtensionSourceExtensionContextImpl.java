@@ -17,10 +17,11 @@
  */
 package net.officefloor.eclipse.wizard.template;
 
-import org.eclipse.core.resources.IProject;
-
 import net.officefloor.compile.properties.PropertyList;
+import net.officefloor.eclipse.extension.sectionsource.SectionSourceExtensionContext;
 import net.officefloor.eclipse.extension.template.WoofTemplateExtensionSourceExtensionContext;
+
+import org.eclipse.core.resources.IProject;
 
 /**
  * {@link WoofTemplateExtensionSourceExtensionContext} implementation.
@@ -30,39 +31,52 @@ import net.officefloor.eclipse.extension.template.WoofTemplateExtensionSourceExt
 public class WoofTemplateExtensionSourceExtensionContextImpl implements
 		WoofTemplateExtensionSourceExtensionContext {
 
+	/**
+	 * {@link PropertyList}.
+	 */
+	private final PropertyList propertyList;
+
+	/**
+	 * {@link SectionSourceExtensionContext}.
+	 */
+	private final SectionSourceExtensionContext context;
+
+	/**
+	 * Initiate.
+	 * 
+	 * @param propertyList
+	 *            {@link PropertyList}.
+	 * @param context
+	 *            {@link SectionSourceExtensionContext}.
+	 */
+	public WoofTemplateExtensionSourceExtensionContextImpl(
+			PropertyList propertyList, SectionSourceExtensionContext context) {
+		this.propertyList = propertyList;
+		this.context = context;
+	}
+
 	/*
 	 * ============= WoofTemplateExtensionSourceExtensionContext =============
 	 */
 
 	@Override
 	public PropertyList getPropertyList() {
-		// TODO implement
-		// WoofTemplateExtensionSourceExtensionContext.getPropertyList
-		throw new UnsupportedOperationException(
-				"TODO implement WoofTemplateExtensionSourceExtensionContext.getPropertyList");
+		return this.propertyList;
 	}
 
 	@Override
 	public void notifyPropertiesChanged() {
-		// TODO implement
-		// WoofTemplateExtensionSourceExtensionContext.notifyPropertiesChanged
-		throw new UnsupportedOperationException(
-				"TODO implement WoofTemplateExtensionSourceExtensionContext.notifyPropertiesChanged");
+		this.context.notifyPropertiesChanged();
 	}
 
 	@Override
 	public void setErrorMessage(String message) {
-		// TODO implement
-		// WoofTemplateExtensionSourceExtensionContext.setErrorMessage
-		throw new UnsupportedOperationException(
-				"TODO implement WoofTemplateExtensionSourceExtensionContext.setErrorMessage");
+		this.context.setErrorMessage(message);
 	}
 
 	@Override
 	public IProject getProject() {
-		// TODO implement WoofTemplateExtensionSourceExtensionContext.getProject
-		throw new UnsupportedOperationException(
-				"TODO implement WoofTemplateExtensionSourceExtensionContext.getProject");
+		return this.context.getProject();
 	}
 
 }
