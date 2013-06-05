@@ -17,11 +17,13 @@
  */
 package net.officefloor.eclipse.gwt;
 
+
 import net.officefloor.eclipse.extension.template.WoofTemplateExtensionSourceExtension;
 import net.officefloor.eclipse.extension.template.WoofTemplateExtensionSourceExtensionContext;
 import net.officefloor.plugin.woof.gwt.GwtWoofTemplateExtensionSource;
 
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 
@@ -52,6 +54,7 @@ public class GwtWoofTemplateExtensionSourceExtension implements
 			WoofTemplateExtensionSourceExtensionContext context) {
 
 		// TODO provide details
+		page.setLayout(new GridLayout());
 		Label todo = new Label(page, SWT.NONE);
 		todo.setText("TODO provide means to configure GWT");
 	}

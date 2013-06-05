@@ -242,7 +242,8 @@ public class GwtWoofTemplateExtensionSource extends
 	 *            {@link WoofTemplateExtensionModel}.
 	 * @return Comet manual publish method name or <code>null</code>.
 	 */
-	public static String getCometManualPublishMethodName(WoofTemplateModel template) {
+	public static String getCometManualPublishMethodName(
+			WoofTemplateModel template) {
 
 		// TODO move GWT and Comet functionality to extension
 		throw new UnsupportedOperationException(
@@ -281,9 +282,7 @@ public class GwtWoofTemplateExtensionSource extends
 
 	@Override
 	protected void loadSpecification(SpecificationContext context) {
-		// TODO implement AbstractWoofTemplateExtensionSource.loadSpecification
-		throw new UnsupportedOperationException(
-				"TODO implement AbstractWoofTemplateExtensionSource.loadSpecification");
+		context.addProperty(PROPERTY_GWT_MODULE_PATH, "GWT Module Path");
 	}
 
 	@Override

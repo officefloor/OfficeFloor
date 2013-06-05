@@ -766,7 +766,8 @@ public class HttpTemplateWizardPage extends WizardPage implements
 					// Create the context for the extension
 					PropertyList properties = instance
 							.createSpecification(HttpTemplateWizardPage.this);
-					WoofTemplateExtensionSourceExtensionContext context = new WoofTemplateExtensionSourceExtensionContextImpl();
+					WoofTemplateExtensionSourceExtensionContext context = new WoofTemplateExtensionSourceExtensionContextImpl(
+							properties, HttpTemplateWizardPage.this);
 
 					// Load the controls to configure the extension
 					Composite panel = new Composite(extensionTabs, SWT.NONE);
