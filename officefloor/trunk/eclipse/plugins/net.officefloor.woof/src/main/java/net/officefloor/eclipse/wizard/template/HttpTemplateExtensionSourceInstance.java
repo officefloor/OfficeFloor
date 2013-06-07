@@ -17,6 +17,7 @@
  */
 package net.officefloor.eclipse.wizard.template;
 
+import net.officefloor.compile.impl.properties.PropertyListSourceProperties;
 import net.officefloor.compile.issues.CompilerIssues;
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.eclipse.classpath.ProjectClassLoader;
@@ -25,7 +26,15 @@ import net.officefloor.eclipse.common.dialog.input.InputHandler;
 import net.officefloor.eclipse.common.dialog.input.impl.PropertyListInput;
 import net.officefloor.eclipse.extension.template.WoofTemplateExtensionSourceExtension;
 import net.officefloor.eclipse.extension.template.WoofTemplateExtensionSourceExtensionContext;
+import net.officefloor.eclipse.repository.project.ProjectConfigurationContext;
 import net.officefloor.eclipse.util.EclipseUtil;
+import net.officefloor.frame.impl.construct.source.SourceContextImpl;
+import net.officefloor.frame.spi.source.ResourceSource;
+import net.officefloor.frame.spi.source.SourceContext;
+import net.officefloor.frame.spi.source.SourceProperties;
+import net.officefloor.model.change.Change;
+import net.officefloor.model.change.Conflict;
+import net.officefloor.model.repository.ConfigurationContext;
 import net.officefloor.plugin.woof.template.WoofTemplateExtensionLoader;
 import net.officefloor.plugin.woof.template.WoofTemplateExtensionLoaderImpl;
 import net.officefloor.plugin.woof.template.WoofTemplateExtensionSource;
@@ -172,6 +181,62 @@ public class HttpTemplateExtensionSourceInstance {
 					context.notifyPropertiesChanged();
 				}
 			});
+		}
+	}
+
+	/**
+	 * Validate the change to configuration for the
+	 * {@link WoofTemplateExtensionSource}.
+	 * 
+	 * @param properties
+	 *            {@link PropertyList} to configure the
+	 *            {@link WoofTemplateExtensionSource}.
+	 */
+	public void validateChange(String oldUri, PropertyList oldProperties,
+			String newUri, PropertyList newProperties,
+			ResourceSource[] resourceSources, CompilerIssues issues) {
+
+		// Create the configuration context
+		ConfigurationContext configurationContext = new ProjectConfigurationContext(
+				this.project);
+
+		// Create the class loader
+		ClassLoader classLoader = ProjectClassLoader.create(this.project,
+				Thread.currentThread().getContextClassLoader());
+
+		// Create the source context
+		SourceContext sourceContext = new SourceContextImpl(true, classLoader,
+				resourceSources);
+
+		// Create the property lists
+		SourceProperties oldSourceProperties = null;
+		if (oldProperties != null) {
+			oldSourceProperties = new PropertyListSourceProperties(
+					oldProperties);
+		}
+		SourceProperties newSourceProperties = null;
+		if (newProperties != null) {
+			newSourceProperties = new PropertyListSourceProperties(
+					newProperties);
+		}
+
+		// Load the possible change
+		WoofTemplateExtensionLoader loader = new WoofTemplateExtensionLoaderImpl();
+		Change<?> change = loader.refactorTemplateExtension(
+				this.woofTemplateExtensionSourceClassName, oldUri,
+				oldSourceProperties, newUri, newSourceProperties,
+				configurationContext, sourceContext);
+
+		// Determine if issue
+		if (change != null) {
+
+			// Report the conflict
+			Conflict[] conflicts = change.getConflicts();
+			if ((conflicts != null) && (conflicts.length > 0)) {
+				// Report the first conflict
+				issues.addIssue(null, null, null, null,
+						conflicts[0].getConflictDescription());
+			}
 		}
 	}
 

@@ -23,6 +23,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
@@ -47,7 +48,6 @@ import net.officefloor.eclipse.extension.util.SourceExtensionUtil;
 import net.officefloor.eclipse.util.EclipseUtil;
 import net.officefloor.eclipse.util.JavaUtil;
 import net.officefloor.eclipse.util.LogUtil;
-import net.officefloor.eclipse.web.HttpTemplateSectionSourceExtension;
 import net.officefloor.eclipse.wizard.access.HttpSecuritySourceInstanceContext;
 import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
 import net.officefloor.frame.spi.source.ResourceSource;
@@ -72,9 +72,12 @@ import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.MouseAdapter;
 import org.eclipse.swt.events.MouseEvent;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.TabFolder;
@@ -201,6 +204,16 @@ public class HttpTemplateWizardPage extends WizardPage implements
 	private final SectionLoader sectionLoader;
 
 	/**
+	 * {@link ResourceSource} instances.
+	 */
+	private final ResourceSource[] resourceSources;
+
+	/**
+	 * Initial URI path for the {@link HttpTemplate}.
+	 */
+	private final String initialUriPath;
+
+	/**
 	 * {@link PropertyList}.
 	 */
 	private final PropertyList properties;
@@ -268,14 +281,14 @@ public class HttpTemplateWizardPage extends WizardPage implements
 	private SectionType sectionType = null;
 
 	/**
-	 * {@link HttpTemplateSectionSourceExtension}.
-	 */
-	private HttpTemplateSectionSourceExtension templateExtension;
-
-	/**
 	 * Available {@link HttpTemplateExtensionSourceInstance} listing.
 	 */
 	private HttpTemplateExtensionSourceInstance[] availableHttpTemplateExtensionSourceInstances;
+
+	/**
+	 * {@link HttpTemplateExtensionStruct} instances.
+	 */
+	private final List<HttpTemplateExtensionStruct> templateExtensions = new LinkedList<HttpTemplateExtensionStruct>();
 
 	/**
 	 * Initiate.
@@ -307,6 +320,7 @@ public class HttpTemplateWizardPage extends WizardPage implements
 		this.compiler.setCompilerIssues(this);
 
 		// Provide configuration of WoOF context
+		final List<ResourceSource> resourceSources = new LinkedList<ResourceSource>();
 		WoofContextConfigurable configurable = new WoofContextConfigurable() {
 
 			@Override
@@ -323,8 +337,11 @@ public class HttpTemplateWizardPage extends WizardPage implements
 			public void addResources(ResourceSource resourceSource) {
 				HttpTemplateWizardPage.this.compiler
 						.addResources(resourceSource);
+				resourceSources.add(resourceSource);
 			}
 		};
+		this.resourceSources = resourceSources
+				.toArray(new ResourceSource[resourceSources.size()]);
 
 		// Load access to web resources
 		File projectDir = project.getLocation().toFile();
@@ -406,6 +423,9 @@ public class HttpTemplateWizardPage extends WizardPage implements
 						linkName, configuredLinks.get(linkName).booleanValue());
 			}
 		}
+
+		// Specify the initial URI path
+		this.initialUriPath = initialUriPath;
 
 		// Add the properties
 		this.uriPath = this
@@ -592,20 +612,6 @@ public class HttpTemplateWizardPage extends WizardPage implements
 		page.setLayoutData(new GridData(SWT.FILL, SWT.BEGINNING, true, false));
 		page.setLayout(new GridLayout(2, false));
 
-		// Obtain HTTP Template Section Source Extension
-		this.templateExtension = (HttpTemplateSectionSourceExtension) ExtensionUtil
-				.createSectionSourceExtensionMap().get(
-						HttpTemplateSectionSource.class.getName());
-		if (this.templateExtension == null) {
-			// Provide error that not able to obtain extension
-			new Label(page, SWT.NONE)
-					.setText("FATAL ERROR: unable to obtain plug-in extension "
-							+ HttpTemplateSectionSourceExtension.class
-									.getName());
-			this.handleChange();
-			return;
-		}
-
 		// Obtain initial values
 		String initialTemplatePath = "";
 		String initialSuperTemplateName = "";
@@ -759,8 +765,8 @@ public class HttpTemplateWizardPage extends WizardPage implements
 					// Add a tab (as second last item)
 					int tabIndex = Math.max(0,
 							(extensionTabs.getItemCount() - 1));
-					TabItem extraTab = new TabItem(extensionTabs, SWT.NONE,
-							tabIndex);
+					final TabItem extraTab = new TabItem(extensionTabs,
+							SWT.NONE, tabIndex);
 					extraTab.setText(extensionLabel);
 
 					// Create the context for the extension
@@ -771,13 +777,49 @@ public class HttpTemplateWizardPage extends WizardPage implements
 
 					// Load the controls to configure the extension
 					Composite panel = new Composite(extensionTabs, SWT.NONE);
-					instance.createControl(panel, context);
+					Composite controls = new Composite(panel, SWT.NONE);
+					instance.createControl(controls, context);
+					extraTab.setControl(panel);
+
+					// Configure the layout (after to override)
+					panel.setLayout(new GridLayout(1, false));
 					panel.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true,
 							true));
-					extraTab.setControl(panel);
+					controls.setLayoutData(new GridData(SWT.FILL, SWT.FILL,
+							true, true));
+
+					// Add extension to listing
+					final HttpTemplateExtensionStruct templateExtension = new HttpTemplateExtensionStruct(
+							instance, properties);
+					HttpTemplateWizardPage.this.templateExtensions
+							.add(templateExtension);
+
+					// Add button to remove extension
+					Button removeButton = new Button(panel, SWT.PUSH);
+					removeButton.setText("Remove extension");
+					removeButton.setLayoutData(new GridData(SWT.RIGHT,
+							SWT.BOTTOM, false, false));
+					removeButton.addSelectionListener(new SelectionAdapter() {
+						@Override
+						public void widgetSelected(SelectionEvent e) {
+
+							// Remove the template extension
+							HttpTemplateWizardPage.this.templateExtensions
+									.remove(templateExtension);
+
+							// Remove from display
+							extraTab.dispose();
+							
+							// Handle change of removing the extension
+							HttpTemplateWizardPage.this.handleChange();
+						}
+					});
 
 					// Provide focus to new tab
 					extensionTabs.setSelection(tabIndex);
+
+					// Handle change of adding the extension
+					HttpTemplateWizardPage.this.handleChange();
 				}
 			}
 		});
@@ -792,19 +834,10 @@ public class HttpTemplateWizardPage extends WizardPage implements
 	/**
 	 * Handles the change.
 	 */
-	@SuppressWarnings({ "rawtypes", "unchecked" })
 	private void handleChange() {
 
 		// Clear error message (as change may have corrected it)
 		this.setErrorMessage(null);
-
-		// Ensure have template extension
-		if (this.templateExtension == null) {
-			this.setErrorMessage("FATAL ERROR: unable to source extension "
-					+ HttpTemplateSectionSourceExtension.class.getName());
-			this.setPageComplete(false);
-			return;
-		}
 
 		// Clear section type (as potentially changing)
 		this.sectionType = null;
@@ -835,18 +868,49 @@ public class HttpTemplateWizardPage extends WizardPage implements
 			return;
 		}
 
-		// Obtain the HTTP Template Section Source class
-		Class sectionSourceClass = this.templateExtension
-				.getSectionSourceClass();
-
 		// Load the Section Type
 		this.isIssue = false; // reset to determine if issue
 		this.sectionType = this.sectionLoader.loadSectionType(
-				sectionSourceClass, this.templatePath, this.properties);
+				HttpTemplateSectionSource.class, this.templatePath,
+				this.properties);
 		if ((this.sectionType == null) || (this.isIssue)) {
 			// Must have section (issue reported as error message)
 			this.setPageComplete(false);
 			return;
+		}
+
+		// Validate the template extensions
+		for (HttpTemplateExtensionStruct extension : this.templateExtensions) {
+
+			// Obtain the extension source class name
+			String extensionSourceClassName = extension.source
+					.getWoofTemplateExtensionSourceClassName();
+
+			// Match against old extensions to find old properties
+			PropertyList oldProperties = null;
+			if (this.templateInstance != null) {
+				for (HttpTemplateExtensionInstance instance : this.templateInstance
+						.getTemplateExtensionInstances()) {
+					if (extensionSourceClassName.equals(instance
+							.getTemplateExtensionClassName())) {
+						oldProperties = instance.getProperties();
+					}
+				}
+			}
+
+			// Obtain the remaining details
+			String oldUri = this.initialUriPath;
+			String newUri = this.uriPath.getValue();
+			PropertyList newProperties = extension.properties;
+
+			// Validate the change
+			extension.source.validateChange(oldUri, oldProperties, newUri,
+					newProperties, this.resourceSources, this);
+			if (this.isIssue) {
+				// Issue reported as error
+				this.setPageComplete(false);
+				return;
+			}
 		}
 
 		// Specification of template details complete
@@ -900,6 +964,37 @@ public class HttpTemplateWizardPage extends WizardPage implements
 	@Override
 	public void notifyPropertiesChanged() {
 		this.handleChange();
+	}
+
+	/**
+	 * Details of the {@link WoofTemplateExtensionSource}.
+	 */
+	private static class HttpTemplateExtensionStruct {
+
+		/**
+		 * {@link HttpTemplateExtensionSourceInstance}.
+		 */
+		public final HttpTemplateExtensionSourceInstance source;
+
+		/**
+		 * {@link PropertyList}.
+		 */
+		public final PropertyList properties;
+
+		/**
+		 * Initiate.
+		 * 
+		 * @param source
+		 *            {@link HttpTemplateExtensionSourceInstance}.
+		 * @param properties
+		 *            {@link PropertyList}.
+		 */
+		public HttpTemplateExtensionStruct(
+				HttpTemplateExtensionSourceInstance source,
+				PropertyList properties) {
+			this.source = source;
+			this.properties = properties;
+		}
 	}
 
 }

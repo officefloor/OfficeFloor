@@ -153,7 +153,7 @@ public class ProjectClassLoader extends URLClassLoader {
 		List<URL> urls = new ArrayList<URL>();
 		for (String path : classpath) {
 
-			// Obain the URL
+			// Obtain the URL
 			URL url = createUrl(path);
 			if (url == null) {
 				continue; // must create URL
@@ -164,7 +164,7 @@ public class ProjectClassLoader extends URLClassLoader {
 		}
 
 		// Return the created class loader
-		return new ProjectClassLoader(urls.toArray(new URL[0]),
+		return new ProjectClassLoader(urls.toArray(new URL[urls.size()]),
 				parentClassLoader);
 	}
 
