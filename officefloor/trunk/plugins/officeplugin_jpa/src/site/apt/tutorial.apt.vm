@@ -117,11 +117,11 @@ Eclipse Extension
   
   The code for the <<<Extension>>>SourceExtension of {{{/apidocs/net/officefloor/plugin/jpa/JpaEntityManagerManagedObjectSource.html}JpaEntityManagerManagedObjectSource}} is as follows.
   
-%{code-snippet|brush-autodetect=1|id=tutorial|file=${projectBasedir}/../../eclipse/plugins/net.officefloor.plugins/src/main/java/net/officefloor/eclipse/jpa/JpaEntityManagerManagedObjectSourceExtension.java}
+%{code-snippet|brush-autodetect=1|id=tutorial|file=${projectBasedir}/../../eclipse/plugins/net.officefloor.extras/src/main/java/net/officefloor/eclipse/jpa/JpaEntityManagerManagedObjectSourceExtension.java}
  
   Making this available to the OfficeFloor Eclipse plug-ins is undertaken by wrapping the above in an Eclipse plug-in with the following extension configuration.  There are extension points following the below naming convention for all Sources within OfficeFloor.
   
-%{code-snippet|brush-autodetect=1|id=tutorial|file=${projectBasedir}/../../eclipse/plugins/net.officefloor.plugins/plugin.xml}
+%{code-snippet|brush-autodetect=1|id=tutorial|file=${projectBasedir}/../../eclipse/plugins/net.officefloor.extras/plugin.xml}
 
 
 Next
