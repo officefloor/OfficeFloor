@@ -23,6 +23,9 @@ import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
+import java.util.Arrays;
+import java.util.LinkedList;
+import java.util.List;
 
 /**
  * {@link InvocationHandler} to enable type compatibility between interface
@@ -216,16 +219,22 @@ public class TypeAdapter implements InvocationHandler {
 							Object argumentElement = argumentArray[e];
 
 							// Determine if need to adapt element
-							if ((String.class.getName().equals(argumentElement
-									.getClass().getName()))
+							if (argumentElement == null) {
+								// Use null value
+								adaptedArray[e] = null;
+
+							} else if ((String.class.getName()
+									.equals(argumentElement.getClass()
+											.getName()))
 									|| (argumentElement.getClass()
 											.isPrimitive())) {
 								// Use primitive value
 								adaptedArray[e] = argumentElement;
+
 							} else {
 								// Adapt value via interfaces
-								Class<?>[] interfaces = argumentElement
-										.getClass().getInterfaces();
+								Class<?>[] interfaces = getInterfaces(argumentElement
+										.getClass());
 								adaptedArray[e] = createProxy(argumentElement,
 										implClassLoader, clientClassLoader,
 										interfaces);
@@ -317,8 +326,8 @@ public class TypeAdapter implements InvocationHandler {
 			} else {
 				// Use implementation interfaces
 				if (returnValue != null) {
-					Class<?>[] interfaces = returnValue.getClass()
-							.getInterfaces();
+					Class<?>[] interfaces = getInterfaces(returnValue
+							.getClass());
 					if (interfaces.length > 0) {
 						// Provide proxy for interfaces of implementation
 						returnValue = createProxy(returnValue,
@@ -360,6 +369,31 @@ public class TypeAdapter implements InvocationHandler {
 
 		// Translate class
 		return classLoader.loadClass(clazz.getName());
+	}
+
+	/**
+	 * Obtains the implementing interfaces the {@link Class}.
+	 * 
+	 * @param clazz
+	 *            {@link Class}.
+	 * @return Implementing interfaces.
+	 */
+	public static Class<?>[] getInterfaces(Class<?> clazz) {
+
+		// Traverse up the inheritance hierarchy to load interfaces
+		List<Class<?>> interfaces = new LinkedList<Class<?>>();
+		do {
+
+			// Add the interfaces for the class
+			interfaces.addAll(Arrays.asList(clazz.getInterfaces()));
+
+			// Move to the super (parent) class
+			clazz = clazz.getSuperclass();
+
+		} while (clazz != null);
+
+		// Return the interfaces
+		return interfaces.toArray(new Class[interfaces.size()]);
 	}
 
 	/**
