@@ -244,6 +244,60 @@ public class WoofTemplateExtensionLoaderImpl implements
 		return properties;
 	}
 
+	/**
+	 * {@link OfficeFloorCompilerRunnable} to refactor the
+	 * {@link WoofTemplateExtensionSource}.
+	 */
+	public static class RefactorTemplateExtension implements
+			OfficeFloorCompilerRunnable<Change<?>> {
+
+		/*
+		 * ================ OfficeFloorCompilerRunnable ==============
+		 */
+
+		@Override
+		public Change<?> run(OfficeFloorCompiler compiler, Object[] parameters)
+				throws Exception {
+
+			// Obtain the parameters
+			String woofTemplateExtensionSourceClassName = (String) parameters[0];
+			String oldUri = (String) parameters[1];
+			SourceProperties oldProperties = (SourceProperties) parameters[2];
+			String newUri = (String) parameters[3];
+			SourceProperties newProperties = (SourceProperties) parameters[4];
+			ConfigurationContext configurationContext = (ConfigurationContext) parameters[5];
+			SourceContext sourceContext = (SourceContext) parameters[6];
+
+			// Construct the context
+			WoofTemplateExtensionChangeContext context = new WoofTemplateExtensionChangeContextImpl(
+					true, sourceContext, oldUri, oldProperties, newUri,
+					newProperties, configurationContext);
+
+			// Attempt to create the extension change
+			Change<?> extensionChange = null;
+			try {
+
+				// Construct the source
+				Class<?> extensionSourceClass = sourceContext
+						.loadClass(woofTemplateExtensionSourceClassName);
+				WoofTemplateExtensionSource source = (WoofTemplateExtensionSource) extensionSourceClass
+						.newInstance();
+
+				// Create potential change to to refactor extension
+				extensionChange = source.createConfigurationChange(context);
+
+			} catch (Throwable ex) {
+				// Provide conflict indicating failure of extension
+				extensionChange = createFailureChange(
+						woofTemplateExtensionSourceClassName, oldUri, newUri,
+						ex);
+			}
+
+			// Return the extension change
+			return extensionChange;
+		}
+	}
+
 	@Override
 	public Change<?> refactorTemplateExtension(
 			String woofTemplateExtensionSourceClassName, String oldUri,
@@ -252,40 +306,52 @@ public class WoofTemplateExtensionLoaderImpl implements
 			ConfigurationContext configurationContext,
 			SourceContext sourceContext) {
 
-		// Construct the context
-		WoofTemplateExtensionChangeContext context = new WoofTemplateExtensionChangeContextImpl(
-				true, sourceContext, oldUri, oldProperties, newUri,
-				newProperties, configurationContext);
+		// Create and configure the compiler
+		OfficeFloorCompiler compiler = OfficeFloorCompiler
+				.newOfficeFloorCompiler(sourceContext.getClassLoader());
 
-		// Attempt to create the extension change
-		Change<?> extensionChange = null;
+		// Load the change
+		Change<?> change = null;
 		try {
+			change = compiler.run(RefactorTemplateExtension.class,
+					woofTemplateExtensionSourceClassName, oldUri,
+					oldProperties, newUri, newProperties, configurationContext,
+					sourceContext);
 
-			// Construct the source
-			Class<?> extensionSourceClass = sourceContext
-					.loadClass(woofTemplateExtensionSourceClassName);
-			WoofTemplateExtensionSource source = (WoofTemplateExtensionSource) extensionSourceClass
-					.newInstance();
-
-			// Create potential change to to refactor extension
-			extensionChange = source.createConfigurationChange(context);
-
-		} catch (Throwable ex) {
+		} catch (Exception ex) {
 			// Provide conflict indicating failure of extension
-			extensionChange = new NoChange<WoofTemplateExtensionModel>(
-					new WoofTemplateExtensionModel(
-							woofTemplateExtensionSourceClassName),
-					"Refactor extension "
-							+ woofTemplateExtensionSourceClassName,
-					"Extension " + woofTemplateExtensionSourceClassName
-							+ " on template "
-							+ (oldUri != null ? oldUri : newUri)
-							+ " prevented change as " + ex.getMessage() + " ["
-							+ ex.getClass().getName() + "]");
+			change = createFailureChange(woofTemplateExtensionSourceClassName,
+					oldUri, newUri, ex);
 		}
 
-		// Return the extension change
-		return extensionChange;
+		// Return the change
+		return change;
+	}
+
+	/**
+	 * Creates the {@link NoChange} for failure of refactor {@link Change}.
+	 * 
+	 * @param woofTemplateExtensionSourceClassName
+	 *            {@link WoofTemplateExtensionSource} class name.
+	 * @param oldUri
+	 *            Old URI.
+	 * @param newUri
+	 *            New URI.
+	 * @param ex
+	 *            Cause.
+	 * @return {@link NoChange}.
+	 */
+	private static NoChange<?> createFailureChange(
+			String woofTemplateExtensionSourceClassName, String oldUri,
+			String newUri, Throwable ex) {
+		return new NoChange<WoofTemplateExtensionModel>(
+				new WoofTemplateExtensionModel(
+						woofTemplateExtensionSourceClassName),
+				"Refactor extension " + woofTemplateExtensionSourceClassName,
+				"Extension " + woofTemplateExtensionSourceClassName
+						+ " on template " + (oldUri != null ? oldUri : newUri)
+						+ " prevented change as " + ex.getMessage() + " ["
+						+ ex.getClass().getName() + "]");
 	}
 
 	@Override
