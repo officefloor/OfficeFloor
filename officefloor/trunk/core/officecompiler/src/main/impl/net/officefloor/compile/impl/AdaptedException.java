@@ -25,16 +25,32 @@ import net.officefloor.compile.issues.CompilerIssues;
  * 
  * @author Daniel Sagenschneider
  */
-public class AdaptedException extends Exception {
+public class AdaptedException extends RuntimeException {
+
+	/**
+	 * Original type.
+	 */
+	private String originalType;
 
 	/**
 	 * Initiate.
 	 * 
 	 * @param message
 	 *            Message with adapted details of the cause.
+	 * @param originalType
+	 *            Original Type.
 	 */
-	public AdaptedException(String message) {
+	public AdaptedException(String message, String originalType) {
 		super(message);
+	}
+
+	/**
+	 * Obtains the original type.
+	 * 
+	 * @return Original type.
+	 */
+	public String getOriginalType() {
+		return this.originalType;
 	}
 
 }

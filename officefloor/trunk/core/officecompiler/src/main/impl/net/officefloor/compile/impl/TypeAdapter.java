@@ -24,8 +24,13 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.util.Arrays;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * {@link InvocationHandler} to enable type compatibility between interface
@@ -36,6 +41,36 @@ import java.util.List;
  * @author Daniel Sagenschneider
  */
 public class TypeAdapter implements InvocationHandler {
+
+	/**
+	 * Primitive object types.
+	 */
+	private static final Set<String> compatibleObjectTypes = new HashSet<String>();
+
+	/**
+	 * Required types that always require proxying.
+	 */
+	private static final Set<String> alwaysProxyRequiredTypes = new HashSet<String>();
+
+	static {
+		// Load the compatible object types
+		compatibleObjectTypes.add(Boolean.class.getName());
+		compatibleObjectTypes.add(Short.class.getName());
+		compatibleObjectTypes.add(Character.class.getName());
+		compatibleObjectTypes.add(Integer.class.getName());
+		compatibleObjectTypes.add(Long.class.getName());
+		compatibleObjectTypes.add(Float.class.getName());
+		compatibleObjectTypes.add(Double.class.getName());
+		compatibleObjectTypes.add(String.class.getName());
+
+		// Load the always proxy required types
+		alwaysProxyRequiredTypes.add(Object.class.getName());
+		alwaysProxyRequiredTypes.add(Collection.class.getName());
+		alwaysProxyRequiredTypes.add(List.class.getName());
+		alwaysProxyRequiredTypes.add(Set.class.getName());
+		alwaysProxyRequiredTypes.add(Map.class.getName());
+		alwaysProxyRequiredTypes.add(Iterator.class.getName());
+	}
 
 	/**
 	 * Invokes the method expecting no {@link Exception}.
@@ -95,7 +130,6 @@ public class TypeAdapter implements InvocationHandler {
 	 * @throws Throwable
 	 *             If fails to invoke the {@link Method}.
 	 */
-	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public static Object invokeMethod(Object implementation, String methodName,
 			Object[] arguments, Class<?>[] paramTypes,
 			ClassLoader clientClassLoader, ClassLoader implClassLoader)
@@ -126,131 +160,10 @@ public class TypeAdapter implements InvocationHandler {
 							methodName, paramTypes);
 		}
 
-		// Determine if must adapt arguments
-		Class<?>[] methodParamTypes = method.getParameterTypes();
+		// Adapt the arguments
 		for (int i = 0; i < arguments.length; i++) {
-			Class<?> methodParamType = methodParamTypes[i];
-
-			// Obtain the overriding argument
-			Object argument = arguments[i];
-			Object overridingArgument = null;
-
-			// Determine if a proxy
-			if ((argument != null) && (Proxy.isProxyClass(argument.getClass()))) {
-				InvocationHandler handler = Proxy
-						.getInvocationHandler(argument);
-				if (handler instanceof TypeAdapter) {
-					TypeAdapter adapter = (TypeAdapter) handler;
-
-					// Use implementation as argument
-					overridingArgument = adapter.implementation;
-				}
-			}
-
-			// If not proxied implementation, adapt argument for invocation
-			if (overridingArgument == null) {
-				if (methodParamType.isInterface()) {
-					// Adapt argument (need to be available for Class Loader)
-					overridingArgument = createProxy(argument, implClassLoader,
-							clientClassLoader, methodParamType);
-
-				} else if (argument != null) {
-					// Determine if can ignore argument
-					if (Class.class.getName().equals(methodParamType.getName())) {
-						// Translate class
-						Class<?> classArgument = (Class<?>) argument;
-						overridingArgument = translateClass(classArgument,
-								implClassLoader);
-
-					} else if (methodParamType.isEnum()) {
-						// Transform enumeration
-						Enum<?> argumentEnum = (Enum<?>) argument;
-						overridingArgument = Enum.valueOf(
-								(Class) methodParamType, argumentEnum.name());
-
-					} else if (isThrowable(argument.getClass())) {
-						// Adapt the throwable
-						Throwable cause = (Throwable) argument;
-						Constructor<?> constructor;
-						try {
-							// Attempt to adapt the actual throwable type
-							Class<?> adaptedCauseClass = translateClass(
-									argument.getClass(), implClassLoader);
-							constructor = adaptedCauseClass
-									.getConstructor(String.class);
-							overridingArgument = constructor.newInstance(cause
-									.getMessage());
-
-						} catch (Throwable ex) {
-							// Only provide exception for CompilerIssue.
-							// Therefore can adapt the exception with another.
-							Class<?> adaptedExceptionClass = translateClass(
-									AdaptedException.class, implClassLoader);
-							constructor = adaptedExceptionClass
-									.getConstructor(String.class);
-							overridingArgument = constructor.newInstance(cause
-									.getMessage());
-						}
-
-					} else if ((String.class.getName().equals(methodParamType
-							.getName()))
-							|| (String.class.getName().equals(argument
-									.getClass().getName()))
-							|| (methodParamType.isPrimitive())) {
-						// Maintain argument (for primitive types)
-						overridingArgument = argument;
-
-					} else if ((methodParamType.isArray())
-							&& ((String.class.getName().equals(methodParamType
-									.getComponentType().getName())) || (methodParamType
-									.getComponentType().isPrimitive()))) {
-						// Maintain array argument (for primitive arrays)
-						overridingArgument = argument;
-
-					} else if (methodParamType.isArray()) {
-						// Proxy the array
-						Object[] argumentArray = (Object[]) argument;
-						Class<?> adaptedComponentType = translateClass(
-								methodParamType.getComponentType(),
-								implClassLoader);
-						Object[] adaptedArray = (Object[]) Array.newInstance(
-								adaptedComponentType, argumentArray.length);
-						for (int e = 0; e < adaptedArray.length; e++) {
-							Object argumentElement = argumentArray[e];
-
-							// Determine if need to adapt element
-							if (argumentElement == null) {
-								// Use null value
-								adaptedArray[e] = null;
-
-							} else if ((String.class.getName()
-									.equals(argumentElement.getClass()
-											.getName()))
-									|| (argumentElement.getClass()
-											.isPrimitive())) {
-								// Use primitive value
-								adaptedArray[e] = argumentElement;
-
-							} else {
-								// Adapt value via interfaces
-								Class<?>[] interfaces = getInterfaces(argumentElement
-										.getClass());
-								adaptedArray[e] = createProxy(argumentElement,
-										implClassLoader, clientClassLoader,
-										interfaces);
-							}
-						}
-						overridingArgument = adaptedArray;
-
-					} else {
-						// Ignore non-important argument
-						overridingArgument = null;
-					}
-				}
-			}
-
-			// Specify the overridden argument value
-			arguments[i] = overridingArgument;
+			arguments[i] = adaptObject(arguments[i], paramTypes[i],
+					clientClassLoader, implClassLoader);
 		}
 
 		// Invoke the method
@@ -261,7 +174,8 @@ public class TypeAdapter implements InvocationHandler {
 
 		} catch (InvocationTargetException ex) {
 			// Propagate method failure
-			throw ex.getCause();
+			throw (Throwable) adaptObject(ex.getCause(), Throwable.class,
+					clientClassLoader, implClassLoader);
 
 		} catch (Exception ex) {
 			// Not compatible
@@ -270,75 +184,154 @@ public class TypeAdapter implements InvocationHandler {
 							methodName, paramTypes);
 		}
 
-		// Adapt return value
+		// Obtain the return type
 		Class<?> returnType = method.getReturnType();
-		if ((returnValue != null) && (returnType != null)) {
-			if (Class.class.getName().equals(returnType.getName())) {
-				// Transform class for return
+		if (returnType != null) {
+			returnType = translateClass(returnType, clientClassLoader);
+		}
+
+		// Adapt return value
+		returnValue = adaptObject(returnValue, returnType, implClassLoader,
+				clientClassLoader);
+
+		// Return the value
+		return returnValue;
+	}
+
+	/**
+	 * Adapts the object.
+	 * 
+	 * @param object
+	 *            Object to be adapted.
+	 * @param requiredType
+	 *            Required Type.
+	 * @param clientClassLoader
+	 *            Client {@link ClassLoader}.
+	 * @param implClassLoader
+	 *            Implementation {@link ClassLoader}.
+	 * @return Adapted object.
+	 * @throws Exception
+	 *             If fails to adapt the object.
+	 */
+	@SuppressWarnings({ "unchecked", "rawtypes" })
+	private static Object adaptObject(Object object, Class<?> requiredType,
+			ClassLoader clientClassLoader, ClassLoader implClassLoader)
+			throws Exception {
+
+		// Null does not need adapting
+		if (object == null) {
+			return null;
+		}
+
+		// Obtain the object class
+		Class<?> objectClass = object.getClass();
+
+		// Determine if a proxy
+		if (Proxy.isProxyClass(objectClass)) {
+			InvocationHandler handler = Proxy.getInvocationHandler(object);
+			if (handler instanceof TypeAdapter) {
+				TypeAdapter adapter = (TypeAdapter) handler;
+
+				// Use implementation as object
+				return adapter.implementation;
+			}
+		}
+
+		// Determine if compatible object
+		if (isCompatibleType(objectClass)) {
+			// Maintain value as compatible
+			return object;
+		}
+
+		// Determine if compatible array
+		if ((objectClass.isArray())
+				&& (isCompatibleType(objectClass.getComponentType()))) {
+			// Maintain array object (for primitive arrays)
+			return object;
+		}
+
+		// Transform for class
+		if (Class.class.getName().equals(objectClass.getName())) {
+			// Translate class
+			Class<?> classObject = (Class<?>) object;
+			return translateClass(classObject, implClassLoader);
+		}
+
+		// Transform for enum
+		if (objectClass.isEnum()) {
+			// Transform enumeration
+			Enum<?> enumObject = (Enum<?>) object;
+			Class<?> adaptObjectClass = translateClass(objectClass,
+					implClassLoader);
+			return Enum.valueOf((Class) adaptObjectClass, enumObject.name());
+		}
+
+		// Determine if throwable
+		if (isThrowable(objectClass)) {
+
+			// Only adapt as throwable if method requiring throwable
+			if (isThrowable(requiredType)) {
+
+				// Adapt the throwable
+				Throwable cause = (Throwable) object;
+				Constructor<?> constructor;
 				try {
-					returnValue = translateClass((Class<?>) returnValue,
-							clientClassLoader);
-				} catch (ClassNotFoundException ex) {
-					/*
-					 * Implementation class not on client class path, so just
-					 * return implementation class and hope not assigning to
-					 * class - resulting in incompatible type exception.
-					 */
-				}
+					// Attempt to adapt the actual throwable type
+					Class<?> adaptedCauseClass = translateClass(objectClass,
+							implClassLoader);
+					constructor = adaptedCauseClass
+							.getConstructor(String.class);
+					return constructor.newInstance(cause.getMessage());
 
-			} else if (returnType.isInterface()) {
-				// Adapt the return (need to be available for Class Loader)
-				returnValue = createProxy(returnValue, clientClassLoader,
-						implClassLoader, returnType);
-
-			} else if (returnType.isArray()) {
-				// Array return type, so must adapt each element
-				Class<?> componentType = returnType.getComponentType();
-				if (componentType.isInterface()) {
-					Object[] returnArray = (Object[]) returnValue;
-
-					// Array of interfaces requiring adapting
-					componentType = translateClass(componentType,
-							clientClassLoader);
-					Object[] array = (Object[]) Array.newInstance(
-							componentType, returnArray.length);
-
-					// Adapt the array elements
-					for (int i = 0; i < array.length; i++) {
-						Object returnElement = returnArray[i];
-						if (returnElement != null) {
-							array[i] = createProxy(returnElement,
-									clientClassLoader, implClassLoader,
-									componentType);
-						}
-					}
-
-					// Override return value with adapted array
-					returnValue = array;
-				}
-
-			} else if ((returnType.isPrimitive())
-					|| (String.class.getName().equals(returnType.getName()))
-					|| (String.class.getName().equals(returnValue.getClass()
-							.getName()))) {
-				// Primitive or String value (so no need to adapt)
-
-			} else {
-				// Use implementation interfaces
-				if (returnValue != null) {
-					Class<?>[] interfaces = getInterfaces(returnValue
-							.getClass());
-					if (interfaces.length > 0) {
-						// Provide proxy for interfaces of implementation
-						returnValue = createProxy(returnValue,
-								clientClassLoader, implClassLoader, interfaces);
-					}
+				} catch (Throwable ex) {
+					// Only provide exception for CompilerIssue.
+					// Therefore can adapt the exception with another.
+					Class<?> adaptedExceptionClass = translateClass(
+							AdaptedException.class, implClassLoader);
+					constructor = adaptedExceptionClass.getConstructor(
+							String.class, String.class);
+					return constructor.newInstance(cause.getMessage(), cause
+							.getClass().getName());
 				}
 			}
 		}
 
-		// Return the value
-		return returnValue;
+		// Transform possible array
+		if (objectClass.isArray()) {
+			// Proxy the array
+			Class<?> adaptedComponentType = translateClass(
+					objectClass.getComponentType(), implClassLoader);
+			Object[] objectArray = (Object[]) object;
+			Object[] adaptedArray = (Object[]) Array.newInstance(
+					adaptedComponentType, objectArray.length);
+
+			// Adapt the elements
+			for (int i = 0; i < adaptedArray.length; i++) {
+				adaptedArray[i] = adaptObject(objectArray[i],
+						adaptedComponentType, clientClassLoader,
+						implClassLoader);
+			}
+
+			// Return the adapted array
+			return adaptedArray;
+		}
+
+		// Adapt by interfaces
+		Class<?>[] interfaces = getInterfaces(objectClass);
+		return createProxy(object, implClassLoader, clientClassLoader,
+				interfaces);
+	}
+
+	/**
+	 * Determine if compatible type.
+	 * 
+	 * @param type
+	 *            Type to check.
+	 * @return <code>true</code> if compatible type.
+	 */
+	private static boolean isCompatibleType(Class<?> type) {
+		return (compatibleObjectTypes.contains(type.getName()))
+				|| (type.isPrimitive());
 	}
 
 	/**
@@ -362,9 +355,19 @@ public class TypeAdapter implements InvocationHandler {
 
 		// Handle if an array
 		if (clazz.isArray()) {
-			Class<?> componentType = classLoader.loadClass(clazz
-					.getComponentType().getName());
-			return Array.newInstance(componentType, 0).getClass();
+
+			// Array so obtain the component type
+			Class<?> componentType = clazz.getComponentType();
+
+			// Determine if compatible array
+			if (isCompatibleType(componentType)) {
+				return clazz; // compatible array
+			}
+
+			// Translate array of object
+			Class<?> adaptedComponentType = classLoader.loadClass(componentType
+					.getName());
+			return Array.newInstance(adaptedComponentType, 0).getClass();
 		}
 
 		// Translate class

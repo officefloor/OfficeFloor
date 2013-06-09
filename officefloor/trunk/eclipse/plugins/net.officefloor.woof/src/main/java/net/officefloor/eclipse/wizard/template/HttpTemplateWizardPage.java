@@ -809,7 +809,7 @@ public class HttpTemplateWizardPage extends WizardPage implements
 
 							// Remove from display
 							extraTab.dispose();
-							
+
 							// Handle change of removing the extension
 							HttpTemplateWizardPage.this.handleChange();
 						}

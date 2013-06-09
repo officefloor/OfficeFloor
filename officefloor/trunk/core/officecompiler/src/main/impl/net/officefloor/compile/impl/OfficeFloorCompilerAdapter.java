@@ -18,11 +18,7 @@
 package net.officefloor.compile.impl;
 
 import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.List;
 
-import net.officefloor.autowire.AutoWire;
-import net.officefloor.autowire.impl.SingletonManagedObjectSource;
 import net.officefloor.autowire.spi.supplier.source.SupplierSource;
 import net.officefloor.autowire.supplier.SupplierLoader;
 import net.officefloor.compile.OfficeFloorCompiler;
@@ -45,7 +41,6 @@ import net.officefloor.compile.spi.work.source.WorkSource;
 import net.officefloor.compile.team.TeamLoader;
 import net.officefloor.compile.work.WorkLoader;
 import net.officefloor.frame.api.OfficeFrame;
-import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.api.escalate.EscalationHandler;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.api.manage.OfficeFloor;
@@ -70,85 +65,6 @@ import net.officefloor.frame.spi.team.source.TeamSource;
  * @author Daniel Sagenschneider
  */
 public class OfficeFloorCompilerAdapter extends OfficeFloorCompiler {
-
-	/**
-	 * Creates the {@link ManagedObjectSource} to provide the singleton
-	 * {@link Object}.
-	 * 
-	 * @param compiler
-	 *            {@link OfficeFloorCompiler}.
-	 * @param singleton
-	 *            Singleton.
-	 * @param autoWiring
-	 *            {@link AutoWire} instances for the singleton.
-	 * @return {@link ManagedObjectSource} to provide the singleton.
-	 * @throws ClassNotFoundException
-	 *             If fails to obtain the adapted {@link Class}.
-	 */
-	@SuppressWarnings("unchecked")
-	public static ManagedObjectSource<None, None> createSingletonManagedObjectSource(
-			OfficeFloorCompiler compiler, Object singleton,
-			AutoWire[] autoWiring) throws ClassNotFoundException {
-
-		// Determine if must adapt for use
-		boolean isAdapt = (compiler instanceof OfficeFloorCompilerAdapter);
-		OfficeFloorCompilerAdapter adapter = null;
-
-		// Adapt the object (if necessary)
-		if (isAdapt) {
-			// Adapting so obtain the adapter
-			adapter = (OfficeFloorCompilerAdapter) compiler;
-
-			// Obtain the interface types (ensuring all are interfaces)
-			List<Class<?>> interfaceTypes = new ArrayList<Class<?>>(
-					autoWiring.length);
-			for (AutoWire autoWire : autoWiring) {
-
-				// Load the type class
-				Class<?> type = adapter.clientClassLoader.loadClass(autoWire
-						.getType());
-
-				// Ensure the interface type
-				if (!type.isInterface()) {
-					throw new IllegalStateException("Adapting "
-							+ OfficeFloorCompiler.class.getSimpleName()
-							+ " so all object types must be an interface ["
-							+ type.getName() + "]");
-				}
-
-				// Register the interface type
-				interfaceTypes.add(type);
-			}
-
-			// Adapt the object
-			singleton = TypeAdapter
-					.createProxy(singleton, adapter.implClassLoader,
-							adapter.clientClassLoader,
-							interfaceTypes.toArray(new Class<?>[interfaceTypes
-									.size()]));
-		}
-
-		// Create the managed object source for the singleton
-		ManagedObjectSource<None, None> managedObjectSource = new SingletonManagedObjectSource(
-				singleton);
-
-		// Adapt managed object source for use
-		if (isAdapt) {
-			// Adapt for invoking implementation
-			Object implManagedObjectSource = TypeAdapter.createProxy(
-					managedObjectSource, adapter.implClassLoader,
-					adapter.clientClassLoader, ManagedObjectSource.class);
-
-			// Adapt implementation for client use
-			managedObjectSource = (ManagedObjectSource<None, None>) TypeAdapter
-					.createProxy(implManagedObjectSource,
-							adapter.clientClassLoader, adapter.implClassLoader,
-							ManagedObjectSource.class);
-		}
-
-		// Return the managed object source for the singleton
-		return managedObjectSource;
-	}
 
 	/**
 	 * {@link OfficeFloorCompiler} implementation.
