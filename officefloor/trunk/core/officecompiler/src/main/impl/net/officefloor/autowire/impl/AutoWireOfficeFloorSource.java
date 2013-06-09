@@ -48,7 +48,6 @@ import net.officefloor.autowire.supplier.SuppliedManagedObjectTeamType;
 import net.officefloor.autowire.supplier.SuppliedManagedObjectType;
 import net.officefloor.autowire.supplier.SupplierType;
 import net.officefloor.compile.OfficeFloorCompiler;
-import net.officefloor.compile.impl.OfficeFloorCompilerAdapter;
 import net.officefloor.compile.impl.issues.FailCompilerIssues;
 import net.officefloor.compile.managedobject.ManagedObjectDependencyType;
 import net.officefloor.compile.managedobject.ManagedObjectType;
@@ -1260,11 +1259,8 @@ public class AutoWireOfficeFloorSource extends AbstractOfficeFloorSource
 				if (this.rawObject != null) {
 
 					// Create the managed object source
-					ManagedObjectSource<?, ?> singleton = this
-							.createSingletonManagedObjectSource(deployer);
-					if (singleton == null) {
-						return; // must have singleton
-					}
+					ManagedObjectSource<?, ?> singleton = new SingletonManagedObjectSource(
+							this.rawObject);
 
 					// Obtain type from raw object
 					this.managedObjectType = context.loadManagedObjectType(
@@ -1281,29 +1277,6 @@ public class AutoWireOfficeFloorSource extends AbstractOfficeFloorSource
 				// Determine if input
 				this.isInput = context
 						.isInputManagedObject(this.managedObjectType);
-			}
-		}
-
-		/**
-		 * Obtains the singleton {@link ManagedObjectSource} for the raw object.
-		 * 
-		 * @param deployer
-		 *            {@link OfficeFloorDeployer}.
-		 * @return Singleton {@link ManagedObjectSource}.
-		 */
-		private ManagedObjectSource<?, ?> createSingletonManagedObjectSource(
-				OfficeFloorDeployer deployer) {
-			try {
-				return OfficeFloorCompilerAdapter
-						.createSingletonManagedObjectSource(this.compiler,
-								this.rawObject,
-								this.autoWireObject.getAutoWiring());
-			} catch (ClassNotFoundException ex) {
-				// Not able to create singleton
-				deployer.addIssue("Unable to manage raw object "
-						+ this.managedObjectName, ex, AssetType.MANAGED_OBJECT,
-						this.managedObjectName);
-				return null; // must be able to create singleton
 			}
 		}
 
@@ -1378,11 +1351,8 @@ public class AutoWireOfficeFloorSource extends AbstractOfficeFloorSource
 				// Determine if raw object
 				if (this.rawObject != null) {
 					// Create singleton for the raw object
-					ManagedObjectSource<?, ?> singleton = this
-							.createSingletonManagedObjectSource(state.deployer);
-					if (singleton == null) {
-						return; // must be able to create singleton
-					}
+					ManagedObjectSource<?, ?> singleton = new SingletonManagedObjectSource(
+							this.rawObject);
 
 					// Build the managed object source
 					this.managedObjectSource = state.deployer

@@ -287,7 +287,7 @@ public class OfficeFloorCompilerAdapterTest extends OfficeFrameTestCase {
 	public void testObject() throws Exception {
 
 		final AdaptManagedObjectImpl object = new AdaptManagedObjectImpl();
-
+		
 		// Build OfficeFloor
 		AutoWireOfficeFloorSource source = new AutoWireOfficeFloorSource(
 				this.compiler);
