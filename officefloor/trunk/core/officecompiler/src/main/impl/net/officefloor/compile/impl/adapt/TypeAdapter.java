@@ -15,8 +15,9 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.compile.impl;
+package net.officefloor.compile.impl.adapt;
 
+import java.io.InputStream;
 import java.lang.reflect.Array;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationHandler;
@@ -62,6 +63,7 @@ public class TypeAdapter implements InvocationHandler {
 		compatibleObjectTypes.add(Float.class.getName());
 		compatibleObjectTypes.add(Double.class.getName());
 		compatibleObjectTypes.add(String.class.getName());
+		compatibleObjectTypes.add(InputStream.class.getName());
 
 		// Load the always proxy required types
 		alwaysProxyRequiredTypes.add(Object.class.getName());
@@ -142,7 +144,16 @@ public class TypeAdapter implements InvocationHandler {
 
 		// Transform the parameter types for implementation
 		for (int i = 0; i < paramTypes.length; i++) {
-			paramTypes[i] = translateClass(paramTypes[i], implClassLoader);
+
+			// Adapt the parameter type
+			Class<?> paramType = translateClass(paramTypes[i], implClassLoader);
+			if (paramType == null) {
+				// No adapted parameter type, then must not be compatible method
+				throw OfficeFloorVersionIncompatibilityException
+						.newTypeIncompatibilityException(implementation,
+								methodName, paramTypes);
+			}
+			paramTypes[i] = paramType;
 		}
 
 		// Obtain the implementation class
@@ -266,6 +277,18 @@ public class TypeAdapter implements InvocationHandler {
 			return Enum.valueOf((Class) adaptObjectClass, enumObject.name());
 		}
 
+		// Transform for InputStream
+		if (InputStream.class.getName().equals(requiredType.getName())) {
+			// Create adapted InputStream
+			Class<?> adaptInputStreamClass = translateClass(InputStreamAdapter.class,
+					implClassLoader);
+			Constructor<?> constructor = adaptInputStreamClass.getConstructor(
+					Object.class, ClassLoader.class, ClassLoader.class);
+			Object instance = constructor.newInstance(object,
+					clientClassLoader, implClassLoader);
+			return instance;
+		}
+
 		// Determine if throwable
 		if (isThrowable(objectClass)) {
 
@@ -341,7 +364,8 @@ public class TypeAdapter implements InvocationHandler {
 	 *            {@link Class}.
 	 * @param classLoader
 	 *            {@link ClassLoader}.
-	 * @return Translated {@link Class}.
+	 * @return Translated {@link Class}. May be <code>null</code> if
+	 *         {@link Class} not available from {@link ClassLoader}.
 	 * @throws ClassNotFoundException
 	 *             If fails to obtain translated {@link Class}.
 	 */
@@ -353,25 +377,32 @@ public class TypeAdapter implements InvocationHandler {
 			return clazz;
 		}
 
-		// Handle if an array
-		if (clazz.isArray()) {
+		try {
 
-			// Array so obtain the component type
-			Class<?> componentType = clazz.getComponentType();
+			// Handle if an array
+			if (clazz.isArray()) {
 
-			// Determine if compatible array
-			if (isCompatibleType(componentType)) {
-				return clazz; // compatible array
+				// Array so obtain the component type
+				Class<?> componentType = clazz.getComponentType();
+
+				// Determine if compatible array
+				if (isCompatibleType(componentType)) {
+					return clazz; // compatible array
+				}
+
+				// Translate array of object
+				Class<?> adaptedComponentType = classLoader
+						.loadClass(componentType.getName());
+				return Array.newInstance(adaptedComponentType, 0).getClass();
 			}
 
-			// Translate array of object
-			Class<?> adaptedComponentType = classLoader.loadClass(componentType
-					.getName());
-			return Array.newInstance(adaptedComponentType, 0).getClass();
-		}
+			// Translate class
+			return classLoader.loadClass(clazz.getName());
 
-		// Translate class
-		return classLoader.loadClass(clazz.getName());
+		} catch (ClassNotFoundException ex) {
+			// Class not available from class loader
+			return null;
+		}
 	}
 
 	/**
@@ -438,10 +469,18 @@ public class TypeAdapter implements InvocationHandler {
 			Class<?>... interfaceTypes) throws ClassNotFoundException {
 
 		// Ensure interface types can be loaded by client Class Loader
+		List<Class<?>> interfaces = new LinkedList<Class<?>>();
 		for (int i = 0; i < interfaceTypes.length; i++) {
-			interfaceTypes[i] = translateClass(interfaceTypes[i],
+
+			// Translate the interface
+			Class<?> adaptedInterfaceType = translateClass(interfaceTypes[i],
 					clientClassLoader);
+			if (adaptedInterfaceType != null) {
+				// Have adaption available
+				interfaces.add(adaptedInterfaceType);
+			}
 		}
+		interfaceTypes = interfaces.toArray(new Class[interfaces.size()]);
 
 		// Create the proxy
 		Object proxy = Proxy.newProxyInstance(clientClassLoader,

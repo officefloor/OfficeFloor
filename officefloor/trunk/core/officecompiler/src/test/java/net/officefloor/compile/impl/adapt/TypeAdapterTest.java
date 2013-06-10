@@ -15,10 +15,15 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.compile.impl;
+package net.officefloor.compile.impl.adapt;
 
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.lang.reflect.Method;
 
+import net.officefloor.compile.impl.adapt.AdaptedException;
+import net.officefloor.compile.impl.adapt.TypeAdapter;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 
 /**
@@ -215,6 +220,39 @@ public class TypeAdapterTest extends OfficeFrameTestCase {
 					parameter[0].getValue());
 			assertEquals("Incorrect second element", "TWO",
 					parameter[1].getValue());
+			return true;
+		}
+	}
+
+	/**
+	 * Ensure not adapt {@link InputStream}.
+	 */
+	public void testInputStreamParameter() {
+		this.doParameterTest(InputStreamParameter.class,
+				new ByteArrayInputStream(new byte[] { 1, 2, 3, 4 }));
+	}
+
+	public static class InputStreamParameter {
+		public boolean run(InputStream parameter) throws IOException {
+
+			// Check all InputStream methods adapted
+			assertEquals("Incorrect available", 4, parameter.available());
+			assertEquals("Incorrect skip", 1, parameter.skip(1));
+			assertEquals("Should have value", 2, parameter.read());
+			byte[] buffer = new byte[1];
+			parameter.read(buffer);
+			assertEquals("Incorrect buffer", 3, buffer[0]);
+			parameter.read(buffer, 0, 1);
+			assertEquals("Incorrect offset buffer", 4, buffer[0]);
+
+			// Ensure can invoke other methods
+			parameter.mark(1);
+			parameter.markSupported();
+			parameter.reset();
+
+			// Close the stream
+			parameter.close();
+
 			return true;
 		}
 	}
