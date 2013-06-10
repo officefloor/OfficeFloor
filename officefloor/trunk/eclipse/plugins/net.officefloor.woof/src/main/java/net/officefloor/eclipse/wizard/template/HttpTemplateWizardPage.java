@@ -89,8 +89,7 @@ import org.eclipse.swt.widgets.TabItem;
  * @author Daniel Sagenschneider
  */
 public class HttpTemplateWizardPage extends WizardPage implements
-		CompilerIssues, SectionSourceExtensionContext,
-		HttpTemplateExtensionSourceInstanceContext {
+		CompilerIssues, SectionSourceExtensionContext {
 
 	/**
 	 * {@link Property} specifying the super {@link WoofTemplateModel} name.
@@ -116,8 +115,7 @@ public class HttpTemplateWizardPage extends WizardPage implements
 	 *         {@link HttpTemplateExtensionInstance}.
 	 */
 	public static Map<String, HttpTemplateExtensionSourceInstance> createHttpTemplateExtensionSourceInstanceMap(
-			ClassLoader classLoader, IProject project,
-			HttpTemplateExtensionSourceInstanceContext context) {
+			ClassLoader classLoader, IProject project) {
 
 		// Obtain extension source instances (by class name for unique set)
 		Map<String, HttpTemplateExtensionSourceInstance> extensionSourceInstances = new HashMap<String, HttpTemplateExtensionSourceInstance>();
@@ -134,7 +132,7 @@ public class HttpTemplateWizardPage extends WizardPage implements
 				}
 				extensionSourceInstances.put(className,
 						new HttpTemplateExtensionSourceInstance(className,
-								null, context, project));
+								null, project));
 			}
 		} catch (Throwable ex) {
 			LogUtil.logError(
@@ -153,8 +151,7 @@ public class HttpTemplateWizardPage extends WizardPage implements
 						woofTemplateExtensionSourceClassName,
 						new HttpTemplateExtensionSourceInstance(
 								woofTemplateExtensionSourceClassName,
-								woofTemplateExtensionSourceExtension, context,
-								project));
+								woofTemplateExtensionSourceExtension, project));
 			} catch (Throwable ex) {
 				LogUtil.logError("Failed to create source instance for "
 						+ woofTemplateExtensionSourceExtension.getClass()
@@ -451,7 +448,7 @@ public class HttpTemplateWizardPage extends WizardPage implements
 
 		// Obtain the map of HTTP template extension source instances
 		Map<String, HttpTemplateExtensionSourceInstance> httpTemplateExtensionSourceInstanceMap = createHttpTemplateExtensionSourceInstanceMap(
-				this.classLoader, project, this);
+				this.classLoader, project);
 
 		// Obtain the HTTP template extension source instances (in order)
 		this.availableHttpTemplateExtensionSourceInstances = httpTemplateExtensionSourceInstanceMap
@@ -839,8 +836,7 @@ public class HttpTemplateWizardPage extends WizardPage implements
 		// Provide unknown source if no source
 		if (source == null) {
 			source = new UnknownHttpTemplateExtensionSourceInstance(
-					extensionClassName, HttpTemplateWizardPage.this,
-					this.project);
+					extensionClassName, this.project);
 		}
 
 		// Add a tab (as second last item)
@@ -1089,16 +1085,12 @@ public class HttpTemplateWizardPage extends WizardPage implements
 		 * 
 		 * @param woofTemplateExtensionSourceClassName
 		 *            {@link WoofTemplateExtensionSource} class name.
-		 * @param context
-		 *            {@link HttpTemplateExtensionSourceInstanceContext}.
 		 * @param project
 		 *            {@link IProject}.
 		 */
 		public UnknownHttpTemplateExtensionSourceInstance(
-				String woofTemplateExtensionSourceClassName,
-				HttpTemplateExtensionSourceInstanceContext context,
-				IProject project) {
-			super(woofTemplateExtensionSourceClassName, null, context, project);
+				String woofTemplateExtensionSourceClassName, IProject project) {
+			super(woofTemplateExtensionSourceClassName, null, project);
 		}
 
 		/**

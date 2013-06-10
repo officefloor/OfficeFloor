@@ -85,11 +85,6 @@ public class HttpTemplateExtensionSourceInstance {
 	private final WoofTemplateExtensionSourceExtension<?> extension;
 
 	/**
-	 * {@link HttpTemplateExtensionSourceInstanceContext}.
-	 */
-	private final HttpTemplateExtensionSourceInstanceContext context;
-
-	/**
 	 * {@link IProject}.
 	 */
 	private final IProject project;
@@ -102,18 +97,14 @@ public class HttpTemplateExtensionSourceInstance {
 	 * @param extension
 	 *            {@link WoofTemplateExtensionSourceExtension}. May be
 	 *            <code>null</code>.
-	 * @param context
-	 *            {@link HttpTemplateExtensionSourceInstanceContext}.
 	 * @param project
 	 *            {@link IProject}.
 	 */
 	public HttpTemplateExtensionSourceInstance(
 			String woofTemplateExtensionSourceClassName,
-			WoofTemplateExtensionSourceExtension<?> extension,
-			HttpTemplateExtensionSourceInstanceContext context, IProject project) {
+			WoofTemplateExtensionSourceExtension<?> extension, IProject project) {
 		this.woofTemplateExtensionSourceClassName = woofTemplateExtensionSourceClassName;
 		this.extension = extension;
-		this.context = context;
 		this.project = project;
 	}
 
