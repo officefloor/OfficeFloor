@@ -596,8 +596,25 @@ public class HttpTemplateWizardPage extends WizardPage implements
 	 * @return {@link HttpTemplateExtensionInstance} listing.
 	 */
 	public HttpTemplateExtensionInstance[] getHttpTemplateExtensionInstances() {
-		// TODO obtain the extension instances
-		return null;
+
+		// Create the listing of template extension instances
+		List<HttpTemplateExtensionInstance> instances = new ArrayList<HttpTemplateExtensionInstance>(
+				this.templateExtensions.size());
+		for (HttpTemplateExtensionStruct struct : this.templateExtensions) {
+
+			// Obtain the details
+			String woofTemplateExtensionSourceClassName = struct.source
+					.getWoofTemplateExtensionSourceClassName();
+			PropertyList properties = struct.properties;
+
+			// Add the extension instance
+			instances.add(new HttpTemplateExtensionInstance(
+					woofTemplateExtensionSourceClassName, properties));
+		}
+
+		// Return the listing of template extensions
+		return instances.toArray(new HttpTemplateExtensionInstance[instances
+				.size()]);
 	}
 
 	/*
@@ -741,6 +758,26 @@ public class HttpTemplateWizardPage extends WizardPage implements
 		addExtensionLabel.setText("Press '+' to add an extension");
 		addExtensionTab.setControl(addExtensionLabel);
 
+		// Add the existing extensions (possibly being refactored)
+		if (this.templateInstance != null) {
+			for (HttpTemplateExtensionInstance instance : this.templateInstance
+					.getTemplateExtensionInstances()) {
+
+				// Find the matching source
+				HttpTemplateExtensionSourceInstance source = null;
+				for (HttpTemplateExtensionSourceInstance availableSource : this.availableHttpTemplateExtensionSourceInstances) {
+					if (availableSource
+							.getWoofTemplateExtensionSourceClassName().equals(
+									instance.getTemplateExtensionClassName())) {
+						source = availableSource;
+					}
+				}
+
+				// Add the template extension
+				this.addTemplateExtension(source, extensionTabs, instance);
+			}
+		}
+
 		// Listen for click on add extension tab
 		extensionTabs.addMouseListener(new MouseAdapter() {
 			@Override
@@ -751,75 +788,16 @@ public class HttpTemplateWizardPage extends WizardPage implements
 				if (clickedTab == addExtensionTab) {
 
 					// Provide dialog to select extension
-					HttpTemplateExtensionSourceInstance instance = SelectHttpTemplateExtensionSourceInstanceDialog.getHttpTemplateExtensionSourceInstance(
+					HttpTemplateExtensionSourceInstance source = SelectHttpTemplateExtensionSourceInstanceDialog.getHttpTemplateExtensionSourceInstance(
 							extensionTabs.getShell(),
 							HttpTemplateWizardPage.this.availableHttpTemplateExtensionSourceInstances);
-					if (instance == null) {
+					if (source == null) {
 						return; // not add extension
 					}
 
-					// Obtain the label of the extension
-					String extensionLabel = instance
-							.getWoofTemplateExtensionLabel();
-
-					// Add a tab (as second last item)
-					int tabIndex = Math.max(0,
-							(extensionTabs.getItemCount() - 1));
-					final TabItem extraTab = new TabItem(extensionTabs,
-							SWT.NONE, tabIndex);
-					extraTab.setText(extensionLabel);
-
-					// Create the context for the extension
-					PropertyList properties = instance
-							.createSpecification(HttpTemplateWizardPage.this);
-					WoofTemplateExtensionSourceExtensionContext context = new WoofTemplateExtensionSourceExtensionContextImpl(
-							properties, HttpTemplateWizardPage.this);
-
-					// Load the controls to configure the extension
-					Composite panel = new Composite(extensionTabs, SWT.NONE);
-					Composite controls = new Composite(panel, SWT.NONE);
-					instance.createControl(controls, context);
-					extraTab.setControl(panel);
-
-					// Configure the layout (after to override)
-					panel.setLayout(new GridLayout(1, false));
-					panel.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true,
-							true));
-					controls.setLayoutData(new GridData(SWT.FILL, SWT.FILL,
-							true, true));
-
-					// Add extension to listing
-					final HttpTemplateExtensionStruct templateExtension = new HttpTemplateExtensionStruct(
-							instance, properties);
-					HttpTemplateWizardPage.this.templateExtensions
-							.add(templateExtension);
-
-					// Add button to remove extension
-					Button removeButton = new Button(panel, SWT.PUSH);
-					removeButton.setText("Remove extension");
-					removeButton.setLayoutData(new GridData(SWT.RIGHT,
-							SWT.BOTTOM, false, false));
-					removeButton.addSelectionListener(new SelectionAdapter() {
-						@Override
-						public void widgetSelected(SelectionEvent e) {
-
-							// Remove the template extension
-							HttpTemplateWizardPage.this.templateExtensions
-									.remove(templateExtension);
-
-							// Remove from display
-							extraTab.dispose();
-
-							// Handle change of removing the extension
-							HttpTemplateWizardPage.this.handleChange();
-						}
-					});
-
-					// Provide focus to new tab
-					extensionTabs.setSelection(tabIndex);
-
-					// Handle change of adding the extension
-					HttpTemplateWizardPage.this.handleChange();
+					// Add the extension
+					HttpTemplateWizardPage.this.addTemplateExtension(source,
+							extensionTabs, null);
 				}
 			}
 		});
@@ -829,6 +807,109 @@ public class HttpTemplateWizardPage extends WizardPage implements
 
 		// Specify page control
 		this.setControl(page);
+	}
+
+	/**
+	 * Adds the {@link HttpTemplateExtensionInstance}.
+	 * 
+	 * @param source
+	 *            {@link HttpTemplateExtensionSourceInstance}.
+	 * @param extensionTabs
+	 *            {@link TabFolder} displaying the
+	 *            {@link HttpTemplateExtensionInstance} listing.
+	 * @param instance
+	 *            {@link HttpTemplateExtensionInstance}. May be
+	 *            <code>null</code>.
+	 */
+	private void addTemplateExtension(
+			HttpTemplateExtensionSourceInstance source,
+			TabFolder extensionTabs, HttpTemplateExtensionInstance instance) {
+
+		// Obtain the class name of the extension
+		String extensionClassName = "Unknown";
+		if (source != null) {
+			// Provide details from source
+			extensionClassName = source
+					.getWoofTemplateExtensionSourceClassName();
+		} else if (instance != null) {
+			// Provide details from instance
+			extensionClassName = instance.getTemplateExtensionClassName();
+		}
+
+		// Provide unknown source if no source
+		if (source == null) {
+			source = new UnknownHttpTemplateExtensionSourceInstance(
+					extensionClassName, HttpTemplateWizardPage.this,
+					this.project);
+		}
+
+		// Add a tab (as second last item)
+		int tabIndex = Math.max(0, (extensionTabs.getItemCount() - 1));
+		final TabItem extraTab = new TabItem(extensionTabs, SWT.NONE, tabIndex);
+		extraTab.setText(source.getWoofTemplateExtensionLabel());
+
+		// Obtain the properties
+		PropertyList properties;
+		if (instance != null) {
+			// Use existing properties (taking copy so as not to alter original)
+			properties = this.compiler.createPropertyList();
+			for (Property property : instance.getProperties()) {
+				properties.addProperty(property.getName(), property.getLabel())
+						.setValue(property.getValue());
+			}
+
+		} else {
+			// Seed properties from specification
+			properties = source
+					.createSpecification(HttpTemplateWizardPage.this);
+		}
+
+		// Create the context
+		WoofTemplateExtensionSourceExtensionContext context = new WoofTemplateExtensionSourceExtensionContextImpl(
+				properties, HttpTemplateWizardPage.this);
+
+		// Create the panel for the controls
+		Composite panel = new Composite(extensionTabs, SWT.NONE);
+		Composite controls = new Composite(panel, SWT.NONE);
+		source.createControl(controls, context);
+		extraTab.setControl(panel);
+
+		// Configure the layout (after to override)
+		panel.setLayout(new GridLayout(1, false));
+		panel.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		controls.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+
+		// Add extension to listing (ensuring have properties)
+		final HttpTemplateExtensionStruct templateExtension = new HttpTemplateExtensionStruct(
+				source, properties);
+		this.templateExtensions.add(templateExtension);
+
+		// Add button to remove extension
+		Button removeButton = new Button(panel, SWT.PUSH);
+		removeButton.setText("Remove extension");
+		removeButton.setLayoutData(new GridData(SWT.RIGHT, SWT.BOTTOM, false,
+				false));
+		removeButton.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+
+				// Remove the template extension
+				HttpTemplateWizardPage.this.templateExtensions
+						.remove(templateExtension);
+
+				// Remove from display
+				extraTab.dispose();
+
+				// Handle change of removing the extension
+				HttpTemplateWizardPage.this.handleChange();
+			}
+		});
+
+		// Provide focus to new tab
+		extensionTabs.setSelection(tabIndex);
+
+		// Handle change of adding the extension
+		this.handleChange();
 	}
 
 	/**
@@ -994,6 +1075,71 @@ public class HttpTemplateWizardPage extends WizardPage implements
 				PropertyList properties) {
 			this.source = source;
 			this.properties = properties;
+		}
+	}
+
+	/**
+	 * Unknown {@link HttpTemplateExtensionSourceInstance}.
+	 */
+	private class UnknownHttpTemplateExtensionSourceInstance extends
+			HttpTemplateExtensionSourceInstance {
+
+		/**
+		 * Initiate.
+		 * 
+		 * @param woofTemplateExtensionSourceClassName
+		 *            {@link WoofTemplateExtensionSource} class name.
+		 * @param context
+		 *            {@link HttpTemplateExtensionSourceInstanceContext}.
+		 * @param project
+		 *            {@link IProject}.
+		 */
+		public UnknownHttpTemplateExtensionSourceInstance(
+				String woofTemplateExtensionSourceClassName,
+				HttpTemplateExtensionSourceInstanceContext context,
+				IProject project) {
+			super(woofTemplateExtensionSourceClassName, null, context, project);
+		}
+
+		/**
+		 * Obtains the error message.
+		 * 
+		 * @return Error message.
+		 */
+		private String getErrorMessage() {
+			return "Could not find extension source "
+					+ this.getWoofTemplateExtensionSourceClassName()
+					+ ". Please ensure it is on the project's class path.";
+		}
+
+		/*
+		 * ================ HttpTemplateExtensionSourceInstance ===============
+		 */
+
+		@Override
+		public PropertyList createSpecification(CompilerIssues issues) {
+			// Provide empty properties
+			return HttpTemplateWizardPage.this.compiler.createPropertyList();
+		}
+
+		@Override
+		public void createControl(Composite page,
+				WoofTemplateExtensionSourceExtensionContext context) {
+
+			// No source so provide error
+			page.setLayout(new GridLayout(1, false));
+			Label errorLabel = new Label(page, SWT.NONE);
+			errorLabel.setForeground(ColorConstants.red);
+			errorLabel.setText(this.getErrorMessage());
+		}
+
+		@Override
+		public void validateChange(String oldUri, PropertyList oldProperties,
+				String newUri, PropertyList newProperties,
+				ResourceSource[] resourceSources, CompilerIssues issues) {
+
+			// Indicate unknown extension source class name
+			issues.addIssue(null, null, null, null, this.getErrorMessage());
 		}
 	}
 

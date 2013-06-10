@@ -15,7 +15,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.compile.impl;
+package net.officefloor.compile.impl.adapt;
 
 import java.io.File;
 import java.io.FileWriter;
@@ -34,6 +34,8 @@ import net.officefloor.compile.OfficeFloorCompilerRunnable;
 import net.officefloor.compile.TypeLoader;
 import net.officefloor.compile.administrator.AdministratorLoader;
 import net.officefloor.compile.governance.GovernanceLoader;
+import net.officefloor.compile.impl.adapt.AdaptedException;
+import net.officefloor.compile.impl.adapt.OfficeFloorCompilerAdapter;
 import net.officefloor.compile.issues.CompilerIssues;
 import net.officefloor.compile.managedobject.ManagedObjectLoader;
 import net.officefloor.compile.managedobject.ManagedObjectType;

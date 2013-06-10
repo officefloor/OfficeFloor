@@ -52,6 +52,28 @@ import org.eclipse.swt.widgets.Control;
 public class HttpTemplateExtensionSourceInstance {
 
 	/**
+	 * Obtains the label from the {@link WoofTemplateExtensionSource} class
+	 * name.
+	 * 
+	 * @param woofTemplateExtensionSourceClassName
+	 *            Class name of the {@link WoofTemplateExtensionSource}.
+	 * @return Label.
+	 */
+	public static String getLabelFromWoofTemplateExtensionClassName(
+			String woofTemplateExtensionSourceClassName) {
+		String label = woofTemplateExtensionSourceClassName;
+		int index = label.lastIndexOf('.');
+		if (index > 0) {
+			// Strip off package name
+			label = label.substring(index + ".".length());
+		}
+		label = label.replace(
+				WoofTemplateExtensionSource.class.getSimpleName(), "");
+		return label;
+
+	}
+
+	/**
 	 * Class name of the {@link WoofTemplateExtensionSource}.
 	 */
 	private final String woofTemplateExtensionSourceClassName;
@@ -120,15 +142,7 @@ public class HttpTemplateExtensionSourceInstance {
 		}
 
 		// No extension label, so determine label from class name
-		String label = this.woofTemplateExtensionSourceClassName;
-		int index = label.lastIndexOf('.');
-		if (index > 0) {
-			// Strip off package name
-			label = label.substring(index + ".".length());
-		}
-		label = label.replace(
-				WoofTemplateExtensionSource.class.getSimpleName(), "");
-		return label;
+		return getLabelFromWoofTemplateExtensionClassName(this.woofTemplateExtensionSourceClassName);
 	}
 
 	/**
