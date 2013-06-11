@@ -15,7 +15,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.plugin.woof;
+package net.officefloor.plugin.json.woof;
 
 import java.io.IOException;
 import java.io.Serializable;
@@ -31,13 +31,16 @@ import net.officefloor.frame.test.LoggerAssertion;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.json.HttpJson;
 import net.officefloor.plugin.json.JsonResponseWriter;
+import net.officefloor.plugin.woof.WoofLoader;
+import net.officefloor.plugin.woof.WoofLoaderImpl;
+import net.officefloor.plugin.woof.WoofOfficeFloorSource;
 
 /**
  * Ensure JSON implicitly works for WoOF.
  * 
  * @author Daniel Sagenschneider
  */
-public class WoofJsonTest extends OfficeFrameTestCase {
+public class WoofImplicitJsonTest extends OfficeFrameTestCase {
 
 	/**
 	 * {@link HttpClient}.
@@ -84,9 +87,9 @@ public class WoofJsonTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensure can service JSON.
+	 * Ensure can service JSON via implicit setup.
 	 */
-	public void testJson() throws Exception {
+	public void testImplicitJsonTemplateExtensionSource() throws Exception {
 
 		// Obtain JSON WoOF configuration
 		String jsonTemplateConfigurationLocation = this.getFileLocation(

@@ -20,7 +20,7 @@ package net.officefloor.eclipse.gwt;
 
 import net.officefloor.eclipse.extension.template.WoofTemplateExtensionSourceExtension;
 import net.officefloor.eclipse.extension.template.WoofTemplateExtensionSourceExtensionContext;
-import net.officefloor.plugin.woof.gwt.GwtWoofTemplateExtensionSource;
+import net.officefloor.plugin.gwt.woof.GwtWoofTemplateExtensionSource;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridLayout;

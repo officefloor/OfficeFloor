@@ -16,6 +16,11 @@
 	<dependencies>
 		<dependency>
 			<groupId>${project.groupId}</groupId>
+			<artifactId>officeplugin_woof</artifactId>
+		</dependency>
+		<!-- TODO remove GWT functionality and make agnostic to client protocol -->
+		<dependency>
+			<groupId>${project.groupId}</groupId>
 			<artifactId>officeplugin_gwt</artifactId>
 		</dependency>
 		<dependency>
@@ -33,6 +38,7 @@
 			<artifactId>syncrpc</artifactId>
 			<scope>test</scope>
 		</dependency>
+		<!-- TODO end of GWT remove -->
 		<dependency>
 			<groupId>org.apache.httpcomponents</groupId>
 			<artifactId>httpclient</artifactId>

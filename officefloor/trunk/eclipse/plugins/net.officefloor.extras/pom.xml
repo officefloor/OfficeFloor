@@ -34,6 +34,11 @@
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
+			<groupId>net.officefloor.core</groupId>
+			<artifactId>officebuilding</artifactId>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
 			<groupId>net.officefloor.plugin</groupId>
 			<artifactId>officeplugin_socket</artifactId>
 			<scope>provided</scope>
@@ -79,6 +84,10 @@
 		<dependency>
 			<groupId>net.officefloor.plugin</groupId>
 			<artifactId>officeplugin_json</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>net.officefloor.plugin</groupId>
+			<artifactId>officeplugin_launch</artifactId>
 		</dependency>
 
 

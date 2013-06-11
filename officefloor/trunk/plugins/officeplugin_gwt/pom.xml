@@ -16,8 +16,14 @@
 	<dependencies>
 		<dependency>
 			<groupId>${project.groupId}</groupId>
-			<artifactId>officeplugin_web</artifactId>
+			<artifactId>officeplugin_woof</artifactId>
 		</dependency>
+		<!-- TODO include comet as functionality of GWT 
+		<dependency>
+			<groupId>${project.groupId}</groupId>
+			<artifactId>officeplugin_comet</artifactId>
+		</dependency>
+		-->
 		<dependency>
 			<groupId>com.google.gwt</groupId>
 			<artifactId>gwt-user</artifactId>

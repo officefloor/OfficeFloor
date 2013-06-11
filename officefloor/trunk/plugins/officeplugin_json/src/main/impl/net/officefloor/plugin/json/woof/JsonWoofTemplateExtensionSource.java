@@ -15,7 +15,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.plugin.woof.json;
+package net.officefloor.plugin.json.woof;
 
 import net.officefloor.plugin.json.web.http.section.JsonHttpTemplateSectionExtension;
 import net.officefloor.plugin.woof.template.WoofTemplateExtensionSource;
@@ -30,7 +30,7 @@ import net.officefloor.plugin.woof.template.impl.AbstractWoofTemplateExtensionSo
  */
 public class JsonWoofTemplateExtensionSource extends
 		AbstractWoofTemplateExtensionSource implements
-		WoofTemplateExtensionSourceService<WoofTemplateExtensionSource> {
+		WoofTemplateExtensionSourceService<JsonWoofTemplateExtensionSource> {
 
 	/*
 	 * ============= WoofTemplateExtensionSourceService ================
@@ -42,8 +42,8 @@ public class JsonWoofTemplateExtensionSource extends
 	}
 
 	@Override
-	public Class<WoofTemplateExtensionSource> getWoofTemplateExtensionSourceClass() {
-		return WoofTemplateExtensionSource.class;
+	public Class<JsonWoofTemplateExtensionSource> getWoofTemplateExtensionSourceClass() {
+		return JsonWoofTemplateExtensionSource.class;
 	}
 
 	/*
