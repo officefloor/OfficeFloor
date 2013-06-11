@@ -20,7 +20,6 @@ package net.officefloor.plugin.woof;
 import java.sql.SQLException;
 import java.util.logging.LogRecord;
 
-import net.officefloor.autowire.AutoWire;
 import net.officefloor.autowire.AutoWireGovernance;
 import net.officefloor.autowire.AutoWireSection;
 import net.officefloor.compile.OfficeFloorCompiler;
@@ -34,20 +33,10 @@ import net.officefloor.model.repository.ConfigurationContext;
 import net.officefloor.model.repository.ConfigurationItem;
 import net.officefloor.model.woof.WoofRepositoryImpl;
 import net.officefloor.model.woof.WoofTemplateModel;
-import net.officefloor.plugin.comet.CometPublisher;
-import net.officefloor.plugin.comet.section.CometSectionSource;
-import net.officefloor.plugin.comet.spi.CometRequestServicer;
-import net.officefloor.plugin.comet.spi.CometService;
-import net.officefloor.plugin.comet.web.http.section.CometHttpTemplateSectionExtension;
 import net.officefloor.plugin.governance.clazz.ClassGovernanceSource;
-import net.officefloor.plugin.gwt.service.ServerGwtRpcConnection;
-import net.officefloor.plugin.gwt.web.http.section.GwtHttpTemplateSectionExtension;
-import net.officefloor.plugin.json.JsonResponseWriter;
-import net.officefloor.plugin.json.web.http.section.JsonHttpTemplateSectionExtension;
 import net.officefloor.plugin.section.clazz.ClassSectionSource;
 import net.officefloor.plugin.web.http.application.HttpSecurityAutoWireSection;
 import net.officefloor.plugin.web.http.application.HttpTemplateAutoWireSection;
-import net.officefloor.plugin.web.http.application.HttpTemplateAutoWireSectionExtension;
 import net.officefloor.plugin.web.http.application.HttpUriLink;
 import net.officefloor.plugin.web.http.application.WebAutoWireApplication;
 import net.officefloor.plugin.web.http.security.HttpSecuritySectionSource;
@@ -387,150 +376,6 @@ public class WoofLoaderTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensure can load GWT extension.
-	 */
-	public void testGwt() throws Exception {
-
-		// TODO move to GWT plugin
-		fail("TODO move to GWT plugin");
-
-		final HttpTemplateAutoWireSection template = this
-				.createMock(HttpTemplateAutoWireSection.class);
-		final HttpTemplateAutoWireSectionExtension extension = this
-				.createMock(HttpTemplateAutoWireSectionExtension.class);
-
-		// Record initiating from source context
-		this.recordInitateFromSourceContext();
-
-		// Record loading template
-		this.recordReturn(this.app, this.app.addHttpTemplate("example",
-				"WOOF/Template.html", Template.class), template);
-		template.setTemplateSecure(false);
-
-		// Record extending with GWT
-		this.recordReturn(this.sourceContext, this.sourceContext
-				.getClassLoader(), Thread.currentThread()
-				.getContextClassLoader());
-		this.recordReturn(this.app, this.app.isObjectAvailable(new AutoWire(
-				ServerGwtRpcConnection.class)), true);
-		this.recordReturn(template, template.getTemplateUri(), "example");
-		this.recordReturn(template, template
-				.addTemplateExtension(GwtHttpTemplateSectionExtension.class),
-				extension);
-		extension.addProperty(
-				GwtHttpTemplateSectionExtension.PROPERTY_TEMPLATE_URI,
-				"example");
-
-		// Record implicit template extensions
-		this.recordImplicitTemplateExtensions(template, "example");
-
-		// Test
-		this.replayMockObjects();
-		this.loader.loadWoofConfiguration(this.getConfiguration("gwt.woof"),
-				this.app, this.sourceContext);
-		this.verifyMockObjects();
-	}
-
-	/**
-	 * Ensure can load Comet extension.
-	 */
-	public void testComet() throws Exception {
-
-		// TODO move to Comet plugin
-		fail("TODO move to Comet plugin");
-
-		final AutoWireSection cometSection = this
-				.createMock(AutoWireSection.class);
-		final HttpUriLink link = this.createMock(HttpUriLink.class);
-		final HttpTemplateAutoWireSection template = this
-				.createMock(HttpTemplateAutoWireSection.class);
-		final HttpTemplateAutoWireSectionExtension extension = this
-				.createMock(HttpTemplateAutoWireSectionExtension.class);
-
-		// Record initiating from source context
-		this.recordInitateFromSourceContext();
-
-		// Record loading template
-		this.recordReturn(this.app, this.app.addHttpTemplate("example",
-				"WOOF/Template.html", Template.class), template);
-		template.setTemplateSecure(false);
-
-		// Record extending with Comet
-		this.recordReturn(this.sourceContext, this.sourceContext
-				.getClassLoader(), Thread.currentThread()
-				.getContextClassLoader());
-		this.recordReturn(this.app,
-				this.app.isObjectAvailable(new AutoWire(CometService.class)),
-				true);
-		this.recordReturn(this.app, this.app.isObjectAvailable(new AutoWire(
-				CometRequestServicer.class)), true);
-		this.recordReturn(this.app,
-				this.app.isObjectAvailable(new AutoWire(CometPublisher.class)),
-				true);
-		this.recordReturn(this.app, this.app.getSection("COMET"), cometSection);
-		this.recordReturn(template, template.getTemplateUri(), "example");
-		this.recordReturn(this.app, this.app.linkUri("example/comet-subscribe",
-				cometSection, CometSectionSource.SUBSCRIBE_INPUT_NAME), link);
-		this.recordReturn(this.app, this.app.linkUri("example/comet-publish",
-				cometSection, CometSectionSource.PUBLISH_INPUT_NAME), link);
-		this.recordReturn(template, template.getTemplateLogicClass(),
-				Template.class);
-		this.recordReturn(template, template
-				.addTemplateExtension(CometHttpTemplateSectionExtension.class),
-				extension);
-
-		// Record implicit extensions
-		this.recordImplicitTemplateExtensions(template, "example");
-
-		// Test
-		this.replayMockObjects();
-		this.loader.loadWoofConfiguration(this.getConfiguration("comet.woof"),
-				this.app, this.sourceContext);
-		this.verifyMockObjects();
-	}
-
-	/**
-	 * Ensure can explicitly configure JSON (and not auto configure).
-	 */
-	public void testJson() throws Exception {
-
-		// TODO move to JSON plugin
-		fail("TODO move to JSON plugin");
-
-		final HttpTemplateAutoWireSection template = this
-				.createMock(HttpTemplateAutoWireSection.class);
-		final HttpTemplateAutoWireSectionExtension extension = this
-				.createMock(HttpTemplateAutoWireSectionExtension.class);
-
-		// Record initiating from source context
-		this.recordInitateFromSourceContext();
-
-		// Record loading template
-		this.recordReturn(this.app, this.app.addHttpTemplate("example",
-				"WOOF/Template.html", JsonTemplate.class), template);
-		template.setTemplateSecure(false);
-
-		// Record extending with JSON
-		this.recordReturn(template, template.getTemplateLogicClass(),
-				JsonTemplate.class);
-		this.recordReturn(this.app, this.app.isObjectAvailable(new AutoWire(
-				JsonResponseWriter.class)), true);
-		this.recordReturn(template, template
-				.addTemplateExtension(JsonHttpTemplateSectionExtension.class),
-				extension);
-		extension
-				.addProperty(
-						JsonHttpTemplateSectionExtension.PROPERTY_JSON_AJAX_METHOD_NAMES,
-						"template");
-
-		// Test
-		this.replayMockObjects();
-		this.loader.loadWoofConfiguration(this.getConfiguration("json.woof"),
-				this.app, this.sourceContext);
-		this.verifyMockObjects();
-	}
-
-	/**
 	 * Ensure issue if unknown template extension.
 	 */
 	public void testUnknownTemplateExtension() throws Exception {
@@ -595,14 +440,6 @@ public class WoofLoaderTest extends OfficeFrameTestCase {
 	 */
 	public static class Template {
 		public void template() {
-		}
-	}
-
-	/**
-	 * Mock template JSON class.
-	 */
-	public static class JsonTemplate {
-		public void template(JsonResponseWriter writer) {
 		}
 	}
 

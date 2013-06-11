@@ -37,8 +37,8 @@ import net.officefloor.model.woof.WoofSectionInputModel;
 import net.officefloor.model.woof.WoofSectionModel;
 import net.officefloor.model.woof.WoofTemplateExtensionModel;
 import net.officefloor.model.woof.WoofTemplateModel;
+import net.officefloor.plugin.gwt.woof.GwtWoofTemplateExtensionSource;
 import net.officefloor.plugin.woof.WoofOfficeFloorSource;
-import net.officefloor.plugin.woof.gwt.GwtWoofTemplateExtensionSource;
 
 import org.apache.maven.artifact.repository.ArtifactRepository;
 import org.apache.maven.model.Dependency;

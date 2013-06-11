@@ -15,7 +15,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.plugin.woof.gwt;
+package net.officefloor.plugin.gwt.woof;
 
 import net.officefloor.model.change.Change;
 import net.officefloor.model.gwt.module.GwtModuleModel;
@@ -24,7 +24,6 @@ import net.officefloor.model.repository.ConfigurationContext;
 import net.officefloor.model.woof.PropertyModel;
 import net.officefloor.model.woof.WoofTemplateExtensionModel;
 import net.officefloor.model.woof.WoofTemplateModel;
-import net.officefloor.plugin.comet.web.http.section.CometHttpTemplateSectionExtension;
 import net.officefloor.plugin.gwt.module.GwtChanges;
 import net.officefloor.plugin.gwt.module.GwtChangesImpl;
 import net.officefloor.plugin.gwt.module.GwtFailureListener;
@@ -82,12 +81,12 @@ public class GwtWoofTemplateExtensionSource extends
 	 *            Comet {@link WoofTemplateExtensionModel}.
 	 * @return {@link PropertyModel} or <code>null</code>.
 	 */
-	private static PropertyModel getCometManualPublishMethodProperty(
-			WoofTemplateExtensionModel cometExtension) {
-		return getTemplateExtensionProperty(
-				cometExtension,
-				CometHttpTemplateSectionExtension.PROPERTY_MANUAL_PUBLISH_METHOD_NAME);
-	}
+//	private static PropertyModel getCometManualPublishMethodProperty(
+//			WoofTemplateExtensionModel cometExtension) {
+//		return getTemplateExtensionProperty(
+//				cometExtension,
+//				CometHttpTemplateSectionExtension.PROPERTY_MANUAL_PUBLISH_METHOD_NAME);
+//	}
 
 	/**
 	 * Obtains the value for the {@link PropertyModel}.
@@ -311,7 +310,7 @@ public class GwtWoofTemplateExtensionSource extends
 			// Include inherits for Comet (if using)
 			if (isEnableComet) {
 				// Extend GWT Module for Comet
-				CometHttpTemplateSectionExtension.extendGwtModule(module);
+//				CometHttpTemplateSectionExtension.extendGwtModule(module);
 			}
 
 			// Obtain the GWT Module path
@@ -689,13 +688,13 @@ public class GwtWoofTemplateExtensionSource extends
 		GwtHttpTemplateSectionExtension.extendTemplate(context.getTemplate(),
 				context.getWebApplication(), context, context.getClassLoader());
 
-		// Extend template with GWT Comet
-		CometHttpTemplateSectionExtension.extendTemplate(context.getTemplate(),
-				context.getWebApplication(), context, context.getClassLoader());
-
-		// Configure in as extension to HTTP template
-		context.getTemplate().addTemplateExtension(
-				CometHttpTemplateSectionExtension.class);
+//		// Extend template with GWT Comet
+//		CometHttpTemplateSectionExtension.extendTemplate(context.getTemplate(),
+//				context.getWebApplication(), context, context.getClassLoader());
+//
+//		// Configure in as extension to HTTP template
+//		context.getTemplate().addTemplateExtension(
+//				CometHttpTemplateSectionExtension.class);
 	}
 
 }

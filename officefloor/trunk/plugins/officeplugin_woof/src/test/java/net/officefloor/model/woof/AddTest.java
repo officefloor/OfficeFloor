@@ -256,16 +256,6 @@ public class AddTest extends AbstractWoofChangesTestCase {
 		this.validateModel();
 	}
 
-	// TODO migrate GWT extension configuration to specific test
-	public void testAddTemplateWithGwtExtension() {
-		fail("TODO migrate configuration to GWT extension test");
-	}
-
-	// TODO migrate Comet extension configuration to specific test
-	public void testAddTemplateWithCometExtension() {
-		fail("TODO migrate configuration to Comet extension test");
-	}
-
 	/**
 	 * Ensure able to add {@link WoofSectionModel}.
 	 */
