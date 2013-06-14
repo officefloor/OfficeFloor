@@ -59,22 +59,25 @@
 \author{DANIEL SAGENSCHNEIDER \affil{daniel@officefloor.net}}
 
 \begin{abstract}
-Objects are used to implement components and the components are structured
-together to provide hierarchical \textsc{layers} of abstraction within an
-application's architecture.  \textsc{dependency injection} is used to invert the
-control of how objects obtain references to each other.  While
+Inverting control to allow the lower-level layer components control over their
+thread of execution, required state and required collaboration allows bottom-up
+development of applications that better suits modern development methodologies,
+such as Agile, that evolve application architectures upwards.  While
 \textsc{dependency injection} allows inverting the control of structuring a
-component, it leaves the executing thread of control for a component and the
-collaboration of components to a top-down coupled hierarchy requiring top-down
-development of applications.  The patterns presented in this paper invert this
-top-down hierarchy to allow bottom-up development of applications.  The
-\textsc{thread injection} pattern decouples the executing thread of control for
-a component.  The \textsc{continuation injection} pattern decouples the
-collaboration of components.  Using the \textsc{dependency injection},
-\textsc{thread injection} and \textsc{continuation injection} patterns together
-enables the \textsc{inversion of control} pattern to build applications
-bottom-up.  Building applications bottom-up better suits development
-methodologies, such as Agile, that evolve application architectures upwards.
+component, the executing thread of control for a component and the collaboration
+of components remains in a top-down coupled hierarchy requiring the top-down
+development of applications.  The \textsc{thread injection},
+\textsc{continuation injection} and \textsc{inversion of control} patterns
+presented in this paper invert this top-down hierarchy control to allow
+bottom-up control in developing applications.  The \textsc{thread injection}
+pattern decouples the executing thread of control for a component.  The
+\textsc{continuation injection} pattern decouples the collaboration of
+components.  Using the \textsc{thread injection} and \textsc{continuation
+injection} patterns together with the \textsc{dependency injection} pattern
+provides the necessary algorithms for an \textsc{inversion of control} pattern.
+The resulting \textsc{inversion of control} pattern enables building
+applications bottom-up to better align to modern development methodologies that
+evolve application architectures upwards.
 \end{abstract}
 
 \category{X.Y.Z}{To}{be}[determined]
@@ -206,9 +209,9 @@ pattern and \textsc{continuation injection} pattern.  The \textsc{continuation
 injection} pattern and the \textsc{thread injection} pattern are then presented.
 After presenting the patterns individually, the \textsc{thread injection} and
 \textsc{continuation injection} patterns are used together to realise an
-\textsc{inversion of control} pattern.  The \textsc{inversion of control}
+\textsc{inversion of control} pattern.  This resulting \textsc{inversion of control}
 pattern provides resolution of the motivating example.  Discussion is then
-provided on using the patterns to implement a web server.
+provided on using these patterns to implement a web server.
 
 
 \section{A Motivating Example}
@@ -731,7 +734,7 @@ particular \texttt{DependencyContext}s (Listing
 \ref{lst:ContinuationInjectionInterfaces}).  The continuation may be configured
 to invoke the component (and its subsequent invoked components) within a new
 \texttt{DependencyContext} to not share state.  To share state between the
-isolated \texttt{Depend\-ency\-Context}s, the isolated contexts may be created
+isolated \texttt{Depend\-ency\-Context}s the isolated contexts may be created
 inside a shared context.  Each dependency type is bound by developer
 configuration to be within the isolated context or the shared context.  The
 instance of a dependency bound to an isolated context may only be used by
@@ -1128,22 +1131,24 @@ implementation.
 
 \subsection{Context}
 
-Applications built with \textsc{layers} typically imposes a top-down approach to
+Applications built with \textsc{layers} typically impose a top-down approach to
 design.  ``The \textsc{layers} require and provide \textsc{explicit interfaces}
 from and to each other, in a top-down manner, from the higher to the lower
 \textsc{layers}'' \cite[p. 11]{ioc}.  The higher-level layer components
 define the variation points that are ``predefined points in the control and data
 flow which allow for modifying and extending a component's behaviour'' \cite[p.
 5]{ioc}.  While various techniques, such as \textsc{dependency injection}, allow
-changing the implementation of the variation points the higher-level layers
+changing the implementation of the variation points, the higher-level layers
 maintain control over what variation points may exist.
 
-Inverting the control by allowing the lower-level layer components to define
-the variation points to be implemented by the higher-level layer components
-will allow a bottom-up design.  This will allow application architecture to be
-evolved upwards rather than designed in a top down approach.  The bottom-up
-control will better suit development methodologies, such as Agile, that evolve
-application architectures upwards.
+Inverting the control by allowing the lower-level layer components to define the
+variation points to be implemented by the higher-level layer components provides
+inversion of control.  Inversion of control occurs by inverting the top-down
+control in designing applications to be bottom-up control.  This bottom-up
+control allows the application architecture to be evolved upwards. Therefore,
+\textsc{inversion of control} better suits development methodologies, such as
+Agile, that evolve application architectures upwards.
+
 
 \subsection{Problem}
 
@@ -1180,8 +1185,8 @@ requirements:
 Within frameworks, the method/function signature is the interface between
 components.  ``The set of all [method] signatures defined by an object \ldots
 characterizes the complete set of requests that can be sent to the object''
-\cite[p. 13]{gof}.  As frameworks are composed of objects (and possibly first
-class functions), the method/function signature defines the interface between
+\cite[p. 13]{gof}.  As frameworks are composed of objects (and possibly
+functions), the method/function signature defines the interface between
 objects/functions and subsequently components.
 
 The method/function signature meets the requirements as it:
@@ -1217,8 +1222,8 @@ variability ``requires adapting the \textsc{explicit interfaces} between the
 \textsc{layers} to stipulate the types of variation parameters'' \cite[p.
 5]{ioc} to allow control over the lower-level layers by the higher-level layers.
 
-Rather than try to define variation points at the higher-level layers to cover
-all possible variations of the lower-level layers, control should inverted and
+Instead of attempting to define variation points at the higher-level layers to cover
+all possible variations of the lower-level layers, control should be inverted and
 given to the lower-level layers to define the variation points.  However, given
 that \textsc{template methods} impose a top-down control over variation points,
 another form of \textsc{explicit interface} is necessary for lower-level layer
@@ -1238,7 +1243,7 @@ required state (objects) via \texttt{stateId}s.  As the lower-level layer
 retrieves its state from \textsc{dependency injection}, the invoking
 higher-level layer components need only provide the single optionally used
 argument.  This allows the lower-level layer component to specify as many
-dependencies as necessary.  It, therefore, gives the lower-level layer component
+dependencies as is necessary.  It, therefore, gives the lower-level layer component
 control over what state (objects/dependencies) it may depend on.
 
 \textsc{thread injection} enables the lower-level layer component to specify its
@@ -1266,11 +1271,11 @@ control throwing as many exceptions as is warranted.
 
 Using the \textsc{dependency injection}, \textsc{thread injection} and
 \textsc{continuation injection} patterns together provides the necessary inversion
-of control over variation points, as the lower-level layer component controls:
+of control over variation points as the lower-level layer component controls:
 \begin{itemize}
-  \item it's name (\texttt{componentId}) which is decoupled from the invoking higher-level layer component invocation (\texttt{contin\-uationId}) by \textsc{continuation injection};
+  \item its name (\texttt{componentId}) which is decoupled from the invoking higher-level layer component invocation (\texttt{contin\-uationId}) by \textsc{continuation injection};
   \item which invocations (\texttt{continuationId}s) are necessary via \textsc{continuation injection};
-  \item what state (\texttt{stateId}s) are required by \textsc{dependency injection};
+  \item what state (\texttt{stateId}s) is required by \textsc{dependency injection};
   \item the types of exceptions that may be thrown by \textsc{continuation injection}; and
   \item the thread of control by \textsc{thread injection}.
 \end{itemize}
@@ -1293,7 +1298,7 @@ injection} pattern (i.e. \texttt{cancel(\ldots)} method of listing
 \texttt{handleException(\ldots)} method to enable application level handling of
 overload conditions.  The \texttt{ComponentContext} (constructed by the
 \texttt{ComponentContextFactory}) provides means to retrieve state via the
-\textsc{dependency injection} \texttt{Dependency\-Context} and invoke other
+\textsc{dependency injection} \texttt{Dependency\-Context} and to invoke other
 components via \textsc{continuation injection}.
 
 \lstset{caption={Combined \textsc{thread injection}, \textsc{continuation injection} and \textsc{dependency injection} pattern interfaces\protect\footnotemark.}}
@@ -1385,9 +1390,9 @@ Orchestration for the motivating example (Fig
 \ref{fig:ExampleComponentOrchestration}) overlaying the thread pools responsible
 for the components (as identified by table
 \ref{tab:example_request_thread_pools}).  The lower-level layer components
-define the required variation points which the higher-level layer is
-responsible for providing the implementations (i.e. dependencies/state, thread
-of control, handling components).
+define the required variation points for which the higher-level layer is
+responsible for providing the variation point implementations (i.e.
+dependencies/state, thread of control, handling components).
 
 This configuration also demonstrates resolution of the motivating example.  Only
 \texttt{Retrieve data from data\-base} has an explicit thread and it will only be
@@ -1413,16 +1418,17 @@ higher-level layer components no longer control the variation points.
 
 \subsection{Consequences}
 
-Using \textsc{inversion of control} allows bottom-up design of the application.
-As the variation points are controlled by the lower-level layer components,
-developers may start by building the lower-level layer components first.  As the
-lower-level layer components are less abstract, the developer is able to focus
-on more concrete problems and provide only the necessary variation points to
-solve the particular problem.  This avoids over engineering the design of the
-application.  Furthermore, as the higher-level layer components are built last,
-there is less need for large initial top-down designs.
+Using \textsc{inversion of control} allows bottom-up control over the design of
+the application.  As the variation points are controlled by the lower-level
+layer components, developers may start by building the lower-level layer
+components first.  As the lower-level layer components are less abstract, the
+developer is able to focus on more concrete problems and provide only the
+necessary variation points to solve the particular problem.  This avoids over
+engineering the design of the application.  Furthermore, as the higher-level
+layer components are built last, there is less need for large initial top-down
+designs.
 
-\textsc{inversion of control} also allows bottom-up evolution of the
+\textsc{inversion of control} also enables bottom-up evolution of the
 application.  Within applications imposing top-down design, the
 \textsc{explicit interface} (\textsc{template method}) between \textsc{layers}
 needs to be refactored to account for required changes to increase the
@@ -1453,7 +1459,7 @@ functions, as functional programming can be considered programming without
 implicit dependencies.
 
 Furthermore, within \textsc{inversion of control} the use of object-orientation
-can focus objects on modelling the state within dependencies and have object's
+can focus objects on modelling the state within dependencies and have objects'
 methods constrain changes in the state.  This is similar to databases storing
 data and constraining the changes in the data.  As application behaviour is
 implemented in components via functions, the application need not be constructed
@@ -1467,11 +1473,11 @@ regarding the \textsc{proactor} pattern being ``hard to debug'' \cite[p.
 \textsc{proactor} issue of being hard to debug, they do follow the trend of
 \textsc{thread-per-request} web servers \cite{thread-per-request} by
 encapsulating developer code within sequentially executed components (segmented
-request handlers formed by chaining components with implicit continuations). 
+request handlers formed by chaining components with implicit continuations).
 However, the introduction of dependencies maintaining state between components
 executed by different threads leaves the possibility for dependencies to be
 non-thread safe.  This can cause difficult to identify thread synchronisation
-bugs.  The risk of these synchronisation bugs is, however, mitigated by
+bugs.  The risk of these synchronisation bugs is, however, mitigated by the
 increased quality of the dependencies due to their increased re-use by
 components containing the application logic.
 
@@ -1480,7 +1486,7 @@ debugging more difficult.  Components are all of the same type which means call
 hierarchies can not be identified based on matching method/function signatures.
 The Component Orchestration from \textsc{continuation injection} pattern,
 however, provides visual cues to aid developer understanding of the application
-to resolve bugs.
+to resolve these bugs.
 
 Within the \textsc{inversion of control} pattern, control has been inverted for
 all interfacing aspects of the component\footnote{The Inversion of Control
@@ -1502,8 +1508,8 @@ re-usable composite components will be left to further work.}.
 \subsection{Related Patterns}
 
 The \textsc{inversion of control} pattern is realised by using the
-\textsc{dependency injection}, \textsc{thread injection} and
-\textsc{continuation injection} patterns to invert control over the variation
+\textsc{thread injection}, \textsc{continuation injection} and
+\textsc{dependency injection} patterns to invert control over the variation
 points within a hierarchical \textsc{layers} architecture to give lower-level
 layer components control over their required state, execution and collaboration.
 
@@ -1517,11 +1523,10 @@ dependency that depends on (wraps) the re-used dependency.
 
 The \textsc{adaptor} pattern may also be used to adapt components that do not
 conform to the \texttt{Component} interface (Listing
-\ref{lst:IocInjectionInterfaces}) into an application implementing
-\textsc{inversion of control}.  This allows the \textsc{inversion of control}
-architecture of the application to re-use components not specifically built for
-it\footnote{As an example, OfficeFloor \cite{officefloor} provides an adapter to
-run a JEE Servlet as a component (Task).}.
+\ref{lst:IocInjectionInterfaces}) into an application implementing the
+\textsc{inversion of control} pattern\footnote{As an example, OfficeFloor
+\cite{officefloor} provides an adapter to run a JEE Servlet as a component
+(Task).}.
 
 
 \subsection{Known Usage}
