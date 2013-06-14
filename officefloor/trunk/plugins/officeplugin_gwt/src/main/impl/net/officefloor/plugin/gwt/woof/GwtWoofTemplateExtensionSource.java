@@ -21,18 +21,18 @@ import net.officefloor.model.change.Change;
 import net.officefloor.model.gwt.module.GwtModuleModel;
 import net.officefloor.model.impl.repository.ModelRepositoryImpl;
 import net.officefloor.model.repository.ConfigurationContext;
-import net.officefloor.model.woof.PropertyModel;
-import net.officefloor.model.woof.WoofTemplateExtensionModel;
-import net.officefloor.model.woof.WoofTemplateModel;
 import net.officefloor.plugin.gwt.module.GwtChanges;
 import net.officefloor.plugin.gwt.module.GwtChangesImpl;
 import net.officefloor.plugin.gwt.module.GwtFailureListener;
+import net.officefloor.plugin.gwt.module.GwtModuleRepository;
 import net.officefloor.plugin.gwt.module.GwtModuleRepositoryImpl;
 import net.officefloor.plugin.gwt.web.http.section.GwtHttpTemplateSectionExtension;
 import net.officefloor.plugin.woof.template.WoofTemplateExtensionChangeContext;
 import net.officefloor.plugin.woof.template.WoofTemplateExtensionSource;
 import net.officefloor.plugin.woof.template.WoofTemplateExtensionSourceContext;
 import net.officefloor.plugin.woof.template.impl.AbstractWoofTemplateExtensionSource;
+
+import com.google.gwt.core.client.EntryPoint;
 
 /**
  * {@link WoofTemplateExtensionSource} for GWT.
@@ -43,217 +43,14 @@ public class GwtWoofTemplateExtensionSource extends
 		AbstractWoofTemplateExtensionSource {
 
 	/**
-	 * Name of the extension property for the GWT Module path.
+	 * Name of the property for the GWT {@link EntryPoint} class name.
 	 */
-	public static String PROPERTY_GWT_MODULE_PATH = "gwt.module.path";
+	public static String PROPERTY_GWT_ENTRY_POINT_CLASS_NAME = "gwt.entry.point.class.name";
 
 	/**
-	 * Obtains the {@link #PROPERTY_GWT_MODULE_PATH} {@link PropertyModel}.
-	 * 
-	 * @param extension
-	 *            GWT {@link WoofTemplateExtensionModel}.
-	 * @return {@link PropertyModel} or <code>null</code>.
+	 * Name of the property for the GWT Async Service Interfaces.
 	 */
-	private static PropertyModel getGwtModulePathProperty(
-			WoofTemplateExtensionModel gwtExtension) {
-		return getTemplateExtensionProperty(gwtExtension,
-				PROPERTY_GWT_MODULE_PATH);
-	}
-
-	/**
-	 * Obtains the GWT Async Interfaces {@link PropertyModel}.
-	 * 
-	 * @param gwtExtension
-	 *            GWT {@link WoofTemplateExtensionModel}.
-	 * @return {@link PropertyModel} or <code>null</code>.
-	 */
-	private static PropertyModel getGwtAsyncInterfacesProperty(
-			WoofTemplateExtensionModel gwtExtension) {
-		return getTemplateExtensionProperty(
-				gwtExtension,
-				GwtHttpTemplateSectionExtension.PROPERTY_GWT_ASYNC_SERVICE_INTERFACES);
-	}
-
-	/**
-	 * Obtains the Comet manual publish method {@link PropertyModel}.
-	 * 
-	 * @param cometExtension
-	 *            Comet {@link WoofTemplateExtensionModel}.
-	 * @return {@link PropertyModel} or <code>null</code>.
-	 */
-//	private static PropertyModel getCometManualPublishMethodProperty(
-//			WoofTemplateExtensionModel cometExtension) {
-//		return getTemplateExtensionProperty(
-//				cometExtension,
-//				CometHttpTemplateSectionExtension.PROPERTY_MANUAL_PUBLISH_METHOD_NAME);
-//	}
-
-	/**
-	 * Obtains the value for the {@link PropertyModel}.
-	 * 
-	 * @param property
-	 *            {@link PropertyModel}. May be <code>null</code>.
-	 * @return {@link PropertyModel} value or <code>null</code>.
-	 */
-	private static String getPropertyValue(PropertyModel property) {
-		return (property == null ? null : property.getValue());
-	}
-
-	/**
-	 * Obtains the {@link PropertyModel}.
-	 * 
-	 * @param extension
-	 *            {@link WoofTemplateExtensionModel}.
-	 * @param propertyName
-	 *            Name of {@link PropertyModel}.
-	 * @return {@link PropertyModel} or <code>null</code>.
-	 */
-	private static PropertyModel getTemplateExtensionProperty(
-			WoofTemplateExtensionModel extension, String propertyName) {
-
-		// Must have extension
-		if (extension == null) {
-			return null;
-		}
-
-		// Obtain the extension property
-		for (PropertyModel property : extension.getProperties()) {
-			if (propertyName.equals(property.getName())) {
-				return property;
-			}
-		}
-
-		// As here, no property
-		return null;
-	}
-
-	/**
-	 * Obtains the GWT template extension.
-	 * 
-	 * @param template
-	 *            {@link WoofTemplateModel}.
-	 * @return GWT {@link WoofTemplateExtensionModel} or <code>null</code>.
-	 */
-	// TODO remove and possibly only provide generic retrieval for extensions
-	@Deprecated
-	private static WoofTemplateExtensionModel getGwtTemplateExtension(
-			WoofTemplateModel template) {
-		return getTemplateExtension(template,
-				GwtWoofTemplateExtensionSource.class.getName());
-	}
-
-	/**
-	 * Obtains the {@link WoofTemplateExtensionModel}.
-	 * 
-	 * @param template
-	 *            {@link WoofTemplateModel}.
-	 * @param extensionClassName
-	 *            {@link WoofTemplateExtensionModel} class name.
-	 * @return {@link WoofTemplateExtensionModel} or <code>null</code>.
-	 */
-	private static WoofTemplateExtensionModel getTemplateExtension(
-			WoofTemplateModel template, String extensionClassName) {
-
-		// Search extension for appropriate extension
-		for (WoofTemplateExtensionModel extension : template.getExtensions()) {
-			if (extensionClassName.equals(extension.getExtensionClassName())) {
-				return extension;
-			}
-		}
-
-		// As here, no extension
-		return null;
-	}
-
-	/**
-	 * Obtains the GWT entry point class name for the {@link WoofTemplateModel}.
-	 * 
-	 * @param template
-	 *            {@link WoofTemplateModel}.
-	 * @param gwtChanges
-	 *            {@link GwtChanges}.
-	 * @return GWT entry point class name or <code>null</code>.
-	 */
-	public static String getGwtEntryPointClassName(WoofTemplateModel template,
-			GwtChanges gwtChanges) {
-
-		// Obtain the GWT module path
-		WoofTemplateExtensionModel gwtExtension = getGwtTemplateExtension(template);
-		PropertyModel gwtModulePathProperty = getGwtModulePathProperty(gwtExtension);
-		String gwtModulePath = getPropertyValue(gwtModulePathProperty);
-		if (gwtModulePath != null) {
-
-			// Obtain the GWT module
-			GwtModuleModel gwtModule = gwtChanges
-					.retrieveGwtModule(gwtModulePath);
-			if (gwtModule != null) {
-
-				// Return the EntryPoint class name
-				return gwtModule.getEntryPointClassName();
-			}
-		}
-
-		// As here, no GWT EntryPoint class name
-		return null;
-	}
-
-	/**
-	 * Obtains the GWT Async Service Interfaces for the
-	 * {@link WoofTemplateModel}.
-	 * 
-	 * @param template
-	 *            {@link WoofTemplateModel}.
-	 * @return GWT Async Service Interfaces.
-	 */
-	public static String[] getGwtAsyncServiceInterfaceNames(
-			WoofTemplateModel template) {
-		WoofTemplateExtensionModel gwtExtension = getGwtTemplateExtension(template);
-		PropertyModel gwtAsyncInterfacesProperty = getGwtAsyncInterfacesProperty(gwtExtension);
-		String gwtAsyncInterfaceValue = getPropertyValue(gwtAsyncInterfacesProperty);
-		String[] gwtAsyncServiceInterfaceNames = GwtHttpTemplateSectionExtension
-				.getGwtAsyncServiceInterfaceNames(gwtAsyncInterfaceValue);
-		return gwtAsyncServiceInterfaceNames;
-	}
-
-	/**
-	 * Indicates if Comet is enabled for the {@link WoofTemplateModel}.
-	 * 
-	 * @param template
-	 *            {@link WoofTemplateModel}.
-	 * @return <code>true</code> Comet is enabled for the
-	 *         {@link WoofTemplateModel}.
-	 */
-	public static boolean isCometEnabled(WoofTemplateModel template) {
-
-		// TODO move GWT and Comet functionality to extension
-		throw new UnsupportedOperationException(
-				"TODO move GWT and Comet functionality to extension");
-
-		// WoofTemplateExtensionModel cometExtension =
-		// getCometTemplateExtension(template);
-		// return (cometExtension != null);
-	}
-
-	/**
-	 * Obtains the Comet manual publish method name.
-	 * 
-	 * @param template
-	 *            {@link WoofTemplateExtensionModel}.
-	 * @return Comet manual publish method name or <code>null</code>.
-	 */
-	public static String getCometManualPublishMethodName(
-			WoofTemplateModel template) {
-
-		// TODO move GWT and Comet functionality to extension
-		throw new UnsupportedOperationException(
-				"TODO move GWT and Comet functionality to extension");
-
-		// WoofTemplateExtensionModel cometExtension =
-		// getCometTemplateExtension(template);
-		// PropertyModel cometManualPublishMethodProperty =
-		// getCometManualPublishMethodProperty(cometExtension);
-		// return getPropertyValue(cometManualPublishMethodProperty);
-	}
+	public static String PROPERTY_GWT_ASYNC_SERVICE_INTERFACES = GwtHttpTemplateSectionExtension.PROPERTY_GWT_ASYNC_SERVICE_INTERFACES;
 
 	/**
 	 * Creates the {@link GwtChanges}.
@@ -281,15 +78,20 @@ public class GwtWoofTemplateExtensionSource extends
 
 	@Override
 	protected void loadSpecification(SpecificationContext context) {
-		context.addProperty(PROPERTY_GWT_MODULE_PATH, "GWT Module Path");
+		context.addProperty(PROPERTY_GWT_ENTRY_POINT_CLASS_NAME,
+				"Entry Point Class");
 	}
 
 	@Override
 	public Change<?> createConfigurationChange(
 			WoofTemplateExtensionChangeContext context) {
 
+		// In new configuration ensure have GWT module path
+
+		// Determine if old GWT module path in old configuration
+
 		// TODO Obtain details
-		String gwtEntryPointClassName = null;
+		String entryPointClassName = null;
 		String uri = context.getNewConfiguration().getUri();
 		boolean isEnableComet = false;
 
@@ -297,31 +99,39 @@ public class GwtWoofTemplateExtensionSource extends
 		GwtChanges gwtChanges = this.createGwtChanges(context
 				.getConfigurationContext());
 
+		GwtModuleModel module = new GwtModuleModel(uri, entryPointClassName,
+				null);
+
+		GwtModuleRepository repository = new GwtModuleRepositoryImpl(
+				new ModelRepositoryImpl(), context.getClassLoader(),
+				"src/main/resources");
+		String gwtModulePath = repository.createGwtModulePath(module);
+
 		// ++++++++++ ADD +++++++++++++++++++++++
 
-		// Determine if have GWT Extension
-		if ((gwtEntryPointClassName != null)
-				&& (gwtEntryPointClassName.trim().length() > 0)) {
-
-			// Create the GWT Module
-			GwtModuleModel module = new GwtModuleModel(uri,
-					gwtEntryPointClassName, null);
-
-			// Include inherits for Comet (if using)
-			if (isEnableComet) {
-				// Extend GWT Module for Comet
-//				CometHttpTemplateSectionExtension.extendGwtModule(module);
-			}
-
-			// Obtain the GWT Module path
-			String gwtModulePath = gwtChanges.createGwtModulePath(module);
-
-			// Create change for adding GWT Module
-			Change<?> gwtChange = gwtChanges.updateGwtModule(module, null);
-
-			// Return change to add GWT Module
-			return gwtChange;
-		}
+		// // Determine if have GWT Extension
+		// if ((gwtEntryPointClassName != null)
+		// && (gwtEntryPointClassName.trim().length() > 0)) {
+		//
+		// // Create the GWT Module
+		// GwtModuleModel module = new GwtModuleModel(uri,
+		// gwtEntryPointClassName, null);
+		//
+		// // Include inherits for Comet (if using)
+		// if (isEnableComet) {
+		// // Extend GWT Module for Comet
+		// // CometHttpTemplateSectionExtension.extendGwtModule(module);
+		// }
+		//
+		// // Obtain the GWT Module path
+		// String gwtModulePath = gwtChanges.createGwtModulePath(module);
+		//
+		// // Create change for adding GWT Module
+		// Change<?> gwtChange = gwtChanges.updateGwtModule(module, null);
+		//
+		// // Return change to add GWT Module
+		// return gwtChange;
+		// }
 
 		// ++++++++++ REFACTOR +++++++++++++++++++++++
 
@@ -688,13 +498,13 @@ public class GwtWoofTemplateExtensionSource extends
 		GwtHttpTemplateSectionExtension.extendTemplate(context.getTemplate(),
 				context.getWebApplication(), context, context.getClassLoader());
 
-//		// Extend template with GWT Comet
-//		CometHttpTemplateSectionExtension.extendTemplate(context.getTemplate(),
-//				context.getWebApplication(), context, context.getClassLoader());
-//
-//		// Configure in as extension to HTTP template
-//		context.getTemplate().addTemplateExtension(
-//				CometHttpTemplateSectionExtension.class);
+		// // Extend template with GWT Comet
+		// CometHttpTemplateSectionExtension.extendTemplate(context.getTemplate(),
+		// context.getWebApplication(), context, context.getClassLoader());
+		//
+		// // Configure in as extension to HTTP template
+		// context.getTemplate().addTemplateExtension(
+		// CometHttpTemplateSectionExtension.class);
 	}
 
 }
