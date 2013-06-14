@@ -191,9 +191,9 @@ public class WoofDevelopmentConfigurationLoader {
 					.getExtensions()) {
 
 				// Determine if GWT extension
-				String extensionAlias = extension.getExtensionClassName();
+				String extensionClassName = extension.getExtensionClassName();
 				if (!(GwtWoofTemplateExtensionSource.class.getName()
-						.equals(extensionAlias))) {
+						.equals(extensionClassName))) {
 					continue; // ignore non-GWT extension
 				}
 
