@@ -331,7 +331,7 @@ constraints on the order in which the components are executed.  Within the
 executed is dictated by synchronous direct method calls.  As a result, the
 \textsc{thread-per-request} pattern provides little indirection to invert the
 control over the order components are executed unless components match on method
-signatures (i.e. polymorphism).
+signatures.
 
 The \textsc{proactor} pattern also imposes hard-coded order over the components
 invoked (albeit they may end up being executed concurrently).  The invoker must
@@ -469,7 +469,7 @@ diagram of invoking a component via the \texttt{doContinuation(\ldots)} method.
   
 \begin{figure}[!t]
 \centering
-\includegraphics[height=7in]{DoContinuationSequenceDiagram}
+\includegraphics[height=7.4in]{DoContinuationSequenceDiagram}
 \caption{Sequence diagram of invoking \texttt{doContinuation(\ldots)}.}
 \label{fig:DoContinuationSequenceDiagram}
 \end{figure}
@@ -633,7 +633,7 @@ operations in the motivating example is shown in figure
 \ref{fig:ExampleComponentOrchestration}.  Each operation is contained in a
 component with the continuations being mapped to the appropriate handling
 components.
- 
+
 \begin{figure}[!t]
 \centering
 \includegraphics[width=4.5in]{ContinuationInjectionComponentOrchestration}
