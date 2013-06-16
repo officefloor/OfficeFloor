@@ -59,7 +59,7 @@
 \author{DANIEL SAGENSCHNEIDER \affil{daniel@officefloor.net}}
 
 \begin{abstract}
-Inverting control to allow the lower-level layer components control over their
+Inverting control to enable the lower-level layer components control over their
 thread of execution, required state and required collaboration allows bottom-up
 development of applications that better suits modern development methodologies,
 such as Agile, that evolve application architectures upwards.  While
@@ -501,12 +501,12 @@ continuations for the application to handle exceptions from any component to
 ensure all exceptions are handled (e.g. handling of the runtime non-checked
 exceptions).  This allows default handling of exceptions within the application
 and gives the component the ability to override only as necessary.  This is
-similar to \texttt{catch} blocks for handling \texttt{Exception}s at different
-levels of the method call hierarchy.  It also reduces the configuration for
-developers by only having to provide the overriding exception handling
-configuration for components.  The invoking component is, therefore, decoupled
-from handling the invoked component's exceptions, as the exceptions are handled
-by other components.
+similar to \texttt{catch} blocks for handling exceptions at different levels of
+the method call hierarchy.  It also reduces the configuration for developers by
+only having to provide the overriding exception handling configuration for
+components.  The invoking component is, therefore, decoupled from handling the
+invoked component's exceptions, as the exceptions are handled by other
+components.
 
 The \texttt{continueComponent()} method (Listing
 \ref{lst:ContinuationInjectionInterfaces}) enables re-executing the current
@@ -1139,8 +1139,8 @@ from and to each other, in a top-down manner, from the higher to the lower
 \textsc{layers}'' \cite[p. 11]{ioc}.  The higher-level layer components define
 the variation points that are ``predefined points in the control and data flow
 which allow for modifying and extending a component's behaviour'' \cite[p.
-5]{ioc}.  The higher-level layers control what variation points may be
-implemented by the lower-level layer components.
+5]{ioc}.  A top-down approach is required, as the higher-level layers control
+what variation points may be implemented by the lower-level layer components.
 
 Inverting the control by allowing the lower-level layer components to control the
 variation points to be implemented by the higher-level layer components provides
