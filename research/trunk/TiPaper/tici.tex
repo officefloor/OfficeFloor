@@ -74,7 +74,7 @@ pattern decouples the executing thread of control for a component.  The
 \textsc{continuation injection} pattern decouples the collaboration of
 components.  Using the \textsc{thread injection} and \textsc{continuation
 injection} patterns together with the \textsc{dependency injection} pattern
-provides the necessary algorithms for an \textsc{inversion of control} pattern.
+provides the necessary decoupling for an \textsc{inversion of control} pattern.
 The resulting \textsc{inversion of control} pattern enables building
 applications bottom-up to better align to modern development methodologies that
 evolve application architectures upwards.
@@ -104,7 +104,7 @@ evolve application architectures upwards.
 
 \begin{bottomstuff}
 This work is the result of the author's development of OfficeFloor.\\
-Author's address: D. Sagenschneider, at home; email: daniel@officefloor.net\\
+Author's address: D. Sagenschneider; email: daniel@officefloor.net\\
 
 Permission to make digital or hard copies of all or part of this work for
 personal or classroom use is granted without fee provided that copies are not
@@ -284,15 +284,15 @@ many mainstream web servers\footnote{For popular web servers (Netcraft November
 2012 survey) dynamic web content is serviced by CGI/FastCGI with for example PHP
 scripts, Microsoft's HTTP.sys/WAS, and JEE Servlets.}) and the \textsc{proactor}
 pattern \cite{proactor} (basis of event-driven web servers) impose tight
-coupling on invocation of components.  The \textsc{thread-per-request} pattern
-enables invoking components by synchronous methods, which is intuitive for
-developers \cite[p. 2]{proactor}.  In contrast, the \textsc{proactor} pattern
-enables asynchronously invoking a constructed component by registering it for
-execution by another thread of control (allowing to execute components
-concurrently).  In both patterns, they tightly couple the invocation as the
-\textsc{thread-per-request} pattern must have the invoker provide the thread of
-control and the \textsc{proactor} pattern must have the invoker construct the
-invoked component.
+coupling on the collaboration of components.  The \textsc{thread-per-request}
+pattern enables invoking components by synchronous methods, which is intuitive
+for developers \cite[p. 2]{proactor}.  In contrast, the \textsc{proactor}
+pattern enables asynchronously invoking a constructed component by registering
+it for execution by another thread of control (allowing to execute components
+concurrently).  In both patterns, they tightly couple the collaboration of
+components as the \textsc{thread-per-request} pattern must have the invoker
+provide the thread of control and the \textsc{proactor} pattern must have the
+invoker construct the invoked component.
 
 
 \subsection{Problem}
@@ -510,9 +510,9 @@ by other components.
 
 The \texttt{continueComponent()} method (Listing
 \ref{lst:ContinuationInjectionInterfaces}) enables re-executing the current
-component.  The Proactor Initiator may be implemented to defer the execution of a
-component again until invoked continuations by the component are completed.
- The Proactor Initiator uses the same tracking of completion as the
+component.  The Proactor Initiator may be implemented to defer the execution of
+a component again until invoked continuations by the component are completed. 
+The Proactor Initiator uses the same tracking of completion as the
 \texttt{Future} to determine the completion of the last Asynchronous Operation
 (component) for the invoked continuations.  On completion of the last
 Asynchronous Operation, the Proactor Initiator registers the component within an
@@ -706,15 +706,17 @@ Integrating the \textsc{continuation injection} pattern with code not contained
 in components does not allow access to the \texttt{ComponentContext} to invoke
 the continuation for the first component.  Listing
 \ref{lst:ContinuationInjectionInterface} provides an interface that allows code
-not contained in a component to invoke the first continuation.  To retrieve
-results, the \texttt{parameter} would be used as a visitor (\textsc{visitor}
-pattern \cite{gof}) and be loaded with results by the invoked components.
+not contained in a component to invoke the first continuation.  The returned
+\texttt{Future}, from the Proactor Initiator tracking of Asynchronous
+Operations, indicates when all components are complete.  To retrieve results,
+the \texttt{parameter} would be used as a visitor (\textsc{visitor} pattern
+\cite{gof}) and be loaded with results by the invoked components.
 
 \lstset{caption=Interface for code not within a component to invoke a continuation.  The component for the continuation is identified with the \texttt{componentId} parameter.}
 \begin{lstlisting}[float,label=lst:ContinuationInjectionInterface]
 
     interface ContinuationInjection {
-        void doContinuation(String componentId, Object parameter);
+        Future doContinuation(String componentId, Object parameter);
     }
 \end{lstlisting}
 
@@ -1134,14 +1136,13 @@ implementation.
 Applications built with \textsc{layers} typically impose a top-down approach to
 design.  ``The \textsc{layers} require and provide \textsc{explicit interfaces}
 from and to each other, in a top-down manner, from the higher to the lower
-\textsc{layers}'' \cite[p. 11]{ioc}.  The higher-level layer components
-define the variation points that are ``predefined points in the control and data
-flow which allow for modifying and extending a component's behaviour'' \cite[p.
-5]{ioc}.  While various techniques, such as \textsc{dependency injection}, allow
-changing the implementation of the variation points, the higher-level layers
-maintain control over what variation points may exist.
+\textsc{layers}'' \cite[p. 11]{ioc}.  The higher-level layer components define
+the variation points that are ``predefined points in the control and data flow
+which allow for modifying and extending a component's behaviour'' \cite[p.
+5]{ioc}.  The higher-level layers control what variation points may be
+implemented by the lower-level layer components.
 
-Inverting the control by allowing the lower-level layer components to define the
+Inverting the control by allowing the lower-level layer components to control the
 variation points to be implemented by the higher-level layer components provides
 inversion of control.  Inversion of control occurs by inverting the top-down
 control in designing applications to be bottom-up control.  This bottom-up
