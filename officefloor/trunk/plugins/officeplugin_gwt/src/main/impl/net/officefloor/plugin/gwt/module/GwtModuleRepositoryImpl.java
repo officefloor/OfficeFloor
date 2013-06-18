@@ -18,6 +18,7 @@
 package net.officefloor.plugin.gwt.module;
 
 import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
@@ -97,7 +98,7 @@ public class GwtModuleRepositoryImpl implements GwtModuleRepository {
 	 */
 
 	@Override
-	public GwtModuleModel retrieveGwtModule(String gwtModulePath,
+	public GwtModuleModel retrieveGwtModuleModel(String gwtModulePath,
 			ConfigurationContext context) throws Exception {
 
 		// Obtain the configuration
@@ -110,6 +111,44 @@ public class GwtModuleRepositoryImpl implements GwtModuleRepository {
 		// Return the GWT Module
 		return this.modelRepository.retrieve(new GwtModuleModel(),
 				configuration);
+	}
+
+	@Override
+	public GwtModule retrieveGwtModule(String gwtModulePath,
+			ConfigurationContext context) throws Exception {
+
+		// Obtain the configuration
+		ConfigurationItem configuration = context
+				.getConfigurationItem(this.pathPrefix + gwtModulePath);
+		if (configuration == null) {
+			return null; // No configuration, so no GWT Module
+		}
+
+		// Return the contents
+		return new GwtModuleImpl(gwtModulePath,
+				configuration.getConfiguration());
+	}
+
+	@Override
+	public void storeGwtModule(GwtModule module, ConfigurationContext context)
+			throws Exception {
+
+		// Obtain the location
+		String location = this.pathPrefix + module.getLocation();
+
+		// Obtain the contents
+		InputStream contents = new ByteArrayInputStream(module.getContents());
+
+		// Store the contents
+		ConfigurationItem configuration = context
+				.getConfigurationItem(location);
+		if (configuration == null) {
+			// Create the configuration item
+			configuration = context.createConfigurationItem(location, contents);
+		} else {
+			// Update the configuration item
+			configuration.setConfiguration(contents);
+		}
 	}
 
 	@Override
@@ -392,6 +431,59 @@ public class GwtModuleRepositoryImpl implements GwtModuleRepository {
 
 		// Return the module name
 		return moduleName;
+	}
+
+	/**
+	 * {@link GwtModule} implementation.
+	 */
+	private static class GwtModuleImpl implements GwtModule {
+
+		/**
+		 * Location.
+		 */
+		private final String location;
+
+		/**
+		 * Contents.
+		 */
+		private byte[] contents;
+
+		/**
+		 * Initiate.
+		 * 
+		 * @param location
+		 *            Location.
+		 * @param contents
+		 *            Contents.
+		 * @throws IOException
+		 *             If fails to retrieve contents.
+		 */
+		public GwtModuleImpl(String location, InputStream contents)
+				throws IOException {
+			this.location = location;
+
+			// Load the contents
+			ByteArrayOutputStream buffer = new ByteArrayOutputStream();
+			for (int value = contents.read(); value != -1; value = contents
+					.read()) {
+				buffer.write(value);
+			}
+			this.contents = buffer.toByteArray();
+		}
+
+		/*
+		 * =============== GwtModule =======================
+		 */
+
+		@Override
+		public String getLocation() {
+			return this.location;
+		}
+
+		@Override
+		public byte[] getContents() {
+			return this.contents;
+		}
 	}
 
 }

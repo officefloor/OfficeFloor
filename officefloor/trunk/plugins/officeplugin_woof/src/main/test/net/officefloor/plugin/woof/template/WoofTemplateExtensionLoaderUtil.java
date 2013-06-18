@@ -34,6 +34,7 @@ import net.officefloor.frame.impl.construct.source.SourcePropertiesImpl;
 import net.officefloor.frame.spi.source.ResourceSource;
 import net.officefloor.frame.spi.source.SourceContext;
 import net.officefloor.frame.spi.source.SourceProperties;
+import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.model.change.Change;
 import net.officefloor.model.impl.repository.memory.MemoryConfigurationContext;
 import net.officefloor.model.repository.ConfigurationContext;
@@ -220,7 +221,7 @@ public class WoofTemplateExtensionLoaderUtil {
 		}
 
 		// Ensure correct content
-		Assert.assertEquals(
+		OfficeFrameTestCase.assertXmlEquals(
 				"Incorrect content for configuration item at location "
 						+ location, content, buffer.toString());
 	}

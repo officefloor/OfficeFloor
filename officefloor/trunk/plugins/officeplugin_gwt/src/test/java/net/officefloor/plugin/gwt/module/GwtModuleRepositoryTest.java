@@ -59,13 +59,27 @@ public class GwtModuleRepositoryTest extends OfficeFrameTestCase {
 	/**
 	 * Ensure able to retrieve the {@link GwtModuleModel} not existing.
 	 */
+	public void testRetrieveNonExistentGwtModuleModule() throws Exception {
+
+		// Create the configuration context
+		ConfigurationContext context = new MemoryConfigurationContext();
+
+		// Retrieve the GWT Module
+		GwtModuleModel module = this.repository.retrieveGwtModuleModel(
+				"not/exist/Resource.gwt.xml", context);
+		assertNull("Should not retrieve GWT Module", module);
+	}
+
+	/**
+	 * Ensure able to retrieve the {@link GwtModule} not existing.
+	 */
 	public void testRetrieveNonExistentGwtModule() throws Exception {
 
 		// Create the configuration context
 		ConfigurationContext context = new MemoryConfigurationContext();
 
 		// Retrieve the GWT Module
-		GwtModuleModel module = this.repository.retrieveGwtModule(
+		GwtModule module = this.repository.retrieveGwtModule(
 				"not/exist/Resource.gwt.xml", context);
 		assertNull("Should not retrieve GWT Module", module);
 	}
@@ -73,7 +87,7 @@ public class GwtModuleRepositoryTest extends OfficeFrameTestCase {
 	/**
 	 * Ensure able to retrieve the {@link GwtModuleModel}.
 	 */
-	public void testRetrieveGwtModule() throws Exception {
+	public void testRetrieveGwtModuleModel() throws Exception {
 
 		// Determine configuration item location
 		final String LOCATION = this.getFileLocation(this.getClass(),
@@ -92,8 +106,8 @@ public class GwtModuleRepositoryTest extends OfficeFrameTestCase {
 		};
 
 		// Retrieve the GWT Module
-		GwtModuleModel module = this.repository.retrieveGwtModule(LOCATION,
-				context);
+		GwtModuleModel module = this.repository.retrieveGwtModuleModel(
+				LOCATION, context);
 		assertNotNull("Should have module", module);
 
 		// Ensure correct values
@@ -101,6 +115,41 @@ public class GwtModuleRepositoryTest extends OfficeFrameTestCase {
 		assertEquals("Incorrect EntryPoint class",
 				"net.officefloor.plugin.gwt.client.Example",
 				module.getEntryPointClassName());
+	}
+
+	/**
+	 * Ensure able to retrieve the {@link GwtModule}.
+	 */
+	public void testRetrieveGwtModule() throws Exception {
+
+		// Determine configuration item location
+		final String LOCATION = this.getFileLocation(this.getClass(),
+				"test.gwt.xml");
+
+		// Obtain the file contents
+		String fileContents = this.getFileContents(this.findFile(
+				this.getClass(), "test.gwt.xml"));
+
+		// Create the configuration context
+		ConfigurationContext context = new ClassLoaderConfigurationContext(
+				Thread.currentThread().getContextClassLoader()) {
+			@Override
+			public ConfigurationItem getConfigurationItem(String location)
+					throws Exception {
+				assertTrue("Ensure prefix path", location.startsWith("src/"));
+				location = location.substring("src/".length());
+				return super.getConfigurationItem(location);
+			}
+		};
+
+		// Retrieve the GWT Module
+		GwtModule module = this.repository.retrieveGwtModule(LOCATION, context);
+		assertNotNull("Should have module", module);
+
+		// Ensure correct values
+		assertEquals("Incorrect location", LOCATION, module.getLocation());
+		assertEquals("Incorrect contents", fileContents,
+				new String(module.getContents()));
 	}
 
 	/**
@@ -152,7 +201,7 @@ public class GwtModuleRepositoryTest extends OfficeFrameTestCase {
 	 * Ensure able to update {@link GwtModuleModel} with additional inheritance.
 	 */
 	public void testUpdateGwtModuleWithInherits() throws Exception {
-		
+
 		// Create the configuration item
 		InputStream initial = this.findInputStream(this.getClass(),
 				"change.gwt.xml");
@@ -198,6 +247,48 @@ public class GwtModuleRepositoryTest extends OfficeFrameTestCase {
 		String expected = this.getText(this.findInputStream(this.getClass(),
 				"updated.gwt.xml"));
 		assertXml("Incorrect updated module", expected, actual);
+	}
+
+	/**
+	 * Ensure appropriately stores the {@link GwtModule}.
+	 */
+	public void testStoreGwtModule() throws Exception {
+
+		// Determine configuration item location
+		final String LOCATION = this.getFileLocation(this.getClass(),
+				"test.gwt.xml");
+
+		// Obtain the file contents
+		final String fileContents = this.getText(this.findInputStream(
+				this.getClass(), "test.gwt.xml"));
+
+		// Create the GWT Module
+		GwtModule module = new GwtModule() {
+			@Override
+			public String getLocation() {
+				return LOCATION;
+			}
+
+			@Override
+			public byte[] getContents() {
+				return fileContents.getBytes();
+			}
+		};
+
+		// Configure context
+		ConfigurationContext context = new MemoryConfigurationContext();
+
+		// Store GWT Module
+		this.repository.storeGwtModule(module, context);
+
+		// Ensure create appropriate content
+		ConfigurationItem item = context
+				.getConfigurationItem("src/net/officefloor/plugin/gwt/module/test.gwt.xml");
+		assertNotNull("Ensure module created", item);
+		String actual = this.getText(item.getConfiguration());
+
+		// Ensure appropriate content
+		assertXml("Incorrect stored module", fileContents, actual);
 	}
 
 	/**

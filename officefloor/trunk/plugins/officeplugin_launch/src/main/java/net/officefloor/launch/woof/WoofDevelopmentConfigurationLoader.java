@@ -29,7 +29,6 @@ import net.officefloor.building.classpath.RemoteRepository;
 import net.officefloor.model.impl.repository.ModelRepositoryImpl;
 import net.officefloor.model.impl.repository.inputstream.InputStreamConfigurationItem;
 import net.officefloor.model.woof.PropertyModel;
-import net.officefloor.model.woof.WoofChanges;
 import net.officefloor.model.woof.WoofModel;
 import net.officefloor.model.woof.WoofRepository;
 import net.officefloor.model.woof.WoofRepositoryImpl;
@@ -197,15 +196,26 @@ public class WoofDevelopmentConfigurationLoader {
 					continue; // ignore non-GWT extension
 				}
 
-				// Obtain the GWT module from properties
+				// Obtain the GWT EntryPoint class
+				String gwtEntryPointClassName = null;
 				for (PropertyModel property : extension.getProperties()) {
-					if (GwtWoofTemplateExtensionSource.PROPERTY_GWT_MODULE_PATH
+					if (GwtWoofTemplateExtensionSource.PROPERTY_GWT_ENTRY_POINT_CLASS_NAME
 							.equals(property.getName())) {
-						String gwtModuleName = transformGwtModulePathToName(property
-								.getValue());
-						configuration.addGwtModuleName(gwtModuleName);
+						gwtEntryPointClassName = property.getValue();
 					}
 				}
+				if (gwtEntryPointClassName == null) {
+					continue; // must have GWT EntryPoint class
+				}
+
+				// Obtain the GWT Module path
+				String gwtModulePath = GwtWoofTemplateExtensionSource
+						.createGwtModulePath(templateUri,
+								gwtEntryPointClassName);
+
+				// Obtain the GWT Module name and add the GWT Module
+				String gwtModuleName = transformGwtModulePathToName(gwtModulePath);
+				configuration.addGwtModuleName(gwtModuleName);
 			}
 		}
 

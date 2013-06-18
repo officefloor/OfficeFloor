@@ -30,7 +30,6 @@ import net.officefloor.model.change.Change;
 import net.officefloor.model.impl.repository.memory.MemoryConfigurationContext;
 import net.officefloor.model.repository.ConfigurationContext;
 import net.officefloor.model.repository.ConfigurationItem;
-import net.officefloor.plugin.gwt.module.GwtChangesTest;
 import net.officefloor.plugin.woof.template.WoofTemplateExtensionLoaderUtil;
 
 import com.google.gwt.core.client.EntryPoint;
@@ -64,14 +63,14 @@ public class GwtWoofTemplateExtensionSourceTest extends OfficeFrameTestCase {
 	public void testRefactor_AddExtension() throws Exception {
 
 		final String gwtEntryPointClassName = "net.officefloor.client.Created";
-		final String gwtModulePath = "net/officefloor/create.gwt.xml";
+		final String gwtModulePath = "net/officefloor/created.gwt.xml";
 
 		// Create the GWT configuration
-		Change<?> change = this.doRefactor(null, null, "example",
+		Change<?> change = this.doRefactor(null, null, "created",
 				gwtEntryPointClassName, null);
 
 		// Validate the change
-		this.assertChange(change, null, null, gwtModulePath, "create.gwt.xml");
+		this.assertChange(change, null, null, gwtModulePath, "created.gwt.xml");
 	}
 
 	/**
@@ -79,21 +78,19 @@ public class GwtWoofTemplateExtensionSourceTest extends OfficeFrameTestCase {
 	 */
 	public void testRefactor_AddExtensionExisting() throws Exception {
 
-		final String gwtModulePath = "net/officefloor/create.gwt.xml";
-		final String existingEntryPointClassName = "net.officefloor.client.Existing";
-		final String updatedEntryPointClassName = "net.officefloor.client.Created";
+		final String gwtModulePath = "net/officefloor/created.gwt.xml";
+		final String gwtEntryPointClassName = "net.officefloor.client.Created";
 
 		// Load the existing configuration
-		this.loadConfigurationItem(gwtModulePath, "empty.gwt.xml");
+		this.loadConfigurationItem(gwtModulePath, "existing.gwt.xml");
 
 		// Create the GWT configuration
-		Change<?> change = this.doRefactor("create",
-				existingEntryPointClassName, "create",
-				updatedEntryPointClassName, null);
+		Change<?> change = this.doRefactor(null, null, "created",
+				gwtEntryPointClassName, null);
 
 		// Validate the change
-		this.assertChange(change, gwtModulePath, "empty.gwt.xml",
-				gwtModulePath, "create.gwt.xml");
+		this.assertChange(change, gwtModulePath, "existing.gwt.xml",
+				gwtModulePath, "created.gwt.xml");
 	}
 
 	/**
@@ -109,7 +106,7 @@ public class GwtWoofTemplateExtensionSourceTest extends OfficeFrameTestCase {
 				gwtEntryPointClassName, null);
 
 		// Validate the change
-		this.assertChange(change, null, null, gwtModulePath, "create.gwt.xml");
+		this.assertChange(change, null, null, gwtModulePath, "root.gwt.xml");
 	}
 
 	/**
@@ -118,20 +115,20 @@ public class GwtWoofTemplateExtensionSourceTest extends OfficeFrameTestCase {
 	 */
 	public void testRefactor_UpdateExtensionInPlace() throws Exception {
 
-		final String gwtModulePath = "net/officefloor/update.gwt.xml";
+		final String gwtModulePath = "net/officefloor/updated.gwt.xml";
 		final String existingEntryPointClassName = "net.officefloor.client.Existing";
-		final String updatedEntryPointClassName = "net.officefloor.client.Updated";
+		final String updatedEntryPointClassName = "net.officefloor.client.Update";
 
 		// Load the existing configuration
-		this.loadConfigurationItem(gwtModulePath, "empty.gwt.xml");
+		this.loadConfigurationItem(gwtModulePath, "existing.gwt.xml");
 
 		// Create the GWT configuration
-		Change<?> change = this.doRefactor("update",
-				existingEntryPointClassName, "update",
+		Change<?> change = this.doRefactor("updated",
+				existingEntryPointClassName, "updated",
 				updatedEntryPointClassName, null);
 
 		// Validate the change
-		this.assertChange(change, gwtModulePath, "empty.gwt.xml",
+		this.assertChange(change, gwtModulePath, "existing.gwt.xml",
 				gwtModulePath, "updated.gwt.xml");
 	}
 
@@ -142,19 +139,19 @@ public class GwtWoofTemplateExtensionSourceTest extends OfficeFrameTestCase {
 
 		final String existingGwtModulePath = "net/officefloor/existing.gwt.xml";
 		final String existingEntryPointClassName = "net.officefloor.client.Existing";
-		final String updatedGwtModulePath = "net/officefloor/update.gwt.xml";
-		final String updatedEntryPointClassName = "net.officefloor.client.Updated";
+		final String updatedGwtModulePath = "net/officefloor/updated.gwt.xml";
+		final String updatedEntryPointClassName = "net.officefloor.client.Update";
 
 		// Load the existing configuration
-		this.loadConfigurationItem(existingEntryPointClassName, "empty.gwt.xml");
+		this.loadConfigurationItem(existingGwtModulePath, "existing.gwt.xml");
 
 		// Create the GWT configuration
 		Change<?> change = this.doRefactor("existing",
-				existingEntryPointClassName, "update",
+				existingEntryPointClassName, "updated",
 				updatedEntryPointClassName, null);
 
 		// Validate the change
-		this.assertChange(change, existingGwtModulePath, "empty.gwt.xml",
+		this.assertChange(change, existingGwtModulePath, "existing.gwt.xml",
 				updatedGwtModulePath, "updated.gwt.xml");
 	}
 
@@ -163,19 +160,18 @@ public class GwtWoofTemplateExtensionSourceTest extends OfficeFrameTestCase {
 	 */
 	public void testRefactor_DeleteExtension() throws Exception {
 
-		final String gwtModulePath = "net/officefloor/update.gwt.xml";
-		final String gwtEntryPointClassName = "net.officefloor.client.Updated";
+		final String gwtModulePath = "net/officefloor/existing.gwt.xml";
+		final String gwtEntryPointClassName = "net.officefloor.client.Existing";
 
 		// Load the existing configuration
-		this.loadConfigurationItem(gwtModulePath, "updated.gwt.xml");
+		this.loadConfigurationItem(gwtModulePath, "existing.gwt.xml");
 
 		// Create the GWT configuration
-		Change<?> change = this.doRefactor("update", gwtEntryPointClassName,
+		Change<?> change = this.doRefactor("existing", gwtEntryPointClassName,
 				null, null, null);
 
-		// Validate the change
-		this.assertChange(change, gwtModulePath, "updated.gwt.xml",
-				gwtModulePath, "updated.gwt.xml");
+		// Validate the no change as just leave GWT Module to reuse
+		assertNull("Should not have change for delete", change);
 	}
 
 	/**
@@ -197,6 +193,10 @@ public class GwtWoofTemplateExtensionSourceTest extends OfficeFrameTestCase {
 			String oldGwtEntryPointClassName, String newUri,
 			String newGwtEntryPointClassName, String newAsyncServiceInterfaces) {
 
+		// Obtain the class loader
+		ClassLoader classLoader = Thread.currentThread()
+				.getContextClassLoader();
+
 		// Create the properties
 		SourceProperties oldProperties = createSourceProperties(
 				oldGwtEntryPointClassName, null);
@@ -207,7 +207,8 @@ public class GwtWoofTemplateExtensionSourceTest extends OfficeFrameTestCase {
 		Change<?> change = WoofTemplateExtensionLoaderUtil
 				.refactorTemplateExtension(
 						GwtWoofTemplateExtensionSource.class, oldUri,
-						oldProperties, newUri, newProperties);
+						oldProperties, newUri, newProperties, this.context,
+						classLoader);
 
 		// Return the change
 		return change;

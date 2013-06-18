@@ -196,7 +196,7 @@ public class WoofDevelopmentLauncherTest extends OfficeFrameTestCase implements
 			WoofOfficeFloorSource.start();
 
 			// Ensure template available
-			this.doHttpRequest(7878, "template.woof", "TEMPLATE");
+			this.doHttpRequest(7878, "Test.woof", "TEMPLATE");
 
 			// Ensure section available
 			this.doHttpRequest(7878, "section", "SECTION");
@@ -214,10 +214,10 @@ public class WoofDevelopmentLauncherTest extends OfficeFrameTestCase implements
 
 		// Launch the application with default configuration
 		this.launchApplication(null, "net.officefloor.launch.woof.Test",
-				"/template.woof", "/section");
+				"/Test.woof", "/section");
 
 		// Ensure template available
-		this.doHttpRequest(8888, "template.woof", "TEMPLATE");
+		this.doHttpRequest(8888, "Test.woof", "TEMPLATE");
 
 		// Ensure section available
 		this.doHttpRequest(8888, "section", "SECTION");
