@@ -131,8 +131,9 @@ public class WoofDevelopmentConfigurationLoaderTest extends OfficeFrameTestCase 
 		// Validate the module names
 		String[] moduleNames = configuration.getModuleNames();
 		assertStringArraySet("module names", moduleNames,
-				"net.officefloor.launch.woof.template",
-				"net.officefloor.launch.woof.another");
+				"net.officefloor.launch.woof.templateA",
+				"net.officefloor.launch.woof.templateC",
+				"net.officefloor.launch.woof.templateD");
 
 		// Validate the WoOF servlet container properties
 		PropertyList properties = configuration.getProperties();

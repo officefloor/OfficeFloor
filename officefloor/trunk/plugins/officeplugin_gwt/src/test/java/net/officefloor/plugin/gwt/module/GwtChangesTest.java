@@ -286,7 +286,7 @@ public class GwtChangesTest extends OfficeFrameTestCase {
 	 */
 	private void assertConfiguration(String path, String expectedEntryPointClass)
 			throws Exception {
-		GwtModuleModel module = this.repository.retrieveGwtModule(path,
+		GwtModuleModel module = this.repository.retrieveGwtModuleModel(path,
 				this.context);
 		if (expectedEntryPointClass == null) {
 			// Ensure configuration deleted

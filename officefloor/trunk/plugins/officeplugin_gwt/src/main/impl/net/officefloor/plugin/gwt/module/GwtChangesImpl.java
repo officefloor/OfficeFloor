@@ -73,7 +73,7 @@ public class GwtChangesImpl implements GwtChanges {
 	@Override
 	public GwtModuleModel retrieveGwtModule(String gwtModulePath) {
 		try {
-			return this.repository.retrieveGwtModule(gwtModulePath,
+			return this.repository.retrieveGwtModuleModel(gwtModulePath,
 					this.context);
 		} catch (Exception ex) {
 			this.listener.notifyFailure("Failed to retrieve GWT Module", ex);
@@ -85,18 +85,22 @@ public class GwtChangesImpl implements GwtChanges {
 	public Change<GwtModuleModel> updateGwtModule(final GwtModuleModel module,
 			final String existingGwtModulePath) {
 
+		// Obtain the new GWT Module path
+		final String newGwtModulePath = this.repository
+				.createGwtModulePath(module);
+
 		// Return the change to the GWT Module
 		return new AbstractChange<GwtModuleModel>(module, "Update GWT Module") {
 
 			/**
-			 * Existing {@link GwtModuleModel}.
+			 * Override {@link GwtModule}.
 			 */
-			private GwtModuleModel existingModule = null;
+			private GwtModule overrideModule = null;
 
 			/**
-			 * New GWT Module path.
+			 * Existing {@link GwtModule}.
 			 */
-			private String newGwtModulePath = null;
+			private GwtModule existingModule = null;
 
 			/*
 			 * ===================== Change ===================================
@@ -105,16 +109,26 @@ public class GwtChangesImpl implements GwtChanges {
 			@Override
 			public void apply() {
 				try {
-					// Obtain the existing GWT Module
-					this.existingModule = GwtChangesImpl.this.repository
-							.retrieveGwtModule(existingGwtModulePath,
+
+					// Obtain potential GWT Module being overridden
+					this.overrideModule = GwtChangesImpl.this.repository
+							.retrieveGwtModule(newGwtModulePath,
 									GwtChangesImpl.this.context);
 
-					// Apply changes the configuration
-					this.newGwtModulePath = GwtChangesImpl.this.repository
-							.storeGwtModule(module,
-									GwtChangesImpl.this.context,
-									existingGwtModulePath);
+					// Obtain the existing module (if relocating)
+					this.existingModule = null; // reset
+					if ((existingGwtModulePath != null)
+							&& (!(existingGwtModulePath
+									.equals(newGwtModulePath)))) {
+						this.existingModule = GwtChangesImpl.this.repository
+								.retrieveGwtModule(existingGwtModulePath,
+										GwtChangesImpl.this.context);
+					}
+
+					// Apply changes to the configuration
+					GwtChangesImpl.this.repository.storeGwtModule(module,
+							GwtChangesImpl.this.context, existingGwtModulePath);
+
 				} catch (Exception ex) {
 					GwtChangesImpl.this.listener.notifyFailure(
 							"Failure applying GWT Module changes", ex);
@@ -124,18 +138,25 @@ public class GwtChangesImpl implements GwtChanges {
 			@Override
 			public void revert() {
 				try {
-					if (this.existingModule == null) {
-						// Remove the configuration (as was just created)
-						GwtChangesImpl.this.repository.deleteGwtModule(
-								this.newGwtModulePath,
-								GwtChangesImpl.this.context);
-					} else {
-						// Revert the configuration (as updated)
+
+					// Reinstate the possible existing module
+					if (this.existingModule != null) {
 						GwtChangesImpl.this.repository.storeGwtModule(
 								this.existingModule,
-								GwtChangesImpl.this.context,
-								this.newGwtModulePath);
+								GwtChangesImpl.this.context);
 					}
+
+					// Reinstate the previous module (from override)
+					if (this.overrideModule != null) {
+						GwtChangesImpl.this.repository.storeGwtModule(
+								this.overrideModule,
+								GwtChangesImpl.this.context);
+					} else {
+						// Nothing overridden, so delete
+						GwtChangesImpl.this.repository.deleteGwtModule(
+								newGwtModulePath, GwtChangesImpl.this.context);
+					}
+
 				} catch (Exception ex) {
 					GwtChangesImpl.this.listener.notifyFailure(
 							"Failure reverting GWT Module changes", ex);
@@ -143,5 +164,4 @@ public class GwtChangesImpl implements GwtChanges {
 			}
 		};
 	}
-
 }

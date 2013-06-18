@@ -31,6 +31,21 @@ import net.officefloor.model.repository.ConfigurationItem;
 public interface GwtModuleRepository {
 
 	/**
+	 * Retrieves the {@link GwtModule}.
+	 * 
+	 * @param gwtModulePath
+	 *            GWT Module path.
+	 * @param context
+	 *            {@link ConfigurationContext}.
+	 * @return {@link GwtModule} or <code>null</code> if not {@link GwtModule}
+	 *         at the path.
+	 * @throws Exception
+	 *             If fails to retrieve the {@link GwtModuleModel}.
+	 */
+	GwtModule retrieveGwtModule(String gwtModulePath,
+			ConfigurationContext context) throws Exception;
+
+	/**
 	 * Retrieves the {@link GwtModuleModel} from the {@link ConfigurationItem}.
 	 * 
 	 * @param gwtModulePath
@@ -42,8 +57,21 @@ public interface GwtModuleRepository {
 	 * @throws Exception
 	 *             If fails to retrieve the {@link GwtModuleModel}.
 	 */
-	GwtModuleModel retrieveGwtModule(String gwtModulePath,
+	GwtModuleModel retrieveGwtModuleModel(String gwtModulePath,
 			ConfigurationContext context) throws Exception;
+
+	/**
+	 * Stores the {@link GwtModule}.
+	 * 
+	 * @param module
+	 *            {@link GwtModule}.
+	 * @param context
+	 *            {@link ConfigurationContext}.
+	 * @throws Exception
+	 *             If fails to store the {@link GwtModule}.
+	 */
+	void storeGwtModule(GwtModule module, ConfigurationContext context)
+			throws Exception;
 
 	/**
 	 * Stores the GWT Module.
