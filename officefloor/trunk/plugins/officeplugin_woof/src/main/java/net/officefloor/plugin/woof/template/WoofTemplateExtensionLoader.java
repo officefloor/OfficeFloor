@@ -23,6 +23,7 @@ import net.officefloor.frame.spi.source.SourceContext;
 import net.officefloor.frame.spi.source.SourceProperties;
 import net.officefloor.model.change.Change;
 import net.officefloor.model.repository.ConfigurationContext;
+import net.officefloor.model.woof.WoofChangeIssues;
 import net.officefloor.model.woof.WoofTemplateModel;
 import net.officefloor.plugin.web.http.application.HttpTemplateAutoWireSection;
 import net.officefloor.plugin.web.http.application.WebAutoWireApplication;
@@ -75,6 +76,8 @@ public interface WoofTemplateExtensionLoader {
 	 *            {@link ConfigurationContext}.
 	 * @param sourceContext
 	 *            {@link SourceContext}.
+	 * @param issues
+	 *            {@link WoofChangeIssues}.
 	 * @return {@link Change} to refactor the
 	 *         {@link WoofTemplateExtensionSource} for the
 	 *         {@link WoofTemplateModel}.
@@ -84,7 +87,7 @@ public interface WoofTemplateExtensionLoader {
 			SourceProperties oldProperties, String newUri,
 			SourceProperties newProperties,
 			ConfigurationContext configurationContext,
-			SourceContext sourceContext);
+			SourceContext sourceContext, WoofChangeIssues issues);
 
 	/**
 	 * Extends the {@link HttpTemplateAutoWireSection} with the

@@ -30,6 +30,7 @@ import net.officefloor.frame.spi.source.SourceProperties;
 import net.officefloor.model.change.Change;
 import net.officefloor.model.impl.change.NoChange;
 import net.officefloor.model.repository.ConfigurationContext;
+import net.officefloor.model.woof.WoofChangeIssues;
 import net.officefloor.model.woof.WoofTemplateExtensionChangeContextImpl;
 import net.officefloor.model.woof.WoofTemplateExtensionModel;
 import net.officefloor.plugin.web.http.application.HttpTemplateAutoWireSection;
@@ -267,11 +268,17 @@ public class WoofTemplateExtensionLoaderImpl implements
 			SourceProperties newProperties = (SourceProperties) parameters[4];
 			ConfigurationContext configurationContext = (ConfigurationContext) parameters[5];
 			SourceContext sourceContext = (SourceContext) parameters[6];
+			WoofChangeIssues issues = (WoofChangeIssues) parameters[7];
+
+			// Wrap issues to report this particular extension failing
+			WoofChangeIssues extensionIssues = new ExtensionWoofChangeIssues(
+					(oldUri == null ? newUri : oldUri),
+					woofTemplateExtensionSourceClassName, issues);
 
 			// Construct the context
 			WoofTemplateExtensionChangeContext context = new WoofTemplateExtensionChangeContextImpl(
 					true, sourceContext, oldUri, oldProperties, newUri,
-					newProperties, configurationContext);
+					newProperties, configurationContext, extensionIssues);
 
 			// Attempt to create the extension change
 			Change<?> extensionChange = null;
@@ -298,13 +305,62 @@ public class WoofTemplateExtensionLoaderImpl implements
 		}
 	}
 
+	/**
+	 * {@link WoofChangeIssues} to provide reporting of issues for
+	 * {@link WoofTemplateExtensionSource}.
+	 */
+	private static class ExtensionWoofChangeIssues implements WoofChangeIssues {
+
+		/**
+		 * Message prefix.
+		 */
+		private final String messagePrefix;
+
+		/**
+		 * Delegate {@link WoofChangeIssues}.
+		 */
+		private final WoofChangeIssues delegate;
+
+		/**
+		 * Initiate.
+		 * 
+		 * @param templateUri
+		 *            {@link HttpTemplateAutoWireSection} URI.
+		 * @param woofTemplateExtensionSourceClassName
+		 *            {@link WoofTemplateExtensionSource} class name.
+		 * @param delegate
+		 *            {@link WoofChangeIssues} delegate.
+		 */
+		public ExtensionWoofChangeIssues(String templateUri,
+				String woofTemplateExtensionSourceClassName,
+				WoofChangeIssues delegate) {
+			this.messagePrefix = "Template " + templateUri + " Extension "
+					+ woofTemplateExtensionSourceClassName + ": ";
+			this.delegate = delegate;
+		}
+
+		/*
+		 * ================ WoofChangeIssues ===================
+		 */
+
+		@Override
+		public void addIssue(String message) {
+			this.delegate.addIssue(this.messagePrefix + message);
+		}
+
+		@Override
+		public void addIssue(String message, Throwable cause) {
+			this.delegate.addIssue(this.messagePrefix + message, cause);
+		}
+	}
+
 	@Override
 	public Change<?> refactorTemplateExtension(
 			String woofTemplateExtensionSourceClassName, String oldUri,
 			SourceProperties oldProperties, String newUri,
 			SourceProperties newProperties,
 			ConfigurationContext configurationContext,
-			SourceContext sourceContext) {
+			SourceContext sourceContext, WoofChangeIssues issues) {
 
 		// Create and configure the compiler
 		OfficeFloorCompiler compiler = OfficeFloorCompiler
@@ -316,7 +372,7 @@ public class WoofTemplateExtensionLoaderImpl implements
 			change = compiler.run(RefactorTemplateExtension.class,
 					woofTemplateExtensionSourceClassName, oldUri,
 					oldProperties, newUri, newProperties, configurationContext,
-					sourceContext);
+					sourceContext, issues);
 
 		} catch (Exception ex) {
 			// Provide conflict indicating failure of extension

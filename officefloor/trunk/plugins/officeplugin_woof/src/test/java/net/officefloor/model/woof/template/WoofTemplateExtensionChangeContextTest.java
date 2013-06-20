@@ -32,6 +32,7 @@ import net.officefloor.frame.spi.source.SourceProperties;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.model.impl.repository.classloader.ClassLoaderConfigurationContext;
 import net.officefloor.model.repository.ConfigurationContext;
+import net.officefloor.model.woof.WoofChangeIssues;
 import net.officefloor.model.woof.WoofTemplateExtension;
 import net.officefloor.model.woof.WoofTemplateExtensionChangeContextImpl;
 import net.officefloor.plugin.woof.template.WoofTemplateExtensionChangeContext;
@@ -43,6 +44,12 @@ import net.officefloor.plugin.woof.template.WoofTemplateExtensionConfiguration;
  * @author Daniel Sagenschneider
  */
 public class WoofTemplateExtensionChangeContextTest extends OfficeFrameTestCase {
+
+	/**
+	 * {@link WoofChangeIssues}.
+	 */
+	private final WoofChangeIssues issues = this
+			.createMock(WoofChangeIssues.class);
 
 	/**
 	 * Validate the context.
@@ -83,11 +90,15 @@ public class WoofTemplateExtensionChangeContextTest extends OfficeFrameTestCase 
 		// Create the context
 		WoofTemplateExtensionChangeContext context = new WoofTemplateExtensionChangeContextImpl(
 				true, sourceContext, "oldUri", oldProperties, "newUri",
-				newProperties, configurationContext);
+				newProperties, configurationContext, this.issues);
 
 		// Validate details
 		assertTrue("Incorrect indicating of loading type",
 				context.isLoadingType());
+
+		// Validate issue
+		assertSame("Incorrect issues", this.issues,
+				context.getWoofChangeIssues());
 
 		// Validate source context
 		assertWoofTemplateExtensionChangeContextResource(context
@@ -141,7 +152,11 @@ public class WoofTemplateExtensionChangeContextTest extends OfficeFrameTestCase 
 		// Create the context
 		WoofTemplateExtensionChangeContext context = new WoofTemplateExtensionChangeContextImpl(
 				true, sourceContext, null, oldProperties, null, newProperties,
-				configurationContext);
+				configurationContext, this.issues);
+
+		// Validate issue
+		assertSame("Incorrect issues", this.issues,
+				context.getWoofChangeIssues());
 
 		// Validate context has no properties
 		assertNull(

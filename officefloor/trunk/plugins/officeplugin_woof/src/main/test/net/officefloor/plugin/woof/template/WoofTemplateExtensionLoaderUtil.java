@@ -39,6 +39,7 @@ import net.officefloor.model.change.Change;
 import net.officefloor.model.impl.repository.memory.MemoryConfigurationContext;
 import net.officefloor.model.repository.ConfigurationContext;
 import net.officefloor.model.repository.ConfigurationItem;
+import net.officefloor.model.woof.WoofChangeIssues;
 import net.officefloor.plugin.web.http.application.HttpTemplateAutoWireSection;
 import net.officefloor.plugin.web.http.application.WebAutoWireApplication;
 
@@ -111,6 +112,27 @@ public class WoofTemplateExtensionLoaderUtil {
 	}
 
 	/**
+	 * Obtains the {@link WoofChangeIssues}.
+	 * 
+	 * @return {@link WoofChangeIssues}.
+	 */
+	public static WoofChangeIssues getWoofChangeIssues() {
+		final CompilerIssues issues = getCompilerIssues();
+		return new WoofChangeIssues() {
+
+			@Override
+			public void addIssue(String message, Throwable cause) {
+				issues.addIssue(null, null, null, null, message, cause);
+			}
+
+			@Override
+			public void addIssue(String message) {
+				issues.addIssue(null, null, null, null, message);
+			}
+		};
+	}
+
+	/**
 	 * Creates the {@link Change} for refactoring.
 	 * 
 	 * @param woofTemplateExtensionSourceClass
@@ -170,12 +192,18 @@ public class WoofTemplateExtensionLoaderUtil {
 		SourceContext sourceContext = getSourceContext(classLoader,
 				resourceSources);
 
+		// Obtain the extension source class name
+		String extensionSourceClassName = woofTemplateExtensionSourceClass
+				.getName();
+
+		// Obtain the WoOF change issues
+		WoofChangeIssues issues = getWoofChangeIssues();
+
 		// Load the change
 		Change<?> change = getWoofTemplateExtensionLoader()
-				.refactorTemplateExtension(
-						woofTemplateExtensionSourceClass.getName(), oldUri,
+				.refactorTemplateExtension(extensionSourceClassName, oldUri,
 						oldProperties, newUri, newProperties,
-						configurationContext, sourceContext);
+						configurationContext, sourceContext, issues);
 
 		// Return the change
 		return change;
