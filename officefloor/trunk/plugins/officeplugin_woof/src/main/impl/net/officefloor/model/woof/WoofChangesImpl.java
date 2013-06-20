@@ -451,6 +451,8 @@ public class WoofChangesImpl implements WoofChanges {
 	 *            {@link SourceContext}.
 	 * @param configurationContext
 	 *            {@link ConfigurationContext}.
+	 * @param issues
+	 *            {@link WoofChangeIssues}.
 	 * @return {@link Change} to refactor the {@link WoofTemplateExtensionModel}
 	 *         instances on the {@link WoofTemplateModel}.
 	 */
@@ -460,7 +462,7 @@ public class WoofChangesImpl implements WoofChanges {
 			WoofTemplateExtension[] extensions,
 			final WoofTemplateModel changeTemplate,
 			SourceContext sourceContext,
-			ConfigurationContext configurationContext) {
+			ConfigurationContext configurationContext, WoofChangeIssues issues) {
 
 		// Create the list of existing extensions
 		final List<WoofTemplateExtensionModel> existingExtensions = new ArrayList<WoofTemplateExtensionModel>(
@@ -511,7 +513,7 @@ public class WoofChangesImpl implements WoofChanges {
 				// Refactor the extension
 				Change<?> extensionChange = refactorExtension(extensionModel,
 						oldUri, newUri, availableExtensions, changeTemplate,
-						sourceContext, configurationContext);
+						sourceContext, configurationContext, issues);
 
 				// Include potential change into aggregate change
 				if (extensionChange != null) {
@@ -531,7 +533,7 @@ public class WoofChangesImpl implements WoofChanges {
 				// Refactor the extension
 				Change<?> extensionChange = refactorExtension(extensionModel,
 						oldUri, newUri, availableExtensions, changeTemplate,
-						sourceContext, configurationContext);
+						sourceContext, configurationContext, issues);
 
 				// Include potential change into aggregate change
 				if (extensionChange != null) {
@@ -552,7 +554,7 @@ public class WoofChangesImpl implements WoofChanges {
 			// Refactor the extension (to remove)
 			Change<?> extensionChange = refactorExtension(extensionModel,
 					oldUri, null, availableExtensions, changeTemplate,
-					sourceContext, configurationContext);
+					sourceContext, configurationContext, issues);
 
 			// Include potential change into aggregate change
 			if (extensionChange != null) {
@@ -587,13 +589,15 @@ public class WoofChangesImpl implements WoofChanges {
 	 *            {@link SourceContext}.
 	 * @param configurationContext
 	 *            {@link ConfigurationContext}.
+	 * @param issues
+	 *            {@link WoofChangeIssues}.
 	 * @return {@link Change} to refactor the {@link WoofTemplateExtension}.
 	 */
 	private static Change<?> refactorExtension(
 			WoofTemplateExtensionModel extension, String oldUri, String newUri,
 			List<WoofTemplateExtensionModel> existingExtensions,
 			WoofTemplateModel changeTemplate, SourceContext sourceContext,
-			ConfigurationContext configurationContext) {
+			ConfigurationContext configurationContext, WoofChangeIssues issues) {
 
 		// Obtain the extension source class
 		String extensionSourceClassName = extension.getExtensionClassName();
@@ -636,7 +640,7 @@ public class WoofChangesImpl implements WoofChanges {
 		WoofTemplateExtensionLoader loader = new WoofTemplateExtensionLoaderImpl();
 		Change<?> change = loader.refactorTemplateExtension(
 				extensionSourceClassName, oldUri, oldProperties, newUri,
-				newProperties, configurationContext, sourceContext);
+				newProperties, configurationContext, sourceContext, issues);
 
 		// Return the possible change
 		return change;
@@ -929,10 +933,13 @@ public class WoofChangesImpl implements WoofChanges {
 			}
 		};
 
+		// Obtain the WoOF change issues
+		WoofChangeIssues issues = context.getWoofChangeIssues();
+
 		// Include adding extensions
 		Change<WoofTemplateModel> extensionChange = refactorExtensions(null,
 				uri, extensions, template, context,
-				context.getConfigurationContext());
+				context.getConfigurationContext(), issues);
 		if (extensionChange != null) {
 			change = new AggregateChange<WoofTemplateModel>(template,
 					change.getChangeDescription(), change, extensionChange);
@@ -1076,12 +1083,15 @@ public class WoofChangesImpl implements WoofChanges {
 		};
 		changes.add(attributeChange);
 
+		// Obtain the WoOF change issues
+		WoofChangeIssues issues = context.getWoofChangeIssues();
+
 		// Refactor extensions (ensuring have extensions)
 		extensions = (extensions == null ? new WoofTemplateExtension[0]
 				: extensions);
 		Change<WoofTemplateModel> extensionChange = refactorExtensions(
 				template, uri, extensions, template, context,
-				context.getConfigurationContext());
+				context.getConfigurationContext(), issues);
 		if (extensionChange != null) {
 			changes.add(extensionChange);
 		}
@@ -1262,10 +1272,13 @@ public class WoofChangesImpl implements WoofChanges {
 			}
 		};
 
+		// Obtain the WoOF change issues
+		WoofChangeIssues issues = context.getWoofChangeIssues();
+
 		// Refactor extensions for changed URI
 		Change<WoofTemplateModel> extensionChange = refactorExtensions(
 				template, uri, null, template, context,
-				context.getConfigurationContext());
+				context.getConfigurationContext(), issues);
 		if (extensionChange != null) {
 			change = new AggregateChange<WoofTemplateModel>(template,
 					change.getChangeDescription(), change, extensionChange);
@@ -1340,7 +1353,17 @@ public class WoofChangesImpl implements WoofChanges {
 			}
 		};
 
-		// TODO include change to remove template
+		// Obtain the WoOF change issues
+		WoofChangeIssues issues = context.getWoofChangeIssues();
+
+		// Refactor extensions for removing template
+		Change<WoofTemplateModel> extensionChange = refactorExtensions(
+				template, null, null, template, context,
+				context.getConfigurationContext(), issues);
+		if (extensionChange != null) {
+			change = new AggregateChange<WoofTemplateModel>(template,
+					change.getChangeDescription(), change, extensionChange);
+		}
 
 		// Include changes for child templates no longer inheriting
 		change = this.includeSuperTemplateNameChanges(change, templateName,

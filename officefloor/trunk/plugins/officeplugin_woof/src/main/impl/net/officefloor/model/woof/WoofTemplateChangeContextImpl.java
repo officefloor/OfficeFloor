@@ -35,6 +35,11 @@ public class WoofTemplateChangeContextImpl extends SourceContextImpl implements
 	private final ConfigurationContext configurationContext;
 
 	/**
+	 * {@link WoofChangeIssues}.
+	 */
+	private final WoofChangeIssues issues;
+
+	/**
 	 * Initiate.
 	 * 
 	 * @param isLoadingType
@@ -43,14 +48,17 @@ public class WoofTemplateChangeContextImpl extends SourceContextImpl implements
 	 *            {@link ClassLoader}.
 	 * @param configurationContext
 	 *            {@link ConfigurationContext}.
+	 * @param issues
+	 *            {@link WoofChangeIssues}.
 	 * @param resourceSources
 	 *            {@link ResourceSource} instances.
 	 */
 	public WoofTemplateChangeContextImpl(boolean isLoadingType,
 			ClassLoader classLoader, ConfigurationContext configurationContext,
-			ResourceSource... resourceSources) {
+			WoofChangeIssues issues, ResourceSource... resourceSources) {
 		super(isLoadingType, classLoader, resourceSources);
 		this.configurationContext = configurationContext;
+		this.issues = issues;
 	}
 
 	/*
@@ -60,6 +68,11 @@ public class WoofTemplateChangeContextImpl extends SourceContextImpl implements
 	@Override
 	public ConfigurationContext getConfigurationContext() {
 		return this.configurationContext;
+	}
+
+	@Override
+	public WoofChangeIssues getWoofChangeIssues() {
+		return this.issues;
 	}
 
 }

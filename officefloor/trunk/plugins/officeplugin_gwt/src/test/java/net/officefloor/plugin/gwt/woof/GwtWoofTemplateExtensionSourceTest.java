@@ -24,12 +24,16 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import net.officefloor.frame.impl.construct.source.SourceContextImpl;
+import net.officefloor.frame.spi.source.SourceContext;
 import net.officefloor.frame.spi.source.SourceProperties;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.model.change.Change;
 import net.officefloor.model.impl.repository.memory.MemoryConfigurationContext;
 import net.officefloor.model.repository.ConfigurationContext;
 import net.officefloor.model.repository.ConfigurationItem;
+import net.officefloor.model.woof.WoofChangeIssues;
+import net.officefloor.plugin.woof.template.WoofTemplateExtensionLoaderImpl;
 import net.officefloor.plugin.woof.template.WoofTemplateExtensionLoaderUtil;
 
 import com.google.gwt.core.client.EntryPoint;
@@ -172,6 +176,57 @@ public class GwtWoofTemplateExtensionSourceTest extends OfficeFrameTestCase {
 
 		// Validate the no change as just leave GWT Module to reuse
 		assertNull("Should not have change for delete", change);
+	}
+
+	/**
+	 * Ensure reports issue in failure of extension.
+	 */
+	public void testRefactor_Issue() throws Exception {
+
+		final Exception failure = new Exception("TEST");
+
+		final ConfigurationContext configurationContext = this
+				.createMock(ConfigurationContext.class);
+		final WoofChangeIssues issues = this.createMock(WoofChangeIssues.class);
+
+		// Record failure
+		configurationContext
+				.getConfigurationItem("src/main/resources/net/officefloor/NEW.gwt.xml");
+		this.control(configurationContext).setThrowable(failure);
+
+		// Record reporting of the failure
+		issues.addIssue("Template OLD Extension "
+				+ GwtWoofTemplateExtensionSource.class.getName()
+				+ ": Failure applying GWT Module changes", failure);
+
+		// Obtain the class loader
+		ClassLoader classLoader = Thread.currentThread()
+				.getContextClassLoader();
+
+		// Create the properties
+		SourceProperties oldProperties = createSourceProperties(
+				"net.officefloor.client.Existing", null);
+		SourceProperties newProperties = createSourceProperties(
+				"net.officefloor.client.Failure", null);
+
+		// Create the source context
+		SourceContext sourceContext = new SourceContextImpl(false, classLoader);
+
+		// Create the change
+		Change<?> change = new WoofTemplateExtensionLoaderImpl()
+				.refactorTemplateExtension(
+						GwtWoofTemplateExtensionSource.class.getName(), "OLD",
+						oldProperties, "NEW", newProperties,
+						configurationContext, sourceContext, issues);
+
+		// Test
+		this.replayMockObjects();
+
+		// Triggers the failure
+		change.apply();
+
+		// Verify
+		this.verifyMockObjects();
 	}
 
 	/**

@@ -49,6 +49,11 @@ public class WoofTemplateExtensionChangeContextImpl extends SourceContextImpl
 	private final WoofTemplateExtensionConfiguration newConfiguration;
 
 	/**
+	 * {@link WoofChangeIssues}.
+	 */
+	private final WoofChangeIssues issues;
+
+	/**
 	 * Initiate.
 	 * 
 	 * @param isLoadingType
@@ -65,17 +70,20 @@ public class WoofTemplateExtensionChangeContextImpl extends SourceContextImpl
 	 *            New {@link SourceProperties}.
 	 * @param configurationContext
 	 *            {@link ConfigurationContext}.
+	 * @param issues
+	 *            {@link WoofChangeIssues}.
 	 */
 	public WoofTemplateExtensionChangeContextImpl(boolean isLoadingType,
 			SourceContext sourceContext, String oldUri,
 			SourceProperties oldProperties, String newUri,
 			SourceProperties newProperties,
-			ConfigurationContext configurationContext) {
+			ConfigurationContext configurationContext, WoofChangeIssues issues) {
 		super(isLoadingType, sourceContext, (newUri == null ? null
 				: newProperties));
 
 		// Store state
 		this.configurationContext = configurationContext;
+		this.issues = issues;
 
 		// Create the old configuration
 		if (oldUri == null) {
@@ -111,6 +119,11 @@ public class WoofTemplateExtensionChangeContextImpl extends SourceContextImpl
 	@Override
 	public ConfigurationContext getConfigurationContext() {
 		return this.configurationContext;
+	}
+
+	@Override
+	public WoofChangeIssues getWoofChangeIssues() {
+		return this.issues;
 	}
 
 	/**

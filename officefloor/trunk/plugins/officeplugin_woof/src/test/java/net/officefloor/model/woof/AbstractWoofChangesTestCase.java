@@ -35,6 +35,7 @@ import net.officefloor.plugin.web.http.security.HttpSecurity;
 import net.officefloor.plugin.web.http.security.type.HttpSecurityDependencyType;
 import net.officefloor.plugin.web.http.security.type.HttpSecurityFlowType;
 import net.officefloor.plugin.web.http.security.type.HttpSecurityType;
+import net.officefloor.plugin.woof.template.WoofTemplateExtensionLoaderUtil;
 
 /**
  * Abstract {@link WoofChanges} {@link TestCase}.
@@ -56,8 +57,10 @@ public abstract class AbstractWoofChangesTestCase extends
 				.getContextClassLoader();
 		ConfigurationContext configurationContext = new ClassLoaderConfigurationContext(
 				classLoader);
+		WoofChangeIssues issues = WoofTemplateExtensionLoaderUtil
+				.getWoofChangeIssues();
 		WoofTemplateChangeContext context = new WoofTemplateChangeContextImpl(
-				false, classLoader, configurationContext);
+				false, classLoader, configurationContext, issues);
 
 		// Return the context
 		return context;

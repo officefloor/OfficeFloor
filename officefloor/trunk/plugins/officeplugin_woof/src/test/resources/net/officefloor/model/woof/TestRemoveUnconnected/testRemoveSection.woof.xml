@@ -1,14 +1,16 @@
 <woof>
 
 	<templates>
-		<template name="TEMPLATE" path="example/Template.ofp" class="net.example.LogicClass" />
-		<extension
-			class="net.officefloor.model.woof.MockNoChangeWoofTemplateExtensionSource" />
-		<extension
-			class="net.officefloor.model.woof.MockChangeWoofTemplateExtensionSource">
-			<property name="ONE" value="A" />
-			<property name="TWO" value="B" />
-		</extension>
+		<template name="TEMPLATE" uri="template" path="example/Template.ofp"
+			class="net.example.LogicClass">
+			<extension
+				class="net.officefloor.model.woof.MockNoChangeWoofTemplateExtensionSource" />
+			<extension
+				class="net.officefloor.model.woof.MockChangeWoofTemplateExtensionSource">
+				<property name="ONE" value="A" />
+				<property name="TWO" value="B" />
+			</extension>
+		</template>
 	</templates>
 
 	<sections />
@@ -26,7 +28,7 @@
 	<exceptions>
 		<exception class="java.lang.Exception" />
 	</exceptions>
-	
+
 	<starting>
 		<start />
 	</starting>

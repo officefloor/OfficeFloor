@@ -25,8 +25,10 @@ import net.officefloor.frame.spi.source.UnknownClassError;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.model.change.Change;
 import net.officefloor.model.change.Conflict;
+import net.officefloor.model.impl.change.AbstractChange;
 import net.officefloor.model.impl.change.NoChange;
 import net.officefloor.model.repository.ConfigurationContext;
+import net.officefloor.model.woof.WoofChangeIssues;
 import net.officefloor.model.woof.WoofTemplateExtensionModel;
 import net.officefloor.plugin.woof.template.impl.AbstractWoofTemplateExtensionSource;
 
@@ -60,6 +62,17 @@ public class RefactorWoofTemplateExtensionLoaderTest extends
 	 */
 	private final ClassLoader classLoader = Thread.currentThread()
 			.getContextClassLoader();
+
+	/**
+	 * {@link WoofChangeIssues}.
+	 */
+	private final WoofChangeIssues issues = this
+			.createMock(WoofChangeIssues.class);
+
+	/**
+	 * Indicates if verify after refactoring.
+	 */
+	private boolean isRefactorVerify = true;
 
 	/**
 	 * Old URI.
@@ -192,7 +205,8 @@ public class RefactorWoofTemplateExtensionLoaderTest extends
 		final Change<?> mockChange = this.createMock(Change.class);
 
 		// Configure extension
-		MockWoofTemplateExtensionSource.reset(this, null, null, mockChange);
+		MockWoofTemplateExtensionSource.reset(this, null, null,
+				new MockChangeFactory(mockChange));
 
 		// Record adapting
 		this.recordReturn(this.sourceContext,
@@ -217,7 +231,8 @@ public class RefactorWoofTemplateExtensionLoaderTest extends
 		final Change<?> mockChange = this.createMock(Change.class);
 
 		// Configure extension
-		MockWoofTemplateExtensionSource.reset(this, null, null, mockChange);
+		MockWoofTemplateExtensionSource.reset(this, null, null,
+				new MockChangeFactory(mockChange));
 
 		// Record adapting
 		this.recordReturn(this.sourceContext,
@@ -229,6 +244,85 @@ public class RefactorWoofTemplateExtensionLoaderTest extends
 
 		// Ensure correct change
 		assertSame("Incorrect change", mockChange, change);
+	}
+
+	/**
+	 * Ensure may report issue to {@link WoofChangeIssues}.
+	 */
+	public void testChangeIssue() {
+
+		// Configure extension
+		MockWoofTemplateExtensionSource.reset(this, null, null,
+				new IssueChange());
+
+		// Record adapting
+		this.recordReturn(this.sourceContext,
+				this.sourceContext.getClassLoader(), this.classLoader);
+
+		// Record the change issues
+		this.issues.addIssue("Template OLD Extension "
+				+ MockWoofTemplateExtensionSource.class.getName() + ": APPLY");
+		this.issues.addIssue("Template OLD Extension "
+				+ MockWoofTemplateExtensionSource.class.getName() + ": REVERT");
+
+		// Allow to run change and verify afterwards
+		this.isRefactorVerify = false;
+
+		// Do refactoring with no configuration
+		Change<?> change = this.refactorTemplateExtension("OLD", new String[0],
+				null, null);
+
+		// Trigger reporting issues
+		change.apply();
+		change.revert();
+
+		// Validate reported issues
+		this.verifyMockObjects();
+	}
+
+	/**
+	 * {@link Change} to report issue.
+	 */
+	private static class IssueChange extends
+			AbstractChange<WoofTemplateExtensionModel> implements ChangeFactory {
+
+		/**
+		 * {@link WoofChangeIssues}.
+		 */
+		private WoofChangeIssues issues;
+
+		/**
+		 * Initiate.
+		 */
+		public IssueChange() {
+			super(new WoofTemplateExtensionModel("TEST"), "Mock change");
+		}
+
+		/*
+		 * ================= ChangeFactory =======================
+		 */
+
+		@Override
+		public Change<?> createChange(WoofTemplateExtensionChangeContext context) {
+			this.issues = context.getWoofChangeIssues();
+			return this;
+		}
+
+		/*
+		 * =================== Change ============================
+		 */
+
+		@Override
+		public void apply() {
+			// Report issue
+			this.issues.addIssue("APPLY");
+		}
+
+		@Override
+		public void revert() {
+			// Report issue
+			this.issues.addIssue("REVERT");
+		}
 	}
 
 	/**
@@ -375,11 +469,61 @@ public class RefactorWoofTemplateExtensionLoaderTest extends
 		this.replayMockObjects();
 		Change<?> change = this.loader.refactorTemplateExtension(
 				extensionSourceClassName, oldUri, oldProperties, newUri,
-				newProperties, this.configurationContext, this.sourceContext);
-		this.verifyMockObjects();
+				newProperties, this.configurationContext, this.sourceContext,
+				this.issues);
+
+		// Determine if verify
+		if (this.isRefactorVerify) {
+			this.verifyMockObjects();
+		}
 
 		// Return the change
 		return change;
+	}
+
+	/**
+	 * {@link ChangeFactory}.
+	 */
+	private static interface ChangeFactory {
+
+		/**
+		 * Creates the {@link Change}.
+		 * 
+		 * @param context
+		 *            {@link WoofTemplateExtensionChangeContext}.
+		 * @return {@link Change}.
+		 */
+		Change<?> createChange(WoofTemplateExtensionChangeContext context);
+	}
+
+	/**
+	 * Mock {@link ChangeFactory}.
+	 */
+	private static class MockChangeFactory implements ChangeFactory {
+
+		/**
+		 * {@link Change}.
+		 */
+		private final Change<?> change;
+
+		/**
+		 * Initiate.
+		 * 
+		 * @param change
+		 *            {@link Change}.
+		 */
+		public MockChangeFactory(Change<?> change) {
+			this.change = change;
+		}
+
+		/*
+		 * ================ ChangeFactory ====================
+		 */
+
+		@Override
+		public Change<?> createChange(WoofTemplateExtensionChangeContext context) {
+			return this.change;
+		}
 	}
 
 	/**
@@ -404,9 +548,9 @@ public class RefactorWoofTemplateExtensionLoaderTest extends
 		private static RuntimeException createFailure;
 
 		/**
-		 * {@link Change}.
+		 * {@link ChangeFactory}.
 		 */
-		private static Change<?> change = null;
+		private static ChangeFactory changeFactory = null;
 
 		/**
 		 * Resets for next test.
@@ -417,16 +561,16 @@ public class RefactorWoofTemplateExtensionLoaderTest extends
 		 *            Failure in instantiating the extension.
 		 * @param createFailure
 		 *            Failure in creating the extension.
-		 * @param change
-		 *            {@link Change}.
+		 * @param changeFactory
+		 *            {@link ChangeFactory}.
 		 */
 		public static void reset(RefactorWoofTemplateExtensionLoaderTest test,
 				Error instantiateFailure, RuntimeException createFailure,
-				Change<?> change) {
+				ChangeFactory changeFactory) {
 			MockWoofTemplateExtensionSource.test = test;
 			MockWoofTemplateExtensionSource.instantiateFailure = instantiateFailure;
 			MockWoofTemplateExtensionSource.createFailure = createFailure;
-			MockWoofTemplateExtensionSource.change = change;
+			MockWoofTemplateExtensionSource.changeFactory = changeFactory;
 		}
 
 		/**
@@ -465,8 +609,9 @@ public class RefactorWoofTemplateExtensionLoaderTest extends
 				throw createFailure;
 			}
 
-			// Return the change
-			return change;
+			// Potentially create and return the change
+			return (changeFactory == null ? null : changeFactory
+					.createChange(context));
 		}
 
 		/**

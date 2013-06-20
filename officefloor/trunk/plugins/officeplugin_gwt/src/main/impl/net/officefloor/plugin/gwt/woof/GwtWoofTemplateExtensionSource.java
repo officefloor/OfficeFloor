@@ -22,6 +22,7 @@ import net.officefloor.model.change.Change;
 import net.officefloor.model.gwt.module.GwtModuleModel;
 import net.officefloor.model.impl.repository.ModelRepositoryImpl;
 import net.officefloor.model.repository.ConfigurationContext;
+import net.officefloor.model.woof.WoofChangeIssues;
 import net.officefloor.plugin.gwt.module.GwtChanges;
 import net.officefloor.plugin.gwt.module.GwtChangesImpl;
 import net.officefloor.plugin.gwt.module.GwtFailureListener;
@@ -181,8 +182,16 @@ public class GwtWoofTemplateExtensionSource extends
 		GwtModuleRepository gwtRepository = new GwtModuleRepositoryImpl(
 				new ModelRepositoryImpl(), classLoader, GWT_MODULE_PATH_PREFIX);
 
+		// Create the failure listener
+		final WoofChangeIssues issues = context.getWoofChangeIssues();
+		GwtFailureListener listener = new GwtFailureListener() {
+			@Override
+			public void notifyFailure(String message, Throwable cause) {
+				issues.addIssue(message, cause);
+			}
+		};
+
 		// Create GWT changes
-		GwtFailureListener listener = null;
 		GwtChanges gwtChanges = new GwtChangesImpl(gwtRepository,
 				configurationContext, listener);
 

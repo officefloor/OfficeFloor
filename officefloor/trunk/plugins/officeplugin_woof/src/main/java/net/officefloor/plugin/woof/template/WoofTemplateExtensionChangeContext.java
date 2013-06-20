@@ -20,6 +20,7 @@ package net.officefloor.plugin.woof.template;
 import net.officefloor.frame.spi.source.SourceContext;
 import net.officefloor.model.change.Change;
 import net.officefloor.model.repository.ConfigurationContext;
+import net.officefloor.model.woof.WoofChangeIssues;
 import net.officefloor.model.woof.WoofTemplateExtension;
 
 /**
@@ -65,5 +66,13 @@ public interface WoofTemplateExtensionChangeContext extends SourceContext {
 	 * @return {@link ConfigurationContext}.
 	 */
 	ConfigurationContext getConfigurationContext();
+
+	/**
+	 * Obtains the {@link WoofChangeIssues} to report issues in
+	 * applying/reverting a {@link Change}.
+	 * 
+	 * @return {@link WoofChangeIssues}.
+	 */
+	WoofChangeIssues getWoofChangeIssues();
 
 }

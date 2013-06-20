@@ -17,37 +17,32 @@
  */
 package net.officefloor.model.woof;
 
-import net.officefloor.frame.spi.source.SourceContext;
 import net.officefloor.model.change.Change;
-import net.officefloor.model.repository.ConfigurationContext;
 
 /**
- * Context for changing a {@link WoofTemplateModel}.
+ * Allows the WoOF {@link Change} to report an issue when it is
+ * applying/reverting.
  * 
  * @author Daniel Sagenschneider
  */
-public interface WoofTemplateChangeContext extends SourceContext {
+public interface WoofChangeIssues {
 
 	/**
-	 * <p>
-	 * Obtains the {@link ConfigurationContext}.
-	 * <p>
-	 * The {@link ConfigurationContext} is at the root of the Project source.
-	 * <p>
-	 * Note that Projects are anticipated to follow the standard <a
-	 * href="http://maven.apache.org">Maven</a> project structure.
+	 * Adds an issue.
 	 * 
-	 * @return {@link ConfigurationContext}.
+	 * @param message
+	 *            Message.
 	 */
-	ConfigurationContext getConfigurationContext();
+	void addIssue(String message);
 
 	/**
-	 * Obtains the {@link WoofChangeIssues} to allow reporting issue in
-	 * attempting the {@link Change}.
+	 * Adds an issue.
 	 * 
-	 * @return {@link WoofChangeIssues} to allow reporting issue in attempting
-	 *         the {@link Change}.
+	 * @param message
+	 *            Message.
+	 * @param cause
+	 *            Cause.
 	 */
-	WoofChangeIssues getWoofChangeIssues();
+	void addIssue(String message, Throwable cause);
 
 }
