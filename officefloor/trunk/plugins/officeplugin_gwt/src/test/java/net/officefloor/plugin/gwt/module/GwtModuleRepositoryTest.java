@@ -170,7 +170,7 @@ public class GwtModuleRepositoryTest extends OfficeFrameTestCase {
 		String expected = this.getText(this.findInputStream(this.getClass(),
 				"create.gwt.xml"));
 		String actual = this.getText(content);
-		assertXml("Incorrect created module", expected, actual);
+		assertXmlEquals("Incorrect created module", expected, actual);
 	}
 
 	/**
@@ -194,7 +194,7 @@ public class GwtModuleRepositoryTest extends OfficeFrameTestCase {
 		String expected = this.getText(this.findInputStream(this.getClass(),
 				"updated.gwt.xml"));
 		String actual = this.getText(updated);
-		assertXml("Incorrect updated module", expected, actual);
+		assertXmlEquals("Incorrect updated module", expected, actual);
 	}
 
 	/**
@@ -219,7 +219,7 @@ public class GwtModuleRepositoryTest extends OfficeFrameTestCase {
 		String expected = this.getText(this.findInputStream(this.getClass(),
 				"updated_inherits.gwt.xml"));
 		String actual = this.getText(updated);
-		assertXml("Incorrect updated module", expected, actual);
+		assertXmlEquals("Incorrect updated module", expected, actual);
 	}
 
 	/**
@@ -246,7 +246,7 @@ public class GwtModuleRepositoryTest extends OfficeFrameTestCase {
 		// Validate content as expected
 		String expected = this.getText(this.findInputStream(this.getClass(),
 				"updated.gwt.xml"));
-		assertXml("Incorrect updated module", expected, actual);
+		assertXmlEquals("Incorrect updated module", expected, actual);
 	}
 
 	/**
@@ -288,7 +288,7 @@ public class GwtModuleRepositoryTest extends OfficeFrameTestCase {
 		String actual = this.getText(item.getConfiguration());
 
 		// Ensure appropriate content
-		assertXml("Incorrect stored module", fileContents, actual);
+		assertXmlEquals("Incorrect stored module", fileContents, actual);
 	}
 
 	/**
@@ -320,7 +320,7 @@ public class GwtModuleRepositoryTest extends OfficeFrameTestCase {
 		// Ensure appropriate content
 		String expected = this.getText(this.findInputStream(this.getClass(),
 				"create.gwt.xml"));
-		assertXml("Incorrect stored (created) module", expected, actual);
+		assertXmlEquals("Incorrect stored (created) module", expected, actual);
 	}
 
 	/**
@@ -355,7 +355,7 @@ public class GwtModuleRepositoryTest extends OfficeFrameTestCase {
 		// Validate content as expected
 		String expected = this.getText(this.findInputStream(this.getClass(),
 				"updated.gwt.xml"));
-		assertXml("Incorrect stored (updated) module", expected, actual);
+		assertXmlEquals("Incorrect stored (updated) module", expected, actual);
 	}
 
 	/**
@@ -390,7 +390,7 @@ public class GwtModuleRepositoryTest extends OfficeFrameTestCase {
 		// Validate content as expected
 		String expected = this.getText(this.findInputStream(this.getClass(),
 				"updated.gwt.xml"));
-		assertXml("Incorrect stored (updated) module", expected, actual);
+		assertXmlEquals("Incorrect stored (updated) module", expected, actual);
 
 		// Ensure the previous GWT Module is removed
 		assertNull("Previous GWT Module should be removed",
@@ -454,23 +454,6 @@ public class GwtModuleRepositoryTest extends OfficeFrameTestCase {
 			writer.write(character);
 		}
 		return writer.toString();
-	}
-
-	/**
-	 * Asserts the XML text to match.
-	 * 
-	 * @param message
-	 *            Message.
-	 * @param expected
-	 *            Expected XML text.
-	 * @param actual
-	 *            Actual XML text.
-	 */
-	private static void assertXml(String message, String expected, String actual) {
-		// Remove tabs from xml (formatting discrepency)
-		expected = expected.replace("\t", "");
-		actual = actual.replace("\t", "");
-		assertEquals(message, expected, actual);
 	}
 
 }
