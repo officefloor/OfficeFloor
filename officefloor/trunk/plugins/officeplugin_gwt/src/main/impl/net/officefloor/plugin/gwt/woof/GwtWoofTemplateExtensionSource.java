@@ -18,11 +18,13 @@
 package net.officefloor.plugin.gwt.woof;
 
 import net.officefloor.compile.impl.util.CompileUtil;
+import net.officefloor.frame.spi.source.SourceProperties;
 import net.officefloor.model.change.Change;
 import net.officefloor.model.gwt.module.GwtModuleModel;
 import net.officefloor.model.impl.repository.ModelRepositoryImpl;
 import net.officefloor.model.repository.ConfigurationContext;
 import net.officefloor.model.woof.WoofChangeIssues;
+import net.officefloor.plugin.gwt.comet.web.http.section.CometHttpTemplateSectionExtension;
 import net.officefloor.plugin.gwt.module.GwtChanges;
 import net.officefloor.plugin.gwt.module.GwtChangesImpl;
 import net.officefloor.plugin.gwt.module.GwtFailureListener;
@@ -56,6 +58,11 @@ public class GwtWoofTemplateExtensionSource extends
 	 * Name of the property for the GWT Async Service Interfaces.
 	 */
 	public static String PROPERTY_GWT_ASYNC_SERVICE_INTERFACES = GwtHttpTemplateSectionExtension.PROPERTY_GWT_ASYNC_SERVICE_INTERFACES;
+
+	/**
+	 * Name of property to indicate if GWT Comet is enabled.
+	 */
+	public static String PROPERTY_ENABLE_COMET = "gwt.comet.enable";
 
 	/**
 	 * Prefix on the {@link GwtModule} path to identify it within the
@@ -152,6 +159,19 @@ public class GwtWoofTemplateExtensionSource extends
 		return gwtModulePath;
 	}
 
+	/**
+	 * Determines if Comet is enabled.
+	 * 
+	 * @param properties
+	 *            {@link SourceProperties}.
+	 * @return <code>true</code> if Comet is enabled.
+	 */
+	private static boolean isCometEnabled(SourceProperties properties) {
+		String enableComet = properties.getProperty(PROPERTY_ENABLE_COMET,
+				String.valueOf(false));
+		return Boolean.TRUE.equals(Boolean.valueOf(enableComet));
+	}
+
 	/*
 	 * ==================== WoofTemplateExtensionSource ======================
 	 */
@@ -195,11 +215,13 @@ public class GwtWoofTemplateExtensionSource extends
 		GwtChanges gwtChanges = new GwtChangesImpl(gwtRepository,
 				configurationContext, listener);
 
-		// TODO determine the required inherit
-		String[] inherit = new String[0];
-
 		// Create the module
-		GwtModuleModel gwtModule = createGetModule(newConfiguration, inherit);
+		GwtModuleModel gwtModule = createGetModule(newConfiguration);
+
+		// Determine if enhance with Comet
+		if (isCometEnabled(newConfiguration)) {
+			CometHttpTemplateSectionExtension.extendGwtModule(gwtModule);
+		}
 
 		// Obtain the existing module path
 		String existingGwtModulePath = getGwtModulePath(
@@ -221,13 +243,12 @@ public class GwtWoofTemplateExtensionSource extends
 		GwtHttpTemplateSectionExtension.extendTemplate(context.getTemplate(),
 				context.getWebApplication(), context, context.getClassLoader());
 
-		// // Extend template with GWT Comet
-		// CometHttpTemplateSectionExtension.extendTemplate(context.getTemplate(),
-		// context.getWebApplication(), context, context.getClassLoader());
-		//
-		// // Configure in as extension to HTTP template
-		// context.getTemplate().addTemplateExtension(
-		// CometHttpTemplateSectionExtension.class);
+		// Extend template with GWT Comet (if enabled)
+		if (isCometEnabled(context)) {
+			CometHttpTemplateSectionExtension.extendTemplate(
+					context.getTemplate(), context.getWebApplication(),
+					context, context.getClassLoader());
+		}
 	}
 
 }

@@ -124,6 +124,9 @@ public class CometHttpTemplateSectionExtension implements
 			SourceProperties properties, ClassLoader classLoader)
 			throws Exception {
 
+		// Configure in as extension to HTTP template
+		template.addTemplateExtension(CometHttpTemplateSectionExtension.class);
+
 		// Determine if already configured Comet Service
 		if (!application.isObjectAvailable(new AutoWire(CometService.class))) {
 			// Configure the Comet Service
