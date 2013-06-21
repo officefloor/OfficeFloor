@@ -29,7 +29,7 @@
 		</dependency>
 		<dependency>
 			<groupId>${project.groupId}</groupId>
-			<artifactId>officeplugin_comet</artifactId>
+			<artifactId>officeplugin_gwt</artifactId>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
