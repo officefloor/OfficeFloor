@@ -18,8 +18,8 @@
 package net.officefloor.tutorial.cometmanualapp;
 
 import junit.framework.TestCase;
-import net.officefloor.plugin.comet.internal.CometEvent;
-import net.officefloor.plugin.comet.internal.CometPublicationService;
+import net.officefloor.plugin.gwt.comet.internal.CometEvent;
+import net.officefloor.plugin.gwt.comet.internal.CometPublicationService;
 import net.officefloor.plugin.woof.WoofOfficeFloorSource;
 import net.officefloor.tutorial.cometmanualapp.client.ConversationMessage;
 import net.officefloor.tutorial.cometmanualapp.client.ConversationSubscription;

@@ -22,6 +22,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+import net.officefloor.eclipse.WoofPlugin;
 import net.officefloor.eclipse.common.action.Operation;
 import net.officefloor.eclipse.common.editor.AbstractOfficeFloorEditor;
 import net.officefloor.eclipse.common.editpolicies.connection.ConnectionChangeFactory;
@@ -93,6 +94,7 @@ import net.officefloor.model.woof.WoofAccessOutputModel;
 import net.officefloor.model.woof.WoofAccessOutputToWoofResourceModel;
 import net.officefloor.model.woof.WoofAccessOutputToWoofSectionInputModel;
 import net.officefloor.model.woof.WoofAccessOutputToWoofTemplateModel;
+import net.officefloor.model.woof.WoofChangeIssues;
 import net.officefloor.model.woof.WoofChanges;
 import net.officefloor.model.woof.WoofChangesImpl;
 import net.officefloor.model.woof.WoofExceptionModel;
@@ -125,10 +127,14 @@ import net.officefloor.model.woof.WoofTemplateOutputToWoofTemplateModel;
 import net.officefloor.plugin.woof.WoofContextConfigurable;
 import net.officefloor.plugin.woof.WoofOfficeFloorSource;
 
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
 import org.eclipse.draw2d.geometry.Rectangle;
 import org.eclipse.gef.EditPart;
 import org.eclipse.gef.EditPolicy;
 import org.eclipse.gef.requests.CreateConnectionRequest;
+import org.eclipse.jface.dialogs.ErrorDialog;
+import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.IEditorPart;
 
 /**
@@ -178,11 +184,36 @@ public class WoofEditor extends
 		WoofOfficeFloorSource.loadWebResourcesFromMavenProject(configurable,
 				projectDir);
 
+		// Create the WoOF change issues
+		WoofChangeIssues issues = new WoofChangeIssues() {
+
+			@Override
+			public void addIssue(String message, Throwable cause) {
+
+				// Obtain the details to display the error
+				Shell shell = WoofEditor.this.getSite().getShell();
+
+				// Create the status
+				IStatus status = new Status(IStatus.ERROR,
+						WoofPlugin.PLUGIN_ID, message, cause);
+
+				// Display the error
+				ErrorDialog dialog = new ErrorDialog(shell, "Error", message,
+						status, IStatus.ERROR);
+				dialog.open();
+			}
+
+			@Override
+			public void addIssue(String message) {
+				this.addIssue(message, null);
+			}
+		};
+
 		// Create the change context
 		ClassLoader classLoader = Thread.currentThread()
 				.getContextClassLoader();
 		WoofTemplateChangeContext context = new WoofTemplateChangeContextImpl(
-				true, classLoader, configurationContext,
+				true, classLoader, configurationContext, issues,
 				resourceSources.toArray(new ResourceSource[resourceSources
 						.size()]));
 

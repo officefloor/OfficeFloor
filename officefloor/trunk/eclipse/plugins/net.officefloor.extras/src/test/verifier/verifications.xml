@@ -47,10 +47,6 @@
 		</file>
 		<file>
 			<location>META-INF/MANIFEST.MF</location>
-			<contains><![CDATA[Bundle-ClassPath:([^:]*)officeplugin_comet-@{officeplugin_comet_version}.jar]]></contains>
-		</file>
-		<file>
-			<location>META-INF/MANIFEST.MF</location>
 			<contains><![CDATA[Bundle-ClassPath:([^:]*)officeplugin_json-@{officeplugin_json_version}.jar]]></contains>
 		</file>
 		<file>
@@ -79,10 +75,6 @@
 		<file>
 			<location>build.properties</location>
 			<contains><![CDATA[bin.includes =([^=]*)officeplugin_gwt-@{officeplugin_gwt_version}.jar]]></contains>
-		</file>
-		<file>
-			<location>build.properties</location>
-			<contains><![CDATA[bin.includes =([^=]*)officeplugin_comet-@{officeplugin_comet_version}.jar]]></contains>
 		</file>
 		<file>
 			<location>build.properties</location>

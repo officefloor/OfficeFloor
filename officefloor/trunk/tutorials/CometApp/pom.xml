@@ -23,7 +23,7 @@
 		</dependency>
 		<dependency>
 			<groupId>net.officefloor.plugin</groupId>
-			<artifactId>officeplugin_comet</artifactId>
+			<artifactId>officeplugin_gwt</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>com.google.gwt</groupId>

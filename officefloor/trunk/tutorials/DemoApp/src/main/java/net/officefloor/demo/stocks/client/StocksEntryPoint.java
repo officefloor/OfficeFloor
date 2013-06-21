@@ -18,7 +18,7 @@
 package net.officefloor.demo.stocks.client;
 
 import net.officefloor.demo.stocks.client.MockMarket.MockStock;
-import net.officefloor.plugin.comet.api.OfficeFloorComet;
+import net.officefloor.plugin.gwt.comet.api.OfficeFloorComet;
 
 import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.core.client.GWT;

@@ -17,6 +17,11 @@
 			<version>${projectVersion}</version>
 		</dependency>
 		<dependency>
+			<groupId>net.officefloor.plugin</groupId>
+			<artifactId>officeplugin_gwt</artifactId>
+			<version>${projectVersion}</version>
+		</dependency>
+		<dependency>
 			<!-- Remove if running stand alone -->
 			<groupId>net.officefloor.plugin</groupId>
 			<artifactId>officeplugin_woof_servlet</artifactId>

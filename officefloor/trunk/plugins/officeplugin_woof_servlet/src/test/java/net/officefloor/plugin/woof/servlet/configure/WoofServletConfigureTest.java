@@ -124,7 +124,7 @@ public class WoofServletConfigureTest extends OfficeFrameTestCase {
 		this.recordReturn(servletDynamic, servletDynamic.setInitParameter(
 				"officefloorservlet.application.index", "1"), true);
 		this.recordReturn(servletDynamic, servletDynamic.addMapping(
-				"/gwt/comet-subscribe", "/gwt/comet-publish", "/gwt/service",
+				"/gwt/service", "/gwt/comet-subscribe", "/gwt/comet-publish",
 				"*.woof"), new HashSet<String>(), new AbstractMatcher() {
 			@Override
 			public boolean matches(Object[] expected, Object[] actual) {
@@ -146,9 +146,8 @@ public class WoofServletConfigureTest extends OfficeFrameTestCase {
 				WoofServlet.SERVLET_NAME, WoofServlet.class), filterDynamic);
 		this.recordReturn(filterDynamic, filterDynamic.setInitParameter(
 				"officefloorservlet.application.index", "1"), true);
-		filterDynamic.addMappingForUrlPatterns(null, false,
-				"/gwt/comet-subscribe", "/gwt/comet-publish", "/gwt/service",
-				"*.woof");
+		filterDynamic.addMappingForUrlPatterns(null, false, "/gwt/service",
+				"/gwt/comet-subscribe", "/gwt/comet-publish", "*.woof");
 		this.control(filterDynamic).setMatcher(new AbstractMatcher() {
 			@Override
 			public boolean matches(Object[] expected, Object[] actual) {
@@ -172,7 +171,7 @@ public class WoofServletConfigureTest extends OfficeFrameTestCase {
 				.log("WoOF Servlet/Filter ("
 						+ WoofServlet.class.getName()
 						+ ") loaded to service "
-						+ "/gwt/comet-subscribe, /gwt/comet-publish, /gwt/service, *.woof");
+						+ "/gwt/service, /gwt/comet-subscribe, /gwt/comet-publish, *.woof");
 
 		// Test
 		this.doTest();

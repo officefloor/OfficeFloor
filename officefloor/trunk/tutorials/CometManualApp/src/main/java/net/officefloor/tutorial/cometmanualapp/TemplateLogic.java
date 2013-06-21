@@ -17,12 +17,12 @@
  */
 package net.officefloor.tutorial.cometmanualapp;
 
-import com.google.gwt.user.client.rpc.AsyncCallback;
-
-import net.officefloor.plugin.comet.internal.CometEvent;
+import net.officefloor.plugin.gwt.comet.internal.CometEvent;
 import net.officefloor.plugin.section.clazz.Parameter;
 import net.officefloor.tutorial.cometmanualapp.client.ConversationMessage;
 import net.officefloor.tutorial.cometmanualapp.client.ConversationSubscription;
+
+import com.google.gwt.user.client.rpc.AsyncCallback;
 
 /**
  * Logic for the template.

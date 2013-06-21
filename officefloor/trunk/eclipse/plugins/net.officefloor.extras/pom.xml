@@ -75,10 +75,6 @@
 		</dependency>
 		<dependency>
 			<groupId>net.officefloor.plugin</groupId>
-			<artifactId>officeplugin_comet</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>net.officefloor.plugin</groupId>
 			<artifactId>officeplugin_gwt</artifactId>
 		</dependency>
 		<dependency>

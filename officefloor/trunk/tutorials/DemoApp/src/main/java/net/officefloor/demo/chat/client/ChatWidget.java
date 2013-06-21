@@ -20,7 +20,7 @@ package net.officefloor.demo.chat.client;
 import java.util.LinkedList;
 import java.util.List;
 
-import net.officefloor.plugin.comet.api.OfficeFloorComet;
+import net.officefloor.plugin.gwt.comet.api.OfficeFloorComet;
 
 import com.google.gwt.cell.client.AbstractCell;
 import com.google.gwt.cell.client.Cell;
