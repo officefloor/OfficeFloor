@@ -24,6 +24,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import net.officefloor.autowire.AutoWire;
+import net.officefloor.autowire.AutoWireSection;
 import net.officefloor.frame.impl.construct.source.SourceContextImpl;
 import net.officefloor.frame.spi.source.SourceContext;
 import net.officefloor.frame.spi.source.SourceProperties;
@@ -33,6 +35,16 @@ import net.officefloor.model.impl.repository.memory.MemoryConfigurationContext;
 import net.officefloor.model.repository.ConfigurationContext;
 import net.officefloor.model.repository.ConfigurationItem;
 import net.officefloor.model.woof.WoofChangeIssues;
+import net.officefloor.plugin.gwt.comet.CometPublisher;
+import net.officefloor.plugin.gwt.comet.spi.CometRequestServicer;
+import net.officefloor.plugin.gwt.comet.spi.CometService;
+import net.officefloor.plugin.gwt.comet.web.http.section.CometHttpTemplateSectionExtension;
+import net.officefloor.plugin.gwt.service.ServerGwtRpcConnection;
+import net.officefloor.plugin.gwt.web.http.section.GwtHttpTemplateSectionExtension;
+import net.officefloor.plugin.web.http.application.HttpTemplateAutoWireSection;
+import net.officefloor.plugin.web.http.application.HttpTemplateAutoWireSectionExtension;
+import net.officefloor.plugin.web.http.application.HttpUriLink;
+import net.officefloor.plugin.web.http.application.WebAutoWireApplication;
 import net.officefloor.plugin.woof.template.WoofTemplateExtensionLoaderImpl;
 import net.officefloor.plugin.woof.template.WoofTemplateExtensionLoaderUtil;
 
@@ -71,7 +83,7 @@ public class GwtWoofTemplateExtensionSourceTest extends OfficeFrameTestCase {
 
 		// Create the GWT configuration
 		Change<?> change = this.doRefactor(null, null, "created",
-				gwtEntryPointClassName, null);
+				gwtEntryPointClassName, null, false);
 
 		// Validate the change
 		this.assertChange(change, null, null, gwtModulePath, "created.gwt.xml");
@@ -90,7 +102,7 @@ public class GwtWoofTemplateExtensionSourceTest extends OfficeFrameTestCase {
 
 		// Create the GWT configuration
 		Change<?> change = this.doRefactor(null, null, "created",
-				gwtEntryPointClassName, null);
+				gwtEntryPointClassName, null, false);
 
 		// Validate the change
 		this.assertChange(change, gwtModulePath, "existing.gwt.xml",
@@ -107,10 +119,26 @@ public class GwtWoofTemplateExtensionSourceTest extends OfficeFrameTestCase {
 
 		// Create the GWT configuration
 		Change<?> change = this.doRefactor(null, null, "/",
-				gwtEntryPointClassName, null);
+				gwtEntryPointClassName, null, false);
 
 		// Validate the change
 		this.assertChange(change, null, null, gwtModulePath, "root.gwt.xml");
+	}
+
+	/**
+	 * Ensure may extend with comet.
+	 */
+	public void testRefactor_Comet() throws Exception {
+
+		final String gwtModulePath = "net/officefloor/Comet.gwt.xml";
+		final String gwtEntryPointClassName = "net.officefloor.client.Created";
+
+		// Create the GWT configuration
+		Change<?> change = this.doRefactor(null, null, "Comet",
+				gwtEntryPointClassName, null, true);
+
+		// Validate the change
+		this.assertChange(change, null, null, gwtModulePath, "comet.gwt.xml");
 	}
 
 	/**
@@ -129,7 +157,7 @@ public class GwtWoofTemplateExtensionSourceTest extends OfficeFrameTestCase {
 		// Create the GWT configuration
 		Change<?> change = this.doRefactor("updated",
 				existingEntryPointClassName, "updated",
-				updatedEntryPointClassName, null);
+				updatedEntryPointClassName, null, false);
 
 		// Validate the change
 		this.assertChange(change, gwtModulePath, "existing.gwt.xml",
@@ -152,7 +180,7 @@ public class GwtWoofTemplateExtensionSourceTest extends OfficeFrameTestCase {
 		// Create the GWT configuration
 		Change<?> change = this.doRefactor("existing",
 				existingEntryPointClassName, "updated",
-				updatedEntryPointClassName, null);
+				updatedEntryPointClassName, null, false);
 
 		// Validate the change
 		this.assertChange(change, existingGwtModulePath, "existing.gwt.xml",
@@ -172,7 +200,7 @@ public class GwtWoofTemplateExtensionSourceTest extends OfficeFrameTestCase {
 
 		// Create the GWT configuration
 		Change<?> change = this.doRefactor("existing", gwtEntryPointClassName,
-				null, null, null);
+				null, null, null, false);
 
 		// Validate the no change as just leave GWT Module to reuse
 		assertNull("Should not have change for delete", change);
@@ -205,9 +233,9 @@ public class GwtWoofTemplateExtensionSourceTest extends OfficeFrameTestCase {
 
 		// Create the properties
 		SourceProperties oldProperties = createSourceProperties(
-				"net.officefloor.client.Existing", null);
+				"net.officefloor.client.Existing", null, false);
 		SourceProperties newProperties = createSourceProperties(
-				"net.officefloor.client.Failure", null);
+				"net.officefloor.client.Failure", null, false);
 
 		// Create the source context
 		SourceContext sourceContext = new SourceContextImpl(false, classLoader);
@@ -230,6 +258,113 @@ public class GwtWoofTemplateExtensionSourceTest extends OfficeFrameTestCase {
 	}
 
 	/**
+	 * Ensure can extend with GWT.
+	 */
+	public void testExtend_Gwt() throws Exception {
+
+		final HttpTemplateAutoWireSection template = this
+				.createMock(HttpTemplateAutoWireSection.class);
+		final WebAutoWireApplication application = this
+				.createMock(WebAutoWireApplication.class);
+
+		// Record the GWT configuration
+		this.recordGwtHttpTemplateSectionExtension("uri", template, application);
+
+		// Ensure can extend template with GWT
+		this.replayMockObjects();
+		WoofTemplateExtensionLoaderUtil
+				.extendTemplate(
+						GwtWoofTemplateExtensionSource.class,
+						template,
+						application,
+						GwtWoofTemplateExtensionSource.PROPERTY_GWT_ENTRY_POINT_CLASS_NAME,
+						"net.officefloor.client.Test");
+		this.verifyMockObjects();
+	}
+
+	/**
+	 * Ensure can extend with GWT and Comet.
+	 */
+	public void testExtend_GwtAndComet() throws Exception {
+
+		final HttpTemplateAutoWireSection template = this
+				.createMock(HttpTemplateAutoWireSection.class);
+		final WebAutoWireApplication application = this
+				.createMock(WebAutoWireApplication.class);
+		final HttpTemplateAutoWireSectionExtension extension = this
+				.createMock(HttpTemplateAutoWireSectionExtension.class);
+		final AutoWireSection section = this.createMock(AutoWireSection.class);
+		final HttpUriLink link = this.createMock(HttpUriLink.class);
+
+		// Record the GWT configuration
+		this.recordGwtHttpTemplateSectionExtension("uri", template, application);
+
+		// Record the Comet configuration
+		this.recordReturn(template, template
+				.addTemplateExtension(CometHttpTemplateSectionExtension.class),
+				extension);
+		this.recordReturn(
+				application,
+				application.isObjectAvailable(new AutoWire(CometService.class)),
+				true);
+		this.recordReturn(application, application
+				.isObjectAvailable(new AutoWire(CometRequestServicer.class)),
+				true);
+		this.recordReturn(application, application
+				.isObjectAvailable(new AutoWire(CometPublisher.class)), true);
+		this.recordReturn(application, application.getSection("COMET"), section);
+		this.recordReturn(template, template.getTemplateUri(), "uri");
+		this.recordReturn(application, application.linkUri(
+				"uri/comet-subscribe", section, "SUBSCRIBE"), link);
+		this.recordReturn(application,
+				application.linkUri("uri/comet-publish", section, "PUBLISH"),
+				link);
+		this.recordReturn(template, template.getTemplateLogicClass(),
+				Object.class);
+
+		// Ensure can extend template with Comet
+		this.replayMockObjects();
+		WoofTemplateExtensionLoaderUtil
+				.extendTemplate(
+						GwtWoofTemplateExtensionSource.class,
+						template,
+						application,
+						GwtWoofTemplateExtensionSource.PROPERTY_GWT_ENTRY_POINT_CLASS_NAME,
+						"net.officefloor.client.Test",
+						GwtWoofTemplateExtensionSource.PROPERTY_ENABLE_COMET,
+						String.valueOf(true));
+		this.verifyMockObjects();
+	}
+
+	/**
+	 * Records adding the {@link GwtHttpTemplateSectionExtension}.
+	 * 
+	 * @param uri
+	 *            Template URI.
+	 * @param template
+	 *            Mock {@link HttpTemplateAutoWireSection}.
+	 * @param application
+	 *            Mock {@link WebAutoWireApplication}.
+	 */
+	private void recordGwtHttpTemplateSectionExtension(String uri,
+			HttpTemplateAutoWireSection template,
+			WebAutoWireApplication application) {
+
+		final HttpTemplateAutoWireSectionExtension extension = this
+				.createMock(HttpTemplateAutoWireSectionExtension.class);
+
+		// Record configuring the GWT extension
+		this.recordReturn(template, template.getTemplateUri(), "uri");
+		this.recordReturn(application, application
+				.isObjectAvailable(new AutoWire(ServerGwtRpcConnection.class)),
+				true);
+		this.recordReturn(template, template
+				.addTemplateExtension(GwtHttpTemplateSectionExtension.class),
+				extension);
+		extension.addProperty("template.uri", "uri");
+	}
+
+	/**
 	 * Undertakes the refactor.
 	 * 
 	 * @param oldUri
@@ -242,11 +377,14 @@ public class GwtWoofTemplateExtensionSourceTest extends OfficeFrameTestCase {
 	 *            New GWT {@link EntryPoint} class name.
 	 * @param newAsyncServiceInterfaces
 	 *            New Async Service Interfaces.
+	 * @param isEnableComet
+	 *            Indicates if enable Comet.
 	 * @return {@link Change}.
 	 */
 	private Change<?> doRefactor(String oldUri,
 			String oldGwtEntryPointClassName, String newUri,
-			String newGwtEntryPointClassName, String newAsyncServiceInterfaces) {
+			String newGwtEntryPointClassName, String newAsyncServiceInterfaces,
+			boolean isEnableComet) {
 
 		// Obtain the class loader
 		ClassLoader classLoader = Thread.currentThread()
@@ -254,9 +392,10 @@ public class GwtWoofTemplateExtensionSourceTest extends OfficeFrameTestCase {
 
 		// Create the properties
 		SourceProperties oldProperties = createSourceProperties(
-				oldGwtEntryPointClassName, null);
+				oldGwtEntryPointClassName, null, false);
 		SourceProperties newProperties = createSourceProperties(
-				newGwtEntryPointClassName, newAsyncServiceInterfaces);
+				newGwtEntryPointClassName, newAsyncServiceInterfaces,
+				isEnableComet);
 
 		// Undertake the refactor
 		Change<?> change = WoofTemplateExtensionLoaderUtil
@@ -276,10 +415,13 @@ public class GwtWoofTemplateExtensionSourceTest extends OfficeFrameTestCase {
 	 *            GWT {@link EntryPoint} class name.
 	 * @param gwtAsyncServiceInterfaces
 	 *            GWT async service interfaces.
+	 * @param isEnableComet
+	 *            Indicates if enable Comet.
 	 * @return {@link SourceProperties}.
 	 */
 	private static SourceProperties createSourceProperties(
-			String gwtEntryPointClassName, String gwtAsyncServiceInterfaces) {
+			String gwtEntryPointClassName, String gwtAsyncServiceInterfaces,
+			boolean isEnableComet) {
 
 		// Create the properties
 		List<String> propertyNameValues = new ArrayList<String>(4);
@@ -294,6 +436,11 @@ public class GwtWoofTemplateExtensionSourceTest extends OfficeFrameTestCase {
 					.addAll(Arrays
 							.asList(GwtWoofTemplateExtensionSource.PROPERTY_GWT_ASYNC_SERVICE_INTERFACES,
 									gwtAsyncServiceInterfaces));
+		}
+		if (isEnableComet) {
+			propertyNameValues.addAll(Arrays.asList(
+					GwtWoofTemplateExtensionSource.PROPERTY_ENABLE_COMET,
+					String.valueOf(isEnableComet)));
 		}
 
 		// Create and return the source properties
