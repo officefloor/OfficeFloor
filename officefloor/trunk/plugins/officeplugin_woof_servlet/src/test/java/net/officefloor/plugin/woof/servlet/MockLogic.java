@@ -17,8 +17,8 @@
  */
 package net.officefloor.plugin.woof.servlet;
 
-import net.officefloor.plugin.comet.CometPublisherInterface;
-import net.officefloor.plugin.comet.api.CometSubscriber;
+import net.officefloor.plugin.gwt.comet.CometPublisherInterface;
+import net.officefloor.plugin.gwt.comet.api.CometSubscriber;
 import net.officefloor.plugin.section.clazz.Parameter;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;

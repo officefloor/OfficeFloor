@@ -31,11 +31,11 @@ import com.gdevelop.gwt.syncrpc.SyncProxy;
 
 import net.officefloor.autowire.AutoWire;
 import net.officefloor.frame.test.OfficeFrameTestCase;
-import net.officefloor.plugin.comet.internal.CometEvent;
-import net.officefloor.plugin.comet.internal.CometInterest;
-import net.officefloor.plugin.comet.internal.CometRequest;
-import net.officefloor.plugin.comet.internal.CometResponse;
-import net.officefloor.plugin.comet.internal.CometSubscriptionService;
+import net.officefloor.plugin.gwt.comet.internal.CometEvent;
+import net.officefloor.plugin.gwt.comet.internal.CometInterest;
+import net.officefloor.plugin.gwt.comet.internal.CometRequest;
+import net.officefloor.plugin.gwt.comet.internal.CometResponse;
+import net.officefloor.plugin.gwt.comet.internal.CometSubscriptionService;
 import net.officefloor.plugin.woof.WoofApplicationExtensionService;
 import net.officefloor.plugin.woof.servlet.MockDependency;
 import net.officefloor.plugin.woof.servlet.WoofServlet;
