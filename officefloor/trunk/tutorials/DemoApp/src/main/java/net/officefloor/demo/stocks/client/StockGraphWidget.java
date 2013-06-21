@@ -21,7 +21,7 @@ import java.util.Arrays;
 import java.util.Comparator;
 import java.util.Date;
 
-import net.officefloor.plugin.comet.api.OfficeFloorComet;
+import net.officefloor.plugin.gwt.comet.api.OfficeFloorComet;
 
 import com.google.gwt.event.logical.shared.SelectionEvent;
 import com.google.gwt.event.logical.shared.SelectionHandler;

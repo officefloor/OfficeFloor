@@ -7,7 +7,7 @@
 	<!-- * entry-point should it be changed in the WoOF editor -->
 	<inherits name="com.google.gwt.user.User"/>
 	<inherits name="com.google.gwt.user.theme.standard.Standard"/>
-<inherits name="net.officefloor.plugin.comet.OfficeFloorComet"/>
+<inherits name="net.officefloor.plugin.gwt.comet.OfficeFloorComet"/>
 <entry-point class="net.officefloor.demo.chat.client.ChatEntryPoint"/>
 <source path="client"/>
 </module>

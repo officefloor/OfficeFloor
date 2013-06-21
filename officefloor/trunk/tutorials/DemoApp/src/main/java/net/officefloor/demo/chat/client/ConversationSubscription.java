@@ -17,7 +17,8 @@
  */
 package net.officefloor.demo.chat.client;
 
-import net.officefloor.plugin.comet.api.CometSubscriber;
+import net.officefloor.plugin.gwt.comet.api.CometSubscriber;
+
 
 /**
  * {@link CometSubscriber} for a conversation.

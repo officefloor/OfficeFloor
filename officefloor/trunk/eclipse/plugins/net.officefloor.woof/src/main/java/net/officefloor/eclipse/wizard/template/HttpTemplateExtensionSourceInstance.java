@@ -35,6 +35,7 @@ import net.officefloor.frame.spi.source.SourceProperties;
 import net.officefloor.model.change.Change;
 import net.officefloor.model.change.Conflict;
 import net.officefloor.model.repository.ConfigurationContext;
+import net.officefloor.model.woof.WoofChangeIssues;
 import net.officefloor.plugin.woof.template.WoofTemplateExtensionLoader;
 import net.officefloor.plugin.woof.template.WoofTemplateExtensionLoaderImpl;
 import net.officefloor.plugin.woof.template.WoofTemplateExtensionSource;
@@ -199,7 +200,7 @@ public class HttpTemplateExtensionSourceInstance {
 	 */
 	public void validateChange(String oldUri, PropertyList oldProperties,
 			String newUri, PropertyList newProperties,
-			ResourceSource[] resourceSources, CompilerIssues issues) {
+			ResourceSource[] resourceSources, final CompilerIssues issues) {
 
 		// Create the configuration context
 		ConfigurationContext configurationContext = new ProjectConfigurationContext(
@@ -225,12 +226,26 @@ public class HttpTemplateExtensionSourceInstance {
 					newProperties);
 		}
 
+		// Report issues to compiler
+		WoofChangeIssues changeIssues = new WoofChangeIssues() {
+
+			@Override
+			public void addIssue(String message, Throwable cause) {
+				issues.addIssue(null, null, null, null, message, cause);
+			}
+
+			@Override
+			public void addIssue(String message) {
+				issues.addIssue(null, null, null, null, message);
+			}
+		};
+
 		// Load the possible change
 		WoofTemplateExtensionLoader loader = new WoofTemplateExtensionLoaderImpl();
 		Change<?> change = loader.refactorTemplateExtension(
 				this.woofTemplateExtensionSourceClassName, oldUri,
 				oldSourceProperties, newUri, newSourceProperties,
-				configurationContext, sourceContext);
+				configurationContext, sourceContext, changeIssues);
 
 		// Determine if issue
 		if (change != null) {

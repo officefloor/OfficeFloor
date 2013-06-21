@@ -13,15 +13,17 @@
     <template name="chat" uri="chat" path="chat.woof.html" class="net.officefloor.demo.chat.ChatLogic" x="186" y="62">
       <output name="output" argument-type="">
       </output>
-      <extension class="net.officefloor.plugin.woof.gwt.GwtWoofTemplateExtensionSource">
-        <property name="gwt.module.path" value="net/officefloor/demo/chat/chat.gwt.xml"/>
+      <extension class="net.officefloor.plugin.gwt.woof.GwtWoofTemplateExtensionSource">
+        <property name="gwt.entry.point.class.name" value="net.officefloor.demo.chat.client.ChatEntryPoint"/>
+        <property name="gwt.comet.enable" value="TRUE"/>
       </extension>
     </template>
     <template name="stocks" uri="stocks" path="stocks.woof.html" class="net.officefloor.demo.stocks.StocksLogic" x="188" y="138">
       <output name="output" argument-type="">
       </output>
-      <extension class="net.officefloor.plugin.woof.gwt.GwtWoofTemplateExtensionSource">
-        <property name="gwt.module.path" value="net/officefloor/demo/stocks/stocks.gwt.xml"/>
+      <extension class="net.officefloor.plugin.gwt.woof.GwtWoofTemplateExtensionSource">
+        <property name="gwt.entry.point.class.name" value="net.officefloor.demo.stocks.client.StocksEntryPoint"/>
+        <property name="gwt.comet.enable" value="TRUE"/>
       </extension>
     </template>
   </templates>

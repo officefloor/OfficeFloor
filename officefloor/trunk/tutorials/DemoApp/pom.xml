@@ -22,6 +22,10 @@
 			<artifactId>officeplugin_woof_servlet</artifactId>
 		</dependency>
 		<dependency>
+			<groupId>net.officefloor.plugin</groupId>
+			<artifactId>officeplugin_gwt</artifactId>
+		</dependency>
+		<dependency>
 			<groupId>org.eclipse.jetty</groupId>
 			<artifactId>jetty-webapp</artifactId>
 			<scope>provided</scope>

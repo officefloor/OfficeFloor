@@ -8,7 +8,7 @@
 	<inherits name="com.google.gwt.user.User"/>
 	<inherits name="com.google.gwt.user.theme.standard.Standard"/>
 	<inherits name="com.google.gwt.visualization.Visualization"/>
-<inherits name="net.officefloor.plugin.comet.OfficeFloorComet"/>
+<inherits name="net.officefloor.plugin.gwt.comet.OfficeFloorComet"/>
 <entry-point class="net.officefloor.demo.stocks.client.StocksEntryPoint"/>
 <source path="client"/>
 </module>

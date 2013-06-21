@@ -21,6 +21,10 @@
 			<groupId>net.officefloor.plugin</groupId>
 			<artifactId>officeplugin_woof</artifactId>
 		</dependency>
+		<dependency>
+			<groupId>net.officefloor.plugin</groupId>
+			<artifactId>officeplugin_gwt</artifactId>
+		</dependency>
 		<!-- START SNIPPET: GwtDependency -->
 		<dependency>
 			<groupId>com.google.gwt</groupId>

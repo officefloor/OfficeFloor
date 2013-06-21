@@ -17,7 +17,7 @@
  */
 package net.officefloor.tutorial.cometapp.client;
 
-import net.officefloor.plugin.comet.api.OfficeFloorComet;
+import net.officefloor.plugin.gwt.comet.api.OfficeFloorComet;
 
 import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.event.dom.client.ClickEvent;
