@@ -5,7 +5,7 @@
 		<href>http://www.officefloor.net/</href>
 	</bannerLeft>
 	<body>
-		<menu name="WoOF">
+		<menu name="WoOF (Web on OfficeFloor)">
 			<item name="My First WoOF app" href="../maven/woof-archetype/index.html" />
 			<item name="Wireframe Prototyping" href="./PrototypeHttpServer/index.html" />
 			<item name="Dynamic web page" href="./DynamicHttpServer/index.html" />
@@ -16,15 +16,14 @@
 			<item name="Generating HTML" href="./RawHttpServer/index.html" />
 			<item name="Sectioning" href="./SectionHttpServer/index.html" />
 			<item name="Template Inheritance" href="./InheritHttpServer/index.html" />
-			<item name="JavaScript" href="./JavaScriptApp/index.html" />
-			<item name="GWT" href="./GwtApp/index.html" />
-			<item name="GWT AJAX" href="./GwtService/index.html" />
-			<item name="Comet" href="./CometApp/index.html" />
-			<item name="Server Events" href="./CometManualApp/index.html" />
 			<item name="Secure Page" href="./SecurePageHttpServer/index.html" />
 			<item name="Secure Link" href="./SecureLinkHttpServer/index.html" />
 			<item name="Authentication" href="./AuthenticationHttpServer/index.html" />
 			<item name="Test" href="./TestHttpServer/index.html" />
+		</menu>
+		<menu name="WoOF Extensions">
+			<item name="AJAX / JSON" href="./JavaScriptApp/index.html" />
+			<item name="GWT" href="./GwtApp/tutorials.html" />
 		</menu>
 		<menu name="Inversion of Control">
 			<item name="Dependency Injection" href="./DatabaseHttpServer/index.html" />
