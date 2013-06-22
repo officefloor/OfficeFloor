@@ -8,7 +8,7 @@
   
   Once you have installed the {{{../install.html}OfficeFloor Eclipse plug-ins}} (by dragging the bottom left install icon to your Eclipse IDE) you have the tools ready for the below tutorials.
   
-  The tutorials are ordered so that each builds on the knowledge of the previous tutorials.  It is therefore best to work though them in order.  Please however feel free to jump between them to get a feel for OfficeFloor.
+  The tutorials are ordered so that each builds on the knowledge of the previous tutorials.  It is therefore best to work though them in order.
 
 
   
@@ -16,7 +16,7 @@ WoOF
 
   The following tutorials cover developing OfficeFloor (WoOF) web applications.
 
-  The acronym <WoOF> standards for <Web on OfficeFloor>.  It is a set of prefabricated plug-ins for OfficeFloor that enables OfficeFloor to work as a high performance Web Application Server.  As you become more familiar with OfficeFloor, you will realise OfficeFloor is a very light weight and versatile plugin application framework that provides {{{../mission.html}open integration of software}}.
+  The acronym <WoOF> standards for <Web on OfficeFloor>.  It is a set of prefabricated plug-ins for OfficeFloor that enables OfficeFloor to work as a high performance Web Application Server.  As you become more familiar with OfficeFloor, you will realise OfficeFloor is a very light weight and versatile plug-in application framework that provides {{{../mission.html}open integration of software}}.
 
 *--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
 || Tutorial                                                    || Description                                               || Covered
@@ -37,19 +37,9 @@ WoOF
 *--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
 | {{{./RawHttpServer/index.html}Generating HTML}}              | Render generated HTML.                                     | @UnescapedHtml
 *--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
-| {{{./SectionHttpServer/index.html}Sectioning content}}       | Sectionally rendering content.                             | \<!-- \{section\} --\>
+| {{{./SectionHttpServer/index.html}Sectioning content}}       | Sectional rendering content.                             | \<!-- \{section\} --\>
 *--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
 | {{{./InheritHttpServer/index.html}Template Inheritance}}     | Inheriting sectioned content.                              | \<!-- \{:override\} --\> , \<!-- \{!\} --\> 
-*--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
-| {{{./JavaScriptApp/index.html}JavaScript}}                   | Using JavaScript, AJAX, JSON.                              | @NotRenderTemplateAfter, @HttpJson, JsonResponseWriter 
-*--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
-| {{{./GwtApp/index.html}GWT}}                                 | Easy configuration of GWT to generate JavaScript within the page | EntryPoint
-*--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
-| {{{./GwtService/index.html}AJAX via GWT RPC}}                | Provides easy implementation of both AJAX functionality within the page and servicing by the server | Service Async Interface
-*--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
-| {{{./CometApp/index.html}Comet}}                             | Shows the ease of using Comet (AJAX push, reverse AJAX) with WoOF | OfficeFloorComet
-*--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
-| {{{./CometManualApp/index.html}Server events}}               | Demonstrates the ease of publishing events                 | @Comet
 *--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
 | {{{./SecurePageHttpServer/index.html}Secure Page}}           | Shows the ease of securing a page                          | Template Secure
 *--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
@@ -60,11 +50,22 @@ WoOF
 | {{{./TestHttpServer/index.html}Test}}                        | Testing the application                                    | Unit/System/Integration testing
 *--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
 
+* WoOF Template Extensions
+
+  The following {{{/apidocs/net/officefloor/plugin/woof/template/WoofTemplateExtensionSource.html}WoofTemplateExtensionSource}} implementations are available to extend the functionality of WoOF.
+
+*--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
+|| Tutorial                                                    || Description                                               || Covered
+*--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
+| {{{./JavaScriptApp/index.html}AJAX / JSON}}                  | Service AJAX requests and JSON payloads.                   | @NotRenderTemplateAfter, @HttpJson, JsonResponseWriter 
+*--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
+| {{{./GwtApp/tutorials.html}GWT}}                             | Use GWT                                                    | GWT
+*--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
 
 
 Inversion of Control
 
-  The previous tutorials have covered the built in dependency objects for WoOF.  They have also covered Continuation Injection and Operation Orchestration.
+  The previous tutorials have covered the built in dependency objects for WoOF.  They have also covered Continuation Injection and Component Orchestration.
   
   The following tutorials focus on extending the web application's functionality by using further inversion of control features of OfficeFloor.
   
@@ -82,12 +83,12 @@ Inversion of Control
 
 Extend OfficeFloor
 
-  OfficeFloor is a plugin application framework that is highly extensible.  For example, the WoOF functionality is provided by plugins (extensions) to OfficeFloor.  The following tutorial covers creating an example extension for OfficeFloor.
+  OfficeFloor is a plug-in application framework that is highly extensible.  For example, the WoOF functionality is provided by plug-ins (extensions) to OfficeFloor.  The following tutorial covers creating an example extension for OfficeFloor.
 
 *--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
 || Tutorial                                                    || Description                                               || Covered
 *--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
-| {{{../plugins/officeplugin_jpa/tutorial.html}Extend OfficeFloor}} | Shows the ease of extending OfficeFloor / WoOF with your own plugins | <<<Extension>>>Source
+| {{{../plugins/officeplugin_jpa/tutorial.html}Extend OfficeFloor}} | Shows the ease of extending OfficeFloor / WoOF with your own plug-ins | <<<Extension>>>Source
 *--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
 
 
@@ -107,7 +108,7 @@ WoOF and a JEE Servlet Container
 *----------------------------------------------------------+-----------------------------------------------------------+------------------------------+
 | {{{./WoofServletMigration/index.html}Embedding Servlet Container within WoOF}}  | Embedding Servlet functionality within WoOF. | ServletContainerWoofApplicationExtensionService
 *----------------------------------------------------------+-----------------------------------------------------------+------------------------------+
-| {{{./WoofServletMigration/migrate.html}Migrate JEE Servlet application to run in OfficeFloor}}  | Migrating an exsting JEE Servlet application to run within OfficeFloor as a WoOF application. |
+| {{{./WoofServletMigration/migrate.html}Migrate JEE Servlet application to run in OfficeFloor}}  | Migrating an existing JEE Servlet application to run within OfficeFloor as a WoOF application. |
 *----------------------------------------------------------+-----------------------------------------------------------+------------------------------+
 
 

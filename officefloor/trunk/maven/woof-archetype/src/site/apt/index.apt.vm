@@ -29,14 +29,14 @@ Creating the WoOF project
   The create a WoOF project use the Maven WoOF archetype.  Run the following within an empty directory:
 
 +-----------------------------------------+
-    mvn archetype:generate -Dfilter=${projectGroupId}:${projectArtifactId}
+    mvn archetype:generate -DarchetypeGroupId=${projectGroupId} -DarchetypeArtifactId=${projectArtifactId}
 +-----------------------------------------+
 
-  Select <<<${projectGroupId}:${projectArtifactId}>>> and provide the Maven configuration parameters.  The tutorial uses the following parameters:
+  Select <<<${projectGroupId}:${projectArtifactId}>>> (if not already selected) and provide the Maven configuration parameters.  The tutorial uses the following parameters:
 
 %{code-snippet|brush=text|file=${basedir}/src/test/resources/projects/woof/archetype.properties}
   
-  Once complete there should now be a directory created by the artifact id.
+  Once complete there should now be a directory created by the name of the artifactId.
   
   Change into the created directory and run the following to build the project:
   
@@ -54,7 +54,7 @@ Running the WoOF project from Maven
     mvn woof:run
 +-----------------------------------------+
 
-  The application will now be available at: <<<http://localhost:7878/static.woof>>>  (and look as follows)
+  The application will now be available at <<<http://localhost:7878/static.woof>>>  and look as follows:
   
 [./images/woof-archetype-static-screenshot.png] WoOF Archetype Static Page Screen Shot
   
@@ -85,13 +85,13 @@ Running the WoOF project within a JEE container
 
 Importing the WoOF project into Eclipse
 
-  Open Eclispe and import the created directory as an existing Maven project.
+  Open Eclipse and import the created directory as an existing Maven project.
   
   Using the above configuration the following should be the project structure within Eclipse.
   
 [./images/woof-project-structure.png] WoOF Project Structure
 
-  For those familar with Maven web projects this should be a very familiar structure:
+  For those familiar with Maven web projects this should be a very familiar structure:
   
    * <<<src/main/java>>> : contains the java code
    
@@ -121,10 +121,7 @@ Running the WoOF project from within Eclipse
 
   To run the WoOF project from within Eclipse, right click on the <<<application.woof>>> file as <<<Run as... WoOF>>>.
   
-  This will bring up the GWT development console and have your application running.  Use the console to open the web page to the URI of interest.
-  
-  The reason for running through the GWT development console is to allow development mode for the potential GWT code of the application.  This allows debugging of both client and server side code.
-
+  This will bring up the development console and have your application running.  Use the console to open the web page to the URI of interest.
 
 
 WoOF graphical configuration
