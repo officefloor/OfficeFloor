@@ -21,9 +21,11 @@ import net.officefloor.compile.impl.util.CompileUtil;
 import net.officefloor.frame.spi.source.SourceProperties;
 import net.officefloor.model.change.Change;
 import net.officefloor.model.gwt.module.GwtModuleModel;
+import net.officefloor.model.impl.change.NoChange;
 import net.officefloor.model.impl.repository.ModelRepositoryImpl;
 import net.officefloor.model.repository.ConfigurationContext;
 import net.officefloor.model.woof.WoofChangeIssues;
+import net.officefloor.model.woof.WoofTemplateExtensionModel;
 import net.officefloor.plugin.gwt.comet.web.http.section.CometHttpTemplateSectionExtension;
 import net.officefloor.plugin.gwt.module.GwtChanges;
 import net.officefloor.plugin.gwt.module.GwtChangesImpl;
@@ -65,6 +67,11 @@ public class GwtWoofTemplateExtensionSource extends
 	public static String PROPERTY_ENABLE_COMET = "gwt.comet.enable";
 
 	/**
+	 * Name of the property for the Comet Manual publish method name.
+	 */
+	public static String PROPERTY_COMET_MANUAL_PUBLISH_METHOD_NAME = CometHttpTemplateSectionExtension.PROPERTY_MANUAL_PUBLISH_METHOD_NAME;
+
+	/**
 	 * Prefix on the {@link GwtModule} path to identify it within the
 	 * {@link ConfigurationContext}.
 	 */
@@ -101,12 +108,15 @@ public class GwtWoofTemplateExtensionSource extends
 	 * 
 	 * @param configuration
 	 *            {@link WoofTemplateExtensionConfiguration}.
+	 * @param issue
+	 *            {@link GwtModuleIssue}.
 	 * @param inherit
 	 *            Inherit GWT Modules for {@link GwtModuleModel}.
 	 * @return {@link GwtModuleModel}.
 	 */
 	private static GwtModuleModel createGetModule(
-			WoofTemplateExtensionConfiguration configuration, String... inherit) {
+			WoofTemplateExtensionConfiguration configuration,
+			GwtModuleIssue issue, String... inherit) {
 
 		// No path if no configuration
 		if (configuration == null) {
@@ -118,9 +128,17 @@ public class GwtWoofTemplateExtensionSource extends
 		String entryPointClassName = configuration.getProperty(
 				PROPERTY_GWT_ENTRY_POINT_CLASS_NAME, null);
 
-		// Ensure have both URI and Entry Point class
-		if ((CompileUtil.isBlank(uri))
-				|| (CompileUtil.isBlank(entryPointClassName))) {
+		// Ensure have URI
+		if (CompileUtil.isBlank(uri)) {
+			issue.message = "Must specify template URI for use by extension "
+					+ GwtWoofTemplateExtensionSource.class.getName();
+			return null;
+		}
+
+		// Ensure have EntryPoint class
+		if (CompileUtil.isBlank(entryPointClassName)) {
+			issue.message = "Must specify EntryPoint class for extension "
+					+ GwtWoofTemplateExtensionSource.class.getName();
 			return null;
 		}
 
@@ -130,6 +148,17 @@ public class GwtWoofTemplateExtensionSource extends
 
 		// Return the GWT Module
 		return module;
+	}
+
+	/**
+	 * Issue in creating the {@link GwtModuleModel}.
+	 */
+	private static class GwtModuleIssue {
+
+		/**
+		 * Issue message.
+		 */
+		private String message = null;
 	}
 
 	/**
@@ -146,8 +175,9 @@ public class GwtWoofTemplateExtensionSource extends
 			WoofTemplateExtensionConfiguration configuration,
 			GwtModuleRepository gwtRepository) {
 
-		// Obtain the GWT Module
-		GwtModuleModel module = createGetModule(configuration);
+		// Obtain the GWT Module (ignoring issues)
+		GwtModuleModel module = createGetModule(configuration,
+				new GwtModuleIssue());
 		if (module == null) {
 			return null; // No module, so no path
 		}
@@ -216,7 +246,14 @@ public class GwtWoofTemplateExtensionSource extends
 				configurationContext, listener);
 
 		// Create the module
-		GwtModuleModel gwtModule = createGetModule(newConfiguration);
+		GwtModuleIssue issue = new GwtModuleIssue();
+		GwtModuleModel gwtModule = createGetModule(newConfiguration, issue);
+		if (gwtModule == null) {
+			// Indicate no change as can not configure GWT Module
+			return new NoChange<WoofTemplateExtensionModel>(
+					new WoofTemplateExtensionModel(this.getClass().getName()),
+					"Refactor " + this.getClass().getName(), issue.message);
+		}
 
 		// Determine if enhance with Comet
 		if (isCometEnabled(newConfiguration)) {

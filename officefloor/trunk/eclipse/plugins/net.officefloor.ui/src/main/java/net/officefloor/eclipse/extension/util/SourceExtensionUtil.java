@@ -181,7 +181,7 @@ public class SourceExtensionUtil {
 	 *            {@link PropertyValueChangeListener}. May be <code>null</code>.
 	 * @return {@link Property} for the {@link Text}.
 	 */
-	private static Property createPropertyClass(String label, String name,
+	protected static Property createPropertyClass(String label, String name,
 			Composite container, final GenericSourceExtensionContext context,
 			final PropertyValueChangeListener listener) {
 
@@ -282,7 +282,7 @@ public class SourceExtensionUtil {
 	 *            {@link PropertyValueChangeListener}. May be <code>null</code>.
 	 * @return {@link Property} for the {@link Text}.
 	 */
-	private static Property createPropertyResource(String label, String name,
+	protected static Property createPropertyResource(String label, String name,
 			Composite container, final GenericSourceExtensionContext context,
 			final PropertyValueChangeListener listener) {
 
@@ -416,7 +416,7 @@ public class SourceExtensionUtil {
 	 *            {@link PropertyValueChangeListener}. May be <code>null</code>.
 	 * @return {@link Property} for the {@link Text}.
 	 */
-	private static Property createPropertyText(String label, String name,
+	protected static Property createPropertyText(String label, String name,
 			String defaultValue, Composite container,
 			final GenericSourceExtensionContext context,
 			final PropertyValueChangeListener listener) {
@@ -530,7 +530,7 @@ public class SourceExtensionUtil {
 	 * @param hidePropertyNames
 	 *            {@link Property} names to hide.
 	 */
-	private static void createPropertyList(String label, Composite container,
+	protected static void createPropertyList(String label, Composite container,
 			final GenericSourceExtensionContext context,
 			String... hidePropertyNames) {
 
@@ -663,7 +663,7 @@ public class SourceExtensionUtil {
 	 *            {@link PropertyValueChangeListener}. May be <code>null</code>.
 	 * @return {@link Property} for the {@link SWT#CHECK} {@link Button}.
 	 */
-	private static Property createPropertyCheckbox(String label, String name,
+	protected static Property createPropertyCheckbox(String label, String name,
 			boolean defaultValue, final String trueValue,
 			final String falseValue, Composite container,
 			final GenericSourceExtensionContext context,
@@ -754,7 +754,7 @@ public class SourceExtensionUtil {
 	 *            {@link PropertyValueChangeListener}. May be <code>null</code>.
 	 * @return {@link Property} for the {@link SWT#CHECK} {@link Button}.
 	 */
-	private static Property createPropertyCombo(String label, String name,
+	protected static Property createPropertyCombo(String label, String name,
 			String defaultValue, String[] values, Composite container,
 			final GenericSourceExtensionContext context,
 			final PropertyValueChangeListener listener) {
@@ -798,7 +798,7 @@ public class SourceExtensionUtil {
 	/**
 	 * All access via static methods.
 	 */
-	private SourceExtensionUtil() {
+	protected SourceExtensionUtil() {
 	}
 
 	/**
@@ -835,7 +835,7 @@ public class SourceExtensionUtil {
 	/**
 	 * Generic source extension context.
 	 */
-	private static interface GenericSourceExtensionContext {
+	protected static interface GenericSourceExtensionContext {
 
 		/**
 		 * Obtains the {@link IProject}.

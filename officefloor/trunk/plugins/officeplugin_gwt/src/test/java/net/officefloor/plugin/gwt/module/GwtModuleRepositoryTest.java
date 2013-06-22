@@ -23,6 +23,8 @@ import java.io.InputStreamReader;
 import java.io.Reader;
 import java.io.StringWriter;
 
+import com.google.gwt.core.client.EntryPoint;
+
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.model.gwt.module.GwtModuleModel;
 import net.officefloor.model.impl.repository.ModelRepositoryImpl;
@@ -54,6 +56,29 @@ public class GwtModuleRepositoryTest extends OfficeFrameTestCase {
 		String gwtModulePath = this.repository.createGwtModulePath(module);
 		assertEquals("Incorrect GWT Module path",
 				"net/example/template.gwt.xml", gwtModulePath);
+	}
+
+	/**
+	 * Ensure correct GWT Module path if only the 'client' package on
+	 * {@link EntryPoint} class.
+	 */
+	public void testGwtModulePathWithClientPackage() throws Exception {
+		GwtModuleModel module = new GwtModuleModel("template",
+				"client.NoPackageEntryPoint", null);
+		String gwtModulePath = this.repository.createGwtModulePath(module);
+		assertEquals("Incorrect GWT Module path", "template.gwt.xml",
+				gwtModulePath);
+	}
+
+	/**
+	 * Ensure correct GWT Module path if no package on {@link EntryPoint} class.
+	 */
+	public void testGwtModulePathWithoutPackage() throws Exception {
+		GwtModuleModel module = new GwtModuleModel("template",
+				"NoPackageEntryPoint", null);
+		String gwtModulePath = this.repository.createGwtModulePath(module);
+		assertEquals("Incorrect GWT Module path", "template.gwt.xml",
+				gwtModulePath);
 	}
 
 	/**

@@ -39,6 +39,12 @@
             class="net.officefloor.eclipse.gwt.GwtWoofTemplateExtensionSourceExtension">
       </wooftemplateextensionsource>
    </extension>
+   <extension
+         point="net.officefloor.woof.wooftemplateextensionsources">
+      <wooftemplateextensionsource
+            class="net.officefloor.eclipse.json.JsonWoofTemplateExtensionSourceExtension">
+      </wooftemplateextensionsource>
+   </extension>
  	<extension point="org.eclipse.debug.core.launchConfigurationTypes">
 		<launchConfigurationType
         delegate="net.officefloor.eclipse.woof.launch.WoofLaunchConfigurationDelegate"

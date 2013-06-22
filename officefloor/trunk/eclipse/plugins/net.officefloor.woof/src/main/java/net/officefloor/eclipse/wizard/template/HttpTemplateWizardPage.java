@@ -974,6 +974,10 @@ public class HttpTemplateWizardPage extends WizardPage implements
 					}
 				}
 			}
+			if (oldProperties == null) {
+				// Ensure have old properties
+				oldProperties = this.compiler.createPropertyList();
+			}
 
 			// Obtain the remaining details
 			String oldUri = this.initialUriPath;

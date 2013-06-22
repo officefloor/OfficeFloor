@@ -31,6 +31,8 @@ import net.officefloor.frame.spi.source.SourceContext;
 import net.officefloor.frame.spi.source.SourceProperties;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.model.change.Change;
+import net.officefloor.model.change.Conflict;
+import net.officefloor.model.impl.change.NoChange;
 import net.officefloor.model.impl.repository.memory.MemoryConfigurationContext;
 import net.officefloor.model.repository.ConfigurationContext;
 import net.officefloor.model.repository.ConfigurationItem;
@@ -71,6 +73,43 @@ public class GwtWoofTemplateExtensionSourceTest extends OfficeFrameTestCase {
 						GwtWoofTemplateExtensionSource.class,
 						GwtWoofTemplateExtensionSource.PROPERTY_GWT_ENTRY_POINT_CLASS_NAME,
 						"GWT EntryPoint Class");
+	}
+
+	/**
+	 * Ensure {@link NoChange} if blank template URI.
+	 */
+	public void testRefactor_BlankTemplateUri() throws Exception {
+
+		// No template URI
+		Change<?> change = this.doRefactor(null, null, "", null, null, false);
+
+		// Ensure no change (reported via template validation)
+		assertFalse("Should not be able to apply", change.canApply());
+		Conflict[] conflicts = change.getConflicts();
+		assertEquals("Incorrect number of conflicts", 1, conflicts.length);
+		assertEquals("Incorrect cause",
+				"Must specify template URI for use by extension "
+						+ GwtWoofTemplateExtensionSource.class.getName(),
+				conflicts[0].getConflictDescription());
+	}
+
+	/**
+	 * Ensure {@link NoChange} if no {@link EntryPoint} class name.
+	 */
+	public void testRefactor_NoEntryPointClassName() throws Exception {
+
+		// No entry point class name
+		Change<?> change = this
+				.doRefactor(null, null, "NEW", null, null, false);
+
+		// Ensure issue
+		assertFalse("Should not be able to apply", change.canApply());
+		Conflict[] conflicts = change.getConflicts();
+		assertEquals("Incorrect number of conflicts", 1, conflicts.length);
+		assertEquals("Incorrect cause",
+				"Must specify EntryPoint class for extension "
+						+ GwtWoofTemplateExtensionSource.class.getName(),
+				conflicts[0].getConflictDescription());
 	}
 
 	/**

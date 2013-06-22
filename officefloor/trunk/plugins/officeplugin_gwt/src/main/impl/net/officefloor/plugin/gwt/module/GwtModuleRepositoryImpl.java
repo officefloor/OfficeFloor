@@ -216,17 +216,20 @@ public class GwtModuleRepositoryImpl implements GwtModuleRepository {
 		String entryPointClassName = module.getEntryPointClassName();
 		int index = entryPointClassName.lastIndexOf('.');
 		if (index >= 0) {
+			// Attempt to find path (minus 'client' part)
 			index = entryPointClassName
 					.lastIndexOf('.', (index - ".".length()));
 		}
-		String modulePath = entryPointClassName.substring(0, index).replace(
-				'.', '/');
+		String modulePath = (index >= 0 ? entryPointClassName.substring(0,
+				index) : "");
+		modulePath = modulePath.replace('.', '/');
 
 		// Obtain the module name
 		String moduleName = this.getGwtModuleName(module);
 
 		// Obtain the path to the GWT Module
-		modulePath = modulePath + "/" + moduleName + ".gwt.xml";
+		modulePath = modulePath + (modulePath.length() == 0 ? "" : "/")
+				+ moduleName + ".gwt.xml";
 
 		// Return the GWT Module path
 		return modulePath;
