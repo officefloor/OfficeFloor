@@ -1,8 +1,6 @@
 <woof>
   <templates>
     <template name="example" uri="example" path="Template.woof.html" class="net.officefloor.tutorial.teamhttpserver.Template" x="90" y="23">
-      <output name="output" argument-type="">
-      </output>
     </template>
   </templates>
   <sections>

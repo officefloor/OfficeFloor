@@ -10,7 +10,7 @@
   
   The below example for this tutorial will implement a simple non-secure page to provide login credentials via a secure link.  The simple page for this tutorial is as follows:
     
-[./images/SecureLinkHttpServer-screenshot.png] SecureLinkHttpServer screenshot.
+[./images/SecureLinkHttpServer-screenshot.png] SecureLinkHttpServer screen shot.
   
   {{{http://sourceforge.net/projects/officefloor/files/maven/maven2/net/officefloor/tutorial/SecureLinkHttpServer/${projectVersion}/SecureLinkHttpServer-${projectVersion}-project.zip/download}Download Tutorial Source}}
 
@@ -28,11 +28,11 @@ Secure Link
 
   To configure the link (form action) to always be communicated via a secure channel, the following is the configuration:
   
-[./images/SecureLinkConfiguration-screenshot.png] Secure Link configuration screenshot.
+[./images/SecureLinkConfiguration-screenshot.png] Secure Link configuration screen shot.
 
   Adding the link and flagging it secure will ensure WoOF renders the link URL on the page to communicate over a secure channel (HTTPS).  WoOF also prevents non-secure access to the link servicing by responding with a redirect to use a secure channel.
   
-  The configuration of links also works in reverse.  Should the Template be configured as secure, adding the link and leaving it unchecked indicates non-secure link.  Note that unless configured, links will follow the template secure setting.
+  The configuration of links also works in reverse.  Should the template be configured as secure, adding the link and leaving it unchecked indicates a non-secure link.  Note that unless configured, links will follow the template secure setting.
 
 
 
@@ -42,7 +42,7 @@ Logic
   
 %{code-snippet|brush-autodetect=1|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/securelinkhttpserver/TemplateLogic.java}
 
-  This tutorial shows sending information over a secure channel (HTTPS) from a non-secure page.  Note that authenticating the login credentials is typically specific to the application/environment and out of focus for this tutorial.
+  This tutorial shows sending information over a secure channel (HTTPS) from a non-secure page.
 
 
 

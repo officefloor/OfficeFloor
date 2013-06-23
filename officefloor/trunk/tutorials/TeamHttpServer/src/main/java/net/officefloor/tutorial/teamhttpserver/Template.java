@@ -48,7 +48,8 @@ public class Template implements Serializable {
 	private String databaseThreadName;
 
 	public LetterEncryption getTemplate() {
-		return this.displayCode;
+		return (this.displayCode == null ? new LetterEncryption(' ', ' ')
+				: this.displayCode);
 	}
 
 	public Template getThreadNames() {
@@ -115,7 +116,7 @@ public class Template implements Serializable {
 			String code = resultSet.getString("CODE");
 			LetterEncryption letterCode = new LetterEncryption(letter,
 					code.charAt(0));
-			
+
 			// Cache
 			this.cache.put(new Character(letter), letterCode);
 

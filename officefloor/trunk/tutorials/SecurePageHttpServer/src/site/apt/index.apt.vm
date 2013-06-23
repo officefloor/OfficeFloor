@@ -10,7 +10,7 @@
   
   The below example for this tutorial will implement a simple page to capture card details.  The simple page for this tutorial is as follows:
     
-[./images/SecurePageHttpServer-screenshot.png] SecurePageHttpServer screenshot.
+[./images/SecurePageHttpServer-screenshot.png] SecurePageHttpServer screen shot.
   
   {{{http://sourceforge.net/projects/officefloor/files/maven/maven2/net/officefloor/tutorial/SecurePageHttpServer/${projectVersion}/SecurePageHttpServer-${projectVersion}-project.zip/download}Download Tutorial Source}}
 
@@ -20,7 +20,7 @@ Secure Page
 
   To configure the page to always be accessed via a secure channel, the following is the configuration for the page:
   
-[./images/SecurePageConfiguration-screenshot.png] Secure Page configuration screenshot.
+[./images/SecurePageConfiguration-screenshot.png] Secure Page configuration screen shot.
 
   Checking the secure check box is the only configuration necessary to ensure use of a secure channel (HTTPS) for accessing the page.
   

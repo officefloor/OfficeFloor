@@ -74,7 +74,7 @@ public class TemplateLogicTest extends Assert {
 		client.getConnectionManager().shutdown();
 
 		// Stop the application
-		WoofOfficeFloorSource.start();
+		WoofOfficeFloorSource.stop();
 	}
 	// END SNIPPET: system
 

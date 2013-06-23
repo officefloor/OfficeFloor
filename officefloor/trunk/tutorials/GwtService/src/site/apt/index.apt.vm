@@ -12,7 +12,7 @@
   
   The focus of the tutorial is using GWT RPC to call on the server to determine whether "higher" or "lower".  To focus on the GWT RPC handling, the game interface has been kept simple and looks as follows.
   
-[./images/GwtService-screenshot.png] GwtService screenshot.
+[./images/GwtService-screenshot.png] GwtService screen shot.
     
   {{{http://sourceforge.net/projects/officefloor/files/maven/maven2/net/officefloor/tutorial/GwtService/${projectVersion}/GwtService-${projectVersion}-project.zip/download}Download Tutorial Source}}
 
@@ -88,7 +88,7 @@ Server side logic
   
   The reason for using the <<<AsyncCallback>>> interface in the server code is that it does not mix techniques.  In other words, in more conventional GWT applications the client is a GWT Async Interface call back while on the server it is a GWT Service Interface synchronous method.  WoOF in keeping the server code as a call back is felt to make the coding more consistent and intuitive.
 
-  The implementation of the GWT service method is reasonably self explainatory (determines whether correct, higher, lower or too many tries).  As the template object is stored within the HTTP Session, the state of game play is maintained across GWT RPC calls.
+  The implementation of the GWT service method is reasonably self explanatory (determines whether correct, higher, lower or too many tries).  As the template object is stored within the HTTP Session, the state of game play is maintained across GWT RPC calls.
   
   
 
@@ -96,7 +96,7 @@ application.woof
 
   The following shows the configuration for adding this tutorial's template along with it's GWT RPC configuration.
   
-[./images/GwtService-add-template-dialog.png] GwtService Add template dialog screenshot.
+[./images/GwtService-add-template-dialog.png] GwtService Add template dialog screen shot.
   
   The GWT Async Interfaces must be specified.  This enables WoOF to bind servicing of the GWT RPC calls to the appropriate template logic class methods.
   
@@ -132,5 +132,5 @@ Unit Testing
 
 Next
 
-  The {{{../CometApp/index.html}next tutorial}} looks at using Comet (AJAX push, reverse AJAX).
+  The {{{../CometApp/index.html}next tutorial}} looks at using GWT Comet (AJAX push, reverse AJAX).
 

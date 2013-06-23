@@ -14,11 +14,11 @@
 
   <<WoOF page>>
 
-[./images/ServletFilterJspIntegration-woof-screenshot.png] WoOF screenshot.
+[./images/ServletFilterJspIntegration-woof-screenshot.png] WoOF screen shot.
 
   <<JSP>>
 
-[./images/ServletFilterJspIntegration-jsp-screenshot.png] JSP screenshot.
+[./images/ServletFilterJspIntegration-jsp-screenshot.png] JSP screen shot.
     
   {{{http://sourceforge.net/projects/officefloor/files/maven/maven2/net/officefloor/tutorial/WoofServletJspIntegration/${projectVersion}/WoofServletJspIntegration-${projectVersion}-project.zip/download}Download Tutorial Source}}
 

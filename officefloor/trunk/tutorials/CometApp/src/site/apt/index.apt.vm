@@ -1,18 +1,18 @@
                                                -----------------------
-                                 Comet (AJAX push, reverse AJAX) Application Tutorial 
+                               GWT Comet (AJAX push, reverse AJAX) Application Tutorial 
                                                -----------------------
 					        Daniel Sagenschneider
                                                -----------------------
 
-  <<Comet Application Tutorial>>
+  <<GWT Comet Application Tutorial>>
 
-  This tutorial demonstrates the simplicity in providing Comet (AJAX push, reverse AJAX) functionality to a WoOF web application.
+  This tutorial demonstrates the simplicity in providing GWT Comet (AJAX push, reverse AJAX) functionality to a WoOF web application.
   
-  To demonstrate the ease of using Comet functionality the following simple chat application will be used for this tutorial.
+  To demonstrate the ease of using GWT Comet functionality the following simple chat application will be used for this tutorial.
   
-[./images/CometApp-screenshot.png] CometApp screenshot.
+[./images/CometApp-screenshot.png] CometApp screen shot.
 
-  The application in this tutorial is deliberately simple to allow focus on the Comet functionality.
+  The application in this tutorial is deliberately simple to allow focus on the GWT Comet functionality.
     
   {{{http://sourceforge.net/projects/officefloor/files/maven/maven2/net/officefloor/tutorial/CometApp/${projectVersion}/CometApp-${projectVersion}-project.zip/download}Download Tutorial Source}}
   
@@ -74,15 +74,15 @@ EntryPoint Class
 
 Server Side
 
-  The following demonstrates the configuration necessary for supporting Comet on the server:
+  The following demonstrates the configuration necessary for supporting GWT Comet on the server:
   
-[./images/CometApp-add-template-dialog.png] CometApp Add template dialog screenshot.
+[./images/CometApp-add-template-dialog.png] CometApp Add template dialog screen shot.
   
-  After checking the checkbox to enable comet, there is no additional configuration or coding necessary to support a single server providing Comet functionality.
+  After checking the check box to enable comet, there is no additional configuration or coding necessary to support a single server providing Comet functionality.
 
 
 
 Next
 
-  The {{{../CometManualApp/index.html}next tutorial}} looks at how the Server can publish events to Comet clients and also how the Server can intercept published events.
+  The {{{../CometManualApp/index.html}next tutorial}} looks at how the Server can publish events to GWT Comet clients and also how the Server can intercept published events.
 

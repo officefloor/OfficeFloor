@@ -12,9 +12,9 @@
   
   The below example for this tutorial will demonstrate only allowing a logged in user to view a page.  The simple key pages for this tutorial are as follows:
     
-[./images/AuthenticationHttpServer-login-screenshot.png] AuthenticationHttpServer login screenshot.
+[./images/AuthenticationHttpServer-login-screenshot.png] AuthenticationHttpServer login screen shot.
 
-[./images/AuthenticationHttpServer-hello-screenshot.png] AuthenticationHttpServer hello screenshot.
+[./images/AuthenticationHttpServer-hello-screenshot.png] AuthenticationHttpServer hello screen shot.
 
   {{{http://sourceforge.net/projects/officefloor/files/maven/maven2/net/officefloor/tutorial/AuthenticationHttpServer/${projectVersion}/AuthenticationHttpServer-${projectVersion}-project.zip/download}Download Tutorial Source}}
 
@@ -50,11 +50,11 @@ Configuring access
 
   The following is the configuration for authentication.
   
-[./images/AuthenticationConfiguration-screenshot.png] Authentication configuration screenshot.
+[./images/AuthenticationConfiguration-screenshot.png] Authentication configuration screen shot.
 
   To specify the access, right click and select <<<Set access>>> from the menu.  A wizard will appear to configure the appropriate {{{/apidocs/net/officefloor/plugin/web/http/security/HttpSecuritySource.html}HttpSecuritySource}}.
   
-  While some authentication schemes are straight forward (e.g. {{{/apidocs/net/officefloor/plugin/web/http/security/scheme/BasicHttpSecuritySource.html}Basic}}), others such as {{{/apidocs/net/officefloor/plugin/web/http/security/scheme/FormHttpSecuritySource.html}form based login}} require application specific behaviour (e.g. a form login page).  On selecting the authentication scheme, links necessary for the choosen authentication will be displayed for configuration.  In the case of this tutorial, the form login link and authentication link are required to be configured to/from the login page.  This allows the application to tailor the login page while still being able to re-use the {{{/apidocs/net/officefloor/plugin/web/http/security/scheme/FormHttpSecuritySource.html}FormHttpSecuritySource}}.
+  While some authentication schemes are straight forward (e.g. {{{/apidocs/net/officefloor/plugin/web/http/security/scheme/BasicHttpSecuritySource.html}Basic}}), others such as {{{/apidocs/net/officefloor/plugin/web/http/security/scheme/FormHttpSecuritySource.html}form based login}} require application specific behaviour (e.g. a form login page).  On selecting the authentication scheme, links necessary for the chosen authentication will be displayed for configuration.  In the case of this tutorial, the form login link and authentication link are required to be configured to/from the login page.  This allows the application to tailor the login page while still being able to re-use the {{{/apidocs/net/officefloor/plugin/web/http/security/scheme/FormHttpSecuritySource.html}FormHttpSecuritySource}}.
   
   To enable differing credential stores (e.g. database, LDAP, etc), the WoOF supplied authentication depends on a {{{/apidocs/net/officefloor/plugin/web/http/security/store/CredentialStore.html}CredentialStore}} managed object being configured.  The following is the managed object configuration for this tutorial.   
   

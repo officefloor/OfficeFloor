@@ -8,13 +8,13 @@
 
   This tutorial looks at an example extension of OfficeFloor to show the ease of adding your own extensions to OfficeFloor.
   
-  The example used is the JPA plugin.  The code in this tutorial is the complete code used for plugging JPA into OfficeFloor.  It also provides the code for graphically configuring JPA.
+  The example used is the JPA plug-in.  The code in this tutorial is the complete code used for plugging JPA into OfficeFloor.  It also provides the code for graphically configuring JPA.
   
   This tutorial covers implementing a {{{/apidocs/net/officefloor/frame/spi/managedobject/source/ManagedObjectSource.html}ManagedObjectSource}} to provide an <<<EntityManager>>> as an available dependency object.  It demonstrates some of the features of OfficeFloor dependencies and why they are not just a class object.  However, in many cases dependency objects are simple POJOs (Plain Old Java Objects) and an implementation already exists to configure these - {{{/apidocs/net/officefloor/plugin/managedobject/clazz/ClassManagedObjectSource.html}ClassManagedObjectSource}}.
   
 
   
-OfficeFloor Plugin Architecture - Managing Complexity
+OfficeFloor Plug-in Architecture - Managing Complexity
   
   The {{{../../mission.html}OfficeFloor mission}} lists the available extensions for OfficeFloor.  To extend OfficeFloor requires writing an implementation of one or more of these extension interfaces.
   

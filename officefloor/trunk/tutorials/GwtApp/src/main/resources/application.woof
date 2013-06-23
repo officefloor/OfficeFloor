@@ -1,8 +1,6 @@
 <woof>
   <templates>
     <template name="template" uri="template" path="Template.woof.html" class="net.officefloor.tutorial.gwtapp.TemplateLogic" x="30" y="31">
-      <output name="output" argument-type="">
-      </output>
       <extension class="net.officefloor.plugin.gwt.woof.GwtWoofTemplateExtensionSource">
         <property name="gwt.entry.point.class.name" value="net.officefloor.tutorial.gwtapp.client.GwtAppEntryPoint"/>
       </extension>

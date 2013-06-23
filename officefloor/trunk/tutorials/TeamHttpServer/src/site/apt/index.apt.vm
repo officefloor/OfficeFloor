@@ -4,13 +4,13 @@
 					        Daniel Sagenschneider
                                                -----------------------
 
-  <<Thread Injection Http Server Tutorial>>
+  <<Thread Injection HTTP Server Tutorial>>
 
   This tutorial demonstrates the ability to assign a thread pool to execute specific methods (i.e. thread injection).  OfficeFloor refers to a thread pool as a {{{/apidocs/net/officefloor/frame/spi/team/Team.html}Team}}.
   
-  The example used for this tutorial is an encrypter for a letter.  A database table stores the encryption by mapping the letter to an alternate letter.  Once the letter encryption is looked up in the database it is cached to provide quicker subsequent lookups for that letter.  The example's web page is as follows and has been kept simple to focus on thread injection.
+  The example used for this tutorial is an encrypter for a letter.  A database table stores the encryption by mapping the letter to an alternate letter.  Once the letter encryption is looked up in the database it is cached to provide quicker subsequent look ups for that letter.  The example's web page is as follows and has been kept simple to focus on thread injection.
 
-[./images/TeamHttpServer-screenshot.png] TeamHttpServer screenshot.
+[./images/TeamHttpServer-screenshot.png] TeamHttpServer screen shot.
   
   The example displays the names of two threads to show the different thread pools (Teams) servicing the request.
   
@@ -25,9 +25,9 @@ Web Server Efficiency and Responsiveness
 
   The thread per request architecture of most web servers will typically have a single thread pool to service all requests.  Database I/O is typically blocking.  Under heavy loads all threads can end up blocked waiting on the database.  As the web server has no free threads, it queues further requests degrading the responsiveness of the web application.
 
-  Most requests to a web server are for static cached content.  Having these requests wait behind longer database requests means non-optimal use of the web server.  The blocked threads leaves the web server's CPU idle.  Having an additional thread would allow the web server to continue servicing the static cached content requests.  This is especially relevant as the company's home page is usually static cached content and users have a low tolerance for slow web site responsiveness.  Also increasing the number of threads for cached content can cause lock contention and potential stavation resulting in degraded responsiveness. 
+  Most requests to a web server are for static cached content.  Having these requests wait behind longer database requests means non-optimal use of the web server.  The blocked threads leaves the web server's CPU idle.  Having an additional thread would allow the web server to continue servicing the static cached content requests.  This is especially relevant as the company's home page is usually static cached content and users have a low tolerance for slow web site responsiveness.  Also increasing the number of threads for cached content can cause lock contention and potential starvation resulting in degraded responsiveness. 
   
-  Serving cached content is best by a single thread while database content is best by a pool of threads.  These two types of request are typically handled by most web servers with a single thread pool.  However increasing the efficiency and responsiveness of a web server is not acheived by increasing the number of threads but by increasing the number of thread pools.
+  Serving cached content is best by a single thread while database content is best by a pool of threads.  These two types of request are typically handled by most web servers with a single thread pool.  However increasing the efficiency and responsiveness of a web server is not achieved by increasing the number of threads but by increasing the number of thread pools.
   
   The example for this tutorial shows how OfficeFloor enables increasing the number of thread pools for efficient servicing of cached and database requests. 
 
@@ -57,7 +57,7 @@ Configuration
   
   The leader follower team is a {{{/apidocs/net/officefloor/frame/spi/team/source/TeamSource.html}TeamSource}} implementation that implements the leader follower thread pool pattern to reduce lock contention.
   
-  WoOF uses the method's dependencies to determine the type of functionality being undertaken by the method.  The method's dependencies give an indicator of what the method is likely to be doing.  In this case if the method requires a <<<DataSource>>> it is very likely that it will be doing blocking database I/O calls.  This means of classifying methods allows OfficeFloor to automagically use the appropriate thread pool to execute the method.  It is what OfficeFloor considers thread injection.
+  WoOF uses the method's dependencies to determine the type of functionality being undertaken by the method.  The method's dependencies give an indicator of what the method is likely to be doing.  In this case if the method requires a <<<DataSource>>> it is very likely that it will be doing blocking database I/O calls.  This means of classifying methods allows OfficeFloor to auto-magically use the appropriate thread pool to execute the method.  It is what OfficeFloor considers thread injection.
 
   All other methods are executed by the default <<<Team>>>.  Running stand-alone this would be the socket listener thread.
   
@@ -120,7 +120,7 @@ Unit Test
   
    * first request retrieves the encrypted code from the database (and caches it)
    
-   * second request retrives it from the cache
+   * second request retrieves it from the cache
 
 
 

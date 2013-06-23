@@ -4,13 +4,13 @@
 					        Daniel Sagenschneider
                                                -----------------------
 
-  <<Dependency Injection Http Server Tutorial>>
+  <<Dependency Injection HTTP Server Tutorial>>
 
   This tutorial demonstrates the dependency injection of a <<<DataSource>>>.
   
   The example used in this tutorial is the following simple application to manage rows within a database table.
   
-[./images/DatabaseHttpServer-screenshot.png] DatabaseHttpServer screenshot.
+[./images/DatabaseHttpServer-screenshot.png] DatabaseHttpServer screen shot.
   
   {{{http://sourceforge.net/projects/officefloor/files/maven/maven2/net/officefloor/tutorial/DatabaseHttpServer/${projectVersion}/DatabaseHttpServer-${projectVersion}-project.zip/download}Download Tutorial Source}}
 

@@ -4,8 +4,6 @@
       <output name="createUser" argument-type="net.officefloor.tutorial.transactionhttpserver.UserProperties">
         <input section="CreateUser" input="createUser"/>
       </output>
-      <output name="output" argument-type="">
-      </output>
     </template>
   </templates>
   <sections>
