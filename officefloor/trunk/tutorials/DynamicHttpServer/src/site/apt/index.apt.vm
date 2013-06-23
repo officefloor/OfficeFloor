@@ -10,7 +10,7 @@
       
   The example used in this tutorial is the following simple dynamic page to show the current time and the listing of System properties:
   
-[./images/DynamicHttpServer-screenshot.png] DynamicHttpServer screenshot.
+[./images/DynamicHttpServer-screenshot.png] DynamicHttpServer screen shot.
     
   {{{http://sourceforge.net/projects/officefloor/files/maven/maven2/net/officefloor/tutorial/DynamicHttpServer/${projectVersion}/DynamicHttpServer-${projectVersion}-project.zip/download}Download Tutorial Source}}
 
@@ -22,7 +22,7 @@ Template.woof.html
 
 %{code-snippet|brush=xml|file=${basedir}/src/main/webapp/Template.woof.html}
 
-  First thing to notice is that the page/template can be rendered in a web browser.  The reason for this is to ensure that web page content can be created/edited by WYSIWYG web design tools.  This is deliberate to allow web page designers to focus on presentation of the web pages rather than having to understand scripting tags and to an extent programming constructs.  It also means the template can be viewed without having written any code - great for reviewing and tweeking the pages.
+  First thing to notice is that the page/template can be rendered in a web browser.  The reason for this is to ensure that web page content can be created/edited by WYSIWYG web design tools.  This is deliberate to allow web page designers to focus on presentation of the web pages rather than having to understand scripting tags and to an extent programming constructs.  It also means the template can be viewed without having written any code - great for reviewing and tweaking the pages.
 
   To provide the developer control of rendering the dynamic content, there are non-obtrusive hooks for dynamically rending of the page.  The two hooks used in the above template are:
 
@@ -36,7 +36,7 @@ TemplateLogic Class
 
   The logic for the rendering the page is the following POJO (plain old java object).
   
-  Please note that WoOF integrates with {{{http://projectlombok.org/}Project Lombok}} to reduce the necessary code.  As per below the <<<@Data>>> annotations are used to generate the getters and constructors for the inner class beans.  It is highly recommended by the WoOF team to consider use of {{{http://projectlombok.org/}Project Lombok}} to reduce the overall amount of code to be written. 
+  Please note that WoOF integrates with {{{http://projectlombok.org/}Project Lombok}} to reduce the necessary code.  As per below the <<<@Data>>> annotations are used to generate the getters and constructors for the inner class beans.  It is highly recommended by the OfficeFloor team to consider use of {{{http://projectlombok.org/}Project Lombok}} to reduce the overall amount of code to be written. 
   
 %{code-snippet|brush-autodetect=1|id=example|file=${basedir}/src/main/java/net/officefloor/tutorial/dynamichttpserver/TemplateLogic.java}
 
@@ -78,7 +78,7 @@ application.woof
   
 [./images/dynamic-woof.png] application.woof configuration.
 
-  This is the only configuration necessary for this web application as the template will be made available at <<<http://localhost:7878/example.woof>>> .  Later tutorials will look at linking page flows and dynamic behaviour however is beyond the scope of this tutorial.
+  This is the only configuration necessary for this web application as the template will be made available at <<<http://localhost:7878/example.woof>>> .  Later tutorials will look at linking page flows and dynamic behaviour.
    
 
 

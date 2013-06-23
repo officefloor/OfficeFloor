@@ -4,14 +4,10 @@
       <output name="handleSubmit" argument-type="">
         <template name="href"/>
       </output>
-      <output name="output" argument-type="">
-      </output>
     </template>
     <template name="href" uri="href" path="href.woof.html" class="" x="32" y="21">
       <output name="link" argument-type="">
         <template name="form"/>
-      </output>
-      <output name="output" argument-type="">
       </output>
     </template>
   </templates>

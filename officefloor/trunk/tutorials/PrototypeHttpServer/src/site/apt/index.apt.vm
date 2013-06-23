@@ -6,20 +6,20 @@
 
   <<Wireframe Prototype Tutorial>>
 
-  This tutorial demonstrates the ease of building working a web application prototype that can be extended later to fully functional web applications.
+  This tutorial demonstrates the ease of building working a web application prototype that can be later extended to fully a functional web application.
   
   The tutorial demonstrates the WoOF prototyping by providing wireframe navigation back and forth between the following two pages:
   
-[./images/PrototypeHttpServer-href-screenshot.png] PrototypeHttpServer href screenshot.
+[./images/PrototypeHttpServer-href-screenshot.png] PrototypeHttpServer href screen shot.
 
-[./images/PrototypeHttpServer-form-screenshot.png] PrototypeHttpServer form screenshot.
+[./images/PrototypeHttpServer-form-screenshot.png] PrototypeHttpServer form screen shot.
 
   {{{http://sourceforge.net/projects/officefloor/files/maven/maven2/net/officefloor/tutorial/PrototypeHttpServer/${projectVersion}/PrototypeHttpServer-${projectVersion}-project.zip/download}Download Tutorial Source}}
 
   
 Prototyping the Web Application
 
-  WoOF provides the ability to wireframe the web pages into a working prototype.  This allows users to provide feedback on the web application before any code needs to be written.  Having this feedback catches issues very early in the development lifecycle leading to reduced overall effort/cost in building the web application.
+  WoOF provides the ability to wireframe the web pages into a working prototype.  This allows users to provide feedback on the web application before any code needs to be written.  Having this feedback catches issues very early in the development life-cycle leading to reduced overall effort/cost in building the web application.
   
   Once the users are happy with the web application, the later tutorials will show how to easily extend the prototype into a working application.
 
@@ -39,7 +39,7 @@ HTML pages
 
 *#\{link\}
 
-  Each of the above pages will render in a web browser.  The HTML does however contain the non-intrusive <<<#\{link\}>>> tags which are used by WoOF to determine the links to configure for the page.
+  Each of the above pages will render in a web browser.  The HTML does contain the non-intrusive <<<#\{link\}>>> tags which are used by WoOF to determine the links to configure for the page.
 
 
 
@@ -51,7 +51,7 @@ Configuring the links
 
   The names of the links are the tag names.  Later tutorials will show how to map the form submission to a server POJO method.
   
-  As the WoOF HTML pages do not contain the actual link URIs, changing the navigation of the web application is controlled by the <<<application.woof>>> configuration.  This allows keeping navigation details out of the web page design.  It also makes changing web application navigation simple.
+  As the WoOF HTML pages do not contain the actual link URIs, changing the navigation of the web application is controlled by the <<<application.woof>>> configuration.  This allows keeping navigation details out of the web page design.  It also makes changing web application navigation simple as the application evolves.
   
   
 
