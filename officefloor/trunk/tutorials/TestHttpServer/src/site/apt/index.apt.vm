@@ -10,13 +10,13 @@
     
   To focus on testing, the below simple application to add two numbers will be used.
     
-[./images/TestHttpServer-screenshot.png] TestHttpServer screenshot.
+[./images/TestHttpServer-screenshot.png] TestHttpServer screen shot.
 
   {{{http://sourceforge.net/projects/officefloor/files/maven/maven2/net/officefloor/tutorial/TestHttpServer/${projectVersion}/TestHttpServer-${projectVersion}-project.zip/download}Download Tutorial Source}}
 
 
 
-Appliction code
+Application code
 
   The application being tested has one page.
 
@@ -26,7 +26,7 @@ Appliction code
   
 %{code-snippet|brush-autodetect=1|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/testhttpserver/TemplateLogic.java}
 
-  The focus of the tutorial is to test that the two numbers are added correctly.  Production quality testing would cover a lot more test scenarios for the application.  However, the additional scenarios have been excluded for brevity as they would follow a similar pattern as described by this tutorial.
+  The focus of the tutorial is to test that the two numbers are added correctly.  Production quality testing would cover a lot more test scenarios for the application.  The additional scenarios have been excluded for brevity as they would follow a similar pattern as described by this tutorial.
 
 
 
@@ -36,7 +36,7 @@ Unit Testing
 
 %{code-snippet|brush-autodetect=1|id=unit|file=${basedir}/src/test/java/net/officefloor/tutorial/testhttpserver/TemplateLogicTest.java}
 
-  This is a simple application.  More complex applications may be dependency injecting more complex objects such as a <<<javax.sql.DataSource>>> or <<<javax.persistence.EntityManager>>>.  Again as the template logic is a POJO, any mocking framwork can be used to mock these objects for use in testing.
+  This is a simple application.  More complex applications may be dependency injecting more complex objects such as a <<<javax.sql.DataSource>>> or <<<javax.persistence.EntityManager>>>.  Again as the template logic is a POJO, any mocking framework can be used to mock these objects for use in testing.
   
 
 System Testing
@@ -49,7 +49,7 @@ System Testing
 
 Integration Testing
 
-  OfficeFloor provides {{{http://maven.apache.org}Maven}} plugins to enable integration testing.  The following is the <<<pom.xml>>> plugins starting/stopping WoOF and running the integration tests.
+  OfficeFloor provides {{{http://maven.apache.org}Maven}} plug-ins to enable integration testing.  The following is the <<<pom.xml>>> plug-ins starting/stopping WoOF and running the integration tests.
   
 %{code-snippet|brush-autodetect=1|id=tutorial|file=${basedir}/pom.xml}
 

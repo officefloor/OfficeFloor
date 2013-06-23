@@ -1,12 +1,10 @@
 <woof>
   <templates>
     <template name="comet" uri="comet" path="Template.woof.html" class="net.officefloor.tutorial.cometmanualapp.TemplateLogic" x="189" y="104">
-      <output name="output" argument-type="">
-      </output>
       <extension class="net.officefloor.plugin.gwt.woof.GwtWoofTemplateExtensionSource">
         <property name="gwt.entry.point.class.name" value="net.officefloor.tutorial.cometmanualapp.client.CometManualAppEntryPoint"/>
         <property name="gwt.async.service.interfaces" value="net.officefloor.tutorial.cometmanualapp.client.UserNameServiceAsync"/>
-        <property name="gwt.comet.enable" value="TRUE"/>
+        <property name="gwt.comet.enable" value="true"/>
         <property name="manual.publish.method.name" value="message"/>
       </extension>
     </template>

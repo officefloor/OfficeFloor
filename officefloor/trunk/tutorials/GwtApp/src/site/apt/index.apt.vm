@@ -10,7 +10,7 @@
   
   The example used in this tutorial is the following simple page to show the seconds since the page load.
   
-[./images/GwtApp-screenshot.png] GwtApp screenshot.
+[./images/GwtApp-screenshot.png] GwtApp screen shot.
     
   {{{http://sourceforge.net/projects/officefloor/files/maven/maven2/net/officefloor/tutorial/GwtApp/${projectVersion}/GwtApp-${projectVersion}-project.zip/download}Download Tutorial Source}}
   
@@ -56,9 +56,9 @@ application.woof
 
   Normally with GWT applications a <<<Module.gwt.xml>>> configuration file is required to be written.  The file indicates to GWT how to compile and create the JavaScript for the web page.
   
-  WoOF makes the GWT integration simpler by generating the configuration file for you.  All that is necessary to provide GWT functionality onto the page is specifying the <<<EntryPoint>>> class when adding the template.  The following demonstrates the GWT configuration for this tutorial.
+  WoOF makes the GWT integration simpler by generating the configuration file for you.  All that is necessary to provide GWT functionality onto the page is add the GWT extension and specifying the <<<EntryPoint>>> class.  The following demonstrates the GWT configuration for this tutorial.
   
-[./images/GwtApp-add-template-dialog.png] GwtApp Add template dialog screenshot.
+[./images/GwtApp-add-template-dialog.png] GwtApp Add template dialog screen shot.
 
   On creating the template, WoOF will automatically generate the <<<Module.gwt.xml>>> file for GWT compilation.  The file may be changed to provide further GWT functionality, however changes to the following attributes will be overwritten by WoOF in managing the GWT functionality.
   
@@ -74,7 +74,7 @@ Compiling GWT with Maven
   
 %{code-snippet|brush-autodetect=1|id=GwtPlugin|file=${basedir}/pom.xml}
  
-  To also make the GWT Java classes available for coding against add the following GWT dependency (with appropriate <<<version>>>).
+  To make the GWT extension functionality and the GWT Java classes available add the following dependencies (with appropriate <<<version>>>).
   
 %{code-snippet|brush-autodetect=1|id=GwtDependency|file=${basedir}/pom.xml}
 

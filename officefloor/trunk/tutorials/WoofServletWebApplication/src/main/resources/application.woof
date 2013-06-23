@@ -4,8 +4,6 @@
       <output name="LINK" argument-type="">
         <resource name="/Template.jsp"/>
       </output>
-      <output name="output" argument-type="">
-      </output>
     </template>
   </templates>
   <sections>

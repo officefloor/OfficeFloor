@@ -4,13 +4,13 @@
 					        Daniel Sagenschneider
                                                -----------------------
 
-  <<Transaction Http Server Tutorial>>
+  <<Transaction HTTP Server Tutorial>>
 
   This tutorial demonstrates providing transaction context to an OfficeFloor web application.  OfficeFloor refers to context as {{{/apidocs/net/officefloor/frame/spi/governance/Governance.html}Governance}}.
   
   The example used for this tutorial is a managing a list of users.  The user name and full name are stored in separate tables to require a transaction to safely create a user.
 
-[./images/TransactionHttpServer-screenshot.png] TransactionHttpServer screenshot.
+[./images/TransactionHttpServer-screenshot.png] TransactionHttpServer screen shot.
   
   As the user name and full name are both required, the example application will not create the user unless both are supplied.
    
@@ -26,7 +26,7 @@ Configuration
 
   The transaction governance is added via right clicking and adding a governance.  On selecting the JPA transaction the transaction governance is added.  For the governance to apply a governance area must be added.  All templates and sections within the governance area are then subject to the governance.  The above configuration shows the <<<CreateUser>>> section to be under transaction management (governance).
 
-  The exception handling configured above has the web page rendered again in the case of a persistence failure.  Should the user name or full name not be supplied the transaction is rolled back due to persistence failure and the page rendered with only the contents committed to the database.
+  The exception handling configured above has the web page rendered again in the case of a persistence failure.  Should the user name or full name not be supplied the transaction is rolled back due to persistence failure.  The page is then rendered with only the contents committed to the database.
   
   
 * Remaining configuration

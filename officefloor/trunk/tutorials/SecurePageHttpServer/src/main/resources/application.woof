@@ -4,14 +4,10 @@
       <output name="main" argument-type="">
         <template name="main"/>
       </output>
-      <output name="output" argument-type="">
-      </output>
     </template>
     <template name="main" uri="main" path="main.woof.html" class="" secure="false" x="116" y="89">
       <output name="card" argument-type="">
         <template name="card"/>
-      </output>
-      <output name="output" argument-type="">
       </output>
     </template>
   </templates>

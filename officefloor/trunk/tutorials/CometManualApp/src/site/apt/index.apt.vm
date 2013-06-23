@@ -4,13 +4,13 @@
 					        Daniel Sagenschneider
                                                -----------------------
 
-  <<Server Side Comet Publish Application Tutorial>>
+  <<Server Side GWT Comet Publish Application Tutorial>>
 
-  This tutorial demonstrates the simplicity in publishing events from the Server.
+  This tutorial demonstrates the simplicity in publishing events from the Server to GWT clients.
   
-  To demonstrate the ease of using Comet (AJAX push, reverse AJAX) functionality on the Server within a WoOF web application the following simple chat application will be used for this tutorial.
+  To demonstrate the ease of using GWT Comet (AJAX push, reverse AJAX) functionality on the Server within a WoOF web application the following simple chat application will be used for this tutorial.
   
-[./images/CometManualApp-screenshot.png] CometManualApp screenshot.
+[./images/CometManualApp-screenshot.png] CometManualApp screen shot.
 
   The application will:
   
@@ -18,7 +18,7 @@
   
     [[1]] Send and receive chat messages indicating who sent each message using the respective HTTP session
   
-  The application in this tutorial is deliberately simple to allow focus on the Comet functionality.
+  The application in this tutorial is deliberately simple to allow focus on the GWT Comet functionality.
     
   {{{http://sourceforge.net/projects/officefloor/files/maven/maven2/net/officefloor/tutorial/CometManualApp/${projectVersion}/CometManualApp-${projectVersion}-project.zip/download}Download Tutorial Source}}
 
@@ -46,7 +46,7 @@ TemplateLogic Class
 
   The following demonstrates the configuration necessary to add the template.
   
-[./images/CometManualApp-add-template-dialog.png] CometApp Add template dialog screenshot.
+[./images/CometManualApp-add-template-dialog.png] CometApp Add template dialog screen shot.
 
   For manually handling the published event the method name is specified.  This allows the Server code to intercept all published events from the clients and manually handle them.  In the case of this tutorial, adding the user name to the message before publishing the event.  The parameter to this specified method is always a {{{/apidocs/net/officefloor/plugin/comet/internal/CometEvent.html}CometEvent}}.  It also follows the GWT RPC handling pattern and therefore must notify that successfully serviced the GWT RPC request via the <<<AsyncCallback>>>.
   
@@ -105,5 +105,5 @@ Client Side Code
 
 Next
 
-  The {{{../SecurePageHttpServer/index.html}next tutorial}} covers securing a page.
+  Please see the {{{../index.html}other tutorials}} for further features.
 

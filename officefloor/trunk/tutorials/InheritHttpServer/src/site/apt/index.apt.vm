@@ -6,13 +6,13 @@
 
   <<Template Inheritance Tutorial>>
   
-  This tutorial demonstrates the inheriting both HTML and logic of templates.
+  This tutorial demonstrates the inheritance of both HTML and logic for templates.
       
   The following are the example pages for this tutorial.  The parent, child and grand child pages inherit from each other as their name suggests.
   
-[./images/InheritHttpServer-parent-screenshot.png] InheritHttpServer parent screenshot.
+[./images/InheritHttpServer-parent-screenshot.png] InheritHttpServer parent screen shot.
 
-[./images/InheritHttpServer-child-screenshot.png] InheritHttpServer child screenshot.
+[./images/InheritHttpServer-child-screenshot.png] InheritHttpServer child screen shot.
 
 [./images/InheritHttpServer-grandchild-screenshot.png] InheritHttpServer grand child screenshot.
 
@@ -38,7 +38,7 @@ Parent
 
 \<!-- \{:section\} --\>
 
-  Template inheritance occurs by the child template overriding sections within the parent template.  To specify which sections are being overridden by the child template, the child child template prefixes the section name with ':'.
+  Template inheritance occurs by the child template overriding sections within the parent template.  To specify which sections are being overridden by the child template, the child template prefixes the section name with ':'.
   
   The child template may introduce further sections after the overriding section by not prefixing them with ':'.  The introduced sections are included immediately after the overriding section but before the corresponding next section in the parent template.
 
@@ -100,7 +100,7 @@ Grand Child
    
   The overriding of the first section also introduces a different property.  This requires the corresponding data method to return a different type (one containing the new property rather than the old property).  To enable overriding data methods of the parent and continue to abide by Java compiler rules, template inheritance for logic classes have methods override each other by name only (not by the entire method signature).  This allows changing the method signature (e.g. adding an additional parameter) and then override the data method by name to return a different type.
 
-  In the case of this tutorial, the following logic class shows overriding the method by name.  This additional parameter is only to create a different method signature to avoid Java compiler issues of returning a different type.
+  In the case of this tutorial, the following logic class shows overriding the method by name.  The additional parameter is only to create a different method signature to avoid Java compiler issues of returning a different type.
   
 %{code-snippet|brush-autodetect=1|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/inherithttpserver/GrandChildLogic.java}
 
