@@ -4,7 +4,7 @@
 					        Daniel Sagenschneider
                                                -----------------------
 
-  <<Session Http Server Tutorial>>
+  <<Session HTTP Server Tutorial>>
 
   This tutorial demonstrates maintaining state within the HTTP session.
   

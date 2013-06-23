@@ -36,7 +36,7 @@ Exception handling configuration
   
   The following shows the configuration for handling the above template exception.
   
-[./images/ExceptionHttpServer-screenshot.png] ExceptionHttpServer screenshot.
+[./images/ExceptionHttpServer-screenshot.png] ExceptionHttpServer screen shot.
 
   The exception being handled is an <<<SQLException>>>.  To add the exception right click and add exception.
   
@@ -75,6 +75,13 @@ Resource
 %{code-snippet|brush=xml|file=${basedir}/src/main/webapp/Error.html}
 
   It is possible to use the details of the exception within a template to generate a response.  For simplicity of this tutorial however a static resource is used (right click and add resource).
+  
+  
+Template specific exception handling
+
+  For exceptions specific to the template, the template logic class may provide a method with a parameter of the exception type that is annotated with <<<@Parameter>>>.  WoOF will reflectively interrogate the template logic class for these methods and use them for exception handling before escalating to the <<<application.woof>>> configuration.
+  
+  In other words, the <<<handleSqlException(...)>>> method can be moved to the <<<TemplateLogic>>> class to provide specific handling of <<<SQLException>>>s occurring within the template.
 
 
 

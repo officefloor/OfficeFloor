@@ -8,9 +8,9 @@
 
   This tutorial demonstrates controlling navigation back and forth between the following two pages:
   
-[./images/NavigateHttpServer-one-screenshot.png] NavigateHttpServer one screenshot.
+[./images/NavigateHttpServer-one-screenshot.png] NavigateHttpServer one screen shot.
 
-[./images/NavigateHttpServer-two-screenshot.png] NavigateHttpServer two screenshot.
+[./images/NavigateHttpServer-two-screenshot.png] NavigateHttpServer two screen shot.
 
   {{{http://sourceforge.net/projects/officefloor/files/maven/maven2/net/officefloor/tutorial/NavigateHttpServer/${projectVersion}/NavigateHttpServer-${projectVersion}-project.zip/download}Download Tutorial Source}}
   
@@ -23,8 +23,6 @@ application.woof
 [./images/navigate-woof.png] application.woof configuration.
 
   The links are the navigation paths between the templates.  Each template provides outputs that by the above configuration navigates the user to the other page.
-
-  Note that it is actually possible to string together multiple templates by linking the <<<output>>> of the template to render further templates in a response.  The <<<output>>> link is optional to be connected, however all other outputs must be linked.
   
 
 
@@ -38,7 +36,7 @@ application.woof
 
 %{code-snippet|brush-autodetect=1|id=example|file=${basedir}/src/main/java/net/officefloor/tutorial/navigatehttpserver/TemplateOne.java}
 
-  As the next task name is not a name of another method (not a template section name, see later tutorials) it becomes an output from the template.  From the configuration above the output is configured to navigate to the other template.
+  As the next task name is not a name of another method (and not a template section name, see later tutorials) it becomes an output from the template.  From the configuration above the output is configured to navigate to the other template.
   
   This is useful should some action be required to be taken when the user clicks to navigate to the next page.
 
@@ -64,7 +62,7 @@ application.woof
    
   This allows programmatically determining which is the next task.  It is possible to add further methods to the interface to provide alternate navigation paths.  Navigation only occurs if the method is invoked.  Please also be aware that navigation to the page happens after the method has completed.
   
-  Both <<<@NextTask>>> and <<<@FlowInterface>>> may also be used in combination. <<<@NextTask>>> will provide the default next task unless overrided by a method of a <<<@FlowInterface>>> being invoked.
+  Both <<<@NextTask>>> and <<<@FlowInterface>>> may also be used in combination. <<<@NextTask>>> will provide the default next task unless overridden by a method of a <<<@FlowInterface>>> being invoked.
 
   The above configuration has the external flow linked back to the first template.
 

@@ -10,7 +10,7 @@
       
   The example used in this tutorial is the following simple page:
   
-[./images/SectionHttpServer-screenshot.png] SectionHttpServer screenshot.
+[./images/SectionHttpServer-screenshot.png] SectionHttpServer screen shot.
     
   {{{http://sourceforge.net/projects/officefloor/files/maven/maven2/net/officefloor/tutorial/SectionHttpServer/${projectVersion}/SectionHttpServer-${projectVersion}-project.zip/download}Download Tutorial Source}}
 
