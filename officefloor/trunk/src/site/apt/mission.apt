@@ -10,7 +10,7 @@
         Inversion of Control = Dependency Injection + Thread Injection + Continuation Injection
 ---
 
-  Identifying these dimensions has given rise to the software equivalent of a <brick> (paper accepted to {{{http://www.europlop.net/content/accepted-papers}EuroPlop}}).  
+  Identifying these dimensions has given rise to the software equivalent of a <brick> (Thread Injection and Continuation Injection paper accepted to {{{http://www.europlop.net/content/writers-workshops}EuroPlop}}).
   
   OfficeFloor therefore allows software development to be as simple as building walls from bricks.  These walls can then be used together to form buildings and more complex structures - many of which already come prefabricated for you.
 

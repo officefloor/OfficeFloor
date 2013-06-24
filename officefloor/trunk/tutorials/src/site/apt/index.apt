@@ -52,7 +52,7 @@ WoOF
 
 * WoOF Template Extensions
 
-  The following {{{/apidocs/net/officefloor/plugin/woof/template/WoofTemplateExtensionSource.html}WoofTemplateExtensionSource}} implementations are available to extend the functionality of WoOF.
+  The following {{{/apidocs/net/officefloor/plugin/woof/template/WoofTemplateExtensionSource.html}WoofTemplateExtensionSource}} implementations are available to extend the functionality of a WoOF template.
 
 *--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
 || Tutorial                                                    || Description                                               || Covered
