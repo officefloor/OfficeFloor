@@ -57,7 +57,7 @@ EntryPoint Class
 
   The <<<OfficeFloorComet.subscribe(...)>>> method registers subscription to Comet events for the provided interface.  On the first subscribe <<<OfficeFloorComet>>> will establish a connection with the server and start the long polling for events.  On receiving an event <<<OfficeFloorComet>>> will appropriately invoke the handler (interface implementation) with the event.  It will then send another long poll request for the next event.  This means only the handler implementation is required and OfficeFloor takes care of listening for events from the server.
 
-  It is possible to subscribe to more than one interface within the same GWT client.  Please see the {{{../../apidocs/net/officefloor/plugin/comet/api/OfficeFloorComet.html}OfficeFloorComet API}} for further details regarding multiple subscriptions.
+  It is possible to subscribe to more than one interface within the same GWT client.  Please see the {{{../../apidocs/net/officefloor/plugin/gwt/comet/api/OfficeFloorComet.html}OfficeFloorComet API}} for further details regarding multiple subscriptions.
   
   In the case of this tutorial the handle of the event is simply appending the text as the next line in the conversation. 
 

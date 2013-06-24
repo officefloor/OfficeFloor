@@ -48,7 +48,7 @@ TemplateLogic Class
   
 [./images/CometManualApp-add-template-dialog.png] CometApp Add template dialog screen shot.
 
-  For manually handling the published event the method name is specified.  This allows the Server code to intercept all published events from the clients and manually handle them.  In the case of this tutorial, adding the user name to the message before publishing the event.  The parameter to this specified method is always a {{{/apidocs/net/officefloor/plugin/comet/internal/CometEvent.html}CometEvent}}.  It also follows the GWT RPC handling pattern and therefore must notify that successfully serviced the GWT RPC request via the <<<AsyncCallback>>>.
+  For manually handling the published event the method name is specified.  This allows the Server code to intercept all published events from the clients and manually handle them.  In the case of this tutorial, adding the user name to the message before publishing the event.  The parameter to this specified method is always a {{{/apidocs/net/officefloor/plugin/gwt/comet/internal/CometEvent.html}CometEvent}}.  It also follows the GWT RPC handling pattern and therefore must notify that successfully serviced the GWT RPC request via the <<<AsyncCallback>>>.
   
   The typical reason for manually handling the published events is to push them onto a queue for a cluster of web servers.  This enables multiple web servers to be notified of the published event and subsequently publish the event to all the Comet clients.  This is necessary as the Comet client establishes a connection to only one web server in the cluster.
 
@@ -60,9 +60,9 @@ TemplateLogic Class
 
 %{code-snippet|brush-autodetect=1|id=example|file=${basedir}/src/main/java/net/officefloor/tutorial/cometmanualapp/client/ConversationSubscription.java}
 
-  The annotation informs WoOF to dependency inject an implementation of the interface that will allow the server code to publish the {{{/apidocs/net/officefloor/plugin/comet/internal/CometEvent.html}CometEvent}}.
+  The annotation informs WoOF to dependency inject an implementation of the interface that will allow the server code to publish the {{{/apidocs/net/officefloor/plugin/gwt/comet/internal/CometEvent.html}CometEvent}}.
   
-  An interface with this annotation must adhere to the same rules of a {{{/apidocs/net/officefloor/plugin/comet/api/CometSubscriber.html}CometSubscriber}}.
+  An interface with this annotation must adhere to the same rules of a {{{/apidocs/net/officefloor/plugin/gwt/comet/api/CometSubscriber.html}CometSubscriber}}.
   
   OfficeFloor will publish the event with the following details:
   
