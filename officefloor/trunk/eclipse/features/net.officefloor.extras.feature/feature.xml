@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <feature
-      label="OfficeFloor Plugins Feature"
       id="net.officefloor.extras.feature"
+      label="WoOF Extras"
       version="2.13.0"
       provider-name="OfficeFloor">
 
@@ -35,9 +35,8 @@
 
    <plugin
          id="net.officefloor.extras"
-         version="2.13.0"
          download-size="0"
          install-size="0"
-         unpack="true"/>
+         version="2.13.0"/>
 
 </feature>
