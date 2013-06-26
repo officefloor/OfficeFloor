@@ -1,0 +1,13 @@
+<office-floor>
+    <teams>
+        <team name="TEAM" source="PASSIVE"/>
+    </teams>
+    <offices>
+        <office name="OFFICE" source="OFFICE"
+         location="net/officefloor/maven/start/TestOffice.office">
+            <team name="OFFICE_TEAM">
+                <office-floor-team name="TEAM"/>
+            </team>
+        </office>
+    </offices>
+</office-floor>

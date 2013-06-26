@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<model>
+	<list type="OfficeSectionModel" name="office section" />
+	<list type="OfficeTeamModel" name="office team" />
+	<list type="ExternalManagedObjectModel" name="external managed object" />
+	<list type="OfficeManagedObjectSourceModel" name="office managed object source" />
+	<list type="OfficeManagedObjectModel" name="office managed object" />
+	<list type="OfficeEscalationModel" name="office escalation" />
+	<list type="AdministratorModel" name="office administrator" />
+	<list type="OfficeGovernanceModel" name="office governance" />
+	<list type="OfficeStartModel" name="office start" />
+</model>

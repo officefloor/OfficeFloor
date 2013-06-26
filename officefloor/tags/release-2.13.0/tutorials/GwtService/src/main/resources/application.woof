@@ -1,0 +1,16 @@
+<woof>
+  <templates>
+    <template name="game" uri="game" path="Template.woof.html" class="net.officefloor.tutorial.gwtservice.TemplateLogic" x="33" y="37">
+      <extension class="net.officefloor.plugin.gwt.woof.GwtWoofTemplateExtensionSource">
+        <property name="gwt.entry.point.class.name" value="net.officefloor.tutorial.gwtservice.client.GwtAppEntryPoint"/>
+        <property name="gwt.async.service.interfaces" value="net.officefloor.tutorial.gwtservice.client.HighLowGameAsync"/>
+      </extension>
+    </template>
+  </templates>
+  <sections>
+  </sections>
+  <resources>
+  </resources>
+  <exceptions>
+  </exceptions>
+</woof>

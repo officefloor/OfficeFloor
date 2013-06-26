@@ -1,0 +1,16 @@
+<woof>
+
+	<templates>
+		<template name="path" path="Path1" class="Class1" uri="path">
+			<extension
+				class="net.officefloor.model.woof.MockNoChangeWoofTemplateExtensionSource" />
+			<extension
+				class="net.officefloor.model.woof.MockChangeWoofTemplateExtensionSource">
+				<property name="ONE" value="A" />
+				<property name="TWO" value="B" />
+			</extension>
+		</template>
+		<template name="same/uri" path="Path2" class="Class2" uri="same/uri" />
+	</templates>
+
+</woof>

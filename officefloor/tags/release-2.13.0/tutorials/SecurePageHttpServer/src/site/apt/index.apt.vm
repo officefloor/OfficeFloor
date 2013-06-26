@@ -1,0 +1,82 @@
+                                               -----------------------
+                                                 Secure Page Tutorial 
+                                               -----------------------
+					        Daniel Sagenschneider
+                                               -----------------------
+
+  <<Secure Page Tutorial>>
+  
+  This tutorial looks at configuring a page to only be accessed via a secure channel (HTTPS).
+  
+  The below example for this tutorial will implement a simple page to capture card details.  The simple page for this tutorial is as follows:
+    
+[./images/SecurePageHttpServer-screenshot.png] SecurePageHttpServer screen shot.
+  
+  {{{http://sourceforge.net/projects/officefloor/files/maven/maven2/net/officefloor/tutorial/SecurePageHttpServer/${projectVersion}/SecurePageHttpServer-${projectVersion}-project.zip/download}Download Tutorial Source}}
+
+
+
+Secure Page
+
+  To configure the page to always be accessed via a secure channel, the following is the configuration for the page:
+  
+[./images/SecurePageConfiguration-screenshot.png] Secure Page configuration screen shot.
+
+  Checking the secure check box is the only configuration necessary to ensure use of a secure channel (HTTPS) for accessing the page.
+  
+  To ease development, WoOF by default runs with a generic security key that is self signed.  Typically for development and testing this will require trusting the key within the browser to access the page.  This default setup should only be used for development/testing to avoid manual key setup.
+  
+  For production, a trusted third-party signed security key is recommended to be configured.
+  
+  Please also see the {{{/apidocs/net/officefloor/plugin/web/http/location/HttpApplicationLocationManagedObjectSource.html}HttpApplicationLocationManagedObjectSource}} for details on configuring the web application's location for generation of the link URLs.
+
+
+
+Template
+
+  The page template content is as follows:
+
+%{code-snippet|brush=xml|file=${basedir}/src/main/webapp/card.woof.html}
+
+  This is similar HTML to previous tutorials.
+
+
+
+Logic Class
+
+  The logic for the page is the following:
+  
+%{code-snippet|brush-autodetect=1|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/securepagehttpserver/CardLogic.java}
+
+  Again this is similar to previous tutorials.
+
+
+
+Remaining Code
+
+  The main page is included for completeness of the tutorial code.
+  
+%{code-snippet|brush=xml|file=${basedir}/src/main/webapp/main.woof.html}
+
+
+
+Unit Test
+
+  The unit test requests the page:
+  
+   * directly
+   
+   * via a link from another page
+   
+   * sending card details
+   
+  The exception within the page logic ensures rendering the response only occurs over a secure channel (HTTPS).
+
+%{code-snippet|brush-autodetect=1|id=tutorial|file=${basedir}/src/test/java/net/officefloor/tutorial/securepagehttpserver/SecurePageTest.java}
+
+
+
+Next
+
+  The {{{../SecureLinkHttpServer/index.html}next tutorial}} looks at securing a specific link.
+

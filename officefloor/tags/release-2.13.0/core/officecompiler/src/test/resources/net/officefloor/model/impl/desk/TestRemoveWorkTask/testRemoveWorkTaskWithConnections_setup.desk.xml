@@ -1,0 +1,52 @@
+<desk>
+	<external-managed-objects>
+		<external-managed-object name="MO"
+			object-type="java.lang.Object" />
+	</external-managed-objects>
+	<external-flows>
+		<external-flow name="FLOW" argument-type="java.lang.String" />
+	</external-flows>
+	<works>
+		<work name="WORK" source="net.example.ExampleWorkSource">
+			<work-task name="WORK_TASK_A">
+				<task-object name="OBJECT" object-type="java.lang.Object">
+					<external-managed-object name="MO" />
+				</task-object>
+			</work-task>
+			<work-task name="WORK_TASK_B" />
+		</work>
+	</works>
+	<tasks>
+		<task name="TASK_A" work="WORK" task="WORK_TASK_A" return-type="java.lang.Integer">
+			<task-flow name="FLOW_TO_TASK" argument-type="java.lang.Double">
+				<task name="TASK_C" />
+			</task-flow>
+			<task-flow name="FLOW_TO_EXT_FLOW" argument-type="java.lang.String">
+				<external-flow name="FLOW" />
+			</task-flow>
+			<next-task name="TASK_C" />
+			<task-escalation escalation-type="java.lang.Exception">
+				<task name="TASK_C" />
+			</task-escalation>
+			<task-escalation escalation-type="java.lang.Error">
+				<external-flow name="FLOW" />
+			</task-escalation>
+		</task>
+		<task name="TASK_B" work="WORK" task="WORK_TASK_A" return-type="java.lang.String">
+			<next-external-flow name="FLOW" />
+			<!--
+				not including flows and escalations as testing next external flow,
+				however as same work task should have them
+			-->
+		</task>
+		<task name="TASK_C" work="WORK" task="WORK_TASK_B">
+			<task-flow name="FLOW" argument-type="java.lang.Object">
+				<task name="TASK_A" />
+			</task-flow>
+			<next-task name="TASK_A" />
+			<task-escalation escalation-type="java.lang.Exception">
+				<task name="TASK_B" />
+			</task-escalation>
+		</task>
+	</tasks>
+</desk>

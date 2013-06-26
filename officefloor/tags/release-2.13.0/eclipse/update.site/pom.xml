@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<parent>
+		<groupId>net.officefloor.eclipse</groupId>
+		<artifactId>eclipse</artifactId>
+		<version>2.13.0</version>
+	</parent>
+	<artifactId>update.site</artifactId>
+	<name>Eclipse Update Site</name>
+	<description>Generates update site content for OfficeFloor in Eclipse.</description>
+	<packaging>eclipse-update-site</packaging>
+	<properties>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+	</properties>
+	<distributionManagement>
+		<repository>
+			<!-- Deploy to temp to not release site.zip -->
+			<id>Ignore</id>
+			<name>Ignore as using ant to deploy</name>
+			<url>file://${java.io.tmpdir}</url>
+		</repository>
+	</distributionManagement>
+	<dependencies>
+		<dependency>
+			<groupId>${project.groupId}</groupId>
+			<artifactId>net.officefloor.feature</artifactId>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>${project.groupId}</groupId>
+			<artifactId>net.officefloor.woof.feature</artifactId>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>${project.groupId}</groupId>
+			<artifactId>net.officefloor.extras.feature</artifactId>
+			<scope>provided</scope>
+		</dependency>
+	</dependencies>
+	<profiles>
+		<profile>
+			<!-- Profile for building -->
+			<id>build-repositories</id>
+			<activation>
+				<file>
+					<exists>${basedir}/pom.xml</exists>
+				</file>
+			</activation>
+			<repositories>
+				<repository>
+					<!-- OfficeFloor -->
+					<id>officefloor-eclipse</id>
+					<layout>p2</layout>
+					<url>http://www.officefloor.net/update</url>
+				</repository>
+			</repositories>
+		</profile>
+		<profile>
+			<!-- Release Update Site Beta -->
+			<id>release-beta-eclipse-update-site</id>
+			<activation>
+				<property>
+					<name>deploy</name>
+					<value>sourceforge</value>
+				</property>
+			</activation>
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>com.atlassian.maven.plugins</groupId>
+						<artifactId>maven-upload-plugin</artifactId>
+						<executions>
+							<execution>
+								<id>upload-beta-site</id>
+								<phase>deploy</phase>
+								<goals>
+									<goal>upload</goal>
+								</goals>
+								<configuration>
+									<resourceSrc>${project.basedir}/target/site/*</resourceSrc>
+									<url>scp://sagenschneider,officefloor@shell.sourceforge.net</url>
+									<resourceDest>home/frs/project/o/of/officefloor/eclipse/${project.version}</resourceDest>
+									<serverId>repo.officefloor.sf.net</serverId>
+								</configuration>
+							</execution>
+						</executions>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+		<profile>
+			<!-- Release to Update Site -->
+			<id>release-eclipse-update-site</id>
+			<activation>
+				<property>
+					<name>deploy</name>
+					<value>sonatype</value>
+				</property>
+			</activation>
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>com.atlassian.maven.plugins</groupId>
+						<artifactId>maven-upload-plugin</artifactId>
+						<executions>
+							<execution>
+								<id>upload-site</id>
+								<phase>deploy</phase>
+								<goals>
+									<goal>upload</goal>
+								</goals>
+								<configuration>
+									<resourceSrc>${project.basedir}/target/site/*</resourceSrc>
+									<url>scp://sagenschneider,officefloor@shell.sourceforge.net</url>
+									<resourceDest>home/frs/project/o/of/officefloor/eclipse/update</resourceDest>
+									<serverId>repo.officefloor.sf.net</serverId>
+								</configuration>
+							</execution>
+						</executions>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+	</profiles>
+</project>

@@ -1,0 +1,8 @@
+<section>
+	<external-managed-objects>
+		<external-managed-object name="OBJECT_A"
+			object-type="java.lang.Integer" />
+		<external-managed-object name="OBJECT_C"
+			object-type="java.lang.Object" />
+	</external-managed-objects>
+</section>

@@ -1,0 +1,17 @@
+<woof>
+  <templates>
+    <template name="_root_" uri="/" path="template.woof.html" class="net.officefloor.tutorial.securelinkhttpserver.TemplateLogic" secure="false" x="70" y="63">
+      <link name="login" secure="true"/>
+    </template>
+  </templates>
+  <sections>
+  </sections>
+  <governances>
+  </governances>
+  <resources>
+  </resources>
+  <exceptions>
+  </exceptions>
+  <starting>
+  </starting>
+</woof>

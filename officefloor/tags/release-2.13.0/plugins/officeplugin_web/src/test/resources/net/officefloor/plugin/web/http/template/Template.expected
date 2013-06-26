@@ -1,0 +1,38 @@
+<html>
+<body>
+Template Test
+<br />
+
+Provide  BEAN value=tree
+<br />
+
+with a listing of <a href="/uri-beans${URI_SUFFIX}">beans</a>:
+<br />
+<table>
+    <tr>
+        <td>Name</td>
+        <td>Description</td>
+        <td>Property toString</td>
+        <td>Property Value</td>
+    </tr>
+    
+    <tr>
+        <td>one</td>
+        <td>Same</td>
+        <td>toString=A</td>
+        <td>value=A</td>
+    </tr>
+    
+    <tr>
+        <td>two</td>
+        <td>Child</td>
+        <td></td>
+        <td></td>
+    </tr>
+    
+</table>
+<form action="/uri-submit${URI_SUFFIX}">
+    <input type="submit" />
+</form>
+</body>
+</html>

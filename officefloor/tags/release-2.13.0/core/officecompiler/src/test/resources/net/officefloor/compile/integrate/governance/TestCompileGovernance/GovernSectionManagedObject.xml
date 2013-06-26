@@ -1,0 +1,40 @@
+<context>
+	<office-floor>
+		<teams>
+			<team name="TEAM" source="ONE_PERSON" />
+		</teams>
+		<offices>
+			<office name="OFFICE" source="OFFICE" location="office">
+				<team name="OFFICE_TEAM">
+					<office-floor-team name="TEAM" />
+				</team>
+			</office>
+		</offices>
+	</office-floor>
+	<office>
+		<teams>
+			<team name="OFFICE_TEAM" />
+		</teams>
+		<governances>
+			<governance name="GOVERNANCE" source="CLASS">
+				<properties>
+					<property name="class.name" value="${testcase}$SimpleGovernance" />
+				</properties>
+				<team name="OFFICE_TEAM" />
+			</governance>
+		</governances>
+		<sections>
+			<section name="SECTION" source="CLASS"
+				location="${testcase}$SectionWithManagedObject">
+				<responsibility name="RESPONSIBILITY">
+					<team name="OFFICE_TEAM" />
+				</responsibility>
+				<sub-section>
+					<section-managed-object name="managedObject">
+						<govern governance="GOVERNANCE" />
+					</section-managed-object>
+				</sub-section>
+			</section>
+		</sections>
+	</office>
+</context>
