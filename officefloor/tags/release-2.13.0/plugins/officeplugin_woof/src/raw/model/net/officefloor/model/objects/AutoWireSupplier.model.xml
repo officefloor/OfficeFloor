@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<model>
+	<interface>AutoWireObjectSourceModel</interface>
+	<field type="String" name="supplier source class name" />
+	<list type="PropertySourceModel" name="property source" />
+</model>

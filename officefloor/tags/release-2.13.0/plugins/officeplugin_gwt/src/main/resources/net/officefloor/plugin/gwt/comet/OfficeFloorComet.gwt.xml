@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<module rename-to="test">
+
+	<!-- Enable use of RPC to call on the Server -->
+	<inherits name="com.google.gwt.user.RemoteService" />
+
+	<!-- Generate adapters for the CometSubscriber interfaces -->
+	<generate-with
+		class="net.officefloor.plugin.gwt.comet.generate.CometAdapterGenerator">
+		<when-type-assignable
+			class="net.officefloor.plugin.gwt.comet.api.CometSubscriber" />
+	</generate-with>
+
+	<!-- Generate map of adapters -->
+	<generate-with
+		class="net.officefloor.plugin.gwt.comet.generate.CometAdapterMapGenerator">
+		<when-type-is class="net.officefloor.plugin.gwt.comet.internal.CometAdapterMap" />
+	</generate-with>
+
+	<!-- Code -->
+	<source path="api" />
+	<source path="internal" />
+</module>

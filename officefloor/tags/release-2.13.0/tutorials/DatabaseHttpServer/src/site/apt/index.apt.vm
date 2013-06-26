@@ -1,0 +1,100 @@
+                                               -----------------------
+                                      Dependency Injection HTTP Server Tutorial 
+                                               -----------------------
+					        Daniel Sagenschneider
+                                               -----------------------
+
+  <<Dependency Injection HTTP Server Tutorial>>
+
+  This tutorial demonstrates the dependency injection of a <<<DataSource>>>.
+  
+  The example used in this tutorial is the following simple application to manage rows within a database table.
+  
+[./images/DatabaseHttpServer-screenshot.png] DatabaseHttpServer screen shot.
+  
+  {{{http://sourceforge.net/projects/officefloor/files/maven/maven2/net/officefloor/tutorial/DatabaseHttpServer/${projectVersion}/DatabaseHttpServer-${projectVersion}-project.zip/download}Download Tutorial Source}}
+
+
+
+Setup the database
+
+  The following is the <<<application.woof>>> configuration for the application.
+
+[./images/database-woof.png] application.woof configuration.
+
+  The configuration identifies to trigger the setup of the database on start-up of the application.  The following is the code triggered which creates the table and inserts a row.
+
+%{code-snippet|brush-autodetect=1|id=example|file=${basedir}/src/main/java/net/officefloor/tutorial/databasehttpserver/Setup.java}
+
+  The dependencies to inject by OfficeFloor is defined by the method's parameters.  OfficeFloor will reflectively interrogate the method and inject the necessary dependencies on invoking it.
+  
+  The above method is invoked on start-up of the application.  Covered later in this tutorial is dependency injecting the <<<DataSource>>> to service a request.
+
+
+
+Configuring Objects
+
+  Objects for dependency injection are configured in the <<<application.objects>>> file contained at the root of the class path.  
+  
+  Providing this file is optional.  It is anticipated that features such as WoOF annotations and {{{/apidocs/net/officefloor/autowire/spi/supplier/source/SupplierSource.html}SupplierSource}} implementations will provide the necessary dependencies for running a web application.  See the {{{../index.html}other tutorials}} for more information.  The file is however supported to extend WoOF web applications with additional custom dependencies.
+  
+  The configuration of the dependency injected <<<DataSource>>> is as follows.
+
+%{code-snippet|brush=xml|file=${basedir}/src/main/resources/application.objects}
+
+  The <<<DataSource>>> is provided by a {{{/apidocs/net/officefloor/frame/spi/managedobject/source/ManagedObjectSource.html}ManagedObjectSource}} implementation.  The <<<type>>> attribute is necessary as OfficeFloor will dependency inject by matching on type.
+  
+  Properties to configure the {{{/apidocs/net/officefloor/frame/spi/managedobject/source/ManagedObjectSource.html}ManagedObjectSource}} implementations can be provided in the above file or within a properties file.  The reason for using a property file is that different property files can be used for each environment.  See the System property on the {{{/apidocs/net/officefloor/autowire/impl/AutoWirePropertiesImpl.html}AutoWirePropertiesImpl}} to specify an environment directory location to find the property files.
+  
+  The contents of <<<DataSource>>> property file is as follows.
+
+%{code-snippet|brush=plain|file=${basedir}/src/main/resources/datasource.properties}
+
+  Objects to be dependency injected within OfficeFloor are made available by {{{/apidocs/net/officefloor/frame/spi/managedobject/source/ManagedObjectSource.html}ManagedObjectSource}} implementations.  Many dependency injection frameworks are based solely on the object's <<<Class>>> and its necessary dependency injection configuration.  OfficeFloor goes beyond this by providing more capabilities to the object such as invoking {{{/apidocs/net/officefloor/frame/spi/managedobject/source/ManagedObjectExecuteContext.html}processes}}.  For example the socket listener within a stand-alone WoOF HTTP Server is actually a {{{/apidocs/net/officefloor/plugin/socket/server/http/source/HttpServerSocketManagedObjectSource.html}HttpServerSocketManagedObjectSource}} that invokes a task to service the HTTP request.
+  
+  The {{{/apidocs/net/officefloor/plugin/managedobject/clazz/ClassManagedObjectSource.html}ClassManagedObjectSource}} is available to provide the typical POJO dependency injection.
+
+
+
+Dependency Injection
+  
+  The following is the content of the template. 
+
+%{code-snippet|brush=xml|file=${basedir}/src/main/webapp/Template.woof.html}
+
+  The table data is provided by the following method.
+
+%{code-snippet|brush-autodetect=1|id=getRows|file=${basedir}/src/main/java/net/officefloor/tutorial/databasehttpserver/Template.java}
+
+  As the method is matched to the template by name, OfficeFloor uses the method's parameters to identify the necessary dependencies to be injected.  In this case the only dependency is the <<<DataSource>>> which was configured above.
+  
+  WoOF auto-wires dependency injection based on type.  Auto-wiring dependencies based on type is adequate (and much easier) for the majority of applications.  WoOF's underlying OfficeFloor framework does provide manual dependency configuration, however this is seldom used as OfficeFloor allows qualifying dependencies for auto-wiring.
+  
+  The handling of <<< #\{addRow\} >>> submission is via the following method.
+
+%{code-snippet|sh-params=first-line:25|brush-autodetect=1|id=addRow|file=${basedir}/src/main/java/net/officefloor/tutorial/databasehttpserver/Template.java}
+
+  The method requires two parameters to be dependency injected.  The <<<DataSource>>> is dependency injected as above.  The <<<Row>>> object below is also dependency injected by its WoOF annotation.  See the {{{../index.html}other tutorials}} for more details on WoOF annotations.
+  
+%{code-snippet|brush-autodetect=1|id=example|file=${basedir}/src/main/java/net/officefloor/tutorial/databasehttpserver/Row.java}
+ 
+  The delete row functionality is similar to the add functionality.
+
+%{code-snippet|sh-params=first-line:41|brush-autodetect=1|id=deleteRow|file=${basedir}/src/main/java/net/officefloor/tutorial/databasehttpserver/Template.java}
+
+  After the add or delete method is executed the template is rendered again for the response back to the client.  The rendering of the page executes the <<<getRows(...)>>> method again to display the changes within the table.
+
+
+
+Unit Test
+
+  The unit test requests the page and then adds a row and deletes a row.
+
+%{code-snippet|brush-autodetect=1|id=test|file=${basedir}/src/test/java/net/officefloor/tutorial/databasehttpserver/DatabaseHttpServerTest.java}
+
+
+
+Next
+
+  The {{{../TransactionHttpServer/index.html}next tutorial}} covers managing transactions.
+

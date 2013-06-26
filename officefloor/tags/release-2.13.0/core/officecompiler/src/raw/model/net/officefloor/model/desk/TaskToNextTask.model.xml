@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<model>
+	<field type="String" name="next task name" />
+	<field type="TaskModel" name="previous task" end-field="next task" />
+	<field type="TaskModel" name="next task" end-list="previous task" />
+</model>

@@ -1,0 +1,45 @@
+/*
+ * License
+ */
+package net.officefloor;
+
+import javax.annotation.Generated;
+
+import net.officefloor.model.AbstractModel;
+import net.officefloor.model.ItemModel;
+import net.officefloor.model.RemoveConnectionsAction;
+
+@Generated("net.officefloor.model.generate.ModelGenerator")
+public class EmptyModel extends AbstractModel implements ItemModel<EmptyModel> {
+
+    public static enum EmptyEvent {
+    
+    }
+
+    /**
+     * Default constructor.
+     */
+    public EmptyModel() {
+    }
+
+    /**
+     * Convenience constructor allowing XY initialising.
+     */
+    public EmptyModel(
+      int x
+    , int y
+    ) {
+        this.setX(x);
+        this.setY(y);
+    }
+
+
+
+    /**
+     * Remove Connections.
+     */
+    public RemoveConnectionsAction<EmptyModel> removeConnections() {
+        RemoveConnectionsAction<EmptyModel> _action = new RemoveConnectionsAction<EmptyModel>(this);
+        return _action;
+    }
+}

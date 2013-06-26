@@ -1,0 +1,43 @@
+// Script to verify the install pom.xml correctly installs OfficeFloor within the test
+
+import java.io.*;
+
+// Log verifying installation
+System.out.println("Verifying install from basedir " + basedir.getAbsolutePath());
+
+// Method to simplify verifying files exist
+void verifyFileExists(String fileName, boolean isExecutable) {
+
+	// Find the OfficeFloor extracted directory
+	File extractDir = null;
+	for (File checkFile : basedir.listFiles()) {
+		if (checkFile.getName().startsWith("OfficeFloor-")) {
+			extractDir = checkFile;
+		}
+	}
+	if ( extractDir == null ) {
+		throw new FileNotFoundException("Unable to find OfficeFloor extracted directory");
+	}
+
+	// Verify file exists
+	System.out.print("    " + fileName);
+	System.out.flush();
+	File file = new File(extractDir, fileName); 
+	if ( !file.isFile() ) {
+		throw new FileNotFoundException("Missing expected file: " + file.getName() + "  [" + file.getPath() + "]");
+	}
+	if ( isExecutable ) {
+		if ( !file.canExecute() ) {
+			throw new IOException("File must be executable: " + file.getName() + "  [" + file.getPath() + "]");
+		}
+		System.out.print(" (executable)");
+	}
+	System.out.println();
+}
+
+// Ensure various files are created for successful installation
+verifyFileExists( "bin/officebuilding", true );
+verifyFileExists( "bin/officefloor", true );
+verifyFileExists( "config/OfficeFloor.properties", false );
+verifyFileExists( "lib/boot.jar", false );
+// others but enough checked to ensure installation for test

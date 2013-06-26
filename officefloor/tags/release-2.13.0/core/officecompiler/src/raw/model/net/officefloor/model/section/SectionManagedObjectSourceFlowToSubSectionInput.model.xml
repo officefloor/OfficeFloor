@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<model>
+	<field type="String" name="sub section name" />
+	<field type="String" name="sub section input name" />
+	<field type="SectionManagedObjectSourceFlowModel" name="section managed object source flow"
+		end-field="sub section input" />
+	<field type="SubSectionInputModel" name="sub section input"
+		end-list="section managed object source flow" />
+</model>
