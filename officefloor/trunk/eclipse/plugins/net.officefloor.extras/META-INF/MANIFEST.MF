@@ -2,11 +2,11 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Eclipse OfficeFloor Extras
 Bundle-SymbolicName: net.officefloor.extras;singleton:=true
-Bundle-Version: 2.13.0
+Bundle-Version: 2.14.0
 Bundle-Vendor: OfficeFloor
-Require-Bundle: net.officefloor.core;bundle-version="2.13.0",
- net.officefloor.ui;bundle-version="2.13.0",
- net.officefloor.woof;bundle-version="2.13.0"
+Require-Bundle: net.officefloor.core;bundle-version="2.14.0",
+ net.officefloor.ui;bundle-version="2.14.0",
+ net.officefloor.woof;bundle-version="2.14.0"
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Eclipse-RegisterBuddy: net.officefloor.core,
  net.officefloor.ui,
@@ -49,10 +49,10 @@ Import-Package: org.eclipse.core.resources,
  org.eclipse.swt.widgets,
  org.eclipse.ui
 Bundle-ClassPath: .,
- officeplugin_gwt-2.13.0.jar,
- officeplugin_jdbc-2.13.0.jar,
- officeplugin_jndi-2.13.0.jar,
- officeplugin_jpa-2.13.0.jar,
- officeplugin_json-2.13.0.jar,
- officeplugin_launch-2.13.0.jar,
+ officeplugin_gwt-2.14.0.jar,
+ officeplugin_jdbc-2.14.0.jar,
+ officeplugin_jndi-2.14.0.jar,
+ officeplugin_jpa-2.14.0.jar,
+ officeplugin_json-2.14.0.jar,
+ officeplugin_launch-2.14.0.jar,
  geronimo-jpa_2.0_spec-1.1.jar

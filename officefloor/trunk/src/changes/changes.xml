@@ -2,7 +2,10 @@
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/changes/1.0.0 http://maven.apache.org/xsd/changes-1.0.0.xsd">
 	<body>
-		<release version="2.13.0" date="In SVN" description="HTTP Template extension plug-ins">
+		<release version="2.14.0" date="In SVN" description="Cometd WoOF template extension">
+			<action type="add" dev="sagenschneider">Cometd WoOF template extension</action>
+		</release>
+		<release version="2.13.0" date="2013-06-27" description="HTTP Template extension plug-ins">
 			<action type="add" dev="sagenschneider">HTTP Template extension plug-ins</action>
 		</release>
 		<release version="2.12.0" date="2013-03-24" description="Raw AJAX support">
