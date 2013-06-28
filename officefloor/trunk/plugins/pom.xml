@@ -14,6 +14,7 @@
 	<description>Plug-ins OfficeFloor to provide specific functionality</description>
 	<modules>
 		<module>officeplugin_base</module>
+		<module>officeplugin_cometd</module>
 		<module>officeplugin_ejb</module>
 		<module>officeplugin_gwt</module>
 		<module>officeplugin_jdbc</module>
