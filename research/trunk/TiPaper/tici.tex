@@ -52,11 +52,11 @@
 \renewcommand{\algorithmcfname}{ALGORITHM}
 
 % Page heads
-\markboth{D. Sagenschneider}{Thread Injection and Continuation Injection}
+\markboth{D. Sagenschneider}{Software Design based on patterns within an Office}
 
 
-\title{Thread Injection and Continuation Injection}
-\author{DANIEL SAGENSCHNEIDER \affil{daniel@officefloor.net}}
+\title{Software Design based on patterns within an Office}
+\author{DANIEL SAGENSCHNEIDER \affil{OfficeFloor, daniel@officefloor.net}}
 
 \begin{abstract}
 Inverting control to enable the lower-level layer components control over their
@@ -80,12 +80,12 @@ applications bottom-up to better align to modern development methodologies that
 evolve application architectures upwards.
 \end{abstract}
 
-\category{X.Y.Z}{To}{be}[determined]
+\category{}{}{}[]
 
 \terms{Design, Performance, Standardization}
 \keywords{Component Orchestration, Continuation Injection, Implicit Thread, Thread Injection}
 
-\acmformat{Sagenschneider, D. 2013.Thread Injection and Continuation Injection.}
+\acmformat{Sagenschneider, D. 2013.Software Design based on patterns within an Office.}
 
 \copyr{Copyright 2013 is held by the author}
 
@@ -122,11 +122,34 @@ workshop at the 18th European Conference on Pattern Languages of Programs
 
 \section{Introduction}
 
+Model Software after the people interactions occuring within an Office.
+
+Process existed in business before information technology began to automate business processes.
+
+Business process was resolved by the people working in Offices undertaking the tasks within the process.
+
+Current software design patterns have constraints that dissallow these Office interaction patterns to occur in software.
+
+It will be assumed that the reader will be familiar with the existing design patterns.
+
+The patterns presented are implementing patterns within the OfficeFloor middleware framework.  They lift these constraints.
+
+Further usage patterns of OfficeFloor are listed in the appendix and will be part of future work.
+
+To be able to relate the Office Patterns to Software Design Patterns the following analogies are made:
+\begin{description}
+  \item[Thread] is mapped to the concept of a Person (Worker).
+  \item[Method] is the functionality of a Task (particular step of a process).
+\end{description}
+
+
+\section{Limitation of existing Software Design Patterns for web servers}
+
 The \textsc{thread-per-request} pattern \cite{thread-per-request} (that can be
 considered a refinement of the \textsc{synchronous multi-threaded} pattern
 \cite{proactor}) is used as the basis of popular modern web
-servers\footnote{Apache, Microsoft IIS, Nginx and JEE identified from the
-Netcraft November 2012 survey.  Google Web Server is also identified as
+servers\footnote{Apache, Microsoft IIS, Nginx and JEE implementations identified
+from the Netcraft November 2012 survey.  Google Web Server is also identified as
 popular.} to service requests concurrently.
 
 Many modern web servers improve their concurrency of servicing high loads of
@@ -147,16 +170,16 @@ Microsoft's HTTP.sys/WAS, and JEE Servlets.}.  Using the
 implementations of dynamic web content servicing at the cost of decreased
 concurrency for the web server.
 
-Due to demands on web servers to resolve such issues as the reverse 10K problem
-\cite{reverse-ten-k-problem}, the \textsc{thread-per-request} pattern is
-requiring developers to manually manage the threading issues involved with
-increased concurrency.  Should the developer want to use asynchronous I/O
-operations for increased concurrency, the developer is required to block the
-request's thread of control, undertake the concurrent operations and continue
-the request's thread of control when all concurrent operations are
-complete\footnote{JEE Servlet 3.x AsyncContext is allowing asynchronous
-operations but requires the developer to still be involved in thread
-synchronisation complexities.}.
+Due to high concurrency demands on web servers to resolve such issues as the
+reverse 10K problem \cite{reverse-ten-k-problem}, the
+\textsc{thread-per-request} pattern is requiring developers to manually manage
+the threading issues involved with increased concurrency.  Should the developer
+want to use asynchronous I/O operations for increased concurrency, the developer
+is required to block the request's thread of control, undertake the concurrent
+operations and continue the request's thread of control when all concurrent
+operations are complete\footnote{JEE Servlet 3.x AsyncContext is allowing
+asynchronous operations but requires the developer to still be involved in
+thread synchronisation complexities.}.
 
 Before using the \textsc{proactor} pattern to service dynamic web content, its
 drawback of scheduling and controlling outstanding operations \cite[p.
@@ -167,143 +190,633 @@ not follow a standard sequence of operations and therefore requires a more
 generic solution that is ``designed carefully to support prioritization and
 cancellation'' \cite[p. 8]{proactor} of the operations.
 
-The \textsc{thread injection} and \textsc{continuation injection} patterns
-presented in this paper provide a generic solution to schedule/control
-operations and enables the use of asynchronous operations for increased
-concurrency in servicing dynamic web content.  Furthermore, using the
-\textsc{thread injection} and \textsc{continuation injection} patterns with the
-\textsc{dependency injection} pattern \cite{ioc} provides the decoupling
-necessary for an \textsc{inversion of control} pattern.
+The patterns presented in this paper address the constraints and limitations
+identified by modelling themselves after patterns occurring within an Office.
 
-As the \textsc{thread injection} and \textsc{continuation injection} patterns
-provide implementing algorithms for the \textsc{proactor} pattern participants,
-the \textsc{proactor} pattern participants have been summarised in table
-\ref{tab:ProactorParticipants}.
-
-\begin{table}[t]
-\tbl{Proactor pattern participants.}{%
-\begin{tabular}{|l|l|}
-\hline
-\bfseries Participant & \bfseries Responsibilities \\
-\hline
-Proactor Initiator & Initiates the Asynchronous Operation and \\ 
- & registers both a Completion Dispatcher and \\
- & Completion Handler with the Asynchronous \\
- & Operation Processor.\\
-\hline
-Completion Dispatcher and & Notified of the completion and handles the \\
-Completion Handler & completion of an Asynchronous Operation. \\
-\hline
-Asynchronous Operation & Operation to be undertaken. \\
-\hline
-Asynchronous Operation Processor & Execution of the Asynchronous Operations. \\
-\hline
-\end{tabular}}
-\label{tab:ProactorParticipants}
-\end{table}
-
-This paper uses the canonical form to present the \textsc{thread injection},
-\textsc{continuation injection} and \textsc{inversion of control} patterns.  The
-paper first presents a motivating example for both the \textsc{thread injection}
-pattern and \textsc{continuation injection} pattern.  The \textsc{continuation
-injection} pattern and the \textsc{thread injection} pattern are then presented.
-After presenting the patterns individually, the \textsc{thread injection} and
-\textsc{continuation injection} patterns are used together to realise an
-\textsc{inversion of control} pattern.  This resulting \textsc{inversion of control}
-pattern provides resolution of the motivating example.  Discussion is then
-provided on using these patterns to implement a web server.
-
-
-\section{A Motivating Example}
-
-A motivating example for the \textsc{thread injection} and \textsc{continuation
-injection} patterns is servicing dynamic web content.  Servicing a typical
-request for dynamic web content may use both cached/static content and data
-retrieved from a database.
-
-Servicing requests with the \textsc{thread-per-request} pattern has requests
-involving no I/O or heavy I/O to be serviced by the same pool of threads.  If,
-for example, the database I/O becomes slow causing all threads to block,
-requests requiring only cached content are not prioritised as they are starved
-of a thread.
-
-Furthermore, for requests requiring only in memory cached content, the
-\textsc{thread-per-request} pattern continues to use a separate thread that
-incurs the cost of one or more thread-context switches.  If the web server knew
-further details about the nature of each request, it should allow the request to
-borrow the thread to reduce thread-context switching.
-
-Table \ref{tab:example_request_operations} lists the operations for servicing an
-example HTTP request.  The operations executed differ based on whether there is
-a cache hit or miss.  Ideally, as explained above, all operations up to and
-including the \texttt{Retrieve data from cache} should be borrowing the thread
-to avoid a thread-context switch.  A separate thread should then only be used if
-the \texttt{Retrieve data from database} operation needs to be executed so that
-the main thread does not block causing potential for thread starvation.  The
-remaining operations should then again be borrowing the thread to avoid
-thread-context switching.
-
-\begin{table}[t]
-\tbl{Example operations for servicing a HTTP request from database and cache. The dependencies of each operation are also listed.}{%
-\begin{tabular}{|l|l|l|}
-\hline
-\bfseries Cache Miss Operations & \bfseries Cache Hit Operations & \bfseries Dependencies \\
-\hline
-Read data from socket & Read data from socket & Selector, Socket \\
-\hline
-Parse HTTP request & Parse HTTP request & Data read \\
-\hline
-Dispatch HTTP request & Dispatch HTTP request & HTTP request \\
-\hline
-Validate client data & Validate client data & HTTP request \\
-\hline
-Retrieve data from cache & Retrieve data from cache & Client data, \\
-(cache miss) & (cache hit) & Cache \\
-\hline
-Retrieve data from database & - & Client data, \\
- & & Database connection \\
-\hline
-Render HTTP response & Render HTTP response & Database data \\
-\hline
-Write HTTP response & Write HTTP response & HTTP response, \\ 
- & & Socket \\
-\hline
-\end{tabular}}
-\label{tab:example_request_operations}
-\end{table}
+All patterns are also given an analogy name with the Office to keep all pattern
+names similar.  In some cases patterns will also have an alternate Software
+Design based name.
 
 
 
-\section{Continuation Injection}
+\section{Patterns for executing Tasks (\textsc{thread injection})}
+
+The following patterns model the execution of methods after the way tasks are
+undertaken within an office.  The implementation notes at the end provide
+details on how to implement the patterns.  The use of all these patterns
+together can be given the Software Design pattern name \textsc{thread injection}
+due to similarity of thread management to dependency management for
+\textsc{dependency injection}~\cite{ioc}.
+
+\subsection{\textsc{\textbf{team}}}
+
+\subsubsection*{Alternate name}
+
+\textsc{thread pool} \cite{thread-per-request}.
+
+\subsubsection*{Context}
+
+Within an Office work loads can be far above that possible by a single person. 
+This is resolved within an Office by creating a Team of people to concurrently
+undertake the tasks.
+
+Developers write code of a task (function/method) for a single thread (person).
+
+\subsubsection*{Problem}
+
+How to handle code \ldots  \textbf{TODO:} Clarify problem.
+
+\subsubsection*{Forces}
+
+Developer writes sequential code.
+
+Tasks are all of a similar nature.  
+
+\subsubsection*{Solution}
+
+Use a pool of threads to execute the tasks concurrently.
+
+\subsubsection*{Consequences} 
+
+Having more people allows getting more work done.
+Similarly having more threads allows more tasks to be executed.
+
+The people in the Office need to coordinate so the tasks get done correctly and
+efficiently.
 
 
-\subsection{Context}
+
+\subsection{\textsc{\textbf{categorise task}}}
+
+\subsubsection*{Context}
+
+To assign a task to a particular team when there are multiple teams, a
+description of the task is required.  This description allows categorising
+similar tasks together to be undertaken by a particular team for improved
+efficiencies.  For example, a financial task should be undertaken by the
+finance team.
+
+\subsubsection*{Problem}
+
+Can the method provide a description of itself for being categorised into a group?
+
+\subsubsection*{Forces}
+
+The method name is free text and is unlikely to follow a naming convention that
+allows parsing out a category.
+
+The developer should not have to write the description of the method.
+
+\subsubsection*{Solution}
+
+Use the parameter types of the method to categorise the method.
+
+For example, all methods that declare a database connection parameter can be
+grouped into a category of tasks that are likely to interact with the database.
+
+For finer grained categorisation, annotations of the parameter types may also be
+used.
+
+\subsubsection*{Consequences}
+
+The method name is not required for categorising.
+
+The developer does not require to provide any more details except the parameters
+the method requires.
+
+Methods that have unused parameters may be incorrectly categorised.
+
+\subsubsection*{Related Patterns}
+
+\textsc{responsible team} provides the particular teams to execute the categorised methods.
+
+
+
+\subsection{\textsc{\textbf{responsible team}}}
+
+\subsubsection*{Context}
+
+To accomplish the process, there are different teams responsible for differing
+tasks in the process.  For example, the financial team will do the finance tasks
+and the software development team will do the coding tasks.
+
+Having this split in responsibility over the categorised tasks allows managing
+the team sizes.  For example, near the end of the financial year the finance
+team may be increased in size for the additional load of financial year end
+tasks.  The software development team however would not be changed in size as
+the development tasks would stay the same in number.
+
+\subsubsection*{Problem}
+
+Can the \textsc{thread pool} be identified as responsible for a particular
+category of methods?
+
+\subsubsection*{Forces}
+
+The possibly configured thread pool name is free text and is unlikely
+to follow a naming convention that allows parsing out its responsible task
+categories.
+
+The developer should not have to provide code to make decisions over thread pool
+responsibilities.
+
+\subsubsection*{Solution}
+
+Configure each \textsc{thread pool} with an attribute containing the type(s)
+that defines its responsible category(s).  Methods are then executed by matching
+on their parameter types against the configured thread pool responsibility type.
+ A default thread pool is used if no match occurs.
+
+For example, configure the \textsc{thread pool} responsible for all database
+interaction with the database connection type.  As each method is categorised by
+the \textsc{categorise task} pattern, the association of method \ldots
+\textbf{TODO: work out matching description}.
+
+\subsubsection*{Consequences}
+
+There will always be a person available in each team to execute their respective
+responsible tasks.  Subsequently, if there is a significant increase in the
+number of tasks in one category the people do not all become focused on these
+tasks to the detriment of the other categories.
+
+\subsubsection*{Related Patterns}
+
+Is a sequence on the \textsc{team} to identify responsibility for executing
+tasks.
+
+
+\subsection{\textsc{\textbf{too busy}}}
+
+\subsubsection*{Alternate name}
+
+Admission Control \cite{seda}. 
+
+\subsubsection*{Context}
+
+Teams may not be able to complete all tasks within the required period of time. 
+This is reported to a manager to take an action to reduce work loads.
+
+The thread pool queues tasks for execution when all threads of the pool are
+exhausted. 
+
+\subsubsection*{Problem}
+
+Can the thread pool notify a manager that it is too busy to complete all tasks
+within a required period of time?
+
+\subsubsection*{Forces}
+
+\subsubsection*{Solution}
+
+\subsubsection*{Consequences}
+
+\subsubsection*{Related Patterns}
+
+
+
+\subsection{Implementation of the execute task patterns}
+
+\subsubsection*{Background}
+
+Both the \textsc{thread-per-request} pattern \cite{thread-per-request} and the
+\textsc{proactor} pattern \cite{proactor} enable a different thread of control
+for the execution of a request/component.  These patterns allow for concurrent
+execution by utilising many threads.  For efficiencies the \textsc{Thread Pool}
+pattern \cite{thread-per-request} is commonly used to pool threads to reduce
+thread management overheads.
+
+As identified by the \textsc{proactor} pattern, the threading ``must be designed
+carefully to support prioritization and cancellation'' \cite[p. 8]{proactor} of
+the execution of components.  Both the \textsc{thread-per-request} pattern and
+the \textsc{proactor} pattern, however, do not define algorithms for
+prioritisation and cancellation of components and leaves this to the developer.
+
+Performance analysis of web servers identifies the importance of this
+prioritisation tuning
+\cite{tuning-important,low-server-footprint,tuning-os-important}.
+Serving static web content follows a similar sequence of operations making the
+use of a pool of threads sufficient.  In contrast, servicing dynamic content has
+significantly varying operations.  Utilising a pool of threads to service all
+dynamic content operations can result in tuning trade-offs that may result in
+performance degradation of the web server during particular load profiles (e.g.
+high load of requests for database data that are starving requests for cached
+data of a thread).  Better isolation of operations is necessary to reduce
+trade-offs in performance tuning.
+
+Having an ability to cancel operations is important to avoid overloading.  As
+load increases on the server, the resources available will be exhausted causing
+delays in servicing requests and in some scenarios cause the server to crash
+(e.g. exhausting available memory).  Operations must be able to be cancelled to
+reduce the load on the server.  However, only operations causing bottlenecks
+should be cancelled (e.g. a request for cached data should not be cancelled if
+it is the database that is overloaded).
+
+\subsubsection*{Implementation}
+
+The component is the object that wraps the method to provide a
+standard interface for the method.  All components are constructed via extrinsic
+\textsc{dependency injection} \cite{ioc}.  The construction of the component is
+encapsulated in the \texttt{DependencyInjectionFactory} and as a result a
+standard interface can be provided for execution of the components by a thread
+of control (Listing \ref{lst:ThreadInjectionInterfaces}).  This enables for a
+single \texttt{ComponentExecutor} implementation to execute differing methods.
+
+\lstset{caption=\textsc{thread injection} pattern interfaces\protect\footnotemark.}
+\begin{lstlisting}[float,label=lst:ThreadInjectionInterfaces]
+
+    interface ComponentExecutor {
+        void executeComponent(String componentId, Object parameter);
+    }
+
+    interface DependencyInjectionFactory {
+        Component createComponent(String componentId);
+        Type[] getRequiredDependencyTypes(String componentId);
+    }
+
+    interface Component {
+        void execute(Object parameter); 
+        void cancel(Object parameter, Exception cause);
+    }
+\end{lstlisting}
+\footnotetext{An example implementation of the
+\texttt{DependencyInjectionFactory} is wrapping Spring's \cite{spring}
+\texttt{DefaultListableBeanFactory} to implement
+\texttt{createComponent(\ldots)} by calling \texttt{getBean(\ldots)} and
+implement \texttt{getRequiredDependencyTypes(\ldots)} by recursively calling
+\texttt{getBeanDefinition(\ldots)}/\texttt{getDependsOn()} to create the 
+list of types.}
+
+To invoke a component, the client code invokes the
+\texttt{executeComponent(\ldots)} method (Listing
+\ref{lst:ThreadInjectionInterfaces}) with the identifier of the desired
+component along with an argument for the parameter of the component.
+Figure \ref{fig:ExecuteComponentSequenceDiagram} provides a sequence diagram of
+executing a component.  The \texttt{ComponentExecutor} uses the
+\texttt{DependencyInjectionFactory} to construct the appropriate
+\texttt{Component} and then assigns it for execution by one of the many
+developer configured thread pools based on the meta-data of the component.
+
+\begin{figure}[!t]
+\centering
+\includegraphics[width=6in]{ExecuteComponentSequenceDiagram}
+\caption{Sequence diagram of invoking \texttt{executeComponent(\ldots)}.}
+\label{fig:ExecuteComponentSequenceDiagram}
+\end{figure}
+
+The prioritisation is achieved by the
+\texttt{getRequiredDependencyTypes(\ldots)} method providing the extrinsic
+\textsc{dependency injection} \cite{ioc} meta-data for the
+component\footnote{\textsc{dependency injection} frameworks using qualification
+to identify dependencies of the same type may return a type object containing
+both class and qualifier rather than just a class.  The thread pool matching may
+then incorporate the qualifier.}.  The developer configures one or more thread
+pools responsible for components with a particular type of
+dependency\footnote{Thread pools may be associated with more than one dependency
+type.}.  The component is then matched by its required dependency types to a
+thread pool responsible for one or more of its dependency types\footnote{The
+\texttt{componentId} may also be used for very fine grained mapping.}.  The
+\texttt{execute(\ldots)} method of the component (Listing
+\ref{lst:ThreadInjectionInterfaces}) is then invoked by a thread from the
+matching thread pool to execute the implementation of the component.
+This provides the necessary isolation of differing components for improved
+tuning of the server.
+
+For components not having dependencies (nor dependencies of any
+performance significance), a default thread pool is configured by the developer
+for their execution.  This ensures all components are mapped to a
+thread pool.  It also means that thread pools need only be configured for
+dependencies requiring isolation.
+
+The \texttt{cancel(\ldots)} method (Listing \ref{lst:ThreadInjectionInterfaces})
+provides the means for the \texttt{ComponentExecutor} to cancel the component.
+The \texttt{ComponentExecutor} will cancel new components for a particular
+thread pool when queuing the component for a thread will result in exceeding a
+particular threshold\footnote{A sufficient threshold would be ensuring the wait
+time, determined by a running average of execution time multiplied against the
+number of components currently in the queue, is below a certain time.}.  Each
+thread pool may have its own thresholds particular to its responsible dependency
+types.  As components are mapped to particular thread pools, this ensures only
+the appropriate components are cancelled.
+
+Once cancelled, the \texttt{ComponentExecutor} may discard the component.  The
+implementation of the \texttt{can\-cel(\ldots)} method is specific to each
+component.  This is to allow appropriate application behaviour to occur on
+cancelling components.
+
+
+\subsubsection*{Consequences}
+
+The isolation provided by using multiple thread pools enables improved tuning of
+the server.  Tuning the thread pools (such as restricting the number of threads
+or changing the pool's thread nice values) allows prioritising threads and
+subsequently prioritising groups of related components.
+
+As each thread pool is executing components for a particular dependency (or set
+of dependencies), this allows for adaptive resource management and admission
+control regarding the dependency \cite{seda}.  This enables both the number of
+threads and dependencies to be dynamically altered to improve throughput.
+However, when maximum throughput is reached additional components for execution
+above this threshold can be cancelled.
+
+To improve performance of runtime decisions the mapping of component to thread
+pool may be cached.  As the dependencies for each component is static, at
+application start up time the \texttt{ComponentExecutor} may preprocess and
+cache the mapping of \texttt{Component} to thread pools to reduce runtime
+decision overheads.  This pre-mapping of components may also provide warnings
+where dependencies of a component make it possible to map the component to
+multiple thread pools.  Different conflict mapping resolutions may be employed,
+however, ordering the thread pools and assigning components based on first match
+is a sufficiently adequate algorithm.
+
+For low load servers where a single thread pool is sufficient, the
+\textsc{thread injection} pattern can cause increased complexity for developer
+configuration.  While the \textsc{thread injection} pattern provides the
+flexibility to focus the tuning of isolated components by tuning their mapped
+thread pool, it does put the burden on the developer to understand thread
+related performance issues (e.g. costs related to thread stack memory and
+thread-context switching) and the performance of the dependencies (along with
+their related components).
+
+The implementation looses its ability to effectively prioritise and cancel
+components if the component dependencies are too similar.
+When used with the \textsc{thread-per-request} pattern within a web server, all
+request handling for dynamic content is likely to use a database connection.
+While this will allow isolation of requests for static content, it will not
+isolate requests for dynamic content serviced from cached data rather than
+database data.  This is because the request handler (component) will depend on
+the database connection to retrieve the data if the data is not cached.  Request
+handling will, therefore, need to be segmented into smaller components to reduce
+the occurrences of sets of common dependencies between components, which results
+in grouping components all onto the same thread pool.
+
+The \textsc{thread pool} pattern \cite{thread-per-request} is used to reduce
+overheads of thread management for improved efficiency in execution of the
+thread pool's responsible components.  To achieve further efficiencies the
+implementation of the thread pool may be specific to the dependency.  For
+example, the thread pool may contain multiple threads for concurrent execution
+of components, a single thread for serial execution of components, or no
+threads and execute components by borrowing the thread to reduce thread-context
+switching.
+
+
+\subsubsection*{Related implementations}
+
+The implementation can be considered a style of cohort scheduling \cite{cohort}
+that groups components with similar dependencies and infers from that similar
+functionality.  However, this implementation works at the application scheduling
+level and allows the use of any Operating System thread scheduling algorithms.
+
+The Staged Event-Driven Architecture (SEDA) \cite{seda} provides an
+implementation without the use of the \textsc{dependency injection} pattern. 
+SEDA directly maps components to a stage and subsequently a thread pool. 
+However, the SEDA pipeline has increased thread-context switching as the stage
+boundaries are hard, which disallows threads to be borrowed.
+
+Dependency capsules \cite{dependency-capsules} follows the idea of isolating
+components that require dependencies to specific thread pools.  However, it
+requires a thread-context switch back to a main thread for executing components
+without dependencies.
+
+OfficeFloor \cite{officefloor} implements the \textsc{thread injection} pattern
+and will be discussed later in this paper as it also implements the
+\textsc{continuation injection} pattern to provide an \textsc{inversion of control}
+implementation.
+
+\textbf{TODO:} Go through previous paper and pull in all related implementations. 
+
+
+
+
+\section{Patterns for co-ordinating tasks (\textsc{continuation injection})}
+
+The following patterns model the co-ordination of methods after the way tasks
+are co-ordinated within an office.  The implementation notes at the end provide
+details on how to implement the patterns.  The use of all these patterns
+together can be given the Software Design pattern name \textsc{continuation
+injection} due to similarity of continuation management to dependency management
+for \textsc{dependency injection}~\cite{ioc}.
+
+
+\subsection{\textsc{\textbf{hand-off}}}
+
+\subsubsection*{Context}
+
+Teams hand-off to each other based on the category of the next task.  For
+example, after financing a project the finance team would hand-off to the
+software development team to build the application.
+
+Method invocations tightly couple the thread of control and disallow changing
+the thread of control in invoking another method.
+
+\subsubsection*{Problem}
+
+Enable changing the thread of control when invoking another method?
+
+\subsubsection*{Forces}
+
+The invoking of a method should still be intuitive for the developer.
+
+\subsubsection*{Solution}
+
+Provide an interface as a method parameter that has methods that asynchronously
+invoke the respective target methods.
+
+\subsubsection*{Consequences}
+
+No return value is available from the invoked method.
+
+Each hand-off will incur the cost of a thread context-switch.
+
+\subsubsection*{Related Patterns}
+
+
+
+\subsection{\textsc{\textbf{escalation}}}
+
+\subsubsection*{Context}
+
+Within an office a person will escalate issues to their manager.  However, for a
+method the exception from a method is thrown to the invoking method.
+
+\subsubsection*{Problem}
+
+Escalate an exception to a manager rather than the caller.
+
+\subsubsection*{Forces}
+
+Method exceptions follow the thread of control's stack back to an appropriate
+\texttt{try~\ldots~catch} block for handling the exception.
+
+\subsubsection*{Solution}
+
+Intercept the exception and \textsc{hand-off} to a manager handling method.
+
+\subsubsection*{Consequences}
+
+Caller does not deal with exceptions from \textsc{hand-off} method invocations.
+
+The caller will not be aware of failures in its invoked methods.  It is,
+however, unreasonable to have the caller responsible for all downstream issues
+in the process flow.
+
+\subsubsection*{Related Patterns}
+
+\textsc{hand-off} is used to enable the exception to be asynchronously handled
+by another method.
+
+
+\subsection{\textsc{\textbf{define process flows}}}
+
+\subsubsection*{Context}
+
+The process within an office is a sequence of tasks where the next task depends
+on what occurs with the current task.  The process can be changed by altering
+the next task for each outcome of the current task.
+
+Method invocation prevents this flexibility as the methods must be altered to
+change the sequence of method execution.
+
+\subsubsection*{Problem}
+
+Provide change in execution order of methods without requiring to change the
+methods.
+
+\subsubsection*{Forces}
+
+Method invocation is tighlty coupled at the code level.
+
+\subsubsection*{Solution}
+
+Use \textsc{hand-off} and, via configuration, map the hand off interface method
+to the method to execute.  Furthermore, provide an implicit hand off on
+completion of a method to execute a next method if no other hand-off is
+triggered.
+
+\subsubsection*{Consequences}
+
+Configuration maps the flow of methods rather than being hard-coded within the
+method.
+
+\subsubsection*{Related Patterns}
+
+\textsc{hand-off} is used to enable the indirection for configuration mapping of
+hand-offs and handling methods.
+
+
+\subsection{\textsc{\textbf{do your work}}}
+
+\subsubsection*{Context}
+
+Within the process flow a team may be assigned to execute a sequence of tasks. 
+Rather than passing the tasks around to different people in the team, it is more
+efficient for one person to complete the tasks without the cost of hand-offs.
+
+\subsubsection*{Problem}
+
+Use the same thread to execute the sequence of methods when the methods hand-off
+back to the same thread pool to avoid excessive thread-context switching.
+
+\subsubsection*{Forces}
+
+The \textsc{hand-off} is asynchronous.
+
+\subsubsection*{Solution}
+
+Before the asynchronous hand-off, check if the thread for the next method is of
+the same responsible thread pool and if so execute the next method
+synchronously (i.e. with the invoking thread of control).
+
+\subsubsection*{Consequences}
+
+Thread context switch is reduced for sequential methods of the same responsible
+thread pool.
+
+\subsubsection*{Related Patterns}
+
+Is a sequence on \textsc{hand-off} to reduce thread context switching.
+
+
+\subsection{\textsc{\textbf{wait to proceed}}}
+
+\subsubsection*{Alternate name}
+
+Future \textbf{TODO: find reference}
+
+\subsubsection*{Context}
+
+\subsubsection*{Problem}
+
+\subsubsection*{Forces}
+
+\subsubsection*{Solution}
+
+\subsubsection*{Consequences}
+
+\subsubsection*{Related Patterns}
+
+
+\subsection{\textsc{\textbf{record information}}}
+
+\subsubsection*{Alternate name}
+
+\textsc{flyweight}~\cite{gof}.
+
+\subsubsection*{Context}
+
+With an office information is recorded so that later tasks can retrieve this
+information.
+
+Methods may only use the arguments supplied from the calling method\footnote{The
+method may also access implicit references via its containing object}.
+
+\subsubsection*{Problem}
+
+Can the method retreive information from previous methods other than its calling
+method.
+
+\subsubsection*{Forces}
+
+Method invocation requires the caller to provide all parameters to the invoked
+method.
+
+\subsubsection*{Solution}
+
+Use \textsc{dependency injection}~\cite{ioc} to inject cached dependencies as
+the arguments to the method.
+
+\subsubsection*{Consequences}
+
+As the dependencies provide cached state, they allow all downstream methods to
+retrieve the state.
+
+Making the dependency state mutable allows further downstream methods awareness
+of changes in information as the tasks in the process execute.
+
+\subsubsection*{Related Patterns}
+
+Is a sequence on \textsc{dependency injection}~\cite{ioc} to cache dependencies
+and inject them as arguments to the method.
+
+
+\subsection{Implementation of the co-ordinate tasks patterns}
+
+\subsubsection*{Background}
 
 Both the \textsc{thread-per-request} pattern \cite{thread-per-request} (basis of
 many mainstream web servers\footnote{For popular web servers (Netcraft November
 2012 survey) dynamic web content is serviced by CGI/FastCGI with for example PHP
 scripts, Microsoft's HTTP.sys/WAS, and JEE Servlets.}) and the \textsc{proactor}
 pattern \cite{proactor} (basis of event-driven web servers) impose tight
-coupling on the collaboration of components.  The \textsc{thread-per-request}
-pattern enables invoking components by synchronous methods, which is intuitive
-for developers \cite[p. 2]{proactor}.  In contrast, the \textsc{proactor}
-pattern enables asynchronously invoking a constructed component by registering
-it for execution by another thread of control (allowing to execute components
-concurrently).  In both patterns, they tightly couple the collaboration of
-components as the \textsc{thread-per-request} pattern must have the invoker
-provide the thread of control and the \textsc{proactor} pattern must have the
-invoker construct the invoked component.
-
-
-\subsection{Problem}
-
-\textbf{Components provide re-usable discrete pieces of functionality
-(application behaviour) that may be developed by different developers.  To
-ensure greater re-usability of a component, how can the collaboration of the
-components be loosely coupled?}
-
-
-\subsection{Forces}
+coupling on the collaboration of components (objects wrapping the execution of a
+method).  The \textsc{thread-per-request} pattern enables invoking components by
+synchronous methods, which is intuitive for developers \cite[p. 2]{proactor}. 
+In contrast, the \textsc{proactor} pattern enables asynchronously invoking a
+constructed component by registering it for execution by another thread of
+control (allowing to execute components concurrently).  In both patterns, they
+tightly couple the collaboration of components as the
+\textsc{thread-per-request} pattern must have the invoker provide the thread of
+control and the \textsc{proactor} pattern must have the invoker construct the
+invoked component.
 
 The \textsc{thread-per-request} pattern imposes a synchronous interface that
 prevents asynchronous use of components.  As the number of downstream systems
@@ -356,16 +869,14 @@ component.  To enable re-use of these components the interface to invoke
 components should be standardised.
 
 
-\subsection{Solution}
+\subsubsection*{Implementation}
 
-\textbf{Provide a context object to the component to enable indirectly invoking other components.}
-
-The \textsc{continuation injection} pattern relies on providing the
-\texttt{ComponentContext} (Listing \ref{lst:ContinuationInjectionInterfaces}) to the
-component.  The \texttt{ComponentContext} contains a mapping of
-\texttt{continuationId} to a handling component.  As each mapping is a
-continuation (''goto'' for executing a component), this allows injecting the
-necessary continuations into the component.
+On executing a component, provide the \texttt{ComponentContext} (Listing
+\ref{lst:ContinuationInjectionInterfaces}) to the component.  The
+\texttt{ComponentContext} contains a mapping of \texttt{continuationId} to a
+handling component.  As each mapping is a continuation (''goto'' for executing a
+component), this allows injecting the necessary continuations into the
+component.
 
 The \texttt{ComponentContext} for a component is constructed via a
 \texttt{ComponentContextFactory} (Listing \ref{lst:ContinuationInjectionInterfaces})
@@ -487,26 +998,26 @@ Also, as state is shared by dependencies, the \texttt{Future} does not provide a
 return value.  This further decouples the invocation as the invoking component
 is not tightly coupling the expected return type for the invocation.
 
-Exceptions are handled by being mapped to a \texttt{continuationId}.  The
-component invokes the \texttt{handle\-Excep\-tion(\ldots)} method with the
-exception\footnote{For easier development of components, the component's
-\texttt{execute(\ldots)} method signature may allow throwing the exception which
-is caught by a wrapping executor that calls the \texttt{handleException(\ldots)}
-method with the caught exception.}.  The \texttt{handleException(\ldots)} method
-is implemented by mapping the exception type to a \texttt{continuationId} and
-invoking the \texttt{doContinuation(\ldots)} method with the exception as the
-argument.  Continuations for specific exception types of the component may be
-configured by the developer.  The developer will also configure ''catch all''
-continuations for the application to handle exceptions from any component to
-ensure all exceptions are handled (e.g. handling of the runtime non-checked
-exceptions).  This allows default handling of exceptions within the application
-and gives the component the ability to override only as necessary.  This is
-similar to \texttt{catch} blocks for handling exceptions at different levels of
-the method call hierarchy.  It also reduces the configuration for developers by
-only having to provide the overriding exception handling configuration for
-components.  The invoking component is, therefore, decoupled from handling the
-invoked component's exceptions, as the exceptions are handled by other
-components.
+Exceptions from the methods are handled by being mapped to a
+\texttt{continuationId}.  The component invokes the
+\texttt{handle\-Excep\-tion(\ldots)} method with the exception\footnote{For
+easier development of components, the component's \texttt{execute(\ldots)}
+method signature may allow throwing the exception which is caught by a wrapping
+executor that calls the \texttt{handleException(\ldots)} method with the caught
+exception.}.  The \texttt{handleException(\ldots)} method is implemented by
+mapping the exception type to a \texttt{continuationId} and invoking the
+\texttt{doContinuation(\ldots)} method with the exception as the argument. 
+Continuations for specific exception types of the component may be configured by
+the developer.  The developer will also configure ''catch all'' continuations
+for the application to handle exceptions from any component to ensure all
+exceptions are handled (e.g. handling of the runtime non-checked exceptions). 
+This allows default handling of exceptions within the application and gives the
+component the ability to override only as necessary.  This is similar to
+\texttt{catch} blocks for handling exceptions at different levels of the method
+call hierarchy.  It also reduces the configuration for developers by only having
+to provide the overriding exception handling configuration for components.  The
+invoking component is, therefore, decoupled from handling the invoked
+component's exceptions, as the exceptions are handled by other components.
 
 The \texttt{continueComponent()} method (Listing
 \ref{lst:ContinuationInjectionInterfaces}) enables re-executing the current
@@ -584,14 +1095,11 @@ remove this restriction by transforming the argument to the necessary type for
 the handling component.}.
 
 
-\subsection{Example}
+\subsubsection*{Example}
 
-The \texttt{Retrieve data from cache} operation (Table
-\ref{tab:example_request_operations}) from the motivating example will be used
-as an example of \textsc{continuation injection}.  Listing
-\ref{lst:Example_Method_Operation} shows the example developer implementation
-code.  A generic component implementation is used to reflectively invoke the
-\texttt{retrieveData(\ldots)} method. It will:
+Listing \ref{lst:Example_Method_Operation} shows the example developer
+implementation code.  A generic component implementation is used to reflectively
+invoke the \texttt{retrieveData(\ldots)} method. It will:
 \begin{enumerate}
   \item Obtain an instance of the \texttt{CacheOperation} via the \texttt{getState(\ldots)} method.
   \item Obtain both the \texttt{key}\footnote{\texttt{key} is a continuation argument from the previous component.} and \texttt{cache} again via the \texttt{getState(\ldots)} method.
@@ -628,21 +1136,8 @@ Continuations from the \texttt{retrieveData(\ldots)} method are:
   \item \texttt{IOException} which is mapped to a component providing an error message page.  It may also be mapped to \texttt{Retrieve data from database} to attempt to continue servicing the request.
 \end{itemize}
 
-The continuation mapping configuration (Component Orchestration) for all the
-operations in the motivating example is shown in figure
-\ref{fig:ExampleComponentOrchestration}.  Each operation is contained in a
-component with the continuations being mapped to the appropriate handling
-components.
 
-\begin{figure}[!t]
-\centering
-\includegraphics[width=4.5in]{ContinuationInjectionComponentOrchestration}
-\caption{Example component orchestration configuration for the Motivating Example.}
-\label{fig:ExampleComponentOrchestration}
-\end{figure}
-
-
-\subsection{Consequences}
+\subsubsection*{Consequences}
 
 The mapping of \texttt{continuationId} to \texttt{componentId} (component) is
 contained within configuration.  This enables changing the handling component
@@ -657,28 +1152,10 @@ concurrent execution of sequential chains of components.  This allows for the
 intuitiveness of the \textsc{synchronous multi-threaded} pattern \cite{proactor}
 for handling concurrency.
 
-As continuations asynchronously invoke components, they need not only be invoked
-by components. Listing \ref{lst:DC_interface} illustrates a possible interface
-that can be injected into dependencies to invoke a component\footnote{No
-\texttt{continutionId} is necessary as may inject multiple instances
-representing the different continuations.}.  This enables dependencies to
-effectively become Active Objects \cite{active-object} when
-necessary\footnote{The web server HTTP(S) socket dependency would, for example,
-typically be implemented by invoking an injected continuation to service
-requests.}.
-
-\lstset{caption=Injected interface for a dependency to invoke a continuation (making the dependency an Active Object)}
-\begin{lstlisting}[float,label=lst:DC_interface]
-
-    interface DependencyContinuation {
-        void doContinuation(Object parameter);
-    }
-\end{lstlisting}
-
 Without the graphical configuration of Component Orchestration, understanding
 the collaboration of components would become difficult due to the indirection
 involved.  This is especially relevant when components are implemented as
-methods/functions, which can result in a large number of components needing to
+methods, which can result in a large number of components needing to
 be configured together\footnote{Future work will present the patterns
 OfficeFloor \cite{officefloor} uses to encapsulate Component Orchestration
 configuration for re-use to avoid its graphical representation from becoming
@@ -720,7 +1197,7 @@ the \texttt{parameter} would be used as a visitor (\textsc{visitor} pattern
     }
 \end{lstlisting}
 
-When implementing components as functions, the functions will not be pure.  As
+When implementing components with functions, the functions will not be pure.  As
 state is shared between components by mutable state within dependencies,
 functions will need to cause side effects (mutate state) to share state with
 other components (functions).  Therefore, caution is required in developing a
@@ -729,439 +1206,70 @@ particular mutations in state.  This is necessary to avoid invalid side effects
 due to changes in configuration that results in re-ordering the execution of the
 components.
 
-Creating isolated \texttt{DependencyContext}s provides the isolation of threads
-within a process.  The \textsc{continuation injection} pattern continuation
-mapping configuration may have qualifying attributes that isolate components to
-particular \texttt{DependencyContext}s (Listing
-\ref{lst:ContinuationInjectionInterfaces}).  The continuation may be configured
-to invoke the component (and its subsequent invoked components) within a new
-\texttt{DependencyContext} to not share state.  To share state between the
-isolated \texttt{Depend\-ency\-Context}s the isolated contexts may be created
-inside a shared context.  Each dependency type is bound by developer
-configuration to be within the isolated context or the shared context.  The
-instance of a dependency bound to an isolated context may only be used by
-component instances within the same isolated context instance.
-However, the instance of a dependency bound to the shared context is re-usable
-across all component instances.  This replicates the concepts of a thread and a
-process by creating isolated ''thread'' contexts within a shared ''process''
-context.
 
+\subsubsection*{Related implementations}
 
-\subsection{Related Patterns}
-
-The \textsc{dependency injection} pattern \cite{ioc} is necessary to enable
-managing state between components\footnote{As the components contain the
-functionality (application behaviour), the \textsc{dependency injection} pattern
-in the context of the relationship to the \textsc{continuation injection}
-pattern may better be described as the \textsc{state injection} pattern.}.
-
-The \textsc{continuation injection} pattern provides an implementing algorithm
-for the \textsc{proactor} pattern's Proactor Initiator, Asynchronous Operation,
-and Completion Dispatcher/Handler participants.
-
-The \textsc{thread injection} pattern, explained later in this paper, provides a
-means for prioritisation and cancellation of the Asynchronous Operations
-required for implementing the remaining Asynchronous Operation Processor
-participant of the \textsc{proactor} pattern.
-
-
-\subsection{Known Usage}
-
-\textsc{continuation injection} is an implementation of the Actor Model
-\cite{actors} as it adheres to the principles of the Actor Model.  The component
-is the actor.  The asynchronous communication between components decouples the continuation
+This provides an implementation of the Actor Model \cite{actors} as it adheres
+to the principles of the Actor Model.  The component is the actor.  The
+asynchronous communication between components decouples the continuation
 argument (message) from the sending component (actor).  The \texttt{componentId}
 provides an address for a component (actor).  The provided
 \texttt{continuationId}s restricts the components (actors) that may be used.
 
-Systems integrated with a queuing infrastructure are heavy weight
-implementations of the \textsc{continuation injection} pattern.  The
-continuation is the queue's client interface with the queue infrastructure
-providing the necessary indirection to map the handling component of a message
-(continuation argument).  Error queues are continuations for handling
-exceptions.  The individual systems can, therefore, be considered components
-that have queues (continuations) injected into them.
+The implementation can also be considered a form of continuation-passing style
+\cite{continuations} except that the continuation is injected rather than passed
+as a parameter.  The added benefit of injecting the continuation is that the
+component is free to depend on as many continuations as necessary.  It also
+means that as the application evolves the component encapsulates potential
+changes requiring different continuations.  The indirection allows managing
+these changes as configuration changes rather than code changes.
 
-\textsc{continuation injection} can also be considered a form of
-continuation-passing style \cite{continuations} except that the continuation is
-injected rather than passed as a parameter.  The added benefit of injecting the
-continuation is that the component is free to depend on as many continuations as
-necessary.  It also means that as the application evolves the component
-encapsulates potential changes requiring different continuations.  The
-indirection provided by the \textsc{continuation injection} pattern allows
-managing these changes as configuration changes rather than code changes.
-
-Subsequently, event-driven architectures are an implementation of the
-\textsc{continuation injection} pattern.  A component runs in a loop waiting for
-events\footnote{The main loop component can be avoided by mapping events
-directly to handling components.}.  On receiving an event, the component invokes
-its appropriate continuations to have the event handled by other components.
-Event-driven architectures are, however, a more rigid implementation as
-components are in most cases only synchronously invoked.
-
-OfficeFloor \cite{officefloor} implements the \textsc{continuation injection}
-pattern and will be discussed later in this paper as it also implements the
-\textsc{thread injection} pattern to provide an \textsc{inversion of control}
-implementation.
+\textbf{TODO:} see preious paper for further related implementations.
 
 
 
-\section{Thread Injection}
+\section{Patterns for re-use of Tasks (\textsc{method inversion of control})}
 
 
-\subsection{Context}
+\subsection{\textsc{\textbf{task defines itself}}}
 
-Both the \textsc{thread-per-request} pattern \cite{thread-per-request} and the
-\textsc{proactor} pattern \cite{proactor} enable a different thread of control
-for the execution of a request/component.  These patterns allow for concurrent
-execution by utilising many threads.  For efficiencies the \textsc{Thread Pool}
-pattern \cite{thread-per-request} is commonly used to pool threads to reduce
-thread management overheads.
+\subsubsection*{Alternate name} \textsc{method inversion of control}.
 
-As identified by the \textsc{proactor} pattern, the threading ``must be designed
-carefully to support prioritization and cancellation'' \cite[p. 8]{proactor} of
-the execution of components.  Performance analysis of web servers identifies the
-importance of this prioritisation tuning
-\cite{tuning-important,low-server-footprint,tuning-os-important}.  Both the
-\textsc{thread-per-request} pattern and the \textsc{proactor} pattern do not
-define algorithms for prioritisation and cancellation of components and leaves
-this to the developer.
+\subsubsection*{Context}
 
+\subsubsection*{Problem}
 
-\subsection{Problem}
+\subsubsection*{Forces}
 
-\textbf{Components provide re-usable discrete pieces of functionality
-(application behaviour) that may be developed by different developers.  The
-execution of these components requires a thread of control.  How can the
-component be loosely coupled to a thread of control to enable the execution of
-the application to be improved?}
+\subsubsection*{Solution}
 
+\subsubsection*{Consequences}
 
-\subsection{Forces}
-
-Tuning the prioritisation is important to the performance of a web server.
-Serving static web content follows a similar sequence of operations making the
-use of a pool of threads sufficient.  In contrast, servicing dynamic content has
-significantly varying operations.  Utilising a pool of threads to service all
-dynamic content operations can result in tuning trade-offs that may result in
-performance degradation of the web server during particular load profiles (e.g.
-high load of requests for database data that are starving requests for cached
-data of a thread).  Better isolation of operations is necessary to reduce
-trade-offs in performance tuning.
-
-Having an ability to cancel operations is important to avoid overloading the web
-server.  As load increases on the server, the resources available to the web
-server will be exhausted causing delays in servicing requests and in some
-scenarios cause the web server to crash (e.g. exhausting available memory). 
-Operations must be able to be cancelled to reduce the load on the server. 
-However, only operations causing bottlenecks should be cancelled (e.g. a request
-for cached data should not be cancelled if it is the database that is
-overloaded).
-
-Both prioritisation and cancellation in the execution of components is specific
-to the application behaviour.  To enable portable implementations of components,
-a standard interface is necessary that provides application specific information
-regarding prioritisation and cancellation of the components.
-
-
-\subsection{Solution}
-
-\textbf{Use multiple thread pools and, based on meta-data of the component, assign execution of the component to a particular thread pool.}
-
-All components are constructed via extrinsic \textsc{dependency injection}
-\cite{ioc}.  The construction of the component is encapsulated in the
-\texttt{DependencyInjectionFactory} and as a result a standard interface can be
-provided for execution of the components by a thread of control (Listing
-\ref{lst:ThreadInjectionInterfaces}).  This enables for a single
-\texttt{ComponentExecutor} implementation to execute differing implementations
-of components.
-
-\lstset{caption=\textsc{thread injection} pattern interfaces\protect\footnotemark.}
-\begin{lstlisting}[float,label=lst:ThreadInjectionInterfaces]
-
-    interface ComponentExecutor {
-        void executeComponent(String componentId, Object parameter);
-    }
-
-    interface DependencyInjectionFactory {
-        Component createComponent(String componentId);
-        Type[] getRequiredDependencyTypes(String componentId);
-    }
-
-    interface Component {
-        void execute(Object parameter); 
-        void cancel(Object parameter, Exception cause);
-    }
-\end{lstlisting}
-\footnotetext{An example implementation of the
-\texttt{DependencyInjectionFactory} is wrapping Spring's \cite{spring}
-\texttt{DefaultListableBeanFactory} to implement
-\texttt{createComponent(\ldots)} by calling \texttt{getBean(\ldots)} and
-implement \texttt{getRequiredDependencyTypes(\ldots)} by recursively calling
-\texttt{getBeanDefinition(\ldots)}/\texttt{getDependsOn()} to create the 
-list of types.}
-
-To invoke a component, the client code invokes the
-\texttt{executeComponent(\ldots)} method (Listing
-\ref{lst:ThreadInjectionInterfaces}) with the identifier of the desired
-component along with an argument for the parameter of the component.
-Figure \ref{fig:ExecuteComponentSequenceDiagram} provides a sequence diagram of
-executing a component.  The \texttt{ComponentExecutor} uses the
-\texttt{DependencyInjectionFactory} to construct the appropriate
-\texttt{Component} and then assigns it for execution by one of the many
-developer configured thread pools based on the meta-data of the component.
-
-\begin{figure}[!t]
-\centering
-\includegraphics[width=6in]{ExecuteComponentSequenceDiagram}
-\caption{Sequence diagram of invoking \texttt{executeComponent(\ldots)}.}
-\label{fig:ExecuteComponentSequenceDiagram}
-\end{figure}
-
-From the perspective of the component, the developer is able to configure which
-thread pool will execute each component.  This effectively injects the thread
-for execution in a similar way to injecting a dependency for use.
-
-The prioritisation is achieved by the
-\texttt{getRequiredDependencyTypes(\ldots)} method providing the extrinsic
-\textsc{dependency injection} \cite{ioc} meta-data for the
-component\footnote{\textsc{dependency injection} frameworks using qualification
-to identify dependencies of the same type may return a type object containing
-both class and qualifier rather than just a class.  The thread pool matching may
-then incorporate the qualifier.}.  The developer configures one or more thread
-pools responsible for components with a particular type of
-dependency\footnote{Thread pools may be associated with more than one dependency
-type.}.  The component is then matched by its required dependency types to a
-thread pool responsible for one or more of its dependency types\footnote{The
-\texttt{componentId} may also be used for very fine grained mapping.}.  The
-\texttt{execute(\ldots)} method of the component (Listing
-\ref{lst:ThreadInjectionInterfaces}) is then invoked by a thread from the
-matching thread pool to execute the implementation of the component.
-This provides the necessary isolation of differing components for improved
-tuning of the server.
-
-For components not having dependencies (nor dependencies of any
-performance significance), a default thread pool is configured by the developer
-for their execution.  This ensures all components are mapped to a
-thread pool.  It also means that thread pools need only be configured for
-dependencies requiring isolation.
-
-The \texttt{cancel(\ldots)} method (Listing \ref{lst:ThreadInjectionInterfaces})
-provides the means for the \texttt{ComponentExecutor} to cancel the component.
-The \texttt{ComponentExecutor} will cancel new components for a particular
-thread pool when queuing the component for a thread will result in exceeding a
-particular threshold\footnote{A sufficient threshold would be ensuring the wait
-time, determined by a running average of execution time multiplied against the
-number of components currently in the queue, is below a certain time.}.  Each
-thread pool may have its own thresholds particular to its responsible dependency
-types.  As components are mapped to particular thread pools, this ensures only
-the appropriate components are cancelled.
-
-Once cancelled, the \texttt{ComponentExecutor} may discard the component.  The
-implementation of the \texttt{can\-cel(\ldots)} method is specific to each
-component.  This is to allow appropriate application behaviour to occur on
-cancelling components.
-
-
-\subsection{Example}
-
-Table \ref{tab:example_request_thread_pools} provides an example set of thread
-pools for the motivating example.  Each operation in the motivating example is
-encapsulated into a component, with each component invoking the next component
-(operation) in the sequence.  A thread pool is configured for components with a
-\texttt{Database connection}.  As the \texttt{Database connection} is only
-available via extrinsic \textsc{dependency injection}, all components requiring
-I/O with the database must depend on the \texttt{Database connection} and are
-subsequently mapped to be executed by a thread from the \texttt{Database} thread
-pool.  The remaining components have their own thread pools allowing them to
-continue to be executed even if the database I/O is causing thread starvation
-within its own thread pool.
-
-\begin{table}[t]
-\tbl{Example of assigning execution of components to thread pools by dependency type}{%
-\begin{tabular}{|l||l||l|}
-\hline
-\bfseries Thread Pool & \bfseries Dependency Type & \bfseries Asynchronous Operation \\
-\hline
-Network & Selector & Read data from socket \\
-\hline
-Database & Database connection & Retrieve data from database \\
-\hline
-Default & - & Parse HTTP request, \\
-& & Dispatch HTTP request, \\
-& & Validate client data, \\ 
-& & Retrieve data from cache, \\
-& & Render HTTP response, \\
-& & Write HTTP response \\
-\hline
-\end{tabular}}
-\label{tab:example_request_thread_pools}
-\end{table}
-
-The result for the motivating example is that the operations for servicing the
-cached request can now be prioritised.  This can occur even if the database
-driver has become non-responsive blocking all threads attempting to use a
-database connection.  Furthermore, as the application becomes more complex with
-an increasing number of downstream systems (e.g. reverse 10K problem
-\cite{reverse-ten-k-problem}), each downstream system's performance impacts may
-be isolated by assigning each downstream system's communication dependency its
-own thread pool.  This has requests that require a slow downstream system to be
-deprioritised, allowing other requests to be serviced.
-
-
-\subsection{Consequences}
-
-The isolation provided by using multiple thread pools enables improved tuning of
-the server.  Tuning the thread pools (such as restricting the number of threads
-or changing the pool's thread nice values) allows prioritising threads and
-subsequently prioritising groups of related components.
-
-As each thread pool is executing components for a particular dependency (or set
-of dependencies), this allows for adaptive resource management and admission
-control regarding the dependency \cite{seda}.  This enables both the number of
-threads and dependencies to be dynamically altered to improve throughput.
-However, when maximum throughput is reached additional components for execution
-above this threshold can be cancelled.
-
-To improve performance of runtime decisions the mapping of component to thread
-pool may be cached.  As the dependencies for each component is static, at
-application start up time the \texttt{ComponentExecutor} may preprocess and
-cache the mapping of \texttt{Component} to thread pools to reduce runtime
-decision overheads.  This pre-mapping of components may also provide warnings
-where dependencies of a component make it possible to map the component to
-multiple thread pools.  Different conflict mapping resolutions may be employed,
-however, ordering the thread pools and assigning components based on first match
-is a sufficiently adequate algorithm.
-
-The \textsc{proactor} pattern's Asynchronous Operation Processor participant can
-be implemented with the \textsc{thread injection} pattern to prioritise and cancel
-Asynchronous Operations.  The Asynchronous Operation Processor is implemented by
-passing the Asynchronous Operation as the argument for the \texttt{Component}
-parameter.  Components are designed specific to Asynchronous Operations so they
-represent the necessary dependencies of the Asynchronous Operation.  On
-executing the component, the component provides the necessary dependencies to
-the Asynchronous Operation and then executes it.  Therefore, as the components
-are assigned to their appropriate thread pools, so are the Asynchronous
-Operations within those components.  This provides an Asynchronous Operation
-Processor that can provide prioritisation and cancellation of Asynchronous
-Operations.
-
-For low load servers where a single thread pool is sufficient, the
-\textsc{thread injection} pattern can cause increased complexity for developer
-configuration.  While the \textsc{thread injection} pattern provides the
-flexibility to focus the tuning of isolated components by tuning their mapped
-thread pool, it does put the burden on the developer to understand thread
-related performance issues (e.g. costs related to thread stack memory and
-thread-context switching) and the performance of the dependencies (along with
-their related components).
-
-The \textsc{thread injection} pattern looses its ability to effectively
-prioritise and cancel components if the component dependencies are too similar. 
-When used with the \textsc{thread-per-request} pattern within a web server, all
-request handling for dynamic content is likely to use a database connection. 
-While this will allow isolation of requests for static content, it will not
-isolate requests for dynamic content serviced from cached data rather than
-database data.  This is because the request handler (component) will depend on
-the database connection to retrieve the data if the data is not cached.  Request
-handling will, therefore, need to be segmented into smaller components to reduce
-the occurrences of sets of common dependencies between components, which results
-in grouping components all onto the same thread pool.
-
-
-\subsection{Related Patterns}
-
-The \textsc{thread injection} pattern utilises information provided by the
-\textsc{dependency injection} pattern.  The \textsc{thread injection} pattern
-can be used in isolation of the \textsc{dependency injection} pattern by passing
-in the component itself (rather than the parameter) and mapping each component
-(by \texttt{componentId} or component implementing type) directly to a thread
-pool.  This, however, involves increased configuration for the developer and may
-become invalid should components change their dependencies as the application
-evolves.  Therefore, it is recommended to use \textsc{thread injection} in
-combination with \textsc{dependency injection} to map components by dependencies
-to thread pools to reduce configuration and mapping errors.
-
-Utilising the \textsc{thread injection} pattern in combination with the
-\textsc{continuation injection} pattern allows reducing the number of components
-with common dependencies.  The \textsc{continuation injection} pattern segments
-the request servicing into a collaboration of components.  As each collaborating
-component undertakes only part of servicing the request, each component only
-needs a subset of the dependencies for the request.  This enables the servicing
-of the request to be reduced into smaller components to avoid sets of common
-dependencies between components, which negates the effectiveness of the
-\textsc{thread injection} pattern.
-
-The \textsc{thread pool} pattern \cite{thread-per-request} is used to reduce
-overheads of thread management for improved efficiency in execution of the
-thread pool's responsible components.  To achieve further efficiencies the
-implementation of the thread pool may be specific to the dependency.  For
-example, the thread pool may contain multiple threads for concurrent execution
-of components, a single thread for serial execution of components, or no
-threads and execute components by borrowing the thread to reduce thread-context
-switching.
-
-
-\subsection{Known Usage}
-
-The \textsc{thread injection} pattern can be considered a style of cohort
-scheduling \cite{cohort} that groups components with similar dependencies and
-infers from that similar functionality.  However, \textsc{thread injection}
-works at the application scheduling level and allows the use of any Operating
-System thread scheduling algorithms.
-
-The Staged Event-Driven Architecture (SEDA) \cite{seda} provides an
-implementation of the \textsc{thread injection} pattern without the use of the
-\textsc{dependency injection} pattern.  SEDA directly maps components to a stage
-and subsequently a thread pool.  However, the SEDA pipeline has increased
-thread-context switching as the stage boundaries are hard, which disallows
-threads to be borrowed.
-
-Dependency capsules \cite{dependency-capsules} follows the idea of isolating
-components that require dependencies to specific thread pools.  However, it
-requires a thread-context switch back to a main thread for executing components
-without dependencies.
-
-OfficeFloor \cite{officefloor} implements the \textsc{thread injection} pattern
-and will be discussed later in this paper as it also implements the
-\textsc{continuation injection} pattern to provide an \textsc{inversion of control}
-implementation.
+\subsubsection*{Related Patterns}
 
 
 
-\section{Inversion of Control}
+\subsection{Implementation of re-use tasks patterns}
 
-
-\subsection{Context}
+\subsubsection*{Background}
 
 Applications built with \textsc{layers} typically impose a top-down approach to
 design.  ``The \textsc{layers} require and provide \textsc{explicit interfaces}
 from and to each other, in a top-down manner, from the higher to the lower
-\textsc{layers}'' \cite[p. 11]{ioc}.  The higher-level layer components define
-the variation points that are ``predefined points in the control and data flow
-which allow for modifying and extending a component's behaviour'' \cite[p.
-5]{ioc}.  A top-down approach is required, as the higher-level layers control
-what variation points may be implemented by the lower-level layer components.
+\textsc{layers}'' \cite[p. 11]{ioc}.  The higher-level layer components (object
+that wraps a method) define the variation points that are ``predefined points in
+the control and data flow which allow for modifying and extending a component's
+behaviour'' \cite[p. 5]{ioc}.  A top-down approach is required, as the
+higher-level layers control what variation points may be implemented by the
+lower-level layer components.
 
 Inverting the control by allowing the lower-level layer components to control the
 variation points to be implemented by the higher-level layer components provides
 inversion of control.  Inversion of control occurs by inverting the top-down
 control in designing applications to be bottom-up control.  This bottom-up
 control allows the application architecture to be evolved upwards. Therefore,
-\textsc{inversion of control} better suits development methodologies, such as
+\textsc{method inversion of control} better suits development methodologies, such as
 Agile, that evolve application architectures upwards.
-
-
-\subsection{Problem}
-
-\textbf{How to invert control by having the lower-level layer components control the variation points of the application?}
-
-
-\subsection{Forces}
-
-Components provide re-usable discrete pieces of functionality (application
-behaviour) that may be developed by different developers.  The \textsc{explicit
-interfaces} of the components allows for exchanging component implementations at
-the different \textsc{layers} of the architecture \cite{ioc}.
 
 The components need to be composed within an architecture that is dictated by
 the framework.  The framework ``will define the overall structure, its
@@ -1232,9 +1340,11 @@ components to provide bottom-up control over defining variation points for the
 application.
 
 
-\subsection{Solution}
+\subsubsection*{Implementation}
 
-\textbf{Use \textsc{dependency injection}, \textsc{thread injection} and \textsc{continuation injection} to have the lower-level layer component control its required variation points.}
+Use \textsc{dependency injection}, \textsc{thread injection} and
+\textsc{continuation injection} to have the lower-level layer component control
+its required variation points.
 
 \textsc{dependency injection} \cite{ioc} (used within \textsc{continuation
 injection}) enables the lower-level layer component to specify the state
@@ -1347,7 +1457,7 @@ components via \textsc{continuation injection}.
 \footnotetext{Integer identifiers may be used for fast array look ups rather than strings.}
 
 
-\subsection{Implicit Thread}
+\subsubsection*{Implicit Thread}
 
 Implicit threads may be used to reduce the thread-context switching of the
 \textsc{inversion of control} pattern.
@@ -1384,40 +1494,7 @@ not prioritise blocking I/O nodes as they know little about them and
 subsequently execute them within a single thread pool.
 
 
-\subsection{Example}
-
-Figure \ref{fig:IocMotivatingExampleResolved} shows the Continuation
-Orchestration for the motivating example (Fig
-\ref{fig:ExampleComponentOrchestration}) overlaying the thread pools responsible
-for the components (as identified by table
-\ref{tab:example_request_thread_pools}).  The lower-level layer components
-define the required variation points for which the higher-level layer is
-responsible for providing the variation point implementations (i.e.
-dependencies/state, thread of control, handling components).
-
-This configuration also demonstrates resolution of the motivating example.  Only
-\texttt{Retrieve data from data\-base} has an explicit thread and it will only be
-executed if data is required from the database.  As the remaining components are
-within the default thread pool, they are executed by an implicit thread (i.e.
-borrow the thread).  The use of implicit threads within the \textsc{inversion of
-control} pattern has resolved the motivating example.
-
-\begin{figure}[t]
-\centering
-\includegraphics[width=4.5in]{IocMotivatingExampleResolved}
-\caption{Component collaboration with thread pools overlaid to show resolution of the Motivating Example.}
-\label{fig:IocMotivatingExampleResolved}
-\end{figure}
-
-The \textsc{inversion of control} pattern allows components identified in figure
-\ref{fig:IocMotivatingExampleResolved} to be re-used within in a different
-context. Figure \ref{fig:IocReuseForQueue} demonstrates re-using components for
-servicing a queue.  The loose coupling by the \textsc{inversion of control}
-pattern has allowed the components to be re-used between both contexts as the
-higher-level layer components no longer control the variation points.
-
-
-\subsection{Consequences}
+\subsubsection*{Consequences}
 
 Using \textsc{inversion of control} allows bottom-up control over the design of
 the application.  As the variation points are controlled by the lower-level
@@ -1429,7 +1506,7 @@ engineering the design of the application.  Furthermore, as the higher-level
 layer components are built last, there is less need for large initial top-down
 designs.
 
-\textsc{inversion of control} also enables bottom-up evolution of the
+\textsc{method inversion of control} also enables bottom-up evolution of the
 application.  Within applications imposing top-down design, the
 \textsc{explicit interface} (\textsc{template method}) between \textsc{layers}
 needs to be refactored to account for required changes to increase the
@@ -1441,16 +1518,8 @@ interface} to invoke the lower-level layer component does not change, the
 invoking higher-level layer components do not require refactoring to evolve the
 application.
 
-%% Part of Example but moved down to not be on same page
-\begin{figure}[t]
-\centering
-\includegraphics[width=4in]{IocReuseForQueue}
-\caption{Component collaboration demonstrating example re-use of components to service messages from a queue.}
-\label{fig:IocReuseForQueue}
-\end{figure}
-
-Within \textsc{inversion of control}, object-orientation provides the implicit
-state (dependencies) to a component.  When a method is used as the
+Within \textsc{method inversion of control}, object-orientation provides the
+implicit state (dependencies) to a component.  When a method is used as the
 implementation of a component, explicit dependencies are injected as arguments
 into the method.  Object-orientation implicitly provides the instance/class
 references to the method.  Having implicit references tightly couples the
@@ -1459,12 +1528,12 @@ functional programming can provide improved component implementations via
 functions, as functional programming can be considered programming without
 implicit dependencies.
 
-Furthermore, within \textsc{inversion of control} the use of object-orientation
-can focus objects on modelling the state within dependencies and have objects'
-methods constrain changes in the state.  This is similar to databases storing
-data and constraining the changes in the data.  As application behaviour is
-implemented in components via functions, the application need not be constructed
-only as a graph of collaborating hierarchical objects.
+Furthermore, within \textsc{method inversion of control} the use of
+object-orientation can focus objects on modelling the state within dependencies
+and have objects' methods constrain changes in the state.  This is similar to
+databases storing data and constraining the changes in the data.  As application
+behaviour is implemented in components via functions, the application need not
+be constructed only as a graph of collaborating hierarchical objects.
 
 As the \textsc{thread injection} and \textsc{continuation injection} patterns
 provide implementing algorithms of the \textsc{proactor} pattern participants,
@@ -1482,19 +1551,19 @@ bugs.  The risk of these synchronisation bugs is, however, mitigated by the
 increased quality of the dependencies due to their increased re-use by
 components containing the application logic.
 
-Furthermore, the indirection of the \textsc{inversion of control} pattern makes
-debugging more difficult.  Components are all of the same type which means call
-hierarchies can not be identified based on matching method/function signatures.
-The Component Orchestration from \textsc{continuation injection} pattern,
-however, provides visual cues to aid developer understanding of the application
-to resolve these bugs.
+Furthermore, the indirection of the \textsc{method inversion of control} pattern
+makes debugging more difficult.  Components are all of the same type which means
+call hierarchies can not be identified based on matching method/function
+signatures.  The Component Orchestration from \textsc{continuation injection}
+pattern, however, provides visual cues to aid developer understanding of the
+application to resolve these bugs.
 
-Within the \textsc{inversion of control} pattern, control has been inverted for
-all interfacing aspects of the component\footnote{The Inversion of Control
-pattern can be described as: Inversion of Control = Dependency Injection +
-Thread Injection + Continuation Injection (or its shorter form: IoC = DI + TI +
-CI).}.  The inversion of control over all \textsc{explicit interface} aspects of
-the component has made the component the software equivalent of a
+Within the \textsc{method inversion of control} pattern, control has been
+inverted for all interfacing aspects of the component\footnote{The Inversion of
+Control pattern can be described as: Inversion of Control = Dependency Injection
++ Thread Injection + Continuation Injection (or its shorter form: IoC = DI + TI
++ CI).}.  The inversion of control over all \textsc{explicit interface} aspects
+of the component has made the component the software equivalent of a
 \textit{brick}\footnote{Objects/methods/functions do not define the dimensions
 of execution and asynchronous collaboration providing only part of the
 ingredients to a building block (brick).}.  The components have a standard
@@ -1504,137 +1573,6 @@ that provides a standard mechanism for developers to weave the \textit{bricks}
 \textit{buildings} and further complex structures\footnote{Discussion on the
 patterns that OfficeFloor \cite{officefloor} uses to weave components into
 re-usable composite components will be left to further work.}.
-
-
-\subsection{Related Patterns}
-
-The \textsc{inversion of control} pattern is realised by using the
-\textsc{thread injection}, \textsc{continuation injection} and
-\textsc{dependency injection} patterns to invert control over the variation
-points within a hierarchical \textsc{layers} architecture to give lower-level
-layer components control over their required state, execution and collaboration.
-
-The \textsc{adapter} pattern \cite{gof} adapts the interfaces of dependencies.
-Standardising the dependency interfaces across all components may not be
-feasible.  The \textsc{adaptor} pattern allows for the re-use of a dependency by
-adapting its interface for the particular component.  The \textsc{dependency
-injection} pattern enables using an adapted dependency with the required
-interface.  The adapted dependency is provided to the component as a new
-dependency that depends on (wraps) the re-used dependency.
-
-The \textsc{adaptor} pattern may also be used to adapt components that do not
-conform to the \texttt{Component} interface (Listing
-\ref{lst:IocInjectionInterfaces}) into an application implementing the
-\textsc{inversion of control} pattern\footnote{As an example, OfficeFloor
-\cite{officefloor} provides an adapter to run a JEE Servlet as a component
-(Task).}.
-
-
-\subsection{Known Usage}
-
-OfficeFloor \cite{officefloor} identifies components as Tasks\footnote{Task is
-the adapted interface within a Job (Asynchronous Operation) for application
-developers to implement.}, which originates from OfficeFloor's modelling of
-application architecture on the way work is processed within an
-office\footnote{OfficeFloor derived its name from being the place containing the
-co-ordination of executing Jobs.}.  Tasks:
-\begin{itemize}
-  \item are undertaken by Teams (particular thread pools via \textsc{thread injection});
-  \item access state within Managed Objects (explicit dependencies via extrinsic \textsc{dependency injection}); and
-  \item invoke flows (continuations providing collaboration of Tasks via \textsc{continuation injection}).
-\end{itemize}
-
-OfficeFloor is the only known framework implementing the \textsc{inversion of
-control} pattern.  Through the development of OfficeFloor, the author identified
-the \textsc{thread injection} and \textsc{continuation injection} patterns along
-with the subsequent \textsc{inversion of control} pattern.
-
-
-
-\section{Web Server implementation}
-
-This section discusses the use of the \textsc{thread injection},
-\textsc{continuation injection} and \textsc{inversion of control} patterns in
-implementing a web server.
-
-
-\subsection{Servicing requests and managing URLs}
-
-For web servers, URL continuations \cite{url-continuation} are used to invoke
-the first component for servicing the request\footnote{A similar approach may be
-taken by other User Interface types (such as a rich GUI) with the user event
-being mapped to the first Asynchronous Operation.}.  A URL may be associated to
-a component by developer configuration.  This component then becomes the first
-component to be invoked for servicing a HTTP request for that URL.  The
-components servicing the HTTP request will access the HTTP request/response
-state via dependencies as necessary.  The URL configuration may be included in
-the \textsc{continuation injection} configuration (Component Orchestration) as
-an attribute of the component node.
-
-Using the identifiers of the components is a convenient means to ease
-maintenance of web pages.  Rather than embedding the URL in the web page, the
-component identifier is used.  When the page is rendered for the client the
-identifiers are replaced with the actual URLs.  This allows the URLs to be
-changed without needing to change web pages.  This configuration also enables
-particular URLs to be changed to use secure channels (e.g. HTTPS) without
-requiring changes to web pages.
-
-Substituting the component URLs at page rendering time also allows for
-distributed load balancing.  A web server may direct clients to a different
-server by substituting URLs for components on another server. The appropriate
-clients will then continue with the other web server.  This subsequently allows the
-load to be balanced across the distributed web servers.
-
-
-\subsection{Handling web server overload conditions}
-
-Cancellation of the component is handled by invoking a continuation.  The
-\texttt{handle\-Exception(\ldots)} method (Listing \ref{lst:IocInjectionInterfaces})
-handling the cancellation exception invokes a continuation for a component
-executed in another thread pool.  This allows the thread pool to shed load to
-components on another thread pool that can more efficiently handle the overload
-condition.  For a web server this component could, for example, send a web page
-indicating the server is temporarily busy or it may send a redirect to a less
-busy web server.
-
-Each component may individually specify the continuation or a default
-continuation may be configured across a set of components.
-The default continuation will be mapped to a component that interrogates the
-\texttt{cause} and undertakes appropriate further components specific to the
-required application behaviour.  Furthermore, using a different overload
-exception for each isolated dependency thread pool allows for the specific
-handling of each overload condition.
-
-
-\subsection{Clustering/Distributing components}
-
-As continuations asynchronously invoke components, the components need not
-reside on the same server.  The injected continuation can be configured to
-invoke a component on another server.  The continuation may synchronously send
-the continuation arguments (e.g. HTTP request) or the arguments may be
-asynchronously communicated (e.g. queue).
-
-Distributing components heterogeneously can also be undertaken by configuring
-the responsible thread pool to reside on another server.  On invoking the
-continuation, the continuation arguments are communicated to the
-server\footnote{May be a cluster of servers behind a load balancer.} containing
-the responsible thread pool.  Configuring the responsible thread pool to reside
-on another server is advantageous.  For example, it may be beneficial to
-co-locate certain components geographically or have certain components run on
-particular hardware.
-
-The Internet is an example implementation that utilises both component
-heterogeneous clustering and the invoking of continuations to other servers. 
-The URL continuation (e.g. by a user clicking on a link) is sent to the server
-containing the thread pool (i.e. web server).  The web server continues the
-process by sending the HTTP response to the client web browser (server to the
-user who may trigger further continuations).
-
-The evolution to Cloud Computing can also be described as a form of component
-heterogeneous clustering.  The number of servers containing a particular thread
-pool are dynamically managed based on the number of components to execute.  This
-dynamic management of servers ensures only the required number of servers are
-allocated for each thread pool.
 
 
 
@@ -1649,17 +1587,22 @@ weave components (Tasks) together into re-usable composite components
 composite components into greater composite components (Offices and
 OfficeFloors) to manage the complexity of an application.
 
+\textbf{TODO} write about user patterns (as this is implementation patterns)
 
 
-\section*{Acknowledgment} I thank my wife Melanie for her patience and support
+
+\section*{Acknowledgment} 
+
+I thank my wife Melanie for her patience and support
 of me developing OfficeFloor on top of my day job.  If she was anyone else
 OfficeFloor would not have been built and this work would not have resulted from
 OfficeFloor.  I also thank my good friend Matthew Brown for being a sounding
 board to many of my ideas.
 
-I am also grateful for the wise shepherding by Veli-Pekka Eloranta to ensure
-this paper succinctly presents the Thread Injection, Continuation Injection and
-Inversion of Control patterns.
+I am also grateful for the wise shepherding by Veli-Pekka Eloranta and the
+participants of EuroPlop 2013 to ensure this paper succinctly presents the
+Thread Injection, Continuation Injection and Method Inversion of Control
+patterns.
 
 
 \bibliographystyle{style/acmlarge}
