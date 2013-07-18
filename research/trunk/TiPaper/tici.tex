@@ -122,259 +122,240 @@ workshop at the 18th European Conference on Pattern Languages of Programs
 
 \section{Introduction}
 
-Model Software after the people interactions occuring within an Office.
+OfficeFloor~\cite{officefloor} is a middleware framework that models its
+architecture on interactions occuring in offices.
 
-Process existed in business before information technology began to automate business processes.
+The premise of this modelling is that business processes occurred manually
+within an office before technology systems began automating tasks.  The manual
+office processes are accepted by people and the patterns proven within many
+business organisations.
 
-Business process was resolved by the people working in Offices undertaking the tasks within the process.
+This paper discusses these office patterns and how they remove constraints
+within existing software design patterns.  The patterns presented are the
+patterns used by OfficeFloor in its implementatation as a middleware framework.
+Usage patterns for developers to build applications with OfficeFloor is left to
+future work.
 
-Current software design patterns have constraints that dissallow these Office interaction patterns to occur in software.
-
-It will be assumed that the reader will be familiar with the existing design patterns.
-
-The patterns presented are implementing patterns within the OfficeFloor middleware framework.  They lift these constraints.
-
-Further usage patterns of OfficeFloor are listed in the appendix and will be part of future work.
-
-To be able to relate the Office Patterns to Software Design Patterns the following analogies are made:
+To be able to relate the office patterns to software design patterns the
+following analogies are made:
 \begin{description}
-  \item[Thread] is mapped to the concept of a Person (Worker).
-  \item[Method] is the functionality of a Task (particular step of a process).
+  \item[Thread] is mapped to the concept of a Person (Worker),
+  \item[Method] is the functionality of a Task (particular step of a process),
+  \item[Object fields] is the structured information managed within an office (e.g. form).
 \end{description}
 
-
-\section{Limitation of existing Software Design Patterns for web servers}
-
-The \textsc{thread-per-request} pattern \cite{thread-per-request} (that can be
-considered a refinement of the \textsc{synchronous multi-threaded} pattern
-\cite{proactor}) is used as the basis of popular modern web
-servers\footnote{Apache, Microsoft IIS, Nginx and JEE implementations identified
-from the Netcraft November 2012 survey.  Google Web Server is also identified as
-popular.} to service requests concurrently.
-
-Many modern web servers improve their concurrency of servicing high loads of
-static web content by using the \textsc{proactor} pattern \cite{proactor} to
-enable use of asynchronous I/O operations.  The \textsc{thread-per-request}
-pattern requires a thread to be allocated to each request to sequentially and
-synchronously execute all operations for servicing a request.  This includes I/O
-operations that tie up thread resources on the web server which necessitates
-more threads and subsequently reduces the concurrency of the web server.  The
-\textsc{procator} pattern overcomes this issue by executing operations
-asynchronously which does not result in the web server threads blocking (e.g.
-use of Operating System asynchronous I/O operations).
-
-However, web servers continue to use the \textsc{thread-per-request} pattern for
-servicing dynamic web content\footnote{CGI/FastCGI with for example PHP scripts,
-Microsoft's HTTP.sys/WAS, and JEE Servlets.}.  Using the
-\textsc{thread-per-request} pattern allows for more intuitive developer
-implementations of dynamic web content servicing at the cost of decreased
-concurrency for the web server.
-
-Due to high concurrency demands on web servers to resolve such issues as the
-reverse 10K problem \cite{reverse-ten-k-problem}, the
-\textsc{thread-per-request} pattern is requiring developers to manually manage
-the threading issues involved with increased concurrency.  Should the developer
-want to use asynchronous I/O operations for increased concurrency, the developer
-is required to block the request's thread of control, undertake the concurrent
-operations and continue the request's thread of control when all concurrent
-operations are complete\footnote{JEE Servlet 3.x AsyncContext is allowing
-asynchronous operations but requires the developer to still be involved in
-thread synchronisation complexities.}.
-
-Before using the \textsc{proactor} pattern to service dynamic web content, its
-drawback of scheduling and controlling outstanding operations \cite[p.
-8]{proactor} must be resolved.  Servicing static web content follows a standard
-sequence of operations that enables providing a bespoke solution to schedule and
-control outstanding operations.  In contrast, servicing dynamic web content does
-not follow a standard sequence of operations and therefore requires a more
-generic solution that is ``designed carefully to support prioritization and
-cancellation'' \cite[p. 8]{proactor} of the operations.
-
-The patterns presented in this paper address the constraints and limitations
-identified by modelling themselves after patterns occurring within an Office.
-
-All patterns are also given an analogy name with the Office to keep all pattern
-names similar.  In some cases patterns will also have an alternate Software
-Design based name.
+The patterns presented in this paper are discussed in three sections.  The first
+section presents the patterns for execution of tasks.  The second section
+presents patterns for co-ordination of tasks.  The third section presents
+patterns for re-use of tasks.  Each section is written in two parts.  The first
+part will list the office patterns and how they influence change in the software
+design.  The second part of each section provides notes on implementation.  This
+paper assumes knowledge of existing software design patterns only for the
+implementation notes within each section.  The implementation notes may be
+skipped by those readers only interested in the influence of the office patterns
+on software design.
 
 
 
-\section{Patterns for executing Tasks (\textsc{thread injection})}
+\section{Patterns for executing Tasks}
 
 The following patterns model the execution of methods after the way tasks are
 undertaken within an office.  The implementation notes at the end provide
-details on how to implement the patterns.  The use of all these patterns
-together can be given the Software Design pattern name \textsc{thread injection}
-due to similarity of thread management to dependency management for
-\textsc{dependency injection}~\cite{ioc}.
+details on how to implement the combined patterns.
+
 
 \subsection{\textsc{\textbf{team}}}
 
-\subsubsection*{Alternate name}
+\subsubsection*{Alternate name} \textsc{thread pool} \cite{thread-per-request}.
 
-\textsc{thread pool} \cite{thread-per-request}.
+\subsubsection*{Context} Within an office work loads can be far above that
+possible by a single person. This is resolved within an office by creating a
+team of people to concurrently undertake the tasks.
 
-\subsubsection*{Context}
+Developers write code of a method (task) for a single thread (person).
 
-Within an Office work loads can be far above that possible by a single person. 
-This is resolved within an Office by creating a Team of people to concurrently
-undertake the tasks.
+\subsubsection*{Problem} Improving throughput of executing many single threaded methods.
 
-Developers write code of a task (function/method) for a single thread (person).
+\subsubsection*{Forces} Developer writes intuitive sequential code.
 
-\subsubsection*{Problem}
+\subsubsection*{Solution} Use a pool of threads to execute the tasks
+concurrently.
 
-How to handle code \ldots  \textbf{TODO:} Clarify problem.
-
-\subsubsection*{Forces}
-
-Developer writes sequential code.
-
-Tasks are all of a similar nature.  
-
-\subsubsection*{Solution}
-
-Use a pool of threads to execute the tasks concurrently.
-
-\subsubsection*{Consequences} 
-
-Having more people allows getting more work done.
+\subsubsection*{Consequences} Having more people allows getting more work done.
 Similarly having more threads allows more tasks to be executed.
 
-The people in the Office need to coordinate so the tasks get done correctly and
-efficiently.
+The people in the office need to coordinate so the tasks get done correctly and
+efficiently.  This is similar of the concurrency issues occurring in executing
+methods concurrently.
+
+\subsubsection*{Notes} See the \textsc{thread pool}
+pattern~\cite{thread-per-request} for a detailed explanation.  The \textsc{team}
+pattern is provided as an example to highlight how the analogies in the
+introduction may enable re-use of office patterns.
 
 
 
 \subsection{\textsc{\textbf{categorise task}}}
 
-\subsubsection*{Context}
+\subsubsection*{Context} To assign a task to a particular team when there are multiple teams, a
+description of the task is required to identify which team is responsible for
+undertaking the task.  This description allows categorising similar tasks
+together to be undertaken by a particular team for improved efficiencies.  For
+example, a financial task should be undertaken by the finance team.
 
-To assign a task to a particular team when there are multiple teams, a
-description of the task is required.  This description allows categorising
-similar tasks together to be undertaken by a particular team for improved
-efficiencies.  For example, a financial task should be undertaken by the
-finance team.
+\subsubsection*{Problem} Can the method provide a description of itself for being categorised into a group?
 
-\subsubsection*{Problem}
-
-Can the method provide a description of itself for being categorised into a group?
-
-\subsubsection*{Forces}
-
-The method name is free text and is unlikely to follow a naming convention that
+\subsubsection*{Forces} The method name is free text and is unlikely to follow a naming convention that
 allows parsing out a category.
 
 The developer should not have to write the description of the method.
 
-\subsubsection*{Solution}
-
-Use the parameter types of the method to categorise the method.
-
-For example, all methods that declare a database connection parameter can be
-grouped into a category of tasks that are likely to interact with the database.
+\subsubsection*{Solution} Use the parameter types of the method to categorise
+the method.  For example, all methods that declare a database connection
+parameter can be grouped into a category of tasks that are likely to interact
+with the database.
 
 For finer grained categorisation, annotations of the parameter types may also be
 used.
 
-\subsubsection*{Consequences}
+\subsubsection*{Consequences} The method name is not required for categorising.
 
-The method name is not required for categorising.
-
-The developer does not require to provide any more details except the parameters
+The developer is not required to provide any more details except the parameters
 the method requires.
 
 Methods that have unused parameters may be incorrectly categorised.
 
 \subsubsection*{Related Patterns}
 
-\textsc{responsible team} provides the particular teams to execute the categorised methods.
+\textsc{responsible team} provides the particular teams to execute the
+categorised methods.
 
 
 
 \subsection{\textsc{\textbf{responsible team}}}
 
-\subsubsection*{Context}
-
-To accomplish the process, there are different teams responsible for differing
-tasks in the process.  For example, the financial team will do the finance tasks
-and the software development team will do the coding tasks.
+\subsubsection*{Context} To accomplish the process, there are different teams
+responsible for differing tasks in the process.  For example, the financial team
+will do the finance tasks and the software development team will do the coding
+tasks.
 
 Having this split in responsibility over the categorised tasks allows managing
 the team sizes.  For example, near the end of the financial year the finance
 team may be increased in size for the additional load of financial year end
-tasks.  The software development team however would not be changed in size as
+tasks.  The software development team, however, would not be changed in size as
 the development tasks would stay the same in number.
 
-\subsubsection*{Problem}
+\subsubsection*{Problem} Making the \textsc{thread pool} responsible for a
+particular category of methods.
 
-Can the \textsc{thread pool} be identified as responsible for a particular
-category of methods?
-
-\subsubsection*{Forces}
-
-The possibly configured thread pool name is free text and is unlikely
-to follow a naming convention that allows parsing out its responsible task
-categories.
+\subsubsection*{Forces} The possibly configured thread pool name is free text
+and is unlikely to follow a naming convention that allows parsing out its
+responsible task categories.
 
 The developer should not have to provide code to make decisions over thread pool
 responsibilities.
 
-\subsubsection*{Solution}
+\subsubsection*{Solution} Configure each thread pool with an attribute
+containing the type(s) that defines its responsible category(s).  Methods are
+then executed by matching on their parameter types (\textsc{categorise task}
+types) against the configured thread pool responsibility type.  A default thread
+pool is used if no match occurs.
 
-Configure each \textsc{thread pool} with an attribute containing the type(s)
-that defines its responsible category(s).  Methods are then executed by matching
-on their parameter types against the configured thread pool responsibility type.
- A default thread pool is used if no match occurs.
+For example, configure the thread pool responsible for all database interaction
+with the database connection type.  As each method is categorised by the
+\textsc{categorise task} pattern, all methods requiring a database connection
+are executed by this thread pool.
 
-For example, configure the \textsc{thread pool} responsible for all database
-interaction with the database connection type.  As each method is categorised by
-the \textsc{categorise task} pattern, the association of method \ldots
-\textbf{TODO: work out matching description}.
+\subsubsection*{Consequences} There will always be a thread available in each
+thread pool to execute their respective responsible tasks.  Subsequently, if
+there is a significant increase in the number of tasks in one category all
+threads do not become focused on these tasks to the detriment of the other
+categories of tasks.
 
-\subsubsection*{Consequences}
+Threads may also be finer tuned (e.g. change in nice value, affinity to CPU)
+based on the responsibilities of their thread pool.  Threads may, however, be
+idle if no tasks occur for their responsible task category.
 
-There will always be a person available in each team to execute their respective
-responsible tasks.  Subsequently, if there is a significant increase in the
-number of tasks in one category the people do not all become focused on these
-tasks to the detriment of the other categories.
+\subsubsection*{Related Patterns} Is a sequence on the \textsc{team} to identify
+responsible categories of tasks to execute.
 
-\subsubsection*{Related Patterns}
 
-Is a sequence on the \textsc{team} to identify responsibility for executing
-tasks.
+
+\subsection{\textsc{\textbf{do it yourself}}}
+
+\subsubsection*{Alternate name} \textsc{reactor}~\cite{reactor}.
+
+\subsubsection*{Context} Certain tasks are more efficient to be undertaken
+yourself without having to assign to another team.  If every task along the
+process had to be undertaken by a different team, it would create significant
+communication overheads that would negatively impact the efficiency of the
+office.  Therefore, within an office many tasks are undertaken by the current
+person involved in the process.
+
+Assigning a method to a thread pool requires one or more thread context
+switches.  Having to thread context switch for each method call is inefficient
+and will degrade performance of the application.
+
+\subsubsection*{Problem} Avoid context switch in executing certain methods (tasks).
+
+\subsubsection*{Forces} Each category of methods will be executed by a particular
+responsible thread pool.  Stepping between these categories causes different
+responsible thread pools to be used that requires to thread context-switch between
+each task category switch.
+
+\subsubsection*{Solution} Use a responsible thread pool that has no threads and
+uses the thread of control that registers the method with the thread pool to
+execute the task.
+
+\subsubsection*{Consequences} Categories of methods may be executed by the
+current thread of control and not incur a thread context-switch to be executed
+by another thread pool.
+
+\subsubsection*{Related Patterns} Is a sequence on the \textsc{responsible team}
+to reduce thread context-switching.
+
 
 
 \subsection{\textsc{\textbf{too busy}}}
 
-\subsubsection*{Alternate name}
+\subsubsection*{Alternate name} Admission Control \cite{seda}. 
 
-Admission Control \cite{seda}. 
+\subsubsection*{Context} Teams may not be able to complete all tasks within the
+required period of time.  The teams may be increased in size to cope with the
+additional tasks.  However, at a certain point there are too many tasks and to
+cope the team will not take on new tasks.
 
-\subsubsection*{Context}
+The thread pool queues methods for execution when all threads of the pool are
+exhausted.  At a certain point the queue becomes too long that new methods added
+to the queue will not be executed within a reasonable period of time.
 
-Teams may not be able to complete all tasks within the required period of time. 
-This is reported to a manager to take an action to reduce work loads.
+\subsubsection*{Problem} Stop the thread pool taking on new methods so it may
+cope with the current excessive load of methods.
 
-The thread pool queues tasks for execution when all threads of the pool are
-exhausted. 
+\subsubsection*{Forces} The thread pool will sequentially execute all methods
+added to its queue.  When the number of methods registered for execution is
+continually more than the number of methods able to be executed, the queue
+grows.  At a certain point the time between registering a method and the actual
+execution of the method is so far apart that the resulting method execution is
+no longer relevant.  Execution of these methods then results in wasted use of
+threads.
 
-\subsubsection*{Problem}
+\subsubsection*{Solution} At a certain queue size, cancel further methods from
+being registered.
 
-Can the thread pool notify a manager that it is too busy to complete all tasks
-within a required period of time?
+\subsubsection*{Consequences} The thread pool will able to execute methods that
+are registered. For methods not registered, alternate tasks are undertaken by
+another less busy thread pool.
 
-\subsubsection*{Forces}
+At high loads of methods some methods will not be executed.  This, however,
+allows the thread pool to execute the methods it can in a timely manner.
 
-\subsubsection*{Solution}
-
-\subsubsection*{Consequences}
-
-\subsubsection*{Related Patterns}
-
+\subsubsection*{Related Patterns} Uses \textsc{escalation} to handle cancelled
+methods.
 
 
-\subsection{Implementation of the execute task patterns}
+
+\subsection{Implementation of the task execution patterns}
 
 \subsubsection*{Background}
 
@@ -394,46 +375,53 @@ prioritisation and cancellation of components and leaves this to the developer.
 Performance analysis of web servers identifies the importance of this
 prioritisation tuning
 \cite{tuning-important,low-server-footprint,tuning-os-important}.
-Serving static web content follows a similar sequence of operations making the
-use of a pool of threads sufficient.  In contrast, servicing dynamic content has
-significantly varying operations.  Utilising a pool of threads to service all
-dynamic content operations can result in tuning trade-offs that may result in
-performance degradation of the web server during particular load profiles (e.g.
-high load of requests for database data that are starving requests for cached
-data of a thread).  Better isolation of operations is necessary to reduce
-trade-offs in performance tuning.
+Serving static web content follows a similar sequence of tasks making the use of
+a pool of threads sufficient.  In contrast, servicing dynamic content has
+significantly varying tasks.  Utilising a pool of threads to service all dynamic
+content tasks can result in tuning trade-offs that may result in performance
+degradation of the server during particular load profiles (e.g. high load of
+requests for database data that are starving requests for cached data of a
+thread).  Better isolation of tasks is necessary to reduce trade-offs in
+performance tuning.
 
-Having an ability to cancel operations is important to avoid overloading.  As
+Having an ability to cancel tasks is important to avoid overloading.  As
 load increases on the server, the resources available will be exhausted causing
 delays in servicing requests and in some scenarios cause the server to crash
-(e.g. exhausting available memory).  Operations must be able to be cancelled to
-reduce the load on the server.  However, only operations causing bottlenecks
+(e.g. exhausting available memory).  Tasks must be able to be cancelled to
+reduce the load on the server.  However, only tasks causing bottlenecks
 should be cancelled (e.g. a request for cached data should not be cancelled if
 it is the database that is overloaded).
 
+
 \subsubsection*{Implementation}
 
-The component is the object that wraps the method to provide a
-standard interface for the method.  All components are constructed via extrinsic
-\textsc{dependency injection} \cite{ioc}.  The construction of the component is
-encapsulated in the \texttt{DependencyInjectionFactory} and as a result a
-standard interface can be provided for execution of the components by a thread
-of control (Listing \ref{lst:ThreadInjectionInterfaces}).  This enables for a
-single \texttt{ComponentExecutor} implementation to execute differing methods.
+The task is the object that wraps the method to provide a standard interface for
+execution of the method.  This enables for a single \texttt{TaskExecutor}
+(Listing \ref{lst:ThreadInjectionInterfaces}) implementation to execute
+differing methods.
+
+To invoke a method, the client code invokes \texttt{executeTask(\ldots)}
+(Listing \ref{lst:ThreadInjectionInterfaces}) with the identifier of the desired
+task along with an argument for a parameter of the task.  Figure
+\ref{fig:ExecuteComponentSequenceDiagram} provides a sequence diagram of
+executing a task.  The \texttt{TaskExecutor} uses the
+\texttt{DependencyInjectionFactory} to construct the appropriate \texttt{Task}
+and then assigns it for execution by one of the many developer configured thread
+pools (\textsc{team}).
 
 \lstset{caption=\textsc{thread injection} pattern interfaces\protect\footnotemark.}
 \begin{lstlisting}[float,label=lst:ThreadInjectionInterfaces]
 
-    interface ComponentExecutor {
-        void executeComponent(String componentId, Object parameter);
+    interface TaskExecutor {
+        void executeTask(String taskId, Object parameter);
     }
 
     interface DependencyInjectionFactory {
-        Component createComponent(String componentId);
-        Type[] getRequiredDependencyTypes(String componentId);
+        Task createTask(String taskId);
+        Type[] getRequiredDependencyTypes(String taskId);
     }
 
-    interface Component {
+    interface Task {
         void execute(Object parameter); 
         void cancel(Object parameter, Exception cause);
     }
@@ -446,15 +434,6 @@ implement \texttt{getRequiredDependencyTypes(\ldots)} by recursively calling
 \texttt{getBeanDefinition(\ldots)}/\texttt{getDependsOn()} to create the 
 list of types.}
 
-To invoke a component, the client code invokes the
-\texttt{executeComponent(\ldots)} method (Listing
-\ref{lst:ThreadInjectionInterfaces}) with the identifier of the desired
-component along with an argument for the parameter of the component.
-Figure \ref{fig:ExecuteComponentSequenceDiagram} provides a sequence diagram of
-executing a component.  The \texttt{ComponentExecutor} uses the
-\texttt{DependencyInjectionFactory} to construct the appropriate
-\texttt{Component} and then assigns it for execution by one of the many
-developer configured thread pools based on the meta-data of the component.
 
 \begin{figure}[!t]
 \centering
@@ -465,43 +444,48 @@ developer configured thread pools based on the meta-data of the component.
 
 The prioritisation is achieved by the
 \texttt{getRequiredDependencyTypes(\ldots)} method providing the extrinsic
-\textsc{dependency injection} \cite{ioc} meta-data for the
-component\footnote{\textsc{dependency injection} frameworks using qualification
-to identify dependencies of the same type may return a type object containing
-both class and qualifier rather than just a class.  The thread pool matching may
-then incorporate the qualifier.}.  The developer configures one or more thread
-pools responsible for components with a particular type of
-dependency\footnote{Thread pools may be associated with more than one dependency
-type.}.  The component is then matched by its required dependency types to a
-thread pool responsible for one or more of its dependency types\footnote{The
-\texttt{componentId} may also be used for very fine grained mapping.}.  The
-\texttt{execute(\ldots)} method of the component (Listing
+\textsc{dependency injection} \cite{ioc} meta-data for the task
+\footnote{\textsc{dependency injection} frameworks using qualification to
+identify dependencies of the same type may return a type object containing both
+class and qualifier rather than just a class.  The thread pool matching may then
+incorporate the qualifier.}.  The developer configures one or more thread pools
+responsible for tasks with a particular type of dependency\footnote{Thread pools
+may be associated with more than one dependency type.}.  The task is then
+matched by its required dependency types (\textsc{categorise task}) to a thread
+pool responsible for one or more of its dependency types (\textsc{responsible
+team})\footnote{The \texttt{componentId} may also be used for very fine grained
+mapping.}.  \texttt{execute(\ldots)} (Listing
 \ref{lst:ThreadInjectionInterfaces}) is then invoked by a thread from the
-matching thread pool to execute the implementation of the component.
-This provides the necessary isolation of differing components for improved
-tuning of the server.
+matching thread pool to execute the task (and its contained method). This
+provides the necessary isolation of differing tasks for improved tuning of the
+server.
 
-For components not having dependencies (nor dependencies of any
-performance significance), a default thread pool is configured by the developer
-for their execution.  This ensures all components are mapped to a
-thread pool.  It also means that thread pools need only be configured for
-dependencies requiring isolation.
+For tasks not having dependencies (nor dependencies of any performance
+significance), a default thread pool is configured by the developer for their
+execution.  This ensures all components are mapped to a thread pool.  It also
+means that thread pools need only be configured for dependencies requiring
+isolation.
 
-The \texttt{cancel(\ldots)} method (Listing \ref{lst:ThreadInjectionInterfaces})
-provides the means for the \texttt{ComponentExecutor} to cancel the component.
-The \texttt{ComponentExecutor} will cancel new components for a particular
-thread pool when queuing the component for a thread will result in exceeding a
-particular threshold\footnote{A sufficient threshold would be ensuring the wait
-time, determined by a running average of execution time multiplied against the
-number of components currently in the queue, is below a certain time.}.  Each
-thread pool may have its own thresholds particular to its responsible dependency
-types.  As components are mapped to particular thread pools, this ensures only
-the appropriate components are cancelled.
+To achieve further efficiencies the implementation of each thread pool may be
+specific to its responsible dependency type.  For example, the thread pool may
+contain multiple threads for concurrent execution of tasks, a single thread for
+serial execution of tasks, or no threads and execute components by borrowing the
+thread to reduce thread-context switching (\textsc{do it yourself}).
 
-Once cancelled, the \texttt{ComponentExecutor} may discard the component.  The
-implementation of the \texttt{can\-cel(\ldots)} method is specific to each
-component.  This is to allow appropriate application behaviour to occur on
-cancelling components.
+\texttt{cancel(\ldots)} (Listing \ref{lst:ThreadInjectionInterfaces}) provides
+means for the \texttt{TaskExecutor} to cancel the task.
+The \texttt{TaskExecutor} will cancel new tasks for a particular thread pool
+when queuing the task for a thread will result in exceeding a particular
+threshold\footnote{A sufficient threshold would be ensuring the wait time,
+determined by a running average of execution time multiplied against the number
+of components currently in the queue, is below a certain time.} (\textsc{too
+busy}).  Each thread pool may have its own thresholds particular to its
+responsible dependency types.  As tasks are mapped to particular thread
+pools, this ensures only the appropriate tasks are cancelled.
+
+Once cancelled, the \texttt{TaskExecutor} may discard the task.  The
+implementation of the \texttt{can\-cel(\ldots)} method is covered in the
+\textsc{escalation} pattern.
 
 
 \subsubsection*{Consequences}
@@ -520,49 +504,39 @@ above this threshold can be cancelled.
 
 To improve performance of runtime decisions the mapping of component to thread
 pool may be cached.  As the dependencies for each component is static, at
-application start up time the \texttt{ComponentExecutor} may preprocess and
-cache the mapping of \texttt{Component} to thread pools to reduce runtime
-decision overheads.  This pre-mapping of components may also provide warnings
-where dependencies of a component make it possible to map the component to
+application start up time the \texttt{TaskExecutor} may preprocess and
+cache the mapping of \texttt{Task} to thread pools to reduce runtime
+decision overheads.  This pre-mapping of tasks may also provide warnings
+where dependencies of a task make it possible to map the task to
 multiple thread pools.  Different conflict mapping resolutions may be employed,
-however, ordering the thread pools and assigning components based on first match
+however, ordering the thread pools and assigning tasks based on first match
 is a sufficiently adequate algorithm.
 
-For low load servers where a single thread pool is sufficient, the
-\textsc{thread injection} pattern can cause increased complexity for developer
-configuration.  While the \textsc{thread injection} pattern provides the
-flexibility to focus the tuning of isolated components by tuning their mapped
-thread pool, it does put the burden on the developer to understand thread
-related performance issues (e.g. costs related to thread stack memory and
-thread-context switching) and the performance of the dependencies (along with
-their related components).
+For low load servers where a single thread pool is sufficient, having multiple
+thread pools can cause increased complexity for developer configuration.  While
+this provides the flexibility to focus the tuning of isolated categories of
+tasks by tuning their mapped thread pool, it does put the burden on the
+developer to understand thread related performance issues (e.g. costs related to
+thread stack memory and thread-context switching) and the performance of the
+dependencies (along with their related tasks).
 
-The implementation looses its ability to effectively prioritise and cancel
-components if the component dependencies are too similar.
-When used with the \textsc{thread-per-request} pattern within a web server, all
-request handling for dynamic content is likely to use a database connection.
-While this will allow isolation of requests for static content, it will not
-isolate requests for dynamic content serviced from cached data rather than
-database data.  This is because the request handler (component) will depend on
-the database connection to retrieve the data if the data is not cached.  Request
-handling will, therefore, need to be segmented into smaller components to reduce
-the occurrences of sets of common dependencies between components, which results
-in grouping components all onto the same thread pool.
-
-The \textsc{thread pool} pattern \cite{thread-per-request} is used to reduce
-overheads of thread management for improved efficiency in execution of the
-thread pool's responsible components.  To achieve further efficiencies the
-implementation of the thread pool may be specific to the dependency.  For
-example, the thread pool may contain multiple threads for concurrent execution
-of components, a single thread for serial execution of components, or no
-threads and execute components by borrowing the thread to reduce thread-context
-switching.
+The implementation looses its ability to effectively prioritise and cancel tasks
+if the task dependencies are too similar.  For example, when used with the
+\textsc{thread-per-request} pattern within a web server, all request handling
+for dynamic content is likely to use a database connection.  While this will
+allow isolation of requests for static content, it will not isolate requests for
+dynamic content serviced from cached data rather than database data.  This is
+because the request handler (task) will depend on the database connection to
+retrieve the data if the data is not cached.  Request handling will, therefore,
+need to be segmented into smaller tasks to reduce the occurrences of sets of
+common dependencies between tasks, which results in grouping components all onto
+the same thread pool.  This is the focus of the collaborating task patterns.
 
 
 \subsubsection*{Related implementations}
 
 The implementation can be considered a style of cohort scheduling \cite{cohort}
-that groups components with similar dependencies and infers from that similar
+that groups tasks with similar dependencies and infers from that similar
 functionality.  However, this implementation works at the application scheduling
 level and allows the use of any Operating System thread scheduling algorithms.
 
@@ -577,53 +551,39 @@ components that require dependencies to specific thread pools.  However, it
 requires a thread-context switch back to a main thread for executing components
 without dependencies.
 
-OfficeFloor \cite{officefloor} implements the \textsc{thread injection} pattern
-and will be discussed later in this paper as it also implements the
-\textsc{continuation injection} pattern to provide an \textsc{inversion of control}
-implementation.
-
 \textbf{TODO:} Go through previous paper and pull in all related implementations. 
 
 
 
 
-\section{Patterns for co-ordinating tasks (\textsc{continuation injection})}
+\section{Patterns for collaborating tasks}
 
-The following patterns model the co-ordination of methods after the way tasks
-are co-ordinated within an office.  The implementation notes at the end provide
-details on how to implement the patterns.  The use of all these patterns
-together can be given the Software Design pattern name \textsc{continuation
-injection} due to similarity of continuation management to dependency management
-for \textsc{dependency injection}~\cite{ioc}.
+The following patterns model the collaboration of methods after the way tasks
+collaborate within an office.  The implementation notes at the end provide
+details on how to implement the patterns.
 
 
 \subsection{\textsc{\textbf{hand-off}}}
 
-\subsubsection*{Context}
-
-Teams hand-off to each other based on the category of the next task.  For
-example, after financing a project the finance team would hand-off to the
-software development team to build the application.
+\subsubsection*{Context} Teams hand-off to each other based on the category of
+the next task.  For example, after financing a project the finance team would
+hand-off to the software development team to build the application.
 
 Method invocations tightly couple the thread of control and disallow changing
 the thread of control in invoking another method.
 
-\subsubsection*{Problem}
+\subsubsection*{Problem} Enable changing the thread of control when invoking another method.
 
-Enable changing the thread of control when invoking another method?
+\subsubsection*{Forces} The invoking of a method should still be intuitive for the developer.
 
-\subsubsection*{Forces}
-
-The invoking of a method should still be intuitive for the developer.
-
-\subsubsection*{Solution}
-
-Provide an interface as a method parameter that has methods that asynchronously
+\subsubsection*{Solution}  Provide an interface as a parameter to method.  The
+interface will have a proxy implementation that has its methods asynchronously
 invoke the respective target methods.
 
-\subsubsection*{Consequences}
+\subsubsection*{Consequences} Able to invoke the target method by another thread of control.
 
-No return value is available from the invoked method.
+No return value will be available from the invoked method due to the
+asynchronous invocation.
 
 Each hand-off will incur the cost of a thread context-switch.
 
@@ -633,116 +593,91 @@ Each hand-off will incur the cost of a thread context-switch.
 
 \subsection{\textsc{\textbf{escalation}}}
 
-\subsubsection*{Context}
+\subsubsection*{Context} Within an office a person will escalate issues to their
+manager.  However, for a method the exception from a method is thrown to the
+invoking method.
 
-Within an office a person will escalate issues to their manager.  However, for a
-method the exception from a method is thrown to the invoking method.
+\subsubsection*{Problem} Escalate an exception to a manager rather than the caller.
 
-\subsubsection*{Problem}
+\subsubsection*{Forces} Method exceptions follow the thread of control's stack
+back to an appropriate \texttt{try~\ldots~catch} block for handling the
+exception.
 
-Escalate an exception to a manager rather than the caller.
+\subsubsection*{Solution} Intercept the exception and \textsc{hand-off} to a
+manager handling method for the exception.
 
-\subsubsection*{Forces}
+\subsubsection*{Consequences} Caller does not deal with exceptions from
+\textsc{hand-off} method invocations.  This does mean the caller will not be
+aware of failures in its invoked methods.  It is, however, unreasonable to have
+the caller responsible for all downstream issues in the process flow.
 
-Method exceptions follow the thread of control's stack back to an appropriate
-\texttt{try~\ldots~catch} block for handling the exception.
+\subsubsection*{Related Patterns} \textsc{hand-off} is used to enable the
+exception to be asynchronously handled by another method.
 
-\subsubsection*{Solution}
-
-Intercept the exception and \textsc{hand-off} to a manager handling method.
-
-\subsubsection*{Consequences}
-
-Caller does not deal with exceptions from \textsc{hand-off} method invocations.
-
-The caller will not be aware of failures in its invoked methods.  It is,
-however, unreasonable to have the caller responsible for all downstream issues
-in the process flow.
-
-\subsubsection*{Related Patterns}
-
-\textsc{hand-off} is used to enable the exception to be asynchronously handled
-by another method.
 
 
 \subsection{\textsc{\textbf{define process flows}}}
 
-\subsubsection*{Context}
-
-The process within an office is a sequence of tasks where the next task depends
-on what occurs with the current task.  The process can be changed by altering
-the next task for each outcome of the current task.
+\subsubsection*{Context} The process within an office is a sequence of tasks
+where the next task depends on what occurs with the current task.  The process
+can be changed by altering the next task for each outcome of the current task.
 
 Method invocation prevents this flexibility as the methods must be altered to
 change the sequence of method execution.
 
-\subsubsection*{Problem}
+\subsubsection*{Problem} Provide change in execution order of methods without
+requiring to change the methods.
 
-Provide change in execution order of methods without requiring to change the
-methods.
+\subsubsection*{Forces} Method invocation is tighlty coupled at the code level.
 
-\subsubsection*{Forces}
+\subsubsection*{Solution} Use \textsc{hand-off} and, via configuration, map the
+hand off interface method to trigger the execution of the target method. 
+Furthermore, provide an implicit hand-off on completion of a method to execute a
+next method if no other hand-off is triggered.
 
-Method invocation is tighlty coupled at the code level.
+\subsubsection*{Consequences} Configuration maps the flow of methods rather than
+being hard-coded within the method.
 
-\subsubsection*{Solution}
+The indirection will make it difficult to follow the flow of the process.  The
+configuration, however, is represented graphically to make it easier and more
+intuitive to follow.
 
-Use \textsc{hand-off} and, via configuration, map the hand off interface method
-to the method to execute.  Furthermore, provide an implicit hand off on
-completion of a method to execute a next method if no other hand-off is
-triggered.
+\subsubsection*{Related Patterns} \textsc{hand-off} is used to enable the
+indirection for configuration mapping of hand-offs and to handling methods.
 
-\subsubsection*{Consequences}
-
-Configuration maps the flow of methods rather than being hard-coded within the
-method.
-
-\subsubsection*{Related Patterns}
-
-\textsc{hand-off} is used to enable the indirection for configuration mapping of
-hand-offs and handling methods.
 
 
 \subsection{\textsc{\textbf{do your work}}}
 
-\subsubsection*{Context}
+\subsubsection*{Context} Within the process flow a team may be assigned to
+execute a sequence of tasks. Rather than passing the tasks around to different
+people in the team, it is more efficient for one person to complete the tasks
+without the cost of hand-offs.
 
-Within the process flow a team may be assigned to execute a sequence of tasks. 
-Rather than passing the tasks around to different people in the team, it is more
-efficient for one person to complete the tasks without the cost of hand-offs.
+\subsubsection*{Problem} Use the same thread to execute the sequence of methods
+when the methods hand-off back to the same thread pool to avoid excessive
+thread-context switching.
 
-\subsubsection*{Problem}
+\subsubsection*{Forces} The \textsc{hand-off} is asynchronous.
 
-Use the same thread to execute the sequence of methods when the methods hand-off
-back to the same thread pool to avoid excessive thread-context switching.
+\subsubsection*{Solution} Before the asynchronous hand-off, check if the thread
+for the next method is of the same responsible thread pool and if so execute the
+next method synchronously (i.e. with the current method's thread of control).
 
-\subsubsection*{Forces}
+\subsubsection*{Consequences} Thread context-switching is reduced for sequential
+methods of the same responsible thread pool.
 
-The \textsc{hand-off} is asynchronous.
+\subsubsection*{Related Patterns} Is a sequence on \textsc{hand-off} to reduce
+thread context switching.
 
-\subsubsection*{Solution}
-
-Before the asynchronous hand-off, check if the thread for the next method is of
-the same responsible thread pool and if so execute the next method
-synchronously (i.e. with the invoking thread of control).
-
-\subsubsection*{Consequences}
-
-Thread context switch is reduced for sequential methods of the same responsible
-thread pool.
-
-\subsubsection*{Related Patterns}
-
-Is a sequence on \textsc{hand-off} to reduce thread context switching.
 
 
 \subsection{\textsc{\textbf{wait to proceed}}}
 
-\subsubsection*{Alternate name}
+\subsubsection*{Alternate name} Future \textbf{TODO: find reference}.
 
-Future \textbf{TODO: find reference}
-
-\subsubsection*{Context}
+\subsubsection*{Context} Need to know when the hand-off task (and further
+handed-off tasks by that task) is complete.
 
 \subsubsection*{Problem}
 
@@ -753,52 +688,79 @@ Future \textbf{TODO: find reference}
 \subsubsection*{Consequences}
 
 \subsubsection*{Related Patterns}
+
+
+
+\subsection{\textsc{\textbf{pick up task again}}}
+
+\subsubsection*{Alternate name}
+
+\subsubsection*{Context} Trigger a hand-off and come back to current task again
+when the hand-off tasks complete.
+
+\subsubsection*{Problem}
+
+\subsubsection*{Forces}
+
+\subsubsection*{Solution}
+
+\subsubsection*{Consequences}
+
+\subsubsection*{Related Patterns}
+
 
 
 \subsection{\textsc{\textbf{record information}}}
 
-\subsubsection*{Alternate name}
+\subsubsection*{Alternate name} \textsc{flyweight}~\cite{gof}.
 
-\textsc{flyweight}~\cite{gof}.
+\subsubsection*{Context} With an office information is recorded so that later
+tasks can retrieve this information.
 
-\subsubsection*{Context}
+Methods, however, may only use the arguments supplied from the calling
+method\footnote{The method may also access implicit references via its
+owning object}.
 
-With an office information is recorded so that later tasks can retrieve this
-information.
+\subsubsection*{Problem} The method being able to retreive information from
+previous methods other than just its calling method.
 
-Methods may only use the arguments supplied from the calling method\footnote{The
-method may also access implicit references via its containing object}.
+\subsubsection*{Forces} Method invocation requires the caller to provide all
+parameters to the invoked method.
 
-\subsubsection*{Problem}
+\subsubsection*{Solution} Use \textsc{dependency injection}~\cite{ioc} to inject
+cached dependencies as the arguments to the method.
 
-Can the method retreive information from previous methods other than its calling
-method.
-
-\subsubsection*{Forces}
-
-Method invocation requires the caller to provide all parameters to the invoked
-method.
-
-\subsubsection*{Solution}
-
-Use \textsc{dependency injection}~\cite{ioc} to inject cached dependencies as
-the arguments to the method.
-
-\subsubsection*{Consequences}
-
-As the dependencies provide cached state, they allow all downstream methods to
-retrieve the state.
+\subsubsection*{Consequences} As the dependencies provide cached state, they
+allow all downstream methods to retrieve the state.
 
 Making the dependency state mutable allows further downstream methods awareness
 of changes in information as the tasks in the process execute.
 
+\subsubsection*{Related Patterns} Is a sequence on \textsc{dependency
+injection}~\cite{ioc} to cache dependencies and inject them as arguments to the
+method.
+
+
+
+\subsection{\textsc{\textbf{inbox}}}
+
+\subsubsection*{Alternate name} Future \textbf{TODO: find reference}.
+
+\subsubsection*{Context}
+
+\subsubsection*{Problem}
+
+\subsubsection*{Forces}
+
+\subsubsection*{Solution}
+
+\subsubsection*{Consequences}
+
 \subsubsection*{Related Patterns}
 
-Is a sequence on \textsc{dependency injection}~\cite{ioc} to cache dependencies
-and inject them as arguments to the method.
 
 
-\subsection{Implementation of the co-ordinate tasks patterns}
+\subsection{Implementation of the task collaboration patterns}
 
 \subsubsection*{Background}
 
@@ -1233,7 +1195,7 @@ these changes as configuration changes rather than code changes.
 
 \subsection{\textsc{\textbf{task defines itself}}}
 
-\subsubsection*{Alternate name} \textsc{method inversion of control}.
+\subsubsection*{Alternate name}
 
 \subsubsection*{Context}
 
@@ -1249,7 +1211,43 @@ these changes as configuration changes rather than code changes.
 
 
 
-\subsection{Implementation of re-use tasks patterns}
+\subsection{\textsc{\textbf{use proven tasks}}}
+
+\subsubsection*{Alternate name}
+
+\subsubsection*{Context}
+
+\subsubsection*{Problem}
+
+\subsubsection*{Forces}
+
+\subsubsection*{Solution}
+
+\subsubsection*{Consequences}
+
+\subsubsection*{Related Patterns}
+
+
+
+\subsection{\textsc{\textbf{process defines itself}}}
+
+\subsubsection*{Alternate name}
+
+\subsubsection*{Context}
+
+\subsubsection*{Problem}
+
+\subsubsection*{Forces}
+
+\subsubsection*{Solution}
+
+\subsubsection*{Consequences}
+
+\subsubsection*{Related Patterns}
+
+
+
+\subsection{Implementation of task re-use patterns}
 
 \subsubsection*{Background}
 
@@ -1603,6 +1601,62 @@ I am also grateful for the wise shepherding by Veli-Pekka Eloranta and the
 participants of EuroPlop 2013 to ensure this paper succinctly presents the
 Thread Injection, Continuation Injection and Method Inversion of Control
 patterns.
+
+
+
+\section{Limitation of existing Software Design Patterns for web servers}
+
+The \textsc{thread-per-request} pattern \cite{thread-per-request} (that can be
+considered a refinement of the \textsc{synchronous multi-threaded} pattern
+\cite{proactor}) is used as the basis of popular modern web
+servers\footnote{Apache, Microsoft IIS, Nginx and JEE implementations identified
+from the Netcraft November 2012 survey.  Google Web Server is also identified as
+popular.} to service requests concurrently.
+
+Many modern web servers improve their concurrency of servicing high loads of
+static web content by using the \textsc{proactor} pattern \cite{proactor} to
+enable use of asynchronous I/O operations.  The \textsc{thread-per-request}
+pattern requires a thread to be allocated to each request to sequentially and
+synchronously execute all operations for servicing a request.  This includes I/O
+operations that tie up thread resources on the web server which necessitates
+more threads and subsequently reduces the concurrency of the web server.  The
+\textsc{procator} pattern overcomes this issue by executing operations
+asynchronously which does not result in the web server threads blocking (e.g.
+use of Operating System asynchronous I/O operations).
+
+However, web servers continue to use the \textsc{thread-per-request} pattern for
+servicing dynamic web content\footnote{CGI/FastCGI with for example PHP scripts,
+Microsoft's HTTP.sys/WAS, and JEE Servlets.}.  Using the
+\textsc{thread-per-request} pattern allows for more intuitive developer
+implementations of dynamic web content servicing at the cost of decreased
+concurrency for the web server.
+
+Due to high concurrency demands on web servers to resolve such issues as the
+reverse 10K problem \cite{reverse-ten-k-problem}, the
+\textsc{thread-per-request} pattern is requiring developers to manually manage
+the threading issues involved with increased concurrency.  Should the developer
+want to use asynchronous I/O operations for increased concurrency, the developer
+is required to block the request's thread of control, undertake the concurrent
+operations and continue the request's thread of control when all concurrent
+operations are complete\footnote{JEE Servlet 3.x AsyncContext is allowing
+asynchronous operations but requires the developer to still be involved in
+thread synchronisation complexities.}.
+
+Before using the \textsc{proactor} pattern to service dynamic web content, its
+drawback of scheduling and controlling outstanding operations \cite[p.
+8]{proactor} must be resolved.  Servicing static web content follows a standard
+sequence of operations that enables providing a bespoke solution to schedule and
+control outstanding operations.  In contrast, servicing dynamic web content does
+not follow a standard sequence of operations and therefore requires a more
+generic solution that is ``designed carefully to support prioritization and
+cancellation'' \cite[p. 8]{proactor} of the operations.
+
+The patterns presented in this paper address the constraints and limitations
+identified by modelling themselves after patterns occurring within an Office.
+
+All patterns are also given an analogy name with the Office to keep all pattern
+names similar.  In some cases patterns will also have an alternate Software
+Design based name.
 
 
 \bibliographystyle{style/acmlarge}
